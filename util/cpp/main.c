@@ -36,7 +36,7 @@ main(argc, argv)
 		argc--, argv++;
 	}
 	compile(argc - 1, &argv[1]);
-	return err_occurred;
+	exit(err_occurred);
 }
 
 compile(argc, argv)
