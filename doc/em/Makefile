@@ -7,6 +7,9 @@ IOP=../../util/ass/ip_spec.t
 doc.pr: $(FILES) itables em.i
 	tbl $(FILES) | $(NROFF) >doc.pr
 
+distr:	$(FILES) itables em.i
+	tbl $(FILES) | nroff -Tlp >doc.pr
+
 opr:	doc.pr
 	make pr | opr
 
