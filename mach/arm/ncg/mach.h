@@ -6,7 +6,6 @@
 #define	dlbdlb(x,y)	fprintf(codefile,"%s = %s\n",x,y)
 #define newlbss(l,x)	fprintf(codefile,"%s:.space\t%ld\n",l,x);
 
-#define	pop_fmt		"(sp)+"
 #define cst_fmt		"%ld"
 #define	off_fmt		"%ld"
 #define ilb_fmt		"I%03x%x"
