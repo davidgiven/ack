@@ -30,7 +30,7 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 	if (tp->t_token == -1) {        /* register frame */
 		bitno = tp->t_att[0].ar+1;
 		if (tep->set_val[bitno>>4]&(1<<(bitno&017)))
-			if (tep->set_val[0]&1 || getrefcount(tp->t_att[0].ar)<=1)
+			if (tep->set_val[0]&1 || getrefcount(tp->t_att[0].ar, FALSE)<=1)
 				goto oklabel;
 		return(0);
 	} else {                /* token frame */
@@ -432,7 +432,7 @@ unsigned stackupto(limit,ply,toplevel) token_p limit; {
 				if (cp->c1_prop>=0) {
 					for (rpp=reglist[cp->c1_prop];
 					       (rp = *rpp)!=0 &&
-					       getrefcount(rp-machregs)!=0;
+					       getrefcount(rp-machregs, TRUE)!=0;
 						  rpp++)
 						;
 					if (rp==0)

@@ -38,7 +38,7 @@ chrefcount(regno,amount,tflag) {
 #endif
 }
 
-getrefcount(regno) {
+getrefcount(regno, tflag) {
 	register struct reginfo *rp;
 	register i,maxcount;
 
@@ -46,13 +46,13 @@ getrefcount(regno) {
 #if MAXMEMBERS!=0
 	if (rp->r_members[0]==0)
 #endif
-		return(rp->r_refcount);
+		return(rp->r_refcount - (tflag ? rp->r_tcount : 0));
 #if MAXMEMBERS!=0
 	else {
 		maxcount=0;
 		for (i=0;i<MAXMEMBERS;i++)
 			if (rp->r_members[i]!=0)
-				maxcount=max(maxcount,getrefcount(rp->r_members[i]));
+				maxcount=max(maxcount,getrefcount(rp->r_members[i], tflag));
 		return(maxcount);
 	}
 #endif

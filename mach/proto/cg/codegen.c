@@ -287,9 +287,14 @@ if (Debug)
 		i++; tp--;
 	}
 	if (tokpatlen>stackheight) {
+		int k;
 		stackpad = tokpatlen-stackheight;
-		for (j=stackheight-1;j>=0;j--)
-			fakestack[j+stackpad] = fakestack[j];
+		for (j=stackheight-1, k = j + stackpad;j>=0;j--, k--) {
+			fakestack[k] = fakestack[j];
+			/* fakestack[j+stackpad] = fakestack[j]; does not
+			   compile under Xenix
+			*/
+		}
 		for (j=0;j<stackpad;j++)
 			fakestack[j].t_token=0;
 		stackheight += stackpad;
@@ -457,7 +462,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 		do {
 			npos=exactmatch=0;
 			for(rpp=reglist[propno];rp= *rpp; rpp++)
-				if (getrefcount(rp-machregs)==0) {
+				if (getrefcount(rp-machregs, FALSE)==0) {
 					pos[npos++] = rp-machregs;
 					if (eqtoken(&rp->r_contents,&token))
 						exactmatch++;
@@ -539,7 +544,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 		}
 	} else {
 		decision = forced;
-		if (getrefcount(decision)!=0) {
+		if (getrefcount(decision, FALSE)!=0) {
 			totalcost = INFINITY;
 			BROKE();
 		}
@@ -606,7 +611,11 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 	}
 	for (i=0;i<repllen;i++) {
 		assert(stackheight<MAXFSTACK);
-		fakestack[stackheight++] = reptoken[i];
+		fakestack[stackheight] = reptoken[i];
+		stackheight++;
+		/* do not combine previous two statements; that does not
+		   compile under Xenix V3.2
+		*/
 	}
 	for(i=0;i<nallreg;i++)
 		chrefcount(allreg[i],-1,FALSE);
@@ -616,9 +625,10 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 	emrepllen=(codep[-1]>>5)&07;
 	j=emp-emlines;
 	if (emrepllen>j) {
-		assert(nemlines+emrepllen-j<MAXEMLINES);
-		for (i=nemlines;i>=0;i--)
-			emlines[i+emrepllen-j] = emlines[i];
+		int k = nemlines + emrepllen - j;
+		assert(k<MAXEMLINES);
+		for (i=nemlines;i>=0;i--, k--)
+			emlines[k] = emlines[i];
 		nemlines += emrepllen-j;
 		emp += emrepllen-j;
 	}
