@@ -71,21 +71,43 @@ getrefcount(regno) {
 
 erasereg(regno) {
 	register struct reginfo *rp;
-	register i;
 
 #if MAXMEMBERS==0
-	rp= &machregs[regno];
-	rp->r_contents.t_token = 0;
-	for (i=0;i<TOKENSIZE;i++)
-		rp->r_contents.t_att[i].aw=0;
+	awayreg(regno);
 #else
 	for (rp=machregs;rp<machregs+NREGS;rp++)
-		if (rp->r_clash[regno>>4]&(1<<(regno&017))) {
-			rp->r_contents.t_token = 0;
-			for (i=0;i<TOKENSIZE;i++)
-				rp->r_contents.t_att[i].aw=0;
-		}
+		if (rp->r_clash[regno>>4]&(1<<(regno&017)))
+			awayreg(rp-machregs);
 #endif
+}
+
+awayreg(regno) {
+	register struct reginfo *rp;
+	register tkdef_p tdp;
+	register i;
+
+	rp = &machregs[regno];
+	rp->r_contents.t_token = 0;
+	for (i=0;i<TOKENSIZE;i++)
+		rp->r_contents.t_att[i].aw = 0;
+
+	/* Now erase recursively all registers containing
+	 * something using this one
+	 */
+	for (rp=machregs;rp<machregs+NREGS;rp++) {
+		if (rp->r_contents.t_token == -1) {
+			if (rp->r_contents.t_att[0].ar == regno)
+				erasereg(rp-machregs);
+		} else {
+			tdp= & tokens[rp->r_contents.t_token];
+			for (i=0;i<TOKENSIZE;i++)
+				if (tdp->t_type[i] == EV_REG && 
+				    rp->r_contents.t_att[i].ar == regno) {
+					erasereg(rp-machregs);
+					break;
+				}
+		}
+	}
 }
 
 cleanregs() {
