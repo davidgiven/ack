@@ -9,7 +9,7 @@ dfa.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/dfa.c,v 2.7 90/06/27 23:
 ecs.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/ecs.c,v 2.5 90/06/27 23:48:17 vern Exp $ (LBL)";
 flex.skel: * $header: /usr/fsys/odin/a/vern/flex/RCS/flex.skel,v 2.16 90/08/03 14:09:36 vern Exp $
 flexdef.h:/* @(#) $header: /usr/fsys/odin/a/vern/flex/RCS/flexdef.h,v 2.10 90/08/03 14:09:52 vern Exp $ (LBL) */
-gen.c:    "@(#) $header: /usr/helios/u0/vern/flex/RCS/gen.c,v 2.10 90/08/29 12:11:13 vern Exp $ (LBL)";
+gen.c:    "@(#) $header: /home/horse/u0/vern/flex/RCS/gen.c,v 2.12 91/03/28 12:01:38 vern Exp $ (LBL)";
 initscan.c: * $header: /usr/fsys/odin/a/vern/flex/RCS/flex.skel,v 2.16 90/08/03 14:09:36 vern Exp $
 initscan.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/scan.l,v 2.9 90/06/27 23:48:34 vern Exp $ (LBL)";
 libmain.c:/* $header: /usr/fsys/odin/a/vern/flex/RCS/libmain.c,v 1.2 90/05/26 16:50:08 vern Exp $ */

@@ -799,7 +799,7 @@ void gentabs()
 
 		    if ( variable_trailing_context_rules &&
 			 ! (accnum & YY_TRAILING_HEAD_MASK) &&
-			 accnum > 0 &&
+			 accnum > 0 && accnum <= num_rules &&
 			 rule_type[accnum] == RULE_VARIABLE )
 			{
 			/* special hack to flag accepting number as part
