@@ -57,7 +57,7 @@ build_lifetimes(items)
 			 * item; yet, there may be a register message for it...
 			 */
 			if(item != (item_p) 0) {
-				item->it_lastlive = now;
+				item->it_lastlive = last_code + 1;
 			}
 		} else {
 			if (is_deadmsg(l)) {
