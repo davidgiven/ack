@@ -4,35 +4,35 @@
 
 EMHOME=../../..
 MACH=acc
-MACHFL=-c.$(SUF) -O -L -Rcem=$(EMHOME)/lang/cem/libcc.new/main -I../headers \
-	    $(DEFS)
-PREF=ancc
+MACHFL=-O -L -Rcem=$(EMHOME)/lib/em_cemcom.ansi -I../headers $(DEFS)
+PREF=ac
 SUB=
 ASAR=arch
 HEADSRC=$(HOME)
 OLIB=tail_$(PREF)$(SUB)
 
-libsrc:
+install:
 	MakeArch
 
-tail:	$(OLIB)
+clean:
+	rm -f OLIST */OLIST
+	(cd ctype; make clean)
+	(cd stdlib; make clean)
+
+tail:	lib
 
 tailcp: tail
 	../../install $(OLIB)
 	rm -f $(OLIB)
 
-$(OLIB):
-	@echo translation test
-
-
-libc:
+lib:
 	MACH=$(MACH) MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) \
 		OLIB=$(OLIB) MakeArch -o
 
-$(ASAR):
+ar aal arch:
 	@rm -f OLIST
 	@sed 's/\.[ce]/.$(SUF)/' < LIST | sed '/\.h/D' > OLIST
-	make "CC=$(MACH)" "MACHFL=$(MACHFL)" `cat OLIST`
+	make -r -f ../make.proto "CC=$(MACH)" "CFLAGS=$(MACHFL)" `cat OLIST`
 
 # arch doesn't work recursively, tar does, which is what we actually want
 tar:

@@ -6,6 +6,7 @@ ctype
 errno
 headers
 locale
+make.proto
 math
 misc
 setjmp

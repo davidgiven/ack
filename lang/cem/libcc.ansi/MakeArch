@@ -17,7 +17,7 @@ case $# in
 			exit 1
 		fi
 		AR=$ASAR
-		echo 'rv $OLIB' > OLIST
+		echo "rv $OLIB" > OLIST
 		;;
 	*)
 		echo $0: too many arguments >&2
@@ -36,6 +36,7 @@ then
 	echo LIST >> OLIST
 	echo MakeArch >> OLIST
 	echo Makefile >> OLIST
+	echo make.proto >> OLIST
 fi
 
 DIRS=`cat LIST`
@@ -60,6 +61,5 @@ do
 	fi
 done
 
-#echo $AR `cat OLIST`
 $AR `cat OLIST`
 ${RANLIB-:} $OLIB

@@ -1,10 +1,5 @@
-.SUFFIXES: .o .e .c
-
-.e.o:
-	$(CC) $(CFLAGS) -c -o $@ $*.e
-
 clean:
-	rm -rf isalnum.o isalpha.o iscntrl.o isdigit.o isgraph.o \
+	rm -f isalnum.o isalpha.o iscntrl.o isdigit.o isgraph.o \
 		islower.o isprint.o ispunct.o isspace.o isupper.o \
 		isxdigit.o isascii.o tolower.o toupper.o chartab.o \
 		isalnum.c isalpha.c iscntrl.c isdigit.c isgraph.c \
@@ -23,19 +18,3 @@ chartab.c: char.tab
 isalnum.c isalpha.c iscntrl.c isdigit.c isgraph.c islower.c isprint.c \
 ispunct.c isspace.c isupper.c isxdigit.c isascii.c tolower.c toupper.c: genfiles
 	genfiles
-
-isalnum.o:
-isalpha.o:
-iscntrl.o:
-isdigit.o:
-isgraph.o:
-islower.o:
-isprint.o:
-ispunct.o:
-isspace.o:
-isupper.o:
-isxdigit.o:
-isascii.o:
-tolower.o:
-toupper.o:
-chartab.o:
