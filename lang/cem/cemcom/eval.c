@@ -80,22 +80,17 @@ EVAL(expr, val, code, true_label, false_label)
 	register gencode = (code == TRUE);
 
 	switch (expr->ex_class)	{
-
 	case Value:	/* just a simple value	*/
 		if (gencode)
 			load_val(expr, val);
 		break;
-
 	case String:	/* a string constant	*/
+		expr_warning(expr, "(DEBUG) value-class 'String' seen");
 		if (gencode) {
-			label datlab = data_label();
-			
-			C_df_dlb(datlab);
-			C_con_scon(expr->SG_VALUE, (arith)expr->SG_LEN);
-			C_lae_dlb(datlab, (arith)0);
+			string2pointer(&expr);
+			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
-
 	case Float:	/* a floating constant	*/
 		if (gencode) {
 			label datlab = data_label();
@@ -106,7 +101,6 @@ EVAL(expr, val, code, true_label, false_label)
 			C_loi(expr->ex_type->tp_size);
 		}
 		break;
-
 	case Oper:	/* compound expression	*/
 	{
 		register int oper = expr->OP_OPER;
@@ -116,7 +110,6 @@ EVAL(expr, val, code, true_label, false_label)
 
 		if (tp->tp_fund == ERRONEOUS)	/* stop immediately */
 			break;
-
 		switch (oper)	{
 		case '+':
 			/*	We have the following possibilities :
@@ -366,8 +359,10 @@ EVAL(expr, val, code, true_label, false_label)
 				store_block(tp->tp_size, tp->tp_align);
 			}
 			else
-				store_val(leftop->VL_IDF, leftop->ex_type,
-					leftop->VL_VALUE);
+				store_val(
+					&(leftop->ex_object.ex_value),
+					leftop->ex_type
+				);
 			break;
 		case PLUSAB:
 		case MINAB:
@@ -410,8 +405,10 @@ EVAL(expr, val, code, true_label, false_label)
 				assop(tp, oper);
 				if (gencode)
 					C_dup(roundup(tp->tp_size));
-				store_val(leftop->VL_IDF, leftop->ex_type,
-					leftop->VL_VALUE);
+				store_val(
+					&(leftop->ex_object.ex_value),
+					leftop->ex_type
+				);
 			}
 			break;
 		case '(':
@@ -433,7 +430,9 @@ EVAL(expr, val, code, true_label, false_label)
 				EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 				ParSize += ATW(expr->ex_type->tp_size);
 			}
-			if (leftop->ex_class == Value && leftop->VL_IDF != 0) {
+			if (	leftop->ex_class == Value
+			&&	leftop->VL_CLASS == Name
+			) {
 				/* just an example:
 					main() { (*((int (*)())0))(); }
 				*/
@@ -466,11 +465,13 @@ EVAL(expr, val, code, true_label, false_label)
 		}
 		case '.':
 			EVAL(leftop, LVAL, code, NO_LABEL, NO_LABEL);
+			ASSERT(is_cp_cst(rightop));
 			if (gencode)
 				C_adp(rightop->VL_VALUE);
 			break;
 		case ARROW:
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
+			ASSERT(is_cp_cst(rightop));
 			if (gencode)
 				C_adp(rightop->VL_VALUE);
 			break;
@@ -532,8 +533,10 @@ EVAL(expr, val, code, true_label, false_label)
 				free_tmp_var(old_offset);
 			}
 			else
-				store_val(leftop->VL_IDF, leftop->ex_type,
-					leftop->VL_VALUE);
+				store_val(
+					&(leftop->ex_object.ex_value),
+					leftop->ex_type
+				);
 			break;
 		}
 		case '?':	/* must be followed by ':'	*/
@@ -841,62 +844,70 @@ free_tmp_var(oldoffset)
 	- into an automatic local variable
 	- into a local static variable
 	- absolute addressing
-	When the destination is described by an (lvalue) expression, the call
-	is "store_val(ex->VL_IDF, ex->ex_type, ex->VL_VALUE)"
 */
-store_val(id, tp, offs)
-	register struct idf *id;
+store_val(vl, tp)
+	register struct value *vl;
 	struct type *tp;
-	arith offs;
 {
 	arith size = tp->tp_size;
 	int tpalign = tp->tp_align;
+	int al_on_word;
+	register int inword;
+	register int indword;
+	arith val = vl->vl_value;
 
-	if (id)	{
+	if (vl->vl_class == Const)	{	/* absolute addressing */
+		load_cst(val, pointer_size);
+		store_block(size, tpalign);
+		return;
+	}
+
+	al_on_word = (tpalign % word_align == 0);
+	if (!(inword = (size == word_size && al_on_word)))
+		indword = (size == dword_size && al_on_word);
+
+	if (vl->vl_class == Name)	{
+		register struct idf *id = vl->vl_data.vl_idf;
 		register struct def *df = id->id_def;
-		int al_on_word = (tpalign % word_align == 0);
-		register inword = (size == word_size && al_on_word);
-		register indword = (size == dword_size && al_on_word);
 
 		if (df->df_level == L_GLOBAL)	{
 			if (inword)
-				C_ste_dnam(id->id_text, offs);
+				C_ste_dnam(id->id_text, val);
 			else
 			if (indword)
-				C_sde_dnam(id->id_text, offs);
+				C_sde_dnam(id->id_text, val);
 			else {
-				C_lae_dnam(id->id_text, offs);
-				store_block(size, tpalign);
-			}
-		}
-		else
-		if (df->df_sc == STATIC)	{
-			if (inword)
-				C_ste_dlb((label)df->df_address, offs);
-			else
-			if (indword)
-				C_sde_dlb((label)df->df_address, offs);
-			else {
-				C_lae_dlb((label)df->df_address, offs);
+				C_lae_dnam(id->id_text, val);
 				store_block(size, tpalign);
 			}
 		}
 		else {
+			ASSERT(df->df_sc != STATIC);
 			if (inword)
-				C_stl(df->df_address + offs);
+				C_stl(df->df_address + val);
 			else
 			if (indword)
-				C_sdl(df->df_address + offs);
+				C_sdl(df->df_address + val);
 			else	{
-				C_lal(df->df_address + offs);
+				C_lal(df->df_address + val);
 				store_block(size, tpalign);
 				df->df_register = REG_NONE;
 			}
 		}
 	}
-	else	{	/* absolute addressing */
-		load_cst(offs, pointer_size);
-		store_block(size, tpalign);
+	else {	
+		label dlb = vl->vl_data.vl_lbl;
+
+		ASSERT(vl->vl_class == Label);
+		if (inword)
+			C_ste_dlb(dlb, val);
+		else
+		if (indword)
+			C_sde_dlb(dlb, val);
+		else {
+			C_lae_dlb(dlb, val);
+			store_block(size, tpalign);
+		}
 	}
 }
 
@@ -914,100 +925,95 @@ load_val(expr, val)
 	struct expr *expr;	/* expression containing the value	*/
 	int val;		/* generate either LVAL or RVAL		*/
 {
-	register struct idf *id;
 	register struct type *tp = expr->ex_type;
-	register struct def *df;
-	register rvalue = (val == RVAL && expr->ex_lvalue != 0);
-	register arith exval = expr->VL_VALUE;
+	register int rvalue = (val == RVAL && expr->ex_lvalue != 0);
 	register arith size = tp->tp_size;
-	register tpalign = tp->tp_align;
-	register al_on_word = (tpalign % word_align == 0);
+	register int tpalign = tp->tp_align;
+	register int al_on_word;
+	register int inword, indword;
+	register arith val = expr->VL_VALUE;
 
-	if ((id = expr->VL_IDF) == 0)	{
-		/* Note: enum constants are also dealt with here */
-		if (rvalue)	{
-			/* absolute addressing
-			*/
-			load_cst(exval, pointer_size);
+	if (expr->VL_CLASS == Const)	{
+		if (rvalue)	{ /* absolute addressing */
+			load_cst(val, pointer_size);
 			load_block(size, tpalign);
 		}
 		else	/* integer, unsigned, long, enum etc	*/
-			load_cst(exval, size);
+			load_cst(val, size);
+		return;
 	}
-	else
-	if ((df = id->id_def)->df_type->tp_fund == FUNCTION)
-		/*	the previous statement tried to catch a function
-			identifier, which may be cast to a pointer to a
-			function.
-			ASSERT(!(rvalue)); ???
-		*/
-		C_lpi(id->id_text);
-	else
-	if (df->df_level == L_GLOBAL)	{
+	if (rvalue) {
+		al_on_word = (tpalign % word_align == 0);
+		if (!(inword = (size == word_size && al_on_word)))
+			indword = (size == dword_size && al_on_word);
+	}
+	if (expr->VL_CLASS == Label) {
 		if (rvalue)	{
-			if (size == word_size && al_on_word)
-				C_loe_dnam(id->id_text, exval);
+			if (inword)
+				C_loe_dlb(expr->VL_LBL, val);
 			else
-			if (size == dword_size && al_on_word)
-				C_lde_dnam(id->id_text, exval);
+			if (indword)
+				C_lde_dlb(expr->VL_LBL, val);
 			else {
-				C_lae_dnam(id->id_text, exval);
+				C_lae_dlb(expr->VL_LBL, val);
 				load_block(size, tpalign);
 			}
 
 		}
 		else	{
-			C_lae_dnam(id->id_text, (arith)0);
-			C_adp(exval);
+			C_lae_dlb(expr->VL_LBL, (arith)0);
+			C_adp(val);
 		}
 	}
-	else
-	if (df->df_sc == STATIC)	{
-		if (rvalue)	{
-			if (size == word_size && al_on_word)
-				C_loe_dlb((label)df->df_address, exval);
-			else
-			if (size == dword_size && al_on_word)
-				C_lde_dlb((label)df->df_address, exval);
-			else	{
-				C_lae_dlb((label)df->df_address, exval);
-				load_block(size, tpalign);
-			}
+	else {
+		register struct idf *id = expr->VL_IDF;
+		register struct def *df;
 
+		ASSERT(expr->VL_CLASS == Name);
+		if ((df = id->id_def)->df_type->tp_fund == FUNCTION)
+			/*	the previous statement tried to catch a function
+				identifier, which may be cast to a pointer to a
+				function.
+				ASSERT(!(rvalue)); ???
+			*/
+			C_lpi(id->id_text);
+		else
+		if (df->df_level == L_GLOBAL)	{
+			if (rvalue)	{
+				if (inword)
+					C_loe_dnam(id->id_text, val);
+				else
+				if (indword)
+					C_lde_dnam(id->id_text, val);
+				else {
+					C_lae_dnam(id->id_text, val);
+					load_block(size, tpalign);
+				}
+			}
+			else	{
+				C_lae_dnam(id->id_text, (arith)0);
+				C_adp(val);
+			}
 		}
 		else	{
-			C_lae_dlb((label)df->df_address, (arith)0);
-			C_adp(exval);
-		}
-	}
-	else	{
-		if (rvalue)	{
-			if (size == word_size && al_on_word)
-				C_lol(df->df_address + exval);
-			else
-			if (size == dword_size && al_on_word)
-				C_ldl(df->df_address + exval);
+			ASSERT(df->df_sc != STATIC);
+			if (rvalue)	{
+				if (inword)
+					C_lol(df->df_address + val);
+				else
+				if (indword)
+					C_ldl(df->df_address + val);
+				else {
+					C_lal(df->df_address + val);
+					load_block(size, tpalign);
+					df->df_register = REG_NONE;
+				}
+			}
 			else	{
-				C_lal(df->df_address + exval);
-				load_block(size, tpalign);
+				C_lal(df->df_address);
+				C_adp(val);
 				df->df_register = REG_NONE;
 			}
-		}
-		else	{
-			/*	following code may be used when
-				comparing addresses as in the following
-				example:
-				f() {
-					int a[10], *i;
-					for (i = &a[0]; i < &a[10]; i++) ...;
-				}
-				We don't accept the contents of a[10] to
-				be legitimate, so the RVAL of it may
-				contain a big mess.
-			*/
-			C_lal(df->df_address);
-			C_adp(exval);
-			df->df_register = REG_NONE;
 		}
 	}
 }

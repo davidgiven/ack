@@ -109,6 +109,7 @@ ch7sel(expp, oper, idf)
 			struct oper *op = &((*expp)->ex_object.ex_oper);
 			
 			if (op->op_oper == '.' || op->op_oper == ARROW)	{
+				ASSERT(is_cp_cst(op->op_right));
 				op->op_right->VL_VALUE += sd->sd_offset;
 				(*expp)->ex_type = sd->sd_type;
 				if ((*expp)->ex_type == error_type)
@@ -188,6 +189,8 @@ ch7cast(expp, oper, tp)
 		function2pointer(expp);
 	if ((*expp)->ex_type->tp_fund == ARRAY)
 		array2pointer(expp);
+	if ((*expp)->ex_class == String)
+		string2pointer(expp);
 	oldtp = (*expp)->ex_type;
 	if (oldtp == tp)
 		{}			/* life is easy */

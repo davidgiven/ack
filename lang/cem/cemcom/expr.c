@@ -15,6 +15,7 @@
 #include	"declar.h"
 #include	"storage.h"
 #include	"sizes.h"
+#include	"level.h"
 
 extern char *symbol2str();
 extern char options[];
@@ -184,10 +185,17 @@ idf2expr(expr)
 		) ? 0 : 1;
 	expr->ex_class = Value;
 	if (def->df_sc == ENUM)	{
-		expr->VL_IDF = 0;
+		expr->VL_CLASS = Const;
 		expr->VL_VALUE = def->df_address;
 	}
-	else	{
+	else
+	if (def->df_sc == STATIC && def->df_level >= L_LOCAL) {
+		expr->VL_CLASS = Label;
+		expr->VL_LBL = def->df_address;
+		expr->VL_VALUE = (arith)0;
+	}
+	else {
+		expr->VL_CLASS = Name;
 		expr->VL_IDF = idf;
 		expr->VL_VALUE = (arith)0;
 	}
@@ -246,6 +254,7 @@ intexpr(ivalue, fund)
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
 	}
 	expr->ex_class = Value;
+	expr->VL_CLASS = Const;
 	expr->VL_VALUE = ivalue;
 	
 	cut_size(expr);
@@ -421,7 +430,7 @@ is_cp_cst(expr)
 	/*	An expression is a `compile-time constant' if it is a
 		load-time constant, and the idf is not there.
 	*/
-	return is_ld_cst(expr) && expr->VL_IDF == 0;
+	return is_ld_cst(expr) && expr->VL_CLASS == Const;
 }
 
 int

@@ -46,13 +46,11 @@ ch7mon(oper, expp)
 		}
 		break;
 	case '&':
-		if ((*expp)->ex_type->tp_fund == ARRAY)	{
+		if ((*expp)->ex_type->tp_fund == ARRAY)
 			array2pointer(expp);
-		}
 		else
-		if ((*expp)->ex_type->tp_fund == FUNCTION)	{
+		if ((*expp)->ex_type->tp_fund == FUNCTION)
 			function2pointer(expp);
-		}
 		else
 #ifndef NOBITFIELD
 		if ((*expp)->ex_type->tp_fund == FIELD)	{
@@ -65,12 +63,15 @@ ch7mon(oper, expp)
 		}
 		else {
 			/* assume that enums are already filtered out	*/
-			if ((*expp)->ex_class == Value && (*expp)->VL_IDF) {
+			if (	(*expp)->ex_class == Value
+			&&	(*expp)->VL_CLASS == Name
+			) {
 				register struct def *def =
 					(*expp)->VL_IDF->id_def;
 
-				/*	&<var> indicates that <var> cannot
-					be used as register anymore
+				/*	&<var> indicates that <var>
+					cannot be used as register
+					anymore
 				*/
 				if (def->df_sc == REGISTER) {
 					expr_error(*expp,
@@ -98,11 +99,7 @@ ch7mon(oper, expp)
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
 			arith o1 = (*expp)->VL_VALUE;
-			if (oper == '-')
-				o1 = -o1;
-			else
-				o1 = ~o1;
-			(*expp)->VL_VALUE = o1;
+			(*expp)->VL_VALUE = (oper == '-') ? -o1 : ~o1;
 		}
 		else
 		if (is_fp_cst(*expp))
@@ -118,9 +115,7 @@ ch7mon(oper, expp)
 			any2arith(expp, oper);
 		opnd2test(expp, '!');
 		if (is_cp_cst(*expp))	{
-			arith o1 = (*expp)->VL_VALUE;
-			o1 = !o1;
-			(*expp)->VL_VALUE = o1;
+			(*expp)->VL_VALUE = !((*expp)->VL_VALUE);
 			(*expp)->ex_type = int_type;
 		}
 		else
@@ -133,7 +128,7 @@ ch7mon(oper, expp)
 		break;
 	case SIZEOF:
 		if (	(*expp)->ex_class == Value
-		&&	(*expp)->VL_IDF
+		&&	(*expp)->VL_CLASS == Name
 		&&	(*expp)->VL_IDF->id_def->df_formal_array
 		)
 			warning("sizeof formal array %s is sizeof pointer!",

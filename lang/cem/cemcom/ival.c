@@ -27,7 +27,6 @@ char *symbol2str();
 char *long2str();
 
 struct expr *do_array(), *do_struct(), *IVAL();
-struct expr *strings = 0; /* list of string constants within initialiser */
 
 /*	do_ival() performs the initialisation of a global variable
 	of type tp with the initialisation expression expr by calling IVAL().
@@ -39,32 +38,7 @@ do_ival(tpp, expr)
 {
 	if (IVAL(tpp, expr) != 0)
 		too_many_initialisers(expr);
-
-	/*	The following loop declares the string constants
-		used in the initialisation.
-		The code for these string constants may not appear in
-		the code of the initialisation because a data label
-		in EM causes the current initialisation to be completed.
-		E.g. char *s[] = {"hello", "world"};
-	*/
-	while (strings != 0) {
-		C_df_dlb(strings->SG_DATLAB);
-		C_con_scon(strings->SG_VALUE, (arith)strings->SG_LEN);
-		strings = strings->next;
-	}
 }
-
-
-/*	store_string() collects the string constants appearing in an
-	initialisation.
-*/
-store_string(expr)
-	struct expr *expr;
-{
-	expr->next = strings;
-	strings = expr;
-}
-
 
 /*	IVAL() recursively guides the initialisation expression through the
 	different routines for the different types of initialisation:
@@ -89,18 +63,14 @@ IVAL(tpp, expr)
 		/* array initialisation	*/
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return 0;
-		if (ISCOMMA(expr))	{
-			/* list of initialisation expressions */
+		if (ISCOMMA(expr)) /* list of initialisation expressions */
 			return do_array(expr, tpp);
-		}
-		/*	There might be an initialisation of a string
-			like char s[] = "I am a string"
-		*/
+		/* catch initialisations like char s[] = "I am a string" */
 		if (tp->tp_up->tp_fund == CHAR && expr->ex_class == String)
 			init_string(tpp, expr);
 		else /* " int i[24] = 12;"	*/
 			check_and_pad(expr, tpp);
-		return 0;	/* nothing left	*/
+		break;
 	case STRUCT:
 		/* struct initialisation */
 		if (valid_type(tp, "struct") == 0)
@@ -109,12 +79,12 @@ IVAL(tpp, expr)
 			return do_struct(expr, tp);
 		/* "struct foo f = 12;"	*/
 		check_and_pad(expr, tpp);
-		return 0;
+		break;
 	case UNION:
 		error("union initialisation not allowed");
-		return 0;
+		break;
 	case ERRONEOUS:
-		return 0;
+		break;
 	default: /* fundamental type	*/
 		if (ISCOMMA(expr))	{ /* " int i = {12};"	*/
 			if (IVAL(tpp, expr->OP_LEFT) != 0)
@@ -127,9 +97,9 @@ IVAL(tpp, expr)
 		}
 		/* "int i = 12;"	*/
 		check_ival(expr, tp);
-		return 0;
+		break;
 	}
-	/* NOTREACHED */
+	return 0;
 }
 
 /*	do_array() initialises the members of an array described
@@ -451,20 +421,18 @@ check_ival(expr, type)
 	case LONG:
 	case ENUM:
 		ch7cast(&expr, '=', type);
-		if (!is_cp_cst(expr))	{
+		if (is_cp_cst(expr))
+			con_int(expr);
+		else
 			illegal_init_cst(expr);
-			break;
-		}
-		con_int(expr);
 		break;
 #ifndef NOBITFIELD
 	case FIELD:
 		ch7cast(&expr, '=', type->tp_up);
-		if (!is_cp_cst(expr))	{
+		if (is_cp_cst(expr))
+			put_bf(type, expr->VL_VALUE);
+		else
 			illegal_init_cst(expr);
-			break;
-		}
-		put_bf(type, expr->VL_VALUE);
 		break;
 #endif NOBITFIELD
 	case FLOAT:
@@ -475,14 +443,13 @@ check_ival(expr, type)
 		else
 		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			expr = expr->OP_RIGHT;
-			if (!is_cp_cst(expr))	{
+			if (is_cp_cst(expr))
+				C_con_fcon(
+					long2str((long)expr->VL_VALUE, 10),
+					type->tp_size
+				);
+			else 
 				illegal_init_cst(expr);
-				break;
-			}
-			C_con_fcon(
-				long2str((long)expr->VL_VALUE, 10),
-				type->tp_size
-			);
 		}
 		else
 			illegal_init_cst(expr);
@@ -493,55 +460,35 @@ check_ival(expr, type)
 		case Oper:
 			illegal_init_cst(expr);
 			break;
-		case String:	/* char *s = "...." */
-		{
-			label datlab = data_label();
-			
-			C_ina_dlb(datlab);
-			C_con_dlb(datlab, (arith)0);
-			expr->SG_DATLAB = datlab;
-			store_string(expr);
-			break;
-		}
 		case Value:
 		{
-			struct value *vl = &(expr->ex_object.ex_value);
-			struct idf *idf = vl->vl_idf;
-
 			ASSERT(expr->ex_type->tp_fund == POINTER);
 			if (expr->ex_type->tp_up->tp_fund == FUNCTION) {
-				if (idf)
-					C_con_pnam(idf->id_text);
+				if (expr->VL_CLASS == Name)
+					C_con_pnam(expr->VL_IDF->id_text);
 				else	/* int (*func)() = 0	*/
 					con_int(expr);
 			}
 			else
-			if (idf) {
-				register struct def *def = idf->id_def;
+			if (expr->VL_CLASS == Name) {
+				register struct idf *id = expr->VL_IDF;
 
-				if (def->df_level >= L_LOCAL) {
-					if (def->df_sc != STATIC)
-						/*	Eg.  int a;
-							static int *p = &a;
-						*/
-						expr_error(expr,
-							"illegal initialisation"
-						);
-					else
-						C_con_dlb(
-							(label)def->df_address,
-							vl->vl_value
-						);
-				}
+				if (id ->id_def->df_level >= L_LOCAL)
+					expr_error(expr,
+						"illegal initialisation");
 				else
-					C_con_dnam(idf->id_text, vl->vl_value);
+					C_con_dnam(id->id_text, expr->VL_VALUE);
 			}
+			else
+			if (expr->VL_CLASS == Label)
+				C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
 			else
 				con_int(expr);
 			break;
 		}
+		case String:
 		default:
-			crash("(check_ival) illegal initialisation expression");
+			crash("(check_ival) illegal value class");
 		}
 		break;
 	case ERRONEOUS:
@@ -565,6 +512,7 @@ init_string(tpp, expr)
 	char *s = expr->SG_VALUE;
 	arith ntopad;
 
+	ASSERT(expr->ex_class == String);
 	length = expr->SG_LEN;
 	if (tp->tp_size == (arith)-1)	{
 		/* set the dimension	*/
@@ -604,21 +552,22 @@ put_bf(tp, val)
 	static arith offset = (arith)-1;
 	register struct field *fd = tp->tp_field;
 	register struct sdef *sd =  fd->fd_sdef;
-	static struct expr expr;
+	static struct expr exp;
 
 	ASSERT(sd);
 	if (offset == (arith)-1) {
 		/* first bitfield in this field	*/
 		offset = sd->sd_offset;
-		expr.ex_type = tp->tp_up;
-		expr.ex_class = Value;
+		exp.ex_type = tp->tp_up;
+		exp.ex_class = Value;
+		exp.VL_CLASS = Const;
 	}
 	if (val != 0)	/* insert the value into "field"	*/
 		field |= (val & fd->fd_mask) << fd->fd_shift;
 	if (sd->sd_sdef == 0 || sd->sd_sdef->sd_offset != offset) {
 		/* the selector was the last stored at this address	*/
-		expr.VL_VALUE = field;
-		con_int(&expr);
+		exp.VL_VALUE = field;
+		con_int(&exp);
 		field = (arith)0;
 		offset = (arith)-1;
 	}
@@ -654,27 +603,28 @@ valid_type(tp, str)
 	return 1;
 }
 
-con_int(expr)
-	register struct expr *expr;
+con_int(ex)
+	register struct expr *ex;
 {
-	register struct type *tp = expr->ex_type;
+	register struct type *tp = ex->ex_type;
 
+	ASSERT(is_cp_cst(ex));
 	if (tp->tp_unsigned)
-		C_con_ucon(long2str((long)expr->VL_VALUE, -10), tp->tp_size);
+		C_con_ucon(long2str((long)ex->VL_VALUE, -10), tp->tp_size);
 	else
-		C_con_icon(long2str((long)expr->VL_VALUE, 10), tp->tp_size);
+		C_con_icon(long2str((long)ex->VL_VALUE, 10), tp->tp_size);
 }
 
-illegal_init_cst(expr)
-	struct expr *expr;
+illegal_init_cst(ex)
+	struct expr *ex;
 {
-	expr_error(expr, "illegal initialisation constant");
+	expr_error(ex, "illegal initialisation constant");
 }
 
-too_many_initialisers(expr)
-	struct expr *expr;
+too_many_initialisers(ex)
+	struct expr *ex;
 {
-	expr_error(expr, "too many initialisers");
+	expr_error(ex, "too many initialisers");
 }
 
 aggregate_type(tp)

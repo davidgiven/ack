@@ -331,14 +331,24 @@ p1_expr(lvl, expr)
 		expr->ex_class == Type ? "Type" : "UNKNOWN CLASS"
 	);
 	switch (expr->ex_class)	{
-		struct value *v;
 		struct oper *o;
 	case Value:
-		v = &expr->ex_object.ex_value;
-		if (v->vl_idf)
-			printf("%s + ", v->vl_idf->id_text);
+		switch (expr->VL_CLASS) {
+		case Const:
+			printf("(Const) ");
+			break;
+		case Name:
+			printf("(Name) %s + ", expr->VL_IDF->id_text);
+			break;
+		case Label:
+			printf("(Label) .%lu + ", expr->VL_LBL);
+			break;
+		default:
+			printf("(Unknown) ");
+			break;
+		}
 		printf(expr->ex_type->tp_unsigned ? "%lu\n" : "%ld\n",
-				v->vl_value);
+			expr->VL_VALUE);
 		break;
 	case String:
 	{

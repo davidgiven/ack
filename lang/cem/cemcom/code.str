@@ -9,6 +9,15 @@ struct stat_block	{
 
 /* ALLOCDEF "stat_block" */
 
+struct string_cst	{	/* storing string constants */
+	struct string_cst *next;
+	char *sc_value;
+	int sc_len;
+	label sc_dlb;
+};
+
+/* ALLOCDEF "string_cst" */
+
 #define	LVAL	0
 #define	RVAL	1
 #define	FALSE	0

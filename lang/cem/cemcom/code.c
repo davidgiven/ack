@@ -59,11 +59,41 @@ famous_first_words()
 	C_ms_emx(word_size, pointer_size);
 }
 
+static struct string_cst *str_list = 0;
+
+code_string(val, len, dlb)
+	char *val;
+	int len;
+	label dlb;
+{
+	struct string_cst *sc = new_string_cst();
+
+	C_ina_dlb(dlb);
+	sc->next = str_list;
+	str_list = sc;
+	sc->sc_value = val;
+	sc->sc_len = len;
+	sc->sc_dlb = dlb;
+}
+
+def_strings(sc)
+	register struct string_cst *sc;
+{
+	if (sc) {
+		def_strings(sc->next);
+		C_df_dlb(sc->sc_dlb);
+		C_con_scon(sc->sc_value, sc->sc_len);
+		free_string_cst(sc);
+	}
+}
+
 end_code()
 {
 	/*	end_code() performs the actions to be taken when closing
 		the output stream.
 	*/
+	def_strings(str_list);
+	str_list = 0;
 	C_ms_src((arith)(LineNumber - 2), FileName);
 	C_close();
 }
@@ -351,6 +381,7 @@ loc_init(expr, id)
 	*/
 	register struct type *tp = id->id_def->df_type;
 	
+	ASSERT(id->id_def->df_sc != STATIC);
 	/* automatic aggregates cannot be initialised. */
 	switch (tp->tp_fund)	{
 	case ARRAY:
@@ -374,9 +405,14 @@ loc_init(expr, id)
 		}
 	}
 	else	{	/* not embraced	*/
+		struct value vl;
+
 		ch7cast(&expr, '=', tp);
 		EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
-		store_val(id, tp, (arith) 0);
+		vl.vl_class = Name;
+		vl.vl_data.vl_idf = id;
+		vl.vl_value = (arith)0;
+		store_val(&vl, tp);
 	}
 }
 

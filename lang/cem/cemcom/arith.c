@@ -257,18 +257,16 @@ float2float(expp, tp)
 	*/
 	
 	fp_used = 1;
-	if (is_fp_cst(*expp))	{
+	if (is_fp_cst(*expp))
 		(*expp)->ex_type = tp;
-	}
-	else	{
+	else
 		*expp = arith2arith(tp, FLOAT2FLOAT, *expp);
-	}
 }
 
 array2pointer(expp)
 	struct expr **expp;
 {
-	/*	The expression, which must be an array, it is converted
+	/*	The expression, which must be an array, is converted
 		to a pointer.
 	*/
 	(*expp)->ex_type =
@@ -278,11 +276,27 @@ array2pointer(expp)
 function2pointer(expp)
 	struct expr **expp;
 {
-	/*	The expression, which must be a function, it is converted
+	/*	The expression, which must be a function, is converted
 		to a pointer to the function.
 	*/
 	(*expp)->ex_type =
 		construct_type(POINTER, (*expp)->ex_type, (arith)0);
+}
+
+string2pointer(expp)
+	struct expr **expp;
+{
+	/*	The expression, which must be a string constant, is converted
+		to a pointer to the string-containing area.
+	*/
+	struct expr *ex = *expp;
+	label lbl = data_label();
+
+	code_string(ex->SG_VALUE, ex->SG_LEN, lbl);
+	ex->ex_class = Value;
+	ex->VL_CLASS = Label;
+	ex->VL_LBL = lbl;
+	ex->VL_VALUE = (arith)0;
 }
 
 opnd2integral(expp, oper)
@@ -420,6 +434,10 @@ any2opnd(expp, oper)
 		break;
 	case ARRAY:
 		array2pointer(expp);
+		break;
+	case POINTER:
+		if ((*expp)->ex_class == String)
+			string2pointer(expp);
 		break;
 #ifndef NOBITFIELD
 	case FIELD:

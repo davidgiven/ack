@@ -10,6 +10,7 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"Lpars.h"
+#include	"assert.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
@@ -21,13 +22,14 @@ cstbin(expp, oper, expr)
 	struct expr **expp, *expr;
 {
 	/*	The operation oper is performed on the constant
-		expressions *expp and expr, and the result restored in
+		expressions *expp(ld) and expr(ct), and the result restored in
 		*expp.
 	*/
 	arith o1 = (*expp)->VL_VALUE;
 	arith o2 = expr->VL_VALUE;
 	int uns = (*expp)->ex_type->tp_unsigned;
 
+	ASSERT(is_ld_cst(*expp) && is_cp_cst(expr));
 	switch (oper)	{
 	case '*':
 		o1 *= o2;
@@ -190,6 +192,7 @@ cut_size(expr)
 	int uns = expr->ex_type->tp_unsigned;
 	int size = (int) expr->ex_type->tp_size;
 
+	ASSERT(expr->ex_class == Value);
 	if (uns) {
 		if (o1 & ~full_mask[size])
 			expr_warning(expr,

@@ -47,7 +47,6 @@ eval_field(expr, code)
 
 	ASSERT(leftop->ex_type->tp_fund == FIELD);
 	ASSERT(asize == word_size);	/* make sure that C_loc() is legal */
-
 	leftop->ex_type = atype;	/* this is cheating but it works... */
 
 	/*	Note that op is either an assignment operator or an increment/
@@ -60,26 +59,21 @@ eval_field(expr, code)
 		conversion(tp, atype);
 		C_loc(fd->fd_mask);
 		C_and(asize);
-		if (code == TRUE)	{
+		if (code == TRUE)
 			C_dup(asize);
-		}
 		C_loc((arith)fd->fd_shift);
-
 		if (atype->tp_unsigned)
 			C_slu(asize);
 		else
 			C_sli(asize);
-
 		C_loc(~((fd->fd_mask << fd->fd_shift) | (~0 << (8 * asize))));
-
 		if (leftop->ex_depth == 0)	{	/* simple case	*/
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
 			store_val(
-				leftop->VL_IDF,
-				leftop->ex_type,
-				leftop->VL_VALUE
+				&(leftop->ex_object.ex_value),
+				leftop->ex_type
 			);
 		}
 		else	{			/* complex case	*/
@@ -98,13 +92,11 @@ eval_field(expr, code)
 		}
 	}
 	else {		/* treat ++F as F += 1 and --F as F -= 1	*/
-
 		/*	F op= e: f = (((((f>>shift)&mask) op e)&mask)<<shift)|
 					(f&~(mask<<shift))
 		*/
-		if (leftop->ex_depth == 0)	{	/* simple case	*/
+		if (leftop->ex_depth == 0)	/* simple case	*/
 			load_val(leftop, RVAL);
-		}
 		else	{			/* complex case	*/
 			tmpvar = tmp_pointer_var(&old_offset);
 			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
@@ -113,26 +105,18 @@ eval_field(expr, code)
 			C_sti(pointer_size);
 			C_loi(asize);
 		}
-
 		C_loc((arith)fd->fd_shift);
-
 		if (atype->tp_unsigned)
 			C_sru(asize);
 		else
 			C_sri(asize);
-
 		C_loc(fd->fd_mask);
 		C_and(asize);
-
-		if (code == TRUE && (op == POSTINCR || op == POSTDECR))	{
+		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
 			C_dup(asize);
-		}
-
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
-
-		/* generate the code for the operator
-		*/
+		/* generate code for the operator */
 		if (op == PLUSPLUS || op == POSTINCR)
 			assop(atype, PLUSAB);
 		else
@@ -140,31 +124,23 @@ eval_field(expr, code)
 			assop(atype, MINAB);
 		else
 			assop(atype, op);
-
 		C_loc(fd->fd_mask);
 		C_and(asize);
-
-		if (code == TRUE && op != POSTINCR && op != POSTDECR)	{
+		if (code == TRUE && op != POSTINCR && op != POSTDECR)
 			C_dup(asize);
-		}
-
 		C_loc((arith)fd->fd_shift);
-
 		if (atype->tp_unsigned)
 			C_slu(asize);
 		else
 			C_sli(asize);
-
 		C_loc(~((fd->fd_mask << fd->fd_shift) | (~0 << (8 * asize))));
-
 		if (leftop->ex_depth == 0)	{
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
 			store_val(
-				leftop->VL_IDF,
-				leftop->ex_type,
-				leftop->VL_VALUE
+				&(leftop->ex_object.ex_value),
+				leftop->ex_type
 			);
 		}
 		else	{
@@ -179,7 +155,6 @@ eval_field(expr, code)
 			free_tmp_var(old_offset);
 		}
 	}
-
 	if (code == TRUE) {
 		/*	Take care that the effective value stored in
 			the bit field (i.e. the value that is got on
@@ -193,7 +168,6 @@ eval_field(expr, code)
 			C_loc(shift);
 			C_sri(asize);
 		}
-
 		conversion(atype, tp);
 	}
 }

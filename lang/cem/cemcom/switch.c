@@ -124,6 +124,7 @@ code_case(expr)
 	register struct case_entry *ce;
 	register struct switch_hdr *sh = switch_stack;
 	
+	ASSERT(is_cp_cst(expr));
 	if (sh == 0)	{
 		error("case statement not in switch");
 		return;
@@ -133,14 +134,11 @@ code_case(expr)
 		/* is probably 0 anyway */
 		return;
 	}
-	
 	expr->ex_type = sh->sh_type;
 	cut_size(expr);
-	
 	ce = new_case_entry();
 	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val = expr->VL_VALUE;
-	
 	if (sh->sh_entries == 0)	{
 		/* first case entry	*/
 		ce->next = (struct case_entry *) 0;

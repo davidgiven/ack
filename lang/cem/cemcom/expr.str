@@ -5,9 +5,18 @@
 	a union of various goodies, we define them first; so be patient.
 */
 
+/* classes of value */
+#define Const	1
+#define Name	2
+#define Label	3
+
 struct value	{
-	struct idf *vl_idf;		/* idf of an external name or 0 */
-	arith vl_value;			/* constant, or offset if idf != 0 */
+	int vl_class;		/* Const, Name or Label	*/
+	arith vl_value;		/* constant value or offset */
+	union {
+		struct idf *vl_idf;	/* external name */
+		label vl_lbl;		/* compiler-generated label */
+	} vl_data;
 };
 
 struct string	{
@@ -53,8 +62,10 @@ struct expr	{
 };
 
 /* some abbreviated selections	*/
+#define VL_CLASS	ex_object.ex_value.vl_class
 #define	VL_VALUE	ex_object.ex_value.vl_value
-#define	VL_IDF		ex_object.ex_value.vl_idf
+#define	VL_IDF		ex_object.ex_value.vl_data.vl_idf
+#define	VL_LBL		ex_object.ex_value.vl_data.vl_lbl
 #define	SG_VALUE	ex_object.ex_string.sg_value
 #define SG_LEN		ex_object.ex_string.sg_len
 #define	SG_DATLAB	ex_object.ex_string.sg_datlab
