@@ -7,7 +7,7 @@ NotimplList = not_impl.c not_impl_table
 PseudoList = C_busy.c C_close.c C_df_dlb.c C_df_dnam.c C_df_ilb.c C_end.c \
 		C_end_narg.c C_exa_dlb.c C_exa_dnam.c C_exp.c C_ina_dlb.c \
 		C_ina_dnam.c C_init.c C_inp.c C_magic.c C_open.c C_pro.c \
-		C_pro_narg.c
+		C_pro_narg.c C_insertpart.c
 StorageList = C_bss_cst.c C_bss_dlb.c C_bss_dnam.c C_bss_ilb.c C_bss_pnam.c \
 		C_con_cst.c C_con_dlb.c C_con_dnam.c C_con_ilb.c C_con_pnam.c \
 		C_con_scon.c C_hol_cst.c C_hol_dlb.c C_hol_dnam.c C_hol_ilb.c \
