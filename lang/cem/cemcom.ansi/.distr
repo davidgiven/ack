@@ -1,8 +1,6 @@
 Version.c
 proto.make
 proto.main
-Resolve
-nmclash.c
 LLlex.c
 LLlex.h
 LLmessage.c
