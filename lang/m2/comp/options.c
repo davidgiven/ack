@@ -131,20 +131,12 @@ DoOption(text)
 			register char *new = text;
 
 			if (++nDEF > mDEF) {
-				char **n = (char **)
-				   Malloc((unsigned)((10+mDEF)*sizeof(char *)));
-
-				for (i = 0; i < mDEF; i++) {
-					n[i] = DEFPATH[i];
-				}
-				free((char *) DEFPATH);
-				DEFPATH = n;
-				mDEF += 10;
+				DEFPATH = (char **)
+				  Realloc(DEFPATH,(mDEF+=10)*sizeof(char *));
 			}
 
-			i = ndirs++;
-			while (new) {
-				register char *tmp = DEFPATH[i];
+			for (i = ndirs++; i <= nDEF; i++) {
+				char *tmp = DEFPATH[i];
 	
 				DEFPATH[i++] = new;
 				new = tmp;
