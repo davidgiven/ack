@@ -41,7 +41,7 @@ name pc
 	mapflag -{*} PC_F={PC_F?} -\{*}
 	mapflag -L PC_F={PC_F?} -\{l-}
 	mapflag -Pr* PC_ERRPATH=*
-	mapflag -Pr* PC_PCPATH=*
+	mapflag -PR* PC_PCPATH=*
 	args -Vw{w}p{p}f{d}l{l} -R{PC_PCPATH} -r{PC_ERRPATH} {PC_F?} < > {SOURCE}
 	prep cond
 	rts .p
