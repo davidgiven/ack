@@ -56,10 +56,7 @@ oper	:	NOOP_1
 			{	callop($1&0xFFFF);}
 	|	CALFOP expr ':' expr
 			{	emit1($1>>8);
-#ifdef RELOCATION
-				newrelo($4.typ, RELO4);
-#endif
-				emit4((long)($4.val));
+				adsize_exp($4, 0);
 #ifdef RELOCATION
 				newrelo($2.typ, RELO2);
 #endif
