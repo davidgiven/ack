@@ -208,11 +208,11 @@ number(s)
 	}
 	while (digit = *s++) {
 		if (digit >= 'A' && digit <= 'F')
-			digit -= 'A' + 10;
+			digit = digit - 'A' + 10;
 		else if (digit >= 'a' && digit <= 'f')
-			digit -= 'a' + 10;
+			digit = digit - 'a' + 10;
 		else if (digit >= '0' && digit <= '9')
-			digit -= '0';
+			digit = digit - '0';
 		else
 			fatal("wrong digit %c", digit);
 		if (digit >= radix)
