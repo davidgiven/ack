@@ -58,7 +58,7 @@ char **argv;
 			continue;
 		switch (*p++) {
 		case 'o':
-			if (*p != NULL) {
+			if (*p != '\0') {
 				aoutpath = p;
 				break;
 			}
@@ -68,7 +68,7 @@ char **argv;
 			aoutpath = argv[i];
 			break;
 		case 'T':
-			if (*p != NULL) {
+			if (*p != '\0') {
 				extern char *tmp_dir;
 
 				tmp_dir = p;
