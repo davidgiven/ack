@@ -17,7 +17,6 @@
 
 #define HOME    "EM"
 #define RTS     "RTS"
-#define NEEDS   "NEEDS"
 #define HEAD    "HEAD"
 #define TAIL    "TAIL"
 #define SRC     "SOURCE"

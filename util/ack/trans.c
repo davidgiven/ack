@@ -119,19 +119,6 @@ do_Rflag(argp) char *argp ; {
 	l_add(&R_list,argp) ;
 }
 
-char *needvar() {
-	static growstring needed ;
-	static int been_here = NO ;
-
-	if ( !been_here ) {
-		gr_init(&needed) ;
-		been_here=YES ;
-		gr_cat(&needed,headvar()) ;
-		gr_cat(&needed,tailvar()) ;
-	}
-	return gr_start(needed) ;
-}
-
 char *headvar() {
 	if ( !touch_head) return "" ;
 	return gr_start(head) ;
@@ -171,7 +158,6 @@ transini() {
 		set_Rflag(l_content(*elem)) ;
 	}
 	l_clear(&R_list) ;
-	setpvar(keeps(NEEDS),needvar) ;
 	setpvar(keeps(HEAD),headvar) ;
 	setpvar(keeps(TAIL),tailvar) ;
 }
