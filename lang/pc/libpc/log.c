@@ -6,38 +6,34 @@
  */
 
 /* $Header$ */
+
 #define __NO_DEFS
 #include <math.h>
 #include <pc_err.h>
-extern	_trp();
 
 double
 _log(x)
-	double x;
+	double	x;
 {
-	/* log(x) = z*P(z*z)/Q(z*z), z = (x-1)/(x+1), x in [1/sqrt(2), sqrt(2)]
+	/*	Algorithm and coefficients from:
+			"Software manual for the elementary functions"
+			by W.J. Cody and W. Waite, Prentice-Hall, 1980
 	*/
-	/*	Hart & Cheney #2707 */
-
-	static double p[5] = {
-		 0.7504094990777122217455611007e+02,
-		-0.1345669115050430235318253537e+03,
-		 0.7413719213248602512779336470e+02,
-		-0.1277249755012330819984385000e+02,
-		 0.3327108381087686938144000000e+00
+	static double a[] = {
+		-0.64124943423745581147e2,
+		 0.16383943563021534222e2,
+		-0.78956112887491257267e0
+	};
+	static double b[] = {
+		-0.76949932108494879777e3,
+		 0.31203222091924532844e3,
+		-0.35667977739034646171e2,
+		 1.0
 	};
 
-	static double q[5] = {
-		 0.3752047495388561108727775374e+02,
-		-0.7979028073715004879439951583e+02,
-		 0.5616126132118257292058560360e+02,
-		-0.1450868091858082685362325000e+02,
-		 0.1000000000000000000000000000e+01
-	};
-
-	extern double _fef();
-	double z, zsqr;
-	int exponent;
+	extern double	_fef();
+	double	znum, zden, z, w;
+	int	exponent;
 
 	if (x <= 0) {
 		_trp(ELOG);
@@ -45,11 +41,18 @@ _log(x)
 	}
 
 	x = _fef(x, &exponent);
-	while (x < M_1_SQRT2) {
-		x += x;
+	if (x > M_1_SQRT2) {
+		znum = (x - 0.5) - 0.5;
+		zden = x * 0.5 + 0.5;
+	}
+	else {
+		znum = x - 0.5;
+		zden = znum * 0.5 + 0.5;
 		exponent--;
 	}
-	z = (x-1)/(x+1);
-	zsqr = z*z;
-	return z * POLYNOM4(zsqr, p) / POLYNOM4(zsqr, q) + exponent * M_LN2;
+	z = znum/zden; w = z * z;
+	x = z + z * w * (POLYNOM2(w,a)/POLYNOM3(w,b));
+	z = exponent;
+	x += z * (-2.121944400546905827679e-4);
+	return x + z * 0.693359375;
 }
