@@ -15,10 +15,8 @@ static int (*proclist[MAXPROCS])();
 
 _cleanup()
 {
-	register int i;
-
-	for (i = callindex; --i >= 0;) {
-		(*proclist[i])();
+	while (--callindex >= 0)
+		(*proclist[callindex])();
 	}
 	callindex = 0;
 }
