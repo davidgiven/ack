@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <system.h>
 #include <stdio.h>
+#include <varargs.h>
 #include "as.h"
 #include "const.h"
 
@@ -223,13 +224,18 @@ char *mnem;
 
 /*** Error ****************************************************************/
 
-error( fmt, argv)
-char *fmt;
-int argv;
+/*VARARGS*/
+error(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list args;
 	extern int yylineno;
 
-	fprint( STDERR, "ERROR in line %d :	", yylineno);
-	doprnt( STDERR, fmt, &argv);
-	fprint( STDERR, "\n");
+	va_start(args);
+		fmt = va_arg(args, char *);
+		fprint( STDERR, "ERROR in line %d :	", yylineno);
+		doprnt( STDERR, fmt, args);
+		fprint( STDERR, "\n");
+	va_end(args);
 }
