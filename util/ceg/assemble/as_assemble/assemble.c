@@ -40,6 +40,8 @@ char *str;
 					str = str + 2;
 				}
 				break;
+		  case '%':	*b_ptr++ = *str;
+				/* fall through */
 		  default  :    *b_ptr++ = *str++;
 		}
 	}
