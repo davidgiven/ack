@@ -183,7 +183,8 @@ ChkLinkOrName(expp)
 
 		if (! ChkDesignator(left)) return 0;
 
-		if ((left->nd_type->tp_fund != T_RECORD ||
+		if ((left->nd_class==Def || left->nd_class==LinkDef) &&
+		    (left->nd_type->tp_fund != T_RECORD ||
 		    !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
@@ -211,7 +212,8 @@ Xerror(expp, "not exported from qualifying module", df);
 			}
 		}
 
-		if (left->nd_def->df_kind == D_MODULE) {
+		if ((left->nd_class == Def || left->nd_class == LinkDef) &&
+		     left->nd_def->df_kind == D_MODULE) {
 			expp->nd_class = Def;
 			FreeNode(left);
 			expp->nd_left = 0;
@@ -221,7 +223,7 @@ Xerror(expp, "not exported from qualifying module", df);
 
 	assert(expp->nd_class == Def);
 
-	return df->df_kind != D_ERROR;
+	return expp->nd_def->df_kind != D_ERROR;
 }
 
 STATIC int

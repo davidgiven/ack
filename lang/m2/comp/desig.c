@@ -269,12 +269,13 @@ CodeMove(rhs, left, rtp)
 				/*	Do a block move
 				*/
 				struct desig l, r;
+				arith sz;
 
 				sz = (size / word_size) * word_size;
 				l = *lhs; r = *rhs;
 				CodeAddress(&r);
 				CodeAddress(&l);
-				C_blm(sz);
+				C_blm((arith) sz);
 				rhs->dsg_offset += sz;
 				lhs->dsg_offset += sz;
 				size -= sz;
@@ -284,16 +285,16 @@ CodeMove(rhs, left, rtp)
 					/*	Then copy dwords, words.
 						Depend on peephole optimizer
 					*/
-					CodeCopy(lhs, rhs, sz, &size);
+					CodeCopy(lhs, rhs, (arith) sz, &size);
 				}
 			}
 			sz = word_size;
 			while (size && --sz) {
 				/*	And then copy remaining parts
 				*/
-				while (word_size % sz) sz--;
+				while ((int) word_size % sz) sz--;
 				while (size >= sz) {
-					CodeCopy(lhs, rhs, sz, &size);
+					CodeCopy(lhs, rhs, (arith) sz, &size);
 				}
 			}
 			return;

@@ -155,7 +155,7 @@ GetDefinitionModule(id, incr)
 			id->id_text);
 	}
 	else if (df == Defined && level == 1) {
-		error("cannot import from currently defined module");
+		error("cannot import from current module \"%s\"", id->id_text);
 		df->df_kind = D_ERROR;
 	}
 	FileName = fn;
