@@ -1,8 +1,5 @@
-LIBDIR=../lib
 install:
-	rm -f $(LIBDIR)/tail_mon
-	ln tail_mon.a $(LIBDIR)/tail_mon
-
+	ln tail_mon.a tail_mon ; ../../install tail_mon ; rm tail_mon
 
 clean :
 
