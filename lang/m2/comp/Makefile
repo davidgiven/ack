@@ -41,7 +41,7 @@ GENCFILES=	tokenfile.c \
 GENGFILES=	tokenfile.g
 GENHFILES=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
-	inputtype.h maxset.h ndir.h density.h\
+	inputtype.h maxset.h density.h\
 	def.h debugcst.h type.h Lpars.h node.h
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h desig.h f_info.h idf.h\
@@ -164,6 +164,7 @@ error.o: node.h
 error.o: warning.h
 main.o: LLlex.h
 main.o: Lpars.h
+main.o: SYSTEM.h
 main.o: debug.h
 main.o: debugcst.h
 main.o: def.h
@@ -171,7 +172,6 @@ main.o: f_info.h
 main.o: idf.h
 main.o: input.h
 main.o: inputtype.h
-main.o: ndir.h
 main.o: node.h
 main.o: scope.h
 main.o: standards.h
@@ -288,7 +288,6 @@ chk_expr.o: type.h
 chk_expr.o: warning.h
 options.o: idfsize.h
 options.o: main.h
-options.o: ndir.h
 options.o: type.h
 options.o: warning.h
 walk.o: LLlex.h

@@ -10,7 +10,6 @@
 /* $Header$ */
 
 #include	"idfsize.h"
-#include	"ndir.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -46,6 +45,19 @@ DoOption(text)
 		options[text[-1]]++;
 		break;
 
+	case 'i':	/* # of bits in set */
+	{
+		char *t = text;
+		int val;
+		extern int maxset;
+
+		val = txt2int(&t);
+		if (val <= 0 || *t) {
+			error("bad -i flag; use -i<num>");
+		}
+		else	maxset = val;
+		break;
+	}
 	case 'w':
 		if (*text) {
 			while (*text) {
@@ -100,13 +112,25 @@ DoOption(text)
 
 	case 'I' :
 		if (*text) {
-			register int i = ndirs++;
+			register int i;
 			register char *new = text;
+
+			if (++nDEF > mDEF) {
+				char **n = (char **)
+					Malloc((10+mDEF)*sizeof(char *));
+
+				for (i = 0; i < mDEF; i++) {
+					n[i] = DEFPATH[i];
+				}
+				free((char *) DEFPATH);
+				DEFPATH = n;
+				mDEF += 10;
+			}
+
+			i = ndirs++;
 			while (new) {
 				register char *tmp = DEFPATH[i];
 	
-				if (i >= NDIRS)
-					fatal("too many -I options");
 				DEFPATH[i++] = new;
 				new = tmp;
 			}

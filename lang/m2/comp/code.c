@@ -140,6 +140,7 @@ CodeExpr(nd, ds, true_label, false_label)
 		ds->dsg_kind = DSG_LOADED;
 		break;
 
+	case Xset:
 	case Set: {
 		register arith *st = nd->nd_set;
 		register int i;
@@ -153,14 +154,10 @@ CodeExpr(nd, ds, true_label, false_label)
 		for (i = tp->tp_size / word_size, st += i; i > 0; i--) { 
 			C_loc(*--st);
 		}
+		CodeSet(nd);
 		}
 		break;
 
-	case Xset:
-		CodeSet(nd);
-		ds->dsg_kind = DSG_LOADED;
-		break;
-		
 	default:
 		crash("(CodeExpr) bad node type");
 	}
@@ -930,12 +927,11 @@ CodeSet(nd)
 {
 	register struct type *tp = nd->nd_type;
 
-	C_zer(tp->tp_size);	/* empty set */
 	nd = nd->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		CodeEl(nd->nd_left, tp);
+		if (nd->nd_left) CodeEl(nd->nd_left, tp);
 		nd = nd->nd_right;
 	}
 }

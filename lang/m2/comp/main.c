@@ -10,7 +10,6 @@
 /* $Header$ */
 
 #include	"debug.h"
-#include	"ndir.h"
 
 #include	<system.h>
 #include	<em_arith.h>
@@ -34,7 +33,8 @@ int		state;			/* either IMPLEMENTATION or PROGRAM */
 char		options[128];
 int		DefinitionModule; 
 char		*ProgName;
-char		*DEFPATH[NDIRS+1];
+char		**DEFPATH;
+int		nDEF, mDEF;
 struct def 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
@@ -50,6 +50,9 @@ main(argc, argv)
 
 	ProgName = *argv++;
 	warning_classes = W_INITIAL;
+	DEFPATH = (char **) Malloc(10 * sizeof(char *));
+	mDEF = 10;
+	nDEF = 1;
 
 	while (--argc > 0) {
 		if (**argv == '-')
@@ -60,10 +63,10 @@ main(argc, argv)
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc < 2) {
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
-		return 1;
+		exit(1);
 	}
 	if (options['x']) c_inp = C_exp;
-	return !Compile(Nargv[1], Nargv[2]);
+	exit(!Compile(Nargv[1], Nargv[2]));
 }
 
 Compile(src, dst)

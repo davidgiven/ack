@@ -63,6 +63,10 @@ ChkVariable(expp)
 		Xerror(expp, "variable expected", expp->nd_def);
 		return 0;
 	}
+	if (expp->nd_class == Value) {
+		node_error(expp, "variable expected");
+		return 0;
+	}
 
 	return 1;
 }
@@ -182,12 +186,16 @@ ChkLinkOrName(expp)
 
 		if (! ChkDesignator(left)) return 0;
 
-		if (left->nd_type->tp_fund != T_RECORD ||
-		    (left->nd_class == Def &&
-		     !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
+		if (left->nd_class == Def &&
+		    (left->nd_type->tp_fund != T_RECORD ||
+		    !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
 			Xerror(left, "illegal selection", left->nd_def);
+			return 0;
+		}
+		if (left->nd_type->tp_fund != T_RECORD) {
+			node_error(left, "illegal selection");
 			return 0;
 		}
 
@@ -273,8 +281,8 @@ node_error(expp, "standard or local procedures may not be assigned");
 }
 
 STATIC int
-ChkElement(expp, tp, set)
-	register struct node *expp;
+ChkElement(expp, tp, set, level)
+	struct node **expp;
 	register struct type *tp;
 	arith **set;
 {
@@ -282,15 +290,17 @@ ChkElement(expp, tp, set)
 		recursively.
 		Also try to compute the set!
 	*/
-	register struct node *left = expp->nd_left;
-	register struct node *right = expp->nd_right;
+	register struct node *expr = *expp;
+	register struct node *left = expr->nd_left;
+	register struct node *right = expr->nd_right;
 	register int i;
 
-	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
+	if (expr->nd_class == Link && expr->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (!ChkElement(left, tp, set) || !ChkElement(right, tp, set)) {
+		if (!ChkElement(&(expr->nd_left), tp, set, 1) ||
+		    !ChkElement(&(expr->nd_right), tp, set, 1)) {
 			return 0;
 		}
 
@@ -304,15 +314,11 @@ node_error(expp, "lower bound exceeds upper bound in range");
 				return 0;
 			}
 
-			if (*set) {
-				for (i=left->nd_INT+1; i<right->nd_INT; i++) {
-					(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
-				}
+			for (i=left->nd_INT; i<=right->nd_INT; i++) {
+				(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
 			}
-		}
-		else if (*set) {
-			free((char *) *set);
-			*set = 0;
+			FreeNode(expr);
+			*expp = 0;
 		}
 
 		return 1;
@@ -320,27 +326,31 @@ node_error(expp, "lower bound exceeds upper bound in range");
 
 	/* Here, a single element is checked
 	*/
-	if (!ChkExpression(expp)) return 0;
+	if (!ChkExpression(expr)) return 0;
 
-	if (!TstCompat(tp, expp->nd_type)) {
-		node_error(expp, "set element has incompatible type");
+	if (!TstCompat(tp, expr->nd_type)) {
+		node_error(expr, "set element has incompatible type");
 		return 0;
 	}
 
-	if (expp->nd_class == Value) {
+	if (expr->nd_class == Value) {
 		/* a constant element
 		*/
 		arith low, high;
 
-		i = expp->nd_INT;
+		i = expr->nd_INT;
 		getbounds(tp, &low, &high);
 
 	    	if (i < low || i > high) {
-			node_error(expp, "set element out of range");
+			node_error(expr, "set element out of range");
 			return 0;
 		}
 
-		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
+		if (! level) {
+			(*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
+			FreeNode(expr);
+			*expp = 0;
+		}
 	}
 
 	return 1;
@@ -356,10 +366,12 @@ ChkSet(expp)
 	register struct type *tp;
 	register struct node *nd;
 	register struct def *df;
-	arith *set;
 	unsigned size;
+	int retval = 1;
 
 	assert(expp->nd_symb == SET);
+
+	expp->nd_class = Set;
 
 	/* First determine the type of the set
 	*/
@@ -392,37 +404,31 @@ ChkSet(expp)
 	if (! nd) {
 		/* The resulting set IS empty, so we just return
 		*/
-		expp->nd_class = Set;
 		expp->nd_set = 0;
 		return 1;
 	}
 	size = tp->tp_size * (sizeof(arith) / word_size);
-	set = (arith *) Malloc(size);
-	clear((char *) set, size);
+	expp->nd_set = (arith *) Malloc(size);
+	clear((char *) (expp->nd_set) , size);
 
 	/* Now check the elements, one by one
 	*/
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (!ChkElement(nd->nd_left, ElementType(tp), &set)) return 0;
+		if (!ChkElement(&(nd->nd_left), ElementType(tp),
+						&(expp->nd_set), 0)) {
+			retval = 0;
+		}
+		if (nd->nd_left) expp->nd_class = Xset;
 		nd = nd->nd_right;
 	}
 
-	if (set) {
-		/* Yes, it was a constant set, and we managed to compute it!
-		   Notice that at the moment there is no such thing as
-		   partial evaluation. Either we evaluate the set, or we
-		   don't (at all). Improvement not neccesary (???)
-		   ??? sets have a contant part and a variable part ???
-		*/
-		expp->nd_class = Set;
-		expp->nd_set = set;
+	if (expp->nd_class == Set) {
 		FreeNode(expp->nd_right);
 		expp->nd_right = 0;
 	}
-
-	return 1;
+	return retval;
 }
 
 STATIC struct node *
@@ -814,10 +820,8 @@ ChkUnOper(expp)
 	switch(expp->nd_symb) {
 	case '+':
 		if (tpr->tp_fund & T_NUMERIC) {
-			expp->nd_token = right->nd_token;
-			expp->nd_class = right->nd_class;
-			FreeNode(right);
-			expp->nd_right = 0;
+			*expp = *right;
+			free_node(right);
 			return 1;
 		}
 		break;

@@ -39,6 +39,9 @@ int
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT;
 
+int
+	maxset = MAXSET;
+
 arith
 	word_size = SZ_WORD,
 	dword_size = 2 * SZ_WORD,
@@ -436,7 +439,7 @@ set_type(tp)
 
 	getbounds(tp, &lb, &ub);
 
-	if (lb < 0 || ub > MAXSET-1) {
+	if (lb < 0 || ub > maxset-1) {
 		error("set type limits exceeded");
 		return error_type;
 	}
@@ -648,7 +651,9 @@ DumpType(tp)
 	print(" fund:");
 	switch(tp->tp_fund) {
 	case T_RECORD:
-		print("RECORD"); break;
+		print("RECORD\n");
+		DumpScope(tp->rec_scope);
+		break;
 	case T_ENUMERATION:
 		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;
 	case T_INTEGER:
