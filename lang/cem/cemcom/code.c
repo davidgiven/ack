@@ -196,6 +196,11 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	register char *name = idf->id_text;
 	register struct def *def = idf->id_def;
 
+	while (def->df_level > L_GLOBAL) def = def->next;
+		/* idf->id_def does not indicate the right def structure
+		   when the function being defined has a parameter of the
+		   same name.
+		*/
 #ifndef PREPEND_SCOPES
 	code_scope(name, def);
 #endif	PREPEND_SCOPES
