@@ -150,7 +150,7 @@ lint_1_local(idf, def)
 	if (	(sc == STATIC || sc == LABEL)
 	&&	!def->df_used
 	) {
-		def_warning(def, "%s %s declared but not used in function %s",
+		def_warning(def, "%s %s not used anywhere in function %s",
 			symbol2str(sc), idf->id_text, func_name);
 	}
 
@@ -359,7 +359,7 @@ check_autos()
 			}
 			else {
 				def_warning(a->ad_def,
-					"%s neither set nor used in function %s",
+					"%s not used anywhere in function %s",
 					a->ad_idf->id_text, func_name);
 			}
 		}
@@ -751,7 +751,7 @@ start_loop_stmt(looptype, const, cond)
 	dbg_lint_stack("start_loop_stmt");
 	if (const && !cond) {
 		/* while (0) | for (;0;) */
-		hwarning("condition in %s statement is constant",
+		hwarning("condition in %s statement is always false",
 						symbol2str(looptype));
 		new->ls_current->st_notreached = 1;
 	}
@@ -815,6 +815,10 @@ end_do_stmt(const, cond)
 	register struct lint_stack_entry *lse = find_wdf();
 
 	dbg_lint_stack("end_do_stmt");
+	if (const && !cond) {
+		/* do ... while (0) */
+		hwarning("condition in do statement is always false");
+	}
 	lse->LS_TEST = (!const ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
 	end_loop_stmt();
 

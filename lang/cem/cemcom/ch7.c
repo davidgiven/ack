@@ -287,13 +287,14 @@ ch7cast(expp, oper, tp)
 			break;
 		case EQUAL:
 		case NOTEQUAL:
+		case ':':
 		case '=':
 		case RETURN:
 			if (is_cp_cst(*expp) && (*expp)->VL_VALUE == (arith)0)
 				break;
 		default:
 			expr_warning(*expp,
-				"illegal conversion of %s to pointer",
+				"dubious conversion of %s to pointer",
 				symbol2str(oldtp->tp_fund));
 			break;
 		}

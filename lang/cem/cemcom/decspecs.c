@@ -51,8 +51,10 @@ do_decspecs(ds)
 	*/
 
 	/* some adjustments as described in RM 8.2 */
-	if (tp == 0) {
+	if (tp == 0 && ds->ds_size == 0 && ds->ds_unsigned == 0) {
 		ds->ds_notypegiven = 1;
+	}
+	if (tp == 0) {
 		tp = int_type;
 	}
 	switch (ds->ds_size)	{

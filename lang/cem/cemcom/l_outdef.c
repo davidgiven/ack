@@ -70,7 +70,7 @@ lint_declare_idf(idf, sc)
 lint_ext_def(idf, sc)
 	struct idf *idf;
 {
-/* At this place the following fields of the outputdefinition can be
+/* At this place the following fields of the output definition can be
  * filled:
  *		name, stat_number, class, file, line, type.
  * For variable definitions and declarations this will be all.
@@ -163,7 +163,7 @@ lint_formals()
 		switch (type->tp_fund) {
 		case CHAR:
 		case SHORT:
-			type = int_type;
+			type = (type->tp_unsigned ? uint_type : int_type);
 			break;
 		case FLOAT:
 			type = double_type;
@@ -271,7 +271,7 @@ output_def(od)
 /* As the types are output the tp_entries are removed, because they
  * are then not needed anymore.
  */
-	if (od->od_class == XXDF)
+	if (od->od_class == XXDF || !od->od_name || od->od_name[0] == '#')
 		return;
 
 	if (LINTLIB) {
