@@ -71,6 +71,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #endif
 
 #ifndef NDEBUG
+	assert(costlimit <= INFINITY);
 	level++;
 	DEBUG("Entering codegen");
 	if (Debug > 1) fprintf(stderr, "toplevel = %d\n", toplevel);
@@ -195,6 +196,7 @@ if (Debug)
 				 */
 				SAVEST;
 				mincost = costlimit-totalcost+1;
+				assert(mincost <= INFINITY);
 				for(i=0;i<npos;i++) {
 					t=codegen(&coderules[pos[i]],ply,FALSE,
 					    costlimit<MAXINT?mincost:MAXINT,0);
@@ -444,6 +446,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	}
 	for (i=0;i<nregneeded;i++)
 		totalcost += docoerc(regtp[i],regcp[i],ply,toplevel,besttup->p_rar[i]);
+	assert(totalcost <= costlimit);
 	myfree((string)besttup);
 	break;
     }
@@ -455,7 +458,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	int doremove = (codep[-1] & 037) == DO_REMOVE;
 	extern int allsetno;
 
-	DEBUG("REMOVE");
+	DEBUG(doremove ? "REMOVE" : "TOSTACK");
 	if (codep[-1]&32) {
 		getint(texpno,codep);
 		getint(nodeno,codep);
@@ -477,10 +480,15 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			CHKCOST();
 			break;
 		}
-	if (doremove) for (rp=machregs;rp<machregs+NREGS;rp++)
+	if (doremove) for (rp=machregs;rp<machregs+NREGS;rp++) {
 		if (rp->r_contents.t_token != 0 &&
-		    match(&rp->r_contents,&machsets[texpno],nodeno))
+		    match(&rp->r_contents,&machsets[texpno],nodeno)) {
+#ifndef NDEBUG
+			if (Debug > 1) fprintf(stderr, "killing reg %ld (%s)\n", (long)(rp-machregs), rp->r_repr ? codestrings[rp->r_repr] : "cc");
+#endif
 			rp->r_contents.t_token=0;
+		}
+	}
 	break;
     }
     case DO_KILLREG:
@@ -492,7 +500,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	result_t result;
 	int dokill = (codep[-1] & 037) == DO_KILLREG;
 
-	DEBUG("RREMOVE");
+	DEBUG(dokill ? "KILLREG" : "RREMOVE");
 	getint(nodeno,codep);
 	result=compute(&enodes[nodeno]);
 	if (result.e_typ!=EV_REG)
@@ -718,6 +726,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	}
 	if (toplevel)
 		gennl();
+	CHKCOST();
 	break;		
     }
     case DO_MOVE: {
