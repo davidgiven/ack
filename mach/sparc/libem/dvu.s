@@ -1,5 +1,74 @@
 .global dvu4
 .global dvi4
+.global mathdvi4
+
+dvi4:
+! %o0' = %o0 / %o1
+! %o1' = %o0 % %o1
+	tst	%o1
+	be	0f
+	clr	%o5
+	tst	%o0
+	bge	1f
+	nop
+	neg	%o0
+	xor	%o5, 1, %o5
+1:
+	tst	%o1
+	bge	3f
+	nop
+	neg	%o1
+	xor	%o5, 2, %o5
+
+3:	/* div common */
+	clr	%o2
+	mov	%o1, %o3
+	clr	%o4
+
+4:
+	cmp	%o1, %o0
+	bgeu	5f
+	nop
+	inc	%o4
+	sll	%o1, 1, %o1
+	b	4b
+	nop
+
+5:
+	sll	%o2, 1, %o2
+	subcc	%o0, %o1, %o0
+	bgeu	3f
+	nop
+	add	%o0, %o1, %o0
+	b	4f
+	nop
+3:
+	inc	%o2
+4:
+	srl	%o1, 1, %o1
+	tst	%o4
+	bz	5f
+	nop
+	dec	%o4
+	b	5b
+	nop
+
+5:
+	andcc	%o5, 1, %g0
+	bz	6f
+	nop
+	neg	%o0
+	neg	%o2
+6:
+	andcc	%o5, 2, %g0
+	bz	8f
+	nop
+	neg	%o2
+8:
+	mov	%o0, %o1
+	mov	%o2, %o0
+	retl
+	nop
 
 dvu4:
 ! %o0' = %o0 / %o1
@@ -24,9 +93,9 @@ dvu4:
 	nop
 
 
-dvi4:
-! %o2 = %o0 / %o1
-! %o3 = %o0 % %o1
+mathdvi4:
+! %o0' = %o0 / %o1
+! %o1' = %o0 % %o1
 	tst	%o1
 	be	0f
 	clr	%o5
@@ -49,7 +118,7 @@ dvi4:
 
 4:
 	cmp	%o1, %o0
-	bgu	5f
+	bgeu	5f
 	nop
 	inc	%o4
 	sll	%o1, 1, %o1
