@@ -150,7 +150,7 @@ IMPLEMENTATION MODULE Streams;
 		IF (cnt > 0) THEN
 			cnt1 := cnt;
 			cnt := 0;
-			IF Unix.write(fildes, ADR(buf), cnt) < 0) THEN END;
+			IF Unix.write(fildes, ADR(buf), cnt) < 0 THEN END;
 		END;
 	END;
   END FlushStream;
