@@ -64,4 +64,5 @@ opr:
 		make pr | opr
 
 clean:
-		-rm -f *.old $(RESFILES) *.t *.out
+		-rm -f *.old $(RESFILES) *.t *.out LLgen.doc top.doc \
+			occam.doc ego.doc
