@@ -103,8 +103,8 @@ reduce_name_table()
 	 * After that, the string table is reduced.
 	 */
 
-#define S_NEEDED	0x8000
-#define removable(nm)	(!(nm->on_type & S_NEEDED) && *(nm->on_foff+string_area) == GENLAB)
+#define S_NEEDED	S_MOD
+#define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
 	register int *diff_index =
 		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
@@ -131,20 +131,35 @@ reduce_name_table()
 		}
 		else {
 			diff_index[i] = old_diff_index;
-			if (old_diff_index) {
-				symbol_table[i - old_diff_index] = *np;
-			}
 		}
+                if ((np->on_type & S_TYP) == S_CRS) {
+                        struct outname *n = &symbol_table[(int) np->on_valu];
+                        if (! (n->on_type & S_COM)) {
+                                np->on_type &= ~S_TYP;
+                                np->on_type |= (n->on_type & S_TYP);
+                                np->on_valu = n->on_valu;
+                        }
+                }
 	}
-	nname -= diff_index[nname - 1];
 
 	rp = u_reloc;
 	for (i = nrelo; i > 0; i--, rp++) {
 		if (rp->r_extern) {
+			symbol_table[rp->r_symbolnum].on_type &= ~S_NEEDED;
 			rp->r_symbolnum -= diff_index[rp->r_symbolnum];
 		}
 	}
 
+        for (i = 0, np = symbol_table; i < nname; i++, np++) {
+                if ((np->on_type & S_TYP) == S_CRS) {
+                        np->on_valu -= diff_index[(int) np->on_valu];
+                }
+                if (diff_index[i] && diff_index[i] == diff_index[i-1]) {
+                        symbol_table[i - diff_index[i]] = *np;
+                }
+        }
+
+	nname -= diff_index[nname - 1];
 	free((char *)(diff_index-1));
 
 	new_str = q = Malloc((unsigned)(string - string_area));
@@ -229,9 +244,12 @@ register struct nlist *u_name;
 	/* print( "naam is %s\n", a_name->on_foff + string_area);   */
 
 	u_name->n_str = a_name->on_foff + 4;
-	if ((a_name->on_type & S_TYP) == S_UND ||
-	    (a_name->on_type & S_EXT)) u_name->n_type = N_EXT;
+	if (a_name->on_type & S_STB) u_name->n_type = a_name->on_type >> 8;
 	else	u_name->n_type = 0;
+	if ((a_name->on_type & S_TYP) == S_CRS) {
+		a_name->on_valu = 0;
+		a_name->on_type = S_COM;
+	}
 	if (a_name->on_valu != -1 && (! (a_name->on_type & S_COM))) {
 		switch((a_name->on_type & S_TYP) - S_MIN) {
 		case SEGTXT:
@@ -251,8 +269,10 @@ register struct nlist *u_name;
 */
 		}
 	}
+	if ((a_name->on_type & S_TYP) == S_UND ||
+	    (a_name->on_type & S_EXT)) u_name->n_type |= N_EXT;
 	u_name->n_other = '\0';
-	u_name->n_desc = 0;
+	u_name->n_desc = a_name->on_desc;
 	if (a_name->on_type & S_COM) 
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)

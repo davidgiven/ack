@@ -9,13 +9,14 @@ BACK=$(TARGET_HOME)/lib.bin/ceg/ce_back
 
 CEG = $(TARGET_HOME)/lib.bin/ceg/util
 
-all:
+all:	back_vax.$(LIBSUF)
 	make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH)
 
-install:
+install:	install_vax
 	make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH) install
 
-cmp:
+cmp:	back_vax.$(LIBSUF)
+	-cmp back_vax.$(LIBSUF) $(TARGET_HOME)/lib.bin/vax4/back_vax.$(LIBSUF)
 	-make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH) cmp
 
 install_vax:	back_vax.$(LIBSUF)
