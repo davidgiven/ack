@@ -43,7 +43,8 @@ do not generate line directives
 set maximum identifier length to
 .IR n .
 .PP
-The following names are always available unless undefined:
+The following names are always available. They cannot be the subject of a
+-U command line option or a #undef directive.
 .RS
 .IP __STDC__
 A decimal constant 1, indicating that this is an ANSI C conforming
