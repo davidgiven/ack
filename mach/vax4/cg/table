@@ -1,7 +1,7 @@
 "$Header$"
 #define LOCLABS		/* define if target assembler recognizes local labels */
 #define REGVARS		/* define for register variables */
-/*#define DORCK		/* define if you want RCK */
+#define DORCK		/* define if you want RCK */
 #define FLOAT4		/* define if you want better 4-byte FP arithmetic */
 #define FLOAT8		/* define if you want better 8-byte FP arithmetic */
 #define ASBUG_AVOID	/* define if you want to avoid a bug in the BSD 4.1 VAX
