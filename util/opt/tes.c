@@ -96,6 +96,7 @@ line_p lnp;
 		while (*s != '\0') {
 			 if (*s++ == '-') {		/* ignores asp -4 */
 				stacktop = 0;
+				s++;
 				continue;
 			 }
 
