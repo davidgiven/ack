@@ -899,17 +899,17 @@ store_val(vl, tp)
 	- static variable
 	- local variable
 */
-load_val(expr, val)
+load_val(expr, rlval)
 	register struct expr *expr; /* expression containing the value	*/
-	int val;		/* generate either LVAL or RVAL		*/
+	int rlval;		/* generate either LVAL or RVAL		*/
 {
 	register struct type *tp = expr->ex_type;
-	int rvalue = (val == RVAL && expr->ex_lvalue != 0);
+	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
 	arith size = tp->tp_size;
 	int tpalign = tp->tp_align;
 	int al_on_word;
 	register int inword, indword;
-	arith val = expr->VL_VALUE;
+	register arith val = expr->VL_VALUE;
 
 	if (expr->VL_CLASS == Const) {
 		if (rvalue) { /* absolute addressing */
