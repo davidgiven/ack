@@ -153,6 +153,22 @@ loc cmu teq $1==0 && $2==w:	teq
 loc cmu tne $1==0 && $2==w:	tne
 loc cmu zeq $1==0 && $2==w:	zeq $3
 loc cmu zne $1==0 && $2==w:	zne $3
+loc cmu tlt $1==0 && $2==w:	asp w loc 0
+loc cmu tle $1==0 && $2==w:	teq
+loc cmu tge $1==0 && $2==w:	asp w loc 1
+loc cmu tgt $1==0 && $2==w:	tne
+loc cmu zlt $1==0 && $2==w:	asp w
+loc cmu zle $1==0 && $2==w:	zeq $3
+loc cmu zge $1==0 && $2==w:	asp w bra $3
+loc cmu zgt $1==0 && $2==w:	zne $3
+ldc cmu tlt $1==0 && $2==2*w:	asp 2*w loc 0
+ldc cmu tle $1==0 && $2==2*w:	ldc 0 cms 2*w teq
+ldc cmu tge $1==0 && $2==2*w:	asp 2*w loc 1
+ldc cmu tgt $1==0 && $2==2*w:	ldc 0 cms 2*w tne
+ldc cmu zlt $1==0 && $2==2*w:	asp 2*w
+ldc cmu zle $1==0 && $2==2*w:	ldc 0 cms 2*w zeq $3
+ldc cmu zge $1==0 && $2==2*w:	asp 2*w bra $3
+ldc cmu zgt $1==0 && $2==2*w:	ldc 0 cms 2*w zne $3
 loc ior $1==0 && $2==w:
 ldc ior $1==0 && $2==2*w:
 zer ior $1==$2:
