@@ -7,7 +7,12 @@
 
 #include "booth.h"
 
-char *strncpy(), *strcpy(), *sprintf();
+extern char *strncpy(), *strcpy();
+#ifndef __STDC__
+extern char *sprintf();
+#else
+/* sprintf should be declared in stdio.h, as returning an int */
+#endif
 
 char * myalloc(n) {
 	register char *p;

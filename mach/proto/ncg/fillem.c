@@ -29,7 +29,11 @@ static char rcsid2[] = "$Header$";
  * Author: Hans van Staveren
  */
 
-extern char	*sprintf();
+#ifndef __STDC__
+extern char *sprintf();
+#else
+/* sprintf should be declared in stdio.h, as returning an int */
+#endif
 
 #ifndef newplb			/* retrofit for older mach.h */
 #define newplb newilb
