@@ -20,7 +20,7 @@ extern struct _io_buf {
     int     _flags;
     unsigned char   *_buf;
     unsigned char   *_ptr;
-}  *_io_table[_NFILES];
+}  *_io_table[_NFILES], _stdin, _stdout, _stderr;
 
 
 #endif	/* FILE */
@@ -28,9 +28,9 @@ extern struct _io_buf {
 #define FILE struct _io_buf
 
 
-#define stdin  (_io_table[0])	
-#define stdout 	(_io_table[1])
-#define stderr 	(_io_table[2])
+#define stdin  (&_stdin)
+#define stdout 	(&_stdout)
+#define stderr 	(&_stderr)
 
 #define getchar() 		getc(stdin)
 #define putchar(c) 		putc(c,stdout)
