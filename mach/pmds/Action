@@ -1,6 +1,6 @@
-name "PMDS download program(s)"
-dir dl
+name "Ack.out --> PMDS a.out format conversion program"
+dir cv
 end
-name "PMDS EM library"
-dir libem
+name "PMDS systemcall library"
+dir libsys
 end

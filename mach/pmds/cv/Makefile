@@ -1,7 +1,9 @@
-CFLAGS=-O
+EMHOME=../../..
+
+CFLAGS=-O -I$(EMHOME)/h
 
 cv:		cv.o
-		$(CC) -o cv -n cv.o
+		$(CC) -o cv -n cv.o $(EMHOME)/modules/lib/libobject.a
 
 install:	cv
 		../../install cv
