@@ -53,43 +53,43 @@ code_endswitch()
 	if (sh->sh_default == 0)	/* no default occurred yet */
 		sh->sh_default = sh->sh_break;
 	C_bra(sh->sh_break);		/* skip the switch table now	*/
-	C_ilb(sh->sh_table);		/* switch table entry		*/
+	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	tablabel = data_label();	/* the rom must have a label	*/
-	C_ndlb(tablabel);
+	C_df_dlb(tablabel);
 	C_rom_begin();
-	C_co_ilb(sh->sh_default);
+	C_ilb(sh->sh_default);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 		register arith val;
 
-		C_co_cst(sh->sh_lowerbd);
-		C_co_cst(sh->sh_upperbd - sh->sh_lowerbd);
+		C_cst(sh->sh_lowerbd);
+		C_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			ASSERT(ce);
 			if (val == ce->ce_value)	{
-				C_co_ilb(ce->ce_label);
+				C_ilb(ce->ce_label);
 				ce = ce->next;
 			}
 			else
-				C_co_ilb(sh->sh_default);
+				C_ilb(sh->sh_default);
 		}
 		C_rom_end();
-		C_lae_ndlb(tablabel, (arith)0); /* perform the switch	*/
+		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(sh->sh_type->tp_size);
 	}
 	else	{ /* CSB */
-		C_co_cst((arith)sh->sh_nrofentries);
+		C_cst((arith)sh->sh_nrofentries);
 		for (ce = sh->sh_entries; ce; ce = ce->next)	{
 			/* generate the entries: value + prog.label	*/
-			C_co_cst(ce->ce_value);
-			C_co_ilb(ce->ce_label);
+			C_cst(ce->ce_value);
+			C_ilb(ce->ce_label);
 		}
 		C_rom_end();
-		C_lae_ndlb(tablabel, (arith)0); /* perform the switch	*/
+		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csb(sh->sh_type->tp_size);
 	}
-	C_ilb(sh->sh_break);
+	C_df_ilb(sh->sh_break);
 	switch_stack = sh->next;	/* unstack the switch descriptor */
 	/* free the allocated switch structure	*/
 	for (ce = sh->sh_entries; ce; ce = tmp)	{
@@ -111,7 +111,7 @@ code_case(val)
 		return;
 	}
 	ce = new_case_entry();
-	C_ilb(ce->ce_label = text_label());
+	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val;
 	if (sh->sh_entries == 0)	{
 		/* first case entry	*/
@@ -180,5 +180,5 @@ code_default()
 		error("multiple entry for default in switch");
 		return;
 	}
-	C_ilb(sh->sh_default = text_label());
+	C_df_ilb(sh->sh_default = text_label());
 }

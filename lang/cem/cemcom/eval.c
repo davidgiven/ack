@@ -87,11 +87,11 @@ EVAL(expr, val, code, true_label, false_label)
 		if (gencode) {
 			label datlab = data_label();
 			
-			C_ndlb(datlab);
+			C_df_dlb(datlab);
 			C_con_begin();
-			C_co_scon(expr->SG_VALUE, (arith)0);
+			C_scon(expr->SG_VALUE, (arith)0);
 			C_con_end();
-			C_lae_ndlb(datlab, (arith)0);
+			C_lae_dlb(datlab, (arith)0);
 		}
 		break;
 
@@ -99,11 +99,11 @@ EVAL(expr, val, code, true_label, false_label)
 		if (gencode) {
 			label datlab = data_label();
 			
-			C_ndlb(datlab);
+			C_df_dlb(datlab);
 			C_rom_begin();
-			C_co_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+			C_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 			C_rom_end();
-			C_lae_ndlb(datlab, (arith)0);
+			C_lae_dlb(datlab, (arith)0);
 			C_loi(expr->ex_type->tp_size);
 		}
 		break;
@@ -315,9 +315,9 @@ EVAL(expr, val, code, true_label, false_label)
 					compare(oper, l_true);
 					C_loc((arith)0);
 					C_bra(l_end);
-					C_ilb(l_true);
+					C_df_ilb(l_true);
 					C_loc((arith)1);
-					C_ilb(l_end);
+					C_df_ilb(l_end);
 				}
 			}
 			break;
@@ -540,12 +540,12 @@ EVAL(expr, val, code, true_label, false_label)
 			label l_end = text_label();
 
 			EVAL(leftop, RVAL, TRUE, l_true, l_false);
-			C_ilb(l_true);
+			C_df_ilb(l_true);
 			EVAL(rightop->OP_LEFT, RVAL, code, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
-			C_ilb(l_false);
+			C_df_ilb(l_false);
 			EVAL(rightop->OP_RIGHT, RVAL, code, NO_LABEL, NO_LABEL);
-			C_ilb(l_end);
+			C_df_ilb(l_end);
 			break;
 		}
 		case AND:
@@ -556,28 +556,28 @@ EVAL(expr, val, code, true_label, false_label)
 				label l_end = text_label();
 
 				EVAL(leftop, RVAL, TRUE, l_maybe, l_false);
-				C_ilb(l_maybe);
+				C_df_ilb(l_maybe);
 				if (gencode)	{
 					EVAL(rightop, RVAL, TRUE,
 							l_true, l_false);
-					C_ilb(l_true);
+					C_df_ilb(l_true);
 					C_loc((arith)1);
 					C_bra(l_end);
-					C_ilb(l_false);
+					C_df_ilb(l_false);
 					C_loc((arith)0);
-					C_ilb(l_end);
+					C_df_ilb(l_end);
 				}
 				else {
 					EVAL(rightop, RVAL, FALSE, l_false,
 						l_false);
-					C_ilb(l_false);
+					C_df_ilb(l_false);
 				}
 			}
 			else	{
 				label l_maybe = text_label();
 
 				EVAL(leftop, RVAL, TRUE, l_maybe, false_label);
-				C_ilb(l_maybe);
+				C_df_ilb(l_maybe);
 				EVAL(rightop, RVAL, code, true_label,
 					false_label);
 			}
@@ -590,28 +590,28 @@ EVAL(expr, val, code, true_label, false_label)
 				label l_end = text_label();
 
 				EVAL(leftop, RVAL, TRUE, l_true, l_maybe);
-				C_ilb(l_maybe);
+				C_df_ilb(l_maybe);
 				if (gencode)	{
 					EVAL(rightop, RVAL, TRUE,
 							l_true, l_false);
-					C_ilb(l_false);
+					C_df_ilb(l_false);
 					C_loc((arith)0);
 					C_bra(l_end);
-					C_ilb(l_true);
+					C_df_ilb(l_true);
 					C_loc((arith)1);
-					C_ilb(l_end);
+					C_df_ilb(l_end);
 				}
 				else	{
 					EVAL(rightop, RVAL, FALSE, l_true,
 						l_true);
-					C_ilb(l_true);
+					C_df_ilb(l_true);
 				}
 			}
 			else	{
 				label l_maybe = text_label();
 
 				EVAL(leftop, RVAL, TRUE, true_label, l_maybe);
-				C_ilb(l_maybe);
+				C_df_ilb(l_maybe);
 				EVAL(rightop, RVAL, code, true_label,
 					false_label);
 			}
@@ -625,12 +625,12 @@ EVAL(expr, val, code, true_label, false_label)
 
 					EVAL(rightop, RVAL, TRUE,
 							l_false, l_true);
-					C_ilb(l_false);
+					C_df_ilb(l_false);
 					C_loc((arith)0);
 					C_bra(l_end);
-					C_ilb(l_true);
+					C_df_ilb(l_true);
 					C_loc((arith)1);
-					C_ilb(l_end);
+					C_df_ilb(l_end);
 				}
 				else
 					EVAL(rightop, RVAL, FALSE,
@@ -867,12 +867,12 @@ store_val(id, tp, offs)
 		else
 		if (df->df_sc == STATIC)	{
 			if (inword)
-				C_ste_ndlb((label)df->df_address, offs);
+				C_ste_dlb((label)df->df_address, offs);
 			else
 			if (indword)
-				C_sde_ndlb((label)df->df_address, offs);
+				C_sde_dlb((label)df->df_address, offs);
 			else {
-				C_lae_ndlb((label)df->df_address, offs);
+				C_lae_dlb((label)df->df_address, offs);
 				store_block(size, tpalign);
 			}
 		}
@@ -960,18 +960,18 @@ load_val(expr, val)
 	if (df->df_sc == STATIC)	{
 		if (rvalue)	{
 			if (size == word_size && al_on_word)
-				C_loe_ndlb((label)df->df_address, exval);
+				C_loe_dlb((label)df->df_address, exval);
 			else
 			if (size == dword_size && al_on_word)
-				C_lde_ndlb((label)df->df_address, exval);
+				C_lde_dlb((label)df->df_address, exval);
 			else	{
-				C_lae_ndlb((label)df->df_address, exval);
+				C_lae_dlb((label)df->df_address, exval);
 				load_block(size, tpalign);
 			}
 
 		}
 		else	{
-			C_lae_ndlb((label)df->df_address, (arith)0);
+			C_lae_dlb((label)df->df_address, (arith)0);
 			C_adp(exval);
 		}
 	}
@@ -1018,11 +1018,11 @@ load_cst(val, siz)
 	else {
 		label datlab;
 
-		C_ndlb(datlab = data_label());
+		C_df_dlb(datlab = data_label());
 		C_rom_begin();
-		C_co_icon(itos(val), siz);
+		C_icon(itos(val), siz);
 		C_rom_end();
-		C_lae_ndlb(datlab, (arith)0);
+		C_lae_dlb(datlab, (arith)0);
 		C_loi(siz);
 	}
 }

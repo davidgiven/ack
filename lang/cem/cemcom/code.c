@@ -156,7 +156,7 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	size = ATW(func_tp->tp_size);
 	C_pro_narg(name);
 	if (is_struct_or_union(func_tp->tp_fund))	{
-		C_ndlb(func_res_label = data_label());
+		C_df_dlb(func_res_label = data_label());
 		C_bss_cst(size, (arith)0, 1);
 	}
 	else
@@ -173,13 +173,13 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	if (options['p'])	{	/* profiling */
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
-			C_ndlb(file_name_label = data_label());
+			C_df_dlb(file_name_label = data_label());
 			C_con_begin();
-			C_co_scon(last_fn_given = FileName, (arith)0);
+			C_scon(last_fn_given = FileName, (arith)0);
 			C_con_end();
 		}
 		/* enable debug trace of EM source */
-		C_fil_ndlb(file_name_label, (arith)0);
+		C_fil_dlb(file_name_label, (arith)0);
 		C_lin((arith)LineNumber);
 	}
 }
@@ -206,11 +206,11 @@ end_proc(fbytes, nbytes)
 #endif	DATAFLOW
 	C_ret((arith)0);
 	if (return_expr_occurred != 0)	{
-		C_ilb(return_label);
+		C_df_ilb(return_label);
 		if (func_res_label != 0)	{
-			C_lae_ndlb(func_res_label, (arith)0);
+			C_lae_dlb(func_res_label, (arith)0);
 			store_block(func_tp->tp_size, func_tp->tp_align);
-			C_lae_ndlb(func_res_label, (arith)0);
+			C_lae_dlb(func_res_label, (arith)0);
 			C_ret(pointer_size);
 		}
 		else
@@ -286,7 +286,7 @@ code_declaration(idf, expr, lvl, sc)
 			code_scope(text, def);
 #endif	USE_TMP
 			def->df_alloc = ALLOC_DONE;
-			C_dnam(text);
+			C_df_dnam(text);
 			do_ival(&(def->df_type), expr);
 		}
 	}
@@ -300,7 +300,7 @@ code_declaration(idf, expr, lvl, sc)
 			/*	they are handled on the spot and get an
 				integer label in EM.
 			*/
-			C_ndlb((label)def->df_address);
+			C_df_dlb((label)def->df_address);
 			if (expr) /* there is an initialisation	*/
 				do_ival(&(def->df_type), expr);
 			else {	/* produce blank space */
@@ -385,7 +385,7 @@ bss(idf)
 	*/
 	if (options['R'] && size == 0)
 		warning("actual array of size 0");
-	C_dnam(idf->id_text);
+	C_df_dnam(idf->id_text);
 	C_bss_cst(align(size, word_align), (arith)0, 1);
 }
 

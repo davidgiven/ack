@@ -92,7 +92,7 @@ label
 				}
 		*/
 		define_label(idf);
-		C_ilb((label)idf->id_def->df_address);
+		C_df_ilb((label)idf->id_def->df_address);
 	}
 ;
 
@@ -116,7 +116,7 @@ if_statement
 					been optimized to a 0 or 1.
 				*/
 				code_expr(expr, RVAL, TRUE, l_true, l_false);
-				C_ilb(l_true);
+				C_df_ilb(l_true);
 			}
 			else	{
 				if (expr->VL_VALUE == (arith)0)	{
@@ -131,14 +131,14 @@ if_statement
 		ELSE
 			{
 				C_bra(l_end);
-				C_ilb(l_false);
+				C_df_ilb(l_false);
 			}
 		statement
-			{	C_ilb(l_end);
+			{	C_df_ilb(l_end);
 			}
 	|
 		empty
-			{	C_ilb(l_false);
+			{	C_df_ilb(l_false);
 			}
 	]
 ;
@@ -154,7 +154,7 @@ while_statement
 	WHILE
 		{
 			stat_stack(l_break, l_continue);
-			C_ilb(l_continue);
+			C_df_ilb(l_continue);
 		}
 	'('
 	expression(&expr)
@@ -162,7 +162,7 @@ while_statement
 			opnd2test(&expr, NOTEQUAL);
 			if (expr->ex_class != Value)	{
 				code_expr(expr, RVAL, TRUE, l_body, l_break);
-				C_ilb(l_body);
+				C_df_ilb(l_body);
 			}
 			else	{
 				if (expr->VL_VALUE == (arith)0)	{
@@ -174,7 +174,7 @@ while_statement
 	statement
 		{
 			C_bra(l_continue);
-			C_ilb(l_break);
+			C_df_ilb(l_break);
 			stat_unstack();
 			free_expression(expr);
 		}
@@ -188,13 +188,13 @@ do_statement
 	}
 :
 	DO
-		{	C_ilb(l_body);
+		{	C_df_ilb(l_body);
 			stat_stack(l_break, l_continue);
 		}
 	statement
 	WHILE
 	'('
-		{	C_ilb(l_continue);
+		{	C_df_ilb(l_continue);
 		}
 	expression(&expr)
 		{
@@ -207,7 +207,7 @@ do_statement
 					C_bra(l_body);
 				}
 			}
-			C_ilb(l_break);
+			C_df_ilb(l_break);
 		}
 	')'
 	';'
@@ -235,7 +235,7 @@ for_statement
 		}
 	]?
 	';'
-		{	C_ilb(l_test);
+		{	C_df_ilb(l_test);
 		}
 	[
 		expression(&e_test)
@@ -243,7 +243,7 @@ for_statement
 			opnd2test(&e_test, NOTEQUAL);
 			if (e_test->ex_class != Value)	{
 				code_expr(e_test, RVAL, TRUE, l_body, l_break);
-				C_ilb(l_body);
+				C_df_ilb(l_body);
 			}
 			else	{
 				if (e_test->VL_VALUE == (arith)0)	{
@@ -257,11 +257,11 @@ for_statement
 	')'
 	statement
 		{
-			C_ilb(l_continue);
+			C_df_ilb(l_continue);
 			if (e_incr)
 				code_expr(e_incr, RVAL, FALSE, NO_LABEL, NO_LABEL);
 			C_bra(l_test);
-			C_ilb(l_break);
+			C_df_ilb(l_break);
 			stat_unstack();
 			free_expression(e_init);
 			free_expression(e_test);

@@ -23,7 +23,7 @@
 
 extern char *symbol2str();
 
-#define con_byte(c)	C_co_ucon(itos((long)(c) & 0xFF), (arith)1)
+#define con_byte(c)	C_ucon(itos((long)(c) & 0xFF), (arith)1)
 
 struct expr *do_array(), *do_struct(), *IVAL();
 struct expr *strings = 0; /* list of string constants within initialiser */
@@ -49,9 +49,9 @@ do_ival(tpp, expr)
 	*/
 	C_con_end();
 	while (strings != 0) {
-		C_ndlb(strings->SG_DATLAB);
+		C_df_dlb(strings->SG_DATLAB);
 		C_con_begin();
-		C_co_scon(strings->SG_VALUE, (arith)0);
+		C_scon(strings->SG_VALUE, (arith)0);
 		C_con_end();
 		strings = strings->next;
 	}
@@ -420,11 +420,11 @@ pad(tp)
 	case CHAR:
 	case ENUM:
 	case POINTER:
-		C_co_ucon("0",  tp->tp_size);
+		C_ucon("0",  tp->tp_size);
 		break;
 	case FLOAT:
 	case DOUBLE:
-		C_co_fcon("0", tp->tp_size);
+		C_fcon("0", tp->tp_size);
 		break;
 	case UNION:
 		error("initialisation of unions not allowed");
@@ -499,12 +499,12 @@ check_ival(expr, type)
 			ConStarted = 1;
 		}
 		if (expr->ex_class == Float)
-			C_co_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+			C_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 		else
 		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			expr = expr->OP_RIGHT;
 			if (expr->ex_class == Value && expr->VL_IDF == 0)
-				C_co_fcon(itos(expr->VL_VALUE), type->tp_size);
+				C_fcon(itos(expr->VL_VALUE), type->tp_size);
 			else 
 				illegal_init_cst(expr);
 		}
@@ -527,7 +527,7 @@ check_ival(expr, type)
 				ConStarted = 1;		/* ??? */
 			C_ina_pt(datlab);
 			C_con_begin();
-			C_co_ndlb(datlab, (arith)0);
+			C_dlb(datlab, (arith)0);
 			expr->SG_DATLAB = datlab;
 			store_string(expr);
 			break;
@@ -544,7 +544,7 @@ check_ival(expr, type)
 			}
 			if (expr->ex_type->tp_up->tp_fund == FUNCTION) {
 				if (idf)
-					C_co_pnam(idf->id_text);
+					C_pnam(idf->id_text);
 				else	/* int (*func)() = 0	*/
 					con_int(expr);
 			}
@@ -560,11 +560,11 @@ check_ival(expr, type)
 						expr_error(expr,
 							"illegal initialisation");
 					else
-						C_co_ndlb((label)def->df_address,
+						C_dlb((label)def->df_address,
 							vl->vl_value);
 				}
 				else
-					C_co_dnam(idf->id_text, vl->vl_value);
+					C_dnam(idf->id_text, vl->vl_value);
 			}
 			else
 				con_int(expr);
@@ -767,9 +767,9 @@ con_int(expr)
 	register struct type *tp = expr->ex_type;
 
 	if (tp->tp_unsigned)
-		C_co_ucon(itos(expr->VL_VALUE), tp->tp_size);
+		C_ucon(itos(expr->VL_VALUE), tp->tp_size);
 	else
-		C_co_icon(itos(expr->VL_VALUE), tp->tp_size);
+		C_icon(itos(expr->VL_VALUE), tp->tp_size);
 }
 
 illegal_init_cst(expr)
