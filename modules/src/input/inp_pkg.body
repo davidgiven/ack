@@ -121,7 +121,7 @@ readfile(fd, fn, size, pbuf)
 		free(*pbuf);
 		return 0;
 	}
-	(*pbuf)[*size] = '\0';	/* invoke loadbuf() at end */
+	(*pbuf)[rsize] = '\0';	/* invoke loadbuf() at end */
 	return 1;
 }
 #endif INP_READ_IN_ONE
