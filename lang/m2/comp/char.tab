@@ -9,7 +9,7 @@
 STGARB:\000-\200
 STSKIP: \r\t\013\014\015
 STNL:\012
-STSIMP:#&()*+,-/;=[]^{|}~
+STSIMP:-#&()*+,/;=[]^{|}~
 STCOMP:.:<>
 STIDF:a-zA-Z
 STSTR:"'

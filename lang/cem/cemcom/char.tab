@@ -11,7 +11,7 @@
 STGARB:\000-\200
 STSKIP:\r \t\013\f
 STNL:\n
-STCOMP:!&+-<=>|
+STCOMP:-!&+<=>|
 STSIMP:%()*,/:;?[]^{}~
 STCHAR:'
 STIDF:a-zA-Z_
