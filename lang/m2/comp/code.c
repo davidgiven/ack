@@ -65,27 +65,6 @@ CodeString(nd)
 	}
 }
 
-STATIC
-CodePadString(nd, sz)
-	register struct node *nd;
-	arith sz;
-{
-	/*	Generate code to push the string indicated by "nd".
-		Make it null-padded to "sz" bytes
-	*/
-	register arith sizearg = WA(nd->nd_type->tp_size);
-
-	assert(nd->nd_type->tp_fund == T_STRING);
-
-	if (sizearg != sz) {
-		/* null padding required */
-		assert(sizearg < sz);
-		C_zer(sz - sizearg);
-	}
-	CodeString(nd);		/* push address of string */
-	C_loi(sizearg);
-}
-
 CodeExpr(nd, ds, true_label, false_label)
 	register struct node *nd;
 	register struct desig *ds;
@@ -180,7 +159,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	if (true_label != 0) {
 		/* Only for boolean expressions
 		*/
-		CodeValue(ds, tp->tp_size);
+		CodeValue(ds, tp->tp_size, tp->tp_align);
 		*ds = InitDesig;
 		C_zne(true_label);
 		C_bra(false_label);
@@ -422,7 +401,16 @@ CodeParameters(param, arg)
 		return;
 	}
 	if (left_type->tp_fund == T_STRING) {
-		CodePadString(left, tp->tp_size);
+		register arith szarg = WA(left_type->tp_size);
+		arith sz = WA(tp->tp_size);
+
+		if (szarg != sz) {
+			/* null padding required */
+			assert(szarg < sz);
+			C_zer(sz - szarg);
+		}
+		CodeString(left);	/* push address of string */
+		C_loi(szarg);
 		return;
 	}
 	CodePExpr(left);
@@ -478,6 +466,15 @@ CodeStd(nd)
 	case S_HIGH:
 		assert(IsConformantArray(tp));
 		DoHIGH(left);
+		break;
+
+	case S_SIZE:
+	case S_TSIZE:
+		assert(IsConformantArray(tp));
+		DoHIGH(left);
+		C_inc();
+		C_loc(tp->arr_elem->tp_size);
+		C_mlu(word_size);
 		break;
 
 	case S_ODD:
@@ -951,7 +948,7 @@ CodeEl(nd, tp)
 }
 
 CodePExpr(nd)
-	struct node *nd;
+	register struct node *nd;
 {
 	/*	Generate code to push the value of the expression "nd"
 		on the stack.
@@ -960,7 +957,7 @@ CodePExpr(nd)
 
 	designator = InitDesig;
 	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
-	CodeValue(&designator, nd->nd_type->tp_size);
+	CodeValue(&designator, nd->nd_type->tp_size, nd->nd_type->tp_align);
 }
 
 CodeDAddress(nd)
@@ -988,7 +985,7 @@ CodeDStore(nd)
 
 	designator = InitDesig;
 	CodeDesig(nd, &designator);
-	CodeStore(&designator, nd->nd_type->tp_size);
+	CodeStore(&designator, nd->nd_type->tp_size, nd->nd_type->tp_align);
 }
 
 DoHIGH(nd)
@@ -1006,8 +1003,9 @@ DoHIGH(nd)
 	assert(IsConformantArray(df->df_type));
 
 	highoff = df->var_off		/* base address and descriptor */
-		  + pointer_size	/* skip base address */
-		  + word_size;		/* skip first field of descriptor */
+		  + 2 * word_size;	/* skip base and first field of
+					   descriptor
+					*/
 	if (df->df_scope->sc_level < proclevel) {
 		C_lxa((arith) (proclevel - df->df_scope->sc_level));
 		C_lof(highoff);

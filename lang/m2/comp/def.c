@@ -131,6 +131,9 @@ define(id, scope, kind)
 			}
 			break;
 
+		case D_TYPE:
+			if (kind == D_FORWTYPE) return df;
+			break;
 		case D_FORWTYPE:
 			if (kind == D_FORWTYPE) return df;
 			if (kind == D_TYPE) {

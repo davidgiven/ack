@@ -221,9 +221,11 @@ WalkProcedure(procedure)
 						/* upper - lower */
 				C_inc();	/* gives number of elements */
 				C_loc(tp->arr_elem->tp_size);
-				C_cal("_wa");
-				C_asp(dword_size);
-				C_lfr(word_size);
+				C_mli(word_size);
+				C_loc(word_size - 1);
+				C_adi(word_size);
+				C_loc(word_size);
+				C_dvi(word_size);
 						/* size in words */
 				C_loc(word_size);
 				C_mli(word_size);
@@ -241,25 +243,16 @@ WalkProcedure(procedure)
 						*/
 				C_ass(word_size);
 						/* adjusted stack pointer */
-				C_lor((arith) 1);
-						/* destination address (sp),
-						   also assumes stack grows
-						   downwards ???
-						*/
-				C_lal(param->par_def->var_off);
-				C_loi(pointer_size);
+				C_lol(param->par_def->var_off);
 						/* push source address */
-				C_exg(pointer_size);
-						/* exchange them */
 				C_lol(tmpvar);	/* push size */
-				C_bls(word_size);
-						/* copy */
+				C_cal("_load");	/* copy */
+				C_asp(2 * word_size);
 				C_lor((arith) 1);	
 						/* push new address of array
 						   ... downwards ... ???
 						*/
-				C_lal(param->par_def->var_off);
-				C_sti(pointer_size);
+				C_stl(param->par_def->var_off);
 				FreeInt(tmpvar);
 			}
 		}
@@ -529,7 +522,7 @@ WalkStat(nd, exit_label)
 			*/
 			ds.dsg_offset = NewPtr();
 			ds.dsg_name = 0;
-			CodeStore(&ds, pointer_size);
+			CodeStore(&ds, pointer_size, pointer_align);
 			ds.dsg_kind = DSG_PFIXED;
 			/* the record is indirectly available */
 			wds.w_desig = ds;
@@ -709,7 +702,7 @@ DoAssign(nd, left, right)
 	   it sais that the left hand side is evaluated first.
 	   DAMN THE BOOK!
 	*/
-	struct desig dsl, dsr;
+	struct desig dsr;
 	register struct type *rtp, *ltp;
 
 	if (! (ChkExpression(right) & ChkVariable(left))) return;
@@ -724,34 +717,18 @@ DoAssign(nd, left, right)
 		return;
 	}
 
+#define StackNeededFor(ds)	((ds)->dsg_kind == DSG_PLOADED \
+				  || (ds)->dsg_kind == DSG_INDEXED)
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
-	if (complex(rtp)) CodeAddress(&dsr);
+	if (complex(rtp)) {
+		if (StackNeededFor(&dsr)) CodeAddress(&dsr);
+	}
 	else {
-		CodeValue(&dsr, rtp->tp_size);
-		RangeCheck(ltp, rtp);
+		CodeValue(&dsr, rtp->tp_size, rtp->tp_align);
 		CodeCoercion(rtp, ltp);
+		RangeCheck(ltp, rtp);
 	}
-	dsl = InitDesig;
-	CodeDesig(left, &dsl);
-
-	/*	Generate code for an assignment. Testing of type
-		compatibility and the like is already done.
-	*/
-
-	if (dsr.dsg_kind == DSG_LOADED) {
-		if (rtp->tp_fund == T_STRING) {
-			CodeAddress(&dsl);
-			C_loc(rtp->tp_size);
-			C_loc(ltp->tp_size);
-			C_cal("_StringAssign");
-			C_asp((int_size << 1) + (pointer_size << 1));
-			return;
-		}
-		CodeStore(&dsl, ltp->tp_size);
-		return;
-	}
-	CodeAddress(&dsl);
-	C_blm(ltp->tp_size);
+	CodeMove(&dsr, left, rtp);
 }
 
 RegisterMessages(df)

@@ -62,11 +62,11 @@ block(struct node **pnd;) :
 ;
 
 declaration:
-	CONST [ ConstantDeclaration ';' ]*
+	CONST [ %persistent ConstantDeclaration ';' ]*
 |
-	TYPE [ TypeDeclaration ';' ]*
+	TYPE [ %persistent TypeDeclaration ';' ]*
 |
-	VAR [ VariableDeclaration ';' ]*
+	VAR [ %persistent VariableDeclaration ';' ]*
 |
 	ProcedureDeclaration ';'
 |
@@ -239,7 +239,7 @@ RecordType(struct type **ptp;)
 		  close_scope(0);
 		}
 	FieldListSequence(scope, &size, &xalign)
-		{ *ptp = standard_type(T_RECORD, xalign, WA(size));
+		{ *ptp = standard_type(T_RECORD, xalign, size);
 		  (*ptp)->rec_scope = scope;
 		}
 	END
@@ -525,5 +525,8 @@ VariableDeclaration
 
 IdentAddr(struct node **pnd;) :
 	IDENT		{ *pnd = MkLeaf(Name, &dot); }
-	ConstExpression(&((*pnd)->nd_left))?
+	[	'['
+		ConstExpression(&((*pnd)->nd_left))
+		']'
+	]?
 ;

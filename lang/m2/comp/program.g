@@ -157,10 +157,11 @@ definition
 	register struct def *df;
 	struct def *dummy;
 } :
-	CONST [ ConstantDeclaration ';' ]*
+	CONST [ %persistent ConstantDeclaration ';' ]*
 |
 	TYPE
-	[ IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
+	[ %persistent
+	  IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	  [ '=' type(&(df->df_type))
 	  | /* empty */
 	    /*
@@ -175,7 +176,7 @@ definition
 	  ';'
 	]*
 |
-	VAR [ VariableDeclaration ';' ]*
+	VAR [ %persistent VariableDeclaration ';' ]*
 |
 	ProcedureHeading(&dummy, D_PROCHEAD)
 	';'

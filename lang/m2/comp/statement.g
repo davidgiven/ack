@@ -31,7 +31,12 @@ statement(register struct node **pnd;)
 				}
 		ActualParameters(&(nd->nd_right))?
 	|
-		BECOMES		{ nd = MkNode(Stat, *pnd, NULLNODE, &dot); }
+		[ BECOMES	
+		| '='		{ error("':=' expected instead of '='");
+				  DOT = BECOMES;
+				}
+		]
+				{ nd = MkNode(Stat, *pnd, NULLNODE, &dot); }
 		expression(&(nd->nd_right))
 	]
 				{ *pnd = nd; }

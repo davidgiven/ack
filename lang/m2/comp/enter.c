@@ -112,9 +112,11 @@ EnterVarList(Idlist, type, local)
 		if (idlist->nd_left) {
 			/* An address was supplied
 			*/
+			register struct type *tp = idlist->nd_left->nd_type;
+
 			df->var_addrgiven = 1;
 			df->df_flags |= D_NOREG;
-			if (idlist->nd_left->nd_type != card_type) {
+			if (tp != error_type && !(tp->tp_fund & T_CARDINAL)){
 				node_error(idlist->nd_left,
 					   "illegal type for address");
 			}
@@ -224,6 +226,11 @@ DoImport(df, scope)
 		/* Also import all definitions that are exported from this
 		   module
 		*/
+		if (df->mod_vis == CurrVis) {
+			error("cannot import current module \"%s\"",
+				df->df_idf->id_text);
+			return;
+		}
 		for (df = df->mod_vis->sc_scope->sc_def;
 		     df;
 		     df = df->df_nextinscope) {
@@ -391,11 +398,16 @@ EnterFromImportList(Idlist, FromDef, FromId)
 		break;
 	case D_MODULE:
 		vis = FromDef->mod_vis;
+		if (vis == CurrVis) {
+node_error(FromId, "cannot import from current module \"%s\"",
+		        	FromDef->df_idf->id_text);
+			return;
+		}
 		break;
 	default:
-		node_error(FromId, "identifier \"%s\" does not represent a module",
+node_error(FromId, "identifier \"%s\" does not represent a module",
 		       FromDef->df_idf->id_text);
-		break;
+		return;
 	}
 
 	for (; idlist; idlist = idlist->next) {

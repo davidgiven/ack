@@ -71,6 +71,10 @@ Forward(tk, ptp)
 	*/
 	register struct def *df = define(tk->nd_IDF, CurrentScope, D_FORWTYPE);
 
+	if (df->df_kind == D_TYPE) {
+		ptp->next = df->df_type;
+		return;
+	}
 	df->df_forw_type = ptp;
 	df->df_forw_node = tk;
 }
@@ -106,8 +110,17 @@ chk_forw(pdf)
 
 	while (df = *pdf) {
 		if (df->df_kind == D_FORWTYPE) {
-node_error(df->df_forw_node, "type \"%s\" not declared", df->df_idf->id_text);
-			FreeNode(df->df_forw_node);
+			register struct def *df1 = df;
+
+			*pdf = df->df_nextinscope;
+			RemoveFromIdList(df);
+			df = lookfor(df->df_forw_node, CurrVis, 1);
+			if (! df->df_kind & (D_ERROR|D_FTYPE|D_TYPE)) {
+node_error(df1->df_forw_node, "\"%s\" is not a type", df1->df_idf->id_text);
+			}
+			df1->df_forw_type->next = df->df_type;
+			FreeNode(df1->df_forw_node);
+			free_def(df1);
 		}
 		else if (df->df_kind == D_FTYPE) {
 			df->df_kind = D_TYPE;

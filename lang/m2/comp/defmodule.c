@@ -103,7 +103,7 @@ GetDefinitionModule(id, incr)
 			df->mod_vis = vis;
 		}
 	}
-	else if (df == Defined) {
+	else if (df == Defined && level == 1) {
 		error("cannot import from currently defined module");
 		df->df_kind = D_ERROR;
 	}

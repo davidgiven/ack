@@ -540,7 +540,7 @@ ChkProcCall(expp)
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
-		else if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
+		if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
 				   left->nd_type,
 				   IsVarParam(param),
 				   left)) {
@@ -1017,10 +1017,14 @@ ChkStandard(expp, left)
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
 		expp->nd_type = intorcard_type;
-		if (! getname(&arg, D_FIELD|D_VARIABLE|D_ISTYPE, 0, edf)) {
+		if (!(left = getname(&arg,D_FIELD|D_VARIABLE|D_ISTYPE,0,edf))) {
 			return 0;
 		}
-		cstcall(expp, S_SIZE);
+		if (! IsConformantArray(left->nd_type)) cstcall(expp, S_SIZE);
+		else node_warning(expp,
+				  W_STRICT,
+				  "%s on conformant array",
+				  expp->nd_left->nd_def->df_idf->id_text);
 		break;
 
 	case S_TRUNC:
