@@ -23,6 +23,7 @@ extern line_p getlines();		/* ( FILE *lf; int n; proc_p *p_out;
 					 * Read n lines of EM text and doubly
 					 * link them.  Also process messages
 					 * if required.
+					 */
 
 extern bblock_p freshblock();		/* ()
 					 * Allocate a bblock struct and assign
