@@ -50,7 +50,7 @@ lae 2 120
 lae sw 7 121
 lal P2 128
 lal N2 129
-lal m 1 130
+lal mP 1 130
 lal mN 1 131
 lal swP 1 132
 lal swN 2 133
