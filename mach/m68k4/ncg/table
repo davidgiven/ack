@@ -45,15 +45,17 @@ D_REG		/* data registers */
 A_REG		/* address registers */
 DD_REG		/* allocatable D_REG, may not be a register variable */
 AA_REG		/* allocatable A_REG, may not be a register variable */
+RD_REG		/* data register, register var */
+RA_REG		/* address register, register var */
 
 
 
 REGISTERS
 
 d0, d1, d2			:D_REG, DD_REG.
-d3, d4, d5, d6, d7		:D_REG  regvar.
+d3, d4, d5, d6, d7		:D_REG, RD_REG regvar.
 a0, a1				:A_REG, AA_REG.
-a2, a3, a4, a5			:A_REG  regvar(reg_pointer).
+a2, a3, a4, a5			:A_REG, RA_REG regvar(reg_pointer).
 lb ("a6"), sp			:A_REG.	/* localbase and stack pointer */
 
 
@@ -1558,11 +1560,11 @@ pat loe lol xor ste $1==$4 && $3==4 && inreg($2)==reg_any
 					call loerxxxste("eor.l")
 
 proc xxxstl example adi stl
-with any4 any
+with any4-RD_REG-dreg4 any-RD_REG-dreg4
     kills regvar($2, reg_any), use_index %xreg==regvar($2, reg_any)
     gen	move %2,{dreg4, regvar($2)}
 	xxx* %1,{LOCAL,$2}
-with exact any4 STACK
+with exact any4-RD_REG-dreg4 STACK
     kills regvar($2, reg_any), use_index %xreg==regvar($2, reg_any)
     gen move_l {post_inc4, sp}, {dreg4, regvar($2)}
 	xxx* %1,{LOCAL,$2}
@@ -1576,12 +1578,12 @@ pat ior stl $1==4 && inreg($2)==reg_any	call xxxstl("or.l")
 pat xor stl $1==4 && inreg($2)==reg_any	call xxxstl("eor.l")
 
 pat ads stl $1==4 && inreg($2)==reg_pointer
-with any4 any4+address
+with any4-areg-RA_REG any4+address-areg-RA_REG
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
     gen	move %2,{areg,regvar($2,reg_pointer)}
 	add_l %1,{areg,regvar($2,reg_pointer)}
 #ifdef TBL68020
-with regX any4+address
+with regX any4+address-areg-RA_REG
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
     gen	move %2,{areg,regvar($2,reg_pointer)}
 	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
@@ -1653,11 +1655,11 @@ with exact absolute4 ext_regX
 
 
 proc xxxdupstl example adi dup stl
-with any4 any
+with any4-RD_REG-dreg4 any-RD_REG-dreg4
     kills regvar($3, reg_any), use_index %xreg==regvar($3, reg_any)
     gen	move %2,{dreg4, regvar($3)}
 	xxx* %1,{LOCAL,$3}		yields {LOCAL, $3}
-with exact any4 STACK
+with exact any4-RD_REG-dreg4 STACK
     kills regvar($3, reg_any), use_index %xreg==regvar($3, reg_any)
     gen move_l {post_inc4, sp}, {dreg4, regvar($3)}
 	xxx* %1,{LOCAL,$3}		yields {LOCAL, $3}
