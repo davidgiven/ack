@@ -1,7 +1,10 @@
 !THIS FILE CONTAINS THE SYSTEM CALLS FOR PMDS-II AS SUBROUTINES FOR THE
 !EM-INTERPRETER. a1 CONTAINS A POINTER TO THE RETURN AREA . EACH SUBROUTINE
 !EXPECTS ITS DATA IN THE FORM EM PRODUCES AND GIVES ITS RESULTS AS EM 
-!REQUIRES
+!REQUIRES.
+!THE PMDS-II REQUIRES THE ARGUMENTS ON THE STACK AS 4 BYTE INTEGERS  OR
+!POINTERS , AND USES THE C-CALLING CONVENTION. THE 2 BYTE WORDS 4 BYTE
+!POINTERS VERSION HAS TO DO SOME CONVERSION FIRST .
 
 _exit:		move.l	(sp),(a1)
 #ifndef lword
@@ -186,8 +189,7 @@ _lseek:		move.l	(sp),(a1)
 		mov	d0,-(sp)
 		mov	d0,-(sp)
 		bra	2f
-1:		move.l	d1,-(sp)
-		mov	d0,-(sp)
+1:		move.l	d0,-(sp)
 		cl	-(sp)
 2:		move.l	(a1),a0
 		jmp	(a0)
@@ -359,10 +361,14 @@ _signal:	move.l	(sp)+,retaddr
 		move.l	retaddr,-(sp)
 		trap	#0
 	.short	48
+		lea	12(sp),sp		!remove arguments
+		bcc	1f
 		mov	d0,-(sp)
-		bne	1f
 		mov	d0,-(sp)
-1:		move.l	retaddr,a0
+		bra	2f
+1: 		mov	d0,-(sp)
+		cl	-(sp)
+2:		move.l	retaddr,a0
 		jmp	(a0)
 	.data
 retaddr:  .long	0
