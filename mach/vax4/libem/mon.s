@@ -75,6 +75,7 @@ Lgetpid:
 Lr0:
 	jsb	Lsyscall
 	pushl	r0
+	movl	r3,ap
 	jmp	(r2)
 Lgetuid:
 Lgetgid:
@@ -83,6 +84,7 @@ Lr0r1:
 	jsb	Lsyscall
 	pushl	r0
 	pushl	r1
+	movl	r3,ap
 	jmp	(r2)
 Lpipe:
 Lwait:	
@@ -93,6 +95,7 @@ Ler0r1:
 	pushl	r0
 	pushl	r1
 	clrl	-(sp)
+	movl	r3,ap
 	jmp	(r2)
 
 	# 1 argument.
@@ -118,6 +121,7 @@ Lchroot:
 Le:
 	jsb	Lsyscall
 	clrl	-(sp)
+	movl	r3,ap
 	jmp	(r2)
 Lalarm:
 Lumask:
@@ -144,6 +148,7 @@ Ler0:
 	jsb	Lsyscall
 	pushl	r0
 	clrl	-(sp)
+	movl	r3,ap
 	jmp	(r2)
 
 	# 3 arguments.
@@ -211,6 +216,7 @@ Lsyscall:
 	bcc	L1
 	cvtwl	r0,(sp)		# Push the error returned twice,
 	cvtwl	r0,-(sp)	# overwrite the return address
+	movl	r3,ap
 	jmp	(r2)
 L1:
 	rsb
@@ -261,16 +267,20 @@ sys:
 	bcc	L4
 	movl	(sp),sigtrp0 [r1] # Error, reset old trap number.
 	pushl	r0
+	movl	r3,ap
 	jmp	(r2)
 L4:	clrl	-(sp)
+	movl	r3,ap
 	jmp	(r2)
 badsig:
 	movl	$-1,(sp)
 	pushl	(sp)
+	movl	r3,ap
 	jmp	(r2)
 badtrp:
 	movl	sigtrp0 [r1],(sp)
 	pushl	$-1
+	movl	r3,ap
 	jmp	(r2)
 
 sigs:
