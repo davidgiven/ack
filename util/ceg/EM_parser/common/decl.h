@@ -1,8 +1,5 @@
-#define SEGBSS		0
-#define SEGHOL		1
-#define SEGCON		2
-#define SEGROM		3
-#define SEGTXT		4
+#include "em_parser.h"
+
 #define NOSEG		5
 #define UNKNOWN		(-1)
 
@@ -11,14 +8,9 @@
 #define	FALSE		0
 
 
-#define STRING		0
-#define LABEL		1
-#define ARITH		2
-#define INT		3
-
-
 #define MAX_ARGS	4
 
+/* All the different types of C_INSTR's, based on types of the arguments. */
 #define NO_ARGS		0
 #define C_ARG		1
 #define D_ARG		2
@@ -51,10 +43,20 @@
 
 
 typedef struct {
-		char *header;
-		int arg_type[MAX_ARGS];		/* Zoals ze eruit gaan!! */
-		char *arg_id[MAX_ARGS], *arg_conv[MAX_ARGS];
+		char *header;		 /* The declaration of parameters for
+					  * each type of C_INSTR.
+					  */
+		int arg_type[MAX_ARGS];	 /* Type of the $i's after the
+					  * conversions ( extnd_name(), etc.).
+					  */
+		char *arg_id[MAX_ARGS],	 /* Names of the parameters, to be used
+					  * left of the '==>' sign.
+					  */
+		     *arg_conv[MAX_ARGS];/* Names of the parameters, to be used
+					  * right of the '==>' sign.
+					  */
 	} t_C_info;
+
 
 typedef struct {
 		char *lexeme;
