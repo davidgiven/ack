@@ -402,7 +402,8 @@ outtokens() {
 		for(i=0;i<maxtokensize;i++)
 			fprintf(ctable,"%d,",typeconv(tp->tk_att[i].ta_type));
 		fprintf(ctable,"},%d},\t/* ",tp->tk_format);
-		outfmt(l_strings[tp->tk_format]);
+		if (tp->tk_format >= 0) outfmt(l_strings[tp->tk_format]);
+		else fprintf(ctable, "(no format)");
 		fprintf(ctable," */\n");
 	}
 	fprintf(ctable,"{0}};\n\n");
