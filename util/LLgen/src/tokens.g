@@ -429,6 +429,7 @@ LLmessage(d) {
 			 * attributes for the inserted token
 			 */
 		savedtok = lextoken;
+		savedtok.t_tokno = LLsymb;
 		if (d == C_IDENT) lextoken.t_string = "dummy_identifier";
 		else if (d == C_LITERAL) lextoken.t_string = "dummy_literal";
 		else if (d == C_NUMBER) lextoken.t_num = 1;
