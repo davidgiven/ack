@@ -42,9 +42,9 @@
 #define C_hol_pnam(n,s,i)	CC_bhpnam(ps_hol,n,s,i)
 
 #define C_con_cst(v)	CC_crcst(ps_con,v)
-#define C_con_icon(v,s)	CC_cricon(ps_con,v,s)
-#define C_con_ucon(v,s)	CC_crucon(ps_con,v,s)
-#define C_con_fcon(v,s)	CC_crfcon(ps_con,v,s)
+#define C_con_icon(v,s)	CC_crxcon(ps_con,sp_icon,v,s)
+#define C_con_ucon(v,s)	CC_crxcon(ps_con,sp_ucon,v,s)
+#define C_con_fcon(v,s)	CC_crxcon(ps_con,sp_fcon,v,s)
 #define C_con_scon(v,s)	CC_crscon(ps_con,v,s)
 #define C_con_dnam(v,s)	CC_crdnam(ps_con,v,s)
 #define C_con_dlb(v,s)	CC_crdlb(ps_con,v,s)
@@ -52,9 +52,9 @@
 #define C_con_pnam(v)	CC_crpnam(ps_con,v)
 
 #define C_rom_cst(v)	CC_crcst(ps_rom,v)
-#define C_rom_icon(v,s)	CC_cricon(ps_rom,v,s)
-#define C_rom_ucon(v,s)	CC_crucon(ps_rom,v,s)
-#define C_rom_fcon(v,s)	CC_crfcon(ps_rom,v,s)
+#define C_rom_icon(v,s)	CC_crxcon(ps_rom,sp_icon,v,s)
+#define C_rom_ucon(v,s)	CC_crxcon(ps_rom,sp_ucon,v,s)
+#define C_rom_fcon(v,s)	CC_crxcon(ps_rom,sp_fcon,v,s)
 #define C_rom_scon(v,s)	CC_crscon(ps_rom,v,s)
 #define C_rom_dnam(v,s)	CC_crdnam(ps_rom,v,s)
 #define C_rom_dlb(v,s)	CC_crdlb(ps_rom,v,s)
@@ -82,4 +82,8 @@
 
 #ifndef op_lol
 #include <em_mnem.h>
+#endif
+
+#ifndef sp_icon
+#include <em_spec.h>
 #endif

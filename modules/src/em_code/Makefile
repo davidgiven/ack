@@ -7,8 +7,8 @@ AR = ar
 SUF = o
 LIBSUF = a
 SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
-	crcst.c crdlb.c crdnam.c crfcon.c cricon.c crilb.c crpnam.c crscon.c \
-	crucon.c cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
+	crcst.c crdlb.c crdnam.c crxcon.c crilb.c crpnam.c crscon.c \
+	cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
 	exc.c fcon.c getid.c icon.c ilb.c insert.c internerr.c \
 	msend.c op.c opcst.c opdlb.c opdnam.c opilb.c opnarg.c oppnam.c pnam.c \
 	pro.c pronarg.c msstart.c psdlb.c psdnam.c pspnam.c scon.c ucon.c \
@@ -57,7 +57,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.$(SUF) *.$(LIBSUF) em_code.3
+		rm -f *.$(SUF) *.$(LIBSUF) em_code.3 em_codeEK.h
 
 lintlib:	make.sh
 		lint -I. -I../../h -I../../../h -Ceme -DREADABLE_EM $(SRC)

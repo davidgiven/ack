@@ -88,7 +88,9 @@ C_putbyte(c)
 	Xputbyte(c);
 }
 
+#ifdef BIGMACHINE
 #define C_putbyte Xputbyte
+#endif
 
 C_init(w, p)
 	arith w, p;

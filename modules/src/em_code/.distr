@@ -12,12 +12,10 @@ convert.c
 crcst.c
 crdlb.c
 crdnam.c
-crfcon.c
-cricon.c
+crxcon.c
 crilb.c
 crpnam.c
 crscon.c
-crucon.c
 cst.c
 dfdlb.c
 dfdnam.c
