@@ -8,10 +8,6 @@ IMPLEMENTATION MODULE Conversions;
 	tmp: ARRAY [0..20] OF CHAR;
     BEGIN
 	i := 0;
-	IF neg THEN
-		tmp[0] := '-';
-		i := 1;
-	END;
 	REPEAT
 		r := num MOD base;
 		num := num DIV base;
@@ -22,6 +18,10 @@ IMPLEMENTATION MODULE Conversions;
 		END;
 		INC(i);
 	UNTIL num = 0;
+	IF neg THEN
+		tmp[i] := '-';
+		INC(i)
+	END;
 	IF len > HIGH(str) + 1 THEN len := HIGH(str) + 1; END;
 	IF i > HIGH(str) + 1 THEN i := HIGH(str) + 1; END;
 	r := 0;
