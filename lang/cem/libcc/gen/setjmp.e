@@ -1,161 +1,118 @@
 #
  mes 2,EM_WSIZE,EM_PSIZE
 
+;
+; layout of a setjmp buffer:
+;
+;  -----------------
+; |   signal mask   |		(only for Berkeley 4.2)
+;  -----------------
+; |   PC of caller  |
+;  -----------------
+; |                 |
+; |  GTO descriptor |
+; |   (SP, LB, PC)  |
+; |                 |
+;  -----------------
+;
+; setjmp saves the signalmask, PC, SP, and LB of caller, and creates a
+; GTO descriptor with a program counter indicating a piece of code that
+; gets the return value right before jumping to the caller of setjmp in
+; the setjmp buffer, which has a layout as displayed above.
+; The big problem here is how to het the return address, i.e. the PC of
+; the caller; This problem is solved by the front-end, which must pass
+; it as an extra parameter to setjmp.
+
+gtobuf
+ bss 3*EM_PSIZE,0,0
+retval
+ bss EM_WSIZE,0,0
+jmpbuf_addr
+ bss EM_PSIZE,0,0
+
+ inp $fill_ret_area
  exp $setjmp
- pro $setjmp,3*EM_WSIZE
-
-; setjmp saves the StackPointer and the LocalBase, and the chunk of
-; memory between the StackPointer and the ArgumentBase, + its size in a
-; buffer, pointed to by the parameter.
-; longjump can then restore this buffer and return.
-; Notice that this does not work on EM implementations in which every
-; procedure frame has a different fragment in memory, because in this case
-; the ArgumentBase will point into the fragment of the caller.
-; What really is needed is a way to find out the size of the return
-; status block.
-; On EM-implementations in which the stack grows upwards it is untested,
-; as there are no such implementations available now.
-; This implementation of setjmp/longjmp
-; depends on the assumption that the routine calling
-; setjmp does not have register variables, and that it saves all registers
-; that are available for variables.
-
+ pro $setjmp,0
+ mes 11
 #ifdef __BSD4_2
  loc 0
  cal $sigblock
  asp EM_WSIZE
  lfr EM_WSIZE
- stl -3*EM_WSIZE
+ lal 0
+ loi EM_PSIZE
+ stf 4*EM_PSIZE
 #endif
- loc 0
- stl -2*EM_WSIZE
- lor 1		; load StackPointer
+ ; create GTO descriptor for longjmp
+ lxl 0
+ dch		; Local Base of caller
+ lxa 0		; Stackpointer of caller
+.1
+ rom *1
+ lae .1
+ loi EM_PSIZE	; where the longjmp ends up
  lal 0
  loi EM_PSIZE
- sti EM_PSIZE	; save it
- lxl 0		; load LocalBase
+ sti 3*EM_PSIZE	; stored in jmpbuf
+ ; also save return address, which has been supplied by the compiler
+ lal EM_PSIZE
+ loi EM_PSIZE
  lal 0
  loi EM_PSIZE
- adp EM_PSIZE
- sti EM_PSIZE	; save it
- lxa 0		; load ArgumentBase
- lal 0
- loi EM_PSIZE
- loi EM_PSIZE	; load saved StackPointer
- sbs EM_WSIZE	; gives size of block that is to be saved, or negative size
- dup EM_WSIZE
- zgt *5
- ngi EM_WSIZE
- loc 1
- stl -2*EM_WSIZE; one if the stack grows upwards
-5
- stl -EM_WSIZE	; save size of block in local
- lol -EM_WSIZE
- lal 0
- loi EM_PSIZE
- adp 2*EM_PSIZE
- sti EM_WSIZE	; and also in the buffer
- lal 0
- loi EM_PSIZE
- loi EM_PSIZE	; load saved StackPointer
- lol -2*EM_WSIZE; positive if the stack grows upwards
- zle *6
- asp EM_PSIZE
- lxa 0
- adp EM_WSIZE	; in this case the source address = ArgumentBase+EM_WSIZE
-6
- lal 0
- loi EM_PSIZE
- adp 2*EM_PSIZE+EM_WSIZE
-		; destination address
- lol -EM_WSIZE	; count
- bls EM_WSIZE	; block copy
+ adp 3*EM_PSIZE
+ sti EM_PSIZE
  loc 0
  ret EM_WSIZE
- end 3*EM_WSIZE
-
- exp $longjmp
- pro $longjmp,3*EM_WSIZE
-
-; first, find out wether the stack grows upwards
- loc 0
- stl -2*EM_WSIZE
- lxa 0
- lxl 0
- cmp
- zge *7
- loc 1
- stl -2*EM_WSIZE; this local contains 1 if it does, otherwise it contains 0
-7
-; then, adjust StackPointer until it is below the saved StackPointer (or
-; above if it grows upwards)
-; then push parameters
-; then copy the saved block in its proper place
-; notice that the parameters can not be used anymore now
-; then restore the LocalBase and the Stackpointer and return.
 1
- loc 0
-2
- lor 1
- lal 0
+ ; so, the longjmp returns here.
+ ; now, create a GTO descriptor for the final GTO
+ lae jmpbuf_addr
  loi EM_PSIZE
- loi EM_PSIZE	; saved StackPointer
- cmp		; compare with current one
- lol -2*EM_WSIZE
- zle *8
- zlt *1
- bra *10
-8
- zgt *1
-10
- lal 0
+ adp 3*EM_PSIZE
  loi EM_PSIZE
- loi EM_PSIZE	; push saved StackPointer
- lol EM_PSIZE	; push value to be returned by longjmp
- lal 0
+ lae gtobuf
+ sti EM_PSIZE	; this is the return address
+ lae jmpbuf_addr
  loi EM_PSIZE
  adp EM_PSIZE
- loi EM_PSIZE	; push saved LocalBase
+ loi 2*EM_PSIZE
+ lae gtobuf+EM_PSIZE
+ sti 2*EM_PSIZE	; that's it, the GTO descriptor is ready;
+		; now take care of the return value ...
+ cal $fill_ret_area
+ gto gtobuf	; there we go ...
+ end 0
+
+ pro $fill_ret_area,0
+ loe retval
+ ret EM_WSIZE
+ end 0
+
+ exp $longjmp
+ pro $longjmp,?
  lal 0
  loi EM_PSIZE
- adp 2*EM_PSIZE+EM_WSIZE
-		; source address
- lal 0
- loi EM_PSIZE
- loi EM_PSIZE	; saved stackpointer
- lol -2*EM_WSIZE
- zle *9		; if not positive, this is the destination address,
-		; otherwise subtract the size of the saved area and add EM_WSIZE
- adp EM_WSIZE
- lal 0
- loi EM_PSIZE
- adp 2*EM_PSIZE
- loi EM_WSIZE
- ngi EM_WSIZE
- ads EM_WSIZE
-9		; destination address
- lal 0
- loi EM_PSIZE
- adp 2*EM_PSIZE
- loi EM_WSIZE	; size
- bls EM_WSIZE	; now we have a frame exactly as it was in setjmp,
-		; and exactly at the same place
- str 0		; restore LocalBase
- stl -EM_WSIZE	; saves the return value
- str 1		; restores the StackPointer
 #ifdef __BSD4_2
- lol -3*EM_WSIZE
+ dup EM_PSIZE
+ lof 4*EM_PSIZE
  cal $sigsetmask
  asp EM_WSIZE
  lfr EM_WSIZE
  asp EM_WSIZE
 #endif
- lol -EM_WSIZE
+ lae jmpbuf_addr
+ sti EM_PSIZE	; save address of jmpbuf
+ lol EM_PSIZE
  dup EM_WSIZE
  zne *3
 		; of course, longjmp may not return 0!
  asp EM_WSIZE
  loc 1
 3
- ret EM_WSIZE
- end 3*EM_WSIZE
+ ste retval	; save return value
+ lal 0
+ loi EM_PSIZE
+ lae gtobuf
+ blm 3*EM_PSIZE	; create GTO descriptor
+ gto gtobuf	; and GTO
+ end 0
