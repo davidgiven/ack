@@ -367,9 +367,9 @@ This error can only occur when the user has installed his own trap handler.
 It means that during execution of the trap handler another trap has occurred,
 and that several times.
 In some cases, this is an error because of overflow of some internal tables.
-.IP "no RETURN from procedure function"
+.IP "no RETURN from function procedure"
 .br
-This error occurs when a procedure function does not return properly
+This error occurs when a function procedure does not return properly
 ("falls" through).
 .IP "illegal instruction"
 .br
