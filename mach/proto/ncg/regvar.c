@@ -111,6 +111,7 @@ fixregvars(saveall) {
 		} else if(regassigned[rvtyp][i].ra_score>0) {
 			rv=regassigned[rvtyp][i].ra_rv;
 			rv->rv_reg=rvnumbers[rvtyp][i];
+			rv->rv_type = rvtyp;
 			regsave(codestrings[machregs[rv->rv_reg].r_repr],
 				    rv->rv_off,rv->rv_size);
 		}
@@ -124,6 +125,15 @@ isregvar(off) long off; {
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
 		if(rvlp->rv_off == off)
 			return(rvlp->rv_reg);
+	return(-1);
+}
+
+isregtyp(off) long off; {
+	register struct regvar *rvlp;
+
+	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
+		if(rvlp->rv_off == off)
+			return(rvlp->rv_reg ? rvlp->rv_type+1 : 0);
 	return(-1);
 }
 

@@ -346,8 +346,7 @@ result_t compute(node) register node_p node; {
 #ifdef REGVARS
 	case EX_INREG:
 	assert(leaf1.e_typ == EV_INT);
-		if ((result.e_v.e_con = isregvar((long) leaf1.e_v.e_con))>0)
-			result.e_v.e_con = machregs[result.e_v.e_con].r_size;
+		result.e_v.e_con = isregtyp((long) leaf1.e_v.e_con);
 		return(result);
 	case EX_REGVAR:
 	assert(leaf1.e_typ == EV_INT);
