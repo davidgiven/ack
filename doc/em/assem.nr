@@ -133,9 +133,9 @@ can be followed by a letter I, U or F.
 This indicator
 specifies the type of the initializer: Integer, Unsigned or Float.
 If no indicator is present I is assumed.
-The size of the object is the wordsize unless
+The size of the initializer is the wordsize unless
 the indicator is followed by an integer specifying the
-object's size.
+initializer's size.
 This integer is governed by the same restrictions as for
 transfer of objects to/from memory.
 As in instruction arguments, initializers include expressions of the form:
@@ -145,8 +145,9 @@ The 'IUF' indicators cannot be used in the offsets.
 .P
 Data labels are referred to by their name.
 .P
+
 Strings are surrounded by double quotes (").
-Semecolon's in string do not indicate the start of comment.
+Semicolon's in string do not indicate the start of comment.
 In the ASCII representation the escape character \e (backslash)
 alters the meaning of subsequent character(s).
 This feature allows inclusion of zeroes, graphic characters and
@@ -175,7 +176,6 @@ the backslash is ignored.
 Example: CON "hello\e012\e0".
 Each string element initializes a single byte.
 The ASCII character set is used to map characters onto values.
-Strings are padded with zeroes up to a multiple of the wordsize.
 .P
 Instruction labels are referred to as *1, *2, etc.  in both branch
 instructions and as initializers.
@@ -209,6 +209,10 @@ l l l.
 .S4 Storage declaration
 Initialized global data is allocated by the pseudoinstruction CON,
 which needs at least one argument.
+Each argument is used to allocate and initialize a number of
+consequtive bytes in data memory.
+The number of bytes to be allocated and the alignment depend on the type
+of the argument.
 For each argument, an integral number of words,
 determined by the argument type, is allocated and initialized.
 .P
@@ -245,8 +249,10 @@ It is not allowed to have more than one HOL block per procedure.
 .P
 The alignment restrictions are enforced by the
 pseudoinstructions.
-All objects are aligned on a multiple of their size or the wordsize
+All initializers are aligned on a multiple of their size or the wordsize
 whichever is smaller.
+Strings form an exception, they are to be seen as a sequence of initializers
+each for one byte, i.e. strings are not padded with zero bytes.
 Switching to another type of fragment or placing a label forces
 word-alignment.
 There are three types of fragments in global data space: CON, ROM and
