@@ -1,0 +1,40 @@
+proc prints(chan out, value fmt[], str[]) =
+-- Like fprintf(out, fmt, str), with only %s or %<width>s in fmt[]
+
+	def otherwise=true:
+	var i, len:
+	seq
+		len:=fmt[byte 0]
+		i:=1
+
+		while i<=len
+			if
+				fmt[byte i] = '%'
+					var w:
+					seq
+						i:=i+1
+						w:=0
+						while (i<=len) and ('0'<=fmt[byte i]) and (fmt[byte i]<='9')
+							seq
+								w:=(w*10)+(fmt[byte i]-'0')
+								i:=i+1
+						if
+							i<=len
+								var key:
+								seq
+									key:=fmt[byte i]
+									if
+										key='s'
+											seq
+												seq i=[0 for w-str[byte 0]]
+													out ! ' '
+												seq i=[0 for str[byte 0]]
+													out ! str[byte i]
+										otherwise
+											out ! key
+									i:=i+1
+				otherwise
+					seq
+						out ! fmt[byte i]
+						i:=i+1
+:
