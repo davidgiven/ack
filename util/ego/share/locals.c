@@ -18,8 +18,6 @@
 #include "../../../h/em_mes.h"
 #include "locals.h"
 
-#define newlocal()	(local_p) newstruct(local)
-#define oldlocal(x)	oldstruct(local,x)
 
 extern short nrglobals;
 
