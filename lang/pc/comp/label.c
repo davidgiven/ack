@@ -50,7 +50,7 @@ chk_labels(Slevel)
 			struct lab *plab = df->lab_next;
 
 			while( plab )	{
-				if( plab->lb_level > 1 )
+				if( plab->lb_level == Slevel )
 					plab->lb_level--;
 				plab = plab->lb_next;
 			}
