@@ -93,7 +93,7 @@ putval(c)
 		putc(c-128, tempfile);
 		v = yylval.y_valu;
 		while (--n >= 0)
-			putc(v >> (n*8), tempfile);
+			putc((int) (v >> (n*8)), tempfile);
 		return;
 	case IDENT:
 	case FBSYM:
