@@ -17,7 +17,7 @@ match_id(id1, id2)
 		first place, and if not, give an error message
 	*/
 	if (id1 != id2 && !is_anon_idf(id1) && !is_anon_idf(id2)) {
-		error("Identifier \"%s\" does not match identifier \"%s\"",
+		error("Name \"%s\" does not match block name \"%s\"",
 		      id1->id_text,
 		      id2->id_text
 		);
@@ -53,11 +53,4 @@ gen_anon_idf()
 	sprintf(buff, "#%d in %s, line %u",
 			++name_cnt, FileName, LineNumber);
 	return str2idf(buff, 1);
-}
-
-int
-is_anon_idf(idf)
-	struct idf *idf;
-{
-	return idf->id_text[0] == '#';
 }

@@ -5,11 +5,14 @@ static  char *RcsId = "$Header$";
 
 #include	<alloc.h>
 #include	<em_arith.h>
+#include	<em_label.h>
 #include	"idf.h"
 #include	"misc.h"
 #include	"main.h"
 #include	"LLlex.h"
 #include	"scope.h"
+#include	"def.h"
+#include	"type.h"
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -40,8 +43,13 @@ priority:
 export
 {
 	struct id_list *ExportList;
+	int QUALflag = 0;
 } :
-	EXPORT QUALIFIED? IdentList(&ExportList) ';'
+	EXPORT
+	[
+		QUALIFIED	{ QUALflag = 1; }
+	]?
+	IdentList(&ExportList) ';'
 			{
 			  FreeIdList(ExportList);
 			}
@@ -67,9 +75,16 @@ import(int local;)
 			}
 ;
 
-DefinitionModule:
+DefinitionModule
+{
+	struct def *df;
+} :
 	DEFINITION	{ state = DEFINITION; }
-	MODULE IDENT	{ open_scope(CLOSEDSCOPE, 0); }
+	MODULE IDENT	{ 
+			  df = define(dot.TOK_IDF, CurrentScope, D_MODULE);
+			  open_scope(CLOSEDSCOPE, 0);
+			  df->df_value.df_module.mo_scope = CurrentScope->sc_scope;
+			}
 	';'
 	import(0)* 
 	/*	export?
@@ -80,7 +95,10 @@ DefinitionModule:
 			{ close_scope(); }
 ;
 
-definition:
+definition
+{
+	struct def *df;
+} :
 	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE
@@ -98,13 +116,17 @@ definition:
 |
 	VAR [ VariableDeclaration ';' ]*
 |
-	ProcedureHeading ';'
+	ProcedureHeading(&df, D_PROCHEAD) ';'
 ;
 
 ProgramModule:
 	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
 	IDENT		{ if (state == IMPLEMENTATION) {
-				/* Re-open scope ??? */
+				/* ????
+				   Read definition module,
+				   Look for current identifier,
+				   and find out its scope number
+				*/
 				open_scope(CLOSEDSCOPE, 0);
 			  }
 			  else	open_scope(CLOSEDSCOPE, 0);

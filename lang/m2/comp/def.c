@@ -10,6 +10,7 @@ static char *RcsId = "$Header$";
 #include	"idf.h"
 #include	"main.h"
 #include	"scope.h"
+#include	"debug.h"
 
 struct def *h_def;		/* Pointer to free list of def structures */
 
@@ -23,6 +24,7 @@ define(id, scope, kind)
 	*/
 	register struct def *df = lookup(id, scope->sc_scope);
 
+	DO_DEBUG(debug(3,"Defining identifier %s in scope %d", id->id_text, scope->sc_scope));
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
@@ -46,7 +48,7 @@ define(id, scope, kind)
 			return df;
 			break;
 		}
-		error("Identifier %s already declared", id->id_text);
+		error("Identifier \"%s\" already declared", id->id_text);
 		return df;
 	}
 	df = new_def();
@@ -71,6 +73,7 @@ lookup(id, scope)
 
 	df1 = 0;
 	df = id->id_def;
+	DO_DEBUG(debug(3,"Looking for identifier %s in scope %d", id->id_text, scope));
 	while (df) {
 		if (df->df_scope == scope) {
 			if (df1) {
@@ -80,6 +83,7 @@ lookup(id, scope)
 			}
 			return df;
 		}
+		df1 = df;
 		df = df->next;
 	}
 	return 0;

@@ -196,7 +196,7 @@ again:
 			PushBack(ch);
 		*tg++ = '\0';
 
-		id = tk->TOK_IDF = str2idf(buf, 1);
+		tk->TOK_IDF = id = str2idf(buf, 1);
 		if (!id) fatal("Out of memory");
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;
 	}

@@ -5,6 +5,7 @@ static char *RcsId = "$Header$";
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<assert.h>
 #include	"idf.h"
 #include	"misc.h"
 #include	"LLlex.h"
@@ -15,29 +16,26 @@ static char *RcsId = "$Header$";
 
 ProcedureDeclaration
 {
-	register struct def *df;
+	struct def *df;
 } :
-	/* ProcedureHeading(&df) */
-	PROCEDURE IDENT
-			{ df = define(dot.TOK_IDF, CurrentScope, D_PROCEDURE);
-			  open_scope(OPENSCOPE, 0);
-			}
-	FormalParameters?
+	ProcedureHeading(&df, D_PROCEDURE)
 	';' block IDENT
 			{ match_id(dot.TOK_IDF, df->df_idf);
 			  close_scope();
 			}
 ;
 
-ProcedureHeading
+ProcedureHeading(struct def **pdf; int type;)
 {
-	register struct def *df;
 } :
-	/*	Only used for definition modules
-	*/
 	PROCEDURE IDENT
-			{ df = define(dot.TOK_IDF, CurrentScope, D_PROCHEAD); }
-	FormalParameters?
+			{ assert(type == D_PROCEDURE || type == D_PROCHEAD);
+			  *pdf = define(dot.TOK_IDF, CurrentScope, D_PROCHEAD);
+			  if (type == D_PROCEDURE) {
+				open_scope(OPENSCOPE, 0);
+			  }
+			}
+	FormalParameters(type, &((*pdf)->df_type))?
 ;
 
 block:
@@ -56,13 +54,13 @@ declaration:
 	ModuleDeclaration ';'
 ;
 
-FormalParameters:
-	'(' [ FPSection [ ';' FPSection ]* ]? ')'
+FormalParameters(int doparams; struct type **tp;) :
+	'(' [ FPSection(doparams) [ ';' FPSection(doparams)]* ]? ')'
 	[ ':' qualident
 	]?
 ;
 
-FPSection
+FPSection(int doparams;)
 {
 	struct id_list *FPList;
 	int VARflag = 0;
@@ -72,6 +70,13 @@ FPSection
 	]?
 	IdentList(&FPList) ':' FormalType
 			{
+			  if (doparams) {
+				EnterIdList(FPList,
+					    D_VARIABLE,
+					    VARflag,
+					    (struct type *) 0	/* ???? */
+				);
+			  }
 			  FreeIdList(FPList);
 			}
 ;
@@ -82,10 +87,13 @@ FormalType:
 
 TypeDeclaration
 {
-	register struct def *df;
+	struct def *df;
+	struct idf *id;
 }:
-	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
-	'=' type
+	IDENT		{ id = dot.TOK_IDF; }
+	'=' type	{ df = define(id, CurrentScope, D_TYPE);
+			  /* ???? */
+			}
 ;
 
 type:
@@ -124,22 +132,29 @@ enumeration
 	struct id_list *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
+			{
+			  EnterIdList(EnumList,
+				      D_ENUM,
+				      0,
+				      (struct type *) 0 /* ???? */
+			  );
+			  FreeIdList(EnumList);
+			}
+
 ;
 
 IdentList(struct id_list **p;)
 {
 	register struct id_list *q = new_id_list();
 } :
-	IDENT			{ q->id_ptr = dot.TOK_IDF; }
+	IDENT			{ q->id_ptr = dot.TOK_IDF;  *p = q;}
 	[
 		',' IDENT	{ q->next = new_id_list();
 				  q = q->next;
 				  q->id_ptr = dot.TOK_IDF;
 				}
 	]*
-				{ q->next = 0;
-				  *p = q;
-				}
+				{ q->next = 0; }
 ;
 
 SubrangeType:
@@ -209,10 +224,13 @@ FormalTypeList:
 
 ConstantDeclaration
 {
-	register struct def *df;
+	struct def *df;
+	struct idf *id;
 }:
-	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_CONST); }
-	'=' ConstExpression
+	IDENT			{ id = dot.TOK_IDF; }
+	'=' ConstExpression	{ df = define(id, CurrentScope, D_CONST);
+				  /* ???? */
+				}
 ;
 
 VariableDeclaration
@@ -224,4 +242,11 @@ VariableDeclaration
 		ConstExpression
 	]?
 	':' type
+			{ EnterIdList(VarList,
+				      D_VARIABLE,
+				      0,
+				      (struct type *) 0	/* ???? */
+				     );
+			  FreeIdList(VarList);
+			}
 ;

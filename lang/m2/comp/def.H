@@ -4,6 +4,7 @@
 
 struct module {
 	int mo_priority;	/* Priority of a module */
+	int mo_scope;		/* Scope of this module */
 };
 
 struct variable {
