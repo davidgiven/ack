@@ -193,6 +193,10 @@ gen_tphead(tpp, nest)
 	register struct e_stack *p;
 	register struct sdef *sd;
 
+	if (tpp && *tpp == error_type) {
+		gen_error = 1;
+		return 0;
+	}
 	if (gen_error) return tpp;
 	p = new_e_stack();
 	p->next = p_stack;
@@ -217,6 +221,13 @@ gen_tphead(tpp, nest)
 			sd = next_field(sd, p);
 		}
 #endif
+		if (! sd) {
+			/* something wrong with this struct */
+			gen_error = 1;
+			p_stack = p->next;
+			free_e_stack(p);
+			return 0;
+		}
 		p->s_def = sd;
 		if (AHEAD != '{' && aggregate_type(sd->sd_type)) {
 			return gen_tphead(&(sd->sd_type), 1);
@@ -236,7 +247,10 @@ gen_tpmiddle()
 	register struct sdef *sd;
 	register struct e_stack *p = p_stack;
 
-	if (gen_error) if (p) return p->s_tpp; else return 0;
+	if (gen_error) {
+		if (p) return p->s_tpp;
+		return 0;
+	}
 again:
 	tp = *(p->s_tpp);
 	switch(tp->tp_fund) {

@@ -140,7 +140,7 @@ external_definition
 ;
 
 ext_decl_specifiers(struct decspecs *ds;) :
-%prefer /* the thin ice in  R.M. 11.1 */
+%if (DOT != IDENTIFIER || AHEAD == IDENTIFIER) /* the thin ice in  R.M. 11.1 */
 	decl_specifiers(ds)
 |
 	empty

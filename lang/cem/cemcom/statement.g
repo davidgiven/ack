@@ -358,7 +358,9 @@ compound_statement:
 		{
 			stack_level();
 		}
-	[%while (AHEAD != ':')		/* >>> conflict on TYPE_IDENTIFIER */
+	[%while ((DOT != IDENTIFIER && AHEAD != ':') ||
+		 (DOT == IDENTIFIER && AHEAD == IDENTIFIER))
+			/* >>> conflict on TYPE_IDENTIFIER, IDENTIFIER */
 		declaration
 	]*
 	[%persistent

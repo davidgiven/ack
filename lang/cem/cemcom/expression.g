@@ -96,7 +96,7 @@ postfixed(struct expr **expp;)
 unary(register struct expr **expp;)
 	{struct type *tp; int oper;}
 :
-%if (first_of_type_specifier(AHEAD))
+%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 	cast(&tp) unary(expp)
 	{	ch7cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
@@ -114,7 +114,7 @@ size_of(register struct expr **expp;)
 	{struct type *tp;}
 :
 	SIZEOF
-	[%if (first_of_type_specifier(AHEAD))
+	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 		cast(&tp)
 		{
 			*expp = intexpr(size_of_type(tp, "type"), INT);

@@ -68,7 +68,8 @@ decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 :
 [
 	other_specifier(ds)+
-	[%prefer /* the thin ice in R.M. 11.1 */
+	[%if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
+		/* the thin ice in R.M. 11.1 */
 		single_type_specifier(ds) other_specifier(ds)*
 	|
 		empty
@@ -121,6 +122,11 @@ type_specifier(struct type **tpp;)
 single_type_specifier(register struct decspecs *ds;):
 	TYPE_IDENTIFIER		/* this includes INT, CHAR, etc. */
 	{idf2type(dot.tk_idf, &ds->ds_type);}
+|
+	IDENTIFIER
+	{error("%s is not a type identifier", dot.tk_idf->id_text);
+	 ds->ds_type = error_type;
+	}
 |
 	struct_or_union_specifier(&ds->ds_type)
 |
