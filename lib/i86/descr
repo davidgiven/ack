@@ -10,7 +10,7 @@ var M=i86
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
 var CPP_F=-Dunix
-var INCLUDES=-I{EM}/include -I/usr/include
+var INCLUDES=-I{EM}/include/_tail_cc
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
@@ -21,7 +21,7 @@ name be
 	need .e
 end
 name as
-	from .s
+	from .s.so
 	to .o
 	program {EM}/lib/{M}/as
 	args - -o > <
@@ -44,7 +44,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{M}/cv_ix
+	program {EM}/lib/{M}/cv
 	args < >
 	outfile a.out
 end
