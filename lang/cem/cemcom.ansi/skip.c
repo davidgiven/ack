@@ -12,6 +12,8 @@
 #include	"input.h"
 
 #ifndef NOPP
+extern int InputLevel;
+
 int
 skipspaces(ch, skipnl)
 	register int ch;
@@ -19,12 +21,19 @@ skipspaces(ch, skipnl)
 	/*	skipspaces() skips any white space and returns the first
 		non-space character.
 	*/
+	register int nlseen = 0;
+
 	for (;;) {
 		while (class(ch) == STSKIP)
 			ch = GetChar();
 		if (skipnl && class(ch) == STNL) {
 			ch = GetChar();
-			++LineNumber;
+			LineNumber++;
+			nlseen++;
+			continue;
+		}
+		if (ch == TOKSEP && InputLevel) {
+			ch = GetChar();
 			continue;
 		}
 
@@ -32,7 +41,7 @@ skipspaces(ch, skipnl)
 
 		if (ch == '/') {
 			ch = GetChar();
-			if (ch == '*') {
+			if (ch == '*' && !InputLevel) {
 				skipcomment();
 				ch = GetChar();
 			}
@@ -41,7 +50,10 @@ skipspaces(ch, skipnl)
 				return '/';
 			}
 		}
-		else
+		else if(nlseen && ch == '#') {
+			domacro();
+			ch = GetChar();
+		} else
 			return ch;
 	}
 }
@@ -53,10 +65,9 @@ SkipToNewLine(garbage)
 	register int ch;
 	register int pstrict = 0;
 
-	UnGetChar();
 	while ((ch = GetChar()) != '\n') {
 		if (ch == '/') {
-			if ((ch = GetChar()) == '*') {
+			if ((ch = GetChar()) == '*' && !InputLevel) {
 				skipcomment();
 				continue;
 			}

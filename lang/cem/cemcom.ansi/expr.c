@@ -6,10 +6,11 @@
 /* EXPRESSION TREE HANDLING */
 
 #include	"lint.h"
-#include	"nofloat.h"
+#include	"assert.h"
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"idf.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"def.h"
 #include	"type.h"
@@ -21,10 +22,10 @@
 #include	"declar.h"
 #include	"sizes.h"
 #include	"level.h"
-#include	"noRoption.h"
 
 extern char *symbol2str();
 extern char options[];
+extern int InSizeof;
 
 int
 rank_of(oper)
@@ -96,7 +97,6 @@ rank_of(oper)
 	/*NOTREACHED*/
 }
 
-#ifndef NOROPTION
 int
 rank_of_expression(ex)
 	register struct expr *ex;
@@ -112,15 +112,14 @@ check_conditional(expr, oper, pos_descr)
 	register struct expr *expr;
 	char *pos_descr;
 {
-	/*	Warn if restricted C is in effect and the expression expr,
-		which occurs at the position pos_descr, is not lighter than
-		the operator oper.
+	/*	Since the grammar is LR and the parser is LL, this kludge
+		here checks if there was a syntax error caused by
+		the priorities in an expression.
 	*/
-	if (options['R'] && rank_of_expression(expr) >= rank_of(oper))
-		expr_warning(expr, "%s %s is ungrammatical",
+	if (rank_of_expression(expr) >= rank_of(oper))
+		expr_error(expr, "%s %s",
 			symbol2str(expr->OP_OPER), pos_descr);
 }
-#endif
 
 dot2expr(expp)
 	struct expr **expp;
@@ -140,11 +139,9 @@ dot2expr(expp)
 	case INTEGER:
 		int2expr(ex);
 		break;
-#ifndef NOFLOAT
 	case FLOATING:
 		float2expr(ex);
 		break;
-#endif NOFLOAT
 	default:
 		crash("bad conversion to expression");
 		/*NOTREACHED*/
@@ -163,9 +160,12 @@ idf2expr(expr)
 	register struct def *def = idf->id_def;
 	
 	if (def == 0)	{
-		if (AHEAD == '(') /* function call, declare name IMPLICITly */
-			add_def(idf, IMPLICIT, funint_type, level); /* RM 13 */
-		else	{
+		if (AHEAD == '(') {
+			/* function call, declare name IMPLICITly (3.3.2.2) */
+			warning("implicit declaration of function %s"
+				, idf->id_text);
+			add_def(idf, IMPLICIT, funint_type, level);
+		} else	{
 			if (!is_anon_idf(idf))
 				error("%s undefined", idf->id_text);
 			/* declare idf anyway */
@@ -180,11 +180,13 @@ idf2expr(expr)
 	}
 	else {
 #ifndef	LINT
-		def->df_used = 1;
+		if (!InSizeof)
+			def->df_used = 1;
 #endif	LINT
 		expr->ex_type = def->df_type;
-		if (expr->ex_type == error_type)
+		if (expr->ex_type == error_type) {
 			expr->ex_flags |= EX_ERROR;
+		}
 	}
 	expr->ex_lvalue =
 		(	def->df_type->tp_fund == FUNCTION ||
@@ -215,9 +217,9 @@ idf2expr(expr)
 	}
 }
 
-string2expr(expp, typ, str, len)
+string2expr(expp, str, len)
 	register struct expr **expp;
-	int typ, len;
+	int len;
 	char *str;
 {
 	/*	The string in the argument is converted into an expression,
@@ -229,9 +231,7 @@ string2expr(expp, typ, str, len)
 	ex->ex_file = dot.tk_file;
 	ex->ex_line = dot.tk_line;
 	ex->ex_type = string_type;
-/*
-	ex->ex_type = qualifier_type(ex->ex_type, TQ_CONST);
-*/
+	/* ex->ex_type = qualifier_type(ex->ex_type, TQ_CONST); */
 	ex->ex_flags |= EX_READONLY;
 	ex->ex_lvalue = 0;
 	ex->ex_class = String;
@@ -249,7 +249,6 @@ int2expr(expr)
 	fill_int_expr(expr, dot.tk_ival, dot.tk_fund);
 }
 
-#ifndef NOFLOAT
 float2expr(expr)
 	register struct expr *expr;
 {
@@ -274,9 +273,12 @@ float2expr(expr)
 	}
 	expr->ex_class = Float;
 	expr->FL_VALUE = dot.tk_fval;
+	flt_str2flt(expr->FL_VALUE, &(expr->FL_ARITH));
+	ASSERT(flt_status != FLT_NOFLT);
+	if (flt_status == FLT_OVFL)
+		expr_warning(expr,"internal floating point overflow");
 	expr->FL_DATLAB = 0;
 }
-#endif NOFLOAT
 
 struct expr*
 intexpr(ivalue, fund)
@@ -287,7 +289,7 @@ intexpr(ivalue, fund)
 		the size indicated by fund.
 	*/
 	register struct expr *expr = new_expr();
-	
+
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
 	fill_int_expr(expr, ivalue, fund);
@@ -324,8 +326,8 @@ fill_int_expr(ex, ivalue, fund)
 		/*	We cannot make a test like
 				ivalue <= max_unsigned
 			because, if
-				sizeof(long) == int_size
-			holds, max_unsigned may be a negative long in
+				sizeof(arith) == int_size
+			holds, max_unsigned may be a negative arith in
 			which case the comparison results in an unexpected
 			answer.
 		*/
@@ -392,7 +394,8 @@ new_oper(tp, e1, oper, e2)
 		
 		expr->ex_depth =
 			(e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth) + 1;
-		expr->ex_flags = (e1_flags | e2->ex_flags) & ~EX_PARENS;
+		expr->ex_flags = (e1_flags | e2->ex_flags)
+			& ~(EX_PARENS | EX_READONLY /* ??? | EX_VOLATILE */ );
 	}
 	op = &expr->ex_object.ex_oper;
 	op->op_type = tp;
@@ -425,43 +428,24 @@ chk_cst_expr(expp)
 		the others in the various C compilers.  I have tried some
 		hypotheses to unify them, but all have failed.
 		
-		This routine will give a warning for those operators
-		not allowed by K&R, under the R-option only.  The anomalies
-		are cast, logical operators and the expression comma.
 		Special problems (of which there is only one, sizeof in
 		Preprocessor #if) have to be dealt with locally
-		
-		Note that according to K&R the negation ! is illegal in
-		constant expressions and is indeed rejected by the
-		Ritchie compiler.
 	*/
 	register struct expr *expr = *expp;
 	register int fund = expr->ex_type->tp_fund;
-	register int flags = expr->ex_flags;
 	int err = 0;
 	
 #ifdef	DEBUG
 	print_expr("constant_expression", expr);
 #endif	DEBUG
-	if (	fund != CHAR && fund != SHORT && fund != INT &&
-		fund != ENUM && fund != LONG
-	)
-		expr_error(expr, "non-numerical constant expression"), err++;
-	else
-	if (!is_ld_cst(expr))
-		expr_error(expr, "expression is not constant"), err++;
-#ifndef NOROPTION
-	if (options['R'])	{
-		if (flags & EX_CAST)
-			expr_warning(expr, "cast in constant expression");
-		if (flags & EX_LOGICAL)
-			expr_warning(expr,
-				"logical operator in constant expression");
-		if (flags & EX_COMMA)
-			expr_warning(expr,
-				"expression comma in constant expression");
+	if ( fund != CHAR && fund != SHORT && fund != INT
+	    && fund != ENUM && fund != LONG) {
+		expr_error(expr, "non-numerical constant expression");
+		err++;
+	} else if (!is_ld_cst(expr)) {
+		expr_error(expr, "expression is not constant");
+		err++;
 	}
-#endif NOROPTION
 	if (err)
 		erroneous2int(expp);
 }
@@ -501,7 +485,7 @@ is_ld_cst(expr)
 
 int
 is_cp_cst(expr)
-	register struct expr *expr;
+	struct expr *expr;
 {
 	/*	An expression is a `compile-time constant' if it is a
 		load-time constant, and the idf is not there.
@@ -509,17 +493,31 @@ is_cp_cst(expr)
 	return is_ld_cst(expr) && expr->VL_CLASS == Const;
 }
 
-#ifndef NOFLOAT
 int
 is_fp_cst(expr)
-	register struct expr *expr;
+	struct expr *expr;
 {
 	/*	An expression is a `floating-point constant' if it consists
 		of the float only.
 	*/
 	return expr->ex_class == Float;
 }
-#endif NOFLOAT
+
+int
+is_zero_cst(expr)
+	register struct expr *expr;
+{
+	flt_arith var;
+
+	switch(expr->ex_class) {
+	case Value:
+		return expr->VL_VALUE == 0;
+	case Float:
+		flt_arith2flt((arith) 0, &var);
+		return flt_cmp(&var, &(expr->FL_ARITH)) == 0;
+	}
+	/*NOTREACHED*/
+}
 
 free_expression(expr)
 	register struct expr *expr;
@@ -527,6 +525,8 @@ free_expression(expr)
 	/*	The expression expr is freed recursively.
 	*/
 	if (expr) {
+		if (expr->ex_class == Float && expr->FL_VALUE)
+			free(expr->FL_VALUE);
 		if (expr->ex_class == Oper)	{
 			free_expression(expr->OP_LEFT);
 			free_expression(expr->OP_RIGHT);

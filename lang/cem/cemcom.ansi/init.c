@@ -74,22 +74,22 @@ init_pp()
 	/* __DATE__ */
 	sprintf(dbuf, "\"%.3s %.2d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
-	macro_def(str2idf("__DATE__"), dbuf, -1, 12, NOFLAG);
+	macro_def(str2idf("__DATE__"), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */
 	sprintf(tbuf, "\"%.2d:%.2d:%.2d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
-	macro_def(str2idf("__TIME__"), tbuf, -1, 10, NOFLAG);
+	macro_def(str2idf("__TIME__"), tbuf, -1, strlen(tbuf), NOUNDEF);
 
 	/* __LINE__	*/
-	macro_def(str2idf("__LINE__"), "0", -1, 1, FUNC);
+	macro_def(str2idf("__LINE__"), "0", -1, 1, NOUNDEF | FUNC);
 
 	/* __FILE__	*/
-	macro_def(str2idf("__FILE__"), "", -1, 1, FUNC);
+	macro_def(str2idf("__FILE__"), "", -1, 1, NOUNDEF | FUNC);
 
 	/* __STDC__ */
-	macro_def(str2idf("__STDC__"), "1", -1, 1, NOFLAG);
+	macro_def(str2idf("__STDC__"), "1", -1, 1, NOUNDEF);
 
 	/* defined(??) */
-	macro_def(str2idf("defined"), "", 1, 1, FUNC);
+	macro_def(str2idf("defined"), "", 1, 1, NOUNDEF | FUNC);
 }
 #endif NOPP

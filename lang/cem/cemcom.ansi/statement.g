@@ -12,6 +12,7 @@
 #include	"debug.h"
 #include	"botch_free.h"
 
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"type.h"
@@ -29,12 +30,12 @@
 extern int level;
 }
 
-/*	Each statement construction is stacked in order to trace a
-	statement to such a construction. Example: a case statement should
-	be recognized as a piece of the most enclosing switch statement.
-*/
+/* Each statement construction is stacked in order to trace a
+ * statement to such a construction. Example: a case statement should
+ * be recognized as a piece of the most enclosing switch statement.
+ */
 
-/* 9 */
+/* 3.6 */
 statement
 	{
 #ifdef	LINT
@@ -104,9 +105,9 @@ expression_statement
 		}
 ;
 
+/* 3.6.1 (partially) */
 label
-	{	struct idf *idf;
-	}
+	{ struct idf *idf; }
 :
 	identifier(&idf)
 	{
@@ -125,6 +126,7 @@ label
 	}
 ;
 
+/* 3.6.4.1 */
 if_statement
 	{
 		struct expr *expr;
@@ -186,6 +188,7 @@ if_statement
 	]
 ;
 
+/* 3.6.5.3 */
 while_statement
 	{
 		struct expr *expr;
@@ -233,6 +236,7 @@ while_statement
 		}
 ;
 
+/* 3.6.5.2 */
 do_statement
 	{	struct expr *expr;
 		label l_break = text_label();
@@ -279,6 +283,7 @@ do_statement
 		}
 ;
 
+/* 3.6.5.3 */
 for_statement
 	{	struct expr *e_init = 0, *e_test = 0, *e_incr = 0;
 		label l_break = text_label();
@@ -350,6 +355,7 @@ for_statement
 		}
 ;
 
+/* 3.6.4.2 */
 switch_statement
 	{
 		struct expr *expr;
@@ -375,6 +381,7 @@ switch_statement
 		}
 ;
 
+/* 3.6.1 (partially) */
 case_statement
 	{
 		struct expr *expr;
@@ -393,6 +400,7 @@ case_statement
 	statement
 ;
 
+/* 3.6.1 (partially) */
 default_statement
 :
 	DEFAULT
@@ -406,6 +414,7 @@ default_statement
 	statement
 ;
 
+/* 3.6.6.4 */
 return_statement
 	{	struct expr *expr = 0;
 	}
@@ -436,6 +445,7 @@ return_statement
 	';'
 ;
 
+/* 3.6.6.1 (partially) */
 jump
 	{	struct idf *idf;
 	}
@@ -452,6 +462,7 @@ jump
 		}
 ;
 
+/* 3.6.2 */
 compound_statement:
 	'{'
 		{

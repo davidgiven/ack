@@ -12,8 +12,9 @@
 	these flags can be set simultaneously.
 */
 #define NOFLAG		0		/* no special flags	*/
-#define	FUNC		01		/* function attached    */
-#define NOREPLACE	02		/* don't replace	*/
+#define	FUNC		0x1		/* function attached    */
+#define	NOUNDEF		0x2		/* special macro */
+#define NOREPLACE	0x4		/* prevent recursion */
 
 #define	FORMALP 0200	/* mask for creating macro formal parameter	*/
 

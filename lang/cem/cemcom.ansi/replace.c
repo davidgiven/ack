@@ -27,7 +27,9 @@
 #include	"argbuf.h"
 #include	"replace.h"
 
-struct	repl	*ReplaceList;	/* list of currently active macros */
+extern struct idf *GetIdentifier();
+extern int InputLevel;
+struct repl *ReplaceList;	/* list of currently active macros */
 
 int
 replace(idf)
@@ -38,15 +40,23 @@ replace(idf)
 		higher interface to the real thing: expand_macro().
 	*/
 	struct repl *repl;
-	int size;
 	
+	if (!(idf->id_macro)) return 0;
+	if (idf->id_macro->mc_flag & NOREPLACE){
+		return 0;
+	}
 	repl = new_repl();
 	repl->r_ptr = repl->r_text;
 	repl->r_args = new_args();
-	if (!expand_macro(repl, idf, (struct idf *)0))
+	repl->r_idf = idf;
+/* repl->r_level = InputLevel;	/* ?? temporary */
+	if (!expand_macro(repl, idf)) {
 		return 0;
-	free_args(repl->r_args);
+	}
+	InputLevel++;
 	InsertText(repl->r_text, repl->r_ptr - repl->r_text);
+	repl->r_level = InputLevel;
+	idf->id_macro->mc_flag |= NOREPLACE;
 	repl->next = ReplaceList;
 	ReplaceList = repl;
 	return 1;
@@ -54,24 +64,33 @@ replace(idf)
 
 unstackrepl()
 {
-	struct repl *repl = ReplaceList;
-
-#ifdef PERSONAL_TOUCH
-	if (repl == NO_REPL) {
-		print("Leendert, you don't understand the principle yet\n");
-		return;
-	}
-#else
-	ASSERT(repl != NO_REPL);
-#endif
-	ReplaceList = repl->next;
-	free_repl(repl);
+	Unstacked++;
 }
 
-expand_macro(repl, idf, previdf)
+EnableMacros()
+{
+	register struct repl *r = ReplaceList, *prev = 0;
+
+	ASSERT(Unstacked > 0);
+	while(r) {
+		struct repl *nxt = r->next;
+
+		if (r->r_level > InputLevel) {
+			r->r_idf->id_macro->mc_flag &= ~NOREPLACE;
+			if (!prev) ReplaceList = nxt;
+			else prev->next = nxt;
+			free_args(r->r_args);
+			free_repl(r);
+		}
+		else prev = r;
+		r = nxt;
+	}
+	Unstacked = 0;
+}
+
+expand_macro(repl, idf)
 	register struct repl *repl;
 	register struct idf *idf;
-	struct idf *previdf;
 {
 	/*	expand_macro() does the actual macro replacement.
 		"idf" is a description of the identifier which
@@ -85,6 +104,10 @@ expand_macro(repl, idf, previdf)
 		ment list associated with "idf" is expanded.
 		expand_macro() returns 1 if the replacement succeeded
 		and 0 if some error occurred.
+
+		A special case is "defined". This acts as a unary operator
+		on a single, unexpanded identifier, which may be surrounded
+		by parenthesis. The function expand_defined handles this.
 	*/
 	register struct macro *mac = idf->id_macro;
 	struct args *args = repl->r_args;
@@ -94,44 +117,37 @@ expand_macro(repl, idf, previdf)
 		if (mac->mc_flag & FUNC) {
 			/* the following assertion won't compile:
 			ASSERT(!strcmp("defined", idf->id_text));
+			expand the assert macro by hand (??? dirty, temporary)
 			*/
+#ifdef	DEBUG
+			if (strcmp("defined", idf->id_text))
+				crash("in %s, %u: assertion %s failed",
+					__FILE__, __LINE__ - 2, 
+					"strcmp(\"defined\", idf->id_text)");
+#endif
 			if (!AccDefined) return 0;
+			expand_defined(repl);
+			return 1;
 		}
 
 		ch = GetChar();
 		ch = skipspaces(ch,1);
 		if (ch != '(') {	/* no replacement if no () */
-			/*	This is obscure. See the examples for the replace
-				algorithm in section 3`.8.3.5.
+			/*	This is obscure. See the examples for the
+				replace algorithm in section 3`.8.3.5.
 			lexwarning("macro %s needs arguments", idf->id_text);
 			*/
 			UnGetChar();
 			return 0;
 		} else
-			getactuals(args, idf);
+			getactuals(repl, idf);
 
-		if (mac->mc_flag & FUNC) {
-			struct idf *param = str2idf(args->a_rawbuf);
-
-			*repl->r_ptr++ = param->id_macro ? '1' : '0';
-			*repl->r_ptr = '\0';
-			return 1;
-		}
 	}
 
 	if (mac->mc_flag & FUNC) /* this macro leads to special action */
 		macro_func(idf);
 
-	if (mac->mc_nps == -1) {
-		register int size = mac->mc_length;
-		register char *text = mac->mc_text;
-
-		ASSERT((repl->r_ptr+size) < &(repl->r_text[LAPBUF]));
-		while (size-- > 0)
-			*repl->r_ptr++ = *text++;
-		*repl->r_ptr = '\0';
-	} else
-		macro2buffer(repl, idf, args);
+	macro2buffer(repl, idf, args);
 
 	/*	According to the ANSI definition:
 
@@ -143,23 +159,56 @@ expand_macro(repl, idf, previdf)
 		character based, we have a problem.
 		For now: just insert a space after all tokens,
 		until ANSI fixes this flaw.
+		^^^^^^^^^^^^^^^^^^^^^^^^^^	tsk tsk tsk
 	*/
-	*repl->r_ptr++ = ' ';
+	if (*repl->r_ptr != TOKSEP) *repl->r_ptr++ = TOKSEP;
 	*repl->r_ptr = '\0';
 
-	if (idf != previdf)
-		maccount(repl, idf);
 	return 1;
 }
 
-getactuals(args, idf)
-	register struct args *args;
+expand_defined(repl)
+	register struct repl *repl;
+{
+	register int ch = GetChar();
+	struct idf *id;
+	int parens = 0;
+
+	ch = skipspaces(ch, 0);
+
+	if (ch == '(') {
+		parens++;
+		ch = GetChar();
+		ch = skipspaces(ch, 0);
+	}
+	if ((class(ch) != STIDF) && (class(ch) != STELL)) {
+		error("identifier missing");
+		if (parens && ch != ')') error(") missing");
+		if (!parens || ch != ')') UnGetChar();
+		*repl->r_ptr++ = '0';
+		*repl->r_ptr = '\0';
+		return;
+	}
+	UnGetChar();
+	id = GetIdentifier(0);
+	ASSERT(id || class(ch) == STELL);
+	ch = GetChar();
+	ch = skipspaces(ch, 0);
+	if (parens && ch != ')') error(") missing");
+	if (!parens || ch != ')') UnGetChar();
+	*repl->r_ptr++ = (id && id->id_macro) ? '1' : '0';
+	*repl->r_ptr = '\0';
+}
+
+getactuals(repl, idf)
+	struct repl* repl;
 	register struct idf *idf;
 {
 	/*	Get the actual parameters from the input stream.
 		The hard part is done by actual(), only comma's and
 		other syntactic trivialities are checked here.
 	*/
+	register struct args *args = repl->r_args;
 	register int nps = idf->id_macro->mc_nps;
 	register int argcnt;
 	register int ch;
@@ -169,12 +218,12 @@ getactuals(args, idf)
 	args->a_rawvec[0] = args->a_rawptr = &args->a_rawbuf[0];
 	if ((ch = GetChar()) != ')') {
 		PushBack();
-		while ((ch = actual(args, idf)) != ')' ) {
+		while ((ch = actual(repl)) != ')' ) {
 			if (ch != ',') {
 				lexerror("illegal macro call");
 				return;
 			}
-			stash(args, '\0');
+			stash(repl, '\0', 1);
 			++argcnt;
 			args->a_expvec[argcnt] = args->a_expptr;
 			args->a_rawvec[argcnt] = args->a_rawptr;
@@ -183,30 +232,73 @@ getactuals(args, idf)
 			if (argcnt >= NPARAMS)
 				fatal("argument vector overflow");
 		}
-		stash(args, '\0');
+		stash(repl, '\0', 1);
 		++argcnt;
 	}
 	if (argcnt < nps)
 		lexerror("too few macro arguments");
-	if (argcnt > nps)
+	else if (argcnt > nps)
 		lexerror("too many macro arguments");
 }
 
+saveraw(repl)
+struct repl *repl;
+{
+	register struct repl *nrepl = ReplaceList;
+	register struct args *ap = nrepl->r_args;
+	struct args *args = repl->r_args;
+	register char *p;
+
+	/* stash identifier name */
+	for (p = nrepl->r_idf->id_text; *p != '\0'; p++)
+		*args->a_rawptr++ = *p;
+
+	/*	The following code deals with expanded function
+		like macro calls. It makes the following code
+		work:
+
+			#define def(a,b)	x(a,b)
+			#define	glue(a,b)	a ## b
+
+			glue(abc,def(a,b))
+			
+		Results in:
+
+			abcdef(a,b);
+	*/
+	if (ap->a_rawvec[0]) {
+		/* stash arguments */
+		register int i;
+
+		*args->a_rawptr++ = '(';
+		for (i = 0; ap->a_rawvec[i] != (char *)0; i++) {
+			for (p = ap->a_rawvec[i]; *p != '\0'; p++)
+				*args->a_rawptr++ = *p;
+			*args->a_rawptr++ = ',';
+		}
+		*(args->a_rawptr-1) = ')';	/* delete last ',' */
+	}
+}
+
 int
-actual(args, idf)
-	register struct args *args;
-	register struct idf *idf;
+actual(repl)
+	struct repl *repl;
 {
 	/*	This routine deals with the scanning of an actual parameter.
-		It keeps in account the openning and clossing brackets,
+		It keeps in account the opening and closing brackets,
 		preprocessor numbers, strings and character constants.
 	*/
 	register int ch;
-	register int level = 0;
+	register int level = 0, nostashraw = 0;
 
 	while (1) {
 		ch = GetChar();
 
+		if (Unstacked) {
+			nostashraw -= Unstacked;
+			if (nostashraw < 0) nostashraw = 0;
+			EnableMacros();
+		}
 		if (class(ch) == STIDF || class(ch) == STELL) {
 			/*	Scan a preprocessor identifier token. If the
 				token is a macro, it is expanded first.
@@ -217,7 +309,12 @@ actual(args, idf)
 			register int pos = -1;
 			register int hash;
 			extern int idfsize;
-			int size;
+			int NoExpandMacro;
+
+			if (ch == NOEXPM) {
+				NoExpandMacro= 1;
+				ch = GetChar();
+			} else NoExpandMacro = 0;
 
 			hash = STARTHASH();
 			do {
@@ -235,47 +332,62 @@ actual(args, idf)
 				replacement list, it's expanded.
 			*/
 			idef = idf_hashed(buf, p - buf, hash);
-			if (idef->id_macro)	/* expand macro identifier */
-				expand_actual(args, idef, idf);
-			else
+			if (NoExpandMacro || !replace(idef)) {
+				if ((idef->id_macro
+				    && (idef->id_macro->mc_flag & NOREPLACE))
+				    || NoExpandMacro)
+					stash(repl, NOEXPM, !nostashraw);
 				for (p = buf; *p != '\0'; p++)
-					stash(args, *p);
-		} else if (class(ch) == STNUM || class(ch) == '.') {
-			/*	preprocessor number token. No this is no joke,
-				the commitee decided (in all it's wisdom) that
-				a preprocessing number has the following regular
-				expression:
-					[0-9"."]{[0-9"."a-zA-Z_]|{[Ee][+-]}}*
+					stash(repl, *p, !nostashraw);
+			} else {
+				if (!nostashraw) saveraw(repl);
+				nostashraw++;
+			}
+		} else if (class(ch) == STNUM) {
+			/*	a preprocessing number has the following
+				regular expression:
+				    [0-9|"."[0-9]]{[0-9"."a-zA-Z_]|{[Ee][+-]}}*
 			*/
-			do {
-				stash(args, ch);
+			stash(repl, ch, !nostashraw);
+			if (ch == '.') {
+				ch = GetChar();
+				if (class(ch) != STNUM) {
+					UnGetChar();
+					continue;
+				}
+				else stash(repl, ch, !nostashraw);
+			}
+			ch = GetChar();
+			while (in_idf(ch) || ch == '.') {
+				stash(repl, ch, !nostashraw);
 				if ((ch = GetChar()) == 'e' || ch == 'E') {
+					stash(repl, ch, !nostashraw);
 					ch = GetChar();
 					if (ch == '+' || ch == '-') {
-						stash(args, ch);
+						stash(repl, ch, !nostashraw);
 						ch = GetChar();
 					}
 				}
-			} while (class(ch) == STNUM || class(ch) == STIDF ||
-				 class(ch) == STELL || ch == '.');
+			}
 			UnGetChar();
 		} else if (ch == '(' || ch == '[' || ch == '{') {
 			/* a comma may occur within these constructions */
 			level++;
-			stash(args, ch);
+			stash(repl, ch, !nostashraw);
 		} else if (ch == ')' || ch == ']' || ch == '}') {
 			level--;
 			/* clossing parenthesis of macro call */
 			if (ch == ')' && level < 0)
 				return ')';
-			stash(args, ch);
+			stash(repl, ch, !nostashraw);
 		} else if (ch == ',') {
 			if (level <= 0) { /* comma separator for next argument */
 				if (level)
 					lexerror("unbalanced parenthesis");
-				return ',';
+				if (!nostashraw)
+					return ',';	/* ??? */
 			}
-			stash(args, ch);
+			stash(repl, ch, !nostashraw);
 		} else if (ch == '\n') {
 			/* newlines are accepted as white spaces */
 			LineNumber++;
@@ -294,16 +406,20 @@ actual(args, idf)
 			*/
 			if (ch == '#')
 				domacro();
+			else if (ch == EOI) {
+				lexerror("unterminated macro call");
+				return ')';
+			}
 			UnGetChar();
-			stash(args, ' ');
+			stash(repl, ' ', !nostashraw);
 		} else if (ch == '/') {
 			/* comments are treated as one white space token */
-			if ((ch = GetChar()) == '*') {
+			if ((ch = GetChar()) == '*' && !InputLevel) {
 				skipcomment();
-				stash(args, ' ');
+				stash(repl, ' ', !nostashraw);
 			} else {
 				UnGetChar();
-				stash(args, '/');
+				stash(repl, '/', !nostashraw);
 			}
 		} else if (ch == '\'' || ch == '"') {
 			/*	Strings are considered as ONE token, thus no
@@ -311,129 +427,28 @@ actual(args, idf)
 			*/
 			register int match = ch;
 
-			stash(args, ch);
+			stash(repl, ch, !nostashraw);
 			while ((ch = GetChar()) != EOI) {
 				if (ch == match)
 					break;
 				if (ch == '\\') {
-					stash(args, ch);
+					stash(repl, ch, !nostashraw);
 					ch = GetChar();
 				} else if (ch == '\n') {
 					lexerror("newline in string");
 					LineNumber++;
-					stash(args, match);
+					stash(repl, match, !nostashraw);
 					break;
 				}
-				stash(args, ch);
+				stash(repl, ch, !nostashraw);
 			}
 			if (ch != match) {
 				lexerror("unterminated macro call");
 				return ')';
 			}
-			stash(args, ch);
+			stash(repl, ch, !nostashraw);
 		} else
-			stash(args, ch);
-	}
-}
-
-expand_actual(args, idef, idf)
-	register struct args *args;
-	register struct idf *idf, *idef;
-{
-	struct repl *nrepl = new_repl();
-	register char *p;
-
-	nrepl->r_args = new_args();
-	nrepl->r_ptr = nrepl->r_text;
-	if (expand_macro(nrepl, idef, idf)) {
-		register struct args *ap = nrepl->r_args;
-
-		for (p = nrepl->r_text; p < nrepl->r_ptr; p++)
-			*args->a_expptr++ = *p;
-
-		/* stash idef name */
-		for (p = idef->id_text; *p != '\0'; p++)
-			*args->a_rawptr++ = *p;
-
-		/*	The following code deals with expanded function
-			like macro calls. It makes the following code
-			work:
-
-				#define def(a,b)	x(a,b)
-				#define	glue(a,b)	a ## b
-
-				glue(abc,def(a,b))
-				
-			Results in:
-
-				abcdef(a,b);
-		*/
-		if (ap->a_rawvec[0]) {
-			/* stash arguments */
-			register int i;
-
-			*args->a_rawptr++ = '(';
-			for (i = 0; ap->a_rawvec[i] != (char *)0; i++) {
-				for (p = ap->a_rawvec[i]; *p != '\0'; p++)
-					*args->a_rawptr++ = *p;
-				*args->a_rawptr++ = ',';
-			}
-			*--args->a_rawptr = ')';
-			++args->a_rawptr;	/* one too far */
-		}
-	} else	/* something happened during the macro expansion */
-		for (p = idef->id_text; *p != '\0'; p++)
-			stash(args, *p);
-	free_args(nrepl->r_args);
-	free_repl(nrepl);
-}
-
-maccount(repl, idf)
-	register struct repl *repl;
-	register struct idf *idf;
-{
-	/*	To prevent re-expansion of already expanded macro's we count
-		the occurrences of the currently expanded macro name in the
-		replacement list. This is mainly to prevent recursion as in:
-
-			#define	f(a)	f(2 * (a))
-			f(y+1);
-
-		This results in:
-
-			f(2*(y+1));
-
-		When reading the inserted text we decrement the count of a
-		macro name until it's zero. Then we start expanding it again.
-	*/
-	register char *text = repl->r_text;
-	register int pos = -1;
-	extern int idfsize;
-
-	while (*text != '\0') {
-		if (*text == '\'' || *text == '"') {
-			register int delim;
-
-			for (delim = *text++; *text != delim; text++)
-				if (*text == '\\')
-					text++;
-			text++;
-		} else
-		if (class(*text) == STIDF || class(*text) == STELL) {
-			char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
-			register char *p = buf;
-
-			do {
-				if (++pos < idfsize)
-					*p++ = *text;
-				text++;
-			} while (in_idf(*text));
-			*p++ = '\0';
-
-			if (!strcmp(idf->id_text, buf))
-				idf->id_macro->mc_count++;
-		} else
-			text++;
+			stash(repl, ch, !nostashraw);
 	}
 }
 
@@ -459,7 +474,7 @@ macro_func(idef)
 		break;
 	case 'L':			/* __LINE__	*/
 		mac->mc_text = long2str((long)LineNumber, 10);
-		mac->mc_length = 1;
+		mac->mc_length = strlen(mac->mc_text);
 		break;
 	default:
 		crash("(macro_func)");
@@ -499,98 +514,124 @@ macro2buffer(repl, idf, args)
 		smarter should be done (but even a DFA is O(|s|)).
 	*/
 	register char *ptr = idf->id_macro->mc_text;
+	register char *tmpptr;
+	int err = 0;
 	char *stringify();
 
 	while (*ptr) {
-		ASSERT(repl->r_ptr < &(repl->r_text[LAPBUF]));
-		if (*ptr == '\'' || *ptr == '"') {
-			register int delim = *ptr;
+	    ASSERT(repl->r_ptr < &(repl->r_text[LAPBUF]));
+	    if (*ptr == '\'' || *ptr == '"') {
+		register int delim = *ptr;
 
-			do {
-				*repl->r_ptr++ = *ptr;
-				if (*ptr == '\\')
-					*repl->r_ptr++ = *++ptr;
-				if (*ptr == '\0') {
-					lexerror("unterminated string");
-					*repl->r_ptr = '\0';
-					return;
-				}
-				ptr++;
-			} while (*ptr != delim || *ptr == '\0');
-			*repl->r_ptr++ = *ptr++;
-		} else if (*ptr == '#') {
-			if (*++ptr == '#') {
-				/* ## - paste operator */
-				ptr++;
+		do {
+		    *repl->r_ptr++ = *ptr;
+		    if (*ptr == '\\')
+			    *repl->r_ptr++ = *++ptr;
+		    if (*ptr == '\0') {
+			    lexerror("unterminated string");
+			    *repl->r_ptr = '\0';
+			    return;
+		    }
+		    ptr++;
+		} while (*ptr != delim || *ptr == '\0');
+		*repl->r_ptr++ = *ptr++;
+	    } else if (*ptr == '#') {
+		if (*++ptr == '#') {
+			/* ## - paste operator */
+		    ptr++;
 
-				/* trim the actual replacement list */
-				--repl->r_ptr;
-				while (is_wsp(*repl->r_ptr) &&
-				       repl->r_ptr >= repl->r_text)
-					--repl->r_ptr;
+			/* trim the actual replacement list */
+		    --repl->r_ptr;
+		    while (is_wsp(*repl->r_ptr)
+				&& repl->r_ptr >= repl->r_text)
+			    --repl->r_ptr;
 
-				/*	## occurred at the beginning of the
-					replacement list.
-				*/
-				if (repl->r_ptr == repl->r_text)
-					goto paste;
-				++repl->r_ptr;
+		    /*	## occurred at the beginning of the
+			    replacement list.
+		    */
+		    if (repl->r_ptr == repl->r_text
+				&& is_wsp(*repl->r_ptr)) {
+			    err = 1;
+			    break;
+		    }
 
-				/* skip space in macro replacement list */
-				while ((*ptr & FORMALP) == 0 && is_wsp(*ptr))
-					ptr++;
+		    while(*repl->r_ptr == TOKSEP
+				&& repl->r_ptr >= repl->r_text)
+			    --repl->r_ptr;
 
-				/*	## occurred at the end of the
-					replacement list.
-				*/
-				if (*ptr & FORMALP) {
-					register int n = *ptr++ & 0177;
-					register char *p;
-					
-					ASSERT(n != 0);
-					p = args->a_rawvec[n-1];
-					while (is_wsp(*p))
-						p++;
-					while (*p)
-						*repl->r_ptr++ = *p++;
-				} else if (*ptr == '\0')
-					goto paste;
-			} else
-				ptr = stringify(repl, ptr, args);
-		} else if (*ptr & FORMALP) {
-			/* insert actual parameter */
+		    tmpptr = repl->r_ptr;
+		    ++repl->r_ptr;
+
+		    /* skip space in macro replacement list */
+		    while ((*ptr & FORMALP) == 0 && is_wsp(*ptr))
+			    ptr++;
+
+		    /*	## occurred at the end of the replacement list.
+		    */
+		    if (*ptr & FORMALP) {
 			register int n = *ptr++ & 0177;
-			register char *p, *q;
-			
-			ASSERT(n != 0);
+			register char *p;
 
-			/*	This is VERY dirty, we look ahead for the
-				## operater. If it's found we use the raw
-				argument buffer instead of the expanded
-				one.
-			*/
-			for (p = ptr; (*p & FORMALP) == 0 && is_wsp(*p); p++)
-				/* VOID */;
-			if (*p == '#' && p[1] == '#')
-				q = args->a_rawvec[n-1];
-			else
-				q = args->a_expvec[n-1];
-
-			while (*q)
-				*repl->r_ptr++ = *q++;
-
-			*repl->r_ptr++ = ' ';
+			ASSERT(n > 0);
+			p = args->a_rawvec[n-1];
+			if (p) {	/* else macro argument missing */
+			    while (is_wsp(*p))
+				p++;
+			    if (*p == NOEXPM) p++;
+			    while (*p)
+				*repl->r_ptr++ = *p++;
+			}
+			if (in_idf(*tmpptr + 1)) {
+				while (in_idf(*tmpptr)
+					    && tmpptr >= repl->r_text)
+					tmpptr--;
+				if (*tmpptr == NOEXPM) *tmpptr = TOKSEP;
+			}
+		    } else if (*ptr == '\0') {
+			    err = 1;
+			    break;
+		    } else {
+			    if (in_idf(*ptr)) {
+				while (in_idf(*tmpptr)
+					    && tmpptr >= repl->r_text)
+					tmpptr--;
+				if (*tmpptr == NOEXPM) *tmpptr = TOKSEP;
+			    }
+		    }
 		} else
-			*repl->r_ptr++ = *ptr++;
+		    ptr = stringify(repl, ptr, args);
+	    } else if (*ptr & FORMALP) {
+		/* insert actual parameter */
+		register int n = *ptr++ & 0177;
+		register char *p, *q;
+			
+		ASSERT(n > 0);
+
+		/*	This is VERY dirty, we look ahead for the
+			## operater. If it's found we use the raw
+			argument buffer instead of the expanded
+			one.
+		*/
+		for (p = ptr; (*p & FORMALP) == 0 && is_wsp(*p); p++)
+				/* EMPTY */;
+		if (*p == '#' && p[1] == '#')
+			q = args->a_rawvec[n-1];
+		else
+			q = args->a_expvec[n-1];
+
+		p = repl->r_ptr;
+		if (q)			/* else macro argument missing */
+		    while (*q)
+			*repl->r_ptr++ = *q++;
+
+		if (*repl->r_ptr != TOKSEP)
+			*repl->r_ptr++ = TOKSEP;
+	    } else
+		*repl->r_ptr++ = *ptr++;
 	}
 	*repl->r_ptr = '\0';
-	return;
-
-paste:
-	/*	Sorry, i know this looks a bit like
-		a unix device driver code.
-	*/
-	lexerror("illegal use of the ## operator");
+	if (err)
+		lexerror("illegal use of the ## operator");
 	return;
 }
 
@@ -625,7 +666,7 @@ stringify(repl, ptr, args)
 		register char *p;
 		
 		ASSERT(n != 0);
-		p = args->a_expvec[n-1];
+		p = args->a_rawvec[n-1];
 		*repl->r_ptr++ = '"';
 		while (*p) {
 			if (is_wsp(*p)) {
@@ -645,7 +686,8 @@ stringify(repl, ptr, args)
 			backslash = *p == '\\';
 			if (*p == '"' || (delim && *p == '\\'))
 				*repl->r_ptr++ = '\\';
-			*repl->r_ptr++ = *p++;
+			if (*p == TOKSEP || *p == NOEXPM) p++;
+			else *repl->r_ptr++ = *p++;
 		}
 
 		/* trim spaces in the replacement list */
@@ -658,20 +700,23 @@ stringify(repl, ptr, args)
 	return ptr;
 }
 
-stash(args, ch)
-	register struct args *args;
+stash(repl, ch, stashraw)
+	struct repl *repl;
 	register int ch;
+	int stashraw;
 {
 	/*	Stash characters into the macro expansion buffer.
 	*/
+	register struct args *args = repl->r_args;
+
 	if (args->a_expptr >= &(args->a_expbuf[ARGBUF]))
 		fatal("macro argument buffer overflow");
 	*args->a_expptr++ = ch;
 
-	if (args->a_rawptr >= &(args->a_rawbuf[ARGBUF]))
-		fatal("raw macro argument buffer overflow");
-	*args->a_rawptr++ = ch;
-
-			
+	if (stashraw) {
+		if (args->a_rawptr >= &(args->a_rawbuf[ARGBUF]))
+			fatal("raw macro argument buffer overflow");
+		*args->a_rawptr++ = ch;
+	}
 }
 #endif NOPP

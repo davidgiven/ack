@@ -34,20 +34,28 @@ char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 int	nestlevel = -1;
 
 struct idf *
-GetIdentifier()
+GetIdentifier(skiponerr)
+	int skiponerr;		/* skip the rest of the line on error */
 {
 	/*	returns a pointer to the descriptor of the identifier that is
-		read from the input stream. A null-pointer is returned if
-		the input does not contain an identifier.
+		read from the input stream. When the input doe not contain
+		an identifier, the rest of the line is skipped and a
+		null-pointer is returned.
 		The substitution of macros is disabled.
 	*/
+	int tmp = UnknownIdIsZero;
 	int tok;
 	struct token tk;
 
-	ReplaceMacros = 0;
+	UnknownIdIsZero = ReplaceMacros = 0;
 	tok = GetToken(&tk);
 	ReplaceMacros = 1;
-	return tok == IDENTIFIER ? tk.tk_idf : (struct idf *)0;
+	UnknownIdIsZero = tmp;
+	if (tok != IDENTIFIER) {
+		if (skiponerr && tok != EOI) SkipToNewLine(0);
+		return (struct idf *)0;
+	}
+	return tk.tk_idf;
 }
 
 /*	domacro() is the control line interpreter. The '#' has already
@@ -61,9 +69,13 @@ GetIdentifier()
 domacro()
 {
 	struct token tk;	/* the token itself			*/
+	int toknum;
 
 	EoiForNewline = 1;
-	switch(GetToken(&tk)) {		/* select control line action	*/
+	ReplaceMacros = 0;
+	toknum = GetToken(&tk);
+	ReplaceMacros = 1;
+	switch(toknum) {		/* select control line action	*/
 	case IDENTIFIER:		/* is it a macro keyword?	*/
 		switch (tk.tk_idf->id_resmac) {
 		case K_DEFINE:				/* "define"	*/
@@ -95,7 +107,7 @@ domacro()
 				the arguments.
 			*/
 			if (GetToken(&tk) != INTEGER) {
-				lexerror("#line without linenumber");
+				error("bad #line syntax");
 				SkipToNewLine(0);
 			}
 			else
@@ -128,8 +140,8 @@ domacro()
 	EoiForNewline = 0;
 }
 
-
-skip_block()
+skip_block(to_endif)
+int to_endif;
 {
 	/*	skip_block() skips the input from
 		1)	a false #if, #ifdef, #ifndef or #elif until the
@@ -142,6 +154,7 @@ skip_block()
 	register int ch;
 	register int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
+	int toknum;
 
 	NoUnstack++;
 	for (;;) {
@@ -153,10 +166,14 @@ skip_block()
 				NoUnstack--;
 				return;
 			}
+			UnGetChar();
 			SkipToNewLine(0);
 			continue;
 		}
-		if (GetToken(&tk) != IDENTIFIER) {
+		ReplaceMacros = 0;
+		toknum = GetToken(&tk);
+		ReplaceMacros = 1;
+		if (toknum != IDENTIFIER) {
 			SkipToNewLine(0);
 			continue;
 		}
@@ -166,13 +183,19 @@ skip_block()
 			on the same level.
 		*/
 		switch(tk.tk_idf->id_resmac) {
+		default:
+			SkipToNewLine(0);
+			break;
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
 			push_if();
+			SkipToNewLine(0);
 			break;
 		case K_ELIF:
-			if (nestlevel == skiplevel) {
+			if (ifstack[nestlevel])
+				lexerror("#elif after #else");
+			if (!to_endif && nestlevel == skiplevel) {
 				nestlevel--;
 				push_if();
 				if (ifexpr()) {
@@ -180,15 +203,19 @@ skip_block()
 					return;
 				}
 			}
+			else SkipToNewLine(0);	/* otherwise done in ifexpr() */
 			break;
 		case K_ELSE:
+			if (ifstack[nestlevel])
+				lexerror("#else after #else");
 			++(ifstack[nestlevel]);
-			if (nestlevel == skiplevel) {
+			if (!to_endif && nestlevel == skiplevel) {
 				if (SkipToNewLine(1))
-					strict("garbage following #endif");
+					strict("garbage following #else");
 				NoUnstack--;
 				return;
 			}
+			else SkipToNewLine(0);
 			break;
 		case K_ENDIF:
 			ASSERT(nestlevel > nestlow);
@@ -199,6 +226,7 @@ skip_block()
 				NoUnstack--;
 				return;
 			}
+			else SkipToNewLine(0);
 			nestlevel--;
 			break;
 		}
@@ -241,7 +269,7 @@ do_include()
 	if (((tok = GetToken(&tk)) == FILESPECIFIER) || tok == STRING)
 		filenm = tk.tk_bts;
 	else {
-		lexerror("bad include syntax");
+		error("bad include syntax");
 		filenm = (char *)0;
 	}
 	AccFileSpecifier = 0;
@@ -249,7 +277,7 @@ do_include()
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
-			fatal("cannot open include file \"%s\"", filenm);
+			error("cannot open include file \"%s\"", filenm);
 		}
 		else {
 			WorkingDir = getwdir(result);
@@ -275,9 +303,8 @@ do_define()
 	char *get_text();
 
 	/* read the #defined macro's name	*/
-	if (!(id = GetIdentifier())) {
-		lexerror("#define: illegal macro name");
-		SkipToNewLine(0);
+	if (!(id = GetIdentifier(1))) {
+		lexerror("illegal #define line");
 		return;
 	}
 	/*	there is a formal parameter list if the identifier is
@@ -297,7 +324,8 @@ do_define()
 	if (class(ch) == STNL) {
 		/*	Treat `#define something' as `#define something ""'
 		*/
-		repl_text = "";
+		repl_text = Malloc(1);
+		*repl_text = '\0';
 		length = 0;
 	}
 	else {
@@ -318,35 +346,38 @@ push_if()
 
 do_elif()
 {
-	if (nestlevel <= nestlow || (ifstack[nestlevel])) {
+	if (nestlevel <= nestlow) {
 		lexerror("#elif without corresponding #if");
 		SkipToNewLine(0);
 	}
-	else { /* restart at this level as if a #if is detected.  */
+	else {		/* restart at this level as if a #if is detected.  */
+		if (ifstack[nestlevel]) {
+			lexerror("#elif after #else");
+			SkipToNewLine(0);
+		}
 		nestlevel--;
 		push_if();
-		skip_block();
+		skip_block(1);
 	}
 }
 
 do_else()
 {
-	struct token tok;
-
 	if (SkipToNewLine(1))
 		strict("garbage following #else");
-	if (nestlevel <= nestlow || (ifstack[nestlevel]))
+	if (nestlevel <= nestlow)
 		lexerror("#else without corresponding #if");
 	else {	/* mark this level as else-d */
+		if (ifstack[nestlevel]) {
+			lexerror("#else after #else");
+		}
 		++(ifstack[nestlevel]);
-		skip_block();
+		skip_block(1);
 	}
 }
 
 do_endif()
 {
-	struct token tok;
-
 	if (SkipToNewLine(1))
 		strict("garbage following #endif");
 	if (nestlevel <= nestlow)	{
@@ -359,7 +390,7 @@ do_if()
 {
 	push_if();
 	if (!ifexpr())	/* a false #if/#elif expression */
-		skip_block();
+		skip_block(0);
 }
 
 do_ifdef(how)
@@ -369,15 +400,15 @@ do_ifdef(how)
 	/*	how == 1 : ifdef; how == 0 : ifndef
 	*/
 	push_if();
-	if (!(id = GetIdentifier()))
+	if (!(id = GetIdentifier(1)))
 		lexerror("illegal #ifdef construction");
 
 	/* The next test is a shorthand for:
 		(how && !id->id_macro) || (!how && id->id_macro)
 	*/
 	if (how ^ (id && id->id_macro != 0))
-		skip_block();
-	else
+		skip_block(0);
+	else if (id)
 		SkipToNewLine(0);
 }
 
@@ -386,15 +417,20 @@ do_undef()
 	register struct idf *id;
 
 	/* Forget a macro definition.	*/
-	if (id = GetIdentifier()) {
+	if (id = GetIdentifier(1)) {
 		if (id->id_macro) { /* forget the macro */
-			free_macro(id->id_macro);
-			id->id_macro = (struct macro *) 0;
+			if (id->id_macro->mc_flag & NOUNDEF) {
+				lexerror("it is not allowed to undef %s", id->id_text);
+			} else {
+				free(id->id_text);
+				free_macro(id->id_macro);
+				id->id_macro = (struct macro *) 0;
+			}
 		} /* else: don't complain */
+		SkipToNewLine(0);
 	}
 	else
 		lexerror("illegal #undef construction");
-	SkipToNewLine(0);
 }
 
 do_error()
@@ -488,15 +524,17 @@ macro_def(id, text, nformals, length, flags)
 	/*	macro_def() puts the contents and information of a macro
 		definition into a structure and stores it into the symbol
 		table entry belonging to the name of the macro.
-		A warning is given if the definition overwrites another.
+		An error is given if there was already a definition
 	*/
 	if (newdef) {		/* is there a redefinition?	*/
-		if (macroeq(newdef->mc_text, text))
-			return;
-		lexwarning("redefine \"%s\"", id->id_text);
+		if (newdef->mc_flag & NOUNDEF) {
+			lexerror("it is not allowed to redefine %s", id->id_text);
+		} else if (!macroeq(newdef->mc_text, text))
+			lexerror("illegal redefine of \"%s\"", id->id_text);
+		free(text);
+		return;
 	}
-	else
-		id->id_macro = newdef = new_macro();
+	id->id_macro = newdef = new_macro();
 	newdef->mc_text = text;		/* replacement text	*/
 	newdef->mc_nps  = nformals;	/* nr of formals	*/
 	newdef->mc_length = length;	/* length of repl. text	*/
@@ -553,14 +591,14 @@ get_text(formals, length)
 			register int delim = c;
 
 			do {
-				/* being careful, as ever */
-				if (pos+3 >= text_size)
-					text = Srealloc(text,
-							text_size += RTEXTSIZE);
-				text[pos++] = c;
-				if (c == '\\')
-					text[pos++] = GetChar();
-				c = GetChar();
+			    /* being careful, as ever */
+			    if (pos+3 >= text_size)
+				text = Srealloc(text,
+					(unsigned) (text_size += RTEXTSIZE));
+			    text[pos++] = c;
+			    if (c == '\\')
+				    text[pos++] = GetChar();
+			    c = GetChar();
 			} while (c != delim && c != EOI && class(c) != STNL);
 			text[pos++] = c;
 			c = GetChar();
@@ -569,7 +607,8 @@ get_text(formals, length)
 		if (c == '/') {
 			c = GetChar();
 			if (pos+1 >= text_size)
-				text = Srealloc(text, text_size += RTEXTSIZE);
+				text = Srealloc(text,
+					(unsigned) (text_size += RTEXTSIZE));
 			if (c == '*') {
 				skipcomment();
 				text[pos++] = ' ';
@@ -593,25 +632,27 @@ get_text(formals, length)
 			} while (in_idf(c));
 			id_buf[--id_size] = '\0';
 			if (n = find_name(id_buf, formals)) {
-				/* construct the formal parameter mark	*/
-				if (pos+1 >= text_size)
-					text = Srealloc(text,
-						text_size += RTEXTSIZE);
-				text[pos++] = FORMALP | (char) n;
+			    /* construct the formal parameter mark	*/
+			    if (pos+1 >= text_size)
+				text = Srealloc(text,
+					(unsigned) (text_size += RTEXTSIZE));
+			    text[pos++] = FORMALP | (char) n;
 			}
 			else {
-				register char *ptr = &id_buf[0];
+			    register char *ptr = &id_buf[0];
 
-				while (pos + id_size >= text_size)
-					text = Srealloc(text,
-						text_size += RTEXTSIZE);
-				while (text[pos++] = *ptr++) ;
-				pos--;
+			    while (pos + id_size >= text_size)
+				text = Srealloc(text,
+					(unsigned) (text_size += RTEXTSIZE));
+			    while (text[pos++] = *ptr++)
+				/* EMPTY */ ;
+			    pos--;
 			}
 		}
 		else {
 			if (pos+1 >= text_size)
-				text = Srealloc(text, text_size += RTEXTSIZE);
+				text = Srealloc(text,
+					(unsigned) (text_size += RTEXTSIZE));
 			text[pos++] = c;
 			c = GetChar();
 		}

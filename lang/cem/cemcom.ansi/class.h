@@ -13,7 +13,7 @@
 #define	class(ch)	(tkclass[ch])
 
 /*	Being the start of a token is, fortunately, a mutual exclusive
-	property, so, although there are less than 16 classes they can be
+	property, so, as there are less than 16 classes they can be
 	packed in 4 bits.
 */
 
@@ -28,6 +28,10 @@
 #define	STSTR	8	/* the starter of a string			*/
 #define	STNUM	9	/* the starter of a numeric constant		*/
 #define	STEOI	10	/* End-Of-Information mark			*/
+#define	STMSPEC	11	/* special class for token expansion		*/
+
+#define	NOEXPM	'\003'	/* don't expand the next macro identifier	*/
+#define	TOKSEP	'\004'	/* the token separator				*/
 
 /*	But occurring inside a token is not, so we need 1 bit for each
 	class.  This is implemented as a collection of tables to speed up

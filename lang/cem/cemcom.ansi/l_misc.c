@@ -11,6 +11,7 @@
 
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
+#include	<flt_arith.h>
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -22,7 +23,6 @@
 #include	"stack.h"
 #include	"type.h"
 #include	"level.h"
-#include	"nofloat.h"
 #include	"l_state.h"
 
 extern char *symbol2str();
@@ -140,7 +140,8 @@ lint_new_oper(expr)
 		break;
 
 	case '~':
-		if (r_fund == ENUM || r_fund == FLOAT || r_fund == DOUBLE)
+		if (r_fund == ENUM || r_fund == FLOAT || r_fund == DOUBLE
+					    /* ??? ||  r_fund == LNGDBL */ )
 			warning("~ on %s", symbol2str(r_fund));
 		break;
 
@@ -285,6 +286,7 @@ numsize(fund)
 	case LONG:	return 4;
 	case FLOAT:	return 5;
 	case DOUBLE:	return 6;
+	case LNGDBL:	return 7;
 	default:	return 0;
 	}
 }
@@ -300,8 +302,8 @@ lint_ptr_conv(from, to)
 {
 /* X -> X ok			-- this includes struct -> struct, of any size
  * X -> CHAR ok
- * DOUBLE -> X ok
- * FLOAT -> LONG -> INT -> SHORT  ok
+ * LNGDBL -> X ok
+ * DOUBLE -> FLOAT -> LONG -> INT -> SHORT  ok
  */
 	if (from == to)
 		return;
@@ -309,10 +311,18 @@ lint_ptr_conv(from, to)
 	if (to == CHAR)
 		return;
 
-	if (from == DOUBLE)
+	if (from == LNGDBL)
 		return;
 
 	switch (from) {
+	case DOUBLE:
+		switch(to) {
+		case FLOAT:
+		case INT:
+		case SHORT:
+			return;
+		}
+		break;
 	case FLOAT:
 		switch (to) {
 		case LONG:

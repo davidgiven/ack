@@ -7,7 +7,6 @@
 
 #include	"lint.h"
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"idfsize.h"
 #include	"numsize.h"
 #include	"debug.h"
@@ -32,12 +31,18 @@ int ReplaceMacros = 1;		/* replacing macros			*/
 int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 int Unstacked = 0;		/* an unstack is done 			*/
+extern int InputLevel;
 #endif
 int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int File_Inserted = 0;		/* a file has just been inserted	*/
 int LexSave = 0;		/* last character read by GetChar	*/
 #define MAX_LL_DEPTH	2
+
+#define	FLG_ESEEN	0x01	/* possibly a floating point number */
+#define	FLG_DOTSEEN	0x02	/* certainly a floating point number */
+extern arith full_mask[];
+extern arith max_int;
 
 static struct token LexStack[MAX_LL_DEPTH];
 static LexSP = 0;
@@ -49,7 +54,7 @@ static LexSP = 0;
 */
 PushLex()
 {
-	ASSERT(LexSP < 2);
+	ASSERT(LexSP < MAX_LL_DEPTH);
 	ASSERT(ASIDE == 0);	/* ASIDE = 0;	*/
 	GetToken(&ahead);
 	LexStack[LexSP++] = dot;
@@ -95,12 +100,11 @@ LLlex()
 char	*string_token();
 arith	char_constant();
 
-
 int
 GetToken(ptok)
 	register struct token *ptok;
 {
-	/*	LexToken() is the actual token recognizer. It calls the
+	/*	GetToken() is the actual token recognizer. It calls the
 		control line interpreter if it encounters a "\n{w}*#"
 		combination. Macro replacement is also performed if it is
 		needed.
@@ -117,7 +121,9 @@ again:	/* rescan the input after an error or replacement	*/
 	ch = GetChar();
 go_on:	/* rescan, the following character has been read	*/
 	if ((ch & 0200) && ch != EOI) /* stop on non-ascii character */
+	{
 		fatal("non-ascii '\\%03o' read", ch & 0377);
+	}
 	/* keep track of the place of the token in the file	*/
 	ptok->tk_file = FileName;
 	ptok->tk_line = LineNumber;
@@ -152,23 +158,13 @@ firstline:
 	case STSKIP:		/* just skip the skip characters	*/
 		goto again;
 	case STGARB:		/* garbage character			*/
+garbage:
 		if (040 < ch && ch < 0177)
 			lexerror("garbage char %c", ch);
 		else
 			lexerror("garbage char \\%03o", ch);
 		goto again;
 	case STSIMP:	/* a simple character, no part of compound token*/
-		if (ch == '/') { /* probably the start of comment	*/
-			ch = GetChar();
-			if (ch == '*') { /* start of comment */
-				skipcomment();
-				goto again;
-			}
-			else {
-				UnGetChar();
-				ch = '/';	/* restore ch	*/
-			}
-		}
 		return ptok->tk_symb = ch;
 	case STCOMP:	/* maybe the start of a compound token		*/
 		nch = GetChar();		/* character lookahead	*/
@@ -181,18 +177,24 @@ firstline:
 		case '&':
 			if (nch == '&')
 				return ptok->tk_symb = AND;
+			else if (nch == '=')
+				return ptok->tk_symb = ANDAB;
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '+':
 			if (nch == '+')
 				return ptok->tk_symb = PLUSPLUS;
+			else if (nch == '=')
+				return ptok->tk_symb = PLUSAB;
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '-':
 			if (nch == '-')
 				return ptok->tk_symb = MINMIN;
-			if (nch == '>')
+			else if (nch == '>')
 				return ptok->tk_symb = ARROW;
+			else if (nch == '=')
+				return ptok->tk_symb = MINAB;
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '<':
@@ -202,8 +204,12 @@ firstline:
 							'>', &(ptok->tk_len));
 				return ptok->tk_symb = FILESPECIFIER;
 			}
-			if (nch == '<')
+			if (nch == '<') {
+				if ((nch = GetChar()) == '=')
+					return ptok->tk_symb = LEFTAB;
+				UnGetChar();
 				return ptok->tk_symb = LEFT;
+			}
 			if (nch == '=')
 				return ptok->tk_symb = LESSEQ;
 			UnGetChar();
@@ -211,64 +217,53 @@ firstline:
 		case '=':
 			if (nch == '=')
 				return ptok->tk_symb = EQUAL;
-
- 			/*	The following piece of code tries to recognise
- 				old-fashioned assignment operators `=op'
-				Note however, that these are removed from the
-				ANSI C standard.
-			*/
- 			switch (nch) {
- 			case '+':
- 				ptok->tk_symb = PLUSAB;
-				goto warn;
- 			case '-':
- 				ptok->tk_symb = MINAB;
-				goto warn;
- 			case '*':
- 				ptok->tk_symb = TIMESAB;
-				goto warn;
- 			case '/':
- 				ptok->tk_symb = DIVAB;
-				goto warn;
- 			case '%':
- 				ptok->tk_symb = MODAB;
-				goto warn;
- 			case '>':
- 			case '<':
- 				GetChar(ch);
- 				if (ch != nch) {
- 					UnGetChar();
- 					lexerror("illegal combination '=%c'",
- 						nch);
- 				}
- 				ptok->tk_symb = nch == '<' ? LEFTAB : RIGHTAB;
-				goto warn;
- 			case '&':
- 				ptok->tk_symb = ANDAB;
-				goto warn;
- 			case '^':
- 				ptok->tk_symb = XORAB;
-				goto warn;
- 			case '|':
- 				ptok->tk_symb = ORAB;
-			warn:
-				warning("Old-fashioned assignment operator");
-				return ptok->tk_symb;
- 			}
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '>':
 			if (nch == '=')
 				return ptok->tk_symb = GREATEREQ;
-			if (nch == '>')
+			if (nch == '>') {
+				if ((nch = GetChar()) == '=')
+					return ptok->tk_symb = RIGHTAB;
+				UnGetChar();
 				return ptok->tk_symb = RIGHT;
+			}
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '|':
 			if (nch == '|')
 				return ptok->tk_symb = OR;
+			else if (nch == '=')
+				return ptok->tk_symb = ORAB;
 			UnGetChar();
 			return ptok->tk_symb = ch;
+		case '%':
+			if (nch == '=')
+				return ptok->tk_symb = MODAB;
+			UnGetChar();
+			return ptok->tk_symb = ch;
+		case '*':
+			if (nch == '=')
+				return ptok->tk_symb = TIMESAB;
+			UnGetChar();
+			return ptok->tk_symb = ch;
+		case '^':
+			if (nch == '=')
+				return ptok->tk_symb = XORAB;
+			UnGetChar();
+			return ptok->tk_symb = ch;
+		case '/':
+			if (nch == '*' && !InputLevel) {
+				skipcomment();
+				goto again;
+			}
+			else if (nch == '=')
+				return ptok->tk_symb = DIVAB;
+			UnGetChar();
+			return ptok->tk_symb = ch;
+		default:
+			crash("bad class for char 0%o", ch);
+			/* NOTREACHED */
 		}
 	case STCHAR:				/* character constant	*/
 		ptok->tk_ival = char_constant("character");
@@ -291,6 +286,7 @@ firstline:
 			return ptok->tk_symb = INTEGER;
 		}
 		UnGetChar();
+		/* fallthrough */
 	case STIDF:
 	{
 		register char *tg = &buf[0];
@@ -298,7 +294,15 @@ firstline:
 		register int hash;
 		register struct idf *idef;
 		extern int idfsize;		/* ??? */
+#ifndef	NOPP
+		int NoExpandNext = 0;
 
+		if (Unstacked) EnableMacros();	/* unstack macro's when allowed. */
+		if (ch == NOEXPM)  {
+			NoExpandNext = 1;
+			ch = GetChar();
+		}
+#endif
 		hash = STARTHASH();
 		do	{			/* read the identifier	*/
 			if (++pos < idfsize) {
@@ -316,12 +320,16 @@ firstline:
 		idef->id_file = ptok->tk_file;
 		idef->id_line = ptok->tk_line;
 #ifndef NOPP
-		if (idef->id_macro && ReplaceMacros) {
+		if (idef->id_macro && ReplaceMacros && !NoExpandNext) {
+#if 0
 			if (idef->id_macro->mc_count > 0)
 				idef->id_macro->mc_count--;
-			else if (replace(idef))
-				goto again;
+			else
+#endif	/* 0 */
+			if (replace(idef))
+					goto again;
 		}
+		NoExpandNext = 0;
 		if (UnknownIdIsZero && idef->id_reserved != SIZEOF) {
 			ptok->tk_ival = (arith)0;
 			ptok->tk_fund = INT;
@@ -338,171 +346,85 @@ firstline:
 	}
 	case STNUM:				/* a numeric constant	*/
 	{
-		register char *np = &buf[1];
-		register int base = 10;
-		register int vch;
-		register arith val = 0;
+		register int siz_left = NUMSIZE - 1;
+		register char *np = &buf[0];
+		int flags = 0;
+
+#define	store(ch)	if (--siz_left >= 0)		\
+				*np++ = ch;
 
 		if (ch == '.') {
-#ifndef NOFLOAT
-			/*	A very embarrasing ambiguity. We have either a
-				floating point number or field operator or
-				ELLIPSIS.
+			/*	An embarrasing ambiguity. We have either a
+				pp-number, a field operator, an ELLIPSIS or
+				an error (..).
 			*/
-			vch = GetChar();
-			if (!is_dig(vch)) {	/* . or ... */
-				if (vch == '.') {
-					if ((vch = GetChar()) == '.')
+			ch = GetChar();
+			if (!is_dig(ch)) {	/* . or ... */
+				if (ch == '.') {
+					if ((ch = GetChar()) == '.')
 						return ptok->tk_symb = ELLIPSIS;
-					/* This is funny: we can't push the
-					   second dot back. But then again
-					   ..<ch> is already an error in C,
-					   so why bother ?
-					*/
-					UnGetChar();
-					lexerror("illegal combination '..'");
-				}
-				UnGetChar();
+					UnGetChar();		/* not '.' */
+					ChPushBack('.');	/* sigh ... */
+				} else
+					UnGetChar();		/* not '.' */
 				return ptok->tk_symb = '.';
 			}
-			*np++ = '0';
 			UnGetChar();
-#else
-			if ((vch = GetChar()) == '.') {
-				if ((vch = GetChar()) == '.')
-					return ptok->tk_symb = ELLIPSIS;
-				UnGetChar();
-				lexerror("illegal combination '..'");
-			}
-			UnGetChar();
-			return ptok->tk_symb = '.';
-#endif
-		}
-		if (ch == '0') {
-			*np++ = ch;
-			ch = GetChar();
-			if (ch == 'x' || ch == 'X') {
-				base = 16;
+			ch = '.';
+			flags |= FLG_DOTSEEN;
+		 }
+		store(ch);
+		ch = GetChar();
+		while(in_idf(ch) || ch == '.') {
+			store(ch);
+			if (ch == '.') flags |= FLG_DOTSEEN;
+			if (ch == 'e' || ch == 'E') {
+				flags |= FLG_ESEEN;
 				ch = GetChar();
-			}
-			else
-				base = 8;
-		}
-		while (vch = val_in_base(ch, base), vch >= 0) {
-			val = val*base + vch;
-			if (np < &buf[NUMSIZE])
-				*np++ = ch;
-			ch = GetChar();
-		}
-		if (is_suf(ch)) {
-			register int suf_long = 0;
-			register int suf_unsigned = 0;
-
-			/*	The type of the integal constant is
-				based on its suffix.
-			*/
-			do {
-				switch (ch) {
-				case 'l':
-				case 'L':
-					suf_long++;
-					break;
-				case 'u':
-				case 'U':
-					suf_unsigned++;
-					break;
+				if (ch == '+' || ch == '-') {
+					flags |= FLG_DOTSEEN;	/* trick */
+					store(ch);
+					ch = GetChar();
 				}
-				ch = GetChar();
-			} while (is_suf(ch));
-			UnGetChar();
+			} else ch = GetChar();
+		}
+		store('\0');
+		UnGetChar();
 
-			if (suf_long > 1)
-				lexerror("only one long suffix allowed");
-			if (suf_unsigned > 1)
-				lexerror("only one unsigned suffix allowed");
-
-			ptok->tk_fund = (suf_long && suf_unsigned) ? ULONG :
-					(suf_long) ? LONG : UNSIGNED;
-			ptok->tk_ival = val;
-			return ptok->tk_symb = INTEGER;
-		}
-#ifndef NOFLOAT
-		if (base == 16 || !(ch == '.' || ch == 'e' || ch == 'E'))
-#endif NOFLOAT
-		{
-			UnGetChar();
-			ptok->tk_ival = val;
-			/*	The semantic analyser must know if the
-				integral constant is given in octal/hexa-
-				decimal form, in which case its type is
-				UNSIGNED, or in decimal form, in which case
-				its type is signed, indicated by
-				the fund INTEGER.
-			*/
-			ptok->tk_fund = 
-				(base == 10 || (base == 8 && val == (arith)0))
-					? INTEGER : UNSIGNED;
-			return ptok->tk_symb = INTEGER;
-		}
-		/* where's the test for the length of the integral ???	*/
-#ifndef NOFLOAT
-		if (ch == '.'){
-			if (np < &buf[NUMSIZE])
-				*np++ = ch;
-			ch = GetChar();
-		}
-		while (is_dig(ch)){
-			if (np < &buf[NUMSIZE])
-				*np++ = ch;
-			ch = GetChar();
-		}
-		if (ch == 'e' || ch == 'E') {
-			if (np < &buf[NUMSIZE])
-				*np++ = ch;
-			ch = GetChar();
-			if (ch == '+' || ch == '-') {
-				if (np < &buf[NUMSIZE])
-					*np++ = ch;
-				ch = GetChar();
+		np = &buf[0];
+		ch = *np++;
+		if (siz_left < 0) {
+			lexerror("number too long");
+			if ((flags & FLG_DOTSEEN)
+			    || (flags & FLG_ESEEN
+				&& !(ch == '0'
+				    && (*np == 'x' || *np == 'X')))) {
+			    ptok->tk_fval = Salloc("0.0", (unsigned) 4);
+			    ptok->tk_fund = DOUBLE;
+			    return ptok->tk_symb = FLOATING;
 			}
-			if (!is_dig(ch)) {
-				lexerror("malformed floating constant");
-				if (np < &buf[NUMSIZE])
-					*np++ = ch;
-			}
-			while (is_dig(ch)) {
-				if (np < &buf[NUMSIZE])
-					*np++ = ch;
-				ch = GetChar();
-			}
+			ptok->tk_ival = 1;
+			ptok->tk_fund = ULONG;
+			ptok->tk_symb = INTEGER;
 		}
-
-		/*	The type of an integral floating point
-			constant may be given by the float (f)
-			or long double (l) suffix.
-		*/
-		if (ch == 'f' || ch == 'F')
-			ptok->tk_fund = FLOAT;
-		else if (ch == 'l' || ch == 'L')
-			ptok->tk_fund = LNGDBL;
-		else {
-			ptok->tk_fund = DOUBLE;
-			UnGetChar();
+		/* Now, the pp-number must be converted into a token */
+		if ((flags & FLG_DOTSEEN)
+			|| (flags & FLG_ESEEN
+			    && !(ch == '0' && (*np == 'x' || *np == 'X')))) {
+			strflt2tok(&buf[0], ptok);
+			return ptok->tk_symb = FLOATING;
 		}
-
-		*np++ = '\0';
-		buf[0] = '-';	/* good heavens...	*/
-		if (np == &buf[NUMSIZE+1]) {
-			lexerror("floating constant too long");
-			ptok->tk_fval = Salloc("0.0",(unsigned) 5) + 1;
-		}
-		else
-			ptok->tk_fval = Salloc(buf,(unsigned) (np - buf)) + 1;
-		return ptok->tk_symb = FLOATING;
-#endif NOFLOAT
+		strint2tok(&buf[0], ptok);
+		return ptok->tk_symb = INTEGER;
 	}
 	case STEOI:			/* end of text on source file	*/
 		return ptok->tk_symb = EOI;
+#ifndef	NOPP
+	case STMSPEC:
+		if (!InputLevel) goto garbage;
+		if (ch == TOKSEP) goto again;
+		/* fallthrough shouldn't happen */
+#endif
 	default:				/* this cannot happen	*/
 		crash("bad class for char 0%o", ch);
 	}
@@ -533,16 +455,13 @@ skipcomment()
 		while (c != '*') {
 			if (class(c) == STNL) {
 				++LineNumber;
-			} else
-			if (c == EOI) {
+			} else if (c == EOI) {
 				NoUnstack--;
 #ifdef	LINT
 				lint_end_comment();
 #endif	LINT
 				return;
 			}
-			if (c == '/' && (c = GetChar()) == '*')
-				strict("extra comment delimiter found");
 			c = GetChar();
 #ifdef	LINT
 			lint_comment_char(c);
@@ -580,7 +499,8 @@ char_constant(nm)
 		if (ch == '\\')
 			ch = quoted(GetChar());
 		if (ch >= 128) ch -= 256;
-		val = val*256 + ch;
+		if (size < (int)int_size)
+			val |= ch << 8 * size;
 		size++;
 		ch = GetChar();
 	}
@@ -612,7 +532,7 @@ string_token(nm, stop_char, plen)
 			lexerror("end-of-file inside %s", nm);
 			break;
 		}
-		if (ch == '\\')
+		if (ch == '\\' && !AccFileSpecifier)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
@@ -775,4 +695,135 @@ trigraph()
 	}
 	PushBack();
 	return('?');
+}
+
+/* strflt2tok only checks the syntax of the floating-point number and
+ * selects the right type for the number.
+ */
+strflt2tok(fltbuf, ptok)
+char fltbuf[];
+struct token *ptok;
+{
+	register char *cp = fltbuf;
+	int malformed = 0;
+
+	while (is_dig(*cp)) cp++;
+	if (*cp == '.') {
+		cp++;
+		while (is_dig(*cp)) cp++;
+	}
+	if (*cp == 'e' || *cp == 'E') {
+		cp++;
+		if (*cp == '+' || *cp == '-')
+			cp++;
+		if (!is_dig(*cp)) malformed++;
+		while (is_dig(*cp)) cp++;
+	}
+	if (*cp == 'f' || *cp == 'F') {
+		if (*(cp + 1)) malformed++;
+		*cp = '\0';
+		ptok->tk_fund = FLOAT;
+	} else if (*cp == 'l' || *cp == 'L') {
+		if (*(cp + 1)) malformed++;
+		*cp = '\0';
+		ptok->tk_fund = LNGDBL;
+	} else {
+		ptok->tk_fund = DOUBLE;
+	}
+	if (*cp) malformed++;
+	if (malformed) {
+		lexerror("malformed floating constant");
+		ptok->tk_fval = Salloc("0.0", (unsigned) 4);
+	} else {
+		ptok->tk_fval = Salloc(fltbuf, (unsigned) (cp - fltbuf + 1));
+	}
+}
+
+strint2tok(intbuf, ptok)
+char intbuf[];
+struct token *ptok;
+{
+	register char *cp = intbuf;
+	int base = 10;
+	arith val = 0, dig, ubound;
+	int uns_flg = 0, lng_flg = 0, malformed = 0, ovfl = 0;
+	int fund;
+
+	ASSERT(*cp != '-');
+	if (*cp == '0') {
+		cp++;
+		if (*cp == 'x' || *cp == 'X') {
+			cp++;
+			base = 16;
+		} else base = 8;
+	}
+	/* The upperbound will be the same as when computed with
+	 * max_unsigned_arith / base (since base is even). The problem here
+	 * is that unsigned arith is not accepted by all compilers.
+	 */
+	ubound = max_arith / (base / 2);
+
+	while (is_hex(*cp)) {
+		dig = is_dig(*cp) ? *cp - '0'
+				    : (( *cp >= 'A' && *cp <= 'F' ? *cp - 'A'
+								: *cp - 'a')
+					+ 10) ;
+		if (dig >= base) {
+			malformed++;			/* ignore */
+		}
+		else {
+			if (val < 0 || val > ubound) ovfl++;
+			val *= base;
+			if (val < 0 && val + dig >= 0) ovfl++;
+			val += dig;
+		}
+		cp++;
+	}
+
+	while (*cp) {
+		if (*cp == 'l' || *cp == 'L') lng_flg++;
+		else if (*cp == 'u' || *cp == 'U') uns_flg++;
+		else break;
+		cp++;
+	}
+	if (*cp) {
+	    malformed++;
+	}
+	if (malformed) {
+		lexerror("malformed %s integer constant",
+				(base == 10 ? "decimal"
+					    : (base == 8 ? "octal"
+							: "hexadecimal")));
+	} else {
+		if (lng_flg > 1)
+			lexerror("only one long suffix allowed");
+		if (uns_flg > 1)
+			lexerror("only one unsigned suffix allowed");
+	}
+	if (ovfl) {
+		lexwarning("overflow in constant");
+		fund = ULONG;
+	} else if ((val & full_mask[(int)int_size]) == val) {
+		if (val >= 0 && val <= max_int) fund = INT;
+		else fund = (base == 10 ? LONG : UNSIGNED);
+	} else if((val & full_mask[(int)long_size]) == val) {
+		if (val > 0) fund = LONG;
+		else fund = ULONG;
+	} else {	/* sizeof(arith) is greater than long_size */
+		ASSERT(arith_size > long_size);
+		lexwarning("constant too large for target machine");
+		/* cut the size to prevent further complaints */
+		val &= full_mask[(int)long_size];
+		fund = ULONG;
+	}
+	if (lng_flg) {
+	    if (fund == INT) fund = LONG;
+	    else if (fund == UNSIGNED) fund = ULONG;
+	}
+	if (uns_flg) {
+	    if (fund == INT) fund = UNSIGNED;
+	    else if (fund == LONG) fund = ULONG;
+	}
+	ptok->tk_fund = fund;
+	ptok->tk_ival = val;
 }

@@ -7,12 +7,12 @@
 
 {
 #include	"lint.h"
-#include	"nofloat.h"
 #include	<em.h>
 #include	"debug.h"
 #include	<alloc.h>
 #include	<assert.h>
 #include	"nobitfield.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
@@ -27,7 +27,6 @@
 #include	"level.h"
 #include	"def.h"
 #include	"LLlex.h"
-#include	"noRoption.h"
 #include	"estack.h"
 #ifdef	LINT
 #include	"l_lint.h"
@@ -45,13 +44,15 @@ struct sdef *gen_align_to_next();
 struct e_stack *p_stack;
 }
 
-/*	initial_value recursively guides the initialisation expression.
-	Upto now, the initialisation of a union is not allowed!
-*/
-/* 7 */
+/* initial_value recursively guides the initialisation expression.
+ */
+/* 3.5 */
+{ static int pack_level; }
+
 initial_value(register struct type **tpp; register struct expr **expp;) :
-	{ if (tpp) gen_tpcheck(tpp, 0); }
+	{ if (tpp) gen_tpcheck(tpp); }
 [
+		{ if (pack_level == 0) gen_error = 0; }
 	assignment_expression(expp)
 		{
 #ifdef	LINT
@@ -71,7 +72,6 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 ;
 
 initial_value_pack(struct type **tpp; struct expr **expp;)
-	{ static int pack_level; }
 :
 	'{'
 			{ if (pack_level == 0) gen_error = 0; pack_level++; }
@@ -108,7 +108,7 @@ initial_value_list(register struct type **tpp; struct expr **expp;)
 ;
 
 {
-gen_tpcheck(tpp, union_allowed)
+gen_tpcheck(tpp)
 	struct type **tpp;
 {
 	register struct type *tp;
@@ -418,24 +418,14 @@ pad(tpx)
 	register struct type *tp = tpx;
 	register arith sz = tp->tp_size;
 
-	gen_tpcheck(&tpx, 1);
+	gen_tpcheck(&tpx);
 	if (gen_error) return;
-	switch (tp->tp_fund) {
-	case UNION:
-#ifndef NOROPTION
-		if (options['R']) {
-			warning("initialisation of unions not allowed");
-		}
-#endif
-		break;
 #ifndef NOBITFIELD
-	case FIELD:
+	if (tp->tp_fund == FIELD) {
 		put_bf(tp, (arith)0);
 		return;
-#endif NOBITFIELD
-		default:
-			break;
 	}
+#endif NOBITFIELD
 
 	while (sz >= word_size) {
 		C_con_cst((arith) 0);
@@ -498,16 +488,21 @@ check_ival(expp, tp)
 			C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
+	case LNGDBL:
 		ch7cast(expp, '=', tp);
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
 #endif DEBUG
-		if (expr->ex_class == Float)
+		if (expr->ex_class == Float) {
+			if (!expr->FL_VALUE) {
+				expr->FL_VALUE = Malloc(FLT_STRLEN);
+				flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
+			}
 			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+		}
 #ifdef NOTDEF
 
 Coercion from int to float is now always done compile time.
@@ -529,7 +524,6 @@ and also to prevent runtime coercions for compile-time constants.
 		else
 			illegal_init_cst(expr);
 		break;
-#endif NOFLOAT
 
 #ifndef NOBITFIELD
 	case FIELD:
@@ -562,13 +556,13 @@ ch_array(tpp, ex)
 	struct expr *ex;
 {
 	register struct type *tp = *tpp;
-	register arith length = ex->SG_LEN;
-	char *s;
+	register int length = ex->SG_LEN, i;
+	register char *to, *from, *s;
 
 	ASSERT(ex->ex_class == String);
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
-		tp = *tpp = construct_type(ARRAY, tp->tp_up, 0, length, NO_PROTO);
+		tp = *tpp = construct_type(ARRAY, tp->tp_up, 0, (arith)length, NO_PROTO);
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
@@ -580,10 +574,14 @@ ch_array(tpp, ex)
 	}
 	/* throw out the characters of the already prepared string	*/
 	s = Malloc((unsigned) (length));
-	clear(s, (int) (length));
-	strncpy(s, ex->SG_VALUE, (int) length);
+	clear(s, length);
+	i = length <= ex->SG_LEN ? length : ex->SG_LEN;
+	to = s; from = ex->SG_VALUE;
+	while(--i >= 0) {
+		*to++ = *from++;
+	}
 	free(ex->SG_VALUE);
-	str_cst(s, (int) (length));
+	str_cst(s, length);
 	free(s);
 }
 
@@ -651,7 +649,7 @@ zero_bytes(sd)
 	*/
 	register int n = sd->sd_sdef->sd_offset - sd->sd_offset -
 		size_of_type(sd->sd_type, "struct member");
-	register int count = n;
+	int count = n;
 
 	while (n-- > 0)
 		con_nullbyte();

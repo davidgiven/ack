@@ -3,20 +3,19 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-/* SEMANTIC ANALYSIS (CHAPTER 7RM)  --  BINARY OPERATORS */
+/* SEMANTIC ANALYSIS (CHAPTER 3.3)  --  BINARY OPERATORS */
 
 #include	"botch_free.h"
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"lint.h"
 #include	"idf.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"struct.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
-#include	"noRoption.h"
 
 extern char options[];
 extern char *symbol2str();
@@ -40,8 +39,8 @@ ch7bin(expp, oper, expr)
 	any2opnd(expp, oper);
 	any2opnd(&expr, oper);
 	switch (oper)	{
-	case '[':				/* RM 7.1 */
-		/* RM 14.3 states that indexing follows the commutative laws */
+	case '[':				/* 3.3.2.1 */
+		/* indexing follows the commutative laws */
 		switch ((*expp)->ex_type->tp_fund)	{
 		case POINTER:
 		case ARRAY:
@@ -67,14 +66,10 @@ ch7bin(expp, oper, expr)
 		ch7mon('*', expp);
 		break;
 
-	case '(':				/* RM 7.1 */
+	case '(':				/* 3.3.2.2 */
 		if (	(*expp)->ex_type->tp_fund == POINTER &&
 			(*expp)->ex_type->tp_up->tp_fund == FUNCTION
 		)	{
-#ifndef NOROPTION
-			if (options['R'])
-				warning("function pointer called");
-#endif NOROPTION
 			ch7mon('*', expp);
 		}
 		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
@@ -82,6 +77,8 @@ ch7bin(expp, oper, expr)
 				symbol2str((*expp)->ex_type->tp_fund));
 			/* leave the expression; it may still serve */
 			free_expression(expr);	/* there go the parameters */
+			*expp = new_oper(error_type,
+					*expp, '(', (struct expr *)0);
 		}
 		else
 			*expp = new_oper((*expp)->ex_type->tp_up,
@@ -89,7 +86,7 @@ ch7bin(expp, oper, expr)
 		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
 
-	case PARCOMMA:				/* RM 7.1 */
+	case PARCOMMA:				/* 3.3.2.2 */
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
 			function2pointer(*expp);
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
@@ -102,7 +99,7 @@ ch7bin(expp, oper, expr)
 	case ORAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		/* Fall through */
+		/* fallthrough */
 	case '/':
 	case DIVAB:
 	case TIMESAB:
@@ -115,7 +112,7 @@ ch7bin(expp, oper, expr)
 	case '|':
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		/* Fall through */
+		/* fallthrough */
 	case '*':
 		arithbalance(expp, oper, &expr);
 		commutative_binop(expp, oper, expr);
@@ -127,7 +124,7 @@ ch7bin(expp, oper, expr)
 			expr = *expp;
 			*expp = etmp;
 		}
-		/*FALLTHROUGH*/
+		/* fallthrough */
 	case PLUSAB:
 	case POSTINCR:
 	case PLUSPLUS:
@@ -226,8 +223,9 @@ ch7bin(expp, oper, expr)
 				ch7bin(expp, ',', expr);
 			}
 		}
-		else
+		else {
 			*expp = new_oper(int_type, *expp, oper, expr);
+		}
 		(*expp)->ex_flags |= EX_LOGICAL;
 		break;
 
@@ -310,6 +308,8 @@ mk_binop(expp, oper, expr, commutative)
 
 	if (is_cp_cst(expr) && is_cp_cst(ex))
 		cstbin(expp, oper, expr);
+	else if (is_fp_cst(expr) && is_fp_cst(ex))
+		fltcstbin(expp, oper, expr);
 	else	{
 		*expp = (commutative && expr->ex_depth >= ex->ex_depth) ?
 				new_oper(ex->ex_type, expr, oper, ex) :
@@ -320,16 +320,18 @@ mk_binop(expp, oper, expr, commutative)
 pointer_arithmetic(expp1, oper, expp2)
 	register struct expr **expp1, **expp2;
 {
+	int typ;
 	/*	prepares the integral expression expp2 in order to
 		apply it to the pointer expression expp1
 	*/
-#ifndef NOFLOAT
-	if (any2arith(expp2, oper) == DOUBLE)	{
+	if ((typ = any2arith(expp2, oper)) == FLOAT
+	    || typ == DOUBLE
+	    || typ == LNGDBL)	{
 		expr_error(*expp2,
-			"illegal combination of float and pointer");
+			"illegal combination of %s and pointer",
+			symbol2str(typ));
 		erroneous2int(expp2);
 	}
-#endif NOFLOAT
 	ch7bin( expp2, '*',
 		intexpr(size_of_type((*expp1)->ex_type->tp_up, "object"),
 			pa_type->tp_fund)

@@ -8,6 +8,7 @@
 {
 #include	<alloc.h>
 #include	"lint.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"type.h"
@@ -15,12 +16,19 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"
-#include	"noRoption.h"
 
 extern struct expr *intexpr();
+int InSizeof = 0;	/* inside a sizeof- expression */
+int ResultKnown = 0;	/* result of the expression is already known */
+
+/* Since the grammar in the standard is not LL(n), it is modified so that
+ * it accepts basically the same grammar. Thsi means that there is no 1-1
+ * mapping from the grammar in the standard to the grammar given here.
+ * Such is life.
+ */
 }
 
-/* 7.1 */
+/* 3.3.1 */
 primary(register struct expr **expp;) :
 	IDENTIFIER
 	{dot2expr(expp);}
@@ -30,14 +38,14 @@ primary(register struct expr **expp;) :
 	string(expp)
 |
 	'(' expression(expp) ')'
-	{(*expp)->ex_flags |= EX_PARENS;}
+	{ (*expp)->ex_flags |= EX_PARENS; }
 ;
 
 
-/*	Character string literals that are adjacent tokens
-	are concatenated into a single character string
-	literal.
-*/
+/* Character string literals that are adjacent tokens
+ * are concatenated into a single character string
+ * literal.
+ */
 string(register struct expr **expp;)
 	{	register int i, len;
 		register char *str;
@@ -51,12 +59,12 @@ string(register struct expr **expp;)
 	}
 	[
 		STRING
-		{	/*	A pasted string keeps the type of the first
-				string literal.
-				The pasting of normal strings and wide
-				character strings are stated as having an
-				undefined behaviour.
-			*/
+		{	/* A pasted string keeps the type of the first
+			 * string literal.
+			 * The pasting of normal strings and wide
+			 * character strings are stated as having an
+			 * undefined behaviour.
+			 */
 			if (dot.tk_fund != fund)
 				warning("illegal pasting of string literals");
 			str = Srealloc(str, (unsigned) (--len + dot.tk_len));
@@ -64,43 +72,35 @@ string(register struct expr **expp;)
 				str[len++] = dot.tk_bts[i];
 		}
 	]*
-	{string2expr(expp, STRING, str, len);}
+	{ string2expr(expp, str, len); }
 ;
 
-secundary(register struct expr **expp;) :
+/* 3.3.2 */
+postfix_expression(register struct expr **expp;)
+	{ int oper; 
+	  struct expr *e1 = 0;
+	  struct idf *idf;
+	}
+:
 	primary(expp)
 	[
-		index_pack(expp)
+		'[' expression(&e1) ']'
+			{ ch7bin(expp, '[', e1); e1 = 0; }
 	|
-		parameter_pack(expp)
+		'(' parameter_list(&e1)? ')'
+			{ ch7bin(expp, '(', e1); call_proto(expp); e1 = 0; }
 	|
-		selection(expp)
+		[ '.' | ARROW ]			{ oper = DOT; }
+		identifier(&idf)		{ ch7sel(expp, oper, idf); }
 	]*
-;
-
-index_pack(struct expr **expp;)
-	{struct expr *e1;}
-:
-	'[' expression(&e1) ']'
-	{ch7bin(expp, '[', e1);}
-;
-
-parameter_pack(struct expr **expp;)
-	{struct expr *e1 = 0;}
-:
-	'(' parameter_list(&e1)? ')'
-	{	ch7bin(expp, '(', e1);
-		call_proto(expp);
-	}
-;
-
-selection(struct expr **expp;)
-	{int oper; struct idf *idf;}
-:
-	[ '.' | ARROW ]
-	{oper = DOT;}
-	identifier(&idf)
-	{ch7sel(expp, oper, idf);}
+	[
+		[
+			PLUSPLUS	{ oper = POSTINCR; }
+		|
+			MINMIN		{ oper = POSTDECR; }
+		]
+		    { ch7incr(expp, oper); }
+	]?
 ;
 
 parameter_list(struct expr **expp;)
@@ -108,28 +108,17 @@ parameter_list(struct expr **expp;)
 :
 	assignment_expression(expp)
 	{any2opnd(expp, PARCOMMA);}
-	[	','
+	[ %persistent
+		','
 		assignment_expression(&e1)
 		{any2opnd(&e1, PARCOMMA);}
 		{ch7bin(expp, PARCOMMA, e1);}
 	]*
 ;
 
-/* 7.2 */
-postfixed(struct expr **expp;)
-	{int oper;}
-:
-	secundary(expp)
-	[
-		postop(&oper)
-		{ch7incr(expp, oper);}
-	|
-		empty
-	]
-;
-
 %first	first_of_type_specifier, type_specifier;
 
+/* 3.3.3 & 3.3.4 */
 unary(register struct expr **expp;)
 	{struct type *tp; int oper;}
 :
@@ -139,7 +128,7 @@ unary(register struct expr **expp;)
 		(*expp)->ex_flags |= EX_CAST;
 	}
 |
-	postfixed(expp)
+	postfix_expression(expp)
 |
 	unop(&oper) unary(expp)
 	{ch7mon(oper, expp);}
@@ -147,10 +136,14 @@ unary(register struct expr **expp;)
 	size_of(expp)
 ;
 
+/* When an identifier is used in a sizeof()-expression, we must stil not
+ * mark it as used.
+ * extern int i;  ....  sizeof(i)  .... need not have a definition for i
+ */
 size_of(register struct expr **expp;)
 	{struct type *tp;}
 :
-	SIZEOF
+	SIZEOF { InSizeof++; }	/* handle (sizeof(sizeof(int))) too */
 	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 		cast(&tp)
 		{
@@ -161,13 +154,19 @@ size_of(register struct expr **expp;)
 		unary(expp)
 		{ch7mon(SIZEOF, expp);}
 	]
+	{ InSizeof--; }
 ;
 
-/* 7.3-7.12 */
+/* 3.3.5-3.3.17 */
 /*	The set of operators in C is stratified in 15 levels, with level
-	N being treated in RM 7.N.  In principle each operator is
-	assigned a rank, ranging from 1 to 15.  Such an expression can
-	be parsed by a construct like:
+	N being treated in RM 7.N (although this is not the standard
+	anymore). The standard describes this in phrase-structure-grammar,
+	which we are unable to parse. The description that follows comes
+	from the old C-compiler.
+
+	In principle each operator is assigned a rank, ranging
+	from 1 to 15.  Such an expression can be parsed by a construct
+	like:
 		binary_expression(int maxrank;)
 			{int oper;}
 		:
@@ -199,48 +198,57 @@ size_of(register struct expr **expp;)
 */
 
 binary_expression(int maxrank; struct expr **expp;)
-	{int oper; struct expr *e1;}
+	{int oper, OldResultKnown; struct expr *e1;}
 :
 	unary(expp)
-	[%while (rank_of(DOT) <= maxrank && AHEAD != '=')
-		/*	'?', '=', and ',' are no binops, and the test
-			for AHEAD != '=' keeps the other assignment
-			operators out
-		*/
+	[%while (rank_of(DOT) <= maxrank )
+		/*	'?', '=', and ',' are no binops
+		 */
 		binop(&oper)
+		{ OldResultKnown = ResultKnown;
+		  if (oper == OR || oper == AND) {
+			  if (is_cp_cst(*expp) || is_fp_cst(*expp)) {
+				  if (is_zero_cst(*expp)) {
+					  if (oper == AND) ResultKnown++;
+				  } else if (oper == OR) ResultKnown++;
+			  }
+		  }
+		}
 		binary_expression(rank_of(oper)-1, &e1)
 		{
 			ch7bin(expp, oper, e1);
+			ResultKnown = OldResultKnown;
 		}
 	]*
 ;
 
-/* 7.13 */
+/* 3.3.15 */
 conditional_expression(struct expr **expp;)
-/*	There is some unfortunate disagreement about what is allowed
-	between the '?' and the ':' of a conditional_expression.
-	Although the Ritchie compiler does not even allow
-	conditional_expressions there, some other compilers (e.g., VAX)
-	accept a full assignment_expression there, and programs
-	(like, e.g., emacs) rely on it. So we have little choice.
-*/
-	{struct expr *e1 = 0, *e2 = 0;}
+	{struct expr *e1 = 0, *e2 = 0; int OldResultKnown, ConstExpr=0;}
 :
 	/* allow all binary operators */
 	binary_expression(rank_of('?') - 1, expp)
 	[	'?'
-		expression(&e1)
-		{
-#ifndef NOROPTION
-			check_conditional(e1, '?', "between ? and :");
-#endif
+		{ OldResultKnown = ResultKnown;
+		  if (is_cp_cst(*expp) || is_fp_cst(*expp)) {
+			  ConstExpr++;
+			  if (is_zero_cst(*expp)) ResultKnown++;
+		  }
 		}
+		expression(&e1)
 		':'
+		{ if (ConstExpr) {
+			if (OldResultKnown == ResultKnown) ResultKnown++;
+			else ResultKnown = OldResultKnown;
+		  }
+		}
+		/* should be: conditional_expression(&e2)
+		 * but that wouldn't work  with 0 ? 0 : i = 0
+		 */
 		assignment_expression(&e2)
 		{	
-#ifndef NOROPTION
-			check_conditional(e2, '=', "after :");
-#endif
+			check_conditional(e2, '=', "not allowed after :");
+			ResultKnown = OldResultKnown;
 			ch7bin(&e1, ':', e2);
 			opnd2test(expp, '?');
 			ch7bin(expp, '?', e1);
@@ -248,11 +256,10 @@ conditional_expression(struct expr **expp;)
 	]?
 ;
 
-/* 7.14 */
+/* 3.3.16 */
 assignment_expression(struct expr **expp;)
-	{
-		int oper;
-		struct expr *e1 = 0;
+	{ int oper;
+	  struct expr *e1 = 0;
 	}
 :
 	conditional_expression(expp)
@@ -265,7 +272,7 @@ assignment_expression(struct expr **expp;)
 	]
 ;
 
-/* 7.15 */
+/* 3.3.17 */
 expression(struct expr **expp;)
 	{struct expr *e1;}
 :
@@ -281,12 +288,6 @@ expression(struct expr **expp;)
 unop(int *oper;) :
 	['*' | '&' | '-' | '+' | '!' | '~' | PLUSPLUS | MINMIN]
 	{*oper = DOT;}
-;
-
-postop(int *oper;):
-	PLUSPLUS {*oper = POSTINCR;}
-|
-	MINMIN {*oper = POSTDECR;}
 ;
 
 multop:
@@ -321,30 +322,8 @@ binop(int *oper;) :
 ;
 
 asgnop(register int *oper;):
-	'=' {*oper = DOT;}
-|
-	'+' '=' {*oper = PLUSAB;}
-|
-	'-' '=' {*oper = MINAB;}
-|
-	'*' '=' {*oper = TIMESAB;}
-|
-	'/' '=' {*oper = DIVAB;}
-|
-	'%' '=' {*oper = MODAB;}
-|
-	LEFT '=' {*oper = LEFTAB;}
-|
-	RIGHT '=' {*oper = RIGHTAB;}
-|
-	'&' '=' {*oper = ANDAB;}
-|
-	'^' '=' {*oper = XORAB;}
-|
-	'|' '=' {*oper = ORAB;}
-|
-	[ PLUSAB | MINAB | TIMESAB | DIVAB | MODAB | LEFTAB | RIGHTAB
-	| ANDAB | XORAB | ORAB ]
+	[ '=' | PLUSAB | MINAB | TIMESAB | DIVAB | MODAB 
+	| LEFTAB | RIGHTAB | ANDAB | XORAB | ORAB ]
 	{ *oper = DOT; }
 
 ;
@@ -357,19 +336,16 @@ constant(struct expr **expp;) :
 ]	{dot2expr(expp);}
 ;
 
-/* 15 */
+/* 3.4 */
 constant_expression (struct expr **expp;) :
-	assignment_expression(expp)
-	{chk_cst_expr(expp);}
+	conditional_expression(expp)
+			    /* was: assignment_expression(expp) */
+	{ chk_cst_expr(expp); }
 ;
 
 identifier(struct idf **idfp;) :
-[
-	IDENTIFIER
-|
-	TYPE_IDENTIFIER
+[ IDENTIFIER
+| TYPE_IDENTIFIER
 ]
-	{
-		*idfp = dot.tk_idf;
-	}
+	{ *idfp = dot.tk_idf; }
 ;

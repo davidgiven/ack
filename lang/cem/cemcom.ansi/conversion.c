@@ -8,7 +8,6 @@
 #include	"lint.h"
 #ifndef	LINT
 
-#include	"nofloat.h"
 #include	<em.h>
 #include	"arith.h"
 #include	"type.h"
@@ -17,9 +16,7 @@
 
 #define	T_SIGNED		1
 #define	T_UNSIGNED		2
-#ifndef NOFLOAT
 #define	T_FLOATING		3
-#endif NOFLOAT
 
 /*	conversion() generates the EM code for a conversion between
 	the types char, short, int, long, float, double and pointer.
@@ -52,9 +49,7 @@ conversion(from_type, to_type)
 			C_cii();
 			break;
 		case T_UNSIGNED:
-#ifndef NOFLOAT
 		case T_FLOATING:
-#endif NOOFLOAT
 			if ((int)from_size < (int)word_size) {
 				C_loc(from_size);
 				C_loc(word_size);
@@ -79,14 +74,11 @@ conversion(from_type, to_type)
 		case T_UNSIGNED:
 			C_cuu();
 			break;
-#ifndef NOFLOAT
 		case T_FLOATING:
 			C_cuf();
 			break;
-#endif NOFLOAT
 		}
 		break;
-#ifndef NOFLOAT
 	case T_FLOATING:
 		C_loc(from_size);
 		C_loc(to_size);
@@ -102,17 +94,14 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
-#endif NOFLOAT
 	default:
 		crash("(conversion) illegal type conversion");
 		/*NOTREACHED*/
 	}
 	if ((int)(to_type->tp_size) < (int)word_size
-#ifndef NOFLOAT
 	    && to_cnvtype != T_FLOATING
-#endif NOFLOAT
 	    ) {
-		extern long full_mask[];
+		extern arith full_mask[];
 
 		if (to_cnvtype == T_SIGNED) {
 			C_loc(to_type->tp_size);
@@ -142,12 +131,10 @@ convtype(tp)
 	case LONG:
 	case ENUM:
 		return tp->tp_unsigned ? T_UNSIGNED : T_SIGNED;
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 	case LNGDBL:
 		return T_FLOATING;
-#endif NOFLOAT
 	case POINTER:
 		return T_UNSIGNED;
 	}

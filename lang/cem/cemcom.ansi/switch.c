@@ -5,7 +5,6 @@
 /* $Header$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
-#include	"nofloat.h"
 #include	<em.h>
 #include	"debug.h"
 #include	"botch_free.h"
@@ -14,13 +13,14 @@
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"label.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"switch.h"
 #include	"code.h"
 #include	"assert.h"
 #include	"expr.h"
 #include	"type.h"
-#include	"noRoption.h"
+#include	"sizes.h"
 
 extern char options[];
 
@@ -39,9 +39,10 @@ compact(nr, low, up)
 static struct switch_hdr *switch_stack = 0;
 
 /* (EB 86.05.20) The following rules hold for switch statements:
-	- the expression E in "switch(E)" is cast to 'int' (RM 9.7)
-	- the expression E in "case E:" must be 'int' (RM 9.7)
-	- the values in the CSA/CSB tables are words (EM 7.4)
+	- the expression E in "switch(E)" shall have integral type (3.6.4.2)
+	- the expression E in "case E:" is converted to the promoted type
+					of the controlling expression
+	- the values in the CSA/CSB tables are words (EM 7.4) (??? JvE)
 	For simplicity, we suppose int_size == word_size.
 */
 
@@ -54,22 +55,21 @@ code_startswitch(expp)
 	register label l_table = text_label();
 	register label l_break = text_label();
 	register struct switch_hdr *sh = new_switch_hdr();
-	int fund = any2arith(expp, SWITCH);	/* INT, LONG or DOUBLE */
+	int fund = any2arith(expp, SWITCH);
+				    /* INT, LONG, FLOAT, DOUBLE or LNGDBL */
 	
 	switch (fund) {
 	case LONG:
-#ifndef NOROPTION
-		if (options['R'])
-			warning("long in switch (cast to int)");
-#endif
+		if (long_size > int_size)
+			warning("can't switch on longs (cast to int)");
 		int2int(expp, int_type);
 		break;
-#ifndef NOFLOAT
+	case FLOAT:
 	case DOUBLE:
-		error("float/double in switch");
+	case LNGDBL:
+		error("floating point type in switch");
 		erroneous2int(expp);
 		break;
-#endif NOFLOAT
 	}
 	stack_stmt(l_break, NO_LABEL);
 	sh->sh_break = l_break;

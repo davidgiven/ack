@@ -15,6 +15,7 @@
 #include	"debug.h"
 
 #include	"tokenname.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
@@ -32,6 +33,7 @@
 #define	ERROR		3
 #define	CRASH		4
 #define	FATAL		5
+#define DO_DEBUG	6
 
 int err_occurred = 0;
 
@@ -93,10 +95,27 @@ strict(va_alist)
 
 	va_start(ap);
 	{
-		_error(STRICT, FileName, LineNumber, ap);
+		_error(STRICT, dot.tk_file, dot.tk_line, ap);
 	}
 	va_end(ap);
 }
+
+#ifdef DEBUG
+/*VARARGS*/
+debug(va_alist)
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(DO_DEBUG, dot.tk_file, dot.tk_line, ap);
+		/* _error(DO_DEBUG, NILEXPR, ap);
+		*/
+	}
+	va_end(ap);
+}
+#endif DEBUG
 
 /*VARARGS*/
 warning(va_alist)
@@ -106,7 +125,9 @@ warning(va_alist)
 
 	va_start(ap);
 	{
-		_error(WARNING, NILEXPR, ap);
+		_error(WARNING, dot.tk_file, dot.tk_line, ap);
+		/* _error(WARNING, NILEXPR, ap);
+		*/
 	}
 	va_end(ap);
 }
@@ -310,12 +331,18 @@ _error(class, fn, ln, ap)
 	case FATAL:
 		remark = "fatal error --";
 		break;
+#ifdef DEBUG
+	case DO_DEBUG:
+		remark = "(debug)";
+		break;
+#endif DEBUG
 	default:
 		/*NOTREACHED*/;
 	}
 	
 #ifndef	LINT
-	if (ln == last_ln && fn && last_fn && strcmp(fn, last_fn) == 0)	{
+	if (class != DO_DEBUG)	/* ??? DEBUG */
+	    if (ln == last_ln && fn && last_fn && strcmp(fn, last_fn) == 0) {
 		/* we've seen this place before */
 		e_seen++;
 		if (e_seen == MAXERR_LINE)

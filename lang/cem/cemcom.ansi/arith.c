@@ -13,9 +13,9 @@
 
 #include	<alloc.h>
 #include	"lint.h"
-#include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"idf.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"sizes.h"
 #include	"type.h"
@@ -25,12 +25,12 @@
 #include	"Lpars.h"
 #include	"field.h"
 #include	"mes.h"
-#include	"noRoption.h"
+#include	"assert.h"
 
 extern char *symbol2str();
 extern char options[];
 
-arithbalance(e1p, oper, e2p)	/* RM 6.6 */
+arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	register struct expr **e1p, **e2p;
 	int oper;
 {
@@ -38,15 +38,17 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 		of the arithmetic operator oper.
 	*/
 	register int t1, t2, u1, u2;
+	int shifting = (oper == LEFT || oper == RIGHT
+			|| oper == LEFTAB || oper == RIGHTAB);
 
 	t1 = any2arith(e1p, oper);
 	t2 = any2arith(e2p, oper);
 	/* Now t1 and t2 are either INT, LONG, FLOAT, DOUBLE, or LNGDBL */
 
-#ifndef NOFLOAT
 	/*	If any operand has the type long double, the other operand
 		is converted to long double.
 	*/
+	/* ??? t1 == LNGDBL, t2 == DOUBLE */
 	if (t1 == LNGDBL) {
 		if (t2 != LNGDBL)
 			int2float(e2p, lngdbl_type);
@@ -82,7 +84,6 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 			int2float(e1p, float_type);
 		return;
 	}
-#endif NOFLOAT
 
 	/* Now they are INT or LONG */
 	u1 = (*e1p)->ex_type->tp_unsigned;
@@ -93,7 +94,8 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	*/
 	if (t1 == LONG && u1 && (t2 != LONG || !u2))
 		t2 = int2int(e2p, ulong_type);
-	else if (t2 == LONG && u2 && (t1 != LONG || !u1))
+	else if (t2 == LONG && u2 && (t1 != LONG || !u1)
+			&& !shifting)	/* ??? */
 		t1 = int2int(e1p, ulong_type);
 
 	/*	If one operand has type long int and the other has type unsigned
@@ -104,7 +106,7 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	*/
 	if (t1 == LONG && t2 == INT && u2)
 		t2 = int2int(e2p, (int_size<long_size)? long_type : ulong_type);
-	else if (t2 == LONG && t1 == INT && u1)
+	else if (t2 == LONG && t1 == INT && u1 && !shifting)	/* ??? */
 		t1 = int2int(e1p, (int_size<long_size)? long_type : ulong_type);
 	if (int_size > long_size) /* sanity check */
 		crash("size of int exceeds size of long");
@@ -115,17 +117,17 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	if (t1 == LONG && t2 != LONG)
 		t2 = int2int(e2p, long_type);
 	else
-	if (t2 == LONG && t1 != LONG)
+	if (t2 == LONG && t1 != LONG && !shifting)	/* ??? */
 		t1 = int2int(e1p, long_type);
 
 	/*	If either operand has type unsigned int, the other operand
 		is converted to unsigned int.
 		Otherwise, both operands have type int.
 	*/
-	if (u1 && !u2)
+	if (u1 && !u2 && !shifting)
 		t2 = int2int(e2p, (t1 == LONG) ? ulong_type : uint_type);
 	else
-	if (!u1 && u2)
+	if (!u1 && u2 && !shifting)
 		t1 = int2int(e1p, (t2 == LONG) ? ulong_type : uint_type);
 }
 
@@ -168,15 +170,15 @@ ch76pointer(expp, oper, tp)
 			ch7cast(expp, oper, tp);
 	}
 	else
-	if (	is_integral_type(exp->ex_type)
-#ifndef NOROPTION
-		&&
-		(	!options['R'] /* we don't care */ ||
-			(oper == EQUAL || oper == NOTEQUAL || oper == ':')
-		)
-#endif NOROPTION
-	)		/* ch 7.7 */
+	if (is_integral_type(exp->ex_type)) {
+		if ((oper != EQUAL && oper != NOTEQUAL && oper != ':')
+		    || !(is_cp_cst(exp) && exp->VL_VALUE == 0)) {
+			expr_error(exp,"%s on %s and pointer",
+					symbol2str(oper),
+					symbol2str(exp->ex_type->tp_fund));
+		}
 		ch7cast(expp, CAST, tp);
+	}
 	else	{
 		expr_error(exp, "%s on %s and pointer",
 				symbol2str(oper),
@@ -191,8 +193,8 @@ any2arith(expp, oper)
 	register struct expr **expp;
 	register int oper;
 {
-	/*	Turns any expression into int_type, long_type or
-		double_type.
+	/*	Turns any expression into int_type, long_type,
+		float_type, double_type or lngdbl_type.
 	*/
 	int fund;
 
@@ -200,41 +202,32 @@ any2arith(expp, oper)
 	case CHAR:
 	case SHORT:
 	case GENERIC:
-		int2int(expp,
-			(*expp)->ex_type->tp_unsigned ? uint_type : int_type);
+		ASSERT((*expp)->ex_type->tp_size <= int_type->tp_size);
+
+		if ((*expp)->ex_type->tp_unsigned
+		    && (*expp)->ex_type->tp_size == int_type->tp_size) {
+			int2int(expp, uint_type);
+		} else {
+			int2int(expp, int_type);
+		}
 		break;
 	case INT:
 	case LONG:
 		break;
 	case ENUM:
-		/* test the admissibility of the operator */
-		if (	is_test_op(oper) || oper == '=' || oper == PARCOMMA ||
-			oper == ',' || oper == ':'
-		)	{
-			/* allowed by K & R */
-		}
-		else
-#ifndef NOROPTION
-		if (!options['R'])	{
-			/* allowed by us */
-		}
-		else
-			expr_warning(*expp, "%s on enum", symbol2str(oper));
-#endif NOROPTION
 #ifndef	LINT
 		int2int(expp, int_type);
 #endif	LINT
 		break;
-#ifndef	NOFLOAT
 	case FLOAT:
-/*
+/*	only when it is a parameter and the default promotion should
+	occur. Hence this code is moved to any2parameter().
 		float2float(expp, double_type);
 		break;
 */
 	case DOUBLE:
 	case LNGDBL:
 		break;
-#endif	NOFLOAT
 #ifndef NOBITFIELD
 	case FIELD:
 		field2arith(expp);
@@ -322,7 +315,6 @@ int2int(expp, tp)
 	return exp->ex_type->tp_fund;
 }
 
-#ifndef NOFLOAT
 int2float(expp, tp)
 	register struct expr **expp;
 	struct type *tp;
@@ -331,18 +323,20 @@ int2float(expp, tp)
 		converted to the floating type tp.
 	*/
 	register struct expr *exp = *expp;
-	char buf[32];
 	
 	fp_used = 1;
 	if (is_cp_cst(exp)) {
 		*expp = new_expr();
 		**expp = *exp;
-		sprint(buf+1, "%ld", (long)(exp->VL_VALUE));
-		buf[0] = '-';
-		exp = *expp;
+		/* sprint(buf+1, "%ld", (long)(exp->VL_VALUE));
+		/* buf[0] = '-';
+		*/
+		exp = *expp;	/* ??? */
+		
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		exp->FL_VALUE = Salloc(buf, (unsigned)strlen(buf)+2) + 1;
+		exp->FL_VALUE = 0 /* Salloc(buf, (unsigned)strlen(buf)+1) */ ;
+		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH));
 		exp->FL_DATLAB = 0;
 	}
 	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
@@ -376,7 +370,6 @@ float2float(expp, tp)
 	else
 		*expp = arith2arith(tp, FLOAT2FLOAT, *expp);
 }
-#endif NOFLOAT
 
 array2pointer(exp)
 	register struct expr *exp;
@@ -384,8 +377,9 @@ array2pointer(exp)
 	/*	The expression, which must be an array, is converted
 		to a pointer.
 	*/
-	exp->ex_type = construct_type(POINTER, exp->ex_type->tp_up, 0,
-				     (arith)0, NO_PROTO);
+	exp->ex_type = construct_type(POINTER, exp->ex_type->tp_up
+				    , /* exp->ex_type->tp_typequal */ 0
+				    , (arith)0, NO_PROTO);
 }
 
 function2pointer(exp)
@@ -454,10 +448,9 @@ opnd2logical(expp, oper)
 	case LONG:
 	case ENUM:
 	case POINTER:
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
-#endif NOFLOAT
+	case LNGDBL:
 		break;
 	default:
 		expr_error(*expp, "%s operand to %s",
@@ -503,13 +496,11 @@ any2opnd(expp, oper)
 {
 	if (!*expp)
 		return;
-	switch ((*expp)->ex_type->tp_fund)	{	/* RM 7.1 */
+	switch ((*expp)->ex_type->tp_fund)	{
 	case CHAR:
 	case SHORT:
 	case ENUM:
-#ifndef NOFLOAT
-	case FLOAT:
-#endif NOFLOAT
+	/* case FLOAT:	/* not necessary anymore */
 		any2arith(expp, oper);
 		break;
 	case ARRAY:
@@ -533,10 +524,8 @@ any2parameter(expp)
 	/*	To handle default argument promotions
 	*/
 	any2opnd(expp, '(');
-#ifndef NOFLOAT
 	if ((*expp)->ex_type->tp_fund == FLOAT)
 		float2float(expp, double_type);
-#endif NOFLOAT
 }
 
 #ifndef NOBITFIELD
@@ -569,19 +558,13 @@ field2arith(expp)
 }
 #endif NOBITFIELD
 
-#ifndef NOFLOAT
-/*	switch_sign_fp() negates the given floating constant expression
-	The lexical analyser has reserved an extra byte of space in front
-	of the string containing the representation of the floating
-	constant.  This byte contains the '-' character and we have to
-	take care of the first byte the fl_value pointer points to.
-*/
+/*	switch_sign_fp() negates the given floating constant expression,
+ *	and frees the string representing the old value.
+ */
 switch_sign_fp(expr)
 	register struct expr *expr;
 {
-	if (*(expr->FL_VALUE) == '-')
-		++(expr->FL_VALUE);
-	else
-		--(expr->FL_VALUE);
+	flt_umin(&(expr->FL_ARITH));
+	if (expr->FL_VALUE) free(expr->FL_VALUE);
+	expr->FL_VALUE = 0;
 }
-#endif NOFLOAT

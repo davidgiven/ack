@@ -6,7 +6,6 @@
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
 #include	"lint.h"
-#include	"nofloat.h"
 #include	<system.h>
 #include	<em.h>
 #include	"debug.h"
@@ -21,7 +20,6 @@
 #include	"struct.h"
 #include	"level.h"
 #include	"mes.h"
-#include	"noRoption.h"
 
 /* #include	<em_reg.h> */
 
@@ -84,8 +82,9 @@ stack_level_of(lvl)
 		return local_level;
 	stl = &UniversalLevel;
 		
-	while (stl->sl_level != lvl)
+	while (stl->sl_level != lvl) {
 		stl = stl->sl_next;
+	}
 	return stl;
 }
 
@@ -214,25 +213,18 @@ unstack_world()
 			def->df_sc = EXTERN;
 		*/
 		
-		if (	def->df_sc == STATIC
-			&& def->df_type->tp_fund == FUNCTION
-			&& !def->df_initialized
-		)	{
+		if (def->df_sc == STATIC
+		    && def->df_type->tp_fund == FUNCTION
+		    && !def->df_initialized) {
 			/* orphaned static function */
-#ifndef NOROPTION
-			if (options['R'])
-				warning("static function %s never defined, %s",
-					idf->id_text,
-					"changed to extern"
-				);
-#endif
+			warning("static function %s never defined, %s"
+				    , idf->id_text
+				    , "changed to extern");
 			def->df_sc = EXTERN;
 		}
 		
-		if (
-			def->df_alloc == ALLOC_SEEN &&
-			!def->df_initialized
-		)	{
+		if (def->df_alloc == ALLOC_SEEN
+		    && !def->df_initialized) {
 			/* space must be allocated */
 			bss(idf);
 			if (def->df_sc != STATIC)

@@ -8,12 +8,13 @@
 #include	"lint.h"
 #ifndef	LINT
 
-#include	"nofloat.h"
 #include	<em.h>
 #include	<em_reg.h>
+#include	<alloc.h>
 #include	"debug.h"
 #include	"nobitfield.h"
 #include	"dataflow.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"
@@ -69,7 +70,7 @@ EVAL(expr, val, code, true_label, false_label)
 	int val, code;
 	label true_label, false_label;
 {
-	register int gencode = (code == TRUE);
+	register int gencode = (code == TRUE && expr->ex_type->tp_size > 0);
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
@@ -82,18 +83,20 @@ EVAL(expr, val, code, true_label, false_label)
 			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
-#ifndef NOFLOAT
 	case Float:	/* a floating constant	*/
 		if (gencode) {
 			label datlab = data_label();
 			
+			if (!expr->FL_VALUE) {
+				expr->FL_VALUE = Malloc(FLT_STRLEN);
+				flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
+			}
 			C_df_dlb(datlab);
 			C_rom_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 			C_lae_dlb(datlab, (arith)0);
 			C_loi(expr->ex_type->tp_size);
 		}
 		break;
-#endif NOFLOAT
 	case Oper:	/* compound expression	*/
 	{
 		int oper = expr->OP_OPER;
@@ -107,6 +110,7 @@ EVAL(expr, val, code, true_label, false_label)
 		}
 		if (tp->tp_fund == VOID)
 			gencode = 0;
+
 		switch (oper) {
 		case '+':
 			/*	We have the following possibilities :
@@ -130,13 +134,11 @@ EVAL(expr, val, code, true_label, false_label)
 					C_cuu();
 					C_ads(pointer_size);
 					break;
-#ifndef NOFLOAT
 				case FLOAT:
 				case DOUBLE:
 				case LNGDBL:
 					C_adf(tp->tp_size);
 					break;
-#endif NOFLOAT
 				default:
 					crash("bad type +");
 				}
@@ -152,13 +154,11 @@ EVAL(expr, val, code, true_label, false_label)
 					case POINTER:
 						C_ngi(tp->tp_size);
 						break;
-#ifndef NOFLOAT
 					case FLOAT:
 					case DOUBLE:
 					case LNGDBL:
 						C_ngf(tp->tp_size);
 						break;
-#endif NOFLOAT
 					default:
 						CRASH();
 					}
@@ -192,13 +192,11 @@ EVAL(expr, val, code, true_label, false_label)
 					C_ads(pointer_size);
 				}
 				break;
-#ifndef NOFLOAT
 			case FLOAT:
 			case DOUBLE:
 			case LNGDBL:
 				C_sbf(tp->tp_size);
 				break;
-#endif NOFLOAT
 			default:
 				crash("bad type -");
 			}
@@ -223,14 +221,12 @@ EVAL(expr, val, code, true_label, false_label)
 						else
 							C_mli(tp->tp_size);
 						break;
-#ifndef NOFLOAT
 					case FLOAT:
 					case DOUBLE:
 					case LNGDBL:
 						/*C_mlf(double_size);*/
 						C_mlf(tp->tp_size);
 						break;
-#endif NOFLOAT
 					default:
 						crash("bad type *");
 					}
@@ -249,14 +245,12 @@ EVAL(expr, val, code, true_label, false_label)
 					else
 						C_dvi(tp->tp_size);
 					break;
-#ifndef NOFLOAT
 				case FLOAT:
 				case DOUBLE:
 				case LNGDBL:
 					/*C_dvf(double_size);*/
 					C_dvf(tp->tp_size);
 					break;
-#endif NOFLOAT
 				default:
 					crash("bad type /");
 				}
@@ -309,13 +303,11 @@ EVAL(expr, val, code, true_label, false_label)
 					else
 						C_cmi(size);
 					break;
-#ifndef NOFLOAT
 				case FLOAT:
 				case DOUBLE:
 				case LNGDBL:
 					C_cmf(size);
 					break;
-#endif NOFLOAT
 				case POINTER:
 					C_cmp();
 					break;
@@ -543,10 +535,6 @@ EVAL(expr, val, code, true_label, false_label)
 			ASSERT(is_cp_cst(right));
 			if (gencode) {
 				C_adp(right->VL_VALUE);
-				if (val == RVAL && expr->ex_lvalue == 0) {
-					load_block(expr->ex_type->tp_size,
-						expr->ex_type->tp_align);
-				}
 			}
 			break;
 		case ARROW:
@@ -624,11 +612,9 @@ EVAL(expr, val, code, true_label, false_label)
 								true_label);
 			break;
 		case INT2INT:
-#ifndef NOFLOAT
 		case INT2FLOAT:
 		case FLOAT2INT:
 		case FLOAT2FLOAT:
-#endif NOFLOAT
 			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				conversion(right->ex_type, left->ex_type);
@@ -640,9 +626,10 @@ EVAL(expr, val, code, true_label, false_label)
 			only its lvalue is evaluated, its rvalue is
 			loaded by the following statements:
 		*/
-		if (gencode && val == RVAL && expr->ex_lvalue == 1)
+		if (gencode && val == RVAL && expr->ex_lvalue == 1) {
 			load_block(expr->ex_type->tp_size,
 				expr->ex_type->tp_align);
+		}
 		break;
 	}
 	default:
@@ -782,13 +769,12 @@ assop(type, oper)
 			break;
 		}
 		break;
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 	case LNGDBL:
 		switch (oper) {
 		case PLUSAB:
-		case PLUSPLUS:
+		case PLUSPLUS:			/* ??? etc... */
 		case POSTINCR:
 			C_adf(size);
 			break;
@@ -805,7 +791,6 @@ assop(type, oper)
 			break;
 		}
 		break;
-#endif NOFLOAT
 	case POINTER:
 		if (oper == MINAB || oper == MINMIN || oper == POSTDECR)
 			C_ngi(size);
@@ -851,7 +836,11 @@ store_val(vl, tp)
 		register struct idf *id = vl->vl_data.vl_idf;
 		register struct def *df = id->id_def;
 
-		if (df->df_level == L_GLOBAL) {
+		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
+		if (df->df_sc == GLOBAL
+		    || df->df_sc == EXTERN
+		    || df->df_sc == STATIC
+		    || df->df_sc == IMPLICIT) {
 			if (inword)
 				C_ste_dnam(id->id_text, val);
 			else
@@ -956,7 +945,11 @@ load_val(expr, rlval)
 			C_lpi(id->id_text);
 		}
 		else
-		if (df->df_level == L_GLOBAL) {
+		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
+		if ( df->df_sc == GLOBAL
+		    || df->df_sc == STATIC
+		    || df->df_sc == EXTERN
+		    || df->df_sc == IMPLICIT) {
 			if (rvalue) {
 				if (inword)
 					C_loe_dnam(id->id_text, val);
@@ -974,7 +967,7 @@ load_val(expr, rlval)
 			}
 		}
 		else {
-			ASSERT(df->df_sc != STATIC);
+			/* ASSERT(df->df_sc != STATIC); */
 			if (rvalue) {
 				if (inword || indword)
 					LoadLocal(df->df_address + val, size);

@@ -1,8 +1,10 @@
 struct repl {
 	struct	repl *next;
+	struct	idf *r_idf;		/* name of the macro */
 	struct	args *r_args;		/* replacement parameters */
-	char	r_text[LAPBUF];		/* replacement text */
+	int	r_level;		/* level of insertion */
 	char	*r_ptr;			/* replacement text pointer */
+	char	r_text[LAPBUF];		/* replacement text */
 };
 
 /* ALLOCDEF "repl" 4 */

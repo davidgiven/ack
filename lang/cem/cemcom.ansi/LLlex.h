@@ -10,7 +10,6 @@
 	to it.
 */
 
-#include "nofloat.h"
 #include "file_info.h"
 #include "nopp.h"
 
@@ -27,9 +26,7 @@ struct token	{
 			int tok_len;	/* length of row of bytes */
 		} tok_string;
 		arith tok_ival;		/* for INTEGER */
-#ifndef NOFLOAT
 		char *tok_fval;		/* for FLOATING */
-#endif NOFLOAT
 	} tok_data;
 };
 
@@ -41,9 +38,7 @@ struct token	{
 #define tk_bts	tok_data.tok_string.tok_bts
 #define tk_len	tok_data.tok_string.tok_len
 #define tk_ival	tok_data.tok_ival
-#ifndef NOFLOAT
 #define tk_fval	tok_data.tok_fval
-#endif NOFLOAT
 
 extern struct token dot, ahead, aside;
 

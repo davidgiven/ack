@@ -3,13 +3,13 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-/* SEMANTIC ANALYSIS (CHAPTER 7RM) -- MONADIC OPERATORS */
+/* SEMANTIC ANALYSIS (CHAPTER 3.3) -- MONADIC OPERATORS */
 
 #include	"botch_free.h"
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"Lpars.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"label.h"
@@ -18,7 +18,7 @@
 #include	"def.h"
 
 extern char options[];
-extern long full_mask[/*MAXSIZE*/];	/* cstoper.c */
+extern arith full_mask[/*MAXSIZE*/];	/* cstoper.c */
 char *symbol2str();
 
 ch7mon(oper, expp)
@@ -29,16 +29,20 @@ ch7mon(oper, expp)
 	register struct expr *expr;
 
 	switch (oper)	{
-	case '*':			/* RM 7.2 */
+	case '*':			/* 3.3.3.2 */
 		/* no FIELD type allowed	*/
 		if ((*expp)->ex_type->tp_fund == ARRAY)
 			array2pointer(*expp);
-		if ((*expp)->ex_type->tp_fund != POINTER)	{
-			expr_error(*expp,
-				"* applied to non-pointer (%s)",
-				symbol2str((*expp)->ex_type->tp_fund));
-		}
-		else {
+		if ((*expp)->ex_type->tp_fund != POINTER) {
+		    if ((*expp)->ex_type->tp_fund != FUNCTION) {
+			    expr_error(*expp,
+				    "* applied to non-pointer (%s)",
+				    symbol2str((*expp)->ex_type->tp_fund));
+		    } else {
+			    warning("superfluous use of * on function");
+			    /* ignore indirection (yegh) */
+		    }
+		} else {
 			expr = *expp;
 			if (expr->ex_lvalue == 0 && expr->ex_class != String)
 				/* dereference in administration only */
@@ -54,16 +58,17 @@ ch7mon(oper, expp)
 				(*expp)->ex_flags |= EX_READONLY;
 			if ((*expp)->ex_type->tp_typequal & TQ_VOLATILE)
 				(*expp)->ex_flags |= EX_VOLATILE;
+			(*expp)->ex_flags &= ~EX_ILVALUE;
 		}
 		break;
 	case '&':
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
-			warning("& before array ignored");
+			expr_warning(*expp, "& before array ignored");
 			array2pointer(*expp);
 		}
 		else
 		if ((*expp)->ex_type->tp_fund == FUNCTION) {
-			warning("& before function ignored");
+			expr_warning(*expp, "& before function ignored");
 			function2pointer(*expp);
 		}
 		else
@@ -74,6 +79,8 @@ ch7mon(oper, expp)
 #endif NOBITFIELD
 		if (!(*expp)->ex_lvalue)
 			expr_error(*expp, "& applied to non-lvalue");
+		else if ((*expp)->ex_flags & EX_ILVALUE)
+			expr_error(*expp, "& applied to illegal lvalue");
 		else {
 			/* assume that enums are already filtered out	*/
 			if (ISNAME(*expp)) {
@@ -90,28 +97,25 @@ ch7mon(oper, expp)
 					break;	/* break case '&' */
 				}
 			}
-			(*expp)->ex_type = pointer_to((*expp)->ex_type);
+			(*expp)->ex_type = pointer_to((*expp)->ex_type,
+						(*expp)->ex_type->tp_typequal);
 			(*expp)->ex_lvalue = 0;
 			(*expp)->ex_flags &= ~EX_READONLY;
 		}
 		break;
 	case '~':
-#ifndef NOFLOAT
 	{
 		int fund = (*expp)->ex_type->tp_fund;
 
-		if (fund == FLOAT || fund == DOUBLE)	{
-			expr_error(
-				*expp,
-				"~ not allowed on %s operands",
-				symbol2str(fund)
-			);
+		if (fund == FLOAT || fund == DOUBLE || fund == LNGDBL)	{
+			expr_error( *expp,
+				    "~ not allowed on %s operands",
+				    symbol2str(fund));
 			erroneous2int(expp);
 			break;
 		}
 		/* FALLTHROUGH */
 	}
-#endif NOFLOAT
 	case '-':
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
@@ -124,11 +128,9 @@ ch7mon(oper, expp)
 			  );
 		}
 		else
-#ifndef NOFLOAT
 		if (is_fp_cst(*expp))
 			switch_sign_fp(*expp);
 		else
-#endif NOFLOAT
 			*expp = new_oper((*expp)->ex_type,
 					NILEXPR, oper, *expp);
 		break;
@@ -152,7 +154,7 @@ ch7mon(oper, expp)
 		break;
 	case SIZEOF:
 		if (ISNAME(*expp) && (*expp)->VL_IDF->id_def->df_formal_array)
-			warning("sizeof formal array %s is sizeof pointer!",
+			expr_warning(*expp, "sizeof formal array %s is sizeof pointer!",
 				(*expp)->VL_IDF->id_text);
 		expr = intexpr((*expp)->ex_class == String ?
 				   (arith)((*expp)->SG_LEN) :

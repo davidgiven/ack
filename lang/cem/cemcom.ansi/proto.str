@@ -9,9 +9,14 @@ struct proto {
 	struct proto *next;
 	struct type *pl_type;	/* parameter type */
 	struct idf *pl_idf;	/* parameter identifier */
-	short pl_flag;		/* ELLIPSIS or FORMAL */
+	short pl_flag;		/* see define's */
 };
 
-#define NO_PROTO	((struct proto *)0)
+#define	NO_PROTO	((struct proto *)0)
+
+#define	PL_VOID		0x01
+#define	PL_FORMAL	0x02
+#define	PL_ELLIPSIS	0x04
+#define	PL_ERRGIVEN	0x08
 
 /* ALLOCDEF "proto" 10 */

@@ -5,7 +5,6 @@
 /* $Header$ */
 /* TYPE DESCRIPTOR */
 
-#include	"nofloat.h"
 #include	"nobitfield.h"
 
 struct type	{
@@ -23,6 +22,7 @@ struct type	{
 	struct type *tp_pointer;/* to POINTER */
 	struct type *tp_array;	/* to ARRAY */
 	struct proto *tp_proto;	/* prototype list */
+	struct proto *tp_pseudoproto;	/* pseudo prototype list */
 	struct type *tp_function;/* to FUNCTION */
 };
 
@@ -30,26 +30,24 @@ struct type	{
 /*	Type qualifiers. Note: TQ_VOLATILE and TQ_CONST can be
 	'ored' to specify: extern const volatile int a;
 */
-#define	TQ_VOLATILE	01
-#define	TQ_CONST	02
+#define	TQ_VOLATILE	0x01
+#define	TQ_CONST	0x02
 
 extern struct type
 	*create_type(), *standard_type(), *construct_type(), *pointer_to(),
-	*array_of(), *function_of();
+	*array_of(), *function_of(), *promoted_type();
 
 #ifndef NOBITFIELD
 extern struct type *field_of();
 #endif NOBITFIELD
 
 extern struct type
-	*char_type, *uchar_type,
+	*schar_type, *uchar_type,
 	*short_type, *ushort_type,
 	*word_type, *uword_type,
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
-#ifndef NOFLOAT
 	*float_type, *double_type, *lngdbl_type,
-#endif NOFLOAT
 	*void_type, *gen_type, *label_type,
 	*string_type, *funint_type, *error_type;
 

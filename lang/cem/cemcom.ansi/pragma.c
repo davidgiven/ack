@@ -38,15 +38,13 @@ struct pkey {
 
 extern struct idf *GetIdentifier();
 
-
 do_pragma()
 {
 	register struct pkey *pkp;
 	register struct idf *id;
 	struct token tk;
-	int flag;
 
-	if ((id = GetIdentifier()) != (struct idf *)0) {
+	if ((id = GetIdentifier(1)) != (struct idf *)0) {
 		/*	Lineair search - why bother ?
 		*/
 		for (pkp = &pragmas[0]; pkp->pk_key != P_UNKNOWN; pkp++)
@@ -67,8 +65,8 @@ do_pragma()
 			strict("unimplemented pragma directive");
 			break;
 		}
+		SkipToNewLine(0);
 	}
-	SkipToNewLine(0);
-
+	else strict("unrecognized pragma line");
 }
 #endif

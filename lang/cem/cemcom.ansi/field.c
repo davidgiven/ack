@@ -14,6 +14,7 @@
 #include	<em.h>
 #include	<em_reg.h>
 #include	"debug.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"

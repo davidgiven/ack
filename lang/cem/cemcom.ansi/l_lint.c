@@ -13,6 +13,7 @@
 #include	"debug.h"
 #include	"interface.h"
 #include	"assert.h"
+#include	<flt_arith.h>
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -24,7 +25,6 @@
 #include	"stack.h"
 #include	"type.h"
 #include	"level.h"
-#include	"nofloat.h"
 #include	"l_lint.h"
 #include	"l_state.h"
 #include	"l_outdef.h"

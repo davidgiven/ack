@@ -7,6 +7,7 @@
 
 #include	"botch_free.h"
 #include	<alloc.h>
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"proto.h"

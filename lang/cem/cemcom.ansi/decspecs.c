@@ -5,7 +5,6 @@
 /* $Header$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
-#include	"nofloat.h"
 #include	"assert.h"
 #include	"Lpars.h"
 #include	"decspecs.h"
@@ -13,7 +12,6 @@
 #include	"type.h"
 #include	"level.h"
 #include	"def.h"
-#include	"noRoption.h"
 
 extern char options[];
 extern int level;
@@ -70,7 +68,7 @@ do_decspecs(ds)
 		type and will have to be postponed to declare_idf.
 	*/
 
-	/* some adjustments as described in RM 8.2 */
+	/* some adjustments as described in 3.5.2. */
 	if (tp == 0) {
 		ds->ds_notypegiven = 1;
 		tp = int_type;
@@ -86,38 +84,24 @@ do_decspecs(ds)
 		if (tp == int_type)
 			tp = long_type;
 		else
-#ifndef NOFLOAT
 		if (tp == double_type)
 			tp = lngdbl_type;
 		else
-#endif NOFLOAT
 			error("long with illegal type");
 		break;
 	}
 	if (ds->ds_unsigned == UNSIGNED) {
 		switch (tp->tp_fund)	{
 		case CHAR:
-#ifndef NOROPTION
-			if (options['R'])
-				warning("unsigned char not allowed");
-#endif
 			tp = uchar_type;
 			break;
 		case SHORT:
-#ifndef NOROPTION
-			if (options['R'])
-				warning("unsigned short not allowed");
-#endif
 			tp = ushort_type;
 			break;
 		case INT:
 			tp = uint_type;
 			break;
 		case LONG:
-#ifndef NOROPTION
-			if (options['R'])
-				warning("unsigned long not allowed");
-#endif
 			tp = ulong_type;
 			break;
 		default:
@@ -128,7 +112,7 @@ do_decspecs(ds)
 	if (ds->ds_unsigned == SIGNED) {
 		switch (tp->tp_fund) {
 		case CHAR:
-			tp = char_type;
+			tp = schar_type;
 			break;
 		case SHORT:
 			tp = short_type;
@@ -172,8 +156,13 @@ qualifier_type(tp, typequal)
 		dtp->tp_typequal = typequal;
 		dtp->tp_size = tp->tp_size;
 		switch (fund) {
-		case POINTER:
 		case ARRAY:
+			if (typequal) {
+			    tp->tp_up = qualifier_type(tp->tp_up, typequal);
+			    dtp->tp_typequal = typequal = 0;
+			}
+			/* fallthrough */
+		case POINTER:
 		case FUNCTION:
 		case STRUCT:
 		case UNION:

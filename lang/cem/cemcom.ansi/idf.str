@@ -40,7 +40,6 @@ struct idf	{
 	struct sdef *id_sdef;	/* selector tags			*/
 	struct tag *id_struct;	/* struct and union tags		*/
 	struct tag *id_enum;	/* enum tags				*/
-	int id_proto;		/* non-zero don't complain about proto	*/
 	int id_special;		/* special action needed at occurrence	*/
 };
 

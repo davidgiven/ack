@@ -3,13 +3,13 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-/*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  7 RM	*/
+/*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  3.3		*/
 
 #include	"lint.h"
-#include	"nofloat.h"
 #include	"debug.h"
 #include	"nobitfield.h"
 #include	"idf.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"proto.h"
 #include	"type.h"
@@ -23,6 +23,7 @@
 
 extern char options[];
 extern char *symbol2str();
+extern struct type *qualifier_type();
 
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer
@@ -52,14 +53,14 @@ ch7sel(expp, oper, idf)
 				"char c; c->selector"
 			*/
 			switch (tp->tp_fund)	{
+			case POINTER:
+				break;
 			case INT:
 			case LONG:
-				/* Allowed by RM 14.1 */
+				/* An error is given in idf2sdef() */
 				ch7cast(expp, CAST, pa_type);
 				sd = idf2sdef(idf, tp);
 				tp = sd->sd_stype;
-				break;
-			case POINTER:
 				break;
 			default:
 				expr_error(exp, "-> applied to %s",
@@ -69,7 +70,9 @@ ch7sel(expp, oper, idf)
 				return;
 			}
 		}
-	} /* oper == ARROW */
+	} else {		/* oper == '.' */
+		/* nothing */
+	}
 	exp = *expp;
 	switch (tp->tp_fund)	{
 	case POINTER:	/* for int *p;	p->next = ...	*/
@@ -105,8 +108,10 @@ ch7sel(expp, oper, idf)
 			*/
 			exp->VL_VALUE += sd->sd_offset;
 			exp->ex_type = sd->sd_type;
-			if (exp->ex_type == error_type)
+			exp->ex_lvalue = exp->ex_type->tp_fund != ARRAY;
+			if (exp->ex_type == error_type) {
 				exp->ex_flags |= EX_ERROR;
+			}
 		}
 		else
 		if (exp->ex_class == Oper)	{
@@ -116,13 +121,17 @@ ch7sel(expp, oper, idf)
 				ASSERT(is_cp_cst(op->op_right));
 				op->op_right->VL_VALUE += sd->sd_offset;
 				exp->ex_type = sd->sd_type;
-				if (exp->ex_type == error_type)
+				exp->ex_lvalue = exp->ex_type->tp_fund != ARRAY;
+				if (exp->ex_type == error_type) {
 					exp->ex_flags |= EX_ERROR;
+				}
 			}
 			else {
 				exp = new_oper(sd->sd_type, exp, '.',
 						intexpr(sd->sd_offset, INT));
-				exp->ex_lvalue = exp->OP_LEFT->ex_lvalue;
+				exp->ex_lvalue = sd->sd_type->tp_fund != ARRAY;
+				if (!exp->OP_LEFT->ex_lvalue)
+					exp->ex_flags |= EX_ILVALUE;
 			}
 		}
 	}
@@ -130,11 +139,15 @@ ch7sel(expp, oper, idf)
 		exp = new_oper(sd->sd_type,
 			exp, oper, intexpr(sd->sd_offset, INT));
 		exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
+		exp->ex_flags &= ~EX_ILVALUE;
 	}
 	if (sd->sd_type->tp_typequal & TQ_CONST)
 		exp->ex_flags |= EX_READONLY;
 	if (sd->sd_type->tp_typequal & TQ_VOLATILE)
 		exp->ex_flags |= EX_VOLATILE;
+	if (oper == '.' && exp->ex_flags & EX_READONLY)  {
+		exp->ex_type = qualifier_type(exp->ex_type, TQ_CONST);
+	}
 	*expp = exp;
 }
 
@@ -191,15 +204,6 @@ ch7cast(expp, oper, tp)
 		int i = is_integral_type(tp);
 
 		if (oldi && i)	{
-			if (	oper != CAST
-			&&	(	tp->tp_fund == ENUM
-				||	oldtp->tp_fund == ENUM
-				)
-			) {
-				expr_warning(*expp,
-					"dubious %s on enum",
-					symbol2str(oper));
-			}
 #ifdef	LINT
 			if (oper == CAST)
 				(*expp)->ex_type = tp;
@@ -209,13 +213,8 @@ ch7cast(expp, oper, tp)
 			int2int(expp, tp);
 #endif	LINT
 		}
-#ifndef NOFLOAT
 		else
 		if (oldi && !i)	{
-			if (oldtp->tp_fund == ENUM && oper != CAST)
-				expr_warning(*expp,
-					"conversion of enum to %s\n",
-					symbol2str(tp->tp_fund));
 #ifdef	LINT
 			if (oper == CAST)
 				(*expp)->ex_type = tp;
@@ -247,12 +246,6 @@ ch7cast(expp, oper, tp)
 			float2float(expp, tp);
 #endif	LINT
 		}
-#else NOFLOAT
-		else {
-			crash("(ch7cast) floats not implemented\n");
-			/*NOTREACHED*/
-		}
-#endif NOFLOAT
 	}
 	else
 	if (oldtp->tp_fund == POINTER && tp->tp_fund == POINTER)	{
@@ -330,6 +323,9 @@ ch7cast(expp, oper, tp)
 			);
 		(*expp)->ex_type = tp;		/* brute force */
 	}
+	if (oper == CAST) {
+		(*expp)->ex_flags |= EX_ILVALUE;
+	}
 }
 
 /*	Determine whether two types are equal.
@@ -348,9 +344,10 @@ equal_type(tp, otp)
 		return 0;
 	if (tp->tp_align != otp->tp_align)
 		return 0;
-	if (tp->tp_fund != ARRAY)
+	if (tp->tp_fund != ARRAY /* && tp->tp_fund != STRUCT */ ) {	/* UNION ??? */
 		if (tp->tp_size != otp->tp_size)
 			return 0;
+	}
 
 	switch (tp->tp_fund) {
 
@@ -359,9 +356,13 @@ equal_type(tp, otp)
 			each parameter in the composite parameter type list
 			is the composite type of the corresponding paramaters.
 		*/
-		if (tp->tp_proto && otp->tp_proto &&
-		    !equal_proto(tp->tp_proto, otp->tp_proto))
-			return 0;
+		if (tp->tp_proto && otp->tp_proto) {
+			if (!equal_proto(tp->tp_proto, otp->tp_proto))
+				return 0;
+		} else if (tp->tp_proto || otp->tp_proto) {
+			if (!legal_mixture(tp, otp))
+				return 0;
+		}
 		return equal_type(tp->tp_up, otp->tp_up);
 
 	case ARRAY:
@@ -374,6 +375,16 @@ equal_type(tp, otp)
 		return equal_type(tp->tp_up, otp->tp_up);
 
 	case POINTER:
+		if (equal_type(tp->tp_up, otp->tp_up)) {
+		    if (otp->tp_up->tp_typequal & TQ_CONST) {
+			if (!(tp->tp_up->tp_typequal & TQ_CONST)) {
+			    strict("illegal use of pointer to const object");
+			}
+		    }
+		    return 1;
+		}
+		else return 0;
+
 	case FIELD:
 		return equal_type(tp->tp_up, otp->tp_up);
 
@@ -387,6 +398,78 @@ equal_type(tp, otp)
 	}
 }
 
+check_pseudoproto(pl, opl)
+	register struct proto *pl, *opl;
+{
+	int retval = 1;
+
+	if (pl->pl_flag & PL_ELLIPSIS) {
+		error("illegal ellipsis terminator");
+		return 2;
+	}
+	while (pl && opl) {
+	    if (!equal_type(pl->pl_type, opl->pl_type)) {
+		if (!(pl->pl_flag & PL_ERRGIVEN)
+		    && !(opl->pl_flag & PL_ERRGIVEN))
+			error("incorrect type for parameter %s of definition",
+				opl->pl_idf->id_text);
+		pl->pl_flag |= PL_ERRGIVEN;
+		opl->pl_flag |= PL_ERRGIVEN;
+		retval = 2;
+	    }
+	    pl = pl->next;
+	    opl = opl->next;
+	}
+	if (pl || opl) {
+		error("incorrect number of parameters");
+		retval = 2;
+	}
+	return retval;
+}
+
+legal_mixture(tp, otp)
+	struct type *tp, *otp;
+{
+	register struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
+	int retval = 1;
+	struct proto *prot;
+	int fund;
+
+	ASSERT( (pl != 0) ^ (opl != 0));
+	if (pl)  {
+		prot = pl;
+	} else  {
+		prot = opl;
+	}
+	if (!opl && otp->tp_pseudoproto) {
+		return check_pseudoproto(tp->tp_proto, otp->tp_pseudoproto);
+	}
+
+	if (prot->pl_flag & PL_ELLIPSIS) {
+		if (!(prot->pl_flag & PL_ERRGIVEN)) {
+			if (pl)
+				error("illegal ellipsis terminator");
+			else	error("ellipsis terminator in previous (prototype) declaration");
+		}
+		prot->pl_flag |= PL_ERRGIVEN;
+		prot = prot->next;
+		return 2;
+	}
+	while (prot) {
+				/* if (!(prot->pl_flag & PL_ELLIPSIS)) {} */
+		fund = prot->pl_type->tp_fund;
+		if (fund == CHAR || fund == SHORT || fund == FLOAT) {
+			if (!(prot->pl_flag & PL_ERRGIVEN))
+			    error("illegal %s parameter in %sdeclaration",
+				symbol2str(fund), (opl ? "previous (prototype) " : "" ));
+			prot->pl_flag |= PL_ERRGIVEN;
+			retval = 2;
+		}
+		prot = prot->next;
+	}
+	return retval;
+}
+
 equal_proto(pl, opl)
 	register struct proto *pl, *opl;
 {
@@ -397,15 +480,35 @@ equal_proto(pl, opl)
 		(a function prototype), the composite type is a function
 		prototype with parameter type list.
 	*/
-	if (pl == 0 || opl == 0) return 0;
+	while ( pl && opl) {
 
-	if (pl->pl_flag != opl->pl_flag)
+	    if ((pl->pl_flag & ~PL_ERRGIVEN) != (opl->pl_flag & ~PL_ERRGIVEN))
 		return 0;
 
-	if (!equal_type(pl->pl_type, opl->pl_type))
+	    if (!equal_type(pl->pl_type, opl->pl_type))
 		return 0;
 
-	return equal_proto(pl->next, opl->next);
+	    pl = pl->next;
+	    opl = opl->next;
+	}
+	return !(pl || opl);
+}
+
+recurconst(tp)
+struct type *tp;
+{
+	register struct sdef *sdf;
+
+	ASSERT(tp);
+	if (!tp) return 0;
+	if (tp->tp_typequal & TQ_CONST) return 1;
+	sdf = tp->tp_sdef;
+	while (sdf) {
+		if (recurconst(sdf->sd_type))
+			return 1;
+		sdf = sdf->sd_sdef;
+	}
+	return 0;
 }
 
 ch7asgn(expp, oper, expr)
@@ -431,13 +534,17 @@ ch7asgn(expp, oper, expr)
 	struct type *tp;
 
 	/* We expect an lvalue */
-	if (!exp->ex_lvalue)	{
-		expr_error(exp, "no lvalue in lhs of %s", symbol2str(oper));
-		exp->ex_depth = 99;	/* no direct store/load at EVAL() */
-			/* what is 99 ??? DG */
+	if (!exp->ex_lvalue) {
+		expr_error(exp, "no lvalue in operand of %s", symbol2str(oper));
+	} else if (exp->ex_flags & EX_ILVALUE)	{
+		strict("incorrect lvalue in operand of %s", symbol2str(oper));
+	} else if (exp->ex_flags & EX_READONLY) {
+		expr_error(exp, "operand of %s is read-only", symbol2str(oper));
+	} else if (fund == STRUCT || fund == UNION) {
+		if (recurconst(exp->ex_type))
+			expr_error(expr,"operand of %s contains a const-qualified member",
+					    symbol2str(oper));
 	}
-	if (exp->ex_flags & EX_READONLY)
-		strict("lhs of assignment is read-only");
 
 	/*	Preserve volatile markers across the tree.
 		This is questionable, depending on the way the optimizer
@@ -520,11 +627,9 @@ is_arith_type(tp)
 	case INT:
 	case LONG:
 	case ENUM:
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 	case LNGDBL:
-#endif NOFLOAT
 		return 1;
 #ifndef NOBITFIELD
 	case FIELD:

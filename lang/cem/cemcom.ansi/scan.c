@@ -166,7 +166,7 @@ copyact(ch1, ch2, lvl)
 		case '/':
 			LoadChar(ch);
 
-			if (ch == '*')	{	/* skip comment	*/
+			if (ch == '*' && !InputLevel)	{	/* skip comment	*/
 				skipcomment();
 				continue;
 			}

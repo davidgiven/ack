@@ -12,7 +12,6 @@
 #include	"arith.h"
 #include	"def.h"
 #include	"type.h"
-#include	"noRoption.h"
 
 extern char options[];
 
@@ -33,25 +32,10 @@ enter_label(idf, defining)
 								idf->id_text);
 		}
 		else	{		/* there may still be room for it */
-#ifndef NOROPTION
-			if (options['R'] && def->df_sc == TYPEDEF)
-				warning("label %s is also a typedef",
-					idf->id_text);
-#endif
-			
 			if (def->df_level == level)	/* but alas, no */
 				error("%s is not a label", idf->id_text);
 			else	{
-				register int lvl = def->df_level + 1;
-				
-#ifndef NOROPTION
-				if (options['R'] && def->df_level > L_LOCAL)
-					warning("label %s is not function-wide",
-								idf->id_text);
-#endif
-				if (lvl < L_LOCAL)
-					lvl = L_LOCAL;
-				add_def(idf, LABEL, label_type, lvl);
+				add_def(idf, LABEL, label_type, L_LOCAL);
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 
 #include	"target_sizes.h"
 #include	"idf.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"label.h"
@@ -15,11 +16,10 @@
 #include	"Lpars.h"
 #include	"assert.h"
 
-long mach_long_sign;	/* sign bit of the machine long */
-int mach_long_size;	/* size of long on this machine == sizeof(long) */
-long full_mask[MAXSIZE];/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
+arith full_mask[MAXSIZE];/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
+extern int ResultKnown;
 
 cstbin(expp, oper, expr)
 	register struct expr **expp, *expr;
@@ -39,35 +39,38 @@ cstbin(expp, oper, expr)
 		break;
 	case '/':
 		if (o2 == 0)	{
-			expr_error(expr, "division by 0");
+			if (!ResultKnown)
+				expr_error(expr, "division by 0");
+			else
+				expr_warning(expr, "division by 0");
 			break;
 		}
 		if (uns)	{
 			/*	this is more of a problem than you might
 				think on C compilers which do not have
-				unsigned long.
+				unsigned arith (== long (probably)).
 			*/
-			if (o2 & mach_long_sign)	{/* o2 > max_long */
+			if (o2 & arith_sign)	{/* o2 > max_arith */
 				o1 = ! (o1 >= 0 || o1 < o2);
 				/*	this is the unsigned test
-					o1 < o2 for o2 > max_long
+					o1 < o2 for o2 > max_arith
 				*/
 			}
-			else	{		/* o2 <= max_long */
-				long half, bit, hdiv, hrem, rem;
+			else	{		/* o2 <= max_arith */
+				arith half, bit, hdiv, hrem, rem;
 
-				half = (o1 >> 1) & ~mach_long_sign;
+				half = (o1 >> 1) & ~arith_sign;
 				bit = o1 & 01;
 				/*	now o1 == 2 * half + bit
-					and half <= max_long
-					and bit <= max_long
+					and half <= max_arith
+					and bit <= max_arith
 				*/
 				hdiv = half / o2;
 				hrem = half % o2;
 				rem = 2 * hrem + bit;
 				o1 = 2 * hdiv + (rem < 0 || rem >= o2);
 				/*	that is the unsigned compare
-					rem >= o2 for o2 <= max_long
+					rem >= o2 for o2 <= max_arith
 				*/
 			}
 		}
@@ -76,24 +79,27 @@ cstbin(expp, oper, expr)
 		break;
 	case '%':
 		if (o2 == 0)	{
-			expr_error(expr, "modulo by 0");
+			if (!ResultKnown)
+				expr_error(expr, "modulo by 0");
+			else
+				expr_warning(expr, "modulo by 0");
 			break;
 		}
 		if (uns)	{
-			if (o2 & mach_long_sign)	{/* o2 > max_long */
+			if (o2 & arith_sign)	{/* o2 > max_arith */
 				o1 = (o1 >= 0 || o1 < o2) ? o1 : o1 - o2;
 				/*	this is the unsigned test
-					o1 < o2 for o2 > max_long
+					o1 < o2 for o2 > max_arith
 				*/
 			}
-			else	{		/* o2 <= max_long */
-				long half, bit, hrem, rem;
+			else	{		/* o2 <= max_arith */
+				arith half, bit, hrem, rem;
 
-				half = (o1 >> 1) & ~mach_long_sign;
+				half = (o1 >> 1) & ~arith_sign;
 				bit = o1 & 01;
 				/*	now o1 == 2 * half + bit
-					and half <= max_long
-					and bit <= max_long
+					and half <= max_arith
+					and bit <= max_arith
 				*/
 				hrem = half % o2;
 				rem = 2 * hrem + bit;
@@ -117,7 +123,7 @@ cstbin(expp, oper, expr)
 			break;
 		if (uns)	{
 			o1 >>= 1;
-			o1 &= ~mach_long_sign;
+			o1 &= ~arith_sign;
 			o1 >>= (o2-1);
 		}
 		else
@@ -133,9 +139,9 @@ cstbin(expp, oper, expr)
 		/* Fall through */
 	case '>':
 		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 > o2 : 1) :
-				(o2 & mach_long_sign ? 0 : o1 > o2)
+			o1 = (o1 & arith_sign ?
+				(o2 & arith_sign ? o1 > o2 : 1) :
+				(o2 & arith_sign ? 0 : o1 > o2)
 			);
 		}
 		else
@@ -151,9 +157,9 @@ cstbin(expp, oper, expr)
 		/* Fall through */
 	case GREATEREQ:
 		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 >= o2 : 1) :
-				(o2 & mach_long_sign ? 0 : o1 >= o2)
+			o1 = (o1 & arith_sign ?
+				(o2 & arith_sign ? o1 >= o2 : 1) :
+				(o2 & arith_sign ? 0 : o1 >= o2)
 			);
 		}
 		else
@@ -201,16 +207,18 @@ cut_size(expr)
 	}
 	if (uns) {
 		if (o1 & ~full_mask[size])
+		    if (!ResultKnown)
 			expr_warning(expr,
 				"overflow in unsigned constant expression");
 		o1 &= full_mask[size];
 	}
 	else {
-		int nbits = (int) (mach_long_size - size) * 8;
-		long remainder = o1 & ~full_mask[size];
+		int nbits = (int) (arith_size - size) * 8;
+		arith remainder = o1 & ~full_mask[size];
 
 		if (remainder != 0 && remainder != ~full_mask[size])
-			expr_warning(expr, "overflow in constant expression");
+		    if (!ResultKnown)
+			expr_warning(expr,"overflow in constant expression");
 		o1 <<= nbits;		/* ??? */
 		o1 >>= nbits;
 	}
@@ -228,10 +236,8 @@ init_cst()
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 	}
-	mach_long_size = i;
-	mach_long_sign = 1L << (mach_long_size * 8 - 1);
-	if ((int)long_size < mach_long_size)
-		fatal("sizeof (long) insufficient on this machine");
+	if ((int)long_size > arith_size)
+		fatal("sizeof (arith) insufficient on this machine");
 	max_int = full_mask[(int)int_size] & ~(1L << ((int)int_size * 8 - 1));
 	max_unsigned = full_mask[(int)int_size];
 }

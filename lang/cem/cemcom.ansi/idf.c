@@ -7,7 +7,6 @@
 
 #include	"lint.h"
 #include	<em_reg.h>
-#include	"nofloat.h"
 #include	"debug.h"
 #include	"idfsize.h"
 #include	"botch_free.h"
@@ -31,7 +30,6 @@
 #include	"Lpars.h"
 #include	"assert.h"
 #include	"specials.h"	/* registration of special identifiers	*/
-#include	"noRoption.h"
 
 int idfsize = IDFSIZE;
 extern char options[];
@@ -226,24 +224,18 @@ declare_idf(ds, dc, lvl)
 			type = construct_type(POINTER, type, 0, (arith)0,
 					      NO_PROTO);
 			break;
-		case ARRAY:	/* RM 10.1	*/
+		case ARRAY:	/* 3.7.1 */
 			type = construct_type(POINTER, type->tp_up, 0, (arith)0,
 					      NO_PROTO);
 			formal_array = 1;
 			break;
-#ifndef NOFLOAT
-		case FLOAT:	/* RM 10.1	*/
-			type = double_type;
-			break;
-#endif NOFLOAT
+		case FLOAT:
 		case CHAR:
 		case SHORT:
-			/*	The RM is not clear about this: we must
-				convert the parameter from int (they have
-				been pushed as ints) to the specified type.
-				The conversion to type int or uint is not
-				allowed.
-			*/
+			/* The conversion is done in formal_cvt(). It is
+			 * not done when the type is float and there is a
+			 * prototype.
+			 */
 			break;
 		}
 	}
@@ -252,29 +244,27 @@ declare_idf(ds, dc, lvl)
 	*/
 	/* update the storage class */
 	if (type && type->tp_fund == FUNCTION)	{
-		if (sc == 0 || (ds->ds_sc_given && sc == AUTO))	/* RM 8.1 */
-			sc = GLOBAL;
-		else
-		if (sc == REGISTER) {
-			error("function storage class cannot be register");
-			ds->ds_sc = sc = GLOBAL;
+		if (lvl != L_GLOBAL)  {		/* 3.5.1 */
+			if (sc == 0)
+				sc = GLOBAL;
+			else if (sc != EXTERN && sc != IMPLICIT) {
+				error("illegal storage class %s for function with block-scope"
+					, symbol2str(sc));
+				ds->ds_sc = sc = GLOBAL;
+			}
 		}
+		else if (sc == 0)
+			sc = GLOBAL;
 	}
 	else	/* non-FUNCTION */
 		if (sc == 0)
 			sc =	lvl == L_GLOBAL ? GLOBAL
 				: lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL
 				: AUTO;
-#ifndef NOROPTION
-	if (options['R']) { /* some special K & R tests */
-		/* is it also an enum? */
-		if (idf->id_enum && idf->id_enum->tg_level == level)
-			warning("%s is also an enum tag", idf->id_text);
-		/* is it a universal typedef? */
-		if (def && def->df_level == L_UNIVERSAL)
-			warning("redeclaring reserved word %s", idf->id_text);
-	}
-#endif
+
+	/* is it a universal typedef? */
+	if (def && def->df_level == L_UNIVERSAL)
+		warning("redeclaring reserved word %s", idf->id_text);
 
 #ifdef	LINT
 	if (	def && def->df_level < lvl
@@ -330,6 +320,7 @@ declare_idf(ds, dc, lvl)
 		def->df_file = idf->id_file;
 		def->df_line = idf->id_line;
 	}
+#if	0	/* be more strict in scope (at least for now) */
 	else
 	if (	lvl >= L_LOCAL &&
 		(type->tp_fund == FUNCTION || sc == EXTERN)
@@ -337,16 +328,13 @@ declare_idf(ds, dc, lvl)
 		/*	extern declaration inside function is treated the
 			same way as global extern declaration
 		*/
-#ifndef NOROPTION
-		if (	options['R'] &&
-			(sc == STATIC && type->tp_fund == FUNCTION)
-		)
+		if (sc == STATIC && type->tp_fund == FUNCTION)
 			if (!is_anon_idf(idf))
 				warning("non-global static function %s",
 					idf->id_text);
-#endif
 		declare_idf(ds, dc, L_GLOBAL);
 	}
+#endif
 	else	{ /* fill in the def block */
 		register struct def *newdef = new_def();
 
@@ -376,7 +364,8 @@ declare_idf(ds, dc, lvl)
 			switch (sc)	{
 			case REGISTER:
 			case AUTO:
-				if (type->tp_size == (arith)-1) {
+				if (type->tp_size == (arith)-1
+					&& type->tp_fund != ARRAY) {
 					error("size of local %s unknown",
 						idf->id_text);
 				/** type = idf->id_def->df_type = int_type; **/
@@ -423,10 +412,12 @@ global_redecl(idf, new_sc, tp)
 		in storage class.
 	*/
 	register struct def *def = idf->id_def;
+	int retval;
 
-	if (!equal_type(tp, def->df_type))
+	if (!(retval = equal_type(tp, def->df_type)))
 		error("redeclaration of %s with different type", idf->id_text);
-	else update_proto(tp, def->df_type);
+	else if (retval == 1)
+		update_proto(tp, def->df_type);
 	if (tp->tp_fund == ARRAY) {
 		/* Multiple array declaration; this may be interesting */
 		if (tp->tp_size < 0)	{		/* new decl has [] */
@@ -451,6 +442,7 @@ global_redecl(idf, new_sc, tp)
 	*/
 	if (new_sc == IMPLICIT)
 		return;			/* no new information */
+
 	switch (def->df_sc)	{	/* the old storage class */
 	case EXTERN:
 		switch (new_sc)	{	/* the new storage class */
@@ -458,15 +450,8 @@ global_redecl(idf, new_sc, tp)
 		case GLOBAL:
 			break;
 		case STATIC:
-			if (def->df_initialized)	{
-				error("cannot redeclare %s to static",
-					idf->id_text);
-			}
-			else	{
-				warning("%s redeclared to static",
-						idf->id_text);
-			}
-			def->df_sc = new_sc;
+			warning("redeclaration of %s to static ignored"
+						, idf->id_text);
 			break;
 		default:
 			crash("bad storage class");
@@ -481,17 +466,8 @@ global_redecl(idf, new_sc, tp)
 		case GLOBAL:
 			break;
 		case STATIC:
-			if (def->df_initialized)
-				error("cannot redeclare %s to static",
-					idf->id_text);
-			else	{
-#ifndef NOROPTION
-				if (options['R'])
-					warning("%s redeclared to static",
-						idf->id_text);
-#endif
-				def->df_sc = STATIC;
-			}
+			warning("redeclaration of %s to static ignored"
+						, idf->id_text);
 			break;
 		default:
 			crash("bad storage class");
@@ -500,21 +476,13 @@ global_redecl(idf, new_sc, tp)
 		break;
 	case STATIC:
 		switch (new_sc)	{	/* the new storage class */
-		case EXTERN:
-			if (def->df_initialized)
-				error("cannot redeclare %s to extern",
-					idf->id_text);
-			else	{
-				warning("%s redeclared to extern",
-					idf->id_text);
-				def->df_sc = EXTERN;
-			}
-			break;
 		case GLOBAL:
+			warning("%s redeclared extern", idf->id_text);
+			def->df_sc = new_sc;
+			break;
+		case EXTERN:			/* complain at definition */
+			break;
 		case STATIC:
-			if (def->df_type->tp_fund != FUNCTION)
-				warning("%s was already static",
-					idf->id_text);
 			break;
 		default:
 			crash("bad storage class");
@@ -528,11 +496,6 @@ global_redecl(idf, new_sc, tp)
 			def->df_sc = new_sc;
 			break;
 		case STATIC:
-#ifndef NOROPTION
-			if (options['R'])
-				warning("%s was implicitly declared as extern",
-					idf->id_text);
-#endif
 			def->df_sc = new_sc;
 			break;
 		default:
@@ -568,18 +531,16 @@ good_formal(def, idf)
 }
 
 declare_params(dc)
-	register struct declarator *dc;
+	struct declarator *dc;
 {
 	/*	Declares the formal parameters if they exist.
 	*/
 	register struct formal *fm = dc->dc_formal;
-	
+
 	while (fm)	{
 		declare_parameter(fm->fm_idf);
 		fm = fm->next;
 	}
-	free_formals(dc->dc_formal);
-	dc->dc_formal = 0;
 }
 
 init_idf(idf)
@@ -617,7 +578,76 @@ declare_enum(tp, idf, l)
 	idf->id_def->df_address = l;
 }
 
-declare_formals(fp)
+check_formals(idf, dc)
+	struct idf *idf;
+	struct declarator *dc;
+{
+	register struct formal *fm = dc->dc_formal;
+	register struct proto *pl = idf->id_def->df_type->tp_proto;
+	register struct decl_unary *du = dc->dc_decl_unary;
+
+	if (!du) {	/* error or typdef'ed function */
+		error("illegal definition of %s", idf->id_text);
+		return;
+	}
+
+	while (du && du->du_fund != FUNCTION)
+		du = du->next;
+	ASSERT(du);
+	if (du->du_proto) return;
+
+	warning("'%s' old-fashioned function definition", dc->dc_idf->id_text);
+
+	if (pl) {
+		if (pl->pl_flag & PL_ELLIPSIS) {
+		    if (!(du->du_proto) && !(pl->pl_flag & PL_ERRGIVEN))
+			error("ellipsis terminator in previous declaration");
+		    pl = pl->next;
+		}
+		else if (pl->pl_flag & PL_VOID) {
+		    pl = pl->next;			/* should be 0 */
+		}
+		while(fm && pl) {
+		    if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type)
+					, pl->pl_type)) {
+			if (!(pl->pl_flag & PL_ERRGIVEN))
+			    error("incorrect type for parameter %s"
+						, fm->fm_idf->id_text);
+			pl->pl_flag |= PL_ERRGIVEN;
+		    }
+		    fm = fm->next;
+		    pl = pl->next;
+		}
+		if (pl || fm) {
+			error("incorrect number of parameters");
+		}
+	} else {			/* make a pseudo-prototype */
+		register struct proto *lpl;
+
+		while (fm) {
+			if (pl == 0) pl = lpl = new_proto();
+			else {
+				lpl->next = new_proto();
+				lpl = lpl->next;
+			}
+			lpl->pl_flag = PL_FORMAL;
+			lpl->pl_idf = fm->fm_idf;
+			lpl->pl_type =
+				    promoted_type(fm->fm_idf->id_def->df_type);
+			fm = fm->next;
+		}
+		if (pl == 0) {		/* make func(void) */
+			pl = new_proto();
+			pl->pl_flag = PL_VOID;
+		}
+		idf->id_def->df_type->tp_pseudoproto = pl;
+	}
+	free_formals(dc->dc_formal);
+	dc->dc_formal = 0;
+}
+
+declare_formals(idf, fp)
+	struct idf *idf;
 	arith *fp;
 {
 	/*	Declares those formals as int that haven't been declared
@@ -628,6 +658,7 @@ declare_formals(fp)
 	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
 	arith f_offset = (arith)0;
 	register int nparams = 0;
+	int hasproto = idf->id_def->df_type->tp_proto != 0;
 
 #ifdef	DEBUG
 	if (options['t'])
@@ -636,13 +667,22 @@ declare_formals(fp)
 	while (se)	{
 		register struct def *def = se->se_idf->id_def;
 		
+		/* this stacklevel may also contain tags. ignore them */
+		if (!def || def->df_level < L_FORMAL1 ) {
+			se = se->next;
+			continue;
+		}
+
 		def->df_address = f_offset;
 		/*	the alignment convention for parameters is: align on
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
 		f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
-		formal_cvt(def); /* cvt int to char or short, if necessary */
+		/* cvt int to char or short and double to float, if necessary
+		 */
+		formal_cvt(hasproto, def);
+
 		se = se->next;
 		def->df_level = L_FORMAL2;	/* CJ */
 		RegisterAccount(def->df_address, def->df_type->tp_size,
@@ -662,11 +702,10 @@ regtype(tp)
 	case INT:
 	case LONG:
 		return reg_any;
-#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
+	case LNGDBL:
 		return reg_float;
-#endif NOFLOAT
 	case POINTER:
 		return reg_pointer;
 	}

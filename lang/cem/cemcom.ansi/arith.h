@@ -26,3 +26,7 @@
 #define	arith	long				/* dummy */
 
 #endif	SPECIAL_ARITHMETICS
+
+#define	arith_size	(sizeof(arith))
+#define	arith_sign	((arith) 1 << (arith_size * 8 - 1))
+#define	max_arith	(~arith_sign)

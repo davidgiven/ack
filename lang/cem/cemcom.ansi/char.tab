@@ -10,14 +10,15 @@
 %iSTGARB
 STSKIP:\r \t\013\f
 STNL:\n
-STCOMP:-!&+<=>|
-STSIMP:%()*,/:;?[]^{}~
+STCOMP:-!&+<=>|*%/^
+STSIMP:(),:;?[]{}~
 STCHAR:'
-STIDF:a-zA-KM-Z_
+STIDF:a-zA-KM-Z_\003
 STELL:L
 STNUM:.0-9
 STSTR:"
 STEOI:\200
+STMSPEC:\004
 %T/* character classes */
 %T#include "class.h"
 %Tchar tkclass[] = {
@@ -44,7 +45,7 @@ STEOI:\200
 %	ISHEX
 %
 %C
-1:a-fA-F
+1:0-9a-fA-F
 %Tchar ishex[] = {
 %p
 %T};
@@ -54,14 +55,6 @@ STEOI:\200
 %C
 1:0-7
 %Tchar isoct[] = {
-%p
-%T};
-%
-%	ISSUF
-%
-%C
-1:lLuU
-%Tchar issuf[] = {
 %p
 %T};
 %

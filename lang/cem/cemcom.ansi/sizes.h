@@ -5,16 +5,13 @@
 /* $Header$ */
 /* VARIOUS TARGET MACHINE SIZE DESCRIPTORS */
 
-#include "nofloat.h"
 #include "nocross.h"
 #include "target_sizes.h"
 
 #ifndef NOCROSS
 extern arith
 	short_size, word_size, dword_size, int_size, long_size,
-#ifndef NOFLOAT
 	float_size, double_size, lngdbl_size,
-#endif NOFLOAT
 	pointer_size;
 #else NOCROSS
 #define short_size	(SZ_SHORT)
@@ -22,11 +19,9 @@ extern arith
 #define dword_size	(2*SZ_WORD)
 #define int_size	(SZ_INT)
 #define long_size	(SZ_LONG)
-#ifndef NOFLOAT
 #define float_size	(SZ_FLOAT)
 #define double_size	(SZ_DOUBLE)
 #define	lngdbl_size	(SZ_LNGDBL)
-#endif NOFLOAT
 #define pointer_size	(SZ_POINTER)
 #endif NOCROSS
 

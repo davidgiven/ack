@@ -23,7 +23,6 @@
 #include	"level.h"
 #include	"assert.h"
 #include	"sizes.h"
-#include	"noRoption.h"
 
 /*	Type of previous selector declared with a field width specified,
 	if any.  If a selector is declared with no field with it is set to 0.
@@ -78,14 +77,6 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	register struct sdef *newsdef;
 	int lvl = tg->tg_level;
 	
-#ifndef NOROPTION
-	if (options['R'] && !is_anon_idf(idf))	{
-		/* a K & R test */
-		if (idf->id_struct && idf->id_struct->tg_level == level)
-			warning("%s is also a struct/union tag", idf->id_text);
-	}
-#endif
-
 	if (stp->tp_fund == STRUCT)	{
 #ifndef NOBITFIELD
 		if (fd == 0)	{	/* no field width specified	*/
@@ -105,24 +96,11 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 #endif NOBITFIELD
 	}
 	else	{	/* (stp->tp_fund == UNION)		*/
-		if (fd)	{
-			error("fields not allowed in unions");
-			free_field(fd);
-			fd = 0;
-		}
+		if (fd) offset = add_field(szp, fd, &tp, idf, stp);
 		offset = (arith)0;
 	}
 	
 	check_selector(idf, stp);
-#ifndef NOROPTION
-	if (options['R'])	{
-		if (	sdef && sdef->sd_level == lvl &&
-			( sdef->sd_offset != offset ||
-			  !equal_type(sdef->sd_type, tp))
-		)				/* RM 8.5 */
-			warning("selector %s redeclared", idf->id_text);
-	}
-#endif
 
 	newsdef = new_sdef();
 	newsdef->sd_sdef = (struct sdef *) 0;
@@ -159,7 +137,10 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 		stp->tp_align = lcm(stp->tp_align, tp->tp_align);
 	}
 	else
-	if (stp->tp_fund == UNION)	{
+	if (stp->tp_fund == UNION && fd == 0)	{
+		/*	Note: the case that a bitfield is declared is
+			handled by add_field() !
+		*/
 		arith sel_size = size_of_type(tp, "member");
 
 		if (*szp < sel_size)
@@ -198,47 +179,29 @@ declare_struct(fund, idf, tpp)
 	register struct tag **tgp;
 	register struct tag *tg;
 
+
 	if (!idf)
 		idf = gen_idf();
 	tgp = (fund == ENUM ? &idf->id_enum : &idf->id_struct);
-	
-#ifndef NOROPTION
-	if (options['R'] && !is_anon_idf(idf))	{
-		/* a K & R test */
-		if (	fund != ENUM &&
-			idf->id_sdef && idf->id_sdef->sd_level == level
-		)	{
-			warning("%s is also a selector", idf->id_text);
-		}
-		if (	fund == ENUM &&
-			idf->id_def && idf->id_def->df_level == level
-		)	{
-			warning("%s is also a variable", idf->id_text);
-		}
-	}
-#endif
-	
 	tg = *tgp;
-	if (tg && tg->tg_type->tp_size < 0 && tg->tg_type->tp_fund == fund) {
-		/*	An unfinished declaration has preceded it, possibly on
-			an earlier level.  We just fill in the answer.
-		*/
+	if (tg
+	    && tg->tg_type->tp_size < 0
+	    && tg->tg_type->tp_fund == fund
+	    && tg->tg_level == level) {
+		/*	An unfinished declaration has preceded it.
+			We just fill in the answer.
+		 */
 		if (tg->tg_busy) {
 			error("recursive declaration of struct/union %s",
 				idf->id_text);
 			declare_struct(fund, gen_idf(), tpp);
 		}
 		else {
-#ifndef NOROPTION
-			if (options['R'] && tg->tg_level != level)
-				warning("%s declares %s in different range",
-					idf->id_text, symbol2str(fund));
-#endif
+			/* hint: if (level <= L_PROTO) */
 			*tpp = tg->tg_type;
 		}
 	}
-	else
-	if (tg && tg->tg_level == level)	{
+	else if (tg && tg->tg_level == level && tg->tg_type->tp_size >= 0)	{
 		/*	There is an already defined struct/union of this name
 			on our level!
 		*/
@@ -307,15 +270,7 @@ idf2sdef(idf, tp)
 	/* Tp not met; any unique identification will do. */
 	if (sdef = idf->id_sdef)	{
 		/* There is an identification */
-		if (uniq_selector(sdef))	{
-			/* and it is unique, so we accept */
-			warning("selector %s applied to alien type",
-					idf->id_text);
-		}
-		else	{
-			/* it is ambiguous */
-			error("ambiguous use of selector %s", idf->id_text);
-		}
+		error("illegal use of selector %s", idf->id_text);
 		return sdef;
 	}
 	
@@ -328,6 +283,7 @@ idf2sdef(idf, tp)
 	return sdef;
 }
 
+#if	0
 int
 uniq_selector(idf_sdef)
 	register struct sdef *idf_sdef;
@@ -352,6 +308,7 @@ uniq_selector(idf_sdef)
 	}
 	return 1;
 }
+#endif
 
 #ifndef NOBITFIELD
 arith
@@ -365,8 +322,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 	/*	The address where this selector is put is returned. If the
 		selector with specified width does not fit in the word, or
 		an explicit alignment is given, a new address is needed.
-		Note that the fields are packed into machine words (according
-		to the RM.)
+		Note that the fields are packed into machine words.
 	*/
 	long bits_in_type = word_size * 8;
 	static int field_offset = (arith)0;
@@ -392,9 +348,10 @@ add_field(szp, fd, fdtpp, idf, stp)
 	switch ((*fdtpp)->tp_fund)	{
 	case CHAR:
 	case SHORT:
-	case INT:
 	case ENUM:
 	case LONG:
+		strict("non-portable field type");
+	case INT:
 		/* right type; size OK? */
 		if ((*fdtpp)->tp_size > word_size) {
 			error("bit field type %s does not fit in a word",
@@ -461,6 +418,8 @@ add_field(szp, fd, fdtpp, idf, stp)
 	else			/* adjust the field at the left		*/
 		fd->fd_shift = bits_in_type - bits_declared;
 	
+	if (stp->tp_fund == UNION) bits_declared = (arith)0;
+
 	return field_offset;
 }
 #endif NOBITFIELD

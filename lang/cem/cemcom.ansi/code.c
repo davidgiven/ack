@@ -11,6 +11,7 @@
 #include	<alloc.h>
 #include	"dataflow.h"
 #include	"use_tmp.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"
@@ -28,7 +29,6 @@
 #include	"specials.h"
 #include	"atw.h"
 #include	"assert.h"
-#include	"noRoption.h"
 #include	"file_info.h"
 #ifdef	LINT
 #include	"l_lint.h"
@@ -37,9 +37,8 @@
 label lab_count = 1;
 label datlab_count = 1;
 
-#ifndef NOFLOAT
 int fp_used;
-#endif NOFLOAT
+extern arith NewLocal();	/* util.c	*/
 
 /* global function info */
 char *func_name;
@@ -109,12 +108,10 @@ end_code()
 	/*	end_code() performs the actions to be taken when closing
 		the output stream.
 	*/
-#ifndef NOFLOAT
 	if (fp_used) {
 		/* floating point used	*/
 		C_ms_flt();
 	}
-#endif NOFLOAT
 	def_strings(str_list);
 	str_list = 0;
 	C_ms_src((int)(LineNumber - 2), FileName);
@@ -203,6 +200,7 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	if (options['d'])
 		DfaStartFunction(name);
 #endif	DATAFLOW
+
 
 	/* set global function info */
 	func_name = name;
@@ -368,32 +366,31 @@ code_declaration(idf, expr, lvl, sc)
 		If there is a storage class indication (EXTERN/STATIC),
 		code_declaration() will generate an exa or ina.
 		The sc is the actual storage class, as given in the
-		declaration.  This is to allow:
-			extern int a;
-			int a = 5;
-		while at the same time forbidding
-			extern int a = 5;
+		declaration.
 	*/
 	register struct def *def = idf->id_def;
 	register arith size = def->df_type->tp_size;
+	int fund = def->df_type->tp_fund;
 	int def_sc = def->df_sc;
 	
 	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
 		return;
-	if (sc == EXTERN && expr && !is_anon_idf(idf))
-		error("%s is extern; cannot initialize", idf->id_text);
 #ifndef PREPEND_SCOPES
-	if (def->df_type->tp_fund == FUNCTION) {
+	if (fund == FUNCTION) {
 		code_scope(idf->id_text, def);
 	}
 #endif PREPEND_SCOPES
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
-			&& def->df_type->tp_fund != FUNCTION
+			&& fund != FUNCTION
 			&& size >= 0
 		)
 			def->df_alloc = ALLOC_SEEN;
+		if (expr && def_sc == STATIC && sc == EXTERN) {
+			warning("%s redeclared extern", idf->id_text);
+			def->df_sc = EXTERN;
+		}
 		if (expr) {	/* code only if initialized */
 #ifndef PREPEND_SCOPES
 			code_scope(idf->id_text, def);
@@ -407,7 +404,7 @@ code_declaration(idf, expr, lvl, sc)
 		/* STATIC, EXTERN, GLOBAL, IMPLICIT, AUTO or REGISTER */
 		switch (def_sc)	{
 		case STATIC:
-			if (def->df_type->tp_fund == FUNCTION) {
+			if (fund == FUNCTION) {
 				/* should produce "inp $function" ??? */
 				break;
 			}
@@ -426,6 +423,9 @@ code_declaration(idf, expr, lvl, sc)
 			}
 			break;
 		case EXTERN:
+			if (expr && !is_anon_idf(idf) && level != L_GLOBAL)
+				error("cannot initialize extern in block"
+						, idf->id_text);
 		case GLOBAL:
 		case IMPLICIT:
 			/* we are sure there is no expression */
@@ -437,6 +437,11 @@ code_declaration(idf, expr, lvl, sc)
 		case REGISTER:
 			if (expr)
 				loc_init(expr, idf);
+			else if ((fund == ARRAY)
+				    && (def->df_type->tp_size == (arith)-1)) {
+				error("size for local %s unknown"
+					, idf->id_text);
+			}
 			break;
 		default:
 			crash("bad local storage class");
@@ -455,27 +460,44 @@ loc_init(expr, id)
 	*/
 	register struct expr *e = expr;
 	register struct type *tp = id->id_def->df_type;
+	static arith tmpoffset = 0;
+	static arith unknownsize = 0;
 	
 	ASSERT(id->id_def->df_sc != STATIC);
 	switch (tp->tp_fund)	{
 	case ARRAY:
+		if (id->id_def->df_type->tp_size == (arith) -1)
+			unknownsize = 1;
 	case STRUCT:
 	case UNION:
-		error("automatic %s cannot be initialized in declaration",
-			symbol2str(tp->tp_fund));
-		free_expression(e);
+		if (!tmpoffset) {	/* first time for this variable */
+			tmpoffset = id->id_def->df_address;
+			id->id_def->df_address = data_label();
+			C_df_dlb((label)id->id_def->df_address);
+		} else {
+			/* generate a 'loi, sti' sequence. The peephole
+			 * optimizer will optimize this into a 'blm'
+			 * whenever possible.
+			 */
+			C_lae_dlb((label)id->id_def->df_address, (arith)0);
+			C_loi(tp->tp_size);
+			if (unknownsize) {
+				/* tmpoffset += tp->tp_size; */
+				unknownsize = 0;
+
+				tmpoffset = NewLocal(tp->tp_size
+						    , tp->tp_align
+						    , regtype(tp)
+						    , id->id_def->df_sc);
+			}
+			C_lal(tmpoffset);
+			C_sti(tp->tp_size);
+			id->id_def->df_address = tmpoffset;
+			tmpoffset = 0;
+		}
 		return;
 	}
 	if (ISCOMMA(e))	{	/* embraced: int i = {12};	*/
-#ifndef NOROPTION
-		if (options['R'])	{
-			if (ISCOMMA(e->OP_LEFT)) /* int i = {{1}} */
-				expr_error(e, "extra braces not allowed");
-			else
-			if (e->OP_RIGHT != 0) /* int i = {1 , 2} */
-				expr_error(e, "too many initializers");
-		}
-#endif NOROPTION
 		while (e)	{
 			loc_init(e->OP_LEFT, id);
 			e = e->OP_RIGHT;
@@ -510,25 +532,17 @@ bss(idf)
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, idf->id_def);
 #endif	PREPEND_SCOPES
-	/*	Since bss() is only called if df_alloc is non-zero, and
-		since df_alloc is only non-zero if size >= 0, we have:
-	*/
-	/*	but we already gave a warning at the declaration of the
-		array. Besides, the message given here does not apply to
-		voids
-	
-	if (options['R'] && size == 0)
-		warning("actual array of size 0");
-	*/
 	C_df_dnam(idf->id_text);
 	C_bss_cst(ATW(size), (arith)0, 1);
 }
 
-formal_cvt(df)
+formal_cvt(hasproto,df)
+	int hasproto;
 	register struct def *df;
 {
 	/*	formal_cvt() converts a formal parameter of type char or
-		short from int to that type.
+		short from int to that type. It also converts a formal
+		parameter of type float from a double to a float.
 	*/
 	register struct type *tp = df->df_type;
 
@@ -539,6 +553,12 @@ formal_cvt(df)
 		/* conversion(int_type, df->df_type); ???
 		   No, you can't do this on the stack! (CJ)
 		*/
+		StoreLocal(df->df_address, tp->tp_size);
+	} else if (tp->tp_size != double_size
+		    && tp->tp_fund == FLOAT
+		    && !hasproto) {
+		LoadLocal(df->df_address, double_size);
+		conversion(double_type, float_type);
 		StoreLocal(df->df_address, tp->tp_size);
 	}
 }

@@ -11,6 +11,7 @@
 
 #include	<alloc.h>
 #include	"interface.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
@@ -442,6 +443,7 @@ outargtype(tp)
 	case LONG:
 	case FLOAT:
 	case DOUBLE:
+	case LNGDBL:
 	case VOID:
 	case ERRONEOUS:
 		if (tp->tp_unsigned)

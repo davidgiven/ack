@@ -8,9 +8,10 @@
 #include	"debug.h"
 
 #ifdef	DEBUG
-#include	"nofloat.h"
+#include	<alloc.h>
 #include	"nopp.h"
 #include	"nobitfield.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"stack.h"
 #include	"idf.h"
@@ -252,8 +253,8 @@ dump_proto(pl)
 	newline();
 	while (pl) {
 		print("%d: %s", argcnt++,
-			pl->pl_flag == FORMAL ?
-			(pl->pl_flag == VOID ? "void" : "formal")
+			pl->pl_flag & PL_FORMAL ?
+			(pl->pl_flag & PL_VOID ? "void" : "formal")
 			: "ellipsis");
 		newline();
 		if (type = pl->pl_type){
@@ -442,9 +443,7 @@ p1_expr(lvl, expr)
 		expr->ex_depth,
 		expr->ex_class == Value ? "Value" :
 		expr->ex_class == String ? "String" :
-#ifndef NOFLOAT
 		expr->ex_class == Float ? "Float" :
-#endif NOFLOAT
 		expr->ex_class == Oper ? "Oper" :
 		expr->ex_class == Type ? "Type" : "UNKNOWN CLASS"
 	);
@@ -479,11 +478,13 @@ p1_expr(lvl, expr)
 		);
 		break;
 	}
-#ifndef NOFLOAT
 	case Float:
+		if (!expr->FL_VALUE) {
+			expr->FL_VALUE = Malloc(FLT_STRLEN);
+			flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
+		}
 		print("%s\n", expr->FL_VALUE);
 		break;
-#endif NOFLOAT
 	case Oper:
 		o = &expr->ex_object.ex_oper;
 		print("\n");

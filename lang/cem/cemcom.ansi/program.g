@@ -47,6 +47,7 @@
 {
 #include	"lint.h"
 #include	"nopp.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"idf.h"
@@ -86,10 +87,10 @@ control_if_expression
 		}
 ;
 
-/* 10 */
+/* 3.7 */
 program:
 	[%persistent external_definition]*
-	{unstack_world();}
+	{ unstack_world(); }
 ;
 
 /*	A C identifier definition is remarkable in that it formulates
@@ -176,29 +177,28 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 	';'
 ;
 
-/* 10.1 */
+/* 3.7.1 */
 function(struct decspecs *ds; struct declarator *dc;)
 	{
 		arith fbytes;
+		register struct idf *idf = dc->dc_idf;
 	}
 :
-	{	register struct idf *idf = dc->dc_idf;
+	{
 #ifdef	LINT
 		lint_start_function();
 #endif	LINT
 		init_idf(idf);
 		stack_level();		/* L_FORMAL1 declarations */
-		if (dc->dc_formal)
-			strict("'%s' old-fashioned function declaration",
-				idf->id_text);
 		declare_params(dc);
 		begin_proc(ds, idf);	/* sets global function info */
 		stack_level();		/* L_FORMAL2 declarations */
-		declare_protos(idf, dc);
+		declare_protos(dc);
 	}
 	declaration*
 	{
-		declare_formals(&fbytes);
+		check_formals(idf, dc);		/* check style-mixtures */
+		declare_formals(idf, &fbytes);
 #ifdef	LINT
 		lint_formals();
 #endif	LINT

@@ -10,6 +10,7 @@
 #include	<alloc.h>
 #include	"nobitfield.h"
 #include	"debug.h"
+#include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"label.h"
@@ -32,7 +33,7 @@
 #endif	LINT
 }
 
-/* 8 */
+/* 3.5 */
 declaration
 	{struct decspecs Ds;}
 :
@@ -49,12 +50,12 @@ declaration
 	empty case has already be dealt with in `external_definition'.
 	This means that something like:
 		unsigned extern int short xx;
-	is perfectly good C.
+	is perfectly legal C.
 	
 	On top of that, multiple occurrences of storage_class_specifiers,
 	unsigned_specifiers and size_specifiers are errors, but a second
 	type_specifier should end the decl_specifiers and be treated as
-	the name to be declared (see the thin ice in RM11.1).
+	the name to be declared.
 	Such a language is not easily expressed in a grammar; enumeration
 	of the permutations is unattractive. We solve the problem by
 	having a regular grammar for the "soft" items, handling the single
@@ -86,7 +87,7 @@ decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 	{do_decspecs(ds);}
 ;
 
-/* 8.1 */
+/* 3.5.1 & 3.5.2 (partially) & 3.5.3 (partially) */
 other_specifier(register struct decspecs *ds;)
 :
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
@@ -125,7 +126,7 @@ other_specifier(register struct decspecs *ds;)
 	}
 ;
 
-/* 8.2 */
+/* 3.5.2 */
 type_specifier(struct type **tpp;)
 	/*	Used in struct/union declarations and in casts; only the
 		type is relevant.
@@ -161,7 +162,7 @@ single_type_specifier(register struct decspecs *ds;):
 	enum_specifier(&ds->ds_type)
 ;
 
-/* 8.3 */
+/* 3.5 */
 init_declarator_list(struct decspecs *ds;):
 	init_declarator(ds)
 	[ ',' init_declarator(ds) ]*
@@ -179,6 +180,7 @@ init_declarator(register struct decspecs *ds;)
 	declarator(&Dc)
 	{
 		reject_params(&Dc);
+		def_proto(&Dc);
 		declare_idf(ds, &Dc, level);
 #ifdef	LINT
 		lint_declare_idf(Dc.dc_idf, ds->ds_sc);
@@ -198,18 +200,26 @@ init_declarator(register struct decspecs *ds;)
 	}
 ;
 
-/* 8.6: initializer */
+/* 3.5.7: initializer */
 initializer(struct idf *idf; int sc;)
 	{
 		struct expr *expr = (struct expr *) 0;
-		int globalflag = level == L_GLOBAL ||
-				 (level >= L_LOCAL && sc == STATIC);
+		int fund = idf->id_def->df_type->tp_fund;
+		int autoagg = (level >= L_LOCAL
+				&& sc != STATIC
+				&& ( fund == STRUCT
+				    || fund == UNION
+				    || fund == ARRAY));
+		int globalflag = level == L_GLOBAL
+				|| (level >= L_LOCAL && sc == STATIC);
 	}
 :
 	{	if (idf->id_def->df_type->tp_fund == FUNCTION)	{
 			error("illegal initialization of function");
 			idf->id_def->df_type->tp_fund = ERRONEOUS;
 		}
+		if (level == L_FORMAL2)
+			warning("illegal initialization of formal parameter (ignored)");
 	}
 	'='
 	{
@@ -220,8 +230,12 @@ initializer(struct idf *idf; int sc;)
 			struct expr ex;
 			code_declaration(idf, &ex, level, sc);
 		}
+		else if (autoagg)
+			loc_init((struct expr *) 0, idf);
 	}
-	initial_value(globalflag ? &(idf->id_def->df_type) : (struct type **)0,
+	initial_value((globalflag || autoagg) ?
+				&(idf->id_def->df_type)
+				: (struct type **)0,
 			&expr)
 	{	if (! globalflag) {
 			if (idf->id_def->df_type->tp_fund == FUNCTION)	{
@@ -234,7 +248,9 @@ initializer(struct idf *idf; int sc;)
 #ifdef	LINT
 			change_state(idf, SET);
 #endif	LINT
-			code_declaration(idf, expr, level, sc);
+			if (autoagg)
+				loc_init((struct expr *) 0, idf);
+			else	code_declaration(idf, expr, level, sc);
 		}
 		init_idf(idf);
 	}
@@ -247,6 +263,7 @@ initializer(struct idf *idf; int sc;)
 	we just include the (formal) parameter list in the declarator
 	description list dc.
 */
+/* 3.5.4 */
 declarator(register struct declarator *dc;)
 	{	struct formal *fm = NO_PARAMS;
 		struct proto *pl = NO_PROTO;
@@ -303,7 +320,7 @@ arrayer(arith *sizep;)
 
 formal_list (struct formal **fmp;)
 :
-	formal(fmp) [ ',' formal(fmp) ]*
+	formal(fmp) [ %persistent ',' formal(fmp) ]*
 ;
 
 formal(struct formal **fmp;)
@@ -404,7 +421,14 @@ struct_or_union_specifier(register struct type **tpp;)
 				(idf->id_struct->tg_busy)--;
 			}
 		|
-			{apply_struct(fund, idf, tpp);}
+			{
+			  /* a ';' means an empty declaration (probably)
+			   * this means that we have to declare a new
+			   * structure. (yegh)
+			   */
+			  if (DOT == ';') declare_struct(fund, idf, tpp);
+			  else apply_struct(fund, idf, tpp);
+			}
 			empty
 		]
 	]
@@ -543,12 +567,13 @@ parameter_type_list(struct proto **plp;)
 		{	register struct proto *new = new_proto();
 
 			new->next = *plp;
-			new->pl_flag = ELLIPSIS;
+			new->pl_flag = PL_ELLIPSIS;
 			*plp = new;
 		}
 
 	]?
-	{	if (level == L_PROTO)
+	{	check_for_void(*plp);
+		if (level == L_PROTO)
 			level = save_level;
 		else level++;
 	}
@@ -558,6 +583,7 @@ parameter_decl_list(struct proto **plp;)
 :
 	parameter_decl(plp)
 	[ %while (AHEAD != ELLIPSIS)
+	  %persistent
 		',' parameter_decl(plp)
 	]*
 ;
@@ -615,11 +641,11 @@ parameter_declarator(register struct declarator *dc;)
 			parameter_type_list(&pl)
 		|
 			formal_list(&fm)
-		|
-			empty
-		]
+		]?
 		')'
-		{add_decl_unary(dc, FUNCTION, 0, (arith)0, fm, pl);}
+		{   add_decl_unary(dc, FUNCTION, 0, (arith)0, fm, pl);
+		    reject_params(dc);
+		}
 	|
 		arrayer(&count)
 		{add_decl_unary(dc, ARRAY, 0, count, NO_PARAMS, NO_PROTO);}
@@ -631,7 +657,8 @@ parameter_declarator(register struct declarator *dc;)
 
 primary_parameter_declarator(register struct declarator *dc;)
 :
-[%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD))
+[%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD)
+				    && (AHEAD != IDENTIFIER))
 	empty
 |
 	identifier(&dc->dc_idf)
@@ -644,7 +671,6 @@ pointer(int *qual;)
 :
 	'*' type_qualifier_list(qual)
 ;
-
 
 /*	Type qualifiers may come in three flavours:
 	volatile, const, const volatile.
@@ -663,12 +689,12 @@ pointer(int *qual;)
 		prior knowledge of the implementation, but may
 		not be used as a l-value.
 */
+/* 3.5.4 */
 type_qualifier_list(int *qual;)
 :
 [
 	[ VOLATILE | CONST ]
 	{ *qual = (DOT == VOLATILE) ? TQ_VOLATILE : TQ_CONST; }
-
 	[
 		[ VOLATILE | CONST ]
 		{	if (DOT == VOLATILE) {
@@ -690,9 +716,5 @@ type_qualifier_list(int *qual;)
 ]
 ;
 
-
 empty:
 ;
-
-/* 8.8 */
-/* included in the IDENTIFIER/TYPE_IDENTIFIER mechanism */

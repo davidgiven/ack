@@ -5,7 +5,6 @@
 /* $Header$ */
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
-#include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -28,14 +27,12 @@ extern struct type *field_of();
 	line parameters.
 */
 struct type
-	*char_type, *uchar_type,
+	*schar_type, *uchar_type,
 	*short_type, *ushort_type,
 	*word_type, *uword_type,
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
-#ifndef NOFLOAT
 	*float_type, *double_type, *lngdbl_type,
-#endif NOFLOAT
 	*void_type, *gen_type, *label_type,
 	*string_type, *funint_type, *error_type;
 
@@ -54,6 +51,19 @@ create_type(fund)
 	ntp->tp_size = (arith)-1;
 
 	return ntp;
+}
+
+struct type *
+promoted_type(tp)
+struct type *tp;
+{
+	if (tp->tp_fund == CHAR || tp->tp_fund == SHORT) {
+		if (tp->tp_unsigned == UNSIGNED && tp->tp_size == int_size)
+			return uint_type;
+		else return int_type;
+	} else if (tp->tp_fund == FLOAT)
+		return double_type;
+	else return tp;
 }
 
 struct type *
@@ -123,8 +133,19 @@ function_of(tp, pl, qual)
 	register struct type *dtp = tp->tp_function;
 
 	/* look for a type with the right qualifier */
+#if 0
+/* the code doesn't work in the following case:
+	int func();
+	int func(int a, int b) { return q(a); }
+   because updating the type works inside the data-structures for that type
+   thus, a new type is created for very function. This may change in the
+   future, when declarations with empty parameter lists become obsolete.
+*/
 	while (dtp && (dtp->tp_typequal != qual || dtp->tp_proto != pl))
 		dtp = dtp->next;
+#else
+	dtp = 0;
+#endif
 
 	if (!dtp)	{
 		dtp = create_type(FUNCTION);

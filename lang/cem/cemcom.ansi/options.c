@@ -8,7 +8,6 @@
 #include	"lint.h"
 #include	"botch_free.h"
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"nopp.h"
 #include	"idfsize.h"
 #include	"nobitfield.h"
@@ -20,7 +19,6 @@
 #include	"align.h"
 #include	"use_tmp.h"
 #include	"dataflow.h"
-#include	"noRoption.h"
 
 #ifndef NOPP
 extern char **inctable;
@@ -85,14 +83,6 @@ next_option:			/* to allow combined one-char options */
 		loptions[opt] = 1;
 		goto next_option;
 #endif	LINT
-
-	case 'R':			/* strict version */
-#ifndef	NOROPTION
-		options[opt] = 1;
-#else	NOROPTION
-		warning("-R option not implemented");
-#endif	NOROPTION
-		goto next_option;
 
 #ifdef	___XXX___
 deleted, is now a debug-flag
@@ -284,28 +274,22 @@ deleted, is now a debug-flag
 					long_align = algn;
 				break;
 			case 'f':	/* float	*/
-#ifndef NOFLOAT
 				if (sz != (arith)0)
 					float_size = sz;
 				if (algn != 0)
 					float_align = algn;
-#endif NOFLOAT
 				break;
 			case 'd':	/* double	*/
-#ifndef NOFLOAT
 				if (sz != (arith)0)
 					double_size = sz;
 				if (algn != 0)
 					double_align = algn;
-#endif NOFLOAT
 				break;
 			case 'x':	/* long double	*/
-#ifndef NOFLOAT
 				if (sz != (arith)0)
 					lngdbl_size = sz;
 				if (algn != 0)
 					lngdbl_align = algn;
-#endif NOFLOAT
 				break;
 			case 'p':	/* pointer	*/
 				if (sz != (arith)0)

@@ -9,7 +9,7 @@
 
 /*	Note: The following macro only garuantees one PushBack.
 */
-#define UnGetChar()	ChPushBack(LexSave)
+#define UnGetChar()	((LexSave != EOI) ? ChPushBack(LexSave) : 0)
 
 extern	int LexSave;	/* last character read by GetChar		*/
 extern 	int GetChar();	/* character input, with trigraph parsing	*/

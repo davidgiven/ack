@@ -9,8 +9,6 @@
 	a union of various goodies, we define them first; so be patient.
 */
 
-#include	"nofloat.h"
-
 /* classes of value */
 #define Const	1
 #define Name	2
@@ -31,12 +29,11 @@ struct string	{
 	label sg_datlab;	/* global data-label			*/
 };
 
-#ifndef NOFLOAT
 struct floating	{
 	char *fl_value;		/* pointer to string repr. the fp const. */
+	flt_arith fl_arith;	/* the value in high precision */
 	label fl_datlab;	/* global data_label	*/
 };
-#endif NOFLOAT
 
 struct oper	{
 	struct type *op_type;	/* resulting type of the operation	*/
@@ -48,9 +45,7 @@ struct oper	{
 /* The following constants indicate the class of the expression: */
 #define	Value	0		/* it is a value known at load time */
 #define	String	1		/* it is a string constant  */
-#ifndef NOFLOAT
 #define	Float	2		/* it is a floating point constant	*/
-#endif NOFLOAT
 #define	Oper	3		/* it is a run-time expression */
 #define	Type	4		/* only its type is relevant */
 
@@ -66,9 +61,7 @@ struct expr	{
 	union	{
 		struct value ex_value;
 		struct string ex_string;
-#ifndef NOFLOAT
 		struct floating ex_float;
-#endif NOFLOAT
 		struct oper ex_oper;
 	} ex_object;
 };
@@ -82,10 +75,9 @@ struct expr	{
 #define	SG_VALUE	ex_object.ex_string.sg_value
 #define SG_LEN		ex_object.ex_string.sg_len
 #define	SG_DATLAB	ex_object.ex_string.sg_datlab
-#ifndef NOFLOAT
 #define	FL_VALUE	ex_object.ex_float.fl_value
+#define	FL_ARITH	ex_object.ex_float.fl_arith
 #define	FL_DATLAB	ex_object.ex_float.fl_datlab
-#endif NOFLOAT
 #define	OP_TYPE		ex_object.ex_oper.op_type
 #define	OP_LEFT		ex_object.ex_oper.op_left
 #define	OP_OPER		ex_object.ex_oper.op_oper
@@ -94,15 +86,16 @@ struct expr	{
 /*	some bits for the ex_flag field, to keep track of various
 	interesting properties of an expression.
 */
-#define	EX_SIZEOF	0001		/* contains sizeof operator */
-#define	EX_CAST		0002		/* contains cast */
-#define	EX_LOGICAL	0004		/* contains logical operator */
-#define	EX_COMMA	0010		/* contains expression comma */
-#define	EX_PARENS	0020		/* the top level is parenthesized */
-#define EX_SIDEEFFECTS	0040		/* expression has side effects */
-#define	EX_READONLY	0100		/* read only variabele */
-#define	EX_VOLATILE	0200		/* volatile variabele */
-#define	EX_ERROR	0400		/* the expression is wrong */
+#define	EX_SIZEOF	0x001		/* contains sizeof operator */
+#define	EX_CAST		0x002		/* contains cast */
+#define	EX_LOGICAL	0x004		/* contains logical operator */
+#define	EX_COMMA	0x008		/* contains expression comma */
+#define	EX_PARENS	0x010		/* the top level is parenthesized */
+#define EX_SIDEEFFECTS	0x020		/* expression has side effects */
+#define	EX_READONLY	0x040		/* read only variabele */
+#define	EX_VOLATILE	0x080		/* volatile variabele */
+#define	EX_ILVALUE	0x100		/* an illegal lvalue e.g. f().x */
+#define	EX_ERROR	0x200		/* the expression is wrong */
 
 #define	NILEXPR		((struct expr *)0)
 

@@ -6,7 +6,6 @@
 /*		PARSER ERROR ADMINISTRATION		*/
 
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
@@ -50,10 +49,8 @@ insert_token(tk)
 		dot.tk_fund = INT;
 		dot.tk_ival = 1;
 		break;
-#ifndef NOFLOAT
 	case FLOATING:
 		dot.tk_fval = Salloc("0.0", 4);
 		break;
-#endif NOFLOAT
 	}
 }

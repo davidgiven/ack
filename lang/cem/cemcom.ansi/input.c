@@ -34,7 +34,7 @@ getwdir(fn)
 		return "";
 	if (p) {
 		*p = '\0';
-		fn = Salloc(fn, p - &fn[0] + 1);
+		fn = Salloc(fn,(unsigned) (p - &fn[0] + 1));
 		*p = '/';
 		return fn;
 	}
@@ -43,9 +43,13 @@ getwdir(fn)
 #endif NOPP
 
 int	NoUnstack;
+int	InputLevel;
+#if 0
+#endif
 
 AtEoIT()
 {
+	InputLevel--;
 	unstackrepl();
 	return 0;
 }
