@@ -1,10 +1,9 @@
 SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=vax4" "SUF=$(SUF)" "ASAR=ar"
+MACHDEF="MACH=vax4" "SUF=$(SUF)" "ASAR=aal"
 PCDEF="PREF=ocm" "SUB=" "SRC=lang/occam/lib"
 
 install:
-	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(PCDEF) $(MACHDEF) tailcp
 
 cmp:

@@ -1,18 +1,15 @@
 SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=vax4" "SUF=$(SUF)" "ASAR=ar"
+MACHDEF="MACH=vax4" "SUF=$(SUF)" "ASAR=aal"
 PCDEF="PREF=pc" "SUB=" "SRC=lang/pc/libpc"
 
 all:
-	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(PCDEF) $(MACHDEF) all
 
 install:
-	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(PCDEF) $(MACHDEF) cp
 
 cmp:
-	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(PCDEF) $(MACHDEF) all
 	-../../compare head_pc
 	-../../compare tail_pc
