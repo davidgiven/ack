@@ -111,7 +111,7 @@ ch76pointer(expp, oper, tp)
 		ch7cast(expp, CAST, tp);
 	else	{
 		if ((*expp)->ex_type != error_type)
-			error("%s on %s and pointer",
+			expr_error(*expp, "%s on %s and pointer",
 				symbol2str(oper),
 				symbol2str((*expp)->ex_type->tp_fund)
 			);
@@ -147,7 +147,7 @@ any2arith(expp, oper)
 		)
 			{}
 		else
-			warning("%s on enum", symbol2str(oper));
+			expr_warning(*expp, "%s on enum", symbol2str(oper));
 		int2int(expp, int_type);
 		break;
 	case FLOAT:
@@ -161,7 +161,7 @@ any2arith(expp, oper)
 		break;
 #endif NOBITFIELD
 	default:
-		error("operator %s on non-numerical operand (%s)",
+		expr_error(*expp, "operator %s on non-numerical operand (%s)",
 			symbol2str(oper), symbol2str(fund));
 	case ERRONEOUS:
 		erroneous2int(expp);
@@ -292,7 +292,7 @@ opnd2integral(expp, oper)
 
 	if (fund != INT && fund != LONG)	{
 		if (fund != ERRONEOUS)
-			error("%s operand to %s",
+			expr_error(*expp, "%s operand to %s",
 				symbol2str(fund), symbol2str(oper));
 		erroneous2int(expp);
 		/* fund = INT; */
@@ -327,7 +327,7 @@ opnd2logical(expp, oper)
 	case DOUBLE:
 		break;
 	default:
-		error("%s operand to %s",
+		expr_error(*expp, "%s operand to %s",
 			symbol2str(fund), symbol2str(oper));
 	case ERRONEOUS:
 		erroneous2int(expp);

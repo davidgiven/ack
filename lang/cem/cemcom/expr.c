@@ -109,7 +109,7 @@ check_conditional(expr, oper, pos_descr)
 		the operator oper.
 	*/
 	if (options['R'] && rank_of_expression(expr) >= rank_of(oper))
-		warning("%s %s is ungrammatical",
+		expr_warning(expr, "%s %s is ungrammatical",
 			symbol2str(expr->OP_OPER), pos_descr);
 }
 

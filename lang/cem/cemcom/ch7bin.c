@@ -45,7 +45,8 @@ ch7bin(expp, oper, expr)
 			case ERRONEOUS:
 				return;
 			default:
-				error("indexing an object of type %s",
+				expr_error(*expp,
+					"indexing an object of type %s",
 					symbol2str((*expp)->ex_type->tp_fund));
 				return;
 			}
@@ -64,7 +65,7 @@ ch7bin(expp, oper, expr)
 		}
 		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
 			if ((*expp)->ex_type != error_type)
-				error("call of non-function (%s)",
+				expr_error(*expp, "call of non-function (%s)",
 					symbol2str((*expp)->ex_type->tp_fund));
 			/* leave the expression; it may still serve */
 			free_expression(expr);	/* there go the parameters */
@@ -81,7 +82,7 @@ ch7bin(expp, oper, expr)
 	case '%':
 		fund = arithbalance(expp, oper, &expr);
 		if (fund == DOUBLE)	{
-			error("floating operand to %%");
+			expr_error(*expp, "floating operand to %%");
 			erroneous2int(expp);
 		}
 		else
@@ -197,7 +198,7 @@ ch7bin(expp, oper, expr)
 		||	is_struct_or_union(expr->ex_type->tp_fund)
 		)	{
 			if ((*expp)->ex_type != expr->ex_type)	{
-				error("illegal balance");
+				expr_error(*expp, "illegal balance");
 				(*expp)->ex_type = error_type;
 			}
 		}
@@ -233,7 +234,7 @@ pntminuspnt(expp, oper, expr)
 	struct type *up_type = (*expp)->ex_type->tp_up;
 
 	if (up_type != expr->ex_type->tp_up)	{
-		error("subtracting incompatible pointers");
+		expr_error(*expp, "subtracting incompatible pointers");
 		free_expression(expr);
 		erroneous2int(expp);
 		return;

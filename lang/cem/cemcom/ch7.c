@@ -49,7 +49,7 @@ ch7sel(expp, oper, idf)
 				tp = sd->sd_stype;
 				break;
 			default:
-				error("-> applied to %s",
+				expr_error(*expp, "-> applied to %s",
 					symbol2str(tp->tp_fund));
 			case ERRONEOUS:
 				(*expp)->ex_type = error_type;
@@ -60,7 +60,7 @@ ch7sel(expp, oper, idf)
 	else { /* oper == '.' */
 		/* filter out illegal expressions "non_lvalue.sel" */
 		if (!(*expp)->ex_lvalue) {
-			error("dot requires lvalue");
+			expr_error(*expp, "dot requires lvalue");
 			(*expp)->ex_type = error_type;
 			return;
 		}
@@ -79,7 +79,7 @@ ch7sel(expp, oper, idf)
 		break;
 	default:
 		if (!is_anon_idf(idf))
-			error("selector %s applied to %s",
+			expr_error(*expp, "selector %s applied to %s",
 				idf->id_text, symbol2str(tp->tp_fund));
 	case ERRONEOUS:
 		(*expp)->ex_type = error_type;
@@ -133,11 +133,11 @@ ch7incr(expp, oper)
 	register int fund = (*expp)->ex_type->tp_fund;
 
 	if (!(*expp)->ex_lvalue)	{
-		error("no lvalue with %s", symbol2str(oper));
+		expr_error(*expp, "no lvalue with %s", symbol2str(oper));
 		return;
 	}
 	if (fund == ENUM)	{
-		warning("%s on enum", symbol2str(oper));
+		expr_warning(*expp, "%s on enum", symbol2str(oper));
 		addend = (arith)1;
 	}
 	else
@@ -153,7 +153,7 @@ ch7incr(expp, oper)
 #endif NOBITFIELD
 	else	{
 		if ((*expp)->ex_type != error_type)
-			error("%s on %s",
+			expr_error(*expp, "%s on %s",
 				symbol2str(oper),
 				symbol2str((*expp)->ex_type->tp_fund)
 			);
@@ -210,15 +210,17 @@ ch7cast(expp, oper, tp)
 				tp->tp_fund == ENUM &&
 				oper != CAST
 			)
-				warning("%s on enums of different types",
-							symbol2str(oper));
+				expr_warning(*expp,
+					"%s on enums of different types",
+					symbol2str(oper));
 			int2int(expp, tp);
 		}
 		else
 		if (oldi && !i)	{
 			if (oldtp->tp_fund == ENUM && oper != CAST)
-				warning("conversion of enum to %s\n",
-						symbol2str(tp->tp_fund));
+				expr_warning(*expp,
+					"conversion of enum to %s\n",
+					symbol2str(tp->tp_fund));
 			int2float(expp, tp);
 		}
 		else
@@ -230,7 +232,7 @@ ch7cast(expp, oper, tp)
 	else
 	if (oldtp->tp_fund == POINTER && tp->tp_fund == POINTER)	{
 		if (oper != CAST)
-			warning("incompatible pointers in %s",
+			expr_warning(*expp, "incompatible pointers in %s",
 							symbol2str(oper));
 		(*expp)->ex_type = tp;	/* free conversion */
 	}
@@ -238,10 +240,12 @@ ch7cast(expp, oper, tp)
 	if (oldtp->tp_fund == POINTER && is_integral_type(tp))	{
 		/* from pointer to integral */
 		if (oper != CAST)
-			warning("illegal conversion of pointer to %s",
+			expr_warning(*expp,
+				"illegal conversion of pointer to %s",
 				symbol2str(tp->tp_fund));
 		if (oldtp->tp_size > tp->tp_size)
-			warning("conversion of pointer to %s loses accuracy",
+			expr_warning(*expp,
+				"conversion of pointer to %s loses accuracy",
 				symbol2str(tp->tp_fund));
 		if (oldtp->tp_size != tp->tp_size)
 			int2int(expp, tp);
@@ -261,12 +265,14 @@ ch7cast(expp, oper, tp)
 			if (is_cp_cst(*expp) && (*expp)->VL_VALUE == (arith)0)
 				break;
 		default:
-			warning("illegal conversion of %s to pointer",
+			expr_warning(*expp,
+				"illegal conversion of %s to pointer",
 				symbol2str(oldtp->tp_fund));
 			break;
 		}
 		if (oldtp->tp_size > tp->tp_size)
-			warning("conversion of %s to pointer loses accuracy",
+			expr_warning(*expp,
+				"conversion of %s to pointer loses accuracy",
 				symbol2str(oldtp->tp_fund));
 		if (oldtp->tp_size != tp->tp_size)
 			int2int(expp, tp);
@@ -275,7 +281,7 @@ ch7cast(expp, oper, tp)
 	}
 	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
-		warning("dubious conversion based on equal size");
+		expr_warning(*expp, "dubious conversion based on equal size");
 		(*expp)->ex_type = tp;		/* brute force */
 	}
 	else
@@ -299,7 +305,7 @@ ch7asgn(expp, oper, expr)
 
 	/* We expect an lvalue */
 	if (!(*expp)->ex_lvalue)	{
-		error("no lvalue in lhs of %s", symbol2str(oper));
+		expr_error(*expp, "no lvalue in lhs of %s", symbol2str(oper));
 		(*expp)->ex_depth = 99;	/* no direct store/load at EVAL() */
 			/* what is 99 ??? DG */
 	}
@@ -310,8 +316,7 @@ ch7asgn(expp, oper, expr)
 	case TIMESAB:
 	case DIVAB:
 	case MODAB:
-		if (!is_arith_type((*expp)->ex_type))
-			error("%s on %s", symbol2str(oper), symbol2str(fund));
+		check_arith_type(expp, oper);
 		any2arith(&expr, oper);
 		ch7cast(&expr, CAST, (*expp)->ex_type);
 		break;
@@ -319,9 +324,7 @@ ch7asgn(expp, oper, expr)
 	case MINAB:
 		any2arith(&expr, oper);
 		if (fund == POINTER)	{
-			if (!is_integral_type(expr->ex_type))
-				error("%s on non-integral type (%s)",
-					symbol2str(oper), symbol2str(fund));
+			check_integral_type(&expr, oper);
 			ch7bin(&expr, '*',
 				intexpr(
 					size_of_type(
@@ -332,23 +335,20 @@ ch7asgn(expp, oper, expr)
 				)
 			);
 		}
-		else
-		if (!is_arith_type((*expp)->ex_type))
-			error("%s on %s", symbol2str(oper), symbol2str(fund));
-		else
+		else	{
+			check_arith_type(expp, oper);
 			ch7cast(&expr, CAST, (*expp)->ex_type);
+		}
 		break;
 	case LEFTAB:
 	case RIGHTAB:
+		check_integral_type(expp, oper);
 		ch7cast(&expr, oper, int_type);
-		if (!is_integral_type((*expp)->ex_type))
-			error("%s on %s", symbol2str(oper), symbol2str(fund));
 		break;
 	case ANDAB:
 	case XORAB:
 	case ORAB:
-		if (!is_integral_type((*expp)->ex_type))
-			error("%s on %s", symbol2str(oper), symbol2str(fund));
+		check_integral_type(expp, oper);
 		ch7cast(&expr, oper, (*expp)->ex_type);
 		break;
 	}
@@ -382,6 +382,18 @@ is_integral_type(tp)
 	}
 }
 
+check_integral_type(expp, oper)
+	struct expr **expp;
+{
+	register struct expr *expr = *expp;
+	
+	if (!is_integral_type(expr->ex_type))	{
+		expr_error(expr, "%s on non-integral type (%s)",
+			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
+	}
+	erroneous2int(expp);
+}
+
 int
 is_arith_type(tp)
 	struct type *tp;
@@ -402,4 +414,16 @@ is_arith_type(tp)
 	default:
 		return 0;
 	}
+}
+
+check_arith_type(expp, oper)
+	struct expr **expp;
+{
+	register struct expr *expr = *expp;
+	
+	if (!is_arith_type(expr->ex_type))	{
+		expr_error(expr, "%s on non-arithmetical type (%s)",
+			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
+	}
+	erroneous2int(expp);
 }

@@ -457,7 +457,7 @@ check_ival(expr, type)
 	case LONG:
 	case ENUM:
 		ch7cast(&expr, '=', type);
-		if (expr->ex_class != Value || expr->VL_IDF != 0)	{
+		if (!is_cp_cst(expr))	{
 			illegal_init_cst(expr);
 			break;
 		}
@@ -466,7 +466,7 @@ check_ival(expr, type)
 #ifndef NOBITFIELD
 	case FIELD:
 		ch7cast(&expr, '=', type->tp_up);
-		if (expr->ex_class != Value || expr->VL_IDF != 0)	{
+		if (!is_cp_cst(expr))	{
 			illegal_init_cst(expr);
 			break;
 		}
@@ -481,7 +481,7 @@ check_ival(expr, type)
 		else
 		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			expr = expr->OP_RIGHT;
-			if (expr->ex_class != Value || expr->VL_IDF != 0)	{
+			if (!is_cp_cst(expr))	{
 				illegal_init_cst(expr);
 				break;
 			}

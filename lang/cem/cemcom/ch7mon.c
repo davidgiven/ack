@@ -29,7 +29,8 @@ ch7mon(oper, expp)
 			array2pointer(expp);
 		if ((*expp)->ex_type->tp_fund != POINTER)	{
 			if ((*expp)->ex_type != error_type)
-				error("* applied to non-pointer (%s)",
+				expr_error(*expp,
+					"* applied to non-pointer (%s)",
 					symbol2str((*expp)->ex_type->tp_fund));
 			(*expp)->ex_type = error_type;
 		}
@@ -57,13 +58,13 @@ ch7mon(oper, expp)
 		else
 #ifndef NOBITFIELD
 		if ((*expp)->ex_type->tp_fund == FIELD)	{
-			error("& applied to field variable");
+			expr_error(*expp, "& applied to field variable");
 			(*expp)->ex_type = error_type;
 		}
 		else
 #endif NOBITFIELD
 		if (!(*expp)->ex_lvalue)	{
-			error("& applied to non-lvalue");
+			expr_error(*expp, "& applied to non-lvalue");
 			(*expp)->ex_type = error_type;
 		}
 		else {
@@ -76,7 +77,8 @@ ch7mon(oper, expp)
 					be used as register anymore
 				*/
 				if (def->df_sc == REGISTER) {
-					error("& on register variable not allowed");
+					expr_error(*expp,
+						"& on register variable not allowed");
 					(*expp)->ex_type = error_type;
 					break;	/* break case '&' */
 				}
@@ -91,7 +93,7 @@ ch7mon(oper, expp)
 		int fund = (*expp)->ex_type->tp_fund;
 
 		if (fund == FLOAT || fund == DOUBLE)	{
-			error("~ not allowed on %s operands",
+			expr_error(*expp, "~ not allowed on %s operands",
 						symbol2str(fund));
 			erroneous2int(expp);
 			break;
