@@ -10,36 +10,96 @@
 #include "LLlex.h"
 
 long str2long();
-char *GetString();
 
 struct token dot, aside;
 
 static char *RcsId = "$Header$";
 
+/*	Skip Modula-2 like comment (* ... *).
+	Note that comment may be nested.
+*/
+static
+SkipComment()
+{
+	register int ch;
+	register int NestLevel = 0;
+
+	LoadChar(ch);
+	for (;;) {
+		if (class(ch) == STNL) {
+			LineNumber++;
+		}
+		else
+		if (ch == '(') {
+			LoadChar(ch);
+			if (ch == '*') {
+				++NestLevel;
+			}
+			else {
+				continue;
+			}
+		}
+		else
+		if (ch == '*') {
+			LoadChar(ch);
+			if (ch == ')') {
+				if (NestLevel-- == 0) {
+					return;
+				}
+			}
+			else {
+				continue;
+			}
+		}
+		LoadChar(ch);
+	}
+}
+
+static char *
+GetString(upto)
+{
+	register int ch;
+	int str_size;
+	char *str = Malloc(str_size = 32);
+	register int pos = 0;
+	
+	LoadChar(ch);
+	while (ch != upto)	{
+		if (class(ch) == STNL)	{
+			lexerror("newline in string");
+			LineNumber++;
+			break;
+		}
+		if (ch == EOI) {
+			lexerror("end-of-file in string");
+			break;
+		}
+		str[pos++] = ch;
+		if (pos == str_size)	{
+			str = Srealloc(str, str_size += 8);
+		}
+		LoadChar(ch);
+	}
+	str[pos] = '\0';
+	return str;
+}
+
+/*	LLlex() plays the role of Lexical Analyzer for the parser.
+	The putting aside of tokens is taken into account.
+*/
 int
 LLlex()
 {
-	/*	LLlex() plays the role of Lexical Analyzer for the parser.
-		The putting aside of tokens is taken into account.
-	*/
-	if (ASIDE)	{	/* a token is put aside		*/
-		dot = aside;
-		ASIDE = 0;
-	}
-	else	{
-		GetToken(&dot);
-		if (DOT == EOI) DOT = -1;
-	}
-
-	return DOT;
-}
-
-int
-GetToken(tk)
-	register struct token *tk;
-{
+	register struct token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
+
+	if (ASIDE)	{	/* a token is put aside		*/
+		*tk = aside;
+		ASIDE = 0;
+		return tk->tk_symb;
+	}
+	tk->tk_lineno = LineNumber;
 
 again:
 	LoadChar(ch);
@@ -54,6 +114,7 @@ again:
 
 	case STNL:
 		LineNumber++;
+		tk->tk_lineno++;
 		goto again;
 
 	case STGARB:
@@ -305,79 +366,12 @@ Sdec:
 	}
 
 	case STEOI:
-		return tk->tk_symb = EOI;
+		return tk->tk_symb = -1;
 
 	case STCHAR:
 	default:
 		crash("bad character class %d", class(ch));
 	}
+	/*NOTREACHED*/
 }
 
-char *
-GetString(upto)
-{
-	register int ch;
-	int str_size;
-	char *str = Malloc(str_size = 32);
-	register int pos = 0;
-	
-	LoadChar(ch);
-	while (ch != upto)	{
-		if (class(ch) == STNL)	{
-			lexerror("newline in string");
-			LineNumber++;
-			break;
-		}
-		if (ch == EOI) {
-			lexerror("end-of-file in string");
-			break;
-		}
-		str[pos++] = ch;
-		if (pos == str_size)	{
-			str = Srealloc(str, str_size += 8);
-		}
-		LoadChar(ch);
-	}
-	str[pos] = '\0';
-	return str;
-}
-
-SkipComment()
-{
-	/*	Skip Modula-2 like comment (* ... *).
-		Note that comment may be nested.
-	*/
-
-	register int ch;
-	register int NestLevel = 0;
-
-	LoadChar(ch);
-	for (;;) {
-		if (class(ch) == STNL) {
-			LineNumber++;
-		}
-		else
-		if (ch == '(') {
-			LoadChar(ch);
-			if (ch == '*') {
-				++NestLevel;
-			}
-			else {
-				continue;
-			}
-		}
-		else
-		if (ch == '*') {
-			LoadChar(ch);
-			if (ch == ')') {
-				if (NestLevel-- == 0) {
-					return;
-				}
-			}
-			else {
-				continue;
-			}
-		}
-		LoadChar(ch);
-	}
-}

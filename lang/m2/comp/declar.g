@@ -177,5 +177,9 @@ VariableDeclaration
 {
 	struct id_list *VarList;
 } :
-	IdentList(&VarList) ':' type
+	IdentList(&VarList)
+	[
+		ConstExpression
+	]?
+	':' type
 ;

@@ -9,7 +9,7 @@
 #include "LLlex.h"
 #include "Lpars.h"
 
-static char *RcsId = "$Header:";
+static char *RcsId = "$Header$";
 
 char options[128];
 char *ProgName;

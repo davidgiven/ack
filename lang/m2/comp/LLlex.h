@@ -4,6 +4,7 @@
 
 struct token	{
 	int tk_symb;		/* token itself	*/
+	int tk_lineno;		/* linenumber on which it occurred */
 	union {
 		struct idf *tk_idf;	/* IDENT	*/
 		char *tk_str;		/* STRING	*/
