@@ -187,7 +187,7 @@ long lo6 = ( 0==1 ? -1L : 1L ) ;
 plong() {
 	printf("long\n\n") ;
 
-	printf("lo1\t%D\nlo2\t%D\nlo3\t%D\nlo4\t%D\nlo5\t%D\nlo6\t%D\n\n",
+	printf("lo1\t%ld\nlo2\t%ld\nlo3\t%ld\nlo4\t%ld\nlo5\t%ld\nlo6\t%ld\n\n",
 		lo1,lo2,lo3,lo4,lo5,lo6 ) ;
 }
 
