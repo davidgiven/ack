@@ -1,7 +1,6 @@
 Version.c
-Makefile
-Resolve
-nmclash.c
+proto.make
+proto.main
 LLlex.c
 LLlex.h
 LLmessage.c
