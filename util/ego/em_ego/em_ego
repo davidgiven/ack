@@ -54,7 +54,7 @@ for i in $PASSES
 do	INFILES=$OUTFILES
 	OUTFILES="$TMP.p.$c.$$ $TMP.d.$c.$$ $TMP.l.$c.$$ $TMP.b.$c.$$"
 	FILES="$FILES $OUTFILES"
-	trap "rm -f $FILES" 0 1 2 15
+	trap "rm -f $FILES; exit 1" 0 1 2 15
 	case $i in
 	ic)	$OPT/ic $INFILES - - $OUTFILES $ICARG || exit 1
 		;;
@@ -72,4 +72,6 @@ do	INFILES=$OUTFILES
 	esac
 	c=`expr $c + 1`
 done
+rm -f $FILES
+trap 0
 exit 0
