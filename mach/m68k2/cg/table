@@ -2743,6 +2743,7 @@ dus $1 == 2 | DATASCR |		remove(ALL)
 				"1:"
 				"move.w -(%[a]),-(sp)"
 				"dbf %[1],1b" | | |
+exg $1==2 | ANY ANY |				|	%[1] %[2] | |
 exg	| STACK |		"move.w #$1,d0"
 				"jsr .exg"	| | |
 fil | |				"move.l #$1,.filn"  | | |
