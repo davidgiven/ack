@@ -49,12 +49,35 @@ do_pragma()
 	char *cur_line = Malloc(size);
 	register char *c_ptr = cur_line;
 	register int c = GetChar();
+	register int delim = 0;
 
-	*c_ptr = '\0';
 	while(c != '\n') {
 		if (c_ptr + 1 - cur_line == size) {
-			cur_line = Realloc(cur_line, (unsigned)(size += ITEXTSIZE));
+			cur_line = Realloc(cur_line, (unsigned)(size + ITEXTSIZE));
 			c_ptr = cur_line + size - 1;
+			size += ITEXTSIZE;
+		}
+		if (delim) {
+			if (c == delim) {
+				delim = 0;
+			}
+			else if (c == '\\') {
+				*c_ptr++ = c;
+				c = GetChar();
+				if (c == '\n') break;
+			}
+		}
+		else if (c == '\'' || c == '"') {
+			delim = c;
+		}
+		else if (c == '/') {
+			if ((c = GetChar()) != '*' || InputLevel) {
+				*c_ptr++ = '/';
+			}
+			else {
+				skipcomment();
+				continue;
+			}
 		}
 		*c_ptr++ = c;
 		c = GetChar();
@@ -65,6 +88,9 @@ do_pragma()
 	} else {
 		pragma_tab = (struct prag_info *)Realloc((char *)pragma_tab
 				    , (unsigned)(sizeof(struct prag_info) * (pragma_nr+1)));
+	}
+	if (delim) {
+		error("unclosed opening %c", delim);
 	}
 	pragma_tab[pragma_nr].pr_linnr = LineNumber;
 	pragma_tab[pragma_nr].pr_fil = FileName;

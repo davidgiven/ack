@@ -312,7 +312,9 @@ do_include()
 		filenm = (char *)0;
 	}
 	AccFileSpecifier = 0;
-	SkipToNewLine();
+	if (SkipToNewLine()) {
+		error("bad include syntax");
+	}
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
