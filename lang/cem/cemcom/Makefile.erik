@@ -105,9 +105,9 @@ NEXTFILES = code.str declar.str decspecs.str def.str expr.str field.str \
 all:	cc
 
 cc:
-	make "CC=$(CC)" hfiles
-	make "CC=$(CC)" LLfiles
-	make "CC=$(CC)" main
+	make "EMHOME="$(EMHOME) "CC=$(CC)" hfiles
+	make "EMHOME="$(EMHOME) "CC=$(CC)" LLfiles
+	make "EMHOME="$(EMHOME) "CC=$(CC)" main
 
 cem:	cem.c
 	$(CC) -O cem.c $(SYSLIB) -o cem

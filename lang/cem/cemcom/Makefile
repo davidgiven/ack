@@ -110,11 +110,11 @@ SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 	./make.allocd <$*.str >$*.h
 
 Main:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make $(CURRDIR)/main ; else sh Resolve main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
 Emain:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make $(CURRDIR)/emain ; else sh Resolve emain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/emain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve emain ; fi'
 	@rm -f nmclash.o a.out
 
 install:	Main
@@ -137,7 +137,7 @@ clean:
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)

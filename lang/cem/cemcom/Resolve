@@ -26,7 +26,7 @@ then
 	:
 else	mkdir ../Xsrc
 fi
-make longnames
+make EMHOME=$EMHOME longnames
 : remove code generating routines from the clashes list as they are defines.
 : code generating routine names start with C_
 sed '/^C_/d' < longnames > tmp$$
@@ -48,11 +48,11 @@ $i:	clashes $PW/$i
 	cid -Fclashes < $PW/$i > $i
 EOF
 done
-make `cat $PW/Cfiles`
+make EMHOME=$EMHOME `cat $PW/Cfiles`
 rm -f makefile
 ed - $PW/makefile <<'EOF'
 /^#EXCLEXCL/,/^#INCLINCL/d
 w makefile
 q
 EOF
-make CURRDIR=$PW $target
+make EMHOME=$EMHOME CURRDIR=$PW $target

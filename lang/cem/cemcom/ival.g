@@ -290,7 +290,7 @@ gen_tpend()
 	register struct sdef *sd;
 	int getout = 0;
 
-	while (!getout) {
+	while (!getout && p) {
 	    if (!gen_error) {
 		tp = *(p->s_tpp);
 		switch(tp->tp_fund) {
