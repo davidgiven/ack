@@ -111,10 +111,11 @@ ch7mon(oper, expp)
 		if (is_cp_cst(*expp))	{
 			arith o1 = (*expp)->VL_VALUE;
 
-			(*expp)->VL_VALUE = (oper == '-') ? -o1 :
+			o1 = (oper == '-') ? -o1 : ~o1;
+			(*expp)->VL_VALUE =
 			  ((*expp)->ex_type->tp_unsigned ?
-				(~o1) & full_mask[(*expp)->ex_type->tp_size] :
-				~o1
+				o1 & full_mask[(*expp)->ex_type->tp_size] :
+				o1
 			  );
 		}
 		else
