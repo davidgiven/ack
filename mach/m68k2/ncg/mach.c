@@ -181,7 +181,7 @@ regreturn()
 prolog(nlocals) full nlocals; {
 
 #ifdef TBL68020
-	fprintf(codefile,"tst.b (-%ld,sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
+	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
 #else
 	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
 #endif
