@@ -3869,6 +3869,7 @@ OK
 #endif
 TEST 134: test sbu W2S
 MAIN 0
+#ifdef W2S
  ldc 1
  ldc 1
  sbu W2S
@@ -3892,8 +3893,10 @@ OK
  zne *1
 OK
 #endif
+#endif
 TEST 135: test mlu W2S
 MAIN 0
+#ifdef W2S
  ldc 5
  ldc 9
  mlu W2S
@@ -3926,8 +3929,10 @@ OK
  zne *1
 OK
 #endif
+#endif
 TEST 136: test dvu W2S
 MAIN 0
+#ifdef W2S
  ldc 15
  ldc 5
  dvu W2S
@@ -3950,6 +3955,7 @@ OK
  cmu W2S
  zne *1
 OK
+#endif
 #endif
 TEST 137: test rmu W2S
 MAIN 0
@@ -4036,6 +4042,7 @@ PROC
  dch
  cmp
  zne *1
+OK
  lal PS
  loi PS
  lal 0
@@ -4043,6 +4050,7 @@ PROC
  lpb
  cmp
  zne *1
+OK
  lal 2*PS
  loi PS
  lal PS
@@ -4063,6 +4071,7 @@ ERRLAB
  dch
  cmp
  zne *1
+OK
  lal PS
  loi PS
  lal 0
@@ -4070,6 +4079,7 @@ ERRLAB
  lpb
  cmp
  zne *1
+OK
 ; now create GTO descriptor
  lal 0
  loi PS	; LB
