@@ -74,3 +74,4 @@ extern char *std_alloc();
 #define	K_INCLUDE	8
 #define	K_LINE		9
 #define	K_UNDEF		10
+#define K_PRAGMA	11

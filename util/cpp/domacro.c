@@ -116,6 +116,12 @@ domacro()
 		case K_UNDEF:				/* "undef"	*/
 			do_undef();
 			break;
+		case K_PRAGMA:				/* "pragma"	*/
+			/*	ignore for now
+			*/
+			PushBack();
+			skipline();
+			break;
 		default:
 			/* invalid word seen after the '#'	*/
 			error("%s: unknown control", id->id_text);
