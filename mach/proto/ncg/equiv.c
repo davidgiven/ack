@@ -31,17 +31,18 @@ struct perm *
 tuples(regls,nregneeded) rl_p *regls; {
 	int class=0;
 	register i,j;
+	register struct reginfo *rp;
 
 	/*
 	 * First compute equivalence classes of registers.
 	 */
 
-	for (i=NREGS;--i>=0;) {
+	for (i=NREGS, rp = &machregs[NREGS-1];--i>=0;rp--) {
 		regclass[i] = class++;
 		if (getrefcount(i, FALSE) == 0) {
 			for (j=NREGS;--j>i;) {
 				if (eqregclass(i,j) &&
-				    eqtoken(&machregs[i].r_contents,
+				    eqtoken(&rp->r_contents,
 					    &machregs[j].r_contents)) {
 					regclass[i] = regclass[j];
 					break;
@@ -71,11 +72,13 @@ permute(index) {
 			for (i=0; i<maxindex; i++)
 				if (regclass[rar[i]] != regclass[pp->p_rar[i]])
 					goto diff;
-			for (i=0; i<maxindex; i++)
+			for (i=0; i<maxindex; i++) {
+				int rari = rar[i], p_rari = pp->p_rar[i];
 				for (j=0; j<i; j++)
-					if (clash(rar[i],rar[j]) !=
-					    clash(pp->p_rar[i],pp->p_rar[j]))
+					if (clash(rari,rar[j]) !=
+					    clash(p_rari,pp->p_rar[j]))
 						goto diff;
+			}
 			return;
 		    diff: ;
 		}
