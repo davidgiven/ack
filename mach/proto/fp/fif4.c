@@ -42,8 +42,8 @@ struct fif4_returns *p;
 		p->fpart = 0;
 		return;
 	}
-	b64_sft(&e1.m1, 64 - e1.exp);
-	b64_sft(&e1.m1, e1.exp - 64);	/* "loose" low order bits */
+	b64_sft(&e1.m1, 63 - e1.exp);
+	b64_sft(&e1.m1, e1.exp - 63);	/* "loose" low order bits */
 	compact(&e1,(_double *) &(p->ipart), sizeof(SINGLE));
 	p->fpart = sbf4(p->ipart, y);
 }

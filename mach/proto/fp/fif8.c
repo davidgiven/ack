@@ -44,8 +44,8 @@ struct fif8_returns *p;
 		p->fpart.__double[1] = 0;
 		return;
 	}
-	b64_sft(&e1.m1, 64 - e1.exp);
-	b64_sft(&e1.m1, e1.exp - 64);	/* "loose" low order bits */
+	b64_sft(&e1.m1, 63 - e1.exp);
+	b64_sft(&e1.m1, e1.exp - 63);	/* "loose" low order bits */
 	compact(&e1, &(p->ipart), sizeof(DOUBLE));
 	p->fpart = sbf8(p->ipart, y);
 }

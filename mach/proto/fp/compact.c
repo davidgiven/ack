@@ -72,6 +72,10 @@ dbl_over:			trap(EFOVFL);
 			DBL->_s.p2++;	/* rounding up	*/
 			if (DBL->_s.p2 == 0L) { /* carry out	*/
 			    DBL->_s.p1.fract++;
+
+			    if (f->exp == 0 && (DBL->_s.p1.fract & ~DBL_MASK)) {
+					f->exp++;
+				}
 			    if (DBL->_s.p1.fract & DBL_CARRYOUT) { /* carry out */
 				if (DBL->_s.p1.fract & 01)
 				    DBL->_s.p2 = CARRYBIT;
@@ -148,6 +152,9 @@ sgl_over:			trap(EFOVFL);
 #endif
 			if (f->m1 & SGL_ROUNDUP) {
 				SGL->fract++;
+				if (f->exp == 0 && (f->m1 & ~SGL_MASK)) {
+					f->exp++;
+				}
 			/* check normal */
 				if (SGL->fract & SGL_CARRYOUT)	{
 					SGL->fract >>= 1;

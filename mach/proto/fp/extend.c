@@ -62,6 +62,7 @@ zero:			zrf_ext(to);
 		to->exp >>= SGL_EXPSHIFT;
 	if (to->exp > 0)
 		leadbit++;	/* will set Lead bit later	*/
+	else to->exp++;
 
 	to->m1 = get4(cpt1);
 
