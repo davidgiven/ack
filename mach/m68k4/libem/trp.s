@@ -3,10 +3,10 @@
 	.text
 .trp:
 	move.l	(sp)+,a2	! return address
-	move.w	(sp)+,d0	! error number
+	move.l	(sp)+,d0	! error number
 	move.l	a2,-(sp)
-	move.w	d0,-(sp)
-	cmp	#16,d0
+	move.l	d0,-(sp)
+	cmp.l	#16,d0
 	bcc	1f
 	btst	d0,.trpim
 	bne	3f
@@ -17,11 +17,13 @@
 	clr.l	.trppc
 	jsr	(a0)
 3:
-	add	#2,sp
+	add	#4,sp
 	rts
 9:
 	pea	fmt
 	jsr	.diagnos
+	add	#4,sp
+	jsr	__cleanup
 	jmp	EXIT
 
 	.data
