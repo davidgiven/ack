@@ -22,6 +22,3 @@ end
 name "Motorola 68000 2-4 System library"
 dir libsys
 end
-name "Motorola 68000 2-4 conversion program"
-dir cv
-end
