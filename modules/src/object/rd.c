@@ -155,23 +155,21 @@ rd_sect(sect, cnt)
 	while (cnt--) {
 		sect--;
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
-		if (sizeof(struct outsect) != SZ_SECT) {
+		if (sizeof(struct outsect) != SZ_SECT)
 #endif
-		c -= 4; sect->os_lign = get4(c);
-		c -= 4; sect->os_flen = get4(c);
-		c -= 4; sect->os_foff = get4(c);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+		{
+			c -= 4; sect->os_lign = get4(c);
+			c -= 4; sect->os_flen = get4(c);
+			c -= 4; sect->os_foff = get4(c);
 		}
-#endif
 		offset[--offcnt] = sect->os_foff + rd_base;
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
-		if (sizeof(struct outsect) != SZ_SECT) {
+		if (sizeof(struct outsect) != SZ_SECT)
 #endif
-		c -= 4; sect->os_size = get4(c);
-		c -= 4; sect->os_base = get4(c);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+		{
+			c -= 4; sect->os_size = get4(c);
+			c -= 4; sect->os_base = get4(c);
 		}
-#endif
 	}
 }
 

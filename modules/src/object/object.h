@@ -13,6 +13,14 @@
 #define Xchar(ch)	((ch) & 0377)
 #endif
 
+#if ! defined(BYTES_REVERSED)
+#define BYTES_REVERSED 1
+#endif
+
+#if ! defined(WORDS_REVERSED)
+#define WORDS_REVERSED 1
+#endif
+
 #if BYTES_REVERSED
 #define uget2(c)	(Xchar((c)[0]) | ((unsigned) Xchar((c)[1]) << 8))
 #define Xput2(i, c)	(((c)[0] = (i)), ((c)[1] = (i) >> 8))
