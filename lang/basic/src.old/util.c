@@ -61,12 +61,12 @@ int i;
 }
 
 char *salloc(length)
-int length;
+unsigned length;
 {		
 	char *s,*c;
 	extern char *malloc() ;
 	s=c= malloc(length);
-	while(length-->0)*c++ =0;
+	while(length--)*c++ =0;
 	return(s);
 }
 
