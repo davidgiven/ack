@@ -1,5 +1,5 @@
 name "NS16032 assembler"
-dir nas
+dir as
 end
 name "NS16032 backend"
 dir cg
@@ -12,6 +12,9 @@ dir libsys
 end
 name "NS16032 C libraries"
 dir libcc
+end
+name "NS16032 PC library"
+dir libpc
 end
 name "NS16032 Basic libraries"
 dir libbc
