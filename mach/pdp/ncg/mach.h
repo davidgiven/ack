@@ -23,7 +23,7 @@
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
 #ifdef ACK_ASS
-#define newlbss(l,x)	fprintf(codefile,"%s:.space 0%o\n",l,x);
+#define newlbss(l,x)	fprintf(codefile,".comm %s,%u\n",l,x);
 #else
 #define newlbss(l,x)	fprintf(codefile,"%s:.=.+0%o\n",l,x);
 #endif

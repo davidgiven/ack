@@ -9,7 +9,7 @@
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
 #define	dlbdlb(x,y)	fprintf(codefile,"%s = %s\n",x,y)
-#define newlbss(l,x)	fprintf(codefile,"%s:.space\t%ld\n",l,x);
+#define newlbss(l,x)	fprintf(codefile,".comm %s,%ld\n",l,x);
 
 #define	pop_fmt		"(sp)+"
 #define cst_fmt		"%ld"
