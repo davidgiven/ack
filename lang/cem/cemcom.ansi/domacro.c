@@ -476,15 +476,13 @@ do_undef(argidf)
 
 do_error()
 {
-	static char errbuf[512];
-	register char *bp = errbuf;
-	register int ch;
+	int len;
+	char *get_text();
+	char *bp = get_text((char **) 0, &len);
 
-	while ((ch = GetChar()) != '\n')
-		*bp++ = ch;
-	*bp = '\0';
-	UnGetChar();
-	lexerror("user error: %s", errbuf);
+	lexerror("user error: %s", bp);
+	free(bp);
+	LineNumber++;
 }
 
 int
@@ -652,6 +650,10 @@ get_text(formals, length)
 			    if (c == '\\') add2repl(repl, GetChar());
 			    c = GetChar();
 			} while (c != delim && c != EOI && class(c) != STNL);
+			if (c == EOI || class(c) == STNL) {
+				lexstrict("unclosed opening %c", delim);
+				break;
+			}
 			add2repl(repl, c);
 			c = GetChar();
 		} else if (c == '/') {
