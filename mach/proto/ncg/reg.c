@@ -73,12 +73,12 @@ erasereg(regno) {
 	register struct reginfo *rp;
 	register int i;
 
-#if MAXMEMBERS==0
 	rp = &machregs[regno];
 	rp->r_contents.t_token = 0;
 	for (i=0;i<TOKENSIZE;i++)
 		rp->r_contents.t_att[i].aw = 0;
 
+#if MAXMEMBERS==0
 	awayreg(regno);
 #else
 	for (rp=machregs+1;rp<machregs+NREGS;rp++)
