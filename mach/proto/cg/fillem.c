@@ -267,6 +267,12 @@ dopseudo() {
 			if ( getarg(any_ptyp)!=sp_cend )
 				fatal("too many parameters");
 #ifdef REGVARS
+		} else if (argval == ms_gto) {
+			getarg(ptyp(sp_cend));
+			if (!regallowed)
+				error("mes 3 not allowed here");
+			fixregvars(TRUE);
+			regallowed=0;
 		} else if (argval == ms_reg) {
 			long r_off;
 			int r_size,r_type,r_score;
@@ -275,7 +281,7 @@ dopseudo() {
 			if (!regallowed)
 				error("mes 3 not allowed here");
 			if(getarg(ptyp(sp_cst2)|ptyp(sp_cend)) == sp_cend) {
-				fixregvars();
+				fixregvars(FALSE);
 				regallowed=0;
 			} else {
 				r_off = argval;
