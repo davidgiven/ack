@@ -588,7 +588,7 @@ Instructions that check for undefined integer or floating-point
 values and underflow or overflow
 are indicated below by (*).
 .N 1
-.DS B
+.DS
 .ta 12n
 GROUP 1 \- LOAD
 
@@ -608,7 +608,9 @@ GROUP 1 \- LOAD
   LDE \*g :	Load double external (two consecutive externals are stacked)
   LDF \*f :	Load double offsetted (top of stack + \*f yield address)
   LPI \*p :	Load procedure identifier
+.DE
 
+.DS
 GROUP 2 \- STORE
 
   STL \*l :	Store local or parameter
@@ -620,7 +622,9 @@ GROUP 2 \- STORE
   SDL \*l :	Store double local or parameter
   SDE \*g :	Store double external
   SDF \*f :	Store double offsetted
+.DE
 
+.DS
 GROUP 3 \- INTEGER ARITHMETIC
 
   ADI \*w :	Addition (*)
@@ -631,7 +635,9 @@ GROUP 3 \- INTEGER ARITHMETIC
   NGI \*w :	Negate (two's complement) (*)
   SLI \*w :	Shift left (*)
   SRI \*w :	Shift right (*)
+.DE
 
+.DS
 GROUP 4 \- UNSIGNED ARITHMETIC
 
   ADU \*w :	Addition
@@ -641,7 +647,9 @@ GROUP 4 \- UNSIGNED ARITHMETIC
   RMU \*w :	Remainder
   SLU \*w :	Shift left
   SRU \*w :	Shift right
+.DE
 
+.DS
 GROUP 5 \- FLOATING POINT ARITHMETIC
 
   ADF \*w :	Floating add (*)
@@ -651,13 +659,17 @@ GROUP 5 \- FLOATING POINT ARITHMETIC
   NGF \*w :	Floating negate (*)
   FIF \*w :	Floating multiply and split integer and fraction part (*)
   FEF \*w :	Split floating number in exponent and fraction part (*)
+.DE
 
+.DS
 GROUP 6 \- POINTER ARITHMETIC
 
   ADP \*f :	Add \*f to pointer on top of stack
   ADS \*w :	Add \*w-byte value and pointer
   SBS \*w :	Subtract pointers in same fragment and push diff as size \*w integer
+.DE
 
+.DS
 GROUP 7 \- INCREMENT/DECREMENT/ZERO
 
   INC \*- :	Increment word on top of stack by 1 (*)
@@ -670,7 +682,9 @@ GROUP 7 \- INCREMENT/DECREMENT/ZERO
   ZRE \*g :	Zero external
   ZRF \*w :	Load a floating zero of size \*w
   ZER \*w :	Load \*w zero bytes
+.DE
 
+.DS				\" ???
 GROUP 8 \- CONVERT    (stack:	source, source size, dest. size (top))
 
   CII \*- :	Convert integer to integer (*)
@@ -682,7 +696,9 @@ GROUP 8 \- CONVERT    (stack:	source, source size, dest. size (top))
   CIU \*- :	Convert integer to unsigned
   CUU \*- :	Convert unsigned to unsigned
   CFU \*- :	Convert floating to unsigned
+.DE
 
+.DS
 GROUP 9 \- LOGICAL
 
   AND \*w :	Boolean and on two groups of \*w bytes
@@ -691,18 +707,24 @@ GROUP 9 \- LOGICAL
   COM \*w :	Complement (one's complement of top \*w bytes)
   ROL \*w :	Rotate left a group of \*w bytes
   ROR \*w :	Rotate right a group of \*w bytes
+.DE
 
+.DS
 GROUP 10 \- SETS
 
   INN \*w :	Bit test on \*w byte set (bit number on top of stack)
   SET \*w :	Create singleton \*w byte set with bit n on (n is top of stack)
+.DE
 
+.DS
 GROUP 11 \- ARRAY
 
   LAR \*w :	Load array element, descriptor contains integers of size \*w
   SAR \*w :	Store array element
   AAR \*w :	Load address of array element
+.DE
 
+.DS
 GROUP 12 \- COMPARE
 
   CMI \*w :	Compare \*w byte integers, Push negative, zero, positive for <, = or >
@@ -717,7 +739,9 @@ GROUP 12 \- COMPARE
   TNE \*- :	True if not equal, i.e. iff top of stack non zero
   TGE \*- :	True if greater or equal, i.e. iff top of stack >= 0
   TGT \*- :	True if greater, i.e. iff top of stack > 0
+.DE
 
+.DS				\" ???
 GROUP 13 \- BRANCH
 
   BRA \*b :	Branch unconditionally to label \*b
@@ -735,14 +759,18 @@ GROUP 13 \- BRANCH
   ZNE \*b :	Branch not zero
   ZGE \*b :	Branch greater or equal zero
   ZGT \*b :	Branch greater than zero
+.DE
 
+.DS
 GROUP 14 \- PROCEDURE CALL
 
   CAI \*- :	Call procedure (procedure identifier on stack)
   CAL \*p :	Call procedure (with identifier \*p)
   LFR \*s :	Load function result
   RET \*z :	Return (function result consists of top \*z bytes)
+.DE
 
+.DS
 GROUP 15 \- MISCELLANEOUS
 
   ASP \*f :	Adjust the stack pointer by \*f

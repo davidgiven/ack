@@ -1,5 +1,7 @@
 This it the text of IR-81,
-DESCRIPTION OF A MACHINE ARCHITECTURE FOR  USE WITH BLOCK  STRUCTURED  LANGUAGES
+DESCRIPTION OF A MACHINE ARCHITECTURE FOR USE WITH BLOCK STRUCTURED LANGUAGES
+
+The file em.i (text of the defining interpreter) was hand-edited from int/em.p
 
 To print, set NROFF and TBL in the Makefile and call  make.
 It uses the kun macro package which is also distributed.
