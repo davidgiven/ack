@@ -34,7 +34,7 @@ char *strcpy();
 EXPORT
 init_pp()
 {
-	long clock;
+	long clock, sys_time();
 	static char date[30];
 	char *ctime();
 

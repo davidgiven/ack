@@ -93,7 +93,7 @@ end_code()
 	*/
 	def_strings(str_list);
 	str_list = 0;
-	C_ms_src((arith)(LineNumber - 2), FileName);
+	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
 
