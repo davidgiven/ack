@@ -252,7 +252,11 @@ garbage:
 			UnGetChar();
 			return ptok->tk_symb = ch;
 		case '/':
-			if (nch == '*' && !InputLevel) {
+			if (nch == '*'
+#ifndef NOPP
+			    && !InputLevel
+#endif
+			) {
 				skipcomment();
 				goto again;
 			}

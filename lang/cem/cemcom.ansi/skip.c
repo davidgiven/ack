@@ -67,7 +67,11 @@ SkipToNewLine(garbage)
 
 	while ((ch = GetChar()) != '\n') {
 		if (ch == '/') {
-			if ((ch = GetChar()) == '*' && !InputLevel) {
+			if ((ch = GetChar()) == '*'
+#ifndef NOPP
+			    && !InputLevel
+#endif
+			) {
 				skipcomment();
 				continue;
 			}

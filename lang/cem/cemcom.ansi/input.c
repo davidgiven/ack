@@ -40,17 +40,21 @@ getwdir(fn)
 	}
 	return "";
 }
+
+int	InputLevel;
 #endif NOPP
 
 int	NoUnstack;
-int	InputLevel;
 
 AtEoIT()
 {
+#ifndef NOPP
 	InputLevel--;
 	unstackrepl();
+#endif NOPP
 	return 0;
 }
+
 
 AtEoIF()
 {
