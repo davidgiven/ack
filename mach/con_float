@@ -103,7 +103,11 @@ float_cst(str, sz, buf)
 #ifdef IEEEFLOAT
 	if (sz == 4) {
 #endif
+#ifdef PDPFLOAT
+		e.flt_exp += 129;
+#else
 		e.flt_exp += 127;
+#endif
 		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
 #ifdef IEEEFLOAT
 		if (e.flt_mantissa.flt_h_32 & 0x80) {
