@@ -7,6 +7,9 @@ DEFINITION MODULE Traps;
 	ERRTOOMANY =	65;	(* too many nested traps + handlers *)
 	ERRNORESULT =	66;	(* no RETURN from function procedure *)
 	ERRCARDOVFL =	67;	(* CARDINAL overflow *)
+	ERRFORLOOP =	68;	(* value of FOR-loop control variable changed
+				   in loop
+				*)
 
   TYPE	TrapHandler = EM.TrapHandler;
 

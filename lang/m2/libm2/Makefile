@@ -11,4 +11,4 @@ all:
 
 install:
 		-mkdir $(DEFDIR)
-		for i in $(SOURCES) ; do cp $$i $(DEFDIR)/$$i ; done
+		cp $(SOURCES) $(DEFDIR)

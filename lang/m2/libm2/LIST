@@ -16,7 +16,6 @@ Semaphores.mod
 random.mod
 Strings.mod
 catch.c
-FORchk.c
 Traps.mod
 Arguments.c
 LtoUset.e

@@ -34,6 +34,7 @@ static struct errm {
 	{ M2_TOOMANY,	"too many nested traps + handlers"},
 	{ M2_NORESULT,	"no RETURN from procedure function"},
 	{ M2_UOVFL,	"cardinal overflow"},
+	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
 	{ -1,		0}
 };
 
@@ -70,5 +71,6 @@ _catch(trapno)
 		*p = 0;
 		Traps_Message(q, 0, (int) (p - q), 1);
 	}
-	exit(trapno);
+	if (trapno != M2_FORCH) exit(trapno);
+	SIG(_catch);
 }
