@@ -2,3 +2,4 @@ times.h
 wait.h
 types.h
 stat.h
+errno.h
