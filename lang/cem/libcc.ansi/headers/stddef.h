@@ -11,8 +11,7 @@
 
 #define	NULL		((void *)0)
 
-#define	offsetof(type, ident)	((size_t) (unsigned long) (char *)(&((type *)0)->ident))
-
+#define	offsetof(type, ident)	((size_t) (unsigned long) &((type *)0)->ident)
 
 #if	_EM_PSIZE == _EM_WSIZE
 typedef int	ptrdiff_t;	/* result of substracting two pointers */
