@@ -18,8 +18,8 @@ cphead: head_$(PREF).e
 head_$(PREF).e: libsrc
 
 libsrc: $(EMHOME)/lang/cem/libcc.ansi/libsrc .
-	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
-	tar xf libsrc
+	tar xf $(EMHOME)/lang/cem/libcc.ansi/libsrc
+	touch libsrc
 
 cmp:	cmplibc cmphead
 	-../../compare $(OLIB)
