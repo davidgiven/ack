@@ -360,10 +360,12 @@ CheckWithDef(df, tp)
 		possible earlier definition in the definition module.
 	*/
 
-	if (df->df_type) {
+	if (df->df_kind == D_PROCHEAD && df->df_type != error_type) {
 		/* We already saw a definition of this type
 		   in the definition module.
 		*/
+		assert(df->df_type != 0);
+
 	  	if (!TstProcEquiv(tp, df->df_type)) {
 			error("inconsistent procedure declaration for \"%s\"",
 			      df->df_idf->id_text); 

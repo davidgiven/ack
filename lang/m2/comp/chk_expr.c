@@ -422,7 +422,7 @@ MkSet(size)
 {
 	register arith	*s;
 
-	size += sizeof(arith);
+	size = ((size + (int)word_size - 1) / (int)word_size + 1) * sizeof(arith);
 	s = (arith *) Malloc(size);
 	clear((char *) s , size);
 	s++;
@@ -433,6 +433,7 @@ MkSet(size)
 FreeSet(s)
 	register arith *s;
 {
+	dec_refcount(s);
 	if (refcount(s) <= 0) {
 		free((char *) (s-1));
 	}
@@ -482,7 +483,7 @@ ChkSet(expp)
 	   First allocate room for the set.
 	*/
 
-	expp->nd_set = MkSet((unsigned)(tp->tp_size) * (sizeof(arith) / (int) word_size));
+	expp->nd_set = MkSet((unsigned)(tp->tp_size));
 
 	/* Now check the elements, one by one
 	*/
