@@ -9,7 +9,6 @@ locale.h
 math.h
 mathconst.h
 setjmp.h
-sgtty.h
 signal.h
 stdarg.h
 stddef.h
@@ -19,5 +18,3 @@ string.h
 time.h
 sys/dirent.h
 sys/errno.h
-sys/stat.h
-sys/types.h
