@@ -36,6 +36,7 @@
 #define DO_TEST		20
 #define DO_DLINE	21
 #define DO_SETCC	22
+#define DO_TOSTACK	23
 
 #ifndef MAXATT
 #define MAXATT TOKENSIZE
