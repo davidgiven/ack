@@ -16,6 +16,11 @@ char _obuf[OBUFSIZE];
 char bits[128];
 #endif
 
+Xflush()
+{
+	sys_write(STDOUT, _obuf, OBUFSIZE);
+}
+
 preprocess(fn)
 	char *fn;
 {
@@ -25,8 +30,8 @@ preprocess(fn)
 	int lineno = 0;
 	extern char options[];
 
-#define flush(X)	(sys_write(STDOUT,_obuf,X), op = _obuf)
-#define echo(ch) 	(op != ob || flush(OBUFSIZE), *op++ = (ch))
+#define flush(X)	(sys_write(STDOUT,_obuf,X))
+#define echo(ch) 	if (op == ob) { Xflush(); op = _obuf; } *op++ = (ch);
 #define newline()	echo('\n')
 
 	for (;;) {
@@ -48,7 +53,9 @@ preprocess(fn)
 			lineno = LineNumber;
 			sprint(p, "#line %d \"%s\"\n", LineNumber,
 							FileName);
-			while (*p) echo(*p++);
+			while (*p) {
+				echo(*p++);
+			}
 		}
 		for (;;) {
 			if (c & 0200)  {
@@ -78,17 +85,23 @@ preprocess(fn)
 							return;
 						}
 						else if (c == '*') {
-							if (options['C']) echo(c);
+							if (options['C']) {
+								echo(c);
+							}
 							LoadChar(c);
 							if (c == '/') {
-								if (options['C']) echo(c);
-								break;
+							   if (options['C']) {
+								echo(c);
+							   }
+							   break;
 							}
 							else {
 								PushBack();
 							}
 						}
-						else if (options['C']) echo(c);
+						else if (options['C']) {
+							echo(c);
+						}
 					}
 					NoUnstack--;
 					LoadChar(c);
@@ -189,7 +202,9 @@ preprocess(fn)
 			nomac:
 				*tg = 0;
 				tg = buf;
-				while (*tg) echo(*tg++);
+				while (*tg) {
+					echo(*tg++);
+				}
 				LoadChar(c);
 				while (in_idf(c)) {
 					echo(c);

@@ -72,9 +72,12 @@ all:	cc
 cc:	hfiles LLfiles
 	make "EMHOME="$(EMHOME) cpp
 
-hfiles: Parameters
+hfiles: Parameters char.c charoffset.h
 	./make.hfiles Parameters
 	@touch hfiles
+
+charoffset.h char.c:	chtab char.tab
+	chtab -fchar.tab > char.c
 
 LLfiles: $(LSRC)
 	$(GEN) $(GENOPTIONS) $(LSRC)
@@ -85,12 +88,6 @@ tokenfile.g:	tokenname.c make.tokfile
 
 symbol2str.c:	tokenname.c make.tokcase
 	<tokenname.c ./make.tokcase >symbol2str.c
-
-char.c:	char.tab chtab
-	chtab -fchar.tab > char.c
-
-charoffset.h:	chtab char.tab
-	chtab -fchar.tab > /dev/null
 
 chtab:	chtab.o
 	$(CC) -o chtab chtab.o
