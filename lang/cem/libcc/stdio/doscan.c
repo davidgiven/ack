@@ -89,7 +89,7 @@ va_list ap;
 			longflag = 1;
 		}
 		else	kind = *format;
-		if (kind != 'c')
+		if (kind != 'c' && kind != '[')
 			while (isspace (ic))
 				ic = getc(iop);
 		done_some = 0;	/* nothing yet */
@@ -214,7 +214,7 @@ va_list ap;
 			{ register char *p;
 			  if (do_assign)
 				p = va_arg(ap, char *);
-			  while (width-- && !isspace (ic) && ic > 0 &&
+			  while (width-- && ic > 0 &&
 				(Xtable[ic] ^ reverse)) {
 				if (do_assign)
 					*p++ = (char) ic;
