@@ -1,4 +1,11 @@
 /*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*/
+
+/* $Header$ */
+
+/*
  *	these are the routines the routines to do 32 and  64-bit addition
  */
 
