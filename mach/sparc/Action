@@ -14,10 +14,6 @@ name "Sparc end library"
 system "sparc"
 dir libend
 end
-!name "M68020 debugger support library"
-!system "sparc"
-!dir libdb
-!end
 name "Sparc system call library"
 system "sparc"
 dir libsys
