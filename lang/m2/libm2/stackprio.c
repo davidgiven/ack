@@ -9,7 +9,7 @@
   Version:	$Header$
 */
 
-static unsigned prio;
+static unsigned prio = 0;
 
 stackprio(n)
 	unsigned n;

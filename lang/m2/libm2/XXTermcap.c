@@ -19,12 +19,12 @@
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\n')
 #define ISDIGIT(x)	((x) >= '0' && (x) <= '9')
 
-short	ospeed;		/* output speed */
-char	PC;		/* padding character */
-char	*BC;		/* back cursor movement */
-char	*UP;		/* up cursor movement */
+short	ospeed = 0;		/* output speed */
+char	PC = 0;			/* padding character */
+char	*BC = 0;		/* back cursor movement */
+char	*UP = 0;		/* up cursor movement */
 
-static char	*capab;		/* the capability itself */
+static char	*capab = 0;		/* the capability itself */
 static int	check_for_tc();
 static int	match_name();
 
@@ -181,8 +181,10 @@ char	*name;
 		else file = "/etc/termcap";
 	} else
 		file = "/etc/termcap";
-	if ((fp = open(file, 0)) < 0)
+	if ((fp = open(file, 0)) < 0) {
+		capab = 0;
 		return(-1); 
+	}
 	while (fgets(buf, 1024, fp) != NULL) {
 		if (buf[0] == '#') continue;
 		while (*(cp = &buf[strlen(buf) - 2]) == '\\')
@@ -191,9 +193,14 @@ char	*name;
 		if (match_name(buf, name)) {
 			strcpy(bp, buf);
 			close(fp);
-			return(check_for_tc());
+			if(check_for_tc() == 0) {
+				capab = 0;
+				return 0;
+			}
+			return 1;
 		}
 	}
+	capab = 0;
 	close(fp);
 	return(0);
 }
@@ -236,7 +243,9 @@ check_for_tc()
 			return(0);	/* no : in termcap entry */
 	if (p[1] != 't' || p[2] != 'c')
 		return(1);
-	if (count > 16) return(0);	/* recursion in tc= definitions */
+	if (count > 16) {
+		return(0);	/* recursion in tc= definitions */
+	}
 	count++;
 	strcpy(terminalname, &p[4]);
 	q = terminalname;
@@ -264,9 +273,9 @@ char	*id;
 	char	*cp;
 	int	ret;
 
-	if ((cp = capab) == NULL || id == NULL)
+	if ((cp = capab) == NULL || id == NULL || *cp == 0)
 		return(-1);
-	while (*++cp != ':')
+	while (*++cp && *cp != ':')
 		;
 	while (*cp) {
 		cp++;
@@ -298,9 +307,9 @@ char	*id;
 {
 	char	*cp;
 
-	if ((cp = capab) == NULL || id == NULL)
+	if ((cp = capab) == NULL || id == NULL || *cp == 0)
 		return(-1);
-	while (*++cp != ':')
+	while (*++cp && *cp != ':')
 		;
 	while (*cp) {
 		cp++;
@@ -328,7 +337,7 @@ char	**area;
 	char	*ret;
 	int	i;
 
-	if ((cp = capab) == NULL || id == NULL)
+	if ((cp = capab) == NULL || id == NULL || *cp == 0)
 		return(NULL);
 	while (*++cp != ':')
 		;

@@ -31,10 +31,30 @@ init()
 	sigtrp(M2_UNIXSIG, SIGALRM);
 	sigtrp(M2_UNIXSIG, SIGTERM);
 }
+#if em22 || em24 || em44
+killbss()
+{
+}
+#else
+
+static int blablabla;		/*	We cannot use end, because then also
+					bss allocated for the systemcall lib
+					would be overwritten. Lets hope that
+					this helps ...
+				*/
+
+killbss()
+{
+	extern char *edata;
+	register char *p = (char *) &edata;
+
+	while (p < (char *) &blablabla) *p++ = 0x66;
+}
+#endif
 
 extern int catch();
 
 int (*handler)() = catch;
-char **argv, **environ;
-int argc, StackSize;
-char *CurrentProcess, MainProcess, StackBase, MainLB;
+char **argv = 0, **environ = 0;
+int argc = 0, StackSize = 0;
+char *CurrentProcess = 0, MainProcess = 0, StackBase = 0, MainLB = 0;

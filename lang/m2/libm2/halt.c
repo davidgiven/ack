@@ -10,7 +10,7 @@
 */
 #define MAXPROCS 16
 
-static int callindex;
+static int callindex = 0;
 static int (*proclist[MAXPROCS])();
 
 _cleanup()
