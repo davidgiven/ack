@@ -263,6 +263,9 @@ do_include()
 			fatal("cannot open include file \"%s\"", filenm);
 		}
 		else {
+#ifndef NOPP
+			add_dependency(result);
+#endif  NOPP
 			WorkingDir = getwdir(result);
 			File_Inserted = 1;
 			FileName = result;
