@@ -28,6 +28,7 @@ fchown.s
 fcntl.s
 flock.s
 fork.s
+Xstat.c
 fstat.s
 fstatfs.s
 fsync.s
