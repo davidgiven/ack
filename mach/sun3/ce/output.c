@@ -189,6 +189,7 @@ register struct relocation_info *u_relo;
 {
 	int retval = 1;
 
+	*(((int *) u_relo)+1) = 0;
 	u_relo->r_address = a_relo->or_addr;
 	u_relo->r_symbolnum = a_relo->or_nami;
 	u_relo->r_pcrel = (a_relo->or_type & RELPC) >> 3;
@@ -196,8 +197,6 @@ register struct relocation_info *u_relo;
 	if ( symbol_table[ a_relo->or_nami].on_valu == -1 ||
 	     (symbol_table[ a_relo->or_nami].on_type & S_COM)) 
 		u_relo->r_extern = 1;
-	else  
-		u_relo->r_extern = 0;
 	if ( u_relo->r_extern == 0) {
 		switch ( (symbol_table[ a_relo->or_nami].on_type & S_TYP) - S_MIN) {
 			case SEGTXT : u_relo->r_symbolnum = N_TEXT;
