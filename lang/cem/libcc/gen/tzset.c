@@ -7,9 +7,15 @@
 #endif
 #endif
 
+#ifdef USG
 long	timezone = -1 * 60;
 int	daylight = 1;
 char	*tzname[] = {"MET", "MDT",};
+#endif
+
+long __timezone = -1 * 60;
+int __daylight = 1;
+char *__tzname[] = {"MET", "MDT", };
 
 tzset()
 {
@@ -18,15 +24,15 @@ tzset()
 	struct timezone tzon;
 
 	gettimeofday(&tval, &tzon);
-	timezone = tzon.tz_minuteswest * 60L;
-	daylight = tzon.tz_dsttime;
+	__timezone = tzon.tz_minuteswest * 60L;
+	__daylight = tzon.tz_dsttime;
 #else
 #ifndef USG
 	struct timeb time;
 
 	ftime(&time);
-	timezone = time.timezone*60L;
-	daylight = time.dstflag;
+	__timezone = time.timezone*60L;
+	__daylight = time.dstflag;
 #endif
 #endif
 
@@ -48,9 +54,15 @@ tzset()
 		while(*p >= '0' && *p <= '9')
 			n = 10 * n + (*p++ - '0');
 		n *= sign;
-		timezone = ((long)(n * 60)) * 60;
-		daylight = (*p != '\0');
+		__timezone = ((long)(n * 60)) * 60;
+		__daylight = (*p != '\0');
 		strncpy(tzname[1], p, 3);
 	}
 	}
+#ifdef USG
+	timezone = __timezone;
+	daylight = __daylight;
+	tzname[0] = __tzname[0];
+	tzname[1] = __tzname[1];
+#endif
 }

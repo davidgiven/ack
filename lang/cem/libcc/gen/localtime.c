@@ -25,13 +25,13 @@ localtime(clock)
 	register struct tm *gmt;
 	long cl;
 	int begindst, enddst;
-	extern int daylight;
-	extern long timezone;
+	extern int __daylight;
+	extern long __timezone;
 
 	tzset();
-	cl = *clock - timezone;
+	cl = *clock - __timezone;
 	gmt = gmtime(&cl);
-	if (daylight) {
+	if (__daylight) {
 		/* daylight saving time.
 		   Unfortunately, rules differ for different countries.
 		   Implemented here are heuristics that got it right
@@ -45,6 +45,7 @@ localtime(clock)
 		     (gmt->tm_yday==begindst && gmt->tm_hour>=2)) &&
 	    	    (gmt->tm_yday<enddst || 
 		     (gmt->tm_yday==enddst && gmt->tm_hour<3))) {
+			/* it all happens between 2 and 3 */
 			cl += 1*60*60;
 			gmt = gmtime(&cl);
 			gmt->tm_isdst++;
