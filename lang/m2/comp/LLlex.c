@@ -153,7 +153,8 @@ GetString(upto)
 	}
 	str->s_length = p - str->s_str;
 	*p = '\0';
-	str->s_str = Realloc(str->s_str, (unsigned)(str->s_length) + 1);
+	str->s_str = Realloc(str->s_str,
+	  (unsigned)((str->s_length+(int)word_size) & ~((int)word_size-1)));
 	if (str->s_length == 0) str->s_length = 1;
 	/* ??? string length at least 1 ??? */
 	return str;
