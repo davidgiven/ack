@@ -55,6 +55,8 @@ unlink.s
 utime.s
 wait.s
 write.s
+exit.c
+cleanup.c
 _exit.c
 _access.c
 _alarm.c
