@@ -412,7 +412,7 @@ do_return_expr(expr)
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	if (struct_return != 0) {
 		LoadLocal((arith) 0, pointer_size);
-		store_block(func_size, func_type->tp_align);
+		store_block(func_type->tp_size, func_type->tp_align);
 	}
 	C_bra(return_label);
 	return_expr_occurred = 1;

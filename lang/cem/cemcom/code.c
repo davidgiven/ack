@@ -319,7 +319,7 @@ end_proc(fbytes)
 	if (return_expr_occurred) {
 		if (func_res_label != 0)	{
 			C_lae_dlb(func_res_label, (arith)0);
-			store_block(func_size, func_type->tp_align);
+			store_block(func_type->tp_size, func_type->tp_align);
 			C_lae_dlb(func_res_label, (arith)0);
 			C_ret(pointer_size);
 		}
