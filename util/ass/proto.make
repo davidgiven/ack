@@ -54,8 +54,7 @@ pr:
 		@pr $(SRC_DIR)/ass00.h $(SRC_DIR)/assex.h $(SRC_DIR)/ass?0.c $(SRC_DIR)/ass[rcd]?.c $(SRC_DIR)/maktab.c
 
 depend:	asstb.c
-	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
-	echo '#DEPENDENCIES' >>Makefile.new
+	rm_deps Makefile >Makefile.new
 	for i in $(CFILES) ; do \
 		echo "`basename $$i .c`.$$(SUF):	$$i" >> Makefile.new ; \
 		echo '	$$(CC) -c $$(CFLAGS)' $$i >> Makefile.new ; \

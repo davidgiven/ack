@@ -149,7 +149,7 @@ struct  lines {
 
 struct  procstat  {
 	line_t  *s_fline;       /* points to first line of procedure */
-	locl_t  (*s_locl)[];    /* pointer to local labels */
+	locl_t  (*s_locl)[1];    /* pointer to local labels */
 	proc_t  *s_curpro;      /* identifies current procedure */
 	relc_t  *s_fdata;       /* last datareloc before procedure */
 	stat_t  *s_prevstat;    /* backward chain of nested procedures */
