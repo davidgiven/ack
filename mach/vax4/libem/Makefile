@@ -2,19 +2,14 @@
 install:	cp
 
 cp:             all
-		../../install head_em
 		../../install tail_em
-		rm -f head_em tail_em
+		rm -f tail_em
 
 cmp:            all
-		-../../compare head_em
 		-../../compare tail_em
-		rm -f head_em tail_em
+		rm -f tail_em
 
-all:            head_em tail_em
-
-head_em:        head_em.s
-		vax4 -I../../../h -c head_em.s ; mv head_em.o head_em
+all:            tail_em
 
 tail_em:
 		ASAR=ar ; export ASAR ;\
@@ -26,5 +21,5 @@ clean:
 opr:
 		make pr | opr
 pr:
-		@pr `pwd`/Makefile `pwd`/head_em.s
+		@pr `pwd`/Makefile
 		@pr -l33 `tail +1 LIST|sort`
