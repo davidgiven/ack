@@ -1,6 +1,7 @@
 tail_cc.2g.a
 abs.c
 atof.c
+strtod.c
 atoi.c
 atol.c
 bcmp.c
