@@ -70,7 +70,7 @@ diag(tail, format, a1, a2, a3, a4)
 	else if (archname)
 		fprintf(stderr, "%s: ", archname);
 	else if (modulname)
-		fprintf(stderr, "%.14s: ", modulname);
+		fprintf(stderr, "%s: ", modulname);
 	fprintf(stderr, format, a1, a2, a3, a4);
 	if (tail) fprintf(stderr, " (%s)\n", tail);
 	else putc('\n', stderr);
