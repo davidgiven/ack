@@ -28,7 +28,7 @@ typedef struct LINERECORD{
 	int	fixed;			/* fixation of block */
 } Linerecord;
 
-Linerecord	*firstline, 
+extern Linerecord	*firstline, 
 		*currline, 
 		*lastline;
 extern List	*forwardlabel;

@@ -7,6 +7,10 @@ static char rcs_id[] = "$Header$" ;
 
 List *forwardlabel=0;
 
+Linerecord	*firstline, 
+		*currline, 
+		*lastline;
+
 /* Line management is handled here */
 
 Linerecord *srchline(nr)
