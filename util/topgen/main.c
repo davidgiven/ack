@@ -17,24 +17,23 @@ main(argc,argv) char *argv[]; {
     newline = 1;
     if (argc != 2) {
 	fprintf(stderr,"Usage : %s targetoptimizerdescription\n",argv[0]);
-	return 1;
+	exit(1);
     }
     if ((input = fopen(argv[1],"r")) == NULL) {
 	fprintf(stderr,"Fatal error : couldn't open %s\n",argv[1]);
-	return 1;
+	exit(1);
     }
     if ((genc = fopen("gen.c","w")) == NULL) {
 	fputs("Fatal error : couldn't open gen.c\n",stderr);
-	return 1;
+	exit(1);
     }
     if ((genh = fopen("gen.h","w")) == NULL) {
 	fputs("Fatal error : couldn't open gen.h\n",stderr);
-	return 1;
+	exit(1);
     }
     inpfile = argv[1];		/* needed for line directives and errors */
     LLparse();
-    if (nerrors) return 1;
-    return 0;
+    exit(nerrors);
 }
 
 /* VARARGS1 */
