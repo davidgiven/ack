@@ -517,6 +517,7 @@ EVAL(expr, val, code, true_label, false_label)
 				else
 					C_lfr(ATW(tp->tp_size));
 			}
+			/* ??? set filename and line number ??? */
 			break;
 		}
 		case '.':

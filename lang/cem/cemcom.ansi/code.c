@@ -68,8 +68,8 @@ init_code(dst_file)
 #ifdef USE_TMP
 #ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
-#endif	USE_TMP
 #endif	PREPEND_SCOPES
+#endif	USE_TMP
 }
 #endif	LINT
 
@@ -519,13 +519,12 @@ bss(idf)
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
-	arith size = idf->id_def->df_type->tp_size;
 	
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, idf->id_def);
 #endif	PREPEND_SCOPES
 	C_df_dnam(idf->id_text);
-	C_bss_cst(ATW(size), (arith)0, 1);
+	C_bss_cst(ATW(idf->id_def->df_type->tp_size), (arith)0, 1);
 }
 
 formal_cvt(hasproto,df)
