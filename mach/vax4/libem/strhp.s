@@ -15,7 +15,7 @@
 	addl2   $02000,r0
 	bicl2   $0777,r0
 	pushl	r0
-	calls	$1,_brk
+	calls	$1,__brk
 	tstl	r0
 	beql	I2
 	pushl	$EHEAP

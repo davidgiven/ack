@@ -19,7 +19,7 @@ printc:
 	pushl	$1
 	pushab	Ich
 	pushl	$2
-	calls	$3,_write
+	calls	$3,__write
 	rsb
 
 	.sect .data

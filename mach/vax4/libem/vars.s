@@ -12,4 +12,4 @@ hol0:
 .trpim:
         .data4   0
 .reghp:
-        .data4   _end
+        .data4   __end
