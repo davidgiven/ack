@@ -1,5 +1,29 @@
 #include "decl.h"
 
+/* This file contains two arrays with information concerning the C_INSTR tokens:
+ *	t_C_info C_info[];	- Describes the arguments of EM-instructions
+ *	struct ? EM_instr[];  	- Contains per entry:
+ *					1) The name of the C_INSTR
+ *					2) The type of its argument, an index in
+ *					   C_info[].
+ *					3) The segment for which code/data must
+ *					   be generated.
+ *				  The array is sorted on the C_INSTR-name.
+ *
+ * Furthermore there are two routines present in this file :
+ *	set_C_instr_info( instr)	- It looks 'instr' up in EM_instr[] and
+ *		char *instr;		- sets the global variables
+ *					- 'C_instr_info' and 'segment'.
+ *
+ *	arg_type( arg)		- 'arg' must be a string starting with a '$' 
+ *		char *arg;	- and a number. arg_type() will return the
+ *				- type of the 'number'th argment of the current
+ *				- C_INSTR.
+ *				- For example, if the EM_table contains:
+ *				    C_loc ==> "pushl $1".
+ *				  then arg_type( "$1") will return ARITH.
+ */
+
 
 t_C_info C_info[] = {
 	/* NO_ARGS	*/   { "()\n{\n",
