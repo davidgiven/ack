@@ -200,7 +200,7 @@ int isshift_once(s, c1, c2)
 		pow <<= 1;
 		i++;
 	}
-	i = 0;
+	i = 1;
 	strcpy(c1, "8");
 	while (i <= 8) {
 		if (pow & val) {
