@@ -2,6 +2,7 @@ Action
 as
 cg
 libem
+libce
 libend
 libbsd4_1a
 libbsd4_2
