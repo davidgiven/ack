@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
+#include	<varargs.h>
 #include	<system.h>
 #include	<em.h>
 
@@ -18,7 +19,7 @@
 #include	"expr.h"
 #include	"LLlex.h"
 
-/*	This file contains the (non-portable) error-message and diagnostic
+/*	This file contains the error-message and diagnostic
 	functions.  Beware, they are called with a variable number of
 	arguments!
 */
@@ -48,60 +49,93 @@ extern char options[];
 */
 
 /*VARARGS1*/
-error(fmt, args)
-	char *fmt;
+error(va_alist)
+	va_dcl
 {
-	_error(ERROR, NILEXPR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(ERROR, NILEXPR, ap);
+	va_end(ap);
 }
 
 /*VARARGS2*/
-expr_error(expr, fmt, args)
-	struct expr *expr;
-	char *fmt;
+expr_error(va_alist)
+	va_dcl
 {
-	if (expr->ex_flags & EX_ERROR)
-		return;			/* to prevent proliferation */
-	_error(ERROR, expr, fmt, &args);
-	expr->ex_flags |= EX_ERROR;
+	struct expr *expr;
+	va_list ap;
+
+	va_start(ap);
+	expr = va_arg(ap, struct expr *);
+	if (!(expr->ex_flags & EX_ERROR)) {
+		/* to prevent proliferation */
+		_error(ERROR, expr, ap);
+		expr->ex_flags |= EX_ERROR;
+	}
+	va_end(ap);
 }
 
 /*VARARGS1*/
-warning(fmt, args)
-	char *fmt;
+warning(va_alist)
+	va_dcl
 {
-	_error(WARNING, NILEXPR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(WARNING, NILEXPR, ap);
+	va_end(ap);
 }
 
 /*VARARGS2*/
-expr_warning(expr, fmt, args)
-	struct expr *expr;
-	char *fmt;
+expr_warning(va_alist)
+	va_dcl
 {
-	if (expr->ex_flags & EX_ERROR)
-		return;			/* to prevent proliferation */
-	_error(WARNING, expr, fmt, &args);
+	struct expr *expr;
+	va_list ap;
+
+	va_start(ap);
+	expr = va_arg(ap, struct expr *);
+	if (!(expr->ex_flags & EX_ERROR)) {
+		/* to prevent proliferation */
+		_error(WARNING, expr, ap);
+	}
+	va_end(ap);
 }
 
 /*VARARGS1*/
-lexerror(fmt, args)
-	char *fmt;
+lexerror(va_alist)
+	va_dcl
 {
-	_error(LEXERROR, NILEXPR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(LEXERROR, NILEXPR, ap);
+	va_end(ap);
 }
 
 #ifndef	NOPP
 /*VARARGS1*/
-lexwarning(fmt, args) char *fmt;	{
-	_error(LEXWARNING, NILEXPR, fmt, &args);
+lexwarning(va_alist)
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	_error(LEXWARNING, NILEXPR, ap);
+	va_end(ap);
 }
 #endif	NOPP
 
 /*VARARGS1*/
-crash(fmt, args)
-	char *fmt;
-	int args;
+crash(va_alist)
+	va_dcl
 {
-	_error(CRASH, NILEXPR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(CRASH, NILEXPR, ap);
+	va_end(ap);
 	C_close();
 #ifdef	DEBUG
 	sys_stop(S_ABORT);
@@ -111,20 +145,22 @@ crash(fmt, args)
 }
 
 /*VARARGS1*/
-fatal(fmt, args)
-	char *fmt;
-	int args;
+fatal(va_alist)
+	va_dcl
 {
+	va_list ap;
+
+	va_start(ap);
 	if (C_busy()) C_close();
-	_error(FATAL, NILEXPR, fmt, &args);
+	_error(FATAL, NILEXPR, ap);
+	va_end(ap);
 	sys_stop(S_EXIT);
 }
 
-_error(class, expr, fmt, argv)
+_error(class, expr, ap)
 	int class;
 	struct expr *expr;
-	char *fmt;
-	int argv[];
+	va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
@@ -135,6 +171,7 @@ _error(class, expr, fmt, argv)
 	char *fn = 0;
 	unsigned int ln = 0;
 	char *remark = 0;
+	char *fmt = va_arg(ap, char *);
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
@@ -209,6 +246,6 @@ _error(class, expr, fmt, argv)
 		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
 		fprint(ERROUT, "%s ", remark);
-	doprnt(ERROUT, fmt, argv);		/* contents of error */
+	doprnt(ERROUT, fmt, ap);		/* contents of error */
 	fprint(ERROUT, "\n");
 }
