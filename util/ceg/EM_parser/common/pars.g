@@ -1,8 +1,38 @@
+/* This file contains the parser for the 'EM_table'.
+ * Every row in the table is converted to a C-function.
+ * The parser is a fairly simple program, for each row it prints a function-
+ * header and the following actions are printed as C-statements. A CALL is just
+ * copied, and an ASSEM_INSTR will be handed to the routine assemble().
+ * Assemble() will turn the assembly-string into a sequence of C-function calls.
+ * How this should be done is expressed in the 'as_table'.
+ *
+ * There are however some complicating factors:
+ *	- A row in the 'EM_table' may contain CONDITION's. 
+ *	  The parser supports this by outptutting some "if" and "else"'s.
+ *
+ *	- The user is allowed to use some abbreviation in the 'EM_table', (s)he
+ *	  can use the DEF_C_INSTR's ( e.g. C_loe..).
+ *	  One such DEF_C_INSTR must be expanded in 3 or more C-functions.
+ *	  The solution is to copy the DEF_C_INSTR to a temporary file. Then
+ *	  this file will be processed as many times as needed to generate all
+ *	  the C-functions.
+ *
+ *	- The assembler-instructions must be processed in blocks not one at a
+ *	  time, so buffering is needed.
+ *
+ *	- When generating object-code, the user can make use of the dist()
+ * 	  function. This function should return the number of bytes between
+ *	  the current instruction and a labelled one, both forward and backward
+ *	  references must be handled.
+ *	  This requires the saving of the generated function, and 
+ *	  backpatching in a second phase.
+ */
 {
 
 #include <system.h>
 #include "decl.h"
 #include "em.h"
+
 extern char yytext[];
 extern int yylineno;
 extern int first_action, last_action, token;
@@ -79,6 +109,9 @@ more_as :
 	|
 	;
 
+
+/* Grammar rules for a default-instruction, just copy to a temporary file. */
+
 Dspecial: CONDITION 		{ out( " %s ", yytext);}
 	  Dsimple 		
 
@@ -115,6 +148,13 @@ Daction	: CALL			{ out( "%s", yytext);}
 
 def_row	: [ special | simple]	{ out( "}\n\n");}
 	;
+
+
+
+/* This is a grammar to handle the -c flag ( only one entry has changed).
+ * Skip all entries in the table until the one that has changed, then
+ * use the grammar rules for the normal case above.
+ */
 
 c_table	: c_row*
 	;
@@ -159,6 +199,9 @@ c_actionlist :
 c_action: CALL
 	| ASSEM_INSTR
 	;
+
+
+
 
 
 {
@@ -215,6 +258,15 @@ int token;
 	}
 }
 
+
+/* The lexical analyzer.
+ *	It uses mylex() to get the tokens.
+ *	It supports the buffering of one token.
+ *	If the curent token is a C_INSTR it will set the global variable
+ *	'C_instr_info' to point to the correct information ( arguments, header,
+ *	etc.).
+ */
+
 int lex_analyzer()
 {
 	extern char *next;
@@ -244,79 +296,12 @@ int next_token()
 }
 
 
-set_segment( seg)
-int seg;
-{
-	switch ( seg) {
-	  case SEGTXT : out( "switchseg( SEGTXT);\n");
-			 break;
-	  case SEGBSS  : out( "switchseg( SEGBSS);\n");
-			 out( "dump_label();\n");
-			 break;
-	  case SEGHOL  : out( "switchseg( SEGHOL); BESTAAT NIET!!\n");
-			 break;
-	  case SEGCON  : out( "switchseg( SEGCON);\n");
-			 out( "dump_label();\n");
-			 break;
-	  case SEGROM  : out( "switchseg( SEGROM);\n");
-			 out( "dump_label();\n");
-			 break;
-	  case UNKNOWN : break;	/* dan niet! */
-	}
-}
+/******************************************************************************/
 
-
-out( fmt, argv)
-char *fmt;
-int argv;
-{
-	doprnt( outfile, fmt, &argv);
-}
-
-
-char *suffix( str, suf)
-char *str, *suf;
-{
-	static char res[15];
-	char *s, *strncpy(), *strcat();
-	int strl, sufl, prefl;
-
-	strl = strlen( str);
-	sufl = strlen( suf);
-
-	for ( s = str + strl; --s >= str && *s != '.';)
-		;
-
-	if ( *s == '.')
-		prefl = s - str;
-	else
-		prefl = strl;
-	
-	if ( prefl + sufl + 1 > 14 )
-		prefl = 14 - 1 - sufl;
-	
-	strncpy( res, str, prefl);
-	res[prefl] = '\0';
-	s = strcat( res, ".");
-	s = strcat( s, suf);
-	return( s);
-}
-
-set_outfile( name)
-char *name;
-{
-	if ( library) {
-		name = suffix( name, "c");
-		sys_close( outfile);
-		if ( !sys_open( name, OP_WRITE, &outfile))
-			fprint( STDERR, "!! can't create %s !!\n", name);
-		out( "#define CODE_EXPANDER\n");
-		out( "#include <em.h>\n");
-		out( "#include \"mach.h\"\n");
-		out( "#include \"back.h\"\n\n");
-	}
-}
-
+/* Handle arguments :
+ *	-l 		: Library, generate one function per file.
+ *	-c <name>	: Change, only update the <name> file.
+ */
 
 main( argc, argv)
 int argc;
@@ -336,10 +321,7 @@ char **argv;
 	}
 	else {
 		library = FALSE;
-		out( "#define CODE_EXPANDER\n");
-		out( "#include <em.h>\n");
-		out( "#include \"mach.h\"\n");
-		out( "#include \"back.h\"\n\n");
+		file_header();
 	}
 	
 	return( table());
