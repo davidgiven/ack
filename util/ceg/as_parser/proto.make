@@ -5,7 +5,7 @@
 SRC_DIR = $(SRC_HOME)/util/ceg/as_parser
 CEGLIB = $(TARGET_HOME)/lib.bin/ceg
 
-IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I.
+IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I. -I$(SRC_DIR)
 CFLAGS = $(COPTIONS) -DFLEX $(IFILES)
 LDFLAGS = $(LDOPTIONS)
 
@@ -50,8 +50,8 @@ opr:
 clean:
 	rm -f as_parser *.$(SUF) lex.yy.c Lpars.[ch] pars.c dummy eval/*.$(SUF) eval/eval
 
-lex.yy.c : table.l
-	flex -s table.l
+lex.yy.c : $(SRC_DIR)/table.l
+	flex -s $(SRC_DIR)/table.l
 
 dummy : $(GFILES)
 	LLgen $(LLOPT) $(GFILES)

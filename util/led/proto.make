@@ -52,13 +52,13 @@ led:	$(OFILES)
 install:led
 	rm -f $(LIBDIR)/em_led $(TARGET_HOME)/man/led.6 $(TARGET_HOME)/man/ack.out.5
 	cp led $(LIBDIR)/em_led
-	cp led.6 $(TARGET_HOME)/man/led.6
-	cp ack.out.5 $(TARGET_HOME)/man/ack.out.5
+	cp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6
+	cp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5
 
 cmp:	led
 	-cmp led $(LIBDIR)/em_led
-	-cmp led.6 $(TARGET_HOME)/man/led.6
-	-cmp ack.out.5 $(TARGET_HOME)/man/ack.out.5
+	-cmp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6
+	-cmp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5
 
 lint:
 	lint $(LINTFLAGS) $(CFILES) $(LINTLIBS)
