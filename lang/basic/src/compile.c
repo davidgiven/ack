@@ -26,5 +26,5 @@ compileprogram()
 	while( basicline = 0, getline())
 		(void) LLparse();
 	epilogcode(); 	
-	(void) sys_close(yyin);
+	sys_close(yyin);
 }

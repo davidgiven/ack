@@ -73,7 +73,7 @@ int i;
 {
 	static char buf[30];
 
-	(void) sprint(buf,"%d",i);
+	sprint(buf,"%d",i);
 	return(buf);
 }
 

@@ -42,7 +42,7 @@ char **argv;
 				case 't': traceflag++; 
 					  break;	/* line tracing */
 				case 'h': /* split EM file */
-					  (void) fprint(STDERR,
+					  fprint(STDERR,
                                                  "h option not implemented\n");
 					  break;
 				case 'd': debug++; 

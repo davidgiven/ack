@@ -256,7 +256,7 @@ heading( )
 {
 	char procname[50];
 
-	sprint(procname,"_%s",fcn->symname);
+	(void) sprint(procname,"_%s",fcn->symname);
         C_pro_narg(procname);
 	if ( fcn->symtype== DEFAULTTYPE)
 		fcn->symtype= DOUBLETYPE;
