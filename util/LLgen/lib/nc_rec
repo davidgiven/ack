@@ -1,8 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include "Lpars.h"
 
 /*
 	compile with -DNOFIRST to disable firstset optimization
@@ -169,8 +166,10 @@ static void delete(struct stacks*, struct stack_elt*);
 static void hyp_run(struct stack_elt*);
 static void check_run(struct stacks*, struct stack_elt*);
 static struct stack_elt *split(struct stack_elt*);
+#ifdef DEBUG
 static void test(struct stacks*);
 static void dump_stack(struct stack_elt*, int);
+#endif
 static void clear_flags(struct stack_elt*, char);
 static void clear_gen_flags(struct stacks*);
 static void match_heads(struct stacks*, int);

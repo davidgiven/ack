@@ -45,6 +45,9 @@ extern void LLscan(int);
 #ifndef LLNOFIRSTS
 extern int LLfirst(int, int);
 #endif
+#if LL_NON_CORR
+extern void LLnc_recover(void);
+#endif
 #else /* not LL_ANSI_C */
 extern LLread();
 extern int LLskip();
@@ -58,5 +61,8 @@ extern LLscan();
 #endif
 #ifndef LLNOFIRSTS
 extern int LLfirst();
+#endif
+#if LL_NON_CORR
+extern LLnc_recover();
 #endif
 #endif /* not LL_ANSI_C */
