@@ -46,5 +46,5 @@ fmt:	.asciz "%s\n"
 	jsr	(.diagnos)
 	lea	(4, sp), sp
 	illegal
-	jsr	(__exit)
+	jmp	(EXIT)
 .align 2

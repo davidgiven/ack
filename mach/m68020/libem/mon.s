@@ -10,7 +10,7 @@
 	pea	(fmt)
 	jsr	(.diagnos)
 	add.l	#8, sp
-	jmp	(__exit)
+	jmp	(EXIT)
 
 .sect .data
 fmt:	.asciz "system call %d not implemented\n"

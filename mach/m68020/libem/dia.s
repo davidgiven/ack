@@ -112,7 +112,7 @@ putchar:
 	move.l	#1, -(sp)
 	pea	(11,sp)
 	move.l	#1, -(sp)
-	jsr	(__write)
+	jsr	(WRITE)
 	lea	(12, sp), sp
 	rts
 .align 2
