@@ -6,7 +6,7 @@ DEFINITION MODULE RealInOut;
   (* Read a real number "x" according to the syntax:
      
 	['+'|'-'] digit {digit} ['.' digit {digit}]
-	['E' ['+'|'-'] digit [digit]]
+	[('E'|'e') ['+'|'-'] digit {digit}]
 
      Done := "a number was read".
      Input terminates with a blank or any control character.
@@ -20,6 +20,6 @@ DEFINITION MODULE RealInOut;
   *)
 
   PROCEDURE WriteRealOct(x: REAL);
-  (* Write x in octal form with exponent and mantissa.
+  (* Write x in octal words.
   *)
 END RealInOut.
