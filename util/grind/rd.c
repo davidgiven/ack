@@ -8,6 +8,10 @@
 #define sun
 #endif
 
+#if defined(__i386)
+#define i386
+#endif
+
 #if defined(__mc68020)
 #define mc68020
 #endif
@@ -21,12 +25,6 @@
 #endif
 
 #if defined(sun) || defined(vax)
-#if defined(sun) && defined(mc68020)
-#define relocation_info	reloc_info_68k
-#endif
-#if defined(sun) && defined(sparc)
-#define relocation_info	reloc_info_sparc
-#endif
 
 struct exec {
 #ifdef sun
@@ -217,4 +215,168 @@ rd_close()
   fclose(inf);
 }
 
+#endif
+
+#if defined(i386)
+#include <stdio.h>
+#include <alloc.h>
+
+struct xexec {
+	unsigned short  x_magic;
+#define XMAGIC  01006
+	unsigned short  x_ext;
+	long            x_text;
+	long            x_data;
+	long            x_bss;
+	long            x_syms;
+	long            x_reloc;
+	long            x_entry;
+	char		x_cpu;
+	char		x_relsym;
+	unsigned short	x_renv;
+};
+
+struct xseg {
+	unsigned short	xs_type;
+	unsigned short	xs_attr;
+	unsigned short	xs_seg;
+	unsigned short	xs_sres;
+	long		xs_filpos;
+	long		xs_psize;
+	long		xs_vsize;
+	long		xs_rbase;
+	long		xs_lres;
+	long		xs_lres2;
+};
+
+static FILE *inf;
+static struct outname *names;
+static char *strings;
+
+#define readf(a, b, c)	(fread((char *)(a), (b), (int)(c), inf))
+
+#define getshort(val, p)	(val = (*p++ & 0377), val |= (*p++ & 0377) << 8)
+#define getlong(val, p)		(val = (*p++ & 0377), \
+				 val |= (*p++ & 0377) << 8, \
+				 val |= (*p++ & 0377L) << 16, \
+				 val |= (*p++ & 0377L) << 24)
+static 
+get_names(h, sz)
+  struct outhead	*h;
+  long sz;
+{
+  register char	*xnms = malloc((unsigned) sz);
+  register char *p;
+  register struct outname *onm = (struct outname *) malloc((((unsigned)sz+8)/9)*sizeof(struct outname));
+  struct  xnm {
+	unsigned short s_type, s_seg;
+	long	s_value;
+  } xnm;
+
+  if (xnms == 0 || onm == 0) No_Mem();
+  if (!readf(xnms, (unsigned) sz, 1)) rd_fatal();
+
+  names = onm;
+  strings = p = xnms;
+  while (sz > 0) {
+	getshort(xnm.s_type, xnms);
+	getshort(xnm.s_seg, xnms);
+	getlong(xnm.s_value, xnms);
+	onm->on_desc = 0;
+	if (xnm.s_type & S_STB) {
+		onm->on_type = xnm.s_type;
+		onm->on_desc = xnm.s_seg;
+	}
+	else {
+		switch(xnm.s_type & 0x1f) {
+		case 0x1f:
+			onm->on_type = S_FIL;
+			break;
+		case 0x8:
+			onm->on_type = S_SCT;
+			break;
+		case 0:
+			onm->on_type = S_UND;
+			break;
+		case 1:
+			onm->on_type = S_ABS;
+			break;
+		default:
+			onm->on_type = xnm.s_type & 0x1f;
+			break;
+		}
+	}
+	if (xnm.s_type & 0x20) onm->on_type |= S_EXT;
+	onm->on_valu = xnm.s_value;
+	sz -= 9;
+	if (*xnms == '\0') {
+		onm->on_foff = -1;
+		xnms++;
+	}
+	else {
+		onm->on_foff = p - strings;
+		while (*p++ = *xnms++)  sz--;
+	}
+	onm++;
+  }
+  h->oh_nname = onm - names;
+  h->oh_nchar = p - strings;
+  while (--onm >= names) {
+	if (onm->on_foff == -1) onm->on_foff = 0;
+	else onm->on_foff += OFF_CHAR(*h);
+  }
+  names = (struct outname *) realloc((char *) names, h->oh_nname * sizeof(struct outname));
+  strings = realloc(strings, (unsigned) h->oh_nchar);
+}
+
+int
+rd_open(f)
+  char	*f;
+{
+  if ((inf = fopen(f, "r")) == NULL) return 0;
+  return 1;
+}
+
+rd_ohead(h)
+  struct outhead	*h;
+{
+  int sepid;
+  struct xexec xhdr;
+  struct xseg xseg[3];
+
+  if (! readf(&xhdr, sizeof(xhdr), 1)) rd_fatal();
+  if (xhdr.x_magic != XMAGIC) rd_fatal();
+  h->oh_magic = O_CONVERTED;
+  h->oh_stamp = 0;
+  h->oh_nsect = 4;
+  h->oh_nrelo = 0;
+  h->oh_flags = 0;
+  h->oh_nemit = xhdr.x_text+xhdr.x_data;
+  sepid = (xhdr.x_renv & 02) ? 1 : 0;
+  fseek(inf, 0140L, 0);
+  if (! readf(&xseg[0], sizeof(xseg[0]), sepid + 2)) rd_fatal();
+  fseek(inf, xseg[sepid+1].xs_filpos, 0);
+  get_names(h, xhdr.x_syms);
+  fclose(inf);
+}
+
+rd_name(nm, count)
+  struct outname	*nm;
+  unsigned int		count;
+{
+  memcpy(nm, names, (int) count * sizeof(struct outname));
+  free((char *) names);
+}
+
+rd_string(nm, count)
+  char		*nm;
+  long		count;
+{
+  memcpy(nm, strings, (int) count);
+  free((char *) strings);
+}
+
+rd_close()
+{
+}
 #endif

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <alloc.h>
+#include <errno.h>
 
 #include "ops.h"
 #include "message.h"
@@ -249,6 +250,17 @@ catch_sigpipe()
   child_pid = 0;
 }
 
+extern int errno;
+static int
+do_read(f, p, c)
+  char	*p;
+{
+  int i = read(f, p, c);
+
+  while (i < 0 && errno == EINTR) i = read(f, p, c);
+  return i;
+}
+
 static int
 ureceive(p, c)
   char	*p;
@@ -264,7 +276,7 @@ ureceive(p, c)
 
   if (! p) p = buf;
   while (c >= 0x1000) {
-	i = read(from_child, p, 0x1000);
+	i = do_read(from_child, p, 0x1000);
 	if (i <= 0) {
 		if (i == 0) {
 			child_pid = 0;
@@ -276,7 +288,7 @@ ureceive(p, c)
 	c -= i;
   }
   while (c > 0) {
-	i = read(from_child, p, (int)c);
+	i = do_read(from_child, p, (int)c);
 	if (i <= 0) {
 		if (i == 0) {
 			child_pid = 0;

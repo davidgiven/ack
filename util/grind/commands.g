@@ -553,6 +553,11 @@ LLlex()
   }
   do {
 	c = getc(db_in);
+	if (interrupted && c == EOF) {
+		c = ' ';
+		interrupted = 0;
+		continue;
+	}
   } while (c != EOF && class(c) == STSKIP);
   if (c == EOF) {
 	eof_seen = 1;

@@ -37,7 +37,13 @@ For some machines, the debugger does not recognize the object file
 format. For these machines, the result of the
 .IR led (6)
 program must be saved and offered to
-.BR grind .
+.BR grind ,
+for instance:
+.DS
+m68020 -c.out -g blabla.c
+m68020 blabla.out
+grind blabla.out a.out
+.DE
 .SH USAGE
 Some
 .B grind
