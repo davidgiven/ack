@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #define close	_close
-#include <unistd.h>
 
 PUBLIC long pathconf(path, name)
 char *path;			/* name of file being interrogated */

@@ -1,10 +1,9 @@
 #include <lib.h>
-#include <string.h>
+#include <unistd.h>
 #define execl	_execl
 #define execle	_execle
 #define execv	_execv
 #define execve	_execve
-#include <unistd.h>
 
 extern char **environ;		/* environment pointer */
 

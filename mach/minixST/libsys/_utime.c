@@ -1,11 +1,12 @@
 /* _utime(2) for POSIX		Authors: Terrence W. Holm & Edwin L. Froese */
 
 #include <lib.h>
-#include <stddef.h>
 #define time	_time
 #include <time.h>
 #define utime	_utime
 #include <utime.h>
+
+long time();
 
 PUBLIC int utime(name, timp)
 char *name;

@@ -8,13 +8,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/dir.h>
-#define getcwd	_getcwd
-#include <unistd.h>
 #include <string.h>
+#define getcwd	_getcwd
 
 #define  DIRECT_SIZE  (sizeof (struct direct))
 
-PRIVATE _PROTOTYPE(void,  go_back(char *path) );
+PRIVATE _PROTOTYPE(void  go_back, (char *path) );
 
 char *getcwd(buffer, size)
 char *buffer;

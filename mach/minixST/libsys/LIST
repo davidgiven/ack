@@ -32,7 +32,6 @@ mkdir.s
 mkfifo.s
 mknod.s
 mknod4.s
-mktemp.s
 mount.s
 open.s
 pause.s
@@ -93,7 +92,6 @@ _mkdir.c
 _mkfifo.c
 _mknod.c
 _mknod4.c
-_mktemp.c
 _mount.c
 _open.c
 pathconf.c
