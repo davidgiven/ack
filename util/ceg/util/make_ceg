@@ -25,7 +25,7 @@ CEG_LIBS = $(TARGET_HOME)/modules/lib/liballoc.$(LIBSUF)\
 all:	ceg/ceg
 
 obj_list:	ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)
-		echo 'ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)' > ceg/list
+		echo 'ceg/as_instr.$(SUF) ceg/eval_as.$(SUF) ceg/as_lib.$(LIBSUF)' > ceg/list
 
 as_list:	ceg/as_lib.$(LIBSUF)
 		echo 'ceg/as_lib.$(LIBSUF)' > ceg/list
