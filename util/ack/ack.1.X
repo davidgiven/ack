@@ -318,6 +318,11 @@ Instruct the front-end and back-end to produce symbolic debugger information
 for \fIgrind\fP(1). This is currently supported by the following front-ends:
 C, ANSI-C, Pascal, Modula-2, and the following back-ends: Motorola M68020,
 Sparc, Vax, Intel 80386.
+.IP \-gdb
+Instruct the front-end and back-end to produce symbolic debugger information
+for \fIgdb\fP. This is currently supported by the following front-ends:
+C, ANSI-C, Pascal, Modula-2, and the following back-ends: Motorola M68020,
+Sparc, Vax, Intel 80386.
 .PP
 All arguments without a suffix or with an unrecognized suffix
 are passed to the loaders, as for flags.
