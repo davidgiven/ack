@@ -67,7 +67,7 @@ main(argc,argv) char **argv ; {
 	if ( nerror==0 ) {
 		writeout();
 	}
-	return nerror ;
+	exit(nerror);
 }
 
 readin() {
