@@ -53,7 +53,7 @@ _penvp
  loc 21331	/*  == 0x5353 */
  bne *1
 /* environ contains the magic value. Assume it's our own environ */
- lae _envp
+ lae _penvp
  loi _EM_PSIZE
  lae environ
  sti _EM_PSIZE

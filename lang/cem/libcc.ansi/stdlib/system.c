@@ -10,10 +10,18 @@
 extern int _fork(void);
 extern int _wait(int *);
 extern void _exit(int);
-extern void _execl(char *, ...);
+extern void _execve(const char *path, const char ** argv, const char ** envp);
 extern void _close(int);
 
 #define	FAIL	127
+
+extern const char **_penvp;
+static const char *exec_tab[] = {
+	"sh",			/* argv[0] */
+	"-c",			/* argument to the shell */
+	NULL,			/* to be filled with user command */
+	NULL			/* terminating NULL */
+	};
 
 int
 system(const char *str)
@@ -27,8 +35,9 @@ system(const char *str)
 		for (i = 3; i <= 20; i++)
 			_close(i);
 		if (!str) str = "cd .";		/* just testing for a shell */
-		_execl("/bin/sh", "sh", "-c", str, (char *) NULL);
-		/* get here if execl fails ... */
+		exec_tab[2] = str;		/* fill in command */
+		_execve("/bin/sh", exec_tab, _penvp);
+		/* get here if execve fails ... */
 		_exit(FAIL);	/* see manual page */
 	}
 	while ((waitval = _wait(&exitstatus)) != pid) {
@@ -39,7 +48,7 @@ system(const char *str)
 		exitstatus = -1;
 	}
 	if (!str) {
-		if (exitstatus == FAIL << 8)		/* execl() failed */
+		if (exitstatus == FAIL << 8)		/* execve() failed */
 			exitstatus = 0;
 		else exitstatus = 1;			/* /bin/sh exists */
 	}

@@ -10,18 +10,18 @@
 #define	ENTRY_INC	10
 #define	rounded(x)	(((x / ENTRY_INC) + 1) * ENTRY_INC)
 
-extern const char **_envp;
-extern const char **environ;	/* environ is a shadow name for _envp */
+extern const char **_penvp;
+extern const char **environ;	/* environ is a shadow name for _penvp */
 
 int
 putenv(char *name)
 {
-	register const char **v = _envp;
+	register const char **v = _penvp;
 	register char *r;
 	static int size = 0;
 	/* When size != 0, it contains the number of entries in the
 	 * table (including the final NULL pointer). This means that the
-	 * last non-null entry  is _envp[size - 2].
+	 * last non-null entry  is _penvp[size - 2].
 	 */
 
 	if (!name) return 0;
@@ -48,7 +48,7 @@ putenv(char *name)
 			}
 		}
 		*r = '=';
-		v = _envp;
+		v = _penvp;
 	}
 
 	if (!size) {
@@ -62,18 +62,18 @@ putenv(char *name)
 		if (!(v = malloc(rounded(i) * sizeof(char **))))
 			return 1;
 		size = i;
-		p = _envp;
-		_envp = v;
+		p = _penvp;
+		_penvp = v;
 		while (*v++ = *p++);		/* copy the environment */
-		v = _envp;
+		v = _penvp;
 	} else if (!(size % ENTRY_INC)) {
-		if (!(v = realloc(_envp, rounded(size) * sizeof(char **))))
+		if (!(v = realloc(_penvp, rounded(size) * sizeof(char **))))
 			return 1;
-		_envp = v;
+		_penvp = v;
 	}
 	v[size - 1] = name;
 	v[size] = NULL;
 	size++;
-	environ = _envp;
+	environ = _penvp;
 	return 0;
 }
