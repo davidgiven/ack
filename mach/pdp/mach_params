@@ -1,0 +1,4 @@
+MACH=pdp
+SUF=o
+ASAR=aal
+RANLIB=:

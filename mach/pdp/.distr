@@ -4,10 +4,7 @@ cg
 top
 cv
 int
-libcc
 libem
-libpc
-libbc
+libend
 libsys
-liboc
-libm2
+mach_params

@@ -14,24 +14,12 @@ name "PDP 11 interpreter"
 system pdp*
 dir int
 end
-name "PDP 11 C libraries"
-dir libcc
-end
 name "PDP 11 EM library"
 dir libem
 end
+name "PDP 11 etext,edata,end library"
+dir libend
+end
 name "PDP 11 systemcall library"
 dir libsys
-end
-name "PDP 11 Pascal library"
-dir libpc
-end
-name "PDP 11 Basic library"
-dir libbc
-end
-name "PDP 11 Occam library"
-dir liboc
-end
-name "PDP 11 Modula-2 library"
-dir libm2
 end
