@@ -178,7 +178,6 @@ register lblst_p lst_elt;
 		}
 	} else {				/* after a label */
 		stack_height = lst_elt->ll_height;
-		change_state(KNOWN);
 	}
 }
 
@@ -223,4 +222,5 @@ line_p lnp;
 	} else if (ISCONDBRANCH(instr)) {	/* conditional branch */
 	    label->n_flags |= NUMCOND;
 	}
+	if (state != NO_STACK_MES) change_state(KNOWN);
 }

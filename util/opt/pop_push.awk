@@ -9,8 +9,9 @@ BEGIN	{ print "#define CONDBRA        '\001'" > "pop_push.h"
 }
 /aar/	{ switch = NR }
 	{ if (switch) {
-	      printf("\"%s\",\n",$3) 
+	      printf("/* %s */ \"%s\",\n",$1,$3) 
 	      col_2[NR-switch] = $2
+	      comment[NR-switch] = $1
 	  }
 	}
 END	{ print "};"
@@ -19,11 +20,11 @@ END	{ print "};"
 	  print "'\000',"
 	  for(i=0; i < NR-switch; i++) {
 		inf = col_2[i]
-		f_out = ""
-		if (substr(inf,1,1)=="b") f_out = "HASLABEL|"
+		f_out = "/* " comment[i] " */ "
+		if (substr(inf,1,1)=="b") f_out = f_out "HASLABEL|"
 		if (substr(inf,2,1)=="c") f_out = f_out "CONDBRA"
 		else if (substr(inf,2,1)=="t") f_out = f_out "JUMP"
-		else f_out = "'\000'"
+		else f_out = f_out "'\000'"
 		print f_out","
 	  }
 	  print "};"
