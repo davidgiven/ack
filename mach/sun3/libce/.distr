@@ -1,4 +1,4 @@
-Makefile
+proto.make
 adf4.s
 adf8.s
 cff.s
