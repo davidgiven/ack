@@ -20,7 +20,7 @@ EXPORT char *
 Malloc(sz)
 	unsigned int sz;
 {
-	char *res = malloc(sz);
+	register char *res = malloc(sz);
 	
 	if (res == 0) No_Mem();
 	return res;

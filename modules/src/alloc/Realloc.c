@@ -21,7 +21,7 @@ Realloc(ptr, sz)
 	char ptr[];
 	unsigned int sz;
 {
-	ptr = realloc(ptr, sz);
-	if (ptr == 0) No_Mem();
-	return ptr;
+	register char *mptr = realloc(ptr, sz);
+	if (mptr == 0) No_Mem();
+	return mptr;
 }
