@@ -366,11 +366,11 @@ void rom(size, c) int size; long c;
 void lin()
 {
 	static oldline=0;
-	extern yylineno;
+	extern lineno;
 
 	if (Lflag) return;
-	if (yylineno!=oldline)
-		C_lin((arith) (oldline=yylineno));
+	if (lineno!=oldline)
+		C_lin((arith) (oldline=lineno));
 }
 
 static struct ftree {

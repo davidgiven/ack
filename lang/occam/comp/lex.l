@@ -22,6 +22,7 @@ int ind=0;		/* Indentation level of current line */
 static int tab=0;	/* First indentation found */
 
 int included=0;		/* Is current file included? */
+int lineno = 1;
 %}
 
 %%
@@ -76,10 +77,13 @@ int included=0;		/* Is current file included? */
 	
 	return key;
 }
-\n[ \f\t]*/"--"			{/* Line with only a comment, don't set tab */}
+\n[ \f\t]*/"--"			{/* Line with only a comment, don't set tab */
+				 lineno++;
+				}
 
 \n[ \f\t]*			{
 
+	lineno++;
 	ind=indentation(yytext+1);
 	if (tab==0)
 		tab=ind;
@@ -332,11 +336,11 @@ set_line_file(l) register char *l;
 
 	while (*l<'0' || *l>'9') l++;
 
-	yylineno=0;
+	lineno=0;
 	while ('0'<=*l && *l<='9')
-		yylineno=yylineno*10+(*l++ - '0');
+		lineno=lineno*10+(*l++ - '0');
 
-	yylineno--;
+	lineno--;
 
 	while (*l++!='"');
 

@@ -19,7 +19,7 @@ static void nonconst(), nonpositive(), rep_cleanup(), check_assoc();
 void init_builtins();
 char *strcpy();
 
-extern int yylineno, LLsymb;
+extern int lineno, LLsymb;
 union type_info info, none;
 }
 %token	AFTER, ALLOCATE, ALT, AND, ANY, BYTE, CHAN, DEF, FALSE, FOR, IF, LOAD;
@@ -115,8 +115,8 @@ guarded_process(register *END;)	{	struct symbol *v;
 	  guard(&F) process	{	branch(END);
 					Label(F);
 				}
-	| ALT			{	line=yylineno; oind=ind; }
-	  [	  %if (line==yylineno)
+	| ALT			{	line=lineno; oind=ind; }
+	  [	  %if (line==lineno)
 		  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test); }
 		  guarded_process(END)
@@ -144,8 +144,8 @@ conditional(register *END; )	{	struct symbol *v;
 				{	branch(END);
 					Label(F);
 				}
-	| IF			{	line=yylineno; oind=ind; }
-	  [	  %if (line==yylineno)
+	| IF			{	line=lineno; oind=ind; }
+	  [	  %if (line==lineno)
 		  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test); }
 		  conditional(END)
@@ -176,8 +176,8 @@ construct			{	struct symbol *v;
 					register line, oind;
 					int BEGIN=0, END=0, NONZERO;
 				}:
-	  SEQ			{	line=yylineno; oind=ind; }
-	  [	  %if (line==yylineno)
+	  SEQ			{	line=lineno; oind=ind; }
+	  [	  %if (line==lineno)
 		  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test); }
 		  process
@@ -188,10 +188,10 @@ construct			{	struct symbol *v;
 		  [ %while (tabulated(oind, ind)) process ]*
 	  ]
 	| PRI ?
-	  [	  PAR		{	line=yylineno; oind=ind;
+	  [	  PAR		{	line=lineno; oind=ind;
 					par_begin();
 				}
-		  [	  %if (line==yylineno)
+		  [	  %if (line==lineno)
 			  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test);
 					NONZERO=0;
@@ -217,11 +217,11 @@ construct			{	struct symbol *v;
 				{	Label(END);
 					par_end();
 				}
-		| ALT		{	line=yylineno; oind=ind;
+		| ALT		{	line=lineno; oind=ind;
 					no_deadlock();
 					Label(new_label(&BEGIN));
 				}
-		  [	  %if (line==yylineno)
+		  [	  %if (line==lineno)
 			  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test); }
 			  guarded_process(&END)
@@ -237,8 +237,8 @@ construct			{	struct symbol *v;
 					Label(END);
 				}
 	  ]
-	| IF			{	line=yylineno; oind=ind; }
-	  [	  %if (line==yylineno)
+	| IF			{	line=lineno; oind=ind; }
+	  [	  %if (line==lineno)
 		  replicator(&v, &e1, &e2)
 				{	rep_init(v, e1, e2, &to_test); }
 		  conditional(&END)
@@ -453,7 +453,7 @@ item(register struct expr **e;)
 					int byte, err=0, subs_call=0;
 					struct expr_list *elp=nil, **aelp= &elp;
 				}:
-	  IDENTIFIER		{	line=yylineno;
+	  IDENTIFIER		{	line=lineno;
 					oind=ind;
 					var=searchall(token.t_sval);
 
@@ -465,7 +465,7 @@ item(register struct expr **e;)
 						*e=new_var(var);
 					}
 				}
-	  [ %while (line==yylineno || tabulated(oind, ind))
+	  [ %while (line==lineno || tabulated(oind, ind))
 		  [	  subscript(&byte, &e1)
 				{	*e=new_node('[', *e, e1, byte); }
 			| '('	{	if (!var_declared(var)) {
