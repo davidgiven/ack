@@ -17,6 +17,7 @@ flt_div(e1,e2,e3)
 	register int j;
 	register unsigned short *u_p = u;
 	int maxv = 4;
+	flt_arith cpe1 = *e1;
 
 	flt_status = 0;
 	e3->flt_sign = e1->flt_sign ^ e2->flt_sign;
@@ -36,8 +37,8 @@ flt_div(e1,e2,e3)
 	e3->flt_exp = e1->flt_exp - e2->flt_exp;
 
 	u[4] = (e1->m2 & 1) << 15;
-	flt_b64_sft(&(e1->flt_mantissa),1);
-	flt_split(e1, u);
+	flt_b64_sft(&(cpe1.flt_mantissa),1);
+	flt_split(&cpe1, u);
 	u[5] = 0; u[6] = 0; u[7] = 0;
 	flt_split(e2, &v[1]);
 	while (! v[maxv]) maxv--;
