@@ -473,7 +473,7 @@ eor_l  "eor.l"	conreg4:ro,	datalt4:rw:cc		cost(2,6).
 ext_l  "ext.l"	D_REG:rw:cc				cost(2,2).
 ext_w  "ext.w"	D_REG:rw:cc				cost(2,2).
 jmp		address+control4			cost(2,0).
-jsr		address+control4 kills :cc		cost(2,3).
+jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
 lea		address+control4:ro, A_REG:wo		cost(2,0).
 lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
@@ -3353,6 +3353,30 @@ with imm_cmp2 STACK
     gen cmp_w {const, loww($4)}, %1
 	bxx* {llabel, $5}
 
+proc zxx1_in example loc loc cii zne
+with test_set1 STACK
+    gen test %1
+	bxx* {llabel, $4}
+
+proc zxx2_in example loc loc cii zne
+with test_set2 STACK
+    gen test %1
+	bxx* {llabel, $4}
+
+pat loc loc cii zlt $1==1 && $2==4	call zxx1_in("blt")
+pat loc loc cii zle $1==1 && $2==4	call zxx1_in("ble")
+pat loc loc cii zne $1==1 && $2==4	call zxx1_in("bne")
+pat loc loc cii zeq $1==1 && $2==4	call zxx1_in("beq")
+pat loc loc cii zge $1==1 && $2==4	call zxx1_in("bge")
+pat loc loc cii zgt $1==1 && $2==4	call zxx1_in("bgt")
+
+pat loc loc cii zlt $1==2 && $2==4	call zxx2_in("blt")
+pat loc loc cii zle $1==2 && $2==4	call zxx2_in("ble")
+pat loc loc cii zne $1==2 && $2==4	call zxx2_in("bne")
+pat loc loc cii zeq $1==2 && $2==4	call zxx2_in("beq")
+pat loc loc cii zge $1==2 && $2==4	call zxx2_in("bge")
+pat loc loc cii zgt $1==2 && $2==4	call zxx2_in("bgt")
+
 pat loc loc cii loc blt $1==1 && $2==4 && in_1($4)	call bxx1_in("blt")
 pat loc loc cii loc ble $1==1 && $2==4 && in_1($4)	call bxx1_in("ble")
 pat loc loc cii loc beq $1==1 && $2==4 && in_1($4)	call bxx1_in("beq")
@@ -3370,7 +3394,7 @@ pat loc loc cii loc bgt $1==2 && $2==4 && in_2($4)	call bxx2_in("bgt")
 pat loc loc cii $1==2 && $2==4
 with DD_REG
     gen ext_l %1	yields	%1
-with exact data2
+with exact memory2
 uses reusing %1,DD_REG
     gen move %1,%a
 	ext_l %a	yields	%a
@@ -3383,7 +3407,7 @@ with DD_REG
     gen ext_w %1
 	ext_l %1	yields	%1
 #endif TBL68020
-with exact data1
+with exact memory1
 uses reusing %1,DD_REG
     gen move %1,%a
 #ifdef TBL68020
