@@ -1,15 +1,3 @@
-name "Minix PC C libraries"
-dir libcc
-end
-name "Minix PC Pascal library"
-dir libpc
-end
 name "Minix PC systemcall library"
 dir libsys
-end
-name "Minix PC Occam library"
-dir liboc
-end
-name "Minix PC Modula-2 library"
-dir libm2
 end

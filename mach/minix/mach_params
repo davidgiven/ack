@@ -1,0 +1,4 @@
+MACH=minix
+SUF=o
+ASAR=aal
+RANLIB=:
