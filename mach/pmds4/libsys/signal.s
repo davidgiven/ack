@@ -2,11 +2,10 @@
 .extern _signal
 NSIG=32
 _signal:
-	move.w	4(sp), d0
-	ext.l	d0
+	move.l	4(sp), d0
 	cmp.l	#NSIG,d0
 	bcc	1f
-	move.l	6(sp),d1
+	move.l	8(sp),d1
 	move.l	d0,a0
 	add.l	a0,a0
 	add.l	a0,a0
@@ -29,6 +28,7 @@ _signal:
 	bne	4f
 	move.l	a1,d0
 4:
+	clr.l	d1
 	rts
 1:
 	move.l	#22,d0
