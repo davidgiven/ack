@@ -6,16 +6,31 @@
 pr_text_with_conversions( str)
 char *str;
 {
-	char *ptr, *next_conversion(), *pr_conversion();
+	char *s, *ptr, *next_conversion(), *pr_conversion();
 
         while (  ptr = next_conversion( str)) {
 		/* ptr points to '%'-sign */
 	 	*ptr = '\0';
-		out( "fprint( outfile, \"%s\");", str);
+
+		out( "fprint( outfile, \"");
+		for ( s = str; *s != '\0'; s++)
+			if ( *s == '\n')
+				out( "\\n");
+			else
+				out( "%c", *s);
+		out( "\");");
+
 	 	*ptr = '%';
 	        str = pr_conversion( ptr);
 	}
-	out( "fprint( outfile, \"%s\");", str);
+
+	out( "fprint( outfile, \"");
+	for ( s = str; *s != '\0'; s++)
+		if ( *s == '\n')
+			out( "\\n");
+		else
+			out( "%c", *s);
+	out( "\");");
 }
 
 char *next_conversion( str)
