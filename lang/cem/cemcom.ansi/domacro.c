@@ -809,6 +809,11 @@ do_line(l)
 		 * Do not attempt to free the old string, since it might
 		 * be used in a def structure.
 		 */
+#ifdef DBSYMTAB
+		if (options['g'] && strcmp(FileName, tk.tk_bts) != 0) {
+			C_ms_std(tk.tk_bts, N_SOL, 0);
+		}
+#endif /* DBSYMTAB */
 		FileName = tk.tk_bts;
 	}
 }

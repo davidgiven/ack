@@ -712,6 +712,12 @@ do_line(l)
 
 	SkipRestOfLine();
 	LineNumber = l;		/* the number of the next input line */
-	if (t == STRING)	/* is there a filespecifier? */
+	if (t == STRING) {	/* is there a filespecifier? */
+#ifdef DBSYMTAB
+		if (options['g'] && strcmp(FileName, tk.tk_bts) != 0) {
+			C_ms_std(tk.tk_bts, N_SOL, 0);
+		}
+#endif /* DBSYMTAB */
 		FileName = tk.tk_bts;
+	}
 }
