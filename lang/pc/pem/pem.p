@@ -34,7 +34,8 @@
 #endif
 
 program pem(input,em,errors);
-{ This Pascal compiler produces EM code as described in
+{/*
+   This Pascal compiler produces EM code as described in
    - A.S.Tanenbaum, J.W.Stevenson & H. van Staveren,
 	"Description of a machine architecture for use with
 	 block structured languages" Informatika rapport 81.
@@ -55,7 +56,7 @@ program pem(input,em,errors);
 	s:      accept only standard pascal programs (-)
 	t:      trace procedure entry and exit (-)
 	u:      treat '_' as letter (-)
-}
+*/}
 {===================================================================}
 #ifdef STANDARD
 label 9999;
@@ -271,10 +272,10 @@ type
 	   standard:(key:standpf);      {identification}
 	   formal,actual,forward,extern,varargs:
 	     (pfpos:position;           {lv gives declaration level.
-			ad is relevant for formal pf's and for
+			ad is relevant for formal pf s and for
 			functions (no conflict!!).
 			for functions: ad is the result address.
-			for formal pf's: ad is the address of the
+			for formal pf s: ad is the address of the
 			descriptor }
 	      pfno:integer;             {unique pf number}
 	      maxlb:integer;		{bytes of parameters}
@@ -324,7 +325,7 @@ var  {the most frequent used externals are declared first}
   charptr,nilptr,zeroptr,procptr,longptr:sp;
 {flags}
   giveline:boolean;     {give source line number at next statement}
-  including:boolean;    {no LIN's for included code}
+  including:boolean;    {no LINs for included code}
   eofexpected:boolean;  {quit without error if true (nextch) }
   main:boolean;         {complete programme or a module}
   intypedec:boolean;    {true if nested in typedefinition}
@@ -1007,7 +1008,7 @@ begin lastnp:=top;
 end;
 
 function searchsection(fip: ip):ip;
-{to find record fields and forward declared procedure id's
+{to find record fields and forward declared procedure identifiers
   -->procedure pfdeclaration
   -->procedure selector}
 label 1;
@@ -2014,7 +2015,7 @@ begin with b do begin savlb:=reglb; ftype:=textptr;
 	    begin loadaddr; temporary(nilptr,reg_pointer);
 	      store; a.ak:=pfixed
 	    end;
-	  fa:=a;  {store doesn't change a}
+	  fa:=a;  {store does not change a}
 	  if (sy<>comma) and not ln then error(+0154);
 	end
       else
