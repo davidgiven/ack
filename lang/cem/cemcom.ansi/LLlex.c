@@ -725,9 +725,9 @@ struct token *ptok;
 		*cp = '\0';
 		ptok->tk_fund = LNGDBL;
 	} else {
+		if (*cp) malformed++;
 		ptok->tk_fund = DOUBLE;
 	}
-	if (*cp) malformed++;
 	if (malformed) {
 		lexerror("malformed floating constant");
 		ptok->tk_fval = Salloc("0.0", (unsigned) 4);
@@ -799,7 +799,7 @@ struct token *ptok;
 		fund = ULONG;
 	} else if ((val & full_mask[(int)int_size]) == val) {
 		if (val >= 0 && val <= max_int) fund = INT;
-		else fund = (base == 10 ? LONG : UNSIGNED);
+		else fund = (((base == 10) && !uns_flg) ? LONG : UNSIGNED);
 	} else if((val & full_mask[(int)long_size]) == val) {
 		if (val > 0) fund = LONG;
 		else fund = ULONG;
