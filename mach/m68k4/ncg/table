@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
-rscid = "$Header:"
+rscid = "$Header$"
 
 			/********************************
 			 *				*
@@ -16,8 +16,8 @@ rscid = "$Header:"
 
 #define small(x) ((x)>=1 && (x)<=8)
 #define nicesize(x) ((x)==1||(x)==2||(x)==4||(x)==8)
-#define lowb(x) (((x)<<24)>>24)
-#define loww(x) (((x)<<16)>>16)
+#define lowb(x) ((x) & 0377)
+#define loww(x) ((x) & 0177777)
 #define in_1(x) ((x)>=0-128 && (x)<128)
 #define in_2(x) ((x)>=0-32768 && (x)<32768)
 
