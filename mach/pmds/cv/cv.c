@@ -15,145 +15,161 @@
  *
  */
 
-char rcs_id[] = "$Header$" ;
-
 /*
- * The assumption is that this program is run on the same machine the
- * assembler has run. So the assembler's idea of long fits cv's idea.
- * The long's produced in the output file have the m68000 format.
- * The idea's of the longs read in can be changed with the following
- * flags:
- *  -v		Vax longs
- *  -p		Pdp 11 longs
- *  -m		M68000 longs
+ * Fortunately we sold our PMDS machine. Unfortunately, we also sold the
+ * documentation that came with it, so I don't know the a.out format
+ * of the machine. This program is written partly by guessing, and partly from
+ * an older conversion program for the PMDS, which put the whole program
+ * in data. The produced object file does not contain a namelist.
  */
 
 #include <stdio.h>
+#include <out.h>
 
-char * prog ;
+#define ASSERT(x) switch (2) { case 0: case (x): ; }
+
+/*
+ * Header and section table of new format object file.
+ */
+struct outhead	outhead;
+struct outsect	outsect[S_MAX];
+
+char	*output_file;
+int	outputfile_created;
+
+int rom_in_data;
+
+char *program ;
 
 char flag ;
 
-#define HDR_LENGTH	40
+#define writef(a, b, c)	fwrite((a), (b), (int)(c), output)
 
-char hdr[HDR_LENGTH] ;
+/* Output file definitions and such */
 
-main(argc,argv) char **argv; {
-	long addr,maxaddr;
-	short count;
-	
-	maxaddr=0;
+
+#define ENTRY 0
+#define HDRSIZE	40
+
+char hdr[HDRSIZE];
+
+
+#define TEXTSG	0
+#define ROMSG	1
+#define DATASG	2
+#define BSSSG	3
+#define LSECT	BSSSG+1
+#define NSECT	LSECT+1
+
+FILE		*output;
+
+main(argc, argv)
+	int	argc;
+	char	*argv[];
+{
+	register int		nsect;
+	long			magic ;
+	long			textsize ;
+	long			datasize ;
+	long			bsssize;
+	long			symstart;
+	extern long		ftell();
+
+	output = stdout;
+	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
 		flag=argv[1][1] ;
 		argc-- ; argv++ ;
 	}
-	if (argc != 3) {
-		fprintf(stderr,"Usage: %s [-[vpm]] VU-a.out pmds-a.out\n",argv[0]);
-		exit(-1);
+	switch (argc) {
+	case 3:	if ((output = fopen(argv[2], "w")) == (FILE *)0)
+			fatal("Can't write %s.\n", argv[2]);
+		output_file = argv[2];
+		outputfile_created = 1;
+		if (! rd_open(argv[1]))
+			fatal("Can't read %s.\n", argv[1]);
+		break;
+	default:fatal("Usage: %s <ACK object> <Mantra object>.\n", argv[0]);
 	}
-	prog=argv[0] ;
-	if (freopen(argv[1],"r",stdin)==NULL) {
-		fprintf(stderr,"%s: ",prog) ;
-		perror(argv[1]);
-		exit(-1);
+	rd_ohead(&outhead);
+	if (BADMAGIC(outhead))
+		fatal("Not an ack object file.\n");
+	if (outhead.oh_flags & HF_LINK)
+		fatal("Contains unresolved references.\n");
+	if (outhead.oh_nrelo > 0)
+		fprintf(stderr, "Warning: relocation information present.\n");
+	if ( outhead.oh_nsect!=LSECT && outhead.oh_nsect!=NSECT )
+		fatal("Input file must have %d sections, not %ld\n",
+			NSECT,outhead.oh_nsect) ;
+	rd_sect(outsect, outhead.oh_nsect);
+	/* A few checks */
+	if ( outsect[TEXTSG].os_base != ENTRY)
+		fatal("text must start at %d not at 0x%lx\n", ENTRY,
+			outsect[TEXTSG].os_base) ;
+	if ( outsect[BSSSG].os_flen != 0 )
+		fatal("bss space contains initialized data\n") ;
+	if ( outsect[BSSSG].os_base != outsect[DATASG].os_base+
+					outsect[DATASG].os_size )
+		fatal("bss segment must follow data segment\n") ;
+	if ( outsect[ROMSG].os_lign == 0x8000 ) {
+		/* 410 file with ROMSG in data space */
+		rom_in_data = 1;
+		magic= 0410 ;
+		textsize= outsect[TEXTSG].os_size ;
+		datasize= outsect[ROMSG].os_size + outsect[DATASG].os_size ;
+		if ( outsect[DATASG].os_base != outsect[ROMSG].os_base+
+						outsect[ROMSG].os_size )
+			fatal("data segment must follow rom\n") ;
+	} else
+	if ( outsect[DATASG].os_lign == 0x8000 ) {
+		/* 410 file with ROMSG in instruction space */
+		rom_in_data = 0;
+		magic= 0410 ;
+		textsize= outsect[TEXTSG].os_size + outsect[ROMSG].os_size ;
+		datasize= outsect[DATASG].os_size ;
+		if ( outsect[ROMSG].os_base != outsect[TEXTSG].os_base+
+						outsect[TEXTSG].os_size )
+			fatal("rom segment must follow text\n") ;
+	} else {
+		/* Plain 407 file */
+		rom_in_data = 1;
+		magic= 0407 ;
+		textsize= outsect[TEXTSG].os_size ;
+		datasize= outsect[ROMSG].os_size + outsect[DATASG].os_size ;
+		if ( outsect[ROMSG].os_base != outsect[TEXTSG].os_base+
+						outsect[TEXTSG].os_size )
+			fatal("rom segment must follow text\n") ;
+		if ( outsect[DATASG].os_base != outsect[ROMSG].os_base+
+						outsect[ROMSG].os_size )
+			fatal("data segment must follow rom\n") ;
 	}
-	if (freopen(argv[2],"w",stdout)==NULL) {
-		fprintf(stderr,"%s: ",prog) ;
-		perror(argv[2]);
-		exit(-1);
+	bsssize = outsect[BSSSG].os_size;
+	if ( outhead.oh_nsect==NSECT ) {
+		if ( outsect[LSECT].os_base != outsect[BSSSG].os_base+
+						outsect[BSSSG].os_size )
+			fatal("end segment must follow bss\n") ;
+		if ( outsect[LSECT].os_size != 0 )
+			fatal("end segment must be empty\n") ;
 	}
-	while ( getaddr(&addr) && getcnt(&count) ) {
-		fseek(stdout,addr+HDR_LENGTH,0);
-		while (count--) {
-			putchar(getchar());
-			if ( ferror(stdout) ) {
-				fprintf(stderr,"%s: write error\n",prog) ;
-				unlink(argv[2]) ; /* remove the output */
-				exit(2) ;
-			}
-			addr++;
-		}
-		if (addr>maxaddr)
-			maxaddr = addr;
+
+	/* Action at last */
+	fseek(output,(long) HDRSIZE,0);
+	emits(&outsect[TEXTSG]) ;
+	emits(&outsect[ROMSG]) ;
+	emits(&outsect[DATASG]) ;
+	fseek(output,0L,0);
+	sethdr(0, (long) magic);
+	sethdr(4, textsize);
+	sethdr(8, datasize);
+	sethdr(12, bsssize);
+	writef(hdr, 1, 40);
+	if ( ferror(output) ) {
+		fatal("output write error\n") ;
 	}
-	sethdr(0,0410L) ;	/* Magic */
-	sethdr(8,maxaddr) ;
-	fseek(stdout,0L,0);
-	fwrite(hdr,sizeof(hdr),1,stdout);
-	if ( ferror(stdout) ) {
-		fprintf(stderr,"%s: write error\n",prog) ;
-		unlink(argv[2]) ; /* remove the output */
-		exit(2) ;
-	}
-	chmod(argv[2],0755);
+	if ( outputfile_created ) chmod(argv[2],0755);
 	return 0;
 }
 
-getaddr(p_addr) long *p_addr ; {
-	char in[4] ;
-	short out[4] ;
-	int i ;
-
-	switch ( fread(in,1,4,stdin) ) {
-	case 0 : return 0 ;
-	case 4 : break ;;
-	default : fprintf(stderr,"%s: Illegal input format\n",prog) ;
-		  return 0 ;
-	}
-	switch ( flag ) {
-	case 0 :	*p_addr = *((long *)in) ;
-			return 1 ;
-	case 'v' :
-			out[0]=in[0] ; out[1]=in[1] ;
-			out[2]=in[2] ; out[3]=in[3] ;
-			break ;
-	case 'm' :	
-			out[0]=in[3] ; out[1]=in[2] ;
-			out[2]=in[1] ; out[3]=in[0] ;
-			break ;
-	case 'p' :
-			out[0]=in[2] ; out[1]=in[3] ;
-			out[2]=in[0] ; out[3]=in[1] ;
-			break ;
-	default :
-			fprintf(stderr,"%s: Unknown conversion %c(%o)\n",
-				prog,flag,flag) ;
-			exit(-1) ;
-	}
-	for ( i=0 ; i<4 ; i++ ) out[i] &= 0xFF ;
-	*p_addr = 256 * ( 256 * ( 256 * out[3] + out[2] ) + out[1] ) + out[0];
-	return 1 ;
-}
-
-getcnt(p_cnt) short *p_cnt ; {
-	char in[2] ;
-	short out[2] ;
-	int i ;
-
-	switch ( fread(in,1,2,stdin) ) {
-	case 2 : break ;;
-	default : fprintf(stderr,"%s: Illegal input format\n",prog) ;
-		  return 0 ;
-	}
-	switch ( flag ) {
-	case 0 :	*p_cnt = *((short *)in) ;
-			return 1 ;
-	case 'v' :
-	case 'p' :
-			out[0]=in[0] ; out[1]=in[1] ;
-			break ;
-	case 'm' :	
-			out[0]=in[1] ; out[1]=in[0] ;
-			break ;
-	default :
-			fprintf(stderr,"%s: Unknown conversion %c(%o)\n",
-				prog,flag,flag) ;
-			exit(-1) ;
-	}
-	for ( i=0 ; i<2 ; i++ ) out[i] &= 0xFF ;
-	*p_cnt = 256 * out[1] + out[0] ;
-	return 1 ;
-}
 
 sethdr(off,val) long val ; {
 	hdr[off]	= val>>24 ;
@@ -161,3 +177,39 @@ sethdr(off,val) long val ; {
 	hdr[off+2]	= val>>8 ;
 	hdr[off+3]	= val ;
 }
+
+/*
+ * Transfer the emitted byted from one file to another.
+ */
+emits(section) struct outsect *section ; {
+	char		*p;
+	char		*calloc();
+	long length = section->os_size;
+
+	rd_outsect(section - outsect);
+	while (section->os_size > 0) {
+		int i = section->os_size > 10*1024 ? 10*1024 : section->os_size;
+
+		section->os_size -= i;
+		if (!(p = calloc(i, 1))) {
+			fatal("No memory.\n");
+		}
+		rd_emit(p, i >= section->os_flen ? section->os_flen:(long) i);
+		section->os_flen -= i;
+		writef(p, 1, i);
+		free(p);
+	}
+}
+
+/* VARARGS1 */
+fatal(s, a1, a2)
+	char	*s;
+{
+	fprintf(stderr,"%s: ",program) ;
+	fprintf(stderr, s, a1, a2);
+	if (outputfile_created)
+		unlink(output_file);
+	exit(-1);
+}
+
+rd_fatal() { fatal("read error.\n"); }
