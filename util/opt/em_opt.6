@@ -4,8 +4,8 @@
 .SH NAME
 em_opt \- EM peephole optimizer
 .SH SYNOPSIS
-.B ~em/lib/em_opt
-[-Ln] [ argument ]
+.B ~em/lib.bin/em_opt
+[-Ln] [-m[l]<num>] [ argument ]
 .SH DESCRIPTION
 Em_opt reads a compact EM-program, argument or standard input,
 and produces another compact EM program on standard output
@@ -23,10 +23,16 @@ the names of all exported entities in this module.
 Do not optimize.
 No peephole optimizations will be performed,
 other functions will be carried out.
+.IP -m<num>
+Try to replace multiplies with constants by combinations of shifts and adds,
+but no more than <num> of them. Integer overflow detection is lost with this
+option.
+.IP -ml<num>
+Like -m<num>, but also for long multiplies.
 .SH "FILES"
 /usr/tmp/emopt??????, is used when the -L flag is given only.
 .SH "SEE ALSO"
-ack(I)
+ack(1)
 .PD 0
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
