@@ -64,7 +64,8 @@ char *salloc(length)
 int length;
 {		
 	char *s,*c;
-	s=c= (char *) malloc(length);
+	extern char *malloc() ;
+	s=c= malloc(length);
 	while(length-->0)*c++ =0;
 	return(s);
 }
