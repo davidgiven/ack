@@ -181,7 +181,7 @@ STATIC bool lt_item(a,b)
 
 
 
-STATIC item_p items[NRITEMTYPES];  /* items[i] points to the list of type i */
+static item_p items[NRITEMTYPES];  /* items[i] points to the list of type i */
 
 
 
