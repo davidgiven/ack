@@ -354,7 +354,7 @@ bd_areg_index
 				bd_2.typ = S_ABS; bd_2.val = (valu_t)0;
 					    /* zero displacement */
 			}
-	|	expr	{	$$ = 0; ffew_2 |= 0300;
+	|	expr	{	$$ = 0; ffew_2 |= 0200;
 				bd_2 = $1;
 				RELOMOVE(bd_rel2, relonami);
 			}
