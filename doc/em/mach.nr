@@ -21,13 +21,15 @@ two groups of 256 secondary opcodes each.
 .A
 EM instructions without arguments have a single opcode assigned,
 possibly escaped:
-.Dr 14
+.Dr 6
 
          |--------------|
          |    opcode    |
          |--------------|
 
-                or
+.De
+		or
+.Dr 6
 
          |--------------|--------------|
          |    escape    |     opcode   |
@@ -42,13 +44,15 @@ and negative arguments.
 .N 1
 There is always an opcode that takes the next two bytes as argument,
 high byte first:
-.Dr 14
+.Dr 6
 
          |--------------|--------------|--------------|
          |    opcode    |    hibyte    |    lobyte    |
          |--------------|--------------|--------------|
 
-                or
+.De
+		or
+.Dr 6
 
          |--------------|--------------|--------------|--------------|
          |    escape    |    opcode    |    hibyte    |    lobyte    |
@@ -85,13 +89,15 @@ that combines the instruction and the high byte of the argument
 into a single opcode.
 These opcodes are called shorties.
 Shorties may be escaped.
-.Dr 14
+.Dr 6
 
          |--------------|--------------|
          | opcode+high  |    lobyte    |  (shortie)
          |--------------|--------------|
 
-                or
+.De
+		or
+.Dr 6
 
          |--------------|--------------|--------------|
          |    escape    | opcode+high  |    lobyte    |
