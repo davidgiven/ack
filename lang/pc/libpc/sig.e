@@ -30,5 +30,6 @@
  lal PROC
  loi EM_PSIZE
  sig
+ asp EM_PSIZE
  ret 0                  ; ignore the result of sig
  end ?
