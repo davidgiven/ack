@@ -50,7 +50,7 @@ AA_REG		/* allocatable A_REG, may not be a register variable */
 
 REGISTERS
 
-d2, d1, d0			:D_REG, DD_REG.
+d0, d1, d2			:D_REG, DD_REG.
 d3, d4, d5, d6, d7		:D_REG  regvar.
 a0, a1				:A_REG, AA_REG.
 a2, a3, a4, a5			:A_REG  regvar(reg_pointer).
@@ -463,6 +463,7 @@ asl_l  "asl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,5).
 asl   "asl #1,"	memalt2:rw:cc				cost(2,4).
 asr_l  "asr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 asr   "asr #1,"	memalt2:rw:cc				cost(2,4).
+bclr		const:ro,	D_REG:rw kills:cc	cost(2,4).
 bra		label					cost(2,5).
 bcc		label					cost(2,5).
 bcs		label					cost(2,5).
@@ -530,7 +531,7 @@ roxl "roxl #1,"	memalt2:rw:cc				cost(2,4).
 roxr "roxr #1,"	memalt2:rw:cc				cost(2,4).
 sne		datalt1:rw				cost(2,3).
 sub_l  "sub.l"	any4:ro,	D_REG:rw:cc		cost(2,3).
-sub_l  "sub.l"	any4:ro,	A_REG:rw		cost(2,3).
+sub_l  "sub.l"	any4+areg:ro,	A_REG+areg:rw		cost(2,3).
 sub_l  "sub.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
 tst_l  "tst.l"	test_set4:ro:cc				cost(2,3).
 tst_w  "tst.w"	test_set2+extend2:ro:cc				cost(2,3).
@@ -573,6 +574,9 @@ MOVES
 
 from consts %num==0 to D_REG+dreg4
     gen clr_l %2
+
+from consts %num==0 to A_REG+areg
+    gen sub_l %2,%2
 
 from consts %num==0 to memalt4
     gen clr_l %2
@@ -1485,6 +1489,10 @@ with regX any4+address
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
     gen	move %2,{areg,regvar($2,reg_pointer)}
 	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
+with exact regX STACK
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move {post_inc4, sp},{areg,regvar($2,reg_pointer)}
+	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
 with exact regX regAcon	
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
     gen	move {regAregXcon, %2.reg, %1.xreg, %1.sc, %2.bd},{areg,regvar($2,reg_pointer)}
@@ -1684,14 +1692,14 @@ pat lol ads stl $1==$3 && $2==4 && inreg($1)==reg_pointer
 
 pat lil lil inc sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
-    uses AA_REG = {indirect4, regvar($1, reg_pointer)}
+    uses DD_REG = {indirect4, regvar($1, reg_pointer)}
     gen add_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
     killreg %a
 			yields	%a
 
 pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
-    uses AA_REG = {indirect4, regvar($1, reg_pointer)}
+    uses DD_REG = {indirect4, regvar($1, reg_pointer)}
     gen sub_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
     killreg %a
 			yields	%a
@@ -1871,14 +1879,14 @@ pat lol adp stl $1==$3 && inreg($1)==reg_pointer
     uses DD_REG = {const, $2}
     gen add_l %a, {LOCAL, $1}
 
-pat lol adp stl $1==$3
-    kills all_indir, LOCAL %bd==$1
-    gen add_l {const, $2}, {LOCAL, $1}
-
 pat lol adp stl $1==$3 && abs_small($2)
     kills all_indir, LOCAL %bd==$1
     uses DD_REG = {const, $2}
     gen add_l %a, {LOCAL, $1}
+
+pat lol adp stl $1==$3
+    kills all_indir, LOCAL %bd==$1
+    gen add_l {const, $2}, {LOCAL, $1}
 
 pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
@@ -3150,7 +3158,7 @@ pat zrl inreg($1)==reg_any
 
 pat zrl inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen move_l {const, 0}, {areg, regvar($1, reg_pointer)}
+    gen move {const,0}, {areg, regvar($1, reg_pointer)}
 
 pat zrl
     kills all_indir, LOCAL %bd==$1
@@ -3513,13 +3521,14 @@ with any4 STACK
 
 pat cmp				leaving cmu 4
 
+#ifndef XXXXX
 proc txx
 with test_set4
     uses reusing %1,DD_REG
     gen test %1
-	bxx[1] {slabel, 1f}
+	bxx[1] {slabel,1f}
 	clr_l %a
-	bra {slabel, 2f}
+	bra {slabel,2f}
 	1:
 	move_l {const,1},%a
 	2:
@@ -3528,9 +3537,9 @@ with test_set4
 with test_set1 + test_set2
     uses reusing %1,DD_REG
     gen test %1
-	bxx[2] {slabel, 1f}
+	bxx[2] {slabel,1f}
 	clr_l %a
-	bra {slabel, 2f}
+	bra {slabel,2f}
 	1:
 	move_l {const,1},%a
 	2:
@@ -3542,6 +3551,29 @@ pat teq					call txx("beq", "beq")
 pat tne					call txx("bne", "bne")
 pat tge					call txx("bge", "bcc")
 pat tgt					call txx("bgt", "bhi")
+#else
+proc txx
+with test_set4
+    uses reusing %1,DD_REG
+    gen test %1
+	sxx[1] %a
+	neg_b %a
+			yields {extend1, %a}
+
+with test_set1 + test_set2
+    uses reusing %1,DD_REG
+    gen test %1
+	sxx[2] %a
+	neg_b %a
+			yields {extend1, %a}
+
+pat tlt					call txx("slt", "scs")
+pat tle					call txx("sle", "sls")
+pat teq					call txx("seq", "seq")
+pat tne					call txx("sne", "sne")
+pat tge					call txx("sge", "scc")
+pat tgt					call txx("sgt", "shi")
+#endif
 
 /*
  * Floating point
@@ -3978,12 +4010,12 @@ proc txxand
 with test_set4 DD_REG
     gen test %1
 	bxx[1] {slabel, 1f}
-	clr_l %2
+	bclr {const,0}, %2
 	1:		yields	%2
 with test_set1 + test_set2 DD_REG
     gen test %1
 	bxx[2] {slabel, 1f}
-	clr_l %2
+	bclr {const,0}, %2
 	1:		yields	%2
 
 proc txxior
@@ -4016,44 +4048,44 @@ proc cmxtxxand
 with exact extend1 extend1 DD_REG
     gen cmp_b %2, %1
 	bxx[2] {llabel,1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with exact extend2 extend2 DD_REG
     gen cmp_w %2, %1
 	bxx[2] {llabel,1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with exact sconsts any4 DD_REG
     uses DD_REG=%1
     gen cmp_l %2, %a
 	bxx[2] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with exact any4 sconsts DD_REG
     uses DD_REG=%2
     gen cmp_l %1, %a
 	bxx[1] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with any4-sconsts genreg DD_REG
     gen cmp_l %1, %2
 	bxx[1] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with genreg any4-sconsts DD_REG
     gen cmp_l %2, %1
 	bxx[2] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with exact immediate4-sconsts imm_cmp4 DD_REG
     gen cmp_l %1, %2
 	bxx[1] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 with exact imm_cmp4 immediate4-sconsts DD_REG
     gen cmp_l %2, %1
 	bxx[2] {slabel, 1f}
-	clr_l %3
+	bclr {const,0}, %3
 	1:		yields	%3
 
 proc cmxtxxior
