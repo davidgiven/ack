@@ -1,0 +1,40 @@
+
+
+.define .nop
+
+! NOP
+! changed into output routine to print linenumber
+! in octal (6 digits)
+
+.nop:
+	push iy
+	ld iy,1f+5
+	ld hl,(hol0)
+	call outdec
+	ld iy,1f+18
+	ld hl,0
+	add hl,sp
+	call octnr
+	ld de,1f
+	call pstrng
+	pop iy
+	ret
+1:	.asciz 'test xxxxx 0xxxxxx\r\n'
+
+octnr:
+	ld b,6
+1:	ld a,7
+	and l
+	add a,'0'
+	dec iy
+	ld (iy+0),a
+	srl h
+	rr l
+	srl h
+	rr l
+	srl h
+	rr l
+	djnz 1b
+	ret
+
+
