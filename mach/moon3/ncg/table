@@ -332,7 +332,7 @@ index_off	= index_off4 + index_off2 + index_off1 .
 regind_addr	= regAcon + regAregXcon + t_regAcon + t_regAregXcon .
 address		= ext_addr + local_addr + regAcon + regAregXcon .
 all_regind	= indirect + offsetted + pre_post + index_off +
-		      regind_addr .
+		      regind_addr + areg .
 all_indir	= all_regind .
 allexceptcon	= ALL - ( D_REG + A_REG + consts + dreg2 + dreg1 +
 		    local_addr + ext_addr + regAcon + regAregXcon +
@@ -361,7 +361,7 @@ address		= regind_addr +
 		  absind_con +
 		  ext_regX .
 all_regind	= indirect + offsetted + index_off + pre_post +
-		      reg_memind + regind_addr .
+		      reg_memind + regind_addr + areg .
 all_indir	= all_regind + memind + ILOCAL .
 allexceptcon	= ALL - ( D_REG + A_REG + consts + dreg2 + dreg1 +
 		    local_addr + ext_addr + regAcon + regAregXcon + ext_regX ) .
