@@ -33,16 +33,16 @@ clean:
 dclean:
 	rm -rf ce ceg Out
 
-ce : ceg/ceg
-	mkdir ce
+ce : ceg/ceg EM_table mach.h
+	-mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
 	(cd ce;cp $(DEF)/*.c .)
 	(cd ce;cp $(DEF)/*/*.c .)
-	ln mach.c ce/mach.c
+	-ln mach.c ce/mach.c
 	@make -f ce_makefile EM_instr
 
 ceg : 
-	mkdir ceg
+	-mkdir ceg
 
 
 
