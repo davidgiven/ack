@@ -5,7 +5,6 @@ GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
 LIBM="PREF=m" "SRC=lang/cem/libcc/libm"
 LIBLN="PREF=ln" "SRC=lang/cem/libcc/libln"
-LIBDIR=../lib
 
 install:	cpstdio cpgen cplibm cplibln
 
