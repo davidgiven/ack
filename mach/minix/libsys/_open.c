@@ -23,7 +23,7 @@ PUBLIC int open(const char *name, int flags, ...)
 }
 #else
 PUBLIC int open(name, flags, mode)
-char *name;
+_CONST char *name;
 int flags, mode;
 {
   if (flags & O_CREAT)

@@ -1,6 +1,7 @@
 #include <lib.h>
 #include <sys/types.h>
 #define geteuid	_geteuid
+#include <unistd.h>
 
 PUBLIC uid_t geteuid()
 {

@@ -1,8 +1,9 @@
 #include <lib.h>
 #define mknod	_mknod
+#include <unistd.h>
 
 PUBLIC int mknod(name, mode, addr)
-char *name;
+_CONST char *name;
 int mode, addr;
 {
   return(_callm1(FS, MKNOD, _len(name), mode, addr,

@@ -1,6 +1,7 @@
 #include <lib.h>
 #include <sys/types.h>
 #define setgid	_setgid
+#include <unistd.h>
 
 PUBLIC int setgid(grp)
 gid_t grp;

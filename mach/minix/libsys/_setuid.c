@@ -1,6 +1,7 @@
 #include <lib.h>
 #include <sys/types.h>
 #define setuid	_setuid
+#include <unistd.h>
 
 PUBLIC int setuid(usr)
 int usr;

@@ -1,7 +1,8 @@
 #include <lib.h>
 #define access	_access
+#include <unistd.h>
 
-int access(name, mode)
+PUBLIC int access(name, mode)
 char *name;
 int mode;
 {

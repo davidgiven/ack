@@ -1,5 +1,6 @@
 #include <lib.h>
 #define chown	_chown
+#include <unistd.h>
 
 PUBLIC int chown(name, owner, grp)
 char *name;

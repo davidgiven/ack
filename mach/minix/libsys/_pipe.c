@@ -1,5 +1,6 @@
 #include <lib.h>
 #define pipe	_pipe
+#include <unistd.h>
 
 PUBLIC int pipe(fild)
 int fild[2];

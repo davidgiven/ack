@@ -1,5 +1,6 @@
 #include <lib.h>
 #define ptrace _ptrace
+#include <unistd.h>
 
 PUBLIC long ptrace(req, pid, addr, data)
 int req, pid;

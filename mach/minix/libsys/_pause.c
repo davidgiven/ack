@@ -1,5 +1,6 @@
 #include <lib.h>
 #define pause	_pause
+#include <unistd.h>
 
 PUBLIC int pause()
 {

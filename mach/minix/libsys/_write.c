@@ -1,5 +1,6 @@
 #include <lib.h>
 #define write	_write
+#include <unistd.h>
 
 PUBLIC int write(fd, buffer, nbytes)
 int fd;

@@ -1,5 +1,6 @@
 #include <lib.h>
 #define dup2     _dup2
+#include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <errno.h>

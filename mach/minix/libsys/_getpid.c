@@ -1,5 +1,6 @@
 #include <lib.h>
 #define getpid	_getpid
+#include <unistd.h>
 
 PUBLIC int getpid()
 {

@@ -1,5 +1,6 @@
 #include <lib.h>
 #define mount	_mount
+#include <unistd.h>
 
 PUBLIC int mount(special, name, rwflag)
 char *name, *special;

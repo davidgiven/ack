@@ -1,5 +1,6 @@
 #include <lib.h>
 #define stime _stime
+#include <unistd.h>
 
 PUBLIC int stime(top)
 long *top;

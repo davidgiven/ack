@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 PUBLIC int stat(name, buffer)
-char *name;
+_CONST char *name;
 struct stat *buffer;
 {
   return(_callm1(FS, STAT, _len(name), 0, 0,

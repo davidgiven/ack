@@ -1,6 +1,7 @@
 #include <lib.h>
 #define brk	_brk
 #define sbrk	_sbrk
+#include <unistd.h>
 
 extern char *_brksize;
 

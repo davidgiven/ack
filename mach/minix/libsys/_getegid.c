@@ -1,6 +1,7 @@
 #include <lib.h>
 #include <sys/types.h>
 #define getegid	_getegid
+#include <unistd.h>
 
 PUBLIC gid_t getegid()
 {

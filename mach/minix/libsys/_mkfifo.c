@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 
 PUBLIC int mkfifo(name, mode)
-char *name;
+_CONST char *name;
 int mode;
 {
   mode = (mode & 0777) | S_IFIFO;

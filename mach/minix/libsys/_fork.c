@@ -1,5 +1,6 @@
 #include <lib.h>
 #define fork	_fork
+#include <unistd.h>
 
 PUBLIC int fork()
 {

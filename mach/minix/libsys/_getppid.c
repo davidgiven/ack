@@ -1,5 +1,6 @@
 #include <lib.h>
 #define getppid	_getppid
+#include <unistd.h>
 
 PUBLIC int getppid()
 {

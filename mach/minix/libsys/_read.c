@@ -1,5 +1,6 @@
 #include <lib.h>
 #define read	_read
+#include <unistd.h>
 
 PUBLIC int read(fd, buffer, nbytes)
 int fd;

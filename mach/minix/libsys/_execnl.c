@@ -5,6 +5,7 @@
  */
 #include <lib.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #define MAXSTK	256		/* maximum EXEC stack size */
 #define	PTRSIZE	sizeof(char *)
