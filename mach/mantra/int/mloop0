@@ -351,66 +351,66 @@ countlabel:
 
 	.sect .data
 skipdisp:
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 1; .byte 0; .byte 0; .byte 2; .byte 0;
-.byte 0; .byte 1; .byte 1; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 1; .byte 2; .byte 1; .byte 1; .byte 1; .byte 1;
-.byte 1; .byte 1; .byte 1; .byte 2; .byte 1; .byte 1; .byte 1; .byte 1;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 1; .data1 0; .data1 0; .data1 2; .data1 0;
+.data1 0; .data1 1; .data1 1; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 1; .data1 2; .data1 1; .data1 1; .data1 1; .data1 1;
+.data1 1; .data1 1; .data1 1; .data1 2; .data1 1; .data1 1; .data1 1; .data1 1;
 
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 1; .byte 0; .byte 0; .byte 0;
-.byte 1; .byte 0; .byte 0; .byte 0; .byte 1; .byte 0; .byte 0; .byte 0;
-.byte 1; .byte 1; .byte 0; .byte 1; .byte 0; .byte 2; .byte 0; .byte 2;
-.byte 1; .byte 0; .byte 0; .byte 0; .byte 1; .byte 1; .byte 0; .byte 1;
-.byte 2; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 1; .data1 0; .data1 0; .data1 0;
+.data1 1; .data1 0; .data1 0; .data1 0; .data1 1; .data1 0; .data1 0; .data1 0;
+.data1 1; .data1 1; .data1 0; .data1 1; .data1 0; .data1 2; .data1 0; .data1 2;
+.data1 1; .data1 0; .data1 0; .data1 0; .data1 1; .data1 1; .data1 0; .data1 1;
+.data1 2; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1;
 
-.byte 2; .byte 2; .byte 0; .byte 0; .byte 1; .byte 1; .byte 1; .byte 0;
-.byte 0; .byte 2; .byte 1; .byte 0; .byte 1; .byte 0; .byte 0; .byte 1;
-.byte 1; .byte 1; .byte 0; .byte 0; .byte 2; .byte 1; .byte 0; .byte 2;
-.byte 0; .byte 1; .byte 1; .byte 2; .byte 1; .byte 1; .byte 1; .byte 1;
-.byte 1; .byte 2; .byte 0; .byte 0; .byte 0; .byte 0; .byte 1; .byte 2;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 1; .byte 2; .byte 2;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 0; .byte 0; .byte 0; .byte 1; .byte 1; .byte 0; .byte 0;
+.data1 2; .data1 2; .data1 0; .data1 0; .data1 1; .data1 1; .data1 1; .data1 0;
+.data1 0; .data1 2; .data1 1; .data1 0; .data1 1; .data1 0; .data1 0; .data1 1;
+.data1 1; .data1 1; .data1 0; .data1 0; .data1 2; .data1 1; .data1 0; .data1 2;
+.data1 0; .data1 1; .data1 1; .data1 2; .data1 1; .data1 1; .data1 1; .data1 1;
+.data1 1; .data1 2; .data1 0; .data1 0; .data1 0; .data1 0; .data1 1; .data1 2;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 1; .data1 2; .data1 2;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 0; .data1 0; .data1 0; .data1 1; .data1 1; .data1 0; .data1 0;
 
-.byte 0; .byte 1; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 1;
-.byte 0; .byte 0; .byte 1; .byte 0; .byte 0; .byte 1; .byte 1; .byte 1;
-.byte 1; .byte 0; .byte 2; .byte 1; .byte 1; .byte 1; .byte 2; .byte 0;
-.byte 0; .byte 1; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 1;
-.byte 2; .byte 2; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
-.byte 0; .byte 1; .byte 0; .byte 0; .byte 0; .byte 0; .byte 2; .byte 1;
-.byte 1; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1; .byte 1;
-.byte 2; .byte 1; .byte 0; .byte 0; .byte 1; .byte 2; .byte 7; .byte 5;
+.data1 0; .data1 1; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 1;
+.data1 0; .data1 0; .data1 1; .data1 0; .data1 0; .data1 1; .data1 1; .data1 1;
+.data1 1; .data1 0; .data1 2; .data1 1; .data1 1; .data1 1; .data1 2; .data1 0;
+.data1 0; .data1 1; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 1;
+.data1 2; .data1 2; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0; .data1 0;
+.data1 0; .data1 1; .data1 0; .data1 0; .data1 0; .data1 0; .data1 2; .data1 1;
+.data1 1; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1; .data1 1;
+.data1 2; .data1 1; .data1 0; .data1 0; .data1 1; .data1 2; .data1 7; .data1 5;
 
 !escaped opcodes
 
-.byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 2; .byte 0; .byte 2;
-.byte 2; .byte 2; .byte 2; .byte 2; .byte 0; .byte 2; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 0; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 0; .byte 0; .byte 0; .byte 2; .byte 2; .byte 2;
-.byte 2; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2;
-.byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 2; .byte 2;
+.data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 2; .data1 0; .data1 2;
+.data1 2; .data1 2; .data1 2; .data1 2; .data1 0; .data1 2; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 0; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 0; .data1 0; .data1 0; .data1 2; .data1 2; .data1 2;
+.data1 2; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2;
+.data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 2; .data1 2;
 
-.byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 2; .byte 2;
-.byte 2; .byte 2; .byte 2; .byte 2; .byte 0; .byte 2; .byte 0; .byte 1;
-.byte 2; .byte 2; .byte 2; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2;
-.byte 0; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 0; .byte 2;
-.byte 0; .byte 2; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2;
-.byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 2; .byte 2;
-.byte 2; .byte 2; .byte 0; .byte 0; .byte 2; .byte 2; .byte 0; .byte 2;
+.data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 2; .data1 2;
+.data1 2; .data1 2; .data1 2; .data1 2; .data1 0; .data1 2; .data1 0; .data1 1;
+.data1 2; .data1 2; .data1 2; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2;
+.data1 0; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 0; .data1 2;
+.data1 0; .data1 2; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2;
+.data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 2; .data1 2;
+.data1 2; .data1 2; .data1 0; .data1 0; .data1 2; .data1 2; .data1 0; .data1 2;
 
-.byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2; .byte 0; .byte 2;
-.byte 2; .byte 0; .byte 1; .byte 0; .byte 0; .byte 0; .byte 2; .byte 0;
-.byte 2; .byte 0; .byte 2; .byte 2; .byte 2; .byte 2; .byte 2; .byte 2;
-.byte 0; .byte 2; .byte 0; .byte 1; .byte 2; .byte 0; .byte 0; .byte 2;
+.data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2; .data1 0; .data1 2;
+.data1 2; .data1 0; .data1 1; .data1 0; .data1 0; .data1 0; .data1 2; .data1 0;
+.data1 2; .data1 0; .data1 2; .data1 2; .data1 2; .data1 2; .data1 2; .data1 2;
+.data1 0; .data1 2; .data1 0; .data1 1; .data1 2; .data1 0; .data1 0; .data1 2;
 
 	.sect .text
 		move.l	globmax,d1
