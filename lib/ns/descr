@@ -9,14 +9,14 @@ var M=ns
 var NAME=NS
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix
+var CPP_F=-D__unix
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -24,14 +24,14 @@ end
 name as
 	from .s
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
+	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args {ALIGN} (.e:{HEAD}={EM}/{RT}em) \
@@ -47,6 +47,6 @@ name led
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.e:{TAIL}={EM}/{LIB}mon {EM}/{LIB}em {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{LIB}mon {EM}/{LIB}mon2 {EM}/{LIB}em {EM}/lib/{M}/end_em)
 	linker
 end

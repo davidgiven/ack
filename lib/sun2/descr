@@ -11,9 +11,8 @@ var P=sun2
 var CC_ALIGN=-Vw{w}.1
 var LIB=lib/{P}/tail_
 var RT=lib/{P}/head_
-var PLIB=lib/{M}/tail_
-var PRT=lib/{M}/head_
-var CPP_F=-Dunix -Dm68k -DM68010 -Dmc68010 -D__BSD4_2
+var MLIB=lib/{M}/tail_
+var CPP_F=-D__unix -D__m68k -D__M68010 -D__mc68010 -D__BSD4_2
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
 # 413 align is the default, rom in text
@@ -21,7 +20,7 @@ var ALIGN=-a0:4 -a1:4 -a2:0x20000 -a3:4 -b0:0x2020
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -29,7 +28,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/m68k2/top
+	program {EM}/lib.bin/m68k2/top
 	args
 	optimizer
 	stdin
@@ -38,42 +37,42 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/m68k2/as
+	program {EM}/lib.bin/m68k2/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
+	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -n ALIGN=-a0:4 -a1:4 -a2:0x20000 -a3:4 -b0:0x2000
 	mapflag -nr ALIGN=-a0:4 -a1:0x20000 -a2:4 -a3:4 -b0:0x2000
 	mapflag -N ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b0:0x2000
 	mapflag -r ALIGN=-a0:4 -a1:0x20000 -a2:4 -a3:4 -b0:0x2020
-	mapflag -fp LIBFP={EM}/{PLIB}fp
+	mapflag -fp LIBFP={EM}/{MLIB}fp
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args  {ALIGN} (.e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.ocm.b={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
-		({RTS}:.p={EM}/{PRT}pc) \
-		({RTS}:.mod={EM}/{PRT}m2) \
+		({RTS}:.p={EM}/{RT}pc) \
+		({RTS}:.mod={EM}/{RT}m2) \
 		-o > < \
-		(.p:{TAIL}={EM}/{PLIB}pc) \
-		(.b:{TAIL}={EM}/{PLIB}bc) \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
-		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/{PLIB}em {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{P}/cv
+	program {EM}/lib.bin/{P}/cv
 	args < >
 	outfile a.out
 end

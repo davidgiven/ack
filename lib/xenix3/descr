@@ -11,15 +11,14 @@ var IM=xenix3
 var LIB=lib/{IM}/tail_
 var ILIB=lib/i86/tail_
 var RT=lib/{IM}/head_
-var IRT=lib/i86/head_
-var CPP_F=-Dunix -D__USG
-var C_LIB={EM}/{ILIB}cc.1s {EM}/{ILIB}cc.2g
+var CPP_F=-D__unix -D__USG
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -27,29 +26,29 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
-	mapflag -l* LNAME={EM}/{ILIB}*
+	program {EM}/lib.bin/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
-	mapflag -ansi C_LIB={EM}/{ILIB}ac
+	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.ocm.b={EM}/{IRT}cc) \
-		({RTS}{ANSI?}:.c={EM}/{IRT}cc) \
-		({RTS}{ANSI?}:.cansi={EM}/{IRT}ac) \
-		({RTS}:.p={EM}/{IRT}pc) \
-		({RTS}:.mod={EM}/{IRT}m2) \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
+		({RTS}:.p={EM}/{RT}pc) \
+		({RTS}:.mod={EM}/{RT}m2) \
 		-o > < \
-		(.p:{TAIL}={EM}/{ILIB}pc) \
-		(.b:{TAIL}={EM}/{ILIB}bc) \
-		(.mod:{TAIL}={EM}/{ILIB}m2) \
-		(.ocm:{TAIL}={EM}/{ILIB}ocm) \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{FLOATS?} \
@@ -59,7 +58,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{IM}/cv
+	program {EM}/lib.bin/{IM}/cv
 	mapflag -F* CVFLAG=-F*
 	args {CVFLAG?} < >
 	outfile a.out

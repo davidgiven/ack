@@ -15,7 +15,7 @@ var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -23,7 +23,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
@@ -31,7 +31,7 @@ name led
 	from .o.a
 	to .out
 	outfile a.out
-	program {EM}/lib/em_led
+	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args -b0:0x1000 ( .e:{HEAD}={EM}/{RT}em) \
@@ -47,7 +47,7 @@ name led
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}mon) \
-		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}sys {EM}/lib/{M}/end_em)
+		(.mod.ocm.b.c.p.e:{TAIL}={EM}/{LIB}mon) \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon2 {EM}/lib/{M}/end_em)
 	linker
 end

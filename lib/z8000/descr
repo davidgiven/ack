@@ -15,7 +15,7 @@ var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -24,7 +24,7 @@ name asld
 	from .s.a
 	to .out
 	outfile a.out
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i  IFILE={EM}/{RT}i
 	mapflag -ansi C_LIB={EM}/{LIB}ac
@@ -41,7 +41,7 @@ name asld
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}mon) \
-		(.e:{TAIL}={EM}/{LIB}em {EM}/lib/z8000/end_em)
+		(.mod.ocm.b.c.p.e:{TAIL}={EM}/{LIB}mon) \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon2 {EM}/lib/z8000/end_em)
 	linker
 end

@@ -9,7 +9,7 @@ var NAME=vax4
 var M=vax4
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix -Dvax
+var CPP_F=-D__unix -D__vax
 var CC_ALIGN=-Vw4.1
 # 413 align is the default, rom in text
 var ALIGN=-a0:4 -a1:4 -a2:0x400 -a3:4
@@ -18,7 +18,7 @@ var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -26,7 +26,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/{M}/top
+	program {EM}/lib.bin/{M}/top
 	args
 	optimizer
 	stdin
@@ -35,14 +35,14 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
+	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -N ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
 	mapflag -r ALIGN=-a0:4 -a1:0x400 -a2:4 -a3:4
@@ -67,7 +67,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{M}/cv
+	program {EM}/lib.bin/{M}/cv
 	mapflag -n CV_ARG=-n
 	args {CV_ARG?} < >
 	outfile a.out

@@ -9,14 +9,14 @@ var M=pdp
 var NAME=pdp
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix
+var CPP_F=-D__unix
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
 var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -24,7 +24,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/{M}/top
+	program {EM}/lib.bin/{M}/top
 	args
 	optimizer
 	stdin
@@ -33,14 +33,14 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
+	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i SEPID=-b1:0
 	mapflag -n ALIGN=-a0:1 -a1:0x2000 -a2:1 -a3:1
@@ -65,7 +65,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{M}/cv
+	program {EM}/lib.bin/{M}/cv
 	args < >
 	outfile a.out
 end
