@@ -124,7 +124,7 @@ List of monitor calls.
 number	name	parameters	results	function
 
 	1	Exit	status:int		Terminate this process
-	2	Fork	e,flag,pid:int		Spawn new process
+	2	Fork		e,flag,pid:int	Spawn new process
 	3	Read	fildes:int;buf:ptr;nbytes:unsp
 				e:int;rbytes:unsp	Read from file
 	4	Write	fildes:int;buf:ptr;nbytes:unsp
@@ -132,7 +132,7 @@ number	name	parameters	results	function
 	5	Open	string:ptr;flag:int
 				e,fildes:int	Open file for read and/or write
 	6	Close	fildes:int	e:int	Close a file
-	7	Wait	e:int;status,pid:int2
+	7	Wait		e:int;status,pid:int2
 					Wait for child
 	8	Creat	string:ptr;mode:int
 				e,fildes:int	Create a new file
@@ -150,19 +150,19 @@ number	name	parameters	results	function
 				e:int	Get file status
 	19	Lseek	fildes:int;off:int4;whence:int
 				e:int;oldoff:int4	Move read/write pointer
-	20	Getpid	pid:int2		Get process identification
+	20	Getpid		pid:int2	Get process identification
 	21	Mount	special,string:ptr;rwflag:int
 				e:int	Mount file system
 	22	Umount	special:ptr	e:int	Unmount file system
 	23	Setuid	userid:int2	e:int	Set user ID
-	24	Getuid	e_uid,r_uid:int2		Get user ID
+	24	Getuid		e_uid,r_uid:int2	Get user ID
 	25	Stime	time:int4	e:int	Set time and date
 	26	Ptrace	request:int;pid:int2;addr:ptr;data:int
 				e,value:int	Process trace
 	27	Alarm	seconds:uns2	previous:uns2	Schedule signal
 	28	Fstat	fildes:int;statbuf:ptr
 				e:int	Get file status
-	29	Pause	Stop until signal
+	29	Pause			Stop until signal
 	30	Utime	string,timep:ptr
 				e:int	Set file times
 	33	Access	string:ptr;mode:int
@@ -174,11 +174,12 @@ number	name	parameters	results	function
 				e:int	Send signal to a process
 	41	Dup	fildes,newfildes:int
 				e,fildes:int	Duplicate a file descriptor
-	42	Pipe	e,w_des,r_des:int	Create a pipe
+	42	Pipe		e,w_des,r_des:int
+					Create a pipe
 	43	Times	buffer:ptr		Get process times
 	44	Profil	buff:ptr;bufsiz,offset,scale:intp	Execution time profile
 	46	Setgid	gid:int2	e:int	Set group ID
-	47	Getgid	e_gid,r_gid:int		Get group ID
+	47	Getgid		e_gid,r_gid:int	Get group ID
 	48	Sigtrp	trapno,signo:int
 				e,prevtrap:int	See below
 	51	Acct	file:ptr	e:int	Turn accounting on or off
