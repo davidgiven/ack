@@ -54,7 +54,7 @@ struct expr	{
 	char *ex_file;		/* the file it (probably) comes from */
 	unsigned int ex_line;	/* the line it (probably) comes from */
 	struct type *ex_type;
-	char ex_lvalue;
+	short ex_lvalue;
 	short ex_flags;
 	int ex_class;
 	int ex_depth;

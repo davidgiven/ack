@@ -58,7 +58,7 @@ promoted_type(tp)
 struct type *tp;
 {
 	if (tp->tp_fund == CHAR || tp->tp_fund == SHORT) {
-		if (tp->tp_unsigned && tp->tp_size == int_size)
+		if (tp->tp_unsigned && (int) tp->tp_size == (int) int_size)
 			return uint_type;
 		else return int_type;
 	} else if (tp->tp_fund == FLOAT)
@@ -127,7 +127,7 @@ construct_type(fund, tp, qual, count, pl)
 struct type *
 function_of(tp, pl, qual)
 	register struct type *tp;
-	register struct proto *pl;
+	struct proto *pl;
 	int qual;
 {
 	register struct type *dtp = tp->tp_function;
@@ -233,7 +233,7 @@ size_of_type(tp, nm)
 
 	if (sz < 0)	{
 		error("size of %s unknown", nm);
-		return (arith)1;
+		sz = (arith)1;
 	}
 	return sz;
 }

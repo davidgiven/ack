@@ -547,18 +547,19 @@ ch3asgn(expp, oper, expr)
 	int fund = exp->ex_type->tp_fund;
 	int vol = 0;
 	struct type *tp;
+	char *oper_string = symbol2str(oper);
 
 	/* We expect an lvalue */
 	if (!exp->ex_lvalue) {
-		expr_error(exp, "no lvalue in operand of %s", symbol2str(oper));
+		expr_error(exp, "no lvalue in operand of %s", oper_string);
 	} else if (exp->ex_flags & EX_ILVALUE)	{
-		strict("incorrect lvalue in operand of %s", symbol2str(oper));
+		strict("incorrect lvalue in operand of %s", oper_string);
 	} else if (exp->ex_flags & EX_READONLY) {
-		expr_error(exp, "operand of %s is read-only", symbol2str(oper));
+		expr_error(exp, "operand of %s is read-only", oper_string);
 	} else if (fund == STRUCT || fund == UNION) {
 		if (recurconst(exp->ex_type))
 			expr_error(expr,"operand of %s contains a const-qualified member",
-					    symbol2str(oper));
+					    oper_string);
 	}
 
 	/*	Preserve volatile markers across the tree.
@@ -596,10 +597,8 @@ ch3asgn(expp, oper, expr)
 			expr = extmp;
 	}
 #ifndef NOBITFIELD
-	if (fund == FIELD)
-		exp = new_oper(exp->ex_type->tp_up, exp, oper, expr);
-	else
-		exp = new_oper(exp->ex_type, exp, oper, expr);
+	exp = new_oper(fund == FIELD ? exp->ex_type->tp_up : exp->ex_type,
+		exp, oper, expr);
 #else NOBITFIELD
 	exp = new_oper(exp->ex_type, exp, oper, expr);
 #endif NOBITFIELD

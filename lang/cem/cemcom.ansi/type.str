@@ -10,7 +10,7 @@
 struct type	{
 	struct type *next;	/* used only with ARRAY */
 	short tp_fund;		/* fundamental type */
-	char tp_unsigned;
+	short tp_unsigned;
 	int tp_align;
 	int tp_typequal;	/* type qualifier */
 	arith tp_size;		/* -1 if declared but not defined */

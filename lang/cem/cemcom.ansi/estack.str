@@ -10,7 +10,7 @@ struct e_stack {
 	arith		s_cnt1, s_cnt2;
 	struct sdef 	*s_def;
 	struct type 	**s_tpp;
-	char 		s_nested;
+	short 		s_nested;
 };
 
 /* ALLOCDEF "e_stack" 5 */

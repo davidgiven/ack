@@ -54,10 +54,9 @@ eval_field(expr, code)
 	struct type *tp = leftop->ex_type->tp_up;
 	arith tmpvar;
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
-	arith asize = atype->tp_size;
 
 	/* First some assertions to be sure that the rest is legal */
-	ASSERT(asize == word_size);	/* make sure that C_loc() is legal */
+	ASSERT(atype->tp_size == word_size);	/* make sure that C_loc() is legal */
 	ASSERT(leftop->ex_type->tp_fund == FIELD);
 	leftop->ex_type = atype;	/* this is cheating but it works... */
 	if (op == '=') {
@@ -66,19 +65,19 @@ eval_field(expr, code)
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		C_loc(fd->fd_mask);
-		C_and(asize);
+		C_and(word_size);
 		if (code == TRUE)
-			C_dup(asize);
+			C_dup(word_size);
 		C_loc((arith)fd->fd_shift);
 		if (atype->tp_unsigned)
-			C_slu(asize);
+			C_slu(word_size);
 		else
-			C_sli(asize);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[asize]));
+			C_sli(word_size);
+		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
 		if (leftop->ex_depth == 0)	{	/* simple case	*/
 			load_val(leftop, RVAL);
-			C_and(asize);
-			C_ior(asize);
+			C_and(word_size);
+			C_ior(word_size);
 			store_val(&(leftop->EX_VALUE), atype);
 		}
 		else	{			/* complex case	*/
@@ -87,11 +86,11 @@ eval_field(expr, code)
 			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
-			C_loi(asize);
-			C_and(asize);
-			C_ior(asize);
+			C_loi(word_size);
+			C_and(word_size);
+			C_ior(word_size);
 			LoadLocal(tmpvar, pointer_size);
-			C_sti(asize);
+			C_sti(word_size);
 			FreeLocal(tmpvar);
 		}
 	}
@@ -107,23 +106,23 @@ eval_field(expr, code)
 			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
-			C_loi(asize);
+			C_loi(word_size);
 		}
 		if (atype->tp_unsigned) {
 			C_loc((arith)fd->fd_shift);
-			C_sru(asize);
+			C_sru(word_size);
 			C_loc(fd->fd_mask);
-			C_and(asize);
+			C_and(word_size);
 		}
 		else {
-			arith bits_in_type = asize * 8;
+			arith bits_in_type = word_size * 8;
 			C_loc(bits_in_type - (fd->fd_width + fd->fd_shift));
-			C_sli(asize);
+			C_sli(word_size);
 			C_loc(bits_in_type - fd->fd_width);
-			C_sri(asize);
+			C_sri(word_size);
 		}
 		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
-			C_dup(asize);
+			C_dup(word_size);
 		conversion(atype, rightop->ex_type);
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		/* the 'op' operation: */
@@ -136,28 +135,28 @@ eval_field(expr, code)
 			assop(rightop->ex_type, op);
 		conversion(rightop->ex_type, atype);
 		C_loc(fd->fd_mask);
-		C_and(asize);
+		C_and(word_size);
 		if (code == TRUE && op != POSTINCR && op != POSTDECR)
-			C_dup(asize);
+			C_dup(word_size);
 		C_loc((arith)fd->fd_shift);
 		if (atype->tp_unsigned)
-			C_slu(asize);
+			C_slu(word_size);
 		else
-			C_sli(asize);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[asize]));
+			C_sli(word_size);
+		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
 		if (leftop->ex_depth == 0)	{
 			load_val(leftop, RVAL);
-			C_and(asize);
-			C_ior(asize);
+			C_and(word_size);
+			C_ior(word_size);
 			store_val(&(leftop->EX_VALUE), atype);
 		}
 		else	{
 			LoadLocal(tmpvar, pointer_size);
-			C_loi(asize);
-			C_and(asize);
-			C_ior(asize);
+			C_loi(word_size);
+			C_and(word_size);
+			C_ior(word_size);
 			LoadLocal(tmpvar, pointer_size);
-			C_sti(asize);
+			C_sti(word_size);
 			FreeLocal(tmpvar);
 		}
 	}
@@ -167,12 +166,12 @@ eval_field(expr, code)
 			retrieval) is on top of stack.
 		*/
 		if (atype->tp_unsigned == 0) {	/* sign extension */
-			register arith shift = asize * 8 - fd->fd_width;
+			register arith shift = word_size * 8 - fd->fd_width;
 
 			C_loc(shift);
-			C_sli(asize);
+			C_sli(word_size);
 			C_loc(shift);
-			C_sri(asize);
+			C_sri(word_size);
 		}
 		conversion(atype, expr->ex_type);
 	}
