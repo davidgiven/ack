@@ -631,6 +631,8 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 	int vil;
 	int cocono= -1;
 	cost_t totcost;
+	int nremoves;
+	int removelist[100];
 	static char tlab[] = "0:";
 	extern int optexact,optstack,startline;
 	extern char *filename;
@@ -690,6 +692,23 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			codenl();
 		}
 	}
+	nremoves=0;
+	for(vp=generates;vp!=0;vp=vp->vi_next) {
+		if (vp->vi_int[0] != INSREMOVE)
+			continue;
+		for(i=0;i<nremoves;i++)
+			if (vp->vi_int[1]==removelist[i])
+				break;
+		if (i==nremoves) {
+			assert(nremoves<(sizeof(removelist)/sizeof(int)));
+			removelist[nremoves++] = vp->vi_int[1];
+		}
+	}
+	for(i=0;i<nremoves;i++) {
+		code8(DO_RREMOVE);
+		codeint(removelist[i]);
+		codenl();
+	}
 	/* allocate part */
 	deal=0;al=0;
 	for (vp=allocates;vp!=0;vp=vp->vi_next) {
@@ -739,6 +758,8 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			codenl();
 			totcost.ct_space += instp->i_cost.ct_space;
 			totcost.ct_time  += instp->i_cost.ct_time ;
+			break;
+		case INSREMOVE:
 			break;
 		case INSMOVE:
 			codecoco(cocono);
