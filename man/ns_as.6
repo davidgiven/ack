@@ -2,12 +2,12 @@
 .TH NS_AS 6 "$Revision$"
 .ad
 .SH NAME
-ns_as \- National Semiconductor 16032 assembler/linker
+ns_as \- National Semiconductor 16032 assembler
 .SH SYNOPSIS
 ~em/lib.bin/ns/as [options] argument ...
 .SH DESCRIPTION
 The assembler for the National Semiconductor 16032 is based
-on the universal assembler \fIuni_ass\fP(VI). It is an assembler generating
+on the universal assembler \fIuni_ass\fP(6). It is an assembler generating
 relocatable object code in \fIack.out\fP(5) format.
 The mnemonics for the instructions are taken from the NS-16000
 Programmers Reference Manual.
@@ -90,7 +90,7 @@ the encoding of the msr register in smr and lmr instructions.
 Two different possibilities are given for the encoding of
 the instructions movsu and movus.
 .SH "SEE ALSO"
-uni_ass(VI)
+uni_ass(6)
 ack(1),
 ack.out(5),
 .br

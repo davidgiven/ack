@@ -428,7 +428,7 @@ Close a file. Closing of files is done for local files when the procedure
 in which they are declared exits.
 The compiler only closes local files if they are not part of a structured type.
 Files allocated in the heap are not closed when they are deallocated.
-There is an external routine \fIpclose\fP in libP(VII), that may be called
+There is an external routine \fIpclose\fP in libpc(7), that may be called
 explicitly to do the closing in these cases.
 Closing may be necessary to flush buffers or to keep the number of
 simultaneously opened files below NFILES.
