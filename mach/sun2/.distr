@@ -1,6 +1,4 @@
 Action
 cv
 libsys
-libcc
-liboc
-libm2
+mach_params

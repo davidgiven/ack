@@ -1,6 +1,5 @@
 In this directory is a complete interpreter for EM-code on a
 PDP 11, written in Unix assembly language.
-The interpreter is split up in 7 files, em.v1 up to em.v7.
 There exist assembler options .test .opfreq .flow .count .prof
 and .last.
 .test tests undefined integers, bad arrays etcetera

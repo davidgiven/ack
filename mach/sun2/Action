@@ -4,13 +4,3 @@ end
 name "Sun 2 M68000 systemcall library"
 dir libsys
 end
-name "Sun 2 M68000 C libraries"
-dir libcc
-end
-name "Sun 2 M68000 Occam library"
-system "vax_bsd4_2|sun*"
-dir liboc
-end
-name "Sun 2 M68000 Modula-2 library"
-dir libm2
-end

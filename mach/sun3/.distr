@@ -1,9 +1,5 @@
 Action
 cv
 libsys
-libcc
-libcc.ansi
-liboc
-libm2
 ce
-libce
+mach_params
