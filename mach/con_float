@@ -13,450 +13,6 @@
    If none of these are defined, PDP-11 format is generated.
 */
 
-#ifndef NOFLOAT
-#ifndef OWNFLOAT
-
-#include <ctype.h>
-
-struct mantissa {
-	unsigned long h_32;
-	unsigned long l_32;
-};
-
-struct EXTEND {
-	short	sign;
-	short	exp;
-	struct mantissa mantissa;
-#define m1 mantissa.h_32
-#define m2 mantissa.l_32
-};
-	
-static int b64_add();
-static int b64_sft();
-
-static
-mul_ext(e1,e2,e3)
-struct EXTEND	*e1,*e2,*e3;
-{
-	/*	Multiply the extended numbers e1 and e2, and put the
-		result in e3.
-	*/
-	register int	i,j;		/* loop control	*/
-	unsigned short	mp[4];
-	unsigned short	mc[4];
-	unsigned short	result[8];	/* result */
-
-	register unsigned short *pres;
-
-	/* first save the sign (XOR)			*/
-	e3->sign = e1->sign ^ e2->sign;
-
-	/* compute new exponent */
-	e3->exp = e1->exp + e2->exp + 1;
-
-	/* check for overflow/underflow	??? */
-
-	/* 128 bit multiply of mantissas	*/
-
-	/* assign unknown long formats		*/
-	/* to known unsigned word formats	*/
-	mp[0] = e1->m1 >> 16;
-	mp[1] = (unsigned short) e1->m1;
-	mp[2] = e1->m2 >> 16;
-	mp[3] = (unsigned short) e1->m2;
-	mc[0] = e2->m1 >> 16;
-	mc[1] = (unsigned short) e2->m1;
-	mc[2] = e2->m2 >> 16;
-	mc[3] = (unsigned short) e2->m2;
-	for (i = 8; i--;) {
-		result[i] = 0;
-	}
-	/*
-	 *	fill registers with their components
-	 */
-	for(i=4, pres = &result[4];i--;pres--) if (mp[i]) {
-		unsigned short k = 0;
-		unsigned long mpi = mp[i];
-		for(j=4;j--;) {
-			unsigned long tmp = (unsigned long)pres[j] + k;
-			if (mc[j]) tmp += mpi * mc[j];
-			pres[j] = tmp;
-			k = tmp >> 16;
-		}
-		pres[-1] = k;
-	}
-
-	if (! (result[0] & 0x8000)) {
-		e3->exp--;
-		for (i = 0; i <= 3; i++) {
-			result[i] <<= 1;
-			if (result[i+1]&0x8000) result[i] |= 1;
-		}
-		result[4] <<= 1;
-	}	
-	/*
-	 *	combine the registers to a total
-	 */
-	e3->m1 = ((unsigned long)(result[0]) << 16) + result[1];
-	e3->m2 = ((unsigned long)(result[2]) << 16) + result[3];
-	if (result[4] & 0x8000) {
-		if (++e3->m2 == 0) {
-			if (++e3->m1 == 0) {
-				e3->m1 = 0x80000000;
-				e3->exp++;
-			}
-		}
-	}
-}
-
-static
-b64_sft(e1,n)
-	struct mantissa *e1;
-	int		n;
-{
-	if (n > 0) {
-		if (n > 63) {
-			e1->l_32 = 0;
-			e1->h_32 = 0;
-			return;
-		}
-		if (n >= 32) {
-			e1->l_32 = e1->h_32;
-			e1->h_32 = 0;
-			n -= 32;
-		}
-		if (n > 0) {
-			e1->l_32 >>= n;
-			if (e1->h_32 != 0) {
-				e1->l_32 |= (e1->h_32 << (32 - n));
-				e1->h_32 >>= n;
-			}
-		}
-		return;
-	}
-	n = -n;
-	if (n > 0) {
-		if (n > 63) {
-			e1->l_32 = 0;
-			e1->h_32 = 0;
-			return;
-		}
-		if (n >= 32) {
-			e1->h_32 = e1->l_32;
-			e1->l_32 = 0;
-			n -= 32;
-		}
-		if (n > 0) {
-			e1->h_32 <<= n;
-			if (e1->l_32 != 0) {
-				e1->h_32 |= (e1->l_32 >> (32 - n));
-				e1->l_32 <<= n;
-			}
-		}
-	}
-}
-
-static int
-b64_add(e1,e2)
-		/*
-		 * pointers to 64 bit 'registers'
-		 */
-	struct mantissa	*e1,*e2;
-{
-	register int	overflow;
-	int		carry;
-
-			/* add higher pair of 32 bits */
-	overflow = ((unsigned long) 0xFFFFFFFF - e1->h_32 < e2->h_32);
-	e1->h_32 += e2->h_32;
-
-			/* add lower pair of 32 bits */
-	carry = ((unsigned long) 0xFFFFFFFF - e1->l_32 < e2->l_32);
-	e1->l_32 += e2->l_32;
-	if ((carry) && (++e1->h_32 == 0))
-		return(1);		/* had a 64 bit overflow */
-	else
-		return(overflow);	/* return status from higher add */
-}
-
-/* The following tables can be computed with the following bc(1)
-   program:
-
-obase=16
-scale=0
-define t(x){
-	auto a, b, c
-	a=2;b=1;c=2^32;n=1
-	while(a<x) {
-		b=a;n+=n;a*=a
-	}
-	n/=2
-	a=b
-	while(b<x) {
-		a=b;b*=c;n+=32
-	}
-	n-=32
-	b=a
-	while(a<x) {
-		b=a;a+=a;n+=1
-	}
-	n-=1
-	x*=16^16
-	b=x%a
-	x/=a
-	if(a<=(2*b)) x+=1
-	obase=10
-	n
-	obase=16
-	return(x)
-}
-for (i=1;i<28;i++) {
-	t(10^i)
-}
-0
-for (i=1;i<20;i++) {
-	t(10^(28*i))
-}
-0
-define r(x){
-	auto a, b, c
-	a=2;b=1;c=2^32;n=1
-	while(a<x) {
-		b=a;n+=n;a*=a
-	}
-	n/=2
-	a=b
-	while(b<x) {
-		a=b;b*=c;n+=32
-	}
-	n-=32
-	b=a
-	while(a<x) {
-		b=a;a+=a;n+=1
-	}
-	a=b
-	a*=16^16
-	b=a%x
-	a/=x
-	if(x<=(2*b)) a+=1
-	obase=10
-	-n
-	obase=16
-	return(a)
-}
-for (i=1;i<28;i++) {
-	r(10^i)
-}
-0
-for (i=1;i<20;i++) {
-	r(10^(28*i))
-}
-0
-
-*/
-static struct EXTEND ten_powers[] = {	/* representation of 10 ** i */
-	{ 0,	0,	0x80000000,	0 },
-	{ 0,	3,	0xA0000000,	0 },
-	{ 0,	6,	0xC8000000,	0 },
-	{ 0,	9,	0xFA000000,	0 },
-	{ 0,	13,	0x9C400000,	0 },
-	{ 0,	16,	0xC3500000,	0 },
-	{ 0,	19,	0xF4240000,	0 },
-	{ 0,	23,	0x98968000,	0 },
-	{ 0,	26,	0xBEBC2000,	0 },
-	{ 0,	29,	0xEE6B2800,	0 },
-	{ 0,	33,	0x9502F900,	0 },
-	{ 0,	36,	0xBA43B740,	0 },
-	{ 0,	39,	0xE8D4A510,	0 },
-	{ 0,	43,	0x9184E72A,	0 },
-	{ 0,	46,	0xB5E620F4,	0x80000000 },
-	{ 0,	49,	0xE35FA931,	0xA0000000 },
-	{ 0,	53,	0x8E1BC9BF,	0x04000000 },
-	{ 0,	56,	0xB1A2BC2E,	0xC5000000 },
-	{ 0,	59,	0xDE0B6B3A,	0x76400000 },
-	{ 0,	63,	0x8AC72304,	0x89E80000 },
-	{ 0,	66,	0xAD78EBC5,	0xAC620000 },
-	{ 0,	69,	0xD8D726B7,	0x177A8000 },
-	{ 0,	73,	0x87867832,	0x6EAC9000 },
-	{ 0,	76,	0xA968163F,	0x0A57B400 },
-	{ 0,	79,	0xD3C21BCE,	0xCCEDA100 },
-	{ 0,	83,	0x84595161,	0x401484A0 },
-	{ 0,	86,	0xA56FA5B9,	0x9019A5C8 },
-	{ 0,	89,	0xCECB8F27,	0xF4200F3A }
-};
-static struct EXTEND big_ten_powers[] = {  /* representation of 10 ** (28*i) */
-	{ 0,	0,	0x80000000,	0 },
-	{ 0,	93,	0x813F3978,	0xF8940984 },
-	{ 0,	186,	0x82818F12,	0x81ED44A0 },
-	{ 0,	279,	0x83C7088E,	0x1AAB65DB },
-	{ 0,	372,	0x850FADC0,	0x9923329E },
-	{ 0,	465,	0x865B8692,	0x5B9BC5C2 },
-	{ 0,	558,	0x87AA9AFF,	0x79042287 },
-	{ 0,	651,	0x88FCF317,	0xF22241E2 },
-	{ 0,	744,	0x8A5296FF,	0xE33CC930 },
-	{ 0,	837,	0x8BAB8EEF,	0xB6409C1A },
-	{ 0,	930,	0x8D07E334,	0x55637EB3 },
-	{ 0,	1023,	0x8E679C2F,	0x5E44FF8F },
-	{ 0,	1116,	0x8FCAC257,	0x558EE4E6 },
-	{ 0,	1209,	0x91315E37,	0xDB165AA9 },
-	{ 0,	1302,	0x929B7871,	0xDE7F22B9 },
-	{ 0,	1395,	0x940919BB,	0xD4620B6D },
-	{ 0,	1488,	0x957A4AE1,	0xEBF7F3D4 },
-	{ 0,	1581,	0x96EF14C6,	0x454AA840 },
-	{ 0,	1674,	0x98678061,	0x27ECE4F5 },
-	{ 0,	1767,	0x99E396C1,	0x3A3ACFF2 }
-};
-
-static struct EXTEND r_ten_powers[] = { /* representation of 10 ** -i */
-	{ 0,	0,	0x80000000,	0 },
-	{ 0,	-4,	0xCCCCCCCC,	0xCCCCCCCD },
-	{ 0,	-7,	0xA3D70A3D,	0x70A3D70A },
-	{ 0,	-10,	0x83126E97,	0x8D4FDF3B },
-	{ 0,	-14,	0xD1B71758,	0xE219652C },
-	{ 0,	-17,	0xA7C5AC47,	0x1B478423 },
-	{ 0,	-20,	0x8637BD05,	0xAF6C69B6 },
-	{ 0,	-24,	0xD6BF94D5,	0xE57A42BC },
-	{ 0,	-27,	0xABCC7711,	0x8461CEFD },
-	{ 0,	-30,	0x89705F41,	0x36B4A597 },
-	{ 0,	-34,	0xDBE6FECE,	0xBDEDD5BF },
-	{ 0,	-37,	0xAFEBFF0B,	0xCB24AAFF },
-	{ 0,	-40,	0x8CBCCC09,	0x6F5088CC },
-	{ 0,	-44,	0xE12E1342,	0x4BB40E13 },
-	{ 0,	-47,	0xB424DC35,	0x095CD80F },
-	{ 0,	-50,	0x901D7CF7,	0x3AB0ACD9 },
-	{ 0,	-54,	0xE69594BE,	0xC44DE15B },
-	{ 0,	-57,	0xB877AA32,	0x36A4B449 },
-	{ 0,	-60,	0x9392EE8E,	0x921D5D07 },
-	{ 0,	-64,	0xEC1E4A7D,	0xB69561A5 },
-	{ 0,	-67,	0xBCE50864,	0x92111AEB },
-	{ 0,	-70,	0x971DA050,	0x74DA7BEF },
-	{ 0,	-74,	0xF1C90080,	0xBAF72CB1 },
-	{ 0,	-77,	0xC16D9A00,	0x95928A27 },
-	{ 0,	-80,	0x9ABE14CD,	0x44753B53 },
-	{ 0,	-84,	0xF79687AE,	0xD3EEC551 },
-	{ 0,	-87,	0xC6120625,	0x76589DDB },
-	{ 0,	-90,	0x9E74D1B7,	0x91E07E48 }
-};
-
-static struct EXTEND r_big_ten_powers[] = { /* representation of 10 ** -(28*i) */
-	{ 0,	0,	0x80000000,	0 },
-	{ 0,	-94,	0xFD87B5F2,	0x8300CA0E },
-	{ 0,	-187,	0xFB158592,	0xBE068D2F },
-	{ 0,	-280,	0xF8A95FCF,	0x88747D94 },
-	{ 0,	-373,	0xF64335BC,	0xF065D37D },
-	{ 0,	-466,	0xF3E2F893,	0xDEC3F126 },
-	{ 0,	-559,	0xF18899B1,	0xBC3F8CA2 },
-	{ 0,	-652,	0xEF340A98,	0x172AACE5 },
-	{ 0,	-745,	0xECE53CEC,	0x4A314EBE },
-	{ 0,	-838,	0xEA9C2277,	0x23EE8BCB },
-	{ 0,	-931,	0xE858AD24,	0x8F5C22CA },
-	{ 0,	-1024,	0xE61ACF03,	0x3D1A45DF },
-	{ 0,	-1117,	0xE3E27A44,	0x4D8D98B8 },
-	{ 0,	-1210,	0xE1AFA13A,	0xFBD14D6E },
-	{ 0,	-1303,	0xDF82365C,	0x497B5454 },
-	{ 0,	-1396,	0xDD5A2C3E,	0xAB3097CC },
-	{ 0,	-1489,	0xDB377599,	0xB6074245 },
-	{ 0,	-1582,	0xD91A0545,	0xCDB51186 },
-	{ 0,	-1675,	0xD701CE3B,	0xD387BF48 },
-	{ 0,	-1768,	0xD4EEC394,	0xD6258BF8 }
-};
-
-static
-add_exponent(e, exp)
-	struct EXTEND	*e;
-{
-	int neg = exp < 0;
-	int divsz, modsz;
-	struct EXTEND x;
-
-	if (neg) exp = -exp;
-	divsz = exp / (sizeof(ten_powers)/sizeof(ten_powers[0]));
-	modsz = exp % (sizeof(ten_powers)/sizeof(ten_powers[0]));
-	if (neg) {
-		mul_ext(e, &r_ten_powers[modsz], &x);
-		mul_ext(&x, &r_big_ten_powers[divsz], e);
-	}
-	else {
-		mul_ext(e, &ten_powers[modsz], &x);
-		mul_ext(&x, &big_ten_powers[divsz], e);
-	}
-}
-
-_str_ext_cvt(s, ss, e)
-	char		*s, **ss;
-	struct EXTEND	*e;
-{
-	/*	Like strtod, but for extended precision */
-	register int	c;
-	int		dotseen = 0;
-	int		digitseen = 0;
-	int		exp = 0;
-
-	if (ss) *ss = s;
-	while (isspace(*s)) s++;
-
-	e->sign = 0;
-	e->exp = 0;
-	e->m1 = e->m2 = 0;
-
-	c = *s;
-	switch(c) {
-	case '-':
-		e->sign = 1;
-	case '+':
-		s++;
-	}
-	while (c = *s++, isdigit(c) || (c == '.' && ! dotseen++)) {
-		if (c == '.') continue;
-		digitseen = 1;
-		if (e->m1 <= (unsigned long)(0xFFFFFFFF)/10) {
-			struct mantissa	a1;
-
-			a1 = e->mantissa;
-			b64_sft(&(e->mantissa), -3);
-			b64_sft(&a1, -1);
-			b64_add(&(e->mantissa), &a1);
-			a1.h_32 = 0;
-			a1.l_32 = c - '0';
-			b64_add(&(e->mantissa), &a1);
-		}
-		else exp++;
-		if (dotseen) exp--;
-	}
-	if (! digitseen) return;
-
-	if (ss) *ss = s - 1;
-
-	if (c == 'E' || c == 'e') {
-		int	exp1 = 0;
-		int	sign = 1;
-
-		switch(*s) {
-		case '-':
-			sign = -1;
-		case '+':
-			s++;
-		}
-		if (c = *s, isdigit(c)) {
-			do {
-				exp1 = 10 * exp1 + (c - '0');
-			} while (c = *++s, isdigit(c));
-			if (ss) *ss = s;
-		}
-		exp += sign * exp1;
-	}
-	if (e->m1 == 0 && e->m2 == 0) return;
-	e->exp = 63;
-	while (! (e->m1 & 0x80000000)) {
-		b64_sft(&(e->mantissa),-1);
-		e->exp--;
-	}
-	add_exponent(e, exp);
-}
-
-#endif
-#endif
-
 #ifdef NOFLOAT
 con_float() {
 
@@ -471,7 +27,12 @@ static int been_here;
 		fputs("Warning : dummy float-constant(s)\n", stderr);
 	}
 }
-#else
+#else /* NOFLOAT */
+
+#include <ctype.h>
+#ifndef OWNFLOAT
+#include <flt_arith.h>
+#endif /* OWNFLOAT */
 
 con_float() {
 	int i, j;
@@ -480,11 +41,11 @@ con_float() {
 	float fl;
 	double f;
 	double atof();
-#else
+#else /* OWNFLOAT */
 	int overflow = 0;
-	struct EXTEND e;
+	flt_arith e;
 	char buf[8];
-#endif
+#endif /* OWNFLOAT */
 
 	if (argval!= 4 && argval!= 8)	{
 		fprintf(stderr,"float constant size = %d\n",argval);
@@ -504,84 +65,86 @@ con_float() {
 	for (i = argval-1; i; i--) {
 		fprintf(codefile,",0%o", *p++ & 0377);
 	}
-#else
-	_str_ext_cvt(str, (char **) 0, &e);
+#else /* OWNFLOAT */
+	flt_str2flt(str, &e);
 #if IEEEFLOAT+ACKFLOAT
 	if (argval == 4) {
 #endif
-		e.exp += 127;
+		e.flt_exp += 127;
 #ifndef IEEEFLOAT
-		e.exp += 2;
+		e.flt_exp += 2;
 #endif
-		if (e.m1 == 0) e.exp = 0;
+		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
 #if IEEEFLOAT+ACKFLOAT
-		if (e.exp >= 255) {
+		if (e.flt_exp >= 255) {
 			overflow = 1;
-			e.exp = 255;
-			e.m1 = e.m2 = 0;
+			e.flt_exp = 255;
+			e.flt_mantissa.flt_h_32 = e.flt_mantissa.flt_l_32 = 0;
 		}
-		if (e.exp <= 0) {
+		if (e.flt_exp <= 0) {
 #if IEEEFLOAT
-			b64_sft(&(e.mantissa), 1);
-			if (e.exp < 0) {
-				b64_sft(&(e.mantissa), -e.exp);
-				e.exp = 0;
+			flt_b64_sft(&(e.flt_mantissa), 1);
+			if (e.flt_exp < 0) {
+				flt_b64_sft(&(e.flt_mantissa), -e.flt_exp);
+				e.flt_exp = 0;
 			}
 #else
-			e.exp = 0;
-			e.m1 = e.m2 = 0;
+			e.flt_exp = 0;
+			e.flt_mantissa.flt_h_32 = e.flt_mantissa.flt_l_32 = 0;
 #endif
 		}
 #endif
-		buf[0] = (e.sign << 7) | (e.exp >> 1);
-		buf[1] = ((e.exp&1) << 7) | ((e.m1 & 0x7fffffff) >> 24);
-		buf[2] = e.m1 >> 16;
-		buf[3] = e.m1 >> 8;
+		buf[0] = (e.flt_sign << 7) | (e.flt_exp >> 1);
+		buf[1] = ((e.flt_exp&1) << 7) |
+				((e.flt_mantissa.flt_h_32 & 0x7fffffff) >> 24);
+		buf[2] = e.flt_mantissa.flt_h_32 >> 16;
+		buf[3] = e.flt_mantissa.flt_h_32 >> 8;
 		if (argval == 8) {
-			buf[4] = e.m1;
-			buf[5] = e.m2 >> 24;
-			buf[6] = e.m2 >> 16;
-			buf[7] = e.m2 >> 8;
-			b64_sft(&(e.mantissa), -56);
+			buf[4] = e.flt_mantissa.flt_h_32;
+			buf[5] = e.flt_mantissa.flt_l_32 >> 24;
+			buf[6] = e.flt_mantissa.flt_l_32 >> 16;
+			buf[7] = e.flt_mantissa.flt_l_32 >> 8;
+			flt_b64_sft(&(e.flt_mantissa), -56);
 		}
-		else	b64_sft(&(e.mantissa), -24);
+		else	flt_b64_sft(&(e.flt_mantissa), -24);
 #if IEEEFLOAT+ACKFLOAT
 	}
 	else {
-		e.exp += 1023;
+		e.flt_exp += 1023;
 #ifndef IEEEFLOAT
-		e.exp += 2;
+		e.flt_exp += 2;
 #endif
-		if (e.m1 == 0) e.exp = 0;
-		if (e.exp >= 2047) {
+		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
+		if (e.flt_exp >= 2047) {
 			overflow = 1;
-			e.exp = 2047;
-			e.m1 = e.m2 = 0;
+			e.flt_exp = 2047;
+			e.flt_mantissa.flt_h_32 = e.flt_mantissa.flt_l_32 = 0;
 		}
-		if (e.exp <= 0) {
+		if (e.flt_exp <= 0) {
 #if IEEEFLOAT
-			b64_sft(&(e.mantissa), 1);
-			if (e.exp < 0) {
-				b64_sft(&(e.mantissa), -e.exp);
-				e.exp = 0;
+			flt_b64_sft(&(e.flt_mantissa), 1);
+			if (e.flt_exp < 0) {
+				flt_b64_sft(&(e.flt_mantissa), -e.flt_exp);
+				e.flt_exp = 0;
 			}
 #else
-			e.exp = 0;
-			e.m1 = e.m2 = 0;
+			e.flt_exp = 0;
+			e.flt_mantissa.flt_h_32 = e.flt_mantissa.flt_l_32 = 0;
 #endif
 		}
-		buf[0] = (e.sign << 7) | (e.exp >> 4);
-		buf[1] = ((e.exp & 017)<< 4) | ((e.m1&0x7fffffff) >> 27);
-		buf[2] = e.m1 >> 19;
-		buf[3] = e.m1 >> 11;
-		buf[4] = e.m1 >> 3;
-		buf[5] = (e.m1 << 5) | (e.m2 >> 27);
-		buf[6] = e.m2 >> 19;
-		buf[7] = e.m2 >> 11;
-		b64_sft(&(e.mantissa), -53);
+		buf[0] = (e.flt_sign << 7) | (e.flt_exp >> 4);
+		buf[1] = ((e.flt_exp & 017)<< 4) | ((e.flt_mantissa.flt_h_32 >> 27) & 017);
+		buf[2] = e.flt_mantissa.flt_h_32 >> 19;
+		buf[3] = e.flt_mantissa.flt_h_32 >> 11;
+		buf[4] = e.flt_mantissa.flt_h_32 >> 3;
+		buf[5] = (e.flt_mantissa.flt_h_32 << 5) | ((e.flt_mantissa.flt_l_32 >> 27) & 037);
+		buf[6] = e.flt_mantissa.flt_l_32 >> 19;
+		buf[7] = e.flt_mantissa.flt_l_32 >> 11;
+		flt_b64_sft(&(e.flt_mantissa), -53);
 	}
 #endif
-	if (! overflow && (e.m1 & 0x80000000)) for (i = argval-1; i>=0; i--) {
+	i = argval-1;
+	if (! overflow && (e.flt_mantissa.flt_h_32 & 0x80000000)) for (; i>=0; i--) {
 		if ((buf[i] &0377) != 0377) {
 			buf[i]++;
 			break;
@@ -596,7 +159,7 @@ con_float() {
 			i != 0 ? ",0%o" : ".data1 0%o", 
 			buf[i]&0377);
 	}
-#endif
+#endif /* OWNFLOAT */
 	putc('\n', codefile);
 }
-#endif
+#endif /* NOFLOAT */
