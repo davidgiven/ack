@@ -22,4 +22,5 @@ Lerr:
 	jmp     .fat
 Liovfl:
 	pushl	$EIOVFL
+	pushl	r1
 	jmp     .trp
