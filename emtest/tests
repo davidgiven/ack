@@ -517,13 +517,23 @@ OK
 TEST 027: test sti 2
 MAIN 20
 #if WS == 1
- loc 89
-#endif
+ ldc 90
+#else
  loc 90
+#endif
  lal -12
  sti 2
+#if WS != 2
+ lal -12
+ loi 2
+#else
  lol -12
+#endif
+#if WS == 1
+ ldc 90
+#else
  loc 90
+#endif
  bne *1
 OK
 TEST 028: test sti 4
@@ -904,15 +914,20 @@ MAIN 0
 OK
 #if WS > 1
  loc 16384
- loc 15
+ loc WS * 8 - 1
  rol WS
  loc 8192
  bne *1
 OK
  loc -2
- loc 15
+ loc WS * 8 - 1
  rol WS
+#if WS == 2
  loc 32767
+#endif
+#if WS == 4
+  loc 2147483647
+#endif
  bne *1
 OK
  loc -28671
@@ -1213,15 +1228,15 @@ a053
  rom 5,2,3*WS
 b053
  con 5,2,1
-MAIN 20
+MAIN 28	: assert WS <= 8
  loc 39
  loc 40
  loc 41
- lal -12
+ lal -28
  loc 6
  lae a053
  sar WS
- lal -12+(3*WS)
+ lal -28+(3*WS)
  loi 3*WS
  loc 41
  bne *1
@@ -1245,16 +1260,16 @@ a054
  rom 5,2,3*WS
 b054
  con 5,2,1
-MAIN 20
+MAIN 28
  loc 39
  loc 40
  loc 41
- lal -12
+ lal -28
  loc 6
  lae a054
  loc WS
  sar ?
- lal -12+(3*WS)
+ lal -28+(3*WS)
  loi 3*WS
  loc 41
  bne *1
@@ -2014,7 +2029,7 @@ MAIN 20
  sti 1
  loc 1030
  lal -8
- sti WS
+ sti 2
  loc 4
  lal -9
  sti 1
@@ -2043,7 +2058,7 @@ OK
 OK
  lal -4
  adp -4
- loi WS
+ loi 2
  loc 1030
  bne *1
 OK
