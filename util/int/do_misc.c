@@ -432,15 +432,12 @@ PRIVATE index_jump(nbytes)
 	register ptr cdp = dppop();	/* Case Descriptor Pointer */
 	register long t_index =		/* Table INDEX */
 			spop(nbytes) - mem_lds(cdp + psize, nbytes);
-	register ptr nPC;		/* New Program Counter */
+	register ptr nPC = 0;		/* New Program Counter */
 
 	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes)) {
 		nPC = mem_ldip(cdp + (2 * nbytes) + ((t_index + 1) * psize));
-		if (nPC == 0) {
-			trap(ECASE);
-		}
 	}
-	else if ((nPC = mem_ldip(cdp)) == 0) {
+	if (nPC == 0 && (nPC = mem_ldip(cdp)) == 0) {
 		trap(ECASE);
 	}
 	newPC(nPC);
