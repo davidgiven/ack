@@ -46,6 +46,7 @@ initialize()
 	result3 = sys_open(tmpfname,OP_WRITE, &tmp_file);
 	if ( result1==0 || result2== 0 || result3== 0 )
 		fatal("Improper file permissions");
+	C_magic();
 	fillkex();	/* initialize symbol table */
 	C_ms_emx((arith)BEMINTSIZE,(arith)BEMPTRSIZE);
 	initdeftype();	/* set default symbol declarers */
