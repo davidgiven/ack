@@ -1,12 +1,14 @@
 # $Header$
 EM	= ../../..
 h	= $(EM)/h
+LIBOBJ	= $(EM)/modules/lib/libobject.a
 CDIR	= $(EM)/mach/proto/nas
 CPP	= $(EM)/lib/cpp
 DEF	=
 
 FFLAG	=
-CFLAGS	= $(FFLAG) -O -I. -I$h $(DEF)
+INCL	= -I. -I$h $(DEF)
+CFLAGS	= $(FFLAG) -O $(INCL)
 YFLAGS	= -d
 LDFLAGS	= $(FFLAG) -i
 
@@ -34,14 +36,14 @@ pr:	$(MACH)
 opr:
 	make pr | opr
 as:	$(COBJ) as.o
-	$(CC) $(LDFLAGS) $(COBJ) as.o -o as
+	$(CC) $(LDFLAGS) $(COBJ) as.o $(LIBOBJ) -o as
 
 as.y:	$(CDIR)/comm2.y
 	$(CPP) -P -I. -I$h $(DEF) $(CDIR)/comm2.y >as.y
 	@echo "expect 1 shift/reduce conflict"
 
 lint:   $(CSRC) as.c
-	lint $(CSRC) as.c
+	lint $(INCL) $(CSRC) as.c
 
 y.tab.h:	as.c
 $(COBJ):	y.tab.h
