@@ -139,8 +139,10 @@ namerelocate(name, sects)
 
 	if ((type & S_TYP) == S_UND || (type & S_TYP) == S_ABS)
 		return;
-	if (type & S_COM)
+	if (type & S_COM) {
+		if ( ! (type&S_EXT) ) fatal("local commons should be handled by the assembler") ;
 		return;
+	}
 
 	sectindex = (type & S_TYP) - S_MIN;
 	if (name->on_valu >= sects[sectindex].os_flen) {
