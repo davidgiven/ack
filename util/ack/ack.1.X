@@ -124,6 +124,8 @@ Verbose.
 Print information while juggling with files.
 .IP \-KR
 Tell the C-compiler to conform to "Kernighan & Ritchie" C.
+.IP \-fp
+Use floating point package, if not for VAX or PDP.
 .SB preprocessing
 .IP \-I\fIdir\fP
 \&\`#include\' files whose names do not begin with \`/\' are
