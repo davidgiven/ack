@@ -17,7 +17,6 @@ extern instr_p gen_instr();
 extern char * malloc();
 extern char *strcat();
 extern char *strcpy();
-extern char *sprintf();
 extern char *strncpy();
 
 struct variable var[NRVARS+1];
