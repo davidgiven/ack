@@ -124,7 +124,7 @@ int __flushbuf(int _c, FILE *_stream);
 
 #define	feof(p)		(((p)->_flags & _IOEOF) != 0)
 #define	ferror(p)	(((p)->_flags & _IOERR) != 0)
-#define clearerr(p)	((p)->_flags &= (_IOERR|_IOEOF))
+#define clearerr(p)	((p)->_flags &= ~(_IOERR|_IOEOF))
 
 #if	defined(__BSD4_2) || defined(__USG) || defined(_POSIX_SOURCE)
 int fileno(FILE *_stream);
