@@ -10,7 +10,6 @@
 #include "sizes.h"
 #include "symbol.h"
 #include "scope.h"
-#include "message.h"
 #include "langdep.h"
 #include "expr.h"
 
@@ -303,12 +302,12 @@ tp_lookup(type_index)
   p = &list_row[type_index[0]];
   while (type_index[1] >= p->len) {
 	int indx = p->len/NINCR;
-	p->len += NINCR;
 	if (p->len) {
 		p->row = (p_type **) Realloc((char *) p->row,
 				(unsigned) (indx + 1) * sizeof(p_type *));
 	}
 	else	p->row = (p_type **) Malloc(sizeof(p_type *));
+	p->len += NINCR;
 	p->row[indx] = (p_type *) Malloc(NINCR * sizeof(p_type));
 	for (i = NINCR-1; i >= 0; i--) {
 		p->row[indx][i] = 0;

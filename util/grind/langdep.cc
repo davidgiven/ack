@@ -14,7 +14,7 @@ static struct langlist *list;
 
 struct langdep	*currlang;
 
-static int
+static void
 add_language(suff, lang)
   char	*suff;
   struct langdep *lang;
@@ -27,14 +27,12 @@ add_language(suff, lang)
   list = p;
 }
 
-int
 init_languages()
 {
   add_language(".mod", m2_dep);
   add_language(".c", c_dep);
 }
 
-int
 find_language(suff)
   char	*suff;
 {

@@ -20,18 +20,21 @@
 extern char	*Salloc();
 extern char	*strindex();
 extern char	*strcpy();
+extern void	signal_child();
 extern FILE	*db_in;
 extern int	disable_intr;
 extern p_tree	run_command, print_command;
 
+struct token	tok, aside;
 int		errorgiven = 0;
 int		child_interrupted = 0;
 int		interrupted = 0;
 int		eof_seen = 0;
+
+static int	shellescape();
+
 static int	extended_charset = 0;
 static int	in_expression = 0;
-
-struct token	tok, aside;
 
 #define binprio(op)	((*(currlang->binop_prio))(op))
 #define unprio(op)	((*(currlang->unop_prio))(op))
@@ -60,7 +63,7 @@ commands
 					com = 0;
 				}
 				else {
-					log(com);
+					enterlog(com);
 					eval(com);
 			  		if (repeatable(com)) {
 						lastcom = com;
@@ -73,7 +76,7 @@ commands
 					}
 				}
 			  } else if (lastcom && ! errorgiven) {
-				log(lastcom);
+				enterlog(lastcom);
 				eval(lastcom);
 			  }
 			  if (give_prompt) {
@@ -101,7 +104,7 @@ command_line(p_tree *p;)
 | where_command(p)
 | STATUS		{ *p = mknode(OP_STATUS); }
 | DUMP			{ *p = mknode(OP_DUMP); }
-| RESTORE count(p)?	{ *p = mknode(OP_RESTORE, *p); }
+| RESTORE opt_num(p)	{ *p = mknode(OP_RESTORE, *p); }
 | delete_command(p)
 | print_command(p)
 | display_command(p)
@@ -111,7 +114,7 @@ command_line(p_tree *p;)
 | FIND qualified_name(p){ *p = mknode(OP_FIND, *p); }
 | WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
 | able_command(p)
-| '!'			{ shellescape();
+| '!'			{ (void) shellescape();
 			  *p = mknode(OP_SHELL);
 			}
 | source_command(p)
@@ -227,7 +230,7 @@ trace_command(p_tree *p;)
   { p_tree whr = 0, cond = 0, exp = 0; }
 :
   TRACE
-  [ ON expression(&exp, 0) ]?
+  [ ON format_expression(&exp) ]?
   where(&whr)?
   condition(&cond)?	{ *p = mknode(OP_TRACE, whr, cond, exp); }
 ;
@@ -290,7 +293,7 @@ regs_command(p_tree *p;)
 
 delete_command(p_tree *p;)
 :
-  DELETE count_list(p)?	{ *p = mknode(OP_DELETE, *p); }
+  DELETE num_list(p)?	{ *p = mknode(OP_DELETE, *p); }
 ;
 
 print_command(p_tree *p;)
@@ -351,14 +354,14 @@ able_command(p_tree *p;)
   [ ENABLE 		{ *p = mknode(OP_ENABLE, (p_tree) 0); }
   | DISABLE 		{ *p = mknode(OP_DISABLE, (p_tree) 0); }
   ]
-  count_list(&(*p)->t_args[0])?
+  num_list(&(*p)->t_args[0])?
 ;
 
-count_list(p_tree *p;)
+num_list(p_tree *p;)
 :
-  count(p)
+  num(p)
   [ ','			{ *p = mknode(OP_LINK, *p, (p_tree) 0); }
-    count(&(*p)->t_args[1])
+    num(&(*p)->t_args[1])
   ]*
 ;
 
@@ -482,11 +485,16 @@ count(p_tree *p;)
 
 opt_num(p_tree *p;)
 :
+  num(p)
+|
+			{ *p = 0; }
+;
+
+num(p_tree *p;)
+:
   count(p)
 |
   '-' count(p)		{ (*p)->t_ival = - (*p)->t_ival; }
-|
-			{ *p = 0; }
 ;
 
 qualified_name(p_tree *p;)
@@ -609,7 +617,7 @@ get_name(c)
   return id->id_reserved ? id->id_reserved : NAME;
 }
 
-extern char * symbol2str();
+extern char *symbol2str();
 
 LLmessage(t)
 {
@@ -630,7 +638,7 @@ LLmessage(t)
   errorgiven = 1;
 }
 
-static int
+static void
 catch_del()
 {
   signal(SIGINT, catch_del);
@@ -641,13 +649,13 @@ catch_del()
   interrupted = 1;
 }
 
-int
+void
 init_del()
 {
   signal(SIGINT, catch_del);
 }
 
-static int
+static void
 ctch()
 {
   /* Only for shell escapes ... */
@@ -656,7 +664,7 @@ ctch()
 
 #define SHBUFSIZ	512
 
-int
+static int
 shellescape()
 {
   register char *p;			/* walks through command */

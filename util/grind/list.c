@@ -15,7 +15,7 @@ extern FILE	*db_out;
 extern t_lineno	currline;
 extern int	interrupted;
 
-static int
+static void
 mk_filnm(dir, file, newname)
   char	*dir;
   char	*file;

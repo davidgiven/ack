@@ -21,6 +21,9 @@ FILE		*db_in;
 int		debug;
 extern struct tokenname tkidf[];
 extern char	*strindex();
+extern void	signal_child();
+extern void	init_del();
+extern void	init_run();
 extern int	eof_seen;
 extern int	interrupted;
 
@@ -73,9 +76,7 @@ main(argc, argv)
   else if (AObj == 0) AObj = "a.out";
   reserve(tkidf);
   reserve(shorts);
-  if (! init_run()) {
-	fatal("something wrong with file descriptors");
-  }
+  init_run();
   prompt();
   Commands();
   signal_child(SIGKILL);

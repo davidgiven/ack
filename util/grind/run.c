@@ -26,12 +26,9 @@ extern struct idf *str2idf();
 extern char	*AObj;
 extern FILE	*db_out;
 extern int	debug;
-extern long	pointer_size;
 extern char	*progname;
 extern int	child_interrupted;
 extern int	interrupted;
-extern int	stop_reason;
-extern int	stack_offset;
 extern t_lineno	currline;
 
 static int	child_pid;		/* process id of child */
@@ -39,17 +36,20 @@ static int	to_child, from_child;	/* file descriptors for communication */
 static int	child_status;
 static int	restoring;
 static int	fild1[2], fild2[2];	/* pipe file descriptors */
+
 int		disable_intr = 1;
-
 int		db_ss;
+int		stack_offset;
 
-static int	catch_sigpipe();
+void		signal_child();
+
+static void	catch_sigpipe();
 static int	stopped();
 static int	uputm(), ugetm();
 static t_addr	curr_stop;
 p_tree		run_command;
 
-static
+static void
 ITOBUF(p, l, sz)
   register char	*p;
   long	l;
@@ -78,7 +78,7 @@ BUFTOI(p, sz)
   return l;
 }
 
-int
+void
 init_run()
 {
   /* take file descriptors so that listing cannot take them */
@@ -89,26 +89,24 @@ init_run()
       pipe(fild2) < 0 ||
       fild1[0] != 3 ||
       fild2[1] != 6) {
-	return 0;
+	fatal("something wrong with file descriptors");
   }
   to_child = fild1[1];
   from_child = fild2[0];
   child_pid = 0;
   if (currfile) CurrentScope = currfile->sy_file->f_scope;
   currline = 0;
-  return 1;
 }
 
 extern int errno;
 
-int
 start_child(p)
   p_tree	p;
 {
   /* start up the process to be debugged and set up communication */
 
   char *argp[MAXARG];				/* argument list */
-  register p_tree pt = p->t_args[0], pt1;
+  register p_tree pt = p->t_args[0], pt1 = 0;
   unsigned int	nargs = 1;			/* #args */
   char	*in_redirect = 0;			/* standard input redirected */
   char	*out_redirect = 0;			/* standard output redirected */
@@ -134,20 +132,20 @@ start_child(p)
 		}
 		else {
 			error("too many arguments");
-			return 0;
+			return;
 		}
 		break;
 	case OP_INPUT:
 		if (in_redirect) {
 			error("input redirected twice?");
-			return 0;
+			return;
 		}
 		in_redirect = pt->t_str;
 		break;
 	case OP_OUTPUT:
 		if (out_redirect) {
 			error("output redirected twice?");
-			return 0;
+			return;
 		}
 		out_redirect = pt->t_str;
 		break;
@@ -162,7 +160,7 @@ start_child(p)
   child_pid = fork();
   if (child_pid < 0) {
 	error("could not create child");
-	return 0;
+	return;
   }
   if (child_pid == 0) {
 	/* this is the child process */
@@ -205,11 +203,10 @@ start_child(p)
 	exit(1);
   }
 
-  /* debugger */
-  close(fild1[0]);
-  close(fild2[1]);
+  /* debugger; don't close fild1[0] and fild2[1]; we want those file
+     descriptors occupied!
+  */
 
-  pipe(fild1);		/* to occupy file descriptors */
   signal(SIGPIPE, catch_sigpipe);
   {
 	struct message_hdr m;
@@ -217,21 +214,20 @@ start_child(p)
   	if (! ugetm(&m)) {
 		error("child not responding");
 		init_run();
-		return 0;
+		return;
 	}
 	curr_stop = BUFTOI(m.m_buf+1, (int) PS);
 	CurrentScope = get_scope_from_addr(curr_stop);
   }
   perform_items();
-  if (! restoring && ! item_addr_actions(curr_stop, M_OK, 1)) {
-	send_cont(1);
+  if (! restoring) {
+	int stop_reason = item_addr_actions(curr_stop, 1, 1);
+	if (! stop_reason) (void) send_cont(1);
+	else (void) stopped("stopped", curr_stop, stop_reason);
   }
-  else if (! restoring) {
-	stopped("stopped", curr_stop);
-  }
-  return 1;
 }
 
+void
 signal_child(sig)
 {
   if (child_pid) {
@@ -243,7 +239,7 @@ signal_child(sig)
   }
 }
 
-static int
+static void
 catch_sigpipe()
 {
   child_pid = 0;
@@ -348,9 +344,10 @@ static struct message_hdr	answer;
 static int	single_stepping;
 
 static int
-stopped(s, a)
-  char	*s;	/* stop message */
-  t_addr a;	/* address where stopped */
+stopped(s, a, stop_reason)
+  char	*s;		/* stop message */
+  t_addr a;		/* address where stopped */
+  int	stop_reason;	/* status entry causing the stop */
 {
   p_position pos;
 
@@ -377,16 +374,17 @@ could_send(m, stop_message)
   t_addr a;
   static int level = 0;
   int child_dead = 0;
+  int stop_reason;
 
   level++;
   for (;;) {
+	stop_reason = 0;
   	if (! child_pid) {
 		error("no process");
 		return 0;
 	}
 	if (m->m_type & M_DB_RUN) {
 		disable_intr = 0;
-		stop_reason = 0;
 		stack_offset = 0;
 	}
 	if (!child_interrupted && (! uputm(m) || ! ugetm(&answer))) {
@@ -405,7 +403,7 @@ could_send(m, stop_message)
 			if (! level) {
 				child_interrupted = 0;
 				interrupted = 0;
-				stopped("interrupted", (t_addr) BUFTOI(answer.m_buf+1, (int)PS));
+				return stopped("interrupted", (t_addr) BUFTOI(answer.m_buf+1, (int)PS), 0);
 			}
 			return 1;
 		}
@@ -428,11 +426,14 @@ could_send(m, stop_message)
 	}
 	a = BUFTOI(answer.m_buf+1, (int)PS);
 	type = answer.m_type & 0377;
+	if (type == M_END_SS) type = 0;
+	else if (type == M_OK || type == M_DB_SS) type = 1;
+	else type = 2;
 	if (m->m_type & M_DB_RUN) {
 		/* run command */
 		CurrentScope = get_scope_from_addr((t_addr) a);
-	    	if (! item_addr_actions(a, type, stop_message) &&
-	            ( type == M_DB_SS || type == M_OK)) {
+	    	if (!(stop_reason = item_addr_actions(a, type, stop_message))
+		    && (type == 1)) {
 			/* no explicit breakpoints at this position.
 			   Also, child did not stop because of
 			   SETSS or SETSSF, otherwise we would
@@ -444,16 +445,16 @@ could_send(m, stop_message)
 			}
 			continue;
 		}
-		if (type != M_END_SS && single_stepping) {
+		if (type != 0 && single_stepping) {
 			m->m_type = M_CLRSS;
 			if (! uputm(m) || ! ugetm(&answer)) return 0;
 		}
 		single_stepping = 0;
 	}
-	if (stop_message) {
-		stopped("stopped", a);
-	}
 	level--;
+	if (stop_message) {
+		return stopped("stopped", a, stop_reason);
+	}
 	return 1;
   }
   /*NOTREACHED*/
@@ -513,6 +514,7 @@ get_string(size, from, to)
   return retval;
 }
 
+void
 set_bytes(size, from, to)
   long	size;
   char	*from;
@@ -542,11 +544,11 @@ set_bytes(size, from, to)
 }
 
 t_addr
-get_dump(globmessage, globbuf, stackmessage, stackbuf)
-  struct message_hdr *globmessage, *stackmessage;
+get_dump(globbuf, stackbuf)
   char **globbuf, **stackbuf;
 {
   struct message_hdr	m;
+  struct message_hdr *globm, *stackm;
   long sz;
 
   m.m_type = M_DUMP;
@@ -566,51 +568,54 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 	assert(0);
   }
 
-  *globmessage = answer;
   sz = BUFTOI(answer.m_buf+1, (int)LS);
-  *globbuf = malloc((unsigned) sz);
-  if (! ureceive(*globbuf, sz) || ! ugetm(stackmessage)) {
+  *globbuf = malloc((unsigned) (sz+sizeof(struct message_hdr)));
+  if (! *globbuf
+      || ! ureceive(*globbuf+sizeof(struct message_hdr), sz)
+      || ! ugetm(&m)) {
 	if (*globbuf) free(*globbuf);
+	else error("could not allocate enougn memory");
 	return 0;
   }
-  assert(stackmessage->m_type == M_DSTACK);
-  sz = BUFTOI(stackmessage->m_buf+1, (int)LS);
-  *stackbuf = malloc((unsigned) sz);
-  if (! ureceive(*stackbuf, sz)) {
-	if (*globbuf) free(*globbuf);
+  globm = (struct message_hdr *) *globbuf;
+  *globm = answer;
+
+  assert(m.m_type == M_DSTACK);
+  sz = BUFTOI(m.m_buf+1, (int)LS);
+  *stackbuf = malloc((unsigned) sz+sizeof(struct message_hdr));
+  if (! *stackbuf || ! ureceive(*stackbuf+sizeof(struct message_hdr), sz)) {
+	free(*globbuf);
 	if (*stackbuf) free(*stackbuf);
+	else error("could not allocate enougn memory");
 	return 0;
   }
-  ITOBUF(globmessage->m_buf+SP_OFF, BUFTOI(stackmessage->m_buf+SP_OFF, (int)PS), (int) PS);
-  if (! *globbuf || ! *stackbuf) {
-	error("could not allocate enough memory");
-	if (*globbuf) free(*globbuf);
-	if (*stackbuf) free(*stackbuf);
-	return 0;
-  }
-  return BUFTOI(globmessage->m_buf+PC_OFF, (int)PS);
+  stackm = (struct message_hdr *) *stackbuf;
+  *stackm = m;
+  ITOBUF(globm->m_buf+SP_OFF, BUFTOI(stackm->m_buf+SP_OFF, (int)PS), (int) PS);
+  return BUFTOI(globm->m_buf+PC_OFF, (int)PS);
 }
 
 int
-put_dump(globmessage, globbuf, stackmessage, stackbuf)
-  struct message_hdr *globmessage, *stackmessage;
+put_dump(globbuf, stackbuf)
   char *globbuf, *stackbuf;
 {
   struct message_hdr m;
-  int retval;
+  struct message_hdr *globm = (struct message_hdr *) globbuf,
+		     *stackm = (struct message_hdr *) stackbuf;
 
+  stackbuf += sizeof(struct message_hdr);
+  globbuf += sizeof(struct message_hdr);
   if (! child_pid) {
 	restoring = 1;
 	start_child(run_command);
 	restoring = 0;
   }
-  retval =	uputm(globmessage)
-		&& usend(globbuf, BUFTOI(globmessage->m_buf+1, (int) LS))
-		&& uputm(stackmessage)
-		&& usend(stackbuf, BUFTOI(stackmessage->m_buf+1, (int) LS))
+  return	uputm(globm)
+		&& usend(globbuf, BUFTOI(globm->m_buf+1, (int) LS))
+		&& uputm(stackm)
+		&& usend(stackbuf, BUFTOI(stackm->m_buf+1, (int) LS))
 		&& ugetm(&m)
-		&& stopped("restored", BUFTOI(m.m_buf+1, (int) PS));
-  return retval;
+		&& stopped("restored", BUFTOI(m.m_buf+1, (int) PS), 0);
 }
 
 t_addr *
@@ -688,7 +693,7 @@ singlestep(type, count)
 {
   struct message_hdr	m;
 
-  m.m_type = type | (db_ss ? M_DB_SS : 0);
+  m.m_type = (type ? M_SETSSF : M_SETSS) | (db_ss ? M_DB_SS : 0);
   ITOBUF(m.m_buf+1, count, (int) LS);
   single_stepping = 1;
   if (could_send(&m, 1) && child_pid) return 1;
@@ -703,9 +708,9 @@ set_or_clear_breakpoint(a, type)
 {
   struct message_hdr m;
 
-  m.m_type = type;
+  m.m_type = type ? M_SETBP : M_CLRBP;
   ITOBUF(m.m_buf+1, (long) a, (int) PS);
-  if (debug) printf("%s breakpoint at 0x%lx\n", type == M_SETBP ? "setting" : "clearing", (long) a);
+  if (debug) printf("%s breakpoint at 0x%lx\n", type ? "setting" : "clearing", (long) a);
   if (child_pid && ! could_send(&m, 0)) {
   }
 
@@ -719,10 +724,10 @@ set_or_clear_trace(start, end, type)
 {
   struct message_hdr m;
 
-  m.m_type = type;
+  m.m_type = type ? M_SETTRACE : M_CLRTRACE;
   ITOBUF(m.m_buf+1, (long)start, (int) PS);
   ITOBUF(m.m_buf+PS+1, (long)end, (int) PS);
-  if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == M_SETTRACE ? "setting" : "clearing", (long) start, (long) end);
+  if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type ? "setting" : "clearing", (long) start, (long) end);
   if (child_pid && ! could_send(&m, 0)) {
 	return 0;
   }

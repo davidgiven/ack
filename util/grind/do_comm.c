@@ -16,14 +16,15 @@
 #include "symbol.h"
 #include "scope.h"
 #include "file.h"
-#include "message.h"
 
 extern FILE	*db_out;
 extern t_lineno	listline, currline;
-extern int	stop_reason;
 extern int	interrupted;
+extern int	stack_offset;
 
 p_tree		print_command;
+
+extern void	set_bytes();
 
 /*ARGSUSED*/
 do_noop(p)
@@ -230,7 +231,6 @@ extern t_addr	get_dump();
 
 struct dump {
   char	*globals, *stack;
-  struct message_hdr mglobal, mstack;
   struct dump *next;
 };
 
@@ -245,7 +245,7 @@ do_dump(p)
 	error("could not allocate enough memory");
 	return;
   }
-  p->t_address = get_dump(&d->mglobal, &d->globals, &d->mstack, &d->stack);
+  p->t_address = get_dump(&d->globals, &d->stack);
   if (! p->t_address) {
 	free((char *) d);
 	return;
@@ -276,7 +276,8 @@ do_restore(p)
 	return;
   }
 
-  if (! put_dump(&d->mglobal, d->globals, &d->mstack, d->stack)) {
+  if (! put_dump(d->globals, d->stack)) {
+	error("restoring failed");
   }
   perform_items();
 }
@@ -468,7 +469,7 @@ setstop(p, kind)
 do_stop(p)
   p_tree	p;
 {
-  if (! setstop(p, M_SETBP)) {
+  if (! setstop(p, 1)) {
 	return;
   }
   add_to_item_list(p);
@@ -504,7 +505,7 @@ do_trace(p)
   p_tree	p;
 {
   p->t_address = NO_ADDR;
-  if (! settrace(p, M_SETTRACE)) {
+  if (! settrace(p, 1)) {
 	return;
   }
   add_to_item_list(p);
@@ -520,12 +521,7 @@ able(p, kind)
   int		kind;
 {
   if (!p) {
-	if (stop_reason) {
-		able_item(stop_reason, kind);
-	}
-	else {
-		error("no current stopping point");
-	}
+	able_item(0, kind);
 	return;
   }
   switch(p->t_oper) {
@@ -585,7 +581,7 @@ do_continue(p)
 	}
   }
   if (count > 0) {
-	fprintf(db_out, "Only %d breakpoints skipped\n",
+	fprintf(db_out, "Only %ld breakpoints skipped\n",
 		p->t_args[0]->t_ival - count);
   }
 }
@@ -598,7 +594,7 @@ do_step(p)
   p_tree	p;
 {
   p = p->t_args[0];
-  if (! singlestep(M_SETSS, p ? p->t_ival : 1L)) {
+  if (! singlestep(0, p ? p->t_ival : 1L)) {
   }
 }
 
@@ -610,7 +606,7 @@ do_next(p)
   p_tree	p;
 {
   p = p->t_args[0];
-  if (! singlestep(M_SETSSF, p? p->t_ival : 1L)) {
+  if (! singlestep(1, p? p->t_ival : 1L)) {
   }
 }
 
@@ -663,7 +659,7 @@ where_entry(num)
   fprintf(db_out, "%s(", sc->sc_definedby->sy_idf->id_text);
   print_params(sc->sc_definedby->sy_type, AB, has_static_link(sc));
   fputs(") ", db_out);
-  print_position(where_PC, 0);
+  (void) print_position(where_PC, 0);
   fputs("\n", db_out);
   return 1;
 }
@@ -705,21 +701,13 @@ do_where(p)
 
 /* implementation of the delete command */
 
-extern p_tree	remove_from_item_list();
-
 do_delete(p)
   p_tree	p;
 {
   switch(p->t_oper) {
   case OP_DELETE:
 	if (! p->t_args[0]) {
-		if (stop_reason) {
-			remove_from_item_list(stop_reason);
-			stop_reason = 0;
-		}
-		else {
-			error("no current stopping point");
-		}
+		remove_from_item_list(0);
 	}
 	else do_delete(p->t_args[0]);
 	break;
@@ -728,20 +716,7 @@ do_delete(p)
 	do_delete(p->t_args[1]);
 	break;
   case OP_INTEGER:
-  	p = remove_from_item_list((int) p->t_ival);
-
-  	if (p) switch(p->t_oper) {
-  	case OP_WHEN:
-  	case OP_STOP:
-		setstop(p, M_CLRBP);
-		break;
-  	case OP_TRACE:
-		settrace(p, M_CLRTRACE);
-		break;
-  	case OP_DUMP:
-		free_dump(p);
-  	}
-  	freenode(p);
+  	remove_from_item_list((int) p->t_ival);
 	break;
   default:
 	assert(0);
@@ -939,7 +914,7 @@ do_log(p)
 extern int	item_count;
 extern int	in_wheninvoked;
 
-log(p)
+enterlog(p)
   p_tree	p;
 {
   register p_tree	p1;
@@ -952,19 +927,20 @@ log(p)
 	case OP_DELETE:
 	case OP_ENABLE:
 	case OP_DISABLE:
+	case OP_RESTORE:
 		/* Change absolute item numbers into relative ones
 		   for safer replay
 		*/
 		p1 = p->t_args[0];
 		while (p1 && p1->t_oper == OP_LINK) {
 			register p_tree	p2 = p1->t_args[0];
-			if (p2->t_ival > 0) {
-				p2->t_ival = item_count - p2->t_ival;
+			if (p2->t_ival > 0 && p2->t_ival <= item_count) {
+				p2->t_ival = p2->t_ival - item_count - 1;
 			}
 			p1 = p1->t_args[1];
 		}
-		if (p1 && p1->t_ival > 0) {
-			p1->t_ival = item_count - p1->t_ival;
+		if (p1 && p1->t_ival > 0 && p1->t_ival <= item_count) {
+			p1->t_ival = p1->t_ival - item_count - 1;
 		}
 		/* Fall through */
 	default:

@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include "type.h"
-#include "message.h"
 #include "langdep.h"
 #include "scope.h"
 #include "symbol.h"
@@ -28,6 +27,9 @@ print_unsigned(tp, v, format)
 	format++;
   }
   switch(format == 0 ? 0 : *format) {
+  case 'u':
+  	fprintf(db_out, currlang->uns_fmt, v);
+	break;
   default:
 	if (tp != uchar_type) {
   		fprintf(db_out, currlang->uns_fmt, v);
@@ -106,6 +108,9 @@ print_integer(tp, v, format)
   case 'x':
   case 'h':
   	fprintf(db_out, currlang->hexint_fmt, v);
+	break;
+  case 'u':
+  	fprintf(db_out, currlang->uns_fmt, v);
 	break;
   }
 }
@@ -251,7 +256,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 		if (fld->fld_bitsize < (sz << 3)) {
 			/* apparently a bit field */
 			/* ??? */
-			fprintf(db_out, "<bitfield, %d, %ld>", fld->fld_bitsize, sz);
+			fprintf(db_out, "<bitfield, %ld, %ld>", fld->fld_bitsize, sz);
 		}
 		else print_val(fld->fld_type, sz, addr+(fld->fld_pos>>3), compressed, indent, format);
 		if (compressed && i > 1) {

@@ -57,6 +57,21 @@ values of type INTEGER with values of type REAL in an expression without
 using conversion routines. In
 .BR grind ,
 the conversions needed are performed automatically.
+.LP
+Expressions whose value is to be printed can be given a "format" by appending
+a `\e', followed by a format. A format consists of a string of letters.
+The following letters are available:
+.LP
+.nf
+c	print all integer values as a char
+d	print all integer values in signed decimal format
+o	print all integer values in octal format
+x	print all integer values in hexadecimal format
+h	print all integer values in hexadecimal format
+u	print all integer values in unsigned decimal format
+s	for "pointer to char" types, make an attempt to print
+	the indicated string
+.fi
 .SS Operators
 .LP
 .B Grind
@@ -64,7 +79,7 @@ supports operators for addition, subtraction, multiplication, division,
 remainder, bitwise or, bitwise xor, bitwise and, boolean or,
 boolean and, left-shift, right-shift, address-of, dereference, less than,
 less than or equal, equal, not equal, greater than, greater than or equal,
-selection.
+selection, array subscripting.
 .LP
 The syntax and priority of these operators depends on the source language.
 Parentheses can be used for grouping.
@@ -97,10 +112,20 @@ This indicates the first statement within the named function (except for
 the trace command discussed later).
 The following way is also accepted:
 .RS
-\fBat\fP [ "\fIfilename\fP": ] \fIlinenumber\fP \fBin \fIfunction\fP
+\fBin\fP \fIfunction\fP \fBat\fP [ "\fIfilename\fP": ] \fIlinenumber\fP
 .RE
 In this case, consistency of the information given is checked. This last
 form is useful for "stuffing" output from the status command described later.
+.SS "Command numbers"
+.LP
+Some command numbers have a command number associated with them. Other commands
+refer to these command numbers. These command numbers can either be given as
+an absolute number, or as a negative number. In the last case, the number
+is interpreted relative to the last number assigned. This feature is normally
+only used for commands that are put in a log file, so that "sourceing" these
+log files is safer (see also the description of the \fBsource\fP and \fBlog\fP
+commands).
+
 .SS "Commands"
 .TP
 .B ^C
@@ -130,7 +155,7 @@ command.
 .br
 Continue execution from where it stopped, or, if \fIsourceline\fP is
 given, at that source line. If \fIcount\fP is given, pass \fIcount\fP-1
-breakpoints.
+breakpoints. \fIsourceline\fP must be in the same function.
 .TP
 \fBtrace\fP [ \fBon\fP \fIexpression\fP ] [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
 .ti -0.5i
@@ -169,7 +194,7 @@ If no condition is given, stop when
 is reached.
 Either a position or a condition (or both) must be given.
 .TP
-\fBwhen\fP [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ] { \fIcommand\fP [ ; \fIcommand ] ... }
+\fBwhen\fP [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ] { \fIcommand\fP [ ; \fIcommand\fP ] ... }
 Execute the
 .B grind
 .IR command (s)
@@ -340,6 +365,7 @@ executing \fBgrind\fP log files created with the \fBlog\fP command.
 .br
 Start logging the \fBgrind\fP commands given on file \fIfilename\fP, or
 stop logging. If no argument is given, the current log file is printed.
+In logged commands, an absolute command number is replaced by a relative one.
 .TP
 \fBdisable\fP [ \fIcommandnumber\fP [ , \fIcommandnumber\fP ... ] ]
 .br
@@ -364,7 +390,7 @@ breakpoint.
 Invoke the shell with \fIshellcommand\fP. \fIshellcommand\fP extends to the
 end of the line. In the command, the characters `%' and `!' are replaced
 with the current file name and the previous shell command respectively.
-The sequences `\%' and `\!' are replaced by `%' and `!' respectively.
+The sequences `\e%' and `\e!' are replaced by `%' and `!' respectively.
 .TP
 \fBframe\fP [ \fIcount\fP | + \fIcount\fP | - \fIcount\fP ]
 .br

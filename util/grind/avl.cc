@@ -170,7 +170,7 @@ add_to_avl_tree(tree, n)
   struct avl_tree	*tree;	/* tree to be added to */
   char			*n;	/* information */
 {
-  balance_add(&(tree->root), n, tree->cmp);
+  (void) balance_add(&(tree->root), n, tree->cmp);
 }
 
 /* extern char *find_ngt(struct avl_tree *tree, char *n);

@@ -27,7 +27,7 @@ static int
 	print_string(),
 	print_char(),
 	get_number(),
-	get_string(),
+	getstring(),
 	get_token(),
 	print_op(),
 	unop_prio(),
@@ -37,7 +37,7 @@ static int
 static long
 	array_elsize();
 
-static struct langdep c = {
+static struct langdep c_lang = {
 	0,
 
 	"%ld",
@@ -59,7 +59,7 @@ static struct langdep c = {
 	array_elsize,
 	binop_prio,
 	unop_prio,
-	get_string,
+	getstring,
 	get_name,
 	get_number,
 	get_token,
@@ -67,9 +67,9 @@ static struct langdep c = {
 	fix_bin_to_pref
 };
 
-struct langdep *c_dep = &c;
+struct langdep *c_dep = &c_lang;
 
-static int
+static void
 printchar(f, c, esc)
   FILE	*f;
   int	c;
@@ -104,7 +104,7 @@ printchar(f, c, esc)
   }
 }
 
-static int
+static
 print_char(c)
   int	c;
 {
@@ -113,7 +113,7 @@ print_char(c)
   putc('\'', db_out);
 }
 
-static int
+static
 print_string(f, s, len)
   FILE	*f;
   char	*s;
@@ -431,7 +431,7 @@ quoted(ch)
 }
 
 static int 
-get_string(c)
+getstring(c)
   int	c;
 {
   register int ch;
@@ -464,7 +464,7 @@ get_string(c)
   return STRING;
 }
 
-static int
+static
 print_op(f, p)
   FILE		*f;
   p_tree	p;
@@ -588,7 +588,7 @@ print_op(f, p)
   }
 }
 
-static int
+static
 fix_bin_to_pref(p)
   p_tree	p;
 {

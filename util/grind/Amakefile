@@ -56,7 +56,6 @@ CSRC = {
 	run.c,
 	symbol.c,
 	print.c,
-	value.c,
 	type.c,
 	rd.c,
 	do_comm.c,
@@ -133,7 +132,7 @@ LINTFLAGS = {
 
 %cluster {
 	%targets lint.out[type = lint-output];
-	%sources $CMD_LLSRC + $CSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
+	%sources $CSRC + $CMD_LLSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
 	%use lint(realdest => lint.out) ;
 } ;
 

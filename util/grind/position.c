@@ -143,11 +143,11 @@ print_position(a, print_function)
   t_addr	a;
   int		print_function;
 {
-  register p_scope	sc = base_scope(get_scope_from_addr(a));
   register p_position	pos = get_position_from_addr(a);
 
-  if (sc && print_function) {
-	fprintf(db_out, "in %s ", sc->sc_definedby->sy_idf->id_text);
+  if (print_function) {
+  	register p_scope sc = base_scope(get_scope_from_addr(a));
+	if (sc) fprintf(db_out, "in %s ", sc->sc_definedby->sy_idf->id_text);
   }
   if (pos) fprintf(db_out, "at \"%s\":%u", pos->filename, pos->lineno);
   return pos;

@@ -25,9 +25,9 @@ static int
 	print_string(),
 	print_char(),
 	get_number(),
-	get_name(),
+	getname(),
 	get_token(),
-	get_string(),
+	getstring(),
 	print_op(),
 	binop_prio(),
 	unop_prio(),
@@ -58,8 +58,8 @@ static struct langdep m2 = {
 	array_elsize,
 	binop_prio,
 	unop_prio,
-	get_string,
-	get_name,
+	getstring,
+	getname,
 	get_number,
 	get_token,
 	print_op,
@@ -68,7 +68,7 @@ static struct langdep m2 = {
 
 struct langdep *m2_dep = &m2;
 
-static int
+static
 print_char(c)
   int	c;
 {
@@ -76,7 +76,7 @@ print_char(c)
   fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "%oC", c);
 }
 
-static int
+static
 print_string(f, s, len)
   FILE	*f;
   char	*s;
@@ -298,7 +298,7 @@ get_number(ch)
 }
 
 static int
-get_name(c)
+getname(c)
   register int	c;
 {
   char	buf[512+1];
@@ -437,7 +437,7 @@ get_token(c)
 }
 
 static int 
-get_string(c)
+getstring(c)
   int	c;
 {
   register int ch;
@@ -457,7 +457,7 @@ get_string(c)
   return STRING;
 }
 
-static int
+static
 print_op(f, p)
   FILE		*f;
   p_tree	p;
@@ -549,7 +549,7 @@ print_op(f, p)
   }
 }
 
-static int
+static
 fix_bin_to_pref()
 {
   /* No problems of this kind in Modula-2 */

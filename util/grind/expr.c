@@ -7,10 +7,10 @@
 	and returns 1 if it evaluates to TRUE, or 0 if it could not be
 	evaluated for some reason or if it evalutes to FALSE.
 	If the expression cannot be evaluated, an error message is given.
-   - int eval_desig(p_tree p, t_addr *pbuf, long **psize, p_type *ptp)
+   - int eval_desig(p_tree p, t_addr *paddr, long **psize, p_type *ptp)
 	This routine evaluates the expression indicated by p, which should
 	result in a designator. The result of the expression is an address
-	which is to be found in *pbuf. *psize will contain the size of the
+	which is to be found in *paddr. *psize will contain the size of the
 	designated object, and *ptp its type.
 	If the expression cannot be evaluated or does not result in a
 	designator, 0 is returned and an error message is given.
@@ -50,14 +50,184 @@
 #include "symbol.h"
 #include "type.h"
 #include "langdep.h"
+#include "scope.h"
+#include "idf.h"
 
 extern FILE	*db_out;
+extern int	stack_offset;
 extern char	*strcpy();
+extern t_addr	*get_EM_regs();
+extern char	*memcpy();
 
 #define	malloc_succeeded(p)	if (! (p)) {\
 					error("could not allocate enough memory");\
 					return 0;\
 				}
+
+/* static t_addr	get_addr(p_symbol sym; long *psize);
+   Get the address of the object indicated by sym. Returns 0 on failure,
+   address on success. *psize will contain size of object.
+   For local variables or parameters, the 'stack_offset' variable is
+   used to determine from which stack frame the search must start.
+*/
+static t_addr
+get_addr(sym, psize)
+  register p_symbol	sym;
+  long			*psize;
+{
+  p_type	tp = sym->sy_type;
+  long		size = tp->ty_size;
+  t_addr	*EM_regs;
+  int		i;
+  p_scope	sc, symsc;
+
+  *psize = size;
+  switch(sym->sy_class) {
+  case VAR:
+	/* exists if child exists; nm_value contains addres */
+	return (t_addr) sym->sy_name.nm_value;
+  case VARPAR:
+  case LOCVAR:
+	/* first find the stack frame in which it resides */
+	symsc = base_scope(sym->sy_scope);
+
+	/* now symsc contains the scope where the storage for sym is
+	   allocated. Now find it on the stack of child.
+	*/
+	i = stack_offset;
+	for (;;) {
+		sc = 0;
+		if (! (EM_regs = get_EM_regs(i++))) {
+			return 0;
+		}
+		if (! EM_regs[1]) {
+			error("%s not available", sym->sy_idf->id_text);
+			return 0;
+		}
+		sc = base_scope(get_scope_from_addr(EM_regs[2]));
+		if (! sc || sc->sc_start > EM_regs[2]) {
+			error("%s not available", sym->sy_idf->id_text);
+			sc = 0;
+			return 0;
+		}
+		if (sc == symsc) break;		/* found it */
+	}
+
+	if (sym->sy_class == LOCVAR) {
+		/* Either local variable or value parameter */
+		return EM_regs[sym->sy_name.nm_value < 0 ? 0 : 1] +
+				  (t_addr) sym->sy_name.nm_value;
+	}
+
+	/* If we get here, we have a var parameter. Get the parameters
+	   of the current procedure invocation.
+	*/
+	{
+		p_type proctype = sc->sc_definedby->sy_type;
+		t_addr a;
+		char *AB;
+
+		size = proctype->ty_nbparams;
+		if (has_static_link(sc)) size += pointer_size;
+		AB = malloc((unsigned) size);
+		if (! AB) {
+			error("could not allocate enough memory");
+			break;
+		}
+		if (! get_bytes(size, EM_regs[1], AB)) {
+			break;
+		}
+		if ((size = tp->ty_size) == 0) {
+			size = compute_size(tp, AB);
+			*psize = size;
+		}
+		a = (t_addr) get_int(AB+sym->sy_name.nm_value, pointer_size, T_UNSIGNED);
+		free(AB);
+		return a;
+	}
+  default:
+	error("%s is not a variable", sym->sy_idf->id_text);
+	break;
+  }
+  return 0;
+}
+
+/* static int	get_value(p_symbol sym; char **pbuf; long *psize);
+   Get the value of the symbol indicated by sym.  Return 0 on failure,
+   1 on success. On success, 'pbuf' contains the value, and 'psize' contains
+   the size. For 'pbuf', storage is allocated by malloc; this storage must
+   be freed by caller (I don't like this any more than you do, but caller
+   does not know sizes).
+   For local variables or parameters, the 'stack_offset' variable is
+   used to determine from which stack frame the search must start.
+*/
+static int
+get_value(sym, pbuf, psize)
+  register p_symbol	sym;
+  char	**pbuf;
+  long	*psize;
+{
+  p_type	tp = sym->sy_type;
+  int		retval = 0;
+  t_addr	a;
+  long		size = tp->ty_size;
+
+  *pbuf = 0;
+  switch(sym->sy_class) {
+  case CONST:
+	*pbuf = malloc((unsigned) size);
+	if (! *pbuf) {
+		error("could not allocate enough memory");
+		break;
+	}
+	switch(tp->ty_class) {
+	case T_REAL:
+		put_real(*pbuf, size, sym->sy_const.co_rval);
+		break;
+	case T_INTEGER:
+	case T_SUBRANGE:
+	case T_UNSIGNED:
+	case T_ENUM:
+		put_int(*pbuf, size, sym->sy_const.co_ival);
+		break;
+	case T_SET:
+		memcpy(*pbuf, sym->sy_const.co_setval, (int) size);
+		break;
+	case T_STRING:
+		memcpy(*pbuf, sym->sy_const.co_sval, (int) size);
+		break;
+	default:
+		fatal("strange constant");
+	}
+	retval = 1;
+	break;
+  case VAR:
+  case VARPAR:
+  case LOCVAR:
+	a = get_addr(sym, psize);
+	if (a) {
+		size = *psize;
+		*pbuf = malloc((unsigned) size);
+		if (! *pbuf) {
+			error("could not allocate enough memory");
+			break;
+		}
+		if (get_bytes(size, a, *pbuf)) {
+			retval = 1;
+		}
+	}
+	break;
+  }
+
+  if (retval == 0) {
+	if (*pbuf) free(*pbuf);
+	*pbuf = 0;
+	*psize = 0;
+  }
+  else *psize = size;
+
+  return retval;
+}
 
 /* buffer to integer and vice versa routines */
 
@@ -808,6 +978,10 @@ cmp_op(p, pbuf, psize, ptp)
 			else	l1 = (unsigned long) l1 >
 				     (unsigned long) l2;
 			break;
+		default:
+			l1 = 0;
+			assert(0);
+			break;
 		}
 		break;
 	case T_REAL:
@@ -833,6 +1007,10 @@ cmp_op(p, pbuf, psize, ptp)
 			break;
 		case E_GT:
 			l1 = d1 > d2;
+			break;
+		default:
+			l1 = 0;
+			assert(0);
 			break;
 		}
 		break;
@@ -1162,8 +1340,6 @@ eval_expr(p, pbuf, psize, ptp)
   }
   return retval;
 }
-
-extern t_addr	get_addr();
 
 int
 eval_desig(p, paddr, psize, ptp)

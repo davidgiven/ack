@@ -21,9 +21,7 @@ extern char	*strindex();
 extern long	str2long();
 extern double	atof();
 
-extern long	pointer_size;
-
-static char	*DbPtr;		/* current pointer in DBX string */
+static char	*DbPtr;			/* current pointer in db string */
 static int	AllowName;		/* set if NAME legal at this point */
 static long	ival;
 static double	fval;
@@ -718,7 +716,7 @@ static unsigned int	NAckNames;	/* Number of ACK symbol table entries */
 static struct outname	*EndAckNames;	/* &AckNames[NAckNames] */
 
 /* Read the symbol table from file 'f', which is supposed to be an
-   ACK a.out format file. Offer DBX strings to the DBX string parser.
+   ACK a.out format file. Offer db strings to the db string parser.
 */
 int
 DbRead(f)
@@ -760,7 +758,7 @@ DbRead(f)
 	else	n->on_mptr = 0;
   }
 
-  /* Offer strings to the DBX string parser if they contain a ':'.
+  /* Offer strings to the db string parser if they contain a ':'.
      Also offer filename-line number information to add_position_addr().
      Here, the order may be important.
   */

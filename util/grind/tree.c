@@ -11,7 +11,6 @@
 #include	"file.h"
 #include	"idf.h"
 #include	"tree.h"
-#include	"message.h"
 #include	"scope.h"
 #include	"symbol.h"
 #include	"langdep.h"
@@ -267,7 +266,7 @@ print_node(f, p, top_level)
 	break;
   case OP_DUMP:
 	fputs("dump ", f);
-	print_position(p->t_address, 1);
+	(void) print_position(p->t_address, 1);
 	break;
   case OP_RESTORE:
 	fputs("restore ", f);
@@ -295,7 +294,7 @@ print_node(f, p, top_level)
   case OP_WHEN:
 	fputs("when ", f);
 	if (p->t_address != NO_ADDR) {
-		print_position(p->t_address, 1);
+		(void) print_position(p->t_address, 1);
 	}
 	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
@@ -315,7 +314,7 @@ print_node(f, p, top_level)
   case OP_STOP:
 	fputs("stop ", f);
 	if (p->t_address != NO_ADDR) {
-		print_position(p->t_address, 1);
+		(void) print_position(p->t_address, 1);
 	}
 	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
@@ -331,7 +330,7 @@ print_node(f, p, top_level)
 		fputs(" ", f);
 	}
 	if (p->t_address != NO_ADDR) {
-		print_position(p->t_address, 1);
+		(void) print_position(p->t_address, 1);
 	}
 	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
@@ -340,7 +339,7 @@ print_node(f, p, top_level)
 	}
 	break;
   case OP_AT:
-	fprintf(f, "at \"%s\":%ld", p->t_filename, p->t_lino);
+	fprintf(f, "at \"%s\":%d", p->t_filename, (int) p->t_lino);
 	break;
   case OP_IN:
 	fputs("in ", f);
