@@ -1,0 +1,21 @@
+SUF=m
+MAKEFILE=../../proto/libg/Makefile
+MACHDEF="MACH=int44" "SUF=$(SUF)"
+M2DEF="PREF=pc" "SUB=" "SRC=lang/m2/libm2"
+
+install:
+	make -f $(MAKEFILE) $(M2DEF) $(MACHDEF) cp
+
+cmp:
+	make -f $(MAKEFILE) $(M2DEF) $(MACHDEF) all
+	-../../compare head_pc
+	-../../compare tail_pc
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] tail* head*
+
+opr:
+	make pr | opr
+
+pr:
+	@pr Makefile
