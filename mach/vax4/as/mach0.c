@@ -16,8 +16,8 @@
 #define valu_t long
 #undef word_t
 #define word_t long
-#undef addr_t
-#define addr_t long
+#undef ADDR_T
+#define ADDR_T long
 
 #undef ALIGNWORD
 #define ALIGNWORD 4

@@ -375,7 +375,7 @@ pass_23(n)
 {
 	register i;
 #ifdef ASLD
-	register addr_t base = 0;
+	register ADDR_T base = 0;
 #endif
 	register sect_t *sp;
 

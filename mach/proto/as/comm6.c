@@ -79,7 +79,7 @@ register item_t *ip;
 {
 #if DEBUG != 0
 #ifdef THREE_PASS
-	register addr_t oldval = ip->i_valu;
+	register ADDR_T oldval = ip->i_valu;
 #endif
 #endif
 

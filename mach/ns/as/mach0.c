@@ -12,8 +12,8 @@
 
 #undef	valu_t
 #define valu_t		long
-#undef	addr_t
-#define	addr_t		long
+#undef	ADDR_T
+#define	ADDR_T		long
 #undef	ALIGNSECT
 #define ALIGNSECT 	2
 

@@ -201,7 +201,7 @@ operation
 						(short)(
 							($4.typ & (S_EXT|S_TYP))
 							|
-							((ushort)$6<<8)
+							((unsigned short)$6<<8)
 						),
 						(short)$7,
 						$4.val
@@ -215,7 +215,7 @@ operation
 						(short)(
 							(DOTTYP & (S_EXT|S_TYP))
 							|
-							((ushort)$4<<8)
+							((unsigned short)$4<<8)
 						),
 						(short)$6,
 						(valu_t)DOTVAL

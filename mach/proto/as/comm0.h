@@ -41,10 +41,8 @@
 
 #define	GENLAB		"I"		/* compiler generated labels */
 
-#define	ushort		unsigned short
-
 #define	valu_t		short		/* type of expression values */
-#define	addr_t		ushort		/* type of dot */
+#define	ADDR_T		unsigned short	/* type of dot */
 #define	word_t		short		/* type of keyword value */
 /*
  * NOTE: word_t is introduced to reduce the tokenfile size for machines
@@ -194,15 +192,15 @@ typedef	struct item_t	item_t;
 
 struct sect_t {
 	short	s_flag;		/* some flag bits */
-	addr_t	s_base;		/* section base */
-	addr_t	s_size;		/* section size */
-	addr_t	s_comm;		/* length of commons */
-	addr_t	s_zero;		/* delayed emit1(0) */
-	addr_t	s_lign;		/* section alignment */
+	ADDR_T	s_base;		/* section base */
+	ADDR_T	s_size;		/* section size */
+	ADDR_T	s_comm;		/* length of commons */
+	ADDR_T	s_zero;		/* delayed emit1(0) */
+	ADDR_T	s_lign;		/* section alignment */
 	long	s_foff;		/* section file offset */
 	item_t	*s_item;	/* points to section name */
 #ifdef THREE_PASS
-	addr_t	s_gain;		/* gain in PASS_2 */
+	ADDR_T	s_gain;		/* gain in PASS_2 */
 #endif
 };
 

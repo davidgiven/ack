@@ -67,10 +67,10 @@ extern sect_t	sect[SECTMAX];
  * specials for the location counter
  */
 extern sect_t	*DOTSCT;	/* &sect[DOTTYP-S_MIN] or NULL */
-extern addr_t	DOTVAL;		/* DOTSCT->s_size + DOTSCT->s_base */
+extern ADDR_T	DOTVAL;		/* DOTSCT->s_size + DOTSCT->s_base */
 extern short	DOTTYP;		/* S_MIN..S_MAX or S_UND */
 
-extern ushort	nname;		/* Counts name table index in PASS_3 */
+extern unsigned short	nname;		/* Counts name table index in PASS_3 */
 
 extern item_t	*hashtab[H_TOTAL];
 extern short	hashindex;	/* see item_search() */
