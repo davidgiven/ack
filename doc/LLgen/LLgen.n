@@ -812,11 +812,12 @@ ldecl   : '{'
 
 productions
         : simpleproduction
-          [ '|' DEFAULT? simpleproduction ]*
+          [ '|' simpleproduction ]*
         ;
 
 simpleproduction
-        : [ IF '(' /* Read C-expression here */ ')'
+        : DEFAULT?
+	  [ IF '(' /* Read C-expression here */ ')'
           | PREFER
           | AVOID
           ]?
