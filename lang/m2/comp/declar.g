@@ -188,9 +188,6 @@ TypeDeclaration
 	'=' type(&tp)
 			{ DeclareType(nd, df, tp);
 			  FreeNode(nd);
-#ifdef DBSYMTAB
-			  if (options['g']) stb_string(df, D_TYPE);
-#endif /* DBSYMTAB */
 			}
 ;
 

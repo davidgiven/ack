@@ -247,6 +247,24 @@ stb_type(tp, assign_num)
 	}
 }
 
+stb_addtp(s, tp)
+	char	*s;
+	t_type	*tp;
+{
+	create_db_str();
+	adds_db_str(s);
+	addc_db_str(':');
+	addc_db_str('t');
+	stb_type(tp, 1);
+	addc_db_str(';');
+	C_ms_stb_cst(db_str.base,
+		     N_LSYM,
+		     tp == void_type || tp->tp_size >= max_int[2]
+		       ? 0
+		       : (int)tp->tp_size,
+		     (arith) 0);
+}
+
 stb_string(df, kind)
 	register t_def *df;
 {

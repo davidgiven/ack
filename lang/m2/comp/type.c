@@ -25,6 +25,7 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"walk.h"
+#include	"main.h"
 #include	"chk_expr.h"
 #include	"warning.h"
 #include	"uns_arith.h"
@@ -673,6 +674,9 @@ DeclareType(nd, df, tp)
 			CheckForImports(df);
 		}
 	}
+#ifdef DBSYMTAB
+	if (options['g']) stb_string(df, D_TYPE);
+#endif
 
 	SolveForwardTypeRefs(df);
 }
@@ -688,6 +692,11 @@ SolveForwardTypeRefs(df)
 		df->df_kind = D_TYPE;
 		while (nd) {
 			nd->nd_type->tp_next = df->df_type;
+#ifdef DBSYMTAB
+			if (options['g'] && nd->nd_type->tp_dbindex < 0) {
+				stb_addtp("(forward_type)", nd->nd_type);
+			}
+#endif
 			nd = nd->nd_RIGHT;
 		}
 		FreeNode(df->df_forw_node);

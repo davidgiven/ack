@@ -229,6 +229,24 @@ stb_type(tp, assign_num)
 	}
 }
 
+stb_addtp(s, tp)
+	char    *s;
+	struct type  *tp;
+{
+	create_db_str();
+	adds_db_str(s);
+	addc_db_str(':');
+	addc_db_str('t');
+	stb_type(tp, 1);
+	addc_db_str(';');
+	C_ms_stb_cst(db_str.base,
+		     N_LSYM,
+		     tp == void_type || tp->tp_size > 32767
+		       ? 0
+		       : (IsPacked(tp) ? (int) tp->tp_psize : (int)tp->tp_size),
+		     (arith) 0);
+}
+
 stb_string(df, kind)
 	register struct def *df;
 	long kind;

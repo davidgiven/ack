@@ -550,6 +550,11 @@ chk_forw_types()
 				  	   "identifier \"%s\" is not a type",
 					   df->df_idf->id_text);
 			fw_type->f_type->next = tp;
+#ifdef DBSYMTAB
+			if (options['g']) {
+				stb_addtp("(forward_type)", fw_type->f_type);
+			}
+#endif
 			fw_type = fw_type->f_next;
 		    }
 
