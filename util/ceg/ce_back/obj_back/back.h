@@ -2,7 +2,8 @@
  */
 
 extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
-	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start();
+	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
+	    *extnd_part(), *extnd_cont();
 extern holno, procno;
 
 #include "data.h"

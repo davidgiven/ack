@@ -76,3 +76,21 @@ int hol;
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
+
+
+char *extnd_part( d)
+int d;
+{
+	string_lengte = mysprint( "part%x", d);
+        index_symbol_table = find_sym( string, STORE_STRING);
+	return( symbol_table[ index_symbol_table].on_foff + string_area);
+}
+
+
+char *extnd_cont( d)
+int d;
+{
+	string_lengte = mysprint( "cont%x", d);
+        index_symbol_table = find_sym( string, STORE_STRING);
+	return( symbol_table[ index_symbol_table].on_foff + string_area);
+}
