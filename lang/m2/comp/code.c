@@ -931,7 +931,6 @@ CodeOper(expr, true_label, false_label)
 		C_sbu(word_size);
 		if (needs_rangecheck(ElementType(rightop->nd_type), leftop->nd_type)) {
 			l_toolarge = ++text_label;
-			l_cont = ++text_label;
 			C_dup(word_size);
 			C_loc(rightop->nd_type->tp_size*8);
 			C_cmu(word_size);
