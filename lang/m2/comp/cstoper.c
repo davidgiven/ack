@@ -38,9 +38,9 @@ arith min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
 			*/
 unsigned int wrd_bits;	/* number of bits in a word */
 #else
-arith full_mask[4] = { 0L, 0xFFL, 0xFFFFL, 0L, 0xFFFFFFFFL };
-arith max_int[4] =   { 0L, 0x7FL, 0x7FFFL, 0L, 0x7FFFFFFFL };
-arith min_int[4] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
+arith full_mask[] = { 0L, 0xFFL, 0xFFFFL, 0L, 0xFFFFFFFFL };
+arith max_int[] =   { 0L, 0x7FL, 0x7FFFL, 0L, 0x7FFFFFFFL };
+arith min_int[] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 #endif
 
 extern char options[];
