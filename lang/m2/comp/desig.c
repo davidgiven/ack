@@ -473,7 +473,7 @@ CodeVarDesig(df, ds)
 		it is a value parameter, it is a var parameter, it is one of
 		those of an enclosing procedure, or it is global.
 	*/
-	register struct scope *sc = df->df_scope;
+	register t_scope *sc = df->df_scope;
 
 	/* Selections from a module are handled earlier, when identifying
 	   the variable, so ...

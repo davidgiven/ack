@@ -72,7 +72,7 @@ TstProcEquiv(tp1, tp2)
 		may also be used for the testing of assignment compatibility
 		between procedure variables and procedures.
 	*/
-	register struct paramlist *p1, *p2;
+	register t_param *p1, *p2;
 
 	/* First check if the result types are equivalent
 	*/

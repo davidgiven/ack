@@ -61,7 +61,7 @@ DefInFront(df)
 t_def *
 MkDef(id, scope, kind)
 	register t_idf *id;
-	register struct scope *scope;
+	register t_scope *scope;
 {
 	/*	Create a new definition structure in scope "scope", with
 		id "id" and kind "kind".
@@ -85,7 +85,7 @@ MkDef(id, scope, kind)
 t_def *
 define(id, scope, kind)
 	register t_idf *id;
-	register struct scope *scope;
+	register t_scope *scope;
 	int kind;
 {
 	/*	Declare an identifier in a scope, but first check if it
@@ -228,7 +228,7 @@ DeclProc(type, id)
 		Also create a name for it.
 	*/
 	register t_def *df;
-	register struct scope *scope;
+	register t_scope *scope;
 	extern char *sprint();
 	static int nmcount;
 	char buf[256];
@@ -312,7 +312,7 @@ DefineLocalModule(id)
 		a name to be used for code generation.
 	*/
 	register t_def *df = define(id, CurrentScope, D_MODULE);
-	register struct scope *sc;
+	register t_scope *sc;
 	static int modulecount = 0;
 	char buf[256];
 	extern char *sprint();

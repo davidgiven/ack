@@ -359,7 +359,7 @@ CodeCall(nd)
 }
 
 CodeParameters(param, arg)
-	struct paramlist *param;
+	t_param *param;
 	t_node *arg;
 {
 	register t_type *tp;

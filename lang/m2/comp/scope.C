@@ -23,10 +23,10 @@
 #include	"def.h"
 #include	"node.h"
 
-struct scope *PervasiveScope;
-struct scopelist *CurrVis, *GlobalVis;
+t_scope *PervasiveScope;
+t_scopelist *CurrVis, *GlobalVis;
 extern int proclevel;
-static struct scopelist *PervVis;
+static t_scopelist *PervVis;
 extern char options[];
 
 /* STATICALLOCDEF "scope" 10 */
@@ -37,8 +37,8 @@ open_scope(scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	register t_scope *sc = new_scope();
+	register t_scopelist *ls = new_scopelist();
 	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 
@@ -53,10 +53,10 @@ open_scope(scopetype)
 	CurrVis = ls;
 }
 
-struct scope *
+t_scope *
 open_and_close_scope(scopetype)
 {
-	struct scope *sc;
+	t_scope *sc;
 
 	open_scope(scopetype);
 	sc = CurrentScope;
@@ -66,8 +66,8 @@ open_and_close_scope(scopetype)
 
 InitScope()
 {
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	register t_scope *sc = new_scope();
+	register t_scopelist *ls = new_scopelist();
 
 	sc->sc_scopeclosed = 0;
 	sc->sc_def = 0;
@@ -161,7 +161,7 @@ df->df_idf->id_text);
 				   Maybe the definitions are in the
 				   enclosing scope?
 				*/
-				register struct scopelist *ls =
+				register t_scopelist *ls =
 						nextvisible(CurrVis);
 				t_def *df1 = df->df_nextinscope;
 	
@@ -213,7 +213,7 @@ close_scope(flag)
 		either POINTER declarations, or EXPORTs, or forward references
 		to MODULES
 	*/
-	register struct scope *sc = CurrentScope;
+	register t_scope *sc = CurrentScope;
 
 	assert(sc != 0);
 

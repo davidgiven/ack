@@ -83,7 +83,7 @@ EnterEnumList(Idlist, type)
 EnterFieldList(Idlist, type, scope, addr)
 	t_node *Idlist;
 	register t_type *type;
-	struct scope *scope;
+	t_scope *scope;
 	arith *addr;
 {
 	/*	Put a list of fields in the symbol table.
@@ -115,7 +115,7 @@ EnterVarList(Idlist, type, local)
 	*/
 	register t_def *df;
 	register t_node *idlist = Idlist;
-	register struct scopelist *sc = CurrVis;
+	register t_scopelist *sc = CurrVis;
 	char buf[256];
 	extern char *sprint();
 
@@ -179,7 +179,7 @@ EnterVarList(Idlist, type, local)
 }
 
 EnterParamList(ppr, Idlist, type, VARp, off)
-	struct paramlist **ppr;
+	t_param **ppr;
 	t_node *Idlist;
 	t_type *type;
 	int VARp;
@@ -189,11 +189,11 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		"ids" indicates the list of identifiers, "tp" their type, and
 		"VARp" indicates D_VARPAR or D_VALPAR.
 	*/
-	register struct paramlist *pr;
+	register t_param *pr;
 	register t_def *df;
 	register t_node *idlist = Idlist;
 	t_node *dummy = 0;
-	static struct paramlist *last;
+	static t_param *last;
 
 	if (! idlist) {
 		/* Can only happen when a procedure type is defined */
@@ -232,7 +232,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 STATIC
 DoImport(df, scope)
 	register t_def *df;
-	struct scope *scope;
+	t_scope *scope;
 {
 	/*	Definition "df" is imported to scope "scope".
 		Handle the case that it is an enumeration type or a module.
@@ -266,7 +266,7 @@ DoImport(df, scope)
 	}
 }
 
-STATIC struct scopelist *
+STATIC t_scopelist *
 ForwModule(df, nd)
 	register t_def *df;
 	t_node *nd;
@@ -275,7 +275,7 @@ ForwModule(df, nd)
 		We could also end up here for not found DEFINITION MODULES.
 		Create a declaration and a scope for this module.
 	*/
-	struct scopelist *vis;
+	t_scopelist *vis;
 
 	if (df->df_scope != GlobalScope) {
 		df->df_scope = enclosing(CurrVis)->sc_scope;
@@ -298,7 +298,7 @@ ForwModule(df, nd)
 STATIC t_def *
 ForwDef(ids, scope)
 	register t_node *ids;
-	struct scope *scope;
+	t_scope *scope;
 {
 	/*	Enter a forward definition of "ids" in scope "scope",
 		if it is not already defined.
@@ -396,7 +396,7 @@ EnterFromImportList(Idlist, FromDef, FromId)
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
 	register t_node *idlist = Idlist;
-	register struct scopelist *vis;
+	register t_scopelist *vis;
 	register t_def *df;
 	char *module_name = FromDef->df_idf->id_text;
 	int forwflag = 0;
@@ -462,7 +462,7 @@ EnterImportList(Idlist, local)
 		This case is indicated by the value 0 of the "local" flag.
 	*/
 	register t_node *idlist = Idlist;
-	struct scope *sc = enclosing(CurrVis)->sc_scope;
+	t_scope *sc = enclosing(CurrVis)->sc_scope;
 	extern t_def *GetDefinitionModule();
 	struct f_info f;
 	

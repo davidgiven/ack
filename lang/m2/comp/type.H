@@ -16,6 +16,8 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 #define TypeOfParam(xpar)	((xpar)->par_def->df_type)
 };
 
+typedef struct paramlist t_param;
+
 /* ALLOCDEF "paramlist" 20 */
 
 struct enume {

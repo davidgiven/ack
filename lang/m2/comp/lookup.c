@@ -26,7 +26,7 @@
 t_def *
 lookup(id, scope, import)
 	register t_idf *id;
-	struct scope *scope;
+	t_scope *scope;
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.
@@ -65,14 +65,14 @@ lookup(id, scope, import)
 t_def *
 lookfor(id, vis, give_error)
 	register t_node *id;
-	struct scopelist *vis;
+	t_scopelist *vis;
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
 		if "give_error" is set, give an error message.
 	*/
 	register t_def *df;
-	register struct scopelist *sc = vis;
+	register t_scopelist *sc = vis;
 
 	while (sc) {
 		df = lookup(id->nd_IDF, sc->sc_scope, 1);

@@ -38,10 +38,13 @@ struct scopelist {
 	struct scopelist *sc_encl;
 };
 
-extern struct scope
+typedef struct scope t_scope;
+typedef struct scopelist t_scopelist;
+
+extern t_scope
 	*PervasiveScope;
 
-extern struct scopelist
+extern t_scopelist
 	*CurrVis, *GlobalVis;
 
 #define CurrentScope	(CurrVis->sc_scope)
@@ -50,4 +53,4 @@ extern struct scopelist
 #define scopeclosed(x)	((x)->sc_scopeclosed)
 #define nextvisible(x)	((x)->sc_next)		/* use with scopelists */
 
-struct scope *open_and_close_scope();
+t_scope *open_and_close_scope();

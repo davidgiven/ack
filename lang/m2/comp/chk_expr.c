@@ -592,7 +592,7 @@ ChkProcCall(expp)
 	*/
 	register t_node *left;
 	t_def *edf = 0;
-	register struct paramlist *param;
+	register t_param *param;
 	int retval = 1;
 	int cnt = 0;
 
@@ -1264,12 +1264,12 @@ ChkCast(expp)
 		is no problem as such values take a word on the EM stack
 		anyway.
 	*/
-	register t_node *left = expp->nd_left;
 	register t_node *arg = expp->nd_right;
-	register t_type *lefttype = left->nd_type;
+	register t_type *lefttype = expp->nd_left->nd_type;
+	t_def		*df = expp->nd_left->nd_def;
 
 	if ((! arg) || arg->nd_right) {
-		return df_error(expp, "type cast must have 1 parameter", left->nd_def);
+		return df_error(expp, "type cast must have 1 parameter", df);
 	}
 
 	if (! ChkExpression(arg->nd_left)) return 0;
@@ -1280,11 +1280,17 @@ ChkCast(expp)
 	if (arg->nd_type->tp_size != lefttype->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
 	     lefttype->tp_size > word_size)) {
-		df_error(expp, "unequal sizes in type cast", left->nd_def);
+		return df_error(expp, "unequal sizes in type cast", df);
+	}
+
+	if (IsConformantArray(arg->nd_type)) {
+		return df_error(expp,
+		  "type transfer function on conformant array not supported",
+		  df);
 	}
 
 	if (arg->nd_class == Value) {
-		FreeNode(left);
+		FreeNode(expp->nd_left);
 		expp->nd_right->nd_left = 0;
 		FreeNode(expp->nd_right);
 		*expp = *arg;

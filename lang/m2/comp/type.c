@@ -393,7 +393,7 @@ subr_type(lb, ub)
 t_type *
 proc_type(result_type, parameters, n_bytes_params)
 	t_type *result_type;
-	struct paramlist *parameters;
+	t_param *parameters;
 	arith n_bytes_params;
 {
 	register t_type *tp = construct_type(T_PROCEDURE, result_type);
@@ -538,7 +538,7 @@ FreeType(tp)
 		This procedure is only called for types, constructed with
 		T_PROCEDURE.
 	*/
-	register struct paramlist *pr, *pr1;
+	register t_param *pr, *pr1;
 
 	assert(tp->tp_fund == T_PROCEDURE);
 
@@ -713,7 +713,7 @@ DumpType(tp)
 		break;
 	case T_PROCEDURE:
 		{
-		register struct paramlist *par = ParamList(tp);
+		register t_param *par = ParamList(tp);
 
 		print("PROCEDURE");
 		if (par) {

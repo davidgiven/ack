@@ -31,30 +31,31 @@
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
 
+extern t_node	*EmptyStatement;
+
 #define needs_static_link()	(proclevel > 1)
-extern t_node *EmptyStatement;
 }
 
 /* inline in declaration: need space
-ProcedureDeclaration
-{
-	t_def *df;
-} :
-			{	++proclevel; }
-	ProcedureHeading(&df, D_PROCEDURE)
-	';' block(&(df->prc_body))
-	IDENT
-			{	EndProc(df, dot.TOK_IDF);
-				--proclevel;
-			}
-;
+ * ProcedureDeclaration
+ * {
+ * 	t_def *df;
+ * } :
+ * 			{	++proclevel; }
+ * 	ProcedureHeading(&df, D_PROCEDURE)
+ * 	';' block(&(df->prc_body))
+ * 	IDENT
+ * 			{	EndProc(df, dot.TOK_IDF);
+ * 				--proclevel;
+ * 			}
+ * ;
 */
 
 ProcedureHeading(t_def **pdf; int type;)
 {
-	t_type *tp = 0;
-	arith parmaddr = needs_static_link() ? pointer_size : 0;
-	struct paramlist *pr = 0;
+	t_type	*tp = 0;
+	arith	parmaddr = needs_static_link() ? pointer_size : 0;
+	t_param	*pr = 0;
 } :
 	PROCEDURE IDENT
 			{ *pdf = DeclProc(type, dot.TOK_IDF); }
@@ -116,25 +117,25 @@ declaration
 ;
 
 /* inline in procedureheading: need space
-FormalParameters(struct paramlist **ppr; arith *parmaddr; t_type **ptp;):
-	'('
-	[
-		FPSection(ppr, parmaddr)
-		[
-			';' FPSection(ppr, parmaddr)
-		]*
-	]?
-	')'
-	[	':' qualtype(ptp)
-	]?
-;
+ * FormalParameters(t_param **ppr; arith *parmaddr; t_type **ptp;):
+ * 	'('
+ * 	[
+ * 		FPSection(ppr, parmaddr)
+ * 		[
+ * 			';' FPSection(ppr, parmaddr)
+ * 		]*
+ * 	]?
+ * 	')'
+ * 	[	':' qualtype(ptp)
+ * 	]?
+ * ;
 */
 
-FPSection(struct paramlist **ppr; arith *parmaddr;)
+FPSection(t_param **ppr; arith *parmaddr;)
 {
-	t_node *FPList;
-	t_type *tp;
-	int VARp;
+	t_node	*FPList;
+	t_type	*tp;
+	int	VARp;
 } :
 	var(&VARp) IdentList(&FPList) ':' FormalType(&tp)
 			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
@@ -267,7 +268,7 @@ ArrayType(t_type **ptp;)
 
 RecordType(t_type **ptp;)
 {
-	register struct scope *scope;
+	register t_scope *scope;
 	arith size = 0;
 	int xalign = struct_align;
 }
@@ -285,14 +286,14 @@ RecordType(t_type **ptp;)
 	END
 ;
 
-FieldListSequence(struct scope *scope; arith *cnt; int *palign;):
+FieldListSequence(t_scope *scope; arith *cnt; int *palign;):
 	FieldList(scope, cnt, palign)
 	[
 		';' FieldList(scope, cnt, palign)
 	]*
 ;
 
-FieldList(struct scope *scope; arith *cnt; int *palign;)
+FieldList(t_scope *scope; arith *cnt; int *palign;)
 {
 	t_node *FldList;
 	t_type *tp;
@@ -358,7 +359,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 ]?
 ;
 
-variant(struct scope *scope; arith *cnt; t_type *tp; int *palign;)
+variant(t_scope *scope; arith *cnt; t_type *tp; int *palign;)
 {
 	t_node *nd;
 } :
@@ -442,7 +443,7 @@ ProcedureType(t_type **ptp;) :
 	  	FormalTypeList(ptp)
 	|
 			{ *ptp = proc_type((t_type *) 0, 
-					   (struct paramlist *) 0,
+					   (t_param *) 0,
 					   (arith) 0);
 			}
 	]
@@ -450,7 +451,7 @@ ProcedureType(t_type **ptp;) :
 
 FormalTypeList(t_type **ptp;)
 {
-	struct paramlist *pr = 0;
+	t_param *pr = 0;
 	arith parmaddr = 0;
 } :
 	'('
@@ -467,7 +468,7 @@ FormalTypeList(t_type **ptp;)
 			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 
-VarFormalType(struct paramlist **ppr; arith *parmaddr;)
+VarFormalType(t_param **ppr; arith *parmaddr;)
 {
 	t_type *tp;
 	int isvar;

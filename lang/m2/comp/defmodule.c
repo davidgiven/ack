@@ -91,10 +91,10 @@ GetDefinitionModule(id, incr)
 	*/
 	register t_def *df;
 	static int level;
-	struct scopelist *vis;
+	t_scopelist *vis;
 	char *fn = FileName;
 	int ln = LineNumber;
-	struct scope *newsc = CurrentScope;
+	t_scope *newsc = CurrentScope;
 
 	level += incr;
 	df = lookup(id, GlobalScope, 1);

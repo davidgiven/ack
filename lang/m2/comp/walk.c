@@ -110,8 +110,8 @@ WalkModule(module)
 		Also generate code for its body.
 		This code is collected in an initialization routine.
 	*/
-	register struct scope *sc;
-	struct scopelist *savevis = CurrVis;
+	register t_scope *sc;
+	t_scopelist *savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
 	priority = module->mod_priority ? module->mod_priority->nd_INT : 0;
@@ -176,10 +176,10 @@ WalkProcedure(procedure)
 	/*	Walk through the definition of a procedure and all its
 		local definitions, checking and generating code.
 	*/
-	struct scopelist *savevis = CurrVis;
-	register struct scope *sc = procedure->prc_vis->sc_scope;
+	t_scopelist *savevis = CurrVis;
+	register t_scope *sc = procedure->prc_vis->sc_scope;
 	register t_type *tp;
-	register struct paramlist *param;
+	register t_param *param;
 	label func_res_label = 0;
 	arith StackAdjustment = 0;
 	arith retsav = 0;
@@ -575,7 +575,7 @@ WalkStat(nd, exit_label)
 
 	case WITH:
 		{
-			struct scopelist link;
+			t_scopelist link;
 			struct withdesig wds;
 			t_desig ds;
 
@@ -728,7 +728,7 @@ DoForInit(nd)
 	}
 
 	if (df->df_scope != CurrentScope) {
-		register struct scopelist *sc = CurrVis;
+		register t_scopelist *sc = CurrVis;
 
 		for (;;) {
 			if (!sc) {
