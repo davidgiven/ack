@@ -11,6 +11,7 @@ LIBRARY=	$(MODLIB)/libem_mes.a $(MODLIB)/libemk.a \
 		$(MODLIB)/libprint.a $(MODLIB)/libstring.a \
 		$(MODLIB)/libsystem.a $(LEXLIB)
 CFLAGS =	-Dvoid=int -O $(INCL)
+LDFLAGS =	-i
 # void = int, because some compilers don't understand void
 HSRC =		code.h em.h expr.h sizes.h symtab.h token.h
 CSRC =		builtin.c code.c em.c expr.c keytab.c report.c symtab.c
@@ -23,7 +24,7 @@ dummy:		$(GFILES)
 		touch dummy
 
 oc:		$(PRIMARY) $(SECUNDARY) $(TERTIARY)
-		$(CC) -o oc $(PRIMARY) $(SECUNDARY) $(TERTIARY) $(LIBRARY)
+		$(CC) $(LDFLAGS) -o oc $(PRIMARY) $(SECUNDARY) $(TERTIARY) $(LIBRARY)
 
 lex.yy.c:	lex.l
 		lex lex.l
