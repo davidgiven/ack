@@ -110,7 +110,7 @@ argument(arg) char *arg; {
 		return;
 	}
 	curfile = arg;  /* for error messages etc. */
-	if ((ifile = fopen(arg,"r")) == NULL) {
+	if ((ifile = fopen(arg,"r")) == 0) {
 		error("can't open %s",arg);
 		return;
 	}

@@ -74,9 +74,9 @@ FILE *frewind(f) FILE *f ; {
 	/* Rewind a file open for writing and open it for reading */
 	/* Assumption, file descriptor is r/w */
 	register FILE *tmp ;
-	rewind(f);
 	tmp=fdopen(dup(fileno(f)),"r");
 	fclose(f);
+	rewind(tmp);
 	return tmp ;
 }
 #endif
@@ -377,7 +377,7 @@ setmode(mode) {
 #ifndef CPM
 int tmpfil() {
 	register char *fname, *cpname ;
-	char *sfname;
+	static char sfname[] = "tmp.00000";
 	register fildes,pid;
 	static char name[80] = TMP_DIR ;
 	int count;
@@ -387,10 +387,9 @@ int tmpfil() {
 	 * After closing the tmpfil-descriptor the file is lost
 	 * Calling this routine frees the program from generating uniqe names.
 	 */
-	sfname = fname = "tmp.00000";
+	fname = sfname+4;
 	count = 10;
 	pid = getpid();
-	fname += 4;
 	while (pid!=0) {
 		*fname++ = (pid&07) + '0';
 		pid >>= 3;

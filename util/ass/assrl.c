@@ -116,11 +116,11 @@ copyout() {
 	remtext = textbytes%wordsize ;
 	if ( remtext != 0 ) remtext = wordsize-remtext ;
 
-	if ((ifile = fopen(eout,"w")) == NULL )
+	if ((ifile = fopen(eout,"w")) == 0 )
 		fatal("can't create e.out");
 #ifdef  CPM
-	fclose(tfile); tfile=fopen("TFILE.$$$, "r");
-	fclose(dfile); dfile=fopen("DFILE.$$$, "r");
+	fclose(tfile); tfile=fopen("TFILE.$$$", "r");
+	fclose(dfile); dfile=fopen("DFILE.$$$", "r");
 #else
 	tfile=frewind(tfile);
 	dfile=frewind(dfile);
@@ -160,7 +160,7 @@ dataprocess(f1,f2) FILE *f1,*f2; {
 	register ieof ;
 
 #ifdef  CPM
-	fclose(rdfile); rdfile=fopen("RDFILE.$$$, "r");
+	fclose(rdfile); rdfile=fopen("RDFILE.$$$", "r");
 #else
 	rdfile=frewind(rdfile) ;
 #endif
@@ -210,7 +210,7 @@ textprocess(f1,f2) FILE *f1,*f2; {
 	register FOFFSET keep ;
 
 #ifdef  CPM
-	fclose(rtfile); rtfile=fopen("RTFILE.$$$, "r");
+	fclose(rtfile); rtfile=fopen("RTFILE.$$$", "r");
 #else
 	rtfile=frewind(rtfile) ;
 #endif
