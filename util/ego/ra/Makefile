@@ -1,6 +1,6 @@
 EMH=../../../h
 EML=../../../lib
-CFLAGS=-DVERBOSE -O
+CFLAGS=-DVERBOSE 
 SHARE=../share
 RA=.
 OBJECTS=ra.o ra_items.o ra_lifet.o ra_allocl.o ra_profits.o ra_interv.o ra_pack.o ra_xform.o ra_aux.o
