@@ -25,9 +25,9 @@ begtext:
 	push bx
 	push cx
 	xor bp,bp
-	add sp,6
 	call    _m_a_i_n
-	call	_exit
+	add sp,6
+	call	__exit
 .sect	.data
 begdata:
 hol0:
