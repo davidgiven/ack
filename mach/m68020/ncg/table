@@ -1127,10 +1127,10 @@ pat lol lof xor lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
 proc lolfxxlolf example lol lof and lol stf
 with conreg4-bconst
     kills allexceptcon
-#ifdef TBL68020 && FANCY_MODES
+#if TBL68020 && FANCY_MODES
     gen xxx* %1, {OFF_off4, lb, $1, $2}
 #else
-    uses AA_REG={LOCAL, $1}}
+    uses AA_REG={LOCAL, $1}
     gen xxx* %1, {offsetted4, %a, $2}
 #endif
 
@@ -1150,7 +1150,7 @@ pat lol lof xor lol stf $1==$4 && $2==$5 && $3==4
 proc lilfxxlilf example lil lof and lil stf
 with conreg4-bconst
     kills allexceptcon
-#ifdef TBL68020 && FANCY_MODES
+#if TBL68020 && FANCY_MODES
     gen xxx* %1, {OFF_off4, regvar($1, reg_pointer), 0, $2}
 #else
     uses AA_REG={indirect4, regvar($1, reg_pointer)}
