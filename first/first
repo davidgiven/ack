@@ -177,9 +177,27 @@ sun2)		ACM=sun2 ; SYS=BSD4_2 ;;
 m68_unisoft)	ACM=m68k2 ; SYS=V7 ;;
 m68_sysV_0)	ACM=mantra ; SYS=SYS_5 ;;
 m68020)		ACM=m68020 ; SYS=SYS_5 ;;
-SMALL)		ACM=i86 ; BM = 0 ; SYS=SYS_5 ;;
-*)		ACM=m68k2 ; SYS=SYS_5 ;;
+SMALL)		ACM=i86 ; BM = 0 ; SYS=XXX ;;
+*)		ACM=m68k2 ; SYS=XXX ;;
 esac
+while :
+do
+case $SYS in
+V7|BSD4_1|BSD4_2|SYS_5)
+	break
+	;;
+*)
+	echo -n "What kind of Unix are you running?
+Choices:
+	V7	for Unix V7, BSD 2.*
+	BSD4_1	for Berkeley 4.1
+	BSD4_2	for Berkeley 4.2, 4.3, SunOS
+	SYS_5	for Xenix, System III, System V
+Your choice (V7|BSD4_1|BSD4_2|SYS_5): "
+	read SYS
+	;;
+esac
+done
 rm -f local.h
 sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < local.h.src >local.h
 if cmp -s ../h/local.h local.h
