@@ -34,6 +34,8 @@ extern char	*strcpy();
 #define oldprc(x)	oldstruct(prc,x)
 #define oldnum(x)	oldstruct(num,x)
 
+#define PF_FILE	2
+#define DF_FILE	2
 
 /* instr_lab */
 
@@ -118,12 +120,14 @@ dblock_p symlookup(name, status)
 			 * list.
 			 */
 			if (strcmp((*spp)->sy_name, name) == 0) {
-				if ((status != DEFINING
-				     && ((*spp)->sy_dblock->d_flags1 & DF_EXTERNAL) == 0)
-				    || (*spp)->sy_dblock->d_pseudo == DUNKNOWN) {
-					/* found */
+				dp = (*spp)->sy_dblock;
+				if (status != DEFINING ||
+			    	    (dp->d_flags1 & DF_EXTERNAL) == 0) {
+					dp->d_flags2 |= DF_FILE;
+				}
+				if (dp->d_flags2 & DF_FILE) {
 					lastname = (*spp)->sy_name;
-					return ((*spp)->sy_dblock);
+					return dp;
 				}
 				break;
 			} else {
@@ -168,6 +172,7 @@ dblock_p symlookup(name, status)
 		 */
 		dp->d_flags1 |= DF_EXTERNAL;
 	}
+	dp->d_flags2 |= DF_FILE;
 	return dp;
 }
 
@@ -217,11 +222,13 @@ proc_p proclookup(name, status)
 		 */
 		if (strcmp((*ppp)->pr_name, name) == 0) {
 			/* found */
-			if ((status != DEFINING
-			     && ((*ppp)->pr_proc->p_flags1 & PF_EXTERNAL) == 0)
-			    || ! ((*ppp)->pr_proc->p_flags1 & PF_BODYSEEN)) {
-				return ((*ppp)->pr_proc);
+			dp = (*ppp)->pr_proc;
+			if (status != DEFINING ||
+			    (dp->p_flags1 & PF_EXTERNAL) == 0) {
+				dp->p_flags2 |= PF_FILE;
+				return dp;
 			}
+			if (dp->p_flags2 & PF_FILE) return dp;
 			break;
 		} else {
 			ppp = &(*ppp)->pr_next;
@@ -256,6 +263,7 @@ proc_p proclookup(name, status)
 		 */
 		dp->p_flags1 |= PF_EXTERNAL;
 	}
+	dp->p_flags2 |= PF_FILE;
 	return dp;
 }
 
@@ -318,35 +326,6 @@ dump_procnames(hash,n,f)
 	}
 }
 
-static int
-extrefproc_superfluous(ph)
-	prc_p	ph;
-{
-	/* The problem is that when an EXP is found, we don't know yet
-	 * to which definition it applies (although this only is a problem
-	 * for erroneous input). Therefore, we create an entry in the
-	 * procedure table, and at the end of the EM file remove it if it
-	 * is superfluous. This routine checks for this superfluousness.
-	 */
-	prc_p	next = ph->pr_next;
-
-	if (! (ph->pr_proc->p_flags1 & PF_BODYSEEN)) {
-		/* No body seen yet, but maybe there is another definition ...
-		*/
-		register prc_p nn = next;
-
-		while (nn) {
-			if ((nn->pr_proc->p_flags1 & (PF_BODYSEEN|PF_EXTERNAL))
-			    == (PF_BODYSEEN|PF_EXTERNAL)
-			    && ! strcmp(nn->pr_name, ph->pr_name)) {
-				return 1;
-			}
-			nn = nn->pr_next;
-		}
-	}
-	return 0;
-}
-
 /* cleanprocs */
 
 cleanprocs(hash,n,mask)
@@ -373,10 +352,9 @@ cleanprocs(hash,n,mask)
 			 * or is 0 if ph is the first struct of
 			 * the list.
 			 */
+			ph->pr_proc->p_flags2 &= ~PF_FILE;
 			next = ph->pr_next;
-			if ((ph->pr_proc->p_flags1 & mask) == 0
-			    || (mask == PF_EXTERNAL
-				&& extrefproc_superfluous(ph))) {
+			if ((ph->pr_proc->p_flags1 & mask) == 0) {
 				if (x == (prc_p) 0) {
 					*pp = next;
 				} else {
@@ -424,37 +402,6 @@ dump_dblocknames(hash,n,f)
 	}
 }
 
-
-static int
-extrefdata_superfluous(ph)
-	sym_p	ph;
-{
-	/* The problem is that when an EXA is found, we don't know yet
-	 * to which definition it applies (although this only is a problem
-	 * for erroneous input). Therefore, we create an entry in the
-	 * data table, and at the end of the EM file remove it if it
-	 * is superfluous. This routine checks for this superfluousness.
-	 */
-	sym_p	next = ph->sy_next;
-
-	if (ph->sy_dblock->d_pseudo == DUNKNOWN) {
-		/* No definition seen yet, but maybe there is another one ...
-		*/
-		register sym_p nn = next;
-
-		while (nn) {
-			if (nn->sy_dblock->d_pseudo != DUNKNOWN
-			    && (nn->sy_dblock->d_flags1 & DF_EXTERNAL)
-			    && ! strcmp(nn->sy_name, ph->sy_name)) {
-				return 1;
-			}
-			nn = nn->sy_next;
-		}
-	}
-	return 0;
-}
-
-
 /* cleandblocks */
 
 cleandblocks(hash,n,mask)
@@ -471,9 +418,8 @@ cleandblocks(hash,n,mask)
 		x = (sym_p) 0;
 		for (sh = *sp; sh != (sym_p) 0; sh = next) {
 			next = sh->sy_next;
-			if ((sh->sy_dblock->d_flags1 & mask) == 0
-			    || (mask == DF_EXTERNAL
-				&& extrefdata_superfluous(sh))) {
+			sh->sy_dblock->d_flags2 &= ~DF_FILE;
+			if ((sh->sy_dblock->d_flags1 & mask) == 0) {
 				if (x == (sym_p) 0) {
 					*sp = next;
 				} else {

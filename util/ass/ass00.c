@@ -117,7 +117,7 @@ argument(arg) char *arg; {
 	inpoff = 2;
 	if ((w = getu16()) == sp_magic )
 		read_compact();
-	else if (w == ARMAG) {
+	else if (w == ARMAG || w == AALMAG) {
 		archmode = TRUE;
 		archive();
 		archmode = FALSE;
@@ -456,9 +456,6 @@ finish_up()
 	 * make the e.out file and stop.
 	 */
 
-#ifdef JOHAN
-	if ( jflag ) return ;
-#endif
 #ifdef DUMP
 	c_print();
 #endif

@@ -121,7 +121,7 @@ int size;       /* size for hash */
 	case ENTERING:
 		break;
 	case INTERNING:
-		if (!new)
+		if (!new && (g->g_status&EXT))
 			werror("INA must be first occurrence of '%s'",name);
 		break;
 	case EXTERNING:          /* lookup in other table */
