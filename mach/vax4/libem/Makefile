@@ -1,14 +1,13 @@
 TAILSRC=tail_em.a
-l=../lib
 
 install:	head_em tail_em
-		cp head_em $l/head_em
-		cp tail_em $l/tail_em
+		../../install head_em
+		../../install tail_em
 		-rm -f head_em tail_em
 
 cmp:		head_em tail_em
-		-cmp head_em $l/head_em
-		-cmp tail_em $l/tail_em
+		-../../compare head_em
+		-../../compare tail_em
 
 head_em:        head_em.s system.h
 		vax4 -c -I../../../h head_em.s
