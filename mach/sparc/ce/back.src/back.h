@@ -50,8 +50,7 @@
 #define set_local_visible	B_stlocvis
 #define symbol_definition	B_symdef
 #define switchseg		B_switchseg
-
-extern File *codefile;
+#define not_implemented		B_not_implemented
 
 extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
@@ -67,3 +66,19 @@ extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 #define 	SEGHOL		-1	/* Does not exist */
 
 #define 	ABSOLUTE	1
+
+#define fprint fprintf
+#define sprint sprintf
+#define print printf
+#undef STDOUT
+#define STDOUT stdout
+#undef STDERR
+#define STDERR stderr
+#undef STDIN
+#define STDIN stdin
+#undef File
+#define File FILE
+#define sys_close fclose
+#include <stdio.h>
+
+extern File *codefile;
