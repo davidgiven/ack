@@ -36,7 +36,6 @@ create_dir $TARGET_HOME/doc
 cp $SRC_HOME/etc/ip_spec.t $TARGET_HOME/etc/ip_spec.t
 cp_dir $SRC_HOME/lib $TARGET_HOME/lib
 cp_dir $SRC_HOME/h $TARGET_HOME/h
-cp_dir $SRC_HOME/doc $TARGET_HOME/doc
 cp_dir $SRC_HOME/include $TARGET_HOME/include
 
 cd $TARGET_HOME
