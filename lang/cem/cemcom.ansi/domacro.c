@@ -190,6 +190,9 @@ int to_endif;
 		toknum = GetToken(&tk);
 		ReplaceMacros = 1;
 		if (toknum != IDENTIFIER) {
+			if (toknum != INTEGER) {
+				lexerror("illegal # line");
+			}
 			SkipToNewLine();
 			continue;
 		}
@@ -202,7 +205,7 @@ int to_endif;
 		default:
 		case K_UNKNOWN:
 			/* invalid word seen after the '#'      */
-			lexerror("%s: unknown control", tk.tk_idf->id_text);
+			lexwarning("%s: unknown control", tk.tk_idf->id_text);
 			/* fallthrough */
 		case K_DEFINE:
 		case K_ERROR:

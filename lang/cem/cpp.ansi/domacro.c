@@ -194,6 +194,9 @@ int to_endif;
 		toknum = GetToken(&tk);
 		ReplaceMacros = 1;
 		if (toknum != IDENTIFIER) {
+			if (toknum != INTEGER) {
+				error("illegal # line");
+			}
 			SkipToNewLine();
 			continue;
 		}
@@ -205,7 +208,7 @@ int to_endif;
 		id = findidf(tk.tk_str);
 		if (id == (struct idf *)0) {
 			/* invalid word seen after the '#' */
-			error("%s: unknown control", tk.tk_str);
+			warning("%s: unknown control", tk.tk_str);
 		}
 		free(tk.tk_str);
 		if (id == (struct idf *)0) continue;

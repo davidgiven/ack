@@ -26,7 +26,7 @@
 #include	"static.h"
 #include	"declar.h"
 
-/*	Some routines (symbol2str, token2str, type2str) which should have
+/*	Some routines (symbol2str, type2str, qual2str) which should have
  *	yielded strings are written to yield a pointer to a transient piece
  *	of memory, containing the string, since this is the only reasonable
  *	thing to do in C. `Transient' means that the result may soon
