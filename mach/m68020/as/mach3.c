@@ -85,7 +85,7 @@
 0,	SZ_EA,		042000|DTA|ALT,	"neg",
 0,	SZ_EA,		040000|DTA|ALT,	"negx",
 0,	SZ_EA,		043000|DTA|ALT,	"not",
-0,	SZ_EA,		045000|DTA,	"tst",
+0,	SZ_EA,		045000,		"tst",
 
 0,	OP_EA,		044000|DTA|ALT,	"nbcd",
 0,	OP_EA,		045300|DTA|ALT,	"tas",
