@@ -161,7 +161,8 @@ backward() {
 			goodrom = (rc >= 2);
 			break;
 		case ps_mes:
-			if ((int) aoff(lnp->l_a.la_arg, 0) == ms_std) {
+			if (prodepth != 0 &&
+			    (int) aoff(lnp->l_a.la_arg, 0) == ms_std) {
 				lnp->l_next = i;
 				i = lnp;
 				continue;
