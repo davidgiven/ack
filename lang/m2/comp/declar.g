@@ -150,16 +150,17 @@ FPSection(t_param **ppr; arith *parmaddr;)
 			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
 ;
 
-FormalType(t_type **ptp;) :
-	ARRAY OF qualtype(ptp)
-		{ /* index type of conformant array is "CARDINAL".
-		     Recognize a conformant array by size 0.
-		  */
-		  register t_type *tp = construct_type(T_ARRAY, card_type);
-
-		  tp->arr_elem = *ptp;
+FormalType(t_type **ptp;)
+		/* index type of conformant array is "CARDINAL".
+		   Recognize a conformant array by size 0.
+		*/
+{	register t_type *tp;
+} :
+	ARRAY OF
+		{ tp = construct_type(T_ARRAY, card_type); }
+	qualtype(&(tp->arr_elem))
+		{ ArrayElSize(tp);
 		  *ptp = tp;
-		  ArrayElSize(tp);
 		}
 |
 	qualtype(ptp)
@@ -206,7 +207,7 @@ SimpleType(register t_type **ptp;) :
 	]
 |
 	enumeration(ptp)
-|			{ *ptp = 0; }
+|			{ *ptp = 0;	/* no qualification */ }
 	SubrangeType(ptp)
 ;
 
@@ -252,10 +253,10 @@ SubrangeType(t_type **ptp;)
 ArrayType(t_type **ptp;)
 {
 	t_type *tp;
-	register t_type *tp2;
+	register t_type *tp1, *tp2;
 } :
 	ARRAY SimpleType(&tp)
-			{ *ptp = tp2 = construct_type(T_ARRAY, tp); }
+			{ tp1 = tp2 = construct_type(T_ARRAY, tp); }
 	[
 		',' SimpleType(&tp)
 			{ tp2->arr_elem = construct_type(T_ARRAY, tp);
@@ -263,7 +264,8 @@ ArrayType(t_type **ptp;)
 			}
 	]* OF type(&tp)
 			{ tp2->arr_elem = tp;
-			  ArraySizes(*ptp);
+			  ArraySizes(tp1);
+			  *ptp = tp1;
 			}
 ;
 
@@ -437,23 +439,28 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			}
 ;
 
-SetType(t_type **ptp;) :
-	SET OF SimpleType(ptp)
-			{ *ptp = set_type(*ptp); }
+SetType(t_type **ptp;)
+{	t_type *tp;
+} :
+	SET OF SimpleType(&tp)
+			{ *ptp = set_type(tp); }
 ;
 
 /*	In a pointer type definition, the type pointed at does not
 	have to be declared yet, so be careful about identifying
-	type-identifiers
+	type-identifiers.
 */
-PointerType(register t_type **ptp;) :
-			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
+PointerType(register t_type **ptp;)
+{	register t_type *tp;
+} :
+			{ tp = construct_type(T_POINTER, NULLTYPE); }
 	POINTER TO
-	[ %if	(type_or_forward(ptp))
-	  type(&((*ptp)->tp_next)) 
+	[ %if	(type_or_forward(tp))
+	  type(&(tp->tp_next)) 
 	|
 	  IDENT
 	]
+			{ *ptp = tp; }
 ;
 
 qualtype(t_type **ptp;)
@@ -464,46 +471,43 @@ qualtype(t_type **ptp;)
 		{ *ptp = qualified_type(nd); }
 ;
 
-ProcedureType(t_type **ptp;) :
-	PROCEDURE 
-	[
-	  	FormalTypeList(ptp)
-	|
-			{ *ptp = proc_type((t_type *) 0, 
-					   (t_param *) 0,
-					   (arith) 0);
-			}
-	]
-;
-
-FormalTypeList(t_type **ptp;)
+ProcedureType(t_type **ptp;)
 {
 	t_param *pr = 0;
 	arith parmaddr = 0;
+	t_type *tp = 0;
 } :
+	PROCEDURE 
+	[
+	  	FormalTypeList(&pr, &parmaddr, &tp)
+	|
+	]
+			{ *ptp = proc_type(tp, pr, parmaddr); }
+;
+
+FormalTypeList(t_param **ppr; arith *pparmaddr; t_type **ptp;) :
 	'('
 	[
-		VarFormalType(&pr, &parmaddr)
+		VarFormalType(ppr, pparmaddr)
 		[
-			',' VarFormalType(&pr, &parmaddr)
+			',' VarFormalType(ppr, pparmaddr)
 		]*
 	|
 	]
 	')'
 	[ ':' qualtype(ptp)
-	|		{ *ptp = 0; }
+	|
 	]
-			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 
-VarFormalType(t_param **ppr; arith *parmaddr;)
+VarFormalType(t_param **ppr; arith *pparmaddr;)
 {
 	t_type *tp;
 	int isvar;
 } :
 	var(&isvar)
 	FormalType(&tp)
-			{ EnterParamList(ppr,NULLNODE,tp,isvar,parmaddr); }
+			{ EnterParamList(ppr,NULLNODE,tp,isvar,pparmaddr); }
 ;
 
 var(int *VARp;) :

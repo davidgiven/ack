@@ -52,7 +52,7 @@ struct switch_hdr	{
 struct case_entry	{
 	struct case_entry *ce_next;	/* next in list */
 	label ce_label;			/* generated label */
-	arith ce_value;			/* value of case label */
+	arith ce_low, ce_up;		/* lower and upper bound of range */
 };
 
 /* STATICALLOCDEF "case_entry" 20 */
@@ -147,14 +147,20 @@ CaseCode(nd, exitlabel, end_reached)
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA
 		*/
+		int gen = 1;
+
 		ce = sh->sh_entries;
 		C_rom_cst((arith) 0);
 		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			assert(ce);
-			if (val == ce->ce_value)	{
+			if (gen || val == ce->ce_low) {
+				gen = 1;
 				C_rom_ilb(ce->ce_label);
-				ce = ce->ce_next;
+				if (val == ce->ce_up) {
+					gen = 0;
+					ce = ce->ce_next;
+				}
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
 			else C_rom_ucon("0", pointer_size);
@@ -171,8 +177,11 @@ CaseCode(nd, exitlabel, end_reached)
 		for (ce = sh->sh_entries; ce; ce = ce->ce_next)	{
 			/* generate the entries: value + prog.label
 			*/
-			C_rom_cst(ce->ce_value);
-			C_rom_ilb(ce->ce_label);
+			val = ce->ce_low;
+			do {
+				C_rom_cst(val);
+				C_rom_ilb(ce->ce_label);
+			} while (val++ != ce->ce_up);
 		}
 		c_lae_dlb(CaseDescrLab);	/* perform the switch */
 		C_csb(word_size);
@@ -238,15 +247,7 @@ AddCases(sh, node, lbl)
 			assert(node->nd_left->nd_class == Value);
 			assert(node->nd_right->nd_class == Value);
 
-			node->nd_type = node->nd_left->nd_type;
-			node->nd_INT = node->nd_left->nd_INT;
-			for (;;) {
-				AddOneCase(sh, node, lbl);
-			        if (node->nd_INT == node->nd_right->nd_INT) {
-					break;
-				}
-			     	node->nd_INT++;
-			}
+			AddOneCase(sh, node->nd_left, node->nd_right, lbl);
 			return;
 		}
 
@@ -257,12 +258,12 @@ AddCases(sh, node, lbl)
 	}
 
 	assert(node->nd_class == Value);
-	AddOneCase(sh, node, lbl);
+	AddOneCase(sh, node, node, lbl);
 }
 
-AddOneCase(sh, node, lbl)
+AddOneCase(sh, lnode, rnode, lbl)
 	register struct switch_hdr *sh;
-	t_node *node;
+	t_node *lnode, *rnode;
 	label lbl;
 {
 	register struct case_entry *ce = new_case_entry();
@@ -270,29 +271,30 @@ AddOneCase(sh, node, lbl)
 	int fund = sh->sh_type->tp_fund;
 
 	ce->ce_label = lbl;
-	ce->ce_value = node->nd_INT;
-	if (! ChkCompat(&node, sh->sh_type, "case")) {
+	ce->ce_low = lnode->nd_INT;
+	ce->ce_up = rnode->nd_INT;
+	if (! ChkCompat(&lnode, sh->sh_type, "case") ||
+	    ! ChkCompat(&rnode, sh->sh_type, "case")) {
 	}
 	if (sh->sh_entries == 0)	{
 		/* first case entry
 		*/
-		ce->ce_next = (struct case_entry *) 0;
 		sh->sh_entries = ce;
-		sh->sh_lowerbd = sh->sh_upperbd = ce->ce_value;
-		sh->sh_nrofentries = 1;
+		sh->sh_lowerbd = ce->ce_low;
+		sh->sh_upperbd = ce->ce_up;
 	}
 	else	{
 		/* second etc. case entry
 		   find the proper place to put ce into the list
 		*/
 		
-		if (chk_bounds(ce->ce_value, sh->sh_lowerbd, fund)) {
-			sh->sh_lowerbd = ce->ce_value;
+		if (chk_bounds(ce->ce_low, sh->sh_lowerbd, fund)) {
+			sh->sh_lowerbd = ce->ce_low;
 		}
-		else if (! chk_bounds(ce->ce_value, sh->sh_upperbd, fund)) {
-			sh->sh_upperbd = ce->ce_value;
+		if (! chk_bounds(ce->ce_up, sh->sh_upperbd, fund)) {
+			sh->sh_upperbd = ce->ce_up;
 		}
-		while (c1 && !chk_bounds(ce->ce_value, c1->ce_value, fund)) {
+		while (c1 &&! chk_bounds(ce->ce_up, c1->ce_low, fund)) {
 			c2 = c1;
 			c1 = c1->ce_next;
 		}
@@ -306,11 +308,14 @@ AddOneCase(sh, node, lbl)
 			The case c1 == 0 && c2 == 0 cannot occur, since
 			the list is guaranteed not to be empty.
 		*/
-		if (c1)	{
-			if (c1->ce_value == ce->ce_value)	{
-node_error(node, "multiple case entry for value %ld", ce->ce_value);
+		if (c2) {
+			if ( chk_bounds(ce->ce_low, c2->ce_up, fund)) {
+node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_low));
 				free_case_entry(ce);
+				return;
 			}
+		}
+		if (c1)	{
 			if (c2)	{
 				ce->ce_next = c2->ce_next;
 				c2->ce_next = ce;
@@ -323,9 +328,8 @@ node_error(node, "multiple case entry for value %ld", ce->ce_value);
 		else	{
 			assert(c2);
 
-			ce->ce_next = (struct case_entry *) 0;
 			c2->ce_next = ce;
 		}
-		(sh->sh_nrofentries)++;
 	}
+	sh->sh_nrofentries += ce->ce_up - ce->ce_low + 1;
 }
