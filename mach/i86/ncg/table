@@ -2976,7 +2976,7 @@ kills ALL
 
 pat nop
 kills ALL
-#ifdef NOTDEF
+#if 0
   gen joehoe {label, ".nop"}
 #endif
 
