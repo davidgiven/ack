@@ -15,17 +15,16 @@
   by a call to Tgetent. The "ARRAY OF CHAR" parameters must be null-terminated.
   You can call them with a constant string argument, as these are always
   null-terminated in our Modula-2 implementation.
-  Unlike the C version, this version takes care of UP, BC, and PC
-  automatically. Only ospeed must still be set by the user.
+  Unlike the C version, this version takes care of UP, BC, PC, and ospeed
+  automatically.
+  If Tgetent is not called by the user, it is called by the module itself,
+  using the TERM environment variable, or "dumb" if TERM does not exist.
 *)
 
 DEFINITION MODULE Termcap;
 
   TYPE	STRCAP;
 	PUTPROC = PROCEDURE(CHAR);
-
-  VAR
-	ospeed: INTEGER;	(* see termcap(3), tty(4) *)
 
   PROCEDURE Tgetent(name: ARRAY OF CHAR) : INTEGER;
 
@@ -36,8 +35,10 @@ DEFINITION MODULE Termcap;
   PROCEDURE Tgoto(cm: STRCAP; col, line: INTEGER): STRCAP;
   (* Result exists until next call to Tgoto *)
 
-  PROCEDURE Tgetstr(id: ARRAY OF CHAR): STRCAP;
-  (* Result exists until next call to Tgetent *)
+  PROCEDURE Tgetstr(id: ARRAY OF CHAR; VAR res: STRCAP) : BOOLEAN;
+  (* Returns FALSE if capability does not exist;
+     Result exists until next call to Tgetent.
+  *)
 
   PROCEDURE Tputs(cp: STRCAP; affcnt: INTEGER; p: PUTPROC);
 

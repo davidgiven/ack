@@ -14,81 +14,82 @@ IMPLEMENTATION MODULE Termcap;
 
   IMPORT XXTermcap;
   FROM SYSTEM IMPORT ADR, ADDRESS;
+  FROM Unix IMPORT gtty;
+  FROM Arguments IMPORT GetEnv;
 
   TYPE	STR = ARRAY[1..32] OF CHAR;
 	STRCAP = POINTER TO STR;
 
   VAR	Buf, Buf1 : ARRAY [1..1024] OF CHAR;
-	UP, BC: STRCAP;
-	PC: CHAR;
-      	Initialized: BOOLEAN;
 	BufCnt : INTEGER;
 
   PROCEDURE Tgetent(name: ARRAY OF CHAR) : INTEGER;
   VAR i: INTEGER;
+      x: STRCAP;
+      sp: STR;
   BEGIN
 	i := XXTermcap.tgetent(ADR(Buf), ADR(name));
 	BufCnt := 1;
+	IF gtty(1, ADR(sp)) < 0 THEN
+	ELSE
+		XXTermcap.ospeed := ORD(sp[2]);
+	END;
 	IF i > 0 THEN
-		Initialized := TRUE;
-		UP := Tgetstr("pc");
-		IF UP # NIL THEN
-			PC := UP^[1];
-		ELSE	PC := 0C;
+		IF Tgetstr("pc", x) THEN
+			XXTermcap.PC := x^[1];
+		ELSE	XXTermcap.PC := 0C;
 		END;
-		UP := Tgetstr("up");
-		BC := Tgetstr("bc");
+		IF Tgetstr("up", x) THEN ; END; XXTermcap.UP := x;
+		IF Tgetstr("bc", x) THEN ; END; XXTermcap.BC := x;
 	END;
 	RETURN i;
   END Tgetent;
 
   PROCEDURE Tgetnum(id: ARRAY OF CHAR): INTEGER;
   BEGIN
-	IF NOT Initialized THEN
-		RETURN -1;
-	END;
 	RETURN XXTermcap.tgetnum(ADR(id));
   END Tgetnum;
 
   PROCEDURE Tgetflag(id: ARRAY OF CHAR): BOOLEAN;
   BEGIN
-	IF NOT Initialized THEN
-		RETURN FALSE;
-	END;
 	RETURN XXTermcap.tgetflag(ADR(id)) = 1;
   END Tgetflag;
 
   PROCEDURE Tgoto(cm: STRCAP; col, line: INTEGER): STRCAP;
   BEGIN
-	XXTermcap.UP := UP;
-	XXTermcap.BC := BC;
 	RETURN XXTermcap.tgoto(cm, col, line);
   END Tgoto;
 
-  PROCEDURE Tgetstr(id: ARRAY OF CHAR): STRCAP;
+  PROCEDURE Tgetstr(id: ARRAY OF CHAR; VAR res: STRCAP) : BOOLEAN;
   VAR a, a2: ADDRESS;
       b: CARDINAL;
   BEGIN
-	IF NOT Initialized THEN
-		RETURN NIL;
-	END;
 	a := ADR(Buf1[BufCnt]);
 	a2 := XXTermcap.tgetstr(ADR(id), ADR(a));
+	res := a2;
 	IF a2 = NIL THEN
-		RETURN NIL;
+		RETURN FALSE;
 	END;
 	b := a - a2;
 	INC(BufCnt, b);
-	RETURN a2;
+	RETURN TRUE;
   END Tgetstr;
 
   PROCEDURE Tputs(cp: STRCAP; affcnt: INTEGER; p: PUTPROC);
   BEGIN
-	XXTermcap.PC := PC;
-	XXTermcap.ospeed := ospeed;
 	XXTermcap.tputs(cp, affcnt, XXTermcap.PUTPROC(p));
   END Tputs;
 
+  PROCEDURE InitTermcap;
+  VAR Bf: STR;
+  BEGIN
+	IF GetEnv("TERM", Bf) = 0 THEN
+		Bf := "dumb";
+	END;
+	IF Tgetent(Bf) <= 0 THEN
+	END;
+  END InitTermcap;
+
 BEGIN
-	Initialized := FALSE;
+	InitTermcap;
 END Termcap.
