@@ -1405,7 +1405,7 @@ kills all_mems
 gen axx* {indir_r, regvar($1)}, %1
 
 proc xxxrstl example adi stl
-with rmorconst rmorconst-RREG
+with rmorconst regorconst-RREG
   kills regvar($2)
   gen move %1, {LOCAL, $2, 4}
       axx* {LOCAL, $2, 4}, %2
