@@ -87,6 +87,9 @@ prconstraint(str) char *str; {
 	    if (name) {		/* yeah, it was a variable */
 		fprintf(genc,"var[%d].value", name->s_num);
 	    }
+	    else if (!strcmp(p, "ANY")) {
+		fputs("ANY.value", genc);
+	    }
 	    else fputs(p,genc);
 	    /* Now replace null byte with whatever used to be there */
 	    *q = c;
