@@ -184,7 +184,7 @@ compile(argc, argv)
 		FileName = source = argv[0];
 	else {
 		source = 0;
-		FileName = "standard input";
+		FileName = Salloc("standard input", 16);
 	}
 
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/

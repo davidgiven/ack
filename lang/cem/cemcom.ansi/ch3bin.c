@@ -85,8 +85,7 @@ ch3bin(expp, oper, expr)
 					*expp, '(', (struct expr *)0);
 		}
 		else
-			*expp = new_oper(expp_tp->tp_up,
-					*expp, '(', expr);
+			*expp = new_oper(expp_tp->tp_up, *expp, '(', expr);
 		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
 

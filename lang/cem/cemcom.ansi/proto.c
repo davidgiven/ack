@@ -160,8 +160,13 @@ struct type *tp;
 struct idf **idpp;
 {
 	struct tag *tg = (struct tag *)0;
+	register int fund = tp->tp_fund;
 
-	while (tp->tp_up) tp = tp->tp_up;
+        while (fund == FIELD || fund == POINTER
+                || fund == ARRAY || fund == FUNCTION) {
+                tp = tp->tp_up;
+                fund = tp->tp_fund;
+        }
 	*idpp = tp->tp_idf;
 	switch(tp->tp_fund) {
 	case ENUM: tg = tp->tp_idf->id_enum; break;
@@ -271,12 +276,8 @@ update_proto(tp, otp)
 	*/
 	register struct proto *pl, *opl;
 
-	if (tp == otp) {
-		return;
-	}
-	if (!tp || !otp) {
-		return;
-	}
+	if (tp == otp) return;
+	if (!tp || !otp) return;
 
 	while (tp->tp_fund != FUNCTION) {
 		tp = tp->tp_up;
@@ -298,7 +299,6 @@ update_proto(tp, otp)
 	} else if (opl) {
 		/* old decl has type */
 	} else if (pl) {
-		/* new decl has type */
 		otp->tp_proto = pl;
 	}
 
@@ -309,7 +309,7 @@ free_proto_list(pl)
 	register struct proto *pl;
 {
 	while (pl) {
-		struct proto *tmp = pl->next;
+		register struct proto *tmp = pl->next;
 		free_proto(pl);
 		pl = tmp;
 	}
@@ -323,8 +323,13 @@ struct type *tp;
 {
 	register struct idf *ident;
 	register struct tag *tgp, **tgpp;
+	register int fund = tp->tp_fund;
 
-	while(tp->tp_up) tp = tp->tp_up;
+	while (fund == FIELD || fund == POINTER
+		|| fund == ARRAY || fund == FUNCTION) {
+		tp = tp->tp_up;
+		fund = tp->tp_fund;
+	}
 
 	ident = tp->tp_idf;
 	switch (tp->tp_fund) {

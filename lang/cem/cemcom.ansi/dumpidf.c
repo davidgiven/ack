@@ -325,7 +325,7 @@ dump_type(tp)
 			ops = 0;
 			break;
 		}
-		tp = tp->tp_up;
+		if (!ops) tp = tp->tp_up;
 	}
 	dumplevel--;
 }
@@ -379,7 +379,7 @@ type2str(tp)
 			ops = 0;
 			break;
 		}
-		tp = tp->tp_up;
+		if (!ops) tp = tp->tp_up;
 	}
 	return buf;
 }

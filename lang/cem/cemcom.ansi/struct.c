@@ -212,6 +212,9 @@ declare_struct(fund, idf, tpp)
 	else	{
 		/* The struct is new. */
 		/* Hook in a new struct tag */
+		if (level <= L_PROTO)
+			warning("declaration of %s-tag inside parameter list",
+				    symbol2str(fund));
 		tg = new_tag();
 		tg->next = *tgp;
 		*tgp = tg;
