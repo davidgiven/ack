@@ -23,6 +23,6 @@ opr:
 	make pr | opr
 
 clean:
-	-rm -f *.[kosme] *.old em_last em_runinf
+	-rm -f *.[kosme] *.old em_last em_runinf core tp.cem.r e.out a.out tp.cem
 
 transI transM cmpI cmpM:
