@@ -101,13 +101,14 @@ MkCoercion(pnd, tp)
 				wmess = "conversion";
 			}
 			break;
-		case T_INTEGER:  {
-			long i = min_int[(int)(tp->tp_size)];
-			long j = nd->nd_INT & i;
-
-			if (j != 0 && (nd_tp->tp_fund != T_INTEGER || j != i)) {
+		case T_INTEGER:
+			if (! chk_bounds(nd->nd_INT,
+					 max_int[(int)(tp->tp_size)],
+					 nd_tp->tp_fund) ||
+			    ! chk_bounds(min_int[(int)(tp->tp_size)],
+					 nd->nd_INT,
+					 T_INTEGER)) {
 				wmess = "conversion";
-			}
 			}
 			break;
 		}
@@ -818,7 +819,6 @@ ChkBinOper(expp)
 {
 	/*	Check a binary operation.
 	*/
-	register t_node *left = expp->nd_left, *right = expp->nd_right;
 	register t_type *tpl, *tpr;
 	t_type *result_type;
 	int allowed;
@@ -826,19 +826,19 @@ ChkBinOper(expp)
 
 	/* First, check BOTH operands */
 
-	retval = ChkExpression(left) & ChkExpression(right);
+	retval = ChkExpression(expp->nd_left) & ChkExpression(expp->nd_right);
 
-	tpl = BaseType(left->nd_type);
-	tpr = BaseType(right->nd_type);
+	tpl = BaseType(expp->nd_left->nd_type);
+	tpr = BaseType(expp->nd_right->nd_type);
 
 	if (tpl == intorcard_type) {
 		if (tpr == int_type || tpr == card_type) {
-			 left->nd_type = tpl = tpr;
+			 expp->nd_left->nd_type = tpl = tpr;
 		}
 	}
 	if (tpr == intorcard_type) {
 		if (tpl == int_type || tpl == card_type) {
-			right->nd_type = tpr = tpl;
+			expp->nd_right->nd_type = tpr = tpl;
 		}
 	}
 
@@ -863,12 +863,11 @@ ChkBinOper(expp)
 			   I don't know! Should we be allowed to check
 			   if a INTEGER is a member of a BITSET???
 			*/
-			node_error(left, "type incompatibility in IN");
+			node_error(expp->nd_left, "type incompatibility in IN");
 			return 0;
 		}
 		MkCoercion(&(expp->nd_left), word_type);
-		left = expp->nd_left;
-		if (left->nd_class == Value && right->nd_class == Set) {
+		if (expp->nd_left->nd_class == Value && expp->nd_right->nd_class == Set) {
 			cstset(expp);
 		}
 		return retval;
@@ -901,12 +900,14 @@ ChkBinOper(expp)
 	}
 
 	if (tpl->tp_fund == T_SET) {
-	    	if (left->nd_class == Set && right->nd_class == Set) {
+	    	if (expp->nd_left->nd_class == Set &&
+		    expp->nd_right->nd_class == Set) {
 			cstset(expp);
 		}
 	}
 	else if ( tpl->tp_fund != T_REAL &&
-		  left->nd_class == Value && right->nd_class == Value) {
+		  expp->nd_left->nd_class == Value &&
+		  expp->nd_right->nd_class == Value) {
 		if (expp->nd_left->nd_type->tp_fund == T_INTEGER) {
 			cstibin(expp);
 		}

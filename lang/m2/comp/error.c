@@ -208,7 +208,7 @@ _error(class, node, ap)
 	switch (class)	{	
 	case WARNING:
 	case LEXWARNING:
-		if (! warn_class & warning_classes) return;
+		if (! (warn_class & warning_classes)) return;
 		switch(warn_class) {
 #ifndef STRICT_3RD_ED
 		case W_OLDFASHIONED:

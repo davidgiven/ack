@@ -434,7 +434,7 @@ again:
 				else {
 					state = End;
 					if (ch == 'H') base = 16;
-					UnloadChar(ch);
+					else UnloadChar(ch);
 				}
 				break;
 
