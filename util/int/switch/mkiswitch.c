@@ -14,9 +14,9 @@
 extern char *sprintf();
 extern FILE *popen();
 
-#include <util/ass/ip_spec.h>
-#include <h/em_spec.h>
-#include <h/em_flag.h>
+#include <ip_spec.h>
+#include <em_spec.h>
+#include <em_flag.h>
 
 extern char em_mnem[][4] ;
 extern char em_flag[] ;

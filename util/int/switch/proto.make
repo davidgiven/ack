@@ -4,9 +4,9 @@
 
 SRC_DIR = $(SRC_HOME)/util/int/switch
 IP_SPEC =	$(SRC_HOME)/etc/ip_spec.t
-UCFLAGS =	-I$(UTIL_HOME) -I$(SRC_HOME) $(COPTIONS)
+UCFLAGS =	-I$(UTIL_HOME)/h $(COPTIONS)
 ULDFLAGS =	$(ULDOPTIONS)
-LINTFLAGS =	-I$(UTIL_HOME) -I$(SRC_HOME) $(LINTOPTIONS)
+LINTFLAGS =	-I$(UTIL_HOME)/h $(LINTOPTIONS)
 
 SRC =		$(SRC_DIR)/mkiswitch.c	$(SRC_DIR)/mkswitch.c
 OBJ =		mkiswitch.$(USUF)	mkswitch.$(USUF)
