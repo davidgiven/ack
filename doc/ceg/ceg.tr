@@ -15,22 +15,22 @@ Amsterdam, The Netherlands
 Introduction
 .PP
 A \fBcode expander\fR (\fBce\fR for short) is a part of the 
-Amsterdam Compiler Kit (\fBACK\fR), which provides the user with
+Amsterdam Compiler Kit (\fBACK\fR) and provides the user with
 high-speed generation of medium-quality code. Although conceptually
 equivalent to the more usual \fBcode generator\fR, it differs in some
 aspects.
 .LP
 Normally, a program to be compiled with \fBACK\fR
-is first fed into the preprocessor. The output of the preprocessor goes 
-into the appropiate front end, which produces EM 
+is first fed to the preprocessor. The output of the preprocessor goes 
+into the appropriate front end, which produces EM 
 .[~[
-IR-81
+Tanenbaum
 .]]
 (a
 machine independent low level intermediate code). The generated EM code is fed
 into the peephole optimizer, which scans it with a window of a few instructions,
 replacing certain inefficient code sequences by better ones. After the
-peephole optimizer a backend follows, which produces high-quality assembly code.
+peephole optimizer a back end follows, which produces high-quality assembly code.
 The assembly code goes via the target optimizer into the assembler and the
 object code then goes into the
 linker/loader, the final component in the pipeline. 
@@ -41,14 +41,15 @@ reducing compile time is more important than execution time of a program.
 For this purpose a new scheme is introduced:
 .IP \ \ 1:
 The code generator and assembler are
-replaced by one program: the \fBcode expander\fR, which directly expands
-the EM-instructions into a relocatable objectfile.
+replaced by a library, the \fBcode expander\fR, consisting of a set of routines
+which directly expand
+the EM-instructions into a relocatable object file.
 The peephole and target optimizer are not used.
 .IP \ \ 2:
-The front end and \fBce\fR are combined into a single
-program, eliminating the overhead of intermediate files.
+These routines replace the usual EM-generating routines in the front end; this
+eliminates the overhead of intermediate files.
 .LP
-This results in a fast compiler producing objectfile, ready to be
+This results in a fast compiler producing object file, ready to be
 linked and loaded, at the cost of unoptimized object code.
 .LP
 Extra speedup is obtained by generating code for a single EM-instruction
@@ -63,16 +64,21 @@ debugged and tested in less than two weeks.
 This document describes the tools for automatically generating a
 \fBce\fR (a library of C files), from two tables and 
 a few machine-dependent functions. 
-A throughout knowledge of EM is necessary to understand this document.
+A thorough knowledge of EM is necessary to understand this document.
 .NH
-An overview (? Inside the code expander generator)
+The code expander generator
+.PP
+The code expander generator (\fBceg\fR) generates a code expander from 
+two tables and a few machine-dependent functions. This section explains how 
+the \fBceg\fR works. The first half describes the transformations on the 
+two tables. The second half tells how these transformations are done by the
+\fBceg\fR.
 .PP
 A code expander consists of a set of routines that convert EM-instructions
 directly to relocatable object code. These routines are called by a front 
-end through the
-EM_CODE(3ACK)
+end through the EM_CODE(3ACK)
 .[~[
-EM_CODE(3ACK)
+EM_CODE
 .]]
 interface. To free the table writer of the burden of building
 an object file, we supply a set of routines that build an object file
@@ -82,7 +88,9 @@ ACK_A.OUT(5L)
 .]]
 format (see appendix B). This set of routines is called
 the
-\fBback\fR-primitives (see appendix A). 
+\fBback\fR-primitives (see appendix A). In short, a code expander consists of a
+set of routines which map the EM_CODE interface on the 
+\fBback\fR-primitives interface, which generate object code.
 .PP
 To avoid repetition of the same sequences of
 \fBback\fR-primitives in different
@@ -91,8 +99,9 @@ and to improve readability, the EM-to-object information must be supplied in
 two
 tables. The EM_table maps EM to an assembly language, and the as_table
 maps
-assembly to \fBback\fR-primitives. The assembly language may be an
-actual assembly language or an ad-hoc one designed by the table writer.
+assembly to \fBback\fR-primitives. The assembly language is chosen by the
+table writer. It can either be an actual assembly language or his ad-hoc 
+designed language.
 .LP
 The following picture shows the dependencies between the different components:
 .sp
@@ -105,7 +114,7 @@ D: arrow right with .start at A.center - (0.25i, 0)
 E: arrow right with .start at B.center - (0.25i, 0)
 F: arrow right with .start at C.center - (0.25i, 0)
 "EM_CODE(3ACK)" at A.start above
-"EM_TABLE" at B.start above
+"EM_table" at B.start above
 "as_table" at C.start above
 "source language  " at D.start rjust
 "EM" at 0.5 of the way between D.end and E.start
@@ -115,17 +124,28 @@ H: "  back primitives" at F.end ljust
 "  (ACK_A.OUT)" at H - (0, 0.2i) ljust
 .PE
 .PP
-The entries in the as_table map assembly instructions on \fBback\fR-primitives.
-The as_table is used to transform the EM->assembly mapping into an EM->
-\fBback\fR- primitives mapping;
-the expanded EM_table is then transformed into a set of C
+Although the picture suggests that during compilation of the EM instructions are
+first transformed into assembly instructions and then the assembly instructions
+are transformed into object-generating calls, the \fBback-primitives\fR, this
+is not what happens in practice, although the user is free to think it does.
+Actually, however the EM_table and the as_table are combined during code
+expander generation time, yielding an imaginary compound table that results in
+routines from the EM_CODE interface that generate object code directly.
+.PP
+As already indicated, the compound table does not exist either. Instead, each
+assembly instruction in the as_table is converted to a routine generating C
 .[~[
 Kernighan
 .]]
-routines, which are
-normally incorporated in a compiler. All this happens during compiler
-generation time. The C routines are activated during the
-execution of the compiler.
+code to generate C code to call the \fBback\fR-primitives. The EM_table is
+converted into a program that for each EM instruction generates a routine,
+using the routines generated from the as_table. Execution of the latter program
+will then generate the code expander.
+.PP
+This scheme allows great flexibility in the table writing, while still
+resulting in a very efficient code expander. One implication is that the
+as_table is interpreted twice and the EM_table only once. This has consequences
+for their structure.
 .PP
 To illustrate what happens, we give an example. The example is an entry in
 the tables for the VAX-machine. The assembly language chosen is a subset of the 
@@ -135,19 +155,35 @@ One of the most fundamental operations in EM is ``loc c", load the value of c
 on the stack. To expand this instruction the 
 tables contain the following information:
 .DS
-\f5
-EM_table   :    C_loc   ==>   "pushl $$$1".
-     /* $1 refers to the first argument of C_loc. */
+EM_table   : \f5
+   C_loc   ==>   "pushl $$$1".
+     /* $1 refers to the first argument of C_loc. 
+      * $$ is a quoted $. */
 
 
-as_table   :    pushl  src : CONST   ==> 
+\fRas_table   :\f5
+   pushl  src : CONST   ==> 
                          @text1( 0xd0);
                          @text1( 0xef);
                          @text4( %$( src->num)).
 \fR
 .DE
 .LP
-The following routine will be generated for C_loc:
+The as_table is transformed in the following routine:
+.DS
+\f5
+pushl_instr(src)
+t_operand *src;    
+/* "t_operand" is a struct defined by the table writer. */
+{
+   printf("swtxt();");
+   printf("text1( 0xd0);");
+   printf("text1( 0xef);");
+   printf("text4( %s );", substitute_dollar( src->num) );
+}
+\fR
+.DE
+Using "pushl_instr()", the following routine is generated from the EM_table:
 .DS
 \f5
 C_loc( c)
@@ -161,19 +197,20 @@ arith c;
 \fR
 .DE
 .LP
-A call by the compiler to "C_loc" will cause the 1-byte numbers "0xd0" 
+A compiler call to "C_loc" will cause the 1-byte numbers "0xd0" 
 and "0xef"
 and the 4-byte value of the variable "c" to be stored in the text segment.
 .PP
 The transformations on the tables are done automatically by the code expander
 generator.
 The code expander generator consists of two tools, one to handle the 
-EM_table, \fBemg\fR, and one to handle the as_table, \fBasg\fR. Asg transforms 
+EM_table, \fBemg\fR, and one to handle the as_table, \fBasg\fR. \fBAsg\fR 
+transforms 
 each assembly instruction in a C routine. These C routines generate calls
 to the \fBback\fR-primitives. Finally, the generated C routines are used
-by emg to generate the actual code expander from the EM_table.
+by \fBemg\fR to generate the actual code expander from the EM_table.
 .PP
-The link between emg and \fBasg\fR is an assembly language.
+The link between \fBemg\fR and \fBasg\fR is an assembly language.
 We did not enforce a specific syntax for the assembly language;
 instead we have chosen to give the table writer the freedom
 to make an ad-hoc assembly language or to use an actual assembly language 
@@ -183,26 +220,29 @@ runs on the machine at hand, he can test the EM_table independently from the
 as_table. Of course there is a price to pay: the table writer has to
 do the decoding of the operands himself. See section 4 for more details.
 .PP
-Before we explain the several parts of the ceg, we will give an overview of
-the four main phases.
-.IP "phase 1):"
+Before we describe the structure of the tables in detail, we will give 
+an overview of the four main phases.
+.IP "phase 1:"
 .br
 The as_table is transformed by \fBasg\fR. This results in a set of C routines. 
-Each assembly-opcode generates one C routine.
-.IP "phase 2):"
+Each assembly-opcode generates one C routine. Note that a call to such a
+routine does not generate the corresponding object code; it generates C code,
+which, when executed, generates the desired object code.
+.IP "phase 2:"
 .br
 The C routines generated by \fBasg\fR are used by emg to expand the EM_table. 
 This
-results in a set of C routines, the code expander, which form the procedural 
-interface EM_CODE(3ACK).
-.IP "phase 3):"
+results in a set of C routines, the code expander, which conform to the 
+procedural interface EM_CODE(3ACK). A call to such a routine does indeed
+generate the desired object code.
+.IP "phase 3:"
 .br
 The front end that uses the procedural interface is linked/loaded with the
-code expander generated in phase 2) and the \fBback\fR-primitives.
-This results in a compiler.
-.IP "phase 4):"
+code expander generated in phase 2 and the \fBback\fR-primitives (a supplied
+library). This results in a compiler.
+.IP "phase 4:"
 .br
-Execution of the compiler; The routines in the code expander are
+Execution of the compiler. The routines in the code expander are
 executed and produce object code.
 .RE
 .NH
@@ -213,7 +253,7 @@ the first 3 sections describe the syntax of the EM_table,
 the
 semantics of the EM_table, and an list of the functions and
 constants that must be present in the EM_table, in the file "mach.c" or in
-the file "mach.h"; the last section deals with the case that the table
+the file "mach.h"; and the last section deals with the case that the table
 writer wants to generate assembly instead of object code. The section on
 semantics contains many examples.
 .NH 2
@@ -244,8 +284,8 @@ a name in the EM_CODE(3ACK) interface. \fBcondition\fR is a C expression.
 \fBfunction-call\fR is a call of a C function. \fBlabel\fR, \fBmnemonic\fR
 and \fBoperand\fR are arbitrary strings. If an \fBoperand\fR 
 contains brackets, the
-brackets must match. In reality there is an upperbound on the number of
-operands; The maxium number is defined by the constant MAX_OPERANDS in de
+brackets must match. In reality there is an upper bound on the number of
+operands; the maximum number is defined by the constant MAX_OPERANDS in de
 file "const.h" in the directory assemble.c. Comments in the table should be
 placed between "/*" and "*/". Finally, before the table is parsed, the
 C preprocessor runs.
@@ -257,13 +297,13 @@ for every instruction in the EM_CODE(3ACK).
 For every EM-instruction not mentioned in the EM_table, a
 C function that prints an error message is generated.
 It is possible to divide the EM_CODE(3ACK)-interface in four parts :
-.IP \0\01) 
+.IP \0\01: 
 text instructions      (e.g., C_loc, C_adi, ..)
-.IP \0\02) 
+.IP \0\02: 
 pseudo instructions    (e.g., C_open, C_df_ilb, ..)
-.IP \0\03) 
+.IP \0\03: 
 storage instructions   (e.g., C_rom_icon,  ..)
-.IP \0\04) 
+.IP \0\04: 
 message instructions   (e.g., C_mes_begin, ..)
 .LP
 This section starts with giving the semantics of the grammar. The examples
@@ -275,7 +315,7 @@ useful for a code expander, they are ignored.
 Actions
 .PP
 The EM_table consists of rules which describe how to expand a \fBC_instr\fR
-from the EM_CODE(3ACK)-interface, an EM instruction, into actions. 
+from the EM_CODE(3ACK)-interface (corresponding to an EM instruction) into actions. 
 There are two kinds of actions: assembly instructions and C function calls. 
 An assembly instruction is defined as a mnemonic followed by zero or more
 operands, separated by commas. The semantics of an assembly instruction is
@@ -305,9 +345,9 @@ Labels
 Since an assembly language without instruction labels is a rather weak 
 language, labels inside a contiguous block of assembly instructions are 
 allowed. When using labels two rules must be observed:
-.IP \0\01)
+.IP \0\01:
 The name of a label should be unique inside an action list.
-.IP \0\02)
+.IP \0\02:
 The labels used in an assembler instruction should be defined in the same
 action list.
 .LP
@@ -337,11 +377,11 @@ is the
 total number of arguments of the current \fBC_instr\fR (there are a few
 exceptions, see Implicit arguments). The table writer may
 refer to an argument as $\fIi\fR. If a plain $-sign is needed in an
-assembly instruction, it must be preceeded by a extra $-sign.
+assembly instruction, it must be preceded by a extra $-sign.
 .PP
 There are two groups of \fBC_instr\fRs whose arguments are handled specially:
 .RS
-.IP "1) Instructions dealing with local offsets."
+.IP "1: Instructions dealing with local offsets."
 .br
 The value of the $\fIi\fR argument referring to a parameter ($\fIi\fR >= 0),
 is increased by "EM_BSIZE". "EM_BSIZE" is the size of the return status block
@@ -352,7 +392,7 @@ C_lol   ==>     "push $1(bp)".
        /* automatic conversion of $1 */
 \fR
 .DE
-.IP "2) Instructions using global names or instruction labels"
+.IP "2: Instructions using global names or instruction labels"
 .br
 All the arguments referring to global names or instruction labels will be
 transformed into a unique assembly name. To prevent name clashes with library
@@ -400,7 +440,7 @@ Equivalence rule
 Among the simple rules there is a special case rule:
 the equivalence rule. This rule declares two \fBC_instr\fR equivalent. To
 distinguish it from the usual simple rule "==>" is replaced by a "::=".
-The benefit of an equivalence rule is that the arguments are not 
+The advantage of an equivalence rule is that the arguments are not 
 converted (see 3.2.3).
 .DS
 \f5
@@ -410,7 +450,7 @@ C_slu   ::=  C_sli( $1).
 .NH 3
 Abbreviations
 .PP
-EM instructions with an external as argument come in three variants in
+EM instructions with an external as an argument come in three variants in
 the EM_CODE(3ACK) interface. In most cases it will be possible to take 
 these variants together. For this purpose the ".." notation is introduced. 
 .DS
@@ -583,7 +623,7 @@ Notice that EM_BSIZE is zero. The vax4 takes care of this automatically.
 .PP
 There are three routines which have to be defined by the table writer. The
 table writer can define them as ordinary C functions in the file "mach.c" or
-define them in the EM_table. For example, for the 8086 it looks like this:
+define them in the EM_table. For example, for the 8086 they look like this:
 .DS
 \f5
 jump       ==>       "jmp $1".
@@ -600,9 +640,12 @@ locals
 \fR
 .DE
 .NH 2
-Generating assembly code
+Generating assembly code 
 .PP
-The constants "BYTES_REVERSED" and "WORDS_REVERSED" are not needed.
+When the code expander generator is used for generating assembly instead of
+object code, not all the above mentioned constants and functions have to 
+be defined. In this case, the constants "BYTES_REVERSED" and "WORDS_REVERSED" 
+are not used.
 .NH 1
 Description of the as_table
 .PP
@@ -617,7 +660,7 @@ VAX or for the 8086.
 .NH 2
 Grammar
 .PP
-The formal form of the as_table is given by the following grammar :
+The form of the as_table is given by the following grammar :
 .VS +4
 .TS
 center tab(#);
@@ -639,7 +682,12 @@ IF_STATEMENT#::=#"@if"   "(" condition ")"   ACTION_LIST
 .LP
 \fBmnemonic\fR, \fBoperand\fR and \fBtype\fR are all C identifiers,
 \fBcondition\fR is a normal C expression.
-\fBfunction-call\fR must be a C function call.
+\fBfunction-call\fR must be a C function call. 
+Since the as_table is
+interpreted on two levels, during code expander generation and during code
+expander execution, two levels of calls are present in it. A "function-call"
+is done during code expander generation, a "@function-call" during code
+expander execution.
 .NH 2
 Semantics
 .PP
@@ -650,7 +698,7 @@ one for each assembler mnemonic. (The names of
 these functions are the assembler mnemonics postfixed with "_instr", e.g.
 \"add" becomes "add_instr()".) These functions will be used by the function 
 assemble() during the expansion of the EM_table. 
-After explainig the semantics of the as_table the function
+After explaining the semantics of the as_table the function
 assemble() will be described.
 .NH 3
 Rules
@@ -683,20 +731,20 @@ determine the opcode. Both cases can be easily expressed in the as_table.
 The first case is obvious. For the second case type fields for the operands
 are introduced.
 .LP
-When both mnemonic and operands determine the opcode, the table writer has 
+When mnemonic and operands together determine the opcode, the table writer has 
 to give several rules for each combination of mnemonic and operands. The rules
 differ in the type fields of the operands.
 The table writer has to supply functions that check the type
 of the operand. The name of such a function is the name of the type; it
 has one argument: a pointer to a struct of type t_operand; it returns
-1 when the operand is of this type, otherwise it returns 0.
+non-zero when the operand is of this type, otherwise it returns 0.
 .LP
 This will usually lead to a list of rules per mnemonic. To reduce the amount of
-work an abbrevation is supplied. Once the mnemonic is specified it can be
+work an abbreviation is supplied. Once the mnemonic is specified it can be
 refered to in the following rules by "...".
 One has to make sure
-that each mnemonic is mentioned only once in the as_table, otherwise \fBasg\fR 
-will generate more than one function with the same name.
+that each mnemonic is mentioned only once in the as_table, as otherwise 
+\fBasg\fR will generate more than one function with the same name.
 .LP
 The following example shows the usage of type fields.
 .DS L
@@ -715,16 +763,20 @@ The table-writer must supply the restriction functions, \f5REG\fR and
 .NH 3 
 The function of the @-sign and the if-statement.
 .PP
-The righthand side of a rule consists of function calls. Some of the
-functions generate object code directly (e.g., the \fBback\fR-primitives),
-others are needed for further assemblation (e.g., \f5gen_operand()\fR in the
-first example). The last group will be evaluated during the expansion
-of the EM_table, while the first group is incorporated in the compiler.
-This is denoted by the @-sign in front of the \fBback\fR-primitives.
+The right hand side of a rule consists of function calls. 
+Since the as_table is
+interpreted on two levels, during code expander generation and during code
+expander execution, two levels of calls are present in it. A function-call
+without a "@"-sign
+is called during code expander generation (e.g., the \f5gen_operand()\fR in the
+first example). 
+A function call with a "@"-sign is called during code expander execution (e.g.,
+the \fBback\fR-primitives). So the last group is a part of the compiler.
 .LP
 The next example concerns the use of the "@"-sign in front of a table writer
 written
-function. The need for this construction arises when you implement push/pop
+function. The need for this construction arises, e.g., when you 
+implement push/pop
 optimization; flags need to be set/unset and tested during the execution of
 the compiler:
 .DS L
@@ -750,7 +802,7 @@ the compiler.  For example one needs to know if a "$\fIi\fR" argument fits in
 one byte.
 In this case one can use a special if-statement provided by \fBasg\fR:
 @if, @elsif, @else, @fi. This means that the conditions will be evaluated at
-runtime of the \fBce\fR. In such a condition one may of course refer to the
+run time of the \fBce\fR. In such a condition one may of course refer to the
 "$\fIi\fR" arguments. For example, constants can be packed into one or two byte
 arguments:
 .DS L
@@ -766,10 +818,10 @@ mov dst:ACCU, src:DATA  ==>  @if ( fits_byte( %$(dst->expr)))
 .NH 3
 References to operands
 .PP
-As mentioned before, the operands of an assembler instruction may be used as
-pointers, to the struct t_operand, in the righthand side of the table.
+As noted before, the operands of an assembler instruction may be used as
+pointers, to the struct t_operand, in the right hand side of the table.
 Because of the free format assembler, the types of the fields in the struct
-t_operand are unknown to \fBasg\fR. Clearly \fBasg\fR must know these types.
+t_operand are unknown to \fBasg\fR. Clearly, however, \fBasg\fR must know these types.
 This section explains how these types must be specified.
 .LP
 References to operands come in three forms: ordinary operands, operands that
@@ -797,7 +849,7 @@ The three cases differ only in the conversion field. The first conversion
 applies to ordinary operands. The second applies to operands that contain
 a "$\fIi\fR". The expression between brackets must be of type char *. The
 result of "%$" is of the type of "$\fIi\fR". The
-third applies operands that refer to a local label. The expression between
+third applies to operands that refer to a local label. The expression between
 the brackets must be of type char *. The result of "%dist" is of type arith.
 .LP
 The following example illustrates the usage of "%$". (For an
@@ -821,12 +873,12 @@ arg_type.h must contain the definition of STRING, ARITH and INT.
 %dist is only guaranteed to work when called as a parameter of text1(), text2() or text4().
 The goal of the %dist conversion is to reduce the number of reloc1(), reloc2()
 and reloc4()
-calls, saving space and time (no relocation at compiler runtime). 
+calls, saving space and time (no relocation at compiler run time). 
 .LP
 The following example illustrates the usage of "%dist".
 .DS L
 \f5
- jmp dst:ILB    ==>    /* label in an instructionlist */
+ jmp dst:ILB    ==>    /* label in an instruction list */
                  @text1( 0xeb);          
                  @text1( %dist( dst->lab)).
 
@@ -836,20 +888,20 @@ The following example illustrates the usage of "%dist".
 \fR
 .DE
 .NH 3
-The functions assemble() and block_assemble
+The functions assemble() and block_assemble()
 .PP
 Assemble() and block_assemble() are two functions provided by \fBceg\fR.
 However, if one is not satisfied with the way they work the table writer can
-supply his own assemble or block_assemble().
+supply his own assemble() or block_assemble().
 The default function assemble() splits an assembly string in a label, mnemonic,
 and operands and performs the following actions on them:
-.IP \0\01)
+.IP \0\01:
 It processes the local label; it records the name and current position. Thereafter it calls the function process_label() with one argument of type string,
 the label. The table writer has to define this function.
-.IP \0\02)
+.IP \0\02:
 Thereafter it calls the function process_mnemonic() with one argument of
 type string, the mnemonic. The table writer has to define this function.
-.IP \0\03)
+.IP \0\03:
 It calls process_operand() for each operand. Process_operand() must be
 written by the table-writer since no fixed representation for operands
 is enforced. It has two arguments, a string (the operand to decode) 
@@ -857,7 +909,7 @@ and a pointer to the struct t_operand. The declaration of the struct
 t_operand must be given in the
 file "as.h", and the table-writer can put in it all the information needed for
 encoding the operand in machine format.
-.IP \0\04)
+.IP \0\04:
 It examines the mnemonic and calls the associated function, generated by
 \fBasg\fR, with pointers to the decoded operands as arguments. This makes it
 possible to use the decoded operands in the right hand side of a rule (see
@@ -868,15 +920,16 @@ instructions that belong to one action list. For every assembly instruction
 in
 this block assemble() is called. But, if a special action is
 required on block of assembly instructions, the table writer only has to
-rewrite this function to get a new \fBceg\fR that oblies to his wishes.
+rewrite this function to get a new \fBceg\fR that obliges to his wishes.
 .PP
 Only four things have to be specified in "as.h" and "as.c". First the user must
 give the declaration of struct t_operand in "as.h", and the functions
 process_operand(), process_mnemonic() and process_label() must be given 
 in "as.c". If the right side of the as_table
 contains function calls other than the \fBback\fR-primitives, these functions
-must also be present in "as.c". Note that both the "@"-sign and "references"
-also work in
+must also be present in "as.c". Note that both the "@"-sign (see 4.2.3) 
+and "references"
+(see 4.2.4) also work in
 the functions defined in "as.c". Example, part of 8086 "as.h" and "as.c" 
 files :
 .nr PS 10
@@ -884,13 +937,13 @@ files :
 .DS L
 \f5
 #define        UNKNOWN                0
-#define        IS_REG                0x1
+#define        IS_REG                 0x1
 #define        IS_ACCU                0x2
 #define        IS_DATA                0x4
-#define        IS_LABEL        0x8
-#define        IS_MEM                0x10
+#define        IS_LABEL               0x8
+#define        IS_MEM                 0x10
 #define        IS_ADDR                0x20
-#define        IS_ILB                0x40
+#define        IS_ILB                 0x40
 
 #define AX                0
 #define BX                3
@@ -900,21 +953,18 @@ files :
 #define SI                6
 #define DI                7
 
-#define REG( op)        ( op->type & IS_REG)
+#define REG( op)         ( op->type & IS_REG)
 #define ACCU( op)        ( op->type & IS_REG  &&  op->reg == AX)
-#define REG_CL( op)        ( op->type & IS_REG  &&  op->reg == CL)
+#define REG_CL( op)      ( op->type & IS_REG  &&  op->reg == CL)
 #define DATA( op)        ( op->type & IS_DATA)
-#define lABEL( op)        ( op->type & IS_LABEL)
-#define ILB( op)        ( op->type & IS_ILB)
-#define MEM( op)        ( op->type & IS_MEM)
+#define LABEL( op)       ( op->type & IS_LABEL)
+#define ILB( op)         ( op->type & IS_ILB)
+#define MEM( op)         ( op->type & IS_MEM)
 #define ADDR( op)        ( op->type & IS_ADDR)
-#define EADDR( op)        ( op->type & ( IS_ADDR | IS_MEM | IS_REG))
-#define CONST1( op)        ( op->type & IS_DATA  && strcmp( "1", op->expr) == 0)
+#define EADDR( op)       ( op->type & ( IS_ADDR | IS_MEM | IS_REG))
+#define CONST1( op)      ( op->type & IS_DATA  && strcmp( "1", op->expr) == 0)
 #define MOVS( op)        ( op->type & IS_LABEL&&strcmp("\"movs\"", op->lab) == 0)
 #define IMMEDIATE( op)        ( op->type & ( IS_DATA | IS_LABEL))
-
-#define TRUE                1
-#define FALSE                0
 
 struct t_operand {
         unsigned type;
@@ -930,23 +980,10 @@ extern struct t_operand saved_op, *AX_oper;
 #include "arg_type.h"
 #include "as.h"
 
-static struct t_operand dummy = { IS_REG, AX, 0, 0, 0};
-struct t_operand saved_op, *AX_oper = &dummy; 
-
-save_op( op)
-struct t_operand *op;
-{
-        saved_op.type = op->type;
-        saved_op.reg = op->reg;
-        saved_op.expr = op->expr;
-        saved_op.lab = op->lab;
-        saved_op.off = op->off;
-}
-
-#define last( s)        ( s + strlen( s) - 1)
-#define LEFT        '('
+#define last( s)     ( s + strlen( s) - 1)
+#define LEFT         '('
 #define RIGHT        ')'
-#define DOLLAR        '$'
+#define DOLLAR       '$'
 
 
 process_label( l)
@@ -1000,129 +1037,14 @@ struct t_operand *op;
                 }
 }
 
-int is_reg( str, op)
-char *str;
-struct t_operand *op;
-{
-        if ( strlen( str) != 2)
-                return( 0);
-
-        switch ( *(str+1)) {
-          case 'x' :
-          case 'l' : switch( *str) {
-                       case 'a' : op->reg = 0;
-                                  return( TRUE);
-
-                       case 'c' : op->reg = 1;
-                                  return( TRUE);
-
-                       case 'd' : op->reg = 2;
-                                  return( TRUE);
-
-                       case 'b' : op->reg = 3;
-                                  return( TRUE);
-
-                       default  : return( FALSE);
-                     }
-
-          case 'h' : switch( *str) {
-                       case 'a' : op->reg = 4;
-                                  return( TRUE);
-
-                       case 'c' : op->reg = 5;
-                                  return( TRUE);
-
-                       case 'd' : op->reg = 6;
-                                  return( TRUE);
-
-                       case 'b' : op->reg = 7;
-                                  return( TRUE);
-
-                       default  : return( FALSE);
-                     }
-
-          case 'p' : switch ( *str) {
-                       case 's' : op->reg = 4;
-                                  return( TRUE);
-
-                       case 'b' : op->reg = 5;
-                                  return( TRUE);
-
-                       default  : return( FALSE);
-                     }
-
-          case 'i' : switch ( *str) {
-                       case 's' : op->reg = 6;
-                                  return( TRUE);
-
-                       case 'd' : op->reg = 7;
-                                  return( TRUE);
-
-                       default  : return( FALSE);
-                     }
-
-          default  : return( FALSE);
-        }
-}
-
-#include <ctype.h>
-#define         isletter( c)        ( isalpha( c) || c == '_')
-
-int contains_label( str)
-char *str;
-{
-        while( !isletter( *str) && *str != '\0')
-                if ( *str == '$')
-                        if ( arg_type( str) == STRING)
-                                return( TRUE);
-                        else
-                                str += 5;
-                else
-                        str++;
-
-        return( isletter( *str));
-}
-
-set_label( str, op)
-char *str;
-struct t_operand *op;
-{
-        char *ptr, *index(), *sprint();
-        static char buf[256];
-
-        ptr = index( str, '+');
-
-        if ( ptr == 0)
-                op->off = "0";
-        else {
-                *ptr = '\0';
-                op->off = ptr + 1;
-        }
-
-        if ( isdigit( *str) && ( *(str+1) == 'b' || *(str+1) == 'f') &&
-             *(str+2) == '\0') {
-                *(str+1) = '\0';        /* b of f verwijderen! */
-                op->lab = str;
-                op->type = IS_ILB;
-        }
-        else {
-                op->type = IS_LABEL;
-                if ( index( str, DOLLAR) != 0)
-                        op->lab = str;
-                else 
-                        /* nood oplossing */
-                        op->lab = sprint( buf, "\"%s\"", str);
-        }
-}
-
-
-/******************************************************************************/
-
-
 
 mod_RM( reg, op)
 int reg;
 struct t_operand *op;
+
+/* This function helps to decode operands in machine format.
+ * Note the $-operators
+ */
 {
         if ( REG( op))
                 R233( 0x3, reg, op->reg);
@@ -1138,7 +1060,7 @@ struct t_operand *op;
                   case DI : R233( 0x0, reg, 0x5);
                             break;
 
-                  case BP : R233( 0x1, reg, 0x6);        /* Uitzondering! */
+                  case BP : R233( 0x1, reg, 0x6);        /* exception! */
                             @text1( 0);
                             break;
 
@@ -1188,40 +1110,18 @@ struct t_operand *op;
                 @fi
         }
 }
-
-mov_REG_EADDR( dst, src)
-struct t_operand *dst, *src;
-{
-        if ( REG(src) && dst->reg == src->reg)
-                ; /* Nothing!! result of push/pop optimization */
-        else {
-                @text1( 0x8b);
-                mod_RM( dst->reg, src);
-        }
-}
-
-
-R233( a, b, c)
-int a,b,c;
-{
-        @text1( %d( (a << 6) | ( b << 3) | c));
-}
-
-
-R53( a, b)
-int a,b;
-{
-        @text1( %d( (a << 3) | b));
-}
 \fR
 .DE
+.nr PS 12
+.nr VS 14
+.LP
 If a different function assemble() is needed, it can be placed in 
 the file "as.c"; assemble() has one argument of type char *.
 .NH 2
 Generating assembly
 .PP
-It is possible to generate assembly in stead of objectfiles (see section 5), in
-which case one does not have to supply "as_table", "as.h" and "as.c". 
+It is possible to generate assembly instead of object files (see section 5), in
+which case there is no need to supply "as_table", "as.h" and "as.c". 
 This option is useful for debugging the EM_table.
 .NH 1
 Building a ce
@@ -1233,13 +1133,13 @@ written and tested.  In the second phase, the as_table is written and tested.
 Phase one
 .PP
 The following is a list of instructions that describe how to make a
-code expander that generates assembly instruction.
-.IP \0\0-1
+code expander that generates assembly instructions.
+.IP \0\01:
 Create a new directory.
-.IP \0\0-2
+.IP \0\02:
 Create the "EM_table", "mach.h" and "mach.c" files; there is no need 
 for "as_table", "as.h" and "as.c" at this moment.
-.IP \0\0-3
+.IP \0\03:
 type
 .br
 \f5
@@ -1255,7 +1155,7 @@ EM-instruction. All these files will be compiled and put in a library called
 .br
 The option \f5-as\fR means that a \fBback\fR-library will be generated (in the directory back) that
 supports the generation of assembly language. The library is named "back.a".
-.IP \0\0-4
+.IP \0\04:
 Link a front end, "ce.a" and "back.a" together resulting in a compiler.
 .LP
 Now, the EM_table can be tested; if an error occurs, change the table
@@ -1271,11 +1171,11 @@ Phase two
 .PP
 The next phase is to generate a \fBce\fR that produces relocatable object
 code.
-.IP \0\0-1
+.IP \0\01:
 Remove the "ce" and "ceg" directories.
-.IP \0\0-2
+.IP \0\02:
 Write the "as_table", "as.h" and "as.c" files.
-.IP \0\0-3
+.IP \0\03:
 type
 .br
 \f5
@@ -1283,21 +1183,20 @@ install_ceg -obj
 \fR
 .br
 The option \f5-obj\fR means that "back.a" will contain a library for generating
-ACK_A.OUT(5L) object files, see appendix B. If another "back.a" is used,
+ACK_A.OUT(5L) object files, see appendix B. If different "back.a" is used,
 omit the \f5-obj\fR flag.
-.IP \0\0-4
+.IP \0\04:
 Link a front end, "ce.a" and "back.a" together resulting in a compiler.
 .LP
 The as_table is ready to be tested. If an error occurs, change the table.
 Then there are two ways to proceed: 
-.IP \0\0-1
+.IP \0\01:
 recompile the whole EM_table,
 .br
 \f5
 update ALL 
 \fR
-.br
-.IP \0\0-2
+.IP \0\02:
 recompile just the few EM-instructions that contained the error,
 \f5  
 .br
@@ -1310,6 +1209,11 @@ assembly instruction.
 ,where \fBC_instr\fR is an erroneous EM-instruction.
 \fR
 .NH
+Acknowledgements
+.LP
+We want to thank Henri Bal, Dick Grune, and Ceriel Jocobs for their 
+valuable suggestions and the critical reading of this paper.
+.NH
 References
 .LP
 .[
@@ -1319,7 +1223,7 @@ $LIST$
 .SH 
 Appendix A, \fRthe \fBback\fR-primitives
 .PP
-This appendix describes the routines avaible to generate relocatable
+This appendix describes the routines available to generate relocatable
 object code. If the default back.a is used, the object code is in 
 ACK A.OUT(5L) format.
 .nr PS 10
@@ -1399,8 +1303,8 @@ Symbol table interaction; with int seg; char *s;
 tab(#);
 l c lw(10c).
 switch_segment( seg)#:#T{
-sets current segment to "seg", and does alignment if necessary.
-"seg" can be one of the four constants defined in "back.h": SEGTXT, SEGROM,
+sets current segment to "seg", and does alignment if necessary. "seg" 
+can be one of the four constants defined in "back.h": SEGTXT, SEGROM,
 SEGCON, SEGBSS.
 T}
 #
@@ -1427,7 +1331,7 @@ output()#:#T{
 End of the job, flush output.
 T}
 do_close()#:#T{
-close outputstream.
+close output stream.
 T}
 init_back()#:#T{
 Only used with user-written back-library, gives the opportunity to initialize.
@@ -1448,7 +1352,7 @@ format. The object file consists of one header, followed by
 four segment headers, followed by text, data, relocation information, 
 symbol table and the string area. The object file is tuned for the ACK-LED,
 so there are some special things done just before the object file is dumped.
-First, the four relocation records are added which contain the names of the four
+First, four relocation records are added which contain the names of the four
 segments. Second, all the local relocation is resolved. This is done by the 
 function do_relo(). If there is a record belonging to a local
 name this address is relocated in the segment to which the record belongs.
