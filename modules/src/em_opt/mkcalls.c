@@ -4,6 +4,8 @@ static char rcsid[] = "$Header$";
 
 #include "nopt.h"
 
+static Linenumber = 0;	/* Local optimization of lin to lni if possible */
+
 OO_mkcalls(p)
 	struct instr *p;
 {
@@ -108,6 +110,7 @@ OO_mkcalls(p)
 	case op_fif:
 		O_fif(p->acst); break;
 	case op_fil:
+		Linenumber = 0;
 		if(p->argtype==nof_ptyp) O_fil_dlb(p->adlb, p->anoff);
 		else O_fil_dnam(p->adnam, p->asoff); break;
 	case op_gto:
@@ -125,6 +128,7 @@ OO_mkcalls(p)
 	case op_ior:
 		O_ior(p->acst); break;
 	case op_lab:
+		Linenumber = 0;
 		O_df_ilb(p->alab); break;
 	case op_lae:
 		if(p->argtype==nof_ptyp) O_lae_dlb(p->adlb, p->anoff);
@@ -149,9 +153,18 @@ OO_mkcalls(p)
 	case op_lim:
 		O_lim(); break;
 	case op_lin:
-		O_lin(p->acst); break;
+		if(Linenumber && p->acst == ++Linenumber) {
+			O_lni();
+		}
+		else {
+			O_lin(p->acst);
+			Linenumber = p->acst;
+		}
+		break;
 	case op_lni:
-		O_lni(); break;
+		O_lni();
+		Linenumber++;
+		break;
 	case op_loc:
 		O_loc(p->acst); break;
 	case op_loe:
