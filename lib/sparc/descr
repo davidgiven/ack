@@ -22,6 +22,15 @@ name be
 	stdout
 	need .e
 end
+name asopt
+	from .s
+	to .so
+	program {EM}/lib.bin/{M}/top
+	args
+	optimizer
+	stdin
+	stdout
+end
 name as
 	from .s.so
 	to .o
