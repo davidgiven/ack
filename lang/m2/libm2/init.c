@@ -3,6 +3,12 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
+/*
+  Module:	initialization and some global vars
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*/
+
 #include <signal.h>
 #include <em_abs.h>
 #include <m2_traps.h>

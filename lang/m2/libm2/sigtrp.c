@@ -3,8 +3,11 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* Mapping of Unix signals to EM traps;
-   Use this only when you don't use the MON instruction
+/*
+  Module:	Mapping of Unix signals to EM traps
+		(only when not using the MON instruction)
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
 */
 
 #ifndef int22
