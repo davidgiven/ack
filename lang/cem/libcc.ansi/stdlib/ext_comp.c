@@ -538,7 +538,18 @@ _str_ext_cvt(const char *s, char **ss, struct EXTEND *e)
 
 #include	<math.h>
 
+static
+ten_mult(struct EXTEND *e)
+{
+	struct EXTEND e1 = *e;
+
+	e1.exp++;
+	e->exp += 3;
+	add_ext(e, &e1, e);
+}
+
 #define NDIGITS 128
+#define NSIGNIFICANT 19
 
 char *
 _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
@@ -546,6 +557,7 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 	/*	Like cvt(), but for extended precision */
 
 	static char buf[NDIGITS+1];
+	struct EXTEND m;
 	register char *p = buf;
 	register char *pe;
 	int findex = 0;
@@ -584,7 +596,7 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 			mul_ext(e, &big_ten_powers[findex], e);
 			*decpt -= findex * TP;
 			/* here, value >= 10 ** -28 */
-			mul_ext(e, &ten_powers[1], e);
+			ten_mult(e);
 			(*decpt)--;
 			pp = &r_ten_powers[0];
 			while(cmp_ext(e, pp) < 0) pp++;
@@ -600,7 +612,17 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 		pe += *decpt;
 		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
+	m.exp = -62;
+	m.sign = 0;
+	m.m1 = 0xA0000000;
+	m.m2 = 0;
 	while (p <= pe) {
+		struct EXTEND oneminm;
+
+		if (p - pe > NSIGNIFICANT) {
+			findex = 0;
+			e->m1 = 0;
+		}
 		if (findex) {
 			struct EXTEND tc, oldtc;
 			int count = 0;
@@ -621,20 +643,31 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 			findex--;
 			continue;
 		}
-		if (e->exp >= 0 && e->m1 != 0) {
-			struct EXTEND x;
+		if (e->m1) {
+			m.sign = 1;
+			add_ext(&ten_powers[0], &m, &oneminm);
+			m.sign = 0;
+			if (e->exp >= 0) {
+				struct EXTEND x;
 
-			x.m2 = 0; x.exp = e->exp;
-			x.sign = 1;
-			x.m1 = e->m1>>(31-e->exp);
-			*p++ = (x.m1) + '0';
-			if (x.m1) {
+				x.m2 = 0; x.exp = e->exp;
+				x.sign = 1;
+				x.m1 = e->m1>>(31-e->exp);
+				*p++ = (x.m1) + '0';
 				x.m1 = x.m1 << (31-e->exp);
 				add_ext(e, &x, e);
 			}
+			else *p++ = '0';
+			/* Check that remainder is still significant */
+			if (cmp_ext(&m, e) > 0 || cmp_ext(e, &oneminm) > 0) {
+				e->m1 = 0;
+				if (e->exp >= -1) *(p-1) += 1;
+				continue;
+			}
+			ten_mult(&m);
+			ten_mult(e);
 		}
 		else *p++ = '0';
-		if (e->m1) mul_ext(e, &ten_powers[1], e);
 	}
 	if (pe >= buf) {
 		p = pe;
@@ -670,18 +703,11 @@ _dbl_ext_cvt(double value, struct EXTEND *e)
 	e->sign = value < 0.0;
 	if (e->sign) value = -value;
 	e->exp = exponent - 1;
-	e->m1 = 0;
-	e->m2 = 0;
-	for (i = 64; i > 0 && value != 0; i--) {
-		double ipart;
-
-		b64_sft(&(e->mantissa),-1);
-		value = modf(2.0*value, &ipart);
-		if (ipart) {
-			e->m2 |= 1;
-		}
-	}
-	if (i > 0) b64_sft(&(e->mantissa),-i);
+	value *= 4294967296.0;
+	e->m1 = value;
+	value -= e->m1;
+	value *= 4294967296.0;
+	e->m2 = value;
 }
 
 static struct EXTEND max_d;
@@ -705,7 +731,7 @@ _ext_dbl_cvt(struct EXTEND *e)
 		f = HUGE_VAL;
 		errno = ERANGE;
 	}
-	else	f = ldexp(ldexp((double)e->m1, 32) + (double)e->m2, e->exp-63);
+	else	f = ldexp((double)e->m1*4294967296.0 + (double)e->m2, e->exp-63);
 	if (sign) f = -f;
 	if (f == 0.0 && (e->m1 != 0 || e->m2 != 0)) {
 		errno = ERANGE;
