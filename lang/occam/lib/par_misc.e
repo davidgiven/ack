@@ -12,6 +12,7 @@
 
  exp $top_save
  pro $top_save, 0
+ mes 11
  loe 0
  lae 4			; load line number and file name
  loi EM_PSIZE
@@ -37,11 +38,14 @@
 
  exp $top_load
  pro $top_load, 0
+ mes 11
  lal 0
  loi EM_PSIZE
  dup EM_PSIZE
  loi EM_PSIZE
  sti EM_PSIZE		; copy pointer from argument 0 to new frame
+ lal 0
+ loi EM_PSIZE
  loi EM_PSIZE		; load indirect to
  str 1			; restore SP
  dup EM_PSIZE		; givesargument 0 again

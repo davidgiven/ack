@@ -116,6 +116,13 @@ static int timeout();
 
 int chan_any(c) register chan *c;
 {
+#ifdef __BSD4_2
+#include <fcntl.h>
+#ifndef O_NDELAY
+#define O_NDELAY FNDELAY
+#endif
+	int flags;
+#endif
 	switch (c->type) {
 	case C_T_FILE:
 		if ((c->f.flgs&C_F_READAHEAD)!=0)
@@ -132,6 +139,24 @@ int chan_any(c) register chan *c;
 				deadlock=0;
 					/* No deadlock while waiting for key */
 
+				/* Unfortunately, the mechanism that was used
+				   here does not work on all Unix systems.
+				   On BSD 4.2 and newer, the "read" is 
+				   automatically restarted. Therefore, on
+				   these systems, we try it with non-blocking
+				   reads
+				*/
+#ifdef __BSD4_2
+				flags = fcntl(fileno(fp), F_GETFL, 0);
+				fcntl(fileno(fp), F_SETFL, flags | O_NDELAY);
+				errno = 0;
+				ch = getc(fp);
+				fcntl(fileno(fp), F_SETFL, flags);
+				if (errno == EWOULDBLOCK) {
+					clearerr(fp);
+					return 0;
+				}
+#else
 				signal(SIGALRM, timeout);
 				alarm(1);
 
@@ -141,8 +166,11 @@ int chan_any(c) register chan *c;
 				signal(SIGALRM, SIG_IGN);
 				alarm(0);
 
-				if (errno==EINTR)
+				if (errno==EINTR) {
+					clearerr(fp);
 					return 0;
+				}
+#endif
 				else {
 					if (!feof(fp)) {
 						c->f.flgs|=C_F_READAHEAD;
