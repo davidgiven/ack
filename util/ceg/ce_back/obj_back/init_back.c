@@ -5,6 +5,9 @@
 char *calloc();
 
 init_back()
+
+/* Allocate space for the tables and set the default values.
+ */
 {
 	text_area = calloc( MAXTEXT, sizeof( char));
 	data_area = calloc( MAXDATA, sizeof( char));

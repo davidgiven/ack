@@ -5,6 +5,10 @@
 
 char *realloc();
 
+/* The routines allocate more space for the segments and update the
+ * global variables. Each time the space asked for is multiplied with 2.
+ */
+
 mem_text()
 {
 	/* print( "text_area too small %d %d \n", text_area, text); */
@@ -53,11 +57,10 @@ mem_relo()
 
 mem_string()
 {
-	int i;
+	int i = string - string_area;
 
 	/* print( "string_area out of memory %d %d \n", string_area, string);*/
 
-	i = string - string_area;
 	size_string = 2 * size_string;
 	string_area = realloc( string_area, sizeof( char) * size_string);
 	string = string_area + i;

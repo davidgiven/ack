@@ -3,10 +3,13 @@
 #include "back.h"
 
 /* The following functions are called from reloc1(), reloc2(), reloc4(),
-   dump_label().
+ * dump_label().
  */
 
 align_word()
+
+/* Do word allignment.
+ */
 {
 	switch ( cur_seg) {	
 		case SEGTXT : return;
@@ -26,6 +29,9 @@ align_word()
 
 
 long cur_value()
+
+/* Return the index of the first free entry.
+ */
 {
 	switch( cur_seg) {
 		case SEGTXT: return text - text_area;

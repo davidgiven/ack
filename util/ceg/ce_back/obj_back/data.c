@@ -2,6 +2,26 @@
 #include <out.h>
 #include "mach.h"
 
+/* Global datastructures : 
+ * - 'text_area' points to the text segment, 'text' points to first free
+ *    entry in the text segment.
+ * - 'data_area' points to the data segment, 'data' points to the first free
+ *    entry in the data segmnet.
+ * - 'string_area' points to the string area, 'string' points to the first free
+ *    entry in the string area.
+ * - 'reloc_info' points to the relocation table, 'relo' points to the first 
+ *    free entry in the relocation table.
+ * - 'symbol_table' points to the symbol table, 'nname' is the index of the 
+ *    first free entry in the symbol_table. If pointers were used it is a pain
+ *    to do a realloc on the symbol table, because all pointers in the 
+ *    relocation table to the symbol table have to be updated.
+ * - The bss segment contains only one vaue, so its enough to count the
+ *   the bytes wanted.
+ * - The 'size_*' variables count the number of entries in each segment.
+ * - 'cur_seg' contains the number of the segment to be filled.
+ *   (see "back.h")
+ */
+
 
 char 		*text_area,
      		*data_area,

@@ -4,10 +4,10 @@
 #include "header.h"
 #include "mach.h"
 
-/* The extnd_*() make a name unique. The resulting string is directly stored
-   in the symbol_table (by mysprint()). Later additional fields in the 
-   symbol_table are filled. For these actions the values of the index in
-   the symbol_table and the length of the string are stored.
+/* The extnd_*()s make a name unique. The resulting string is directly stored
+ * in the symbol_table (by mysprint()). Later additional fields in the 
+ * symbol_table are filled. For these actions the values of the index in
+ * the symbol_table and the length of the string are stored.
  */
 
 extern int 	string_lengte, index_symbol_table;

@@ -3,7 +3,8 @@
 #include "data.h"
 
 output()
-/* Notice : entries in the symbol_table are converted.
+/* Dump the tables.
+ * Notice : entries in the symbol_table are converted.
  */
 
 {

@@ -6,6 +6,12 @@ int  Label, label_waiting;
 
 save_label( lab)
 char *lab;
+
+/* It is now not possible to tell where the label belongs to, so store
+ * the string and remember the returned index to store the missing
+ * information later on (see dump_label()). Two labels at one address
+ * is not allowed.
+ */
 {
 	Label = find_sym( lab, SYMBOL_DEFINITION);
 	label_waiting = 1;

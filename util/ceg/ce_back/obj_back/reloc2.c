@@ -4,6 +4,10 @@
 #include "back.h"
 #include "header.h"
 
+/* There are two forms of relocation program counter relative or
+ * absolute.
+ */
+
 reloc2( sym, off, pcrel)
 char *sym;
 arith off;
@@ -13,7 +17,7 @@ int pcrel;
 		mem_relo();
 
 	relo->or_type = RELO2;
-#ifdef BYTES_REVERSED			/* Nog optimaliseren?? */
+#ifdef BYTES_REVERSED			
 	relo->or_type |= RELBR;
 #endif
 #ifdef WORDS_REVERSED

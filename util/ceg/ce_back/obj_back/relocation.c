@@ -2,15 +2,21 @@
 #include <out.h>
 #include "back.h"
 
+/* Solve the local references.
+ */
+
 #define seg_index( s)	( nname - SEGBSS - 1 + s)
 
 long 		get4(); 
-long 		base_adres();
 extern short    get2();
 extern char 	get1();
 
 
 do_local_relocation()
+
+/* Check if this reference is solvable. External references contain
+ * -1 in 'on_valu'.
+ */
 {
 	register struct outrelo *ptr;
 	register int s;
@@ -26,6 +32,10 @@ do_local_relocation()
 do_relo(np,rp)
 struct outname *np;
 struct outrelo *rp;
+
+/* Solve the reference relative to the start of the segment where the symbol
+ * is defined.
+ */
 {
 	long oldval,newval;
 	char *sect;
@@ -44,7 +54,6 @@ struct outrelo *rp;
 			break;
 	}
 
-	/* nu reloceren tov het segment waar het symbool in voorkomt! */
 	if  ( rp->or_type & RELO4) {
 		oldval = get4( sect, rp->or_addr);
 		newval = oldval + np->on_valu;
@@ -76,16 +85,4 @@ struct outrelo *rp;
 		np->on_foff+string_area, rp->or_addr, rp->or_sect-S_MIN, oldval, 		newval, np->on_valu);
 	  */
 	 
-}
-
-
-long base_adres( seg)
-int seg;
-{
-	switch ( seg) {
-		case SEGTXT : return( 0);
-		case SEGCON  : return( text-text_area);
-		case SEGBSS  : return( text-text_area + data-data_area);
-		default : fprint( STDERR, "base_adres() wrong seg %d\n", seg);
-	}
 }

@@ -1,6 +1,10 @@
 #include <system.h>
 #include "data.h"
 
+/* Mysprint() stores the string directly in the string_arae. This saves
+ * a copy action.
+ */
+
 int mysprint( fmt, args)
 	char *fmt;
 	int args;

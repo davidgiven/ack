@@ -7,11 +7,7 @@ IDIRS=-I.\
       -I$(EM)/h\
       -I$(EM)/modules/h
 
-LIBS=$(EM)/modules/lib/object.a\
-     $(EM)/modules/lib/libstring.a\
-     $(EM)/modules/lib/libprint.a\
-     $(EM)/modules/lib/liballoc.a\
-     $(EM)/modules/lib/libsystem.a
+LIBS=$(EM)/modules/lib/*.a
 
 all : data.o con2.o con4.o relocation.o end_back.o gen1.o gen2.o\
       gen4.o init_back.o mysprint.o output.o reloc1.o reloc2.o reloc4.o\

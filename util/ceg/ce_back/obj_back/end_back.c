@@ -6,18 +6,21 @@
 
 end_back()
 {
-	sync();                 
-	define_segments();  
+	finish_tables();                 
 	do_local_relocation();
 }
 
 
-sync()
+finish_tables()
+
+/* Prepare tables for do_local_relocation() and output().
+ */
 {
 	while ( ( text - text_area) % EM_WSIZE != 0 ) 
 		text1( '\0');
 	while ( ( data - data_area) % EM_WSIZE != 0 )
 		con1( '\0');
+	define_segments();  
 }
 
 
