@@ -252,6 +252,18 @@ w
 q
 ABC
 	)
+	( cd ../mach
+	  : machines with word or pointer size not 2
+	  for i in int24 int44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
+	  do
+	  cp $i/Action $i/Action.orig
+	  ed - $i/Action <<ABC
+/odula-2/,/^end/s/^/!/
+w
+q
+ABC
+	  done
+	)
 	;;
 *)	( cd ../lang/cem/cemcom
 	  cp BigPars Parameters
