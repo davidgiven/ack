@@ -235,6 +235,10 @@ lae | | | {EXTERNAL_ADDR,$1} | |
 
 lxl $1 == 0 | | | LB | |
 lxl $1 == 1 | | | {DISPL4,LB,8} | |
+lxl $1 == 2 | | 
+		allocate(ADDREG)
+		"move.l 8(a6),%[a]"
+		"move.l 8(%[a]),%[a]"	| %[a] | |
 lxl $1>1    | |
 		allocate(ADDREG,DATAREG = {IMMEDIATE,$1-1})
 		"move.l a6,%[a]"
@@ -788,9 +792,14 @@ ldl ldc sbi sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 lde ldc sbi sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"sub.l #$2,$1"		| | |	(9,17)
+mli $1 == 2 | DATASCR ANY |	"muls %[2],%[1]"
+				erase(%[1])
+				setcc(%[1])		| %[1] | |
 mli $1 == 2 | ANY DATASCR |	"muls %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])		| %[2] | |
+ldc mli loww(1) == 1 && highw(1) == 0 && $2 == 4 | | | | |
+ldc mli loww(1) == 2 && highw(1) == 0 && $2 == 4 | | | | loc 1 sli 4 |
 mli $1 == 4 | |			remove(ALL)
 				"jsr .mli"
 							| DD1 | |
@@ -1062,9 +1071,7 @@ adp $1 >= 0-32767 && $1 <= 32767
 ...	| nocoercions: LOCAL_ADDR | | {LOCAL_ADDR,%[1.off]+$1} | |
 ...	| nocoercions: REGOFF_ADDR | | {REGOFF_ADDR,%[1.reg],%[1.off]+$1}  | |
 ...	| nocoercions: ADDREG | | {REGOFF_ADDR,%[1],$1} | |
-...	| ADDSCR |	"lea $1(%[1]),%[1]"
-			erase(%[1])
-			setcc(%[1])			| %[1] | |
+...	| ADDSCR |	|	{REGOFF_ADDR,%[1],$1} | |
 adp	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+"
 						+ tostring($1)} | |
 ...	| ADDSCR |	"add.l #$1,%[1]"
@@ -1098,6 +1105,9 @@ ldl adp sdl $1 == $3 && inreg($1) < 2 | |	remove(MEM_ALL)
 				"add.l #$2,$1(a6)"	| | | (8,16)
 lde adp sde $1 == $3 | |	remove(MEM_ALL)
 				"add.l #$2,$1"		| | | (9,17)
+ldc ads loww(1) == 0 && highw(1) == 0 && $2 == 4 | | | | |
+ldc ads highw(1) == 0 && $2 == 4 | ADDREG | 
+					| {REGOFF_ADDR,%[1],loww(1)} | |
 ads $1 == 2 |	ANY ADDSCR |	"add.w %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])	| %[2] | |
@@ -1289,6 +1299,22 @@ loc loc cii $1==1 && $2==4 | ANY |
 				"ext.l %[a]"
 				erase(%[a])
 				setcc(%[a])	| %[a] | |
+loc loc cuu $1==1 && $2==4 | nocoercions: DATASCR |
+				"and.l #255,%[1]"
+				erase(%[1])
+				setcc(%[1])	| %[1] | |
+...			   | ANY |
+				allocate(DATAREG4)
+				"clr.l %[a]"
+				move(%[1],%[a.1])
+				erase(%[a])
+						| %[a] | |
+...			   | ANY1 |
+				allocate(DATAREG4)
+				"clr.l %[a]"
+				"move.b %[1],%[a.1]"
+				erase(%[a])
+						| %[a] | |
 loc loc cii $1==2 && $2==4 | ANY |
 				allocate(%[1],DATAREG4)
 				move(%[1],%[a.1])
@@ -1299,6 +1325,9 @@ loc loc cuu $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
 loc loc ciu $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
 loc loc cui $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
 
+loc loc loc cuu $1 == 0 && $2 == 1 && $3 == 4 | | | {DOUBLE,"0"} | |
+loc loc loc ciu $1 == 0 && $2 == 1 && $3 == 4 | | | {DOUBLE,"0"} | |
+loc loc loc cui $1 == 0 && $2 == 1 && $3 == 4 | | | {DOUBLE,"0"} | |
 loc loc loc cuu $1 == 0 && $2 == 2 && $3 == 4 | | | {DOUBLE,"0"} | |
 loc loc loc ciu $1 == 0 && $2 == 2 && $3 == 4 | | | {DOUBLE,"0"} | |
 loc loc loc cui $1 == 0 && $2 == 2 && $3 == 4 | | | {DOUBLE,"0"} | |
@@ -1311,6 +1340,7 @@ loc loc ciu $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
 ...			   | ANY	| |  | |
 loc loc cui $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
 ...			   | ANY	| |  | |
+loc loc loc cuu $2 == 1 && $3 == 4 && $1 > 0 && $1 < 128 | | | | ldc $1 |
 
 /* Floating point stuff */
 
@@ -2251,12 +2281,36 @@ ldc cmi zgt loww(1)==0&&highw(1)==0 && $2==4 | DATA_ALT4 STACK |
 				test(%[1])
 				"bgt $3" | | |
 
+ldc cmi zlt $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"blt $3" | | |
+ldc cmi zle $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"ble $3" | | |
+ldc cmi zeq $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"beq $3" | | |
+ldc cmi zne $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"bne $3" | | |
+ldc cmi zge $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"bge $3" | | |
+ldc cmi zgt $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"bgt $3" | | |
 
 ldc cms zeq loww(1)==0&&highw(1)==0 && $2==4 | DATA_ALT4 STACK |
 				test(%[1])
 				"beq $3" | | |
 ldc cms zne loww(1)==0&&highw(1)==0 && $2==4 | DATA_ALT4 STACK |
 				test(%[1])
+				"bne $3" | | |
+ldc cms zeq $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
+				"beq $3" | | |
+ldc cms zne $2==4 | DATA_ALT4 STACK |
+				"cmp.l #$1,%[1]"
 				"bne $3" | | |
 
 cmp tlt	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
@@ -2559,6 +2613,7 @@ zgt |	DATA_ALT |		remove(ALL)
 
 /* G R O U P :  XIV   P R O C E D U R E   C A L L S   */
 
+lpi cai | | | | cal $1 |
 cai | ADDREG |		remove(ALL)
 			"jsr (%[1])"
 						| | |
@@ -2739,6 +2794,16 @@ mon | STACK | "jsr .mon" | | |
 nop | STACK | "jsr .nop" | | |
 lim | | | {ABS4,".trpim"} | |
 lor $1 == 0 |	|   |  LB | |
+#ifdef REGVARS
+lor sdl $1 == 1 && inreg($2) == 2 |
+				STACK |	"move.l sp,%(regvar($1)%)" | | |
+#endif
+lor sdl $1 == 1 | STACK |	"move.l sp,$2(a6)" 	| | |
+lor adp $1 == 1 | STACK |	allocate(ADDREG)
+				"move.l sp,%[a]"
+				"add.l #$2,%[a]"	| %[a] | |
+lor ldf $1 == 1 | STACK |	allocate(ADDREG)
+				"move.l $2(sp),%[a]"	| %[a] | |
 lor $1 == 1 |	STACK |		"move.l sp,-(sp)"	| | |
 lor $1 == 2 | | | {ABS4,".reghp"} | |
 lpb | | | | adp 8 |
