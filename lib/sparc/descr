@@ -53,10 +53,12 @@ name led
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.f={EM}/{RT}ac) \
 		({RTS}:.mod={EM}/{RT}m2) \
-		({RTS}:.p.8={EM}/{RT}pc) \
+		({RTS}:.cp.8={EM}/{RT}cpc) \
+		({RTS}:.8={EM}/{RT}pc) \
 		-o > < \
 		(.8:{TAIL}={EM}/{LIB}a68s) \
-		(.p.8:{TAIL}={EM}/{LIB}pc) \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.cp.8:{TAIL}={EM}/{LIB}cpc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
