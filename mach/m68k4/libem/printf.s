@@ -1,128 +1,88 @@
-.define _printn
 .define _printf
-.extern _printf
-.sect .text;.sect .rom;.sect .data;.sect .bss
 .sect .text
-_putchar:
-move.l	#1,-(sp)
-lea	8(sp),a0
-move.l	8(sp),d0
-move.b	d0,(a0)
-move.l	a0,-(sp)
-move.l	#1,-(sp)
-jsr	_write
-add.l	#12,sp
-rts
-_printf:
-tst.b -56(sp)
-link	a6,#-16
-!Local -4 into d7
-!Local -12 into d6
-!Local -8 into a5
-!Local 8 into a4
-!Local -16 into a3
-movem.l d7/d6/a5/a4/a3,-(sp)
-move.l 8(a6),a4
-lea 12(a6),a1
-move.l a1, a5
-I0014:
-move.l a4, a0
-add.l #1,a4
-clr.l d0
-move.b (a0),d0
-move.l d0, d7
-cmp.l #37,d7
-beq I0015
-tst.l d7
-beq I0012
-move.l d7,-(sp)
-jsr _putchar
-add #4,sp
-jmp I0014
-I0015:
-move.l a4, a0
-add.l #1,a4
-clr.l d0
-move.b (a0),d0
-move.l d0, d7
-cmp.l #100,d7
-beq I0018
-cmp.l #117,d7
-bne I0017
-I0018:
-move.l a5, a0
-add.l #4,a5
-move.l (a0), d6
-cmp.l #100,d7
-bne I0019
-tst.l d6
-bge I0019
-clr.l d2
-sub.l d6,d2
-move.l d2, d6
-pea 45
-jsr _putchar
-add #4,sp
-I0019:
-move.l d6,-(sp)
-jsr _printn
-add #4,sp
-jmp I0014
-I0017:
-cmp.l #115,d7
-bne I0014
-move.l a5, a0
-add.l #4,a5
-move.l (a0), a3
-I001c:
-move.l a3, a0
-add.l #1,a3
-clr.l d0
-move.b (a0),d0
-move.l d0, d7
-tst.l d7
-beq I0014
-move.l d7,-(sp)
-jsr _putchar
-add #4,sp
-jmp I001c
-I0012:
-movem.l (sp)+,d7/d6/a5/a4/a3
-unlk a6
-rts
-.extern _printn
-_printn:
-tst.b -44(sp)
-link	a6,#-4
-!Local -4 into d7
-move.l d7,-(sp)
+.sect .rom
 .sect .data
-_14:
-.data4	808530483
-.data4	875902519
-.data4	943259648
+.sect .bss
+.sect .bss
+_getal:
+	.space	12
+_char:
+	.space	1
+	.align  4
+.sect .data
+hexs:
+	.ascii	"0123456789abcdef"
+	.align	4
 .sect .text
-move.l 8(a6),-(sp)
-pea 10
-jsr .dvu
-move.l d1, d7
-tst.l d7
-beq I0023
-move.l d7,-(sp)
-jsr _printn
-add #4,sp
-I0023:
-pea _14
-move.l 8(a6),-(sp)
-pea 10
-jsr .dvu
-move.l (sp)+,a1
-add.l d2,a1
-clr.l d0
-move.b (a1),d0
-move.l d0,-(sp)
-jsr _putchar
-add #4,sp
-move.l (sp)+,d7
-unlk a6
-rts
+_printf:
+	movem.l	d0/d1/d2/a0/a1/a2/a3/a4/a5/a6, -(sp)
+	lea	44(sp), a6	! a6 <- address of arguments
+	move.l	(a6)+, a5	! a5 <- address of format
+next:	move.b	(a5)+, d0
+	beq	out
+	cmp.b	#'%', d0
+	beq	procnt
+put:	move.l	d0, -(sp)
+	jsr	_putchar	! long argument on stack
+	tst.l	(sp)+
+	bra	next
+
+procnt:	move.b	(a5)+, d0
+	cmp.b	#'d', d0	! NOTE: %d means unsigned.
+	beq	digit
+	cmp.b	#'x', d0
+	beq	hex
+	cmp.b	#'s', d0
+	beq	string
+	cmp.b	#'%', d0	! second % has to be printed.
+	beq	put
+	tst.b	-(a5)		! normal char should be printed
+	bra	next
+
+string:	move.l	(a6)+, a2	! a2 <- address of string
+sloop:	move.b	(a2)+, d0
+	beq	next
+	move.l	d0, -(sp)
+	jsr	_putchar	! long argument on stack
+	tst.l	(sp)+
+	bra	sloop
+
+digit:	move.l	(a6)+, d1	! d1 <- integer
+	move.l	#_getal+12, a2	! a2 <- ptr to last part of buf
+	clr.b	-(a2)		! stringterminator
+1:	
+	move.l	d1,-(sp)
+	move.l	#10,-(sp)
+	jsr	.dvu		! d1 <- qotient; d0 <- remainder
+	add.l	#'0', d0
+	move.b	d0, -(a2)
+	tst.l	d1		! if quotient = 0 then ready
+	bne	1b
+	bra	sloop		! print digitstring.
+
+hex:	move.l	(a6)+, d1	! d1 <- integer
+	move.l	#_getal+12, a2	! a2 <- ptr to last part of buf
+	clr.b	-(a2)		! stringterminator
+	move.l	#7, d2		! loop control
+1:	move.l	d1, d0
+	and.l	#15, d0
+	move.l	#hexs,a0
+	add.l	d0,a0
+	move.b	(a0), -(a2) ! hex digit
+	asr.l	#4, d1
+	dbf	d2, 1b
+	bra	sloop
+
+out:
+	movem.l	(sp)+, d0/d1/d2/a0/a1/a2/a3/a4/a5/a6
+	rts
+
+
+_putchar:
+	move.l	#1, -(sp)
+	pea	11(sp)
+	move.l	#1, -(sp)
+	jsr	_write
+	lea	12(sp), sp
+	rts
+.align 2
