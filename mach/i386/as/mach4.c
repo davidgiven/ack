@@ -144,29 +144,29 @@ oper	:	NOOP_1
 			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
-				emit1(0xF); emit1(042); emit1(0200|($4<<3)|(reg_1&07));}
+				emit1(0xF); emit1(0x20); emit1(0300|($4<<3)|(reg_1&07));}
 	|	MOV ea_1 ',' RSYSDR
 			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
-				emit1(0xF); emit1(043); emit1(0200|($4<<3)|(reg_1&07));}
+				emit1(0xF); emit1(0x21); emit1(0300|($4<<3)|(reg_1&07));}
 	|	MOV ea_1 ',' RSYSTR
 			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
-				emit1(0xF); emit1(046); emit1(0200|($4<<3)|(reg_1&07));}
+				emit1(0xF); emit1(0x24); emit1(0300|($4<<3)|(reg_1&07));}
 	|	MOV RSYSCR ',' R32
 			{
 				if ($1 != 1) serror("syntax error");
-				emit1(0xF); emit1(040); emit1(0200|($4<<3)|$2);}
+				emit1(0xF); emit1(0x22); emit1(0300|($2<<3)|$4);}
 	|	MOV RSYSDR ',' R32
 			{
 				if ($1 != 1) serror("syntax error");
-				emit1(0xF); emit1(041); emit1(0200|($4<<3)|$2);}
+				emit1(0xF); emit1(0x23); emit1(0300|($2<<3)|$4);}
 	|	MOV RSYSTR ',' R32
 			{
 				if ($1 != 1) serror("syntax error");
-				emit1(0xF); emit1(044); emit1(0200|($4<<3)|$2);}
+				emit1(0xF); emit1(0x26); emit1(0300|($2<<3)|$4);}
 /* Intel 80[23]87 coprocessor instructions */
 	|	FNOOP
 			{	emit1($1); emit1($1>>8);}
