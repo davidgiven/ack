@@ -1,6 +1,3 @@
 Action
-libcc
-libpc
-libbc
-liboc
-libm2
+libend
+mach_params

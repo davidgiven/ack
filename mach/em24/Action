@@ -1,15 +1,3 @@
-name "2-4 Interpreter C libraries"
-dir libcc
-end
-name "2-4 Interpreter Pascal library"
-dir libpc
-end
-name "2-4 Interpreter Basic library"
-dir libbc
-end
-name "2-4 Interpreter Occam library"
-dir liboc
-end
-name "2-4 Interpreter Modula-2 library"
-dir libm2
+name "em24 etext,edata,end library"
+dir libend
 end
