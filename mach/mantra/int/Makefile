@@ -44,14 +44,17 @@ em4_t-c-:tmp.s compile con_float.o
 em4_t--p:	tmp.s compile con_float.o
 	./compile -o em4_t--p -P $(FLTRAP) -Dlword -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=1 tmp.s con_float.o
 
-con_float.o:	con_float.c compile
-	./compile -c -L -O con_float.c
+con_float.o:	con_float.c
+	case `ack_sys` in m68k2|pmds) \
+		acc -mm68k4 -c -L -O con_float.c;; \
+		*) acc -c -L -O con_float.c;; \
+	esac
 
 compile:	Makefile
-		case `ack_sys` in sun*) MACH=sun2;; pmds*) MACH=pmds4;; \
+		case `ack_sys` in sun*) MACH=`ack_sys`; AS=-Ras=../../../lib/m68k2/as;; pmds*) MACH=pmds4;; \
 				    m68_sysV_0) MACH=mantra;; \
-				    m68k2) MACH=m68k2;; *) MACH=m68k4;; \
-		esac ; echo $$MACH -r.c -.m -fp '$$*' > compile; chmod +x compile
+				    *) MACH=m68k4;; \
+		esac ; echo $$MACH $$AS -r.c -.m -fp '$$*' > compile; chmod +x compile
 install:	all
 		-mkdir $b24 $b44
 		ls em2_???? | sed 's:em2_\(.*\):cp & $b24/em_\1:' | sh

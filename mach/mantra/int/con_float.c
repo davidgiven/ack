@@ -20,32 +20,7 @@ con_float(argval, str, res)
 		while (argval--) *res++ = *p++;
 		return;
 	}
-	f = frexp(f, &i);
 	fl = f;
-	fl = frexp(fl,&j);
-	if (i+j > 127) {
-		/* overflow situation. Unfortunately we don't have the
-		   slightest idea where the floating point constant came
-		   from, so, for the time being, just ignore
-		*/
-		*res++ = f < 0 ? 0377 : 0177;
-		*res++ = 0377;
-		*res++ = 0377;
-		*res = 0377;
-		return;
-	}
-	if (i+j < -127) {
-		/* underflow situation. Unfortunately we don't have the
-		   slightest idea where the floating point constant came
-		   from, so, for the time being, just ignore
-		*/
-		*res++ = f < 0 ? 0200 : 0;
-		*res++ = 0200;
-		*res++ = 0;
-		*res = 0;
-		return;
-	}
-	fl = ldexp(fl, i+j);
 	p = (char *) &fl;
 	while (argval--) *res++ = *p++;
 }

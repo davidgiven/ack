@@ -177,6 +177,9 @@ dat6:		add.l	d2,a3	;	move.l	d2,d3
 		bne	6b	;	add.l	d3,a3
 		bra	datloop
 
+.sect .data
+flt_label:	.data4 0
+.sect .text
 dofloat:
 		move.l	d2,d0
 		checkfsize
@@ -186,9 +189,11 @@ dofloat:
 		move.l	a3,-(sp)
 		add.l	d0,a3
 		move.l	a4,-(sp)
+		move.l	a4,flt_label
 		move.l	d0,-(sp)
 		bsr	_con_float
 		lea	12(sp),sp
+		clr.l	flt_label
 		movem.l	(sp)+,a0/a1/d0-d2
 1:
 		tst.b	(a4)+ ;		bne	1b
@@ -200,6 +205,10 @@ _con_float:
 		rts
 #else
 __fptrp:
+		tst.l	flt_label
+		beq	1f
+		rts
+1:
 		move.l	4(sp),d0
 		mov	d0,-(sp)
 		bra	error
