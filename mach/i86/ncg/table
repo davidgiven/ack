@@ -724,7 +724,7 @@ pat sti $1==1
   kills indirects
   gen move %2,{EXTERN1,%1.off}
   with ADDR_LOCAL regorconst12
-  kills indexed,locals %ind+%size > $1 && %ind <= $1
+  kills indexed,locals %ind+%size > %1.ind && %ind <= %1.ind
   gen move %2,{ind_regoff1,bp,%1.ind}
 
 pat sti $1==4
