@@ -337,8 +337,8 @@ register char *argv[];
 
 				print("%s%3u/%u%7ld %s %s %s",
 					mode,
-					(unsigned) member->ar_uid,
-					(unsigned) member->ar_gid,
+					(unsigned) (member->ar_uid & 0377),
+					(unsigned) (member->ar_gid & 0377),
 					member->ar_size,
 					date+4,
 					date+20,
