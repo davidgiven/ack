@@ -474,6 +474,23 @@ addu(sz)
 	C_adu((arith)sz);
 }
 
+static int
+complex_lhs(nd)
+	register t_node *nd;
+{
+	switch(nd->nd_class) {
+	case Value:
+	case Name:
+	case Set:
+	case Def:
+		return 0;
+	case Select:
+		return complex_lhs(nd->nd_NEXT);
+	default:
+		return 1;
+	}
+}
+
 CodeStd(nd)
 	t_node *nd;
 {
@@ -545,10 +562,19 @@ CodeStd(nd)
 	case S_DEC:
 	case S_INC: {
 		register arith size;
+		int compl = complex_lhs(left);
+		arith tmp = 0;
 
 		size = left->nd_type->tp_size;
 		if ((int) size < (int) word_size) size = word_size;
-		CodePExpr(left);
+		if (compl) {
+			tmp = NewPtr();
+			CodeDAddress(left, 1);
+			STL(tmp, pointer_size);
+			LOL(tmp, pointer_size);
+			C_loi(left->nd_type->tp_size);
+		}
+		else CodePExpr(left);
 		CodeCoercion(left->nd_type, tp);
 		if (arg) {
 			CodePExpr(arg->nd_LEFT);
@@ -570,7 +596,12 @@ CodeStd(nd)
 			RangeCheck(left->nd_type, tp->tp_fund == T_INTEGER ?
 						int_type : card_type);
 		}
-		CodeDStore(left);
+		if (compl) {
+			LOL(tmp, pointer_size);
+			C_sti(left->nd_type->tp_size);
+			FreePtr(tmp);
+		}
+		else CodeDStore(left);
 		break;
 		}
 
@@ -579,8 +610,18 @@ CodeStd(nd)
 		break;
 
 	case S_INCL:
-	case S_EXCL:
-		CodePExpr(left);
+	case S_EXCL: {
+		int compl = complex_lhs(left);
+		arith tmp = 0;
+
+		if (compl) {
+			tmp = NewPtr();
+			CodeDAddress(left, 1);
+			STL(tmp, pointer_size);
+			LOL(tmp, pointer_size);
+			C_loi(left->nd_type->tp_size);
+		}
+		else CodePExpr(left);
 		CodePExpr(arg->nd_LEFT);
 		C_loc(tp->set_low);
 		C_sbi(word_size);
@@ -592,8 +633,14 @@ CodeStd(nd)
 			C_com(tp->tp_size);
 			C_and(tp->tp_size);
 		}
-		CodeDStore(left);
+		if (compl) {
+			LOL(tmp, pointer_size);
+			C_sti(left->nd_type->tp_size);
+			FreePtr(tmp);
+		}
+		else CodeDStore(left);
 		break;
+		}
 
 	default:
 		crash("(CodeStd)");
