@@ -58,6 +58,9 @@ COPTIONS =
 GEN = $(EMHOME)/bin/LLgen
 GENOPTIONS = -vvvx
 
+# tabgen
+TABGEN = $(EMHOME)/bin/tabgen
+
 # Special #defines during compilation
 PROF = #-pg
 CDEFS =	$(EM_INCLUDES) $(LIB_INCLUDES)
@@ -219,7 +222,7 @@ symbol2str.c:	tokenname.c make.tokcase
 	<tokenname.c ./make.tokcase >symbol2str.c
 
 char.c:	char.tab
-	$(EMHOME)/bin/tabgen -fchar.tab >char.c
+	$(TABGEN) -fchar.tab >char.c
 
 next.c:	make.next $(STRSRC)
 	./make.next $(STRSRC) >next.c
