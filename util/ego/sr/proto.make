@@ -51,7 +51,7 @@ clean:
 	rm -f *.$(SUF) sr Out out nohup.out
 
 lint:
-	$(LINT) $(LINTFLAGS) $(CFILES)
+	$(LINT) $(LINTFLAGS) $(CFILES) $(EMLIB)/ego/$(LINTPREF)share.$(LINTSUF) $(EMLIB)/$(LINTPREF)em_data.$(LINTSUF)
 
 pr:
 	@pr $(PRFILES)
