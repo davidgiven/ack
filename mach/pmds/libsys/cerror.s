@@ -1,4 +1,5 @@
 .define cerror
+.define _errno
 .sect .text
 .sect .rom
 .sect .data
