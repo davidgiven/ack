@@ -1,38 +1,43 @@
-# $Revision$
+# $Header$
 var w=4
 var p=4
-var s=2
+var s=4
 var l=4
 var f=4
 var d=8
 var NAME=m68k4
 var M=m68k4
-var LIBDIR=/lib/{M}
-var LIB=lib/{M}/tail_
-var RT=lib/{M}/head_
-var CPP_F=-Dunix
-var INCLUDES=-I{EM}/include -I/usr/include
+var LIB=mach/m68k4/lib/tail_
+var RT=mach/m68k4/lib/head_
+var INCLUDES=-I{EM}/include
 name be
-	from .m.g
-	to .s
+	from .m
+	to .o
 	program {EM}/lib/{M}/cg
 	args <
 	stdout
 	need .e
 end
 name asld
-	from .s.a
+	from .s.a.o
 	to .out
-	outfile a.out
 	program {EM}/lib/m68k2/as
 	mapflag -l* LNAME={EM}/{LIB}*
-	args (.e:{HEAD}={EM}/{RT}em) \
-({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
-(.p.c.b:{TAIL}={EM}/{LIBDIR}/sys1.s) (.p:{TAIL}={EM}/{LIBDIR}/sys2.s) \
-(.c.b:{TAIL}={EM}/{LIBDIR}/write.s) \
-(.p:{TAIL}={EM}/{LIB}pc) (.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.c.b:{TAIL}={EM}/{LIB}mon {EM}/{LIB}fake) \
-(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{LIB}em.vend)
+	mapflag -d* LFLAG={LFLAG?} -d*
+	mapflag -s* LFLAG={LFLAG?} -s*
+	mapflag -n*
+	mapflag -i*
+	args {LFLAG?} (.e:{HEAD}={EM}/{RT}em) \
+({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon.pmds {EM}/end_em)
 	prep cond
 	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{PMDS}/cv
+	args < >
+	outfile a.out
 end
