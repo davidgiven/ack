@@ -11,7 +11,6 @@
 	jb	1f
 	add	ax,02000
 	and	ax,~0777
-	mov	(.limhp),ax
 	push	bx
 	push	ax
 	call	_brk
@@ -20,6 +19,7 @@
 	cmp	ax,-1
 	je	2f
 1:
+	mov	(.limhp),cx
 	jmp	bx
 2:
 	mov	ax,EHEAP
