@@ -1,0 +1,92 @@
+If your system lacks /usr/include/local.h ,
+then you should create an appropriate local.h in
+this directory.  An appropriate local.h may simply
+be empty, or it may #define VAX or #define CRAY
+(or whatever else you must do to make fp.h work right).
+Alternatively, edit fp.h to suite your machine.
+
+If your system lacks /usr/include/fcntl.h , then you
+should simply create an empty fcntl.h in this directory.
+
+If your system's sprintf does not work the way ANSI C
+specifies -- specifically, if it does not return the
+number of characters transmitted -- then insert the line
+
+#define USE_STRLEN
+
+at the end of fmt.h .  This is necessary with
+at least some versions of Sun software.
+
+If your system's fopen does not like the ANSI binary
+reading and writing modes "rb" and "wb", then you should
+compile open.c with NON_ANSI_RW_MODES #defined.
+
+If you get error messages about references to cf->_ptr
+and cf->_base when compiling wrtfmt.c and wsfe.c or to
+stderr->_flag when compiling err.c, then insert the line
+
+#define NON_UNIX_STDIO
+
+at the beginning of fio.h, and recompile these modules.
+
+You may need to supply the following non-ANSI routines:
+
+  fstat(int fileds, struct stat *buf) is similar
+to stat(char *name, struct stat *buf), except that
+the first argument, fileds, is the file descriptor
+returned by open rather than the name of the file.
+fstat is used in the system-dependent routine
+canseek (in the libI77 source file err.c), which
+is supposed to return 1 if it's possible to issue
+seeks on the file in question, 0 if it's not; you may
+need to suitably modify err.c .  On non-UNIX systems,
+you can avoid references to fstat and stat by compiling
+err.c, inquire.c, open.c, and util.c with MSDOS defined;
+in that case, you may need to supply access(char *Name,0),
+which is supposed to return 0 if file Name exists,
+nonzero otherwise.
+
+  char * mktemp(char *buf) is supposed to replace the
+6 trailing X's in buf with a unique number and then
+return buf.  The idea is to get a unique name for
+a temporary file.
+
+On non-UNIX systems, you may need to change a few other,
+e.g.: the form of name computed by mktemp() in endfile.c and
+open.c; the use of the open(), close(), and creat() system
+calls in endfile.c, err.c, open.c; and the modes in calls on
+fopen() and fdopen() (and perhaps the use of fdopen() itself
+-- it's supposed to return a FILE* corresponding to a given
+an integer file descriptor) in err.c and open.c (component ufmt
+of struct unit is 1 for formatted I/O -- text mode on some systems
+-- and 0 for unformatted I/O -- binary mode on some systems).
+
+For Turbo C++, in particular, you need to adjust the mktemp
+invocations and should compile all of libI77 with -DMSDOS .
+You also need to #undef ungetc in lread.c and rsne.c .
+Don't use -mh -- it is horribly broken.
+
+If you want to be able to load against libI77 but not libF77,
+then you will need to add sig_die.o (from libF77) to libI77.
+
+If you wish to use translated Fortran that has funny notions
+of record length for direct unformatted I/O (i.e., that assumes
+RECL= values in OPEN statements are not bytes but rather counts
+of some other units -- e.g., 4-character words for VMS), then you
+should insert an appropriate #define for url_Adjust at the
+beginning of open.c .  For VMS Fortran, for example,
+#define url_Adjust(x) x *= 4
+would suffice.
+
+To check for transmission errors, issue the command
+	make check
+This assumes you have the xsum program whose source, xsum.c,
+is distributed as part of "all from f2c/src".  If you do not
+have xsum, you can obtain xsum.c by sending the following E-mail
+message to netlib@research.att.com
+	send xsum.c from f2c/src
+
+The makefile assumes you have installed f2c.h in a standard
+place (and does not cause recompilation when f2c.h is changed);
+f2c.h comes with "all from f2c" (the source for f2c) and is
+available separately ("f2c.h from f2c").
