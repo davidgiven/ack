@@ -2845,6 +2845,11 @@ with any4-sconsts any4-sconsts
     kills all_indir, LOCAL %bd==$1
     gen move %1, {LOCAL, $1} 
         move %2, {LOCAL, $1+4}
+#if TBL68881
+with exact FD_REG
+    kills all_indir, LOCAL %bd==$1
+    gen	fmove_d %1, {LOCAL, $1}
+#endif
 with exact STACK
     kills all_indir, LOCAL %bd==$1
     gen move_l {post_inc4, sp}, {LOCAL,$1}
@@ -2855,6 +2860,11 @@ with any4-sconsts any4-sconsts
     kills posextern
     gen move %1, {absolute4, $1}
 	move %2, {absolute4, $1+4}
+#if TBL68881
+with exact FD_REG
+    kills posextern
+    gen	fmove_d %1, {absolute4, $1}
+#endif
 with exact STACK
     kills posextern
     gen move_l {post_inc4, sp}, {absolute4,$1}
@@ -3018,6 +3028,68 @@ with shconreg DD_REG
  */
  
 #if TBL68881
+pat adf stl $1==4
+    with FS_REG STACK
+    gen fadd_s {post_inc4,sp},%1	yields %1	leaving stl $2
+pat adf sdl $1==8
+    with FD_REG STACK
+    gen fadd_d {post_inc4,sp},%1	yields %1	leaving sdl $2
+pat sbf stl $1==4
+    with FS_REG FS_REG STACK
+    gen fsub %1,%2			yields %2	leaving stl $2
+pat sbf sdl $1==8
+    with FD_REG FD_REG STACK
+    gen fsub %1,%2			yields %2	leaving sdl $2
+pat mlf stl $1==4
+    with FS_REG STACK
+    gen fmul_s {post_inc4,sp},%1	yields %1	leaving stl $2
+pat mlf sdl $1==8
+    with FD_REG STACK
+    gen fmul_d {post_inc4,sp},%1	yields %1	leaving sdl $2
+pat dvf stl $1==4
+    with FS_REG FS_REG STACK
+    gen fdiv %1,%2			yields %2	leaving stl $2
+pat dvf sdl $1==8
+    with FD_REG FD_REG STACK
+    gen fdiv %1,%2			yields %2	leaving sdl $2
+pat ngf stl $1==4
+    with FS_REG STACK
+    gen fneg %1				yields %1	leaving stl $2
+pat ngf sdl $1==8
+    with FD_REG STACK
+    gen fneg %1				yields %1	leaving sdl $2
+
+pat adf ste $1==4
+    with FS_REG STACK
+    gen fadd_s {post_inc4,sp},%1	yields %1	leaving ste $2
+pat adf sde $1==8
+    with FD_REG STACK
+    gen fadd_d {post_inc4,sp},%1	yields %1	leaving sde $2
+pat sbf ste $1==4
+    with FS_REG FS_REG STACK
+    gen fsub %1,%2			yields %2	leaving ste $2
+pat sbf sde $1==8
+    with FD_REG FD_REG STACK
+    gen fsub %1,%2			yields %2	leaving sde $2
+pat mlf ste $1==4
+    with FS_REG STACK
+    gen fmul_s {post_inc4,sp},%1	yields %1	leaving ste $2
+pat mlf sde $1==8
+    with FD_REG STACK
+    gen fmul_d {post_inc4,sp},%1	yields %1	leaving sde $2
+pat dvf ste $1==4
+    with FS_REG FS_REG STACK
+    gen fdiv %1,%2			yields %2	leaving ste $2
+pat dvf sde $1==8
+    with FD_REG FD_REG STACK
+    gen fdiv %1,%2			yields %2	leaving sde $2
+pat ngf ste $1==4
+    with FS_REG STACK
+    gen fneg %1				yields %1	leaving ste $2
+pat ngf sde $1==8
+    with FD_REG STACK
+    gen fneg %1				yields %1	leaving sde $2
+
 pat adf $1==4
     with FS_REG STACK
     gen fadd_s {indirect4,sp},%1
@@ -4146,13 +4218,13 @@ with DD_REG AA_REG AA_REG
 	2:
 
 pat csa $1==4
-with any4 any4 STACK
+with any4 D_REG+LOCAL+const+ILOCAL+absolute4 STACK
     gen move %1,a0
 	move %2,d0
 	jmp {absolute4, ".csa"}
 
 pat csb $1==4
-with any4 any4 STACK
+with any4 D_REG+LOCAL+const+ILOCAL+absolute4 STACK
     gen move %1,a0
 	move %2,d0
 	jmp {absolute4, ".csb"}
