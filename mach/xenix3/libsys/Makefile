@@ -1,5 +1,5 @@
 # $Header$
-MACH=xenix3.0
+MACH=xenix3
 all:		libmon_o.a head_em.o
 
 install: 	all

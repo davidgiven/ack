@@ -1,4 +1,4 @@
-if xenix3.0 -c $1 1>&2
+if xenix3 -c $1 1>&2
 then echo `basename $1 $2`.o
 else exit 1
 fi
