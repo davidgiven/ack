@@ -80,7 +80,7 @@ __flushbuf(int c, FILE * stream)
 			stream->_flags |= _IOERR;
 			return EOF;
 		}
-		return c;
+		return (unsigned char) c;
 	} else if (io_testflag(stream, _IOLBF)) {
 		*stream->_ptr++ = c;
 		/* stream->_count has been updated in putc macro. */
@@ -123,5 +123,5 @@ __flushbuf(int c, FILE * stream)
 		}
 		*(stream->_buf) = c;
 	}
-	return c;
+	return (unsigned char) c;
 }
