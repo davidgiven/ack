@@ -254,8 +254,9 @@ valu_t bytes;
 			DOTGAIN += (bytes - 1) - gap;
 #endif
 	}
-	DOTVAL += gap;
-	sp->s_zero += gap;
+	/* I don't play the os_zero game here, but plainly write out zero's */
+	/* Led abuses trailing zero parts */
+	while (gap--) emit1(0) ;
 }
 
 #ifdef RELOCATION
