@@ -4,3 +4,6 @@ end
 name "SUN 68020 systemcall library"
 dir libsys
 end
+name "SUN 68020 C libraries"
+dir libcc
+end
