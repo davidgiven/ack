@@ -67,7 +67,7 @@ clean:
 		rm -f O_*.o
 		rm -f O_*.c
 		rm -f $(NOFILES) main.o mkstrct.o $(POFILES)
-		rm -f $(GENFILES) parser libopt.a
+		rm -f $(GENFILES) parser em_nopt $(LIBOPT)
 
 em_nopt:	main.o $(NOFILES)
 		$(CC) -o em_nopt main.o $(NOFILES) $(LIBS)
