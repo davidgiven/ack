@@ -343,7 +343,7 @@ emits(section) struct outsect *section ; {
 long
 emit_symtab()
 {
-	register unsigned short i;
+	register int i;
 	struct xnm {
 		unsigned short s_type, s_seg;
 		long	s_value;
@@ -354,39 +354,44 @@ emit_symtab()
 	extern char *malloc();
 	long off = OFF_CHAR(outhead);
 	register char *p;
+	register struct outname *np;
 
 	chars = malloc((unsigned)(outhead.oh_nchar));
 	if (! chars) return 0;
-	names = (struct outname *)
+	np = names = (struct outname *)
 		malloc(outhead.oh_nname * sizeof(struct outname));
-	if (! names) {
+	if (! np) {
 		free(chars);
 		return 0;
 	}
 	xptr = malloc((unsigned)(outhead.oh_nchar) + 9 * outhead.oh_nname);
 	if (! xptr) {
 		free(chars);
-		free((char *) names);
+		free((char *) np);
 		return 0;
 	}
 	xname = xptr;
-	rd_name(names, outhead.oh_nname);
+	rd_name(np, outhead.oh_nname);
 	rd_string(chars,outhead.oh_nchar);
-	for (i = 0; i < outhead.oh_nname; i++) {
+	for (i = 0; i < outhead.oh_nname; i++, np++) {
 		xnm.s_seg = 077;
-		switch(names[i].on_type & S_ETC) {
+		if (np->on_type & S_STB) {
+			xnm.s_seg = np->on_desc;
+			xnm.s_type = np->on_type;
+		}
+		else switch(np->on_type & S_ETC) {
 		case S_FIL:
 		case S_MOD:
 			xnm.s_type = 0x1f;
 			break;
 		case S_SCT:
 			xnm.s_type = 0x8;
-			if ((names[i].on_type & S_TYP) != S_MIN+TEXTSG) {
+			if ((np->on_type & S_TYP) != S_MIN+TEXTSG) {
 				xnm.s_seg = 0107;
 			}
 			break;
 		default:
-			switch(names[i].on_type & S_TYP) {
+			switch(np->on_type & S_TYP) {
 			case S_UND:
 				xnm.s_type = 0;
 				break;
@@ -409,22 +414,23 @@ emit_symtab()
 				break;
 			default:
 				fprintf(stderr,"warning: unknown s_type: %d\n",
-					(int)(names[i].on_type) & S_TYP);
+					(int)(np->on_type) & S_TYP);
 			}
 		}
-		if (names[i].on_type & S_EXT) xnm.s_type |= 0x20;
-		xnm.s_value = names[i].on_valu;
-		if (names[i].on_foff == 0) {
+		if (np->on_type & S_EXT) xnm.s_type |= 0x20;
+		xnm.s_value = np->on_valu;
+		shortcvt(xnm.s_type, xptr);
+		shortcvt(xnm.s_seg, xptr);
+		longcvt(xnm.s_value, xptr);
+		if (np->on_foff == 0) {
+			*xptr++ = '\0';
 		}
 		else {
-			long l = names[i].on_foff - off;
+			long l = np->on_foff - off;
 			if (l < 0 || l >= outhead.oh_nchar) {
 				fatal("bad on_off: %ld\n",l);
 			}
 			p = &chars[l];
-			shortcvt(xnm.s_type, xptr);
-			shortcvt(xnm.s_seg, xptr);
-			longcvt(xnm.s_value, xptr);
 			do {
 				*xptr++ = *p;
 			} while (*p++);
