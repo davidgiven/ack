@@ -18,7 +18,7 @@ extern short	pass INIT(PASS_1);
 				/* PASS 1, 2 or 3 */
 extern short	peekc;		/* push back symbol (PASS_1) */
 extern short	unresolved;	/* number of unresolved references */
-extern short	lineno;		/* input line number */
+extern long	lineno;		/* input line number */
 extern short	hllino;		/* high-level language line number */
 extern short	nerrors;	/* terminate at end of pass if set */
 extern short	sflag INIT(SYM_DEF);

@@ -388,7 +388,7 @@ char *tail, *s;
 {
 	fflush(stdout);
 	if (modulename)
-		fprintf(stderr, "\"%s\", line %d: ", modulename, lineno);
+		fprintf(stderr, "\"%s\", line %ld: ", modulename, lineno);
 	else
 		fprintf(stderr, "%s: ", progname);
 	fprintf(stderr, s, a1, a2, a3, a4);
