@@ -63,7 +63,7 @@ STATIC choose_cset(f, s_p)
 	Ccopy_set(time_space_ratio >= 50 ? cs1 : cs2, s_p);
 
 	Cdeleteset(cs1); Cdeleteset(cs2);
- }
+}
 
 cs_machinit(f)
 	FILE *f;
