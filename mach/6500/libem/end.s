@@ -1,8 +1,8 @@
 .define endtext, enddata, endbss, end
 
 .text
-.align 2
 endtext:
+.align 2
 .data
 .align 2
 enddata:
