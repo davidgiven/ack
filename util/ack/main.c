@@ -226,7 +226,7 @@ process(arg) char *arg ; {
 	/* Try to find a path through the transformations */
 	switch( setpath() ) {
 	case F_NOPATH :
-		error("Incomplete internal specification for %s",arg) ;
+		error("Cannot produce the desired file from %s",arg) ;
 		l_add(&c_arguments,keeps(arg)) ;
 		return 1 ;
 	case F_NOMATCH :
@@ -245,18 +245,18 @@ process(arg) char *arg ; {
 			   if ( !nill_flag ) {
 				printf("%s\n",arg) ;
 			   }
-			   switch ( phase->t_prep ) {
-			default : if ( !mayprep() ) break ;
-			case YES: if ( !transform(cpp_trafo) ) {
-					n_error++ ;
+			}
+			switch ( phase->t_prep ) {
+			default :    if ( !mayprep() ) break ;
+			case YES:    if ( !transform(cpp_trafo) ) {
+					   n_error++ ;
 #ifdef DEBUG
-					vprint("Pre-processor failed\n") ;
+					   vprint("Pre-processor failed\n") ;
 #endif
-					return 0 ;
-				   }
+					   return 0 ;
+				     }
 			case NO :
-				  break ;
-			   }
+				     break ;
 			}
 			if ( cpp_trafo && stopsuffix &&
 			     strcmp(cpp_trafo->t_out,stopsuffix)==0 ) {
