@@ -97,20 +97,17 @@ Compile(src, dst)
 	CompUnit();
 	C_ms_src((arith) (LineNumber - 1), FileName);
 	close_scope(SC_REVERSE);
-	if (err_occurred) {
-		C_close();
-		return 0;
-	}
-	WalkModule(Defined);
-	if (fp_used) {
-		C_ms_flt();
+	if (!err_occurred) {
+		WalkModule(Defined);
+		if (fp_used) {
+			C_ms_flt();
+		}
 	}
 	C_close();
 #ifdef DEBUG
-	if (options['m']) MemUse();
+	if (options['i']) Info();
 #endif
-	if (err_occurred) return 0;
-	return 1;
+	return ! err_occurred;
 }
 
 #ifdef DEBUG
@@ -219,7 +216,10 @@ END SYSTEM.\n";
 }
 
 #ifdef DEBUG
-MemUse()
+
+int	cntlines;
+
+Info()
 {
 	extern int cnt_def, cnt_node, cnt_paramlist, cnt_type,
 		   cnt_switch_hdr, cnt_case_entry, 
@@ -231,5 +231,6 @@ MemUse()
 cnt_def, cnt_node, cnt_paramlist, cnt_type,
 cnt_switch_hdr, cnt_case_entry, 
 cnt_scope, cnt_scopelist, cnt_forwards, cnt_tmpvar);
+print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif

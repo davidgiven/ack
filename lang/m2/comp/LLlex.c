@@ -29,6 +29,9 @@ struct token dot, aside;
 struct type *toktype;
 struct string string;
 int idfsize = IDFSIZE;
+#ifdef DEBUG
+extern int	cntlines;
+#endif
 
 static
 SkipComment()
@@ -43,6 +46,9 @@ SkipComment()
 	for (;;) {
 		if (class(ch) == STNL) {
 			LineNumber++;
+#ifdef DEBUG
+			cntlines++;
+#endif
 		}
 		else
 		if (ch == '(') {
@@ -79,6 +85,9 @@ GetString(upto)
 		if (class(ch) == STNL)	{
 			lexerror("newline in string");
 			LineNumber++;
+#ifdef DEBUG
+			cntlines++;
+#endif
 			break;
 		}
 		if (ch == EOI) {
@@ -129,6 +138,9 @@ again:
 
 	case STNL:
 		LineNumber++;
+#ifdef DEBUG
+		cntlines++;
+#endif
 		tk->tk_lineno++;
 		goto again;
 
