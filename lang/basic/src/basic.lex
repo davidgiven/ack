@@ -225,7 +225,7 @@ File *stream;
             if ( characters_left == 0 ) { /* Nothing read */
                 if ( external_bufp == buffer ) {
                     *external_bufp = '\0';
-                    return(NULL);  /* EOF */
+                    return(0);  /* EOF */
                 } else { /* Something was already copied */
                     *external_bufp = '\0';
                     return(buffer);
@@ -241,7 +241,7 @@ getline()
 {
 	/* get next input line */
 
-	if ( our_fgets(inputline,MAXLINELENGTH,yyin) == NULL)
+	if ( our_fgets(inputline,MAXLINELENGTH,yyin) == 0)
 		return(FALSE);
 	yylineno ++;
 	if ( strindex(inputline,'\n') == 0)

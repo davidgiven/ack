@@ -3,7 +3,6 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
-#include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 #include <system.h>
