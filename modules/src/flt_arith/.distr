@@ -12,6 +12,7 @@ flt_modf.c
 flt_mul.c
 flt_nrm.c
 flt_str2fl.c
+flt_umin.c
 misc.h
 ucmp.c
 flt_arith.3

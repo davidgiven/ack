@@ -38,13 +38,16 @@ extern int	flt_status;
 .B flt_div(e1, e2, e3)
 .B flt_arith *e1, *e2, *e3;
 .PP
+.B flt_umin(e)
+.B flt_arith *e;
+.PP
 .B flt_modf(e1, intpart, fractpart)
 .B flt_arith *e1, *intpart, *fractpart;
 .PP
 .B int flt_cmp(e1, e2)
 .B flt_arith *e1, *e2;
 .PP
-.B int flt_str2flt(s, e)
+.B flt_str2flt(s, e)
 .B char *s;
 .B flt_arith *e;
 .PP
@@ -111,6 +114,12 @@ by the one indicated by
 and stores the result indirectly through
 .IR e3 .
 .PP
+.B flt_umin
+negates the number indicated by
+.I e
+and stores the result indirectly through
+.IR e .
+.PP
 .B flt_modf
 splits the number indicated by
 .I e
@@ -176,7 +185,7 @@ characters are stored.
 .B flt_arith2flt
 converts the number
 .I n
-to the floating point format use in this package and returns the result
+to the floating point format used in this package and returns the result
 in
 .IR e .
 .PP

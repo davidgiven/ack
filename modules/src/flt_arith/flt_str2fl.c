@@ -402,9 +402,11 @@ flt_flt2str(e, buf, bufsize)
 	register char *s1;
 	char Xbuf[NDIG+12];
 	register char *s = Xbuf;
+	flt_arith e1;
 
+	e1 = *e;
 	flt_status = 0;
-	s1 = flt_ecvt(e,NDIG,&dp,&sign);
+	s1 = flt_ecvt(&e1,NDIG,&dp,&sign);
         if (sign)
                 *s++ = '-';
         *s++ = *s1++;
@@ -439,6 +441,6 @@ flt_flt2str(e, buf, bufsize)
 	s = Xbuf;
 	s1 = buf;
 	do {
-		*s1++ = *s++;
-	} while (*s);
+		*s1++ = *s;
+	} while (*s++);
 }
