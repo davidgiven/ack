@@ -20,6 +20,7 @@ struct def	{		/* for ordinary tags */
 	char df_initialized;	/* an initialization has been generated */
 	char df_alloc;		/* 0, ALLOC_SEEN or ALLOC_DONE */
 	char df_used;		/* set if idf is used */
+	char df_formal_array;	/* to warn if sizeof is taken */
 	char *df_file;		/* file containing the definition */
 	unsigned int df_line;	/* line number of the definition */
 #ifdef	LINT
@@ -27,7 +28,6 @@ struct def	{		/* for ordinary tags */
 	int df_firstbrace;	/* brace number of its first occurrence */
 	int df_minlevel;	/* the lowest level needed for this def */
 #endif	LINT
-	char df_formal_array;	/* to warn if sizeof is taken */
 	arith df_address;
 };
 
