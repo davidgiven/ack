@@ -220,11 +220,11 @@ stb_type(tp, assign_num)
 		break;
 	case T_FILE:
 		addc_db_str('L');
-		stb_type(tp->next);
+		stb_type(tp->next, 0);
 		break;
 	case T_STRING:
 		addc_db_str('*');
-		stb_type(char_type);
+		stb_type(char_type, 0);
 		break;
 	}
 }
@@ -268,7 +268,7 @@ stb_string(df, kind)
 	case D_END:
 	case D_PEND:
 		adds_db_str(sprint(buf, "E%d;", df->prc_vis->sc_count));
-		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, 0);
+		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith)0);
 		break;
 	case D_VARIABLE:
 		if (df->df_flags & D_VARPAR) {	/* VAR parameter */

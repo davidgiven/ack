@@ -121,7 +121,7 @@ DoDirective(directive, nd, tp, scl, function)
 	struct type *tp;
 	struct scopelist *scl;
 {
-	int kind;			/* kind of directive */
+	long kind;			/* kind of directive */
 	int inp;			/* internal or external name */
 	int ext = 0;		/* directive = EXTERN */
 	struct def *df = lookup(directive, PervasiveScope, D_INUSE);
