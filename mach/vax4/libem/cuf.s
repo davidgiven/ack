@@ -13,23 +13,23 @@
 	bneq    Ierr
 	cmpl    r0,$4
 	bneq    Idld
-	cvtlf   (sp)+,-(sp)
+	cvtld   (sp)+,-(sp)
 	bgeq    Iout
-	addf2	Itwo32f,(sp)
+	addd2	Itwo32F,(sp)
 Iout:
+	cvtdf	(sp)+,-(sp)
 	jmp     (r2)
 Idld:
 	cmpl    r0,$8
 	bneq    Ierr
 	cvtld   (sp)+,-(sp)
-	bgeq    Iout
+	bgeq    Iout2
 	addd2   Itwo32F,(sp)
+Iout2:
 	jmp     (r2)
 Ierr:
 	pushl	$EILLINS
 	jmp     .fat
 .sect .rom
-Itwo32f:
-	.data1 0200,0120,00,00
 Itwo32F:
 	.data1 0200,0120,00,00,00,00,00,00
