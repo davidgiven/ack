@@ -1,4 +1,5 @@
 #
+#include "em_abs.h"
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *
@@ -43,6 +44,11 @@ _penvp
  loi EM_PSIZE
  lae _penvp
  sti EM_PSIZE
+#if unix && ! (em22 || em24 || em44)
+ lpi $_ctch_
+ sig
+ asp EM_PSIZE
+#endif
  lal EM_WSIZE+EM_PSIZE
  loi EM_PSIZE
  lal EM_WSIZE
@@ -54,3 +60,31 @@ _penvp
  lfr EM_WSIZE
  cal $exit
  end
+
+#if unix && ! (em22 || em24 || em44)
+ exp $_ctch_
+ pro $_ctch_,0
+ lol 0
+ loc EIDIVZ
+ beq *1
+ lol 0
+ loc EFDIVZ
+ beq *1
+ bra *2
+2
+ lol 0
+ trp
+ bra *3
+1
+ loc 8
+ cal $getpid
+ lfr EM_WSIZE
+ cal $kill
+ asp 2*EM_WSIZE
+3
+ lpi $_ctch_
+ sig
+ asp EM_WSIZE
+ rtt
+ end 0
+#endif
