@@ -22,3 +22,6 @@ end
 name "MSC6500 Occam library"
 dir liboc
 end
+name "MSC6500 Modula-2 library"
+dir libm2
+end
