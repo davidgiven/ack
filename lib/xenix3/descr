@@ -7,6 +7,7 @@ var f=4
 var d=8
 var NAME=xenix3_0
 var M=xenix3.0
+var IM=i86
 var LIB=lib/{M}/tail_
 var ILIB=lib/i86/tail_
 var RT=lib/{M}/head_
@@ -17,7 +18,7 @@ var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib/{IM}/cg
 	args <
 	stdout
 	need .e
@@ -25,7 +26,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib/{IM}/as
 	args - -o > <
 	prep cond
 end
@@ -35,12 +36,18 @@ name led
 	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i SEPID=-b1:0
+	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
-({RTS}:.ocm.b.c={EM}/{IRT}cc) ({RTS}:.p={EM}/{IRT}pc) -o > < \
+		({RTS}:.ocm.b.c={EM}/{IRT}cc) \
+		({RTS}:.p={EM}/{IRT}pc) \
+		({RTS}:.mod={EM}/{IRT}m2) \
+		-o > < \
 		(.p:{TAIL}={EM}/{ILIB}pc) \
 		(.b:{TAIL}={EM}/{ILIB}bc) \
+		(.mod:{TAIL}={EM}/{ILIB}m2) \
 		(.ocm:{TAIL}={EM}/{ILIB}ocm) \
 		(.ocm.b.c:{TAIL}={EM}/{ILIB}cc.1s {EM}/{ILIB}cc.2g) \
+		{FLOATS?} \
 		(.e:{TAIL}={EM}/{ILIB}em {EM}/{LIB}mon {EM}/lib/i86/end_em)
 	linker
 end
