@@ -4,7 +4,7 @@
 .extern __vectab, __M
 mtype = 2			! M+mtype = &M.m_type
 .sect .text
-_begsig:
+__begsig:
 	push ax			! after interrupt, save all regs
 	push bx
 	push cx
