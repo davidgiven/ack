@@ -29,7 +29,7 @@ static unsigned long
 string2long(register const char *nptr, char ** const endptr,
 			int base, int is_signed)
 {
-	register int v;
+	register unsigned int v;
 	register unsigned long val = 0;
 	register int c;
 	int ovfl = 0, sign = 1;
@@ -64,8 +64,8 @@ string2long(register const char *nptr, char ** const endptr,
 			else
 				v = c - '0';
 			if (v >= base) break;
-			if (val > (ULONG_MAX - v) / base) ovfl++;
-			val = (val * base) + v;
+			if (val > (ULONG_MAX - v) / base) ++ovfl;
+			else val = (val * base) + v;
 		}
 		nptr++;
 	}
@@ -76,8 +76,8 @@ string2long(register const char *nptr, char ** const endptr,
 
 	if (!ovfl) {
 		/* Overflow is only possible when converting a signed long.
-		 * val is unsigned long, so -LONG_MIN is converted to
-		 * unsigned long.
+		 * The "-(LONG_MIN+1)+(unsigned long) 1" construction is there
+		 * to prevent overflow warnings on -LONG_MIN.
 		 */
 		if (is_signed
 		    && (   (sign < 0 && val > -(LONG_MIN+1)+(unsigned long) 1)
@@ -92,5 +92,5 @@ string2long(register const char *nptr, char ** const endptr,
 			else return LONG_MAX;
 		else return ULONG_MAX;
 	}
-	return (long) sign * val;
+	return (sign * val);
 }
