@@ -24,6 +24,10 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 
+extern int	proclevel;
+struct desig	Desig;
+struct desig	InitDesig = {DSG_INIT, 0, 0};
+
 CodeValue(ds, size)
 	register struct desig *ds;
 {
@@ -44,7 +48,7 @@ CodeValue(ds, size)
 			break;
 		}
 
-		if (size == dwird_size) {
+		if (size == dword_size) {
 			if (ds->dsg_name) {
 				C_lde_dnam(ds->dsg_name, ds->dsg_offset);
 			}
@@ -63,7 +67,7 @@ CodeValue(ds, size)
 		break;
 
 	default:
-		assert(0);
+		crash("(CodeValue)");
 	}
 
 	ds->dsg_kind = DSG_LOADED;
@@ -101,8 +105,7 @@ CodeAddress(ds)
 		break;
 
 	default:
-		assert(0);
-		break;
+		crash("(CodeAddress)");
 	}
 
 	ds->dsg_offset = 0;
@@ -152,13 +155,176 @@ CodeFieldDesig(df, ds)
 	case DSG_PFIXED:
 	case DSG_INDEXED:
 		CodeAddress(ds);
-		ds->dsg_kind = PLOADED;
+		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = df->fld_off;
 		break;
 
 	default:
-		assert(0);
-		break;
+		crash("(CodeFieldDesig)");
 	}
 }
 
+CodeVarDesig(df, ds)
+	register struct def *df;
+	register struct desig *ds;
+{
+	/*	Generate code for a variable represented by a "def" structure.
+		Of course, there are numerous cases: the variable is local,
+		it is a value parameter, it is a var parameter, it is one of
+		those of an enclosing procedure, or it is global.
+	*/
+	register struct scope *sc = df->df_scope;
+
+	/* Selections from a module are handled earlier, when identifying
+	   the variable, so ...
+	*/
+	assert(ds->dsg_kind == DSG_INIT);
+
+	if (df->var_addrgiven) {
+		/* the programmer specified an address in the declaration of
+		   the variable. Generate code to push the address.
+		*/
+		CodeConst(df->var_off, pointer_size);
+		ds->dsg_kind = DSG_PLOADED;
+		ds->dsg_offset = 0;
+		return;
+	}
+
+	if (df->var_name) {
+		/* this variable has been given a name, so it is global.
+		   It is directly accessible.
+		*/
+		ds->dsg_name = df->var_name;
+		ds->dsg_offset = 0;
+		ds->dsg_kind = DSG_FIXED;
+		return;
+	}
+	
+	if (sc->sc_level == 0) {
+		/* the variable is global, but declared in a module local
+		   to the implementation or program module.
+		   Such variables can be accessed through an offset from
+		   the name of the module.
+		*/
+		ds->dsg_name = &(sc->sc_name[1]);
+		ds->dsg_offset = df->var_off;
+		ds->dsg_kind = DSG_FIXED;
+		return;
+	}
+
+	if (sc->sc_level != proclevel) {
+		/* the variable is local to a statically enclosing procedure.
+		*/
+		assert(proclevel > sc->sc_level);
+		if (df->df_flags & (D_VARPAR|D_VALPAR)) {
+			/* value or var parameter
+			*/
+			C_lxa((arith) (proclevel - sc->sc_level));
+			if (df->df_flags & D_VARPAR) {
+				/* var parameter
+				*/
+				C_adp(df->var_off);
+				C_loi(pointer_size);
+				ds->dsg_offset = 0;
+				ds->dsg_kind = DSG_PLOADED;
+				return;
+			}
+		}
+		else	C_lxl((arith) (proclevel - sc->sc_level));
+		ds->dsg_kind = DSG_PLOADED;
+		ds->dsg_offset = df->var_off;
+		return;
+	}
+
+	/* Now, finally, we have a local variable or a local parameter
+	*/
+	if (df->df_flags & D_VARPAR) {
+		/* a var parameter; address directly accessible.
+		*/
+		ds->dsg_kind = DSG_PFIXED;
+	}
+	else	ds->dsg_kind = DSG_FIXED;
+	ds->dsg_offset =df->var_off;
+}
+
+CodeDesig(nd, ds)
+	register struct node *nd;
+	register struct desig *ds;
+{
+	/*	Generate code for a designator. Use divide and conquer
+		principle
+	*/
+
+	switch(nd->nd_class) {	/* Divide */
+	case Def: {
+		register struct def *df = nd->nd_def;
+
+		switch(df->df_kind) {
+		case D_FIELD:
+			CodeFieldDesig(df, ds);
+			break;
+
+		case D_VARIABLE:
+			CodeVarDesig(df, ds);
+			break;
+
+		default:
+			crash("(CodeDesig) Def");
+		}
+		}
+		break;
+
+	case Link:
+		assert(nd->nd_symb == '.');
+		assert(nd->nd_right->nd_class == Def);
+		CodeDesig(nd->nd_left, ds);
+		CodeFieldDesig(nd->nd_right->nd_def, ds);
+		break;
+
+	case Oper:
+		assert(nd->nd_symb == '[');
+		CodeDesig(nd->nd_left, ds);
+		CodeAddress(ds);
+		*ds = InitDesig;
+		CodeExpr(nd->nd_right, ds, NO_LABEL, NO_LABEL);
+		CodeValue(ds, nd->nd_right->nd_type->tp_size);
+		CodeCoercion(nd->nd_right->nd_type, int_type);
+		if (IsConformantArray(nd->nd_left->nd_type)) {
+			/* ??? */
+		}
+		else	{
+			/* load address of descriptor
+			*/
+			/* ??? */
+		}
+		break;
+
+	case Uoper:
+		assert(nd->nd_symb == '^');
+		CodeDesig(nd->nd_right, ds);
+		switch(ds->dsg_kind) {
+		case DSG_LOADED:
+			ds->dsg_kind = DSG_PLOADED;
+			break;
+
+		case DSG_INDEXED:
+		case DSG_PLOADED:
+		case DSG_PFIXED:
+			CodeValue(ds, pointer_size);
+			ds->dsg_kind = DSG_PLOADED;
+			ds->dsg_offset = 0;
+			break;
+
+		case DSG_FIXED:
+			ds->dsg_kind = DSG_PFIXED;
+			break;
+
+		default:
+			crash("(CodeDesig) Uoper");
+		}
+		break;
+		
+	default:
+		crash("(CodeDesig) class");
+	}
+}

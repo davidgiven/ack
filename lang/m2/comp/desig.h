@@ -44,10 +44,12 @@ struct withdesig {
 	struct scope *w_scope;	/* scope in which fields of this record
 				   reside
 				*/
-	struct desig *w_desig;	/* a desig structure for this particular
+	struct desig w_desig;	/* a desig structure for this particular
 				   designator
 				*/
 };
 
 extern struct withdesig	*WithDesigs;
-extern struct desig	Desig;
+extern struct desig	Desig, InitDesig;
+
+#define NO_LABEL	((label) 0)

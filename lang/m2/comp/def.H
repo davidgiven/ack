@@ -45,10 +45,8 @@ struct field {
 
 struct dfproc {
 	struct scopelist *pr_vis; /* scope of procedure */
-	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
 #define prc_vis		df_value.df_proc.pr_vis
-#define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
 };
 

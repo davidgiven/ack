@@ -111,6 +111,20 @@ fatal(fmt, args)
 	sys_stop(S_EXIT);
 }
 
+/*VARARGS1*/
+crash(fmt, args)
+	char *fmt;
+	int args;
+{
+
+	_error(CRASH, NULLNODE, fmt, &args);
+#ifdef DEBUG
+	sys_stop(S_ABORT);
+#else
+	sys_stop(S_EXIT);
+#endif
+}
+
 _error(class, node, fmt, argv)
 	int class;
 	struct node *node;

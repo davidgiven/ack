@@ -18,7 +18,7 @@ LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
-	cstoper.o chk_expr.o options.o walk.o casestat.o
+	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o code.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \

@@ -371,6 +371,12 @@ node_error(arg->nd_left, "type incompatibility in parameter");
 			return 0;
 		}
 
+		if (param->par_var &&
+		    !chk_designator(arg->nd_left, VARIABLE|DESIGNATOR)) {
+			node_error(arg->nd_left,"VAR parameter expected");
+			return 0;
+		}
+
 		param = param->next;
 	}
 
@@ -445,14 +451,20 @@ chk_designator(expp, flag)
 
 	if (expp->nd_class == Link) {
 		assert(expp->nd_symb == '.');
-		assert(expp->nd_right->nd_class == Name);
 
 		if (! chk_designator(expp->nd_left,
 				     (flag|HASSELECTORS))) return 0;
 
 		tp = expp->nd_left->nd_type;
 
+		if (expp->nd_right->nd_class == Def) {
+			/* We were here already!
+			*/
+			return 1;
+		}
+
 		assert(tp->tp_fund == T_RECORD);
+		assert(expp->nd_right->nd_class == Name);
 
 		df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
 
@@ -472,7 +484,8 @@ df->df_idf->id_text);
 			}
 		}
 
-		if (expp->nd_left->nd_class == Def) {
+		if (expp->nd_left->nd_class == Def &&
+		    expp->nd_left->nd_def->df_kind == D_MODULE) {
 			expp->nd_class = Def;
 			expp->nd_def = df;
 			FreeNode(expp->nd_left);
@@ -628,7 +641,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 					symbol2str(expp->nd_symb));
 		return 0;
 	}
-	
+
 	switch(expp->nd_symb) {
 	case '+':
 	case '-':

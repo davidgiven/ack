@@ -64,13 +64,34 @@ EnterIdList(idlist, kind, flags, type, scope, addr)
 		df->df_type = type;
 		df->df_flags |= flags;
 		if (addr) {
+			int xalign = type->tp_align;
+
+			if (xalign < word_align && kind != D_FIELD) {
+				xalign = word_align;
+			}
+
 			if (*addr >= 0) {
-				off = align(*addr, type->tp_align);
-				*addr = off + type->tp_size;
+				if (scope->sc_level) {
+					/* alignment of parameters is on
+					   word boundaries. We cannot do any
+					   better, because we don't know the
+					   alignment of the stack pointer when
+					   starting to push parameters
+					*/
+					off = *addr;
+					*addr = align(off, word_align);
+				}
+				else {
+					/* for global variables we can honour
+					   the alignment requirements totally.
+					*/
+					off = align(*addr, xalign);
+					*addr = off + type->tp_size;
+				}
 			}
 			else {
-				off = -align(-*addr, type->tp_align);
-				*addr = off - type->tp_size;
+				off = -align(-*addr-type->tp_size, xalign);
+				*addr = off;
 			}
 			if (kind == D_VARIABLE) {
 				df->var_off = off;

@@ -15,6 +15,7 @@ static char *RcsId = "$Header$";
 #include	"type.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"desig.h"
 
 #include	"density.h"
 
@@ -64,7 +65,7 @@ CaseCode(nd, exitlabel)
 
 	assert(nd->nd_class == Stat && nd->nd_symb == CASE);
 
-	WalkExpr(nd->nd_left);
+	WalkExpr(nd->nd_left, NO_LABEL, NO_LABEL);
 	sh->sh_type = nd->nd_left->nd_type;
 	sh->sh_break = text_label();
 	sh->sh_default = 0;

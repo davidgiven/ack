@@ -217,8 +217,11 @@ WalkStat(nd, lab)
 	assert(nd->nd_class == Stat);
 
 	switch(nd->nd_symb) {
-	case BECOMES:
-		WalkExpr(right);
+	case BECOMES: {
+		struct desig ds;
+
+		WalkExpr(right, NO_LABEL, NO_LABEL);
+		ds = Desig;
 		WalkDesignator(left);	/* May we do it in this order??? */
 
 		if (! TstAssCompat(left->nd_type, right->nd_type)) {
@@ -226,18 +229,19 @@ WalkStat(nd, lab)
 			break;
 		}
 
-		CodeAssign(nd);
-
+		CodeAssign(nd, &ds, &Desig);
+		}
 		break;
 
 	case IF:
-		{	label l1, l2;
+		{	label l1, l2, l3;
 
 			l1 = instructionlabel++;
 			l2 = instructionlabel++;
-			ExpectBool(left);
+			l3 = instructionlabel++;
+			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
-			C_zeq(l1);
+			C_df_ilb(l3);
 			WalkNode(right->nd_left, lab);
 
 			if (right->nd_right) {	/* ELSE part */
@@ -255,13 +259,14 @@ WalkStat(nd, lab)
 		break;
 
 	case WHILE:
-		{	label l1, l2;
+		{	label l1, l2, l3;
 
 			l1 = instructionlabel++;
 			l2 = instructionlabel++;
+			l3 = instructionlabel++;
 			C_df_ilb(l1);
-			ExpectBool(left);
-			C_zeq(l2);
+			ExpectBool(left, l3, l2);
+			C_df_ilb(l3);
 			WalkNode(right, lab);
 			C_bra(l1);
 			C_df_ilb(l2);
@@ -269,13 +274,14 @@ WalkStat(nd, lab)
 		}
 
 	case REPEAT:
-		{	label l1;
+		{	label l1, l2;
 
 			l1 = instructionlabel++;
+			l2 = instructionlabel++;
 			C_df_ilb(l1);
 			WalkNode(left, lab);
-			ExpectBool(right);
-			C_zeq(l1);
+			ExpectBool(right, l2, l1);
+			C_df_ilb(l2);
 			break;
 		}
 
@@ -314,10 +320,9 @@ WalkStat(nd, lab)
 			   Decide here wether to use a temporary variable or
 			   not, depending on the value of Desig.
 			   Suggestion: temporary if Desig != DSG_FIXED
-
-			   And then:
-			   wds.w_desig = Desig; ???
+			   ???
 			*/
+			wds.w_desig = Desig;
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
 			CurrVis = &link;
@@ -335,7 +340,7 @@ WalkStat(nd, lab)
 
 	case RETURN:
 		if (right) {
-			WalkExpr(right);
+			WalkExpr(right, NO_LABEL, NO_LABEL);
 			/* What kind of compatibility do we need here ???
 			   assignment compatibility?
 			*/
@@ -352,22 +357,24 @@ node_error(right, "type incompatibility in RETURN statement");
 	}
 }
 
-ExpectBool(nd)
+ExpectBool(nd, true_label, false_label)
 	struct node *nd;
+	label true_label, false_label;
 {
 	/*	"nd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
 
-	WalkExpr(nd);
+	WalkExpr(nd, true_label, false_label);
 
 	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
 		node_error(nd, "boolean expression expected");
 	}
 }
 
-WalkExpr(nd)
+WalkExpr(nd, true_label, false_label)
 	struct node *nd;
+	label true_label, false_label;
 {
 	/*	Check an expression and generate code for it
 	*/
@@ -376,7 +383,8 @@ WalkExpr(nd)
 
 	if (! chk_expr(nd)) return;
 
-	/* ??? */
+	Desig = InitDesig;
+	CodeExpr(nd, &Desig, true_label, false_label);
 }
 
 WalkDesignator(nd)
@@ -389,25 +397,8 @@ WalkDesignator(nd)
 
 	if (! chk_designator(nd, DESIGNATOR|VARIABLE)) return;
 
-	/* ??? */
-}
-
-CodeCall(nd)
-	struct node *nd;
-{
-	/*	Generate code for a procedure call. Checking of parameters
-		and result is already done.
-	*/
-	/* ??? */
-}
-
-CodeAssign(nd)
-	struct node *nd;
-{
-	/*	Generate code for an assignment. Testing of type
-		compatibility and the like is already done.
-	*/
-	/* ??? */
+	Desig = InitDesig;
+	CodeDesig(nd, &Desig);
 }
 
 #ifdef DEBUG

@@ -45,7 +45,9 @@ struct record {
 
 struct proc {
 	struct paramlist *pr_params;
+	arith pr_nbpar;
 #define prc_params	tp_value.tp_proc.pr_params
+#define prc_nbpar	tp_value.tp_proc.pr_nbpar
 };
 
 struct type	{

@@ -56,16 +56,16 @@ ProcedureHeading(struct def **pdf; int type;)
 		{
 		  if (type == D_PROCEDURE) proclevel++;
 		  df = DeclProc(type);
+		  tp = construct_type(T_PROCEDURE, tp);
 		  if (proclevel > 1) {
 			/* Room for static link
 			*/
-			df->prc_nbpar = pointer_size;
+			tp->prc_nbpar = pointer_size;
 		  }
-		  else	df->prc_nbpar = 0;
+		  else	tp->prc_nbpar = 0;
 		}
-	FormalParameters(type == D_PROCEDURE, &params, &tp, &(df->prc_nbpar))?
+	FormalParameters(type == D_PROCEDURE, &params, &(tp->next), &(tp->prc_nbpar))?
 		{
-		  tp = construct_type(T_PROCEDURE, tp);
 		  tp->prc_params = params;
 		  if (df->df_type) {
 			/* We already saw a definition of this type

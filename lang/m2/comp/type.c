@@ -149,6 +149,20 @@ init_types()
 	*/
 	register struct type *tp;
 
+	/* first, do some checking
+	*/
+	if (int_size != word_size) {
+		fatal("Integer size not equal to word size");
+	}
+
+	if (long_size < int_size) {
+		fatal("Long integer size smaller than integer size");
+	}
+
+	if (double_size < float_size) {
+		fatal("Long real size smaller than real size");
+	}
+
 	/* character type
 	*/
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
