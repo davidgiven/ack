@@ -256,6 +256,8 @@ IMPLEMENTATION MODULE InOut ;
 		integ := int
 	END;
 	IF buf[index] > " " THEN
+		Write(buf[index]);
+		Write(termCH);
 		Traps.Message("illegal integer");
 		HALT;
 	END;
@@ -419,6 +421,7 @@ IMPLEMENTATION MODULE InOut ;
   END WriteString;
 
 BEGIN	(* InOut initialization *)
+	unread := FALSE;
 	WITH ibuf DO
 		fildes := 0;
 		bufferedcount := BUFSIZ;
