@@ -310,7 +310,7 @@ idf2sdef(idf, tp)
 	*sdefp = sdef = new_sdef();
 	clear((char *)sdef, sizeof(struct sdef));
 	sdef->sd_idf = idf;
-	sdef->sd_type = error_type;
+	sdef->sd_stype = sdef->sd_type = error_type;
 	return sdef;
 }
 

@@ -171,6 +171,7 @@ idf2expr(expr)
 	/* now def != 0 */
 	if (def->df_type->tp_fund == LABEL) {
 		expr_error(expr, "illegal use of label %s", idf->id_text);
+		expr->ex_type = error_type;
 	}
 	else {
 		def->df_used = 1;

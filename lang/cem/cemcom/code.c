@@ -183,7 +183,12 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		DfaStartFunction(name);
 #endif	DATAFLOW
 
-	func_tp = def->df_type->tp_up;
+	if (def->df_type->tp_fund != FUNCTION) {
+		error("making function body for non-function");
+		func_tp = error_type;
+	}
+	else
+		func_tp = def->df_type->tp_up;
 	size = ATW(func_tp->tp_size);
 	C_pro_narg(name);
 	if (is_struct_or_union(func_tp->tp_fund))	{

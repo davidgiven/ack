@@ -279,7 +279,7 @@ switch_statement
 	'('
 	expression(&expr)
 		{
-			code_startswitch(expr);
+			code_startswitch(&expr);
 		}
 	')'
 	statement

@@ -32,8 +32,8 @@ static struct switch_hdr *switch_stack = 0;
 	For simplicity, we suppose int_size == word_size.
 */
 
-code_startswitch(expr)
-	struct expr *expr;
+code_startswitch(expp)
+	struct expr **expp;
 {
 	/*	Check the expression, stack a new case header and
 		fill in the necessary fields.
@@ -41,17 +41,17 @@ code_startswitch(expr)
 	register label l_table = text_label();
 	register label l_break = text_label();
 	register struct switch_hdr *sh = new_switch_hdr();
-	int fund = any2arith(&expr, SWITCH);	/* INT, LONG or DOUBLE */
+	int fund = any2arith(expp, SWITCH);	/* INT, LONG or DOUBLE */
 	
 	switch (fund)	{
 	case LONG:
 		if (options['R'])
 			warning("long in switch (cast to int)");
-		int2int(&expr, int_type);
+		int2int(expp, int_type);
 		break;
 	case DOUBLE:
 		error("float/double in switch");
-		erroneous2int(&expr);
+		erroneous2int(expp);
 		break;
 	}
 	
@@ -60,12 +60,12 @@ code_startswitch(expr)
 	sh->sh_default = 0;
 	sh->sh_table = l_table;
 	sh->sh_nrofentries = 0;
-	sh->sh_type = expr->ex_type;	/* the expression switched	*/
+	sh->sh_type = (*expp)->ex_type;	/* the expression switched	*/
 	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* immaterial ??? */
 	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
-	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(*expp, RVAL, TRUE, NO_LABEL, NO_LABEL);
 					/* evaluate the switch expr.	*/
 	C_bra(l_table);			/* goto start of switch_table	*/
 }

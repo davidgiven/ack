@@ -181,7 +181,7 @@ declare_idf(ds, dc, lvl)
 		/*	at the L_FORMAL1 level there is no type specified yet
 		*/
 		ASSERT(lvl == L_FORMAL1);
-		type = 0;
+		type = int_type;	/* may change at L_FORMAL2 */
 	}
 	else	{
 		/* combine the decspecs and the declarator into one type */
@@ -583,7 +583,7 @@ declare_parameter(idf)
 {
 	/*	idf is declared as a formal.
 	*/
-	add_def(idf, FORMAL, (struct type *)0, level);
+	add_def(idf, FORMAL, int_type, level);
 }
 
 declare_enum(tp, idf, l)
@@ -616,8 +616,6 @@ declare_formals(fp)
 		struct idf *idf = se->se_idf;
 		struct def *def = idf->id_def;
 		
-		if (def->df_type == 0)
-			def->df_type = int_type; /* default type */
 		def->df_address = f_offset;
 
 		/*	the alignment convention for parameters is: align on
