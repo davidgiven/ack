@@ -149,7 +149,7 @@ rule			{	register p_nont p;
 	 			p = &nonterms[g_getcont(temp)];
 				if (p->n_rule) {
 					error(linecount,
-"nonterminal %s already defined", lextoken.t_string);
+"Nonterminal %s already defined", lextoken.t_string);
 				}
 				/*
 				 * Remember the order in which the nonterminals
@@ -360,10 +360,11 @@ simpleproduction(p_gram *p; register int *conflres;)
 					if ((q->t_flags & PERSISTENT) &&
 					    kind == FIXED) {
 						error(linecount,
-							"illegal %%persistent");
+							"Illegal %%persistent");
 					}
 					*/
 				}
+				termdeleted = 0;
 				*p_rule++ = elem;
 			}
 	  ]*		{	register p_term q;
@@ -530,7 +531,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			if (!level) unput(ch);
 			if (level || flag == 1) putc(ch,f);
 			if ((!level) && flag == 2 && !semicolon) {
-				error(linecount,"missing ';'");
+				error(linecount,"Missing ';'");
 			}
 			return;
 		}
@@ -585,7 +586,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 					ch = input();
 				}
 				if (ch == '\n') {
-					error(linecount,"newline in string");
+					error(linecount,"Newline in string");
 					unput(match);
 				}
 				putc(ch,f);

@@ -130,7 +130,7 @@ scanner() {
 			for (;;) {
 				ch = input();
 				if (ch == '\n' || ch == EOF) {
-					error(linecount,"missing '");
+					error(linecount,"Missing '");
 					break;
 				}
 				if (ch == '\'') break;
@@ -190,7 +190,7 @@ scanner() {
 					}
 					w++;
 				}
-				error(linecount,"illegal reserved word");
+				error(linecount,"Illegal reserved word");
 			}
 			lextoken.t_string = ltext;
 			return C_IDENT;
@@ -245,7 +245,7 @@ skipcomment(flag) {
 	int		saved;	/* line count on which comment starts */
 
 	saved = linecount;
-	if (input() != '*') error(linecount,"illegal comment");
+	if (input() != '*') error(linecount,"Illegal comment");
 	do {
 		ch = input();
 		while (ch == '*') {

@@ -73,6 +73,15 @@ STATIC		genincrdecr();
 
 p_mem alloc();
 
+doclose(f)
+	FILE *f;
+{
+	if (ferror(f) != 0) {
+		fatal(0,"Write error on temporary");
+	}
+	fclose(f);
+}
+
 gencode(argc) {
 	register p_file p = files;
 	
@@ -90,10 +99,7 @@ gencode(argc) {
 		copyfile(incl_file);
 		generate(p);
 		getaction(2);
-		if (ferror(fpars) != 0) {
-			fatal(0,"Write error on temporary");
-		}
-		fclose(fpars);
+		doclose(fpars);
 		/* And install */
 		install(genname(p->f_name),p->f_name);
 		p++;
@@ -124,10 +130,7 @@ geninclude() {
 				  p->t_tokno);
 		}
 	}
-	if (ferror(fpars) != 0) {
-		fatal(0,"write error on temporary");
-	}
-	fclose(fpars);
+	doclose(fpars);
 	install(HFILE, ".");
 }
 
@@ -204,10 +207,7 @@ genrecovery() {
 	}
 	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
-	if (ferror(f) != 0) {
-		fatal(0,"write error on temporary");
-	}
-	fclose(f);
+	doclose(f);
 	install(RFILE, ".");
 }
 

@@ -130,16 +130,22 @@ search(type,str,option) register string str; {
 				if (type1 == LITERAL || type == LITERAL) {
 					continue;
 				}
-				if (type != UNKNOWN) {
+				if (type == TERMINAL) {
 					error(linecount,
-						"%s : illegal type",
+						"%s: is already a nonterminal",
+						str);
+					continue;
+				}
+				else if (type == NONTERM) {
+					error(linecount,
+						"%s : is already a token",
 						str);
 					continue;
 				}
 			}
 			if (option==ENTERING)  {
 				error(linecount,
-					"%s : already defined",str);
+					"%s : is already defined",str);
 			}
 			p->h_type.g_lineno = linecount;
 			return &(p->h_type);			

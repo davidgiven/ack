@@ -46,7 +46,7 @@ co_reach() {
 	for (p = nonterms; p < maxnt; p++) {
 		if (! p->n_rule) {	/* undefined */
 			f_input = p->n_string;
-			error(p->n_lineno,"nonterminal %s not defined",
+			error(p->n_lineno,"Nonterminal %s not defined",
 				p->n_name);
 		}
 	}
@@ -66,7 +66,7 @@ co_reach() {
 	    for (s = x->f_list; s; s = s->o_next) {
 		p = &nonterms[s->o_index];
 		if (! (p->n_flags & REACHABLE)) {
-			error(p->n_lineno,"nonterminal %s unreachable",
+			warning(p->n_lineno,"nonterminal %s unreachable",
 				p->n_name);
 		}
 	    }
