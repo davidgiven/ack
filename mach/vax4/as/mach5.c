@@ -213,7 +213,7 @@ branch(opc, exp)
 		exp.val -= DOTGAIN;
 	}
 	if (pass >= PASS_2 &&
-	    ((exp.typ & ~S_DOT) != DOTTYP || ! fitw(exp.val))) {
+	    ((exp.typ & ~S_DOT) != DOTTYP || ! fitw(exp.val-1))) {
 		serror("label too far");
 	}
 	if (small(fitb(exp.val) && ((exp.typ & ~S_DOT) == DOTTYP), 1)) {
@@ -222,7 +222,7 @@ branch(opc, exp)
 	}
 	else {
 		emit1(opc|0x20);
-		emit2((int) exp.val);
+		emit2((int) (exp.val - 1));
 	}
 }
 
