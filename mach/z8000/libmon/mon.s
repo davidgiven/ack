@@ -11,7 +11,7 @@ mon:
 	cp	R0, $1		! exit
 	jr	NE, read
 	inc	R15, $2
-	sc	$EXIT
+	sc	$0
 read:	cp	R0, $3		! read
 	jr	NE, write
 	pop	R0, *RR14	! dummy;  all input from stdin

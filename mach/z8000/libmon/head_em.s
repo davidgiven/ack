@@ -1,4 +1,4 @@
-.define  EXIT, F_DUM
+.define  EXIT, WRITE, F_DUM
 .define  ERANGE, ESET, EHEAP, EILLINS, EODDZ, ECASE, EBADMON
 .define  hol0, trppc, trpim, reghp, argv, envp
 .sect .text
@@ -7,7 +7,6 @@
 .sect .bss
 .sect .text
 
-EXIT	= 0
 F_DUM	= 0
 
 ERANGE  = 1
@@ -40,8 +39,11 @@ EBADMON = 25
 	push	*RR14, argv
 	push	*RR14, $1
 	calr	__m_a_i_n
+EXIT:
 	ldl	RR14, $0xC00017FC
 	sc	$0
+
+WRITE:	jr	__write
 
 .sect .bss
 begbss:
