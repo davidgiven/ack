@@ -1,5 +1,5 @@
 !File: lint.h
-#undef	LINT		1	/* if defined, 'lint' is produced	*/
+/*#define	LINT		1	/* if defined, 'lint' is produced	*/
 
 
 !File: pathlength.h
@@ -75,7 +75,7 @@
 
 
 !File: botch_free.h
-#undef BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
+/*#define BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
 
 
 !File: dataflow.h
@@ -83,7 +83,7 @@
 
 
 !File: debug.h
-#undef DEBUG		1	/* perform various self-tests		*/
+/*#define DEBUG		1	/* perform various self-tests		*/
 
 
 !File: use_tmp.h
@@ -112,16 +112,16 @@
 
 
 !File: nopp.h
-#undef NOPP		1	/* if NOT defined, use built-int preprocessor */
+/*#define NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h
-#undef NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
+/*#define NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
 
 
 !File: spec_arith.h
 /* describes internal compiler arithmetics */
-#undef	SPECIAL_ARITHMETICS	/* something different from native long */
+/*#define	SPECIAL_ARITHMETICS	/* something different from native long */
 
 
 !File: static.h
@@ -129,19 +129,19 @@
 
 
 !File: nofloat.h
-#undef NOFLOAT		1	/* if NOT defined, floats are implemented */
+/*#define NOFLOAT		1	/* if NOT defined, floats are implemented */
 
 
 !File: noRoption.h
-#undef NOROPTION	1	/* if NOT defined, R option is implemented */
+/*#define NOROPTION	1	/* if NOT defined, R option is implemented */
 
 
 !File: nocross.h
-#undef NOCROSS		1	/* if NOT defined, cross compiler */
+/*#define NOCROSS		1	/* if NOT defined, cross compiler */
 
 
 !File: regcount.h
-#undef REGCOUNT		1	/* count occurrences for register messages */
+/*#define REGCOUNT		1	/* count occurrences for register messages */
 
 !File: dbsymtab.h
 #define DBSYMTAB	1	/* ability to produce symbol table for debugger
