@@ -725,8 +725,10 @@ lib are needed for compilation.
 The column head i/p contains the integer and pointer size used in units of
 bytes.
 The subdirectories with the same name in mach contain the sources.
-A * in the column headed 'fp' indicates whether floating point can be used
-for that particular machine.
+A * in the column headed 'fp' indicates that floating point can be used
+for that particular machine. A + in that column indicates that floating
+point is only available under the '-fp' option. In this case, software
+floating point emulation is used.
 .TS
 c c c c c c c
 l l l l l l l.
@@ -742,48 +744,53 @@ vax4	VAX/BSD 4.?	4/4	C	*	vax4	No assembler
 			Basic
 			Occam
 
-m68k2	M68000/Unisoft	2/4	C		m68k2
+m68k2	M68000/Unisoft	2/4	C	+	m68k2
 			Pascal
 			Basic
 			Occam
 
-m68k4	M68000/Unisoft	4/4	C		m68k4
+m68k4	M68000/Unisoft	4/4	C	+	m68k4
 			Pascal		m68k2
 			Basic
 			Occam
 
-pmds	M68000/PMDS	2/4	C		pmds	Philips Micro
+pmds	M68000/PMDS	2/4	C	+	pmds	Philips Micro
 			Pascal		m68k2	Devel. System
 			Basic
 			Occam
 
-pmds4	M68000/PMDS	4/4	C		pmds4	Philips Micro
+pmds4	M68000/PMDS	4/4	C	+	pmds4	Philips Micro
 			Pascal		m68k2	Devel. System
 			Basic		m68k4
 			Occam
 
-mantra	M68000/SysV.0	4/4	C		mantra
+mantra	M68000/SysV.0	4/4	C	+	mantra
 			Pascal		m68k2
 			Basic		m68k4
 			Occam
 
-m68020	M68020/V/68	4/4	C		m68020
+m68020	M68020/V/68	4/4	C	+	m68020
 	R2V2.1		Pascal
 			Basic
 			Occam
 
-sun3	SUN 3 R3.0	4/4	C		sun3
+sun3	SUN 3 R3.0	4/4	C	+	sun3
 			Pascal		m68020
 			Basic
 			Occam
 
-sun2	SUN 2 R3.0	4/4	C		sun2
+sun2	SUN 2 R3.0	4/4	C	+	sun2
 			Pascal		m68k4
 			Basic		m68k2
 			Occam
 
-i86	IBM PC/IX	2/2	C		i86	IBM PC with PC/IX
+i86	IBM PC/IX	2/2	C	+	i86	IBM PC with PC/IX
 			Pascal			Causes kernel crashes
+			Basic
+			Occam
+
+xenix3	Microsoft Xenix V3	2/2	C	+	xenix3	IBM AT with Xenix
+			Pascal		i86
 			Basic
 			Occam
 
@@ -792,7 +799,6 @@ z8000	Zilog 8000	2/2	C		z8000	Central Data
 			Basic			Uses assembler/loader
 			Occam
 
-int						Same as int22
 int22	EM machine	2/2	C	*	int22	Needs interpreter
 			Pascal
 			Basic
@@ -845,7 +851,7 @@ the Mantra system, etc.
 The first one can only interpret 2/2 e.out files,
 the other takes 2/4 and 4/4 files.
 The PDP 11 interpreter executes floating point instructions.
-The interpreter on the PMDS traps if you try to use floating point.
+The interpreter for the M68000 traps if you try to use floating point.
 .LP
 The program \fBem\fP in the bin directory calls the appropriate
 interpreter.

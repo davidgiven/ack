@@ -14,7 +14,7 @@ RESFILES= \
 	peep.$(SUF) cg.$(SUF) ncg.$(SUF) regadd.$(SUF) LLgen.$(SUF) \
 	basic.$(SUF) crefman.$(SUF) pcref.$(SUF) val.$(SUF) \
 	6500.$(SUF) i80.$(SUF) z80.$(SUF) top.$(SUF) ego.$(SUF) \
-	m68020.$(SUF) occam.$(SUF) nopt.$(SUF)
+	m68020.$(SUF) occam.$(SUF) m2ref.$(SUF)
 
 .SUFFIXES: .doc .$(SUF)
 
@@ -33,6 +33,8 @@ val.$(SUF):	val.doc
 		$(NROFF) val.doc >$@
 6500.$(SUF):	6500.doc
 		$(TBL) 6500.doc | $(NROFF) $(MS) >$@
+ncg.$(SUF):	ncg.doc
+		$(TBL) ncg.doc | $(NROFF) $(MS) >$@
 LLgen.doc:	LLgen.X
 LLgen.X:
 		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER)

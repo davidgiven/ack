@@ -50,11 +50,13 @@ ARRAY [0 .. 0] OF CHAR
 and contains one character: \f50C\fP.
 .PP
 When the text of a comment starts with a '\f5$\fP', it may be a pragma.
-Currently, two pragmas exist:
+Currently, the following pragmas exist:
 .DS
 .ft 5
-(*$F (F stands for Foreign) *)
-(*$R[+|-] (Runtime checks, on or off) *)
+(*$F      (F stands for Foreign) *)
+(*$R[+|-] (Runtime checks, on or off, default on) *)
+(*$A[+|-] (Array bound checks, on or off, default off) *)
+(*$U      (Allow for underscores within identifiers) *)
 .ft P
 .DE
 The Foreign pragma is only meaningful in a \f5DEFINITION MODULE\fP,
@@ -67,6 +69,11 @@ range checks,
 checks when assigning a \f5CARDINAL\fP to an \f5INTEGER\fP and vice versa,
 and checks that \f5FOR\fP-loop control-variables are not changed
 in the body of the loop.
+Array bound checks can be enabled, because many EM implementations do not
+implement the array bound checking of the EM array instructions.
+When enabled, the compiler generates a check before generating an
+EM array instruction.
+Even when underscores are enabled, they still may not start an identifier.
 .PP
 Constants of type \f5LONGINT\fP are integers with a suffix letter \f5D\fP
 (for instance \f51987D\fP).
@@ -305,7 +312,9 @@ The detection of this error depends on the EM implementation.
 .IP "cardinal overflow"
 .br
 This error is detected, unless runtime checks are disabled.
-This message is also given on cardinal underflow.
+.IP "cardinal underflow"
+.br
+This error is detected, unless runtime checks are disabled.
 .IP "real overflow"
 .br
 The detection of this error depends on the EM implementation.
@@ -365,6 +374,21 @@ implementation that does not have floating point.
 Calling the compiler
 .PP
 See [4,5,6] for a detailed explanation.
+.NH 1
+The procedure call interface
+.PP
+Parameters are pushed on the stack in reversed order, so that the EM AB
+(argument base) register indicates the first parameter.
+For VAR parameters, its address is passed, for value parameters its value.
+The only exception to this rule is with conformant arrays.
+For conformant arrays, the address is passed, and an array descriptor is
+passed. The descriptor is an EM array descriptor. It consists of three
+fields: the lower bound (always 0), upper bound - lower bound, and the
+size of the elements.
+The descriptor is pushed first.
+If the parameter is a value parameter, the called routine must make sure
+that its value is never changed, for instance by making its own copy
+of the array.
 .NH 1
 References
 .IP [1]
