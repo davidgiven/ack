@@ -22,7 +22,10 @@ do
 	fi
 	if [ -f $SRC_HOME/$i/Action ]
 	then
-		cp $SRC_HOME/$i/Action $i/Action
+		cd $SRC_HOME/$i
+		cp Action* $CONFIG/$i
+		chmod +w $CONFIG/$i/Action*
+		cd $CONFIG
 	fi
 done
 
@@ -37,10 +40,12 @@ cd $CONFIG
 for i in lang/cem/cemcom.ansi lang/cem/cemcom lang/m2/comp
 do
 	cp $SRC_HOME/$i/BigPars $CONFIG/$i/Parameters
+	chmod +w $CONFIG/$i/Parameters
 done
 for i in lang/pc/comp lang/cem/cpp.ansi
 do
 	cp $SRC_HOME/$i/Parameters $CONFIG/$i/Parameters
+	chmod +w $CONFIG/$i/Parameters
 done
 
 cd $CONFIG/mach

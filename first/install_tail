@@ -70,4 +70,5 @@ esac
 
 : and finally installing ...
 cd $CONFIG
+set +e
 exec $SRC_HOME/TakeAction
