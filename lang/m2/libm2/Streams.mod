@@ -373,7 +373,7 @@ IMPLEMENTATION MODULE Streams;
 	result := succeeded;
   END SetPosition;
 
-  PROCEDURE isatty(stream: Stream): BOOLEAN;
+  PROCEDURE isatty(stream: Stream; VAR result: StreamResult): BOOLEAN;
     VAR buf: ARRAY[1..100] OF CHAR;
   BEGIN
 	IF (stream = NIL) OR (s^.kind = none) THEN

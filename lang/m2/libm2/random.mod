@@ -42,6 +42,6 @@ BEGIN
 END StartSeed;
 
 BEGIN
- 	X0 := time(NIL);
+ 	X[0] := time(NIL);
 	StartSeed(CARDINAL(getpid()) * X[0]);
 END random.

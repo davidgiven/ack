@@ -22,7 +22,7 @@ IMPLEMENTATION MODULE PascalIO;
   FROM SYSTEM IMPORT ADR;
 
   TYPE	charset = SET OF CHAR;
-	btype = (reading, writing, free);
+	btype = (Preading, Pwriting, free);
 
   CONST	spaces = charset{11C, 12C, 13C, 14C, 15C, ' '};
 
@@ -50,7 +50,7 @@ IMPLEMENTATION MODULE PascalIO;
 			Traps.Message("could not open input file");
 			HALT;
 		END;
-		type := reading;
+		type := Preading;
 		done := FALSE;
 		eof := FALSE;
 	END;
@@ -66,7 +66,7 @@ IMPLEMENTATION MODULE PascalIO;
 			Traps.Message("could not open output file");
 			HALT;
 		END;
-		type := writing;
+		type := Pwriting;
 	END;
   END Rewrite;
 
@@ -107,7 +107,7 @@ IMPLEMENTATION MODULE PascalIO;
 
   PROCEDURE Error(tp: btype);
   BEGIN
-	IF tp = reading THEN
+	IF tp = Preading THEN
 		Traps.Message("input text expected");
 	ELSE
 		Traps.Message("output text expected");
@@ -124,7 +124,7 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE NextChar(InputText: Text): CHAR;
   BEGIN
 	WITH InputText^ DO
-		IF type # reading THEN Error(reading); END;
+		IF type # Preading THEN Error(Preading); END;
 		IF NOT done THEN
 			Get(InputText);
 		END;
@@ -135,7 +135,7 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE Get(InputText: Text);
   BEGIN
 	WITH InputText^ DO
-		IF type # reading THEN Error(reading); END;
+		IF type # Preading THEN Error(Preading); END;
 		IF eof THEN
 			Traps.Message("unexpected EOF");
 			HALT;
@@ -171,7 +171,7 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE WriteChar(OutputText: Text; char: CHAR);
   BEGIN
 	WITH OutputText^ DO
-		IF type # writing THEN Error(writing); END;
+		IF type # Pwriting THEN Error(Pwriting); END;
 		Write(stream, char, result);
 	END;
   END WriteChar;
@@ -409,13 +409,13 @@ BEGIN	(* PascalIO initialization *)
 	WITH ibuf DO
 		stream := InputStream;
 		eof := FALSE;
-		type := reading;
+		type := Preading;
 		done := FALSE;
 	END;
 	WITH obuf DO
 		stream := OutputStream;
 		eof := FALSE;
-		type := writing;
+		type := Pwriting;
 	END;
 	Notext := NIL;
 	Input := ADR(ibuf);
