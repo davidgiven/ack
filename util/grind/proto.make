@@ -34,7 +34,7 @@ SRC_C = \
 	$(SRC_DIR)/pascal.c \
 	$(SRC_DIR)/c.c
 GEN_C = db_symtab.c commands.c Lpars.c DBSpars.c avl.c scope.c itemlist.c \
-	langdep.c ops.c chtab.c symbol2str.c
+	langdep.c ops.c chtab.c symbol2str.c next.c
 CFILES=	$(SRC_C) $(GEN_C)
 
 SRC_H = \
