@@ -35,12 +35,11 @@ ECASE	= 20
 	.sect .text
 begtext:
 	add.l	#2,sp !convert argc from 4-byte to 2-byte
-	pea	endbss
-	jsr	_brk
-	add.l	#4,sp
 	jsr	_m_a_i_n
 	add	#010,sp
 EXIT:
+	move.w	d0,-(sp)
+	jsr	_exit
 
 	.sect .data
 begdata:

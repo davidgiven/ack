@@ -34,14 +34,12 @@ ECASE	= 20
 
 	.sect .text
 begtext:
-	pea	endbss
-	jsr	_brk
-	add.l	#4,sp
 	jsr	_m_a_i_n
 	add	#012,sp
 EXIT:
 
-	jsr __exit
+	move.l	d0,-(sp)
+	jsr _exit
 	! As a temporary measure
 	jsr .trp
 	

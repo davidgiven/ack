@@ -10,7 +10,7 @@
 
 
 
-! EM runtime start-off for the Bleasdale 68000 system
+! EM runtime start-off for the Mantra 68000 system
 
 
 LINO_AD	= 0
@@ -27,7 +27,7 @@ EBADGTO = 27
 
 	.sect .text
 begtext:
-	! Bleasdale puts the argument and environment vectors
+	! Mantra puts the argument and environment vectors
 	! themselves on top of the stack, instead of POINTERS
 	! to these vectors. We get things right here.
 	move.l	4(sp),a0
@@ -53,7 +53,8 @@ begtext:
 	jsr	_m_a_i_n
 	add	#012,sp
 EXIT:
-	jsr	__exit
+	move.l	d0,-(sp)
+	jsr	_exit
 
 	.sect .data
 begdata:
