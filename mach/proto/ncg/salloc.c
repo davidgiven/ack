@@ -34,7 +34,7 @@ string malloc();
 string myalloc(size) {
 	register string p;
 
-	p = (string) malloc(size);
+	p = (string) malloc((unsigned)size);
 	if (p==0)
 		fatal("Out of memory");
 	return(p);
@@ -82,7 +82,7 @@ garbage_collect() {
 
 	if (nstab<THRESHOLD)
 		return;
-	qsort(stab,nstab,sizeof (char *),compar);
+	qsort((char *)stab,nstab,sizeof (char *),compar);
 	for (i=0;i<nstab;i++)
 		used[i]= FALSE;
 	for(emlp=emlines;emlp<emlines+nemlines;emlp++)

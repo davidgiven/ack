@@ -29,6 +29,8 @@ static char rcsid2[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+extern char	*sprintf();
+
 #ifndef newplb			/* retrofit for older mach.h */
 #define newplb newilb
 #endif
@@ -197,7 +199,7 @@ dopseudo() {
 	word romcont[MAXROM+1];
 	int nromwords;
 	int rombit,rommask;
-	unsigned dummy,stackupto();
+	unsigned stackupto();
 
 	if (nextispseu==0 || nemlines>0)
 		error("No table entry for %d",emlines[0].em_instr);
@@ -206,7 +208,7 @@ dopseudo() {
 	case sp_ilb1:
 	case sp_ilb2:
 		swtxt();
-		dummy = stackupto(&fakestack[stackheight-1],maxply,TRUE);
+		/* dummy = */stackupto(&fakestack[stackheight-1],maxply,TRUE);
 		cleanregs();
 		strarg(savetab1);
 		newilb(argstr);

@@ -19,6 +19,8 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+extern char	*sprintf();
+
 #define LLEAF 01
 #define LDEF  02
 #define RLEAF 04
@@ -101,9 +103,9 @@ string tostring(n) register word n; {
 	char buf[25];
 
 	if (n>=-20 && n<=20 && (n&1)==0) {
-		if (digstr[(n>>1)+10][0]==0)
-			sprintf(digstr[(n>>1)+10],WRD_FMT,n);
-		return(digstr[(n>>1)+10]);
+		if (digstr[((int)n>>1)+10][0]==0)
+			sprintf(digstr[((int)n>>1)+10],WRD_FMT,n);
+		return(digstr[((int)n>>1)+10]);
 	}
 	sprintf(buf,WRD_FMT,n);
 	return(mystrcpy(buf));

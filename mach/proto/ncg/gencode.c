@@ -19,6 +19,8 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+extern char	*sprintf();
+
 string mystrcpy();
 
 FILE *codefile;

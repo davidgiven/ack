@@ -133,7 +133,7 @@ unlinkregs() {
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=t) {
 		t=rvlp->rv_next;
-		myfree(rvlp);
+		myfree((string)rvlp);
 	}
 	rvlist=0;
 	for (rvtyp=reg_any;rvtyp<=reg_float;rvtyp++) {

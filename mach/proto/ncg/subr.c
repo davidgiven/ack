@@ -600,7 +600,7 @@ c3_p findcoerc(tp,tep) token_p tp; set_p tep; {
 			}
 			if (curreglist->rl_n != 0)
 				return(cp);
-			myfree(curreglist);
+			myfree((string)curreglist);
 		}
 	}
 	return(0);      /* nothing found */
@@ -613,6 +613,7 @@ itokcost() {
 		tdp->t_cost.ct_space = costcalc(tdp->t_cost);
 }
 
+/*VARARGS1*/
 error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
 	fprintf(stderr,"Error: ");
@@ -625,6 +626,7 @@ error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 	exit(-1);
 }
 
+/*VARARGS1*/
 fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
 	fprintf(stderr,"Fatal: ");

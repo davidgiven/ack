@@ -354,7 +354,7 @@ if(Debug>1) fprintf(stderr,"Pattern too long, %d with only %d items on stack\n",
 			cp = findcoerc((token_p) 0, &machsets[tokexp[i]]);
 			if (cp==0) {
 				for (j=0;j<nregneeded;j++)
-					myfree(regls[j]);
+					myfree((string) (regls[j]));
 #ifndef ALLOW_NEXTEM
 				assert(!toplevel);
 				BROKE();
@@ -416,15 +416,15 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 			mincost = t;
 			besttup = tup;
 		} else
-			myfree(tup);
+			myfree((string) tup);
 		RESTST;
 	}
 	FREEST;
 	for (i=0;i<nregneeded;i++)
-		myfree(regls[i]);
+		myfree((string)(regls[i]));
 	if (totalcost+mincost>costlimit) {
 		if (besttup)
-			myfree(besttup);
+			myfree((string)besttup);
 normalfailed:	if (stackpad!=tokpatlen) {
 			if (stackpad) {
 				if (costlimit<MAXINT)
@@ -443,7 +443,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	}
 	for (i=0;i<nregneeded;i++)
 		totalcost += docoerc(regtp[i],regcp[i],ply,toplevel,besttup->p_rar[i]);
-	myfree(besttup);
+	myfree((string)besttup);
 	break;
     }
     case DO_TOSTACK:

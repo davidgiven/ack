@@ -15,6 +15,7 @@ static char rcsid[] = "$Header$";
  */
 
 extern string myalloc();
+extern char *strcpy();
 
 glosym_p glolist= (glosym_p) 0;
 

@@ -14,6 +14,7 @@ static char rcsid[] = "$Header$";
 
 char *progname;
 extern char startupcode[];
+extern unsigned codegen();
 int maxply=1;
 #ifndef NDEBUG
 int Debug=0;
