@@ -82,13 +82,6 @@ main(argc,argv) char **argv; {
 			"%s has unresolved references, cannot run it\n",file);
 		exit(-1);
 	}
-	/*
-	if ( header.h_psize!=EM_PSIZE) {
-		fprintf(stderr,
-			"%s cannot be interpreted on this machine\n",file);
-		exit(-1);
-	}
-	*/
 	if (tflg)
 		flags[0] = tflg=='+' ? 't' : '-';
 	else
