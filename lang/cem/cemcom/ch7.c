@@ -189,13 +189,15 @@ ch7cast(expp, oper, tp)
 		int i = is_integral_type(tp);
 
 		if (oldi && i)	{
-			if (	oldtp->tp_fund == ENUM &&
-				tp->tp_fund == ENUM &&
-				oper != CAST
-			)
+			if (	oper != CAST
+			&&	(	tp->tp_fund == ENUM
+				||	oldtp->tp_fund == ENUM
+				)
+			) {
 				expr_warning(*expp,
-					"%s on enums of different types",
+					"dubious %s on enum",
 					symbol2str(oper));
+			}
 #ifdef	LINT
 			if (oper == CAST)
 				(*expp)->ex_type = tp;

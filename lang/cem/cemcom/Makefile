@@ -3,6 +3,7 @@
 
 # Machine and environ dependent definitions
 EMHOME = ../../..
+EMHOME = /usr/em#???
 MKDEP = $(EMHOME)/bin/mkdep
 PRID = $(EMHOME)/bin/prid
 CID = $(EMHOME)/bin/cid
@@ -129,6 +130,11 @@ MYLINTFLAGS = #-xh
 .str.h:
 	./make.allocd <$*.str >$*.h
 
+LINTTEST:	#???
+	make Lnt
+	lnt -xha --x BBFT.c
+#	./lnt -Dmc68000 -I/usr/em/h -I/usr/em/modules/h -I/usr/em/modules/pkg u.c
+
 Main:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve main ; fi'
 	@rm -f nmclash.o a.out
@@ -150,7 +156,7 @@ CEmain:	Cfiles
 	mv *.o CODE_EXPANDER
 
 Lnt:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
+#???	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
 	make "EMHOME="$(EMHOME) $(CURRDIR)/lnt
 	@rm -f nmclash.o a.out
 
@@ -268,7 +274,7 @@ Xlint:	$(SRC)
 	$(LINT) $(CDEFS) $(LINTFLAGS) $(SRC)
 
 Xmylint:	$(SRC)
-	$(MYLINT) $(CDEFS) $(MYLINTFLAGS) $(SRC)
+	time $(MYLINT) $(CDEFS) $(MYLINTFLAGS) $(SRC) #???
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 main.o: LLlex.h

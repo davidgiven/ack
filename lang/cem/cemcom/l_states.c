@@ -717,10 +717,6 @@ start_switch_part(expr)
  */
 	register struct lint_stack_entry *lse = new_lint_stack_entry();
 
-	/* the following is a trick to detect a constant
-	 * expression in a switch
-	 */
-	opnd2test(&expr, SWITCH);
 	if (is_cp_cst(expr))
 		hwarning("value in switch statement is constant");
 

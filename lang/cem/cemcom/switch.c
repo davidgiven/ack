@@ -155,7 +155,7 @@ code_case(expr)
 	}
 	if (expr->ex_flags & EX_ERROR) /* is probably 0 anyway */
 		return;
-	ch7cast(&expr, SWITCH, sh->sh_type);
+	ch7cast(&expr, CASE, sh->sh_type);
 	ce = new_case_entry();
 	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val = expr->VL_VALUE;
