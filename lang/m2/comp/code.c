@@ -867,7 +867,7 @@ CodeOper(expr, true_label, false_label)
 		CodePExpr(rightop);
 		CodePExpr(leftop);
 		C_loc(rightop->nd_type->set_low);
-		C_sbi(word_size);
+		C_sbu(word_size);
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != NO_LABEL) {
 			C_zne(true_label);

@@ -471,7 +471,7 @@ set_type(tp)
 	*/
 	arith lb, ub, diff;
 
-	if (! bounded(tp)) {
+	if (! bounded(tp) || tp->tp_size > word_size) {
 		error("illegal base type for set");
 		return error_type;
 	}
@@ -485,7 +485,7 @@ set_type(tp)
 #endif
 
 	diff = ub - lb + 1;
-	if (diff < 0 || (sizeof(int) == 2 && diff > 65535)) {
+	if (diff < 0) {
 		error("set type limits exceeded");
 		return error_type;
 	}

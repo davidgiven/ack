@@ -40,13 +40,15 @@ overflow(expp)
 {
 	node_warning(expp, W_ORDINARY, "overflow in constant expression");
 }
-	
-arith
-ar_abs(i)
-	arith i;
-{
 
-	return i < 0 ? -i : i;
+STATIC
+commonbin(expp)
+	register t_node *expp;
+{
+	expp->nd_class = Value;
+	expp->nd_token = expp->nd_right->nd_token;
+	CutSize(expp);
+	FreeLR(expp);
 }
 
 cstunary(expp)
@@ -56,6 +58,7 @@ cstunary(expp)
 		expression below it, and the result restored in expp.
 	*/
 	register t_node *right = expp->nd_right;
+	arith o1;
 
 	switch(expp->nd_symb) {
 	/* Should not get here
@@ -67,23 +70,20 @@ cstunary(expp)
 		if (right->nd_INT == min_int[(int)(right->nd_type->tp_size)])
 			overflow(expp);
 		
-		expp->nd_INT = -right->nd_INT;
+		o1 = -right->nd_INT;
 		break;
 
 	case NOT:
 	case '~':
-		expp->nd_INT = !right->nd_INT;
+		o1 = !right->nd_INT;
 		break;
 
 	default:
 		crash("(cstunary)");
 	}
 
-	expp->nd_class = Value;
-	expp->nd_symb = right->nd_symb;
-	CutSize(expp);
-	FreeNode(right);
-	expp->nd_right = 0;
+	commonbin(expp);
+	expp->nd_INT = o1;
 }
 
 STATIC
@@ -153,19 +153,19 @@ cstibin(expp)
 
 	switch (expp->nd_symb)	{
 	case '*':
-		if (o1 == 0 || o2 == 0) {
-			o1 = 0;
-			break;
+		if (o1 > 0 && o2 > 0) {
+			if (max_int[sz] / o1 < o2) overflow(expp);
 		}
-		if ((o1 > 0 && o2 > 0) || (o1 < 0 && o2 < 0)) {
-			if (o1 == min_int[sz] ||
-			    o2 == min_int[sz] ||
-			    max_int[sz] / ar_abs(o1) < ar_abs(o2)) overflow(expp);
+		else if (o1 < 0 && o2 < 0) {
+			if (o1 == min_int[sz] || o2 == min_int[sz] ||
+			    max_int[sz] / (-o1) < (-o2)) overflow(expp);
 		}
 		else if (o1 > 0) {
 			if (min_int[sz] / o1 > o2) overflow(expp);
 		}
-		else if (min_int[sz] / o2 > o1) overflow(expp);
+		else if (o2 > 0) {
+			if (min_int[sz] / o2 > o1) overflow(expp);
+		}
 		o1 *= o2;
 		break;
 
@@ -206,27 +206,19 @@ cstibin(expp)
 		break;
 
 	case '<':
-		{	arith tmp = o1;
-			
-			o1 = o2;
-			o2 = tmp;
-		}
-		/* Fall through */
+		o1 = (o1 < o2);
+		break;
 
 	case '>':
 		o1 = (o1 > o2);
 		break;
 
 	case LESSEQUAL:
-		{	arith tmp = o1;
-			
-			o1 = o2;
-			o2 = tmp;
-		}
-		/* Fall through */
+		o1 = (o2 <= o1);
+		break;
 
 	case GREATEREQUAL:
-		o1 = chk_bounds(o2, o1, T_INTEGER);
+		o1 = (o2 >= o1);
 		break;
 
 	case '=':
@@ -241,13 +233,8 @@ cstibin(expp)
 		crash("(cstibin)");
 	}
 
-	expp->nd_class = Value;
-	expp->nd_token = expp->nd_right->nd_token;
+	commonbin(expp);
 	expp->nd_INT = o1;
-	CutSize(expp);
-	FreeNode(expp->nd_left);
-	FreeNode(expp->nd_right);
-	expp->nd_left = expp->nd_right = 0;
 }
 
 cstubin(expp)
@@ -317,24 +304,16 @@ cstubin(expp)
 		break;
 
 	case '<':
-		{	arith tmp = o1;
-			
-			o1 = o2;
-			o2 = tmp;
-		}
-		/* Fall through */
+		o1 = ! chk_bounds(o2, o1, T_CARDINAL);
+		break;
 
 	case '>':
 		o1 = ! chk_bounds(o1, o2, T_CARDINAL);
 		break;
 
 	case LESSEQUAL:
-		{	arith tmp = o1;
-			
-			o1 = o2;
-			o2 = tmp;
-		}
-		/* Fall through */
+		o1 = chk_bounds(o1, o2, T_CARDINAL);
+		break;
 
 	case GREATEREQUAL:
 		o1 = chk_bounds(o2, o1, T_CARDINAL);
@@ -361,14 +340,9 @@ cstubin(expp)
 		crash("(cstubin)");
 	}
 
-	expp->nd_class = Value;
-	expp->nd_token = expp->nd_right->nd_token;
-	if (expp->nd_type == bool_type) expp->nd_symb = INTEGER;
+	commonbin(expp);
 	expp->nd_INT = o1;
-	CutSize(expp);
-	FreeNode(expp->nd_left);
-	FreeNode(expp->nd_right);
-	expp->nd_left = expp->nd_right = 0;
+	if (expp->nd_type == bool_type) expp->nd_symb = INTEGER;
 }
 
 cstset(expp)
@@ -399,9 +373,7 @@ cstset(expp)
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
 		FreeSet(set2);
 		expp->nd_symb = INTEGER;
-		FreeNode(expp->nd_left);
-		FreeNode(expp->nd_right);
-		expp->nd_left = expp->nd_right = 0;
+		FreeLR(expp);
 		return;
 	}
 
@@ -469,9 +441,7 @@ cstset(expp)
 	}
 	FreeSet(expp->nd_left->nd_set);
 	FreeSet(expp->nd_right->nd_set);
-	FreeNode(expp->nd_left);
-	FreeNode(expp->nd_right);
-	expp->nd_left = expp->nd_right = 0;
+	FreeLR(expp);
 }
 
 cstcall(expp, call)
@@ -486,29 +456,26 @@ cstcall(expp, call)
 	assert(expp->nd_class == Call);
 
 	expr = expp->nd_right->nd_left;
-	expp->nd_right->nd_left = 0;
-	FreeNode(expp->nd_right);
 	tp = expr->nd_type;
 
 	expp->nd_class = Value;
 	expp->nd_symb = INTEGER;
+	expp->nd_INT = expr->nd_INT;
 	switch(call) {
 	case S_ABS:
-		if (expr->nd_INT < 0) {
-			if (expr->nd_INT <= min_int[(int)(tp->tp_size)]) {
+		if (expp->nd_INT < 0) {
+			if (expp->nd_INT <= min_int[(int)(tp->tp_size)]) {
 				overflow(expr);
 			}
-			expp->nd_INT = - expr->nd_INT;
+			expp->nd_INT = - expp->nd_INT;
 		}
-		else expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
 
 	case S_CAP:
-		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
-			expr->nd_INT = expr->nd_INT + ('A' - 'a');
+		if (expp->nd_INT >= 'a' && expp->nd_INT <= 'z') {
+			expp->nd_INT += ('A' - 'a');
 		}
-		expp->nd_INT = expr->nd_INT;
 		break;
 
 	case S_MAX:
@@ -535,7 +502,7 @@ cstcall(expp, call)
 		break;
 
 	case S_ODD:
-		expp->nd_INT = (expr->nd_INT & 1);
+		expp->nd_INT &= 1;
 		break;
 
 	case S_SIZE:
@@ -545,9 +512,7 @@ cstcall(expp, call)
 	default:
 		crash("(cstcall)");
 	}
-	FreeNode(expr);
-	FreeNode(expp->nd_left);
-	expp->nd_right = expp->nd_left = 0;
+	FreeLR(expp);
 }
 
 CutSize(expr)
@@ -565,8 +530,7 @@ CutSize(expr)
 	else {
 		int nbits = (int) (mach_long_size - tp->tp_size) * 8;
 
-		expr->nd_INT <<= nbits;
-		expr->nd_INT >>= nbits;
+		expr->nd_INT = (expr->nd_INT << nbits) >> nbits;
 	}
 }
 
@@ -576,7 +540,8 @@ InitCst()
 	register arith bt = (arith)0;
 
 	while (!(bt < 0))	{
-		bt = (bt << 8) + 0377, i++;
+		i++;
+		bt = (bt << 8) + 0377;
 		if (i == MAXSIZE)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
@@ -590,5 +555,5 @@ InitCst()
 		fatal("sizeof (long) insufficient on this machine");
 	}
 
-	wrd_bits = 8 * (unsigned) word_size;
+	wrd_bits = 8 * (int) word_size;
 }

@@ -1317,9 +1317,8 @@ ChkCast(expp)
 	}
 
 	if (arg->nd_class == Value) {
-		FreeNode(expp->nd_left);
 		expp->nd_right->nd_left = 0;
-		FreeNode(expp->nd_right);
+		FreeLR(expp);
 		*expp = *arg;
 	}
 	expp->nd_type = lefttype;

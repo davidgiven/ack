@@ -61,6 +61,14 @@ dot2leaf(class)
 	return MkLeaf(class, &dot);
 }
 
+FreeLR(nd)
+	register t_node *nd;
+{
+	FreeNode(nd->nd_left);
+	FreeNode(nd->nd_right);
+	nd->nd_left = nd->nd_right = 0;
+}
+
 FreeNode(nd)
 	register t_node *nd;
 {
@@ -68,8 +76,7 @@ FreeNode(nd)
 		list
 	*/
 	if (!nd) return;
-	FreeNode(nd->nd_left);
-	FreeNode(nd->nd_right);
+	FreeLR(nd);
 	free_node(nd);
 }
 
