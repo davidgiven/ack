@@ -206,17 +206,17 @@ trapcc(sig)
 #define lang_suffix()	"c"
 #define comp_name()	"$H/lib.bin/c_ce"
 #define ansi_c_name()	"$H/lib.bin/c_ce.ansi"
-#endif FCC
+#endif /* FCC */
 
 #ifdef FM2
 #define lang_suffix()	"mod"
 #define comp_name()	"$H/lib.bin/m2_ce"
-#endif FM2
+#endif /* FM2 */
 
 #ifdef FPC
 #define lang_suffix()	"p"
 #define comp_name()	"$H/lib.bin/pc_ce"
-#endif FPC
+#endif /* FPC */
 
 
 #ifdef FCC
@@ -255,7 +255,7 @@ lang_opt(str)
 	}
 	return 0;
 }
-#endif FCC
+#endif /* FCC */
 
 #ifdef FM2
 int
@@ -290,7 +290,7 @@ lang_opt(str)
 	}
 	return 0;
 }
-#endif FM2
+#endif /* FM2 */
 
 #ifdef FPC
 int
@@ -325,7 +325,7 @@ lang_opt(str)
 	}
 	return 0;
 }
-#endif FPC
+#endif /* FPC */
 
 main(argc, argv)
 	char *argv[];
@@ -455,11 +455,11 @@ main(argc, argv)
 
 #ifdef FM2
 	INCLUDE = expand_string("-I$H/lib/m2");
-#endif FM2
+#endif /* FM2 */
 #ifdef FCC
 	INCLUDE = expand_string(ansi_c ? "-I$H/include/tail_ac" : "-I$H/include/_tail_cc");
 	append(&COMP_FLAGS, "-L");
-#endif FCC
+#endif /* FCC */
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
 	while (count-- > 0) {

@@ -54,7 +54,7 @@ OK
  loc -32768
  bne *1
 OK
-#endif WS > 1
+#endif /* WS > 1 */
 #if WS > 2
  loc 65535
  loc 65535
@@ -80,7 +80,7 @@ OK
  loc -2147483648
  bne *1
 OK
-#endif WS > 2
+#endif /* WS > 2 */
 TEST 003: test signed and unsigned loc
 MAIN 0
 #if WS == 1
