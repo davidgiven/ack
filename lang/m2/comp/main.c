@@ -40,7 +40,7 @@ char		options[128];
 int		DefinitionModule; 
 char		*ProgName;
 char		**DEFPATH;
-int		nDEF = 1, mDEF = 10;
+int		nDEF = 2, mDEF = 10;
 int		pass_1 = 1;
 t_def	 	*Defined;
 extern int 	err_occurred;
@@ -56,6 +56,7 @@ main(argc, argv)
 
 	ProgName = *argv++;
 	DEFPATH = (char **) Malloc((unsigned)mDEF * sizeof(char *));
+	DEFPATH[1] = 0;
 
 	while (--argc > 0) {
 		if (**argv == '-')
