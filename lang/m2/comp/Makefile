@@ -1,20 +1,23 @@
 # make modula-2 "compiler"
-EMDIR =		../../..
-MHDIR =		$(EMDIR)/modules/h
-PKGDIR =	$(EMDIR)/modules/pkg
-LIBDIR =	$(EMDIR)/modules/lib
+EMHOME =		../../..
+MHDIR =		$(EMHOME)/modules/h
+PKGDIR =	$(EMHOME)/modules/pkg
+LIBDIR =	$(EMHOME)/modules/lib
 OBJECTCODE =	$(LIBDIR)/libemk.a
-LLGEN =		$(EMDIR)/bin/LLgen
+LLGEN =		$(EMHOME)/bin/LLgen
+MKDEP =		$(EMHOME)/bin/mkdep
+PRID =		$(EMHOME)/bin/prid
+CID =		$(EMHOME)/bin/cid
 CURRDIR =	.
 
-INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
+INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 
 GFILES =	tokenfile.g program.g declar.g expression.g statement.g
 LLGENOPTIONS =
 PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
-MALLOC = $(LIBDIR)/dickmalloc.o
+MALLOC = $(LIBDIR)/malloc.o
 LFLAGS = $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
@@ -55,7 +58,7 @@ all:	Cfiles
 	@rm -f nmclash.o a.out
 
 install:	all
-	cp $(CURRDIR)/main $(EMDIR)/lib/em_m2
+	cp $(CURRDIR)/main $(EMHOME)/lib/em_m2
 
 clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes $(CURRDIR)/main
@@ -66,7 +69,7 @@ lint:	Cfiles
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)
-	sh -c 'if test -f longnames ; then prid -l7 longnames $? > Xlongnames ; mv Xlongnames longnames ; else prid -l7 $? > longnames ; fi'
+	sh -c 'if test -f longnames ; then $(PRID) -l7 longnames $? > Xlongnames ; mv Xlongnames longnames ; else $(PRID) -l7 $? > longnames ; fi'
 
 # entry points not to be used directly
 
@@ -114,7 +117,7 @@ tab:
 depend:
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
-	mkdep $(SRC) |\
+	$(MKDEP) $(SRC) |\
 		sed 's/\.c:/\.o:/' >> Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile

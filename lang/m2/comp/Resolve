@@ -48,7 +48,7 @@ do
 	cat >> Makefile <<EOF
 
 $i:	clashes $PW/$i
-	cid -Fclashes < $PW/$i > $i
+	\$(CID) -Fclashes < $PW/$i > $i
 EOF
 done
 make CURRDIR=$currdir $target
