@@ -491,7 +491,7 @@ _dstget(register struct tm *timep)
 		if (timep->tm_yday == begindst)
 			dsttranssec = dsts->ds_sec;
 		else	dsttranssec = dste->ds_sec;
-		cursec = ((timep->tm_hour * 60) + timep->tm_min) * 60
+		cursec = ((timep->tm_hour * 60) + timep->tm_min) * 60L
 			    + timep->tm_sec;
 
 		if ((timep->tm_yday == begindst && cursec >= dsttranssec)
