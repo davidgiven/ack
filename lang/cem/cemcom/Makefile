@@ -650,6 +650,7 @@ eval.o: nofloat.h
 eval.o: nopp.h
 eval.o: sizes.h
 eval.o: spec_arith.h
+eval.o: specials.h
 eval.o: stack.h
 eval.o: target_sizes.h
 eval.o: type.h
@@ -679,7 +680,9 @@ conversion.o: sizes.h
 conversion.o: spec_arith.h
 conversion.o: target_sizes.h
 conversion.o: type.h
+util.o: Lpars.h
 util.o: align.h
+util.o: def.h
 util.o: nocross.h
 util.o: nofloat.h
 util.o: regcount.h
@@ -688,6 +691,7 @@ util.o: stack.h
 util.o: target_sizes.h
 util.o: use_tmp.h
 util.o: util.h
+blocks.o: Lpars.h
 blocks.o: align.h
 blocks.o: arith.h
 blocks.o: atw.h
