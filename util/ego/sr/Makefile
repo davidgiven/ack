@@ -1,4 +1,3 @@
-
 EMH=../../../h
 EML=../../../lib
 CFLAGS=-DVERBOSE
@@ -7,18 +6,12 @@ SR=.
 OBJECTS=sr.o sr_expr.o sr_reduce.o sr_iv.o sr_cand.o sr_xform.o sr_aux.o 
 SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/aux.o $(SHARE)/go.o
 SRC=sr.h sr_iv.h sr_reduce.h sr_cand.h sr_xform.h sr_expr.h sr_aux.h sr.c sr_iv.c sr_reduce.c sr_cand.c sr_xform.c sr_expr.c sr_aux.c
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 sr: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -o sr -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
+	 $(CC) -o sr -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
 lpr:
 	pr $(SRC) | lpr
-opr:
-	pr $(SRC) | opr
-dumpflop:
-	tar -uf /mnt/ego/sr/sr.tarf $(SRC) Makefile
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 sr.o:	../share/alloc.h
