@@ -25,12 +25,9 @@
 #define	IFDEPTH	256	/* maximum number of nested if-constructions	*/
 
 
-!File: lapbuf.h
-#define	LAPBUF	4096	/* size of macro actual parameter buffer	*/
-
-
-!File: argbuf.h
-#define	ARGBUF	2048	/* sizeof of macro actual parameter buffer	*/
+!File: macbuf.h
+#define	LAPBUF	128	/* initial size of macro replacement buffer	*/
+#define	ARGBUF	128	/* initial size of macro parameter buffer(s)	*/
 
 
 !File: strsize.h

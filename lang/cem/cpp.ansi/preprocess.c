@@ -28,6 +28,9 @@ Xflush()
 	sys_write(STDOUT, _obuf, OBUFSIZE);
 }
 
+static char *SkipComment();
+extern char options[];
+
 preprocess(fn)
 	char *fn;
 {
@@ -36,7 +39,7 @@ preprocess(fn)
 	register char *ob = &_obuf[OBUFSIZE];
 	char Xbuf[256];
 	int lineno = 0;
-	extern char options[];
+	int startline;
 
 #define flush(X)	(sys_write(STDOUT,_obuf,X))
 #define echo(ch) 	if (op == ob) { Xflush(); op = _obuf; } *op++ = (ch);
@@ -75,33 +78,47 @@ preprocess(fn)
 	for (;;) {
 		LineNumber++;
 		lineno++;
+		startline = 1;
 		c = GetChar();
-		while (class(c) == STSKIP) {
+		while (startline) {
+		    while (class(c) == STSKIP || c == '/') {
+			if (c == '/') {
+			    if (!InputLevel) {
+				c = GetChar();
+				if (c == '*') {
+				    op = SkipComment(op, &lineno);
+				    if (!op) return;
+				    if (!options['C']) echo(' ');
+				    c = GetChar();
+				    continue;
+				}
+				UnGetChar();
+				c = '/';
+			    }
+			    break;
+			}
 			echo(c);
 			c = GetChar();
-		}
+		    }
 
-		while (c == '#') {
+		    if (c == '#') {
 			if (!domacro()) {	/* pass pragma's to compiler */
-				register char *p = "#pragma";
+			    register char *p = "#pragma";
 
-				do_line(lineno, fn);
+			    do_line(lineno, fn);
 
-				while(*p) {
-					echo(*p++);
-				}
-				while ((c = GetChar()) != EOI) {
-					if (class(c) == STNL) break;
-					echo(c);
-				}
+			    while(*p) {
+				echo(*p++);
+			    }
+			    while ((c = GetChar()) != EOI) {
+				if (class(c) == STNL) break;
+				echo(c);
+			    }
 			}
 			lineno++;
 			newline();
 			c = GetChar();
-			while (class(c) == STSKIP) {
-				echo(c);
-				c = GetChar();
-			}
+		    } else startline = 0;
 		}
 		do_line(lineno, fn);
 		for (;;) {
@@ -120,43 +137,9 @@ preprocess(fn)
 			if (c == '/' && !InputLevel) {
 				c = GetChar();
 				if (c == '*') {
-					NoUnstack++;
-					if (options['C']) {
-						echo('/');
-						echo('*');
-					}
-					for (;;) {
-						c = GetChar();
-						if (c == '\n') {
-							++LineNumber;
-							++lineno;
-							echo(c);
-						}
-						else if (c == EOI) {
-							newline();
-							flush(op - _obuf);
-							return;
-						}
-						else if (c == '*') {
-							if (options['C']) {
-								echo(c);
-							}
-							c = GetChar();
-							if (c == '/') {
-							   if (options['C']) {
-								echo(c);
-							   }
-							   break;
-							}
-							else {
-								UnGetChar();
-							}
-						}
-						else if (options['C']) {
-							echo(c);
-						}
-					}
-					NoUnstack--;
+					op = SkipComment(op, &lineno);
+					if (!op) return;
+					if (!options['C']) echo(' ');
 					c = GetChar();
 					continue;
 				}
@@ -328,4 +311,49 @@ preprocess(fn)
 		}
 	}
 	/*NOTREACHED*/
+}
+
+static char *
+SkipComment(op, lineno)
+char *op;
+int *lineno;
+{
+	char *ob = &_obuf[OBUFSIZE];
+	register int c;
+
+	NoUnstack++;
+	if (options['C']) {
+		echo('/');
+		echo('*');
+	}
+	c = GetChar();
+	for(;;) {
+		if (c == EOI) {
+			newline();
+			flush(op - _obuf);
+			op = 0;
+			break;
+		}
+		if (options['C']) {
+			echo(c);
+		}
+		if (c == '\n') {
+			++LineNumber;
+			++*lineno;
+			if (!options['C']) {
+				echo(c);
+			}
+		}
+		if (c == '*') {
+			c = GetChar();
+			if (c == '/') {
+				if (options['C']) {
+					echo(c);
+				}
+				break;			/* for(;;) */
+			}
+		} else c = GetChar();
+	}
+	NoUnstack--;
+	return op;
 }

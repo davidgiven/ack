@@ -22,6 +22,8 @@
 #include	"class.h"
 #include	"macro.h"
 #include	"bits.h"
+#include	"macbuf.h"
+#include	"replace.h"
 
 extern char options[];
 extern	char **inctable;	/* list of include directories		*/
@@ -54,7 +56,7 @@ GetIdentifier(skiponerr)
 	ReplaceMacros = 1;
 	UnknownIdIsZero = tmp;
 	if (tok != IDENTIFIER) {
-		if (skiponerr && tok != EOF) SkipToNewLine(0);
+		if (skiponerr && tok != EOF) SkipToNewLine();
 		return (char *)0;
 	}
 	return tk.tk_str;
@@ -85,7 +87,7 @@ domacro()
 		id = findidf(tk.tk_str);
 		if (!id) {
 			error("%s: unknown control", tk.tk_str);
-			SkipToNewLine(0);
+			SkipToNewLine();
 			free(tk.tk_str);
 			break;
 		}
@@ -121,7 +123,7 @@ domacro()
 			*/
 			if (GetToken(&tk) != INTEGER) {
 				error("bad #line syntax");
-				SkipToNewLine(0);
+				SkipToNewLine();
 			}
 			else
 				do_line((unsigned int)tk.tk_val);
@@ -131,14 +133,13 @@ domacro()
 			break;
 		case K_PRAGMA:				/* "pragma"	*/
 			return 0;	/* this is for the compiler */
-			break;
 		case K_UNDEF:				/* "undef"	*/
 			do_undef();
 			break;
 		default:
 			/* invalid word seen after the '#'	*/
 			error("%s: unknown control", id->id_text);
-			SkipToNewLine(0);
+			SkipToNewLine();
 		}
 		break;
 	case INTEGER:		/* # <integer> [<filespecifier>]?	*/
@@ -148,7 +149,7 @@ domacro()
 		break;
 	default:	/* invalid token following '#'		*/
 		error("illegal # line");
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	return 1;
 }
@@ -180,15 +181,21 @@ int to_endif;
 				NoUnstack--;
 				return;
 			}
-			UnGetChar();
-			SkipToNewLine(0);
+			if (ch == '/') {
+				if (ch != '*') UnGetChar();
+				else {
+					skipcomment();
+					continue;
+				}
+			} else UnGetChar();
+			SkipToNewLine();
 			continue;
 		}
 		ReplaceMacros = 0;
 		toknum = GetToken(&tk);
 		ReplaceMacros = 1;
 		if (toknum != IDENTIFIER) {
-			SkipToNewLine(0);
+			SkipToNewLine();
 			continue;
 		}
 		/*	an IDENTIFIER: look for #if, #ifdef and #ifndef
@@ -200,13 +207,13 @@ int to_endif;
 		free(tk.tk_str);
 		switch(id->id_resmac) {
 		default:
-			SkipToNewLine(0);
+			SkipToNewLine();
 			break;
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
 			push_if();
-			SkipToNewLine(0);
+			SkipToNewLine();
 			break;
 		case K_ELIF:
 			if (ifstack[nestlevel])
@@ -219,26 +226,26 @@ int to_endif;
 					return;
 				}
 			}
-			else SkipToNewLine(0);  /* otherwise done in ifexpr() */
+			else SkipToNewLine();  /* otherwise done in ifexpr() */
 			break;
 		case K_ELSE:
 			if (ifstack[nestlevel])
 				error("#else after #else");
 			++(ifstack[nestlevel]);
 			if (!to_endif && nestlevel == skiplevel) {
-				if (SkipToNewLine(1)) {
+				if (SkipToNewLine()) {
 					if (!options['o'])
 						strict("garbage following #else");
 				}
 				NoUnstack--;
 				return;
 			}
-			else SkipToNewLine(0);
+			else SkipToNewLine();
 			break;
 		case K_ENDIF:
 			assert(nestlevel > svnestlevel[nestcount]);
 			if (nestlevel == skiplevel) {
-				if (SkipToNewLine(1)) {
+				if (SkipToNewLine()) {
 					if (!options['o'])
 						strict("garbage following #endif");
 				}
@@ -246,7 +253,7 @@ int to_endif;
 				NoUnstack--;
 				return;
 			}
-			else SkipToNewLine(0);
+			else SkipToNewLine();
 			nestlevel--;
 			break;
 		}
@@ -292,7 +299,7 @@ do_include()
 		filenm = (char *)0;
 	}
 	AccFileSpecifier = 0;
-	SkipToNewLine(0);
+	SkipToNewLine();
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
@@ -326,12 +333,12 @@ do_define()
 		return;
 	}
 	/*	there is a formal parameter list if the identifier is
-		followed immediately by a '('. 
+		followed immediately by a '('.
 	*/
 	ch = GetChar();
 	if (ch == '(') {
 		if ((nformals = getparams(formals, parbuf)) == -1) {
-			SkipToNewLine(0);
+			SkipToNewLine();
 			free(str);
 			return;	/* an error occurred	*/
 		}
@@ -340,17 +347,8 @@ do_define()
 	/* read the replacement text if there is any			*/
 	ch = skipspaces(ch,0);	/* find first character of the text	*/
 	assert(ch != EOI);
-	if (class(ch) == STNL) {
-		/*	Treat `#define something' as `#define something ""'
-		*/
-		repl_text = Malloc(1);
-		*repl_text = '\0';
-		length = 0;
-	}
-	else {
-		UnGetChar();
-		repl_text = get_text((nformals > 0) ? formals : 0, &length);
-	}
+	UnGetChar();
+	repl_text = get_text((nformals > 0) ? formals : 0, &length);
 	macro_def(str2idf(str, 0), repl_text, nformals, length, NOFLAG);
 	LineNumber++;
 }
@@ -367,12 +365,12 @@ do_elif()
 {
 	if (nestlevel <= svnestlevel[nestcount]) {
 		error("#elif without corresponding #if");
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	else { /* restart at this level as if a #if is detected.  */
 		if (ifstack[nestlevel]) {
 			error("#elif after #else");
-			SkipToNewLine(0);
+			SkipToNewLine();
 		}
 		nestlevel--;
 		push_if();
@@ -382,7 +380,7 @@ do_elif()
 
 do_else()
 {
-	if (SkipToNewLine(1)) {
+	if (SkipToNewLine()) {
 		if (!options['o'])
 			strict("garbage following #else");
 	}
@@ -399,7 +397,7 @@ do_else()
 
 do_endif()
 {
-	if (SkipToNewLine(1)) {
+	if (SkipToNewLine()) {
 		if (!options['o'])
 			strict("garbage following #endif");
 	}
@@ -438,7 +436,7 @@ do_ifdef(how)
 	if (how ^ (id && id->id_macro != 0))
 		skip_block(0);
 	else
-		SkipToNewLine(0);
+		SkipToNewLine();
 }
 
 do_undef()
@@ -458,7 +456,7 @@ do_undef()
 			}
 		} /* else: don't complain */
 		free(str);
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	else
 		error("illegal #undef construction");
@@ -604,6 +602,8 @@ find_name(nm, index)
 	return 0;
 }
 
+#define	BLANK(ch)	((ch == ' ') || (ch == '\t'))
+
 char *
 get_text(formals, length)
 	char *formals[];
@@ -614,101 +614,111 @@ get_text(formals, length)
 		substituting each formal parameter by a special character
 		(non-ascii: 0200 & (order-number in the formal parameter
 		list)) in order to substitute this character later by the
-		actual parameter.  The replacement text is copied into
+		actual parameter. The replacement text is copied into
 		itself because the copied text will contain fewer or the
-		same amount of characters.  The length of the replacement
+		same amount of characters. The length of the replacement
 		text is returned.
 
 		Implementation:
-		finite automaton : we are only interested in
-		identifiers, because they might be replaced by some actual
-		parameter.  Other tokens will not be seen as such.
+		finite automaton : we are interested in
+		1-  white space, sequences must be mapped onto 1 single
+		    blank.
+		2-  identifiers, since they might be replaced by some
+		    actual parameter.
+		3-  strings and character constants, since replacing
+		    variables within them is illegal, and white-space is
+		    significant.
+		4-  comment, same as for 1
+		Other tokens will not be seen as such.
 	*/
 	register int c;
-	register unsigned text_size;
-	char *text = Malloc(text_size = ITEXTSIZE);
-	register int pos = 0;
+	struct repl repls;
+	register struct repl *repl = &repls;
+	int blank = 0;
 
 	c = GetChar();
 
+	repl->r_ptr = repl->r_text = Malloc(repl->r_size = ITEXTSIZE);
 	while ((c != EOI) && (class(c) != STNL)) {
+		if (BLANK(c)) {
+			if (!blank++) add2repl(repl, ' ');
+			c = GetChar();
+			continue;
+		}
+
 		if (c == '\'' || c == '"') {
 			register int delim = c;
 
 			do {
-				/* being careful, as ever */
-				if (pos+3 >= text_size)
-					text = Srealloc(text, text_size <<= 1);
-				text[pos++] = c;
-				if (c == '\\')
-					text[pos++] = GetChar();
+				add2repl(repl, c);
+				if (c == '\\') add2repl(repl, GetChar());
 				c = GetChar();
 			} while (c != delim && c != EOI && class(c) != STNL);
-			text[pos++] = c;
+			add2repl(repl, c);
 			c = GetChar();
-		}
-		else
-		if (c == '/') {
+		} else if (c == '/') {
 			c = GetChar();
-			if (pos+1 >= text_size)
-				text = Srealloc(text, text_size <<= 1);
 			if (c == '*') {
 				skipcomment();
-				text[pos++] = ' ';
+				if (!blank++) add2repl(repl,' ');
 				c = GetChar();
-			}
-			else
-				text[pos++] = '/';
-		}
-		else
-		if (formals && (class(c) == STIDF || class(c) == STELL)) {
+				continue;	/* skip zero'ing of blank */
+			} else add2repl(repl, '/');
+		} else if (formals
+			    && (class(c) == STIDF || class(c) == STELL)) {
 			char id_buf[IDFSIZE + 1];
-			register id_size = 0;
-			register n;
+			register char *idp = id_buf;
+			int n;
 
 			/* read identifier: it may be a formal parameter */
-			id_buf[id_size++] = c;
+			*idp++ = c;
 			do {
 				c = GetChar();
-				if (id_size <= IDFSIZE)
-					id_buf[id_size++] = c;
+				if (idp <= &id_buf[IDFSIZE])
+					*idp++ = c;
 			} while (in_idf(c));
-			id_buf[--id_size] = '\0';
-			if (n = find_name(id_buf, formals)) {
-				/* construct the formal parameter mark	*/
-				if (pos+1 >= text_size)
-					text = Srealloc(text,
-						text_size <<= 1);
-				text[pos++] = FORMALP | (char) n;
-			}
-			else {
-				register char *ptr = &id_buf[0];
+			*--idp = '\0';
 
-				while (pos + id_size >= text_size)
-					text_size <<= 1;
-				text = Realloc(text, text_size);
-				while (text[pos++] = *ptr++)
-					/* EMPTY */ ;
-				pos--;
+			/* construct the formal parameter mark or identifier */
+			if (n = find_name(id_buf, formals))
+				add2repl(repl, FORMALP | (char) n);
+			else {
+				idp = id_buf;
+				while (*idp) add2repl(repl, *idp++);
 			}
-		}
-		else {
-			if (pos+1 >= text_size)
-				text = Realloc(text, text_size <<= 1);
-			text[pos++] = c;
+		} else if (class(c) == STNUM) {
+			add2repl(repl, c);
+			if (c == '.') {
+				c = GetChar();
+				if (class(c) != STNUM) {
+					blank = 0; continue;
+				}
+				add2repl(repl, c);
+			}
+			c = GetChar();
+			while(in_idf(c) || c == '.') {
+				add2repl(repl, c);
+				if((c = GetChar()) == 'e' || c == 'E') {
+					add2repl(repl, c);
+					c = GetChar();
+					if (c == '+' || c == '-') {
+						add2repl(repl, c);
+						c = GetChar();
+					}
+				}
+			}
+		} else {
+			add2repl(repl, c);
 			c = GetChar();
 		}
+		blank = 0;
 	}
-	text[pos++] = '\0';
-	text = Realloc(text, pos);
-	*length = pos - 1;
-	return text;
+	*length = repl->r_ptr - repl->r_text;
+	return Realloc(repl->r_text, repl->r_ptr - repl->r_text + 1);
 }
 
-#define	BLANK(ch)	((ch == ' ') || (ch == '\t'))
-
 /*	macroeq() decides whether two macro replacement texts are
-	identical.  This version compares the texts, which occur
+	identical. This version compares the texts, which occur
 	as strings, without taking care of the leading and trailing
 	blanks (spaces and tabs).
 */
@@ -739,9 +749,10 @@ do_line(l)
 	unsigned int l;
 {
 	struct token tk;
+	int t = GetToken(&tk);
 
-	LineNumber = l - 1;	/* the number of the next input line */
-	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
+	SkipToNewLine();
+	LineNumber = l;		/* the number of the next input line */
+	if (t == STRING)	/* is there a filespecifier? */
 		FileName = tk.tk_str;
-	SkipToNewLine(0);
 }

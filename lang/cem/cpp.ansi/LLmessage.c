@@ -16,7 +16,7 @@ LLmessage(tk)	{
 		error("garbage at end of line");
 	else if (tk)	{
 		error("%s missing", symbol2str(tk));
-		if (DOT != EOF) SkipToNewLine(0);
+		if (DOT != EOF) SkipToNewLine();
 		DOT = EOF;
 	}
 	else
