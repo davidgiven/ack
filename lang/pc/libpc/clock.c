@@ -33,5 +33,11 @@ int clock() {
 	struct tbuf t;
 
 	times(&t);
-	return( (t.utime + t.stime) & 077777);
+	return( (int)(t.utime + t.stime) &
+#if EM_WSIZE <= 2
+	077777
+#else
+	0x7fffffffL
+#endif
+	);
 }
