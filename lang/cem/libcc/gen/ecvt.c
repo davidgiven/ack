@@ -28,12 +28,12 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	static char buf[NDIGITS];
 	char buf1[NDIGITS];
 	register char *pe = buf1;
-	register  char *pb = buf;
+	register  char *pb;
 	int pointpos = 0;
 
 
 	if (ndigit < 0) ndigit = 0;
-	if (ndigit >= NDIGITS - 1) ndigit = NDIGITS - 2;
+	if (ndigit >= NDIGITS - 10) ndigit = NDIGITS - 11;
 
 	*sign = 0;
 	if (value < 0) {
@@ -50,6 +50,11 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 			/* compensate for rounding errors, because
 			   the conversion to "int" truncates
 			*/
+			if (pe >= &buf1[NDIGITS]) {
+				pb = &buf1[NDIGITS-10];
+				while (pb > buf1) *--pb = *--pe;
+				pe = &buf[NDIGITS-10];
+			}
 			*pe++ = (int)((value+.05) * 10) + '0';
 			pointpos++;
 		} while (intpart != 0);
@@ -61,6 +66,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 			fractpart = value;
 			pointpos--;
 		}
+		pb = &buf[0];
 	}
 	pe = &buf[ndigit];
 	if (! ecvtflag) {
