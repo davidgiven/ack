@@ -35,7 +35,7 @@ con_float() {
 static int been_here;
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
-	fprintf(codefile,".long\t");
+	fprintf(codefile,".data4\t");
 	if (argval == 8)
 		fprintf(codefile,"F_DUM,");
 	fprintf(codefile,"F_DUM\n");
