@@ -297,6 +297,9 @@ loc dus $2==w:	dup $1
 loc loc cii $1==$2:
 loc loc cuu $1==$2:
 loc loc cff $1==$2:
+loc loc cii loc loc cii $1==$5 && $2==$4 && $1<$2:
+loc loc cuu loc loc cuu $1==$5 && $2==$4 && $1<$2:
+loc loc cff loc loc cff $1==$5 && $2==$4 && $1<$2:
 loc and !defined($2):   and $1
 loc ior !defined($2):   ior $1
 loc xor !defined($2):   xor $1
