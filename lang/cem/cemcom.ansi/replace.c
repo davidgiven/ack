@@ -313,7 +313,7 @@ actual(repl)
 			do {
 				if (++pos < idfsize) {
 					*p++ = ch;
-					hash = ENHASH(hash, ch, pos);
+					hash = ENHASH(hash, ch);
 				}
 				ch = GetChar();
 			} while (in_idf(ch));

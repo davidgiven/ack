@@ -83,7 +83,6 @@ main(argc, argv)
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
 
-	init_hmask();
 #ifndef NOPP
 	inctable = (char **) Malloc(10 * sizeof(char *));
 	inctable[0] = "";
@@ -125,7 +124,9 @@ main(argc, argv)
 
 char *source = 0;
 
+#ifdef GEN_NM_LIST
 char *nmlist = 0;
+#endif GEN_NM_LIST
 
 compile(argc, argv)
 	char *argv[];
@@ -157,15 +158,21 @@ compile(argc, argv)
 	case 2:
 		destination = argv[1];
 		break;
+#ifdef GEN_NM_LIST
 	case 3:
 		nmlist = argv[2];
 		destination = argv[1];
 		break;
+#endif GEN_NM_LIST
 #endif	LINT
 
 	default:
 #ifndef	LINT
+#ifdef GEN_NM_LIST
 		fatal("use: %s source destination [namelist]", prog_name);
+#else GEN_NM_LIST
+		fatal("use: %s source destination", prog_name);
+#endif GEN_NM_LIST
 #else	LINT
 		fatal("use: %s source", prog_name);
 #endif	LINT

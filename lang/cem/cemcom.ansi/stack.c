@@ -179,7 +179,9 @@ unstack_world()
 	lint_global_level(local_level);
 #endif	LINT
 
+#ifdef GEN_NM_LIST
 	open_name_list();
+#endif GEN_NM_LIST
 
 	while (se)	{
 		register struct idf *idf = se->se_idf;
@@ -227,8 +229,10 @@ unstack_world()
 		    && !def->df_initialized) {
 			/* space must be allocated */
 			bss(idf);
+#ifdef GEN_NM_LIST
 			if (def->df_sc != STATIC)
 				namelist(idf->id_text);	/* may be common */
+#endif GEN_NM_LIST
 			def->df_alloc = ALLOC_DONE;	/* see Note below */
 		}
 		se = se->next;
@@ -247,6 +251,7 @@ unstack_world()
 	*/
 }
 
+#ifdef GEN_NM_LIST
 /*	A list of potential common names is kept, to be fed to
 	an understanding loader.  The list is written to a file
 	the name of which is nmlist.  If nmlist == NULL, no name
@@ -269,3 +274,4 @@ namelist(nm)
 		sys_write(nfp, "\n", 1);
 	}
 }
+#endif GEN_NM_LIST

@@ -137,7 +137,7 @@ str2idf(tg)
 	hash = STARTHASH();
 	while (++pos < idfsize && (ch = *cp++))	{
 		*ncp++ = ch;
-		hash = ENHASH(hash, ch, pos);
+		hash = ENHASH(hash, ch);
 	}
 	hash = STOPHASH(hash);
 	*ncp++ = '\0';
@@ -755,20 +755,5 @@ free_formals(fm)
 
 		free_formal(fm);
 		fm = tmp;
-	}
-}
-
-char hmask[IDFSIZE];
-
-init_hmask()
-{
-	/*	A simple congruence random number generator, as
-		described in Knuth, vol 2.
-	*/
-	register int h, rnd = HASH_X;
-	
-	for (h = 0; h < IDFSIZE; h++)	{
-		hmask[h] = rnd;
-		rnd = (HASH_A * rnd + HASH_C) & HASHMASK;
 	}
 }

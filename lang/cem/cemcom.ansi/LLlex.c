@@ -316,7 +316,7 @@ garbage:
 		do	{			/* read the identifier	*/
 			if (++pos < idfsize) {
 				*tg++ = ch;
-				hash = ENHASH(hash, ch, pos);
+				hash = ENHASH(hash, ch);
 			}
 			ch = GetChar();
 		} while (in_idf(ch));

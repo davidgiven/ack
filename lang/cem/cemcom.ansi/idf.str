@@ -7,24 +7,11 @@
 
 #include	"nopp.h"
 
-/*	Since the % operation in the calculation of the hash function
-	turns out to be expensive, it is replaced by the cheaper XOR (^).
-	Each character of the identifier is xored with an 8-bit mask which
-	depends on the position of the character; the sum of these results
-	is the hash value.  The random masks are obtained from a
-	congruence generator in idf.c.
-*/
+#define	HASHSIZE	307	/* must be odd */
 
-#define	HASHSIZE	256	/* must be a power of 2 */
-#define	HASH_X		0253	/* Knuth's X */
-#define	HASH_A		77	/* Knuth's a */
-#define	HASH_C		153	/* Knuth's c */
-
-extern char hmask[];		/* the random masks */
-#define	HASHMASK		(HASHSIZE-1)	/* since it is a power of 2 */
 #define	STARTHASH()		(0)
-#define	ENHASH(hs,ch,ps)	(hs + (ch ^ hmask[ps]))
-#define	STOPHASH(hs)		(hs & HASHMASK)
+#define	ENHASH(hs,ch)		((hs << 2) + ch)
+#define	STOPHASH(hs)		((unsigned)hs % HASHSIZE)
 
 struct idf	{
 	struct idf *next;
