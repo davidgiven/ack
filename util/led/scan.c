@@ -93,6 +93,8 @@ getfile(filename)
 		modulname = filename;
 		return PLAIN;
 	case ARMAG:
+		warning("Using out-of-date archive %s",filename) ;
+	case AALMAG:
 		archname = filename;
 		if (passnumber == FIRST) {
 			read_arhdr(&archive_header);
