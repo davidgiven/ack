@@ -94,3 +94,7 @@
 #undef DBSYMTAB	1	/* ability to produce symbol table for debugger */
 
 
+!File: use_insert.h
+#undef USE_INSERT	1	/* use C_insertpart mechanism */
+
+

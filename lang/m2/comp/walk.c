@@ -41,6 +41,7 @@
 #include	"misc.h"
 #include	"warning.h"
 #include	"bigresult.h"
+#include	"use_insert.h"
 
 extern arith		NewPtr();
 extern arith		NewInt();
@@ -261,9 +262,13 @@ WalkProcedure(procedure)
 	arith StackAdjustment = 0;	/* space for conformant arrays */
 	arith retsav = 0;		/* temporary space for return value */
 	arith func_res_size = 0;
+#ifdef USE_INSERT
 	int partno = C_getid();
 	int partno2 = C_getid();
-	int end_reached;		/* can fall through ... */
+#else
+	label cd_init;
+	label cd_body;
+#endif
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -302,7 +307,21 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	TmpOpen(procscope);
+#ifdef USE_INSERT
 	C_insertpart(partno2);	/* procedure header */
+#else
+	C_pro_narg(procscope->sc_name);
+#ifdef DBSYMTAB
+	if (options['g']) {
+		C_ms_std((char *) 0, N_LBRAC, proclevel);
+	}
+#endif /* DBSYMTAB */
+	C_ms_par(procedure->df_type->prc_nbpar
+#ifdef BIG_RESULT_ON_STACK
+		+ (too_big ? func_res_size : 0)
+#endif
+		);
+#endif
 	/* generate code for filename only when the procedure can be
 	   exported, either directly or by taking the address.
 	   This cannot be done if the level is bigger than one (because in
@@ -311,13 +330,37 @@ WalkProcedure(procedure)
 	DoFilename(procscope->sc_level == 1);
 	DoPriority();
 
-	C_insertpart(partno);
-
 	text_label = 1;		/* label at end of procedure */
 
-	end_reached = WalkNode(procedure->prc_body, NO_EXIT_LABEL, REACH_FLAG);
+#ifdef USE_INSERT
+	C_insertpart(partno);
+#else
+	cd_init = ++text_label;
+	cd_body = ++text_label;
+	C_bra(cd_init);
+	def_ilb(cd_body);
+#endif
 
+	if ((WalkNode(procedure->prc_body, NO_EXIT_LABEL, REACH_FLAG) & REACH_FLAG)) {
+		if (func_res_size) {
+			node_warning(procscope->sc_end,
+				     W_ORDINARY,
+				     "function procedure \"%s\" does not always return a value",
+				     procedure->df_idf->id_text);
+			c_loc(M2_NORESULT);
+			C_trp();
+			C_asp(-func_res_size);
+		}
+#ifndef USE_INSERT
+		C_bra(RETURN_LABEL);
+#endif
+	}
+
+#ifdef USE_INSERT
 	C_beginpart(partno);
+#else
+	def_ilb(cd_init);
+#endif
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -403,17 +446,12 @@ WalkProcedure(procedure)
 			}
 		}
 	}
+#ifdef USE_INSERT
 	C_endpart(partno);
+#else
+	C_bra(cd_body);
+#endif
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
-	if ((end_reached & REACH_FLAG) && func_res_size) {
-		node_warning(procscope->sc_end,
-			     W_ORDINARY,
-			     "function procedure \"%s\" does not always return a value",
-			     procedure->df_idf->id_text);
-		c_loc(M2_NORESULT);
-		C_trp();
-		C_asp(-func_res_size);
-	}
 	def_ilb(RETURN_LABEL);	/* label at end */
 	if (too_big) {
 		/* Fill the data area reserved for the function result
@@ -454,6 +492,7 @@ WalkProcedure(procedure)
 	}
 	EndPriority();
 	C_ret(func_res_size);
+#ifdef USE_INSERT
 	C_beginpart(partno2);
 	C_pro(procscope->sc_name, -procscope->sc_off);
 #ifdef DBSYMTAB
@@ -466,8 +505,11 @@ WalkProcedure(procedure)
 		+ (too_big ? func_res_size : 0)
 #endif
 		);
+#endif
 	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
+#ifdef USE_INSERT
 	C_endpart(partno2);
+#endif
 #ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_RBRAC, proclevel);

@@ -76,7 +76,8 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o $(EXTRA_O)
 GENH =	errout.h \
 	idfsize.h numsize.h strsize.h target_sizes.h bigparam.h bigresult.h \
 	inputtype.h density.h squeeze.h nocross.h nostrict.h \
-	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h real.h
+	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h real.h \
+	use_insert.h dbsymtab.h
 HFILES =LLlex.h \
 	chk_expr.h class.h const.h debug.h f_info.h idf.h \
 	input.h main.h misc.h scope.h standards.h tokenname.h \
@@ -448,6 +449,7 @@ walk.o: squeeze.h
 walk.o: strict3rd.h
 walk.o: target_sizes.h
 walk.o: type.h
+walk.o: use_insert.h
 walk.o: walk.h
 walk.o: warning.h
 desig.o: LLlex.h
