@@ -12,8 +12,10 @@
 	add	ax,02000
 	and	ax,~0777
 	mov	(.limhp),ax
-	cmp	ax,sp
-	jae	2f
+	push	ax
+	call	_brk
+	or	ax,ax
+	jne	2f
 1:
 	jmp	bx
 2:
