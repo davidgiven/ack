@@ -12,15 +12,16 @@ IMPLEMENTATION MODULE random;
 *)
 
 FROM Unix IMPORT getpid, time;
-TYPE index = [0..54];
+TYPE index = [1..55];
 
 VAR	X: ARRAY index OF CARDINAL;
-	k, j: index;
+	j, k: index;
+	tm: LONGINT;
 
 PROCEDURE Random(): CARDINAL;
 BEGIN
-	IF k+1 > 54 THEN k := 0; ELSE INC(k) END;
-	IF j+1 > 54 THEN j := 0; ELSE INC(j) END;
+	IF k-1 <= 0 THEN k := 55; ELSE DEC(k) END;
+	IF j-1 <= 0 THEN j := 55; ELSE DEC(j) END;
 	X[k] := X[k] + X[j];
 	RETURN X[k]
 END Random;
@@ -32,16 +33,26 @@ BEGIN
 END Uniform;
 
 PROCEDURE StartSeed(seed: CARDINAL);
+VAR v: CARDINAL;
 BEGIN
-	X[0] := seed;
-	FOR k := 1 TO 54 DO
-		X[k] := X[k-1] * 1297;
+	FOR k := 1 TO 55 DO
+		seed := 1297 * seed + 123;
+		X[k] := seed;
 	END;
-	k := 54;
-	j := 30;
+	FOR k := 1 TO 15 DO
+		j := tm MOD 55D + 1D;
+		v := X[j];
+		tm := tm DIV 7D;
+		j := tm MOD 55D + 1D;
+		X[j] := v;
+		tm := tm * 3D;
+	END;
+	k := 1;
+	j := 25;
 END StartSeed;
 
 BEGIN
- 	X[0] := time(NIL);
-	StartSeed(CARDINAL(getpid()) * X[0]);
+ 	tm := time(NIL);
+	X[1] := tm;
+	StartSeed(CARDINAL(getpid()) * X[1]);
 END random.

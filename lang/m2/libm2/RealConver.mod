@@ -85,8 +85,8 @@ IMPLEMENTATION MODULE RealConversions;
 	ind2 := ndigits+1;
 
 	IF NOT ecvtflag THEN 
-		IF INTEGER(ind2) + pointpos < 0 THEN
-			ind2 := 0;
+		IF INTEGER(ind2) + pointpos <= 0 THEN
+			ind2 := 1;
 		ELSE
 			ind2 := INTEGER(ind2) + pointpos
 		END;
@@ -118,6 +118,10 @@ IMPLEMENTATION MODULE RealConversions;
 					INC(ind1);
 				END;
 			END;
+		END;
+		IF (NOT ecvtflag) AND (ind1 = 0) THEN
+			str[0] := CHR(ORD(str[0])-5);
+			INC(ind1);
 		END;
 	END;
 	IF ecvtflag THEN
@@ -169,8 +173,13 @@ IMPLEMENTATION MODULE RealConversions;
 		END;
 		IF ndigits = 0 THEN
 			str[pointpos] := 0C;
+			ind1 := pointpos - 1;
 		ELSE
 			str[pointpos] := '.';
+			IF INTEGER(ind1) > pointpos+INTEGER(ndigits) THEN
+				ind1 := pointpos+INTEGER(ndigits);
+			END;
+			str[pointpos+INTEGER(ndigits)+1] := 0C;
 		END;
 		IF sign THEN
 			FOR i := ind1 TO 0 BY -1 DO
