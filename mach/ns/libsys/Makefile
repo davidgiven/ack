@@ -1,18 +1,18 @@
 # $Header$
 MACH=ns
-all:		tail_mon head_em.o
+all:		libmon_o.a head_em.o
 
 install: 	all
 		../../install head_em.o head_em
-		../../install tail_mon
+		../../install libmon_o.a tail_mon
 
 cmp:		all
 		-../../compare head_em.o head_em
-		-../../compare tail_mon
+		-../../compare libmon_o.a tail_mon
 
-tail_mon:	tail_mon.a
+libmon_o.a:	libmon_s.a
 		ASAR=aal ; export ASAR ;\
-		march . tail_mon
+		march . libmon_o.a
 
 head_em.o:	head_em.s
 		$(MACH) -I../../../h -c head_em.s
@@ -24,5 +24,5 @@ opr :
 		make pr | opr
 
 pr:
-		@pr -h `pwd`/head_em.s head_em.s
-		@ar pv tail_mon.a | pr -h `pwd`/tail_mon.a
+		@pr `pwd`/head_em.s
+		@ar pv libmon_s.a | pr -h `pwd`/libmon_s.a

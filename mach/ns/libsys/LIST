@@ -1,4 +1,4 @@
-LIST
+libmon_s.a
 exit.s
 gtty.s
 signal.s
