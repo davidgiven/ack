@@ -1,1 +1,1 @@
-exec /usr/em/doc/em.doc/int/em /usr/em/doc/em.doc/int/tables ${1-e.out} core
+exec /usr/em/doc/em/int/em /usr/em/doc/em/int/tables ${1-e.out} core
