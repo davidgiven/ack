@@ -15,6 +15,7 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"dbsymtab.h"
 
 int slevel = 0;		/* nesting level of statements */
 }
@@ -47,14 +48,16 @@ Statement
 	]?
 					{ if( !options['L'] )
 						C_lin((arith) dot.tk_lineno);
+#ifdef DBSYMTAB
 					  if (options['g']) {
 					    static int ms_lineno;
 
 					    if (ms_lineno != dot.tk_lineno) {
-						C_ms_std((char *) 0, N_SLINE, dot.tk_lineno);
+						C_ms_std((char *) 0, N_SLINE, (int) dot.tk_lineno);
 						ms_lineno = dot.tk_lineno;
 					    }
 					  }
+#endif /* DBSYMTAB */
 					}
 	[
 		SimpleStatement

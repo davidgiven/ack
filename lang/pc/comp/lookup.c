@@ -31,6 +31,7 @@ struct def *
 lookup(id, scope, inuse)
 	register struct idf *id;
 	struct scope *scope;
+	long	inuse;
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.

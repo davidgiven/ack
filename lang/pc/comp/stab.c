@@ -32,6 +32,8 @@
 
 extern int	proclevel;
 
+extern char	*sprint();
+
 static struct db_str {
 	unsigned	sz;
 	char		*base;

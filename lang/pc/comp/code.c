@@ -32,7 +32,7 @@ routine_label(df)
 {
 	df->prc_label = ++data_label;
 	C_df_dlb(df->prc_label);
-	C_rom_scon(df->df_idf->id_text, strlen(df->df_idf->id_text) + 1);
+	C_rom_scon(df->df_idf->id_text, (arith)(strlen(df->df_idf->id_text) + 1));
 }
 
 RomString(nd)
@@ -250,7 +250,7 @@ CodeEndBlock(df, StackAdjustment)
 		}
 		if( tp = ResultType(df->df_type) )	{
 			if( !options['R'] ) {
-				C_lin(LineNumber);
+				C_lin((arith)LineNumber);
 				C_lol(df->prc_bool);
 				C_cal("_nfa");
 				C_asp(word_size);

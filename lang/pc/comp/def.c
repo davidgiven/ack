@@ -20,6 +20,7 @@ struct def *
 MkDef(id, scope, kind)
 	register struct idf *id;
 	register struct scope *scope;
+	long kind;
 {
 	/*	Create a new definition structure in scope "scope", with
 	 *	id "id" and kind "kind".
@@ -44,6 +45,7 @@ struct def *
 define(id, scope, kind)
 	register struct idf *id;
 	register struct scope *scope;
+	long kind;
 {
 	/*	Declare an identifier in a scope, but first check if it
 		already has been defined.
@@ -52,7 +54,7 @@ define(id, scope, kind)
 	*/
 	register struct def *df;
 
-	if( df = lookup(id, scope, 0) )	{
+	if( df = lookup(id, scope, 0L) )	{
 		if (df->df_kind == D_INUSE) {
 			if( kind != D_INUSE ) {
 			    error("\"%s\" already used in this block",

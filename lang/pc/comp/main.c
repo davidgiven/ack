@@ -116,7 +116,7 @@ Compile(src, dst)
 	C_df_dlb(++data_label);
 	C_rom_scon(FileName,(arith) strlen(FileName) + 1);
 	LLparse();
-	C_ms_src((arith) (LineNumber - 1), FileName);
+	C_ms_src((int)LineNumber - 1, FileName);
 	if( fp_used ) C_ms_flt();
 	C_close();
 #ifdef DEBUG
