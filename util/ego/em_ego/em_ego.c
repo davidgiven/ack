@@ -1,5 +1,9 @@
 /* $Header$ */
 
+/* Driver program for the global optimizer. It might even become the global
+   optimizer itself one day ...
+*/
+
 #include <em_path.h>
 #include <signal.h>
 #include <system.h>
@@ -73,6 +77,7 @@ static int	nphase_args;
 
 static char	*opt_dir;
 static char	*prog_name;
+static char	*tmp_dir = TMP_DIR;
 
 static void
 cleanup()
@@ -287,6 +292,7 @@ main(argc, argv)
 		case 't':
 			if (argv[0][2] == '\0') {
 				keeptemps = 1;
+				tmp_dir = ".";
 				continue;
 			}
 			break;
@@ -368,14 +374,14 @@ main(argc, argv)
 	fatal("no correct -P flag given");
   }
 
-  (void) strcpy(ddump, TMP_DIR);
+  (void) strcpy(ddump, tmp_dir);
   (void) strcat(ddump, "/ego.dd.XXXXXX");
   (void) mktemp(ddump);
-  (void) strcpy(pdump, TMP_DIR);
+  (void) strcpy(pdump, tmp_dir);
   (void) strcat(pdump, "/ego.pd.XXXXXX");
   (void) mktemp(pdump);
 
-  (void) strcpy(tmpbufs[0], TMP_DIR);
+  (void) strcpy(tmpbufs[0], tmp_dir);
   (void) strcat(tmpbufs[0], "/ego.A.BB.XXXXXX");
   (void) mktemp(tmpbufs[0]);
   for (i = 2*NTEMPS-1; i >= 1; i--) {
