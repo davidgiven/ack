@@ -235,6 +235,7 @@ jsr tosdst4+label .
 ret const4:ro .
 adjspd tossrc4:ro .
 exit label .
+sprd tossrc4:ro, MEMREG:rw .
 
 
 
@@ -2179,6 +2180,14 @@ uses REG
 pat sim
 with src24
     gen movw %1, {absolute2, ".ignmask"}
+
+pat str $1==0
+with src4
+gen sprd %1, fp
+
+pat str $1==1
+with src4
+gen sprd %1, sp
 
 pat str $1==2
 with src4
