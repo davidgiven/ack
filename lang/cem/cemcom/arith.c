@@ -412,10 +412,17 @@ opnd2test(expp, oper)
 	register struct expr **expp;
 {
 	opnd2logical(expp, oper);
-	if ((*expp)->ex_class == Oper && is_test_op((*expp)->OP_OPER))
-		{ /* It is already a test */ }
-	else
-		ch7bin(expp, NOTEQUAL, intexpr((arith)0, INT));
+	if ((*expp)->ex_class == Oper) {
+		if (is_test_op((*expp)->OP_OPER)) {
+			/* It is already a test */
+			return;
+		}
+		if ((*expp)->OP_OPER == ',') {
+			opnd2test(&((*expp)->OP_RIGHT), oper);
+			return;
+		}
+	}
+	ch7bin(expp, NOTEQUAL, intexpr((arith)0, INT));
 }
 
 int
