@@ -6,18 +6,20 @@ FLOATS=-DNOFLOAT
 # for machines with software floating point library:
 FLOATS=-fp
 PC = apc
+INTPC = em44
+INT = int
 
 all:            testC testI
 
 testI:
-		em22 $(FLOATS) t1.p; int
-		em22 $(FLOATS) t2.p; int
-		em22 $(FLOATS) t3.p; int e.out f1 f2 f3 f4 f5 f6
-		em22 $(FLOATS) t4.p; int
-		em22 $(FLOATS) t5.p; int
-		em22 $(FLOATS) tstenc.p; int
-		em22 $(FLOATS) tstgto.p; int
-		em22 $(FLOATS) -.p callc.p cmod.c ; int
+		$(INTPC) $(FLOATS) t1.p; $(INT)
+		$(INTPC) $(FLOATS) t2.p; $(INT)
+		$(INTPC) $(FLOATS) t3.p; $(INT) e.out f1 f2 f3 f4 f5 f6
+		$(INTPC) $(FLOATS) t4.p; $(INT)
+		$(INTPC) $(FLOATS) t5.p; $(INT)
+		$(INTPC) $(FLOATS) tstenc.p; $(INT)
+		$(INTPC) $(FLOATS) tstgto.p; $(INT)
+		$(INTPC) $(FLOATS) -.p callc.p cmod.c ; $(INT)
 		rm -f e.out f? *.k int.log int.mess
 
 testC:
