@@ -19,7 +19,10 @@ all:
 	-nroff macro.v7 libmon.7 > libmon.opr
 	-nroff macro.v7 libpc.7 > libpc.opr
 	-nroff macro.v7 cpp.6 > cpp.opr
+	-nroff macro.v7 cgg.6 > cgg.opr
 	-nroff macro.v7 em_ass.6 > em_ass.opr
+	-nroff macro.v7 em_cg.6 > em_cg.opr
+	-nroff macro.v7 em_ncg.6 > em_ncg.opr
 	-nroff macro.v7 em_decode.6 > em_decode.opr
 	-nroff macro.v7 em_opt.6 > em_opt.opr
 	-nroff macro.v7 em_pem.6 > em_pem.opr
@@ -45,7 +48,10 @@ install:
 	-cp libmon.7 /usr/man/man7/em_libmon.7
 	-cp libpc.7 /usr/man/man7/em_libpc.7
 	-cp cpp.6 /usr/man/man6/cpp.6
+	-cp cgg.6 /usr/man/man6/cgg.6
 	-cp em_ass.6 /usr/man/man6/em_ass.6
+	-cp em_cg.6 /usr/man/man6/em_cg.6
+	-cp em_ncg.6 /usr/man/man6/em_ncg.6
 	-cp em_decode.6 /usr/man/man6/em_decode.6
 	-cp em_opt.6 /usr/man/man6/em_opt.6
 	-cp em_pem.6 /usr/man/man6/em_pem.6
