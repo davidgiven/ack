@@ -378,6 +378,7 @@ stl inreg($1)==2
 			remove(regvar($1))
 			move(%[1], regvar($1))			|	| |
 ...		| nocoercions : STACK |
+			remove(regvar($1))
 			"pop %(regvar($1)%)" samecc		|  | |(1,8)
 #endif
 stl		| regorconst |
