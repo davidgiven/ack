@@ -477,7 +477,7 @@ static long
 align(size)
 	register long	size;
 {
-	return (size + (sizeof(double) - 1)) & ~(sizeof(double) - 1);
+	return (size + (sizeof(double) - 1)) & ~(int)(sizeof(double) - 1);
 }
 
 /*
