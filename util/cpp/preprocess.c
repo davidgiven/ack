@@ -100,6 +100,7 @@ preprocess(fn)
 							++LineNumber;
 							++lineno;
 							echo(c);
+							break;
 						}
 						else if (c == EOI) {
 							flush(op - _obuf);
@@ -143,8 +144,6 @@ preprocess(fn)
 					echo(c);
 					LoadChar(c);
 					if (c == '\n') {
-						++LineNumber;
-						lineno++;
 						break;
 					}
 					else if (c == EOI) {
@@ -162,6 +161,8 @@ preprocess(fn)
 				}
 				while (c != stopc);
 				echo(c);
+				if (c == '\n')
+					break;	/* Don't eat # */
 				LoadChar(c);
 				continue;
 				}

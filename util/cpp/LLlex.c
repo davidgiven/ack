@@ -207,12 +207,11 @@ go_on:
 			if (c == '\\') {
 				LoadChar(c);
 				if (c == '\n') {
-					LoadChar(c);
 					LineNumber++;
-					continue;
 				}
 				c = quoted(c);
 			}
+			if (c >= 128) c -= 256;
 			val = val*256 + c;
 			size++;
 			LoadChar(c);
