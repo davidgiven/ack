@@ -90,6 +90,7 @@ struct varinfo *atts,*cost,*format;
 	register struct varinfo *vip;
 	int i;
 	int tokno;
+	int thistokensize;
 	char formstr[50],smallstr[2];
 
 	sy_p = lookup(name,symtok,newsymbol);
@@ -111,6 +112,7 @@ struct varinfo *atts,*cost,*format;
 		tp->tk_att[i].ta_name = vip->vi_str[0];
 		vip->vi_str[0]=0;
 	}
+	thistokensize=i;
 	if (i>maxtokensize)
 		maxtokensize=i;
 	if (vip!=0)
@@ -123,7 +125,7 @@ struct varinfo *atts,*cost,*format;
 			if (vip->vi_int[0]==0)
 				strcat(formstr,vip->vi_str[0]);
 			else {
-				for(i=0;i<MAXATT;i++) {
+				for(i=0;i<thistokensize;i++) {
 					if (strcmp(vip->vi_str[0],tp->tk_att[i].ta_name)==0) {
 						smallstr[0] = i+1;
 						smallstr[1] = 0;
@@ -131,7 +133,7 @@ struct varinfo *atts,*cost,*format;
 						break;
 					}
 				}
-				if (i==MAXATT)
+				if (i==thistokensize)
 					error("%s not a known attribute",
 						vip->vi_str[0]);
 			}
