@@ -1,9 +1,5 @@
 Action
 as
 cg
-libcc
 libem
-libpc
-libbc
-liboc
-libm2
+mach_params

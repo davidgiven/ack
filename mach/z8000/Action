@@ -4,21 +4,6 @@ end
 name "Zilog Z8000 backend"
 dir cg
 end
-name "Zilog Z8000 C libraries"
-dir libcc
-end
 name "Zilog Z8000 EM library"
 dir libem
-end
-name "Zilog Z8000 Pascal library"
-dir libpc
-end
-name "Zilog Z8000 Basic library"
-dir libbc
-end
-name "Zilog Z8000 Occam library"
-dir liboc
-end
-name "Zilog Z8000 Modula-2 library"
-dir libm2
 end
