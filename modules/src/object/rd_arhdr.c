@@ -21,7 +21,7 @@ rd_arhdr(fd, arhdr)
 
 		i = read(fd, c, AR_TOTAL);
 		if (i == 0) return 0;
-		if (i < 0 || i != AR_TOTAL) {
+		if (i != AR_TOTAL) {
 			rd_fatal();
 		}
 		i = 14;
@@ -41,7 +41,7 @@ rd_arhdr(fd, arhdr)
 		register int i;
 		i = read(fd, (char *) arhdr, AR_TOTAL);
 		if (i == 0) return 0;
-		if (i < 0 || i != AR_TOTAL) rd_fatal();
+		if (i != AR_TOTAL) rd_fatal();
 	}
 #endif
 	return 1;
