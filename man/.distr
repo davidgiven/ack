@@ -17,4 +17,4 @@ libpc.7
 head
 pc_prlib.7
 uni_ass.6
-Makefile
+proto.make
