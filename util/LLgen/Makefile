@@ -19,6 +19,9 @@ cmp:
 	-cmp lib/rec $(LIBDIR)/rec
 	-cmp lib/incl $(LIBDIR)/incl
 
+distr:
+	cd src; make distr
+
 opr:
 	make pr | opr
 
