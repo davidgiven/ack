@@ -1,4 +1,9 @@
 .define .cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Convert integer to integer
 ! Expects in a-reg:	1 for signed integer to signed integer (cii)

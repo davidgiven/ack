@@ -1,4 +1,9 @@
 .define .mli2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !  16 bits signed integer multiply
 !  the algorithm multiples A * B, where A = A0*2^8 + A1 and B = B0*2^8 + B1

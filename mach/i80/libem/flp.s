@@ -3,6 +3,11 @@
 .define .zrf4,.zrf8
 .define .cfi,.cif,.cuf,.cff,.cfu
 .define .cmf4,.cmf8
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Floating point is not implemented
 

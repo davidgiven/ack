@@ -1,4 +1,9 @@
 .define .dup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Duplicate top bytes of stack
 ! Expects in de-registers: number of bytes to duplicate

@@ -1,4 +1,9 @@
 .define .dvi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 32 bits integer divide and remainder routine
 ! Bit 0 of a-reg is set iff quotient has to be delivered

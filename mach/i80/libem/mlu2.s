@@ -1,4 +1,9 @@
 .define .mlu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 16 bits unsigned multiply routine
 ! Expects operands on stack

@@ -1,4 +1,9 @@
 .define .ror4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Rotate 4 bytes right
 ! Expects in de-reg:	number of rotates

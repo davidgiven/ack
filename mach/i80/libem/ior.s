@@ -1,4 +1,9 @@
 .define .ior
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 
 ! Any size inclusive-or.

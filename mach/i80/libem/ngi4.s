@@ -1,4 +1,9 @@
 .define .ngi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Exchange 32 bits integer by its two's complement
 ! Expects operand on stack

@@ -1,4 +1,9 @@
 .define .sbi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Subtract two 32 bits signed or unsigned integers.
 ! Expects operands on stack

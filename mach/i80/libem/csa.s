@@ -1,4 +1,9 @@
 .define .csa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Case jump
 ! Expects on stack:	address of case descriptor

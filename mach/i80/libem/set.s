@@ -1,4 +1,9 @@
 .define .set
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Create set with one bit on
 ! Expects in de-reg:	size of set to be created

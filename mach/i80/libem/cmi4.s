@@ -1,4 +1,9 @@
 .define .cmi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Compare 32 bits integers
 ! Expects:	operands on stack

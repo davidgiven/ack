@@ -1,4 +1,9 @@
 .define .nop
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 .nop:	push b
 	lhld hol0+4

@@ -1,4 +1,9 @@
 .define .sar2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Store array element, descriptor contains 2-bytes integers
 ! Expects on stack:	pointer to array descriptor

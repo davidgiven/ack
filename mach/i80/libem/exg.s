@@ -1,4 +1,9 @@
 .define .exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Exchange top bytes of stack
 ! Expects in de-registers the number of bytes to be exchanged.

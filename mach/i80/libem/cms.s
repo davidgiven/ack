@@ -1,4 +1,9 @@
 .define .cms
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Any size compare
 ! Expects:	size in de-registers

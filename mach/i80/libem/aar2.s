@@ -1,4 +1,9 @@
 .define .aar2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Load address of array element, decriptor contains 2-bytes integers
 ! Expects on stack:	pointer to array descriptor

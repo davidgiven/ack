@@ -1,4 +1,9 @@
 .define .csb
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Table lookup jump
 ! Expects on stack:	address of case descriptor

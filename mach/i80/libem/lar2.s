@@ -1,4 +1,9 @@
 .define .lar2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Load array element, descriptor contains 2-bytes integers
 ! Expects on stack:	pointer to array descriptor

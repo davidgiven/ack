@@ -1,4 +1,9 @@
 .define .mli4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 32 bits signed and unsigned integer multiply routine
 ! Expects operands on stack

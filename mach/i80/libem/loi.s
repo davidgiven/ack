@@ -1,4 +1,9 @@
 .define .loi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Load indirect
 ! Expects in de-registers: number of bytes to be loaded

@@ -1,5 +1,10 @@
-
 .define .dvi2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+
 
 ! 16 bits signed and unsigned integer divide and remainder routine
 ! Bit 0 of a-reg is set iff quotient has to be delivered

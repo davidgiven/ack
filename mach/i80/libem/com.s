@@ -1,4 +1,9 @@
 .define .com
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Complement bytes on top of stack.
 ! Expects in de-registers: number of bytes

@@ -1,4 +1,9 @@
 .define .set2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Create 16 bits set with one bit on
 ! Expects in de-reg:	bit number

@@ -1,4 +1,9 @@
 .define .sti
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Store indirect
 ! Expects on stack:	number of bytes to be stored

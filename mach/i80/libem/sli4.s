@@ -1,4 +1,9 @@
 .define .sli4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Shift 32 bits integer left
 ! Expects on stack:	number of shifts

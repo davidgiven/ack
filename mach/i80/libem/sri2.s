@@ -1,4 +1,9 @@
 .define .sri2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Shift 16 bits signed or unsigned integer right
 ! Expects in a-reg.:	1 if signed integer

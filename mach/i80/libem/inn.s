@@ -1,4 +1,9 @@
 .define .inn
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Any size bit test on set.
 ! Expects in de-reg:	size of set (in bytes)

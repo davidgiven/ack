@@ -1,4 +1,9 @@
 .define .adi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Add two 32 bits signed or unsigned integers
 ! Expects on stack: operands

@@ -1,4 +1,9 @@
 .define .rck
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Range check
 ! Expects on stack: address of range check descriptor

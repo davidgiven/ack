@@ -1,4 +1,9 @@
 .define .blm
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Block move
 ! Expects in de-reg:	size of block
