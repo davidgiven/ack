@@ -6,10 +6,11 @@
 
 /* This file contains the routine assemble(). Assemble() cuts an
  * assembly instruction in a label, a mnemonic and several operands.
- * For a label and operands it calls table writer defined routines, 
- * process_label() and process_operand(), to give the table writer 
- * the oppurtunity to do something special. At the end assemble() calls
- * the routine belonging to the mnemonic with the supplied operands.
+ * For a mnemonic,label and operands it calls table writer defined 
+ * routines, process_mnemonic() * process_label() and process_operand(), 
+ * to give the table writer the oppurtunity to do something special.
+ * At the end assemble() calls the routine belonging to the mnemonic 
+ * with the supplied operands.
  *     If the table writer has other expectations of assemble() he should
  * write his own version.
  * 	Assemble parser the following instructions :
@@ -169,7 +170,7 @@ char *match_ch( c, str, instr)
 char *skip_string( ptr)
 	char *ptr;
 {
-	while  ( isalnum( *ptr) || ( *ptr == '_'))
+	while  ( isalnum( *ptr) && !isspace( *ptr) && *ptr != ':')
 		ptr++;
 	return( ptr);
 }
