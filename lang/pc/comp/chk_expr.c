@@ -1045,6 +1045,7 @@ ChkStandard(expp,left)
 
 	    case R_EOF:
 	    case R_EOLN:
+	    case R_GET:
 	    case R_PAGE:	{
 		int st_out;
 
@@ -1053,8 +1054,11 @@ ChkStandard(expp,left)
 			st_out = 1;
 		}
 		else	{
-			expp->nd_type = bool_type;
 			st_out = 0;
+			if (req == R_GET) {
+				expp->nd_type = NULLTYPE;
+			}
+			else	expp->nd_type = bool_type;
 		}
 		if( !arg->nd_right )	{
 			struct node *nd;
@@ -1069,7 +1073,8 @@ ChkStandard(expp,left)
 		else	{
 			if( !(left = getarg(&arg, T_FILE, 1, name, NULLTYPE)) )
 				return 0;
-			if( req != R_EOF && left->nd_type != text_type ) {
+			if( (req == R_PAGE || req == R_EOLN)
+			    && left->nd_type != text_type ) {
 				Xerror(name, "textfile expected");
 				return 0;
 			}
@@ -1080,7 +1085,6 @@ ChkStandard(expp,left)
 	    case R_REWRITE:
 	    case R_PUT:
 	    case R_RESET:
-	    case R_GET:
 		if( !(left = getarg(&arg, T_FILE, 1, name, NULLTYPE)) )
 			return 0;
 		expp->nd_type = NULLTYPE;
