@@ -223,9 +223,9 @@ void bxx(pos, op, L) register pos, op, L;
 		if (pos && (i+=3)>=6) i-=6;
 		if (vz>wz) {
 			C_cmi((arith) vz);
-			(C_zxx[i])((label) L);
+			(*C_zxx[i])((label) L);
 		} else {
-			(C_bxx[i])((label) L);
+			(*C_bxx[i])((label) L);
 		}
 	}
 }
@@ -236,7 +236,7 @@ void Txx(op) register int op;
 
 	for (i=0; operators[i]!=op; i++) ;
 
-	(C_txx[i])();
+	(*C_txx[i])();
 	cwv();
 	C_ngi((arith) vz);
 }
@@ -251,7 +251,7 @@ void xxi(op) register op;
 
 	for (i=0; operators[i]!=op; i++) ;
 
-	(C_xxi[i])((arith) vz);
+	(*C_xxi[i])((arith) vz);
 }
 
 void aar()			{	C_aar((arith) wz); }
