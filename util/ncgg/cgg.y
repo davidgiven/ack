@@ -1016,7 +1016,7 @@ expr
 	| ROM '(' emarg ',' NUMBER ')'
 		{ $$ = make_expr(TYPINT,EX_ROM,$3-1,chkincl($5,1,3)-1); }
 	| ISROM '(' emarg ')'
-		{ $$ = make_expr(TYPINT,EX_ISROM,$3-1,0); }
+		{ $$ = make_expr(TYPBOOL,EX_ISROM,$3-1,0); }
 	| LOWW '(' emarg ')'
 		{ $$ = make_expr(TYPINT,EX_LOWW,$3-1,0); }
 	| HIGHW '(' emarg ')'
