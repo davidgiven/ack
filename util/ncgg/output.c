@@ -716,7 +716,7 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			code53(DO_REMOVE,0);
 			codeint(vp->vi_int[0]);
 		} else {
-			code8(DO_RREMOVE);
+			code8(DO_KILLREG);
 			codeint(-vp->vi_int[0] - 1);
 		}
 		codenl();

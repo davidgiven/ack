@@ -482,12 +482,14 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			rp->r_contents.t_token=0;
 	break;
     }
+    case DO_KILLREG:
     case DO_RREMOVE: {	/* register remove */
 	register i;
 	int nodeno;
 	token_p tp;
 	tkdef_p tdp;
 	result_t result;
+	int dokill = (codep[-1] & 037) == DO_KILLREG;
 
 	DEBUG("RREMOVE");
 	getint(nodeno,codep);
@@ -495,6 +497,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	if (result.e_typ!=EV_REG)
 		break;
 	if ( in_stack(result.e_v.e_reg) ) BROKE() ; /* Check aside-stack */
+	if (dokill) machregs[result.e_v.e_reg].r_contents.t_token = 0;
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (tp->t_token==-1) {
 			if(tp->t_att[0].ar==result.e_v.e_reg)
