@@ -1,6 +1,6 @@
 tested:		last
 	set -x ;\
-		for i in `awk '{for(i=\$$1;i<=127;i++)print i}' last ` ;\
+		for i in `awk '{for(i=\$$1;i<=151;i++)print i}' last ` ;\
 		do \
 		  echo $$i; \
 		  echo $$i >last; \

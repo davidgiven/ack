@@ -3840,9 +3840,9 @@ OK
  bne *1
 OK
 #endif
-#ifdef W2S
 TEST 133: test adu W2S
 MAIN 0
+#ifdef W2S
  ldc 1
  ldc 1
  adu W2S
@@ -3865,6 +3865,7 @@ OK
  cmu W2S
  zne *1
 OK
+#endif
 #endif
 TEST 134: test sbu W2S
 MAIN 0
@@ -3952,6 +3953,7 @@ OK
 #endif
 TEST 137: test rmu W2S
 MAIN 0
+#ifdef W2S
  ldc 15
  ldc 5
  rmu W2S
