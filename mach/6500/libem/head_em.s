@@ -8,6 +8,7 @@
 .define Ytmp, EXG, ARTH, RETURN, SIGN
 .define RETSIZE, TRAPVAL, STACK, BRANCH
 .define start, Push, Pop, STACKTh, STACKTl
+.define F_DUM
 
 ! DEFINITIONS
 
@@ -20,6 +21,8 @@ RDCH	= 0FFE0h	! This subroutine returns a character in
 			! register A from the current input stream
 OSBYTE	= 0FFF4h	! This subroutine performs miscelaneous
 			! operating system calls
+
+F_DUM	= 0		! Dummy floating point constant
 
 	! Here are the error numbers
 
