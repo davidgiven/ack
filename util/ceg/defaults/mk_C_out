@@ -1,5 +1,5 @@
 trap "rm -f tmp$$"  0 1 2 3 15
-cp C_out_skel.c tmp$$
+cp $1 tmp$$
 ed - tmp$$ <<'EOF'
 /^#include "C_mnem_narg"/d
 .-1r C_mnem_narg

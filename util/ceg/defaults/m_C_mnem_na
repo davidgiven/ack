@@ -1,5 +1,6 @@
-EM_TABLE=../../../etc/em_table
-list=`./argtype w $EM_TABLE`
+EM_TABLE=$1
+argtype=$2
+list=`$argtype w $EM_TABLE`
 echo "switch(p->em_opcode) {"
 for i in $list
 do
