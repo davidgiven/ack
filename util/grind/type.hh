@@ -63,9 +63,12 @@ typedef struct type {
 #define ty_fileof	ty_v.typ_ptrto
      /* arrays: */
      struct {
+	long typ_lb, typ_hb;
 	struct type *typ_index;
 	struct type *typ_elements;
      } ty_array;
+#define ty_lb		ty_v.ty_array.typ_lb
+#define ty_hb		ty_v.ty_array.typ_hb
 #define ty_index	ty_v.ty_array.typ_index
 #define ty_elements	ty_v.ty_array.typ_elements
      /* subranges: */
@@ -115,5 +118,5 @@ extern long
 extern p_type	char_type, uchar_type, bool_type, int_type,
 		long_type, double_type, string_type;
 extern p_type	void_type, incomplete_type;
-extern long	int_size;
+extern long	int_size, pointer_size;
 

@@ -177,6 +177,25 @@ array_type(bound_type, el_type)
 
   tp->ty_class = T_ARRAY;
   tp->ty_index = bound_type;
+  switch(bound_type->ty_class) {
+  case T_SUBRANGE:
+	if (bound_type->ty_A) break;
+	tp->ty_lb = bound_type->ty_low;
+	tp->ty_hb = bound_type->ty_up;
+	break;
+  case T_ENUM:
+	tp->ty_lb = 0;
+	tp->ty_hb = bound_type->ty_nenums-1;
+	break;
+  case T_UNSIGNED:
+	tp->ty_lb = 0;
+	tp->ty_hb = bound_type->ty_size == 1 ? 255 : 65535L;
+	break;
+  case T_INTEGER:
+	tp->ty_lb = bound_type->ty_size == 1 ? -128 : -32768;
+	tp->ty_hb = bound_type->ty_size == 1 ? 127 : 32767;
+	break;
+  }
   tp->ty_elements = el_type;
   tp->ty_size = (*currlang->arrayelsize)(el_type->ty_size) * nel(bound_type);
   return tp;
@@ -384,8 +403,10 @@ compute_size(tp, AB)
   if (tp->ty_index->ty_A & 1) {
 	low = BUFTOI(AB+tp->ty_index->ty_low);
   } else low = tp->ty_index->ty_low;
+  tp->ty_lb = low;
   if (tp->ty_index->ty_A & 2) {
 	high = BUFTOI(AB+tp->ty_index->ty_up);
   } else high = tp->ty_index->ty_up;
+  tp->ty_hb = high;
   return (high - low + 1) * tp->ty_elements->ty_size;
 }

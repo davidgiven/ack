@@ -29,3 +29,7 @@
 #define E_BAND	21		/* bitwise and */
 #define E_BOR	22		/* bitwise or */
 #define E_BXOR	23
+#define E_BNOT	24
+#define E_DERSELECT 25		/* -> in C */
+#define E_LSFT	26
+#define E_RSFT	27

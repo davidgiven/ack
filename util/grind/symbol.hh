@@ -1,5 +1,6 @@
-/* $Header$
-   Symbol table data structure.
+/* $Header$ */
+
+/* Symbol table data structure.
    Each identifier structure refers to a list of possible meanings of this
    identifier. Each of these meanings is represented by a "symbol" structure.
 */
@@ -39,14 +40,12 @@ typedef struct symbol {
   union {
 	t_const	syv_const;	/* CONST */
 	t_name	syv_name;
-/*	struct outname syv_onam;	/* for non-dbx entries */
 	struct file *syv_file;		/* for FILESYM */
 	struct symbol *syv_fllink;	/* for FILELINK */
 	struct fields *syv_field;
   }	sy_v;
 #define sy_const	sy_v.syv_const
 #define sy_name		sy_v.syv_name
-#define sy_onam		sy_v.syv_onam
 #define sy_file		sy_v.syv_file
 #define sy_filelink	sy_v.syv_fllink
 #define sy_field	sy_v.syv_field
@@ -54,7 +53,7 @@ typedef struct symbol {
 
 /* ALLOCDEF "symbol" 50 */
 
-extern p_symbol	NewSymbol(), Lookup(), Lookfor(), Lookfromscope(), add_file();
+extern p_symbol	NewSymbol(), Lookup(), Lookfromscope(), add_file();
 extern p_symbol identify();
 
 extern p_symbol	currfile;

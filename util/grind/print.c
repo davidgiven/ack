@@ -40,7 +40,7 @@ print_unsigned(tp, v)
   long		v;
 {
   if (tp == uchar_type) {
-	fprintf(db_out, currlang->char_fmt, (int) v);
+	(*currlang->printchar)((int) v);
   }
   else	fprintf(db_out, currlang->uns_fmt, v);
 }
@@ -51,7 +51,7 @@ print_integer(tp, v)
   long		v;
 {
   if (tp == char_type) {
-	fprintf(db_out, currlang->char_fmt, (int) v);
+	(*currlang->printchar)((int) v);
   }
   else	fprintf(db_out, currlang->decint_fmt, v);
 }
@@ -300,21 +300,4 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	assert(0);
 	break;
   }
-}
-
-int
-print_sym(sym)
-  p_symbol	sym;
-{
-  char		*buf;
-  long		size;
-
-  if (get_value(sym, &buf, &size)) {
-	fputs(" = ", db_out);
-	print_val(sym->sy_type, size, buf, 0, 0);
-	if (buf) free(buf);
-	fputs("\n", db_out);
-	return 1;
-  }
-  return 0;
 }

@@ -1,5 +1,33 @@
 /* $Header$ */
 
+/* This file contains the expression evaluator. It exports four routines:
+   - int eval_cond(p_tree p)
+	This routine evaluates the conditional expression indicated by p
+	and returns 1 if it evaluates to TRUE, or 0 if it could not be
+	evaluated for some reason or if it evalutes to FALSE.
+	If the expression cannot be evaluated, an error message is given.
+   - int eval_desig(p_tree p, t_addr *pbuf, long **psize, p_type *ptp)
+	This routine evaluates the expression indicated by p, which should
+	result in a designator. The result of the expression is an address
+	which is to be found in *pbuf. *psize will contain the size of the
+	designated object, and *ptp its type.
+	If the expression cannot be evaluated or does not result in a
+	designator, 0 is returned and an error message is given.
+	Otherwise, 1 is returned.
+   - int eval_expr(p_tree p, char **pbuf, long **psize, p_type *ptp)
+	This routine evaluates the expression indicated by p.
+	The result of the expression is left in *pbuf.
+	*psize will contain the size of the value, and *ptp its type.
+	If the expression cannot be evaluated, 0 is returned and an error
+	message is given.  Otherwise, 1 is returned.
+   - int convert(char **pbuf, long *psize, p_type *ptp, p_type tp, long size)
+	This routine tries to convert the value in pbuf of size psize
+	and type ptp to type tp with size size. It returns 0 if this fails,
+	while producing an error message. Otherwise, it returns 1 and
+	the resulting value, type and size are left in pbuf, ptp, and
+	psize, respectively.
+*/
+
 #include <stdio.h>
 #include <alloc.h>
 #include <assert.h>
@@ -14,6 +42,8 @@
 
 extern FILE	*db_out;
 
+/* buffer to integer and vice versa routines */
+
 static long
 get_int(buf, size, class)
   char	*buf;
@@ -22,12 +52,12 @@ get_int(buf, size, class)
   long l;
 
   switch((int)size) {
-  case 1:
+  case sizeof(char):
 	l = *buf;
 	if (class == T_INTEGER && l >= 0x7F) l -= 256;
 	else if (class != T_INTEGER && l < 0) l += 256;
 	break;
-  case 2:
+  case sizeof(short):
 	l = *((short *) buf);
 	if (class == T_INTEGER && l >= 0x7FFF) l -= 65536;
 	else if (class != T_INTEGER && l < 0) l += 65536;
@@ -37,6 +67,28 @@ get_int(buf, size, class)
   }
   return l;
 }
+
+static
+put_int(buf, size, value)
+  char	*buf;
+  long	size;
+  long	value;
+{
+  switch((int)size) {
+  case sizeof(char):
+	*buf = value;
+	break;
+  case sizeof(short):
+	*((short *) buf) = value;
+	break;
+  default:
+	*((long *) buf) = value;
+	break;
+  }
+  /*NOTREACHED*/
+}
+
+/* buffer to real and vice versa routines */
 
 static double
 get_real(buf, size)
@@ -50,26 +102,6 @@ get_real(buf, size)
 	return *((double *) buf);
   }
   /*NOTREACHED*/
-}
-
-static
-put_int(buf, size, value)
-  char	*buf;
-  long	size;
-  long	value;
-{
-  switch((int)size) {
-  case 1:
-	*buf = value;
-	break;
-  case 2:
-	*((short *) buf) = value;
-	break;
-  default:
-	*((long *) buf) = value;
-	break;
-  }
-  /* NOTREACHED */
 }
 
 static
@@ -89,19 +121,24 @@ put_real(buf, size, value)
   /* NOTREACHED */
 }
 
-static int
-convert(pbuf, psize, ptp, tp)
+int
+convert(pbuf, psize, ptp, tp, size)
   char	**pbuf;
   long	*psize;
   p_type *ptp;
   p_type tp;
+  long size;
 {
+  /* Convert the value in pbuf, of size psize and type ptp, to type
+     tp and leave the resulting value in pbuf, the resulting size
+     in psize, and the resulting type in ptp.
+  */
   long	l;
   double d;
 
   if (*ptp == tp) return 1;
-  if (tp->ty_size > *psize) {
-	*pbuf = Realloc(*pbuf, (unsigned int) tp->ty_size);
+  if (size > *psize) {
+	*pbuf = Realloc(*pbuf, (unsigned int) size);
   }
   if ((*ptp)->ty_class == T_SUBRANGE) *ptp = (*ptp)->ty_base;
   switch((*ptp)->ty_class) {
@@ -117,17 +154,17 @@ convert(pbuf, psize, ptp, tp)
   	case T_UNSIGNED:
   	case T_POINTER:
   	case T_ENUM:
-		put_int(*pbuf, tp->ty_size, l);
-		*psize = tp->ty_size;
+		put_int(*pbuf, size, l);
+		*psize = size;
 		*ptp = tp;
 		return 1;
 	case T_REAL:
 		put_real(*pbuf,
-			 tp->ty_size,
+			 size,
 			 (*ptp)->ty_class == T_INTEGER 
 				? (double) l
 				: (double) (unsigned long) l);
-		*psize = tp->ty_size;
+		*psize = size;
 		*ptp = tp;
 		return 1;
 	default:
@@ -142,14 +179,14 @@ convert(pbuf, psize, ptp, tp)
   	case T_INTEGER:
   	case T_UNSIGNED:
   	case T_POINTER:
-		if (tp == bool_type) put_int(*pbuf, tp->ty_size, (long) (d != 0));
-		else put_int(*pbuf, tp->ty_size, (long) d);
-		*psize = tp->ty_size;
+		if (tp == bool_type) put_int(*pbuf, size, (long) (d != 0));
+		else put_int(*pbuf, size, (long) d);
+		*psize = size;
 		*ptp = tp;
 		return 1;
 	case T_REAL:
-		put_real(*pbuf, tp->ty_size, d);
-		*psize = tp->ty_size;
+		put_real(*pbuf, size, d);
+		*psize = size;
 		*ptp = tp;
 		return 1;
 	default:
@@ -171,9 +208,10 @@ eval_cond(p)
   long	size;
   p_type tp;
   long val;
+  p_type target_tp = currlang->has_bool_type ? bool_type : int_type;
 
   if (eval_expr(p, &buf, &size, &tp)) {
-	if (convert(&buf, &size, &tp, currlang->has_bool_type ? bool_type : int_type)) {
+	if (convert(&buf, &size, &tp, target_tp, target_tp->ty_size)) {
 		val = get_int(buf, size, T_UNSIGNED);
 		if (buf) free(buf);
 		return (int) (val != 0);
@@ -183,6 +221,8 @@ eval_cond(p)
   return 0;
 }
 
+/* one routine for each unary operator */
+
 static int
 do_not(p, pbuf, psize, ptp)
   p_tree	p;
@@ -190,10 +230,60 @@ do_not(p, pbuf, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
+  p_type target_tp = currlang->has_bool_type ? bool_type : int_type;
+
   if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
-      convert(pbuf, psize, ptp, currlang->has_bool_type ? bool_type : int_type)) {
+      convert(pbuf, psize, ptp, target_tp, target_tp->ty_size)) {
 	put_int(*pbuf, *psize, (long) !get_int(*pbuf, *psize, T_UNSIGNED));
 	return 1;
+  }
+  return 0;
+}
+
+static int
+do_bnot(p, pbuf, psize, ptp)
+  p_tree	p;
+  char		**pbuf;
+  long		*psize;
+  p_type	*ptp;
+{
+  if (eval_expr(p->t_args[0], pbuf, psize, ptp)) {
+	switch((*ptp)->ty_class) {
+	case T_INTEGER:
+	case T_ENUM:
+	case T_UNSIGNED:
+	case T_SUBRANGE:
+		put_int(*pbuf, *psize, ~get_int(*pbuf, *psize, T_UNSIGNED));
+		return 1;
+	default:
+		error("illegal operand type(s)");
+		break;
+	}
+  }
+  return 0;
+}
+
+static int
+ptr_addr(p, paddr, psize, ptp)
+  p_tree	p;
+  t_addr	*paddr;
+  long		*psize;
+  p_type	*ptp;
+{
+  char	*buf;
+
+  if (eval_expr(p->t_args[0], &buf, psize, ptp)) {
+	switch((*ptp)->ty_class) {
+	case T_POINTER:
+		*ptp = (*ptp)->ty_ptrto;
+		*psize = (*ptp)->ty_size;
+		*paddr = get_int(buf, pointer_size, T_UNSIGNED);
+		free(buf);
+		return 1;
+  	default:
+		error("illegal operand of DEREF");
+		break;
+	}
   }
   return 0;
 }
@@ -205,25 +295,14 @@ do_deref(p, pbuf, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
-  char	*addr;
+  t_addr addr;
 
-  if (eval_expr(p->t_args[0], pbuf, psize, ptp)) {
-	switch((*ptp)->ty_class) {
-	case T_POINTER:
-		addr = *((char **) (*pbuf));
-		free(*pbuf);
-		*ptp = (*ptp)->ty_ptrto;
-		*psize = (*ptp)->ty_size;
-		*pbuf = Malloc((unsigned) (*ptp)->ty_size);
-		if (! get_bytes(*psize, (t_addr) addr, *pbuf)) {
-			error("could not get value");
-			break;
-		}
-		return 1;
-  	default:
-		error("illegal operand of DEREF");
-		break;
+  if (ptr_addr(p, &addr, psize, ptp)) {
+	*pbuf = Malloc((unsigned) *psize);
+	if (! get_bytes(*psize, addr, *pbuf)) {
+		error("could not get value");
 	}
+	return 1;
   }
   return 0;
 }
@@ -300,6 +379,9 @@ static int (*un_op[])() = {
   0,
   0,
   0,
+  0,
+  0,
+  do_bnot,
   0,
   0
 };
@@ -389,11 +471,12 @@ do_andor(p, pbuf, psize, ptp)
   char		*buf;
   long		size;
   p_type	tp;
+  p_type	target_tp = currlang->has_bool_type ? bool_type : int_type;
 
   if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
-      convert(pbuf, psize, ptp, currlang->has_bool_type ? bool_type : int_type) &&
+      convert(pbuf, psize, ptp, target_tp, target_tp->ty_size) &&
       eval_expr(p->t_args[1], &buf, &size, &tp) &&
-      convert(&buf, &size, &tp, currlang->has_bool_type ? bool_type : int_type)) {
+      convert(&buf, &size, &tp, target_tp, target_tp->ty_size)) {
 	l1 = get_int(*pbuf, *psize, T_UNSIGNED);
 	l2 = get_int(buf, size, T_UNSIGNED);
 	put_int(*pbuf,
@@ -424,8 +507,8 @@ do_arith(p, pbuf, psize, ptp)
   if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
       eval_expr(p->t_args[1], &buf, &size, &tp) &&
       (balance_tp = balance(*ptp, tp)) &&
-      convert(pbuf, psize, ptp, balance_tp) &&
-      convert(&buf, &size, &tp, balance_tp)) {
+      convert(pbuf, psize, ptp, balance_tp, balance_tp->ty_size) &&
+      convert(&buf, &size, &tp, balance_tp, balance_tp->ty_size)) {
 	switch(balance_tp->ty_class) {
 	case T_INTEGER:
 	case T_ENUM:
@@ -538,6 +621,54 @@ do_arith(p, pbuf, psize, ptp)
 }
 
 static int
+do_sft(p, pbuf, psize, ptp)
+  p_tree	p;
+  char		**pbuf;
+  long		*psize;
+  p_type	*ptp;
+{
+  long		l1, l2;
+  char		*buf = 0;
+  long		size;
+  p_type	tp;
+
+  if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
+      eval_expr(p->t_args[1], &buf, &size, &tp) &&
+      convert(&buf, &size, &tp, int_type, int_size)) {
+	tp = *ptp;
+	if (tp->ty_class == T_SUBRANGE) {
+		tp = tp->ty_base;
+	}
+	switch(tp->ty_class) {
+	case T_INTEGER:
+	case T_ENUM:
+	case T_UNSIGNED:
+		l1 = get_int(*pbuf, *psize, tp->ty_class);
+		l2 = get_int(buf, size, T_INTEGER);
+		free(buf);
+		buf = 0;
+		switch(p->t_whichoper) {
+		case E_LSFT:
+			l1 <<= (int) l2;
+			break;
+		case E_RSFT:
+			if (tp->ty_class == T_INTEGER) l1 >>= (int) l2;
+			else l1 = (unsigned long) l1 >> (int) l2;
+			break;
+		}
+		break;
+	default:
+		error("illegal operand type(s)");
+		free(buf);
+		return 0;
+	}
+	return 1;
+  }
+  if (buf) free(buf);
+  return 0;
+}
+
+static int
 do_cmp(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
@@ -553,8 +684,8 @@ do_cmp(p, pbuf, psize, ptp)
   if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
       eval_expr(p->t_args[1], &buf, &size, &tp) &&
       (balance_tp = balance(*ptp, tp)) &&
-      convert(pbuf, psize, ptp, balance_tp) &&
-      convert(&buf, &size, &tp, balance_tp)) {
+      convert(pbuf, psize, ptp, balance_tp, balance_tp->ty_size) &&
+      convert(&buf, &size, &tp, balance_tp, balance_tp->ty_size)) {
 	switch(balance_tp->ty_class) {
 	case T_INTEGER:
 	case T_ENUM:
@@ -665,7 +796,7 @@ do_in(p, pbuf, psize, ptp)
 		free(buf);
 		return 0;
 	}
-	if (! convert(pbuf, psize, ptp, tp->ty_setbase)) {
+	if (! convert(pbuf, psize, ptp, tp->ty_setbase, int_size)) {
 		free(buf);
 		return 0;
 	}
@@ -684,9 +815,9 @@ do_in(p, pbuf, psize, ptp)
 }
 
 static int
-do_array(p, pbuf, psize, ptp)
+array_addr(p, paddr, psize, ptp)
   p_tree	p;
-  char		**pbuf;
+  t_addr	*paddr;
   long		*psize;
   p_type	*ptp;
 {
@@ -695,7 +826,94 @@ do_array(p, pbuf, psize, ptp)
   long		size;
   p_type	tp;
 
-  error("[ not implemented"); 	/* ??? */
+  if (eval_desig(p->t_args[0], paddr, psize, ptp) &&
+      eval_expr(p->t_args[1], &buf, &size, &tp)) {
+	if ((*ptp)->ty_class != T_ARRAY && (*ptp)->ty_class != T_POINTER) {
+		error("illegal left-hand side of [");
+		free(buf);
+		return 0;
+	}
+	if (! convert(&buf, &size, &tp, int_type, int_size)) {
+		free(buf);
+		return 0;
+	}
+	l = get_int(buf, size, T_INTEGER);
+	free(buf);
+	buf = 0;
+	if ((*ptp)->ty_class == T_ARRAY) {
+	    	if (l < (*ptp)->ty_lb || l > (*ptp)->ty_hb) {
+			error("array bound error");
+			return 0;
+		}
+		l -= (*ptp)->ty_lb;
+		*ptp = (*ptp)->ty_elements;
+		l *= (*currlang->arrayelsize)((*ptp)->ty_size);
+	}
+	else {
+		*ptp = (*ptp)->ty_ptrto;
+		l *= (*ptp)->ty_size;
+	}
+	*psize = (*ptp)->ty_size;
+	*paddr += l;
+	return 1;
+  }
+  return 0;
+}
+
+static int
+do_array(p, pbuf, psize, ptp)
+  p_tree	p;
+  char		**pbuf;
+  long		*psize;
+  p_type	*ptp;
+{
+  t_addr	a;
+
+  if (array_addr(p, &a, psize, ptp)) {
+	*pbuf = Malloc((unsigned int) *psize);
+	if (! get_bytes(*psize, a, *pbuf)) {
+		return 0;
+	}
+	return 1;
+  }
+  return 0;
+}
+
+static int
+select_addr(p, paddr, psize, ptp)
+  p_tree	p;
+  t_addr	*paddr;
+  long		*psize;
+  p_type	*ptp;
+{
+  register p_type	tp;
+  register struct fields *f;
+  register int		nf;
+
+  if (eval_desig(p->t_args[0], paddr, psize, ptp)) {
+	tp = *ptp;
+	if (tp->ty_class != T_STRUCT && tp->ty_class != T_UNION) {
+		error("SELECT on non-struct");
+		return 0;
+	}
+	if (p->t_args[1]->t_oper != OP_NAME) {
+		error("right-hand side of SELECT not a name");
+		return 0;
+	}
+	for (nf = tp->ty_nfields, f = tp->ty_fields; nf; nf--, f++) {
+		if (! strcmp(f->fld_name, p->t_args[1]->t_str)) break;
+	}
+	if (! nf) {
+		error("'%s' not found", p->t_args[1]->t_str);
+		return 0;
+	}
+	
+	/* ??? this needs some work for bitfields ??? */
+	*paddr += f->fld_pos>>3;
+	*psize = f->fld_bitsize >> 3;
+	*ptp = f->fld_type;
+	return 1;
+  }
   return 0;
 }
 
@@ -706,12 +924,14 @@ do_select(p, pbuf, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
-  long		l;
-  char		*buf = 0;
-  long		size;
-  p_type	tp;
-
-  error("SELECT not implemented"); 	/* ??? */
+  t_addr	a;
+  if (select_addr(p, &a, psize, ptp)) {
+	*pbuf = Malloc((unsigned int) *psize);
+	if (! get_bytes(*psize, a, *pbuf)) {
+		return 0;
+	}
+	return 1;
+  }
   return 0;
 }
 
@@ -739,7 +959,10 @@ static int (*bin_op[])() = {
   do_select,
   do_arith,
   do_arith,
-  do_arith
+  do_arith,
+  0,
+  do_sft,
+  do_sft
 };
 
 int
@@ -806,6 +1029,76 @@ eval_expr(p, pbuf, psize, ptp)
 		free(*pbuf);
 		*pbuf = 0;
 	}
+	*psize = 0;
+  }
+  return retval;
+}
+
+extern t_addr	get_addr();
+
+int
+eval_desig(p, paddr, psize, ptp)
+  p_tree	p;
+  t_addr	*paddr;
+  long		*psize;
+  p_type	*ptp;
+{
+  register p_symbol	sym;
+  int	retval = 0;
+  t_addr a;
+
+  switch(p->t_oper) {
+  case OP_NAME:
+  case OP_SELECT:
+	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR);
+	if (! sym) return 0;
+	if (! (a = get_addr(sym, psize))) {
+		print_node(p, 0);
+		fputs(" currently not available\n", db_out);
+		break;
+	}
+	*paddr = a;
+	*ptp = sym->sy_type;
+	retval = 1;
+	break;
+
+  case OP_UNOP:
+	switch(p->t_whichoper) {
+	case E_DEREF:
+		if (ptr_addr(p, paddr, psize, ptp)) {
+			retval = 1;
+		}
+		break;
+	default:
+		print_node(p, 0);
+		fputs(" not a designator\n", db_out);
+		break;
+	}
+	break;
+
+  case OP_BINOP:
+	switch(p->t_whichoper) {
+	case E_ARRAY:
+		if (array_addr(p, paddr, psize, ptp)) {
+			retval = 1;
+		}
+		break;
+	case E_SELECT:
+		if (select_addr(p, paddr, psize, ptp)) {
+			retval = 1;
+		}
+		break;
+	default:
+		print_node(p, 0);
+		fputs(" not a designator\n", db_out);
+		break;
+	}
+	break;
+  default:
+	assert(0);
+	break;
+  }
+  if (! retval) {
 	*psize = 0;
   }
   return retval;

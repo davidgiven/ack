@@ -23,12 +23,14 @@ extern double
 
 static int
 	print_string(),
+	print_char(),
 	get_number(),
 	get_name(),
 	get_token(),
 	get_string(),
 	print_op(),
-	op_prio();
+	binop_prio(),
+	unop_prio();
 
 static long
 	array_elsize();
@@ -41,8 +43,7 @@ static struct langdep m2 = {
 	"%lXH",
 	"%lu",
 	"%lXH",
-	"%g",
-	"%oC",
+	"%G",
 
 	"[",
 	"]",
@@ -52,8 +53,10 @@ static struct langdep m2 = {
 	"}",
 
 	print_string,
+	print_char,
 	array_elsize,
-	op_prio,
+	binop_prio,
+	unop_prio,
 	get_string,
 	get_name,
 	get_number,
@@ -62,6 +65,13 @@ static struct langdep m2 = {
 };
 
 struct langdep *m2_dep = &m2;
+
+static int
+print_char(c)
+  int	c;
+{
+  fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "%oC", c);
+}
 
 static int
 print_string(s, len)
@@ -89,16 +99,26 @@ array_elsize(size)
 }
 
 static int
-op_prio(op)
+unop_prio(op)
   int	op;
 {
   switch(op) {
   case E_NOT:
   	return 5;
-
+  case E_MIN:
+  case E_PLUS:
+	return 3;
   case E_SELECT:
 	return 9;
+  }
+  return 1;
+}
 
+static int
+binop_prio(op)
+  int	op;
+{
+  switch(op) {
   case E_AND:
   case E_MUL:
   case E_DIV:
@@ -230,6 +250,7 @@ get_number(ch)
   /* a real real constant */
   if (np < &buf[512]) *np++ = '.';
 
+  ch = getc(db_in);
   while (is_dig(ch)) {
 	/* 	Fractional part
 	*/
@@ -452,6 +473,19 @@ print_op(p)
 	}
 	break;
   case OP_BINOP:
+	if (p->t_whichoper == E_ARRAY) {
+		print_node(p->t_args[0], 0);
+		fputs("[", db_out);
+		print_node(p->t_args[1], 0);
+		fputs("]", db_out);
+		break;
+	}
+	if (p->t_whichoper == E_SELECT) {
+		print_node(p->t_args[0], 0);
+		fputs(".", db_out);
+		print_node(p->t_args[1], 0);
+		break;
+	}
 	fputs("(", db_out);
 	print_node(p->t_args[0], 0);
 	switch(p->t_whichoper) {
@@ -496,9 +530,6 @@ print_op(p)
 		break;
 	case E_GT:
 		fputs(">", db_out);
-		break;
-	case E_SELECT:
-		fputs(".", db_out);
 		break;
 	}
 	print_node(p->t_args[1], 0);

@@ -13,7 +13,6 @@ struct langdep {
   char	*uns_fmt;		/* unsigneds (format for long) */
   char	*addr_fmt;		/* address (format for long) */
   char	*real_fmt;		/* real (format for double) */
-  char	*char_fmt;		/* character (format for int) */
 
   /* display openers and closers: */
   char	*open_array_display;
@@ -25,8 +24,10 @@ struct langdep {
 
   /* language dependant routines: */
   int	(*printstring)();
+  int	(*printchar)();
   long	(*arrayelsize)();
-  int	(*op_prio)();
+  int	(*binop_prio)();
+  int	(*unop_prio)();
   int	(*get_string)();
   int	(*get_name)();
   int	(*get_number)();
@@ -34,7 +35,7 @@ struct langdep {
   int	(*printop)();
 };
 
-extern struct langdep	*m2_dep, *def_dep, *c_dep, *currlang;
+extern struct langdep	*m2_dep, *c_dep, *currlang;
 
 extern int find_language();
 

@@ -32,7 +32,8 @@ static int	skip_to_eol();
 
 struct token	tok, aside;
 
-#define prio(op)	((*(currlang->op_prio))(op))
+#define binprio(op)	((*(currlang->binop_prio))(op))
+#define unprio(op)	((*(currlang->unop_prio))(op))
 }
 %start Commands, commands;
 
@@ -100,6 +101,7 @@ command_line(p_tree *p;)
 | delete_command(p)
 | print_command(p)
 | trace_command(p)
+| set_command(p)
 |			{ *p = 0; }
 ;
 
@@ -241,6 +243,12 @@ print_command(p_tree *p;)
   ]*
 ;
 
+set_command(p_tree *p;)
+:
+  SET expression(p, 1)	{ *p = mknode(OP_SET, *p, (p_tree) 0); }
+  TO expression(&((*p)->t_args[1]), 1)
+;
+
 condition(p_tree *p;)
 :
   IF expression(p, 1)
@@ -257,12 +265,13 @@ expression(p_tree *p; int level;)
   { int currprio, currop; }
 :			{ in_expression++; }
   factor(p)
-  [ %while ((currprio = prio(currop = (int) tok.ival)) > level)
+  [ %while ((currprio = binprio(currop = (int) tok.ival)) > level)
 	[ BIN_OP | PREF_OR_BIN_OP ] 
 			{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
 			  (*p)->t_whichoper = currop;
 			}
 	expression(&((*p)->t_args[1]), currprio)
+			{ adjust_oper(p); }
   ]*
 			{ in_expression--; }
 ;
@@ -283,7 +292,7 @@ factor(p_tree *p;)
 			  (*p)->t_whichoper = (int) tok.ival;
 			}
   [ PREF_OP | PREF_OR_BIN_OP ]
-  expression(&(*p)->t_args[0], prio((*p)->t_whichoper))
+  expression(&(*p)->t_args[0], unprio((*p)->t_whichoper))
 ;
 
 designator(p_tree *p;)
@@ -383,6 +392,8 @@ name(p_tree *p;)
   | RESTORE
   | TRACE
   | ON
+  | SET
+  | TO
   ]			{ *p = mknode(OP_NAME, tok.idf, tok.str); }
 ;
 

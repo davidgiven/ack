@@ -60,6 +60,8 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{DUMP, "dump"},
 	{RESTORE, "restore"},
 	{TRACE, "trace"},
+	{SET, "set"},
+	{TO, "to"},
 	{-1, "quit"},
 	{0, ""}
 };

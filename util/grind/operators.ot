@@ -20,6 +20,7 @@ OP_WHERE	0	do_where
 OP_STATUS	0	do_status
 OP_DELETE	0	do_delete
 OP_SELECT	2	0
+OP_SET		2	do_set
 OP_PRINT	1	do_print
 OP_DUMP		0	do_dump
 OP_RESTORE	0	do_restore

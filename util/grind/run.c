@@ -373,9 +373,31 @@ get_bytes(size, from, to)
 	return 0;
   }
 
+  if (answer.m_type == FAIL) {
+	return 0;
+  }
+
   assert(answer.m_type == DATA && answer.m_size == m.m_size);
 
   return ureceive(to, answer.m_size);
+}
+
+int
+set_bytes(size, from, to)
+  long	size;
+  char	*from;
+  t_addr to;
+{
+  struct message_hdr	m;
+
+  m.m_type = SETBYTES;
+  m.m_size = size;
+  ATOBUF(m.m_buf, (char *) to);
+
+  return uputm(&m)
+	 && usend(from, size)
+	 && ugetm(&m)
+	 && m.m_type != FAIL;
 }
 
 int
@@ -389,6 +411,7 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
   if (! could_send(&m, 0)) {
 	return 0;
   }
+  if (answer.m_type == FAIL) return 0;
   assert(answer.m_type == DGLOB);
   *globmessage = answer;
   *globbuf = Malloc((unsigned) answer.m_size);
@@ -441,6 +464,7 @@ get_EM_regs(level)
   if (! could_send(&m, 0)) {
 	return 0;
   }
+  if (answer.m_type == FAIL) return 0;
   *to++ = (t_addr) BUFTOA(answer.m_buf);
   *to++ = (t_addr) BUFTOA(answer.m_buf+pointer_size);
   *to++ = (t_addr) BUFTOA(answer.m_buf+2*pointer_size);
@@ -458,7 +482,7 @@ set_pc(PC)
   m.m_type = SETEMREGS;
   m.m_size = 0;
   ATOBUF(m.m_buf+PC_OFF*pointer_size, (char *)PC);
-  return could_send(&m, 0);
+  return could_send(&m, 0) && answer.m_type != FAIL;
 }
 
 int
@@ -469,7 +493,7 @@ send_cont(stop_message)
 
   m.m_type = (CONT | (db_ss ? DB_SS : 0));
   m.m_size = 0;
-  return could_send(&m, stop_message);
+  return could_send(&m, stop_message) && answer.m_type != FAIL;
 }
 
 int
@@ -482,7 +506,7 @@ do_single_step(type, count)
   m.m_type = type | (db_ss ? DB_SS : 0);
   m.m_size = count;
   single_stepping = 1;
-  if (could_send(&m, 1)) {
+  if (could_send(&m, 1) && answer.m_type != FAIL) {
 	return 1;
   }
   single_stepping = 0;

@@ -94,17 +94,6 @@ Lookfromscope(id, class, sc)
   return (p_symbol) 0;
 }
 
-/* Lookup a definition for 'id' with class in the 'class' bitset,
-   starting in scope 'CurrentScope' and also looking in enclosing scopes.
-*/
-p_symbol
-Lookfor(id, class)
-  register struct idf *id;
-  int	class;
-{
-  return Lookfromscope(id, class, CurrentScope);
-}
-
 extern char *strrindex();
 
 p_symbol
@@ -153,12 +142,12 @@ consistent(p, sc)
 
   switch(p->t_oper) {
   case OP_NAME:
-	sym = Lookfromscope(p->t_idf, FILELINK|FILESYM|PROC|MODULE, sc);
+	sym = Lookfromscope(p->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc);
 	return sym != 0;
 
   case OP_SELECT:
 	arg = p->t_args[1];
-	sym = Lookfromscope(arg->t_idf, FILELINK|FILESYM|PROC|MODULE, sc);
+	sym = Lookfromscope(arg->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc);
 	if (sym == 0) return 0;
 	return consistent(p, sym->sy_scope);
 

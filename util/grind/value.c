@@ -1,12 +1,14 @@
 /* $Header$ */
 
 #include <alloc.h>
+#include <assert.h>
 
 #include "position.h"
 #include "scope.h"
 #include "symbol.h"
 #include "type.h"
 #include "message.h"
+#include "langdep.h"
 
 int stack_offset;		/* for up and down commands */
 
@@ -14,70 +16,27 @@ extern long pointer_size;
 extern t_addr *get_EM_regs();
 extern char *memcpy();
 
-/* Get the value of the symbol indicated by sym.
+/* Get the address of the object indicated by sym.
    Return 0 on failure,
-	  1 on success.
-   On success, 'buf' contains the value, and 'size' contains the size.
-   For 'buf', storage is allocated by Malloc; this storage must
-   be freed by caller (I don't like this any more than you do, but caller
-   does not know sizes).
+	  address on success.
+   *psize will contain size of object.
 */
-int
-get_value(sym, buf, psize)
+t_addr
+get_addr(sym, psize)
   register p_symbol	sym;
-  char	**buf;
-  long	*psize;
+  long			*psize;
 {
   p_type	tp = sym->sy_type;
   long		size = tp->ty_size;
-  int		retval = 0;
   t_addr	*EM_regs;
   int		i;
   p_scope	sc, symsc;
-  char		*AB;
 
-  *buf = 0;
+  *psize = size;
   switch(sym->sy_class) {
   case VAR:
 	/* exists if child exists; nm_value contains addres */
-	*buf = Malloc((unsigned) size);
-	if (get_bytes(size, (t_addr) sym->sy_name.nm_value, *buf)) {
-		retval = 1;
-	}
-	break;
-  case CONST:
-	*buf = Malloc((unsigned) size);
-	switch(tp->ty_class) {
-	case T_REAL:
-		if (size != sizeof(double)) {
-			*((float *) *buf) = sym->sy_const.co_rval;
-		}
-		else	*((double *) *buf) = sym->sy_const.co_rval;
-		break;
-	case T_INTEGER:
-	case T_SUBRANGE:
-	case T_UNSIGNED:
-	case T_ENUM:
-		if (size == 1) {
-			*((char *) *buf) = sym->sy_const.co_ival;
-		}
-		else if (size == 2) {
-			*((short *) *buf) = sym->sy_const.co_ival;
-		}
-		else {
-			*((long *) *buf) = sym->sy_const.co_ival;
-		}
-		break;
-	case T_SET:
-		memcpy(*buf, sym->sy_const.co_setval, (int) size);
-		break;
-	case T_STRING:
-		memcpy(*buf, sym->sy_const.co_sval, (int) size);
-		break;
-	default:
-		fatal("strange constant");
-	}
-	retval = 1;
+	return (t_addr) sym->sy_name.nm_value;
 	break;
   case VARPAR:
   case LOCVAR:
@@ -110,17 +69,8 @@ get_value(sym, buf, psize)
 
 	if (sym->sy_class == LOCVAR) {
 		/* Either local variable or value parameter */
-		*buf = Malloc((unsigned) size);
-		if (get_bytes(size,
-			      EM_regs[sym->sy_name.nm_value < 0 
-					? LB_OFF 
-					: AB_OFF
-				     ] +
-				  (t_addr) sym->sy_name.nm_value,
-			      *buf)) {
-			retval = 1;
-		}
-		break;
+		return EM_regs[sym->sy_name.nm_value < 0 ? LB_OFF : AB_OFF] +
+				  (t_addr) sym->sy_name.nm_value;
 	}
 
 	/* If we get here, we have a var parameter. Get the parameters
@@ -128,6 +78,8 @@ get_value(sym, buf, psize)
 	*/
 	{
 		p_type proctype = sc->sc_definedby->sy_type;
+		t_addr a;
+		char *AB;
 
 		size = proctype->ty_nbparams;
 		if (has_static_link(sc)) size += pointer_size;
@@ -137,15 +89,84 @@ get_value(sym, buf, psize)
 		}
 		if ((size = tp->ty_size) == 0) {
 			size = compute_size(tp, AB);
+			*psize = size;
+		}
+		a = (t_addr) BUFTOA(AB+sym->sy_name.nm_value);
+		free(AB);
+		return a;
+	}
+  default:
+	break;
+  }
+  return 0;
+}
+
+/* Get the value of the symbol indicated by sym.
+   Return 0 on failure,
+	  1 on success.
+   On success, 'buf' contains the value, and 'size' contains the size.
+   For 'buf', storage is allocated by Malloc; this storage must
+   be freed by caller (I don't like this any more than you do, but caller
+   does not know sizes).
+*/
+int
+get_value(sym, buf, psize)
+  register p_symbol	sym;
+  char	**buf;
+  long	*psize;
+{
+  p_type	tp = sym->sy_type;
+  int		retval = 0;
+  t_addr	a;
+  long		size = tp->ty_size;
+
+  *buf = 0;
+  switch(sym->sy_class) {
+  case CONST:
+	*buf = Malloc((unsigned) size);
+	switch(tp->ty_class) {
+	case T_REAL:
+		if (size != sizeof(double)) {
+			*((float *) *buf) = sym->sy_const.co_rval;
+		}
+		else	*((double *) *buf) = sym->sy_const.co_rval;
+		break;
+	case T_INTEGER:
+	case T_SUBRANGE:
+	case T_UNSIGNED:
+	case T_ENUM:
+		if (size == sizeof(char)) {
+			*((char *) *buf) = sym->sy_const.co_ival;
+		}
+		else if (size == sizeof(short)) {
+			*((short *) *buf) = sym->sy_const.co_ival;
+		}
+		else {
+			*((long *) *buf) = sym->sy_const.co_ival;
+		}
+		break;
+	case T_SET:
+		memcpy(*buf, sym->sy_const.co_setval, (int) size);
+		break;
+	case T_STRING:
+		memcpy(*buf, sym->sy_const.co_sval, (int) size);
+		break;
+	default:
+		fatal("strange constant");
+	}
+	retval = 1;
+	break;
+  case VAR:
+  case VARPAR:
+  case LOCVAR:
+	a = get_addr(sym, psize);
+	if (a) {
+		size = *psize;
+		*buf = Malloc((unsigned) size);
+		if (get_bytes(size, a, *buf)) {
+			retval = 1;
 		}
 	}
-	*buf = Malloc((unsigned) size);
-	if (get_bytes(size,
-		      (t_addr) BUFTOA(AB+sym->sy_name.nm_value),
-		      *buf)) {
-		retval = 1;
-	}
-	free(AB);
 	break;
   }
 

@@ -25,11 +25,13 @@ extern double
 
 static int
 	print_string(),
+	print_char(),
 	get_number(),
 	get_string(),
 	get_token(),
 	print_op(),
-	op_prio();
+	unop_prio(),
+	binop_prio();
 
 static long
 	array_elsize();
@@ -43,7 +45,6 @@ static struct langdep c = {
 	"%lu",
 	"0x%lX",
 	"%g",
-	"'\\%o'",
 
 	"{",
 	"}",
@@ -53,8 +54,10 @@ static struct langdep c = {
 	"}",
 
 	print_string,
+	print_char,
 	array_elsize,
-	op_prio,
+	unop_prio,
+	binop_prio,
 	get_string,
 	get_name,
 	get_number,
@@ -63,6 +66,13 @@ static struct langdep c = {
 };
 
 struct langdep *c_dep = &c;
+
+static int
+print_char(c)
+  int	c;
+{
+  fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "'\\0%o'", c);
+}
 
 static int
 print_string(s, len)
@@ -89,12 +99,57 @@ array_elsize(size)
   return ((size + int_size - 1) / int_size) * int_size;
 }
 
-/*ARGSUSED*/
 static int
-op_prio(op)
+unop_prio(op)
   int	op;
 {
   switch(op) {
+  case E_NOT:
+  case E_BNOT:
+  case E_MIN:
+  case E_MUL:
+  case E_SELECT:
+  case E_PLUS:
+	return 12;
+  }
+  return 1;
+}
+
+static int
+binop_prio(op)
+  int	op;
+{
+  switch(op) {
+  case E_OR:
+	return 2;
+  case E_AND:
+	return 3;
+  case E_BOR:
+	return 4;
+  case E_BXOR:
+	return 5;
+  case E_BAND:
+	return 6;
+  case E_EQUAL:
+  case E_NOTEQUAL:
+	return 7;
+  case E_LT:
+  case E_LTEQUAL:
+  case E_GT:
+  case E_GTEQUAL:
+	return 8;
+  case E_LSFT:
+  case E_RSFT:
+	return 9;
+  case E_MIN:
+  case E_PLUS:
+	return 10;
+  case E_MUL:
+  case E_DIV:
+  case E_ZDIV:
+  case E_MOD:
+  case E_ZMOD:
+	return 11;
   }
   return 1;
 }
@@ -194,6 +249,12 @@ get_token(c)
 	tok.ival = E_PLUS;
 	return PREF_OR_BIN_OP;
   case '-':
+	c = getc(db_in);
+	if (c == '>') {
+		tok.ival = E_DERSELECT;
+		return BIN_OP;
+	}
+	ungetc(c, db_in);
 	tok.ival = E_MIN;
 	return PREF_OR_BIN_OP;
   case '*':
@@ -244,6 +305,10 @@ get_token(c)
 		tok.ival = E_LTEQUAL;
 		return BIN_OP;
 	}
+	if (c == '<') {
+		tok.ival = E_LSFT;
+		return BIN_OP;
+	}
 	ungetc(c, db_in);
 	tok.ival = E_LT;
 	return BIN_OP;
@@ -251,6 +316,10 @@ get_token(c)
 	c = getc(db_in);
 	if (c == '=') {
 		tok.ival = E_GTEQUAL;
+		return BIN_OP;
+	}
+	if (c == '>') {
+		tok.ival = E_RSFT;
 		return BIN_OP;
 	}
 	ungetc(c, db_in);
@@ -264,6 +333,9 @@ get_token(c)
 	}
 	ungetc(c, db_in);
 	tok.ival = E_NOT;
+	return PREF_OP;
+  case '~':
+	tok.ival = E_BNOT;
 	return PREF_OP;
   default:
 	error("illegal character 0%o", c);
@@ -360,12 +432,41 @@ print_op(p)
 		fputs("*", db_out);
 		print_node(p->t_args[0], 0);
 		break;
+	case E_BNOT:
+		fputs("~", db_out);
+		print_node(p->t_args[0], 0);
+		break;
 	}
 	break;
   case OP_BINOP:
+	if (p->t_whichoper == E_ARRAY) {
+		print_node(p->t_args[0], 0);
+		fputs("[", db_out);
+		print_node(p->t_args[1], 0);
+		fputs("]", db_out);
+		break;
+	}
+	if (p->t_whichoper == E_DERSELECT) {
+		print_node(p->t_args[0], 0);
+		fputs("->", db_out);
+		print_node(p->t_args[1], 0);
+		break;
+	}
+	if (p->t_whichoper == E_SELECT) {
+		print_node(p->t_args[0], 0);
+		fputs(".", db_out);
+		print_node(p->t_args[1], 0);
+		break;
+	}
 	fputs("(", db_out);
 	print_node(p->t_args[0], 0);
 	switch(p->t_whichoper) {
+	case E_LSFT:
+		fputs("<<", db_out);
+		break;
+	case E_RSFT:
+		fputs(">>", db_out);
+		break;
 	case E_AND:
 		fputs("&&", db_out);
 		break;
@@ -413,9 +514,6 @@ print_op(p)
 		break;
 	case E_GT:
 		fputs(">", db_out);
-		break;
-	case E_SELECT:
-		fputs(".", db_out);
 		break;
 	}
 	print_node(p->t_args[1], 0);

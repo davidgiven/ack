@@ -16,6 +16,7 @@
 #include	"symbol.h"
 #include	"langdep.h"
 #include	"type.h"
+#include	"expr.h"
 
 extern FILE	*db_out;
 extern t_lineno	currline;
@@ -75,6 +76,21 @@ mknode(va_alist)
   return p;
 }
 
+adjust_oper(pp)
+  p_tree	*pp;
+{
+  register p_tree	p = *pp, p1;
+
+  switch(p->t_whichoper) {
+  case E_DERSELECT:
+	p1 = mknode(OP_UNOP, p->t_args[0]);
+	p1->t_whichoper = E_DEREF;
+	p->t_args[0] = p1;
+	p->t_whichoper = E_SELECT;
+	break;
+  }
+}
+
 freenode(p)
   register p_tree	p;
 {
@@ -111,6 +127,12 @@ print_node(p, top_level)
   case OP_FILE:
 	fputs("file ", db_out);
 	print_node(p->t_args[0], 0);
+	break;
+  case OP_SET:
+	fputs("set ", db_out);
+	print_node(p->t_args[0], 0);
+	fputs(" to ", db_out);
+	print_node(p->t_args[1], 0);
 	break;
   case OP_DELETE:
 	fprintf(db_out, "delete %d", p->t_ival);
@@ -332,7 +354,7 @@ get_pos(p)
 
   case OP_NAME:
   case OP_SELECT:
-	sym = identify(p, PROC|MODULE);
+	sym = identify(p, FUNCTION|PROC|MODULE);
 	if (! sym) {
 		break;
 	}
@@ -561,6 +583,27 @@ do_print(p)
 	fputs("\n", db_out);
 	break;
   }
+}
+
+do_set(p)
+  p_tree	p;
+{
+  char	*buf = 0;
+  long	size, size2;
+  p_type tp, tp2;
+  t_addr a;
+
+  if (! eval_desig(p->t_args[0], &a, &size, &tp) ||
+      ! eval_expr(p->t_args[1], &buf, &size2, &tp2) ||
+      ! convert(&buf, &size2, &tp2, tp, size)) {
+	if (buf) free(buf);
+	return;
+  }
+
+  if (! set_bytes(size, buf, a)) {
+	error("could not handle this SET request");
+  }
+  free(buf);
 }
 
 perform(p, a)

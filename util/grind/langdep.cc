@@ -46,6 +46,6 @@ find_language(suff)
 	p = p->l_next;
   }
   if (! currlang) {
-	currlang = def_dep;
+	currlang = c_dep;
   }
 }
