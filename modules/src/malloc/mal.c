@@ -28,8 +28,9 @@
 extern char *SBRK();
 #ifdef STORE
 #define	MAX_STORE	32
-private do_free(), sell_out();
+private do_free(), Xfree(), sell_out();
 privatedata mallink *store[MAX_STORE];
+privatedata char *freed;
 #endif STORE
 
 char *
@@ -39,6 +40,7 @@ malloc(n)
 	register mallink *ml;
 	register int min_class;
 
+	if (freed) Xfree();
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
 #ifdef STORE
 	if (n <= MAX_STORE*MIN_SIZE)	{
@@ -138,10 +140,18 @@ malloc(n)
 
 free(addr)
 	char *addr;
+{
+	if (freed) Xfree();
+	freed = addr;
+}
+
+private
+Xfree()
 {check_mallinks("free entry");{
-	register mallink *ml = mallink_of_block(addr);
+	register mallink *ml = mallink_of_block(freed);
 #ifdef STORE
 
+	freed = 0;
 	if (free_of(ml))
 		return;				/* user frees free block */
 	if (size_of(ml) <= MAX_STORE*MIN_SIZE)	{
@@ -217,6 +227,8 @@ realloc(addr, n)
 	register unsigned int size;
 
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
+	if (freed && freed != addr) Xfree();
+	else freed = 0;
 	if (free_of(ml)) {
 		unlink_free_chunk(ml);
 		set_free(ml, 0);		/* user reallocs free block */
