@@ -485,7 +485,18 @@ emit_symtab()
 		M->value = A->on_valu;
 		switch(A->on_type & S_TYP) {
 			case S_UND:
-				M->type = N_UNDF;
+				switch(A->on_type & S_ETC) {
+				default:
+					M->type = N_UNDF;
+					break;
+				case S_MOD:
+				case S_FIL:
+					M->type = N_FN;
+					break;
+				case S_LIN:
+					M->type = N_ABS;
+					break;
+				}
 				break;
 			case S_ABS:
 				M->type = N_ABS;
@@ -528,6 +539,7 @@ emit_symtab()
 		if (M->name = A->on_foff) {
 			M->name -= offX;
 		}
+		else M->name = outhead.oh_nchar + 3;	/* pointer to nullbyte */
 		cvlong(&(M->name));
 		cvlong(&(M->value));
 	}
