@@ -1,3 +1,13 @@
+: check that the script is started from the "first" directory
+p=`pwd`
+case `basename $p` in
+first)
+	;;
+*)
+	echo "this script must be started from the 'first' directory"
+	exit 3
+	;;
+esac
 : check $PATH first
 if sh ckpath
 then :
