@@ -1,0 +1,16 @@
+/* btscat()
+*/
+
+char *
+btscat(b1, n1, b2, n2)
+	char *b1;
+	int n1;
+	register char *b2;
+	register int n2;
+{
+	register char *b = b1 + n1;
+
+	while (n2-- > 0)
+		*b++ = *b2++;
+	return b1;
+}
