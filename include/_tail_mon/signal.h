@@ -22,5 +22,5 @@
 #define	SIGTERM	15	/* software termination signal from kill */
 
 int	(*signal())();
-#define	SIG_DFL	(int (*)())0
-#define	SIG_IGN	(int (*)())1
+#define	SIG_DFL	(int (*)())-2
+#define	SIG_IGN	(int (*)())-3
