@@ -378,7 +378,7 @@ char *op;
 int *lineno;
 {
 	char *ob = &_obuf[OBUFSIZE];
-	register int c;
+	register int c, oldc = '\0';
 
 	NoUnstack++;
 	if (options['C']) {
@@ -410,8 +410,14 @@ int *lineno;
 					echo(c);
 				}
 				break;			/* for(;;) */
+			} else if (oldc == '/') {
+				warning("comment inside comment ?");
 			}
-		} else c = GetChar();
+			oldc = '*';
+		} else {
+			oldc = c;
+			c = GetChar();
+		}
 	}
 	NoUnstack--;
 	return op;
