@@ -77,7 +77,6 @@ main(argc,argv) char **argv ; {
 		scanlist(l_first(tr_list),elem) {
 			if ( t_cont(*elem)->t_linker ) {
 				linker= t_cont(*elem) ;
-				linker->t_do= YES ;
 			}
 		}
 	}
@@ -106,7 +105,11 @@ main(argc,argv) char **argv ; {
 			orig.p_keeps=NO ;
 			orig.p_path=phase->t_origname ;
 			if ( p_basename ) throws(p_basename) ;
-			p_basename= keeps(basename(orig.p_path)) ;
+			if ( orig.p_path ) {
+				p_basename= keeps(basename(orig.p_path)) ;
+			} else {
+				p_basename=0 ;
+			}
 			if ( !startrf(phase) && !k_flag ) return 1 ;
 		}
 	}
@@ -171,7 +174,15 @@ vieuwargs(argc,argv) char **argv ; {
 			break ;
 	   case 'O':    Optflag++ ;
 			break ;
-	   case 'v':    v_flag++ ;
+	   case 'v':    if ( argp[2] ) {
+				v_flag += atoi(&argp[2]) ;
+				eaten=1 ;
+			} else {
+	   			v_flag++ ;
+			}
+#ifdef DEBUG
+	   		if ( v_flag>=3 ) debug=v_flag-2 ;
+#endif
 			break ;
 	   case 'g':    g_flag++ ;
 			break ;
@@ -201,10 +212,6 @@ vieuwargs(argc,argv) char **argv ; {
 			}
 			eaten=1 ;
 			break ;
-#ifdef DEBUG
-	   case 'd':    debug++ ;
-			break ;
-#endif
 	   case  0 :    nill_flag++ ; eaten++ ;
 			break;
 	   case 'w':    { register char *tokeep ;
