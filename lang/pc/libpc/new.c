@@ -21,7 +21,7 @@
 extern		_sav();
 extern		_rst();
 
-#define assert()	/* nothing */
+#define assert(x)	/* nothing */
 #define	UNDEF		0x8000
 
 struct adm {

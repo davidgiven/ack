@@ -23,7 +23,7 @@
 extern		_wstrin();
 extern char	*_fcvt();
 
-#define	assert()	/* nothing */
+#define	assert(x)	/* nothing */
 
 #define	HUGE_DIG	39	/* log10(maxreal) */
 #define	PREC_DIG	80	/* the maximum digits returned by _fcvt() */

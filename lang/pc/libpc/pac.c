@@ -22,7 +22,7 @@
 
 extern		_trp();
 
-#define	assert()	/* nothing */
+#define	assert(x)	/* nothing */
 
 struct descr {
 	int	low;
