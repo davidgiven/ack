@@ -279,8 +279,8 @@ DeclProc(type, id)
 		scope = CurrentScope;
 		scope->sc_name = name;
 		scope->sc_definedby = df;
-		df->prc_vis = CurrVis;
 	}
+	df->prc_vis = CurrVis;
 
 	return df;
 }

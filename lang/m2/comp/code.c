@@ -37,6 +37,19 @@ extern int	proclevel;
 extern char	options[];
 int		fp_used;
 
+STATIC char *
+NameOfProc(df)
+	register struct def *df;
+{
+
+	assert(df->df_kind & (D_PROCHEAD|D_PROCEDURE));
+
+	if (df->df_kind == D_PROCEDURE) {
+		return df->prc_vis->sc_scope->sc_name;
+	}
+	return df->for_name;
+}
+
 CodeConst(cst, size)
 	arith cst;
 	int size;
@@ -293,7 +306,6 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register struct node *left = nd->nd_left;
-	register struct def *df;
 	register struct node *right = nd->nd_right;
 	register struct type *result_tp;
 
@@ -319,19 +331,13 @@ CodeCall(nd)
 
 	switch(left->nd_class) {
 	case Def: {
-		df = left->nd_def;
-
-		if (df->df_kind == D_PROCEDURE) {
-			int level = df->df_scope->sc_level;
+		if (left->nd_def->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
+			int level = left->nd_def->df_scope->sc_level;
 
 			if (level > 0) {
 				C_lxl((arith) (proclevel - level));
 			}
-			C_cal(NameOfProc(df));
-			break;
-		}
-		else if (df->df_kind == D_PROCHEAD) {
-			C_cal(df->for_name);
+			C_cal(NameOfProc(left->nd_def));
 			break;
 		}}
 		/* Fall through */

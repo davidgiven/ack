@@ -313,8 +313,6 @@ chk_basesubrange(tp, base)
 	}
 
 	tp->tp_next = base;
-	tp->tp_size = base->tp_size;
-	tp->tp_align = base->tp_align;
 }
 
 int
@@ -374,8 +372,6 @@ subr_type(lb, ub)
 	res = construct_type(T_SUBRANGE, tp);
 	res->sub_lb = lb->nd_INT;
 	res->sub_ub = ub->nd_INT;
-	res->tp_size = tp->tp_size;
-	res->tp_align = tp->tp_align;
 	if (tp == card_type) {
 		u_small(res, res->sub_ub);
 	}
