@@ -137,13 +137,21 @@ CodeExpr(nd, ds, true_label, false_label)
 	case Set: {
 		register unsigned i = (unsigned) (tp->tp_size) / (int) word_size;
 		register arith *st = nd->nd_set + i;
+		int null_set = 1;
 
 		ds->dsg_kind = DSG_LOADED;
 		for (; i; i--) { 
-			C_loc(*--st);
+			if (*--st != 0) null_set = 0;
+		}
+		if (! null_set) {
+			i = (unsigned) (tp->tp_size) / (int) word_size;
+			st = nd->nd_set + i;
+			for (; i; i--) { 
+				C_loc(*--st);
+			}
 		}
 		FreeSet(nd->nd_set);
-		CodeSet(nd);
+		CodeSet(nd, null_set);
 		}
 		break;
 
@@ -992,7 +1000,7 @@ CodeUoper(nd)
 	}
 }
 
-CodeSet(nd)
+CodeSet(nd, null_set)
 	register t_node *nd;
 {
 	register t_type *tp = nd->nd_type;
@@ -1001,18 +1009,23 @@ CodeSet(nd)
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (nd->nd_LEFT) CodeEl(nd->nd_LEFT, tp);
+		if (nd->nd_LEFT) {
+			CodeEl(nd->nd_LEFT, tp, null_set);
+			null_set = 0;
+		}
 		nd = nd->nd_RIGHT;
 	}
+	if (null_set) C_zer(tp->tp_size);
 }
 
-CodeEl(nd, tp)
+CodeEl(nd, tp, null_set)
 	register t_node *nd;
 	register t_type *tp;
 {
 	register t_type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
+		if (null_set) C_zer(tp->tp_size);
 		C_loc(tp->set_low);
 		C_loc(tp->tp_size);	/* push size */
 		if (eltype->tp_fund == T_SUBRANGE) {
@@ -1028,7 +1041,7 @@ CodeEl(nd, tp)
 		C_loc(tp->set_low);
 		C_sbi(word_size);
 		C_set(tp->tp_size);
-		C_ior(tp->tp_size);
+		if (! null_set) C_ior(tp->tp_size);
 	}
 }
 
