@@ -13,7 +13,6 @@
 # define RCS_BEM	"$Header$"
 #endif
 
-#define POINTERSIZE	4
 #define MAXINT		32768
 #define MININT		-32767
 #define EMINTSIZE	"EM_WSIZE"
@@ -25,6 +24,8 @@
 
 #define CHANNEL		0
 #define THRESHOLD	40		/* for splitting blocks */
+
+#define void		int		/* Some C compilers don't know void */
 
 extern char	*program;		/* name of source program */
 extern char	*inpfile;		/* input tko compiler */
@@ -60,6 +61,12 @@ extern Linerecord *currline;
 extern char *itoa();
 extern char *datalabel();
 extern char *instrlabel();
+extern char *proclabel();
 extern char *typesize();
 extern char *typestring();
-extern void sprintf();
+extern char *salloc();
+
+extern char *sprintf();
+extern char *strcpy();
+extern char *strcat();
+extern char *malloc();
