@@ -381,9 +381,10 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					else Xtable['-'] = 1;
 				}
 			}
-			if (!*format) return done;
-			
-			if (!(Xtable[ic] ^ reverse)) return done;
+			if (!*format || !(Xtable[ic] ^ reverse)) {
+				if (ic != EOF) ungetc(ic, stream);
+				return done;
+			}
 
 			if (!(flags & FL_NOASSIGN))
 				str = va_arg(ap, char *);
