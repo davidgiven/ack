@@ -68,8 +68,12 @@ freopen(const char *name, const char *mode, FILE *stream)
 
 	if ((rwflags & O_TRUNC)
 	    || (((fd = _open(name, rwmode)) < 0)
-		    && (flags & _IOWRITE)))
-		fd = _creat(name, PMODE);
+		    && (flags & _IOWRITE))) {
+		if (((fd = _creat(name, PMODE)) < 0) && flags | _IOREAD) {
+			(void) _close(fd);
+			fd = _open(name, rwmode);
+		}
+	}
 
 	if (fd < 0) {
 		for( i = 0; i < FOPEN_MAX; i++) {
