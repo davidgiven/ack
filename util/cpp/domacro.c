@@ -307,10 +307,10 @@ do_define()
 	ch = skipspaces(ch);	/* find first character of the text	*/
 	assert(ch != EOI);
 	if (class(ch) == STNL) {
-		/*	Treat `#define something' as `#define something "1"'
+		/*	Treat `#define something' as `#define something ""'
 		*/
-		repl_text = "1";
-		length = 1;
+		repl_text = "";
+		length = 0;
 	}
 	else {
 		PushBack();
