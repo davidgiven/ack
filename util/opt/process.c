@@ -68,9 +68,9 @@ relabel() {
 
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
 		for (np = *npp; np != (num_p) 0; np = np->n_next) {
-			if (! np->n_line) continue;
-			assert((np->n_line->l_instr&BMASK) == op_lab
-			    && np->n_line->l_a.la_np == np);
+			assert(! np->n_line ||
+			   ((np->n_line->l_instr&BMASK) == op_lab
+			    && np->n_line->l_a.la_np == np));
 			for(tp=np; (tp->n_flags&(NUMKNOWN|NUMMARK))==0;
 				   tp = tp->n_repl)
 				tp->n_flags |= NUMMARK;
