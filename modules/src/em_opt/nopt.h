@@ -38,7 +38,7 @@ extern p_instr	OO_nxtrepl;
 
 p_instr OO_halfflush();
 
-# define GETNXTPATT() (OO_nxtpatt>&OO_buffer[MAXBUFFER]?OO_halfflush():OO_nxtpatt++)
+# define GETNXTPATT() (OO_nxtpatt>=&OO_buffer[MAXBUFFER]?OO_halfflush():OO_nxtpatt++)
 # define GETNXTREPL() (OO_nxtrepl++)
 
 # define FLUSHDFA()	(GETNXTPATT())->em_opcode=OTHER;\

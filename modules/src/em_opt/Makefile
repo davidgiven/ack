@@ -115,7 +115,7 @@ $(LIBOPT):	dfadummy $(NOFILES) mkstrct.$(SUF) pseudo.d incalls.d
 
 $(LIBCEOPT):
 		make clean
-		make PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
+		make "EMHOME="$(EMHOME) PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
 		mv $(LIBOPT) $(LIBCEOPT)
 		make clean
 
