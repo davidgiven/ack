@@ -1,3 +1,5 @@
+/* The global datastructures (see "data.c"). */
+
 extern long 	cur_value();
 
 extern int 	cur_seg;
