@@ -85,6 +85,7 @@ name m2
 	program {EM}/lib/em_m2
 	mapflag -I* M2_INCL={M2_INCL?} -I*
 	mapflag -L M2_F={M2_F?} -L
+	mapflag -g M2_F={M2_F?} -g
 	mapflag -w* M2_F={M2_F?} -w*
 	mapflag -W* M2_F={M2_F?} -W*
 	mapflag -_ M2_F={M2_F?} -U
@@ -205,7 +206,7 @@ name opt2
 	stdout
 end
 name decode
-	from .k.m.g
+	from .k.m.g.gk
 	to .e
 	program {EM}/lib/em_decode
 	args <
