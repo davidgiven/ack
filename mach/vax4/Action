@@ -9,6 +9,10 @@ name "Vax 4-4 EM library"
 system vax*
 dir libem
 end
+name "Vax 4-4 Occam library"
+system vax*
+dir liboc
+end
 name "Vax 4-4 Basic library"
 system vax*
 dir libbc
