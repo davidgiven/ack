@@ -13,7 +13,7 @@ OLIB=tail_$(PREF)$(SUB)
 
 install:
 	MakeArch
-	-if [ -d $(EMHOME)/include/tail_ac ] then : ; else mkdir $(EMHOME)/include/tail_ac ; fi
+	-mkdir $(EMHOME)/include/tail_ac
 	( cd headers; tar cf - `cat LIST` ) | ( cd $(EMHOME)/include/tail_ac ; tar xf - )
 
 clean:
