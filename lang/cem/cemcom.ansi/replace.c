@@ -567,7 +567,7 @@ macro2buffer(repl, idf, args)
 		    ptr++;
 		} while (*ptr != delim || *ptr == '\0');
 		add2repl(repl, *ptr++);
-	    } else if (func && *ptr == '#') {
+	    } else if (*ptr == '#' && (func || *(ptr+1) == '#')) {
 		if (*++ptr == '#') {
 		    register int tmpindex;
 			/* ## - paste operator */
