@@ -21,6 +21,8 @@ IMPLEMENTATION MODULE Storage;
 
   CONST
 	NLISTS = 20;
+	MAGICW = 0A5A5H;
+	MAGICC = 175C;
 
   TYPE
 	ALIGNTYPE = 
@@ -35,8 +37,9 @@ IMPLEMENTATION MODULE Storage;
 	Bucket =
 	  RECORD
 		CASE : BOOLEAN OF
-		   FALSE: BSIZE: CARDINAL;	(* size of user part in UNITs *)
-			  BNEXT: BucketPtr; |	(* next free Bucket *)
+		   FALSE:
+			  BNEXT: BucketPtr; 	(* next free Bucket *)
+			  BSIZE: CARDINAL; |	(* size of user part in UNITs *)
 		   TRUE: BXX: ALIGNTYPE
 		END;
 		BSTORE: ALIGNTYPE;
@@ -158,11 +161,20 @@ IMPLEMENTATION MODULE Storage;
   END Allocate;
 
   PROCEDURE ALLOCATE(VAR a: ADDRESS; size: CARDINAL);
+  VAR p: BucketPtr;
+      pc: POINTER TO CHAR;
   BEGIN
 	a := MyAllocate(size);
 	IF a = NIL THEN
 		Message("out of core");
 		HALT;
+	END;
+	p := a - UNIT;
+	WITH p^ DO
+		IF BSIZE # ((size + (UNIT - 1)) DIV UNIT) THEN
+			pc := a + size;
+			pc^ := MAGICC;
+		END;
 	END;
   END ALLOCATE;
 
@@ -184,11 +196,27 @@ IMPLEMENTATION MODULE Storage;
 
   PROCEDURE DEALLOCATE(VAR a: ADDRESS; size: CARDINAL);
     VAR	p: BucketPtr;
+	pc: POINTER TO CHAR;
   BEGIN
-	IF (a = NIL) THEN RETURN; END;
+	IF (a = NIL) THEN 
+		Message("(Warning) NIL pointer deallocated");
+		RETURN;
+	END;
 	p := a - UNIT;
-	IF (p^.BNEXT # BucketPtr(USED)) THEN RETURN; END;
+	IF (p^.BNEXT # BucketPtr(USED)) THEN
+		Message("(Warning) area already deallocated or heap corrupted");
+		a := NIL;
+		RETURN;
+	END;
 	WITH p^ DO
+		IF BSIZE # ((size + (UNIT - 1)) DIV UNIT) THEN
+			Message("(Warning) wrong size in deallocate");
+		ELSIF (BSIZE*UNIT # size) THEN
+			pc := a + size;
+			IF pc^ # MAGICC THEN
+				Message("(Warning) area corrupted");
+			END;
+		END;	
 		IF BSIZE <= NLISTS THEN
 			BNEXT := FreeLists[BSIZE];
 			FreeLists[BSIZE] := p;
@@ -197,6 +225,7 @@ IMPLEMENTATION MODULE Storage;
 			Llist := p;
 		END;
 	END;
+	a := NIL
   END DEALLOCATE;
 
   PROCEDURE ReOrganize();
@@ -291,7 +320,7 @@ IMPLEMENTATION MODULE Storage;
 	brk := sbrk(UNIT - brk MOD UNIT);
 	FirstBlock := sbrk(0);
 	Compacted := FALSE;
-	USED := 1;
+	USED := MAGICW;
   END InitStorage;
 
 BEGIN
