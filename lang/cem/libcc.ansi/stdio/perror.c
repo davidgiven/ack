@@ -10,7 +10,10 @@
 void
 perror(const char *s)
 {
-	if (s && *s)
-		(void) fprintf(stderr,"%s: ", s);
-	(void) fprintf(stderr,"%s\n", strerror(errno));
+	if (s && *s) {
+		(void) fputs(s, stderr);
+		(void) fputs(": ", stderr);
+	}
+	(void) fputs(strerror(errno), stderr);
+	(void) fputs("\n", stderr);
 }
