@@ -2,6 +2,7 @@
 #include "const.h"
 #include "back.h"
 
+/* This file contains low-level routines for generating assembly code. */
 
 int procno = 0, holno = 0, cur_seg = -1, saved = FALSE;
 char name[256], labeltje[256];
