@@ -115,10 +115,12 @@ $(LIBOPT):	dfadummy $(NOFILES) pseudo.d incalls.d
 		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES)
 		-sh -c 'ranlib $(LIBOPT)'
 
-$(LIBCEOPT):	dfadummy pseudo.d incalls.d
+$(LIBCEOPT):	dfadummy
 		rm -f O_*.$(SUF) $(NOFILES)
+		-mv $(LIBOPT) $(LIBOPT).saved
 		make "EMHOME="$(EMHOME) PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
 		mv $(LIBOPT) $(LIBCEOPT)
+		-mv $(LIBOPT).saved $(LIBOPT)
 		rm -f O_*.$(SUF) $(NOFILES)
 
 dfadummy:	patterns parser
