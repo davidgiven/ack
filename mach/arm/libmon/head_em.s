@@ -10,7 +10,7 @@
 .sect .text
 .base 0x8000
  ADR R0,begbss
- ADR R1,_endbss
+ ADR R1,endbss
  MOV R2,#0
  ADR R3,_incptflag
  STR R2,[R3]
@@ -164,7 +164,7 @@ argc:
  .asciz 'PROGRAM'
  .align
 _RegHp:
- .data4 _endbss
+ .data4 endbss
 _Lineno:
  .data4	0
 _Filna:
