@@ -535,7 +535,12 @@ declare_formals(idf, fp)
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
-		f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
+		if (! hasproto 
+		    && def->df_type->tp_fund == FLOAT
+		    && def->df_type->tp_size != double_size) {
+			f_offset = align(f_offset + double_size, (int) word_size);
+		}
+		else f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
 		RegisterAccount(def->df_address, def->df_type->tp_size,
 				regtype(def->df_type),
 				def->df_sc);
