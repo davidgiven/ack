@@ -98,7 +98,7 @@ OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
 SRC =	$(CSRC) $(LCSRC) $(GSRC)
 
 cpp:	$(OBJ) Makefile
-	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(LIBS) -o cpp 
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LIBS) -o cpp 
 	size cpp
 
 cfiles: hfiles LLfiles $(GSRC)
