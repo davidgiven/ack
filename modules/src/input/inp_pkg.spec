@@ -20,7 +20,7 @@
 
 /* INPUT PRIMITIVES */
 
-#define	LoadChar(dest)	((dest = *_ipp++) || (dest = loadbuf()))
+#define	LoadChar(dest)	((void)((dest = *_ipp++) || (dest = loadbuf())))
 #define	PushBack()	(--_ipp)
 #define ChPushBack(ch)	(*--_ipp = (ch))
 
