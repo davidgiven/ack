@@ -141,6 +141,8 @@ Key keywords [] ={
 0,	0,	0,	0
 };
 
+char *index();
+
 /* Keyword index table */
 
 int	kex[27];
@@ -469,4 +471,14 @@ yylex()
 		return(RELOP);
 	}
 	return(*cptr++);
+}
+
+char *
+index(s, c)
+	register char *s, c;
+{
+	while (*s)
+		if (*s++ == c)
+			return --s;
+	return (char *)0;
 }
