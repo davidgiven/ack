@@ -986,6 +986,22 @@ with REG REG
   gen sal %1,{ANYCON,1}
       rcl %2,{ANYCON,1}		yields %2 %1
 
+pat loc sli $1==2 && $2==4
+with REG REG
+  gen sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}		yields %2 %1
+
+pat loc sli $1==3 && $2==4
+with REG REG
+  gen sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}		yields %2 %1
+
 pat loc sli $1==16 && $2==4
 with rmorconst rmorconst	yields %1 {ANYCON,0}
 
@@ -1017,6 +1033,22 @@ with REG
 pat loc sri $1==1 && $2==4
 with REG REG
   gen sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}		yields %2 %1
+
+pat loc sri $1==2 && $2==4
+with REG REG
+  gen sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}
+      sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}		yields %2 %1
+
+pat loc sri $1==3 && $2==4
+with REG REG
+  gen sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}
+      sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}
+      sar %2,{ANYCON,1}
       rcr %1,{ANYCON,1}		yields %2 %1
 
 pat sri $1==2
