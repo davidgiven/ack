@@ -5,7 +5,9 @@
 EXTERN  char            *stopsuffix;    /* Suffix to stop at */
 EXTERN  char            *machine;       /* The machine id */
 EXTERN	char		*callname;	/* argv[0] */
-EXTERN  char            *rts;           /* The runtime-system id */
+EXTERN  char            *rts;           /* The runtime-system */
+EXTERN  char            *rtsuf;         /* The runtime-system module suffix */
+EXTERN	char		*Optlist;	/* Which optimizers */
 
 EXTERN  list_head       arguments;      /* List of arguments */
 EXTERN  list_head       flags;          /* List of flags */

@@ -175,6 +175,8 @@ vieuwargs(argc,argv) char **argv ; {
 			hide=YES ;
 			break ;
 	   case 'O':    Optflag++ ;
+			Optlist= &argp[2] ;
+			eaten=1 ;
 			break ;
 	   case 'v':    if ( argp[2] ) {
 				v_flag += atoi(&argp[2]) ;

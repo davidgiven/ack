@@ -84,6 +84,7 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 		scan_found();
 		return ;
 	}
+	if (! f_scan) return;
 	scanlist(f_scan, scan) {
 		trafo= t_cont(*scan) ;
 		if ( satisfy(trafo,suffix) ) {
@@ -129,10 +130,10 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 				scan_found() ;
 				return ;
 			}
-			if ( l_next(*scan) ) {
-				try(l_next(*scan),trafo->t_out);
+			if (! l_next(*scan) && !stopsuffix) {
+				scan_found() ;
 			} else {
-				if ( !stopsuffix ) scan_found() ;
+				try(l_next(*scan),trafo->t_out);
 			}
 			trafo->t_scan= NO ;
 		}
