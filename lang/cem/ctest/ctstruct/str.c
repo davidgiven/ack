@@ -153,7 +153,7 @@ struct w3 setp1(count) {
 		return(myp) ;
 	}
 	myp = setp1(count-1) ;
-	myp.w3_a[count-1] = 99-count ;
+	myp.w3_a[count-1] = 99-count-1 ;
 	return(myp) ;
 }
 
