@@ -468,7 +468,11 @@ do_undef(argidf)
 				id->id_macro = (struct macro *) 0;
 			}
 		} /* else: don't complain */
-		if (!argidf) SkipToNewLine();
+		if (!argidf) {
+			if (SkipToNewLine())
+				if (!options['o'])
+					lexstrict("garbage following #undef");
+		}
 	}
 	else
 		lexerror("illegal #undef construction");

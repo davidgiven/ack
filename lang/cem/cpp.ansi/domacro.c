@@ -478,7 +478,10 @@ do_undef(argstr)
 		} /* else: don't complain */
 		if (!argstr){
 			free(str);
-			SkipToNewLine();
+			if (SkipToNewLine()) {
+				if (!options['o'])
+					strict("garbage following #else");
+			}
 		}
 	}
 	else
