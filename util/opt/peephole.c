@@ -655,9 +655,17 @@ basicblock(alpp) line_p *alpp; {
 		lpp = next;
 	}
 	lpp = alpp;
-	if (repl_muls) while ((*lpp) != (line_p) 0) {
+	if (repl_muls) {
+	    while ((lp = *lpp) != (line_p) 0 && (lp->l_instr&BMASK) != op_lab) {
 		line_p b_repl, e_repl;
-		int cnt = repl_mul(*lpp, &b_repl, &e_repl);
+		int cnt;
+		
+		if ((cnt = (lp->l_instr & BMASK)) != op_loc && cnt != op_ldc) {
+			lpp = &lp->l_next;
+			continue;
+		}
+
+		cnt = repl_mul(lp, &b_repl, &e_repl);
 
 		lp = *lpp;
 		if (cnt > 0 && cnt <= repl_muls) {
@@ -677,6 +685,7 @@ basicblock(alpp) line_p *alpp; {
 			}
 			lpp = &lp->l_next;
 		}
+	    }
 	}
 	return madeopt;
 }
@@ -696,9 +705,6 @@ repl_mul(lp, b, e)
 	*b = 0;
 	if (! next) return 0;
 	if ((ins = (next->l_instr & BMASK)) != op_mli && ins != op_mlu) {
-		return 0;
-	}
-	if ((ins = (lp->l_instr & BMASK)) != op_loc && ins != op_ldc) {
 		return 0;
 	}
 	switch(next->l_optyp) {

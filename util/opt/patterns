@@ -32,6 +32,7 @@ adp sti $1!=0 && $2==w: stf $1
 adp sti $1!=0 && $2==2*w:       sdf $1
 asp $1==0:
 asp asp :       asp $1+$2
+dup asp $1<=$2:	asp $2-$1
 blm $1==0 : asp 2*p
 cmi zeq $1==w:  beq $2
 cmi zge $1==w:  bge $2
