@@ -33,7 +33,7 @@ compact(nr, low, up)
 	*/
 	arith diff = up - low;
 
-	return (nr != 0 && diff >= 0 && diff / nr <= (DENSITY - 1));
+	return (nr == 0 || (diff >= 0 && diff / nr <= (DENSITY - 1)));
 }
 
 static struct switch_hdr *switch_stack = 0;
@@ -106,7 +106,8 @@ code_endswitch()
 		C_rom_cst(sh->sh_lowerbd);
 		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
-		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
+		if (sh->sh_nrofentries)
+		    for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			ASSERT(ce);
 			if (val == ce->ce_value) {
 				C_rom_ilb(ce->ce_label);

@@ -112,6 +112,7 @@ deleted, is now a debug-flag
 	}
 
 #ifdef ___XXX___
+deleted, is now a debug-flag
 	case 'E' :	/* run preprocessor only, with #<int>	*/
 #ifndef NOPP
 		options['E'] = 1;
@@ -161,6 +162,7 @@ deleted, is now a debug-flag
 		break;
 
 #ifdef ___XXX___
+deleted, is now a debug-flag
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
 #ifndef NOPP
 		options['E'] = 1;
@@ -171,8 +173,8 @@ deleted, is now a debug-flag
 		break;
 #endif ___XXX___
 
-#ifdef USE_TMP
 	case 'T' : {
+#ifdef USE_TMP
 		extern char *C_tmpdir;
 		if (*text)
 			C_tmpdir = text;
