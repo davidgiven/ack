@@ -168,9 +168,9 @@ set_Rflag(argp) register char *argp ; {
 	register int length ;
 	char *eq, *colon ;
 
-	eos= index(&argp[2],'-');
-	eq= index(&argp[2],EQUAL) ;
-	colon= index(&argp[2],':');
+	eos= strindex(&argp[2],'-');
+	eq= strindex(&argp[2],EQUAL) ;
+	colon= strindex(&argp[2],':');
 	if ( !eos ) {
 		eos= eq ;
 	} else {
@@ -479,7 +479,7 @@ int mapexpand(mapentry,cflag)
 	register char *space ;
 	int length ;
 
-	star=index(mapentry,STAR) ;
+	star=strindex(mapentry,STAR) ;
 	space=firstblank(mapentry) ;
 	if ( star >space ) star= (char *)0 ;
 	if ( star ) {
@@ -523,7 +523,7 @@ doassign(line,star,length) char *line, *star ; {
 	for ( ; *ptr && *ptr!=SPACE && *ptr!=TAB && *ptr!=EQUAL ; ptr++ ) {
 		gr_add(&name,*ptr) ;
 	}
-	ptr= index(ptr,EQUAL) ;
+	ptr= strindex(ptr,EQUAL) ;
 	if ( !ptr ) {
 		error("Missing %c in assignment %s",EQUAL,line);
 		return ;
@@ -611,7 +611,7 @@ addargs(string) char *string ; {
 	register char *temp, *repc ;
 	register list_elem *elem ;
 
-	repc=index(string,C_IN) ;
+	repc=strindex(string,C_IN) ;
 	if ( repc ) {
 		/* INPUT FILE TOKEN seen, replace it and scan further */
 		if ( repc==string && string[1]==0 ) {
@@ -637,7 +637,7 @@ addargs(string) char *string ; {
 		}
 		return ;
 	}
-	repc=index(string,C_OUT) ;
+	repc=strindex(string,C_OUT) ;
 	if ( repc ) {
 		/* replace the outfile token as with the infile token */
 #ifdef DEBUG

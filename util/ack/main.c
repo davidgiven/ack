@@ -251,7 +251,7 @@ vieuwargs(argc,argv) char **argv ; {
 firstarg(argp) register char *argp ; {
 	register char *name ;
 
-	name=rindex(argp,'/') ;
+	name=strrindex(argp,'/') ;
 	if ( name && *(name+1) ) {
 		name++ ;
 	} else {
@@ -270,7 +270,7 @@ process(arg) char *arg ; {
 #ifdef DEBUG
 	if ( debug ) vprint("Processing %s\n",arg) ;
 #endif
-	p_suffix= rindex(arg,SUFCHAR) ;
+	p_suffix= strrindex(arg,SUFCHAR) ;
 	orig.p_keep= YES ;      /* Don't throw away the original ! */
 	orig.p_keeps= NO;
 	orig.p_path= arg ;
