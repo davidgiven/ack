@@ -16,14 +16,14 @@ cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
 }
 
 char *
-ecvt(long double value, int ndigit, int *decpt, int *sign)
+_ecvt(long double value, int ndigit, int *decpt, int *sign)
 {
 
 	return cvt(value, ndigit, decpt, sign, 1);
 }
 
 char *
-fcvt(long double value, int ndigit, int *decpt, int *sign)
+_fcvt(long double value, int ndigit, int *decpt, int *sign)
 {
 	return cvt(value, ndigit, decpt, sign, 0);
 }

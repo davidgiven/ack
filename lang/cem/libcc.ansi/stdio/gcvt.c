@@ -11,14 +11,14 @@
 #define	USE_EXP(exp, ndigits)	(((exp) < LOW_EXP + 1) || (exp >= ndigits + 1))
 
 char *
-gcvt(long double value, int ndigit, char *s, int flags)
+_gcvt(long double value, int ndigit, char *s, int flags)
 {
 	int sign, dp;
 	register char *s1, *s2;
 	register int i;
 	register int nndigit = ndigit;
 
-	s1 = ecvt(value, ndigit, &dp, &sign);
+	s1 = _ecvt(value, ndigit, &dp, &sign);
 	s2 = s;
 	if (sign) *s2++ = '-';
 	else if (flags & FL_SIGN)

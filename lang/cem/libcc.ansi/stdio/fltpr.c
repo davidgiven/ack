@@ -13,7 +13,7 @@ _pfloat(long double r, register char *s, int n, int flags)
 	int sign, dp;
 	register int i;
 
-	s1 = fcvt(r, n, &dp, &sign);
+	s1 = _fcvt(r, n, &dp, &sign);
 	if (sign)
 		*s++ = '-';
 	else if (flags & FL_SIGN)
@@ -45,7 +45,7 @@ _pscien(long double r, register char *s, int n, int flags)
 	int sign, dp; 
 	register char *s1;
 
-	s1 = ecvt(r, n + 1, &dp, &sign);
+	s1 = _ecvt(r, n + 1, &dp, &sign);
 	if (sign)
 		*s++ = '-';
 	else if (flags & FL_SIGN)

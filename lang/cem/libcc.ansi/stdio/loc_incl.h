@@ -20,9 +20,9 @@ FILE *fdopen(int fd, const char *mode);
 #ifndef	NOFLOAT
 char *_pfloat(long double r, register char *s, int n, int flags);
 char *_pscien(long double r, register char *s, int n, int flags);
-char *ecvt(long double value, int ndigit, int *decpt, int *sign);
-char *fcvt(long double value, int ndigit, int *decpt, int *sign);
-char *gcvt(long double value, int ndigit, char *s, int flags);
+char *_ecvt(long double value, int ndigit, int *decpt, int *sign);
+char *_fcvt(long double value, int ndigit, int *decpt, int *sign);
+char *_gcvt(long double value, int ndigit, char *s, int flags);
 #endif	/* NOFLOAT */
 
 #define	FL_LJUST	0x0001		/* left-justify field */
