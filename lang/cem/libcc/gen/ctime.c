@@ -1,5 +1,5 @@
 /* $Header$ */
-#ifdef __BSD_2
+#ifdef __BSD4_2
 #include <sys/time.h>
 #else
 #include <time.h>
