@@ -33,6 +33,7 @@
 #define extnd_hol	B_ex_hol
 #define extnd_part	B_ex_part
 #define extnd_cont	B_ex_cont
+#define extnd_main	B_ex_main
 #define gen1		B_gen1
 #define gen2		B_gen2
 #define gen4		B_gen4
@@ -51,7 +52,7 @@ extern File *codefile;
 
 extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
-	    *extnd_part(), *extnd_cont();
+	    *extnd_part(), *extnd_cont(), *extnd_main();
 
 #define 	swtxt() 	switchseg( SEGTXT)
 #define		bss(n)		fprint(codefile, BSS_FMT, (long)(n))
