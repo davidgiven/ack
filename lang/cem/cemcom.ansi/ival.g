@@ -61,7 +61,10 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
 			if (tpp) {
-				if (is_ld_cst(*expp) || is_fp_cst(*expp) || level >= L_LOCAL) {
+				if (level >= L_LOCAL
+				    || is_ld_cst(*expp)
+				    || is_fp_cst(*expp)
+				    || (*expp)->ex_class == String) {
 					gen_simple_exp(tpp, expp);
 					free_expression(*expp);
 					*expp = 0;

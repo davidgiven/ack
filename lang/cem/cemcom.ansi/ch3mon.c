@@ -56,7 +56,7 @@ ch3mon(oper, expp)
 			(*expp)->ex_flags &= ~EX_ILVALUE;
 		}
 		break;
-	case '&':
+	case ADDRESSOF:
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
 			(*expp)->ex_type = pointer_to((*expp)->ex_type, 0);
 		}
@@ -87,7 +87,7 @@ ch3mon(oper, expp)
 				if (def->df_sc == REGISTER) {
 					expr_error(*expp,
 					"& on register variable not allowed");
-					break;	/* break case '&' */
+					break;	/* break case ADDRESSOF */
 				}
 			}
 			(*expp)->ex_type = pointer_to((*expp)->ex_type,

@@ -495,7 +495,7 @@ any2opnd(expp, oper)
 	if (!*expp)
 		return;
 
-	if (oper == SIZEOF || oper == '&') return;
+	if (oper == SIZEOF || oper == ADDRESSOF) return;
 
 	switch ((*expp)->ex_type->tp_fund)	{
 	case CHAR:

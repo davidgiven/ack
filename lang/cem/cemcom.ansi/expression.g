@@ -283,7 +283,9 @@ expression(struct expr **expp;)
 
 unop(int *oper;) :
 	['*' | '&' | '-' | '+' | '!' | '~' | PLUSPLUS | MINMIN]
-	{*oper = DOT;}
+	{   if (DOT == '&') DOT = ADDRESSOF;
+	    *oper = DOT;
+	}
 ;
 
 multop:

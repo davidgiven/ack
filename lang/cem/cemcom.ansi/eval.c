@@ -70,7 +70,9 @@ EVAL(expr, val, code, true_label, false_label)
 	int val, code;
 	label true_label, false_label;
 {
-	register int gencode = (code == TRUE && expr->ex_type->tp_size > 0);
+	register int gencode = (code == TRUE
+				&& (expr->ex_type->tp_size > 0
+				    || expr->ex_type->tp_fund == FUNCTION));
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/

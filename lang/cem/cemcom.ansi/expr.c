@@ -48,6 +48,7 @@ rank_of(oper)
 	case MINMIN:
 	case CAST:
 	case SIZEOF:
+	case ADDRESSOF:
 		return 2;			/* monadic */
 	case '*':
 	case '/':

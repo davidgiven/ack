@@ -70,12 +70,25 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case '(':				/* 3.3.2.2 */
+#if 1
 		if (	expp_tp->tp_fund == POINTER &&
 			expp_tp->tp_up->tp_fund == FUNCTION
 		)	{
 			ch3mon('*', expp);
 			expp_tp = (*expp)->ex_type;
 		}
+#else
+		if (expp_tp->tp_fund != POINTER
+		    || expp->tp_up->tp_fund != FUNCTION) {
+			expr_error(*expp, "call of non-function (%s)",
+				symbol2str(expp_tp->tp_fund));
+			/* leave the expression; it may still serve */
+			free_expression(expr);	/* there go the parameters */
+			*expp = new_oper(error_type,
+					*expp, '(', (struct expr *)0);
+		}
+#endif
+#if 1
 		if (expp_tp->tp_fund != FUNCTION)	{
 			expr_error(*expp, "call of non-function (%s)",
 				symbol2str(expp_tp->tp_fund));
@@ -84,6 +97,7 @@ ch3bin(expp, oper, expr)
 			*expp = new_oper(error_type,
 					*expp, '(', (struct expr *)0);
 		}
+#endif
 		else
 			*expp = new_oper(expp_tp->tp_up,
 					*expp, '(', expr);

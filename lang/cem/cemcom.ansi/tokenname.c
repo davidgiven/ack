@@ -120,6 +120,7 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{INITCOMMA, "initcomma"},
 	{CAST, "cast"},
 	{CASTAB, "castab"},
+	{ADDRESSOF,"unary &"},
 	{POSTINCR, "postfix ++"},
 	{POSTDECR, "postfix --"},
 
