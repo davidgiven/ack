@@ -609,6 +609,22 @@ ldf loc inn $3==2*w && $2>=0 && $2<16*w :
 	lof $1+($2/(8*w))*w loc $2&(8*w-1) inn w
 loc inn $1<0 || $1>=8*$2 : asp $2 loc 0
 
+lol lol beq $1==$2 : bra $3
+loe loe beq $1==$2 : bra $3
+lil lil beq $1==$2 : bra $3
+
+lol lol bne $1==$2 :
+loe loe bne $1==$2 :
+lil lil bne $1==$2 :
+
+lol lol teq $1==$2 : loc 1
+loe loe teq $1==$2 : loc 1
+lil lil teq $1==$2 : loc 1
+
+lol lol tne $1==$2 : loc 0
+loe loe tne $1==$2 : loc 0
+lil lil tne $1==$2 : loc 0
+
 lol loc CBO stl $3==w && $1==$4 : loc $2 lol $1 CBO w stl $4
 lol loe CBO stl $3==w && $1==$4 : loe $2 lol $1 CBO w stl $4
 lol lol CBO stl $3==w && $1==$4 && $1!=$2 : lol $2 lol $1 CBO w stl $4
