@@ -414,9 +414,9 @@ add_field(szp, fd, fdtpp, idf, stp)
 		/*	align this selector on the next boundary :
 			the previous selector wasn't a bitfield.
 		*/
-		field_offset = align(*szp, word_align);
-		*szp = field_offset + word_size;
-		stp->tp_align = lcm(stp->tp_align, word_align);
+		field_offset = align(*szp, int_align);
+		*szp = field_offset + int_size;
+		stp->tp_align = lcm(stp->tp_align, int_align);
 		bits_declared = (arith)0;
 		field_busy = 1;
 	}
@@ -424,9 +424,9 @@ add_field(szp, fd, fdtpp, idf, stp)
 	if (fd->fd_width > bits_in_type - bits_declared)	{
 		/*	field overflow: fetch next memory unit
 		*/
-		field_offset = align(*szp, word_align);
-		*szp = field_offset + word_size;
-		stp->tp_align = lcm(stp->tp_align, word_align);
+		field_offset = align(*szp, int_align);
+		*szp = field_offset + int_size;
+		stp->tp_align = lcm(stp->tp_align, int_align);
 		bits_declared = fd->fd_width;
 	}
 	else

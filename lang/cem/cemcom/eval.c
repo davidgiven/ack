@@ -482,7 +482,7 @@ EVAL(expr, val, code, true_label, false_label)
 			if (gencode) {
 				if (is_struct_or_union(tp->tp_fund)) {
 					C_lfr(pointer_size);
-					load_block(tp->tp_size, word_align);
+					load_block(tp->tp_size, (int) word_size);
 				}
 				else
 					C_lfr(ATW(tp->tp_size));
