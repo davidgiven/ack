@@ -53,7 +53,7 @@ mktab:	mktab.o $(LIBS)
 
 mktab.o:	scan.c optim.h param.h pattern.h types.h
 
-pop_push.c ./pop_push.h: $(EMHOME)/etc/em_table pop_push.awk
+pop_push.c pop_push.h: $(EMHOME)/etc/em_table pop_push.awk
 	awk -f pop_push.awk < $(EMHOME)/etc/em_table > pop_push.c
 
 depend: pattern.c
@@ -88,10 +88,12 @@ clean:
 		pop_push.c pop_push.h
 
 regnoglob.o:	reg.c
-		$(CC) $(CFLAGS) -c -o regnoglob.o reg.c
+		$(CC) $(CFLAGS) -c reg.c
+		mv reg.o regnoglob.o
 
 regglob.o:	reg.c
-		$(CC) $(CFLAGS) -c -DGLOBAL_OPT -o regglob.o reg.c
+		$(CC) $(CFLAGS) -c -DGLOBAL_OPT reg.c
+		mv reg.o regglob.o
 
 # the next lines are generated automatically
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
