@@ -22,7 +22,7 @@ cd to ~/mach/proto/ncg, and inspect file param.h. The constant MAXEMLINES
 should be at least 40. Edit the file if necessary.
 
 cd to ~/util/ncgg, and inspect file param.h. The constant MAXNODES should
-have as parameters at least 1500 and 1350. If this is not the case, edit the
+have as parameter at least 1200. If this is not the case, edit the
 file and type 'make install' to generate a new ncgg.
 
 If some compilations fail, inspect file Out in the appropriate subdirectory
