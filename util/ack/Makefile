@@ -36,7 +36,7 @@ cmp:		ack ack.1
 		-cmp ack.1 $(MANDIR)/ack.1
 
 ack.1:		ack.1.X
-		tbl < ack.1.X > ack.1
+		-sh -c 'if tbl < ack.1.X > ack.1 ; then : ; else cp ack.1.X ack.1 ; fi
 
 clean:
 		-rm -f *.old *.o ack ack.1
