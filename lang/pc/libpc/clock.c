@@ -29,6 +29,10 @@ struct tbuf {
 	long	cstime;
 };
 
+#ifndef EM_WSIZE
+#define EM_WSIZE _EM_WSIZE
+#endif
+
 int clock() {
 	struct tbuf t;
 

@@ -14,7 +14,7 @@ extern	_trp();
 #define NITER	5
 
 static double
-ldexp(fl,exp)
+Ldexp(fl,exp)
 	double fl;
 	int exp;
 {
@@ -63,8 +63,8 @@ _sqt(x)
 		exponent--;
 		val *= 2;
 	}
-	val = ldexp(val + 1.0, exponent/2 - 1);
-	/* was: val = (val + 1.0)/2.0; val = ldexp(val, exponent/2); */
+	val = Ldexp(val + 1.0, exponent/2 - 1);
+	/* was: val = (val + 1.0)/2.0; val = Ldexp(val, exponent/2); */
 	for (exponent = NITER - 1; exponent >= 0; exponent--) {
 		val = (val + x / val) / 2.0;
 	}

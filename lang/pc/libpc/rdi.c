@@ -60,15 +60,15 @@ int _nxtdig(f) struct file *f; {
 }
 
 int _getint(f) struct file *f; {
-	int signed,i,ch;
+	int is_signed,i,ch;
 
-	signed = _getsig(f);
+	is_signed = _getsig(f);
 	ch = _fstdig(f);
 	i = 0;
 	do
 		i = i*10 - ch;
 	while ((ch = _nxtdig(f)) >= 0);
-	return(signed ? i : -i);
+	return(is_signed ? i : -i);
 }
 
 int _rdi(f) struct file *f; {

@@ -27,15 +27,15 @@ extern int	_fstdig();
 extern int	_nxtdig();
 
 long _rdl(f) struct file *f; {
-	int signed,ch; long l;
+	int is_signed,ch; long l;
 
 	_rf(f);
 	_skipsp(f);
-	signed = _getsig(f);
+	is_signed = _getsig(f);
 	ch = _fstdig(f);
 	l = 0;
 	do
 		l = l*10 - ch;
 	while ((ch = _nxtdig(f)) >= 0);
-	return(signed ? l : -l);
+	return(is_signed ? l : -l);
 }

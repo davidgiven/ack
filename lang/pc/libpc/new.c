@@ -34,6 +34,7 @@ struct adm	*_highp = 0;
 
 _new(n,pp) int n; struct adm **pp; {
 	struct adm *p,*q;
+	int *ptmp;
 
 	n = ((n+sizeof(*p)-1) / sizeof(*p)) * sizeof(*p);
 	if ((p = _lastp) != 0)
@@ -62,6 +63,7 @@ _new(n,pp) int n; struct adm **pp; {
 	_rst(&q);
 initialize:
 	*pp = p;
-	while (p < q)
-		*((int *)p)++ = UNDEF;
+	ptmp = (int *)p;
+	while (ptmp < (int *)q)
+		*ptmp++ = UNDEF;
 }

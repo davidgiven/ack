@@ -24,6 +24,10 @@ extern		_trp();
 
 #define	assert(x)	/* nothing */
 
+#ifndef EM_WSIZE
+#define EM_WSIZE _EM_WSIZE
+#endif
+
 struct descr {
 	int	low;
 	int	diff;
@@ -39,9 +43,10 @@ _pac(ad,zd,zp,i,ap) int i; struct descr *ad,*zd; char *zp,*ap; {
 	ap += (i * ad->size);
 	i = (zd->diff + 1) * zd->size;
 	if (zd->size == 1) {
+		int *aptmp = (int *)ap;
 		assert(ad->size == EM_WSIZE);
 		while (--i >= 0)
-			*zp++ = *((int *)ap)++;
+			*zp++ = *aptmp++;
 	} else {
 		assert(ad->size == zd->size);
 		while (--i >= 0)

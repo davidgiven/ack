@@ -42,13 +42,13 @@ static dig(ch) int ch; {
 }
 
 double _rdr(f) struct file *f; {
-	int i; double e; int signed,ch;
+	int i; double e; int is_signed,ch;
 
 	r = 0;
 	pow10 = 0;
 	_rf(f);
 	_skipsp(f);
-	signed = _getsig(f);
+	is_signed = _getsig(f);
 	ch = _fstdig(f);
 	do
 		dig(ch);
@@ -74,5 +74,5 @@ double _rdr(f) struct file *f; {
 		r /= e;
 	else
 		r *= e;
-	return(signed? -r : r);
+	return(is_signed? -r : r);
 }

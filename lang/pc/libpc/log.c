@@ -11,6 +11,11 @@
 #include <math.h>
 #include <pc_err.h>
 
+#if __STDC__
+#include <pc_math.h>
+#define HUGE	HUGE_VAL
+#endif
+
 double
 _log(x)
 	double	x;

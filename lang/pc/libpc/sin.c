@@ -10,6 +10,10 @@
 #define __NO_DEFS
 #include <math.h>
 
+#if __STDC__
+#include <pc_math.h>
+#endif
+
 static double
 sinus(x, cos_flag)
 	double x;

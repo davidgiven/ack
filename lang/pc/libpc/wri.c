@@ -21,6 +21,12 @@
 
 extern		_wstrin();
 
+#ifndef EM_WSIZE
+#ifdef _EM_WSIZE
+#define EM_WSIZE _EM_WSIZE
+#endif
+#endif
+
 #if EM_WSIZE==4
 #define SZ 11
 #define MININT -2147483648

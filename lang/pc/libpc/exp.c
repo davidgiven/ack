@@ -11,8 +11,16 @@
 #include <pc_err.h>
 extern	_trp();
 
+#if __STDC__
+#include <float.h>
+#include <pc_math.h>
+#define M_MIN_D	DBL_MIN
+#define M_MAX_D	DBL_MAX
+#define HUGE	HUGE_VAL
+#endif
+
 static double
-ldexp(fl,exp)
+Ldexp(fl,exp)
 	double fl;
 	int exp;
 {
@@ -97,5 +105,5 @@ _exp(x)
 	xn = g * g;
 	x = g * POLYNOM2(xn, p);
 	n += 1;
-	return (ldexp(0.5 + x/(POLYNOM3(xn, q) - x), n));
+	return (Ldexp(0.5 + x/(POLYNOM3(xn, q) - x), n));
 }

@@ -17,7 +17,7 @@
  */
 
 /* Author: J.W. Stevenson */
-/*
+
 /* function argc:integer; extern; */
 /* function argv(i:integer):string; extern; */
 /* procedure argshift; extern; */
