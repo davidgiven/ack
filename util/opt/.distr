@@ -24,8 +24,8 @@ proinf.h
 putline.c
 reg.c
 scan.l
-shc.c
-shc.h
+tes.c
+tes.h
 special.c
 testopt
 types.h
