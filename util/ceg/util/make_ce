@@ -12,7 +12,7 @@ DEF = $(CEG)/defaults
 
 IFILES	= -I. -I$(SRC_DIR) -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(SRC_HOME)/mach
 
-CFLAGS = $(COPTIONS) $(IFILES)
+CFLAGS = $(COPTIONS) $(IFILES) -DNDEBUG
 
 .c.$(SUF):
 	cd ce ; $(CC) -c $(CFLAGS) ../$*.c ; cd ..

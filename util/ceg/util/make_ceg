@@ -14,7 +14,7 @@ DEF = $(CEG)/defaults
 
 IFILES	= -I. -I$(SRC_DIR) -I.. -I$(AS) -I$(Em) -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I../back
 
-CFLAGS = $(COPTIONS) $(IFILES)
+CFLAGS = $(COPTIONS) $(IFILES) -DNDEBUG
 LDFLAGS = $(LDOPTIONS)
 
 CEG_LIBS = $(TARGET_HOME)/modules/lib/liballoc.$(LIBSUF)\
