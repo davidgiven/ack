@@ -129,15 +129,6 @@ reduce_name_table()
 		register struct outname *np = &symbol_table[i];
 
 		np->on_type &= ~S_NEEDED;
-		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
-			long sz = np->on_valu;
-
-			switchseg(SEGBSS);
-			align_word();
-			np->on_type &= (~S_COM);
-			np->on_valu = cur_value();
-			bss(sz);
-		}
 		if (diff_index[i] && diff_index[i] == diff_index[i-1]) {
 			symbol_table[i - diff_index[i]] = *np;
 		}

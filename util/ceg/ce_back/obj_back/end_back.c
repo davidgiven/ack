@@ -9,6 +9,20 @@ finish_tables()
 /* Prepare tables for do_local_relocation() and output().
  */
 {
+	register struct outname *np = symbol_table;
+	register int i = nname;
+
+	for (; i; i--, np++) {
+		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
+                        long sz = np->on_valu;
+
+                        switchseg(SEGBSS);
+                        align_word();
+                        np->on_type &= (~S_COM);
+                        np->on_valu = cur_value();
+                        bss(sz);
+                }
+	}
 	while ( ( text - text_area) % EM_WSIZE != 0 ) 
 		text1( '\0');
 	while ( ( data - data_area) % EM_WSIZE != 0 )
