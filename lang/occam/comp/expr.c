@@ -114,13 +114,13 @@ struct expr *new_var(var)
 
 	pe->kind=E_VAR;
 
-	if ((var->type&T_TYPE)==T_VAR || var->type&T_NOTDECL) {
-		pe->type=(var->type&(~T_TYPE));
+	if ((var->s_type&T_TYPE)==T_VAR || var->s_type&T_NOTDECL) {
+		pe->type=(var->s_type&(~T_TYPE));
 		pe->type|=T_VALUE|T_LVALUE;
 	} else
-		pe->type=var->type;
+		pe->type=var->s_type;
 
-	pe->arr_siz=var->arr_siz;
+	pe->arr_siz=var->s_arr_siz;
 
 	pe->u.var=var;
 
@@ -242,8 +242,8 @@ struct expr *new_call(proc, args)
 
 	pe->kind=E_CALL;
 	pe->type=T_VOID;
-	pe->u.call.proc=proc;
-	pe->u.call.args=args;
+	pe->u.call.c_proc=proc;
+	pe->u.call.c_args=args;
 
 	return pe;
 }
@@ -299,12 +299,12 @@ static void assigned(e) register struct expr *e;
 	) {
 		register struct symbol *var;
 
-		if ((var=e->u.var)->type&T_REP) {
+		if ((var=e->u.var)->s_type&T_REP) {
 			warning("replicator index %s may not be assigned",
-				var->name);
-			var->type&= ~T_REP;
+				var->s_name);
+			var->s_type&= ~T_REP;
 		}
-		var->type|=T_ASSIGNED;
+		var->s_type|=T_ASSIGNED;
 	}
 }
 
@@ -315,11 +315,11 @@ void used(e) register struct expr *e;
 	) {
 		register struct symbol *var;
 
-		if ( ! ( (var=e->u.var)->type&(T_ASSIGNED|T_BUILTIN))
-		    && (var->type&T_TYPE)==T_VAR
-		    && var->info.vc.st.level==curr_level)
-			warning("%s used before assigned", var->name);
-		var->type|=(T_USED|T_ASSIGNED);
+		if ( ! ( (var=e->u.var)->s_type&(T_ASSIGNED|T_BUILTIN))
+		    && (var->s_type&T_TYPE)==T_VAR
+		    && var->s_info.vc.st.level==curr_level)
+			warning("%s used before assigned", var->s_name);
+		var->s_type|=(T_USED|T_ASSIGNED);
 	}
 }
 
@@ -416,10 +416,10 @@ void check_param(aform, act, err)
 		return;
 	}
 
-	if ((form->type&T_ARR)!=(act->type&T_ARR) && !(act->type&T_NOTDECL) ) {
+	if ((form->pr_type&T_ARR)!=(act->type&T_ARR) && !(act->type&T_NOTDECL) ) {
 			report(NONCORR);
 	} else {
-		switch (form->type&T_TYPE) {
+		switch (form->pr_type&T_TYPE) {
 		case T_VAR:
 			if ( ! (
 				(act->type&T_TYPE)==T_VALUE
@@ -442,7 +442,7 @@ void check_param(aform, act, err)
 			break;
 		}
 	}
-	*aform= form->next;
+	*aform= form->pr_next;
 }
 
 void destroy(e) register struct expr *e;
@@ -456,11 +456,11 @@ void destroy(e) register struct expr *e;
 			break;
 		case E_IO:
 		case E_CALL:
-			destroy(e->kind==E_IO ? e->u.io.chan : e->u.call.proc);
+			destroy(e->kind==E_IO ? e->u.io.chan : e->u.call.c_proc);
 			{
 				register struct expr_list *elp, *junk;
 
-				elp= e->kind==E_IO ? e->u.io.args : e->u.call.args;
+				elp= e->kind==E_IO ? e->u.io.args : e->u.call.c_args;
 
 				while (elp!=nil) {
 					destroy(elp->arg);

@@ -36,9 +36,9 @@
 struct symbol;
 
 struct par_list {	/* List of parameter types for a proc object */
-	struct par_list *next;
-	struct symbol *var;	/* The formal parameter while visible */
-	int type;		/* Its type */
+	struct par_list *pr_next;
+	struct symbol *pr_var;	/* The formal parameter while visible */
+	int pr_type;		/* Its type */
 };
 
 struct expr;
@@ -65,11 +65,11 @@ union type_info {
 };
 
 struct symbol {
-	char	*name;
-	short	type;
-	int	arr_siz;
-	union type_info	info;
-	struct symbol	*left, *right;
+	char	*s_name;
+	short	s_type;
+	int	s_arr_siz;
+	union type_info	s_info;
+	struct symbol	*s_left, *s_right;
 };
 
 struct symtab {
@@ -89,8 +89,8 @@ void pars_add();
 int form_offsets();
 void check_recursion();
 
-#define var_constant(v)	(((v)->type&T_TYPE)==T_CONST)
-#define var_proc(v)	(((v)->type&T_TYPE)==T_PROC)
-#define var_declared(v)	(! ((v)->type&T_NOTDECL))
+#define var_constant(v)	(((v)->s_type&T_TYPE)==T_CONST)
+#define var_proc(v)	(((v)->s_type&T_TYPE)==T_PROC)
+#define var_declared(v)	(! ((v)->s_type&T_NOTDECL))
 
 extern union type_info none;

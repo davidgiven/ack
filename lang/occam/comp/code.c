@@ -111,23 +111,23 @@ void code_val(e) register struct expr *e;
 	case E_VAR: {
 		register struct symbol *var=e->u.var;
 
-		if (var->type&T_BUILTIN)
-			Loe(var->info.vc.st.builtin, var->info.vc.offset);
+		if (var->s_type&T_BUILTIN)
+			Loe(var->s_info.vc.st.builtin, var->s_info.vc.offset);
 		else
-		if (var->info.vc.st.level==curr_level)
-			if (var->type&T_PARAM && (var->type&T_TYPE)!=T_VALUE)
-				Lil(var->info.vc.offset);
+		if (var->s_info.vc.st.level==curr_level)
+			if (var->s_type&T_PARAM && (var->s_type&T_TYPE)!=T_VALUE)
+				Lil(var->s_info.vc.offset);
 			else
-				Lol(var->info.vc.offset);
+				Lol(var->s_info.vc.offset);
 		else {
-			if (var->info.vc.offset<0)
-				lxl(curr_level-var->info.vc.st.level);
+			if (var->s_info.vc.offset<0)
+				lxl(curr_level-var->s_info.vc.st.level);
 			else
-				lxa(curr_level-var->info.vc.st.level);
-			if (var->type&T_PARAM && (var->type&T_TYPE)!=T_VALUE)
-				Lif(var->info.vc.offset);
+				lxa(curr_level-var->s_info.vc.st.level);
+			if (var->s_type&T_PARAM && (var->s_type&T_TYPE)!=T_VALUE)
+				Lif(var->s_info.vc.offset);
 			else
-				Lof(var->info.vc.offset);
+				Lof(var->s_info.vc.offset);
 		}
 		}break;
 	case E_CONST:
@@ -233,25 +233,25 @@ void code_addr(e) register struct expr *e;
 	case E_VAR: {	/* variable or channel */
 		register struct symbol *var=e->u.var;
 
-		if (var->type&T_BUILTIN)
-			lae(var->info.vc.st.builtin, var->info.vc.offset);
+		if (var->s_type&T_BUILTIN)
+			lae(var->s_info.vc.st.builtin, var->s_info.vc.offset);
 		else
-		if (var->info.vc.st.level==curr_level)
-			if (var->type&T_PARAM
-			    && (var->type&(T_TYPE|T_ARR))!=T_VALUE)
-				Lolp(var->info.vc.offset);
+		if (var->s_info.vc.st.level==curr_level)
+			if (var->s_type&T_PARAM
+			    && (var->s_type&(T_TYPE|T_ARR))!=T_VALUE)
+				Lolp(var->s_info.vc.offset);
 			else
-				lal(var->info.vc.offset);
+				lal(var->s_info.vc.offset);
 		else {
-			if (var->info.vc.offset<0)
-				lxl(curr_level-var->info.vc.st.level);
+			if (var->s_info.vc.offset<0)
+				lxl(curr_level-var->s_info.vc.st.level);
 			else
-				lxa(curr_level-var->info.vc.st.level);
-			if (var->type&T_PARAM
-			    && (var->type&(T_TYPE|T_ARR))!=T_VALUE)
-				Lofp(var->info.vc.offset);
+				lxa(curr_level-var->s_info.vc.st.level);
+			if (var->s_type&T_PARAM
+			    && (var->s_type&(T_TYPE|T_ARR))!=T_VALUE)
+				Lofp(var->s_info.vc.offset);
 			else
-				adp(var->info.vc.offset);
+				adp(var->s_info.vc.offset);
 		}
 		} break;
 	case E_TABLE:
@@ -440,12 +440,12 @@ void code_void(e) register struct expr *e;
 		break;
 	case E_CALL: {
 		register size=0;
-		register struct expr_list *elp=e->u.call.args;
-		register struct symbol *proc=e->u.call.proc->u.var;
-		register struct par_list *pars=proc->info.proc.pars;
+		register struct expr_list *elp=e->u.call.c_args;
+		register struct symbol *proc=e->u.call.c_proc->u.var;
+		register struct par_list *pars=proc->s_info.proc.pars;
 
 		while (elp!=nil) {
-			if (pars->type==T_VALUE) {
+			if (pars->pr_type==T_VALUE) {
 				code_val(elp->arg);
 				size+=vz;
 			} else {
@@ -453,27 +453,27 @@ void code_void(e) register struct expr *e;
 				size+=pz;
 			}
 			elp=elp->next;
-			pars=pars->next;
+			pars=pars->pr_next;
 		}
-		if (proc->type&T_BUILTIN) {
-			cal(proc->info.proc.st.builtin);
+		if (proc->s_type&T_BUILTIN) {
+			cal(proc->s_info.proc.st.builtin);
 			asp(size);
 		} else {
-			if (proc->info.proc.st.level>curr_level) {
+			if (proc->s_info.proc.st.level>curr_level) {
 				/* Call down */
 				lor0();
 			} else
-			if (proc->info.proc.st.level==curr_level) {
+			if (proc->s_info.proc.st.level==curr_level) {
 				/* Call at same level */
 				Lolp(0);
 			} else {
 				/* Call up */
-				lxa(curr_level-proc->info.proc.st.level);
+				lxa(curr_level-proc->s_info.proc.st.level);
 				loi(pz);
 			}
-			cal(proc_label(proc->info.proc.label, proc->name));
+			cal(proc_label(proc->s_info.proc.label, proc->s_name));
 			asp(size+pz);
-			if (proc->info.proc.file!=curr_file) fil();
+			if (proc->s_info.proc.file!=curr_file) fil();
 		}
 		} break;
 	}
@@ -486,11 +486,11 @@ void prologue(proc) register struct symbol *proc;
 
 	if (err) return;
 
-	proc->info.proc.st.level= ++curr_level;
-	proc->info.proc.file= curr_file;
-	proc->info.proc.label= ++P;
+	proc->s_info.proc.st.level= ++curr_level;
+	proc->s_info.proc.file= curr_file;
+	proc->s_info.proc.label= ++P;
 	curr_offset=min_offset=0;
-	pro(proc_label(proc->info.proc.label, proc->name));
+	pro(proc_label(proc->s_info.proc.label, proc->s_name));
 	if (curr_level==1) fil();
 }
 
@@ -515,7 +515,7 @@ void rep_init(v, e1, e2, r_info)
 	r_info->BEGIN=r_info->END=0;
 
 	code_val(e1);
-	Stl(v->info.vc.offset);
+	Stl(v->s_info.vc.offset);
 
 	if (!constant(e1) || !constant(e2)) {
 		if (constant(e2) && word_constant(e2->u.const)) {
@@ -540,10 +540,10 @@ void rep_test(v, e1, e2, r_info)
 {
 	if (err) return;
 
-	Inl(v->info.vc.offset);
+	Inl(v->s_info.vc.offset);
 
 	if (constant(e1) && constant(e2)) {
-		Lol(v->info.vc.offset);
+		Lol(v->s_info.vc.offset);
 		Loc(e1->u.const+e2->u.const);
 		if (vz>wz) {
 			cmi();

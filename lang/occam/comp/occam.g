@@ -407,11 +407,11 @@ proc_declaration		{	struct par_list *pars=nil;
 					prologue(proc);
 				}
 	  form_parms(&pars) ?	{	form_offsets(pars);
-					proc->info.proc.pars=pars;
+					proc->s_info.proc.pars=pars;
 				}
 	  '=' process		{	epilogue(proc);
 					sym_up();
-					proc->type&= ~T_RECURS;
+					proc->s_type&= ~T_RECURS;
 					min_offset=old_min_offset;
 					Label(OVER);
 				}
@@ -457,10 +457,10 @@ item(register struct expr **e;)
 					var=searchall(token.t_sval);
 
 					if (var_constant(var))
-						*e=copy_const(var->info.const);
+						*e=copy_const(var->s_info.const);
 					else {
 						if (var_proc(var))
-							pars=var->info.proc.pars;
+							pars=var->s_info.proc.pars;
 						*e=new_var(var);
 					}
 				}
@@ -468,13 +468,13 @@ item(register struct expr **e;)
 		  [	  subscript(&byte, &e1)
 				{	*e=new_node('[', *e, e1, byte); }
 			| '('	{	if (!var_declared(var)) {
-						var->type=T_PROC|T_USED|T_NOTDECL;
-						var->info.proc.pars=nil;
+						var->s_type=T_PROC|T_USED|T_NOTDECL;
+						var->s_info.proc.pars=nil;
 						err=1;
 					}
 					if (!var_proc(var)) {
 						report("%s is not a named process",
-							var->name);
+							var->s_name);
 						err=1;
 					}
 				}

@@ -13,15 +13,15 @@
 #define E_CALL	7
 
 struct table {
-	long	val;
 	struct table	*next;
+	long	val;
 };
 
 struct expr;
 
 struct expr_list {
-	struct expr *arg;
 	struct expr_list	*next;
+	struct expr *arg;
 };
 
 struct expr {
@@ -47,8 +47,8 @@ struct expr {
 		} io;
 
 		struct {
-			struct expr *proc;
-			struct expr_list *args;
+			struct expr *c_proc;
+			struct expr_list *c_args;
 		} call;
 	} u;
 };

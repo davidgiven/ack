@@ -23,8 +23,8 @@ static struct symbol **search_sym(tree, name)
 	register struct symbol **aps=tree, *ps;
 	register cmp;
 
-	while ((ps= *aps)!=nil && (cmp=strcmp(name, ps->name))!=0)
-		aps= cmp<0 ? &ps->left : &ps->right;
+	while ((ps= *aps)!=nil && (cmp=strcmp(name, ps->s_name))!=0)
+		aps= cmp<0 ? &ps->s_left : &ps->s_right;
 
 	return aps;
 }
@@ -48,14 +48,14 @@ struct symbol *insert(name, type, arr_siz, info)
 
 	ps= (struct symbol *) malloc(sizeof *ps);
 
-	ps->name=name;
+	ps->s_name=name;
 
 	if (included && curr_level==0)	/* Top_level symbol in include file */
 		type|=T_USED;		/* are always used */
-	ps->type=type;
-	ps->arr_siz=arr_siz;
-	ps->info= *info;
-	ps->left=ps->right=nil;
+	ps->s_type=type;
+	ps->s_arr_siz=arr_siz;
+	ps->s_info= *info;
+	ps->s_left=ps->s_right=nil;
 	*aps=ps;
 
 	return ps;
@@ -81,7 +81,7 @@ struct symbol *searchall(name) char *name;
 void check_recursion(proc)
 	register struct expr *proc;
 {
-	if (proc->kind==E_VAR && proc->u.var->type&T_RECURS)
+	if (proc->kind==E_VAR && proc->u.var->s_type&T_RECURS)
 		warning("recursion not allowed");
 }
 
@@ -101,28 +101,28 @@ void sym_down()
 static void sym_destroy(ps) register struct symbol *ps;
 {
 	if (ps!=nil) {
-		sym_destroy(ps->left);
-		sym_destroy(ps->right);
-		if ( !(ps->type&T_NOTDECL) ) {
-			if ( !(ps->type&T_USED) )
-				warning("%s: never used", ps->name);
+		sym_destroy(ps->s_left);
+		sym_destroy(ps->s_right);
+		if ( !(ps->s_type&T_NOTDECL) ) {
+			if ( !(ps->s_type&T_USED) )
+				warning("%s: never used", ps->s_name);
 			else
-			if ( !(ps->type&T_ASSIGNED) && (ps->type&T_TYPE)==T_VAR)
-				warning("%s: never assigned", ps->name);
+			if ( !(ps->s_type&T_ASSIGNED) && (ps->s_type&T_TYPE)==T_VAR)
+				warning("%s: never assigned", ps->s_name);
 		}
-		if ((ps->type&T_TYPE)==T_PROC) {
+		if ((ps->s_type&T_TYPE)==T_PROC) {
 			register struct par_list *par, *junk;
 
-			par=ps->info.proc.pars;
+			par=ps->s_info.proc.pars;
 			while (par!=nil) {
 				junk=par;
-				par=par->next;
+				par=par->pr_next;
 				free(junk);
 			}
 		} else
-		if ((ps->type&T_TYPE)==T_CONST)
-			destroy(ps->info.const);
-		free(ps->name);
+		if ((ps->s_type&T_TYPE)==T_CONST)
+			destroy(ps->s_info.const);
+		free(ps->s_name);
 		free(ps);
 	}
 }
@@ -174,12 +174,12 @@ void pars_add(aapars, type, var)
 
 	pl= (struct par_list *) malloc(sizeof *pl);
 
-	pl->type=type;
-	pl->var=var;
-	pl->next= **aapars;
+	pl->pr_type=type;
+	pl->pr_var=var;
+	pl->pr_next= **aapars;
 
 	**aapars=pl;
-	*aapars= &pl->next;
+	*aapars= &pl->pr_next;
 }
 
 int form_offsets(pars) register struct par_list *pars;
@@ -189,19 +189,19 @@ int form_offsets(pars) register struct par_list *pars;
 
 	if (pars==nil) return pz;
 
-	if ((var=pars->var)!=nil) {
-		register offset=form_offsets(pars->next);
+	if ((var=pars->pr_var)!=nil) {
+		register offset=form_offsets(pars->pr_next);
 
-		switch (var->type&T_TYPE) {
+		switch (var->s_type&T_TYPE) {
 		case T_VAR:
 		case T_CHAN:
-			var->info.vc.st.level=curr_level;
-			var->info.vc.offset=offset;
+			var->s_info.vc.st.level=curr_level;
+			var->s_info.vc.offset=offset;
 			return offset+pz;
 		case T_VALUE:
-			var->info.vc.st.level=curr_level;
-			var->info.vc.offset=offset;
-			return offset+ ((var->type&T_ARR) ? pz : vz);
+			var->s_info.vc.st.level=curr_level;
+			var->s_info.vc.offset=offset;
+			return offset+ ((var->s_type&T_ARR) ? pz : vz);
 		}
 	}
 }
