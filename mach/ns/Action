@@ -1,5 +1,5 @@
 name "NS16032 assembler"
-dir as
+dir nas
 end
 name "NS16032 backend"
 dir cg
