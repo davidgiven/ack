@@ -12,12 +12,6 @@
 #include	"comm1.h"
 #include	"y.tab.h"
 
-#ifndef __STDC__
-extern char *sprintf();
-#else
-/* sprintf should be declared in stdio.h, as returning an int */
-#endif
-
 valu_t
 load(ip)
 register item_t *ip;
