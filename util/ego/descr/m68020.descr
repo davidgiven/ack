@@ -79,8 +79,8 @@ register save costs:
 	5 -> (50,10)
 	6 -> (58,10)
 	7 -> (66,10)
-	8 -> (84,10)
-	9 -> (92,10)
+	8 -> (74,10)
+	9 -> (82,10)
 	0 -> (0,0)
 %%UD
 access costs of global variables:
