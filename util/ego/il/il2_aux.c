@@ -410,7 +410,7 @@ STATIC selected(a)
 
 STATIC compare(x,best,space)
 	call_p x, *best;
-	short  space;
+	long  space;
 {
 	/* See if x is better than the current best choice */
 
@@ -428,7 +428,7 @@ STATIC compare(x,best,space)
 
 STATIC call_p best_one(list,space)
 	call_p list;
-	short  space;
+	long  space;
 {
 	/* Find the best candidate of the list
 	 * that has not already been selected. The
@@ -438,7 +438,7 @@ STATIC call_p best_one(list,space)
 	 */
 
 	call_p best = (call_p) 0;
-	call_p x,c;
+	call_p c;
 
 	for (c = list; c != (call_p) 0; c = c->cl_cdr) {
 		if (IS_SELECTED(c)) {
@@ -510,7 +510,7 @@ STATIC single_calls(proclist)
 select_calls(proclist,ccf,space)
 	proc_p proclist;
 	FILE   *ccf;
-	short space ;
+	long space ;
 {
 	/* Select all calls that are to be expanded in line. */
 
@@ -699,7 +699,7 @@ append_abstract(a,p)
 
 Sstatist(list,space)
 	call_p list;
-	short space;
+	long space;
 {
 	call_p c;
 
@@ -718,7 +718,7 @@ Sstatist(list,space)
 
 Sstat(proclist,space)
 	proc_p proclist;
-	short space;
+	long space;
 {
 	proc_p p;
 

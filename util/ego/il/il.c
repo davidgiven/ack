@@ -26,7 +26,8 @@
 int calnr;
 int complete_program;
 calcnt_p cchead;	/* call-count info of current proc */
-STATIC short space = 0;
+STATIC long space = 0;
+STATIC long total_size = 0;
 
 STATIC char cname[] = "/usr/tmp/ego.i1.XXXXXX";
 STATIC char ccname[] = "/usr/tmp/ego.i2.XXXXXX";
@@ -87,6 +88,7 @@ pass1(lnam,bnam,cnam)
 		/* address of em text in em-file */
 		/* address of graph in basic block file */
 		curproc->P_SIZE = proclength(curproc); /* #instructions */
+		total_size += curproc->P_SIZE;
 		if (BIG_PROC(curproc)) {
 			/* curproc is too large to be expanded in line */
 			UNSUITABLE(curproc);
@@ -120,7 +122,7 @@ STATIC char cname2[] = "/usr/tmp/ego.i4.XXXXXX";
 
 pass2(cnam,space)
 	char *cnam;
-	short space;
+	long space;
 {
 	FILE  *cf, *cf2, *ccf;
 	call_p c,a;
@@ -283,6 +285,7 @@ il_flags(p)
 		while (*p != '\0') {
 			space = 10*space +*p++ -'0';
 		}
+		space = total_size * space / 100 ;
 		break;
 	case 'a':
 		complete_program = 1;

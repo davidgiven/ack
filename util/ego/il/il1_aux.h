@@ -30,7 +30,7 @@ extern bool par_overlap();	/* (offset off1, int t1, offset off2, int t2)
 extern short looplevel();	/* (bblock_p b)
 				 * Determine the loop nesting level of b.
 				 */
-extern short proclength();	/* (proc_p p)
+extern int proclength();	/* (proc_p p)
 				 * Determine the number of EM instructions
 				 * in p. Do not count pseudos.
 				 */

@@ -164,12 +164,12 @@ short looplevel(b)
 
 
 
-short proclength(p)
+int proclength(p)
 	proc_p p;
 {
 	/* count the number of EM instructions of p */
 
-	register short cnt;
+	register int cnt;
 	register bblock_p b;
 	register line_p l;
 

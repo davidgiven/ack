@@ -156,7 +156,6 @@ remunit(kind,p,l)
 	register bblock_p b;
 	bblock_p next;
 	Lindex   pi;
-	loop_p   lp;
 
 	if (kind == LDATA) {
 		remlines(l);
