@@ -12,6 +12,26 @@ x)
 *)
 	echo "Sorry, there is something wrong with your PATH ($PATH)" ;;
 esac
+echo "echo t_$$" > X_Y_Z_
+chmod +x X_Y_Z_
+case x`X_Y_Z_`
+in
+xt_$$)
+	;;
+x)
+	(cd ../bin ; echo Sorry, . is not in your shell PATH" ($PATH)")
+	STAT=2 ;;
+*)
+	echo "Sorry, there is something wrong with your PATH ($PATH)" ;;
+esac
+rm -f X_Y_Z_
+case $STAT
+in
+2)
+	;;
+*)
+	hash -r ;;
+esac
 echo "echo l_$$" >x_tpath
 chmod +x x_tpath
 case x`(x_tpath) 2>/dev/null`
