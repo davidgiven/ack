@@ -11,7 +11,6 @@ IMPLEMENTATION MODULE RealConversions;
   Version:      $Header$
 *)
 
-  FROM EM IMPORT FIF;
 
   PROCEDURE RealToString(arg: REAL;
 		width, digits: INTEGER;
@@ -21,6 +20,15 @@ IMPLEMENTATION MODULE RealConversions;
 	LongRealToString(LONG(arg), width, digits, str, ok);
   END RealToString;
 
+  TYPE
+	Powers = RECORD
+		pval: LONGREAL;
+		rpval: LONGREAL;
+		exp: INTEGER
+	END;
+
+  VAR Powers10: ARRAY[1..6] OF Powers;
+
   PROCEDURE LongRealToString(arg: LONGREAL;
 		width, digits: INTEGER;
 		VAR str: ARRAY OF CHAR;
@@ -28,12 +36,10 @@ IMPLEMENTATION MODULE RealConversions;
     VAR	pointpos: INTEGER;
 	i: CARDINAL;
 	ecvtflag: BOOLEAN;
-	r, intpart, fractpart: LONGREAL;
+	r: LONGREAL;
 	ind1, ind2 : CARDINAL;
 	sign: BOOLEAN;
-	tmp : CHAR;
 	ndigits: CARDINAL;
-	dummy, dig: LONGREAL;
 
   BEGIN
 	r := arg;
@@ -50,62 +56,37 @@ IMPLEMENTATION MODULE RealConversions;
 	pointpos := 0;
 	sign := r < 0.0D;
 	IF sign THEN r := -r END;
-	r := FIF(r, 1.0D, intpart);
-	fractpart := r;
-	pointpos := 0;
+	IF r # 0.0D THEN
+		IF r >= 10.0D THEN
+			FOR i := 1 TO 6 DO
+				WITH Powers10[i] DO
+					WHILE r >= pval DO
+						r := r * rpval;
+						INC(pointpos, exp)
+					END;
+				END;
+			END;
+		END;
+		IF r < 1.0D THEN
+			FOR i := 1 TO 6 DO
+				WITH Powers10[i] DO
+					WHILE r*pval < 10.0D DO
+						r := r * pval;
+						DEC(pointpos, exp)
+					END;
+				END;
+			END;
+		END;
+		(* Now, we have r in [1.0, 10.0) *)
+		INC(pointpos);
+	END;
 	ind1 := 0;
 	ok := TRUE;
-	(*
-	  Do integer part, which is now in "intpart". "r" now contains the
-	  fraction part.
-	*)
-	IF intpart # 0.0D THEN
-		ind2 := 0;
-		WHILE intpart # 0.0D DO
-			IF ind2 > HIGH(str) THEN
-				IF NOT ecvtflag THEN
-					str[0] := 0C;
-					ok := FALSE;
-					RETURN;
-				END;
-				FOR ind1 := 1 TO HIGH(str) DO
-					str[ind1-1] := str[ind1];
-				END;
-				DEC(ind2);
-			END;
-			dummy := FIF(FIF(intpart, 0.1D, intpart),10.0D, dig);
-			IF (dummy > 0.5D) AND (dig < 9.0D) THEN
-				dig := dig + 1.0D;
-			END;
-			str[ind2] := CHR(TRUNC(dig+0.5D) + ORD('0'));
-			INC(ind2);
-			INC(pointpos);
-		END;
-		i := 0;
-		ind1 := ind2;
-		WHILE ind2 > i DO
-			DEC(ind2);
-			tmp := str[i];
-			str[i] := str[ind2];
-			str[ind2] := tmp;
-			INC(i);
-		END;
-	ELSE
-		INC(pointpos);
-		IF r > 0.0D THEN
-			WHILE r < 1.0D DO
-				fractpart := r;
-				r := r * 10.0D;
-				DEC(pointpos);
-			END;
-		END;
-	END;
-	ind2 := ndigits;
+	ind2 := ndigits+1;
+
 	IF NOT ecvtflag THEN 
 		IF INTEGER(ind2) + pointpos < 0 THEN
-			ind2 := ndigits;
-			FOR i := 0 TO ndigits DO str[i] := '0'; END;
-			ind1 := ndigits+1;
+			ind2 := 0;
 		ELSE
 			ind2 := INTEGER(ind2) + pointpos
 		END;
@@ -115,24 +96,27 @@ IMPLEMENTATION MODULE RealConversions;
 		str[0] := 0C;
 		RETURN;
 	END;
-	WHILE ind1 <= ind2 DO
-		fractpart := FIF(fractpart, 10.0D, r);
+	WHILE ind1 < ind2 DO
 		str[ind1] := CHR(TRUNC(r)+ORD('0'));
+		r := 10.0D * (r - FLOATD(TRUNC(r)));
 		INC(ind1);
 	END;
-	ind1 := ind2;
-	str[ind2] := CHR(ORD(str[ind2])+5);
-	WHILE str[ind2] > '9' DO
-		str[ind2] := '0';
-		IF ind2 > 0 THEN
-			DEC(ind2);
-			str[ind2] := CHR(ORD(str[ind2])+1);
-		ELSE
-			str[ind2] := '1';
-			INC(pointpos);
-			IF NOT ecvtflag THEN
-				IF ind1 > 0 THEN str[ind1] := '0'; END;
-				INC(ind1);
+	IF ind2 > 0 THEN
+		DEC(ind2);
+		ind1 := ind2;
+		str[ind2] := CHR(ORD(str[ind2])+5);
+		WHILE str[ind2] > '9' DO
+			str[ind2] := '0';
+			IF ind2 > 0 THEN
+				DEC(ind2);
+				str[ind2] := CHR(ORD(str[ind2])+1);
+			ELSE
+				str[ind2] := '1';
+				INC(pointpos);
+				IF NOT ecvtflag THEN
+					IF ind1 > 0 THEN str[ind1] := '0'; END;
+					INC(ind1);
+				END;
 			END;
 		END;
 	END;
@@ -329,4 +313,11 @@ IMPLEMENTATION MODULE RealConversions;
 	IF (iB <= HIGH(str)) AND (ORD(ch) > ORD(' ')) THEN ok := FALSE; END
   END StringToLongReal;
 
+BEGIN
+	WITH Powers10[1] DO pval := 1.0D32; rpval := 1.0D-32; exp := 32 END;
+	WITH Powers10[2] DO pval := 1.0D16; rpval := 1.0D-16; exp := 16 END;
+	WITH Powers10[3] DO pval := 1.0D8; rpval := 1.0D-8; exp := 8 END;
+	WITH Powers10[4] DO pval := 1.0D4; rpval := 1.0D-4; exp := 4 END;
+	WITH Powers10[5] DO pval := 1.0D2; rpval := 1.0D-2; exp := 2 END;
+	WITH Powers10[6] DO pval := 1.0D1; rpval := 1.0D-1; exp := 1 END;
 END RealConversions.
