@@ -10,8 +10,9 @@
 #define INFINITE	10000
 #define NRREGTYPES	(reg_float+1)
 
-int nrinstrs;  /* number of instructions of current procedure */
-line_p *instrmap;  /* Dynamic array: instrmap[i] points to i'th instruction */
+extern int nrinstrs;  /* number of instructions of current procedure */
+extern line_p *instrmap; 
+/* Dynamic array: instrmap[i] points to i'th instruction */
 
 extern cond_p alocaltab[NRREGTYPES][NRREGTYPES],
 	alocaddrtab[NRREGTYPES][NRREGTYPES], aconsttab,
@@ -115,9 +116,6 @@ extern short alloc_id;  /* last al_id used for current procedure */
 #define LP_HEADER	lp_extend->lpx_ra.lpx_header
 #define B_BEGIN		b_extend->bx_ra.bx_begin
 #define B_END		b_extend->bx_ra.bx_end
-#define B_DIST		b_extend->bx_ra.bx_dist
-#define B_USECNT	b_extend->bx_ra.bx_usecnt
-#define B_MARK		b_extend->bx_ra.bx_mark
 
 #define DLINK(l1,l2)	l1->l_next=l2; l2->l_prev=l1
 
