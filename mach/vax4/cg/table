@@ -1774,27 +1774,35 @@ dup adp loe sti $1==4 && $4==4
 #ifdef REGVARS
 lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==1 && $5==1
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {reginc1,regvar($1)}		| |
 lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==2 && $5==2
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {reginc2,regvar($1)}		| |
 lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==4 && $5==4
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {reginc4,regvar($1)}		| |
 lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==8 && $5==8
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {reginc8,regvar($1)}		| |
 lol adp dup stl loi $1==$4 && $2==(0-1) && inreg($1)==2 && $3==4 && $5==1
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {regdec1,regvar($1)}		| |
 lol adp dup stl loi $1==$4 && $2==(0-2) && inreg($1)==2 && $3==4 && $5==2
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {regdec2,regvar($1)}		| |
 lol adp stl lil $1==$4 && $2==(0-4) && inreg($1)==2 && $3==$1
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {regdec4,regvar($1)}		| |
 lol adp dup stl loi $1==$4 && $2==(0-8) && inreg($1)==2 && $3==4 && $5==8
 		| |	remove(regvar($1))
+			erase(regvar($1))
 			| {regdec8,regvar($1)}		| |
 lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==1 && $5==1
 		| NC source1 |
