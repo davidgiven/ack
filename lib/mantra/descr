@@ -51,7 +51,7 @@ name led
 ({RTS}:.ocm.b.c={EM}/{NRT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
-		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.ocm:{TAIL}={EM}/{NLIB}ocm) \
 		(.ocm.b.c:{TAIL}={EM}/{NLIB}cc.1s {EM}/{NLIB}cc.2g) \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{NLIB}mon {EM}/lib/{M}/end_em)
 	linker
