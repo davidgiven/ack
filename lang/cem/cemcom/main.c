@@ -21,6 +21,7 @@
 #include	"LLlex.h"
 #include	"alloc.h"
 #include	"specials.h"
+#include	"ssize.h"
 
 extern struct tokenname tkidf[], tkother[];
 extern char *symbol2str();
@@ -328,8 +329,14 @@ preprocess()
 			printf(" ");
 			break;
 		case STRING:
-			printf("\"%s\" ", dot.tk_bts);
+		{
+			char sbuf[SSIZE];
+			char *bts2str();
+
+			printf("\"%s\" ", 
+				bts2str(dot.tk_bts, dot.tk_len, sbuf));
 			break;
+		}
 		case INTEGER:
 			printf("%ld ", dot.tk_ival);
 			break;

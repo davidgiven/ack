@@ -185,7 +185,7 @@ sim:	cfiles
 	$(SIM) $(SIMFLAGS) `sources $(COBJ)` $(GSRC) $(LSRC)
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-main.o: LLlex.h Lpars.h alloc.h arith.h debug.h declar.h idf.h input.h inputtype.h level.h maxincl.h myalloc.h nobitfield.h nopp.h spec_arith.h specials.h target_sizes.h tokenname.h type.h use_tmp.h
+main.o: LLlex.h Lpars.h alloc.h arith.h debug.h declar.h idf.h input.h inputtype.h level.h maxincl.h myalloc.h nobitfield.h nopp.h spec_arith.h specials.h target_sizes.h tokenname.h type.h use_tmp.h ssize.h
 idf.o: LLlex.h Lpars.h align.h alloc.h arith.h assert.h botch_free.h debug.h declar.h decspecs.h def.h idf.h idfsize.h label.h level.h nobitfield.h nopp.h sizes.h spec_arith.h specials.h stack.h storage.h struct.h type.h
 declarator.o: Lpars.h alloc.h arith.h botch_free.h declar.h expr.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h type.h
 decspecs.o: Lpars.h arith.h decspecs.h def.h level.h nobitfield.h spec_arith.h type.h

@@ -284,7 +284,8 @@ type2str(tp)
 }
 
 char *		/* the ultimate transient buffer supplier */
-next_transient()	{
+next_transient()
+{
 	static int bnum;
 	static char buf[MAXTRANS][300];
 
@@ -340,8 +341,15 @@ p1_expr(lvl, expr)
 				v->vl_value);
 		break;
 	case String:
-		printf("%s\n", expr->SG_VALUE);
+	{
+		char bts2str();
+
+		printf(
+			"%s\n",
+			bts2str(expr->SG_VALUE, expr->SG_LEN, next_transient())
+		);
 		break;
+	}
 	case Float:
 		printf("%s\n", expr->FL_VALUE);
 		break;
