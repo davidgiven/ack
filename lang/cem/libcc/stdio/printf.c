@@ -13,5 +13,5 @@ va_dcl
 	_doprnt (fmt, ap, stdout);
 	if ( io_testflag(stdout,IO_PERPRINTF) )
         	fflush(stdout);
-	va_end(list);
+	va_end(ap);
 }
