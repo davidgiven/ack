@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define	ptyp(x)		(1<<(x-sp_fspec))
 
 #define	cst_ptyp	(ptyp(sp_cst2)|ptyp(sp_cst4))

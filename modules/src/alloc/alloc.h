@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	PROGRAM'S INTERFACE TO MEMORY ALLOCATION ROUTINES		*/
 
 /*	This file serves as the interface between the program and the

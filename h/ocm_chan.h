@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	ocm_chan.h - channel definitions */
 #include <stdio.h>
 #include "ocm_parco.h"

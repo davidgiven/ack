@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* flags */
 #define	EM_PAR	0017	/* parameter type */
 #define	EM_FLO	0060	/* flow information */
