@@ -44,7 +44,7 @@ CSRC =		main.c nopt.c mkstrct.c aux.c outputdfa.c outcalls.c\
 SRCS =		Makefile nopt.h parser.h parser.g syntax.l pseudo.r\
 		patterns $(CSRC)
 
-NOFILES =	nopt.$(SUF) mkstrct.$(SUF) dfa.$(SUF) trans.$(SUF) aux.$(SUF)
+NOFILES =	nopt.$(SUF) dfa.$(SUF) trans.$(SUF) aux.$(SUF) mkstrct.$(SUF)
 
 POFILES =	parser.$(SUF) syntax.$(SUF) outputdfa.$(SUF) outcalls.$(SUF) findworst.$(SUF)\
 		initlex.$(SUF) Lpars.$(SUF)
@@ -77,7 +77,7 @@ lint:		lintparser lintnopt
 clean:
 		rm -f O_*.$(SUF)
 		rm -f O_*.c
-		rm -f $(NOFILES) main.$(SUF) mkstrct.$(SUF) $(POFILES)
+		rm -f $(NOFILES) main.$(SUF) $(POFILES)
 		rm -f $(GENFILES) parser em_nopt $(LIBOPT)
 
 # How to build stand alone version of the optimizer
@@ -110,7 +110,7 @@ lintnopt:	dfadummy $(OLINT)
 
 $(LIBOPT):	dfadummy $(NOFILES) mkstrct.$(SUF) pseudo.d incalls.d
 		rm -f $(LIBOPT)
-		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES) mkstrct.$(SUF)
+		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES)
 		-sh -c 'ranlib $(LIBOPT)'
 
 $(LIBCEOPT):
