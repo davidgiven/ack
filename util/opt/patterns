@@ -338,7 +338,7 @@ loe dec ste $1==$3:     dee $1
 loe inc ste $1==$3:     ine $1
 loe loc mli $2==0 && $3==w:     loc 0
 loe LEP adp SEP $1!=$4:	LEP $2 adp $3 SEP $4 loe $1
-lol LLP adp SLP $1!=$4:	LLP $2 adp $3 SLP $4 loe $1
+lol LLP adp SLP $1!=$4:	LLP $2 adp $3 SLP $4 lol $1
 #ifdef INT
 loe loe $2==$1-w:       lde $2
 loe loe beq $2==$1+w:   lde $1  beq $3
