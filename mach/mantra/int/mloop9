@@ -1,0 +1,296 @@
+!---------------------------------------------------------------------------
+!		MISCELLANEOUS
+!----------------------------------------------------------------------------
+ass_z:		mov	(sp)+,d0 ;	bra	5f
+ass_l:		move.b	(a3)+,-(sp) ;	move.b	(a3)+,1(sp)
+		move.w	(sp)+,d0
+5:		checksize
+		bra	e_oddz
+4:		move.l	(sp)+,d0 ;	bpl	3f
+		asr.l	wmu,d0	;	bra	8f
+2:		move.w	(sp)+,d0 ;	bpl	3f
+		asr.w	#1,d0	;	ext.l	d0
+		bra	8f
+
+asp_1W:		asp_2W:		asp_3W:		asp_4W:		asp_5W:
+		sub.w	#176,d0
+#ifndef	lword
+		asr.l	#1,d0
+#endif
+3:		add.l	d0,sp	;	jmp	(a4)
+asp_w0:		move.l	d6,d0	;	move.b	(a3)+,d0
+5:		asl.l	wmu,d0 ;	bra	3b
+asp_lw:		move.b	(a3)+,-(sp) ;	move.b	(a3)+,1(sp)
+		move.w	(sp)+,d0  ;	ext.l	d0
+6:		bmi	8f
+		asl.l	wmu,d0	;	bra	3b
+8:		neg.l	d0	;	sub.l	#1,d0
+1:		mov	und,-(sp) ;	dbra	d0,1b
+		jmp	(a4)
+asp_qw:		move.l	(sp)+,d0 ;	bra	6b
+
+!-----------------------------------------------------------------------------
+bls_z:		mov	(sp)+,d0 ;	bra	0f
+bls_l:		adroff		;	move.w	(a1),d0
+0:		checksize
+2:		move.w	(sp)+,d0 ;	bra	0f
+4:		move.l	(sp)+,d0 ;	bra	0f
+
+blm_q:		move.l	(sp)+,d0 ;	bra	0f
+blm_l:		adroff		;	move.w	(a1),d0
+		bra	0f
+blm_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
+0:		move.l	d0,d2	;	asr.w	wmu,d2
+		beq	5f	;	move.l	a1,d1
+		sub.w	#1,d2	;	move.l	(sp)+,a0	!dest. address
+		move.l	(sp)+,a1 ;	cmp.l	a0,a1
+!a1 contains source address. beware of overlap of pieces
+		beq	3f	;	bcs	2f
+1:		mov	(a1)+,(a0)+ ;	dbra	d2,1b
+3:		move.l	d1,a1
+5:		jmp	(a4)
+2:		add.l	d0,a1	;	add.l	d0,a0
+4:		mov	-(a1),-(a0) ;	dbra	d2,4b
+		bra	3b
+
+!----------------------------------------------------------------------------
+csa_z:		mov	(sp)+,d0 ;	bra	0f
+csa_l:		adroff		;	move.w	(a1),d0
+0:		sub.l	wrd,d0	;	bne	e_illins
+csa_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
+		ext.l	d0
+		add.l	#4,a0	;	subt	(a0),d0
+		blt	6f
+		comp	word(a0),d0 ;	bhi	6f
+		asl.l	#2,d0	;	add.l	wrd,d0
+		move.l	word(a0,d0),d1 ;	bne	5f
+6:		sub.l	#4,a0	;	move.l	(a0),d1
+		beq	e_case
+5:		move.l	d1,a3	;	jmp	(a4)
+
+csb_z:		mov	(sp)+,d0 ;	bra	0f
+csb_l:		adroff		;	move.w	(a1),d0
+0:		comp	wrd,d0 ;	bne	e_illins
+csb_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
+		mov	4(a0),d1 ;	sub.l	#1,d1
+		move.l	a0,a3
+!Use a3 as a general register
+		move.l	wrd,d2 ;	add.l	#4,d2
+1:		add.l	d2,a0	;	comp	(a0),d0
+		dbeq	d1,1b	;	bne	2f
+		move.l	word(a0),d1 ;	beq	e_case
+		move.l	d1,a3	;	jmp	(a4)
+2:		move.l	(a3),d1	;	beq	e_case
+		move.l	d1,a3	;	jmp	(a4)
+
+!-----------------------------------------------------------------------------
+dch_z:		move.l	(sp)+,a0 ;	move.l	(a0),-(sp)
+		move.l	ml,a0	;	cmp.l	(sp),a0
+		bls	e_badptr ;	jmp	(a4)
+
+lpb_z:		add.l	#16,(sp) ;	jmp	(a4)
+
+!----------------------------------------------------------------------------
+
+dup_1W:		mov	(sp),-(sp) ;	jmp	(a4)
+dup_l:		adroff		;	move.w	(a1),d0
+		bra	1f
+dus_z:		mov	(sp)+,d0 ;	bra	0f
+dus_l:		adroff		;	move.w	(a1),d0
+0:		checksize
+2:		move.w	(sp)+,d0 ;	bra	1f
+4:		move.l	(sp)+,d0
+1:		ble	e_oddz ;	bclr	#0,d0
+		move.l	sp,a0	;	add.l	d0,a0
+		asr.l	wmu,d0	;	sub.l	#1,d0
+3:		mov	-(a0),-(sp) ;	dbra	d0,3b
+		jmp	(a4)
+!We do not test if d0 is indeed a word multiple . This can eventually be done
+!in the usual way.
+
+!-----------------------------------------------------------------------------
+exg_z:		mov	(sp)+,d0 ;	bra	0f
+exg_l:		adroff		;	move.w	(a1),d0
+		bra	0f 
+exg_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
+0:		move.l	d7,d1	;	move.l	d0,a0
+1:		asri	#1,d0	;	dbcs	d1,1b
+		bcs	e_oddz	;	sub.l	#1,d0
+		add.l	a0,sp	;	add.l	sp,a0
+2:		mov	-(sp),d1 ;	mov	-(a0),(sp)
+		mov	d1,(a0)	;	dbra	d0,2b
+		jmp	(a4)
+
+gto_q:		move.l	(sp)+,a0 ;	bra	3f
+gto_l:		move.l	d6,a0	;	move.b	(a3)+,-(sp)
+		move.b	(a3)+,1(sp) ;	move.w	(sp)+,a0
+3:		add.l	a6,a0	;	move.l	(a0)+,a3
+		move.l	(a0)+,sp ;	move.l	(a0),a2
+		jmp	(a4)
+
+lim_z:		move.w	ignmask,-(sp) ;	jmp	(a4)
+sim_z:		move.w	(sp)+,ignmask ;	jmp	(a4)
+
+	.bss
+ignmask:  .space 2
+	.define ignmask
+	.text
+
+!---------------------------------------------------------------------------
+lor_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
+		bne	1f	;	move.l	a2,-(sp)
+		jmp	(a4)
+1:		sub.w	#1,d0	;	bne	2f
+		move.l	sp,-(sp) ;	jmp	(a4)
+2:		sub.w	#1,d0	;	bne	e_illins
+		move.l	hp,-(sp) ;	jmp	(a4)
+
+str_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
+		bne	1f	;	move.l	(sp)+,a2
+		jmp	(a4)
+1:		sub.w	#1,d0	;	bne	2f
+		move.l	(sp)+,sp ;	claimstack
+		jmp	(a4)
+2:		sub.w	#1,d0	;	bne	e_illins
+		move.l	(sp)+,d1 ;	cmp.l	nd,d1
+		bcc	3f					!break
+		cmp.l	tblmax,d1 ;	bcs	4f
+5:		move.l	d1,hp	;	jmp	(a4)
+3:		move.l	d1,-(sp) ;	add.l	#1280,(sp)
+		bsr	_break ;	testen	(sp)+
+4:		bne	e_heap	;	bra	5b
+
+!----------------------------------------------------------------------------
+rck_z:		mov	(sp)+,d0 ;	bra	0f
+rck_l:		adroff		;	move.w	(a1),d0
+0:		sub.l	wrd,d0	;	beq	rck_1W
+		sub.l	wrd,d0	;	bne	e_oddz
+		move.l	(sp)+,a0
+		mov	(sp),d0	;	comp	(a0),d0 ;	blt	9f
+		add.l	wrd,a0	;	bra	1f
+rck_1W:		move.l	(sp)+,a0
+		mov	(sp),d0	;	comp	(a0),d0 ;	blt	9f
+1:		comp	word(a0),d0 ;	bgt	9f
+		jmp	(a4)
+9:		bra	e_range
+!Temp. solution until trp_z is implemented
+
+!--------------------------------------------------------------------------
+nop_z:
+lblnop:		lea	nopln+16,a0 ;	move.l	(a6),d1
+		bsr	itoa	
+		lea	nopln+33,a0 ;	move.l	sp,d1
+		bsr	itoa
+		move.l	#45,-(sp)
+		pea	nopln 	;	mov	#1,-(sp)
+		bsr	_write
+		add.l	wrd+4,sp
+		jmp	(a4)
+
+	.data
+nopln:	.asciz	"line number nop              sp             \n"
+	.align 2
+	.text
+!unsigned to ascii for integers  , a0 is address of first character
+! d1 contains integer. Output is 11 characters of which the first is a space.
+
+	.define itoa
+	.text
+
+itoa:		move.l	#9,d4	;	add.l	#11,a0
+		move.l	#10,d0
+0:		bsr	dvu4	;	add.w	#48,d3
+		move.b	d3,-(a0) ;	tst.l	d1
+		dbeq	d4,0b
+1:		move.b	#32,-(a0) ;	dbra	d4,1b
+		rts
+
+!------------------------------------------------------------------------------
+fil_q:		move.l	(sp)+,a0 ;	bra	3f
+fil_l:		adroff		;	move.w	(a1),d0
+		move.l	d0,a0
+3:		add.l	a6,a0	;	cmp.l	4(a6),a0
+		beq	0f
+#if	flow+count+prof
+		move.l	curproc,a5
+		move.l	8(a5),d0
+		sub.l	12(a5),d0
+		move.l	d0,countfld		!START COUNTPTR FOR THIS PROC
+		move.l	a0,20(a5)		!FILE POINTER IN PROC DES
+#endif
+		move.l	a0,4(a6)
+0:		jmp	(a4)
+
+!-----------------------------------------------------------------------------
+lni_z:		add.l	#1,(a6)
+#if	count+flow+prof
+		add.l	#1,countptr
+#if	prof
+		add.l	#4,profile
+#endif
+#endif
+		bra	8f
+lin_l:		adroff		;	move.w	(a1),d0 ;	bra 1f
+lin_q:		move.l	(sp)+,d0 ;	bra	1f
+lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
+1:		cmp.l	(a6),d0 ;	beq	9f
+		move.l	d0,(a6)
+#if	count+flow+prof
+		move.l	countfld,d1
+		add.l	d0,d1
+		move.l	d1,countptr
+#if	prof
+		asl.l	#2,d1
+		add.l	ltime,d1
+		move.l	d1,profile
+#endif
+#endif
+8:
+#if	last
+		bsr	nexttab	;	move.l	4(a6),(a5)+	!store new line
+		move.l	(a6),(a5)		!number in buffer lasttable
+#endif
+#if	count
+		move.l	countptr,d1	!LINE NUMBER IN d1
+		asl.l	#2,d1		!MULTIPLY BY 4
+		move.l	lcount,a0
+		add.l	#1,0(a0,d1)	!ADD 1 TO THE CORRESPONDING COUNT
+#endif
+#if	flow
+		move.l	countptr,d1	!LINE NUMBER IN d1
+		move.l	#8,d0
+		bsr	dvu4
+!QUOTIENT IN d1 REST IN d3
+		move.l	lflow,a0
+		bset	d3,0(a0,d1)
+!ATTENTION BIT 0 CORR TO LINE 0
+#endif
+!9:		bra	nop_z
+9:		jmp	(a4)
+!----------------------------------------------------------------------------
+mon_z:		mov	(sp)+,d0 ;	bmi	e_badmon
+		cmp.l	#64,d0	;	bge	e_badmon
+		move.l	a4,-(sp) ;	asl.l	#2,d0
+		add.l	#syscal,d0 ;	move.l	d0,a0
+		move.l	(a0),a0	;	jmp	(a0)
+
+	.data
+syscal:
+.long	e_badmon ; .long hlt_z ; .long	_fork ; .long	_read
+.long	_write ; .long	_open ; .long	_close ; .long	_wait
+.long	_creat ; .long	_link ; .long	_unlink ; .long e_badmon
+.long	_chdir ; .long	e_badmon ; .long _mknod ; .long	_chmod
+.long	_chown ; .long	_break ; .long _stat ; .long	_lseek
+.long	_getpid ; .long _mount ; .long	_umount ; .long	_setuid
+.long	_getuid ; .long	_stime ; .long	_ptrace ; .long	_alarm
+.long	_fstat ; .long	_pause ; .long	_utime ; .long	e_badmon
+.long	e_badmon ; .long _access ; .long _nice ; .long	_ftime
+.long	_sync ; .long	_kill ; .long	e_badmon ; .long e_badmon
+.long	e_badmon ; .long _dup ; .long	_pipe ; .long	_times
+.long	_profil ; .long e_badmon ; .long _setgid ; .long _getgid
+.long	_sigtrp ; .long e_badmon ; .long e_badmon ; .long _acct
+.long	e_badmon ; .long _lock ; .long	_ioctl ; .long	e_badmon
+.long	_mpxcall ; .long e_badmon ; .long e_badmon ; .long _exece
+.long	_umask ; .long	_chroot ; .long	e_badmon ; .long e_badmon
+
+	.text

@@ -1,0 +1,344 @@
+!--------------------------------------------------------------------------
+!	Laod constant , load local , store local
+!--------------------------------------------------------------------------
+
+loc_0:	mov	d6,-(sp)
+	jmp	(a4)
+loc_1:	loc_2:	loc_3:	loc_4:	loc_5:	loc_6:	loc_7:	loc_8:
+loc_9:	loc_10:	loc_11:	loc_12:	loc_13:	loc_14:	loc_15:	loc_16:
+loc_17:	loc_18:	loc_19:	loc_20:	loc_21:	loc_22:	loc_23:	loc_24:	
+loc_25:	loc_26:	loc_27:	loc_28:	loc_29:	loc_30:	loc_31:	loc_32:
+loc_33:
+	asr.w	#2,d0		!make the multiplication undone
+	mov	d0,-(sp)
+	jmp	(a4)
+loc__1:
+	mov	#-1,-(sp)
+	jmp	(a4)
+loc_s0:	clr.w	d0
+	move.b	(a3)+,d0
+	mov	d0,-(sp)
+	jmp	(a4)
+loc_s_1:	mov	#-1,d0
+	move.b	(a3)+,d0
+	mov	d0,-(sp)
+	jmp	(a4)
+lpi_l:
+	adroff
+	move.w	(a1),d0
+	move.l	d0,-(sp)
+	jmp	(a4)
+lpi_q:	jmp	(a4)
+
+loc_q:	jmp	(a4)
+#ifndef lword
+	 bra	e_illins
+#endif
+loc_l:	adroff
+	move.w	(a1),d0
+	ext.l	d0
+	mov	d0,-(sp)
+	jmp	(a4)
+ldc_0:	cl	-(sp)
+	cl	-(sp)
+	jmp	(a4)
+ldc_l:
+	adroff
+	move.w	(a1),d0
+	ext.l	d0		!ext works only on d register
+4:	move.l	d0,-(sp)	!adapt for l , then "move.2l" signextended
+#ifdef	lword
+	bmi	0f
+	clr.l	-(sp)
+	bra	1f
+0:	move.l	#-1,-(sp)
+1:
+#endif
+	jmp	(a4)
+ldc_q:
+#ifdef lword
+	clr.l	-(sp)
+#endif
+	jmp	(a4)
+
+!-------------------------------------------------------------------------
+!	offsets should be adapted for wordsize 4 .Use identifiers
+!	l3 to l_8 for the offsets in lol_3W to lol__8 . Use the
+!	preprocessor for conditional definitions .
+
+lol_0:		mov	l0(a2),-(sp)	; jmp	(a4)
+lol_1W:		mov	l1(a2),-(sp)	; jmp	(a4)
+lol_2W:		mov	l2(a2),-(sp)	; jmp	(a4)
+lol_3W:		mov	l3(a2),-(sp)	; jmp	(a4)
+lol__1W:	mov	l_1(a2),-(sp)	; jmp	(a4)
+lol__2W:	mov	l_2(a2),-(sp)	; jmp	(a4)
+lol__3W:	mov	l_3(a2),-(sp)	; jmp	(a4)
+lol__4W:	mov	l_4(a2),-(sp)	; jmp	(a4)
+lol__5W:	mov	l_5(a2),-(sp)	; jmp	(a4)
+lol__6W:	mov	l_6(a2),-(sp)	; jmp	(a4)
+lol__7W:	mov	l_7(a2),-(sp)	; jmp	(a4)
+lol__8W:	mov	l_8(a2),-(sp)	; jmp	(a4)
+lol_w0:		clr.w	d0	
+		move.b	(a3)+,d0
+5:		asl.l	wmu,d0
+		mov	16(a2,d0),-(sp)	
+		jmp	(a4)
+
+lol_w_1:	move.l	#-1,d0
+		move.b	(a3)+,d0
+2:		asl.l	wmu,d0
+		mov	0(a2,d0),-(sp)
+		jmp	(a4)
+lol_pw:		adroff
+		move.w	(a1),d0
+		bra	5b
+
+lol_nw:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+		bra	2b
+lol_qnw:	move.l	(sp)+,d0
+		bra	2b
+lol_qpw:	move.l	(sp)+,d0
+		bra	5b
+
+
+!--------------------------------------------------------------------------
+
+ldl_0:		mov	l1(a2),-(sp)	!offset code
+		mov	l0(a2),-(sp)	!offset code
+		jmp	(a4)
+ldl_w_1:	move.l	#-1,d0
+		move.b	(a3)+,d0
+2:		asl.l	wmu,d0
+		mov	word(a2,d0),-(sp)
+		mov	0(a2,d0),-(sp)
+		jmp	(a4)
+ldl_pw:		adroff
+		move.w	(a1),d0
+5:		asl.l	wmu,d0
+		mov	l1(a2,d0),-(sp)
+		mov	l0(a2,d0),-(sp)
+		jmp	(a4)
+ldl_nw:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+		bra	2b
+ldl_qpw:	move.l	(sp)+,d0
+		bra	5b
+ldl_qnw:	move.l	(sp)+,d0
+		bra	2b
+
+!-------------------------------------------------------------------------
+loe_lw:		adroff
+		move.w	(a1),d0
+		bra	1f
+loe_qw:		move.l	(sp)+,d0
+		bra	1f
+
+loe_w0:		loe_w1:		loe_w2:		loe_w3:		loe_w4:
+		sub.w	#624,d0
+		asl.w	#6,d0
+		move.b	(a3)+,d0
+1:		ext.l	d0
+		asl.l	wmu,d0
+		mov	0(a6,d0),-(sp)
+		jmp	(a4)
+
+lde_lw:		adroff
+		move.w	(a1),d0
+		bra	1f
+lde_qw:		move.l	(sp)+,d0
+		bra	1f
+
+lde_w0:		clr.w	d0
+		move.b	(a3)+,d0
+1:		asl.l	wmu,d0		
+		mov	word(a6,d0),-(sp)
+		mov	0(a6,d0),-(sp)
+		jmp	(a4)
+
+!------------------------------------------------------------------------------
+lil_0:		move.l	l0(a2),a0
+		mov	(a0),-(sp)
+		jmp	(a4)
+lil_1W:		move.l	l1(a2),a0
+		mov	(a0),-(sp)
+		jmp	(a4)
+lil_pw:		adroff
+		move.w	(a1),d0
+		bra	1f
+lil_qpw:	move.l	(sp)+,d0
+		bra	1f
+
+lil_w0:		clr.w	d0
+		move.b	(a3)+,d0
+1:		asl.l	wmu,d0
+		move.l	l0(a2,d0),a0
+		mov	(a0),-(sp)
+		jmp	(a4)
+
+lil_nw:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+		bra	1f
+lil_qnw:	move.l	(sp)+,d0
+		bra	1f
+
+lil_w_1:	move.l	#-1,d0
+		move.b (a3)+,d0
+1:		asl.l	wmu,d0	
+		move.l	0(a2,d0),a0
+		mov	(a0),-(sp)
+		jmp	(a4)
+
+!---------------------------------------------------------------------------
+lof_s0:		move.l	d6,d0
+		move.b	(a3)+,d0
+		bra	1f
+lof_l:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+		bra	1f
+lof_q:		move.l	(sp)+,d0
+		bra	1f
+lof_1W:		move.l	#1,d0
+2:		asl.w	wmu,d0
+1:		move.l	(sp)+,a0
+		mov	0(a0,d0),-(sp)
+		jmp	(a4)
+lof_2W:		move.l	#2,d0	;	bra	2b
+lof_3W:		move.l	#3,d0	;	bra	2b
+lof_4W:		move.l	#4,d0	;	bra	2b
+ldf_l:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+2:		move.l	(sp)+,a0
+		mov	word(a0,d0),-(sp)
+		mov	0(a0,d0),-(sp)
+		jmp	(a4)
+ldf_q:		move.l	(sp)+,d0
+		bra	2b
+
+!-------------------------------------------------------------------------
+
+lal_p:		adroff
+		move.w	(a1),d0
+		bra	1f
+lal_qp:		move.l	(sp)+,d0
+		bra	1f
+lal_0:		pea	16(a2)
+		jmp	(a4)	
+lal_w0:		clr.w	d0
+		move.b	(a3)+,d0
+		asl.l	wmu,d0
+1:		add.l	#16,d0
+		bra	3f
+lal_n:		adroff
+		move.w	(a1),d0
+		ext.l	d0
+		bra	3f
+lal_qn:		move.l	(sp)+,d0
+		bra	3f
+lal__1:		move.l	#-1,d0
+3:		pea	0(a2,d0)
+		jmp	(a4)
+lal_w_1:	move.l	#-1,d0
+2:		move.b	(a3)+,d0
+		asl.l	wmu,d0
+		bra	3b
+lal_w_2:	move.l	#-512,d0
+		bra	2b
+lae_l:		adroff
+		move.w	(a1),d0
+		bra	1f
+lae_q:		move.l	(sp)+,d0
+		bra	1f
+lae_w0:		lae_w1:		lae_w2:		lae_w3:		lae_w4:
+lae_w5:		lae_w6:
+		sub.w	#484,d0
+		asl.w	#6,d0
+		move.b	(a3)+,d0
+		asl.w	wmu,d0
+1:		pea	0(a6,d0)
+		jmp	(a4)
+
+!---------------------------------------------------------------------------
+lxl_1:		move.l	16(a2),-(sp)
+		jmp	(a4)
+lxl_l:		adroff
+		move.w	(a1),d0
+		beq	5f
+		bgt	1f
+		blt	e_oddz
+1:		sub.l	#1,d0
+		bra	2f
+lxl_2:		move.w	#1,d0
+2:		move.l	a2,a0
+3:		move.l	16(a0),a0
+		dbra	d0,3b
+		move.l	a0,-(sp)
+		jmp	(a4)
+5:		move.l	a2,-(sp)
+		jmp	(a4)
+
+lxa_1:		move.l	#0,d0
+		bra	3f
+lxa_l:		adroff
+		move.w	(a1),d0
+		bgt	1f
+		blt	e_oddz
+		pea	16(a2)
+		jmp	(a4)
+1:		sub.l	#1,d0
+3:		move.l	a2,a0
+2:		move.l	16(a0),a0
+		dbra	d0,2b
+		pea	16(a0)
+		jmp	(a4)
+
+!-----------------------------------------------------------------------
+
+loi_l:		adroff
+		clr.l	d1
+		move.w	(a1),d1
+		bra	8f
+loi_s0:		clr.l	d1
+		move.b	(a3)+,d1
+8:		cmp.w	#1,d1
+		beq	loi_1
+		cmp.w	#2,d1
+		beq	2f
+		move.w	d1,d0
+		move.w	d7,d2
+3:		asr.w	#1,d0	;	dbcs	d2,3b
+		bcs	e_oddz
+		bra	5f
+loi_1W:		loi_2W:		loi_3W:		loi_4W:
+		asr.w	#2,d0
+		sub.w	#168,d0
+		move.l	d0,d1
+		asl.w	wmu,d1
+5:		move.l	(sp)+,a0
+		add.l	d1,a0
+		sub.w	#1,d0
+1:		mov	-(a0),-(sp)
+		dbra	d0,1b
+		jmp	(a4)
+2:		move.l	(sp)+,a0
+		move.w	(a0),d0
+		mov	d0,-(sp)
+		jmp	(a4)
+loi_1:		move.l	(sp)+,a0
+		move.w	d6,d0
+		move.b	(a0),d0
+		mov	d0,-(sp)
+		jmp	(a4)
+
+los_z:		mov	(sp)+,d0
+		bra	0f
+los_l:		adroff
+		move.w	(a1),d0
+0:		checksize
+2:		move.l	#0,d1	;	move.w	(sp)+,d1 ;	bra	8b
+4:		move.l	(sp)+,d1 ;	bra	8b

@@ -1,0 +1,6 @@
+	.text
+end:
+	.bss
+endbss:
+	.data
+enddata:
