@@ -539,6 +539,9 @@ EVAL(expr, val, code, true_label, false_label)
 				else
 					C_lfr(ATW(tp->tp_size));
 			}
+			if (tp->tp_fund == FLOAT || tp->tp_fund == DOUBLE
+			    || tp->tp_fund == LNGDBL)
+				fp_used = 1;
 			/* ??? set filename and line number ??? */
 			break;
 		}
