@@ -240,7 +240,7 @@ char *argv[];
 	usage();
 #ifdef DISTRIBUTION
   if (distr_fl) {
-	struct stat statbuf;
+	static struct stat statbuf;
 
 	stat(progname, &statbuf);
 	distr_time = statbuf.st_mtime;
