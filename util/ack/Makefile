@@ -12,6 +12,7 @@ LNTABLES=acc apc abc vax2 vax4 i86 ix m68k2 m68k4 pmds pmds4 z8000\
 int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 
 CFLAGS=-O -n
 BINDIR=../../bin
+MODDIR=../../modules/lib
 
 head:   ack
 
@@ -31,7 +32,7 @@ clean:
 		(cd pc ; make clean )
 
 ack:    $(OBJ)
-	$(CC) -o ack $(CFLAGS) $(OBJ)
+	$(CC) -o ack $(CFLAGS) $(OBJ) $(MODDIR)/libstr.a
 
 grows.o files.o list.o run.o \
 data.o main.o scan.o trans.o rmach.o util.o : ack.h list.h
