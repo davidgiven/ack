@@ -407,5 +407,5 @@ end;
 begin ect:=0; pct:=0;
   tst40; tst41; tst42; tst43; tst44; tst45;
   write('Program t4:',pct:3,' tests completed.');
-  writeln('Number of errors = ',ect:0);
+  writeln('Number of errors = ',ect:1);
 end.

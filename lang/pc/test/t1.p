@@ -726,5 +726,5 @@ tst17;	tst18;	tst19;	tst20;
 
 #endif
 write('Program t1:',pct:3,' tests completed.');
-writeln('Number of errors = ',ect:0);
+writeln('Number of errors = ',ect:1);
 end.

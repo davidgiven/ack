@@ -735,5 +735,5 @@ begin ect := 0;  pct := 0;
 tst21; tst22; tst25; tst26; tst27; tst28; tst29; tst30; tst31; tst32; tst33;
 
 write('Program t2:',pct:3,' tests completed.');
-writeln('Number of errors = ',ect:0);
+writeln('Number of errors = ',ect:1);
 end.

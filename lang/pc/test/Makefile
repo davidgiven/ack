@@ -1,29 +1,34 @@
 # $Header$
 
-NOFL =
+FLOATS=
+# for machines without floating point:
+FLOATS=-DNOFLOAT
+# for machines with software floating point library:
+FLOATS=-fp
+PC = apc
 
 all:            testC testI
 
 testI:
-		em22 $(NOFL) t1.p; int
-		em22 $(NOFL) t2.p; int
-		em22 $(NOFL) t3.p; int e.out f1 f2 f3 f4 f5 f6
-		em22 $(NOFL) t4.p; int
-		em22 $(NOFL) t5.p; int
-		em22 $(NOFL) tstenc.p; int
-		em22 $(NOFL) tstgto.p; int
-		em22 $(NOFL) -.p callc.p cmod.c ; int
-		rm -f e.out f? *.k
+		em22 $(FLOATS) t1.p; int
+		em22 $(FLOATS) t2.p; int
+		em22 $(FLOATS) t3.p; int e.out f1 f2 f3 f4 f5 f6
+		em22 $(FLOATS) t4.p; int
+		em22 $(FLOATS) t5.p; int
+		em22 $(FLOATS) tstenc.p; int
+		em22 $(FLOATS) tstgto.p; int
+		em22 $(FLOATS) -.p callc.p cmod.c ; int
+		rm -f e.out f? *.k int.log int.mess
 
 testC:
-		apc $(NOFL) t1.p; a.out
-		apc $(NOFL) t2.p; a.out
-		apc $(NOFL) t3.p; a.out f1 f2 f3 f4 f5 f6
-		apc $(NOFL) t4.p; a.out
-		apc $(NOFL) t5.p; a.out
-		apc $(NOFL) tstenc.p; a.out
-		apc $(NOFL) tstgto.p; a.out
-		apc $(NOFL) -.p callc.p cmod.c ; a.out
+		$(PC) $(FLOATS) t1.p ; a.out
+		$(PC) $(FLOATS) t2.p ; a.out
+		$(PC) $(FLOATS) t3.p ; a.out f1 f2 f3 f4 f5 f6
+		$(PC) $(FLOATS) t4.p ; a.out
+		$(PC) $(FLOATS) t5.p ; a.out
+		$(PC) $(FLOATS) tstenc.p ; a.out
+		$(PC) $(FLOATS) tstgto.p ; a.out
+		$(PC) $(FLOATS) callc.p cmod.c ; a.out
 		rm -f a.out f? *.[os]
 
 install cmp:
