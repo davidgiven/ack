@@ -45,4 +45,5 @@ char **argv;
 	}
 	/* process em object files */
 	simpleprogram();
+	exit(0);
 }
