@@ -26,10 +26,21 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".short\t%d\n",(int) (l >> 16));
 }
 
-con_float() {
-	fatal("no reals");
-}
 
+con_float() {
+
+static int been_here;
+	if (argval != 4 && argval != 8)
+		fatal("bad fcon size");
+	fprintf(codefile,".long\t");
+	if (argval == 8)
+		fprintf(codefile,"F_DUM,");
+	fprintf(codefile,"F_DUM\n");
+	if ( !been_here++)
+	{
+	fprintf(stderr,"Warning : dummy float-constant(s)\n");
+	}
+}
 
 prolog(nlocals) full nlocals; {
 
