@@ -90,7 +90,7 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 	*time_out = (m == (cond_p) 0 ? -1 : map_value(m,off,TRUE));
 	*space_out = (m == (cond_p) 0 ? -1 : map_value(m,off,FALSE));
 	/*
-	printf("itemtyp = %d, localtyp = %d off = %D\n",itemtyp,localtyp,off);
+	printf("itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	printf("ALLOCSCORE = (%d,%d)\n",*time_out,*space_out);
 	*/
 }
@@ -126,7 +126,7 @@ opening_cost(itemtyp,localtyp,off,time_out,space_out)
 	*time_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,TRUE));
 	*space_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,FALSE));
 	/*
-	printf("itemtyp = %d, localtyp = %d off = %D\n",itemtyp,localtyp,off);
+	printf("itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	printf("OPEN_COST = (%d,%d)\n",*time_out,*space_out);
 	*/
 }

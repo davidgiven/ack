@@ -270,7 +270,7 @@ eliminate(pp)
 			if (ravp->av_saveloc != (entity_p) 0) {
 				tmp = ravp->av_saveloc->en_loc;
 				mes = find_mesreg(tmp);
-				OUTVERBOSE("re-using %D(LB)", tmp);
+				OUTVERBOSE("re-using %ld(LB)", tmp);
 			} else {
 				tmp = tmplocal(pp,  ravp->av_size);
 				mes = gen_mesreg(tmp, ravp, pp);

@@ -266,7 +266,7 @@ pr_localtab() {
 	for (i = 1; i <= nrlocals; i++) {
 		lc = locals[i];
 		printf("LOCAL %d\n",i);
-		printf("	offset= %D\n",lc->lc_off);
+		printf("	offset= %ld\n",lc->lc_off);
 		printf("	size=   %d\n",lc->lc_size);
 		printf("	flags=  %d\n",lc->lc_flags);
 	}
@@ -305,7 +305,7 @@ pr_defs()
 				printf("%d\n",SHORT(l));
 				break;
 			case OPOFFSET:
-				printf("%D\n",OFFSET(l));
+				printf("%ld\n",OFFSET(l));
 				break;
 			case OPOBJECT:
 				printf("%d\n",OBJ(l)->o_id);

@@ -28,10 +28,10 @@ extern byte em_flag[];
 
 #define space1()	printf("	")
 char format[] = "	%-11s%d\n";
-char lformat[] = "	%-11s%D\n";
+char lformat[] = "	%-11s%ld\n";
 char sformat[] = "	%-10s%s\n";
 char dformat[] = "		%-11s%d\n";
-char oformat[] = "		%-11s%D\n";
+char oformat[] = "		%-11s%ld\n";
 
 
 
@@ -263,7 +263,7 @@ showinstr()
 			printf(" *%d",getshort());
 			break;
 		case OPOFFSET:
-			printf(" %D", getoff());
+			printf(" %ld", getoff());
 			break;
 		case OPLIST:
 			arglist();
@@ -296,7 +296,7 @@ arglist()
 				printf(" *%d",getshort());
 				break;
 			case ARGOFF:
-				printf(" %D", getoff());
+				printf(" %ld", getoff());
 				break;
 			case ARGICN:
 			case ARGUCN:

@@ -101,7 +101,7 @@ STATIC entity_p result_local(size, l)
 	if (INSTR(l)==op_stl && size==ws || INSTR(l)==op_sdl && size==2*ws) {
 		enp = getentity(l, &dummy);
 		if (is_regvar(enp->en_loc)) {
-			OUTTRACE("save local found, %D(LB)", enp->en_loc);
+			OUTTRACE("save local found, %ld(LB)", enp->en_loc);
 			return enp;
 		}
 	}

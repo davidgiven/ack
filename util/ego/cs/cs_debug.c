@@ -35,7 +35,7 @@ STATIC showinstr(lnp)
 			fprintf(stderr," %d", OBJ(lnp)->o_id);
 			break;
 		case OPOFFSET:
-			fprintf(stderr," %D", OFFSET(lnp));
+			fprintf(stderr," %ld", OFFSET(lnp));
 			break;
 		default:
 			fprintf(stderr," ?");
@@ -114,26 +114,26 @@ OUTENTITIES()
 		register entity_p rep = en_elem(i);
 
 		fprintf(stderr,"%s,", enkinds[rep->en_kind]);
-		fprintf(stderr,"size %D,", rep->en_size);
+		fprintf(stderr,"size %ld,", rep->en_size);
 		fprintf(stderr,"valno %d,", rep->en_vn);
 		switch (rep->en_kind) {
 			case ENCONST:
-				fprintf(stderr,"$%D\n", rep->en_val);
+				fprintf(stderr,"$%ld\n", rep->en_val);
 				break;
 			case ENLOCAL:
 			case ENALOCAL:
-				fprintf(stderr,"%D(LB)\n", rep->en_loc);
+				fprintf(stderr,"%ld(LB)\n", rep->en_loc);
 				break;
 			case ENINDIR:
 				fprintf(stderr,"*%d\n", rep->en_ind);
 				break;
 			case ENOFFSETTED:
 			case ENAOFFSETTED:
-				fprintf(stderr,"%D(%d)\n", rep->en_off, rep->en_base);
+				fprintf(stderr,"%ld(%d)\n", rep->en_off, rep->en_base);
 				break;
 			case ENALOCBASE:
 			case ENAARGBASE:
-				fprintf(stderr,"%D levels\n", rep->en_levels);
+				fprintf(stderr,"%ld levels\n", rep->en_levels);
 				break;
 			case ENARRELEM:
 				fprintf(stderr,"%d[%d], ",rep->en_arbase,rep->en_index);

@@ -323,21 +323,21 @@ fold_var(old,new,b)
 	if (TYPE(old) == OPOBJECT) {
 		printf("global var.");
 	} else {
-		printf("local var. with off. %D",off_set(old));
+		printf("local var. with off. %ld",off_set(old));
 		find_local(off_set(old),&nr,&ok);
 		assert(ok);
 		loc = locals[nr];
-		printf(",score %D",loc->lc_score);
+		printf(",score %ld",loc->lc_score);
 	}
 	printf(" replaced by ");
 	if (TYPE(new) == OPOBJECT) {
 		printf("global var.");
 	} else {
-		printf("local var. with off. %D",off_set(new));
+		printf("local var. with off. %ld",off_set(new));
 		find_local(off_set(new),&nr,&ok);
 		assert(ok);
 		loc = locals[nr];
-		printf(",score %D",loc->lc_score);
+		printf(",score %ld",loc->lc_score);
 	}
 	printf("\n");
 END DEBUG */

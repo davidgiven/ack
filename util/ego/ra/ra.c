@@ -436,7 +436,7 @@ print_items(items,p)
 				printf("id of external = %d\n",
 					item->i_t.it_obj->o_id);
 			} else {
-				printf("offset = %D\n",
+				printf("offset = %ld\n",
 					item->i_t.it_off);
 			}
 			printf("regtype = %s\n",str_regtypes[item->it_regtype]);
@@ -476,7 +476,7 @@ print_allocs(list)
 				fprintf(stderr,"id = %d]\n", item->i_t.it_proc->p_id);
 				break;
 			default:
-				fprintf(stderr,"offset = %D]\n", item->i_t.it_off);
+				fprintf(stderr,"offset = %ld]\n", item->i_t.it_off);
 			}
 			fprintf(stderr,"#usages(static) = %d\n",al->al_susecount);
 			fprintf(stderr,"#usages(dyn) = %d\n",al->al_dusecount);
@@ -494,7 +494,7 @@ print_allocs(list)
 			}
 			fprintf(stderr,"} \n");
 			fprintf(stderr,"profits = %d\n",al->al_profits);
-			fprintf(stderr,"dummy local = %D\n",al->al_dummy);
+			fprintf(stderr,"dummy local = %ld\n",al->al_dummy);
 			fprintf(stderr,"regnr = %d\n",al->al_regnr);
 		}
 	}
