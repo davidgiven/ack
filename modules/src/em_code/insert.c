@@ -125,6 +125,7 @@ swttmp()
 	if (C_tmpfile == 0) {
 		static char tmpbuf[64];
 		register char *p = tmpbuf;
+		extern char *mktemp();
 
 		strcpy(p, C_tmpdir);
 		strcat(p, "/CodeXXXXXX");

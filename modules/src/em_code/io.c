@@ -24,7 +24,7 @@ File		*C_ofp;
 #ifndef INCORE
 File		*C_tfr, *C_old_ofp;
 char		*C_tmpfile;
-char		*strcpy(), *strcat(), *mktemp();
+char		*strcpy(), *strcat();
 char		*C_ibuf = 0;
 long		C_current_out;
 #endif
