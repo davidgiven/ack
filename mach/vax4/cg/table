@@ -54,7 +54,7 @@ R8	= ("r8",4) regvar,RREG.
 R9	= ("r9",4) regvar,RREG.
 RA	= ("r10",4) regvar,RREG.
 RB	= ("r11",4) regvar,RREG.
-#else REGVARS
+#else /* REGVARS */
 R4	= ("r4",4),REG.
 R5	= ("r5",4),REG.
 R6	= ("r6",4),REG.
@@ -63,7 +63,7 @@ R8	= ("r8",4),REG.
 R9	= ("r9",4),REG.
 RA	= ("r10",4),REG.
 RB	= ("r11",4),REG.
-#endif REGVARS
+#endif /* REGVARS */
 QR0	= ("r0",8,R0,R1),QREG.
 QR2	= ("r2",8,R2,R3),QREG.
 #ifndef REGVARS
@@ -71,14 +71,14 @@ QR4	= ("r4",8,R4,R5),QREG.
 QR6	= ("r6",8,R6,R7),QREG.
 QR8	= ("r8",8,R8,R9),QREG.
 QRA	= ("r10",8,RA,RB),QREG.
-#endif REGVARS
+#endif /* REGVARS */
 QR1	= ("r1",8,R1,R2),QREG.
 #ifndef REGVARS
 QR3	= ("r3",8,R3,R4),QREG.
 QR5	= ("r5",8,R5,R6),QREG.
 QR7	= ("r7",8,R7,R8),QREG.
 QR9	= ("r9",8,R9,RA),QREG.
-#endif REGVARS
+#endif /* REGVARS */
 
 TOKENS:
 
@@ -112,7 +112,7 @@ regdec1 =	{REGISTER reg;}		4 cost=(0,3)  "-(%[reg])"
 regdec2 =	{REGISTER reg;}		4 cost=(0,3)  "-(%[reg])"
 regdec4 =	{REGISTER reg;}		4 cost=(0,3)  "-(%[reg])"
 regdec8 =	{REGISTER reg;}		8 cost=(0,6)  "-(%[reg])"
-#endif REGVARS
+#endif /* REGVARS */
 displ1 =	{REGISTER reg; STRING ind;} 4 cost=(2,6)  "%[ind](%[reg])"
 displ2 =	{REGISTER reg; STRING ind;} 4 cost=(2,6)  "%[ind](%[reg])"
 displ4 =	{REGISTER reg; STRING ind;} 4 cost=(2,6)  "%[ind](%[reg])"
@@ -186,19 +186,19 @@ Xsource1 =	regdef1 + displ1 + displdef1 +
 source1 =	Xsource1
 #ifdef REGVARS
 		+ reginc1 + regdec1
-#endif REGVARS
+#endif /* REGVARS */
 Xsource2 =	regdef2 + displ2 + displdef2 +
 		EXTERNAL2 + reldef2 + CONST2 + LOCAL2 + ind2
 source2 =	Xsource2
 #ifdef REGVARS
 		+ reginc2 + regdec2
-#endif REGVARS
+#endif /* REGVARS */
 Xsource4 =	REG + regdef4 + displ4 + displdef4 + LocaLBase +
 		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4 + ind4
 source4 =	Xsource4
 #ifdef REGVARS
 		+ RREG + reginc4 + regdec4
-#endif REGVARS
+#endif /* REGVARS */
 dups4 =		CONST + regdef1 + displ1 + LOCAL1 +
 		REG +	regdef2 + displ2 + LOCAL2 +
 		RREG +	regdef4 + displ4 + LOCAL4 + DOUBLE
@@ -208,7 +208,7 @@ Xsource8 =	QREG + regdef8 + displ8 + displdef8 +
 source8 =	Xsource8
 #ifdef REGVARS
 		+ reginc8 + regdec8
-#endif REGVARS
+#endif /* REGVARS */
 source1or2 =	source1 + source2 - ind2
 source1or2or4 = source1or2 + source4 - (ind2 + ind4)
 source2or4 =	source2 + source4 - ind4
@@ -227,12 +227,12 @@ nonexist =	nonexist1 + aind
 regch4 =	reginc1 + regdec1 + reginc2 + regdec2 + reginc4 + regdec4
 regch8 =	reginc8 + regdec8
 regch =		regch4 + regch8
-#endif REGVARS
+#endif /* REGVARS */
 displs =	displ1 + displ2 + displ4 + displ8 +
 		regdef1 + regdef2 + regdef4 + regdef8
 #ifdef REGVARS
 		+ regch
-#endif REGVARS
+#endif /* REGVARS */
 displdefs =	displdef1 + displdef2 + displdef4 + displdef8
 EXTERNALS =	EXTERNAL1 + EXTERNAL2 + EXTERNAL4 + EXTERNAL8
 LOCALS =	LOCAL1 + LOCAL2 + LOCAL4 + LOCAL8
@@ -248,10 +248,10 @@ extandloc =	externals + LOCALS
 #ifdef REGVARS
 reg4 =		REG + RREG + LocaLBase
 reg8 =		QREG
-#else REGVARS
+#else /* REGVARS */
 reg4 =		REG
 reg8 =		QREG
-#endif REGVARS
+#endif /* REGVARS */
 sreg4 = 	REG * SCRATCH
 sreg8 = 	QREG * SCRATCH
 bigsource4 =	source1or2or4 + nonexist + ind2 + ind4
@@ -262,9 +262,9 @@ scr =		ALL - (EXTERNALS + LOCALS + ADDR_LOCAL + ADDR_EXTERNAL + CONST
 #ifdef REGVARS
 #define REMEXTANDLOC remove(externals) remove(LOCALS,inreg(%[num])==0)
 #define REMREG(x) remove(regch,%[reg]==regvar(x))
-#else REGVARS
+#else /* REGVARS */
 #define REMEXTANDLOC remove(extandloc)
-#endif REGVARS
+#endif /* REGVARS */
 
 CODE:
 
@@ -278,13 +278,13 @@ loc		| |		| {CONST4,$1}				| |
 ldc		| |		| {CONST8,$1}				| |
 #ifdef REGVARS
 lol inreg($1)==2 | | REMREG($1)	| regvar($1)				| |
-#endif REGVARS
+#endif /* REGVARS */
 lol $1 < 0	| |		| {LOCAL4,LB,$1,4}			| |
 lol $1 >= 0	| |		| {LOCAL4,AP,$1,4}			| |
 loe		| |		| {EXTERNAL4,$1}			| |
 #ifdef REGVARS
 lil inreg($1)==2 | |	REMREG($1)	| {regdef4,regvar($1)}		| |
-#endif REGVARS
+#endif /* REGVARS */
 lil $1 < 0	| |		| {displdef4,LB,tostring($1)}		| |
 lil $1 >= 0	| |		| {displdef4,AP,tostring($1)}		| |
 lof		| |		|			| adp $1 loi 4	|
@@ -407,7 +407,7 @@ stl inreg($1)==2 | NC bigsource4 |
 			move(%[1],regvar($1))		|	| |
 ...		| STACK |
 			"movl\t(sp)+,%(regvar($1)%)"	|	| | (3,7)
-#endif REGVARS
+#endif /* REGVARS */
 stl $1 < 0	| NC bigsource4 |
 			remove(displaced)
 			remove(LOCALS,%[num] <= $1+3 && %[num]+%[size] > $1)
@@ -431,7 +431,7 @@ sil inreg($1)==2 | NC bigsource4 |
 			move(%[1],{regdef4,regvar($1)})	|	| |
 ...		| STACK |
 			"movl\t(sp)+,(%(regvar($1)%))"	|	| | (3,10)
-#endif REGVARS
+#endif /* REGVARS */
 sil $1 < 0	| NC bigsource4 |
 			REMEXTANDLOC
 			move(%[1],{displdef4,LB,tostring($1)})	|	| |
@@ -663,7 +663,7 @@ adi stl $1==4 && inreg($2)==2
 			"addl3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 adi stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -687,7 +687,7 @@ adi lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"addl3\t%[1],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 adi sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -721,7 +721,7 @@ sbi stl $1==4 && inreg($2)==2
 			"subl3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sbi stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -745,7 +745,7 @@ sbi lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"subl3\t%[1],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sbi sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -783,7 +783,7 @@ mli stl $1==4 && inreg($2)==2
 			"mull3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 mli stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -807,7 +807,7 @@ mli lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"mull3\t%[1],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 mli sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -841,7 +841,7 @@ dvi stl $1==4 && inreg($2)==2
 			"divl3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 dvi stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -865,7 +865,7 @@ dvi lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"divl3\t%[1],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 dvi sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -900,7 +900,7 @@ rmi stl $1==4 && inreg($2)==2
 			"subl3\t%[a],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))		|	| |
-#endif REGVARS
+#endif /* REGVARS */
 rmi stl $1==4 && $2<0
 		| Xsource4 Xsource4 |
 			remove(displaced)
@@ -936,7 +936,7 @@ rmi lol stf $1==4 && inreg($2)==2
 			"mull2\t%[1],%[a]"
 			"subl3\t%[a],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 rmi sil $1==4 && $2<0
 		| Xsource4 Xsource4 |
 			REMEXTANDLOC
@@ -976,7 +976,7 @@ ngi stl $1==4 && inreg($2)==2
 			"mnegl\t%[1],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2)) 		|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ngi stl $1==4 && $2<0
 		| source4 |
 			remove(displaced)
@@ -1000,7 +1000,7 @@ ngi lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"mnegl\t%[1],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ngi sil $1==4 && $2<0
 		| source4 |
 			REMEXTANDLOC
@@ -1030,7 +1030,7 @@ sli stl $1==4 && inreg($2)==2
 			"ashl\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sli stl $1==4 && $2<0
 		| source1or2or4 source4 |
 			remove(displaced)
@@ -1054,7 +1054,7 @@ sli lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"ashl\t%[1],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sli sil $1==4 && $2<0
 		| source1or2or4 source4 |
 			REMEXTANDLOC
@@ -1097,7 +1097,7 @@ sri stl $1==4 && inreg($2)==2
 			"ashl\t$$%(0-%[1.num]%),%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| | (6,10)+%[1]+%[2]
-#endif REGVARS
+#endif /* REGVARS */
 sri stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -1147,7 +1147,7 @@ sri lol stf $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"ashl\t$$%(0-%[1.num]%),%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)}) |	| | (6,10)+%[1]+%[2]
-#endif REGVARS
+#endif /* REGVARS */
 sri sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -1255,7 +1255,7 @@ adf stl $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"addf3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 adf stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -1274,7 +1274,7 @@ adf sil $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"addf3\t%[1],%[2],(%(regvar($2)%))"
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 adf sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -1289,7 +1289,7 @@ adf ste $1==4	| source4 source4 |
 			remove(externals)
 			"addf3\t%[1],%[2],$2"
 			setcc({EXTERNAL4,$2})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 adf $1==8	| source8 source8 |
 			allocate(%[1],%[2],QREG)
 			"addd3\t%[1],%[2],%[a]"
@@ -1319,7 +1319,7 @@ adf sde $1==8	| source8 source8 |
 			remove(externals)
 			"addd3\t%[1],%[2],$2"
 			setcc({EXTERNAL8,$2})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 adf !defined($1) | source4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -1340,7 +1340,7 @@ sbf stl $1==4 && inreg($2)==2
 			"subf3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sbf stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -1359,7 +1359,7 @@ sbf sil $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"subf3\t%[1],%[2],(%(regvar($2)%))"
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 sbf sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -1374,7 +1374,7 @@ sbf ste $1==4	| source4 source4 |
 			remove(externals)
 			"subf3\t%[1],%[2],$2"
 			setcc({EXTERNAL4,$2})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 sbf $1==8	| source8 source8 |
 			allocate(%[1],%[2],QREG)
 			"subd3\t%[1],%[2],%[a]"
@@ -1400,7 +1400,7 @@ sbf sde $1==8	| source8 source8 |
 			remove(externals)
 			"subd3\t%[1],%[2],$2"
 			setcc({EXTERNAL8,$2})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 sbf !defined($1) | source1or2or4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -1424,7 +1424,7 @@ mlf stl $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"mulf3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 mlf stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -1443,7 +1443,7 @@ mlf sil $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"mulf3\t%[1],%[2],(%(regvar($2)%))"
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 mlf sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -1458,7 +1458,7 @@ mlf ste $1==4	| source4 source4 |
 			remove(externals)
 			"mulf3\t%[1],%[2],$2"
 			setcc({EXTERNAL4,$2})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 mlf $1==8	| source8 source8 |
 			allocate(%[1],%[2],QREG)
 			"muld3\t%[1],%[2],%[a]"
@@ -1488,7 +1488,7 @@ mlf sde $1==8	| source8 source8 |
 			remove(externals)
 			"muld3\t%[1],%[2],$2"
 			setcc({EXTERNAL8,$2})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 mlf !defined($1) | source1or2or4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -1509,7 +1509,7 @@ dvf stl $1==4 && inreg($2)==2
 			"divf3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 dvf stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -1528,7 +1528,7 @@ dvf sil $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"divf3\t%[1],%[2],(%(regvar($2)%))"
 			setcc(regvar($2))		|	   | |
-#endif REGVARS
+#endif /* REGVARS */
 dvf sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -1543,7 +1543,7 @@ dvf ste $1==4	| source4 source4 |
 			remove(externals)
 			"divf3\t%[1],%[2],$2"
 			setcc({EXTERNAL4,$2})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 dvf $1==8	| source8 source8 |
 			allocate(%[1],%[2],QREG)
 			"divd3\t%[1],%[2],%[a]"
@@ -1569,7 +1569,7 @@ dvf sde $1==8	| source8 source8 |
 			remove(externals)
 			"divd3\t%[1],%[2],$2"
 			setcc({EXTERNAL8,$2})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 dvf !defined($1) | source1or2or4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -1586,7 +1586,7 @@ ngf stl $1==4 && inreg($2)==2
 			"mnegf\t%[1],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ngf stl $1==4 && $2<0
 		| source4 |
 			remove(displaced)
@@ -1605,7 +1605,7 @@ ngf sil $1==4 && inreg($2)==2
 			remove(regvar($2))
 			"mnegf\t%[1],(%(regvar($2)%))"
 			setcc(regvar($2))	|	   | |
-#endif REGVARS
+#endif /* REGVARS */
 ngf sil $1==4 && $2<0
 		| source4 |
 			REMEXTANDLOC
@@ -1620,7 +1620,7 @@ ngf ste $1==4	| source4 |
 			remove(externals)
 			"mnegf\t%[1],$2"
 			setcc({EXTERNAL4,$2})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 ngf $1==8	| source8 |
 			allocate(%[1],QREG)
 			"mnegd\t%[1],%[a]"
@@ -1642,7 +1642,7 @@ ngf sde $1==8	| source8 |
 			remove(externals)
 			"mnegd\t%[1],$2"
 			setcc({EXTERNAL8,$2})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 ngf !defined($1) | source1or2or4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -1891,7 +1891,7 @@ lol adp stl $1==$3 && inreg($1)==2
 		| |	remove(regvar($1))
 			"addl2\t$$$2,%(regvar($1)%)"
 			erase(regvar($1))		|	| |
-#endif REGVARS
+#endif /* REGVARS */
 lol adp stl $1==$3 && $1<0
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
@@ -1977,7 +1977,7 @@ inl inreg($1)==2 | |	remove(regvar($1))
 			"incl\t%(regvar($1)%)"
 			erase(regvar($1))
 			setcc(regvar($1))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 inl $1<0	| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			"incl\t$1(fp)"
@@ -1993,7 +1993,7 @@ lol inl $1==$2 && inreg($1)==2
 			"incl\t%(regvar($1)%)"
 			erase(regvar($1))
 			setcc(regvar($1))	| %[a]	| |
-#endif REGVARS
+#endif /* REGVARS */
 ine		| |	remove(externals)
 			"incl\t$1"
 			setcc({EXTERNAL4,$1})	|	| |
@@ -2002,7 +2002,7 @@ del inreg($1)==2 | |	remove(regvar($1))
 			"decl\t%(regvar($1)%)"
 			erase(regvar($1))
 			setcc(regvar($1))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 del $1<0	| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			"decl\t$1(fp)"
@@ -2018,7 +2018,7 @@ lol del $1==$2 && inreg($1)==2
 			"decl\t%(regvar($1)%)"
 			erase(regvar($1))
 			setcc(regvar($1))	| %[a]	| |
-#endif REGVARS
+#endif /* REGVARS */
 dee		| |	remove(externals)
 			"decl\t$1"
 			setcc({EXTERNAL4,$1})	|	| |
@@ -2027,7 +2027,7 @@ zrl inreg($1)==2 | |	remove(regvar($1))
 			"clrl\t%(regvar($1)%)"
 			erase(regvar($1))
 			setcc(regvar($1))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 zrl $1<0	| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			"clrl\t$1(fp)"
@@ -2039,7 +2039,7 @@ zrl $1>=0	| |	remove(displaced)
 zrl zrl $1==$2+4 && $1<0
 #ifdef REGVARS
 	&& inreg($1)<2 && inreg($2)<2
-#endif REGVARS
+#endif /* REGVARS */
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$2+7 && %[num]+%[size]>$2)
 			"clrq\t$2(fp)"
@@ -2047,7 +2047,7 @@ zrl zrl $1==$2+4 && $1<0
 zrl zrl $1==$2+4 && $1>=0
 #ifdef REGVARS
 	&& inreg($1)<2 && inreg($2)<2
-#endif REGVARS
+#endif /* REGVARS */
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$2+7 && %[num]+%[size]>$2)
 			"clrq\t$2(ap)"
@@ -2070,10 +2070,10 @@ zer defined($1)	| STACK |
 #ifdef LOCLABS
 			"1:\tclrl\t-(sp)"
 			"sobgtr\tr0,1b"
-#else LOCLABS
+#else /* LOCLABS */
 			"clrl\t-(sp)"
 			"sobgtr\tr0,.-2"
-#endif LOCLABS
+#endif /* LOCLABS */
 			erase(R0)		|	| |
 zer !defined($1) | source1or2or4 |
 			remove(ALL)
@@ -2081,10 +2081,10 @@ zer !defined($1) | source1or2or4 |
 #ifdef LOCLABS
 			"1:\tclrl\t-(sp)"
 			"sobgtr\tr0,1b"
-#else LOCLABS
+#else /* LOCLABS */
 			"clrl\t-(sp)"
 			"sobgtr\tr0,.-2"
-#endif LOCLABS
+#endif /* LOCLABS */
 			erase(R0)		|	| |
 
 /********************************
@@ -2115,7 +2115,7 @@ loc loc cii stl $1==1 && $2==4 && inreg($4)==2
 			"cvtbl\t%[1],%(regvar($4)%)"
 			erase(regvar($1))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cii stl $1==1 && $2==4 && $4<0
 		| source1or2or4 |
 			remove(displaced)
@@ -2143,7 +2143,7 @@ loc loc cii stl $1==2 && $2==4 && inreg($4)==2
 			"cvtwl\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cii stl $1==2 && $2==4 && $4<0
 		| source2or4 |
 			remove(displaced)
@@ -2174,7 +2174,7 @@ loc loc cfi stl $1==4 && $2==4 && inreg($4)==2
 			"cvtfl\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cfi stl $1==4 && $2==4 && $4<0
 		| source4 |
 			remove(displaced)
@@ -2191,7 +2191,7 @@ loc loc cfi ste $1==4 && $2==4	| source4 |
 			remove(externals)
 			"cvtfl\t%[1],$4"
 			setcc({EXTERNAL4,$4})	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 loc loc cfi $1==4 && $2==4	| source4 |
 			allocate(%[1],REG)
 			"cvtfl\t%[1],%[a]"
@@ -2204,7 +2204,7 @@ loc loc cfi stl $1==8 && $2==4 && inreg($4)==2
 			"cvtdl\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cfi stl $1==8 && $2==4 && $4<0
 		| source8 |
 			remove(displaced)
@@ -2221,7 +2221,7 @@ loc loc cfi ste $1==8 && $2==4	| source8 |
 			remove(externals)
 			"cvtdl\t%[1],$4"
 			setcc({EXTERNAL4,$4})	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 loc loc cfi $1==8 && $2==4	| source8 |
 			allocate(%[1],REG)
 			"cvtdl\t%[1],%[a]"
@@ -2234,7 +2234,7 @@ loc loc cif stl $1==4 && $2==4 && inreg($4)==2
 			"cvtlf\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cif stl $1==4 && $2==4 && $4<0
 		| source4 |
 			remove(displaced)
@@ -2248,7 +2248,7 @@ loc loc cif stl $1==4 && $2==4 && $4>=0
 loc loc cif ste $1==4 && $2==4	| source4 |
 			remove(externals)
 			"cvtlf\t%[1],$4"	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 loc loc cif $1==4 && $2==4	| source4 |
 			allocate(%[1],REG)
 			"cvtlf\t%[1],%[a]"	| %[a]	| |
@@ -2261,7 +2261,7 @@ loc loc cif sdl $1==4 && $2==8 && inreg($4)==2
 			"cvtld\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 */
 loc loc cif sdl $1==4 && $2==8 && $4<0
 		| source4 |
@@ -2276,7 +2276,7 @@ loc loc cif sdl $1==4 && $2==8 && $4>=0
 loc loc cif sde $1==4 && $2==8	| source4 |
 			remove(externals)
 			"cvtld\t%[1],$4"	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 loc loc cif $1==4 && $2==8	| source4 |
 			allocate(%[1],QREG)
 			"cvtld\t%[1],%[a]"	| %[a]	| |
@@ -2295,7 +2295,7 @@ loc loc cff sdl $1==4 && $2==8 && inreg($4)==2
 			"cvtfd\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 */
 loc loc cff sdl $1==4 && $2==8 && $4<0
 		| source4 |
@@ -2310,7 +2310,7 @@ loc loc cff sdl $1==4 && $2==8 && $4>=0
 loc loc cff sde $1==4 && $2==8	| source4 |
 			remove(externals)
 			"cvtfd\t%[1],$4"	|	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 loc loc cff $1==4 && $2==8	| source4 |
 			allocate(%[1],QREG)
 			"cvtfd\t%[1],%[a]"	| %[a]	| |
@@ -2322,7 +2322,7 @@ loc loc cff stl $1==8 && $2==4 && inreg($4)==2
 			"cvtdf\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 loc loc cff stl $1==8 && $2==4 && $4<0
 		| source8 |
 			remove(displaced)
@@ -2336,7 +2336,7 @@ loc loc cff stl $1==8 && $2==4 && $4>=0
 loc loc cff ste $1==8 && $2==4	| source8 |
 			remove(externals)
 			"cvtdf\t%[1],$4"	|	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 loc loc cff $1==8 && $2==4	| source8 |
 			allocate(%[1],REG)
 			"cvtdf\t%[1],%[a]"	| %[a]	| |
@@ -2396,7 +2396,7 @@ and stl $1==4 && inreg($2)==2
 			"bicl3\t$$~%[2.num],%[1],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| | (4,4)+%[1]+%[2]
-#endif REGVARS
+#endif /* REGVARS */
 and stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -2452,7 +2452,7 @@ and sil $1==4 && inreg($2)==2
 			"bicl3\t$$~%[2.num],%[1],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})
 						|	| | (6,12)+%[1]+%[2]
-#endif REGVARS
+#endif /* REGVARS */
 and sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -2537,7 +2537,7 @@ ior stl $1==4 && inreg($2)==2
 			"bisl3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ior stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -2556,7 +2556,7 @@ ior sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"bisl3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ior sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -2603,7 +2603,7 @@ xor stl $1==4 && inreg($2)==2
 			"xorl3\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 xor stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -2622,7 +2622,7 @@ xor sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"xorl3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 xor sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -2657,7 +2657,7 @@ com stl $1==4 && inreg($2)==2
 			"mcoml\t%[1],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 com stl $1==4 && $2<0
 		| source4 |
 			remove(displaced)
@@ -2676,7 +2676,7 @@ com sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"mcoml\t%[1],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 com sil $1==4 && $2<0
 		| source4 |
 			REMEXTANDLOC
@@ -2712,7 +2712,7 @@ rol stl $1==4 && inreg($2)==2
 			"rotl\t%[1],%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 rol stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -2731,7 +2731,7 @@ rol sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"rotl\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 rol sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -2774,7 +2774,7 @@ ror stl $1==4 && inreg($2)==2
 			"rotl\t$$%(32-%[1.num]%),%[2],%(regvar($2)%)"
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ror stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
@@ -2813,7 +2813,7 @@ ror sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"rotl\t$$%(32-%[1.num]%),%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ror sil $1==4 && $2<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -2867,7 +2867,7 @@ com and stl $1==4 && $2==4 && inreg($3)==2
 			"bicl3\t%[1],%[2],%(regvar($3)%)"
 			erase(regvar($3))
 			setcc(regvar($3))	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 com and stl $1==4 && $2==4 && $3<0
 		| source4 source4 |
 			remove(displaced)
@@ -2886,7 +2886,7 @@ com and sil $1==4 && $2==4 && inreg($3)==2
 			REMEXTANDLOC
 			"bicl3\t%[1],%[2],(%(regvar($3)%))"
 			setcc({regdef4,regvar($3)})	|	| |
-#endif REGVARS
+#endif /* REGVARS */
 com and sil $1==4 && $2==4 && $3<0
 		| source4 source4 |
 			REMEXTANDLOC
@@ -3715,7 +3715,7 @@ cmf tgt $1==4	| source4 source4 |
 #endif
 			erase(%[a])
 			setcc(%[a])		| %[a]	| |
-#endif FLOAT4
+#endif /* FLOAT4 */
 #ifdef FLOAT8
 cmf tlt $1==8	| source8 source8 |
 			allocate(%[1],%[2],REG)
@@ -3814,7 +3814,7 @@ cmf tgt $1==8	| source8 source8 |
 #endif
 			erase(%[a])
 			setcc(%[a])		| %[a]	| |
-#endif FLOAT8
+#endif /* FLOAT8 */
 /* Remember that cmu was replaced by cmp. */
 cmp tlt 	| source4 source4 |
 			allocate(REG={CONST1,0})
@@ -4313,9 +4313,9 @@ ret $1==8	| NC bigsource8 |
 
 #ifdef REGVARS
 asp $1==4	| bigsource4 - regch4 |		|	| |
-#else REGVARS
+#else /* REGVARS */
 asp $1==4	| NC bigsource4 |		|	| |
-#endif REGVARS
+#endif /* REGVARS */
 ...		| STACK |
 			"tstl\t(sp)+"		|	| | (2,7)
 asp $1>0	| STACK |
@@ -4388,9 +4388,9 @@ dup stl $1==4	| 	|			|	| stl $2 lol $2 |
 dup $1==4	| dups4 |		| %[1] %[1]	| |
 #ifdef REGVARS
 dup $1==8	| bigsource8-regch8 |	| %[1] %[1]	| |
-#else REGVARS
+#else /* REGVARS */
 dup $1==8	| bigsource8 |		| %[1] %[1]	| |
-#endif REGVARS
+#endif /* REGVARS */
 ...		| dups4 dups4 |		| %[2] %[1] %[2] %[1] | |
 dup		| STACK |
 			allocate(REG,REG={CONST1,$1/4})
@@ -4467,15 +4467,15 @@ rck !defined($1) | source4 |
 			move(%[1],R0)
 			"jsb\t.rck"
 			erase(R0)		|	| |
-#else DORCK
+#else /* DORCK */
 #ifdef REGVARS
 rck defined($1)	| bigsource4-regch4 |		|	| |
 rck !defined($1) | bigsource4-regch4 bigsource4-regch4 | | | |
-#else REGVARS
+#else /* REGVARS */
 rck defined($1)	| bigsource4 |		|	| |
 rck !defined($1) | bigsource4 bigsource4 |	|	| |
-#endif REGVARS
-#endif DORCK
+#endif /* REGVARS */
+#endif /* DORCK */
 rtt		| | "ret"			|	| |
 sig		| STACK |
 			"jsb\t.sig"		|	| |
@@ -4576,7 +4576,7 @@ MOVES:
 				setcc(%[2]) erase(%[2]),(3,4)+%[1])
 (reginc8+regdec8,reg8,		"movq\t%[1],%[2]"
 				setcc(%[2]) erase(%[2]),(3,7)+%[1])
-#endif REGVARS
+#endif /* REGVARS */
 (source8,source8,		"movq\t%[1],%[2]"
 				setcc(%[2]),		(3,4)+%[1]+%[2])
 (source4,source4,		"movl\t%[1],%[2]"

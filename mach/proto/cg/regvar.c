@@ -135,6 +135,6 @@ unlinkregs() {
 	}
 }
 
-#endif REGVARS
+#endif /* REGVARS */
 
 /* nothing after this */

@@ -205,7 +205,7 @@ chkregs() {
 		for(j=0;j<nregvar[i];j++)
 			inctcount(rvnumbers[i][j]);
 	}
-#endif REGVARS
+#endif /* REGVARS */
 	for (rp=machregs+1;rp<machregs+NREGS;rp++) {
 		assert(rp->r_refcount==rp->r_tcount);
 		rp->r_tcount=0;

@@ -47,7 +47,7 @@ expr
 #else
 			  $$.typ = $1.typ;  /* Even if $1.typ is relocatable, it should be   */
 			                    /* absolute by the final pass.                   */
-#endif RELOCATION
+#endif /* RELOCATION */
 			}
 	;
 operation

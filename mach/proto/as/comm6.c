@@ -26,7 +26,7 @@ register int typ;
 		typ = S_VAR;
 	else if (pass == PASS_2 && (ip->i_type & S_TYP) == S_UND)
 		ip->i_type |= typ;
-#endif THREE_PASS
+#endif /* THREE_PASS */
 	if (typ == S_UND)
 		serror("illegal equate");
 	if (pass == PASS_3)
@@ -40,7 +40,7 @@ register item_t *ip;
 	register flag;
 #ifdef GENLAB
 	static char genlab[] = GENLAB;
-#endif GENLAB
+#endif /* GENLAB */
 
 	if (pass == PASS_1) {
 		/* printf("declare %s: %o\n", ip->i_name, typ); */
@@ -59,12 +59,12 @@ register item_t *ip;
 		flag = SYM_LOC;
 #else
 	flag = SYM_EXT|SYM_LOC;	/* S_EXT not stable in PASS_1 */
-#endif THREE_PASS
+#endif /* THREE_PASS */
 #ifdef GENLAB
 	if (!(flag & SYM_EXT) &&
 	    strncmp(ip->i_name, genlab, sizeof(genlab)-1) == 0)
 		flag = SYM_LAB;
-#endif GENLAB
+#endif /* GENLAB */
 	if (sflag & flag)
 		newsymb(
 			ip->i_name,

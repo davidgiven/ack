@@ -138,7 +138,7 @@ EXTEND	*e1,*e2;
 			*lp <<= count;
 		}
 	}
-#else USE_DIVIDE
+#else /* USE_DIVIDE */
 
 	u[4] = (e1->m2 & 1) << 15;
 	b64_rsft(&(e1->m1));

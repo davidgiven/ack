@@ -2,7 +2,7 @@
 
 #ifndef lint
 static char rcsid[] = "$Header$";
-#endif lint
+#endif /* lint */
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
@@ -129,7 +129,7 @@ prolog(nlocals)
 		fprintf(codefile,"\tsubl2\t$%ld,sp\n",nlocals);
 }
 
-#endif not REGVARS
+#endif /* not REGVARS */
 
 char    *segname[] = {
 	".sect .text",	/* SEGTXT */
@@ -273,4 +273,4 @@ regscore(off, size, typ, score, totyp)
 	return i - 1;
 }
 
-#endif REGVARS
+#endif /* REGVARS */

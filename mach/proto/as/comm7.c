@@ -167,7 +167,7 @@ listline(textline)
 	listcolm = 0;
 	listflag = listtemp;
 }
-#endif LISTING
+#endif /* LISTING */
 
 /* ---------- code optimization ---------- */
 

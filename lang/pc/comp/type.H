@@ -146,7 +146,7 @@ extern struct type
 #define	long_size	(SZ_LONG)
 #define	pointer_size	(SZ_POINTER)
 #define	real_size	(SZ_REAL)
-#else NOCROSS
+#else /* NOCROSS */
 extern int
 	word_align,
 	int_align,
@@ -161,7 +161,7 @@ extern arith
 	long_size,
 	pointer_size,
 	real_size;		/* All from type.c */
-#endif NOCROSS
+#endif /* NOCROSS */
 
 extern arith
 	align();

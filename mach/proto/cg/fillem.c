@@ -548,7 +548,7 @@ bss(n,t,b) full n; {
 	if (b==0
 #ifdef BSS_INIT
 	    || (t==sp_cstx && argval==BSS_INIT)
-#endif BSS_INIT
+#endif /* BSS_INIT */
 		) {
 		switchseg(SEGBSS);
 		newlbss(labstr,n);

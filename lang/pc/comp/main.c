@@ -101,7 +101,7 @@ Compile(src, dst)
 		LexScan();
 		return 0;	/* running the optimizer is not very useful */
 	}
-#endif DEBUG
+#endif /* DEBUG */
 	C_init(word_size, pointer_size);
 	if( !C_open(dst) )
 		fatal("couldn't open output file");
@@ -121,7 +121,7 @@ Compile(src, dst)
 	C_close();
 #ifdef DEBUG
 	if( options['I'] ) Info();
-#endif DEBUG
+#endif /* DEBUG */
 	return !err_occurred;
 }
 

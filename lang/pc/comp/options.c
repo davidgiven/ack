@@ -147,7 +147,7 @@ DoOption(text)
 				}
 		}
 		break;
-#endif NOCROSS
+#endif /* NOCROSS */
 	}
 	}
 }

@@ -332,7 +332,7 @@ instsize(tinstno,tp) token_p tp; {
 		return(tokens[inp->in_info[0]].t_size);
 	}
 }
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 
 tref(tp,amount) register token_p tp; {
 	register i;
@@ -389,7 +389,7 @@ found:
 		fakestack[stackheight++] = savestack[i];
 	return(cp->c2_nsplit);
 }
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 
 unsigned docoerc(tp,cp,ply,toplevel,forced) token_p tp; c3_p cp; {
 	token_t savestack[MAXSAVE];

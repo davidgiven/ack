@@ -42,11 +42,11 @@ extern short	dflag;		/* -d option (list mode) */
 #ifdef ASLD
 #ifdef RELOCATION
 extern short	rflag;		/* -r option (relocation info) */
-#endif RELOCATION
+#endif /* RELOCATION */
 #else
 #define	rflag	1
 extern valu_t	relonami;
-#endif ASLD
+#endif /* ASLD */
 
 #ifdef THREE_PASS
 extern short	bflag;		/* -b option (no optimizations) */

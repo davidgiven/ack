@@ -51,10 +51,10 @@ extern valu_t	bd_rel1,bd_rel2,od_rel1,od_rel2;
 #ifdef ASLD
 #define	T_EMIT2(a,b,c,d)	t_emit2(a,b,c,(valu_t)0)
 #define	T_EMIT4(a,b,c,d)	t_emit4(a,b,c,(valu_t)0)
-#else  ALSD
+#else  /* ALSD */
 #define	T_EMIT2(a,b,c,d)	t_emit2(a,b,c,(valu_t)d)
 #define	T_EMIT4(a,b,c,d)	t_emit4(a,b,c,(valu_t)d)
-#endif ASLD
+#endif /* ASLD */
 #else
 #define	T_EMIT2(a,b,c,d)	t_emit2(a)
 #define	T_EMIT4(a,b,c,d)	t_emit4(a)

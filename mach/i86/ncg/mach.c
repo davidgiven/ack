@@ -153,7 +153,7 @@ regreturn()
 	}
 	else fputs("jmp .cret\n", codefile);
 }
-#endif REGVARS
+#endif /* REGVARS */
 
 mes(type) word type ; {
 	int argt ;

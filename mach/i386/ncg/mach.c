@@ -156,7 +156,7 @@ regreturn()
 	}
 	fputs("leave\nret\n", codefile);
 }
-#endif REGVARS
+#endif /* REGVARS */
 
 mes(type) word type ; {
 	int argt, a1, a2 ;

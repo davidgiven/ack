@@ -68,8 +68,8 @@
 #ifndef ASLD
 #ifndef RELOCATION
 separate linker only possible if relocation info produced
-#endif RELOCATION
-#endif ASLD
+#endif /* RELOCATION */
+#endif /* ASLD */
 
 #ifndef DEBUG
 #define	DEBUG	1
@@ -124,7 +124,7 @@ _include	<signal.h>
 #else
 #define	PASS_SYMB	1
 #define	PASS_RELO	1
-#endif THREE_PASS
+#endif /* THREE_PASS */
 
 #ifdef ASLD
 #define	RELOMOVE(a,b)	/* empty */

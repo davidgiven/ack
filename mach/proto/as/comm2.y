@@ -96,7 +96,7 @@ static item_t	*last_it, *o_it;
 			else if (listtemp) { listflag = listtemp; listeoln = 1; }
 #else
 #define	LISTLINE(n)	/* empty */
-#endif LISTING
+#endif /* LISTING */
 
 #ifdef ASLD
 #define	RELODONE	/* empty */

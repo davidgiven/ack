@@ -200,7 +200,7 @@ regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,8)
 t_regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,8) .
 t_regAcon	= {A_REG reg; INT bd;} 4 cost(2,6) .
 
-#else TBL68020
+#else /* TBL68020 */
 	/* Part (iii) */
 absolute4	= {ADDR bd;} 4 cost(4,7) "(" bd ")" .
 offsetted4	= {A_REG reg; INT bd;} 4 cost(2,6) "(" bd "," reg ")" .
@@ -288,7 +288,7 @@ DREG_pair	= {D_REG4 reg1; D_REG4 reg2;} 8 cost(2,0) reg1 ":" reg2 .
 #define	t_regAregXcon	regAregXcon
 #define t_regAcon	regAcon
 
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE!=2
 #define DLOCAL LOCAL
@@ -349,7 +349,7 @@ control1	= indirect1 + offsetted1 + index_off1 + absolute1 .
 alterable1	= data1 + D_REG - consts .
 any1		= data1 + D_REG .
 
-#else TBL68020
+#else /* TBL68020 */
 
 data4		= D_REG4 + indirect4 + post_inc4 + pre_dec4 + index_off4 +
 		  offsetted4 + OFF_off4 + OFF_indoff4 +
@@ -396,7 +396,7 @@ control1	= memory1 - (post_inc1 + pre_dec1 + consts ) .
 alterable1	= data1 + D_REG - consts .
 any1		= data1 + D_REG. /* all four above together */
 
-#endif TBL68020
+#endif /* TBL68020 */
 	/* This is a common part */
 #if WORD_SIZE==2
 /* Not any4, since any is used in 'with' and not in 'kills' */
@@ -424,7 +424,7 @@ allexceptcon	= ALL - ( D_REG + A_REG + consts + dreg2 + dreg1 +
 		    t_regAcon + t_regAregXcon ) .
 use_index	= index_off4 + index_off2 + index_off1 .
 
-#else TBL68020
+#else /* TBL68020 */
 
 reg_memind4	= OFF_off4 + OFF_indoff4 + INDOFF_off4 .
 memind4		= reg_memind4 +
@@ -466,7 +466,7 @@ use_indaddr	= regAregXcon +
 
 use_index	= use_index4 + use_index2 + use_index1 + use_indaddr + regX .
 
-#endif TBL68020
+#endif /* TBL68020 */
 	/* A common part */
 posextern	= absolute + all_indir .
 
@@ -513,7 +513,7 @@ test_set2	= datalt2 .
 #endif
 test_set1	= datalt1 .
 
-#else TBL68020
+#else /* TBL68020 */
 
 imm_cmp4	= any4 - immediate4 - A_REG .
 imm_cmp2	= any2 - consts .
@@ -527,15 +527,15 @@ test_set2	= data2 - consts .
 #endif
 test_set1	= data1 - consts .
 
-#endif TBL68020
+#endif /* TBL68020 */
 
 test_set	= test_set4 + test_set2 + test_set1 .
 
 #ifndef TBL68020
 t_address	= address + t_regAregXcon + t_regAcon .
-#else TBL68020
+#else /* TBL68020 */
 #define	t_address	address
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if TBL68881
 freg		= FD_REG + FS_REG .
@@ -591,7 +591,7 @@ divs_l "divs.l" data4:ro,	LOCAL:rw:cc		cost(0,90).
 divu_l "divu.l" data4:ro,	LOCAL:rw:cc		cost(0,78).
 muls_l "muls.l" data4:ro,	LOCAL:rw:cc		cost(0,44).
 mulu_l "mulu.l" data4:ro,	LOCAL:rw:cc		cost(0,44).
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 add_l  "add.l"	any4:ro,	D_REG4:rw:cc		cost(2,3).
@@ -777,9 +777,9 @@ extb_l "extb.l" extend1_4+D_REG+LOCAL:rw:cc			cost(2,4).
 muls_l "muls.l" data4:ro,	D_REG+LOCAL:rw:cc		cost(2,44).
 mulu_l "mulu.l" data4:ro,	D_REG+LOCAL:rw:cc		cost(2,44).
 #endif
-#else TBL68020
+#else /* TBL68020 */
 pea		address+control4			cost(2,4).
-#endif TBL68020
+#endif /* TBL68020 */
 
 	/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	 * Extra pseudo instruction; it just kills a D_REG;
@@ -888,7 +888,7 @@ from t_regAcon sfit(%bd, 16) to A_REG+areg
 from t_regAcon to A_REG+areg
     gen move_l %1.reg, %2
 	add_l {const4, %1.bd}, %2
-#endif TBL68020
+#endif /* TBL68020 */
 
 from address - ext_addr to A_REG+areg
     gen lea %1, %2
@@ -977,7 +977,7 @@ from t_regAcon sfit(%bd, 16) to STACK
 from t_regAcon to STACK
     gen move_l %1.reg, {pre_dec4, sp}
 	add_l {const4, %1.bd}, {indirect4, sp}
-#endif TBL68020
+#endif /* TBL68020 */
 
 from A_REG to STACK
     gen pea {indirect4, %1}
@@ -1059,7 +1059,7 @@ from extend1 to STACK
 #ifdef TBL68020
 from regX to STACK
     gen pea %1
-#endif TBL68020
+#endif /* TBL68020 */
 	/* This last stackingrule is never used: whenever regX is put on
 	 * the fakestack, some em-instuctions are left that remove it
 	 * immediately. However cgg complained about not having a
@@ -1138,7 +1138,7 @@ from t_regAcon
     uses reusing %1, AA_REG=%1.reg
     gen add_l {const4, %1.bd}, %a
 			yields	%a
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 from regAregXcon %bd==0 && %sc==1
@@ -1539,7 +1539,7 @@ pat lol mlu stl $1==$3 && $2==WORD_SIZE && inreg($1)==reg_any
 with data_int
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen mulu_i %1, {LOCAL, $1}
-#endif TBL68020
+#endif /* TBL68020 */
 
 proc lolxxxstl example lol adi stl
 with conreg_int-bconst
@@ -2948,7 +2948,7 @@ with exact local_addr	yields	{LOCAL, %1.bd+$1}
 with exact ext_addr	yields	{absolute_int, %1.bd+$1}
 #ifndef TBL68020
 with regAcon		yields	{offsetted_int, %1.reg, %1.bd+$1}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon	yields	{offsetted_int, %1.reg, %1.bd+$1}
 with exact regAregXcon	yields	{index_off_int, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
 #ifdef FANCY_MODES
@@ -3037,7 +3037,7 @@ with exact ext_addr	yields	{absolute1, %1.bd}
 #ifndef TBL68020
 with regAcon		yields	{offsetted1, %1.reg, %1.bd}
 with regAregXcon	yields	{index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon	yields	{offsetted1, %1.reg, %1.bd}
 with exact regAregXcon	yields	{index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
 #ifdef FANCY_MODES
@@ -3070,7 +3070,7 @@ with exact ext_addr	yields	{absolute2, %1.bd}
 #ifndef TBL68020
 with regAcon		yields	{offsetted2, %1.reg, %1.bd}
 with regAregXcon	yields	{index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon	yields	{offsetted2, %1.reg, %1.bd}
 with exact regAregXcon	yields	{index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
 #if WORD_SIZE==2
@@ -3102,7 +3102,7 @@ with exact ext_addr	yields	{absolute4, %1.bd}
 #ifndef TBL68020
 with regAcon		yields	{offsetted4, %1.reg, %1.bd}
 with regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon	yields	{offsetted4, %1.reg, %1.bd}
 with exact regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
 #if WORD_SIZE==4
@@ -3342,7 +3342,7 @@ with regAcon store_int
     kills allexceptcon
     gen move %2, {offsetted_int, %1.reg, %1.bd+$1}
 #endif
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon store_int
     kills allexceptcon
     gen move %2, {offsetted_int, %1.reg, %1.bd+$1}
@@ -3390,7 +3390,7 @@ with exact ext_regX store_int
     kills allexceptcon
     gen move %2, {abs_index_int, %1.sc, %1.xreg, %1.bd+$1}
 #endif	/* FANCY_MODES */
-#endif TBL68020
+#endif /* TBL68020 */
 
 pat sti $1==1
 with A_REG any1
@@ -3409,7 +3409,7 @@ with regAcon any1
 with regAregXcon any1
     kills allexceptcon
     gen move %2, {index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon any1
     kills allexceptcon
     gen move %2, {offsetted1, %1.reg, %1.bd}
@@ -3457,7 +3457,7 @@ with exact ext_regX any1
     kills allexceptcon
     gen move %2, {abs_index1, %1.sc, %1.xreg, %1.bd}
 #endif /* FANCY_MODES */
-#endif TBL68020
+#endif /* TBL68020 */
 
 pat sti $1==2
 with A_REG any2
@@ -3476,7 +3476,7 @@ with regAcon any2
 with regAregXcon any2
     kills allexceptcon
     gen move %2, {index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon any2
     kills allexceptcon
     gen move %2, {offsetted2, %1.reg, %1.bd}
@@ -3529,7 +3529,7 @@ with exact ext_regX any2
     kills allexceptcon
     gen move %2, {abs_index2, %1.sc, %1.xreg, %1.bd}
 #endif /* FANCY_MODES */
-#endif TBL68020
+#endif /* TBL68020 */
 
 pat sti $1==4
 with A_REG store4-sconsts4
@@ -3557,7 +3557,7 @@ with regAcon store4-sconsts4
 with regAregXcon store4-sconsts4
     kills allexceptcon
     gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
-#else TBL68020
+#else /* TBL68020 */
 with exact regAcon store4
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd}
@@ -3607,7 +3607,7 @@ with exact ext_regX store4
     kills allexceptcon
     gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd}
 #endif /* FANCY_MODES */
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 pat sti $1==6
@@ -3834,7 +3834,7 @@ pat mli $1==4
 #ifdef TBL68020
 with data4 DD_REG4
     gen muls_l %1, %2	yields	%2
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".mli"}
@@ -3853,12 +3853,12 @@ pat dvi $1==4
 #ifdef TBL68020
 with data4-sconsts4 DD_REG4
     gen divs_l %1, %2	yields	%2
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".dvi"}
 			yields	dl1
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 pat rmi $1==2
@@ -3878,12 +3878,12 @@ with data4-sconsts4 DD_REG4
 	killreg %2
 		/* !!!! contents of %2 have changed: make this known to cg */
 			yields	%a
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".dvi"}
 			yields	dl2
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 pat ngi $1==2
@@ -3934,12 +3934,12 @@ pat mlu $1==4
 #ifdef TBL68020
 with data4-sconsts4 DD_REG4
     gen mulu_l %1, %2	yields	%2
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".mlu"}
 			yields	dl1
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 pat dvu $1==2
@@ -3953,12 +3953,12 @@ pat dvu $1==4
 #ifdef TBL68020
 with data4-sconsts4 DD_REG4
     gen divu_l %1, %2	yields	%2
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".dvu"}
 			yields	dl1
-#endif TBL68020
+#endif /* TBL68020 */
 
 #if WORD_SIZE==2
 pat rmu $1==2
@@ -3979,12 +3979,12 @@ with data4-sconsts4 DD_REG4
 	killreg %2
 		/* !!!! contents of %2 have changed: make this known to cg */
 			yields	%a
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".dvu"}
 			yields	dl2
-#endif TBL68020
+#endif /* TBL68020 */
 
 pat slu				leaving sli $1
 
@@ -4400,7 +4400,7 @@ with exact LOCAL ext_regX
 with exact absolute4 ext_regX
 			yields	{abs_regXcon, %2.sc, %2.xreg, %1.bd, %2.bd}
 #endif /* FANCY_MODES */
-#endif TBL68020
+#endif /* TBL68020 */
 
 	/* I WOULD ALSO LIKE THIS:
 	 * 	pat ads
@@ -4442,7 +4442,7 @@ with DD_REG4
     gen add_l %1, %1    yields  %1
 #endif
 
-#endif TBL68020
+#endif /* TBL68020 */
 
 
 /************************************************
@@ -5093,7 +5093,7 @@ pat lae aar $2==4 && rom($1,3)==1
 pat lae aar $2==4 && nicesize(rom($1,3))
 with D_REG		yields	{regX, rom($1,3), %1}
 				leaving ads 4 adp rom($1,3)*(0-rom($1,1))
-#else TBL68020
+#else /* TBL68020 */
 pat lae aar $2==4 && rom($1,3)==2
 with DD_REG
     gen asl_l {small_const, 1}, %1
@@ -5111,7 +5111,7 @@ with DD_REG
     gen asl_l {small_const, 3}, %1
 			yields	%1
 				leaving ads 4 adp (0 - rom($1,1))<<3
-#endif TBL68020
+#endif /* TBL68020 */
 #endif	/* ARR_OPT */
 #endif /* WORD_SIZE!=2 */
 
@@ -5928,11 +5928,11 @@ with A_REG D_REG4
 	pea {absolute4, 1}			/* push constant 1 == ERANGE */
 	jsr {absolute4, ".trp"}
 	1:			yields	%2
-#else TBL68020
+#else /* TBL68020 */
 with STACK
     kills ALL
     gen jsr {absolute4, ".rck"}
-#endif TBL68020
+#endif /* TBL68020 */
 #endif /* WORD_SIZE==4 || TBL68020 */
 
 pat rtt				leaving ret 0
@@ -6579,10 +6579,10 @@ with memory1+DD_REG
 #else
 #ifdef TBL68020
 	extb_l	{LOCAL,$4}
-#else TBL68020
+#else /* TBL68020 */
 	ext_w	{LOCAL,$4}
 	ext_l	{LOCAL,$4}
-#endif TBL68020
+#endif /* TBL68020 */
 #endif
 
 pat loc loc cii $1==2 && $2==4

@@ -33,7 +33,7 @@ arith
 	long_size	= SZ_LONG,
 	pointer_size	= SZ_POINTER,
 	real_size	= SZ_REAL;
-#endif NOCROSS
+#endif /* NOCROSS */
 
 extern arith	max_int;
 

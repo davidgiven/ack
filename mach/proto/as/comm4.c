@@ -93,8 +93,8 @@ char **argv;
 #ifdef RELOCATION
 #ifdef ASLD
 			rflag = 1;
-#endif ASLD
-#endif RELOCATION
+#endif /* ASLD */
+#endif /* RELOCATION */
 			break;
 		case 'b':
 #ifdef THREE_PASS
@@ -115,7 +115,7 @@ char **argv;
 #ifdef RELOCATION
 	if (rflag)
 		sflag |= SYM_SCT;
-#endif RELOCATION
+#endif /* RELOCATION */
 	pass_1(argc, argv);
 #ifdef THREE_PASS
 	pass_23(PASS_2);
@@ -304,7 +304,7 @@ needed()
 #endif
 	return(need);
 }
-#endif ASLD
+#endif /* ASLD */
 
 parse(s)
 char *s;
@@ -423,7 +423,7 @@ pass_23(n)
 	machstart(n);
 #ifndef ASLD
 	newmodule(modulename);
-#endif ASLD
+#endif /* ASLD */
 	ffreopen(temppath, tempfile);
 	yyparse();
 	commfinish();
@@ -534,12 +534,12 @@ commfinish()
 					0,
 					load(ip)
 				);
-#else not ASLD
+#else /* not ASLD */
 #ifdef THREE_PASS
 			if (pass == PASS_2) {
 				cp->c_size -= sp->s_gain;
 			}
-#endif THREE_PASS
+#endif /* THREE_PASS */
 		}
 		if (pass == PASS_1) cp->c_size = ip->i_valu;
 		if (PASS_SYMB) {
@@ -553,7 +553,7 @@ commfinish()
 				cp->c_size
 			);
 		}
-#endif not ASLD
+#endif /* not ASLD */
 	}
 	if (PASS_SYMB == 0)
 		return;
@@ -578,7 +578,7 @@ commfinish()
 				(valu_t)0
 			);
 		}
-#endif not ASLD
+#endif /* not ASLD */
 	/*
 	 * produce symbol table entries for sections
 	 */

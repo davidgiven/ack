@@ -39,7 +39,7 @@ int		OO_wrstats = 1;	/* pattern statistics output */
 #define printstate(s) dumpstate(s)
 #else
 #define printstate(s)
-#endif DEBUG
+#endif /* DEBUG */
 
 /**** WHICH IS FASTER? ****
 #define BTSCPY(pp,qq,i,p,q,n) btscpy(p,q,(n)*sizeof(struct e_instr))

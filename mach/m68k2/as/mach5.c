@@ -430,7 +430,7 @@ ea707172(sz)
 #else
 		if (exp_2.typ != S_ABS)
 			sm = 0;
-#endif ASLD
+#endif /* ASLD */
 		sm = small(sm, 2);
 		if (sm)
 			mrg_2 = 070;

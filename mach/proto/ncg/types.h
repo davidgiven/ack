@@ -27,4 +27,4 @@ typedef char * string;
 #define word long
 #ifndef WRD_FMT
 #define WRD_FMT "%ld"
-#endif WRD_FMT
+#endif /* WRD_FMT */

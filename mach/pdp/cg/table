@@ -40,10 +40,10 @@
 #ifdef REGPATCH
 #define SL 8
 #define SSL "010"
-#else REGPATCH
+#else /* REGPATCH */
 #define SL 4
 #define SSL "4"
-#endif REGPATCH
+#endif /* REGPATCH */
 
 #define NC nocoercions:
 

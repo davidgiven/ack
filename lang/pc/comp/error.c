@@ -59,7 +59,7 @@ debug(va_alist)
 	}
 	va_end(ap);
 }
-#endif DEBUG
+#endif /* DEBUG */
 
 /*VARARGS*/
 error(va_alist)
@@ -220,7 +220,7 @@ _error(class, node, ap)
 		case VDEBUG:
 			remark = "(debug)";
 			break;
-#endif DEBUG
+#endif /* DEBUG */
 	}
 
 	/* the place */
@@ -235,7 +235,7 @@ _error(class, node, ap)
 		case FATAL:
 #ifdef DEBUG
 		case VDEBUG:
-#endif DEBUG
+#endif /* DEBUG */
 			ln = LineNumber;
 			break;
 	}
@@ -268,7 +268,7 @@ _error(class, node, ap)
 	}
 #ifdef DEBUG
 	}
-#endif DEBUG
+#endif /* DEBUG */
 
 	if( FileName ) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
 

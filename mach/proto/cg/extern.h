@@ -41,7 +41,7 @@ extern int pathash[256];                /* Indices into previous */
 extern c1_t c1coercs[];                 /* coercions type 1 */
 #ifdef MAXSPLIT
 extern c2_t c2coercs[];                 /* coercions type 2 */
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 extern c3_t c3coercs[];                 /* coercions type 3 */
 extern struct reginfo **reglist[];	/* lists of registers per property */
 

@@ -295,14 +295,14 @@ if (Debug)
 #ifdef MAXSPLIT
 			sret = split(tp,&tokexp[i],ply,toplevel);
 			if (sret==0) {
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 				totalcost += stackupto(tp,ply,toplevel);
 				CHKCOST();
 				break;
 #ifdef MAXSPLIT
 			}
 			i += sret;
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 		} else
 			i += 1;
 		tp--;
