@@ -65,25 +65,26 @@ optimization
 	;
 
 patterns(struct exp_node **tests;)
-	{ struct mnem_list *list;
-	  struct exp_node *pair1, *pair2;
-	  struct exp_node *onetest; int argtype; }
+			{
+			struct mnem_list *list;
+			struct exp_node *onetest;
+			}
 	:
-		{
-		list = (struct mnem_list *)NULL;
-		*tests = (struct exp_node *)NULL;
-		}
+			{
+			list = (struct mnem_list *)NULL;
+			*tests = (struct exp_node *)NULL;
+			}
 	[
 	OPCODE
-		{
-		if(++lencurrpatt>longestpattern)
-			longestpattern=lencurrpatt;
-		list = addelem(list,opval, (struct exp_node *)NULL);
-		opval->id_used=1;
-		if(lencurrpatt==1)
-			opval->id_startpatt=1;
-		currentstate=dotransition(currentstate,opval,list,lencurrpatt);
-		}
+			{
+			if(++lencurrpatt>longestpattern)
+				longestpattern=lencurrpatt;
+			list = addelem(list,opval, (struct exp_node *)NULL);
+			opval->id_used=1;
+			if(lencurrpatt==1)
+				opval->id_startpatt=1;
+			currentstate=dotransition(currentstate,opval,list,lencurrpatt);
+			}
 	[
 		restriction(opval->id_argfmt,&onetest)
 			{
@@ -202,7 +203,7 @@ action(struct mnem_list **list;)
 
 exp(int level; struct exp_node **result;)
 			{ struct exp_node *res1, *res2;
-			  int operator, intval; }
+			  int operator; }
 		:
 		%if(level <= MAXPRIO)
 		exp(MAXPRIO+1,&res1)
@@ -331,8 +332,8 @@ addaction(startline, state, restrictions, finaltest, repllist)
 	p->replacement.m_len = lenthisrepl;
 	p->replacement.m_elems = constructlist(repllist,lenthisrepl);
 	/* chain new action to END of action chain */
-	if((q = actions[currentstate])==(struct action *)NULL)
-		actions[currentstate] = p;
+	if((q = actions[state])==(struct action *)NULL)
+		actions[state] = p;
 	else {
 		while(q->next != (struct action *)NULL)
 			q = q->next;
@@ -346,7 +347,6 @@ constructlist(list,len)
 	int len;
 {
 	struct mnem_elem **p;
-	int i;
 	p = (struct mnem_elem **)Malloc(len*sizeof(struct mnem_elem *));
 	while(len--) {
 		p[len] = list->elem;
@@ -443,6 +443,8 @@ priority(op) int op; {
 	case UPLUS:
 	case UMINUS:	return(11);
 	}
+	fprintf(stderr,"Internal error: priority: - unrecognized operator\n");
+	return(0);
 }
 
 struct exp_node *

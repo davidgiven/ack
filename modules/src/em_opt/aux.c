@@ -4,8 +4,9 @@ static char rcsid4[] = "$Header$";
 
 #include "nopt.h"
 
+arith
 OO_rotate(w,amount)
-	int w, amount;
+	arith w, amount;
 {
 	long highmask, lowmask;
 	highmask = (long)(-1) << amount;
@@ -16,13 +17,13 @@ OO_rotate(w,amount)
 }
 
 OO_signsame(a,b)
-	int a, b;
+	arith a, b;
 {
 	return( (a ^ b) >= 0);
 }
 
 OO_sfit(val,nbits)
-	int val, nbits;
+	arith val, nbits;
 {
 	register long mask = 0;
 	register int i;
@@ -32,7 +33,7 @@ OO_sfit(val,nbits)
 }
 
 OO_ufit(val, nbits)
-	int val, nbits;
+	arith val, nbits;
 {
 	register long mask = 0;
 	register int i;
@@ -59,6 +60,7 @@ OO_extsame(a1,a2)
 		return (a1->em_dlb == a2->em_dlb);
 	default:
 		fatal("illegal type (%d) to sameext!",a1->em_argtype);
+		/*NOTREACHED*/
 	}
 }
 
@@ -76,9 +78,11 @@ OO_namsame(a1,a2)
 		return (a1->em_dlb == a2->em_dlb);
 	default:
 		fatal("illegal type (%d) to samenam!",a1->em_argtype);
+		/*NOTREACHED*/
 	}
 }
 
+arith
 OO_offset(a)
 	register p_instr a;
 {
@@ -91,5 +95,6 @@ OO_offset(a)
 		return a->em_off;
 	default:
 		fatal("illegal type (%d) to offset!",a->em_argtype);
+		/*NOTREACHED*/
 	}
 }

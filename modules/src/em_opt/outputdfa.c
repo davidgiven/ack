@@ -33,6 +33,7 @@ PRIVATE
 openofile(filename)
 	char *filename;
 {
+	char *strcpy(), *strcat();
 	strcpy(ofilename,filename);
 	strcpy(ofiletemp,filename);
 	strcat(ofiletemp,".new");
@@ -210,23 +211,21 @@ PRIVATE
 outdotrans()
 {
 	int s;
-	int i;
-	struct state *p;
 	struct action *a;
-	int firsttest;
 	int seennontested;
+	int seentested;
 	fprintf(ofile,"#include \"nopt.h\"\n\n");
 	for(s=0;s<=higheststate;s++) {
 		if(actions[s]!=(struct action *)NULL) {
 			fprintf(ofile,"\nOO_%ddotrans() {\n",s);
+			fprintf(ofile,"\tregister p_instr *patt = OO_patternqueue;\n");
 			fprintf(ofile,"\t/* ");
 			outmnems(patterns[s]);
 			fprintf(ofile," */\n");
-			fprintf(ofile,"\tregister p_instr *patt = OO_patternqueue;\n");
-			seennontested=0;
-			firsttest=1;
+			seentested = seennontested=0;
 			for(a=actions[s];a!=(struct action *)NULL;a=a->next) {
 				if(a->test!=(struct exp_node *)NULL) {
+					seentested++;
 					fprintf(ofile,"\tif(");
 					outexp(a->test,s);
 					fprintf(ofile,") {\n");
@@ -246,7 +245,8 @@ outdotrans()
 				fprintf(ofile,"\tOO_state=%d;\n",s);
 				fprintf(ofile,"\treturn;\n");
 			}
-			fprintf(ofile,"free:\tOO_nfree(%d);\n",patterns[s].m_len);
+			if(seentested) fprintf(ofile,"free:");
+			fprintf(ofile,"\tOO_nfree(%d);\n",patterns[s].m_len);
 			fprintf(ofile,"}\n");
 		}
 		/*
@@ -278,21 +278,20 @@ outoneaction(s,a)
 	fprintf(ofile,"#ifdef STATS\n");
 	fprintf(ofile,"\t\tif(OO_wrstats) fprintf(stderr,\"%d\\n\");\n",a->linenum);
 	fprintf(ofile,"#endif\n");
-	outrepl(s,patterns[s],a->replacement);
+	outrepl(s,a->replacement);
 	findworst(a->replacement);
 }
 
 PRIVATE
-outrepl(state,patt,repl)
+outrepl(state,repl)
 	int state;
-	struct mnems patt,repl;
+	struct mnems repl;
 {
 	/*
 	/* Contruct <repl>=r1 r2 ... rn and put on output queue.
 	*/
 	int n = repl.m_len;
-	int m = patt.m_len;
-	int i,j,count;
+	int i;
 	for(i=1;i<=n;i++) {
 		struct mnem_elem *ri = repl.m_elems[i-1];
 		char *mnem = ri->op_code->id_text;
@@ -303,6 +302,7 @@ outrepl(state,patt,repl)
 		case CST:
 		case CSTOPT:
 			fprintf(ofile,"\t\tOO_outcst(op_%s,",mnem);
+			fprintf(ofile,"(arith)");
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
@@ -377,15 +377,19 @@ outexp(e,state)
 		break;
 	case COMMA:
 		outext(e->exp_left);
-		fprintf(ofile,","); outexp(e->exp_right,state);
+		fprintf(ofile,",");
+		fprintf(ofile,"(arith)");
+		outexp(e->exp_right,state);
 		break;
 	case SAMESIGN:
 	case SFIT:
 	case UFIT:
 	case ROTATE:
 		outop(e->node_type);
+		fprintf(ofile,"(arith)");
 		outexp(e->exp_left,state);
 		fprintf(ofile,",");
+		fprintf(ofile,"(arith)");
 		outexp(e->exp_right,state);
 		fprintf(ofile,")");
 		break;
@@ -394,7 +398,7 @@ outexp(e,state)
 		outop(e->node_type);
 		outext(e->exp_left);
 		fprintf(ofile,",");
-		outext(e->exp_right,state);
+		outext(e->exp_right);
 		fprintf(ofile,")");
 		break;
 	case PATARG:

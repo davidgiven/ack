@@ -35,13 +35,15 @@ extern p_instr	*OO_nxtbackup;
 extern p_instr	OO_OTHER;
 extern int	OO_state;
 extern int	OO_noutput;	/* number of instructions in output queue */
-extern int	OO_WSIZE;	/* wordlength */
-extern int	OO_PSIZE;	/* pointer length */
+extern arith	OO_WSIZE;	/* wordlength */
+extern arith	OO_PSIZE;	/* pointer length */
 #ifdef STATS
 extern int	OO_wrstats;			/* statistics output */
 #endif
 
 extern char	*OO_freestr();
+extern arith	OO_rotate();
+extern arith	OO_offset();
 
 #define CST(p)		(p->em_cst)
 #define PNAM(p)		(p->em_pnam)

@@ -26,7 +26,7 @@ findworst(repl)
 	/*	requires a backup of n-i+1 instructions and a goto to state 0.
 	*/
 	int n = repl.m_len;
-	int first,i,j;
+	int first,i;
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
@@ -71,7 +71,7 @@ findfail(state,resout,rescpy,resgto)
 	/* The first such match of the form pi pi+1 ... pn requires an output
 	/* of p1 p2 ... pi-1 and a push back of pn pn-1 ... pi.	
 	*/
-	int s,i,j;
+	int s,i;
 	struct state *p;
 	int istrans;
 	int n = patterns[state].m_len;

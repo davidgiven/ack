@@ -7,10 +7,8 @@ static char rcsidp4[] = "$Header$";
 outputincalls()
 {
 	struct idf *op;
-	int opcode;
 	char *s;
 	for(op=ops;op!=(struct idf *)NULL;op=op->id_nextidf) {
-		opcode = op->id_opcode;
 		s = op->id_text;
 		switch(op->id_argfmt) {
 		case NOARG:

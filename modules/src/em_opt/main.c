@@ -80,7 +80,7 @@ main(argc,argv)
 	exit(errors);
 }
 
-/* VARARGS */
+/*VARARGS1*/
 error(s,a1,a2,a3,a4)
 	char *s;
 {
@@ -93,7 +93,7 @@ error(s,a1,a2,a3,a4)
 	errors++;
 }
 
-/* VARARGS */
+/*VARARGS1*/
 fatal(s,a1,a2,a3,a4)
 	char *s;
 {

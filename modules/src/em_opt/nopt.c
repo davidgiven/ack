@@ -31,8 +31,8 @@ static char	*nextstr;
 static char	*laststr;
 
 int		OO_noutput;	/* number of instructions in output queue */
-int		OO_WSIZE;	/* wordlength */
-int		OO_PSIZE;	/* pointer length */
+arith		OO_WSIZE;	/* wordlength */
+arith		OO_PSIZE;	/* pointer length */
 
 #ifdef STATS
 int		OO_wrstats = 1;	/* pattern statistics output */
@@ -199,7 +199,8 @@ OO_outop(opcode)
 }
 
 OO_outcst(opcode,cst)
-	int opcode,cst;
+	int opcode;
+	arith cst;
 {
 	register p_instr p = GETINSTR();
 	p->em_type = EM_MNEM;
@@ -210,7 +211,8 @@ OO_outcst(opcode,cst)
 }
 
 OO_outlab(opcode,lab)
-	int opcode,lab;
+	int opcode;
+	label lab;
 {
 	register p_instr p = GETINSTR();
 	p->em_type = EM_MNEM;
@@ -247,7 +249,7 @@ OO_outdefilb(opcode,deflb)
 OO_outext(opcode,arg,off)
 	int opcode;
 	p_instr	arg;
-	int off;
+	arith off;
 {
 	register p_instr p = GETINSTR();
 	p->em_type = EM_MNEM;
