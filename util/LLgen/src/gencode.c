@@ -547,6 +547,19 @@ alternation(pp, safety, mustscan, mustpop, lb)
 	if (unsafe && hulp1 == lb) {
 		fprintf(f,"L_%d: \n", hulp1);
 	}
+	if (safety == SAFE) {
+		/* check if we can avoid to generate the switch */
+		for (;;) {
+			if (g_gettype(p) == EORULE) return;
+			l = g_getlink(p);
+			if (l->l_flag & COND) break;
+			if ((g_gettype(l->l_rule) != TERMINAL &&
+			     g_gettype(l->l_rule) != LITERAL) ||
+			    g_gettype(l->l_rule+1) != EORULE) break;
+			p++;
+		}
+		p = pp;
+	}
 	while (g_gettype(p) != EORULE) {
 		l = g_getlink(p);
 		if (l->l_flag & COND) {
