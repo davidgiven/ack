@@ -858,6 +858,6 @@ C_trp		==> 	"jsr (.trp)".
 
 prolog		==>	.
 
-jump 		==>	"jmp $1".
+jump 		==>	"bra $1".
 
 locals		==>	"link a6, #-$1".

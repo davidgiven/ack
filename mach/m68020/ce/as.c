@@ -18,8 +18,8 @@ char *m;
 
 
 process_operand( str, op)
-char *str;
-struct t_operand *op;
+register char *str;
+register struct t_operand *op;
 {
 	char *glob_lbl();
 
@@ -171,7 +171,7 @@ char *reg;
 }
 
 int is_reg( str)
-char *str;
+register char *str;
 {
 	switch ( *str) {
 	  case 'a' :
@@ -187,9 +187,9 @@ char *str;
 char *glob_lbl( lbl)
 char *lbl;
 {
-	char *gl, *malloc();
+	char *gl, *Malloc();
 
-	gl = malloc( strlen( lbl) + 3);
+	gl = Malloc( strlen( lbl) + 3);
 	sprintf( gl, "\"%s\"", lbl);
 	return( gl);
 }
@@ -199,7 +199,7 @@ char *lbl;
 
 
 int mode_reg( eaddr)
-struct t_operand *eaddr;
+register struct t_operand *eaddr;
 {
 	switch ( eaddr->type) {
 	  case IS_A_REG         : return( 0x08 | eaddr->reg);
@@ -240,7 +240,7 @@ struct t_operand *eaddr;
 
 
 code_extension( eaddr)
-struct t_operand *eaddr;
+register struct t_operand *eaddr;
 {
 
 	switch ( eaddr->type) {
@@ -341,9 +341,9 @@ struct t_operand *dst;
 
 
 int two_log( nr)
-int nr;
+register int nr;
 {
-	int log;
+	register int log;
 
 	for ( log = 0; nr >= 2; nr >>= 1)
 		log++;

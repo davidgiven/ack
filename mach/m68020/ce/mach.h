@@ -1,8 +1,8 @@
 #define BYTES_REVERSED
 #define WORDS_REVERSED
 
-#define ONE_BYTE        char
-#define TWO_BYTES	short
+#define ONE_BYTE        int
+#define TWO_BYTES	int
 #define FOUR_BYTES	long
 
 #define EM_WSIZE	4
@@ -13,9 +13,11 @@
 
 #define NAME_FMT	"_%s"
 #define DNAM_FMT	"_%s"
-#define DLB_FMT		"_%ld"
+#define DLB_FMT		"I_%ld"
 #define	ILB_FMT		"I%x_%lx"
 #define HOL_FMT		"hol%d"
+
+#define GENLAB		'I'
 
 #define	ALIGN_FMT		".align\n"
 
