@@ -176,8 +176,8 @@ jbr label .
 jeq label .
 jne label .
 jxx "syntax error" label .
-jmp dst2+label .
-jsr GENREG:rw,dst2+label kills :cc.
+jmp dst2+label kills :cc r0 r1 r3.
+jsr GENREG:rw,dst2+label kills :cc r0 r1 r3.
 mov src2:ro,dst2:wo:cc .
 movb src1or2:ro,dst1+REG:wo kills :cc .
 mul src2:ro,ODDREG:rw:cc .
