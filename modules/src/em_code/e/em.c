@@ -15,6 +15,11 @@
 
 static File *ofp = 0;
 
+C_init(w, p)
+	arith w, p;
+{
+}
+
 C_open(nm)	/* open file for readable code output	*/
 	char *nm;
 {
