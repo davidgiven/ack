@@ -92,7 +92,7 @@ expr_t		exp;
 		 -16 <= exp.val && exp.val <= 15
 		)
 		emit1(reg + ind + (exp.val & 037));
-	else if ((exp.typ&S_TYP)==S_ABS && -256<=exp.val && exp.val<=255) {
+	else if ((exp.typ&S_TYP)==S_ABS && -128<=exp.val && exp.val<=127) {
 		emit1(0x88 + reg + ind);
 		emit1(exp.val);
 	} else {
