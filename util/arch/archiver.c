@@ -700,12 +700,13 @@ enter_name(namep)
 	tab[tnum].ran_off = tssiz;
 	tab[tnum].ran_pos = offset;
 
-	for (cp = namep->on_mptr; *cp; cp++) {
+	for (cp = namep->on_mptr;; cp++) {
 		if (tssiz >= strtabsz) {
 			tstrtab = realloc(tstrtab, (strtabsz += 4096));
 			if (! tstrtab) error(TRUE, "string table overflow\n");
 		}
 		tstrtab[tssiz++]  = *cp;
+		if (!*cp) break;
 	}
 	tnum++;
 }
