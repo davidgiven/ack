@@ -13,6 +13,7 @@
 #define ms_ext	 8	/* List of exported symbols from this library module */
 #define ms_par	 9	/* Number of bytes of parameters accessed            */
 #define ms_ego	10	/* Hint from EM Global Optimizer                     */
+#define ms_gto	11	/* Dangerous procedure, uses nonlocal goto	     */
 
 /*
  * for details about ms_reg, see em_reg.h
