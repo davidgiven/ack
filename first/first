@@ -80,7 +80,7 @@ system type: "
 		exit 10
 	fi
 fi
-echo -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
+myecho -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
 if read YESNO
 then
 	case $YESNO in
