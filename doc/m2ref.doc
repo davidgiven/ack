@@ -30,13 +30,6 @@ in the "Report on The Programming Language Modula-2", as it appeared in [1],
 from now on referred to as "the Report".
 Also, the Report sometimes leaves room for interpretation. The section numbers
 mentioned are the section numbers of the Report.
-.PP
-Basically, the compiler recognizes the language as described in [1], and
-most of [2], for backwards compatibility. It warns the user for old-fashioned
-constructions (constructions that [1] does not allow).
-If the \fI-Rm2-3\fP option (see [6]) is passed to \fIack\fP, this backwards
-compatibility feature is disabled. Also, it may not be present on some
-smaller machines, like the PDP-11.
 .NH 2
 Syntax (section 2)
 .PP
@@ -68,8 +61,11 @@ The Foreign pragma is only meaningful in a \f5DEFINITION MODULE\fP,
 and indicates that this
 \f5DEFINITION MODULE\fP describes an interface to a module written in another
 language (for instance C, Pascal, or EM).
-Runtime checks are: range-checks, checks when assigning CARDINALS to INTEGERS
-and vice versa, and checks that FOR-loop control-variables are not changed
+Runtime checks that can be disabled are:
+range checks,
+\f5CARDINAL\fP overflow checks,
+checks when assigning a \f5CARDINAL\fP to an \f5INTEGER\fP and vice versa,
+and checks that \f5FOR\fP-loop control-variables are not changed
 in the body of the loop.
 .PP
 Constants of type \f5LONGINT\fP are integers with a suffix letter \f5D\fP
@@ -96,7 +92,8 @@ Each operand of a constant expression must be a constant:
 a string, a number, a set, an enumeration literal, a qualifier denoting a
 constant expression, a typetransfer with a constant argument, or
 one of the standard procedures 
-\f5ABS\fP, \f5CAP\fP, \f5CHR\fP, \f5LONG\fP, \f5MAX\fP, \f5MIN\fP, \f5ODD\fP, \f5ORD\fP,
+\f5ABS\fP, \f5CAP\fP, \f5CHR\fP, \f5LONG\fP, \f5MAX\fP, \f5MIN\fP,
+\f5ODD\fP, \f5ORD\fP,
 \f5SIZE\fP, \f5SHORT\fP, \f5TSIZE\fP, or \f5VAL\fP, with constant argument(s);
 \f5TSIZE\fP and \f5SIZE\fP may also have a variable as argument.
 .PP
@@ -109,7 +106,8 @@ Type declarations (section 6)
 .NH 3
 Basic types (section 6.1)
 .PP
-The type \f5CHAR\fP includes the ASCII character set as a subset. Values range from
+The type \f5CHAR\fP includes the ASCII character set as a subset.
+Values range from
 \f50C\fP to \f5377C\fP, not from \f50C\fP to \f5177C\fP.
 .NH 3
 Enumerations (section 6.2)
@@ -121,14 +119,15 @@ Record types (section 6.5)
 .PP
 The syntax of variant sections in [1] is different from the one in [2].
 Our implementation recognizes both, giving a warning for the older one.
-However, see section 2.
+However, see section 3.
 .NH 3
 Set types (section 6.6)
 .PP
 The only limitation imposed by the compiler is that the base type of the
 set must be a subrange type, an enumeration type, \f5CHAR\fP, or
-\f5BOOLEAN\fP. So, the lower bound
-does not have to be positive. However, if a negative lower bound is used,
+\f5BOOLEAN\fP.
+So, the lower bound may be negative.
+However, if a negative lower bound is used,
 the compiler gives a warning of the \fIrestricted\fP class (see the manual
 page of the compiler).
 .PP
@@ -145,7 +144,8 @@ Operators (section 8.2)
 .NH 4
 Arithmetic operators (section 8.2.1)
 .PP
-The Report does not specify the priority of the unary operators \f5+\fP or \f5-\fP:
+The Report does not specify the priority of the unary
+operators \f5+\fP or \f5-\fP:
 It does not specify whether
 .DS
 .ft 5
@@ -217,15 +217,15 @@ Standard procedures (section 10.2)
 .PP
 Our implementation supports \f5NEW\fP and \f5DISPOSE\fP
 for backwards compatibility,
-but issues warnings for their use. However, see section 2.
+but issues warnings for their use. However, see section 3.
 .PP
 Also, some new standard procedures were added, similar to the new standard
 procedures in Wirth's newest compiler:
 .IP \-
-\f5LONG\fP converts an argument of type \f5INTEGER\fP or \f5REAL\fP to the types \f5LONGINT\fP or
-\f5LONGREAL\fP.
+\f5LONG\fP converts an argument of type \f5INTEGER\fP or \f5REAL\fP to the
+types \f5LONGINT\fP or \f5LONGREAL\fP.
 .IP \-
-\f5SHORT\fP performs the inverse transformation, without range-checks.
+\f5SHORT\fP performs the inverse transformation, without range checks.
 .IP \-
 \f5FLOATD\fP is analogous to \f5FLOAT\fP, but yields a result of type
 \f5LONGREAL\fP.
@@ -242,6 +242,16 @@ safer. In some obscure cases the \f5ARRAY OF WORD\fP mechanism does not quite
 work properly.
 .PP
 The procedure \f5IOTRANSFER\fP is not implemented.
+.NH 1
+Backwards compatibility
+.PP
+Besides recognizing the language as described in [1], the compiler recognizes
+most of the language described in [2], for backwards compatibility.
+It warns the user for old-fashioned
+constructions (constructions that [1] does not allow).
+If the \fI-Rm2-3\fP option (see [6]) is passed to \fIack\fP, this backwards
+compatibility feature is disabled. Also, it may not be present on some
+smaller machines, like the PDP-11.
 .NH 1
 Compile time errors
 .PP
@@ -270,7 +280,8 @@ The ACK Modula-2 compiler produces code for an EM machine as defined in [3].
 Therefore, it depends on the implementation
 of the EM machine for detection some of the runtime errors that could occur.
 .PP
-The \fITraps\fP module enables the use to install his own runtime error handler.
+The \fITraps\fP module enables the user to install his own runtime
+error handler.
 The default one just displays what happened and exits.
 Basically, a trap handler is just a procedure that takes an INTEGER as
 parameter. The INTEGER is the trap number. This INTEGER can be one of the
