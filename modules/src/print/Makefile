@@ -3,7 +3,8 @@ LIBPRINT = libprint.a
 MODDIR=$(EMHOME)/modules
 INSTALL = $(MODDIR)/install
 COMPARE = $(MODDIR)/compare
-CFLAGS = -c -O -I$(MODDIR)/h
+INCLUDES = -I$(MODDIR)/h
+CFLAGS = -c -O $(INCLUDES)
 SRC = doprnt.c fprint.c print.c sprint.c format.c
 OBJ = doprnt.o fprint.o print.o sprint.o format.o
 
@@ -30,6 +31,10 @@ opr:
 
 clean:
 		rm -f *.o $(LIBPRINT)
+
+lintlib:
+		lint $(INCLUDES) -Cprint $(SRC)
+		mv llib-lprint.ln $(MODDIR)/lib
 
 doprnt.o: param.h
 fprint.o: param.h

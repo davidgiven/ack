@@ -3,7 +3,8 @@ MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 LIBSYS	= libsystem.a
-CFLAGS	= -I. -O
+INCLUDES = -I.
+CFLAGS	= $(INCLUDES) -O
 OBJ	= access.o break.o chmode.o close.o create.o filesize.o \
 	modtime.o lock.o open.o read.o remove.o stop.o \
 	system.o time.o unlock.o write.o
@@ -37,6 +38,10 @@ pr:
 
 opr:
 		make pr | opr
+
+lintlib:
+		lint $(INCLUDES) -Csystem $(CSRC)
+		mv llib-lsystem.ln $(MODULES)/lib
 
 access.o: system.h
 break.o: system.h
