@@ -1,6 +1,11 @@
 # $Header$
 d=../../..
 h=$d/h
+
+# Use apc -m.... for cross-compilation.
+APC=apc
+ACC=acc
+
 PEM=$d/lib/pc_pem
 PEM_OUT=$d/lib/pc_pem.out
 
@@ -13,13 +18,13 @@ pem.out:        pem.m
 		apc -mint --t -o pem.out pem.m
 
 pem:            pem.m
-		apc $(LDFLAG) -o pem pem.m
+		$(APC) $(LDFLAG) -o pem pem.m
 
 # pem.m is system dependent and may NOT be distributed
 pem.m:          pem.p $(HEAD)
 		-rm -f pem.m
-		-if apc -I$h -O -c.m pem.p ; then :; else \
-			acc -o move move.c ; move ; rm -f move move.[oskm] ; \
+		-if $(APC) -I$h -O -c.m pem.p ; then :; else \
+			$(ACC) -o move move.c ; move ; rm -f move move.[oskm] ; \
 		fi
 
 cmp:		pem
