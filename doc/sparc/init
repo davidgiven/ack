@@ -1,3 +1,4 @@
+.de In
 .nr PS 12
 .nr VS 14
 .\" .fp 6 AM
@@ -6,6 +7,7 @@
 .ds So \f1\s+1
 .ds OQ `\h'-1p'`
 .ds CQ '\h'-1p''
+..
 .de UX
 .ie \\n(UX \s-1UNIX\s0\\$1
 .el \{\

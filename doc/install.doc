@@ -154,10 +154,7 @@ include files for some of the modules.
 .IP "doc"
 this directory contains the unformatted documents for the Kit.
 A list of the available documents can be found in the last section.
-.IP "doc/em"
-the EM-manual IR-81.
-.IP "doc/em/int"
-the EM interpreter written in Pascal.
+These documents must be processed by [nt]roff.
 .IP "man"
 man files for various utilities.
 .if n .nr PD 1v
@@ -196,13 +193,6 @@ the main description of EM sits here.
 Files (e.g. em_table) describing
 the opcodes and pseudos in use,
 the operands allowed, effect in stack etc. etc.
-.IP "mkun"
-the PUBMAC macro package for nroff/troff from the Katholieke Universiteit at
-Nijmegen.
-It is used for the EM reference manual.
-The Makefile installs the macro package in
-/usr/lib/tmac.
-This package is in the public domain.
 .IP "mach"
 just there to group the directories with all sources for each machine.
 The section about "Machines" of this manual indicates which subdirectories
@@ -580,20 +570,6 @@ Asking for things that don't have to be installed.
 .IP \-
 Producing a shell script called "INSTALL" that will take care of the
 ACK installation process.
-.if n .sp 1
-.if n .nr PD 1v
-.LP
-Some actions still have to be done by hand:
-.if n .sp 1
-.if n .nr PD 0
-.IP \-
-The installation of the PUBMAC macro package is not done
-automatically because super-user privileges are needed to do
-that on most systems.
-This macro package is used with several of the documents
-provided in the Kit.
-.if n .sp 1
-.if n .nr PD 0
 .NH
 Compiling the Kit
 .PP
@@ -1209,42 +1185,40 @@ An example of the output of a make is present in the file Out.std.
 Documentation
 .PP
 After installationm manual pages for Amsterdam Compiler Kit can be found
-in the $TARGET_HOME/man directory.
-.LP
-Several documents are provided:
+in the $TARGET_HOME/man directory. Also, the following documents are provided
+in the $TARGET_HOME/doc directory:
 .TS
 l l.
-doc/toolkit.doc	general overview (CACM article)
-doc/em	description of the EM machine architecture
-doc/ack.doc	format of machine description files (lib/*/descr)
-doc/ansi_C.doc	ANSI C implementation description
-doc/basic.doc	Basic reference manual
-doc/pcref.doc	Pascal-frontend reference manual
-doc/val.doc	results of running the Pascal Validation Suite
-doc/crefman.doc	C-frontend description
-doc/LLgen	description of the LL(1) parser generator
-doc/peep.doc	internal documentation for the peephole optimizer
-doc/cg.doc	documentation for backend writers and maintainers
-doc/regadd.doc	addendum to previous document describing register variables
-doc/ncg.doc	documentation for the newest backends
-doc/v7bugs.doc	bugs in the V7 system and how to fix them
-doc/6500.doc	MSC 6500 backend description
-doc/i80.doc	Intel 8080 backend description
-doc/z80.doc	Zilog Z80 backend description
-doc/m68020.doc	Motorola M68000/M68020 backend description
-doc/sparc	SPARC code expander description
-doc/occam	occam-frontend description
-doc/ego	Global Optimizer description
-doc/top	Target Optimizer description
-doc/int	description of the EM interpreter written in C
-doc/ceg	documentation for code-expander writers and maintainers
-doc/lint	documentation of LINT
-doc/m2ref.doc	Modula-2 frontend description
-doc/install.doc	this document
-doc/install.pr	this document (formatted)
+toolkit.doc	general overview (CACM article)
+em.doc	description of the EM machine architecture
+ack.doc	format of machine description files (lib/*/descr)
+ansi_C.doc	ANSI C implementation description
+basic.doc	Basic reference manual
+pcref.doc	Pascal-frontend reference manual
+val.doc	results of running the Pascal Validation Suite
+crefman.doc	C-frontend description
+LLgen	description of the LL(1) parser generator
+peep.doc	internal documentation for the peephole optimizer
+cg.doc	documentation for backend writers and maintainers
+regadd.doc	addendum to previous document describing register variables
+ncg.doc	documentation for the newest backends
+v7bugs.doc	bugs in the V7 system and how to fix them
+6500.doc	MSC 6500 backend description
+i80.doc	Intel 8080 backend description
+z80.doc	Zilog Z80 backend description
+m68020.doc	Motorola M68000/M68020 backend description
+sparc.doc	SPARC code expander description
+occam.doc	occam-frontend description
+ego.doc	Global Optimizer description
+top.doc	Target Optimizer description
+int.doc	description of the EM interpreter written in C
+ceg.doc	documentation for code-expander writers and maintainers
+lint.doc	documentation of LINT
+m2ref.doc	Modula-2 frontend description
+install.doc	this document
+install.pr	this document (formatted for a simple line printer)
 .TE
 .LP
-The names in this list without a suffix are in fact a subdirectory.
 Use the Makefile to get readable copies.
 .LP
 Good luck.

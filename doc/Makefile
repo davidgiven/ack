@@ -1,14 +1,13 @@
 # $Header$
 
-SUF=pr
-PRINT=cat
-NROFF=nroff
-TBL=tbl
-EQN=eqn
-PIC=pic
-REFER=refer
+# This Makefile is not supposed to be used in the doc source directory.
+# Instead, it is supposed to be copied to the target doc directory.
+
+SUF=dit
+PRINT=dis
+NROFF=troff
 MS=-ms
-TARGET=-Tlp
+OPR=dip
 
 RESFILES= \
 	toolkit.$(SUF) install.$(SUF) em.$(SUF) ack.$(SUF) v7bugs.$(SUF) \
@@ -18,73 +17,52 @@ RESFILES= \
 	m68020.$(SUF) occam.$(SUF) m2ref.$(SUF) ceg.$(SUF) nopt.$(SUF) \
 	sparc.$(SUF) int.$(SUF) lint.$(SUF)
 
-.SUFFIXES: .doc .$(SUF)
+.SUFFIXES: .doc .$(SUF) .lpr
 
 .doc.$(SUF):
-		$(NROFF) $(MS) $(TARGET) $< > $@
+		$(NROFF) $(MS) $< > $@
 
-crefman.$(SUF):	crefman.doc
-		$(EQN) $(TARGET) crefman.doc | $(NROFF) $(MS) $(TARGET) >$@
-ansi_C.$(SUF):	ansi_C.doc
-		$(TBL) ansi_C.doc | $(NROFF) $(MS) $(TARGET) >$@
+# directly to the printer:
+.doc.lpr:
+		$(NROFF) $(MS) $< | $(OPR)
+
+# Exceptions, to be run without -ms
+
 v7bugs.$(SUF):	v7bugs.doc
-		$(NROFF) $(TARGET) v7bugs.doc >$@
-install.$(SUF):	install.doc
-		$(TBL) install.doc | $(NROFF) $(MS) $(TARGET) >$@
+		$(NROFF) v7bugs.doc >$@
+
+v7bugs.lpr:	v7bugs.doc
+		$(NROFF) v7bugs.doc | $(OPR)
+
 pcref.$(SUF):	pcref.doc
-		$(TBL) pcref.doc | $(NROFF) $(TARGET) >$@
+		$(NROFF) pcref.doc >$@
+
+pcref.lpr:	pcref.doc
+		$(NROFF) pcref.doc | $(OPR)
+
 val.$(SUF):	val.doc
-		$(NROFF) $(TARGET) val.doc >$@
-6500.$(SUF):	6500.doc
-		$(TBL) 6500.doc | $(NROFF) $(MS) $(TARGET) >$@
-m68020.$(SUF):	m68020.doc
-		$(EQN) $(TARGET) m68020.doc | $(TBL) | $(NROFF) $(MS) $(TARGET) >$@
-ncg.$(SUF):	ncg.doc
-		$(TBL) ncg.doc | $(NROFF) $(MS) $(TARGET) >$@
-LLgen.doc:	LLgen.X
-LLgen.X:
-		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
-lint.doc:	lint.X
-lint.X:
-		cd lint; make
-top.doc:	top.X
-top.X:
-		cd top; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
-occam.doc:	occam.X
-occam.X:
-		cd occam; make "PIC="$(PIC) "TBL="$(TBL) "EQN="$(EQN) "TARGET="$(TARGET)
-sparc.doc:	sparc.X
-sparc.X:
-		cd sparc; make "PIC="$(PIC) "TBL="$(TBL) "TARGET="$(TARGET)
-ego.doc:	ego.X
-ego.X:
-		cd ego; make "REFER="$(REFER) "TARGET="$(TARGET) "TBL="$(TBL)
-em.$(SUF):	em.X
-em.X:
-		cd em; make "TBL="$(TBL) "NROFF="$(NROFF) "SUF="$(SUF) "TARGET="$(TARGET)
+		$(NROFF) val.doc >$@
 
-int.doc:	int.X
-int.X:
-		cd int; make "TBL="$(TBL)
-
-ceg.doc:	ceg.X
-ceg.X:
-		cd ceg; make "PIC="$(PIC) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
-
-install cmp:
-
-distr:		install.doc
-		tbl install.doc | nroff -Tlpr $(MS) >install.pr
+val.lpr:	val.doc
+		$(NROFF) val.doc | $(OPR)
 
 pr:
-		@make "SUF="$(SUF) "NROFF="$(NROFF) "EQN="$(EQN) "TBL="$(TBL) \
-			"PIC="$(PIC) "MS="$(MS) "TARGET="$(TARGET) \
+		@make "SUF="$(SUF) "NROFF="$(NROFF) "MS="$(MS) \
 			$(RESFILES) >make.pr.out 2>&1
 		@$(PRINT) $(RESFILES)
 
+# The 'opr' entry creates a lot of paper ... but the user must be able
+# to write the doc directory. I hope that this limits the users of
+# this entry to persons that know what they are doing.
 opr:
-		make pr | opr
+		@make "SUF="$(SUF) "NROFF="$(NROFF) "MS="$(MS) $(RESFILES) 
+		$(OPR) $(RESFILES)
 
 clean:
-		-rm -f *.old $(RESFILES) *.t *.out LLgen.doc top.doc \
-			occam.doc ego.doc int.doc ceg.doc lint.doc sparc.doc
+		-rm -f $(RESFILES)
+
+# The distr entry is only used when making a distribution tree.
+# It makes a version of the installation manual, suitable for a simple
+# line printer.
+distr:		install.doc
+		tbl install.doc | nroff -Tlpr $(MS) >install.pr

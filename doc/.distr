@@ -1,5 +1,6 @@
 READ_ME
 Makefile
+proto.make
 ack.doc
 basic.doc
 cg.doc

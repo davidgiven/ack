@@ -1,4 +1,4 @@
-.so init
+.In
 .TL
 .sp 1.2c
 A fast backend for SPARC processors
