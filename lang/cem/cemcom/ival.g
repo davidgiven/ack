@@ -554,7 +554,6 @@ ch_array(tpp, ex)
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
-		extern char options[];
 
 		if (length > dim) {
 			expr_warning(ex, "too many initialisers");
@@ -578,10 +577,10 @@ str_cst(str, len)
 	register char *str;
 	register int len;
 {
-	arith chunksize = ((127 + word_size) / word_size) * word_size;
+	int chunksize = ((127 + (int) word_size) / (int) word_size) * (int) word_size;
 
 	while (len > chunksize) {
-		C_con_scon(str, chunksize);
+		C_con_scon(str, (arith) chunksize);
 		len -= chunksize;
 		str += chunksize;
 	}

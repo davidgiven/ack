@@ -245,10 +245,10 @@ int2int(expp, tp)
 			*/
 			extern long full_mask[];
 			long remainder = exp->VL_VALUE &
-						~full_mask[tp->tp_size];
+						~full_mask[(int)(tp->tp_size)];
 
 			if (remainder == 0 ||
-			    remainder == ~full_mask[tp->tp_size]) {
+			    remainder == ~full_mask[(int)(tp->tp_size)]) {
 				exp->VL_VALUE &= ~remainder;
 			}
 		}

@@ -125,6 +125,8 @@ single_type_specifier(register struct decspecs *ds;):
 |
 	IDENTIFIER
 	{error("%s is not a type identifier", dot.tk_idf->id_text);
+	 dot.tk_idf->id_def->df_type = error_type;
+	 dot.tk_idf->id_def->df_sc = TYPEDEF;
 	 ds->ds_type = error_type;
 	}
 |
