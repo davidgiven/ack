@@ -12,7 +12,7 @@
 	The chunks are properly chained in the physical chain.
 */
 
-privatedata mallink *free_list[MAX_FLIST];
+privatedata mallink *free_list[MAX_FLIST+1];
 
 public
 link_free_chunk(register mallink *ml)
@@ -20,7 +20,7 @@ link_free_chunk(register mallink *ml)
 	/*	The free chunk ml is inserted in its proper logical
 		chain.
 	*/
-	register mallink **mlp = &free_list[-1];
+	register mallink **mlp = &free_list[0];
 	register size_type n = size_of(ml);
 	register mallink *ml1;
 
@@ -32,7 +32,7 @@ link_free_chunk(register mallink *ml)
 	}
 	while (n >= MIN_SIZE);
 
-	ml1 = *mlp;
+	ml1 = *--mlp;
 	set_log_prev(ml, MAL_NULL);
 	set_log_next(ml, ml1);
 	calc_checksum(ml);
