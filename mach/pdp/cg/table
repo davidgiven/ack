@@ -361,6 +361,8 @@ lol stf inreg($1)!=2 | xsource2 |
 			move(%[1],{regind2,%[a],tostring($2)})	|    | |
 lae lol ads sti $3==2 && inreg($2)==2 |	| 
 					| {regconst2, regvar($2), $1} | sti $4 |
+lae lol ads loi $3==2 && inreg($2)==2 |	| 
+					| {regconst2, regvar($2), $1} | loi $4 |
 #endif
 sti $1==2       | REG xsource2 |
 			INDSTORE
@@ -589,6 +591,16 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 ...             | source2 SCR_REG |
 			"add %[1],%[2]"
 			setcc(%[2])     erase(%[2])     | %[2]  | | (2,450)+%[1]
+
+ldc adi $2==4 && highw(1)==0 | SCR_REG SCR_REG |
+			"add $$%(loww(1)%),%[2]"
+			"adc %[1]"
+			erase(%[1]) erase(%[2])		| %[2] %[1] | |
+ldc adi $2==4 | SCR_REG SCR_REG |
+			"add $$%(loww(1)%),%[2]"
+			"adc %[1]"
+			"add $$%(highw(1)%),%[1]"
+			erase(%[1]) erase(%[2])		| %[2] %[1] | |
 adi $1==4       | SCR_REG SCR_REG source2 source2 |
 			"add %[4],%[2]"
 			"adc %[1]"
@@ -627,6 +639,15 @@ sbi $1==2       | source2 SCR_REG |
 			"sub %[2],%[1]"
 			"neg %[1]"
 			setcc(%[1])     erase(%[1])     | %[1]  | | (4,750)+%[2]
+ldc sbi $2==4 && highw(1)==0 | SCR_REG SCR_REG |
+			"sub $$%(loww(1)%),%[2]"
+			"sbc %[1]"
+			erase(%[1]) erase(%[2])		| %[2] %[1] | |
+ldc sbi $2==4 | SCR_REG SCR_REG |
+			"sub $$%(loww(1)%),%[2]"
+			"sbc %[1]"
+			"sub $$%(highw(1)%),%[1]"
+			erase(%[1]) erase(%[2])		| %[2] %[1] | |
 sbi $1==4       | source2-REG source2-REG SCR_REG SCR_REG |
 			"sub %[2],%[4]"
 			"sbc %[3]"
@@ -1036,9 +1057,21 @@ lol lol adp stl $1==$2 && $2==$4 && inreg($1)==2 | |
 lol lol adp stl $1==$2 && $2==$4 | |
 			allocate(REG={LOCAL2, $1, 2})	| %[a] 
 							| lol $2 adp $3 stl $2 |
+lol inl $1==$2 && inreg($1)==2 | |
+			allocate(REG=regvar($1))	| %[a] 
+							| inl $2 |
+lol inl $1==$2 | |
+			allocate(REG={LOCAL2, $1, 2})	| %[a] 
+							| inl $2 |
+lol adp dup stl $1==$4 && $3==2 && inreg($1)==2	| | |
+					| lol $1 adp $2 stl $1 lol $1 |
 lol adp stl $1==$3 && $2==1 && inreg($1)==2 | |
 			remove(regvar($1))
 			"inc %(regvar($1)%)"
+			erase(regvar($1))		|	| |
+lol adp stl $1==$3 && $2==0-1 && inreg($1)==2 | |
+			remove(regvar($1))
+			"dec %(regvar($1)%)"
 			erase(regvar($1))		|	| |
 lol adp stl $1==$3 && inreg($1)==2 | |
 			remove(regvar($1))
@@ -1069,6 +1102,11 @@ lol adp stl $1==$3 && $2==1 | |
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
 			"inc $1(r5)"
 			setcc({LOCAL2,$1,2})		|	| |
+lol adp stl $1==$3 && $2==0-1 | |
+			remove(indordef)
+			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
+			"dec $1(r5)"
+			setcc({LOCAL2,$1,2})		|	| |
 lol adp stl $1==$3 | |
 			remove(indordef)
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
@@ -1077,6 +1115,14 @@ lol adp stl $1==$3 | |
 loe adi ste $2==2 && $1==$3 | source2 |
 			remove(posextern)
 			"add %[1],$1"
+			setcc({relative2,$1})		|	| |
+loe adp ste $1==$3 && $2==1 | |
+			remove(posextern)
+			"inc $1"
+			setcc({relative2,$1})		|	| |
+loe adp ste $1==$3 && $2==0-1 | |
+			remove(posextern)
+			"dec $1"
 			setcc({relative2,$1})		|	| |
 loe adp ste $1==$3 | |
 			remove(posextern)
@@ -2072,11 +2118,19 @@ ble             | source2 source2 |
 			remove(all)
 			"cmp %[2],%[1]"
 			"jle $1"                                |       | |
-beq             | source2 source2 |
+beq             | NC source1 source1 |
+			remove(all)
+			"cmpb %[2],%[1]"
+			"jeq $1"                                |       | |
+...             | source2 source2 |
 			remove(all)
 			"cmp %[2],%[1]"
 			"jeq $1"                                |       | |
-bne             | source2 source2 |
+bne             | NC source1 source1 |
+			remove(all)
+			"cmpb %[2],%[1]"
+			"jne $1"                                |       | |
+...             | source2 source2 |
 			remove(all)
 			"cmp %[2],%[1]"
 			"jne $1"                                |       | |
