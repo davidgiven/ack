@@ -5,7 +5,9 @@ cmi.s
 cmp.s
 cmu.s
 csa.s
+csa4.s
 csb.s
+csb4.s
 cuu.s
 exg.s
 inn.s
