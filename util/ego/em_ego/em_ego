@@ -40,8 +40,10 @@ else
 	*)	PHASES='il cf caopt ic cf cs sr cj bo sp ud lv ra ' ;;
 	esac
 fi
+TMPOPT=$TMP.o.$$
 PASSES="ic cf $PHASES ca"
 OUTFILES="$PDUMP $DDUMP"
+FILES="$OUTFILES $TMPOPT"
 c=1
 if test "$ICARG"
 then :
@@ -51,38 +53,22 @@ fi
 for i in $PASSES
 do	INFILES=$OUTFILES
 	OUTFILES="$TMP.p.$c.$$ $TMP.d.$c.$$ $TMP.l.$c.$$ $TMP.b.$c.$$"
-	trap "rm -f $INFILES $OUTFILES $PDUMP $DDUMP $TMPOPT; exit 1" 1 2 15
+	FILES="$FILES $OUTFILES"
+	trap "rm -f $FILES" 0 1 2 15
 	case $i in
-	ic)	if $OPT/ic $INFILES - - $OUTFILES $ICARG
-		then :
-		else exit 1
-		fi ;;
-	ca)	if $OPT/ca $INFILES $PDUMP $DDUMP - -
-		then 
-		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
-		else
-		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
-		exit 1
-		fi;;
+	ic)	$OPT/ic $INFILES - - $OUTFILES $ICARG || exit 1
+		;;
+	ca)	$OPT/ca $INFILES $PDUMP $DDUMP - - || exit 1
+		;;
 	caopt)	rm -f $TMPOPT
-		TMPOPT=$TMP.o.$$
-		if $OPT/ca $INFILES $PDUMP $DDUMP - - | $EM/lib/em_opt2 > $TMPOPT
-		then
-		rm -f $INFILES $PDUMP $DDUMP
-		else
-		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
-		exit 1
-		fi
+		$OPT/ca $INFILES $PDUMP $DDUMP - - | $EM/lib/em_opt2 > $TMPOPT || exit 1
 		ICARG=$TMPOPT
 		OUTFILES="$PDUMP $DDUMP"
+		rm -f $INFILES $PDUMP $DDUMP
 		;;
-	*)	if $OPT/$i $INFILES $OUTFILES $FLAGS
-		then 
+	*)	$OPT/$i $INFILES $OUTFILES $FLAGS || exit 1
 		rm -f $INFILES
-		else 
-		rm -f $INFILES
-		exit 1
-		fi ;;
+		;;
 	esac
 	c=`expr $c + 1`
 done
