@@ -21,7 +21,9 @@ _float	f;
 {
 	char unsigned	*p;
 
-	p = (char unsigned *) &f;
-	*p ^= 0x80;
+	if (f != (_float) 0) {
+		p = (char unsigned *) &f;
+		*p ^= 0x80;
+	}
 }
 
