@@ -16,7 +16,7 @@
 
 #define cst_fmt         "%ld"
 #define off_fmt         "%ld"
-#define ilb_fmt         "I%x_%x"
+#define ilb_fmt         "I%x_%d"
 #define dlb_fmt         "I_%d"
 #define hol_fmt         "hol%d"
 
