@@ -1,6 +1,5 @@
 # $Header$
 install:
-	arch t tail_em.a > LIST
 	../../install tail_em.a tail_em
 	../../install end.s tail_em.vend
 
