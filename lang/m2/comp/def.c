@@ -111,6 +111,7 @@ define(id, scope, kind)
 	*/
 	register t_def *df;
 
+	DO_DEBUG(options['S'], print("define %s, %x\n", id->id_text, kind));
 	df = lookup(id, scope, D_IMPORT, 0);
 	if (	/* Already in this scope */
 		df

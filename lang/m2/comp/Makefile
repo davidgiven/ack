@@ -12,13 +12,15 @@ CID =		$(EMHOME)/bin/cid
 CURRDIR =	.
 
 INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
+OLIBS = $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a
 
 GF =	program.g declar.g expression.g statement.g
 GENGFILES=	tokenfile.g
 GFILES =$(GENGFILES) $(GF)
 LLGENOPTIONS = -v
 PROFILE =
-CFLAGS = $(PROFILE) $(INCLUDES) -O -DSTATIC=
+COPTIONS=
+CFLAGS = $(PROFILE) $(INCLUDES) $(COPTIONS) -O -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
 LDFLAGS = -i $(PROFILE)
@@ -56,6 +58,18 @@ all:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
+Omain:	Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	@rm -f nmclash.o a.out
+	mv *.o PEEPHOLE
+
+CEmain: Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)/cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	@rm -f nmclash.o a.out
+	mv *.o CODE_EXPANDER
+
 install:	all
 	cp $(CURRDIR)/main $(EMHOME)/lib/em_m2
 	rm -f $(EMHOME)/man/em_m2.6 $(EMHOME)/man/modula-2.1
@@ -63,8 +77,8 @@ install:	all
 
 cmp:	all
 	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_m2
-	-cmp $(CURRDIR)/em_m2.6 $(EMHOME)/man/em_m2.6 
-	-cmp $(CURRDIR)/modula-2.1 $(EMHOME)/man/modula-2.1 
+	-cmp $(CURRDIR)/em_m2.6 $(EMHOME)/man/em_m2.6
+	-cmp $(CURRDIR)/modula-2.1 $(EMHOME)/man/modula-2.1
 
 opr:
 	make pr | opr
@@ -86,14 +100,14 @@ longnames:	$(SRC) $(HFILES)
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENC) $(GENH) Makefile
+Cfiles: hfiles LLfiles $(GENC) $(GENH) Makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 LLfiles:	$(GFILES)
 	$(LLGEN) $(LLGENOPTIONS) $(GFILES)
 	@touch LLfiles
 
-hfiles:	Parameters make.hfiles
+hfiles: Parameters make.hfiles
 	make.hfiles Parameters
 	touch hfiles
 
@@ -125,10 +139,10 @@ next.c:		$(NEXTFILES) ./make.next
 char.c: char.tab tab
 	tab -fchar.tab >char.c
 
-tab: 
+tab:
 	$(CC) tab.c -o tab
 
-depend:	Cfiles
+depend: Cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
 	$(MKDEP) $(SRC) |\
@@ -149,9 +163,18 @@ Xlint:
 		$(LIBDIR)/llib-lstring.ln \
 		$(LIBDIR)/llib-lsystem.ln
 
-$(CURRDIR)/main:	$(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
+$(CURRDIR)/main:	$(OBJ) $(CURRDIR)/Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/main
 	-size $(CURRDIR)/main
+
+$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain
+	size $(CURRDIR)/omain
+
+$(CURRDIR)/cemain:      $(OBJ) $(CURRDIR)/Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/cemain 
+	size $(CURRDIR)/cemain
+
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h

@@ -12,6 +12,9 @@ currdir=`pwd`
 case $1 in
 main)	target=$currdir/$1
 	;;
+omain)	target=$currdir/$1
+	options=-DPEEPHOLE
+	;;
 Xlint)	target=$1
 	;;
 *)	echo "$0: $1: Illegal argument" 1>&2
@@ -51,4 +54,4 @@ $i:	clashes $PW/$i
 	\$(CID) -Fclashes < $PW/$i > $i
 EOF
 done
-make EMHOME=$EMHOME CURRDIR=$currdir $target
+make EMHOME=$EMHOME CURRDIR=$currdir COPTIONS=$options $target

@@ -24,6 +24,9 @@
 #include	"misc.h"
 
 extern int	pass_1;
+#ifdef DEBUG
+extern char	options[];
+#endif
 
 t_def *
 lookup(id, scope, import, flags)
@@ -65,6 +68,7 @@ lookup(id, scope, import, flags)
 			assert(df->imp_def != 0);
 			df = df->imp_def;
 		}
+		DO_DEBUG(options['S'], print("lookup %s, %x\n", id->id_text, df->df_kind));
 	}
 	return df;
 }
@@ -78,24 +82,36 @@ lookfor(id, vis, message, flags)
 		If it is not defined create a dummy definition and,
 		if message is set, give an error message
 	*/
-	register t_scopelist *sc = vis;
+	register t_scopelist *sc;
+	t_scopelist *sc1 = 0;
 	t_def *df;
 
-	while (sc) {
+	for (sc = vis; sc; sc = nextvisible(sc)) {
 		df = lookup(id->nd_IDF, sc->sc_scope, D_IMPORTED, flags);
 		if (df) {
+			if (message && df->df_kind == D_FORWARD) {
+				if (! sc1) sc1 = sc;
+				while (sc && sc->sc_scope != df->df_scope) {
+					sc = enclosing(sc);
+				}
+				if (sc) continue;
+				break;
+			}
 			if (pass_1 && message) {
+				if (sc1) sc = sc1;
 				while (vis->sc_scope->sc_level >
-				       sc->sc_scope->sc_level) {
+				       sc->sc_scope->sc_level ||
+				       (sc1 &&
+					vis->sc_scope->sc_level >=
+					sc->sc_scope->sc_level)) {
 					define( id->nd_IDF,
 						vis->sc_scope,
 						D_INUSE)-> imp_def = df;
-					vis = nextvisible(vis);
+					vis = enclosing(vis);
 				}
 			}
 			return df;
 		}
-		sc = nextvisible(sc);
 	}
 
 	if (message) id_not_declared(id);
