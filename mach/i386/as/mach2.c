@@ -8,6 +8,10 @@
  * INTEL 80386 tokens
  */
 
+%token <y_word> ATOGGLE
+%token <y_word> OTOGGLE
+%token <y_word> USE16
+%token <y_word> USE32
 %token <y_word> R32
 %token <y_word> R16
 %token <y_word> R8

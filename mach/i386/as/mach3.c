@@ -10,6 +10,8 @@
  * No system registers for now ...
  */
 
+0,	USE16,		0,		".use16",
+0,	USE32,		0,		".use32",
 0,	R32,		0,		"ax",
 0,	R32,		1,		"cx",
 0,	R32,		2,		"dx",
@@ -213,10 +215,10 @@
 0,	NOTOP,		071,		"idiv",
 0,	PREFIX,		0144,		"fseg",
 0,	PREFIX,		0145,		"gseg",
-0,	PREFIX,		0146,		"o16",	/* operand size toggle */
-0,	PREFIX,		0146,		"o32",	/* operand size toggle */
-0,	PREFIX,		0147,		"a16",	/* address size toggle */
-0,	PREFIX,		0147,		"a32",	/* address size toggle */
+0,	OTOGGLE,	0146,		"o16",	/* operand size toggle */
+0,	OTOGGLE,	0346,		"o32",	/* operand size toggle */
+0,	ATOGGLE,	0147,		"a16",	/* address size toggle */
+0,	ATOGGLE,	0347,		"a32",	/* address size toggle */
 0,	PREFIX,		0360,		"lock",
 0,	PREFIX,		0362,		"rep",
 0,	PREFIX,		0362,		"repne",

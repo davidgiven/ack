@@ -8,18 +8,37 @@
 
 operation
 	:
-		prefix oper
-			{	address_long = 1; operand_long = 1; }
+		USE16
+			{	use32 = 0; address_long = 0; operand_long = 0; }
+	|
+		USE32
+			{	use32 = 1; address_long = 1; operand_long = 1; }
+	|	prefix oper
+			{	address_long = use32; operand_long = use32; }
 	|	prefix1		/* to allow for only prefixes on a line */
 	;
 prefix	:	/* empty */
 	|	prefix1
 	;
-prefix1:	prefix PREFIX
-			{	if ($2 == 0146) operand_long = ! operand_long;
-				if ($2 == 0147) address_long = ! address_long;
-				emit1($2);
-			}
+prefix1:	prefix PREFIX	{ emit1($2); }
+	|
+		prefix ATOGGLE
+				{ if ((($2&0200) >> 7) == address_long) {
+					if (pass == PASS_3) warning("address size toggle ignored");
+				  } else {
+					emit1($2 & 0177);
+					address_long = ! address_long;
+				  }
+				}
+	|
+		prefix OTOGGLE
+				{ if ((($2&0200) >> 7) == operand_long) {
+					if (pass == PASS_3) warning("operand size toggle ignored");
+				  } else {
+					emit1($2 & 0177);
+					operand_long = ! operand_long;
+				  }
+				}
 	;
 oper	:	NOOP_1
 			{	emit1($1);}
@@ -177,8 +196,15 @@ st_i	:	ST '(' absexp ')'
 
 	;
 mem	:	'(' expr ')'
-			{	rm_2 = 05; exp_2 = $2; reg_2 = 05; mod_2 = 0;
+			{	if (address_long) {
+					rm_2 = 05; reg_2 = 05; mod_2 = 0;
+				}
+				else {
+					reg_2 = 06;
+				}
+				exp_2 = $2;
 				RELOMOVE(rel_2, relonami);
+					
 			}
 	|	bases
 			{	exp_2.val = 0; exp_2.typ = S_ABS; indexed();}
@@ -188,10 +214,20 @@ mem	:	'(' expr ')'
 			}
 	;
 bases	:	'(' R32 ')'
-			{	reg_2 = $2; sib_2 = 0; rm_2 = 0;}
+			{	if (address_long) {
+					reg_2 = $2; sib_2 = 0; rm_2 = 0;
+				}
+				else 	reg_2 = sr_m[$2];
+			}
 	|	'(' R32 ')' '(' R32 scale ')'
-			{	rm_2 = 04; sib_2 |= regindex_ind[$2][$5];
-				reg_2 = $2;
+			{	if (address_long) {
+					rm_2 = 04;
+					 sib_2 |= regindex_ind[$2][$5];
+					reg_2 = $2;
+				}
+				else {
+					reg_2 = dr_m[$2][$5];
+				}
 			}
 	|	'(' R32 '*' absexp ')'
 			{	if ($4 == 1) {

@@ -75,3 +75,28 @@ char	regindex_ind[8][8] = {
 #endif
 
 extern int	address_long INIT(1), operand_long INIT(1);
+extern int	use32 INIT(1);
+
+/* For 16-bit addressing: copied from i86 assembler */
+#ifndef extern
+extern char     sr_m[8];
+#else
+char    sr_m[8] = {
+        -1,     -1,     -1,     7,      -1,     6,      4,      5
+};
+#endif
+
+#ifndef extern
+extern char     dr_m[8][8];
+#else
+char    dr_m[8][8] = {
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1,
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1,
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1,
+        -1,     -1,     -1,     -1,     -1,     -1,     0,      1,
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1,
+        -1,     -1,     -1,     -1,     -1,     -1,     2,      3,
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1,
+        -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1
+};
+#endif

@@ -8,7 +8,40 @@
  * INTEL 80386 special routines
  */
 
+ea_1_16(param)
+{
+        if ((reg_1 & 070) || (param & ~070)) {
+                serror("bad operand");
+        }
+        emit1(reg_1 | param);
+        switch(reg_1 >> 6) {
+        case 0:
+                if (reg_1 == 6 || (reg_1 & 040)) {
+#ifdef RELOCATION
+                        RELOMOVE(relonami, rel_1);
+                        newrelo(exp_1.typ, RELO2);
+#endif
+                        emit2(exp_1.val);
+                }
+                break;
+        case 1:
+                emit1(exp_1.val);
+                break;
+        case 2:
+#ifdef RELOCATION
+                RELOMOVE(relonami, rel_1);
+                newrelo(exp_1.typ, RELO2);
+#endif
+                emit2(exp_1.val);
+                break;
+        }
+}
+
 ea_1(param) {
+	if (! address_long) {
+		ea_1_16(param);
+		return;
+	}
 	if (is_expr(reg_1)) {
 		serror("bad operand");
 		return;
@@ -49,6 +82,10 @@ checkscale(val)
 {
 	int v = val;
 
+	if (! address_long) {
+		serror("scaling not allowed in 16-bit mode");
+		return 0;
+	}
 	if (v != val) v = 0;
 	switch(v) {
 	case 1:
@@ -93,24 +130,34 @@ regsize(sz)
 }
 
 indexed() {
-	mod_2 = 0;
-	if (sib_2 == -1)
-		serror("register error");
-	if (rm_2 == 0 && reg_2 == 4) {
-		/* base register sp, no index register; use
-		   indexed mode without index register
-		*/
-		rm_2 = 04;
-		sib_2 = 044;
+	if (address_long) {
+		mod_2 = 0;
+		if (sib_2 == -1)
+			serror("register error");
+		if (rm_2 == 0 && reg_2 == 4) {
+			/* base register sp, no index register; use
+		   	   indexed mode without index register
+			*/
+			rm_2 = 04;
+			sib_2 = 044;
+		}
+		if (reg_2 == 015) {
+			reg_2 = 05;
+			return;
+		}
+		if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
+			mod_2 = 02;
+		else if (exp_2.val != 0 || reg_2 == 5)
+			mod_2 = 01;
 	}
-	if (reg_2 == 015) {
-		reg_2 = 05;
-		return;
+	else {
+        	if (reg_2 & ~7)
+                	serror("register error");
+        	if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
+                	reg_2 |= 0200;
+        	else if (exp_2.val != 0 || reg_2 == 6)
+                	reg_2 |= 0100;
 	}
-	if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
-		mod_2 = 02;
-	else if (exp_2.val != 0 || reg_2 == 5)
-		mod_2 = 01;
 }
 
 ebranch(opc,exp)
@@ -245,7 +292,7 @@ adsize_exp(exp, relpc)
 		emit4((long)(exp.val));
 	}
 	else {
-		if (! fitw(exp.val)) {
+		if (! fitw(exp.val) && pass == PASS_3) {
 			warning("offset does not fit in 2 bytes; remove prefix");
 		}
 #ifdef RELOCATION
