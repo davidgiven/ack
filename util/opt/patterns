@@ -549,7 +549,7 @@ loe lol and ste $3==w && $1==$4 : lol $2 loe $1 and w ste $4
 loi asp $1==$2 : asp p
 lal loi loc loc loc loc ior $2==4*w && $7==4*w && ($3==0)+($4==0)+($5==0)+($6==0)>2 :
 	lol $1+3*w loc $3 ior w lol $1+2*w loc $4 ior w lol $1+w loc $5 ior w lol $1 loc $6 ior w
-loc dup stl loc dup stl $2==2 && $5==2:
+loc dup stl loc dup stl $2==w && $5==w:
 	loc $1 stl $3 loc $4 stl $6 loc $1 loc $4
 LLP LLP adp SLP sti $2==$4 && (!notreg($2) || $5!=p):
 	LLP $1 sti $5 LLP $2 adp $3 SLP $4
@@ -571,7 +571,7 @@ dup LEP sdf $1==2*w : LEP $2 sdf $3 LEP $2 ldf $3
 lol dup $2==w : lol $1 lol $1
 loe dup $2==w : loe $1 loe $1
 lil dup $2==w : lil $1 lil $1
-LEP loi dup $2==w && $3==2 : LEP $1 loi w LEP $1 loi w
+LEP loi dup $2==w && $3==w : LEP $1 loi w LEP $1 loi w
 ldl dup $2==2*w : ldl $1 ldl $1
 lde dup $2==2*w : lde $1 lde $1
 #endif
