@@ -14,6 +14,7 @@ all:
 	-nroff macro.v7 arch.5 >arch.5.opr
 	-nroff macro.v7 libmon.7 > libmon.opr
 	-nroff macro.v7 libpc.7 > libpc.opr
+	-nroff macro.v7 cpp.6 > cpp.opr
 	-nroff macro.v7 em_ass.6 > em_ass.opr
 	-nroff macro.v7 em_decode.6 > em_decode.opr
 	-nroff macro.v7 em_opt.6 > em_opt.opr
@@ -35,6 +36,7 @@ install:
 	-cp arch.5 /usr/man/man5/arch.5
 	-cp libmon.7 /usr/man/man7/em_libmon.7
 	-cp libpc.7 /usr/man/man7/em_libpc.7
+	-cp cpp.6 /usr/man/man6/cpp.6
 	-cp em_ass.6 /usr/man/man6/em_ass.6
 	-cp em_decode.6 /usr/man/man6/em_decode.6
 	-cp em_opt.6 /usr/man/man6/em_opt.6
