@@ -32,6 +32,7 @@ int optstack=0;	/* Inside with <blah> STACK rule */
 int saferulefound=0;
 int maxempatlen=0;
 int maxrule=0;
+int in_em_repl=0;	/* set when in EM replacement part */
 struct varinfo *defcost;
 int Xstackflag=0; /* set in coercions, moves, and tests. %1 means something
 		     different then.
@@ -882,8 +883,8 @@ yieldlist
 leaving
 	: /* empty */
 		{ $$ = 0; }
-	| LEAVING {emhere=1; } leavelist
-		{ emhere=0; $$ = $3; }
+	| LEAVING {emhere=1; in_em_repl=1; } leavelist
+		{ emhere=0; in_em_repl=0; $$ = $3; }
 	;
 leavelist
 	: leavelist_el
@@ -947,6 +948,8 @@ emarg
 tokarg
 	: PERCENT
 		{ $$ = $1;
+		  if (in_em_repl)
+			error("No token references allowed in EM replacement part");
 		  if ($1<1 || $1>tokpatlen) {
 			error("Only %d tokens in stackpattern",tokpatlen);
 			$$ =1;
