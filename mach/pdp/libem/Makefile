@@ -15,7 +15,7 @@ head_em.o:      head_em.s
 		pdp -c head_em.s
 
 libem_o.a:	libem_s.a
-		march . libem_o.a
+		ASAR=ar ; export ASAR ; march . libem_o.a
 
 clean:
 		rm -f *.o libem_o.a
