@@ -1,4 +1,3 @@
-#define ex_ap(y)	fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)	/* nothing */
 
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
@@ -25,6 +24,5 @@
 
 #define modhead		".sect .text;.sect .rom;.sect .data;.sect .bss\n"
 
-#define id_first	'_'
 #define BSS_INIT	0
 
