@@ -497,7 +497,7 @@ gen	move {EXTERN2,$1}, {LOCAL,$3,2}
 pat lil inreg($1) > 0			yields {ind_reg2, regvar($1)}
 #endif
 pat lil	
-  uses ADDREG={ind_regoff2,bp,$1}    	yields {ind_reg2,%a}
+  uses ADDREG={LOCAL,$1,2}	    	yields {ind_reg2,%a}
 
 pat lil lil $1==$2				leaving lil $1 dup 2
 
@@ -523,10 +523,10 @@ pat lxl $1==0				yields {ADDR_LOCAL,0}
 pat lxl $1==1				yields {LOCAL,SL,2}
 
 pat lxl $1==2				
-  uses ADDREG={ind_regoff2,bp,SSL}	yields {ind_regoff2,%a,SSL}
+  uses ADDREG={LOCAL,SL,2}		yields {ind_regoff2,%a,SSL}
 
 pat lxl $1>2				
-  uses ADDREG={ind_regoff2,bp,SSL},
+  uses ADDREG={LOCAL,SL,2},
        CXREG={ANYCON,$1-1}
   gen 1:
       mov %a,{ind_regoff2,%a,4}
@@ -535,14 +535,14 @@ pat lxl $1>2
 pat lxa $1==0				yields {ADDR_LOCAL,SL}
 
 pat lxa $1==1 				
-  uses ADDREG={ind_regoff2,bp,SSL}	yields {Xreg_off,%a,SSL}
+  uses ADDREG={LOCAL,SL,2}		yields {Xreg_off,%a,SSL}
 
 pat lxa $1==2
-  uses ADDREG={ind_regoff2,bp,SSL}
+  uses ADDREG={LOCAL,SL,2}
   gen move {ind_regoff2,%a,SSL},%a	yields {Xreg_off,%a,SSL}
 
 pat lxa $1>2	
-  uses ADDREG={ind_regoff2,bp,SSL},
+  uses ADDREG={LOCAL,SL,2},
        CXREG={ANYCON,$1-1}
   gen 1:
       mov %a,{ind_regoff2,%a,4}
@@ -632,15 +632,15 @@ pat stl
   kills indexed,locals %ind+%size > $1 && %ind < $1+2
   gen move %1,{LOCAL,$1,2}
   with exact STACK
-  kills ALL
-  gen pop {ind_regoff2,bp,$1}
+  kills indexed,locals %ind+%size > $1 && %ind < $1+2
+  gen pop {LOCAL,$1,2}
 
 pat ste
   with regorconst
   kills indirects
   gen move %1,{EXTERN2,$1}
   with exact STACK
-  kills ALL
+  kills indirects
   gen pop {EXTERN2,$1}
 
 #ifdef REGVARS
@@ -649,18 +649,18 @@ pat sil inreg($1)==reg_any
   kills referals
   gen move %1,{ind_reg2,regvar($1)}
   with exact STACK
-  kills ALL
+  kills referals
   gen pop {ind_reg2,regvar($1)}
 #endif
 pat sil
   with regorconstnoaddr
   kills referals
-  uses ADDREG={ind_regoff2,bp,$1}
+  uses ADDREG={LOCAL,$1,2}
   gen move %1,{ind_reg2,%a}
       killreg %a
   with exact STACK
-  kills ALL
-  uses ADDREG={ind_regoff2,bp,$1}
+  kills referals
+  uses ADDREG={LOCAL,$1,2}
   gen pop {ind_reg2,%a}
       killreg %a
 
@@ -669,16 +669,23 @@ pat stf
   kills referals
   gen move %2,{ind_regoff2,%1,$1}
   with exact addreg STACK
-  kills ALL
+  kills referals
   gen pop {ind_regoff2, %1,$1}
   with reg_off regorconst
   kills referals
   gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
   with exact reg_off STACK
+  kills referals
   gen pop {ind_regoff2,%1.reg,$1+%1.off}
   with exact bpreg_off STACK
+  kills all_locals, indexed
   gen pop {ind_bpregoff2,%1.reg,$1+%1.ind}
-  with exact ADDR_LOCAL				leaving stl %1.ind+$1
+  with ADDR_LOCAL regorconst
+  kills indexed,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+2
+  gen move %2,{LOCAL,%1.ind+$1,2}
+  with exact ADDR_LOCAL STACK
+  kills indexed,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+2
+  gen pop {LOCAL,%1.ind+$1,2}
   with bpreg_off regorconst
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
@@ -694,21 +701,32 @@ pat sti $1==2
   kills referals
   gen move %2,{ind_reg2,%1}
   with exact addreg STACK
-  kills ALL
+  kills referals
   gen pop {ind_reg2,%1}
   with reg_off regorconst
   kills referals
   gen move %2,{ind_regoff2,%1.reg,%1.off}
   with exact reg_off STACK
-  kills ALL
+  kills referals
   gen pop {ind_regoff2,%1.reg,%1.off}
-  with exact ADDR_LOCAL				leaving stl %1.ind
   with bpreg_off regorconst
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind}
   with exact bpreg_off STACK
+  kills all_locals,indexed
   gen pop {ind_bpregoff2,%1.reg,%1.ind}
-  with exact ADDR_EXTERN			leaving ste %1.off
+  with ADDR_EXTERN regorconst
+  kills indirects
+  gen move %2,{EXTERN2,%1.off}
+  with exact ADDR_EXTERN STACK
+  kills indirects
+  gen pop {EXTERN2,%1.off}
+  with ADDR_LOCAL regorconst
+  kills indexed,locals %ind+%size > %1.ind && %ind < %1.ind+2
+  gen move %2,{LOCAL,%1.ind,2}
+  with exact ADDR_LOCAL STACK
+  kills indexed,locals %ind+%size > %1.ind && %ind < %1.ind+2
+  gen pop {LOCAL,%1.ind,2}
 
 pat sti $1==1
   with addreg regorconst12
@@ -725,35 +743,9 @@ pat sti $1==1
   gen move %2,{EXTERN1,%1.off}
   with ADDR_LOCAL regorconst12
   kills indexed,locals %ind+%size > %1.ind && %ind <= %1.ind
-  gen move %2,{ind_regoff1,bp,%1.ind}
+  gen move %2,{LOCAL1,%1.ind,1}
 
-pat sti $1==4
-  with addreg regorconst regorconst
-  kills referals
-  gen move %2,{ind_reg2,%1}
-      move %3,{ind_regoff2,%1,2}
-  with exact addreg STACK
-  kills referals
-  gen pop {ind_reg2,%1}
-      pop {ind_regoff2,%1,2}
-  with reg_off regorconst regorconst
-  kills referals
-  gen move %2,{ind_regoff2,%1.reg,%1.off}
-      move %3,{ind_regoff2,%1.reg,%1.off+2}
-  with exact reg_off STACK
-  kills referals
-  gen pop {ind_regoff2,%1.reg,%1.off}
-      pop {ind_regoff2,%1.reg,%1.off+2}
-  with bpreg_off regorconst regorconst
-  kills all_locals,indexed
-  gen move %2,{ind_bpregoff2,%1.reg,%1.ind}
-      move %3,{ind_bpregoff2,%1.reg,%1.ind+2}
-  with exact bpreg_off STACK
-  kills all_locals,indexed
-  gen pop {ind_bpregoff2,%1.reg,%1.ind}
-      pop {ind_bpregoff2,%1.reg,%1.ind+2}
-  with exact ADDR_EXTERN		leaving sde %1.off
-  with exact ADDR_LOCAL			leaving sdl %1.ind
+pat sti $1==4				leaving sdf 0
 
 pat sti $1>4
   with BXREG
@@ -792,7 +784,7 @@ pat sdf
   gen move %2,{ind_regoff2,%1,$1}
       move %3,{ind_regoff2,%1,$1+2}
   with exact addreg STACK
-  kills ALL
+  kills referals
   gen pop {ind_regoff2,%1,$1}
       pop {ind_regoff2,%1,$1+2}
   with reg_off regorconst regorconst
@@ -800,19 +792,29 @@ pat sdf
   gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
       move %3,{ind_regoff2,%1.reg,%1.off+$1+2}
   with exact reg_off STACK
-  kills ALL
+  kills referals
   gen pop {ind_regoff2,%1.reg,$1+%1.off}
       pop {ind_regoff2,%1.reg,$1+2+%1.off}
   with exact bpreg_off STACK
-  kills ALL
+  kills all_locals,indexed
   gen pop {ind_bpregoff2, %1.reg,$1+%1.ind}
       pop {ind_bpregoff2, %1.reg,$1+2+%1.ind}
-
-/* Funny things happen when the sign changes in the stl parameters */
-
-  with exact ADDR_LOCAL				leaving stl %1.ind+$1
-							stl %1.ind+$1+2
-  with exact ADDR_EXTERN			leaving sde %1.off+$1
+  with ADDR_LOCAL regorconst regorconst
+  kills indexed,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
+  gen	move %2,{LOCAL,%1.ind+$1,2}
+	move %3,{LOCAL,%1.ind+$1+2,2}
+  with exact ADDR_LOCAL STACK
+  kills indexed,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
+  gen	pop {LOCAL,%1.ind+$1,2}
+	pop {LOCAL,%1.ind+$1+2,2}
+  with ADDR_EXTERN regorconst regorconst
+  kills indirects
+  gen	move %2,{EXTERN2,%1.off+$1}
+	move %3,{EXTERN2,%1.off+$1+2}
+  with exact ADDR_EXTERN STACK
+  kills indirects
+  gen	pop {EXTERN2,%1.off+$1}
+	pop {EXTERN2,%1.off+$1+2}
   with bpreg_off regorconst regorconst
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
@@ -2232,8 +2234,10 @@ kills ALL
       joehoe {label,".cms"}     yields cx
 
 pat cms !defined($1)
+with CXREG
 kills ALL
   gen joehoe {label,".cms"}	yields cx
+
 pat cmf $1==4
 kills ALL
   gen joehoe {label,".cmf4"}	leaving asp 8 lfr 2
