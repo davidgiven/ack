@@ -424,7 +424,7 @@ complete_sections()
 			continue;
 
 		outsect[sectindex].os_size += sect_comm[sectindex];
-		if (flagword & RFLAG)
+		if (flagword & RFLAG) continue;
 		outsect[sectindex].os_lign =
 			tstbit(sectindex, lignmap) ? sect_lign[sectindex] : 1;
 		if (tstbit(sectindex, basemap)) {
