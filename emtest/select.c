@@ -46,6 +46,8 @@ char	name1[] = "/usr/tmp/f1XXXXXX";
 char	name2[] = "/usr/tmp/f2XXXXXX";
 char	name3[] = "/usr/tmp/f3XXXXXX";
 
+char *to3dig();
+
 stop() {
 	unlink(name1);
 	unlink(name2);
@@ -130,9 +132,10 @@ select() {
 	}
 	fprintf(file2, "; %s\n", line);
 	if (fflag) {
-		fprintf(file1, ".%03d\n", i);
-		fprintf(file1, " con \"tst%03d\"\n", i);
-		fprintf(file2, " fil .%03d\n", i);
+		char *s = to3dig(i);
+		fprintf(file1, ".%s\n", s);
+		fprintf(file1, " con \"tst%s\"\n", s);
+		fprintf(file2, " fil .%s\n", s);
 	}
 	f = file1;
 	while (getline()) {
@@ -246,4 +249,17 @@ usage() {
 	fprintf(stderr, "usage: %s -f [[low]-[high]] [testcollection]\n", prog);
 	nerrors++;
 	stop();
+}
+
+char *
+to3dig(i)
+	register int i;
+{
+	static char buf[4];
+	register char *s = buf;
+
+	*s++ = (i % 1000) / 100 + '0';
+	*s++ = (i % 100) / 10 + '0';
+	*s++ = (i % 10) + '0';
+	*s = '\0';
 }
