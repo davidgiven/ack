@@ -15,7 +15,7 @@ add_ext(e1,e2)
 register EXTEND	*e1,*e2;
 {
 	if (b64_add(&e1->m1,&e2->m1)) {	/* addition carry */
-		b64_sft(&e1->m1,1);	/* shift mantissa one bit RIGHT */
+		b64_rsft(&e1->m1);	/* shift mantissa one bit RIGHT */
 		e1->m1 |= 0x80000000L;	/* set max bit	*/
 		e1->exp++;		/* increase the exponent */
 	}

@@ -40,8 +40,8 @@ EXTEND	*e1,*e2;
 	 * that m1 is quaranteed to be larger if its
 	 * maximum bit is set
 	 */
-	b64_sft(&e1->m1,1);	/* 64 bit shift right */
-	b64_sft(&e2->m1,1);	/* 64 bit shift right */
+	b64_rsft(&e1->m1);	/* 64 bit shift right */
+	b64_rsft(&e2->m1);	/* 64 bit shift right */
 	e1->exp++;
 	e2->exp++;
 	/*	check for underflow, divide by zero, etc	*/
@@ -92,7 +92,7 @@ EXTEND	*e1,*e2;
 		/* first left shift result 1 bit	*/
 		/* this is ALWAYS done			*/
 
-		b64_sft(result,-1);
+		b64_lsft(result);
 
 		/* compare dividend and divisor		*/
 		/* if dividend >= divisor add a bit	*/
@@ -124,7 +124,7 @@ EXTEND	*e1,*e2;
 		error = ((*lp | *(lp+1)) != 0L) ? 1 : 0;
 		if (error)	{	/* more work */
 			/*	assume max bit == 0 (see above)	*/
-			b64_sft(&e1->m1,-1);
+			b64_lsft(&e1->m1);
 			continue;
 		}
 		else

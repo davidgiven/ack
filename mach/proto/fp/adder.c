@@ -55,34 +55,8 @@ register	B64	*e1,*e2;
 b32_add(e1,e2)
 register	unsigned long	*e1,*e2;
 {
-	register	int	carry;
-
-	if (*e1 & *e2 & MAXBIT) /* both max_bits are set */
-		carry = TRUE;	 /* so there is a carry	*/
-	else 
-		carry = ((*e1 | *e2) & MAXBIT)
-				/* only one is set - might be a carry */
-			? UNKNOWN
-				/* both are clear - no carry */
-			: FALSE;
-# ifdef EXT_DEBUG
-	fflush(stdout);
-	printf("\t\t\t\t\tb32_add: overflow before add(%d) test(%d)\n",
-				carry,(*e1&MAXBIT)?FALSE:TRUE);
-	printf("%08X\n%08X\n",*e1,*e2);
-# endif
+	int	carry = ((unsigned long) 0xFFFFFFFF - *e1 < *e2);
 
 	*e1 += *e2;
-# ifdef EXT_DEBUG
-	printf("%08X\n",*e1);
-	fflush(stdout);
-# endif
-	if (carry != UNKNOWN)
-		return(carry);
-	else
-		/*
-		 * if maxbit in answer is set there is no carry
-		 * return the NAND of this bit
-		 */
-		return((*e1&MAXBIT)?FALSE:TRUE);
+	return carry;
 }
