@@ -5,7 +5,7 @@
 SRC_DIR = $(SRC_HOME)/modules/src/read_em
 MOD_DIR = $(TARGET_HOME)/modules
 EM_TABLE = $(SRC_HOME)/etc/em_table
-INCLUDES = -I$(TARGET_HOME)/h -I$(MOD_DIR)/h -I$(SRC_DIR)
+INCLUDES = -I$(TARGET_HOME)/h -I$(MOD_DIR)/h -I$(SRC_DIR) -I.
 DEFINES = -DPRIVATE=static -DEXPORT=
 CFLAGS = $(INCLUDES) $(DEFINES) $(COPTIONS)
 
