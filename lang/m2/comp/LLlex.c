@@ -355,11 +355,11 @@ again:
 		register t_idf *id;
 
 		do	{
-			if (ch == '_' && *tag == '_') {
-				lexerror("an identifier may not contain two consecutive underscores");
-			}
 			if (tag - buf < idfsize) *tag++ = ch;
 			LoadChar(ch);
+			if (ch == '_' && *(tag-1) == '_') {
+				lexerror("an identifier may not contain two consecutive underscores");
+			}
 		} while(in_idf(ch));
 
 		UnloadChar(ch);
