@@ -1,5 +1,6 @@
 Version.c
-Makefile
+proto.make
+proto.main
 Resolve
 nmclash.c
 LLlex.c
@@ -14,9 +15,7 @@ arith.h
 assert.h
 atw.h
 blocks.c
-cem.1
-cem.c
-cemcom.1
+cemcom.ansi.1
 ch3.c
 ch3bin.c
 ch3mon.c
@@ -75,7 +74,6 @@ make.hfiles
 make.next
 make.tokcase
 make.tokfile
-mcomm.c
 mes.h
 options
 options.c
