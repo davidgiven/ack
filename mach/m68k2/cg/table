@@ -1773,7 +1773,7 @@ aar !defined($1) | |
 
 /* G R O U P XII :  C O M P A R E */
 
-cmi $1 == 2 |	ANY DATAREG |	allocate(DATAREG={immediate, 0})
+cmi $1 == 2 |	ANY DATAREG |	allocate(DATAREG={IMMEDIATE, 0})
 				"cmp.w %[1],%[2]"
 				"beq 2f"
 				"bgt 1f"
