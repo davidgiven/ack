@@ -160,7 +160,9 @@ expand_macro(repl, idf)
 		three tokens: + + ID. Therefore a token separator is
 		inserted after the replacement.
 	*/
-	if (*(repl->r_ptr -1) != TOKSEP) add2repl(repl, TOKSEP);
+	if (repl->r_text == repl->r_ptr || *(repl->r_ptr -1) != TOKSEP) {
+		add2repl(repl, TOKSEP);
+	}
 	return 1;
 }
 
@@ -651,7 +653,7 @@ macro2buffer(repl, idf, args)
 		    while (*q)
 			add2repl(repl, *q++);
 
-		if (*(repl->r_ptr-1) != TOKSEP)
+		if (repl->r_text == repl->r_ptr || *(repl->r_ptr-1) != TOKSEP)
 			add2repl(repl, TOKSEP);
 	    } else {
 		add2repl(repl, *ptr++);
