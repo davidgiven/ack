@@ -9,7 +9,7 @@
 
 
 !File: idepth.h
-#define	IDEPTH		20	/* maximum nr of stacked input buffers	*/
+#define	IDEPTH		100	/* maximum nr of stacked input buffers	*/
 
 
 !File: errout.h
