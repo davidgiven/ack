@@ -513,9 +513,12 @@ dup SLP sti $1==p && $3==w:     SLP $2  sil $2
 loc cms $1==0 && $2==w: tne
 zer $1==w: loc 0
 loc loc adi $3==w && sfit($1+$2,8*w) : loc $1+$2
+loc loc adu $3==w : loc $1+$2
 loc loc sbi $3==w && sfit($1-$2,8*w) : loc $1-$2
+loc loc sbu $3==w : loc $1-$2
 loc loc sbs $3==w && w==p && sfit($1-$2,8*w) : loc $1-$2
 loc loc mli $3==w && sfit($1*$2,8*w) : loc $1*$2
+loc loc mlu $3==w : loc $1*$2
 loc loc dvi $3==w && $2!=0 : loc $1/$2
 loc loc and $3==w :	loc $1&$2
 loc loc ior $3==w :	loc $1|$2
@@ -574,6 +577,7 @@ lae loi lae sti $2==$4 && $2>8 && ( !defined($1==$3) || $3<=$1-$2 || $3>=$1+$2 )
 loc loc loc cif $1==0 && $2==w :	zrf $3
 loc loc loc ciu $1>=0 && $2==w && $3==2*w :	ldc $1
 loc loc loc cii $2==w && $3==2*w :	ldc $1
+loc loc loc cii $2<w && $3==w :	loc $1
 loi loc inn $1==$3 && $2>=0 && $2<$1*8 : 
 	lof ($2/(8*w))*w loc $2&(8*w-1) inn w
 ldl loc inn $3==2*w && $2>=0 && $2<16*w : 
