@@ -17,7 +17,6 @@ em_spec.h
 out.h
 pc_err.h
 pc_file.h
-pc_size.h
 ranlib.h
 ocm_chan.h
 ocm_parco.h
