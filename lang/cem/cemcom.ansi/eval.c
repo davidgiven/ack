@@ -76,8 +76,16 @@ EVAL(expr, val, code, true_label, false_label)
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
-		if (gencode)
-			load_val(expr, val);
+		if (gencode) {
+			if (true_label) {
+				/* can only result from ','-expressions with
+				   constant right-hand sides ???
+				*/
+				ASSERT(is_cp_cst(expr));
+				C_bra(expr->VL_VALUE == 0 ? false_label : true_label);
+			}
+			else load_val(expr, val);
+		}
 		break;
 	case String:	/* a string constant	*/
 		if (gencode) {

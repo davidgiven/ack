@@ -764,7 +764,7 @@ do_line(l)
 	int t = GetToken(&tk);
 	static char *saved_name = (char *)0;
 
-	SkipToNewLine();
+	if (t != EOI) SkipToNewLine();
 	LineNumber = l;		/* the number of the next input line */
 	if (t == STRING) {	/* is there a filespecifier? */
 		extern char *source;	/* defined in main.c */

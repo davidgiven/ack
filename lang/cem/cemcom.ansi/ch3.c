@@ -136,8 +136,14 @@ ch3sel(expp, oper, idf)
 		}
 	}
 	else { /* oper == ARROW */
-		exp = new_oper(sd->sd_type,
-			exp, oper, intexpr(sd->sd_offset, INT));
+		if (is_ld_cst(exp)) {
+			exp->VL_VALUE += sd->sd_offset;
+			exp->ex_type = sd->sd_type;
+		}
+		else  {
+			exp = new_oper(sd->sd_type,
+				exp, oper, intexpr(sd->sd_offset, INT));
+		}
 		exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
 		exp->ex_flags &= ~EX_ILVALUE;
 	}

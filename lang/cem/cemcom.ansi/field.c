@@ -52,7 +52,10 @@ eval_field(expr, code)
 	register struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
 	arith tmpvar = 0;
-	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
+	struct type *atype = ( tp->tp_unsigned
+				&& fd->fd_width >= 8 * word_size)
+				    ? uword_type
+				    : word_type;
 
 	/* First some assertions to be sure that the rest is legal */
 	ASSERT(atype->tp_size == word_size);	/* make sure that C_loc() is legal */

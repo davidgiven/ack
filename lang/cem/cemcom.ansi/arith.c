@@ -562,11 +562,14 @@ field2arith(expp)
 	*/
 	register struct type *tp = (*expp)->ex_type->tp_up;
 	register struct field *fd = (*expp)->ex_type->tp_field;
-	register struct type *atype = tp->tp_unsigned ? uword_type : word_type;
+	register struct type *atype = (tp->tp_unsigned
+					&& fd->fd_width >= 8 * word_size)
+					    ? uword_type
+					    : word_type;
 
 	(*expp)->ex_type = atype;
 
-	if (atype->tp_unsigned)	{	/* don't worry about the sign bit */
+	if (tp->tp_unsigned)	{	/* don't worry about the sign bit */
 		ch3bin(expp, RIGHT, intexpr((arith)fd->fd_shift, INT));
 		ch3bin(expp, '&', intexpr(fd->fd_mask, INT));
 	}
@@ -579,7 +582,6 @@ field2arith(expp)
 		);
 		ch3bin(expp, RIGHT, intexpr(bits_in_type - fd->fd_width, INT));
 	}
-	ch3cast(expp, CAST, tp);	/* restore its original type */
 }
 #endif NOBITFIELD
 
