@@ -317,6 +317,8 @@ InsertFile(filnam, table)
 	}
 #else NOPP
 	{
+		LineNumber = 0;
+		FileName = filnam;
 #ifdef READ_IN_ONE
 		isize = size;
 		ipp = text;
@@ -361,10 +363,8 @@ EXPORT int
 loadbuf()
 {
 #ifndef NOPP
-	if (!head) {
-		/* stack exhausted, EOF on sourcefile	*/
+	if (!head) /* stack exhausted, EOF on sourcefile	*/
 		return EOI;
-	}
 #endif NOPP
 	
 #ifndef NOPP
@@ -372,23 +372,18 @@ loadbuf()
 #else NOPP
 	if (ipp < &ibuf[isize])
 #endif NOPP
-	{
-		/* a genuine '\0' character has been seen	*/
-		return '\0';
-	}
+		return '\0'; /* a genuine '\0' character has been seen	*/
 
 #ifndef READ_IN_ONE
 #ifndef NOPP
 	if (	FilDes != 0
 	&&	(head->bh_size = readblock(FilDes, head->bh_text)) > 0
-	)	{
+	)
 		return ipp = &(head->bh_text[1]), *ipp++;
-	}
 #else NOPP
 	if (FilDes != 0 && (isize = readblock(FilDes, &ibuf[0])) > 0)
 		return ipp = &ibuf[1], *ipp++;
 #endif NOPP
-
 #endif READ_IN_ONE
 
 #ifdef NOPP
@@ -399,11 +394,12 @@ loadbuf()
 #endif READ_IN_ONE
 #endif NOPP
 
-	return
 #ifndef NOPP
-		pop_bh() ? (*ipp ? *ipp++ : loadbuf()) :
+	if (pop_bh())
+		return *ipp ? *ipp++ : loadbuf();
 #endif NOPP
-		(ipp = &"\0\0"[1], EOI);
+	ipp = &"\0\0"[1];
+	return EOI;
 }
 
 /*	Some miscellaneous routines : setwdir() and mk_filename()
