@@ -197,6 +197,8 @@ handle_defaults()
 				 * so set correct info.
 				 */
 				set_C_instr_info( def_info[(i>>2)<<2].name);
+				segment = UNKNOWN;
+				/* to prevent another dump_label+switchseg */
 				def_row();
 				out( "}\n\n");
 			}
