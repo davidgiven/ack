@@ -15,6 +15,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+#include	<alloc.h>
 
 #include	"idf.h"
 #include	"type.h"
@@ -24,6 +25,8 @@
 #include	"standards.h"
 #include	"warning.h"
 #include	"const.h"
+
+extern char	*symbol2str();
 
 arith full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
@@ -264,6 +267,91 @@ cstibin(expp)
 
 	commonbin(expp);
 	expp->nd_INT = o1;
+}
+
+cstfbin(expp)
+	register t_node *expp;
+{
+	/*	The binary operation in "expp" is performed on the constant
+		expressions below it, and the result restored in expp.
+		This version is for REAL expressions.
+	*/
+	register struct real *p = expp->nd_left->nd_token.tk_data.tk_real;
+	register flt_arith *o1 = &p->r_val;
+	register flt_arith *o2 = &expp->nd_right->nd_RVAL;
+	int compar = 0;
+	int cmpval = 0;
+
+	assert(expp->nd_class == Oper);
+	assert(expp->nd_left->nd_class == Value);
+	assert(expp->nd_right->nd_class == Value);
+
+	switch (expp->nd_symb)	{
+	case '*':
+		flt_mul(o1, o2, o1);
+		break;
+
+	case '/':
+		flt_div(o1, o2, o1);
+		break;
+
+	case '+':
+		flt_add(o1, o2, o1);
+		break;
+
+	case '-':
+		flt_sub(o1, o2, o1);
+		break;
+
+	case '<':
+	case '>':
+	case LESSEQUAL:
+	case GREATEREQUAL:
+	case '=':
+	case '#':
+		compar++;
+		cmpval = flt_cmp(o1, o2);
+		switch(expp->nd_symb) {
+		case '<':		cmpval = (cmpval < 0); break;
+		case '>':		cmpval = (cmpval > 0); break;
+		case LESSEQUAL:		cmpval = (cmpval <= 0); break;
+		case GREATEREQUAL:	cmpval = (cmpval >= 0); break;
+		case '=':		cmpval = (cmpval == 0); break;
+		case '#':		cmpval = (cmpval != 0); break;
+		}
+		if (expp->nd_right->nd_REAL) free(expp->nd_right->nd_REAL);
+		free_real(expp->nd_right->nd_token.tk_data.tk_real);
+		break;
+
+	default:
+		crash("(cstfbin)");
+	}
+
+	switch(flt_status) {
+	case FLT_OVFL:
+		node_warning(expp, "floating point overflow on %s", 
+				symbol2str(expp->nd_symb));
+		break;
+	case FLT_DIV0:
+		node_error(expp, "division by 0.0");
+		break;
+	}
+
+	if (p->r_real) {
+		free(p->r_real);
+		p->r_real = 0;
+	}
+	if (compar) {
+		free_real(p);
+	}
+	commonbin(expp);
+	if (compar) {
+		expp->nd_symb = INTEGER;
+		expp->nd_INT = cmpval;
+	}
+	else {
+		expp->nd_token.tk_data.tk_real = p;
+	}
 }
 
 cstubin(expp)
@@ -564,6 +652,7 @@ CutSize(expr)
 	register t_type *tp = BaseType(expr->nd_type);
 
 	assert(expr->nd_class == Value);
+	if (tp->tp_fund == T_REAL) return;
 	if (tp->tp_fund != T_INTEGER) {
 		expr->nd_INT &= full_mask[(int)(tp->tp_size)];
 	}

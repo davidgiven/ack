@@ -127,7 +127,13 @@ CodeExpr(nd, ds, true_label, false_label)
 		switch(nd->nd_symb) {
 		case REAL:
 			C_df_dlb(++data_label);
-			C_rom_fcon(nd->nd_REL, tp->tp_size);
+			if (! nd->nd_REAL) {
+				static char buf[FLT_STRLEN];
+
+				flt_flt2str(&nd->nd_RVAL, buf, FLT_STRLEN);
+				C_rom_fcon(buf, tp->tp_size);
+			}
+			else C_rom_fcon(nd->nd_REAL, tp->tp_size);
 			c_lae_dlb(data_label);
 			C_loi(tp->tp_size);
 			break;

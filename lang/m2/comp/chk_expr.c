@@ -37,6 +37,7 @@
 
 extern char *symbol2str();
 extern char *sprint();
+extern arith flt2arith();
 
 STATIC int
 df_error(nd, mess, edf)
@@ -78,14 +79,53 @@ MkCoercion(pnd, tp)
 	register t_type	*nd_tp = nd->nd_type;
 	extern int	pass_1;
 	char		*wmess = 0;
+	arith		op;
 
 	if (nd_tp == tp || nd_tp->tp_fund == T_STRING /* Why ??? */) return;
 	nd_tp = BaseType(nd_tp);
-	if (nd->nd_class == Value &&
-	    nd_tp->tp_fund != T_REAL &&
-	    tp->tp_fund != T_REAL) {
-		/* Constant expression not involving REALs */
+	if (nd->nd_class == Value) {
+		if (nd_tp->tp_fund == T_REAL) {
+			switch(tp->tp_fund) {
+			case T_REAL:
+				nd->nd_type = tp;
+				return;
+			case T_CARDINAL:
+				op = flt_flt2arith(&nd->nd_RVAL, 1);
+				break;
+			case T_INTEGER:
+				op = flt_flt2arith(&nd->nd_RVAL, 0);
+				break;
+			default:
+				crash("MkCoercion");
+			}
+			if (flt_status == FLT_OVFL) {
+				wmess = "conversion";
+			}
+			if (!wmess || pass_1) {
+				if (nd->nd_REAL) free(nd->nd_REAL);
+				free_real(nd->nd_token.tk_data.tk_real);
+				nd->nd_INT = op;
+				nd->nd_symb = INTEGER;
+			}
+		}
 		switch(tp->tp_fund) {
+		case T_REAL: {
+			struct real *p = new_real();
+			switch(BaseType(nd_tp)->tp_fund) {
+			case T_CARDINAL:
+			case T_INTORCARD:
+				flt_arith2flt(nd->nd_INT, &p->r_val, 1);
+				break;
+			case T_INTEGER:
+				flt_arith2flt(nd->nd_INT, &p->r_val, 0);
+				break;
+			default:
+				crash("MkCoercion");
+			}
+			nd->nd_token.tk_data.tk_real = p;
+			nd->nd_symb = REAL;
+			}
+			break;
 		case T_SUBRANGE:
 		case T_ENUMERATION:
 		case T_CHAR:
@@ -330,6 +370,16 @@ ChkExLinkOrName(expp)
 			expp->nd_class = Def;
 		}
 		else	expp->nd_class = Value;
+		if (df->df_type->tp_fund == T_REAL) {
+			struct real *p = expp->nd_token.tk_data.tk_real;
+
+			expp->nd_token.tk_data.tk_real = new_real();
+			*(expp->nd_token.tk_data.tk_real) = *p;
+			if (p->r_real) {
+				p->r_real = Salloc(p->r_real,
+					   (unsigned)(strlen(p->r_real)+1));
+			}
+		}
 	}
 
 	if (!(df->df_kind & D_VALUE)) {
@@ -912,11 +962,13 @@ ChkBinOper(expp)
 			cstset(expp);
 		}
 	}
-	else if ( tpl->tp_fund != T_REAL &&
-		  expp->nd_left->nd_class == Value &&
+	else if ( expp->nd_left->nd_class == Value &&
 		  expp->nd_right->nd_class == Value) {
 		if (expp->nd_left->nd_type->tp_fund == T_INTEGER) {
 			cstibin(expp);
+		}
+		else if (tpl->tp_fund == T_REAL) {
+			cstfbin(expp);
 		}
 		else	cstubin(expp);
 	}
@@ -967,8 +1019,11 @@ ChkUnOper(expp)
 		else if (tpr->tp_fund == T_REAL) {
 			if (right->nd_class == Value) {
 				*expp = *right;
-				if (*(expp->nd_REL) == '-') (expp->nd_REL)++;
-				else (expp->nd_REL)--;
+				flt_umin(&(expp->nd_RVAL));
+				if (expp->nd_REAL) {
+					free(expp->nd_REAL);
+					expp->nd_REAL = 0;
+				}
 				FreeNode(right);
 			}
 			return 1;
@@ -976,6 +1031,7 @@ ChkUnOper(expp)
 		break;
 
 	case NOT:
+	case '~':
 		if (tpr == bool_type) {
 			if (right->nd_class == Value) {
 				cstunary(expp);
@@ -1026,6 +1082,10 @@ ChkStandard(expp)
 		MkCoercion(&(arg->nd_left), expp->nd_type);
 		switch(expp->nd_type->tp_fund) {
 		case T_REAL:
+			if (arg->nd_left->nd_class == Value) {
+				arg->nd_left->nd_RVAL.flt_sign = 0;
+				free_it = 1;
+			}
 			break;
 		case T_INTEGER:
 			if (arg->nd_left->nd_class == Value) {

@@ -42,6 +42,7 @@ extern int	cntlines;
 #endif
 
 extern char	options[];
+extern int	flt_status;
 
 STATIC
 SkipComment()
@@ -391,10 +392,9 @@ again:
 		enum statetp {Oct,OptHex,Hex,Dec,OctEndOrHex,End,OptReal,Real};
 		register enum statetp state;
 		register int base = 8;
-		register char *np = &buf[1];
+		register char *np = &buf[0];
 					/* allow a '-' to be added	*/
 
-		buf[0] = '-';
 		*np++ = ch;
 		state = is_oct(ch) ? Oct : Dec;
 		LoadChar(ch);
@@ -489,7 +489,7 @@ again:
 					*/
 					arith ubound = max_int[sizeof(arith)]
 							/ (base >> 1);
-					np = &buf[1];
+					np = &buf[0];
 					while (*np == '0') np++;
 					tk->TOK_INT = 0;
 					while (*np) {
@@ -613,12 +613,17 @@ lexwarning(W_ORDINARY, "overflow in constant");
 		*np++ = '\0';
 		PushBack();
 
+		tk->tk_data.tk_real = new_real();
 		if (np >= &buf[NUMSIZE]) {
-			tk->TOK_REL = Salloc("-0.0", 5)+1;
+			tk->TOK_REAL = Salloc("0.0", 4);
 			lexerror("real constant too long");
 		}
-		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;
+		else	tk->TOK_REAL = Salloc(buf, (unsigned) (np - buf));
 		CheckForLet();
+		flt_str2flt(tk->TOK_REAL, &(tk->TOK_RVAL));
+		if (flt_status == FLT_OVFL) {
+lexwarning(W_ORDINARY, "overflow in floating point constant");
+		}
 		return tk->tk_symb = REAL;
 
 		/*NOTREACHED*/

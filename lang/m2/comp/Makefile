@@ -20,20 +20,19 @@ MODLIB =	$(LIBDIR)/libinput.a \
 		$(LIBDIR)/libassert.a \
 		$(LIBDIR)/liballoc.a \
 		$(MALLOC) \
+		$(LIBDIR)/libflt.a \
 		$(LIBDIR)/libprint.a \
 		$(LIBDIR)/libstring.a \
 		$(LIBDIR)/libsystem.a
 EMCELIB =	$(LIBDIR)/libem_mesCE.a \
 		$(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/$(BACK).a \
-		$(LIBDIR)/libflt.a \
 		$(LIBDIR)/libobject.a \
 		$(EMHOME)/lib/em_data.a
 EMOCELIB =	$(LIBDIR)/libem_mesO.a \
 		$(LIBDIR)/libCEopt.a \
 		$(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/$(BACK).a \
-		$(LIBDIR)/libflt.a \
 		$(LIBDIR)/libobject.a \
 		$(EMHOME)/lib/em_data.a
 
@@ -49,8 +48,8 @@ PROFILE =
 COPTIONS =
 INCLUDES =	-I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 OPTIM =		-O
-CFLAGS =	$(PROFILE) $(INCLUDES) $(COPTIONS) $(OPTIM) -DSTATIC=
-LINTFLAGS =	-DSTATIC= -DNORCSID
+CFLAGS =	$(PROFILE) $(INCLUDES) $(COPTIONS) $(OPTIM)
+LINTFLAGS =
 LDFLAGS =	-i $(PROFILE)
 
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
@@ -77,14 +76,14 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o $(EXTRA_O)
 GENH =	errout.h \
 	idfsize.h numsize.h strsize.h target_sizes.h bigparam.h bigresult.h \
 	inputtype.h density.h squeeze.h nocross.h nostrict.h \
-	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h
+	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h real.h
 HFILES =LLlex.h \
 	chk_expr.h class.h const.h debug.h f_info.h idf.h \
 	input.h main.h misc.h scope.h standards.h tokenname.h \
 	walk.h warning.h SYSTEM.h $(GENH)
 #
 GENFILES =	$(GENGFILES) $(GENC) $(GENH)
-NEXTFILES =	def.H type.H node.H desig.H scope.C tmpvar.C casestat.C
+NEXTFILES =	def.H type.H node.H desig.H real.H scope.C tmpvar.C casestat.C
 
 #EXCLEXCLEXCLEXCL
 
@@ -159,6 +158,7 @@ symbol2str.c:	tokenname.c make.tokcase
 
 def.h:		make.allocd
 type.h:		make.allocd
+real.h:		make.allocd
 node.h:		make.allocd
 desig.h:	make.allocd
 scope.c:	make.allocd
@@ -188,6 +188,7 @@ Xlint:
 		$(LIBDIR)/llib-linput.ln \
 		$(LIBDIR)/llib-lassert.ln \
 		$(LIBDIR)/llib-lalloc.ln \
+		$(LIBDIR)/llib-lflt.ln \
 		$(LIBDIR)/llib-lprint.ln \
 		$(LIBDIR)/llib-lstring.ln \
 		$(LIBDIR)/llib-lsystem.ln
@@ -221,6 +222,7 @@ LLlex.o: input.h
 LLlex.o: inputtype.h
 LLlex.o: nocross.h
 LLlex.o: numsize.h
+LLlex.o: real.h
 LLlex.o: strsize.h
 LLlex.o: target_sizes.h
 LLlex.o: type.h
@@ -228,6 +230,7 @@ LLlex.o: warning.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
 LLmessage.o: idf.h
+LLmessage.o: real.h
 error.o: LLlex.h
 error.o: debug.h
 error.o: debugcst.h
@@ -238,6 +241,7 @@ error.o: inputtype.h
 error.o: main.h
 error.o: node.h
 error.o: nostrict.h
+error.o: real.h
 error.o: strict3rd.h
 error.o: warning.h
 main.o: LLlex.h
@@ -253,6 +257,7 @@ main.o: input.h
 main.o: inputtype.h
 main.o: nocross.h
 main.o: node.h
+main.o: real.h
 main.o: scope.h
 main.o: standards.h
 main.o: strict3rd.h
@@ -278,6 +283,7 @@ type.o: idf.h
 type.o: nocross.h
 type.o: node.h
 type.o: nostrict.h
+type.o: real.h
 type.o: scope.h
 type.o: squeeze.h
 type.o: target_sizes.h
@@ -294,6 +300,7 @@ def.o: idf.h
 def.o: main.h
 def.o: nocross.h
 def.o: node.h
+def.o: real.h
 def.o: scope.h
 def.o: target_sizes.h
 def.o: type.h
@@ -303,6 +310,7 @@ misc.o: f_info.h
 misc.o: idf.h
 misc.o: misc.h
 misc.o: node.h
+misc.o: real.h
 enter.o: LLlex.h
 enter.o: bigparam.h
 enter.o: debug.h
@@ -314,6 +322,7 @@ enter.o: main.h
 enter.o: misc.h
 enter.o: nocross.h
 enter.o: node.h
+enter.o: real.h
 enter.o: scope.h
 enter.o: target_sizes.h
 enter.o: type.h
@@ -331,6 +340,7 @@ defmodule.o: main.h
 defmodule.o: misc.h
 defmodule.o: nocross.h
 defmodule.o: node.h
+defmodule.o: real.h
 defmodule.o: scope.h
 defmodule.o: target_sizes.h
 defmodule.o: type.h
@@ -343,6 +353,7 @@ typequiv.o: idf.h
 typequiv.o: main.h
 typequiv.o: nocross.h
 typequiv.o: node.h
+typequiv.o: real.h
 typequiv.o: strict3rd.h
 typequiv.o: target_sizes.h
 typequiv.o: type.h
@@ -355,16 +366,19 @@ node.o: def.h
 node.o: main.h
 node.o: nocross.h
 node.o: node.h
+node.o: real.h
 node.o: target_sizes.h
 node.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: bigparam.h
+cstoper.o: const.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
 cstoper.o: idf.h
 cstoper.o: nocross.h
 cstoper.o: node.h
+cstoper.o: real.h
 cstoper.o: standards.h
 cstoper.o: target_sizes.h
 cstoper.o: type.h
@@ -383,6 +397,7 @@ chk_expr.o: misc.h
 chk_expr.o: nocross.h
 chk_expr.o: node.h
 chk_expr.o: nostrict.h
+chk_expr.o: real.h
 chk_expr.o: scope.h
 chk_expr.o: standards.h
 chk_expr.o: strict3rd.h
@@ -415,6 +430,7 @@ walk.o: main.h
 walk.o: misc.h
 walk.o: nocross.h
 walk.o: node.h
+walk.o: real.h
 walk.o: scope.h
 walk.o: squeeze.h
 walk.o: strict3rd.h
@@ -430,6 +446,7 @@ desig.o: def.h
 desig.o: desig.h
 desig.o: nocross.h
 desig.o: node.h
+desig.o: real.h
 desig.o: scope.h
 desig.o: squeeze.h
 desig.o: target_sizes.h
@@ -446,6 +463,7 @@ code.o: def.h
 code.o: desig.h
 code.o: nocross.h
 code.o: node.h
+code.o: real.h
 code.o: scope.h
 code.o: squeeze.h
 code.o: standards.h
@@ -461,6 +479,7 @@ lookup.o: idf.h
 lookup.o: misc.h
 lookup.o: nocross.h
 lookup.o: node.h
+lookup.o: real.h
 lookup.o: scope.h
 lookup.o: target_sizes.h
 lookup.o: type.h
@@ -476,6 +495,7 @@ program.o: idf.h
 program.o: main.h
 program.o: nocross.h
 program.o: node.h
+program.o: real.h
 program.o: scope.h
 program.o: strict3rd.h
 program.o: target_sizes.h
@@ -494,6 +514,7 @@ declar.o: misc.h
 declar.o: nocross.h
 declar.o: node.h
 declar.o: nostrict.h
+declar.o: real.h
 declar.o: scope.h
 declar.o: strict3rd.h
 declar.o: target_sizes.h
@@ -510,6 +531,7 @@ expression.o: def.h
 expression.o: idf.h
 expression.o: nocross.h
 expression.o: node.h
+expression.o: real.h
 expression.o: target_sizes.h
 expression.o: type.h
 expression.o: warning.h
@@ -520,6 +542,7 @@ statement.o: def.h
 statement.o: idf.h
 statement.o: nocross.h
 statement.o: node.h
+statement.o: real.h
 statement.o: scope.h
 statement.o: target_sizes.h
 statement.o: type.h
@@ -537,6 +560,7 @@ casestat.o: density.h
 casestat.o: desig.h
 casestat.o: nocross.h
 casestat.o: node.h
+casestat.o: real.h
 casestat.o: squeeze.h
 casestat.o: target_sizes.h
 casestat.o: type.h
@@ -548,6 +572,7 @@ tmpvar.o: debugcst.h
 tmpvar.o: def.h
 tmpvar.o: main.h
 tmpvar.o: nocross.h
+tmpvar.o: real.h
 tmpvar.o: scope.h
 tmpvar.o: target_sizes.h
 tmpvar.o: type.h
@@ -559,6 +584,7 @@ scope.o: def.h
 scope.o: idf.h
 scope.o: nocross.h
 scope.o: node.h
+scope.o: real.h
 scope.o: scope.h
 scope.o: target_sizes.h
 scope.o: type.h

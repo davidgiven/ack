@@ -5,16 +5,15 @@
  * Author: Ceriel J.H. Jacobs
  */
 
-/* D E B U G G I N G   M A C R O */
+/* R E A L   C O N S T A N T   D E S C R I P T O R   D E F I N I T I O N */
 
 /* $Header$ */
 
-#include "debugcst.h"
+#include <flt_arith.h>
 
-#ifdef DEBUG
-#define DO_DEBUG(x, y)	((x) && (y))
-#define STATIC
-#else
-#define DO_DEBUG(x, y)
-#define STATIC static
-#endif
+struct real {
+	char		*r_real;
+	flt_arith	r_val;
+};
+
+/* ALLOCDEF "real" 20 */

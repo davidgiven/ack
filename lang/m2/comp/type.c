@@ -820,11 +820,11 @@ intorcard(left, right)
 	register t_type *left, *right;
 {
 	if (left == intorcard_type) {
-		if (right == int_type || right == card_type) {
-			return right;
-		}
+		t_type *tmp = left;
+		left = right;
+		right = tmp;
 	}
-	else if (right == intorcard_type) {
+	if (right == intorcard_type) {
 		if (left == int_type || left == card_type) {
 			return left;
 		}

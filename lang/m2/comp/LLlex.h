@@ -9,6 +9,8 @@
 
 /* $Header$ */
 
+#include "real.h"
+
 /* Structure to store a string constant
 */
 struct string {
@@ -25,7 +27,7 @@ struct token	{
 		struct idf *tk_idf;	/* IDENT	*/
 		struct string *tk_str;	/* STRING	*/
 		arith tk_int;		/* INTEGER	*/
-		char *tk_real;		/* REAL		*/
+		struct real *tk_real;	/* REAL		*/
 		arith *tk_set;		/* only used in parse tree node */
 		struct def *tk_def;	/* only used in parse tree node */
 		label tk_lab;		/* only used in parse tree node */
@@ -38,7 +40,8 @@ typedef struct token	t_token;
 #define TOK_STR	tk_data.tk_str->s_str
 #define TOK_SLE tk_data.tk_str->s_length
 #define TOK_INT	tk_data.tk_int
-#define TOK_REL tk_data.tk_real
+#define TOK_REAL tk_data.tk_real->r_real
+#define TOK_RVAL tk_data.tk_real->r_val
 
 extern t_token dot, aside;
 extern struct type *toktype;

@@ -40,7 +40,8 @@ struct node {
 #define nd_STR		nd_token.TOK_STR
 #define nd_SLE		nd_token.TOK_SLE
 #define nd_INT		nd_token.TOK_INT
-#define nd_REL		nd_token.TOK_REL
+#define nd_REAL		nd_token.TOK_REAL
+#define nd_RVAL		nd_token.TOK_RVAL
 };
 
 typedef struct node	t_node;

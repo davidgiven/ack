@@ -136,7 +136,7 @@ LexScan()
 			break;
 		
 		case REAL:
-			print("%s\n", tkp->TOK_REL);
+			print("%s\n", tkp->TOK_REAL);
 			break;
 
 		case STRING:
