@@ -270,6 +270,8 @@ code.o: debug.h
 code.o: debugcst.h
 code.o: def.h
 code.o: desig.h
+code.o: f_info.h
+code.o: idf.h
 code.o: main.h
 code.o: misc.h
 code.o: nocross.h
@@ -368,6 +370,7 @@ main.o: main.h
 main.o: nocross.h
 main.o: node.h
 main.o: required.h
+main.o: scope.h
 main.o: target_sizes.h
 main.o: tokenname.h
 main.o: type.h
@@ -447,6 +450,16 @@ progs.o: nocross.h
 progs.o: scope.h
 progs.o: target_sizes.h
 progs.o: type.h
+stab.o: LLlex.h
+stab.o: const.h
+stab.o: def.h
+stab.o: idf.h
+stab.o: main.h
+stab.o: nocross.h
+stab.o: node.h
+stab.o: scope.h
+stab.o: target_sizes.h
+stab.o: type.h
 declar.o: LLlex.h
 declar.o: Lpars.h
 declar.o: chk_expr.h
