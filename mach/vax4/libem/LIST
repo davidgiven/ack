@@ -8,7 +8,6 @@ cff.s
 cfi.s
 cfu.s
 cif.s
-cii.s
 cmand.s
 cmf.s
 cmi.s
@@ -24,7 +23,6 @@ dvi.s
 dvu.s
 dvu4.s
 exg.s
-fat.s
 fef.s
 fif.s
 gto.s
@@ -47,6 +45,7 @@ ror.s
 sbf.s
 sbi.s
 sbs.s
+cii.s
 set.s
 sig.s
 sim.s
@@ -55,17 +54,18 @@ sri.s
 sru.s
 strhp.s
 sts.s
-trp.s
 xar.s
 xor.s
 aar4.s
-csa4.s
-csb4.s
 lar4.s
-rck4.s
 sar4.s
 csx.s
+csa4.s
+csb4.s
 rck.s
+rck4.s
 lpb.s
 strlb.s
 mon.s
+fat.s
+trp.s
