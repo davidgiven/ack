@@ -653,13 +653,17 @@ token.
 The user may also supply his own error recovery routines, or handle
 errors differently. For this purpose, the name of a routine to be called
 when an error occurs may be declared using the keyword \fB%onerror\fR.
-This routine takes one parameter, which is either the token number of the
+This routine takes two parameters.
+The first one is either the token number of the
 token expected, or 0. In the last case, the error occurred at a choice.
 In both cases, the routine must ensure that the next call to the lexical
 analyser returns the token that replaces the current one. Of course,
 that could well be the current one, in which case
 .I LLparse
 recovers from the error.
+The second parameter contains a list of tokens that are not skipped at the
+error point. The list is in the form of a null-terminated array of integers,
+whose address is passed.
 .PP
 The user must supply a lexical analyzer to read the input stream and
 break it up into tokens, which are passed to
