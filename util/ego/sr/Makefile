@@ -2,7 +2,7 @@
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
-SHARE=../share
+SHR=../share
 
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
