@@ -21,7 +21,9 @@ extern int inc_pos;
 
 extern char options[];
 extern int idfsize;
+#ifdef USE_TMP
 extern char *tmpfdir;	/* main.c */
+#endif USE_TMP
 
 int txt2int();
 
