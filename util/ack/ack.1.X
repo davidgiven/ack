@@ -1,4 +1,4 @@
-\" $Header$
+.\" $Header$
 .TH ACK I
 .ad
 .SH NAME
