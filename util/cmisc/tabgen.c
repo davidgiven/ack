@@ -279,7 +279,7 @@ quoted(pstr)
 			ch = '\f';
 			break;
 		case 'v':
-			ch = '\v';
+			ch = 013;
 			break;
 		default :
 			ch = *(str - 1);
