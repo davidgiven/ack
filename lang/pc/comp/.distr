@@ -4,6 +4,7 @@ LLmessage.c
 Makefile
 Parameters
 Resolve
+Version.c
 body.c
 casestat.C
 char.tab
@@ -42,6 +43,7 @@ misc.h
 nmclash.c
 node.H
 node.c
+options
 options.c
 program.g
 progs.c
