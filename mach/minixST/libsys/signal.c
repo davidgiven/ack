@@ -23,5 +23,6 @@ int (*func)();			/* pointer to function that catches signal */
   M.m6_i1 = signr;
   M.m6_f1 = ( (func == SIG_IGN || func == SIG_DFL) ? func : begsig);
   r = callx(MM, SIGNAL);
+  if (r == 1) old = SIG_IGN;
   return( (r < 0 ? (int (*)()) r : old) );
 }
