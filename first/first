@@ -216,16 +216,23 @@ case `ack_sys` in
 vax_bsd4_2)	
 	( cd ../mach/vax4
 	  echo "Copying mach/vax4/libbsd4_2 to mach/vax4/libsys"
-	  mkdir libsys
+	  mkdir libsys > /dev/null 2>&1
 	  rm -f libsys/*
 	  cp libbsd4_2/* libsys
-ABC
+	)
+	;;
+vax_bsd4_1a)	
+	( cd ../mach/vax4
+	  echo "Copying mach/vax4/libbsd4_1a to mach/vax4/libsys"
+	  mkdir libsys > /dev/null 2>&1
+	  rm -f libsys/*
+	  cp libbsd4_1a/* libsys
 	)
 	;;
 vax_sysV_2)
 	( cd ../mach/vax4 
 	  echo "Copying mach/vax4/libsysV_2 to mach/vax4/libsys"
-	  mkdir libsys
+	  mkdir libsys > /dev/null 2>&1
 	  rm -f libsys/*
 	  cp libsysV_2/* libsys
 	)
