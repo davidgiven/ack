@@ -8,6 +8,8 @@
 #include <math.h>
 #include <stdio.h>
 
+int nerrors;
+
 #define EPS_D	5.0e-14
 main()
 {
@@ -16,6 +18,7 @@ main()
 	testexplog();
 	testgamma();
 	testbessel();
+	exit(nerrors);
 }
 
 dotest(s, x, d, v)
@@ -27,6 +30,7 @@ dotest(s, x, d, v)
 	if (fabs((v - d) / (fabs(v) < EPS_D ? 1.0 : v)) > EPS_D) {
 		printf(s, x);
 		printf(" = %.16e, should be %.16e\n", d, v);
+		nerrors++;
 	}
 }
 
