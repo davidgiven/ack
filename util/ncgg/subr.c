@@ -173,6 +173,7 @@ prophall(n) {
 	register i;
 	short hallset[SETSIZE];
 	
+	if (n < 0) return;
 	for(i=0;i<SETSIZE;i++)
 		hallset[i] = i<SZOFSET(MAXREGS) ? l_props[n].pr_regset[i] : 0;
 	nexthall(hallset);
