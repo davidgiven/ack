@@ -89,9 +89,11 @@ clean:
 	rm -f *.o opt mktab mktab.c scan.c pattern.c opt2 Out
 
 regnoglob.c:	reg.c
+		-rm -f regnoglob.c
 		cp reg.c regnoglob.c
 
 regglob.c:	reg.c
+		-rm -f regglob.c
 		cp reg.c regglob.c
 
 regglob.o:	regglob.c
@@ -100,7 +102,7 @@ regglob.o:	regglob.c
 kfiles: $(KFILES)
 
 .SUFFIXES: .k
-.c.k: ; cem -c $*.c
+.c.k: ; acc -c.k $*.c
 
 # the next lines are generated automatically
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
