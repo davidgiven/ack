@@ -43,18 +43,28 @@ con_part(sz,w) register sz; word w; {
 }
 
 con_mult(sz) word sz; {
-	long l;
+	long atol();
 
 	if (argval != 4)
 		fatal("bad icon/ucon size");
-	l = atol(str);
-	fprintf(codefile,".short\t%d\n",(int)l);
-	fprintf(codefile,".short\t%d\n",(int)(l>>16));
+	fprintf(codefile, ".data4\t%ld\n", atol(str));
 }
 
 con_float() {
+	static int been_here;
+	int sz = argval;
 
-	fatal("no reals");
+	if (sz != 4 && sz != 8) {
+		fatal("bad fcon size");
+	}
+	if (! been_here) {
+		been_here = 1;
+		fprintf(stderr,"warning: dummy floating constant(s)\n");
+	}
+	while (sz) {
+		fprintf(codefile, ".data4 0	!dummy float\n");
+		sz -= 4;
+	}
 }
 
 
@@ -96,8 +106,8 @@ mes(type) word type ; {
 }
 
 char *segname[] = {
-	".text",
-	".data",
-	".data",
-	".bss"
+	".sect .text",
+	".sect .data",
+	".sect .rom",
+	".sect .bss"
 };
