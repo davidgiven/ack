@@ -3173,6 +3173,12 @@ kills ALL
       sar cx,{ANYCON,1}
       joehoe {label, ".blm"}
 
+pat lae csa $2==2
+with ACC
+kills ALL
+uses BXREG = { ADDR_EXTERN, $1}
+  gen jmp {label, ".csa2"}
+
 pat csa $1==2
 with BXREG ACC
 kills ALL
@@ -3183,14 +3189,11 @@ with BXREG ACC DXREG
 kills ALL
   gen jmp {label, ".csa4"}
 
-/*
-pat csa !defined($1)
-with rm-BXREG-ACC ACC
+pat lae csb $2==2
+with ACC
 kills ALL
-  gen cmp %1,{ANYCON,2}
-      jne {label, ".unknown"}
-      jmp {label, ".csa2"}
-*/
+uses BXREG = { ADDR_EXTERN, $1}
+  gen jmp {label, ".csb2"}
 
 pat csb $1==2
 with BXREG ACC
@@ -3201,14 +3204,6 @@ pat csb $1==4
 with BXREG ACC DXREG
 kills ALL
   gen jmp {label, ".csb4"}
-
-/*
-pat csb !defined($1)
-with rm-BXREG-ACC BXREG ACC
-  gen cmp %1,{ANYCON,2}
-      jne {label, ".unknown"}
-      jmp {label, ".csb2"}
-*/
 
 pat dup $1==2
 with anyreg				yields %1 %1
