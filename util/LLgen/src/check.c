@@ -258,6 +258,7 @@ check(p) register p_gram p; {
 "Conflict resolver without conflict");
 				}
 			}
+			if (l->l_flag & PREFERING) propagate(l->l_symbs,p+1);
 			free( (p_mem) temp);
 			retval |= check(l->l_rule);
 			break; }
@@ -448,7 +449,6 @@ resolve(p) register p_gram p; {
 				error(p->g_lineno,"Alternative never chosen");
 			}
 			resolve(l->l_rule);
-			if (l->l_flag & PREFERING) propagate(l->l_symbs,p+1);
 			break; }
 		}
 		p++;
