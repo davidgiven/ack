@@ -363,7 +363,7 @@ tne tne :       tne
 tne zeq :       zeq $2
 tne zne :       zne $2
 #ifdef INT
-loc loc loc $1==0 && $2==0 && $3==0 :    zer 6
+loc loc loc $1==0 && $2==0 && $3==0 :    zer 3*w
 zer loc defined($1) && $2==0:   zer $1+w
 #endif
 loi loc and $1==1 && $3==w && ($2&255)==255:    loi 1
