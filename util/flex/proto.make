@@ -160,7 +160,7 @@ cmp: flex $(SRC_DIR)/flex.skel
 	-cmp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel 
 
 clean :
-	rm -f core errs flex *.$(SUF) parse.c *.lint parse.h tags
+	rm -f core errs flex *.$(SUF) parse.c *.lint parse.h tags scan.c
 
 tags :
 	ctags $(FLEX_C_SOURCES)
