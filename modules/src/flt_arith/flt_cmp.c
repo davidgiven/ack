@@ -13,19 +13,10 @@ flt_cmp(e1, e2)
 {
 	int sign;
 	int tmp;
+	flt_arith x;
 
-	if (e1->m1 == 0 && e1->m2 == 0 &&
-	    e2->m1 == 0 && e2->m2 == 0) {
-		return 0;
-	}
-	sign = e1->flt_sign ? -1 : 1;
-	if (e1->flt_sign > e2->flt_sign) return -1;
-	if (e1->flt_sign < e2->flt_sign) return 1;
-	if (e1->flt_exp < e2->flt_exp) return -sign;
-	if (e1->flt_exp > e2->flt_exp) return sign;
-	if ((tmp = ucmp(e1->m1, e2->m1)) < 0) return -sign;
-	if (tmp > 0) return sign;
-	if ((tmp = ucmp(e1->m2, e2->m2)) < 0) return -sign;
-	if (tmp > 0) return sign;
-	return 0;
+	flt_sub(e1, e2, &x);
+	if (x.m1 == 0 && x.m2 == 0) return 0;
+	if (x.flt_sign) return -1;
+	return 1;
 }
