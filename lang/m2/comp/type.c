@@ -637,7 +637,12 @@ DeclareType(nd, df, tp)
 				 df->df_idf->id_text);
 		}
 	}
-	else	df->df_type = tp;
+	else {
+		df->df_type = tp;
+		if (BaseType(tp)->tp_fund == T_ENUMERATION) {
+			CheckForImports(df);
+		}
+	}
 }
 
 t_type *

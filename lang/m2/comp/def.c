@@ -137,7 +137,7 @@ define(id, scope, kind)
 			   another one, or we may have found the definition
 			   for this module.
 			*/
-			if (kind == D_FORWMODULE) {
+			if (kind & (D_FORWMODULE|D_FORWARD)) {
 				return df;
 			}
 
@@ -168,7 +168,7 @@ define(id, scope, kind)
 			/* A forward reference, for which we may now have
 			   found a definition.
 			*/
-			if (kind != D_FORWARD) {
+			if (! (kind & (D_FORWARD | D_FORWMODULE))) {
 				FreeNode(df->for_node);
 			}
 
@@ -179,6 +179,9 @@ define(id, scope, kind)
 			   it found an error. Maybe, the user gives a
 			   definition after all.
 			*/
+			if (kind & (D_TYPE|D_PROCEDURE|D_CONST)) {
+				df->df_flags = D_DEFINED;
+			}
 			df->df_kind = kind;
 			return df;
 		}

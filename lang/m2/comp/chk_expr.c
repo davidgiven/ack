@@ -1137,7 +1137,6 @@ ChkStandard(expp)
 
 	case S_ORD:
 		if (! (left = getarg(&arg, T_NOSUB, 0, edf))) return 0;
-		MkCoercion(&(arg->nd_left), BaseType(left->nd_type));
 		expp->nd_type = card_type;
 		if (arg->nd_left->nd_class == Value) {
 			arg->nd_left->nd_type = card_type;

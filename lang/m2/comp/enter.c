@@ -233,62 +233,75 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	FreeNode(Idlist);
 }
 
-STATIC t_def *
-DoImport(df, scope)
-	register t_def *df;
+STATIC t_def *DoImport();
+
+ImportEffects(idef, scope, flag)
+	t_def *idef;
 	t_scope *scope;
 {
-	/*	Definition "df" is imported to scope "scope".
-		Handle the case that it is an enumeration type or a module.
+	/*	Handle side effects of an import:
+		- a module could have unqualified exports ???
+		- importing an enumeration type also imports literals
 	*/
-	register t_def *idef = define(df->df_idf, scope, D_IMPORT);
-
-	idef->imp_def = df;
+	register t_def *df = idef;
+	register t_type *tp;
 
 	while (df->df_kind & D_IMPORTED) {
 		df = df->imp_def;
 	}
 
-	if (df->df_kind == D_TYPE && df->df_type->tp_fund == T_ENUMERATION) {
+	tp = BaseType(df->df_type);
+	if ((df->df_kind & (D_TYPE|D_FTYPE)) &&
+	    tp->tp_fund == T_ENUMERATION) {
 		/* Also import all enumeration literals
 		*/
-		for (df = df->df_type->enm_enums; df; df = df->enm_next) {
-			register t_def *df1 = define(df->df_idf, scope, D_IMPORT);
-			
-			df1->imp_def = df;
-			df1->df_flags |= D_USED;/* don't complain when these
-						   are not used
-						*/
+		for (df = tp->enm_enums; df; df = df->enm_next) {
+			if (! DoImport(df, scope, flag|D_USED)) assert(0);
+				/* don't complain when not used ... */
 		}
 		idef->df_flags |= D_USED;	/* don't complain ... */
 	}
 	else if (df->df_kind == D_MODULE) {
-		/* Also import all definitions that are exported from this
-		   module
-		*/
 		if (df->mod_vis == CurrVis) {
 			error("cannot import current module \"%s\"",
 				df->df_idf->id_text);
-			return idef;
+			return;
 		}
+		if (df->df_scope == GlobalScope) return;
+		/* Also import all definitions that are exported from this
+		   module
+		*/
 		for (df = df->mod_vis->sc_scope->sc_def;
 		     df;
 		     df = df->df_nextinscope) {
 			if (df->df_flags & D_EXPORTED) {
-				register t_def *df1 =
-					define(df->df_idf, scope, D_IMPORT);
-			
-				df1->imp_def = df;
-				df1->df_flags |= D_USED;
+				if (!DoImport(df, scope, D_IMP_BY_EXP|D_USED)){
+					assert(0);
+				}
 				/* don't complain when these are not used */
 			}
 		}
 		idef->df_flags |= D_USED;	/* don't complain ... */
 	}
+}
+
+STATIC t_def *
+DoImport(df, scope, flag)
+	register t_def *df;
+	t_scope *scope;
+{
+	/*	Definition "df" is imported to scope "scope".
+	*/
+	t_def *idef = define(df->df_idf, scope, D_IMPORT);
+
+	idef->imp_def = df;
+	idef->df_flags |= flag;
+	ImportEffects(idef, scope, flag);
 	return idef;
 }
 
-STATIC t_scopelist *
+
+STATIC
 ForwModule(df, nd)
 	register t_def *df;
 	t_node *nd;
@@ -314,7 +327,6 @@ ForwModule(df, nd)
 				/* Here ! */
 	df->for_vis = vis;
 	df->for_node = nd;
-	return vis;
 }
 
 STATIC t_def *
@@ -361,6 +373,7 @@ EnterExportList(Idlist, qualified)
 			node_error(idlist,
 				"multiple occurrences of \"%s\" in export list",
 				idlist->nd_IDF->id_text);
+			continue;
 		}
 
 		df->df_flags |= qualified;
@@ -373,12 +386,10 @@ EnterExportList(Idlist, qualified)
 			while (df1) {
 				if ((df1->df_kind & D_IMPORTED) &&
 				    df1->imp_def == CurrentScope->sc_definedby) {
-					DoImport(df, df1->df_scope)->df_flags |=
-						D_IMP_BY_EXP;
+					if (! DoImport(df, df1->df_scope, D_IMP_BY_EXP)) assert(0);
 				}
 				df1 = df1->df_next;
 			}
-
 			/* Also handle the definition as if the enclosing
 			   scope imports it.
 			*/
@@ -404,18 +415,38 @@ EnterExportList(Idlist, qualified)
 					continue;
 				}
 				if (df1->df_kind == D_HIDDEN &&
-				    df2->df_kind == D_TYPE) {
+				    (df2->df_kind & (D_TYPE|D_FTYPE))) {
 					DeclareType(idlist, df1, df2->df_type);
 					df1->df_kind = D_TYPE;
 					continue;
 				}
 			}
 
-			DoImport(df, enclosing(CurrVis)->sc_scope)->df_flags |= 
-				D_IMP_BY_EXP;
+			if (! DoImport(df,enclosing(CurrVis)->sc_scope,D_IMP_BY_EXP)) assert(0);
 		}
 	}
 	FreeNode(Idlist);
+}
+
+CheckForImports(df)
+	t_def *df;
+{
+	/*	We have a definition for "df"; check all imports of
+		it for side-effects
+	*/
+	register t_def *df1 = df->df_idf->id_def;
+
+	while (df1) {
+		if (df1->df_kind & D_IMPORTED) {
+			register t_def *df2 = df1->imp_def;
+
+			while (df2->df_kind & D_IMPORTED) df2 = df2->imp_def;
+			if (df2 == df) {
+				ImportEffects(df1, df1->df_scope, 0);
+			}
+		}
+		df1 = df1->df_next;
+	}
 }
 
 EnterFromImportList(idlist, FromDef, FromId)
@@ -425,13 +456,13 @@ EnterFromImportList(idlist, FromDef, FromId)
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
-	register t_scopelist *vis;
+	register t_scope *sc;
 	register t_def *df;
 	char *module_name = FromDef->df_idf->id_text;
-	int forwflag = 0;
 
 	switch(FromDef->df_kind) {
 	case D_ERROR:
+	case D_FORWARD:
 		/* The module from which the import was done
 		   is not yet declared. I'm not sure if I must
 		   accept this, but for the time being I will.
@@ -439,16 +470,14 @@ EnterFromImportList(idlist, FromDef, FromId)
 		   be found.
 		   ???
 		*/
-		vis = ForwModule(FromDef, FromId);
-		forwflag = 1;
-		break;
+		ForwModule(FromDef, FromId);
+		/* Fall through */
 	case D_FORWMODULE:
-		vis = FromDef->for_vis;
-		forwflag = 1;
-		break;
+		EnterImportList(idlist, 1, FromDef->for_vis->sc_scope);
+		return;
 	case D_MODULE:
-		vis = FromDef->mod_vis;
-		if (vis == CurrVis) {
+		sc = FromDef->mod_vis->sc_scope;
+		if (sc == CurrentScope) {
 node_error(FromId, "cannot import from current module \"%s\"", module_name);
 			return;
 		}
@@ -459,15 +488,14 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 	}
 
 	for (; idlist; idlist = idlist->nd_left) {
-		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
-		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 0, 0))) {
+		if (! (df = lookup(idlist->nd_IDF, sc, 0, 0))) {
 			if (! is_anon_idf(idlist->nd_IDF)) {
 				node_error(idlist,
 			"identifier \"%s\" not declared in module \"%s\"",
 					idlist->nd_IDF->id_text,
 					module_name);
 			}
-			df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
+			df = define(idlist->nd_IDF,sc,D_ERROR);
 		}
 		else if (! (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 			node_error(idlist,
@@ -476,20 +504,20 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 			module_name);
 			df->df_flags |= D_QEXPORTED;
 		}
-		if (! DoImport(df, CurrentScope)) assert(0);
+		if (! DoImport(df, CurrentScope, 0)) assert(0);
 	}
 
-	if (!forwflag) FreeNode(FromId);
+	FreeNode(FromId);
 }
 
-EnterImportList(idlist, local)
+EnterImportList(idlist, local, sc)
 	register t_node *idlist;
+	t_scope *sc;
 {
-	/*	Import "idlist" from the enclosing scope.
+	/*	Import "idlist" from scope "sc".
 		If the import is not local, definition modules must be read
 		for "idlist".
 	*/
-	t_scope *sc = enclosing(CurrVis)->sc_scope;
 	extern t_def *GetDefinitionModule();
 	struct f_info f;
 	
@@ -499,7 +527,7 @@ EnterImportList(idlist, local)
 		if (! DoImport(local ?
 			   ForwDef(idlist, sc) :
 			   GetDefinitionModule(idlist->nd_IDF, 1), 
-			 CurrentScope)) assert(0);
+			 CurrentScope, 0)) assert(0);
 		file_info = f;
 	}
 }

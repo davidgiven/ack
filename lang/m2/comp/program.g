@@ -116,7 +116,9 @@ import(int local;)
 			{ if (FromId) {
 				EnterFromImportList(ImportList, df, FromId);
 			  }
-			  else EnterImportList(ImportList, local);
+			  else EnterImportList(ImportList,
+					       local,
+					       enclosing(CurrVis)->sc_scope);
 			  FreeNode(ImportList);
 			}
 ;
