@@ -81,7 +81,7 @@ struct buffer_header	{
 #ifndef INP_READ_IN_ONE
 struct i_buf {
 	struct i_buf *next;
-	char ib_text[INP_BUFSIZE+INP_NPUSHBACK-1];
+	char ib_text[INP_BUFSIZE+INP_NPUSHBACK];
 };
 
 # endif not INP_READ_IN_ONE
