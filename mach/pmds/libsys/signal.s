@@ -29,6 +29,7 @@ _signal:
 	bne	4f
 	move.l	a1,d0
 4:
+	clr.l	d1
 	rts
 1:
 	move.l	#22,d0
@@ -50,3 +51,4 @@ enter:
 	rtr
 .bss
 dvect: .space 4*NSIG
+.text
