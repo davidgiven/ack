@@ -5,7 +5,7 @@ routines to simulate parallelism
 .PP
 Translation of the parallel construct:
 .DS
-.ft 5
+.ft CW
 	par
 		P0
 		par i = [ 1 for n ]

@@ -8,30 +8,30 @@ the aspect of indentation.
 .NH 2
 The LLgen Parser Generator
 .PP
-LLgen accepts a Context Free syntax extended with the operators `\f5*\fP', `\f5?\fP' and `\f5+\fP'
+LLgen accepts a Context Free syntax extended with the operators `\f(CW*\fP', `\f(CW?\fP' and `\f(CW+\fP'
 that have effects similar to those in regular expressions.
-The `\f5*\fP' is the closure set operator without an upperbound; `\f5+\fP' is the positive
-closure operator without an upperbound; `\f5?\fP' is the optional operator;
-`\f5[\fP' and `\f5]\fP' can be used for grouping.
+The `\f(CW*\fP' is the closure set operator without an upperbound; `\f(CW+\fP' is the positive
+closure operator without an upperbound; `\f(CW?\fP' is the optional operator;
+`\f(CW[\fP' and `\f(CW]\fP' can be used for grouping.
 For example, a comma-separated list of expressions can be described as:
 .DS
-.ft 5
+.ft CW
 	expression_list:
 		  expression [ ',' expression ]*
 		;
 .ft
 .DE
 .LP
-Alternatives must be separated by `\f5|\fP'.
+Alternatives must be separated by `\f(CW|\fP'.
 C code (``actions'') can be inserted at all points between the colon and the
 semicolon.
 Variables global to the complete rule can be declared just in front of the
-colon enclosed in the brackets `\f5{\fP' and `\f5}\fP'.  All other declarations are local to
+colon enclosed in the brackets `\f(CW{\fP' and `\f(CW}\fP'.  All other declarations are local to
 their actions.
 Nonterminals can have parameters to pass information.
 A more mature version of the above example would be:
 .DS
-.ft 5
+.ft CW
        expression_list(expr *e;)       {	expr e1, e2;	} :
                 expression(&e1)
                 [ ',' expression(&e2)
@@ -48,18 +48,18 @@ are possible, viz. the \fBalternation\fP and \fBrepetition\fP conflict.
 An alternation confict arises if two sides of an alternation can start with the
 same symbol. E.g.
 .DS
-.ft 5
+.ft CW
 	plus:	'+' | '+' ;
 .ft
 .DE
-The parser doesn't know which `\f5+\fP' to choose (neither do we).
+The parser doesn't know which `\f(CW+\fP' to choose (neither do we).
 Such a conflict can be resolved by putting an \fBif-condition\fP in front of
 the first conflicting production. It consists of a \fB``%if''\fP followed by a
 C-expression between parentheses.
 If a conflict occurs (and only if it does) the C-expression is evaluated and
 parsing continues along this path if non-zero. Example:
 .DS
-.ft 5
+.ft CW
 	plus:
 		  %if (some_plusses_are_more_equal_than_others())
 		  '+'
@@ -69,7 +69,7 @@ parsing continues along this path if non-zero. Example:
 .ft
 .DE
 A repetition conflict arises when the parser cannot decide whether
-``\f5productionrule\fP'' in e.g. ``\f5[ productionrule ]*\fP'' must be chosen
+``\f(CWproductionrule\fP'' in e.g. ``\f(CW[ productionrule ]*\fP'' must be chosen
 once more, or that it should continue.
 This kind of conflicts can be resolved by putting a \fBwhile-condition\fP right
 after the opening parentheses.  It consists of a \fB``%while''\fP
@@ -79,7 +79,7 @@ comma-expression if the total expression is not part of another comma-separated
 list:
 .DS
 .nf
-.ft 5
+.ft CW
 	comma_expression:
 		  sub_expression
 		  [ %while (not_part_of_comma_separated_list())
@@ -110,7 +110,7 @@ is the \fBSEQ\fP construct, which exists in two flavors, one with a replicator
 and one process:
 .DS
 .nf
-.ft 5
+.ft CW
 	seq i = [ 1 for str[byte 0] ]
 		out ! str[byte i]
 .ft
@@ -119,7 +119,7 @@ and one process:
 and one without a replicator and several processes:
 .DS
 .nf
-.ft 5
+.ft CW
 	seq
 		in ? c
 		out ! c
@@ -129,7 +129,7 @@ and one without a replicator and several processes:
 The LLgen skeleton grammar to handle these two is:
 .DS
 .nf
-.ft 5
+.ft CW
 	SEQ			{	line=yylineno; oind=ind; }
 	[	  %if (line==yylineno)
 		  replicator

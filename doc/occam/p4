@@ -27,7 +27,7 @@ ANY
 According to the occam syntax the \fBANY\fP keyword may be the only argument of
 an input or output process. Thus,
 .DS
-.ft 5
+.ft CW
 	c ? ANY; x
 .ft
 .DE

@@ -82,7 +82,7 @@ machine-dependent description table (see figure 1.).
 So the major part of the code of a target optimizer is
 shared among all target optimizers.
 .DS
-.ft 5
+.ft CW
 
 
                                        |-------------------------|
@@ -164,7 +164,7 @@ ANY matches every instruction mnemonic.
 .nf
 
 Examples of mnemonic descriptions:
-.ft 5
+.ft CW
 
         add
         sub.l
@@ -177,7 +177,7 @@ An operand can also be described by a string constant.
 .nf
 
 Examples:
-.ft 5
+.ft CW
 
        (sp)+
        r5
@@ -192,7 +192,7 @@ Each such declaration defines the name of a variable and
 a \fIrestriction\fR to which its value is subjected.
 .nf
 Example of variable declarations:
-.ft 5
+.ft CW
 
       CONST       { VAL[0] == '$' };
       REG         { VAL[0] == 'r' && VAL[1] >= '0' && VAL[1] <= '3' &&
@@ -206,7 +206,7 @@ a null-terminated string.
 An operand description given via a variable name matches an
 actual operand if the actual operand obeys the associated restriction.
 .nf
-.ft 5
+.ft CW
 
      CONST  matches   $1, $-5, $foo etc.
      REG    matches   r0, r1, r2 and r3
@@ -224,7 +224,7 @@ These procedures must be added to the table after the patterns.
 .nf
 
 Example:
-.ft 5
+.ft CW
 
      FERMAT_NUMBER    { VAL[0] == '$' && is_fermat_number(&VAL[1]) };
 
@@ -238,7 +238,7 @@ The most general form allowed is:
        string_constant1 variable_name string_constant2
 
 Example:
-.ft 5
+.ft CW
 
        (REG)+  matches  (r0)+, (r1)+, (r2)+ and (r3)+
 
@@ -268,19 +268,19 @@ the optional constraint C is satisfied, i.e. it evaluates to TRUE.
 .LP
 .nf
 The pattern:
-.ft 5
+.ft CW
 
       dec REG : move.b CONST,(REG)
 
 .ft R
 matches:
-.ft 5
+.ft CW
 
       dec r0 : move.b $4,(r0)
 
 .ft R
 but not:
-.ft 5
+.ft CW
 
       dec r0 : move.b $4,(r1)
 
@@ -292,7 +292,7 @@ extra names for a register should be declared, all sharing
 the same restriction.
 .nf
 Example:
-.ft 5
+.ft CW
 
      REG1,REG2  { VAL[0] == 'r' &&  .....  };
 
@@ -305,13 +305,13 @@ the parameter restrictions).
 The expression may refer to the variables and to ANY.
 .nf
 Example:
-.ft 5
+.ft CW
 
     move REG1,REG2    { REG1[1] == REG2[1] + 1 }
 
 .ft R
 matches
-.ft 5
+.ft CW
 
     move r1,r0
     move r2,r1
@@ -338,7 +338,7 @@ Vax examples
 Suppose the table contains the following declarations:
 .nf
 
-.ft 5
+.ft CW
          X, LOG        { TRUE };
          LAB           { VAL[0] == 'L' };   /* e.g. L0017 */
          A             { no_side_effects(VAL) };
@@ -353,7 +353,7 @@ These procedures must be supplied by the table-writer and must be
 included in the table.
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  addl3 X,A,A    -> addl2 X,A;
 .ft R
 
@@ -362,7 +362,7 @@ This entry changes a 3-operand instruction into a cheaper  2-operand
 instruction.
 An optimization like:
 .nf
-.ft 5
+.ft CW
 
         addl3 r0,(r2)+,(r2)+   -> addl2 r0,(r2)+
 
@@ -373,7 +373,7 @@ Hence the second argument is required to
 be side-effect free.
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  addw2 $-NUM,X  -> subw2 $NUM,X;
 .ft R
 
@@ -384,7 +384,7 @@ because constants in the range 0 to 63 are represented
 very efficiently on the Vax.
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  bitw $NUM,A : jneq LAB
                 { is_poweroftwo(NUM,LOG) }  -> jbs $LOG,A,LAB;
 
@@ -395,7 +395,7 @@ x and y.
 A "jbs n,x,l" branches to l if bit n of x is set.
 So, for example, the following transformation is possible:
 .nf
-.ft 5
+.ft CW
 
       bitw $32,r0 : jneq L0017 ->  jbs $5,r0,L0017
 
@@ -413,7 +413,7 @@ PDP-11 examples
 Suppose we have the following declarations:
 .nf
 
-.ft 5
+.ft CW
          X             { TRUE };
          A             { no_side_effects(VAL) };
          L1, L2        { VAL[0] == 'I' };
@@ -426,7 +426,7 @@ The implementation of "no_side_effects" may of course
 differ for the PDP-11 and the Vax.
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  mov REG,A : ANY A,X  ->  mov REG,A : ANY REG,X ;
 .ft R
 
@@ -436,7 +436,7 @@ If A and REG hold the same value (which is true after "mov REG,A")
 and A is used as source (first) operand, it is cheaper to use REG instead.
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  jeq L1 : jbr L2 : labdef L1  ->  jne L2 : labdef L1;
 .ft R
 
@@ -447,7 +447,7 @@ As the target optimizer has to know how such a definition
 looks like, this must be expressed in the table (see Appendix A).
 .PP
 .nf
-.ft 5
+.ft CW
 \fIentry:\fP  add $01,X { carry_dead(REST) }  -> inc X;
 .ft R
 
@@ -487,27 +487,27 @@ backwards,
 as it is possible that instructions that were rejected earlier now do match.
 For example, consider the following patterns:
 .DS
-.ft 5
+.ft CW
 cmp $0, X           -> tst X ;
 mov REG,X : tst X   -> move REG.X ;   /* redundant test */
 .ft R
 .DE
 If the input is:
 .DS
-.ft 5
+.ft CW
 mov r0,foo : cmp $0,foo
 .ft R
 .DE
 then the first instruction is initially rejected.
 However, after the transformation
 .DS
-.ft 5
+.ft CW
 cmp $0,foo   ->  tst foo
 .ft R
 .DE
 the following optimization is possible:
 .DS
-.ft 5
+.ft CW
 mov r0,foo : tst foo  ->  mov r0,foo
 .ft R
 .DE
@@ -725,7 +725,7 @@ Identifiers are sequences of letters, digits and the underscore ('_'),
 beginning with a letter.
 .PP
 .DS
-.ft 5
+.ft CW
 table   ->   {parameter_line} '%%;' {variable_declaration} '%%;'
              {entry} '%%;' user_routines.
 .ft R
@@ -735,7 +735,7 @@ constants, variable declarations, pattern rules and
 user-supplied subroutines.
 .PP
 .DS
-.ft 5
+.ft CW
 parameter_line ->  identifier value ';' .
 .ft R
 .DE
@@ -792,7 +792,7 @@ the line is not optimized.
 Optimization does, however, proceed with the rest of the input.
 .PP
 .DS
-.ft 5
+.ft CW
 variable_declaration  -> identifier {',' identifier} restriction ';' .
 
 restriction           ->  '{' anything '}' .
@@ -816,7 +816,7 @@ Inside the expression, the name VAL stands for the part of the actual
 The expression may contain calls to procedures that are defined in the
 user-routines section.
 .DS
-.ft 5
+.ft CW
 entry             ->  pattern '->' replacement ';' .
 
 pattern           ->  instruction_descr
@@ -862,7 +862,7 @@ which contains the mnemonic of the first instruction of the
 rest of the input. (REST is a null-string if this mnemonic can
 not be determined).
 .DS
-.ft 5
+.ft CW
 user_routines -> anything .
 .ft R
 .DE

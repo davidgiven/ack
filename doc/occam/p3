@@ -59,10 +59,10 @@ line left 1.0 from 7/12 <2nd box.nw, 2nd box.sw>
 .DS C
 \fIFigure 1. Interprocess and outside world communication channels\fP
 .DE
-The basic channel handling is done by \f5chan_in\fP and \f5chan_out\fP. All
-other routines are based on them. The routine \f5chan_any\fP only checks if
+The basic channel handling is done by \f(CWchan_in\fP and \f(CWchan_out\fP. All
+other routines are based on them. The routine \f(CWchan_any\fP only checks if
 there's a value available on a given channel. (It does not read this value!)
-\f5C_init\fP initializes an array of interprocess communication channels.
+\f(CWC_init\fP initializes an array of interprocess communication channels.
 .LP
 The following table shows Occam statements paired with the routines used to
 execute them.
@@ -224,7 +224,7 @@ for(;;) {
 T}
 .sp 0.5
 .TE
-The code of \f5c_init\fP, \f5chan_in\fP, \f5chan_out\fP and \f5chan_any\fP
+The code of \f(CWc_init\fP, \f(CWchan_in\fP, \f(CWchan_out\fP and \f(CWchan_any\fP
 can be found in Appendix A.
 .NH 3
 Synchronization on interprocess communication channels
@@ -252,7 +252,7 @@ NOW
 \fBNOW\fP evaluates to the current time returned by the time(2) system call.
 The code is simply:
 .DS
-.ft 5
+.ft CW
 .nf
 	long now()
 	{
@@ -276,14 +276,14 @@ defined:
 \fBerror\fP, that corresponds with the standard error file.
 .IP -
 \fBfile\fP, an array of channels that can be subscripted with an index
-obtained by the builtin named process ``\f5open\fP''. Note that
+obtained by the builtin named process ``\f(CWopen\fP''. Note that
 \fBinput\fP=\fBfile\fP[0], \fBoutput\fP=\fBfile\fP[1] and
 \fBerror\fP=\fBfile\fP[2].
 .LP
 Builtin named processes to open and close files are defined as
 .DS
 .nf
-.ft 5
+.ft CW
 proc open(var index, value name[], mode[]) = ..... :
 proc close(value index) = ..... :
 .fi
@@ -291,7 +291,7 @@ proc close(value index) = ..... :
 .DE
 To open a file `junk', write nonsense onto it, and close it, goes as follows:
 .DS
-.ft 5
+.ft CW
 .nf
 	var i:
 	seq
@@ -318,19 +318,19 @@ and lines are buffered before they are read).
 (i.e. no echoing of typed characters and no line buffering).
 .LP
 To exit an Occam program, e.g. after an error, a builtin named process
-\f5exit\fP is available that takes an exit code as its argument.
+\f(CWexit\fP is available that takes an exit code as its argument.
 .NH 2
 Replicators and slices
 .PP
 Both the base and the count of replicators like in
 .DS
-.ft 5
+.ft CW
 	par i = [ base for count ]
 .ft
 .DE
 may be arbitrary expressions. The count in array slices like in
 .DS
-.ft 5
+.ft CW
 	c ? A[ base for count ]
 .ft
 .DE

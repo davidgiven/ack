@@ -16,7 +16,7 @@ no procedures in Occam).
 In addition to the normal assignment statement, Occam has two more
 information-transfer statements, the input and the output:
 .DS
-.ft 5
+.ft CW
 	chan1 ? x        -- reads a value from chan1 into x
 	chan2 ! x        -- writes the value of x onto chan2
 .ft
@@ -36,7 +36,7 @@ for multiple input). The conditional and repetitive processes are normal
 .PP
 \fIProducer-consumer example:\fP
 .DS
-.ft 5
+.ft CW
 .nf
 CHAN buffer:                    -- declares the channel buffer
 PAR
@@ -60,7 +60,7 @@ with arrays of variables and/or channels.
 .PP
 \fIExample: 20 window-sorters in series:\fP
 .DS
-.ft 5
+.ft CW
 .nf
 CHAN s[20]:                     -- 20 channels
 PAR i = [ 0 FOR 19 ]            -- 19 processes
