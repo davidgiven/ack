@@ -73,9 +73,9 @@ Im2:
 	.data4	1
 	.data4	0
 .reghp:
-	.data4	_end
+	.data4	__end
 .limhp:
-	.data4	_end
+	.data4	__end
 hol0:
 	.space	8
 .trppc:
