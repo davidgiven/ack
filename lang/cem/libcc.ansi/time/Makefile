@@ -1,5 +1,3 @@
-CFLAGS=-L -LIB
-
 .SUFFIXES: .o .e .c
 
 .e.o:

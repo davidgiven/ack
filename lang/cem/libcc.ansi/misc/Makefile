@@ -1,5 +1,3 @@
-CFLAGS=-L -LIB -DNFS
-
 .SUFFIXES: .o .e .c
 
 .e.o:

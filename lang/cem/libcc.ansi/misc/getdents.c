@@ -62,14 +62,14 @@ struct  direct {
 #include	<sys/stat.h>
 #ifdef UNK
 #ifndef UFS
-#error UNK applies only to UFS
+#error	UNK applies only to UFS
 /* One could do something similar for getdirentries(), but I didn't bother. */
 #endif
 #include	<signal.h>
 #endif
 
-#if defined(UFS) + defined(BFS) + defined(NFS) != 1	/* sanity check */
-#error exactly one of UFS, BFS, or NFS must be defined
+#if	defined(UFS) + defined(BFS) + defined(NFS) != 1	/* sanity check */
+#error	exactly one of UFS, BFS, or NFS must be defined
 #endif
 
 #ifdef UFS

@@ -1,5 +1,5 @@
 #include	<stdio.h>
-#if __STDC__ == 1
+#if	__STDC__ == 1
 #include	<stdlib.h>
 #include	<string.h>
 #else

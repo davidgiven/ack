@@ -22,8 +22,8 @@ struct timezone {
 
 int gettimeofday(struct timeval *tp, struct timezone *tzp);
 
-#elif !defined(_POSIX_SOURCE) && !defined(__USG)
-#if	!defined(_MINIX)	/* MINIX has no ftime() */
+#elif	!defined(_POSIX_SOURCE) && !defined(__USG)
+#if	!defined(_MINIX)		/* MINIX has no ftime() */
 struct timeb {
 	long	time;
 	undigned short millitm;
@@ -283,7 +283,7 @@ _tzset(void)
 	_daylight = tz.tz_dsttime;
 	_timezone = tz.tz_minuteswest * 60;
 
-#elif !defined(_POSIX_SOURCE) && !defined(__USG)
+#elif	!defined(_POSIX_SOURCE) && !defined(__USG)
 
 #if	!defined(_MINIX)		/* MINIX has no ftime() */
 	struct timeb time;

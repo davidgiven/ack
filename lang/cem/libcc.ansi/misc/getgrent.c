@@ -13,7 +13,7 @@
 
 int open(const char *path, int flags);
 
-#if   defined(__BSD4_2)
+#if	defined(__BSD4_2)
 typedef int off_t;                              /* see lseek(2) */
 #else
 typedef long off_t;
