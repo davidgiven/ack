@@ -77,7 +77,8 @@ extern struct action	*actions[MAXSTATES];
 extern struct mnems	patterns[MAXSTATES];
 extern int		higheststate;	/* Highest state yet allocated */
 extern struct idf	*ops;		/* Chained list of all ops */
-extern int		longestpattern;
+extern int		maxpattern;
+extern int		maxreplacement;
 extern int		nerrors;
 extern FILE		*ofile;
 

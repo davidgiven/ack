@@ -18,7 +18,8 @@ int errors;			/* Number of errors */
 main(argc,argv)
 	char **argv;
 {
-	register p_instr p = GETINSTR();
+	static struct e_instr buff;
+	register p_instr p = &buff;
 
 	if (argc >= 2) {
 		filename = argv[1];
@@ -36,11 +37,13 @@ main(argc,argv)
 	}
 	else	if (!O_open( (char *) 0)) fatal("O_open failed");
 	O_magic();
+	EM_mkcalls(p);
+
 	for(;;) {
+		EM_getinstr(p=GETNXTPATT());
 		switch(p->em_type) {
 		case EM_DEFILB:
-			*OO_nxtpatt++ = p;
-			OO_dfa(p->em_opcode=op_lab);
+			p->em_opcode=op_lab;
 			break;
 		case EM_MNEM:
 			switch(p->em_argtype) {
@@ -57,23 +60,31 @@ main(argc,argv)
 				p->em_string = OO_freestr(p->em_string);
 				break;
 			}
-			*OO_nxtpatt++ = p;
-			OO_dfa(p->em_opcode);
 			break;
 		default:
-			FLUSHDFA();
-			EM_mkcalls(p);
-			OO_free(p);
+			p->em_opcode = OTHER;
+			/* fall thru */
+			if (OO_state) {
+				buff = *p;
+				OO_dfa(OTHER);
+				EM_mkcalls(&buff);
+			}
+			else {
+				OO_flush();
+				EM_mkcalls(p);
+			}
+			continue;
+		case EM_PSEU:
 			break;
 		case EM_EOF:
 			goto got_eof;
 		case EM_ERROR:
 			error("%s", EM_error);
-			break;
+			continue;
 		case EM_FATAL:
 			fatal("%s", EM_error);
 		}
-		EM_getinstr(p=GETINSTR());
+		OO_dfa(p->em_opcode);
 	}
  got_eof:
 	O_close();

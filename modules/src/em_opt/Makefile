@@ -1,5 +1,5 @@
 # $Header$
-EMHOME =	../../..
+EMHOME =	/proj/em/Work
 INSTALL =	$(EMHOME)/modules/install
 COMPARE =	$(EMHOME)/modules/compare
 LINT	=	lint
@@ -35,7 +35,7 @@ CSRC =		main.c nopt.c mkstrct.c aux.c outputdfa.c outcalls.c\
 SRCS =		Makefile nopt.h parser.h parser.g syntax.l pseudo.r\
 		patterns $(CSRC)
 
-NOFILES =	nopt.o dfa.o trans.o aux.o
+NOFILES =	nopt.o mkstrct.o dfa.o trans.o aux.o
 
 POFILES =	parser.o syntax.o outputdfa.o outcalls.o findworst.o\
 		initlex.o Lpars.o
@@ -77,13 +77,14 @@ NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.a\
 		$(EMHOME)/modules/lib/libemk.a\
 		$(EMHOME)/modules/lib/liballoc.a\
 		$(EMHOME)/modules/lib/malloc.o\
+		$(EMHOME)/modules/lib/libstring.a\
 		$(EMHOME)/modules/lib/libsystem.a\
 		$(EMHOME)/lib/em_data.a
 
 em_nopt:	dfadummy main.o $(NOFILES)
 		$(CC) -o em_nopt main.o $(NOFILES) $(NOPTLIB)
 
-OLINT =		main.c nopt.c aux.c dfa.c trans.c
+OLINT =		main.c mkstrct.c nopt.c aux.c dfa.c trans.c
 
 OLINTLIB = 	$(EMHOME)/modules/lib/llib-lread_emkV.ln\
 		$(EMHOME)/modules/lib/llib-lemk.ln\

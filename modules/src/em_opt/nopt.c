@@ -6,36 +6,39 @@ static char rcsid2[] = "$Header$";
 
 extern int (*OO_fstate[])();	/* Initialized from patterns in dfa.c */
 extern int OO_maxpattern;	/* Initialized from patterns in dfa.c */
-#define MAXBACKUP	50
-#define MAXOUTPUT	200
-#define MAXSTRING	1000
+extern int OO_maxreplacement;	/* Initialized from patterns in dfa.c */
 
 extern char	em_mnem[][4];
 extern char	em_pseu[][4];
 
-p_instr		OO_freeq;
-p_instr		*OO_patternqueue;
-p_instr		*OO_nxtpatt;
-p_instr		*OO_bkupqueue;
-p_instr		*OO_nxtbackup;
-p_instr		OO_OTHER;
+p_instr	OO_buffer;
+p_instr	OO_patternqueue;
+p_instr	OO_nxtpatt;
+p_instr	OO_endbackup;
+p_instr	OO_nxtrepl;
+static p_instr	OO_replqueue;
 
 static char	*filename;
-static p_instr	*lastbackup;
-static p_instr	*outputqueue;
-static p_instr	*nextoutput;
-static p_instr	*lastoutput;
 static char	*strqueue;
 static char	*nextstr;
 static char	*laststr;
 
-int		OO_noutput;	/* number of instructions in output queue */
 arith		OO_WSIZE;	/* wordlength */
 arith		OO_PSIZE;	/* pointer length */
 
 #ifdef STATS
 int		OO_wrstats = 1;	/* pattern statistics output */
 #endif
+#ifdef DEBUG
+#define printstate(s) dumpstate(s)
+#else
+#define printstate(s)
+#endif DEBUG
+
+/**** WHICH IS FASTER? ****
+#define BTSCPY(pp,qq,i,p,q,n) btscpy(p,q,(n)*sizeof(struct e_instr))
+ **************************/
+#define BTSCPY(pp,qq,i,p,q,n) for(pp=(p),qq=(q),i=(n);i--;*pp++ = *qq++)
 
 O_init(wsize,psize)
 	arith wsize, psize;
@@ -67,10 +70,12 @@ OO_dfa(last)
 	register int last;
 {
 	for(;;) {
+		printstate("OO_dfa");
 		(*OO_fstate[OO_state])(last);
-		if (OO_nxtbackup==OO_bkupqueue)
-			return;
-		last = ((*OO_nxtpatt++ = *(--OO_nxtbackup))->em_opcode);
+		if (!OO_endbackup) return;
+		last = (OO_nxtpatt++)->em_opcode;
+		if (OO_nxtpatt >= OO_endbackup)
+			OO_endbackup = 0;
 	}
 }
 
@@ -89,34 +94,15 @@ PRIVATE
 allocmem()
 {
 	/* Allocate memory for queues on heap */
-	OO_nxtpatt = OO_patternqueue =
-		(p_instr *)Malloc(OO_maxpattern*sizeof(p_instr));
-	OO_nxtbackup = OO_bkupqueue =
-		(p_instr *)Malloc(MAXBACKUP*sizeof(p_instr));
-	lastbackup = OO_bkupqueue + MAXBACKUP - 1;
-	nextoutput = outputqueue =
-		(p_instr *)Malloc(MAXOUTPUT*sizeof(p_instr));
-	lastoutput = outputqueue + MAXOUTPUT - 1;
-	OO_noutput = 0;
+	OO_buffer = (p_instr)
+		Malloc((unsigned)(MAXBUFFER*sizeof(struct e_instr)));
+	OO_patternqueue = OO_nxtpatt = OO_buffer;
+	OO_replqueue = (p_instr)
+		Malloc((unsigned)OO_maxreplacement*sizeof(struct e_instr));
+	OO_nxtrepl = OO_replqueue;
 	nextstr = strqueue =
 		(char *)Malloc(MAXSTRING*sizeof(char));
 	laststr = strqueue + MAXSTRING - 1;
-	/* allocate dummy OTHER data structure */
-	OO_OTHER = (p_instr)Malloc(sizeof(struct e_instr));
-	OO_OTHER->em_type = EM_MNEM;
-	OO_OTHER->em_opcode = OTHER;
-	OO_OTHER->em_argtype = 0;
-}
-
-OO_nfree(n)
-	register int n;
-{
-	register p_instr *p = OO_nxtpatt = OO_patternqueue;
-	while(n--) {
-		OO_free(*p);	/* OO_free is macro so don't use *p++ */
-		p++;
-	}
-	OO_state = 0;
 }
 
 char *
@@ -150,235 +136,196 @@ OO_flush()
 	/* Output all instructions waiting in the output queue and free their
 	/* storage including the saved strings.
 	*/
-	register int n;
-	register p_instr *p;
-#ifdef DEBUG
+	register p_instr p,q;
+	register int i,n;
 	printstate("Flush");
-#endif
-	if (n = OO_noutput) {
-		for(p=outputqueue;n--;p++) {
-			EM_mkcalls(*p);
-			OO_free(*p);
-		}
-		nextoutput=outputqueue;
-		if(OO_nxtbackup==OO_bkupqueue)
-			nextstr = strqueue;
-		OO_noutput = 0;
+	for(p=OO_buffer;p<OO_patternqueue;p++)
+		EM_mkcalls(p);
+	if(p->em_opcode!=OTHER)
+		EM_mkcalls(p);
+	if(OO_endbackup) {
+		n = OO_endbackup-OO_nxtpatt;
+		BTSCPY(p,q,i,OO_buffer,OO_nxtpatt,n);
+		OO_endbackup = OO_buffer + n;
 	}
+	else nextstr = strqueue;
+	OO_patternqueue = OO_nxtpatt = OO_buffer;
 }
 
-OO_out(p)
-	p_instr	p;
+p_instr
+OO_halfflush()
 {
-	/* Put the instruction p on the output queue */
-	if(nextoutput > lastoutput) {
-#ifdef DEBUG
-		fprintf(stderr,"Warning: Overflow of outputqueue - output flushed\n");
-#endif
-		OO_flush();
-	}
-	OO_noutput++;
-	*nextoutput++ = p;
+	/*
+	/* Called when buffer full, flush half the buffer and move the
+	/* the pattern pointers to the new positions. Return a pointer
+	/* to the new nxtpatt position and increment it.
+	/* Note that OO_endbackup is always NIL (i.e. there are no
+	/* instructions on the backup queue) when this is invoked.
+	*/
+	register int i,n;
+	register p_instr p,q;
+	printstate("Half flush");
+	n = MAXBUFFER / 2;
+	for(p=OO_buffer,i=n;i--;)
+		EM_mkcalls(p++);
+	/* now copy the rest of buffer and pattern back */
+	BTSCPY(p,q,i,OO_buffer,OO_buffer+n,n+(OO_nxtpatt-OO_buffer));
+	OO_patternqueue -= n;
+	OO_nxtpatt -= n;
+	printstate("after Half flush");
+	return (OO_nxtpatt++);
 }
 
-OO_outop(opcode)
-	int opcode;
-{
-	register p_instr p = GETINSTR();
-	p->em_type = EM_MNEM;
-	p->em_opcode = opcode;
-	p->em_argtype = 0;
-	OO_out(p);
-}
-
-OO_outcst(opcode,cst)
-	int opcode;
-	arith cst;
-{
-	register p_instr p = GETINSTR();
-	p->em_type = EM_MNEM;
-	p->em_opcode = opcode;
-	p->em_argtype = cst_ptyp;
-	p->em_cst = cst;
-	OO_out(p);
-}
-
-OO_outlab(opcode,lab)
-	int opcode;
-	label lab;
-{
-	register p_instr p = GETINSTR();
-	p->em_type = EM_MNEM;
-	p->em_opcode = opcode;
-	p->em_argtype = ilb_ptyp;
-	p->em_ilb = lab;
-	OO_out(p);
-}
-
-OO_outpnam(opcode,pnam)
-	int opcode;
-	char *pnam;
-{
-	register p_instr p = GETINSTR();
-	p->em_type = EM_MNEM;
-	p->em_opcode = opcode;
-	p->em_argtype = pro_ptyp;
-	p->em_pnam = pnam;
-	OO_out(p);
-}
-
-OO_outdefilb(opcode,deflb)
-	int opcode;
-	label deflb;
-{
-	register p_instr p = GETINSTR();
-	p->em_type = EM_DEFILB;
-	p->em_opcode = opcode;
-	p->em_argtype = 0;
-	p->em_ilb = deflb;
-	OO_out(p);
-}
-
-OO_outext(opcode,arg,off)
+OO_mkext(p,opcode,arg,off)
+	register p_instr p;
 	int opcode;
 	p_instr	arg;
 	arith off;
 {
-	register p_instr p = GETINSTR();
-	p->em_type = EM_MNEM;
-	p->em_opcode = opcode;
-	switch(p->em_argtype = arg->em_argtype) {
+	switch(arg->em_argtype) {
 	case cst_ptyp:
-		p->em_cst = off;
+		EM_mkcst(p,opcode,off);
 		break;
 	case sof_ptyp:
-		p->em_dnam = arg->em_dnam;
-		p->em_off = off;
+		EM_mksof(p,opcode,arg->em_dnam,off);
 		break;
 	case nof_ptyp:
-		p->em_dlb = arg->em_dlb;
-		p->em_off = off;
+		EM_mknof(p,opcode,arg->em_dlb,off);
 		break;
 	default:
 		fatal("Unexpected type %d in outext",arg->em_argtype);
 	}
-	OO_out(p);
-}
-
-OO_pushback(p)
-	p_instr	p;
-{
-	/* push instr. p onto bkupqueue */
-	if(OO_nxtbackup > lastbackup) {
-#ifdef DEBUG
-		fprintf(stderr,"Warning: Overflow of bkupqueue-backup ignored\n");
-		printstate("Backup overflow");
-#endif
-		return;
-	}
-	*OO_nxtbackup++ = p;
 }
 
 OO_backup(n)
-	register int n;
+	int n;
 {
-	/* copy (up to) n instructions from output to backup queues */
-	while(n-- && nextoutput>outputqueue) {
-		OO_pushback(*(--nextoutput));
-		OO_noutput--;
+	/* copy the replacement queue into the buffer queue */
+	/* then move the pattern queue back n places */
+	register p_instr p,q;
+	register int i,lrepl, diff;
+	printstate("Before backup");
+	lrepl = OO_nxtrepl-OO_replqueue;
+	if(OO_endbackup) {
+		/* move the region between OO_nxtpatt and OO_endbackup */
+		if ((diff = (OO_nxtpatt-OO_patternqueue) - lrepl) > 0) {
+			/* move left by diff */
+			BTSCPY(p,q,i,OO_nxtpatt-diff,OO_nxtpatt,OO_endbackup-OO_nxtpatt);
+			OO_nxtpatt -= diff;
+			OO_endbackup -= diff;
+		}
+		else if (diff < 0) {
+			/* move right by diff */
+			/* careful of overflowing buffer!! */
+			if ((OO_nxtpatt-diff)> (OO_buffer+MAXBUFFER) )
+				OO_halfflush();
+			/* cannot use btscpy as strings may overlap */
+			p = (q=OO_endbackup-1) - diff;
+			while(q>=OO_nxtpatt)
+				*p-- = *q--;
+			OO_nxtpatt -= diff;
+			OO_endbackup -= diff;
+		}
 	}
+	/* copy the replacement */
+	if (lrepl) {
+		BTSCPY(p,q,i,OO_patternqueue,OO_replqueue,lrepl);
+		OO_nxtrepl = OO_replqueue;
+		OO_patternqueue += lrepl;
+	}
+	/* now move the position of interest back n instructions */
+	if ((OO_patternqueue-OO_buffer) < n) 
+		n = (OO_patternqueue-OO_buffer);
+	OO_nxtpatt = OO_patternqueue -= n;
+	if(!OO_endbackup && n)
+		OO_endbackup = OO_patternqueue+n;
+	OO_state = 0;
+	printstate("After backup");
 }
 
-OO_dodefault(numout, numcopy,newstate)
-	register int numout, numcopy;
+OO_dodefault(numout, newstate)
+	int numout;
 	int newstate;
 {
-	register p_instr *p, *q;
-	OO_pushback(*--OO_nxtpatt);
-	q = (p = OO_patternqueue) + numout;
-	while(numcopy--) {
-		if(numout) {
-			numout--;
-			OO_out(*p);
-		}
-		*p++ = *q++;
-	}
-	OO_nxtpatt = p;
-	while(numout--) OO_out(*p++);
+	printstate("Before dodefault");
+	if(!OO_endbackup) OO_endbackup = OO_nxtpatt;
+	OO_nxtpatt--;
+	OO_patternqueue += numout;
 	OO_state = newstate;
+	printstate("After dodefault");
 }
 
 #ifdef DEBUG
-PRIVATE
-printstate(mess)
+dumpstate(mess)
 	char *mess;
 {
-	p_instr	*p;
-	fprintf(stderr,"%s - state: ",mess);
-	p = outputqueue;
-	while(p<nextoutput)
-		prtinst(*p++);
+	p_instr	p;
+	fprintf(stderr,"%s - state(%d): ",mess,OO_state);
+	p = OO_buffer;
+	while(p<OO_patternqueue)
+		prtinst(p++);
 	fprintf(stderr," |==| ");
-	p = OO_patternqueue;
 	while(p<OO_nxtpatt)
-		prtinst(*p++);
+		prtinst(p++);
 	fprintf(stderr," |==| ");
-	p = OO_bkupqueue;
-	while(p<OO_nxtbackup)
-		prtinst(*p++);
+	if(OO_endbackup) {
+		while(p<OO_endbackup)
+			prtinst(p++);
+	}
 	fprintf(stderr,"\n");
 }
 
-PRIVATE
 prtinst(p)
 	p_instr	p;
 {
 	switch(p->em_type) {
 	case EM_MNEM:
-		if(p->em_opcode == OTHER)
-			fprintf(stderr,"OTHER");
-		else
-			fprintf(stderr,"%s",em_mnem[p->em_opcode-sp_fmnem]);
+		fprintf(stderr,"%s ",em_mnem[p->em_opcode-sp_fmnem]);
 		break;
 	case EM_PSEU:
-	case EM_STARTMES:
-		fprintf(stderr,"%s",em_pseu[p->em_opcode-sp_fpseu]);
+		fprintf(stderr,"%s ",em_pseu[p->em_opcode-sp_fpseu]);
 		break;
+	case EM_STARTMES:
 	case EM_MESARG:
 	case EM_ENDMES:
+		fprintf(stderr,"MES ");
 		break;
 	case EM_DEFILB:
-		fprintf(stderr,"%ld", (long)p->em_ilb);
-		break;
+		fprintf(stderr,"%ld ", (long)p->em_ilb);
+		return;
 	case EM_DEFDLB:
-		fprintf(stderr,"%ld", (long)p->em_dlb);
-		break;
+		fprintf(stderr,"%ld ", (long)p->em_dlb);
+		return;
 	case EM_DEFDNAM:
-		fprintf(stderr,"%d", p->em_dnam);
-		break;
+		fprintf(stderr,"%d ", p->em_dnam);
+		return;
 	case EM_ERROR:
 	case EM_FATAL:
 	case EM_EOF:
-		break;
+		return;
 	}
 	switch(p->em_argtype) {
 	case 0:
-		fprintf(stderr," ");
 		break;
 	case cst_ptyp:
-		fprintf(stderr," %d ",p->em_cst);
+		fprintf(stderr,"%d ",p->em_cst);
 		break;
 	case nof_ptyp:
-		fprintf(stderr," .%d+%d ",p->em_dlb,p->em_off);
+		fprintf(stderr,".%d+%d ",p->em_dlb,p->em_off);
 		break;
 	case sof_ptyp:
-		fprintf(stderr," %s+%d ",p->em_dnam,p->em_off);
+		fprintf(stderr,"%s+%d ",p->em_dnam,p->em_off);
 		break;
 	case ilb_ptyp:
-		fprintf(stderr," *%d ",p->em_ilb);
+		fprintf(stderr,"*%d ",p->em_ilb);
 		break;
 	case pro_ptyp:
-		fprintf(stderr," $%s ",p->em_pnam);
+		fprintf(stderr,"$%s ",p->em_pnam);
+		break;
+	case str_ptyp:
+	case ico_ptyp:
+	case uco_ptyp:
+		fprintf(stderr,"\"%s\"",p->em_string);
 		break;
 	default:
 		fatal(" prtinst - Unregognized arg %d ",p->em_argtype);

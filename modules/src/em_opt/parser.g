@@ -25,7 +25,8 @@ struct action	*actions[MAXSTATES];
 struct mnems	patterns[MAXSTATES];
 int		higheststate = 0;	/* Highest state yet allocated */
 struct idf	*ops;			/* Chained list of all ops */
-int		longestpattern = 0;
+int		maxpattern = 0;
+int		maxreplacement = 0;
 int		nerrors = 0;
 
 static int	lencurrpatt;
@@ -77,8 +78,8 @@ patterns(struct exp_node **tests;)
 	[
 	OPCODE
 			{
-			if(++lencurrpatt>longestpattern)
-				longestpattern=lencurrpatt;
+			if(++lencurrpatt>maxpattern)
+				maxpattern=lencurrpatt;
 			list = addelem(list,opval, (struct exp_node *)NULL);
 			opval->id_used=1;
 			if(lencurrpatt==1)
@@ -169,7 +170,8 @@ action(struct mnem_list **list;)
 	[
 	OPCODE
 			{
-			lenthisrepl++;
+			if(++lenthisrepl>maxreplacement)
+				maxreplacement = lenthisrepl;
 			test= (struct exp_node *)NULL;
 			keepopval = opval;
 			}
@@ -347,7 +349,8 @@ constructlist(list,len)
 	int len;
 {
 	struct mnem_elem **p;
-	p = (struct mnem_elem **)Malloc(len*sizeof(struct mnem_elem *));
+	p = (struct mnem_elem **)
+		Malloc((unsigned)(len*sizeof(struct mnem_elem *)));
 	while(len--) {
 		p[len] = list->elem;
 		list = list->next;

@@ -99,7 +99,7 @@ outdfa()
 	int seenswitch;
 	fprintf(ofile,"#include \"nopt.h\"\n");
 	fprintf(ofile,"\n");
-	fprintf(ofile,"int OO_maxpattern = %d;\n", longestpattern);
+	fprintf(ofile,"int OO_maxreplacement = %d;\n", maxreplacement);
 	fprintf(ofile,"int OO_state = 0;\n");
 	fprintf(ofile,"\n");
 	for(s=0;s<=higheststate;s++) {
@@ -114,6 +114,9 @@ outdfa()
 		fprintf(ofile,"static dfa%d(opcode)\n",s);
 		fprintf(ofile,"\tint opcode;\n");
 		fprintf(ofile,"{\n");
+		fprintf(ofile,"\t/* ");
+		outmnems(patterns[s]);
+		fprintf(ofile," */\n");
 		seenswitch = 0;
 		for(p=states[s];p!=(struct state *)NULL;p=p->next) {
 			if(!seenswitch) {
@@ -133,19 +136,12 @@ outdfa()
 			}
 			fprintf(ofile,"\tdefault:\n");
 			fprintf(ofile,"\t\tOO_flush();\n");
-			fprintf(ofile,"\t\tEM_mkcalls(*--OO_nxtpatt);\n");
-			fprintf(ofile,"\t\tOO_free(*OO_nxtpatt);\n");
-			fprintf(ofile,"\t\tbreak;\n");
-			fprintf(ofile,"\tcase OTHER:\n");
-			fprintf(ofile,"\t\tOO_flush();\n");
-			fprintf(ofile,"\t\t--OO_nxtpatt;\n");
 			fprintf(ofile,"\t\tbreak;\n");
 		}
 		else {
 			if(seenswitch) fprintf(ofile,"\tdefault:\n");
 			findfail(s,&nout,&ncpy,&ngto);
-			fprintf(ofile,"\t\tOO_dodefault(%d,%d,%d);\n",
-				nout,ncpy,ngto);
+			fprintf(ofile,"\t\tOO_dodefault(%d,%d);\n",nout,ngto);
 			if(actions[ngto]!=NULL)
 				fprintf(ofile,"\t\tOO_%ddotrans();\n",ngto);
 			if(seenswitch) fprintf(ofile,"\t\tbreak;\n");
@@ -171,24 +167,23 @@ outdotrans()
 	int s;
 	struct action *a;
 	int seennontested;
-	int seentested;
 	fprintf(ofile,"#include \"nopt.h\"\n\n");
 	for(s=0;s<=higheststate;s++) {
 		if(actions[s]!=(struct action *)NULL) {
 			fprintf(ofile,"\nOO_%ddotrans() {\n",s);
-			fprintf(ofile,"\tregister p_instr *patt = OO_patternqueue;\n");
+			fprintf(ofile,"\tregister p_instr patt = OO_patternqueue;\n");
 			fprintf(ofile,"\t/* ");
 			outmnems(patterns[s]);
 			fprintf(ofile," */\n");
-			seentested = seennontested=0;
+			seennontested=0;
 			for(a=actions[s];a!=(struct action *)NULL;a=a->next) {
 				if(a->test!=(struct exp_node *)NULL) {
-					seentested++;
 					fprintf(ofile,"\tif(");
 					outexp(a->test,s);
 					fprintf(ofile,") {\n");
 					outoneaction(s,a);
-					fprintf(ofile,"\t\tgoto free;\n\t}\n");
+					fprintf(ofile,"\t\treturn;\n");
+					fprintf(ofile,"\t}\n");
 				}
 				else {
 					if(seennontested) {
@@ -199,12 +194,8 @@ outdotrans()
 					outoneaction(s,a);
 				}
 			}
-			if(!seennontested) {
+			if(!seennontested)
 				fprintf(ofile,"\tOO_state=%d;\n",s);
-				fprintf(ofile,"\treturn;\n");
-			}
-			if(seentested) fprintf(ofile,"free:");
-			fprintf(ofile,"\tOO_nfree(%d);\n",patterns[s].m_len);
 			fprintf(ofile,"}\n");
 		}
 		/*
@@ -243,32 +234,42 @@ outrepl(state,repl)
 		char *mnem = ri->op_code->id_text;
 		switch(ri->op_code->id_argfmt) {
 		case NOARG:
-			fprintf(ofile,"\t\tOO_outop(op_%s);\n",mnem);
+			fprintf(ofile,"\t\tEM_mkop(GETNXTREPL(),op_%s);\n",mnem);
 			break;
 		case CST:
-		case CSTOPT:
-			fprintf(ofile,"\t\tOO_outcst(op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_mkcst(GETNXTREPL(),op_%s,",mnem);
 			fprintf(ofile,"(arith)");
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
+		case CSTOPT:
+			if(ri->arg) {
+				fprintf(ofile,"\t\tEM_mkcst(GETNXTREPL(),op_%s,",mnem);
+				fprintf(ofile,"(arith)");
+				outexp(ri->arg,state);
+			}
+			else {
+				fprintf(ofile,"\t\tEM_mknarg(GETNXTREPL(),op_%s);\n",mnem);
+			}
+			fprintf(ofile,");\n");
+			break;
 		case LAB:
-			fprintf(ofile,"\t\tOO_outlab(op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_mkilb(GETNXTREPL(),op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case DEFILB:
-			fprintf(ofile,"\t\tOO_outdefilb(op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_mkdefilb(GETNXTREPL(),op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case PNAM:
-			fprintf(ofile,"\t\tOO_outpnam(op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_mkpro(GETNXTREPL(),op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case EXT:
-			fprintf(ofile,"\t\tOO_outext(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_mkext(GETNXTREPL(),op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
@@ -316,10 +317,10 @@ outexp(e,state)
 		fprintf(ofile,")");
 		break;
 	case DEFINED:
-		fprintf(ofile,"(patt[%d]->em_argtype)",e->leaf_val-1);
+		fprintf(ofile,"DEFINED(patt[%d])",e->leaf_val-1);
 		break;
 	case UNDEFINED:
-		fprintf(ofile,"(patt[%d]->em_argtype==0)",e->leaf_val-1);
+		fprintf(ofile,"!DEFINED(patt[%d])",e->leaf_val-1);
 		break;
 	case COMMA:
 		outext(e->exp_left);
@@ -367,7 +368,7 @@ outexp(e,state)
 			fprintf(ofile,"PNAM(patt[%d])",e->leaf_val-1);
 			break;
 		case EXT:
-			fprintf(ofile,"OO_offset(patt[%d])",e->leaf_val-1);
+			fprintf(ofile,"OO_offset(patt+%d)",e->leaf_val-1);
 			break;
 		}
 		break;
@@ -388,7 +389,7 @@ outext(e)
 		fprintf(stderr,"Internal error in outext of parser\n");
 		nerrors++;
 	}
-	fprintf(ofile,"patt[%d]",e->leaf_val-1);
+	fprintf(ofile,"patt+%d",e->leaf_val-1);
 }
 
 PRIVATE

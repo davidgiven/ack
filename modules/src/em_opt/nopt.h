@@ -12,26 +12,29 @@
 #include <system.h>
 #include <emO_code.h>
 
+#define MAXBUFFER	200
+#define MAXSTRING	1000
+
 #define OTHER	0
 #define op_lab	sp_fpseu
 
 typedef struct e_instr *p_instr;
 
-#define FLUSHDFA()	if(OO_state) {\
-				*OO_nxtpatt++ = OO_OTHER; OO_dfa(OTHER);\
-			} else if(OO_noutput) OO_flush();
+extern p_instr	OO_buffer;
+extern p_instr	OO_patternqueue;
+extern p_instr	OO_nxtpatt;
+extern p_instr	OO_endbackup;
+extern p_instr	OO_nxtrepl;
 
-#define GETINSTR() ((p_instr)st_alloc((char **)&OO_freeq,sizeof(struct e_instr),20))
-#define OO_free(p) st_free((p),&OO_freeq,sizeof(struct e_instr))
+p_instr OO_halfflush();
 
-extern p_instr	OO_freeq;
-extern p_instr	*OO_patternqueue;
-extern p_instr	*OO_nxtpatt;
-extern p_instr	*OO_bkupqueue;
-extern p_instr	*OO_nxtbackup;
-extern p_instr	OO_OTHER;
+# define GETNXTPATT() (OO_nxtpatt>&OO_buffer[MAXBUFFER]?OO_halfflush():OO_nxtpatt++)
+# define GETNXTREPL() (OO_nxtrepl++)
+
+# define FLUSHDFA()	(GETNXTPATT())->em_opcode=OTHER;\
+			if (OO_state) OO_dfa(OTHER); else OO_flush()
+
 extern int	OO_state;
-extern int	OO_noutput;	/* number of instructions in output queue */
 extern arith	OO_WSIZE;	/* wordlength */
 extern arith	OO_PSIZE;	/* pointer length */
 #ifdef STATS
@@ -42,8 +45,9 @@ extern char	*OO_freestr();
 extern arith	OO_rotate();
 extern arith	OO_offset();
 
-#define CST(p)		(p->em_cst)
-#define PNAM(p)		(p->em_pnam)
-#define LAB(p)		(p->em_ilb)
-#define DEFILB(p)	(p->em_ilb)
+#define CST(p)		(p.em_cst)
+#define PNAM(p)		(p.em_pnam)
+#define LAB(p)		(p.em_ilb)
+#define DEFILB(p)	(p.em_ilb)
+#define DEFINED(p)	(p.em_argtype)
 

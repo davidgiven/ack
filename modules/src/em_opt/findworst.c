@@ -30,7 +30,7 @@ findworst(repl)
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
-		fprintf(ofile,"\t\tOO_backup(%d);\n", longestpattern-1);
+		fprintf(ofile,"\t\tOO_backup(%d);\n", maxpattern-1);
 		return;
 	}
 	for(s=1;s<=higheststate;s++) {
@@ -56,8 +56,7 @@ findworst(repl)
 			}
 		}
 	}
-	if(mostbackups)
-		fprintf(ofile,"\t\tOO_backup(%d);\n",mostbackups);
+	fprintf(ofile,"\t\tOO_backup(%d);\n",mostbackups);
 }
 
 findfail(state,resout,rescpy,resgto)
