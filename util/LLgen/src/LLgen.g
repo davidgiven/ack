@@ -462,9 +462,9 @@ elem (register p_gram pres;)
 	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
 			}
-	  [ params	{	if (nparams > 14) {
+	  [ params	{	if (nparams > 15) {
 					error(linecount,"Too many parameters");
-				} else	g_setnpar(pres,nparams+1);
+				} else	g_setnpar(pres,nparams);
 				if (g_gettype(pres) == TERMINAL) {
 					error(linecount,
 						"Terminal with parameters");
@@ -543,7 +543,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	 * is ch2.
 	 * If flag != 0, copy opening and closing parameters too.
 	 */
-	static int	id_seen = 0;
+	static int	text_seen = 0;
 	register	FILE *f;
 	register	ch;		/* Current char */
 	register	match;		/* used to read strings */
@@ -552,7 +552,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	f = fact;
 	if (!level) {
 		saved = linecount;
-		id_seen = 0;
+		text_seen = 0;
 		nparams = 0;			/* count comma's */
 		putc('\0',f);
 		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
@@ -560,11 +560,12 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	if (level || flag) putc(ch1,f);
 	for (;;) {
 		ch = input();
-		if (c_class[ch] == ISLET) id_seen = 1;
 		if (ch == ch2) {
-			if (!level) unput(ch);
+			if (!level) {
+				unput(ch);
+				if (text_seen) nparams++;
+			}
 			if (level || flag) putc(ch,f);
-			if (id_seen) nparams++;
 			return;
 		}
 		switch(ch) {
@@ -574,12 +575,15 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			error(linecount,"Parentheses mismatch");
 			break;
 		  case '(':
+			text_seen = 1;
 			copyact('(',')',flag,level+1);
 			continue;
 		  case '{':
+			text_seen = 1;
 			copyact('{','}',flag,level+1);
 			continue;
 		  case '[':
+			text_seen = 1;
 			copyact('[',']',flag,level+1);
 			continue;
 		  case '/':
@@ -591,15 +595,13 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 				continue;
 			}
 			ch = '/';
+			text_seen = 1;
 			break;
 		  case ';':
 		  case ',':
-			if (!level) {		/*
-						 * Only ','s and ';'s on the
-						 * outer level are counted
-						 */
+			if (! level && text_seen) {
+				text_seen = 0;
 				nparams++;
-				id_seen = 0;
 			}
 			break;
 		  case '\'':
@@ -608,6 +610,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			 * watch out for brackets in strings, they do not
 			 * count !
 			 */
+			text_seen = 1;
 			match = ch;
 			putc(ch,f);
 			while((ch = input())) {
@@ -627,6 +630,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 		    case EOF :
 			if (!level) error(saved,"Action does not terminate");
 			return;
+		    default:
+			if (c_class[ch] != ISSPA) text_seen = 1;
 		}
 		putc(ch,f);
 	}

@@ -189,7 +189,7 @@ check(p) register p_gram p; {
 			n = &nonterms[g_getcont(p)];
 			if (g_getnpar(p) != getntparams(n)) {
 			    error(p->g_lineno,
-			        "Call of %s : parameter count mismatch",
+			        "Call of %s: parameter count mismatch",
 				n->n_name);
 			}
 			break; }
