@@ -10,7 +10,7 @@
 #include	"input.h"
 
 int
-skipspaces(ch)
+skipspaces(ch, skipnl)
 	register int ch;
 {
 	/*	skipspaces() skips any white space and returns the first
@@ -19,6 +19,11 @@ skipspaces(ch)
 	for (;;) {
 		while (class(ch) == STSKIP)
 			LoadChar(ch);
+		if (skipnl && class(ch) == STNL) {
+			LoadChar(ch);
+			++LineNumber;
+			continue;
+		}
 		/* How about "\\\n"?????????	*/
 		if (ch == '/') {
 			LoadChar(ch);

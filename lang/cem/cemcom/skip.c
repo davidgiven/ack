@@ -14,14 +14,14 @@
 
 #ifndef NOPP
 PRIVATE int
-skipspaces(ch)
+skipspaces(ch, skipnl)
 	register int ch;
 {
 	/*	skipspaces() skips any white space and returns the first
 		non-space character.
 	*/
 	for (;;) {
-		while (class(ch) == STSKIP)
+		while (class(ch) == STSKIP || (skipnl && class(ch) == STNL))
 			LoadChar(ch);
 
 		/* How about "\\\n"?????????	*/

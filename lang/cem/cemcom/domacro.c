@@ -288,7 +288,7 @@ do_define()
 		LoadChar(ch);
 	}
 	/* read the replacement text if there is any			*/
-	ch = skipspaces(ch);	/* find first character of the text	*/
+	ch = skipspaces(ch,0);	/* find first character of the text	*/
 	ASSERT(ch != EOI);
 	if (class(ch) == STNL) {
 		/*	Treat `#define something' as `#define something ""'
@@ -415,7 +415,7 @@ getparams(buf, parbuf)
 	register char **pbuf2;
 
 	LoadChar(c);
-	c = skipspaces(c);
+	c = skipspaces(c,0);
 	if (c == ')') {		/* no parameters: #define name()	*/
 		*pbuf = (char *) 0;
 		return 0;
@@ -448,7 +448,7 @@ getparams(buf, parbuf)
 		}
 
 		pbuf++;
-		c = skipspaces(c);
+		c = skipspaces(c,0);
 		if (c == ')') {	/* end of the formal parameter list	*/
 			*pbuf = (char *) 0;
 			return pbuf - buf;
@@ -458,7 +458,7 @@ getparams(buf, parbuf)
 			return -1;
 		}
 		LoadChar(c);
-		c = skipspaces(c);
+		c = skipspaces(c,0);
 	}
 	/*NOTREACHED*/
 }

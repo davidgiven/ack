@@ -68,7 +68,7 @@ replace(idef)
 			return 0;
 		}
 		LoadChar(c);
-		c = skipspaces(c);
+		c = skipspaces(c,1);
 		if (c != '(') {		/* no replacement if no ()	*/
 			lexerror("(warning) macro %s needs arguments",
 				idef->id_text);
