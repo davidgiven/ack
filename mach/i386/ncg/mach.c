@@ -78,7 +78,7 @@ prolog(nlocals) full nlocals; {
 		break;
 	default:
 #endif
-		fprintf(codefile, "\tsub\tesp,%ld\n",nlocals);
+		fprintf(codefile, "sub\tesp,%ld\n",nlocals);
 #ifdef NOTDEF
 		break;
 	}
@@ -112,10 +112,12 @@ i_regsave()
 
 f_regsave()
 {
-	if (si_off == -lbytes) lbytes -= 4;
-	if (di_off == -lbytes) lbytes -= 4;
-	if (si_off == -lbytes) lbytes -= 4;
-	if (lbytes) fprintf(codefile, "\tsub\tesp,%ld\n",(long) lbytes);
+	if (si_off != di_off) {
+		if (si_off == -lbytes) lbytes -= 4;
+		if (di_off == -lbytes) lbytes -= 4;
+		if (si_off == -lbytes) lbytes -= 4;
+	}
+	if (lbytes) fprintf(codefile, "sub\tesp,%ld\n",(long) lbytes);
 	if (firstreg == 1) {
 		fputs("push edi\n", codefile);
 		if (si_off != -1) fputs("push esi\n", codefile);

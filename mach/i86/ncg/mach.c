@@ -103,9 +103,11 @@ i_regsave()
 
 f_regsave()
 {
-	if (di_off == -lbytes) lbytes -= 2;
-	if (si_off == -lbytes) lbytes -= 2;
-	if (di_off == -lbytes) lbytes -= 2;
+	if (si_off != di_off) {
+		if (di_off == -lbytes) lbytes -= 2;
+		if (si_off == -lbytes) lbytes -= 2;
+		if (di_off == -lbytes) lbytes -= 2;
+	}
 	switch (lbytes) {
 	case 4: fputs("\tpush\tax\n", codefile);
 	case 2: fputs("\tpush\tax\n", codefile);
