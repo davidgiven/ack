@@ -3188,6 +3188,12 @@ pat los $1==WORD_SIZE
 with STACK
     kills ALL
     gen jsr {absolute4, ".los"}
+#if WORD_SIZE==2
+pat los $1==4
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".los4"}
+#endif
 
 pat lde
 #if WORD_SIZE==2
@@ -3677,6 +3683,12 @@ pat sts $1==WORD_SIZE
 with STACK
     kills ALL
     gen jsr {absolute4, ".sts"}
+#if WORD_SIZE==2
+pat sts $1==4
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".sts4"}
+#endif
 
 #if WORD_SIZE==2
 pat sdl
