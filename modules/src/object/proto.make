@@ -2,7 +2,7 @@
 
 SRC_DIR = $(SRC_HOME)/modules/src/object
 MOD_DIR = $(TARGET_HOME)/modules
-INCLUDES = -I$(TARGET_HOME)/h -I$(SRC_DIR)
+INCLUDES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(SRC_DIR)
 CFLAGS = $(INCLUDES) $(COPTIONS)
 
 CFILES =	$(SRC_DIR)/rd_arhdr.c $(SRC_DIR)/wr_arhdr.c \

@@ -5,7 +5,7 @@
 SRC_DIR = $(SRC_HOME)/modules/src/print
 MOD_DIR = $(TARGET_HOME)/modules
 LIBPRINT = libprint.$(LIBSUF)
-INCLUDES = -I$(SRC_DIR) -I$(MOD_LIB)/h
+INCLUDES = -I$(SRC_DIR) -I$(MOD_DIR)/h
 
 CFLAGS = $(COPTIONS) $(INCLUDES)
 
@@ -21,13 +21,13 @@ $(LIBPRINT):	$(OBJ)
 		$(RANLIB) $(LIBPRINT)
 
 install:	all lintlib
-		cp $(LIBPRINT) $(MOD_LIB)/lib/$(LIBPRINT)
-		$(RANLIB) $(MOD_LIB)/lib/$(LIBPRINT)
-		cp $(SRC_DIR)/print.3 $(MOD_LIB)/man/print.3
+		cp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
+		$(RANLIB) $(MOD_DIR)/lib/$(LIBPRINT)
+		cp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3
 
 cmp:		all
-		-cmp $(LIBPRINT) $(MOD_LIB)/lib/$(LIBPRINT)
-		-cmp $(SRC_DIR)/print.3 $(MOD_LIB)/man/print.3
+		-cmp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
+		-cmp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC)
@@ -39,7 +39,7 @@ clean:
 		rm -f *.$(SUF) $(LIBPRINT)
 
 lintlib:
-		$(MK_LINT_LIB) print $(MOD_LIB)/lib $(INCLUDES) $(SRC)
+		$(MK_LINT_LIB) print $(MOD_DIR)/lib $(INCLUDES) $(SRC)
 
 doprnt.$(SUF):	$(SRC_DIR)/param.h $(SRC_DIR)/doprnt.c
 		$(CC) -c $(CFLAGS) $(SRC_DIR)/doprnt.c
