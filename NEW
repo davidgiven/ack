@@ -3,19 +3,17 @@ with files belonging to this version, although that might sometimes work.
 Many problems with the previous distribution have been fixed.
 The major additions are:
 
-	- a new language: Modula-2
-	- a much improved 8086 back-end; unfortunately still only
-	  small model
-	- floating point package, usable with most back-ends
-	- ported to Microsoft Xenix V3.2
-	- cross-compilation to a PC running Minix
-	- cross-compilation to an Atari ST running Minix
+	- an ANSI C compiler
+	- an Intel 80386 back-end
+	- an Acorn Archimedes back-end
+	- code-expanders for VAX, Intel 80386 and Motorola M68020 processors,
+	  allowing the creation of very fast compilers.
 
 				Ceriel J.H. Jacobs
 				Dept. of Math. and Computer Science
 				Vrije Universiteit
-				De Boelelaan 1081
+				De Boelelaan 1081a
 				1081 HV  Amsterdam
 				The Netherlands
 
-				(UseNet: ceriel@cs.vu.nl)
+				(Email: ceriel@cs.vu.nl)
