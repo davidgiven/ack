@@ -20,7 +20,7 @@ main(argc, argv)
 	char    **argv;
 {
 	/*
-	 * Usage: ass [-[d][p][m][u]] [-s(s/m/l)] [ [file] [flag] ] ...
+	 * Usage: ass [-[d][p][m][u]] [-s(s/m/l/x)] [ [file] [flag] ] ...
 	 *   The d flag can be repeated several times, resulting in more
 	 *        debugging information.
 	 */
@@ -76,7 +76,7 @@ getcore() {
 getsizes(str) char *str; {
 
 	/*
-	 * accepts -ss (small), -sm (medium), -sl (large), -sg (giant)
+	 * accepts -ss (small), -sm (medium), -sl (large), -sx (extra large)
 	 */
 
 	switch(LC(*str)) {
@@ -84,7 +84,7 @@ getsizes(str) char *str; {
 	case 's':       oursize = &sizes[0]; break;
 	case 'm':       oursize = &sizes[1]; break;
 	case 'l':       oursize = &sizes[2]; break;
-	case 'g':	oursize = &sizes[3]; break;
+	case 'x':	oursize = &sizes[3]; break;
 	}
 }
 

@@ -129,9 +129,9 @@ char    *eout           =  "e.out";
 arch_t  archhdr;
 siz_t  sizes[NDEFAULT] = {
 /*   mlab, glab,mproc,xproc, proc */
-    { 151,   29,   31,   73,  130 },
-    { 307,  127,  151,  401,  460 },
-    { 601,  251,  151,  401,  600 },
-    {1601, 1601, 1601, 1601, 2000 }
+    { 151,   29,   31,   73,  130 },	/* small */
+    { 307,  127,  151,  401,  460 },	/* medium */
+    { 601,  251,  151,  401,  600 },	/* large */
+    {1601, 1601, 1601, 1601, 2000 }	/* extra large */
 };
-siz_t  *oursize        =  &sizes[1] ;  /* point to selected sizes */
+siz_t  *oursize        =  &sizes[2] ;  /* point to selected sizes */
