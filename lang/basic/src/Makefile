@@ -5,7 +5,7 @@ h=$(EMHOME)/h
 m=$(EMHOME)/modules/h
 LIBDIR= $(EMHOME)/modules/lib
 LIBDIR2= $(EMHOME)/lib
-CFLAGS = -I$h -I$m
+CFLAGS = -I$h -I$m -O
 
 FILES= bem.o symbols.o initialize.o compile.o \
 	parsepar.o gencode.o util.o graph.o \
@@ -17,15 +17,15 @@ CSRCFILES= bem.c symbols.c initialize.c compile.c \
 CGENFILES= basic.c Lpars.c
 CFILES=$(CSRCFILES) $(CGENFILES)
 
-LIBFILES= $(LIBDIR)/libem_mes.a $(LIBDIR)/libeme.a \
+LIBFILES= $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a \
 	  $(LIBDIR2)/em_data.a $(LIBDIR)/libprint.a \
 	  $(LIBDIR)/liballoc.a \
 	  $(LIBDIR)/libsystem.a $(LIBDIR)/libstring.a
 
-LINTLIBFILES= $(LIBDIR)/llib-lem_mes.a $(LIBDIR)/llib-leme.a \
-	  $(LIBDIR)/llib-lprint.a \
-	  $(LIBDIR)/llib-lalloc.a \
-	  $(LIBDIR)/llib-lsystem.a $(LIBDIR)/llib-lstring.a
+LINTLIBFILES= $(LIBDIR)/llib-lem_mes.ln $(LIBDIR)/llib-lemk.ln \
+	  $(LIBDIR)/llib-lprint.ln \
+	  $(LIBDIR)/llib-lalloc.ln \
+	  $(LIBDIR)/llib-lsystem.ln $(LIBDIR)/llib-lstring.ln
 
 all:		dummy bem
 
@@ -56,7 +56,7 @@ $(FILES): 	bem.h symbols.h graph.h
 tokentab.h:	Lpars.h
 		maketokentab
 
-lint:		$(CFILES)
+lint:		dummy $(CFILES) tokentab.h	
 		lint -b $(CFLAGS) $(CFILES) $(LINTLIBFILES)
 
 clean:

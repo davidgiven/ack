@@ -59,6 +59,7 @@ List	*datalist=0;
 datastmt()
 {
 	List *l,*l1;
+	extern long sys_filesize();
 
 	/* NOSTRICT */ l= (List *) salloc(sizeof(List));
 	l->linenr= currline->linenr;

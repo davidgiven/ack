@@ -73,7 +73,7 @@ extern Linerecord *currline;
 extern char *itoa();
 extern char *salloc();
 
-extern char *sprintf();
+extern char *sprint();
 extern char *strcpy();
 extern char *strcat();
 extern char *malloc();
