@@ -7,9 +7,13 @@ first)	FDIR=.
 esac
 
 if echo 'a\c' | grep 'c' >/dev/null ; then
-	E_FLAG='-n' E_SFX=''   : We have BSD-like echo command.
+	: We have BSD-like echo command.
+	E_FLAG='-n'
+	E_SFX=''
 else
-	E_FLAG=''   E_SFX='\c' : We have SystemV-like echo command.
+	: We have SystemV-like echo command.
+	E_FLAG=''
+	E_SFX='\c'
 fi
 export E_FLAG E_SFX
 

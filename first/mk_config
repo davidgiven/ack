@@ -81,6 +81,10 @@ EOF
 		fi
 		cd ../..
 	fi
+	if [ -f $SRC_HOME/mach/$i/mach_params ]
+	then	:
+	else	continue
+	fi
 	for j in libem libend libmon libfp libsys libdb
 	do
 	    if [ -d $i/$j ]
