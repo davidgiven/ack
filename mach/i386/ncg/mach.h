@@ -31,3 +31,4 @@
 #define fmt_id(fr,to)	sprintf(to, "_%s", fr)
 
 #define BSS_INIT        0
+#define MACH_OPTIONS

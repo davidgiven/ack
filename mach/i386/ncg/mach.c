@@ -158,6 +158,21 @@ regreturn()
 }
 #endif /* REGVARS */
 
+#ifdef MACH_OPTIONS
+static int gdb_flag = 0;
+
+mach_option(s)
+	char *s;
+{
+	if (! strcmp(s, "-gdb")) {
+		gdb_flag = 1;
+	}
+	else {
+		error("Unknown flag %s", s);
+	}
+}
+#endif /* MACH_OPTIONS */
+
 mes(type) word type ; {
 	int argt, a1, a2 ;
 
@@ -186,6 +201,16 @@ mes(type) word type ; {
 		argt = getarg(cst_ptyp);
 		a2 = argval;
 		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+#ifdef MACH_OPTIONS
+		if (gdb_flag) {
+			if (a1 == N_PSYM) {
+				/* Change offset from AB into offset from
+				   the frame pointer (bp).
+				*/
+				argval += 8;
+			}
+		}
+#endif
 		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
 		argt = getarg(end_ptyp);
 		break;
@@ -197,7 +222,11 @@ mes(type) word type ; {
 			argt = getarg(cst_ptyp);
 		}
 		swtxt();
-		if (argval == N_SLINE) {
+		if (argval == N_SLINE
+#ifdef MACH_OPTIONS
+		    && ! gdb_flag
+#endif
+		) {
 			fputs("call ___u_LiB\n", codefile);
 			cleanregs();	/* debugger might change variables */
 		}

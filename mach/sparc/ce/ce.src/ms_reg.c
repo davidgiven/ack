@@ -306,13 +306,17 @@ C_mes_end()
 	}
 }
 
+extern int __gdb_flag;
+
 C_cst( l)
 arith l;
 {
+	static int correct_offset;
+
 	if (db_mes) {
 		if (! db_str) {
 			switchseg( SEGTXT);
-			if (l == N_SLINE) {
+			if (l == N_SLINE && ! __gdb_flag) {
 				flush_cache();
 				fprintf(codefile, "call ___uX_LiB\nnop\n");
 			}
@@ -323,8 +327,17 @@ arith l;
 			db_str = 1;
 			db_nul = 1;
 		}
-		else	fprint(codefile, ",0x%lx", (long) l);
+		else {
+			if (correct_offset++ == -1) {
+				l += EM_BSIZE;
+			}
+			fprint(codefile, ",0x%lx", (long) l);
+		}
 		if (! db_nul) {
+			correct_offset = 0;
+			if (l == N_PSYM && __gdb_flag) {
+				correct_offset = -2;
+			}
 			fprint(codefile, ",0");
 			db_nul = 1;
 		}

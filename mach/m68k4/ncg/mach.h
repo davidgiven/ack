@@ -46,3 +46,4 @@ You must specify the appropriate word size, then REMOVE tables.c
 #define fmt_id(sf,st)	sprintf(st,"_%s",sf)
 
 #define BSS_INIT	0
+#define MACH_OPTIONS

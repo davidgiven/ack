@@ -29,6 +29,7 @@ char *filename;			/* Name of input file */
 char *out_file;			/* Name of output file */
 int errors;			/* Number of errors */
 int debug;
+int __gdb_flag;
 extern char *C_error;
 
 main(argc,argv)
@@ -47,6 +48,10 @@ main(argc,argv)
 		if (av[0][0]=='-' && av[0][1]=='d' && av[0][2]==0)
 		{
 			debug= 1;
+			continue;
+		}
+		if (! strcmp(av[0], "-gdb")) {
+			__gdb_flag = 1;
 			continue;
 		}
 		if (!filename)

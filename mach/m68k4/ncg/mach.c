@@ -178,7 +178,20 @@ prolog(n) full n; {
 	nlocals = n;
 }
 
+#ifdef MACH_OPTIONS
+static int gdb_flag = 0;
 
+mach_option(s)
+	char *s;
+{
+	if (! strcmp(s, "-gdb")) {
+		gdb_flag = 1;
+	}
+	else {
+		error("Unknown flag %s", s);
+	}
+}
+#endif /* MACH_OPTIONS */
 
 mes(type) word type ; {
 	int argt, a1, a2 ;
@@ -208,9 +221,14 @@ mes(type) word type ; {
 		argt = getarg(cst_ptyp);
 		a2 = argval;
 		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
-#ifdef DBX
-		if (a1 == N_PSYM) {
-			argval += 8;
+#ifdef MACH_OPTIONS
+		if (gdb_flag) {
+			if (a1 == N_PSYM) {
+				/* Change offset from AB into offset from
+				   the frame pointer.
+				*/
+				argval += 8;
+			}
 		}
 #endif
 		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
@@ -224,8 +242,11 @@ mes(type) word type ; {
 			argt = getarg(cst_ptyp);
 		}
 		swtxt();
-#ifndef DBX
-		if (argval == N_SLINE) {
+		if (argval == N_SLINE
+#ifdef MACH_OPTIONS
+		    && ! gdb_flag
+#endif
+		) {
 #ifdef TBL68020
 			fputs("jsr (___u_LiB)\n", codefile);
 #else
@@ -233,7 +254,6 @@ mes(type) word type ; {
 #endif
 			cleanregs();	/* debugger might change variables */
 		}
-#endif
 		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
 		argt = getarg(cst_ptyp);
 		fprintf(codefile, "%d\n", (int) argval);

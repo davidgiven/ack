@@ -27,5 +27,6 @@
 #define con_dlb(x)	fprintf(codefile,".data4\t%s\n",x)
 
 #define BSS_INIT	0
+#define MACH_OPTIONS
 
 #define modhead		".sect .text\n.sect .rom\n.sect .data\n.sect .bss\n"
