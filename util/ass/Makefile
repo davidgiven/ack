@@ -10,7 +10,7 @@ CFLAGS=-O
 all:            ass$(SEP_OPT)
 
 clean:
-		-rm -f ass-i ass-n *.o maktab *.old asstb.c
+		-rm -f ass-i ass-n *.o maktab *.old asstb.c asprint
 
 install :       all
 		cp ass$(SEP_OPT) $(ASS_PATH)
