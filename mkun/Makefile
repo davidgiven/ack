@@ -1,25 +1,37 @@
-DEST=/usr/lib/tmac/tmac.kun
+# $Header$
+LIB=/usr/lib
+MIDDLE=tmac
+# the script replaces references to pathnames and
+# deletes all comment
+RUNSCRIPT=sed -e s-LIBDIR-$(LIB)-g -e '/Header/!s/[ 	]*\\".*//' -e '/^\.$$/d' -e 's/^\.[ 	][ 	]*/./'
+FILES=tmac.kun tmac.q?
 
-install:
-	for i in  "" 1 2 3 4 5 6 7 8 ;\
-	do ;\
-		cp tmac.q$i $DEST$i ;\
-	done
+TBL=tbl
+REFER=refer
+SUF=pr
+NROFF=nroff
 
-cmp:
-	for i in  "" 1 2 3 4 5 6 7 8 ;\
-	do ;\
-		cmp tmac.q$i $DEST$i ;\
-	done
+head:		$(FILES)
 
-pr:
-	@for i in  "" 1 2 3 4 5 6 7 8 ;\
-	do ;\
-		pr tmac.q$i ;\
-	done
+pubmac.$(SUF):	pubmac
+		sed 's/^\.UW/.BW/' < pubmac | $(TBL) | \
+			$(REFER) | $(NROFF) -kun > pubmac.$(SUF)
 
-opr:
-	make pr | opr
+install:	install_files
+
+install_files:
+		for i in $(FILES) ;\
+		do\
+			rm -f $$$(LIB)/$(MIDDLE)/$$i ;\
+			$(RUNSCRIPT) $$i >$$$(LIB)/$(MIDDLE)/$$i ;\
+			chmod -w $$$(LIB)/$(MIDDLE)/$$i ;\
+		done
 
 clean:
-	@:
+
+pr:
+
+opr:
+
+cmp:
+		echo "no cmp"
