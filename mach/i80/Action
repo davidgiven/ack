@@ -17,5 +17,5 @@ name "Intel 8080 MON library"
 dir libmon
 end
 name "Intel 8080 system call library"
-dir libmon
+dir libsys
 end
