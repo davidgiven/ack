@@ -40,13 +40,16 @@ int	Unstacked;
 
 AtEoIT()
 {
-	if (NoUnstack) error("unexpected EOF");
+	if (NoUnstack) warning("unexpected EOF");
 	DoUnstack();
 	return 0;
 }
 
 AtEoIF()
 {
-	if (NoUnstack) error("unexpected EOF");
+	extern int nestlevel;
+
+	if (nestlevel != -1) warning("missing #endif");
+	else if (NoUnstack) warning("unexpected EOF");
 	return 0;
 }

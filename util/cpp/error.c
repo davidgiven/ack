@@ -36,7 +36,7 @@ error(fmt, args)
 warning(fmt, args)
 	char *fmt;
 {
-	err_hdr("warning ");
+	err_hdr("(warning) ");
 	doprnt(ERROUT, fmt, &args);
 	fprint(ERROUT, "\n");
 }
@@ -46,7 +46,7 @@ crash(fmt, args)
 	char *fmt;
 	int args;
 {
-	err_hdr("crash ");
+	err_hdr("CRASH\007 ");
 	doprnt(ERROUT, fmt, &args);
 	fprint(ERROUT, "\n");
 	sys_stop(S_ABORT);
@@ -57,7 +57,7 @@ fatal(fmt, args)
 	char *fmt;
 	int args;
 {
-	err_hdr("fatal ");
+	err_hdr("fatal error -- ");
 	doprnt(ERROUT, fmt, &args);
 	fprint(ERROUT, "\n");
 	sys_stop(S_EXIT);

@@ -30,7 +30,7 @@ IMPORT char *getwdir();
 PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
-PRIVATE int nestlevel = -1;	/* initially no nesting level.		*/
+int nestlevel = -1;		/* initially no nesting level.		*/
 
 PRIVATE char *
 GetIdentifier()

@@ -64,10 +64,11 @@ getactuals(idef)
 		*/
 		warning("argument mismatch, %s", idef->id_text);
 
-		while (++nr_of_params < acnt) {
+		while (nr_of_params < acnt) {
 			/*	too few paraeters: remaining actuals are ""
 			*/
 			actparams[nr_of_params] = "";
+			nr_of_params++;
 		}
 	}
 
@@ -110,16 +111,19 @@ copyact(ch1, ch2, level)
 
 		switch(ch)	{
 
+#ifdef __MATCHING_PAR__
 		case ')':
 		case '}':
 		case ']':
 			error("unbalanced parenthesis");
 			break;
+#endif __MATCHING_PAR__
 
 		case '(':
 			copyact('(', ')', level+1);
 			break;
 
+#ifdef __MATCHING_PAR__
 		case '{':
 			/*	example:
 					#define declare(v, t)	t v
@@ -131,6 +135,7 @@ copyact(ch1, ch2, level)
 		case '[':
 			copyact('[', ']', level+1);
 			break;
+#endif __MATCHING_PAR__
 
 		case '\n':
 			LoadChar(ch);
