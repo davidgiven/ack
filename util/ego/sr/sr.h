@@ -9,6 +9,10 @@
  *
  */
 
+/*#define SLI_REDUCE		/* if defined, shift-lefts are also reduced */
+				/* not defined for the moment; should use
+				 * machine specific information (as should
+				 * reduction of array instructions	*/
 
 typedef struct iv	*iv_p;
 typedef struct code_info *code_p;

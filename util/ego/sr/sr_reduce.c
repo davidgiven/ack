@@ -45,6 +45,10 @@ STATIC int regtyp(code)
 	switch(code->co_instr) {
 		case op_mli:
 		case op_mlu:
+#ifdef SLI_REDUCE
+		case op_sli:
+		case op_slu:
+#endif
 			return reg_any;
 		default:
 			return reg_pointer;
@@ -88,6 +92,10 @@ STATIC line_p newcode(code,tmp)
 	switch(code->co_instr) {
 		case op_mli:
 		case op_mlu:
+#ifdef SLI_REDUCE
+		case op_sli:
+		case op_slu:
+#endif
 			/* new code is just a LOL tmp */
 			l = int_line(tmp);
 			l->l_instr = op_lol;
@@ -193,6 +201,17 @@ STATIC init_code(code,tmp)
 			l->l_next = int_line(tmp);
 			l->l_next->l_instr = op_stl;
 			break;
+#ifdef SLI_REDUCE
+		case op_sli:
+		case op_slu:
+			/* reduced code is: iv_expr << lc
+			 * init_code is:    tmp = iv_expr << lc
+			 * So we just insert a 'STL tmp'.
+			 */
+			l->l_next = int_line(tmp);
+			l->l_next->l_instr = op_stl;
+			break;
+#endif
 		case op_lar:
 		case op_sar:
 			/* reduced code is: ...= A[iv_expr] resp.
@@ -264,6 +283,21 @@ STATIC incr_code(code,tmp)
 			store_tmp = int_line(tmp);
 			store_tmp->l_instr = op_stl;
 			break;
+#ifdef SLI_REDUCE
+		case op_sli:
+		case op_slu:
+			loc = int_line(
+				  code->co_sign *
+				  code->co_iv->iv_step *
+				  (1 << off_set(code->c_o.co_loadlc)));
+			loc->l_instr = op_loc;
+			add->l_instr = op_adi;
+			load_tmp = int_line(tmp);
+			load_tmp->l_instr = op_lol;
+			store_tmp = int_line(tmp);
+			store_tmp->l_instr = op_stl;
+			break;
+#endif
 		case op_lar:
 		case op_sar:
 		case op_aar:
@@ -381,6 +415,11 @@ STATIC bool same_code(c1,c2,vars)
 
 	switch(c1->co_instr) {
 		case op_mli:
+		case op_mlu:
+#ifdef SLI_REDUCE
+		case op_sli:
+		case op_slu:
+#endif
 			return c1->co_instr == c2->co_instr &&
 			off_set(c1->c_o.co_loadlc) ==
 			off_set(c2->c_o.co_loadlc) &&
@@ -389,8 +428,9 @@ STATIC bool same_code(c1,c2,vars)
 		case op_aar:
 		case op_lar:
 		case op_sar:
-			return c2->co_instr != op_mli &&
-			c2->co_instr != op_mlu &&
+			return ( c2->co_instr == op_aar ||
+				 c2->co_instr == op_lar ||
+				 c2->co_instr == op_sar) &&
 			same_expr(c1->co_ivexpr,c1->co_endexpr,
 				  c2->co_ivexpr,c2->co_endexpr) &&
 			same_address(c1->c_o.co_desc,c2->c_o.co_desc,vars) &&
@@ -576,6 +616,59 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 
 
 
+#ifdef SLI_REDUCE
+STATIC try_leftshift(lp,ivs,vars,b,shft)
+	loop_p   lp;
+	lset	 ivs,vars;
+	bblock_p b;
+	line_p   shft;
+{
+	/* See if we can reduce the strength of the leftshift
+	 * instruction. If so, then set up the global common
+	 * data structure 'c' (containing information about the
+	 * code to be reduced) and call 'reduce'.
+	 */
+
+	line_p l2,lbegin;
+	iv_p   iv;
+	code_p c;
+	int    sign;
+
+	VL(shft);
+	OUTTRACE("trying leftshift instruction on line %d",linecount);
+	if (ovfl_harmful && !IS_STRONG(b)) return;
+	/* If b is not a strong block, optimization may
+	 * introduce an overflow error in the initializing code.
+	 */
+
+	l2 = PREV(shft); /* Instruction before the shift */
+	if (is_const(l2) &&
+		(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign))) {
+			/* recognized "iv << const " */
+			c = newcinfo();
+			c->c_o.co_loadlc = l2;
+			c->co_endexpr = PREV(l2);
+			c->co_lfirst = lbegin;
+	} else {
+		OUTTRACE("failed",0);
+		return;
+	}
+	c->co_iv = iv;
+	c->co_loop = lp;
+	c->co_block = b;
+	c->co_llast = shft;
+	c->co_ivexpr = lbegin;
+	c->co_sign = sign;
+	c->co_tmpsize = ws; /* temp. local is a word */
+	c->co_instr = INSTR(shft);
+	OUTVERBOSE("sr: leftshift in proc %d loop %d",
+		curproc->p_id, lp->lp_id);
+	Ssr++;
+	reduce(c,vars);
+}
+
+
+#endif
 STATIC try_array(lp,ivs,vars,b,arr)
 	loop_p   lp;
 	lset	 ivs,vars;
@@ -647,8 +740,8 @@ strength_reduction(lp,ivs,vars)
 	lset    ivs;	/* set of induction variables of the loop */
 	lset	vars;	/* set of local variables changed in loop */
 {
-	/* Find all expensive instructions (multiply, array) and see if
-	 * they can be reduced. We branch to several instruction-specific
+	/* Find all expensive instructions (leftshift, multiply, array) and see
+	 * if they can be reduced. We branch to several instruction-specific
 	 * routines (try_...) that check if reduction is possible,
 	 * and that set up a common data structure (code_info).
 	 * The actual transformations are done by 'reduce', that is
@@ -667,6 +760,12 @@ strength_reduction(lp,ivs,vars)
 			next = l->l_next;
 			if (TYPE(l) == OPSHORT && SHORT(l) == ws) {
 				switch(INSTR(l)) {
+#ifdef SLI_REDUCE
+					case op_sli:
+					case op_slu:
+						try_leftshift(lp,ivs,vars,b,l);
+						break;
+#endif
 					case op_mlu:
 					case op_mli:
 						try_multiply(lp,ivs,vars,b,l);
