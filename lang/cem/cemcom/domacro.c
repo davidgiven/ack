@@ -352,11 +352,12 @@ do_ifdef(how)
 	*/
 	push_if();
 	if (id = GetIdentifier()) {
-		if ((how && !(id && id->id_macro)) ||
-			(!how && id && id->id_macro))
-		{	/* this id is not defined	*/
+		if (
+			(how && !(id && id->id_macro))
+		||
+			(!how && id && id->id_macro)
+		) /* this id is not defined	*/
 			skip_block();
-		}
 		else
 			SkipRestOfLine();
 	}
@@ -390,9 +391,8 @@ do_line(l)
 {
 	struct token tk;
 
-	LineNumber = l;
-	/* is there a filespecifier?	*/
-	if (GetToken(&tk) == STRING)
+	LineNumber = l - 1;	/* the number of the next input line */
+	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
 		FileName = tk.tk_bts;
 	SkipRestOfLine();
 }

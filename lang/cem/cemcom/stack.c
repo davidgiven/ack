@@ -210,12 +210,15 @@ unstack_world()
 		
 #ifdef DEBUG
 		if (options['a']) {
-			print("\"%s\", %s, %s, %s\n",
+			char *symbol2str();
+
+			print("\"%s\", %s, %s, %s, %s\n",
 				idf->id_text,
 				(def->df_alloc == 0) ? "no alloc" :
 				(def->df_alloc == ALLOC_SEEN) ? "alloc seen" :
 				(def->df_alloc == ALLOC_DONE) ? "alloc done" :
 				"illegal alloc info",
+				symbol2str(def->df_sc),
 				def->df_initialized ? "init" : "no init",
 				def->df_used ? "used" : "not used");
 		}

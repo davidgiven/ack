@@ -352,7 +352,7 @@ p1_expr(lvl, expr)
 		break;
 	case String:
 	{
-		char bts2str();
+		char *bts2str();
 
 		print(
 			"%s\n",
