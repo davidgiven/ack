@@ -12,7 +12,7 @@ cmp:            all
 		rm -f head_em tail_em
 
 distr:
-		arch cr `head -1 LIST` `tail +2 LIST`
+		arch cr `cat LIST`
 
 all:            head_em tail_em
 
