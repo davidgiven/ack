@@ -39,10 +39,11 @@ extern int		_unlink();
 extern long		_lseek();
 
 static int tmpfil() {
+	static char *namebuf[] = "/usr/tmp/plf.xxxxx";
 	int i; char *p,*q;
 
 	i = _getpid();
-	p = "/usr/tmp/plf.xxxxx";
+	p = namebuf;
 	q = p + 13;
 	do
 		*q++ = (i & 07) + '0';

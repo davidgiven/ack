@@ -16,8 +16,9 @@ extern	_trp();
 #include <pc_math.h>
 #define M_MIN_D	DBL_MIN
 #define M_MAX_D	DBL_MAX
-#define HUGE	HUGE_VAL
 #endif
+#undef HUGE
+#define HUGE	1e1000
 
 static double
 Ldexp(fl,exp)
@@ -77,7 +78,16 @@ _exp(x)
 	int	negative = x < 0;
 
 	if (x <= M_LN_MIN_D) {
-		return M_MIN_D;
+		g = M_MIN_D/4.0;
+
+		if (g != 0.0) {
+			/* unnormalized numbers apparently exist */
+			if (x < (M_LN2 * (DBL_MIN_EXP - 53))) return 0.0;
+		}
+		else {
+			if (x < M_LN_MIN_D) return 0.0;
+			return M_MIN_D;
+		}
 	}
 	if (x >= M_LN_MAX_D) {
 		if (x > M_LN_MAX_D) {
@@ -87,8 +97,6 @@ _exp(x)
 		return M_MAX_D;
 	}
 	if (negative) x = -x;
-
-	/* ??? avoid underflow ??? */
 
 	n = x * M_LOG2E + 0.5;	/* 1/ln(2) = log2(e), 0.5 added for rounding */
 	xn = n;

@@ -3,6 +3,9 @@
 
 #if __STDC__
 #include <float.h>
+#else
+#include <math.h>
+#define DBL_MAX	M_MAX_D
 #endif
 
 static char *cvt();
@@ -59,11 +62,9 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	}
 
 	*decpt = 0;
-#if __STDC__
 	if (value >= DBL_MAX) {
 		value = DBL_MAX;
 	}
-#endif
 	if (value != 0.0) {
 		register struct powers_of_10 *pp = &p10[0];
 

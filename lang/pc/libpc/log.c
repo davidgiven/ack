@@ -13,8 +13,10 @@
 
 #if __STDC__
 #include <pc_math.h>
-#define HUGE	HUGE_VAL
+#include <float.h>
 #endif
+#undef HUGE
+#define HUGE	1e1000
 
 double
 _log(x)

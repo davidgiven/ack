@@ -26,10 +26,15 @@ extern char	*_fcvt();
 
 #define	assert(x)	/* nothing */
 
-#define	HUGE_DIG	39	/* log10(maxreal) */
+#if __STDC__
+#include <float.h>
+#define	HUGE_DIG	DBL_MAX_10_EXP	/* log10(maxreal) */
+#else
+#define	HUGE_DIG	400	/* log10(maxreal) */
+#endif
 #define	PREC_DIG	80	/* the maximum digits returned by _fcvt() */
 #define	FILL_CHAR	'0'	/* char printed if all of _fcvt() used */
-#define	BUFSIZE		HUGE_DIG + PREC_DIG + 2
+#define	BUFSIZE		HUGE_DIG + PREC_DIG + 3
 
 _wrf(n,w,r,f) int n,w; double r; struct file *f; {
 	char *p,*b; int s,d; char buf[BUFSIZE];
