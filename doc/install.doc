@@ -356,6 +356,10 @@ a dependency generator for makefiles.
 .br
 The ACK link-editor, reading ACK relocatable a.out format, and writing
 ACK a.out format.
+.IP "util/int"
+.br
+An EM interpreter, written in C. Very useful for checking out software.
+Unfortunately not available for small machines.
 .ne 4
 .LP
 All pathnames mentioned in the text of this document are relative to the
@@ -1194,19 +1198,20 @@ doc/basic.doc	Basic reference manual
 doc/pcref.doc	Pascal-frontend reference manual
 doc/val.doc	results of running the Pascal Validation Suite
 doc/crefman.doc	C-frontend description
-doc/LLgen	description of the LL(1) parser generator.
+doc/LLgen	description of the LL(1) parser generator
 doc/peep.doc	internal documentation for the peephole optimizer
 doc/cg.doc	documentation for backend writers and maintainers
 doc/regadd.doc	addendum to previous document describing register variables
 doc/ncg.doc	documentation for the newest backends
 doc/v7bugs.doc	bugs in the V7 system and how to fix them
-doc/6500.doc	MSC 6500 backend description.
-doc/i80.doc	Intel 8080 backend description.
-doc/z80.doc	Zilog Z80 backend description.
+doc/6500.doc	MSC 6500 backend description
+doc/i80.doc	Intel 8080 backend description
+doc/z80.doc	Zilog Z80 backend description
 doc/m68020.doc	Motorola M68000/M68020 backend description
 doc/occam	Occam-frontend description
 doc/ego	Global Optimizer description
 doc/top	Target Optimizer description
+doc/int	description of the EM interpreter written in C
 doc/m2ref.doc	Modula-2 frontend description
 doc/install.doc	this document
 doc/install.pr	this document (formatted)

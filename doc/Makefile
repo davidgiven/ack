@@ -52,6 +52,10 @@ em.$(SUF):	em.X
 em.X:
 		cd em; make "TBL="$(TBL) "NROFF="$(NROFF) "SUF="$(SUF) "TARGET="$(TARGET)
 
+int.doc:	int.X
+int.X:
+		cd int; make "TBL="$(TBL)
+
 install cmp:
 
 distr:		install.doc
