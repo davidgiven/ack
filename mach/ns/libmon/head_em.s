@@ -1,4 +1,5 @@
 .define hol0,argv,.reghp,.limhp,envp,begbss
+.define WRITE
 .define .ignmask, .trpreg
 .define .stop, BRK
 .define ERANGE,EILLINS,ECASE
