@@ -91,11 +91,8 @@ offset get_off() {
 }
 
 STATIC make_string(n) int n; {
-	register char *s;
-	extern char *sprintf();
 	
-	s=sprintf(string,".%u",n);
-	assert(s == string);
+	sprintf(string,".%u",n);
 }
 
 STATIC inident() {
