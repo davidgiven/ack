@@ -24,7 +24,7 @@ module interface but with routine names of the form
 .BI C_ xxx
 replaced by names like
 .BI O_ xxx.
-Furthermore there is also routine
+Furthermore there is also no routine
 .I O_getid
 and no variable
 .I O_tmpdir
@@ -288,6 +288,37 @@ the insertpart mechanism in the
 .I EM_OPT
 ) module.
 The removal of dead code is performed by the global optimizer.
+Various
+.I ext_functions
+available in the old tables are no longer available as they rely on
+information that is not available to the current program.
+These are the
+.I notreg
+and the
+.I rom
+functions.
+The previous optimizer allowed the use of
+.I LLP,
+.I LEP,
+.I SLP
+and
+.I SEP
+in patterns. For example
+.I LLP
+stood for either
+.I lol
+if the pointer size was the same as the word size, or for
+.I ldl
+if the pointer size was twice the word size.
+In the current optimizer it is necessary to include two patterns for each
+such single pattern in the old table. For example for a pattern containing
+.I LLP
+there would be one pattern with
+.I lol
+and with a global restriction of the form
+.I p=w
+and another pattern with ldl and a global restriction of the form
+.I p=2*w.
 
 .NH
 The Parser
@@ -303,7 +334,7 @@ Lex sources file defining form of tokens in table.
 .IP initlex.c 15
 Uses the data in the library
 .I em_data.a
-to initialize the lexical analyser to recognize EM instruction mnemonics.
+to initialize the lexical analyzer to recognize EM instruction mnemonics.
 .IP outputdfa.c 15
 Routines to output the dfa when it has been constructed. It outputs the files
 .I dfa.c
@@ -375,6 +406,10 @@ queue containing instructions that match the current prefix, and a
 .I backup
 queue of instructions that have been backed up over and need to be reparsed
 for further pattern matches.
+These three queues are maintained in a single fixed size buffer as explained
+in more detail in the next section.
+Also, after a successful match, a replacement queue is constructed.
+
 
 .LP
 If no errors are detected by the parser in the tables it output the following
@@ -422,7 +457,7 @@ patterns at all then the dfa routine is called to flush any current queued
 output and the the output
 .BI C_ xxx
 routine is called. If the EM instruction does appear in a pattern then the
-instruction data structure is allocated, (from the free list), its fields
+instruction data structure fields are
 initialized and it is added onto the end of the pattern queue.
 The dfa routines are then called to attempted to make a transition.
 This file is input to the
@@ -464,10 +499,10 @@ the backup queue is empty.
 .IP mkstrct.c 10
 contains routines to build the data structure from the input
 .BI C_ xxx
-routines and place the structure on the pattern queue. These routines are not
-required in the stand alone optimizer.
+routines and place the structure on the pattern queue. These routines are also
+used to build the data structures when a replacement is constructed.
 .IP aux.c 10
-routines to implement the functions used in the rules.
+routines to implement the external functions used in the pattern table.
 
 .LP
 The following files are also used in building the module library:
@@ -491,42 +526,42 @@ EM instructions. It is also processed by
 .NH
 Miscellaneous Issues
 .LP
-The output and backup queues are maintained on fixed length arrays
-of pointers the the
+The output, pattern and backup queues are maintained in fixed length array,
+.I OO_buffer
+allocated of size
+.I MAXBUFFER
+(a constant declared in nopt.h) at run time.
+It consists of an array of the
 .I e_instr
 data structure used by the
 .I READ_EM(3)
 module.
-The size of these queues are fixed in size according to the
-values of
-.I MAXOUTPUT
+At any time the pointers
+.I OO_patternqueue
 and
-.I MAXBACKUP
-defined in the file
-.I nopt.c.
-The size of the pattern queue is set to the length of the maximum pattern
-length by the tables output by the parser.
-The space for the structures are initially obtained by calls to
-.I Malloc
-(from the
-.I alloc(3)
-module),
-and freed when the output queue or patterns queue is cleared. These freed
-structures are collected on the free list and reused to avoid the overheads
-of repeated calls to
-.I malloc
+.I OO_nxtpatt
+point to the beginning and end of the current pattern prefix that corresponds
+to the current state. Any instructions on the backup queue are between
+.I OO_nxtpatt
 and
-.I free.
+.I OO_endbackup.
+If there are no instructions on the backup queue then
+.I OO_endbackup
+will be 0 (zero).
+The size of the replacement queue is set to the length of the maximum
+replacement length by the tables output by the parser.
 
 .LP
-The fixed size of the output and pattern queues causes no difficulty in
+The fixed size of the buffer causes no difficulty in
 practice and can only result in some potential optimizations being missed.
-When the output queue fills it is simply prematurely flushed and backups
-when the backup queue is fill are simply ignored. A possible improvement
-would be to flush only part of the output queue when it fills. It should
-be noted that it is not possible to statically determine the maximum possible
-size for these queues as they need to be unbounded in the worst case. A
-study of the rule
+When space for a new instruction is required and the buffer is full the
+routine
+.I OO_halfflush
+is called to flush half the buffer and move all the data structures left.
+It should be noted that it is not possible to statically determine the
+maximum possible size for these queues as they need to be unbounded in
+the worst case.
+A study of the rule
 .DS
 .I
 	inc dec :
