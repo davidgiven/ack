@@ -38,7 +38,7 @@
 typedef struct instruction *instr_p;
 typedef struct pattern_descr *patdescr_p;
 typedef struct instr_descr *idescr_p;
-typedef struct template *templ_p;
+typedef struct templat *templ_p;
 
 struct instruction {
 	instr_p	fw;
@@ -71,7 +71,7 @@ struct pattern_descr {
 	idescr_p repl;
 };
 
-struct template {
+struct templat {
 	char	*lctxt;
 	int	varno;
 	char	*rctxt;
@@ -79,7 +79,7 @@ struct template {
 
 struct instr_descr {
 	char		*opcode;
-	struct template templates[MAXOP];
+	struct templat templates[MAXOP];
 };
 
 typedef int bool;
