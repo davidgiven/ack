@@ -6,5 +6,12 @@
  loi EM_PSIZE
  loc 35
  mon
- ret 0
+ zne *1
+ loc 0
+ bra *2
+1
+ ste errno
+ loc -1
+2
+ ret EM_WSIZE
  end
