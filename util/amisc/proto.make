@@ -28,7 +28,9 @@ ashow:	$(SRC_DIR)/ashow.c
 
 install:	all
 	for i in $(ALL); do rm -f $(BINDIR)/$$i; cp $$i $(BINDIR)/$$i; done
-	for i in anm.1 asize.1 astrip.1; do rm -f $(MANDIR)/$$i; cp $(SRC_DIR)/$$i $(MANDIR)/$$i; done
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then for i in anm.1 asize.1 astrip.1; do rm -f $(MANDIR)/$$i; cp $(SRC_DIR)/$$i $(MANDIR)/$$i; done ; \
+	fi
 
 cmp:	all
 	-for i in $(ALL); do cmp $$i $(BINDIR)/$$i; done

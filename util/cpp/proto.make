@@ -112,10 +112,10 @@ cfiles: hfiles LLfiles $(GSRC)
 	@touch cfiles
 
 install: all
-	rm -f $(CEMPP)
 	cp cpp $(CEMPP)
-	rm -f $(MANDIR)/cpp.6
-	cp $(SRC_DIR)/cpp.6 $(MANDIR)/cpp.6
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then cp $(SRC_DIR)/cpp.6 $(MANDIR)/cpp.6 ; \
+	fi
 
 cmp:	all
 	-cmp cpp $(CEMPP)

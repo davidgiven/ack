@@ -32,10 +32,10 @@ cgg:	cgg.$(SUF) $(OFILES) output.$(SUF)
 	$(CC) $(LDFLAGS) $(OFILES) output.$(SUF) $(TARGET_HOME)/lib.bin/em_data.$(LIBSUF) -o cgg
 
 install:	cgg
-	rm -f $(TARGET_HOME)/lib.bin/ncgg
 	cp cgg $(TARGET_HOME)/lib.bin/ncgg
-	rm -f $(MANDIR)/ncgg.6
-	cp $(SRC_DIR)/ncgg.6 $(MANDIR)/ncgg.6
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then cp $(SRC_DIR)/ncgg.6 $(MANDIR)/ncgg.6 ; \
+	fi
 
 cmp:	cgg
 	-cmp cgg $(TARGET_HOME)/lib.bin/ncgg

@@ -13,7 +13,9 @@ all:		cid cclash prid tabgen
 
 install:	all
 		cp cid cclash prid tabgen $(TARGET_BIN)
-		cp $(SRC_DIR)/cid.1 $(SRC_DIR)/cclash.1 $(SRC_DIR)/prid.1 $(SRC_DIR)/tabgen.1 $(TARGET_MAN)
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/cid.1 $(SRC_DIR)/cclash.1 $(SRC_DIR)/prid.1 $(SRC_DIR)/tabgen.1 $(TARGET_MAN) ; \
+		fi
 
 cmp:		all
 		-cmp cid $(TARGET_BIN)/cid

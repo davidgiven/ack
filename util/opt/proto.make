@@ -43,12 +43,11 @@ cmp:	all
 	-cmp $(SRC_DIR)/em_opt.6 $(TARGET_HOME)/man/em_opt.6
 
 install:all
-	rm -f $(TARGET_HOME)/lib.bin/em_opt
 	cp opt $(TARGET_HOME)/lib.bin/em_opt
-	rm -f $(TARGET_HOME)/lib.bin/em_opt2
 	cp opt2 $(TARGET_HOME)/lib.bin/em_opt2
-	rm -f $(TARGET_HOME)/man/em_opt.6
-	cp $(SRC_DIR)/em_opt.6 $(TARGET_HOME)/man/em_opt.6
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then cp $(SRC_DIR)/em_opt.6 $(TARGET_HOME)/man/em_opt.6 ; \
+	fi
 
 pattern.c:	$(SRC_DIR)/patterns mktab
 	$(CPP) $(SRC_DIR)/patterns | mktab > pattern.c

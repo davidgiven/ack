@@ -50,10 +50,11 @@ led:	$(OFILES)
 	$(CC) $(LDFLAGS) $(OFILES) $(LDLIBS) -o led
 
 install:led
-	rm -f $(LIBDIR)/em_led $(TARGET_HOME)/man/led.6 $(TARGET_HOME)/man/ack.out.5
 	cp led $(LIBDIR)/em_led
-	cp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6
-	cp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	cp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6 ; \
+		cp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5 ; \
+	fi
 
 cmp:	led
 	-cmp led $(LIBDIR)/em_led

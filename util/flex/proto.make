@@ -144,10 +144,12 @@ lint : $(FLEX_C_SOURCES)
 install: first_flex $(SRC_DIR)/flex.skel
 	rm -f $(BINDIR)/flex
 	cp flex $(BINDIR)/flex
-	cp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel
-	cp $(SRC_DIR)/flex.1 $(MANDIR)/flex.1
-	cp $(SRC_DIR)/flexdoc.1 $(MANDIR)/flexdoc.1
-	
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	cp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel ; \
+		cp $(SRC_DIR)/flex.1 $(MANDIR)/flex.1 ; \
+		cp $(SRC_DIR)/flexdoc.1 $(MANDIR)/flexdoc.1 ; \
+	fi
+
 clean :
 	rm -f core errs flex *.$(SUF) parse.c *.lint parse.h tags
 

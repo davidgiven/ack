@@ -61,12 +61,13 @@ clean:
 		rm -f $(DEC_PATH) $(ENC_PATH) esize *.$(SUF) *.old
 
 install :       all
-		rm -f $l/em_$(DEC_PATH) $l/em_$(ENC_PATH) $(TARGET_HOME)/bin/esize $(TARGET_HOME)/man/em_decode.6 $(TARGET_HOME)/man/esize.1
 		cp $(DEC_PATH) $l/em_$(DEC_PATH)
 		cp $(ENC_PATH) $l/em_$(ENC_PATH)
 		cp esize $(TARGET_HOME)/bin/esize
-		cp $(SRC_DIR)/em_decode.6 $(TARGET_HOME)/man/em_decode.6
-		cp $(SRC_DIR)/esize.1 $(TARGET_HOME)/man/esize.1
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	cp $(SRC_DIR)/em_decode.6 $(TARGET_HOME)/man/em_decode.6 ; \
+			cp $(SRC_DIR)/esize.1 $(TARGET_HOME)/man/esize.1 ; \
+		fi
 
 cmp :           all
 		-cmp $(DEC_PATH) $l/em_$(DEC_PATH)

@@ -51,7 +51,9 @@ clean:
 
 install:	$(PROGRAM)
 		cp $(PROGRAM) $(DEST)/$(PROGRAM)
-		cp $(SRC_DIR)/manpage $(MAN)/yacc.1
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/manpage $(MAN)/yacc.1 ; \
+		fi
 
 cmp:		$(PROGRAM)
 		-cmp $(PROGRAM) $(DEST)/$(PROGRAM)

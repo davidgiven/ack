@@ -91,7 +91,9 @@ all:	test
 
 install:	$(INT)
 	cp $(INT) $(TARGET_HOME)/bin/int
-	cp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	cp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1 ; \
+	fi
 
 cmp:	$(INT)
 	-cmp $(INT) $(TARGET_HOME)/bin/int

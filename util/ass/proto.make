@@ -24,10 +24,10 @@ clean:
 		-rm -f ass *.$(SUF) maktab *.old asstb.c
 
 install :       all
-		rm -f $(TARGET_HOME)/lib.bin/em_ass
 		cp ass $(TARGET_HOME)/lib.bin/em_ass
-		rm -f $(TARGET_HOME)/man/em_ass.6
-		cp $(SRC_DIR)/em_ass.6 $(TARGET_HOME)/man/em_ass.6
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/em_ass.6 $(TARGET_HOME)/man/em_ass.6 ; \
+		fi
 
 cmp :           all
 		-cmp ass $(TARGET_HOME)/lib.bin/em_ass
