@@ -656,8 +656,10 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 			break;
 		}
 	}
-	if (!toplevel)
-		ply += emrepllen;
+	if (!toplevel) {
+		if (ply >= j) ply += emrepllen - j;
+		else ply = emrepllen;
+	}
 	break;
     case DO_COST:
 	DEBUG("COST");

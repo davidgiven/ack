@@ -852,8 +852,14 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			break;
 		}
 	}
-	if (!toplevel)
-		ply += emrepllen;
+	if (!toplevel) {
+		if (ply >= j) ply = emrepllen + ply - j;
+		else ply = emrepllen;
+#ifndef NDEBUG
+		if (Debug > 4) 
+			fprintf(stderr, "ply becomes %d\n", ply);
+#endif
+	}
 	break;
     }
     case DO_COST: {
