@@ -254,7 +254,15 @@ ImportEffects(idef, scope, flag)
 	register t_def *df = idef;
 	register t_type *tp;
 
-	while (df->df_kind & D_IMPORTED) {
+	while ((df->df_kind & D_IMPORTED) && df->imp_def != df) {
+		/* The second condition could occur on some (erroneous and
+		   obscure) input such as:
+			IMPLEMENTATION MODULE Test;
+			FROM X IMPORT XType, XType;
+			END Test.
+		   when X does not exist.
+		*/
+
 		df = df->imp_def;
 	}
 
