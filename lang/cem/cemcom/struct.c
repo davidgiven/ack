@@ -353,10 +353,10 @@ uniq_selector(idf_sdef)
 
 #ifndef NOBITFIELD
 arith
-add_field(szp, fd, pfd_type, idf, stp)
+add_field(szp, fd, fdtpp, idf, stp)
 	arith *szp;		/* size of struct upto here	*/
 	struct field *fd;	/* bitfield, containing width	*/
-	struct type **pfd_type;	/* type of selector		*/
+	struct type **fdtpp;	/* type of selector		*/
 	struct idf *idf;	/* name of selector		*/
 	struct type *stp;	/* current struct descriptor	*/
 {
@@ -383,11 +383,11 @@ add_field(szp, fd, pfd_type, idf, stp)
 		fd->fd_width > bits_in_type
 	)	{
 		error("illegal field-width specified");
-		*pfd_type = error_type;
+		*fdtpp = error_type;
 		return field_offset;
 	}
 
-	switch ((*pfd_type)->tp_fund)	{
+	switch ((*fdtpp)->tp_fund)	{
 
 	case CHAR:
 	case SHORT:
@@ -395,10 +395,10 @@ add_field(szp, fd, pfd_type, idf, stp)
 	case ENUM:
 	case LONG:
 		/* right type; size OK? */
-		if ((*pfd_type)->tp_size > word_size) {
+		if ((*fdtpp)->tp_size > word_size) {
 			error("bit field type %s does not fit in a word",
-				symbol2str((*pfd_type)->tp_fund));
-			*pfd_type = error_type;
+				symbol2str((*fdtpp)->tp_fund));
+			*fdtpp = error_type;
 			return field_offset;
 		}
 		break;
@@ -406,8 +406,8 @@ add_field(szp, fd, pfd_type, idf, stp)
 	default:
 		/* wrong type altogether */
 		error("illegal field type (%s)",
-				symbol2str((*pfd_type)->tp_fund));
-		*pfd_type = error_type;
+				symbol2str((*fdtpp)->tp_fund));
+		*fdtpp = error_type;
 		return field_offset;
 	}
 
@@ -447,8 +447,8 @@ add_field(szp, fd, pfd_type, idf, stp)
 		Now we need a mask to use its value in expressions.
 	*/
 
-	*pfd_type = construct_type(FIELD, *pfd_type, (arith)0);
-	(*pfd_type)->tp_field = fd;
+	*fdtpp = construct_type(FIELD, *fdtpp, (arith)0);
+	(*fdtpp)->tp_field = fd;
 
 	/*	Set the mask right shifted. This solution avoids the
 		problem of having sign extension when using the mask for
