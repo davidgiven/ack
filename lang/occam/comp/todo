@@ -1,0 +1,3 @@
+- Optimize nested PARs.
+- Don't resolve guards in IFs that lead to skip statements.
+- Add more comments (more? are there any yet?).
