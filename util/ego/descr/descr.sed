@@ -6,7 +6,7 @@ s/cases//
 s/case//
 s/sizes//
 s/size//
-s/\-\>//
+s/->//
 s/pointer/2/g
 s/general/0/g
 s/fitbyte/1/
