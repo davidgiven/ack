@@ -1029,10 +1029,10 @@ ngf $1==4	| |
 			"jsr .ngf4"		    | | asp 4 lfr 4 |
 ngf $1==8	| |
 			remove(ALL)
-			"jsr .ngf8"		    |  |  asp 16 lfr 4 loi 8 |
+			"jsr .ngf8"		    |  |  asp 8 lfr 4 loi 8 |
 fif $1==4	| |
 			remove(ALL)
-			"jsr .fif4"		    |  | asp 16 lfr 4 loi 8 |
+			"jsr .fif4"		    |  | asp 8 lfr 4 loi 8 |
 fif $1==8	| |
 			remove(ALL)
 			"jsr .fif8"		    |  | asp 16 lfr 4 loi 16 |
