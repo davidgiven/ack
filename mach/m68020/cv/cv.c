@@ -65,6 +65,22 @@ SCNHDR	scnh[NS];
 FILE		*input;
 FILE		*output;
 
+long align(a,b)
+        long a,b;
+{
+        a += b - 1;
+        return a - a % b;
+}
+
+int
+follows(pa, pb)
+        register struct outsect *pa, *pb;
+{
+        /* return 1 if pa follows pb */
+
+        return pa->os_base == align(pb->os_base+pb->os_size, pa->os_lign);
+}
+
 main(argc, argv)
 	int	argc;
 	char	*argv[];
@@ -116,8 +132,7 @@ main(argc, argv)
 	if ( outsect[BSSSG].os_flen != 0 )
 		printf("Warning: bss space contains initialized data\n") ;
 			/* as actually writes zeroes in the bss segment */
-	if ( outsect[BSSSG].os_base != outsect[DATASG].os_base+
-					outsect[DATASG].os_size )
+	if ( ! follows(&outsect[BSSSG], &outsect[DATASG]))
 		fatal("bss segment must follow data segment\n") ;
 
 	/* 410 file with ROMSG in instruction space */
@@ -125,14 +140,12 @@ main(argc, argv)
 	magic= 0410 ;
 	textsize= outsect[TEXTSG].os_size + outsect[ROMSG].os_size ;
 	datasize= outsect[DATASG].os_size ;
-	if ( outsect[ROMSG].os_base != outsect[TEXTSG].os_base+
-					outsect[TEXTSG].os_size )
+	if ( ! follows(&outsect[ROMSG], &outsect[TEXTSG]))
 		fatal("rom segment must follow text\n") ;
 
 	bsssize = outsect[BSSSG].os_size;
 	if ( outhead.oh_nsect==NSECT ) {
-		if ( outsect[LSECT].os_base != outsect[BSSSG].os_base+
-						outsect[BSSSG].os_size )
+		if ( ! follows(&outsect[LSECT], &outsect[BSSSG]))
 			fatal("end segment must follow bss\n") ;
 		if ( outsect[LSECT].os_size != 0 )
 			fatal("end segment must be empty\n") ;
