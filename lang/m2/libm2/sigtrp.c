@@ -50,6 +50,7 @@ sigtrp(trapno, signo)
 	*/
 	extern int errno;
 	int (*ctch)() = __ctchsig;
+	int (*oldctch)();
 	int oldtrap;
 
 	if (signo <= 0 || signo >= sizeof(__traps)/sizeof(__traps[0])) {
@@ -70,10 +71,13 @@ sigtrp(trapno, signo)
 
 	oldtrap = __traps[signo];
 
-	if (signal(signo, ctch) == (int (*)())-1)  /* errno set by signal */
+	if ((oldctch = signal(signo, ctch)) == (int (*)())-1)  /* errno set by signal */
 		return -1;
 	
-	__traps[signo] = trapno;
+	else if (oldctch == SIG_IGN) {
+		signal(signo, SIG_IGN);
+	}
+	else __traps[signo] = trapno;
 
 	return oldtrap;
 }
