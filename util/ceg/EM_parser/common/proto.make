@@ -2,6 +2,7 @@
 
 #PARAMS		do not remove this line!
 
+SRC_DIR = $(SRC_HOME)/util/ceg/EM_parser/common
 CEGLIB = $(TARGET_HOME)/lib.bin/ceg
 PARLIB = $(CEGLIB)/EM_parser
 OBJLIB = $(PARLIB)/obj_EM_pars
@@ -11,7 +12,7 @@ GFILES = $(SRC_DIR)/pars.g
 OFILES = pars.$(SUF) Lpars.$(SUF) scan.$(SUF) mylex.$(SUF) default.$(SUF) \
 	 C_instr2.$(SUF) help.$(SUF) eval.$(SUF) action.$(SUF)
 
-IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I.
+IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I. -I$(SRC_DIR)
 CFLAGS = $(COPTIONS) $(IFILES)
 
 all :	dummy

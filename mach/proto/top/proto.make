@@ -29,6 +29,7 @@ queue.$(SUF): $(CDIR)/queue.c
 	$(CC) -c $(CFLAGS) $(CDIR)/queue.c
 
 install: all
+	-mkdir $(TARGET_HOME)/lib.bin/$(MACH)
 	cp top $(TARGET_HOME)/lib.bin/$(MACH)/top
 
 cmp:	 all

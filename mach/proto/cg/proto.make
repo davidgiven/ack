@@ -68,6 +68,7 @@ var.$(SUF): $(CDIR)/var.c
 	$(CC) -c $(CFLAGS) $(CDIR)/var.c
 
 install: all
+	-mkdir $(TARGET_HOME)/lib.bin/$(MACH)
 	cp cg $(TARGET_HOME)/lib.bin/$(MACH)/cg
 
 cmp:	 all

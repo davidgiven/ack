@@ -29,6 +29,7 @@ COMM	= $(CDIR)/comm0.h $(CDIR)/comm1.h $(CDIR)/comm2.y $(CSRC)
 all:	as
 
 install:all
+	-mkdir $(TARGET_HOME)/lib.bin/$(MACH)
 	cp as $(TARGET_HOME)/lib.bin/$(MACH)/as
 
 cmp:
@@ -57,12 +58,12 @@ as.c:	as.y
 
 y.tab.h:	as.c
 $(COBJ):	y.tab.h
-$(COBJ) as.y:	$(CDIR)/comm0.h mach0.c
-$(COBJ) as.y:	$(CDIR)/comm1.h mach1.c
-as.y:		mach2.c
-comm3.$(SUF):	mach3.c
-as.y:		mach4.c
-comm8.$(SUF):	mach5.c
+$(COBJ) as.y:	$(CDIR)/comm0.h $(MDIR)/mach0.c
+$(COBJ) as.y:	$(CDIR)/comm1.h $(MDIR)/mach1.c
+as.y:		$(MDIR)/mach2.c
+comm3.$(SUF):	$(MDIR)/mach3.c
+as.y:		$(MDIR)/mach4.c
+comm8.$(SUF):	$(MDIR)/mach5.c
 comm3.$(SUF):	$(CDIR)/comm3.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm3.c
 comm4.$(SUF):	$(CDIR)/comm4.c

@@ -2,8 +2,8 @@
 
 #PARAMS		do not remove this line!
 
-DEFDIR = $(TARGET_HOME)/lib/m2
-SRCDIR = $(SRC_HOME)/lang/m2/libm2
+DEF_DIR = $(TARGET_HOME)/lib/m2
+SRC_DIR = $(SRC_HOME)/lang/m2/libm2
 
 SOURCES =	ASCII.def EM.def MathLib0.def Processes.def \
 		RealInOut.def Storage.def Arguments.def Conversion.def \
@@ -25,5 +25,5 @@ opr:
 		make pr | opr
 
 install:
-		-mkdir $(DEFDIR)
-		for i in $(SOURCES) ; do cp $(SRC_DIR)/$$i $(DEFDIR)/$$i ; done
+		-mkdir $(DEF_DIR)
+		for i in $(SOURCES) ; do cp $(SRC_DIR)/$$i $(DEF_DIR)/$$i ; done
