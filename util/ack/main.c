@@ -162,6 +162,9 @@ vieuwargs(argc,argv) char **argv ; {
 		switch ( argp[1] ) {
 	   case 'm':    if ( machine ) fuerror("Two machines?") ;
 			machine= &argp[2];
+			if (*machine == '\0') {
+				fuerror("-m needs machine name");
+			}
 			eaten=1 ;
 			break ;
 	   case 'o':    if ( nextarg>=argc ) {
