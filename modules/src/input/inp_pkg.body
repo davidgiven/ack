@@ -61,13 +61,13 @@ extern INP_TYPE INP_VAR;
 #endif INP_TYPE
 
 #ifdef DEBUG
-#define PRIVATE
+#define INP_PRIVATE
 #else
-#define PRIVATE static
+#define INP_PRIVATE static
 #endif
 
-struct buffer_header	{
-	struct buffer_header *next;
+struct INP_buffer_header	{
+	struct INP_buffer_header *bh_next;
 	int bh_size;	/* = strlen (text), should be unsigned	*/
 	char *bh_text;	/* pointer to buffer containing text	*/
 	char *bh_ipp;	/* current read pointer (= stacked ipp)	*/
@@ -79,24 +79,24 @@ struct buffer_header	{
 };
 
 #ifndef INP_READ_IN_ONE
-struct i_buf {
-	struct i_buf *next;
+struct INP_i_buf {
+	struct INP_i_buf *ib_next;
 	char ib_text[INP_BUFSIZE+INP_NPUSHBACK];
 };
 
 # endif not INP_READ_IN_ONE
 
 char *_ipp;
-PRIVATE struct buffer_header *head;
+INP_PRIVATE struct INP_buffer_header *INP_head;
 
 #ifdef INP_READ_IN_ONE
-/*	readfile() creates a buffer in which the text of the file
+/*	INP_rdfile() creates a buffer in which the text of the file
 	is situated.  A pointer to the start of this text is
 	returned.  *size is initialized with the buffer length.
 */
 
-PRIVATE int
-readfile(fd, fn, size, pbuf)
+INP_PRIVATE int
+INP_rdfile(fd, fn, size, pbuf)
 	register File *fd;
 	char *fn;		/* file name */
 	register long *size;
@@ -127,19 +127,19 @@ readfile(fd, fn, size, pbuf)
 #endif INP_READ_IN_ONE
 
 #ifndef INP_READ_IN_ONE
-/*	Input buffer supplying routines: pushbuf()
+/*	Input buffer supplying routines: INP_pbuf()
 */
 
-PRIVATE struct i_buf *i_ptr;
+INP_PRIVATE struct INP_i_buf *i_ptr;
 
-PRIVATE char *
-pushbuf()
+INP_PRIVATE char *
+INP_pbuf()
 {
-	register struct i_buf *ib = 
-		(struct i_buf *) malloc(sizeof(struct i_buf));
+	register struct INP_i_buf *ib = 
+		(struct INP_i_buf *) malloc(sizeof(struct INP_i_buf));
 
 	if (!ib) return 0;
-	ib->next = i_ptr;
+	ib->ib_next = i_ptr;
 	i_ptr = ib;
 
 	/*	Don't give him all of it, we need some to implement a good
@@ -149,42 +149,42 @@ pushbuf()
 }
 #endif not INP_READ_IN_ONE
 
-/*	Input buffer administration: push_bh() and pop_bh()
+/*	Input buffer administration: INP_push_bh() and INP_pop_bh()
 */
-PRIVATE struct buffer_header *
-push_bh()
+INP_PRIVATE struct INP_buffer_header *
+INP_push_bh()
 {
-	register struct buffer_header *bh;
+	register struct INP_buffer_header *bh;
 
-	if (bh = head) {
+	if (bh = INP_head) {
 		bh->bh_ipp = _ipp;
 #ifdef INP_TYPE
 		bh->bh_i = INP_VAR;
 #endif INP_TYPE
 	}
-	if (!(bh = (struct buffer_header *)malloc(sizeof(struct buffer_header)))) return 0;
-	bh->next = head;
+	if (!(bh = (struct INP_buffer_header *)malloc(sizeof(struct INP_buffer_header)))) return 0;
+	bh->bh_next = INP_head;
 	bh->bh_eofreturned = 0;
-	head = bh;
+	INP_head = bh;
 	return bh;
 }
 
-/*	pop_bh() uncovers the previous inputbuffer on the stack
+/*	INP_pop_bh() uncovers the previous inputbuffer on the stack
 	of headers.  0 is returned if there are no more
 	inputbuffers on the stack, 1 is returned in the other case.
 */
-PRIVATE int
-pop_bh()
+INP_PRIVATE int
+INP_pop_bh()
 {
-	register struct buffer_header *bh = head;
+	register struct INP_buffer_header *bh = INP_head;
 
 
-	bh = bh->next;
-	free((char *) head);
-	head = bh;
+	bh = bh->bh_next;
+	free((char *) INP_head);
+	INP_head = bh;
 
 	if (!bh)	{	/* no more entries */
-		head = (struct buffer_header *) 0;
+		INP_head = (struct INP_buffer_header *) 0;
 		return 0;
 	}
 
@@ -198,11 +198,11 @@ pop_bh()
 
 #ifndef INP_READ_IN_ONE
 /*	low level I/O routine : read one block from current input
-	stream : readblock
+	stream : INP_rdblock
 */
 
-PRIVATE int
-readblock(fd, buf, n)
+INP_PRIVATE int
+INP_rdblock(fd, buf, n)
 	File *fd;
 	char buf[];
 	int *n;
@@ -217,13 +217,13 @@ readblock(fd, buf, n)
 #endif not INP_READ_IN_ONE
 
 /*	Miscellaneous routines :
-	mk_filename()
+	INP_mk_filename()
 */
 
-/*	mk_filename() concatenates a dir and filename.
+/*	INP_mk_filename() concatenates a dir and filename.
 */
-PRIVATE int
-mk_filename(dir, file, newname)
+INP_PRIVATE int
+INP_mk_filename(dir, file, newname)
 	register char *dir, *file;
 	char **newname;
 {
@@ -265,7 +265,7 @@ InsertFile(filnam, table, result)
 		else {
 			while (*table) {	
 				/* look in the directory table */
-				if (!mk_filename(*table++, filnam, &newfn)) {
+				if (!INP_mk_filename(*table++, filnam, &newfn)) {
 					return 0;
 				}
 				if (sys_open(newfn, OP_READ, &fd)) {
@@ -282,7 +282,7 @@ InsertFile(filnam, table, result)
 	}
 
 	if (fd) {
-		register struct buffer_header *bh = push_bh();
+		register struct INP_buffer_header *bh = INP_push_bh();
 
 		if (!bh) {
 			if (fd != STDIN) sys_close(fd);
@@ -290,7 +290,7 @@ InsertFile(filnam, table, result)
 		}
 #ifdef INP_READ_IN_ONE
 		if (fd == STDIN) return 0;	/* illegal */
-		if (!readfile(fd, filnam, &size, &text)) {
+		if (!INP_rdfile(fd, filnam, &size, &text)) {
 			sys_close(fd);
 			return 0;
 		}
@@ -298,9 +298,9 @@ InsertFile(filnam, table, result)
 		_ipp = bh->bh_text = text;
 #else not INP_READ_IN_ONE
 		if (
-		     !(_ipp = bh->bh_text = pushbuf())
+		     !(_ipp = bh->bh_text = INP_pbuf())
 		   ||
-		     !readblock(fd,_ipp,&(bh->bh_size))) {
+		     !INP_rdblock(fd,_ipp,&(bh->bh_size))) {
 			if (fd != STDIN) sys_close(fd);
 			return 0;
 		}
@@ -316,7 +316,7 @@ int
 InsertText(text, length)
 	char *text;
 {
-	register struct buffer_header *bh = push_bh();
+	register struct INP_buffer_header *bh = INP_push_bh();
 
 	if (!bh) return 0;
 	bh->bh_size = (long) length;
@@ -334,7 +334,7 @@ InsertText(text, length)
 int
 loadbuf()
 {
-	register struct buffer_header *bh = head;
+	register struct INP_buffer_header *bh = INP_head;
 	static char buf[INP_NPUSHBACK + 1];
 	int FromFile;
 
@@ -362,7 +362,7 @@ loadbuf()
 				*--de = *--so;
 			}
 #endif
-			if ( readblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
+			if ( INP_rdblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
 		   	   &&
 			     bh->bh_size > 0
 			   ) {
@@ -376,9 +376,9 @@ loadbuf()
 
 		if (bh->bh_fd) {	/* unstack a file */
 #ifndef INP_READ_IN_ONE
-			struct i_buf *ib;
+			struct INP_i_buf *ib;
 
-			ib = i_ptr->next;
+			ib = i_ptr->ib_next;
 			free((char *) i_ptr);
 			i_ptr = ib;
 #else INP_READ_IN_ONE
@@ -395,7 +395,7 @@ loadbuf()
 		}
 	}
 
-	if (pop_bh()) {
+	if (INP_pop_bh()) {
 		if (*_ipp) return *_ipp++;
 		return loadbuf();
 	}

@@ -8,27 +8,27 @@
 	congruence generator.
 */
 
-#define	HASHSIZE	256	/* size of hashtable, must be a power of 2 */
+#define	IDF_HASHSIZE	256	/* size of hashtable, must be a power of 2 */
 #ifndef IDF_HSIZE
 #define IDF_HSIZE	16	/* # of significant characters for hashing.
 				   This is NOT the number of significant
 				   characters!
 				*/
 #endif
-#define	HASH_X		0253	/* Knuth's X */
-#define	HASH_A		77	/* Knuth's a */
-#define	HASH_C		153	/* Knuth's c */
+#define	IDF_HASH_X		0253	/* Knuth's X */
+#define	IDF_HASH_A		77	/* Knuth's a */
+#define	IDF_HASH_C		153	/* Knuth's c */
 
-#define	HASHMASK		(HASHSIZE-1)	/* since it is a power of 2 */
-#define	STARTHASH(hs)		(hs = 0)
-#define	ENHASH(hs,ch,hm)	(hs += (ch ^ hm))
-#define	STOPHASH(hs)		(hs &= HASHMASK)
+#define	IDF_HASHMASK		(IDF_HASHSIZE-1)	/* since it is a power of 2 */
+#define	IDF_STARTHASH(hs)	(hs = 0)
+#define	IDF_ENHASH(hs,ch,hm)	(hs += (ch ^ hm))
+#define	IDF_STOPHASH(hs)	(hs &= IDF_HASHMASK)
 
-static char hmask[IDF_HSIZE];
+static char IDF_hmask[IDF_HSIZE];
 
-static struct idf *id_hashtable[HASHSIZE];
+static struct idf *IDF_hashtable[IDF_HASHSIZE];
 	/*	All identifiers can in principle be reached through
-		id_hashtable; id_hashtable[hc] is the start of a chain of
+		IDF_hashtable; IDF_hashtable[hc] is the start of a chain of
 		idf's whose tags all hash to hc.
 		Any identifier is entered into this
 		list, regardless of the nature of its declaration
@@ -36,7 +36,7 @@ static struct idf *id_hashtable[HASHSIZE];
 	*/
 
 static struct idf *
-new_idf(tg, size, cpy)
+IDF_new(tg, size, cpy)
 	register char *tg;
 	register int size;
 {
@@ -78,8 +78,8 @@ hash_stat()
 	register int i;
 
 	print("Hash table tally:\n");
-	for (i = 0; i < HASHSIZE; i++)	{
-		register struct idf *notch = id_hashtable[i];
+	for (i = 0; i < IDF_HASHSIZE; i++)	{
+		register struct idf *notch = IDF_hashtable[i];
 		register int cnt = 0;
 
 		while (notch)	{
@@ -100,17 +100,17 @@ str2idf(tg, cpy)
 		identifier tg.  If necessary, an entry is created.
 	*/
 	register char *cp = tg;
-	register char *phm = &hmask[0];
+	register char *phm = &IDF_hmask[0];
 	struct idf **hook;
 	register struct idf *notch;
 	register int hash;
 	int size;
 
-	STARTHASH(hash);
-	while (*cp && phm < &hmask[IDF_HSIZE]) {
-		ENHASH(hash, *cp++, *phm++);
+	IDF_STARTHASH(hash);
+	while (*cp && phm < &IDF_hmask[IDF_HSIZE]) {
+		IDF_ENHASH(hash, *cp++, *phm++);
 	}
-	STOPHASH(hash);
+	IDF_STOPHASH(hash);
 	while (*cp++) /* nothing. Find end of string */ ;
 	size = cp - tg;
 
@@ -119,7 +119,7 @@ str2idf(tg, cpy)
 		entered if cpy >= 0. A pointer to it is returned.
 		Notice that the chains of idf's are sorted alphabetically.
 	*/
-	hook = &id_hashtable[hash];
+	hook = &IDF_hashtable[hash];
 
 	while ((notch = *hook))	{
 		register char *s1 = tg;
@@ -139,7 +139,7 @@ str2idf(tg, cpy)
 	}
 	/* a new struct idf must be inserted at the hook */
 	if (cpy < 0) return 0;
-	notch = new_idf(tg, size, cpy);
+	notch = IDF_new(tg, size, cpy);
 	notch->id_next = *hook;
 	*hook = notch;		/* hooked in */
 	return notch;
@@ -149,11 +149,11 @@ init_idf()	{
 	/*	A simple congruence random number generator, as
 		described in Knuth, vol 2.
 	*/
-	register int rnd = HASH_X;
+	register int rnd = IDF_HASH_X;
 	register char *phm;
 	
-	for (phm = &hmask[0]; phm < &hmask[IDF_HSIZE];)	{
+	for (phm = &IDF_hmask[0]; phm < &IDF_hmask[IDF_HSIZE];)	{
 		*phm++ = rnd;
-		rnd = (HASH_A * rnd + HASH_C) & HASHMASK;
+		rnd = (IDF_HASH_A * rnd + IDF_HASH_C) & IDF_HASHMASK;
 	}
 }
