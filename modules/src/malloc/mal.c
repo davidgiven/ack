@@ -152,7 +152,13 @@ malloc(n)
 free(addr)
 	char *addr;
 {check_mallinks("free entry");{
-	register mallink *ml = mallink_of_block(addr);
+	register mallink *ml;
+	
+	if (addr == 0) {
+		check_mallinks("free(0) very fast exit");
+		return;
+	}
+	ml = mallink_of_block(addr);
 
 #ifdef STORE
 
