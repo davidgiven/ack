@@ -35,6 +35,7 @@
  */
 
 /* #define REGPATCH		/* save all registers in link block */
+/* #define UNTESTED		/* include untested rules */
 
 #ifdef REGPATCH
 #define SL 8
@@ -300,6 +301,7 @@ los $1==2       | |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jsr pc,los2~"                  |       	| |
+#ifdef UNTESTED
 los !defined($1)| source2 |
 			remove(all)
 			"cmp %[1],$$2"
@@ -307,6 +309,8 @@ los !defined($1)| source2 |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jsr pc,los2~"                  |       	| |
+#endif
+
 ldl             | |             | {LOCAL4, $1,4}                        | |
 lde             | |             | {relative4, $1}                       | |
 ldf             | regconst2 |
@@ -604,10 +608,12 @@ adi $1==4       | SCR_REG SCR_REG source2 source2 |
 			"add %[1],%[3]"
 			setcc(%[3]) erase(%[3]) erase(%[4])
 				| %[4] %[3]              | | (6,1200)+%[1]+%[2]
+#ifdef UNTESTED
 adi !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,adi~"                   |       | |
+#endif
 sbi $1==2       | source2 SCR_REG |
 			"sub %[1],%[2]"
 			setcc(%[2])     erase(%[2])     | %[2]  | | (2,450)+%[1]
@@ -625,10 +631,12 @@ sbi $1==4       | source2-REG source2-REG SCR_REG SCR_REG |
 			"sub %[2],2(sp)"
 			"sbc (sp)"
 			"sub %[1],(sp)"		      | | | (10,2800)+%[1]+%[2]
+#ifdef UNTESTED
 sbi !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,sbi~"                   |       | |
+#endif
 mli $1==2       | SCR_ODD_REG source2 |
 			"mul %[2],%[1]"
 			setcc(%[1])     erase(%[1])     | %[1]  | |(2,3300)+%[2]
@@ -638,10 +646,12 @@ mli $1==2       | SCR_ODD_REG source2 |
 mli $1==4       | |     remove(all)
 			"jsr pc,mli4~"
 				| r1 r0                                 | |
+#ifdef UNTESTED
 mli !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,mli~"                   |       | |
+#endif
 dvi $1==2       | source2 source2 |
 			allocate(%[2],REG_PAIR)
 			"mov %[2],%[a.2]"
@@ -655,10 +665,12 @@ dvi $1==2       | source2 source2 |
 			"div (sp)+,r0"			| r0	 | |(100,10000)
 dvi $1==4       | |     remove(all)
 			"jsr pc,dvi4~"                  | r1 r0 | |
+#ifdef UNTESTED
 dvi !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,dvi~"                   |       | |
+#endif
 rmi $1==2       | source2 source2 |
 			allocate(%[2],REG_PAIR)
 			"mov %[2],%[a.2]"
@@ -672,10 +684,12 @@ rmi $1==2       | source2 source2 |
 			"div (sp)+,r0"			| r1	 | |(100,10000)
 rmi $1==4       | |     remove(all)
 			"jsr pc,rmi4~"                  | r1 r0 | |
+#ifdef UNTESTED
 rmi !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,rmi~"                   |       | |
+#endif
 ngi $1==2       | SCR_REG |
 			"neg %[1]"
 			setcc(%[1])     erase(%[1])     | %[1]  | | (2,750)
@@ -685,10 +699,12 @@ ngi $1==4       | SCR_REG SCR_REG |
 			"sbc %[1]"
 			setcc(%[1]) erase(%[1]) erase(%[2])
 				| %[2] %[1]                     | | (6,1800)
+#ifdef UNTESTED
 ngi !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,ngi~"                   |       | |
+#endif
 loc sli $1==1 && $2==2 | SCR_REG |
 			"asl %[1]"
 			setcc(%[1])	erase(%[1])		| %[1]| |
@@ -698,10 +714,12 @@ sli $1==2       | source2 SCR_REG |
 sli $1==4       | source2 SCR_REG_PAIR |
 			"ashc %[1],%[2]"
 			setcc(%[2])     erase(%[2])             | %[2]  | |
+#ifdef UNTESTED
 sli !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,sli~"                   |       | |
+#endif
 loc sri $1==1 && $2==2	| SCR_REG |
 			"asr %[1]"
 			setcc(%[1])	erase(%[1])		| %[1]| |
@@ -719,10 +737,12 @@ sri $1==4       | SCR_REG SCR_REG_PAIR |
 			"neg %[1]"
 			"ashc %[1],%[2]"
 			setcc(%[2])     erase(%[1]) erase(%[2]) | %[2]  | |
+#ifdef UNTESTED
 sri !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,sri~"                   |       | |
+#endif
 
 /************************************************
  * Group 4 : unsigned arithmetic                *
@@ -739,26 +759,32 @@ sbu             | |     |                                       | sbi $1 |
 mlu $1==2       | |     |                                       | mli $1 |
 mlu $1==4       | |     remove(all)
 			"jsr pc,mlu4~"                  | r1 r0 | |
+#ifdef UNTESTED
 mlu !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,mlu~"                   |       | |
+#endif
 dvu $1==2       | |     remove(all)
 			"jsr pc,dvu2~"                  | r0    | |
 dvu $1==4       | |     remove(all)
 			"jsr pc,dvu4~"                  | r1 r0 | |
+#ifdef UNTESTED
 dvu !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,dvu~"                   |       | |
+#endif
 rmu $1==2       | |     remove(all)
 			"jsr pc,rmu2~"                  | r1    | |
 rmu $1==4       | |     remove(all)
 			"jsr pc,rmu4~"                  | r1 r0 | |
+#ifdef UNTESTED
 rmu !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,rmu~"                   |       | |
+#endif
 slu 		| |	|				| sli $1 |
 sru $1==2       | SCR_REG xsource2 |
 			allocate(%[2],REG_PAIR)
@@ -777,10 +803,12 @@ sru $1==4       | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,sru~"
 			erase(r0)                               |       | |
+#ifdef UNTESTED
 sru !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,sru~"                   |       | |
+#endif
 
 /************************************************
  * Group 5 : Floating point arithmetic          *
@@ -800,20 +828,24 @@ adf $1==8       | double8 SCR_DBL_REG |
 ...             | SCR_DBL_REG double8 |
 			"addf %[2],%[1]"
 			samecc erase(%[1])              | %[1] | | (2,6000)+%[2]
+#ifdef UNTESTED
 adf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,adf~"                   |       | |
+#endif
 sbf $1==4       | FLT_REG SCR_FLT_REG |
 			"subf %[1],%[2]"
 			samecc erase(%[2])              | %[2] | | (2,5000)+%[1]
 sbf $1==8       | double8 SCR_DBL_REG |
 			"subf %[1],%[2]"
 			samecc erase(%[2])              | %[2] | | (2,6000)+%[1]
+#ifdef UNTESTED
 sbf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,sbf~"                   |       | |
+#endif
 mlf $1==4       | FLT_REG SCR_FLT_REG |
 			"mulf %[1],%[2]"
 			samecc erase(%[2])              | %[2] | | (2,7000)+%[1]
@@ -826,30 +858,36 @@ mlf $1==8       | double8 SCR_DBL_REG |
 ...             | SCR_DBL_REG double8 |
 			"mulf %[2],%[1]"
 			samecc erase(%[1])              | %[1] | | (2,10000)+%[2]
+#ifdef UNTESTED
 mlf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,mlf~"                   |       | |
+#endif
 dvf $1==4       | FLT_REG SCR_FLT_REG |
 			"divf %[1],%[2]"
 			samecc erase(%[2])              | %[2] | | (2,8000)+%[1]
 dvf $1==8       | double8 SCR_DBL_REG |
 			"divf %[1],%[2]"
 			samecc erase(%[2])              | %[2] | | (2,12000)+%[1]
+#ifdef UNTESTED
 dvf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,dvf~"                   |       | |
+#endif
 ngf $1==4       | SCR_FLT_REG |
 			"negf %[1]"
 			samecc erase(%[1])              | %[1] | |(2,2700)
 ngf $1==8       | SCR_DBL_REG |
 			"negf %[1]"
 			samecc erase(%[1])              | %[1] | |(2,2700)
+#ifdef UNTESTED
 ngf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,ngf~"                   |       | |
+#endif
 fif $1==4       | longf4 FLT_REG |
 			allocate(FLT_REG_PAIR)
 			move(%[1],%[a.1])
@@ -860,10 +898,12 @@ fif $1==8       | double8 double8 |
 			move(%[1],%[a.1])
 			"modf %[2],%[a]"
 			samecc erase(%[a.1])    | %[a.1] %[a.2] | | (2,15000)+%[2]
+#ifdef UNTESTED
 fif !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,fif~"                   |       | |
+#endif
 fef $1==4       | FLT_REG |
 			allocate(REG)
 			"movei %[1],%[a]"
@@ -876,10 +916,12 @@ fef $1==8       | DBL_REG |
 			"movie $$0,%[1]"
 			samecc
 			erase(%[1])             |%[1] %[a] | | (4,5000)
+#ifdef UNTESTED
 fef !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,fef~"                   |       | |
+#endif
 
 /****************************************
  * Group 6 : pointer arithmetic.        *
@@ -1084,6 +1126,7 @@ zer !defined($1)| SCR_REG |
  * Group 8 : Convert instructions       *
  ****************************************/
 
+#ifdef UNTESTED
 cii             | |     remove(all)
 			" jsr pc,cii~"                  |       | |
 cfi             | |             |                       | cfu   |
@@ -1099,6 +1142,8 @@ ciu             | |             |                       | cuu   |
 cui             | |             |                       | cuu   |
 cuu             | |     remove(all)
 			"jsr pc,cuu~"                   |       | |
+#endif
+
 loc loc cii $1==1 && $2==2      | source1or2 |
 			 allocate(%[1],REG)
 			 "movb %[1],%[a]"
@@ -1212,11 +1257,13 @@ and defined($1) | |     remove(all)
 			move({CONST2,$1}, r0)
 			"jsr pc,and~"
 			erase(r0)                               |       | |
+#ifdef UNTESTED
 and !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,and~"
 			erase(r0)                               |       | |
+#endif
 ior $1==2       | SCR_REG source2 |
 			"bis %[2],%[1]"
 			setcc(%[1])
@@ -1245,6 +1292,7 @@ ior defined($1) | |     remove(all)
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[b],1b"
 			erase(%[a]) erase(%[b])		|       | | (12,2100+$1*975)
+#ifdef UNTESTED
 ior !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG=%[1])
@@ -1253,6 +1301,7 @@ ior !defined($1)| SCR_REG |
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[1],1b"
 			erase(%[1]) erase(%[a])         |       | |
+#endif
 xor $1==2       | REG SCR_REG |
 			"xor %[1],%[2]"
 			setcc(%[2])
@@ -1265,11 +1314,13 @@ xor defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,xor~"
 			erase(r0)                               |       | |
+#ifdef UNTESTED
 xor !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,xor~"
 			erase(r0)                               |       | |
+#endif
 com $1==2       | SCR_REG |
 			"com %[1]"
 			setcc(%[1])
@@ -1280,6 +1331,7 @@ com defined($1) | |     remove(all)
 			"1:\tcom (%[b])+"
 			"sob %[a],1b"
 			erase(%[a])                     |       | | (10,1800+$1*825)
+#ifdef UNTESTED
 com !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG)
@@ -1288,6 +1340,7 @@ com !defined($1)| SCR_REG |
 			"1:\tcom (%[a])+"
 			"sob %[1],1b"
 			erase(%[1])                             |       | |
+#endif
 rol $1==2       | CONST2 SCR_ODD_REG |
 			"ashc $$%(%[1.num]-16%),%[2]"
 			setcc(%[2])
@@ -1301,11 +1354,13 @@ rol defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,rol~"
 			erase(r0)                               |       | |
+#ifdef UNTESTED
 rol !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,rol~"
 			erase(r0)                               |       | |
+#endif
 ror $1==2       | CONST2 SCR_ODD_REG |
 			"ashc $$%(0-%[1.num]%),%[2]"
 			setcc(%[2])
@@ -1318,11 +1373,13 @@ ror defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,ror~"
 			erase(r0)                               |       | |
+#ifdef UNTESTED
 ror !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,ror~"
 			erase(r0)                               |       | |
+#endif
 com and $1==2 && $2==2  | source2 SCR_REG |
 			  "bic %[1],%[2]"
 			  setcc(%[2])
@@ -1371,12 +1428,14 @@ inn defined($1) | source2 |
 			move({CONST2,$1},r0)
 			"jsr pc,inn~"
 			erase(r01)                              | r0    | |
+#ifdef UNTESTED
 inn !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"mov (sp)+,r1"
 			"jsr pc,inn~"
 			erase(r01)                              | r0    | |
+#endif
 set $1==2       | REG |
 			allocate(REG={CONST2,1})
 			"ash %[1],%[a]"
@@ -1445,8 +1504,10 @@ aar $1==2       | |
 			"mov (sp)+,r1"
 			"jsr pc,aar~"
 			erase(r01)                              |       | |
+#ifdef UNTESTED
 aar !defined($1) | |    remove(all)
 			"jsr pc,iaar~"                  |       | |
+#endif
 lae sar defined(rom(1,3)) | |   |       | lae $1 aar $2 sti rom(1,3) |
 lae lar defined(rom(1,3)) | |   |       | lae $1 aar $2 loi rom(1,3) |
 sar $1==2       | |
@@ -1455,16 +1516,20 @@ sar $1==2       | |
 			"mov (sp)+,r1"
 			"jsr pc,sar~"
 			erase(r01)                              |       | |
+#ifdef UNTESTED
 sar !defined($1) | |    remove(all)
 			"jsr pc,isar~"                  |       | |
+#endif
 lar $1==2       | |
 			remove(all)
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jsr pc,lar~"
 			erase(r01)                              |       | |
+#ifdef UNTESTED
 lar !defined($1) | |    remove(all)
 			"jsr pc,ilar~"                  |       | |
+#endif
 
 /****************************************
  * group 12 : Compare instructions      *
@@ -1481,41 +1546,49 @@ cmi $1==2       | source2 SCR_REG |
 			erase(%[1])                             | %[1]  | |
 cmi $1==4       | |     remove(all)
 			"jsr pc,cmi4~"                  | r0    | |
+#ifdef UNTESTED
 cmi !defined($1) | source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,cmi~"
 			erase(r0)                               | r0    | |
+#endif
 cmf defined($1) | |     remove(ALL)
 			move({CONST2,$1},r0)
 			"jsr pc,cmf~"
 			erase(r0)                               | r0    | |
+#ifdef UNTESTED
 cmf !defined($1)| source2 |
 			remove(ALL)
 			move(%[1],r0)
 			"jsr pc,cmf~"
 			erase(r0)                               | r0    | |
+#endif
 cmu $1==2       | |             |                       | cmp |
 cmu $1==4       | |     remove(all)
 			"jsr pc,cmu4~"                  | r0    | |
 cmu defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,cmu~"                   | r0    | |
+#ifdef UNTESTED
 cmu !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,cmu~"
 			erase(r0)                               | r0    | |
+#endif
 cms $1==2       | |             |                       | cmi $1 |
 cms defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,cms~"
 			erase(r0)                               | r0    | |
+#ifdef UNTESTED
 cms !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,cms~"
 			erase(r0)                              | r0    | |
+#endif
 cmp             | source2 source2 |
 			allocate(REG = {CONST2,0})
 			"cmp %[1],%[2]"
@@ -2156,11 +2229,13 @@ asp             | |     remove(all)
 			"add $$$1,sp"          		|       | |
 ass $1==2       | |     remove(all)
 			"add (sp)+,sp"                  	|       | |
+#ifdef UNTESTED
 ass !defined($1)| source2 |
 			remove(all)
 			"cmp %[1],$$2"
 			"beq 1f;jmp unknown~;1:"
 			"add (sp)+,sp"                          |       | |
+#endif
 
 blm $1==4	| SCR_REG SCR_REG |
 			"mov (%[2])+,(%[1])+"
@@ -2186,6 +2261,7 @@ bls $1==2       | source2 |
 			move(%[1],r0)
 			"jsr pc,blm~"
 			erase(r01)                              |       | |
+#ifdef UNTESTED
 bls !defined($1)| source2 source2 |
 			remove(all)
 			"cmp %[1],$$2"
@@ -2193,6 +2269,7 @@ bls !defined($1)| source2 source2 |
 			move(%[2],r0)
 			"jsr pc,blm~"
 			erase(r01)                              |       | |
+#endif
 lae csa $2==2 | source2 |
 			remove(all)
 			move(%[1],r1)
@@ -2203,6 +2280,7 @@ csa $1==2	| |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jmp csa~" 				|       | |
+#ifdef UNTESTED
 csa !defined($1)| source2 |
 			remove(all)
 			"cmp %[1],$$2"
@@ -2210,6 +2288,7 @@ csa !defined($1)| source2 |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jmp csa~" 				|       | |
+#endif
 lae csb $2==2	| source2 |
 			remove(all)
 			move(%[1],r1)
@@ -2221,6 +2300,7 @@ csb $1==2       | |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jmp csb~" 				|	| |
+#ifdef UNTESTED
 csb !defined($1)| source2 |
 			remove(all)
 			"cmp %[1],$$2"
@@ -2228,6 +2308,7 @@ csb !defined($1)| source2 |
 			"mov (sp)+,r0"
 			"mov (sp)+,r1"
 			"jmp csb~" 				|	| |
+#endif
 dup $1==2       | REG     |             | %[1] %[1]                     | |
 dup $1==4       | NC longf4 | | %[1] %[1]				| |
 ...		| source2 source2 |     | %[2] %[1] %[2] %[1]           | |
@@ -2245,6 +2326,7 @@ dus $1==2       | source2 |
 			move(%[1],r0)
 			"jsr pc,dup~"
 			erase(r01)                              |       | |
+#ifdef UNTESTED
 dus !defined($1)| source2 |
 			remove(all)
 			"cmp %[1],$$2"
@@ -2252,6 +2334,7 @@ dus !defined($1)| source2 |
 			"mov (sp)+,r0"
 			"jsr pc,dup~"
 			erase(r01)                              |       | |
+#endif
 gto		| |	remove(all)
 			"mov $$$1,-(sp)"
 			"jmp gto~"				|       | |
@@ -2273,12 +2356,14 @@ rck $1==2       | source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,rck~"                   |       | |
+#ifdef UNTESTED
 rck !defined($1)| source2 source2 |
 			remove(all)
 			"cmp %[1],$$2"
 			"beq 1f;jmp unknown~;1:"
 			move(%[2],r0)
 			"jsr pc,rck~"                       |       | |
+#endif
 #else
 rck $1==2	| source2 |				|	| |
 rck !defined($1)| source2 source2 |			|	| |
