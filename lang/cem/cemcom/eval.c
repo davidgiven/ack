@@ -470,10 +470,11 @@ EVAL(expr, val, code, true_label, false_label)
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					EVAL(ex->OP_RIGHT, RVAL,
-					     ex->ex_type->tp_size > 0,
+					register struct expr *rght = ex->OP_RIGHT;
+					EVAL(rght, RVAL,
+					     rght->ex_type->tp_size > 0,
 							NO_LABEL, NO_LABEL);
-					ParSize += ATW(ex->ex_type->tp_size);
+					ParSize += ATW(rght->ex_type->tp_size);
 					ex = ex->OP_LEFT;
 				}
 				EVAL(ex, RVAL, ex->ex_type->tp_size > 0,
