@@ -696,7 +696,8 @@ with REG src2 src2
   kills allexeptcon
   gen move %2,{regdef2,%1}
       move %3,{regind2,%1,2}
-with REG STACK
+with REG
+kills ALL
   gen mov {autoinc,sp},{autoinc,%1}
       mov {autoinc,sp},{regdef2,%1}
 
@@ -732,14 +733,16 @@ with REG relative8
       mov {autoinc,%a},{autoinc,%1}
       mov {autoinc,%a},{autoinc,%1}
       mov {regdef2,%a},{regdef2,%1}
-with REG STACK
+with REG
+kills ALL
   gen mov {autoinc,sp},{autoinc,%1}
       mov {autoinc,sp},{autoinc,%1}
       mov {autoinc,sp},{autoinc,%1}
       mov {autoinc,sp},{regdef2,%1}
 
 pat sti
-with REG STACK
+with REG
+kills ALL
 uses REG={const2,$1/2}
 gen 1:
     mov {autoinc,sp},{autoinc,%1}
@@ -887,7 +890,7 @@ with src2 ODDREG
   gen mul %1,%2				yields %2
 
 pat mli $1==4
-with STACK
+kills ALL
   gen jsr pc,{label, "mli4~"}		yields r1 r0
 
 pat dvi $1==2
@@ -903,7 +906,7 @@ with src2 src2 STACK
       div {autoinc,sp},r0		yields r0
 
 pat dvi $1==4
-with STACK
+kills ALL
   gen jsr pc,{label, "dvi4~"}		yields r1 r0
 
 pat rmi $1==2
@@ -919,7 +922,7 @@ with src2 src2 STACK
       div {autoinc,sp},r0		yields r1
 
 pat rmi $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "rmi4~"}		yields r1 r0 
 
 pat ngi $1==2
@@ -981,23 +984,23 @@ pat sbu						leaving sbi $1
 pat mlu $1==2					leaving mli 2
 
 pat mlu $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "mlu4~"}		yields r1 r0 
 
 pat dvu $1==2
-with STACK
+kills ALL
 gen jsr pc,{label, "dvu2~"}		yields r0
 
 pat dvu $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "dvu4~"}		yields r1 r0
 
 pat rmu $1==2
-with STACK
+kills ALL
 gen jsr pc,{label, "rmu2~"}		yields r1
 
 pat rmu $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "rmu4~"}		yields r1 r0 
 
 pat slu						leaving sli $1
@@ -1018,7 +1021,7 @@ gen move %1,%a.2
     ashc {const2,0-$1},%a		yields %a.2
 
 pat sru $1==4
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "sru~"}
 
@@ -1244,7 +1247,7 @@ gen move {const2,$1/2},r0
  ****************************************/
 
 pat cii
-with STACK
+kills ALL
 gen jsr pc,{label, "cii~"}
 
 pat cfi						leaving cfu
@@ -1252,23 +1255,23 @@ pat ciu						leaving cuu
 pat cui						leaving cuu
 
 pat cfu
-with STACK
+kills ALL
 gen jsr pc,{label, "cfi~"}
 
 pat cif
-with STACK
+kills ALL
 gen jsr pc,{label, "cif~"}
 
 pat cuf
-with STACK
+kills ALL
 gen jsr pc,{label, "cuf~"}
 
 pat cff
-with STACK
+kills ALL
 gen jsr pc,{label, "cff~"}
 
 pat cuu
-with STACK
+kills ALL
 gen jsr pc,{label, "cuu~"}
 
 pat loc loc cii $1==1 && $2==2
@@ -1392,7 +1395,7 @@ with REG REG
       bic %1,%2				yields %2
 
 pat and defined($1)
-with STACK
+kills ALL
 gen move {const2,$1}, r0
     jsr pc,{label, "and~"}
 
@@ -1431,7 +1434,7 @@ with REG REG
   gen xor %2,%1				yields %1
 
 pat xor defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "xor~"}
 
@@ -1455,7 +1458,7 @@ with REG ODDREG
       ashc %1,%2			yields %2
 
 pat rol defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "rol~"}
 
@@ -1467,7 +1470,7 @@ with REG ODDREG
       ashc %1,%2			yields %2
 
 pat ror defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "ror~"}
 
@@ -1528,7 +1531,8 @@ gen ash %1,%a				yields %a
 						leaving and 2 zne $2
 
 pat inn defined($1)
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r1
     move {const2,$1},r0
     jsr pc,{label, "inn~"}		yields r0
@@ -1539,7 +1543,8 @@ uses REG={const2,1}
 gen ash %1,%a				yields %a
 
 pat set defined($1)
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r1
     move {const2,$1},r0
     jsr pc,{label, "set~"}
@@ -1589,7 +1594,7 @@ gen mul {const2,rom($1,3)},%1		yields {regconst2,%1,(0-rom($1,3))*rom($1,1)}
 						leaving adi 2
 
 pat aar $1==2
-with STACK
+kills ALL
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jsr pc,{label, "aar~"}
@@ -1597,28 +1602,28 @@ gen mov {autoinc,sp},r0
 pat lae sar defined(rom($1,3))		leaving lae $1 aar $2 sti rom($1,3)
 pat lae lar defined(rom($1,3))		leaving lae $1 aar $2 loi rom($1,3)
 pat sar $1==2
-with STACK
+kills ALL
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jsr pc,{label, "sar~"}
 
 pat lar $1==2
-with STACK
+kills ALL
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jsr pc,{label, "lar~"}
 
 #ifdef UNTESTED
 pat aar !defined($1)
-with STACK
+kills ALL
 gen jsr pc,{label, "iaar~"}
 
 pat sar !defined($1)
-with STACK
+kills ALL
 gen jsr pc,{label, "isar~"}
 
 pat lar !defined($1)
-with STACK
+kills ALL
 gen jsr pc,{label, "ilar~"}
 #endif
 
@@ -1634,34 +1639,35 @@ with REG src2
       neg %1				yields %1
 
 pat cmi $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "cmi4~"}		yields r0
 
 pat cmf defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "cmf~"}		yields r0
 
 pat cmu $1==2					leaving cmp
 
 pat cmu $1==4
-with STACK
+kills ALL
 gen jsr pc,{label, "cmu4~"}		yields r0
 
 pat cmu defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "cmu~"}		yields r0
 
 pat cms $1==2					leaving cmi $1
 
 pat cms defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "cms~"}		yields r0
 
 pat cms !defined($1)
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r0
     jsr pc,{label, "cms~"}		yields r0
 
@@ -1984,18 +1990,19 @@ pat and zne $1==2		call andzen("jne")
  ************************************************/
 
 pat cal
-with STACK
+kills ALL
 gen jsr pc,{label, $1}
 
 pat cai
-with REG STACK
+with REG
+kills ALL
 gen jsr pc,{regdef2,%1}
 
 pat lfr $1==2				yields r0
 pat lfr $1==4				yields r1 r0
 pat lfr $1==8				yields {relative8,"retar"}
 pat lfr
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "lfr~"}
 
@@ -2027,7 +2034,7 @@ pat ret $1==8				yields {addr_external, "retar"}
 						leaving sti 8 ret 0
 
 pat ret
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jmp {label,"ret~"}
 
@@ -2091,25 +2098,27 @@ gen
 	1:
 
 pat lae csa $2==2
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r1
     move {addr_external,$1},r0
     jmp {label, "csa~"}
 
 pat csa $1==2
-with STACK
+kills ALL
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jmp {label, "csa~"}
 
 pat lae csb $2==2
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r1
     move {addr_external,$1},r0
     jmp {label, "csb~"}
 
 pat csb $1==2
-with STACK
+kills ALL
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jmp {label, "csb~"}
@@ -2124,21 +2133,23 @@ with src2 src2				yields %2 %1 %2 %1
 pat dup $1==8
 with exact long8			yields %1 %1
 with STACK
+kills ALL
 gen move {const2, $1}, r0
     jsr pc,{label, "dup~"}
 
 pat dup
-with STACK
+kills ALL
 gen move {const2, $1}, r0
     jsr pc,{label, "dup~"}
 
 pat dus $1==2
-with src2 STACK
+with src2
+kills ALL
 gen move %1,r0
     jsr pc,{label, "dup~"}
 
 pat gto
-with STACK
+kills ALL
 gen mov {addr_external, $1},{autodec,sp}
     jmp {label, "gto~"}
 
@@ -2163,11 +2174,11 @@ gen mov sp,%a				yields %a
 pat lor $1==2				yields {relative2,"reghp~"}
 
 pat mon
-with STACK
+kills ALL
 gen jsr pc,{label, "mon~"}
 
 pat nop
-with STACK
+kills ALL
 gen jsr pc,{label, "nop~"}
 
 pat rck $1==2
@@ -2182,30 +2193,32 @@ gen move {relative2,"trppc~"},%a
     mov %1,{relative2,"trppc~"}		yields %a
 
 pat sim
-with STACK
+kills ALL
 gen jsr pc,{label, "sim~"}
 
 pat str $1==0
 with src2
+kills ALL
 gen mov %1,lb
 
 pat str $1==1
-with src2 STACK
+with src2
+kills ALL
 gen mov %1,sp
 
 pat str $1==2
-with STACK
+kills ALL
 gen jsr pc,{label, "strhp~"}
 
 pat trp
-with STACK
+kills ALL
 gen jsr pc,{label, "trp~"}
 
 pat exg $1==2
 with src2 src2				yields %1 %2
 
 pat exg defined($1)
-with STACK
+kills ALL
 gen move {const2,$1},r0
     jsr pc,{label, "exg~"}
 
