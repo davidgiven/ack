@@ -138,19 +138,12 @@ dumpidf(idf, opt)
 		}
 		dumpsdefs(idf->id_sdef, selector);
 	}
-	if (idf->id_struct)	{
+	if (idf->id_tag)	{
 		if (!started++)	{
 			newline();
 			print("%s:", idf->id_text);
 		}
-		dumptags(idf->id_struct);
-	}
-	if (idf->id_enum)	{
-		if (!started++)	{
-			newline();
-			print("%s:", idf->id_text);
-		}
-		dumptags(idf->id_enum);
+		dumptags(idf->id_tag);
 	}
 }
 

@@ -150,11 +150,11 @@ unstack_level()
 			idf->id_sdef = sdef->next;
 			free_sdef(sdef);
 		}
-		while (	(tag = idf->id_struct)
+		while (	(tag = idf->id_tag)
 		&&	tag->tg_level >= level
 		)	{
 			/* unlink it from the struct list under the idf block */
-			idf->id_struct = tag->next;
+			idf->id_tag = tag->next;
 			free_tag(tag);
 		}
 	}

@@ -72,7 +72,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	extern arith add_field();
 #endif NOBITFIELD
 
-	struct tag *tg = stp->tp_idf->id_struct;	/* or union */
+	struct tag *tg = stp->tp_idf->id_tag;	/* or union */
 	struct sdef *sdef = idf->id_sdef;
 	register struct sdef *newsdef;
 	int lvl = tg->tg_level;
@@ -183,7 +183,7 @@ declare_struct(fund, idf, tpp)
 	if (*tpp) error("multiple types in declaration");
 	if (!idf)
 		idf = gen_idf();
-	tgp = &idf->id_struct;
+	tgp = &idf->id_tag;
 	tg = *tgp;
 	if (tg
 	    && tg->tg_type->tp_size < 0
@@ -243,7 +243,7 @@ apply_struct(fund, idf, tpp)
 	*/
 	register struct tag **tgp;
 
-	tgp = &idf->id_struct;
+	tgp = &idf->id_tag;
 
 	if (*tgp)
 		*tpp = (*tgp)->tg_type;

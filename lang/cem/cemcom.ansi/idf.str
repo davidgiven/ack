@@ -18,7 +18,7 @@ struct id_u {
 	struct def *idd_label;	/* labels				*/
 	struct def *idd_def;	/* variables, typedefs, enum-constants	*/
 	struct sdef *idd_sdef;	/* selector tags			*/
-	struct tag *idd_struct;	/* struct and union tags		*/
+	struct tag *idd_tag;	/* struct, union, and enum tags		*/
 	int idd_special;	/* special action needed at occurrence	*/
 };
 
@@ -31,8 +31,7 @@ struct id_u {
 #define id_label	id_user.idd_label
 #define id_def		id_user.idd_def
 #define id_sdef		id_user.idd_sdef
-#define id_struct	id_user.idd_struct
-#define id_enum		id_user.idd_struct
+#define id_tag		id_user.idd_tag
 #define id_special	id_user.idd_special
 
 #include <idf_pkg.spec>

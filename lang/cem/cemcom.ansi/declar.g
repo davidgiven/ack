@@ -379,7 +379,7 @@ enum_specifier(register struct type **tpp;)
 			{
 #ifdef DBSYMTAB
 				if (options['g']) {
-					stb_tag(idf->id_enum, idf->id_text);
+					stb_tag(idf->id_tag, idf->id_text);
 				}
 #endif /*DBSYMTAB */
 			}
@@ -446,14 +446,14 @@ struct_or_union_specifier(register struct type **tpp;)
 		[
 			{
 				declare_struct(fund, idf, tpp);
-				(idf->id_struct->tg_busy)++;
+				(idf->id_tag->tg_busy)++;
 			}
 			struct_declaration_pack(*tpp)
 			{
-				(idf->id_struct->tg_busy)--;
+				(idf->id_tag->tg_busy)--;
 #ifdef DBSYMTAB
 				if (options['g']) {
-					stb_tag(idf->id_struct, idf->id_text);
+					stb_tag(idf->id_tag, idf->id_text);
 				}
 #endif /*DBSYMTAB */
 			}
