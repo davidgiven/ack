@@ -6,7 +6,7 @@ SOURCES =	ASCII.def EM.def MathLib0.def Processes.def \
 		random.def Semaphores.def Unix.def RealConver.def \
 		Strings.def InOut.def Terminal.def TTY.def \
 		Mathlib.def PascalIO.def Traps.def CSP.def \
-		Epilogue.def Streams.def
+		Epilogue.def Streams.def ArraySort.def
 
 all:
 

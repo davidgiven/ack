@@ -16,6 +16,7 @@ Conversion.mod
 Semaphores.mod
 random.mod
 Strings.mod
+ArraySort.mod
 catch.c
 Traps.mod
 Arguments.c
