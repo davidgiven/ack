@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 #undef getchar

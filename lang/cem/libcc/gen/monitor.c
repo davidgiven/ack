@@ -1,3 +1,4 @@
+/* $Header$ */
 static int bs;
 static char *bp;
 static char *bufp;

@@ -1,3 +1,4 @@
+/* $Header$ */
 swab(from, to, nbytes)
 	register char *from, *to;
 {

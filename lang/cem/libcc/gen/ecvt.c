@@ -1,3 +1,4 @@
+/* $Header$ */
 #ifndef NOFLOAT
 extern double modf();
 static char *cvt();

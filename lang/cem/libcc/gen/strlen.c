@@ -1,3 +1,4 @@
+/* $Header$ */
 int strlen(s)
 char *s;
 {

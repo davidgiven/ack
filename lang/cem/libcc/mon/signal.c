@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <signal.h>
 
 typedef int (*callvec)() ;

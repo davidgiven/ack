@@ -1,3 +1,4 @@
+/* $Header$ */
 extern char *strpbrk();
 
 char *

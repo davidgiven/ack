@@ -1,3 +1,4 @@
+/* $Header$ */
 static	qsort1();
 static	int (*qcompar)();
 static	qexchange();

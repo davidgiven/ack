@@ -1,3 +1,4 @@
+/* $Header$ */
 /* perror(s) print the current error message. */
 
 extern int errno;

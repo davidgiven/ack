@@ -1,3 +1,4 @@
+/* $Header$ */
 ffs(i)
 	register int i;
 {

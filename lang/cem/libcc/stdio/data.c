@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 unsigned char  _sobuf[BUFSIZ];

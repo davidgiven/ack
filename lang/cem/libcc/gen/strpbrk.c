@@ -1,3 +1,4 @@
+/* $Header$ */
 char *
 strpbrk(string, brk)
 	register char *string, *brk;

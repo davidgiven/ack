@@ -1,3 +1,4 @@
+/* $Header$ */
 int
 strspn(string, in)
 	char *string;

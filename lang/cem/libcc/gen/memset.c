@@ -1,3 +1,4 @@
+/* $Header$ */
 char *
 memset(s, c, n)
 	char *s;

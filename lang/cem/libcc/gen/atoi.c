@@ -1,3 +1,4 @@
+/* $Header$ */
 atoi(s)
 register char *s;
 {

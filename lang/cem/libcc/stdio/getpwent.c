@@ -1,3 +1,4 @@
+/* $Header$ */
 /*
  * get entry from password file
  *

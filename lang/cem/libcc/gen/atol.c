@@ -1,3 +1,4 @@
+/* $Header$ */
 long atol(s)
 register char *s;
 {

@@ -1,3 +1,4 @@
+/* $Header$ */
 char    *getenv();
 char	*index();
 

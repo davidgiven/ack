@@ -1,3 +1,4 @@
+/* $Header$ */
 /* mktemp - make a name for a temporary file */
 
 char *mktemp(template)

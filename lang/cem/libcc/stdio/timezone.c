@@ -1,3 +1,4 @@
+/* $Header$ */
 static struct zonetable {
 	int	offset;
 	char	*stdzone;

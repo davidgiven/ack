@@ -1,3 +1,4 @@
+/* $Header$ */
 int strcmp(s1, s2)
 register char *s1, *s2;
 {

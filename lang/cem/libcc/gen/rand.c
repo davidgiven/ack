@@ -1,3 +1,4 @@
+/* $Header$ */
 static long seed = 1L;
 
 int rand()

@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 fwrite(ptr, size, count, file)

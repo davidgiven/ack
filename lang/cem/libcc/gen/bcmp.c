@@ -1,3 +1,4 @@
+/* $Header$ */
 int
 bcmp(b1, b2, n)
 	register char *b1, *b2;

@@ -1,3 +1,4 @@
+/* $Header$ */
 
 #define CLICK_SIZE	16
 #if EM_WSIZE == EM_PSIZE

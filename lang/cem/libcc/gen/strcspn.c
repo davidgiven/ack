@@ -1,3 +1,4 @@
+/* $Header$ */
 int
 strcspn(string, notin)
 	char *string;

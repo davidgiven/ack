@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 int fscanf (fp, format, args)

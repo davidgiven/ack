@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <time.h>
 
 extern struct tm *localtime();

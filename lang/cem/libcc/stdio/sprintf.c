@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 char *sprintf(buf,format,args)

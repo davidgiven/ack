@@ -1,3 +1,4 @@
+/* $Header$ */
 bfill(dst, len, fill)
 	register char *dst;
 	register int len;

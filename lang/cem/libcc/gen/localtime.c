@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <time.h>
 
 #define YEARSIZE(year)	((year) % 4 ? 365 : 366)

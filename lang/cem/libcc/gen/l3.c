@@ -1,3 +1,4 @@
+/* $Header$ */
 ltol3(cp, lp, n)
 register char	*cp;
 register long	*lp;

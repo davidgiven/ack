@@ -1,3 +1,4 @@
+/* $Header$ */
 /*
  * return offset in file.
  */

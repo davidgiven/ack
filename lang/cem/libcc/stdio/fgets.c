@@ -1,3 +1,4 @@
+/* $Header$ */
 #include <stdio.h>
 
 char *fgets(str, n, file)

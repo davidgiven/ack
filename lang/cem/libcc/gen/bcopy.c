@@ -1,3 +1,4 @@
+/* $Header$ */
 bcopy(old, new, n)
 register char *old, *new;
 register int n;

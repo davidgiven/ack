@@ -1,3 +1,4 @@
+/* $Header$ */
 bzero(b, l)
 	register char *b;
 {
