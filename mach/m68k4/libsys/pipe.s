@@ -1,7 +1,7 @@
 .define _pipe
 .extern _pipe
 _pipe:		
-		mov.w #0x2A,d0
+		move.w #0x2A,d0
 		trap #0
 		bcc 1f
 		jmp cerror
