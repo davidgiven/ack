@@ -27,7 +27,7 @@ static File *ofp = 0;
 static
 flush() {
 	if (sys_write(ofp, &obuf[0], opp - &obuf[0]) == 0) {
-		sys_stop(S_ABORT);
+		C_failed();
 	}
 	opp = &obuf[0];
 }
