@@ -2725,9 +2725,9 @@ blm $1 > 12 |	ADDSCR ADDSCR |	remove(MEM_ALL)
 /* Wait for restriction nregneeded<2 to be removed
 bls $1 == 2 |	DATASCR ADDSCR ADDSCR |
 				remove(MEM_ALL)
-				"sub.w #1,%[1]"
 				"asr #1,%[1]"
-				"beq 2f"
+				"sub.w #1,%[1]"
+				"blt 2f"
 				"1:"
 				"move.w (%[3])+,(%[2])+"
 				"dbf %[1],1b"
@@ -2741,9 +2741,9 @@ bls $1 == 2 | STACK |
 				"move.w (sp)+,%[c]"
 				"move.l (sp)+,%[b]"
 				"move.l (sp)+,%[a]"
-				"sub.w #1,%[c]"
 				"asr #1,%[c]"
-				"beq 2f"
+				"sub.w #1,%[c]"
+				"blt 2f"
 				"1:"
 				"move.w (%[a])+,(%[b])+"
 				"dbf %[c],1b"
