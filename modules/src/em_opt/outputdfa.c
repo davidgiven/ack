@@ -195,7 +195,8 @@ outdfa()
 	printf("Number of patterns: %d\n", numpatterns);
 	printf("Longest pattern: %d\n", maxpattern);
 	printf("Longest replacement: %d\n", maxreplacement);
-	printf("Dfa contains %d distinct state/opcode pairs\n", numentries);
+	printf("Dfa contains %d states and %d distinct state/opcode pairs\n",
+	       higheststate+1,numentries);
 	printf("Compacted using row displacement into %d entries\n",maxpos);
 	/* output the arrays */
 	fprintf(ofile,"struct dfa OO_checknext[] = {\n");
@@ -235,30 +236,131 @@ outmnems(l)
 		fprintf(ofile,"%s ",l.m_elems[i-1]->op_code->id_text);
 }
 
+PRIVATE int
+sametest(s1,s2,e1,e2)
+	int s1,s2;
+	struct exp_node *e1,*e2;
+{
+	/* retrun 1 if tests are identical */
+	if(e1) {
+		if(!e2) return 0;
+		if(e1->node_type!=e2->node_type) return 0;
+		switch(e1->node_type) {
+		case LOGAND:
+		case LOGOR:
+		case BITAND:
+		case BITOR:
+		case XOR:
+		case MINUS:
+		case PLUS:
+		case TIMES:
+		case DIV:
+		case MOD:
+		case EQ:
+		case NE:
+		case LT:
+		case LE:
+		case GT:
+		case GE:
+		case LSHIFT:
+		case RSHIFT:
+		case COMMA:
+		case SAMESIGN:
+		case SFIT:
+		case UFIT:
+		case ROTATE:
+		case SAMEEXT:
+		case SAMENAM:
+			return (sametest(e1->exp_left,e2->exp_left) &&
+				sametest(e1->exp_right,e2->exp_right));
+		case NOT:
+		case COMP:
+		case UPLUS:
+		case UMINUS:
+			return sametest(e1->exp_left,e2->exp_left);
+		case DEFINED:
+		case UNDEFINED:
+		case INT:
+			return (e1->leaf_val == e2->leaf_val);
+		case PATARG:
+			 /* depends on pattern !! */
+			if (e1->leaf_val != e2->leaf_val) return 0;
+			return (patterns[s1].m_elems[e1->leaf_val-1]->
+				   op_code->id_argfmt
+			     == patterns[s1].m_elems[e2->leaf_val-1]->
+				   op_code->id_argfmt);
+		case PSIZE:
+		case WSIZE:
+			return 1;
+
+		}
+	}
+	else return (e2==0);
+}
+
+PRIVATE int
+samerepl(s1,s2,r1,r2)
+	int s1,s2;
+	struct mnems r1,r2;
+{
+	/* return 1 if replacements are identical */
+	register int i;
+	register struct mnem_elem *m1,*m2;
+	if (r1.m_len != r2.m_len) return 0; /* different length */
+	for(i=0;i<r1.m_len;i++) {
+		m1=r1.m_elems[i];
+		m2=r2.m_elems[i];
+		if(m1->op_code!=m2->op_code) return 0;
+		if(!sametest(s1,s2,m1->arg,m2->arg)) return 0;
+	}
+	return 1;
+}
+
+PRIVATE int
+samecode(s1,s2)
+	int s1,s2;
+{
+	/* return 1 if replacement code of state s1 and s2 are identical */
+	register struct action *a1,*a2;
+	if (patterns[s1].m_len != patterns[s2].m_len) return 0;
+	a1 = actions[s1];
+	a2 = actions[s2];
+	while(a1) {
+		if(!a2) return 0; /* a2 is shorter */
+		if(!samerepl(s1,s2,a1->replacement,a2->replacement)) return 0;
+		if(!sametest(s1,s2,a1->test,a2->test)) return 0;
+		a1 = a1->next;
+		a2 = a2->next;
+	}
+	if(a2) return 0; /* a2 is longer */
+	return 1;
+}
+
 PRIVATE
 outdotrans()
 {
-	int s;
+	register int s,t;
 	struct action *a;
 	int seennontested;
+	int *farray;
 	fprintf(ofile,"#include \"nopt.h\"\n\n");
-	/* declare all the trans functions */
-	for(s=0;s<=higheststate;s++) {
-		if(actions[s]!=(struct action *)NULL)
-			fprintf(ofile,"static do%dtrans();\n",s);
-	}
-	/* output the array itself */
-	fprintf(ofile,"\nint (*OO_ftrans[])()=\n{\n");
-	for(s=0;s<=higheststate;s++) {
-		if(actions[s]!=(struct action *)NULL)
-			fprintf(ofile,"\tdo%dtrans,\n",s);
-		else
-			fprintf(ofile,"\t0,\n");
-	}
-	fprintf(ofile,"};\n\n");
-	/* now output the functions */
+	/* keep track of which procedure used for each state */
+	farray = (int *)Malloc((unsigned)(higheststate+1)*sizeof(int));
+	for(s=0;s<=higheststate;s++) farray[s] = EMPTY;
+	/* output the functions avoiding duplicates */
 	for(s=0;s<=higheststate;s++) {
 		if(actions[s]!=(struct action *)NULL) {
+			/* first look for a previous identical function */
+			for(t=0;t<s;t++) {
+				if(actions[t]!=(struct action *)NULL &&
+				   samecode(s,t)) {
+					   /* use state 't' instead */
+					   farray[s]=t;
+					   goto next_func;
+				   }
+			}
+			/* no identical function so make new one */
+			farray[s] = s;
 			fprintf(ofile,"\nstatic do%dtrans() {\n",s);
 			fprintf(ofile,"\tregister p_instr patt = OO_patternqueue;\n");
 			fprintf(ofile,"\t/* ");
@@ -285,7 +387,18 @@ outdotrans()
 			}
 			fprintf(ofile,"}\n");
 		}
+	next_func:
+		continue;
 	}
+	/* output the array itself */
+	fprintf(ofile,"\n\nint (*OO_ftrans[])()=\n{\n");
+	for(s=0;s<=higheststate;s++) {
+		if(farray[s]!=EMPTY)
+			fprintf(ofile,"\tdo%dtrans,\n",farray[s]);
+		else
+			fprintf(ofile,"\t0,\n");
+	}
+	fprintf(ofile,"};\n");
 }
 
 PRIVATE

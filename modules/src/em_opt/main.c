@@ -61,21 +61,21 @@ main(argc,argv)
 				break;
 			}
 			break;
-		default:
-			p->em_opcode = OTHER;
-			/* fall thru */
-			if (OO_state) {
-				buff = *p;
-				OO_dfa(OTHER);
-				EM_mkcalls(&buff);
-			}
-			else {
-				OO_flush();
-				EM_mkcalls(p);
-			}
-			continue;
 		case EM_PSEU:
+			switch(p->em_opcode) {
+			case ps_pro:
+			case ps_end:
+				break;
+			default:
+				EM_mkcalls(p);
+				OO_nxtpatt--;
+				continue;
+			}
 			break;
+		default:
+			EM_mkcalls(p);
+			OO_nxtpatt--;
+			continue;
 		case EM_EOF:
 			goto got_eof;
 		case EM_ERROR:
