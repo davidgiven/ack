@@ -48,5 +48,4 @@ unknown.s
 fat.s
 trp.s
 stop.s
-printf.s
 print.s
