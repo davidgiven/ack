@@ -77,7 +77,7 @@ struct regadm {
 	char *ra_str;
 	long  ra_off;
 } regadm[2];
-int nregvars;
+int n_regvars;
 
 regscore(off,size,typ,score,totyp) long off; {
 
@@ -98,13 +98,13 @@ regscore(off,size,typ,score,totyp) long off; {
 i_regsave() {
 
 	Rstring[0] = 0;
-	nregvars=0;
+	n_regvars=0;
 }
 
 f_regsave() {
 	register i;
 
-	if (nregvars==0 || lbytes==0) {
+	if (n_regvars==0 || lbytes==0) {
 #ifdef REGPATCH
 		fprintf(codefile,"mov r2,-(sp)\nmov r4,-(sp)\n");
 #endif
@@ -113,7 +113,7 @@ f_regsave() {
 			fprintf(codefile,"tst -(sp)\n");
 		else if (lbytes!=0)
 			fprintf(codefile,"sub $0%o,sp\n",lbytes);
-		for (i=0;i<nregvars;i++)
+		for (i=0;i<n_regvars;i++)
 			fprintf(codefile,"mov %s,-(sp)\n",regadm[i].ra_str);
 	} else {
 		if (lbytes>6) {
@@ -123,7 +123,7 @@ f_regsave() {
 			fprintf(codefile,"jsr r5,PR%d%s\n",lbytes,Rstring);
 		}
 	}
-	for (i=0;i<nregvars;i++)
+	for (i=0;i<n_regvars;i++)
 		if (regadm[i].ra_off>=0)
 			fprintf(codefile,"mov 0%lo(r5),%s\n",regadm[i].ra_off,
 						regadm[i].ra_str);
@@ -142,9 +142,9 @@ regsave(regstr,off,size) char *regstr; long off; {
 end of commented away */
 
 	strcat(Rstring,regstr);
-	regadm[nregvars].ra_str = regstr;
-	regadm[nregvars].ra_off = off;
-	nregvars++;
+	regadm[n_regvars].ra_str = regstr;
+	regadm[n_regvars].ra_off = off;
+	n_regvars++;
 }
 
 regreturn() {
