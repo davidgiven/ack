@@ -225,7 +225,13 @@ X0)
 w
 q
 ABC
-	  cd ../../../lib/descr
+	  cd ../../../util/cpp
+	  ed - Makefile <<ABC
+/MALLOC/s/=/=#/
+w
+q
+ABC
+	  cd ../../lib/descr
 	  cp fe fe.orig
 	  ed - fe << ABC
 /em_cemcom/i
