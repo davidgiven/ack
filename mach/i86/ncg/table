@@ -1640,8 +1640,8 @@ gen neg {LOCAL, $1, 2}
 
 pat ldl ngi sdl $1==$3 && $2==4
 kills indexed,locals %ind+%size > $1 && %ind < $1+4
-gen neg {LOCAL, $1, 2}
-    neg {LOCAL, $1+2, 2}
+gen neg {LOCAL, $1+2, 2}
+    neg {LOCAL, $1, 2}
     sbb {LOCAL, $1+2, 2}, {ANYCON, 0}
  
 pat lol lol adp stl loi stl $1==$2 && $2==$4 && $5<=2
@@ -1744,8 +1744,8 @@ gen neg {EXTERN2, $1}
 
 pat lde ngi sde $1==$3 && $2==4
 kills indirects
-gen neg {EXTERN2, $1}
-    neg {EXTERN2, $1+2}
+gen neg {EXTERN2, $1+2}
+    neg {EXTERN2, $1}
     sbb {EXTERN2, $1+2}, {ANYCON, 0}
 
 pat loe loe adp ste $1==$2 && $1==$4
