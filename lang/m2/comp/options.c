@@ -91,10 +91,19 @@ DoOption(text)
 		break;
 
 	case 'I' :
-		if (++ndirs >= NDIRS) {
-			fatal("too many -I options");
+		if (*text) {
+			register int i = ndirs++;
+			register char *new = text;
+			while (new) {
+				register char *tmp = DEFPATH[i];
+	
+				if (i >= NDIRS)
+					fatal("too many -I options");
+				DEFPATH[i++] = new;
+				new = tmp;
+			}
 		}
-		DEFPATH[ndirs] = text;
+		else	DEFPATH[ndirs] = 0;
 		break;
 
 	case 'V' :	/* set object sizes and alignment requirements	*/

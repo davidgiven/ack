@@ -117,10 +117,15 @@ DefinitionModule
 	register struct def *df;
 	struct node *exportlist;
 	int dummy;
+	extern struct idf *DefId;
 } :
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  if (!Defined) Defined = df;
+			  if (df->df_idf != DefId) {
+				error("DEFINITION MODULE name is not \"%s\"",
+					DefId->id_text);
+			  }
 			  CurrentScope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);

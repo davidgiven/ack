@@ -252,7 +252,7 @@ again1:
 				goto again;
 			}
 			else if (nch == EOI) eofseen = 1;
-			else PushBack(nch);
+			else PushBack();
 		}
 		return tk->tk_symb = ch;
 
@@ -292,7 +292,7 @@ again1:
 			crash("(LLlex, STCOMP)");
 		}
 		if (nch == EOI) eofseen = 1;
-		else PushBack(nch);
+		else PushBack();
 		return tk->tk_symb = ch;
 
 	case STIDF:
@@ -306,7 +306,7 @@ again1:
 		} while(in_idf(ch));
 
 		if (ch == EOI) eofseen = 1;
-		else PushBack(ch);
+		else PushBack();
 		*tag++ = '\0';
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
@@ -373,7 +373,7 @@ again1:
 					state = End;
 					if (ch == 'H') base = 16;
 					else if (ch == EOI) eofseen = 1;
-					else PushBack(ch);
+					else PushBack();
 				}
 				break;
 
@@ -387,7 +387,7 @@ again1:
 				if (ch != 'H') {
 					lexerror("H expected after hex number");
 					if (ch == EOI) eofseen = 1;
-					else PushBack(ch);
+					else PushBack();
 				}
 				break;
 
@@ -404,7 +404,7 @@ again1:
 					break;
 				}
 				if (ch == EOI) eofseen = 1;
-				else PushBack(ch);
+				else PushBack();
 				ch = *--np;
 				*np++ = '\0';
 				base = 8;
@@ -447,8 +447,8 @@ lexwarning(W_ORDINARY, "character constant out of range");
 				if (ch == '.') {
 					/*	Indeed the '..' token
 					*/
-					PushBack(ch);
-					PushBack(ch);
+					PushBack();
+					PushBack();
 					state = End;
 					base = 10;
 					break;
@@ -493,7 +493,7 @@ lexwarning(W_ORDINARY, "character constant out of range");
 
 		*np++ = '\0';
 		if (ch == EOI) eofseen = 1;
-		else PushBack(ch);
+		else PushBack();
 
 		if (np >= &buf[NUMSIZE]) {
 			tk->TOK_REL = Salloc("0.0", 5);

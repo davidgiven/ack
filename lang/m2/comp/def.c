@@ -16,11 +16,6 @@
 #include	"node.h"
 #include	"Lpars.h"
 
-struct def *h_def;		/* pointer to free list of def structures */
-#ifdef DEBUG
-int	cnt_def;		/* count number of allocated ones */
-#endif
-
 extern int	(*c_inp)();
 
 STATIC

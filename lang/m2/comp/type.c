@@ -55,16 +55,6 @@ struct type
 	*std_type,
 	*error_type;
 
-struct paramlist *h_paramlist;
-#ifdef DEBUG
-int	cnt_paramlist;
-#endif
-
-struct type *h_type;
-#ifdef DEBUG
-int	cnt_type;
-#endif
-
 struct type *
 construct_type(fund, tp)
 	int fund;

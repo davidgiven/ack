@@ -22,19 +22,19 @@ CSRC =	LLlex.c LLmessage.c char.c error.c main.c \
 	symbol2str.c tokenname.c idf.c input.c type.c def.c \
 	scope.c misc.c enter.c defmodule.c typequiv.c node.c \
 	cstoper.c chk_expr.c options.c walk.c casestat.c desig.c \
-	code.c tmpvar.c lookup.c Version.c
+	code.c tmpvar.c lookup.c Version.c next.c
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
-	code.o tmpvar.o lookup.o Version.o
+	code.o tmpvar.o lookup.o Version.o next.o
 SRC =	$(CSRC) $(LSRC) Lpars.c
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 # Keep the next entries up to date!
 GENCFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
-	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c
+	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
 GENGFILES=	tokenfile.g
 GENHFILES=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
@@ -46,6 +46,7 @@ HFILES=		LLlex.h\
 	walk.h warning.h $(GENHFILES)
 #
 GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
+NEXTFILES = def.H type.H node.H scope.C tmpvar.C casestat.C
 
 #EXCLEXCLEXCLEXCL
 
@@ -86,23 +87,23 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	make.tokcase <tokenname.c >symbol2str.c
 
-def.h:		def.H make.allocd
-		make.allocd < def.H > def.h
+.SUFFIXES:	.H .h
+.H.h:
+		./make.allocd < $*.H > $*.h
 
-type.h:		type.H make.allocd
-		make.allocd < type.H > type.h
+.SUFFIXES:	.C .c
+.C.c:
+		./make.allocd < $*.C > $*.c
 
-node.h:		node.H make.allocd
-		make.allocd < node.H > node.h
+def.h:		make.allocd
+type.h:		make.allocd
+node.h:		make.allocd
+scope.c:	make.allocd
+tmpvar.c:	make.allocd
+casestat.c:	make.allocd
 
-scope.c:	scope.C make.allocd
-		make.allocd < scope.C > scope.c
-
-tmpvar.c:	tmpvar.C make.allocd
-		make.allocd < tmpvar.C > tmpvar.c
-
-casestat.c:	casestat.C make.allocd
-		make.allocd < casestat.C > casestat.c
+next.c:		$(NEXTFILES) ./make.next
+		./make.next $(NEXTFILES) > next.c
 
 char.c: char.tab tab
 	tab -fchar.tab >char.c
@@ -154,6 +155,7 @@ desig.o: LLlex.h debug.h debugcst.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h debugcst.h def.h desig.h node.h scope.h standards.h type.h walk.h
 tmpvar.o: debug.h debugcst.h def.h main.h scope.h type.h
 lookup.o: LLlex.h debug.h debugcst.h def.h idf.h misc.h node.h scope.h type.h
+next.o: debug.h debugcst.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h main.h node.h scope.h type.h warning.h
 declar.o: LLlex.h Lpars.h chk_expr.h debug.h debugcst.h def.h idf.h main.h misc.h node.h scope.h type.h warning.h

@@ -46,7 +46,12 @@ ProcedureHeading(struct def **pdf; int type;)
 	PROCEDURE IDENT
 			{ *pdf = DeclProc(type, dot.TOK_IDF); }
 	FormalParameters(&pr, &parmaddr, &tp)?
-			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr)); }
+			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
+			  if (tp && IsConstructed(tp)) {
+warning(W_STRICT, "procedure \"%s\" has a constructed result type",
+	(*pdf)->df_idf->id_text);
+			  }
+			}
 ;
 
 block(struct node **pnd;) :

@@ -67,7 +67,7 @@ Compile(src, dst)
 	}
 	LineNumber = 1;
 	FileName = src;
-	DEFPATH[0] = "";
+	DEFPATH[0] = ".";
 	DEFPATH[NDIRS] = 0;
 	init_idf();
 	InitCst();
