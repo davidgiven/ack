@@ -23,6 +23,7 @@ do
 	xname)		SYS="$2"
 			ACTION='make $PAR'
 			DIR=.
+			FM=no
 			FAIL='Failed for $SYS, see $DIR/Out'
 			SUCC='$SYS -- done'
 			ATYPE=
@@ -31,11 +32,16 @@ do
 			;;
 	xfatal)		FATAL=yes ;;
 	xaction|xindir)	case x$ATYPE in
-			x)	ACTION=$2 ; ATYPE=$1 ;;
+			x)	ACTION=$2 ; ATYPE=$1
+				case $ATYPE$FM in
+				indirno) FAIL='Failed for $SYS' ;;
+				esac
+				;;
 			*)	echo Already specified an $ATYPE for this name
-				RETC=-1 ;;
+				RETC=65 ;;
 			esac ;;
-	xfailure)	FAIL="$2" ;;
+	xfailure)	FM=yes 
+			FAIL="$2" ;;
 	xsuccess)	SUCC="$2" ;;
 	xdir)		DIR="$2" ;;
 	xsystem)	case `ack_sys` in
@@ -48,7 +54,7 @@ do
 			no)	continue ;;
 			esac
 			case x$SYS in
-			x)	echo Missing name line; RETC=-1 ;;
+			x)	echo Missing name line; RETC=65 ;;
 			*)	if test -d $DIR
 				then (
 				     cd $DIR
@@ -80,7 +86,7 @@ do
 				esac
 				else
 				      echo Directory $DIR for $SYS is inaccessible
-				      RETC=-2
+				      RETC=66
 				fi ;;
 			esac
 			case $FATAL$RETC in
@@ -91,9 +97,10 @@ do
 			SYS=
 			;;
 	*)		echo Unknown keyword "$1"
-			RETC=-3 ;;
+			RETC=67 ;;
 	esac
 done
+exit $RETC
 } <$CMD
 RETX=$?
 case $RETX in
