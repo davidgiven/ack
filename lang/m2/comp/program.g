@@ -59,10 +59,12 @@ ModuleDeclaration
 
 priority(arith *pprio;)
 {
-	struct node *nd;
+	register struct node *nd;
+	struct node *nd1;		/* &nd is illegal */
 } :
-	'[' ConstExpression(&nd) ']'
-			{ if (!(nd->nd_type->tp_fund & T_CARDINAL)) {
+	'[' ConstExpression(&nd1) ']'
+			{ nd = nd1;
+			  if (!(nd->nd_type->tp_fund & T_CARDINAL)) {
 				node_error(nd, "illegal priority");
 			  }
 			  *pprio = nd->nd_INT;
@@ -70,9 +72,7 @@ priority(arith *pprio;)
 			}
 ;
 
-export(int *QUALflag; struct node **ExportList;)
-{
-} :
+export(int *QUALflag; struct node **ExportList;):
 	EXPORT
 	[
 		QUALIFIED
@@ -86,7 +86,7 @@ export(int *QUALflag; struct node **ExportList;)
 import(int local;)
 {
 	struct node *ImportList;
-	struct node *FromId = 0;
+	register struct node *FromId = 0;
 	register struct def *df;
 	extern struct def *GetDefinitionModule();
 } :
@@ -121,7 +121,7 @@ DefinitionModule
 			  if (!Defined) Defined = df;
 			  CurrentScope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
-			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
+			  df->df_type = standard_type(T_RECORD, 1, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  DefinitionModule++;
 			}
@@ -210,12 +210,9 @@ ProgramModule
 ;
 
 Module:
-				{ open_scope(CLOSEDSCOPE);
-				  warning(W_ORDINARY, "Compiling a definition module");
-				}
-	DefinitionModule
-				{ close_scope(SC_CHKFORW); }
-|
+	DEFINITION
+				{ fatal("Compiling a definition module"); }
+|	%default
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }
 	|

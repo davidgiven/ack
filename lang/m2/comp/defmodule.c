@@ -36,7 +36,7 @@ GetFile(name)
 	buf[10] = '\0';			/* maximum length */
 	strcat(buf, ".def");
 	if (! InsertFile(buf, DEFPATH, &(FileName))) {
-		error("could'nt find a DEFINITION MODULE for \"%s\"", name);
+		error("could not find a DEFINITION MODULE for \"%s\"", name);
 		return 0;
 	}
 	LineNumber = 1;
@@ -56,6 +56,7 @@ GetDefinitionModule(id, incr)
 	struct def *df;
 	static int level;
 	struct scopelist *vis;
+	int didread = 0;
 
 	level += incr;
 	df = lookup(id, GlobalScope, 1);
@@ -68,6 +69,7 @@ GetDefinitionModule(id, incr)
 		else {
 			open_scope(CLOSEDSCOPE);
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
+				didread = 1;
 				DefModule();
 				if (level == 1) {
 					/* The module is directly imported by
@@ -93,6 +95,9 @@ GetDefinitionModule(id, incr)
 		}
 		df = lookup(id, GlobalScope, 1);
 		if (! df) {
+			if (didread) {
+				error("did not read a DEFINITION MODULE for \"%s\"", id->id_text);
+			}
 			df = MkDef(id, GlobalScope, D_ERROR);
 			df->df_type = error_type;
 			df->mod_vis = vis;

@@ -86,7 +86,6 @@ CodePadString(nd, sz)
 	C_loi(sizearg);
 }
 
-
 CodeExpr(nd, ds, true_label, false_label)
 	register struct node *nd;
 	register struct desig *ds;
@@ -365,26 +364,36 @@ CodeParameters(param, arg)
 	left = arg->nd_left;
 	left_type = left->nd_type;
 	if (IsConformantArray(tp)) {
+		register struct type *elem = tp->arr_elem;
+
 		C_loc(tp->arr_elsize);
 		if (IsConformantArray(left_type)) {
 			DoHIGH(left);
-			if (tp->arr_elem->tp_size !=
-			    left_type->arr_elem->tp_size) {
+			if (elem->tp_size != left_type->arr_elem->tp_size) {
 				/* This can only happen if the formal type is
-				   ARRAY OF WORD
+				   ARRAY OF (WORD|BYTE)
 				*/
-				assert(tp->arr_elem == word_type);
 				C_loc(left_type->arr_elem->tp_size);
-				C_cal("_wa");
-				C_asp(dword_size);
-				C_lfr(word_size);
+				C_mli(word_size);
+				if (elem == word_type) {
+					C_loc(word_size - 1);
+					C_adi(word_size);
+					C_loc(word_size);
+					C_dvi(word_size);
+				}
+				else {
+					assert(elem == byte_type);
+				}
 			}
 		}
 		else if (left->nd_symb == STRING) {
-			C_loc(left->nd_SLE);
+			C_loc(left->nd_SLE - 1);
 		}
-		else if (tp->arr_elem == word_type) {
+		else if (elem == word_type) {
 			C_loc((left_type->tp_size+word_size-1) / word_size - 1);
+		}
+		else if (elem == byte_type) {
+			C_loc(left_type->tp_size - 1);
 		}
 		else {
 			arith lb, ub;
@@ -395,20 +404,30 @@ CodeParameters(param, arg)
 		if (left->nd_symb == STRING) {
 			CodeString(left);
 		}
-		else	CodeDAddress(left);
-	}
-	else if (IsVarParam(param)) {
-		CodeDAddress(left);
-	}
-	else {
-		if (left_type->tp_fund == T_STRING) {
-			CodePadString(left, tp->tp_size);
-		}
-		else {
+		else if (left->nd_class == Call) {
+			/* ouch! forgot about this one! */
+			arith tmp, TmpSpace();
+
 			CodePExpr(left);
-			RangeCheck(left_type, tp);
+			tmp = TmpSpace(left->nd_type->tp_size, left->nd_type->tp_align);
+			C_lal(tmp);
+			C_sti(WA(left->nd_type->tp_size));
+			C_lal(tmp);
 		}
+		else	CodeDAddress(left);
+		return;
 	}
+	if (IsVarParam(param)) {
+		CodeDAddress(left);
+		return;
+	}
+	if (left_type->tp_fund == T_STRING) {
+		CodePadString(left, tp->tp_size);
+		return;
+	}
+	CodePExpr(left);
+	RangeCheck(tp, left_type);
+	CodeCoercion(left_type, tp);
 }
 
 CodeStd(nd)
@@ -536,33 +555,6 @@ CodeStd(nd)
 	default:
 		crash("(CodeStd)");
 	}
-}
-
-CodeAssign(nd, dss, dst)
-	register struct node *nd;
-	struct desig *dst, *dss;
-{
-	/*	Generate code for an assignment. Testing of type
-		compatibility and the like is already done.
-	*/
-	register struct type *tp = nd->nd_right->nd_type;
-	arith size = nd->nd_left->nd_type->tp_size;
-
-	if (dss->dsg_kind == DSG_LOADED) {
-		if (tp->tp_fund == T_STRING) {
-			CodeAddress(dst);
-			C_loc(tp->tp_size);
-			C_loc(size);
-			C_cal("_StringAssign");
-			C_asp((int_size << 1) + (pointer_size << 1));
-			return;
-		}
-		CodeStore(dst, size);
-		return;
-	}
-	CodeAddress(dss);
-	CodeAddress(dst);
-	C_blm(size);
 }
 
 RangeCheck(tpl, tpr)
@@ -800,32 +792,30 @@ CodeOper(expr, true_label, false_label)
 	case OR:
 	case AND:
 	case '&': {
-		label l_true, l_false, l_maybe = ++text_label, l_end;
+		label  l_maybe = ++text_label, l_end;
 		struct desig Des;
+		int genlabels = 0;
 
 		if (true_label == 0)	{
-			l_true = ++text_label;
-			l_false = ++text_label;
+			genlabels = 1;
+			true_label = ++text_label;
+			false_label = ++text_label;
 			l_end = ++text_label;
-		}
-		else {
-			l_true = true_label;
-			l_false = false_label;
 		}
 
 		Des = InitDesig;
 		if (expr->nd_symb == OR) {
-			CodeExpr(leftop, &Des, l_true, l_maybe);
+			CodeExpr(leftop, &Des, true_label, l_maybe);
 		}
-		else	CodeExpr(leftop, &Des, l_maybe, l_false);
+		else	CodeExpr(leftop, &Des, l_maybe, false_label);
 		C_df_ilb(l_maybe);
 		Des = InitDesig;
-		CodeExpr(rightop, &Des, l_true, l_false);
-		if (true_label == 0) {
-			C_df_ilb(l_true);
+		CodeExpr(rightop, &Des, true_label, false_label);
+		if (genlabels) {
+			C_df_ilb(true_label);
 			C_loc((arith)1);
 			C_bra(l_end);
-			C_df_ilb(l_false);
+			C_df_ilb(false_label);
 			C_loc((arith)0);
 			C_df_ilb(l_end);
 		}

@@ -15,7 +15,6 @@
 
 struct scope {
 	struct scope *next;
-	struct forwards *sc_forw;
 	char *sc_name;		/* name of this scope */
 	struct def *sc_def;	/* list of definitions in this scope */
 	arith sc_off;		/* offsets of variables in this scope */

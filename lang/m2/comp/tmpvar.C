@@ -41,14 +41,23 @@ TmpOpen(sc) struct scope *sc;
 }
 
 arith
+TmpSpace(sz, al)
+	arith sz;
+{
+	register struct scope *sc = ProcScope;
+
+	sc->sc_off = - WA(align(sz - sc->sc_off, al));
+	return sc->sc_off;
+}
+
+arith
 NewInt()
 {
 	register arith offset;
 	register struct tmpvar *tmp;
 
 	if (!TmpInts) {
-		offset = - WA(align(int_size - ProcScope->sc_off, int_align));
-		ProcScope->sc_off = offset;
+		offset = TmpSpace(int_size, int_align);
 		if (! options['n']) C_ms_reg(offset, int_size, reg_any, 0);
 	}
 	else {
@@ -67,8 +76,7 @@ NewPtr()
 	register struct tmpvar *tmp;
 
 	if (!TmpPtrs) {
-		offset = - WA(align(pointer_size - ProcScope->sc_off, pointer_align));
-		ProcScope->sc_off = offset;
+		offset = TmpSpace(pointer_size, pointer_align);
 		if (! options['n']) C_ms_reg(offset, pointer_size, reg_pointer, 0);
 	}
 	else {

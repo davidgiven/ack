@@ -8,8 +8,11 @@ case $# in
 	exit 1
 	;;
 esac
+currdir=`pwd`
 case $1 in
-../comp/main|Xlint)
+main)	target=$currdir/$1
+	;;
+Xlint)	target=$1
 	;;
 *)	echo "$0: $1: Illegal argument" 1>&2
 	exit 1
@@ -48,4 +51,4 @@ $i:	clashes $PW/$i
 	cid -Fclashes < $PW/$i > $i
 EOF
 done
-make $1
+make CURRDIR=$currdir $target

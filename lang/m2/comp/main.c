@@ -29,6 +29,9 @@ struct def 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
 
+extern		C_inp(), C_exp();
+int		(*c_inp)() = C_inp;
+
 main(argc, argv)
 	register char **argv;
 {
@@ -49,6 +52,7 @@ main(argc, argv)
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
 		return 1;
 	}
+	if (options['x']) c_inp = C_exp;
 	return !Compile(Nargv[1], Nargv[2]);
 }
 
@@ -197,6 +201,7 @@ do_SYSTEM()
 	*/
 	open_scope(CLOSEDSCOPE);
 	(void) Enter("WORD", D_TYPE, word_type, 0);
+	(void) Enter("BYTE", D_TYPE, byte_type, 0);
 	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
 	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
 	(void) Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
@@ -215,14 +220,14 @@ Info()
 {
 	extern int cnt_def, cnt_node, cnt_paramlist, cnt_type,
 		   cnt_switch_hdr, cnt_case_entry, 
-		   cnt_scope, cnt_scopelist, cnt_forwards, cnt_tmpvar;
+		   cnt_scope, cnt_scopelist, cnt_tmpvar;
 
 	print("\
 %6d def\n%6d node\n%6d paramlist\n%6d type\n%6d switch_hdr\n\
-%6d case_entry\n%6d scope\n%6d scopelist\n%6d forwards\n%6d tmpvar\n",
+%6d case_entry\n%6d scope\n%6d scopelist\n%6d tmpvar\n",
 cnt_def, cnt_node, cnt_paramlist, cnt_type,
 cnt_switch_hdr, cnt_case_entry, 
-cnt_scope, cnt_scopelist, cnt_forwards, cnt_tmpvar);
+cnt_scope, cnt_scopelist, cnt_tmpvar);
 print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif

@@ -5,11 +5,11 @@ PKGDIR =	$(EMDIR)/modules/pkg
 LIBDIR =	$(EMDIR)/modules/lib
 OBJECTCODE =	$(LIBDIR)/libemk.a
 LLGEN =		$(EMDIR)/bin/LLgen
+CURRDIR =	.
 
 INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
 
 GFILES =	tokenfile.g program.g declar.g expression.g statement.g
-CC =	cc
 LLGENOPTIONS =
 PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
@@ -50,14 +50,14 @@ GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
 #EXCLEXCLEXCLEXCL
 
 all:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make ../comp/main ; else sh Resolve ../comp/main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make $(CURRDIR)/main ; else sh Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
 install:	all
-	cp main $(EMDIR)/lib/em_m2
+	cp $(CURRDIR)/main $(EMDIR)/lib/em_m2
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes main
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes $(CURRDIR)/main
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
@@ -123,9 +123,9 @@ depend:
 Xlint:
 	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
 
-../comp/main:	$(OBJ) ../comp/Makefile
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o ../comp/main
-	size ../comp/main
+$(CURRDIR)/main:	$(OBJ)
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
+	size $(CURRDIR)/main
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h Lpars.h class.h const.h debug.h debugcst.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h warning.h

@@ -177,7 +177,7 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
 		a value parameter.
-		Otherwise, a conformant array may do, or an ARRAY OF WORD
+		Otherwise, a conformant array may do, or an ARRAY OF (WORD|BYTE)
 		may do too.
 		Or: a WORD may do.
 	*/
@@ -202,9 +202,14 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		   )
 		)
 	    ||
+		(  formaltype == byte_type
+		&& actualtype->tp_size == (arith) 1
+		)
+	    ||
 		(  IsConformantArray(formaltype)
 		&&
 		   (  formaltype->arr_elem == word_type
+		   || formaltype->arr_elem == byte_type
 		   ||
 		      (  actualtype->tp_fund == T_ARRAY
 		      && TstTypeEquiv(formaltype->arr_elem,actualtype->arr_elem)

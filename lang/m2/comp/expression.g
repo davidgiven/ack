@@ -50,7 +50,7 @@ ExpList(struct node **pnd;)
 	register struct node *nd;
 } :
 	expression(pnd)		{ *pnd = nd = MkNode(Link,*pnd,NULLNODE,&dot);
-				  (*pnd)->nd_symb = ',';
+				  nd->nd_symb = ',';
 				}
 	[
 		','		{ nd->nd_right = MkLeaf(Link, &dot);
@@ -60,20 +60,26 @@ ExpList(struct node **pnd;)
 	]*
 ;
 
-ConstExpression(struct node **pnd;):
+ConstExpression(struct node **pnd;)
+{
+	register struct node *nd;
+}:
 	expression(pnd)
 	/*
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
-		{ DO_DEBUG(options['X'], print("CONSTANT EXPRESSION\n"));
-		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
-		  if (ChkExpression(*pnd) &&
-		      ((*pnd)->nd_class != Set && (*pnd)->nd_class != Value)) {
+		{ nd = *pnd;
+		  DO_DEBUG(options['X'], print("CONSTANT EXPRESSION\n"));
+		  DO_DEBUG(options['X'], PrNode(nd, 0));
+
+		  if (ChkExpression(nd) &&
+		      ((nd)->nd_class != Set && (nd)->nd_class != Value)) {
 			error("constant expression expected");
 		  }
+
 		  DO_DEBUG(options['X'], print("RESULTS IN\n"));
-		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
+		  DO_DEBUG(options['X'], PrNode(nd, 0));
 		}
 ;
 
@@ -102,6 +108,7 @@ SimpleExpression(struct node **pnd;)
 		[ '+' | '-' ]
 			{ *pnd = MkLeaf(Uoper, &dot);
 			  pnd = &((*pnd)->nd_right);
+			  /* priority of unary operator ??? */
 			}
 	]?
 	term(pnd)

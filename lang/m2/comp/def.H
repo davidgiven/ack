@@ -63,13 +63,20 @@ struct dforward {
 #define for_name	df_value.df_forward.fo_name
 };
 
+struct forwtype {
+	struct node *f_node;
+	struct type *f_type;
+#define df_forw_type	df_value.df_fortype.f_type
+#define df_forw_node	df_value.df_fortype.f_node
+};
+
 struct def	{		/* list of definitions for a name */
 	struct def *next;	/* next definition in definitions chain */
 	struct def *df_nextinscope;
 				/* link all definitions in a scope */
 	struct idf *df_idf;	/* link back to the name */
 	struct scope *df_scope;	/* scope in which this definition resides */
-	short df_kind;		/* the kind of this definition: */
+	unsigned short df_kind;	/* the kind of this definition: */
 #define D_MODULE	0x0001	/* a module */
 #define D_PROCEDURE	0x0002	/* procedure of function */
 #define D_VARIABLE	0x0004	/* a variable */
@@ -82,20 +89,22 @@ struct def	{		/* list of definitions for a name */
 #define D_HIDDEN	0x0200	/* a hidden type */
 #define D_FORWARD	0x0400	/* not yet defined */
 #define D_FORWMODULE	0x0800	/* module must be declared later */
-#define D_ERROR		0x1000	/* a compiler generated definition for an
+#define D_FORWTYPE	0x1000	/* forward type */
+#define D_FTYPE		0x2000	/* resolved forward type */
+#define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
-#define D_ISTYPE	(D_HIDDEN|D_TYPE)
+#define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	char df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
 #define D_USED		0x02	/* set if used (future use ???) */
 #define D_DEFINED	0x04	/* set if it is assigned a value (future use ???) */
-#define D_VARPAR	0x10	/* set if it is a VAR parameter */
-#define D_VALPAR	0x20	/* set if it is a value parameter */
-#define D_EXPORTED	0x40	/* set if exported */
-#define D_QEXPORTED	0x80	/* set if qualified exported */
+#define D_VARPAR	0x08	/* set if it is a VAR parameter */
+#define D_VALPAR	0x10	/* set if it is a value parameter */
+#define D_EXPORTED	0x20	/* set if exported */
+#define D_QEXPORTED	0x40	/* set if qualified exported */
 	struct type *df_type;
 	union {
 		struct module df_module;
@@ -106,6 +115,7 @@ struct def	{		/* list of definitions for a name */
 		struct import df_import;
 		struct dfproc df_proc;
 		struct dforward df_forward;
+		struct forwtype df_fortype;
 		int df_stdname;	/* define for standard name */
 	} df_value;
 };

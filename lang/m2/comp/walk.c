@@ -44,13 +44,15 @@ DoProfil()
 	static label	filename_label = 0;
 
 	if (! options['L']) {
-		if (!filename_label) {
-			filename_label = ++data_label;
-			C_df_dlb(filename_label);
+		register label fn_label = filename_label;
+
+		if (!fn_label) {
+			filename_label = fn_label = ++data_label;
+			C_df_dlb(fn_label);
 			C_rom_scon(FileName, (arith) (strlen(FileName) + 1));
 		}
 
-		C_fil_dlb(filename_label, (arith) 0);
+		C_fil_dlb(fn_label, (arith) 0);
 	}
 }
 
@@ -126,7 +128,7 @@ WalkProcedure(procedure)
 		local definitions, checking and generating code.
 	*/
 	struct scopelist *savevis = CurrVis;
-	register struct scope *sc;
+	register struct scope *sc = procedure->prc_vis->sc_scope;
 	register struct type *tp;
 	register struct paramlist *param;
 	label func_res_label = 0;
@@ -136,7 +138,6 @@ WalkProcedure(procedure)
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
-	sc = CurrentScope;
 
 	/* Generate code for all local modules and procedures
 	*/
@@ -390,7 +391,7 @@ WalkCall(nd)
 }
 
 WalkStat(nd, exit_label)
-	struct node *nd;
+	register struct node *nd;
 	label exit_label;
 {
 	/*	Walk through a statement, generating code for it.
@@ -468,10 +469,11 @@ WalkStat(nd, exit_label)
 		{
 			arith tmp = 0;
 			register struct node *fnd;
+			int good_forvar;
 			label l1 = ++text_label;
 			label l2 = ++text_label;
 
-			if (! DoForInit(nd, left)) break;
+			good_forvar = DoForInit(nd, left);
 			fnd = left->nd_right;
 			if (fnd->nd_class != Value) {
 				/* Upperbound not constant.
@@ -489,15 +491,19 @@ WalkStat(nd, exit_label)
 				C_bgt(l2);
 			}
 			else	C_blt(l2);
-			RangeCheck(nd->nd_type, int_type);
-			CodeDStore(nd);
+			if (good_forvar) {
+				RangeCheck(nd->nd_type, int_type);
+				CodeDStore(nd);
+			}
 			WalkNode(right, exit_label);
-			CodePExpr(nd);
-			C_loc(left->nd_INT);
-			C_adi(int_size);
-			C_bra(l1);
-			C_df_ilb(l2);
-			C_asp(int_size);
+			if (good_forvar) {	
+				CodePExpr(nd);
+				C_loc(left->nd_INT);
+				C_adi(int_size);
+				C_bra(l1);
+				C_df_ilb(l2);
+				C_asp(int_size);
+			}
 			if (tmp) FreeInt(tmp);
 		}
 		break;
@@ -545,14 +551,23 @@ WalkStat(nd, exit_label)
 
 	case RETURN:
 		if (right) {
-			if (! WalkExpr(right)) break;
+			if (! ChkExpression(right)) break;
 			/* The type of the return-expression must be
 			   assignment compatible with the result type of the
 			   function procedure (See Rep. 9.11).
 			*/
 			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
+				break;
 			}
+			if (right->nd_type->tp_fund == T_STRING) {
+				arith strsize = WA(right->nd_type->tp_size);
+
+				C_zer(WA(func_type->tp_size) - strsize);
+				CodePExpr(right);
+				C_loi(strsize);
+			}
+			else	CodePExpr(right);
 		}
 		C_bra(RETURN_LABEL);
 		break;
@@ -644,12 +659,12 @@ DoForInit(nd, left)
 	if (df->df_kind == D_FIELD) {
 		node_error(nd,
 			   "FOR-loop variable may not be a field of a record");
-		return 0;
+		return 1;
 	}
 
 	if (!df->var_name && df->var_off >= 0) {
 		node_error(nd, "FOR-loop variable may not be a parameter");
-		return 0;
+		return 1;
 	}
 
 	if (df->df_scope != CurrentScope) {
@@ -659,7 +674,7 @@ DoForInit(nd, left)
 			if (!sc) {
 				node_error(nd,
 				      "FOR-loop variable may not be imported");
-				return 0;
+				return 1;
 			}
 			if (sc->sc_scope == df->df_scope) break;
 			sc = nextvisible(sc);
@@ -669,7 +684,7 @@ DoForInit(nd, left)
 	if (df->df_type->tp_size > word_size ||
 	    !(df->df_type->tp_fund & T_DISCRETE)) {
 		node_error(nd, "illegal type of FOR loop variable");
-		return 0;
+		return 1;
 	}
 
 	if (!TstCompat(df->df_type, left->nd_left->nd_type) ||
@@ -677,7 +692,7 @@ DoForInit(nd, left)
 		if (!TstAssCompat(df->df_type, left->nd_left->nd_type) ||
 		    !TstAssCompat(df->df_type, left->nd_right->nd_type)) {
 			node_error(nd, "type incompatibility in FOR statement");
-			return 0;
+			return 1;
 		}
 node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	}
@@ -695,29 +710,48 @@ DoAssign(nd, left, right)
 	   DAMN THE BOOK!
 	*/
 	struct desig dsl, dsr;
+	register struct type *rtp, *ltp;
 
 	if (! (ChkExpression(right) & ChkVariable(left))) return;
+	rtp = right->nd_type;
+	ltp = left->nd_type;
 
-	if (right->nd_symb == STRING) TryToString(right, left->nd_type);
+	if (right->nd_symb == STRING) TryToString(right, ltp);
 	dsr = InitDesig;
 
-	if (! TstAssCompat(left->nd_type, right->nd_type)) {
+	if (! TstAssCompat(ltp, rtp)) {
 		node_error(nd, "type incompatibility in assignment");
 		return;
 	}
 
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
-	if (complex(right->nd_type)) {
-		CodeAddress(&dsr);
-	}
+	if (complex(rtp)) CodeAddress(&dsr);
 	else {
-		CodeValue(&dsr, right->nd_type->tp_size);
-		RangeCheck(left->nd_type, right->nd_type);
+		CodeValue(&dsr, rtp->tp_size);
+		RangeCheck(ltp, rtp);
+		CodeCoercion(rtp, ltp);
 	}
 	dsl = InitDesig;
 	CodeDesig(left, &dsl);
 
-	CodeAssign(nd, &dsr, &dsl);
+	/*	Generate code for an assignment. Testing of type
+		compatibility and the like is already done.
+	*/
+
+	if (dsr.dsg_kind == DSG_LOADED) {
+		if (rtp->tp_fund == T_STRING) {
+			CodeAddress(&dsl);
+			C_loc(rtp->tp_size);
+			C_loc(ltp->tp_size);
+			C_cal("_StringAssign");
+			C_asp((int_size << 1) + (pointer_size << 1));
+			return;
+		}
+		CodeStore(&dsl, ltp->tp_size);
+		return;
+	}
+	CodeAddress(&dsl);
+	C_blm(ltp->tp_size);
 }
 
 RegisterMessages(df)

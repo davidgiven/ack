@@ -48,6 +48,7 @@ struct type
 	*real_type,
 	*longreal_type,
 	*word_type,
+	*byte_type,
 	*address_type,
 	*intorcard_type,
 	*bitset_type,
@@ -123,7 +124,7 @@ standard_type(fund, align, size)
 	register struct type *tp = new_type();
 
 	tp->tp_fund = fund;
-	tp->tp_align = align;
+	tp->tp_align = align ? align : 1;
 	tp->tp_size = size;
 
 	return tp;
@@ -179,6 +180,7 @@ InitTypes()
 	/* SYSTEM types
 	*/
 	word_type = standard_type(T_WORD, word_align, word_size);
+	byte_type = standard_type(T_WORD, 1, (arith) 1);
 	address_type = construct_type(T_POINTER, word_type);
 
 	/* create BITSET type
@@ -407,11 +409,11 @@ ArrayElSize(tp)
 
 	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
 	algn = align(tp->tp_size, tp->tp_align);
-	if (algn && word_size % algn != 0) {
+	if (word_size % algn != 0) {
 		/* algn is not a dividor of the word size, so make sure it
 		   is a multiple
 		*/
-		algn = WA(algn);
+		return WA(algn);
 	}
 	return algn;
 }
@@ -432,13 +434,13 @@ ArraySizes(tp)
 	*/
 	if (! bounded(index_type)) {
 		error("illegal index type");
-		tp->tp_size = 0;
+		tp->tp_size = tp->arr_elsize;
 		return;
 	}
 
 	getbounds(index_type, &lo, &hi);
 
-	tp->tp_size = WA((hi - lo + 1) * tp->arr_elsize);
+	tp->tp_size = (hi - lo + 1) * tp->arr_elsize;
 
 	/* generate descriptor and remember label.
 	*/

@@ -102,10 +102,11 @@ FormalType(struct type **ptp;)
 } :
 	ARRAY OF qualtype(ptp)
 		{ register struct type *tp = construct_type(T_ARRAY, NULLTYPE);
+
 		  tp->arr_elem = *ptp;
 		  *ptp = tp;
 		  tp->arr_elsize = ArrayElSize(tp->arr_elem);
-		  tp->tp_align = lcm(word_align, pointer_align);
+		  tp->tp_align = tp->arr_elem->tp_align;
 		}
 |
 	 qualtype(ptp)
@@ -160,16 +161,18 @@ enumeration(struct type **ptp;)
 	struct node *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
-		{
-		  *ptp = standard_type(T_ENUMERATION, int_align, int_size);
-		  EnterEnumList(EnumList, *ptp);
-		  if (ufit((*ptp)->enm_ncst-1, 1)) {
-			(*ptp)->tp_size = 1;
-			(*ptp)->tp_align = 1;
+		{ register struct type *tp =
+		  	standard_type(T_ENUMERATION, int_align, int_size);
+
+		  *ptp = tp;
+		  EnterEnumList(EnumList, tp);
+		  if (ufit(tp->enm_ncst-1, 1)) {
+			tp->tp_size = 1;
+			tp->tp_align = 1;
 		  }
-		  else if (ufit((*ptp)->enm_ncst-1, short_size)) {
-			(*ptp)->tp_size = short_size;
-			(*ptp)->tp_align = short_align;
+		  else if (ufit(tp->enm_ncst-1, short_size)) {
+			tp->tp_size = short_size;
+			tp->tp_align = short_align;
 		  }
 		}
 ;
@@ -234,7 +237,6 @@ RecordType(struct type **ptp;)
 		{ open_scope(OPENSCOPE);	/* scope for fields of record */
 		  scope = CurrentScope;
 		  close_scope(0);
-		  size = 0;
 		}
 	FieldListSequence(scope, &size, &xalign)
 		{ *ptp = standard_type(T_RECORD, xalign, WA(size));

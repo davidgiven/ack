@@ -106,9 +106,8 @@ GetString(upto)
 	}
 	str->s_length = p - str->s_str;
 	while (p - str->s_str < len) *p++ = '\0';
-	if (str->s_length == 0) str->s_length = 1;	/* ??? string length
-							   at least 1 ???
-						   	*/
+	if (str->s_length == 0) str->s_length = 1;
+	/* ??? string length at least 1 ??? */
 	return str;
 }
 
@@ -239,12 +238,10 @@ again1:
 		goto again;
 
 	case STGARB:
-		if (040 < ch && ch < 0177)	{
+		if ((unsigned) ch - 040 < 0137)	{
 			lexerror("garbage char %c", ch);
 		}
-		else	{
-			lexerror("garbage char \\%03o", ch);
-		}
+		else	lexerror("garbage char \\%03o", ch);
 		goto again;
 
 	case STSIMP:

@@ -95,6 +95,7 @@ extern struct type
 	*real_type,
 	*longreal_type,
 	*word_type,
+	*byte_type,
 	*address_type,
 	*intorcard_type,
 	*bitset_type,

@@ -438,6 +438,7 @@ getarg(argp, bases, designator, edf)
 	}
 
 	left = arg->nd_left;
+	*argp = arg;
 
 	if (designator ? !ChkVariable(left) : !ChkExpression(left)) {
 		return 0;
@@ -454,7 +455,6 @@ getarg(argp, bases, designator, edf)
 		}
 	}
 
-	*argp = arg;
 	return left;
 }
 
@@ -469,6 +469,8 @@ getname(argp, kinds, bases, edf)
 	*/
 	register struct node *arg = *argp;
 	register struct node *left;
+
+	*argp = arg->nd_right;
 
 	if (!arg->nd_right) {
 		Xerror(arg, "too few arguments supplied", edf);
@@ -496,7 +498,6 @@ getname(argp, kinds, bases, edf)
 		}
 	}
 
-	*argp = arg;
 	return left;
 }
 
@@ -539,7 +540,7 @@ ChkProcCall(expp)
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
-		if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
+		else if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
 				   left->nd_type,
 				   IsVarParam(param),
 				   left)) {
@@ -552,6 +553,9 @@ ChkProcCall(expp)
 
 	if (expp->nd_right) {
 		Xerror(expp->nd_right, "too many parameters supplied", edf);
+		while (expp->nd_right) {
+			getarg(&expp, 0, 0, edf);
+		}
 		return 0;
 	}
 
@@ -581,7 +585,7 @@ ChkCall(expp)
 			return ChkCast(expp, left);
 		}
 
-		if (IsProcCall(left)) {
+		if (IsProcCall(left) || left->nd_type == error_type) {
 			/* A procedure call.
 		   	   It may also be a call to a standard procedure
 			*/

@@ -50,7 +50,6 @@ InitScope()
 	register struct scopelist *ls = new_scopelist();
 
 	sc->sc_scopeclosed = 0;
-	sc->sc_forw = 0;
 	sc->sc_def = 0;
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
@@ -61,14 +60,6 @@ InitScope()
 	CurrVis = ls;
 }
 
-struct forwards {
-	struct forwards *next;
-	struct node *fo_tok;
-	struct type *fo_ptyp;
-};
-
-/* STATICALLOCDEF "forwards" 5 */
-
 Forward(tk, ptp)
 	struct node *tk;
 	struct type *ptp;
@@ -78,13 +69,10 @@ Forward(tk, ptp)
 		may have forward references that must howewer be declared in the
 		same scope.
 	*/
-	register struct forwards *f = new_forwards();
-	register struct scope *sc = CurrentScope;
+	register struct def *df = define(tk->nd_IDF, CurrentScope, D_FORWTYPE);
 
-	f->fo_tok = tk;
-	f->fo_ptyp = ptp;
-	f->next = sc->sc_forw;
-	sc->sc_forw = f;
+	df->df_forw_type = ptp;
+	df->df_forw_node = tk;
 }
 
 STATIC
@@ -117,7 +105,15 @@ chk_forw(pdf)
 	register struct def *df;
 
 	while (df = *pdf) {
-		if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
+		if (df->df_kind == D_FORWTYPE) {
+node_error(df->df_forw_node, "type \"%s\" not declared", df->df_idf->id_text);
+			FreeNode(df->df_forw_node);
+		}
+		else if (df->df_kind == D_FTYPE) {
+			df->df_kind = D_TYPE;
+			df->df_forw_type->next = df->df_type;
+		}
+		else if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
 			/* These definitions must be found in
 			   the enclosing closed scope, which of course
 			   may be the scope that is now closed!
@@ -126,7 +122,7 @@ chk_forw(pdf)
 				/* Indeed, the scope was a closed
 				   scope, so give error message
 				*/
-node_error(df->for_node, "identifier \"%s\" has not been declared",
+node_error(df->for_node, "identifier \"%s\" not declared",
 df->df_idf->id_text);
 				FreeNode(df->for_node);
 			}
@@ -151,25 +147,6 @@ df->df_idf->id_text);
 		}
 		pdf = &df->df_nextinscope;
 	}
-}
-
-STATIC
-rem_forwards(fo)
-	register struct forwards *fo;
-{
-	/*	When closing a scope, all forward references must be resolved
-	*/
-	register struct def *df;
-
-	if (fo->next) rem_forwards(fo->next);
-	df = lookfor(fo->fo_tok, CurrVis, 0);
-	if (! is_type(df)) {
-		node_error(fo->fo_tok,
-			   "identifier \"%s\" does not represent a type",
-			   df->df_idf->id_text);
-	}
-	fo->fo_ptyp->next = df->df_type;
-	free_forwards(fo);
 }
 
 Reverse(pdf)
@@ -210,7 +187,6 @@ close_scope(flag)
 	assert(sc != 0);
 
 	if (flag) {
-		if (sc->sc_forw) rem_forwards(sc->sc_forw);
 		DO_DEBUG(options['S'], PrScopeDef(sc->sc_def));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));

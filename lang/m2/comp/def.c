@@ -21,6 +21,8 @@ struct def *h_def;		/* pointer to free list of def structures */
 int	cnt_def;		/* count number of allocated ones */
 #endif
 
+extern int	(*c_inp)();
+
 STATIC
 DefInFront(df)
 	register struct def *df;
@@ -128,6 +130,18 @@ define(id, scope, kind)
 				return df;
 			}
 			break;
+
+		case D_FORWTYPE:
+			if (kind == D_FORWTYPE) return df;
+			if (kind == D_TYPE) {
+				df->df_kind = D_FTYPE;
+				FreeNode(df->df_forw_node);
+			}
+			else {
+				error("identifier \"%s\" must be a type",
+					id->id_text);
+			}
+			return df;
 
 		case D_FORWARD:
 			/* A forward reference, for which we may now have
@@ -247,7 +261,7 @@ DeclProc(type, id)
 			df = define(id, CurrentScope, type);
 			sprint(buf,"_%d_%s",++nmcount,id->id_text);
 			name = Salloc(buf, (unsigned)(strlen(buf)+1));
-			C_inp(buf);
+			(*c_inp)(buf);
 		}
 		open_scope(OPENSCOPE);
 		scope = CurrentScope;
@@ -311,13 +325,13 @@ DefineLocalModule(id)
 
 	/* Create a type for it
 	*/
-	df->df_type = standard_type(T_RECORD, 0, (arith) 0);
+	df->df_type = standard_type(T_RECORD, 1, (arith) 0);
 	df->df_type->rec_scope = sc;
 
 	/* Generate code that indicates that the initialization procedure
 	   for this module is local.
 	*/
-	C_inp(buf);
+	(*c_inp)(buf);
 
 	return df;
 }
