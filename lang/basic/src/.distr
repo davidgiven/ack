@@ -1,4 +1,5 @@
-Makefile
+proto.make
+proto.main
 basic.g
 basic.lex
 bem.c

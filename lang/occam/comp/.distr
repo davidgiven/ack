@@ -1,4 +1,5 @@
-Makefile
+proto.make
+proto.main
 builtin.c
 code.c
 code.h
