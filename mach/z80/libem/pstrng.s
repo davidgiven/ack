@@ -1,3 +1,5 @@
+
+
 .define	pstrng
 ! print a string of characters to the console
 ! entry: DE points to string
@@ -7,7 +9,7 @@ pstrng:	push	af
 1:	ld	a,(de)
 	or	a
 	jr	z,2f
-	call	putchr
+	call	putchar
 	inc	de
 	jr	1b
 2:	pop	af

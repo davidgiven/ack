@@ -15,8 +15,8 @@ tail.cpm:	mon.cpm.s
 		@echo Warning: untested, this is an example
 		arch cr tail.cpm mon.cpm.s
 
-tail.nascom:	mon.s putchr.nas.s
-		arch cr tail.nascom mon.s putchr.nas.s
+tail.nascom:	mon.s char.nas.s
+		arch cr tail.nascom mon.s char.nas.s
 
 tail.hermac:	mon.s char.her.s
 		arch cr tail.hermac mon.s char.her.s
@@ -25,4 +25,4 @@ opr:
 		make pr | opr
 pr:
 		@pr `pwd`/Makefile `pwd`/head_em.s
-		@pr `pwd`/subr.s `pwd`/mon.s `pwd`/mon.cpm.s `pwd`/putchr.s `pwd`/putchr.nas.s `pwd`/char.her.s
+		@pr `pwd`/mon.s `pwd`/mon.cpm.s `pwd`/char.nas.s `pwd`/char.her.s
