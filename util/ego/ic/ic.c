@@ -342,6 +342,13 @@ line_p readoperand(instr)
 #ifdef LONGOFF
 		case CSTX2:
 			/* double constant */
+			if (flag == PAR_G) {
+				lnp = newline(OPOBJECT);
+				OBJ(lnp) =
+				  object((char *) 0, tabval2,
+					 opr_size(instr));
+				break;
+			}
 			lnp = newline(OPOFFSET);
 			OFFSET(lnp) = tabval2;
 			break;
