@@ -22,9 +22,9 @@
 		/*	1) FOR THE DIFFERENT FORMATS	*/
 
 #define	SGL_MAX		   255	/*	standard definition	*/
-#define	SGL_MIN		     0	/*	standard definition	*/
+#define	SGL_MIN		     1	/*	standard definition	*/
 #define	DBL_MAX		  2047	/*	standard definition	*/
-#define	DBL_MIN		     0	/*	standard definition	*/
+#define	DBL_MIN		     1	/*	standard definition	*/
 #define EXT_MAX		 16384	/*	standard minimum	*/
 #define EXT_MIN		-16383	/*	standard minimum	*/
 #else
@@ -41,9 +41,9 @@
 		/*	1) FOR THE DIFFERENT FORMATS	*/
 
 #define	SGL_MAX		   255	/*	standard definition	*/
-#define	SGL_MIN		     0	/*	standard definition	*/
+#define	SGL_MIN		     1	/*	standard definition	*/
 #define	DBL_MAX		  255	/*	standard definition	*/
-#define	DBL_MIN		     0	/*	standard definition	*/
+#define	DBL_MIN		     1	/*	standard definition	*/
 #define EXT_MAX		 16384	/*	standard minimum	*/
 #define EXT_MIN		-16383	/*	standard minimum	*/
 #endif
