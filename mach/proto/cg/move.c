@@ -57,6 +57,7 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 		} else {
 			if (eqtoken(&machregs[tp2->t_att[0].ar].r_contents,tp1))
 				return(0);
+			erasereg(tp2->t_att[0].ar);
 			machregs[tp2->t_att[0].ar].r_contents = *tp1;
 		}
 		for (rp=machregs;rp<machregs+NREGS;rp++) {
