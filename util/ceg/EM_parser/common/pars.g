@@ -55,7 +55,9 @@ char *to_change;
 table	: row*
 	;
 
-row	: C_INSTR 		{ set_outfile( yytext); header( yytext);}
+row	: C_INSTR 		{ set_outfile( yytext); header( yytext);
+				  set_segment(segment);
+				}
 	  [ special | simple]	{ out( "}\n\n");}
 
 	| DEF_C_INSTR		{ init_defaults( yytext);}
@@ -73,7 +75,7 @@ special :
 	  simple 		{ out( "}\n");}
 	;
 
-simple	: ARROW 		{ set_segment( segment); save_output();}
+simple	: ARROW 		{ save_output();}
 	  actionlist		{ back_patch();}
         ;
 
@@ -149,7 +151,8 @@ Daction	: CALL			{ out( "%s", yytext);}
 
 	;
 
-def_row	: [ special | simple]	{ out( "}\n\n");}
+def_row	: 			{ set_segment(segment);}
+	[ special | simple]	{ out( "}\n\n");}
 	;
 
 
@@ -163,7 +166,9 @@ c_table	: c_row*
 	;
 
 c_row	: %if ( to_change && strcmp( yytext, to_change) == 0)
-	  C_INSTR 		{ set_outfile( yytext); header( yytext);}
+	  C_INSTR 		{ set_outfile( yytext); header( yytext);
+				  set_segment(segment);
+				}
 	  [ special | simple]	{ out( "}\n\n"); to_change = 0; }
 
 	| C_INSTR
