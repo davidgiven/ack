@@ -75,6 +75,7 @@ The field \fIid_text\fR will point to a copy of \fItag\fR, or
 to the \fItag\fR itself, depending on \fIcpy\fR.
 The field \fInext\fR is used for internal information and must not
 be changed by the user of this module.
+The user-defined part of the structure is initialized with zeros.
 .PP
 The function \fIfindidf\fP searches for the string \fItag\fP in the
 namelist, but returns 0 when it is not present.
