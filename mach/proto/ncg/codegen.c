@@ -849,6 +849,19 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	level--;
 #endif
 	return(totalcost);
+#ifdef USE_SHC
+    case DO_LABDEF: {
+	int index;
+
+	DEBUG("LABDEF");
+	if (toplevel) {
+		getint(index,codep);
+		printlabel(index);
+	}
+
+	break;
+    }
+#endif
 	}
 	}
     doreturn:

@@ -11,6 +11,10 @@ static char rcsid[] = "$Header$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
+#ifdef	USE_SHC
+#include <stdio.h>
+#include "label.h"
+#endif
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -72,6 +76,10 @@ char opdesc[] = {
 	LLDEF|RLDEF,		/* EX_XOR */
 	LLDEF|RLDEF,		/* EX_AND */
 	0,			/* EX_ISROM */
+#ifdef USE_SHC
+	0,			/* EX_STACKHEIGHT */
+	0,			/* EX_FALLTHROUGH */
+#endif
 };
 
 string salloc(),strcpy(),strcat();
@@ -376,5 +384,27 @@ result_t compute(node) register node_p node; {
 	assert(leaf1.e_typ == EV_INT);
 		result.e_v.e_con = -leaf1.e_v.e_con;
 		return(result);
+#ifdef USE_SHC
+	case EX_STACKHEIGHT:			/* Hans, new */
+	    { register label_p lbl;
+
+		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
+		if (lbl != NULL) {
+		    result.e_v.e_con = lbl->lb_height;
+		} else {
+		    result.e_v.e_con = 0;
+		}
+		return(result);
+	    }
+	case EX_FALLTHROUGH:			/* Hans, new */
+	    { register label_p lbl;
+
+		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
+		if (lbl != NULL) {
+		    result.e_v.e_con = lbl->lb_fallthrough;
+		} else result.e_v.e_con = 0;
+		return(result);
+	    }
+#endif
 	}
 }

@@ -11,3 +11,4 @@
 #define INSSETCC	(-5)
 #define INSERASE	(-6)
 #define INSREMOVE	(-7)
+#define INSLABDEF	(-8)

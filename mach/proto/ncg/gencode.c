@@ -11,6 +11,9 @@ static char rcsid[] = "$Header$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#ifdef USE_SHC
+#include "mach.h"
+#endif
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -139,3 +142,11 @@ prtoken(tp,leadingchar) token_p tp; {
 		}
 	}
 }
+
+#ifdef	USE_SHC
+printlabel(labnum)
+int labnum;
+{
+	newilb(dollar[labnum].e_v.e_addr.ea_str);
+}
+#endif

@@ -206,6 +206,3 @@ instalookup(insta,filled) inst_t insta; {
 	l_instances[i] = insta;
 	return(i);
 }
-
-	
-				

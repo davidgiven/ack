@@ -20,12 +20,14 @@ cost	COST
 defined	DEFINED
 exact	EXACT
 example	EXAMPLE
+fallthrough	FALLTHROUGH
 from	FROM
 gen	GEN
 highw	HIGHW
 inreg	INREG
 is_rom	ISROM
 kills	KILLS
+labeldef	LABELDEF
 leaving	LEAVING
 loww	LOWW
 move	MOVE
@@ -41,6 +43,7 @@ reusing	REUSING
 rom	ROM
 samesign	SAMESIGN
 sfit	SFIT
+stackheight	STACKHEIGHT
 test	TEST
 to	TO
 ufit	UFIT

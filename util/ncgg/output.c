@@ -11,6 +11,7 @@ int	code_in_c=1;	/* put code in "tables.c" */
 int	tabledebug=0;	/* do not generate code for table debugging */
 #endif
 int	verbose=0;	/* print all statistics */
+int	use_shc;	/* use stackheight information */
 char	*c_file=	"tables.c";
 char	*h_file=	"tables.H";
 char	*cd_file=	"code";
@@ -592,6 +593,8 @@ outdefs() {
 	}
 	if (tabledebug)
 		cdef("TABLEDEBUG",1);
+	if (use_shc)
+		cdef("USE_SHC",1);
 }
 
 outars() {
@@ -823,6 +826,12 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			break;
 		case INSERASE:
 			code8(DO_ERASE);
+			codeint(vp->vi_int[1]);
+			codenl();
+			break;
+		case INSLABDEF:
+			cocono = 0;
+			code8(DO_LABDEF);
 			codeint(vp->vi_int[1]);
 			codenl();
 			break;

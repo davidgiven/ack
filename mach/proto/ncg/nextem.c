@@ -64,7 +64,12 @@ byte *trypat(bp,len) register byte *bp; {
 	if (Debug) {
 		fprintf(stderr,"Matched:");
 		for (i=0;i<patlen;i++) {
-			fprintf(stderr," %3.3s",em_mnem[emp[i].em_instr-sp_fmnem]);
+#ifdef USE_SHC
+			if (emp[i].em_instr == op_lab)
+				fprintf(stderr," lab");
+			else
+#endif
+				fprintf(stderr," %3.3s",em_mnem[emp[i].em_instr-sp_fmnem]);
 			if (emp[i].em_soper)
 				fprintf(stderr," %s",emp[i].em_soper);
 		}

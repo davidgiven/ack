@@ -38,7 +38,7 @@ int Xstackflag=0; /* set in coercions, moves, and tests. %1 means something
 		   */
 
 struct varinfo *gen_inst(),*gen_move(),*gen_test(),*gen_preturn(),*gen_tlab();
-struct varinfo *make_erase();
+struct varinfo *gen_label(), *make_erase();
 expr_t make_expr(),ident_expr(),subreg_expr(),tokm_expr(),all_expr();
 expr_t perc_ident_expr(),sum_expr(),regvar_expr();
 
@@ -71,6 +71,7 @@ iocc_t iops[20];
 %token TESTS
 %token STACKINGRULES COERCIONS
 %token INSTRUCTIONS
+%token STACKHEIGHT FALLTHROUGH LABELDEF
 %token PROC CALL EXAMPLE
 %token FROM TO
 %token TEST MOVE STACK RETURN
@@ -844,6 +845,8 @@ gen_instruction
 		{ $$ = gen_move($2,$4); }
 	| TEST tokeninstance
 		{ $$ = gen_test($2);}
+	| LABELDEF emarg
+		{ $$ = gen_label($2-1); use_shc++; }
 	| RETURN
 		{ $$ = gen_preturn(); }
 	;
@@ -1009,6 +1012,10 @@ expr
 		{ $$ = make_expr(TYPBOOL,EX_DEFINED,i_expr($3),0); }
 	| SAMESIGN '(' expr ',' expr ')'
 		{ $$ = make_expr(TYPBOOL,EX_SAMESIGN,i_expr($3),i_expr($5)); }
+	| STACKHEIGHT '(' emarg ')'
+		{ $$ = make_expr(TYPINT,EX_STACKHEIGHT,$3-1,0); }
+	| FALLTHROUGH '(' emarg ')'
+		{ $$ = make_expr(TYPBOOL,EX_FALLTHROUGH,$3-1,0); }
 	| SFIT '(' expr ',' expr ')'
 		{ $$ = make_expr(TYPBOOL,EX_SFIT,i_expr($3),i_expr($5)); }
 	| UFIT '(' expr ',' expr ')'

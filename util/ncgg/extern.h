@@ -36,6 +36,7 @@ extern int maxmembers;
 extern int regclass;
 extern int maxtokensize;
 extern int nprocargs, maxprocargs;
+extern int use_shc;
 
 extern char *mystrcpy();
 extern char *myalloc();

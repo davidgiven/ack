@@ -127,6 +127,13 @@ fillemlines() {
 			error("unknown instruction byte");
 		case sp_ilb1:
 		case sp_ilb2:
+#ifdef USE_SHC
+			lp->em_instr = op_lab;
+			lp->em_optyp = OPSYMBOL;
+			lp->em_soper = strarg(t);
+			lp->em_u.em_loper = argval;
+			return;
+#endif
 		case sp_fpseu:
 		case sp_dlb1:
 		case sp_dlb2:
@@ -169,6 +176,11 @@ fillemlines() {
 			continue;
 		case PAR_B:
 			t = sp_ilb2;
+#ifdef USE_SHC
+			lp->em_optyp = OPSYMBOL;
+			lp->em_u.em_loper = argval;
+			lp->em_soper = strarg(t);
+#endif
 			break;
 		case PAR_D:
 			assert(t == sp_cstx);
@@ -201,6 +213,7 @@ dopseudo() {
 		error("No table entry for %d",emlines[0].em_instr);
 	nextispseu=0;
 	switch(savetab1) {
+#ifndef USE_SHC
 	case sp_ilb1:
 	case sp_ilb2:
 		swtxt();
@@ -215,6 +228,7 @@ dopseudo() {
 		}
 #endif
 		return;
+#endif
 	case sp_dlb1:
 	case sp_dlb2:
 	case sp_dnam:
@@ -296,6 +310,16 @@ dopseudo() {
 				fatal("bad pointer size");
 			if ( getarg(any_ptyp)!=sp_cend )
 				fatal("too many parameters");
+#ifdef USE_SHC
+		} else if (argval == ms_sth) {
+			int lbl, height, flthr;
+			getarg(ptyp(sp_cst2)); lbl = argval;
+			getarg(ptyp(sp_cst2)); height = argval;
+			getarg(ptyp(sp_cst2)); flthr = argval;
+			if ( getarg(any_ptyp)!=sp_cend )
+				fatal("too many parameters");
+			add_label(lbl,height, flthr);
+#endif
 #ifdef REGVARS
 		} else if (argval == ms_gto) {
 			getarg(ptyp(sp_cend));
@@ -365,6 +389,9 @@ dopseudo() {
 		break;
 	case ps_end:
 		getarg(cst_ptyp | ptyp(sp_cend));
+#ifdef USE_SHC
+		kill_labels();
+#endif
 		cleanregs();
 #ifdef REGVARS
 		unlinkregs();

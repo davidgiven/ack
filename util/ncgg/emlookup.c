@@ -25,6 +25,7 @@ initemhash() {
 
 	for(i=0;i<=sp_lmnem-sp_fmnem;i++)
 		enter(em_mnem[i],i+sp_fmnem);
+	enter("lab", op_lab);
 }
 
 unsigned emhash(name) register char *name; {

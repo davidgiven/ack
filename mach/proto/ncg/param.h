@@ -15,6 +15,8 @@
 
 #define MAXROM 3
 
+#define op_lab  (sp_lmnem+1)
+
 /*
  * Tunable constants
  */

@@ -110,6 +110,15 @@ struct varinfo *gen_test(from) iocc_t from; {
 	return(vp);
 }
 
+struct varinfo *gen_label(arg) int arg; {
+	register struct varinfo *vp;
+
+	NEW(vp,struct varinfo);
+	vp->vi_int[0] = INSLABDEF;
+	vp->vi_int[1] = arg;
+	return(vp);
+}
+
 struct varinfo *gen_preturn() {
 	register struct varinfo *vp;
 

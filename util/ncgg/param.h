@@ -48,3 +48,6 @@
 
 #define NEXT(n,max,string) (n<max? n++ : tabovf(string))
 #define NEW(x,y) x=(y*)myalloc(sizeof(*(x)))
+
+#include <em_spec.h>
+#define op_lab	(sp_lmnem + 1)

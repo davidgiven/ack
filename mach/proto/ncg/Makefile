@@ -16,11 +16,11 @@ CDIR=$(EMHOME)/mach/proto/ncg
 CGG=$(EMHOME)/lib/ncgg
 CPP=$(EMHOME)/lib/cpp
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
-       $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/main.c $(CDIR)/move.c \
-       $(CDIR)/nextem.c $(CDIR)/reg.c $(CDIR)/regvar.c $(CDIR)/salloc.c \
-       $(CDIR)/state.c $(CDIR)/subr.c $(CDIR)/var.c
-OFILES=codegen.o compute.o equiv.o fillem.o gencode.o glosym.o main.o\
-       move.o nextem.o reg.o regvar.o salloc.o state.o subr.o var.o
+       $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/label.c $(CDIR)/main.c \
+       $(CDIR)/move.c $(CDIR)/nextem.c $(CDIR)/reg.c $(CDIR)/regvar.c \
+       $(CDIR)/salloc.c $(CDIR)/state.c $(CDIR)/subr.c $(CDIR)/var.c
+OFILES=codegen.o compute.o equiv.o fillem.o gencode.o glosym.o label.o \
+	main.o move.o nextem.o reg.o regvar.o salloc.o state.o subr.o var.o
 
 all:	tables.c
 	make "EMHOME="$(EMHOME) cg
@@ -43,6 +43,8 @@ gencode.o: $(CDIR)/gencode.c
 	$(CC) -c $(CFLAGS) $(CDIR)/gencode.c
 glosym.o: $(CDIR)/glosym.c
 	$(CC) -c $(CFLAGS) $(CDIR)/glosym.c
+label.o: $(CDIR)/label.c
+	$(CC) -c $(CFLAGS) $(CDIR)/label.c
 main.o: $(CDIR)/main.c
 	$(CC) -c $(CFLAGS) $(CDIR)/main.c
 move.o: $(CDIR)/move.c
@@ -97,6 +99,7 @@ compute.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 compute.o:	$(CDIR)/data.h
 compute.o:	$(CDIR)/extern.h
 compute.o:	$(CDIR)/glosym.h
+compute.o:	$(CDIR)/label.h
 compute.o:	$(CDIR)/param.h
 compute.o:	$(CDIR)/result.h
 compute.o:	tables.h
@@ -130,6 +133,10 @@ glosym.o:	$(CDIR)/glosym.h
 glosym.o:	$(CDIR)/param.h
 glosym.o:	tables.h
 glosym.o:	$(CDIR)/types.h
+label.o:	$(CDIR)/label.h
+label.o:	$(CDIR)/param.h
+label.o:	tables.h
+label.o:	$(CDIR)/types.h
 main.o:		$(CDIR)/param.h
 main.o:		tables.h
 move.o:		$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
