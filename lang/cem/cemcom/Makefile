@@ -17,7 +17,7 @@ PRTLIB = $(EMHOME)/modules/lib/libprint.a
 EMMESLIB = $(EMHOME)/modules/lib/libem_mes.a
 EMMESOLIB = $(EMHOME)/modules/lib/libem_mesO.a
 EMMESCELIB = $(EMHOME)/modules/lib/libem_mesCE.a
-MACH = vax4
+MACH = sun3
 EMCELIB = $(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/back.a \
 		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a

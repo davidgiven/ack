@@ -674,6 +674,8 @@ con_int(ex)
 	ASSERT(is_cp_cst(ex));
 	if (tp->tp_unsigned)
 		C_con_ucon(long2str((long)ex->VL_VALUE, -10), tp->tp_size);
+	else if (tp->tp_size == word_size)
+		C_con_cst(ex->VL_VALUE);
 	else
 		C_con_icon(long2str((long)ex->VL_VALUE, 10), tp->tp_size);
 }
