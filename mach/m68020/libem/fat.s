@@ -7,5 +7,5 @@
 	.sect .text
 .fatal:
 	jsr	(.trp)
-	jmp	(_exit)
+	jmp	(__exit)
 .align 2

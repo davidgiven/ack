@@ -10,7 +10,7 @@ set.s
 inn.s
 fat.s
 trp.s
-trpstr.s
+trpstr.c
 mon.s
 nop.s
 dia.s

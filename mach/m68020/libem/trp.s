@@ -40,11 +40,11 @@ fmt:	.asciz "%s\n"
 	rts
 9:
 	move.l	d0,-(sp)
-	jsr	(.trpstr)
+	jsr	(__trpstr)
 	move.l	d0,(sp)
 	pea	(fmt)
 	jsr	(.diagnos)
 	lea	(4, sp), sp
 	illegal
-	jsr	(_exit)
+	jsr	(__exit)
 .align 2

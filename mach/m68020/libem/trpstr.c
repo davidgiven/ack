@@ -1,6 +1,6 @@
 #include <em_abs.h>
 char *
-trpstr(d)
+_trpstr(d)
 {
 	switch(d)
 	{

@@ -1,10 +1,2 @@
 LIST
-Makefile
-compmodule
-em_end.s
-etext.s
-edata.s
-end.s
 libem_s.a
-trpstr.c
-strscript
