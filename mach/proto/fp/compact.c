@@ -166,7 +166,7 @@ sgl_over:			trap(EFOVFL);
 			    || ((f->m1 & SGL_EXACT) == SGL_ROUNDUP
 			        && (f->m1 & (SGL_ROUNDUP << 1)))) {
 				SGL->fract++;
-				if (f->exp == 0 && (f->m1 & ~SGL_MASK)) {
+				if (f->exp == 0 && (SGL->fract & ~SGL_MASK)) {
 					f->exp++;
 				}
 			/* check normal */
