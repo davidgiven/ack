@@ -14,6 +14,7 @@
 operation
 	:		{	instrp = instr;
 				dot_offset = 0;
+				curr_instr = curr_token;
 			}
 		instruction
 			{	emit_instr();
@@ -131,7 +132,9 @@ instruction
 			{	movem(0, $2, $3);}
 	|	MOVEM sizedef notimmreg ',' regs
 			{	movem(1, $2, $5);}
-	| 	MOVESP sizedef ea_ea
+	| 	MOVESP sizedef
+			{	curr_size = $1; }
+		ea_ea
 			{	if ($1 == 0) {
 					/* movep */
 					movep($2);
@@ -372,8 +375,8 @@ reg	:	DREG
 			{	$$ = $1 | 010;}
 	;
 sizedef	:	/* empty */
-			{	$$ = SIZE_DEF;}
-	|	SIZE
+			{	$$ = SIZE_DEF; curr_size = SIZE_DEF; }
+	|	SIZE	{	curr_size = $1; $$ = $1; }
 	;
 sizenon	:	/* empty */
 			{	$$ = SIZE_NON;}

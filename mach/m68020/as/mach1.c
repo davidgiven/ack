@@ -90,6 +90,9 @@ extern int dot_offset;
 #define	PUTW		0x40
 #define	PUTL		0x80
 
+extern int	curr_instr;
+extern int	curr_size;
+
 #ifndef extern
 extern short	eamode[];
 #else

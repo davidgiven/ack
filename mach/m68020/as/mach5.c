@@ -628,8 +628,42 @@ ea7071(sz)
 		return;
 	}
 	if ((bd_2.typ & ~S_DOT) == DOTTYP) {
-		if (small(fitw(bd_2.val-(DOTVAL+2)), 2)) {
-			bd_2.val -= (DOTVAL+2);
+			/* the "off" variable fixes the problem described above,
+			 * e.g., when references to program space are made by
+			 * instructions with more than one opcode word.
+			 */
+		int off = 2;
+
+		switch(curr_instr) {
+		case MOVEM:
+		case FMOVE:
+		case FMOVEM:
+		case FDYADIC:
+		case FMONADIC:
+		case FSINCOS:
+		case FSCC:
+		case FTST:
+		case DIVL:
+		case OP_RANGE:
+		case CALLM:
+		case CAS:
+		case CPSCC:
+		case CPTRAPCC:
+		case PFLUSH:
+		case PTEST:
+		case PMOVE:
+		case PLOAD:
+			off = 4;
+			break;
+		case MOVESP:
+			if (curr_size != 0) off = 4;
+			break;
+		case DIVMUL:
+			if (curr_size != SIZE_W) off = 4;
+			break;
+		}
+		if (small(fitw(bd_2.val-(DOTVAL+off)), 2)) {
+			bd_2.val -= (DOTVAL+off);
 			mrg_2 = 072;
 		}
 	} else
