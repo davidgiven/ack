@@ -5,6 +5,7 @@
 TBL=tbl
 
 TARGET_DIR = $(TARGET_HOME)/doc
+SRC_DIR = $(SRC_HOME)/doc/em
 
 head:   $(TARGET_DIR)/em.doc
 
