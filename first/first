@@ -212,6 +212,13 @@ ABC
 	  cp tables1.h tables.h
 	)
 	done
+	( cd ../modules/src/malloc
+	  ed - param.h <<ABC
+/STORE/s/define/undef/
+w
+q
+ABC
+	)
 	;;
 *)	( cd ../lang/cem/cemcom
 	  cp BigPars Parameters
