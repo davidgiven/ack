@@ -1,13 +1,21 @@
 EMHOME = ../../..
-LIBPRINT = libprint.a
 MODDIR=$(EMHOME)/modules
 INSTALL = $(MODDIR)/install
 COMPARE = $(MODDIR)/compare
 INCLUDES = -I$(MODDIR)/h
-CFLAGS = -O $(INCLUDES)
+CFLAGS = -O $(INCLUDES) $(COPT)
 AR = ar
+SUF = o
+LIBSUF = a
+
+LIBPRINT = libprint.$(LIBSUF)
+
 SRC = doprnt.c fprint.c print.c sprint.c format.c
-OBJ = doprnt.o fprint.o print.o sprint.o format.o
+OBJ = doprnt.$(SUF) fprint.$(SUF) print.$(SUF) sprint.$(SUF) format.$(SUF)
+
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
 all:		$(LIBPRINT)
 
@@ -21,8 +29,8 @@ install:	all
 		$(INSTALL) man/print.3
 
 cmp:		all
-		$(COMPARE) lib/$(LIBPRINT)
-		$(COMPARE) man/print.3
+		-$(COMPARE) lib/$(LIBPRINT)
+		-$(COMPARE) man/print.3
 
 pr:
 		@pr Makefile $(SRC)
@@ -31,13 +39,13 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.o $(LIBPRINT)
+		rm -f *.$(SUF) $(LIBPRINT)
 
 lintlib:
 		lint $(INCLUDES) -Cprint $(SRC)
 		mv llib-lprint.ln $(MODDIR)/lib
 
-doprnt.o: param.h
-fprint.o: param.h
-print.o: param.h
-sprint.o: param.h
+doprnt.$(SUF): param.h
+fprint.$(SUF): param.h
+print.$(SUF): param.h
+sprint.$(SUF): param.h

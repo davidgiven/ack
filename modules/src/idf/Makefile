@@ -10,9 +10,9 @@ install:	all
 		$(INSTALL) man/idf.3
 
 cmp:		all
-		$(COMPARE) pkg/idf_pkg.body
-		$(COMPARE) pkg/idf_pkg.spec
-		$(COMPARE) man/idf.3
+		-$(COMPARE) pkg/idf_pkg.body
+		-$(COMPARE) pkg/idf_pkg.spec
+		-$(COMPARE) man/idf.3
 
 pr:
 		@pr Makefile idf_pkg.spec idf_pkg.body

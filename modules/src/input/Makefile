@@ -2,29 +2,35 @@ EMHOME = ../../..
 MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
-CFLAGS = -O
+CFLAGS = -O $(COPT)
 AR = ar
+SUF = o
+LIBSUF = a
 
-OBJECTS =	AtEoIF.o\
-		AtEoIT.o
+OBJECTS =	AtEoIF.$(SUF)\
+		AtEoIT.$(SUF)
 
-all:		libinput.a
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
-libinput.a:	$(OBJECTS)
-		$(AR) cr libinput.a $(OBJECTS)
-		-sh -c 'ranlib libinput.a'
+all:		libinput.$(LIBSUF)
+
+libinput.$(LIBSUF):	$(OBJECTS)
+		$(AR) cr libinput.$(LIBSUF) $(OBJECTS)
+		-sh -c 'ranlib libinput.$(LIBSUF)'
 
 install:	all
-		$(INSTALL) lib/libinput.a
+		$(INSTALL) lib/libinput.$(LIBSUF)
 		$(INSTALL) man/input.3
 		$(INSTALL) pkg/inp_pkg.body
 		$(INSTALL) pkg/inp_pkg.spec
 
 cmp:		all
-		$(COMPARE) lib/libinput.a
-		$(COMPARE) man/input.3
-		$(COMPARE) pkg/inp_pkg.body
-		$(COMPARE) pkg/inp_pkg.spec
+		-$(COMPARE) lib/libinput.$(LIBSUF)
+		-$(COMPARE) man/input.3
+		-$(COMPARE) pkg/inp_pkg.body
+		-$(COMPARE) pkg/inp_pkg.spec
 
 pr:
 		@pr Makefile inp_pkg.spec inp_pkg.body AtEoIF.c AtEoIT.c
@@ -33,7 +39,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.[oa]
+		rm -f *.$(SUF) *.$(LIBSUF)
 
 lintlib:
 		lint -Cinput AtEoIF.c AtEoIT.c

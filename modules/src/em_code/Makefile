@@ -2,8 +2,10 @@ EMHOME = ../../..
 ETC = $(EMHOME)/etc
 INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
-CFLAGS = -I$(EMHOME)/h -I$(EMHOME)/modules/h -I. -O
+CFLAGS = -I$(EMHOME)/h -I$(EMHOME)/modules/h -I. -O $(COPT)
 AR = ar
+SUF = o
+LIBSUF = a
 SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
 	crcst.c crdlb.c crdnam.c crfcon.c cricon.c crilb.c crpnam.c crscon.c \
 	crucon.c cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
@@ -12,33 +14,37 @@ SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
 	pro.c pronarg.c msstart.c psdlb.c psdnam.c pspnam.c scon.c ucon.c \
 	C_out.c failed.c
 
-OBS = failed.o insert.o internerr.o getid.o
+OBS = failed.$(SUF) insert.$(SUF) internerr.$(SUF) getid.$(SUF)
 
-all:		em_codeEK.h libeme.a libemk.a em_code.3
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
+
+all:		em_codeEK.h libeme.$(LIBSUF) libemk.$(LIBSUF) em_code.3
 
 install:	all
-		$(INSTALL) lib/libeme.a
-		$(INSTALL) lib/libemk.a
+		$(INSTALL) lib/libeme.$(LIBSUF)
+		$(INSTALL) lib/libemk.$(LIBSUF)
 		$(INSTALL) man/em_code.3
 		$(INSTALL) h/em_codeEK.h
 
 compare:	all
-		$(COMPARE) lib/libeme.a
-		$(COMPARE) lib/libemk.a
-		$(COMPARE) man/em_code.3
-		$(COMPARE) h/em_codeEK.h
+		-$(COMPARE) lib/libeme.$(LIBSUF)
+		-$(COMPARE) lib/libemk.$(LIBSUF)
+		-$(COMPARE) man/em_code.3
+		-$(COMPARE) h/em_codeEK.h
 
 em_code.3:	em_code.3X
 		-sh -c 'tbl < em_code.3X > em_code.3'
 		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
-libeme.a:	e/em_private.h e/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ie $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh -x make.sh e
-		-sh -c 'ranlib libeme.a'
+libeme.$(LIBSUF):	e/em_private.h e/em.c $(OBS) io.c
+		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c -Ie $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh -x make.sh e
+		-sh -c 'ranlib libeme.$(LIBSUF)'
 
-libemk.a:	k/em_private.h k/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ik $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh -x make.sh k
-		-sh -c 'ranlib libemk.a'
+libemk.$(LIBSUF):	k/em_private.h k/em.c $(OBS) io.c
+		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c -Ik $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh -x make.sh k
+		-sh -c 'ranlib libemk.$(LIBSUF)'
 
 em_codeEK.h:	make.em.gen $(ETC)/em_table em.nogen
 		make.em.gen $(ETC)/em_table > em_codeEK.h
@@ -51,12 +57,12 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.o *.a em_code.3
+		rm -f *.$(SUF) *.$(LIBSUF) em_code.3
 
 lintlib:	make.sh
 		lint -I. -I../../h -I../../../h -Ie -Ceme $(SRC) e/*.c
 		lint -I. -I../../h -I../../../h -Ik -Cemk $(SRC) k/*.c
 		mv llib-leme.ln llib-lemk.ln $(EMHOME)/modules/lib
 
-insert.o:	insert.c insert.h
+insert.$(SUF):	insert.c insert.h
 		$(CC) $(CFLAGS) -c insert.c

@@ -13,12 +13,12 @@ main()
 {
 	if (sizeof(unsigned int) == sizeof(char *)) {
 		puts("typedef unsigned int size_type;");
-		return 0;
+		exit(0);
 	}
 	if (sizeof(long) == sizeof(char *)) {
 		puts("typedef long size_type;");
-		return 0;
+		exit(0);
 	}
 	fputs(stderr, "funny pointer size\n");
-	return 1;
+	exit(1);
 }

@@ -2,17 +2,25 @@ EMHOME = ../../..
 MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
-LIBSYS	= libsystem.a
 INCLUDES = -I.
-CFLAGS	= $(INCLUDES) -O
+CFLAGS	= $(INCLUDES) -O $(COPT)
 AR = ar
-OBJ	= access.o break.o chmode.o close.o create.o filesize.o \
-	modtime.o lock.o open.o read.o remove.o stop.o \
-	system.o time.o unlock.o write.o seek.o rename.o
+SUF = o
+LIBSUF = a
+
+LIBSYS	= libsystem.$(LIBSUF)
+OBJ	= access.$(SUF) break.$(SUF) chmode.$(SUF) close.$(SUF) create.$(SUF) \
+	  filesize.$(SUF) modtime.$(SUF) lock.$(SUF) open.$(SUF) read.$(SUF) \
+	  remove.$(SUF) stop.$(SUF) system.$(SUF) time.$(SUF) unlock.$(SUF) \
+	  write.$(SUF) seek.$(SUF) rename.$(SUF)
 CSRC	= access.c break.c chmode.c close.c create.c filesize.c \
-	modtime.c lock.c open.c read.c remove.c stop.c \
-	system.c time.c unlock.c write.c seek.c rename.c
+	  modtime.c lock.c open.c read.c remove.c stop.c \
+	  system.c time.c unlock.c write.c seek.c rename.c
 SRC	= Makefile system.h $(CSRC)
+
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
 all:		$(LIBSYS)
 
@@ -27,12 +35,12 @@ install:	all
 		$(INSTALL) h/system.h
 
 cmp:		all
-		$(COMPARE) lib/$(LIBSYS)
-		$(COMPARE) man/system.3
-		$(COMPARE) h/system.h
+		-$(COMPARE) lib/$(LIBSYS)
+		-$(COMPARE) man/system.3
+		-$(COMPARE) h/system.h
 
 clean:
-		rm -f *.[oa]
+		rm -f *.$(SUF) *.$(LIBSUF)
 
 pr:
 		@pr $(SRC)
@@ -44,12 +52,12 @@ lintlib:
 		lint $(INCLUDES) -Csystem $(CSRC)
 		mv llib-lsystem.ln $(MODULES)/lib
 
-access.o: system.h
-break.o: system.h
-close.o: system.h
-create.o: system.h
-open.o: system.h
-read.o: system.h
-stop.o: system.h
-system.o: system.h
-write.o: system.h
+access.$(SUF): system.h
+break.$(SUF): system.h
+close.$(SUF): system.h
+create.$(SUF): system.h
+open.$(SUF): system.h
+read.$(SUF): system.h
+stop.$(SUF): system.h
+system.$(SUF): system.h
+write.$(SUF): system.h

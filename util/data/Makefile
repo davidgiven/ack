@@ -2,27 +2,33 @@
 d=../..
 h=$d/h
 l=$d/lib
-ar=ar
+AR=ar
+SUF=o
+LIBSUF=ma
 
-OBJ=em_mnem.o em_pseu.o em_flag.o em_ptyp.o
+OBJ=em_mnem.$(SUF) em_pseu.$(SUF) em_flag.$(SUF) em_ptyp.$(SUF)
 
-DATA_PATH=em_data.a
+DATA_PATH=em_data.$(LIBSUF)
 
-CFLAGS=-O -I$h
+CFLAGS=-O -I$h $(COPT)
+
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
 $(DATA_PATH):   $(OBJ)
-		$(ar) rv $(DATA_PATH) $(OBJ)
+		$(AR) rv $(DATA_PATH) $(OBJ)
 		-sh -c 'ranlib $(DATA_PATH)'
 
-em_flag.o:      $h/em_flag.h
+em_flag.$(SUF):      $h/em_flag.h
 
-em_ptyp.o:      $h/em_flag.h $h/em_ptyp.h
+em_ptyp.$(SUF):      $h/em_flag.h $h/em_ptyp.h
 
 install :       $(DATA_PATH)
 		-cmp -s $(DATA_PATH) $l/$(DATA_PATH) || { cp $(DATA_PATH) $l/$(DATA_PATH) ; sh -c 'ranlib $l/$(DATA_PATH)' ; }
 
 cmp :           $(DATA_PATH)
-		cmp $(DATA_PATH) $l/$(DATA_PATH)
+		-cmp $(DATA_PATH) $l/$(DATA_PATH)
 
 clean:
 		rm -f $(OBJ) $(DATA_PATH) *.old

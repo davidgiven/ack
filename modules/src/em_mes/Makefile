@@ -2,44 +2,51 @@ EMHOME = ../../..
 HDIR = $(EMHOME)/modules/h
 INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
+INCLUDES=-I$(EMHOME)/h -I$(HDIR)
+CFLAGS = $(INCLUDES) -O $(COPT)
+AR = ar
+SUF = o
+LIBSUF = a
+
 SRC =	C_ms_err.c C_ms_opt.c C_ms_emx.c C_ms_reg.c C_ms_src.c\
 	C_ms_flt.c C_ms_com.c C_ms_par.c C_ms_ego.c C_ms_gto.c
-OBJ =	C_ms_err.o C_ms_opt.o C_ms_emx.o C_ms_reg.o C_ms_src.o\
-	C_ms_flt.o C_ms_com.o C_ms_par.o C_ms_ego.o C_ms_gto.o
-INCLUDES=-I$(EMHOME)/h -I$(HDIR)
-CFLAGS = $(INCLUDES) -O
-AR = ar
+OBJ =	C_ms_err.$(SUF) C_ms_opt.$(SUF) C_ms_emx.$(SUF) C_ms_reg.$(SUF) C_ms_src.$(SUF)\
+	C_ms_flt.$(SUF) C_ms_com.$(SUF) C_ms_par.$(SUF) C_ms_ego.$(SUF) C_ms_gto.$(SUF)
 
-all:		libem_mes.a # libem_mesCE.a libem_mesO.a 
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
-libem_mes.a:	$(OBJ)
-		rm -f libem_mes.a
-		$(AR) cr libem_mes.a $(OBJ)
-		-sh -c 'ranlib libem_mes.a'
+all:		libem_mes.$(LIBSUF) # libem_mesCE.$(LIBSUF) libem_mesO.$(LIBSUF) 
 
-libem_mesO.a:
-		rm -f *.o libem_mesO.a
+libem_mes.$(LIBSUF):	$(OBJ)
+		rm -f libem_mes.$(LIBSUF)
+		$(AR) cr libem_mes.$(LIBSUF) $(OBJ)
+		-sh -c 'ranlib libem_mes.$(LIBSUF)'
+
+libem_mesO.$(LIBSUF):
+		rm -f *.$(SUF) libem_mesO.$(LIBSUF)
 		$(CC) -c $(CFLAGS) -DPEEPHOLE $(SRC)
-		$(AR) cr libem_mesO.a $(OBJ)
-		-sh -c 'ranlib libem_mesO.a'
-		rm -f *.o
+		$(AR) cr libem_mesO.$(LIBSUF) $(OBJ)
+		-sh -c 'ranlib libem_mesO.$(LIBSUF)'
+		rm -f *.$(SUF)
 
-libem_mesCE.a:
-		rm -f *.o libem_mesCE.a
+libem_mesCE.$(LIBSUF):
+		rm -f *.$(SUF) libem_mesCE.$(LIBSUF)
 		$(CC) -c $(CFLAGS) -DCODE_EXPANDER $(SRC)
-		$(AR) cr libem_mesCE.a $(OBJ)
-		-sh -c 'ranlib libem_mesCE.a'
-		rm -f *.o
+		$(AR) cr libem_mesCE.$(LIBSUF) $(OBJ)
+		-sh -c 'ranlib libem_mesCE.$(LIBSUF)'
+		rm -f *.$(SUF)
 
 install:	all
-		$(INSTALL) lib/libem_mes.a
-#		$(INSTALL) lib/libem_mesO.a
+		$(INSTALL) lib/libem_mes.$(LIBSUF)
+#		$(INSTALL) lib/libem_mesO.$(LIBSUF)
 		$(INSTALL) man/em_mes.3
 
 cmp:		all
-		$(COMPARE) lib/libem_mes.a
-#		$(COMPARE) lib/libem_mesO.a
-		$(COMPARE) man/em_mes.3
+		-$(COMPARE) lib/libem_mes.$(LIBSUF)
+#		-$(COMPARE) lib/libem_mesO.$(LIBSUF)
+		-$(COMPARE) man/em_mes.3
 
 pr:
 		@pr Makefile $(SRC)
@@ -48,7 +55,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.[oa]
+		rm -f *.$(SUF) *.$(LIBSUF)
 
 lintlib:
 		lint $(INCLUDES) -Cem_mes $(SRC)

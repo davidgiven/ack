@@ -4,8 +4,10 @@ INSTALL=$(EMHOME)/modules/install
 COMPARE=$(EMHOME)/modules/compare
 INCLUDES = -I. -I$(HDIR)
 AR = ar
+SUF = o
+LIBSUF = a
 
-CFLAGS = -O $(INCLUDES)
+CFLAGS = -O $(INCLUDES) $(COPT)
 
 CSRC =		Malloc.c\
 		Salloc.c\
@@ -19,24 +21,29 @@ CSRC =		Malloc.c\
 SOURCES =	alloc.h\
 		$(CSRC)
 
-OBJECTS =	botch.o clear.o st_alloc.o Malloc.o Salloc.o \
-		Srealloc.o Realloc.o std_alloc.o No_Mem.o
+OBJECTS =	botch.$(SUF) clear.$(SUF) st_alloc.$(SUF) Malloc.$(SUF) \
+		Salloc.$(SUF) \
+		Srealloc.$(SUF) Realloc.$(SUF) std_alloc.$(SUF) No_Mem.$(SUF)
 
-all:		liballoc.a
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
-liballoc.a:	$(OBJECTS)
-		$(AR) cr liballoc.a $(OBJECTS)
-		-sh -c 'ranlib liballoc.a'
+all:		liballoc.$(LIBSUF)
+
+liballoc.$(LIBSUF):	$(OBJECTS)
+		$(AR) cr liballoc.$(LIBSUF) $(OBJECTS)
+		-sh -c 'ranlib liballoc.$(LIBSUF)'
 
 install:	all
-		$(INSTALL) lib/liballoc.a
+		$(INSTALL) lib/liballoc.$(LIBSUF)
 		$(INSTALL) man/alloc.3
 		$(INSTALL) h/alloc.h
 
 cmp:		all
-		$(COMPARE) lib/liballoc.a
-		$(COMPARE) man/alloc.3
-		$(COMPARE) h/alloc.h
+		-$(COMPARE) lib/liballoc.$(LIBSUF)
+		-$(COMPARE) man/alloc.3
+		-$(COMPARE) h/alloc.h
 
 pr:
 		@pr Makefile $(SOURCES)
@@ -45,11 +52,12 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.[oa]
+		rm -f *.$(SUF) *.$(LIBSUF)
 
 lintlib:
 		lint $(INCLUDES) -Calloc $(CSRC)
 		mv llib-lalloc.ln $(EMHOME)/modules/lib
-st_alloc.o:	alloc.h 
-std_alloc.o:	alloc.h 
-Malloc.o:	alloc.h
+
+st_alloc.$(SUF):	alloc.h 
+std_alloc.$(SUF):	alloc.h 
+Malloc.$(SUF):		alloc.h

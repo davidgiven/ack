@@ -1,18 +1,24 @@
 EMHOME = ../../..
 INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
-CFLAGS = -O -I$(EMHOME)/modules/h
+CFLAGS = -O -I$(EMHOME)/modules/h $(COPT)
+SUF = o
+RCC = cc	#$ must produce a runnable object
 
 MALLOCSRC =	READ_ME size_type.h param.h impl.h check.h log.h phys.h \
 		mal.c log.c phys.c check.c
 
-all:		malloc.o
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
+
+all:		malloc.$(SUF)
 
 install:	all
-		$(INSTALL) lib/malloc.o
+		$(INSTALL) lib/malloc.$(SUF)
 
 cmp:		all
-		$(COMPARE) lib/malloc.o
+		-$(COMPARE) lib/malloc.$(SUF)
 
 malloc1.c:	$(MALLOCSRC) Makefile add_file
 		rm -f malloc1.c
@@ -29,10 +35,10 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.o clashes malloc1.c size_type.h getsize malloc.c
+		rm -f *.$(SUF) clashes malloc1.c size_type.h getsize malloc.c
 
 size_type.h:	getsize
 		getsize > size_type.h
 
-getsize:	getsize.o
-		$(CC) -o getsize getsize.o
+getsize:	getsize.c
+		$(RCC) -o getsize getsize.c

@@ -46,5 +46,5 @@ if $cc $cflags scon.c ; then : ; else exit 1 ; fi
 if $cc $cflags ucon.c ; then : ; else exit 1 ; fi
 if $cc $cflags -I../read_em C_out.c ; then : ; else exit 1 ; fi
 if $cc $cflags $1/em.c ; then : ; else exit 1 ; fi
-if mv em.o em$1.o ; then : ; else exit 1 ; fi
-if $ar rc libem$1.a bhcst.o bhdlb.o bhdnam.o bhfcon.o bhicon.o bhilb.o bhpnam.o bhucon.o crcst.o crdlb.o crdnam.o crfcon.o cricon.o crilb.o crpnam.o crscon.o crucon.o cst.o dfdlb.o dfdnam.o dfilb.o dlb.o dnam.o end.o endarg.o exc.o fcon.o getid.o icon.o ilb.o insert.o internerr.o msend.o op.o opcst.o opdlb.o opdnam.o opilb.o opnarg.o oppnam.o pnam.o pro.o pronarg.o msstart.o psdlb.o psdnam.o pspnam.o scon.o ucon.o C_out.o em$1.o failed.o ; then : ; else exit 1 ; fi
+if mv em.$suf em$1.$suf ; then : ; else exit 1 ; fi
+if $ar rc libem$1.$libsuf bhcst.$suf bhdlb.$suf bhdnam.$suf bhfcon.$suf bhicon.$suf bhilb.$suf bhpnam.$suf bhucon.$suf crcst.$suf crdlb.$suf crdnam.$suf crfcon.$suf cricon.$suf crilb.$suf crpnam.$suf crscon.$suf crucon.$suf cst.$suf dfdlb.$suf dfdnam.$suf dfilb.$suf dlb.$suf dnam.$suf end.$suf endarg.$suf exc.$suf fcon.$suf getid.$suf icon.$suf ilb.$suf insert.$suf internerr.$suf msend.$suf op.$suf opcst.$suf opdlb.$suf opdnam.$suf opilb.$suf opnarg.$suf oppnam.$suf pnam.$suf pro.$suf pronarg.$suf msstart.$suf psdlb.$suf psdnam.$suf pspnam.$suf scon.$suf ucon.$suf C_out.$suf em$1.$suf failed.$suf ; then : ; else exit 1 ; fi
