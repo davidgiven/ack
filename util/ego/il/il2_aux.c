@@ -254,10 +254,7 @@ assign_ratio(c)
 	/* Extra points for constants as parameters */
 	if (ratio <= 0) ratio = 1;
 	ll = c->cl_looplevel+1; 
-	if (IS_CALLED_IN_LOOP(c->cl_caller)) ll++;
-	/* Commented out; I don't see the point; Even if it is not called
-	   from a loop, inline expansion is better
-	if (ll == 1) ll = 0;
+	if (ll == 1 && !IS_CALLED_IN_LOOP(c->cl_caller)) ll = 0;
 	/* If the call is not in a loop and the called proc. is never called
 	 * in a loop, ll is set to 0.
 	*/
