@@ -397,8 +397,9 @@ cputlines(l,lf)
 		}
 		oldline(lnp);
 	}
-	if (thispro != (proc_p) 0) {
+	if (lmap != (line_p *) 0) {
 		oldmap(lmap,llength);
+		lmap = (line_p *) 0;
 	}
 }
 
