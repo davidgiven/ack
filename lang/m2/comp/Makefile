@@ -240,6 +240,7 @@ def.o: node.h
 def.o: scope.h
 def.o: target_sizes.h
 def.o: type.h
+def.o: warning.h
 misc.o: LLlex.h
 misc.o: f_info.h
 misc.o: idf.h
