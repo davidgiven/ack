@@ -1352,13 +1352,11 @@ and defined($1) | |     remove(all)
 			move({CONST2,$1}, r0)
 			"jsr pc,and~"
 			erase(r0)                               |       | |
-#ifdef UNTESTED
 and !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,and~"
 			erase(r0)                               |       | |
-#endif
 ior $1==2       | SCR_REG source2 |
 			"bis %[2],%[1]"
 			setcc(%[1])
@@ -1387,7 +1385,6 @@ ior defined($1) | |     remove(all)
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[b],1b"
 			erase(%[a]) erase(%[b])		|       | | (12,2100+$1*975)
-#ifdef UNTESTED
 ior !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG=%[1])
@@ -1396,7 +1393,6 @@ ior !defined($1)| SCR_REG |
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[1],1b"
 			erase(%[1]) erase(%[a])         |       | |
-#endif
 xor $1==2       | REG SCR_REG |
 			"xor %[1],%[2]"
 			setcc(%[2])
@@ -1409,13 +1405,11 @@ xor defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,xor~"
 			erase(r0)                               |       | |
-#ifdef UNTESTED
 xor !defined($1)| source2 |
 			remove(all)
 			move(%[1],r0)
 			"jsr pc,xor~"
 			erase(r0)                               |       | |
-#endif
 com $1==2       | SCR_REG |
 			"com %[1]"
 			setcc(%[1])
@@ -1426,7 +1420,6 @@ com defined($1) | |     remove(all)
 			"1:\tcom (%[b])+"
 			"sob %[a],1b"
 			erase(%[a])                     |       | | (10,1800+$1*825)
-#ifdef UNTESTED
 com !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG)
@@ -1435,7 +1428,6 @@ com !defined($1)| SCR_REG |
 			"1:\tcom (%[a])+"
 			"sob %[1],1b"
 			erase(%[1])                             |       | |
-#endif
 rol $1==2       | CONST2 SCR_ODD_REG |
 			"ashc $$%(%[1.num]-16%),%[2]"
 			setcc(%[2])
