@@ -186,9 +186,10 @@ expand_defined(repl)
 	}
 	UnGetChar();
 	str = GetIdentifier(0);
-	if (str)
-		id = str2idf(str, 0);
-	else	id = 0;
+	if (str) {
+		id = findidf(str);
+		free(str);
+	} else	id = 0;
 	assert(id || class(ch) == STELL);
 	ch = GetChar();
 	ch = skipspaces(ch, 0);

@@ -21,7 +21,6 @@
 	formal parameter in this text.
 */
 struct macro	{
-	struct macro *next;
 	char *	mc_text;	/* the replacement text		*/
 	int	mc_nps;		/* number of formal parameters	*/
 	int	mc_length;	/* length of replacement text	*/

@@ -82,3 +82,8 @@ compile(argc, argv)
 	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
 }
+
+No_Mem()				/* called by alloc package */
+{
+	fatal("out of memory");
+}

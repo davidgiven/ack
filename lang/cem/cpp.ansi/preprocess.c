@@ -53,7 +53,7 @@ do_pragma()
 	*c_ptr = '\0';
 	while(c != '\n') {
 		if (c_ptr + 1 - cur_line == size) {
-			cur_line = Realloc(cur_line, size + ITEXTSIZE);
+			cur_line = Realloc(cur_line, size += ITEXTSIZE);
 			c_ptr = cur_line + size - 1;
 		}
 		*c_ptr++ = c;

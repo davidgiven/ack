@@ -41,7 +41,7 @@ do_option(text)
 	{
 		register char *cp = text, *name, *mactext;
 
-		if (class(*cp) != STIDF || class(*cp) == STELL)	{
+		if (class(*cp) != STIDF && class(*cp) != STELL)	{
 			error("identifier missing in -D%s", text);
 			break;
 		}
