@@ -5,9 +5,13 @@ arith cur_pos = 0;
 
 dist( lab)
 char *lab;
+
+/* Just output a reference which must be filled in on a second pass */
+
 {
 	out( "$%s$ - %ld", lab, cur_pos);
 }
+
 
 #define MAX_LABEL	10
 #define	TRUE		1
@@ -24,6 +28,9 @@ int n_labs = 0;
 
 handle_label( lab)
 char *lab;
+
+/* Record position of this label */
+
 {
 	char *Salloc();
 
@@ -39,6 +46,9 @@ char *lab;
 
 relocate( f)
 FILE *f;
+
+/* Output position-count of the label in file 'f', remove also trailing $ */
+
 {
 	char buf[256];
 	int i;
@@ -58,6 +68,9 @@ File *oldout;
 extern File *outfile;
 
 back_patch()
+/* Echo the text on file '.tmp', but replace every occurence of label-
+ *reference's by its position-count. Reference of label 'foo' is '$foo$'.
+ */
 {
 	FILE *save;
 	char c, c1;
@@ -98,5 +111,5 @@ save_output()
 	if ( ! sys_open( ".tmp", OP_WRITE, &outfile))
 		fprint( STDERR, "can't open .tmp\n");
 	cur_pos = 0;
-	n_labs = 0;	/* geheugen-ruimte teruggeven? */
+	n_labs = 0;
 }
