@@ -34,7 +34,7 @@ int nestlevel = -1;
 int svnestlevel[30] = {-1};
 int nestcount;
 
-PRIVATE char *
+char *
 GetIdentifier()
 {
 	/*	returns a pointer to the descriptor of the identifier that is

@@ -69,19 +69,32 @@ replace(idef)
 			return 0;
 		}
 		LoadChar(c);
-		c = skipspaces(c,1);
+		c = skipspaces(c,! (mac->mc_flag & FUNC));
 		if (c != '(') {		/* no replacement if no ()	*/
-			lexerror("(warning) macro %s needs arguments",
-				idef->id_text);
 			PushBack();
-			return 0;
+			if (! (mac->mc_flag & FUNC)) {
+				lexerror("(warning) macro %s needs arguments",
+					idef->id_text);
+				return 0;
+			}
 		}
-		actpars = getactuals(idef);	/* get act.param. list	*/
 		if (mac->mc_flag & FUNC) {
-			struct idf *param = str2idf(*actpars);
+			struct idf *param;
+			extern struct idf *GetIdentifier();
 
+			UnknownIdIsZero = 0;
+			param = GetIdentifier();
+			UnknownIdIsZero = 1;
+			if (c == '(') {
+				LoadChar(c);
+				c = skipspaces(c,0);
+				if (c != ')') error(") missing");
+			}
+			if (! param) {
+				error("identifier missing");
+			}
 			repl = new_mlist();
-			if (param->id_macro) 
+			if (param && param->id_macro) 
 				reptext = "1";
 			else
 				reptext = "0";
@@ -93,6 +106,7 @@ replace(idef)
 			repl->m_mac = mac;
 			return 1;
 		}
+		actpars = getactuals(idef);	/* get act.param. list	*/
 	}
 	repl = new_mlist();
 	repl->m_mac = mac;

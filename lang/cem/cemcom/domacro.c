@@ -34,7 +34,7 @@ PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 
 int	nestlevel = -1;
 
-PRIVATE struct idf *
+struct idf *
 GetIdentifier()
 {
 	/*	returns a pointer to the descriptor of the identifier that is
