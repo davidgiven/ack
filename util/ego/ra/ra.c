@@ -23,8 +23,13 @@
 #include "ra_xform.h"
 
 
+#define newrabx()	(bext_p)	newstruct(bext_ra)
+#define newralpx()	(lpext_p)	newstruct(lpext_ra)
+#define oldrabx(x)	oldstruct(bext_ra,x)
+#define oldralpx(x)	oldstruct(lpext_ra,x)
+
 short alloc_id;
-item_p items[NRITEMTYPES];
+static item_p items[NRITEMTYPES];
 int nrinstrs;
 line_p *instrmap;
 
