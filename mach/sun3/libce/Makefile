@@ -9,7 +9,8 @@ FOBJ =	adf4.o adf8.o cff.o cfi.o cfu.o cif.o cmf4.o cmf8.o cuf.o dvf4.o \
 	dvf8.o fef4.o fef8.o fif4.o fif8.o mlf4.o mlf8.o sbf4.o sbf8.o vars.o
 
 OBJ =	$(EMOBJ) $(FOBJ)
-all:	libext.a
+
+all:	libext.a head_em.sun.o
 
 .s.o:
 	sun3 -c $*.s
@@ -19,11 +20,16 @@ libext.a:	$(OBJ)
 	ar rv libext.a $(OBJ)
 	ranlib libext.a
 
+head_em.sun.o:	head_em.o
+	../../../lib/sun3/cv -u head_em.o head_em.sun.o
+
 install:	all
 	../../install libext.a tail_ext
+	../../install head_em.sun.o head_em.sun
 
 cmp:	all
 	-../../compare libext.a tail_ext
+	-../../compare head_em.sun.o head_em.sun
 
 clean:
 	rm -f *.[oa]
