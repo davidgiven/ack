@@ -220,13 +220,19 @@ gen_tphead(tpp, nest)
 	}
 	if (gen_error) return tpp;
 	if (tp->tp_fund == UNION) {
+		/* Here, we saw a {, which could be the start of a union
+		   initializer. It could, however, also be the start of the
+		   initializer for the first union field ...
+		*/
 		sd = tp->tp_sdef;
-		if (AHEAD == '{' &&
+		if (AHEAD != '{' &&
 		    (aggregate_type(sd->sd_type) || 
 		     sd->sd_type->tp_fund == UNION)) {
-			return &(sd->sd_type);
+			/* In this case, assume that it is the start of the
+			   initializer of the union field, so:
+			*/
+			return gen_tphead(&(tp->tp_sdef->sd_type), nest);
 		}
-		return gen_tphead(&(tp->tp_sdef->sd_type), nest);
 	}
 	p = new_e_stack();
 	p->next = p_stack;
@@ -234,6 +240,10 @@ gen_tphead(tpp, nest)
 	p->s_nested = nest;
 	p->s_tpp = tpp;
 	switch(tp->tp_fund) {
+	case UNION:
+		p->s_def = sd = tp->tp_sdef;
+		p->bytes_upto_here = 0;
+		return &(sd->sd_type);
 	case ARRAY:
 		p->nelem = -1;
 		p->elem_count = 1;
@@ -289,6 +299,11 @@ again:
 	switch(tp->tp_fund) {
 	case ERRONEOUS:
 		if (! gen_error) gen_error = pack_level;
+		return p->s_tpp;
+	case UNION:
+		sd = p->s_def;
+		p->bytes_upto_here +=
+			size_of_type(sd->sd_type, "selector");
 		return p->s_tpp;
 	default:
 		if (p->elem_count == p->nelem && p->s_nested) {
@@ -357,6 +372,13 @@ gen_tpend()
 	    if (!gen_error) {
 		tp = *(p->s_tpp);
 		switch(tp->tp_fund) {
+		case UNION:
+			sd = p->s_def;
+			p->bytes_upto_here +=
+				size_of_type(sd->sd_type, "selector");
+			while (p->bytes_upto_here++ < tp->tp_size)
+				con_nullbyte();
+			break;
 		case ARRAY:
 			if (tp->tp_size == -1) {
 				*(p->s_tpp) = construct_type(ARRAY, tp->tp_up,
