@@ -222,4 +222,3 @@ EnableMacros()
 	assert(cnt == Unstacked);
 	Unstacked = 0;
 }
-#endif NOPP
