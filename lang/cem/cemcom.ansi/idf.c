@@ -262,6 +262,10 @@ actual_declaration(sc, tp)
 	if (fund == FUNCTION || fund == ARRAY)
 		/* allocation solved in other ways */
 		return 0;
+	if (sc == EXTERN && fund == VOID) {
+		/* strange, but should be accepted */
+		return 0;
+	}
 	/* to be allocated */
 	return 1;
 }
