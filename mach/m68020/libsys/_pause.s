@@ -1,9 +1,9 @@
-.define ___fstat
-.extern ___fstat
+.define __pause
+.extern __pause
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 .sect .text
-___fstat:	move.l	#0x1C,d0
+__pause:		move.l #0x1D,d0
 		jmp (callc)

@@ -1,9 +1,9 @@
-.define ___fstat
-.extern ___fstat
+.define __unlink
+.extern __unlink
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 .sect .text
-___fstat:	move.l	#0x1C,d0
+__unlink:	move.l #0xA,d0
 		jmp (callc)

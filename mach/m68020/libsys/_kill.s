@@ -1,9 +1,9 @@
-.define ___fstat
-.extern ___fstat
+.define __kill
+.extern __kill
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 .sect .text
-___fstat:	move.l	#0x1C,d0
+__kill:		move.l #0x25,d0
 		jmp (callc)

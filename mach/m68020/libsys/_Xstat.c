@@ -4,20 +4,7 @@
 static	Xcvt();
 
 int
-stat(path, buf)
-	char *path;
-	struct stat *buf;
-{
-	char Xbuf[100];
-	int retval;
-
-	retval = _stat(path, Xbuf);
-	Xcvt(Xbuf, (char *)buf);
-	return retval;
-}
-
-int
-fstat(fd, buf)
+_fstat(fd, buf)
 	int fd;
 	struct stat *buf;
 {
