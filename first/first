@@ -120,8 +120,8 @@ for i in $RMD
 do
 (	cd ../lib/$i
 	if grep '^name as$' descr >/dev/null 2>&1
-		then
-cp descr descr.orig
+	then
+	cp descr descr.orig
 ed - descr <<'ABC'
 /^name as$/;/^end$/d
 /^name ld$/;/^end$/d
@@ -133,6 +133,7 @@ ABC
 done
 case `ack_sys` in
 vax_bsd4_2)	( cd ../lib/vax4
+		  cp descr descr.orig
 		  ed - descr <<'ABC'
 /CPP_F/s/$/-D__BSD4_2/
 w
@@ -141,8 +142,47 @@ ABC
 		)
 		;;
 vax_sysV_2)	( cd ../lib/vax4
+		  cp descr descr.orig
 		  ed - descr <<'ABC'
 /CPP_F/s/$/-D__USG/
+w
+q
+ABC
+		)
+		;;
+esac
+case `ack_sys` in
+m68_sysV_0)	
+		( cd ../lib/int24
+		  cp descr descr.orig
+		  ed - descr <<'ABC'
+/CPP_F/s/$/-D__USG/
+w
+q
+ABC
+		)
+		( cd ../lib/int44
+		  cp descr descr.orig
+		  ed - descr <<'ABC'
+/CPP_F/s/$/-D__USG/
+w
+q
+ABC
+		)
+		;;
+sun2|sun3)
+		( cd ../lib/int24
+		  cp descr descr.orig
+		  ed - descr <<'ABC'
+/CPP_F/s/$/-D__BSD4_2/
+w
+q
+ABC
+		)
+		( cd ../lib/int44
+		  cp descr descr.orig
+		  ed - descr <<'ABC'
+/CPP_F/s/$/-D__BSD4_2/
 w
 q
 ABC
