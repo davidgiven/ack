@@ -240,12 +240,6 @@ PATTERNS
 pat loc					yields {const2,$1}
 pat ldc					yields {const2,highw($1)}
 					       {const2,loww($1)}
-pat lol lol $1==$2
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de de
 
 pat lol
 uses hlreg={const2,$1}, dereg
@@ -254,24 +248,9 @@ gen dad lb
     inx hl
     mov d,{m}				yields de
 
-pat loe loe $1==$2
-uses hlreg
-gen lhld {label,$1}			yields hl hl
-
 pat loe
 uses hlreg
 gen lhld {label,$1}			yields hl
-
-pat lil lil $1==$2
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov h,{m}
-    mov l,e
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de de
 
 pat lil
 uses hlreg={const2,$1}, dereg

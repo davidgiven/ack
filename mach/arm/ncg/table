@@ -668,6 +668,8 @@ pat lol loc ior stl	inreg($1)==reg_any && inreg($4)==reg_any && $3==4
 pat lol loc xor stl	inreg($1)==reg_any && inreg($4)==reg_any && $3==4
     call lol_loc_op_stl("EOR")
 
+pat lol dup inreg($1)==reg_any && $2==4	leaving lol $1 lol $1
+
 /* Procedure : load register, load register, op xx, store register	*/
 proc lol_lol_op_stl example lol lol adi stl
     kills local %ind==$4
@@ -772,7 +774,7 @@ kills GENREG
 gen STR_B %1, {regrelpi, regvar($1), $5}
 
 /* code for *pp->p++ and *pp->p-- (integers) */
-pat lil lil adp sil loi $1==$2 && $2==$4 && $5==4 && inreg($1)==reg_any
+pat lil dup adp sil loi $1==$4 && $2==4 && $5==4 && inreg($1)==reg_any
 kills GENREG
 uses GENREG,GENREG
 gen LDR %a, {regind, regvar($1)}
@@ -780,7 +782,7 @@ gen LDR %a, {regind, regvar($1)}
     STR %b, {regind, regvar($1)}
     LDR %b, {regind, %a}				yields %b
 
-pat lil lil adp sil sti $1==$2 && $2==$4 && $5==4 && inreg($1)==reg_any
+pat lil dup adp sil sti $1==$4 && $2==4 && $5==4 && inreg($1)==reg_any
 with GENREG
 kills GENREG
 uses GENREG,GENREG
@@ -790,7 +792,7 @@ gen LDR %a, {regind, regvar($1)}
     STR %1, {regind, %a}
 
 /* code for *pp->p++ and *pp->p-- (bytes) */
-pat lil lil adp sil loi $1==$2 && $2==$4 && $5==1 && inreg($1)==reg_any
+pat lil dup adp sil loi $1==$4 && $2==4 && $5==1 && inreg($1)==reg_any
 kills GENREG
 uses GENREG,GENREG
 gen LDR %a, {regind, regvar($1)}
@@ -798,7 +800,7 @@ gen LDR %a, {regind, regvar($1)}
     STR %b, {regind, regvar($1)}
     LDR_B %b, {regind, %a}				yields %b
 
-pat lil lil adp sil sti $1==$2 && $2==$4 && $5==1 && inreg($1)==reg_any
+pat lil dup adp sil sti $1==$4 && $2==4 && $5==1 && inreg($1)==reg_any
 with GENREG
 kills GENREG
 uses GENREG,GENREG
@@ -2248,14 +2250,14 @@ gen move %1, {absolute, "_RegHp"}
 /***********************************************************************/
 
 /* code for *p++ and *p-- (integers)*/
-pat lol lol adp stl loi $1==$2 && $2==$4 && $5==4
+pat lol dup adp stl loi $1==$4 && $2==4 && $5==4
 kills GENREG
 uses GENREG, GENREG
 gen move {lb_local, $1}, %a
     LDR %b, {regrelpi, %a, $5}
     STR %a, {lb_local, $1}		yields %b
 
-pat lol lol adp stl sti $1==$2 && $2==$4 && $5==4
+pat lol dup adp stl sti $1==$4 && $2==4 && $5==4
 with GENREG
 kills GENREG
 uses GENREG
@@ -2264,14 +2266,14 @@ gen move {lb_local,$1}, %a
     STR %a, {lb_local, $1}
 
 /* code for *p++ and *p-- (bytes)*/
-pat lol lol adp stl loi $1==$2 && $2==$4 && $5==1
+pat lol dup adp stl loi $1==$4 && $2==4 && $5==1
 kills GENREG
 uses GENREG, GENREG
 gen move {lb_local, $1}, %a
     LDR_B %b, {regrelpi, %a, $5}
     STR %a, {lb_local, $1}		yields %b
 
-pat lol lol adp stl sti $1==$2 && $2==$4 && $5==1
+pat lol dup adp stl sti $1==$4 && $2==4 && $5==1
 with GENREG
 kills GENREG
 uses GENREG
@@ -2280,7 +2282,7 @@ gen move {lb_local,$1}, %a
     STR %a, {lb_local, $1}
 
 /* code for *pp->p++ and *pp->p-- (integers)*/
-pat lil lil adp sil loi $1==$2 && $2==$4 && $5==4
+pat lil dup adp sil loi $1==$4 && $2==4 && $5==4
 kills GENREG
 uses GENREG, GENREG, GENREG
 gen move {lb_local, $1}, %a
@@ -2289,7 +2291,7 @@ gen move {lb_local, $1}, %a
     STR %c, {regind, %a}
     LDR %c, {regind, %b}		yields %c
 
-pat lil lil adp sil sti $1==$2 && $2==$4 && $5==4
+pat lil dup adp sil sti $1==$4 && $2==4 && $5==4
 with GENREG
 kills GENREG
 uses GENREG, GENREG, GENREG
@@ -2300,7 +2302,7 @@ gen move {lb_local, $1}, %a
     STR %1, {regind, %b}
 
 /* code for *pp->p++ and *pp->p-- (bytes)*/
-pat lil lil adp sil loi $1==$2 && $2==$4 && $5==1
+pat lil dup adp sil loi $1==$4 && $2==4 && $5==1
 kills GENREG
 uses GENREG, GENREG, GENREG
 gen move {lb_local, $1}, %a
@@ -2309,7 +2311,7 @@ gen move {lb_local, $1}, %a
     STR %c, {regind, %a}
     LDR_B %c, {regind, %b}		yields %c
 
-pat lil lil adp sil sti $1==$2 && $2==$4 && $5==1
+pat lil dup adp sil sti $1==$4 && $2==4 && $5==1
 with GENREG
 kills GENREG
 uses GENREG, GENREG, GENREG
