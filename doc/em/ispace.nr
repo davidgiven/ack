@@ -45,6 +45,7 @@ the trapping instruction (see next chapter).
 the GTO instruction, which is used for non-local goto's.
 It can remove several frames from the stack and transfer
 control to an active procedure.
+(see also MES~11 in paragraph 11.1.4.4)
 .PE
 .IE
 .P
