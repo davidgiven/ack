@@ -401,7 +401,9 @@ cms zne $1==w:  bne $2
 lol lae aar adp $3==w:  adp $4  lol $1  lae $2  aar w
 loe lae aar adp $3==w:  adp $4  loe $1  lae $2  aar w
 cmi zeq defined($1):    cms $1  zeq $2
+cmu zeq defined($1):    cms $1  zeq $2
 cmi zne defined($1):    cms $1  zne $2
+cmu zne defined($1):    cms $1  zne $2
 #ifdef INT
 loe inc dup ste $1==$4 && $3==w:        ine $1  loe $1
 loe dec dup ste $1==$4 && $3==w:        dee $1  loe $1
