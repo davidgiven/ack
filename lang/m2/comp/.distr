@@ -5,7 +5,6 @@ proto.make
 proto.main
 BigPars
 SmallPars
-Resolve
 SYSTEM.h
 Version.c
 casestat.C
@@ -42,7 +41,6 @@ make.tokfile
 misc.c
 misc.h
 modula-2.1
-nmclash.c
 node.H
 node.c
 options.c
