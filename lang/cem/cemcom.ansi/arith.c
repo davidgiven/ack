@@ -254,6 +254,9 @@ any2arith(expp, oper)
 		break;
 	case ENUM:
 #ifndef	LINT
+		/*	we do not want this conversion for lint, since we
+			want to keep enums and ints separate
+		*/
 		int2int(expp, int_type);
 #endif	LINT
 		break;

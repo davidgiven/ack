@@ -28,6 +28,7 @@
 #define	C_lin(c)
 #define	C_loi(c)
 #define	C_lol(c)
+#define	C_ret(c)
 #define	C_sdl(c)
 #define	C_sti(c)
 #define	C_stl(c)
@@ -72,4 +73,5 @@
 #define	C_ms_gto()
 #define	C_ms_par(b)
 #define	C_ms_reg(o,s,t,c)
+#define	C_ms_err()
 

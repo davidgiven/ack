@@ -15,6 +15,8 @@
 #include	"macro.h"
 #include	"idf.h"
 
+extern char *sprint();
+
 struct mkey	{
 	char *mk_reserved;
 	int mk_key;

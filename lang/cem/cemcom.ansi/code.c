@@ -342,7 +342,6 @@ end_proc(fbytes)
 	}
 	C_df_ilb(return_label);
 	prc_exit();
-#ifndef	LINT
 	if (return_expr_occurred) {
 		if (func_res_label != 0)	{
 			C_lae_dlb(func_res_label, (arith)0);
@@ -352,7 +351,6 @@ end_proc(fbytes)
 			C_ret(func_size);
 	}
 	else	C_ret((arith) 0);
-#endif	LINT
 
 	/* getting the number of "local" bytes is posponed until here,
 	   because copying the function result in "func_res_label" may

@@ -56,10 +56,10 @@ add_proto(pl, ds, dc, lvl)
 	int lvl;
 {
 	/*	The full typed identifier or abstract type, described
-		by the structures decspecs and declarator are turned
+		by the structures decspecs and declarator is turned
 		a into parameter type list structure.
 		The parameters will be declared at level L_FORMAL2,
-		later on it's decided whether they were prototypes
+		later on it will decided whether they were prototypes
 		or actual declarations.
 	*/
 	register struct idf *idf = dc->dc_idf;
@@ -132,7 +132,7 @@ add_proto(pl, ds, dc, lvl)
 		newdef->df_file = idf->id_file;
 		newdef->df_line = idf->id_line;
 #ifdef LINT
-		newdef->df_set = (type->tp_fund == ARRAY);
+		newdef->df_set = 0;
 		/* newdef->df_firstbrace = 0; */
 #endif
 		/*	We can't put the idf onto the stack, since these kinds
@@ -168,8 +168,8 @@ add_proto(pl, ds, dc, lvl)
 
 struct tag *
 gettag(tp, idpp)
-struct type *tp;
-struct idf **idpp;
+	struct type *tp;
+	struct idf **idpp;
 {
 	struct tag *tg = (struct tag *)0;
 	register int fund = tp->tp_fund;
@@ -242,6 +242,11 @@ declare_protos(dc)
 				continue;
 			}
 
+			/*	Postponed storage class checking.
+			*/
+			if (def->df_sc == 0)
+				error("illegal storage class in parameter declaration");
+
 			def->df_level = L_FORMAL2;
 			stack_idf(pl->pl_idf, stl);
 			pl = pl->next;
@@ -312,7 +317,7 @@ update_proto(tp, otp)
  * remove them from the symbol-table
  */
 remove_proto_tag(tp)
-struct type *tp;
+	struct type *tp;
 {
 	register struct idf *ident;
 	register struct tag *tgp, **tgpp;
@@ -384,7 +389,7 @@ call_proto(expp)
 {
 	/*	If the function specified by (*expp)->OP_LEFT has a prototype,
 		the parameters are converted according the rules specified in
-		par. 3.3.2.2. E.i. the parameters are converted to the prototype
+		par. 3.3.2.2. I.e., the parameters are converted to the prototype
 		counter parts as if by assignment. For the parameters falling
 		under ellipsis clause the old parameters conversion stuff
 		applies.
