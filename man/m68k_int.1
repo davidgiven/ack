@@ -10,16 +10,18 @@ The loadfile ("e.out" if not specified) is opened to read the first 8 word heade
 The format of this header is explained in e.out(V).
 One of these 8 words is a flag word
 specifying the interpreter options requested at compile time.
-The usual setting of these options is +t +l -f -c -p.
-One of these options may be overridden at run time
-by the corresponding flag of em.
+The usual setting of these options is +t -f -c -p.
+These options may be overridden at runtime as follows:
+em -t turns the test option of; em +c turns count on ; em +p turns profile
+on ; em +c +p turns both count and profile on.
 Based on these options the name of the appropriate interpreter
 is constructed.
 Two versions exist, one for two byte words and four byte pointers and
 one for four byte words and pointers.
+The information in the header of the e.out file is used by em to select the 
+right interpreter for the word size of used in the e.out file.
 .PP
-This interpreter is first searched for in /usr/em/mach/m68k[2,4]/int, then in the current
-directory.
+This interpreter is searched for in /usr/em/lib/int[24]4.
 .PP
 The flags control the following options that can be turned off
 or on by prepending them with - or + respectively:
@@ -39,35 +41,33 @@ em_profile.
 maintain a bit map of all source lines that have been executed.
 This map is written onto a file em_flow .
 This option is almost free in time and space.
-The file is not easy to read .
+The file is not easy to read.
 Of each procedure only the lines between the first statement and the last
 statement are represented in the bit map.
+Currently this option is not installed in the em tree.
 .IP c
 count line usage in tables that
 contains for every source line the number of times it
 was entered.
-These tables are written onto em_count.
-This option is cheap in time ,but costs some in memory space.
+These tables are written onto em_count, a human readable file .
+This option is cheap in time, but costs some in memory space.
 .IP l
 dump the line numbers of the last 64 lines entered onto a file named
 em_last.
 This file will be in a human readable format.
+This option is used simultaneously with the test option.
 .PP
 These flags
 give rise to 5 different interpreters which are in the
-directory /usr/em/mach/m68k2/int or in /usr/em/mach/m68k4/int
-for the two byte word or the four byte word options , respectively.
+directory /usr/em/lib/int24 or in /usr/em/lib/int44
+for the two byte word or the four byte word options, respectively.
 .PP
 .SH "FILES"
-.IP /usr/em/mach/m68k[2,4]/int/em_???? 35
+.IP /usr/em/lib/int[24]4/em_???? 35
 interpreters proper
 .PD 0
-.IP /usr/em/lib/m68k2_int/mloop?
+.IP /usr/em/mach/m68k2/int/mloop?
 source of interpreter
-.IP /usr/em/mach/m68k[2,4]/int/?+
-positive option switch
-.IP /usr/em/mach/m68k[2,4]/int/?-
-negative option switch
 .IP em_profile
 profile data
 .IP em_count
@@ -78,16 +78,19 @@ source line flow data
 last lines executed
 .PD
 .SH "SEE ALSO"
-ack(I), int(I)
+\fIack\fP(I),
+\fIint24\fP(I),
+\fIint44\fP(I)
 .SH BUGS
 Most error messages are self explanatory.
 If runtime flags are turned on it is advisable to try again
 with the default options.
-Of the interpreter does not work most probably your particular
+If the interpreter does not work most probably your particular
 machine has an other format for the system calls then assumed
-in the source .
+in the source.
 In that case adapt source file mloopc to your machine.
 Also the instruction that causes the machine to allocate stack
 space might differ .
 In that case adapt the macro 'claimstack' in deffile.
-Bugs should be reported to Freek van Schagen.
+.SH AUTHOR
+Freek van Schagen
