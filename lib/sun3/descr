@@ -54,9 +54,10 @@ name led
 	args {ALIGN} (.e:{HEAD}= {EM}/{RT}em) \
 		({RTS}:.ocm.b.c={EM}/{RT}cc) \
 		({RTS}:.mod={EM}/{RT}m2) \
-		({RTS}:.p={EM}/{PRT}pc) \
+		({RTS}:.p.8={EM}/{PRT}pc) \
 		-o > < \
-		(.p:{TAIL}={EM}/{PLIB}pc) \
+		(.8:{TAIL}={EM}/{LIB}a68s) \
+		(.p.8:{TAIL}={EM}/{PLIB}pc) \
 		(.b:{TAIL}={EM}/{PLIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
