@@ -1,0 +1,3 @@
+pause() {
+	sigpause(sigblock());
+}
