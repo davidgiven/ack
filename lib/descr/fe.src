@@ -52,7 +52,7 @@ name pc
  name abc
 	from .b
 	to .e
-	program /usr/mk/bin/bem
+	program {EM}/lib/em_bem
 	mapflag -h ABC_F={ABC_F?} -h
 	mapflag -w ABC_F={ABC_F?} -w
 	mapflag -L ABC_F={ABC_F?} -L
