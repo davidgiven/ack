@@ -91,6 +91,10 @@ malloc(n)
 		}
 
 		p = SBRK((int)req);
+		if (p == ILL_BREAK) {
+			req = n + mallink_size();
+			p = SBRK((int)req);
+		}
 		if (p == ILL_BREAK)	{
 			/*	Now this is bad.  The system will not give us
 				more memory.  We can only liquidate our store
