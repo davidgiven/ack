@@ -12,7 +12,9 @@ CURRDIR =	.
 
 INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 
-GFILES =	tokenfile.g program.g declar.g expression.g statement.g
+GF =	program.g declar.g expression.g statement.g
+GENGFILES=	tokenfile.g
+GFILES =$(GENGFILES) $(GF)
 LLGENOPTIONS = -v
 PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -O -DSTATIC=
@@ -21,34 +23,30 @@ MALLOC = $(LIBDIR)/malloc.o
 LFLAGS = $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
-CSRC =	LLlex.c LLmessage.c char.c error.c main.c \
-	symbol2str.c tokenname.c idf.c input.c type.c def.c \
-	scope.c misc.c enter.c defmodule.c typequiv.c node.c \
-	cstoper.c chk_expr.c options.c walk.c casestat.c desig.c \
-	code.c tmpvar.c lookup.c Version.c next.c
+CSRC =	LLlex.c LLmessage.c error.c main.c \
+	tokenname.c idf.c input.c type.c def.c \
+	misc.c enter.c defmodule.c typequiv.c node.c \
+	cstoper.c chk_expr.c options.c walk.c desig.c \
+	code.c lookup.c Version.c
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
 	code.o tmpvar.o lookup.o Version.o next.o
-SRC =	$(CSRC) $(LSRC) Lpars.c
+GENC=	$(LSRC) symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
+SRC =	$(CSRC) $(GENC) Lpars.c
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
-# Keep the next entries up to date!
-GENCFILES=	tokenfile.c \
-	program.c declar.c expression.c statement.c \
-	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
-GENGFILES=	tokenfile.g
-GENHFILES=	errout.h\
+GENH=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
 	inputtype.h maxset.h density.h\
 	def.h debugcst.h type.h Lpars.h node.h
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h desig.h f_info.h idf.h\
 	input.h main.h misc.h scope.h standards.h tokenname.h\
-	walk.h warning.h $(GENHFILES)
+	walk.h warning.h $(GENH)
 #
-GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
+GENFILES = $(GENGFILES) $(GENC) $(GENH)
 NEXTFILES = def.H type.H node.H scope.C tmpvar.C casestat.C
 
 #EXCLEXCLEXCLEXCL
@@ -59,6 +57,19 @@ all:	Cfiles
 
 install:	all
 	cp $(CURRDIR)/main $(EMHOME)/lib/em_m2
+	rm -f $(EMHOME)/man/em_m2.6 $(EMHOME)/man/modula-2.1
+	cp $(CURRDIR)/em_m2.6 $(CURRDIR)/modula-2.1 $(EMHOME)/man
+
+cmp:	all
+	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_m2
+	-cmp $(CURRDIR)/em_m2.6 $(EMHOME)/man/em_m2.6 
+	-cmp $(CURRDIR)/modula-2.1 $(EMHOME)/man/modula-2.1 
+
+opr:
+	make pr | opr
+
+pr:
+	@pr Makefile Resolve Parameters $(GF) *.H $(HFILES) *.C $(CSRC)
 
 clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes \
@@ -74,7 +85,7 @@ longnames:	$(SRC) $(HFILES)
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES) Makefile
+Cfiles:	hfiles LLfiles $(GENC) $(GENH) Makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 LLfiles:	$(GFILES)
