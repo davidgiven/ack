@@ -4,7 +4,7 @@ SUF=pr
 PRINT=cat
 RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\
 ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF) LLgen.$(SUF)\
-basic.$(SUF) 6500.$(SUF)
+basic.$(SUF) 6500.$(SUF) ncg.$(SUF)
 NROFF=nroff
 MS=-ms
 
@@ -15,6 +15,8 @@ v7bugs.$(SUF):      v7bugs.doc
 ack.$(SUF):         ack.doc
 		$(NROFF) $(MS) $? >$@
 cg.$(SUF):		cg.doc
+		$(NROFF) $(MS) $? >$@
+ncg.$(SUF):		ncg.doc
 		$(NROFF) $(MS) $? >$@
 regadd.$(SUF):		regadd.doc
 		$(NROFF) $(MS) $? >$@
