@@ -36,4 +36,3 @@
 	mov     ax,EILLINS
 	push    ax
 	jmp     .fat
-	jmp     bx
