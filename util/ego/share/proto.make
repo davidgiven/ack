@@ -101,8 +101,7 @@ lintlib:	classdefs.h
 	$(MK_LINT_LIB) share $(TARGET_HOME)/lib.bin/ego $(CPPFLAGS) $(CFILES)
 
 depend:	$(SRC_DIR)/pop_push.h classdefs.h
-	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
-	echo '#DEPENDENCIES' >>Makefile.new
+	rm_deps Makefile >Makefile.new
 	for i in $(CFILES) ; do \
 		echo "`basename $$i .c`.$$(SUF):	$$i" >> Makefile.new ; \
 		echo '	$$(CC) -c $$(CFLAGS)' $$i >> Makefile.new ; \

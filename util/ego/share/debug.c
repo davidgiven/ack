@@ -31,7 +31,6 @@ error(s,a) char *s,*a; {
 	fprintf(stderr,": ");
 	fprintf(stderr,s,a);
 	fprintf(stderr,"\n");
-	_cleanup();
 	abort();
 	exit(-1);
 }
