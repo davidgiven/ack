@@ -218,6 +218,13 @@ case X$BM in
 X0)
 	( cd ../lang/cem/cemcom
 	  cp SmallPars Parameters
+	  cp makefile makefile.orig
+	  ed - makefile <<ABC
+/MALLOC/s/=/=#/
+w
+q
+ABC
+	)
 	  cd ../../../lib/descr
 	  cp fe fe.orig
 	  ed - fe << ABC
