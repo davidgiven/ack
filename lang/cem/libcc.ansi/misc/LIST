@@ -5,6 +5,7 @@ getpw.c
 getw.c
 putw.c
 putenv.c
+environ.c
 popen.c
 sleep.c
 termcap.c
