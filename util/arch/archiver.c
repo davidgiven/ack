@@ -296,15 +296,15 @@ register char *argv[];
 				wr_arhdr(temp_fd, member);
 				copy_member(member, ar_fd, temp_fd, 0);
 			}
-#ifndef AAL
 			else {
+#ifndef AAL
 				if (app_fl && i != argc) {
 					print("%s: already in archive\n", argv[i]);
 					argv[i] = "";
 				}
+#endif
 				lseek(ar_fd, even(member->ar_size),1);
 			}
-#endif
 			continue;
 		}
 	}
