@@ -410,7 +410,7 @@ uses dereg={const2,$1}
 gen Call {label,".loi"}
 
 pat los $1==2
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".loi"}
 
@@ -506,7 +506,6 @@ gen dad lb
     mov {m},d				yields de
 
 pat lil loc adi sil $1==$4 && $3==2
-with STACK
 uses hlreg={const2,$1}, dereg, areg
 gen dad lb
     mov e,{m}
@@ -554,7 +553,7 @@ gen dad lb
     mov {m},e
 
 pat stf
-with hl_or_de STACK
+with hl_or_de
 uses hl_or_de={const2,$1}
 gen dad de
     pop de
@@ -593,7 +592,8 @@ with label dereg hlreg
    gen shld {label,%1.off+2}
        xchg.
        shld %1
-with hlreg dereg STACK
+with hlreg dereg
+kills ALL
    gen mov {m},e
        inx hl
        mov {m},d
@@ -604,7 +604,8 @@ with hlreg dereg STACK
        mov {m},d
 
 pat sti $1<512
-with hlreg STACK
+with hlreg
+kills ALL
 uses areg={const1,$1/2}, dereg
 gen 1:
     pop de
@@ -621,12 +622,13 @@ uses dereg={const2,$1}
 gen Call {label,".sti"}
 
 pat sts $1==2
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".sti"}
 
 pat sdl
-with dereg STACK
+with dereg
+kills ALL
 uses hlreg={const2,$1}
 gen dad lb
     mov {m},e
@@ -639,21 +641,25 @@ gen dad lb
     mov {m},d
 
 pat sde
-with hlreg STACK
+with hlreg
+kills ALL
 gen shld {label,$1}
     pop hl
     shld {label,$1+2}
-with hlreg dereg STACK
+with hlreg dereg
+kills ALL
 gen shld {label,$1}
     xchg.
     shld {label,$1+2}
-with dereg hlreg STACK
+with dereg hlreg
+kills ALL
 gen shld {label,$1+2}
     xchg.
     shld {label,$1}
 
 pat sdf
-with hl_or_de STACK
+with hl_or_de
+kills ALL
 uses hl_or_de={const2,$1}
 gen dad de
     pop de
@@ -980,7 +986,7 @@ pat zer $1==2				yields {const2,0}
 pat zer $1==4				yields {const2,0} {const2,0}
 
 pat zer $1<511
-with STACK
+kills ALL
 uses reg={const1,$1/2}, hl_or_de={const2,0}
 gen 1:
     push %b
@@ -988,7 +994,7 @@ gen 1:
     jnz {label,1b}
 
 pat zer
-with STACK
+kills ALL
 uses hl_or_de={const2,$1/2}, hl_or_de={const2,0}, areg
 gen xra a
     1:
@@ -1137,7 +1143,7 @@ uses dereg={const2,$1}
 gen Call {label,".and"}
 
 pat and !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".and"}
 
@@ -1165,7 +1171,7 @@ uses dereg={const2,$1}
 gen Call {label,".ior"}
 
 pat ior !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".ior"}
 
@@ -1193,7 +1199,7 @@ uses dereg={const2,$1}
 gen Call {label,".xor"}
 
 pat xor !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".xor"}
 
@@ -1213,12 +1219,13 @@ uses dereg={const2,$1}
 gen Call {label,".com"}
 
 pat com !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".com"}
 
 pat rol $1==2
-with dereg hlreg STACK
+with dereg hlreg
+kills ALL
 uses areg
 gen mov a,e
     ani {const1,15}
@@ -1233,12 +1240,13 @@ gen mov a,e
     3:					yields hl
 
 pat rol $1==4
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".rol4"}
 
 pat ror $1==2
-with dereg hlreg STACK
+with dereg hlreg
+kills ALL
 uses areg
 gen mov a,e
     ani {const1,15}
@@ -1258,7 +1266,7 @@ gen mov a,e
     2:					yields hl
 
 pat ror $1==4
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".ror4"}
 
@@ -1276,12 +1284,12 @@ uses dereg={const2,$1}
 gen Call {label,".inn"}			yields de
 
 pat inn !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".inn"}			yields de
 
 pat set $1==2
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".set2"}		yields de
 
@@ -1291,7 +1299,7 @@ uses dereg={const2,$1}
 gen Call {label,".set"}
 
 pat set !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".set"}
 
@@ -1346,7 +1354,7 @@ pat lar defined($1)
 gen Call {label,"eunimpl"}
 
 pat lar !defined($1)
-with hl_or_de STACK
+with hl_or_de
 kills ALL
 uses areg
 gen mov a,%1.2
@@ -1366,7 +1374,7 @@ kills ALL
 gen Call {label,"eunimpl"}
 
 pat sar !defined($1)
-with hl_or_de STACK
+with hl_or_de
 kills ALL
 uses areg
 gen mov a,%1.2
@@ -1386,7 +1394,7 @@ kills ALL
 gen Call {label,"eunimpl"}
 
 pat aar !defined($1)
-with hl_or_de STACK
+with hl_or_de
 kills ALL
 uses areg
 gen mov a,%1.2
@@ -1450,7 +1458,7 @@ uses dereg={const2,$1}
 gen Call {label,".cms"}			yields de
 
 pat cms !defined($1)
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".cms"}			yields de
 
@@ -1831,7 +1839,7 @@ kills ALL
 gen Call {label,$1}
 
 pat cai
-with hlreg STACK
+with hlreg
 kills ALL
 uses dereg
 gen lxi de,{label,1f}
@@ -1943,7 +1951,7 @@ uses dereg={const2,$1}
 gen Call {label,".blm"}
 
 pat bls
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".blm"}
 
@@ -1969,7 +1977,7 @@ uses dereg={const2,$1}
 gen Call {label,".dup"}
 
 pat dus $1==2
-with dereg STACK
+with dereg
 kills ALL
 gen Call {label,".dup"}
 
