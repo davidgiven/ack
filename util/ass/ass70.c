@@ -96,20 +96,21 @@ int size;       /* size for hash */
 	rem = glohash(name,size);
 	j = 0; new=0;
 	g = &table[rem];
-	while (g->g_name[0] != 0 && strcmp(name,g->g_name) != 0) {
+	while (g->g_name != 0 && strcmp(name,g->g_name) != 0) {
 		j++;
 		if (j>size)
 			fatal("global label table overflow");
 		rem = (rem + globstep) % size;
 		g = &table[rem];
 	}
-	if (g->g_name[0] == 0) {
+	if (g->g_name == 0) {
 		/*
 		 * This symbol is shining new.
 		 * Enter it in table except for status = SEARCHING
 		 */
 		if (status == SEARCHING)
 			return(0);
+		g->g_name = (char *) getarea((unsigned) (strlen(name) + 1));
 		strcpy(g->g_name,name);
 		g->g_status = 0;
 		g->g_val.g_addr=0;
@@ -211,12 +212,12 @@ proc_t *prolookup(name,status) char *name; {
 	switch(status) {
 	case PRO_OCC:
 		p = searchproc(name,mprocs,oursize->n_mproc);
-		if (p->p_name[0]) {
+		if (p->p_name) {
 			p->p_status |= OCC;
 			return(p);
 		}
 		p = searchproc(name,xprocs,oursize->n_xproc);
-		if (p->p_name[0]) {
+		if (p->p_name) {
 			p->p_status |= OCC;
 			return(p);
 		}
@@ -225,20 +226,20 @@ proc_t *prolookup(name,status) char *name; {
 		break;
 	case PRO_INT:
 		p = searchproc(name,xprocs,oursize->n_xproc);
-		if (p->p_name[0] && (p->p_status&EXT) )
+		if (p->p_name && (p->p_status&EXT) )
 			error("pro '%s' conflicting use",name);
 
 		p = searchproc(name,mprocs,oursize->n_mproc);
-		if (p->p_name[0])
+		if (p->p_name)
 			werror("INP must be first occurrence of '%s'",name);
 		pstat = 0;
 		break;
 	case PRO_EXT:
 		p = searchproc(name,mprocs,oursize->n_mproc);
-		if (p->p_name[0])
+		if (p->p_name)
 			error("pro '%s' exists already localy",name);
 		p = searchproc(name,xprocs,oursize->n_xproc);
-		if (p->p_name[0]) {
+		if (p->p_name) {
 			/*
 			 * The If statement is removed to be friendly
 			 * to Backend writers having to deal with assemblers
@@ -255,7 +256,7 @@ proc_t *prolookup(name,status) char *name; {
 		break;
 	case PRO_DEF:
 		p = searchproc(name,xprocs,oursize->n_xproc);
-		if (p->p_name[0] && (p->p_status&EXT) ) {
+		if (p->p_name && (p->p_status&EXT) ) {
 			if (p->p_status&DEF)
 				error("global pro '%s' redeclared",name);
 			else
@@ -264,7 +265,7 @@ proc_t *prolookup(name,status) char *name; {
 			return(p);
 		} else {
 			p = searchproc(name,mprocs,oursize->n_mproc);
-			if (p->p_name[0]) {
+			if (p->p_name) {
 				if (p->p_status&DEF)
 					error("local pro '%s' redeclared",
 						name);
@@ -296,7 +297,7 @@ proc_t *searchproc(name,table,size)
 	rem = glohash(name,size);
 	j = 0;
 	p = &table[rem];
-	while (p->p_name[0] != 0 && strcmp(name,p->p_name) != 0) {
+	while (p->p_name != 0 && strcmp(name,p->p_name) != 0) {
 		j++;
 		if (j>size)
 			fatal("procedure table overflow");
@@ -326,6 +327,7 @@ proc_t *place; {
 	 */
 
 	p=place;
+	p->p_name = (char *) getarea((unsigned) (strlen(name) + 1));
 	strcpy(p->p_name,name);
 	p->p_status = status;
 	if (procnum>=oursize->n_proc)

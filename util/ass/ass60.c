@@ -138,7 +138,7 @@ if ( ( (n==0 || n>=100) && d_flag) || (n<=1 && d_flag>=2) ) {
 	printf("\n\t%8.8s  %8.8s  %8.8s\n",
 		"g_name","g_status","g_addr");
 	for (gb = xglobs,i = 0;gb < &xglobs[oursize->n_glab]; gb++, i++)
-	    if (gb->g_name[0] != 0) {
+	    if (gb->g_name != 0) {
 		printf("%5d\t%8.6s",i,gb->g_name);
 		printf("  %8o  %8ld\n",gb->g_status,gb->g_val.g_addr);
 	    }
@@ -146,7 +146,7 @@ if ( ( (n==0 || n>=100) && d_flag) || (n<=1 && d_flag>=2) ) {
 	printf("\n\t%8.8s%8s%8s\t%8s%8s\n",
 		"name","status","num","off","locals");
 	for (pl=mprocs;pl< &mprocs[oursize->n_mproc]; pl++)
-	    if (pl->p_name[0]) {
+	    if (pl->p_name) {
 		printf("%4d\t%-8s%8o%8d",
 			pl-mprocs,pl->p_name,pl->p_status,pl->p_num);
 		if (pl->p_status&DEF)
@@ -158,7 +158,7 @@ if ( ( (n==0 || n>=100) && d_flag) || (n<=1 && d_flag>=2) ) {
 	printf("\n\t%8s%8s%8s\t%8s%8s\n",
 		"name","status","num","off","locals");
 	for (pl=xprocs;pl< &xprocs[oursize->n_xproc]; pl++)
-	    if (pl->p_name[0]) {
+	    if (pl->p_name) {
 		printf("%4d\t%-8s%8o%8d",
 			pl-xprocs,pl->p_name,pl->p_status,pl->p_num);
 		if (pl->p_status&DEF)

@@ -112,7 +112,6 @@ typedef union {
 #define TRUE            1
 #define FALSE           0
 
-#define IDLENGTH        8       /* length of glo's and pro's */
 #define MAXSTRING       200     /* Maximum string length accepted */
 #define LOCLABSIZE      128     /* size of local label hash table */
 				/* may not be smaller */
@@ -169,7 +168,7 @@ struct  loc_label {
 #define NOTPRESENT      4       /* Undefined and error message given */
 
 struct  glob_label {
-	char    g_name[IDLENGTH+1];     /* name + null-byte */
+	char    *g_name;
 	char    g_status;               /* see below */
 	union {
 		cons_t  g_addr;         /* value if status&DEF */
@@ -241,7 +240,7 @@ struct  sizes {
 };
 
 struct  procs {                 /* format of mprocs[] and xprocs[] */
-	char    p_name[IDLENGTH+1];     /* name + 1 null-byte */
+	char    *p_name;
 	char    p_status;       /* same bits as g_status except REL */
 	int     p_num;          /* unique procedure descriptor */
 };

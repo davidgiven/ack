@@ -198,7 +198,6 @@ getstring() {
 
 inident() {
 	getstring();
-	string[IDLENGTH] = '\0';
 }
 
 char *inproname() {
@@ -220,7 +219,7 @@ int needed() {
 			break ;
 		case sp_pnam :
 			p = searchproc(string,xprocs,oursize->n_xproc);
-			if (p->p_name[0]) {
+			if (p->p_name) {
 				if ((p->p_status & DEF) != 0)
 					continue ;
 			} else continue ;

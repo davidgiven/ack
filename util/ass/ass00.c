@@ -386,7 +386,7 @@ enmd_pro() {
 
 	limit = &mprocs[oursize->n_mproc];
 	for (p=mprocs; p<limit; p++) {
-		if (p->p_name[0] == 0)
+		if (p->p_name == 0)
 			continue;
 		if ((p->p_status&DEF)==0)
 			error("undefined local procedure '%s'",p->p_name);
@@ -421,7 +421,7 @@ enmd_glo() {
 
 	limit = &mglobs[oursize->n_mlab];
 	for ( mg = mglobs; mg < limit; mg++) {
-		if (mg->g_name[0] == 0)
+		if (mg->g_name == 0)
 			continue;
 		if ((mg->g_status&(EXT|DEF))==0)
 			error("undefined local symbol '%s'",glostring(mg));
@@ -511,12 +511,12 @@ check_def() {
 		printf("Unresolved references\n  Procedures:\n");
 		count = oursize->n_xproc;
 		for (p = xprocs; count--; p++)
-			if (p->p_name[0] && (p->p_status&DEF)==0)
+			if (p->p_name && (p->p_status&DEF)==0)
 				printf("    %s\n",p->p_name);
 		printf("  Data:\n");
 		count = oursize->n_glab;
 		for (g = xglobs; count--; g++)
-			if (g->g_name[0] && (g->g_status&DEF)==0)
+			if (g->g_name && (g->g_status&DEF)==0)
 				printf("    %s\n",glostring(g));
 	}
 }
