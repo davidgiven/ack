@@ -104,6 +104,14 @@ int get16() {
 	return l_byte | (h_byte*256) ;
 }
 
+int getu16() {
+	register int l_byte, h_byte;
+
+	l_byte = get8();
+	h_byte = get8();
+	return l_byte | (h_byte*256) ;
+}
+
 cons_t get32() {
 	register cons_t l;
 	register int h_byte;
@@ -165,6 +173,41 @@ glob_t *getlab(status) {
 	return(glo2lookup(string,status));
 }
 
+char *getdig(str,number) char *str; register unsigned number; {
+	register int remain;
+
+	remain= number%10;
+	number /= 10;
+	if ( number ) str= getdig(str,number) ;
+	*str++ = '0'+remain ;
+	return str ;
+}
+
+make_string(n) unsigned n ; {
+	string[0] = '.';
+	*getdig(&string[1],n)= 0;
+}
+
+
+getstring() {
+	register char *p;
+	register n;
+
+	getarg(cst_ptyp);
+	if ( argval < 0 || argval >= MAXSTRING-1 )
+		fatal("string/identifier too long");
+	strlngth = n = argval;
+	p = string;
+	while (--n >= 0)
+		*p++ = get8();
+	*p = 0 ;
+}
+
+inident() {
+	getstring();
+	string[IDLENGTH] = '\0';
+}
+
 char *inproname() {
 	getarg(ptyp(sp_pnam));
 	return(string);
@@ -209,6 +252,13 @@ cons_t valsize() {
 	case sp_pnam:
 		return ptrsize ;
 	case sp_scon:
+		/* Pad the string with zeros up to the wordsize */
+		while ( strlngth%wordsize ) {
+			if ( strlngth>=MAXSTRING )
+				fatal("string too long") ;
+			string[strlngth]=0 ;
+			strlngth++ ;
+		}
 		return strlngth ;
 	case sp_fcon:
 	case sp_icon:
@@ -535,41 +585,6 @@ setsizes() {
 	maxdunsig = maxval(2*8*wordsize)   ;
 }
 
-char *getdig(str,number) char *str; register unsigned number; {
-	register int remain;
-
-	remain= number%10;
-	number /= 10;
-	if ( number ) str= getdig(str,number) ;
-	*str++ = '0'+remain ;
-	return str ;
-}
-
-make_string(n) unsigned n ; {
-	string[0] = '.';
-	*getdig(&string[1],n)= 0;
-}
-
-
-getstring() {
-	register char *p;
-	register n;
-
-	getarg(cst_ptyp);
-	if ( argval < 0 || argval >= MAXSTRING-1 )
-		fatal("string/identifier too long");
-	strlngth = n = argval;
-	p = string;
-	while (--n >= 0)
-		*p++ = get8();
-	*p = 0 ;
-}
-
-inident() {
-	getstring();
-	string[IDLENGTH] = '\0';
-}
-
 exchange(p1,p2) {
 	int size, line ;
 	int l_of_p1, l_of_p2, l_of_before ;
@@ -704,10 +719,14 @@ chkstart() {
 	if ( !oksizes ) fatal("missing size specification") ;
 	setmode(DATA_CONST) ;
 	extconst((cons_t)0) ;
+	databytes= wordsize ;
 	setmode(DATA_REP) ;
-	extadr( (cons_t) (ABSSIZE/wordsize-1) ) ;
+	if ( wordsize<ABSSIZE ) {
+		register factor = ABSSIZE/wordsize - 1 ;
+		extadr( (cons_t) factor ) ;
+		databytes += factor * wordsize ;
+	}
 	absout++ ;
-	databytes = ABSSIZE ;
 	memtype= HOLBSS ;
 }
 
@@ -722,9 +741,7 @@ sizealign(size) cons_t size ; {
 }
 
 align(size) int size ; {
-	register unsigned gapsize ;
-
-	for ( gapsize= databytes%size ; gapsize ; gapsize-- ) {
+	while ( databytes%size ) {
 		setmode(DATA_BYTES) ;
 		ext8(0) ;
 		databytes++ ;
