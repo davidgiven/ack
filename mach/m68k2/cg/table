@@ -1035,6 +1035,50 @@ adu | | | | adi $1 |
 sbu | | | | sbi $1 |
 slu | | | | sli $1 |
 
+/* Floating point stuff */
+adf $1==4	| |
+			remove(ALL)
+			"jsr .adf4"		    | | asp 8 lfr 4 |
+adf $1==8	| |
+			remove(ALL)
+			"jsr .adf8"		    | | asp 16 lfr 4 loi 8 |
+sbf $1==4	| |
+			remove(ALL)
+			"jsr .sbf4"		    | | asp 8 lfr 4 |
+sbf $1==8	| |
+			remove(ALL)
+			"jsr .sbf8"		    | | asp 16 lfr 4 loi 8 |
+mlf $1==4	| |
+			remove(ALL)
+			"jsr .mlf4"		    | | asp 8 lfr 4 |
+mlf $1==8	| |
+			remove(ALL)
+			"jsr .mlf8"		    | | asp 16 lfr 4 loi 8 |
+dvf $1==4	| |
+			remove(ALL)
+			"jsr .dvf4"		    | | asp 8 lfr 4 |
+dvf $1==8	| |
+			remove(ALL)
+			"jsr .dvf8"		    | | asp 16 lfr 4 loi 8 |
+ngf $1==4	| |
+			remove(ALL)
+			"jsr .ngf4"		    | | asp 4 lfr 4 |
+ngf $1==8	| |
+			remove(ALL)
+			"jsr .ngf8"		    |  |  asp 16 lfr 4 loi 8 |
+fif $1==4	| |
+			remove(ALL)
+			"jsr .fif4"		    |  | asp 16 lfr 4 loi 8 |
+fif $1==8	| |
+			remove(ALL)
+			"jsr .fif8"		    |  | asp 16 lfr 4 loi 16 |
+fef $1==4	| |
+			remove(ALL)
+			"jsr .fef4"		    |  |  asp 4 lfr 4 loi 8 |
+fef $1==8	| |
+			remove(ALL)
+			"jsr .fef8"		    |  |  asp 8 lfr 4 loi 12 |
+
 
 
 /* G R O U P  VI :   P O I N T E R  A R I T H M E T I C  */
@@ -1249,6 +1293,7 @@ zer $1 > 12  |	|	remove(ALL)
 		"1:"
 		"clr -(sp)"
 		"dbf %[a],1b"		| | |
+zrf		| |			| |	  zer $1 |
 
 
 
@@ -1297,6 +1342,88 @@ loc loc ciu $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
 ...			   | ANY	| |  | |
 loc loc cui $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
 ...			   | ANY	| |  | |
+
+/* Floating point stuff */
+
+loc loc cif	$1==2 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cif4"		      | | asp 4 lfr 4 |
+loc loc cif	$1==2 && $2==8 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cif8"		  | | asp 4 lfr 4 loi 8 |
+loc loc cif	$1==4 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cif4"		      | | asp 6 lfr 4 |
+loc loc cif	$1==4 && $2==8 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cif8"		  | | asp 6 lfr 4 loi 8 |
+loc loc cuf	$1==2 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cuf4"		      | | asp 4 lfr 4 |
+loc loc cuf	$1==2 && $2==8 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cuf8"		  | | asp 4 lfr 4 loi 8 |
+loc loc cuf	$1==4 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cuf4"		      | | asp 6 lfr 4 |
+loc loc cuf	$1==4 && $2==8 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"jsr .cuf8"		  | | asp 6 lfr 4 loi 8 |
+loc loc cfi	$1==4 && $2==2 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfi"		      | | asp 8 lfr 2 |
+loc loc cfi	$1==4 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfi"		      | | asp 8 lfr 4 |
+loc loc cfi	$1==8 && $2==2 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfi"		      | | asp 12 lfr 2 |
+loc loc cfi	$1==8 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfi"		      | | asp 12 lfr 4 |
+loc loc cfu	$1==4 && $2==2 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfu"		      | | asp 8 lfr 2 |
+loc loc cfu	$1==4 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfu"		      | | asp 8 lfr 4 |
+loc loc cfu	$1==8 && $2==2 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfu"		      | | asp 12 lfr 2 |
+loc loc cfu	$1==8 && $2==4 | |
+			remove(ALL)
+			"move.w #$1,-(sp)"
+			"move.w #$2,-(sp)"
+			"jsr .cfu"		      | | asp 12 lfr 4 |
+loc loc cff	$1==8 && $2==4 | |
+			remove(ALL)
+			"jsr .cff4"		      | | asp 8 lfr 4 |
+loc loc cff	$1==4 && $2==8 | |
+			remove(ALL)
+			"jsr .cff8"		| | asp 4 lfr 4 loi 8 |
+
 
 /* G R O U P  IX :   L O G I C A L  */
 
@@ -1727,6 +1854,15 @@ cms !defined($1) | ANY |	remove(ALL)
 cmp | |				remove(ALL)
 				"jsr .cmp"
 						| D1 | |
+/* floating point */
+
+cmf $1==4	| |
+			remove(ALL)
+			"jsr .cmf4"		       | | asp 8 lfr 2 |
+cmf $1==8	| |
+			remove(ALL)
+			"jsr .cmf8"		       | | asp 16 lfr 2 |
+
 
 cmi tlt and $1==2 && $3==2 | ANY DATAREG DATASCR |
 				"cmp %[1],%[2]"
@@ -2650,27 +2786,6 @@ str $1 == 2 | |			remove(ALL)
 				"jsr .strhp"
 							| | |
 trp | STACK |			"jsr .trp"		| | |
-
-
-/* For several floating point instructions we generate an illegal 
- * instruction trap.
- */
-
-adf | | | | loc 18 trp |
-sbf | | | | loc 18 trp |
-mlf | | | | loc 18 trp |
-dvf | | | | loc 18 trp |
-ngf | | | | loc 18 trp |
-fef | | | | loc 18 trp |
-fif | | | | loc 18 trp |
-zrf | | | | loc 18 trp |
-cfi | | | | loc 18 trp |
-cif | | | | loc 18 trp |
-cuf | | | | loc 18 trp |
-cff | | | | loc 18 trp |
-cfu | | | | loc 18 trp |
-cmf | | | | loc 18 trp |
-
 
 
 /* C O E R C I O N S */

@@ -23,6 +23,19 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the Motorola 68000
  */
 
+#define IEEEFLOAT
+
+#ifdef IEEEFLOAT
+#include "FP.h"
+#include "trp.c"
+#include "fcompact.c"
+#include "dbl_extract.c"
+#ifdef	PRT_EXP_DEBUG
+#include "prt_extend.c"
+#endif
+#endif IEEEFLOAT
+
+
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -48,18 +61,53 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".long %s\n",str);
 }
 
-con_float() {
+#ifdef IEEEFLOAT
+dbl_adjust(fl)
+my_dbl	*fl;
+{
+	EXTEND	buf;
 
-static int been_here;
-	if (argval != 4 && argval != 8)
-		fatal("bad fcon size");
-	fprintf(codefile,".long\t");
-	if (argval == 8)
-		fprintf(codefile,"F_DUM,");
-	fprintf(codefile,"F_DUM\n");
-	if ( !been_here++)
-	{
-	fprintf(stderr,"Warning : dummy float-constant(s)\n");
+		/* special routine to strip SGL_BIAS */
+	dbl_extract(fl,&buf);
+		/* standard routine to add DBL_BIAS */
+	fcompact(&buf,fl,sizeof(double));
+}
+#endif IEEEFLOAT
+
+con_float()
+{
+	register word	sz;
+	register long	*l;
+#ifdef IEEEFLOAT
+	register my_dbl	*md;
+#endif IEEEFLOAT
+		 double	d;
+	char	mesg[128];
+
+	sz = argval;
+	if (sz!= 4 && sz!= 8) {
+		sprintf(mesg,"con_float(): bad fcon size %d %D\nstr: %s\n\0",
+				sz,sz,str);
+		fatal(mesg);
+	}
+
+	d = atof(str);
+	l = (long *) &d;
+
+#ifdef IEEEFLOAT
+	if (sz == 8)	{
+		/* ATOF() RETURNS THE PROPER FORMAT FOR A FLOAT */
+		/* BUT NOT FOR A DOUBLE. CORRECT THE FORMAT.	*/
+		md = (my_dbl *) &d;
+		dbl_adjust(md);
+	}
+#endif IEEEFLOAT
+
+	while ( sz ) {
+		fprintf(codefile,"\t.word 0x%x,0x%x !float test %s\n",
+			(int)(*l)&0xFFFF,(int)(*l>>16)&0xFFFF,str);
+		sz -=4 ;
+		l++;
 	}
 }
 
