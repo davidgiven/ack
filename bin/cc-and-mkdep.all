@@ -16,5 +16,5 @@ do
 			;;
 	esac
 done
-$UTIL_HOME/lib.bin/cpp -d $cpp_args > $n
+$UTIL_HOME/lib.bin/cpp -d -m $cpp_args > $n
 exec $CC $*
