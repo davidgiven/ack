@@ -23,9 +23,6 @@ static char rcsid[] = "$Header$";
 #define ALLOW_NEXTEM	/* code generator is allowed new try of NEXTEM
 			   in exceptional cases */
 
-#define MAXPATTERN 5
-#define MAXREPLLEN 5    /* Max length of EM-replacement, should come from boot */
-
 byte startupcode[] = { DO_NEXTEM };
 
 byte *nextem();
@@ -251,7 +248,7 @@ if (Debug)
 	unsigned mincost,t;
 	token_p tp;
 	int size,lsize;
-	int tokexp[MAXPATTERN];
+	int tokexp[MAXPATLEN];
 	int nregneeded;
 	token_p regtp[MAXCREG];
 	c3_p regcp[MAXCREG];
@@ -779,7 +776,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	register i;
 	int j;
 	int nodeno;
-	result_t result;
+	result_t result[MAXEMREPLLEN];
 	int emrepllen,eminstr;
 
 	DEBUG("EMREPLACE");
@@ -797,8 +794,10 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		getint(eminstr,codep);
 		getint(nodeno,codep);
 		emp[i].em_instr = eminstr;
-		result = compute(&enodes[nodeno]);
-		switch(result.e_typ) {
+		result[i] = compute(&enodes[nodeno]);
+	}
+	for (i=0;i<emrepllen;i++) {
+		switch(result[i].e_typ) {
 		default:
 			assert(FALSE);
 		case 0:
@@ -807,12 +806,12 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			break;
 		case EV_INT:
 			emp[i].em_optyp = OPINT;
-			emp[i].em_soper = tostring(result.e_v.e_con);
-			emp[i].em_u.em_ioper = result.e_v.e_con;
+			emp[i].em_soper = tostring(result[i].e_v.e_con);
+			emp[i].em_u.em_ioper = result[i].e_v.e_con;
 			break;
 		case EV_ADDR:
 			emp[i].em_optyp = OPSYMBOL;
-			emp[i].em_soper = ad2str(result.e_v.e_addr);
+			emp[i].em_soper = ad2str(result[i].e_v.e_addr);
 			break;
 		}
 	}
