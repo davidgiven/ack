@@ -1,5 +1,5 @@
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=ns" "SUF=o"
+MACHDEF="MACH=ns" "SUF=o" "ASAR=aal"
 BCDEF="PREF=bc" "SUB=" "SRC=lang/basic/lib"
 
 install:
