@@ -3,7 +3,7 @@
 _fillbuf(iop)
 register FILE *iop;
 {
-	unsigned char ch[_NFILES];
+	static unsigned char ch[_NFILES];
 
 	iop->_count = 0;
 	if (fileno(iop) < 0) return EOF;
