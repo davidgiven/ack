@@ -12,7 +12,7 @@ static arg();
 static pseudo();
 
 extern char em_flag[];
-char C_error;
+char *C_error;
 
 #define flags(pp)	(em_flag[(pp)->em_opcode - sp_fmnem] & EM_PAR)
 
