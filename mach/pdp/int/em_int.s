@@ -158,7 +158,8 @@
 startoff:
 	mov	sp,r0
 	mov	sp,ml
-	mov	02(sp),filb	/ pointer to argv in filb for error message
+	mov	sp,filb
+	add	$2,filb		/ pointer to argv in filb for error message
 	dec	(r0)
 	mov	(r0)+,argc	/ pass to userprogram later
 	bgt	0f		/ go for argument
@@ -316,7 +317,7 @@ dat5:	mov	pb,r0		/ and program base for procedures
 	br	datloop		/ next data descriptor
 
 dat1:	mov	$und,(r3)+	/ reserve words	with undefineds
-	sob	r2,2b		/ jump back if more
+	sob	r2,dat1		/ jump back if more
 	br	datloop		/ next data descriptor
 
 0:	mov	r3,r1		/ copy data pointer (odd register)
