@@ -99,13 +99,19 @@ eval_field(expr, code)
 			C_sti(pointer_size);
 			C_loi(asize);
 		}
-		C_loc((arith)fd->fd_shift);
-		if (atype->tp_unsigned)
+		if (atype->tp_unsigned) {
+			C_loc((arith)fd->fd_shift);
 			C_sru(asize);
-		else
+			C_loc(fd->fd_mask);
+			C_and(asize);
+		}
+		else {
+			arith bits_in_type = asize * 8;
+			C_loc(bits_in_type - (fd->fd_width + fd->fd_shift));
+			C_sli(asize);
+			C_loc(bits_in_type - fd->fd_width);
 			C_sri(asize);
-		C_loc(fd->fd_mask);
-		C_and(asize);
+		}
 		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
 			C_dup(asize);
 		conversion(atype, rightop->ex_type);

@@ -395,32 +395,42 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 			}
 			if (newcode) {
-				conversion(left->ex_type, tp);
 				if (gencode && (oper == POSTINCR ||
 						oper == POSTDECR))
-					C_dup(tp->tp_size);
+					C_dup(ATW(left->ex_type->tp_size));
+				conversion(left->ex_type, tp);
 			}
 			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
 			if (newcode) {
+				int dupval = gencode && oper != POSTINCR &&
+						oper != POSTDECR;
 				assop(tp, oper);
-				if (gencode && oper != POSTINCR && 
-						oper != POSTDECR)
-					C_dup(tp->tp_size);
 				conversion(tp, left->ex_type);
-			}
-			if (newcode && compl == 0)
-				store_val(&(left->ex_object.ex_value),
-					left->ex_type);
-			else
-			if (compl == 1) {
-				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
-				if (newcode) C_sti(left->ex_type->tp_size);
-			}
-			else if (newcode) {
-				C_lal(tmp);	/* always init'd */
-				C_loi(pointer_size);
-				C_sti(left->ex_type->tp_size);
-				free_tmp_var(old_offset);
+				if (compl == 0) {
+					store_val(&(left->ex_object.ex_value),
+						left->ex_type);
+					if (dupval) load_val(left, RVAL);
+				}
+				else if (compl == 1) {
+					EVAL(left, LVAL,1, NO_LABEL, NO_LABEL);
+					C_sti(left->ex_type->tp_size);
+					if (dupval) {
+						EVAL(left, LVAL, 1, NO_LABEL,
+							NO_LABEL);
+						C_loi(left->ex_type->tp_size);
+					}
+				}
+				else {
+					C_lal(tmp);	/* always init'd */
+					C_loi(pointer_size);
+					C_sti(left->ex_type->tp_size);
+					if (dupval) {
+						C_lal(tmp);
+						C_loi(pointer_size);
+						C_loi(left->ex_type->tp_size);
+					}
+					free_tmp_var(old_offset);
+				}
 			}
 			break;
 		}

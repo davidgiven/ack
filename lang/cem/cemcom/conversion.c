@@ -32,22 +32,35 @@ conversion(from_type, to_type)
 
 	if (from_type == to_type)	/* a little optimisation */
 		return;
+	if (to_size < word_size) to_size = word_size;
 	switch (fundamental(from_type))	{
 	case T_SIGNED:
 		switch (fundamental(to_type))	{
 		case T_SIGNED:
 			C_loc(from_size);
-			C_loc(to_size < word_size ? word_size : to_size);
+			C_loc(to_size);
 			C_cii();
 			break;
 		case T_UNSIGNED:
-			C_loc(from_size < word_size ? word_size : from_size);
-			C_loc(to_size < word_size ? word_size : to_size);
+			if (from_size < word_size) {
+				C_loc(from_size);
+				C_loc(word_size);
+				C_cii();
+				from_size = word_size;
+			}
+			C_loc(from_size);
+			C_loc(to_size);
 			C_ciu();
 			break;
 #ifndef NOFLOAT
 		case T_FLOATING:
-			C_loc(from_size < word_size ? word_size : from_size);
+			if (from_size < word_size) {
+				C_loc(from_size);
+				C_loc(word_size);
+				C_cii();
+				from_size = word_size;
+			}
+			C_loc(from_size);
 			C_loc(to_size);
 			C_cif();
 			break;
@@ -55,8 +68,9 @@ conversion(from_type, to_type)
 		}
 		break;
 	case T_UNSIGNED:
-		C_loc(from_size < word_size ? word_size : from_size);
-		C_loc(to_size < word_size ? word_size : to_size);
+		if (from_size < word_size) from_size = word_size;
+		C_loc(from_size);
+		C_loc(to_size);
 		switch (fundamental(to_type))	{
 		case T_SIGNED:
 			C_cui();
@@ -74,7 +88,7 @@ conversion(from_type, to_type)
 #ifndef NOFLOAT
 	case T_FLOATING:
 		C_loc(from_size);
-		C_loc(to_size < word_size ? word_size : to_size);
+		C_loc(to_size);
 		switch (fundamental(to_type))	{
 		case T_SIGNED:
 			C_cfi();

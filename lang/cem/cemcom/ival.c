@@ -4,6 +4,7 @@
 #include	"nofloat.h"
 #include	<em.h>
 #include	"debug.h"
+#include	<alloc.h>
 #include	"nobitfield.h"
 #include	"arith.h"
 #include	"align.h"
@@ -469,12 +470,11 @@ ch_array(tpp, ex)
 	struct expr *ex;
 {
 	register struct type *tp = *tpp;
-	register arith length;
-	register char *s = ex->SG_VALUE;
-	register arith ntopad;
+	register arith length = ex->SG_LEN;
+	char *s;
+	arith ntopad;
 
 	ASSERT(ex->ex_class == String);
-	length = ex->SG_LEN;
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
@@ -497,19 +497,28 @@ ch_array(tpp, ex)
 		ntopad = align(dim, word_align) - length;
 	}
 	/* throw out the characters of the already prepared string	*/
-	while (length-- > 0)
-		C_con_ucon(long2str((long)*s++ & 0xFF, 10), (arith)1);
-	/* pad the allocated memory (the alignment has been calculated)	*/
-	while (ntopad-- > 0)
-		con_nullbyte();
+	s = Malloc((int) (length + ntopad));
+	clear(s, (int) (length + ntopad));
+	strncpy(s, ex->SG_VALUE, (int) length);
+	str_cst(s, (int) (length + ntopad));
+	free(s);
 }
 
+/*	As long as some parts of the pipeline cannot handle very long string
+	constants, string constants are written out in chunks
+*/
 str_cst(str, len)
 	register char *str;
 	register int len;
 {
-	while (len-- > 0)
-		C_con_ucon(long2str((long)*str++ & 0xFF, 10), (arith)1);
+	arith chunksize = ((127 + word_size) / word_size) * word_size;
+
+	while (len > chunksize) {
+		C_con_scon(str, chunksize);
+		len -= chunksize;
+		str += chunksize;
+	}
+	C_con_scon(str, (arith) len);
 }
 
 #ifndef NOBITFIELD

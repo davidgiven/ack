@@ -309,6 +309,7 @@ firstline:
 					LineNumber++;
 				ch = quoted(ch);
 			}
+			if (ch >= 128) ch -= 256;
 			val = val*256 + ch;
 			size++;
 			LoadChar(ch);
