@@ -332,7 +332,7 @@ prset(p) p_set p; {
 	for (;;) {
 		i = (unsigned) *p++;
 		for (k = 0; k < sizeof(int); k++) {
-			fprintf(fpars,"0%o,",(int)(i & 0377));
+			fprintf(fpars,"'\\%o',",(int)(i & 0377));
 			i >>= 8;
 			if (--j == 0) {
 				fputs("\n",fpars);
