@@ -112,6 +112,18 @@ name abc
 	need .b
 	callname abc
 end
+var A68INIT={EM}/lib/em_a68s_init
+name a68s
+        from .8.a68
+        to .k
+        program {EM}/lib/em_a68s{w}{p}
+        mapflag -PA* A68INIT=*
+        args < > {SOURCE}.lst {A68INIT}{w}{p} /dev/null
+        prep cond
+        rts .8
+        need .8
+        callname a68s
+end
 name encode
 	from .e
 	to .k
@@ -133,6 +145,9 @@ name ego
 	from .m.ma
 	to .gk
 	program /bin/sh
+	mapflag -EGO* EGO_F={EGO_F?} *
+# The following lines are obsolete, but here for backwards compatibility.
+# They should be removed some day.
 	mapflag -IL* EGO_F={EGO_F?} -IL*
 	mapflag -CS* EGO_F={EGO_F?} -CS*
 	mapflag -SR* EGO_F={EGO_F?} -SR*
@@ -142,17 +157,18 @@ name ego
 	mapflag -SP* EGO_F={EGO_F?} -SP*
 	mapflag -BO* EGO_F={EGO_F?} -BO*
 	mapflag -CJ* EGO_F={EGO_F?} -CJ*
+	mapflag -EV EGO_F={EGO_F?} -V
+# End of obsolete lines
 	mapflag -Q* EGO_F={EGO_F?} -Q*
 	mapflag -T* EGO_F={EGO_F?} -T*
 	mapflag -S* EGO_F={EGO_F?} -S*
 	mapflag -s* EGO_F={EGO_F?} -s*
 	mapflag -a* EGO_F={EGO_F?} -a*
-	mapflag -EV EGO_F={EGO_F?} -V
+	mapflag -O* EGO_F={EGO_F?} -O*
 	args {EM}/lib/em_ego {EM} {EGO_F?} -P {EM}/lib/ego \
 -M{EM}/lib/ego/{M}descr <
-	optimizer
+	optimizer 2
 	stdout
-	priority -1
 	combiner
 end
 name opt2
