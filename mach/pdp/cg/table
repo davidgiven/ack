@@ -61,13 +61,13 @@ REGISTERS:
 r0      = ("r0", 2), REG.
 r1      = ("r1", 2), REG, ODD_REG.
 #ifdef REGVARS
-r2	= ("r2", 2) regvar, REG.
+r2	= ("r2", 2) regvar, RREG.
 #else
 /* r2      = ("r2", 2), REG. */
 #endif
 r3      = ("r3", 2), REG, ODD_REG.
 #ifdef REGVARS
-r4	= ("r4", 2) regvar, REG.
+r4	= ("r4", 2) regvar, RREG.
 #else
 /* r4      = ("r4", 2), REG. */
 #endif
@@ -147,7 +147,7 @@ SCR_DBL_REG =   DBL_REG * SCRATCH
 SCR_ODD_REG =   ODD_REG * SCRATCH
 SCR_REG_PAIR =  REG_PAIR * SCRATCH
 all=            ALL 
-source2 =       REG + regdef2 + regind2 + reginddef2 + localbase + 
+source2 =       RREG + REG + regdef2 + regind2 + reginddef2 + localbase + 
 		relative2 + reldef2 + ADDR_EXTERNAL + CONST2 + LOCAL2 
 xsource2 =	source2 + ftoint
 source1 =       regdef1 + regind1 + reginddef1 + relative1 +
@@ -167,8 +167,8 @@ variable2 =     relative2 + reldef2
 variable4 =     relative4
 variable8 =     relative8
 variable  =     variable2 + variable4 + variable8
-dadres2 =       relative2 + REG + regind2
-regs =          REG + REG_PAIR + FLT_REG + FLT_REG_PAIR +
+dadres2 =       relative2 + RREG + REG + regind2
+regs =          RREG + REG + REG_PAIR + FLT_REG + FLT_REG_PAIR +
 		DBL_REG + DBL_REG_PAIR
 noconst2 =	source2 - CONST2 - ADDR_EXTERNAL
 allexeptcon =   all - regs - CONST2 - ADDR_LOCAL - ADDR_EXTERNAL
@@ -177,8 +177,10 @@ posextern =	variable + regdeferred + indexed + externals
 diradr2 =       regconst2 + ADDR_EXTERNAL
 
 #ifdef REGVARS
+register =	RREG + REG
 #define INDSTORE remove(allexeptcon-locals) remove(locals, inreg(%[ind])==0)
 #else
+register = 	REG
 #define INDSTORE remove(allexeptcon)
 #endif
 
@@ -202,7 +204,7 @@ loe             | |             | {relative2, $1}                       | |
 lil inreg($1)==2| |		| {regdef2, regvar($1)}		| |
 #endif
 lil             | |             | {reginddef2, lb, tostring($1)}    | |
-lof		| REG         | | {regind2,%[1],tostring($1)}       | |
+lof		| register         | | {regind2,%[1],tostring($1)}       | |
 ...		| NC regconst2 |
 		 | {regind2,%[1.reg],tostring($1)+"+"+%[1.ind]}        | |
 ...             | NC ADDR_EXTERNAL |
@@ -246,7 +248,7 @@ lxa $1 > 3      | |     allocate(REG={LOCAL2, SL, 2}, REG={CONST2,$1-1})
 			setcc(%[a]) erase(%[a]) erase(%[b])
 				| {regconst2, %[a], SSL }               | |
 dch		| |		|                              | loi 2    |
-loi $1==2       | REG |            | {regdef2, %[1]}                    | |
+loi $1==2       | register |            | {regdef2, %[1]}                    | |
 ...             | NC regconst2 |   | {regind2, %[1.reg], %[1.ind]}      | |
 ...             | NC relative2 |   | {reldef2, %[1.ind]}                | |
 ...             | NC regind2 |     | {reginddef2, %[1.reg], %[1.ind]}   | |
@@ -255,7 +257,7 @@ loi $1==2       | REG |            | {regdef2, %[1]}                    | |
 ...             | NC ADDR_EXTERNAL | | {relative2, %[1.ind]}            | |
 ...             | NC LOCAL2 |
 		               |{reginddef2, lb, tostring(%[1.ind])}| |
-loi $1==1       | REG |         | {regdef1, %[1]}                       | |
+loi $1==1       | register |         | {regdef1, %[1]}                       | |
 ...             | NC regconst2 |   | {regind1, %[1.reg], %[1.ind]}      | |
 ...             | NC ADDR_EXTERNAL | | {relative1, %[1.ind]}            | |
 ...		| NC ADDR_LOCAL| |{regind1, lb, tostring(%[1.ind])} | |
@@ -263,11 +265,11 @@ loi $1==1       | REG |         | {regdef1, %[1]}                       | |
 ...             | NC regind2 |     | {reginddef1, %[1.reg], %[1.ind]}   | |
 ...		| NC regdef2 |	   | {reginddef1, %[1.reg], "0"}| |
 ...		| NC LOCAL2 | |{reginddef1, lb, tostring(%[1.ind])} | |
-loi $1==4       | REG |         | {regdef4, %[1]}                       | |
+loi $1==4       | register |         | {regdef4, %[1]}                       | |
 ...             | NC regconst2 |   | {regind4, %[1.reg], %[1.ind]}      | |
 ...             | NC ADDR_LOCAL |  | {LOCAL4,%[1.ind],4}                | |
 ...             | NC ADDR_EXTERNAL | | {relative4, %[1.ind]}            | |
-loi $1==8       | REG |         | {regdef8, %[1]}                       | |
+loi $1==8       | register |         | {regdef8, %[1]}                       | |
 ...             | NC regconst2 |   | {regind8, %[1.reg], %[1.ind]}      | |
 ...             | NC ADDR_LOCAL |
 		 | {regind8, lb , tostring(%[1.ind])}         	| |
@@ -363,7 +365,7 @@ lae lol ads sti $3==2 && inreg($2)==2 |	|
 lae lol ads loi $3==2 && inreg($2)==2 |	| 
 					| {regconst2, regvar($2), $1} | loi $4 |
 #endif
-sti $1==2       | REG xsource2 |
+sti $1==2       | register xsource2 |
 			INDSTORE
 			move(%[2],{regdef2,%[1]})               |       | |
 ...             | regconst2 xsource2 |
@@ -381,7 +383,7 @@ sti $1==2       | REG xsource2 |
 ...             | regind2 xsource2 |
 			INDSTORE
 			move(%[2],{reginddef2,%[1.reg],%[1.ind]}) |     | |
-sti $1==1       | REG source1or2 |
+sti $1==1       | register source1or2 |
 			INDSTORE
 			move(%[2],{regdef1,%[1]})               |       | |
 ...             | regconst2 source1or2 |
@@ -431,7 +433,7 @@ sti $1==4       | NC dadres2 FLT_REG |
 			INDSTORE
 			"setl\nmovfi %[2.reg],%[1.ind]\nseti"
 			samecc					|	| |
-...             | REG source2 source2 |
+...             | register source2 source2 |
 			INDSTORE
 			move(%[2],{regdef2,%[1]})
 			move(%[3],{regind2,%[1],"2"})             |       | |
@@ -558,7 +560,7 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 ...		| NC SCR_REG ADDR_LOCAL	|
 			"add r5,%[1]" erase(%[1])	|
 					   {regconst2,%[1],tostring(%[2.ind])} | | (2,45)
-...		| NC REG ADDR_LOCAL |
+...		| NC register ADDR_LOCAL |
 			allocate(REG)
 			"mov r5,%[a]"
 			"add %[1],%[a]"
@@ -568,7 +570,7 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 					   {regconst2,%[1],%[2.ind]} | | (2,45)
 ...		| NC CONST2+ADDR_EXTERNAL+ADDR_LOCAL+regconst2 SCR_REG |
 						| %[1] %[2]	| adi 2 |
-...		| NC source2-REG CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
+...		| NC source2-register CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
 			allocate(%[1],REG=%[1])	| %[2] %[a] | adi 2 |
 ...		| NC source1 CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
 			allocate(REG={CONST2, 0})
@@ -645,7 +647,7 @@ loc sbi $2==2	| |					| | loc 0-$1 adi 2 |
 sbi $1==2       | source2 SCR_REG |
 			"sub %[1],%[2]"
 			setcc(%[2])     erase(%[2])     | %[2]  | | (2,45)+%[1]
-...             | NC SCR_REG source2-REG |
+...             | NC SCR_REG source2-register |
 			"sub %[2],%[1]"
 			"neg %[1]"
 			setcc(%[1])     erase(%[1])     | %[1]  | | (4,75)+%[2]
@@ -658,7 +660,7 @@ ldc sbi $2==4 | SCR_REG SCR_REG |
 			"sbc %[1]"
 			"sub $$%(highw(1)%),%[1]"
 			erase(%[1]) erase(%[2])		| %[2] %[1] | |
-sbi $1==4       | source2-REG source2-REG SCR_REG SCR_REG |
+sbi $1==4       | source2-register source2-register SCR_REG SCR_REG |
 			"sub %[2],%[4]"
 			"sbc %[3]"
 			"sub %[1],%[3]"
@@ -977,7 +979,7 @@ fef !defined($1)| source2 |
  * Pointers have size 2 bytes.          *
  ****************************************/
 
-adp		| REG |  | {regconst2, %[1], tostring($1)} | |
+adp		| SCR_REG |  | {regconst2, %[1], tostring($1)} | |
 ...             | NC regconst2 |   | {regconst2, %[1.reg], tostring($1)+"+"+%[1.ind]}    | |
 ...             | NC ADDR_EXTERNAL | | {ADDR_EXTERNAL, tostring($1)+"+"+%[1.ind]} | |
 ...             | NC ADDR_LOCAL |  | {ADDR_LOCAL,%[1.ind]+$1}              | |
@@ -1573,11 +1575,11 @@ ior !defined($1)| SCR_REG |
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[1],1b"
 			erase(%[1]) erase(%[a])         |       | |
-xor $1==2       | REG SCR_REG |
+xor $1==2       | register SCR_REG |
 			"xor %[1],%[2]"
 			setcc(%[2])
 			erase(%[2])                     | %[2]  | | (2,30)
-...             | SCR_REG REG |
+...             | SCR_REG register |
 			"xor %[2],%[1]"
 			setcc(%[1])
 			erase(%[1])                     | %[1]  | | (2,30)
@@ -1703,7 +1705,7 @@ inn !defined($1)| source2 |
 			"jsr pc,inn~"
 			erase(r01)                              | r0    | |
 #endif
-set $1==2       | REG |
+set $1==2       | register |
 			allocate(REG={CONST2,1})
 			"ash %[1],%[a]"
 			erase(%[a])                             | %[a]  | |
@@ -2486,7 +2488,7 @@ and zne $1==2	| source1 source1or2 |
 
 cal             | |     remove(ALL)
 			"jsr pc,$1"                     |       | |
-cai             | REG | remove(ALL)
+cai             | register | remove(ALL)
 			"jsr pc,(%[1])"                 |       | |
 lfr $1==2       | |                                             | r0    | |
 lfr $1==4       | |                                             | r1 r0 | |
@@ -2630,7 +2632,7 @@ csb !defined($1)| source2 |
 			"mov (sp)+,r1"
 			"jmp csb~" 				|	| |
 #endif
-dup $1==2       | REG     |             | %[1] %[1]                     | |
+dup $1==2       | register     |             | %[1] %[1]                     | |
 dup $1==4       | NC longf4 | | %[1] %[1]				| |
 ...		| source2 source2 |     | %[2] %[1] %[2] %[1]           | |
 dup $1==8	| NC double8| | %[1] %[1]				| |
@@ -2735,7 +2737,7 @@ lol lal sti $1==$2 && $3==1| | | | | /* throw away funny C-proc-prolog */
 		"mov r5,%[a]"
 		"add $$%[1.ind],%[a]"
 		setcc(%[a])                     | %[a]  | |(6,105)
-| REG |                         | {regconst2, %[1], "0"}  | | (2,60)
+| register |                         | {regconst2, %[1], "0"}  | | (2,60)
 | xsource2 |     allocate(%[1], REG=%[1])        | %[a]  | |
 | xsource2 |     allocate(%[1], REG=%[1])        | {regconst2, %[a], "0"}  | |
 | longf4 |      allocate(FLT_REG)
