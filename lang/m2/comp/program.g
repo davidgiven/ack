@@ -1,8 +1,15 @@
-/*
-	Program: Modula-2 grammar in LL(1) form
-	Version: Mon Feb 24 14:29:39 MET 1986
-*/
+/* O V E R A L L   S T R U C T U R E */
 
+{
+static  char *RcsId = "$Header$";
+
+#include	<alloc.h>
+#include	<em_arith.h>
+#include	"idf.h"
+#include	"misc.h"
+#include	"main.h"
+#include	"LLlex.h"
+}
 /*
 	The grammar as given by Wirth is already almost LL(1); the
 	main problem is that the full form of a qualified designator
@@ -17,19 +24,12 @@
 	field identifiers.
 */
 
-{
-#include "idf.h"
-#include "idlist.h"
-
-static  char *RcsId = "$Header$";
-}
-
 %lexical LLlex;
 
 %start	CompUnit, CompilationUnit;
 
 ModuleDeclaration:
-	MODULE IDENT priority? ';' import* export? block IDENT
+	MODULE IDENT priority? ';' import(1)* export? block IDENT
 ;
 
 priority:
@@ -41,14 +41,18 @@ export
 	struct id_list *ExportList;
 } :
 	EXPORT QUALIFIED? IdentList(&ExportList) ';'
+			{
+			  FreeIdList(ExportList);
+			}
 ;
 
-import
+import(int local;)
 {
 	struct id_list *ImportList;
+	struct idf *id = 0;
 } :
 	[ FROM
-	  IDENT
+	  IDENT		{ id = dot.TOK_IDF; }
 	]?
 	IMPORT IdentList(&ImportList) ';'
 	/*
@@ -57,19 +61,19 @@ import
 	   If the FROM clause is present, the identifier in it is a module
 	   name, otherwise the names in the import list are module names.
 	*/
+			{
+			  FreeIdList(ImportList);
+			}
 ;
 
 DefinitionModule:
-	DEFINITION
-	{
-#ifdef DEBUG
-		debug("Definition module");
-#endif DEBUG
-	}
-	MODULE IDENT ';' import* 
-	/* export?
+	DEFINITION	{ state = DEFINITION; }
+	MODULE IDENT
+	';'
+	import(0)* 
+	/*	export?
 
-	   New Modula-2 does not have export lists in definition modules.
+	   	New Modula-2 does not have export lists in definition modules.
 	*/
 	definition* END IDENT '.'
 ;
@@ -96,19 +100,17 @@ definition:
 ;
 
 ProgramModule:
-	MODULE
-	{
-#ifdef DEBUG
-		debug("Program module");
-#endif DEBUG
-	}
-	IDENT priority? ';' import* block IDENT '.'
+	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
+	IDENT priority? ';' import(0)* block IDENT '.'
 ;
 
 Module:
 	DefinitionModule
 |
-	IMPLEMENTATION? ProgramModule
+	[
+		IMPLEMENTATION	{ state = IMPLEMENTATION; }
+	]?
+	ProgramModule
 ;
 
 CompilationUnit:

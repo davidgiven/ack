@@ -1,4 +1,4 @@
-/*	Token Descriptor Definition	*/
+/* T O K E N   D E S C R I P T O R   D E F I N I T I O N */
 
 /* $Header$ */
 
@@ -9,8 +9,8 @@ struct token	{
 		struct idf *tk_idf;	/* IDENT	*/
 		char *tk_str;		/* STRING	*/
 		struct {		/* INTEGER	*/
-			int tk_type;	/* type	*/
-			long tk_value;	/* value	*/
+			struct type *tk_type;	/* type	*/
+			arith tk_value;	/* value	*/
 		} tk_int;
 		char *tk_real;		/* REAL		*/
 	} tk_data;

@@ -13,7 +13,8 @@ CFLAGS =	-DDEBUG -p $(INCLUDES)
 LFLAGS =	-p
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
-	symbol2str.o tokenname.o idf.o input.o idlist.o
+	symbol2str.o tokenname.o idf.o input.o type.o def.o \
+	scope.o misc.o print.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -40,7 +41,10 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	make.tokcase <tokenname.c >symbol2str.c
 
-idlist.h:	idlist.H make.allocd
+misc.h:		misc.H make.allocd
+def.h:		def.H make.allocd
+type.h:		type.H make.allocd
+scope.c:	scope.C make.allocd
 
 char.c: char.tab tab
 	./tab -fchar.tab >char.c
@@ -61,19 +65,22 @@ depend:
 	make.allocd < $< > $@
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h param.h
-LLmessage.o: LLlex.h Lpars.h f_info.h idf.h
+LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h input.h
+LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
-error.o: LLlex.h f_info.h
-main.o: LLlex.h Lpars.h f_info.h idf.h
+error.o: LLlex.h f_info.h input.h
+main.o: LLlex.h Lpars.h debug.h f_info.h idf.h input.h main.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
-idlist.o: idf.h idlist.h
+type.o: Lpars.h def.h def_sizes.h idf.h type.h
+def.o: Lpars.h def.h idf.h main.h scope.h
+scope.o: scope.h
+misc.o: LLlex.h f_info.h idf.h misc.h
 tokenfile.o: Lpars.h
-program.o: Lpars.h idf.h idlist.h
-declar.o: LLlex.h Lpars.h idf.h idlist.h
+program.o: LLlex.h Lpars.h idf.h main.h misc.h
+declar.o: LLlex.h Lpars.h def.h idf.h misc.h scope.h type.h
 expression.o: Lpars.h
 statement.o: Lpars.h
 Lpars.o: Lpars.h

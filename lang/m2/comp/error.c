@@ -1,105 +1,101 @@
-/*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
+/* E R R O R   A N D   D I A G N O S T I C   R O U T I N E S */
 
 /*	This file contains the (non-portable) error-message and diagnostic
 	giving functions.  Be aware that they are called with a variable
 	number of arguments!
 */
 
-#include	<stdio.h>
+static char *RcsId = "$Header$";
+
+#include	<system.h>
+#include	<em_arith.h>
 #include	"input.h"
 #include	"f_info.h"
 #include	"LLlex.h"
 
-static char *RcsId = "$Header$";
+#define MAXERR_LINE	5	/* Number of error messages on one line ... */
+#define	ERROUT		STDERR
 
-#define	ERROUT	stderr
-
+/* error classes */
 #define	ERROR		1
 #define	WARNING		2
 #define	LEXERROR	3
 #define	LEXWARNING	4
 #define	CRASH		5
 #define	FATAL		6
-#define	NONFATAL	7
-#ifdef	DEBUG
-#define	VDEBUG		8
-#endif	DEBUG
+#ifdef DEBUG
+#define VDEBUG		7
+#endif
+
+#define NILEXPR	((struct expr *) 0)
 
 int err_occurred;
-/*
-	extern int ofd;		/* compact.c	* /
-	#define	compiling (ofd >= 0)
-*/
 
+extern char *symbol2str();
 extern char options[];
 
-/*	There are two general error message giving functions:
-	error() : syntactic and semantic error messages
-	lexerror() : lexical and pre-processor error messages
-	The difference lies in the fact that the first function deals with
-	tokens already read in by the lexical analyzer so the name of the
-	file it comes from and the linenumber must be retrieved from the
-	token instead of looking at the global variables LineNumber and
-	FileName.
+/*	There are three general error-message functions:
+		lexerror()	lexical and pre-processor error messages
+		error()		syntactic and semantic error messages
+		expr_error()	errors in expressions
+	The difference lies in the place where the file name and line
+	number come from.
+	Lexical errors report from the global variables LineNumber and
+	FileName, expression errors get their information from the
+	expression, whereas other errors use the information in the token.
 */
+
+#ifdef DEBUG
+/*VARARGS2*/
+debug(level, fmt, args)
+	char *fmt;
+{
+	if (level <= options['D']) _error(VDEBUG, NILEXPR, fmt, &args);
+}
+#endif DEBUG
 
 /*VARARGS1*/
 error(fmt, args)
 	char *fmt;
 {
-	/*
-		if (compiling)
-			C_ms_err();
-	*/
-	++err_occurred;
-	_error(ERROR, fmt, &args);
+	_error(ERROR, NILEXPR, fmt, &args);
 }
 
-#ifdef DEBUG
-debug(fmt, args)
+/*VARARGS2*/
+expr_error(expr, fmt, args)
+	struct expr *expr;
 	char *fmt;
 {
-	if (options['D'])
-		_error(VDEBUG, fmt, &args);
+	_error(ERROR, expr, fmt, &args);
 }
-#endif DEBUG
+
+/*VARARGS1*/
+warning(fmt, args)
+	char *fmt;
+{
+	_error(WARNING, NILEXPR, fmt, &args);
+}
+
+/*VARARGS2*/
+expr_warning(expr, fmt, args)
+	struct expr *expr;
+	char *fmt;
+{
+	_error(WARNING, expr, fmt, &args);
+}
 
 /*VARARGS1*/
 lexerror(fmt, args)
 	char *fmt;
 {
-	/*
-		if (compiling)
-			C_ms_err();
-	*/
-	++err_occurred;
-	_error(LEXERROR, fmt, &args);
+	_error(LEXERROR, NILEXPR, fmt, &args);
 }
 
 /*VARARGS1*/
-lexwarning(fmt, args) char *fmt;	{
-	if (options['w']) return;
-	_error(LEXWARNING, fmt, &args);
-}
-
-/*VARARGS1*/
-crash(fmt, args)
+lexwarning(fmt, args) 
 	char *fmt;
-	int args;
 {
-	/*
-		if (compiling)
-			C_ms_err();
-	*/
-	_error(CRASH, fmt, &args);
-	fflush(ERROUT);
-	fflush(stderr);
-	fflush(stdout);
-	/*
-		cclose();
-	*/
-	abort();	/* produce core by "Illegal Instruction" */
-			/* this should be changed into exit(1)	 */
+	_error(LEXWARNING, NILEXPR, fmt, &args);
 }
 
 /*VARARGS1*/
@@ -107,64 +103,103 @@ fatal(fmt, args)
 	char *fmt;
 	int args;
 {
-	/*
-		if (compiling)
-			C_ms_err();
-	*/
-	_error(FATAL, fmt, &args);
-	exit(-1);
+
+	_error(FATAL, NILEXPR, fmt, &args);
+	sys_stop(S_EXIT);
 }
 
-/*VARARGS1*/
-nonfatal(fmt, args)
-	char *fmt;
-	int args;
-{
-	_error(NONFATAL, fmt, &args);
-}
-
-/*VARARGS1*/
-warning(fmt, args)
-	char *fmt;
-{
-	if (options['w']) return;
-	_error(WARNING, fmt, &args);
-}
-
-_error(class, fmt, argv)
+_error(class, expr, fmt, argv)
 	int class;
+	struct expr *expr;
 	char *fmt;
 	int argv[];
 {
-
+	/*	_error attempts to limit the number of error messages
+		for a given line to MAXERR_LINE.
+	*/
+	static unsigned int last_ln = 0;
+	static int e_seen = 0;
+	unsigned int ln = 0;
+	char *remark = 0;
+	
+	/*	Since name and number are gathered from different places
+		depending on the class, we first collect the relevant
+		values and then decide what to print.
+	*/
+	/* preliminaries */
 	switch (class)	{
-
 	case ERROR:
 	case LEXERROR:
-		fprintf(ERROUT, "%s, line %ld: ", FileName, LineNumber);
+	case CRASH:
+	case FATAL:
+		/*
+		if (C_busy())
+			C_ms_err();
+		*/
+		err_occurred = 1;
 		break;
+	
 	case WARNING:
 	case LEXWARNING:
-		fprintf(ERROUT, "%s, line %ld: (warning) ",
-			FileName, LineNumber);
+		if (options['w'])
+			return;
+		break;
+	}
+
+	/* the remark */
+	switch (class)	{	
+	case WARNING:
+	case LEXWARNING:
+		remark = "(warning)";
 		break;
 	case CRASH:
-		fprintf(ERROUT, "CRASH\007 %s, line %ld: \n",
-			FileName, LineNumber);
+		remark = "CRASH\007";
 		break;
 	case FATAL:
-		fprintf(ERROUT, "%s, line %ld: fatal error -- ",
-			FileName, LineNumber);
+		remark = "fatal error --";
 		break;
-	case NONFATAL:
-		fprintf(ERROUT, "warning: ");	/* no line number ??? */
-		break;
-#ifdef DEBUG
-	case VDEBUG:
-		fprintf(ERROUT, "-D ");
-		break;
-#endif DEBUG
 	}
-	_doprnt(fmt, argv, ERROUT);
+	
+	/* the place */
+	switch (class)	{	
+	case WARNING:
+	case ERROR:
+		ln = /* expr ? expr->ex_line : */ dot.tk_lineno;
+		break;
+	case LEXWARNING:
+	case LEXERROR:
+	case CRASH:
+	case FATAL:
+		ln = LineNumber;
+		break;
+	}
+	
+#ifdef DEBUG
+	if (class != VDEBUG) {
+#endif
+	if (ln == last_ln)	{
+		/* we've seen this place before */
+		e_seen++;
+		if (e_seen == MAXERR_LINE)
+			fmt = "etc ...";
+		else
+		if (e_seen > MAXERR_LINE)
+			/* and too often, I'd say ! */
+			return;
+	}
+	else	{
+		/* brand new place */
+		last_ln = ln;
+		e_seen = 0;
+	}
+	
+	if (FileName)
+		fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
+	if (remark)
+		fprintf(ERROUT, "%s ", remark);
+#ifdef DEBUG
+	}
+#endif
+	doprnt(ERROUT, fmt, argv);		/* contents of error */
 	fprintf(ERROUT, "\n");
 }

@@ -1,4 +1,4 @@
-/*		U S E   O F   C H A R A C T E R   C L A S S E S		*/
+/* U S E   O F   C H A R A C T E R   C L A S S E S */
 
 /* $Header$ */
 

@@ -1,6 +1,10 @@
-#include "tokenname.h"
-#include "Lpars.h"
-#include "idf.h"
+/* T O K E N   D E F I N I T I O N S */
+
+static char *RcsId = "$Header$";
+
+#include	"tokenname.h"
+#include	"Lpars.h"
+#include	"idf.h"
 
 /*	To centralize the declaration of %tokens, their presence in this
 	file is taken as their declaration. The Makefile will produce
@@ -8,8 +12,6 @@
 	that all tokens have a printable name.
 	Also, the "token2str.c" file is produced from this file.
 */
-
-static char *RcsId = "$Header$";
 
 struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{IDENT, "identifier"},
@@ -73,10 +75,18 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 };
 
 struct tokenname tkinternal[] = {	/* internal keywords	*/
+	{PROGRAM, ""},
 	{0, "0"}
 };
 
 struct tokenname tkstandard[] =	{	/* standard identifiers */
+	{CHAR, "CHAR"},
+	{BOOLEAN, "BOOLEAN"},
+	{LONGINT, "LONGINT"},
+	{CARDINAL, "CARDINAL"},
+	{LONGREAL, "LONGREAL"},
+	{SUBRANGE, ""},
+	{ERRONEOUS, ""},
 	{0, ""}
 };
 

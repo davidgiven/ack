@@ -1,19 +1,22 @@
-/*	LEXICAL ANALYSER FOR MODULA-2	*/
+/* L E X I C A L   A N A L Y S E R   F O R   M O D U L A - 2 */
 
-#include "input.h"
-#include <alloc.h>
-#include "f_info.h"
-#include "Lpars.h"
-#include "class.h"
-#include "param.h"
-#include "idf.h"
-#include "LLlex.h"
+static char *RcsId = "$Header$";
+
+#include	<alloc.h>
+#include	<em_arith.h>
+#include	"input.h"
+#include	"f_info.h"
+#include	"Lpars.h"
+#include	"class.h"
+#include	"idf.h"
+#include	"LLlex.h"
+
+#define IDFSIZE	256	/* Number of significant characters in an identifier */
+#define NUMSIZE	256	/* maximum number of characters in a number */
 
 long str2long();
 
 struct token dot, aside;
-
-static char *RcsId = "$Header$";
 
 /*	Skip Modula-2 like comment (* ... *).
 	Note that comment may be nested.

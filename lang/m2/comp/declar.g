@@ -1,17 +1,43 @@
-{
-#include "idf.h"
-#include "idlist.h"
-#include "LLlex.h"
+/* D E C L A R A T I O N S */
 
+{
 static char *RcsId = "$Header$";
+
+#include	<em_arith.h>
+#include	<em_label.h>
+#include	"idf.h"
+#include	"misc.h"
+#include	"LLlex.h"
+#include	"def.h"
+#include	"type.h"
+#include	"scope.h"
 }
 
-ProcedureDeclaration:
-	ProcedureHeading ';' block IDENT
+ProcedureDeclaration
+{
+	register struct def *df;
+} :
+	/* ProcedureHeading(&df) */
+	PROCEDURE IDENT
+			{ df = define(dot.TOK_IDF, CurrentScope, D_PROCEDURE);
+			  open_scope(OPENSCOPE, 0);
+			}
+	FormalParameters?
+	';' block IDENT
+			{ match_id(dot.TOK_IDF, df->df_idf);
+			  close_scope();
+			}
 ;
 
-ProcedureHeading:
-	PROCEDURE IDENT FormalParameters?
+ProcedureHeading
+{
+	register struct def *df;
+} :
+	/*	Only used for definition modules
+	*/
+	PROCEDURE IDENT
+			{ df = define(dot.TOK_IDF, CurrentScope, D_PROCHEAD); }
+	FormalParameters?
 ;
 
 block:
@@ -32,22 +58,34 @@ declaration:
 
 FormalParameters:
 	'(' [ FPSection [ ';' FPSection ]* ]? ')'
-	[ ':' qualident ]?
+	[ ':' qualident
+	]?
 ;
 
 FPSection
 {
 	struct id_list *FPList;
+	int VARflag = 0;
 } :
-	VAR? IdentList(&FPList) ':' FormalType
+	[
+		VAR	{ VARflag = 1; }
+	]?
+	IdentList(&FPList) ':' FormalType
+			{
+			  FreeIdList(FPList);
+			}
 ;
 
 FormalType:
 	[ ARRAY OF ]? qualident
 ;
 
-TypeDeclaration:
-	IDENT '=' type
+TypeDeclaration
+{
+	register struct def *df;
+}:
+	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
+	'=' type
 ;
 
 type:
@@ -169,8 +207,12 @@ FormalTypeList:
 	[ ':' qualident ]?
 ;
 
-ConstantDeclaration:
-	IDENT '=' ConstExpression
+ConstantDeclaration
+{
+	register struct def *df;
+}:
+	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_CONST); }
+	'=' ConstExpression
 ;
 
 VariableDeclaration

@@ -1,12 +1,15 @@
+/* S Y N T A X   E R R O R   R E P O R T I N G */
+
+static char *RcsId = "$Header$";
+
 #include	<alloc.h>
-#include	"f_info.h"
+#include	<em_arith.h>
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 
-static char *RcsId = "$Header$";
-
 extern char *symbol2str();
+extern struct idf *gen_anon_idf();
 int err_occurred = 0;
 
 LLmessage(tk)
@@ -19,28 +22,6 @@ LLmessage(tk)
 	}
 	else
 		error("%s deleted", symbol2str(dot.tk_symb));
-}
-
-struct idf *
-gen_anon_idf()
-{
-	/*	A new idf is created out of nowhere, to serve as an
-		anonymous name.
-	*/
-	static int name_cnt;
-	char buff[100];
-	char *sprintf();
-
-	sprintf(buff, "#%d in %s, line %u",
-			++name_cnt, FileName, LineNumber);
-	return str2idf(buff, 1);
-}
-
-int
-is_anon_idf(idf)
-	struct idf *idf;
-{
-	return idf->id_text[0] == '#';
 }
 
 insert_token(tk)

@@ -1,18 +1,20 @@
-/* mod2 -- compiler , althans: een aanzet daartoe */
-
-#include <stdio.h>
-#undef BUFSIZ			/* Really neccesary??? */
-#include <system.h>
-#include "input.h"
-#include "f_info.h"
-#include "idf.h"
-#include "LLlex.h"
-#include "Lpars.h"
+/* M A I N   P R O G R A M */
 
 static char *RcsId = "$Header$";
 
+#include	<system.h>
+#include	<em_arith.h>
+#include	"input.h"
+#include	"f_info.h"
+#include	"idf.h"
+#include	"LLlex.h"
+#include	"Lpars.h"
+#include	"main.h"
+#include	"debug.h"
+
 char options[128];
 char *ProgName;
+int state;
 extern int err_occurred;
 
 main(argc, argv)
@@ -23,9 +25,6 @@ main(argc, argv)
 
 	ProgName = *argv++;
 
-# ifdef DEBUG
-	setbuf(stdout, (char *) 0);
-# endif
 	while (--argc > 0) {
 		if (**argv == '-')
 			Option(*argv++);
@@ -34,13 +33,13 @@ main(argc, argv)
 	}
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc != 2) {
-		fprintf(stderr, "%s: Use one file argument\n", ProgName);
+		fprintf(STDERR, "%s: Use one file argument\n", ProgName);
 		return 1;
 	}
 #ifdef DEBUG
 	printf("Mod2 compiler -- Debug version\n");
-	debug("-D: Debugging on");
 #endif DEBUG
+	DO_DEBUG(debug(1,"Debugging level: %d", options['D']));
 	return !Compile(Nargv[1]);
 }
 
@@ -53,13 +52,15 @@ Compile(src)
 	printf("%s\n", src);
 #endif DEBUG
 	if (! InsertFile(src, (char **) 0)) {
-		fprintf(stderr,"%s: cannot open %s\n", ProgName, src);
+		fprintf(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
 	}
 	LineNumber = 1;
 	FileName = src;
 	init_idf();
 	reserve(tkidf);
+	init_scope();
+	init_types();
 #ifdef DEBUG
 	if (options['L'])
 		LexScan();
@@ -80,7 +81,7 @@ LexScan()
 {
 	register int symb;
 
-	while ((symb = LLlex()) != EOF) {
+	while ((symb = LLlex()) != EOI) {
 		printf(">>> %s ", symbol2str(symb));
 		switch(symb) {
 
@@ -107,15 +108,12 @@ LexScan()
 }
 
 TimeScan() {
-	while (LLlex() != EOF) /* nothing */;
+	while (LLlex() != -1) /* nothing */;
 }
 #endif
 
 Option(str)
 	char *str;
 {
-#ifdef DEBUG
-	debug("option %c", str[1]);
-#endif DEBUG
 	options[str[1]]++;	/* switch option on	*/
 }

@@ -1,3 +1,5 @@
+/* S T A T E M E N T S */
+
 {
 static char *RcsId = "$Header$";
 }
