@@ -37,16 +37,13 @@ clean:
 	rm -f *.$(SUF) dummy Lpars.[ch] pars.c
 
 pr:
-	@pr $(SRC_DIR)/Makefile $(SRC_DIR)/C_instr2.c $(SRC_DIR)/action.c \
+	@pr $(SRC_DIR)/proto.make $(SRC_DIR)/C_instr2.c $(SRC_DIR)/action.c \
 		$(SRC_DIR)/arg_type.h $(SRC_DIR)/decl.h $(SRC_DIR)/default.c \
 		$(SRC_DIR)/em_parser.h $(SRC_DIR)/eval.c $(SRC_DIR)/help.c \
 		$(SRC_DIR)/mylex.c $(SRC_DIR)/pars.g $(SRC_DIR)/scan.c
 
 opr:
 	make pr | opr
-
-OFILES = pars.$(SUF) Lpars.$(SUF) scan.$(SUF) mylex.$(SUF) default.$(SUF) \
-	 C_instr2.$(SUF) help.$(SUF) eval.$(SUF) action.$(SUF)
 
 Lpars.$(SUF):	Lpars.h $(SRC_DIR)/decl.h Lpars.c
 		$(CC) $(CFLAGS) -c Lpars.c
