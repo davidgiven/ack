@@ -1,3 +1,4 @@
+#include "varargs.h"
 #include "decl.h"
 
 /* All the functions in this file will be called by the parser.
@@ -207,20 +208,32 @@ operand_clean()
 	n_ops = 0;
 }
 
-out( fmt, argv)
-char *fmt;
-int argv;
+/*VARARGS*/
+out(va_alist)
+va_dcl
 {
-	doprnt( outfile, fmt, &argv);
+	va_list pvar;
+	char *fmt;
+
+	va_start(pvar);
+	fmt = va_arg(pvar, char *);
+	doprnt( outfile, fmt, pvar);
+	va_end(pvar);
 }
 
-error( fmt, argv)
-char *fmt;
-int argv;
+/*VARARGS*/
+error(va_alist)
+va_dcl
 {
+	char *fmt;
+	va_list pvar;
+
+	va_start(pvar);
+	fmt = va_arg(pvar, char *);
 	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, &argv);
+	doprnt( STDERR, fmt, pvar);
 	fprint( STDERR, "	!!\n");
+	va_end(pvar);
 }
 
 inc_ops()
