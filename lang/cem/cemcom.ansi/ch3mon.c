@@ -36,19 +36,14 @@ ch3mon(oper, expp)
 	switch (oper)	{
 	case '*':			/* 3.3.3.2 */
 		/* no FIELD type allowed	*/
-		if ((*expp)->ex_type->tp_fund != POINTER) {
-			if ((*expp)->ex_type != error_type) {
-			    expr_error(*expp,
+		expr = *expp;
+		if (expr->ex_type->tp_fund != POINTER) {
+			if (expr->ex_type != error_type) {
+			    expr_error(expr,
 				    "* applied to non-pointer (%s)",
-				    symbol2str((*expp)->ex_type->tp_fund));
+				    symbol2str(expr->ex_type->tp_fund));
 			}
 		} else {
-			expr = *expp;
-
-			if (expr->ex_type->tp_up->tp_fund != FUNCTION &&
-			    expr->ex_type->tp_up->tp_size <= 0) {
-				expr_error(expr, "incomplete type in expression");
-			}
 			if (is_ld_cst(expr))
 				/* dereference in administration only */
 				expr->ex_type = expr->ex_type->tp_up;
@@ -60,6 +55,9 @@ ch3mon(oper, expp)
 				expr->ex_type->tp_fund != ARRAY &&
 				expr->ex_type->tp_fund != FUNCTION
 				);
+			if (expr->ex_lvalue && expr->ex_type->tp_size <= 0) {
+				expr_error(expr, "incomplete type in expression");
+			}
 			if (expr->ex_type->tp_typequal & TQ_CONST)
 				expr->ex_flags |= EX_READONLY;
 			if (expr->ex_type->tp_typequal & TQ_VOLATILE)
