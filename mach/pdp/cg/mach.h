@@ -1,8 +1,9 @@
 /* $Header$ */
 
-#define ex_ap(y)	fprintf(codefile,"\t.globl %s\n",y)
+#define ex_ap(y)	fprintf(codefile,".globl %s\n",y)
 #define in_ap(y)	/* nothing */
 
+#define newplb(x)	fprintf(codefile,"%s:\n",x)
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
 #define newlbss(l,x)	fprintf(codefile,"%s:.=.+0%o\n",l,x);
