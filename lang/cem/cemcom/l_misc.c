@@ -362,7 +362,7 @@ lint_relop(left, right, oper)
 	&&	right->ex_class == Value
 	&&	right->VL_CLASS == Const
 	) {
-		if (right->VL_VALUE < 0) {
+		if (!right->ex_type->tp_unsigned && right->VL_VALUE < 0) {
 			warning("unsigned compared to negative constant");
 		}
 		if (right->VL_VALUE == 0) {

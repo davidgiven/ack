@@ -394,6 +394,7 @@ expr.o: sizes.h
 expr.o: spec_arith.h
 expr.o: target_sizes.h
 expr.o: type.h
+expr.o: use_tmp.h
 ch7.o: Lpars.h
 ch7.o: arith.h
 ch7.o: assert.h
@@ -743,6 +744,7 @@ switch.o: density.h
 switch.o: expr.h
 switch.o: idf.h
 switch.o: label.h
+switch.o: lint.h
 switch.o: noRoption.h
 switch.o: nobitfield.h
 switch.o: nofloat.h
