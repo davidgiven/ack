@@ -4436,7 +4436,7 @@ with STACK
 pat nop
 with STACK
     kills ALL
-    gen jsr {absolute4, ".nop"}
+/*     gen jsr {absolute4, ".nop"} */
 
 pat rck
 #ifdef TBL68020
