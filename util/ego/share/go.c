@@ -39,7 +39,7 @@ STATIC mach_init(machfile,phase_machinit)
 	fscanf(f,"%d",&ws);
 	fscanf(f,"%d",&ps);
 	if (ws != ps && ps != 2*ws) error("illegal pointer size");
-	phase_machinit(f);
+	(*phase_machinit)(f);
 	fclose(f);
 }
 
@@ -88,14 +88,14 @@ go(argc,argv,initialize,optimize,phase_machinit,proc_flag)
 				verbose_flag = TRUE;
 				break;
 			default:
-				proc_flag(p);
+				(*proc_flag)(p);
 				break;
 		}
 	}
 	time_space_ratio = (time_opt ? 100 : 0);
 	fproc = getptable(pname); /* proc table */
 	fdblock = getdtable(dname);  /* data block table */
-	initialize();
+	(*initialize)();
 	if (optimize == no_action) return;
 	f   = openfile(lname,"r");
 	gf  = openfile(bname,"r");
@@ -115,7 +115,7 @@ go(argc,argv,initialize,optimize,phase_machinit,proc_flag)
 		/* The global variable curproc points to the
 		 * current procedure. It is set by getgraph
 		 */
-		optimize(curproc);
+		(*optimize)(curproc);
 		putunit(LTEXT,curproc,(line_p) 0,gf2,f2);
 		/* output control flow graph + text */
 		OUTTRACE("graph of proc %d outputted",curproc->p_id);
