@@ -1,4 +1,7 @@
+#define DUK	/* Modifications by Duk Bekema. */
+
 /* @(#)astrip.c	1.1 */
+/* $Header$ */
 #define	ushort	unsigned short
 
 #include "out.h"
@@ -138,16 +141,24 @@ register FILE	*f;
 		case '2':
 			i = getc(f);
 			i |= (getc(f) << 8);
+#ifndef DUK
+			*((short *)p)++ = i;
+#else DUK
 			*((short *)p) = i;
 			p += sizeof(short);
+#endif DUK
 			continue;
 		case '4':
 			l = (long)getc(f);
 			l |= (long)(getc(f) << 8);
 			l |= ((long)getc(f) << 16);
 			l |= ((long)getc(f) << 24);
+#ifndef DUK
+			*((long *)p)++ = l;
+#else DUK
 			*((long *)p) = l;
 			p += sizeof(long);
+#endif DUK
 			continue;
 		default:
 		case '\0':
@@ -173,14 +184,22 @@ char		*fnam;
 			i = *p++; putc(i,f);
 			break;
 		case 2:
+#ifndef DUK
+			i = *((short *)p)++;
+#else DUK
 			i = *((short *)p);
 			p += sizeof(short);
+#endif DUK
 			putc(i,f);
 			i>>=8; putc(i,f);
 			break;
 		case 4:
+#ifndef DUK
+			l = *((long *)p)++;
+#else DUK
 			l = *((long *)p);
 			p += sizeof(long);
+#endif DUK
 			putc(l,f);
 			l >>=8; putc(l,f);
 			l >>=8; putc(l,f);
