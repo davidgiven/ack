@@ -10,8 +10,8 @@
 
 #include	<varargs.h>
 #include	<em_arith.h>
-#include	<em_code.h>
 #include	<em_label.h>
+#include	<em_code.h>
 #include	<system.h>
 
 #include	"LLlex.h"
