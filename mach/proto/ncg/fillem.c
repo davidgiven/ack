@@ -57,8 +57,6 @@ long con();
 
 #define get8()  getc(emfile)
 
-#define MAXSTR 256
-
 FILE *emfile;
 extern FILE *codefile;
 extern FILE *freopen();
@@ -68,7 +66,8 @@ int opcode;
 int offtyp;
 long argval;
 int dlbval;
-char str[MAXSTR],argstr[128],labstr[128];
+char *str,argstr[128],labstr[128];
+unsigned int maxstrsiz;
 int strsiz;
 int holno=0;
 int procno=0;
@@ -90,6 +89,7 @@ string tostring();
 string holstr();
 string strarg();
 string mystrcpy();
+string myalloc();
 long get32();
 
 in_init(filename) char *filename; {
@@ -99,6 +99,7 @@ in_init(filename) char *filename; {
 		error("Can't open %s",filename);
 	if (get16()!=sp_magic)
 		error("Bad format %s",filename ? filename : "standard-input");
+	str = myalloc(maxstrsiz=256);
 }
 
 in_start() {
@@ -517,8 +518,13 @@ getstring() {
 	register n;
 
 	getarg(cst_ptyp);
-	if (argval < 0 || argval > MAXSTR-1)
+	if (argval < 0)
 		fatal("string/identifier too long");
+	if (argval >= maxstrsiz) {
+		myfree(str);
+		str = myalloc((unsigned) argval + 1);
+		maxstrsiz = argval + 1;
+	}
 	strsiz = n = (int) argval;
 	p = str;
 	while (--n >= 0)

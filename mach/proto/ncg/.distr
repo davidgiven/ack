@@ -9,6 +9,8 @@ fillem.c
 gencode.c
 glosym.c
 glosym.h
+label.c
+label.h
 main.c
 move.c
 nextem.c
