@@ -3,37 +3,35 @@
  * This file is copied into Lpars.c.
  */
 
-# ifndef lint
+#ifndef lint
 static char *rcsid = "$Header$";
-# endif
+#endif
 
 unsigned int	LLtcnt[LL_NTERMINALS];
 unsigned int	LLscnt[LL_NSETS];
 int		LLcsymb, LLsymb;
 static int	LLlevel;
 
-/* In this file are defined: */
-extern		LLread();
-extern int	LLskip();
-extern int	LLnext();
-#ifndef LL_FASTER
-extern		LLscan();
+#if LL_ANSI_C
+void	LLmessage(int);
 #endif
-extern		LLerror();
-# ifndef LLNOFIRSTS
-extern int	LLfirst();
-# endif
-extern		LLnewlevel();
-extern		LLoldlevel();
-
 #ifdef LL_USERHOOK
+#if LL_ANSI_C
+static void	LLdoskip(int);
+static int	LLuserhook(int, int*);
+#else
 static		LLdoskip();
 static int	LLuserhook();
 #endif
+#endif
 
 #ifndef LL_FASTER
+#if LL_ANSI_C
+void LLscan(int t)
+#else
 LLscan(t)
 	int	t;
+#endif
 {
 	/*
 	 * Check if the next symbol is equal to the parameter
@@ -48,7 +46,11 @@ LLscan(t)
 }
 #endif
 
+#if LL_ANSI_C
+void LLread(void) {
+#else
 LLread() {
+#endif
 	for (;;) {
 		if ((LLcsymb = LLindex[(LLsymb = LL_LEXI())]) >= 0) return;
 		LLmessage(0);
@@ -56,8 +58,12 @@ LLread() {
 	/* NOTREACHED */
 }
 
+#if LL_ANSI_C
+void LLerror(int t)
+#else
 LLerror(t)
 	int	t;
+#endif
 {
 	register int i;
 
@@ -67,7 +73,7 @@ LLerror(t)
 #ifdef LL_USERHOOK
 		static int lst[] = { EOFILE, 0 };
 		if (LLuserhook(EOFILE, lst)) /* nothing */;
-#endif LL_USERHOOK
+#endif /* LL_USERHOOK */
 		if (LLsymb != EOFILE && LLsymb > 0) {
 			LLmessage(-1);
 			while ((LLsymb = LL_LEXI()) > 0 && LLsymb != EOFILE) 
@@ -91,17 +97,25 @@ LLerror(t)
 	if (LLsymb != t) LLmessage(t);
 }
 
-# ifndef LLNOFIRSTS
-LLfirst(x, d) {
+#ifndef LLNOFIRSTS
+#if LL_ANSI_C
+int LLfirst(int x, int d) {
+#else
+int LLfirst(x, d) {
+#endif
 	register int i;
 
 	return (i = LLindex[x]) >= 0 &&
 		(LLsets[d + (i >> 3)] & (1 << (i & 07)));
 }
-# endif
+#endif
 
-LLnext(n)
+#if LL_ANSI_C
+int LLnext(int n)
+#else
+int LLnext(n)
 	int	n;
+#endif
 {
 	/*	returns: 0 if the current symbol is'nt skipped, and it
 			 is'nt a member of "n",
@@ -122,7 +136,11 @@ LLnext(n)
 	return retval;
 }
 
-LLskip() {
+#if LL_ANSI_C
+int LLskip(void) {
+#else
+int LLskip() {
+#endif
 	/*	returns 0 if the current symbol is'nt skipped, and
 		1 if it is, t.i., we have a new symbol
 	*/
@@ -130,20 +148,27 @@ LLskip() {
 	return LLdoskip(0);
 }
 
-static int
-LLuserhook(exp, list)
-	int exp;
+#if LL_ANSI_C
+extern void LL_USERHOOK(int, int *);
+static int LLuserhook(int e, int *list)
+#else
+static int LLuserhook(e, list)
+	int e;
 	int *list;
+#endif
 {
 	int old = LLsymb;
-	LL_USERHOOK(exp, list);
+	LL_USERHOOK(e, list);
 	LLread();
 	return LLsymb != old;
 }
 
-static
-LLmklist(list)
+#if LL_ANSI_C
+static void LLmklist(register int *list)
+#else
+static LLmklist(list)
 	register int *list;
+#endif
 {
 	char Xset[LL_SSIZE];
 	register char *p;
@@ -167,13 +192,16 @@ LLmklist(list)
 	*list = 0;
 }
 
-static
-LLdoskip(exp)
-	int	exp;
+#if LL_ANSI_C
+static int LLdoskip(int e)
+#else
+static int LLdoskip(e)
+	int	e;
+#endif
 {
 	int LLx;
 	int list[LL_NTERMINALS+1];
-#endif LL_USERHOOK
+#endif /* LL_USERHOOK */
 	register int i;
 	int retval;
 	int LLi, LLb;
@@ -181,13 +209,13 @@ LLdoskip(exp)
 	retval = 0;
 #ifdef LL_USERHOOK
 	LLmklist(list);
-	LLx = LLuserhook(exp, list);
+	LLx = LLuserhook(e, list);
 	if (LLx) retval = 1;
-#endif LL_USERHOOK
+#endif /* LL_USERHOOK */
 	for (;;) {
 		if (LLtcnt[LLcsymb] != 0) {
 #ifdef LL_USERHOOK
-			if (!exp || !LLx || LLcsymb == LLindex[exp])
+			if (!e || !LLx || LLcsymb == LLindex[e])
 #endif
 			return retval;
 		}
@@ -197,7 +225,7 @@ LLdoskip(exp)
 			if (LLscnt[i] != 0) {
 				if (LLsets[LL_SSIZE*i+LLi] & LLb) {
 #ifdef LL_USERHOOK
-					if (!exp || !LLx || LLcsymb == LLindex[exp])
+					if (!e || !LLx || LLcsymb == LLindex[e])
 #endif
 					return retval;
 				}
@@ -205,10 +233,10 @@ LLdoskip(exp)
 		}
 #ifdef LL_USERHOOK
 		if (LLx) {
-			LLx = LLuserhook(exp, list);
+			LLx = LLuserhook(e, list);
 			continue;
 		}
-#endif LL_USERHOOK
+#endif /* LL_USERHOOK */
 		LLmessage(0);
 		retval = 1;
 		LLread();
@@ -216,7 +244,11 @@ LLdoskip(exp)
 	/* NOTREACHED */
 }
 
+#if LL_ANSI_C
+void LLnewlevel(unsigned int *LLsinfo) {
+#else
 LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
+#endif
 	register int i;
 
 	if (LLlevel++) {
@@ -234,16 +266,18 @@ LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
 	LLtincr(0);
 }
 
-LLoldlevel(LLsinfo)
-	unsigned int *LLsinfo;
-{
+#if LL_ANSI_C
+void LLoldlevel(unsigned int *LLsinfo) {
+#else
+LLoldlevel(LLsinfo) unsigned int *LLsinfo; {
+#endif
 	register int i;
 
 	LLtdecr(0);
-# ifdef LL_DEBUG
+#ifdef LL_DEBUG
 	for (i = 0; i < LL_NTERMINALS; i++) LL_assert(LLtcnt[i] == 0);
 	for (i = 0; i < LL_NSETS; i++) LL_assert(LLscnt[i] == 0);
-# endif
+#endif
 	if (--LLlevel) {
 		for (i = LL_NSETS - 1; i >= 0; i--) {
 			LLscnt[i] = LLsinfo[LL_NTERMINALS+i];

@@ -105,6 +105,7 @@ typedef	struct {
 				 */
 # define getntparams(p)	((p)->n_flags&017)
 # define setntparams(p,i)	{assert(((unsigned)(i))<=017);(p)->n_flags&=~017;(p)->n_flags|=(i);}
+# define GENSTATIC	01000	/* set if routine can be made static */
 # define RECURSIVE	02000	/* Set if the default rule is recursive */
 # define PARAMS		04000	/* tells if a nonterminal has parameters */
 # define EMPTY		010000	/* tells if a nonterminal produces empty */
@@ -133,6 +134,7 @@ typedef	struct {
 	p_set	n_contains;	/* pointer to symbols that can be produced */
 	string	n_name;		/* name of nonterminal */
 	int	n_next;		/* index of next nonterminal */
+	long	n_off;		/* index of parameters in action file */
 } t_nont, *p_nont;
 
 /* 
@@ -225,6 +227,7 @@ typedef struct f_file {
 				 */
 	int f_nonterminals;	/* list of nonterminals in this file  */
 	int f_terminals;	/* list of terminals in this file  */
+	p_set f_used;		/* set of nonterminals used in this file */
 } t_file, *p_file;
 
 typedef struct info_alloc {

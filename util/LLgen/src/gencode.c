@@ -56,6 +56,8 @@ STATIC		prset();
 STATIC		macro();
 STATIC		controlline();
 STATIC		getparams();
+STATIC		getansiparams();
+STATIC		genprototypes();
 STATIC		gettok();
 STATIC		rulecode();
 STATIC int *	dopush();
@@ -113,6 +115,8 @@ gencode(argc) {
 		opentemp(f_input);
 		correct_prefix();
 		/* generate code ... */
+		if (ansi_c) fputs("#define LL_ANSI_C 1\n", fpars);
+		fprintf(fpars, "#define LL_LEXI %s\n", lexical);
 		copyfile(incl_file);
 		generate(p);
 		getaction(2);
@@ -123,6 +127,7 @@ gencode(argc) {
 	}
 	geninclude();
 	genrecovery();
+	fclose(fact);
 }
 
 STATIC
@@ -165,8 +170,10 @@ genrecovery() {
 	opentemp((string) 0);
 	f = fpars;
 	correct_prefix();
-	copyfile(incl_file);
 	if (!firsts) fputs("#define LLNOFIRSTS\n", f);
+	if (ansi_c) fputs("#define LL_ANSI_C 1\n", f);
+	fprintf(f, "#define LL_LEXI %s\n", lexical);
+	copyfile(incl_file);
 	for (st = start; st; st = st->ff_next) {
 		/* Make sure that every set the parser needs is in the list
 		 * before generating a define of the number of them!
@@ -178,17 +185,23 @@ genrecovery() {
 	}
 	i = maxptr - setptr;
 	fprintf(f,
-"#define LL_LEXI %s\n#define LL_SSIZE %d\n#define LL_NSETS %d\n#define LL_NTERMINALS %d\n",
-		  lexical,
+"#define LL_SSIZE %d\n#define LL_NSETS %d\n#define LL_NTERMINALS %d\n",
 		  nbytes,
 		  i > 0 ? i : 1,
 		  ntokens);
 	if (onerror) fprintf(f,"#define LL_USERHOOK %s\n", onerror);
 	/* Now generate the routines that call the startsymbols */
-	for (st = start; st; st = st->ff_next) {
-		fputs(st->ff_name, f);
+	if (ansi_c) for (st = start; st; st = st->ff_next) {
 		p = &nonterms[st->ff_nont];
-		fputs("() {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];\n\tLLnewlevel(s);\n\tLLread();\n", f);
+		fputs("void ", f);
+		genextname(st->ff_nont, p->n_name, f);
+		fputs("(void);\n", f);
+	}
+	for (st = start; st; st = st->ff_next) {
+		if (ansi_c) fputs("void ", f);
+		fprintf(f, "%s(%s)", st->ff_name, ansi_c ? "void" : "");
+		p = &nonterms[st->ff_nont];
+		fputs(" {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];\n\tLLnewlevel(s);\n\tLLread();\n", f);
 		if (g_gettype(p->n_rule) == ALTERNATION) {
 			genpush(findindex(p->n_contains));
 		}
@@ -238,6 +251,7 @@ generate(f) p_file f; {
 	int i;
 	register p_first ff;
 	int mustpop;
+	int is_first = 1;
 
 	fprintf(fpars, "#define LL_LEXI %s\n", lexical);
 	listcount = 0;
@@ -258,13 +272,18 @@ generate(f) p_file f; {
 		    getntparams(p) == 0) {
 			continue;
 		}
+		if (is_first) genprototypes(f);
+		is_first = 0;
+		if (p->n_flags & GENSTATIC) fputs("static ", fpars);
+		if (ansi_c) fputs("void ", fpars);
 		genextname(s, p->n_name, fpars);
 		if (p->n_flags & PARAMS) {
 			fputs("(\n", fpars);
 			controlline();
-			getparams();
+			if (ansi_c) getansiparams(1);
+			else getparams();
 		}
-		else fputs("() {\n", fpars);
+		else fprintf(fpars, "(%s) {\n", ansi_c ? "void" : "");
 		if (p->n_flags & LOCALS) getaction(1);
 		i = getntsafe(p);
 		mustpop = NOPOP;
@@ -378,6 +397,71 @@ getparams() {
 	fseek(fact,off,0);
 	getaction(0);
 	fprintf(fpars, "%c {\n",add_semi);
+}
+
+STATIC
+genprototypes(f)
+	register p_file f;
+{
+	/*
+	 * Generate prototypes for all nonterminals
+	 */
+	register int i;
+	register p_nont	p;
+	long	off = ftell(fact);
+
+	for (i = 0; i < nnonterms; i++)	{
+		if (! IN(f->f_used, i)) continue;
+		p = &nonterms[i];
+		if (g_gettype(p->n_rule) == EORULE &&
+		    getntparams(p) == 0) {
+			continue;
+		}
+		if (ansi_c || (p->n_flags & GENSTATIC)) {
+			if (p->n_flags & GENSTATIC) fputs("static ", fpars);
+			if (ansi_c) fputs("void ", fpars);
+			genextname(i, p->n_name, fpars);
+			if (! ansi_c) fputs("();\n", fpars);
+			else if (p->n_flags & PARAMS) {
+				fputs("(\n", fpars);
+				fseek(fact, p->n_off, 0);
+				controlline();
+				getansiparams(0);
+				fseek(fact, off, 0);
+			}
+			else fputs("(void);\n", fpars);
+		}
+	}
+}
+
+STATIC
+getansiparams(mkdef) {
+	/* getansiparams is called if a nonterminal has parameters
+	 * and an ANSI C function definition/declaration has to be produced.
+	 * If a definition has to be produced, "mkdef" is set to 1.
+ 	 */
+	register int l;
+	char add_semi = ' ';
+	int delayed = 0;
+
+	ltext[0] = '\0';
+	while ((l = gettok()) != ENDDECL) {
+		if (delayed) {
+			fputc(',', fpars);
+			delayed = 0;
+		}
+		if ((l == ';' || l == ',') && ltext[0] != '\0') {
+			/*
+			 * The last identifier found before a ';' or a ','
+			 * must be a parameter
+			 */
+			delayed = 1;
+			ltext[0] = '\0';
+		}
+		else if (l == IDENT) fprintf(fpars, "%s", ltext);
+		else fputc(l, fpars);
+	}
+	fprintf(fpars, ") %c\n", mkdef ? '{' : ';');
 }
 
 STATIC

@@ -131,19 +131,48 @@ do_compute() {
 STATIC
 createsets() {
 	/*
-	 * Allocate space for the sets
+	 * Allocate space for the sets. Also determine which files use
+	 * which nonterminals, and determine which nonterminals can be
+	 * made static.
 	 */
 	register p_nont p;
+	register p_file f;
+	register p_start st;
+	register int i;
+	int n = NINTS(NBYTES(nnonterms));
+	p_mem alloc();
 
-	for (p = nonterms; p < maxnt; p++) {
-		p->n_first = get_set();
-		p->n_follow = get_set();
-		walk(p->n_rule);
+	for (f = files; f < maxfiles; f++) {
+		register p_set s;
+		f->f_used = s = (p_set) alloc((unsigned)n*sizeof(*(f->f_used)));
+		for (i = n; i; i--) *s++ = 0;
+		for (i = f->f_nonterminals; i != -1; i = p->n_next) {
+			p = &nonterms[i];
+			p->n_flags |= GENSTATIC;
+			p->n_first = get_set();
+			p->n_follow = get_set();
+			walk(f->f_used, p->n_rule);
+		}
+	}
+	for (f = files; f < maxfiles; f++) {
+		for (i = f->f_nonterminals; i != -1; i = p->n_next) {
+			register p_file f2;
+
+			p = &nonterms[i];
+			for (f2 = files; f2 < maxfiles; f2++) {
+				if (f2 != f && IN(f2->f_used, i)) {
+					p->n_flags &= ~GENSTATIC;
+				}
+			}
+		}
+	}
+	for (st = start; st; st = st->ff_next) {
+		nonterms[st->ff_nont].n_flags &= ~GENSTATIC;
 	}
 }
 
 STATIC
-walk(p) register p_gram p; {
+walk(u, p) p_set u; register p_gram p; {
 	/*
 	 * Walk through the grammar rule p, allocating sets
 	 */
@@ -156,7 +185,7 @@ walk(p) register p_gram p; {
 			q = g_getterm(p);
 			q->t_first = get_set();
 			q->t_follow = get_set();
-			walk(q->t_rule);
+			walk(u, q->t_rule);
 			break; }
 		  case ALTERNATION : {
 			register p_link l;
@@ -164,7 +193,12 @@ walk(p) register p_gram p; {
 			l = g_getlink(p);
 			l->l_symbs = get_set();
 			l->l_others = get_set();
-			walk(l->l_rule);
+			walk(u, l->l_rule);
+			break; }
+		  case NONTERM : {
+			register int i = g_getcont(p);
+
+			PUTIN(u, i);
 			break; }
 		  case EORULE :
 			return;

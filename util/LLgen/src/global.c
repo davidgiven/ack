@@ -66,3 +66,4 @@ string	rec_file, incl_file;
 int	low_percentage = 10, high_percentage = 30;
 int	min_cases_for_jmptable = 8;
 int	jmptable_option;
+int	ansi_c = 0;

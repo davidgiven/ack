@@ -100,6 +100,10 @@ main(argc,argv) register string	argv[]; {
 				ntneeded = 1;
 				ntprint = 1;
 				continue;
+			  case 'a':
+			  case 'A':
+				ansi_c = 1;
+				continue;
 			  default:
 				fprintf(stderr,"illegal option : %c\n",*arg);
 				exit(1);

@@ -29,6 +29,7 @@ static string	rcsid = "$Header$";
 p_mem		alloc(), ralloc();
 string		store();
 p_gram		search();
+long		ftell();
 
 static int	nparams;		/* parameter count for nonterminals */
 static int	acount;			/* count #of global actions */
@@ -211,6 +212,7 @@ rule			{	register p_nont p;
 				p->n_count = acount;
 				acount = 0;
 				p->n_lineno = linecount;
+				p->n_off = ftell(fact);
 			}
 	  [ params	{	p->n_flags |= PARAMS;
 				if (nparams > 15) {
