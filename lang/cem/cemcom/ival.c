@@ -67,7 +67,7 @@ IVAL(tpp, ex)
 			return do_array(ex, tpp);
 		/* catch initialisations like char s[] = "I am a string" */
 		if (tp->tp_up->tp_fund == CHAR && ex->ex_class == String)
-			init_string(tpp, ex);
+			ch_array(tpp, ex);
 		else /* " int i[24] = 12;"	*/
 			check_and_pad(ex, tpp);
 		break;
@@ -140,7 +140,7 @@ do_array(ex, tpp)
 			f = f->OP_LEFT;
 		}
 		if (f->ex_class == String) { /* hallelujah, it's a string! */
-			init_string(tpp, f);
+			ch_array(tpp, f);
 			return g ? g->OP_RIGHT : ex->OP_RIGHT;
 		}
 		/* else: just go on with the next part of this function */
@@ -492,11 +492,11 @@ check_ival(ex, tp)
 	}
 }
 
-/*	init_string() initialises an array of characters by specifying
+/*	ch_array() initialises an array of characters when given
 	a string constant.
 	Alignment is taken care of.
 */
-init_string(tpp, ex)
+ch_array(tpp, ex)
 	struct type **tpp;	/* type tp = array of characters	*/
 	struct expr *ex;
 {
@@ -534,6 +534,14 @@ init_string(tpp, ex)
 	/* pad the allocated memory (the alignment has been calculated)	*/
 	while (ntopad-- > 0)
 		con_nullbyte();
+}
+
+str_cst(str, len)
+	register char *str;
+	register int len;
+{
+	while (len-- > 0)
+		C_con_ucon(long2str((long)*str++ & 0xFF, 10), (arith)1);
 }
 
 #ifndef NOBITFIELD

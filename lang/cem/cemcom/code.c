@@ -81,7 +81,7 @@ def_strings(sc)
 	if (sc) {
 		def_strings(sc->next);
 		C_df_dlb(sc->sc_dlb);
-		C_con_scon(sc->sc_value, sc->sc_len);
+		str_cst(sc->sc_value, sc->sc_len);
 		free_string_cst(sc);
 	}
 }
