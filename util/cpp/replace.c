@@ -156,7 +156,7 @@ macro2buffer(idef, actpars, siztext)
 			/*	copy the text of the actual parameter
 				into the replacement text
 			*/
-			for (p = actpars[n - 1]; p && *p; p++) {
+			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
 					text = Srealloc(text, size += RTEXTSIZE);

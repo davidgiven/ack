@@ -57,12 +57,12 @@ getactuals(idef)
 		/*	argument mismatch: too many or too few
 			actual parameters.
 		*/
-		error("argument mismatch, %s", idef->id_text);
+		warning("argument mismatch, %s", idef->id_text);
 
 		while (++nr_of_params < acnt) {
 			/*	too few paraeters: remaining actuals are ""
 			*/
-			actparams[nr_of_params] = (char *) 0;
+			actparams[nr_of_params] = "";
 		}
 	}
 
