@@ -977,7 +977,7 @@ fef !defined($1)| source2 |
  * Pointers have size 2 bytes.          *
  ****************************************/
 
-adp		| SCR_REG |  | {regconst2, %[1], tostring($1)} | |
+adp		| REG |  | {regconst2, %[1], tostring($1)} | |
 ...             | NC regconst2 |   | {regconst2, %[1.reg], tostring($1)+"+"+%[1.ind]}    | |
 ...             | NC ADDR_EXTERNAL | | {ADDR_EXTERNAL, tostring($1)+"+"+%[1.ind]} | |
 ...             | NC ADDR_LOCAL |  | {ADDR_LOCAL,%[1.ind]+$1}              | |
@@ -1613,7 +1613,7 @@ rol $1==2       | CONST2 SCR_ODD_REG |
 			setcc(%[2])
 			erase(%[2])			| %[2] | |
 ...		| SCR_REG SCR_ODD_REG |
-			"sub $$16,%[1]"
+			"sub $$%(16%),%[1]"
 			"ashc %[1],%[2]"
 			setcc(%[2])
 			erase(%[1]) erase(%[2])         | %[2]  | |
@@ -1667,18 +1667,18 @@ com and $1==$2  | |     remove(all)
 inn $1==2       | SCR_REG SCR_REG |
 			"neg %[1]"
 			"ash %[1],%[2]"
-			"bic $$177776,%[2]"
+			"bic $$0177776,%[2]"
 			erase(%[1]) erase(%[2])                 | %[2]  | |
 loc inn $2==2 && $1==0 | SCR_REG |
-			"bic $$177776,%[1]"
+			"bic $$0177776,%[1]"
 			erase(%[1])				| %[1]	| |
 loc inn $2==2 && $1==1 | SCR_REG |
 			"asr %[1]"
-			"bic $$177776,%[1]"
+			"bic $$0177776,%[1]"
 			erase(%[1])				| %[1]	| |
 loc inn $2==2	| SCR_REG |
 			"ash $$%(0-$1%),%[1]"
-			"bic $$177776,%[1]"
+			"bic $$0177776,%[1]"
 			erase(%[1])				| %[1]	| |
 
 loc inn zeq $2==2 | |	| {CONST2, 1<<$1} | and 2 zeq $3 |
