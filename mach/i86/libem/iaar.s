@@ -10,10 +10,9 @@
 	jne     .unknown
 	pop     bx      ! descriptor address
 	pop     ax      ! index
-	pop     dx      ! array base
 	sub     ax,(bx)
 	mul     4(bx)
-	mov	bx,dx
+	pop	bx	! base address
 	add     bx,ax
 	push	cx
 	ret
