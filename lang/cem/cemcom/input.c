@@ -71,7 +71,7 @@ PRIVATE struct buffer_header *head  = 0;	/* current input buffer	*/
 IMPORT char **WorkingDir;	/* name of current working directory	*/
 #else NOPP
 long isize;
-char ibuf[BUFSIZ];
+char ibuf[BUFSIZ + 1];
 #endif NOPP
 
 #ifdef READ_IN_ONE
