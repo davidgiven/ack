@@ -2059,7 +2059,7 @@ zrf $1==8	| |	allocate(QREG)
 zer $1==4	| |		| {CONST4,0}		| |
 zer $1==8	| |	allocate(QREG)
 			"clrq\t%[a]"		| %[a]	| |
-zer $1<=32	| STACK |
+zer $1>8&&$1<=32	| STACK |
 			"clrq\t-(sp)"		|	| zer $1-8 |
 zer defined($1)	| STACK |
 			move({CONST4,$1/4},R0)
