@@ -220,7 +220,7 @@ jmp label cost(1,7).
 joehoe "call" label+rm cost(1,8).
 jxx "syntax error" label.
 lea anyreg:wo, halfindir:ro cost(1,2).
-loop label cost(1,5).
+loop label kills cx cost(1,5).
 #ifdef REGVARS
 mov LOCAL:wo, memory2:ro cost(1,2).	/* only for register variables, UNSAFE!!! */
 #endif
@@ -231,7 +231,7 @@ movb REG1:wo, rm1:ro cost(1,2).
 mul rmorconst:ro kills :cc ax dx cost(1,124).
 neg rmorconst:rw:cc.
 nop .
-not rmorconst:rw:cc.
+not rmorconst:rw.
 ORB "orb" REG1:ro, REG1:ro:cc.		/* use ORB for tests */
 OR "or" anyreg:ro, anyreg:ro:cc.	/* Use OR for tests */
 #ifdef REGVARS
@@ -888,7 +888,7 @@ with rmnoacc rmorconst
 
 pat dvi $1==4
 kills ALL
-  gen joehoe {label,".dvi4"}	yields cx ax
+  gen joehoe {label,".dvi4"}	yields dx ax
 
 /*
 pat dvi !defined($1)
@@ -911,7 +911,7 @@ with rmnoacc rmorconst
 
 pat rmi $1==4
 kills ALL
-  gen joehoe {label,".rmi4"}	yields bx dx
+  gen joehoe {label,".rmi4"}	yields dx ax
 
 /*
 pat rmi !defined($1)
@@ -1026,6 +1026,7 @@ gen joehoe {label,".dvu4"}	yields dx ax
 /*
 pat dvu !defined($1)
 with ACC STACK
+kills ALL
 gen joehoe {label,".dvu"}
 */
 
@@ -1041,6 +1042,7 @@ gen joehoe {label,".rmu4"}	yields dx ax
 /*
 pat rmu !defined($1)
 with ACC STACK
+kills ALL
 gen joehoe {label,".rmu"}
 */
 
@@ -1071,6 +1073,7 @@ gen jcxz {label,1f}
 /*
 pat sru !defined($1)
 with ACC STACK
+kills ALL
 gen joehoe {label,".sru"}
 */
 
@@ -1329,7 +1332,7 @@ pat lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
       sal {LOCAL,$1,2},{ANYCON,1}
 pat lol loc sli stl $1==$4 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
-  uses CXREG={ANYCON,2}
+  uses CXREG={ANYCON,$2}
   gen sal {LOCAL,$1,2},cl
 pat lol loc sri stl $1==$4 && $2==1 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
@@ -1340,7 +1343,7 @@ pat lol loc sri stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
       sar {LOCAL,$1,2},{ANYCON,1}
 pat lol loc sri stl $1==$4 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
-  uses CXREG={ANYCON,2}
+  uses CXREG={ANYCON,$2}
   gen sar {LOCAL,$1,2},cl
 #endif
 #ifdef REGVARS
@@ -2082,25 +2085,25 @@ pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0
 						leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0
-					leaving loc rom($1,1) sbi 2 ads 2
+					leaving adp 0-rom($1,1) ads 2
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0
-  with REG
+  with ADDREG
   gen sal %1,{ANYCON,1}			yields %1	leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0
-  with REG
-  gen sal %1,{ANYCON,1}     yields %1   leaving loc 2*rom($1,1) sbi 2 ads 2
+  with ADDREG
+  gen sal %1,{ANYCON,1}     yields %1   leaving adp 0-2*rom($1,1) ads 2
 
 pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)==0
-  with REG
+  with ADDREG
   gen sal %1,{ANYCON,1}
       sal %1,{ANYCON,1}			yields %1	leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)!=0
-  with REG
+  with ADDREG
   gen sal %1,{ANYCON,1}
-      sal %1,{ANYCON,1}  yields %1	leaving loc 4*rom($1,1) sbi 2 ads 2
+      sal %1,{ANYCON,1}  yields %1	leaving adp 0-4*rom($1,1) ads 2
 
 pat lae aar $2==2 && rom($1,1)==0
   with ACC
@@ -2111,19 +2114,19 @@ pat lae aar $2==2 && defined(rom($1,1))
   with ACC
   uses DXREG,REG={ANYCON,rom($1,3)}
   gen mul %b 		yields %1
-   				leaving loc rom($1,1)*rom($1,3) sbi 2 ads 2
+   				leaving adp 0-rom($1,1)*rom($1,3) ads 2
  
 pat loc sli ads $1==1 && $2==2 && $3==2
-with REG
+with ADDREG
   gen sal %1,{ANYCON,1}		yields %1	leaving ads 2
 
 pat loc sli ads $1==2 && $2==2 && $3==2
-with REG
+with ADDREG
   gen sal %1,{ANYCON,1}
       sal %1,{ANYCON,1}		yields %1	leaving ads 2
 
 pat loc sli ads $2==2 && $3==2
-with REG
+with ADDREG
 uses CXREG={ANYCON,$1}
   gen sal %1,cl			yields %1	leaving ads 2
 
@@ -2151,9 +2154,9 @@ pat aar $1==2
   gen sub %2,{EXTERN2,%1.off}
       mul {EXTERN2,4+%1.off}	yields %2	leaving ads 2
 
-pat lae lar defined(rom($1,3))	leaving lae $1 aar $2 sti rom($1,3)
+pat lae lar defined(rom($1,3))	leaving lae $1 aar $2 loi rom($1,3)
 
-pat lae sar defined(rom($1,3))  leaving lae $1 aar $2 loi rom($1,3)
+pat lae sar defined(rom($1,3))  leaving lae $1 aar $2 sti rom($1,3)
 
 pat aar !defined($1)
   kills ALL
@@ -2434,7 +2437,7 @@ with rm rm STACK
       cmp %2, {ANYCON, highw($1)}
       jne {label,$3}
 
-pat cms zne
+pat cms zne $1==4
 with regorconst regorconst rm rm STACK
   gen cmp %3,%1
       jne {label,$2}
@@ -2447,7 +2450,7 @@ kills ALL
       cmp %2,%4
       jne {label,$2}
 
-pat cms zeq
+pat cms zeq $1==4
 with regorconst regorconst rm rm STACK
   gen cmp %3,%1
       jne {label, 1f}
@@ -2800,10 +2803,12 @@ kills ALL
 
 pat rck $1==2
 with BXREG ACC
+kills ALL
   gen joehoe {label, ".rck"}				yields ax
 
 pat rck !defined($1)
 with rm-BXREG-ACC BXREG ACC
+kills ALL
   gen cmp %1,{ANYCON,2}
       jne {label, ".unknown"}
       joehoe {label, ".rck"}				yields ax
