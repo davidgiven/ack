@@ -10,24 +10,29 @@
  */
 
 #include "whichone.h"
+#include <stb.h>
 
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
 		part_size++;
-	if (part_size == 4)
+	if (part_size == TEM_WSIZE)
 		part_flush();
 	if (sz == 1) {
 		w &= 0xFF;
+#if WORD_SIZE==4
 		w <<= 8*(3-part_size);
 		part_word |= w;
 	} else if (sz == 2) {
 		w &= 0xFFFF;
-		if (part_size == 0)
-			w <<= 16;
+#endif
+		if (part_size == 0) {
+			/* Shift 8 for m68k2, 16 otherwise */
+			w <<= 4 * TEM_WSIZE;
+		}
 		part_word |= w;
 	} else {
-		assert(sz == 4);
+		assert(sz == TEM_WSIZE);
 		part_word = w;
 	}
 	part_size += sz;
@@ -62,7 +67,7 @@ regscore(off,size,typ,score,totyp)
 			score += 5;
 			/* fall through .. */
 		case reg_any:
-			if (size != 4 || totyp == reg_pointer) return -1;
+			if (size != TEM_WSIZE || totyp == reg_pointer) return -1;
 			break;
 	}
 	if (off >= 0) {
@@ -176,7 +181,7 @@ prolog(n) full n; {
 
 
 mes(type) word type ; {
-	int argt ;
+	int argt, a1, a2 ;
 
 	switch ( (int)type ) {
 	case ms_ext :
@@ -191,6 +196,41 @@ mes(type) word type ; {
 				break ;
 			}
 		}
+	case ms_stb:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			fputs(".symb \"\", ", codefile);
+		else {
+			fprintf(codefile, ".symb \"%s\", ", str);
+			argt = getarg(cst_ptyp);
+		}
+		a1 = argval;
+		argt = getarg(cst_ptyp);
+		a2 = argval;
+		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
+		argt = getarg(end_ptyp);
+		break;
+	case ms_std:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			str[0] = '\0';
+		else {
+			argt = getarg(cst_ptyp);
+		}
+		swtxt();
+		if (argval == N_SLINE) {
+#ifdef TBL68020
+			fputs("jsr (___u_LiB)\n", codefile);
+#else
+			fputs("jsr ___u_LiB\n", codefile);
+#endif
+		}
+		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
+		argt = getarg(cst_ptyp);
+		fprintf(codefile, "%d\n", (int) argval);
+		argt = getarg(end_ptyp);
+		break;
 	default :
 		while ( getarg(any_ptyp) != sp_cend ) ;
 		break ;

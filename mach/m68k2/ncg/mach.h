@@ -12,6 +12,9 @@ TBL68000 or TBL68020, in the file whichone.h, then REMOVE tables.c
 and then run "make" again
 #endif
 #endif
+#if WORD_SIZE!=2 && WORD_SIZE!=4
+You must specify the appropriate word size, then REMOVE tables.c
+#endif
 
 #define ex_ap(y)	fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)	/* nothing */
@@ -37,7 +40,11 @@ and then run "make" again
 #endif
 #define hol_off		"%ld+hol%d"
 
+#if WORD_SIZE==2
+#define con_cst(x)	fprintf(codefile,".data2\t%d\n",x)
+#else
 #define con_cst(x)	fprintf(codefile,".data4\t%ld\n",x)
+#endif
 #define con_ilb(x)	fprintf(codefile,".data4\t%s\n",x)
 #define con_dlb(x)	fprintf(codefile,".data4\t%s\n",x)
 

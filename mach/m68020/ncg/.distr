@@ -4,5 +4,6 @@ mach.c
 mach.h
 table
 whichone.h
+instrmacs.h
 tables1.c
 tables1.h
