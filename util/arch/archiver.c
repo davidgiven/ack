@@ -253,6 +253,9 @@ get_member()
 again:
   if (rd_arhdr(ar_fd, &member) == 0)
 	return NIL_MEM;
+  if (member.ar_size < 0) {
+	error(TRUE, "archive has member with negative size\n");
+  }
 #ifdef AAL
   if (equal(SYMDEF, member.ar_name)) {
 	lseek(ar_fd, member.ar_size, 1);
@@ -499,7 +502,7 @@ int from, to;
 	}
 	if (to >= 0) mwrite(to, io_buffer, rest);
 	mem_size -= (long) rest;
-  } while (mem_size != 0L);
+  } while (mem_size > 0L);
 
   if (is_odd) {
 	lseek(from, 1L, 1);
