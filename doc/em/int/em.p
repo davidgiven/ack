@@ -281,7 +281,7 @@ begin if (a<0) or (a>maxoffs)
 end;
 
 function argo(a:double):size;
-begin if (a<0) or (a>maxoffs)
+begin if (a<=0) or (a>maxoffs)
 	then trap(EODDZ)
 	else if (a mod wsize<>0) and (wsize mod a<>0) then trap(EODDZ);
       argo:=a ;
@@ -683,7 +683,7 @@ begin
   a:=argp(uerrorproc);
   uerrorproc:=0;              { reset signal }
   call(a);                    { call the routine }
-  intrap:=false;              { Don't catch recursive traps anymore }
+  intrap:=false;              { Do not catch recursive traps anymore }
   goto 8888;                  { reenter main loop }
 end;
 
@@ -1149,7 +1149,7 @@ end;
 	jmp (r2)               /done
 
   The important thing to notice is where and how the operand fetch occurred:
-       lol2, lol4, and lol6, (the mini's) have implicit operands
+       lol2, lol4, and lol6, (the minis) have implicit operands
        lolb knew it had to fetch one byte, and did so without any table lookup
        lolw knew it had to fetch a word, and did so, high order byte first }
 {
@@ -1604,10 +1604,9 @@ begin
 	 end;
     CSA: begin k:=argw(k); if k<>wsize then trap(EILLINS);
 	   a:=popa;
-	   st:= popsw - signwd(memw(a+asize)); b:=0;
+	   st:= popsw - signwd(memw(a+asize));
 	   if (st>=0) and (st<=memw(a+wsize+asize)) then
-	      b:=mema(a+2*wsize+asize+asize*st);
-	   if b=0 then b:=mema(a);
+	      b:=mema(a+2*wsize+asize+asize*st) else b:=mema(a);
 	   if b=0 then trap(ECASE) else newpc(b)
 	 end;
     CSB: begin k:=argw(k); if k<>wsize then trap(EILLINS); a:=popa;
