@@ -99,10 +99,21 @@ else
 fi
 : "Take action according to the system used"
 : 'Prevent the use of the system assembler on for certain systems'
+: 'prevent the use of ranlib on pdp 11s'
 case `ack_sys` in
 vax_bsd*)	RMD=pdp ;;
 vax_sys*)	RMD=pdp ;;
-pdp_*)		RMD="vax4" ;;
+pdp_*)		RMD="vax4"
+		echo "exit 93" > ../bin/ranlib
+		chmod +x ../bin/ranlib
+		ranlib > /dev/null 2>&1
+		case X$? in
+		X93)	;;
+		*)	echo "Sorry, there still is an error in your PATH."
+			echo "It finds the system ranlib before ours, which is in the ACK bin directory."
+			exit 13
+		esac
+		;;
 *)		RMD="pdp vax4" ;;
 esac
 for i in $RMD
