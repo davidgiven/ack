@@ -316,6 +316,7 @@ IMPLEMENTATION MODULE InOut ;
 	IF NOT Done THEN
 		RETURN;
 	END;
+	UnRead(ch);
     	REPEAT
 		Read(ch);
 		termCH := ch;

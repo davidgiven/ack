@@ -15,9 +15,9 @@ Conversion.mod
 Semaphores.mod
 random.mod
 Strings.mod
-Arguments.c
 catch.c
 Traps.mod
+Arguments.c
 LtoUset.e
 StrAss.c
 absd.c
