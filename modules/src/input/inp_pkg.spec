@@ -22,14 +22,22 @@
 #define	PushBack()	(--_ipp)
 #define ChPushBack(ch)	(*--_ipp = (ch))
 
-/*	EOF may be defined as -1 in most programs but the character -1 may
-	be expanded to the int -1 which causes troubles at the indexing in
-	the class or boolean arrays.
+/*	EOI may be defined as -1 in most programs but the character -1 may
+	be expanded to the int -1 which causes troubles with indexing.
 */
 #define	EOI	(0200)
 
 extern char *_ipp;
+
+#if __STDC__
+int loadbuf(void);
+int InsertFile(char *, char **, char **);
+int InsertText(char *, int);
+#else
 extern int loadbuf();
+extern int InsertFile();
+extern int InsertText();
+#endif
 
 /*	int InsertFile(filename, table, result)
 		char *filename; 
@@ -41,10 +49,8 @@ extern int loadbuf();
 	will be looked for in the directories, mentioned in the null-terminated
 	list indicated by "table". It returns 1 if it succeeds, 0 if it fails.
 	"result" will contain the full path if InsertFile returns 1.
-*/
-extern int InsertFile();
 
-/*	int InsertText(text, length)
+	int InsertText(text, length)
 		char *text;
 		int length;
 	This funtion suspends input from the current input stream. The next
@@ -52,4 +58,3 @@ extern int InsertFile();
 	whose length is indicated by "length".
 	It returns 1 if it succeeds, 0 if it fails.
 */
-extern int InsertText();

@@ -1,13 +1,10 @@
 /*	INPUT AND BUFFER HANDLING MODULE	*/
 
 /*
-	[input.X inp_pkg.spec input.h]
 	Input buffering module: this module contains the routines that
 	offers an input buffering mechanism to the user.
 
 	This module exports the following objects:
-	input.h :	an include-file, which must be included when using
-			this module
 	InsertFile() :	suspend input from current buffer and obtain the
 			next input characters from the specified file
 	InsertText() :	suspend input from current buffer and take the
@@ -37,7 +34,12 @@
 	INP_NPUSHBACK: the number of characters pushback
 */
 
-#include <alloc.h>
+#if __STDC__
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
+
 #include <system.h>
 
 #ifndef INP_NPUSHBACK
@@ -362,6 +364,7 @@ loadbuf()
 			register char *de = bh->bh_text;
 			register int i = INP_NPUSHBACK - 1;
 
+			if (i >= bh->bh_size) i = bh->bh_size - 1;
 			while (i-- > 0) {
 				/* make sure PushBack will work */
 				*--de = *--so;
@@ -385,6 +388,7 @@ loadbuf()
 			register char *de = &buf[INP_NPUSHBACK - 1];
 			register int i = INP_NPUSHBACK - 1;
 
+			if (i >= bh->bh_size) i = bh->bh_size - 1;
 			for (;i > 0; i--) {
 				/* make sure PushBack will work */
 				*--de = *--so;
