@@ -834,13 +834,13 @@ rmu !defined($1)| source2 |
 #endif
 slu 		| |	|				| sli $1 |
 loc slu		| |	|				| loc $1 sli $2 |
-sru $1==2       | SCR_REG xsource2 |
-			allocate(%[2],REG_PAIR)
-			move(%[2],%[a.2])
-			move({CONST2,0},%[a.1])
-			"neg %[1]"
-			"ashc %[1],%[a]"
-			erase(%[a])			| %[a.2]  | |
+sru $1==2       | source2 xsource2 |
+			allocate(%[1],%[2],REG=%[1],REG_PAIR)
+			move(%[2],%[b.2])
+			move({CONST2,0},%[b.1])
+			"neg %[a]"
+			"ashc %[a],%[b]"
+			erase(%[b])			| %[b.2]  | |
 loc sru $2==2       | xsource2 |
 			allocate(%[1],REG_PAIR)
 			move(%[1],%[a.2])
