@@ -389,6 +389,7 @@ For some of these, the installation procedure has not been tested, as
 we don't have them. However,
 the pdp_v7, vax_bsd4_1a, pc_ix, sun3 and m68 systems are known to behave
 reasonably.
+The Sun systems should run Release 3.0 or later.
 For ANY you can use any name you fancy,
 but the Kit will not be able to compile programs for your system.
 If you want to do that you have to read the section about "compilation
