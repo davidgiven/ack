@@ -3,5 +3,6 @@ If you don't have that, you can change references to it with a sed-script
 like
 	s/\.ft CW/.ft yourfont/
 	s/\\f(CW/\\fyourfont/g
+	s/^.fp\(.*\)CW$/.fp\1yourfont/
 However, the font must be a constant-width font for the documents to look
 reasonable.

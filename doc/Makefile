@@ -49,6 +49,9 @@ top.X:
 occam.doc:	occam.X
 occam.X:
 		cd occam; make "PIC="$(PIC) "TBL="$(TBL) "EQN="$(EQN) "TARGET="$(TARGET)
+sparc.doc:	sparc.X
+sparc.X:
+		cd sparc; make "PIC="$(PIC) "TBL="$(TBL) "TARGET="$(TARGET)
 ego.doc:	ego.X
 ego.X:
 		cd ego; make "REFER="$(REFER) "TARGET="$(TARGET) "TBL="$(TBL)
