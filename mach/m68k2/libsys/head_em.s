@@ -1,5 +1,5 @@
 .define .lino,.filn
-.define EXIT
+.define EXIT,BRK,WRITE
 .define	begtext,begdata,begbss
 .define	EARRAY,ERANGE,ESET,EIDIVZ,EHEAP,EILLINS,ECASE,EBADGTO
 .define	hol0,.reghp,.limhp,.trpim,.trppc
@@ -56,6 +56,12 @@ begtext:
 EXIT:
 	move.w	d0,-(sp)
 	jsr	__exit
+
+BRK:
+	jmp	__brk
+
+WRITE:
+	jmp	__write
 
 	.sect .data
 begdata:
