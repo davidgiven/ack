@@ -195,6 +195,7 @@ expand_defined(repl)
 	if (parens && ch != ')') error(") missing");
 	if (!parens || ch != ')') UnGetChar();
 	add2repl(repl, (id && id->id_macro) ? '1' : '0');
+	add2repl(repl, ' ');
 }
 
 newarg(args)
