@@ -1,5 +1,5 @@
 name "Motorola 68000 assembler"
-dir as
+dir nas
 end
 name "Motorola 68000 2-4 backend"
 dir cg
@@ -9,7 +9,7 @@ system m68*
 dir int
 end
 name "Motorola 68000 2-4 conversion program"
-dir cv
+dir ncv
 end
 name "Motorola 68000 2-4 C libraries"
 dir libcc
