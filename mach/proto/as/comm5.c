@@ -474,8 +474,8 @@ item_alloc(typ)
 	static item_t *next;
 
 	if (--nleft < 0) {
-		next = (item_t *) sbrk(MEMINCR);
-		if ((int) next == -1)
+		next = (item_t *) malloc(MEMINCR);
+		if (next == 0)
 			fatal("out of memory");
 		nleft += (MEMINCR / sizeof(item_t));
 	}

@@ -398,8 +398,8 @@ new_common(ip)
 	static struct common_t *next;
 
 	if (--nleft < 0) {
-		next = (struct common_t *) sbrk(MEMINCR);
-		if ((int) next == -1) {
+		next = (struct common_t *) malloc(MEMINCR);
+		if (next == 0) {
 			fatal("out of memory");
 		}
 		nleft += (MEMINCR / sizeof (struct common_t));

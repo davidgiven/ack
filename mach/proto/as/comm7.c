@@ -70,8 +70,8 @@ register char *s;
 		n++;
 	while (*p++);
 	if ((nleft -= n) < 0) {
-		next = sbrk(MEMINCR);
-		if ((int) next == -1)
+		next = malloc(MEMINCR);
+		if (next == 0)
 			fatal("out of memory");
 		nleft = (MEMINCR / sizeof(char)) - n;
 		assert(nleft >= 0);

@@ -114,7 +114,7 @@ extern FILE	*fftemp();
 /* some library functions used */
 extern long	atol();
 extern char	*mktemp();
-extern char	*sbrk();
+extern char	*malloc();
 extern char	*getenv();
 
 /* ========== Machine dependent C declarations ========== */
