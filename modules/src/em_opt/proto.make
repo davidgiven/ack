@@ -59,7 +59,7 @@ GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c \
 
 all:		em_nopt $(LIBOPT) $(LIBCEOPT)
 
-install:	all lintlib
+install:	all
 		cp $(LIBOPT) $(MOD_DIR)/lib/$(LIBOPT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBOPT)
 		cp $(LIBCEOPT) $(MOD_DIR)/lib/$(LIBCEOPT)

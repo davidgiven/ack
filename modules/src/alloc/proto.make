@@ -33,7 +33,7 @@ $(LIBALLOC):	$(OBJECTS)
 		$(AR) r $(LIBALLOC) $(OBJECTS)
 		$(RANLIB) $(LIBALLOC)
 
-install:	all lintlib
+install:	all
 		cp $(LIBALLOC) $(MOD_DIR)/lib/$(LIBALLOC)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBALLOC)
 		cp $(SRC_DIR)/alloc.3 $(MOD_DIR)/man/alloc.3

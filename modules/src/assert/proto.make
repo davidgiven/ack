@@ -13,7 +13,7 @@ libassert.$(LIBSUF):	BadAssert.$(SUF)
 		$(AR) r libassert.$(LIBSUF) BadAssert.$(SUF)
 		$(RANLIB) libassert.$(LIBSUF)
 
-install:	all lintlib
+install:	all
 		cp libassert.$(LIBSUF) $(MOD_DIR)/lib/libassert.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libassert.$(LIBSUF)
 		cp $(SRC_DIR)/assert.3 $(MOD_DIR)/man/assert.3

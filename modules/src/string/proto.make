@@ -29,7 +29,7 @@ $(LIBSTRING):	$(OBJ)
 		$(AR) r $(LIBSTRING) $(OBJ)
 		$(RANLIB) $(LIBSTRING)
 
-install:	all lintlib
+install:	all
 		cp $(LIBSTRING) $(MOD_DIR)/lib/$(LIBSTRING)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSTRING)
 		cp $(SRC_DIR)/string.3 $(MOD_DIR)/man/string.3

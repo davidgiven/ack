@@ -42,7 +42,7 @@ $(LIBFLT):	$(OBJ)
 		$(AR) r $(LIBFLT) $(OBJ)
 		$(RANLIB) $(LIBFLT)
 
-install:	all lintlib
+install:	all
 		cp $(LIBFLT) $(MOD_DIR)/lib/$(LIBFLT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBFLT)
 		cp $(SRC_DIR)/flt_arith.h $(MOD_DIR)/h/flt_arith.h

@@ -28,7 +28,7 @@ $(LIBSYS):	$(OBJ)
 		$(AR) r $(LIBSYS) $(OBJ)
 		$(RANLIB) $(LIBSYS)
 
-install:	all lintlib
+install:	all
 		cp $(LIBSYS) $(MOD_DIR)/lib/$(LIBSYS)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSYS)
 		cp $(SRC_DIR)/system.3 $(MOD_DIR)/man/system.3

@@ -63,7 +63,7 @@ OBS = failed.$(SUF) insert.$(SUF) internerr.$(SUF) getid.$(SUF)
 
 all:		em_codeEK.h libeme.$(LIBSUF) libemk.$(LIBSUF) em_code.3
 
-install:	all lintlib
+install:	all
 		cp libeme.$(LIBSUF) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		cp libemk.$(LIBSUF) $(MOD_DIR)/lib/libemk.$(LIBSUF)

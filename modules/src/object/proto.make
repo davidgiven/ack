@@ -21,7 +21,7 @@ OFILES =	rd.$(SUF) rd_arhdr.$(SUF) rd_int2.$(SUF) rd_long.$(SUF) \
 
 all:		libobject.$(LIBSUF)
 
-install:	all lintlib
+install:	all
 		cp libobject.$(LIBSUF) $(MOD_DIR)/lib/libobject.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libobject.$(LIBSUF)
 		cp $(SRC_DIR)/object.3 $(MOD_DIR)/man/object.3

@@ -48,3 +48,5 @@ getsize:	$(SRC_DIR)/getsize.c
 malloc.$(SUF):	malloc.c
 		$(CC) -c $(CFLAGS) malloc.c
 # to avoid options that the SUN make adds.
+
+lintlib:

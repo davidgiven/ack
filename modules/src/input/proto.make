@@ -17,7 +17,7 @@ libinput.$(LIBSUF):	$(OBJECTS)
 		$(AR) r libinput.$(LIBSUF) $(OBJECTS)
 		$(RANLIB) libinput.$(LIBSUF)
 
-install:	all lintlib
+install:	all
 		cp libinput.$(LIBSUF) $(MOD_DIR)/lib/libinput.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libinput.$(LIBSUF)
 		cp $(SRC_DIR)/input.3 $(MOD_DIR)/man/input.3

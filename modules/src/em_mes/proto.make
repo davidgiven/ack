@@ -44,7 +44,7 @@ libem_mesCE.$(LIBSUF):
 		$(RANLIB) libem_mesCE.$(LIBSUF)
 		rm -f *.$(SUF)
 
-install:	all lintlib
+install:	all
 		cp libem_mes.$(LIBSUF) $(MOD_DIR)/lib/libem_mes.$(LIBSUF)
 		cp libem_mesCE.$(LIBSUF) $(MOD_DIR)/lib/libem_mesCE.$(LIBSUF)
 		cp libem_mesO.$(LIBSUF) $(MOD_DIR)/lib/libem_mesO.$(LIBSUF)

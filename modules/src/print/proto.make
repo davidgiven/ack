@@ -20,7 +20,7 @@ $(LIBPRINT):	$(OBJ)
 		$(AR) r $(LIBPRINT) $(OBJ)
 		$(RANLIB) $(LIBPRINT)
 
-install:	all lintlib
+install:	all
 		cp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBPRINT)
 		cp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3

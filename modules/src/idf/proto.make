@@ -24,3 +24,4 @@ opr:
 		make pr | opr
 
 clean:
+lintlib:

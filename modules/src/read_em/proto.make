@@ -34,7 +34,7 @@ K_OFILES =	read_emk.$(SUF) makecalls.$(SUF) EM_vars.$(SUF)
 
 all:		$(TARGETS)
 
-install:	all lintlib
+install:	all
 		cp $(SRC_DIR)/em_comp.h $(MOD_DIR)/h/em_comp.h
 		cp $(SRC_DIR)/read_em.3 $(MOD_DIR)/man/read_em.3
 		cp libread_emk.$(LIBSUF) $(MOD_DIR)/lib/libread_emk.$(LIBSUF)
