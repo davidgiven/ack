@@ -3,7 +3,7 @@
 .nr LL 6i
 .tr ~
 .TL
-Code expander generator
+The Code Expander Generator
 .AU
 Frans Kaashoek
 Koen Langendoen
@@ -70,9 +70,9 @@ The code expander generator
 .PP
 The code expander generator (\fBceg\fR) generates a code expander from 
 two tables and a few machine-dependent functions. This section explains how 
-the \fBceg\fR works. The first half describes the transformations on the 
-two tables. The second half tells how these transformations are done by the
-\fBceg\fR.
+\fBceg\fR works. The first half describes the transformations that are done on
+the two tables. The 
+second half tells how these transformations are done by the \fBceg\fR.
 .PP
 A code expander consists of a set of routines that convert EM-instructions
 directly to relocatable object code. These routines are called by a front 
@@ -84,13 +84,16 @@ interface. To free the table writer of the burden of building
 an object file, we supply a set of routines that build an object file
 in the ACK_A.OUT(5L)
 .[~[
-ACK_A.OUT(5L)
+%T ACK_A.OUT(5L)
+%J ACK Documentation
+%I Vrije Universiteit
+%C Amsterdam, The Netherlands
 .]]
 format (see appendix B). This set of routines is called
 the
 \fBback\fR-primitives (see appendix A). In short, a code expander consists of a
 set of routines which map the EM_CODE interface on the 
-\fBback\fR-primitives interface, which generate object code.
+\fBback\fR-primitives interface.
 .PP
 To avoid repetition of the same sequences of
 \fBback\fR-primitives in different
@@ -124,9 +127,9 @@ H: "  back primitives" at F.end ljust
 "  (ACK_A.OUT)" at H - (0, 0.2i) ljust
 .PE
 .PP
-Although the picture suggests that during compilation of the EM instructions are
+Although the picture suggests that during compilation the EM instructions are
 first transformed into assembly instructions and then the assembly instructions
-are transformed into object-generating calls, the \fBback-primitives\fR, this
+are transformed into object-generating calls, this
 is not what happens in practice, although the user is free to think it does.
 Actually, however the EM_table and the as_table are combined during code
 expander generation time, yielding an imaginary compound table that results in
@@ -134,15 +137,18 @@ routines from the EM_CODE interface that generate object code directly.
 .PP
 As already indicated, the compound table does not exist either. Instead, each
 assembly instruction in the as_table is converted to a routine generating C
+code
 .[~[
 Kernighan
 .]]
-code to generate C code to call the \fBback\fR-primitives. The EM_table is
+to generate C code to call the \fBback\fR-primitives. The EM_table is
 converted into a program that for each EM instruction generates a routine,
 using the routines generated from the as_table. Execution of the latter program
 will then generate the code expander.
 .PP
-This scheme allows great flexibility in the table writing, while still
+This scheme allows great flexibility (e.g., when \fBceg\fR is called with a
+special flag it generates assembly instead of object code)
+in the table writing, while still
 resulting in a very efficient code expander. One implication is that the
 as_table is interpreted twice and the EM_table only once. This has consequences
 for their structure.
@@ -197,7 +203,7 @@ arith c;
 \fR
 .DE
 .LP
-A compiler call to "C_loc" will cause the 1-byte numbers "0xd0" 
+A compiler call to "C_loc()" will cause the 1-byte numbers "0xd0" 
 and "0xef"
 and the 4-byte value of the variable "c" to be stored in the text segment.
 .PP
@@ -271,14 +277,13 @@ SIMPLE%::=%( "==>" | "::=")   ACTION_LIST
 ACTION_LIST%::=%[ ACTION   ( ";" ACTION)* ]   "."
 ACTION%::=%AS_INSTR
 %|%function-call
-.sp
 AS_INSTR%::=%""" [ label ":"]   [ INSTR] """
 INSTR%::=%mnemonic   [ operand   ( ","   operand)* ]
 .TE
 .VS -4
 .PP
-\"(" ")" brackets are used for grouping, "[" ... "]" means ... 0 or 1 time,
-\"*" means zero or more times, "+" means one or more times and "|" means 
+The "(" ")" brackets are used for grouping, "[" ... "]" means ... 0 or 1 time,
+a "*" means zero or more times, a "+" means one or more times and a "|" means 
 a choice between left or right. A \fBC_instr\fR is 
 a name in the EM_CODE(3ACK) interface. \fBcondition\fR is a C expression. 
 \fBfunction-call\fR is a call of a C function. \fBlabel\fR, \fBmnemonic\fR
@@ -550,7 +555,7 @@ must contain %s.
 T}
 DLB_FMT#:#T{
 Print format describing numerical-data-label to a unique name conversion.
-The format must contain a %d.
+The format must contain a %ld.
 T}
 ILB_FMT#:#T{
 Print format describing instruction-label to a unique name conversion.
@@ -589,7 +594,7 @@ BYTES_REVERSED#:#T{
 Must be defined if you want the byte order reversed.
 By default the least significant byte is outputted first.
 .FS
-When both byte orders occur, for example NS 16032, the table writer has to
+When both byte orders are used, for example NS 16032, the table writer has to
 supply his own set of routines.
 .FE
 T}
@@ -645,7 +650,7 @@ Generating assembly code
 When the code expander generator is used for generating assembly instead of
 object code, not all the above mentioned constants and functions have to 
 be defined. In this case, the constants "BYTES_REVERSED" and "WORDS_REVERSED" 
-are not used.
+are not used (see section 5).
 .NH 1
 Description of the as_table
 .PP
@@ -843,6 +848,9 @@ the type of the operand in the following way.
                      "$"         |
                      "dist"
        printformat := see PRINT(3ACK)
+.[~[
+PRINT
+.]]
 \fR
 .DE
 The three cases differ only in the conversion field. The first conversion
@@ -930,12 +938,16 @@ contains function calls other than the \fBback\fR-primitives, these functions
 must also be present in "as.c". Note that both the "@"-sign (see 4.2.3) 
 and "references"
 (see 4.2.4) also work in
-the functions defined in "as.c". Example, part of 8086 "as.h" and "as.c" 
-files :
+the functions defined in "as.c". 
+.sp
+The folowing example shows a part of 8086 "as.h" and "as.c" files:
 .nr PS 10
 .nr VS 12
 .DS L
 \f5
+
+/* Constants and type definitions in as.h */
+
 #define        UNKNOWN                0
 #define        IS_REG                 0x1
 #define        IS_ACCU                0x2
@@ -977,6 +989,9 @@ extern struct t_operand saved_op, *AX_oper;
 .DE
 .DS L
 \f5
+
+/* Some functions in as.c. */
+
 #include "arg_type.h"
 #include "as.h"
 
@@ -1037,6 +1052,7 @@ struct t_operand *op;
                 }
 }
 
+/*********************************************************************/
 
 mod_RM( reg, op)
 int reg;
