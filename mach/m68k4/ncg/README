@@ -1,10 +1,10 @@
 The file 'table' in this directory contains a back end table for the
 MC68020 processor as well as one for the MC68000. Both tables use 4 bytes
 for words as well as for pointers. The table must be preprocessed first
-by the C preprocessor. If the -Dm68k4 flag is used when preprocessing, a
-code generator for the m68k4 is generated, otherwise a m68020 codegenerator
-is produced.	(See Makefile: PREFLAGS)
-The m68k4 cg can very well be used for the MC68010 processor, for it makes
-rather efficient use of the 68010 loop mode.
+by the C preprocessor.
+The file "whichone.h" specifies which code generator is generated:
+it #defines either TBL68000 or TBL86020.
+The m68k4(TBL68000) cg can very well be used for the MC68010 processor,
+for it makes rather efficient use of the 68010 loop mode.
 
 The mach.[ch] files are also suitable for both the m68020 and the m68k4.
