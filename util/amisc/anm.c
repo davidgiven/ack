@@ -216,6 +216,13 @@ char **argv;
 				sprintf(cs1, " -");
 				sprintf(cs2, " M");
 				break;
+			case S_COM:
+				sprintf(cs1, " C");
+				if (nbufp[n].on_type&S_EXT)
+					sprintf(cs2, " E");
+				else
+					sprintf(cs2, " -");
+				break;
 			case 0:
 				if (nbufp[n].on_type&S_EXT)
 					sprintf(cs2, " E");
