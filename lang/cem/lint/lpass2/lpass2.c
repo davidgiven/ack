@@ -7,8 +7,8 @@
 #include	<alloc.h>
 
 #include	"private.h"
-#include	"../lpass1/l_lint.h"
-#include	"../lpass1/l_class.h"
+#include	"l_lint.h"
+#include	"l_class.h"
 #include	"class.h"
 #include	"inpdef.h"
 

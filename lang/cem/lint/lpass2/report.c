@@ -8,7 +8,7 @@
 
 #include	<system.h>
 #include	"private.h"
-#include	"../lpass1/l_class.h"
+#include	"l_class.h"
 #include	"class.h"
 #include	"inpdef.h"
 

@@ -4,7 +4,7 @@
  */
 /* $Header$ */
 
-#include	"../lpass1/l_class.h"
+#include	"l_class.h"
 #include	"class.h"
 
 int class[MAX_CLASS_CONST-MIN_CLASS_CONST+1];

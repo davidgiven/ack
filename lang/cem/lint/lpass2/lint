@@ -12,11 +12,13 @@ EMLINT=/home/top/dick/lint
 
 #LDEFMACH=-Dmc68000
 
-LPASS1=${LPASS1-"$EMLINT/lpass1/lnt $LDEFMACH"}	# pass 1 program
-LPASS2=${LPASS2-"$EMLINT/lpass2/lpass2"}	# pass 2 program
+PARAMS1=$LDEFMACH
+LPASS1=${LPASS1-"$EMLINT/lpass1"}		# pass 1 program
+LPASS2=${LPASS2-"$EMLINT/lpass2"}		# pass 2 program
 LLIB=${LLIB-"$EMLINT/llib"}			# lint libraries directory
 
 LINTLIB=${LINTLIB-$LLIB}
+CLIB=c.llb
 
 TMP=/usr/tmp/lint1.$$
 NEW=/usr/tmp/lint2.$$
@@ -33,6 +35,10 @@ LIBRARY=
 while	test -n "$1"
 do
 	case "$1" in
+	-ansi)	LPASS1=${LPASS1}.ansi
+		CLIB=ansi_c.llb
+		shift
+		;;
 	-l*)	# library parameter; start pass 1
 		break
 		;;
@@ -63,16 +69,16 @@ case "$LIBRARY" in
 '')	# normal lint; we want its messages on stdout; this takes some doing
 	(	# intermediate file has to go to stdout for pipe connection
 		(	# pass 1: messages to stderr
-			LIBC=true	# true if c.llb to be included
+			LIBC=true	# true if $CLIB to be included
 			STATNR=0	# static scope number
 
 			for F in $*
 			do
 				case $F in
-				-l)	# do NOT include c.llb
+				-l)	# do NOT include $CLIB
 					LIBC=false
 					;;
-				-lc)	# do include c.llb
+				-lc)	# do include $CLIB
 					LIBC=true
 					;;
 				-l*)	# include special lint library
@@ -96,8 +102,8 @@ case "$LIBRARY" in
 			done
 
 			case "$LIBC" in
-			true)	# append c.llb
-				cat $LINTLIB/c.llb
+			true)	# append $CLIB
+				cat $LINTLIB/$CLIB
 				;;
 			esac
 		) |

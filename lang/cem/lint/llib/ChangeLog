@@ -1,3 +1,6 @@
+30-Sep-91  Ceriel Jacobs (ceriel) at ceriel
+	Adapted for ACK distribution
+
 10-Feb-89  Dick Grune (dick) at dick
 	Adapted to change in names: libraries now end in .llb.
 	Added many names from libcc/math.
