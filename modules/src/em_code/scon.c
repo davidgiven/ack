@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_scon(str, siz)
 	char *str;
 	arith siz;

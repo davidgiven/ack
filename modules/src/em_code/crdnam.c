@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crdnam(op, s, off)
 	char *s;
 	arith off;

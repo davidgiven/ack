@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crilb(op, l)
 	label l;
 {

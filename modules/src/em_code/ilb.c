@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_ilb(l)
 	label l;
 {

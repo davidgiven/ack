@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crcst(op, v)
 	arith v;
 {

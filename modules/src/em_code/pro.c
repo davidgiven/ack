@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_pro(pnam, l)
 	char *pnam;
 	arith l;

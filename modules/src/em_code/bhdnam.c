@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_bhdnam(op, n, s, off, i)
 	arith n;
 	char *s;

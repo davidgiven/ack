@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_bhicon(op, n, s, sz, i)
 	arith n;
 	char *s;

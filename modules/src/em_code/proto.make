@@ -6,7 +6,7 @@ ETC = $(SRC_HOME)/etc
 SRC_DIR = $(SRC_HOME)/modules/src/em_code
 MOD_DIR = $(TARGET_HOME)/modules
 
-INCLUDES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(MOD_DIR)/h -I$(SRC_HOME)/modules/src/read_em -I$(SRC_DIR)
+INCLUDES = -I. -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(MOD_DIR)/h -I$(SRC_HOME)/modules/src/read_em -I$(SRC_DIR)
 CFLAGS = $(INCLUDES) $(COPTIONS)
 SRC =	$(SRC_DIR)/bhcst.c\
 	$(SRC_DIR)/bhdlb.c\
@@ -64,11 +64,12 @@ OBS = failed.$(SUF) insert.$(SUF) internerr.$(SUF) getid.$(SUF)
 all:		em_codeEK.h libeme.$(LIBSUF) libemk.$(LIBSUF) em_code.3
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp libeme.$(LIBSUF) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		cp libemk.$(LIBSUF) $(MOD_DIR)/lib/libemk.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libemk.$(LIBSUF)
-		cp em_code.3 $(MOD_DIR)/man/em_code.3
 		cp em_codeEK.h $(MOD_DIR)/h/em_codeEK.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage em_code.3 $(TARGET_HOME) ; \
@@ -78,7 +79,6 @@ cmp:	all
 		-cmp libeme.$(LIBSUF) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		-cmp libemk.$(LIBSUF) $(MOD_DIR)/lib/libemk.$(LIBSUF)
 		-cmp em_codeEK.h $(MOD_DIR)/h/em_codeEK.h
-		-cmp em_code.3 $(MOD_DIR)/man/em_code.3
 
 em_code.3:	$(SRC_DIR)/em_code.3X
 		-sh -c 'tbl < $(SRC_DIR)/em_code.3X > em_code.3'

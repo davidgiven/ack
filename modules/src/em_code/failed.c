@@ -5,6 +5,7 @@
  */
 #include <system.h>
 
+void
 C_failed()
 {
 	sys_write(STDERR,"read, write, or open failed\n",28);

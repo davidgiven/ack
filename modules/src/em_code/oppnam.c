@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_oppnam(opcode, pnam)
 	char *pnam;
 {

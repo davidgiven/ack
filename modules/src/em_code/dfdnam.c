@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_dfdnam(s)
 	char *s;
 {

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_bhcst(op, n, w, i)
 	arith n;
 	arith w;

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_msstart(cst)
 	int cst;
 {

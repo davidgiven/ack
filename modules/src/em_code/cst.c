@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_cst(l)
 	arith l;
 {

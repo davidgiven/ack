@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_op(opcode)
 {
 	/*	Instruction that never has an argument

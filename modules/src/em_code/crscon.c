@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crscon(op, v, s)
 	char *v;
 	arith s;

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_psdnam(op, dnam)
 	char *dnam;
 {

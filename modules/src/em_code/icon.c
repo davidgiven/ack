@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_icon(val, siz)
 	char *val;
 	arith siz;

@@ -87,3 +87,61 @@
 #ifndef sp_icon
 #include <em_spec.h>
 #endif
+
+/* prototypes, also hand written. */
+_PROTOTYPE(void CC_bhcst, (int, arith, arith, int));
+_PROTOTYPE(void CC_bhdlb, (int, arith, label, arith, int));
+_PROTOTYPE(void CC_bhdnam, (int, arith, char *, arith, int));
+_PROTOTYPE(void CC_bhfcon, (int, arith, char *, arith, int));
+_PROTOTYPE(void CC_bhicon, (int, arith, char *, arith, int));
+_PROTOTYPE(void CC_bhilb, (int, arith, label, int));
+_PROTOTYPE(void CC_bhpnam, (int, arith, char *, int));
+_PROTOTYPE(void CC_bhucon, (int, arith, char *, arith, int));
+_PROTOTYPE(void CC_crcst, (int, arith));
+_PROTOTYPE(void CC_crdlb, (int, label, arith));
+_PROTOTYPE(void CC_crdnam, (int, char *, arith));
+_PROTOTYPE(void CC_crilb, (int, label));
+_PROTOTYPE(void CC_crpnam, (int, char *));
+_PROTOTYPE(void CC_crscon, (int, char *, arith));
+_PROTOTYPE(void CC_crxcon, (int, int, char *, arith));
+_PROTOTYPE(void CC_cst, (arith));
+_PROTOTYPE(void CC_dfdlb, (label));
+_PROTOTYPE(void CC_dfdnam, (char *));
+_PROTOTYPE(void CC_dfilb, (label));
+_PROTOTYPE(void CC_dlb, (label, arith));
+_PROTOTYPE(void CC_dnam, (char *, arith));
+_PROTOTYPE(void CC_end, (arith));
+_PROTOTYPE(void CC_endnarg, (void));
+_PROTOTYPE(void CC_exc, (arith, arith));
+_PROTOTYPE(void CC_fcon, (char *, arith));
+_PROTOTYPE(void CC_icon, (char *, arith));
+_PROTOTYPE(void CC_ilb, (label));
+_PROTOTYPE(void CC_msend, (void));
+_PROTOTYPE(void CC_msstart, (int));
+_PROTOTYPE(void CC_op, (int));
+_PROTOTYPE(void CC_opcst, (int, arith));
+_PROTOTYPE(void CC_opdlb, (int, label, arith));
+_PROTOTYPE(void CC_opdnam, (int, char *, arith));
+_PROTOTYPE(void CC_opilb, (int, label));
+_PROTOTYPE(void CC_opnarg, (int));
+_PROTOTYPE(void CC_oppnam, (int, char *));
+_PROTOTYPE(void CC_pnam, (char *));
+_PROTOTYPE(void CC_pro, (char *, arith));
+_PROTOTYPE(void CC_pronarg, (char *));
+_PROTOTYPE(void CC_psdlb, (int, label));
+_PROTOTYPE(void CC_psdnam, (int, char *));
+_PROTOTYPE(void CC_pspnam, (int, char *));
+_PROTOTYPE(void CC_scon, (char *, arith));
+_PROTOTYPE(void CC_ucon, (char *, arith));
+
+_PROTOTYPE(void C_init, (arith, arith));
+_PROTOTYPE(void C_failed, (void));
+_PROTOTYPE(void C_internal_error, (void));
+_PROTOTYPE(int C_open, (char *));
+_PROTOTYPE(void C_close, (void));
+_PROTOTYPE(int C_busy, (void));
+_PROTOTYPE(void C_magic, (void));
+_PROTOTYPE(int C_getid, (void));
+_PROTOTYPE(void C_insertpart, (int));
+_PROTOTYPE(void C_beginpart, (int));
+_PROTOTYPE(void C_endpart, (int));

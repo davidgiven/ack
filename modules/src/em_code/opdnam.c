@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_opdnam(opcode, dnam, offset)
 	char *dnam;
 	arith offset;

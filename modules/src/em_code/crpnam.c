@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crpnam(op, p)
 	char *p;
 {

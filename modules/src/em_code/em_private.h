@@ -14,6 +14,10 @@
 #include	<em_mnem.h>
 #include	<em_reg.h>
 
+#include	<ansi.h>
+
+#include	"em_codeEK.h"
+
 #ifdef READABLE_EM
 /* macros used in the definitions of the interface functions C_* */
 #define	OP(x)		C_pt_op(x)
@@ -63,4 +67,22 @@
 #define	C_pt_cend()	C_putbyte(sp_cend)
 #define	C_pt_op(x)	C_putbyte(x)
 #define	C_pt_ps(x)	C_putbyte(x)
+#endif /* READABLE_EM */
+
+_PROTOTYPE(void C_pt_dnam, (char *));
+_PROTOTYPE(void C_pt_ilb, (label));
+_PROTOTYPE(void C_pt_op, (int));
+_PROTOTYPE(void C_pt_cst, (arith));
+_PROTOTYPE(void C_pt_scon, (char *, arith));
+_PROTOTYPE(void C_pt_ps, (int));
+_PROTOTYPE(void C_pt_dlb, (label));
+_PROTOTYPE(void C_pt_doff, (label, arith));
+_PROTOTYPE(void C_pt_noff, (char *, arith));
+_PROTOTYPE(void C_pt_pnam, (char *));
+_PROTOTYPE(void C_pt_dfilb, (label));
+_PROTOTYPE(void C_pt_wcon, (int, char *, arith));
+#ifdef READABLE_EM
+_PROTOTYPE(void C_pt_nl, (void));
+_PROTOTYPE(void C_pt_comma, (void));
+_PROTOTYPE(void C_pt_ccend, (void));
 #endif /* READABLE_EM */

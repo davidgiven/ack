@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_dfdlb(l)
 	label l;
 {

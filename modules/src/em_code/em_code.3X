@@ -6,61 +6,61 @@ emcode \- EM code interface for compilers
 .nf
 .B #include <em.h>
 .PP
-.B C_init(wsize, psize)
+.B void C_init(wsize, psize)
 .B arith wsize, psize;
 .PP
 .B int C_open(filename)
-.B C_close()
+.B void C_close()
 .B int C_busy()
 .B char *filename;
 .PP
-.B C_magic()
+.B void C_magic()
 .PP
-.B C_df_dlb(l)
-.B C_df_dnam(s)
-.B C_df_ilb(l)
+.B void C_df_dlb(l)
+.B void C_df_dnam(s)
+.B void C_df_ilb(l)
 .B label l; char *s;
 .PP
-.B C_pro(s, l)
-.B C_pro_narg(s)
-.B C_end(l)
-.B C_end_narg()
+.B void C_pro(s, l)
+.B void C_pro_narg(s)
+.B void C_end(l)
+.B void C_end_narg()
 .B char *s; arith l;
 .PP
-.B C_exa_dlb(l)
-.B C_exa_dnam(s)
-.B C_exp(s)
-.B C_ina_dlb(l)
-.B C_ina_dnam(s)
-.B C_inp(s)
+.B void C_exa_dlb(l)
+.B void C_exa_dnam(s)
+.B void C_exp(s)
+.B void C_ina_dlb(l)
+.B void C_ina_dnam(s)
+.B void C_inp(s)
 .B char *s; label l;
 .PP
-.BI C_bss_ cstp ()
-.BI C_hol_ cstp ()
-.BI C_con_ cstp ()
-.BI C_rom_ cstp ()
+.BI "void C_bss_" cstp ()
+.BI "void C_hol_" cstp ()
+.BI "void C_con_" cstp ()
+.BI "void C_rom_" cstp ()
 .PP
 .B #include <em_mes.h>
-.B C_mes_begin(ms)
-.BI C_ cstp ()
-.B C_mes_end()
+.B void C_mes_begin(ms)
+.BI "void C_" cstp ()
+.B void C_mes_end()
 .B int ms;
 .PP
-.B C_exc(c1, c2)
+.B void C_exc(c1, c2)
 .B arith c1, c2;
 .PP
-.BI C_ mnem ()
-.BI C_ mnem _dlb()
-.BI C_ mnem _dnam()
-.BI C_ mnem _narg()
+.BI "void C_" mnem ()
+.BI "void C_" mnem _dlb()
+.BI "void C_" mnem _dnam()
+.BI "void C_" mnem _narg()
 .PP
-.B C_insertpart(id)
+.B void C_insertpart(id)
 .B int id;
 .PP
-.B C_beginpart(id)
+.B void C_beginpart(id)
 .B int id;
 .PP
-.B C_endpart(id)
+.B void C_endpart(id)
 .B int id;
 .PP
 .B int C_getid()

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_crdlb(op, v, off)
 	label v;
 	arith off;

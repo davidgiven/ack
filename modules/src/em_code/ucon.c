@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_ucon(val,siz)
 	char *val;
 	arith siz;

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_pronarg(pnam)
 	char *pnam;
 {

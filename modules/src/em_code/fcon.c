@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_fcon(val, siz)
 	char *val;
 	arith siz;

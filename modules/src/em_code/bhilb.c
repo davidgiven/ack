@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_bhilb(op, n, l, i)
 	arith n;
 	label l;

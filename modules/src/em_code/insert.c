@@ -302,6 +302,7 @@ resume(p)
 	pp->pp_begin = C_current_out - C_BASE;
 }
 
+void
 C_insertpart(part)
 	int part;
 {
@@ -340,6 +341,7 @@ C_insertpart(part)
 	resume(p);
 }
 
+void
 C_beginpart(part)
 	int part;
 {
@@ -359,6 +361,7 @@ C_beginpart(part)
 	resume(p);
 }
 
+void
 C_endpart(part)
 	int part;
 {

@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_end(l)
 	arith l;
 {

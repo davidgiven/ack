@@ -2,6 +2,7 @@
 
 /* $Header$ */
 
+void
 CC_opdlb(opcode, dlb, offset)
 	label dlb;
 	arith offset;
