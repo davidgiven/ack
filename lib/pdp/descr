@@ -47,7 +47,8 @@ name led
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.ocm.b.c={EM}/{RT}cc) \
 		({RTS}:.mod={EM}/{RT}m2) \
-		({RTS}:.p={EM}/{RT}pc) -o > < \
+		({RTS}:.p={EM}/{RT}pc) \
+		-o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \

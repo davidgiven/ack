@@ -49,9 +49,10 @@ name led
 	mapflag -nr ALIGN=-a0:4 -a1:0x8000 -a2:4 -a3:4
 	mapflag -fp LIBFP={EM}/{LIB}fp
 	args -b0:0x80000 {ALIGN} (.e:{HEAD}={EM}/{NRT}em) \
-	({RTS}:.ocm.b.c={EM}/{NRT}cc) \
-	({RTS}:.mod={EM}/{NRT}m2) \
-	({RTS}:.p={EM}/{RT}pc) -o > < \
+		({RTS}:.ocm.b.c={EM}/{NRT}cc) \
+		({RTS}:.mod={EM}/{NRT}m2) \
+		({RTS}:.p={EM}/{RT}pc) \
+		-o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.mod:{TAIL}={EM}/{NLIB}m2) \
