@@ -19,14 +19,17 @@ int i;
 	if(i>0) 
 		if( fputc(' ',_chanwr)==EOF) error(29);
 	fprintf(_chanwr,"%d",i);
+	if( ferror(_chanwr) ) error(29);
 }
 _wrflt(f)
 double f;
 {
-	if( fprintf(_chanwr,"%f",f)== EOF) error(29);
+	fprintf(_chanwr,"%f",f);
+	if( ferror(_chanwr) ) error(29);
 }
 _wrstr(s)
 String *s;
 {
-	 if( fprintf(_chanwr,"\"%s\"",s->strval)== EOF) error(29);
+	fprintf(_chanwr,"\"%s\"",s->strval);
+	if( ferror(_chanwr) ) error(29);
 }
