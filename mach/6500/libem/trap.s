@@ -131,5 +131,4 @@ Mtrap:
 	jsr Mprint
 errorend:
 	ldx TRAPVAL
-	jsr Push
-	jsr __exit
+	jmp EXIT
