@@ -29,6 +29,7 @@
 #define	EOI	(0200)
 
 extern char *_ipp;
+extern int loadbuf();
 
 /*	int InsertFile(filename, table, result)
 		char *filename; 
