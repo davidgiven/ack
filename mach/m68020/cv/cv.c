@@ -8,11 +8,46 @@
  */
 
 #include <stdio.h>
-#include <filehdr.h>
-#include <aouthdr.h>
-#include <scnhdr.h>
-#include <out.h>
+
+typedef struct filehdr {
+	unsigned short	f_magic;	/* magic number */
+	unsigned short	f_nscns;	/* number of sections */
+	long		f_timdat;	/* time & date stamp */
+	long		f_symptr;	/* file pointer to symtab */
+	long		f_nsyms;	/* number of symtab entries */
+	unsigned short	f_opthdr;	/* sizeof(optional hdr) */
+	unsigned short	f_flags;	/* flags */
+} FILHDR;
+
+typedef	struct aouthdr {
+	short	magic;
+	short	vstamp; 
+	long	tsize;
+	long	dsize;
+	long	bsize;
+	long	entry;
+	long	text_start;
+	long	data_start;
+} AOUTHDR;
+
+typedef struct scnhdr {
+	char		s_name[8];
+	long		s_paddr;
+	long		s_vaddr;
+	long		s_size;
+	long		s_scnptr;
+	long		s_relptr;
+	long		s_lnnoptr;
+	unsigned short	s_nreloc;
+	unsigned short	s_nlnno;
+	long		s_flags;
+} SCNHDR;
+
 #define AOUTHSZ sizeof(AOUTHDR)
+#define	SCNHSZ	sizeof(SCNHDR)
+#define	FILHSZ	sizeof(FILHDR)
+
+#include <out.h>
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }
 
@@ -53,6 +88,9 @@ SCNHDR	scnh[NS];
 #define STYP_DATA 0x40
 #define STYP_BSS  0x80
 
+#define _TEXT ".text"
+#define _DATA ".data"
+#define _BSS  ".bss"
 
 #define TEXTSG	0
 #define ROMSG	1
