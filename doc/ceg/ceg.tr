@@ -597,7 +597,7 @@ example NS 16032, the table writer has to
 supply his own set of routines.
 .FE
 T}
-WORD_REVERSED#:#T{
+WORDS_REVERSED#:#T{
 Must be defined if you want the word order reversed.
 By default the least significant word is outputted first.
 T}
@@ -648,10 +648,65 @@ locals
 Generating assembly code 
 .PP
 When the code expander generator is used for generating assembly instead of
-object code (see section 5), not all the above mentioned constants 
-and functions have to 
-be defined. In this
-case, the constants ``BYTES_REVERSED'' and ``WORDS_\%REVERSED'' are not used.
+object code (see section 5), additional print formats have to be defined 
+in ``mach.h''. The following table lists these formats.
+.TS
+tab(#);
+l c lw(10c).
+BYTE_FMT#:#T{
+Print format to allocate and initialize one byte. The format must 
+contain %ld.
+T}
+WORD_FMT#:#T{
+Print format to allocate and initialize one word. The format must 
+contain %ld.
+T}
+LONG_FMT#:#T{
+Print format to allocate and initialize one long. The format must 
+contain %ld.
+T}
+BSS_FMT#:#T{
+Print format to allocate space in the bss segment. The format must 
+contain %ld (number of bytes).
+T}
+
+SEGTXT_FMT#:#T{
+Print format to switch to the text segment.
+T}
+SEGDAT_FMT#:#T{
+Print format to switch to the data segment.
+T}
+SEGBSS_FMT#:#T{
+Print format to switch to the bss segment.
+T}
+
+SYMBOL_DEF_FMT#:#T{
+Print format to define a label. The format must contain %s.
+T}
+GLOBAL_FMT#:#T{
+Print format to declare a global name. The format must contain %s.
+T}
+LOCAL_FMT#:#T{
+Print format to declare a local name. The format must contain %s.
+T}
+
+RELOC1_FMT#:#T{
+Print format to initialize a byte with an address expression. The format must
+contain %s (name) and %ld (offset).
+T}
+RELOC2_FMT#:#T{
+Print format to initialize a word with an address expression. The format must
+contain %s (name) and %ld (offset).
+T}
+RELOC4_FMT#:#T{
+Print format to initialize a long with an address expression. The format must
+contain %s (name) and %ld (offset).
+T}
+
+ALIGN_FMT#:#T{
+Print format to align a segment.
+T}
+.TE
 .NH 1
 Description of the as_table
 .PP
@@ -1240,7 +1295,7 @@ Phase two
 The next phase is to generate a \fBce\fR that produces relocatable object
 code.
 .IP \0\01:
-Remove the ``ce'' and ``ceg'' directories.
+Remove the ``ce'', ``ceg'', and ``back'' directories.
 .IP \0\02:
 Write the ``as_table'', ``as.h'', and ``as.c'' files.
 .IP \0\03:
