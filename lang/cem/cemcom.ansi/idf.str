@@ -32,6 +32,15 @@ struct idf	{
 
 /* ALLOCDEF "idf" 50 */
 
+#ifndef NOPP
+struct dependency	{
+	struct dependency *next;
+	struct idf *dep_idf;
+};
+
+/* ALLOCDEF "dependency" 10 */
+#endif /* NOPP */
+
 extern struct idf *str2idf(), *idf_hashed();
 
 extern int level;

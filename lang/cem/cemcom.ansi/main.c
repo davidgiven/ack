@@ -138,13 +138,13 @@ main(argc, argv)
 
 #ifndef NOPP
 
-struct idf    *file_head;
+struct dependency    *file_head;
 extern char *strrindex();
 
 list_dependencies(source)
 char *source;
 {
-    register struct idf *p = file_head;
+    register struct dependency *p = file_head;
 
     if (source) {
 	register char *s = strrindex(source, '.');
@@ -167,9 +167,8 @@ char *source;
 	fatal("could not open %s", dep_file);
     }
     while (p) {
-	ASSERT(p->id_resmac == K_FILE);
-	dependency(p->id_text, source);
-	p = (struct idf *) (p->id_file);
+	dependency(p->dep_idf->id_text, source);
+	p = p->next;
     }
 }
 
@@ -179,9 +178,12 @@ char *s;
     register struct idf *p = str2idf(s);
 
     if (! p->id_resmac) {
+	register struct dependency *q = new_dependency();
+
 	p->id_resmac = K_FILE;
-	p->id_file = (char *) file_head;
-	file_head = p;
+	q->dep_idf = p;
+	q->next = file_head;
+	file_head = q;
     }
 }
 
