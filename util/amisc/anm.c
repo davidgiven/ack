@@ -159,9 +159,6 @@ char **argv;
 				break;
 			}
 
-			if (nbuf.on_foff == 0)
-				continue; /* skip entries without names */
-
 			if (globl_flg && (nbuf.on_type&S_EXT)==0)
 				continue;
 
@@ -170,7 +167,8 @@ char **argv;
 			    ((nbuf.on_type&S_TYP)!=S_UND || (nbuf.on_type&S_ETC)!=0))
 				continue;
 
-			nbuf.on_mptr = (char *) (nbuf.on_foff + fi_to_co);
+			if (nbuf.on_foff == 0) nbuf.on_mptr = 0;
+			else nbuf.on_mptr = (char *) (nbuf.on_foff + fi_to_co);
 
 			/* adjust value for specially encoded bases */
 			if (hbuf.oh_flags & HF_8086) {
@@ -245,7 +243,7 @@ char **argv;
 				sprintf(cs2, " ?");
 			}
 
-			printf("%8lx %s %s %s\n",nbufp[n].on_valu,cs1,cs2,nbufp[n].on_mptr);
+			printf("%8lx %s %s %s\n",nbufp[n].on_valu,cs1,cs2,nbufp[n].on_mptr ? nbufp[n].on_mptr : "(NULL)");
 		}
 
 		if (nbufp)
@@ -275,6 +273,12 @@ struct outname	*p1, *p2;
 		if (p1->on_valu < p2->on_valu)
 			return(-revsort_flg);
 	}
+
+	if (! p1->on_mptr) {
+		if (! p2->on_mptr) return 0;
+		return -revsort_flg;
+	}
+	if (! p2->on_mptr) return revsort_flg;
 
 	i = strcmp(p1->on_mptr, p2->on_mptr);
 
