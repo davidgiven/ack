@@ -31,7 +31,7 @@ __flushbuf(int c, FILE * stream)
 					    (unsigned char *) malloc(BUFSIZ))) {
 					stream->_flags |= _IONBF;
 				} else {
-					stream->_flags |= _IOLBF;
+					stream->_flags |= _IOLBF|_IOMYBUF;
 					stream->_bufsiz = BUFSIZ;
 					stream->_count = -1;
 				}
@@ -44,6 +44,7 @@ __flushbuf(int c, FILE * stream)
 					stream->_bufsiz = BUFSIZ;
 					if (!io_testflag(stream, _IOLBF))
 						stream->_count = BUFSIZ - 1;
+					else	stream->_count = -1;
 				}
 			}
 			stream->_ptr = stream->_buf;
