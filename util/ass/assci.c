@@ -483,8 +483,8 @@ inpseudo(instr_no) {
 			if ( !needed() ) {
 				eof_seen++ ;
 			}
-			if ( line_num!=1 ) {
-				werror("mes ms_ext must be first pseudo") ;
+			if ( line_num>2 ) {
+				werror("mes ms_ext must be first or second pseudo") ;
 			}
 			return ;
 		}

@@ -211,7 +211,10 @@ int i_flag,flag,number ; cons_t val ; {
 		if ( val<0 ) val = -1-val ;
 		return val>=0 && val<number*256 ;
 	case OP16 :
-		if ( i_flag==PAR_G ) return val>=0 && val<=maxadr ;
+		if ( i_flag==PAR_G ) {
+			return val>=0 &&
+			       val<=maxadr && val <= 65535L;
+		}
 		return val>= -32768 && val<=32767 ;
 	case OP32 :
 		return TRUE ;
