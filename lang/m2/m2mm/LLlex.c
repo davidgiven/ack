@@ -23,6 +23,8 @@ struct token	dot,
 int		idfsize = IDFSIZE;
 int		ForeignFlag;
 
+extern char	*getwdir();
+
 STATIC
 SkipComment()
 {
@@ -160,6 +162,7 @@ CheckForLineDirective()
 		 */
 		if (class(ch) == STNL && strcmp(FileName,buf)) {
 			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+			WorkingDir = getwdir(FileName);
 		}
 	}
 	if (class(ch) == STEOI) {
