@@ -24,6 +24,7 @@
 #include "../share/go.h"
 
 int calnr;
+int complete_program;
 calcnt_p cchead;	/* call-count info of current proc */
 STATIC short space = 0;
 
@@ -277,10 +278,15 @@ Sdiagnostics()
 il_flags(p)
 	char *p;
 {
-	if (*p++ == 's') {
+	switch(*p++) {
+	case 's':
 		while (*p != '\0') {
 			space = 10*space +*p++ -'0';
 		}
+		break;
+	case 'a':
+		complete_program = 1;
+		break;
 	}
 }
 

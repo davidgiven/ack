@@ -88,6 +88,7 @@ struct calcnt {
 
 
 
+extern int complete_program;
 extern int calnr;
 extern calcnt_p cchead;		/* calcnt info of current proc */
 

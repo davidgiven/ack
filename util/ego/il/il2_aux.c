@@ -323,7 +323,7 @@ STATIC bool is_dispensable(callee,ccf)
 	 */
 
 	if ((--callee->P_NRCALLED) == 0 &&
-	    (callee->p_flags1 & PF_EXTERNAL) == 0 &&
+	    (complete_program || (callee->p_flags1 & PF_EXTERNAL) == 0) &&
 	    (callee->p_flags1 & PF_LPI) == 0) {
 		DISPENSABLE(callee);
 		OUTTRACE("procedure %d can be removed",callee->p_id);
@@ -466,7 +466,8 @@ STATIC singles(cals)
 		} else {
 			if (c->cl_proc->P_NRCALLED == 1 &&
 			    !IS_CHANGED(c->cl_proc) &&
-			    (c->cl_proc->p_flags1 & PF_EXTERNAL) == 0 &&
+			    (complete_program || 
+			      (c->cl_proc->p_flags1 & PF_EXTERNAL) == 0) &&
 			    (c->cl_proc->p_flags1 & PF_LPI) == 0) {
 				c->cl_proc->P_NRCALLED = 0;
 				SELECTED(c);
