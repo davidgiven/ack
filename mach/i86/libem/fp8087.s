@@ -21,7 +21,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	2(bx)
+	wait
 	fadds	6(bx)
+	wait
 	fstps	6(bx)
 	wait
 	ret
@@ -29,7 +31,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	2(bx)
+	wait
 	faddd	10(bx)
+	wait
 	fstpd	10(bx)
 	wait
 	ret
@@ -38,7 +42,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	6(bx)
+	wait
 	fsubs	2(bx)
+	wait
 	fstps	6(bx)
 	wait
 	ret
@@ -47,7 +53,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	10(bx)
+	wait
 	fsubd	2(bx)
+	wait
 	fstpd	10(bx)
 	wait
 	ret
@@ -56,7 +64,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	2(bx)
+	wait
 	fmuls	6(bx)
+	wait
 	fstps	6(bx)
 	wait
 	ret
@@ -64,7 +74,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	2(bx)
+	wait
 	fmuld	10(bx)
+	wait
 	fstpd	10(bx)
 	wait
 	ret
@@ -73,7 +85,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	6(bx)
+	wait
 	fdivs	2(bx)
+	wait
 	fstps	6(bx)
 	wait
 	ret
@@ -82,7 +96,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	10(bx)
+	wait
 	fdivd	2(bx)
+	wait
 	fstpd	10(bx)
 	wait
 	ret
@@ -91,7 +107,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	2(bx)
+	wait
 	fchs
+	wait
 	fstps	2(bx)
 	wait
 	ret
@@ -100,7 +118,9 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	2(bx)
+	wait
 	fchs
+	wait
 	fstpd	2(bx)
 	wait
 	ret
@@ -110,36 +130,48 @@ bigmin:
 	push	bx		! make room for FP status word
 	wait
 	flds	4(bx)
+	wait
 	fmuls	8(bx)		! multiply
+	wait
 	fld	st		! copy result
+	wait
 	ftst			! test sign; handle negative separately
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf			! result of test in condition codes
 	jb	1f
 	frndint			! this one rounds (?)
+	wait
 	fcom	st(1)		! compare with original; if <=, then OK
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf
 	jbe	2f
 	fisubs	(one)		! else subtract 1
+	wait
 	jmp	2f
 1:				! here, negative case
 	frndint			! this one rounds (?)
+	wait
 	fcom	st(1)		! compare with original; if >=, then OK
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf
 	jae	2f
 	fiadds	(one)		! else add 1
+	wait
 2:
 	fsub	st(1),st	! subtract integer part
+	wait
 	mov	bx,2(bx)
 	fstps	(bx)
+	wait
 	fstps	4(bx)
 	wait
 	pop	bx
@@ -150,36 +182,47 @@ bigmin:
 	push	bx		! make room for FP status word
 	wait
 	fldd	4(bx)
+	wait
 	fmuld	12(bx)		! multiply
+	wait
 	fld	st		! and copy result
+	wait
 	ftst			! test sign; handle negative separately
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf			! result of test in condition codes
 	jb	1f
 	frndint			! this one rounds (?)
+	wait
 	fcom	st(1)		! compare with original; if <=, then OK
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf
 	jbe	2f
 	fisubs	(one)		! else subtract 1
+	wait
 	jmp	2f
 1:				! here, negative case
 	frndint			! this one rounds (?)
+	wait
 	fcom	st(1)		! compare with original; if >=, then OK
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
 	sahf
 	jae	2f
 	fiadds	(one)		! else add 1
+	wait
 2:
 	fsub	st(1),st	! subtract integer part
 	mov	bx,2(bx)
 	fstpd	(bx)
+	wait
 	fstpd	8(bx)
 	wait
 	pop	bx
@@ -313,12 +356,16 @@ bigmin:
 	mov	bx,sp
 	cmp	2(bx),2
 	jne	1f
+	wait
 	filds	4(bx)
+	wait
 	fstps	2(bx)
 	wait
 	ret
 1:
+	wait
 	fildl	4(bx)
+	wait
 	fstps	4(bx)
 	wait
 	ret
@@ -327,12 +374,16 @@ bigmin:
 	mov	bx,sp
 	cmp	2(bx),2
 	jne	1f
+	wait
 	filds	4(bx)
+	wait
 	fstpd	2(bx)
 	wait
 	ret
 1:
+	wait
 	fildl	4(bx)
+	wait
 	fstpd	2(bx)
 	wait
 	ret
@@ -344,18 +395,25 @@ bigmin:
 	mov	ax,4(bx)
 	mov	2(bx),ax
 	mov	4(bx),0
+	wait
 	fildl	2(bx)
+	wait
 	fstps	2(bx)
 	wait
 	ret
 1:
+	wait
 	fildl	4(bx)
+	wait
 	cmp	6(bx),0
 	jge	1f
 2:
+	wait
 	fisubl	(bigmin)
+	wait
 	fisubl	(bigmin)
 1:
+	wait
 	fstps	4(bx)
 	wait
 	ret
@@ -366,13 +424,18 @@ bigmin:
 	jne	1f
 	mov	6(bx),0
 1:
+	wait
 	fildl	4(bx)
+	wait
 	cmp	6(bx),0
 	jge	1f
 2:
+	wait
 	fisubl	(bigmin)
+	wait
 	fisubl	(bigmin)
 1:
+	wait
 	fstpd	2(bx)
 	wait
 	ret
@@ -380,6 +443,7 @@ bigmin:
 .cfi:
 	mov	bx,sp
 	push	bx
+	wait
 	fstcw	-2(bx)
 	wait
 	mov	dx,-2(bx)
@@ -390,7 +454,9 @@ bigmin:
 	cmp	4(bx),4
 	jne	2f
 				! loc 4 loc ? cfi
+	wait
 	flds	6(bx)
+	wait
 	fistpl	6(bx)
 	wait
 	cmp	2(bx),2
@@ -400,10 +466,13 @@ bigmin:
 	mov	4(bx),dx
 	wait
 	fldcw	4(bx)
+	wait
 	ret
 2:
 				! loc 8 loc ? cfi
+	wait
 	fldd	6(bx)
+	wait
 	fistpl	10(bx)
 	wait
 	cmp	2(bx),2
@@ -414,18 +483,22 @@ bigmin:
 .cfu:
 	mov	bx,sp
 	push	bx
+	wait
 	fstcw	-2(bx)
 	wait
 	mov	dx,-2(bx)
 	or	-2(bx),0xc00	! truncating mode
 	wait
 	fldcw	-2(bx)
+	wait
 	pop	ax
 	cmp	4(bx),4
 	jne	2f
 				! loc 4 loc ? cfu
 	flds	6(bx)
+	wait
 	fabs			! ???
+	wait
 	fistpl	6(bx)
 	wait
 	cmp	2(bx),2
@@ -435,11 +508,15 @@ bigmin:
 	mov	4(bx),dx
 	wait
 	fldcw	4(bx)
+	wait
 	ret
 2:
+	wait
 				! loc 8 loc ? cfu
 	fldd	6(bx)
+	wait
 	fabs			! ???
+	wait
 	fistpl	10(bx)
 	wait
 	cmp	2(bx),2
@@ -451,12 +528,14 @@ bigmin:
 	mov	bx,sp
 	wait
 	fldd	2(bx)
+	wait
 	fstcw	2(bx)
 	wait
 	mov	dx,2(bx)
 	and	2(bx),0xf3ff	! set to rounding mode
 	wait
 	fldcw	2(bx)
+	wait
 	fstps	6(bx)
 	mov	2(bx),dx
 	wait
@@ -468,6 +547,7 @@ bigmin:
 	mov	bx,sp
 	wait
 	flds	2(bx)
+	wait
 	fstpd	2(bx)
 	wait
 	ret
@@ -476,9 +556,13 @@ bigmin:
 	mov	bx,sp
 	push	bx		! room for 8087 status word
 	xor	cx,cx
+	wait
 	flds	6(bx)
+	wait
 	flds	2(bx)
+	wait
 	fcompp			! compare and pop operands
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
@@ -499,9 +583,13 @@ bigmin:
 	mov	bx,sp
 	push	bx		! room for 8087 status word
 	xor	cx,cx
+	wait
 	fldd	10(bx)
+	wait
 	fldd	2(bx)
+	wait
 	fcompp			! compare and pop operands
+	wait
 	fstsw	-2(bx)
 	wait
 	mov	ax,-2(bx)
