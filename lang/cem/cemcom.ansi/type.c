@@ -280,7 +280,7 @@ standard_type(fund, sgn, algn, sz)
 {
 	register struct type *tp = create_type(fund);
 
-	tp->tp_unsigned = sgn;
+	tp->tp_unsigned = sgn != 0;
 	tp->tp_align = algn;
 	tp->tp_size = sz;
 
