@@ -43,7 +43,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f lex.yy.c occam.c *.o oc dummy
+		rm -f lex.yy.c occam.c *.o oc dummy Lpars.c Lpars.h
 
 $(PRIMARY):			Lpars.h
 occam.o keytab.o:		token.h
