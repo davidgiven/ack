@@ -59,9 +59,9 @@ p_mem new_mem();
 
 name_init() {
 	token_info.i_esize = sizeof (t_token);
-	token_info.i_incr = 25;
+	token_info.i_incr = 100;
 	nont_info.i_esize = sizeof (t_nont);
-	nont_info.i_incr = 25;
+	nont_info.i_incr = 100;
 	search(TERMINAL,"EOFILE",ENTERING);
 }
 

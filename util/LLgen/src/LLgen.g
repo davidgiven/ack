@@ -61,9 +61,9 @@ STATIC p_gram	copyrule();
 
 a_init() {
 	term_info.i_esize = sizeof (t_term);
-	term_info.i_incr = 50;
+	term_info.i_incr = 100;
 	link_info.i_esize = sizeof (t_link);
-	link_info.i_incr = 50;
+	link_info.i_incr = 100;
 	name_init();
 }
 
