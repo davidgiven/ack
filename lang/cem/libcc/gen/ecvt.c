@@ -78,7 +78,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		fractpart = modf(fractpart * 10, &value);
 		*pb++ = (int)value + '0';
 	}
-	pe = pb;
+	pb = pe;
 	*pb += 5;	/* round of at the end */
 	while (*pb > '9') {
 		*pb = '0';
