@@ -1,5 +1,5 @@
 .SILENT:
-CEM=net86
+CEM=i86 -DNOFLOAT
 head:
 	echo use run
 
