@@ -61,7 +61,7 @@ go(argc,argv,initialize,optimize,phase_machinit,proc_flag)
 	short kind;
 	int i;
 	char *p;
-	bool time_opt = FALSE;
+	bool time_opt = TRUE;
 
 	linecount = 0;
 	for (i = ARGSTART; i < argc; i++) {
