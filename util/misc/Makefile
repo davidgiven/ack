@@ -17,7 +17,7 @@ HFILES=$h/em_mnem.h $h/em_spec.h $h/em_pseu.h $h/em_flag.h $h/em_ptyp.h  \
 	$h/em_mes.h $(mh)/em.h $(mh)/em_comp.h
 
 CFLAGS=-O -I$(mh) -I$h
-LDFLAGS = -i
+LDFLAGS = 
 
 all:            $(DEC_PATH) $(ENC_PATH) esize
 

@@ -7,7 +7,7 @@ LIBS =	$(LIB)/libobject.a $(LIB)/libprint.a \
 	$(LIB)/libstring.a $(LIB)/libsystem.a
 
 CFLAGS=-O -I$(EMH)
-LDFLAGS = -i
+LDFLAGS = 
 
 all:            arch aal
 

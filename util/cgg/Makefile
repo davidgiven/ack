@@ -2,7 +2,7 @@
 
 PREFLAGS=-I../../h
 CFLAGS=$(PREFLAGS)
-LDFLAGS=-i
+LDFLAGS=
 LINTOPTS=-hbxac $(PREFLAGS)
 LIBS=../../lib/em_data.a
 # LEXLIB is system dependent, try -ll or -lln first

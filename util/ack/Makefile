@@ -14,7 +14,7 @@ LNTABLES=acc apc abc ocm m2 vax4 i86 i386 m68k2 m68k4 pmds pmds4 mantra \
 	sun3 sun2 xenix3 minix minixST
 INCLUDES=-I$(EMHOME)/h
 CFLAGS=-O $(INCLUDES)
-LDFLAGS=-i
+LDFLAGS=
 BINDIR=$(EMHOME)/bin
 MANDIR=$(EMHOME)/man
 MODDIR=$(EMHOME)/modules/lib

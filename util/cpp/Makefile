@@ -24,7 +24,7 @@ CEMPP = $(BIN)/cpp
 # What C compiler to use and how
 CC = cc
 COPTIONS =
-LDFLAGS = -i
+LDFLAGS = 
 
 # What parser generator to use and how
 GEN = $(EMHOME)/bin/LLgen

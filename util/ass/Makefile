@@ -32,7 +32,7 @@ lint:           ass00.c ass30.c ass40.c ass50.c ass60.c ass70.c \
 ass:       ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
-		$(CC) -i $(CFLAGS) -o ass \
+		$(CC) $(CFLAGS) -o ass \
 			ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
