@@ -35,6 +35,7 @@ error(va_alist)
 	va_list ap;
 
 	err_hdr("");
+	err_occurred = 1;
 	va_start(ap);
 	fmt = va_arg(ap, char *);
 	doprnt(ERROUT, fmt, ap);
