@@ -97,7 +97,7 @@ operation
 	|	ROTATE ind
 			{	xymem($2,0313); emit1($1 | 06);}
 	|	BITS absexp ',' r8
-			{	fit(fit3($2.val));
+			{	fit(fit3($2));
 				emit1(0313); emit1($1 | low3($2)<<3 | $4);
 			}
 	|	BITS absexp ',' ind
