@@ -9,7 +9,7 @@ var NAME=z80
 var M=z80
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var INCLUDES=-I{EM}/include -I/usr/include
+var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name be
 	from .m.g
 	to .s
@@ -18,14 +18,20 @@ name be
 	stdout
 	need .e
 end
-name asld
-	from .s.a
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/{M}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
 	to .out
 	outfile a.out
-	program {EM}/lib/{M}/as
+	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
-	mapflag -i 
-	args (.e:{HEAD}={EM}/{RT}em) \
+	args -b0:0x1000 ( .e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
