@@ -334,7 +334,7 @@ STATIC showinstr(lnp) line_p lnp; {
 	case OPOBJECT:
 	    printf(" %d", OBJ(lnp)->o_id); break;
 	case OPOFFSET:
-	    printf(" %D", OFFSET(lnp)); break;
+	    printf(" %ld", OFFSET(lnp)); break;
 	default:
 	    printf(" ?"); break;
     }
