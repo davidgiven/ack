@@ -616,7 +616,8 @@ getarg(argp, bases, designator, edf)
 	register t_node *arg = nextarg(argp, edf);
 	register t_node *left;
 
-	if (! arg->nd_LEFT ||
+	if (! arg ||
+	    ! arg->nd_LEFT ||
 	    ! (designator ? ChkVariable(&(arg->nd_LEFT), D_USED|D_DEFINED) : ChkExpression(&(arg->nd_LEFT)))) {
 		return 0;
 	}
@@ -652,7 +653,7 @@ getname(argp, kinds, bases, edf)
 	register t_node *arg = nextarg(argp, edf);
 	register t_node *left;
 
-	if (!arg->nd_LEFT || ! ChkDesig(&(arg->nd_LEFT), D_USED)) return 0;
+	if (!arg || !arg->nd_LEFT || ! ChkDesig(&(arg->nd_LEFT), D_USED)) return 0;
 
 	left = arg->nd_LEFT;
 	if (left->nd_class != Def) {
