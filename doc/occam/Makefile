@@ -8,7 +8,7 @@ TBL=tbl
 	cat $(FILES) | $(PIC) | $(TBL) | $(EQN) > $@
 
 channel.h.t:	$(EMHOME)/h/ocm_chan.h
-	ctot <$(CDIR)/h/ocm_chan.h >channel.h.t
+	ctot <$(EMHOME)/h/ocm_chan.h >channel.h.t
 
 channel.c.t:	channel.c
 	ctot <channel.c >channel.c.t
