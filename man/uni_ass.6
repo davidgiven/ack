@@ -1,8 +1,8 @@
 .\" $Header$
-.TH UNI_ASS VI
+.TH UNI_ASS 6ACK
 .ad
 .SH NAME
-uni_ass \- universal assembler, assembler/loader
+uni_ass \- universal assembler, assembler\-loader
 .SH SYNOPSIS
 ~em/lib/\fImach\fP/as [options] argument ...
 .SH DESCRIPTION
@@ -14,7 +14,9 @@ and expression evaluation.
 The resulting program assembles assembly modules.
 For some machines, it also does the link-editing (loading).
 Arguments may be flags, assembly language modules, or,
-in the case of an assembler/loader, arch(1) libraries.
+in the case of an assembler\-loader, 
+.IR arch (1)
+libraries.
 .br
 Flags are:
 .IP \-d\fIonum\fP
@@ -48,6 +50,7 @@ is 1000 it is interpreted as 1700.
 Note that '-d' alone (unless it contains bit 9)
 is not enough to get a listing.
 A .list pseudo is also needed in each module to be listed.
+Assemblers may be compiled with the listing facilities disabled.
 .IP -s[\fIonum\fP]
 This option controls the
 amount of symbolic debug information generated.
@@ -72,7 +75,8 @@ statements
 .RE
 Default is 073: all except local compiler labels.
 .IP -r
-Generate relocation information, for assemblers that can.
+Generate relocation information, for assemblers\-loaders that can.
+Assemblers always produce relocation information.
 .IP -b
 Turn off branch optimization.
 .IP -o\fIname\fP
