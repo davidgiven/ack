@@ -17,6 +17,7 @@ struct sym {
 #define SYMKNOWN	000004
 #define SYMOUT		000010
 #define SYMDEF		000020
+#define SYMSEEN		000040
 
 #define NSYMHASH	127
 extern sym_p symhash[NSYMHASH],symlookup();

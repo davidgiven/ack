@@ -93,7 +93,8 @@ symknown() {
 
 	for (spp = symhash; spp < &symhash[NSYMHASH]; spp++)
 		for (sp = *spp; sp != (sym_p) 0; sp = sp->s_next)
-			sp->s_flags |= SYMKNOWN;
+			if (sp->s_flags & SYMSEEN)
+				sp->s_flags |= SYMKNOWN;
 }
 
 cleanlocals() {

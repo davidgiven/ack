@@ -32,10 +32,12 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
-#define local(x)	if (((x)->s_flags&SYMKNOWN) == 0)\
-				x->s_flags &= ~ SYMGLOBAL
-#define global(x)	if(((x)->s_flags&SYMKNOWN) == 0)\
-				x->s_flags |= SYMGLOBAL
+#define local(x)	((((x)->s_flags&SYMKNOWN) == 0 && \
+			  ((x)->s_flags &= ~ SYMGLOBAL)),\
+			 (x)->s_flags |= SYMSEEN)
+#define global(x)	((((x)->s_flags&SYMKNOWN) == 0 && \
+			  ((x)->s_flags |= SYMGLOBAL)), \
+			 (x)->s_flags |= SYMSEEN)
 
 #define DTYPHOL	1
 #define DTYPBSS 2
