@@ -6,11 +6,11 @@ all:		head_em.o libhermac_o.a libnascom_o.a libcpm_o.a
 
 install:	head_em.o $(TAIL)
 		../../install head_em.o head_em
-		../../install $(TAIL) tail_mon
+		../../install $(TAIL) tail_sys
 
 cmp:		head_em.o $(TAIL)
 		-../../compare head_em.o head_em
-		-../../compare $(TAIL) tail_mon
+		-../../compare $(TAIL) tail_sys
 
 head_em.o:	head_em.s
 		$(MACH) -I../../../h -c head_em.s
@@ -39,6 +39,9 @@ libhermac_s.a:
 		arch cr libhermac_s.a mon.s char.her.s
 		echo libhermac_s.a > LIST
 		arch t libhermac_s.a >> LIST
+
+clean:
+		rm -f *.o *_o.a out nohup.out Out
 
 opr:
 		make pr | opr
