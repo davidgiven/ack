@@ -21,8 +21,6 @@ getw.c
 popen.c
 fdopen.c
 printf.c
-doprnt.c
-fltpr.c
 putchar.c
 puts.c
 putw.c
@@ -31,6 +29,8 @@ fseek.c
 scanf.c
 setbuf.c
 sprintf.c
+doprnt.c
+fltpr.c
 flushbuf.c
 fclose.c
 data.c
