@@ -25,10 +25,10 @@ LEXLIB=-ll
 all:	opt opt2
 
 opt:    $(OFILES) $(ONOGLOB) pattern.o $(LIBS)
-	cc $(LDFLAGS) $(CFLAGS) $(OFILES) $(ONOGLOB) pattern.o $(LIBS) -o opt
+	$(CC) $(LDFLAGS) $(CFLAGS) $(OFILES) $(ONOGLOB) pattern.o $(LIBS) -o opt
 
 opt2:   $(OFILES) $(OGLOB) pattern.o $(LIBS)
-	cc $(LDFLAGS) $(CFLAGS) $(OFILES) $(OGLOB) pattern.o $(LIBS) -o opt2
+	$(CC) $(LDFLAGS) $(CFLAGS) $(OFILES) $(OGLOB) pattern.o $(LIBS) -o opt2
 
 test:   opt testopt
 	testopt
@@ -52,7 +52,7 @@ pattern.c:      patterns mktab
 	/lib/cpp patterns | mktab > pattern.c
 
 mktab:  mktab.o $(LIBS)
-	cc $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
+	$(CC) $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
 
 mktab.o:	scan.c
 
