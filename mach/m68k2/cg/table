@@ -1308,7 +1308,7 @@ and defined($1) && $1 == 2 | ANY DATASCR |
 				"and %[2],%[1]"
 				setcc(%[1])
 				erase(%[1])		| %[1]  | | (2,2)+%[2]
-lol loc and $2 == 255 && inreg($1) < 2 && $3 == 2 | | | {DISPL1,LB,$1} | |
+lol loc and $2 == 255 && inreg($1) < 2 && $3 == 2 | | | {DISPL1,LB,$1+1} | |
 lal loi and lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
 			   | DATAREG |
 				remove(MEM_ALL)
@@ -2371,14 +2371,14 @@ tgt	|	DATA_ALT |	allocate(DATAREG={IMMEDIATE,1})
 
 bra |  STACK |	"bra $1"	| | |
 /* byte comparisons */
-loc beq  $1 >= 0 && $1 < 256 | nocoercions: DATA_ALT1 |
+loc beq  $1 >= 0 && $1 < 128 | nocoercions: DATA_ALT1 |
 				remove(ALL)
 				"cmp.b #$1,%[1]"
 				"beq $2"	| | |
 ...			     | DATA_ALT STACK |
 				"cmp #$1,%[1]"
 				"beq $2"	| | |
-loc bne  $1 >= 0 && $1 < 256 | nocoercions: DATA_ALT1 |
+loc bne  $1 >= 0 && $1 < 128 | nocoercions: DATA_ALT1 |
 				remove(ALL)
 				"cmp.b #$1,%[1]"
 				"bne $2"	| | |
