@@ -6,7 +6,7 @@
 #include	<stdio.h>
 
 void
-clearerr(FILE *stream)
+(clearerr)(FILE *stream)
 {
-	stream->_flags &= ~(_IOERR|_IOEOF);
+	clearerr(stream);
 }
