@@ -48,7 +48,7 @@
 #include	"idf.h"
 #include	"label.h"
 #include	"type.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"decspecs.h"
 #include	"code.h"
 #include	"expr.h"

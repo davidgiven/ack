@@ -12,7 +12,7 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"decspecs.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"storage.h"
 #include	"sizes.h"
 

@@ -16,7 +16,7 @@
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"tokenname.h"
 #include	"Lpars.h"
 #include	"LLlex.h"

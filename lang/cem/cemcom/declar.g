@@ -12,7 +12,7 @@
 #include	"field.h"
 #include	"decspecs.h"
 #include	"def.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"

@@ -16,7 +16,7 @@
 #include	"def.h"
 #include	"type.h"
 #include	"struct.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"decspecs.h"
 #include	"sizes.h"
 #include	"Lpars.h"

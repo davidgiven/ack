@@ -6,7 +6,7 @@
 #include	"arith.h"
 #include	"type.h"
 #include	"Lpars.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"storage.h"
 #include	"idf.h"
 #include	"label.h"
