@@ -243,8 +243,8 @@ EM_dopseudo(p)
 			break;
 		case ps_pro:
 			checkarg(&(p->em_arg), pro_ptyp);
-			if (p->em_size >= 0) {
-				C_pro(p->em_pnam, p->em_size);
+			if (p->em_nlocals >= 0) {
+				C_pro(p->em_pnam, p->em_nlocals);
 			}
 			else	C_pro_narg(p->em_pnam);
 			break;

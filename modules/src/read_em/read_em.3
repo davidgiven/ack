@@ -65,7 +65,7 @@ This structure has the following layout:
 /* $Header$ */
 
 struct e_arg {
-	int	ems_argtype;		/* type of this argument */
+	int	ema_argtype;		/* type of this argument */
 	union e_simple_arg {
 		arith	emu_cst;	/* a cst */
 		label	emu_dlb;	/* a numeric data label */
@@ -73,15 +73,16 @@ struct e_arg {
 		char	*emu_dnam;	/* a data label */
 		char	*emu_pnam;	/* a procedure name */
 		char	*emu_string;	/* a string (fcon,icon,ucon,scon) */
-	}	ems_arg;
-	arith	ems_szoroff;
+	}	ema_arg;
+	arith	ema_szoroff;
 };
-#define ema_cst 	ems_arg.emu_cst
-#define ema_dlb 	ems_arg.emu_dlb
-#define ema_ilb 	ems_arg.emu_ilb
-#define ema_dnam	ems_arg.emu_dnam
-#define ema_pnam	ems_arg.emu_pnam
-#define ema_string	ems_arg.emu_string
+#define ema_cst 	ema_arg.emu_cst
+#define ema_dlb 	ema_arg.emu_dlb
+#define ema_ilb 	ema_arg.emu_ilb
+#define ema_dnam	ema_arg.emu_dnam
+#define ema_pnam	ema_arg.emu_pnam
+#define ema_nlocals	ema_szoroff
+#define ema_string	ema_arg.emu_string
 
 
 struct e_instr {
@@ -109,16 +110,17 @@ extern int
 #define em_ilb  	em_arg.ema_ilb
 #define em_dlb  	em_arg.ema_dlb
 #define em_dnam 	em_arg.ema_dnam
-#define em_argtype	em_arg.ems_argtype
+#define em_argtype	em_arg.ema_argtype
 #define em_cst  	em_arg.ema_cst
 #define em_pnam 	em_arg.ema_pnam
+#define em_nlocals	em_arg.ema_nlocals
 #define em_string	em_arg.ema_string
-#define em_off  	em_arg.ems_szoroff
-#define em_size 	em_arg.ems_szoroff
+#define em_off  	em_arg.ema_szoroff
+#define em_size 	em_arg.ema_szoroff
 
 /* arguments for EXC pseudo: */
 #define em_exc1 	em_arg.ema_cst
-#define em_exc2 	em_arg.ems_szoroff
+#define em_exc2 	em_arg.ema_szoroff
 
 extern char
 	*EM_error, *EM_filename;
@@ -157,7 +159,8 @@ an EM machine instruction.
 .IP "	em_arg" \nau
 The \fIem_opcode\fR field
 contains the opcode of the instruction, and \fIem_arg\fR may contain an
-argument.
+argument. If \fIem_argtype\fR indicates that there is no argument,
+\fIem_cst\fR is set to 0.
 .IP "EM_PSEU	em_opcode" \nau
 an EM pseudo instruction.
 .IP "	em_arg" \nau
@@ -174,6 +177,8 @@ They use EM_holsize, EM_holinit, EM_bsssize, and EM_bssinit, because those
 arguments do not fit in the \fIe_arg\fR structure, and we want to keep the
 \fIe_arg\fR structure as small as possible.
 The EXC pseudo has its arguments encoded as indicated in the #defines.
+The PRO pseudo has its second argument in \fIema_nlocals\fR. If it is
+-1, it was omitted.
 .IP "EM_STARTMES	em_arg" \nau
 the start of a MES pseudo.
 .br
@@ -212,11 +217,11 @@ end of file
 .PD
 .PP
 The \fIe_arg\fR structure consists of the fields
-the field \fIems_argtype\fR, containing the type of this argument or 0
+the field \fIema_argtype\fR, containing the type of this argument or 0
 if absent,
-the field \fIems_arg\fR, containing the value of the argument,
-and \fIems_szoroff\fR, containing an optional offset or size.
-The possible values of \fIems_argtype\fR, defined in <em_ptyp.h>,
+the field \fIema_arg\fR, containing the value of the argument,
+and \fIema_szoroff\fR, containing an optional offset or size.
+The possible values of \fIema_argtype\fR, defined in <em_ptyp.h>,
 are summarized below:
 .br
 .ta \w'dlb_ptyp\ \ \ \ 'u +\w'em_opcode\ \ \ 'u
@@ -228,45 +233,45 @@ are summarized below:
 Meaning
 .IP "0	none" \nau
 no argument.
-.IP "ilb_ptyp	emu_ilb" \nau
+.IP "ilb_ptyp	ema_ilb" \nau
 an instruction label.
 .PD 0
-.IP "nof_ptyp	emu_dlb" \nau
+.IP "nof_ptyp	ema_dlb" \nau
 an offset from a numeric data label.
-.IP "	ems_szoroff" \nau
+.IP "	ema_szoroff" \nau
 The
-\fIems_szodiff\fR field contains the offset and the
-\fIemu_dlb\fR field contains the label.
-.IP "sof_ptyp	emu_dnam" \nau
+\fIema_szoroff\fR field contains the offset and the
+\fIema_dlb\fR field contains the label.
+.IP "sof_ptyp	ema_dnam" \nau
 an offset from a non-numeric data label.
-.IP "	ems_szoroff" \nau
-The \fIems_szoroff\fR field contains the offset and the \fIemu_dnam\fR field
+.IP "	ema_szoroff" \nau
+The \fIema_szoroff\fR field contains the offset and the \fIema_dnam\fR field
 contains the label, represented as a string.
-.IP "cst_ptyp	emu_cst" \nau
+.IP "cst_ptyp	ema_cst" \nau
 a numeric constant.
-.IP "pro_ptyp	emu_pnam" \nau
+.IP "pro_ptyp	ema_pnam" \nau
 a procedure name, not including the '$',
 represented as a string.
-.IP "str_ptyp	emu_string" \nau
+.IP "str_ptyp	ema_string" \nau
 a string constant.
-.IP "	ems_szoroff" \nau
-The string is found in \fIemu_string\fR, represented as a row of bytes, of
-length \fIems_szoroff\fR.
-.IP "ico_ptyp	emu_string" \nau
+.IP "	ema_szoroff" \nau
+The string is found in \fIema_string\fR, represented as a row of bytes, of
+length \fIema_szoroff\fR.
+.IP "ico_ptyp	ema_string" \nau
 an integer constant.
-.IP "	ems_szoroff" \nau
-A string representation of the constant is found in \fIemu_string\fR.
-It has size \fIems_szoroff\fR bytes on the target machine.
-.IP "uco_ptyp	emu_string" \nau
+.IP "	ema_szoroff" \nau
+A string representation of the constant is found in \fIema_string\fR.
+It has size \fIema_szoroff\fR bytes on the target machine.
+.IP "uco_ptyp	ema_string" \nau
 an unsigned constant.
-.IP "	ems_szoroff" \nau
-A string representation of the constant is found in \fIemu_string\fR.
-It has size \fIems_szoroff\fR bytes on the target machine.
-.IP "fco_ptyp	emu_string" \nau
+.IP "	ema_szoroff" \nau
+A string representation of the constant is found in \fIema_string\fR.
+It has size \fIema_szoroff\fR bytes on the target machine.
+.IP "fco_ptyp	ema_string" \nau
 a floating constant.
-.IP "	ems_szoroff" \nau
-A string representation of the constant is found in \fIemu_string\fR.
-It has size \fIems_szoroff\fR bytes on the target machine.
+.IP "	ema_szoroff" \nau
+A string representation of the constant is found in \fIema_string\fR.
+It has size \fIema_szoroff\fR bytes on the target machine.
 .PD
 .PP
 When an error occurs, \fIEM_error\fR is set to indicate the reason.

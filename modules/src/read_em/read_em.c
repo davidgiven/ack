@@ -242,6 +242,7 @@ EM_getinstr(p)
 			j = em_flag[p->em_opcode - sp_fmnem] & EM_PAR;
 			i = em_ptyp[j];
 			if (j == PAR_NO) {	/* No arguments */
+				p->em_argtype = 0;
 				break;
 			}
 #ifndef COMPACT
@@ -280,7 +281,10 @@ EM_getinstr(p)
 				break;
 			}
 			case PAR_W:
-				if (p->em_argtype == 0) break;
+				if (p->em_argtype == 0) {
+					p->em_cst = 0;
+					break;
+				}
 				check((p->em_cst & ~wordmask[wsize]) == 0);
 				/* Fall through */
 			case PAR_S:
@@ -349,9 +353,9 @@ EM_getinstr(p)
 				getarg(pro_ptyp, &(p->em_arg));
 				getarg(cst_ptyp|ptyp(sp_cend), &dummy);
 				if (dummy.ems_argtype == 0) {
-					p->em_off = -1;
+					p->em_nlocals = -1;
 				}
-				else	p->em_off = dummy.ema_cst;
+				else	p->em_nlocals = dummy.ema_cst;
 				break;
 			case ps_end:
 				getarg(cst_ptyp|ptyp(sp_cend), &(p->em_arg));

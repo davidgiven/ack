@@ -5,7 +5,7 @@
 /* $Header$ */
 
 struct e_arg {
-	int	ems_argtype;		/* type of this argument */
+	int	ema_argtype;		/* type of this argument */
 	union e_simple_arg {
 		arith	emu_cst;	/* a cst */
 		label	emu_dlb;	/* a numeric data label */
@@ -13,15 +13,16 @@ struct e_arg {
 		char	*emu_dnam;	/* a data label */
 		char	*emu_pnam;	/* a procedure name */
 		char	*emu_string;	/* a string (fcon,icon,ucon,scon) */
-	}	ems_arg;
-	arith	ems_szoroff;
+	}	ema_arg;
+	arith	ema_szoroff;
 };
-#define ema_cst 	ems_arg.emu_cst
-#define ema_dlb 	ems_arg.emu_dlb
-#define ema_ilb 	ems_arg.emu_ilb
-#define ema_dnam	ems_arg.emu_dnam
-#define ema_pnam	ems_arg.emu_pnam
-#define ema_string	ems_arg.emu_string
+#define ema_cst 	ema_arg.emu_cst
+#define ema_dlb 	ema_arg.emu_dlb
+#define ema_ilb 	ema_arg.emu_ilb
+#define ema_dnam	ema_arg.emu_dnam
+#define ema_pnam	ema_arg.emu_pnam
+#define ema_nlocals	ema_szoroff
+#define ema_string	ema_arg.emu_string
 
 
 struct e_instr {
@@ -49,16 +50,17 @@ extern int
 #define em_ilb  	em_arg.ema_ilb
 #define em_dlb  	em_arg.ema_dlb
 #define em_dnam 	em_arg.ema_dnam
-#define em_argtype	em_arg.ems_argtype
+#define em_argtype	em_arg.ema_argtype
 #define em_cst  	em_arg.ema_cst
 #define em_pnam 	em_arg.ema_pnam
+#define em_nlocals 	em_arg.ema_nlocals
 #define em_string	em_arg.ema_string
-#define em_off  	em_arg.ems_szoroff
-#define em_size 	em_arg.ems_szoroff
+#define em_off  	em_arg.ema_szoroff
+#define em_size 	em_arg.ema_szoroff
 
 /* Arguments for EXC pseudo: */
 #define em_exc1 	em_arg.ema_cst
-#define em_exc2 	em_arg.ems_szoroff
+#define em_exc2 	em_arg.ema_szoroff
 
 extern char
 	*EM_error, *EM_filename;
