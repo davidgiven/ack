@@ -54,7 +54,7 @@ hardldiv:
 	neg	04(sp)
 	sbc	r3
 	com	(sp)
-6:	mov	$16.,r4
+6:	mov	$16,r4
 9:	clc
 	rol	r2
 	rol	r1

@@ -5,7 +5,7 @@
 ! $Header$
 
 setfloat~:
-	cmp	r0,$8.
+	cmp	r0,$8
 	bne	1f
 	rts	pc
 1:	cmp	r0,$04

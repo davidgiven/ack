@@ -52,7 +52,7 @@ hardrmi4:
 	neg	r3
 	neg	02(sp)
 	sbc	r3
-6:	mov	$16.,r4
+6:	mov	$16,r4
 1:	clc
 	rol	r2
 	rol	r1
