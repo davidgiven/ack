@@ -92,5 +92,5 @@ string2long(register const char *nptr, char ** const endptr,
 			else return LONG_MAX;
 		else return ULONG_MAX;
 	}
-	return (unsigned long) sign * val;
+	return (long) sign * val;
 }
