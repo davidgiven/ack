@@ -340,6 +340,7 @@ lhalt:
 		clr.l	(a1)+		!skip file name
 		bra	4b		!only new line
 9:
+		cl	-(sp)
 	.sect .data
 emlast:	.asciz	"em_last"
 mess1:	.asciz	"no line processed yet\n"
