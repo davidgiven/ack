@@ -1,6 +1,10 @@
 /* D E F I N I T I O N   M E C H A N I S M */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<alloc.h>
 #include	<em_arith.h>
@@ -15,14 +19,9 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 
-#include	"debug.h"
-
 struct def *h_def;		/* Pointer to free list of def structures */
 
-static struct def illegal_def =
-	{0, 0, 0, 0, D_ERROR};
-
-struct def *ill_df = &illegal_def;
+struct def *ill_df;
 
 struct def *
 MkDef(id, scope, kind)
@@ -49,6 +48,16 @@ MkDef(id, scope, kind)
 	return df;
 }
 
+InitDef()
+{
+	/*	Initialize this module. Easy, the only thing to be initialized
+		is "illegal_def".
+	*/
+	struct idf *gen_anon_idf();
+
+	ill_df = MkDef(gen_anon_idf(), CurrentScope, D_ERROR);
+}
+
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
@@ -59,8 +68,6 @@ define(id, scope, kind)
 	*/
 	register struct def *df;
 
-	DO_DEBUG(5, debug("Defining identifier \"%s\", kind = %d",
-			  id->id_text, kind));
 	df = lookup(id, scope);
 	if (	/* Already in this scope */
 		df
@@ -372,10 +379,9 @@ ids->nd_IDF->id_text);
 			else	df = GetDefinitionModule(ids->nd_IDF);
 		}
 
-DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text,
-df->df_kind));
-		define(df->df_idf, CurrentScope, D_IMPORT)->imp_def = df;
+		define(ids->nd_IDF,CurrentScope,D_IMPORT)->imp_def = df;
 		DoImport(df, CurrentScope);
+
 		ids = ids->next;
 	}
 
@@ -463,8 +469,8 @@ DeclProc(type)
 				sprint(buf, "_%d_%s", ++nmcount,
 					df->df_idf->id_text);
 			}
-			else	(sprint(buf, "%s_%s",CurrentScope->sc_name,
-						df->df_idf->id_text));
+			else	sprint(buf, "%s_%s",CurrentScope->sc_name,
+						df->df_idf->id_text);
 			open_scope(OPENSCOPE);
 			df->prc_vis = CurrVis;
 			CurrentScope->sc_name = Malloc((unsigned)(strlen(buf)+1));
@@ -491,6 +497,6 @@ InitProc(nd, df)
 PrDef(df)
 	register struct def *df;
 {
-	debug("name: %s, kind: %d", df->df_idf->id_text, df->df_kind);
+	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }
 #endif DEBUG

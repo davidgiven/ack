@@ -1,7 +1,11 @@
 /* O V E R A L L   S T R U C T U R E */
 
 {
+#ifndef NORCSID
 static  char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<alloc.h>
 #include	<em_arith.h>
@@ -14,8 +18,6 @@ static  char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"node.h"
-
-#include	"debug.h"
 
 static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   parsing the definition module of the

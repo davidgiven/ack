@@ -1,6 +1,10 @@
 /* S C O P E   M E C H A N I S M */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<assert.h>
 #include	<alloc.h>
@@ -13,8 +17,6 @@ static char *RcsId = "$Header$";
 #include	"type.h"
 #include	"def.h"
 #include	"node.h"
-
-#include	"debug.h"
 
 struct scope *PervasiveScope, *GlobalScope;
 struct scopelist *CurrVis;
@@ -233,7 +235,7 @@ close_scope(flag)
 PrScopeDef(df)
 	register struct def *df;
 {
-	debug("List of definitions in currently ended scope:");
+	print("List of definitions in currently ended scope:\n");
 	while (df) {
 		PrDef(df);
 		df = df->df_nextinscope;

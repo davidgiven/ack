@@ -1,19 +1,23 @@
 /* E X P R E S S I O N S */
 
 {
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
 #include	"node.h"
 #include	"const.h"
 #include	"type.h"
-#include	"debug.h"
 }
 
 number(struct node **p;)

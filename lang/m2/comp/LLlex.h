@@ -18,6 +18,7 @@ struct token	{
 		char *tk_real;		/* REAL		*/
 		arith *tk_set;		/* only used in parse tree node */
 		struct def *tk_def;	/* only used in parse tree node */
+		label tk_lab;		/* only used in parse tree node */
 	} tk_data;
 };
 

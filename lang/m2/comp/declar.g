@@ -1,7 +1,11 @@
 /* D E C L A R A T I O N S */
 
 {
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -16,8 +20,6 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"misc.h"
 #include	"main.h"
-
-#include	"debug.h"
 
 int		proclevel = 0;	/* nesting level of procedures */
 extern char	*sprint();
@@ -382,6 +384,9 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				{ id = gen_anon_idf(); }
 	]
 				{ tp = df->df_type;
+				  if (!(tp->tp_fund & T_DISCRETE)) {
+					error("Illegal type in variant");
+				  }
 				  df = define(id, scope, D_FIELD);
 				  df->df_type = tp;
 				  df->fld_off = align(*cnt, tp->tp_align);
@@ -439,8 +444,8 @@ CaseLabels(struct type **ptp; struct node **pnd;)
 		ConstExpression(&nd2)
 				{ if (!TstCompat(nd1->nd_type, nd2->nd_type)) {
 node_error(nd2,"type incompatibility in case label");
+				  	nd1->nd_type = error_type;
 				  }
-				  nd1->nd_type = error_type;
 				  (*pnd)->nd_right = nd2;
 				}
 	]?

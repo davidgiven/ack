@@ -1,9 +1,14 @@
 /* E X P R E S S I O N   C H E C K I N G */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
 
 /*	Check expressions, and try to evaluate them as far as possible.
 */
+
+#include	"debug.h"
+
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
@@ -18,8 +23,6 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"const.h"
 #include	"standards.h"
-
-#include	"debug.h"
 
 extern char *symbol2str();
 

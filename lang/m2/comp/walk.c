@@ -1,10 +1,14 @@
 /* P A R S E   T R E E   W A L K E R */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
 
 /*	Routines to walk through parts of the parse tree, and generate
 	code for these parts.
 */
+
+#include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -18,15 +22,25 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"Lpars.h"
 
-#include	"debug.h"
-
 extern arith	align();
 static int	prclev = 0;
-static label	instructionlabel = 0;
-static label	datalabel = 0;
+static label	instructionlabel;
+static label	datalabel = 1;
 static label	return_label;
 static char	return_expr_occurred;
 static struct type *func_type;
+
+label
+text_label()
+{
+	return instructionlabel++;
+}
+
+label
+data_label()
+{
+	return datalabel++;
+}
 
 WalkModule(module)
 	register struct def *module;
@@ -182,9 +196,7 @@ WalkStat(nd, lab)
 	register struct node *right = nd->nd_right;
 
 	if (nd->nd_class == Call) {
-		if (chk_call(nd)) {
-			/* ??? */
-		}
+		if (chk_call(nd)) CodeCall(nd);
 		return;
 	}
 
@@ -199,7 +211,9 @@ WalkStat(nd, lab)
 			node_error(nd, "type incompatibility in assignment");
 			break;
 		}
-		/* ??? */
+
+		CodeAssign(nd);
+
 		break;
 
 	case IF:
@@ -223,23 +237,8 @@ WalkStat(nd, lab)
 		}
 
 	case CASE:
-		{
-			WalkExpr(left);
-
-			while (right) {
-				if (right->nd_class == Link && right->nd_symb == '|') {
-					WalkNode(right->nd_left->nd_right, lab);
-					right = right->nd_right;
-				}
-				else	{
-					WalkNode(right, lab);
-					right = 0;
-				}
-			}
-
-			/* ??? */
-			break;
-		}
+		CaseCode(nd, lab);
+		break;
 
 	case WHILE:
 		{	label l1, l2;
@@ -317,6 +316,7 @@ WalkStat(nd, lab)
 			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
 			}
+			return_expr_occurred = 1;
 		}
 		C_bra(return_label);
 		break;
@@ -348,9 +348,9 @@ WalkExpr(nd)
 
 	DO_DEBUG(1, (DumpTree(nd), print("\n")));
 
-	if (chk_expr(nd)) {
-		/* ??? */
-	}
+	if (! chk_expr(nd)) return;
+
+	/* ??? */
 }
 
 WalkDesignator(nd)
@@ -361,9 +361,27 @@ WalkDesignator(nd)
 
 	DO_DEBUG(1, (DumpTree(nd), print("\n")));
 
-	if (chk_designator(nd, DESIGNATOR|VARIABLE)) {
-		/* ??? */
-	}
+	if (! chk_designator(nd, DESIGNATOR|VARIABLE)) return;
+
+	/* ??? */
+}
+
+CodeCall(nd)
+	struct node *nd;
+{
+	/*	Generate code for a procedure call. Checking of parameters
+		and result is already done.
+	*/
+	/* ??? */
+}
+
+CodeAssign(nd)
+	struct node *nd;
+{
+	/*	Generate code for an assignment. Testing of type
+		compatibility and the like is already done.
+	*/
+	/* ??? */
 }
 
 #ifdef DEBUG

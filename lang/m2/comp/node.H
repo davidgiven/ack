@@ -21,6 +21,7 @@ struct node {
 	struct token nd_token;
 #define nd_set		nd_token.tk_data.tk_set
 #define nd_def		nd_token.tk_data.tk_def
+#define nd_lab		nd_token.tk_data.tk_lab
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
 #define nd_filename	nd_token.tk_filename

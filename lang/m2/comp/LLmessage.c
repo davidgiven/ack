@@ -1,9 +1,13 @@
 /* S Y N T A X   E R R O R   R E P O R T I N G */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
 
 #include	<alloc.h>
 #include	<em_arith.h>
+#include	<em_label.h>
+
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"Lpars.h"

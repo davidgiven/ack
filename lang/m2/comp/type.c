@@ -1,15 +1,17 @@
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"target_sizes.h"
+#include	"debug.h"
+#include	"maxset.h"
 
 #include	<assert.h>
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-
-#include	"target_sizes.h"
-#include	"debug.h"
-#include	"maxset.h"
 
 #include	"def.h"
 #include	"type.h"

@@ -1,6 +1,10 @@
 /* D E F I N I T I O N   M O D U L E S */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<assert.h>
 #include	<em_arith.h>
@@ -13,8 +17,6 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"f_info.h"
 #include	"main.h"
-
-#include	"debug.h"
 
 #ifdef DEBUG
 long	sys_filesize();

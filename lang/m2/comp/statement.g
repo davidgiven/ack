@@ -1,7 +1,9 @@
 /* S T A T E M E N T S */
 
 {
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
 
 #include	<em_arith.h>
 #include	<em_label.h>

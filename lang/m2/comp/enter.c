@@ -1,11 +1,16 @@
 /* H I G H   L E V E L   S Y M B O L   E N T R Y   A N D   L O O K U P */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+
 #include	"idf.h"
 #include	"def.h"
 #include	"type.h"

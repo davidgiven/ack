@@ -1,6 +1,11 @@
 /* M A I N   P R O G R A M */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
+#include	"ndir.h"
 
 #include	<system.h>
 #include	<em_arith.h>
@@ -17,9 +22,6 @@ static char *RcsId = "$Header$";
 #include	"standards.h"
 #include	"tokenname.h"
 #include	"node.h"
-
-#include	"debug.h"
-#include	"ndir.h"
 
 char	options[128];
 int	DefinitionModule; 
@@ -39,7 +41,7 @@ main(argc, argv)
 
 	while (--argc > 0) {
 		if (**argv == '-')
-			do_option((*argv++) + 1);
+			DoOption((*argv++) + 1);
 		else
 			Nargv[Nargc++] = *argv++;
 	}
@@ -70,11 +72,12 @@ Compile(src, dst)
 	DEFPATH[0] = "";
 	DEFPATH[NDIRS] = 0;
 	init_idf();
-	init_cst();
+	InitCst();
 	reserve(tkidf);
 	init_scope();
 	init_types();
-	add_standards();
+	InitDef();
+	AddStandards();
 #ifdef DEBUG
 	if (options['l']) {
 		LexScan();
@@ -133,7 +136,7 @@ LexScan()
 }
 #endif
 
-add_standards()
+AddStandards()
 {
 	register struct def *df;
 	struct def *Enter();

@@ -67,4 +67,5 @@ extern char options[];
 #define NDIRS	16		/* maximum number of directories searched */
 
 
-
+!File: density.h
+#define DENSITY	3		/* see casestat.C for an explanation */

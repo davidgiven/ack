@@ -1,16 +1,20 @@
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
 
 #include	<em_label.h>
 #include	<em_arith.h>
 #include	<alloc.h>
 #include	<system.h>
+
 #include	"def.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"node.h"
-#include	"debug.h"
 
 struct node *h_node;		/* header of free list */
 

@@ -1,12 +1,15 @@
 /* C O N S T A N T   E X P R E S S I O N   H A N D L I N G */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
+#include	"target_sizes.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
-
-#include	"target_sizes.h"
 
 #include	"idf.h"
 #include	"type.h"
@@ -47,7 +50,7 @@ cstunary(expp)
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
 	expp->nd_INT = o1;
-	cut_size(expp);
+	CutSize(expp);
 	FreeNode(expp->nd_right);
 	expp->nd_right = 0;
 }
@@ -64,11 +67,14 @@ cstbin(expp)
 	int uns = expp->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
-	assert(expp->nd_left->nd_class == Value && expp->nd_right->nd_class == Value);
+	assert(expp->nd_left->nd_class == Value);
+	assert(expp->nd_right->nd_class == Value);
+
 	switch (expp->nd_symb)	{
 	case '*':
 		o1 *= o2;
 		break;
+
 	case DIV:
 		if (o2 == 0)	{
 			node_error(expp, "division by 0");
@@ -106,6 +112,7 @@ cstbin(expp)
 		else
 			o1 /= o2;
 		break;
+
 	case MOD:
 		if (o2 == 0)	{
 			node_error(expp, "modulo by 0");
@@ -135,12 +142,15 @@ cstbin(expp)
 		else
 			o1 %= o2;
 		break;
+
 	case '+':
 		o1 += o2;
 		break;
+
 	case '-':
 		o1 -= o2;
 		break;
+
 	case '<':
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
@@ -151,6 +161,7 @@ cstbin(expp)
 		else
 			o1 = o1 < o2;
 		break;
+
 	case '>':
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
@@ -201,7 +212,7 @@ cstbin(expp)
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
 	expp->nd_INT = o1;
-	cut_size(expp);
+	CutSize(expp);
 	FreeNode(expp->nd_left);
 	FreeNode(expp->nd_right);
 	expp->nd_left = expp->nd_right = 0;
@@ -318,18 +329,18 @@ cstcall(expp, call)
 		}
 		if (expr->nd_INT < 0) expp->nd_INT = - expr->nd_INT;
 		else expp->nd_INT = expr->nd_INT;
-		cut_size(expp);
+		CutSize(expp);
 		break;
 	case S_CAP:
 		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
 			expp->nd_INT = expr->nd_INT + ('A' - 'a');
 		}
 		else	expp->nd_INT = expr->nd_INT;
-		cut_size(expp);
+		CutSize(expp);
 		break;
 	case S_CHR:
 		expp->nd_INT = expr->nd_INT;
-		cut_size(expp);
+		CutSize(expp);
 		break;
 	case S_MAX:
 		if (expp->nd_type == int_type) {
@@ -363,7 +374,7 @@ cstcall(expp, call)
 		break;
 	case S_ORD:
 		expp->nd_INT = expr->nd_INT;
-		cut_size(expp);
+		CutSize(expp);
 		break;
 	case S_SIZE:
 		expp->nd_INT = align(expr->nd_type->tp_size, (int) word_size) /
@@ -386,7 +397,7 @@ cstcall(expp, call)
 		      )
 		    )
 		   )	node_warning(expp,"overflow in constant expression");
-		else cut_size(expp);
+		else CutSize(expp);
 		break;
 	default:
 		assert(0);
@@ -396,7 +407,7 @@ cstcall(expp, call)
 	expp->nd_right = expp->nd_left = 0;
 }
 
-cut_size(expr)
+CutSize(expr)
 	register struct node *expr;
 {
 	/*	The constant value of the expression expr is made to
@@ -430,7 +441,7 @@ cut_size(expr)
 	expr->nd_INT = o1;
 }
 
-init_cst()
+InitCst()
 {
 	int i = 0;
 	arith bt = (arith)0;

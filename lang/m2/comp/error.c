@@ -5,13 +5,16 @@
 	number of arguments!
 */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
-
-#include	<system.h>
-#include	<em_arith.h>
+#endif
 
 #include	"errout.h"
 #include	"debug.h"
+
+#include	<system.h>
+#include	<em_arith.h>
+#include	<em_label.h>
 
 #include	"input.h"
 #include	"f_info.h"

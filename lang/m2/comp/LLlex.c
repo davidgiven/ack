@@ -1,15 +1,18 @@
 /* L E X I C A L   A N A L Y S E R   F O R   M O D U L A - 2 */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
+#endif
+
+#include	"debug.h"
+#include	"idfsize.h"
+#include	"numsize.h"
+#include	"strsize.h"
 
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
-
-#include	"idfsize.h"
-#include	"numsize.h"
-#include	"strsize.h"
 
 #include	"input.h"
 #include	"f_info.h"

@@ -1,21 +1,22 @@
 /* U S E R   O P T I O N - H A N D L I N G */
 
+#ifndef NORCSID
 static char *RcsId = "$Header$";
-
-#include	<em_arith.h>
-#include	<em_label.h>
+#endif
 
 #include	"idfsize.h"
 #include	"ndir.h"
+
+#include	<em_arith.h>
+#include	<em_label.h>
 
 #include	"type.h"
 #include	"main.h"
 
 extern int	idfsize;
-
 static int	ndirs;
 
-do_option(text)
+DoOption(text)
 	char *text;
 {
 	switch(*text++)	{
