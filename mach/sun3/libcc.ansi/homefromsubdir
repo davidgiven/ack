@@ -1,11 +1,11 @@
 if [ $# = 1 ]
 then
-	NAM=`expr $1 : '^\(\..*\)'`
-	if [ X$NAM = X ]
+	NAM=`expr $1 : '^\(\/.*\)'`
+	if [ X$NAM != X ]
 	then
 	    NAM=$1
 	else
-	    NAM=../$NAM
+	    NAM=../$1
 	fi
 	echo $NAM
 	exit 0
