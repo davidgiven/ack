@@ -19,15 +19,19 @@
 #include "../../../h/em_spec.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_reg.h"
+#include "../../../h/em_mes.h"
+#include "../../../h/em_ego.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_items.h"
 #include "ra_lifet.h"
 
 
-#define MSG_OFF(l)	aoff(ARG(l),1)
-#define is_livemsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_liv)
-#define is_deadmsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ded)
+#define MSG_OFF(l)	aoff(ARG(l),2)
+#define is_livemsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ego && \
+			 aoff(ARG(l),1) == ego_live)
+#define is_deadmsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ego && \
+			 aoff(ARG(l),1) == ego_dead)
 
 build_lifetimes(items)
 	item_p items[];

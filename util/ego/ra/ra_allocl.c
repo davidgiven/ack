@@ -59,7 +59,7 @@ STATIC count_usage(p,item,nrloops,sloopcnt,dloopcnt)
 		for (li = Lfirst(loops); li != (Lindex) 0; li=Lnext(li,loops)) {
 			l = (loop_p) Lelem(li);
 			sloopcnt[l->lp_id]++;
-			dloopcnt[l->lp_id] += 
+			dloopcnt[l->lp_id] +=
 				(IS_FIRM(u->t_bblock) ? loop_scale(lev) : 1);
 		}
 	}
@@ -293,13 +293,15 @@ STATIC allocs_of_item(p,item,loops,sloopcnt,dloopcnt,alloc_list_p)
 	insert_alloc(wholeproc, alloc_list_p);
 	for (li = Lfirst(loops); li != (Lindex) 0; li = Lnext(li,loops)) {
 		lp = (loop_p) Lelem(li);
-		if (sloopcnt[lp->lp_id] != 0 && !updates_needed(lp,item)) {
+		if (sloopcnt[lp->lp_id] != 0 && !updates_needed(lp,item)
+		    && !((header = lp->LP_HEADER) == (bblock_p) 0 &&
+				MUST_INIT(item,lp->lp_entry))) {
 			/* Item is used within loop, so consider loop
 			 * as a timespan during which item may be put in
 			 * a register.
-			 */
 			if ((header = lp->LP_HEADER) == (bblock_p) 0 &&
 				MUST_INIT(item,lp->lp_entry)) continue;
+			 */
 			lt = loop_lifetime(lp);
 			susecount = sloopcnt[lp->lp_id];
 			dusecount = dloopcnt[lp->lp_id];
@@ -314,6 +316,12 @@ STATIC allocs_of_item(p,item,loops,sloopcnt,dloopcnt,alloc_list_p)
 				     loop_inits(lp,item,header),wholeproc,
 				     TRUE,FALSE),
 					  alloc_list_p);
+		} else if (sloopcnt[lp->lp_id] != 0) {
+			/* I confess: this is a hack.  I didn't expect the
+			 * Spanish inquisition.
+			 */
+			if (wholeproc->al_dusecount < dloopcnt[lp->lp_id])
+				wholeproc->al_dusecount = dloopcnt[lp->lp_id];
 		}
 	}
 }

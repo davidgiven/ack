@@ -8,6 +8,7 @@
  *  R A _ P R O F I T S . C
  */
 
+#include <stdio.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/lset.h"
@@ -96,8 +97,8 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 	*time_out = (m == (cond_p) 0 ? -1 : map_value(m,off,TRUE));
 	*space_out = (m == (cond_p) 0 ? -1 : map_value(m,off,FALSE));
 	/*
-	printf("itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
-	printf("ALLOCSCORE = (%d,%d)\n",*time_out,*space_out);
+	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
+	fprintf(stderr,"ALLOCSCORE = (%d,%d)\n",*time_out,*space_out);
 	*/
 }
 
@@ -132,8 +133,8 @@ opening_cost(itemtyp,localtyp,off,time_out,space_out)
 	*time_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,TRUE));
 	*space_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,FALSE));
 	/*
-	printf("itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
-	printf("OPEN_COST = (%d,%d)\n",*time_out,*space_out);
+	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
+	fprintf(stderr,"OPEN_COST = (%d,%d)\n",*time_out,*space_out);
 	*/
 }
 
@@ -154,7 +155,7 @@ regsave_cost(regs,time_out,space_out)
 	*time_out = index_value(regsav_cost,n,TRUE);
 	*space_out = index_value(regsav_cost,n,FALSE);
 	/*
-	printf("REGSAVE COST, n=%d, (%d,%d)\n",n,*time_out,*space_out);
+	fprintf(stderr,"REGSAVE COST, n=%d, (%d,%d)\n",n,*time_out,*space_out);
 	*/
 }
 

@@ -107,26 +107,19 @@ STATIC bool room_for(alloc,packed)
 
 STATIC alloc_p best_alloc(unpacked,packed,time_opt)
 	alloc_p unpacked,packed;
-	bool time_opt;
+	bool time_opt;	/* now unused */
 {
 	/* Find the next best candidate */
 
 	register alloc_p x,best;
-	bool loops_only;
 
-	for (loops_only = time_opt; ; loops_only = FALSE) {
-		/* If we're optimizing execution time, we first
-		 * consider loops.
-		 */
-		best = unpacked; /* dummy */
-		for (x = unpacked->al_next; x != (alloc_p) 0; x = x->al_next) {
-			if ((!loops_only || x->al_isloop) && 
-			    x->al_profits > best->al_profits &&
-			    room_for(x,packed)) {
-				best = x;
-			}
+	best = unpacked; /* dummy */
+
+	for (x = unpacked->al_next; x != (alloc_p) 0; x = x->al_next) {
+		if (x->al_profits > best->al_profits &&
+		    room_for(x,packed)) {
+			best = x;
 		}
-		if (best != unpacked || !loops_only) break;
 	}
 	return (best == unpacked ? (alloc_p) 0 : best);
 }

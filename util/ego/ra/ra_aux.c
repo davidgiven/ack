@@ -41,5 +41,5 @@ time_p cons_time(l,b)
 short loop_scale(lev)
 	short lev;
 {
-	return (lev == 0 ? 1 : (lev > 3 ? 20 : 5 * lev));
+	return (lev == 0 ? 1 : (lev > 3 ? 32 : 8 * lev));
 }

@@ -437,29 +437,29 @@ print_items(items,p)
 	item_p item;
 	interv_p iv;
 
-	printf("BEGIN PROCEDURE %d\n",p->p_id);
+	fprintf(stderr, "BEGIN PROCEDURE %d\n",p->p_id);
 	for (t = 0; t < NRITEMTYPES;t++) {
 		for (item = items[t]; item != (item_p) 0;item = item->it_next) {
-			printf("\nitemtype = %s\n",str_types[t]);
+			fprintf(stderr, "\nitemtype = %s\n",str_types[t]);
 			if (t == GLOBL_ADDR) {
-				printf("id of external = %d\n",
+				fprintf(stderr, "id of external = %d\n",
 					item->i_t.it_obj->o_id);
 			} else {
-				printf("offset = %ld\n",
+				fprintf(stderr, "offset = %ld\n",
 					item->i_t.it_off);
 			}
-			printf("regtype = %s\n",str_regtypes[item->it_regtype]);
-			printf("size = %d\n",item->it_size);
-			printf("#usages = %d\n", Lnrelems(item->it_usage));
-			printf("lifetime = {");
+			fprintf(stderr, "regtype = %s\n",str_regtypes[item->it_regtype]);
+			fprintf(stderr, "size = %d\n",item->it_size);
+			fprintf(stderr, "#usages = %d\n", Lnrelems(item->it_usage));
+			fprintf(stderr, "lifetime = {");
 			for (iv = item->it_lives; iv != (interv_p) 0;
 			     iv = iv->i_next) {
-				printf("(%d,%d) ",iv->i_start,iv->i_stop);
+				fprintf(stderr, "(%d,%d) ",iv->i_start,iv->i_stop);
 			}
-			printf("} \n");
+			fprintf(stderr, "} \n");
 		}
 	}
-	printf("END PROCEDURE %d\n\n",p->p_id);
+	fprintf(stderr, "END PROCEDURE %d\n\n",p->p_id);
 }
 
 
@@ -490,6 +490,7 @@ print_allocs(list)
 			fprintf(stderr,"#usages(static) = %d\n",al->al_susecount);
 			fprintf(stderr,"#usages(dyn) = %d\n",al->al_dusecount);
 			fprintf(stderr,"#inits = %d\n",Lnrelems(al->al_inits));
+			fprintf(stderr,"isloop = %d\n",al->al_isloop);
 			fprintf(stderr,"timespan = {");
 			for (iv = al->al_timespan; iv != (interv_p) 0;
 			     iv = iv->i_next) {
@@ -523,8 +524,8 @@ stat_regusage(list)
 	for (x = list; x != (alloc_p) 0; x = x->al_next) {
 		regs_needed[x->al_regtype]++;
 	}
-	/* printf("data regs:%d\n",regs_needed[reg_any]); */
-	/* printf("address regs:%d\n",regs_needed[reg_pointer]); */
+	/* fprintf(stderr, "data regs:%d\n",regs_needed[reg_any]); */
+	/* fprintf(stderr, "address regs:%d\n",regs_needed[reg_pointer]); */
 }
 
 		
@@ -538,7 +539,7 @@ statistics(items)
 	int t,r;
 	int cnt;
 
-	printf("\nSTATISTICS\n");
+	fprintf(stderr, "\nSTATISTICS\n");
 	for (r = 0; r <= reg_float; r++) cnt_regtypes[r] = 0;
 	for (t = 0; t < NRITEMTYPES;t++) {
 		cnt = 0;
@@ -549,9 +550,9 @@ statistics(items)
 			}
 			next = item->it_next;
 		}
-		printf("#%s = %d\n",str_types[t],cnt);
+		fprintf(stderr, "#%s = %d\n",str_types[t],cnt);
 	}
 	for (r = 0; r <= reg_float; r++) {
-		printf("#%s = %d\n",str_regtypes[r],cnt_regtypes[r]);
+		fprintf(stderr, "#%s = %d\n",str_regtypes[r],cnt_regtypes[r]);
 	}
 }

@@ -19,6 +19,7 @@
 #include "../../../h/em_spec.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_mes.h"
+#include "../../../h/em_ego.h"
 #include "../../../h/em_reg.h"
 #include "ra.h"
 #include "ra_interv.h"
@@ -434,10 +435,12 @@ rem_mes(p)
 	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
 		for (l = b->b_start; l != (line_p) 0; l = next) {
 			next = l->l_next;
-			if ( INSTR(l) == ps_mes &&
-			    ((m = aoff(ARG(l),0)) == ms_liv || m == ms_ded)) {
-					/* remove live/dead messages */
-					rm_line(l,b);
+			if (INSTR(l) == ps_mes
+			    && aoff(ARG(l),0) == ms_ego
+			    && ((m = aoff(ARG(l),1)) == ego_live
+				|| m == ego_dead)) {
+				/* remove live/dead messages */
+				rm_line(l,b);
 			}
 		}
 	}

@@ -8,10 +8,6 @@
  *
  */
 
-/* TEMPORARY: should be put in ../../../h/em_mes.h: */
-#define ms_liv 9
-#define ms_ded 10
-
 #define INFINITE	10000
 #define NRREGTYPES	(reg_float+1)
 
