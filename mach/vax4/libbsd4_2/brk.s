@@ -14,7 +14,7 @@ Ierr:
 	jmp	cerror
 
 DEFINE(_sbrk)
-	addl3	cur,4(ap),-(sp)
+	addl3	Icur,4(ap),-(sp)
 	bcs	Ierr
 	pushl	$1
 	movl	ap,r3
