@@ -14,7 +14,7 @@ static char rcsid[] = "$Header$";
 #include "orig.h"
 #include "scan.h"
 
-static		get_name();
+static		get_names();
 static		process();
 static		getexternal();
 static		redefine();

@@ -31,7 +31,6 @@ static char rcsid[] = "$Header$";
 static		copy_down();
 static		copy_up();
 static		free_saved_moduls();
-static		writelong();
 
 struct memory	mems[NMEMS];
 
