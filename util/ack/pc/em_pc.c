@@ -49,12 +49,15 @@ char    *eflag;
 char    *wflag;
 
 int     sizes[sz_last+1] = {
-	2,      /* sz_addr */
+	4,      /* sz_addr */
 	8,      /* sz_real */
 	0,      /* sz_head */
 	512,    /* sz_buff */
 	4096,   /* sz_mset */
-	2,      /* sz_iset */
+	4,      /* sz_iset */
+	4,      /* sz_word */
+	4,      /* sz_int */
+	4,      /* sz_long */
 };
 
 #define CALLSIZE                60
@@ -193,10 +196,15 @@ initsizes(f) FILE *f; {
 		case 'b': sz_buff = i; continue;
 		case 'm': sz_mset = i; continue;
 		case 'j': sz_iset = i; continue;
-		case 'w':
-		case 'i': if (i == 2) continue; break;
-		case 'l': if (i == 4) continue; break;
+		case 'w': sz_word = i; continue;
+		case 'i': sz_int  = i; continue;
+		case 'l': sz_long = i; continue;
 		}
+		fatal("bad V-flag %s",vvflag);
+	}
+	if (sz_word != sz_int ||
+	    (sz_int != 2 && sz_int != 4) ||
+	    (sz_long != 4)) {
 		fatal("bad V-flag %s",vvflag);
 	}
 	if (sz_head == 0)
