@@ -42,6 +42,9 @@ install:	all
 cmp:	all
 	-../compare ic
 
+clean:
+	rm -f *.o ic Out out nohup.out
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
