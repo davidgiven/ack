@@ -1,8 +1,4 @@
-#define DUK	/* Modifications by Duk Bekema. */
-
-/* @(#)astrip.c	1.1 */
 /* $Header$ */
-#define	ushort	unsigned short
 
 #include "out.h"
 #include <signal.h>
@@ -19,6 +15,7 @@ char	*mktemp();
 FILE	*fopen();
 FILE	*tf;
 struct outhead buf;
+int	readerror, writeerror;
 
 main(argc, argv)
 char **argv;
@@ -41,16 +38,17 @@ strip(name)
 char *name;
 {
 	long size;
-	FILE *f;
 
-	if ((f = fopen(name,"r")) == NULL) {
+	if (! rd_open(name)) {
 		fprintf(stderr, "astrip: cannot open %s\n", name);
 		return(1);
 	}
-	getofmt ((char *)&buf, SF_HEAD , f);
-	if(BADMAGIC(buf)) {
+	readerror = 0;
+	writeerror = 0;
+	rd_ohead(&buf);
+	if(readerror || BADMAGIC(buf)) {
 		fprintf(stderr, "astrip: %s-- bad format\n", name);
-		fclose(f);
+		rd_close();
 		return(1);
 	}
 	size = OFF_RELO(buf) - SZ_HEAD;
@@ -60,62 +58,68 @@ char *name;
 	buf.oh_nchar = 0;
 
 
-	if ((tf = fopen(tname,"w")) == NULL) {
+	if (! wr_open(tname)) {
 		fprintf(stderr, "astrip: cannot create temp file %s\n", tname);
-		fclose(f);
+		rd_close();
 		return(2);
 	}
-	fseek(tf, (long)0, 0);
-	putofmt((char *)&buf,SF_HEAD,tf,tname);
-	if(copy(name, tname, f, tf, size)) {
-		fclose(f);
-		fclose(tf);
+	wr_ohead(&buf);
+	if (writeerror) {
+		fprintf(stderr, "astrip: write error on temp file %s\n", tname);
+		rd_close();
+		wr_close();
 		return(1);
 	}
-	fclose(f);
-	fclose(tf);
+	if(copy(name, tname, size)) {
+		rd_close();
+		wr_close();
+		return(1);
+	}
+	rd_close();
+	wr_close();
 	size += SZ_HEAD;
-	if ((f = fopen(name,"w")) == NULL) {
+	if (! wr_open(name)) {
 		fprintf(stderr, "astrip: cannot write %s\n", name);
 		return(1);
 	}
-	if ((tf = fopen(tname,"r")) == NULL) {
+	if (! rd_open(tname)) {
 		fprintf(stderr, "astrip: cannot read temp file %s\n", tname);
-		fclose(f);
+		wr_close();
 		return(2);
 	}
-	fseek(tf, (long)0, 0);
-	if(copy(tname, name, tf, f, size)) {
-		fclose(f);
-		fclose(tf);
+	if(copy(tname, name, size)) {
+		wr_close();
+		rd_close();
 		return(2);
 	}
 
-	fclose(f);
-	fclose(tf);
+	wr_close();
+	rd_close();
 	return(0);
 }
 
-copy(fnam, tnam, fr, to, size)
+copy(fnam, tnam, size)
 char *fnam;
 char *tnam;
 long size;
-FILE *fr,*to;
 {
 	register s, n;
 	char lbuf[512];
+	int fr, fw;
 
+	fr = rd_fd();
+	fw = wr_fd();
 	while(size != (long)0) {
 		s = 512;
 		if(size < 512)
 			s = (int) size;
-		n = fread(lbuf,1,s,fr);
-		if(n != s) {
+		rd_bytes(fr, lbuf, (long) s);
+		if (readerror) {
 			fprintf(stderr, "astrip: unexpected eof on %s\n", fnam);
 			return(1);
 		}
-		n = fwrite(lbuf,1,s,to);
-		if(n != s) {
+		wr_bytes(fw, lbuf, (long) s);
+		if (writeerror) {
 			fprintf(stderr, "astrip: write error on %s\n", tnam);
 			return(1);
 		}
@@ -124,90 +128,12 @@ FILE *fr,*to;
 	return(0);
 }
 
-getofmt(p, s, f)
-register char	*p;
-register char	*s;
-register FILE	*f;
+rd_fatal()
 {
-	register i;
-	register long l;
-
-	for (;;) {
-		switch (*s++) {
-/*		case '0': p++; continue; */
-		case '1':
-			*p++ = getc(f);
-			continue;
-		case '2':
-			i = getc(f);
-			i |= (getc(f) << 8);
-#ifndef DUK
-			*((short *)p)++ = i;
-#else DUK
-			*((short *)p) = i;
-			p += sizeof(short);
-#endif DUK
-			continue;
-		case '4':
-			l = (long)getc(f);
-			l |= (long)(getc(f) << 8);
-			l |= ((long)getc(f) << 16);
-			l |= ((long)getc(f) << 24);
-#ifndef DUK
-			*((long *)p)++ = l;
-#else DUK
-			*((long *)p) = l;
-			p += sizeof(long);
-#endif DUK
-			continue;
-		default:
-		case '\0':
-			break;
-		}
-		break;
-	}
+	readerror = 1;
 }
 
-putofmt(p, s, f, fnam)
-register char	*p;
-register char	*s;
-register FILE	*f;
-char		*fnam;
+wr_fatal()
 {
-	register i,j;
-	register long l;
-
-	while (j = *s++) {
-		switch (j -= '0') {
-/*		case 0: p++; break; */
-		case 1:
-			i = *p++; putc(i,f);
-			break;
-		case 2:
-#ifndef DUK
-			i = *((short *)p)++;
-#else DUK
-			i = *((short *)p);
-			p += sizeof(short);
-#endif DUK
-			putc(i,f);
-			i>>=8; putc(i,f);
-			break;
-		case 4:
-#ifndef DUK
-			l = *((long *)p)++;
-#else DUK
-			l = *((long *)p);
-			p += sizeof(long);
-#endif DUK
-			putc(l,f);
-			l >>=8; putc(l,f);
-			l >>=8; putc(l,f);
-			l >>=8; putc(l,f);
-			break;
-		default:
-			break;
-		}
-		if (ferror(f)) fprintf(stderr, "astrip: write error on %s\n", fnam);
-	}
+	writeerror = 1;
 }

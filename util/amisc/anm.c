@@ -1,6 +1,3 @@
-#define DUK	/* Modifications by Duk Bekema. */
-
-/* @(#)anm.c	1.4 */
 /* $Header$ */
 /*
 **	print symbol tables for
@@ -8,7 +5,6 @@
 **
 **	anm [-gopruns] [name ...]
 */
-#define	ushort	unsigned short
 
 #include	"out.h"
 
@@ -23,13 +19,14 @@ int	globl_flg;
 int	nosort_flg;
 int	arch_flg;
 int	prep_flg;
+int	read_error;
 struct	outhead	hbuf;
 struct	outsect	sbuf;
-FILE	*fi;
 long	off;
 char	*malloc();
 char	*realloc();
 long	s_base[S_MAX];	/* for specially encoded bases */
+char	*filename;
 
 main(argc, argv)
 char **argv;
@@ -89,16 +86,21 @@ char **argv;
 		unsigned	readcount;
 		int		i,j;
 
-		fi = fopen(*++argv,"r");
-		if (fi == NULL) {
+		read_error = 0;
+		if (! rd_open(*++argv)) {
 			fprintf(stderr, "anm: cannot open %s\n", *argv);
 			continue;
 		}
 
-		getofmt((char *)&hbuf, SF_HEAD, fi);
+		filename = *argv;
+		rd_ohead(&hbuf);
+		if (read_error) {
+			rd_close();
+			continue;
+		}
 		if (BADMAGIC(hbuf)) {
-			fprintf(stderr, "anm: %s-- bad format\n", *argv);
-			fclose(fi);
+			fprintf(stderr, "anm: %s -- bad format\n", *argv);
+			rd_close();
 			continue;
 		}
 		if (narg > 1)
@@ -106,14 +108,14 @@ char **argv;
 
 		n = hbuf.oh_nname;
 		if (n == 0) {
-			fprintf(stderr, "anm: %s-- no name list\n", *argv);
-			fclose(fi);
+			fprintf(stderr, "anm: %s -- no name list\n", *argv);
+			rd_close();
 			continue;
 		}
 
 		if (hbuf.oh_nchar == 0) {
-			fprintf(stderr, "anm: %s-- no names\n", *argv);
-			fclose(fi);
+			fprintf(stderr, "anm: %s -- no names\n", *argv);
+			rd_close();
 			continue;
 		}
 		if ((readcount = hbuf.oh_nchar) != hbuf.oh_nchar) {
@@ -121,10 +123,14 @@ char **argv;
 			exit(2);
 		}
 
-		/* store special section bases */
+		/* store special section bases ??? */
 		if (hbuf.oh_flags & HF_8086) {
+			rd_sect(&sbuf, hbuf.oh_nsect);
+			if (read_error) {
+				rd_close();
+				continue;
+			}
 			for (i=0; i<hbuf.oh_nsect; i++) {
-				getofmt((char *)&sbuf, SF_SECT, fi);
 				s_base[i+S_MIN] =
 					(sbuf.os_base>>12) & 03777760;
 			}
@@ -134,17 +140,20 @@ char **argv;
 			fprintf(stderr, "anm: out of memory on %s\n", *argv);
 			exit(2);
 		}
-		fseek(fi, OFF_CHAR(hbuf), 0);
-		if (fread(cbufp, 1, readcount, fi) == 0) {
-			fprintf(stderr, "anm: read error on %s\n", *argv);
-			exit(2);
+		rd_string(cbufp, hbuf.oh_nchar);
+		if (read_error) {
+			free(cbufp);
+			rd_close();
+			continue;
 		}
-		fi_to_co = cbufp - OFF_CHAR(hbuf);
 
-		fseek(fi, OFF_NAME(hbuf), 0);
+		fi_to_co = (long) (cbufp - OFF_CHAR(hbuf));
 		i = 0;
 		while (--n >= 0) {
-			getofmt((char *)&nbuf, SF_NAME, fi);
+			rd_name(&nbuf, 1);
+			if (read_error) {
+				break;
+			}
 
 			if (nbuf.on_foff == 0)
 				continue; /* skip entries without names */
@@ -157,7 +166,7 @@ char **argv;
 			    ((nbuf.on_type&S_TYP)!=S_UND || (nbuf.on_type&S_ETC)!=0))
 				continue;
 
-			nbuf.on_mptr = nbuf.on_foff + fi_to_co;
+			nbuf.on_mptr = (char *) (nbuf.on_foff + fi_to_co);
 
 			/* adjust value for specially encoded bases */
 			if (hbuf.oh_flags & HF_8086) {
@@ -180,7 +189,7 @@ char **argv;
 			nbufp[i++] = nbuf;
 		}
 
-		if (nosort_flg==0)
+		if (nbufp && nosort_flg==0)
 			qsort(nbufp, i, sizeof(struct outname), compare);
 
 		for (n=0; n<i; n++) {
@@ -231,7 +240,7 @@ char **argv;
 			free((char *)nbufp);
 		if (cbufp)
 			free((char *)cbufp);
-		fclose(fi);
+		rd_close();
 	}
 	exit(0);
 }
@@ -265,46 +274,8 @@ struct outname	*p1, *p2;
 	return(0);
 }
 
-getofmt(p, s, f)
-register char	*p;
-register char	*s;
-register FILE	*f;
+rd_fatal()
 {
-	register i;
-	register long l;
-
-	for (;;) {
-		switch (*s++) {
-/*		case '0': p++; continue; */
-		case '1':
-			*p++ = getc(f);
-			continue;
-		case '2':
-			i = getc(f);
-			i |= (getc(f) << 8);
-#ifndef DUK
-			*((short *)p)++ = i;
-#else DUK
-			*((short *)p) = i;
-			p += sizeof(short);
-#endif DUK
-			continue;
-		case '4':
-			l = (long)getc(f);
-			l |= ((long)getc(f) << 8);
-			l |= ((long)getc(f) << 16);
-			l |= ((long)getc(f) << 24);
-#ifndef DUK
-			*((long *)p)++ = l;
-#else DUK
-			*((long *)p) = l;
-			p += sizeof(long);
-#endif DUK
-			continue;
-		default:
-		case '\0':
-			break;
-		}
-		break;
-	}
+	fprintf(stderr,"read error on %s\n", filename);
+	read_error = 1;
 }
