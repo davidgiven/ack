@@ -790,7 +790,7 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			codenl();
 			break;
 		case INSTLAB:
-			cocono = -1;
+			cocono = 0;
 			tlab[0] = vp->vi_int[1] + '0';
 			code53(DO_INSTR,0);
 			codeint(strlookup(tlab));
