@@ -55,7 +55,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 #endif
 		}
 		else {
-			*pval = *pval % val;
+			*pval = *pval / val;
 		}
 		break;
 	case '%':
@@ -89,7 +89,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 #endif
 		}
 		else {
-			*pval = *pval / val;
+			*pval = *pval % val;
 		}
 		break;
 	case '*':
