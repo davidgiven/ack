@@ -72,8 +72,12 @@ get_names(head)
 		 * area, so we don't have to be afraid to confuse "no name"
 		 * with "the first name".
 		 */
-		if (name.on_foff)
+		if (name.on_foff) {
+			if (name.on_foff < 0 || name.on_foff >= charoff) {
+				fatal("illegal offset in name");
+			}
 			name.on_foff += charindex - charoff;
+		}
 		namerelocate(&name);
 		if (name.on_type & S_EXT) {
 			getexternal(&name);
