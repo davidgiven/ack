@@ -2,7 +2,7 @@
 #include <alloc.h>
 #include <out.h>
 #include "mach.h"
-#include "data.h"
+#include "back.h"
 
 static reduce_name_table();
 
@@ -125,9 +125,20 @@ reduce_name_table()
 		rp++;
 	}
 	for (i = 0; i < nname; i++) {
-		symbol_table[i].on_type &= ~S_NEEDED;
+		register struct outname *np = &symbol_table[i];
+
+		np->on_type &= ~S_NEEDED;
+		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
+			long sz = np->on_valu;
+
+			switchseg(SEGBSS);
+			align_word();
+			np->on_type &= (~S_COM);
+			np->on_valu = cur_value();
+			bss(sz);
+		}
 		if (diff_index[i] && diff_index[i] == diff_index[i-1]) {
-			symbol_table[i - diff_index[i]] = symbol_table[i];
+			symbol_table[i - diff_index[i]] = *np;
 		}
 	}
 	nname -= diff_index[nname - 1];
