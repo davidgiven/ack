@@ -67,9 +67,10 @@ setfiles(phase) register trf *phase ; {
 		in.p_keep=YES ;
 		in.p_keeps=NO ;
 	}
-	if ( phase->t_outfile ) {
+	if ( phase->t_outfile && phase->t_keep ) {
 		out.p_path=phase->t_outfile ;
 		out.p_keeps=NO ;
+		out.p_keep=YES ;
 	} else {
 		gr_init(&pathname) ;
 		if ( !phase->t_keep && !t_flag ) {
@@ -79,7 +80,15 @@ setfiles(phase) register trf *phase ; {
 			gr_cat(&pathname,unique()) ;
 			out.p_keep=NO ;
 		} else {
-			gr_cat(&pathname,p_basename) ;
+			if ( !p_basename ) {
+				gr_cat(&pathname,"Ack") ;
+				gr_cat(&pathname,unique()) ;
+				p_basename=keeps(gr_start(pathname)) ;
+				werror("Output written on %s%s",
+					p_basename,phase->t_out) ;
+			} else {
+				gr_cat(&pathname,p_basename) ;
+			}
 			out.p_keep=YES ;
 		}
 		gr_cat(&pathname,phase->t_out) ;
@@ -167,8 +176,9 @@ add_input(file,phase) path *file ; trf *phase ; {
 			file->p_path,phase->t_name) ;
 	}
 #endif
-	if ( !l_first(phase->t_inputs) ) {
-		/* This becomes the first entry in the input list */
+	phase->t_do=YES ;
+	if ( !phase->t_origname && orig.p_path[0]!='-' ) {
+		/* This entry decides the name of the result */
 		phase->t_origname= orig.p_path ;
 	}
 	store= (path *) getcore(sizeof (path)) ;
