@@ -112,7 +112,7 @@ STATIC int makedmap(dbl)
 	for (d = dbl; d != (dblock_p) 0; d = d->d_next) cnt++;
 	dmap = (dblock_p *) newmap(cnt);
 	for (d = dbl; d != (dblock_p) 0; d = d->d_next) {
-		assert(d->d_id) <= cnt;
+		assert(d->d_id <= cnt);
 		dmap[d->d_id] = d;
 	}
 	return cnt;
