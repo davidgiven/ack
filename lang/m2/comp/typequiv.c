@@ -146,8 +146,8 @@ TstAssCompat(tp1, tp2)
 	tp1 = BaseType(tp1);
 	tp2 = BaseType(tp2);
 
-	if ((tp1->tp_fund & T_INTORCARD) &&
-	    (tp2->tp_fund & T_INTORCARD)) return 1;
+	if (((tp1->tp_fund & T_INTORCARD) || tp1 == address_type) &&
+	    ((tp2->tp_fund & T_INTORCARD) || tp2 == address_type)) return 1;
 
 	if ((tp1->tp_fund == T_REAL) &&
 	    (tp2->tp_fund == T_REAL)) return 1;

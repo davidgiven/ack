@@ -58,6 +58,7 @@ t_type
 	*int_type,
 	*card_type,
 	*longint_type,
+	*longcard_type,
 	*real_type,
 	*longreal_type,
 	*word_type,
@@ -92,7 +93,7 @@ construct_type(fund, tp)
 
 	case T_ARRAY:
 		dtp->tp_value.tp_arr = new_array();
-		if (tp) dtp->tp_align = tp->tp_align;
+		dtp->tp_align = struct_align;
 		break;
 
 	case T_SUBRANGE:
@@ -151,13 +152,8 @@ InitTypes()
 		fatal("integer size not equal to word size");
 	}
 
-	if ((int) int_size != (int) pointer_size) {
-		fatal("cardinal size not equal to pointer size");
-	}
-
-	if ((int) long_size < (int) int_size ||
-	    (int) long_size % (int) word_size != 0) {
-		fatal("illegal long integer size");
+	if ((int) long_size < (int) int_size) {
+		fatal("long integer size smaller than integer size");
 	}
 
 	if ((int) double_size < (int) float_size) {
@@ -179,6 +175,7 @@ InitTypes()
 	*/
 	int_type = standard_type(T_INTEGER, int_align, int_size);
 	longint_type = standard_type(T_INTEGER, long_align, long_size);
+	longcard_type = standard_type(T_CARDINAL, long_align, long_size);
 	card_type = standard_type(T_CARDINAL, int_align, int_size);
 	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
 
@@ -402,6 +399,9 @@ proc_type(result_type, parameters, n_bytes_params)
 	if (! fit(n_bytes_params, (int) word_size)) {
 		error("maximum parameter byte count exceeded");
 	}
+	if (result_type && ! fit(WA(result_type->tp_size), (int) word_size)) {
+		error("maximum return value size exceeded");
+	}
 	return tp;
 }
 
@@ -496,7 +496,6 @@ set_type(tp)
 	return tp;
 }
 
-arith
 ArrayElSize(tp)
 	register t_type *tp;
 {
@@ -505,16 +504,23 @@ ArrayElSize(tp)
 	   or a multiple of it.
 	*/
 	register arith algn;
+	register t_type *elem_type = tp->arr_elem;
 
-	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
-	algn = align(tp->tp_size, tp->tp_align);
+	if (elem_type->tp_fund == T_ARRAY) ArraySizes(elem_type);
+	algn = align(elem_type->tp_size, elem_type->tp_align);
 	if (word_size % algn != 0) {
 		/* algn is not a dividor of the word size, so make sure it
 		   is a multiple
 		*/
-		return WA(algn);
+		algn = WA(algn);
 	}
-	return algn;
+	if (! fit(algn, (int) word_size)) {
+		error("element size of array too large");
+	}
+	tp->arr_elsize = algn;
+	if (tp->tp_align < elem_type->tp_align) {
+		tp->tp_align = elem_type->tp_align;
+	}
 }
 
 ArraySizes(tp)
@@ -523,25 +529,29 @@ ArraySizes(tp)
 	/*	Assign sizes to an array type, and check index type
 	*/
 	register t_type *index_type = IndexType(tp);
-	register t_type *elem_type = tp->arr_elem;
 	arith lo, hi, diff;
 
-	tp->arr_elsize = ArrayElSize(elem_type);
-	tp->tp_align = elem_type->tp_align;
+	ArrayElSize(tp);
 
 	/* check index type
 	*/
-	if (! bounded(index_type)) {
+	if (index_type->tp_size > word_size || ! bounded(index_type)) {
 		error("illegal index type");
 		tp->tp_size = tp->arr_elsize;
 		return;
 	}
 
 	getbounds(index_type, &lo, &hi);
+	tp->arr_low = lo;
+	tp->arr_high = hi;
 	diff = hi - lo;
 
-	tp->tp_size = (diff + 1) * tp->arr_elsize;
-	if (! fit(tp->tp_size, (int) word_size)) {
+	if (! fit(diff, (int) int_size)) {
+		error("too many elements in array");
+	}
+
+	tp->tp_size = align((diff + 1) * tp->arr_elsize, tp->tp_align);
+	if (! ufit(tp->tp_size, (int) pointer_size)) {
 		error("array too large");
 	}
 
@@ -549,7 +559,7 @@ ArraySizes(tp)
 	*/
 	tp->arr_descr = ++data_label;
 	C_df_dlb(tp->arr_descr);
-	C_rom_cst(lo);
+	C_rom_cst((arith) 0);
 	C_rom_cst(diff);
 	C_rom_cst(tp->arr_elsize);
 }

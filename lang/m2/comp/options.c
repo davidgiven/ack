@@ -21,6 +21,8 @@
 #include	"warning.h"
 #include	"nostrict.h"
 #include	"nocross.h"
+#include	"class.h"
+#include	"squeeze.h"
 
 #define	MINIDFSIZE	14
 
@@ -42,8 +44,14 @@ DoOption(text)
 		options[*text]++;	/* debug options etc.	*/
 		break;
 
+	case 'U':	/* allow underscores in identifiers */
+		inidf['_'] = 1;
+		break;
 	case 'L':	/* no fil/lin */
 	case 'R':	/* no range checks */
+	case 'A':	/* extra array bound checks, for machines that do not
+			   implement it in AAR/LAR/SAR
+			*/
 	case 'n':	/* no register messages */
 	case 'x':	/* every name global */
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
@@ -98,6 +106,7 @@ DoOption(text)
 		break;
 
 	case 'M': {	/* maximum identifier length */
+#ifndef SQUEEZE
 		char *t = text;		/* because &text is illegal */
 
 		idfsize = txt2int(&t);
@@ -111,6 +120,7 @@ DoOption(text)
 			warning(W_ORDINARY, "minimum identifier length is %d", MINIDFSIZE);
 			idfsize = MINIDFSIZE;
 		}
+#endif
 		}
 		break;
 
@@ -223,6 +233,7 @@ DoOption(text)
 	}
 }
 
+#if (!SQUEEZE) | (!NOCROSS)
 int
 txt2int(tp)
 	register char **tp;
@@ -239,3 +250,4 @@ txt2int(tp)
 	}
 	return val;
 }
+#endif

@@ -297,7 +297,8 @@ WalkProcedure(procedure)
 					}
 					StackAdjustment = NewPtr();
 					C_lor((arith) 1);
-					C_stl(StackAdjustment);
+					C_lal(StackAdjustment);
+					C_sti(pointer_size);
 				}
 				/* First compute new stackpointer */
 				C_lal(param->par_def->var_off);
@@ -306,11 +307,12 @@ WalkProcedure(procedure)
 				C_lfr(pointer_size);
 				C_str((arith) 1);
 						/* adjusted stack pointer */
-				C_lol(param->par_def->var_off);
+				C_lal(param->par_def->var_off);
+				C_loi(pointer_size);
 						/* push source address */
 				C_cal("_copy_array");
 						/* copy */
-				C_asp(word_size);
+				C_asp(pointer_size);
 			}
 		}
 	}
@@ -334,7 +336,8 @@ WalkProcedure(procedure)
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
 			*/
-			C_lol(StackAdjustment);
+			C_lal(StackAdjustment);
+			C_loi(pointer_size);
 			C_str((arith) 1);
 		}
 		c_lae_dlb(func_res_label);
@@ -349,7 +352,8 @@ WalkProcedure(procedure)
 			C_lal(retsav);
 			C_sti(func_res_size);
 		}
-		C_lol(StackAdjustment);
+		C_lal(StackAdjustment);
+		C_loi(pointer_size);
 		C_str((arith) 1);
 		if (func_type) {
 			C_lal(retsav);

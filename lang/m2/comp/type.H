@@ -45,9 +45,13 @@ struct array {
 	struct type *ar_elem;	/* type of elements */
 	label ar_descr;		/* label of array descriptor */
 	arith ar_elsize;	/* size of elements */
+	arith ar_low;		/* lower bound of index */
+	arith ar_high;		/* upper bound of index */
 #define arr_elem	tp_value.tp_arr->ar_elem
 #define arr_descr	tp_value.tp_arr->ar_descr
 #define arr_elsize	tp_value.tp_arr->ar_elsize
+#define arr_low		tp_value.tp_arr->ar_low
+#define arr_high	tp_value.tp_arr->ar_high
 };
 
 /* ALLOCDEF "array" 5 */
@@ -117,6 +121,7 @@ extern t_type
 	*int_type,
 	*card_type,
 	*longint_type,
+	*longcard_type,
 	*real_type,
 	*longreal_type,
 	*word_type,
