@@ -4,6 +4,7 @@ INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 INCLUDES = -I$(EMHOME)/h
 CFLAGS = -O $(INCLUDES)
+AR = ar
 CFILES =	rd_arhdr.c wr_arhdr.c \
 		rd_ranlib.c wr_ranlib.c \
 		rd_bytes.c wr_bytes.c \
@@ -37,7 +38,7 @@ clean:
 		rm -f *.[oa] nohup.out Out byte_order byte_order.h
 
 libobject.a:	$(OFILES)
-		ar r libobject.a $(OFILES)
+		$(AR) r libobject.a $(OFILES)
 		-sh -c 'ranlib libobject.a'
 
 depend:		byte_order.h
