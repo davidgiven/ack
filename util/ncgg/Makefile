@@ -32,7 +32,7 @@ debugcgg:	cgg.o $(OFILES) debugoutput.o
 cgg.o:	scan.c
 
 enterkeyw.c:	cvtkeywords keywords y.tab.h
-	cvtkeywords
+	cvtkeywords keywords
 
 debugoutput.o:	debugoutput.c
 	$(CC) $(CFLAGS) -DCODEDEBUG -c debugoutput.c

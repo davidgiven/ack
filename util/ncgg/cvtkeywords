@@ -1,6 +1,6 @@
 : '$Header$'
 grep '^#' y.tab.h >tokendefs
-ed - keywords <<'!Funky!Stuff!'
+ed - $1 <<'!Funky!Stuff!'
 g/^#/d
 1,$s/\([^ 	]*\)[ 	][ 	]*\(.*\)/	sy_p=lookup("\1",symkeyw,newsymbol);sy_p->sy_value.syv_keywno=\2;/
 1i
