@@ -189,12 +189,12 @@ ch3cast(expp, oper, tp)
 	if (oldtp->tp_fund == FIELD)	{
 		field2arith(expp);
 		ch3cast(expp, oper, tp);
+		return;
 	}
-	else
 	if (tp->tp_fund == FIELD) {
 		ch3cast(expp, oper, tp->tp_up);
+		return;
 	}
-	else
 #endif NOBITFIELD
 	if (oper == CASTAB || oper == '=' || oper == RETURN) {
 		qual_lev = -2;
