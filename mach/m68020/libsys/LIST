@@ -1,4 +1,6 @@
 libmon_s.a
+execle.c
+execv.c
 exit.s
 _exit.s
 access.s
