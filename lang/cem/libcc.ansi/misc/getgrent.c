@@ -19,9 +19,9 @@ typedef int off_t;                              /* see lseek(2) */
 typedef long off_t;
 #endif
 
-off_t lseek(int d, off_t offset, int whence);
-int read(int d, char *buf, int nbytes);
-int close(int d);
+off_t _lseek(int d, off_t offset, int whence);
+int _read(int d, char *buf, int nbytes);
+int _close(int d);
 
 #define	RBUFSIZE	1024
 static char _gr_file[] = "/etc/group";
@@ -37,7 +37,7 @@ int
 setgrent(void)
 {
         if (_gfd >= 0)
-	        lseek(_gfd, 0L, 0);
+	        _lseek(_gfd, 0L, 0);
         else
 	        _gfd = open(_gr_file, O_RDONLY);
 
@@ -49,7 +49,7 @@ int
 endgrent(void) 
 {
         if (_gfd >= 0)
-	        close(_gfd);
+	        _close(_gfd);
 
         _gfd = -1;
         _bufcnt = 0;
@@ -65,7 +65,7 @@ getline(void)
         _buf = _grbuf;
         do {
 	        if (--_bufcnt <= 0){
-	                if ((_bufcnt = read(_gfd, _buffer, RBUFSIZE)) <= 0)
+	                if ((_bufcnt = _read(_gfd, _buffer, RBUFSIZE)) <= 0)
 		                return 0;
 	                else
 		                _pnt = _buffer;

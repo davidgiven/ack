@@ -12,7 +12,7 @@
 #include	<sys/types.h>
 #include	<dirent.h>
 
-extern off_t lseek(int d, int offset, int whence);
+extern off_t _lseek(int d, int offset, int whence);
 
 #ifndef SEEK_CUR
 #define	SEEK_CUR	1
@@ -30,5 +30,5 @@ telldir(register DIR *dirp)		/* return offset of next entry */
 	if ( dirp->dd_loc < dirp->dd_size )	/* valid index */
 		return ((struct dirent *)&dirp->dd_buf[dirp->dd_loc])->d_off;
 	else				/* beginning of next directory block */
-		return lseek( dirp->dd_fd, (off_t)0, SEEK_CUR );
+		return _lseek( dirp->dd_fd, (off_t)0, SEEK_CUR );
 }

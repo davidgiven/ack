@@ -16,7 +16,7 @@ typedef void	*pointer;		/* (void *) if you have it */
 #define	NULL	0
 #endif
 
-int close(int d);
+int _close(int d);
 
 int
 closedir(register DIR *dirp)		/* stream from opendir */
@@ -32,5 +32,5 @@ closedir(register DIR *dirp)		/* stream from opendir */
 	fd = dirp->dd_fd;		/* bug fix thanks to R. Salz */
 	free( (pointer)dirp->dd_buf );
 	free( (pointer)dirp );
-	return close( fd );
+	return _close( fd );
 }

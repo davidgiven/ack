@@ -11,15 +11,11 @@
 #include	<sys/stat.h>
 #include	<dirent.h>
 
-#ifdef BSD_SYSV
-#define open	_open			/* avoid emulation overhead */
-#endif
-
 typedef void	*pointer;		/* (void *) if you have it */
 
-extern int open(const char *path, int flags, int mode);
-extern int close(int d);
-extern int fstat(int fd, struct stat *buf);
+extern int _open(const char *path, int flags, int mode);
+extern int _close(int d);
+extern int _fstat(int fd, struct stat *buf);
 
 #ifndef NULL
 #define	NULL	0
@@ -40,12 +36,12 @@ opendir(const char *dirname)		/* name of directory */
 	register int	fd;		/* file descriptor for read */
 	struct stat	sbuf;		/* result of fstat() */
 
-	if ( (fd = open( dirname, O_RDONLY, 0 )) < 0 )
+	if ( (fd = _open( dirname, O_RDONLY, 0 )) < 0 )
 		return NULL;		/* errno set by open() */
 
-	if ( fstat( fd, &sbuf ) != 0 || !S_ISDIR( sbuf.st_mode ) )
+	if ( _fstat( fd, &sbuf ) != 0 || !S_ISDIR( sbuf.st_mode ) )
 		{
-		(void)close( fd );
+		(void)_close( fd );
 		errno = ENOTDIR;
 		return NULL;		/* not a directory */
 		}
@@ -59,7 +55,7 @@ opendir(const char *dirname)		/* name of directory */
 		if ( dirp != NULL )
 			free( (pointer)dirp );
 
-		(void)close( fd );
+		(void)_close( fd );
 		errno = serrno;
 		return NULL;		/* not enough memory */
 		}

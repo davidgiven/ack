@@ -13,7 +13,7 @@
 #include	<sys/types.h>
 #include	<dirent.h>
 
-extern off_t	lseek(int d, int offset, int whence);
+extern off_t	_lseek(int d, int offset, int whence);
 
 #ifndef NULL
 #define	NULL	0
@@ -33,5 +33,5 @@ rewinddir(register DIR *dirp)
 		}
 
 	dirp->dd_loc = dirp->dd_size = 0;	/* invalidate buffer */
-	(void)lseek( dirp->dd_fd, (off_t)0, SEEK_SET );	/* may set errno */
+	(void)_lseek( dirp->dd_fd, (off_t)0, SEEK_SET );	/* may set errno */
 }

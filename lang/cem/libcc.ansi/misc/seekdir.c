@@ -15,7 +15,7 @@
 #include	<sys/types.h>
 #include	<dirent.h>
 
-extern off_t lseek(int d, int offset, int whence);
+extern off_t _lseek(int d, int offset, int whence);
 
 #ifndef NULL
 #define	NULL	0
@@ -97,7 +97,7 @@ seekdir(register DIR *dirp, register off_t loc)
 
 				dirp->dd_loc = dirp->dd_size = 0;
 
-				if ( lseek( dirp->dd_fd, (off_t)0, SEEK_SET )
+				if ( _lseek( dirp->dd_fd, (off_t)0, SEEK_SET )
 					!= 0
 				   )
 					return;	/* errno already set (EBADF) */

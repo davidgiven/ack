@@ -7,8 +7,6 @@
 #include	<stdlib.h>
 #include	"../stdio/loc_incl.h"
 
-int lseek(int d, int offset, int whence);
-
 FILE *
 fdopen(int fd, const char *mode)
 {

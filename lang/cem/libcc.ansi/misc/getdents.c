@@ -97,8 +97,8 @@ extern int	read();
 extern int	_getdents();		/* actual system call */
 #endif
 
-extern int	fstat(int fd, struct stat *buf);
-extern off_t	lseek(int d, int offset, int whence);
+extern int	_fstat(int fd, struct stat *buf);
+extern off_t	_lseek(int d, int offset, int whence);
 
 #ifndef DIRBLKSIZ
 #define	DIRBLKSIZ	4096		/* directory file read buffer size */
@@ -209,7 +209,7 @@ getdents(int fildes, char *buf, unsigned nbyte)	/* returns # bytes read;
 		return -1;
 		}
 
-	if ( fstat( fildes, &statb ) != 0 )
+	if ( _fstat( fildes, &statb ) != 0 )
 		return -1;		/* errno set by fstat() */
 
 	if ( !S_ISDIR( statb.st_mode ) )
@@ -218,7 +218,7 @@ getdents(int fildes, char *buf, unsigned nbyte)	/* returns # bytes read;
 		return -1;
 		}
 
-	if ( (offset = lseek( fildes, (off_t)0, SEEK_CUR )) < 0 )
+	if ( (offset = _lseek( fildes, (off_t)0, SEEK_CUR )) < 0 )
 		return -1;		/* errno set by lseek() */
 
 #ifdef BFS				/* no telling what remote hosts do */
