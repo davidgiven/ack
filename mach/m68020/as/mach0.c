@@ -1,4 +1,3 @@
-/* @(#)mach0.c	1.5 */
 /*
  * Motorola 68020 options
  */
@@ -29,5 +28,3 @@
 
 #undef	VALWIDTH
 #define	VALWIDTH	8
-
-#define ASLD

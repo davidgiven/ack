@@ -1,4 +1,3 @@
-/* @(#)mach1.c	1.8 */
 /*
  * Motorola 68020 dependent C declarations
  */

@@ -1,4 +1,3 @@
-/* @(#)mach5.c	1.16 */
 /*
  * Motorola 68020 auxiliary functions
  */

@@ -1,4 +1,3 @@
-/* @(#)mach3.c	1.4 */
 /*
  * Motorola 68020 keywords
  */

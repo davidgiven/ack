@@ -1,4 +1,3 @@
-/* @(#)mach4.c	1.11 */
 /*
  *  Motorola 68020 syntax rules
  */

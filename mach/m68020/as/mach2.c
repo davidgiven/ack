@@ -1,4 +1,3 @@
-/* @(#)mach2.c	1.5 */
 /*
  * Motorola 68020 tokens
  */
