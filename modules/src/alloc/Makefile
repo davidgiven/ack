@@ -7,6 +7,9 @@ INCLUDES = -I. -I$(HDIR)
 CFLAGS = -O $(INCLUDES)
 
 CSRC =		Malloc.c\
+		Salloc.c\
+		Srealloc.c\
+		Realloc.c\
 		botch.c\
 		clear.c\
 		st_alloc.c\
@@ -15,7 +18,8 @@ CSRC =		Malloc.c\
 SOURCES =	alloc.h\
 		$(CSRC)
 
-OBJECTS =	botch.o clear.o st_alloc.o Malloc.o std_alloc.o No_Mem.o
+OBJECTS =	botch.o clear.o st_alloc.o Malloc.o Salloc.o \
+		Srealloc.o Realloc.o std_alloc.o No_Mem.o
 
 all:		liballoc.a
 

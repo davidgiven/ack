@@ -7,7 +7,7 @@
 
 /*	The memory allocation routines offered in this file are:
 
-	char *Malloc(n)		: allocate n bytes
+	char *Srealloc(ptr, n)	: reallocate buffer to n bytes
 
 	This file imports routines from "system".
 */
@@ -17,11 +17,9 @@
 #include	"alloc.h"
 
 EXPORT char *
-Malloc(sz)
+Srealloc(str, sz)
+	char str[];
 	unsigned int sz;
 {
-	char *res = malloc(sz);
-	
-	if (res == 0) No_Mem();
-	return res;
+	return Realloc(str, sz);
 }

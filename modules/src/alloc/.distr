@@ -1,5 +1,8 @@
 Makefile
 Malloc.c
+Srealloc.c
+Realloc.c
+Salloc.c
 alloc.3
 alloc.h
 botch.c

@@ -1,7 +1,7 @@
 .TH ALLOC 3ACK "March 25, 1986"
 .ad
 .SH NAME
-Malloc, Salloc, Srealloc, st_alloc, st_free\ \-\ low level memory allocation routines
+Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory allocation routines
 .SH SYNOPSIS
 .B #include <alloc.h>
 .PP
@@ -12,6 +12,10 @@ Malloc, Salloc, Srealloc, st_alloc, st_free\ \-\ low level memory allocation rou
 .B char *Salloc(str, size)
 .br
 .B char *str;
+.B unsigned int size;
+.PP
+.B char *Realloc(ptr, size)
+.B char *buf;
 .B unsigned int size;
 .PP
 .B char *Srealloc(str, size)
@@ -34,6 +38,13 @@ Malloc, Salloc, Srealloc, st_alloc, st_free\ \-\ low level memory allocation rou
 .br
 .B unsigned int size;
 .PP
+.br
+.B clear(ptr, size)
+.br
+.B char *ptr;
+.br
+.B unsigned int size;
+.PP
 .SH DESCRIPTION
 This set of routines provides a checking memory allocation mechanism.
 .PP
@@ -43,8 +54,14 @@ bytes, beginning on a boundary suitable for any data type.
 \fISalloc\fR returns a pointer to a block of at least \fIsize\fR
 bytes, initialized with the null-terminated string \fIstr\fR.
 .PP
+\fIRealloc\fR changes the size of
+the block at \fIbuf\fR to \fIsize\fR bytes, and returns a pointer to the
+(possibly moved) block.
+.PP
 \fISrealloc\fR reallocates
 the string at \fIstr\fR to \fIsize\fR bytes.
+It actually does the same as \fIRealloc\fP, and exists only for
+backwards compatibility.
 .PP
 All these routines use \fImalloc\fR and \fIrealloc\fR.
 \fIFree\fR can be used on pointers returned by these routines.
@@ -62,6 +79,8 @@ the structure to be freed, \fIphead\fR is again a pointer to a field
 containing the head of the free list, and \fIsize\fR again contains the size
 of the structures.
 These last two routines are best used in a macro.
+.PP
+\fIClear\fR clears \fIsize\fR bytes, starting at \fIptr\fR.
 .SH FILES
 .nf
 ~em/modules/h/alloc.h
@@ -70,7 +89,7 @@ These last two routines are best used in a macro.
 .SH "SEE ALSO"
 malloc(3)
 .SH DIAGNOSTICS
-\fIMalloc\fR, \fISalloc\fR, \fISrealloc\fR, and \fIst_alloc\fR
+\fIMalloc\fR, \fISalloc\fR, \fIRealloc\fP, \fISrealloc\fR, and \fIst_alloc\fR
 call a routine \fINo_Mem\fR if there is no memory available. This routine
 is not supposed to return. A default one, that
 gives an error message and stops execution, is provided.

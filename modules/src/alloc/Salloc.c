@@ -7,7 +7,8 @@
 
 /*	The memory allocation routines offered in this file are:
 
-	char *Malloc(n)		: allocate n bytes
+	char *Salloc(str, n)	: allocate n bytes, initialized with the string
+					str
 
 	This file imports routines from "system".
 */
@@ -17,11 +18,18 @@
 #include	"alloc.h"
 
 EXPORT char *
-Malloc(sz)
-	unsigned int sz;
+Salloc(str, sz)
+	register char str[];
+	register unsigned int sz;
 {
+	/*	Salloc() is not a primitive function: it just allocates a
+		piece of storage and copies a given string into it.
+	*/
 	char *res = malloc(sz);
-	
-	if (res == 0) No_Mem();
+	register char *m = res;
+
+	if (m == 0) No_Mem();
+	while (sz--)
+		*m++ = *str++;
 	return res;
 }

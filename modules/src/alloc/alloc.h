@@ -11,11 +11,11 @@
 		char *Malloc(n)		allocate n bytes
 		char *Salloc(str, n)	allocate n bytes and fill them with
 					string str
-		char *Realloc(str, n)	reallocate the string at str to n bytes,
-					only works if str was last allocated
+		char *Realloc(str, n)	reallocate the block at str to n bytes.
+		char *Srealloc(str, n)	same as Realloc.
 */
 
-extern char *Salloc(), *Malloc(), *Srealloc();
+extern char *Salloc(), *Malloc(), *Srealloc(), *Realloc();
 extern char *malloc(), *realloc();
 
 /*	S T R U C T U R E - S T O R A G E  D E F I N I T I O N S	*/
