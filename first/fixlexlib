@@ -54,7 +54,7 @@ Xfail)	echo 'What option do I have to give to cc to get the LEX library?'
 	exec $0 $ANSWER "$TRIES"
 	;;
 Xsucces)
-	for i in ../util/opt ../util/cgg ../util/ncgg ../lang/occam/comp ../modules/src/em_opt
+	for i in ../util/opt ../util/cgg ../util/ncgg ../lang/occam/comp ../modules/src/em_opt ../util/ceg/as_parser
 	do
 	    (	cd $i
 		cp Makefile makefile
