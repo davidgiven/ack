@@ -1,5 +1,29 @@
 /*  I N P U T   R O U T I N E S */
 
+extern	FILE	*curinp;		/* current input file */
+extern block_id lastbid;		/* block identifying number */
+extern lab_id	 lastlabid;		/* last label identifier */
+
+#define getbyte()	getc(curinp)
+extern short	getshort();		/* ()
+					 * Read a short from curinp
+					 */
+extern offset	getoff();		/* ()
+					 * Read an offset from curinp
+					 */
+extern line_p read_line();		/* ( proc_p *p_out)
+					 * Read a line of EM code (i.e. one 
+					 * instruction)  and its arguments 
+					 * (if any). If the instruction is a
+					 * 'pro' pseudo, set p_out.
+					 */
+
+extern line_p getlines();		/* ( FILE *lf; int n; proc_p *p_out;
+					 *   bool collect_mes)
+					 * Read n lines of EM text and doubly
+					 * link them.  Also process messages
+					 * if required.
+
 extern bblock_p freshblock();		/* ()
 					 * Allocate a bblock struct and assign
 					 * it a brand new block_id.
@@ -25,32 +49,4 @@ extern bool	 getunit();		/* (FILE *gf,*lf; short kind_out;
 					 * collected and put in the global
 					 * variable 'mesregs'. The proc read
 					 * is returned in p_out.
-					 */
-extern bool	 getbblocks();		/* (FILE *f,short kind_out,
-					 * short *n_out, bblock_p *g_out,
-					 * line_p *l_out)
-					 * Read the EM text of a single
-					 * unit from the given file.
-					 * This unit can be either a procedure
-					 * or a umber of data declarations and
-					 * messages. If it is a proc., then
-					 * partition the text into
-					 * basic blocks. Return the
-					 * number of basic blocks in n_out.
-					 */
-extern call_p getcall();		/* (FILE *cf)
-					 * Read a call from the call-file
-					 */
-extern line_p get_text();		/* (FILE *lf; proc_p *p_out)
-					 * Read the EM text of one procedure.
-					 * The procedure read is returned via
-					 * p_out.
-					 */
-extern calcnt_p getcc();		/* (FILE *ccf; proc_p p)
-					 * Read the call-count information
-					 * of procedure p.
-					 */
-extern line_p get_ca_lines();		/* (FILE *lf; proc_p *p_out)
-					 * Read em lines till end pseudo is met.
-					 * (Used only by CA phase).
 					 */
