@@ -19,10 +19,16 @@ DEFINITION MODULE RealInOut;
      DEL or BACKSPACE, depending on the implementation of ReadString.
   *)
 
+  PROCEDURE ReadLongReal(VAR x: LONGREAL);
+  (* Like ReadReal, but for LONGREAL *)
+
   PROCEDURE WriteReal(x: REAL; n: CARDINAL);
   (* Write x using n characters.
      If fewer than n characters are needed, leading blanks are inserted.
   *)
+
+  PROCEDURE WriteLongReal(x: LONGREAL; n: CARDINAL);
+  (* Like WriteReal, but for LONGREAL *)
 
   PROCEDURE WriteFixPt(x: REAL; n, k: CARDINAL);
   (* Write x in fixed-point notation usign n characters with k digits
@@ -30,7 +36,13 @@ DEFINITION MODULE RealInOut;
      leading blanks are inserted.
   *)
 
+  PROCEDURE WriteLongFixPt(x: LONGREAL; n, k: CARDINAL);
+  (* Like WriteFixPt, but for LONGREAL *)
+
   PROCEDURE WriteRealOct(x: REAL);
   (* Write x in octal words.
   *)
+
+  PROCEDURE WriteLongRealOct(x: LONGREAL);
+  (* Like WriteRealOct, but for LONGREAL *)
 END RealInOut.

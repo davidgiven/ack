@@ -21,39 +21,56 @@ IMPLEMENTATION MODULE RealInOut;
   TYPE	RBUF = ARRAY [0..MAXWIDTH+1] OF CHAR;
 
   PROCEDURE WriteReal(arg: REAL; ndigits: CARDINAL);
+  BEGIN
+	WriteLongReal(LONG(arg), ndigits)
+  END WriteReal;
+
+  PROCEDURE WriteLongReal(arg: LONGREAL; ndigits: CARDINAL);
     VAR buf : RBUF;
 	ok : BOOLEAN;
 
   BEGIN
 	IF ndigits > MAXWIDTH THEN ndigits := MAXWIDTH; END;
 	IF ndigits < 10 THEN ndigits := 10; END;
-	RealConversions.RealToString(arg, ndigits, -INTEGER(ndigits - 7), buf, ok);
+	RealConversions.LongRealToString(arg, ndigits, -INTEGER(ndigits - 7), buf, ok);
 	InOut.WriteString(buf);
-  END WriteReal;
+  END WriteLongReal;
 
   PROCEDURE WriteFixPt(arg: REAL; n, k: CARDINAL);
+  BEGIN
+	WriteLongFixPt(LONG(arg), n, k)
+  END WriteFixPt;
+
+  PROCEDURE WriteLongFixPt(arg: LONGREAL; n, k: CARDINAL);
   VAR buf: RBUF;
       ok : BOOLEAN;
 
   BEGIN
 	IF n > MAXWIDTH THEN n := MAXWIDTH END;
-	RealConversions.RealToString(arg, n, k, buf, ok);
+	RealConversions.LongRealToString(arg, n, k, buf, ok);
 	InOut.WriteString(buf);
-  END WriteFixPt;
+  END WriteLongFixPt;
 
   PROCEDURE ReadReal(VAR x: REAL);
+  VAR x1: LONGREAL;
+  BEGIN
+	ReadLongReal(x1);
+	x := x1
+  END ReadReal;
+
+  PROCEDURE ReadLongReal(VAR x: LONGREAL);
     VAR	Buf: ARRAY[0..512] OF CHAR;
 	ok: BOOLEAN;
 
   BEGIN
 	InOut.ReadString(Buf);
-	RealConversions.StringToReal(Buf, x, ok);
+	RealConversions.StringToLongReal(Buf, x, ok);
 	IF NOT ok THEN
 		Traps.Message("real expected");
 		HALT;
 	END;
 	Done := TRUE;
-  END ReadReal;
+  END ReadLongReal;
 
   PROCEDURE wroct(x: ARRAY OF WORD);
   VAR	i: CARDINAL;
@@ -68,6 +85,11 @@ IMPLEMENTATION MODULE RealInOut;
   BEGIN
 	wroct(x);
   END WriteRealOct;
+
+  PROCEDURE WriteLongRealOct(x: LONGREAL);
+  BEGIN
+	wroct(x);
+  END WriteLongRealOct;
 
 BEGIN
 	Done := FALSE;

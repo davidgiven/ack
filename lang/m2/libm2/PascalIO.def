@@ -102,6 +102,9 @@ DEFINITION MODULE PascalIO;
      Input stops at the character following the real.
   *)
 
+  PROCEDURE ReadLongReal(InputText: Text; VAR Real: LONGREAL);
+  (* Like ReadReal, but for LONGREAL *)
+
   (***************************************************************************
      Output routines;
      All these routines result in a runtime error when not called with either
@@ -149,4 +152,7 @@ DEFINITION MODULE PascalIO;
      Always use at least "Width" places, blank-padding to the left if needed.
   *)
 
+  PROCEDURE WriteLongReal(OutputText: Text; Real: LONGREAL;
+			  Width, Nfrac: CARDINAL);
+  (* Like WriteReal, but for LONGREAL *)
 END PascalIO.

@@ -272,6 +272,13 @@ IMPLEMENTATION MODULE PascalIO;
   END ReadCardinal;
 
   PROCEDURE ReadReal(InputText: Text; VAR real: REAL);
+  VAR x1: LONGREAL;
+  BEGIN
+	ReadLongReal(InputText, x1);
+	real := x1
+  END ReadReal;
+
+  PROCEDURE ReadLongReal(InputText: Text; VAR real: LONGREAL);
   VAR
 	buf: numbuf;
 	ch: CHAR;
@@ -328,13 +335,13 @@ IMPLEMENTATION MODULE PascalIO;
 	END;
 	IF ok THEN
 		buf[index] := 0C;
-		RealConversions.StringToReal(buf, real, ok);
+		RealConversions.StringToLongReal(buf, real, ok);
 	END;
 	IF NOT ok THEN
 		Traps.Message("Illegal real");
 		HALT;
 	END;
-  END ReadReal;
+  END ReadLongReal;
 
   PROCEDURE WriteCardinal(OutputText: Text; card: CARDINAL; width: CARDINAL);
   VAR
@@ -362,6 +369,11 @@ IMPLEMENTATION MODULE PascalIO;
   END WriteBoolean;
 
   PROCEDURE WriteReal(OutputText: Text; real: REAL; width, nfrac: CARDINAL);
+  BEGIN
+	WriteLongReal(OutputText, LONG(real), width, nfrac)
+  END WriteReal;
+
+  PROCEDURE WriteLongReal(OutputText: Text; real: LONGREAL; width, nfrac: CARDINAL);
   VAR
 	buf: numbuf;
 	ok: BOOLEAN;
@@ -371,18 +383,18 @@ IMPLEMENTATION MODULE PascalIO;
 		width := SIZE(buf);
 	END;
 	IF nfrac > 0 THEN
-		RealConversions.RealToString(real, width, nfrac, buf, ok);
+		RealConversions.LongRealToString(real, width, nfrac, buf, ok);
 	ELSE
 		IF width < 9 THEN width := 9; END;
-		IF real < 0.0 THEN
+		IF real < 0.0D THEN
 			digits := 7 - INTEGER(width);
 		ELSE
 			digits := 6 - INTEGER(width);
 		END;
-		RealConversions.RealToString(real, width, digits, buf, ok);
+		RealConversions.LongRealToString(real, width, digits, buf, ok);
 	END;
 	WriteString(OutputText, buf, 0);
-  END WriteReal;
+  END WriteLongReal;
 
   PROCEDURE WriteString(OutputText: Text; str: ARRAY OF CHAR; width: CARDINAL);
   VAR index: CARDINAL;
