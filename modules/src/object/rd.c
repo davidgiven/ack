@@ -3,8 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#include <out.h>
-#include "object.h"
+#include "obj.h"
 
 extern long		lseek();
 
@@ -42,7 +41,7 @@ static long		rd_base;
 
 static int sectionnr;
 
-static
+static void
 OUTREAD(p, b, n)
 	char *b;
 	long n;
@@ -73,6 +72,7 @@ rd_open(f)
 
 static int offcnt;
 
+int
 rd_fdopen(fd)
 {
 	register int i;
@@ -90,6 +90,7 @@ rd_fdopen(fd)
 	return 1;
 }
 
+void
 rd_close()
 {
 
@@ -97,11 +98,13 @@ rd_close()
 	outfile = -1;
 }
 
+int
 rd_fd()
 {
 	return outfile;
 }
 
+void
 rd_ohead(head)
 	register struct outhead	*head;
 {
@@ -135,6 +138,7 @@ rd_ohead(head)
 #endif
 }
 
+void
 rd_rew_relos(head)
 	register struct outhead *head;
 {
@@ -143,6 +147,7 @@ rd_rew_relos(head)
 	BEGINSEEK(PARTRELO, off);
 }
 
+void
 rd_sect(sect, cnt)
 	register struct outsect	*sect;
 	register unsigned int	cnt;
@@ -168,6 +173,7 @@ rd_sect(sect, cnt)
 	}
 }
 
+void
 rd_outsect(s)
 {
 	OUTSECT(s);
@@ -177,6 +183,7 @@ rd_outsect(s)
 /*
  * We don't have to worry about byte order here.
  */
+void
 rd_emit(emit, cnt)
 	char		*emit;
 	long		cnt;
@@ -185,6 +192,7 @@ rd_emit(emit, cnt)
 	offset[sectionnr] += cnt;
 }
 
+void
 rd_relo(relo, cnt)
 	register struct outrelo	*relo;
 	register unsigned int cnt;
@@ -208,6 +216,7 @@ rd_relo(relo, cnt)
 	}
 }
 
+void
 rd_name(name, cnt)
 	register struct outname	*name;
 	register unsigned int cnt;
@@ -231,6 +240,7 @@ rd_name(name, cnt)
 	}
 }
 
+void
 rd_string(addr, len)
 	char *addr;
 	long len;
@@ -240,6 +250,7 @@ rd_string(addr, len)
 }
 
 #ifdef SYMDBUG
+void
 rd_dbug(buf, size)
 	char		*buf;
 	long		size;

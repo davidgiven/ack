@@ -2,7 +2,7 @@
 
 SRC_DIR = $(SRC_HOME)/modules/src/object
 MOD_DIR = $(TARGET_HOME)/modules
-INCLUDES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(SRC_DIR)
+INCLUDES = -I$(TARGET_HOME)/h -I$(MOD_DIR)/h -I$(TARGET_HOME)/config -I$(SRC_DIR)
 CFLAGS = $(INCLUDES) $(COPTIONS)
 
 CFILES =	$(SRC_DIR)/rd_arhdr.c $(SRC_DIR)/wr_arhdr.c \
@@ -22,16 +22,18 @@ OFILES =	rd.$(SUF) rd_arhdr.$(SUF) rd_int2.$(SUF) rd_long.$(SUF) \
 all:		libobject.$(LIBSUF)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp libobject.$(LIBSUF) $(MOD_DIR)/lib/libobject.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libobject.$(LIBSUF)
-		cp $(SRC_DIR)/object.3 $(MOD_DIR)/man/object.3
+		cp $(SRC_DIR)/object.h $(MOD_DIR)/h/object.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/object.3 $(TARGET_HOME) ; \
 		fi
 
 compare:	all
 		-cmp libobject.$(LIBSUF) $(MOD_DIR)/lib/libobject.$(LIBSUF)
-		-cmp $(SRC_DIR)/object.3 $(MOD_DIR)/man/object.3
+		-cmp $(SRC_DIR)/object.h $(MOD_DIR)/h/object.h
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC_DIR)/object.h $(CFILES)

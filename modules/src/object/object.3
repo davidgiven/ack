@@ -13,70 +13,72 @@ and write ACK-object files and libraries
 .B #include <arch.h>
 .br
 .B #include <ranlib.h>
+.br
+.B #include <object.h>
 .PP
 .B int wr_open(filename)
 .br
 .B char *filename;
 .PP
-.B wr_close()
+.B void wr_close()
 .PP
-.B wr_ohead(head)
+.B void wr_ohead(head)
 .br
 .B struct outhead *head;
 .PP
-.B wr_sect(sect, cnt)
+.B void wr_sect(sect, cnt)
 .br
 .B struct outsect *sect;
 .br
 .B unsigned int cnt;
 .PP
-.B wr_outsect(sectionnr)
+.B void wr_outsect(sectionnr)
 .br
 .B int sectionnr;
 .PP
-.B wr_emit(emit, cnt)
+.B void wr_emit(emit, cnt)
 .br
 .B char *emit;
 .br
 .B long cnt;
 .PP
-.B wr_putc(ch)
+.B void wr_putc(ch)
 .PP
-.B wr_relo(relo, cnt)
+.B void wr_relo(relo, cnt)
 .br
 .B struct outrelo *relo;
 .br
 .B unsigned int cnt;
 .PP
-.B wr_name(name, cnt)
+.B void wr_name(name, cnt)
 .br
-.B struct name *name;
+.B struct outname *name;
 .br
 .B unsigned int cnt;
 .PP
-.B wr_string(stringaddr, cnt)
+.B void wr_string(stringaddr, cnt)
 .br
 .B char *stringaddr;
 .br
 .B long cnt;
 .PP
-.B wr_arhdr(fd, arhdr)
+.B void wr_arhdr(fd, arhdr)
 .br
 .B struct ar_hdr *arhdr;
 .PP
-.B wr_ranlib(fd, ran, cnt)
+.B void wr_ranlib(fd, ran, cnt)
 .br
 .B struct ranlib *ran;
 .br
 .B long cnt;
 .PP
-.B wr_int2(fd, i)
+.B void wr_int2(fd, i)
 .PP
-.B wr_long(fd, l)
+.B void wr_long(fd, l)
 .br
 .B long l;
 .PP
-.B wr_bytes(fd, buf, l)
+.B void wr_bytes(fd, buf, l)
 .br
 .B char *buf;
 .br
@@ -88,45 +90,45 @@ and write ACK-object files and libraries
 .PP
 .B int rd_fdopen(fd)
 .PP
-.B rd_close()
+.B void rd_close()
 .PP
-.B rd_ohead(head)
+.B void rd_ohead(head)
 .br
 .B struct outhead *head;
 .PP
-.B rd_sect(sect, cnt)
+.B void rd_sect(sect, cnt)
 .br
 .B struct outsect *sect;
 .br
 .B unsigned int cnt;
 .PP
-.B rd_outsect(sectionnr)
+.B void rd_outsect(sectionnr)
 .br
 .B int sectionnr;
 .PP
-.B rd_emit(emit, cnt)
+.B void rd_emit(emit, cnt)
 .br
 .B char *emit;
 .br
 .B long cnt;
 .PP
-.B rd_relo(relo, cnt)
+.B void rd_relo(relo, cnt)
 .br
 .B struct outrelo *relo;
 .br
 .B unsigned int cnt;
 .PP
-.B rd_rew_relo(head)
+.B void rd_rew_relo(head)
 .br
 .B struct outhead *head;
 .PP
-.B rd_name(name, cnt)
+.B void rd_name(name, cnt)
 .br
-.B struct name *name;
+.B struct outname *name;
 .br
 .B unsigned int cnt;
 .PP
-.B rd_string(stringaddr, cnt)
+.B void rd_string(stringaddr, cnt)
 .br
 .B char *stringaddr;
 .br
@@ -136,7 +138,7 @@ and write ACK-object files and libraries
 .br
 .B struct ar_hdr *arhdr;
 .PP
-.B rd_ranlib(fd, ran, cnt)
+.B void rd_ranlib(fd, ran, cnt)
 .br
 .B struct ranlib *ran;
 .br
@@ -148,13 +150,13 @@ and write ACK-object files and libraries
 .PP
 .B long rd_long(fd)
 .PP
-.B rd_bytes(fd, buf, l)
+.B void rd_bytes(fd, buf, l)
 .br
 .B char *buf;
 .br
 .B long l;
 .PP
-.B rd_fd()
+.B int rd_fd()
 .SH DESCRIPTION
 These routines come in handy when reading or writing ACK-object files
 or libraries. No checking is performed.

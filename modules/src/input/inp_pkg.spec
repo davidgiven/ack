@@ -16,6 +16,8 @@
 	to work. Its default value is 1.
 */
 
+#include <ansi.h>
+
 /* INPUT PRIMITIVES */
 
 #define	LoadChar(dest)	((dest = *_ipp++) || (dest = loadbuf()))
@@ -29,15 +31,11 @@
 
 extern char *_ipp;
 
-#if __STDC__
-int loadbuf(void);
-int InsertFile(char *, char **, char **);
-int InsertText(char *, int);
-#else
-extern int loadbuf();
-extern int InsertFile();
-extern int InsertText();
-#endif
+_PROTOTYPE(int loadbuf, (void));
+_PROTOTYPE(int AtEoIT, (void));
+_PROTOTYPE(int AtEoIF, (void));
+_PROTOTYPE(int InsertFile, (char *, char **, char **));
+_PROTOTYPE(int InsertText, (char *, int));
 
 /*	int InsertFile(filename, table, result)
 		char *filename; 

@@ -1,6 +1,7 @@
 proto.make
 object.3
 object.h
+obj.h
 rd.c
 rd_arhdr.c
 rd_bytes.c

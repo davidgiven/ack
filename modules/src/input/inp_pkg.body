@@ -97,6 +97,8 @@ INP_PRIVATE struct INP_buffer_header *INP_head, *INP_free;
 	returned.  *size is initialized with the buffer length.
 */
 
+_PROTOTYPE(INP_PRIVATE int INP_rdfile, (File *, char *, long *, char **));
+
 INP_PRIVATE int
 INP_rdfile(fd, fn, size, pbuf)
 	register File *fd;
@@ -134,6 +136,7 @@ INP_rdfile(fd, fn, size, pbuf)
 
 INP_PRIVATE struct INP_i_buf *i_ptr;
 
+_PROTOTYPE(INP_PRIVATE char * INP_pbuf, (void));
 INP_PRIVATE char *
 INP_pbuf()
 {
@@ -153,6 +156,9 @@ INP_pbuf()
 
 /*	Input buffer administration: INP_push_bh() and INP_pop_bh()
 */
+_PROTOTYPE(INP_PRIVATE struct INP_buffer_header *INP_push_bh, (void));
+_PROTOTYPE(INP_PRIVATE int INP_pop_bh, (void));
+
 INP_PRIVATE struct INP_buffer_header *
 INP_push_bh()
 {
@@ -205,11 +211,12 @@ INP_pop_bh()
 /*	low level I/O routine : read one block from current input
 	stream : INP_rdblock
 */
+_PROTOTYPE(INP_PRIVATE int INP_rdblock, (File *, char *, int *));
 
 INP_PRIVATE int
 INP_rdblock(fd, buf, n)
 	File *fd;
-	char buf[];
+	char *buf;
 	int *n;
 {
 
@@ -224,6 +231,7 @@ INP_rdblock(fd, buf, n)
 /*	Miscellaneous routines :
 	INP_mk_filename()
 */
+_PROTOTYPE(INP_PRIVATE int INP_mk_filename, (char *, char *, char **));
 
 /*	INP_mk_filename() concatenates a dir and filename.
 */
