@@ -1,3 +1,8 @@
+This is ACK distribution 5.2.
+
+The only addition with respect to the 5th ACK distribution is the support
+for Solaris 2 on SPARCs. It also contains many bug fixes.
+
 Notes for the 5th ACK distribution:
 
 It is not wise to mix files created by the previous version of the Kit
@@ -22,15 +27,6 @@ Also added, but not part of the Kit proper are
 	- f2c: a Fortran to C compiler by AT&T.
 
 See the ACK installation manual for their copyright notices.
-
-This version is usually refered to as 5.0.
-
-Notes for update 1 of the 5th ACK distribution:
-
-This is a complete distribution, but does not deserve a new version number,
-as the only addition is the support for Solaris 2 on SPARCs. It also contains
-many bug fixes.
-We refer to this version as 5.1.
 
 --
 Ceriel Jacobs, Dept. of Mathematics and Computer Science, Vrije Universiteit,
