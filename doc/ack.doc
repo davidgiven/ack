@@ -28,8 +28,8 @@ starting with the next transformation in the table for another
 transformation that has as input suffix the output suffix of
 the previous transformation.
 A few special transformations are recognized, among them is the
-combiner.
-A program combining several files into one.
+combiner, which is
+a program combining several files into one.
 When no stop suffix was specified (flag \fB\-c.suffix\fP) \fIack\fP
 stops after executing the combiner with as arguments the \-
 possibly transformed \- input files and libraries.
@@ -74,7 +74,8 @@ This descriptions are simply files read in at compile time.
 At the moment of writing this document, the descriptions
 included are: pdp, fe, i86, m68k2, vax2 and int.
 The name of a description is first searched for internally,
-then in the directory lib/ack and finally in the current
+then in lib/descr/\fIname\fP, then in
+lib/\fIname\fP/descr, band finally in the current
 directory of the user.
 .NH
 Using the description file
@@ -204,14 +205,13 @@ The possible keywords are:
 .br
 followed by a sequence of suffices.
 Each file with one of these suffices is allowed as input file.
-Preprocessor transformations, those with the \fBP\fP property
-after the \fIprop\fP keyword, do not need the \fIfrom\fP
+Preprocessor transformations do not need the \fIfrom\fP
 keyword. All other transformations do.
 .nr PD 0
 .IP \fIto\fP
 .br
 followed by the suffix of the output file name or in the case of a
-linker \-~indicated by C option after the \fIprop\fP keyword~\-
+linker
 the output file name.
 .IP \fIprogram\fP
 .br
@@ -264,20 +264,32 @@ The variables assigned to by \fImapflags\fP will probably be
 used here.
 The flags not recognized by \fIack\fP or any of the transformations
 are passed to the linker and inserted before all other arguments.
-.IP \fIprop\fP
+.IP \fIstdin\fP
 .br
-This \-~optional~\- keyword is followed by a sequence of options,
-each option is indicated by one character
-signifying a special property of the transformation.
+This keyword indicates that the transformation reads from standard input.
+.IP \fIstdout\fP
+.br
+This keyword indicates that the transformation writes on standard output.
+.IP \fIoptimizer\fP
+.br
+This keyword indicates that this transformation is an optimizer.
+.IP \fIlinker\fP
+.br
+This keyword indicates that this transformation is the linker.
+.IP \fIcombiner\fP
+.br
+This keyword indicates that this transformation is a combiner. A combiner
+is a program combining several files into one, but is not a linker.
+An example of a combiner is the global optimizer.
+.IP \fIprep\fP
+.br
+This \-~optional~\- keyword is followed an option indicating its relation
+to the preprocessor.
 The possible options are:
 .DS X
-   <            the input file will be read from standard input
-   >            the output file will be written on standard output
-   p            the input files must be preprocessed
-   m            the input files must be preprocessed when starting with #
-   O            this transformation is an optimizer and may be skipped
-   P            this transformation is the preprocessor
-   C            this transformation is the linker
+  always	the input files must be preprocessed
+  cond	the input files must be preprocessed when starting with #
+  is	this transformation is the preprocessor
 .DE
 .IP \fIrts\fP
 .br
@@ -308,22 +320,19 @@ transformations.
 Amsterdam Compiler Kit.
 The variable SOURCE is set to the name of the argument that is currently
 being massaged, this is usefull for debugging.
+The variable SUFFIX is set to the suffix of the argument that is
+currently being massaged.
 .br
 The variable M indicates the
-directory in mach/{M}/lib/tail_..... and NAME is the string to
+directory in lib/{M}/tail_..... and NAME is the string to
 be defined by the preprocessor with \-D{NAME}.
 The definitions of {w}, {s}, {l}, {d}, {f} and {p} indicate
 EM_WSIZE, EM_SSIZE, EM_LSIZE, EM_DSIZE, EM_FSIZE and EM_PSIZE
 respectively.
 .br
-The variable INCLUDES is used as the last argument to \fIcpp\fP,
-it is currently used to add the directory {EM}/include to
+The variable INCLUDES is used as the last argument to \fIcpp\fP.
+It is used to add directories to
 the list of directories containing #include files.
-{EM}/include contains a few files used by the library routines
-for part III from the
-.UX
-manual.
-These routines are included in the kit.
 .PP
 The variables HEAD, TAIL and RTS are set by \fIack\fP and used
 to compose the arguments for the linker.
@@ -346,7 +355,8 @@ name cpp	# the C-preprocessor
 		#  then the include dir's for this machine
 		#  then the NAME and size valeus finally
 		#  followed by the input file name
-	prop >P	# Output on stdout, is preprocessor
+	stdout	# Output on stdout
+	prep is	# Is preprocessor
 end
 name cem	# the C-compiler proper
 	from .c	# used for files with suffix .c
@@ -357,7 +367,9 @@ name cem	# the C-compiler proper
 	args \-Vw{w}i{w}p{p}f{f}s{s}l{l}d{d} {CEM_F?}
 		# the arguments are the object sizes in
 		# the \-V... flag and possibly \-l and \-Xp
-	prop <>p	# input on stdin, output on stdout, use cpp
+	stdin	# input from stdin
+	stdout	# output on stdout
+	prep always	# use cpp
 	rts .c	# use the C run-time system
 	need .c	# use the C libraries
 end
@@ -366,7 +378,7 @@ name decode	# make human readable files from compact code
 	to .e	# produce .e files
 	program {EM}/lib/em_decode	# pathname of loadfile
 	args <	# the input file name is the only argument
-	prop >	# the output comes on stdout
+	stdout	# the output comes on stdout
 end
 .DE
 
@@ -379,11 +391,7 @@ var p=2	# pointersize 2
 var s=2	# short size 2
 var l=4	# long size 4
 var f=4	# float size 4
-var d=8	# double size 8
-var M=int	# Unused in this example
-var NAME=int22	# for cpp (NAME=int results in #define int 1)
-var LIB=mach/int/lib/tail_	# part of file name for libraries
-var RT=mach/int/lib/head_	# part of file name for run-time startoff
+var d=8	# douã⁄XY¬H»\ùŸàö[Hòe startoff
 var SIZE_FLAG=\-sm	# default internal table size flag
 var INCLUDES=\-I{EM}/include	# use {EM}/include for #include files
 name asld	# Assembler/loader
@@ -404,7 +412,7 @@ name asld	# Assembler/loader
 		# the next line contains the choice for head_cc or head_pc
 		# and the specification of in- and output.
 		# the last three args lines choose libraries
-	prop C  # This is the final stage
+	linker
 end
 .DE
 
