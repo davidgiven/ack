@@ -54,9 +54,11 @@ struct exec exec;
 
 char	*output_file;
 int	outputfile_created;
-int	output;
+FILE	*output;
 
 char *program ;
+char *chars;
+char *malloc();
 
 char flag ;
 
@@ -73,15 +75,9 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
-	long			magic ;
-	long			textsize ;
-	long			datasize ;
-	long			bsssize;
-	long			symstart;
 	register struct exec *e = &exec;
 
-	output = 1;
+	output = stdout;
 	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
 		flag=argv[1][1] ;
@@ -90,7 +86,7 @@ main(argc, argv)
 	switch (argc) {
 	case 1: rd_fdopen(0);
 		break;
-	case 3:	if ((output = creat(argv[2], 0644)) < 0) {
+	case 3:	if ((output = fopen(argv[2], "w")) == 0) {
 			fatal("Can't write %s.\n", argv[2]);
 		}
 		output_file = argv[2];
@@ -162,9 +158,16 @@ main(argc, argv)
 			fatal("end segment must be empty\n") ;
 	}
 
+	if (((unsigned) outhead.oh_nchar != outhead.oh_nchar) ||
+	     (outhead.oh_nchar != 0 &&
+	      (chars = malloc((unsigned)outhead.oh_nchar)) == 0)) {
+		fprintf(stderr, "%s: (warning) No name list generated\n", program);
+		e->a_syms = 0;
+	}
+
 	/* Action at last */
-	write(output, (char *) e, 6);
-	wr_int2(e->a_version);
+	fwrite((char *) e, 1, 6, output);
+	wr_int2((int) e->a_version);
 	wr_long(e->a_text);
 	wr_long(e->a_data);
 	wr_long(e->a_bss);
@@ -174,18 +177,20 @@ main(argc, argv)
 	emits(&outsect[TEXTSG]) ;
 	emits(&outsect[ROMSG]) ;
 	emits(&outsect[DATASG]) ;
-	emit_symtab();
+	if (e->a_syms) emit_symtab();
+	fclose(output);
 	if ( outputfile_created ) chmod(argv[2],0755);
-	return 0;
+	exit(0);
 }
 
 wr_int2(n)
+	int n;
 {
 	char buf[2];
 
 	buf[0] = n;
 	buf[1] = (n >> 8);
-	write(output, buf, 2);
+	fwrite(buf, 1, 2, output);
 }
 
 wr_long(l)
@@ -197,7 +202,7 @@ wr_long(l)
 	buf[1] = (l >> 8);
 	buf[2] = (l >> 16);
 	buf[3] = (l >> 24);
-	write(output, buf, 4);
+	fwrite(buf, 1, 4, output);
 }
 
 /*
@@ -213,7 +218,7 @@ emits(section) struct outsect *section ; {
 	while (n > 0) {
 		blk = n > BUFSIZ ? BUFSIZ : n;
 		rd_emit(buffer, (long) blk);
-		write(output, buffer, blk);
+		fwrite(buffer, 1, blk, output);
 		n -= blk;
 	}
 	if ((n = section->os_size - section->os_flen) > 0) {
@@ -222,7 +227,7 @@ emits(section) struct outsect *section ; {
 		}
 		while (n > 0) {
 			blk = n > BUFSIZ ? BUFSIZ : n;
-			write(output, buffer, blk);
+			fwrite(buffer, 1, blk, output);
 			n -= blk;
 		}
 	}
@@ -234,16 +239,11 @@ emit_symtab()
 	struct nlist IX_name;	  /* symbol table entry in PC/IX format */
 	register unsigned short i;
 
-	char x;
-	long y;
-	extern char *malloc();
-	char *chars;
 	long l;
 	long off = OFF_CHAR(outhead);
 	int j;
 	char *p;
 
-	chars = malloc(outhead.oh_nchar);
 	rd_string(chars,outhead.oh_nchar);
 	for (i = 0; i < outhead.oh_nname; i++) {
 		rd_name(&ACK_name, 1);
@@ -288,10 +288,10 @@ emit_symtab()
 		for (j++; j < 8; j++) {
 			IX_name.n_name[j] = 0;
 		}
-		write(output, (char *) &IX_name, 8);
+		fwrite((char *) &IX_name, 1, 8, output);
 		wr_long(IX_name.n_value);
-		write(output, &(IX_name.n_sclass), 2);
-		wr_int2(IX_name.n_type);
+		fwrite(&(IX_name.n_sclass), 1, 2, output);
+		wr_int2((int) IX_name.n_type);
 	}
 }
 
@@ -301,8 +301,10 @@ fatal(s, a1, a2)
 {
 	fprintf(stderr,"%s: ",program) ;
 	fprintf(stderr, s, a1, a2);
-	if (outputfile_created)
+	if (outputfile_created) {
+		fclose(output);
 		unlink(output_file);
+	}
 	exit(1);
 }
 
