@@ -1,4 +1,5 @@
 	.define	filb
+	.define _m_a_i_n
 	.define curproc
 	.define	pd
 	.define	nproc
@@ -20,16 +21,18 @@
 !		START OF THE PROGRAM
 !---------------------------------------------------------------------------
 
-		lea	retarea,a1		!a1 POINTS AT RETURN AREA
+_m_a_i_n:
+		tst.l	(sp)+
+		lea	retarea,a5		!a5 POINTS AT RETURN AREA
 		move.l	nd,-(sp)		!nd contains endbss
 		bsr	_Xbreak
 		add.l	wrd,sp
 #if	last
 		move.l	#126,d0			!initialise lasttable
-		lea	lasttable,a5
-0:		clr.l	(a5)+
+		lea	lasttable,a1
+0:		clr.l	(a1)+
 		dbra	d0,0b
-		move.l	#-1,(a5)
+		move.l	#-1,(a1)
 		move.l	#linused-8,linused
 #endif
 		move.l	4(sp),a2
@@ -71,10 +74,10 @@ emfile:	.asciz	"e.out"
 		bne	badarg1
 		lea	header,a0
 		move.l	#5,d0			!convert em integer to integer
-0:		add.l	#4,a1
-		move.b	(a0)+,-(a1) ;	move.b	(a0)+,-(a1)
-		move.b	(a0)+,-(a1) ;	move.b	(a0)+,-(a1)
-		move.l	(a1),-4(a0) ;	dbra	d0,0b
+0:		add.l	#4,a5
+		move.b	(a0)+,-(a5) ;	move.b	(a0)+,-(a5)
+		move.b	(a0)+,-(a5) ;	move.b	(a0)+,-(a5)
+		move.l	(a5),-4(a0) ;	dbra	d0,0b
 		move.l	nd,a0	;	move.l	a0,pb	!Bottom emtext
 		add.l	ntext,a0 ;	move.l	a0,pd	!proc. descr. base
 		move.l	nproc,d1 ;	asl.l	#3,d1	!2 pointers
@@ -101,19 +104,21 @@ emfile:	.asciz	"e.out"
 lblbuf:		sub.l	#2048,sp
 		claimstack
 		move.l	sp,a4				!transport  ptr a4
-		move.l	sp,a5
+		move.l	sp,a1
+		move.l	a1,-(sp)
 		move.l	#2048,-(sp) ;	move.l	a4,-(sp)
 		mov	savefd,-(sp) ;	bsr	_Xread
 		testen	(sp)+	;	bne	badarg
 		move.l	(sp)+,d0
+		move.l	(sp)+,a1
 		cmp.l	#2048,d0 ;	bcs	0f
-		add.l	#1024,a5 ;	bra	1f	!a5 =buffer middle
-0:		add.l	d0,a5				!a5 = buffer end
+		add.l	#1024,a1 ;	bra	1f	!a1 =buffer middle
+0:		add.l	d0,a1				!a1 = buffer end
 1:		move.l	eb,a3		!At a3 filling has to start
 		clr.l	d1	;	clr.l	d2
 		move.l	#datswi,a6
 
-datloop:	cmp.l	a4,a5	;	bhi	9f	!Go on filling data
+datloop:	cmp.l	a4,a1	;	bhi	9f	!Go on filling data
 		bsr	blshift		!shift block down , read next block
 9:		sub.l	#1,ndata ;	blt	finito
 		move.b	(a4)+,d1 ;	beq	dat0	!type byte in d1
@@ -126,10 +131,10 @@ datswi:	.data4	dat1;	.data4	dat2;	.data4	dat3;	.data4	dat4
 	.data4	dat5;	.data4	dat6;	.data4	dat6;	.data4	dofloat
 	.sect .text
 
-dat0:		add.l	#4,a1
-		move.b	(a4)+,-(a1) ;	move.b	(a4)+,-(a1)
-		move.b	(a4)+,-(a1) ;	move.b	(a4)+,-(a1)
-		move.l	(a1),d0 ;	move.l	a3,d4	!d0 =count
+dat0:		add.l	#4,a5
+		move.b	(a4)+,-(a5) ;	move.b	(a4)+,-(a5)
+		move.b	(a4)+,-(a5) ;	move.b	(a4)+,-(a5)
+		move.l	(a5),d0 ;	move.l	a3,d4	!d0 =count
 		sub.l	a2,d4	!reconstruct byte count of previous describtor
 		sub.l	#1,d0	;	sub.l	#1,d4
 1:		move.l	d4,d3
@@ -167,18 +172,21 @@ dofloat:	add.l	d2,a3
 atof:		tst.b	(a4)+	;	bne	atof	
 		rts
 
-blshift:	move.l	a5,a0	;	move.l	#1024,d0
+blshift:	move.l	a1,a0	;	move.l	#1024,d0
+		tst.l	-(sp)
 		sub.l	d0,a0	;	move.l	d0,-(sp)
 		sub.l	d0,a4			!update pointer
 		asr.l	#2,d0
-0:		move.l	(a5)+,(a0)+ ;	sub.w	#1,d0
-		bgt	0b	;	move.l	a0,a5
-		move.l	a5,-(sp) ;	mov	savefd,-(sp)
+0:		move.l	(a1)+,(a0)+ ;	sub.w	#1,d0
+		bgt	0b	;	move.l	a0,a1
+		move.l	a1,4(sp)
+		move.l	a1,-(sp) ;	mov	savefd,-(sp)
 		bsr	_Xread
 		testen	(sp)+	;	bne	badarg
 		move.l	(sp)+,d0
+		move.l	(sp)+,a1
 		cmp.l	#1024,d0 ;	beq	1f
-		add.l	d0,a5
+		add.l	d0,a1
 1:		rts
 
 finito:		cmp.l	hp,a3	;	bne	badarg	!load file error
@@ -190,7 +198,7 @@ finito:		cmp.l	hp,a3	;	bne	badarg	!load file error
 
 		move.l	nproc,d1 ;	move.l	pd,a3
 		asl.l	#3,d1			!proc. descr. is 8 bytes
-4:		move.l	a5,d2	;	sub.l	a4,d2	!What is available?
+4:		move.l	a1,d2	;	sub.l	a4,d2	!What is available?
 		add.l	#7,d2	;	and.w	#-0x8,d2  !multiple of 8!
 		sub.l	d2,d1				!subtract what can 
 		asr.l	#3,d2				!be read. divide by 8
@@ -237,39 +245,39 @@ finito:		cmp.l	hp,a3	;	bne	badarg	!load file error
 ! Count pointer zero is reserved for the case that no line number
 ! is yet defined.
 
-! Register use: a6 is external base ("eb"), a1 points at return area, other
+! Register use: a6 is external base ("eb"), a5 points at return area, other
 ! registers are free
 
 makelink:	move.l	pd,a0
 		move.l	#0,a2
 		move.l	a0,a3		!a3 will point at the first proc.
 		move.l	a0,a4		!a4 will point at proc descr base
-0:		move.l	a0,a5		!keep former descr pointer in a5
+0:		move.l	a0,a1		!keep former descr pointer in a1
 		add.l	#24,a0		!a0 points at next one
 		cmp.l	a0,a6		!top of descriptor space
 		bls	4f		!yes? ready!
 1:		move.l	4(a0),d0	!start address of current proc in d0
-		cmp.l	4(a5),d0	!compair start address with previous
+		cmp.l	4(a1),d0	!compair start address with previous
 		bcc	2f		!d0 large? follow link!
-		sub.l	#24,a5		!d0 small? compair with previous
-		cmp.l	a5,a4		!is a5 smaller than pd
+		sub.l	#24,a1		!d0 small? compair with previous
+		cmp.l	a1,a4		!is a1 smaller than pd
 		bls	1b		!no? try again
 		move.l	a3,16(a0)	!yes? then smallest text add up to now
 		move.l	a0,a3		!remind a3 is to point at first proc
 		bra	0b		!next descriptor
-2:		move.l	16(a5),d1	!follow the link to find place
+2:		move.l	16(a1),d1	!follow the link to find place
 		beq	3f		!if 0 then no link defined
 		move.l	d1,a2
 		cmp.l	4(a2),d0	!compair start address
-		bcs	3f		!start addr between those of a5 and a2
-		move.l	a2,a5		!d0 above start address of a5
+		bcs	3f		!start addr between those of a1 and a2
+		move.l	a2,a1		!d0 above start address of a1
 		bra	2b		!go on looking
-3:		move.l	a0,16(a5)	!a0 follows a5
+3:		move.l	a0,16(a1)	!a0 follows a1
 		move.l	d1,16(a0)	!a2 follows a0
 		bra	0b
 4:		move.l	a3,firstp	!firstp links to first procedure
 
-! Register use: a3 points at first procedure , d0 opcode byte , a5 base of
+! Register use: a3 points at first procedure , d0 opcode byte , a1 base of
 ! table , d1 keeps min line nr , d2 keeps max line nr , d3 current line nr ,
 ! maxcount in d4
 
@@ -305,17 +313,17 @@ procinf:	move.l	#1,maxcount	!count pointer for first procedure
 		bra	4f
 3:		adroff
 		move.l	#0,d3
-		move.w	(a1),d3
+		move.w	(a5),d3
 		bra	4f
 6:		move.b	(a3)+,d0
 		cmp.b	#35,d0		!lin_q ?
 		bne	6f		!skip for escape2 at 6f
-		move.b	(a3)+,(a1)+
-		move.b	(a3)+,(a1)+
-		move.b	(a3)+,(a1)+
-		move.b	(a3)+,(a1)
-		sub.l	#3,a1
-		move.l	(a1),d3
+		move.b	(a3)+,(a5)+
+		move.b	(a3)+,(a5)+
+		move.b	(a3)+,(a5)+
+		move.b	(a3)+,(a5)
+		sub.l	#3,a5
+		move.l	(a5),d3
 4:		cmp.l	d1,d3		!d3 less than minimum ?
 		bcc	5f
 		move.l	d3,d1

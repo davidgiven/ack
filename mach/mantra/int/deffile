@@ -72,7 +72,7 @@
 #define l_8 -16
 #define checksize cmp.w #2,d0 ; beq 2f ; cmp.w #4,d0 ; beq 4f ; bra e_oddz
 #endif
-#define  adroff move.b	(a3)+,(a1) ;	move.b	(a3)+,1(a1)
+#define  adroff move.b	(a3)+,(a5) ;	move.b	(a3)+,1(a5)
 #define	claimstack	tst.b	-1024(sp)
 #define	locptr	cmp.l	sp,a0 ;\
 		bcc	6f  

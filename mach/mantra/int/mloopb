@@ -15,8 +15,8 @@ _sigtrp:	move.l	(sp)+,d2	!save return address
 		move.l	d4,a0
 		add.l	a0,a0
 		add.l	a0,a0
-		lea	sig_trp-4(a0),a5
-		move.l	(a5),d2		!previous trap number in d2
+		lea	sig_trp-4(a0),a1
+		move.l	(a1),d2		!previous trap number in d2
 		comp	#256,d1		!-2 and -1 special
 		bcc	1f
 		move.l	sig_adr-4(a0),d3	!Get the pointer to the trap- 
@@ -28,7 +28,7 @@ sig_bad:	mov	22,-(sp)	!_Xsignal. If pointer 0 trapping is
 		bmi	sig_bad
 		move.l	d1,d3
 		ad	#2,d3		!0:reset default for signal, -1: ignore
-2:		move.l	d1,(a5)		!set new trapno
+2:		move.l	d1,(a1)		!set new trapno
 		move.l	d3,-(sp)		!set arguments to signal:
 		mov	d4,-(sp)		!pointer ,signo to be trapped
 		bsr	_Xsignal
@@ -85,7 +85,7 @@ sig12:		pea	sig12
 		bsr	_Xsignal
 		bsr	e_badmon
 		rtr
-sig11:		move.l	4(a1),d0
+sig11:		move.l	4(a5),d0
 		sub.l	sp,d0
 		bcs	e_memflt	!in this case error handling possible
 		move.l	ml,sp		!refresh stack and stop .

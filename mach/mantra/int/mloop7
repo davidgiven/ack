@@ -8,7 +8,7 @@
 !-----------------------------------------------------------------------------
 
 adu_z:		mov	(sp)+,d0 ;	bra	0f
-adu_l:		adroff		;	move.w	(a1),d0
+adu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d1 ;	add.w	d1,(sp)
 		jmp	(a4)
@@ -16,7 +16,7 @@ adu_l:		adroff		;	move.w	(a1),d0
 		jmp	(a4)
 
 sbu_z:		mov	(sp)+,d0 ;	bra	0f
-sbu_l:		adroff		;	move.w	(a1),d0
+sbu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d1 ;	sub.w	d1,(sp)
 		jmp	(a4)
@@ -26,7 +26,7 @@ sbu_l:		adroff		;	move.w	(a1),d0
 !------------------------------------------------------------------------------
 
 mlu_z:		mov	(sp)+,d0 ;	bra	0f
-mlu_l:		adroff		;	move.w	(a1),d0
+mlu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d0 ;	mulu	(sp),d0
 		move.w	d0,(sp)	;	jmp	(a4)
@@ -37,7 +37,7 @@ mlu_l:		adroff		;	move.w	(a1),d0
 !----------------------------------------------------------------------------
 
 dvu_z:		mov	(sp)+,d0 ;	bra	0f
-dvu_l:		adroff		;	move.w	(a1),d0
+dvu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d1 ;	beq	3f
 		move.w	(sp),d0 ;	divu	d1,d0
@@ -51,7 +51,7 @@ dvu_l:		adroff		;	move.w	(a1),d0
 !----------------------------------------------------------------------------
 
 rmu_z:		mov	(sp)+,d0 ;	bra	0f
-rmu_l:		adroff		;	move.w	(a1),d0
+rmu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d1 ;	beq	3f
 		move.w	(sp),d0 ;	divu	d1,d0
@@ -66,7 +66,7 @@ rmu_l:		adroff		;	move.w	(a1),d0
 !------------------------------------------------------------------------.
 
 slu_z:		mov	(sp)+,d0 ;	bra	0f
-slu_l:		adroff		;	move.w	(a1),d0
+slu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d0 
 		bmi	7f
@@ -85,7 +85,7 @@ slu_l:		adroff		;	move.w	(a1),d0
 9:		nega	d0	;	bra	5b
 
 sru_z:		mov	(sp)+,d0 ;	bra	0f
-sru_l:		adroff		;	move.w	(a1),d0
+sru_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d0 
 		bmi	7b
@@ -102,7 +102,7 @@ sru_l:		adroff		;	move.w	(a1),d0
 !	DUMMY FLOATING POINT ROUTINES
 !------------------------------------------------------------------------------
 adf_l:	sbf_l:	mlf_l:	dvf_l:
-		adroff		;	move.w	(a1),d0
+		adroff		;	move.w	(a5),d0
 1:		add.l	d0,sp	
 #ifdef FLTRAP
 		bra	flnim

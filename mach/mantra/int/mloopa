@@ -39,9 +39,9 @@ fatal:		clr.l	-(sp)			!dummy return address
 
 error:		movem.l	d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6,-(sp)
 		mov	60(sp),d0		!ERROR NUMBER IN d0
-		lea	retsize,a5
+		lea	retsize,a1
 		move.l	#16,d1
-1:		move.w	-(a5),-(sp)
+1:		move.w	-(a1),-(sp)
 		dbra	d1,1b
 		cmp.w	#0xB,d0
 		bge	0f		!FATAL ERROR , START ERROR HANDLING
@@ -52,8 +52,8 @@ error:		movem.l	d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6,-(sp)
 		and.w	d2,d1
 		bne	0f
 		move.l	#16,d1
-		lea	retsize,a5
-1:		move.w	(sp)+,(a5)+
+		lea	retsize,a1
+1:		move.w	(sp)+,(a1)+
 		dbra	d1,1b
 		movem.l	(sp)+,d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6
 
@@ -73,8 +73,8 @@ rtt_z:		move.l	a2,sp
 		add.l	#0x10,sp		!REMOVE RETURN STATUS BLOCK
 		add.l	wrd,sp			!REMOVE  ERROR NUMBER
 		move.l	#16,d0
-		lea	retsize,a5
-1:		move.w	(sp)+,(a5)+
+		lea	retsize,a1
+1:		move.w	(sp)+,(a1)+
 		dbra	d0,1b
 		movem.l	(sp)+,d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6
 		add.l	wrd,sp
@@ -126,12 +126,12 @@ notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
 2:		move.l	4(a6),a0
 		cmp.l	#0,a0
 		beq	5f
-		move.l	a0,a5
+		move.l	a0,a1
 		sub.l	#4,sp
-		move.l	a5,-(sp)
+		move.l	a1,-(sp)
 		move.l	#-1,d0
 1:		add.l	#1,d0
-		tst.b	(a5)+
+		tst.b	(a1)+
 		bne	1b
 		move.l	d0,4(sp)
 		mov	#2,-(sp)
@@ -249,8 +249,8 @@ lhalt:
 		beq	0f
 		bsr	nexttab
 		bra	1f
-0:		lea	lasttable,a5
-1:		tst.l	(a5)
+0:		lea	lasttable,a1
+1:		tst.l	(a1)
 		bne	2f		!exists entry in table
 		move.l	#22,-(sp)	!here case no lines processed
 		pea	mess1
@@ -263,9 +263,9 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
-		move.l	(a5),d7
+		move.l	(a1),d7
 		move.l	d7,a0		!keep file pointer in d7
-		clr.l	(a5)+		!this will stop the printing
+		clr.l	(a1)+		!this will stop the printing
 		move.l	#-1,d1		!d1 will contain length of file name
 3:		add.l	#1,d1
 		tst.b	(a0)+
@@ -275,7 +275,7 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
-4:		move.l	(a5),d1		!next print line numbers
+4:		move.l	(a1),d1		!next print line numbers
 		lea	mess3,a0
 		bsr	itoa
 		move.l	#12,-(sp)
@@ -284,11 +284,11 @@ lhalt:
 		bsr	_Xwrite
 		add.l	wrd+4,sp
 		bsr	nexttab
-		tst.l	(a5)		!in case 0 no more lines
+		tst.l	(a1)		!in case 0 no more lines
 		beq	9f
-		cmp.l	(a5),d7
+		cmp.l	(a1),d7
 		bne	2b		!new file name
-		clr.l	(a5)+		!skip file name
+		clr.l	(a1)+		!skip file name
 		bra	4b		!only new line
 9:
 	.sect .data
@@ -345,12 +345,12 @@ emess:
 !------------------------------------------------------------------------------
 	.sect .text
 #if	last
-nexttab:	move.l  linused,a5
-		add.l	#8,a5
-		cmp.l	#linused,a5	!top of buffer reached?
+nexttab:	move.l  linused,a1
+		add.l	#8,a1
+		cmp.l	#linused,a1	!top of buffer reached?
 		bne	1f		!if so back to bottom
-		sub.l	#512,a5
-1:		move.l	a5,linused
+		sub.l	#512,a1
+1:		move.l	a1,linused
 		rts
 #endif
 #if count+prof
@@ -359,9 +359,9 @@ nexttab:	move.l  linused,a5
 	.sect .text
 tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
 		lea	buffer,a3
-		move.l	firstp,a5	!IN a5 POINTER TO CURRENT PROC.
+		move.l	firstp,a1	!IN a1 POINTER TO CURRENT PROC.
 		move.l	#0,a2		!IN a2 POINTER TO FILENAME .
-2:		move.l	16(a5),d0
+2:		move.l	16(a1),d0
 		beq	9f		!LAST PROCEDURE , EXCEPTION .
 		move.l	d0,a6		!IN a6 POINTER TO NEXT PROCEDURE .
 7:		move.l	8(a6),d7	!COUNTPTR OF NEXT IN d7
@@ -370,12 +370,12 @@ tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
 		beq	9f
 		move.l	d0,a6
 		bra	7b
-8:		move.l	8(a5),d6	!COUNTPTR OF CURRENT IN d6.
-		move.l	12(a5),d5	!FIRST LINE NUMBER IN d5.
+8:		move.l	8(a1),d6	!COUNTPTR OF CURRENT IN d6.
+		move.l	12(a1),d5	!FIRST LINE NUMBER IN d5.
 		beq	1f		!NO LINES : GO ON.
-		cmp.l	20(a5),a2	!START PRINTING FILE NAME .
+		cmp.l	20(a1),a2	!START PRINTING FILE NAME .
 		beq	6f		!NO NEW NAME.
-		move.l	20(a5),a2	!NEW FILE NAME.
+		move.l	20(a1),a2	!NEW FILE NAME.
 		cmp.l	#0,a2		!NO FILE NAME .
 		beq	6f
 		move.l	#0,d1		!START SCANNING FILE NAME
@@ -407,8 +407,8 @@ tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
 		add.l	#4,d6		!NEXT COUNT.
 		sub.l	#1,d7		!ONE LINE LESS TO GO.
 		bhi	0b
-1:		move.l	a6,a5
-		cmp.l	#0,a5
+1:		move.l	a6,a1
+		cmp.l	#0,a1
 		bne	2b
 		add.l	wrd,sp		!REMOVE FILE DESCR.
 		rts			!READY.

@@ -30,7 +30,7 @@ loc_s_1:	mov	#-1,d0
 	jmp	(a4)
 lpi_l:
 	adroff
-	move.w	(a1),d0
+	move.w	(a5),d0
 	move.l	d0,-(sp)
 	jmp	(a4)
 lpi_q:	jmp	(a4)
@@ -40,7 +40,7 @@ loc_q:	jmp	(a4)
 	 bra	e_illins
 #endif
 loc_l:	adroff
-	move.w	(a1),d0
+	move.w	(a5),d0
 	ext.l	d0
 	mov	d0,-(sp)
 	jmp	(a4)
@@ -49,7 +49,7 @@ ldc_0:	cl	-(sp)
 	jmp	(a4)
 ldc_l:
 	adroff
-	move.w	(a1),d0
+	move.w	(a5),d0
 	ext.l	d0		!ext works only on d register
 4:	move.l	d0,-(sp)
 #ifdef	lword
@@ -100,7 +100,7 @@ lol_w_1:	move.l	#-1,d0
 		mov	0(a2,d0),-(sp)
 		jmp	(a4)
 lol_pw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 5:		asl.l	wmu,d0
 		add.l	a2,d0
 		move.l	d0,a0
@@ -113,7 +113,7 @@ lol_pw:		adroff
 		jmp	(a4)
 
 lol_nw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 2:		asl.l	wmu,d0
 		add.l	a2,d0
@@ -150,7 +150,7 @@ ldl_w_1:	move.l	#-1,d0
 		mov	(a0),-(sp)
 		jmp	(a4)
 ldl_pw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 5:		asl.l	wmu,d0
 		add.l	a2,d0
 		move.l	d0,a0
@@ -163,7 +163,7 @@ ldl_pw:		adroff
 		mov	l0(a0),-(sp)
 		jmp	(a4)
 ldl_nw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 		bra	2b
 ldl_qpw:	move.l	(sp)+,d0
@@ -173,7 +173,7 @@ ldl_qnw:	move.l	(sp)+,d0
 
 !-------------------------------------------------------------------------
 loe_lw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		bra	1f
 loe_qw:		move.l	(sp)+,d0
 		bra	1f
@@ -194,7 +194,7 @@ loe_w0:		loe_w1:		loe_w2:		loe_w3:		loe_w4:
 		jmp	(a4)
 
 lde_lw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		bra	1f
 lde_qw:		move.l	(sp)+,d0
 		bra	1f
@@ -235,7 +235,7 @@ lil_1W:		move.l	l1(a2),a0
 		mov	(a0),-(sp)
 		jmp	(a4)
 lil_pw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		bra	1f
 lil_qpw:	move.l	(sp)+,d0
 		bra	1f
@@ -262,7 +262,7 @@ lil_w0:		clr.w	d0
 		jmp	(a4)
 
 lil_nw:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 		bra	1f
 lil_qnw:	move.l	(sp)+,d0
@@ -294,7 +294,7 @@ lof_s0:		move.l	d6,d0
 		move.b	(a3)+,d0
 		bra	1f
 lof_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 		bra	1f
 lof_q:		move.l	(sp)+,d0
@@ -315,7 +315,7 @@ lof_2W:		move.l	wrd+word,d0	;	bra	1b
 lof_3W:		move.l	wrd+word+word,d0	;	bra	1b
 lof_4W:		move.l	wrd+word+word+word,d0	;	bra	1b
 ldf_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 2:		move.l	(sp)+,a0
 		add.l	d0,a0
@@ -335,7 +335,7 @@ ldf_q:		move.l	(sp)+,d0
 !-------------------------------------------------------------------------
 
 lal_p:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		bra	1f
 lal_qp:		move.l	(sp)+,d0
 1:		add.l	#0+l0,d0
@@ -348,7 +348,7 @@ lal_w0:		clr.w	d0
 		add.l	#0+l0,d0
 		bra	3f
 lal_n:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		ext.l	d0
 		bra	4f
 lal_qn:		move.l	(sp)+,d0
@@ -366,7 +366,7 @@ lal_w_2:	move.l	#-512,d0
 		bra	2b
 
 lae_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 1:		add.l	a6,d0
 		move.l	d0,-(sp)
 		jmp	(a4)
@@ -385,7 +385,7 @@ lae_w5:		lae_w6:
 lxl_1:		move.l	l0(a2),-(sp)
 		jmp	(a4)
 lxl_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		beq	5f
 		bgt	1f
 		blt	e_oddz
@@ -408,7 +408,7 @@ lxl_2:		move.l	#1,d0
 lxa_1:		move.l	#0,d0
 		bra	3f
 lxa_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 		bgt	1f
 		blt	e_oddz
 		pea	l0(a2)
@@ -429,7 +429,7 @@ lxa_l:		adroff
 
 loi_l:		adroff
 		clr.l	d1
-		move.w	(a1),d1
+		move.w	(a5),d1
 		bra	8f
 loi_s0:		move.l	#0,d1
 		move.b	(a3)+,d1
@@ -487,7 +487,7 @@ loi_1:		move.l	(sp)+,a0
 los_z:		mov	(sp)+,d0
 		bra	0f
 los_l:		adroff
-		move.w	(a1),d0
+		move.w	(a5),d0
 0:		checksize
 2:		move.l	#0,d1	;	move.w	(sp)+,d1 ;	bra	8b
 4:		move.l	(sp)+,d1 ;	bra	8b

@@ -9,7 +9,7 @@
 !		SIGNED INTEGER ARITHMETIC
 !------------------------------------------------------------------------------
 
-adi_l:		adroff		;	move.w	(a1),d0	;	bra 1f
+adi_l:		adroff		;	move.w	(a5),d0	;	bra 1f
 adi_z:		mov	(sp)+,d0
 1:		sub.w	wrd,d0	;	beq	adi_1W
 		sub.w	wrd,d0	;	beq	adi_2W
@@ -40,7 +40,7 @@ adi_2W:
 !--------------------------------------------------------------------------
 
 sbi_z:		mov	(sp)+,d0 ;	bra	1f
-sbi_l:		adroff		;	move.w	(a1),d0
+sbi_l:		adroff		;	move.w	(a5),d0
 1:		sub.w	wrd,d0	;	beq	sbi_1W
 		sub.w	wrd,d0	;	beq	sbi_2W
 		bra	e_oddz
@@ -71,7 +71,7 @@ sbi_2W:
 !----------------------------------------------------------------------------
 
 mli_z:		mov	(sp)+,d0 ;	bra	0f
-mli_l:		adroff		;	move.w	(a1),d0
+mli_l:		adroff		;	move.w	(a5),d0
 0:		sub.w	wrd,d0	;	beq	mli_1W
 		sub.w	wrd,d0	;	beq	mli_2W
 		bra	e_oddz
@@ -150,7 +150,7 @@ mlu4:		move.l	d1,d3	;	move.l	d0,d2
 !---------------------------------------------------------------------------
 
 dvi_z:		mov	(sp)+,d0 ;	bra	0f
-dvi_l:		adroff		;	move.w	(a1),d0
+dvi_l:		adroff		;	move.w	(a5),d0
 0:		sub.w	wrd,d0	;	beq	dvi_1W
 		sub.w	wrd,d0	;	beq	dvi_2W
 		bra	e_oddz
@@ -172,7 +172,7 @@ dvi_2W:
 		jmp	(a4)
 
 rmi_z:		mov	(sp)+,d0 ;	bra	1f
-rmi_l:		adroff		;	move.w	(a1),d0
+rmi_l:		adroff		;	move.w	(a5),d0
 1:		sub.l	wrd,d0	;	beq	rmi_1W
 		sub.l	wrd,d0	;	beq	rmi_2W
 		bra	e_oddz
@@ -255,7 +255,7 @@ dvu4:
 !----------------------------------------------------------------------------
 
 ngi_z:		mov	(sp)+,d0 ;	bra	0f
-ngi_l:		adroff		;	move.w	(a1),d0
+ngi_l:		adroff		;	move.w	(a5),d0
 0:		sub.l	wrd,d0	;	bne	2f
 #if test
 		comp	und,(sp) ;	bne	1f
@@ -281,7 +281,7 @@ ngi_l:		adroff		;	move.w	(a1),d0
 !--------------------------------------------------------------------------
 
 sli_z:		mov	(sp)+,d0 ;	bra	0f
-sli_l:		adroff		;	move.w	(a1),d0
+sli_l:		adroff		;	move.w	(a5),d0
 0:		sub.w	wrd,d0	;	beq	sli_1W
 		sub.w	wrd,d0	;	beq	sli2
 		bra	e_oddz
@@ -330,7 +330,7 @@ sli2:
 #endif
 
 sri_z:		mov	(sp)+,d0 ;	bra	0f
-sri_l:		adroff		;	move.w	(a1),d0
+sri_l:		adroff		;	move.w	(a5),d0
 0:		sub.w	wrd,d0	;	bne	sri2
 		mov	(sp)+,d0 
 		bmi	7b

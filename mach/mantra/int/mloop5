@@ -25,7 +25,7 @@ calcarr:	move.l	(sp)+,d3	!save return address
 
 aar_1W:		bsr	calcarr	;	move.l	a0,-(sp)
 		jmp	(a4)
-aar_l:		adroff		;	cmp.w	wrd,(a1)
+aar_l:		adroff		;	cmp.w	wrd,(a5)
 0:		bne	e_illins ;	bra	aar_1W
 aar_z:		comp	wrd,(sp)+  ;	bra	0b
 
@@ -43,7 +43,7 @@ lar_1W:		bsr	calcarr	;	add.l	d1,a0
 7:		mov	-(a0),-(sp);	dbra	d1,7b
 		jmp	(a4)
 
-lar_l:		adroff		;	cmp.w	wrd,(a1)
+lar_l:		adroff		;	cmp.w	wrd,(a5)
 8:		bne	e_illins;	bra	lar_1W
 lar_z:		comp	wrd,(sp)+ ;	bra	8b
 
@@ -60,7 +60,7 @@ sar_1W:		bsr	calcarr	;	asr.w	#1,d1
 7:		mov (sp)+,(a0)+	;	dbra	d1,7b
 		jmp	(a4)
 sar_z:		comp	wrd,(sp)+ ;	bra	1f
-sar_l:		adroff		;	cmp.w	wrd,(a1)
+sar_l:		adroff		;	cmp.w	wrd,(a5)
 1:		bne	e_illins ;	bra	sar_1W
 
 !-------------------------------------------------------------------------

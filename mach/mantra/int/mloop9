@@ -38,31 +38,31 @@ asp_qw:		move.l	(sp)+,d0 ;	bra	6b
 
 !-----------------------------------------------------------------------------
 bls_z:		mov	(sp)+,d0 ;	bra	0f
-bls_l:		adroff		;	move.w	(a1),d0
+bls_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d0 ;	bra	0f
 4:		move.l	(sp)+,d0 ;	bra	0f
 
 blm_q:		move.l	(sp)+,d0 ;	bra	0f
-blm_l:		adroff		;	move.w	(a1),d0
+blm_l:		adroff		;	move.w	(a5),d0
 		bra	0f
 blm_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 0:		move.l	d0,d2	;	asr.w	wmu,d2
-		beq	5f	;	move.l	a1,d1
+		beq	5f	;	move.l	a5,d1
 		sub.w	#1,d2	;	move.l	(sp)+,a0	!dest. address
-		move.l	(sp)+,a1 ;	cmp.l	a0,a1
-!a1 contains source address. beware of overlap of pieces
+		move.l	(sp)+,a5 ;	cmp.l	a0,a5
+!a5 contains source address. beware of overlap of pieces
 		beq	3f	;	bcs	2f
-1:		mov	(a1)+,(a0)+ ;	dbra	d2,1b
-3:		move.l	d1,a1
+1:		mov	(a5)+,(a0)+ ;	dbra	d2,1b
+3:		move.l	d1,a5
 5:		jmp	(a4)
-2:		add.l	d0,a1	;	add.l	d0,a0
-4:		mov	-(a1),-(a0) ;	dbra	d2,4b
+2:		add.l	d0,a5	;	add.l	d0,a0
+4:		mov	-(a5),-(a0) ;	dbra	d2,4b
 		bra	3b
 
 !----------------------------------------------------------------------------
 csa_z:		mov	(sp)+,d0 ;	bra	0f
-csa_l:		adroff		;	move.w	(a1),d0
+csa_l:		adroff		;	move.w	(a5),d0
 0:		sub.l	wrd,d0	;	bne	e_illins
 csa_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
 		add.l	#4,a0	;	subt	(a0),d0
@@ -70,14 +70,14 @@ csa_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
 		comp	word(a0),d0 ;	bhi	6f
 		extend	d0
 		asl.l	#2,d0	;	add.l	wrd,d0
-		move.l	a0,a5	;	add.l	d0,a5
-		move.l	word(a5),d1 ;	bne	5f
+		move.l	a0,a1	;	add.l	d0,a1
+		move.l	word(a1),d1 ;	bne	5f
 6:		sub.l	#4,a0	;	move.l	(a0),d1
 		beq	e_case
 5:		move.l	d1,a3	;	jmp	(a4)
 
 csb_z:		mov	(sp)+,d0 ;	bra	0f
-csb_l:		adroff		;	move.w	(a1),d0
+csb_l:		adroff		;	move.w	(a5),d0
 0:		comp	wrd,d0 ;	bne	e_illins
 csb_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
 		mov	4(a0),d1 ;	sub.l	#1,d1
@@ -101,10 +101,10 @@ lpb_z:		add.l	#0+l0,(sp) ;	jmp	(a4)
 !----------------------------------------------------------------------------
 
 dup_1W:		mov	(sp),-(sp) ;	jmp	(a4)
-dup_l:		adroff		;	move.w	(a1),d0
+dup_l:		adroff		;	move.w	(a5),d0
 		bra	1f
 dus_z:		mov	(sp)+,d0 ;	bra	0f
-dus_l:		adroff		;	move.w	(a1),d0
+dus_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d0 ;	bra	1f
 4:		move.l	(sp)+,d0
@@ -117,7 +117,7 @@ dus_l:		adroff		;	move.w	(a1),d0
 
 !-----------------------------------------------------------------------------
 exg_z:		mov	(sp)+,d0 ;	bra	0f
-exg_l:		adroff		;	move.w	(a1),d0
+exg_l:		adroff		;	move.w	(a5),d0
 		bra	0f 
 exg_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 0:		move.l	d7,d1	;	move.l	d0,a0
@@ -185,7 +185,7 @@ str_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 
 !----------------------------------------------------------------------------
 rck_z:		mov	(sp)+,d0 ;	bra	0f
-rck_l:		adroff		;	move.w	(a1),d0
+rck_l:		adroff		;	move.w	(a5),d0
 0:		sub.l	wrd,d0	;	beq	rck_1W
 		sub.l	wrd,d0	;	bne	e_oddz
 		move.l	(sp)+,a0
@@ -229,16 +229,16 @@ itoa:		move.l	#9,d4	;	add.l	#11,a0
 
 !------------------------------------------------------------------------------
 fil_q:		move.l	(sp)+,a0 ;	bra	3f
-fil_l:		adroff		;	move.w	(a1),d0
+fil_l:		adroff		;	move.w	(a5),d0
 		move.l	d0,a0
 3:		add.l	a6,a0	;	cmp.l	4(a6),a0
 		beq	0f
 #if	flow+count+prof
-		move.l	curproc,a5
-		move.l	8(a5),d0
-		sub.l	12(a5),d0
+		move.l	curproc,a1
+		move.l	8(a1),d0
+		sub.l	12(a1),d0
 		move.l	d0,countfld		!START COUNTPTR FOR THIS PROC
-		move.l	a0,20(a5)		!FILE POINTER IN PROC DES
+		move.l	a0,20(a1)		!FILE POINTER IN PROC DES
 #endif
 		move.l	a0,4(a6)
 0:		jmp	(a4)
@@ -252,7 +252,7 @@ lni_z:		add.l	#1,(a6)
 #endif
 #endif
 		bra	8f
-lin_l:		adroff		;	move.w	(a1),d0 ;	bra 1f
+lin_l:		adroff		;	move.w	(a5),d0 ;	bra 1f
 lin_q:		move.l	(sp)+,d0 ;	bra	1f
 lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
 1:		cmp.l	(a6),d0 ;	beq	9f
@@ -269,8 +269,9 @@ lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
 #endif
 8:
 #if	last
-		bsr	nexttab	;	move.l	4(a6),(a5)+	!store new line
-		move.l	(a6),(a5)		!number in buffer lasttable
+		bsr	nexttab	;
+		move.l	4(a6),(a1)+	!store new line
+		move.l	(a6),(a1)		!number in buffer lasttable
 #endif
 #if	count
 		move.l	countptr,d1	!LINE NUMBER IN d1
@@ -311,7 +312,7 @@ syscal:
 .data4 e_badmon, 	_Xdup,		_Xpipe, 	_Xtimes
 .data4 _Xprofil, 	e_badmon,	_Xsetgid,	_Xgetgid
 .data4 _sigtrp, 	e_badmon,	e_badmon,	_Xacct
-.data4 e_badmon, 	_Xlock, 	_Xioctl, 	e_badmon
+.data4 e_badmon, 	e_badmon, 	_Xioctl, 	e_badmon
 .data4 e_badmon, 	e_badmon,	e_badmon,	_Xexece
 .data4 _Xumask, 	_Xchroot, 	e_badmon,	e_badmon
 

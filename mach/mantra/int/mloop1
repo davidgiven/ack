@@ -12,14 +12,14 @@ loop:	move.l	#0,d0
 	add.w	d0,d0		!opcode to index in table
 	add.w	d0,d0
 #if prof
+	lea	timeinf,a1
+	move.l	0(a1,d0),d1	!get operation time
 	move.l	profile,a0
-	lea	timeinf,a5
-	move.l	0(a5,d0),d1	!get operation time
 	add.l	d1,(a0)
 #endif
 #if opfreq
-	lea	counttab,a5
-	add.l	#1,0(a5,d0)
+	lea	counttab,a0
+	add.l	#1,0(a0,d0)
 #endif
 	jmp	dispat(pc,d0)		!jump to branch to the operation
 
@@ -112,13 +112,13 @@ escape1:
 	cmp.w	#640,d0		!check for range
 	bhi	e_illins	!jump to ill instruction procedure
 #if prof
-	lea	timeinf1,a5
-	move.l	0(a5,d0),d1
+	lea	timeinf1,a1
+	move.l	0(a1,d0),d1
 	add.l	d1,(a0)
 #endif
 #if opfreq
-	lea	counttab+1024,a5
-	add.l	#1,0(a5,d0)
+	lea	counttab+1024,a0
+	add.l	#1,0(a0,d0)
 #endif
 	jmp	dispae1(pc,d0)		!jump to the operation
 
@@ -188,13 +188,13 @@ escape2:
 	cmp.w	#220,d0
 	bhi	e_illins
 #if prof
-	lea	timeinf2,a5
-	move.l	0(a5,d0),d1
+	lea	timeinf2,a1
+	move.l	0(a1,d0),d1
 	add.l	d1,(a0)
 #endif
 #if opfreq
-	lea	counttab+1664,a5
-	add.l	#1,0(a5,d0)
+	lea	counttab+1664,a1
+	add.l	#1,0(a1,d0)
 #endif
 	jmp	dispae2(pc,d0)
 
