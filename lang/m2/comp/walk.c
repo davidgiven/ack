@@ -256,7 +256,7 @@ WalkCall(nd)
 	assert(nd->nd_class == Call);
 
 	if (! options['L']) C_lin((arith) nd->nd_lineno);
-	if (chk_call(nd)) {
+	if (ChkCall(nd)) {
 		if (nd->nd_type != 0) {
 			node_error(nd, "procedure call expected");
 			return;
@@ -472,7 +472,7 @@ ExpectBool(nd, true_label, false_label)
 	*/
 	struct desig ds;
 
-	if (!chk_expr(nd)) return;
+	if (!ChkExpression(nd)) return;
 
 	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
 		node_error(nd, "boolean expression expected");
@@ -488,7 +488,7 @@ WalkExpr(nd)
 	/*	Check an expression and generate code for it
 	*/
 
-	if (! chk_expr(nd)) return;
+	if (! ChkExpression(nd)) return;
 
 	CodePExpr(nd);
 }
@@ -500,7 +500,7 @@ WalkDesignator(nd, ds)
 	/*	Check designator and generate code for it
 	*/
 
-	if (! chk_variable(nd)) return;
+	if (! ChkVariable(nd)) return;
 
 	*ds = InitDesig;
 	CodeDesig(nd, ds);
@@ -515,9 +515,9 @@ DoForInit(nd, left)
 	nd->nd_class = Name;
 	nd->nd_symb = IDENT;
 
-	if (! chk_variable(nd) ||
-	    ! chk_expr(left->nd_left) ||
-	    ! chk_expr(left->nd_right)) return 0;
+	if (! ChkVariable(nd) ||
+	    ! ChkExpression(left->nd_left) ||
+	    ! ChkExpression(left->nd_right)) return 0;
 
 	df = nd->nd_def;
 	if (df->df_kind == D_FIELD) {
@@ -543,16 +543,16 @@ DoForInit(nd, left)
 		}
 	}
 
-	if (nd->nd_type->tp_size > word_size ||
-	    !(nd->nd_type->tp_fund & T_DISCRETE)) {
+	if (df->df_type->tp_size > word_size ||
+	    !(df->df_type->tp_fund & T_DISCRETE)) {
 		node_error(nd, "illegal type of FOR loop variable");
 		return 0;
 	}
 
-	if (!TstCompat(nd->nd_type, left->nd_left->nd_type) ||
-	    !TstCompat(nd->nd_type, left->nd_right->nd_type)) {
-		if (!TstAssCompat(nd->nd_type, left->nd_left->nd_type) ||
-		    !TstAssCompat(nd->nd_type, left->nd_right->nd_type)) {
+	if (!TstCompat(df->df_type, left->nd_left->nd_type) ||
+	    !TstCompat(df->df_type, left->nd_right->nd_type)) {
+		if (!TstAssCompat(df->df_type, left->nd_left->nd_type) ||
+		    !TstAssCompat(df->df_type, left->nd_right->nd_type)) {
 			node_error(nd, "type incompatibility in FOR statement");
 			return 0;
 		}
@@ -571,8 +571,8 @@ DoAssign(nd, left, right)
 	/* May we do it in this order (expression first) ??? */
 	struct desig dsl, dsr;
 
-	if (!chk_expr(right)) return;
-	if (! chk_variable(left)) return;
+	if (!ChkExpression(right)) return;
+	if (! ChkVariable(left)) return;
 	TryToString(right, left->nd_type);
 	dsr = InitDesig;
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);

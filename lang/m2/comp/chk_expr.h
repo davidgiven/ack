@@ -9,5 +9,5 @@ extern int	(*DesigChkTable[])();	/* table of designator checking
 					   functions, indexed by node class
 					*/
 
-#define	chk_expr(expp)	((*ExprChkTable[(expp)->nd_class])(expp))
-#define chk_designator(expp)	((*DesigChkTable[(expp)->nd_class])(expp))
+#define	ChkExpression(expp)	((*ExprChkTable[(expp)->nd_class])(expp))
+#define ChkDesignator(expp)	((*DesigChkTable[(expp)->nd_class])(expp))

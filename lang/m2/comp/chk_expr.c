@@ -28,11 +28,11 @@ static char *RcsId = "$Header$";
 extern char *symbol2str();
 
 int
-chk_variable(expp)
+ChkVariable(expp)
 	register struct node *expp;
 {
 
-	if (! chk_designator(expp)) return 0;
+	if (! ChkDesignator(expp)) return 0;
 
 	if (expp->nd_class == Def &&
 	    !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
@@ -44,7 +44,7 @@ chk_variable(expp)
 }
 
 STATIC int
-chk_arrow(expp)
+ChkArrow(expp)
 	register struct node *expp;
 {
 	register struct type *tp;
@@ -54,7 +54,7 @@ chk_arrow(expp)
 
 	expp->nd_type = error_type;
 
-	if (! chk_variable(expp->nd_right)) return 0;
+	if (! ChkVariable(expp->nd_right)) return 0;
 
 	tp = expp->nd_right->nd_type;
 
@@ -69,7 +69,7 @@ chk_arrow(expp)
 }
 
 STATIC int
-chk_arr(expp)
+ChkArr(expp)
 	register struct node *expp;
 {
 	register struct type *tpl, *tpr;
@@ -80,9 +80,9 @@ chk_arr(expp)
 	expp->nd_type = error_type;
 
 	if ( 
-	     !chk_variable(expp->nd_left)
+	     !ChkVariable(expp->nd_left)
 	   ||
-	     !chk_expr(expp->nd_right)
+	     !ChkExpression(expp->nd_right)
 	   ||
 	     expp->nd_left->nd_type == error_type
 	   )	return 0;
@@ -111,7 +111,7 @@ chk_arr(expp)
 }
 
 STATIC int
-chk_value(expp)
+ChkValue(expp)
 	struct node *expp;
 {
 	switch(expp->nd_symb) {
@@ -121,13 +121,13 @@ chk_value(expp)
 		return 1;
 
 	default:
-		crash("(chk_value)");
+		crash("(ChkValue)");
 	}
 	/*NOTREACHED*/
 }
 
 STATIC int
-chk_linkorname(expp)
+ChkLinkOrName(expp)
 	register struct node *expp;
 {
 	register struct def *df;
@@ -142,7 +142,7 @@ chk_linkorname(expp)
 
 		assert(expp->nd_symb == '.');
 
-		if (! chk_designator(left)) return 0;
+		if (! ChkDesignator(left)) return 0;
 
 		if (left->nd_type->tp_fund != T_RECORD ||
 		    (left->nd_class == Def &&
@@ -204,12 +204,12 @@ df->df_idf->id_text);
 }
 
 STATIC int
-chk_ex_linkorname(expp)
+ChkExLinkOrName(expp)
 	register struct node *expp;
 {
 	register struct def *df;
 
-	if (! chk_linkorname(expp)) return 0;
+	if (! ChkLinkOrName(expp)) return 0;
 	if (expp->nd_class != Def) return 1;
 	df = expp->nd_def;
 
@@ -237,7 +237,7 @@ STATIC int
 RemoveSet(set)
 	arith **set;
 {
-	/*	This routine is only used for error exits of chk_el.
+	/*	This routine is only used for error exits of ChkElement.
 		It frees the set indicated by "set", and returns 0.
 	*/
 	if (*set) {
@@ -248,7 +248,7 @@ RemoveSet(set)
 }
 
 STATIC int
-chk_el(expp, tp, set)
+ChkElement(expp, tp, set)
 	register struct node *expp;
 	register struct type *tp;
 	arith **set;
@@ -265,7 +265,7 @@ chk_el(expp, tp, set)
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (!chk_el(left, tp, set) || !chk_el(right, tp, set)) {
+		if (!ChkElement(left, tp, set) || !ChkElement(right, tp, set)) {
 			return 0;
 		}
 
@@ -295,7 +295,7 @@ node_error(expp, "lower bound exceeds upper bound in range");
 
 	/* Here, a single element is checked
 	*/
-	if (!chk_expr(expp)) {
+	if (!ChkExpression(expp)) {
 		return RemoveSet(set);
 	}
 
@@ -326,7 +326,7 @@ node_error(expp, "lower bound exceeds upper bound in range");
 }
 
 STATIC int
-chk_set(expp)
+ChkSet(expp)
 	register struct node *expp;
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
@@ -345,7 +345,7 @@ chk_set(expp)
 	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		if (! chk_designator(nd)) return 0;
+		if (! ChkDesignator(nd)) return 0;
 
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
@@ -383,7 +383,7 @@ node_error(expp, "specifier does not represent a set type");
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (!chk_el(nd->nd_left, ElementType(tp), &set)) return 0;
+		if (!ChkElement(nd->nd_left, ElementType(tp), &set)) return 0;
 		nd = nd->nd_right;
 	}
 
@@ -426,8 +426,8 @@ getarg(argp, bases, designator)
 	arg = arg->nd_right;
 	left = arg->nd_left;
 
-	if ((!designator && !chk_expr(left)) ||
-	    (designator && !chk_variable(left))) {
+	if ((!designator && !ChkExpression(left)) ||
+	    (designator && !ChkVariable(left))) {
 		return 0;
 	}
 
@@ -454,7 +454,7 @@ getname(argp, kinds)
 	}
 
 	arg = arg->nd_right;
-	if (! chk_designator(arg->nd_left)) return 0;
+	if (! ChkDesignator(arg->nd_left)) return 0;
 
 	if (arg->nd_left->nd_class != Def && arg->nd_left->nd_class != LinkDef) {
 		node_error(arg, "identifier expected");
@@ -471,7 +471,7 @@ getname(argp, kinds)
 }
 
 STATIC int
-chk_proccall(expp)
+ChkProcCall(expp)
 	register struct node *expp;
 {
 	/*	Check a procedure call
@@ -507,7 +507,7 @@ node_error(left, "type incompatibility in parameter");
 }
 
 int
-chk_call(expp)
+ChkCall(expp)
 	register struct node *expp;
 {
 	/*	Check something that looks like a procedure or function call.
@@ -515,19 +515,19 @@ chk_call(expp)
 		it may also be a cast or a standard procedure call.
 	*/
 	register struct node *left;
-	STATIC int chk_std();
-	STATIC int chk_cast();
+	STATIC int ChkStandard();
+	STATIC int ChkCast();
 
 	/* First, get the name of the function or procedure
 	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
-	if (! chk_designator(left)) return 0;
+	if (! ChkDesignator(left)) return 0;
 
 	if (IsCast(left)) {
 		/* It was a type cast. This is of course not portable.
 		*/
-		return chk_cast(expp, left);
+		return ChkCast(expp, left);
 	}
 
 	if (IsProcCall(left)) {
@@ -537,12 +537,12 @@ chk_call(expp)
 		if (left->nd_type == std_type) {
 			/* A standard procedure
 			*/
-			return chk_std(expp, left);
+			return ChkStandard(expp, left);
 		}
 		/* Here, we have found a real procedure call. The left hand
 		   side may also represent a procedure variable.
 		*/
-		return chk_proccall(expp);
+		return ChkProcCall(expp);
 	}
 
 	node_error(left, "procedure, type, or function expected");
@@ -606,7 +606,7 @@ AllowedTypes(operator)
 }
 
 STATIC int
-chk_address(tpl, tpr)
+ChkAddress(tpl, tpr)
 	register struct type *tpl, *tpr;
 {
 	
@@ -622,7 +622,7 @@ chk_address(tpl, tpr)
 }
 
 STATIC int
-chk_oper(expp)
+ChkBinOper(expp)
 	register struct node *expp;
 {
 	/*	Check a binary operation.
@@ -634,7 +634,7 @@ chk_oper(expp)
 	left = expp->nd_left;
 	right = expp->nd_right;
 
-	if (!chk_expr(left) || !chk_expr(right)) return 0;
+	if (!ChkExpression(left) || !ChkExpression(right)) return 0;
 
 	tpl = BaseType(left->nd_type);
 	tpr = BaseType(right->nd_type);
@@ -686,10 +686,11 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 	    (tpl != bool_type && Boolean(expp->nd_symb))) {
 		if (!(tpl->tp_fund == T_POINTER &&
 		      (T_CARDINAL & allowed) &&
-		      chk_address(tpl, tpr))) {
+		      ChkAddress(tpl, tpr))) {
 node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
 			return 0;
 		}
+		expp->nd_type = card_type;
 	}
 
 	if (tpl->tp_fund == T_SET) {
@@ -706,7 +707,7 @@ node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_
 }
 
 STATIC int
-chk_uoper(expp)
+ChkUnOper(expp)
 	register struct node *expp;
 {
 	/*	Check an unary operation.
@@ -714,9 +715,10 @@ chk_uoper(expp)
 	register struct node *right = expp->nd_right;
 	register struct type *tpr;
 
-	if (! chk_expr(right)) return 0;
+	if (! ChkExpression(right)) return 0;
 
 	tpr = BaseType(right->nd_type);
+	if (tpr == address_type) tpr = card_type;
 	expp->nd_type = tpr;
 
 	switch(expp->nd_symb) {
@@ -766,7 +768,7 @@ chk_uoper(expp)
 		break;
 
 	default:
-		crash("chk_uoper");
+		crash("ChkUnOper");
 	}
 	node_error(expp, "illegal operand for unary operator \"%s\"",
 			symbol2str(expp->nd_symb));
@@ -785,14 +787,14 @@ getvariable(argp)
 		return 0;
 	}
 
-	if (! chk_variable(arg->nd_left)) return 0;
+	if (! ChkVariable(arg->nd_left)) return 0;
 
 	*argp = arg;
 	return arg->nd_left;
 }
 
 STATIC int
-chk_std(expp, left)
+ChkStandard(expp, left)
 	register struct node *expp, *left;
 {
 	/*	Check a call of a standard procedure or function
@@ -909,7 +911,7 @@ chk_std(expp, left)
 						"ALLOCATE" : "DEALLOCATE", 0);
 			expp->nd_left = MkLeaf(Name, &dt);
 		}
-		return chk_call(expp);
+		return ChkCall(expp);
 
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
@@ -989,7 +991,7 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 		}
 
 	default:
-		crash("(chk_std)");
+		crash("(ChkStandard)");
 	}
 
 	if (arg->nd_right) {
@@ -1001,7 +1003,7 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 }
 
 STATIC int
-chk_cast(expp, left)
+ChkCast(expp, left)
 	register struct node *expp, *left;
 {
 	/*	Check a cast and perform it if the argument is constant.
@@ -1019,7 +1021,7 @@ node_error(expp, "only one parameter expected in type cast");
 	}
 
 	arg = arg->nd_left;
-	if (! chk_expr(arg)) return 0;
+	if (! ChkExpression(arg)) return 0;
 
 	if (arg->nd_type->tp_size != left->nd_type->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
@@ -1078,33 +1080,33 @@ done_before(expp)
 extern int	NodeCrash();
 
 int (*ExprChkTable[])() = {
-	chk_value,
-	chk_arr,
-	chk_oper,
-	chk_uoper,
-	chk_arrow,
-	chk_call,
-	chk_ex_linkorname,
+	ChkValue,
+	ChkArr,
+	ChkBinOper,
+	ChkUnOper,
+	ChkArrow,
+	ChkCall,
+	ChkExLinkOrName,
 	NodeCrash,
-	chk_set,
+	ChkSet,
 	NodeCrash,
 	NodeCrash,
-	chk_ex_linkorname,
+	ChkExLinkOrName,
 	NodeCrash
 };
 
 int (*DesigChkTable[])() = {
-	chk_value,
-	chk_arr,
+	ChkValue,
+	ChkArr,
 	no_desig,
 	no_desig,
-	chk_arrow,
+	ChkArrow,
 	no_desig,
-	chk_linkorname,
+	ChkLinkOrName,
 	NodeCrash,
 	no_desig,
 	done_before,
 	NodeCrash,
-	chk_linkorname,
+	ChkLinkOrName,
 	done_before
 };

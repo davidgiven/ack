@@ -154,6 +154,10 @@ InitTypes()
 		fatal("integer size not equal to word size");
 	}
 
+	if (int_size != pointer_size) {
+		fatal("cardinal size not equal to pointer size");
+	}
+
 	if (long_size < int_size || long_size % word_size != 0) {
 		fatal("illegal long integer size");
 	}

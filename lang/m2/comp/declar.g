@@ -341,7 +341,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			   the type
 			*/
 				{ warning("Old fashioned Modula-2 syntax!");
-				  if (chk_designator(nd) &&
+				  if (ChkDesignator(nd) &&
 				      (nd->nd_class != Def ||
 				       !(nd->nd_def->df_kind&(D_ERROR|D_ISTYPE)) ||
 				       !nd->nd_def->df_type)) {

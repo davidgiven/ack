@@ -48,7 +48,7 @@ qualident(int types;
 		{ if (types) {
 			df = ill_df;
 
-			if (chk_designator(nd)) {
+			if (ChkDesignator(nd)) {
 			    if (nd->nd_class != Def) {
 				node_error(nd, "%s expected", str);
 			    }
@@ -99,7 +99,7 @@ ConstExpression(struct node **pnd;):
 	 */
 		{ DO_DEBUG(options['X'], print("CONSTANT EXPRESSION\n"));
 		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
-		  if (chk_expr(*pnd) &&
+		  if (ChkExpression(*pnd) &&
 		      ((*pnd)->nd_class != Set && (*pnd)->nd_class != Value)) {
 			error("Constant expression expected");
 		  }
