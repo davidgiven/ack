@@ -10,5 +10,5 @@ cfi~:
 	jsr	pc,setfloat~
 	movf	(sp)+,r0
 	movfi	r0,-(sp)
-	setl;seti
+	setd;seti
 	jmp	(r1)

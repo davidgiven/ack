@@ -9,5 +9,5 @@ fef~:
 	movei	r0,-(sp)
 	movie	$0,r0
 	movf	r0,02(sp)
-	setl
+	setd
 	jmp	(r1)

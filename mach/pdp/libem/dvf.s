@@ -9,5 +9,5 @@ dvf~:
 	movf	(sp)+,r1
 	divf	r0,r1
 	movf	r1,-(sp)
-	setl
+	setd
 	jmp	(r1)

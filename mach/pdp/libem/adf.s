@@ -9,5 +9,5 @@ adf~:
 	movf	(sp)+,r0
 	addf	(sp)+,r0
 	movf	r0,-(sp)
-	setl
+	setd
 	jmp	(r1)

@@ -9,7 +9,7 @@ cmf~:
 	movf	(sp)+,r1
 	clr	r0
 	cmpf	r0,r1
-	setl
+	setd
 	cfcc
 	beq	1f
 	blt	2f

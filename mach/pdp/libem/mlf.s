@@ -8,5 +8,5 @@ mlf~:
 	movf	(sp)+,r0
 	mulf	(sp)+,r0
 	movf	r0,-(sp)
-	setl
+	setd
 	jmp	(r1)

@@ -6,5 +6,5 @@ ngf~:
 	mov	(sp)+,r1
 	jsr	pc,setfloat~
 	negf	(sp)
-	setl
+	setd
 	jmp	(r1)

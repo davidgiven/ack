@@ -10,5 +10,5 @@ cff~:
 	jsr	pc,setfloat~
 	movof	(sp)+,r0
 	movf	r0,-(sp)
-	setl
+	setd
 1:	jmp	(r1)

@@ -9,5 +9,5 @@ fif~:
 	modf	(sp)+,r0
 	movf	r0,-(sp)
 	movf	r1,-(sp)
-	setl
+	setd
 	jmp	(r1)

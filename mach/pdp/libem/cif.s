@@ -10,7 +10,7 @@ cif~:
 1:	jsr	pc,setint~
 	movif	(sp)+,r0
 	movf	r0,-(sp)
-	setl;seti
+	setd;seti
 	jmp	(r1)
 cuf~:
 	mov	(sp)+,r1

@@ -9,5 +9,5 @@ sbf~:
 	subf	(sp)+,r0
 	negf	r0
 	movf	r0,-(sp)
-	setl
+	setd
 	jmp	(r1)
