@@ -3,6 +3,7 @@
 .define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
+.define EXIT
 .extern _end
 
 ERANGE          = 1
@@ -27,7 +28,10 @@ begtext:
 	push cx
 	xor bp,bp
 	call    __m_a_i_n
+EXIT:
 	int 0x81     
+BRK:
+	jmp	__brk
 .sect	.data
 begdata:
 hol0:
