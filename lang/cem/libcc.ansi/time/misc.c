@@ -233,6 +233,15 @@ parseTZ(const char *p)
 
 	if (!p) return;
 
+	if (*p == ':') {
+		/*
+		 * According to POSIX, this is implementation defined.
+		 * Since it depends on the particular operating system, we
+		 * can do nothing.
+		 */
+		return;
+	}
+
 	if (!strcmp(lastTZ, p)) return;		/* nothing changed */
 
 	*_tzname[0] = '\0';
