@@ -208,7 +208,6 @@ bigmin:
 1:				! we get here on zero exp
 	mov	ax,6(bx)
 	and	ax,0177
-	mov	6(bx),ax
 	or	ax,4(bx)
 	jne	1f		! zero result
 	xor	ax,ax
@@ -219,6 +218,7 @@ bigmin:
 	ret
 1:				! otherwise unnormalized number
 	mov	cx,6(bx)
+	and	cx,0100177
 	mov	dx,cx
 	and	cx,0x8000
 	mov	ax,-125
@@ -267,7 +267,6 @@ bigmin:
 1:				! we get here on zero exp
 	mov	ax,10(bx)
 	and	ax,017
-	mov	10(bx),ax
 	or	ax,8(bx)
 	or	ax,6(bx)
 	or	ax,4(bx)
@@ -282,6 +281,7 @@ bigmin:
 	ret
 1:				! otherwise unnormalized number
 	mov	cx,10(bx)
+	and	cx,0100017
 	mov	dx,cx
 	and	cx,0x8000
 	mov	ax,-1021
