@@ -84,7 +84,7 @@ error(s,a1,a2,a3,a4)
 fatal(s,a1,a2,a3,a4)
 	char *s;
 {
-	C_close();
+	if (C_busy()) C_close();
 	error(s,a1,a2,a3,a4);
 	exit(1);
 }
