@@ -21,6 +21,7 @@ chstack.$(SUF):	$(SRC_DIR)/chstack.c
 	$(CC) $(COPTIONS) -c $(SRC_DIR)/chstack.c
 
 install:	all
+	-mkdir $(TARGET_HOME)/lib.bin/xenix3
 	cp cv $(TARGET_HOME)/lib.bin/xenix3/cv
 	cp chstack $(TARGET_HOME)/lib.bin/xenix3/chstack
 
@@ -29,7 +30,7 @@ cmp:	all
 	-cmp chstack $(TARGET_HOME)/lib.bin/xenix3/chstack
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out cv chstack
 
 lint:
 	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)

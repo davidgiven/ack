@@ -27,7 +27,7 @@ cmp:	all
 	echo Nothing is compared
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out
 
 lint:
 	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/mccpm.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)

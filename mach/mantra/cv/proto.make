@@ -21,6 +21,7 @@ Xcv.$(SUF):	$(SRC_DIR)/Xcv.c
 	$(CC) $(COPTIONS) -I$(TARGET_HOME)/h -c $(SRC_DIR)/Xcv.c
 
 install:	all
+	-mkdir $(TARGET_HOME)/lib.bin/mantra
 	cp cv $(TARGET_HOME)/lib.bin/mantra/cv
 	cp Xcv $(TARGET_HOME)/lib.bin/mantra/Xcv
 
@@ -29,7 +30,7 @@ cmp:	all
 	-cmp Xcv $(TARGET_HOME)/lib.bin/mantra/Xcv
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out cv Xcv
 
 lint:
 	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)

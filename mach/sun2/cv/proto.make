@@ -15,13 +15,14 @@ cv.$(SUF):	$(SRC_DIR)/cv.c
 	$(CC) $(COPTIONS) -DMACH=1 -I$(TARGET_HOME)/h -c $(SRC_DIR)/cv.c
 
 install:	all
+	-mkdir $(TARGET_HOME)/lib.bin/sun2
 	cp cv $(TARGET_HOME)/lib.bin/sun2/cv
 
 cmp:	all
 	-cmp cv $(TARGET_HOME)/lib.bin/sun2/cv
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out cv
 
 lint:
 	$(LINT) $(LINTOPTIONS) -DMACH=1 -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)

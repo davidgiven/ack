@@ -15,13 +15,14 @@ dl.$(SUF):	$(SRC_DIR)/dl.c
 	$(CC) $(COPTIONS) -I$(TARGET_HOME)/h -c $(SRC_DIR)/dl.c
 
 install:	all
+	-mkdir $(TARGET_HOME)/lib.bin/6500
 	cp dl $(TARGET_HOME)/lib.bin/6500/dl
 
 cmp:	all
 	-cmp dl $(TARGET_HOME)/lib.bin/6500/dl
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out dl
 
 lint:
 	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/dl.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)

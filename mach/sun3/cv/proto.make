@@ -21,13 +21,14 @@ Xcv.$(SUF):	$(SRC_DIR)/Xcv.c
 	$(CC) $(COPTIONS) -DMACH=2 -I$(TARGET_HOME)/h -c $(SRC_DIR)/Xcv.c
 
 install:	all
+	-mkdir $(TARGET_HOME)/lib.bin/sun3
 	cp cv $(TARGET_HOME)/lib.bin/sun3/cv
 
 cmp:	all
 	-cmp cv $(TARGET_HOME)/lib.bin/sun3/cv
 
 clean:
-	rm -f *.(SUF) Out
+	rm -f *.$(SUF) Out cv
 
 lint:
 	$(LINT) $(LINTOPTIONS) -DMACH=2 -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)
