@@ -74,7 +74,7 @@ compile(argc, argv)
 		break;
 	case 0:
 		FileName = "";
-		WorkingDir = 0;
+		WorkingDir = "";
 		break;
 	default:
 		FileName = argv[0];
