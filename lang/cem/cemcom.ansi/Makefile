@@ -176,7 +176,7 @@ Oinstall:	Omain
 	cp $(CURRDIR)omain $(EMHOME)/lib/em_cemcomO
 
 cmp:	Main
-	-cmp $(CURRDIR)main $(EMHOME)/lib/em_cemcom
+	-cmp $(CURRDIR)main $(EMHOME)/lib/em_cemcom.ansi
 	-cmp $(CURRDIR)cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 pr:
