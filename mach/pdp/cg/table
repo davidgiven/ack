@@ -1105,6 +1105,9 @@ lol adp stl $1==$3 && inreg($1)==2 | |
 			remove(regvar($1))
 			"add $$$2,%(regvar($1)%)"
 			erase(regvar($1))		|	| |
+lil lil adp sil $2==$4 && inreg($1)==2 | |
+			allocate(REG={regdef2, regvar($1)}) 
+						| %[a] | lil $2 adp $3 sil $2 |
 lil adp sil $1==$3 && $2==1 && inreg($1)==2 | |
 			INDSTORE
 			"inc *%(regvar($1)%)"		|	| |
@@ -1173,6 +1176,9 @@ lol adp stl $1==$3 | |
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
 			"add $$$2,$1(r5)"
 			setcc({LOCAL2,$1,2})		|	| |
+lil lil adp sil $2==$4 | |
+			allocate(REG={reginddef2, lb, tostring($1)}) 
+						| %[a] | lil $2 adp $3 sil $2 |
 lil adp sil $1==$3 && $2==1 | |
 			INDSTORE
 			"inc *$1(r5)"
@@ -1201,6 +1207,9 @@ loe adp ste $1==$3 | |
 			remove(posextern)
 			"add $$$2,$1"
 			setcc({relative2,$1})		|	| |
+loe loi loe loi adp loe sti $3==$6 && $2==2 && $4==2 && $7==2 | |
+			allocate(REG={reldef2, $1})
+				| %[a] | loe $3 loi $4 adp $5 loe $6 sti $7 |
 loe loi adp loe sti $1==$4 && $2==2 && $5==2 && $3==1 | |
 			INDSTORE
 			"inc *$1"
