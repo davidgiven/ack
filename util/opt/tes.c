@@ -80,6 +80,7 @@ line_p lnp;
 	register int arg, argdef;
 	line_p x = PREV(lnp);
 	line_p y = (x == (line_p) 0 ? (line_p) 0 : PREV(x));
+	int neg = 0;
 
 	if (instr == op_lab) {
 		do_inst_label(lnp);
@@ -94,11 +95,7 @@ line_p lnp;
 
 	if (*s != '0') {
 		while (*s != '\0') {
-			 if (*s++ == '-') {		/* ignores asp -4 */
-				stacktop = 0;
-				s++;
-				continue;
-			 }
+			neg = (*s++ == '-');
 
 			if (TYPE(lnp) == OPSHORT) {
 				arg = SHORT(lnp);
@@ -148,6 +145,11 @@ line_p lnp;
 				assert(FALSE);
 			}
 		}
+		/*
+		 * When the last argument was negative, the element size
+		 * must be negated.  This is to catch 'asp -4'.
+		 */
+		if (neg) stacktop = -stacktop;
 	}
 
 	if (stacktop < 0) stacktop = 0;
