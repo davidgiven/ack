@@ -1917,7 +1917,13 @@ lol lol adp stl $1==$4 && $2==$4
 lil lil adp sil $1==$2 && $1==$4 && inreg($1)==2
 		| |	REMEXTANDLOC
 			allocate(REG={regdef4,regvar($1)})
-			"addl2\t$$$3,(%(regvar($1)%))"	| %[a]	| |
+			"addl2\t$$$3,(%(regvar($1)%))"
+			setcc(regvar($1))	| %[a]	| |
+lol lof dup adp lol stf $1==$5 && $2==$6 && $3==4 && inreg($1)==2
+		| |	REMEXTANDLOC
+			allocate(REG={displ4,regvar($1),tostring($2)})
+			"addl2\t$$$4,$2(%(regvar($1)%))"
+						| %[a]	| |
 #endif
 loe adp ste $1==$3
 		| |	remove(externals)
