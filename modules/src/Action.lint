@@ -1,0 +1,52 @@
+name "system-call interface module"
+action "make lintlib"
+dir system
+end
+name "string routines module"
+action "make lintlib"
+dir string
+end
+name "formatted print module"
+action "make lintlib"
+dir print
+end
+name "assertion module"
+action "make lintlib"
+dir assert
+end
+name "memory allocation module"
+action "make lintlib"
+dir alloc
+end
+name "fast, linear time malloc"
+action "make lintlib"
+dir malloc
+end
+name "identifier table module"
+action "make lintlib"
+dir idf
+end
+name "input module"
+action "make lintlib"
+dir input
+end
+name "ACK-object reading and writing module"
+action "make lintlib"
+dir object
+end
+name "EM code generation module"
+action "make lintlib"
+dir em_code
+end
+name "EM messages generation module"
+action "make lintlib"
+dir em_mes
+end
+name "EM-code reading module"
+action "make lintlib"
+dir read_em
+end
+name "Floating point arithmetic module"
+action "make lintlib"
+dir flt_arith
+end
