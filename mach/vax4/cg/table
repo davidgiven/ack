@@ -1830,7 +1830,7 @@ lol adp stl $1==$3 && inreg($1)==2
 lol adp stl $1==$3 && $1<0
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
-			"addl2\t$$$2,$1(ap)" 
+			"addl2\t$$$2,$1(fp)" 
 			setcc({LOCAL4,LB,$1,4})	|	| |
 lol adp stl $1==$3 && $1>=0
 		| |	remove(displaced)
