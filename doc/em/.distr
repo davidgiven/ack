@@ -21,8 +21,6 @@ mach.nr
 macr.nr
 mapping.nr
 mem.nr
-print
-show
 title.nr
 traps.nr
 types.nr
