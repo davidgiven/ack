@@ -786,7 +786,7 @@ Pfile(fname)
 	Pfname = fname;
 	Plineno = 1;
 	if (!Pct[' ']) {
-		for(s = " \t\n\r\v\f"; *s; s++)
+		for(s = " \t\n\r\013\f"; *s; s++) /* ACK_MOD: \v is not K&R C */
 			Pct[*s] = P_space;
 		for(s = "*,();"; *s; s++)
 			Pct[*s] = P_delim;
