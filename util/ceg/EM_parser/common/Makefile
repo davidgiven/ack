@@ -1,7 +1,7 @@
 EM=/proj/em/Work
 
 GFILES = pars.g
-OFILES = pars.o Lpars.o scan.o mylex.o default.o C_instr2.o assem.o eval.o\
+OFILES = pars.o Lpars.o scan.o mylex.o default.o C_instr2.o help.o eval.o\
 	 action.o
 IFILES = -I$(EM)/h -I$(EM)/modules/h
 CC = cc
@@ -22,4 +22,3 @@ dummy : $(GFILES)
 
 Lpars.o	: Lpars.h decl.h
 pars.o	: Lpars.h decl.h
-Lpars.o	: Lpars.h decl.h
