@@ -530,8 +530,10 @@ sts $1==2	| X_CXREG X_BXREG |
 			remove(ALL)
 			"call .sti"
 			erase(%[1]) erase(%[2]) 		|	| |
-sdl		|	  |			  |	| stl $1 stl $1+2 |
-sde		|	  |			  |  | ste $1 ste $1+"+2" |
+sdl		| regorconst regorconst  |  | %[2] %[1]  | stl $1 stl $1+2 |
+...		| nocoercions: STACK |	| | stl $1 stl $1+2 |
+sde		| regorconst regorconst  |  | %[2] %[1]  | ste $1 ste $1+"+2" |
+...		| nocoercions: STACK |	| | ste $1 ste $1+"+2" |
 sdf		| addreg regorconst regorconst |
 			remove(referals)
 			move(%[2],{ind_regoff2,%[1],tostring($1)})
@@ -1155,7 +1157,7 @@ lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==2 | |
 lol loc sli stl $1==$4 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			allocate(CXREG = {ANYCON, $2})
-			"sar %(regvar($1)%),cl"
+			"sal %(regvar($1)%),cl"
 			setcc(regvar($1))		| | |
 lol loc sri stl $1==$4 && $2==1 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
