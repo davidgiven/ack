@@ -366,10 +366,14 @@ add_field(szp, fd, fdtpp, idf, stp)
 		Note that the fields are packed into machine words (according
 		to the RM.)
 	*/
-	long bits_in_type = word_size * 8;
+#ifdef word_size
+#define bits_in_type	((int)(8*word_size))
+#else
+	int bits_in_type = word_size * 8;
+#endif
 	static int field_offset = (arith)0;
 	static struct type *current_struct = 0;
-	static long bits_declared;	/* nr of bits used in *field_offset */
+	static int bits_declared;	/* nr of bits used in *field_offset */
 
 	if (current_struct != stp)	{
 		/*	This struct differs from the last one
@@ -394,7 +398,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 	case ENUM:
 	case LONG:
 		/* right type; size OK? */
-		if ((*fdtpp)->tp_size > word_size) {
+		if ((int) (*fdtpp)->tp_size > (int) word_size) {
 			error("bit field type %s does not fit in a word",
 				symbol2str((*fdtpp)->tp_fund));
 			*fdtpp = error_type;
@@ -417,7 +421,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 		field_offset = align(*szp, int_align);
 		*szp = field_offset + int_size;
 		stp->tp_align = lcm(stp->tp_align, int_align);
-		bits_declared = (arith)0;
+		bits_declared = 0;
 		field_busy = 1;
 	}
 
