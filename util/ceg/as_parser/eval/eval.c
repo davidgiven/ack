@@ -8,6 +8,11 @@
 
 
 
+/* This program processes the file 'as.c', and will take care of things like
+ * %d( <expression>), @func( arg), %$(   ), etc.
+ * The main-loop is constructed as a finite automat.
+ */
+
 
 main()
 {
@@ -181,6 +186,8 @@ char *str;
 		pr_call( str);
 }
 
+
+/* Adjust 'cur_pos' when necessary */
 
 pr_call( call)
 char *call;
