@@ -23,6 +23,8 @@
 #define	MESLEN		30
 #define PATHLEN		100
 
+/* to make it easier to patch ... */
+char 			emdir[64] = EM_DIR;
 extern struct file	*_curfil;
 
 extern int		_pargc;
@@ -68,7 +70,7 @@ _catch(erno) unsigned erno; {
 		*qq++ = _curfil->fname;
 		*qq++ = ": ";
 	}
-	if ( (i=strtobuf(EM_DIR,filename,PATHLEN)) >= PATHLEN-1 ||
+	if ( (i=strtobuf(emdir,filename,PATHLEN)) >= PATHLEN-1 ||
 	     (filename[i]='/' ,
 	      strtobuf(RTERR_PATH,filename+i+1,PATHLEN-i-1) >= PATHLEN-i-1
 	     ) )

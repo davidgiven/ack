@@ -42,6 +42,9 @@ RENAME(x,y) string x,y; {
 	if(! sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
 }
 
+/* to make it easier to patch ... */
+char emdir[64] = EM_DIR;
+
 string
 libpath(s) string s; {
 	/* Must deliver a full pathname to the library file "s" */
@@ -52,9 +55,9 @@ libpath(s) string s; {
 	string strcpy(), strcat();
 	static string subdir = "/lib/LLgen/";
 
-	length = strlen(EM_DIR) + strlen(subdir) + strlen(s) + 1;
+	length = strlen(emdir) + strlen(subdir) + strlen(s) + 1;
 	p = (string) alloc((unsigned) length);
-	strcpy(p,EM_DIR);
+	strcpy(p,emdir);
 	strcat(p,subdir);
 	strcat(p,s);
 	return p;
