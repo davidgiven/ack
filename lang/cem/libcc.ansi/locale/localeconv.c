@@ -23,6 +23,7 @@ localeconv(void)
 	lcp->mon_grouping = "";
 	lcp->positive_sign = "";
 	lcp->negative_sign = "";
+	lcp->int_frac_digits = CHAR_MAX;
 	lcp->frac_digits = CHAR_MAX;
 	lcp->p_cs_precedes = CHAR_MAX;
 	lcp->p_sep_by_space = CHAR_MAX;

@@ -1,0 +1,2 @@
+localeconv.c
+setlocale.c
