@@ -35,7 +35,7 @@ IMPLEMENTATION MODULE Storage;
 	Bucket =
 	  RECORD
 		CASE : BOOLEAN OF
-		   FALSE: BSIZE: INTEGER;	(* size of user part in UNITs *)
+		   FALSE: BSIZE: CARDINAL;	(* size of user part in UNITs *)
 			  BNEXT: BucketPtr; |	(* next free Bucket *)
 		   TRUE: BXX: ALIGNTYPE
 		END;
@@ -53,8 +53,8 @@ IMPLEMENTATION MODULE Storage;
 	USED: ADDRESS;
 
   PROCEDURE MyAllocate(size: CARDINAL) : ADDRESS;
-    VAR	nu : INTEGER;
-	b : INTEGER;
+    VAR	nu : CARDINAL;
+	b : CARDINAL;
 	p, q: BucketPtr;
 	brk : ADDRESS;
   BEGIN
@@ -79,7 +79,7 @@ IMPLEMENTATION MODULE Storage;
 			IF FreeLists[b] # NIL THEN
 				q := FreeLists[b];
 				FreeLists[b] := q^.BNEXT;
-				p := ADDRESS(q) + CARDINAL((nu+1)*UNIT);
+				p := ADDRESS(q) + (nu+1)*UNIT;
 				(* p indicates the block that must be given
 				   back
 				*)
@@ -113,7 +113,7 @@ IMPLEMENTATION MODULE Storage;
 					(* split block,
 					   tail goes to FreeLists area
 					*)
-					q := ADDRESS(p) + CARDINAL((nu+1)*UNIT);
+					q := ADDRESS(p) + (nu+1)*UNIT;
 					q^.BSIZE := p^.BSIZE -nu -1;
 					q^.BNEXT := FreeLists[q^.BSIZE];
 					FreeLists[q^.BSIZE] := q;
@@ -124,7 +124,7 @@ IMPLEMENTATION MODULE Storage;
 			(* Give part of tail of original block.
 			   Block stays in this list.
 			*)
-			q := ADDRESS(p) + CARDINAL((p^.BSIZE-nu)*UNIT);
+			q := ADDRESS(p) + (p^.BSIZE-nu)*UNIT;
 			q^.BSIZE := nu;
 			p^.BSIZE := p^.BSIZE - nu - 1;
 			q^.BNEXT := USED;
@@ -202,8 +202,9 @@ IMPLEMENTATION MODULE Storage;
   PROCEDURE ReOrganize();
     VAR lastblock: BucketPtr;
 	b, be: BucketPtr;
-	i: INTEGER;
+	i: CARDINAL;
   BEGIN
+	lastblock := NIL;
 	FOR i := 1 TO NLISTS DO
 		b := FreeLists[i];
 		WHILE b # NIL DO
@@ -231,7 +232,7 @@ IMPLEMENTATION MODULE Storage;
 	b := FirstBlock;
 	WHILE ADDRESS(b) < ADDRESS(lastblock) DO
 		LOOP
-			be := ADDRESS(b)+CARDINAL((b^.BSIZE+1)*UNIT);
+			be := ADDRESS(b)+(b^.BSIZE+1)*UNIT;
 			IF b^.BNEXT # NIL THEN	
 				(* this block is not free *)
 				EXIT;
@@ -245,9 +246,13 @@ IMPLEMENTATION MODULE Storage;
 				EXIT;
 			END;
 			(* this block and the next one are free,
-			   so merge them
+			   so merge them, but only if it is not too big
 			*)
-			b^.BSIZE := b^.BSIZE + be^.BSIZE + 1;
+			IF MAX(CARDINAL) - b^.BSIZE > be^.BSIZE THEN
+				b^.BSIZE := b^.BSIZE + be^.BSIZE + 1;
+			ELSE
+				EXIT;
+			END;
 		END;
 		b := be;
 	END;
@@ -270,12 +275,12 @@ IMPLEMENTATION MODULE Storage;
 				END;
 			END;
 		END;
-		b := ADDRESS(b) + CARDINAL((b^.BSIZE+1) * UNIT);
+		b := ADDRESS(b) + (b^.BSIZE+1) * UNIT;
 	END;
   END ReOrganize;
 
   PROCEDURE InitStorage();
-    VAR	i: INTEGER;
+    VAR	i: CARDINAL;
 	brk: ADDRESS;
   BEGIN
 	FOR i := 1 TO NLISTS DO
