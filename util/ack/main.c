@@ -70,7 +70,7 @@ main(argc,argv) char **argv ; {
 	transini();
 	scanneeds();
 	sprintf(template,TMPNAME,getpid()) ;
-	if ( n_error && !k_flag ) return n_error ;
+	if ( n_error && !k_flag ) exit(n_error) ;
 
 	for ( n_sig=sigs ; *n_sig ; n_sig++ ) {
 		if ( signal(*n_sig,noodstop)==SIG_IGN ) {
@@ -80,7 +80,7 @@ main(argc,argv) char **argv ; {
 
 
 	scanlist ( l_first(arguments), elem ) {
-		if ( !process(l_content(*elem)) && !k_flag ) return 1 ;
+		if ( !process(l_content(*elem)) && !k_flag ) exit(1) ;
 	}
 	orig.p_path= (char *)0 ;
 	if ( !rts ) rts="" ;
@@ -109,17 +109,17 @@ main(argc,argv) char **argv ; {
 			} else {
 				p_basename=0 ;
 			}
-			if ( !startrf(phase) && !k_flag ) return 1 ;
+			if ( !startrf(phase) && !k_flag ) exit(1) ;
 		}
 	}
 
-	if ( n_error ) return n_error ;
+	if ( n_error ) exit(n_error) ;
 
 	if ( g_flag ) {
-		return do_run();
+		exit(do_run()) ;
 	}
 
-	return 0 ;
+	exit(0) ;
 }
 
 char *srcvar() {
