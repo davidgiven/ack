@@ -13,5 +13,5 @@ wctomb(char *s, wchar_t wchar)
 	if (!s) return 0;		/* no state dependent codings */
 
 	*s = wchar;
-	return (*s != '\0');
+	return 1;
 }
