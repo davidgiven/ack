@@ -19,6 +19,7 @@ indir
 end
 name "LL(1) Parser generator"
 dir util/LLgen
+action "make firstinstall"
 end
 name "C preprocessor"
 dir util/cpp
