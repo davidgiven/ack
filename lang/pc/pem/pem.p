@@ -1392,7 +1392,9 @@ begin inita(fsp,negaddr(fsp));
 end;
 
 procedure genhol;
-begin gencst(ps_hol,posaddr(holeb,nil,false));
+  var sz: integer;
+begin sz := posaddr(holeb,nil,false); if sz = 0 then sz := sz_word;
+  gencst(ps_hol,sz);
   if sz_word = 4 then begin put1(sp_cst4); put1(0); put1(0); end
   else put1(sp_cst2);
   put1(0); put1(128);	 	{ 1000000000000000 pattern}
