@@ -162,12 +162,16 @@ regreturn()
 
 #ifdef MACH_OPTIONS
 static int gdb_flag = 0;
+static char *fp_hook_nam;
 
 mach_option(s)
 	char *s;
 {
 	if (! strcmp(s, "-gdb")) {
 		gdb_flag = 1;
+	}
+	else if (s[1] == 'F') {
+		fp_hook_nam = &s[2];
 	}
 	else {
 		error("Unknown flag %s", s);
@@ -237,6 +241,14 @@ mes(type) word type ; {
 		fprintf(codefile, "%d\n", (int) argval);
 		argt = getarg(end_ptyp);
 		break;
+#ifdef MACH_OPTIONS
+	case ms_flt:
+		if (fp_hook_nam) {
+			part_flush();
+			ex_ap(fp_hook_nam);
+		}
+		/* fall through */
+#endif
 	default :
 		while ( getarg(any_ptyp) != sp_cend ) ;
 		break ;
