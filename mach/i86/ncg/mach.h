@@ -20,8 +20,6 @@
 #define dlb_fmt         "_%d"
 #define hol_fmt         "hol%d"
 
-#define loc_off         "%d(bp)"
-#define arg_off         "4+%d(bp)"
 #define hol_off         "%ld+hol%d"
 
 #define con_cst(x)      fprintf(codefile,".data2\t%ld\n",x)

@@ -13,6 +13,7 @@ rscid = "$Header$"
  * Adapted to ncg format by BMT Mosseveld, EM v Mulligen, M de Rooy, E tulp,
  * and R Vendelmans (practical work course compiler construction).
  *
+ * New format table much corrected: Ceriel Jacobs
  * Added register variables: Ceriel Jacobs
  * Adapted to use floating point library: Ceriel Jacobs
  *
@@ -26,24 +27,12 @@ rscid = "$Header$"
  *
  */
 
-#ifdef LARGE
-#define PSIZE 4
-SL = 6
-SSL = "6"
-#else
-#define PSIZE 2
 SL = 4
 SSL = "4"
-#endif
 
 EM_WSIZE = 2
-#ifdef LARGE
-EM_PSIZE = 4
-EM_BSIZE = 6
-#else
 EM_PSIZE = 2
 EM_BSIZE = 4
-#endif
 
 SIZEFACTOR = 5/1
 
@@ -67,12 +56,8 @@ BXREG
 ADDREG
 CXREG
 DXREG
-#ifndef REGVARS
 IREG
-SIREG
-DIREG
-#else
-RREG
+#ifdef REGVARS
 RADDREG
 #endif
 
@@ -84,18 +69,17 @@ al                                  : REG1 , ACC1 .
 ah,bl,bh,ch,dl,dh                   : REG1 .
 cl                                  : REG1 , SHIFT_CREG .
 ax = al + ah                        : REG , GENREG , ACC .
-bx = bl + bh                        : REG , GENREG , BREG , BXREG ,
-                                      ADDREG , AREG .
+bx = bl + bh                        : REG , GENREG , BXREG , ADDREG , AREG .
 cx = cl + ch                        : REG , GENREG , CXREG , SHIFT_CREG.
 dx = dl + dh                        : REG , GENREG , DXREG .
 #ifndef REGVARS
-si                                  : REG , IREG , AREG , SIREG , ADDREG .
-di                                  : REG , IREG , AREG , DIREG , ADDREG .
+si                                  : REG , IREG , AREG , ADDREG .
+di                                  : REG , IREG , AREG , ADDREG .
 #else
-si				    : AREG , RADDREG , RREG regvar(reg_any) .
-di				    : AREG , RADDREG , RREG regvar(reg_any) .
+si				    : AREG , RADDREG , IREG regvar(reg_any) .
+di				    : AREG , RADDREG , IREG regvar(reg_any) .
 #endif
-bp                                  : AREG , BREG .
+bp                                  : AREG .
 sp				    : BREG .
 
 /*****************************************************************/
@@ -103,10 +87,11 @@ TOKENS
 /*****************************************************************/
 
 ANYCON          = { INT val; }      2 cost(2,2) val .
-ADDR_EXTERN     = { ADDR off; }     PSIZE cost(2,2) off .
+CONSTR		= { ADDR off; }	    2 cost(2,2) off .
+ADDR_EXTERN     = { ADDR off; }     2 cost(2,2) off .
 EXTERN1         = { ADDR off; }     2 cost(2,12) "(" off ")" .
 EXTERN2         = { ADDR off; }     2 cost(2,12) "(" off ")" .
-ADDR_LOCAL      = { INT ind; }      PSIZE cost(1,9) ind "(bp)" .
+ADDR_LOCAL      = { INT ind; }      2 cost(1,9) ind "(bp)" .
 LOCAL          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
 LOCAL1          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
 
@@ -116,8 +101,6 @@ Rbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "("
                   reg ")" .
 Xreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg 
                   ")" .
-Xbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "("
-                  reg ")" .
 
 ind_reg2        = { AREG reg;} 2 cost(0,11) "(" reg ")" .
 ind_regoff2     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg
@@ -144,10 +127,10 @@ memory2 	= EXTERN2 + ind_reg2 + ind_regoff2 + ind_bpregoff2 +
 memory1 	= EXTERN1 + ind_reg1 + ind_regoff1 + ind_bpregoff1 +
                   LOCAL1 .
 
-const		= ANYCON + ADDR_EXTERN .
-register	= REG
+const		= ANYCON + ADDR_EXTERN + CONSTR .
+register	= REG + AREG
 #ifdef REGVARS
-		  + RREG
+		  + IREG
 #endif
 			.
 addreg		= ADDREG
@@ -157,14 +140,14 @@ addreg		= ADDREG
 			.
 anyreg		= register + BREG .
 rm		= anyreg + memory2 .
-rmnoacc		= RREG + BREG + CXREG + memory2 .
+rmnoacc		= IREG + BXREG + CXREG + memory2 .
 rmorconst	= const + rm .
 regorconst	= const + anyreg .
 #ifdef REGVARS
 /* Needed because there is a shortage of ADDREG-registers.
    This is the main penalty for having register variables.
 */
-regorconstnoaddr = const + RREG + ACC + CXREG + DXREG .
+regorconstnoaddr = const + IREG + ACC + CXREG + DXREG .
 #else
 regorconstnoaddr = regorconst .
 #endif
@@ -188,15 +171,11 @@ referals	= indirects + locals .
 
 /* Miscellaneous */
 reg_off		= Xreg_off + Rreg_off .
-bpreg_off	= Xbpreg_off + Rbpreg_off .
+bpreg_off	= Rbpreg_off .
 halfindir	= reg_off + bpreg_off + ADDR_LOCAL .
 some_off	= halfindir + ADDR_EXTERN + addreg .
 a_word		= rmorconst + rm1 + halfindir .
 no_reg_off	= rmorconst + rm1 + ADDR_LOCAL .
-#ifdef REGVARS
-IREG		= RREG .
-uses_bx		= BXREG + Xreg_off + Xbpreg_off .
-#endif
  
 /*****************************************************************/
 INSTRUCTIONS
@@ -386,15 +365,12 @@ from rm1 to STACK
       pop bx
 
 from Xreg_off to STACK
-  gen add %1.reg,{ADDR_EXTERN,%1.off}
-      push %1.reg
-
-from Xbpreg_off to STACK
-  gen move %1,%1.reg
+  gen add %1.reg,{CONSTR,%1.off}
       push %1.reg
 
 from ADDR_LOCAL %ind==0 to STACK
-  gen push bp
+  gen 
+	push bp
 
 from halfindir to STACK
   uses REG
@@ -422,12 +398,15 @@ from rmorconst
   uses reusing %1,REG=%1		yields %a
 
 from Xreg_off
-  gen add %1.reg,{ADDR_EXTERN,%1.off}			yields %1.reg
+  gen add %1.reg,{CONSTR,%1.off}			yields %1.reg
 
 from halfindir
   uses reusing %1,ADDREG
   gen move %1,%a			yields %a
 
+from halfindir
+  uses REG
+  gen move %1,%a			yields %a
 /************************
  * From source to token *
  ************************/
@@ -485,20 +464,18 @@ pat loe					yields {EXTERN2,$1}
 pat loe loe $1==$2
   uses GENREG = {EXTERN2, $1}		yields %a %a
 
-#ifndef LARGE
 #ifdef REGVARS
 pat lil inreg($1) > 0			yields {ind_reg2, regvar($1)}
-#endif
 #endif
 pat lil	
   uses ADDREG={ind_regoff2,bp,$1}    	yields {ind_reg2,%a}
 
 pat lof	
   with exact reg_off		yields {ind_regoff2,%1.reg,%1.off+$1}
-  with addreg			yields {ind_regoff2,%1,$1}
   with exact bpreg_off		yields {ind_bpregoff2,%1.reg,%1.ind+$1}
   with exact ADDR_EXTERN	yields {EXTERN2,%1.off+$1}
   with exact ADDR_LOCAL		yields {LOCAL,%1.ind + $1,2}
+  with addreg			yields {ind_regoff2,%1,$1}
 
 pat lal					yields {ADDR_LOCAL,$1}
 
@@ -670,21 +647,19 @@ pat stf
   kills referals
   gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
   with exact reg_off STACK
-  gen pop {ADDR_EXTERN,$1+%1.off}
+  gen pop {ind_regoff2,%1.reg,$1+%1.off}
   with exact bpreg_off STACK
-  gen pop {ADDR_EXTERN,$1+%1.ind}
-  with exact ADDR_LOCAL STACK
-  gen pop {ADDR_EXTERN,$1+%1.ind}
+  gen pop {ind_bpregoff2,%1.reg,$1+%1.ind}
   with exact ADDR_LOCAL				leaving stl %1.ind+$1
   with bpreg_off regorconst
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
-
-/* ??? why commented out ???
   with ADDR_EXTERN regorconst
   kills indirects
   gen move %2,{EXTERN2,%1.off+$1}
-*/
+  with exact ADDR_EXTERN STACK
+  kills indirects
+  gen pop {EXTERN2,%1.off+$1}
 
 pat sti $1==2
   with addreg regorconst
@@ -705,12 +680,7 @@ pat sti $1==2
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind}
   with exact bpreg_off STACK
   gen pop {ind_bpregoff2,%1.reg,%1.ind}
-  with ADDR_EXTERN regorconst
-  kills indirects
-  gen move %2,{EXTERN2,%1.off}
-  with exact ADDR_EXTERN STACK
-  kills ALL
-  gen pop {EXTERN1,%1.off}
+  with exact ADDR_EXTERN			leaving ste %1.off
 
 pat sti $1==1
   with addreg regorconst12
@@ -754,22 +724,8 @@ pat sti $1==4
   kills all_locals,indexed
   gen pop {ind_bpregoff2,%1.reg,%1.ind}
       pop {ind_bpregoff2,%1.reg,%1.ind+2}
-  with ADDR_EXTERN regorconst regorconst
-  kills indirects
-  gen move %2,{EXTERN2,%1.off}
-      move %3,{EXTERN2,%1.off+2}
-  with exact ADDR_EXTERN STACK
-  kills indirects
-  gen pop {EXTERN2,%1.off}
-      pop {EXTERN2,%1.off+2}
-  with ADDR_LOCAL regorconst regorconst
-  kills indexed,locals %ind>=%1.ind && %ind<%1.ind+4
-  gen move %2,{ind_regoff2,bp,%1.ind}
-      move %3,{ind_regoff2,bp,%1.ind+2}
-  with exact ADDR_LOCAL STACK
-  kills indexed,locals %ind>=%1.ind && %ind<%1.ind+4
-  gen pop {ind_regoff2,bp,%1.ind}
-      pop {ind_regoff2,bp,%1.ind+2}
+  with exact ADDR_EXTERN		leaving sde %1.off
+  with exact ADDR_LOCAL			leaving sdl %1.ind
 
 pat sti $1>4
   with BXREG
@@ -817,21 +773,18 @@ pat sdf
       move %3,{ind_regoff2,%1.reg,%1.off+$1+2}
   with exact reg_off STACK
   kills ALL
-  gen pop {ADDR_EXTERN,$1+%1.off}
-      pop {ADDR_EXTERN,$1+2+%1.off}
+  gen pop {ind_regoff2,%1.reg,$1+%1.off}
+      pop {ind_regoff2,%1.reg,$1+2+%1.off}
   with exact bpreg_off STACK
   kills ALL
-  gen pop {ADDR_EXTERN,$1+%1.ind}
-      pop {ADDR_EXTERN,$1+2+%1.ind}
-  with exact ADDR_LOCAL STACK
-  kills ALL
-  gen pop {ADDR_EXTERN,$1+%1.ind}
-      pop {ADDR_EXTERN,$1+2+%1.ind}
+  gen pop {ind_bpregoff2, %1.reg,$1+%1.ind}
+      pop {ind_bpregoff2, %1.reg,$1+2+%1.ind}
 
 /* Funny things happen when the sign changes in the stl parameters */
 
   with exact ADDR_LOCAL				leaving stl %1.ind+$1
 							stl %1.ind+$1+2
+  with exact ADDR_EXTERN			leaving sde %1.off+$1
   with bpreg_off regorconst regorconst
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
@@ -1161,7 +1114,6 @@ with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
 with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
 with exact ADDR_EXTERN	yields {ADDR_EXTERN,%1.off+$1}
 with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
-with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
 with REG
   gen inc %1		yields %1
@@ -1173,7 +1125,6 @@ with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
 with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
 with exact ADDR_EXTERN  yields {ADDR_EXTERN,%1.off+$1}
 with exact ADDR_LOCAL   yields {ADDR_LOCAL,%1.ind+$1}
-with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
 with REG
   gen dec %1		yields %1
@@ -1185,7 +1136,6 @@ with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
 with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
 with exact ADDR_EXTERN	yields {ADDR_EXTERN,%1.off+$1}
 with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
-with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
 with ADDREG		yields {Xreg_off,%1,$1}
 with exact RADDREG	yields {Rreg_off, %1, $1}
@@ -1201,18 +1151,12 @@ with exact ADDR_EXTERN Rreg_off
 			yields {Rreg_off,%2.reg,%2.off+%1.off}
 with exact ADDR_EXTERN Xreg_off
 			yields {Xreg_off,%2.reg,%2.off+%1.off}
-with rm Xreg_off
-  gen add %2.reg,%1	yields {Xreg_off,%2.reg,%2.off}
-with exact ANYCON Xbpreg_off
-			yields {Xbpreg_off,%2.reg,%2.ind+%1.val}
+with rmorconst Xreg_off
+  gen add %2.reg,%1	yields %2
 with exact ANYCON Rbpreg_off
-			yields {Xbpreg_off,%2.reg,%2.ind+%1.val}
-with rm Xbpreg_off
-  gen add %2.reg,%1	yields {Xbpreg_off,%2.reg,%2.ind}
+			yields {Rbpreg_off,%2.reg,%2.ind+%1.val}
 with Xreg_off rmorconst
-  gen add %1.reg,%2	yields {Xreg_off,%1.reg,%1.off}
-with Xbpreg_off rmorconst
-  gen add %1.reg,%2	yields {Xbpreg_off,%1.reg,%1.ind}
+  gen add %1.reg,%2	yields %1
 with exact Xreg_off ANYCON
 			yields {Xreg_off,%1.reg,%1.off+%2.val}
 with exact Rreg_off ANYCON
@@ -1224,38 +1168,25 @@ with exact Rreg_off ADDR_EXTERN
 with exact Xreg_off reg_off
   gen add %1.reg,%2.reg
 			yields {Xreg_off,%1.reg,%1.off+%2.off}
-#ifndef REGVARS
-with IREG ADDR_LOCAL
-			yields {Xbpreg_off,%1,%2.ind}
-
-/*
-with (REG-IREG) ADDR_LOCAL
-  uses reusing %1,ADDREG=%1
-  gen add %a,bp		yields {reg_off,%a,%2.ind}
-*/
-#else
-with exact RREG ADDR_LOCAL
+with exact IREG ADDR_LOCAL
 			yields {Rbpreg_off, %1, %2.ind}
-with exact RREG ADDR_EXTERN
+with exact IREG ADDR_EXTERN
 			yields {Rreg_off, %1, %2.off}
-with exact ADDR_EXTERN RREG
+with exact ADDR_EXTERN IREG
 			yields {Rreg_off,%2,%1.off}
-with exact ADDR_LOCAL RREG
+with exact ADDR_LOCAL IREG
 			yields {Rbpreg_off,%2,%1.ind}
-#endif
 
-with exact ADDREG ADDR_EXTERN
-			yields {Xreg_off,%1,%2.off}
-with exact ADDREG ADDR_LOCAL
-			yields {Xbpreg_off,%1,%2.ind}
-with ADDREG rm
-  gen add %1,%2		yields %1
-with exact ADDR_EXTERN ADDREG
-			yields {Xreg_off,%2,%1.off}
-with exact ADDR_LOCAL ADDREG
-			yields {Xbpreg_off,%2,%1.ind}
+with exact rmorconst ADDR_EXTERN
+  uses reusing %1,ADDREG=%1
+			yields {Xreg_off,%a,%2.off}
+with exact ADDR_EXTERN rmorconst
+  uses reusing %2,ADDREG=%2
+			yields {Xreg_off,%a,%1.off}
 with rm ADDREG
   gen add %2,%1		yields %2
+with ADDREG rm
+  gen add %1,%2		yields %1
 
 pat sbs $1==2
 with exact ANYCON Xreg_off
@@ -2151,25 +2082,25 @@ pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0
 						leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0
-					leaving adp 0-rom($1,1) ads 2
+					leaving loc rom($1,1) sbi 2 ads 2
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0
-  with ADDREG
+  with REG
   gen sal %1,{ANYCON,1}			yields %1	leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0
-  with ADDREG
-  gen sal %1,{ANYCON,1}     yields %1   leaving adp 0-2*rom($1,1) ads 2
+  with REG
+  gen sal %1,{ANYCON,1}     yields %1   leaving loc 2*rom($1,1) sbi 2 ads 2
 
 pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)==0
-  with ADDREG
+  with REG
   gen sal %1,{ANYCON,1}
       sal %1,{ANYCON,1}			yields %1	leaving ads 2
 
 pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)!=0
-  with ADDREG
+  with REG
   gen sal %1,{ANYCON,1}
-      sal %1,{ANYCON,1}  yields %1	leaving adp 0-4*rom($1,1) ads 2
+      sal %1,{ANYCON,1}  yields %1	leaving loc 4*rom($1,1) sbi 2 ads 2
 
 pat lae aar $2==2 && rom($1,1)==0
   with ACC
@@ -2180,69 +2111,45 @@ pat lae aar $2==2 && defined(rom($1,1))
   with ACC
   uses DXREG,REG={ANYCON,rom($1,3)}
   gen mul %b 		yields %1
-   				leaving adp 0-rom($1,1)*rom($1,3) ads 2
+   				leaving loc rom($1,1)*rom($1,3) sbi 2 ads 2
  
 pat loc sli ads $1==1 && $2==2 && $3==2
-with ADDREG
+with REG
   gen sal %1,{ANYCON,1}		yields %1	leaving ads 2
-#ifdef REGVARS
-with exact rmorconst-ADDREG uses_bx
-  uses reusing %2, REG=%2,ADDREG=%1
-  gen sal %b,{ANYCON,1}		yields %b %a	leaving ads 2
-#endif
 
 pat loc sli ads $1==2 && $2==2 && $3==2
-with ADDREG
+with REG
   gen sal %1,{ANYCON,1}
       sal %1,{ANYCON,1}		yields %1	leaving ads 2
-#ifdef REGVARS
-with exact rmorconst-ADDREG uses_bx
-  uses reusing %2, REG=%2,ADDREG=%1
-  gen sal %b,{ANYCON,1}
-      sal %b,{ANYCON,1}		yields %b %a	leaving ads 2
-#endif
 
 pat loc sli ads $2==2 && $3==2
-with ADDREG
+with REG
 uses CXREG={ANYCON,$1}
-  gen sal %1,cl 		yields %1	leaving ads 2
-#ifdef REGVARS
-with exact rmorconst-(ADDREG+CXREG) uses_bx
-  uses reusing %2, REG=%2,ADDREG=%1,CXREG={ANYCON,$1}
-  gen sal %b,cl			yields %b %a	leaving ads 2
-#endif
+  gen sal %1,cl			yields %1	leaving ads 2
 
 pat aar $1==2
-  with AREG ACC ADDREG
+  with AREG ACC
   uses DXREG
   gen sub %2,{ind_reg2,%1}
-      mul {ind_regoff2,%1,4}
-      add %3,%2			yields %3
-  with AREG ACC REG
+      mul {ind_regoff2,%1,4}	yields %2	leaving ads 2
+  with reg_off ACC
   uses DXREG
-  gen sub %2,{ind_reg2,%1}
-      mul {ind_regoff2,%1,4}
-      add %3,%2			yields %3
-  with reg_off ACC ADDREG
+  gen sub %2,{ind_regoff2, %1.reg, %1.off}
+      mul {ind_regoff2, %1.reg, 4+%1.off}
+      				yields %2	leaving ads 2
+  with bpreg_off ACC
   uses DXREG
-  gen sub %2,%1
-      mul {ADDR_EXTERN, 4+%1.off}
-      add %3,%2			yields %3
-  with bpreg_off ACC ADDREG
+  gen sub %2,{ind_bpregoff2, %1.reg, %1.ind}
+      mul {ind_bpregoff2, %1.reg, 4+%1.ind}
+				yields %2	leaving ads 2
+  with ADDR_LOCAL ACC
   uses DXREG
-  gen sub %2,%1
-      mul {ADDR_EXTERN, 4+%1.ind}
-      add %3,%2			yields %3
-  with ADDR_LOCAL ACC ADDREG
-  uses DXREG
-  gen sub %2,%1
-      mul {ADDR_EXTERN, 4+%1.ind}
-      add %3,%2			yields %3
-  with ADDR_EXTERN ACC ADDREG
+  gen sub %2,{LOCAL,%1.ind,2}
+      mul {LOCAL, 4+%1.ind,2}	yields %2	leaving ads 2
+  with ADDR_EXTERN ACC
   uses DXREG
   gen sub %2,{EXTERN2,%1.off}
-      mul {EXTERN2,4+%1.off}
-      add %3,%2			yields %3
+      mul {EXTERN2,4+%1.off}	yields %2	leaving ads 2
 
 pat lae lar defined(rom($1,3))	leaving lae $1 aar $2 sti rom($1,3)
 
@@ -2577,7 +2484,7 @@ with GENREG STACK
       jxx* {label,$3}
 with exact IREG
   kills ALL
-  gen check %1,{ANYCON,$1}
+  gen testb %1,{ANYCON,$1}
       jxx* {label,$3}
 
 pat loc and zeq $1<256 && $1>=0 && $2==2 call locandzxx("je")
