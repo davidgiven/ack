@@ -1,13 +1,14 @@
 #include "sys.h"
-.globl	_ucall
+.define	_ucall
 
 _ucall:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
 	mov	6(sp),0f+6
-	mov	10(sp),0f+10
-	sys	local; 0f
+	mov	010(sp),0f+010
+	sys	local; .data2 0f
 	rts	pc
-.data
+.sect .data
 0:
-	sys	ucall; ..; ..; ..; ..
+	sys	ucall
+	.data2	0, 0, 0, 0

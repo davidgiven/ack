@@ -1,17 +1,18 @@
 #include "sys.h"
-.globl	_access
-.globl	_errno
+.define	_access
+.extern	_errno
 
 _access:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
 	clr	r0
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:
 	rts	pc
-.data
+.sect .data
 0:
-	sys	access; ..; ..
+	sys	access
+	.data2	0, 0

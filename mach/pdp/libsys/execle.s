@@ -1,6 +1,6 @@
 #include "sys.h"
-.globl	_execle
-.globl	_errno
+.define	_execle
+.extern	_errno
 
 _execle:
 	mov	2(sp),0f+2
@@ -11,10 +11,11 @@ _execle:
 	tst	(r0)+
 	bne	1b
 	mov	(r0),0f+6
-	sys	indir; 0f
+	sys	indir; .data2 0f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc
-.data
+.sect .data
 0:
-	sys	exece; ..; ..; ..
+	sys	exece
+	.data2	0, 0, 0

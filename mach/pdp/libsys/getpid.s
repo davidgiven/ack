@@ -1,5 +1,5 @@
 #include "sys.h"
-.globl	_getpid
+.define	_getpid
 
 _getpid:
 	sys	getpid

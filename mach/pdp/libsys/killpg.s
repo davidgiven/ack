@@ -1,12 +1,12 @@
 #include "sys.h"
-.globl	_killpg
-.globl	_errno
+.define	_killpg
+.extern	_errno
 
 _killpg:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
-	sys	local; 0f
-	bec	1f
+	sys	local; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc
@@ -14,6 +14,7 @@ _killpg:
 	clr	r0
 	rts	pc
 
-.data
+.sect .data
 0:
-	sys	killpg; ..; ..
+	sys	killpg
+	.data2	0, 0

@@ -1,5 +1,5 @@
 #include "sys.h"
-.globl	_pause
+.define	_pause
 
 _pause:
 	sys	pause

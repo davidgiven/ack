@@ -1,16 +1,17 @@
 #include "sys.h"
-.globl	_creat
-.globl	_errno
+.define	_creat
+.extern	_errno
 
 _creat:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:
 	rts	pc
-.data
+.sect .data
 0:
-	sys	creat; ..; ..
+	sys	creat
+	.data2	0, 0

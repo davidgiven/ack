@@ -1,13 +1,14 @@
 #include "sys.h"
-.globl	_profil
+.define	_profil
 
 _profil:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
 	mov	6(sp),0f+6
-	mov	10(sp),0f+10
-	sys	indir; 0f
+	mov	010(sp),0f+010
+	sys	indir; .data2 0f
 	rts	pc
-.data
+.sect .data
 0:
-	sys	profil; ..; ..; ..; ..
+	sys	profil
+	.data2	0, 0, 0, 0

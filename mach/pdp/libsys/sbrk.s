@@ -1,16 +1,16 @@
 #include "sys.h"
-.globl	_sbrk
-.globl	_brk
-.globl	_end
-.globl	_errno
+.define	_sbrk
+.define	_brk
+.extern	_end
+.extern	_errno
 
 _sbrk:
 	mov	2(sp),0f+2
 	beq	1f
 	add	xxx,0f+2
 	bcs	2f
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 2:
 	mov	r0,_errno
 	mov	$-1,r0
@@ -22,8 +22,8 @@ _sbrk:
 
 _brk:
 	mov	2(sp),0f+2
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc
@@ -32,7 +32,8 @@ _brk:
 	clr	r0
 	rts	pc
 
-.data
+.sect .data
 0:
-	sys	break; ..
-xxx:	_end
+	sys	break
+	.data2	0
+xxx:	.data2 _end

@@ -1,5 +1,5 @@
 #include "sys.h"
-.globl	_time
+.define	_time
 
 _time:
 	sys	time

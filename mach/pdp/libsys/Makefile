@@ -10,7 +10,7 @@ cmp:            all
 		-../../compare libmon_o.a tail_mon
 
 libmon_o.a:	libmon_s.a
-		ASAR=ar ; export ASAR ;\
+		ASAR=aal ; export ASAR ;\
 		march . libmon_o.a
 
 clean:

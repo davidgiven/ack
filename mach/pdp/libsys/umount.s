@@ -1,11 +1,11 @@
 #include "sys.h"
-.globl	_umount
-.globl	_errno
+.define	_umount
+.extern	_errno
 
 _umount:
 	mov	2(sp),0f+2
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc
@@ -13,6 +13,7 @@ _umount:
 	clr	r0
 	rts	pc
 
-.data
+.sect .data
 0:
-	sys	umount; ..
+	sys	umount
+	.data2	0

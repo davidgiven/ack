@@ -1,10 +1,11 @@
 #include "sys.h"
-.globl	_times
+.define	_times
 
 _times:
 	mov	2(sp),0f+2
-	sys	indir; 0f
+	sys	indir; .data2 0f
 	rts	pc
-.data
+.sect .data
 0:
-	sys	times; ..
+	sys	times
+	.data2	0

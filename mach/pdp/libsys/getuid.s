@@ -1,6 +1,6 @@
 #include "sys.h"
-.globl	_getuid
-.globl	_geteuid
+.define	_getuid
+.define	_geteuid
 
 _getuid:
 	sys	getuid

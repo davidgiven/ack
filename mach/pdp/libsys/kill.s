@@ -1,12 +1,12 @@
 #include "sys.h"
-.globl	_kill
-.globl	_errno
+.define	_kill
+.extern	_errno
 
 _kill:
 	mov	2(sp),r0
 	mov	4(sp),0f+2
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc
@@ -14,6 +14,7 @@ _kill:
 	clr	r0
 	rts	pc
 
-.data
+.sect .data
 0:
-	sys	kill; ..
+	sys	kill
+	.data2	0

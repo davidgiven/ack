@@ -1,7 +1,6 @@
-#include <sgtty.h>
 int stty(fildes,argp)
 	int fildes ;
-	struct sgttyb *argp ;
+	char *argp;
 {
-	return ioctl(fildes,TIOCSETP,argp) ;
+	return ioctl(fildes,/*TIOCSETP*/(('t'<<8)|9),argp) ;
 }

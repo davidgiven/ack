@@ -1,7 +1,7 @@
 #include "sys.h"
-.globl	_dup
-.globl	_dup2
-.globl	_errno
+.define	_dup
+.define	_dup2
+.extern	_errno
 
 _dup2:
 	mov	2(sp),r0
@@ -13,7 +13,7 @@ _dup:
 1:
 	mov	4(sp),r1
 	sys	dup
-	bec	1f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:

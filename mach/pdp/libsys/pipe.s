@@ -1,10 +1,10 @@
 #include "sys.h"
-.globl	_pipe
-.globl	_errno
+.define	_pipe
+.extern	_errno
 
 _pipe:
 	sys	pipe
-	bec	1f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc

@@ -1,3 +1,4 @@
-.globl _errno
-.bss
-_errno: .=.+2
+.sect .text ; .sect .rom; .sect .data; .sect .bss
+.define _errno
+.sect .bss
+_errno: .space 2

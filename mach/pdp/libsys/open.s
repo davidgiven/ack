@@ -1,16 +1,17 @@
 #include "sys.h"
-.globl	_open
-.globl	_errno
+.define	_open
+.extern	_errno
 
 _open:
 	mov	2(sp),0f+2
 	mov	4(sp),0f+4
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:
 	rts	pc
-.data
+.sect .data
 0:
-	sys	open; ..; ..
+	sys	open
+	.data2	0, 0

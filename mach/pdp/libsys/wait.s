@@ -1,10 +1,10 @@
 #include "sys.h"
-.globl	_wait
-.globl	_errno
+.define	_wait
+.extern	_errno
 
 _wait:
 	sys	wait
-	bec	1f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 	rts	pc

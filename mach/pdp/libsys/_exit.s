@@ -1,5 +1,5 @@
 #include "sys.h"
-.globl	__exit
+.define	__exit
 
 __exit:
 	mov	2(sp),r0

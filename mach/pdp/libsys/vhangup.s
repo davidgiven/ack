@@ -1,14 +1,14 @@
 #include "sys.h"
-.globl	_vhangup
-.globl	_errno
+.define	_vhangup
+.extern	_errno
 
 _vhangup:
-	sys	local; 0f
-	bec	1f
+	sys	local; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:
 	rts	pc
-.data
+.sect .data
 0:
 	sys	vhangup

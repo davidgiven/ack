@@ -1,11 +1,11 @@
 #include "sys.h"
-.globl	_fork
-.globl	_errno
+.define	_fork
+.extern	_errno
 
 _fork:
 	sys	fork
 	br	1f
-	bec	2f
+	bcc	2f
 	mov	r0,_errno
 	mov	$-1,r0
 2:

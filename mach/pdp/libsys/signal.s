@@ -1,31 +1,30 @@
-#include <errno.h>
 #include "sys.h"
-rtt	= 6
-.globl	_signal
-.globl	_errno
+EINVAL =  026
+.define	_signal
+.extern	_errno
 
-NSIGNALS = 0
+NSIGNALS = 024
 tvect:
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
-	jsr	r0,1f; NSIGNALS=NSIGNALS+1
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
+	jsr	r0,1f
 
 1:
 	mov	r1,-(sp)
@@ -64,8 +63,8 @@ _signal:
 	add	$tvect,r1
 	mov	r1,0f+4
 1:
-	sys	indir; 0f
-	bes	3f
+	sys	indir; .data2 0f
+	bcs	3f
 	bit	$1,r0
 	beq	1f
 	mov	r0,(sp)
@@ -74,15 +73,16 @@ _signal:
 	mov	(sp)+,r5
 	rts	pc
 2:
-	mov	$EINVAL.,r0
+	mov	$EINVAL,r0
 3:
 	mov	r0,_errno
 	mov	$-1,r0
 	mov	(sp)+,r5
 	rts	pc
 
-.data
+.sect .data
 0:
-	sys	signal; ..; ..
-.bss
-dvect:	.=.+[NSIGNALS*2]
+	sys	signal
+	.data2	0, 0
+.sect .bss
+dvect:	.space [NSIGNALS*2]

@@ -1,5 +1,5 @@
 #include "sys.h"
-.globl	_sync
+.define	_sync
 
 _sync:
 	sys	sync

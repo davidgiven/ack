@@ -1,6 +1,6 @@
 #include "sys.h"
-.globl	_getgid
-.globl	_getegid
+.define	_getgid
+.define	_getegid
 
 _getgid:
 	sys	getgid

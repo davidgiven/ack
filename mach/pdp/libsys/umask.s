@@ -1,15 +1,16 @@
 #include "sys.h"
-.globl	_umask
-.globl	_errno
+.define	_umask
+.extern	_errno
 
 _umask:
 	mov	2(sp),0f+2
-	sys	indir; 0f
-	bec	1f
+	sys	indir; .data2 0f
+	bcc	1f
 	mov	r0,_errno
 	mov	$-1,r0
 1:
 	rts	pc
-.data
+.sect .data
 0:
-	sys	umask; ..
+	sys	umask
+	.data2	0

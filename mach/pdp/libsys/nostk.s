@@ -1,9 +1,9 @@
 #include "sys.h"
-.globl _nostk
+.define _nostk
 
 _nostk:
-	sys	local; 0f
+	sys	local; .data2 0f
 	rts	pc
-.data
+.sect .data
 0:
 	sys	nostk
