@@ -609,28 +609,6 @@ basicblock(alpp) line_p *alpp; {
 	lpp = alpp; madeopt = FALSE;
 	while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
 		lp = *lpp;
-		if (repl_muls) {
-			line_p b_repl, e_repl;
-			int cnt = repl_mul(lp, &b_repl, &e_repl);
-
-			if (cnt > 0 && cnt <= repl_muls) {
-				*lpp = b_repl;
-				e_repl->l_next = lp->l_next->l_next;
-				oldline(lp->l_next);
-				oldline(lp);
-				lp = b_repl;
-				madeopt = TRUE;
-			}
-			else {
-				while (b_repl != (line_p) 0) {
-					line_p n = b_repl->l_next;
-
-					oldline(b_repl);
-					b_repl = n;
-				}
-			}
-		}
-
 		next = &lp->l_next;
 		hash[0] = lp->l_instr&BMASK;
 		lp=lp->l_next;
@@ -675,6 +653,30 @@ basicblock(alpp) line_p *alpp; {
 		}
 		else	count = 0;
 		lpp = next;
+	}
+	lpp = alpp;
+	if (repl_muls) while ((*lpp) != (line_p) 0) {
+		line_p b_repl, e_repl;
+		int cnt = repl_mul(*lpp, &b_repl, &e_repl);
+
+		lp = *lpp;
+		if (cnt > 0 && cnt <= repl_muls) {
+			*lpp = b_repl;
+			e_repl->l_next = lp->l_next->l_next;
+			oldline(lp->l_next);
+			oldline(lp);
+			lpp = &e_repl->l_next;
+			madeopt = TRUE;
+		}
+		else {
+			while (b_repl != (line_p) 0) {
+				line_p n = b_repl->l_next;
+
+				oldline(b_repl);
+				b_repl = n;
+			}
+			lpp = &lp->l_next;
+		}
 	}
 	return madeopt;
 }
@@ -779,17 +781,19 @@ repl_mul(lp, b, e)
 				newinstr(b, op_asp, sz); b = &((*b)->l_next);
 			}
 			newinstr(b, op_sbu, sz); b = &((*b)->l_next);
-			retval++;
-			newinstr(b, op_exg, sz); b = &((*b)->l_next);
-			newinstr(b, op_loc, n1); b = &((*b)->l_next);
-			newinstr(b, op_slu, sz); b = &((*b)->l_next);
-			retval++;
-			newinstr(b, op_exg, sz); b = &((*b)->l_next);
-			newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
-			newinstr(b, op_asp, sz); b = &((*b)->l_next);
-			newinstr(b, op_adu, sz); b = &((*b)->l_next);
 			newinstr(b, op_exg, sz); b = &((*b)->l_next);
 			retval++;
+			if (n1 != 8*sz) {
+				newinstr(b, op_loc, n1); b = &((*b)->l_next);
+				newinstr(b, op_slu, sz); b = &((*b)->l_next);
+				retval++;
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
+				newinstr(b, op_asp, sz); b = &((*b)->l_next);
+				newinstr(b, op_adu, sz); b = &((*b)->l_next);
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				retval++;
+			}
 			if (n0) {
 				newinstr(b, op_loc, n0); b = &((*b)->l_next);
 				newinstr(b, op_slu, sz); b = &((*b)->l_next);
