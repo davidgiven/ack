@@ -1,0 +1,5 @@
+This directory contains the files char.her.s, that has routines
+getchar and putchar for the MC-CPM, and char.nas.s, that
+has the same routines for the Nascom.
+The library "tail" should contain one of these two files.
+The default is char.her.s.
