@@ -26,6 +26,7 @@
 #include	"l_lint.h"
 #include	"l_brace.h"
 #include	"l_state.h"
+#include	"l_comment.h"
 #include	"l_outdef.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -35,7 +36,6 @@ extern char *func_name;
 extern struct type *func_type;
 extern int func_notypegiven;
 extern char loptions[];
-extern int s_NOTREACHED;
 
 /* global variables for the lint_stack */
 struct lint_stack_entry stack_bottom;
@@ -326,13 +326,15 @@ check_autos()
 check_args_used()
 {
 	register struct stack_entry *se = local_level->sl_entry;
-	extern int f_ARGSUSED;
 
 	ASSERT(level == L_FORMAL1);
 	while (se) {
 		register struct def *def = se->se_idf->id_def;
 
-		if (def && !def->df_used && !loptions['v'] && !f_ARGSUSED) {
+		if (	(def && !def->df_used)
+		&&	!loptions['v']
+		&&	!(f_ARGSUSED || LINTLIB)
+		) {
 			def_warning(def, "argument %s not used in function %s",
 					se->se_idf->id_text, func_name);
 		}
@@ -861,8 +863,7 @@ lint_break_stmt()
 lint_start_function()
 {
 	lint_return_stmt(-1);	/* initialization */
-	move_ARG2f();
-	move_VAR2f();
+	lint_comment_function();
 }
 
 lint_end_function()

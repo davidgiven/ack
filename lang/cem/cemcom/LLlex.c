@@ -74,7 +74,7 @@ LLlex()
 	}
 	else {		/* read ahead and return the old one	*/
 #ifdef	LINT
-		move_NOT2s();
+		lint_comment_ahead();
 #endif	LINT
 		dot = ahead;
 		/*	the following test is performed due to the dual
@@ -477,8 +477,8 @@ skipcomment()
 	NoUnstack++;
 	LoadChar(c);
 #ifdef	LINT
-	lint_comment(-2);
-	lint_comment(c);
+	lint_start_comment();
+	lint_comment_char(c);
 #endif	LINT
 	do {
 		while (c != '*') {
@@ -487,18 +487,24 @@ skipcomment()
 			else
 			if (c == EOI) {
 				NoUnstack--;
+#ifdef	LINT
+				lint_end_comment();
+#endif	LINT
 				return;
 			}
 			LoadChar(c);
 #ifdef	LINT
-			lint_comment(c);
+			lint_comment_char(c);
 #endif	LINT
 		} /* last Character seen was '*' */
 		LoadChar(c);
 #ifdef	LINT
-		lint_comment(c);
+		lint_comment_char(c);
 #endif	LINT
 	} while (c != '/');
+#ifdef	LINT
+	lint_end_comment();
+#endif	LINT
 	NoUnstack--;
 }
 

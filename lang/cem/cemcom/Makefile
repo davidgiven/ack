@@ -448,6 +448,7 @@ arith.o: expr.h
 arith.o: field.h
 arith.o: idf.h
 arith.o: label.h
+arith.o: lint.h
 arith.o: mes.h
 arith.o: noRoption.h
 arith.o: nobitfield.h
@@ -821,6 +822,7 @@ l_states.o: expr.h
 l_states.o: file_info.h
 l_states.o: idf.h
 l_states.o: l_brace.h
+l_states.o: l_comment.h
 l_states.o: l_lint.h
 l_states.o: l_outdef.h
 l_states.o: l_state.h
@@ -883,6 +885,7 @@ l_outdef.o: field.h
 l_outdef.o: file_info.h
 l_outdef.o: idf.h
 l_outdef.o: l_class.h
+l_outdef.o: l_comment.h
 l_outdef.o: l_lint.h
 l_outdef.o: l_outdef.h
 l_outdef.o: label.h

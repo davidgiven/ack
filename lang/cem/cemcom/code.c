@@ -74,6 +74,7 @@ init_code(dst_file)
 
 static struct string_cst *str_list = 0;
 
+#ifndef	LINT
 code_string(val, len, dlb)
 	char *val;
 	int len;
@@ -88,6 +89,7 @@ code_string(val, len, dlb)
 	sc->sc_len = len;
 	sc->sc_dlb = dlb;
 }
+#endif	LINT
 
 def_strings(sc)
 	register struct string_cst *sc;

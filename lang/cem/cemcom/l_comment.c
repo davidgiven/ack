@@ -5,10 +5,13 @@
 /* $Header$ */
 /*	Lint-specific comment handling	*/
 
+#include	<ctype.h>
+
 #include	"lint.h"
 
 #ifdef	LINT
 
+#include	<alloc.h>
 #include	"arith.h"
 #include	"l_state.h"
 
@@ -21,124 +24,162 @@
 static int notreached;
 static int varargsN = -1;
 static int argsused;
-static check_pseudo();
+static int formatN;
+static char *format;
+static char *prev_format;
 
 int LINTLIB;				/* file is lint library */
 int s_NOTREACHED;			/* statement not reached */
 int f_VARARGSn;				/* function with variable # of args */
 int f_ARGSUSED;				/* function does not use all args */
+int f_FORMATn;				/* argument f_FORMATn is f_FORMAT */
+char *f_FORMAT;
 
-set_not_reached()
-{
-	notreached = 1;
-}
-
-move_NOT2s()
+lint_comment_ahead()
 {
 	s_NOTREACHED = notreached;
 	notreached = 0;
 }
 
-set_varargs(n)
-{
-	varargsN = n;
-}
-
-move_VAR2f()
-{
-	f_VARARGSn = varargsN;
-	varargsN = -1;
-}
-
-set_argsused(n)
-{
-	argsused = n;
-}
-
-move_ARG2f()
+lint_comment_function()
 {
 	f_ARGSUSED = argsused;
 	argsused = 0;
+
+	f_VARARGSn = varargsN;
+	varargsN = -1;
+
+	f_FORMATn = formatN;
+	formatN = 0;
+	f_FORMAT = format;
+	if (format)
+		prev_format = format;
+	format = 0;
 }
 
-set_lintlib()
+static char buf[1000];
+static char *bufpos;			/* next free position in buf */
+
+lint_start_comment()
 {
-	LINTLIB = 1;
+	bufpos = &buf[0];
 }
 
-#define IN_SPACE	0
-#define IN_WORD		1
-#define IN_COMMENT	2
-
-lint_comment(c)
+lint_comment_char(c)
 	int c;
 {
-/* This function is called with every character between /_* and *_/ (the
- * _underscores are used because comment in C doesn't nest).
- * It looks for pseudocomments.
- * In this version it is allowed that 'keyword' is followed by rubbish.
- * At the start of each comment the function should be initialized by
- * calling it with c = -2.
- * I am not sure if this way of information hiding is a good solution.
- */
-	static int position;	/* IN_SPACE, IN_WORD, IN_COMMENT */
-	static char buf[12];
-	static int i;		/* next free position in buf */
-
-	if (c == -2) {
-		position = IN_SPACE;
-		i = 0;
-		return;
-	}
-
-	if (position == IN_COMMENT)
-		return;
-
-	if (position == IN_SPACE) {
-		if (c == ' ' || c == '\t')
-			return;
-		position = IN_WORD;
-	}
-	/* position == IN_WORD */
-	if (c == ' ' || c == '\t' || c == '*') {
-		position = IN_COMMENT;
-		check_pseudo(buf, i);
-	}
-	else
-	if (i < 12)
-		buf[i++] = (char)c;
-	else
-		position = IN_COMMENT;
+/* This function is called with every character between /_* and *_/ */
+	if (bufpos - &buf[0] < sizeof(buf)-1)
+		*bufpos++ = (char)c;
 }
 
-#include	<ctype.h>
-
-static
-check_pseudo(buf, i)
-	char *buf;
+lint_end_comment()
 {
-/* Look if the i characters in buf are aequivalent with one of the
- * strings N_OTREACHED, V_ARARGS[n], A_RGSUSED, L_INTLIBRARY
- * (the u_nderscores are there to not confuse (UNIX) lint)
- */
-	buf[i++] = '\0';
-	if (strcmp(buf, "NOTREACHED") == 0) {
-		set_not_reached();
+	*bufpos++ = '\0';
+	bufpos = &buf[0];
+
+	/* skip initial blanks */
+	while (*bufpos && isspace(*bufpos)) {
+		bufpos++;
 	}
-	else if (strcmp(buf, "ARGSUSED") == 0) {
-		set_argsused(1);
+
+	/* now test for one of the pseudo-comments */
+	if (strncmp(bufpos, "NOTREACHED", 10) == 0) {
+		notreached = 1;
 	}
-	else if (strcmp(buf, "LINTLIBRARY") == 0) {
-		set_lintlib();
+	else
+	if (strncmp(bufpos, "ARGSUSED", 8) == 0) {
+		argsused = 1;
 	}
-	else if (strncmp(buf, "VARARGS", 7) == 0) {
-		if (i == 8) {
-			set_varargs(0);
+	else
+	if (strncmp(bufpos, "LINTLIBRARY", 11) == 0) {
+		LINTLIB = 1;
+	}
+	else
+	if (strncmp(bufpos, "VARARGS", 7) == 0) {
+		varargsN = isdigit(bufpos[7]) ? atoi(&bufpos[7]) : 0;
+	}
+	else
+	if (strncmp(bufpos, "FORMAT", 6) == 0 && isdigit(bufpos[6])) {
+		int argn = bufpos[6] - '0';
+
+		varargsN = argn + 1;
+		make_format(argn, &bufpos[7]);
+		
+	}
+}
+
+/*	We use a small FSA to skip layout inside formats, but to preserve
+	a space between letters and digits.
+*/
+
+#define	NONE		0
+#define	LETGIT		1
+#define	LETGITSPACE	2
+
+make_format(argn, oldf)
+	int argn;
+	char *oldf;
+{
+	register char *newf;
+	register int last_stat;
+
+	while (*oldf && *oldf != '$') {
+		oldf++;
+	}
+	if (!*oldf) {
+		/* no format given, repeat previous format */
+		if (!prev_format) {
+			warning("format missing and no previous format");
 		}
-		else if (i == 9 && isdigit(buf[7])) {
-			set_varargs(atoi(&buf[7]));
+		formatN = argn;
+		format = prev_format;
+		return;
+	}
+	if (*oldf++ != '$') {
+		warning("no format in FORMAT pseudo-comment");
+		format = 0;
+		return;
+	}
+
+	/* there is a new format to be composed */
+	newf = Malloc(strlen(oldf));
+		/* certainly enough and probably not overly too much */
+	formatN = argn;
+	format = newf;
+
+	last_stat = NONE;
+	while (*oldf && *oldf != '$') {
+		register char ch = *oldf++;
+
+		if (isspace(ch)) {
+			if (last_stat == LETGIT)
+				last_stat = LETGITSPACE;
+		}
+		else
+		if (isalnum(ch)) {
+			switch (last_stat) {
+			case NONE:
+				last_stat = LETGIT;
+				break;
+			case LETGITSPACE:
+				*newf++ = ' ';
+				last_stat = LETGIT;
+				break;
+			}
+			*newf++ = ch;
+		}
+		else {
+			last_stat = NONE;
+			*newf++ = ch;
 		}
 	}
+	if (*oldf != '$') {
+		warning("no end of format in FORMAT pseudo-comment");
+		format = 0;
+		return;
+	}
+	*newf++ = '\0';
 }
 
 #endif	LINT

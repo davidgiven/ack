@@ -365,8 +365,9 @@ p1_expr(lvl, expr)
 		char *bts2str();
 
 		print(
-			"%s\n",
-			bts2str(expr->SG_VALUE, expr->SG_LEN, next_transient())
+			"\"%s\"\n",
+			bts2str(expr->SG_VALUE, expr->SG_LEN-1,
+							next_transient())
 		);
 		break;
 	}

@@ -24,12 +24,13 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"l_lint.h"
+#include	"l_comment.h"
 #include	"l_outdef.h"
 #include	"l_class.h"
 
+extern char *bts2str();
 extern char *symbol2str();
 
-extern int f_VARARGSn, LINTLIB;
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef, OutCall;
 
@@ -127,17 +128,16 @@ local_EFDC(idf)
 lint_formals()
 {
 /* Make a list of tp_entries containing the types of the formal
- * parameters of the function definition currently parsed.
+ * parameters of the function definition just parsed.
  */
 	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
-	register struct tp_entry **hook = &OutDef.od_entry;
+	register struct argument **hook = &OutDef.od_arg;
+	register int nrargs = 0;
 
-	OutDef.od_nrargs = 0;
 	while (se) {
 		register struct type *type = se->se_idf->id_def->df_type;
-		register struct tp_entry *te = new_tp_entry();
+		register struct argument *arg = new_argument();
 
-		switch (type->tp_fund) {
 		/*	Do the conversions on the formals that could not be
 			done in declare_idf().
 			It is, unfortunately, impossible not to do them,
@@ -146,6 +146,7 @@ lint_formals()
 			want to duplicate the whole of expression handling
 			for lint.
 		*/
+		switch (type->tp_fund) {
 		case CHAR:
 		case SHORT:
 			type = int_type;
@@ -154,19 +155,45 @@ lint_formals()
 			type = double_type;
 			break;
 		}
-		te->te_type = type;
-		te->te_class = !Const;
-		*hook = te;
-		hook = &te->next;
 
-		OutDef.od_nrargs++;
+		if (f_FORMAT && nrargs == f_FORMATn) {
+			if (	type->tp_fund != POINTER
+			||	type->tp_up->tp_fund != CHAR
+			) {
+				warning("format parameter %d is not pointer to char",
+					nrargs);
+			}
+			arg->ar_type = string_type;
+			arg->ar_class = ArgString;
+			arg->CAS_VALUE = f_FORMAT;
+			arg->CAS_LEN = strlen(f_FORMAT);
+			f_FORMAT = 0;
+		}
+		else {
+			arg->ar_type = type;
+			arg->ar_class = ArgFormal;
+		}
+		*hook = arg;
+		hook = &arg->next;
+
+		nrargs++;
 		se = se->next;
 	}
-	if (f_VARARGSn > OutDef.od_nrargs) {
-		warning("VARARGS%d function has only %d arguments",
-			f_VARARGSn, OutDef.od_nrargs);
-		f_VARARGSn = OutDef.od_nrargs;
+
+	if (f_VARARGSn > nrargs) {
+		warning("VARARGS%d function has only %d argument%s",
+			f_VARARGSn, nrargs, nrargs == 1 ? "" : "s"
+		);
+		f_VARARGSn = nrargs;
 	}
+	if (f_FORMAT) {
+		warning("FORMAT%d function has only %d argument%s",
+			f_FORMATn, nrargs, nrargs == 1 ? "" : "s"
+		);
+		f_FORMAT = 0;
+	}
+
+	OutDef.od_nrargs = nrargs;
 }
 
 output_use(idf)
@@ -212,10 +239,10 @@ output_def(od)
 			break;
 		case SFDF:
 			/* remove tp_entries */
-			while (od->od_entry) {
-				register struct tp_entry *tmp = od->od_entry;
-				od->od_entry = od->od_entry->next;
-				free_tp_entry(tmp);
+			while (od->od_arg) {
+				register struct argument *tmp = od->od_arg;
+				od->od_arg = od->od_arg->next;
+				free_argument(tmp);
 			}
 			return;
 		default:
@@ -229,19 +256,19 @@ output_def(od)
 	case LFDF:
 		if (f_VARARGSn != -1) {
 			printf(":%d", -1 - f_VARARGSn);
-			outtypes(od->od_entry, f_VARARGSn);
+			outargs(od->od_arg, f_VARARGSn);
 		}
 		else {
 			printf(":%d", od->od_nrargs);
-			outtypes(od->od_entry, od->od_nrargs);
+			outargs(od->od_arg, od->od_nrargs);
 		}
-		od->od_entry = 0;
+		od->od_arg = 0;
 		printf(":%d", od->od_valreturned);
 		break;
 	case FC:
 		printf(":%d", od->od_nrargs);
-		outtypes(od->od_entry, od->od_nrargs);
-		od->od_entry = 0;
+		outargs(od->od_arg, od->od_nrargs);
+		od->od_arg = 0;
 		printf(":%d", od->od_valused);
 		break;
 	case EVDF:
@@ -257,26 +284,53 @@ output_def(od)
 		/*NOTREACHED*/
 	}
 	printf(":");
-	outtype(od->od_type);
+	outargtype(od->od_type);
 	printf(":%u:%s\n", od->od_line, od->od_file);
 }
 
-outtypes(te, n)
-	struct tp_entry *te;
+outargs(arg, n)
+	struct argument *arg;
 {
-/* Output n types in the tp_entry-list and remove all the entries */
+/* Output the n arguments in the argument list and remove them */
 
-	register struct tp_entry *tmp;
+	register struct argument *tmp;
 
 	while (n--) {
-		ASSERT(te);
-		printf(":");
-		if (te->te_class == Const && te->te_value >= 0) {
+		ASSERT(arg);
+		outarg(arg);
+		tmp = arg;
+		arg = arg->next;
+		free_argument(tmp);
+	}
+	/* remove the remaining entries */
+	while (arg) {
+		tmp = arg;
+		arg = arg->next;
+		free_argument(tmp);
+	}
+}
+
+outarg(arg)
+	struct argument *arg;
+{
+	printf(":");
+	switch (arg->ar_class) {
+	case ArgConst:
+		if (arg->CAA_VALUE >= 0) {
 			/* constant non-negative actual parameter */
 			printf("+");
 		}
-		outtype(te->te_type);
-		if (te->te_type->tp_fund == FUNCTION) {
+		outargtype(arg->ar_type);
+		break;
+
+	case ArgString:
+		outargstring(arg);
+		break;
+
+	case ArgFormal:
+	case ArgExpr:
+		outargtype(arg->ar_type);
+		if (arg->ar_type->tp_fund == FUNCTION) {
 			/* UGLY PATCH !!! ??? */
 			/*	function names as operands are sometimes
 				FUNCTION and sometimes POINTER to FUNCTION,
@@ -286,34 +340,44 @@ outtypes(te, n)
 			*/
 			printf("*");
 		}
-		tmp = te;
-		te = te->next;
-		free_tp_entry(tmp);
-	}
-	/* remove the remaining entries */
-	while (te) {
-		tmp = te;
-		te = te->next;
-		free_tp_entry(tmp);
+		break;
+
+	default:
+		NOTREACHED();
+		/*NOTREACHED*/
 	}
 }
 
-outtype(tp)
+outargstring(arg)
+	struct argument *arg;
+{
+	char buff[1000];
+	register char *p;
+
+	bts2str(arg->CAS_VALUE, arg->CAS_LEN, buff);
+	for (p = &buff[0]; *p; p++) {
+		if (*p == '"' || *p == ':')
+			*p = ' ';
+	}
+	printf("\"%s\"", buff);
+}
+
+outargtype(tp)
 	struct type *tp;
 {
 	switch (tp->tp_fund) {
 	case POINTER:
-		outtype(tp->tp_up);
+		outargtype(tp->tp_up);
 		printf("*");
 		break;
 
 	case ARRAY:
-		outtype(tp->tp_up);
+		outargtype(tp->tp_up);
 		printf("*");	/* compatible with [] */
 		break;
 
 	case FUNCTION:
-		outtype(tp->tp_up);
+		outargtype(tp->tp_up);
 		printf("()");
 		break;
 
@@ -365,7 +429,8 @@ fill_outcall(ex, used)
 	register struct idf *idf = ex->OP_LEFT->VL_IDF;
 	register struct def *def = idf->id_def;
 
-	if (def->df_sc == IMPLICIT) {
+	if (def->df_sc == IMPLICIT && !idf->id_def->df_used) {
+		/* IFDC, first time */
 		implicit_func_decl(idf, ex->ex_file, ex->ex_line);
 	}
 
@@ -375,7 +440,7 @@ fill_outcall(ex, used)
 	OutCall.od_name = idf->id_text;
 	OutCall.od_file = ex->ex_file;
 	OutCall.od_line = ex->ex_line;
-	OutCall.od_entry = (struct tp_entry *)0;
+	OutCall.od_arg = (struct argument *)0;
 	OutCall.od_nrargs = 0;
 
 	if ((ex = ex->OP_RIGHT) != 0) {	/* function call with arguments */
@@ -392,20 +457,24 @@ fill_outcall(ex, used)
 fill_arg(e)
 	struct expr *e;
 {
-	register struct tp_entry *te;
+	register struct argument *arg;
 
-	te = new_tp_entry();
-	te->te_type = e->ex_type;
+	arg = new_argument();
+	arg->ar_type = e->ex_type;
 	if (is_cp_cst(e)) {
-		te->te_class = Const;
-		te->te_value = e->VL_VALUE;
+		arg->ar_class = ArgConst;
+		arg->CAA_VALUE = e->VL_VALUE;
+	}
+	else if (e->ex_class == String) {
+		arg->ar_class = ArgString;
+		arg->CAS_VALUE = e->SG_VALUE;
+		arg->CAS_LEN = e->SG_LEN - 1;	/* SG_LEN includes the \0 */
 	}
 	else {
-		te->te_class = !Const;
-		te->te_value = (arith) 0;
+		arg->ar_class = ArgExpr;
 	}
-	te->next = OutCall.od_entry;
-	OutCall.od_entry = te;
+	arg->next = OutCall.od_arg;
+	OutCall.od_arg = arg;
 	OutCall.od_nrargs++;
 }
 

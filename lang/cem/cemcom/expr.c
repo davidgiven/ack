@@ -462,6 +462,10 @@ is_ld_cst(expr)
 	/*	An expression is a `load-time constant' if it is of the form
 		<idf> +/- <integral> or <integral>.
 	*/
+#ifdef	LINT
+	if (expr->ex_class == String)
+		return 1;
+#endif	LINT
 	return expr->ex_lvalue == 0 && expr->ex_class == Value;
 }
 
