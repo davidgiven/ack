@@ -26,7 +26,10 @@ name asld
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i  IFILE={EM}/{RT}i
 	args {IFILE?} (.e:{HEAD}={EM}/{RT}em) \
-({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		({RTS}:.ocm.b.c={EM}/{RT}cc) \
+		({RTS}:.p={EM}/{RT}pc) \
+		({RTS}:.mod={EM}/{RT}m2) \
+		-o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \

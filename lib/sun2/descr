@@ -14,7 +14,7 @@ var LIB=lib/{P}/tail_
 var RT=lib/{P}/head_
 var PLIB=lib/{M}/tail_
 var PRT=lib/{M}/head_
-var CPP_F=-Dunix=unix -D__BSD4_2
+var CPP_F=-Dunix -Dm68k -DM68010 -Dmc68010 -D__BSD4_2
 var INCLUDES=-I{EM}/include/_tail_cc
 # 413 align is the default, rom in text
 var ALIGN=-a0:4 -a1:4 -a2:0x20000 -a3:4 -b0:0x2020
@@ -57,6 +57,7 @@ name led
 		(.p:{TAIL}={EM}/{PLIB}pc) \
 		(.b:{TAIL}={EM}/{PLIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		{LIBFP?} \
 		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/{PLIB}em {EM}/lib/{M}/end_em)
