@@ -91,10 +91,10 @@ An example of Intel 8086 assembly language:
 		mov	bp,sp
 	.sect .data
 	_35:
-	.word	24944
-	.word	26990
-	.word	14947
-	.word	32
+	.data2	24944
+	.data2	26990
+	.data2	14947
+	.data2	32
 	.sect .text
 	call _disable
 	mov ax,_35
@@ -115,11 +115,11 @@ An example of Intel 8086 assembly language:
 		mov	bp,sp
 	.sect .data
 	_38:
-	.word	28526
-	.word	24944
-	.word	26990
-	.word	14947
-	.word	32
+	.data2	28526
+	.data2	24944
+	.data2	26990
+	.data2	14947
+	.data2	32
 	.sect .text
 	mov ax,_38
 	push ax
