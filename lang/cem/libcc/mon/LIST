@@ -68,12 +68,14 @@ _creat.e
 _dup.e
 _dup2.e
 _execl.e
+_execve.e
 _exit.e
 _fork.e
 _fstat.e
 _ftime.e
 _getpid.e
 _gtty.c
+_stty.c
 _ioctl.e
 _kill.e
 _link.e
@@ -83,6 +85,7 @@ _pause.e
 _pipe.e
 _read.e
 _sbrk.e
+_times.e
 _unlink.e
 _wait.e
 _write.e
