@@ -16,6 +16,7 @@
 
 #include "FP_types.h"
 
+_float
 cuf4(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
@@ -41,7 +42,8 @@ long	src;	/* largest possible integer to convert */
 	fprintf(stderr,"CUF4(ds(%d),ss(%d),src(%D))\n\n",4,ss,i_src);
 #endif
 	if (i_src == 0)	{
-		src = 0L;
+		*result = (_float) 0L;
+		return (_float) 0L;
 	}
 			/* ESTABLISHED THAT src != 0	*/
 
@@ -58,4 +60,5 @@ long	src;	/* largest possible integer to convert */
 	fprintf(stderr,"CUF() buf.exp after nrm_ext() == %d\n\n",buf.exp);
 #endif
 	compact(&buf,(_double *) result,4);
+	return *result;
 }
