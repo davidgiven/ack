@@ -40,6 +40,7 @@ t_lineno	currline, listline;
 static int	catch_sigpipe();
 static int	stopped();
 static int	uputm(), ugetm();
+static t_addr	curr_stop;
 
 int
 init_run()
@@ -169,7 +170,13 @@ start_child(p)
 	return 0;
   }
   do_items();
-  if (! restoring) send_cont(1);
+  if (! restoring && ! item_addr_actions(curr_stop)) {
+	send_cont(1);
+  }
+  else if (! restoring) {
+	stopped("stopped", curr_stop);
+	handle_displays();
+  }
   return 1;
 }
 
@@ -294,10 +301,11 @@ stopped(s, a)
 
   if (s) {
 	fprintf(db_out, "%s ", s);
-	pos = print_position((t_addr) a, 1);
+	pos = print_position(a, 1);
 	fputs("\n", db_out);
 	list_position(pos);
   }
+  curr_stop = a;
   return 1;
 }
 

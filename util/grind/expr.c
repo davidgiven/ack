@@ -871,6 +871,14 @@ array_addr(p, paddr, psize, ptp)
 		free(buf);
 		return 0;
 	}
+	if ((*ptp)->ty_class == T_POINTER) {
+		if (! get_bytes(pointer_size, *paddr, (char *) paddr)) {
+			error("could not get value");
+			free(buf);
+			return 0;
+		}
+		*paddr = get_int((char *) paddr, pointer_size, T_UNSIGNED);
+	}
 	if (! convert(&buf, &size, &tp, int_type, int_size)) {
 		free(buf);
 		return 0;

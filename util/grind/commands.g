@@ -439,6 +439,10 @@ LLlex()
 	c = getc(db_in);
   } while (c != EOF && class(c) == STSKIP);
   if (c == EOF) return c;
+  if (extended_charset && in_ext(c)) {
+	TOK = get_name(c);
+	return TOK;
+  }
   switch(class(c)) {
   case STSTR:
 	TOK = (*currlang->get_string)(c);

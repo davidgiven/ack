@@ -109,9 +109,10 @@ unop_prio(op)
   case E_NOT:
   case E_BNOT:
   case E_MIN:
-  case E_MUL:
+  case E_DEREF:
   case E_SELECT:
   case E_PLUS:
+  case E_ADDR:
 	return 12;
   }
   return 1;

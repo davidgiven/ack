@@ -368,7 +368,6 @@ do_list(p)
 		p_position pos;
 
 		if (a == ILL_ADDR) {
-			error("could not determine address");
 			return;
 		}
 		pos = get_position_from_addr(a);

@@ -329,6 +329,8 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
     p_type t1, t2;
     long ic1, ic2;
     int A_used = 0;
+    int tclass;
+    char *str;
   }
 :			{ *ptp = 0; }
   [
@@ -336,16 +338,28 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 	/* these are used in C for references to a struct, union or
 	 * enum that has not been declared (yet)
 	 */
-  	'x'		{ tp = new_type(); tp->ty_flags = T_CROSS; }
+  	'x'
   	[ 's'	/* struct */
-			{ tp->ty_class = T_STRUCT; }
+			{ tclass = T_STRUCT; }
   	| 'u'	/* union */
-			{ tp->ty_class = T_UNION; }
+			{ tclass = T_UNION; }
   	| 'e'	/* enum */
-			{ tp->ty_class = T_ENUM; }
+			{ tclass = T_ENUM; }
   	]
 			{ AllowName = 1; }
-  	name(&(tp->ty_tag))
+  	name(&str)
+			{ sy = Lookfromscope(str2idf(str,0),CurrentScope,TAG);
+			  if (sy && sy->sy_type->ty_class == tclass) {
+				tp = sy->sy_type;
+			  }
+			  else {
+				tp = new_type();
+				tp->ty_flags = T_CROSS;
+				tp->ty_class = tclass;
+				tp->ty_tag = str;
+				sy = NewSymbol(str, CurrentScope, TAG, (struct outname *) 0);
+			  }
+			}
   |
   	/* subrange */
   	/* the integer_const's represent the lower and the upper bound.
