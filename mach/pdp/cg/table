@@ -955,9 +955,29 @@ inl             | |     remove(indordef)
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
 			"inc $1(r5)"
 			setcc({LOCAL2,$1,2})          |       | |
+ldl ldc adi sdl $1==$4 && $3==4 && highw(2)==0 | |
+			remove(indordef)
+			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
+			"add $$%(loww(2)%),2+$1(r5)"
+			"adc $1(r5)"			 |	| |
+ldl ldc adi sdl $1==$4 && $3==4 | |
+			remove(indordef)
+			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
+			"add $$%(loww(2)%),2+$1(r5)"
+			"adc $1(r5)"
+			"add $$%(highw(2)%),$1(r5)"	|	| |
 ine             | |     remove(posextern)
 			"inc $1"
 			setcc({relative2,$1})           |       | |
+lde ldc adi sde $1==$4 && $3==4 && highw(2)==0 | |
+			remove(posextern)
+			"add $$%(loww(2)%),2+$1"
+			"adc $1"			|	| |
+lde ldc adi sde $1==$4 && $3==4 | |
+			remove(posextern)
+			"add $$%(loww(2)%),2+$1"
+			"adc $1"
+			"add $$%(highw(2)%),$1"		|	| |
 dec             | SCR_REG |
 			"dec %[1]"
 			setcc(%[1])     erase(%[1])     | %[1]  | |
@@ -992,6 +1012,20 @@ lol adi stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))
 			"add %[1],%(regvar($1)%)"
 			erase(regvar($1))		|	| |
+lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
+			allocate(REG={CONST2, 0})
+			remove(regvar($1))
+			"bisb (%(regvar($1)%))+,%[a]"	| %[a]	| |
+lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
+			allocate(REG)
+			remove(regvar($1))
+			"mov (%(regvar($1)%))+,%[a]"	| %[a]	| |
+lol lol adp stl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | source1or2|
+			remove(regvar($1))
+			"movb %[1],(%(regvar($1)%))+"	| 	| |
+lol lol adp stl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | source2 |
+			remove(regvar($1))
+			"mov %[1],(%(regvar($1)%))+"	| 	| |
 lol lol adp stl $1==$2 && $2==$4 && inreg($1)==2 | |
 			allocate(REG=regvar($1))	| %[a] 
 							| lol $2 adp $3 stl $2 |
@@ -1586,6 +1620,27 @@ cmu !defined($1)| source2 |
 			erase(r0)                               | r0    | |
 #endif
 cms $1==2       | |             |                       | cmi $1 |
+ldc cms zeq $2==4 && loww(1)==0 && highw(1)==0 | source2 SCR_REG |
+			remove(all)
+			"bis %[1],%[2]"
+			"jeq $3"			|		| |
+ldc cms zne $2==4 && loww(1)==0 && highw(1)==0 | source2 SCR_REG |
+			remove(all)
+			"bis %[1],%[2]"
+			"jne $3"			|		| |
+ldc cms zeq $2==4	| source2 source2 |
+			remove(all)
+			"cmp $$%(loww(1)%),%[2]"
+			"bne 1f"
+			"cmp $$%(highw(1)%),%[1]"
+			"jeq $3"
+			"1:"				|		| |
+ldc cms zne $2==4	| source2 source2 |
+			remove(all)
+			"cmp $$%(loww(1)%),%[2]"
+			"jne $3"
+			"cmp $$%(highw(1)%),%[1]"
+			"jne $3"			|		| |
 cms defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,cms~"
