@@ -58,8 +58,8 @@ extern char	temppath[50];
 extern FILE	*input;
 extern FILE	*tempfile;
 
-extern char	stringbuf[STRINGMAX];
-				/* contains last string value */
+extern char	*stringbuf;	/* contains last string value */
+extern int	stringlen;	/* contains length of last string value */
 
 extern sect_t	sect[SECTMAX];
 
@@ -116,6 +116,7 @@ extern FILE	*fftemp();
 extern long	atol();
 extern char	*mktemp();
 extern char	*malloc();
+extern char	*realloc();
 extern char	*calloc();
 extern char	*getenv();
 extern char	*strncpy();

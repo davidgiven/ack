@@ -109,11 +109,6 @@ getarg(typset, ap)
 		register struct string *p;
 
 		p = getstring(1);
-#ifdef CHECKING
-		if (state & INSTRING) {
-			xerror("Procedure name too long");
-		}
-#endif CHECKING
 		ap->ema_pnam = p->str;
 		ap->ema_argtype = pro_ptyp;
 		break;
@@ -124,11 +119,6 @@ getarg(typset, ap)
 		register struct string *p;
 
 		p = getstring(1);
-#ifdef CHECKING
-		if (state & INSTRING) {
-			xerror("Data label too long");
-		}
-#endif CHECKING
 		ap->ema_dnam = p->str;
 		ap->ema_szoroff = 0;
 		ap->ema_argtype = sof_ptyp;
@@ -154,11 +144,6 @@ getarg(typset, ap)
 		getarg(cst_ptyp, ap);
 		ap->ema_szoroff = ap->ema_cst;
 		p = getstring(0);
-#ifdef CHECKING
-		if (state & INSTRING) {
-			xerror("Numeric constant too long");
-		}
-#endif CHECKING
 		ap->ema_argtype = ptyp(i);
 		ap->ema_string = p->str;
 		break;
@@ -226,8 +211,7 @@ checkident(s)
 }
 #endif CHECKING
 
-/* getstring: read a string from the input, but at most STRSIZ characters
-	of it. The next characters will be read another time around
+/* getstring: read a string from the input
 */
 /*ARGSUSED*/
 PRIVATE struct string *
@@ -236,32 +220,24 @@ getstring(isident)
 	register char *p;
 	register int n;
 	register struct string *s = &string;
+	struct e_arg dummy;
 
-	if (!(state & INSTRING)) {	/* Not reading a string yet */
-		struct e_arg dummy;
-
-		getarg(cst_ptyp, &dummy);
+	getarg(cst_ptyp, &dummy);
 					/* Read length of string */
-		strleft = dummy.ema_cst;
+	n = dummy.ema_cst;
 #ifdef CHECKING
-		if (strleft < 0) {
-			xerror("Negative length in string");
-			s->length = 0;
-			return s;
-		}
+	if (n < 0) {
+		xerror("Negative length in string");
+		s->length = 0;
+		return s;
+	}
 #endif CHECKING
-	}
 
-	if (strleft <= STRSIZ) {	/* Handle the whole string */
-		n = strleft;
-		state &= ~INSTRING;
-	}
-	else {				/* Handle STRSIZ characters of it, and
-					   indicate that there is more
-					*/
-	 	n = STRSIZ;
-		strleft -= STRSIZ;
-		state |= INSTRING;
+	if (n > s->maxlen) {
+		if (! s->maxlen) {
+			s->str = Malloc(s->maxlen = 256);
+		}
+		else	s->str = Realloc(s->str, (s->maxlen = (n+255)&~255));
 	}
 
 	s->length = n;

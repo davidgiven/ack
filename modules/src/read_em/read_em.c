@@ -18,6 +18,7 @@
 */
 
 #include <assert.h>
+#include <alloc.h>
 #include <system.h>
 #include <em_label.h>
 #include <em_arith.h>
@@ -60,29 +61,21 @@ _fill()
 	}
 }
 
-#define STRSIZ	256		/* Maximum length of strings */
-
 static struct e_instr *emhead;	/* Where we put the head */
 static struct e_instr aheads[3];
 static int ahead;
 
 static struct string {
 	int length;
-	char str[STRSIZ + 1];
+	unsigned int maxlen;
+	char *str;
 } string;
-
-#ifdef COMPACT
-static arith strleft;		/* count # of chars left to read
-				   in a string
-				*/
-#endif
 
 static int state;		/* What state are we in? */
 #define CON	01		/* Reading a CON */
 #define ROM	02		/* Reading a ROM */
 #define MES	03		/* Reading a MES */
 #define PSEUMASK 03
-#define INSTRING 010		/* Reading a string */
 
 static int EM_initialized;	/* EM_open called? */
 
@@ -395,35 +388,6 @@ EM_getinstr(p)
 			wsize = 2;
 			psize = 2;
 			EM_error = "EM code should start with mes 2";
-		}
-		return EM_error == 0;
-	}
-
-	if (state & INSTRING) {	/* We already delivered part of a string.
-				   Deliver the next part
-				*/
-		register struct string *s;
-		
-		s = getstring(0);
-		p->em_argtype = str_ptyp;
-		p->em_string = s->str;
-		p->em_size = s->length;
-		switch(state & PSEUMASK) {
-		default:
-			assert(0);
-		case MES:
-			if (!EM_error)
-				EM_error = "String too long in message";
-			p->em_type = EM_MESARG;
-			break;
-		case CON:
-			p->em_type = EM_PSEU;
-			p->em_opcode = ps_con;
-			break;
-		case ROM:
-			p->em_type = EM_PSEU;
-			p->em_opcode = ps_rom;
-			break;
 		}
 		return EM_error == 0;
 	}

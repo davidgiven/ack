@@ -306,7 +306,7 @@ emitstr(zero)
 	register char *p;
 
 	p = stringbuf;
-	i = *p++ & 0377;
+	i = stringlen;
 	while (--i >= 0)
 		emit1(*p++);
 	if (zero)

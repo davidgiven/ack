@@ -105,8 +105,23 @@ putval(c)
 		p = (char *) &yylval.y_strp; break;
 #endif
 	case STRING:
+		v = stringlen;
+		putc(c-128, tempfile);
+		for (n = 0; n < sizeof(v); n++) {
+			if (v == 0)
+				break;
+			v >>= 8;
+		}
+		c = NUMBER0 + n;
+		putc(c-128, tempfile);
+		v = stringlen;
+		while (--n >= 0)
+			putc((int) (v >> (n*8)), tempfile);
 		p = stringbuf;
-		n = (*p & 0377) + 1; break;
+		n = stringlen;
+		while (--n >= 0)
+			putc(*p++, tempfile);
+		return;
 	case OP_EQ:
 	case OP_NE:
 	case OP_LE:
@@ -166,8 +181,10 @@ getval(c)
 		p = (char *) &yylval.y_strp; break;
 #endif
 	case STRING:
+		getval(getc(tempfile)+128);
+		stringlen = n = yylval.y_valu;
 		p = stringbuf;
-		*p++ = n = getc(tempfile); p[n] = '\0'; break;
+		p[n] = '\0'; break;
 	case OP_EQ:
 	case OP_NE:
 	case OP_LE:
@@ -346,8 +363,15 @@ instring(termc)
 {
 	register char *p;
 	register c;
+	static int maxstring = 0;
 
-	p = stringbuf+1;
+	if (! maxstring) {
+		maxstring = STRINGMAX;
+		if ((stringbuf = malloc(maxstring)) == 0) {
+			fatal("out of memory");
+		}
+	}
+	p = stringbuf;
 	for (;;) {
 		c = nextchar();
 		if (c == '\n' || c == '\0') {
@@ -359,11 +383,17 @@ instring(termc)
 			break;
 		if (c == '\\')
 			c = inescape();
-		if (p >= &stringbuf[STRINGMAX - 1])
-			fatal("string buffer overflow");
+		if (p >= &stringbuf[maxstring - 1]) {
+			int cnt = p - stringbuf;
+
+			if ((stringbuf = realloc(stringbuf, maxstring += 256)) == 0) {
+				fatal("out of memory");
+			}
+			p = stringbuf + cnt;
+		}
 		*p++ = c;
 	}
-	stringbuf[0] = p - stringbuf - 1;
+	stringlen = p - stringbuf;
 	*p = '\0';
 	return(STRING);
 }

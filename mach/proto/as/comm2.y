@@ -128,7 +128,7 @@ program	:	/* empty */
 			{	lineno++; LISTLINE(1); RELODONE;}
 	|	program '#' NUMBER STRING '\n'
 			{	lineno = $3;
-				if (modulename) strncpy(modulename, &stringbuf[1], STRINGMAX-1);
+				if (modulename) strncpy(modulename, stringbuf, STRINGMAX-1);
 				LISTLINE(1); RELODONE;
 			}
 	|	program error '\n'
@@ -196,7 +196,7 @@ operation
 #endif
 					    
 					newsymb(
-						*(stringbuf+1) ? stringbuf+1 : (char *) 0,
+						*stringbuf ? stringbuf : (char *) 0,
 						(short)(
 							($4.typ & (S_EXT|S_TYP))
 							|
@@ -210,7 +210,7 @@ operation
 	|	SYMD STRING ','  absexp ',' absexp
 			{	if ((sflag & SYM_SMB) && PASS_SYMB) {
 					newsymb(
-						*(stringbuf+1) ? stringbuf+1 : (char *) 0,
+						*stringbuf ? stringbuf : (char *) 0,
 						(short)(
 							(DOTTYP & (S_EXT|S_TYP))
 							|
@@ -239,7 +239,7 @@ operation
 			{	if ((sflag & SYM_LIN) && PASS_SYMB) {
 					hllino = 0;
 					newsymb(
-						stringbuf+1,
+						stringbuf,
 						(short)(DOTTYP | S_FIL),
 						(short)0,
 						(valu_t)DOTVAL
@@ -295,9 +295,9 @@ expr	:	error
 				$$.typ = $1->i_type & ~S_EXT;
 			}
 	|	STRING
-			{	if (stringbuf[0] != 1)
+			{	if (stringlen != 1)
 					serror("too many chars");
-				$$.val = stringbuf[1];
+				$$.val = stringbuf[0];
 				$$.typ = S_ABS;
 			}
 	|	ASC_LPAR expr ASC_RPAR

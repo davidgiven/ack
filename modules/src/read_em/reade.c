@@ -3,7 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/*	This file is ment to be included in the file read_emeV.c.
+/*	This file is ment to be included in the file read_em.c.
 	It contains the part that takes care of the reading of human readable
 	EM-code.
 */
@@ -171,6 +171,10 @@ getname()
 
 	s = &string;
 	p = s->str;
+	if (!p) {
+		s->maxlen = 256;
+		s->str = p = Malloc(256);
+	}
 	c = getbyte();
 
 	if (!(isalpha(c) || c == '_')) {
@@ -180,7 +184,12 @@ getname()
 	}
 
 	while (isalnum(c) || c == '_') {
-		if (p < &(s->str[STRSIZ])) *p++ = c;
+		if (p >= &(s->str[s->maxlen])) {
+			int df = p - s->str;
+			s->str = Realloc(s->str, (s->maxlen += 256));
+			p = s->str + df;
+		}
+		*p++ = c;
 		c = getbyte();
 	}
 
@@ -202,15 +211,17 @@ getstring()
 
 	s = &string;
 	p = s->str;
-
-	if (!(state & INSTRING)) {	/* Not reading a string yet */
-		termc = getbyte();
-		/* assert(termc == '"' || termc == '\''); */
-		/* This assertion does not work. Compiler error messages.
-		   The trouble lies in the ", it terminates the string
-		   created in the assertion macro
-		*/
+	if (!p) {
+		s->maxlen = 256;
+		s->str = p = Malloc(256);
 	}
+
+	termc = getbyte();
+	/* assert(termc == '"' || termc == '\''); */
+	/* This assertion does not work. Compiler error messages.
+	   The trouble lies in the ", it terminates the string
+	   created in the assertion macro
+	*/
 
 	for (;;) {
 		if ((c = getbyte()) == '\n' || c == EOF) {
@@ -221,16 +232,15 @@ getstring()
 
 		if (c == termc) {
 			if (termc == '"') *p++ = '\0';
-			state &= ~INSTRING;
 			break;
 		}
 
 		if (c == '\\') c = getescape();
 
-		if (p >= &(s->str[STRSIZ])) {
-			state |= INSTRING;
-			ungetbyte(c);
-			break;
+		if (p >= &(s->str[s->maxlen])) {
+			int df = p - s->str;
+			s->str = Realloc(s->str, (s->maxlen += 256));
+			p = s->str + df;
 		}
 
 		*p++ = c;	
@@ -268,7 +278,7 @@ getnumber(c, ap)
 	register int c;
 	register struct e_arg *ap;
 {
-	char str[STRSIZ + 1];
+	char str[256 + 1];
 	register char *p = str;
 	int n;
 	int expsign;
@@ -291,7 +301,7 @@ getnumber(c, ap)
 	n = sp_cst4;
 
 	for (;;) {
-		if (p >= &(str[STRSIZ])) {
+		if (p >= &(str[256])) {
 			syntax("number too long");
 			return sp_cst4;
 		}
@@ -580,7 +590,7 @@ getmnem(c, p)
 PRIVATE
 line_line()
 {
-	static char filebuf[STRSIZ + 1];
+	static char filebuf[256 + 1];
 	char *btscpy();
 	struct e_arg dummy;
 
