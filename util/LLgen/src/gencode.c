@@ -761,7 +761,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 		mustpop = NOPOP;
 	}
 	if (unsafe && hulp1 == lb) {
-		fprintf(f,"L_%d: ;\n", hulp1);
+		fprintf(f,"goto L_%d; /* so that the label is used for certain */\nL_%d: ;\n", hulp1, hulp1);
 	}
 	if (safety == SAFE) {
 		/* check if we can avoid to generate the switch */
@@ -849,7 +849,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 		nsafe = SAFE;
 		if (l->l_flag & DEF) {
 			if (unsafe) {
-				fprintf(f,"L_%d: ;\n", hulp2);
+				fprintf(f,"goto L_%d;\nL_%d: ;\n", hulp2, hulp2);
 			}
 			if (safety != SAFE) nsafe = SAFESCANDONE;
 		}
@@ -863,7 +863,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 		}
 		if ((l->l_flag & COND) && !(l->l_flag & NOCONF)) {
 			p++;
-			fprintf(f,"L_%d : ;\n",hulp);
+			fprintf(f,"goto L_%d;\nL_%d : ;\n", hulp, hulp);
 			if (g_gettype(p+1) == EORULE) {
 				continue;
 			}
@@ -1099,7 +1099,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	else if (rep_kind == OPT) safeterm = safety;
 	else /* if (rep_kind == STAR) */ safeterm = max(safety, gettout(q));
 	hulp2 = nlabel++;
-	fprintf(f, "L_%d : ", hulp2);
+	fprintf(f, "goto L_%d;\nL_%d : ", hulp2, hulp2);
 	if (q->t_flags & RESOLVER) {
 		hulp1 = nlabel++;
 		if (! (q->t_flags & NOCONF)) {
@@ -1168,7 +1168,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	}
 	gencases(tokenlist, casecnt, compacted);
 	if (q->t_flags & RESOLVER) {
-		fprintf(f, "L_%d : ;\n", hulp1);
+		fprintf(f, "goto L_%d;\nL_%d : ;\n", hulp1, hulp1);
 	}
 	if (rep_kind == OPT) genpop(ispushed);
 	if (rep_count > 0) {
