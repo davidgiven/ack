@@ -96,7 +96,7 @@ GEN_H = botch_free.h dataflow.h debug.h density.h errout.h \
         regcount.h \
 	code.h declar.h decspecs.h def.h expr.h field.h estack.h util.h \
 	idf.h macro.h stmt.h struct.h switch.h type.h l_brace.h l_state.h \
-	l_outdef.h stack.h
+	l_outdef.h stack.h lapbuf.h noRoption.h nofloat.h
 
 HFILES=	$(GEN_H) $(SRC_H)
 

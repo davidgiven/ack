@@ -134,6 +134,9 @@ gen_tpcheck(tpp, union_allowed)
 		if (! valid_type(tp, "union"))
 			gen_error = pack_level;
 		break;
+	case ERRONEOUS:
+		if (! gen_error) gen_error = pack_level;
+		break;
 	}
 }
 
@@ -243,6 +246,9 @@ gen_tphead(tpp, nest)
 			return gen_tphead(&(sd->sd_type), 1);
 		}
 		return &(sd->sd_type);
+	case ERRONEOUS:
+		if (! gen_error) gen_error = pack_level;
+		/* fall through */
 	default:
 		p->nelem = 1;
 		p->elem_count = 1;
@@ -264,6 +270,9 @@ gen_tpmiddle()
 again:
 	tp = *(p->s_tpp);
 	switch(tp->tp_fund) {
+	case ERRONEOUS:
+		if (! gen_error) gen_error = pack_level;
+		return p->s_tpp;
 	default:
 		if (p->elem_count == p->nelem && p->s_nested) {
 			p = p->next;
@@ -544,6 +553,7 @@ and also to prevent runtime coercions for compile-time constants.
 #endif NOBITFIELD
 
 	case ERRONEOUS:
+		if (! gen_error) gen_error = pack_level;
 		break;
 	default:
 		crash("check_ival");
