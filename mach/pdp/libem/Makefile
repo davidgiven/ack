@@ -11,9 +11,6 @@ cmp:            all
 		-../../compare tail_em
 		rm -f head_em tail_em
 
-distr:
-		arch cr `cat LIST`
-
 all:            head_em tail_em
 
 head_em:        head_em.s
