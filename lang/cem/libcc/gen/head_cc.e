@@ -30,9 +30,9 @@ _penvp
  exp $m_a_i_n
  pro $m_a_i_n,0
 #if EM_WSIZE==1
- ldc 1288	; EIOVFL | EIUND | ECONV
+ ldc 1336	; EIOVFL | EIUND | ECONV | EFOVFL | EFUNFL
 #else
- loc 1288
+ loc 1336
 #endif
  sim            ; ignored
  lal EM_WSIZE+EM_PSIZE
