@@ -41,6 +41,7 @@
 
 extern arith		NewPtr();
 extern arith		NewInt();
+extern arith		TmpSpace();
 
 extern int		proclevel;
 
@@ -61,7 +62,11 @@ static int		UseWarnings();
 #define	NO_EXIT_LABEL	((label) 0)
 #define RETURN_LABEL	((label) 1)
 
-LblWalkNode(lbl, nd, exit)
+#define REACH_FLAG	1
+#define EXIT_FLAG	2
+
+int
+LblWalkNode(lbl, nd, exit, reach)
 	label lbl, exit;
 	register t_node *nd;
 {
@@ -71,7 +76,7 @@ LblWalkNode(lbl, nd, exit)
 	*/
 
 	def_ilb(lbl);
-	WalkNode(nd, exit);
+	return WalkNode(nd, exit, reach);
 }
 
 static arith tmpprio;
@@ -104,6 +109,8 @@ EndPriority()
 def_ilb(l)
 	label l;
 {
+	/*	Instruction label definition. Forget about line number.
+	*/
 	C_df_ilb(l);
 	oldlineno = 0;
 }
@@ -111,7 +118,11 @@ def_ilb(l)
 DoLineno(nd)
 	register t_node *nd;
 {
-	if (! options['L'] && nd->nd_lineno && nd->nd_lineno != oldlineno) {
+	/*	Generate line number information, if necessary.
+	*/
+	if (! options['L'] &&
+	    nd->nd_lineno &&
+	    nd->nd_lineno != oldlineno) {
 		oldlineno = nd->nd_lineno;
 		C_lin((arith) nd->nd_lineno);
 	}
@@ -119,6 +130,11 @@ DoLineno(nd)
 
 DoFilename(needed)
 {
+	/*	Generate filename information, when needed.
+		This routine is called at the generation of a
+		procedure entry, and after generating a call to
+		another procedure.
+	*/
 	static label	filename_label = 0;
 
 	oldlineno = 0;	/* always invalidate remembered line number */
@@ -182,6 +198,9 @@ WalkModule(module)
 			C_ine_dlb(data_label, (arith) 0);
 		}
 		else if (! options['R']) {
+			/* put funny value in BSS, in an attempt to detect
+			   uninitialized variables
+			*/
 			C_cal("killbss");
 		}
 
@@ -192,7 +211,7 @@ WalkModule(module)
 	}
 	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
-	WalkNode(module->mod_body, NO_EXIT_LABEL);
+	WalkNode(module->mod_body, NO_EXIT_LABEL, REACH_FLAG);
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	def_ilb(RETURN_LABEL);
 	EndPriority();
@@ -215,10 +234,13 @@ WalkProcedure(procedure)
 	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	register t_type *tp;
 	register t_param *param;
-	int too_big = 0;
-	arith StackAdjustment = 0;
-	arith retsav = 0;
+	int too_big = 0;		/* returnsize larger than returnarea */
+	arith StackAdjustment = 0;	/* space for conformant arrays */
+	arith retsav = 0;		/* temporary space for return value */
 	arith func_res_size = 0;
+	int partno = C_getid();
+	int partno2 = C_getid();
+	int end_reached;		/* can fall through ... */
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -242,17 +264,22 @@ WalkProcedure(procedure)
 
 	/* Generate code for this procedure
 	*/
-	C_pro_narg(procscope->sc_name);
-	C_ms_par(procedure->df_type->prc_nbpar +
-		 (too_big ? func_res_size : 0));
 	TmpOpen(procscope);
+	C_insertpart(partno2);
+	C_insertpart(partno);
+
+	text_label = 1;		/* label at end of procedure */
+
+	end_reached = WalkNode(procedure->prc_body, NO_EXIT_LABEL, REACH_FLAG);
+
+	C_beginpart(partno);
 	DoPriority();
 	/* generate code for filename only when the procedure can be
 	   exported, either directly or by taking the address.
-	   This cannot be done if the level is not zero (because in
+	   This cannot be done if the level is bigger than one (because in
 	   this case it is a nested procedure).
 	*/
-	DoFilename(! procscope->sc_level);
+	DoFilename(procscope->sc_level == 1);
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -261,7 +288,7 @@ WalkProcedure(procedure)
 
 	/* Make sure that arguments of size < word_size are on a
 	   fixed place.
-	   Also make copies of conformant arrays when neccessary.
+	   Also make copies of parameters when neccessary.
 	*/
 	for (param = ParamList(procedure->df_type);
 	     param;
@@ -273,17 +300,37 @@ WalkProcedure(procedure)
 				if (tp->tp_size < word_size &&
 				    (int) word_size % (int) tp->tp_size == 0) {
 					C_lol(param->par_def->var_off);
-					STL(param->par_def->var_off, tp->tp_size);
+					STL(param->par_def->var_off,
+					    tp->tp_size);
+					continue;
 				}
+				if (IsBigParamTp(tp) &&
+				    (param->par_def->df_flags & D_DEFINED)){
+					/* Value parameter changed in body.
+					   Make a copy
+					*/
+					arith tmp = TmpSpace(tp->tp_size,
+							     tp->tp_align);
+					LOL(param->par_def->var_off,
+					    pointer_size);
+					C_lal(tmp);
+					CodeConst(WA(tp->tp_size),
+						  (int)pointer_size);
+					C_bls(pointer_size);
+					C_lal(tmp);
+					STL(param->par_def->var_off,
+					    pointer_size);
+				}
+				continue;
 			}
-			else {
+			if (param->par_def->df_flags & D_DEFINED) {
 				/* Here, we have to make a copy of the
 				   array. We must also remember how much
 				   room is reserved for copies, because
 				   we have to adjust the stack pointer before
 				   a RET is done. This is even more complicated
 				   when the procedure returns a value.
-				   Then, the value must be saved (in retval),
+				   Then, the value must be saved,
 				   the stack adjusted, the return value pushed
 				   again, and then RET
 				*/
@@ -295,9 +342,8 @@ WalkProcedure(procedure)
 						   needed if the value itself
 						   is returned
 						*/
-						procscope->sc_off -=
-							func_res_size;
-						retsav = procscope->sc_off;
+						retsav= TmpSpace(func_res_size,
+								1);
 					}
 					StackAdjustment = NewPtr();
 					C_lor((arith) 1);
@@ -316,12 +362,13 @@ WalkProcedure(procedure)
 			}
 		}
 	}
-
-	text_label = 1;		/* label at end of procedure */
-
-	WalkNode(procedure->prc_body, NO_EXIT_LABEL);
+	C_endpart(partno);
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
-	if (func_res_size) {
+	if ((end_reached & REACH_FLAG) && func_res_size) {
+		node_warning(procscope->sc_end,
+			     W_ORDINARY,
+			     "function procedure \"%s\" does not always return a value",
+			     procedure->df_idf->id_text);
 		c_loc(M2_NORESULT);
 		C_trp();
 		C_asp(-func_res_size);
@@ -357,10 +404,16 @@ WalkProcedure(procedure)
 	}
 	EndPriority();
 	C_ret(func_res_size);
+	C_beginpart(partno2);
+	C_pro(procscope->sc_name, -procscope->sc_off);
+	C_ms_par(procedure->df_type->prc_nbpar +
+		 (too_big ? func_res_size : 0));
 	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
+	C_endpart(partno2);
 	C_end(-procscope->sc_off);
 	if (! fit(procscope->sc_off, (int) word_size)) {
-		node_error(procedure->prc_body, "maximum local byte count exceeded");
+		node_error(procedure->prc_body,
+			   "maximum local byte count exceeded");
 	}
 	TmpClose();
 	CurrVis = savevis;
@@ -409,19 +462,22 @@ MkCalls(df)
 	}
 }
 
-WalkLink(nd, exit_label)
+WalkLink(nd, exit_label, end_reached)
 	register t_node *nd;
 	label exit_label;
 {
 	/*	Walk node "nd", which is a link.
+		"exit_label" is set to a label number when inside a LOOP.
+		"end_reached" maintains info about reachability (REACH_FLAG),
+		and whether an EXIT statement was seen (EXIT_FLAG).
 	*/
 
 	while (nd && nd->nd_class == Link) {	 /* statement list */
-		WalkNode(nd->nd_left, exit_label);
+		end_reached = WalkNode(nd->nd_left, exit_label, end_reached);
 		nd = nd->nd_right;
 	}
 
-	WalkNode(nd, exit_label);
+	return WalkNode(nd, exit_label, end_reached);
 }
 
 STATIC
@@ -434,7 +490,8 @@ ForLoopVarExpr(nd)
 	CodeCoercion(tp, BaseType(tp));
 }
 
-WalkStat(nd, exit_label)
+int
+WalkStat(nd, exit_label, end_reached)
 	register t_node *nd;
 	label exit_label;
 {
@@ -445,8 +502,11 @@ WalkStat(nd, exit_label)
 
 	assert(nd->nd_class == Stat);
 
-	if (nd->nd_symb == ';') return;
+	if (nd->nd_symb == ';') return 1;
 
+	if (! end_reached & REACH_FLAG) {
+		node_warning(nd, W_ORDINARY, "statement not reached");
+	}
 	DoLineno(nd);
 	options['R'] = (nd->nd_flags & ROPTION);
 	options['A'] = (nd->nd_flags & AOPTION);
@@ -467,24 +527,26 @@ WalkStat(nd, exit_label)
 
 	case IF:
 		{	label l1 = ++text_label, l3 = ++text_label;
+			int end_r;
 
 			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
-			LblWalkNode(l3, right->nd_left, exit_label);
+			end_r = LblWalkNode(l3, right->nd_left, exit_label, end_reached);
 
 			if (right->nd_right) {	/* ELSE part */
 				label l2 = ++text_label;
 
 				C_bra(l2);
-				LblWalkNode(l1, right->nd_right, exit_label);
+				end_reached = end_r | LblWalkNode(l1, right->nd_right, exit_label, end_reached);
 				l1 = l2;
 			}
+			else	end_reached |= end_r;
 			def_ilb(l1);
 			break;
 		}
 
 	case CASE:
-		CaseCode(nd, exit_label);
+		end_reached = CaseCode(nd, exit_label, end_reached);
 		break;
 
 	case WHILE:
@@ -492,10 +554,10 @@ WalkStat(nd, exit_label)
 				exit = ++text_label,
 				dummy = ++text_label;
 
-			def_ilb(loop);
-			ExpectBool(left, dummy, exit);
-			LblWalkNode(dummy, right, exit_label);
-			C_bra(loop);
+			C_bra(dummy);
+			end_reached |= LblWalkNode(loop, right, exit_label, end_reached);
+			def_ilb(dummy);
+			ExpectBool(left, loop, exit);
 			def_ilb(exit);
 			break;
 		}
@@ -503,7 +565,7 @@ WalkStat(nd, exit_label)
 	case REPEAT:
 		{	label loop = ++text_label, exit = ++text_label;
 
-			LblWalkNode(loop, left, exit_label);
+			end_reached = LblWalkNode(loop, left, exit_label, end_reached);
 			ExpectBool(right, exit, loop);
 			def_ilb(exit);
 			break;
@@ -512,7 +574,10 @@ WalkStat(nd, exit_label)
 	case LOOP:
 		{	label loop = ++text_label, exit = ++text_label;
 
-			LblWalkNode(loop, right, exit);
+			if (LblWalkNode(loop, right, exit, end_reached) & EXIT_FLAG) {
+				end_reached &= REACH_FLAG;
+			}
+			else	end_reached = 0;
 			C_bra(loop);
 			def_ilb(exit);
 			break;
@@ -575,7 +640,7 @@ WalkStat(nd, exit_label)
 
 					ForLoopVarExpr(nd);
 					C_stl(tmp2);
-					WalkNode(right, exit_label);
+					end_reached |= WalkNode(right, exit_label, end_reached);
 					C_lol(tmp2);
 					ForLoopVarExpr(nd);
 					C_beq(x);
@@ -583,7 +648,7 @@ WalkStat(nd, exit_label)
 					C_trp();
 					def_ilb(x);
 				}
-				else	WalkNode(right, exit_label);
+				else	end_reached |= WalkNode(right, exit_label, end_reached);
 				nd->nd_def->df_flags &= ~D_FORLOOP;
 				FreeInt(tmp2);
 				if (stepsize) {
@@ -601,7 +666,7 @@ WalkStat(nd, exit_label)
 				}
 			}
 			else {
-				WalkNode(right, exit_label);
+				end_reached |= WalkNode(right, exit_label, end_reached);
 				nd->nd_def->df_flags &= ~D_FORLOOP;
 			}
 			C_bra(l1);
@@ -620,13 +685,14 @@ WalkStat(nd, exit_label)
 			struct withdesig wds;
 			t_desig ds;
 
-			if (! WalkDesignator(left, &ds, D_USED|D_DEFINED)) break;
+			if (! WalkDesignator(left, &ds, D_USED)) break;
 			if (left->nd_type->tp_fund != T_RECORD) {
 				node_error(left, "record variable expected");
 				break;
 			}
 
 			wds.w_next = WithDesigs;
+			wds.w_flags = D_USED;
 			WithDesigs = &wds;
 			wds.w_scope = left->nd_type->rec_scope;
 			CodeAddress(&ds);
@@ -642,20 +708,23 @@ WalkStat(nd, exit_label)
 			link.sc_scope = wds.w_scope;
 			link.sc_next = CurrVis;
 			CurrVis = &link;
-			WalkNode(right, exit_label);
+			end_reached = WalkNode(right, exit_label, end_reached);
 			CurrVis = link.sc_next;
 			WithDesigs = wds.w_next;
 			FreePtr(ds.dsg_offset);
+			WalkDesignator(left, &ds, wds.w_flags & (D_USED|D_DEFINED));
 			break;
 		}
 
 	case EXIT:
 		assert(exit_label != 0);
 
+		if (end_reached & REACH_FLAG) end_reached = EXIT_FLAG;
 		C_bra(exit_label);
 		break;
 
 	case RETURN:
+		end_reached &= ~REACH_FLAG;
 		if (right) {
 			if (! ChkExpression(right)) break;
 			/* The type of the return-expression must be
@@ -677,6 +746,7 @@ WalkStat(nd, exit_label)
 	default:
 		crash("(WalkStat)");
 	}
+	return end_reached;
 }
 
 extern int	NodeCrash();
@@ -900,16 +970,18 @@ UseWarnings(df)
 	}
 	switch(df->df_flags & (D_USED|D_DEFINED|D_VALPAR|D_VARPAR)) {
 	case 0:
-	case D_VALPAR:
 	case D_VARPAR:
 		warning = "never used/assigned";
 		break;
 	case D_USED|D_VARPAR:
-		warning = "never assigned, could be value parameter";
+		if (df->df_type->tp_fund != T_EQUAL) {
+			warning = "never assigned, could be value parameter";
+		}
 		break;
 	case D_USED:
 		warning = "never assigned";
 		break;
+	case D_VALPAR:
 	case D_DEFINED:
 	case D_DEFINED|D_VALPAR:
 		warning = "never used";
@@ -924,7 +996,10 @@ warn:
 			     "%s \"%s\" %s",
 			     (df->df_flags & D_VALPAR) ? "value parameter" :
 			      (df->df_flags & D_VARPAR) ? "variable parameter" :
-			       "identifier",
+			       (df->df_kind == D_VARIABLE) ? "variable" :
+				(df->df_kind == D_TYPE) ? "type" :
+				 (df->df_kind == D_CONST) ? "constant" :
+				  "procedure",
 			     df->df_idf->id_text, warning);
 	}
 }

@@ -514,6 +514,7 @@ CodeFieldDesig(df, ds)
 		/* Found it. Now, act like it was a selection.
 		*/
 		*ds = wds->w_desig;
+		wds->w_flags |= df->df_flags;
 		assert(ds->dsg_kind == DSG_PFIXED);
 	}
 
@@ -583,10 +584,11 @@ CodeVarDesig(df, ds)
 			*/
 			C_lxa((arith) difflevel);
 			if ((df->df_flags & D_VARPAR) ||
+			    IsBigParamTp(df->df_type) ||
 			    IsConformantArray(df->df_type)) {
-				/* var parameter or conformant array.
-				   For conformant array's, the address is
-				   passed.
+				/* var parameter, big parameter,
+				   or conformant array.
+				   The address is passed.
 				*/
 				C_adp(df->var_off);
 				C_loi(pointer_size);
@@ -603,7 +605,9 @@ CodeVarDesig(df, ds)
 
 	/* Now, finally, we have a local variable or a local parameter
 	*/
-	if ((df->df_flags & D_VARPAR) || IsConformantArray(df->df_type)) {
+	if ((df->df_flags & D_VARPAR) ||
+	    ((df->df_flags & D_VALPAR) && IsBigParamTp(df->df_type)) ||
+	    IsConformantArray(df->df_type)) {
 		/* a var parameter; address directly accessible.
 		*/
 		ds->dsg_kind = DSG_PFIXED;

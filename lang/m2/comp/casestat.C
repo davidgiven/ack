@@ -77,7 +77,8 @@ compact(nr, low, up)
 		diff / nr <= (DENSITY - 1));
 }
 
-CaseCode(nd, exitlabel)
+int
+CaseCode(nd, exitlabel, end_reached)
 	t_node *nd;
 	label exitlabel;
 {
@@ -91,6 +92,7 @@ CaseCode(nd, exitlabel)
 	register struct case_entry *ce;
 	register arith val;
 	label CaseDescrLab;
+	int rval;
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
@@ -109,15 +111,12 @@ CaseCode(nd, exitlabel)
 				/* non-empty case
 				*/
 				pnode->nd_lab = ++text_label;
-				if (! AddCases(sh, /* to descriptor */
-					       pnode->nd_left->nd_left,
-						   /* of case labels */
-					       pnode->nd_lab
-						   /* and code label */
-					      )) {
-					FreeSh(sh);
-					return;
-				}
+				AddCases(sh, /* to descriptor */
+					 pnode->nd_left->nd_left,
+					     /* of case labels */
+					 pnode->nd_lab
+					     /* and code label */
+					      );
 			}
 		}
 		else {
@@ -135,8 +134,6 @@ CaseCode(nd, exitlabel)
 		*/
 		if (! (sh->sh_type->tp_fund & T_DISCRETE)) {
 			node_error(nd, "illegal type in CASE-expression");
-			FreeSh(sh);
-			return;
 		}
 	}
 
@@ -184,12 +181,13 @@ CaseCode(nd, exitlabel)
 	/* Now generate code for the cases
 	*/
 	pnode = nd;
+	rval = 0;
 	while (pnode = pnode->nd_right) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
-				LblWalkNode(pnode->nd_lab,
+				rval |= LblWalkNode(pnode->nd_lab,
 					    pnode->nd_left->nd_right,
-					    exitlabel);
+					    exitlabel, end_reached);
 				C_bra(sh->sh_break);
 			}
 		}
@@ -198,13 +196,15 @@ CaseCode(nd, exitlabel)
 			*/
 			assert(sh->sh_default != 0);
 
-			LblWalkNode(sh->sh_default, pnode, exitlabel);
+			rval |= LblWalkNode(sh->sh_default,
+					pnode, exitlabel, end_reached);
 			break;
 		}
 	}
 
 	def_ilb(sh->sh_break);
 	FreeSh(sh);
+	return rval;
 }
 
 FreeSh(sh)
@@ -241,22 +241,23 @@ AddCases(sh, node, lbl)
 			node->nd_type = node->nd_left->nd_type;
 			node->nd_INT = node->nd_left->nd_INT;
 			for (;;) {
-				if (! AddOneCase(sh, node, lbl)) return 0;
+				AddOneCase(sh, node, lbl);
 			        if (node->nd_INT == node->nd_right->nd_INT) {
 					break;
 				}
 			     	node->nd_INT++;
 			}
-			return 1;
+			return;
 		}
 
 		assert(node->nd_symb == ',');
-		return	AddCases(sh, node->nd_left, lbl) &&
-		    	AddCases(sh, node->nd_right, lbl);
+		AddCases(sh, node->nd_left, lbl);
+		AddCases(sh, node->nd_right, lbl);
+		return;
 	}
 
 	assert(node->nd_class == Value);
-	return AddOneCase(sh, node, lbl);
+	AddOneCase(sh, node, lbl);
 }
 
 AddOneCase(sh, node, lbl)
@@ -271,8 +272,6 @@ AddOneCase(sh, node, lbl)
 	ce->ce_label = lbl;
 	ce->ce_value = node->nd_INT;
 	if (! ChkCompat(&node, sh->sh_type, "case")) {
-		free_case_entry(ce);
-		return 0;
 	}
 	if (sh->sh_entries == 0)	{
 		/* first case entry
@@ -311,7 +310,6 @@ AddOneCase(sh, node, lbl)
 			if (c1->ce_value == ce->ce_value)	{
 node_error(node, "multiple case entry for value %ld", ce->ce_value);
 				free_case_entry(ce);
-				return 0;
 			}
 			if (c2)	{
 				ce->ce_next = c2->ce_next;
@@ -330,5 +328,4 @@ node_error(node, "multiple case entry for value %ld", ce->ce_value);
 		}
 		(sh->sh_nrofentries)++;
 	}
-	return 1;
 }

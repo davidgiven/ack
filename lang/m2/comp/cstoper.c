@@ -371,6 +371,10 @@ cstset(expp)
 	setsize = (unsigned) (expp->nd_right->nd_type->tp_size) / (unsigned) word_size;
 
 	if (expp->nd_symb == IN) {
+		/*	The setsize must fit in an unsigned, as it is
+			allocated with Malloc, so we can do the arithmetic
+			in an unsigned too.
+		*/
 		unsigned i;
 
 		assert(expp->nd_left->nd_class == Value);
@@ -378,6 +382,10 @@ cstset(expp)
 		expp->nd_left->nd_INT -= expp->nd_right->nd_type->set_low;
 		i = expp->nd_left->nd_INT;
 		expp->nd_class = Value;
+		/*	Careful here; use expp->nd_left->nd_INT to see if
+			it falls in the range of the set. Do not use i
+			for this, as i may be truncated.
+		*/
 		expp->nd_INT = (expp->nd_left->nd_INT >= 0 &&
 				expp->nd_left->nd_INT < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
@@ -393,7 +401,7 @@ cstset(expp)
 	case '-': /* Set difference */
 	case '*': /* Set intersection */
 	case '/': /* Symmetric set difference */
-		expp->nd_set = resultset = MkSet(setsize * (unsigned) word_size);
+		expp->nd_set = resultset = MkSet(expp->nd_type->set_sz);
 		for (j = 0; j < setsize; j++) {
 			switch(expp->nd_symb) {
 			case '+':

@@ -53,7 +53,7 @@ main(argc, argv)
 	register char **Nargv = &argv[0];
 
 	ProgName = *argv++;
-	DEFPATH = (char **) Malloc(mDEF * sizeof(char *));
+	DEFPATH = (char **) Malloc((unsigned)mDEF * sizeof(char *));
 
 	while (--argc > 0) {
 		if (**argv == '-')

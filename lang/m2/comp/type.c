@@ -503,7 +503,7 @@ set_type(tp)
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
 	*/
-	arith lb, ub, diff;
+	arith lb, ub, diff, alloc_size;
 
 	if (! bounded(tp) || tp->tp_size > word_size) {
 		error("illegal base type for set");
@@ -526,6 +526,12 @@ set_type(tp)
 
 	tp = construct_type(T_SET, tp);
 	tp->tp_size = WA((diff + 7) >> 3);
+	alloc_size = (tp->tp_size / word_size + 1) * sizeof(arith);
+	tp->set_sz = alloc_size;
+	if (tp->set_sz != alloc_size) {
+		error("set size too large");
+		return error_type;
+	}
 	tp->set_low = lb;
 	return tp;
 }

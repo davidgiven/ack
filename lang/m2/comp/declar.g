@@ -402,7 +402,7 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			{ 
 			  if (*ptp != 0) {
 				t_type *tp = intorcard(*ptp,
-					BaseType((*pnd)->nd_type), 0);
+					BaseType((*pnd)->nd_type));
 				if (tp) *ptp = tp;
 				ChkCompat(pnd, *ptp, "case label");
 			  }

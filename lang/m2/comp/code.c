@@ -417,6 +417,8 @@ CodeParameters(param, arg)
 			C_loc(left_type->arr_high - left_type->arr_low);
 		}
 		c_loc(0);
+	}
+	if (IsConformantArray(tp) || IsVarParam(param) || IsBigParamTp(tp)) {
 		if (left->nd_symb == STRING) {
 			CodeString(left);
 		}
@@ -436,10 +438,6 @@ CodeParameters(param, arg)
 			}
 			break;
 		}
-		return;
-	}
-	if (IsVarParam(param)) {
-		CodeDAddress(left, 1);
 		return;
 	}
 	if (left_type->tp_fund == T_STRING) {

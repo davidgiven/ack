@@ -64,14 +64,16 @@ struct record {
 
 struct proc {
 	struct paramlist *pr_params;
-	arith pr_nbpar;
+	arith pr_nbpar;		/* number of bytes parameters accessed */
 #define prc_params	tp_value.tp_proc.pr_params
 #define prc_nbpar	tp_value.tp_proc.pr_nbpar
 };
 
 struct set {
-	arith st_low;
+	arith st_low;		/* lowerbound of subrange type of set */
+	unsigned st_sz;		/* size of constant set in compiler */
 #define set_low		tp_value.tp_set.st_low
+#define set_sz		tp_value.tp_set.st_sz
 };
 
 struct type	{
@@ -224,6 +226,7 @@ extern t_type
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
 #define	TooBigForReturnArea(tpx) ((tpx)->tp_size > ret_area_size)
+#define IsBigParamTp(tpx)	((tpx)->tp_size > double_size)
 
 extern long full_mask[];
 extern long max_int[];

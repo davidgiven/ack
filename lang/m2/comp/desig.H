@@ -55,6 +55,7 @@ typedef struct desig	t_desig;
 
 struct withdesig {
 	struct withdesig *w_next;
+	int w_flags;		/* D_USED|D_DEFINED */
 	struct scope *w_scope;	/* scope in which fields of this record
 				   reside
 				*/

@@ -207,23 +207,24 @@ ChkArr(expp, flags)
 			    "index type");
 }
 
-#ifdef DEBUG
+/*ARGSUSED*/
 STATIC int
 ChkValue(expp)
 	t_node *expp;
 {
+#ifdef DEBUG
 	switch(expp->nd_symb) {
 	case REAL:
 	case STRING:
 	case INTEGER:
-		return 1;
+		break;
 
 	default:
 		crash("(ChkValue)");
 	}
-	/*NOTREACHED*/
-}
 #endif
+	return 1;
+}
 
 STATIC int
 ChkLinkOrName(expp, flags)
@@ -430,7 +431,6 @@ MkSet(size)
 {
 	register arith	*s;
 
-	size = (size / (int) word_size + 1) * sizeof(arith);
 	s = (arith *) Malloc(size);
 	clear((char *) s , size);
 	s++;
@@ -492,7 +492,7 @@ ChkSet(expp)
 	   First allocate room for the set.
 	*/
 
-	expp->nd_set = MkSet((unsigned)(tp->tp_size));
+	expp->nd_set = MkSet(tp->set_sz);
 
 	/* Now check the elements, one by one
 	*/
@@ -1163,7 +1163,7 @@ ChkStandard(expp)
 		}
 		left = getvariable(&arg,
 			edf,
-			edf->df_value.df_stdname == S_NEW ? D_DEFINED : D_USED);
+			D_USED|D_DEFINED);
 		expp->nd_type = 0;
 		if (! left) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
@@ -1395,19 +1395,17 @@ no_desig(expp)
 }
 
 STATIC int
-done_before()
+add_flags(expp, flags)
+	t_node *expp;
 {
+	expp->nd_def->df_flags |= flags;
 	return 1;
 }
 
 extern int	NodeCrash();
 
 int (*ExprChkTable[])() = {
-#ifdef DEBUG
 	ChkValue,
-#else
-	done_before,
-#endif
 	ChkArr,
 	ChkBinOper,
 	ChkUnOper,
@@ -1416,7 +1414,7 @@ int (*ExprChkTable[])() = {
 	ChkExLinkOrName,
 	NodeCrash,
 	ChkSet,
-	done_before,
+	add_flags,
 	NodeCrash,
 	ChkExLinkOrName,
 };
@@ -1431,7 +1429,7 @@ int (*DesigChkTable[])() = {
 	ChkLinkOrName,
 	NodeCrash,
 	no_desig,
-	done_before,
+	add_flags,
 	NodeCrash,
 	ChkLinkOrName,
 };

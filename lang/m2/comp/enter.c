@@ -222,7 +222,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 			*/
 			*off += pointer_size + word_size + dword_size;
 		}
-		else if (VARp == D_VARPAR) {
+		else if (VARp == D_VARPAR || IsBigParamTp(type)) {
 			*off += pointer_size;
 		}
 		else {
