@@ -22,8 +22,6 @@
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
-int		Roption;
-extern char	options[];
 extern t_node *EmptyStatement;
 }
 
@@ -32,24 +30,6 @@ statement(register t_node **pnd;)
 	register t_node *nd;
 	extern int return_occurred;
 } :
-	/* We need some method for making sure lookahead is done, so ...
-	*/
-	[	PROGRAM
-		/* LLlex never returns this */
-	| %default
-				{ if (options['R'] != Roption) {
-					Roption = options['R'];
-					nd = dot2leaf(Option);
-					nd->nd_symb = 'R';
-					nd->nd_INT = Roption;
-					*pnd = nd =
-					    dot2node(Link, nd, NULLNODE);
-					nd->nd_symb = ';';
-					pnd = &(nd->nd_right);
-				  }
-				}
-	]
-[
 	/*
 	 * This part is not in the reference grammar. The reference grammar
 	 * states : assignment | ProcedureCall | ...
@@ -108,7 +88,6 @@ statement(register t_node **pnd;)
 			{ return_occurred = 1; }
 |
 	/* empty */	{ *pnd = EmptyStatement; }
-]
 ;
 
 /*

@@ -429,8 +429,7 @@ CodeParameters(param, arg)
 
 			CodePExpr(left);
 			tmp = TmpSpace(left->nd_type->tp_size, left->nd_type->tp_align);
-			C_lal(tmp);
-			C_sti(WA(left->nd_type->tp_size));
+			STL(tmp, WA(left->nd_type->tp_size));
 			C_lal(tmp);
 			}
 			break;
@@ -892,8 +891,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		else	CodeExpr(leftop, Des, l_maybe, false_label);
 		def_ilb(l_maybe);
-		free_desig(Des);
-		Des = new_desig();
+		clear((char *) Des, sizeof(t_desig));
 		CodeExpr(rightop, Des, true_label, false_label);
 		if (genlabels) {
 			def_ilb(true_label);

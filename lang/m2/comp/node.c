@@ -20,6 +20,7 @@
 #include	"def.h"
 #include	"type.h"
 #include	"node.h"
+#include	"main.h"
 
 t_node *
 MkNode(class, left, right, token)
@@ -34,6 +35,8 @@ MkNode(class, left, right, token)
 	nd->nd_right = right;
 	nd->nd_token = *token;
 	nd->nd_class = class;
+	if (options['R']) nd->nd_flags |= ROPTION;
+	if (options['A']) nd->nd_flags |= AOPTION;
 	return nd;
 }
 
@@ -48,17 +51,13 @@ t_node *
 MkLeaf(class, token)
 	t_token *token;
 {
-	register t_node *nd = new_node();
-
-	nd->nd_token = *token;
-	nd->nd_class = class;
-	return nd;
+	return MkNode(class, NULLNODE, NULLNODE, token);
 }
 
 t_node *
 dot2leaf(class)
 {
-	return MkLeaf(class, &dot);
+	return MkNode(class, NULLNODE, NULLNODE, &dot);
 }
 
 FreeLR(nd)

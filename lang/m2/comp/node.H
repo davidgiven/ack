@@ -12,7 +12,7 @@
 struct node {
 	struct node *nd_left;
 	struct node *nd_right;
-	int nd_class;		/* kind of node */
+	char nd_class;		/* kind of node */
 #define Value	0		/* constant */
 #define Arrsel  1		/* array selection */
 #define Oper	2		/* binary operator */
@@ -25,8 +25,10 @@ struct node {
 #define Def	9		/* an identified name */
 #define Stat	10		/* a statement */
 #define Link	11
-#define Option	12
 				/* do NOT change the order or the numbers!!! */
+	char nd_flags;		/* options */
+#define ROPTION	1
+#define AOPTION 2
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;
 #define nd_set		nd_token.tk_data.tk_set

@@ -42,9 +42,8 @@ int		nDEF, mDEF;
 int		pass_1;
 t_def	 	*Defined;
 extern int 	err_occurred;
-extern int 	Roption;
 extern int	fp_used;		/* set if floating point used */
-static t_node	_emptystat = { NULLNODE, NULLNODE, Stat, NULLTYPE, { ';' }};
+static t_node	_emptystat = { NULLNODE, NULLNODE, Stat, 0, NULLTYPE, { ';' }};
 t_node		*EmptyStatement = &_emptystat;
 
 main(argc, argv)
@@ -92,7 +91,6 @@ Compile(src, dst)
 	InitScope();
 	InitTypes();
 	AddStandards();
-	Roption = options['R'];
 #ifdef DEBUG
 	if (options['l']) {
 		LexScan();
@@ -159,7 +157,7 @@ LexScan()
 static struct stdproc {
 	char *st_nam;
 	int  st_con;
-} stdproc[] = {
+} stdprocs[] = {
 	{ "ABS",	S_ABS },
 	{ "CAP",	S_CAP },
 	{ "CHR",	S_CHR },
@@ -188,20 +186,30 @@ static struct stdproc {
 	{ 0,		0 }
 };
 
+static struct stdproc sysprocs[] = {
+	{ "TSIZE",	S_TSIZE },
+	{ "ADR",	S_ADR },
+	{ 0,		0 }
+};
+
 extern t_def *Enter();
 
-AddStandards()
-{
-	register t_def *df;
+AddProcs(p)
 	register struct stdproc *p;
-	static t_token nilconst = { INTEGER, 0};
-
-	for (p = stdproc; p->st_nam != 0; p++) {
+{
+	for (; p->st_nam != 0; p++) {
 		if (! Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con)) {
 			assert(0);
 		}
 	}
+}
 
+AddStandards()
+{
+	register t_def *df;
+	static t_token nilconst = { INTEGER, 0};
+
+	AddProcs(stdprocs);
 	EnterType("CHAR", char_type);
 	EnterType("INTEGER", int_type);
 	EnterType("LONGINT", longint_type);
@@ -232,12 +240,7 @@ do_SYSTEM()
 	EnterType("WORD", word_type);
 	EnterType("BYTE", byte_type);
 	EnterType("ADDRESS",address_type);
-	if (! Enter("ADR", D_PROCEDURE, std_type, S_ADR)) {
-		assert(0);
-	}
-	if (! Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE)) {
-		assert(0);
-	}
+	AddProcs(sysprocs);
 	if (!InsertText(systemtext, sizeof(systemtext) - 1)) {
 		fatal("could not insert text");
 	}

@@ -32,6 +32,7 @@
 #include	"node.h"
 #include	"warning.h"
 #include	"walk.h"
+#include	"squeeze.h"
 
 extern int	proclevel;
 extern arith	NewPtr();
@@ -50,6 +51,36 @@ WordOrDouble(ds, size)
 		if (size == dword_size) return 2;
 	}
 	return 0;
+}
+
+LOL(offset, size)
+	arith offset, size;
+{
+	if (size == word_size) {
+		C_lol(offset);
+	}
+	else if (size == dword_size) {
+		C_ldl(offset);
+	}
+	else {
+		C_lal(offset);
+		C_loi(size);
+	}
+}
+
+STL(offset, size)
+	arith offset, size;
+{
+	if (size == word_size) {
+		C_stl(offset);
+	}
+	else if (size == dword_size) {
+		C_sdl(offset);
+	}
+	else {
+		C_lal(offset);
+		C_sti(size);
+	}
 }
 
 int
@@ -106,30 +137,22 @@ DoStore(ds, size)
 	return 1;
 }
 
-int
-word_multiple(tp)
-	register t_type *tp;
-{
 	/*	Return 1 if the type indicated by tp has a size that is a
 		multiple of the word_size and is also word_aligned
 	*/
-	return  (int)(tp->tp_size) % (int)word_size == 0 &&
-		tp->tp_align >= word_align;
-}
+#define word_multiple(tp) \
+	( (int)(tp->tp_size) % (int)word_size == 0 && \
+	  tp->tp_align >= word_align)
 
-int
-word_dividor(tp)
-	register t_type *tp;
-{
 	/*	Return 1 if the type indicated by tp has a size that is a proper
 		dividor of the word_size, and has alignment >= size or
 		alignment >= word_align
 	*/
-	return	tp->tp_size < word_size && 
-		(int)word_size % (int)(tp->tp_size) == 0 &&
-		(tp->tp_align >= word_align ||
-		 tp->tp_align >= (int)(tp->tp_size));
-}
+#define word_dividor(tp) \
+	(	tp->tp_size < word_size &&  \
+		(int)word_size % (int)(tp->tp_size) == 0 && \
+		(tp->tp_align >= word_align || \
+		 tp->tp_align >= (int)(tp->tp_size)))
 
 #define USE_LOI_STI	0
 #define USE_LOS_STS	1
@@ -139,14 +162,15 @@ word_dividor(tp)
 				*/
 
 STATIC int
-type_to_stack(tp)
+suitable_move(tp)
 	register t_type *tp;
 {
 	/*	Find out how to load or store the value indicated by "ds".
 		There are three ways:
-		- with LOI/STI
-		- with LOS/STS
-		- with calls to _load/_store
+		- suitable for BLM/LOI/STI
+		- suitable for LOI/STI
+		- suitable for LOS/STS/BLS
+		- suitable for calls to load/store/blockmove
 	*/
 
 	if (! word_multiple(tp)) {
@@ -175,12 +199,14 @@ CodeValue(ds, tp)
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
-		switch (type_to_stack(tp)) {
+		switch (suitable_move(tp)) {
 		case USE_BLM:
 		case USE_LOI_STI:
+#ifndef SQUEEZE
 			CodeAddress(ds);
 			C_loi(tp->tp_size);
 			break;
+#endif
 		case USE_LOS_STS:
 			CodeAddress(ds);
 			CodeConst(tp->tp_size, (int)pointer_size);
@@ -188,16 +214,14 @@ CodeValue(ds, tp)
 			break;
 		case USE_LOAD_STORE:
 			sz = WA(tp->tp_size);
-			if (ds->dsg_kind == DSG_PLOADED) {
+			if (ds->dsg_kind != DSG_PFIXED) {
 				arith tmp = NewPtr();
 
 				CodeAddress(ds);
-				C_lal(tmp);
-				C_sti(pointer_size);
+				STL(tmp, pointer_size);
 				CodeConst(-sz, (int) pointer_size);
 				C_ass(pointer_size);
-				C_lal(tmp);
-				C_loi(pointer_size);
+				LOL(tmp, pointer_size);
 				FreePtr(tmp);
 			}
 			else  {
@@ -224,7 +248,7 @@ CodeValue(ds, tp)
 }
 
 ChkForFOR(nd)
-	t_node *nd;
+	register t_node *nd;
 {
 	/*	Check for an assignment to a FOR-loop control variable
 	*/
@@ -248,9 +272,6 @@ CodeStore(ds, tp)
 	/*	Generate code to store the value on the stack in the designator
 		described in "ds"
 	*/
-	t_desig save;
-
-	save = *ds;
 
 	switch(ds->dsg_kind) {
 	case DSG_FIXED:
@@ -258,12 +279,14 @@ CodeStore(ds, tp)
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
-		CodeAddress(&save);
-		switch (type_to_stack(tp)) {
+		CodeAddress(ds);
+		switch (suitable_move(tp)) {
 		case USE_BLM:
 		case USE_LOI_STI:
+#ifndef SQUEEZE
 			C_sti(tp->tp_size);
 			break;
+#endif
 		case USE_LOS_STS:
 			CodeConst(tp->tp_size, (int) pointer_size);
 			C_sts(pointer_size);
@@ -326,6 +349,7 @@ CodeMove(rhs, left, rtp)
 	*/
 	register t_desig *lhs = new_desig();
 	register t_type *tp = left->nd_type;
+	int loadedflag = 0;
 
 	ChkForFOR(left);
 	switch(rhs->dsg_kind) {
@@ -345,61 +369,60 @@ CodeMove(rhs, left, rtp)
 		CodeStore(lhs, tp);
 		break;
 	case DSG_FIXED:
+		CodeDesig(left, lhs);
 		if (lhs->dsg_kind == DSG_FIXED &&
 		    fit(tp->tp_size, (int) word_size) &&
-		    (int) (lhs->dsg_offset) % (int) word_size ==
-		    (int) (rhs->dsg_offset) % (int) word_size) {
-			register int sz;
+		    (int) (lhs->dsg_offset) % word_align ==
+		    (int) (rhs->dsg_offset) % word_align) {
+			register int sz = 1;
 			arith size = tp->tp_size;
 
-			CodeDesig(left, lhs);
-			while (size &&
-			       (sz = ((int)(lhs->dsg_offset)%(int)word_size))) {
+			while (size && sz < word_align) {
 				/*	First copy up to word-aligned
 					boundaries
 				*/
-				if (sz < 0) sz = -sz;	/* bloody '%' */
-				while ((int) word_size % sz) sz--;
-				CodeCopy(lhs, rhs, (arith) sz, &size);
-			}
-			if (size > 3*dword_size) {
-				/*	Do a block move
-				*/
-				arith sz;
-
-				sz = size - size % word_size;
-				CodeCopy(lhs, rhs, sz, &size);
-			}
-			else for (sz = (int) dword_size;
-				  sz; sz -= (int) word_size) {
-				while (size >= sz) {
-					/*	Then copy dwords, words.
-						Depend on peephole optimizer
-					*/
-					CodeCopy(lhs, rhs, (arith) sz, &size);
+				if (!((int)(lhs->dsg_offset)%(sz+sz))) {
+					sz += sz;
 				}
+				else	CodeCopy(lhs, rhs, (arith) sz, &size);
 			}
+			/*	Now copy the bulk
+			*/
+			sz = (int) size % (int) word_size;
+			size -= sz;
+			CodeCopy(lhs, rhs, size, &size);
+			size = sz;
 			sz = word_size;
-			while (size && --sz) {
+			while (size) {
 				/*	And then copy remaining parts
 				*/
-				while ((int) word_size % sz) sz--;
-				while (size >= sz) {
+				sz >>= 1;
+				if (size >= sz) {
 					CodeCopy(lhs, rhs, (arith) sz, &size);
 				}
 			}
 			break;
 		}
+		CodeAddress(lhs);
+		loadedflag = 1;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
+		assert(! loadedflag || rhs->dsg_kind == DSG_FIXED);
 		CodeAddress(rhs);
-		CodeDesig(left, lhs);
-		CodeAddress(lhs);
-		switch (type_to_stack(tp)) {
+		if (loadedflag) {
+			C_exg(pointer_size);
+		}
+		else {
+			CodeDesig(left, lhs);
+			CodeAddress(lhs);
+		}
+		switch (suitable_move(tp)) {
 		case USE_BLM:
+#ifndef SQUEEZE
 			C_blm(tp->tp_size);
 			break;
+#endif
 		case USE_LOS_STS:
 			CodeConst(tp->tp_size, (int) pointer_size);
 			C_bls(pointer_size);

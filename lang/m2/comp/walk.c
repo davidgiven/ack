@@ -268,8 +268,7 @@ WalkProcedure(procedure)
 				if (tp->tp_size < word_size &&
 				    (int) word_size % (int) tp->tp_size == 0) {
 					C_lol(param->par_def->var_off);
-					C_lal(param->par_def->var_off);
-					C_sti(tp->tp_size);
+					STL(param->par_def->var_off, tp->tp_size);
 				}
 			}
 			else {
@@ -297,8 +296,7 @@ WalkProcedure(procedure)
 					}
 					StackAdjustment = NewPtr();
 					C_lor((arith) 1);
-					C_lal(StackAdjustment);
-					C_sti(pointer_size);
+					STL(StackAdjustment, pointer_size);
 				}
 				/* First compute new stackpointer */
 				C_lal(param->par_def->var_off);
@@ -307,8 +305,7 @@ WalkProcedure(procedure)
 				C_lfr(pointer_size);
 				C_str((arith) 1);
 						/* adjusted stack pointer */
-				C_lal(param->par_def->var_off);
-				C_loi(pointer_size);
+				LOL(param->par_def->var_off, pointer_size);
 						/* push source address */
 				C_cal("_copy_array");
 						/* copy */
@@ -336,8 +333,7 @@ WalkProcedure(procedure)
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
 			*/
-			C_lal(StackAdjustment);
-			C_loi(pointer_size);
+			LOL(StackAdjustment, pointer_size);
 			C_str((arith) 1);
 		}
 		c_lae_dlb(func_res_label);
@@ -349,17 +345,13 @@ WalkProcedure(procedure)
 		   and put function result back on the stack
 		*/
 		if (func_type) {
-			C_lal(retsav);
-			C_sti(func_res_size);
+			STL(retsav, func_res_size);
 		}
-		C_lal(StackAdjustment);
-		C_loi(pointer_size);
+		LOL(StackAdjustment, pointer_size);
 		C_str((arith) 1);
 		if (func_type) {
-			C_lal(retsav);
-			C_loi(func_res_size);
+			LOL(retsav, func_res_size);
 		}
-		FreePtr(StackAdjustment);
 	}
 	EndPriority();
 	C_ret(func_res_size);
@@ -453,6 +445,8 @@ WalkStat(nd, exit_label)
 	assert(nd->nd_class == Stat);
 
 	DoLineno(nd);
+	if (nd->nd_flags & ROPTION) options['R'] = 1;
+	if (nd->nd_flags & AOPTION) options['A'] = 1;
 	switch(nd->nd_symb) {
 	case '(':
 		if (ChkCall(nd)) {
@@ -682,16 +676,6 @@ WalkStat(nd, exit_label)
 
 extern int	NodeCrash();
 
-STATIC
-WalkOption(nd)
-	t_node *nd;
-{
-	/* Set option indicated by node "nd"
-	*/
-
-	options[nd->nd_symb] = nd->nd_INT;
-}
-
 int (*WalkTable[])() = {
 	NodeCrash,
 	NodeCrash,
@@ -705,7 +689,6 @@ int (*WalkTable[])() = {
 	NodeCrash,
 	WalkStat,
 	WalkLink,
-	WalkOption
 };
 
 ExpectBool(nd, true_label, false_label)
@@ -883,45 +866,53 @@ static int
 UseWarnings(df)
 	register t_def *df;
 {
-	if (is_anon_idf(df->df_idf)) return;
-	if (df->df_kind & (D_IMPORTED | D_VARIABLE | D_PROCEDURE | D_CONST | D_TYPE)) {
-		struct node *nd;
+	char *warning = 0;
 
-		if (df->df_flags & (D_EXPORTED | D_QEXPORTED)) return;
-		if (df->df_kind & D_IMPORTED) {
-			register t_def *df1 = df->imp_def;
+	if (is_anon_idf(df->df_idf) ||
+	    !(df->df_kind&(D_IMPORTED|D_VARIABLE|D_PROCEDURE|D_CONST|D_TYPE)) ||
+	    (df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
+		return;
+	}
 
-			df1->df_flags |= df->df_flags & (D_USED|D_DEFINED);
-			if (df->df_kind == D_INUSE) return;
-			if ( !(df->df_flags & D_IMP_BY_EXP)) {
-				if (! (df->df_flags & (D_USED | D_DEFINED))) {
-					node_warning(
-						df->df_scope->sc_end,
-						W_ORDINARY,
-						"identifier \"%s\" imported but not %s",
-						df->df_idf->id_text,
-						df1->df_kind == D_VARIABLE ?
-							"used/assigned" :
-							"used");
+	if (df->df_kind & D_IMPORTED) {
+		register t_def *df1 = df->imp_def;
+
+		df1->df_flags |= df->df_flags & (D_USED|D_DEFINED);
+		if (df->df_kind == D_INUSE) return;
+		if ( !(df->df_flags & D_IMP_BY_EXP)) {
+			if (! (df->df_flags & (D_USED | D_DEFINED))) {
+				if (df1->df_kind == D_VARIABLE) {
+					warning = "imported but not used/assigned";
 				}
-				return;
+				else	warning = "imported but not used";
+				goto warn;
 			}
-			df = df1;
+			return;
 		}
-		if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST))) return;
-		nd = df->df_scope->sc_end;
-		if (! (df->df_flags & D_DEFINED)) {
-			node_warning(nd,
-				     W_ORDINARY,
-				     "identifier \"%s\" never assigned",
-				     df->df_idf->id_text);
-		}
-		if (! (df->df_flags & D_USED)) {
-			node_warning(nd,
-				     W_ORDINARY,
-				     "identifier \"%s\" never used",
-				     df->df_idf->id_text);
-		}
+		df = df1;
+	}
+	if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST))) {
+		return;
+	}
+	switch(df->df_flags & (D_USED|D_DEFINED)) {
+	case 0:
+		warning = "never used/assigned";
+		break;
+	case D_USED:
+		warning = "never assigned";
+		break;
+	case D_DEFINED:
+		warning = "never used";
+		break;
+	case D_USED|D_DEFINED:
+		return;
+	}
+warn:
+	if (warning) {
+		node_warning(df->df_scope->sc_end,
+			     W_ORDINARY,
+			     "identifier \"%s\" %s",
+			     df->df_idf->id_text, warning);
 	}
 }
 

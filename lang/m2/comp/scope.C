@@ -46,7 +46,7 @@ open_scope(scopetype)
 	sc->sc_level = proclevel;
 	ls->sc_scope = sc;
 	ls->sc_encl = CurrVis;
-	if (scopetype == OPENSCOPE) {
+	if (! sc->sc_scopeclosed) {
 		ls->sc_next = ls->sc_encl;
 	}
 	CurrVis = ls;
@@ -68,12 +68,8 @@ InitScope()
 	register t_scope *sc = new_scope();
 	register t_scopelist *ls = new_scopelist();
 
-	sc->sc_scopeclosed = 0;
-	sc->sc_def = 0;
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
-	ls->sc_next = 0;
-	ls->sc_encl = 0;
 	ls->sc_scope = PervasiveScope;
 	PervVis = ls;
 	CurrVis = ls;

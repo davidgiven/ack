@@ -210,6 +210,13 @@ InitTypes()
 	*error_type = *char_type;
 }
 
+int
+fit(sz, nbytes)
+	arith sz;
+{
+	return ((sz) + ((arith)0x80<<(((nbytes)-1)*8)) & ~full_mask[(nbytes)]) == 0;
+}
+
 STATIC
 u_small(tp, n)
 	register t_type *tp;
