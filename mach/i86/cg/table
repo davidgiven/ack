@@ -365,7 +365,7 @@ sti $1==2	| ADDREG regorconst |
 ...		| nocoercions : reg_off STACK |
 			remove(referals)
 			"pop %[1]" samecc			      | | |
-...		| ADDR_LOCAL | 				| | stl %[1.ind] |
+...		| nocoercions : ADDR_LOCAL | 		| | stl %[1.ind] |
 ...		| bpreg_off regorconst |
 			remove(all_locals)
 			remove(indexed)
@@ -462,7 +462,7 @@ sdf		| ADDREG regorconst regorconst |
 			"pop $1+%[1]"
 			"pop %($1+2%)+%[1]" samecc		      | | |
 	/* Funny things happen when the sign changes in the stl parameters */
-...		| ADDR_LOCAL | |      | stl %[1.ind]+$1 stl %[1.ind]+$1+2 |
+...		| nocoercions: ADDR_LOCAL | |      | stl %[1.ind]+$1 stl %[1.ind]+$1+2 |
 ...		| bpreg_off regorconst regorconst |
 			remove(all_locals)
 			remove(indexed)
