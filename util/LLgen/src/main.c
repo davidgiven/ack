@@ -50,7 +50,6 @@ extern		install();
 # ifndef NDEBUG
 extern		badassertion();
 # endif not NDEBUG
-int		 nflag;
 
 main(argc,argv) register string	argv[]; {
 	register string arg;
@@ -90,10 +89,6 @@ main(argc,argv) register string	argv[]; {
 			  	incl_file = ++arg;
 				break;
 # endif not NDEBUG
-			  case 'n':
-			  case 'N':
-				nflag = 1;
-				continue;
 			  case 'x':
 			  case 'X':
 				ntneeded = 1;

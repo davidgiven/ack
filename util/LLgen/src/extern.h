@@ -82,4 +82,3 @@ extern int	nerrors;
 extern string	rec_file, incl_file;
 extern p_term	terms;
 extern p_link	links;
-extern int	nflag;

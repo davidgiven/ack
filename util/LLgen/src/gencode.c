@@ -206,7 +206,7 @@ genrecovery() {
 	}
 	fputs(c_arrend, f);
 	free((p_mem) index);
-	if (nflag) fputs("#define LL_NEWMESS\n", f);
+	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
 	if (ferror(f) != 0) {
 		fatal(0,"write error on temporary");
