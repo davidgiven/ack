@@ -89,8 +89,8 @@ datatable()
 	int line=0;
 
 	/* called at end to generate the data seek table */
-	fprintf(emfile," exa _seektable\n");
-	fprintf(emfile,"_seektable\n");
+	fprintf(emfile," exa _seektab\n");
+	fprintf(emfile,"_seektab\n");
 	l= datalist;
 	while(l)
 	{
@@ -192,7 +192,7 @@ int lab;
 	/* save this information too */
 
 	 emcode("loc",itoa(0));
-	 emcode("cal","$_setchannel");
+	 emcode("cal","$_setchan");
 	 emcode("asp",EMINTSIZE);
 	 emcode("loc",itoa(lab));
 	 emcode("cal","$_restore");
@@ -266,7 +266,7 @@ setchannel(val)
 int val;
 {	/* obtain file descroption */
 	emcode("loc",itoa(val));
-	emcode("cal","$_setchannel");
+	emcode("cal","$_setchan");
 	emcode("asp",EMINTSIZE);
 }
 /* The if-then-else statements */
@@ -541,7 +541,7 @@ prolog2()
 	if( dataused)
 	{
 		fprintf(emfile," loc 0\n");
-		fprintf(emfile," cal $_setchannel\n");
+		fprintf(emfile," cal $_setchan\n");
 		fprintf(emfile," asp EM_WSIZE\n");
 		fprintf(emfile,"datfname\n rom \"%s\"\n", datfname);
 		fprintf(emfile," lae datfname\n");
