@@ -2,6 +2,7 @@
 #include <em.h>
 #include <out.h>
 #include "header.h"
+#include "data.h"
 #include "mach.h"
 
 /* The extnd_*()s make a name unique. The resulting string is directly stored
