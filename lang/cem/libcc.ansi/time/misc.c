@@ -26,7 +26,7 @@ int _gettimeofday(struct timeval *tp, struct timezone *tzp);
 #if	!defined(_MINIX)		/* MINIX has no ftime() */
 struct timeb {
 	long	time;
-	undigned short millitm;
+	unsigned short millitm;
 	short	timezone;
 	short	dstflag;
 };
