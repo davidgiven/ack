@@ -640,9 +640,11 @@ optsecondstring
 	;
 
 onepattern
-	: 	{ inithall(); startline=lineno; tokpatlen=0; }
+	: 	{ inithall(); startline=lineno;
+		  tokpatlen=0; optexact=0; optstack=0;
+		}
 	  kills allocates generates yields leaving
-		{ optexact=0; optstack=0;
+		{ 
 		  patindex[npatterns++]=codeindex;
 		  checkhall();
 		  dopattern(0,$2,$3,$4,$5,$6);
