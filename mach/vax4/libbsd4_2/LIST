@@ -29,6 +29,7 @@ _getrusage.s
 _lseek.s
 _sigblock.s
 _sigvec.s
+_sigsetmask.s
 accept.s
 access.s
 acct.s
