@@ -1,5 +1,9 @@
 /* $Header$ */
+#ifdef __BSD4_2
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 
 #define YEARSIZE(year)	((year) % 4 ? 365 : 366)
 #define FIRSTSUNDAY(t)	(((t)->tm_yday - (t)->tm_wday + 420) % 7)

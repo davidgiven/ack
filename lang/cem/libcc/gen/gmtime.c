@@ -1,5 +1,9 @@
 /* $Header$ */
+#ifdef __BSD4_2
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 
 static int monthsize[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
