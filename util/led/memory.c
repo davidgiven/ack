@@ -9,7 +9,6 @@ static char rcsid[] = "$Header$";
  * is done and pieces after the one that requested the growth are moved up.
  */
 
-#include <stdio.h>
 #include "out.h"
 #include "const.h"
 #include "assert.h"
@@ -19,7 +18,7 @@ static char rcsid[] = "$Header$";
 struct memory	mems[NMEMS];
 
 bool	incore = TRUE;	/* TRUE while everything can be kept in core. */
-off_t	core_position = (off_t)0;	/* Index of current module. */
+ind_t	core_position = (ind_t)0;	/* Index of current module. */
 
 #define AT_LEAST	2	/* See comment about string areas. */
 
@@ -29,51 +28,18 @@ off_t	core_position = (off_t)0;	/* Index of current module. */
  */
 init_core()
 {
-	FILE			*ledrc;
-	int			piece;
-	off_t			left;
 	register char		*base;
-	register off_t		total_size;
+	register ind_t		total_size;
 	register struct memory	*mem;
 	extern char		*sbrk();
 
-#ifndef TJALK
-	/*
-	 * Read in what should be allocated for each piece initially.
-	 * This facilitates testing, but is slower and should not
-	 * be done in the final version. XXX
-	 */
-	incore = (ledrc = fopen(".ledrc", "r")) != (FILE *)0;
+#include "mach.c"
 
-	if (incore) {
-		while (fscanf(ledrc, "%d %d", &piece, &left) == 2)
-			mems[piece].mem_left = left;
-		fclose(ledrc);
-	}
-#else TJALK
-	mems[ALLOHEAD].mem_left = 20;	/*XXX*/
-	mems[ALLOSECT].mem_left = 60;	/*XXX*/
-	mems[ALLOEMIT + 0].mem_left = 65536;
-	mems[ALLOEMIT + 1].mem_left = 65536;
-	mems[ALLORELO].mem_left = 65536;
-	mems[ALLOLOCL].mem_left = 65536;
-	mems[ALLOGLOB].mem_left = 65536;
-	mems[ALLOLCHR].mem_left = 65536;
-	mems[ALLOGCHR].mem_left = 65536;
-#ifdef SYMDBUG
-	mems[ALLODBUG].mem_left = 65536;
-#endif SYMDBUG
-	mems[ALLOSYMB].mem_left = 4096;
-	mems[ALLOARCH].mem_left = 512;
-	mems[ALLOMODL].mem_left = 196608;
-	mems[ALLORANL].mem_left = 4096;
-#endif TJALK
-
-	total_size = (off_t)0;/* Will accumulate the sizes. */
+	total_size = (ind_t)0;	/* Will accumulate the sizes. */
 	base = sbrk(0);		/* First free. */
 	for (mem = mems; mem < &mems[NMEMS]; mem++) {
 		mem->mem_base = base;
-		mem->mem_full = (off_t)0;
+		mem->mem_full = (ind_t)0;
 		base += mem->mem_left;	/* Each piece will start after prev. */
 		total_size += mem->mem_left;
 	}
@@ -93,12 +59,11 @@ init_core()
 	mems[ALLOLCHR].mem_full = 1;
 	mems[ALLOGCHR].mem_full = 1;
 
-	if ((int)sbrk(total_size) == -1) {
+	if (total_size != (int)total_size || (int)sbrk((int)total_size) == -1) {
 		incore = FALSE;	/* In core strategy failed. */
 		if ((int)sbrk(AT_LEAST) == -1)
 			fatal("no core at all");
 	}
-
 }
 
 /*
@@ -109,13 +74,13 @@ init_core()
 static bool
 move_up(piece, incr)
 	register int		piece;
-	register off_t		incr;
+	register ind_t		incr;
 {
 	register struct memory	*mem;
 	extern char		*sbrk();
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
-	if ((int)sbrk(incr) == -1)
+	if (incr != (int)incr || (int)sbrk((int)incr) == -1)
 		return FALSE;
 
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
@@ -137,33 +102,33 @@ extern int	passnumber;
 static bool
 compact(piece, incr)
 	register int		piece;
-	register off_t		incr;
+	register ind_t		incr;
 {
-	register off_t		gain;
+	register ind_t		gain;
 	register struct memory	*mem;
 
 	debug("compact(%d, %d)\n", piece, (int)incr, 0, 0);
 	gain = mems[0].mem_left;
-	mems[0].mem_left = (off_t)0;
+	mems[0].mem_left = (ind_t)0;
 	for (mem = &mems[1]; mem <= &mems[piece]; mem++) {
 		/* Here memory is inserted before a piece. */
-		assert(passnumber == FIRST || gain == (off_t)0);
+		assert(passnumber == FIRST || gain == (ind_t)0);
 		copy_down(mem, gain);
 		gain += mem->mem_left;
-		mem->mem_left = (off_t)0;
+		mem->mem_left = (ind_t)0;
 	}
 	/*
 	 * Note that we already added the left bytes of the piece we want to
 	 * enlarge to `gain'.
 	 */
 	if (gain < incr) {
-		register off_t	up = (off_t)0;
+		register ind_t	up = (ind_t)0;
 
 		for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--) {
 			/* Here memory is appended after a piece. */
 			up += mem->mem_left;
 			copy_up(mem, up);
-			mem->mem_left = (off_t)0;
+			mem->mem_left = (ind_t)0;
 		}
 		gain += up;
 	}
@@ -180,11 +145,11 @@ compact(piece, incr)
 static
 copy_down(mem, dist)
 	register struct memory	*mem;
-	off_t			dist;
+	ind_t			dist;
 {
 	register char		*old;
 	register char		*new;
-	register off_t		size;
+	register ind_t		size;
 
 	size = mem->mem_full;
 	old = mem->mem_base;
@@ -203,11 +168,11 @@ copy_down(mem, dist)
 static
 copy_up(mem, dist)
 	register struct memory	*mem;
-	off_t			dist;
+	ind_t			dist;
 {
 	register char		*old;
 	register char		*new;
-	register off_t		size;
+	register ind_t		size;
 
 	size = mem->mem_full;
 	old = mem->mem_base + size;
@@ -224,18 +189,20 @@ copy_up(mem, dist)
  * how many times the area is moved, because of another allocate, this offset
  * remains valid.
  */
-off_t
+ind_t
 alloc(piece, size)
 	register int		piece;
-	register off_t		size;
+	register long		size;
 {
-	register off_t		incr = 0;
-	register off_t		left = mems[piece].mem_left;
-	register off_t		full = mems[piece].mem_full;
+	register ind_t		incr = 0;
+	register ind_t		left = mems[piece].mem_left;
+	register ind_t		full = mems[piece].mem_full;
 
 	assert(passnumber == FIRST || (!incore && piece == ALLOMODL));
-	if (size == (off_t)0)
+	if (size == (long)0)
 		return full;
+	if (size != (ind_t)size)
+		return BADOFF;
 
 	while (left + incr < size)
 		incr += INCRSIZE;
@@ -254,14 +221,16 @@ alloc(piece, size)
  * Same as alloc() but for a piece which really needs it. If the first
  * attempt fails, release the space occupied by other pieces and try again.
  */
-off_t
+ind_t
 hard_alloc(piece, size)
-	int		piece;
-	off_t		size;
+	register int	piece;
+	register long	size;
 {
-	off_t		ret;
+	register ind_t	ret;
 	register int	i;
 
+	if (size != (ind_t)size)
+		return BADOFF;
 	if ((ret = alloc(piece, size)) != BADOFF)
 		return ret;
 
@@ -270,8 +239,6 @@ hard_alloc(piece, size)
 	 */
 	for (i = 0; i < NMEMS; i++) {
 		switch (i) {
-		case ALLOHEAD:
-		case ALLOSECT:
 		case ALLOGLOB:
 		case ALLOGCHR:
 		case ALLOSYMB:
@@ -296,7 +263,7 @@ hard_alloc(piece, size)
 static
 free_saved_moduls()
 {
-	register off_t		size;
+	register ind_t		size;
 	register char		*old, *new;
 	register struct memory	*mem = &mems[ALLOMODL];
 
@@ -307,7 +274,7 @@ free_saved_moduls()
 		*new++ = *old++;
 	mem->mem_full -= core_position;
 	mem->mem_left += core_position;
-	core_position = (off_t)0;
+	core_position = (ind_t)0;
 }
 
 /*
@@ -320,22 +287,20 @@ dealloc(piece)
 	/*
 	 * Some pieces need their memory throughout the program.
 	 */
-	assert(piece != ALLOHEAD);
-	assert(piece != ALLOSECT);
 	assert(piece != ALLOGLOB);
 	assert(piece != ALLOGCHR);
 	assert(piece != ALLOSYMB);
 	assert(piece != ALLOARCH);
 	mems[piece].mem_left += mems[piece].mem_full;
-	mems[piece].mem_full = (off_t)0;
+	mems[piece].mem_full = (ind_t)0;
 }
 
 char *
 core_alloc(piece, size)
 	register int	piece;
-	register off_t	size;
+	register long	size;
 {
-	register off_t	off;
+	register ind_t	off;
 
 	if ((off = alloc(piece, size)) == BADOFF)
 		return (char *)0;
@@ -350,15 +315,13 @@ freeze_core()
 {
 	register int	i;
 
-	core_position = (off_t)0;
+	core_position = (ind_t)0;
 
 	if (incore)
 		return;
 
 	for (i = 0; i < NMEMS; i++) {
 		switch (i) {
-		case ALLOHEAD:
-		case ALLOSECT:
 		case ALLOGLOB:
 		case ALLOGCHR:
 		case ALLOSYMB:
@@ -369,7 +332,7 @@ freeze_core()
 			break;
 		}
 	}
-	compact(NMEMS - 1, (off_t)0);
+	compact(NMEMS - 1, (ind_t)0);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -383,24 +346,24 @@ extern bool	words_reversed;
  */
 write_bytes()
 {
-	register struct outhead	*head;
-	ushort		nsect, nrelo;
-	long		offchar;
-	int		fd;
-	register int	piece;
-	extern ushort	NLocals, NGlobals;
-	extern long	NLChars, NGChars;
-	extern int	flagword;
-	extern char	*outputname;
+	ushort			nsect, nrelo;
+	long			offchar;
+	int			fd;
+	register struct memory	*mem;
+	extern ushort		NLocals, NGlobals;
+	extern long		NLChars, NGChars;
+	extern int		flagword;
+	extern struct outhead	outhead;
+	extern struct outsect	outsect[];
+	extern char		*outputname;
 
-	head = (struct outhead *)mems[ALLOHEAD].mem_base;
-	nsect = head->oh_nsect;
-	nrelo = head->oh_nrelo;
-	offchar = OFF_CHAR(*head);
+	nsect = outhead.oh_nsect;
+	nrelo = outhead.oh_nrelo;
+	offchar = OFF_CHAR(outhead);
 
 	if (bytes_reversed || words_reversed) {
-		headswap();
-		sectswap(nsect);
+		swap((char *)&outhead, SF_HEAD);
+		sectswap(outsect, nsect);
 		reloswap(nrelo);
 	}
 	/*
@@ -423,8 +386,10 @@ write_bytes()
 	/*
 	 * These pieces must always be written.
 	 */
-	for (piece = ALLOHEAD; piece < ALLORELO; piece++)
-		writelong(fd, mems[piece].mem_base, mems[piece].mem_full);
+	writelong(fd, (char *)&outhead, (ind_t)SZ_HEAD);
+	writelong(fd, (char *)outsect, (ind_t)nsect * SZ_SECT);
+	for (mem = &mems[ALLOEMIT]; mem < &mems[ALLORELO]; mem++)
+		writelong(fd, mem->mem_base, mem->mem_full);
 	/*
 	 * The rest depends on the flags.
 	 */
@@ -433,10 +398,10 @@ write_bytes()
 	if (!(flagword & SFLAG)) {
 		writelong(fd, mems[ALLOLOCL].mem_base, mems[ALLOLOCL].mem_full);
 		writelong(fd, mems[ALLOGLOB].mem_base, mems[ALLOGLOB].mem_full);
-		writelong(fd, mems[ALLOLCHR].mem_base + 1, NLChars);
-		writelong(fd, mems[ALLOGCHR].mem_base + 1, NGChars);
+		writelong(fd, mems[ALLOLCHR].mem_base + 1, (ind_t)NLChars);
+		writelong(fd, mems[ALLOGCHR].mem_base + 1, (ind_t)NGChars);
 #ifdef SYMDBUG
-		writelong(fd, mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_size);
+		writelong(fd, mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_full);
 #endif SYMDBUG
 	}
 	close(fd);
@@ -446,12 +411,12 @@ static
 writelong(fd, base, size)
 	register int	fd;
 	register char	*base;
-	register off_t	size;
+	register ind_t	size;
 {
 	register int	chunk;
 
 	while (size) {
-		chunk = size > (off_t)MAXCHUNK ? MAXCHUNK : size;
+		chunk = size > (ind_t)MAXCHUNK ? MAXCHUNK : size;
 		write(fd, base, chunk);
 		size -= chunk;
 		base += chunk;
@@ -459,21 +424,10 @@ writelong(fd, base, size)
 }
 
 static
-headswap()
-{
-	register struct outhead	*head;
-
-	head = (struct outhead *)mems[ALLOHEAD].mem_base;
-	swap((char *)head, SF_HEAD);
-}
-
-static
-sectswap(nsect)
+sectswap(sect, nsect)
+	register struct outsect	*sect;
 	register ushort		nsect;
 {
-	register struct outsect	*sect;
-
-	sect = (struct outsect *)mems[ALLOSECT].mem_base;
 	while (nsect--)
 		swap((char *)sect++, SF_SECT);
 }
