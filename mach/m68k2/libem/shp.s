@@ -10,9 +10,11 @@
 	add.l	#0x400,d0
 	and.l	#~0x3ff,d0
 	move.l	d0,.limhp
+	move.l	a0,-(sp)
 	move.l	d0,-(sp)
 	jsr	_brk
 	tst.l	(sp)+
+	move.l	(sp)+,a0
 	tst.w	d0
 	bne	2f
 1:
