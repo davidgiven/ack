@@ -31,6 +31,7 @@ int     toterr;
 int     parent;
 
 char    *eeflag;
+char    *vvflag = "-V";
 int	no_pemflag = 0 ;
 char    *pemflag[MAX_FLAG];
 char    *eflag;
@@ -145,7 +146,7 @@ char *flag(f) char *f; {
 		wflag = f;
 		break;
 	case 'V':
-		initsizes(f+2);
+		vvflag = f;
 		return(0);
 	case '{':
 		if ( no_pemflag>=MAX_FLAG ) {
@@ -168,10 +169,11 @@ char *flag(f) char *f; {
 	return(0);
 }
 
-initsizes(vvflag) char *vvflag; {
+initsizes(f) FILE *f; {
 	register c, i;
-	register char *p = vvflag;
+	register char *p;
 
+	p = vvflag + 2;
 	while (c = *p++) {
 		i = atoi(p);
 		while (*p >= '0' && *p <= '9')
@@ -194,6 +196,10 @@ initsizes(vvflag) char *vvflag; {
 	    (sz_long != 4)) {
 		fatal("bad V-flag %s",vvflag);
 	}
+	if (sz_head == 0)
+		sz_head = 6*sz_word + 2*sz_addr;
+	for (i = 0; i <= sz_last; i++)
+		fprintf(f, "%d\n",sizes[i]);
 }
 
 /* ------------------ calling sequences -------------------- */
@@ -208,10 +214,7 @@ pem(p,q) char *p,*q; {
 	d = tempfile('d');
 	if ((erfil = fopen(d,"w")) == NULL)
 		syserr(d);
-	if (sz_head == 0)
-		sz_head = 6*sz_word + 2*sz_addr;
-	for (i = 0; i <= sz_last; i++)
-		fprintf(erfil, "%d\n",sizes[i]);
+	initsizes(erfil);
 	fprintf(erfil,"%s\n",basename(source));
 	for ( i=0 ; i<no_pemflag ; i++ ) fprintf(erfil,"%s\n",pemflag[i]);
 	fclose(erfil);

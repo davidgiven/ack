@@ -1,9 +1,0 @@
-The mach?.c files in this directory were made for an earlier version of
-the universal assembler and are too dependent on its innards.
-I have no idea in what way they should be changed.
-
-				Duk Bekema
-
-I adapted them to the new framework. It appears to work now.
-
-				Ceriel Jacobs

@@ -1,5 +1,0 @@
-for i in *.descr
-do
-m=`basename $i .descr`
-../../../lib/cpp -P -I../../../h $i | sed -f descr.sed > ../../../lib/ego/${m}descr
-done
