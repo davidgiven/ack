@@ -68,9 +68,9 @@ i_regsave() {
 
 f_regsave(){
 	register i;
-	register int c = '[';
+	register int c = ' ';
 
-	fprintf(codefile, "enter ");
+	fprintf(codefile, "enter [");
 	for (i=0; i<n_regvars; i++) {
 		fprintf(codefile,"%c%s", c, regadm[i].ra_str);
 		c = ',';
@@ -92,9 +92,9 @@ regsave(regstr,off,size) char *regstr; long off; {
 
 regreturn() {
 	register int i;
-	register int c = '[';
+	register int c = ' ';
 
-	fprintf(codefile, "exit ");
+	fprintf(codefile, "exit [");
 	for (i=1; i<n_regvars; i++) {
 		fprintf(codefile,"%c%s", c, regadm[i].ra_str);
 		c = ',';
