@@ -1,4 +1,4 @@
-#include "lib.h"
+#include <lib.h>
 
 PUBLIC int exit(status)
 int status;
