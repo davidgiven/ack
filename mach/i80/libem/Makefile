@@ -1,14 +1,29 @@
-install:	tail
-		../../install tail tail_em
+# $Header$
+MACH=i80
+all:		libem_o.a end.o
 
-cmp:		tail
-		-../../compare tail tail_em
+install: 	all
+		../../install end.o end_em
+		../../install libem_o.a tail_em
 
-tail:
-		arch cr `cat LIST`
 
-opr:
+cmp:		all
+		-../../compare end.o end_em
+		-../../compare libem_o.a tail_em
+
+libem_o.a:	libem_s.a
+		ASAR=aal ; export ASAR ;\
+		march . libem_o.a
+
+end.o:		end.s
+		$(MACH) -I../../../h -c end.s
+
+clean:
+		rm -f *.o libem_o.a
+
+opr :
 		make pr | opr
+
 pr:
-		@pr `pwd`/Makefile
-		@pr -l33 `tail +1 LIST|sort`
+		@pr `pwd`/end.s
+		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
