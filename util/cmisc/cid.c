@@ -55,6 +55,7 @@ DoOption(str)
 	}
 }
 
+/*ARGSUSED*/
 CheckId(id, len)
 	char *id;
 {
@@ -100,7 +101,7 @@ GetMacros(fn)
 
 	if ((fp = fopen(fn, "r")) == NULL) {
 		fprintf(stderr, "%s: cannot read file \"%s\"\n", ProgName, fn);
-		return 0;
+		return;
 	}
 
 	while ((c = getc(fp)) != EOF) {
@@ -163,7 +164,7 @@ Salloc(str)
 	if (str == 0) {
 		str = "";
 	}
-	return strcpy(Malloc(strlen(str) + 1), str);
+	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
 struct idf *

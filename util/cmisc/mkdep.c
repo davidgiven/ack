@@ -76,7 +76,7 @@ add_name(nm)
 		nlp = nlp->next;
 	}
 
-	(nnlp = new_namelist())->name = strcpy(Malloc(strlen(nm) + 1), nm);
+	(nnlp = new_namelist())->name = strcpy(Malloc((unsigned)strlen(nm) + 1), nm);
 
 	if (lnlp) {
 		nnlp->next = lnlp->next;
@@ -100,6 +100,7 @@ print_namelist(nm, nlp)
 	}
 }
 
+/*ARGSUSED*/
 main(argc, argv)
 	char *argv[];
 {
@@ -135,10 +136,12 @@ contains_slash(s)
 	return 0;
 }
 
+extern char *fgets();
+
 dofile(fn)
 	char *fn;
 {
-	char *fgets(), buf[BSIZ];
+	char buf[BSIZ];
 	FILE *fp;
 	char *nm, *include_line();
 
@@ -156,7 +159,7 @@ dofile(fn)
 	while (fgets(buf, BSIZ, fp) != NULL)
 		if (nm = include_line(buf)) {
 			add_name(nm);
-			dofile(nm);
+			if (dofile(nm)) ;
 		}
 
 	fclose(fp);

@@ -106,7 +106,7 @@ Salloc(str)
 	if (str == 0)
 		str = "";
 
-	return strcpy(Malloc(strlen(str) + 1), str);
+	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
 EnHash(id)
