@@ -26,7 +26,7 @@ struct header {
 #define PROFILE	002
 #define FLOW	004
 #define COUNT	010
-
+char em_dir[64] = EM_DIR;	/* easier to patch */
 char *defargv[] = {
 	"em",
 	"e.out",
@@ -106,7 +106,7 @@ main(argc,argv) char **argv; {
 	else
 		flags[3]= header.h_flags&PROFILE ? 'p' : '-';
 	sprintf(interpret,"%s/lib/em%d%d/em_%s",
-		EM_DIR,header.h_wsize,header.h_psize,flags);
+		em_dir,header.h_wsize,header.h_psize,flags);
 	execv(interpret,argv);
 	fprintf(stderr,"Interpreter %s not available\n",interpret);
 }
