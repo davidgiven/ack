@@ -326,8 +326,7 @@ format_expression(p_tree *p;)
   { p_tree	p1; }
 :
   expression(p, 0)
-  [ '\\' 
-	[ name(&p1)	{ register char *c = p1->t_str;
+  [ '\\' name(&p1)	{ register char *c = p1->t_str;
 			  while (*c) {
 				if (! strindex("doshcax", *c)) {
 					error("illegal format: %c", *c);
@@ -337,8 +336,6 @@ format_expression(p_tree *p;)
 			  }
 			  *p = mknode(OP_FORMAT, *p, p1);
 			}
-	|
-	]
   |
   ]
 ;
