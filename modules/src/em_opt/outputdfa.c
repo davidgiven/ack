@@ -94,7 +94,6 @@ PRIVATE
 outdfa()
 {
 	int s;
-	struct idf *op;
 	struct state *p;
 	int nout, ncpy, ngto;
 	int seenswitch;
@@ -164,16 +163,6 @@ outmnems(l)
 	int i;
 	for(i=1;i<=l.m_len;i++) 
 		fprintf(ofile,"%s ",l.m_elems[i-1]->op_code->id_text);
-}
-
-PRIVATE
-outtranshdr()
-{
-	register int s;
-	for(s=0;s<=higheststate;s++) {
-		if(actions[s]!=NULL)
-			fprintf(ofile,"extern OO_%ddotrans();\n",s);
-	}
 }
 
 PRIVATE
