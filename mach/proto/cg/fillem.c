@@ -40,6 +40,10 @@ static char rcsid2[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+#ifndef newplb			/* retrofit for older mach.h */
+#define newplb newilb
+#endif
+
 /* segment types for switchseg() */
 #define SEGTXT          0
 #define SEGCON          1
@@ -328,7 +332,7 @@ dopseudo() {
 		switchseg(SEGTXT);
 		procno++;
 		strarg(getarg(ptyp(sp_pnam)));
-		newilb(argstr);
+		newplb(argstr);
 		getarg(cst_ptyp);
 		prolog((full)argval);
 #ifdef REGVARS
