@@ -1,11 +1,12 @@
 /* $Header$ */
 /*		A S M			*/
 
-asm_seen(s, l)
+code_asm(s, l)
 	char *s;
 	int l;
 {
 	/*	'asm' '(' string ')' ';'
 	*/
-	warning("\"asm(\"%s\")\" instruction skipped", s);
+	s = s; l = l;
+	error("\"asm instruction not implemented", s);
 }

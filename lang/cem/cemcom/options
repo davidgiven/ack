@@ -6,7 +6,7 @@ I	expand include table with directory name following
 M	set identifier length
 n	don't generate register messages
 p	generate linenumbers and filename indications
-	while generating compact EM code
+	while generating EM code
 P	in running the preprocessor do not output '# line' lines
 R	restricted C
 T	take path following as directory for storing temporary file(s)

@@ -89,7 +89,7 @@ program:
 	the declaration in a way different from most other languages:
 	e.g., rather than defining x as a pointer-to-integer, it defines
 	*x as an integer and lets the compiler deduce that x is actually
-	pointer-to-integer.  This has profound consequences, but for the
+	pointer-to-integer.  This has profound consequences, both for the
 	structure of an identifier definition and for the compiler.
 	
 	A definition starts with a decl_specifiers, which contains things

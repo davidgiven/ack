@@ -393,6 +393,6 @@ asm_statement
 		}
 	')'
 	';'
-		{	asm_seen(asm_bts, asm_len);
+		{	code_asm(asm_bts, asm_len);
 		}
 ;
