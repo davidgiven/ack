@@ -639,6 +639,7 @@ parameter_decl(struct proto **plp;)
 	{	add_proto(new, &Ds, &Dc, level);
 		new->next = *plp;
 		*plp = new;
+		remove_declarator(&Dc);
 	}
 ;
 

@@ -11,7 +11,7 @@
 */
 
 struct declarator	{
-	struct declarator *next;
+	/* struct declarator *next; */
 	struct idf *dc_idf;
 	struct decl_unary *dc_decl_unary;
 	struct formal *dc_formal;	/* params for function	*/

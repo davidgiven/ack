@@ -11,7 +11,7 @@
 */
 
 struct stack_level	{
-	struct stack_level *next;
+	/* struct stack_level *next; */
 	struct stack_level *sl_next;		/* upward link		*/
 	struct stack_level *sl_previous;	/* downward link	*/
 	struct stack_entry *sl_entry;		/* sideward link	*/
