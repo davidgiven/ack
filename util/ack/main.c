@@ -107,10 +107,6 @@ main(argc,argv) char **argv ; {
 
 	if ( n_error ) exit(n_error) ;
 
-	if ( g_flag ) {
-		exit(do_run()) ;
-	}
-
 	exit(0) ;
 }
 
@@ -188,8 +184,6 @@ vieuwargs(argc,argv) char **argv ; {
 #ifdef DEBUG
 	   		if ( v_flag>=3 ) debug=v_flag-2 ;
 #endif
-			break ;
-	   case 'g':    g_flag++ ;
 			break ;
 	   case 'c':    if ( stopsuffix ) fuerror("Two -c flags") ;
 			stopsuffix= &argp[2]; eaten=1;

@@ -23,7 +23,6 @@ EXTERN  list_head       head_list;      /* List of suffices for headers */
 EXTERN  list_head       tail_list;      /* List of suffices for tails */
 
 EXTERN  int             k_flag;         /* Like -k of lint */
-EXTERN  int             g_flag;         /* do_run() */
 EXTERN  int             t_flag;         /* Preserve intermediate files */
 EXTERN  int             v_flag;         /* Verbose */
 EXTERN  int             w_flag;         /* Don't print warnings */

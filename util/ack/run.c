@@ -23,12 +23,6 @@ static char      **arglist ;    /* The first argument */
 static unsigned  argcount ;     /* The current number of arguments */
 static unsigned  argmax;        /* The maximum number of arguments so far */
 
-int do_run() {
-	fatal("-g flag not implemented") ;
-	/*NOTREACHED*/
-	return 0 ;
-}
-
 int runphase(phase) register trf *phase ; {
 	register list_elem *elem ;
       char *prog ; int result ;

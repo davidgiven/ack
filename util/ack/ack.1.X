@@ -310,10 +310,6 @@ it very likely that the phase will be used.
 .IP \-k
 Do not stop when an error occurs, but try to transform all
 other arguments as far as possible.
-.IP \-g
-Try to run the resulting load file.
-No arguments can be passed this way,
-so it is only useful in simple cases.
 .PP
 All arguments without a suffix or with an unrecognized suffix
 are passed to the loaders, as for flags.
@@ -422,8 +418,6 @@ C.J.H. Jacobs, \fIThe ACK Modula-2 Compiler\fP.
 .PD
 The diagnostics are intended to be self\-explanatory.
 .SH BUGS
-The -g flag is inoperative.
-.br
 Not all warning messages are superseded by \fB\-w\fP.
 .br
 Argument assembly files are not preprocessed when fed into the
