@@ -746,3 +746,6 @@ adp LLP sti LLP loi adp $1+$6==0 && $2==$4 && $3==p && $5==p :
 	dup p adp $1 LLP $2 sti p
 adp LEP sti LEP loi adp $1+$6==0 && $2==$4 && $3==p && $5==p :
 	dup p adp $1 LEP $2 sti p
+/* The next to patterns added on request of Kees Visser */
+lol asp $2>=w:	asp $2-w
+ldl asp $2>=2*w:	asp $2-2*w
