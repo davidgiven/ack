@@ -3,6 +3,7 @@ HOME=../..
 TBL=tbl
 NROFF=nroff
 SUF=pr
+TARGET=-Tlp
 
 head:   ../em.$(SUF)
 
@@ -13,7 +14,7 @@ FILES = macr.nr title.nr intro.nr mem.nr ispace.nr dspace.nr mapping.nr \
 IOP=$(HOME)/etc/ip_spec.t#			# to construct itables from
 
 ../em.$(SUF):	$(FILES) itables dispatdummy em.i Makefile
-		$(TBL) $(FILES) | $(NROFF) > ../em.$(SUF)
+		$(TBL) $(FILES) | $(NROFF) $(TARGET) > ../em.$(SUF)
 
 app.codes.pr: app.codes.nr itables dispatdummy
 

@@ -8,6 +8,7 @@ EQN=eqn
 PIC=pic
 REFER=refer
 MS=-ms
+TARGET=-Tlp
 
 RESFILES= \
 	toolkit.$(SUF) install.$(SUF) em.$(SUF) ack.$(SUF) v7bugs.$(SUF) \
@@ -19,37 +20,37 @@ RESFILES= \
 .SUFFIXES: .doc .$(SUF)
 
 .doc.$(SUF):
-		$(NROFF) $(MS) $< > $@
+		$(NROFF) $(MS) $(TARGET) $< > $@
 
 crefman.$(SUF):	crefman.doc
-		$(EQN) crefman.doc | $(NROFF) $(MS) >$@
+		$(EQN) $(TARGET) crefman.doc | $(NROFF) $(MS) $(TARGET) >$@
 v7bugs.$(SUF):	v7bugs.doc
-		$(NROFF) v7bugs.doc >$@
+		$(NROFF) $(TARGET) v7bugs.doc >$@
 install.$(SUF):	install.doc
-		$(TBL) install.doc | $(NROFF) $(MS) >$@
+		$(TBL) $(TARGET) install.doc | $(NROFF) $(MS) $(TARGET) >$@
 pcref.$(SUF):	pcref.doc
-		$(TBL) pcref.doc | $(NROFF) >$@
+		$(TBL) $(TARGET) pcref.doc | $(NROFF) $(TARGET) >$@
 val.$(SUF):	val.doc
-		$(NROFF) val.doc >$@
+		$(NROFF) $(TARGET) val.doc >$@
 6500.$(SUF):	6500.doc
-		$(TBL) 6500.doc | $(NROFF) $(MS) >$@
+		$(TBL) $(TARGET) 6500.doc | $(NROFF) $(MS) $(TARGET) >$@
 ncg.$(SUF):	ncg.doc
-		$(TBL) ncg.doc | $(NROFF) $(MS) >$@
+		$(TBL) $(TARGET) ncg.doc | $(NROFF) $(MS) $(TARGET) >$@
 LLgen.doc:	LLgen.X
 LLgen.X:
-		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER)
+		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
 top.doc:	top.X
 top.X:
-		cd top; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER)
+		cd top; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
 occam.doc:	occam.X
 occam.X:
-		cd occam; make "PIC="$(PIC) "TBL="$(TBL) "EQN="$(EQN)
+		cd occam; make "PIC="$(PIC) "TBL="$(TBL) "EQN="$(EQN) "TARGET="$(TARGET)
 ego.doc:	ego.X
 ego.X:
-		cd ego; make "REFER="$(REFER)
+		cd ego; make "REFER="$(REFER) "TARGET="$(TARGET)
 em.$(SUF):	em.X
 em.X:
-		cd em; make "TBL="$(TBL) "NROFF="$(NROFF) "SUF="$(SUF)
+		cd em; make "TBL="$(TBL) "NROFF="$(NROFF) "SUF="$(SUF) "TARGET="$(TARGET)
 
 install cmp:
 
@@ -58,7 +59,7 @@ distr:		install.doc
 
 pr:
 		@make "SUF="$(SUF) "NROFF="$(NROFF) "EQN="$(EQN) "TBL="$(TBL) \
-			"PIC="$(PIC) "MS="$(MS) \
+			"PIC="$(PIC) "MS="$(MS) "TARGET="$(TARGET) \
 			$(RESFILES) >make.pr.out 2>&1
 		@$(PRINT) $(RESFILES)
 
