@@ -1,0 +1,39 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+SRC_DIR =	$(SRC_HOME)/mach/$(MACH)/libsys
+
+all:		libmon head
+
+libmon:		$(SRC_DIR)/libmon_s.a
+		ASAR="$(ASAR)" ; export ASAR ; \
+		RANLIB="$(RANLIB)" ; export RANLIB ; \
+		MACH="$(MACH)" ; export MACH ; \
+		MACHFL="$(MACHFL)" ; export MACHFL ; \
+		if [ $(SUF) = o ] march $(SRC_DIR) libmon $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/libmon_s.a libmon ; fi
+
+head:		$(SRC_DIR)/head_em.s
+		$(MACH) $(MACHFL) $(SRC_DIR)/head_em.s
+		mv head_em.$(SUF) head
+
+install:	all
+		cp libmon $(TARGET_HOME)/lib/$(MACH)/tail_mon
+		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_mon
+		cp head $(TARGET_HOME)/lib/$(MACH)/head_em
+
+cmp:		all
+		-cmp libmon $(TARGET_HOME)/lib/$(MACH)/tail_mon
+		-cmp head $(TARGET_HOME)/lib/$(MACH)/head_em
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] head libmon
+
+opr:
+		make pr | opr
+
+pr:
+		@pr $(SRC_DIR)/head_em.s
+		@arch pv $(SRC_DIR)/libmon_s.a | pr -h $(SRC_DIR)/libmon_s.a

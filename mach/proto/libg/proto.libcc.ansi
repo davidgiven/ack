@@ -1,0 +1,64 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+SRC_DIR = $(SRC_HOME)/lang/cem/libcc.ansi
+
+.SUFFIXES: .o .e .c .m .s
+
+.c.o .c.m .c.s:
+		$(MACH) $(MACHFL) -ansi -c $<
+
+.e.o .e.m .e.s:
+		$(MACH) $(MACHFL) -c $<
+
+fake:
+all:		copy head tail
+
+head:
+		$(MACH) $(MACHFL) -c -I$(TARGET_HOME)/h head_ac.e
+
+copy:
+		( cd $(SRC_DIR) ; tar cf - LIST `cat LIST` head_ac.e ) | \
+			tar xf -
+		for i in `cat LIST` ; \
+		do cd $$i ; \
+		   make `cat LIST` ; \
+		   cd .. ; \
+		done
+
+tail:
+		for i in `cat LIST` ; \
+		do cd $$i ; \
+		   rm -f OLIST ; \
+		   sed 's/\.[ce]/.$(SUF)/' < LIST | sed '/\.h/D' > OLIST ; \
+		   make -f ../Makefile `cat OLIST` ; \
+		   cd .. ; \
+		   for j in `cat $$i/OLIST` ; \
+		   do echo $$i/$$j >> OLIST ; \
+		   done ; \
+		done
+		$(AR) r tail_ac `cat OLIST`
+		$(RANLIB) tail_ac
+
+install:	all
+		cp head_ac.$(SUF) $(TARGET_HOME)/lib/$(MACH)/head_ac
+		cp tail_ac $(TARGET_HOME)/lib/$(MACH)/tail_ac
+		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_ac
+
+cmp:		all
+		-cmp head_ac.$(SUF) $(TARGET_HOME)/lib/$(MACH)/head_ac
+		-cmp tail_ac $(TARGET_HOME)/lib/$(MACH)/tail_ac
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] tail* head* OLIST
+		-rm -rf `cat LIST`
+		-rm -f LIST
+
+opr:
+		@echo "nothing to be printed"
+
+pr:
+		@echo "nothing to be printed"

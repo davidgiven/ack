@@ -1,0 +1,41 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+MACHDEF= \
+	"MACH=$(MACH)" \
+	"SUF=$(SUF)" \
+	"ASAR=$(ASAR)" \
+	"RANLIB=$(RANLIB)" \
+	"SRC_HOME=$(SRC_HOME)" \
+	"TARGET_HOME=$(TARGET_HOME)" \
+	"COMPILE=$(SRC_HOME)/mach/proto/libg/compmodule"
+
+MAKEFILE=$(SRC_HOME)/mach/proto/libg/Makefile
+LIBOC="PREF=ocm" "SRC=lang/occam/lib"
+
+all:		liboc
+
+liboc:
+		make -f $(MAKEFILE) $(LIBOC) $(MACHDEF) tail
+
+install:	cpliboc
+
+cpliboc:
+		make -f $(MAKEFILE) $(LIBOC) $(MACHDEF) tailcp
+
+cmp:		cmpliboc
+
+cmpliboc:	liboc
+		-cmp tail_oc $(TARGET_HOME)/lib/$(MACH)/tail_oc
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] tail* head*
+
+opr:
+		@echo "nothing to be printed"
+
+pr:
+		@echo "nothing to be printed"

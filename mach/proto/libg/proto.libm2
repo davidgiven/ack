@@ -1,0 +1,42 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+MACHDEF= \
+	"MACH=$(MACH)" \
+	"SUF=$(SUF)" \
+	"ASAR=$(ASAR)" \
+	"RANLIB=$(RANLIB)" \
+	"SRC_HOME=$(SRC_HOME)" \
+	"TARGET_HOME=$(TARGET_HOME)" \
+	"COMPILE=$(SRC_HOME)/mach/proto/libg/compmodule"
+
+MAKEFILE=$(SRC_HOME)/mach/proto/libg/Makefile
+LIBM2="PREF=m2" "SRC=lang/m2/libm2"
+
+all:		libm2
+
+libm2:
+		make -f $(MAKEFILE) $(LIBM2) $(MACHDEF) all
+
+install:	cplibm2
+
+cplibm2:
+		make -f $(MAKEFILE) $(LIBM2) $(MACHDEF) cp
+
+cmp:		cmplibm2
+
+cmplibm2:	libm2
+		-cmp head_m2 $(TARGET_HOME)/lib/$(MACH)/head_m2
+		-cmp tail_m2 $(TARGET_HOME)/lib/$(MACH)/tail_m2
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] tail* head*
+
+opr:
+		@echo "nothing to be printed"
+
+pr:
+		@echo "nothing to be printed"
