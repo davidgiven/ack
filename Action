@@ -185,6 +185,10 @@ end
 name "Pascal frontend"
 dir lang/pc/pem
 end
+name "Motorola 68000 interpreters"
+system "m68*|sun*"
+dir mach/mantra/int
+end
 name "EM interpreter in C"
 dir util/int
 end
