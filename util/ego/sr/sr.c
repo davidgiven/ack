@@ -136,11 +136,12 @@ STATIC opt_proc(p)
 	 */
 
 	Lindex i;
-	loop_p lp,outermost = 0;
+	loop_p lp,outermost;
 	int min_level;
 
 	for (;;) {
 		min_level = 1000;
+		outermost = 0;
 		for (i = Lfirst(p->p_loops); i != (Lindex) 0;
 		     i = Lnext(i,p->p_loops)) {
 			lp = (loop_p) Lelem(i);
