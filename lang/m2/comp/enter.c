@@ -133,8 +133,7 @@ EnterVarList(Idlist, type, local)
 			*/
 			register struct type *tp = idlist->nd_left->nd_type;
 
-			df->var_addrgiven = 1;
-			df->df_flags |= D_NOREG;
+			df->df_flags |= D_ADDRGIVEN | D_NOREG;
 			if (tp != error_type && !(tp->tp_fund & T_CARDINAL)){
 				node_error(idlist->nd_left,
 					   "illegal type for address");

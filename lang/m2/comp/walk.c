@@ -325,7 +325,7 @@ WalkDef(df)
 			WalkProcedure(df);
 			break;
 		case D_VARIABLE:
-			if (!proclevel  && !df->var_addrgiven) {
+			if (!proclevel  && !(df->df_flags & D_ADDRGIVEN)) {
 				C_df_dnam(df->var_name);
 				C_bss_cst(
 					WA(df->df_type->tp_size),

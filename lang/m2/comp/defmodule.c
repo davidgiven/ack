@@ -94,6 +94,7 @@ GetDefinitionModule(id, incr)
 	struct scopelist *vis;
 	char *fn = FileName;
 	int ln = LineNumber;
+	struct scope *newsc = CurrentScope;
 
 	level += incr;
 	df = lookup(id, GlobalScope, 1);
@@ -110,6 +111,7 @@ GetDefinitionModule(id, incr)
 
 			ForeignFlag = 0;
 			open_scope(CLOSEDSCOPE);
+			newsc = CurrentScope;
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 
 				DefModule();
@@ -136,7 +138,7 @@ GetDefinitionModule(id, incr)
 			}
 			else {
 				df = lookup(id, GlobalScope, 1);
-				CurrentScope->sc_name = id->id_text;
+				newsc->sc_name = id->id_text;
 			}
 			vis = CurrVis;
 			close_scope(SC_CHKFORW);
@@ -145,6 +147,7 @@ GetDefinitionModule(id, incr)
 			df = MkDef(id, GlobalScope, D_ERROR);
 			df->df_type = error_type;
 			df->mod_vis = vis;
+			newsc->sc_definedby = df;
 		}
 	}
 	else if (df->df_flags & D_BUSY) {

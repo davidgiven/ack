@@ -177,7 +177,7 @@ CodeCoercion(t1, t2)
 		fund1 = T_CARDINAL;
 		break;
 	}
-	switch(fund2 = t1->tp_fund) {
+	switch(fund2 = t2->tp_fund) {
 	case T_WORD:
 		fund2 = T_INTEGER;
 		break;
@@ -556,7 +556,10 @@ CodeStd(nd)
 			if (tp->tp_fund == T_INTEGER) C_adi(size);
 			else	C_adu(size);
 		}
-		if (size == word_size) RangeCheck(tp, int_type);
+		if (size == word_size) {
+			RangeCheck(tp, tp->tp_fund == T_INTEGER ?
+						int_type : card_type);
+		}
 		CodeDStore(left);
 		break;
 		}

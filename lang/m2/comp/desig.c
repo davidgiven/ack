@@ -438,7 +438,7 @@ CodeVarDesig(df, ds)
 	*/
 	assert(ds->dsg_kind == DSG_INIT);
 
-	if (df->var_addrgiven) {
+	if (df->df_flags & D_ADDRGIVEN) {
 		/* the programmer specified an address in the declaration of
 		   the variable. Generate code to push the address.
 		*/

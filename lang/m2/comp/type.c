@@ -249,11 +249,16 @@ qualified_type(nd)
 		else {
 			register struct def *df = nd->nd_def;
 
-			if (df->df_kind&(D_ISTYPE|D_FORWARD|D_ERROR)) {
+			if (df->df_kind&(D_ISTYPE|D_FORWARD|D_FORWTYPE|D_ERROR)) {
 			    if (! df->df_type) {
 node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
 			    }
-			    else tp = df->df_type;
+			    else {
+				if (df->df_kind == D_FORWTYPE) {
+					df->df_kind = D_FTYPE;
+				}
+			   	tp = df->df_type;
+			    }
 			}
 			else {
 node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
@@ -577,17 +582,25 @@ type_or_forward(ptp)
 		in "dot". This routine handles the different cases.
 	*/
 	register struct node *nd;
+	register struct def *df1;
 
 	*ptp = construct_type(T_POINTER, NULLTYPE);
-	if (lookup(dot.TOK_IDF, CurrentScope, 1)) {
+	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1))) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
+		if (df1->df_kind == D_FORWTYPE) {
+			nd = new_node();
+			nd->nd_token = dot;
+			nd->nd_right = df1->df_forw_node;
+			df1->df_forw_node = nd;
+			nd->nd_type = *ptp;
+		}
 		return 1;
 	}
 	nd = new_node();
 	nd->nd_token = dot;
-	if (lookfor(nd, CurrVis, 0)->df_kind == D_MODULE) {
+	if ((df1 = lookfor(nd, CurrVis, 0))->df_kind == D_MODULE) {
 		/* A Modulename in one of the enclosing scopes.
 		   It is not clear from the language definition that
 		   it is correct to handle these like this, but
@@ -610,10 +623,14 @@ type_or_forward(ptp)
 
 		if (df->df_kind == D_TYPE) {
 			(*ptp)->next = df->df_type;
+			free_node(nd);
 		}
 		else {
-			df->df_forw_type = *ptp;
+			nd->nd_type = *ptp;
 			df->df_forw_node = nd;
+			if (df1->df_kind == D_TYPE) {
+				df->df_type = df1->df_type;
+			}
 		}
 	}
 	return 0;

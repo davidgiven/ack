@@ -142,7 +142,6 @@ define(id, scope, kind)
 			if (kind == D_FORWTYPE) return df;
 			if (kind == D_TYPE) {
 				df->df_kind = D_FTYPE;
-				FreeNode(df->df_forw_node);
 			}
 			else {
 				error("identifier \"%s\" must be a type",

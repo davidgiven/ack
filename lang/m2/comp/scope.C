@@ -117,21 +117,31 @@ chk_forw(pdf)
 	while (df = *pdf) {
 		if (df->df_kind == D_FORWTYPE) {
 			register struct def *df1 = df;
+			register struct node *nd = df->df_forw_node;
 
 			*pdf = df->df_nextinscope;
 			RemoveFromIdList(df);
-			df = lookfor(df->df_forw_node, CurrVis, 1);
+			df = lookfor(nd, CurrVis, 1);
 			if (! df->df_kind & (D_ERROR|D_FTYPE|D_TYPE)) {
-node_error(df1->df_forw_node, "\"%s\" is not a type", df1->df_idf->id_text);
+node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 			}
-			df1->df_forw_type->next = df->df_type;
+			while (nd) {
+				nd->nd_type->next = df->df_type;
+				nd = nd->nd_right;
+			}
 			FreeNode(df1->df_forw_node);
 			free_def(df1);
 			continue;
 		}
 		else if (df->df_kind == D_FTYPE) {
+			register struct node *nd = df->df_forw_node;
+
 			df->df_kind = D_TYPE;
-			df->df_forw_type->next = df->df_type;
+			while (nd) {
+				nd->nd_type->next = df->df_type;
+				nd = nd->nd_right;
+			}
+			FreeNode(df->df_forw_node);
 		}
 		else if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
 			/* These definitions must be found in

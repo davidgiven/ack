@@ -21,10 +21,8 @@ struct module {
 struct variable {
 	arith va_off;		/* address or offset of variable */
 	char *va_name;		/* name of variable if given */
-	char va_addrgiven;	/* an address was given in the program */
 #define var_off		df_value.df_variable.va_off
 #define var_name	df_value.df_variable.va_name
-#define var_addrgiven	df_value.df_variable.va_addrgiven
 };
 
 struct constant {
@@ -74,8 +72,6 @@ struct dforward {
 
 struct forwtype {
 	struct node *f_node;
-	struct type *f_type;
-#define df_forw_type	df_value.df_fortype.f_type
 #define df_forw_node	df_value.df_fortype.f_node
 };
 
@@ -116,6 +112,7 @@ struct def	{		/* list of definitions for a name */
 #define D_QEXPORTED	0x40	/* set if qualified exported */
 #define D_BUSY		0x80	/* set if busy reading this definition module */
 #define D_FOREIGN	0x100	/* set for foreign language modules */
+#define D_ADDRGIVEN	0x200	/* set if address given for variable */
 	struct type *df_type;
 	union {
 		struct module df_module;
