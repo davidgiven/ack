@@ -144,5 +144,14 @@ char *segname[] = {
 
 con_float() {
 
-	fatal("no reals");
+	static int warning_given;
+	int i;
+
+	if (! warning_given) {
+		fprintf(stderr, "warning: dummy floating point constant\n");
+		warning_given = 1;
+	}
+	for (i = argval; i > 0; i -= 4) {
+		fputs(".data4 0 ! dummy float\n", codefile);
+	}
 }
