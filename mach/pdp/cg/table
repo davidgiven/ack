@@ -792,6 +792,11 @@ mlu !defined($1)| source2 |
 			move(%[1],r0)
 			"jsr pc,mlu~"                   |       | |
 #endif
+loc dvu $1>0 && $1<=32767 && $2==2       | source2 |
+			allocate(%[1],REG_PAIR)
+			move(%[1],%[a.2])
+			"clr %[a.1]"
+			"div $$$1,%[a.1]"		| %[a.1] | |
 dvu $1==2       | |     remove(all)
 			"jsr pc,dvu2~"                  | r0    | |
 dvu $1==4       | |     remove(all)
@@ -802,6 +807,11 @@ dvu !defined($1)| source2 |
 			move(%[1],r0)
 			"jsr pc,dvu~"                   |       | |
 #endif
+loc rmu $1>0 && $1<=32767 && $2==2       | source2 |
+			allocate(%[1],REG_PAIR)
+			move(%[1],%[a.2])
+			"clr %[a.1]"
+			"div $$$1,%[a.1]"		| %[a.2] | |
 rmu $1==2       | |     remove(all)
 			"jsr pc,rmu2~"                  | r1    | |
 rmu $1==4       | |     remove(all)
@@ -1348,6 +1358,16 @@ and $1==2 	| CONST2 SCR_REG |
 			"bic %[1],%[2]"
 			setcc(%[2])
 			erase(%[1]) erase(%[2]) | %[2]  | | (4,600)
+ldc and $2==4 && highw(1)==0	| source2 SCR_REG |
+			"bic $$%(~loww(1)%),%[2]"
+			erase(%[2])		| {CONST2, 0} %[1] | |
+ldc and $2==4 && highw(1)==0-1	| source2 SCR_REG |
+			"bic $$%(~loww(1)%),%[2]"
+			erase(%[2])		| %[2] %[1] | |
+ldc and $2==4	| SCR_REG SCR_REG |
+			"bic $$%(~highw(1)%),%[1]"
+			"bic $$%(~loww(1)%),%[2]"
+			erase(%[1]) erase(%[2])	| %[2] %[1] | |
 and defined($1) | |     remove(all)
 			move({CONST2,$1}, r0)
 			"jsr pc,and~"
@@ -1365,6 +1385,16 @@ ior $1==2       | SCR_REG source2 |
 			"bis %[1],%[2]"
 			setcc(%[2])
 			erase(%[2])                     | %[2]  | | (2,450)+%[1]
+ldc ior $2==4 && highw(1)==0	| source2 SCR_REG |
+			"bis $$%(loww(1)%),%[2]"
+			erase(%[2])		| %[2] %[1] | |
+ldc ior $2==4 && highw(1)==0-1	| source2 SCR_REG |
+			"bis $$%(loww(1)%),%[2]"
+			erase(%[2])		| {CONST2, 0-1} %[1] | |
+ldc ior $2==4	| SCR_REG SCR_REG |
+			"bis $$%(highw(1)%),%[1]"
+			"bis $$%(loww(1)%),%[2]"
+			erase(%[1]) erase(%[2])	| %[2] %[1] | |
 ior $1==8	| NC source2 source2 source2 source2 |
 			remove(all)
 			"bis %[1],(sp)"
@@ -1631,6 +1661,10 @@ cmi $1==2       | source2 SCR_REG |
 			"neg %[1]"
 			setcc(%[1])
 			erase(%[1])                             | %[1]  | |
+ldc cmi zlt highw(1)==0 && loww(1)==0 && $2==4 | source2 source2 |
+					| %[1] | zlt $3 |
+ldc cmi zge highw(1)==0 && loww(1)==0 && $2==4 | source2 source2 |
+					| %[1] | zge $3 |
 cmi $1==4       | |     remove(all)
 			"jsr pc,cmi4~"                  | r0    | |
 #ifdef UNTESTED
