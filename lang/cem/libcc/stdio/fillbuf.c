@@ -1,6 +1,8 @@
 /* $Header$ */
 #include <stdio.h>
 
+char *malloc();
+
 _fillbuf(iop)
 register FILE *iop;
 {
