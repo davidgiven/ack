@@ -383,6 +383,7 @@ EVAL(expr, val, code, true_label, false_label)
 			arith tmp;
 			int compl;	/* Complexity of left operand */
 			int newcode = left->ex_type->tp_size > 0; /* CJ */
+			int right_done = 0;
 #ifndef NOBITFIELD
 			if (left->ex_type->tp_fund == FIELD) {
 				eval_field(expr, gencode);
@@ -391,16 +392,32 @@ EVAL(expr, val, code, true_label, false_label)
 #endif NOBITFIELD
 			if (newcode && left->ex_class == Value) {
 				compl = 0; /* Value */
+			}
+			else if (left->ex_depth == 1 &&
+			    !(left->ex_flags & EX_SIDEEFFECTS))	{
+				compl = 1;
+			}
+			else 	compl = 2;
+
+			/* evaluate right-hand side first when possible,
+			   but not for POSTINCR or PLUSPLUS, because then
+			   we might miss a chance for increment instructions.
+			*/
+			if (compl != 2 &&
+			    tp->tp_fund != POINTER &&
+			    (oper == PLUSAB || oper == TIMESAB ||
+			     oper == ANDAB || oper == XORAB || oper == ORAB)) {
+				right_done = 1;
+				EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+			}
+			if (compl == 0) {
 				load_val(left, RVAL);
 			}
 			else
-			if (left->ex_depth == 1 &&
-			    !(left->ex_flags & EX_SIDEEFFECTS))	{
-				compl = 1;
+			if (compl == 1) {
 				EVAL(left, RVAL, newcode, NO_LABEL, NO_LABEL);
 			}
 			else {
-				compl = 2; /* otherwise */
 				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
 				if (newcode) {
 					tmp = LocalPtrVar();
@@ -415,7 +432,9 @@ EVAL(expr, val, code, true_label, false_label)
 					C_dup(ATW(left->ex_type->tp_size));
 				conversion(left->ex_type, tp);
 			}
-			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+			if (! right_done) {
+				EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+			}
 			if (newcode) {
 				int dupval = gencode && oper != POSTINCR &&
 						oper != POSTDECR;
