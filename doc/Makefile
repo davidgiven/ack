@@ -43,6 +43,9 @@ ncg.$(SUF):	ncg.doc
 LLgen.doc:	LLgen.X
 LLgen.X:
 		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
+lint.doc:	lint.X
+lint.X:
+		cd lint; make
 top.doc:	top.X
 top.X:
 		cd top; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
@@ -83,4 +86,4 @@ opr:
 
 clean:
 		-rm -f *.old $(RESFILES) *.t *.out LLgen.doc top.doc \
-			occam.doc ego.doc int.doc ceg.doc
+			occam.doc ego.doc int.doc ceg.doc lint.doc sparc.doc
