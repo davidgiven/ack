@@ -36,10 +36,10 @@ tuples(regls,nregneeded) rl_p *regls; {
 	 * First compute equivalence classes of registers.
 	 */
 
-	for (i=0;i<NREGS;i++) {
+	for (i=NREGS;--i>=0;) {
 		regclass[i] = class++;
 		if (getrefcount(i, FALSE) == 0) {
-			for (j=0;j<i;j++) {
+			for (j=NREGS;--j>i;) {
 				if (eqregclass(i,j) &&
 				    eqtoken(&machregs[i].r_contents,
 					    &machregs[j].r_contents)) {
@@ -86,8 +86,8 @@ permute(index) {
 		perms = pp;
 	} else {
 		rlp=lar[index];
-		for (i=rlp->rl_n-1; i>=0; i--) {
-			rar[index] = rlp->rl_list[i];
+		for (i=rlp->rl_n; i>0; i--) {
+			rar[index] = rlp->rl_list[rlp->rl_n-i];
 			permute(index+1);
 		}
 	}

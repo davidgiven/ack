@@ -327,12 +327,34 @@ distance(cindex) {
 		} else
 			exact++;
 	}
+	for (;i<tpl+fromstackneeded;i++) {
+		/*	Make sure that any pattern we pick can be
+			made from the stack
+		*/
+		getint(tokexp,bp);
+		if (! from_stack(&machsets[tokexp])) {
+			return(MAXINT);
+		}
+	}
 	if (exact==tpl && ! fromstackneeded) {
 		if (xsekt)
 			return(0);
 		return(10-exact);
 	}
 	return(20-2*exact+fromstackneeded);
+}
+
+extern set_t unstackset;
+
+int from_stack(s1)
+	register set_p s1;
+{
+	register set_p s2 = &unstackset;
+	register int i;
+	for (i = 0; i < SETSIZE; i++) {
+		if ((s1->set_val[i] & s2->set_val[i]) != 0) return 1;
+	}
+	return 0;
 }
 
 unsigned costcalc(cost) cost_t cost; {

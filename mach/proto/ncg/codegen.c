@@ -848,9 +848,14 @@ normalfailed:	if (stackpad!=tokpatlen) {
     doreturn:
 #ifdef ALLOW_NEXTEM
 	if (toplevel && totalcost == INFINITY && ! paniced) {
-		totalcost += stackupto(&fakestack[stackheight-1], ply, toplevel);
-		paniced = 1;
 		DEBUG("PANIC!");
+		totalcost += stackupto(&fakestack[stackheight-1], ply, toplevel);
+#ifndef NDEBUG
+		if (Debug > 2)
+			fprintf(stderr, "Stackheight = %d\n", stackheight);
+#endif
+		paniced = 1;
+		tokpatlen = 0;
 		goto panic;
 	}
 #endif
