@@ -1,6 +1,10 @@
 /* $Header$ */
 #ifndef NOFLOAT
 
+#if __STDC__
+#include <float.h>
+#endif
+
 static char *cvt();
 #define NDIGITS	128
 
@@ -55,6 +59,11 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	}
 
 	*decpt = 0;
+#if __STDC__
+	if (value >= DBL_MAX) {
+		value = DBL_MAX;
+	}
+#endif
 	if (value != 0.0) {
 		register struct powers_of_10 *pp = &p10[0];
 
