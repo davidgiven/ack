@@ -4,7 +4,7 @@
 
 SRC_DIR = $(SRC_HOME)/util/ceg/as_parser/eval
 
-CFLAGS = $(COPTIONS)
+CFLAGS = $(COPTIONS) -DNDEBUG
 LDFLAGS = $(LDOPTIONS)
 
 eval:		eval.$(SUF)

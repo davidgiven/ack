@@ -12,7 +12,7 @@ OFILES = dist.$(SUF)
 HFILES = $(SRC_DIR)/arg_type.h $(SRC_DIR)/em_parser.h
 
 IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h
-CFLAGS = $(COPTIONS) $(IFILES)
+CFLAGS = $(COPTIONS) $(IFILES) -DNDEBUG
 
 all :	$(OFILES)
 

@@ -10,7 +10,7 @@ IDIRS=-I.\
       -I$(TARGET_HOME)/h\
       -I$(TARGET_HOME)/modules/h
 
-CFLAGS = $(COPTIONS) $(IDIRS)
+CFLAGS = $(COPTIONS) $(IDIRS) -DNDEBUG
 
 all:	data.$(SUF) con2.$(SUF) con4.$(SUF) relocation.$(SUF) end_back.$(SUF) \
 	gen1.$(SUF) gen2.$(SUF) gen4.$(SUF) init_back.$(SUF) output.$(SUF) \

@@ -6,7 +6,7 @@ SRC_DIR = $(SRC_HOME)/util/ceg/as_parser
 CEGLIB = $(TARGET_HOME)/lib.bin/ceg
 
 IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I. -I$(SRC_DIR)
-CFLAGS = $(COPTIONS) -DFLEX $(IFILES)
+CFLAGS = $(COPTIONS) -DFLEX $(IFILES) -DNDEBUG
 LDFLAGS = $(LDOPTIONS)
 
 GFILES = $(SRC_DIR)/pars.g
