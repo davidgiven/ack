@@ -251,7 +251,7 @@ cstset(expp)
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
 
 	set2 = expp->nd_right->nd_set;
-	setsize = (unsigned) expp->nd_right->nd_type->tp_size / (unsigned) word_size;
+	setsize = (unsigned) (expp->nd_right->nd_type->tp_size) / (unsigned) word_size;
 
 	if (expp->nd_symb == IN) {
 		unsigned i;

@@ -311,11 +311,6 @@ ChkExLinkOrName(expp)
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		/* Replace an enum-literal or a CONST identifier by its value.
 		*/
-		if (df->df_type->tp_fund == T_SET) {
-			expp->nd_class = Set;
-			inc_refcount(expp->nd_set);
-		}
-		else	expp->nd_class = Value;
 		if (df->df_kind == D_ENUM) {
 			expp->nd_INT = df->enm_val;
 			expp->nd_symb = INTEGER;
@@ -327,6 +322,11 @@ ChkExLinkOrName(expp)
 			expp->nd_token = df->con_const;
 			expp->nd_lineno = ln;
 		}
+		if (df->df_type->tp_fund == T_SET) {
+			expp->nd_class = Set;
+			inc_refcount(expp->nd_set);
+		}
+		else	expp->nd_class = Value;
 	}
 
 	if (!(df->df_kind & D_VALUE)) {
@@ -426,7 +426,7 @@ MkSet(size)
 {
 	register arith	*s;
 
-	size = ((size + (int)word_size - 1) / (int)word_size + 1) * sizeof(arith);
+	size = (size / (int) word_size + 1) * sizeof(arith);
 	s = (arith *) Malloc(size);
 	clear((char *) s , size);
 	s++;
@@ -439,6 +439,7 @@ FreeSet(s)
 {
 	dec_refcount(s);
 	if (refcount(s) <= 0) {
+		assert(refcount(s) == 0);
 		free((char *) (s-1));
 	}
 }
