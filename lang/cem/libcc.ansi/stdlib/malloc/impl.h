@@ -19,7 +19,7 @@
 
 union _inf {
 	union _inf *ptr;
-	unsigned int ui;
+	size_type ui;
 };
 
 typedef union _inf mallink;
@@ -47,7 +47,7 @@ typedef union _inf mallink;
 #define	N_WORDS			7
 #endif	/* CHECK */
 
-#define	mallink_size()		(unsigned int) \
+#define	mallink_size()		(size_t) \
 	align((N_WORDS - OFF_SET) * sizeof (mallink))
 
 #ifdef	CHECK

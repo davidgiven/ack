@@ -12,7 +12,7 @@ private acquire_malout(void), check_ml_last(const char *s);
 private dump_all_mallinks(void), dump_free_list(int i);
 private dump_mallink(const char *s, mallink *ml), print_loop(mallink *ml);
 private working_on(mallink *ml);
-private unsigned int checksum(mallink *ml);
+private size_type checksum(mallink *ml);
 static FILE *malout;
 
 private mallink *free_list_entry(int i);
@@ -121,7 +121,7 @@ dump_mallink(const char *s, mallink *ml)	{
 	}
 	fprintf(malout, " p_s: %p;", prev_size_of(ml));
 	fprintf(malout, " t_s: %p;", _this_size_of(ml));
-	fprintf(malout, " sz: %p;", size_of(ml));
+	fprintf(malout, " sz: %lu;", (unsigned long) size_of(ml));
 	fprintf(malout, " fr: %d;", free_of(ml));
 	fprintf(malout, "\n");
 }
@@ -145,7 +145,7 @@ dump_mallink(const char *s, mallink *ml)	{
 private
 check_mallinks(const char *s)	{
 	mallink *ml;
-	unsigned int size;
+	size_type size;
 	int i;
 	char stat;
 	
@@ -215,16 +215,16 @@ check_ml_last(const char *s)	{
 		Error("size of ml_last == 0, at %p", s, ml_last);
 }
 
-private unsigned int
+private size_type
 checksum(mallink *ml)	{
-	unsigned int sum = 0;
+	size_type sum = 0;
 	
 	if (free_of(ml))	{
-		sum += (unsigned int)_log_prev_of(ml);
-		sum += (unsigned int)_log_next_of(ml);
+		sum += (size_type)_log_prev_of(ml);
+		sum += (size_type)_log_next_of(ml);
 	}
-	sum += (unsigned int)prev_size_of(ml);
-	sum += (unsigned int)_this_size_of(ml);
+	sum += (size_type)prev_size_of(ml);
+	sum += (size_type)_this_size_of(ml);
 	return sum;
 }
 
@@ -284,6 +284,9 @@ check_work_empty(const char *s)	{
 
 private int
 Error(const char *fmt, const char *s, mallink *ml)	{
+	static int already_called = 0;
+
+	if (already_called++) return 0;
 	setbuf(stdout, (char *) 0);
 	printf("%s: ", s);
 	printf(fmt, (long)ml);

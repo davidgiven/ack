@@ -16,9 +16,9 @@ publicdata mallink *ml_last;
 #define BITS			(FREE_BIT)
 #endif
 
-#define __bits(ml)		((size_type)_phys_prev_of(ml) & BITS)
-#define	__free_of(ml)		((size_type)_phys_prev_of(ml) & FREE_BIT)
-#define __phys_prev_of(ml)	(mallink *)((size_type)_phys_prev_of(ml) & ~BITS)
+#define __bits(ml)		((int)((size_type)_phys_prev_of(ml) & BITS))
+#define	__free_of(ml)		((int)((size_type)_phys_prev_of(ml) & FREE_BIT))
+#define __phys_prev_of(ml)	((mallink *)((size_type)_phys_prev_of(ml) & ~BITS))
 #define prev_size_of(ml)	((char *)(ml) - \
 				 (char *)__phys_prev_of(ml) - \
 				 mallink_size() \
@@ -49,7 +49,7 @@ public Error(const char *fmt, const char *s, mallink *ml);
 */
 #define size_of(ml)		(_this_size_of(ml) - mallink_size())
 #define	set_phys_next(ml,e) \
-	(_this_size_of(ml) = (unsigned int)((char *)(e) - (char *)(ml)))
+	(_this_size_of(ml) = (size_type)((char *)(e) - (char *)(ml)))
 #define	phys_next_of(ml)	(mallink *) ((char *)(ml) + _this_size_of(ml))
 
 #define	set_free(ml,e) \

@@ -96,11 +96,15 @@ malloc(register size_t n)
 			SBRK((int) (align((size_type) p) - (size_type) p));
 		}
 
-		p = SBRK((int)req);
-		assert((size_type)p == align((size_type)p));
+		/* SBRK takes an int; sorry ... */
+		if ((int) req < 0) {
+			p = ILL_BREAK;
+		} else {
+			p = SBRK((int)req);
+		}
 		if (p == ILL_BREAK) {
 			req = n + mallink_size();
-			p = SBRK((int)req);
+			if ((int) req >= 0) p = SBRK((int)req);
 		}
 		if (p == ILL_BREAK)	{
 			/*	Now this is bad.  The system will not give us
@@ -128,6 +132,7 @@ malloc(register size_t n)
 #endif /* STORE */
 		}
 		else {
+			assert((size_type)p == align((size_type)p));
 			ml = create_chunk(p, req);
 		}
 		check_mallinks("suitable_chunk, extended");
@@ -235,7 +240,7 @@ void *
 realloc(void *addr, register size_t n)
 {check_mallinks("realloc entry");{
 	register mallink *ml, *ph_next;
-	register size_t size;
+	register size_type size;
 
 	if (addr == NULL) {
 		/*	Behave like most Unix realloc's when handed a
