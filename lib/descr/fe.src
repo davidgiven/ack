@@ -1,5 +1,10 @@
 # (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
 # $Header$
+#
+# Don't generate line updating code by default (i.e.: -L flag provided to cem).
+# To put it on again: use -NL
+var LFLAG=-L
+
 callname ack
 name cpp
 	# no from, this is a preprocessor
@@ -30,6 +35,7 @@ name cem
 #	mapflag -D* CPP_F={CPP_F?} -D*
 	mapflag -M* CEM_F={CEM_F?} -M*
 	mapflag -L CEM_F={CEM_F?} -L
+	mapflag -NL LFLAG=
 	mapflag -KR CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
 	mapflag -p CEM_F={CEM_F?} -p
@@ -43,7 +49,7 @@ name cem
 		-D_EM_SSIZE={s} -D_EM_LSIZE={l} -D_EM_FSIZE={f} -D_EM_DSIZE={d} \
 		-Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} \
 		{CC_ALIGN?} \
-		{CEM_F?} < >
+		{CEM_F?} {LFLAG?} < >
 	rts .c
 	need .c
 	callname acc
