@@ -126,13 +126,13 @@ cp ../lib/vax4/descr.src ../lib/vax4/descr
 cp ../lib/descr/fe.src ../lib/descr/fe
 echo "take some actions according to system used ..."
 case `ack_sys` in
-pdp_*)		RMD="vax4"
-		echo "disabling use of ranlib; cannot trust its result"
+pdp_*)		echo "disabling use of ranlib; cannot trust its result"
 		echo 'echo "no ranlib on this system"; exit 93' > ../bin/ranlib
 		chmod +x ../bin/ranlib
+		RMD=""
 		;;
-vax*)		;;
-*)		RMD="vax4" ;;
+*)		RMD=""
+		;;
 esac
 for i in $RMD
 do
@@ -140,7 +140,7 @@ do
 	echo "disabling use of local assembler and loader for $i"
 	if grep '^name as$' descr >/dev/null 2>&1
 	then
-ed - descr <<'ABC'
+		ed - descr <<'ABC'
 /^name as$/;/^end$/d
 /^name ld$/;/^end$/d
 w
@@ -150,22 +150,40 @@ ABC
 )
 done
 case `ack_sys` in
-vax_bsd4_2)	( cd ../lib/vax4
-		  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__BSD4_2/
-w
-q
-ABC
-		)
-		;;
-vax_sysV_2)	( cd ../lib/vax4
-		  ed - descr <<'ABC'
+vax_bsd_4_1a)
+	( cd ../mach/vax4
+	  mkdir libsys > /dev/null 2>&1
+	  rm -f libsys/*
+	  cp libbsd4_1a/* libsys
+	)
+	;;
+vax_sysV_2)
+	( cd ../lib/vax4
+	  ed - descr <<'ABC'
 /CPP_F/s/$/ -D__USG/
 w
 q
 ABC
-		)
-		;;
+	)
+	( cd ../mach/vax4 
+	  mkdir libsys > /dev/null 2>&1
+	  rm -f libsys/*
+	  cp libsysV_2/* libsys
+	)
+	;;
+*)	( cd ../lib/vax4
+	  ed - descr <<'ABC'
+/CPP_F/s/$/ -D__BSD4_2/
+w
+q
+ABC
+	)
+	( cd ../mach/vax4
+	  mkdir libsys > /dev/null 2>&1
+	  rm -f libsys/*
+	  cp libbsd4_2/* libsys
+	)
+	;;
 esac
 echo 'Setting the default machine in ../h/local.h ...'
 BM=1
@@ -221,30 +239,6 @@ else
 fi
 echo "Your default machine to compile for is $ACM"
 case `ack_sys` in
-vax_bsd4_2)	
-	( cd ../mach/vax4
-	  echo "Copying mach/vax4/libbsd4_2 to mach/vax4/libsys"
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libbsd4_2/* libsys
-	)
-	;;
-vax_bsd4_1a)	
-	( cd ../mach/vax4
-	  echo "Copying mach/vax4/libbsd4_1a to mach/vax4/libsys"
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libbsd4_1a/* libsys
-	)
-	;;
-vax_sysV_2)
-	( cd ../mach/vax4 
-	  echo "Copying mach/vax4/libsysV_2 to mach/vax4/libsys"
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libsysV_2/* libsys
-	)
-	;;
 i386)
 	( cd ../lib/descr
 	  ed - fe << ABC
