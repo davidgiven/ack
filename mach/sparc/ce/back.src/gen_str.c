@@ -13,7 +13,7 @@ int n;
 			while (n--)
 			{
 				c= *s++;
-				if (isprint(c) && c != '"')
+				if (isprint(c) && c != '"' && c != '\\')
 					fprint(codefile, "%c", c);
 				else
 					fprint(codefile, "\\%03o", c);
