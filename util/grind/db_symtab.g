@@ -537,6 +537,7 @@ param_list(p_type t;)
   	|	'v'	{ p->par_kind = 'v'; }
   	|	'i' 	{ p->par_kind = 'i'; }
   	]
+			{ p->par_type = 0; }
   	type(&(p->par_type), (int *) 0, (p_symbol) 0) ';'
 			{ p->par_off = t->ty_nbparams;
 			  t->ty_nbparams += 
