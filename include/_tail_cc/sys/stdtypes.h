@@ -11,5 +11,9 @@
 typedef long	sigset_t;	/* for <signal.h> on SUN's */
 typedef	long	time_t;
 typedef	long	size_t;
+typedef long	clock_t;
+typedef int	pid_t;
+typedef unsigned short	gid_t;
+typedef unsigned short	uid_t;
 
 #endif	/* __STDTYPES_H__ */
