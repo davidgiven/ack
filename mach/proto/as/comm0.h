@@ -261,3 +261,5 @@ typedef	struct sect_t	sect_t;
 #define	MACHREL_BWR	(0)
 #endif
 #endif
+
+extern FILE *fopen();   /* some systems don't have this in stdio.h */
