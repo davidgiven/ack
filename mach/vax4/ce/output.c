@@ -3,7 +3,6 @@
 #include <out.h>
 #include "mach.h"
 #include "back.h"
-#include "data.h"
 
 /*	Unportable code. Written for VAX, meant to be run on a VAX.
 */
@@ -11,7 +10,7 @@
 Read above comment ...
 #endif
 
-extern File *_out_file;
+extern File *B_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
@@ -20,16 +19,14 @@ static struct exec u_header;
 
 static long ntext, ndata, nrelo, nchar;
 
-long _base_address[SEGBSS+1];
+long B_base_address[SEGBSS+1];
 
 static int trsize=0, drsize=0;
 
 static struct relocation_info *u_reloc;
 
-static reduce_name_table();
-static putbuf(), put_stringtablesize();
-static init_unixheader();
-static convert_reloc(), convert_name()
+static reduce_name_table(), putbuf(), put_stringtablesize();
+static convert_name(), convert_reloc(), init_unixheader();
 
 output_back()
 {
@@ -162,6 +159,7 @@ reduce_name_table()
 	string = q;
 }
 
+static
 init_unixheader()
 {
 	ntext = text - text_area;
@@ -183,6 +181,7 @@ init_unixheader()
 	 */
 }
 
+static
 convert_reloc( a_relo, u_relo)
 register struct outrelo *a_relo;
 register struct relocation_info *u_relo;
@@ -220,6 +219,7 @@ register struct relocation_info *u_relo;
 #define 	n_mptr 		n_un.n_name
 #define 	n_str		n_un.n_strx
 
+static
 convert_name( a_name, u_name)
 register struct outname *a_name;
 register struct nlist *u_name;
@@ -253,21 +253,22 @@ register struct nlist *u_name;
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)
 		u_name->n_value = a_name->on_valu + 
-			_base_address[( a_name->on_type & S_TYP) - S_MIN];
+			B_base_address[( a_name->on_type & S_TYP) - S_MIN];
 	else 
 		 u_name->n_value = 0;
 }
 
+static
 put_stringtablesize( n)
 long n;
 {
 	putbuf( (char *)&n, 4L);
 }
 
-
+static
 putbuf(buf,n)
 char *buf;
 long n;
 {
-	sys_write( _out_file, buf, n);
+	sys_write( B_out_file, buf, n);
 }

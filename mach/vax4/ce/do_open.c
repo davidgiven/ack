@@ -1,6 +1,7 @@
 #include <system.h>
+#include <back.h>
 
-File *_out_file;
+File *B_out_file;
 
 open_back( filename)
 char *filename;
@@ -8,6 +9,6 @@ char *filename;
 	if ( filename == (char *) '\0')
 		return( 0);
 	else
-		return( sys_open( filename, OP_WRITE, &_out_file));
+		return( sys_open( filename, OP_WRITE, &B_out_file));
 }
 
