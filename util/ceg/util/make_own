@@ -23,6 +23,10 @@ CEG_LIBS = $(EM)/modules/lib/liballoc.a\
 all:    back ceg ce
 	make -f ce_makefile ce.a
 
+install:	all
+	../../install ce.a
+	../../install back.a
+
 clean:
 	rm -rf ce ceg ce.a back.a Out 
 
