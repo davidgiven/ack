@@ -1168,6 +1168,42 @@ dee | |
 				remove(ALL_ACCESSIBLE)
 		"sub.w #1,$1"
 		setcc({ABS,$1})	| | |
+#ifdef REGVARS
+ldl ldl adp sdl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
+		allocate(DATAREG={IMMEDIATE,0})
+		remove(regvar($1))
+		"move.b (%regvar($1)%))+,%[a]"		| %[a] | |
+ldl ldl adp sdl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
+		allocate(DATAREG)
+		remove(regvar($1))
+		"move.w (%regvar($1)%))+,%[a]"		| %[a] | |
+ldl ldl adp sdl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | ANY1 |
+		remove(regvar($1))
+		"move.b %[1],(%(regvar($1)%))+"	|	| |
+ldl ldl adp sdl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | ANY |
+		remove(regvar($1))
+		"move.w %[1],(%(regvar($1)%))+"	|	| |
+ldl ldl adp sdl $1==$2 && $2==$4 && inreg($1)==2 | |
+		allocate(ADDREG=regvar($1))		| %[a]
+							| ldl $2 adp $3 sdl $2 |
+lol inl $1==$2 && inreg($1)==2 | |
+		allocate(DATAREG=regvar($1))		| %[a]
+							| inl $2	|
+lol inl $1==$2 | |
+		allocate(DATAREG={DISPL,LB,$1})		| %[a]
+							| inl $2	|
+lol del $1==$2 && inreg($1)==2 | |
+		allocate(DATAREG=regvar($1))		| %[a]
+							| del $2	|
+lol del $1==$2 | |
+		allocate(DATAREG={DISPL,LB,$1})		| %[a]
+							| del $2	|
+loe ine $1==$2 | |
+		allocate(DATAREG={ABS,$1})		| %[a]
+							| ine $2	|
+loe dee $1==$2 | |
+		allocate(DATAREG={ABS,$1})		| %[a]
+							| dee $2	|
 zrl |  | 	remove(DISPL,%[reg] == LB && %[dis] == $1)
 		remove(DISPL4,%[reg] == LB && (%[dis] == $1-2 ||
 					   %[dis] == $1))
