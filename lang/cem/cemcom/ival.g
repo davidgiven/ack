@@ -525,7 +525,7 @@ ch_array(tpp, ex)
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
-		ntopad = align(tp->tp_size, word_size) - tp->tp_size;
+		ntopad = align(tp->tp_size, (int) word_size) - tp->tp_size;
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
@@ -535,7 +535,7 @@ ch_array(tpp, ex)
 			expr_warning(ex, "too many initialisers");
 			length = dim;
 		}
-		ntopad = align(dim, word_size) - length;
+		ntopad = align(dim,(int)  word_size) - length;
 	}
 	/* throw out the characters of the already prepared string	*/
 	s = Malloc((unsigned) (length + ntopad));
