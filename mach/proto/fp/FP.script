@@ -34,7 +34,6 @@ g/_sub_ext/s//.sub_ext/g
 g/_zrf_ext/s//.zrf_ext/g
 g/_compact/s//.compact/g
 g/_extend/s//.extend/g
-g/_b32_add/s//.b32_add/g
 g/_b64_add/s//.b64_add/g
 g/_b64_sft/s//.b64_sft/g
 g/_b64_rsft/s//.b64_rsft/g

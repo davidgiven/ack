@@ -32,10 +32,12 @@ register	B64	*e1,*e2;
 				int	carry;
 
 			/* add higher pair of 32 bits */
-	overflow = b32_add(&e1->h_32,&e2->h_32);
+	overflow = ((unsigned long) 0xFFFFFFFF - e1->h_32 < e2->h_32);
+	e1->h_32 += e2->h_32;
 
 			/* add lower pair of 32 bits */
-	carry =	   b32_add(&e1->l_32,&e2->l_32);
+	carry = ((unsigned long) 0xFFFFFFFF - e1->l_32 < e2->l_32);
+	e1->l_32 += e2->l_32;
 # ifdef	EXT_DEBUG
 	printf("\t\t\t\t\tb64_add: overflow (%d); internal carry(%d)\n",
 					overflow,carry);
@@ -45,18 +47,4 @@ register	B64	*e1,*e2;
 		return(TRUE);		/* had a 64 bit overflow */
 	else
 		return(overflow);	/* return status from higher add */
-}
-
-	/*
-	 *	add 32 bits (unsigned longs)
-	 *	and return the carry status
-	 */
-
-b32_add(e1,e2)
-register	unsigned long	*e1,*e2;
-{
-	int	carry = ((unsigned long) 0xFFFFFFFF - *e1 < *e2);
-
-	*e1 += *e2;
-	return carry;
 }

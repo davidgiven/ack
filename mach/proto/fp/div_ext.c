@@ -38,6 +38,7 @@ EXTEND	*e1,*e2;
 			unsigned short u[9], v[5];
 			register int j;
 			register unsigned short *u_p = u;
+			int maxv = 4;
 #endif
 
 	if ((e2->m1 | e2->m2) == 0) {
@@ -169,6 +170,7 @@ EXTEND	*e1,*e2;
 	v[2] = e2->m1;
 	v[3] = e2->m2 >> 16;
 	v[4] = e2->m2;
+	while (! v[maxv]) maxv--;
 	result[0] = 0;
 	result[1] = 0;
 	lp = result;
@@ -204,7 +206,7 @@ EXTEND	*e1,*e2;
 			unsigned long k = 0;
 			int borrow = 0;
 
-			for (i = 4; i > 0; i--) {
+			for (i = maxv; i > 0; i--) {
 				unsigned long tmp = q_est * v[i] + k + borrow;
 				unsigned short md = tmp;
 
@@ -222,7 +224,7 @@ EXTEND	*e1,*e2;
 				*/
 				*lp |= (j & 1) ? (q_est - 1) : ((q_est-1)<<16);
 				borrow = 0;
-				for (i = 4; i > 0; i--) {
+				for (i = maxv; i > 0; i--) {
 					unsigned long tmp 
 					    = v[i]+(unsigned long)u_p[i]+borrow;
 					

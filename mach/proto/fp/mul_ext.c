@@ -17,12 +17,12 @@
 mul_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-	register int	k,i,j;		/* loop control	*/
-	long  unsigned	*reg[7];
-	long  unsigned	tmp[4];
+	register int	i,j;		/* loop control	*/
 	short unsigned	mp[4];	/* multiplier */
 	short unsigned	mc[4];	/* multipcand */
-	B64	low64,tmp64;	/* 64 bit storage	*/
+	short unsigned	result[8];	/* result */
+	B64		tmp64;
+	register unsigned short *pres;
 
 	/* first save the sign (XOR)			*/
 
@@ -88,48 +88,33 @@ infinity:	e1->m1 = e1->m2 =0L;
 	mc[1] = (unsigned short) e2->m1;
 	mc[2] = e2->m2 >> 16;
 	mc[3] = (unsigned short) e2->m2;
-	/*
-	 *	assign pointers
-	 */
-	reg[0] = &e1->m1;	/* the answer goes here */
-	reg[1] = &tmp[1];
-	reg[2] = &e1->m2;	/* and here	*/
-	reg[3] = &tmp[2];
-	reg[4] = &low64.h_32;
-	reg[5] = &tmp[3];
-	reg[6] = &low64.l_32;
-
-	/*
-	 *	zero registers
-	 */
-	for(i=7;i--;)
-		*reg[i] = 0;
-
+	for (i = 8; i--;) {
+		result[i] = 0;
+	}
 	/*
 	 *	fill registers with their components
 	 */
-	for(i=4;i--;) if (mp[i])
-		for(j=4;j--;) if (mc[j]) {
-			k = i+j;
-			tmp[0] = (long)mp[i] * (long)mc[j];
-			if (b32_add(reg[k],tmp))	{
-				for(tmp[0] = 0x10000L;k>0;)
-					if (b32_add(reg[--k],tmp) == 0)
-						break;
-			}
+	for(i=4, pres = &result[4];i--;pres--) if (mp[i]) {
+		unsigned short k = 0;
+		unsigned long mpi = mp[i];
+		for(j=4;j--;) {
+			unsigned long tmp = (unsigned long)pres[j] + k;
+			if (mc[j]) tmp += mpi * mc[j];
+			pres[j] = tmp;
+			k = tmp >> 16;
 		}
+		pres[-1] = k;
+	}
 	
 	/*
 	 *	combine the registers to a total
 	 */
-	tmp64.h_32 = (*reg[1]>>16);
-	tmp64.l_32 = (*reg[1]<<16) + (*reg[3]>>16);
-	b64_add((B64 *)&e1->m1,&tmp64);
-	tmp64.l_32 = *reg[5]<<16;
-	tmp64.h_32 = (*reg[5]>>16) + (*reg[3]<<16);
-	if (b64_add(&low64,&tmp64))
+	e1->m1 = ((unsigned long)(result[0]) << 16) + result[1];
+	e1->m2 = ((unsigned long)(result[2]) << 16) + result[3];
+	if (result[4] & 0x8000) {
 		if (++e1->m2 == 0)
 			e1->m1++;
+	}
 
 	nrm_ext(e1);
 }
