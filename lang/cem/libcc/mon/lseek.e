@@ -21,5 +21,13 @@
  loc -1
 #endif
 1
+#if EM_WSIZE==1
+ ret 4*EM_WSIZE
+#endif
+#if EM_WSIZE==2
  ret 2*EM_WSIZE
+#endif
+#if EM_WSIZE==4
+ ret EM_WSIZE
+#endif
  end
