@@ -5,7 +5,6 @@ static char rcsid[] = "$Header$";
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
-#include "assert.h"
 #include "line.h"
 #include "lookup.h"
 #include "alloc.h"
@@ -123,11 +122,8 @@ offset getoff() {
 }
 
 make_string(n) int n; {
-	register char *s;
-	extern char *sprintf();
 
-	s=sprintf(string,".%u",n);
-	assert(s == string);
+	sprintf(string,".%u",n);
 }
 
 inident() {
