@@ -80,7 +80,7 @@ S2record (buf)
 	outbyte ((int) (pc >> 16));
 	outbyte ((int) (pc >> 8));
 	outbyte ((int) pc);
-	record ();
+	record (buf);
 	}
 
 S1record (buf)
