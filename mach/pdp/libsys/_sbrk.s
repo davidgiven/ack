@@ -7,7 +7,7 @@
 __sbrk:
 	mov	2(sp),0f+2
 	beq	1f
-	add	Ixxx,0f+2
+	add	.limhp,0f+2
 	bcs	2f
 	sys	indir; .data2 0f
 	bcc	1f
@@ -16,8 +16,8 @@ __sbrk:
 	mov	$-1,r0
 	rts	pc
 1:
-	mov	Ixxx,r0
-	add	2(sp),Ixxx
+	mov	.limhp,r0
+	add	2(sp),.limhp
 	rts	pc
 
 __brk:
@@ -28,7 +28,7 @@ __brk:
 	mov	$-1,r0
 	rts	pc
 1:
-	mov	2(sp),Ixxx
+	mov	2(sp),.limhp
 	clr	r0
 	rts	pc
 
@@ -36,4 +36,3 @@ __brk:
 0:
 	sys	break
 	.data2	0
-Ixxx:	.data2 _end
