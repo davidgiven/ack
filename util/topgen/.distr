@@ -1,5 +1,5 @@
+proto.make
 LLlex.c
-Makefile
 hash.c
 main.c
 misc.h
