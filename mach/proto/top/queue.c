@@ -2,7 +2,7 @@
 #include "queue.h"
 
 empty_queue(q)
-	queue q;
+	register queue q;
 {
 	q->head = q->tail = (instr_p) 0;
 	q->qlen = 0;
@@ -15,7 +15,7 @@ int empty(q)
 }
 
 remove_head(q)
-	queue q;
+	register queue q;
 {
 	if ( (q->head = q->head->fw) == (instr_p) 0) {
 		q->tail = (instr_p) 0;
@@ -41,8 +41,8 @@ add(q,instr)
 }
 
 insert(q,instr)
-	queue q;
-	instr_p instr;
+	register queue q;
+	register instr_p instr;
 {
 	if (q->qlen++ == 0) {
 		q->head = q->tail = instr;
@@ -56,7 +56,7 @@ insert(q,instr)
 }
 
 join_queues(q1,q2)
-	queue q1,q2;
+	register queue q1,q2;
 {
 	if (q1->qlen > 0) {
 		q2->qlen += q1->qlen;
