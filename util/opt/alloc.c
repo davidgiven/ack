@@ -342,7 +342,7 @@ short *newcore(size) int size; {
 	return(p);
 }
 
-#ifdef NOMALLOC
+#ifndef USEMALLOC
 
 /*
  * stdio uses malloc and free.
