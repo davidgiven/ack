@@ -54,7 +54,7 @@ name led
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
-		(.e:{TAIL}={EM}/{LIB}mon {EM}/{MLIB}em {EM}/lib/minixST/end_em)
+		(.e:{TAIL}={EM}/{LIB}mon {EM}/{MLIB}em {EM}/lib/m68k2/end_em)
 	linker
 end
 name cv
