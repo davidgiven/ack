@@ -724,18 +724,18 @@ pat lil inreg($1)==reg_pointer
 
 pat stl inreg($1)==reg_any
 with any4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen move %1, {LOCAL, $1}
 
 pat stl inreg($1)==reg_pointer
 with any4
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen move %1, {LOCAL, $1}
 with exact ext_addr
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen move %1, {LOCAL, $1}
 with exact address-ext_addr
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen lea %1, {LOCAL, $1}
 
 pat sil inreg($1)==reg_pointer
@@ -746,13 +746,13 @@ with any4
 
 pat lol sbi stl $1==$3 && $2==4 && inreg($1)==reg_any
 with any4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sub_l %1, {LOCAL, $1}
 	neg_l {LOCAL, $1}
 
 pat lol sbu stl $1==$3 && $2==4 && inreg($1)==reg_any
 with any4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sub_l %1, {LOCAL, $1}
 	neg_l {LOCAL, $1}
 
@@ -779,11 +779,11 @@ pat lil com sil $1==$3 && $2==4 && inreg($1)==reg_pointer
 
 
 proc lolcshstl example lol loc sli stl
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sh* {shconst, $2}, {LOCAL, $1}
 
 proc lolrshstl example lol lol sli stl
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sh* {LOCAL, $2}, {LOCAL, $1}
 
 proc lil1shlsil example lil loc sli sil		/* only left */
@@ -831,29 +831,29 @@ pat lol lol ror stl $1==$4 && inreg($2)==reg_any && $3==4 && inreg($1)==reg_any
 
 #ifdef TBL68020
 pat lol loc dvi stl $1==$4 && $3==4 && inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen divs_l {const, $2}, {LOCAL, $1}
 
 pat lol loc dvu stl $1==$4 && $3==4 && inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen divu_l {const, $2}, {LOCAL, $1}
 
 pat lol loc mli stl $1==$4 && $3==4 && inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen muls_l {const, $2}, {LOCAL, $1}
 
 pat lol loc mlu stl $1==$4 && $3==4 && inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen mulu_l {const, $2}, {LOCAL, $1}
 
 pat lol mli stl $1==$3 && $2==4 && inreg($1)==reg_any
     with data4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen muls_l %1, {LOCAL, $1}
 
 pat lol mlu stl $1==$3 && $2==4 && inreg($1)==reg_any
     with data4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen mulu_l %1, {LOCAL, $1}
 #endif TBL68020
 
@@ -867,25 +867,25 @@ pat lil dec sil $1==$3 && inreg($1)==reg_pointer
     gen sub_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
 
 pat inl inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen add_l {const, 1}, {LOCAL, $1}
 
 pat del inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sub_l {const, 1}, {LOCAL, $1}
 
 pat zrl inreg($1)==reg_any
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen clr_l {LOCAL, $1}
 
 pat zrl inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_any), all_regind %reg==regvar($1, reg_pointer)
     gen move_l {const, 0}, {LOCAL, $1}
 
 
 proc lolxxstl example lol and stl
 with data4
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen xxx* %1, {LOCAL, $1}
 
 proc lilxxsil example lil and sil
@@ -894,7 +894,7 @@ with conreg4
     gen xxx* %1, {indirect4, regvar($1, reg_pointer)}
 
 proc lolcxxstl example lol loc and stl
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen xxx* {const, $2}, {LOCAL, $1}
 
 proc lilcxxsil example lil loc and sil
@@ -902,7 +902,7 @@ proc lilcxxsil example lil loc and sil
     gen xxx* {const, $2}, {indirect4, regvar($1, reg_pointer)}
 
 proc lolrxxstl example lol lol and stl
-    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen xxx* {LOCAL, $2}, {LOCAL, $1}
 
 proc lilrxxsil example lil lol and sil
@@ -2708,12 +2708,7 @@ with any4
     gen move_l %1, {absolute4, ".trpim"}
 
 pat str $1==0
-with any4
-#ifdef TBL68020
-    kills LOCAL, ILOCAL, all_regind %reg==lb, local_addr
-#else TBL68020
-    kills LOCAL, all_regind %reg==lb, local_addr
-#endif TBL68020
+with any4 STACK
     gen move %1, lb
 
 pat str $1==1
