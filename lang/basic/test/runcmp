@@ -1,5 +1,5 @@
 echo -n $1 "  "
-if abc - -o $1.x -fp $1 
+if abc - -o $1.x $fp $1 
 then
 	if $1.x >$1.r
 	then :; else

@@ -6,7 +6,10 @@ SRC=	bull.b buzzword.b checker.b creator.b grafiek.b gunner.b learn.b\
 	test24.b test25.b test26.b test27.b test28.b test29.b test30.b\
 	test31.b test32.b test33.b test34.b test35.b
 
+#FLOATS = -fp
+FLOATS =
+
 head:	
-	for i in $(SRC) ; do runcmp $$i ; done
+	for i in $(SRC) ; do fp=$(FLOATS); export fp; runcmp $$i ; done
 clean:
 	rm -f *.b.[rx] *.[dekmos]

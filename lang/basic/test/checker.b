@@ -22,7 +22,7 @@
 2200 rem
 2300 l=-1*l
 2400 for x=1to 8
-2500 for y=-1to8
+2500 for y=1to8
 2600 if s(x,y)=0 then 3500
 2700 if g>0 then 3000
 2800 if s(x,y)>0 then 3500
