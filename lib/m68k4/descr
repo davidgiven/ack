@@ -24,7 +24,7 @@ name asld
 	from .s.a
 	to .out
 	outfile a.out
-	program {EM}/lib/{M}/as
+	program {EM}/lib/m68k2/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) \
 ({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
