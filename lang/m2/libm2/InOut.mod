@@ -67,7 +67,7 @@ IMPLEMENTATION MODULE InOut ;
 	openinput(filename);
   END OpenInputFile;
 
-  PROCEDURE openinput(VAR namebuf: ARRAY OF CHAR);
+  PROCEDURE openinput(namebuf: ARRAY OF CHAR);
   BEGIN
 	IF (namebuf[0] = '-') AND (namebuf[1] = 0C) THEN
 		CurrIn := Streams.InputStream;
@@ -106,7 +106,7 @@ IMPLEMENTATION MODULE InOut ;
 	openoutput(filename);
   END OpenOutputFile;
 
-  PROCEDURE openoutput(VAR namebuf: ARRAY OF CHAR);
+  PROCEDURE openoutput(namebuf: ARRAY OF CHAR);
   BEGIN
 	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
 		CurrOut := Streams.OutputStream;
