@@ -8,7 +8,7 @@ var M=vax4
 var NAME=vax4
 var LIB=mach/vax4/lib/tail_
 var RT=mach/vax4/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

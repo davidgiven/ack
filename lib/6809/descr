@@ -9,7 +9,7 @@ var NAME=m6809
 var M=6809
 var LIB=mach/6809/lib/tail_
 var RT=mach/6809/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

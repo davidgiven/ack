@@ -8,7 +8,7 @@ var NAME=nascom
 var M=z80a
 var LIB=mach/z80a/lib/tail_
 var RT=mach/z80a/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

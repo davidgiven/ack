@@ -8,7 +8,7 @@ var NAME=z80
 var M=z80
 var LIB=mach/z80/lib/tail_
 var RT=mach/z80/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

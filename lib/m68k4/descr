@@ -9,7 +9,7 @@ var M=m68k4
 var LIBDIR=mach/m68k4/lib
 var LIB=mach/m68k4/lib/tail_
 var RT=mach/m68k4/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

@@ -8,7 +8,7 @@ var M=pdp
 var NAME=pdp
 var LIB=mach/pdp/lib/tail_
 var RT=mach/pdp/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

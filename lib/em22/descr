@@ -9,7 +9,7 @@ var NAME=int22
 var LIB=mach/int/lib/tail_
 var RT=mach/int/lib/head_
 var SIZE_FLAG=-sm
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name asld
 	from .k.m.a
 	to e.out

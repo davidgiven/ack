@@ -8,7 +8,7 @@ var NAME=m68k2
 var M=m68k2
 var LIB=mach/m68k2/lib/tail_
 var RT=mach/m68k2/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s

@@ -9,7 +9,7 @@ var NAME=CPM
 var LIB=mach/z80/int/lib/tail_
 var RT=mach/z80/int/lib/head_
 var SIZE_F=-sm
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name asld
 	from .k.m.a
 	to e.out

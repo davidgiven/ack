@@ -8,7 +8,7 @@ var NAME=i8086
 var M=i86
 var LIB=mach/i86/lib/tail_
 var RT=mach/i86/lib/head_
-var INCLUDES=-I{EM}/include
+var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
 	to .s
