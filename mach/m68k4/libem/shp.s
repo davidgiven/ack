@@ -13,7 +13,7 @@
 	and.l	#~0x3ff, d1
 	move.l	d1, -(sp)
 	move.l	d1,.limhp
-	jsr	__brk		! allocate 1K bytes of extra storage
+	jsr	BRK		! allocate 1K bytes of extra storage
 	add.l	#4, sp
 	tst.l	d0
 	bne	2f
