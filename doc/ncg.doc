@@ -301,16 +301,16 @@ Here is a list of reserved words; all of these are unavailable as identifiers.
 .TS
 box;
 l l l l l.
-ADDR	STACK	from	reg_any	test
-COERCIONS	STACKINGRULES	gen	reg_float	to
-INSTRUCTIONS	TESTS	highw	reg_loop	ufit
-INT	TIMEFACTOR	inreg	reg_pointer	uses
-MOVES	TOKENS	kills	regvar	with
-PATTERNS	call	leaving	return	yields
-PROPERTIES	cost	loww	reusing	
-REGISTERS	defined	move	rom	
-SETS	exact	pat	samesign	
-SIZEFACTOR	example	proc	sfit	
+ADDR	STACK	from	proc	sfit
+COERCIONS	STACKINGRULES	gen	reg_any	test
+INSTRUCTIONS	TESTS	highw	reg_float	to
+INT	TIMEFACTOR	inreg	reg_loop	ufit
+MOVES	TOKENS	is_rom	reg_pointer	uses
+PATTERNS	call	kills	regvar	with
+PROPERTIES	cost	leaving	return	yields
+REGISTERS	defined	loww	reusing
+SETS	exact	move	rom
+SIZEFACTOR	example	pat	samesign
 .TE
 C style comments are accepted.
 .DS
@@ -883,6 +883,14 @@ number
 .I a
 in the EM-pattern.
 Undefined if that descriptor does not exist.
+.IP is_rom($a)
+Integer expression indicating whether EM instruction number
+.I a
+in the EM-pattern refers to ROM. This may be useful for generating 
+position-independent code with the ROM in read-only memory.
+.I Is_rom
+enables one to see the difference between ROM references and other data
+references.
 .IP loww($a)
 Returns the lower half of the argument of EM instruction number
 .I a .
@@ -1656,10 +1664,10 @@ The current version of
 .I cgg
 does not check correctness of the example, so be careful.
 .PP
-A procedure is called with one or two string-parameters,
+A procedure is called with string-parameters,
 that are assembler opcodes.
-They can be accessed by appending the strings `[1]' or `[2]'
-to a table opcode.
+They can be accessed by appending the string `[<number>]'
+to a table opcode, where <number> is the parameter number.
 The string `*' can be used as an equivalent for `[1]'.
 Just in case this is not clear, here is an example for
 a procedure to increment/decrement a register.
@@ -1676,7 +1684,7 @@ The procedure is called with parameter "inc" or "dec".
 The procedure call is given instead of the code-part of the
 code rule and looks like this
 .DS
-call <identifier> '(' string [ ',' string ] ')'
+call <identifier> '(' <comma-separated list of strings> ')'
 .DE
 which leads to the following large example:
 .DS
