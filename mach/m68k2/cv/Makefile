@@ -1,10 +1,8 @@
-CFLAGS=-I../../../h
+CFLAGS=-I../../../h -O
+LDFLAGS = -i
 
 cv:             cv.o
-		$(CC) -o cv -n cv.o
-
-cv.prev:        cv.prev.o
-		$(CC) -o cv.prev -n cv.prev.o
+		$(CC) -o cv $(LDFLAGS) cv.o
 
 install:	ins_cv
 ins_cv:		cv
