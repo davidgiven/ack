@@ -48,7 +48,7 @@ PROCEDURE entier(x: REAL): INTEGER;
 BEGIN
 	IF x < 0.0 THEN
 		i := TRUNC(-x);
-		IF FLOAT(-i) = x THEN
+		IF FLOAT(i) = -x THEN
 			RETURN -i;
 		ELSE
 			RETURN -i -1;
