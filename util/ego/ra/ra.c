@@ -355,6 +355,7 @@ ra_optimize(p)
 	offset locls;
 	bool time_opt = (time_space_ratio == 100);
 
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	ra_extproc(p);
 	loop_blocks(p);
 	alloc_id =0;

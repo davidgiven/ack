@@ -591,6 +591,7 @@ lv_flags(p)
 lv_optimize(p)
 	proc_p p;
 {
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	locals = (local_p *) 0;
 	lv_extend(p);
 	live_variables_analysis(p);

@@ -287,6 +287,7 @@ cj_optimize(p)
 	bblock_p b;
 	bool changes = TRUE;
 
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	while(changes) {
 		changes = FALSE;
 		b = p->p_start; 

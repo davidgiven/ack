@@ -303,6 +303,7 @@ bo_optimize(p)
 {
 	bblock_p b;
 
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	bo_extproc(p);
 	loop_blocks(p);
 	bo_loops(p);

@@ -40,6 +40,7 @@ STATIC cs_optimize(p)
 
 	register bblock_p rbp, bdone;
 
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	avails = (avail_p) 0;
 	entities = Lempty_set();
 	cs_clear();

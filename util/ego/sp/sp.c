@@ -197,6 +197,7 @@ sp_optimize(p)
 {
 	register bblock_p b;
 
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	mark_unsave_blocks(p);
 	for (b = p->p_start; b != 0; b = b->b_next) {
 		stack_pollution(b);

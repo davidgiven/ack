@@ -216,6 +216,7 @@ STATIC sr_cleanproc(p)
 sr_optimize(p)
 	proc_p p;
 {
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	sr_extproc(p);
 	loopblocks(p);
 	opt_proc(p);

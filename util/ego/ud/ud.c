@@ -533,6 +533,7 @@ STATIC ud_cleanup(p)
 ud_optimize(p)
 	proc_p p;
 {
+	if (IS_ENTERED_WITH_GTO(p)) return;
 	ud_extend(p);
 	locals = (local_p *) 0;
 	vardefs = (cset *) 0;

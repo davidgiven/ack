@@ -54,7 +54,8 @@ apriori(proctab)
 	for (p = proctab; p != (proc_p) 0; p = p->p_next) {
 		if (!BODY_KNOWN(p)  ||
 		     ENVIRON(p) || RECURSIVE(p) ||
-		     PARAMS_UNKNOWN(p) || MANY_LOCALS(p)) {
+		     PARAMS_UNKNOWN(p) || MANY_LOCALS(p) ||
+		     IS_ENTERED_WITH_GTO(p)) {
 			 UNSUITABLE(p);
 #ifdef VERBOSE
 			if (BODY_KNOWN(p)) {
