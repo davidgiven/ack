@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define  LINO_AD,FILN_AD
 .define  ERANGE,ESET,EHEAP,EILLINS,ECASE
-.define  hol0,trppc~,trpim~,reghp~
+.define  hol0,trppc~,trpim~,reghp~,.limhp
 ! $Header$
 
 #define float 1
@@ -56,6 +56,7 @@ hol0:   .data2 0,0     ! line no
 trppc~: .data2 0
 trpim~: .data2 0
 reghp~: .data2 _end
+.limhp: .data2 _end
 
 	.sect .text
 sig8:
