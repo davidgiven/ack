@@ -1,0 +1,413 @@
+/*	INPUT AND BUFFER HANDLING MODULE	*/
+
+/*
+	[input.X inp_pkg.spec input.h]
+	Input buffering module: this module contains the routines that
+	offers an input buffering mechanism to the user.
+
+	This module exports the following objects:
+	input.h :	an include-file, which must be included when using
+			this module
+	InsertFile() :	suspend input from current buffer and obtain the
+			next input characters from the specified file
+	InsertText() :	suspend input from current buffer and take the
+			specified text as stream of input characters
+	LoadChar() :	(defined in input.h) read next character from
+			the input ; LoadChar() invokes loadbuf() on
+			encounting a ASCII NUL character
+	PushBack() :	(defined in input.h) push last character back onto
+			the input stream; NPUSHBACK characters of pushback
+			are guaranteed, provided that they have all been read
+			from the current input stream
+	AtEoIT() :	this routine is called at the end of an inserted text.
+			A default one is provided, which does nothing.
+	AtEoIF() :	this routine is called at the end of an inserted file.
+			A default one is provided, which does nothing.
+	
+	Imported objects are:
+	INP_NPUSHBACK, INP_READ_IN_ONE, INP_TYPE, INP_VAR,
+	routines from the "alloc" package, routines from the "storage"
+	package, and routines from the "system" package.
+
+	INP_READ_IN_ONE defined: every input file is read into memory completely
+		and made an input buffer. Only use it if the size of a file
+		fits always fits in an integer and you have lots of memory.
+	INP_READ_IN_ONE not defined: the input from files is buffered in
+		a fixed length input buffer
+	INP_NPUSHBACK: the number of characters pushback
+*/
+
+#include <alloc.h>
+#include <system.h>
+
+#ifndef INP_NPUSHBACK
+#define INP_NPUSHBACK 1
+#endif
+
+#if INP_NPUSHBACK < 1
+#define INP_NPUSHBACK 1
+#endif
+
+#ifndef INP_BUFSIZE
+#define INP_BUFSIZE BUFSIZ
+#endif
+
+#if INP_NPUSHBACK > INP_BUFSIZE/2
+Now this is really ridiculous! You deserve what you get!!
+#endif
+
+#ifdef INP_TYPE
+extern INP_TYPE INP_VAR;
+#endif INP_TYPE
+
+#ifdef DEBUG
+#define PRIVATE
+#else
+#define PRIVATE static
+#endif
+
+struct buffer_header	{
+	struct buffer_header *next;
+	int bh_size;	/* = strlen (text), should be unsigned	*/
+	char *bh_text;	/* pointer to buffer containing text	*/
+	char *bh_ipp;	/* current read pointer (= stacked ipp)	*/
+#ifdef INP_TYPE
+	INP_TYPE bh_i;	/* user defined */
+#endif INP_TYPE
+	File *bh_fd;	/* A file descriptor in case of a file */
+	char bh_eofreturned;	/* set if we returned eof for this buffer */
+};
+
+#ifndef INP_READ_IN_ONE
+struct i_buf {
+	struct i_buf *next;
+	char ib_text[INP_BUFSIZE+INP_NPUSHBACK-1];
+};
+
+# endif not INP_READ_IN_ONE
+
+char *_ipp;
+PRIVATE struct buffer_header *head;
+
+#ifdef INP_READ_IN_ONE
+/*	readfile() creates a buffer in which the text of the file
+	is situated.  A pointer to the start of this text is
+	returned.  *size is initialized with the buffer length.
+*/
+
+PRIVATE int
+readfile(fd, fn, size, pbuf)
+	register File *fd;
+	char *fn;		/* file name */
+	register long *size;
+	extern long sys_filesize();
+	char **pbuf;		/* output parameter */
+{
+	int rsize;
+
+	if (
+	     (*size = sys_filesize(fn)) < 0
+	   ||
+	     ((unsigned) (*size + 1) != (*size + 1))
+	   ||
+	     !(*pbuf = malloc((unsigned) (*size + 1)))) {
+		sys_close(fd);
+		return 0;
+	}
+	if (
+	     !sys_read(fd, *pbuf, (int) *size, &rsize)
+	   ||
+	     *size != rsize
+	   )  {
+		sys_close(fd);
+		free(*pbuf);
+		return 0;
+	}
+	sys_close(fd);
+	(*pbuf)[*size] = '\0';	/* invoke loadbuf() at end */
+	return 1;
+}
+#endif INP_READ_IN_ONE
+
+#ifndef INP_READ_IN_ONE
+/*	Input buffer supplying routines: pushbuf()
+*/
+
+PRIVATE struct i_buf *i_ptr;
+
+PRIVATE char *
+pushbuf()
+{
+	register struct i_buf *ib = 
+		(struct i_buf *) malloc(sizeof(struct i_buf));
+
+	if (!ib) return 0;
+	ib->next = i_ptr;
+	i_ptr = ib;
+
+	/*	Don't give him all of it, we need some to implement a good
+	   	PushBack
+	*/
+	return &(ib->ib_text[INP_NPUSHBACK-1]);
+}
+#endif not INP_READ_IN_ONE
+
+/*	Input buffer administration: push_bh() and pop_bh()
+*/
+PRIVATE struct buffer_header *
+push_bh()
+{
+	register struct buffer_header *bh;
+
+	if (bh = head) {
+		bh->bh_ipp = _ipp;
+#ifdef INP_TYPE
+		bh->bh_i = INP_VAR;
+#endif INP_TYPE
+	}
+	if (!(bh = (struct buffer_header *)malloc(sizeof(struct buffer_header)))) return 0;
+	bh->next = head;
+	bh->bh_eofreturned = 0;
+	head = bh;
+	return bh;
+}
+
+/*	pop_bh() uncovers the previous inputbuffer on the stack
+	of headers.  0 is returned if there are no more
+	inputbuffers on the stack, 1 is returned in the other case.
+*/
+PRIVATE int
+pop_bh()
+{
+	register struct buffer_header *bh = head;
+
+	if (bh->bh_fd) {	/* unstack a file */
+#ifndef INP_READ_IN_ONE
+		struct i_buf *ib;
+
+		ib = i_ptr->next;
+		free((char *) i_ptr);
+		i_ptr = ib;
+#else INP_READ_IN_ONE
+		free(bh->bh_text);
+#endif INP_READ_IN_ONE
+	}
+
+	bh = bh->next;
+	free((char *) head);
+	head = bh;
+
+	if (!bh)	{	/* no more entries */
+		head = (struct buffer_header *) 0;
+		return 0;
+	}
+
+	_ipp = bh->bh_ipp;	/* restore previous input pointer */
+#ifdef INP_TYPE
+	INP_VAR = bh->bh_i;
+#endif INP_TYPE
+
+	return 1;
+}
+
+#ifndef INP_READ_IN_ONE
+/*	low level I/O routine : read one block from current input
+	stream : readblock
+*/
+
+PRIVATE int
+readblock(fd, buf, n)
+	File *fd;
+	char buf[];
+	int *n;
+{
+
+	if (!sys_read(fd, buf, INP_BUFSIZE, n)) {
+		return 0;
+	}
+	buf[*n] = '\0';
+	return 1;
+}
+#endif not INP_READ_IN_ONE
+
+/*	Miscellaneous routines :
+	mk_filename()
+*/
+
+/*	mk_filename() concatenates a dir and filename.
+*/
+PRIVATE int
+mk_filename(dir, file, newname)
+	register char *dir, *file;
+	char **newname;
+{
+
+	register char *dst;
+
+	dst = malloc((unsigned) (strlen(dir) + strlen(file) + 2));
+	if (!dst) return 0;
+	*newname = dst;
+	while (*dst++ = *dir++);
+	*--dst = '/';
+	while (*++dst = *file++);
+	return 1;
+}
+
+/*	Interface routines : InsertFile, InsertText, and loadbuf
+*/
+
+int
+InsertFile(filnam, table, result)
+	char *filnam;
+	char *table[];
+	char **result;
+{
+	char *newfn = 0;
+
+#ifdef INP_READ_IN_ONE
+	char *text;
+	long size;
+#endif INP_READ_IN_ONE
+	File *fd = 0;
+
+	if (!filnam) fd = STDIN;
+	else {
+		if (table == 0 || filnam[0] == '/') {
+				/* don't look in the table! */
+			if (!sys_open(filnam, OP_READ, &fd)) return 0;
+		}
+		else {
+			while (*table) {	
+				/* look in the directory table */
+				if (!mk_filename(*table++, filnam, &newfn)) {
+					return 0;
+				}
+				if (sys_open(newfn, OP_READ, &fd)) {
+					/* free filnam ??? NO we don't know 
+					   where it comes from!
+					*/
+					filnam = newfn;
+					break;
+				}
+				free(newfn);
+				newfn = 0;
+			}
+		}
+	}
+
+	if (fd) {
+		struct buffer_header *push_bh();
+		register struct buffer_header *bh = push_bh();
+
+		if (!bh) {
+			if (fd != STDIN) sys_close(fd);
+			return 0;
+		}
+#ifdef INP_READ_IN_ONE
+		if (fd == STDIN) return 0;	/* illegal */
+		if (!readfile(fd, filnam, &size, &text)) {
+			sys_close(fd);
+			return 0;
+		}
+		bh->bh_size = size;
+		_ipp = bh->bh_text = text;
+#else not INP_READ_IN_ONE
+		if (
+		     !(_ipp = bh->bh_text = pushbuf())
+		   ||
+		     !readblock(fd,_ipp,&(bh->bh_size))) {
+			if (fd != STDIN) sys_close(fd);
+			return 0;
+		}
+#endif INP_READ_IN_ONE
+		bh->bh_fd = fd;	/* this is a file */
+		*result = filnam;
+		return 1;
+	}
+	return 0;
+}
+
+int
+InsertText(text, length)
+	char *text;
+{
+	struct buffer_header *push_bh();
+	register struct buffer_header *bh = push_bh();
+
+	if (!bh) return 0;
+	bh->bh_size = (long) length;
+	_ipp = bh->bh_text = text;
+	bh->bh_fd = 0;	/* No file! */
+	return 1;
+}
+
+/*	loadbuf() is called if LoadChar meets a '\0' character
+	which may be the end-of-buffer mark of the current input
+	buffer.  The '\0' could be genuine although not likely.
+	Note: this routine is exported due to its occurence in the definition
+	of LoadChar [input.h], that is defined as a macro.
+*/
+int
+loadbuf()
+{
+	register struct buffer_header *bh = head;
+	static char buf[INP_NPUSHBACK + 1];
+	int FromFile;
+
+	if (!bh) {		/* stack exhausted, EOF on sourcefile */
+		return EOI;
+	}
+
+	if (_ipp < &(bh->bh_text[bh->bh_size])) {
+				/* a genuine '\0' character has been seen */
+		return '\0';
+	}
+
+	FromFile = (bh->bh_fd != 0);
+
+#ifndef INP_READ_IN_ONE
+	if (FromFile) {
+#if INP_PUSHBACK > 1
+		register char *so = &(bh->bh_text[bh->bh_size]);
+		register char *de = bh->bh_text;
+		register int i = INP_NPUSHBACK - 1;
+
+		while (i-- > 0) {
+				/* make sure PushBack will work */
+			*--de = *--so;
+		}
+#endif
+		if (
+		     readblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
+		   &&
+		     bh->bh_size > 0
+		   ) {
+			_ipp = bh->bh_text;
+			return *_ipp++;
+		}
+	}
+
+#endif not INP_READ_IN_ONE
+
+	if (!bh->bh_eofreturned) {
+		bh->bh_eofreturned = 1;
+		_ipp--;
+		if (FromFile) {
+			if (AtEoIF()) return EOI;
+		}
+		else {
+			if (AtEoIT()) return EOI;
+		}
+	}
+
+#ifndef INP_READ_IN_ONE
+	if (FromFile && bh->bh_fd != STDIN) sys_close(bh->bh_fd);
+#endif not INP_READ_IN_ONE
+
+	if (pop_bh()) {
+		if (*_ipp) return *_ipp++;
+		return loadbuf();
+	}
+	_ipp = &buf[INP_NPUSHBACK];
+	return EOI;
+}

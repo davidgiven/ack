@@ -1,0 +1,14 @@
+#include <em.h>
+#include <em_mes.h>
+
+C_ms_ego(hint, offs, siz, regno)
+	int hint, regno;
+	arith offs, siz;
+{
+	C_mes_begin(ms_ego);
+	C_cst((arith)hint);
+	C_cst(offs);
+	C_cst(siz);
+	C_cst((arith)regno);
+	C_mes_end();
+}
