@@ -67,7 +67,7 @@ gencode.o:	types.h
 global.o:	extern.h
 global.o:	io.h
 global.o:	types.h
-machdep.o:	$(EMHOME)/em_path.h
+machdep.o:	$(EMHOME)/h/em_path.h
 machdep.o:	types.h
 main.o:	assert.h
 main.o:	extern.h
