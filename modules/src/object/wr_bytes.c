@@ -4,7 +4,7 @@
    You have to put it in an int!
 */
 
-int maxchunk = MAXCHUNK;
+static int maxchunk = MAXCHUNK;
 
 /*
  * Just write "cnt" bytes to file-descriptor "fd".

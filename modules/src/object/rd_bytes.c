@@ -4,7 +4,7 @@
    an int!
 */
 
-int maxchunk = MAXCHUNK;
+static int maxchunk = MAXCHUNK;
 
 /*
  * We don't have to worry about byte order here.
