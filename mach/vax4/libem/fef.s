@@ -24,12 +24,13 @@ I2:
 	pushl	$EILLINS
 	jmp	.fat
 Ihulp:
+	movl	(sp)+,r2
 	tstd	r0
 	bneq	1f
 	clrl	-(sp)
-	rsb
+	jmp	(r2)
 1:
-	extzv	$7,$8,r0,r2
-	subl3	$128,r2,-(sp)
+	extzv	$7,$8,r0,-(sp)
+	subl2	$128,(sp)
 	insv	$128,$7,$8,r0
-	rsb
+	jmp	(r2)
