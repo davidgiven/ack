@@ -11,6 +11,7 @@ CID =		$(EMHOME)/bin/cid
 CURRDIR =
 LINT =		lint
 MACH =		sun3
+BACK =		back
 
 MALLOC =	$(LIBDIR)/malloc.o
 EMELIB =	$(LIBDIR)/libem_mes.a $(LIBDIR)/libeme.a
@@ -24,14 +25,14 @@ MODLIB =	$(LIBDIR)/libinput.a \
 		$(LIBDIR)/libsystem.a
 EMCELIB =	$(LIBDIR)/libem_mesCE.a \
 		$(EMHOME)/lib/$(MACH)/ce.a \
-		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/lib/$(MACH)/$(BACK).a \
 		$(LIBDIR)/libflt.a \
 		$(LIBDIR)/libobject.a \
 		$(EMHOME)/lib/em_data.a
 EMOCELIB =	$(LIBDIR)/libem_mesO.a \
 		$(LIBDIR)/libCEopt.a \
 		$(EMHOME)/lib/$(MACH)/ce.a \
-		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/lib/$(MACH)/$(BACK).a \
 		$(LIBDIR)/libflt.a \
 		$(LIBDIR)/libobject.a \
 		$(EMHOME)/lib/em_data.a
@@ -93,12 +94,12 @@ all:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE "EXTRA_O="$(EXTRA_O) $(CURRDIR)omain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE "EXTRA_O="$(EXTRA_O) "BACK="$(BACK) $(CURRDIR)omain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
 
 CEmain: Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER "BACK="$(BACK) $(CURRDIR)cemain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
 
 install:	all
