@@ -18,6 +18,7 @@ RESFILES= \
 	$(TARGET_HOME)/doc/ncg.doc \
 	$(TARGET_HOME)/doc/regadd.doc \
 	$(TARGET_HOME)/doc/LLgen.doc \
+	$(TARGET_HOME)/doc/pascal.doc \
 	$(TARGET_HOME)/doc/basic.doc \
 	$(TARGET_HOME)/doc/crefman.doc \
 	$(TARGET_HOME)/doc/ansi_C.doc \
@@ -104,6 +105,10 @@ $(TARGET_HOME)/doc/m68020.doc:	$(SRC_HOME)/doc/m68020.doc
 $(TARGET_HOME)/doc/sparc.doc:	sparc.X
 sparc.X:
 		cd sparc; make "PIC="$(PIC) "TBL="$(TBL)
+
+$(TARGET_HOME)/doc/pascal.doc:	pascal.X
+pascal.X:
+		cd pascal; make "PIC="$(PIC)
 
 $(TARGET_HOME)/doc/top.doc:	top.X
 top.X:

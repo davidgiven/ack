@@ -12,7 +12,8 @@ OPR=dip
 RESFILES= \
 	toolkit.$(SUF) install.$(SUF) em.$(SUF) ack.$(SUF) v7bugs.$(SUF) \
 	peep.$(SUF) cg.$(SUF) ncg.$(SUF) regadd.$(SUF) LLgen.$(SUF) \
-	basic.$(SUF) crefman.$(SUF) pcref.$(SUF) val.$(SUF) ansi_C.$(SUF) \
+	basic.$(SUF) crefman.$(SUF) pascal.$(SUF) pcref.$(SUF) val.$(SUF) \
+	ansi_C.$(SUF) \
 	6500.$(SUF) i80.$(SUF) z80.$(SUF) top.$(SUF) ego.$(SUF) \
 	m68020.$(SUF) occam.$(SUF) m2ref.$(SUF) ceg.$(SUF) nopt.$(SUF) \
 	sparc.$(SUF) int.$(SUF) lint.$(SUF)
