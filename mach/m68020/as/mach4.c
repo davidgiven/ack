@@ -125,14 +125,10 @@ instruction
 			{	move($2);}
 	|	MOVEP sizedef ea_ea
 			{	movep($2);}
-	|	MOVEM sizedef regs ',' 
-			{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
-		notimmreg
+	|	MOVEM sizedef regs ',' notimmreg
 			{	movem(0, $2, $3);}
-	|	MOVEM sizedef 
-			{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
-		notimmreg ',' regs
-			{	movem(1, $2, $6);}
+	|	MOVEM sizedef notimmreg ',' regs
+			{	movem(1, $2, $5);}
 	| 	MOVES sizedef ea_ea
 			{	if (mrg_1 <= 017) {
 					T_EMIT2(007000 | $2 | mrg_2,0,0,0);
@@ -209,54 +205,8 @@ instruction
 				T_EMIT2($3 | ($7<<6) | ($12<<12),0,0,0);
 				T_EMIT2($5 | ($9<<6) | ($16<<12),0,0,0);
 			}
-	|   /* Coprocessor instructions; syntax may be changed (please).
-	     * No coprocessor defined extension words are emitted.
-	     */
-		CP CPBCC cp_cond expr
-			{	cpbcc($2 | $1 | $3, $4);
-			}
-	|	CP CPDBCC cp_cond DREG ',' expr
-			{	T_EMIT2($2 | $1 | $4,0,0,0);
-				$6.val -= (DOTVAL+dot_offset);
-				fit(fitw($6.val));
-				T_EMIT2(loww($6.val), $6.typ,
-						RELPC|RELO2, relonami);
-			}
-	|	CP CPGEN
-			{	T_EMIT2($2 | $1,0,0,0);
-				/* NO COMMAND WORD IS EMITTED;
-				 * THIS INSTRUCTIONS IS (STILL) ONE BIG RIDDLE.
-				 * NO EFFECTIVE ADDRESS IS CALCULATED (SYNTAX ?)
-				 */
-			}
-	|	CP CPRESTORE ea
-			{	T_EMIT2($2 | $1 | mrg_2,0,0,0);
-				ea_2(SIZE_W, (mrg_2 & 070)==030 ? 0 : CTR);
-			}
-	|	CP CPSAVE ea
-			{	T_EMIT2($2 | $1 | mrg_2,0,0,0);
-				ea_2(SIZE_W,(mrg_2 & 070)==020 ? 0 : CTR|ALT);
-			}
-	|	CP CPSCC cp_cond ea
-			{	T_EMIT2($2 | $1 | mrg_2,0,0,0);
-				T_EMIT2($3,0,0,0);
-				ea_2(SIZE_B,DTA|ALT);
-			}
-	|	CP CPTRAPCC cp_cond SIZE imm
-			{	checksize($4,2|4);
-				T_EMIT2($2 | $1 | ($4>>6)+1,0,0,0);
-				T_EMIT2($3,0,0,0);
-				ea_2($4, 0);
-			}
-	|	CP TRAPCC cp_cond
-			{	T_EMIT2($2 | $1 | 4,0,0,0);
-				T_EMIT2($3,0,0,0);
-			}
-	;
-cp_cond	:	'.' absexp
-			{	fit(fit6($2));
-				$$ = low6($2);
-			}
+	|	fp_op
+	|	mm_op
 	;
 bcdx	:	ABCD
 	|	ADDX sizedef
@@ -303,11 +253,15 @@ ea	:	DREG
 			{	mrg_2 = 010 | $1;}
 	|	SPEC
 			{	mrg_2 = $1;}
-	|		{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
-		notimmreg
+	|	notimmreg
 	|	imm
 	;
 notimmreg
+	:
+			{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
+	notimmreg1
+	;
+notimmreg1
 	:	'(' AREG ')'
 			{	mrg_2 = 020 | $2;}
 	|	'(' AREG ')' '+'
@@ -433,4 +387,278 @@ ea_ea	:	ea ','
 				RELOMOVE(od_rel1, od_rel2);
 			}
 		ea
+	;
+fp_op	:	CP
+			{	co_id = $1; }
+		fp_op1
+	|		{	co_id = DEF_FP; }
+		fp_op1
+	;
+fp_op1	:	FMOVE fsize ea ',' FPCR
+			{	check_fsize($2, FSIZE_L);
+				if ((mrg_2&070) == 010 && $5 != 001)
+					badoperand();
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0100000|($5<<10)),0,0,0);
+				ea_2(SIZE_L, 0);
+			}
+	|	FMOVE fsize FPCR ',' ea
+			{	check_fsize($2, FSIZE_L);
+				if ((mrg_2&070) == 010 && $3 == 001)
+					badoperand();
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0120000|($3<<10)),0,0,0);
+				ea_2(SIZE_L, ALT);
+			}
+	|	FMOVE fsize FPREG ',' FPREG
+			{	emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7));
+			}
+	|	FMOVE fsize ea ',' FPREG
+			{	ch_sz_dreg($2, mrg_2&070);
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0040000|($2<<10)|($5<<7)),0,0,0);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FMOVE fsize FPREG ',' ea
+			{	ch_sz_dreg($2, mrg_2&070);
+				if ($2 == FSIZE_P)
+					serror("packed decimal needs k-factor");
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0060000|($2<<10)|($3<<7)),0,0,0);
+				ea_2(SIZE_L, DTA|ALT);
+			}
+	|	FMOVE fsize FPREG ',' ea '{' '#' absexp '}'
+			{	check_fsize($2, FSIZE_P);
+				fit(sfit7($8));
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0066000|($3<<7)|low7($8)),0,0,0);
+				ea_2(SIZE_L, MEM|DTA|ALT);
+			}
+	|	FMOVE fsize FPREG ',' ea '{' DREG '}'
+			{	check_fsize($2, FSIZE_P);
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0076000|($3<<7)|($7<<4)),0,0,0);
+				ea_2(SIZE_L, MEM|DTA|ALT);
+			}
+	|	FMOVECR fsize '#' absexp ',' FPREG
+			{	fit(fit7($4));
+				check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(056000|($6<<7)|low7($4));
+			} 
+	|	FMOVEM FSIZE fregs ',' notimmreg
+			{	check_fsize($2, FSIZE_X);
+				if ((mrg_2&070) == 030)
+					serror("bad addressing category");
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2(0160000 |
+					(((mrg_2&070)==040 || ($3&04000)) ?
+						$3 :
+						(010000|reverse($3,8))),
+					0,0,0);
+				ea_2(SIZE_L, MEM|ALT);
+			}
+	|	FMOVEM FSIZE notimmreg ',' fregs
+			{	check_fsize($2, FSIZE_X);
+				if ((mrg_2&070) == 040)
+					serror("bad addressing category");
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0150000|(($5&04000)?$5:reverse($5,8))),0,0,0);
+				ea_2(SIZE_L, MEM);
+			}
+	|	FMOVEM SIZE fcregs ',' ea
+			{	checksize($2, 4);
+				if ((mrg_2&070) == 1 && $3!= 02000)
+					serror("bad addressing category");
+				if ((mrg_2 & 070) == 0 &&
+				    $3 != 02000 && $3 != 04000 && $3 != 010000)
+					serror("bad addressing category");
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0120000|$3),0,0,0);
+				ea_2(SIZE_L, ALT);
+			}
+	|	FMOVEM SIZE ea ',' fcregs
+			{	checksize($2, 4);
+				if ((mrg_2&070) == 1 && $5!= 02000)
+					serror("bad addressing category");
+				if ((mrg_2 & 070) == 0 &&
+				    $5 != 02000 && $5 != 04000 && $5 != 010000)
+					serror("bad addressing category");
+				T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0100000|$5),0,0,0);
+				ea_2(SIZE_L, 0);
+			}
+	|	FDYADIC fsize ea ',' FPREG
+			{	T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0040000|($2<<10)|($5<<7)|$1),0,0,0);
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FDYADIC fsize FPREG ',' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7)|$1);
+			}
+	|	FMONADIC fsize ea ',' FPREG
+			{	T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0040000|($2<<10)|($5<<7)|$1),0,0,0);
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FMONADIC fsize FPREG ',' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7)|$1);
+			}
+	|	FMONADIC fsize FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($3<<7)|$1);
+			}
+	|	FSINCOS fsize ea ',' FPREG ':' FPREG
+			{	T_EMIT2(0170000|co_id|mrg_2,0,0,0);
+				T_EMIT2(0040000|($2<<10)|($7<<7)|$1|$5,0,0,0);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FSINCOS fsize FPREG ',' FPREG ':' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($7<<7)|$1|$5);
+			}
+	|	FBCC expr
+			{	fbranch($1, $2);}
+	|	FDBCC DREG ',' expr
+			{	T_EMIT2(0170110|co_id|$2,0,0,0);
+				T_EMIT2($1,0,0,0);
+				$4.val -= (DOTVAL+dot_offset);
+				fit(fitw($4.val));
+				T_EMIT2(loww($4.val), $4.typ,
+					RELPC|RELO2,relonami);
+			}
+	|	FNOP
+			{	emit2(0170200|co_id);
+				emit2(0);
+			}
+	|	FSCC ea
+			{	T_EMIT2(0170100|co_id|mrg_2,0,0,0);
+				T_EMIT2($1,0,0,0);
+				ea_2(SIZE_B, DTA|ALT);
+			}
+	|	FTST fsize ea
+			{	T_EMIT2((0170000|co_id|mrg_2),0,0,0);
+				T_EMIT2((0040072|($2<<10)),0,0,0);
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FTST fsize FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|072);
+			}
+	|	FSAVRES ea
+			{	if ((mrg_2&070) == ($1&070))
+					badoperand();
+				T_EMIT2((0170000|co_id|($1&0700)|mrg_2),0,0,0);
+				ea_2(0, $1&07);
+			}
+	|	FTRAPCC
+			{	emit2(0170174|co_id);
+				emit2($1);
+			}
+	|	FTRAPCC SIZE imm
+			{	checksize($2, 2|4);
+				T_EMIT2((0170170|co_id|($2==SIZE_L?03:02)),
+					0,0,0);
+				T_EMIT2($1,0,0,0);
+				ea_2($2,0);
+			}
+	;
+fregs	:	DREG
+			{	$$ = 04000 | $1 << 4; }
+	|	frlist
+	;
+frlist	:	frrange
+	|	frlist '/' frrange
+			{	$$ = $1 | $3;}
+	;
+frrange	:	FPREG
+			{	$$ = 1 << $1; }
+	|	FPREG '-' FPREG
+			{	if ($1 > $3)
+					badoperand();
+				for ($$ = 0; $1 <= $3; $1++)
+					$$ |= (1 << $1);
+			}
+	;
+fcregs	:	FPCR
+			{	$$ = $1 << 10; }
+	|	fcregs '/' FPCR
+			{	$$ = $1 | ($3 << 10); }
+	;
+fsize	:	/*	empty */
+			{	$$ = FSIZE_X; }
+	|	SIZE
+			{	if ($1 == SIZE_L)
+					$$ = FSIZE_L;
+				else if ($1 == SIZE_W)
+					$$ = FSIZE_W;
+				else	$$ = FSIZE_B;
+			}
+	|	FSIZE
+	;
+mm_op	:	CP
+			{	co_id = $1; }
+		mm_op1
+	|		{	co_id = DEF_MM; }
+		mm_op1
+	;
+mm_op1	:   /* Coprocessor instructions; syntax may be changed (please).
+	     * No coprocessor defined extension words are emitted.
+	     */
+		CPBCC cp_cond expr
+			{	cpbcc($1 | co_id | $2, $3);
+			}
+	|	CPDBCC cp_cond DREG ',' expr
+			{	T_EMIT2($1 | co_id | $3,0,0,0);
+				$5.val -= (DOTVAL+dot_offset);
+				fit(fitw($5.val));
+				T_EMIT2(loww($5.val), $5.typ,
+						RELPC|RELO2, relonami);
+			}
+	|	CPGEN
+			{	T_EMIT2($1 | co_id,0,0,0);
+				/* NO COMMAND WORD IS EMITTED;
+				 * THIS INSTRUCTIONS IS (STILL) ONE BIG RIDDLE.
+				 * NO EFFECTIVE ADDRESS IS CALCULATED (SYNTAX ?)
+				 */
+			}
+	|	CPRESTORE ea
+			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
+				ea_2(SIZE_W, (mrg_2 & 070)==030 ? 0 : CTR);
+			}
+	|	CPSAVE ea
+			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
+				ea_2(SIZE_W,(mrg_2 & 070)==020 ? 0 : CTR|ALT);
+			}
+	|	CPSCC cp_cond ea
+			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
+				T_EMIT2($2,0,0,0);
+				ea_2(SIZE_B,DTA|ALT);
+			}
+	|	CPTRAPCC cp_cond SIZE imm
+			{	checksize($3,2|4);
+				T_EMIT2($1 | co_id | ($3>>6)+1,0,0,0);
+				T_EMIT2($2,0,0,0);
+				ea_2($3, 0);
+			}
+	|	CPTRAPCC cp_cond
+			{	T_EMIT2($1 | co_id | 4,0,0,0);
+				T_EMIT2($2,0,0,0);
+			}
+	;
+cp_cond	:	'.' absexp
+			{	fit(fit6($2));
+				$$ = low6($2);
+			}
 	;

@@ -62,8 +62,25 @@
 %token <y_word> CPSAVE
 %token <y_word> CPSCC
 %token <y_word> CPTRAPCC
+%token <y_word> FPCR
+%token <y_word> FPREG
+%token <y_word> FMOVE
+%token <y_word> FMOVECR
+%token <y_word> FMOVEM
+%token <y_word> FDYADIC
+%token <y_word> FMONADIC
+%token <y_word> FSINCOS
+%token <y_word> FBCC
+%token <y_word> FDBCC
+%token <y_word> FNOP
+%token <y_word> FSCC
+%token <y_word> FTST
+%token <y_word> FSAVRES
+%token <y_word> FTRAPCC
+%token <y_word> FSIZE
 
 %type <y_word> bcdx op_ea regs rrange 
 %type <y_word> reg sizedef sizenon creg
 %type <y_word> off_width abs31 bd_areg_index
 %type <y_word> areg_index areg scale cp_cond
+%type <y_word> fsize fregs fcregs frlist frrange

@@ -11,11 +11,14 @@
 #define	low4(z)		((short)(z) & 017)
 #define	low5(z)		((short)(z) & 037)
 #define	low6(z)		((short)(z) & 077)
+#define	low7(z)		((short)(z) & 0177)
 
 #define	fit3(z)		((((z)-1) & ~07) == 0)
 #define	fit4(z)		(((z) & ~017) == 0)
 #define	fit5(z)		(((z) & ~037) == 0)
 #define	fit6(z)		(((z) & ~077) == 0)
+#define	fit7(z)		(((z) & ~0177) == 0)
+#define	sfit7(z)	(fit7((z)+64))
 #define	fit8(z)		(((z) & ~0xFF) == 0)
 #define	fit16(z)	(((z) & ~0xFFFF) == 0)
 
@@ -24,6 +27,18 @@
 #define	SIZE_L		0200
 #define	SIZE_NON	0300
 #define	SIZE_DEF	SIZE_W
+
+#define FSIZE_L		00
+#define FSIZE_S		01
+#define FSIZE_X		02
+#define FSIZE_P		03
+#define FSIZE_W		04
+#define FSIZE_D		05
+#define FSIZE_B		06
+
+#define	DEF_FP		01000	/* default floating point processor */
+#define	DEF_MM		00000	/* default memory management */
+extern int	co_id;		/* coprocessor id */
 
 extern int	mrg_1,mrg_2;	/* Mode and ReGister */
 extern short	ffew_1, ffew_2; /* Full Format Extension Word */

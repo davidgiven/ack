@@ -208,6 +208,19 @@ checksize(sz, bits)
 		serror("bad size");
 }
 
+check_fsize(sz, size)
+{
+	if (sz != size)
+		serror("bad size");
+}
+
+ch_sz_dreg(size, mode)
+{
+	if (mode == 0 &&
+	    (size == FSIZE_X || size == FSIZE_P || size == FSIZE_D))
+		serror("illegal size for data register");
+}
+
 checkscale(val)
 valu_t val;
 {
@@ -225,7 +238,7 @@ valu_t val;
 
 badoperand()
 {
-	serror("bad operands");
+	serror("bad operand(s)");
 }
 
 shift_op(opc, sz)
@@ -466,16 +479,9 @@ move_special(sz)
 movem(dr, sz, regs)
 {
 	register i;
-	register r;
 
 	if ((mrg_2>>3) == 04) {
-		r = regs; regs = 0;
-		for (i = 0; i < 16; i++) {
-			regs <<= 1;
-			if (r & 1)
-				regs++;
-			r >>= 1;
-		}
+		regs = reverse(regs, 16);
 	}
 	checksize(sz, 2|4);
 	if ((mrg_2>>3)-3 == dr)
@@ -490,6 +496,21 @@ movem(dr, sz, regs)
 	if (dr == 0)
 		i |= ALT;
 	ea_2(sz, i);
+}
+
+reverse(regs, max)
+	register int regs;
+{
+	register int r, i;
+
+	r = regs; regs = 0;
+	for (i = max; i > 0; i--) {
+		regs <<= 1;
+		if (r & 1)
+			regs++;
+		r >>= 1;
+	}
+	return regs;
 }
 
 movep(sz)
@@ -613,4 +634,29 @@ ea7071(sz)
 	} else
 		if (small(bd_2.typ == S_ABS && fitw(bd_2.val), 2))
 			mrg_2 = 070;
+}
+
+fbranch(opc, exp)
+expr_t exp;
+{
+	register sm;
+
+	exp.val -= (DOTVAL + 2);
+	if ((pass == PASS_2) 
+	    &&
+	    (exp.val > 0)
+	    &&
+	    ((exp.typ & S_DOT) == 0)
+	   )
+		exp.val -= DOTGAIN;
+	sm = fitw(exp.val);
+	if ((exp.typ & ~S_DOT) != DOTTYP)
+		sm = 0;
+	if (small(sm,2)) {
+		T_EMIT2(0170200|co_id|opc, 0, 0, 0);
+		T_EMIT2(loww(exp.val), 0, 0, 0);
+		return;
+	}
+	T_EMIT2(0170300|co_id|opc, 0, 0, 0); /* 4 byte offset */
+	T_EMIT4(exp.val, exp.typ, RELPC|RELO4, relonami);
 }
