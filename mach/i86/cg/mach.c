@@ -43,6 +43,9 @@ con_mult(sz) word sz; {
 
 #define CODE_GENERATOR
 #define IEEEFLOAT
+#define FL_MSL_AT_LOW_ADDRESS	0
+#define FL_MSW_AT_LOW_ADDRESS	0
+#define FL_MSB_AT_LOW_ADDRESS	0
 #include <con_float>
 
 /*
