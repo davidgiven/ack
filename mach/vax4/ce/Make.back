@@ -1,7 +1,7 @@
 EMHOME=../../../..
 CEG=$(EMHOME)/lib/ceg
 SOURCE=$(CEG)/ce_back/obj_back
-CFLAGS=-O
+CFLAGS=-O #-pg
 CC=cc
 
 IDIRS=-I.\

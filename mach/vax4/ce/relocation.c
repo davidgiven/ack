@@ -3,12 +3,9 @@
 #include "data.h"
 #include "back.h"
 
-long 		get4(); 
-extern long 	base_address();
-/*
-extern short    get2();
-extern char 	get1();
-*/
+/* Written to run on SUN, and generate code for SUN */
+
+extern long 	base_address[];
 
 do_local_relocation()
 {
@@ -16,11 +13,13 @@ do_local_relocation()
 	
 	/* print( "n relocation records %d\n", relo - reloc_info);  */
 
+	base_address[SEGTXT] = 0;
+	base_address[SEGCON] = text - text_area;
+	base_address[SEGBSS] = base_address[SEGCON] + data - data_area;
 	for ( rp = reloc_info; rp < relo; rp++) {
 		register struct outname *np = &symbol_table[rp->or_nami];
 
 		if ( np->on_valu  != -1 && ! (np->on_type & S_COM)) {
-			register long oldval,newval;
 			register char *sect;
 
 			switch( rp->or_sect - S_MIN) {
@@ -36,19 +35,12 @@ do_local_relocation()
 				 		rp->or_sect - S_MIN);
 					break;
 			}
-			oldval = get4( sect, rp->or_addr);
-			newval = oldval + np->on_valu + 
-				base_address( (np->on_type & S_TYP) -S_MIN);	 
 			if  ( rp->or_type & RELO4) 
-				put4( sect, rp->or_addr, newval);
-			/*
-			else if  ( rp->or_type & RELO2) 
-				put2( sect, rp->or_addr, (int) newval);
-			else if  ( rp->or_type & RELO1) 
-				put1( sect, rp->or_addr, (char) newval);
-			*/
+				*((long *)(sect+rp->or_addr)) +=
+					np->on_valu +
+					base_address[(np->on_type&S_TYP)-S_MIN];
 			else
-				print( STDERR,
+				fprint( STDERR,
 				  "do_relo() : bad relocation size\n");
 		}
 	}
