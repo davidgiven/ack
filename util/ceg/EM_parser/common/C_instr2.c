@@ -440,7 +440,7 @@ char *instr;
 		else if ( rel < 0)
 			high = mid;
 		else
-			/* pas op, mid is naar beneden afgerond !! */
+			/* watch it, mit is truncated !! */
 			low = ( mid == low ? low + 1: mid);
 	}
 	C_instr_info = &C_info[ EM_instr[mid].class];

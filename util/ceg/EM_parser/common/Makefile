@@ -32,7 +32,7 @@ cmp:	all
 	for i in $(OFILES) ; do cmp $$i $(ASLIB)/$$i ; done
 
 clean:
-	rm -f *.o
+	rm -f *.o dummy Lpars.[ch] pars.c
 
 pr:
 	@pr Makefile C_instr2.c action.c arg_type.h decl.h default.c \
