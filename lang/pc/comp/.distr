@@ -3,6 +3,7 @@ LLlex.h
 LLmessage.c
 Makefile
 Parameters
+Resolve
 body.c
 casestat.C
 char.tab
@@ -38,6 +39,7 @@ make.tokcase
 make.tokfile
 misc.c
 misc.h
+nmclash.c
 node.H
 node.c
 options.c

@@ -10,25 +10,97 @@
 #include	"desig.h"
 #include	"idf.h"
 #include	"main.h"
+#include	"misc.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
 
+MarkDef(nd, flags, on)
+	register struct node *nd;
+	unsigned short flags;
+{
+	while( nd && nd->nd_class != Def ) {
+		if( (nd->nd_class == Arrsel) ||
+		    (nd->nd_class == LinkDef) )
+			nd = nd->nd_left;
+		else if( nd->nd_class == Arrow )
+			nd = nd->nd_right;
+		else break;
+	}
+	if( nd && (nd->nd_class == Def) ) {
+		if( (flags & D_SET) && on &&
+		    BlockScope != nd->nd_def->df_scope )
+			nd->nd_def->df_flags |= D_SETINHIGH;
+		if( on ) {
+			if( (flags & D_SET) &&
+			    (nd->nd_def->df_flags & D_WITH) )
+				node_warning(nd,
+				"variable \"%s\" already referenced in with",
+				nd->nd_def->df_idf->id_text);
+			nd->nd_def->df_flags |= flags;
+		}
+		else
+			nd->nd_def->df_flags &= ~flags;
+	}
+}
+
+AssertStat(expp, line)
+	register struct node *expp;
+	unsigned short line;
+{
+	struct desig dsr;
+
+	if( !ChkExpression(expp) )
+		return;
+
+	if( expp->nd_type != bool_type )	{
+		node_error(expp, "type of assertion should be boolean");
+		return;
+	}
+
+	if( options['a'] && !err_occurred ) {
+		dsr = InitDesig;
+		CodeExpr(expp, &dsr, NO_LABEL);
+		C_loc((arith)line);
+		C_cal("_ass");
+	}
+}
 
 AssignStat(left, right)
 	register struct node *left, *right;
 {
 	register struct type *ltp, *rtp;
+	int retval = 0;
 	struct desig dsr;
 
-	if( !(ChkExpression(right) && ChkLhs(left)) )
-		return;
+	retval = ChkExpression(right);
+	MarkUsed(right);
+	retval &= ChkLhs(left);
 
 	ltp = left->nd_type;
 	rtp = right->nd_type;
 
+	MarkDef(left, (unsigned short)D_SET, 1);
+
+	if( !retval ) return;
+
+	if( ltp == int_type && rtp == long_type )	{
+		right = MkNode(IntReduc, NULLNODE, right, &dot);
+		right->nd_type = int_type;
+	}
+	else if( ltp == long_type && rtp == int_type )	{
+		right = MkNode(IntCoerc, NULLNODE, right, &dot);
+		right->nd_type = long_type;
+	}
+
 	if( !TstAssCompat(ltp, rtp) )	{
 		node_error(left, "type incompatibility in assignment");
+		return;
+	}
+
+	if( left->nd_class == Def &&
+	    (left->nd_def->df_flags & D_INLOOP) )	{
+		node_error(left, "assignment to a control variable");
 		return;
 	}
 
@@ -45,7 +117,7 @@ AssignStat(left, right)
 			CodeValue(&dsr, rtp);
 
 			if( ltp == real_type && BaseType(rtp) == int_type )
-				Int2Real();
+				Int2Real(rtp->tp_size);
 
 			RangeCheck(ltp, rtp);
 		}
@@ -71,11 +143,15 @@ ChkForStat(nd)
 	register struct node *nd;
 {
 	register struct def *df;
+	int retvar = 0;
 
-	if( !(ChkVariable(nd) && ChkExpression(nd->nd_left) &&
-						ChkExpression(nd->nd_right)) )
-		return;
-	
+	retvar = ChkVariable(nd);
+	retvar &= ChkExpression(nd->nd_left);
+	MarkUsed(nd->nd_left);
+	retvar &= ChkExpression(nd->nd_right);
+	MarkUsed(nd->nd_right);
+	if( !retvar ) return;
+
 	assert(nd->nd_class == Def);
 
 	df = nd->nd_def;
@@ -88,12 +164,15 @@ ChkForStat(nd)
 	assert(df->df_kind == D_VARIABLE);
 
 	if( df->df_scope != GlobalScope && df->var_off >= 0 )	{
-	       node_error(nd,"for loop: control variable can't be a parameter");
-	       return;
+		node_error(nd,
+			    "for loop: control variable can't be a parameter");
+		MarkDef(nd,(unsigned short)(D_LOOPVAR | D_SET | D_USED), 1);
+		return;
 	}
 
 	if( !(df->df_type->tp_fund & T_ORDINAL) )	{
 		node_error(nd, "for loop: control variable must be ordinal");
+		MarkDef(nd,(unsigned short)(D_LOOPVAR | D_SET | D_USED), 1);
 		return;
 	}
 
@@ -105,9 +184,35 @@ ChkForStat(nd)
 		node_error(nd,
 		    "for loop: final value incompatible with control variable");
 	
-	df->df_flags |= D_LOOPVAR;
+	if( df->df_type == long_type )
+		node_error(nd, "for loop: control variable can not be a long");
+
+	if( df->df_flags & D_INLOOP )
+		node_error(nd, "for loop: control variable already used");
+
+	if( df->df_flags & D_SETINHIGH )
+		node_error(nd,
+			    "for loop: control variable already set in block");
+
+	MarkDef(nd,(unsigned short) (D_LOOPVAR | D_INLOOP | D_SET | D_USED), 1);
 
 	return;
+}
+
+EndForStat(nd)
+	register struct node *nd;
+{
+	register struct def *df;
+
+	df = nd->nd_def;
+
+	if( (df->df_scope != BlockScope) ||
+	    (df->df_scope != GlobalScope && df->var_off >= 0) ||
+	    !(df->df_type->tp_fund & T_ORDINAL)
+	  )
+		return;
+
+	MarkDef(nd,(unsigned short) (D_INLOOP | D_SET), 0);
 }
 
 arith
@@ -123,8 +228,10 @@ CodeInitFor(nd, priority)
 	CodePExpr(nd);
 	if( nd->nd_class != Value )	{
 		tmp = NewInt(priority);
+
 		C_dup(int_size);
 		C_stl(tmp);
+
 		return tmp;
 	}
 	return (arith) 0;
@@ -191,6 +298,19 @@ WithStat(nd)
 		return;
 	}
 
+	MarkDef(nd, (unsigned short)(D_USED | D_SET | D_WITH), 1);
+	/*
+	if( (nd->nd_class == Arrow) &&
+	    (nd->nd_right->nd_type->tp_fund & T_FILE) ) {
+		nd->nd_right->nd_def->df_flags |= D_WITH;
+	}
+	*/
+
+	scl = new_scopelist();
+	scl->sc_scope = nd->nd_type->rec_scope;
+	scl->next = CurrVis;
+	CurrVis = scl;
+
 	if( err_occurred ) return;
 
 	/* Generate code */
@@ -200,7 +320,7 @@ WithStat(nd)
 	wds = new_withdesig();
 	wds->w_next = WithDesigs;
 	WithDesigs = wds;
-	wds->w_scope = nd->nd_type->rec_scope;
+	wds->w_scope = scl->sc_scope;
 
 	/* create a desig structure for the temporary */
 	ds.dsg_kind = DSG_FIXED;
@@ -213,11 +333,6 @@ WithStat(nd)
 	/* record is indirectly available */
 	ds.dsg_kind = DSG_PFIXED;
 	wds->w_desig = ds;
-
-	scl = new_scopelist();
-	scl->sc_scope = wds->w_scope;
-	scl->next = CurrVis;
-	CurrVis = scl;
 }
 
 EndWith(saved_scl, nd)
@@ -227,6 +342,7 @@ EndWith(saved_scl, nd)
 	/* restore scope, and release structures */
 	struct scopelist *scl;
 	struct withdesig *wds;
+	struct node *nd1;
 
 	while( CurrVis != saved_scl )	{
 
@@ -234,6 +350,9 @@ EndWith(saved_scl, nd)
 		scl = CurrVis;
 		CurrVis = CurrVis->next;
 		free_scopelist(scl);
+
+		if( WithDesigs == 0 )
+			continue;	/* we didn't generate any code */
 
 		/* release temporary */
 		FreePtr(WithDesigs->w_desig.dsg_offset);
@@ -243,5 +362,10 @@ EndWith(saved_scl, nd)
 		WithDesigs = WithDesigs->w_next;
 		free_withdesig(wds);
 	}
+
+	for( nd1 = nd; nd1 != NULLNODE; nd1 = nd1->nd_right ) {
+		MarkDef(nd1->nd_left, (unsigned short)(D_WITH), 0);
+	}
+
 	FreeNode(nd);
 }

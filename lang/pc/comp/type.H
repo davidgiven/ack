@@ -77,17 +77,19 @@ struct type	{
 #define T_PROCEDURE	0x0010
 #define T_FUNCTION	0x0020
 #define T_FILE		0x0040
-#define T_STRING	0x0080
+#define T_STRINGCONST	0x0080
 #define T_SUBRANGE	0x0100
 #define T_SET		0x0200
 #define T_ARRAY		0x0400
 #define T_RECORD	0x0800
 #define T_POINTER	0x1000
-#define T_ERROR		0x2000	/* bad type */
-#define T_NUMERIC	(T_INTEGER | T_REAL)
-#define T_INDEX		(T_SUBRANGE | T_ENUMERATION | T_CHAR)
-#define T_ORDINAL	(T_INTEGER | T_INDEX)
-#define T_CONSTRUCTED	(T_ARRAY | T_SET | T_RECORD | T_FILE | T_STRING)
+#define T_LONG		0x2000
+#define T_STRING	0x4000
+#define T_ERROR		0x8000	/* bad type */
+#define T_NUMERIC	(T_INTEGER | T_REAL | T_LONG)
+#define T_INDEX		(T_SUBRANGE | T_ENUMERATION | T_CHAR | T_INTEGER )
+#define T_ORDINAL	(T_INDEX | T_LONG)
+#define T_CONSTRUCTED	(T_ARRAY | T_SET | T_RECORD | T_FILE | T_STRINGCONST)
 #define T_ROUTINE	(T_FUNCTION | T_PROCEDURE)
 	unsigned short tp_flags;
 #define T_HASFILE	0x1	/* set if type has a filecomponent */
@@ -112,16 +114,35 @@ extern struct type
 	*bool_type,
 	*char_type,
 	*int_type,
+	*long_type,
 	*real_type,
+	*string_type,
 	*std_type,
 	*text_type,
 	*nil_type,
 	*emptyset_type,
 	*error_type;		/* All from type.c */
 
+#include "nocross.h"
+#ifdef NOCROSS
+#include "target_sizes.h"
+#define	word_align	(AL_WORD)
+#define	int_align	(AL_INT)
+#define	long_align	(AL_LONG)
+#define	pointer_align	(AL_POINTER)
+#define	real_align	(AL_REAL)
+#define	struct_align	(AL_STRUCT)
+
+#define	word_size	(SZ_WORD)
+#define	int_size	(SZ_INT)
+#define	long_size	(SZ_LONG)
+#define	pointer_size	(SZ_POINTER)
+#define	real_size	(SZ_REAL)
+#else NOCROSS
 extern int
 	word_align,
 	int_align,
+	long_align,
 	pointer_align,
 	real_align,
 	struct_align;		/* All from type.c */
@@ -129,8 +150,10 @@ extern int
 extern arith
 	word_size,
 	int_size,
+	long_size,
 	pointer_size,
 	real_size;		/* All from type.c */
+#endif NOCROSS
 
 extern arith
 	align();

@@ -49,6 +49,7 @@ CaseExpr(nd)
 	register struct node *expp = nd->nd_left;
 
 	if( !ChkExpression(expp) ) return;
+	MarkUsed(expp);
 
 	if( !(expp->nd_type->tp_fund & T_ORDINAL) )	{
 		node_error(expp, "case-expression must be ordinal");

@@ -23,13 +23,17 @@ Enter(name, kind, type, pnam)
 {
 	/*	Enter a definition for "name" with kind "kind" and type
 		"type" in the Current Scope. If it is a standard name, also
-		put its number in the definition structure.
+		put its number in the definition structure, and mark the
+		name as set, to inhibit warnings about used before set.
 	*/
 	register struct def *df;
 
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
-	if( pnam ) df->df_value.df_reqname = pnam;
+	if( pnam ) {
+		df->df_value.df_reqname = pnam;
+		df->df_flags |= D_SET;
+	}
 	return df;
 }
 
@@ -45,13 +49,13 @@ EnterProgList(Idlist)
 			!strcmp(output, idlist->nd_IDF->id_text)
 		   ) {
 			/* the occurence of input or output as program- 
-			 * parameter is their declartion as a GLOBAL variable
-			 * of type text
+			 * parameter is their declaration as a GLOBAL
+			 *  variable of type text
 			 */
 			if( df = define(idlist->nd_IDF, CurrentScope,
 							D_VARIABLE) )	{
 				df->df_type = text_type;
-				df->df_flags |= (D_PROGPAR | D_NOREG);
+				df->df_flags |= (D_SET | D_PROGPAR | D_NOREG);
 				if( !strcmp(input, idlist->nd_IDF->id_text) ) {
 					df->var_name = input;
 					set_inp();
@@ -67,6 +71,7 @@ EnterProgList(Idlist)
 								D_PARAMETER) ) {
 				df->df_type = error_type;
 				df->df_flags |= D_PROGPAR;
+				df->var_name = idlist->nd_IDF->id_text;
 			}
 		}
 	
@@ -88,6 +93,7 @@ EnterEnumList(Idlist, type)
 		if( df = define(idlist->nd_IDF, CurrentScope, D_ENUM) )	{
 			df->df_type = type;
 			df->enm_val = (type->enm_ncst)++;
+			df->df_flags |= D_SET;
 		}
 	FreeNode(Idlist);
 }
@@ -171,7 +177,7 @@ EnterParamList(fpl, parlist)
 		for( id = fpl->nd_left; id; id = id->nd_next )
 		    if( df = define(id->nd_IDF, CurrentScope, D_VARIABLE) ) {
 			df->var_off = nb_pars;
-			if( fpl->nd_INT == D_VARPAR || IsConformantArray(tp) )
+			if( fpl->nd_INT & D_VARPAR || IsConformantArray(tp) )
 				nb_pars += pointer_size;
 			else
 				nb_pars += tp->tp_size;
@@ -192,6 +198,7 @@ EnterParamList(fpl, parlist)
 	return nb_pars;
 }
 
+arith
 EnterParTypes(fpl, parlist)
 	register struct node *fpl;
 	struct paramlist **parlist;
@@ -199,16 +206,30 @@ EnterParTypes(fpl, parlist)
 	/* Parameters in heading of procedural and functional
 	   parameters (only types are important, not the names).
 	*/
+	register arith nb_pars = 0;
 	register struct node *id;
+	struct type *tp;
 	struct def *df;
 
-	for( ; fpl; fpl = fpl->nd_right )
+	for( ; fpl; fpl = fpl->nd_right ) {
+		tp = fpl->nd_type;
 		for( id = fpl->nd_left; id; id = id->nd_next )
 			if( df = new_def() )	{
+				if( fpl->nd_INT & D_VARPAR ||
+				    IsConformantArray(tp) )
+					nb_pars += pointer_size;
+				else
+					nb_pars += tp->tp_size;
 				LinkParam(parlist, df);
-				df->df_type = fpl->nd_type;
+				df->df_type = tp;
 				df->df_flags |= fpl->nd_INT;
 			}
+		while( IsConformantArray(tp) ) {
+			nb_pars += 3 * word_size;
+			tp = tp->arr_elem;
+		}
+	}
+	return nb_pars;
 }
 
 LinkParam(parlist, df)

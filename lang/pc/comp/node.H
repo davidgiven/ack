@@ -19,6 +19,8 @@ struct node {
 #define Link		11
 #define LinkDef		12
 #define Cast		13	/* convert integer to real */
+#define IntCoerc	14	/* coercion of integers to longs */
+#define IntReduc	15	/* reduction of longs to integers */
 				/* do NOT change the order or the numbers!!! */
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;

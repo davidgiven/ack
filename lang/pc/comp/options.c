@@ -8,6 +8,7 @@
 #include	"idfsize.h"
 #include	"main.h"
 #include	"type.h"
+#include	"nocross.h"
 
 #define	MINIDFSIZE	9
 
@@ -28,8 +29,10 @@ DoOption(text)
 		break;
 				/* recognized flags:
 					-i: largest value of set of integer
-					-u: allow underscore in identifier
+					-u, -U: allow underscore in identifier
 					-w: no warnings
+					-R: no range checks
+					-A: range checks for array references
 				   and many more if DEBUG
 				*/
 
@@ -51,9 +54,10 @@ DoOption(text)
 
 		idfsize = txt2int(&t);
 		text = t;
-		if( idfsize <= 0 || *t )
+		if( idfsize <= 0 || *t ) {
 			fatal("malformed -M option");
 			/*NOTREACHED*/
+		}
 		if( idfsize > IDFSIZE )	{
 			idfsize = IDFSIZE;
 			warning("maximum identifier length is %d", IDFSIZE);
@@ -65,14 +69,15 @@ DoOption(text)
 		break;
 	}
 
-	case 'u':			/* underscore allowed in identifiers */
-		class('_') = STIDF;
-		inidf['_'] = 1;
-		break;
+	/* case 'u':			/* underscore allowed in identifiers */
+		/* class('_') = STIDF;
+		/* inidf['_'] = 1;
+		/* break;
+		*/
 
 	case 'V' :	{ /* set object sizes and alignment requirements */
-			  /* syntax : -V[ [w|i|f|p] size? [.alignment]? ]* */
-
+			  /* syntax : -V[ [w|i|l|f|p] size? [.alignment]? ]* */
+#ifndef NOCROSS
 		register arith size;
 		register int align;
 		char c, *t;
@@ -88,7 +93,7 @@ DoOption(text)
 				align = txt2int(&t);
 				text = t;
 			}
-			if( !strindex("wifpS", c) )
+			if( !strindex("wilfpS", c) )
 				error("-V: bad type indicator %c\n", c);
 			if( size )
 				switch( c )	{
@@ -97,6 +102,9 @@ DoOption(text)
 					break;
 				case 'i':	/* int		*/
 					int_size = size;
+					break;
+				case 'l':	/* long		*/
+					long_size = size;
 					break;
 				case 'f':	/* real		*/
 					real_size = size;
@@ -117,6 +125,9 @@ DoOption(text)
 				case 'i':	/* int		*/
 					int_align = align;
 					break;
+				case 'l':	/* long		*/
+					long_align = align;
+					break;
 				case 'f':	/* real		*/
 					real_align = align;
 					break;
@@ -129,6 +140,7 @@ DoOption(text)
 				}
 		}
 		break;
+#endif NOCROSS
 	}
 	}
 }

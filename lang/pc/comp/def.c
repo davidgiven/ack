@@ -52,8 +52,15 @@ define(id, scope, kind)
 	*/
 	register struct def *df;
 
-	if( df = lookup(id, scope) )	{
+	if( df = lookup(id, scope, 0) )	{
 		switch( df->df_kind )	{
+
+		    case D_INUSE :
+			if( kind != D_INUSE ) {
+			    error("\"%s\" already used in this block",
+							id->id_text);
+			}
+			return MkDef(id, scope, kind);
 
 		    case D_LABEL :
 			/* generate error message somewhere else */
@@ -113,7 +120,7 @@ DoDirective(directive, nd, tp, scl, function)
 	int kind;			/* kind of directive */
 	int inp;			/* internal or external name */
 	int ext = 0;		/* directive = EXTERN */
-	struct def *df = lookup(directive, PervasiveScope);
+	struct def *df = lookup(directive, PervasiveScope, D_INUSE);
 
 	if( !df )	{
 		if( !is_anon_idf(directive) )
@@ -136,6 +143,7 @@ DoDirective(directive, nd, tp, scl, function)
 
 		default:
 			crash("(DoDirective)");
+			/* NOTREACHED */
 	}
 
 	if( df = define(nd->nd_IDF, CurrentScope, kind) )	{
@@ -150,9 +158,10 @@ DoDirective(directive, nd, tp, scl, function)
 		df->prc_vis = scl;
 		df->prc_name = gen_proc_name(nd->nd_IDF, inp);
 		if( ext ) df->df_flags |= D_EXTERNAL;
+		df->df_flags |= D_SET;
 	}
 }
-			
+
 struct def *
 DeclProc(nd, tp, scl)
 	register struct node *nd;
@@ -162,6 +171,7 @@ DeclProc(nd, tp, scl)
 	register struct def *df;
 
 	if( df = define(nd->nd_IDF, CurrentScope, D_PROCEDURE) )	{
+		df->df_flags |= D_SET;
 		if( df->df_kind == D_FWPROCEDURE )	{
 			df->df_kind = D_PROCEDURE;	/* identification */
 
@@ -172,7 +182,7 @@ DeclProc(nd, tp, scl)
 
 			if( tp->prc_params )
 				node_error(nd,
-				  "procedure identification \"%s\" expected",
+				  "\"%s\" already declared",
 							nd->nd_IDF->id_text);
 		}
 		else	{	/* normal declaration */
@@ -181,6 +191,7 @@ DeclProc(nd, tp, scl)
 			/* simulate open_scope() */
 			CurrVis = df->prc_vis = scl;
 		}
+		routine_label(df);
 	}
 	else CurrVis = scl;		/* simulate open_scope() */
 
@@ -196,11 +207,12 @@ DeclFunc(nd, tp, scl)
 	register struct def *df;
 
 	if( df = define(nd->nd_IDF, CurrentScope, D_FUNCTION) )	{
+	    df->df_flags &= ~D_SET;
 	    if( df->df_kind == D_FUNCTION )	{	/* declaration */
 		if( !tp )	{
 			node_error(nd, "\"%s\" illegal function declaration",
 							nd->nd_IDF->id_text);
-			tp = error_type;
+			tp = construct_type(T_FUNCTION, error_type);
 		}
 		/* simulate open_scope() */
 		CurrVis = df->prc_vis = scl;
@@ -215,12 +227,67 @@ DeclFunc(nd, tp, scl)
 
 		if( tp )
 			node_error(nd,
-				   "function identification \"%s\" expected",
+				   "\"%s\" already declared",
 				   nd->nd_IDF->id_text);
 
 	    }
+	    routine_label(df);
 	}
 	else CurrVis = scl;			/* simulate open_scope() */
 
 	return df;
+}
+
+EndFunc(df)
+	register struct def *df;
+{
+	/* assignment to functionname is illegal outside the functionblock */
+	df->prc_res = 0;
+
+	/* Give the error about assignment as soon as possible. The
+	 * |= assignment inhibits a warning in the main procedure.
+	 */
+	if( !(df->df_flags & D_SET) ) {
+		error("function \"%s\" not assigned",df->df_idf->id_text);
+		df->df_flags |= D_SET;
+	}
+}
+
+EndBlock(block_df)
+	register struct def *block_df;
+{
+	register struct def *tmp_def = CurrentScope->sc_def;
+	register struct def *df;
+
+	while( tmp_def ) {
+	    df = tmp_def;
+	    	/* The length of a usd_def chain is at most 1.
+		 * The while is just defensive programming.
+		 */
+	    while( df->df_kind & D_INUSE )
+		df = df->usd_def;
+
+	    if( !is_anon_idf(df->df_idf)
+		    && (df->df_scope == CurrentScope) ) {
+		if( !(df->df_kind & (D_ENUM|D_LABEL|D_ERROR)) ) {
+		    if( !(df->df_flags & D_USED) ) {
+			if( !(df->df_flags & D_SET) ) {
+			    warning("\"%s\" neither set nor used in \"%s\"",
+				df->df_idf->id_text, block_df->df_idf->id_text);
+			}
+			else {
+			    warning("\"%s\" unused in \"%s\"",
+				df->df_idf->id_text, block_df->df_idf->id_text);
+			}
+		    }
+		    else if( !(df->df_flags & D_SET) ) {
+			if( !(df->df_flags & D_LOOPVAR) )
+			    warning("\"%s\" not set in \"%s\"",
+				df->df_idf->id_text, block_df->df_idf->id_text);
+		    }
+		}
+
+	    }
+	    tmp_def = tmp_def->df_nextinscope;
+	}
 }

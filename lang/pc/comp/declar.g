@@ -1,10 +1,14 @@
 /* D E C L A R A T I O N S */
 
 {
+/* next line DEBUG */ 
+#include	"debug.h"
+
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<pc_file.h>
 
 #include	"LLlex.h"
 #include	"chk_expr.h"
@@ -16,8 +20,12 @@
 #include	"scope.h"
 #include	"type.h"
 
+#define	offsetof(type, field)	(int) &(((type *)0)->field)
+#define	PC_BUFSIZ	(sizeof(struct file) - (int)((struct file *)0)->bufadr)
+
 int proclevel = 0;		/* nesting level of procedures */
 int parlevel = 0;		/* nesting level of parametersections */
+int expect_label = 0;		/* so the parser knows that we expect a label */
 static int in_type_defs;	/* in type definition part or not */
 }
 
@@ -25,42 +33,14 @@ static int in_type_defs;	/* in type definition part or not */
 Block(struct def *df;)
 {
 	arith i;
-	label save_label;
 } :
 					{ text_label = (label) 0; }
 	LabelDeclarationPart
-	ConstantDefinitionPart
-					{ in_type_defs = 1; }
-	TypeDefinitionPart
-					{ in_type_defs = 0;
-					  /* resolve forward references */
-					  chk_forw_types();
-					}
-	VariableDeclarationPart
-					{ if( !proclevel )	{
-						chk_prog_params();
-						BssVar();
-					  }
-					  proclevel++;
-					  save_label = text_label;
-					}
-	ProcedureAndFunctionDeclarationPart
-					{ text_label = save_label;
-
-					  proclevel--;
-					  chk_directives();
-
-					  /* needed with labeldefinitions
-					     and for-statement
-					  */
-					  BlockScope = CurrentScope;
-
-					  if( !err_occurred )
-						i = CodeBeginBlock( df );
-					}
+	Module(df, &i)
 	CompoundStatement
 					{ if( !err_occurred )
 						CodeEndBlock(df, i);
+					  if( df ) EndBlock(df);
 					  FreeNode(BlockScope->sc_lablist);
 					}
 ;
@@ -89,6 +69,44 @@ LabelDeclarationPart
 		';'
 	]?
 ;
+
+Module(struct def *df; arith *i;)
+{
+	label save_label;
+} :
+	ConstantDefinitionPart
+					{ in_type_defs = 1; }
+	TypeDefinitionPart
+					{ in_type_defs = 0;
+					  /* resolve forward references */
+					  chk_forw_types();
+					}
+	VariableDeclarationPart
+					{ if( !proclevel )	{
+						chk_prog_params();
+						BssVar();
+					  }
+					  proclevel++;
+					  save_label = text_label;
+					}
+	ProcedureAndFunctionDeclarationPart
+					{ text_label = save_label;
+
+					  proclevel--;
+					  chk_directives();
+
+					  /* needed with labeldefinitions
+					     and for-statement
+					  */
+					  BlockScope = CurrentScope;
+
+					  if( !err_occurred )
+						*i = CodeBeginBlock( df );
+					}
+;
+
+
+
 
 ConstantDefinitionPart:
 	[
@@ -132,10 +150,11 @@ Label(struct node **pnd;)
 {
 	char lab[5];
 	extern char *sprint();
-} :
+} :	{ expect_label = 1; }
 	INTEGER		/* not really an integer, in [0..9999] */
 	{ if( dot.TOK_INT < 0 || dot.TOK_INT > 9999 )	{
-		error("label must lie in closed interval [0..9999]");
+		if( dot.TOK_INT != -1 )		/* This means insertion */
+			error("label must lie in closed interval [0..9999]");
 		*pnd = NULLNODE;
 	  }
 	  else	{
@@ -143,6 +162,7 @@ Label(struct node **pnd;)
 		*pnd = MkLeaf(Name, &dot);
 		(*pnd)->nd_IDF = str2idf(lab, 1);
 	  }
+	  expect_label = 0;
 	}
 ;
 
@@ -159,6 +179,7 @@ ConstantDefinition
 			{ if( df = define(id,CurrentScope,D_CONST) )	{
 			  	df->con_const = nd;
 				df->df_type = nd->nd_type;
+				df->df_flags |= D_SET;
 			  }
 			}
 ;
@@ -172,8 +193,10 @@ TypeDefinition
 } :
 	IDENT			{ id = dot.TOK_IDF; }
 	'=' TypeDenoter(&tp)
-			{ if( df = define(id, CurrentScope, D_TYPE) )
+			{ if( df = define(id, CurrentScope, D_TYPE) ) {
 			  	df->df_type = tp;
+				df->df_flags |= D_SET;
+			  }
 			}
 ;
 
@@ -276,7 +299,9 @@ ProcedureHeading(register struct node **pnd; register struct type **ptp;)
 	struct node *fpl;
 } :
 	PROCEDURE
-	IDENT			{ *pnd = MkLeaf(Name, &dot); }
+	IDENT			{
+				  *pnd = MkLeaf(Name, &dot);
+				}
 	[
 		FormalParameterList(&fpl)
 				{ arith nb_pars = 0;
@@ -287,14 +312,16 @@ ProcedureHeading(register struct node **pnd; register struct type **ptp;)
 					nb_pars = EnterParamList(fpl, &pr);
 				  else
 					/* procedure parameter */
-					EnterParTypes(fpl, &pr);
+					nb_pars = EnterParTypes(fpl, &pr);
 				
 				  *ptp = proc_type(pr, nb_pars);
 				  FreeNode(fpl);
 				}
 	|
 		/* empty */
-				{ *ptp = proc_type(0, 0); }
+				{ *ptp =
+				    proc_type((struct paramlist *)0, (arith) 0);
+				}
 	]
 ;
 
@@ -329,16 +356,18 @@ FunctionDeclaration
 				  else DoDirective(dot.TOK_IDF, nd, tp, scl, 1);
 				}
 	|
-				{ if( df = DeclFunc(nd, tp, scl) )
-					df->prc_res = CurrentScope->sc_off =
+				{ if( df = DeclFunc(nd, tp, scl) ) {
+					df->prc_res =
 					     - ResultType(df->df_type)->tp_size;
+					df->prc_bool =
+						CurrentScope->sc_off =
+							df->prc_res - int_size;
+				    }
 				}
 			Block(df)
-				{ if( df )
-					/* assignment to functionname is illegal
-					   outside the functionblock
-					 */
-					df->prc_res = 0;
+				{ if( df ) {
+					EndFunc(df);
+				  }
 
 				  /* open_scope() is simulated in DeclFunc() */
 				  close_scope();
@@ -368,7 +397,7 @@ FunctionHeading(register struct node **pnd; register struct type **ptp;)
 					nb_pars = EnterParamList(fpl, &pr);
 				  else
 					/* function parameter */
-					EnterParTypes(fpl, &pr);
+					nb_pars = EnterParTypes(fpl, &pr);
 				}
 	|
 		/* empty */
@@ -627,7 +656,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 
 			/* initialize selector */
 			(*sel)->sel_ptrs = (struct selector **)
-				       Malloc(ncst * sizeof(struct selector *));
+			   Malloc((unsigned)ncst * sizeof(struct selector *));
 			(*sel)->sel_ncst = ncst;
 			(*sel)->sel_lb = lb;
 
@@ -758,6 +787,12 @@ FileType(register struct type **ptp;):
 			      error("file type has an illegal component type");
 			      (*ptp)->next = error_type;
 			  }
+			  else {
+				if( (*ptp)->next->tp_size > PC_BUFSIZ )
+					(*ptp)->tp_size = (*ptp)->tp_psize =
+					    (*ptp)->next->tp_size +
+					    sizeof(struct file) - PC_BUFSIZ;
+			  }
 			}
 ;
 
@@ -771,7 +806,10 @@ PointerType(register struct type **ptp;)
 			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
 	IDENT
 			{ nd = MkLeaf(Name, &dot);
-			  df = lookup(nd->nd_IDF, CurrentScope);
+			  df = lookup(nd->nd_IDF, CurrentScope, D_INUSE);
+			  /* if( !df && CurrentScope == GlobalScope)
+			      df = lookup(nd->nd_IDF, PervasiveScope, D_INUSE);
+			  */
 			  if( in_type_defs &&
 			      (!df || (df->df_kind & (D_ERROR | D_FORWTYPE)))
 			    )
@@ -814,11 +852,11 @@ FormalParameterSection(struct node *nd;):
 	[
 		/* ValueParameterSpecification */
 		/* empty */
-					{ nd->nd_INT = D_VALPAR; }
+					{ nd->nd_INT = (D_VALPAR | D_SET); }
 	|
 		/* VariableParameterSpecification */
 		VAR
-					{ nd->nd_INT = D_VARPAR; }
+					{ nd->nd_INT = (D_VARPAR | D_USED); }
 	]
 	IdentifierList(&(nd->nd_left)) ':'
 	[
@@ -829,15 +867,17 @@ FormalParameterSection(struct node *nd;):
 		TypeIdentifier(&(nd->nd_type))
 	]
 			{ if( nd->nd_type->tp_flags & T_HASFILE  &&
-			      nd->nd_INT  == D_VALPAR ) {
+			      (nd->nd_INT  & D_VALPAR) ) {
 			    error("value parameter can't have a filecomponent");
 			    nd->nd_type = error_type;
 			  }
 			}
 |
 	ProceduralParameterSpecification(&(nd->nd_left), &(nd->nd_type))
+					{ nd->nd_INT = (D_VALPAR | D_SET); }
 |
 	FunctionalParameterSpecification(&(nd->nd_left), &(nd->nd_type))
+					{ nd->nd_INT = (D_VALPAR | D_SET); }
 ]
 ;
 
@@ -923,13 +963,19 @@ Index_TypeSpecification(register struct type **ptp, *tp;)
 	register struct def *df1, *df2;
 } :
 	IDENT
-			{ if( df1 = define(dot.TOK_IDF, CurrentScope, D_LBOUND))
+			{ if( df1 =
+			    define(dot.TOK_IDF, CurrentScope, D_LBOUND)) {
 				df1->bnd_type = tp;	/* type conf. array */
+				df1->df_flags |= D_SET;
+			  }
 			}
 	UPTO
 	IDENT
-			{ if( df2 = define(dot.TOK_IDF, CurrentScope, D_UBOUND))
+			{ if( df2 =
+			    define(dot.TOK_IDF, CurrentScope, D_UBOUND)) {
 				df2->bnd_type = tp;	/* type conf. array */
+				df2->df_flags |= D_SET;
+			  }
 			}
 	':' TypeIdentifier(ptp)
 			{ if( !bounded(*ptp) &&

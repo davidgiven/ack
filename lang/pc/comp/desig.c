@@ -16,6 +16,8 @@
 #include	"def.h"
 #include	"desig.h"
 #include	"main.h"
+/* next line DEBUG */
+#include	"idf.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
@@ -87,7 +89,7 @@ CodeMove(rhs, left, rtp)
 	switch( rhs->dsg_kind )	{
 	case DSG_LOADED:
 		CodeDesig(left, lhs);
-		if( rtp->tp_fund == T_STRING )	{
+		if( rtp->tp_fund == T_STRINGCONST )	{
 			CodeAddress(lhs);
 			C_blm(lhs->dsg_packed ? ltp->tp_psize : ltp->tp_size);
 			return;
@@ -439,6 +441,13 @@ CodeFuncDesig(df, ds)
 		   the function (i.e. in the statement-part of a nested function
 		   or procedure).
 		*/
+		if( !options['R'] ) {
+			C_loc((arith)1);
+			C_lxl((arith) (proclevel - df->df_scope->sc_level - 1));
+			C_adp(df->prc_bool);
+			C_sti(int_size);
+		}
+
 		C_lxl((arith) (proclevel - df->df_scope->sc_level - 1));
 		ds->dsg_kind = DSG_PLOADED;
 	}
@@ -446,6 +455,11 @@ CodeFuncDesig(df, ds)
 		/* Assignment to function-identifier in the statement-part of
 		   the function.
 		*/
+		if( !options['R'] ) {
+			C_loc((arith)1);
+			C_stl(df->prc_bool);
+		}
+
 		ds->dsg_kind = DSG_FIXED;
 	}
 	assert(df->prc_res < 0);
@@ -518,6 +532,9 @@ CodeDesig(nd, ds)
 		else
 			C_lae_dlb(tp->arr_ardescr, (arith) 0);
 
+		if( options['A'] ) {
+			C_cal("_rcka");
+		}
 		ds->dsg_kind = DSG_INDEXED;
 		ds->dsg_packed = IsPacked(tp);
 		break;

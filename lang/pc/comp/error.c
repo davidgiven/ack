@@ -130,7 +130,7 @@ _error(class, node, fmt, argv)
 	static unsigned int last_ln = 0;
 	unsigned int ln = 0;
 	static char * last_fn = 0;
-	static int e_seen = 0;
+	static int e_seen = 0, w_seen = 0;
 	register char *remark = 0;
 
 	/*	Since name and number are gathered from different places
@@ -189,17 +189,25 @@ _error(class, node, fmt, argv)
 #endif
 	if( FileName == last_fn && ln == last_ln )	{
 		/* we've seen this place before */
-		e_seen++;
-		if( e_seen == MAXERR_LINE ) fmt = "etc ...";
-		else if( e_seen > MAXERR_LINE )
-			/* and too often, I'd say ! */
-			return;
+		if( class != WARNING && class != LEXWARNING ) {
+			e_seen++;
+			if( e_seen == MAXERR_LINE ) fmt = "etc ...";
+			else if( e_seen > MAXERR_LINE )
+				/* and too often, I'd say ! */
+				return;
+		}
+		else {
+			w_seen++;
+			if( w_seen == MAXERR_LINE ) fmt = "etc ...";
+			else if( w_seen > MAXERR_LINE )
+				return;
+		}
 	}
 	else	{
 		/* brand new place */
 		last_ln = ln;
 		last_fn = FileName;
-		e_seen = 0;
+		e_seen = w_seen = 0;
 	}
 #ifdef DEBUG
 	}

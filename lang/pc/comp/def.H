@@ -47,6 +47,11 @@ struct lab	{
 
 /* ALLOCDEF "lab" 10 */
 
+struct used	{
+	struct def *us_def;	/* used definition */
+#define usd_def		df_value.df_used.us_def
+};
+
 struct forwtype	{
 	struct forwtype *f_next;
 	struct node *f_node;
@@ -58,10 +63,14 @@ struct forwtype	{
 struct dfproc	{			/* used for procedures and functions */
 	struct scopelist *pc_vis;	/* scope of this procedure/function */
 	char *pc_name;			/* internal name */
+	label pc_label;			/* label of name (for tracing) */
 	arith pc_res;			/* offset of function result */
+	arith pc_bool;			/* offset of run-time boolean */
 #define prc_vis		df_value.df_proc.pc_vis
 #define prc_name	df_value.df_proc.pc_name
+#define prc_label	df_value.df_proc.pc_label
 #define prc_res		df_value.df_proc.pc_res
+#define prc_bool	df_value.df_proc.pc_bool
 };
 
 struct def	{		/* list of definitions for a name */
@@ -71,39 +80,46 @@ struct def	{		/* list of definitions for a name */
 	struct idf *df_idf;	/* link back to the name */
 	struct scope *df_scope;	/* scope in which this definition resides */
 	long df_kind;		/* the kind of this definition: */
-#define D_PROCEDURE	0x00001	/* procedure */
-#define D_FUNCTION	0x00002	/* function */
-#define D_TYPE		0x00004	/* a type */
-#define D_CONST		0x00008	/* a constant */
-#define D_ENUM		0x00010	/* an enumeration literal */
-#define D_FIELD		0x00020	/* a field in a record */
-#define D_PROGRAM	0x00040	/* the program */
-#define D_VARIABLE	0x00080	/* a variable */
-#define D_PARAMETER	0x00100	/* program parameter */
-#define D_FORWTYPE	0x00200	/* forward type */
-#define D_FTYPE		0x00400	/* resolved forward type */
-#define D_FWPROCEDURE	0x00800	/* forward procedure */
-#define D_FWFUNCTION	0x01000	/* forward function */
-#define D_LABEL		0x02000	/* a label */
-#define D_LBOUND	0x04000	/* lower bound identifier in conformant array */
-#define D_UBOUND	0x08000	/* upper bound identifier in conformant array */
-#define D_FORWARD	0x10000	/* directive "forward" */
-#define D_EXTERN	0x20000	/* directive "extern" */
-#define D_ERROR		0x40000	/* a compiler generated definition for an
-				 * undefined variable
-				 */
+#define D_PROCEDURE	0x000001	/* procedure */
+#define D_FUNCTION	0x000002	/* function */
+#define D_TYPE		0x000004	/* a type */
+#define D_CONST		0x000008	/* a constant */
+#define D_ENUM		0x000010	/* an enumeration literal */
+#define D_FIELD		0x000020	/* a field in a record */
+#define D_PROGRAM	0x000040	/* the program */
+#define D_VARIABLE	0x000080	/* a variable */
+#define D_PARAMETER	0x000100	/* program parameter */
+#define D_FORWTYPE	0x000200	/* forward type */
+#define D_FTYPE		0x000400	/* resolved forward type */
+#define D_FWPROCEDURE	0x000800	/* forward procedure */
+#define D_FWFUNCTION	0x001000	/* forward function */
+#define D_LABEL		0x002000	/* a label */
+#define D_LBOUND	0x004000	/* lower bound id. in conform. array */
+#define D_UBOUND	0x008000	/* upper bound id. in conform. array */
+#define D_FORWARD	0x010000	/* directive "forward" */
+#define D_EXTERN	0x020000	/* directive "extern" */
+#define D_ERROR		0x040000	/* a compiler generated definition
+					 * for an undefined variable */
+#define D_MODULE	0x080000	/* the module */
+#define D_INUSE		0x100000	/* variable is in use */
+
 #define D_VALUE		(D_FUNCTION | D_CONST | D_ENUM | D_FIELD | D_VARIABLE\
 			 | D_FWFUNCTION | D_LBOUND | D_UBOUND)
 #define D_ROUTINE      (D_FUNCTION | D_FWFUNCTION | D_PROCEDURE | D_FWPROCEDURE)
 	unsigned short df_flags;
-#define D_NOREG		0x01	/* set if it may not reside in a register */
-#define D_VALPAR	0x02	/* set if it is a value parameter */
-#define D_VARPAR	0x04	/* set if it is a var parameter */
-#define D_LOOPVAR	0x08	/* set if it is a contol-variable */
-#define D_EXTERNAL	0x10	/* set if proc/func is external declared */
-#define D_PROGPAR	0x20	/* set if input/output was mentioned in
-				 * the program-heading
-				 */
+#define D_NOREG		0x001	/* set if it may not reside in a register */
+#define D_VALPAR	0x002	/* set if it is a value parameter */
+#define D_VARPAR	0x004	/* set if it is a var parameter */
+#define D_LOOPVAR	0x008	/* set if it is a control-variable */
+#define D_EXTERNAL	0x010	/* set if proc/func is external declared */
+#define D_PROGPAR	0x020	/* set if input/output was mentioned in
+				 * the program-heading */
+#define D_USED		0x040	/* set when the variable is used */
+#define D_SET		0x080	/* set when the variable is set */
+#define D_INLOOP	0x100	/* set when we are inside a loop */
+#define D_WITH		0x200	/* set inside a with statement */
+#define D_SETINHIGH	0x400	/* set in a higher scope level (for loops) */
+
 	struct type *df_type;
 	union {
 		struct constant df_constant;
@@ -112,6 +128,7 @@ struct def	{		/* list of definitions for a name */
 		struct enumval df_enum;
 		struct field df_field;
 		struct lab df_label;
+		struct used df_used;
 		struct forwtype *df_fwtype;
 		struct dfproc df_proc;
 		int df_reqname;	/* define for required name */

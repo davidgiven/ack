@@ -4,15 +4,18 @@
 em_pc \- Pascal compiler
 .SH SYNOPSIS
 .B em_pc
-.RI [ option ] 
+.RI [ option ]
 .I source
 .I destination
 .SH DESCRIPTION
 .I Em_pc
 is a compiler that translates Pascal programs into EM code.
+Normally the compiler is called by means of the user interface program
+\fIack\fR(I).
+.PP
 The input is taken from
 .IR source ,
-while the EM code is written on 
+while the EM code is written on
 .IR destination .
 .br
 .I Option
@@ -21,6 +24,7 @@ is a, possibly empty, sequence of the following combinations:
 set maximum identifier length to \fIn\fP.
 The minimum value for \fIn\fR is 9, because the keyword
 "PROCEDURE" is that long.
+.IR n
 .IP \fB\-n\fR
 do not generate EM register messages.
 The user-declared variables will not be stored into registers on the target
@@ -32,7 +36,8 @@ an interpreter to keep track of the current location in the source code.
 .br
 set the size and alignment requirements.
 The letter \fIc\fR indicates the simple type, which is one of
-\fBw\fR(word size), \fBi\fR(INTEGER), \fBf\fR(REAL), or \fBp\fR(POINTER).
+\fBw\fR(word size), \fBi\fR(INTEGER), \fBl\fR(LONG), \fBr\fR(REAL),
+\fBp\fR(POINTER).
 It may also be the letter \fBS\fR, indicating that an initial
 record alignment follows.
 The \fIm\fR parameter can be used to specify the length of the type (in bytes)
@@ -40,22 +45,39 @@ and the \fIn\fR parameter for the alignment of that type.
 Absence of \fIm\fR or \fIn\fR causes a default value to be retained.
 .IP \fB\-w\fR
 suppress warning messages.
-.IP \fB\-u\fR
-The character '_' is treated like a letter, so it is allowed to use the
-underscore in identifiers.
-.IP \fB\-i\fR\fInum\fR
-maximum number of bits in a set. When not used, a default value is
-retained.
+.IP
+.IP \fB\-R\fR
+disable range checks. Additionally, the run-time tests to see if
+a function is assigned, are skipped.
+.IP \fB\-A\fR
+enable extra array bound checks, for machines that do not implement the
+EM ones.
 .IP \fB\-C\fR
-The lower case and upper case letters are treated different.
-.IP \fB\-r\fR
-The rangechecks are generated where necessary.
-.LP
+the lower case and upper case letters are treated differently.
+.IP "\fB\-u\fR, \fB\-U\fR"
+allow underscores in identifiers. It is not allowed to start an identifier
+with an underscore.
+.IP \fB\-a\fR
+don't generate code for assertions.
+.IP \fB\-c\fR
+allow C-like strings. This option is mainly intended for usage with
+C-functions. This option will cause the type 'string' to be known.
+.IP \fB\-d\fR
+allow the type 'long'.
+.IP \fB\-i\fR\fIn\fR
+set the size of integer sets to \fIn\fR. When not used, a default value is
+retained.
+.IP \fB\-s\fR
+allow only standard Pascal. This disables the \fB\-c\fR, \fB\-d\fR, \fB\-u\fR,
+\fB\-U\fR and \fB\-C\fR
+options. Furthermore, assertions are not recognized at all (instead of just
+being skipped).
+.IP \fB\-t\fR
+trace calls and exits of procedures and functions.
+.PP
 .SH FILES
 .IR ~em/lib/em_pc :
 binary of the Pascal compiler.
 .SH DIAGNOSTICS
 All warning and error messages are written on standard error output.
-.SH REMARKS
-Debugging and profiling facilities may be present during the development
-of \fIem_pc\fP.
+Descriptions of run-time errors are read from ~em/etc/pc_rt_errors.

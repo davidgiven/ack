@@ -33,9 +33,49 @@ Xerror(nd, mess)
 	if( nd->nd_class == Def && nd->nd_def )	{
 		if( nd->nd_def->df_kind != D_ERROR )
 			node_error(nd,"\"%s\": %s",
-					nd->nd_def->df_idf->id_text, mess);
+				    nd->nd_def->df_idf->id_text, mess);
 	}
 	else	node_error(nd, "%s", mess);
+}
+
+struct node *
+ZeroParam()
+{
+	register struct node *nd;
+
+	nd = MkLeaf(Value, &dot);
+	nd->nd_type = int_type;
+	nd->nd_symb = INTEGER;
+	nd->nd_INT = (arith) 0;
+	nd = MkNode(Link, nd, NULLNODE, &dot);
+	nd->nd_symb = ',';
+
+	return nd;
+}
+
+MarkUsed(nd)
+	register struct node *nd;
+{
+	while( nd && nd->nd_class != Def ) {
+		if( (nd->nd_class == Arrsel) || (nd->nd_class == LinkDef) )
+			nd = nd->nd_left;
+		else if( nd->nd_class == Arrow)
+			nd = nd->nd_right;
+		else break;
+	}
+
+	if( nd && nd->nd_class == Def ) {
+		if( !((nd->nd_def->df_flags & D_VARPAR) ||
+		    (nd->nd_def->df_kind == D_FIELD)) ) {
+			if( !(nd->nd_def->df_flags & D_SET) &&
+			    (nd->nd_def->df_scope == CurrentScope) )
+				if( !is_anon_idf(nd->nd_def->df_idf) ) {
+					warning("\"%s\" used before set",
+						nd->nd_def->df_idf->id_text);
+				}
+			nd->nd_def->df_flags |= (D_USED | D_SET);
+		}
+	}
 }
 
 STATIC int
@@ -89,6 +129,7 @@ ChkLhs(expp)
 	if( !ChkVarAccess(expp) ) return 0;
 
 	class = expp->nd_class;
+
 	/* a constant is replaced by it's value in ChkLinkOrName, check here !,
 	 * the remaining classes are checked by ChkVarAccess
 	 */
@@ -160,7 +201,7 @@ ChkLinkOrName(expp)
 			return 0;
 		}
 
-		if( !(df = lookup(expp->nd_IDF, left->nd_type->rec_scope)) ) {
+		if( !(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, D_INUSE)) ) {
 			id_not_declared(expp);
 			return 0;
 		}
@@ -176,6 +217,7 @@ ChkLinkOrName(expp)
 	df = expp->nd_def;
 
 	if( df->df_kind & (D_ENUM | D_CONST) )	{
+		MarkUsed(expp);
 		/* Replace an enum-literal or a CONST identifier by its value.
 		*/
 		if( df->df_kind == D_ENUM )	{
@@ -201,8 +243,9 @@ ChkExLinkOrName(expp)
 	if( !ChkLinkOrName(expp) ) return 0;
 	if( expp->nd_class != Def ) return 1;
 
-	if( !(expp->nd_def->df_kind & D_VALUE) )
+	if( !(expp->nd_def->df_kind & D_VALUE) ) {
 		Xerror(expp, "value expected");
+	}
 
 	return 1;
 }
@@ -218,6 +261,8 @@ ChkUnOper(expp)
 
 	if( !ChkExpression(right) ) return 0;
 
+	MarkUsed(right);
+
 	expp->nd_type = tpr = BaseType(right->nd_type);
 
 	switch( expp->nd_symb )	{
@@ -230,7 +275,7 @@ ChkUnOper(expp)
 		break;
 
 	case '-':
-		if( tpr->tp_fund == T_INTEGER )	{
+		if( tpr->tp_fund == T_INTEGER || tpr->tp_fund == T_LONG ) {
 			if( right->nd_class == Value )
 				cstunary(expp);
 			return 1;
@@ -256,6 +301,9 @@ ChkUnOper(expp)
 		break;
 
 	case '(':
+		/* Delete the brackets */
+		*expp = *right;
+		free_node(right);
 		return 1;
 
 	default:
@@ -287,10 +335,13 @@ ResultOfOperation(operator, tpl, tpr)
 		case '*'	:
 				if( tpl == real_type || tpr == real_type )
 					return real_type;
+				if( tpl == long_type || tpr == long_type)
+					return long_type;
 				return tpl;
 		case '/'	:
 				return real_type;
 	}
+	if (tpr == long_type && tpl == int_type) return tpr;
 	return tpl;
 }
 
@@ -310,22 +361,23 @@ AllowedTypes(operator)
 				return T_NUMERIC;
 		case DIV	:
 		case MOD	:
-				return T_INTEGER;
+				return T_INTEGER | T_LONG;
 		case OR		:
 		case AND	:
 				return T_ENUMERATION;
 		case '='	:
 		case NOTEQUAL   :
 				return T_ENUMERATION | T_CHAR | T_NUMERIC |
-					T_SET | T_POINTER | T_STRING;
+					T_SET | T_POINTER | T_STRINGCONST |
+					T_STRING;
 		case LESSEQUAL	:
 		case GREATEREQUAL:
 				return T_ENUMERATION | T_CHAR | T_NUMERIC |
-					T_SET | T_STRING;
+					T_SET | T_STRINGCONST;
 		case '<'	:
 		case '>'	:
 				return T_ENUMERATION | T_CHAR | T_NUMERIC |
-					T_STRING;
+					T_STRINGCONST;
 		default		:
 				crash("(AllowedTypes)");
 	}
@@ -353,6 +405,9 @@ ChkBinOper(expp)
 
 	retval = ChkExpression(left) & ChkExpression(right);
 
+	MarkUsed(left);
+	MarkUsed(right);
+
 	tpl = BaseType(left->nd_type);
 	tpr = BaseType(right->nd_type);
 
@@ -362,7 +417,7 @@ ChkBinOper(expp)
 	   of the operands.
 	   There are some needles and pins:
 	   - Boolean operators are only allowed on boolean operands, but the
-	     "allowed-mask" of "AllowedTyped" can only indicate an enumeration
+	     "allowed-mask" of "AllowedTypes" can only indicate an enumeration
 	     type.
 	   - The IN-operator has as right-hand-side operand a set.
 	   - Strings and packed arrays can be equivalent.
@@ -393,7 +448,7 @@ ChkBinOper(expp)
 		arith ub;
 		extern arith IsString();
 
-		if( allowed & T_STRING && (ub = IsString(tpl)) )
+		if( allowed & T_STRINGCONST && (ub = IsString(tpl)) )	{
 			if( ub == IsString(tpr) )
 				return 1;
 			else	{
@@ -401,6 +456,10 @@ ChkBinOper(expp)
 						symbol2str(expp->nd_symb));
 				return 0;
 			}
+		}
+		else if( allowed & T_STRING && tpl->tp_fund == T_STRING )
+				return 1;
+
 		node_error(expp, "\"%s\": illegal operand type(s)",
 						symbol2str(expp->nd_symb));
 		return 0;
@@ -413,16 +472,27 @@ ChkBinOper(expp)
 	}
 
 	if( allowed & T_NUMERIC )	{
-		if( tpl == int_type &&
+		if( (tpl == int_type || tpl == long_type) &&
 		    (tpr == real_type || expp->nd_symb == '/') ) {
 			expp->nd_left =
 				MkNode(Cast, NULLNODE, expp->nd_left, &dot);
 			expp->nd_left->nd_type = tpl = real_type;
 		}
-		if( tpl == real_type && tpr == int_type )	{
+		if( tpl == real_type &&
+				(tpr == int_type || tpr == long_type))	{
 			expp->nd_right =
 				MkNode(Cast, NULLNODE, expp->nd_right, &dot);
 			expp->nd_right->nd_type = tpr = real_type;
+		}
+		if( tpl == int_type && tpr == long_type) {
+			expp->nd_left =
+				MkNode(IntCoerc, NULLNODE, expp->nd_left, &dot);
+			expp->nd_left->nd_type = long_type;
+		}
+		else if( tpl == long_type && tpr == int_type) {
+			expp->nd_right =
+				MkNode(IntCoerc, NULLNODE, expp->nd_right, &dot);
+			expp->nd_right->nd_type = long_type;
 		}
 	}
 
@@ -499,6 +569,7 @@ ChkElement(expp, tp, set, cnt)
 	/* Here, a single element is checked
 	*/
 	if( !ChkExpression(expp) ) return 0;
+	MarkUsed(expp);
 
 	if( *tp == emptyset_type )	{
 		/* first element in set determines the type of the set */
@@ -590,7 +661,7 @@ ChkSet(expp)
 			/* after all the work we've done, the set turned out
 			   out to be empty!
 			*/
-			free(set);
+			free((char *) set);
 			set = (arith *) 0;
 		}
 		expp->nd_set = set;
@@ -601,6 +672,49 @@ ChkSet(expp)
 	return 1;
 }
 
+char *
+ChkAllowedVar(nd, reading)		/* reading indicates read or readln */
+	register struct node *nd;
+{
+	char *message = 0;
+
+	switch( nd->nd_class )	{
+	case Def:
+		if( nd->nd_def->df_flags & D_INLOOP ) {
+			message = "control variable";
+			break;
+		}
+		if( nd->nd_def->df_kind != D_FIELD ) break;
+		/* FALL THROUGH */
+
+	case LinkDef:
+		assert(nd->nd_def->df_kind == D_FIELD);
+
+		if( nd->nd_def->fld_flags & F_PACKED )
+			message = "field of packed record";
+		else if( nd->nd_def->fld_flags & F_SELECTOR )
+			message = "variant selector";
+		break;
+
+	case Arrsel:
+		if( IsPacked(nd->nd_left->nd_type) )
+			if( !reading ) message = "component of packed array";
+		break;
+
+	case Arrow:
+		if( nd->nd_right->nd_type->tp_fund == T_FILE )
+			message = "filebuffer variable";
+		break;
+
+	default:
+		crash("(ChkAllowedVar)");
+		/*NOTREACHED*/
+	}
+	MarkDef(nd, D_SET, 1);
+	return message;
+}
+
+int
 ChkVarPar(nd, name)
 	register struct node *nd, *name;
 {
@@ -610,43 +724,16 @@ ChkVarPar(nd, name)
 		of a variable where that variable possesses a type
 		that is designated packed.
 	*/
-	static char var_mes[] = "can't be a variable parameter";
-	static char err_mes[64];
+	static char err_mes[80];
 	char *message = (char *) 0;
 	extern char *sprint();
 
 	if( !ChkVariable(nd) ) return 0;
 
-	switch( nd->nd_class )	{
-	case Def:
-		if( nd->nd_def->df_kind != D_FIELD ) break;
-		/* FALL THROUGH */
+	message = ChkAllowedVar(nd, 0);
 
-	case LinkDef:
-		assert(nd->nd_def->df_kind == D_FIELD);
-
-		if( nd->nd_def->fld_flags & F_PACKED )
-			message = "field of packed record %s";
-		else if( nd->nd_def->fld_flags & F_SELECTOR )
-			message = "variant selector %s";
-		break;
-
-	case Arrsel:
-		if( IsPacked(nd->nd_left->nd_type) )
-			message = "component of packed array %s";
-		break;
-
-	case Arrow:
-		if( nd->nd_right->nd_type->tp_fund == T_FILE )
-			message = "filebuffer variable %s";
-		break;
-
-	default:
-		crash("(ChkVarPar)");
-		/*NOTREACHED*/
-	}
 	if( message )	{
-		sprint(err_mes, message, var_mes);
+		sprint(err_mes, "%s can't be a variable parameter", message);
 		Xerror(name, err_mes);
 		return 0;
 	}
@@ -684,13 +771,29 @@ getarg(argp, bases, varaccess, name, paramtp)
 			Xerror(name, "illegal proc/func parameter");
 			return 0;
 		}
-		else if( ChkLinkOrName(left->nd_left) )
+		else if( ChkLinkOrName(left->nd_left) ) {
 			left->nd_type = left->nd_left->nd_type;
-
+			MarkUsed(left->nd_left);
+		}
 		else return 0;
 	}
-	else if( varaccess ? !ChkVarPar(left, name) : !ChkExpression(left) )
-			return 0;
+	else if( varaccess ) {
+	    if( !ChkVarPar(left, name) )
+		    return 0;
+	}
+	else if( !ChkExpression(left) ) {
+		MarkUsed(left);
+		return 0;
+	}
+
+	if( !varaccess ) MarkUsed(left);
+
+	if( !varaccess &&  bases == T_INTEGER &&
+		    BaseType(left->nd_type)->tp_fund == T_LONG) {
+		arg->nd_left = MkNode(IntReduc, NULLNODE, left, &dot);
+		arg->nd_left->nd_type = int_type;
+		left = arg->nd_left;
+	}
 
 	if( bases && !(BaseType(left->nd_type)->tp_fund & bases) )	{
 		Xerror(name, "unexpected parameter type");
@@ -709,7 +812,7 @@ ChkProcCall(expp)
 	register struct node *left;
 	struct node *name;
 	register struct paramlist *param;
-	char ebuf[64];
+	char ebuf[80];
 	int retval = 1;
 	int cnt = 0;
 	int new_par_section;
@@ -731,20 +834,39 @@ ChkProcCall(expp)
 	/* Check parameter list
 	*/
 	for( param = ParamList(left->nd_type); param; param = param->next ) {
-		if( !(left = getarg(&expp, 0, IsVarParam(param), name,
+		if( !(left = getarg(&expp, 0, (int) IsVarParam(param), name,
 							TypeOfParam(param))) )
 			return 0;
 
 		cnt++;
-
 		new_par_section = lasttp != TypeOfParam(param);
 		if( !TstParCompat(TypeOfParam(param), left->nd_type,
-				   IsVarParam(param), left, new_par_section) ) {
+			    (int) IsVarParam(param), left, new_par_section) ) {
 			sprint(ebuf, "type incompatibility in parameter %d",
 					cnt);
 			Xerror(name, ebuf);
 			retval = 0;
 		}
+
+		/* Convert between integers and longs.
+		 */
+		if( !IsVarParam(param) && options['d'] )	{
+			if( left->nd_type->tp_fund == T_INTEGER &&
+					TypeOfParam(param)->tp_fund == T_LONG) {
+				expp->nd_left =
+					MkNode(IntCoerc, NULLNODE, left, &dot);
+				expp->nd_left->nd_type = long_type;
+				left = expp->nd_left;
+			}
+			else if( left->nd_type->tp_fund == T_LONG &&
+				    TypeOfParam(param)->tp_fund == T_INTEGER) {
+				expp->nd_left =
+					MkNode(IntReduc, NULLNODE, left, &dot);
+				expp->nd_left->nd_type = int_type;
+				left = expp->nd_left;
+			}
+		}
+
 		if( left->nd_type == emptyset_type )
 			/* type of emptyset determined by the context */
 			left->nd_type = TypeOfParam(param);
@@ -780,6 +902,7 @@ ChkCall(expp)
 
 	if( ChkLinkOrName(left) )	{
 
+		MarkUsed(left);
 		if( IsProcCall(left) || left->nd_type == error_type )	{
 			/* A call.
 		   	   It may also be a call to a standard procedure
@@ -862,7 +985,8 @@ ChkStandard(expp,left)
 		if( !(left = getarg(&arg, T_NUMERIC, 0, name, NULLTYPE)) )
 			return 0;
 		expp->nd_type = real_type;
-		if( BaseType(left->nd_type)->tp_fund == T_INTEGER )	{
+		if( BaseType(left->nd_type)->tp_fund == T_INTEGER ||
+			    BaseType(left->nd_type)->tp_fund == T_LONG)	{
 			arg->nd_left = MkNode(Cast,NULLNODE, arg->nd_left,&dot);
 			arg->nd_left->nd_type = real_type;
 		}
@@ -878,6 +1002,10 @@ ChkStandard(expp,left)
 	    case R_ORD:
 		if( !(left = getarg(&arg, T_ORDINAL, 0, name, NULLTYPE)) )
 			return 0;
+		if( BaseType(left->nd_type)->tp_fund == T_LONG )	{
+			arg->nd_left = MkNode(IntReduc, NULLNODE, arg->nd_left, &dot);
+			arg->nd_left->nd_type = int_type;
+		}
 		expp->nd_type = int_type;
 		if( left->nd_class == Value )
 			cstcall(expp, R_ORD);
@@ -896,12 +1024,12 @@ ChkStandard(expp,left)
 		if( !(left = getarg(&arg, T_ORDINAL, 0, name, NULLTYPE)) )
 			return 0;
 		expp->nd_type = left->nd_type;
-		if( left->nd_class == Value && !options['r'] )
+		if( left->nd_class == Value && options['R'] )
 			cstcall(expp, req);
 		break;
 
 	    case R_ODD:
-		if( !(left = getarg(&arg, T_INTEGER, 0, name, NULLTYPE)) )
+		if( !(left = getarg(&arg, T_INTEGER | T_LONG , 0, name, NULLTYPE)) )
 			return 0;
 		expp->nd_type = bool_type;
 		if( left->nd_class == Value )
@@ -924,7 +1052,7 @@ ChkStandard(expp,left)
 		if( !arg->nd_right )	{
 			struct node *nd;
 
-			if( !(nd = ChkStdInOut(name, st_out)) )
+			if( !(nd = ChkStdInOut(name->nd_IDF->id_text, st_out)) )
 				return 0;
 
 			expp->nd_right = MkNode(Link, nd, NULLNODE, &dot);
@@ -1042,6 +1170,21 @@ ChkStandard(expp,left)
 		expp->nd_type = NULLTYPE;
 		break;
 
+	    case R_MARK:
+	    case R_RELEASE:
+		if( !(left = getarg(&arg, T_POINTER, 1, name, NULLTYPE)) )
+			return 0;
+		expp->nd_type = NULLTYPE;
+		break;
+
+	    case R_HALT:
+		if( !arg->nd_right ) 		/* insert 0 parameter */
+			arg->nd_right = ZeroParam();
+		if( !(left = getarg(&arg, T_INTEGER, 0, name, NULLTYPE)) )
+			return 0;
+		expp->nd_type = NULLTYPE;
+		break;
+
 	    default:
 		crash("(ChkStandard)");
 	}
@@ -1072,6 +1215,8 @@ ChkArrow(expp)
 
 	if( !ChkVariable(expp->nd_right) ) return 0;
 
+	MarkUsed(expp->nd_right);
+
 	tp = expp->nd_right->nd_type;
 
 	if( !(tp->tp_fund & (T_POINTER | T_FILE)) )	{
@@ -1101,7 +1246,13 @@ ChkArr(expp)
 
 	expp->nd_type = error_type;
 
-	retval = ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right);
+	/* Check the index first, so a[a[j]] is checked in order of
+	 * evaluation. This to make sure that warnings are generated
+	 * in the right order.
+	 */
+	retval = ChkExpression(expp->nd_right);
+	MarkUsed(expp->nd_right);
+	retval &= ChkVariable(expp->nd_left);
 
 	tpl = expp->nd_left->nd_type;
 	tpr = expp->nd_right->nd_type;
@@ -1118,6 +1269,11 @@ ChkArr(expp)
 	if( !TstCompat(IndexType(tpl), tpr) )	{
 		node_error(expp, "incompatible index type");
 		return 0;
+	}
+
+	if( tpr == long_type ) {
+		expp->nd_right = MkNode(IntReduc, NULLNODE, expp->nd_right, &dot);
+		expp->nd_right->nd_type = int_type;
 	}
 
 	expp->nd_type = tpl->arr_elem;
@@ -1158,6 +1314,8 @@ int (*ExprChkTable[])() = {
 	NodeCrash,
 	ChkExLinkOrName,
 	NodeCrash,
+	NodeCrash,
+	NodeCrash,
 	NodeCrash
 };
 
@@ -1175,5 +1333,7 @@ int (*VarAccChkTable[])() = {
 	done_before,
 	ChkLinkOrName,
 	done_before,
+	no_var_access,
+	no_var_access,
 	no_var_access
 };

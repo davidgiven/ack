@@ -45,5 +45,6 @@ struct token	{
 
 extern struct token dot, aside;
 extern struct type *toktype, *asidetype;
+extern int tokenseen;
 
 #define	ASIDE	aside.tk_symb

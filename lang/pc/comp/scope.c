@@ -80,7 +80,7 @@ chk_prog_params()
 	    if( df->df_kind & D_PARAMETER )	{
 		if( !is_anon_idf(df->df_idf) )	{
 		    if( df->df_type == error_type )
-		     error("program parameter \"%s\" must be a global variable",
+			 error("program parameter \"%s\" must be a global variable",
 							df->df_idf->id_text);
 		    else if( df->df_type->tp_fund != T_FILE )
 			error("program parameter \"%s\" must have a file type",

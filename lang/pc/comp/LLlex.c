@@ -36,6 +36,89 @@ struct type	*toktype,
 		*asidetype;
 
 static int	eofseen;
+extern int	in_compound;
+
+int tokenseen = 0;	/* Some comment-options must precede any program text */
+
+/* Warning: The options specified inside comments take precedence over
+ * the ones on the command line.
+ */
+CommentOptions()
+{
+	register int ch, ci;
+	/* Parse options inside comments */
+
+	do {
+		LoadChar(ch);
+		ci = ch;
+		switch ( ci ) {
+		case 'c':		/* for strings */
+		case 'd':		/* for longs */
+		case 's':		/* check for standard */
+		case 'u':		/* for underscores */
+		case 'C':		/* for different cases */
+		case 'U':		/* for underscores */
+			if( tokenseen ) {
+				lexwarning("the '%c' option must precede any program text", ci);
+				break;
+			}
+
+			LoadChar(ch);
+			if( ci == 's' && options[ci] && ch == '-')
+				lexwarning("option '%c-' overrides previous one", ci);
+			if( ch == '-' ) options[ci] = 0;
+			else if( ch == '+' ) options[ci] = 1;
+			else PushBack();
+			break;
+
+		case 'l':	ci = 'L' ;	/* for indexing */
+			/* fall through */
+		case 'a':			/* assertions */
+		case 't':			/* tracing */
+		case 'A':			/* extra array range-checks */
+		case 'L':			/* FIL & LIN instructions */
+		case 'R':			/* range checks */
+		{
+			int on_on_minus = (ci == 'L' || ci == 'R');
+
+			LoadChar(ch);
+			if( ch == '-' ) options[ci] = on_on_minus;
+			else if( ch == '+' ) options[ci] = !on_on_minus;
+			else PushBack();
+			break;
+		}
+
+		case 'i':
+		{
+			register int i=0;
+
+			LoadChar(ch);
+			while( ch >= '0' && ch <= '9' ) {
+				i = 10 * i + (ch - '0');
+				LoadChar(ch);
+			}
+			PushBack();
+			if( tokenseen ) {
+				lexwarning("the '%c' option must precede any program text", ci);
+				break;
+			}
+			if( i <= 0 ) {
+				lexwarning("bad '%c' option", ci);
+				break;
+			}
+			max_intset = i;
+			break;
+		}
+
+		default:
+			break;
+		}
+		LoadChar(ch);
+	} while (ch == ',' );
+
+	PushBack();
+}
+
 
 STATIC
 SkipComment()
@@ -48,6 +131,7 @@ SkipComment()
 	register int ch;
 
 	LoadChar(ch);
+	if (ch == '$') CommentOptions();
 	for (;;)	{
 		if( class(ch) == STNL )	{
 			LineNumber++;
@@ -70,9 +154,10 @@ SkipComment()
 }
 
 STATIC struct string *
-GetString()
+GetString( delim )
+register int delim;
 {
-	/*	Read a Pascal string, delimited by the character "'".
+	/*	Read a Pascal string, delimited by the character ' or ".
 	*/
 	register int ch;
 	register struct string *str = (struct string *)
@@ -83,9 +168,10 @@ GetString()
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	for( ; ; )	{
 		LoadChar(ch);
-		if( ch & 0200 )
+		if( ch & 0200 ) {
 			fatal("non-ascii '\\%03o' read", ch & 0377);
 			/*NOTREACHED*/
+		}
 		if( class(ch) == STNL )	{
 			lexerror("newline in string");
 			LineNumber++;
@@ -98,9 +184,9 @@ GetString()
 			lexerror("end-of-file in string");
 			break;
 		}
-		if( ch == '\'' )	{
+		if( ch == delim )	{
 			LoadChar(ch);
-			if( ch != '\'' )
+			if( ch != delim )
 				break;
 		}
 		*p++ = ch;
@@ -128,6 +214,71 @@ GetString()
 	return str;
 }
 
+static char *s_error = "illegal line directive";
+
+CheckForLineDirective()
+{
+	register int	ch;
+	register int	i = 0;
+	char		buf[IDFSIZE + 2];
+	register char	*c = buf;
+
+	LoadChar(ch);
+
+	if( ch != '#' ) {
+		PushBack();
+		return;
+	}
+	do {	/*
+		 * Skip to next digit. Do not skip newlines.
+		 */
+		LoadChar(ch);
+		if( class(ch) == STNL ) {
+			LineNumber++;
+			lexerror(s_error);
+			return;
+		}
+		else if( ch == EOI ) {
+			eofseen = 1;
+			break;
+		}
+	} while( class(ch) != STNUM );
+	while( class(ch) == STNUM )	{
+		i = i * 10 + (ch - '0');
+		LoadChar(ch);
+	}
+	if( ch == EOI ) {
+		eofseen = 1;
+	}
+	while( ch != '"' && ch != EOI && class(ch) != STNL) LoadChar(ch);
+	if( ch == '"' )	{
+		do {
+			LoadChar(ch);
+			*c++ = ch;
+			if( class(ch) == STNL ) {
+				LineNumber++;
+				error(s_error);
+				return;
+			}
+		} while( ch != '"' );
+		*--c = '\0';
+		do {
+			LoadChar(ch);
+		} while( class(ch) != STNL );
+		/*
+		 * Remember the filename
+		 */
+		 if( !eofseen && strcmp(FileName, buf) ) {
+			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+		}
+	}
+	if( eofseen ) {
+		error(s_error);
+		return;
+	}
+	LineNumber = i;
+}
+
 int
 LLlex()
 {
@@ -148,6 +299,7 @@ LLlex()
 
 	tk->tk_lineno = LineNumber;
 
+again1:
 	if( eofseen )	{
 		eofseen = 0;
 		ch = EOI;
@@ -158,9 +310,10 @@ again:
 		if( !options['C'] )		/* -C : cases are different */
 			TO_LOWER(ch);
 
-		if( (ch & 0200) && ch != EOI )
+		if( (ch & 0200) && ch != EOI ) {
 			fatal("non-ascii '\\%03o' read", ch & 0377);
 			/*NOTREACHED*/
+		}
 	}
 
 	switch( class(ch) )	{
@@ -171,12 +324,16 @@ again:
 #ifdef DEBUG
 		cntlines++;
 #endif
-		goto again;
+		CheckForLineDirective();
+		goto again1;
 
 	case STSKIP:
 		goto again;
 
 	case STGARB:
+		if( !tokenseen && (ch == '"' || ch == '_') ) {
+			return tk->tk_symb = ch;
+		}
 		if( (unsigned) ch < 0177 )
 			lexerror("garbage char %c", ch);
 		else
@@ -189,7 +346,7 @@ again:
 			if( nch == '*' )	{		/* (* */
 				SkipComment();
 				tk->tk_lineno = LineNumber;
-				goto again;
+				goto again1;
 			}
 			if( nch == '.' )			/* (. is [ */
 				return tk->tk_symb = '[';
@@ -199,7 +356,7 @@ again:
 		else if( ch == '{' )	{
 			SkipComment();
 			tk->tk_lineno = LineNumber;
-			goto again;
+			goto again1;
 		}
 		else if( ch == '@' ) ch = '^';		/* @ is ^ */
 
@@ -259,14 +416,15 @@ again:
 		if( ch == EOI ) eofseen = 1;
 		else PushBack();
 
+		if( buf[0] == '_' ) lexerror("underscore starts identifier");
 		tk->TOK_IDF = id = str2idf(buf, 1);
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;
 	}
 
 	case STSTR:	{
-		register struct string *str = GetString();
+		register struct string *str = GetString(ch);
 
-		if( str->s_length == 1 )	{
+		if( str->s_length == 1 && ch == '\'')	{
 #ifdef DEBUG
 			if( options['l'] )	{
 				/* to prevent LexScan from crashing */
@@ -280,8 +438,14 @@ again:
 			free((char *) str);
 		}
 		else	{
-			tk->tk_data.tk_str = str;
-			toktype = standard_type(T_STRING, 1, str->s_length);
+			if( ch == '\'' )	{
+				tk->tk_data.tk_str = str;
+				toktype = standard_type(T_STRINGCONST, 1, str->s_length);
+			}
+			else	{
+				tk->tk_data.tk_str = str;
+				toktype = string_type;
+			}
 		}
 		return tk->tk_symb = STRING;
 	}
@@ -391,7 +555,7 @@ again:
 			tk->TOK_REL = Salloc("0.0", 4);
 			lexerror("floating constant too long");
 		}
-		else tk->TOK_REL = Salloc(buf, np - buf);
+		else tk->TOK_REL = Salloc(buf,(unsigned) (np - buf));
 
 		toktype = real_type;
 		return tk->tk_symb = REAL;

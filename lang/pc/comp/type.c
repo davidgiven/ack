@@ -1,7 +1,6 @@
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
 #include	"debug.h"
-#include	"target_sizes.h"
 
 #include	<alloc.h>
 #include	<assert.h>
@@ -18,9 +17,12 @@
 #include	"scope.h"
 #include	"type.h"
 
+#ifndef NOCROSS
+#include	"target_sizes.h"
 int
 	word_align	= AL_WORD,
 	int_align	= AL_INT,
+	long_align	= AL_LONG,
 	pointer_align	= AL_POINTER,
 	real_align	= AL_REAL,
 	struct_align	= AL_STRUCT;
@@ -28,29 +30,63 @@ int
 arith
 	word_size	= SZ_WORD,
 	int_size	= SZ_INT,
+	long_size	= SZ_LONG,
 	pointer_size	= SZ_POINTER,
 	real_size	= SZ_REAL;
+#endif NOCROSS
+
+extern arith	max_int;
 
 struct type
 	*bool_type,
 	*char_type,
 	*int_type,
+	*long_type,
 	*real_type,
+	*string_type,
 	*std_type,
 	*text_type,
 	*nil_type,
 	*emptyset_type,
 	*error_type;
 
-InitTypes()
+CheckTypeSizes()
 {
-	/*	Initialize the predefined types
-	*/
-
 	/* first, do some checking
 	*/
 	if( int_size != word_size )
 		fatal("integer size not equal to word size");
+	if( word_size != 2 && word_size != 4 )
+		fatal("illegal wordsize");
+	if( pointer_size != 2 && pointer_size != 4 )
+		fatal("illegal pointersize");
+	if( options['d'] ) {
+		if( long_size < int_size )
+			fatal("longsize should be at least the integersize");
+		if( long_size > 2 * int_size)
+			fatal("longsize should be at most twice the integersize");
+	}
+	if( pointer_size < word_size )
+		fatal("pointersize should be at least the wordsize");
+	if( real_size != 4 && real_size != 8 )
+		fatal("illegal realsize");
+}
+
+InitTypes()
+{
+	/* First check the sizes of some basic EM-types
+	*/
+	CheckTypeSizes();
+	if( options['s'] ) {
+		options['c'] = 0;
+		options['d'] = 0;
+		options['u'] = 0;
+		options['C'] = 0;
+		options['U'] = 0;
+	}
+
+	/*	Initialize the predefined types
+	*/
 
 	/* character type
 	*/
@@ -69,6 +105,16 @@ InitTypes()
 	/* real type
 	*/
 	real_type = standard_type(T_REAL, real_align, real_size);
+
+	/* long type
+	*/
+	if( options['d'] )
+		long_type = standard_type(T_LONG, long_align, long_size);
+
+	/* string type
+	*/
+	if( options['c'] )
+		string_type = standard_type(T_STRING, pointer_align, pointer_size);
 
 	/* an unique type for standard procedures and functions
 	*/
@@ -92,6 +138,13 @@ InitTypes()
 	emptyset_type = construct_type(T_SET, error_type);
 	emptyset_type->tp_size = word_size;
 	emptyset_type->tp_align = word_align;
+}
+
+int
+fit(sz, nbytes)
+        arith sz;
+{
+	return ((sz) + ((arith)0x80<<(((nbytes)-1)*8)) & ~full_mask[(nbytes)]) == 0;
 }
 
 struct type *
@@ -184,19 +237,24 @@ chk_type_id(ptp, nd)
 	register struct type **ptp;
 	register struct node *nd;
 {
+	register struct def *df;
+
 	*ptp = error_type;
 	if( ChkLinkOrName(nd) )	{
 		if( nd->nd_class != Def )
 			node_error(nd, "type expected");
 		else	{
-			register struct def *df = nd->nd_def;
+			/* register struct def *df = nd->nd_def; */
+			df = nd->nd_def;
 
-			if( df->df_kind & (D_TYPE | D_FTYPE | D_ERROR) )
+			df->df_flags |= D_USED;
+			if( df->df_kind & (D_TYPE | D_FTYPE | D_ERROR) ) {
 				if( !df->df_type )
 				    node_error(nd, "type \"%s\" not declared",
 							df->df_idf->id_text);
 				else
 				    *ptp = df->df_type;
+			}
 			else
 				node_error(nd,"identifier \"%s\" is not a type",
 							df->df_idf->id_text);
@@ -253,7 +311,11 @@ getbounds(tp, plo, phi)
 		*plo = tp->sub_lb;
 		*phi = tp->sub_ub;
 	}
-	else	{
+	else if( tp->tp_fund & T_INTEGER ) {
+		*plo = -max_int;
+		*phi = max_int;
+	}
+	else {
 		*plo = 0;
 		*phi = tp->enm_ncst - 1;
 	}
@@ -350,7 +412,10 @@ ArrayElSize(tp, packed)
 		/* algn is not a dividor of the word size, so make sure it
 		   is a multiple
 		*/
-		return WA(algn);
+		algn = WA(algn);
+	}
+	if( !fit(algn, (int) word_size) ) {
+		error("element of array too large");
 	}
 	return algn;
 }
@@ -362,10 +427,10 @@ ArraySizes(tp)
 	*/
 	register struct type *index_type = IndexType(tp);
 	register struct type *elem_type = tp->arr_elem;
-	arith lo, hi;
+	arith lo, hi, diff;
 
 	tp->tp_flags |= T_CHECKED;
-	tp->arr_elsize = ArrayElSize(elem_type, IsPacked(tp));
+	tp->arr_elsize = ArrayElSize(elem_type,(int) IsPacked(tp));
 
 	/* check index type
 	*/
@@ -378,8 +443,17 @@ ArraySizes(tp)
 	}
 
 	getbounds(index_type, &lo, &hi);
+	diff = hi - lo;
 
-	tp->tp_psize = (hi - lo + 1) * tp->arr_elsize;
+	if( diff < 0 || !fit(diff, (int) word_size) ) {
+		error("too many elements in array");
+	}
+
+	if( (unsigned long)full_mask[(int) pointer_size]/(diff + 1) <
+	    tp->arr_elsize ) {
+		error("array too large");
+	}
+	tp->tp_psize = (diff + 1) * tp->arr_elsize;
 	tp->tp_palign = (word_size % tp->tp_psize) ? word_align : tp->tp_psize;
 	tp->tp_size = WA(tp->tp_psize);
 	tp->tp_align = word_align;
@@ -389,7 +463,7 @@ ArraySizes(tp)
 	tp->arr_ardescr = ++data_label;
 	C_df_dlb(data_label);
 	C_rom_cst(lo);
-	C_rom_cst(hi - lo);
+	C_rom_cst(diff);
 	C_rom_cst(tp->arr_elsize);
 }
 
@@ -424,14 +498,15 @@ chk_forw_types()
 			while( scl )	{
 				/* look in enclosing scopes */
 				df1 = lookup(df->df_fortype->f_node->nd_IDF,
-					     scl->sc_scope);
+					     scl->sc_scope, D_INUSE);
 				if( df1 ) break;
 				scl = nextvisible( scl );
 			}
 
-			if( !df1  || df1->df_kind != D_TYPE )
+			if( !df1  || df1->df_kind != D_TYPE ) {
 					/* bad forward type */
 				tp = error_type;
+			}
 			else	{	/* ok */
 				tp = df1->df_type;
 
@@ -440,6 +515,9 @@ chk_forw_types()
 				      CurrentScope->sc_def = df->df_nextinscope;
 				else
 				      ldf->df_nextinscope = df->df_nextinscope;
+
+				/* remove the def struct from symbol-table */
+				remove_def(df);
 			}
 		    }
 		    else		/* forward type was resolved */
@@ -455,6 +533,7 @@ chk_forw_types()
 		    }
 
 		    FreeForward( df->df_fortype );
+		    df->df_flags |= D_USED;
 		    if( tp == error_type )
 				df->df_kind = D_ERROR;
 		    else
@@ -540,10 +619,14 @@ DumpType(tp)
 		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;
 	case T_INTEGER:
 		print("INTEGER"); break;
+	case T_LONG:
+		print("LONG"); break;
 	case T_REAL:
 		print("REAL"); break;
 	case T_CHAR:
 		print("CHAR"); break;
+	case T_STRING:
+		print("STRING"); break;
 	case T_PROCEDURE:
 	case T_FUNCTION:
 		{
@@ -565,8 +648,8 @@ DumpType(tp)
 		}
 	case T_FILE:
 		print("FILE"); break;
-	case T_STRING:
-		print("STRING"); break;
+	case T_STRINGCONST:
+		print("STRINGCONST"); break;
 	case T_SUBRANGE:
 		print("SUBRANGE %ld-%ld", (long) tp->sub_lb, (long) tp->sub_ub);
 		break;

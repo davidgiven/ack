@@ -8,3 +8,12 @@ extern struct idf
 
 extern char 
 	*gen_proc_name();
+
+extern char *symbol2str();
+extern arith NewInt();
+extern arith NewPtr();
+extern arith CodeBeginBlock();
+extern arith EnterParamList();
+extern arith EnterParTypes();
+extern arith CodeInitFor();
+extern arith IsString();

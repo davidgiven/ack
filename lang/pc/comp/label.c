@@ -17,8 +17,9 @@ DeclLabel(nd)
 {
 	struct def *df;
 
-	if( !(df = define(nd->nd_IDF, CurrentScope, D_LABEL)) )
+	if( !(df = define(nd->nd_IDF, CurrentScope, D_LABEL)) ) {
 		node_error(nd, "label %s redeclared", nd->nd_IDF->id_text);
+	}
 	else	{
 		df->lab_no = ++text_label;
 		nd->nd_def = df;
@@ -74,6 +75,7 @@ TstLabel(nd, Slevel)
 	else
 		FreeNode(nd);
 
+	df->df_flags = D_USED;
 	if( !df->lab_level )	{
 		/* forward jump */
 		register struct lab *labelptr;
@@ -105,7 +107,7 @@ DefLabel(nd, Slevel)
 {
 	register struct def *df;
 
-	if( !(df = lookup(nd->nd_IDF, BlockScope)) )	{
+	if( !(df = lookup(nd->nd_IDF, BlockScope, D_INUSE)) )	{
 		node_error(nd, "label %s must be declared in same block"
 							, nd->nd_IDF->id_text);
 		df = define(nd->nd_IDF, BlockScope, D_LABEL);
@@ -116,6 +118,7 @@ DefLabel(nd, Slevel)
 	}
 	else FreeNode(nd);
 
+	df->df_flags |= D_SET;
 	if( df->lab_level)
 		node_error(nd, "label %s already defined", nd->nd_IDF->id_text);
 	else	{

@@ -7,8 +7,10 @@
 #include	"chk_expr.h"
 #include	"def.h"
 #include	"desig.h"
+#include	"f_info.h"
 #include	"idf.h"
 #include	"main.h"
+#include	"misc.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
@@ -57,11 +59,14 @@ Statement
 SimpleStatement
 {
 	struct node *pnd, *expp;
+	unsigned short line;
 } :
 	/* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
 	 * Note : the grammar states : AssignmentStatement |
 	 *				ProcedureStatement | ...
+	 * In order to add assertions, there is an extra entry, which gives
+	 * a conflict. This conflict is then resolved using an %if clause.
 	 */
 	EmptyStatement
 |
@@ -69,13 +74,20 @@ SimpleStatement
 |
 	/* Evidently this is the beginning of the changed part
 	 */
+	%if( !options['s'] && !strcmp(dot.TOK_IDF->id_text, "assert") )
+	IDENT			{ line = LineNumber; }
+		Expression(&expp)
+				{ AssertStat(expp, line); }
+|
 	IDENT			{ pnd = MkLeaf(Name, &dot); }
-	[
+	[	%default
+
 		/* At this point the IDENT can be a FunctionIdentifier in
 		 * which case the VariableAccessTail must be empty.
 		 */
 		VariableAccessTail(&pnd)
 		[
+			%default
 			BECOMES
 		|
 			'='	{ error("':=' expected instead of '='"); }
@@ -92,6 +104,7 @@ SimpleStatement
 
 				  FreeNode(pnd);
 				}
+
 	]
 |
 	InputOutputStatement
@@ -353,6 +366,7 @@ ForStatement
 	Statement
 				{ if( !err_occurred )
 				       CodeEndFor(nd, stepsize, l1, l2, tmp2);
+				  EndForStat(nd);
 				  chk_labels(slevel + 1);
 				  FreeNode(nd);
 				  if( tmp1 ) FreeInt(tmp1);
@@ -415,6 +429,7 @@ WriteParameter(register struct node **pnd;)
 	Expression(pnd)
 					{ if( !ChkExpression(*pnd) )
 						(*pnd)->nd_type = error_type;
+					  MarkUsed(*pnd);
 					  *pnd = nd =
 					     MkNode(Link, *pnd, NULLNODE, &dot);
 					  nd->nd_symb = ':';
@@ -428,6 +443,7 @@ WriteParameter(register struct node **pnd;)
 		Expression(&(nd->nd_left))
 					{ if( !ChkExpression(nd->nd_left) )
 					      nd->nd_left->nd_type = error_type;
+					  MarkUsed(nd->nd_left);
 					}
 		[
 			':'		{ nd->nd_right = MkLeaf(Link, &dot);
@@ -436,6 +452,7 @@ WriteParameter(register struct node **pnd;)
 			Expression(&(nd->nd_left))
 					{ if( !ChkExpression(nd->nd_left) )
 					      nd->nd_left->nd_type = error_type;
+					  MarkUsed(nd->nd_left);
 					}
 		]?
 	]?

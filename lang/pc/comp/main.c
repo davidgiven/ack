@@ -8,6 +8,7 @@
 
 #include	"LLlex.h"
 #include	"Lpars.h"
+#include	"class.h"
 #include	"const.h"
 #include	"def.h"
 #include	"f_info.h"
@@ -48,9 +49,10 @@ main(argc, argv)
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if( Nargc < 2 )	{
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
-		exit(1);
+		sys_stop(S_EXIT);
 	}
-	exit(!Compile(Nargv[1], Nargv[2]));
+	if(!Compile(Nargv[1], Nargv[2])) sys_stop(S_EXIT);
+	sys_stop(S_END);
 }
 
 Compile(src, dst)
@@ -58,6 +60,7 @@ Compile(src, dst)
 {
 	extern struct tokenname tkidf[];
 	extern struct tokenname tkstandard[];
+	int tk;
 
 	if( !InsertFile(src, (char **) 0, &src) )	{
 		fprint(STDERR, "%s: cannot open %s\n", ProgName, src);
@@ -69,13 +72,32 @@ Compile(src, dst)
 	InitCst();
 	reserve(tkidf);
 	reserve(tkstandard);
+
+	CheckForLineDirective();
+	tk = LLlex();			/* Read the first token and put */
+	aside = dot;			/* it aside. In this way, options */
+	asidetype = toktype;		/* inside comments will be seen */
+	dot.tk_symb = tk;		/* before the program starts. */
+	tokenseen = 1;
+
 	InitScope();
 	InitTypes();
 	AddRequired();
+
+	if( options['c'] ) tkclass['"'] = STSTR;
+	if( options['u'] || options['U'] ) {
+		class('_') = STIDF;
+		inidf['_'] = 1;
+	}
+	if( tk == '"' || tk == '_' ) {
+		PushBack();
+		ASIDE = 0;
+	}
+
 #ifdef DEBUG
 	if( options['l'] )	{
 		LexScan();
-		return 1;
+		return 0;	/* running the optimizer is not very useful */
 	}
 #endif DEBUG
 	C_init(word_size, pointer_size);
@@ -84,7 +106,7 @@ Compile(src, dst)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	C_df_dlb(++data_label);
-	C_rom_scon(FileName, strlen(FileName) + 1);
+	C_rom_scon(FileName,(arith) strlen(FileName) + 1);
 	LLparse();
 	C_ms_src((arith) (LineNumber - 1), FileName);
 	if( fp_used ) C_ms_flt();
@@ -148,6 +170,14 @@ AddRequired()
 	/* DYNAMIC ALLOCATION PROCEDURES */
 	(void) Enter("new", D_PROCEDURE, std_type, R_NEW);
 	(void) Enter("dispose", D_PROCEDURE, std_type, R_DISPOSE);
+	if( !options['s'] ) {
+		(void) Enter("mark", D_PROCEDURE, std_type, R_MARK);
+		(void) Enter("release", D_PROCEDURE, std_type, R_RELEASE);
+	}
+
+	/* MISCELLANEOUS PROCEDURE(S) */
+	if( !options['s'] )
+		(void) Enter("halt", D_PROCEDURE, std_type, R_HALT);
 
 	/* TRANSFER PROCEDURES */
 	(void) Enter("pack", D_PROCEDURE, std_type, R_PACK);
@@ -187,6 +217,11 @@ AddRequired()
 	(void) Enter("boolean", D_TYPE, bool_type, 0);
 	(void) Enter("text", D_TYPE, text_type, 0);
 
+	if( options['d'] )
+		(void) Enter("long", D_TYPE, long_type, 0);
+	if( options['c'] )
+		(void) Enter("string", D_TYPE, string_type, 0);
+
 	/* DIRECTIVES */
 	(void) Enter("forward", D_FORWARD, NULLTYPE, 0);
 	(void) Enter("extern", D_EXTERN, NULLTYPE, 0);
@@ -196,13 +231,16 @@ AddRequired()
 
 	df = Enter("maxint", D_CONST, int_type, 0);
 	df->con_const = &maxintnode;
+	df->df_flags |= D_SET;
 	maxintnode.nd_type = int_type;
 	maxintnode.nd_INT = max_int;		/* defined in cstoper.c */
 	df = Enter("true", D_ENUM, bool_type, 0);
 	df->enm_val = 1;
+	df->df_flags |= D_SET;
 	df->enm_next = Enter("false", D_ENUM, bool_type, 0);
 	df = df->enm_next;
 	df->enm_val = 0;
+	df->df_flags |= D_SET;
 	df->enm_next = NULLDEF;
 }
 

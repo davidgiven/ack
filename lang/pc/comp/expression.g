@@ -11,6 +11,8 @@
 #include	"chk_expr.h"
 #include	"def.h"
 #include	"main.h"
+#include	"misc.h"
+#include	"idf.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
@@ -49,7 +51,8 @@ UnsignedNumber(register struct node **pnd;):
 ;
 
 ConstantIdentifier(register struct node **pnd;):
-	IDENT			{ *pnd = MkLeaf(Name, &dot); }
+	IDENT			{ *pnd = MkLeaf(Name, &dot);
+				}
 ;
 
 /* ISO section 6.7.1, p. 121 */
@@ -98,13 +101,16 @@ Factor(register struct node **pnd;)
 	/* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
 	 */
+	%default
 	%prefer		/* solve conflicts on IDENT and UnsignedConstant */
 	IDENT			{ *pnd = MkLeaf(Name, &dot); }
 	[
 		/* ISO section 6.7.3, p. 126
 		 * IDENT is a FunctionIdentifier
 		 */
-				{ *pnd = MkNode(Call, *pnd, NULLNODE, &dot); }
+				{
+				  *pnd = MkNode(Call, *pnd, NULLNODE, &dot);
+				}
 		ActualParameterList(&((*pnd)->nd_right))
 	|
 		/* IDENT can be a BoundIdentifier or a ConstantIdentifier or
@@ -116,6 +122,7 @@ Factor(register struct node **pnd;)
 			{ int class;
 
 			  df = lookfor(*pnd, CurrVis, 1);
+			  /* df->df_flags |= D_USED; */
 			  if( df->df_type->tp_fund & T_ROUTINE )	{
 				/* This part is context-sensitive:
 				   is the occurence of the proc/func name
@@ -200,6 +207,7 @@ BooleanExpression(register struct node **pnd;):
 			{ if( ChkExpression(*pnd) &&
 						(*pnd)->nd_type != bool_type )
 				node_error(*pnd, "boolean expression expected");
+			  MarkUsed(*pnd);
 			}
 ;
 

@@ -21,7 +21,6 @@ TstTypeEquiv(tp1, tp2)
 {
 	/*	test if two types are equivalent.
 	*/
-
 	return tp1 == tp2 || tp1 == error_type || tp2 == error_type;
 }
 
@@ -30,7 +29,7 @@ IsString(tp)
 	register struct type *tp;
 {
 	/* string = packed array[1..ub] of char and ub > 1 */
-	if( tp->tp_fund & T_STRING ) return tp->tp_psize;
+	if( tp->tp_fund & T_STRINGCONST ) return tp->tp_psize;
 
 	if( IsConformantArray(tp) ) return 0;
 
@@ -94,6 +93,13 @@ TstCompat(tp1, tp2)
 		else return 0;
 	}
 
+	/* no clause, just check for longs and ints */
+	/* BaseType is used in case of array indexing */
+	if ((BaseType(tp1) == int_type && tp2 == long_type) ||
+			(tp1 == long_type && tp2 == int_type))
+		return 1;
+
+
 	/* clause b */
 	tp1 = BaseType(tp1);
 	tp2 = BaseType(tp2);
@@ -114,7 +120,7 @@ TstAssCompat(tp1, tp2)
 
 	/* clause b */
 	if( tp1 == real_type )
-		return BaseType(tp2) == int_type;
+		return BaseType(tp2) == int_type || BaseType(tp2) == long_type;
 
 	return 0;
 }
@@ -247,7 +253,7 @@ TstConform(formaltype, actualtype, new_par_section)
 
 	lastactual = actualtype;
 
-	if( actualtype->tp_fund == T_STRING )	{
+	if( actualtype->tp_fund == T_STRINGCONST )	{
 		actualindextp = int_type;
 		alb = 1;
 		aub = actualtype->tp_psize;
@@ -271,7 +277,8 @@ TstConform(formaltype, actualtype, new_par_section)
 		return 0;
 
 	/* clause (b) */
-	if( bounded(actualindextp) || actualindextp->tp_fund == T_STRING ) {
+	if( bounded(actualindextp) ||
+			actualindextp->tp_fund == T_STRINGCONST ) {
 		/* test was necessary because the actual type could be confor-
 		   mant !!
 		*/

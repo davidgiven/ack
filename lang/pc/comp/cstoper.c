@@ -18,10 +18,17 @@
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
 long full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
-arith max_int;		/* maximum integer on target machine	*/
+arith max_int;		/* maximum integer on the target machine */
+arith min_int;		/* mimimum integer on the target machin */
 char *maxint_str;	/* string representation of maximum integer */
 arith wrd_bits;		/* number of bits in a word */
 arith max_intset;	/* largest value of set of integer */
+
+overflow(expp)
+	struct node *expp;
+{
+	node_warning(expp, "overflow in constant expression");
+}
 
 cstunary(expp)
 	register struct node *expp;
@@ -66,13 +73,15 @@ cstbin(expp)
 	*/
 	register arith o1, o2;
 	register char *s1, *s2;
-	int str = expp->nd_left->nd_type->tp_fund & T_STRING;
+	int str = expp->nd_left->nd_type->tp_fund & T_STRINGCONST;
 
 	if( str )	{
+		o1 = o2 = 0;			/* so LINT won't complain */
 		s1 = expp->nd_left->nd_STR;
 		s2 = expp->nd_right->nd_STR;
 	}
 	else	{
+		s1 = s2 = (char *) 0;		/* so LINT won't complain */
 		o1 = expp->nd_left->nd_INT;
 		o2 = expp->nd_right->nd_INT;
 	}
@@ -83,14 +92,39 @@ cstbin(expp)
 
 	switch( expp->nd_symb )	{
 		case '+':
+			if (o1 > 0 && o2 > 0) {
+				if (max_int - o1 < o2) overflow(expp);
+			}
+			else if (o1 < 0 && o2 < 0) {
+				if (min_int - o1 > o2) overflow(expp);
+			}
 			o1 += o2;
 			break;
 
 		case '-':
+			if ( o1 >= 0 && o2 < 0) {
+				if (max_int + o2 < o1) overflow(expp);
+			}
+			else if (o1 < 0 && o2 >= 0) {
+				if (min_int + o2 > o1) overflow(expp);
+			}
 			o1 -= o2;
 			break;
 
 		case '*':
+			if (o1 > 0 && o2 > 0) {
+				if (max_int / o1 < o2) overflow(expp);
+			}
+			else if (o1 < 0 && o2 < 0) {
+				if (o1 == min_int || o2 == min_int ||
+				    max_int / (-o1) < (-o2)) overflow(expp);
+			}
+			else if (o1 > 0) {
+				if (min_int / o1 > o2) overflow(expp);
+			}
+			else if (o2 > 0) {
+				if (min_int / o2 > o1) overflow(expp);
+			}
 			o1 *= o2;
 			break;
 
@@ -171,7 +205,7 @@ cstset(expp)
 	assert(expp->nd_right->nd_class == Set);
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
 	set2 = expp->nd_right->nd_set;
-	setsize = expp->nd_right->nd_type->tp_size / word_size;
+	setsize = (unsigned) (expp->nd_right->nd_type->tp_size) / (unsigned) word_size;
 
 	if( expp->nd_symb == IN )	{
 		arith i;
@@ -331,12 +365,26 @@ cstcall(expp, req)
 	expp->nd_symb = INTEGER;
 	switch( req )	{
 	    case R_ABS:
-		if( expr->nd_INT < 0 ) expp->nd_INT = - expr->nd_INT;
+		if( expr->nd_INT < 0 ) {
+			if (expr->nd_INT <= min_int) {
+				overflow(expr);
+			}
+			expp->nd_INT = - expr->nd_INT;
+		}
 		else expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
 
 	    case R_SQR:
+		if (expr->nd_INT < 0) {
+			if ( expr->nd_INT == min_int ||
+			    max_int / expr->nd_INT > expr->nd_INT) {
+				overflow(expr);
+			}
+		}
+		else if (max_int / expr->nd_INT < expr->nd_INT) {
+			overflow(expr);
+		}
 		expp->nd_INT = expr->nd_INT * expr->nd_INT;
 		CutSize(expp);
 		break;
@@ -413,7 +461,7 @@ CutSize(expr)
 		/* integers in [-maxint .. maxint] */
 		int nbits = (int) (mach_long_size - size) * 8;
 
-		node_warning(expr, "overflow in constant expression");
+		/* overflow(expr); */
 		/* sign bit of o1 in sign bit of mach_long */
 		o1 <<= nbits;
 		/* shift back to get sign extension */
@@ -441,6 +489,7 @@ InitCst()
 		fatal("sizeof (long) insufficient on this machine");
 
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
+	min_int = - max_int;
 	maxint_str = long2str(max_int, 10);
 	maxint_str = Salloc(maxint_str, (unsigned int) strlen(maxint_str));
 	wrd_bits = 8 * word_size;

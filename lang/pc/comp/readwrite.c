@@ -8,15 +8,21 @@
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"
+#include	"misc.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+
+/* DEBUG */
+#include	"idf.h"
 
 ChkRead(arg)
 	register struct node *arg;
 {
 	struct node *file;
 	char *name = "read";
+	char *message, buff[80];
+	extern char *ChkAllowedVar();
 
 	assert(arg);
 	assert(arg->nd_symb == ',');
@@ -43,6 +49,19 @@ ChkRead(arg)
 					"\"%s\": illegal parameter type",name);
 				return;
 			}
+			else if( (BaseType(file->nd_type->next) == long_type
+				    && arg->nd_left->nd_type == int_type)
+				||
+				(BaseType(file->nd_type->next) == int_type
+				    && arg->nd_left->nd_type == long_type) ) {
+			    if( int_size != long_size ) {
+				 node_error(arg->nd_left,
+					"\"%s\": longs and integers have different sizes",name);
+				    return;
+			    }
+			    else node_warning(arg->nd_left,
+					"\"%s\": mixture of longs and integers", name);
+			}
 		}
 		else if( !(BaseType(arg->nd_left->nd_type)->tp_fund &
 					( T_CHAR | T_NUMERIC )) )	{
@@ -50,6 +69,14 @@ ChkRead(arg)
 					"\"%s\": illegal parameter type",name);
 			return;
 		}
+		message = ChkAllowedVar(arg->nd_left, 1);
+		if( message ) {
+			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+							    message);
+			node_error(arg->nd_left, buff, name);
+			return;
+		}
+
 		CodeRead(file, arg->nd_left);
 		arg = arg->nd_right;
 	}
@@ -60,6 +87,8 @@ ChkReadln(arg)
 {
 	struct node *file;
 	char *name = "readln";
+	char *message, buff[80];
+	extern char *ChkAllowedVar();
 
 	if( !arg )	{
 		if( !(file = ChkStdInOut(name, 0)) )
@@ -93,6 +122,13 @@ ChkReadln(arg)
 					( T_CHAR | T_NUMERIC )) )	{
 			node_error(arg->nd_left,
 					"\"%s\": illegal parameter type",name);
+			return;
+		}
+		message = ChkAllowedVar(arg->nd_left, 1);
+		if( message ) {
+			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+							    message);
+			node_error(arg->nd_left, buff, name);
 			return;
 		}
 		CodeRead(file, arg->nd_left);
@@ -203,8 +239,9 @@ ChkWriteParameter(filetype, arg, name)
 	tp = BaseType(arg->nd_left->nd_type);
 
 	if( filetype == text_type )	{
-		if( !(tp == bool_type || tp->tp_fund & (T_CHAR | T_NUMERIC) ||
-							IsString(tp)) )	{
+		if( !(tp == bool_type ||
+				tp->tp_fund & (T_CHAR | T_NUMERIC | T_STRING) ||
+				IsString(tp)) )	{
 			node_error(arg->nd_left, "\"%s\": %s", name, mess);
 			return 0;
 		}
@@ -259,8 +296,9 @@ ChkStdInOut(name, st_out)
 	register struct def *df;
 	register struct node *nd;
 
-	if( !(df = lookup(str2idf(st_out ? output : input, 0), GlobalScope)) ||
-				!(df->df_flags & D_PROGPAR) )	{
+	if( !(df = lookup(str2idf(st_out ? output : input, 0),
+			    GlobalScope, D_INUSE)) ||
+			!(df->df_flags & D_PROGPAR) )	{
 		error("\"%s\": standard input/output not defined", name);
 		return NULLNODE;
 	}
@@ -268,6 +306,7 @@ ChkStdInOut(name, st_out)
 	nd = MkLeaf(Def, &dot);
 	nd->nd_def = df;
 	nd->nd_type = df->df_type;
+	df->df_flags |= D_USED;
 
 	return nd;
 }
@@ -289,6 +328,10 @@ CodeRead(file, arg)
 
 			case T_INTEGER:
 				C_cal("_rdi");
+				break;
+
+			case T_LONG:
+				C_cal("_rdl");
 				break;
 
 			case T_REAL:
@@ -314,9 +357,11 @@ CodeRead(file, arg)
 		RangeCheck(arg->nd_type, file->nd_type->next);
 
 		C_loi(file->nd_type->next->tp_psize);
-		if( BaseType(file->nd_type->next) == int_type &&
-							tp == real_type )
-			Int2Real();
+		if( tp == real_type ) {
+		    if( BaseType(file->nd_type->next) == int_type ||
+			BaseType(file->nd_type->next) == long_type )
+			    Int2Real(file->nd_type->next->tp_psize);
+		}
 
 		CodeDStore(arg);
 		C_cal("_get");
@@ -349,7 +394,7 @@ CodeWrite(file, arg)
 	CodePExpr(expp);
 
 	if( file->nd_type == text_type )	{
-		if( tp->tp_fund & (T_ARRAY | T_STRING) )	{
+		if( tp->tp_fund & (T_ARRAY | T_STRINGCONST) )	{
 			C_loc(IsString(tp));
 			nbpars += pointer_size + int_size;
 		}
@@ -375,6 +420,10 @@ CodeWrite(file, arg)
 				C_cal(width ? "_wsi" : "_wri");
 				break;
 
+			case T_LONG:
+				C_cal(width ? "_wsl" : "_wrl");
+				break;
+
 			case T_REAL:
 				if( right )	{
 					CodePExpr(right->nd_left);
@@ -385,19 +434,25 @@ CodeWrite(file, arg)
 				break;
 
 			case T_ARRAY:
-			case T_STRING:
+			case T_STRINGCONST:
 				C_cal(width ? "_wss" : "_wrs");
 				break;
 
+			case T_STRING:
+				C_cal(width ? "_wsz" : "_wrz");
+				break;
+
 			default:
-				crash("CodeWrite)");
+				crash("(CodeWrite)");
 				/*NOTREACHED*/
 		}
 		C_asp(nbpars);
 	}
 	else	{
 		if( file->nd_type->next == real_type && tp == int_type )
-			Int2Real();
+			Int2Real(int_size);
+		else if( file->nd_type->next == real_type && tp == long_type )
+			Int2Real(long_size);
 
 		CodeDAddress(file);
 		C_cal("_wdw");

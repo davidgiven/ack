@@ -1,24 +1,33 @@
 # make iso-pascal "compiler"
 EMHOME =	../../..
-MHDIR =		$(EMHOME)/modules/h
-PKGDIR =	$(EMHOME)/modules/pkg
-LIBDIR =	$(EMHOME)/modules/lib
-OBJECTCODE =	$(LIBDIR)/libemk.a $(EMHOME)/lib/em_data.a
+MDIR =		$(EMHOME)/modules
+MHDIR =		$(MDIR)/h
+PKGDIR =	$(MDIR)/pkg
+LIBDIR =	$(MDIR)/lib
+OBJECTCODE =	$(LIBDIR)/libemk.a
 LLGEN =		$(EMHOME)/bin/LLgen
 MKDEP =		$(EMHOME)/bin/mkdep
-CURRDIR =	.
+PRID =		$(EMHOME)/bin/prid
+CID =		$(EMHOME)/bin/cid
+CURRDIR =
 CC =		fcc
+CC =		cc
 PRINTER =	vu45
+LINT =		lint
 
 INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
+
+OLIBS = $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a
 
 GFILES =	tokenfile.g declar.g expression.g program.g statement.g
 LLGENOPTIONS =
 PROFILE =
-CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
-LINTFLAGS = -DSTATIC=
+COPTIONS =
+OPTIM=	-O
+CFLAGS = $(PROFILE) $(INCLUDES) $(OPTIM) $(COPTIONS) -DSTATIC=
+LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
-LFLAGS = $(PROFILE)
+LDFLAGS = -i $(PROFILE)
 LSRC =	declar.c expression.c program.c statement.c tokenfile.c
 LOBJ =	declar.o expression.o program.o statement.o tokenfile.o
 CSRC =	LLlex.c LLmessage.c body.c chk_expr.c code.c\
@@ -32,13 +41,12 @@ COBJ =	LLlex.o LLmessage.o body.o casestat.o char.o chk_expr.o code.o\
 OBJ =	Lpars.o $(COBJ) $(LOBJ)
 
 # Keep the next entries up to date!
-GENCFILES=	Lpars.c declar.c expression.c program.c statement.c\
-	tokenfile.c symbol2str.c casestat.c tmpvar.c char.c next.c
-SRC =	Lpars.c $(CSRC) $(GENCFILES)
+GENCFILES=	$(LSRC) Lpars.c symbol2str.c casestat.c tmpvar.c char.c next.c
+SRC =	$(CSRC) $(GENCFILES)
 GENGFILES=	tokenfile.g
 GENHFILES=	Lpars.h debugcst.h density.h errout.h idfsize.h inputtype.h\
 	numsize.h strsize.h def.h type.h desig.h scope.h node.h\
-	target_sizes.h
+	target_sizes.h nocross.h
 HFILES=		LLlex.h chk_expr.h class.h const.h debug.h def.h desig.h\
 	f_info.h idf.h input.h main.h misc.h node.h required.h scope.h\
 	tokenname.h type.h $(GENHFILES)
@@ -49,26 +57,57 @@ NEXTFILES = def.H desig.H node.H scope.H type.H casestat.C tmpvar.C
 #EXCLEXCLEXCLEXCL
 
 all:	Cfiles
-	make $(CURRDIR)/main
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)main ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve main ; fi'
+	@rm -f nmclash.o a.out
+
+Omain:	Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	@rm -f nmclash.o a.out
+	mv *.o PEEPHOLE
+
+CEmain: Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	@rm -f nmclash.o a.out
+	mv *.o CODE_EXPANDER
+
+install:	all
+	cp $(CURRDIR)main $(EMHOME)/lib/em_pc
+
+cmp:	all
+	-cmp $(CURRDIR)main $(EMHOME)/lib/em_pc
+
+opr:
+	make pr | opr
+
+pr:
+	@pr Makefile Resolve Parameters $(GFILES) *.H $(HFILES) *.C $(CSRC)
 
 clean:
-	rm -f *.o main $(GENFILES) hfiles Cfiles LLfiles
+	rm -f $(OBJ) $(CURRDIR)main $(GENFILES) hfiles Cfiles LLfiles clashes \
+		LL.output
+	(cd .. ; rm -rf Xsrc)
+
+lint:	Cfiles
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xlint ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve Xlint ; fi'
+	@rm -f nmclash.o a.out
+
+longnames:	$(SRC) $(HFILES)
+	sh -c 'if test -f longnames ; then $(PRID) -l7 longnames $? > Xlongnames ; mv Xlongnames longnames ; else $(PRID) -l7 $? > longnames ; fi'
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES) Makefile
+Cfiles: hfiles LLfiles $(GENCFILES) $(GENHFILES) Makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 LLfiles:	$(GFILES)
 	$(LLGEN) $(LLGENOPTIONS) $(GFILES)
 	@touch LLfiles
 
-hfiles:	Parameters make.hfiles
+hfiles: Parameters make.hfiles
 	make.hfiles Parameters
 	touch hfiles
-
-lint:	Cfiles
-	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
 
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile < tokenname.c > tokenfile.g
@@ -95,10 +134,10 @@ tmpvar.c:	make.allocd
 next.c:		$(NEXTFILES) ./make.next
 		./make.next $(NEXTFILES) > next.c
 
-char.c:	char.tab
+char.c: char.tab
 	$(EMHOME)/bin/tabgen -fchar.tab > char.c
 
-depend:
+depend: Cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
 	$(MKDEP) $(SRC) |\
@@ -110,19 +149,37 @@ print:	$(CSRC) $(GFILES) $(HFILES)	# print recently changed files
 	pr -t $? | rpr $(PRINTER)
 	@touch print
 
-xref:	
+xref:
 	ctags -x $(CSRC) $(HFILES) | sed "s/).*/)/">Xref
 
 #INCLINCLINCLINCL
 
-$(CURRDIR)/main:	$(OBJ)
-	-mv main main.old
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libassert.a $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
-	size $(CURRDIR)/main.old
-	size $(CURRDIR)/main
+Xlint:
+	$(LINT) $(INCLUDES) $(LINTFLAGS) $(SRC) \
+		$(LIBDIR)/llib-lem_mes.ln \
+		$(LIBDIR)/llib-lemk.ln \
+		$(LIBDIR)/llib-linput.ln \
+		$(LIBDIR)/llib-lassert.ln \
+		$(LIBDIR)/llib-lalloc.ln \
+		$(LIBDIR)/llib-lprint.ln \
+		$(LIBDIR)/llib-lstring.ln \
+		$(LIBDIR)/llib-lsystem.ln
+
+$(CURRDIR)main: $(OBJ) $(CURRDIR)Makefile
+	-mv $(CURRDIR)main $(CURRDIR)main.old
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)main
+	size $(CURRDIR)main.old
+	size $(CURRDIR)main
+
+$(CURRDIR)omain:	$(OBJ) #$(CURRDIR)Makefile
+#	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
+#	#size $(CURRDIR)omain
+
+$(CURRDIR)cemain:      $(OBJ) #$(CURRDIR)Makefile
+#	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)cemain
+#	# #size $(CURRDIR)cemain
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-Lpars.o: Lpars.h
 LLlex.o: LLlex.h
 LLlex.o: Lpars.h
 LLlex.o: class.h
@@ -135,12 +192,16 @@ LLlex.o: idfsize.h
 LLlex.o: input.h
 LLlex.o: inputtype.h
 LLlex.o: main.h
+LLlex.o: nocross.h
 LLlex.o: numsize.h
 LLlex.o: strsize.h
+LLlex.o: target_sizes.h
 LLlex.o: type.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
 LLmessage.o: idf.h
+LLmessage.o: nocross.h
+LLmessage.o: target_sizes.h
 LLmessage.o: type.h
 body.o: LLlex.h
 body.o: chk_expr.h
@@ -150,19 +211,12 @@ body.o: def.h
 body.o: desig.h
 body.o: idf.h
 body.o: main.h
+body.o: misc.h
+body.o: nocross.h
 body.o: node.h
 body.o: scope.h
+body.o: target_sizes.h
 body.o: type.h
-casestat.o: LLlex.h
-casestat.o: Lpars.h
-casestat.o: chk_expr.h
-casestat.o: debug.h
-casestat.o: debugcst.h
-casestat.o: density.h
-casestat.o: main.h
-casestat.o: node.h
-casestat.o: type.h
-char.o: class.h
 chk_expr.o: LLlex.h
 chk_expr.o: Lpars.h
 chk_expr.o: chk_expr.h
@@ -173,9 +227,11 @@ chk_expr.o: def.h
 chk_expr.o: idf.h
 chk_expr.o: main.h
 chk_expr.o: misc.h
+chk_expr.o: nocross.h
 chk_expr.o: node.h
 chk_expr.o: required.h
 chk_expr.o: scope.h
+chk_expr.o: target_sizes.h
 chk_expr.o: type.h
 code.o: LLlex.h
 code.o: Lpars.h
@@ -184,15 +240,19 @@ code.o: debugcst.h
 code.o: def.h
 code.o: desig.h
 code.o: main.h
+code.o: misc.h
+code.o: nocross.h
 code.o: node.h
 code.o: required.h
 code.o: scope.h
+code.o: target_sizes.h
 code.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: const.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
+cstoper.o: nocross.h
 cstoper.o: node.h
 cstoper.o: required.h
 cstoper.o: target_sizes.h
@@ -204,24 +264,31 @@ def.o: def.h
 def.o: idf.h
 def.o: main.h
 def.o: misc.h
+def.o: nocross.h
 def.o: node.h
 def.o: scope.h
+def.o: target_sizes.h
 def.o: type.h
 desig.o: LLlex.h
 desig.o: debug.h
 desig.o: debugcst.h
 desig.o: def.h
 desig.o: desig.h
+desig.o: idf.h
 desig.o: main.h
+desig.o: nocross.h
 desig.o: node.h
 desig.o: scope.h
+desig.o: target_sizes.h
 desig.o: type.h
 enter.o: LLlex.h
 enter.o: def.h
 enter.o: idf.h
 enter.o: main.h
+enter.o: nocross.h
 enter.o: node.h
 enter.o: scope.h
+enter.o: target_sizes.h
 enter.o: type.h
 error.o: LLlex.h
 error.o: debug.h
@@ -241,18 +308,23 @@ label.o: LLlex.h
 label.o: def.h
 label.o: idf.h
 label.o: main.h
+label.o: nocross.h
 label.o: node.h
 label.o: scope.h
+label.o: target_sizes.h
 label.o: type.h
 lookup.o: LLlex.h
 lookup.o: def.h
 lookup.o: idf.h
 lookup.o: misc.h
+lookup.o: nocross.h
 lookup.o: node.h
 lookup.o: scope.h
+lookup.o: target_sizes.h
 lookup.o: type.h
 main.o: LLlex.h
 main.o: Lpars.h
+main.o: class.h
 main.o: const.h
 main.o: debug.h
 main.o: debugcst.h
@@ -262,8 +334,10 @@ main.o: idf.h
 main.o: input.h
 main.o: inputtype.h
 main.o: main.h
+main.o: nocross.h
 main.o: node.h
 main.o: required.h
+main.o: target_sizes.h
 main.o: tokenname.h
 main.o: type.h
 misc.o: LLlex.h
@@ -272,25 +346,31 @@ misc.o: idf.h
 misc.o: main.h
 misc.o: misc.h
 misc.o: node.h
-next.o: debug.h
-next.o: debugcst.h
 node.o: LLlex.h
 node.o: debug.h
 node.o: debugcst.h
+node.o: nocross.h
 node.o: node.h
+node.o: target_sizes.h
 node.o: type.h
 options.o: class.h
 options.o: const.h
 options.o: idfsize.h
 options.o: main.h
+options.o: nocross.h
+options.o: target_sizes.h
 options.o: type.h
 readwrite.o: LLlex.h
 readwrite.o: debug.h
 readwrite.o: debugcst.h
 readwrite.o: def.h
+readwrite.o: idf.h
 readwrite.o: main.h
+readwrite.o: misc.h
+readwrite.o: nocross.h
 readwrite.o: node.h
 readwrite.o: scope.h
+readwrite.o: target_sizes.h
 readwrite.o: type.h
 scope.o: LLlex.h
 scope.o: debug.h
@@ -298,16 +378,12 @@ scope.o: debugcst.h
 scope.o: def.h
 scope.o: idf.h
 scope.o: misc.h
+scope.o: nocross.h
 scope.o: node.h
 scope.o: scope.h
+scope.o: target_sizes.h
 scope.o: type.h
 symbol2str.o: Lpars.h
-tmpvar.o: debug.h
-tmpvar.o: debugcst.h
-tmpvar.o: def.h
-tmpvar.o: main.h
-tmpvar.o: scope.h
-tmpvar.o: type.h
 tokenname.o: Lpars.h
 tokenname.o: idf.h
 tokenname.o: tokenname.h
@@ -318,6 +394,7 @@ type.o: debugcst.h
 type.o: def.h
 type.o: idf.h
 type.o: main.h
+type.o: nocross.h
 type.o: node.h
 type.o: scope.h
 type.o: target_sizes.h
@@ -326,24 +403,32 @@ typequiv.o: LLlex.h
 typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
+typequiv.o: nocross.h
 typequiv.o: node.h
+typequiv.o: target_sizes.h
 typequiv.o: type.h
 progs.o: LLlex.h
 progs.o: debug.h
 progs.o: debugcst.h
 progs.o: def.h
 progs.o: main.h
+progs.o: nocross.h
 progs.o: scope.h
+progs.o: target_sizes.h
 progs.o: type.h
 declar.o: LLlex.h
 declar.o: Lpars.h
 declar.o: chk_expr.h
+declar.o: debug.h
+declar.o: debugcst.h
 declar.o: def.h
 declar.o: idf.h
 declar.o: main.h
 declar.o: misc.h
+declar.o: nocross.h
 declar.o: node.h
 declar.o: scope.h
+declar.o: target_sizes.h
 declar.o: type.h
 expression.o: LLlex.h
 expression.o: Lpars.h
@@ -351,13 +436,19 @@ expression.o: chk_expr.h
 expression.o: debug.h
 expression.o: debugcst.h
 expression.o: def.h
+expression.o: idf.h
 expression.o: main.h
+expression.o: misc.h
+expression.o: nocross.h
 expression.o: node.h
 expression.o: scope.h
+expression.o: target_sizes.h
 expression.o: type.h
 program.o: LLlex.h
 program.o: Lpars.h
 program.o: def.h
+program.o: f_info.h
+program.o: idf.h
 program.o: main.h
 program.o: node.h
 program.o: scope.h
@@ -366,9 +457,37 @@ statement.o: Lpars.h
 statement.o: chk_expr.h
 statement.o: def.h
 statement.o: desig.h
+statement.o: f_info.h
 statement.o: idf.h
 statement.o: main.h
+statement.o: misc.h
+statement.o: nocross.h
 statement.o: node.h
 statement.o: scope.h
+statement.o: target_sizes.h
 statement.o: type.h
 tokenfile.o: Lpars.h
+Lpars.o: Lpars.h
+symbol2str.o: Lpars.h
+casestat.o: LLlex.h
+casestat.o: Lpars.h
+casestat.o: chk_expr.h
+casestat.o: debug.h
+casestat.o: debugcst.h
+casestat.o: density.h
+casestat.o: main.h
+casestat.o: nocross.h
+casestat.o: node.h
+casestat.o: target_sizes.h
+casestat.o: type.h
+tmpvar.o: debug.h
+tmpvar.o: debugcst.h
+tmpvar.o: def.h
+tmpvar.o: main.h
+tmpvar.o: nocross.h
+tmpvar.o: scope.h
+tmpvar.o: target_sizes.h
+tmpvar.o: type.h
+char.o: class.h
+next.o: debug.h
+next.o: debugcst.h

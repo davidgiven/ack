@@ -4,12 +4,16 @@
 #include	<assert.h>
 #include	<em.h>
 #include	<em_reg.h>
+#include	<em_abs.h>
 
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"def.h"
 #include	"desig.h"
+#include	"f_info.h"
+#include	"idf.h"
 #include	"main.h"
+#include	"misc.h"
 #include	"node.h"
 #include	"required.h"
 #include	"scope.h"
@@ -23,11 +27,25 @@ CodeFil()
 		C_fil_dlb((label) 1, (arith) 0);
 }
 
+routine_label(df)
+	register struct def * df;
+{
+	df->prc_label = ++data_label;
+	C_df_dlb(df->prc_label);
+	C_rom_scon(df->df_idf->id_text, strlen(df->df_idf->id_text) + 1);
+}
+
 RomString(nd)
 	register struct node *nd;
 {
 	C_df_dlb(++data_label);
-	C_rom_scon(nd->nd_STR, nd->nd_SLE);		/* no trailing '\0' */
+
+	/* A string of the string_type is null-terminated. */
+	if( nd->nd_type == string_type )
+		C_rom_scon(nd->nd_STR, nd->nd_SLE + 1);	/* with trailing '\0' */
+	else
+		C_rom_scon(nd->nd_STR, nd->nd_SLE);	/* no trailing '\0' */
+
 	nd->nd_SLA = data_label;
 }
 
@@ -94,12 +112,13 @@ CodeBeginBlock(df)
 	*/
 
 	arith StackAdjustment = 0;
-	arith offset;			/* offset to save StackPointer */
+	arith offset = 0;		/* offset to save StackPointer */
 
 	TmpOpen(df->prc_vis->sc_scope);
 
 	switch( df->df_kind )	{
 
+	case D_MODULE : break; /* nothing */
 	case D_PROGRAM :
 		C_exp("m_a_i_n");
 		C_pro_narg("m_a_i_n");
@@ -108,8 +127,13 @@ CodeBeginBlock(df)
 		CodeFil();
 
 		/* initialize external files */
-		make_extfl();
 		call_ini();
+		/* ignore floating point underflow */
+		C_lim();
+		C_loc((arith) (1 << EFUNFL));
+		C_ior(int_size);
+		C_sim();
+
 		break;
 
 	case D_PROCEDURE :
@@ -123,6 +147,21 @@ CodeBeginBlock(df)
 		offset = CodeGtoDescr(df->prc_vis->sc_scope);
 		CodeFil();
 
+		if( options['t'] ) {
+			C_lae_dlb(df->prc_label,(arith)0);
+			C_cal("procentry");
+			C_asp(pointer_size);
+		}
+
+		/* prc_bool is the local variable that indicates if the
+		 * function result is assigned. This and can be disabled
+		 * with the -R option. The variable, however, is always
+		 * allocated and initialized.
+		 */
+		if( df->prc_res ) {
+			C_zer((arith) int_size);
+			C_stl(df->prc_bool);
+		}
 		for( param = ParamList(df->df_type); param; param = param->next)
 			if( !IsVarParam(param) )	{
 				tp = TypeOfParam(param);
@@ -213,8 +252,19 @@ CodeEndBlock(df, StackAdjustment)
 			if( !options['n'] )
 				RegisterMessages(df->prc_vis->sc_scope->sc_def);
 
+			if( options['t'] ) {
+				C_lae_dlb(df->prc_label,(arith)0);
+				C_cal("procexit");
+				C_asp(pointer_size);
+			}
 			if( tp = ResultType(df->df_type) )	{
-				if( tp->tp_size == real_size )
+				if( !options['R'] ) {
+					C_lin(LineNumber);
+					C_lol(df->prc_bool);
+					C_cal("_nfa");
+					C_asp(word_size);
+				}
+				if( tp->tp_size == 2 * word_size )
 					C_ldl(-tp->tp_size);
 				else
 					C_lol(-tp->tp_size);
@@ -345,11 +395,28 @@ CodeExpr(nd, ds, true_label)
 		struct node *right = nd->nd_right;
 
 		CodePExpr(right);
-		Int2Real();
+		Int2Real(right->nd_type->tp_size);
 		ds->dsg_kind = DSG_LOADED;
 		break;
 	}
+	case IntCoerc:	{
+		/* convert integer to long integer */
+		struct node *right = nd->nd_right;
 
+		CodePExpr(right);
+		Int2Long();
+		ds->dsg_kind = DSG_LOADED;
+		break;
+	}
+	case IntReduc:	{
+		/* convert a long to an integer */
+		struct node *right = nd->nd_right;
+
+		CodePExpr(right);
+		Long2Int();
+		ds->dsg_kind = DSG_LOADED;
+		break;
+	}
 	default:
 		crash("(CodeExpr : bad node type)");
 		/*NOTREACHED*/
@@ -373,7 +440,7 @@ CodeUoper(nd)
 	switch( nd->nd_symb )	{
 		case '-':
 			assert(tp->tp_fund & T_NUMERIC);
-			if( tp->tp_fund == T_INTEGER )
+			if( tp->tp_fund == T_INTEGER || tp->tp_fund == T_LONG )
 				C_ngi(tp->tp_size);
 			else
 				C_ngf(tp->tp_size);
@@ -412,6 +479,7 @@ CodeBoper(expr, true_label)
 			Operands(leftop, rightop);
 			switch( tp->tp_fund )	{
 				case T_INTEGER:
+				case T_LONG:
 					C_adi(tp->tp_size);
 					break;
 				case T_REAL:
@@ -429,6 +497,7 @@ CodeBoper(expr, true_label)
 			Operands(leftop, rightop);
 			switch( tp->tp_fund )	{
 				case T_INTEGER:
+				case T_LONG:
 					C_sbi(tp->tp_size);
 					break;
 				case T_REAL:
@@ -447,6 +516,7 @@ CodeBoper(expr, true_label)
 			Operands(leftop, rightop);
 			switch( tp->tp_fund )	{
 				case T_INTEGER:
+				case T_LONG:
 					C_mli(tp->tp_size);
 					break;
 				case T_REAL:
@@ -470,7 +540,7 @@ CodeBoper(expr, true_label)
 
 		case DIV:
 			Operands(leftop, rightop);
-			if( tp->tp_fund == T_INTEGER )
+			if( tp->tp_fund == T_INTEGER || tp->tp_fund == T_LONG)
 				C_dvi(tp->tp_size);
 			else
 				crash("(CodeBoper: bad type DIV)");
@@ -478,8 +548,13 @@ CodeBoper(expr, true_label)
 
 		case MOD:
 			Operands(leftop, rightop);
-			if( tp->tp_fund == T_INTEGER )	{
+			if( tp->tp_fund == T_INTEGER ) {
 				C_cal("_mdi");
+				C_asp(2 * tp->tp_size);
+				C_lfr(tp->tp_size);
+			}
+			else if( tp->tp_fund == T_LONG) {
+				C_cal("_mdil");
 				C_asp(2 * tp->tp_size);
 				C_lfr(tp->tp_size);
 			}
@@ -499,6 +574,7 @@ CodeBoper(expr, true_label)
 
 			switch( tp->tp_fund )	{
 				case T_INTEGER:
+				case T_LONG:
 					C_cmi(tp->tp_size);
 					break;
 				case T_REAL:
@@ -532,12 +608,16 @@ CodeBoper(expr, true_label)
 					C_cms(tp->tp_size);
 					break;
 
-				case T_STRING:
+				case T_STRINGCONST:
 				case T_ARRAY:
-					C_loc(IsString(tp));
+					C_loc((arith) IsString(tp));
 					C_cal("_bcp");
 					C_asp(2 * pointer_size + word_size);
 					C_lfr(word_size);
+					break;
+
+				case T_STRING:
+					C_cmp();
 					break;
 
 				default:
@@ -644,7 +724,7 @@ CodeParameters(param, arg)
 	struct paramlist *param;
 	struct node *arg;
 {
-	register struct type *tp, *left_tp, *last_tp;
+	register struct type *tp, *left_tp, *last_tp = (struct type *) 0;
 	struct node *left;
 	struct desig ds;
 
@@ -669,7 +749,7 @@ CodeParameters(param, arg)
 		CodeDAddress(left);
 		return tp;
 	}
-	if( left_tp->tp_fund == T_STRING )	{
+	if( left_tp->tp_fund == T_STRINGCONST )	{
 		CodePString(left, tp);
 		return tp;
 	}
@@ -680,7 +760,7 @@ CodeParameters(param, arg)
 
 	RangeCheck(tp, left_tp);
 	if( tp == real_type && BaseType(left_tp) == int_type )
-		Int2Real();
+		Int2Real(int_size);
 
 	return tp;
 }
@@ -693,7 +773,7 @@ CodeConfDescr(ftp, atp)
 	if( IsConformantArray(elemtp) )
 		CodeConfDescr(elemtp, atp->arr_elem);
 
-	if( atp->tp_fund == T_STRING )	{
+	if( atp->tp_fund == T_STRINGCONST )	{
 		C_loc((arith) 1);
 		C_loc(atp->tp_psize - 1);
 		C_loc((arith) 1);
@@ -807,6 +887,8 @@ CodeStd(nd)
 			CodePExpr(left);
 			if( tp == int_type )
 				C_cal("_abi");
+			else if ( tp == long_type )
+				C_cal("_abl");
 			else
 				C_cal("_abr");
 			C_asp(tp->tp_size);
@@ -816,8 +898,8 @@ CodeStd(nd)
 		case R_SQR:
 			CodePExpr(left);
 			C_dup(tp->tp_size);
-			if( tp == int_type )
-				C_mli(int_size);
+			if( tp == int_type || tp == long_type )
+				C_mli(tp->tp_size);
 			else
 				C_mlf(real_size);
 			break;
@@ -884,10 +966,14 @@ CodeStd(nd)
 		case R_SUCC:
 		case R_PRED:
 			CodePExpr(left);
+			C_loc((arith)1);
+			if( tp == long_type) Int2Long();
+
 			if( req == R_SUCC )
-				C_inc();
+				C_adi(tp->tp_size);
 			else
-				C_dec();
+				C_sbi(tp->tp_size);
+
 			if( bounded(left->nd_type) )
 				genrck(left->nd_type);
 			break;
@@ -895,7 +981,9 @@ CodeStd(nd)
 		case R_ODD:
 			CodePExpr(left);
 			C_loc((arith) 1);
-			C_and(word_size);
+			if(  tp == long_type ) Int2Long();
+			C_and(tp->tp_size);
+			if( tp == long_type ) Long2Int(); /* bool_size == int_size */
 			break;
 
 		case R_EOF:
@@ -989,16 +1077,57 @@ CodeStd(nd)
 			C_asp(pointer_size + word_size);
 			break;
 
+		case R_MARK:
+		case R_RELEASE:
+			CodeDAddress(left);
+			if( req == R_MARK )
+				C_cal("_sav");
+			else
+				C_cal("_rst");
+			C_asp(pointer_size);
+			break;
+
+		case R_HALT:
+			if( left )
+				CodePExpr(left);
+			else
+				C_zer(int_size);
+			C_cal("_hlt");			/* can't return */
+			C_asp(int_size);	/* help the optimizer(s) */
+			break;
+
 		default:
 			crash("(CodeStd)");
 			/*NOTREACHED*/
 	}
 }
 
-Int2Real()
+Long2Int()
+{
+	/* convert a long to integer */
+
+	if (int_size == long_size) return;
+
+	C_loc(long_size);
+	C_loc(int_size);
+	C_cii();
+}
+
+Int2Long()
+{
+	/* convert integer to long */
+
+	if (int_size == long_size) return;
+	C_loc(int_size);
+	C_loc(long_size);
+	C_cii();
+}
+
+Int2Real(size)		/* size is different for integers and longs */
+arith size;
 {
 	/* convert integer to real */
-	C_loc(int_size);
+	C_loc(size);
 	C_loc(real_size);
 	C_cif();
 }
@@ -1049,7 +1178,7 @@ genrck(tp)
 	register label o1;
 	int newlabel = 0;
 
-	if( !options['r'] ) return;
+	if( options['R'] ) return;
 
 	getbounds(tp, &lb, &ub);
 

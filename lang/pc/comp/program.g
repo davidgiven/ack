@@ -7,6 +7,8 @@
 
 #include	"LLlex.h"
 #include	"def.h"
+#include	"f_info.h"
+#include	"idf.h"
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
@@ -20,8 +22,18 @@
 Program
 {
 	struct def *df;
+	arith dummy;
 }:
 	ProgramHeading(&df) ';' Block(df) '.'
+	| { df = new_def();
+	    df->df_idf = str2idf(FileName, 1);
+	    df->df_kind = D_MODULE;
+	    open_scope();
+	    GlobalScope = CurrentScope;
+	    df->prc_vis = CurrVis;
+	  }
+
+	  Module(df, &dummy)
 ;
 
 ProgramHeading(register struct def **df;):
@@ -37,6 +49,7 @@ ProgramHeading(register struct def **df;):
 		'('
 		ProgramParameters
 		')'
+				{ make_extfl(); }
 	]?
 ;
 

@@ -18,6 +18,7 @@
 extern char		*symbol2str();
 extern char		*Malloc(), *Salloc();
 extern struct idf	*gen_anon_idf();
+extern int expect_label;
 
 LLmessage(tk)
 	register int tk;
@@ -44,11 +45,14 @@ LLmessage(tk)
 						Malloc(sizeof (struct string));
 			dotp->TOK_SLE = 1;
 			dotp->TOK_STR = Salloc("", 1);
-			toktype = standard_type(T_STRING, 1, (arith) 1);
+			toktype = standard_type(T_STRINGCONST, 1, (arith) 1);
 			break;
 		case INTEGER:
-			dotp->TOK_INT = 1;
 			toktype = int_type;
+			if( !expect_label )
+				dotp->TOK_INT = 1;
+			else
+				dotp->TOK_INT = -1;
 			break;
 		case REAL:
 			dotp->tk_data.tk_real = (struct real *)
