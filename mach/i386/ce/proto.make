@@ -2,11 +2,11 @@
 
 #PARAMS		do not remove this line!
 
-SRC_DIR = $(SRC_HOME)/mach/i386/ce
+MACH = i386
+OBJ = obj
+SRC_DIR = $(SRC_HOME)/mach/$(MACH)/ce
 
 CEG = $(TARGET_HOME)/lib.bin/ceg/util
-OBJ = obj
-MACH = i386
 
 all:
 	make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH)
