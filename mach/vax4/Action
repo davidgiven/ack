@@ -17,6 +17,9 @@ end
 name "Vax 4-4 EM library"
 dir libem
 end
+name "Vax 4-4 debugger support library"
+dir libdb
+end
 name "Vax 4-4 etext,edata,end library"
 dir libend
 end

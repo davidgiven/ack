@@ -6,6 +6,7 @@ libend
 libbsd4_1a
 libbsd4_2
 libsysV_2
+libdb
 top
 ce
 cv
