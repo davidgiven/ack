@@ -16,6 +16,8 @@ last_sunday(d, t)
 	return d - (d - first) % 7;
 }
 
+extern struct tm *gmtime();
+
 struct tm *
 localtime(clock)
 	long *clock;
