@@ -21,13 +21,13 @@ wr_arhdr(fd, arhdr)
 		while (i--) {
 			*c++ = *p++;
 		}
-		put2(arhdr->ar_date>>16,c); c += 2;
-		put2(arhdr->ar_date,c); c += 2;
+		put2((int)(arhdr->ar_date>>16),c); c += 2;
+		put2((int)(arhdr->ar_date),c); c += 2;
 		*c++ = arhdr->ar_uid;
 		*c++ = arhdr->ar_gid;
 		put2(arhdr->ar_mode,c); c += 2;
-		put2(arhdr->ar_size>>16,c); c += 2;
-		put2(arhdr->ar_size,c);
+		put2((int)(arhdr->ar_size>>16),c); c += 2;
+		put2((int)(arhdr->ar_size),c);
 		wr_bytes(fd, buf, (long) AR_TOTAL);
 	}
 #if WORDS_REVERSED && !BYTES_REVERSED
