@@ -1,31 +1,27 @@
-#include "../lpass1/lint.h"
-#include "../lpass1/manifest.h"
-#include "inpdef.h"
-#include <ctype.h>	/* for efficient definition of isdigit */
+#include	<varargs.h>
 
-#define INP_NPUSHBACK 2
+#include	"../lpass1/l_lint.h"
+#include	"../lpass1/l_class.h"
+#include	"inpdef.h"
 
-#include <inp_pkg.spec>
-#include <inp_pkg.body>
+#include	<alloc.h>
+#include	<system.h>
 
-#define min(a, b) ((a) <= (b) ? (a) : (b))
-#define same_name() !strcmp(cur_name, next_id->id_name)
+#define	MSGOUT		STDERR	/* filedes on which to write the messages */
+#define	ERROUT		STDERR	/* filedes on which to write the panics */
 
-#define ReadUnsigned ReadInt	/* for the time being ??? */
+#define	streq(s1,s2)	(strcmp(s1, s2) == 0)
+#define	min(a,b)	((a) <= (b) ? (a) : (b))
+
+#define	type_equal(s1,s2)	(streq(s1, s2))
 
 char *cur_name;
-struct inpdef *next_id,
+struct inpdef *dot_id,
 	*ext_def,
 	*static_def;
 struct inpdef *id_read();
-static int LineNr = 1;
 
-/* Two dangerous macro's. They replace a single statement by
- * two statements
- */
-#define loadchar(ch) LoadChar(ch); if (ch=='\n') LineNr++
-#define pushback(ch) PushBack(); if (ch=='\n') LineNr--
-
+#define	same_name()	streq(cur_name, dot_id->id_name)
 
 main(argc, argv)
 	char *argv[];
@@ -33,10 +29,12 @@ main(argc, argv)
 	struct inpdef *id;
 
 	init(argc, argv);
-	while (next_id) {
-		cur_name = next_id->id_name;
+
+	get_dot_id();
+	while (dot_id) {
+		cur_name = dot_id->id_name;
 		read_defs();
-		while (next_id && same_name()) {
+		while (dot_id && same_name()) {
 			id = id_read();
 			check(id);
 			free_inpdef(id);
@@ -53,46 +51,47 @@ init(argc, argv)
 	char *argv[];
 {
 /* Prepare standard input for reading using the input-package
- * Read first inpdef into next_id
+ * Read first inpdef into dot_id
  * Parse options
  */
 
 	char *result;
 
-	if (!InsertFile((char *)0, table, &result))
-		panic("InsertFile() fails");
-	next_id = new_inpdef();
-	if (get_id(next_id) == EOI) {
-		free_inpdef(next_id);
-		next_id = 0;
-		return;
-	}
-	for (;argc > 1 && *argv[1] == '-'; argc--, argv++)
+	while (argc > 1 && *argv[1] == '-') {
 		switch (argv[1][1]) {
 		case 'u':
-		/* don't give warnings like "used but not defined"
+		/* don't report situations like "used but not defined"
 		 * and "defined but never used"
 		 */
+		case 'X':		/* ??? prints incoming inpdefs */
 			options[argv[1][1]] = 1;
 			break;
 		default:
 			/* ready to extend */
 			break;
 		}
+		argc--, argv++;
+	}
+
+	if (!InsertFile((char *)0, table, &result))
+		panic("InsertFile() fails");
 }
 
 read_defs()
 {
 	struct inpdef *id;
 
-	while (next_id && same_name() && next_id->id_class <= LVDF) {
+	if (ext_def || static_def)
+		panic("read_defs: slate not clean");/*???*/
+
+	while (dot_id && same_name() && is_def(dot_id)) {
 		id = id_read();
 		switch (id->id_class) {
 		case EFDF:
 		case EVDF:
 			if (ext_def) {
-				warning("%s multiply defined", id->id_name);
-				places(id, ext_def);
+				report("%L: %s also defined at %L",
+					id, id->id_name, ext_def);
 				free_inpdef(id);
 			}
 			else {
@@ -102,8 +101,8 @@ read_defs()
 		case SFDF:
 		case SVDF:
 			if (ext_def) {
-				warning("%s multiply defined", id->id_name);
-				places(id, ext_def);
+				report("%L: %s also defined at %L",
+					id, id->id_name, ext_def);
 				free_inpdef(id);
 			}
 			else {
@@ -116,12 +115,9 @@ read_defs()
 				/* Some libraries contain more than one
 				 * definition
 				 */
-				if (	ext_def->id_class != LFDF
-				&&	ext_def->id_class != LVDF
-				) {
-					warning("%s also defined in library",
-						id->id_name);
-					places(id, ext_def);
+				if (is_lib_class(ext_def->id_class)) {
+					report("%L: %s redefined in library %L",
+						id, id->id_name, ext_def);
 				}
 				free_inpdef(id);
 			}
@@ -138,160 +134,29 @@ read_defs()
 struct inpdef *
 id_read()
 {
-/* Returns the value of next_id if present, 0 otherwise.
- * Reads a new inpdef ahead, to which next_id will be pointing.
+/* Returns the value of dot_id if present, 0 otherwise.
+ * Reads a new inpdef ahead, to which dot_id will be pointing.
  * Cur_name will be pointing to id_name of the returned inpdef.
  */
 	struct inpdef *old_id;
 
-	if (!next_id)
+	if (!dot_id)
 		return (0);
-	old_id = next_id;
+	old_id = dot_id;
 	cur_name = old_id->id_name;
-	next_id = new_inpdef();
-	if (get_id(next_id) == EOI) {
-		free_inpdef(next_id);
-		cur_name = "";
-		next_id = 0;
-	}
+	get_dot_id();
 	return (old_id);
 }
 
-int
-get_id(id)
-	struct inpdef *id;
+get_dot_id()
 {
-/* A low-level function which just reads a definition */
-
-	int eoi;
-
-	if (ReadString(id->id_name, ':', NAMESIZE) == EOI)
-		return (EOI);
-	loadchar(id->id_class);
-	if (id->id_class == EOI)
-		return (EOI);
-	SkipChar(':');
-	if (ReadString(id->id_file, ':', FNAMESIZE) == EOI)
-		return (EOI);
-	if (ReadUnsigned(&id->id_line) == EOI)
-		return (EOI);
-	SkipChar(':');
-	switch (id->id_class) {
-	case EFDF:
-	case SFDF:
-	case LFDF:
-	case FC:
-		if (ReadInt(&id->id_nrargs) == EOI)
-			return (EOI);
-		SkipChar(':');
-		eoi = args_read(
-			(id->id_nrargs < 0 ? -id->id_nrargs-1 : id->id_nrargs),
-			id->id_argtps);
-		if (eoi == EOI)
-			return (EOI);
-		if (ReadInt(&id->id_returns) == EOI)
-			return (EOI);
-		SkipChar(':');
-		break;
+/* Allocates a new inpdef, calls it dot_id and fills it */
+	dot_id = new_inpdef();
+	if (!get_id(dot_id)) {
+		free_inpdef(dot_id);
+		cur_name = "";
+		dot_id = 0;
 	}
-	return (ReadString(id->id_type, '\n', TYPESIZE));
-}
-
-int
-ReadString(buf, delim, maxsize)
-	char *buf;
-{
-/* Reads a string until 'delim' is encountered.
- * Delim is discarded.
- * If 'maxsize-1' is exeded, "string too long" is written by panic().
- * A '\0' is appended to the string.
- * At EOI EOI is returned, else the length of the string (including
- * the appended '\0') is returned.
- */
-	int ch;
-	int nread = 0;
-
-	while (nread < maxsize - 1) {
-		loadchar(ch);
-		if (ch == EOI)
-			return (EOI);
-		if (ch == delim)
-			break;
-		buf[nread++] = (char)ch;
-	}
-	if (ch != delim) {
-		buf[nread] = '\0';
-		panic("line %d: string too long: %s", LineNr, buf);
-	}
-	buf[nread++] = '\0';
-	return (nread);
-}
-
-int
-ReadInt(ip)
-	int *ip;
-{
-/* Reads a decimal integer until a character which is not
- * a digit is encountered.
- * Non-digits except minus-sign in front of the number are discarded.
- * Doesn't check on overflow.
- * Just a minus-sign is interpreted as 0. (To prevent a look-ahead.)
- * At EOI EOI is returned.
- */
-	int ch;
-	int negative = 0;
-	int i = 0;
-
-	do {
-		loadchar(ch);
-	}	/* {} needed because of the loadchar-macro; yack */
-	while (!isdigit(ch) && ch != '-');
-	if (ch == EOI)
-		return (EOI);
-	if (ch == '-')
-		negative = 1;
-	else
-		i = ch - '0';
-	loadchar(ch);
-	while (isdigit(ch)) {
-		i = 10*i + ch - '0';
-		loadchar(ch);
-	}
-	pushback(ch);
-	*ip = negative ? -i : i;
-	return (!EOI);
-}
-
-SkipChar(ch)
-{
-	int c;
-
-	loadchar(c);
-	if (c != ch)
-		panic("line %d: bad format, '%c' expected; '%c' read",
-				LineNr, ch, c);
-}
-
-int
-args_read(nrargs, buf)
-char *buf;
-{
-/* Reads a string into buf with format <type1>:<type2>: ... :<typen>: */
-
-	int i;
-	int charcount = 1;
-	int n;
-
-	*buf = '\0';
-	for (i = 0; i < nrargs; i++) {
-		if ((n = ReadString(buf, ':', ARGTPSSIZE-charcount-1)) == EOI)
-			return (EOI);
-		charcount += n;
-		buf += n - 1;
-		*buf++ = ':';
-	}
-	*buf = '\0';
-	return (!EOI);
 }
 
 struct inpdef *definition();
@@ -308,73 +173,69 @@ check(id)
 	switch (id->id_class) {
 	case EFDC:
 		if (!idef) {
-			uwarning("%s declared but never defined", id->id_name);
-			unewline();
+			if (!options['u']) {
+				report("%L: %s declared but never defined",
+					id, id->id_name);
+			}
 			discard_defs();
 			break;
 		}
 		if (idef->id_class == EVDF || idef->id_class == LVDF) {
-			warning("%s value declared inconsistently",
-				id->id_name);
-			places(id, idef);
+			report("%L: function %s declared as variable at %L",
+				id, id->id_name, idef);
 			break;
 		}
-		if (strcmp(id->id_type, idef->id_type)) {
-			warning("%s value declared inconsistently",
-				id->id_name);
-			places(id, idef);
+		if (!type_equal(id->id_type, idef->id_type)) {
+			report("%L: value of function %s declared differently at %L",
+				id, id->id_name, idef);
 		}
 		break;
 	case EVDC:
 		if (!idef) {
-			uwarning("%s declared but never defined", id->id_name);
-			unewline();
+			if (!options['u']) {
+				report("%L: %s declared but never defined",
+					id, id->id_name);
+			}
 			discard_defs();
 			break;
 		}
 		if (idef->id_class == EFDF || idef->id_class == LFDF) {
-			warning("%s value declared inconsistently",
-				id->id_name);
-			places(id, idef);
+			report("%L: variable %s declared as function at %L",
+				id, id->id_name, idef);
 			break;
 		}
-		if (strcmp(id->id_type, idef->id_type)) {
-			warning("%s value declared inconsistently",
-				id->id_name);
-			places(id, idef);
+		if (!type_equal(id->id_type, idef->id_type)) {
+			report("%L: variable %s declared differently at %L",
+				id, id->id_name, idef);
 		}
 		break;
 	case IFDC:
 		if (!idef)
 			break;		/* used but not defined */
 		if (idef->id_class == EVDF || idef->id_class == LVDF) {
-			warning("%s value declared inconsistently",
-				id->id_name);
-			places(id, idef);
+			report("%L: function %s declared as variable at %L",
+				id, id->id_name, idef);
 			break;
 		}
-		if (strcmp(id->id_type, idef->id_type)) {
-			warning("%s implicitly declared inconsistently",
-				id->id_name);
-			places(id, idef);
+		if (!type_equal(id->id_type, idef->id_type)) {
+			report("%L: function value of %s declared differently at %L",
+				id, id->id_name, idef);
 		}
 		break;
 	case FC:
-	case VU:
 		if (!idef) {
-			uwarning("%s used but not defined", id->id_name);
-			unewline();
+			if (!options['u']) {
+				report("%L: function %s used but not defined",
+					id, id->id_name);
+			}
 			discard_defs();
 			break;
 		}
 		idef->id_called = 1;
-		if (id->id_class == VU)
-			break;
 		check_args(id, idef);
 		if (id->id_returns == USED && !idef->id_returns) {
-			warning("%s value is used, but none is returned",
-				id->id_name);
-			places(id, idef);
+			report("%L: value of %s is used, but none is returned at %L",
+				id, id->id_name, idef);
 		}
 		switch (id->id_returns) {
 		case USED:
@@ -390,6 +251,25 @@ check(id)
 			panic("invalid id->id_returns in check");
 		}
 		break;
+	case VU:
+		if (!idef) {
+			if (!options['u']) {
+				report("%L: variable %s used but not defined",
+					id, id->id_name);
+			}
+			discard_defs();
+			break;
+		}
+		idef->id_called = 1;
+		break;
+	case EFDF:
+	case SFDF:
+	case EVDF:
+	case SVDF:
+	case LFDF:
+	case LVDF:
+		panic("check() called for a definition");
+		break;
 	default:
 		panic("invalid class (%c) in check", id->id_class);
 		break;
@@ -402,7 +282,7 @@ discard_defs()
 
 	struct inpdef *id;
 
-	while (next_id && same_name()) {
+	while (dot_id && same_name()) {
 		id = id_read();
 		free_inpdef(id);
 	}
@@ -411,44 +291,86 @@ discard_defs()
 check_args(id, idef)
 	struct inpdef *id, *idef;
 {
-	register char *argtps1 = id->id_argtps;
-	register char *argtps2 = idef->id_argtps;
-	int i, n, varargs = 0;
+	register char *act_tp = id->id_argtps;
+	register char *def_tp = idef->id_argtps;
+	register int i;
+	register int nrargs;		/* # of args to be type-checked */
+	register int varargs;
 
+	/* determine nrargs */
 	if (idef->id_nrargs < 0) {
 		varargs = 1;
-		n = -idef->id_nrargs - 1;
+		nrargs = -idef->id_nrargs - 1;
 	}
 	else {
-		n = idef->id_nrargs;
+		varargs = 0;
+		nrargs = idef->id_nrargs;
 	}
+
+	/* adjust nrargs, if necessary */
 	if (varargs) {
-		if (n > id->id_nrargs) {
-			warning("%s variable # of args", id->id_name);
-			places(id, idef);
-			n = id->id_nrargs;
+		if (nrargs > id->id_nrargs) {
+			report("%L: number of args to %s differs from %L",
+				id, id->id_name, idef);
+			nrargs = id->id_nrargs;
 		}
 	}
 	else {
-		if (n != id->id_nrargs) {
-			warning("%s variable # of args", id->id_name);
-			places(id, idef);
-			n = min(n, id->id_nrargs);
+		if (nrargs != id->id_nrargs) {
+			report("%L: number of args to %s differs from %L",
+				id, id->id_name, idef);
+			nrargs = min(nrargs, id->id_nrargs);
 		}
 	}
-	for (i = 1; i <= n; i++) {
-		while (*argtps1 == *argtps2 && *argtps1 != ':') {
-			argtps1++;
-			argtps2++;
+
+	for (i = 1; i <= nrargs; i++) {
+		register char *act = act_tp;
+		register char *def = def_tp;
+
+		/* isolate actual argument type */
+		while (*act_tp) {
+			if (*act_tp == ':') {
+				*act_tp = '\0';
+				break;
+			}
+			act_tp++;
 		}
-		if (*argtps1 != *argtps2) {
-			warning("%s, arg %d used inconsistently",
-				id->id_name, i);
-			places(id, idef);
+		/* isolate formal argument type */
+		while (*def_tp) {
+			if (*def_tp == ':') {
+				*def_tp = '\0';
+				break;
+			}
+			def_tp++;
 		}
-		while (*argtps1++ != ':') ;
-		while (*argtps2++ != ':') ;
+
+		if (!type_match(act, def)) {
+			report("%L: arg %d of %s differs from that at %L",
+				id, i, id->id_name, idef);
+		}
+		*act_tp++ = ':';
+		*def_tp++ = ':';
 	}
+}
+
+int
+type_match(act, def)
+	char *act, *def;
+{
+	if (type_equal(act, def))
+		return 1;
+	if (act[0] == '+') {
+		/* a non-negative constant */
+		/* might be signed or unsigned */
+		if (type_equal(&act[1], def))
+			return 1;
+		if (	strncmp(def, "unsigned ", 9)
+		&&	type_equal(&act[1], &def[10])
+		) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 check_usage()
@@ -470,24 +392,27 @@ check_usage()
 check_def(id)
 	struct inpdef *id;
 {
-	if (	!id->id_called && strcmp(id->id_name, "main")
-	&&	ext_def->id_class != LFDF
-	&&	ext_def->id_class != LVDF
-	) {
-		uwarning("%s defined (%s(%u)) but never used",
-			id->id_name, id->id_file, id->id_line);
-		unewline();
+	if (!id->id_called) {
+		if (streq(id->id_name, "main")) {
+			/* silent */
+		}
+		else if (ext_def && is_lib_class(ext_def->id_class)) {
+			/* silent */
+		}
+		else {
+			if (!options['u']) {
+				report("%L: %s defined but never used",
+					id, id->id_name);
+			}
+		}
 	}
-	if (	id->id_class == EFDF
-	||	id->id_class == SFDF
-	||	id->id_class == LFDF
-	) {
+
+	if (is_fundef_class(id->id_class)) {
 		if (id->id_returns && id->id_called && id->id_ignored) {
-			warning("%s returns value which is %s ignored",
-				id->id_name,
-				id->id_used || id->id_voided ?
-				"sometimes" : "always");
-			newline();
+			report("%L: %s returns value which is %s ignored",
+				id, id->id_name,
+				(id->id_used || id->id_voided) ?
+						"sometimes" : "always");
 		}
 	}
 }
@@ -513,7 +438,7 @@ definition(id)
 	struct inpdef *sd = static_def;
 
 	while (sd) {
-		if (!strcmp(id->id_file, sd->id_file))
+		if (id->id_statnr == sd->id_statnr)
 			return (sd);
 		sd = sd->next;
 	}
@@ -536,46 +461,74 @@ free_defs()
 	}
 }
 
-#include "../lpass1/errout.h"	/* for definition of ERROUT */
-
-places(id1, id2)
-	struct inpdef *id1, *id2;
+/* VARARGS */
+report(va_alist)
+	va_dcl
 {
-	fprint(ERROUT, "\t%s(%u) :: %s(%u)\n",
-		id1->id_file, id1->id_line, id2->id_file, id2->id_line);
-}
+	va_list ap;
 
-/* VARARGS1 */
-warning(fmt, args)
-	char *fmt;
-{
-	doprnt(ERROUT, fmt, &args);
-}
+	va_start(ap);
+	{
+		char *fmt = va_arg(ap, char*);
+		register char *f = fmt;
+		register char fc;
 
-/* VARARGS1 */
-uwarning(fmt, args)
-	char *fmt;
-{
-	if (!options['u'])
-		doprnt(ERROUT, fmt, &args);
-}
+		/*	First see if the first arg is an inpdef with
+			a global file name; if so, skip this message.
+		*/
+		if (f[0] == '%' && f[1] == 'L') {
+			/* it is an inpdef */
+			register struct inpdef *id =
+				va_arg(ap, struct inpdef *);
 
-newline()
-{
-	fprint(ERROUT, "\n");
-}
-
-unewline()
-{
-	if (!options['u'])
-		fprint(ERROUT, "\n");
+			f += 2;
+			/* is the file name global? */
+			if (id->id_file[0] == '/')
+				return;
+			/*	if no, we have used up the argument,
+				so print it here
+			*/
+			fprint(MSGOUT, "\"%s\", line %d",
+				id->id_file, id->id_line);
+		}
+		while ((fc = *f++)) {
+			if (fc == '%') {
+				switch (*f++) {
+					register struct inpdef *id;
+					register char *s;
+					register int i;
+				case 'L':	/* a location item */
+					id = va_arg(ap, struct inpdef *);
+					fprint(MSGOUT, "\"%s\", line %d",
+						id->id_file, id->id_line);
+					break;
+				case 's':	/* a string item */
+					s = va_arg(ap, char *);
+					fprint(MSGOUT, "%s", s);
+					break;
+				case 'd':	/* an int item */
+					i = va_arg(ap, int);
+					fprint(MSGOUT, "%d", i);
+					break;
+				default:
+					panic("bad format %s", fmt);
+					break;
+				}
+			}
+			else {
+				fprint(MSGOUT, "%c", fc);
+			}
+		}
+		fprint(MSGOUT, "\n");
+	}
+	va_end(ap);
 }
 
 /* VARARGS1 */
 panic(fmt, args)
 	char *fmt;
 {
-	fprint(ERROUT, "PANIC: ");
+	fprint(ERROUT, "PANIC, lint, pass2: ");
 	doprnt(ERROUT, fmt, &args);
 	fprint(ERROUT, "\n");
 	exit(1);
@@ -585,9 +538,21 @@ panic(fmt, args)
 print_id(id)
 	struct inpdef *id;
 {
-	print("%c, %s, %s, %u, %d, %s, %d, %s\n",
-		id->id_class,
+	print("inpdef: %s, %s, %04d, \"%s\", %d, %d, %s, %d, %s\n",
+		id->id_class == EFDF ? "EFDF" :
+		id->id_class == SFDF ? "SFDF" :
+		id->id_class == EVDF ? "EVDF" :
+		id->id_class == SVDF ? "SVDF" :
+		id->id_class == LFDF ? "LFDF" :
+		id->id_class == LVDF ? "LVDF" :
+		id->id_class == EFDC ? "EFDC" :
+		id->id_class == EVDC ? "EVDC" :
+		id->id_class == IFDC ? "IFDC" :
+		id->id_class == FC ? "FC" :
+		id->id_class == VU ? "VU" :
+		id->id_class == ERRCL ? "ERRCL" : "<BADCLASS>",
 		id->id_name,
+		id->id_statnr,
 		id->id_file,
 		id->id_line,
 		id->id_nrargs,
@@ -595,3 +560,4 @@ print_id(id)
 		id->id_returns,
 		id->id_type);
 }
+

@@ -1,3 +1,28 @@
+ 8-Jul-88  Dick Grune (dick) at dick
+	Added a special meta-type (also in lpaas1) for non-negative
+	constant actual arguments, because these may match both the signed
+	and unsigned versions of the type.
+
+ 4-Jul-88  Dick Grune (dick) at dick
+	Added a scope number, to avoid problems with static object defined
+	in a .h file and used in the main file.  These should match but
+	they didn't, since scope was checked by comparing file names.
+
+28-Jun-88  Dick Grune (dick) at dick
+	Do not print messages that originate from files whose names start
+	with a /.
+
+24-Jun-88  Dick Grune (dick) at dick
+	Introduced a format %L to print location indications like
+	"aap.c", line 31. report() does a printf-like analysis now.
+
+18-Jun-88  Dick Grune (dick) at dick
+	Rewrote messages (originals were copies of lint).
+
+13-Jun-88  Dick Grune (dick) at dick
+	Moved the file name to the end of the intermediate records, to
+	avoid problems with files with : in their names.
+
 11-May-88  Dick Grune (dick) at dick
 	Received sources from Frans Kunst.
 

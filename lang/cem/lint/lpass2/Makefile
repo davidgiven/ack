@@ -19,18 +19,27 @@ CFLAGS = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg -I/usr/include
 .str.h:
 	$(LPASS1)/make.allocd <$*.str >$*.h
 
-lpass2:	lpass2.o makefile next.o
-	$(CC) $(COPTIONS) $(LDFLAGS) lpass2.o next.o $(LLIBS) -o lpass2
+SRC =	lpass2.c read.c
+OBJ =	lpass2.o read.o
+
+test:	lpass2
+	make lint
+
+lpass2:	$(OBJ) Makefile next.o
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) next.o $(LLIBS) -o lpass2
 	size lpass2
 
 lint:
-	lint $(CFLAGS) lpass2.c next.c
+	../lint $(CFLAGS) $(SRC) next.c #???
 
 next.c:	inpdef.str
 	$(LPASS1)/make.next inpdef.str > next.c
 
+tags:	$(SRC)
+	ctags $(SRC)
+
 clean:
-	rm -f a.out core next.c inpdef.h lpass2.o next.o
+	rm -f a.out core next.c inpdef.h $(OBJ) next.o
 
 #----------------------------------------------------------------
-lpass2.o: ../lpass1/errout.h ../lpass1/lint.h ../lpass1/manifest.h inpdef.h
+lpass2.o: ../lpass1/errout.h ../lpass1/lint.h ../lpass1/l_class.h inpdef.h

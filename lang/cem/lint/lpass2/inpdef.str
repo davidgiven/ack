@@ -8,7 +8,7 @@ struct inpdef {
 	int id_class;
 	char id_name[NAMESIZE];
 	char id_file[FNAMESIZE];
-	unsigned int id_line;
+	int id_line;
 	int id_nrargs;
 	char id_argtps[ARGTPSSIZE];
 	int id_returns;
@@ -18,5 +18,7 @@ struct inpdef {
 	int id_ignored;
 	int id_voided;
 };
+
+#define	is_def(id)	(is_def_class(id->id_class))
 
 /* ALLOCDEF "inpdef" 10 */
