@@ -21,7 +21,7 @@ pem.out:        pem.m
 		apc -mint --t -o pem.out pem.m
 
 pem:            pem.m
-		$(APC) $(LDFLAG) -o pem pem.m
+		$(APC) $(LDFLAG) -O -o pem pem.m
 
 # pem.m is system dependent and may NOT be distributed
 pem.m:          pem.p $(HEAD)

@@ -2466,7 +2466,7 @@ begin
     if j = i+1 then argcst(setcode(cstpart[j]))
     else
       begin
-        if j = i+2 then put1(sp_cst2)
+        if (j = i+2) and ((sz_word <= 2) or not (MB1 in cstpart[j])) then put1(sp_cst2)
         else begin j:=i+4; put1(sp_cst4) end;
         for j:=i+1 to j do put1(setcode(cstpart[j]))
       end;
