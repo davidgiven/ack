@@ -46,6 +46,7 @@
 #define set_global_visible	B_stglobvis
 #define set_local_visible	B_stlocvis
 #define symbol_definition	B_symdef
+#define not_implemented		B_not_implemented
 
 
 /* Numbering of the segments and some global constants */

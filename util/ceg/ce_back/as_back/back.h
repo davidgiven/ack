@@ -47,6 +47,7 @@
 #define set_local_visible	B_stlocvis
 #define symbol_definition	B_symdef
 #define switchseg		B_switchseg
+#define not_implemented		B_not_implemented
 
 extern File *codefile;
 
