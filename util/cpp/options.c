@@ -10,6 +10,7 @@
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
+#include	"mkdep.h"
 
 char options[128];			/* one for every char	*/
 int inc_pos = 1;			/* place where next -I goes */
@@ -25,13 +26,19 @@ do_option(text)
 {
 	switch(*text++)	{
 	case '-':
+#ifdef MKDEP
+	case 'x':
+#endif
 		options[*text] = 1;
 		break;
 	default:
+#ifndef MKDEP
 		error("illegal option: %c", text[-1]);
+#endif
 		break;
 	case 'C' :	/* comment output		*/
-		options['C'] = 1;
+	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
+		options[*(text-1)] = 1;
 		break;
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
@@ -97,9 +104,6 @@ do_option(text)
 			warning("minimum identifier length is 8");
 			idfsize = 8;
 		}
-		break;
-	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
-		options['P'] = 1;
 		break;
 	case 'U' :	/* -Uname :	undefine predefined	*/
 		if (*text)	{

@@ -198,6 +198,7 @@ options.o: class.h
 options.o: idf.h
 options.o: idfsize.h
 options.o: macro.h
+options.o: mkdep.h
 preprocess.o: LLlex.h
 preprocess.o: bits.h
 preprocess.o: charoffset.h

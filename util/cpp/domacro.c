@@ -278,12 +278,12 @@ do_include()
 			error("cannot find include file \"%s\"", filenm);
 #else
 			warning("cannot find include file \"%s\"", filenm);
-			add_file(filenm);
+			add_dependency(filenm);
 #endif
 		}
 		else {
 #ifdef MKDEP
-			add_file(result);
+			add_dependency(result);
 #endif
 			WorkingDir = getwdir(result);
 			svnestlevel[++nestcount] = nestlevel;

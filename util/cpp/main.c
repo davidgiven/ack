@@ -39,7 +39,7 @@ main(argc, argv)
 
 	inctable = (char **) Malloc(10 * sizeof(char *));
 	inc_max = 10;
-	inc_total = 2;
+	inc_total = 3;
 	inctable[0] = "";
 	inctable[1] = "/usr/include";
 	init_pp();	/* initialise the preprocessor macros	*/
@@ -90,25 +90,37 @@ compile(argc, argv)
 	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
 #ifdef MKDEP
-	list_files();
+	list_dependencies(source);
 #endif
 }
 
 #ifdef MKDEP
 struct idf	*file_head;
+extern char *strrindex();
 
-list_files()
+list_dependencies(source)
+	char *source;
 {
 	register struct idf *p = file_head;
 
+	if (source) {
+		register char *s = strrindex(source, '.');
+
+		if (s && *(s+1)) {
+			s++;
+			*s++ = 'o';
+			*s = '\0';
+		}
+		else source = 0; 
+	}
 	while (p) {
 		assert(p->id_resmac == K_FILE);
-		print("%s\n", p->id_text);
+		dependency(p->id_text, source);
 		p = p->id_file;
 	}
 }
 
-add_file(s)
+add_dependency(s)
 	char *s;
 {
 	register struct idf *p = str2idf(s, 0);
@@ -118,5 +130,15 @@ add_file(s)
 		p->id_file = file_head;
 		file_head = p;
 	}
+}
+
+dependency(s, source)
+	char *s;
+{
+	if (options['s'] && !strncmp(s, "/usr/include/", 13)) {
+		return;
+	}
+	if (options['m'] && source) print("%s: ", source);
+	print("%s\n", s);
 }
 #endif
