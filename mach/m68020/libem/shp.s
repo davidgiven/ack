@@ -13,10 +13,14 @@ EHEAP=17
 	blt	1f
 	add.l	#0x400, d1
 	and.l	#~0x3ff, d1
+	move.l	a0,-(sp)
 	move.l	d1, -(sp)
+	move.l	d1,(.limhp)
 	jsr	(__brk)		! allocate 1K bytes of extra storage
-	bcs	2f
-	move.l	(sp)+,(.limhp)
+	add.l	#4,sp
+	move.l	(sp)+,a0
+	tst.l	d0
+	bne	2f
 1:
 	move.l	(sp)+, (.reghp)	! store new value
 	jmp	(a0)		! return
