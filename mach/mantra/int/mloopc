@@ -111,7 +111,11 @@ sys6:		cmp.l	#-1,d0
 		mov	d0,-(sp)
 		bra	2f
 1:		mov	d0,-(sp)		! ??
-		mov	xxxx,-(sp)
+#ifdef lword
+		move.l	xxxx,-(sp)
+#else
+		move.w	xxxx+2,-(sp)
+#endif
 		cl	-(sp)
 2:		move.l	.retaddr,a0
 		jmp	(a0)
@@ -371,6 +375,52 @@ _Xioctl:	move.l	(sp)+,.retaddr
 #ifndef	lword
 		bsr	st248
 #endif
+#ifdef __USG
+! only support TIOCGETP and TIOCSETP
+		move.l	4(sp),d0
+		cmp.l	d0,#0x7408	! TIOCGETP
+		bne	1f
+		move.l	(sp)+,d0
+		move.l	d0,(sp)
+		jsr	_gtty
+		lea	8(sp),sp
+		bra	sys4
+1:
+		cmp.l	d0,#0x7409	! TIOCSETP
+		bne	9f
+		move.l	(sp)+,d0
+		move.l	d0,(sp)
+		jsr	_stty
+		lea	8(sp),sp
+		bra	sys4
+#endif
+#ifdef __BSD4_2
+.sect .data
+XXmapping:
+.data4	0x7408,0x40067408			! TIOCGETP
+.data4	0x7409,0x80067409			! TIOCSETP
+.data4	0x740a,0x8006740a			! TIOCSETN
+.data4	0x740d,0x2000740d			! TIOCEXCL
+.data4	0x740e,0x2000740e			! TIOCNXCL
+.data4	0x7402,0x20007402			! TIOCHPCL
+.data4	0x7412,0x40067412			! TIOCGETC
+.data4	0x7411,0x40067411			! TIOCSETC
+.data4	0
+.sect .text
+		lea	XXmapping, a0
+		move.l	4(sp),d0
+1:
+		tst.l	(a0)
+		beq	9f
+		cmp.l	(a0),d0
+		beq	1f
+		add.l	#8,a0
+		bra	1b
+1:
+		move.l	4(a0),d0
+		move.l	d0,4(sp)
+#endif
+9:
 		jsr	_ioctl
 		lea	12(sp),sp
 		bra	sys4
