@@ -274,7 +274,9 @@ fill_int_expr(ex, ivalue, fund)
 		ex->ex_type = int_type;
 		break;
 	case LONG:
-		ex->ex_type = long_type;
+		ex->ex_type = 
+			(ivalue & (1L << (8*long_size - 1))) ? ulong_type
+				: long_type;
 		break;
 	case UNSIGNED:
 		/*	We cannot make a test like
@@ -286,10 +288,18 @@ fill_int_expr(ex, ivalue, fund)
 			answer.  We assume that the type "unsigned long"
 			is not part of portable C !
 		*/
-		ex->ex_type = (ivalue & ~max_unsigned) ? long_type : uint_type;
+		ex->ex_type = 
+			(ivalue & ~max_int) ?
+			  ( (ivalue & ~max_unsigned) ? 
+			      ( ivalue & (1L<<(8*long_size-1)) ?
+					ulong_type : long_type
+			      ) : uint_type
+			  ) : int_type;
 		break;
 	case INTEGER:
-		ex->ex_type = (ivalue <= max_int) ? int_type : long_type;
+		ex->ex_type = (ivalue <= max_int) ? int_type 
+			: (ivalue & (1L << (8*long_size - 1))) ? ulong_type
+				: long_type;
 		break;
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
