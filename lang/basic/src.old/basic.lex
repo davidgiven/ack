@@ -44,12 +44,11 @@ Key keywords [] ={
 "else",		ELSESYM,	0,	0,
 "end",		ENDSYM,		0,	0,
 "eof",		FUNCTION,	EOFSYM,		0,
+"eqv",		BOOLOP,		EQVSYM,	0,
 "erase",	ILLEGAL,	0,	0,
 "error",	ERRORSYM,	0,	0,
 "err",		ERRSYM,		0,	0,
 "erl",		ERLSYM,		0,	0,
-"else",		ELSESYM,	0,	0,
-"eqv",		BOOLOP,		EQVSYM,	0,
 "exp",		FUNCTION,	EXPSYM,		0,
 "field",	FIELDSYM,	0,	0,
 "fix",		FUNCTION,	FIXSYM,		0,
@@ -309,23 +308,29 @@ readconstant()
 number()
 {
 	long	i1;
-	double	f,dec;
-	int	minflag;
+	double	atof();
 	register char *c;
+	int overflow = 0;
+	char cx;
 
 	i1=0;
 	c=cptr;
 	while(isdigit(*c)){
 		i1= i1*10 + *c-'0';
+		if (i1 < 0) overflow = 1;
 		c++;
 	}
-	cptr=c;
 	if( *c != '.'){
-		if( i1> MAXINT || i1<MININT) {
-			/*NOSTRICT*/ dval= i1;
+		if( i1> MAXINT || i1<MININT || overflow) {
+			cx = *c;
+			*c = 0;
+			/*NOSTRICT*/ dval= atof(cptr);
+			cptr=c;
+			*c = cx;
 			return(FLTVALUE);
 		}
 		/*NOSTRICT*/ ival= i1;
+		cptr = c;
 #ifdef YYDEBUG
 		if(yydebug) printf("number:INTVALUE %d",i1);
 #endif
@@ -333,28 +338,22 @@ number()
 	}
 	/* handle floats */
 	/*NOSTRICT*/
-	f= i1; dec=0.1;
 	c++;
 	while( isdigit(*c)){
-		f= f + dec * (*c - '0');
-		dec /= 10.0;
 		c++;
 	}
 	/* handle exponential part */
 	if( *c =='e' || *c == 'E'){
 		c++;
-		minflag= (*c== '-')? -1: 1;
-		if( *c=='-' || *c=='+') c++;
 		while(isdigit(*c)){
-			f *= 10.0;
 			c++;
 		}
-		if(minflag== -1) f= 1.0/f;
 	}
-	dval= f;
-	cptr=c;
+	cx = *c; *c = 0;
+	dval = atof(cptr);
+	*c = cx; cptr=c;
 #ifdef YYDEBUG
-	if(yydebug) printf("number:FLTVALUE %f",f);
+	if(yydebug) printf("number:FLTVALUE %f",dval);
 #endif
 	return(FLTVALUE);
 }
@@ -384,6 +383,9 @@ scanstring()
 			if( firstchar == '"')
 				error("non-terminated string");
 			return(STRVALUE);
+		case '\'':
+		case '\\':
+			putc('\\', emfile);
 		default:
 			fputc(*cptr,emfile);
 		}
@@ -445,7 +447,9 @@ yylex()
 		return(yylex());
 	case '&':
 		return(readconstant());
-	case '?': return(PRINTSYM);
+	case '?': 
+		cptr++;
+		return(PRINTSYM);
 	case '>':
 		if( *(c+1)=='='){
 			c++;c++;cptr=c; yylval.integer= GESYM;return(RELOP);

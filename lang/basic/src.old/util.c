@@ -12,29 +12,35 @@ int	errorcnt;
 warning(str)
 char *str;
 {
-	printf("WARNING:%s\n",str);
+	if (! wflag) Xerror("WARNING",str);
 }
 error(str)
 char *str;
 {
-	extern int listing,yylineno;
-	if( !listing) printf("LINE %d:",yylineno);
-	printf("ERROR:%s\n",str);
+	Xerror("ERROR",str);
 	errorcnt++;
+}
+Xerror(type,str)
+char *str;
+char *type;
+{
+	extern int listing,yylineno;
+	if( !listing) fprintf(stderr,"LINE %d:",yylineno);
+	fprintf(stderr,"%s:%s\n",type,str);
 }
 fatal(str)
 char *str;
 {
-	printf("FATAL:%s\n",str);
+	Xerror("FATAL",str);
 	exit(-1);
 }
 notyetimpl()
 {
-	printf("WARNING: not yet implemented\n");
+	warning("not yet implemented");
 }
 illegalcmd()
 {
-	printf("WARNING: illegal command\n");
+	warning("illegal command");
 }
 char *itoa(i)
 int i;

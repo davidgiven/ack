@@ -4,12 +4,12 @@
 static char rcs_id[] = "$Header$" ;
 #endif
 
-int	listing;		/* -l listing required */
+int	listing;		/* -E listing required */
 int	debug;			/* -d compiler debugging */
-int	wflag=1;		/* -w no warnings */
+int	wflag=0;		/* -w no warnings */
 int	hflag=0;		/* -h<number> to split EM program */
 int	traceflag=0;		/* generate line tracing code */
-int	nolins=0;		/* generate no LIN statements */
+int	nolins=0;		/* -l: generate no LIN statements */
 
 parseparams(argc,argv)
 int argc;
@@ -37,8 +37,9 @@ char **argv;
 				threshold= THRESHOLD;	
 			break;
 		case 'd': debug++; break;
-		case 'l': nolins++; break;	/* no EM lin statements */
+		case 'L': nolins++; break;	/* no EM lin statements */
 		case 'E': listing++; break;	/* generate full listing */
+		case 'w': wflag++; break;
 		} else {
 			/* new input file */
 			switch ( files++ ) {
@@ -49,4 +50,5 @@ char **argv;
 			default:fatal("Too many file arguments") ;
 			}
 		}
+	if (files < 3) fatal("Too few file arguments");
 }

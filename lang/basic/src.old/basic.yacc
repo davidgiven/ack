@@ -15,7 +15,6 @@
 %token ERRSYM
 %token ERLSYM
 %token ERRORSYM
-%token ELSESYM
 %token FIELDSYM
 %token FORSYM
 %token <integer> FUNCTION
@@ -353,8 +352,8 @@ format  : USINGSYM STRVALUE ';'		{ loadstr($2);}
 	| /* empty */				{formatstring=0;}
 
 printlist: expression			{ printstmt($1); $$=1;}
-	| ','				{ zone(0); $$=0;}
-	| ';'				{ zone(1); $$=0;}
+	| ','				{ zone(1); $$=0;}
+	| ';'				{ zone(0); $$=0;}
 	| printlist expression		{ printstmt($2); $$=1;}
 	| printlist ','			{ zone(1);$$=0;}
 	| printlist ';'			{ zone(0);$$=0;}
@@ -405,25 +404,31 @@ indexed	: identifier '(' 			{newarrayload($1);}
 	;
 
 
-expression: negation
-	| negation BOOLOP expression	{$$=boolop($1,$3,$2);}
+expression:
+	  negation
+	| expression BOOLOP expression	{$$=boolop($1,$3,$2);}
+	;
 
 negation: NOTSYM compare		{$$=boolop($2,0,NOTSYM);}
 	| compare
 	;
+
 compare	: sum
 	| sum RELOP sum			{$$=relop($1,$3,$2);}
 	| sum '=' sum			{$$=relop($1,$3,'=');}
+	;
 	
 sum	: term
-	| term '-' sum			{$$=plusmin($1,$3,'-');}
-	| term '+' sum			{$$=plusmin($1,$3,'+');}
+	| sum '-' sum			{$$=plusmin($1,$3,'-');}
+	| sum '+' sum			{$$=plusmin($1,$3,'+');}
+	;
 term	: factor
 	| factor '^' factor		{$$=power($1,$3);}
-	| factor '*' term		{$$=muldiv($1,$3,'*');}
-	| factor '\\' term		{$$=muldiv($1,$3,'\\');}
-	| factor '/' term		{$$=muldiv($1,$3,'/');}
-	| factor MODSYM term		{$$=muldiv($1,$3,MODSYM);}
+	| term '*' term		{$$=muldiv($1,$3,'*');}
+	| term '\\' term		{$$=muldiv($1,$3,'\\');}
+	| term '/' term		{$$=muldiv($1,$3,'/');}
+	| term MODSYM term		{$$=muldiv($1,$3,MODSYM);}
+	;
 factor  : INTVALUE			{$$=loadint(ival);}
 	| '(' expression ')'		{$$=$2;}
 	| '-' factor  { $$=negate($2);}
@@ -440,7 +445,7 @@ factor  : INTVALUE			{$$=loadint(ival);}
 	| funcname			{ $$=fcnend(0);}
 	| funcname funccall ')'	{ $$=fcnend($2);}
 	| MIDSYM '$' midparms	
-	{	warning("Unsupported function call");
+	{
 		emcode("cal","$_mid");
 		emcode("asp",EMINTSIZE);
 		emcode("asp",EMINTSIZE);

@@ -50,8 +50,11 @@ int nr;
 	/* save location on tmpfile */
 	currline->offset= ftell(tmpfile);
 	fprintf(tmpfile,"%d\n",currline->emlabel);
-	fprintf(tmpfile," lin %d\n",nr);
-	emlinecount += 2;
+	emlinecount++;
+	if (! nolins) {
+		fprintf(tmpfile," lin %d\n",nr);
+		emlinecount++;
+	}
 	if( tronoff || traceflag) {
 		emcode("loc",itoa(nr));
 		emcode("cal","$_trace");

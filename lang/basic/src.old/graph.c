@@ -45,7 +45,7 @@ linewarnings()
 	{
 	 	if( !srchline(l->linenr))
 		{
-			printf("ERROR: line %d not defined\n",l->linenr);
+			fprintf(stderr,"ERROR: line %d not defined\n",l->linenr);
 			errorcnt++;
 		}
 		l=l->nextlist;
