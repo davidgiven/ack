@@ -11,6 +11,11 @@ LEXLIB=-lln
 cgg:	bootgram.o
 	cc $(LDFLAGS) bootgram.o $(LIBS) $(LEXLIB) -o cgg
 
+bootgram.c:	bootgram.y
+	@echo expect 1 shift/reduce conflict
+	yacc bootgram.y
+	mv y.tab.c bootgram.c
+
 install:	cgg
 	cp cgg ../../lib/cgg
 
