@@ -78,13 +78,24 @@ regsize(sz) register sz; {
 }
 
 indexed() {
+	int sm1, sm2;
 
 	if (mrg_2 & ~7)
 		serror("register error");
-	if (exp_2.typ != S_ABS || fitb((short)exp_2.val) == 0)
+	sm1 = exp_2.typ == S_ABS && fitb((short)(exp_2.val));
+	if (sm1) {
+		sm2 = exp_2.val == 0 && mrg_2 != 6;
+	}
+	else sm2 = 0;
+	if (small(sm1, 1)) {
+		if (small(sm2, 1)) {
+		}
+		else mrg_2 |= 0100;
+	}
+	else {
+		if (small(0, 1)) {}
 		mrg_2 |= 0200;
-	else if (exp_2.val != 0 || mrg_2 == 6)
-		mrg_2 |= 0100;
+	}
 }
 
 branch(opc,exp) register opc; expr_t exp; {
@@ -165,11 +176,13 @@ addop(opc) register opc; {
 	} else if (mrg_2 & 040) {
 		if ((opc&1) == 0) {
 			emit1(0200);
-		} else if (exp_2.typ != S_ABS || fitb((short)exp_2.val) == 0 ||
-			   opc==011 || opc==041 || opc==061 ) {
-			emit1(0201);
 		} else {
-			emit1(0203); opc &= ~1;
+			int sm = exp_2.typ == S_ABS && fitb((short)exp_2.val) &&
+				opc != 011 && opc != 041 && opc != 061;
+			if (small(sm, 1)) {
+				emit1(0203); opc &= ~1;
+			}
+			else emit1(0201);
 		}
 		ea_1(opc & 070);
 #ifdef RELOCATION
@@ -193,7 +206,7 @@ rolop(opc) register opc; {
 	if (cmrg == 0301) {
 		emit1(0322 | (opc&1)); ea_1(opc&070);
 	} else if (cmrg & 040) {
-		if (exp_2.val == 1) {
+		if (small(exp_2.val == 1, 1)) {
 			emit1(0320 | (opc&1)); ea_1(opc&070);
 		} else {
 			fit(fitb(exp_2.val));

@@ -1,4 +1,4 @@
-#define RCSID4 "$Header$"
+#define RCSID4 "$Id$"
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
