@@ -15,7 +15,7 @@ rscid = "$Header$"
 #include "whichone.h"
 
 /*#define	FANCY_MODES
-/*	On the M68020, there are some rea fancy addressing modes.
+/*	On the M68020, there are some real fancy addressing modes.
 	Their use makes the code a bit shorter, but also much slower.
 	The FANCY_MODES #define enables the use of these addressing
 	modes.
