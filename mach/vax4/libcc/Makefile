@@ -6,7 +6,7 @@ MON="PREF=mon" "SRC=lang/cem/libcc/mon"
 LIBM="PREF=m" "SRC=lang/cem/libcc/libm"
 LIBLN="PREF=ln" "SRC=lang/cem/libcc/libln"
 
-install:	cpstdio cpgen cplibm cplibln
+install:	cpstdio cpgen
 
 cpstdio:
 		RANLIB=ranlib ; export RANLIB ;\
@@ -24,7 +24,7 @@ cplibln:
 		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(LIBLN) $(MACHDEF) tailcp
 
-cmp:		cmpstdio cmpgen cmplib cmplibln
+cmp:		cmpstdio cmpgen
 
 cmpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tail
