@@ -3,6 +3,7 @@
 #include "mach.h"
 #include "back.h"
 
+void
 C_con_scon( s, n)
 char *s;
 arith n;

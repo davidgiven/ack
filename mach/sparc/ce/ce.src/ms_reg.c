@@ -34,6 +34,7 @@ static int current_reg_mes[RM_COUNT+4];
 static int in_reg_mes = 0;	/* boolean */
 static int reg_mes_nr;
 static int db_mes = 0;
+static int db_kind = 0;
 static int db_str = 0;
 static int db_nul = 0;		/* boolean */
 
@@ -252,18 +253,36 @@ load_float_regs()
 
 }
 
+void
 C_mes_begin( ms)
 int ms;
 {
+#ifdef __solaris__
+	static int inits;
+#endif
+
 	reg_mes_nr = 0;
 	in_reg_mes = (ms == ms_reg);
 	if (ms == ms_gto)
 		fprint(codefile, "ta	3\n");
 	db_mes = (ms == ms_stb || ms == ms_std) ? ms : 0;
+#ifdef __solaris__
+	if (db_mes && ! inits) {
+		fprint(codefile, ".pushsection \".text\"\nBtext.text:\n.popsection\n");
+		fprint(codefile, ".pushsection \".data\"\nBdata.data:\n.popsection\n");
+		fprint(codefile, ".pushsection \".bss\"\nBbss.bss:\n.popsection\n");
+		inits = 1;
+	}
+#endif
 }
 
 static dump_reg_tabs();
 
+#ifdef __solaris__
+extern char *B_procnam;
+#endif
+
+void
 C_mes_end()
 {
 	int pos;
@@ -271,10 +290,22 @@ C_mes_end()
 
 	if (db_mes) {
 		db_nul = 0;
+#ifdef __solaris__
+		if (db_mes == ms_std) {
+			if (db_str == 2) {
+				fprint(codefile, ",1f\n1:\n");
+			}
+			else {
+				fprint(codefile, ",1f-%s\n1:\n", B_procnam);
+			}
+		}
+#else
 		if (db_mes == ms_std && db_str == 2) fprint(codefile,",1f\n1:\n");
+#endif
 		else fprint(codefile, "\n");
 		db_str = 0;
 		db_mes = 0;
+		db_kind = 0;
 	}
 	if (!in_reg_mes)	/* end of some other mes */
 		return;
@@ -326,22 +357,32 @@ C_mes_end()
 
 extern int __gdb_flag;
 
+void
 C_cst( l)
 arith l;
 {
 	static int correct_offset;
 
 	if (db_mes) {
+		if (! db_kind) db_kind = l;
 		if (! db_str) {
 			switchseg( SEGTXT);
 			if (l == N_SLINE && ! __gdb_flag) {
 				flush_cache();
+#ifdef __solaris__
+				fprint(codefile, "call $__uX_LiB\nnop\n");
+#else
 				fprint(codefile, "call ___uX_LiB\nnop\n");
+#endif
 			}
+#ifdef __solaris__
+			fprint(codefile, ".stabn 0x%lx,0", (long) l);
+#else
 			if (db_mes == ms_std) {
 				fprint(codefile, ".stabd 0x%lx,0", (long) l);
 			}
 			else	fprint(codefile, ".stabn 0x%lx,0", (long) l);
+#endif
 			db_str = 1;
 			db_nul = 1;
 		}
@@ -364,6 +405,7 @@ arith l;
 		current_reg_mes[reg_mes_nr++] = l;
 }
 
+void
 C_scon(s, l)
 register char *s;
 register arith l;
@@ -383,6 +425,7 @@ register arith l;
 	}
 }
 
+void
 C_dlb(l, off)
 label l;
 arith off;
@@ -391,9 +434,20 @@ arith off;
 		fprint(codefile,",");
 		fprint(codefile, DLB_FMT, (long) l);
 		if (off) fprint(codefile,"+%ld", (long) off);
+#ifdef __solaris__
+		switch(db_kind) {
+		case N_LCSYM:
+			fprint(codefile, "-Bbss.bss");
+			break;
+		case N_STSYM:
+			fprint(codefile, "-Bdata.data");
+			break;
+		}
+#endif
 	}
 }
 
+void
 C_dnam(l, off)
 char *l;
 arith off;
@@ -402,26 +456,44 @@ arith off;
 		fprint(codefile,",");
 		fprint(codefile, DNAM_FMT, l);
 		if (off) fprint(codefile,"+%ld", (long) off);
+#ifdef __solaris__
+		switch(db_kind) {
+		case N_LCSYM:
+			fprint(codefile, "-Bbss.bss");
+			break;
+		case N_STSYM:
+			fprint(codefile, "-Bdata.data");
+			break;
+		}
+#endif
 	}
 }
 
 extern int B_procno;
 
+void
 C_ilb(l)
 label l;
 {
 	if (db_mes) {
 		fprint(codefile,",");
 		fprint(codefile, ILB_FMT, B_procno, (long)l);
+#ifdef __solaris__
+		fprint(codefile, "-Btext.text");
+#endif
 	}
 }
 
+void
 C_pnam(s)
 char *s;
 {
 	if (db_mes) {
 		fprint(codefile,",");
 		fprint(codefile, NAME_FMT, s);
+#ifdef __solaris__
+		fprint(codefile, "-Btext.text");
+#endif
 	}
 }
 

@@ -2,13 +2,12 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <alloc.h>
 #include "mach.h"
 
 #ifdef __STDC__
-#include <stdlib.h>
 #include <string.h>
 #else
-extern char *malloc();
 extern char *strcpy();
 #endif
 
@@ -107,6 +106,12 @@ const13(x)
 static struct cache_elt cache[CACHE_SIZE], *tos = 0;
 static int c_count = 0;
 static const_str_t s;
+
+_PROTOTYPE(static void panic, (char*));
+_PROTOTYPE(static void dump_cache, (File *stream));
+_PROTOTYPE(static int cache_read, (int n, int i));
+_PROTOTYPE(static void flush_part_cache, (int c, int r, int f, int d));
+_PROTOTYPE(static void subst_reg, (reg_t, reg_t));
 
 static void panic(s)
 char *s;
@@ -824,8 +829,7 @@ char *s;
 	char *p;
 
 enter("push_ext");
-	p = malloc(strlen(s)+1);
-	assert(p);
+	p = Malloc(strlen(s)+1);
 
 	INC_TOS;
 	tos->reg = reg_g0;
@@ -1282,7 +1286,7 @@ enter("dup_tos");
 			*tos = tos[-n];
 			if (tos->ext)
 			{
-				ext= malloc(strlen(tos->ext)+1);
+				ext= Malloc(strlen(tos->ext)+1);
 				strcpy(ext, tos->ext);
 				tos->ext= ext;
 			}

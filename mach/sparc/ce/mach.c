@@ -13,19 +13,6 @@ int arg;
 }
 #endif
 
-
-/*
-do_open( filename)
-char *filename;
-{
-	if ( filename == (char *)0 || !sys_open( filename, OP_WRITE, &codefile))
-		return( 0);
-
-	fprint( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");
-	return( 1);
-}
-*/
-
 #define IEEEFLOAT
 #define FL_MSL_AT_LOW_ADDRESS	1
 #define FL_MSW_AT_LOW_ADDRESS	1

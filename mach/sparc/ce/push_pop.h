@@ -34,11 +34,7 @@ extern reg_t reg_f0;
 extern reg_t reg_sp, reg_lb, reg_gap;
 extern reg_t reg_tmp;
 
-#ifdef __STDC__
-#define _PROTOTYPE(x,y) x y
-#else
-#define _PROTOTYPE(x,y) x()
-#endif
+#include "ansi.h"
 
 _PROTOTYPE(int const13, (int));
 _PROTOTYPE(void init_cache, (void));
@@ -54,13 +50,8 @@ _PROTOTYPE(void push_const, (arith));
 _PROTOTYPE(void push_reg, (reg_t));
 _PROTOTYPE(void push_ext, (char *));
 _PROTOTYPE(void flush_cache, (void));
-static _PROTOTYPE(void flush_part_cache, (int c, int r, int f, int d));
-static _PROTOTYPE(void subst_reg, (reg_t, reg_t));
 _PROTOTYPE(void cache_need, (int));
-static _PROTOTYPE(int cache_read, (int n, int i));
-static _PROTOTYPE(void dump_cache, (File *stream));
 _PROTOTYPE(void pop_nop, (int));
-static _PROTOTYPE(void panic, (char*));
 
 _PROTOTYPE(reg_t alloc_reg, (void));
 _PROTOTYPE(reg_t alloc_reg_var, (void));
@@ -74,8 +65,6 @@ _PROTOTYPE(reg_t pop_reg_reg, (reg_t*));
 _PROTOTYPE(reg_t pop_float, (void));
 _PROTOTYPE(reg_t pop_double, (reg_t *sub_reg));
 _PROTOTYPE(void pop_reg_as, (reg_t r));
-static _PROTOTYPE(reg_t top_reg, (void));
-static _PROTOTYPE(reg_t top_reg_c13, (char*));
 
 _PROTOTYPE(arith pop_const, (char *n_str));
 _PROTOTYPE(arith top_const, (void));
