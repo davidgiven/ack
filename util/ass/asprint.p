@@ -80,6 +80,7 @@ procedure getit;  { start the ball rolling }
 var cset:set of char;
     f:ifset;
     insno:byte;
+    iclass: insclass;
     nops:integer;
     opcode:byte;
     i,j,n:integer;

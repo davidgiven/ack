@@ -211,10 +211,13 @@ int i_flag,flag,number ; cons_t val ; {
 		if ( val<0 ) val = -1-val ;
 		return val>=0 && val<number*256 ;
 	case OP16 :
+		/* Commented out for the time being. This must be in
+		   ip_spec.t ...
 		if ( i_flag==PAR_G ) {
 			return val>=0 &&
 			       val<=maxadr && val <= 65535L;
 		}
+		*/
 		return val>= -32768 && val<=32767 ;
 	case OP32 :
 		return TRUE ;

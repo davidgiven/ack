@@ -35,7 +35,7 @@ static int glohash(aname,size) char *aname; {
 	for(sum=i=0,p=aname;*p;i += 3)
 		sum += (*p++)<<(i&07);
 	sum &= 077777;
-	globstep = (sum / size) + 7;
+	globstep = (sum / size) % (size - 7) + 7;
 	return(sum % size);
 }
 
