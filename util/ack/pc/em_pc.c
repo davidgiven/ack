@@ -15,6 +15,8 @@
  *
  */
 
+/* $Header$ */
+
 /*
  * put all the pieces of the pascal part of the EM project together
  *      original author: Johan Stevenson, Vrije Universiteit, Amsterdam
@@ -33,8 +35,8 @@
 
 #define void                    int
 
-char	*pc_path	=	PEM_PATH ;
-char    *err_path       =	ERR_PATH;
+char	*pc_path;
+char    *err_path;
 
 int     toterr;
 int     parent;
@@ -210,6 +212,7 @@ pem(p,q) char *p,*q; {
 	int i;
 	FILE *erfil;
 
+	if ( !pc_path ) fatal("Missing compiler pathname specification\n") ;
 	v = initvector(pc_path);
 	d = tempfile('d');
 	if ((erfil = fopen(d,"w")) == NULL)
@@ -614,6 +617,7 @@ int nexterror() {
 fillindex() {
 	register *ip,n,c;
 
+	if ( !err_path ) fatal("Missing error file name\n") ;
 	if ((mesfil = fopen(err_path,"r")) == NULL)
 		syserr(err_path);
 	ip = index;
