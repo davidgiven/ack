@@ -6,10 +6,13 @@
 /*	return negative, zero or positive value if
 	resp. s < t, s == t or s > t; compare at most n characters
 */
+
+#include "ack_string.h"
+
 int
 strncmp(s, t, n)
-	register char *s, *t;
-	register int n;
+	register _CONST char *s, *t;
+	register _SIZET n;
 {
 	while (n-- > 0) {
 		if (*s == *t++) {

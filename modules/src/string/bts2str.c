@@ -8,6 +8,8 @@
 	86/03/17 EHB
 */
 
+#include "ack_string.h"
+
 #define is_print(c)	((unsigned)((c) - ' ') <= '~' - ' ')
 
 char *

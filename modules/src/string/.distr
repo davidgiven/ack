@@ -18,3 +18,4 @@ strncmp.c
 strncpy.c
 strrindex.c
 strzero.c
+ack_string.h

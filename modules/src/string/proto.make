@@ -18,7 +18,7 @@ OBJ =	bts2str.$(SUF) btscat.$(SUF) btscmp.$(SUF) btscpy.$(SUF) \
 	strlen.$(SUF) strncat.$(SUF) strncmp.$(SUF) strncpy.$(SUF) \
 	strrindex.$(SUF) strzero.$(SUF)
 
-INCLUDES = -I$(SRC_DIR)
+INCLUDES = -I$(SRC_DIR) -I$(MOD_DIR)/h
 CFLAGS = $(COPTIONS) $(INCLUDES)
 
 LIBSTRING = libstring.$(LIBSUF)
@@ -30,16 +30,18 @@ $(LIBSTRING):	$(OBJ)
 		$(RANLIB) $(LIBSTRING)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBSTRING) $(MOD_DIR)/lib/$(LIBSTRING)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSTRING)
-		cp $(SRC_DIR)/string.3 $(MOD_DIR)/man/string.3
+		cp $(SRC_DIR)/ack_string.h $(MOD_DIR)/h/ack_string.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/string.3 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
 		-cmp $(LIBSTRING) $(MOD_DIR)/lib/$(LIBSTRING)
-		-cmp $(SRC_DIR)/string.3 $(MOD_DIR)/man/string.3
+		-cmp $(SRC_DIR)/ack_string.h $(MOD_DIR)/h/ack_string.h
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC)

@@ -21,16 +21,18 @@ $(LIBPRINT):	$(OBJ)
 		$(RANLIB) $(LIBPRINT)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBPRINT)
-		cp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3
+		cp $(SRC_DIR)/print.h $(MOD_DIR)/h/print.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/print.3 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
 		-cmp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
-		-cmp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3
+		-cmp $(SRC_DIR)/print.h $(MOD_DIR)/h/print.h
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC)

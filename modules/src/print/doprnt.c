@@ -5,7 +5,7 @@
 /* $Header$ */
 
 #include <system.h>
-#include <varargs.h>
+#include "print.h"
 #include "param.h"
 
 /*FORMAT1 $
@@ -15,7 +15,7 @@
 	%[uxbo] = unsigned int
 	%d = int
 $ */
-/*VARARGS2*/
+void
 doprnt(fp, fmt, argp)
 	File *fp;
 	char *fmt;

@@ -5,19 +5,19 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .SH SYNOPSIS
 .nf
 .B #include <system.h>
-.B #include <varargs.h>
+.B #include <print.h>
 .PP
-.B print(format [, arg] ... )
+.B void print(format [, arg] ... )
 .B char *format;
 .PP
-.B fprint(filep, format [, arg] ... )
+.B void fprint(filep, format [, arg] ... )
 .B File *filep;
 .B char *format;
 .PP
 .B char *sprint(s, format [, arg] ... )
 .B char *s, *format;
 .PP
-.B doprnt(filep, format, args)
+.B void doprnt(filep, format, args)
 .B File *filep;
 .B char *format;
 .B va_list args;
@@ -106,29 +106,6 @@ length of the string.
 takes
 .I args
 as the address of the arguments of the format string.
-This allows routines, e.g.
-.IR print ,
-to be defined as follows:
-.br
-.RS
-.nf
-#include <varargs.h>
-#include <system.h>
-
-/*VARARGS*/
-print(va_alist)
-	va_dcl
-{
-	char *fmt;
-	va_list args;
-
-	va_start(args);
-	fmt = va_arg(args, char *);
-	doprnt(STDOUT, fmt, args);
-	va_end(args);
-}
-.fi
-.RE
 .SH FILES
 .nf
 ~em/modules/lib/libprint.a

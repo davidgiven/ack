@@ -6,6 +6,8 @@
 /* btscmp()
 */
 
+#include "ack_string.h"
+
 int
 btscmp(b1, n1, b2, n2)
 	register char *b1, *b2;

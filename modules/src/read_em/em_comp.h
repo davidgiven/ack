@@ -6,6 +6,8 @@
 #ifndef __EMCOMP_INCLUDED__
 #define __EMCOMP_INCLUDED__
 
+#include <ansi.h>
+
 struct e_arg {
 	int	ema_argtype;		/* type of this argument */
 	union e_simple_arg {
@@ -43,6 +45,11 @@ struct e_instr {
 	int     	em_opcode;
 	struct e_arg	em_arg;
 };
+
+_PROTOTYPE(int EM_open, (char *));
+_PROTOTYPE(void EM_close, (void));
+_PROTOTYPE(int EM_getinstr, (struct e_instr *));
+_PROTOTYPE(int EM_mkcalls, (struct e_instr *));
 
 extern arith
 	EM_holsize;

@@ -4,7 +4,8 @@
  */
 /* $Header$ */
 
-#include <varargs.h>
+#include <system.h>
+#include "print.h"
 
 extern char *long2str();
 
@@ -33,7 +34,6 @@ integral(c)
 	%[uxbo] = unsigned int
 	%d = int
 $ */
-/*VARARGS2*/
 int
 _format(buf, fmt, argp)
 	char *buf, *fmt;

@@ -4,8 +4,8 @@
  */
 /* $Header$ */
 
-#include <varargs.h>
 #include <system.h>
+#include "print.h"
 #include "param.h"
 
 /*FORMAT1v $
@@ -17,15 +17,25 @@
 $ */
 /*VARARGS*/
 char *
-sprint(va_alist)
+sprint
+#if __STDC__
+	(char *buf, char *fmt, ...)
+{
+#else
+	(va_alist)
 	va_dcl
 {
 	char *buf, *fmt;
+#endif
 	va_list args;
 
+#if __STDC__
+	va_start(args, fmt);
+#else
 	va_start(args);
 	buf = va_arg(args, char *);
 	fmt = va_arg(args, char *);
+#endif
 	buf[_format(buf, fmt, args)] = '\0';
 	va_end(args);
 	return buf;

@@ -5,6 +5,9 @@
  */
 /* str2bts -- (1985, EHB)
 */
+
+#include "ack_string.h"
+
 static
 is_oct(c)
 	char c;

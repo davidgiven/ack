@@ -5,11 +5,14 @@
  */
 /* return length of s
 */
-int
+
+#include "ack_string.h"
+
+_SIZET
 strlen(s)
-	char *s;
+	_CONST char *s;
 {
-	register char *b = s;
+	register _CONST char *b = s;
 
 	while (*b++)
 		;

@@ -10,6 +10,8 @@
 	(1985, EHB)
 */
 
+#include "ack_string.h"
+
 #define MAXWIDTH 32
 
 char *

@@ -6,6 +6,8 @@
 /* btscpy()
 */
 
+#include "ack_string.h"
+
 char *
 btscpy(b1, b2, n)
 	register char *b1, *b2;

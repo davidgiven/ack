@@ -41,7 +41,7 @@ PRIVATE struct string *getstring();
 /* getarg : read an argument of any type, and check it against "typset"
    if neccesary. Put result in "ap".
 */
-PRIVATE
+PRIVATE void
 getarg(typset, ap)
 	register struct e_arg *ap;
 {
@@ -259,7 +259,7 @@ getstring(isident)
 
 /* gethead: read the start of an EM-line
 */
-PRIVATE
+PRIVATE void
 gethead(p)
 	register struct e_instr *p;
 {

@@ -6,6 +6,8 @@
 /* strzero()
 */
 
+#include "ack_string.h"
+
 char *
 strzero(s)
 	char *s;

@@ -6,7 +6,7 @@ SRC_DIR = $(SRC_HOME)/modules/src/read_em
 MOD_DIR = $(TARGET_HOME)/modules
 EM_TABLE = $(SRC_HOME)/etc/em_table
 INCLUDES = -I$(TARGET_HOME)/h -I$(MOD_DIR)/h -I$(SRC_DIR) -I.
-DEFINES = -DPRIVATE=static -DEXPORT=
+DEFINES = -DPRIVATE=static -DEXPORT= -DNDEBUG
 CFLAGS = $(INCLUDES) $(DEFINES) $(COPTIONS)
 
 TARGETS =	libread_emk.$(LIBSUF) \
@@ -35,8 +35,9 @@ K_OFILES =	read_emk.$(SUF) makecalls.$(SUF) EM_vars.$(SUF)
 all:		$(TARGETS)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(SRC_DIR)/em_comp.h $(MOD_DIR)/h/em_comp.h
-		cp $(SRC_DIR)/read_em.3 $(MOD_DIR)/man/read_em.3
 		cp libread_emk.$(LIBSUF) $(MOD_DIR)/lib/libread_emk.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libread_emk.$(LIBSUF)
 		cp libread_emkV.$(LIBSUF) $(MOD_DIR)/lib/libread_emkV.$(LIBSUF)
@@ -52,7 +53,6 @@ cmp:		all
 		-cmp libread_emk.$(LIBSUF) $(MOD_DIR)/lib/libread_emk.$(LIBSUF)
 		-cmp libread_emkV.$(LIBSUF) $(MOD_DIR)/lib/libread_emkV.$(LIBSUF)
 		-cmp libread_emeV.$(LIBSUF) $(MOD_DIR)/lib/libread_emeV.$(LIBSUF)
-		-cmp $(SRC_DIR)/read_em.3 $(MOD_DIR)/man/read_em.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC_DIR)/m_C_mnem $(SRC_DIR)/m_C_mnem_na $(SRC_DIR)/argtype $(SRCFILES)

@@ -6,6 +6,8 @@
 /* str2long()
 */
 
+#include "ack_string.h"
+
 value(c, b)
 	char c;
 	int b;

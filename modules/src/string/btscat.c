@@ -6,6 +6,8 @@
 /* btscat()
 */
 
+#include "ack_string.h"
+
 char *
 btscat(b1, n1, b2, n2)
 	char *b1;

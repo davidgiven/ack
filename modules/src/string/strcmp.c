@@ -6,9 +6,12 @@
 /*	return negative, zero or positive value if
 	resp. s < t, s == t or s > t
 */
+
+#include "ack_string.h"
+
 int
 strcmp(s, t)
-	register char *s, *t;
+	register _CONST char *s, *t;
 {
 	while (*s == *t++)
 		if (*s++ == '\0')

@@ -43,7 +43,7 @@ hash(s)
 	return h;
 }
 
-PRIVATE
+PRIVATE void
 pre_hash(i, s)
 	char *s;
 {
@@ -66,7 +66,7 @@ pre_hash(i, s)
 extern char em_mnem[][4];
 extern char em_pseu[][4];
 
-PRIVATE
+PRIVATE void
 inithash()
 {
 	register int i;
@@ -103,7 +103,7 @@ nospace()
 
 /* syntax: Put an error message in EM_error and skip to the end of the line
 */
-PRIVATE
+PRIVATE void
 syntax(s)
 	char *s;
 {
@@ -117,7 +117,7 @@ syntax(s)
 
 /* checkeol: check that we have a complete line (except maybe for spaces)
 */
-PRIVATE
+PRIVATE void
 checkeol()
 {
 
@@ -251,7 +251,7 @@ getstring()
 	return s;
 }
 
-PRIVATE gettyp();
+PRIVATE void gettyp();
 
 PRIVATE int
 offsetted(argtyp, ap)
@@ -446,7 +446,7 @@ get15u()
 	return (int) (dummy.ema_cst);
 }
 
-PRIVATE
+PRIVATE void
 gettyp(typset, ap)
 	register struct e_arg *ap;
 {
@@ -520,10 +520,9 @@ gettyp(typset, ap)
 	if (argtyp == sp_cend) {
 		ap->ema_argtype = 0;
 	}
-	return;
 }
 
-PRIVATE
+PRIVATE void
 getarg(typset, ap)
 	struct e_arg *ap;
 {
@@ -533,19 +532,19 @@ getarg(typset, ap)
 		if ((c = nospace()) != ',') {
 			if (c != '\n') {
 				syntax("comma expected");
-				return 0;
+				return;
 			}
 			ungetbyte(c);
 		}
 	}
 	argnum++;
-	return gettyp(typset, ap);
+	gettyp(typset, ap);
 }
 
 /* getmnem: We found the start of either an instruction or a pseudo.
 	get the rest of it
 */
-PRIVATE
+PRIVATE void
 getmnem(c, p)
 	register struct e_instr *p;
 {
@@ -587,7 +586,7 @@ getmnem(c, p)
 	}
 }
 
-PRIVATE
+PRIVATE void
 line_line()
 {
 	static char filebuf[256 + 1];
@@ -601,7 +600,7 @@ line_line()
 	EM_filename = filebuf;
 }
 
-PRIVATE
+PRIVATE void
 getlabel(c, p)
 	register struct e_instr *p;
 {
@@ -624,7 +623,7 @@ getlabel(c, p)
 	checkeol();
 }
 
-PRIVATE
+PRIVATE void
 gethead(p)
 	register struct e_instr *p;
 {

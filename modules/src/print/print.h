@@ -4,12 +4,20 @@
  */
 /* $Header$ */
 
-#define stdin	STDIN
-#define stdout	STDOUT
-#define stderr	STDERR
+#ifndef __PRINT_INCLUDED__
+#define __PRINT_INCLUDED__
 
-#define printf	print
-#define sprintf	sprint
-#define fprintf	fprint
+#include <ansi.h>
+#if __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
-#define FILE	File
+_PROTOTYPE(void print, (char *fmt, ...));
+_PROTOTYPE(void fprint, (File *f, char *fmt, ...));
+_PROTOTYPE(void doprnt, (File *f, char *fmt, va_list ap));
+_PROTOTYPE(int _format, (char *buf, char *fmt, va_list ap));
+_PROTOTYPE(char *sprint, (char *buf, char *fmt, ...));
+
+#endif /* __PRINT_INCLUDED__ */

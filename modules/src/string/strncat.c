@@ -5,10 +5,14 @@
  */
 /* append t to s, upto n characters	
 */
+
+#include "ack_string.h"
+
 char *
 strncat(s, t, n)
-	register char *s, *t;
-	register int n;
+	register char *s;
+	register _CONST char *t;
+	register _SIZET n;
 {
 	register char *b = s;
 

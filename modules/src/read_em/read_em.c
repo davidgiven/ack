@@ -99,7 +99,7 @@ static char *argrange = "Argument range error";
 /* Error handling
 */
 
-PRIVATE
+PRIVATE void
 xerror(s)
 	char *s;
 {
@@ -108,7 +108,7 @@ xerror(s)
 }
 
 #ifdef COMPACT
-PRIVATE
+PRIVATE void
 xfatal(s)
 	char *s;
 {
@@ -157,7 +157,7 @@ EM_open(filename)
 
 /* EM_close: Close input file
 */
-EXPORT
+EXPORT void
 EM_close()
 {
 	
@@ -175,7 +175,7 @@ EM_close()
 	again, but also to deliver the arguments on next calls to EM_getinstr.
 	This is indicated by the variable "argp".
 */
-PRIVATE
+PRIVATE void
 startmes(p)
 	register struct e_instr *p;
 {

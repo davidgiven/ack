@@ -5,9 +5,13 @@
  */
 /* append t to s
 */
+
+#include "ack_string.h"
+
 char *
 strcat(s, t)
-	register char *s, *t;
+	register char *s;
+	register _CONST char *t;
 {
 	register char *b = s;
 

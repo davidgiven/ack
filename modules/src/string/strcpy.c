@@ -5,9 +5,13 @@
  */
 /* Copy t into s
 */
+
+#include "ack_string.h"
+
 char *
 strcpy(s, t)
-	register char *s, *t;
+	register char *s;
+	register _CONST char *t;
 {
 	register char *b = s;
 

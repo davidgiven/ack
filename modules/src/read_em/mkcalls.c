@@ -31,7 +31,7 @@ static int listtype = 0;	/* indicates pseudo when generating code for
 	The argument must be of a type allowed by "typset".
 	Return a pointer to the next argument.
 */
-PRIVATE
+PRIVATE int
 checkarg(arg, typset)
 	register struct e_arg *arg;
 {
@@ -58,7 +58,7 @@ checkarg(arg, typset)
 
 /*	EM_doinstr: An EM instruction
 */
-PRIVATE
+PRIVATE void
 EM_doinstr(p)
 	register struct e_instr *p;
 {
@@ -94,7 +94,7 @@ EM_doinstr(p)
 #include "C_mnem"
 }
 
-PRIVATE
+PRIVATE void
 EM_dopseudo(p)
 	register struct e_instr *p;
 {
@@ -326,7 +326,7 @@ EM_dopseudo(p)
 	}
 }
 
-PRIVATE
+PRIVATE void
 EM_docon(p)
 	register struct e_instr *p;
 {
@@ -365,7 +365,7 @@ EM_docon(p)
 	}
 }
 
-PRIVATE
+PRIVATE void
 EM_dostartmes(p)
 	register struct e_instr *p;
 {

@@ -6,6 +6,8 @@
 /* btszero()
 */
 
+#include "ack_string.h"
+
 char *
 btszero(b, n)
 	char *b;

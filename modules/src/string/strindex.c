@@ -6,9 +6,12 @@
 /* strindex() -- (86/03/18 EHB)
 */
 
+#include "ack_string.h"
+
 char *
 strindex(s, c)
-	register char *s, c;
+	register char *s;
+	int c;
 {
 	while (*s)
 		if (*s++ == c)
