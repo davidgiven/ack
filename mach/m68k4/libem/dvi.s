@@ -7,13 +7,13 @@
  ! signed long divide
 	.sect .text
 .dvi:
-	move.l	4(sp),d0
+	move.l	4(sp),d2
 	move.l	8(sp),d1
 	move.l	d4,-(sp)
 	clr.l	d4
-	tst.l	d0	! divisor
+	tst.l	d2	! divisor
 	bpl	1f
-	neg.l	d0
+	neg.l	d2
 	not	d4
 1:
 	tst.l	d1	! dividend
@@ -25,7 +25,7 @@
 	swap	d4
 2:
 	move.l	d1,-(sp)
-	move.l	d0,-(sp)
+	move.l	d2,-(sp)
 	jsr	.dvu
 	tst	d4
 	beq	5f
@@ -33,7 +33,7 @@
 5:
 	tst.l	d4
 	bpl	6f
-	neg.l	d2	! remainder
+	neg.l	d0	! remainder
 6:
 	move.l	(sp)+,d4
 	move.l	(sp)+,a0
