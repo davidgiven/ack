@@ -13,10 +13,10 @@
 1:
 	cmp	(a0)+,(a1)+
 	bne	2f
-	dbf	d0,1b
+	sub.l	#1,d0
+	bne	1b
 2:
 	asl	#1,d1
 	add	d1,sp
 	move.l	d0,-(sp)
 	jmp	(a2)
-.align 2
