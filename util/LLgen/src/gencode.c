@@ -458,16 +458,21 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			safety = NOSCANDONE;
 			break; }
 		  case NONTERM : {
-			register p_nont n;
+			register p_nont n = &nonterms[g_getnont(p)];
 
-			n = &nonterms[g_getnont(p)];
 			if (safety == NOSCANDONE &&
-			    getntsafe(n) < NOSCANDONE) fputs(c_read, f);
+			    getntsafe(n) < NOSCANDONE) {
+				safety = getntsafe(n);
+				fputs(c_read, f);
+			}
 			if (toplevel == 0 &&
 			    (g_gettype(n->n_rule) != ALTERNATION ||
 			     getntsafe(n) <= SAFESCANDONE)) {
 				genpop(findindex(n->n_contains));
 			}
+			if (g_gettype(n->n_rule) == EORULE &&
+			    safety == getntout(n) &&
+			    ! g_getnpar(p)) break;
 			fprintf(f,"L%d_%s(\n",g_getnont(p), n->n_name);
 			if (g_getnpar(p)) {
 				controlline();
