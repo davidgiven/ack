@@ -35,7 +35,6 @@ int idfsize = IDFSIZE;
 extern char options[];
 extern arith NewLocal();
 extern char *symbol2str();
-extern char *sprint();
 
 char sp_occurred[SP_TOTAL+1];	/* indicate occurrence of special id	*/
 

@@ -146,6 +146,8 @@ debug(va_alist)
 	va_start(ap);
 	{
 		_error(DO_DEBUG, dot.tk_file, dot.tk_line, ap);
+		/* _error(DO_DEBUG, NILEXPR, ap);
+		*/
 	}
 	va_end(ap);
 }
@@ -160,6 +162,8 @@ warning(va_alist)
 	va_start(ap);
 	{
 		_error(WARNING, dot.tk_file, dot.tk_line, ap);
+		/* _error(WARNING, NILEXPR, ap);
+		*/
 	}
 	va_end(ap);
 }
