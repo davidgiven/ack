@@ -17,11 +17,12 @@ gen_anon_idf()
 		anonymous name.
 	*/
 	static int name_cnt;
-	char buff[100];
+	char *s = Malloc(strlen(FileName) + 50);
 	char *sprint();
 
-	sprint(buff, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
-	return str2idf(buff, 1);
+	sprint(s, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
+	s = Realloc(s, strlen(s)+1);
+	return str2idf(s, 0);
 }
 
 not_declared(what, id, where)

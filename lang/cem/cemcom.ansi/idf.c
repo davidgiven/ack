@@ -47,11 +47,12 @@ gen_idf()
 		anonymous name.
 	*/
 	static int name_cnt;
-	char buff[100];
+	char *s = Malloc(strlen(dot.tk_file) + 50);
 
-	sprint(buff, "#%d in %s, line %u",
+	sprint(s, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);
-	return str2idf(buff, 1);
+	s = Realloc(s, strlen(s)+1);
+	return str2idf(s, 0);
 }
 
 int
