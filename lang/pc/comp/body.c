@@ -58,7 +58,7 @@ AssertStat(expp, line)
 		return;
 	}
 
-	if( options['a'] && !err_occurred ) {
+	if( !options['a'] && !err_occurred ) {
 		dsr = InitDesig;
 		CodeExpr(expp, &dsr, NO_LABEL);
 		C_loc((arith)line);
