@@ -630,10 +630,10 @@ STATIC
 WalkOption(nd)
 	struct node *nd;
 {
-	/* Toggle option indicated by node "nd"
+	/* Set option indicated by node "nd"
 	*/
 
-	options[nd->nd_symb] = ! options[nd->nd_symb];
+	options[nd->nd_symb] = nd->nd_INT;
 }
 
 int (*WalkTable[])() = {

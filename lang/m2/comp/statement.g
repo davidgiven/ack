@@ -41,6 +41,7 @@ statement(register struct node **pnd;)
 					Roption = options['R'];
 					nd = dot2leaf(Option);
 					nd->nd_symb = 'R';
+					nd->nd_INT = Roption;
 					*pnd = nd =
 					    dot2node(Link, nd, NULLNODE);
 					nd->nd_symb = ';';
