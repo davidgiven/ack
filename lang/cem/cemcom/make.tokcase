@@ -23,6 +23,7 @@ s/.*{\(.*\),.*\(".*"\).*$/	case \1 :\
 
 cat <<'--EOT--'
 	default:
+		if (tok <= 0) return "end of file";
 		if (tok < 040 || tok >= 0177) {
 			return "bad token";
 		}
