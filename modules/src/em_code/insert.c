@@ -67,7 +67,10 @@ outpart(id)
 	*/
 	Part *p = C_findpart(id);
 
-	if (p) C_out_parts(p->p_parts);
+	if (p) {
+		C_out_parts(p->p_parts);
+		p->p_parts = 0;
+	}
 }
 
 static
@@ -109,7 +112,9 @@ C_out_parts(pp)
 			}
 #endif
 		}
+		prev = pp;
 		pp = pp->pp_next;
+		free((char *) prev);
 	}
 }
 
