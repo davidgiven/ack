@@ -17,8 +17,8 @@ CLIBDIR =	$(SRC_HOME)/lang/cem/libcc#	# to create c.llb
 ANSILIBDIR =	$(SRC_HOME)/lang/cem/libcc.ansi## to create c.llb
 INCLUDE =	$(SRC_HOME)/include/_tail_cc
 AINCLUDE =	$(SRC_HOME)/lang/cem/libcc.ansi/headers
-CLIBFLAGS =	-I$(INCLUDE)			# to compile $(CLIBDIR)
-ANSILIBFLAGS =	-I$(AINCLUDE)			# to compile $(ANSILIBDIR)
+CLIBFLAGS =	-I$(INCLUDE)#			# to compile $(CLIBDIR)
+ANSILIBFLAGS =	-I$(AINCLUDE)#			# to compile $(ANSILIBDIR)
 
 all:	c.llb ansi_c.llb
 
