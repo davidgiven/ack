@@ -16,7 +16,7 @@ OFILES=codegen.o compute.o equiv.o fillem.o gencode.o glosym.o main.o\
        move.o nextem.o reg.o regvar.o salloc.o state.o subr.o var.o
 
 all:	tables.c
-	make cg
+	make "EMHOME="$(EMHOME) cg
 
 cg: tables.o $(OFILES)
 	$(CC) $(LDFLAGS) $(OFILES) tables.o $(LIBS) -o cg
