@@ -1,6 +1,10 @@
 .define _fork
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern _fork
-.text
+.sect .text
 _fork:		move.w #0x2,d0
 		trap #0
 		bra 1f

@@ -1,6 +1,10 @@
 .define _exit
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern _exit
-.text
+.sect .text
 _exit:
 tst.b -40(sp)
 link	a6,#-0

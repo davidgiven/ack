@@ -1,11 +1,21 @@
 # $Header$
-install:
-	../../install tail_mon.a tail_mon
+MACH=m68k2
+all:		tail_mon
+install: 	all
+		../../install tail_mon
 
-clean :
+cmp:		all
+		-../../compare tail_mon
+
+tail_mon:
+		ASAR=aal ; export ASAR ;\
+		march . tail_mon
+
+clean:
+		rm -f *.o
 
 opr :
-	make pr | opr
+		make pr | opr
 
 pr:
-	@ar pv tail_mon.a
+		@ar pv tail_mon.a

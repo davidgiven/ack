@@ -1,6 +1,10 @@
 .define __cleanup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern __cleanup
-.text
+.sect .text
 __cleanup:
 tst.b -40(sp)
 link	a6,#-0

@@ -1,8 +1,12 @@
 .define _brk
 .define _sbrk
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern _brk
 .extern _sbrk
-.text
+.sect .text
 _sbrk:		move.l nd,a0
 		add.w  4(sp),a0
 		move.w #0x11,d0
@@ -21,6 +25,6 @@ _brk:		move.w #0x11,d0
 		move.l 4(sp),nd
 		clr.l d0
 		rts
-.data
-nd:		.long endbss
-.text
+.sect .data
+nd:		.data4 endbss
+.sect .text

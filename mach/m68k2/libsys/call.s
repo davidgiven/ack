@@ -3,12 +3,16 @@
 .define calle
 .define cerror
 .define _errno
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern call
 .extern callc
 .extern calle
 .extern cerror
 .extern _errno
-.text
+.sect .text
 call:		trap #0
 		bcs cerror
 		rts
@@ -23,6 +27,6 @@ cerror:
 		move.w d0,_errno
 		move.l #-1,d0
 		rts
-.bss
+.sect .bss
 _errno:		.space 4
-.text
+.sect .text

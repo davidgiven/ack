@@ -1,6 +1,10 @@
 .define _mknod
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern _mknod
-.text
+.sect .text
 _mknod:		move.w #0xE,d0
 		move.l 4(sp),a0
 		move.w 8(sp),d1
