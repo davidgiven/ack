@@ -254,9 +254,6 @@ movzx anyreg:wo, REG+rm2:ro.
 mul rmorconst:ro kills :cc eax edx cost(2,41).
 neg rmorconst:rw:cc.
 not rmorconst:rw.
-ORB "orb" REG1:ro, REG1:ro:cc.		/* use ORB for tests */
-ORW "o16 or" REG2:ro, REG2:ro:cc.	/* use ORW for tests */
-OR "or" anyreg:ro, anyreg:ro:cc.	/* Use OR for tests */
 #ifdef REGVARS
 or LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
@@ -285,10 +282,12 @@ sub rm:rw:cc, regorconst:ro.
 sub anyreg:rw:cc, rmorconst+halfindir:ro.
 check "test" rm:ro, regorconst:ro kills :cc.
 check "test" anyreg:ro, rmorconst:ro kills :cc.
-testb "testb" rm1:ro, regorconst:ro kills :cc.
-testb "testb" REG1:ro, rmorconst:ro kills :cc.
-testw "o16 test" rm2:ro, regorconst:ro kills :cc.
-testw "o16 test" REG2:ro, rmorconst:ro kills :cc.
+testb "testb" rm1:ro, regorconst124:ro kills :cc.
+testb "testb" REG1:ro, rmorconst1:ro kills :cc.
+testw "o16 test" rm2:ro, regorconst24:ro kills :cc.
+testw "o16 test" REG2:ro, rmorconst2:ro kills :cc.
+testl "test" rm:ro, regorconst:ro kills :cc.
+testl "test" REG:ro, rmorconst:ro kills :cc.
 uxx "syntax error"  rm:rw:cc.
 xchg rm:rw, anyreg:rw.
 xchg anyreg:rw, rm:rw.
@@ -361,19 +360,19 @@ TESTS
 /*****************************************************************/
 
 to test anyreg
-gen OR %1,%1
+gen testl %1,%1
 
 to test memory
 gen cmp %1, {ANYCON,0}
 
 to test REG1
-gen ORB %1,%1
+gen testb %1,%1
 
 to test memory1
 gen cmpb %1, {ANYCON,0}
 
 to test REG2
-gen ORW %1,%1
+gen testw %1,%1
 
 to test memory2
 gen cmpw %1, {ANYCON,0}
