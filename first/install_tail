@@ -47,7 +47,7 @@ w
 q
 ABC
 	ed - $CONFIG/mach/vax4/Action << 'ABC'
-/libbds4_2/s/libbsd4_2/libsysV_2/
+/libbsd4_2/s/libbsd4_2/libsysV_2/
 w
 q
 ABC
@@ -71,7 +71,7 @@ ABC
 	;;
 Xvax_bsd4_1a)
 	ed - $CONFIG/mach/vax4/Action << 'ABC'
-/libbds4_2/s/libbsd4_2/libbsd4_1a/
+/libbsd4_2/s/libbsd4_2/libbsd4_1a/
 w
 q
 ABC
