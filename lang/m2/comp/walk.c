@@ -854,9 +854,6 @@ WalkStat(nd, exit_label, end_reached)
 			   assignment compatible with the result type of the
 			   function procedure (See Rep. 9.11).
 			*/
-			if (nd->nd_RIGHT->nd_symb == STRING) {
-				TryToString(nd->nd_RIGHT, func_type);
-			}
 			if (!ChkAssCompat(&(nd->nd_RIGHT), func_type, "RETURN")) {
 				break;
 			}
@@ -1013,8 +1010,6 @@ DoAssign(nd)
 	if (! (ChkExpression(&(nd->nd_RIGHT)) &
 	       ChkVariable(&(nd->nd_LEFT), D_DEFINED))) return;
 	tp = nd->nd_LEFT->nd_type;
-
-	if (nd->nd_RIGHT->nd_symb == STRING) TryToString(nd->nd_RIGHT, tp);
 
 	if (! ChkAssCompat(&(nd->nd_RIGHT), tp, "assignment")) {
 		return;

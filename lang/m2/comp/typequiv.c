@@ -26,6 +26,7 @@
 #include	"node.h"
 #include	"warning.h"
 #include	"main.h"
+#include	"Lpars.h"
 
 extern char *sprint();
 
@@ -289,6 +290,9 @@ ChkAssCompat(nd, tp, message)
 		Give an error message when it fails
 	*/
 
+	if ((*nd)->nd_symb == STRING) {
+		TryToString((*nd), tp);
+	}
 	return CompatCheck(nd, tp, message, TstAssCompat);
 }
 
