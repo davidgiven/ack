@@ -139,6 +139,11 @@ char **argv;
 	register nfile = 0;
 #endif
 
+#ifdef THREE_PASS
+	bitindex = -1;
+	nbits = BITCHUNK;
+#endif
+
 	tempfile = fftemp(temppath, "asTXXXXXX");
 #ifdef LISTING
 	listmode = dflag;
@@ -384,7 +389,8 @@ pass_23(n)
 	listeoln = 1;
 #endif
 #ifdef THREE_PASS
-	nbits = 0;
+	bitindex = -1;
+	nbits = BITCHUNK;
 #endif
 	for (i = 0; i < FB_SIZE; i++)
 		fb_ptr[FB_FORW+i] = fb_ptr[FB_HEAD+i];

@@ -78,9 +78,11 @@ extern short	hashindex;	/* see item_search() */
 extern item_t	*fb_ptr[4*FB_SIZE];
 
 #ifdef THREE_PASS
-extern char	bittab[BITMAX>>3];
-				/* one bit per small-large decision */
-extern long	nbits;		/* number of decisions so far */
+#define BITCHUNK	(8 * MEMINCR)
+extern int	nbits;
+extern int	bitindex;	/* bitindex * MEMINCR * 8 + nbits gives
+				   number of decisions so far
+				*/
 #endif
 
 #ifdef LISTING

@@ -26,7 +26,6 @@
 
 /* table sizes */
 #define	STRINGMAX	200	/* <= 256 */
-#define	BITMAX		2000	/* for short or long branches */
 #define	SECTMAX		64
 #define	NAMEMAX		80
 #define	MEMINCR		2048

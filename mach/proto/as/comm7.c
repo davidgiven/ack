@@ -172,6 +172,9 @@ listline(textline)
 /* ---------- code optimization ---------- */
 
 #ifdef THREE_PASS
+#define PBITTABSZ	128
+static char *pbittab[PBITTABSZ];
+
 small(fitsmall, gain)
 {
 	register bit;
@@ -181,16 +184,32 @@ small(fitsmall, gain)
 		nosect();
 	if (bflag)
 		return(0);
-	if (nbits == BITMAX) {
-		static int w_given;
-		if (pass == PASS_1 && ! w_given) {
-			w_given = 1;
-			warning("bit table overflow");
+	if (nbits == BITCHUNK) {
+		bitindex++;
+		nbits = 0;
+		if (bitindex == PBITTABSZ) {
+			static int w_given;
+			if (pass == PASS_1 && ! w_given) {
+				w_given = 1;
+				warning("bit table overflow");
+			}
+			return(0);
 		}
-		return(0);
+		if (pbittab[bitindex] == 0 && pass == PASS_1) {
+			if ((pbittab[bitindex] = malloc(MEMINCR)) == 0) {
+				static int w2_given;
+
+				if (!w2_given) {
+					w2_given = 1;
+					warning("out of space for bit table");
+				}
+			}
+		}
+		if (pbittab[bitindex] == 0)
+			return (0);
 	}
-	p = &bittab[(int) (nbits>>3)];
-	bit = 1 << ((int)nbits&7);
+	bit = 1 << (nbits&7);
+	p = pbittab[bitindex]+(nbits>>3);
 	nbits++;
 	switch (pass) {
 	case PASS_1:
