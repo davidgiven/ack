@@ -3,6 +3,7 @@
 struct sigvec { int (*handler)(); int mask,flags; };
 int (*(_sigfunc[32]))();
 extern int _sigtramp();
+extern int errno;
 
 sigvec(sig,vec,ovec)
 	register struct sigvec *vec;
