@@ -620,13 +620,13 @@ dopush(p,safety,toplevel,pp) register p_gram p; int **pp; {
 			return ip;
 		  case TERM : {
 			register p_term q;
-			int rep, cnt;
+			int rep_kind, rep_count;
 
 			q = g_getterm(p);
-			rep = r_getkind(q);
-			cnt = r_getnum(q);
+			rep_kind = r_getkind(q);
+			rep_count = r_getnum(q);
 			if (!(toplevel > 0 && safety <= SAFESCANDONE &&
-			    (rep == OPT || (rep == FIXED && cnt == 0)))) {
+			    (rep_kind == OPT || (rep_kind == FIXED && rep_count == 0)))) {
 				*ip++ = findindex(q->t_contains);
 			}
 			break; }
@@ -730,29 +730,24 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	/*
 	 * Generate code for a term
 	 */
-	register FILE	*f;
-	register int	i;
-	register int	rep;
-	int		persistent;
-	int		ispushed;
+	register FILE	*f = fpars;
+	register int	rep_count = r_getnum(q);
+	register int	rep_kind = r_getkind(q);
+	int		term_is_persistent = (q->t_flags & PERSISTENT);
+	int		ispushed = NOPOP;
 	int		sw = SAFE;
 
-	f = fpars;
-	i = r_getnum(q);
-	rep = r_getkind(q);
-	persistent = (q->t_flags & PERSISTENT);
-	ispushed = NOPOP;
 	if (!(toplevel > 0 && 
 	      (safety == 0 || (!onerror && safety <= SAFESCANDONE)) &&
-	    (rep == OPT || (rep == FIXED && i == 0)))) {
+	    (rep_kind == OPT || (rep_kind == FIXED && rep_count == 0)))) {
 		ispushed = findindex(q->t_contains);
 	}
-	if (safety == NOSCANDONE && (rep != FIXED || i == 0 ||
+	if (safety == NOSCANDONE && (rep_kind != FIXED || rep_count == 0 ||
 	    gettout(q) != NOSCANDONE)) {
 		fputs(c_read, f);
 		safety = SCANDONE;
 	}
-	if (rep == PLUS && !persistent) {
+	if (rep_kind == PLUS && !term_is_persistent) {
 		int temp;
 
 		temp = findindex(q->t_first);
@@ -762,12 +757,12 @@ codeforterm(q,safety,toplevel) register p_term q; {
 			genpush(temp);
 		}
 	}
-	if (i) {
+	if (rep_count) {
 		/* N > 0, so generate fixed forloop */
 		fputs("{\nregister LL_i;\n", f);
 		assert(ispushed != NOPOP);
-		fprintf(f, "for (LL_i = %d; LL_i >= 0; LL_i--) {\n", i - 1);
-		if (rep == FIXED) {
+		fprintf(f, "for (LL_i = %d; LL_i >= 0; LL_i--) {\n", rep_count - 1);
+		if (rep_kind == FIXED) {
 			fputs("if (!LL_i) ", f);
 			genpop(ispushed);
 			genpush(ispushed);
@@ -777,65 +772,64 @@ codeforterm(q,safety,toplevel) register p_term q; {
 			}
 		}
 	}
-	else if (rep != OPT && rep != FIXED) {
+	else if (rep_kind != OPT && rep_kind != FIXED) {
 		/* '+' or '*', so generate infinite loop */
 		fputs("for (;;) {\n",f);
 	}
-	else if (rep == OPT &&
+	else if (rep_kind == OPT &&
 		 (safety == 0 || (!onerror && safety <= SAFESCANDONE))) {
 		genpop(ispushed);
 		ispushed = NOPOP;
 	}
-	if (rep == STAR || rep == OPT) {
-		sw = genswhead(q, rep, i, safety, ispushed);
+	if (rep_kind == STAR || rep_kind == OPT) {
+		sw = genswhead(q, rep_kind, rep_count, safety, ispushed);
 	}
 	rulecode(q->t_rule,
-		 t_safety(rep,i,persistent,safety),
+		 t_safety(rep_kind,rep_count,term_is_persistent,safety),
 		 gettout(q) != NOSCANDONE,
-		 rep == FIXED ? ispushed : NOPOP);
-	if (gettout(q) == NOSCANDONE && rep != FIXED) {
+		 rep_kind == FIXED ? ispushed : NOPOP);
+	if (gettout(q) == NOSCANDONE && rep_kind != FIXED) {
 		fputs(c_read, f);
 	}
 	/* in the case of '+', the if is after the code for the rule */
-	if (rep == PLUS) {
-		if (i) {
+	if (rep_kind == PLUS) {
+		if (rep_count) {
 			fputs("if (!LL_i) break;\n", f);
 		}
-		sw = genswhead(q, rep, i, safety, ispushed);
+		sw = genswhead(q, rep_kind, rep_count, safety, ispushed);
 	}
-	if (rep != OPT && rep != FIXED) fputs("continue;\n", f);
-	if (rep != FIXED) {
+	if (rep_kind != OPT && rep_kind != FIXED) fputs("continue;\n", f);
+	if (rep_kind != FIXED) {
 		fputs(c_close, f); /* Close switch */
-		if (rep != OPT) {
+		if (rep_kind != OPT) {
 			genpop(ispushed);
 			fputs(c_break, f);
 		}
 	}
-	if (rep != OPT && (rep != FIXED || i > 0)) {
+	if (rep_kind != OPT && (rep_kind != FIXED || rep_count > 0)) {
 		fputs(c_close, f);	/* Close for */
-		if (i > 0) {
+		if (rep_count > 0) {
 			fputs(c_close, f);/* Close Register ... */
 		}
 	}
-	return t_after(rep, i, gettout(q));
+	return t_after(rep_kind, rep_count, gettout(q));
 }
 
 STATIC
-genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
+genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	/*
 	 * Generate switch statement for term q
 	 */
-	register FILE	*f;
+	register FILE	*f = fpars;
 	p_set		p1;
 	p_set		setalloc();
 	int		hulp1, hulp2;
 	int		safeterm;
 	int		termissafe = 0;
 
-	f = fpars;
-	if (rep == PLUS) safeterm = gettout(q);
-	else if (rep == OPT) safeterm = safety;
-	else /* if (rep == STAR) */ safeterm = max(safety, gettout(q));
+	if (rep_kind == PLUS) safeterm = gettout(q);
+	else if (rep_kind == OPT) safeterm = safety;
+	else /* if (rep_kind == STAR) */ safeterm = max(safety, gettout(q));
 	hulp2 = nlabel++;
 	fprintf(f, "L_%d : ", hulp2);
 	fputs("switch(LLcsymb) {\n", f);
@@ -869,7 +863,7 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 		termissafe = 1;
 	}
 	else	gencases(q->t_follow);
-	if (rep == OPT) genpop(ispushed);
+	if (rep_kind == OPT) genpop(ispushed);
 	fputs(c_break, f);
 	if (! termissafe) {
 		int i;
@@ -881,7 +875,7 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 		++nvar;
 		fprintf(f,"default:{int LL_%d=LLnext(%d);\n;if (!LL_%d) {\n",
 			nvar, i, nvar);
-		if (rep == OPT) genpop(ispushed);
+		if (rep_kind == OPT) genpop(ispushed);
 		fputs(c_break, f);
 		fputs(c_close, f);
 		fprintf(f,"else if (LL_%d & 1) goto L_%d;}\n",nvar, hulp2);
@@ -893,10 +887,10 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 	if (q->t_flags & RESOLVER) {
 		fprintf(f, "L_%d : ;\n", hulp1);
 	}
-	if (rep == OPT) genpop(ispushed);
-	if (cnt > 0) {
+	if (rep_kind == OPT) genpop(ispushed);
+	if (rep_count > 0) {
 		assert(ispushed != NOPOP);
-		fputs(rep == STAR ? "if (!LL_i) " : "if (LL_i == 1) ", f);
+		fputs(rep_kind == STAR ? "if (!LL_i) " : "if (LL_i == 1) ", f);
 		genpop(ispushed);
 	}
 	return safeterm;
