@@ -11,9 +11,9 @@ HEADSRC=$(HOME)/$(SRC)/head_$(PREF).e
 
 all:    head tail
 
-head:   head_$(PREF) $(HOME)/h/*.h
+head:   head_$(PREF)
 
-tail:   tail_$(PREF)$(SUB) $(HOME)/h/*.h
+tail:   tail_$(PREF)$(SUB)
 
 headcp: head
 	../../install head_$(PREF)
