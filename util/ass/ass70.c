@@ -17,6 +17,11 @@
 
 #include        "ass00.h"
 #include        "assex.h"
+
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
 ** utilities of EM1-assembler/loader
 */

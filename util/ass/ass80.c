@@ -19,6 +19,10 @@
 #include        "assex.h"
 #include        "../../h/em_path.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
  * this file contains several library routines.
  */

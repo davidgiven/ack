@@ -18,6 +18,10 @@
 #include        "ass00.h"
 #include        "assex.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #define COPYFINAL       1
 #define COPYTEMP        0
 

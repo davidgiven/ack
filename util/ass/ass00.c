@@ -18,6 +18,10 @@
  *
  */
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
 ** Main routine of EM1-assembler/loader
 */

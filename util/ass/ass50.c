@@ -19,6 +19,10 @@
 #include        "assex.h"
 #include        "ip_spec.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
 ** Pass 5 of EM1 assembler/loader
 ** Fix reloc tables

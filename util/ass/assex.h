@@ -2,6 +2,8 @@
  * global data
  */
 
+#define	RCS_EX	"$Header$"
+
 extern  int     wordsize;
 extern  int     ptrsize;
 extern  cons_t  maxadr;

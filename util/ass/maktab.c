@@ -20,6 +20,10 @@
 #include "../../h/em_spec.h"
 #include "../../h/em_flag.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /* This program reads the human readable interpreter specification
    and produces a efficient machine representation that can be
    translated by a C-compiler.

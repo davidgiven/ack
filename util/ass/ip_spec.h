@@ -1,5 +1,7 @@
 /* Contents of flags used when describing interpreter opcodes */
 
+#define	RCS_IP		"$Header$"
+
 #define OPTYPE  07      /* type field in flag */
 
 #define OPMINI  0       /* m  MINI */

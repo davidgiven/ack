@@ -31,6 +31,10 @@
 
 #include "ass00.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #ifdef MEMUSE
 static unsigned m_used = 0 ;
 static unsigned m_free = 0 ;

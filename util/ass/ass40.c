@@ -17,6 +17,11 @@
 
 #include        "ass00.h"
 #include        "assex.h"
+
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
 ** Make scans to do final assignment of instruction sizes & formats
 ** to those not already done. assign final values to labels

@@ -19,6 +19,10 @@
 #include        "assex.h"
 #include        "ip_spec.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #ifdef DUMP
 static  char    *typestr[] =
      {"missing","const","procname","glosym","locsym","glosym+off","pseudo"};

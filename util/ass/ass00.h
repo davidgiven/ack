@@ -5,6 +5,8 @@
 #include "../../h/arch.h"
 #include "../../h/local.h"
 
+#define	RCS_ASS	"$Header$"
+
 /*
  * compile time options
  */

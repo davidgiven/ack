@@ -21,6 +21,10 @@
 #include        "../../h/em_pseu.h"
 #include        "../../h/em_ptyp.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*
  * read compact code and fill in tables
  */

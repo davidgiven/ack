@@ -19,6 +19,11 @@
 #include        "assex.h"
 #include        "ip_spec.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+static char rcs_ip[] = RCS_IP ;
+#endif
+
 short           opt_line ;      /* max_line_no - # lines removed from end
 				   after perfoming exc's.
 				   Used to estimate the distance in # of
