@@ -339,7 +339,7 @@ int compact_line() {
 		lastglosym = curglosym;
 		setline() ; line_num++ ;
 		if (table1() != sp_fpseu)
-			fatal("no pseudo after global label");
+			fatal("no pseudo after data label");
 	case sp_fpseu:
 		inpseudo(tabval);
 		setline() ;
@@ -620,15 +620,13 @@ exchange(p1,p2) {
 		if ( ctrunc(a_lnp->instr_num) !=sp_fpseu ) {
 			fatal("EXC inconsistency") ;
 		}
-		doinsert(a_lnp,line,a_lnp->ad.ad_ln.ln_extra-size) ;
-		a_lnp->ad.ad_ln.ln_first += size ;
-		a_lnp->ad.ad_ln.ln_extra = size-1 ;
+		doinsert(a_lnp,line,size-1) ;
+		a_lnp->ad.ad_ln.ln_extra -= size ;
 		size=0 ;
-		b_lnp=a_lnp->l_next ;
 	} else  {
-		doinsert(a_lnp,line,-1) ;
-		b_lnp= a_lnp ;
+		if( a_lnp) doinsert(a_lnp,line,-1) ;
 	}
+	b_lnp= a_lnp ;
 	while ( b_lnp ) {
 		b_lnp= b_lnp->l_next ;
 		line-- ;
@@ -644,18 +642,17 @@ exchange(p1,p2) {
 		size++ ;
 		if ( size>=p2 ) break ;
 	}
+	if ( !b_lnp ) { /* if a_lnp==0, so is b_lnp */
+		fatal("Cannot perform exchange") ;
+	}
 	if ( ( size-= p2 )>0 ) {
 		if ( ctrunc(b_lnp->instr_num) !=sp_fpseu ) {
 			fatal("EXC inconsistency") ;
 		}
-		doinsert(b_lnp,line,b_lnp->ad.ad_ln.ln_extra-size) ;
-		b_lnp->ad.ad_ln.ln_first += size ;
-		b_lnp->ad.ad_ln.ln_extra = size-1 ;
+		doinsert(b_lnp,line,size-1) ;
+		b_lnp->ad.ad_ln.ln_extra -= size ;
 	} else  {
 		doinsert(b_lnp,line,-1) ;
-	}
-	if ( !b_lnp ) { /* if a_lnp==0, so is b_lnp */
-		fatal("Cannot perform exchange") ;
 	}
 	t_lnp = b_lnp->l_next ;
 	b_lnp->l_next = pstate.s_fline ;
