@@ -181,15 +181,24 @@ STATIC jump_cross(l1,l2,b1,b2)
 
 	/* Now adjust the EM text */
 	l = PREV(l1);
+	while (l && INSTR(l) == op_lab) {
+		l1 = l;
+		l = PREV(l);
+	}
 	if (l == (line_p) 0) {
 		b1->b_start = (line_p) 0;
 	} else {
 		l->l_next = (line_p) 0;
 	}
-	l = newline(OPINSTRLAB);
-	l->l_instr = op_lab;
-	INSTRLAB(l) = freshlabel();
-	DLINK(l,l1);
+	if (INSTR(l1) == op_lab) {
+		l = l1;
+	}
+	else {
+		l = newline(OPINSTRLAB);
+		l->l_instr = op_lab;
+		INSTRLAB(l) = freshlabel();
+		DLINK(l,l1);
+	}
 	b->b_start = l;
 	for (l = l2; INSTR(l) != op_bra; l = l->l_next) {
 		assert (l != (line_p) 0);
