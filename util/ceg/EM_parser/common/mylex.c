@@ -24,7 +24,7 @@
  */
 
 
-#define YYTEXT	256
+#define YYTEXT	4096
 char yytext[YYTEXT],	/* string-buffer for the token */
      *next;		/* points to the first free posistion in yytext[] */
 extern char scanc();
