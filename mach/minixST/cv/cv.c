@@ -59,7 +59,7 @@ minixhead()
 		stack += 0x00010000L;
 	if (chmemstr)
 		stack = chmem(chmemstr, stack);
-	printf("%D bytes assigned to stack+malloc area\n", stack);
+	printf("%ld bytes assigned to stack+malloc area\n", stack);
 	mh[6] = stack + (mh[3] + mh[4]);
 	if ((mh[0] & 0x00200000L) == 0)		/* not SEPARATE */
 		mh[6] += mh[2];
