@@ -27,4 +27,6 @@ function showpage(pagename)
 
 /* Revision history
  * $Log$
+ * Revision 1.1  2005/02/14 23:39:07  dtrg
+ * Initial version.
  */

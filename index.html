@@ -1,0 +1,408 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- ACK site HTML. -->
+<!-- Written in 2005 by David Given, dg@cowlark.com. -->
+<!-- This file is in the public domain. -->
+<!-- $Source$ -->
+<!-- $State$ -->
+
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<meta http-equiv="Content-Script-Type" content="text/javascript">
+	<title>The Amsterdam Compiler Kit</title>
+  <link type="text/css" href="site.css" rel="stylesheet">
+	<script type="text/javascript" src="pager.js"></script>
+</head>
+<body>
+<div class="title">
+<h1>The
+Amsterdam Compiler Kit</h1>
+</div>
+<div class="contents">
+<h3><a href="#home" onclick="showpage('home')">Home</a></h3>
+<h3><a href="#introduction" onclick="showpage('introduction')">Introduction</a></h3>
+<h3><a href="#documentation" onclick="showpage('documentation')">Documentation</a></h3>
+<h3><a href="#installation" onclick="showpage('installation')">Installation</a></h3>
+<p class="c"><a href="http://sourceforge.net/projects/tack"><img
+ src="http://sourceforge.net/sflogo.php?group_id=108104&amp;type=1"
+ alt="SourceForge.net Logo" border="0" height="31" width="88"></a></p>
+<p class="c">
+<a href="http://validator.w3.org/check?uri=referer"><img border="0"
+src="http://www.w3.org/Icons/valid-html401"
+alt="Valid HTML 4.01!" height="31" width="88"></a>
+</p>
+</div>
+<div class="body">
+
+<div id="home"><h2><a name="home">Home</a></h2>
+<h3>2005-02-14</h3>
+<p>Initial version of this web page set up.</p>
+<h3>2005-02-11</h3>
+<p>Converted the troff documentation into (dodgy) HTML and PDF files; see the documentation section for the list. The man pages haven't been converted yet, but at least the main documentation is available.
+</p>
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+</div>
+
+<div class="page" id="introduction"><h2><a name="introduction">Introduction</a></h2>
+<p>The Amsterdam Compiler Kit is
+fast, lightweight and retargetable compiler suite and toolchain written
+by <a href="http://www.cs.vu.nl/%7East/">Andrew
+Tanenbaum</a> and <a href="http://www.cs.vu.nl/%7Eceriel">Ceriel Jacobs</a>,
+and was Minix' native toolchain. The ACK was originally closed-source
+software (that allowed binaries to be distributed for Minix as a
+special case), but in April 2003 it was released under a BSD open
+source license.</p>
+<p>The ACK achieves maximum
+portability by using an intermediate byte-code language called EM. Each
+language front-end produces EM object files, which are then processed
+through a number of generic optimisers before being translated by a
+back-end into native machine code. The logic flow is as follows:</p>
+<p style="text-align: center;">
+<table class="grid">
+  <tbody>
+    <tr>
+      <th class="c">Front-End</th>
+      <th class="c">Generic
+Optimisation</th>
+      <th class="c">Back-End</th>
+      <th class="c">Specific
+Optimisation</th>
+    </tr>
+    <tr>
+      <td class="c">
+      <table>
+        <tbody>
+          <tr>
+            <td class="c">ANSI C</td>
+          </tr>
+          <tr>
+            <td class="c">K&amp;R C</td>
+          </tr>
+          <tr>
+            <td class="c">Pascal</td>
+          </tr>
+          <tr>
+            <td class="c">Modula-2</td>
+          </tr>
+          <tr>
+            <td class="c">Fortran</td>
+          </tr>
+          <tr>
+            <td class="c">Occam</td>
+          </tr>
+          <tr>
+            <td class="c">Basic</td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+      <td class="c">
+      <table>
+        <tbody>
+          <tr>
+            <td class="c">Peephole optimiser</td>
+          </tr>
+          <tr>
+            <td class="c">Global optimisation</td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+      <td class="c">
+      <table>
+        <tbody>
+          <tr>
+            <td class="c">6500</td>
+          </tr>
+          <tr>
+            <td class="c">6800</td>
+          </tr>
+          <tr>
+            <td class="c">6805</td>
+          </tr>
+          <tr>
+            <td class="c">6809</td>
+          </tr>
+          <tr>
+            <td class="c">ARM</td>
+          </tr>
+          <tr>
+            <td class="c">i80</td>
+          </tr>
+          <tr>
+            <td class="c">Z80</td>
+          </tr>
+          <tr>
+            <td class="c">Z8000</td>
+          </tr>
+          <tr>
+            <td class="c">i86</td>
+          </tr>
+          <tr>
+            <td class="c">i386</td>
+          </tr>
+          <tr>
+            <td class="c">68000</td>
+          </tr>
+          <tr>
+            <td class="c">NS16032</td>
+          </tr>
+          <tr>
+            <td class="c">SPARC</td>
+          </tr>
+          <tr>
+            <td class="c">VAX</td>
+          </tr>
+          <tr>
+            <td class="c">PDP11</td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+      <td class="c">Peephole
+optimiser</td>
+    </tr>
+  </tbody>
+</table>
+<p>Unlike <a href="http://gcc.gnu.org/">gcc</a>'s
+intermediate language, EM is a real programming language and could be
+implemented in hardware; a number of the language front-ends have
+libraries implemented in EM assembly. EM is a relatively high-level
+stack-based machine, and one of the tools supplied with ACK is an
+interpreter capable of executing EM binaries directly, with a high
+degree of safety checking. See the <tt>em</tt>
+document referenced below for more information.</p>
+<p>ACK comes with a generic linker and librarian capable of
+manipulating files in the ACK's own a.out-based format; it will work on
+files containing EM code as well as native machine code. (You can not,
+however, link EM code to native machine code without translating the EM
+binary first.)
+</p>
+</div>
+
+<div class="page" id="documentation"><h2><a name="documentation">Documentation</a></h2>
+<p>The following documentation is
+available online, generated from the troff source supplied with the
+package. The HTML here is automatically converted and not of the
+greatest quality, but is readable:</p>
+<p style="text-align: center;">
+<table 
+ class="grid" border="0" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td>6500</td>
+      <td><a href="doc/6500.html">html</a></td>
+      <td><a href="doc/6500.pdf">pdf</a></td>
+      <td>the MOS 6500 code
+generator</td>
+    </tr>
+    <tr>
+      <td>LLgen</td>
+      <td><a href="doc/LLgen.html">html</a></td>
+      <td><a href="doc/LLgen.pdf">pdf</a></td>
+      <td>the LL(1) parser
+generator</td>
+    </tr>
+    <tr>
+      <td>ack</td>
+      <td><a href="doc/ack.html">html</a></td>
+      <td><a href="doc/ack.pdf">pdf</a></td>
+      <td>the description files
+used to drive the compiler front-end</td>
+    </tr>
+    <tr>
+      <td>ansi_C</td>
+      <td><a href="doc/ansi_C.html">html</a></td>
+      <td><a href="doc/ansi_C.pdf">pdf</a></td>
+      <td>the ANSI C compiler</td>
+    </tr>
+    <tr>
+      <td>basic</td>
+      <td><a href="doc/basic.html">html</a></td>
+      <td><a href="doc/basic.pdf">pdf</a></td>
+      <td>the BASIC compiler</td>
+    </tr>
+    <tr>
+      <td>ceg</td>
+      <td><a href="doc/ceg.html">html</a></td>
+      <td><a href="doc/ceg.pdf">pdf</a></td>
+      <td>the fast code generator</td>
+    </tr>
+    <tr>
+      <td>cg</td>
+      <td><a href="doc/cg.html">html</a></td>
+      <td><a href="doc/cg.pdf">pdf</a></td>
+      <td>the old code generator</td>
+    </tr>
+    <tr>
+      <td>crefman</td>
+      <td><a href="doc/crefman.html">html</a></td>
+      <td><a href="doc/crefman.pdf">pdf</a></td>
+      <td>the K&amp;R C
+compiler</td>
+    </tr>
+    <tr>
+      <td>ego</td>
+      <td><a href="doc/ego.html">html</a></td>
+      <td><a href="doc/ego.pdf">pdf</a></td>
+      <td>the EM optimiser</td>
+    </tr>
+    <tr>
+      <td>em</td>
+      <td><a href="doc/em.html">html</a></td>
+      <td><a href="doc/em.pdf">pdf</a></td>
+      <td>the EM intermediate code
+format &amp; virtual machine</td>
+    </tr>
+    <tr>
+      <td>i80</td>
+      <td><a href="doc/i80.html">html</a></td>
+      <td><a href="doc/i80.pdf">pdf</a></td>
+      <td>the Intel i80 code
+generator</td>
+    </tr>
+    <tr>
+      <td>install</td>
+      <td><a href="doc/install.html">html</a></td>
+      <td><a href="doc/install.pdf">pdf</a></td>
+      <td>installation instructions</td>
+    </tr>
+    <tr>
+      <td>int</td>
+      <td><a href="doc/int.html">html</a></td>
+      <td><a href="doc/int.pdf">pdf</a></td>
+      <td>the EM interpreter</td>
+    </tr>
+    <tr>
+      <td>lint</td>
+      <td><a href="doc/lint.html">html</a></td>
+      <td><a href="doc/lint.pdf">pdf</a></td>
+      <td>the off-line C program
+checker</td>
+    </tr>
+    <tr>
+      <td>m2ref</td>
+      <td><a href="doc/m2ref.html">html</a></td>
+      <td><a href="doc/m2ref.pdf">pdf</a></td>
+      <td>the Module-2 compiler</td>
+    </tr>
+    <tr>
+      <td>m68020</td>
+      <td><a href="doc/m68020.html">html</a></td>
+      <td><a href="doc/m68020.pdf">pdf</a></td>
+      <td>the Motorola
+68000-series code generator</td>
+    </tr>
+    <tr>
+      <td>ncg</td>
+      <td><a href="doc/ncg.html">html</a></td>
+      <td><a href="doc/ncg.pdf">pdf</a></td>
+      <td>the new code generator</td>
+    </tr>
+    <tr>
+      <td>nopt</td>
+      <td><a href="doc/nopt.html">html</a></td>
+      <td><a href="doc/nopt.pdf">pdf</a></td>
+      <td>the new peephole
+optimiser</td>
+    </tr>
+    <tr>
+      <td>occam</td>
+      <td><a href="doc/occam.html">html</a></td>
+      <td><a href="doc/occam.pdf">pdf</a></td>
+      <td>the Occam compiler</td>
+    </tr>
+    <tr>
+      <td>pascal</td>
+      <td><a href="doc/pascal.html">html</a></td>
+      <td><a href="doc/pascal.pdf">pdf</a></td>
+      <td>the Pascal compiler
+implementation</td>
+    </tr>
+    <tr>
+      <td>pcref</td>
+      <td><a href="doc/pcref.html">html</a></td>
+      <td><a href="doc/pcref.pdf">pdf</a></td>
+      <td>the Pascal compiler user
+reference</td>
+    </tr>
+    <tr>
+      <td>peep</td>
+      <td><a href="doc/peep.html">html</a></td>
+      <td><a href="doc/peep.pdf">pdf</a></td>
+      <td>the old peephole
+optimiser</td>
+    </tr>
+    <tr>
+      <td>regadd</td>
+      <td><a href="doc/regadd.html">html</a></td>
+      <td><a href="doc/regadd.pdf">pdf</a></td>
+      <td>report on adding support
+for register variables</td>
+    </tr>
+    <tr>
+      <td>toolkit</td>
+      <td><a href="doc/toolkit.html">html</a></td>
+      <td><a href="doc/toolkit.pdf">pdf</a></td>
+      <td>high-level overview</td>
+    </tr>
+    <tr>
+      <td>top</td>
+      <td><a href="doc/top.html">html</a></td>
+      <td><a href="doc/top.pdf">pdf</a></td>
+      <td>native assembly level
+optimiser</td>
+    </tr>
+    <tr>
+      <td>v7bugs</td>
+      <td><a href="doc/v7bugs.html">html</a></td>
+      <td><a href="doc/v7bugs.pdf">pdf</a></td>
+      <td>a list of bugs found in
+V7 Unix</td>
+    </tr>
+    <tr>
+      <td>val</td>
+      <td><a href="doc/val.html">html</a></td>
+      <td><a href="doc/val.pdf">pdf</a></td>
+      <td>Pascal validation suite
+report</td>
+    </tr>
+    <tr>
+      <td>z80</td>
+      <td><a href="doc/z80.html">html</a></td>
+      <td><a href="doc/z80.pdf">pdf</a></td>
+      <td>the Zilog Z80 code
+generator</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="page" id="installation"><h2><a name="installation">Installation</a></h2>
+<p>Currently the only source
+available for the ACK is the original version 5.5 distribution; this
+has problems compiling on modern systems such as Linux and BSD. (It may
+compile cleanly on Solaris, however; I do not have a test machine to
+try.)</p>
+<p>If you like, you
+can download
+it from the <a
+ href="http://sourceforge.net/project/showfiles.php?group_id=130811&amp;package_id=143762">Sourceforge
+file distribution site</a>.<br>
+</p>
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+<p>&nbsp;</p> <!-- style bug workaround -->
+</div>
+</div>
+<div class="footer"></div>
+</body>
+</html>
+<!-- vim: set ts=2 sw=2: -->
