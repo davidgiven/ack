@@ -3,6 +3,7 @@
 #include "back.h"
 
 extern int locals_created;
+extern int procno;
 
 C_pro( s, l)
 char *s;
