@@ -376,22 +376,24 @@ IMPLEMENTATION MODULE Streams;
   PROCEDURE isatty(stream: Stream; VAR result: StreamResult): BOOLEAN;
     VAR buf: ARRAY[1..100] OF CHAR;
   BEGIN
-	IF (stream = NIL) OR (s^.kind = none) THEN
+	IF (stream = NIL) OR (stream^.kind = none) THEN
 		result := nostream;
 		RETURN FALSE;
 	END;
 #ifdef __USG
-	RETURN ioctl(stream^.fildes, INTEGER(ORD('T') * 256 + 1), ADR(buf)) >= 0;
+	RETURN Unix.ioctl(stream^.fildes, INTEGER(ORD('T') * 256 + 1), ADR(buf)) >= 0;
 #else
 #ifdef __BSD4_2
-	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8 + 6*65536 + 40000000H), ADR(buf)) >= 0;
+	RETURN Unix.ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8 + 6*65536 + 40000000H), ADR(buf)) >= 0;
 #else
-	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8), ADR(buf)) >= 0;
+	RETURN Unix.ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8), ADR(buf)) >= 0;
 #endif
 #endif
   END isatty;
 
-BEGIN
+  PROCEDURE InitStreams;
+  VAR result: StreamResult;
+  BEGIN
 	InputStream := ADR(ibuf);
 	OutputStream := ADR(obuf);
 	ErrorStream := ADR(ebuf);
@@ -414,7 +416,7 @@ BEGIN
 		maxcnt := 0;
 		cnt := 0;
 		bufferedcnt := BUFSIZ;
-		IF isatty(OutputStream) THEN
+		IF isatty(OutputStream, result) THEN
 			buffering := linebuffered;
 		ELSE
 			buffering := blockbuffered;
@@ -429,7 +431,7 @@ BEGIN
 		maxcnt := 0;
 		cnt := 0;
 		bufferedcnt := BUFSIZ;
-		IF isatty(ErrorStream) THEN
+		IF isatty(ErrorStream, result) THEN
 			buffering := linebuffered;
 		ELSE
 			buffering := blockbuffered;
@@ -437,4 +439,8 @@ BEGIN
 	END;
 	head := InputStream;
 	IF Epilogue.CallAtEnd(EndIt) THEN ; END;
+  END InitStreams;
+
+BEGIN
+	InitStreams
 END Streams.

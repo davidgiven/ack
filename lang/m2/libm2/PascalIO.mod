@@ -16,8 +16,7 @@ IMPLEMENTATION MODULE PascalIO;
   IMPORT RealConversions;
   FROM Streams IMPORT Stream, StreamKind, StreamMode, StreamResult,
 		      InputStream, OutputStream, OpenStream, CloseStream, 
-		      EndOfStream, Read, Write, SetStreamBuffering,
-		      StreamBuffering;
+		      EndOfStream, Read, Write, StreamBuffering;
   FROM Storage IMPORT ALLOCATE;
   FROM SYSTEM IMPORT ADR;
 

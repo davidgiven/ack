@@ -132,7 +132,7 @@ IMPLEMENTATION MODULE InOut ;
 	j : CARDINAL;
   BEGIN
 	Done := TRUE;
-	IF Streams.isatty(Streams.InputStream) THEN
+	IF Streams.isatty(Streams.InputStream, result) THEN
 		XWriteString(prompt);
 	END;
 	XReadString(buf);
