@@ -41,9 +41,11 @@ Enter(name, kind, type, pnam)
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
 	if (pnam) df->df_value.df_stdname = pnam;
+	else if (options['g']) stb_string(df, kind);
 	return df;
 }
 
+t_def *
 EnterType(name, type)
 	char *name;
 	t_type *type;
@@ -52,9 +54,7 @@ EnterType(name, type)
 		"type" in the Current Scope.
 	*/
 
-	if (! Enter(name, D_TYPE, type, 0)) {
-		assert(0);
-	}
+	return Enter(name, D_TYPE, type, 0);
 }
 
 EnterEnumList(Idlist, type)
@@ -68,7 +68,7 @@ EnterEnumList(Idlist, type)
 		be exported, in which case its literals must also be exported.
 		Thus, we need an easy way to get to them.
 	*/
-	register t_def *df;
+	register t_def *df, *df1 = 0;
 	register t_node *idlist = Idlist;
 
 	type->enm_ncst = 0;
@@ -76,8 +76,11 @@ EnterEnumList(Idlist, type)
 		df = define(idlist->nd_IDF, CurrentScope, D_ENUM);
 		df->df_type = type;
 		df->enm_val = (type->enm_ncst)++;
-		df->enm_next = type->enm_enums;
-		type->enm_enums = df;
+		if (! df1) {
+			type->enm_enums = df;
+		}
+		else	df1->enm_next = df;
+		df1 = df;
 	}
 	FreeNode(Idlist);
 }
@@ -177,6 +180,7 @@ EnterVarList(Idlist, type, local)
 				C_ina_dnam(df->var_name);
 			}
 		}
+		if (options['g']) stb_string(df, D_VARIABLE);
 	}
 	FreeNode(Idlist);
 }
@@ -218,8 +222,11 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		df->df_flags |= VARp;
 
 		if (IsConformantArray(type)) {
-			/* we need room for the base address and a descriptor
+			/* we need room for the base address and a descriptor:
+			   arr_low and arr_high are set to their offset
 			*/
+			type->arr_low = *off + pointer_size;
+			type->arr_high = *off + pointer_size + word_size;
 			*off += pointer_size + word_size + dword_size;
 		}
 		else if (VARp == D_VARPAR || IsBigParamTp(type)) {

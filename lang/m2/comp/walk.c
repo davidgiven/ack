@@ -22,6 +22,7 @@
 #include	<m2_traps.h>
 #include	<assert.h>
 #include	<alloc.h>
+#include	<stb.h>
 
 #include	"strict3rd.h"
 #include	"LLlex.h"
@@ -121,11 +122,19 @@ DoLineno(nd)
 {
 	/*	Generate line number information, if necessary.
 	*/
-	if (! options['L'] &&
+	if ((! options['L'] || options['g']) &&
 	    nd->nd_lineno &&
 	    nd->nd_lineno != oldlineno) {
 		oldlineno = nd->nd_lineno;
-		C_lin((arith) nd->nd_lineno);
+		if (! options['L']) C_lin((arith) nd->nd_lineno);
+		if ( options['g']) {
+			static int	ms_lineno;
+
+			if (ms_lineno != nd->nd_lineno) {
+				C_ms_std((char *) 0, N_SLINE, nd->nd_lineno);
+				ms_lineno = nd->nd_lineno;
+			}
+		}
 	}
 }
 
@@ -212,11 +221,17 @@ WalkModule(module)
 	}
 	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
+	if (options['g']) {
+		C_ms_std((char *) 0, N_LBRAC, proclevel);
+	}
 	WalkNode(module->mod_body, NO_EXIT_LABEL, REACH_FLAG);
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	def_ilb(RETURN_LABEL);
 	EndPriority();
 	C_ret((arith) 0);
+	if (options['g']) {
+		C_ms_std((char *) 0, N_RBRAC, proclevel);
+	}
 	C_end(-sc->sc_off);
 	proclevel--;
 	TmpClose();
@@ -431,6 +446,9 @@ WalkProcedure(procedure)
 	C_ret(func_res_size);
 	C_beginpart(partno2);
 	C_pro(procscope->sc_name, -procscope->sc_off);
+	if (options['g']) {
+		C_ms_std((char *) 0, N_LBRAC, proclevel);
+	}
 	C_ms_par(procedure->df_type->prc_nbpar
 #ifdef BIG_RESULT_ON_STACK
 		+ (too_big ? func_res_size : 0)
@@ -438,6 +456,9 @@ WalkProcedure(procedure)
 		);
 	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
 	C_endpart(partno2);
+	if (options['g']) {
+		C_ms_std((char *) 0, N_RBRAC, proclevel);
+	}
 	C_end(-procscope->sc_off);
 	if (! fit(procscope->sc_off, (int) word_size)) {
 		node_error(procedure->prc_body,

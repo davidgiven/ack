@@ -112,10 +112,12 @@ declaration
 |
 			{	++proclevel; }
 	ProcedureHeading(&df, D_PROCEDURE)
+			{	if (options['g']) stb_string(df, D_PROCEDURE); }
 	';'
 	block(&(df->prc_body))
 	IDENT
-			{	EndProc(df, dot.TOK_IDF);
+			{	if (options['g']) stb_string(df, D_PEND);
+				EndProc(df, dot.TOK_IDF);
 				--proclevel;
 			}
 	';'
@@ -178,6 +180,7 @@ TypeDeclaration
 	'=' type(&tp)
 			{ DeclareType(nd, df, tp);
 			  FreeNode(nd);
+			  if (options['g']) stb_string(df, D_TYPE);
 			}
 ;
 
@@ -285,6 +288,7 @@ RecordType(t_type **ptp;)
 		  }
 		  *ptp = standard_type(T_RECORD, xalign, align(size, xalign));
 		  (*ptp)->rec_scope = scope;
+		  Reverse(&(scope->sc_def));
 		}
 	END
 ;
@@ -530,6 +534,7 @@ ConstantDeclaration
 			  df->con_const = nd->nd_token;
 			  df->df_type = nd->nd_type;
 			  FreeNode(nd);
+			  if (options['g']) stb_string(df, D_CONST);
 			}
 ;
 

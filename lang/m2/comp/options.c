@@ -57,6 +57,7 @@ DoOption(text)
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
 	case '3':	/* strict 3rd edition Modula-2 */
 	case 'l':	/* local additions enabled */
+	case 'g':	/* generate symbol table for debugger */
 		options[text[-1]]++;
 		break;
 

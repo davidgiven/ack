@@ -32,6 +32,8 @@ extern char options[];
 
 /* STATICALLOCDEF "scopelist" 10 */
 
+static int	sc_count;
+
 open_scope(scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
@@ -48,6 +50,7 @@ open_scope(scopetype)
 	if (! sc->sc_scopeclosed) {
 		ls->sc_next = ls->sc_encl;
 	}
+	ls->sc_count = sc_count++;
 	CurrVis = ls;
 }
 
@@ -161,7 +164,7 @@ Reverse(pdf)
 		from this list.
 	*/
 	register t_def *df, *df1;
-#define INTERESTING (D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE|D_IMPORTED|D_TYPE|D_CONST)
+#define INTERESTING (D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE|D_IMPORTED|D_TYPE|D_CONST|D_FIELD)
 
 	df = 0;
 	df1 = *pdf;

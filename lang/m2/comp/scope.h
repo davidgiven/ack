@@ -40,6 +40,7 @@ struct scopelist {
 	struct scopelist *sc_next;
 	struct scope *sc_scope;
 	struct scopelist *sc_encl;
+	int sc_count;
 };
 
 typedef struct scope t_scope;

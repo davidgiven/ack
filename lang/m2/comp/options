@@ -1,5 +1,6 @@
 options:
 
+g:	symbol table for debugger
 l:	local extensions enabled
 n:	no register messages
 s:	symmetric range for integers: MIN(INTEGER) = -MAX(INTEGER)

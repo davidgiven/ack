@@ -60,8 +60,10 @@ ModuleDeclaration
 	';'
 	import(1)*
 	export(&qualified, &exportlist)
+			{ if (options['g']) stb_string(df, D_MODULE); }
 	block(&(df->mod_body))
 	IDENT		{ EnterExportList(exportlist, qualified);
+			  if (options['g']) stb_string(df, D_END);
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(df->df_idf, dot.TOK_IDF);
 			}
@@ -139,7 +141,6 @@ DefinitionModule
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  df->df_flags |= D_BUSY | ForeignFlag;
-			  if (!Defined) Defined = df;
 		  	  currscope->sc_definedby = df;
 			  if (DefId && df->df_idf != DefId) {
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
@@ -151,6 +152,10 @@ DefinitionModule
 			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);
 			  df->df_type->rec_scope = currscope;
 			  DefinitionModule++;
+			  if (!Defined) {
+				Defined = df;
+				if (options['g']) stb_string(df, D_MODULE);
+			  }
 			}
 	';'
 	import(0)* 
@@ -201,6 +206,7 @@ definition
 			}
 	  ]
 	  ';'
+			{ if (options['g']) stb_string(df, D_TYPE); }
 	]*
 |
 	VAR [ %persistent VariableDeclaration ';' ]*
@@ -223,12 +229,14 @@ ProgramModule
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "__M2M_";
 		  	CurrentScope->sc_definedby = df;
+			if (options['g']) stb_string(df, D_MODULE);
 		  }
 		}
 	priority(&(df->mod_priority))
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
-		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
+		{ if (options['g']) stb_string(df, D_END);
+		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(df->df_idf, dot.TOK_IDF);
 		}
 	'.'

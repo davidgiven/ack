@@ -80,7 +80,7 @@ struct type	{
 	struct type *tp_next;	/* used with ARRAY, PROCEDURE, POINTER, SET,
 				   SUBRANGE, EQUAL
 				*/
-	int tp_fund;		/* fundamental type  or constructor */
+	short tp_fund;		/* fundamental type  or constructor */
 #define T_RECORD	0x0001
 #define	T_ENUMERATION	0x0002
 #define	T_INTEGER	0x0004
@@ -102,6 +102,7 @@ struct type	{
 #define T_INDEX		(T_ENUMERATION|T_CHAR|T_SUBRANGE)
 #define T_DISCRETE	(T_INDEX|T_INTORCARD)
 #define	T_CONSTRUCTED	(T_ARRAY|T_SET|T_RECORD)
+	short tp_dbindex;	/* index in debugger symbol table */
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {
@@ -132,6 +133,7 @@ extern t_type
 	*address_type,
 	*intorcard_type,
 	*bitset_type,
+	*void_type,
 	*std_type,
 	*error_type;		/* All from type.c */
 

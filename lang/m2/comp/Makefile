@@ -58,12 +58,12 @@ CSRC =	LLlex.c LLmessage.c error.c main.c \
 	tokenname.c idf.c input.c type.c def.c \
 	misc.c enter.c defmodule.c typequiv.c node.c \
 	cstoper.c chk_expr.c options.c walk.c desig.c \
-	code.c lookup.c Version.c
+	code.c lookup.c Version.c stab.c
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
-	code.o tmpvar.o lookup.o Version.o next.o
+	code.o tmpvar.o lookup.o Version.o stab.o next.o
 GENC=	$(LSRC) symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
 SRC =	$(CSRC) $(GENC)
 
@@ -483,6 +483,16 @@ lookup.o: real.h
 lookup.o: scope.h
 lookup.o: target_sizes.h
 lookup.o: type.h
+stab.o: LLlex.h
+stab.o: bigparam.h
+stab.o: const.h
+stab.o: def.h
+stab.o: idf.h
+stab.o: nocross.h
+stab.o: real.h
+stab.o: scope.h
+stab.o: target_sizes.h
+stab.o: type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h
 program.o: Lpars.h

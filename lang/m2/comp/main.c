@@ -17,6 +17,7 @@
 #include	<em_code.h>
 #include	<alloc.h>
 #include	<assert.h>
+#include	<stb.h>
 
 #include	"strict3rd.h"
 #include	"input.h"
@@ -82,6 +83,13 @@ Compile(src, dst)
 	LineNumber = 1;
 	FileName = src;
 	WorkingDir = getwdir(src);
+	C_init(word_size, pointer_size);
+	if (! C_open(dst)) fatal("could not open output file");
+	C_magic();
+	C_ms_emx(word_size, pointer_size);
+	if (options['g']) {
+		C_ms_std(FileName, N_SO, 0);
+	}
 	init_idf();
 	InitCst();
 	reserve(tkidf);
@@ -97,10 +105,6 @@ Compile(src, dst)
 	open_scope(OPENSCOPE);
 	GlobalVis = CurrVis;
 	close_scope(0);
-	C_init(word_size, pointer_size);
-	if (! C_open(dst)) fatal("could not open output file");
-	C_magic();
-	C_ms_emx(word_size, pointer_size);
 	CheckForLineDirective();
 	CompUnit();
 	C_ms_src((int)LineNumber - 1, FileName);
@@ -211,17 +215,19 @@ AddStandards()
 	EnterType("LONGINT", longint_type);
 	EnterType("REAL", real_type);
 	EnterType("LONGREAL", longreal_type);
-	EnterType("BOOLEAN", bool_type);
 	EnterType("CARDINAL", card_type);
+	EnterType("(void)", void_type);
 	df = Enter("NIL", D_CONST, address_type, 0);
 	df->con_const = nilconst;
 
 	EnterType("PROC", construct_type(T_PROCEDURE, NULLTYPE));
 	EnterType("BITSET", bitset_type);
-	df = Enter("TRUE", D_ENUM, bool_type, 0);
-	df->enm_val = 1;
-	df->enm_next = Enter("FALSE", D_ENUM, bool_type, 0);
-	assert(df->enm_next->enm_val == 0 && df->enm_next->enm_next == 0);
+	df = Enter("FALSE", D_ENUM, bool_type, 0);
+	bool_type->enm_enums = df;
+	df->enm_next = Enter("TRUE", D_ENUM, bool_type, 0);
+	df->enm_next->enm_val = 1;
+	assert(df->enm_val == 0 && df->enm_next->enm_next == 0);
+	EnterType("BOOLEAN", bool_type);
 }
 
 do_SYSTEM()

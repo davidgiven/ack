@@ -68,6 +68,7 @@ t_type
 	*address_type,
 	*intorcard_type,
 	*bitset_type,
+	*void_type,
 	*std_type,
 	*error_type;
 
@@ -213,6 +214,7 @@ InitTypes()
 	*/
 	error_type = new_type();
 	*error_type = *char_type;
+	void_type = error_type;
 }
 
 int
@@ -654,6 +656,7 @@ DeclareType(nd, df, tp)
 			node_error(nd,
 				 "opaque type \"%s\" has a circular definition",
 				 df->df_idf->id_text);
+			tp->tp_next = error_type;
 		}
 	}
 	else {

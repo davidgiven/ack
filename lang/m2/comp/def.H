@@ -101,11 +101,13 @@ struct def	{		/* list of definitions for a name */
 				*/
 #define D_INUSE		0x8000	/* identification in this scope (like D_IMPORT)
 				*/
+#define D_END		(D_MODULE|D_PROCEDURE)	/* special value for stab.c */
+#define D_PEND		(D_MODULE|D_PROCEDURE|D_VARIABLE)	/* special value for stab.c */
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE)
 #define D_IMPORTED	(D_IMPORT|D_INUSE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
-	unsigned short  df_flags;
+	unsigned short df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
 #define D_USED		0x02	/* set if used */
 #define D_DEFINED	0x04	/* set if it is assigned a value */
