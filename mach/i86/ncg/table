@@ -1995,6 +1995,8 @@ with REG rmorconst
 with rmorconst REG
   gen and %2,%1				yields %2
 
+pat loc and $1==65535 && $2==2
+
 pat and $1==4
 with EXACT REG REG rmorconst rmorconst
   gen and %1,%3
