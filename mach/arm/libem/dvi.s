@@ -1,0 +1,31 @@
+.define	.dvi
+
+	.sect .text
+
+.dvi:	LDMFD R12<,{R1,R2}
+	MOV R3,#0
+	CMP R1,#0
+	ADD.MI R3,R3,#1
+	RSB.MI R1,R1,#0
+	CMP R2,#0
+	ADD.MI R3,R3,#2
+	RSB.MI R2,R2,#0
+	MOV R0,#1
+div1:	CMP R1,#0x80000000
+	CMP.CC R1,R2
+	MOV.CC R1,R1,ASL #1
+	MOV.CC R0,R0,ASL #1
+	BCC div1
+	MOV R3,#0
+div2:	CMP R2,R1
+	SUB.CS R2,R2,R1
+	ADD.CS R3,R3,R0
+	MOV.S R0,R0,LSR #1
+	MOV.NE R1,R1,LSR #1
+	BNE div2
+	TST R4, #2
+	RSB.NE R2,R2,#0
+	TST R4, #1
+	TST.NE R4, #1
+	RSB.NE R3,R3,#0
+	MOV R15,R14
