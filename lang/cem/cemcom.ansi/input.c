@@ -63,6 +63,7 @@ AtEoIT()
 	return 0;
 }
 
+extern char *source;
 
 AtEoIF()
 {
@@ -80,5 +81,7 @@ AtEoIF()
 	IncludeLevel--;
 #endif
 #endif /* NOPP */
+	if (WorkingDir[0] != '\0') free(WorkingDir);
+	if (FileName != source) free(FileName);
 	return 0;
 }

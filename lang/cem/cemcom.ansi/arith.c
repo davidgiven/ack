@@ -381,13 +381,6 @@ int2float(expp, tp)
 	int uns = exp->ex_type->tp_unsigned;
 	
 	if (is_cp_cst(exp)) {
-		*expp = new_expr();
-		**expp = *exp;
-		/* sprint(buf+1, "%ld", (long)(exp->VL_VALUE));
-		/* buf[0] = '-';
-		*/
-		exp = *expp;	/* ??? */
-		
 		exp->ex_type = tp;
 		exp->ex_class = Float;
 		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);

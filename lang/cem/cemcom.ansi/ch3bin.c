@@ -203,8 +203,9 @@ ch3bin(expp, oper, expr)
 				where o1 == (*expp)->VL_VALUE;
 				and ((oper == AND) || (oper == OR))
 			*/
-			if ((oper == AND) == (ex->VL_VALUE != (arith)0))
+			if ((oper == AND) == (ex->VL_VALUE != (arith)0)) {
 				*expp = expr;
+			}
 			else {
 				ex->ex_flags |= expr->ex_flags;
 				free_expression(expr);
@@ -260,8 +261,17 @@ ch3bin(expp, oper, expr)
 #ifdef	LINT
 			hwarning("condition in ?: expression is constant");
 #endif	/* LINT */
-			*expp = (*expp)->VL_VALUE ?
-				expr->OP_LEFT : expr->OP_RIGHT;
+			if ((*expp)->VL_VALUE) {
+				free_expression(*expp);
+				free_expression(expr->OP_RIGHT);
+				*expp = expr->OP_LEFT;
+			}
+			else {
+				free_expression(*expp);
+				free_expression(expr->OP_LEFT);
+				*expp = expr->OP_RIGHT;
+			}
+			free_expr(expr);
 			(*expp)->ex_flags |= EX_ILVALUE;
 		}
 		else {
@@ -274,6 +284,7 @@ ch3bin(expp, oper, expr)
 #ifdef	LINT
 			hwarning("constant expression ignored");
 #endif	/* LINT */
+			free_expression(*expp);
 			*expp = expr;
 		}
 		else {

@@ -315,6 +315,7 @@ do_include()
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
 			lexerror("cannot open include file \"%s\"", filenm);
 			add_dependency(filenm);
+			free(filenm);
 		}
 		else {
 			add_dependency(result);
@@ -329,6 +330,7 @@ do_include()
 				C_ms_std(FileName, N_BINCL, 0);
 			}
 #endif /* DBSYMTAB */
+			if (result != filenm) free(filenm);
 		}
 	}
 }
