@@ -32,6 +32,7 @@
 #define SYS_profil 44
 #define SYS_getgid 47
 #define SYS_acct 51
+#define SYS_mctl 53
 #define SYS_ioctl 54
 #define SYS_reboot 55
 #define SYS_symlink 57
@@ -113,11 +114,15 @@
 #define SYS_setrlimit 145
 #define SYS_killpg 146
 #define SYS_getsockname 150
+#define SYS_getmsg 151
+#define SYS_putmsg 152
+#define SYS_poll 153
 #define SYS_nfssvc 155
 #define SYS_getdirentries 156
 #define SYS_statfs 157
 #define SYS_fstatfs 158
 #define SYS_umount 159
+#define SYS_unmount 159
 #define SYS_async_daemon 160
 #define SYS_getfh 161
 #define SYS_getdomainname 162
@@ -129,3 +134,6 @@
 #define SYS_semsys 169
 #define SYS_msgsys 170
 #define SYS_shmsys 171
+#define SYS_getdents 174
+#define SYS_fchdir 176
+#define SYS_fchroot 177

@@ -104,7 +104,6 @@ mknod.s
 mmap.s
 mount.s
 mprotect.s
-msync.s
 munmap.s
 nfssvc.s
 nice.c
@@ -161,6 +160,7 @@ stime.c
 stty.c
 swapon.s
 symlink.s
+sync.s
 tell.c
 time.c
 times.c
