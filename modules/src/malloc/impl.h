@@ -64,7 +64,7 @@ typedef union _inf mallink;
 #define	mallink_of_block(addr)	((mallink *)addr)
 
 #define	public	extern
-#define	publicdata
+#define	publicdata	extern
 #ifndef	EXTERN
 #define	private	static
 #define	privatedata	static
