@@ -235,7 +235,7 @@ jsr tosdst4+label .
 ret const4:ro .
 adjspd tossrc4:ro .
 exit label .
-sprd tossrc4:ro, MEMREG:rw .
+sprd MEMREG:rw, tossrc4:ro .
 
 
 
@@ -2182,12 +2182,12 @@ with src24
     gen movw %1, {absolute2, ".ignmask"}
 
 pat str $1==0
-with src4
-gen sprd %1, fp
+with src4 STACK
+gen sprd fp, %1
 
 pat str $1==1
-with src4
-gen sprd %1, sp
+with src4 STACK
+gen sprd sp, %1
 
 pat str $1==2
 with src4
