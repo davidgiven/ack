@@ -10,7 +10,7 @@ PREFLAGS=-I$(EMHOME)/h -I. -DNDEBUG
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) -O
 LDFLAGS=-i $(PFLAGS)
-LINTOPTS=-hbxac
+LINTOPTS=-bx
 LIBS=$(EMHOME)/lib/em_data.a
 CDIR=$(EMHOME)/mach/proto/ncg
 CGG=$(EMHOME)/lib/ncgg
@@ -72,8 +72,8 @@ tables.c: table $(CGG)
 	$(EMHOME)/lib/cpp $(TABLEFLAGS) table | $(CGG) $(CGGFLAGS)
 	-cmp tables.h tables.H || cp tables.H tables.h
 
-lint: $(CFILES)
-	lint $(LINTOPTS) $(PREFLAGS) $(CFILES)
+lint: $(CFILES) tables.c
+	lint $(LINTOPTS) $(PREFLAGS) -I$(CDIR) $(CFILES) tables.c
 clean:
 	rm -f *.o tables.c tables.h debug.out cg tables.H
 
