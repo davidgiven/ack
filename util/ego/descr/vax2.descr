@@ -105,8 +105,10 @@ array bound harmful?:  no
 first time then space:
 addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
 		  op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif -1
-		  op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif -1
+cheap operations: op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif
+		  op_cmi op_cmf op_cmu op_cms op_cmp -1
+		  op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif
+		  op_cmi op_cmf op_cmu op_cms op_cmp -1
 lexical tresholds: 1 1
 indirection limit: 8
 do sli if index?: no no
