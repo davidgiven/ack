@@ -27,7 +27,7 @@ static struct symbol **search_sym(tree, name)
 struct symbol *insert(name, type, arr_siz, info)
 	char *name;
 	int type, arr_siz;
-	union type_info info;
+	union type_info *info;
 /* Inserts an object with given name and other info into the current symbol
  * tree.  A pointer is returned to the inserted symbol so that more info may
  * or changed.  Nil is returned on redeclaration.
@@ -49,7 +49,7 @@ struct symbol *insert(name, type, arr_siz, info)
 		type|=T_USED;		/* are always used */
 	ps->type=type;
 	ps->arr_siz=arr_siz;
-	ps->info=info;
+	ps->info= *info;
 	ps->left=ps->right=nil;
 	*aps=ps;
 
@@ -70,7 +70,7 @@ struct symbol *searchall(name) char *name;
 		tab=tab->global;
 	}
 	report("%s not declared", name);
-	return insert(name, T_NOTDECL, 0, none);
+	return insert(name, T_NOTDECL, 0, &none);
 }
 
 void check_recursion(proc)

@@ -19,3 +19,4 @@ void init_rt(), exp(), rom(), blt(), magic(), lin(), tst(), fil(), trp();
 void main_fil(), init(), openfile(), closefile(), maxdes();
 
 void par_begin(), par_fork(), par_end(), resumenext(), no_deadlock();
+extern int Lflag;

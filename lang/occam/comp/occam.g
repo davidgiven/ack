@@ -5,6 +5,8 @@
 #include "expr.h"
 #include "code.h"
 #include "sizes.h"
+#include <system.h>
+#include <em.h>
 
 #define MAXERRORS	10	/* Maximum number of insert/delete errors */
 
@@ -158,7 +160,7 @@ replicator(register struct symbol **s; register struct expr **e1, **e2; )
 					sym_down();
 					var_memory(&info, T_VAR, 1);
 					*s=insert(index,
-					T_VAR|T_REP|T_USED|T_ASSIGNED, 1, info);
+					T_VAR|T_REP|T_USED|T_ASSIGNED, 1, &info);
 				}
 	;
 
@@ -306,7 +308,7 @@ chan	{ register type, arr_siz=1; register char *name; struct expr *e; }:
 	  ]?
 				{	chan_memory(&info, arr_siz);
 					chan_init(&info, arr_siz);
-					insert(name, type, arr_siz, info);
+					insert(name, type, arr_siz, &info);
 				}
 	;
 
@@ -332,7 +334,7 @@ var				{	register type, byte=0, arr_siz=1;
 				}
 	  ]?
 				{	var_memory(&info, type, arr_siz);
-					insert(name, type, arr_siz, info);
+					insert(name, type, arr_siz, &info);
 				}
 	;
 
@@ -342,7 +344,7 @@ const_def { register char *name; struct expr *e; }:
 				{	if (!constant(e) && !arr_constant(e))
 						nonconst("expression in constant definition");
 					info.const=e;
-					insert(name, T_CONST|T_USED, 0, info);
+					insert(name, T_CONST|T_USED, 0, &info);
 				}
 	;
 
@@ -366,7 +368,7 @@ form_parm(register struct par_list ***aapars; register *g_type;)
 				{	type|=T_ARR; }
 	  ]?
 				{	pars_add(aapars, type&(T_TYPE|T_ARR),
-					  insert(name, type|T_PARAM, 0, none));
+					  insert(name, type|T_PARAM, 0, &none));
 				}
 	;
 
@@ -394,7 +396,7 @@ proc_declaration		{	struct par_list *pars=nil;
 				}:
 	  PROC IDENTIFIER	{	branch(&OVER);
 					proc=insert(token.t_sval,
-						T_PROC|T_RECURS, 0, none);
+						T_PROC|T_RECURS, 0, &none);
 					old_min_offset=min_offset;
 					sym_down();
 					prologue(proc);
@@ -614,18 +616,78 @@ val_expr(register struct expr **e;) :
 %lexical scanner;
 {
 int err=0;
-#include <stdio.h>
 
 main(argc, argv) register argc; register char **argv;
 {
-	wz= (argc>1 && strcmp(argv[1], "4")==0) ? 4 : 2;
-	pz= (argc>2 && strcmp(argv[2], "4")==0) ? 4 : wz;
+	while (argc > 1 && argv[1][0] == '-') {
+		do_option(&argv[1][1]);
+		argc--;
+		argv++;
+	}
 
 	leader();
 	occam();
 	trailer();
 
 	exit(err);
+}
+
+do_option(text)
+	char *text;
+{
+	extern int Lflag;
+
+	switch(*text++)	{
+
+	default:
+		fatal("illegal option: %c", *--text);
+
+	case 'L' :			/* no fil/lin */
+		Lflag++;
+		break;
+	case 'V' :	/* set object sizes and alignment requirements	*/
+	{
+		arith size, align;
+		char c;
+
+		while (c = *text++)	{
+			size = txt2int(&text);
+			switch (c)	{
+			case 'w':	/* word		*/
+				if (size != (arith)0)
+					wz = size;
+				break;
+			case 'p':	/* pointer	*/
+				if (size != (arith)0)
+					pz = size;
+				break;
+			case 'l':	/* long		*/
+				if (size != (arith)0)
+					vz = size;
+				break;
+			default:
+				fatal("-V: bad type indicator %c\n", c);
+			}
+		}
+		break;
+	}
+	}
+}
+
+int
+txt2int(tp)
+	char **tp;
+{
+	/*	the integer pointed to by *tp is read, while increasing
+		*tp; the resulting value is yielded.
+	*/
+	register int val = 0, ch;
+	
+	while (ch = **tp, ch >= '0' && ch <= '9')	{
+		val = val * 10 + ch - '0';
+		(*tp)++;
+	}
+	return val;
 }
 
 LLmessage(tk) register tk;
@@ -639,11 +701,10 @@ LLmessage(tk) register tk;
 	if (tk==0)
 		warning("syntax error: bad token %s (deleted)", tokenname(LLsymb, 0));
 	else { /* tk<0 */
-		fprintf(stderr, "Compiler stack overflow. Compiler ends.");
-		err=1; trailer(); exit(1);
+		warning("syntax error: garbage at end of program");
 	}
 	if (++errors==MAXERRORS) {
-		fprintf(stderr, "Too many insert/delete errors. Compiler ends.\n");
+		fprint(STDERR, "Too many insert/delete errors. Compiler ends.\n");
 		err=1; trailer(); exit(1);
 	}
 }

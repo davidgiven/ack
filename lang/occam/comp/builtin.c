@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "symtab.h"
 #include "expr.h"
 #include "sizes.h"
@@ -32,43 +31,43 @@ void init_builtins()
 
 	info.vc.st.builtin=file;
 	info.vc.offset=0;
-	insert(file, T_CHAN|T_ARR|T_BUILTIN, _NFILE, info);
+	insert(file, T_CHAN|T_ARR|T_BUILTIN, 20, &info);
 
 	info.vc.st.builtin=file;
 	info.vc.offset=0;
-	insert("input", T_CHAN|T_BUILTIN, 1, info);
+	insert("input", T_CHAN|T_BUILTIN, 1, &info);
 
 	info.vc.st.builtin=file;
 	info.vc.offset=wz+pz;
-	insert("output", T_CHAN|T_BUILTIN, 1, info);
+	insert("output", T_CHAN|T_BUILTIN, 1, &info);
 
 	info.vc.st.builtin=file;
 	info.vc.offset=2*(wz+pz);
-	insert("error", T_CHAN|T_BUILTIN, 1, info);
+	insert("error", T_CHAN|T_BUILTIN, 1, &info);
 
 	/* DEF EOF= -1, TEXT= -2, RAW= -3: */
 
 	info.const=new_const(-1L);
-	insert("EOF", T_CONST|T_BUILTIN, 0, info);
+	insert("EOF", T_CONST|T_BUILTIN, 0, &info);
 
 	info.const=new_const(-2L);
-	insert("TEXT", T_CONST|T_BUILTIN, 0, info);
+	insert("TEXT", T_CONST|T_BUILTIN, 0, &info);
 
 	info.const=new_const(-3L);
-	insert("RAW", T_CONST|T_BUILTIN, 0, info);
+	insert("RAW", T_CONST|T_BUILTIN, 0, &info);
 
 	/* PROC open(VAR fd, VALUE name[], mode[])= .... : */
 	info.proc.st.builtin="b_open";
 	info.proc.pars=open_list;
-	insert("open", T_PROC|T_BUILTIN, 0, info);
+	insert("open", T_PROC|T_BUILTIN, 0, &info);
 
 	/* PROC close(VALUE fd)= .... : */
 	info.proc.st.builtin="b_close";
 	info.proc.pars=close_list;
-	insert("close", T_PROC|T_BUILTIN, 0, info);
+	insert("close", T_PROC|T_BUILTIN, 0, &info);
 
 	/* PROC exit(VALUE code)= .... : */
 	info.proc.st.builtin="b_exit";
 	info.proc.pars=exit_list;
-	insert("exit", T_PROC|T_BUILTIN, 0, info);
+	insert("exit", T_PROC|T_BUILTIN, 0, &info);
 }

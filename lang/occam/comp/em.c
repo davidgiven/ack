@@ -1,8 +1,6 @@
-#include <stdio.h>
 #include "sizes.h"
 #include "Lpars.h"
-#include "em_arith.h"
-#include "em_label.h"
+#include <em.h>
 #include "em.h"
 
 /* This file is used to shield code.c as much as possible from em dependant
@@ -12,7 +10,8 @@
  * word or double word arith.
  */
 
-int wz, pz;
+int wz = 4, pz = 4, vz = 4;
+int Lflag;
 static Lab=0;
 char *malloc();
 
@@ -23,15 +22,14 @@ void init()
 
 void openfile(file) char *file;
 {
-	C_open(file);
+	if (C_open(file) < 0) {
+		fatal("Could not open output file");
+	}
 }
 
 void meswp()
 {
-	C_mes_begin(2);
-	C_cst((arith) wz);
-	C_cst((arith) pz);
-	C_mes_end();
+	C_ms_emx((arith) wz, (arith) pz);
 }
 
 void maxdes()
@@ -82,7 +80,7 @@ char *proc_label(L, name) register L; register char *name;
 	lab=malloc(strlen(name)+(1+sizeof(int)*3+1));
 		/* That is: P<L><name>\0 */
 
-	sprintf(lab, "P%d", L);
+	sprint(lab, "P%d", L);
 
 	n=lab+strlen(lab);
 
@@ -278,7 +276,7 @@ void lol(offset) int offset;	{	C_lol((arith) offset); }
 void lor0()			{	C_lor((arith) 0); }
 void lxa(offset) int offset;	{	C_lxa((arith) offset); }
 void lxl(offset) int offset;	{	C_lxl((arith) offset); }
-void meserr()			{	C_mes_begin(0); C_mes_end(); }
+void meserr()			{	C_ms_err(); }
 void ngi()			{	C_ngi((arith) vz); }
 void pro(lab) char *lab;	{	C_pro_narg(lab); }
 void ret(size) int size;	{	C_ret((arith) size); }
@@ -300,7 +298,7 @@ void zne(lab) int lab;		{	C_zne((label) lab); }
 char *itoa(i) long i;
 {
 	static char a[sizeof(long)*3];
-	sprintf(a, "%D", i);
+	sprint(a, "%ld", i);
 	return a;
 }
 
@@ -314,6 +312,7 @@ void lin()
 	static oldline=0;
 	extern yylineno;
 
+	if (Lflag) return;
 	if (yylineno!=oldline)
 		C_lin((arith) (oldline=yylineno));
 }
@@ -328,9 +327,10 @@ char *curr_file="stdin";
 
 static void do_fil(f) struct ftree *f;
 {
+	if (Lflag) return;
 	if (f->lab==0) {
 		dot_label(new_dot_label(&f->lab));
-		C_rom_scon(f->file, (arith) strlen(f->file));
+		C_rom_scon(f->file, (arith) (strlen(f->file)+1));
 	}
 	C_fil_dlb((label) f->lab);
 }
