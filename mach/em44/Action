@@ -1,0 +1,9 @@
+name "4-4 Interpreter C libraries"
+dir libcc
+end
+name "4-4 Interpreter Pascal library"
+dir libpc
+end
+name "4-4 Interpreter Basic library"
+dir libbc
+end

@@ -1,0 +1,131 @@
+name	"System definition"
+dir first
+action did_first
+failure "You have to run the shell script first in the directory first"
+fatal
+end
+name	"EM definition"
+dir etc
+end
+name "C preprocessor"
+dir util/cpp
+end
+name "EM definition library"
+dir util/data
+end
+name "Encode/Decode"
+dir util/misc
+end
+name "Shell files in bin"
+dir util/shf
+end
+name "EM assembler"
+dir util/ass
+end
+name "EM Peephole optimizer"
+dir util/opt
+end
+name "ACK archiver"
+dir util/arch
+end
+name "Program 'ack'"
+dir util/ack
+end
+name "Bootstrap for backend tables"
+dir util/cgg
+end
+name "LL(1) Parser generator"
+dir util/LLgen
+end
+name "Bootstrap for newest form of backend tables"
+dir util/ncgg
+end
+name "C frontend"
+dir lang/cem/comp
+end
+name "Basic frontend"
+dir lang/basic/src
+end
+name "Intel 8086 support"
+dir mach/i86
+indir
+end
+name "MSC6500 support"
+dir mach/6500
+indir
+end
+name "Motorola 6800 support"
+dir mach/6800
+indir
+end
+name "Motorola 6805 support"
+dir mach/6805
+indir
+end
+name "Motorola 6809 support"
+dir mach/6809
+indir
+end
+name "Intel 8080 support"
+dir mach/8080
+indir
+end
+name "2-2 Interpreter support"
+dir mach/int22
+indir
+end
+name "2-4 Interpreter support"
+dir mach/int24
+indir
+end
+name "4-4 Interpreter support"
+dir mach/int44
+indir
+end
+name "IBM PC/IX support"
+dir mach/ix
+indir
+end
+name "Motorola 68000 2-4 support"
+dir mach/m68k2
+indir
+end
+name "NS16032 support"
+dir mach/ns
+indir
+end
+name "PDP 11 support"
+dir mach/pdp
+indir
+end
+name "PMDS support"
+dir mach/pmds
+indir
+end
+name "Signetics 2650 support"
+dir mach/s2650
+indir
+end
+name "Vax 2-4 support"
+dir mach/vax2
+indir
+end
+name "Vax 4-4 support"
+dir mach/vax4
+indir
+end
+name "Z80 support"
+dir mach/z80
+indir
+end
+name "Zilog Z8000 support"
+dir mach/z8000
+indir
+end
+name "Nascom support"
+dir mach/z80a
+indir
+end
+name "Pascal frontend"
+dir lang/pc/pem
+end
