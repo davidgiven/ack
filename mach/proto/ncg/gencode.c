@@ -22,6 +22,7 @@ static char rcsid[] = "$Header$";
 string mystrcpy();
 
 FILE *codefile;
+extern FILE *freopen();
 
 out_init(filename) char *filename; {
 
@@ -88,20 +89,20 @@ praddr(ad) addr_t ad; {
 	if (ad.ea_str==0 || *(ad.ea_str) == '\0')
 		fprintf(codefile,WRD_FMT,ad.ea_off);
 	else {
-		fprintf(codefile,"%s",ad.ea_str);
+		fputs(ad.ea_str, codefile);
 		if (ad.ea_off<0) {
-			fputc('-', codefile);
+			putc('-', codefile);
 			fprintf(codefile,WRD_FMT,-ad.ea_off);		
 		}
 		else if(ad.ea_off>0) {
-			fputc('+',codefile);
+			putc('+',codefile);
 			fprintf(codefile,WRD_FMT,ad.ea_off);
 		}
 	}
 }
 
 gennl() {
-	fputc('\n',codefile);
+	putc('\n',codefile);
 }
 
 prtoken(tp,leadingchar) token_p tp; {
@@ -109,9 +110,9 @@ prtoken(tp,leadingchar) token_p tp; {
 	register char *code;
 	register tkdef_p tdp;
 
-	fputc(leadingchar,codefile);
+	putc(leadingchar,codefile);
 	if (tp->t_token == -1) {
-		fprintf(codefile,"%s",codestrings[machregs[tp->t_att[0].ar].r_repr]);
+		fputs(codestrings[machregs[tp->t_att[0].ar].r_repr],codefile);
 		return;
 	}
 	tdp = &tokens[tp->t_token];
@@ -119,7 +120,7 @@ prtoken(tp,leadingchar) token_p tp; {
 	code = codestrings[tdp->t_format];
 	while ((c = *code++) != 0) {
 		if (c>=' ' && c<='~')
-			fputc(c,codefile);
+			putc(c,codefile);
 		else {
 			assert(c>0 && c<=TOKENSIZE);
 			switch(tdp->t_type[c-1]) {
@@ -132,7 +133,7 @@ prtoken(tp,leadingchar) token_p tp; {
 				praddr(tp->t_att[c-1].aa);
 				break;
 			case EV_REG:
-				fprintf(codefile,"%s",codestrings[machregs[tp->t_att[c-1].ar].r_repr]);
+				fputs(codestrings[machregs[tp->t_att[c-1].ar].r_repr],codefile);
 				break;
 			}
 		}

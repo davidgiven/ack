@@ -20,6 +20,7 @@ static char rcsid[] = "$Header$";
  */
 
 FILE *codefile;
+extern FILE *freopen();
 
 out_init(filename) char *filename; {
 

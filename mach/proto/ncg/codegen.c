@@ -432,10 +432,13 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	myfree(besttup);
 	break;
     }
+    case DO_TOSTACK:
     case DO_REMOVE: {
 	int texpno,nodeno;
 	token_p tp;
 	struct reginfo *rp;
+	int doremove = (codep[-1] & 037) == DO_REMOVE;
+	extern int allsetno;
 
 	DEBUG("REMOVE");
 	if (codep[-1]&32) {
@@ -445,6 +448,13 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		getint(texpno,codep);
 		nodeno=0;
 	}
+	if (texpno == allsetno) {
+		totalcost += stackupto(&fakestack[stackheight-tokpatlen-1],ply,toplevel);
+		CHKCOST();
+		if (doremove) for (rp=machregs;rp<machregs+NREGS;rp++)
+			rp->r_contents.t_token=0;
+		break;
+	}
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (match(tp,&machsets[texpno],nodeno)) {
 			/* investigate possible coercion to register */
@@ -452,8 +462,9 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			CHKCOST();
 			break;
 		}
-	for (rp=machregs;rp<machregs+NREGS;rp++)
-		if (match(&rp->r_contents,&machsets[texpno],nodeno))
+	if (doremove) for (rp=machregs;rp<machregs+NREGS;rp++)
+		if (rp->r_contents.t_token != 0 &&
+		    match(&rp->r_contents,&machsets[texpno],nodeno))
 			rp->r_contents.t_token=0;
 	break;
     }

@@ -61,6 +61,7 @@ long con();
 
 FILE *emfile;
 extern FILE *codefile;
+extern FILE *freopen();
 
 int nextispseu,savetab1;
 int opcode;
