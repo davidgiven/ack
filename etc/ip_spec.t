@@ -37,7 +37,7 @@ del swN 1 105
 dup mwPo 1 106
 dvf sP 1 107
 dvi mwPo 1 108
-fil 2 109
+fil u 109
 inc - 110
 ine w2 111
 ine sw 1 112
@@ -46,7 +46,7 @@ inl swN 1 116
 inn sP 1 117
 ior mwPo 1 118
 ior sP 1 119
-lae 2 120
+lae u 120
 lae sw 7 121
 lal P2 128
 lal N2 129
@@ -252,7 +252,7 @@ sbs e2 113
 sbs e- 114
 sbu e2 115
 sbu e- 116
-sde e2 117
+sde eu 117
 sdf e2 118
 sdl ewP2 119
 sdl ewN2 120
@@ -294,7 +294,7 @@ exg esP 1 155
 exg e2 156
 exg e- 157
 lpb e- 158
-gto e2 159
+gto eu 159
 ldc 4 0
 lae 4 1
 lal P4 2

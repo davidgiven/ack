@@ -15,6 +15,8 @@ $(FILES):       em_table
 
 install:	$(FILES)
 
+distr:		$(FILES)
+
 opr:
 		make pr ^ opr
 pr:
