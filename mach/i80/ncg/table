@@ -1,4 +1,3 @@
-
 /************************************************************/
 /************************************************************/
 /*******					       ******/
@@ -23,11 +22,10 @@ regpair			/* register pairs bc, de and hl */
 regind			/* register indirect */
 dereg			/* de-register-pair */
 hlreg			/* hl-register-pair */
-hlorde			/* de- or hl-register-pair */
+hl_or_de		/* de- or hl-register-pair */
 localbase
 stackpointer
-psword			/* consists of a-register + condition codes */
-mem			/* not really a register property */
+psword
 
 
 REGISTERS
@@ -36,110 +34,114 @@ a			:areg,reg.
 b,c			:lbreg.
 d,e,h,l			:reg.
 lb("b")=b+c		:regpair, localbase, regind.
-de("d")=d+e		:regpair, regind, dereg, hlorde.
-hl("h")=h+l		:regpair, hlreg, hlorde.
+de("d")=d+e		:regpair, regind, dereg, hl_or_de.
+hl("h")=h+l		:regpair, hlreg, hl_or_de.
 sp			:stackpointer.
-psw=a			:psword.
-m			:mem.		/* not really a register */
+psw=a			:psword.     /* in fact psw also includes
+					condition codes */
 
 TOKENS
 
-const1			= { INT num; } 1 num .
-const2			= { INT num; } 2 num .
-label			= { ADDR off; } 2 off .
-
+const1			= { INT num; } 1 num.
+const2			= { INT num; } 2 num.
+label			= { ADDR off; } 2 off.
+m			= { } 2 cost(0,3) "m".
 
 SETS
 
-reg1			= reg + lbreg + mem .
-bdhsp			= regpair + stackpointer .
-bdhpsw			= regpair + psword .
-immediate		= const2 + label .
-src1			= reg .
-src2			= hlorde + const2 + label .
-src1or2			= src1 + src2 .
+reg1			= reg + lbreg + m.
+b_d_h_sp		= regpair + stackpointer.
+b_d_h_psw		= regpair + psword.
+immediate		= const2 + label.
+src1			= reg.
+src2			= hl_or_de + const2 + label.
+src1or2			= src1 + src2.
 
 INSTRUCTIONS
 
-/* aci	const1:ro	kills a:cc	cost(2,7) .	*/
-   adc	reg1:ro		kills a:cc	cost(1,4) .
-   add	reg1:ro 	kills a:cc	cost(1,4) .
-/* adi	const1:ro 	kills a:cc	cost(2,7) .	*/
-   ana	reg1:ro 	kills a:cc	cost(1,4) .
-   ani	const1:ro 	kills a:cc	cost(2,7) .
-   Call	"call" label:ro			cost(3,17) .
+/* aci	const1:ro	kills a:cc	cost(2, 7).	*/
+   adc	reg1:ro		kills a:cc	cost(1, 4).
+   add	reg1:ro 	kills a:cc	cost(1, 4).
+/* adi	const1:ro 	kills a:cc	cost(2, 7).	*/
+   ana	reg1:ro 	kills a:cc	cost(1, 4).
+   ani	const1:ro 	kills a:cc	cost(2, 7).
+   Call	"call" label:ro			cost(3,17).
 			   /* 'call' is a reserved word */
-/* cc	label:ro			cost(11,3) . 	*/
-/* cm	label:ro			cost(11,3) .	*/
-   cma			kills a		cost(1,4) .
-   cmc			kills:cc	cost(1,4) .
-   cmp	reg1:ro 	kills:cc	cost(1,4) .
-/* cnc	label:ro			cost(11,3) .	*/
-   cnz	label:ro			cost(11,3) .
-/* cp	label:ro			cost(11,3) .	*/
-/* cpe	label:ro			cost(11,3) .	*/
-   cpi	const1:ro 	kills:cc	cost(11,3) .
-/* cpo	label:ro			cost(11,3) .	*/
-/* cz	label:ro			cost(11,3) .	*/
-/* daa			kills a:cc	cost(1,4) .	*/
-   dad	bdhsp:ro 	kills hl:cc	cost(1,10) .
-   dcr	reg1:rw:cc			cost(1,5) .
-   dcx	bdhsp:rw			cost(1,5) .
-/* di					cost(1,4) .	*/
-/* ei					cost(1,4) .	*/
-/* hlt					cost(1,4) .	*/
-/* in	const1:ro			cost(2,10) .	*/
-   inr	reg1:rw:cc			cost(1,5) .
-   inx	bdhsp:rw			cost(1,5) .
-   jc	label:ro			cost(3,10) .
-   jm	label:ro			cost(3,10) .
-   jmp	label:ro			cost(3,10) .
-   jnc	label:ro			cost(3,10) .
-   jnz	label:ro			cost(3,10) .
-   jp	label:ro			cost(3,10) .
-/* jpe	label:ro			cost(3,10) .	*/
-/* jpo	label:ro			cost(3,10) .	*/
-   jz	label:ro			cost(3,10) .
-   lda	label:ro 	kills a		cost(3,13) .
-   ldax	regind:ro 	kills a		cost(1,7) .
-   lhld	label:ro 	kills hl	cost(3,16) .
-   lxi	bdhsp:wo,immediate:ro		cost(3,10) .
-   mov	reg1:wo,reg1:ro			cost(1,5) .
-   mvi	reg1:wo,const1:ro		cost(2,7) .
-/* nop					cost(1,0) .	*/
-   ora	reg1:ro 	kills a:cc	cost(1,4) .
-/* ori	const1:ro 	kills a:cc	cost(2,7) .	*/
-/* out	const1:ro			cost(2,10) .	*/
-   pchl					cost(1,5) .
-   pop	bdhpsw:wo			cost(1,10) .
-   push	bdhpsw:ro			cost(1,10) .
-   ral			kills a:cc	cost(1,4) .
-   rar			kills a:cc	cost(1,4) .
-/* rc					cost(1,8) .	*/
-   ret					cost(1,10) .
-   rlc			kills a:cc	cost(1,4) .
-/* rm					cost(1,8) .	*/
-/* rnc					cost(1,8) .	*/
-/* rnz					cost(1,8) .	*/
-/* rp					cost(1,8) .	*/
-/* rpe					cost(1,8) .	*/
-/* rpo					cost(1,8) .	*/
-   rrc			kills a:cc	cost(1,4) .
-/* rst	const1:ro			cost(1,11) .	*/
-/* rz					cost(1,8) .	*/
-   sbb	reg1:ro 	kills a:cc	cost(1,4) .
-/* sbi	const1:ro 	kills a:cc	cost(2,7) .	*/
-   shld	label:ro			cost(3,16) .
-   sphl					cost(1,5) .
-   sta	label:ro			cost(3,13) .
-   stax	regind:ro			cost(1,7) .
-/* stc			kills:cc	cost(1,4) .	*/
-   sub	reg1:ro 	kills a:cc	cost(1,4) .
-   sui	const1:ro 	kills a:cc	cost(2,7) .
-   xchg			kills de hl	cost(1,4) .
-   xra	reg1:ro 	kills a:cc	cost(1,4) .
-/* xri	const1:ro 	kills a:cc	cost(2,7) .	*/
-   xthl			kills hl	cost(1,18) .
+/* cc	label:ro			cost(3,14). 	*/
+/* cm	label:ro			cost(3,14).	*/
+   cma			kills a		cost(3,14).
+   cmc			kills:cc	cost(1, 4).
+   cmp	reg1:ro 	kills:cc	cost(1, 4).
+/* cnc	label:ro			cost(3,14).	*/
+   cnz	label:ro			cost(3,14).
+/* cp	label:ro			cost(3,14).	*/
+/* cpe	label:ro			cost(3,14).	*/
+   cpi	const1:ro 	kills:cc	cost(2, 7).
+/* cpo	label:ro			cost(3,14).	*/
+/* cz	label:ro			cost(3,14).	*/
+/* daa			kills a:cc	cost(1, 4).	*/
+   dad	b_d_h_sp:ro 	kills hl:cc	cost(1,10).
+   dcr	reg+lbreg:rw:cc			cost(1, 5).
+   dcr	m:rw:cc				cost(1, 7).
+   dcx	b_d_h_sp:rw			cost(1, 5).
+/* di					cost(1, 4).	*/
+/* ei					cost(1, 4).	*/
+/* hlt					cost(1, 4).	*/
+/* in	const1:ro			cost(2,10).	*/
+   inr	reg+lbreg:rw:cc			cost(1, 5).
+   inr	m:rw:cc				cost(1, 7).
+   inx	b_d_h_sp:rw			cost(1, 5).
+   jc	label:ro			cost(3,10).
+   jm	label:ro			cost(3,10).
+   jmp	label:ro			cost(3,10).
+   jnc	label:ro			cost(3,10).
+   jnz	label:ro			cost(3,10).
+   jp	label:ro			cost(3,10).
+/* jpe	label:ro			cost(3,10).	*/
+/* jpo	label:ro			cost(3,10).	*/
+   jz	label:ro			cost(3,10).
+   lda	label:ro 	kills a		cost(3,13).
+   ldax	regind:ro 	kills a		cost(1, 7).
+   lhld	label:ro 	kills hl	cost(3,16).
+   lxi	b_d_h_sp:wo,immediate:ro	cost(3,10).
+   mov	reg+lbreg:wo,reg+lbreg:ro	cost(1, 5).
+   mov  m:wo,reg1:ro			cost(1, 4).
+   mov  reg1:wo,m:ro			cost(1, 4).
+   mvi	reg1:wo,const1:ro		cost(2, 7).
+/* nop					cost(1, 3).	*/
+   ora	reg1:ro 	kills a:cc	cost(1, 4).
+/* ori	const1:ro 	kills a:cc	cost(2, 7).	*/
+/* out	const1:ro			cost(2,10).	*/
+   pchl					cost(1, 5).
+   pop	b_d_h_psw:wo			cost(1,10).
+   push	b_d_h_psw:ro			cost(1,10).
+   ral			kills a:cc	cost(1, 4).
+   rar			kills a:cc	cost(1, 4).
+/* rc					cost(1, 8).	*/
+   ret					cost(1,10).
+   rlc			kills a:cc	cost(1, 4).
+/* rm					cost(1, 8).	*/
+/* rnc					cost(1, 8).	*/
+/* rnz					cost(1, 8).	*/
+/* rp					cost(1, 8).	*/
+/* rpe					cost(1, 8).	*/
+/* rpo					cost(1, 8).	*/
+   rrc			kills a:cc	cost(1, 4).
+/* rst	const1:ro			cost(1,11).	*/
+/* rz					cost(1, 8).	*/
+   sbb	reg1:ro 	kills a:cc	cost(1, 4).
+/* sbi	const1:ro 	kills a:cc	cost(2, 7).	*/
+   shld	label:ro			cost(3,16).
+   sphl					cost(1, 5).
+   sta	label:ro			cost(3,13).
+   stax	regind:ro			cost(1, 7).
+/* stc			kills:cc	cost(1, 4).	*/
+   sub	reg1:ro 	kills a:cc	cost(1, 4).
+   sui	const1:ro 	kills a:cc	cost(2, 7).
+   xchg			kills de hl	cost(1, 4).
+   xra	reg1:ro 	kills a:cc	cost(1, 4).
+/* xri	const1:ro 	kills a:cc	cost(2, 7).	*/
+   xthl			kills hl	cost(1,18).
    
 
 MOVES
@@ -147,10 +149,13 @@ MOVES
 from reg to reg
 gen mov %2,%1
 
+from const1 %num==0 to areg
+gen xra a
+
 from const1 to reg
 gen mvi %2,%1
 
-from immediate to bdhsp
+from immediate to b_d_h_sp
 gen lxi %2,%1
 
 from reg to regpair
@@ -163,7 +168,7 @@ gen mov %2.1,%1.1
 
 TESTS
 
-to test areg		/* just a dummy test, never used */
+to test areg		/* dummy test, never used */
 gen ora a
 
 STACKINGRULES
@@ -171,22 +176,12 @@ STACKINGRULES
 from regpair to STACK
 gen push %1
 
-from reg to STACK
-uses hlorde
+from immediate + reg to STACK
+uses hl_or_de
 gen move %1,%a
     push %a
 
-from reg to STACK
-gen push hl
-    move %1,hl
-    xthl.
-
-from immediate to STACK
-uses hlorde
-gen lxi %a,%1
-    push %a
-
-from immediate to STACK
+from immediate + reg to STACK
 gen push hl
     move %1,hl
     xthl.
@@ -198,7 +193,7 @@ uses regpair
 gen pop %a				yields %a
 
 from STACK
-uses hlorde
+uses hl_or_de
 gen pop %a				yields %a.2
 
 from STACK
@@ -211,20 +206,28 @@ from immediate
 uses regpair
 gen move %1,%a				yields %a
 
-from const1
-uses reg
+from hl_or_de
+uses hl_or_de
+gen xchg.				yields %a
+
+from regpair
+uses regpair
 gen move %1,%a				yields %a
 
 from reg
-uses reusing %1, hlorde
-gen mov %a.2,%1
-    mvi %a.1,{const1,0}			yields %a
+uses reusing %1, hl_or_de
+gen move %1,%a.2
+    move {const1,0},%a.1		yields %a
 
-from hlorde				yields %1.2
+from hl_or_de				yields %1.2
 
-from hlorde
+from const2
+uses hl_or_de
+gen move %1,%a				yields %a.2
+
+from hl_or_de
 uses areg
-gen mov a,%1.2				yields a
+gen move %1.2,a				yields a
 
 PATTERNS
 
@@ -238,16 +241,16 @@ pat ldc					yields {const2,highw($1)}
 pat lol lol $1==$2
 uses hlreg={const2,$1}, dereg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m				yields de de
+    mov d,{m}				yields de de
 
 pat lol
 uses hlreg={const2,$1}, dereg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m				yields de
+    mov d,{m}				yields de
 
 pat loe loe $1==$2
 uses hlreg
@@ -257,25 +260,36 @@ pat loe
 uses hlreg
 gen lhld {label,$1}			yields hl
 
+pat lil lil $1==$2
+uses hlreg={const2,$1}, dereg
+gen dad lb
+    mov e,{m}
+    inx hl
+    mov h,{m}
+    mov l,e
+    mov e,{m}
+    inx hl
+    mov d,{m}				yields de de
+
 pat lil
 uses hlreg={const2,$1}, dereg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,e
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m				yields de
+    mov d,{m}				yields de
 
 pat lof
-with hlorde
-kills hlorde
-uses hlorde={const2,$1}
+with hl_or_de
+kills hl_or_de
+uses hl_or_de={const2,$1}
 gen dad de
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m				yields de
+    mov d,{m}				yields de
 
 pat lal
 uses hlreg={const2,$1}
@@ -289,21 +303,21 @@ pat lxl $1==1
 uses dereg, hlreg
 gen move {const2,SL},hl
     dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m				yields de
+    mov d,{m}				yields de
 
-pat lxl $1>1
+pat lxl $1>1 && $1<256
 uses dereg, areg={const1,$1}, hlreg
 gen move lb,de
     1:
     lxi hl,{const2,SL}
     dad de
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     dcr a
-    jnz {label,"1b"}			yields de
+    jnz {label,1b}			yields de
 
 pat lxa $1==0
 uses hlreg
@@ -314,9 +328,9 @@ pat lxa $1==1
 uses dereg, hlreg
 gen move {const2,SL},hl
     dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     lxi hl,{const2,SL}
     dad de				yields hl
 
@@ -326,11 +340,11 @@ gen move lb,de
     1:
     lxi hl,{const2,SL}
     dad de
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
     lxi hl,{const2,SL}
     dad de				yields hl
 
@@ -343,16 +357,16 @@ with dereg
   gen ldax de				yields a
 with hlreg
   uses reg
-  gen mov %a,m				yields %a
+  gen mov %a,{m}			yields %a
 
 pat loi $1==2
 with exact label
    gen lhld %1				yields hl
 with hlreg
    uses dereg
-   gen mov e,m
+   gen mov e,{m}
        inx %1
-       mov d,m				yields de
+       mov d,{m}			yields de
 
 pat loi $1==4
 with exact label
@@ -365,28 +379,28 @@ with exact label
        lhld %1				yields de hl
 with hlreg
    uses dereg, areg
-   gen mov e,m
+   gen mov e,{m}
        inx %1
-       mov d,m
+       mov d,{m}
        inx hl
-       mov a,m
+       mov a,{m}
        inx hl
-       mov h,m
+       mov h,{m}
        mov l,a				yields hl de
 
 pat loi $1<=510
-with hlorde STACK
-uses hlorde={const2,$1-1}, areg
+with hl_or_de STACK
+uses hl_or_de={const2,$1-1}, areg
 gen dad de
     mvi a,{const1,$1/2}
     1:
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m
+    mov e,{m}
     dcx hl
     push de
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
 
 pat loi $1>=512
 with STACK
@@ -401,14 +415,14 @@ pat ldl
 with STACK
 uses dereg, hlreg={const2,$1+3}
 gen dad lb
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m
+    mov e,{m}
     dcx hl
     push de
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m				yields de
+    mov e,{m}				yields de
 
 pat lde
 with STACK
@@ -427,20 +441,20 @@ gen lhld {label,$1+2}
     lhld {label,$1}			yields de hl
 
 pat ldf
-with hlorde STACK
-uses hlorde={const2,$1+3}
+with hl_or_de STACK
+uses hl_or_de={const2,$1+3}
 gen dad de
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m
+    mov e,{m}
     dcx hl
     push de
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m				yields de
+    mov e,{m}				yields de
 
 pat lpi
-uses hlorde={label,$1}			yields %a
+uses hl_or_de={label,$1}		yields %a
 
 /******************************************/
 /* Group 2: Store instructions            */
@@ -453,9 +467,9 @@ pat stl
 with dereg
 uses hlreg={const2,$1}
 gen dad lb
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
 
 pat ste loe $1==$2
 with hlreg				yields hl hl leaving ste $1
@@ -468,131 +482,135 @@ pat sil
 with dereg
 uses hlreg={const2,$1}, areg
 gen dad lb
-    mov a,m
+    mov a,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,a
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
 
 pat sil lil $1==$2
 with dereg
 uses hlreg={const2,$1}, areg
 gen dad lb
-    mov a,m
+    mov a,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,a
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d				yields de
+    mov {m},d				yields de
 
 pat lil loc adi sil $1==$4 && $3==2
 with STACK
 uses hlreg={const2,$1}, dereg, areg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,e
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     push hl
     lxi hl,{const2,$2}
     dad de
     xchg.
     pop hl
-    mov m,d
+    mov {m},d
     dcx hl
-    mov m,e
+    mov {m},e
 
 pat lil inc sil $1==$3
 uses hlreg={const2,$1}, areg
 gen dad lb
-    mov a,m
+    mov a,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,a
-    inr m
-    jnz {label,"1f"}
+    inr {m}
+    jnz {label,1f}
     inx hl
-    inr m
+    inr {m}
     1:
 
 pat lil dec sil $1==$3
 uses hlreg={const2,$1}, dereg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov h,m
+    mov h,{m}
     mov l,e
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     dcx de
-    mov m,d
+    mov {m},d
     dcx hl
-    mov m,e
+    mov {m},e
 
 pat stf
-with hlorde STACK
-uses hlorde={const2,$1}
+with hl_or_de STACK
+uses hl_or_de={const2,$1}
 gen dad de
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
 
 pat sti $1==1
-with exact label areg
+with label areg
    gen sta %1
-with exact dereg areg
+with dereg areg
    gen stax de
 with hlreg reg
-   gen mov m,%2
+   gen mov {m},%2
 
 
 pat sti $1==2
-with exact label hlreg
-uses hlreg
+with label hlreg
    gen shld %1
 with hlreg dereg
-   gen mov m,e
+   gen mov {m},e
        inx %1
-       mov m,d
+       mov {m},d
+with dereg hlreg
+   gen xchg.
+       mov {m},e
+       inx %2
+       mov {m},d
 
 pat sti $1==4
-with exact label hlreg dereg
+with label hlreg dereg
    gen shld %1
        xchg.
        shld {label,%1.off+2}
-with exact label dereg hlreg
-    gen shld {label,%1.off+2}
-        xchg.
-        shld %1
+with label dereg hlreg
+   gen shld {label,%1.off+2}
+       xchg.
+       shld %1
 with hlreg dereg STACK
-   gen mov m,e
+   gen mov {m},e
        inx hl
-       mov m,d
+       mov {m},d
        inx hl
        pop de
-       mov m,e
+       mov {m},e
        inx hl
-       mov m,d
+       mov {m},d
 
-pat sti $1<511
+pat sti $1<512
 with hlreg STACK
 uses areg={const1,$1/2}, dereg
 gen 1:
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
     inx hl
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
 
 pat sti
 with STACK
@@ -607,14 +625,14 @@ pat sdl
 with dereg STACK
 uses hlreg={const2,$1}
 gen dad lb
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
     inx hl
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
 
 pat sde
 with hlreg STACK
@@ -631,18 +649,18 @@ gen shld {label,$1+2}
     shld {label,$1}
 
 pat sdf
-with hlorde STACK
-uses hlorde={const2,$1}
+with hl_or_de STACK
+uses hl_or_de={const2,$1}
 gen dad de
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
     inx hl
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
 
 /****************************************/
 /* Group 3: Integer arithmetic          */
@@ -655,21 +673,16 @@ with dereg hlreg
    gen dad de				yields hl
 with hlreg hlreg
    gen dad hl				yields hl
+with dereg dereg
+   gen xchg.
+       dad hl				yields hl
 
 pat adi $1==4
 with STACK
 gen Call {label,".adi4"}
 
 pat sbi $1==2
-with hlorde hlorde
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov %2.2,a
-    mov a,%2.1
-    sbb %1.1
-    mov %2.1,a				yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%2.2
     sub %1.2
@@ -677,6 +690,14 @@ gen mov a,%2.2
     mov a,%2.1
     sbb %1.1
     mov %1.1,a				yields %1
+with hl_or_de hl_or_de
+uses areg
+gen mov a,%2.2
+    sub %1.2
+    mov %2.2,a
+    mov a,%2.1
+    sbb %1.1
+    mov %2.1,a				yields %2
 
 pat sbi $1==4
 with STACK
@@ -711,7 +732,7 @@ uses areg={const1,128}
 gen Call {label,".dvi4"}
 
 pat ngi $1==2
-with hlorde
+with hl_or_de
 uses areg
 gen xra a
     sub %1.2
@@ -790,6 +811,30 @@ with STACK
 uses areg={const1,0}
 gen Call {label,".sri4"}
 
+
+/********************************************/
+/* Group 5: Floating point artihmetic	    */
+/********************************************/
+
+pat lof			gen Call {label,"eunimpl"}
+pat ldf			gen Call {label,"eunimpl"}
+pat stf			gen Call {label,"eunimpl"}
+pat sdf			gen Call {label,"eunimpl"}
+pat adf			gen Call {label,"eunimpl"}
+pat sbf			gen Call {label,"eunimpl"}
+pat mlf			gen Call {label,"eunimpl"}
+pat dvf			gen Call {label,"eunimpl"}
+pat ngf			gen Call {label,"eunimpl"}
+pat fif			gen Call {label,"eunimpl"}
+pat fef			gen Call {label,"eunimpl"}
+pat zrf			gen Call {label,"eunimpl"}
+pat cfi			gen Call {label,"eunimpl"}
+pat cif			gen Call {label,"eunimpl"}
+pat cuf			gen Call {label,"eunimpl"}
+pat cff			gen Call {label,"eunimpl"}
+pat cfu			gen Call {label,"eunimpl"}
+pat cmf			gen Call {label,"eunimpl"}
+
 /********************************************/
 /* Group 6: Pointer arithmetic              */
 /********************************************/
@@ -797,26 +842,26 @@ gen Call {label,".sri4"}
 pat adp $1==0			/* do nothing */
 
 pat adp $1==1
-with hlorde
+with hl_or_de
 gen inx %1				yields %1
 
 pat adp $1==2
-with hlorde
+with hl_or_de
 gen inx %1
     inx %1				yields %1
 
 pat adp $1==0-1
-with hlorde
+with hl_or_de
 gen dcx %1				yields %1
 
 pat adp $1==0-2
-with hlorde
+with hl_or_de
 gen dcx %1
     dcx %1				yields %1
 
 pat adp
-with hlorde
-uses hlorde={const2,$1}
+with hl_or_de
+uses hl_or_de={const2,$1}
 gen dad de				yields hl
 
 pat ads $1==2					leaving adi 2
@@ -828,40 +873,40 @@ pat sbs $1==2					leaving sbi 2
 /********************************************/
 
 pat inc
-with hlorde
+with hl_or_de
 gen inx %1				yields %1
 
 pat inl
 uses hlreg={const2,$1}
 gen dad lb
-    inr m
-    jnz {label,"1f"}
+    inr {m}
+    jnz {label,1f}
     inx hl
-    inr m
+    inr {m}
     1:
 
 pat ine
 uses hlreg={label,$1}
-gen inr m
-    jnz {label,"1f"}
+gen inr {m}
+    jnz {label,1f}
     inx hl
-    inr m
+    inr {m}
     1:
 
 pat dec
-with hlorde
+with hl_or_de
 gen dcx %1				yields %1
 
 pat del
 uses hlreg={const2,$1}, dereg
 gen dad lb
-    mov e,m
+    mov e,{m}
     inx hl
-    mov d,m
+    mov d,{m}
     dcx de
-    mov m,d
+    mov {m},d
     dcx hl
-    mov m,e
+    mov {m},e
 
 pat dee
 uses hlreg
@@ -873,9 +918,9 @@ pat zrl
 uses hlreg={const2,$1}, areg
 gen dad lb
     xra a
-    mov m,a
+    mov {m},a
     inx hl
-    mov m,a
+    mov {m},a
 
 pat zre
 uses hlreg={const2,0}
@@ -887,23 +932,23 @@ pat zer $1==4				yields {const2,0} {const2,0}
 
 pat zer $1<511
 with STACK
-uses reg={const1,$1/2}, hlorde={const2,0}
+uses reg={const1,$1/2}, hl_or_de={const2,0}
 gen 1:
     push %b
     dcr %a
-    jnz {label,"1b"}
+    jnz {label,1b}
 
 pat zer
 with STACK
-uses hlorde={const2,$1/2}, hlorde={const2,0}, areg
+uses hl_or_de={const2,$1/2}, hl_or_de={const2,0}, areg
 gen xra a
     1:
     push %b
     dcx %a
     cmp %a.2
-    jnz {label,"1b"}
+    jnz {label,1b}
     cmp %a.1
-    jnz {label,"1b"}
+    jnz {label,1b}
 
 /*****************************************/
 /* Group 8: Convert instructions	 */
@@ -912,31 +957,31 @@ gen xra a
 pat loc loc cii $1==$2
 
 pat loc loc cii $1==2 && $2==4
-with hlorde
-uses hlorde={const2,0}, areg
+with hl_or_de
+uses hl_or_de={const2,0}, areg
 gen mov a,%1.1
     ora a
-    jp {label,"1f"}
+    jp {label,1f}
     lxi %a,{const2,0-1}
     1:					yields %a %1
 
 pat loc loc cii $1==4 && $2==2
-with hlorde hlorde			yields %1
+with hl_or_de hl_or_de			yields %1
 
 pat loc loc cii $1==1 && $2==2
 with reg
-uses areg=%1, hlorde
+uses areg=%1, hl_or_de
 gen move {const1,0},%b.1
     move a,%b.2
     ora a
-    jp {label,"1f"}
+    jp {label,1f}
     mvi %b.1,{const1,255}
     1:					yields %b
-with hlorde
+with hl_or_de
 uses areg=%1.2
 gen move {const1,0},%1.1
     ora a
-    jp {label,"1f"}
+    jp {label,1f}
     mvi %1.1,{const1,255}
     1:					yields %1
 
@@ -950,7 +995,7 @@ with hlreg
    gen move {const1,0},%1.1
        move l,a
        ora a
-       jp {label,"1f"}
+       jp {label,1f}
        mvi h,{const1,255}
        1:
        mov e,h
@@ -962,7 +1007,7 @@ uses areg={const1,1}
 gen Call {label,".cii"}
 
 pat loc loc ciu					leaving loc $1 loc $2 cuu
-pat loc loc ciu					leaving loc $1 loc $2 cuu
+pat loc loc cui					leaving loc $1 loc $2 cuu
 
 pat cui						leaving cuu $1
 
@@ -978,16 +1023,16 @@ with src1or2 src1or2			yields %1
 
 pat loc loc cuu $1==1 && $2==2
 with reg
-   uses reusing %1, hlorde
+   uses reusing %1, hl_or_de
    gen move %1,%a			yields %a
-with hlorde
+with hl_or_de
    gen move {const1,0},%1.1		yields %1
 
 pat loc loc cuu $1==1 && $2==4
 with reg
-   uses reusing %1, hlorde
+   uses reusing %1, hl_or_de
    gen move %1,%a			yields {const2,0} %a
-with hlorde
+with hl_or_de
    gen move {const1,0},%1.1		yields {const2,0} %1
 
 pat cuu
@@ -1000,7 +1045,7 @@ gen Call {label,".cii"}
 /*****************************************/
 
 pat and $1==2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     ana %2.2
@@ -1008,7 +1053,7 @@ gen mov a,%1.2
     mov a,%1.1
     ana %2.1
     mov %2.1,a				yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     ana %2.2
@@ -1027,7 +1072,7 @@ with dereg STACK
 gen Call {label,".and"}
 
 pat ior $1==2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     ora %2.2
@@ -1035,7 +1080,7 @@ gen mov a,%1.2
     mov a,%1.1
     ora %2.1
     mov %2.1,a				yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     ora %2.2
@@ -1054,7 +1099,7 @@ with dereg STACK
 gen Call {label,".ior"}
 
 pat xor $1==2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     xra %2.2
@@ -1062,7 +1107,7 @@ gen mov a,%1.2
     mov a,%1.1
     xra %2.1
     mov %2.1,a				yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     xra %2.2
@@ -1081,7 +1126,7 @@ with dereg STACK
 gen Call {label,".xor"}
 
 pat com $1==2
-with hlorde
+with hl_or_de
 uses areg
 gen mov a,%1.2
     cma.
@@ -1104,14 +1149,14 @@ with dereg hlreg STACK
 uses areg
 gen mov a,e
     ani {const1,15}
-    jz {label,"3f"}
+    jz {label,3f}
     1:
     dad hl
-    jnc {label,"2f"}
+    jnc {label,2f}
     inr l
     2:
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
     3:					yields hl
 
 pat rol $1==4
@@ -1123,7 +1168,7 @@ with dereg hlreg STACK
 uses areg
 gen mov a,e
     ani {const1,15}
-    jz {label,"2f"}
+    jz {label,2f}
     mov e,a
     mov a,l
     1:
@@ -1135,7 +1180,7 @@ gen mov a,e
     rar.
     mov l,a
     dcr e
-    jnz {label,"1b"}
+    jnz {label,1b}
     2:					yields hl
 
 pat ror $1==4
@@ -1223,7 +1268,7 @@ pat lar defined($1)
 gen Call {label,"eunimpl"}
 
 pat lar !defined($1)
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen mov a,%1.2
     cpi {const1,2}
@@ -1241,7 +1286,7 @@ pat sar defined($1)
 gen Call {label,"eunimpl"}
 
 pat sar !defined($1)
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen mov a,%1.2
     cpi {const1,2}
@@ -1259,7 +1304,7 @@ pat aar defined($1)
 gen Call {label,"eunimpl"}
 
 pat aar !defined($1)
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen mov a,%1.2
     cpi {const1,2}
@@ -1281,23 +1326,23 @@ uses areg={const1,1}
 gen Call {label,".cmi4"}		yields de
 
 pat cmu $1==2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%2.1
     cmp %1.1
-    jz {label,"2f"}
-    jc {label,"1f"}  
+    jz {label,2f}
+    jc {label,1f}  
     0:
     lxi %2,{const2,1}
-    jmp {label,"3f"}
+    jmp {label,3f}
     1:
     lxi %2,{const2,0-1}
-    jmp {label,"3f"}
+    jmp {label,3f}
     2:
     mov a,%2.2
     cmp %1.2
-    jc {label,"1b"}
-    jnz {label,"0b"}
+    jc {label,1b}
+    jnz {label,0b}
     lxi %2,{const2,0}
     3:					yields %2
 
@@ -1320,7 +1365,7 @@ gen Call {label,".cms"}			yields de
 pat cmp						leaving cmu 2
 
 pat tlt
-with hlorde
+with hl_or_de
 uses areg
 gen mov a,%1.1
     ral.
@@ -1330,41 +1375,41 @@ gen mov a,%1.1
     mov %1.2,a				yields %1
 
 pat tle
-with hlorde
-uses hlorde={const2,1}, areg
+with hl_or_de
+uses hl_or_de={const2,1}, areg
 gen xra a
     add %1.1
-    jm {label,"2f"}
-    jnz {label,"1f"}
+    jm {label,2f}
+    jnz {label,1f}
     xra a
     add %1.2
-    jz {label,"2f"}
+    jz {label,2f}
     1:
     dcx %a
     2:					yields %a
 
 pat teq
-with hlorde
+with hl_or_de
 uses areg
 gen mov a,%1.1
     ora %1.2
     move {const2,0},%1
-    jnz {label,"1f"}
+    jnz {label,1f}
     inx %1
     1:					yields %1
 
 pat tne
-with hlorde
+with hl_or_de
 uses areg
 gen mov a,%1.1
     ora %1.2
     move {const2,0},%1
-    jz {label,"1f"}
+    jz {label,1f}
     inx %1
     1:					yields %1
 
 pat tge
-with hlorde
+with hl_or_de
 uses areg
 gen mov a,%1.1
     ral.
@@ -1375,129 +1420,129 @@ gen mov a,%1.1
     mov %1.2,a				yields %1
 
 pat tgt
-with hlorde
-uses hlorde={const2,0}, areg
+with hl_or_de
+uses hl_or_de={const2,0}, areg
 gen xra a
     add %1.1
-    jm {label,"2f"}
-    jnz {label,"1f"}
+    jm {label,2f}
+    jnz {label,1f}
     xra a
     add %1.2
-    jz {label,"2f"}
+    jz {label,2f}
     1:
     inx %a
     2:					yields %a
 
 pat loc cmi teq and $1>=0 && $1<=255 && $2==2 && $4==2
-with exact areg hlorde
+with exact areg hl_or_de
 gen cpi {const1,$1}
-    jz {label,"1f"}
+    jz {label,1f}
     move {const2,0},%2
     1:					yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jz {label,"2f"}
+    jz {label,2f}
     1:
     move {const2,0},%2
     2:					yields %2
 
 pat loc cmi tne and $1>=0 && $1<=255 && $2==2 && $4==2
-with exact areg hlorde
+with exact areg hl_or_de
 gen cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     move {const2,0},%2
     1:					yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jnz {label,"1f"}
+    jnz {label,1f}
     move {const2,0},%2
     1:					yields %2
 
 pat loc cmi teq ior $1>=0 && $1<=255 && $2==2 && $4==2
-with exact areg hlorde
+with exact areg hl_or_de
 gen cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     move {const2,1},%2
     1:					yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jnz {label,"1f"}
+    jnz {label,1f}
     move {const2,1},%2
     1:					yields %2
 
 pat loc cmi tne ior $1>=0 && $1<=255 && $2==2 && $4==2
-with exact areg hlorde
+with exact areg hl_or_de
 gen cpi {const1,$1}
-    jz {label,"1f"}
+    jz {label,1f}
     move {const2,1},%2
     1:					yields %2
-with hlorde hlorde
+with hl_or_de hl_or_de
 uses areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jz {label,"2f"}
+    jz {label,2f}
     1:
     move {const2,1},%2
     2:					yields %2
 
 pat loc cmi teq $1>=0 && $1<=255 && $2==2
 with exact areg
-uses hlorde={const2,0}
+uses hl_or_de={const2,0}
 gen cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     inx %a
     1:					yields %a
-with hlorde
-uses hlorde={const2,0}, areg
+with hl_or_de
+uses hl_or_de={const2,0}, areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jnz {label,"1f"}
+    jnz {label,1f}
     inx %a
     1:					yields %a
 
 
 pat loc cmi tne $1>=0 && $1<=255 && $2==2
 with exact areg
-uses hlorde={const2,0}
+uses hl_or_de={const2,0}
 gen cpi {const1,$1}
-    jz {label,"1f"}
+    jz {label,1f}
     inx %a
     1:					yields %a
-with hlorde
-uses hlorde={const2,1}, areg
+with hl_or_de
+uses hl_or_de={const2,1}, areg
 gen mov a,%1.2
     cpi {const1,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%1.1
     ora a
-    jnz {label,"1f"}
+    jnz {label,1f}
     dcx %a
     1:					yields %a
 
 pat loc cmi $1>=0 && $1<=255 && $2==2
 with exact areg
-uses hlorde
+uses hl_or_de
 gen sui {const1,$1}
     mov %a.2,a
     rar.
@@ -1519,7 +1564,7 @@ with STACK
 gen jmp {label,$1}
 
 pat blt
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%2.2
     sub %1.2
@@ -1528,7 +1573,7 @@ gen mov a,%2.2
     jm {label,$1}
 
 pat ble
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%1.2
     sub %2.2
@@ -1537,18 +1582,18 @@ gen mov a,%1.2
     jp {label,$1}
 
 pat beq
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%2.2
     cmp %1.2
-    jnz {label,"1f"}
+    jnz {label,1f}
     mov a,%2.1
     cmp %1.1
     jz {label,$1}
     1:
 
 pat bne
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%2.2
     cmp %1.2
@@ -1558,7 +1603,7 @@ gen mov a,%2.2
     jnz {label,$1}
 
 pat bge
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%2.2
     sub %1.2
@@ -1567,7 +1612,7 @@ gen mov a,%2.2
     jp {label,$1}
 
 pat bgt
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%1.2
     sub %2.2
@@ -1578,34 +1623,34 @@ gen mov a,%1.2
 pat zlt
 with STACK
 gen pop psw
-    ral.
-    jc {label,$1}
-with hlorde STACK
+    ora a
+    jm {label,$1}
+with hl_or_de STACK
 gen mov a,%1.1
     ora a
     jm {label,$1}
 
 pat zle
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen xra a
     add %1.1
     jm {label,$1}
-    jnz {label,"1f"}
+    jnz {label,1f}
     xra a
     add %1.2
     jz {label,$1}
     1:
 
 pat zeq
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen mov a,%1.1
     ora %1.2
     jz {label,$1}
 
 pat zne
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen mov a,%1.1
     ora %1.2
@@ -1616,17 +1661,17 @@ with STACK
 gen pop psw
     ral.
     jnc {label,$1}
-with hlorde STACK
+with hl_or_de STACK
 gen mov a,%1.1
     ora a
     jp {label,$1}
 
 pat zgt
-with hlorde STACK
+with hl_or_de STACK
 uses areg
 gen xra a
     add %1.1
-    jm {label,"1f"}
+    jm {label,1f}
     jnz {label,$1}
     xra a
     add %1.2
@@ -1637,22 +1682,22 @@ pat lol zeq
 with STACK
 uses hlreg={const2,$1}, areg
 gen dad lb
-    mov a,m
+    mov a,{m}
     inx hl
-    ora m
+    ora {m}
     jz {label,$2}
 
 pat lol zne
 with STACK
 uses hlreg={const2,$1}, areg
 gen dad lb
-    mov a,m
+    mov a,{m}
     inx hl
-    ora m
+    ora {m}
     jnz {label,$2}
 
 pat ior zeq $1==2
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%1.1
     ora %1.2
@@ -1661,7 +1706,7 @@ gen mov a,%1.1
     jz {label,$2}
 
 pat ior zne $1==2
-with hlorde hlorde STACK
+with hl_or_de hl_or_de STACK
 uses areg
 gen mov a,%1.1
     ora %1.2
@@ -1680,7 +1725,7 @@ gen Call {label,$1}
 pat cai
 with hlreg STACK
 uses dereg
-gen lxi de,{label,"1f"}
+gen lxi de,{label,1f}
     push de
     pchl.
     1:
@@ -1692,12 +1737,12 @@ with STACK
 uses areg={const1,$1/2}, hlreg={label,".fra"+$1}, dereg
 gen 1:
     dcx hl
-    mov d,m
+    mov d,{m}
     dcx hl
-    mov e,m
+    mov e,{m}
     push de
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
 
 pat lfr ret $1==$2				leaving ret 0
 
@@ -1722,12 +1767,12 @@ with STACK
 uses areg={const1,$1/2}, hlreg={label,".fra"}, dereg
 gen 1:
     pop de
-    mov m,e
+    mov {m},e
     inx hl
-    mov m,d
+    mov {m},d
     inx hl
     dcr a
-    jnz {label,"1b"}
+    jnz {label,1b}
     move lb,hl
     sphl.
     pop lb
@@ -1826,9 +1871,8 @@ uses dereg={const2,1}
 gen Call {label,".exg"}
 
 pat fil
-uses hlreg
-gen lxi hl,{label,$1}
-    shld {label,"hol0"+4}
+uses hlreg={label,$1}
+gen shld {label,"hol0"+4}
 
 pat gto
 with STACK
@@ -1875,7 +1919,7 @@ with STACK
 gen Call {label,".nop"}
 
 pat rck
-with hlorde STACK
+with hl_or_de STACK
 
 pat rtt						leaving ret 0
 
@@ -1909,22 +1953,3 @@ gen shld {label,".reghp"}
 pat trp
 with STACK
 gen Call {label,".trp"}
-
-pat lof			gen Call {label,"eunimpl"}
-pat ldf			gen Call {label,"eunimpl"}
-pat stf			gen Call {label,"eunimpl"}
-pat sdf			gen Call {label,"eunimpl"}
-pat adf			gen Call {label,"eunimpl"}
-pat sbf			gen Call {label,"eunimpl"}
-pat mlf			gen Call {label,"eunimpl"}
-pat dvf			gen Call {label,"eunimpl"}
-pat ngf			gen Call {label,"eunimpl"}
-pat fif			gen Call {label,"eunimpl"}
-pat fef			gen Call {label,"eunimpl"}
-pat zrf			gen Call {label,"eunimpl"}
-pat cfi			gen Call {label,"eunimpl"}
-pat cif			gen Call {label,"eunimpl"}
-pat cuf			gen Call {label,"eunimpl"}
-pat cff			gen Call {label,"eunimpl"}
-pat cfu			gen Call {label,"eunimpl"}
-pat cmf			gen Call {label,"eunimpl"}
