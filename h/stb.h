@@ -1,4 +1,8 @@
 /* $Header$ */
+/*
+ * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 
 /* debugger symbol table types, as in DBX */
 

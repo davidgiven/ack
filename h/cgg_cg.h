@@ -150,7 +150,7 @@ typedef struct {        /* splitting coercions */
 	short c2_repl[MAXSPLIT];/* replacement instances */
 	short c2_codep;         /* code index */
 } c2_t,*c2_p;
-#endif MAXSPLIT
+#endif /* MAXSPLIT */
 
 typedef struct {        /* one to one coercions */
 	short c3_texpno;        /* token expression number */

@@ -1,3 +1,9 @@
+/* $Header$ */
+/*
+ * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+
 /* Modula-2 runtime errors */
 
 #define M2_TOOLARGE	64	/* stack of process too large */

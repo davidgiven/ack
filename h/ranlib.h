@@ -4,9 +4,12 @@
  */
 /* $Header$ */
 
+#ifndef __RANLIB_H_INCLUDED
+#define __RANLIB_H_INCLUDED
+
 #ifndef SYMDEF
 #	define SYMDEF	"__.SYMDEF"
-#endif SYMDEF
+#endif /* SYMDEF */
 
 /*
  * Structure of the SYMDEF table of contents for an archive.
@@ -27,3 +30,5 @@ struct ranlib {
 
 #define SZ_RAN	8
 #define SF_RAN	"44"
+
+#endif /* __RANLIB_H_INCLUDED */

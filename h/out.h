@@ -3,12 +3,15 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
+
+#ifndef __OUT_H_INCLUDED
+#define __OUT_H_INCLUDED
 /*
  * output format for ACK assemblers
  */
 #ifndef ushort
 #define ushort	unsigned short
-#endif ushort
+#endif /* ushort */
 
 struct outhead {
 	ushort 	oh_magic;	/* magic number */
@@ -119,3 +122,5 @@ struct outname {
 #define OFF_RELO(x)	(OFF_EMIT(x) + (x).oh_nemit)
 #define OFF_NAME(x)	(OFF_RELO(x) + ((long)(x).oh_nrelo * SZ_RELO))
 #define OFF_CHAR(x)	(OFF_NAME(x) + ((long)(x).oh_nname * SZ_NAME))
+
+#endif /* __OUT_H_INCLUDED */
