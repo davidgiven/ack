@@ -21,6 +21,7 @@ name cpp
 	mapflag -ansi ANSI_C=.ansi
 	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
 		-D__{NAME} \
+		-D__ACK \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
@@ -75,6 +76,7 @@ name cem
 	args \
 		{CPP_F?} \
 		-D__{NAME} \
+		-D__ACK \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
