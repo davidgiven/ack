@@ -157,7 +157,7 @@ int	ltype,rtype,operator;
 	else
 	if( result==STRINGTYPE)
 	{
-		emcode("cal","$_strcompare");
+		emcode("cal","$_strcomp");
 		emcode("asp",EMPTRSIZE);
 		emcode("asp",EMPTRSIZE);
 		emcode("lfr",EMINTSIZE);
