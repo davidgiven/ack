@@ -319,7 +319,8 @@ simpleproduction(p_gram *p; register int *conflres;)
 			{ if (g_gettype(&elem) == TERM) {
 				register p_term q = g_getterm(&elem);
 
-				if (g_gettype(q->t_rule) != ALTERNATION &&
+				if (! (q->t_flags & RESOLVER) &&
+				    g_gettype(q->t_rule) != ALTERNATION &&
 				    g_gettype(q->t_rule) != EORULE) {
 				    while (g_gettype(q->t_rule) != EORULE) {
 					*p_rule++ = *q->t_rule++;
