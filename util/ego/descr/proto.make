@@ -8,6 +8,7 @@ EMH = $(TARGET_HOME)/h
 
 SOURCES = \
 	$(SRC_DIR)/i86.descr \
+	$(SRC_DIR)/i386.descr \
 	$(SRC_DIR)/m68k2.descr \
 	$(SRC_DIR)/pdp.descr \
 	$(SRC_DIR)/vax4.descr \
@@ -19,7 +20,7 @@ SOURCES = \
 	$(SRC_DIR)/em44.descr
 
 TARGETS = i86descr m68k2descr vax4descr pdpdescr m68k4descr m68020descr \
-	  em22descr em24descr em44descr sparcdescr
+	  em22descr em24descr em44descr sparcdescr i386descr
 
 PRFILES = $(SRC_DIR)/proto.make $(SRC_DIR)/descr.sed $(SOURCES)
 
@@ -69,4 +70,7 @@ em44descr:	$(SRC_DIR)/em44.descr $(SRC_DIR)/descr.sed
 
 sparcdescr:	$(SRC_DIR)/sparc.descr $(SRC_DIR)/descr.sed
 		$(CPP) -P -I$(EMH) $(SRC_DIR)/sparc.descr | sed -f $(SRC_DIR)/descr.sed > sparcdescr
+
+i386descr:	$(SRC_DIR)/i386.descr $(SRC_DIR)/descr.sed
+		$(CPP) -P -I$(EMH) $(SRC_DIR)/i386.descr | sed -f $(SRC_DIR)/descr.sed > i386descr
 

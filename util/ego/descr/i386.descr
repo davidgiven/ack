@@ -1,61 +1,76 @@
 wordsize: 4
 pointersize: 4
 %%RA
-general registers: 0
+general registers: 2
 address registers: 0
 floating point registers: 0
-use general as pointer: no
+use general as pointer: yes
 
 register score parameters:
         local variable:
-                (1 case)
+                (2 cases)
+                pointer,general
+                        (1 size)
+                        default ->      (8,4)
                 general,general
                         (1 size)
-                        default ->      (-1,-1)
+                        default ->      (4,2)
         address of local variable:
-                (1 case)
+                (2 cases)
+                pointer,general
+                        (1 size)
+                        default ->      (0,0)
                 general,general
                         (1 size)
-                        default ->      (-1,-1)
+                        default ->      (2,2)
         constant:
                 (1 sizes)
-                default ->      (-1,-1)
+                default ->      (2,2)
         double constant:
                 (1 size)
                 default ->      (-1,-1)
         address of global variable:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (4,2)
         address of procedure:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (2,2)
 
 opening cost parameters:
         local variable:
-                (1 case)
+                (2 cases)
+                pointer
+                        (1 size)
+                        default ->      (9,4)
                 general
                         (1 size)
-                        default ->      (-1,-1)
+                        default ->      (9,4)
         address of local variable:
-                (1 case)
+                (2 cases)
+                pointer
+                        (1 size)
+                        default ->      (10,6)
                 general
                         (1 size)
-                        default ->      (-1,-1)
+                        general ->      (10,6)
         constant:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (4,4)
         double constant:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (1000,1000)
         address of global variable:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (4,4)
         address of procedure:
                 (1 size)
-                default ->      (-1,-1)
+                default ->      (4,4)
 
 register save costs:
-        (1 case)
+        (4 cases)
+        0 -> (0,0)
+        1 -> (18,2)
+        2 -> (36,4)
         0 -> (0,0)
 
 %%UD
@@ -66,16 +81,16 @@ access costs of local variables:
 	(1 size)
 	default ->	(4,2)
 %%SR
-overflow harmful?:  yes
-array bound harmful?:  yes
+overflow harmful?:  no
+array bound harmful?:  no
 reduce sli if shift count larger than:  0
 %%CS
 #include "em_mnem.h"
 first time then space:
-addressing modes: -1
-                  -1
-cheap operations: -1
-                  -1
+addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
+                  op_adp op_lof op_ldf op_loi op_dch op_lpb -1
+cheap operations: op_cii op_cui op_ciu op_cuu -1
+                  op_cii op_cui op_ciu op_cuu -1
 lexical tresholds: 1 1
 indirection limit: 8
 do not eliminate sli if index on shiftcounts:   -1
