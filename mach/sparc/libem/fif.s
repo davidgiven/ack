@@ -11,7 +11,7 @@ Fd80000000:
 .align 8
 .double 0r4294967296
 Fs80000000:
-.single 0r2147483648
+.single 0r4294967296
 Fs0:
 .single 0r0
 
