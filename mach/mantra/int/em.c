@@ -19,6 +19,8 @@
 #include <em_path.h>
 #include <local.h>
 
+char rcs_id[]	=	"$Header$" ;
+
 #define MAGIC 07255
 
 struct header {
