@@ -13,3 +13,7 @@
 
 /* size of local machine, either 0 (for 16 bit address space), or 1 */
 #	define BIGMACHINE	1
+
+/* operating system, SYS_5, V7, BSD4_1 or BSD4_2; Do NOT delete the comment
+   in the next line! */
+#	define BSD4_2		1	/* SYSTEM */
