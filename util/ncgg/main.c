@@ -34,8 +34,11 @@ main(argc,argv) char **argv; {
 			exit(-1);
 		}
 		filename = argv[1];
+	}
+	else if (argc == 1) {
+		filename = "";
 	} else
-		error("Usage: %s [-c] [-d] [-v] table",argv[0]);
+		error("Usage: %s [-c] [-d] [-v] [table]",argv[0]);
 	initemhash();
 	enterkeyw();
 	initnodes();
