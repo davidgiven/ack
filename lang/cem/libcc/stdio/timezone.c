@@ -1,4 +1,5 @@
 /* $Header$ */
+#ifndef __USG
 static struct zonetable {
 	int	offset;
 	char	*stdzone;
@@ -58,3 +59,4 @@ timezone(zone, dst)
 	*c = '\0';
 	return buf;
 }
+#endif

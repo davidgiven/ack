@@ -1,7 +1,6 @@
 /* $Header$ */
 #include	<stdio.h>
 
-
 setbuf(iop, buffer)
 register FILE *iop;
 char *buffer;
@@ -13,9 +12,11 @@ char *buffer;
 
 	iop->_buf = (unsigned char *) buffer;
 
+	iop->_count = 0;
 	if ( iop->_buf == NULL )
 		iop->_flags |= IO_UNBUFF;
+	else
+		iop->_count = BUFSIZ;
 
 	iop->_ptr = iop->_buf;
-	iop->_count = 0;
 }
