@@ -2,6 +2,7 @@
  *  L O C A L S . C
  */
 
+#include <stdio.h>
 #include "types.h"
 #include "debug.h"
 #include "global.h"
@@ -16,6 +17,9 @@
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_mes.h"
 #include "locals.h"
+
+#define newlocal()	(local_p) newstruct(local)
+#define oldlocal(x)	oldstruct(local,x)
 
 extern short nrglobals;
 
