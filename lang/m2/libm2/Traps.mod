@@ -43,7 +43,7 @@ IMPLEMENTATION MODULE Traps;
 		IF Unix.write(2, q, ADDRESS(p) - ADDRESS(q)) < 0 THEN END;
 	ELSE
 		l := Argv(0, buf);
-		IF Unix.write(2, ADR(buf), l) < 0 THEN END;
+		IF Unix.write(2, ADR(buf), l-1) < 0 THEN END;
 	END;
 	lino := EM.LINO();
 	i := 0;
