@@ -30,4 +30,4 @@ char *filename;
 #define FL_MSL_AT_LOW_ADDRESS	1
 #define FL_MSW_AT_LOW_ADDRESS	1
 #define FL_MSB_AT_LOW_ADDRESS	1
-#include <float_cst>
+#include <con_float>
