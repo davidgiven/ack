@@ -211,7 +211,10 @@ checksize(sz, bits)
 checkscale(val)
 valu_t val;
 {
-	switch(val) {
+	int v = val;
+
+	if (v != val) v = 0;
+	switch(v) {
 	case 1:		return 0;
 	case 2:		return 1<<9;
 	case 4:		return 2<<9;
