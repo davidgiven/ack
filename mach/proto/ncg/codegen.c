@@ -854,8 +854,9 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	int index;
 
 	DEBUG("LABDEF");
+	getint(index,codep);
 	if (toplevel) {
-		getint(index,codep);
+		swtxt();
 		printlabel(index);
 	}
 
