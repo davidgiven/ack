@@ -25,10 +25,8 @@ InitScope()
 	register struct scope *sc = new_scope();
 	register struct scopelist *ls = new_scopelist();
 
-	sc->sc_def = 0;
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
-	ls->next = 0;
 	ls->sc_scope = PervasiveScope;
 	ls->sc_count = ++sccount;
 	CurrVis = ls;
@@ -46,13 +44,20 @@ open_scope()
 	CurrVis = ls;
 }
 
-close_scope()
+close_scope(doclean)
 {
 	/* When this procedure is called, the next visible scope is equal to
 	   the statically enclosing scope
 	*/
+	register struct def *df;
 
 	assert(CurrentScope != 0);
+	df = CurrentScope->sc_def;
+	if (doclean) while (df) {
+		struct def *next = df->df_nextinscope;
+		remove_def(df);
+		df = next;
+	}
 	CurrVis = CurrVis->next;
 }
 

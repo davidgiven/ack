@@ -89,7 +89,9 @@ SimpleStatement
 	%if( !options['s'] && !strcmp(dot.TOK_IDF->id_text, "assert") )
 	IDENT			{ line = LineNumber; }
 		Expression(&expp)
-				{ AssertStat(expp, line); }
+				{ AssertStat(expp, line);
+				  FreeNode(expp);
+				}
 |
 	IDENT			{ pnd = MkLeaf(Name, &dot); }
 	[	%default
@@ -233,6 +235,7 @@ IfStatement
 					  ds = InitDesig;
 					  if( !err_occurred )
 						CodeExpr(nd, &ds, l1);
+					  FreeNode(nd);
 					}
 	THEN
 	Statement			{ chk_labels(slevel + 1); }
@@ -318,6 +321,7 @@ RepeatStatement
 					  ds = InitDesig;
 					  if( !err_occurred )
 						CodeExpr(nd, &ds, repeatlb);
+					  FreeNode(nd);
 					}
 ;
 
@@ -337,6 +341,7 @@ WhileStatement
 					  ds = InitDesig;
 					  if( !err_occurred )
 						CodeExpr(nd, &ds, exitlb);
+					  FreeNode(nd);
 					}
 	DO
 	Statement

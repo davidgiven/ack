@@ -16,7 +16,6 @@
 #include	"type.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
-int mach_long_size;	/* size of long on this machine == sizeof(long) */
 long full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int;		/* maximum integer on the target machine */
 arith min_int;		/* mimimum integer on the target machin */
@@ -459,7 +458,7 @@ CutSize(expr)
 	else if( remainder != 0 && remainder != ~full_mask[size] ||
 	    		(o1 & full_mask[size]) == 1 << (size * 8 - 1) )	{
 		/* integers in [-maxint .. maxint] */
-		int nbits = (int) (mach_long_size - size) * 8;
+		int nbits = (int) (sizeof(long) - size) * 8;
 
 		/* overflow(expr); */
 		/* sign bit of o1 in sign bit of mach_long */
@@ -483,15 +482,14 @@ InitCst()
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 	}
-	mach_long_size = i;
-	mach_long_sign = 1 << (mach_long_size * 8 - 1);
-	if( int_size > mach_long_size )
+	mach_long_sign = 1L << (sizeof(long) * 8 - 1);
+	if( int_size > sizeof(long) )
 		fatal("sizeof (long) insufficient on this machine");
 
-	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
+	max_int = full_mask[int_size] & ~(1L << (int_size * 8 - 1));
 	min_int = - max_int;
 	maxint_str = long2str(max_int, 10);
 	maxint_str = Salloc(maxint_str, (unsigned int) strlen(maxint_str));
-	wrd_bits = 8 * word_size;
+	wrd_bits = 8 * (int) word_size;
 	if( !max_intset ) max_intset = wrd_bits - 1;
 }

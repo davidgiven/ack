@@ -93,6 +93,7 @@ CaseEnd(nd, exit_label)
 		CaseCode(nd->nd_lab, ch, exit_label);
 
 	FreeCh(ch);
+	FreeNode(nd);
 }
 
 FreeCh(ch)

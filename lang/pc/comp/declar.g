@@ -288,7 +288,7 @@ ProcedureDeclaration
 	 */
 				{ open_scope(); }
 	ProcedureHeading(&nd, &tp) ';'
-				{ scl = CurrVis; close_scope(); }
+				{ scl = CurrVis; close_scope(0); }
 	[
 		Directive
 				{ DoDirective(dot.TOK_IDF, nd, tp, scl, 0); }
@@ -303,7 +303,7 @@ ProcedureDeclaration
 #ifdef DBSYMTAB
 				  if (options['g']) stb_string(df, D_PEND);
 #endif /* DBSYMTAB */
-				  close_scope();
+				  close_scope(1);
 				}
 	]
 ;
@@ -360,7 +360,7 @@ FunctionDeclaration
 	 */
 				{ open_scope(); }
 	FunctionHeading(&nd, &tp) ';'
-				{ scl = CurrVis; close_scope(); }
+				{ scl = CurrVis; close_scope(0); }
 	[
 		Directive
 				{ if( !tp )	{
@@ -391,7 +391,7 @@ FunctionDeclaration
 				  }
 
 				  /* open_scope() is simulated in DeclFunc() */
-				  close_scope();
+				  close_scope(1);
 				}
 	]
 ;
@@ -553,7 +553,7 @@ RecordType(register struct type **ptp; unsigned short packed;)
 	RECORD
 		{ open_scope();		/* scope for fields of record */
 		  scope = CurrentScope;
-		  close_scope();
+		  close_scope(0);
 		}
 	FieldList(scope, &size, &xalign, packed, &sel)
 		{ if( size == 0 )	{
