@@ -3,9 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/*	st_alloc - get a structure from a free list. If no structures left,
+/*	std_alloc - get a structure from a free list. If no structures left,
 		create new ones.
 		The counterpart, st_free, is a macro, defined in alloc.h
+	This is a counting version of st_alloc.
 */
 
 #include	"alloc.h"
@@ -17,6 +18,8 @@ std_alloc(phead, size, count, pcnt)
 	int *pcnt;
 {
 	register char *p;
+	register long *q;
+	char *retval;
 
 	if (*phead == 0)	{
 		while (count >= 1 && (p = malloc(size * count)) == 0) {
@@ -35,7 +38,25 @@ std_alloc(phead, size, count, pcnt)
 	}
 	else p = *phead;
 	*phead = (char *) (((_PALLOC_) p)->_A_next);
-	p += size;
-	while (size--) *--p = 0;
-	return p;
+	retval = p;
+	q = (long *) p;
+	while (size >= 8*sizeof(long)) {
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		size -= 8*sizeof(long);
+	}
+	while (size >= sizeof(long)) {
+		*q++ = 0;
+		size -= sizeof(long);
+	}
+	p = (char *) q;
+
+	while (size--) *p++ = 0;
+	return retval;
 }
