@@ -86,7 +86,7 @@ iocc_t iops[20];
 %token TIMEFACTOR SIZEFACTOR
 %token COST
 %type <yy_varinfo> prop_list property ident_list ident_list_el
-%type <yy_varinfo> att_list att_list_el att_list_el_list structdecl optcost optformat
+%type <yy_varinfo> att_list att_list_el att_list_el_list att_ident structdecl optcost optformat
 %type <yy_varinfo> kills allocates yields leaving
 %type <yy_varinfo> generates kill_list kill_list_el uselist uselist_el genlist yieldlist
 %type <yy_varinfo> leavelist leavelist_el gen_instruction
@@ -302,28 +302,28 @@ att_list
 	: /* empty */
 		{ $$ = 0; }
 	| att_list_el att_list
-		{ $1->vi_next = $2; $$ = $1; }
+		{ $$ = $1; while ($$->vi_next) $$ = $$->vi_next;
+		  $$->vi_next = $2; $$ = $1;
+		}
 	;
 att_list_el
-	: att_list_el_type IDENT
-		{ NEW ($<yy_varinfo>$,struct varinfo);
-		  $<yy_varinfo>$->vi_int[0] = $1;
-		  $<yy_varinfo>$->vi_str[0] = $2;
-		  att_type = $1;
-		}
-	  att_list_el_list ';'
-		{ $<yy_varinfo>3->vi_next = $4;
-		  $$ = $<yy_varinfo>3;
-		}
+	: att_list_el_type
+		{ att_type = $1; }
+	  att_list_el_list
+	  ';'
+		{ $$ = $3; }
 	;
 att_list_el_list
-	: /* empty */
-		{ $$ = 0; }
-	| ',' IDENT att_list_el_list
+	: att_ident
+	| att_ident ',' att_list_el_list
+		{ $1->vi_next = $3; $$ = $1; }
+	;
+att_ident
+	: IDENT
 		{ NEW($$, struct varinfo);
-		  $$->vi_next = $3;
+		  $$->vi_next = 0;
 		  $$->vi_int[0] = att_type;
-		  $$->vi_str[0] = $2;
+		  $$->vi_str[0] = $1;
 		}
 	;
 att_list_el_type
