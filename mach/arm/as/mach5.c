@@ -42,8 +42,7 @@ short typ;
 		return;
 	}	
 
-	switch (opc){
-	case MOV:
+	if (opc == MOV) {
 		if (small((val & 0xF0000000) == 0xF0000000, 8)){
 			emit4(0xE51F0004 | (ins & 0xF000));
 			emit4(val);
@@ -57,7 +56,8 @@ short typ;
 		}
 		DOTVAL += 16;
 		return;
-	case ADD:
+	}
+	if (opc == ADD) {
 		if (small((val & 0xF0000000) == 0xF0000000, 4)){
 			emit4(0xE51F0004 | (ins & 0xF000));
 			emit4(val);
@@ -69,13 +69,11 @@ short typ;
 		emit4(val);
 		emit4(0xE2800000 | (ins&0xFF000) | (ins&0xF000)>>12);
 		return;
-	default:
-		if (pass == PASS_1)
-			DOTVAL += 16;
-		else
-			serror("immediate value out of range");
-		return;
 	}
+	if (pass == PASS_1)
+		DOTVAL += 16;
+	else
+		serror("immediate value out of range");
 }
 
 calcimm(opc,val,typ)
@@ -90,35 +88,32 @@ short typ;
 	if ((*val & ~0xFF) == 0) return 1;
 
 	if ((~*val & ~0xFF) == 0){
-		switch (*opc){
-		case AND:
+		if (*opc == AND) {
 			*val = ~*val;
 			*opc = BIC;
 			return 1;
-		case MOV:
+		}
+		if (*opc == MOV) {
 			*val = ~*val;
 			*opc = MVN;
 			return 1;
-		case ADC:
+		}
+		if (*opc == ADC) {
 			*val = ~*val;
 			*opc = SBC;
 			return 1;
-		default : 
-			break;
 		}
 	}	
 	if ((-1**val & ~0xFF) == 0 ){
-		switch (*opc){
-		case ADD:
+		if (*opc == ADD) {
 			*val *= -1;
 			*opc = SUB;
 			return 1;
-		case CMP:
+		}
+		if (*opc == CMP) {
 			*val *= -1;
 			*opc = CMN;
 			return 1;
-		default:
-			break;
 		}
 	}
 
@@ -130,21 +125,20 @@ short typ;
 			return 1;
 		}
 		if ((~*val & ~0xFF) == 0){
-			switch (*opc){
-			case AND:
+			if (*opc == AND) {
 				*val = ~*val|i<<8;
 				*opc = BIC;
 				return 1;
-			case MOV:
+			}
+			if (*opc == MOV) {
 				*val = ~*val|i<<8;
 				*opc = MVN;
 				return 1;
-			case ADC:
+			}
+			if (*opc == ADC) {
 				*val = ~*val|i<<8;
 				*opc = SBC;
 				return 1;
-			default : 
-				break;
 			}
 		}	
 	}while(i<15);
@@ -205,13 +199,13 @@ short typ;
 	if (typ != S_ABS){
 		tmpval = val-DOTVAL-8;
 		if (small((tmpval & ~0xFF) == 0),12){
-			emit4(0xE2000000|ADD|0xF<<16|reg<<12|tmpval);
+			emit4(0xE2000000|ADD|(long)0xF<<16|reg<<12|tmpval);
 			return 0;
 		}
 	
 		tmpval *= -1;
 		if (small((tmpval & ~0xFF) == 0), 12){
-			emit4(0xE2000000|SUB|0xF<<16|reg<<12|tmpval);
+			emit4(0xE2000000|SUB|(long)0xF<<16|reg<<12|tmpval);
 			return 0;
 		}
 	}
