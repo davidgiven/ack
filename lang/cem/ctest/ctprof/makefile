@@ -13,11 +13,11 @@ tp.cem.r: tp.cem
 	echo running tp
 	-tp.cem >tp.cem.r
 	rm -f tp.cem
-procentry.k: procentry.c
-	$(CEM) -c.k procentry.c
-tp.cem: tp.c procentry.k
-	echo $(CEM) tp.c procentry.k
-	$(CEM) -p -o tp.cem -O tp.c procentry.k
+procentry.m: procentry.c
+	$(CEM) -c.m procentry.c
+tp.cem: tp.c procentry.m
+	echo $(CEM) tp.c procentry.m
+	$(CEM) -p -o tp.cem -O tp.c procentry.m
 	rm -f procentry.[kosm] tp.[kmos]
 gen:    tp.cem.r
 	echo comparing tp
