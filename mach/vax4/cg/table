@@ -4,7 +4,7 @@
 #define DORCK		/* define if you want RCK */
 #define FLOAT4		/* define if you want better 4-byte FP arithmetic */
 #define FLOAT8		/* define if you want better 8-byte FP arithmetic */
-#define ASBUG_AVOID	/* define if you want to avoid a bug in the BSD 4.1 VAX
+/* #define ASBUG_AVOID	/* define if you want to avoid a bug in the BSD 4.1 VAX
 			   assembler, that sometimes generates "*1" for
 			   (r1). This is avoided by generating 0(r1), which is
 			   optimized by the assembler to (r1).
@@ -87,8 +87,6 @@ CONST1 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST2 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST4 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST8 =	{STRING ind;}		8 cost=(8,6)  "$%[ind]"
-FCONST4 =	{INT num;}		4 cost=(4,3)  "$0f%[num].0"
-FCONST8 =	{INT num;}		8 cost=(8,6)  "$0f%[num].0"
 LOCAL1 =	{REGISTER reg; INT num,size;}	4 cost=(2,6)  "%[num](%[reg])"
 LOCAL2 =	{REGISTER reg; INT num,size;}	4 cost=(2,6)  "%[num](%[reg])"
 LOCAL4 =	{REGISTER reg; INT num,size;}	4 cost=(2,6)  "%[num](%[reg])"
@@ -196,7 +194,7 @@ source2 =	Xsource2
 		+ reginc2 + regdec2
 #endif REGVARS
 Xsource4 =	REG + regdef4 + displ4 + displdef4 + LocaLBase +
-		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4 + FCONST4 + ind4
+		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4 + ind4
 source4 =	Xsource4
 #ifdef REGVARS
 		+ RREG + reginc4 + regdec4
@@ -205,7 +203,7 @@ dups4 =		CONST + regdef1 + displ1 + LOCAL1 +
 		REG +	regdef2 + displ2 + LOCAL2 +
 		RREG +	regdef4 + displ4 + LOCAL4 + DOUBLE
 Xsource8 =	QREG + regdef8 + displ8 + displdef8 +
-		EXTERNAL8 + reldef8 + CONST8 + LOCAL8 + FCONST8
+		EXTERNAL8 + reldef8 + CONST8 + LOCAL8
 		+ extind8 + displind8 + extdefind8 + displdefind8
 source8 =	Xsource8
 #ifdef REGVARS
@@ -1652,7 +1650,9 @@ ngf !defined($1) | source1or2or4 |
 fif $1==4	| source4 source4 |
 			allocate(%[1],%[2],REG,REG)
 			"mulf3\t%[1],%[2],%[a]"
-			"emodf\t%[a],$$0,$$0f1.0,-(sp),%[b]"
+			/* the assembler does not do immediate floating point */
+			"cvtlf $$1,%[b]"
+			"emodf\t%[a],$$0,%[b],-(sp),%[b]"
 			/*
 			 * Don't trust the integer part.
 			 * Overflow could occur.
@@ -1662,7 +1662,8 @@ fif $1==4	| source4 source4 |
 fif $1==8	| source8 source8 |
 			allocate(%[1],%[2],QREG,QREG)
 			"muld3\t%[1],%[2],%[a]"
-			"emodd\t%[a],$$0,$$0f1.0,-(sp),%[b]"
+			"cvtld $$1,%[b]"
+			"emodd\t%[a],$$0,%[b],-(sp),%[b]"
 			"tstl\t(sp)+"
 			"subd2\t%[b],%[a]"	| %[b] %[a]	| |
 fif !defined($1) | source1or2or4 |
@@ -1670,18 +1671,11 @@ fif !defined($1) | source1or2or4 |
 			move(%[1],R0)
 			"jsb\t.fif"
 			erase(R0)		|	| |
-fef $1==4	| sreg4 |
-			allocate(REG)
-			"extzv\t$$7,$$8,%[1],%[a]"
-			"subl2\t$$128,%[a]"
-			"insv\t$$128,$$7,$$8,%[1]" 
-			erase(%[1])		| %[1] %[a] | |
-fef $1==8	| sreg8 |
-			allocate(REG)
-			"extzv\t$$7,$$8,%[1],%[a]"
-			"subl2\t$$128,%[a]"
-			"insv\t$$128,$$7,$$8,%[1]" 
-			erase(%[1])		| %[1] %[a] | |
+fef defined($1)	| |
+			remove(ALL)
+			move({CONST4, $1}, R0)
+			"jsb\t.fef"
+			erase(R0)		|	| |
 fef !defined($1) | source1or2or4 |
 			remove(ALL)
 			move(%[1],R0)
@@ -2054,9 +2048,6 @@ zrl zrl $1==$2-4 | |				|	| zrl $2 zrl $1 |
 zre		| |	remove(externals)
 			"clrl\t$1"
 			setcc({EXTERNAL4,$1})	|	| |
-/* Avoid a bug in the VAX assembler, that handles $0f0.0 wrong.
-   So, do NOT create {FCONST[4|8], 0}!
-*/
 zrf $1==4	| |	allocate(REG)
 			"clrl\t%[a]"		| %[a]	| |
 zrf $1==8	| |	allocate(QREG)
@@ -2249,8 +2240,6 @@ loc loc cif stl $1==4 && $2==4 && $4>=0
 loc loc cif ste $1==4 && $2==4	| source4 |
 			remove(externals)
 			"cvtlf\t%[1],$4"	|	| |
-loc loc loc cif $1!=0 && $2==4 && $3==4	| |	| {FCONST4, $1} | |
-/* $1 != 0: kludge to avoid bug in VAX assembler */
 #endif FLOAT4
 loc loc cif $1==4 && $2==4	| source4 |
 			allocate(%[1],REG)
@@ -2279,11 +2268,6 @@ loc loc cif sdl $1==4 && $2==8 && $4>=0
 loc loc cif sde $1==4 && $2==8	| source4 |
 			remove(externals)
 			"cvtld\t%[1],$4"	|	| |
-loc loc loc cif $1!=0 && $2==4 && $3==8	| |	| {FCONST8,$1}	| |
-/* $1!=0: kludge to avoid known bug in Vax assembler, that
- * doesn't handle 0f0.0 (and other numbers that have the 0x4000 bit off
- * in the exponent) right.
- */
 #endif FLOAT8
 loc loc cif $1==4 && $2==8	| source4 |
 			allocate(%[1],QREG)
@@ -4570,14 +4554,6 @@ MOVES:
 				setcc(%[2]),		(2,4)+%[2])
 (CONST8 %[ind]=="0",source8,	"clrq\t%[2]"
 				setcc(%[2]),		(2,4)+%[2])
-(FCONST4 %[num]==0,source4,	"clrl\t%[2]"
-				setcc(%[2]),		(2,4)+%[2])
-(FCONST4,source4,		"movf\t%[1],%[2]"
-				setcc(%[2]),		(3,4)+%[1]+%[2])
-(FCONST8 %[num]==0,source8,	"clrq\t%[2]"
-				setcc(%[2]),		(2,4)+%[2])
-(FCONST8,source8,		"movd\t%[1],%[2]"
-				setcc(%[2]),		(3,4)+%[1]+%[2])
 #ifdef REGVARS
 /* Tokens with side effects should not be remembered. */
 (reginc1+regdec1,reg4,		"movzbl\t%[1],%[2]"
@@ -4640,10 +4616,6 @@ STACKS:
 (source1,,	"movzbl\t%[1],-(sp)",	(3,7) + %[1])
 (CONST sfit(%[num],16),,
 		"cvtwl\t%[1],-(sp)",	(3,7) + %[1])
-(FCONST4,,	"pushl\t%[1]",		(2,7) + %[1])
-(FCONST8 %[num]==0,,
-		"clrq\t-(sp)",		(2,10))
-(FCONST8,,	"movd\t%[1],-(sp)",	(3,10) + %[1])
 (source2,,	"movzwl\t%[1],-(sp)",	(3,7) + %[1])
 (source4,,	"pushl\t%[1]"
 		setcc(%[1]),		(2,7) + %[1])

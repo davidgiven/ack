@@ -42,7 +42,7 @@ con_mult(sz)
 {
 	if (sz != 4)
 		fatal("bad icon/ucon size");
-	fprintf(codefile,".long\t%s\n",str);
+	fprintf(codefile,".data4\t%s\n",str);
 }
 
 mes(mesno)
@@ -51,40 +51,15 @@ mes(mesno)
 	while (getarg(any_ptyp) != sp_cend );
 }
 
-con_float()
-{
-	/*
-	 * Insert a dot at the right position, if it is not present,
-	 * to make the floating point constant acceptable to the assembler.
-	 */
-	register char	*c;
-	extern char	*index();
-
-	if (argval != 4 && argval != 8)
-		fatal("bad fcon size");
-	if (argval == 8)
-		fprintf(codefile,".double\t0d");
-	else	fprintf(codefile,".float\t0f");
-
-	if (index(str,'.') != (char *) 0) {
-		fprintf(codefile,"%s\n",str);
-	
-	/*
-	 * There must be a dot after the `e' or - if the `e' is not present -
-	 * at the end.
-	 */
-	} else if ((c = index(str,'e')) != (char *) 0) {
-		*c++ = '\0';
-		fprintf(codefile,"%s.e%s\n",str,c--);
-		*c = 'e';
-	} else	fprintf(codefile,"%s.\n",str);
-}
+#define PDPFLOAT
+#define CODE_GENERATOR
+#include <con_float>
 
 #ifndef REGVARS
 prolog(nlocals)
 	full	nlocals;
 {
-	fprintf(codefile,".word 00\n");
+	fprintf(codefile,".data2 00\n");
 	if (nlocals == 0)
 		return;
 	if (nlocals == 4)
@@ -98,10 +73,10 @@ prolog(nlocals)
 #endif not REGVARS
 
 char    *segname[] = {
-	".text",	/* SEGTXT */
-	".data",	/* SEGCON */
-	".data",	/* SEGROM */
-	".data"		/* SEGBSS */
+	".sect .text",	/* SEGTXT */
+	".sect .data",	/* SEGCON */
+	".sect .rom",	/* SEGROM */
+	".sect .bss"	/* SEGBSS */
 };
 
 #ifdef REGVARS
@@ -149,7 +124,7 @@ regsave(str, off, size)
 	p_reg->sr_off = off;
 	(p_reg++)->sr_size = size;
 	fprintf(codefile,
-		"\t# Local %ld, size %d, to register %s\n",
+		"\t! Local %ld, size %d, to register %s\n",
 		off, size, str
 	);
 }
@@ -182,7 +157,7 @@ f_regsave()
 	/*
 	 * Now generate code to save registers.
 	 */
-	fprintf(codefile, ".word 0%o\n", mask);
+	fprintf(codefile, ".data2 0%o\n", mask);
 	/*
 	 * Emit code to initialize parameters in registers.
 	 */
