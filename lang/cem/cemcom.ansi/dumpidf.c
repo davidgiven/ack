@@ -145,6 +145,13 @@ dumpidf(idf, opt)
 		}
 		dumptags(idf->id_struct);
 	}
+	if (idf->id_enum)	{
+		if (!started++)	{
+			newline();
+			print("%s:", idf->id_text);
+		}
+		dumptags(idf->id_enum);
+	}
 }
 
 dumpdefs(def, opt)
@@ -163,7 +170,7 @@ dumpdefs(def, opt)
 		);
 		print("%s, line %u",
 			def->df_file ? def->df_file : "NO_FILE", def->df_line);
-		dump_type(def->df_type);
+		dumptype(def->df_type);
 		def = def->next;
 	}
 	dumplevel--;
@@ -229,7 +236,7 @@ dumpsdefs(sdef, sdk)
 	dumplevel--;
 }
 
-dump_proto(pl)
+dumpproto(pl)
 	register struct proto *pl;
 {
 	register struct type *type;
@@ -246,7 +253,7 @@ dump_proto(pl)
 				? "ellipsis" : "unknown" ));
 		newline();
 		if (type = pl->pl_type){
-			dump_type(type);
+			dumptype(type);
 			newline();
 		}
 		if (pl->pl_idf) {
@@ -261,7 +268,7 @@ dump_proto(pl)
 	print("dump proto type list (end)\n");
 }
 
-dump_type(tp)
+dumptype(tp)
 	register struct type *tp;
 {
 	int ops = 1;
@@ -271,6 +278,7 @@ dump_type(tp)
 	if (!tp) {
 		print("<NILTYPE>");
 		newline();
+		dumplevel--;
 		return;
 	}
 
@@ -290,7 +298,7 @@ dump_type(tp)
 			if (tp->tp_proto) {
 				print("with prototype");
 				dumplevel++;
-				dump_proto(tp->tp_proto);
+				dumpproto(tp->tp_proto);
 				dumplevel--;
 				newline();
 			}
@@ -302,7 +310,7 @@ dump_type(tp)
 			if (tp->tp_idf)
 				print("%s ", tp->tp_idf->id_text);
 #ifndef NOBITFIELD
-			if (tp->tp_field)	{
+			if (tp->tp_fund == FIELD && tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
 				print("[s=%ld,w=%ld] of ",
@@ -356,7 +364,7 @@ type2str(tp)
 				sprint(buf, "%s %s ", buf,
 					tp->tp_idf->id_text);
 #ifndef NOBITFIELD
-			if (tp->tp_field)	{
+			if (tp->tp_fund == FIELD && tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
 				sprint(buf, "%s [s=%ld,w=%ld] of ", buf,

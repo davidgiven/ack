@@ -199,7 +199,8 @@ lint_1_global(idf, def)
 	struct def *def;
 {
 	register int sc = def->df_sc;
-	register int fund = def->df_type->tp_fund;
+	register struct type *tp = def->df_type;
+	register int fund = tp->tp_fund;
 
 	switch (sc) {
 	case STATIC:
@@ -210,6 +211,10 @@ lint_1_global(idf, def)
 #endif	IMPLICIT
 		if (fund == ERRONEOUS)
 			break;
+
+		if (fund == FUNCTION && sc != STATIC) {
+			output_proto(idf, def);
+		}
 
 		if (def->df_set || def->df_used) {
 			/* Output a line to the intermediate file for

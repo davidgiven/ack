@@ -99,12 +99,12 @@ code_endswitch()
 
 	if (sh->sh_default == 0)	/* no default occurred yet */
 		sh->sh_default = sh->sh_break;
+
+#ifndef LINT
 	C_bra(sh->sh_break);		/* skip the switch table now	*/
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	/* evaluate the switch expr.	*/
-#ifndef LINT
 	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
-#endif
 	if (sh->sh_nrofentries <= 1) {
 		if (sh->sh_nrofentries) {
 			load_cst(sh->sh_lowerbd, size);
@@ -150,6 +150,8 @@ code_endswitch()
 	    }
 	}
 	C_df_ilb(sh->sh_break);
+#endif
+
 	switch_stack = sh->next;	/* unstack the switch descriptor */
 	for (ce = sh->sh_entries; ce;) { /* free allocated switch structure */
 		register struct case_entry *tmp = ce->next;

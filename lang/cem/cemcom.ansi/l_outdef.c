@@ -17,6 +17,7 @@
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
+#include	"proto.h"
 #include	"declar.h"
 #include	"decspecs.h"
 #include	"LLlex.h"
@@ -50,7 +51,8 @@ PRIVATE outargs();
 PRIVATE outarg();
 PRIVATE outargstring();
 PRIVATE outargtype();
-PRIVATE fill_arg();
+PRIVATE add_expr_arg();
+PRIVATE def2decl();
 
 lint_declare_idf(idf, sc)
 	struct idf *idf;
@@ -90,11 +92,11 @@ lint_ext_def(idf, sc)
 {
 /* At this place the following fields of the output definition can be
  * filled:
- *		name, stat_number, class, file, line, type.
+ *		od_name, od_statnr, od_class, od_file, od_line, od_type.
  * For variable definitions and declarations this will be all.
- * For functions the fields nrargs and argtps are filled after parsing
+ * For functions the fields od_nrargs and od_arg are filled after parsing
  * the arguments.
- * The returns-field is known at the end of the function definition.
+ * The od_valreturned field is known at the end of the function definition.
  * sc indicates the storage class defined by the declaration specifier.
  */
 	register struct def *def = idf->id_def;
@@ -126,6 +128,7 @@ lint_ext_def(idf, sc)
 	OutDef.od_valreturned = NORETURN;
 }
 
+PRIVATE
 def2decl(sc)
 	int sc;
 {
@@ -159,7 +162,7 @@ local_EFDC(idf)
 
 lint_formals()
 {
-/* Make a list of tp_entries containing the types of the formal
+/* Make a list of 'struct argument's containing the types of the formal
  * parameters of the function definition just parsed.
  */
 	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
@@ -169,24 +172,6 @@ lint_formals()
 	while (se) {
 		register struct type *type = se->se_idf->id_def->df_type;
 		register struct argument *arg = new_argument();
-
-		/*	Do the conversions on the formals that could not be
-			done in declare_idf().
-			It is, unfortunately, impossible not to do them,
-			since the corresponding actuals will have been
-			converted to generate proper code and we do not
-			want to duplicate the whole of expression handling
-			for lint.
-		*/
-		switch (type->tp_fund) {
-		case CHAR:
-		case SHORT:
-			type = (type->tp_unsigned ? uint_type : int_type);
-			break;
-		case FLOAT:
-			type = double_type;
-			break;
-		}
 
 		if (f_FORMAT && nrargs == f_FORMATn) {
 			if (	!f_FORMATvar
@@ -258,6 +243,46 @@ lint_formals()
 	OutDef.od_nrargs = nrargs;
 }
 
+output_proto(idf, def)
+	struct idf *idf;
+	struct def *def;
+{
+	/* fund == FUNCTION && sc != STATIC */
+	register struct proto *pl = def->df_type->tp_proto;
+	register int nrargs = 0;
+
+	if (!pl) return;
+
+	OutDef.od_name = idf->id_text;
+	OutDef.od_statnr = 0;
+	OutDef.od_class = PFDF;
+	OutDef.od_file = def->df_file;
+	OutDef.od_line = def->df_line;
+	OutDef.od_type = def->df_type->tp_up;
+	OutDef.od_valreturned = NORETURN;/*???*/
+
+	while (pl) {
+		register struct type *type = pl->pl_type;
+		register struct argument *arg = new_argument();
+
+		if (type) {
+			arg->ar_type = type;
+			arg->ar_class = ArgFormal;
+		}
+		else {
+			arg->ar_class = ArgEllipsis;
+		}
+		arg->next = OutDef.od_arg;
+		OutDef.od_arg = arg;
+
+		nrargs++;
+		pl = pl->next;
+	}
+
+	OutDef.od_nrargs = nrargs;
+	outdef();
+}
+
 output_use(idf)
 	struct idf *idf;
 {
@@ -286,7 +311,7 @@ PRIVATE
 output_def(od)
 	struct outdef *od;
 {
-/* As the types are output the tp_entries are removed, because they
+/* As the types are output the 'struct argument's are freed, because they
  * are then not needed anymore.
  */
 	if (od->od_class == XXDF || !od->od_name || od->od_name[0] == '#')
@@ -301,7 +326,7 @@ output_def(od)
 			od->od_class = LVDF;
 			break;
 		case SFDF:
-			/* remove tp_entries */
+			/* free the 'struct argument's */
 			while (od->od_arg) {
 				register struct argument *tmp = od->od_arg;
 				od->od_arg = od->od_arg->next;
@@ -314,9 +339,10 @@ output_def(od)
 	}
 	printf("%s:%d:%c", od->od_name, od->od_statnr, od->od_class);
 	switch (od->od_class) {
+	case LFDF:
+	case PFDF:
 	case EFDF:
 	case SFDF:
-	case LFDF:
 		if (f_VARARGSn != -1) {
 			printf(":%d", -1 - f_VARARGSn);
 			outargs(od->od_arg, f_VARARGSn);
@@ -407,6 +433,10 @@ outarg(arg)
 		}
 		break;
 
+	case ArgEllipsis:
+		printf(".");	/* one is enough for computers */
+		break;
+
 	default:
 		NOTREACHED();
 		/*NOTREACHED*/
@@ -460,21 +490,28 @@ outargtype(tp)
 		printf("%s ", symbol2str(tp->tp_fund));
 		if (is_anon_idf(tp->tp_idf)) {
 			/* skip the #<num>, replace it by '#anonymous id' */
-			printf("#anonymous id%s", strindex(tp->tp_idf->id_text, ' '));
+			printf("#anonymous id%s",
+				strindex(tp->tp_idf->id_text, ' ')
+			);
 		}
-		else printf(tp->tp_idf->id_text);
+		else {
+			printf(tp->tp_idf->id_text);
+		}
 		break;
 
 	case CHAR:
 	case INT:
 	case SHORT:
 	case LONG:
+	case ULONG:
 	case FLOAT:
 	case DOUBLE:
+	case LNGDBL:
 	case VOID:
 	case ERRONEOUS:
-		if (tp->tp_unsigned)
+		if (tp->tp_unsigned) {
 			printf("unsigned ");
+		}
 		printf("%s", symbol2str(tp->tp_fund));
 		break;
 	default:
@@ -526,19 +563,20 @@ fill_outcall(ex, used)
 	OutCall.od_arg = (struct argument *)0;
 	OutCall.od_nrargs = 0;
 
-	if ((ex = ex->OP_RIGHT) != 0) {	/* function call with arguments */
-		/* store types of argument expressions in tp_entries */
+	if ((ex = ex->OP_RIGHT) != 0) {
+		/* function call with arguments: */
+		/* store types of argument expressions in 'struct argument's */
 		while (ex->ex_class == Oper && ex->OP_OPER == PARCOMMA) {
-			fill_arg(ex->OP_RIGHT);
+			add_expr_arg(ex->OP_RIGHT);
 			ex = ex->OP_LEFT;
 		}
-		fill_arg(ex);
+		add_expr_arg(ex);
 	}
 	OutCall.od_valused = used;	/* USED, IGNORED or VOIDED */
 }
 
 PRIVATE
-fill_arg(e)
+add_expr_arg(e)
 	struct expr *e;
 {
 	register struct argument *arg;
