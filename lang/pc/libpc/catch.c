@@ -17,7 +17,6 @@
  */
 
 #include	<em_abs.h>
-#include	<em_path.h>
 #include	<pc_err.h>
 #include	<pc_file.h>
 
