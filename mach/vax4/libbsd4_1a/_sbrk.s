@@ -1,11 +1,11 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 break = 17
-.define	_sbrk
-.define	_brk
+.define	__sbrk
+.define	__brk
 
 .align	1
-_sbrk:
+__sbrk:
 	.data2	0x0000
 	addl3	Ibrk,4(ap),-(sp)
 	bcc	1f
@@ -20,7 +20,7 @@ _sbrk:
 	ret
 
 .align	1
-_brk:
+__brk:
 	.data2	0x0000
 	chmk	$break
 	bcc 	1f
