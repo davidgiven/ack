@@ -7,15 +7,18 @@
 #include	<limits.h>
 #include	"loc_incl.h"
 
+/* The code assumes that time_t is an unsigned long. When it is not, some
+ * things may have to change.
+ */
 time_t
 mktime(register struct tm *timep)
 {
-	int day, year, month, yday;
-	long tmp_sec, tz = _tzone();
-	register time_t seconds, localseconds;
-	int overflow = 0;
+	register long day, year;
+	register int tm_year;
+	int yday, month;
+	register time_t seconds;
+	int overflow;
 	unsigned dst;
-
 
 	timep->tm_min += timep->tm_sec / 60;
 	timep->tm_sec %= 60;
@@ -43,87 +46,81 @@ mktime(register struct tm *timep)
 	}
 	day += (timep->tm_mday - 1);
 	while (day < 0) {
-		day += YEARSIZE(YEAR1 + timep->tm_year - 1);
+		day += YEARSIZE(YEAR0 + timep->tm_year - 1);
 		timep->tm_year--;
 	}
-	while (day >= YEARSIZE(YEAR1 + timep->tm_year)) {
-		day -= YEARSIZE(YEAR1 + timep->tm_year);
+	while (day >= YEARSIZE(YEAR0 + timep->tm_year)) {
+		day -= YEARSIZE(YEAR0 + timep->tm_year);
 		timep->tm_year++;
 	}
-	while (day >= _ytab[LEAPYEAR(YEAR1 + timep->tm_year)][timep->tm_mon]) {
-		day -= _ytab[LEAPYEAR(YEAR1 + timep->tm_year)][timep->tm_mon];
+	while (day >= _ytab[LEAPYEAR(YEAR0 + timep->tm_year)][timep->tm_mon]) {
+		day -= _ytab[LEAPYEAR(YEAR0 + timep->tm_year)][timep->tm_mon];
 		if (++(timep->tm_mon) == 12) {
 			timep->tm_mon = 0;
 			timep->tm_year++;
 		}
 	}
 	timep->tm_mday = day + 1;
-	year = 70;
-	if (timep->tm_year < year) return -1;
+	_tzset();			/* set timezone and dst info  */
+	year = EPOCH_YR;
+	if (timep->tm_year < year - YEAR0) return -1;
 	seconds = 0;
-	while (!overflow && year < timep->tm_year) {
-		tmp_sec = SECS_DAY * YEARSIZE(YEAR1 + year);
-		if (TIME_MAX - tmp_sec <= seconds) overflow++;
-		else {
-			seconds += tmp_sec;
-			year++;
-		}
-	}
+	day = 0;			/* means days since day 0 now */
+	overflow = 0;
+
+	/* Assume that when day becomes negative, there will certainly
+	 * be overflow on seconds.
+	 * The check for overflow needs not to be done for leapyears
+	 * divisible by 400.
+	 * The code only works when year (1970) is not a leapyear.
+	 */
+#if	EPOCH_YR != 1970
+#error	EPOCH_YR != 1970
+#endif
+	tm_year = timep->tm_year + YEAR0;
+
+	if (LONG_MAX / 365 < tm_year - year) overflow++;
+	day = (tm_year - year) * 365;
+	if (LONG_MAX - day < (tm_year - year) / 4 + 1) overflow++;
+	day += (tm_year - year) / 4
+		+ ((tm_year % 4) && tm_year % 4 < year % 4);
+	day -= (tm_year - year) / 100
+		+ ((tm_year % 100) && tm_year % 100 < year % 100);
+	day += (tm_year - year) / 400
+		+ ((tm_year % 400) && tm_year % 400 < year % 400);
+
 	yday = month = 0;
-	while (!overflow && month < timep->tm_mon) {
-		yday += _ytab[LEAPYEAR(YEAR1 + year)][month];
+	while (month < timep->tm_mon) {
+		yday += _ytab[LEAPYEAR(tm_year)][month];
 		month++;
 	}
 	yday += (timep->tm_mday - 1);
-	if (!overflow) {
-		tmp_sec = yday * SECS_DAY;
-		if (TIME_MAX - tmp_sec <= seconds) overflow++;
-		else seconds += tmp_sec;
-	}
+	if (day + yday < 0) overflow++;
+	day += yday;
 
-	timep->tm_yday = yday;		/* ??? assignments should be later */
-					/* day 0 was thursday (4) */
-	timep->tm_wday = (seconds / SECS_DAY + 4) % 7;
+	timep->tm_yday = yday;
+	timep->tm_wday = (day + 4) % 7;		/* day 0 was thursday (4) */
+
+	seconds = ((timep->tm_hour * 60) + timep->tm_min) * 60 + timep->tm_sec;
+
+	if ((TIME_MAX - seconds) / SECS_DAY < day) overflow++;
+	seconds += day * SECS_DAY;
+
+	/* Now adjust according to timezone and daylight saving time */
+
+	if (((_timezone > 0) && (TIME_MAX - _timezone < seconds))
+	    || ((_timezone < 0) && (seconds < -_timezone)))
+		overflow++;
+	seconds += _timezone;
 
 	if (timep->tm_isdst < 0)
 		dst = _dstget(timep);
 	else if (timep->tm_isdst)
-		dst = 60 * 60;
+		dst = _dst_off;
 	else dst = 0;
 
-	if (!overflow) {
-		tmp_sec = timep->tm_hour * 60 * 60;
-		if (TIME_MAX - tmp_sec <= seconds) overflow++;
-		else seconds += tmp_sec;
-	}
-
-	if (!overflow) {
-		tmp_sec = timep->tm_min * 60;
-		if (TIME_MAX - tmp_sec <= seconds) overflow++;
-		else seconds += tmp_sec;
-	}
-
-	if (!overflow) {
-		tmp_sec = timep->tm_sec;
-		if (TIME_MAX - tmp_sec <= seconds) overflow++;
-		else seconds += tmp_sec;
-	}
-
-	localseconds = seconds;
-
-	if (!overflow) {
-		tmp_sec = tz;
-		if (((tmp_sec > 0) && (TIME_MAX - tmp_sec <= seconds))
-		    || ((tmp_sec < 0) && (seconds < -tmp_sec)))
-			overflow++;
-		else seconds += tmp_sec;
-	}
-
-	if (!overflow) {
-		tmp_sec = dst;
-		if (tmp_sec > seconds) overflow++;
-		else seconds -= tmp_sec;
-	}
+	if (dst > seconds) overflow++;	/* dst is always non-negative */
+	seconds -= dst;
 
 	if (overflow) return (time_t)-1;
 

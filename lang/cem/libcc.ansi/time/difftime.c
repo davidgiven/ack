@@ -1,5 +1,5 @@
 /*
- * difftime - compute the difference bnetween two calendar times
+ * difftime - compute the difference between two calendar times
  */
 /* $Header$ */
 

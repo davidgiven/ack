@@ -6,7 +6,7 @@
 #include	<time.h>
 #include	"loc_incl.h"
 
-/* The width can be negative in both s_prnt() as in u_prnt(). This
+/* The width can be -1 in both s_prnt() as in u_prnt(). This
  * indicates that as many characters as needed should be printed.
  */
 static char *
@@ -43,14 +43,15 @@ strftime(char *s, size_t maxsize,
 
 	if (!format) return 0;
 
+	_tzset();	/* for %Z conversion */
 	firsts = s;
 	while (maxsize && *format) {
-		if (maxsize && *format && *format != '%') {
+		while (maxsize && *format && *format != '%') {
 			*s++ = *format++;
 			maxsize--;
-			continue;
 		}
-		if (*format++ != '%') break;	/* maxsize == 0 || !*format */
+		if (!maxsize || !*format) break;
+		format++;
 
 		olds = s;
 		switch (*format++) {
@@ -75,7 +76,8 @@ strftime(char *s, size_t maxsize,
 		case 'c':
 			n = strftime(s, maxsize,
 					"%a %b %d %H:%M:%S %Y", timeptr);
-			maxsize -= n;
+			if (n) maxsize -= n;
+			else maxsize = 0;
 			s += n;
 			break;
 		case 'd':
@@ -128,12 +130,14 @@ strftime(char *s, size_t maxsize,
 			break;
 		case 'x':
 			n = strftime(s, maxsize, "%a %b %d %Y", timeptr);
-			maxsize -= n;
+			if (n) maxsize -= n;
+			else maxsize = 0;
 			s += n;
 			break;
 		case 'X':
 			n = strftime(s, maxsize, "%H:%M:%S", timeptr);
-			maxsize -= n;
+			if (n) maxsize -= n;
+			else maxsize = 0;
 			s += n;
 			break;
 		case 'y':
@@ -141,12 +145,12 @@ strftime(char *s, size_t maxsize,
 			maxsize -= s - olds;
 			break;
 		case 'Y':
-			s = u_prnt(s, maxsize, timeptr->tm_year + 1900, -1);
+			s = u_prnt(s, maxsize, timeptr->tm_year + YEAR0, -1);
 			maxsize -= s - olds;
 			break;
 		case 'Z':
 			s = s_prnt(s, maxsize,
-					__tzname[(timeptr->tm_isdst > 0)], -1);
+					_tzname[(timeptr->tm_isdst > 0)], -1);
 			maxsize -= s - olds;
 			break;
 		case '%':

@@ -14,7 +14,7 @@ gmtime(register const time_t *timer)
 	register struct tm *timep = &br_time;
 	time_t time = *timer;
 	register unsigned long dayclock, dayno;
-	int year = 1970;
+	int year = EPOCH_YR;
 
 	dayclock = time % SECS_DAY;
 	dayno = time / SECS_DAY;
@@ -27,7 +27,7 @@ gmtime(register const time_t *timer)
 		dayno -= YEARSIZE(year);
 		year++;
 	}
-	timep->tm_year = year - YEAR1;
+	timep->tm_year = year - YEAR0;
 	timep->tm_yday = dayno;
 	timep->tm_mon = 0;
 	while (dayno >= _ytab[LEAPYEAR(year)][timep->tm_mon]) {

@@ -3,7 +3,6 @@
  */
 /* $Header$ */
 
-#include	<stdio.h>
 #include	<string.h>
 #include	<time.h>
 #include	"loc_incl.h"
@@ -36,7 +35,8 @@ four_digits(register char *pb, int i)
 char *asctime(const struct tm *timeptr)
 {
 	static char buf[26];
-	register char *pb = buf, *ps;
+	register char *pb = buf;
+	register const char *ps;
 	register int n;
 
 	strcpy(pb, DATE_STR);

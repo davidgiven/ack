@@ -1,9 +1,9 @@
 /*
- * tzset - system V compatibility
+ * tzset - set timezone information
  */
 /* $Header$ */
 
-#ifdef	__USG
+/* This function is present for System V && POSIX */
 
 #include	<time.h>
 #include	"loc_incl.h"
@@ -11,6 +11,5 @@
 void
 tzset(void)
 {
-	_tzone();	/* does the job */
+	_tzset();	/* does the job */
 }
-#endif	/* __USG */
