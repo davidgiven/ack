@@ -411,8 +411,12 @@ int	aside_length = -1 ;
 
 save_stack(tp) register token_p tp ; {
 	int i ;
+	token_p tmp = &fakestack[stackheight - 1];
 
-	aside_length = &fakestack[stackheight-1] -tp;
+	/*aside_length = &fakestack[stackheight-1] -tp;
+	  This did not compile on Xenix V3.2: CODE GENERATION ERROR!
+	*/
+	aside_length = tmp - tp;
 	assert(aside_length<=MAXSAVE);
 #ifndef NDEBUG
 	if (aside_length!=0 && Debug>1)
