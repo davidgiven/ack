@@ -1,0 +1,219 @@
+.TH AFPC 1
+.SH NAME
+afpc \- fast ACK compatible Pascal compiler
+.SH SYNOPSIS
+.B afpc
+[
+.B \-c
+]
+[
+.B \-v
+]
+[
+.B \-vn
+]
+[ \fB\-D\fIname\fR ]
+[ \fB\-D\fIname\fB=\fIdef\fR ]
+[
+.BI \-I pathname
+]
+[
+.B \-w
+]
+[
+.B \-L
+]
+[
+.B \-o 
+.I outfile
+]
+[
+.B \-R
+]
+[
+.B \-A
+]
+[
+.B \-a
+]
+[
+.B \-d
+]
+[
+.BI \-i num
+]
+[
+.B \-t
+]
+[
+.B \-C
+]
+[
+.B \-U+
+]
+[
+.B \-u+
+]
+[
+.B \-s+
+]
+[
+.B \-c+
+]
+[
+.BI \-U name
+]
+[
+.BI -M compiler
+]
+.I sourcefile ...
+.SH DESCRIPTION
+.LP
+.I afpc
+is a fast
+.B Pascal
+compiler. It translates 
+.B Pascal
+programs
+into ack(1)-compatible relocatable object modules, and does so in one pass.
+Then, if the \fB\-c\fP flag is not given,
+.I afpc
+offers the object modules to a link-editor,
+to create an executable binary.
+.LP
+.I Fpc
+accepts several types of filename arguments.  Files with 
+names ending in
+.B .p
+are taken to be 
+.B Pascal
+source programs. 
+They are compiled, and the resulting object module is placed in the current
+directory.
+The object module is named after its source file, the suffix
+.B .o
+replacing 
+.BR .p
+in the name of the object.
+A file with suffix
+.B .p
+is passed through the C preprocessor if it begins with a '#'.
+.LP
+Other arguments refer to loader options,
+object modules, or object libraries.
+Unless the
+.B \-c
+flag is given, these modules and libraries, together with the results of any
+specified compilations, are passed (in the order given) to the
+link-editor to produce
+an output file named
+.IR a.out .
+You can specify a name for the executable by using the
+.B \-o 
+option.
+.LP
+If a single 
+.B Pascal
+program is compiled and loaded all at once, the object module
+file is deleted.
+.SH OPTIONS
+.LP
+.IP \fB\-c\fP
+.br
+Suppress the loading phase of the compilation, and force an object module to
+be produced, even if only one program is compiled.
+A single object module can be named explicitly using the
+.B \-o
+option.
+.IP \fB\-D\fIname\fR\fB=\fIdef\fR
+Define a symbol
+.I name
+to the 
+preprocessor, as if by "#define".
+.IP \fB\-D\fIname\fR
+.br
+same as \fB\-D\fIname\fB=1\fR.
+.IP \fB\-I\fIpathname\fR
+.br
+Add
+.I pathname
+to the list of directories in which to search for
+.B #include
+files with filenames not beginning with slash.
+The preprocessor first searches for
+.B #include
+files in the directory containing
+.I sourcefile,
+then in directories in
+.B \-I
+options, and finally, in
+.I /usr/include.
+.IP "\fB\-o \fIoutput\fR"
+Name the final output file
+.I output.
+.IP \fB\-U\fIname\fR
+.br
+Remove any initial definition of
+.I name.
+.IP \fB\-v\fP
+.br
+Verbose. Print the commands as they are executed.
+.IP \fB\-vn\fP
+.br
+Verbose, no execute. Only print the commands, do not execute them.
+.IP \fB\-L\fP
+.br
+do not generate code to keep track of
+the current location in the source code.
+.IP \fB\-w\fP
+.br
+suppress warning messages.
+.IP \fB\-d\fP
+.br
+allow for "long"s.
+.IP \fB\-i\fInum\fR
+.br
+set size for integer sets. By default, the set size is the word size.
+.IP \fB\-C\fP
+.br
+distinguish between lower case and upper case. Normally, upper case letters
+are considered equal to their lower case counterpart.
+.IP \fB\-t\fP
+.br
+trace calls and exits of procedures and functions.
+.IP \fB\-R\fP
+.br
+disable all range-checks.
+.IP \fB\-A\fP
+.br
+enable extra array bound checks. Unfortunately, the back-end used for this
+compiler is a bit sloppy, so extra array bound checks are needed if you want
+detection of array bound errors.
+.IP \fB\-a\fP
+.br
+disable assertions. Assertions are skipped instead of evaluated.
+.IP "\fB\-U+\fP, \fB\-u+\fP"
+.br
+allow for underscores within identifiers. Identifiers may not start
+with an underscore, even if this flag is given.
+.IP \fB-s+\fP
+.br
+allow only standard 
+.BR Pascal .
+This disables the \fB\-c+\fP, \fB\-d\fR, \fB\-u+\fR,
+\fB\-U+\fR and \fB\-C\fR options.
+Furthermore, assertions are not recognized at all.
+.IP \fB-c+\fP
+.br
+allow C-like strings. This option is mainly intended for usage with
+C-functions. This option will cause the type 'string' to be known.
+.IP \fB\-M\fIcompiler\fR
+.br
+use \fIcompiler\fR as Modula-2 compiler instead of the default.
+.SH "SEE ALSO"
+.IP [1]
+J.W. Stevenson, H. v. Eck, \fIAmsterdam Compiler Kit-Pascal reference manual\fP.
+.IP [2]
+ack(1) unix manual page.
+.SH DIAGNOSTICS
+Diagnostics are intended to be self-explanatory.

@@ -1,0 +1,12 @@
+name "Fast ANSI C compiler"
+dir f_c
+end
+name "Fast Pascal compiler"
+dir f_pc
+end
+name "Fast Modula-2 compiler"
+dir f_m2
+end
+name "Driver for fast compilers"
+dir driver
+end

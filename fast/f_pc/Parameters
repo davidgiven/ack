@@ -1,0 +1,61 @@
+!File: debugcst.h
+#undef DEBUG		1	/* perform various self-tests	*/
+
+
+!File: density.h
+#define DENSITY		3	/* to determine, if a csa or csb
+					instruction must be generated	*/
+
+
+!File: errout.h
+#define	ERROUT		STDERR	/* file pointer for writing messages	*/
+#define	MAXERR_LINE	5	/* maximum number of error messages given
+					on the same input line.		*/
+
+
+!File: idfsize.h
+#define IDFSIZE		128	/* max. significant length of an identifier */
+
+
+!File: inputtype.h
+#define INP_READ_IN_ONE	1	/* read input file in one	*/
+
+
+!File: numsize.h
+#define	NUMSIZE	256		/* maximum length of a numeric constant	*/
+
+
+!File: strsize.h
+#define ISTRSIZE	32	/* minimum number of bytes allocated for
+					storing a string		*/
+#define RSTRSIZE	8	/* step size in enlarging the memory for
+					the storage of a string		*/
+
+
+!File: target_sizes.h
+#define MAXSIZE		8	/* the maximum of the SZ_* constants	*/
+
+/* target machine sizes	*/
+#define	SZ_CHAR		(arith)1
+#define SZ_WORD		(arith)4
+#define	SZ_INT		(arith)4
+#define SZ_LONG		(arith)4
+#define	SZ_POINTER	(arith)4
+#define	SZ_REAL		(arith)8
+
+/* target machine alignment requirements	*/
+#define	AL_CHAR		1
+#define AL_WORD		((int)SZ_WORD)
+#define	AL_INT		((int)SZ_WORD)
+#define	AL_LONG		((int)SZ_WORD)
+#define	AL_POINTER	((int)SZ_WORD)
+#define	AL_REAL		((int)SZ_WORD)
+#define	AL_STRUCT	((int)SZ_WORD)
+
+
+!File: nocross.h
+#define NOCROSS		1	/* define when cross compiler not needed */
+
+
+!File: dbsymtab.h
+#undef DBSYMTAB	1	/* ability to produce symbol table for debugger */
