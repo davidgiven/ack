@@ -80,19 +80,22 @@ DoOption(text)
 		break;
 
 	case 'W':
-		while (*text) {
-			switch(*text++) {
-			case 'O':
-				warning_classes |= W_OLDFASHIONED;
-				break;
-			case 'R':
-				warning_classes |= W_STRICT;
-				break;
-			case 'W':
-				warning_classes |= W_ORDINARY;
-				break;
+		if (*text) {
+			while (*text) {
+				switch(*text++) {
+				case 'O':
+					warning_classes |= W_OLDFASHIONED;
+					break;
+				case 'R':
+					warning_classes |= W_STRICT;
+					break;
+				case 'W':
+					warning_classes |= W_ORDINARY;
+					break;
+				}
 			}
 		}
+		else warning_classes = W_OLDFASHIONED|W_STRICT|W_ORDINARY;
 		break;
 
 	case 'M': {	/* maximum identifier length */

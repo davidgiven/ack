@@ -45,8 +45,9 @@ Xerror(nd, mess, edf)
 		if (edf->df_kind != D_ERROR)  {
 			node_error(nd,"\"%s\": %s", edf->df_idf->id_text, mess);
 		}
+		return;
 	}
-	else	node_error(nd, "%s", mess);
+	node_error(nd, "%s", mess);
 }
 
 int
@@ -277,9 +278,24 @@ node_error(expp, "standard or local procedures may not be assigned");
 }
 
 STATIC int
-ChkElement(expp, tp, set, level)
+ChkEl(expr, tp)
+	register struct node *expr;
+	struct type *tp;
+{
+	if (!ChkExpression(expr)) return 0;
+
+	if (!TstCompat(tp, expr->nd_type)) {
+		node_error(expr, "set element has incompatible type");
+		return 0;
+	}
+
+	return 1;
+}
+
+STATIC int
+ChkElement(expp, tp, set)
 	struct node **expp;
-	register struct type *tp;
+	struct type *tp;
 	arith **set;
 {
 	/*	Check elements of a set. This routine may call itself
@@ -289,66 +305,50 @@ ChkElement(expp, tp, set, level)
 	register struct node *expr = *expp;
 	register struct node *left = expr->nd_left;
 	register struct node *right = expr->nd_right;
-	register arith i;
+	register unsigned int i;
+	arith lo, hi, low, high;
 
 	if (expr->nd_class == Link && expr->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (!ChkElement(&(expr->nd_left), tp, set, 1) ||
-		    !ChkElement(&(expr->nd_right), tp, set, 1)) {
+		if (! (ChkEl(left, tp) & ChkEl(right, tp))) {
 			return 0;
 		}
 
-		if (left->nd_class == Value && right->nd_class == Value) {
-			/* We have a constant range. Put all elements in the
-			   set
-			*/
-
-		    	if (left->nd_INT > right->nd_INT) {
-node_error(expr, "lower bound exceeds upper bound in range");
-				return 0;
-			}
-
-			for (i=left->nd_INT; i<=right->nd_INT; i++) {
-				(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
-			}
-			FreeNode(expr);
-			*expp = 0;
+		if (!(left->nd_class == Value && right->nd_class == Value)) {
+			return 1;
 		}
+		/* We have a constant range. Put all elements in the
+		  set
+		*/
 
-		return 1;
+		low = left->nd_INT;
+		high = right->nd_INT;
 	}
-
-	/* Here, a single element is checked
-	*/
-	if (!ChkExpression(expr)) return 0;
-
-	if (!TstCompat(tp, expr->nd_type)) {
-		node_error(expr, "set element has incompatible type");
+	else {
+		if (! ChkEl(expr, tp)) return 0;
+		if (expr->nd_class != Value) {
+			return 1;
+		}
+		low = high = expr->nd_INT;
+	}
+	if (low > high) {
+		node_error(expr, "lower bound exceeds upper bound in range");
 		return 0;
 	}
 
-	if (expr->nd_class == Value) {
-		/* a constant element
-		*/
-		arith low, high;
-
-		i = expr->nd_INT;
-		getbounds(tp, &low, &high);
-
-	    	if (i < low || i > high) {
-			node_error(expr, "set element out of range");
-			return 0;
-		}
-
-		if (! level) {
-			(*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
-			FreeNode(expr);
-			*expp = 0;
-		}
+	getbounds(tp, &lo, &hi);
+	if (low < lo || high > hi) {
+		node_error(expr, "set element out of range");
+		return 0;
 	}
 
+	for (i=(unsigned)low; i<= (unsigned)high; i++) {
+		(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
+	}
+	FreeNode(expr);
+	*expp = 0;
 	return 1;
 }
 
@@ -407,7 +407,7 @@ ChkSet(expp)
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
 		if (!ChkElement(&(nd->nd_left), ElementType(tp),
-						&(expp->nd_set), 0)) {
+						&(expp->nd_set))) {
 			retval = 0;
 		}
 		if (nd->nd_left) expp->nd_class = Xset;
@@ -1172,6 +1172,7 @@ ChkCast(expp, left)
 		is no problem as such values take a word on the EM stack
 		anyway.
 	*/
+	register struct type *lefttype = left->nd_type;
 	register struct node *arg = expp->nd_right;
 
 	if ((! arg) || arg->nd_right) {
@@ -1182,23 +1183,21 @@ ChkCast(expp, left)
 	arg = arg->nd_left;
 	if (! ChkExpression(arg)) return 0;
 
-	if (arg->nd_type->tp_size != left->nd_type->tp_size &&
+	if (arg->nd_type->tp_size != lefttype->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
-	     left->nd_type->tp_size > word_size)) {
+	     lefttype->tp_size > word_size)) {
 		Xerror(expp, "unequal sizes in type cast", left->nd_def);
 	}
 
 	if (arg->nd_class == Value) {
-		struct type *tp = left->nd_type;
-
 		FreeNode(left);
 		expp->nd_right->nd_left = 0;
 		FreeNode(expp->nd_right);
 		expp->nd_left = expp->nd_right = 0;
 		*expp = *arg;
-		expp->nd_type = tp;
+		expp->nd_type = lefttype;
 	}
-	else expp->nd_type = left->nd_type;
+	else expp->nd_type = lefttype;
 
 	return 1;
 }

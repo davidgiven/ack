@@ -33,42 +33,54 @@
 extern int	proclevel;
 struct desig	InitDesig = {DSG_INIT, 0, 0, 0};
 
-int	C_ste_dnam(), C_sde_dnam(), C_loe_dnam(), C_lde_dnam();
-int	C_stl(), C_sdl(), C_lol(), C_ldl();
-
-#define WRD	0
-#define DWRD	1
-#define LD	0
-#define STR	1
-
-static int (*lcl_ld_and_str[2][2])() = {
-{ C_lol, C_stl },
-{ C_ldl, C_sdl }
-};
-
-static int (*ext_ld_and_str[2][2])() = {
-{ C_loe_dnam, C_ste_dnam },
-{ C_lde_dnam, C_sde_dnam }
-};
-
 int
-DoLoadOrStore(ds, size, LoadOrStoreFlag)
+WordOrDouble(ds, size)
 	register struct desig *ds;
 	arith size;
 {
-	int sz;
+	return ((int) (ds->dsg_offset) % (int) word_size == 0 &&
+		( (int) size == (int) word_size ||
+		  (int) size == (int) dword_size));
+}
 
-	if (ds->dsg_offset % word_size != 0) return 0;
-
-	if (size == word_size) sz = WRD;
-	else if (size == dword_size) sz = DWRD;
-	else return 0;
-
+int
+DoLoad(ds, size)
+	register struct desig *ds;
+	arith size;
+{
+	if (! WordOrDouble(ds, size)) return 0;
 	if (ds->dsg_name) {
-		(*(ext_ld_and_str[sz][LoadOrStoreFlag]))(ds->dsg_name, ds->dsg_offset);
+		if ((int) size == (int) word_size) {
+			C_loe_dnam(ds->dsg_name, ds->dsg_offset);
+		}
+		else	C_lde_dnam(ds->dsg_name, ds->dsg_offset);
 	}
 	else {
-		(*(lcl_ld_and_str[sz][LoadOrStoreFlag]))(ds->dsg_offset);
+		if ((int) size == (int) word_size) {
+			C_lol(ds->dsg_offset);
+		}
+		else	C_ldl(ds->dsg_offset);
+	}
+	return 1;
+}
+
+int
+DoStore(ds, size)
+	register struct desig *ds;
+	arith size;
+{
+	if (! WordOrDouble(ds, size)) return 0;
+	if (ds->dsg_name) {
+		if ((int) size == (int) word_size) {
+			C_ste_dnam(ds->dsg_name, ds->dsg_offset);
+		}
+		else	C_sde_dnam(ds->dsg_name, ds->dsg_offset);
+	}
+	else {
+		if ((int) size == (int) word_size) {
+			C_stl(ds->dsg_offset);
+		}
+		else	C_sdl(ds->dsg_offset);
 	}
 	return 1;
 }
@@ -88,15 +100,15 @@ properly(ds, size, al)
 		  with DSG_FIXED.
 	*/
 
-	arith szmodword = size % word_size;	/* 0 if multiple of wordsize */
-	arith wordmodsz = word_size % size;	/* 0 if dividor of wordsize */
+	int szmodword = (int) size % (int) word_size;	/* 0 if multiple of wordsize */
+	int wordmodsz = word_size % size;	/* 0 if dividor of wordsize */
 
 	if (szmodword && wordmodsz) return 0;
 	if (al >= word_align) return 1;
 	if (szmodword && al >= szmodword) return 1;
 
 	return ds->dsg_kind == DSG_FIXED &&
-	       ((! szmodword && ds->dsg_offset % word_align == 0) ||
+	       ((! szmodword && (int) (ds->dsg_offset) % word_align == 0) ||
 		(! wordmodsz && ds->dsg_offset % size == 0));
 }
 
@@ -114,7 +126,7 @@ CodeValue(ds, tp)
 		break;
 
 	case DSG_FIXED:
-		if (DoLoadOrStore(ds, tp->tp_size, LD)) break;
+		if (DoLoad(ds, tp->tp_size)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
@@ -167,7 +179,7 @@ CodeStore(ds, tp)
 	save = *ds;
 	switch(ds->dsg_kind) {
 	case DSG_FIXED:
-		if (DoLoadOrStore(ds, tp->tp_size, STR)) break;
+		if (DoStore(ds, tp->tp_size)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
@@ -242,7 +254,8 @@ CodeMove(rhs, left, rtp)
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(rhs);
-		if (tp->tp_size % word_size == 0 && tp->tp_align >= word_size) {
+		if ((int) (tp->tp_size) % (int) word_size == 0 &&
+		    tp->tp_align >= (int) word_size) {
 			CodeDesig(left, lhs);
 			CodeAddress(lhs);
 			C_blm(tp->tp_size);
@@ -254,12 +267,13 @@ CodeMove(rhs, left, rtp)
 	case DSG_FIXED:
 		CodeDesig(left, lhs);
 		if (lhs->dsg_kind == DSG_FIXED &&
-		    lhs->dsg_offset % word_size ==
-		    rhs->dsg_offset % word_size) {
+		    (int) (lhs->dsg_offset) % (int) word_size ==
+		    (int) (rhs->dsg_offset) % (int) word_size) {
 			register int sz;
 			arith size = tp->tp_size;
 
-			while (size && (sz = (lhs->dsg_offset % word_size))) {
+			while (size &&
+			       (sz = ((int)(lhs->dsg_offset) % (int)word_size))) {
 				/*	First copy up to word-aligned
 					boundaries
 				*/
@@ -282,7 +296,7 @@ CodeMove(rhs, left, rtp)
 				lhs->dsg_offset += sz;
 				size -= sz;
 			}
-			else for (sz = dword_size; sz; sz -= word_size) {
+			else for (sz = (int) dword_size; sz; sz -= (int) word_size) {
 				while (size >= sz) {
 					/*	Then copy dwords, words.
 						Depend on peephole optimizer
@@ -306,7 +320,8 @@ CodeMove(rhs, left, rtp)
 			CodeAddress(lhs);
 			loadedflag = 1;
 		}
-		if (tp->tp_size % word_size == 0 && tp->tp_align >= word_size) {
+		if ((int)(tp->tp_size) % (int) word_size == 0 &&
+		    tp->tp_align >= word_size) {
 			CodeAddress(rhs);
 			if (loadedflag) C_exg(pointer_size);
 			else CodeAddress(lhs);
@@ -359,7 +374,7 @@ CodeAddress(ds)
 		break;
 		
 	case DSG_PFIXED:
-		DoLoadOrStore(ds, word_size, LD);
+		DoLoad(ds, word_size);
 		break;
 
 	case DSG_INDEXED:
@@ -445,7 +460,7 @@ CodeVarDesig(df, ds)
 		/* the programmer specified an address in the declaration of
 		   the variable. Generate code to push the address.
 		*/
-		CodeConst(df->var_off, pointer_size);
+		CodeConst(df->var_off, (int) pointer_size);
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = 0;
 		return;

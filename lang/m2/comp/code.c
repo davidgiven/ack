@@ -36,24 +36,25 @@ extern int	proclevel;
 int		fp_used;
 
 CodeConst(cst, size)
-	arith cst, size;
+	arith cst;
+	int size;
 {
 	/*	Generate code to push constant "cst" with size "size"
 	*/
 
-	if (size <= word_size) {
+	if (size <= (int) word_size) {
 		C_loc(cst);
 	}
-	else if (size == dword_size) {
+	else if (size == (int) dword_size) {
 		C_ldc(cst);
 	}
 	else {
 		crash("(CodeConst)");
 /*
 		C_df_dlb(++data_label);
-		C_rom_icon(long2str((long) cst), size);
+		C_rom_icon(long2str((long) cst), (arith) size);
 		C_lae_dlb(data_label, (arith) 0);
-		C_loi(size);
+		C_loi((arith) size);
 */
 	}
 }
@@ -64,12 +65,11 @@ CodeString(nd)
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
 		C_loc(nd->nd_INT);
+		return;
 	}
-	else {
-		C_df_dlb(++data_label);
-		C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
-		C_lae_dlb(data_label, (arith) 0);
-	}
+	C_df_dlb(++data_label);
+	C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
+	C_lae_dlb(data_label, (arith) 0);
 }
 
 CodeExpr(nd, ds, true_label, false_label)
@@ -111,15 +111,15 @@ CodeExpr(nd, ds, true_label, false_label)
 		switch(nd->nd_symb) {
 		case REAL:
 			C_df_dlb(++data_label);
-			C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
+			C_rom_fcon(nd->nd_REL, tp->tp_size);
 			C_lae_dlb(data_label, (arith) 0);
-			C_loi(nd->nd_type->tp_size);
+			C_loi(tp->tp_size);
 			break;
 		case STRING:
 			CodeString(nd);
 			break;
 		case INTEGER:
-			CodeConst(nd->nd_INT, tp->tp_size);
+			CodeConst(nd->nd_INT, (int) (tp->tp_size));
 			break;
 		default:
 			crash("Value error");
@@ -134,11 +134,11 @@ CodeExpr(nd, ds, true_label, false_label)
 
 	case Xset:
 	case Set: {
-		register int i = tp->tp_size / word_size;
+		register unsigned i = (unsigned) (tp->tp_size) / (int) word_size;
 		register arith *st = nd->nd_set + i;
 
 		ds->dsg_kind = DSG_LOADED;
-		for (; i > 0; i--) { 
+		for (; i; i--) { 
 			C_loc(*--st);
 		}
 		CodeSet(nd);
@@ -282,6 +282,7 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register struct node *left = nd->nd_left;
+	register struct def *df;
 	register struct node *right = nd->nd_right;
 	register struct type *result_tp;
 
@@ -307,7 +308,7 @@ CodeCall(nd)
 
 	switch(left->nd_class) {
 	case Def: {
-		register struct def *df = left->nd_def;
+		df = left->nd_def;
 
 		if (df->df_kind == D_PROCEDURE) {
 			int level = df->df_scope->sc_level;
@@ -516,9 +517,28 @@ CodeStd(nd)
 		CodePExpr(left);
 		break;
 
-	case S_TRUNCD:
-	case S_TRUNC:
 	case S_FLOAT:
+		CodePExpr(left);
+		RangeCheck(card_type, left->nd_type);
+		CodeCoercion(tp, nd->nd_type);
+		break;
+
+	case S_TRUNC: {
+		label lb = ++text_label;
+
+		CodePExpr(left);
+		C_dup(tp->tp_size);
+		C_zrf(tp->tp_size);
+		C_cmf(tp->tp_size);
+		C_zge(lb);
+		C_loc((arith) ECONV);
+		C_trp();
+		C_df_ilb(lb);
+		CodeCoercion(tp, nd->nd_type);
+		}
+		break;
+
+	case S_TRUNCD:
 	case S_FLOATD:
 	case S_LONG:
 	case S_SHORT:
@@ -816,11 +836,11 @@ CodeOper(expr, true_label, false_label)
 		if (true_label != NO_LABEL)	{
 			compare(expr->nd_symb, true_label);
 			C_bra(false_label);
+			break;
 		}
-		else	{
-			truthvalue(expr->nd_symb);
-		}
+		truthvalue(expr->nd_symb);
 		break;
+
 	case IN:
 		/* In this case, evaluate right hand side first! The
 		   INN instruction expects the bit number on top of the

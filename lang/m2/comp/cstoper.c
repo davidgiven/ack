@@ -30,7 +30,7 @@ long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
-arith wrd_bits;		/* number of bits in a word */
+unsigned int wrd_bits;	/* number of bits in a word */
 
 extern char options[];
 
@@ -42,7 +42,7 @@ cstunary(expp)
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result restored in expp.
 	*/
-	register arith o1 = expp->nd_right->nd_INT;
+	register struct node *right = expp->nd_right;
 
 	switch(expp->nd_symb) {
 	/* Should not get here
@@ -51,7 +51,7 @@ cstunary(expp)
 	*/
 
 	case '-':
-		o1 = -o1;
+		expp->nd_INT = -right->nd_INT;
 		if (expp->nd_type->tp_fund == T_INTORCARD) {
 			expp->nd_type = int_type;
 		}
@@ -59,7 +59,7 @@ cstunary(expp)
 
 	case NOT:
 	case '~':
-		o1 = !o1;
+		expp->nd_INT = !right->nd_INT;
 		break;
 
 	default:
@@ -67,10 +67,9 @@ cstunary(expp)
 	}
 
 	expp->nd_class = Value;
-	expp->nd_token = expp->nd_right->nd_token;
-	expp->nd_INT = o1;
+	expp->nd_symb = right->nd_symb;
 	CutSize(expp);
-	FreeNode(expp->nd_right);
+	FreeNode(right);
 	expp->nd_right = 0;
 }
 
@@ -247,21 +246,23 @@ cstset(expp)
 {
 	register arith *set1, *set2;
 	arith *resultset = 0;
-	register int setsize, j;
+	register unsigned int setsize;
+	register int j;
 
 	assert(expp->nd_right->nd_class == Set);
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
 	set2 = expp->nd_right->nd_set;
-	setsize = expp->nd_right->nd_type->tp_size / word_size;
+	setsize = (unsigned) expp->nd_right->nd_type->tp_size / (unsigned) word_size;
 
 	if (expp->nd_symb == IN) {
-		arith i;
+		unsigned i;
 
 		assert(expp->nd_left->nd_class == Value);
 
 		i = expp->nd_left->nd_INT;
 		expp->nd_class = Value;
-		expp->nd_INT = (i >= 0 && i < setsize * wrd_bits &&
+		expp->nd_INT = (expp->nd_left->nd_INT >= 0 &&
+				expp->nd_left->nd_INT < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
 		free((char *) set2);
 		expp->nd_symb = INTEGER;
@@ -531,5 +532,5 @@ InitCst()
 	max_int = full_mask[int_size] & ~(1L << (int_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
 	max_longint = full_mask[long_size] & ~(1L << (long_size * 8 - 1));
-	wrd_bits = 8 * word_size;
+	wrd_bits = 8 * (unsigned) word_size;
 }

@@ -452,7 +452,7 @@ set_type(tp)
 
 	getbounds(tp, &lb, &ub);
 
-	if (lb < 0 || ub > maxset-1) {
+	if (lb < 0 || ub > maxset-1 || (sizeof(int)==2 && ub > 65535)) {
 		error("set type limits exceeded");
 		return error_type;
 	}
