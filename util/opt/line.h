@@ -70,7 +70,6 @@ typedef union {
 
 struct line {
 	line_p		l_next;		/* maintains linked list */
-	line_p		l_prev;		/* for back referencing loc's */
 	byte		l_instr;	/* instruction number */
 	byte		l_optyp;	/* specifies what follows */
 	un_l_a		l_a;

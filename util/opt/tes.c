@@ -30,7 +30,6 @@ extern char flow_tab[];
 
 #define INSTR(lnp)      (lnp->l_instr & BMASK)
 #define TYPE(lnp)       lnp->l_optyp
-#define PREV(lnp)       lnp->l_prev
 #define SHORT(lnp)      lnp->l_a.la_short
 #define MINI(lnp)	((lnp->l_optyp & BMASK) - Z_OPMINI)
 
@@ -69,14 +68,12 @@ tes_pseudos()
 	}
 }
 
-tes_instr(lnp)
-line_p lnp;
+tes_instr(lnp, x, y)
+line_p lnp, x, y;
 {
 	char *s;
 	register instr = INSTR(lnp);
 	register int arg, argdef;
-	line_p x = PREV(lnp);
-	line_p y = (x == (line_p) 0 ? (line_p) 0 : PREV(x));
 	int neg = 0;
 
 	if (instr == op_lab) {

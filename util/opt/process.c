@@ -191,14 +191,14 @@ symvalue() {
 
 do_tes()
 {
-	register line_p insptr = instrs, oldlin = NULL;
+	register line_p insptr = instrs, oldlin = NULL, oldlin2 = NULL;
 
 	init_state();
 	tes_pseudos();
 	while (insptr != NULL) {
-		insptr->l_prev = oldlin;
+		tes_instr(insptr, oldlin, oldlin2);
+		oldlin2 = oldlin;
 		oldlin = insptr;
-		tes_instr(insptr);
 		insptr = insptr->l_next;
 	}
 }
