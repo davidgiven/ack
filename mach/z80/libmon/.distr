@@ -1,6 +1,6 @@
-Makefile
 README
-compmodule
+LIST
+libmon_s.a
 char.her.s
 head_em.s
 mon.cpm.s

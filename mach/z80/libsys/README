@@ -8,5 +8,4 @@ tested. The Nascom environment has been known to work too.
 The CPM files are included as an example only. These have never
 been tested.
 
-The definition of TAIL in the Makefile decides which environment
-you use.
+The LIST file determines which system is used.
