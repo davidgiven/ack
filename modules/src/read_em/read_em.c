@@ -227,7 +227,7 @@ EM_getinstr()
 		args = argp;
 		argp = args->em_next;
 		p->em_type = EM_MESARG;
-		p->em_args = args;
+		p->em_arg = args;
 		args->em_next = 0;
 		return p;
 	}
