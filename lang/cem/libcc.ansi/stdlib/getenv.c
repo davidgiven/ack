@@ -18,8 +18,8 @@ getenv(const char *name)
 		return (char *)NULL;
 	while ((p = *v++) != NULL) {
 		q = name;
-		while (*q && (*q++ == *p++))
-			/* EMPTY */ ;
+		while (*q && (*q == *p++))
+			q++;
 		if (*q || (*p != '='))
 			continue;
 		return (char *)p + 1;
