@@ -4,9 +4,6 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
-#ifndef __TYPES_H__
-#define __TYPES_H__
-
 /*
  * Basic system types and major/minor device constructing/busting macros.
  */
@@ -14,6 +11,7 @@
 #if     !defined(_SYS_TYPES_H)
 #define _SYS_TYPES_H
 
+#ifdef __STDC__
 #if     !defined(_SIZE_T)
 #define _SIZE_T
 typedef unsigned int    size_t;         /* type returned by sizeof */
@@ -23,6 +21,7 @@ typedef unsigned int    size_t;         /* type returned by sizeof */
 #define _TIME_T
 typedef unsigned long   time_t;
 #endif  /* TIME_T */
+#endif
 
 #if !defined(_POSIX_SOURCE)
 
@@ -77,4 +76,4 @@ typedef unsigned short  uid_t;  /* user id */
 #endif  /* _MINIX */
 #endif  /* _POSIX_SOURCE */
 
-#endif /* __TYPES_H__ */
+#endif /* _SYS_TYPES_H */

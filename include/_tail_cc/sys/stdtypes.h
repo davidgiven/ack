@@ -9,9 +9,11 @@
 #define	__STDTYPES_H__
 
 typedef long	sigset_t;	/* for <signal.h> on SUN's */
+#ifndef __STDC__
 typedef	long	time_t;
 typedef	long	size_t;
 typedef long	clock_t;
+#endif
 typedef int	pid_t;
 typedef unsigned short	gid_t;
 typedef unsigned short	uid_t;
