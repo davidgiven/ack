@@ -27,6 +27,8 @@
 #include	"scope.h"
 #include	"main.h"
 
+extern int	gdb_flag;
+
 #define INCR_SIZE	64
 
 extern int	proclevel;
@@ -276,12 +278,34 @@ stb_string(df, kind)
 	addc_db_str(':');
 	switch(kind) {
 	case D_MODULE:
-		adds_db_str(sprint(buf, "M%d;", df->mod_vis->sc_count));
+		if (gdb_flag) {
+			addc_db_str('F');
+			stb_type(void_type, 0);
+			addc_db_str(';');
+		}
+		else {
+			adds_db_str(sprint(buf, "M%d;", df->mod_vis->sc_count));
+		}
 		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->mod_vis->sc_scope->sc_name);
 		break;
 	case D_PROCEDURE:
-		adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
+		if (gdb_flag) {
+			addc_db_str('f');
+		}
+		else	adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
 		stb_type(tp->tp_next ? tp->tp_next : void_type, 0);
+		if (gdb_flag) {
+			t_scopelist *sc = df->prc_vis;
+			sc = enclosing(sc);
+			while (sc) {
+				t_def *d = sc->sc_scope->sc_definedby;
+
+				if (d && d->df_kind == D_PROCEDURE) {
+					adds_db_str(sprint(buf, ",%s", d->df_idf->id_text));
+				}
+				sc = enclosing(sc);
+			}
+		}
 		addc_db_str(';');
 		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->prc_vis->sc_scope->sc_name);
 		{
@@ -293,10 +317,12 @@ stb_string(df, kind)
 		}
 		break;
 	case D_END:
+		if (gdb_flag) break;
 		adds_db_str(sprint(buf, "E%d;", df->mod_vis->sc_count));
 		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith) 0);
 		break;
 	case D_PEND:
+		if (gdb_flag) break;
 		adds_db_str(sprint(buf, "E%d;", df->prc_vis->sc_count));
 		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith) 0);
 		break;

@@ -35,6 +35,7 @@ recognize some keywords!
 extern int	idfsize;
 static int	ndirs = 1;
 int		warning_classes = W_INITIAL;
+int		gdb_flag;
 
 DoOption(text)
 	register char *text;
@@ -64,6 +65,10 @@ DoOption(text)
 #ifdef DBSYMTAB
 	case 'g':	/* generate symbol table for debugger */
 		options['g']++;
+		if (*text == 'd') {
+			/* Assume -gdb. */
+			gdb_flag = 1;
+		}
 		options['n']++;	/* no register vars ??? */
 		break;
 #endif /* DBSYMTAB */

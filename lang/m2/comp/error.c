@@ -72,7 +72,7 @@ debug(char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(VDEBUG, NULLNODE, ap);
+		_error(VDEBUG, NULLNODE, ap, 0);
 	}
 	va_end(ap);
 }
@@ -85,7 +85,7 @@ error(char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(ERROR, NULLNODE, fmt, ap);
+		_error(ERROR, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 }
@@ -97,31 +97,31 @@ node_error(t_node *node, char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(ERROR, node, fmt, ap);
+		_error(ERROR, node, fmt, ap, 0);
 	}
 	va_end(ap);
 }
 
 /*VARARGS*/
-warning(char *fmt, ...)
+warning(int class, char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
 	{
-		_error(WARNING, NULLNODE, fmt, ap);
+		_error(WARNING, NULLNODE, fmt, ap, class);
 	}
 	va_end(ap);
 }
 
 /*VARARGS*/
-node_warning(t_node *node, char *fmt, ...)
+node_warning(t_node *node, int class, char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
 	{
-		_error(WARNING, node, fmt, ap);
+		_error(WARNING, node, fmt, ap, class);
 	}
 	va_end(ap);
 }
@@ -133,19 +133,19 @@ lexerror(char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(LEXERROR, NULLNODE, fmt, ap);
+		_error(LEXERROR, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 }
 
 /*VARARGS*/
-lexwarning(char *fmt, ...)
+lexwarning(int class, char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
 	{
-		_error(LEXWARNING, NULLNODE, fmt, ap);
+		_error(LEXWARNING, NULLNODE, fmt, ap, class);
 	}
 	va_end(ap);
 }
@@ -157,7 +157,7 @@ fatal(char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(FATAL, NULLNODE, fmt, ap);
+		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 	sys_stop(S_EXIT);
@@ -170,7 +170,7 @@ crash(char *fmt, ...)
 
 	va_start(ap, fmt);
 	{
-		_error(CRASH, NULLNODE, fmt, ap);
+		_error(CRASH, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 #ifdef DEBUG
@@ -190,7 +190,7 @@ debug(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char *);
-		_error(VDEBUG, NULLNODE, fmt, ap);
+		_error(VDEBUG, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 }
@@ -205,7 +205,7 @@ error(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char *);
-		_error(ERROR, NULLNODE, fmt, ap);
+		_error(ERROR, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 }
@@ -220,7 +220,7 @@ node_error(va_alist)
 	{
 		t_node *node = va_arg(ap, t_node *);
 		char *fmt = va_arg(ap, char *);
-		_error(ERROR, node, fmt, ap);
+		_error(ERROR, node, fmt, ap, 0);
 	}
 	va_end(ap);
 }
@@ -233,8 +233,9 @@ warning(va_alist)
 
 	va_start(ap);
 	{
+		int class = va_arg(ap, int);
 		char *fmt = va_arg(ap, char *);
-		_error(WARNING, NULLNODE, fmt, ap);
+		_error(WARNING, NULLNODE, fmt, ap, class);
 	}
 	va_end(ap);
 }
@@ -248,8 +249,9 @@ node_warning(va_alist)
 	va_start(ap);
 	{
 		t_node *nd = va_arg(ap, t_node *);
+		int class = va_arg(ap, int);
 		char *fmt = va_arg(ap, char *);
-		_error(WARNING, nd, fmt, ap);
+		_error(WARNING, nd, fmt, ap, class);
 	}
 	va_end(ap);
 }
@@ -263,7 +265,7 @@ lexerror(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char *);
-		_error(LEXERROR, NULLNODE, fmt, ap);
+		_error(LEXERROR, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 }
@@ -276,8 +278,9 @@ lexwarning(va_alist)
 
 	va_start(ap);
 	{
+		int class = va_arg(ap, int);
 		char *fmt = va_arg(ap, char *);
-		_error(LEXWARNING, NULLNODE, fmt, ap);
+		_error(LEXWARNING, NULLNODE, fmt, ap, class);
 	}
 	va_end(ap);
 }
@@ -291,7 +294,7 @@ fatal(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char *);
-		_error(FATAL, NULLNODE, fmt, ap);
+		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 	sys_stop(S_EXIT);
@@ -306,7 +309,7 @@ crash(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char *);
-		_error(CRASH, NULLNODE, fmt, ap);
+		_error(CRASH, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
 #ifdef DEBUG
@@ -317,18 +320,18 @@ crash(va_alist)
 }
 #endif
 
-_error(class, node, fmt, ap)
+_error(class, node, fmt, ap, warn_class)
 	int class;
 	t_node *node;
 	char *fmt;
 	register va_list ap;
+	int warn_class;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
 	*/
 	unsigned int ln = 0;
 	register char *remark = 0;
-	int warn_class;
 	
 	/* check visibility of message */
 	if (class == ERROR || class == WARNING) {
@@ -355,7 +358,6 @@ _error(class, node, fmt, ap)
 	switch (class)	{	
 	case WARNING:
 	case LEXWARNING:
-		warn_class = va_arg(ap, int);
 		if (! (warn_class & warning_classes)) return;
 		switch(warn_class) {
 #ifndef STRICT_3RD_ED
