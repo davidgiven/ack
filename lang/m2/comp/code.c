@@ -414,7 +414,7 @@ CodeParameters(param, arg)
 		case Arrsel:
 		case Arrow:
 		case Def:
-			CodeDAddress(left);
+			CodeDAddress(left, IsVarParam(param));
 			break;
 		default:{
 			arith tmp, TmpSpace();
@@ -429,7 +429,7 @@ CodeParameters(param, arg)
 		return;
 	}
 	if (IsVarParam(param)) {
-		CodeDAddress(left);
+		CodeDAddress(left, 1);
 		return;
 	}
 	if (left_type->tp_fund == T_STRING) {
@@ -462,7 +462,7 @@ subu(sz)
 	if (options['R']) C_sbu(sz);
 	else {
 		C_cal(sz == word_size ? "subu" : "subul");
-		C_asp(sz);
+		c_asp((int)sz);
 	}
 }
 
@@ -473,7 +473,7 @@ addu(sz)
 	if (options['R']) C_adu(sz);
 	else {
 		C_cal(sz == word_size ? "addu" : "addul");
-		C_asp(sz);
+		c_asp((int)sz);
 	}
 }
 
@@ -507,7 +507,7 @@ CodeStd(nd)
 			if (tp->tp_size == float_size) C_cal("absf");
 			else	C_cal("absd");
 		}
-		C_asp(tp->tp_size);
+		c_asp((int)(tp->tp_size));
 		C_lfr(tp->tp_size);
 		break;
 
@@ -545,7 +545,7 @@ CodeStd(nd)
 		break;
 
 	case S_ADR:
-		CodeDAddress(left);
+		CodeDAddress(left, 1);
 		break;
 
 	case S_DEC:
@@ -739,7 +739,7 @@ CodeOper(expr, true_label, false_label)
 				C_cal(tp->tp_size <= word_size ?
 					"mulu" :
 					"mulul");
-				C_asp(tp->tp_size);
+				c_asp((int)(tp->tp_size));
 			}
 			break;
 		case T_REAL:
@@ -830,7 +830,7 @@ CodeOper(expr, true_label, false_label)
 			if (expr->nd_symb == GREATEREQUAL) {
 				/* A >= B is the same as A equals A + B
 				*/
-				C_dup(2*tp->tp_size);
+				C_dup(tp->tp_size << 1);
 				C_asp(tp->tp_size);
 				C_ior(tp->tp_size);
 				expr->nd_symb = '=';
@@ -1027,7 +1027,7 @@ CodeEl(nd, tp)
 		else	C_loc((arith) (eltype->enm_ncst - 1));
 		Operands(nd);
 		C_cal("LtoUset");	/* library routine to fill set */
-		C_asp(5 * word_size);
+		c_asp(5 * (int)word_size);
 	}
 	else {
 		CodePExpr(nd);
@@ -1051,7 +1051,7 @@ CodePExpr(nd)
 	free_desig(designator);
 }
 
-CodeDAddress(nd)
+CodeDAddress(nd, chk_controlvar)
 	t_node *nd;
 {
 	/*	Generate code to push the address of the designator "nd"
@@ -1059,12 +1059,22 @@ CodeDAddress(nd)
 	*/
 
 	register t_desig *designator = new_desig();
+	int chkptr;
 
-	/* ChkForFOR(nd); ??? not quite: wrong for value conformant arrays,
-			  where the parameter is the for-loop control variable
-	*/
+	if (chk_controlvar) ChkForFOR(nd);
 	CodeDesig(nd, designator);
+	chkptr = designator->dsg_kind==DSG_PLOADED ||
+		 designator->dsg_kind==DSG_PFIXED;
 	CodeAddress(designator);
+
+	/*	Generate dummy use of pointer, to get possible error message
+		as soon as possible
+	*/
+	if (chkptr && ! options['R']) {
+		C_dup(pointer_size);
+		C_loi((arith) 1);
+		c_asp((int)word_size);
+	}
 	free_desig(designator);
 }
 
@@ -1117,5 +1127,10 @@ c_lae_dlb(l)
 	label l;
 {
 	C_lae_dlb(l, (arith) 0);
+}
+
+c_asp(n)
+{
+	C_asp((arith) n);
 }
 #endif

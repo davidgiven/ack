@@ -447,7 +447,7 @@ genrck(tp)
 	else {
 		C_cal(btp->tp_fund == T_INTEGER ? "rckil" : "rckul");
 	}
-	C_asp(pointer_size);
+	c_asp((int)pointer_size);
 }
 
 getbounds(tp, plo, phi)

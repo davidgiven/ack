@@ -236,7 +236,7 @@ CodeValue(ds, tp)
 			CodeAddress(ds);
 			CodeConst(tp->tp_size, (int) pointer_size);
 			C_cal("load");
-			C_asp(pointer_size + pointer_size);
+			c_asp((int)pointer_size + (int)pointer_size);
 			break;
 		}
 		break;
@@ -368,7 +368,7 @@ CodeMove(rhs, left, rtp)
 			C_loc(rtp->tp_size);
 			C_loc(tp->tp_size);
 			C_cal("StringAssign");
-			C_asp(pointer_size + pointer_size + dword_size);
+			c_asp((int)pointer_size + (int)pointer_size + (int)dword_size);
 			break;
 		}
 		CodeStore(lhs, tp);
@@ -436,7 +436,7 @@ CodeMove(rhs, left, rtp)
 		case USE_LOI_STI:
 			CodeConst(tp->tp_size, (int) pointer_size);
 			C_cal("blockmove");
-			C_asp(3 * pointer_size);
+			c_asp(3 * (int)pointer_size);
 			break;
 		}
 		break;
