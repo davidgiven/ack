@@ -1,4 +1,3 @@
-
 EMH=../../../h
 EML=../../../lib
 CFLAGS=-DVERBOSE -O
@@ -7,8 +6,6 @@ RA=.
 OBJECTS=ra.o ra_items.o ra_lifet.o ra_allocl.o ra_profits.o ra_interv.o ra_pack.o ra_xform.o ra_aux.o
 SHOBJECTS=$(SHARE)/aux.o $(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/go.o
 SRC=ra.h ra_items.h ra_lifet.h ra_allocl.h ra_profits.h ra_interv.h ra_pack.h ra_xform.h ra_aux.h ra.c ra_items.c ra_lifet.c ra_allocl.c ra_profits.c ra_interv.c ra_pack.c ra_xform.c ra_aux.c
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 itemtab.h: \
 	makeitems \
@@ -16,10 +13,10 @@ itemtab.h: \
 	 makeitems $(EMH)/em_mnem.h itemtab.src > itemtab.h
 makeitems: \
 	makeitems.c
-	 cc -o makeitems makeitems.c
+	 $(CC) -o makeitems makeitems.c
 ra: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -o ra -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
+	 $(CC) -o ra -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
 opr:
 	pr $(SRC) | opr
 lpr:

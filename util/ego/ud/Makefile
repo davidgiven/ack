@@ -6,18 +6,12 @@ UD=.
 OBJECTS=ud.o ud_const.o ud_copy.o ud_aux.o ud_defs.o
 SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/map.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/files.o $(SHARE)/aux.o $(SHARE)/locals.o $(SHARE)/init_glob.o $(SHARE)/go.o
 SRC=ud.h ud_defs.h ud_const.h ud_copy.h ud_aux.h ud.c ud_defs.c ud_const.c ud_copy.c ud_aux.c
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 ud: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -o ud -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
+	 $(CC) -o ud -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
 lpr:
 	pr $(SRC) | lpr
-opr:
-	pr $(SRC) | opr
-dumpflop:
-	tar -uf /mnt/ego/ud/ud.tarf $(SRC)
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 ud.o:	../../../h/em_pseu.h

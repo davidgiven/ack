@@ -8,16 +8,12 @@ il3_change.o il3_subst.o il3_aux.o il_aux.o
 SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/parser.o $(SHARE)/aux.o $(SHARE)/go.o
 SRC=il.h il1_anal.h il1_cal.h il1_formal.h il1_aux.h il2_aux.h il3_subst.h il3_change.h il3_aux.h il_aux.h \
 il.c il1_anal.c il1_cal.c il1_formal.c il1_aux.c il2_aux.c il3_subst.c il3_change.c il3_aux.c il_aux.c
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 il: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -o il -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
+	 $(CC) -o il -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
 lpr:
 	pr $(SRC) | lpr
-dumpflop:
-	tar -uf /mnt/ego/il/il.tarf $(SRC)
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 il.o:	../../../h/em_mnem.h

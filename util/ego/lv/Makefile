@@ -6,16 +6,12 @@ LV=.
 OBJECTS=lv.o
 SHOBJECTS=$(SHARE)/get.o $(SHARE)/aux.o $(SHARE)/put.o $(SHARE)/map.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/parser.o $(SHARE)/files.o $(SHARE)/locals.o $(SHARE)/init_glob.o $(SHARE)/go.o
 SRC=lv.h  lv.c 
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 lv: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -o lv -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-opr:
-	pr $(SRC) | opr
-dumpflop:
-	tar -uf /mnt/ego/lv/lv.tarf $(SRC)
+	 $(CC) -o lv -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
+lpr:
+	pr $(SRC) | lpr
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 lv.o:	../../../h/em_mnem.h
