@@ -575,10 +575,6 @@ code_expr(expr, val, code, tlbl, flbl)
 	if (! options['L'])	/* profiling	*/
 		C_lin((arith)(expr->ex_line));
 
-	/*	HERE WE SHOULD GENERATE A MESSAGE:
-		if (expr->ex_flags & EX_VOLATILE)
-			HANDS_OFF
-	*/
 	EVAL(expr, val, code, tlbl, flbl);
 #else	LINT
 	lint_expr(expr, code ? USED : IGNORED);

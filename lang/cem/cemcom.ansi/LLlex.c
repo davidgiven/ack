@@ -449,7 +449,7 @@ skipcomment()
 		EOI is returned by LoadChar only on encountering EOF of the
 		top-level file...
 	*/
-	register int c;
+	register int c, oldc = '\0';
 
 	NoUnstack++;
 	c = GetChar();
@@ -468,12 +468,16 @@ skipcomment()
 #endif	LINT
 				return;
 			}
+			oldc = c;
 			c = GetChar();
 #ifdef	LINT
 			lint_comment_char(c);
 #endif	LINT
 		} /* last Character seen was '*' */
 		c = GetChar();
+		if ( c != '/' && oldc == '/')
+			lexwarning("comment inside comment ?");
+		oldc = '*';
 #ifdef	LINT
 		lint_comment_char(c);
 #endif	LINT

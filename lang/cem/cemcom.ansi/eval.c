@@ -70,9 +70,11 @@ EVAL(expr, val, code, true_label, false_label)
 	int val, code;
 	label true_label, false_label;
 {
-	register int gencode = (code == TRUE
-				&& (expr->ex_type->tp_size > 0
-				    || expr->ex_type->tp_fund == FUNCTION));
+	int vol = (code != TRUE && recurqual(expr->ex_type, TQ_VOLATILE));
+	register int gencode = ((code == TRUE
+				    && (expr->ex_type->tp_size > 0
+					|| expr->ex_type->tp_fund == FUNCTION))
+				|| vol);
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
@@ -661,7 +663,9 @@ EVAL(expr, val, code, true_label, false_label)
 	default:
 		crash("(EVAL) bad expression class");
 	}
-	if (expr->ex_flags & EX_VOLATILE) C_nop();
+	if (expr->ex_flags & EX_VOLATILE || vol) C_nop();
+	if (vol) C_asp(expr->ex_type->tp_size);
+
 }
 
 /*	compare() serves as an auxiliary function of EVAL	*/

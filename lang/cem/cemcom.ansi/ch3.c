@@ -154,6 +154,9 @@ ch3sel(expp, oper, idf)
 	if (oper == '.' && exp->ex_flags & EX_READONLY)  {
 		exp->ex_type = qualifier_type(exp->ex_type, TQ_CONST);
 	}
+	if (exp->ex_flags & EX_VOLATILE)  {
+		exp->ex_type = qualifier_type(exp->ex_type, TQ_VOLATILE);
+	}
 	*expp = exp;
 }
 
@@ -558,18 +561,19 @@ equal_proto(pl, opl)
 	return !(pl || opl);
 }
 
-/* check if a type has a const declared member */
-recurconst(tp)
+/* check if a type has a consqualified member */
+recurqual(tp, qual)
 struct type *tp;
+int qual;
 {
 	register struct sdef *sdf;
 
 	ASSERT(tp);
 
-	if (tp->tp_typequal & TQ_CONST) return 1;
+	if (tp->tp_typequal & qual) return 1;
 	sdf = tp->tp_sdef;
 	while (sdf) {
-		if (recurconst(sdf->sd_type))
+		if (recurqual(sdf->sd_type, qual))
 			return 1;
 		sdf = sdf->sd_sdef;
 	}
@@ -595,7 +599,6 @@ ch3asgn(expp, oper, expr)
 	*/
 	register struct expr *exp = *expp;
 	int fund = exp->ex_type->tp_fund;
-	int vol = 0;
 	struct type *tp;
 	char *oper_string = symbol2str(oper);
 
@@ -608,16 +611,10 @@ ch3asgn(expp, oper, expr)
 	} else if (exp->ex_flags & EX_READONLY) {
 		expr_error(exp, "operand of %s is read-only", oper_string);
 	} else if (fund == STRUCT || fund == UNION) {
-		if (recurconst(exp->ex_type))
+		if (recurqual(exp->ex_type, TQ_CONST))
 			expr_error(expr,"operand of %s contains a const-qualified member",
 					    oper_string);
 	}
-
-	/*	Preserve volatile markers across the tree.
-		This is questionable, depending on the way the optimizer
-		wants this information.
-	*/
-	vol = (exp->ex_flags & EX_VOLATILE) || (expr->ex_flags & EX_VOLATILE);
 
 	if (oper == '=') {
 		ch3cast(&expr, oper, exp->ex_type);
@@ -654,7 +651,7 @@ ch3asgn(expp, oper, expr)
 	exp = new_oper(exp->ex_type, exp, oper, expr);
 #endif NOBITFIELD
 	exp->OP_TYPE = tp;	/* for EVAL() */
-	exp->ex_flags |= vol ? (EX_SIDEEFFECTS|EX_VOLATILE) : EX_SIDEEFFECTS;
+	exp->ex_flags |= EX_SIDEEFFECTS;
 	*expp = exp;
 }
 
