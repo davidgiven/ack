@@ -416,13 +416,13 @@ check_pseudoproto(pl, opl)
 
 	if (pl->pl_flag & PL_ELLIPSIS) {
 		error("illegal ellipsis terminator");
+		pl->pl_flag |= PL_ERRGIVEN;
+		opl->pl_flag |= PL_ERRGIVEN;
 		return 0;
 	}
 	if (opl->pl_flag & PL_VOID) {
 		if (!(pl->pl_flag & PL_VOID))
-			error("function is defined without parameters");
-		pl->pl_flag |= PL_ERRGIVEN;
-		opl->pl_flag |= PL_ERRGIVEN;
+			strict("function is defined without parameters");
 		return 0;
 	}
 	while (pl && opl) {
