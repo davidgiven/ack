@@ -261,6 +261,8 @@ outincludes() {
 outregs() {
 	register i,j,k;
 	short rset[SZOFSET(MAXREGS)];
+	short clashlist[MAXREGS*MAXREGS];
+	int iclashlist = 0;
 	int t,ready;
 
 
@@ -308,12 +310,21 @@ outregs() {
 			fprintf(ctable,"},{");
 			for (j=0;j<SZOFSET(nregs);j++)
 				fprintf(ctable,"0%o,",rset[j]&0xFFFF);
-			fprintf(ctable,"}");
+			fprintf(ctable,"}, %d", iclashlist);
+			for (j = 1; j < nregs; j++) {
+				if (BIT(rset, j)) clashlist[iclashlist++] = j;
+			}
+			clashlist[iclashlist++] = 0;
 		}
 		fprintf(ctable,",%d",l_regs[i].ri_rregvar>=0);
 		fprintf(ctable,"},\n");
 	}
-	fprintf(ctable,"};\n\n");
+	fprintf(ctable,"};\n\n short clashlist[] = {\n\t");
+	for (i = 0; i < iclashlist; i++) {
+		fprintf(ctable, "%d, ", clashlist[i]);
+		if (clashlist[i] == 0) fprintf(ctable, "\n\t");
+	}
+	fprintf(ctable, "0};\n\n");
 }
 
 outregvars() {
