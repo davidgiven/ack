@@ -7,8 +7,8 @@ COMPARE = $(MODULES)/compare
 
 all:		libassert.a
 
-libassert.a:	BadAssertion.o
-		ar r libassert.a BadAssertion.o
+libassert.a:	BadAssert.o
+		ar r libassert.a BadAssert.o
 		-sh -c 'ranlib libassert.a'
 
 install:	all
@@ -22,7 +22,7 @@ cmp:		all
 		$(COMPARE) h/assert.h
 
 pr:
-		@pr Makefile assert.h BadAssertion.c
+		@pr Makefile assert.h BadAssert.c
 
 opr:
 		make pr | opr
