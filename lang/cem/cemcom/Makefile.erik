@@ -173,7 +173,7 @@ lxref:
 lint:	lint.main lint.cem lint.tab
 
 lint.main: cfiles
-	lint -DNORCSID -bx $(CDEFS) `sources $(OBJ)` >lint.out
+	lint -bx $(CDEFS) `sources $(OBJ)` >lint.out
 
 cchk:
 	cchk `sources $(COBJ)`
