@@ -10,7 +10,8 @@ testI:
 		int t5.p; em
 		int tstenc.p; em
 		int tstgto.p; em
-		rm -f e.out f?
+		int -.p callc.p cmod.c ; em
+		rm -f e.out f? *.k
 
 testC:
 		apc t1.p; a.out
@@ -20,7 +21,8 @@ testC:
 		apc t5.p; a.out
 		apc tstenc.p; a.out
 		apc tstgto.p; a.out
-		rm -f a.out f?
+		apc -.p callc.p cmod.c ; em
+		rm -f a.out f? *.[os]
 
 install cmp:
 
