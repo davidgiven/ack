@@ -1,7 +1,6 @@
 sed '
 s:^.*ALLOCDEF.*"\(.*\)".*$:\
 /* allocation definitions of struct \1 */\
-extern char *st_alloc();\
 extern struct \1 *h_\1;\
 #define	new_\1() ((struct \1 *) \\\
 		st_alloc((char **)\&h_\1, sizeof(struct \1)))\

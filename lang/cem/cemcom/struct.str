@@ -11,8 +11,6 @@ struct sdef	{		/* for selectors */
 	arith sd_offset;
 };
 
-extern char *st_alloc();
-
 /* ALLOCDEF "sdef" */
 
 struct tag	{		/* for struct-, union- and enum tags */

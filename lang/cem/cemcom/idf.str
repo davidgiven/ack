@@ -22,13 +22,6 @@ extern char hmask[];		/* the random masks */
 #define	ENHASH(hs,ch,ps)	(hs + (ch ^ hmask[ps]))
 #define	STOPHASH(hs)		(hs & HASHMASK)
 
-struct idstack_item	{	/* stack of identifiers */
-	struct idstack_item *next;
-	struct idf *is_idf;
-};
-
-/* ALLOCDEF "idstack_item" */
-
 struct idf	{
 	struct idf *next;
 	char *id_text;

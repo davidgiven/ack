@@ -189,14 +189,15 @@ compile(argc, argv)
 #endif USE_TMP
 
 #ifdef	DEBUG
-		if (options['u'])	/* unstack L_UNIVERSAL	*/
-			unstack_level();
+		if (options['u'])	{
+			unstack_level();	/* unstack L_GLOBAL */
+		}
 		if (options['f'] || options['t'])
 			dumpidftab("end of main", options['f'] ? 0 : 0);
 #endif	DEBUG
 #ifndef NOPP
 	}
-#endif NOPP
+#endif	NOPP
 	PopLex();
 }
 

@@ -10,12 +10,20 @@ struct declarator	{
 	struct declarator *next;
 	struct idf *dc_idf;
 	struct decl_unary *dc_decl_unary;
-	struct idstack_item *dc_fparams;	/* params for function	*/
+	struct formal *dc_formal;	/* params for function	*/
 };
 
 /* ALLOCDEF "declarator" */
 
-#define	NO_PARAMS ((struct idstack_item *) 0)
+
+struct formal	{			/* list of formals */
+	struct formal *next;
+	struct idf *fm_idf;
+};
+
+/* ALLOCDEF "formal" */
+
+#define	NO_PARAMS ((struct formal *) 0)
 
 struct decl_unary	{
 	struct decl_unary *next;

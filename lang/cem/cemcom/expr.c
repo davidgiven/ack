@@ -132,7 +132,7 @@ dot2expr(expp)
 		string2expr(*expp);
 		break;
 	case INTEGER:
-		*expp = intexpr(dot.tk_ival, dot.tk_fund);
+		int2expr(*expp);
 		break;
 	case FLOATING:
 		float2expr(*expp);
@@ -214,6 +214,27 @@ string2expr(expr)
 	expr->SG_DATLAB = 0;
 }
 
+int2expr(expr)
+	struct expr *expr;
+{
+	/*	Dot contains an integer constant which is turned
+		into an expression.
+	*/
+	fill_int_expr(expr, dot.tk_ival, dot.tk_fund);
+}
+
+float2expr(expr)
+	struct expr *expr;
+{
+	/*	Dot contains a floating point constant which is turned
+		into an expression.
+	*/
+	expr->ex_type = double_type;
+	expr->ex_class = Float;
+	expr->FL_VALUE = dot.tk_fval;
+	expr->FL_DATLAB = 0;
+}
+
 struct expr*
 intexpr(ivalue, fund)
 	arith ivalue;
@@ -227,6 +248,17 @@ intexpr(ivalue, fund)
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
 	
+	fill_int_expr(expr, ivalue, fund);
+	return expr;
+}
+
+fill_int_expr(expr, ivalue, fund)
+	struct expr *expr;
+	arith ivalue;
+{
+	/*	Details derived from ivalue and fund are put into the
+		constant integer expression expr.
+	*/
 	switch (fund) {
 	case INT:
 		expr->ex_type = int_type;
@@ -258,19 +290,6 @@ intexpr(ivalue, fund)
 	expr->VL_VALUE = ivalue;
 	
 	cut_size(expr);
-	return expr;
-}
-
-float2expr(expr)
-	struct expr *expr;
-{
-	/*	Dot contains a floating point constant which is turned
-		into an expression.
-	*/
-	expr->ex_type = double_type;
-	expr->ex_class = Float;
-	expr->FL_VALUE = dot.tk_fval;
-	expr->FL_DATLAB = 0;
 }
 
 struct expr *

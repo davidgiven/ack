@@ -153,10 +153,9 @@ non_function(struct decspecs *ds; struct declarator *dc;)
 :
 	{reject_params(dc);}
 	initializer(dc->dc_idf, &expr)?
-		{
-			code_declaration(dc->dc_idf, expr, level, ds->ds_sc);
-			free_expression(expr);
-		}
+	{
+		code_declaration(dc->dc_idf, expr, level, ds->ds_sc);
+	}
 	[
 		','
 		init_declarator(ds)

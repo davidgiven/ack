@@ -1,4 +1,4 @@
-/* DERIVED FROM $Header$ */
+/* $Header$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
 #include	<system.h>
@@ -250,19 +250,21 @@ unstack_world()
 			/* space must be allocated */
 			bss(idf);
 			namelist(idf->id_text);		/* may be common */
-			def->df_alloc = ALLOC_DONE;	/* *)	*/
+			def->df_alloc = ALLOC_DONE;	/* see Note below */
 		}
 		se = se->next;
 	}
-	/*   *)	df_alloc must be set to ALLOC_DONE because the idf entry
+	/*	Note:
+		df_alloc must be set to ALLOC_DONE because the idf entry
 		may occur several times in the list.
 		The reason for this is that the same name may be used
-		for different purposes on the same level, e.g
+		for different purposes on the same level, e.g.
 			struct s {int s;} s;
-		is a legal definition and contains 3 defining occurrences of s.
-		Each definition has been entered into the idfstack.
+		is a legal definition and contains 3 defining occurrences
+		of s.
+		Each definition has been entered into the identifier stack.
 		Although only one of them concerns a variable, we meet the
-		s 3 times when scanning the idfstack.
+		s 3 times when scanning the identifier stack.
 	*/
 }
 

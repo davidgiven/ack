@@ -180,6 +180,7 @@ cstbin(expp, oper, expr)
 	cut_size(*expp);
 	(*expp)->ex_flags |= expr->ex_flags;
 	(*expp)->ex_flags &= ~EX_PARENS;
+	free_expression(expr);
 }
 
 cut_size(expr)

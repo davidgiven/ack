@@ -1,5 +1,5 @@
 !File: myalloc.h
-#define OWNALLOC	1	/* use own superfast allocation		*/
+#define	OWNALLOC	1	/* use own superfast allocation		*/
 #define	ALLOCSIZ	4096	/* allocate pieces of 4K	*/
 #define	ALIGNSIZE	8	/* needed for alloc.c	*/
 

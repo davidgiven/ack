@@ -55,7 +55,7 @@ code_startswitch(expr)
 		break;
 	}
 	
-	stat_stack(l_break, NO_LABEL);
+	stack_stmt(l_break, NO_LABEL);
 	sh->sh_break = l_break;
 	sh->sh_default = 0;
 	sh->sh_table = l_table;
@@ -123,7 +123,7 @@ code_endswitch()
 		ce = tmp;
 	}
 	free_switch_hdr(sh);
-	stat_unstack();
+	unstack_stmt();
 }
 
 code_case(expr)

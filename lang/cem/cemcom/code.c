@@ -12,6 +12,7 @@
 #include	"idf.h"
 #include	"label.h"
 #include	"code.h"
+#include	"stmt.h"
 #include	"alloc.h"
 #include	"def.h"
 #include	"expr.h"
@@ -28,7 +29,7 @@
 #include	"atw.h"
 #include	"assert.h"
 
-static struct stat_block *stat_sp, *stat_head;
+static struct stmt_block *stmt_stack;
 
 char *symbol2str();
 int fp_used;
@@ -37,20 +38,18 @@ label datlab_count = 1;
 
 extern char options[];
 
-/*	init_code() initialises the output file on which the compact
-	EM code is written
-*/
 init_code(dst_file)
 	char *dst_file;
 {
+	/*	init_code() initialises the output file on which the
+		compact EM code is written
+	*/
 	C_init(word_size, pointer_size); /* initialise EM module */
 	if (C_open(dst_file) == 0)
 		fatal("cannot write to %s\n", dst_file);
 #ifndef	USE_TMP
 	famous_first_words();
 #endif	USE_TMP
-	stat_sp = stat_head = new_stat_block();
-	clear((char *)stat_sp, sizeof(struct stat_block));
 }
 
 famous_first_words()
@@ -162,18 +161,18 @@ static label func_res_label;
 static char *last_fn_given = "";
 static label file_name_label;
 
-/*	begin_proc() is called at the entrance of a new function
-	and performs the necessary code generation:
-	-	a scope indicator (if needed) exp/inp
-	-	the procedure entry pro $name
-	-	reserves some space if the result of the function
-		does not fit in the return area
-	-	a fil pseudo instruction
-*/
 begin_proc(name, def)	/* to be called when entering a procedure	*/
 	char *name;
 	struct def *def;
 {
+	/*	begin_proc() is called at the entrance of a new function
+		and performs the necessary code generation:
+		-	a scope indicator (if needed) exp/inp
+		-	the procedure entry pro $name
+		-	reserves some space if the result of the function
+			does not fit in the return area
+		-	a fil pseudo instruction
+	*/
 	arith size;
 
 #ifndef	USE_TMP
@@ -217,20 +216,21 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	}
 }
 
-/*	end_proc() deals with the code to be generated at the end of
-	a function, as there is:
-	-	the EM ret instruction: "ret 0"
-	-	loading of the function result in the function result area
-		if there has been a return <expr> in the function body
-		(see do_return_expr())
-	-	indication of the use of floating points
-	-	indication of the number of bytes used for formal parameters
-	-	use of special identifiers such as "setjmp"
-	-	"end" + number of bytes used for local variables
-*/
 end_proc(fbytes, nbytes)
 	arith fbytes, nbytes;
 {
+	/*	end_proc() deals with the code to be generated at the end of
+		a function, as there is:
+		-	the EM ret instruction: "ret 0"
+		-	loading of the function result in the function
+			result area if there has been a return <expr>
+			in the function body (see do_return_expr())
+		-	indication of the use of floating points
+		-	indication of the number of bytes used for
+			formal parameters
+		-	use of special identifiers such as "setjmp"
+		-	"end" + number of bytes used for local variables
+	*/
 	static int mes_flt_given = 0;	/* once for the whole program */
 
 #ifdef	DATAFLOW
@@ -296,6 +296,10 @@ code_declaration(idf, expr, lvl, sc)
 		-	global variables, coded only if initialized;
 		-	local static variables;
 		-	local automatic variables;
+		Since the expression may be modified in the process,
+		code_declaration() frees it after use, as the caller can
+		no longer do so.
+		
 		If there is a storage class indication (EXTERN/STATIC),
 		code_declaration() will generate an exa or ina.
 		The sc is the actual storage class, as given in the
@@ -328,6 +332,7 @@ code_declaration(idf, expr, lvl, sc)
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(text);
 			do_ival(&(def->df_type), expr);
+			free_expression(expr);
 		}
 	}
 	else
@@ -341,8 +346,11 @@ code_declaration(idf, expr, lvl, sc)
 				integer label in EM.
 			*/
 			C_df_dlb((label)def->df_address);
-			if (expr) /* there is an initialisation	*/
+			if (expr)	{
+				/* there is an initialisation	*/
 				do_ival(&(def->df_type), expr);
+				free_expression(expr);
+			}
 			else {	/* produce blank space */
 				if (size <= 0) {
 					error("size of %s unknown", text);
@@ -378,6 +386,7 @@ loc_init(expr, id)
 {
 	/*	loc_init() generates code for the assignment of
 		expression expr to the local variable described by id.
+		It frees the expression afterwards.
 	*/
 	register struct type *tp = id->id_def->df_type;
 	
@@ -388,6 +397,7 @@ loc_init(expr, id)
 	case STRUCT:
 	case UNION:
 		error("no automatic aggregate initialisation");
+		free_expression(expr);
 		return;
 	}
 	
@@ -407,8 +417,9 @@ loc_init(expr, id)
 	else	{	/* not embraced	*/
 		struct value vl;
 
-		ch7cast(&expr, '=', tp);
+		ch7cast(&expr, '=', tp);	/* may modify expr */
 		EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		free_expression(expr);
 		vl.vl_class = Name;
 		vl.vl_data.vl_idf = id;
 		vl.vl_value = (arith)0;
@@ -416,11 +427,11 @@ loc_init(expr, id)
 	}
 }
 
-/*	bss() allocates bss space for the global idf.
-*/
 bss(idf)
 	struct idf *idf;
 {
+	/*	bss() allocates bss space for the global idf.
+	*/
 	register struct def *def = idf->id_def;
 	arith size = def->df_type->tp_size;
 	
@@ -454,85 +465,80 @@ formal_cvt(def)
 		}
 }
 
-/*	code_expr() is the parser's interface to the expression code
-	generator.
-	If line number trace is wanted, it generates a lin instruction.
-	EVAL() is called directly.
-*/
 code_expr(expr, val, code, tlbl, flbl)
 	struct expr *expr;
 	label tlbl, flbl;
 {
+	/*	code_expr() is the parser's interface to the expression code
+		generator.
+		If line number trace is wanted, it generates a
+		lin instruction.  EVAL() is called directly.
+	*/
 	if (options['p'])	/* profiling	*/
 		C_lin((arith)LineNumber);
 	EVAL(expr, val, code, tlbl, flbl);
 }
 
 /*	The FOR/WHILE/DO/SWITCH stacking mechanism:
-	stat_stack() has to be called at the entrance of a
+	stack_stmt() has to be called at the entrance of a
 	for, while, do or switch statement to indicate the
 	EM labels where a subsequent break or continue causes
 	the program to jump to.
 */
-/*	do_break() generates EM code needed at the occurrence of "break":
+/*	code_break() generates EM code needed at the occurrence of "break":
 	it generates a branch instruction to the break label of the
 	innermost statement in which break has a meaning.
 	As "break" is legal in any of 'while', 'do', 'for' or 'switch',
 	which are the only ones that are stacked, only the top of
 	the stack is interesting.
-	0 is returned if the break cannot be bound to any enclosing
-	statement.
 */
-int
-do_break()
+code_break()
 {
-	register struct stat_block *stat_ptr = stat_sp;
+	register struct stmt_block *stmt_block = stmt_stack;
 
-	if (stat_ptr)	{
-		C_bra(stat_ptr->st_break);
-		return 1;
+	if (stmt_block)	{
+		C_bra(stmt_block->st_break);
+		return;
 	}
-	return 0;	/* break is illegal	*/
+	error("break not inside for, while, do or switch");
 }
 
-/*	do_continue() generates EM code needed at the occurrence of "continue":
+/*	code_continue() generates EM code needed at the occurrence of
+	"continue":
 	it generates a branch instruction to the continue label of the
 	innermost statement in which continue has a meaning.
-	0 is returned if the continue cannot be bound to any enclosing
-	statement.
 */
-int
-do_continue()
+code_continue()
 {
-	register struct stat_block *stat_ptr = stat_sp;
+	register struct stmt_block *stmt_block = stmt_stack;
 
-	while (stat_ptr)	{
-		if (stat_ptr->st_continue)	{
-			C_bra(stat_ptr->st_continue);
-			return 1;
+	while (stmt_block)	{
+		if (stmt_block->st_continue)	{
+			C_bra(stmt_block->st_continue);
+			return;
 		}
-		stat_ptr = stat_ptr->next;
+		stmt_block = stmt_block->next;
 	}
-	return 0;
+	error("continue not inside for, while or do");
 }
 
-stat_stack(break_label, cont_label)
+stack_stmt(break_label, cont_label)
 	label break_label, cont_label;
 {
-	register struct stat_block *newb = new_stat_block();
+	register struct stmt_block *stmt_block = new_stmt_block();
 
-	newb->next = stat_sp;
-	newb->st_break = break_label;
-	newb->st_continue = cont_label;
-	stat_sp = newb;
+	stmt_block->next = stmt_stack;
+	stmt_block->st_break = break_label;
+	stmt_block->st_continue = cont_label;
+	stmt_stack = stmt_block;
 }
 
-/*	stat_unstack() unstacks the data of a statement
-	which may contain break or continue
-*/
-stat_unstack()
+unstack_stmt()
 {
-	register struct stat_block *sbp = stat_sp;
-	stat_sp = stat_sp->next;
-	free_stat_block(sbp);
+	/*	unstack_stmt() unstacks the data of a statement
+		which may contain break or continue
+	*/
+	register struct stmt_block *sbp = stmt_stack;
+	stmt_stack = stmt_stack->next;
+	free_stmt_block(sbp);
 }

@@ -21,7 +21,7 @@ struct xxx	{
 };
 
 char *
-st_alloc(phead, size)
+head_alloc(phead, size)
 	char **phead;
 	int size;
 {

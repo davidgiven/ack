@@ -552,14 +552,14 @@ declare_params(dc)
 {
 	/*	Declares the formal parameters if they exist.
 	*/
-	register struct idstack_item *is = dc->dc_fparams;
+	register struct formal *fm = dc->dc_formal;
 	
-	while (is)	{
-		declare_parameter(is->is_idf);
-		is = is->next;
+	while (fm)	{
+		declare_parameter(fm->fm_idf);
+		fm = fm->next;
 	}
-	del_idfstack(dc->dc_fparams);
-	dc->dc_fparams = 0;
+	free_formals(dc->dc_formal);
+	dc->dc_formal = 0;
 }
 
 init_idf(idf)
@@ -672,13 +672,13 @@ update_ahead(idf)
 				TYPE_IDENTIFIER : IDENTIFIER;
 }
 
-del_idfstack(is)
-	struct idstack_item *is;
+free_formals(fm)
+	struct formal *fm;
 {
-	while (is)	{
-		register struct idstack_item *tmp = is->next;
-		free_idstack_item(is);
-		is = tmp;
+	while (fm)	{
+		register struct formal *tmp = fm->next;
+		free_formal(fm);
+		fm = tmp;
 	}
 }
 

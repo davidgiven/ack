@@ -10,6 +10,7 @@
 #include	"def.h"
 #include	"sizes.h"
 #include	"align.h"
+#include	"storage.h"
 
 struct type *function_of(), *array_of();
 #ifndef NOBITFIELD

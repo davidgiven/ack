@@ -153,7 +153,7 @@ while_statement
 :
 	WHILE
 		{
-			stat_stack(l_break, l_continue);
+			stack_stmt(l_break, l_continue);
 			C_df_ilb(l_continue);
 		}
 	'('
@@ -175,7 +175,7 @@ while_statement
 		{
 			C_bra(l_continue);
 			C_df_ilb(l_break);
-			stat_unstack();
+			unstack_stmt();
 			free_expression(expr);
 		}
 ;
@@ -189,7 +189,7 @@ do_statement
 :
 	DO
 		{	C_df_ilb(l_body);
-			stat_stack(l_break, l_continue);
+			stack_stmt(l_break, l_continue);
 		}
 	statement
 	WHILE
@@ -212,7 +212,7 @@ do_statement
 	')'
 	';'
 		{
-			stat_unstack();
+			unstack_stmt();
 			free_expression(expr);
 		}
 ;
@@ -226,7 +226,7 @@ for_statement
 	}
 :
 	FOR
-		{	stat_stack(l_break, l_continue);
+		{	stack_stmt(l_break, l_continue);
 		}
 	'('
 	[
@@ -263,7 +263,7 @@ for_statement
 							NO_LABEL, NO_LABEL);
 			C_bra(l_test);
 			C_df_ilb(l_break);
-			stat_unstack();
+			unstack_stmt();
 			free_expression(e_init);
 			free_expression(e_test);
 			free_expression(e_incr);
@@ -317,20 +317,14 @@ default_statement
 break_statement
 :
 	BREAK
-		{
-			if (!do_break())
-				error("invalid break");
-		}
+	{code_break();}
 	';'
 ;
 
 continue_statement
 :
 	CONTINUE
-		{
-			if (!do_continue())
-				error("invalid continue");
-		}
+	{code_continue();}
 	';'
 ;
 

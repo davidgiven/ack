@@ -16,6 +16,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
+#include	"storage.h"
 
 extern char options[];
 }
@@ -151,7 +152,6 @@ init_declarator(struct decspecs *ds;)
 	initializer(Dc.dc_idf, &expr)?
 	{
 		code_declaration(Dc.dc_idf, expr, level, ds->ds_sc);
-		free_expression(expr);
 	}
 ]
 	{remove_declarator(&Dc);}
@@ -167,7 +167,7 @@ init_declarator(struct decspecs *ds;)
 declarator(struct declarator *dc;)
 	{
 		arith count;
-		struct idstack_item *is = 0;
+		struct formal *fm = 0;
 	}
 :
 [
@@ -177,11 +177,11 @@ declarator(struct declarator *dc;)
 						old-fashioned initialization.
 					*/
 		'('
-		formal_list(&is) ?	/* semantic check later...	*/
+		formal_list(&fm) ?	/* semantic check later...	*/
 		')'
 		{
-			add_decl_unary(dc, FUNCTION, (arith)0, is);
-			is = 0;
+			add_decl_unary(dc, FUNCTION, (arith)0, fm);
+			fm = 0;
 		}
 	|
 		arrayer(&count)
@@ -219,21 +219,21 @@ arrayer(arith *sizep;)
 	']'
 ;
 
-formal_list (struct idstack_item **is;)
+formal_list (struct formal **fmp;)
 :
-	formal(is) [ ',' formal(is) ]*
+	formal(fmp) [ ',' formal(fmp) ]*
 ;
 
-formal(struct idstack_item **is;)
+formal(struct formal **fmp;)
 	{struct idf *idf;	}
 :
 	identifier(&idf)
 	{
-		struct idstack_item *new = new_idstack_item();
+		struct formal *new = new_formal();
 		
-		new->is_idf = idf;
-		new->next = *is;
-		*is = new;
+		new->fm_idf = idf;
+		new->next = *fmp;
+		*fmp = new;
 	}
 ;
 

@@ -1,14 +1,6 @@
 /* $Header$ */
 /*	C O D E - G E N E R A T O R   D E F I N I T I O N S	*/
 
-struct stat_block	{
-	struct stat_block *next;
-	label st_break;
-	label st_continue;
-};
-
-/* ALLOCDEF "stat_block" */
-
 struct string_cst	{	/* storing string constants */
 	struct string_cst *next;
 	char *sc_value;

@@ -32,10 +32,10 @@ declare_type(tp, dc)
 	return tp;
 }
 
-add_decl_unary(dc, fund, count, is)
+add_decl_unary(dc, fund, count, fm)
 	struct declarator *dc;
 	arith count;
-	struct idstack_item *is;
+	struct formal *fm;
 {
 	/*	A decl_unary describing a constructor with fundamental
 		type fund and with size count is inserted in front of the
@@ -47,14 +47,14 @@ add_decl_unary(dc, fund, count, is)
 	new->next = dc->dc_decl_unary;
 	new->du_fund = fund;
 	new->du_count = count;
-	if (is)	{
+	if (fm)	{
 		if (dc->dc_decl_unary)	{
 			/* paramlist only allowed at first decl_unary	*/
 			error("formal parameter list discarded");
 		}
 		else	{
 			/* register the parameters	*/
-			dc->dc_fparams = is;
+			dc->dc_formal = fm;
 		}
 	}
 	dc->dc_decl_unary = new;
@@ -82,10 +82,10 @@ reject_params(dc)
 	/*	The declarator is checked to have no parameters, if it
 		is a function.
 	*/
-	if (dc->dc_fparams)	{
+	if (dc->dc_formal)	{
 		error("non_empty formal parameter pack");
-		del_idfstack(dc->dc_fparams);
-		dc->dc_fparams = 0;
+		free_formals(dc->dc_formal);
+		dc->dc_formal = 0;
 	}
 }
 
