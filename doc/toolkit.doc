@@ -1,7 +1,6 @@
 .\" $Header$
 .RP
-.ND
-.nr LL 78m
+.ND July 1984
 .tr ~
 .ds as *
 .TL

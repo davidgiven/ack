@@ -1,6 +1,6 @@
 . \" $Header$"
-.po +10
-.ND
+.RP
+.ND Dec 1984
 .TL
 .B
 A backend table for the 6500 microprocessor
@@ -12,212 +12,6 @@ The backend table is part of the Amsterdam Compiler Kit (ACK).
 It translates the intermediate language family EM to a machine
 code for the MCS6500 microprocessor family.
 .AE
-.PP
-.bp
-.NH
-Introduction.
-.PP
-As more and more organizations aquire many micro and minicomputers,
-the need for portable compilers is becoming more and more acute.
-The present situation, in which each harware vendor provides its
-own compilers -- each with its own deficiencies and extensions, and
-none of them compatible -- leaves much to be desired.
-The ideal situation would be an integrated system containing
-a family of (cross) compilers, each compiler accepting a standard
-source language and, producing code for a wide variety of target
-machines. Furthermore, the compilers should be compatible, so programs 
-written in one language can call procedures written in another
-language. Finally, the system should be designed so as to make
-adding new languages and, new machines easy. Such an integerated
-system is being built at the Vrije Universiteit.
-.PP
-The compiler building system, which is called the "Amsterdam Compiler
-Kit" (ACK), can be thought of as a "tool kit." It consists of
-a number of parts that can be combined to form compilers (and
-interpreters) with various properties. The tool kit is based
-on an idea (UNCOL) that was first suggested in 1960 [5],
-but which never really caught on then. The problem which UNCOL
-attemps to solve is how to make a compiler for each of
-.B
-N
-.R
-languages on
-.B
-M
-.R
-different machines without having to write
-.B
-N
-.R
-x
-.B
-M
-.R
-programs.
-.PP
-As shown in Fig. 1, the UNCOL approach is to write
-.B
-N
-.R
-"front ends," each of which translates
-one source language to a common
-intermediate language, UNCOL (UNiversal Computer Oriented
-Language), and
-.B
-M
-.R
-"back ends," each of which translates programs
-in UNCOL to a specific machine language. Under these conditions,
-only
-.B
-N
-.R
-+
-.B
-M
-.R
-programs must be written to provide all
-.B
-N
-.R
-languages on all
-.B
-M
-.R
-machines, instead of
-.B
-N
-.R
-x
-.B
-M
-.R
-programs.
-.PP
-Various reseachers have attempted to design a suitable UNCOL [1,6],
-but none of these have become popular. It is the believe of the
-designers of the Amsterdam Compiler Kit that previous attemps 
-have failed because they have been too ambitious, that is, they have
-tried to cover all languages and all machines using a single UNCOL.
-The approach of the designers is more modest:
-they cater only to algebraic languages and machines whose memory
-consist of 8-bit bytes, each with its own address.
-Typical languages that could be handled include Ada, ALGOL 60,
-ALGOL 68, BASIC, C, FORTRAN, Modula, Pascal, PL/I, PL/M, PLAIN and
-RATFOR, where COBOL, LISP and SNOBOL would be less efficient.
-Examples of machines that could be included are the Intel 8080 and
-8086, Motorola 6800, 6809 and 68000, Zilog Z80 and Z8000, DEC PDP-11
-and Vax, MOS Technology MCS6500 family and IBM but not the Burroughs
-6700, CDC Cyber or Univac 1108 (because they are not byte_oriented).
-With these restrictions the designers believe that the old UNCOL
-idea can be used as the basis of a practical compiler-building 
-system.
-.sp 10
-.bp
-.NH
-An overview of the Amsterdam Compiler kit
-.PP
-The tool kit consists of eight components:
-.IP 1.
-The preprocessor.
-.IP 2.
-The front ends.
-.IP 3.
-The peephole optimizer.
-.IP 4.
-The global optimizer.
-.IP 5.
-The back end.
-.IP 6.
-The target machine optimizer.
-.IP 7.
-The universal assembler/linker.
-.IP 8.
-The utility package.
-.PP
-A fully optimizing compiler, depicted in Fig. 2, has seven cascaded
-phases. Conceptually, each component reads an input file and writes
-a transformed output file to be used as input to the next component.
-In practice, some components may use temporary files to allow
-multiple passes over the input or internal intermediate files.
-.sp 20
-.PP
-In the following paragraphs a brief decription of each component
-is given.
-A more detailed description of the back end will be given in the 
-rest of this document. For a more detailed descripiton on the rest
-of the components see [7]. A program to be compiled is first fed
-into the (language independed) preprocessor, which provides a
-simple macro facility and similar textual facilities.
-The preprocessor's ouput is a legal program in one of the programming
-languages supported, whereas the input is a program possibly
-augmented with macro's, etc.
-.PP
-This output goes into the appropriate front end, whose job it is to 
-produce intermediate cade.
-This intermediate code (the UNCOL of ACK) is the machine language
-for a simple stack machine EM (Encoding Machine).
-A typical front end might build a parse tree from the input
-and then use the parse tree to generate EM cade,
-which is similar to reverse Polish.
-In order to perform this work, the front end has to maintain tables of declare
-tables of declared variables, labels, etc., determine where
-to place the data structures in memory and so on.
-.PP
-The EM code generated by the front end is fed into the peephole
-optimizer, which scans it with a window of a view instructions,
-replacing certain inefficient code sequences by better ones.
-Such a search is important because EM contains instructions to
-handle numerous important special cases efficiently
-(e.g. incrementing a variable by 1).
-It is our strategy to relieve the front ends of the burden
-of hunting for special cases because there are many front ends
-and just one peephole optimizer.
-By handeling the special cases in the peephole optimizer,
-the front ends become simpler, easier to write and easier to maintain.
-.PP
-Following the peephole optimizer is a global optimizer [2],
-which unlike the peephole optimizer, examines the program as a whole.
-It builts a data flow graph to make possible a variety of global
-optimizations, among them, moving invariant code out of loops,
-avoiding redundant computations, live/dead analysis and
-eliminating tail recursion.
-Note that the output of the global optimizer is still EM code.
-.PP
-Next comes the back end, which differs from the front ends in a
-fundamental way.
-Each front end is a separate program, whereas the back end is a 
-single program that is driven by a machine dependent driving table.
-The driving table for a specific machine tells how EM code is
-mapped onto the machine's assembly language.
-Although a simple driving table just might macro expand each
-EM instruction into a sequence of target machine instructions,
-a much more sophisticated translation strategy is normaly used,
-as described later.
-For speech, the back end does not actually read in the driving
-table at run time.
-Instead, the tables are compiled along with the back end in advance,
-resulting in one binairy program per machine.
-.PP
-The output of the back end is a program in the assembly language
-of some particular machine.
-The next component in the pipeline reads this program and performs
-peephole optimization on it.
-The optimizations performed here involve idiosyncrasies of the
-target machine that cannot be performed by the machine-independent
-EM-to-EM peephole optimizer.
-Typically these optimizations take advantage of the special
-instructions or special addressing modes.
-.PP
-The optimized target machine assembly code then goes into the final
-component in the pipeline, the universal assembler/linker.
-This program assembles the input to object format, extracting
-routines from libraries and including them as needed.
-.PP
-The final component of the tool kit is the utility package,
-which contains various test programs, interpreters for EM code,
-EM libraries, conversion programs and other aids for the
-implementer and user.
 .bp
 .DS C
 .B
@@ -264,7 +58,7 @@ manufactured by Acorn Computer Ltd..
 The MOS Technology MCS6500
 .PP
 The MCS6500 is as a family of CPU devices developed by MOS
-Technology.
+Technology [1].
 The members of the MCS6500 family are the same chips in a 
 different housing.
 The MCS6502, the big brother in the family, can handle 64k
@@ -861,7 +655,7 @@ The above description of the machine table is
 a description of the table for the MCS6500.
 It uses only a part of the possibilities which the code generator
 generator offers.
-For a more precise and detailed description see [4].
+For a more precise and detailed description see [2].
 .DS C
 .B
 THE BACK END TABLE.
@@ -1141,7 +935,7 @@ This subroutine expects the multiplicand in zero page
 at locations ARTH, ARTH+1, while the multiplier is in zero
 page locations ARTH+2, ARTH+3.
 For a description of the algorithms used for multiplication and
-division, see [9].
+division, see [3].
 A table content is:
 .sp  1
 .br
@@ -2071,34 +1865,6 @@ if it is to be used on a MCS6500.
 REFERENCES.
 .R
 .IP 1.
-Haddon. B.K., and Waite, W.M.
-Experience with the Universal Intermediate Language Janus.
-.B
-Software Practice & Experience 8
-.R
-,
-5 (Sept.-Oct. 1978), 601-616.
-.RS
-.PP
-An intermediate language for use with Algol 68, Pascal, etc.
-is described.
-The paper discusses some problems encountered and how they were
-dealt with.
-.RE
-.IP 2.
-Lowry, E.S., and Medlock, C.W. Object Code Optimization.
-.B
-Commun. ACM 12
-.R
-,
-(Jan. 1969), 13-22.
-.RS
-.PP
-A classical paper on global object code optimization.
-It covers data flow analysis, common subexpressions, code motion,
-register allocation and other techniques.
-.RE
-.IP 3.
 Osborn, A., Jacobson, S., and Kane, J. The Mos Technology MCS6500.
 .B
 An Introduction to Microcomputers ,
@@ -2109,7 +1875,7 @@ Volume II, Some Real Products (june 1977) chap. 9.
 A hardware description of some real existing CPU's, such as
 the Intel Z80, MCS6500, etc. is given in this book.
 .RE
-.IP 4.
+.IP 2.
 van Staveren, H.
 The table driven code generator from the Amsterdam Compiler Kit.
 Vrije Universiteit, Amsterdam, (July 11, 1983).
@@ -2117,43 +1883,7 @@ Vrije Universiteit, Amsterdam, (July 11, 1983).
 .PP
 The defining document for writing a back end table.
 .RE
-.IP 5.
-Steel, T.B., Jr. UNCOL: The Myth and the Fact. in
-.B
-Ann. Rev. Auto. Prog.
-.R
-Goodman, R. (ed.), vol 2., (1960), 325-344.
-.RS
-.PP
-An introduction to the UNCOL idea by its originator.
-.RE
-.IP 6.
-Steel. T.B., Jr. A first Version of UNCOL.
-.B
-Proc. Western Joint Comp. Conf.
-.R
-,
-(1961), 371-377.
-.IP 7.
-Tanenbaum, A.S., Stevenson, J.W., Keizer, E.G., and van Staveren,
-H.
-A Practical Tool Kit for Making Portable Compilers.
-Informatica Rapport 74, Vrije Universiteit, Amsterdam, 1983.
-.RS
-.PP
-An overview on the Amsterdam Compiler Kit.
-.RE
-.IP 8.
-Tanenbaum, A.S., Stevenson, J.W., Keizer, E.G., and van Staveren,
-H.
-Description of an Experimental Machine Architecture for use with
-Block Structured Languages.
-Informatica Rapport 81, Vrije Universiteit, Amsterdam, 1983.
-.RS
-.PP
-The defining document for EM.
-.RE
-.IP 9.
+.IP 3.
 Tanenbaum, A.S. Structured Computer Organization.
 Prentice Hall. (1976).
 .RS

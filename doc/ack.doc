@@ -1,7 +1,6 @@
 .\" $Header$
-.nr LL 7.5i
-.tr ~
 .nr PD 1v
+.tr ~
 .TL
 Ack Description File
 .br
@@ -9,7 +8,7 @@ Reference Manual
 .AU
 Ed Keizer
 .AI
-Wiskundig Seminarium
+Vakgroep Informatica
 Vrije Universiteit
 Amsterdam
 .NH
@@ -24,16 +23,16 @@ source file.
 Each transformation table entry tells which input suffixes are
 allowed and what suffix/name the output file has.
 When the output file does not already satisfy the request of the
-user, with the flag \fB-c.suffix\fP, the table is scanned
+user, with the flag \fB\-c.suffix\fP, the table is scanned
 starting with the next transformation in the table for another
 transformation that has as input suffix the output suffix of
 the previous transformation.
 A few special transformations are recognized, among them is the
 combiner.
 A program combining several files into one.
-When no stop suffix was specified (flag \fB-c.suffix\fP) \fIack\fP
-stops after executing the combiner with as arguments the -
-possibly transformed - input files and libraries.
+When no stop suffix was specified (flag \fB\-c.suffix\fP) \fIack\fP
+stops after executing the combiner with as arguments the \-
+possibly transformed \- input files and libraries.
 \fIAck\fP will only perform the transformations in the order in
 which they are presented in the table.
 .LP
@@ -60,7 +59,7 @@ convoluted.
 First, when the last filename in the program call name is not
 one of \fIack\fP, \fIcc\fP, \fIacc\fP, \fIpc\fP or \fIapc\fP,
 this filename is used as the backend description name.
-Second, when the \fB-m\fP is present the \fB-m\fP is chopped of this
+Second, when the \fB\-m\fP is present the \fB\-m\fP is chopped of this
 flag and the rest is used as the backend description name.
 Third, when both failed the shell environment variable ACKM is
 used.
@@ -119,8 +118,8 @@ Syntax:  (\fIsuffix sequence\fP:\fIsuffix sequence\fP=\fItext\fP)
 .br
 Example: (.c.p.e:.e=tail_em)
 .br
-If the two suffix sequences have a common member -~\&.e in this
-case~- the text is produced.
+If the two suffix sequences have a common member \-~\&.e in this
+case~\- the text is produced.
 When no common member is present the empty string is produced.
 Thus the example given is a constant expression.
 Normally, one of the suffix sequences is produced by variable
@@ -134,17 +133,17 @@ the text following the \fIneed\fP is appended to both the HEAD and
 TAIL variable.
 The value of the variable RTS is determined by the first
 transformation used with a \fIrts\fP property.
-.LP
+.IP
 Two runtime flags have effect on the value of one or more of
 these variables.
-The flag \fB-.suffix\fP has the same effect on these three variables
+The flag \fB\-.suffix\fP has the same effect on these three variables
 as if a file with that \fBsuffix\fP was included in the argument list
 and had to be translated.
-The flag \fB-r.suffix\fP only has that effect on the TAIL
+The flag \fB\-r.suffix\fP only has that effect on the TAIL
 variable.
 The program call names \fIacc\fP and \fIcc\fP have the effect
-of an automatic \fB-.c\fB flag.
-\fIApc\fP and \fIpc\fP have the effect of an automatic \fB-.p\fP flag.
+of an automatic \fB\-.c\fP flag.
+\fIApc\fP and \fIpc\fP have the effect of an automatic \fB\-.p\fP flag.
 .IP "Line splitting"
 .br
 The string is transformed into a sequence of strings by replacing
@@ -168,7 +167,7 @@ of the line.
 Three special two-characters sequences exist: \e#, \e\e and
 \e<newline>.
 Their effect is described under 'backslashing' above.
-Each - nonempty - line starts with a keyword, possibly
+Each \- nonempty \- line starts with a keyword, possibly
 preceded by blank space.
 The keyword can be followed by a further specification.
 The two are separated by blank space.
@@ -193,7 +192,7 @@ The lines in between associate properties to a transformation
 and may be presented in any order.
 The identifier after the \fIname\fP keyword determines the name
 of the transformation.
-This name is used for debugging and by the \fB-R\fP flag.
+This name is used for debugging and by the \fB\-R\fP flag.
 The keywords are used to specify which input suffices are
 recognized by that transformation,
 the program to run, the arguments to be handed to that program
@@ -212,7 +211,7 @@ keyword. All other transformations do.
 .IP \fIto\fP
 .br
 followed by the suffix of the output file name or in the case of a
-linker -~indicated by C option after the \fIprop\fP keyword~-
+linker \-~indicated by C option after the \fIprop\fP keyword~\-
 the output file name.
 .IP \fIprogram\fP
 .br
@@ -235,9 +234,9 @@ assignment separated by blank space.
 As soon as both description files are read, \fIack\fP looks
 at all transformations in these files to find a match for the
 flags given to \fIack\fP.
-The flags \fB-m\fP, \fB-o\fP,
-\fI-O\fP, \fB-r\fP, \fB-v\fP, \fB-g\fP, -\fB-c\fP, \fB-t\fP,
-\fB-k\fP, \fB-R\fP and -\f-.\fP are specific to \fIack\fP and
+The flags \fB\-m\fP, \fB\-o\fP,
+\fB\-O\fP, \fB\-r\fP, \fB\-v\fP, \fB\-g\fP, \-\fB\-c\fP, \fB\-t\fP,
+\fB\-k\fP, \fB\-R\fP and \-\fB\-.\fP are specific to \fIack\fP and
 not handed down to any transformation.
 The matching is performed in the order in which the entries
 appear in the definition.
@@ -249,11 +248,11 @@ replaced by the characters matched by
 the * in the expression.
 The right hand part is also subject to variable replacement.
 The variable will probably be used in the program arguments.
-The \fB-l\fP flags are special,
+The \fB\-l\fP flags are special,
 the order in which they are presented to \fIack\fP must be
 preserved.
 The identifier LNAME is used in conjunction with the scanning of
-\fB-l\fP flags.
+\fB\-l\fP flags.
 The value assigned to LNAME is used to replace the flag.
 The example further on shows the use all this.
 .IP \fIargs\fP
@@ -261,13 +260,13 @@ The example further on shows the use all this.
 The keyword is followed by the program call arguments.
 It is subject to backslashing, variable replacement, expression
 replacement, line splitting and IO replacement.
-The variables assigned to by \fImapflags\P will probably be
+The variables assigned to by \fImapflags\fP will probably be
 used here.
 The flags not recognized by \fIack\fP or any of the transformations
 are passed to the linker and inserted before all other arguments.
-.IP \fIprop\fB
+.IP \fIprop\fP
 .br
-This -~optional~- keyword is followed by a sequence of options,
+This \-~optional~\- keyword is followed by a sequence of options,
 each option is indicated by one character
 signifying a special property of the transformation.
 The possible options are:
@@ -282,18 +281,18 @@ The possible options are:
 .DE
 .IP \fIrts\fP
 .br
-This -~optional~- keyword indicates that the rest of the line must be
+This \-~optional~\- keyword indicates that the rest of the line must be
 used to set the variable RTS, if it was not already set.
 Thus the variable RTS is set by the first transformation
 executed which such a property or as a result from \fIack\fP's program
-call name (acc, cc, apc or pc) or by the \fB-.suffix\fP flag.
+call name (acc, cc, apc or pc) or by the \fB\-.suffix\fP flag.
 .IP \fIneed\fP
 .br
-This -~optional~- keyword indicates that the rest of the line must be
+This \-~optional~\- keyword indicates that the rest of the line must be
 concatenated to the NEEDS variable.
 This is done once for every transformation used or indicated
 by one of the program call names mentioned above or indicated
-by the \fB-.suffix\fP flag.
+by the \fB\-.suffix\fP flag.
 .br
 .nr PD 1v
 .NH
@@ -302,7 +301,7 @@ Conventions used in description files
 \fIAck\fP reads two description files.
 A few of the variables defined in the machine specific file
 are used by the descriptions of the front-ends.
-Other variables, set by \fack\fB, are of use to all
+Other variables, set by \fIack\fP, are of use to all
 transformations.
 .PP
 \fIAck\fP sets the variable EM to the home directory of the
@@ -312,7 +311,7 @@ being massaged, this is usefull for debugging.
 .br
 The variable M indicates the
 directory in mach/{M}/lib/tail_..... and NAME is the string to
-be defined by the preprocessor with -D{NAME}.
+be defined by the preprocessor with \-D{NAME}.
 The definitions of {w}, {s}, {l}, {d}, {f} and {p} indicate
 EM_WSIZE, EM_SSIZE, EM_LSIZE, EM_DSIZE, EM_FSIZE and EM_PSIZE
 respectively.
@@ -330,91 +329,94 @@ The variables HEAD, TAIL and RTS are set by \fIack\fP and used
 to compose the arguments for the linker.
 .NH
 Example
-.sp 1
-description for front-end
+.PP
+Description for front-end
 .DS X
-name cpp                        # the C-preprocessor
-        # no from, it's governed by the P property
-        to .i                   # result files have suffix i
-        program {EM}/lib/cpp    # pathname of loadfile
-        mapflag -I* CPP_F={CPP_F?} -I*          # grab -I.. -U.. and
-        mapflag -U* CPP_F={CPP_F?} -U*          # -D.. to use as arguments
-        mapflag -D* CPP_F={CPP_F?} -D*          # in the variable CPP_F
-        args {CPP_F?} {INCLUDES?} -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
--DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} <
-                                # The arguments are: first the -[IUD]...
-                                #  then the include dir's for this machine
-                                #  then the NAME and size valeus finally
-                                #  followed by the input file name
-        prop >P                 # Output on stdout, is preprocessor
+.ta 4n 40n
+name cpp	# the C-preprocessor
+		# no from, it's governed by the P property
+	to .i	# result files have suffix i
+	program {EM}/lib/cpp	# pathname of loadfile
+	mapflag \-I* CPP_F={CPP_F?} \-I*	# grab \-I.. \-U.. and
+	mapflag \-U* CPP_F={CPP_F?} \-U*	# \-D.. to use as arguments
+	mapflag \-D* CPP_F={CPP_F?} \-D*	# in the variable CPP_F
+	args {CPP_F?} {INCLUDES?} \-D{NAME} \-DEM_WSIZE={w} \-DEM_PSIZE={p} \e
+	    \-DEM_SSIZE={s} \-DEM_LSIZE={l} \-DEM_FSIZE={f} \-DEM_DSIZE={d} <
+		# The arguments are: first the \-[IUD]...
+		#  then the include dir's for this machine
+		#  then the NAME and size valeus finally
+		#  followed by the input file name
+	prop >P	# Output on stdout, is preprocessor
 end
-name cem                        # the C-compiler proper
-        from .c                 # used for files with suffix .c
-        to .k                   # produces compact code files
-        program {EM}/lib/em_cem # pathname of loadfile
-        mapflag -p CEM_F={CEM_F?} -Xp   # pass -p as -Xp to cem
-        mapflag -L CEM_F={CEM_F?} -l    # pass -L as -l to cem
-        args -Vw{w}i{w}p{p}f{f}s{s}l{l}d{d} {CEM_F?}
-                                # the arguments are the object sizes in
-                                # the -V... flag and possibly -l and -Xp
-        prop <>p                # input on stdin, output on stdout, use cpp
-        rts .c                  # use the C run-time system
-        need .c                 # use the C libraries
+name cem	# the C-compiler proper
+	from .c	# used for files with suffix .c
+	to .k	# produces compact code files
+	program {EM}/lib/em_cem	# pathname of loadfile
+	mapflag \-p CEM_F={CEM_F?} \-Xp	# pass \-p as \-Xp to cem
+	mapflag \-L CEM_F={CEM_F?} \-l	# pass \-L as \-l to cem
+	args \-Vw{w}i{w}p{p}f{f}s{s}l{l}d{d} {CEM_F?}
+		# the arguments are the object sizes in
+		# the \-V... flag and possibly \-l and \-Xp
+	prop <>p	# input on stdin, output on stdout, use cpp
+	rts .c	# use the C run-time system
+	need .c	# use the C libraries
 end
-name decode                     # make human readable files from compact code
-        from .k.m               # accept files with suffix .k or .m
-        to .e                   # produce .e files
-        program {EM}/lib/em_decode      # pathname of loadfile
-        args <                  # the input file name is the only argument
-        prop >                  # the output comes on stdout
+name decode	# make human readable files from compact code
+	from .k.m	# accept files with suffix .k or .m
+	to .e	# produce .e files
+	program {EM}/lib/em_decode	# pathname of loadfile
+	args <	# the input file name is the only argument
+	prop >	# the output comes on stdout
 end
 .DE
 
 .DS X
+.ta 4n 40n
 Example of a backend, in this case the EM assembler/loader.
 
-var w=2                         # wordsize 2
-var p=2                         # pointersize 2
-var s=2                         # short size 2
-var l=4                         # long size 4
-var f=4                         # float size 4
-var d=8                         # double size 8
-var M=int                       # Unused in this example
-var NAME=int22                  # for cpp (NAME=int results in #define int 1)
-var LIB=mach/int/lib/tail_      # part of file name for libraries
-var RT=mach/int/lib/head_       # part of file name for run-time startoff
-var SIZE_FLAG=-sm               # default internal table size flag
-var INCLUDES=-I{EM}/include     # use {EM}/include for #include files
-name asld                       # Assembler/loader
-        from .k.m.a             # accepts compact code and archives
-        to e.out                # output file name
-        program {EM}/lib/em_ass         # load file pathname
-        mapflag -l* LNAME={EM}/{LIB}*   # e.g. -ly becomes
-                                        #   {EM}/mach/int/lib/tail_y
-        mapflag -+* ASS_F={ASS_F?} -+*  # recognize -+ and --
-        mapflag --* ASS_F={ASS_F?} --*
-        mapflag -s* SIZE_FLAG=-s*       # overwrite old value of SIZE_FLAG
-        args {SIZE_FLAG} \
-                ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
-                (.p:{TAIL}={EM}/{LIB}pc) \
-                (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-                (.c.p:{TAIL}={EM}/{LIB}mon)
-                # -s[sml] must be first argument
-                # the next line contains the choice for head_cc or head_pc
-                # and the specification of in- and output.
-                # the last three args lines choose libraries
-        prop C  # This is the final stage
+var w=2	# wordsize 2
+var p=2	# pointersize 2
+var s=2	# short size 2
+var l=4	# long size 4
+var f=4	# float size 4
+var d=8	# double size 8
+var M=int	# Unused in this example
+var NAME=int22	# for cpp (NAME=int results in #define int 1)
+var LIB=mach/int/lib/tail_	# part of file name for libraries
+var RT=mach/int/lib/head_	# part of file name for run-time startoff
+var SIZE_FLAG=\-sm	# default internal table size flag
+var INCLUDES=\-I{EM}/include	# use {EM}/include for #include files
+name asld	# Assembler/loader
+	from .k.m.a	# accepts compact code and archives
+	to e.out	# output file name
+	program {EM}/lib/em_ass	# load file pathname
+	mapflag \-l* LNAME={EM}/{LIB}*	# e.g. \-ly becomes
+		#	{EM}/mach/int/lib/tail_y
+	mapflag \-+* ASS_F={ASS_F?} \-+*  # recognize \-+ and \-\-
+	mapflag \-\-* ASS_F={ASS_F?} \-\-*
+	mapflag \-s* SIZE_FLAG=\-s*	# overwrite old value of SIZE_FLAG
+	args {SIZE_FLAG} \e
+	    ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) \-o > < \e
+	    (.p:{TAIL}={EM}/{LIB}pc) \e
+	    (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \e
+	    (.c.p:{TAIL}={EM}/{LIB}mon)
+		# \-s[sml] must be first argument
+		# the next line contains the choice for head_cc or head_pc
+		# and the specification of in- and output.
+		# the last three args lines choose libraries
+	prop C  # This is the final stage
 end
 .DE
 
-The command "ack -mint -v -v -I../h -L -ly prog.c"
- would result in the following
+The command \fIack \-mint \-v \-v \-I../h \-L \-ly prog.c\fP
+would result in the following
 calls (with exec(II)):
 .DS X
-1)  /lib/cpp -I../h -I/usr/em/include -Dint22 -DEM_WSIZE=2 -DEM_PSIZE=2
-      -DEM_SSIZE=2 -DEM_LSIZE=4 -DEM_FSIZE=4 -DEM_DSIZE=8 prog.c
-2)  /usr/em/lib/em_cem -Vw2i2p2f4s2l4d8 -l
-3)  /usr/em/lib/em_ass -sm /usr/em/mach/int/lib/head_cc -o e.out prog.k
-      /usr/em/mach/int/lib/tail_y /usr/em/mach/int/lib/tail_cc.1s
-      /usr/em/mach/int/lib/tail_cc.2g /usr/em/mach/int/lib/tail_mon
+.ta 4n
+1)	/lib/cpp \-I../h \-I/usr/em/include \-Dint22 \-DEM_WSIZE=2 \-DEM_PSIZE=2 \e
+	    \-DEM_SSIZE=2 \-DEM_LSIZE=4 \-DEM_FSIZE=4 \-DEM_DSIZE=8 prog.c
+2)	/usr/em/lib/em_cem \-Vw2i2p2f4s2l4d8 \-l
+3)	/usr/em/lib/em_ass \-sm /usr/em/mach/int/lib/head_cc \-o e.out prog.k
+	/usr/em/mach/int/lib/tail_y /usr/em/mach/int/lib/tail_cc.1s
+	/usr/em/mach/int/lib/tail_cc.2g /usr/em/mach/int/lib/tail_mon
 .DE

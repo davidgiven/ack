@@ -2,7 +2,7 @@
 .ds OF \\fBtest~off:~\\fR
 .ds ON \\fBtest~on:~~\\fR
 .ds AL \\fBtest~all:~\\fR
-.ll 72
+.ll 72n
 .wh 0 hd
 .wh 60 fo
 .de hd
@@ -37,7 +37,7 @@ by
 .de VU
 .sp 3
 .ce 4
-Wiskundig Seminarium
+Vakgroep Informatica
 Vrije Universiteit
 De Boelelaan 1081
 Amsterdam

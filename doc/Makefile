@@ -2,14 +2,19 @@
 
 SUF=pr
 PRINT=cat
-RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\
-ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF) LLgen.$(SUF)\
-basic.$(SUF) 6500.$(SUF) ncg.$(SUF) i80.$(SUF)
 NROFF=nroff
+TBL=tbl
+EQN=eqn
 MS=-ms
 
+RESFILES= \
+	toolkit.$(SUF) install.$(SUF) ack.$(SUF) v7bugs.$(SUF) \
+	peep.$(SUF) cg.$(SUF) ncg.$(SUF) regadd.$(SUF) LLgen.$(SUF) \
+	basic.$(SUF) cref.$(SUF) pcref.$(SUF) val.$(SUF) \
+	6500.$(SUF) i80.$(SUF) z80.$(SUF)
+
 cref.$(SUF):        cref.doc
-		tbl $? | $(NROFF) >$@
+		$(TBL) $? | $(NROFF) >$@
 v7bugs.$(SUF):      v7bugs.doc
 		$(NROFF) $(MS) $? >$@
 ack.$(SUF):         ack.doc
@@ -17,11 +22,11 @@ ack.$(SUF):         ack.doc
 cg.$(SUF):		cg.doc
 		$(NROFF) $(MS) $? >$@
 ncg.$(SUF):		ncg.doc
-		tbl $? | $(NROFF) $(MS) >$@
+		$(TBL) $? | $(NROFF) $(MS) >$@
 regadd.$(SUF):		regadd.doc
 		$(NROFF) $(MS) $? >$@
 install.$(SUF):     install.doc
-		$(NROFF) $(MS) $? >$@
+		$(TBL) $? | $(NROFF) $(MS) >$@
 pcref.$(SUF):       pcref.doc
 		$(NROFF) $? >$@
 basic.$(SUF):       basic.doc
@@ -33,23 +38,26 @@ val.$(SUF):         val.doc
 toolkit.$(SUF):	toolkit.doc
 		$(NROFF) $(MS) $? >$@
 LLgen.$(SUF):	LLgen.doc
-		eqn $? | tbl | $(NROFF) $(MS) >$@
+		$(EQN) $? | $(TBL) | $(NROFF) $(MS) >$@
 6500.$(SUF):	6500.doc
-		$(NROFF) $(MS) $? >$@
+		$(TBL) $? | $(NROFF) $(MS) >$@
 i80.$(SUF):	i80.doc
+		$(NROFF) $(MS) $? >$@
+z80.$(SUF):	z80.doc
 		$(NROFF) $(MS) $? >$@
 
 install cmp:
 
 distr:		install.doc
 		tbl install.doc | nroff -Tlp $(MS) >install.pr
+
 pr:
-		@make "SUF="$SUF "NROFF="$NROFF "PRINT="$PRINT $(RESFILES) \
-			>make.pr.out 2>&1
+		@make "SUF="$(SUF) "NROFF="$(NROFF) \
+			$(RESFILES) >make.pr.out 2>&1
 		@$(PRINT) $(RESFILES)
 
 opr:
 		make pr | opr
 
 clean:
-		-rm -f *.old $(RESFILES) *.t
+		-rm -f *.old $(RESFILES) *.t *.out

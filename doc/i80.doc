@@ -1,4 +1,6 @@
+. \" $Header$
 .RP
+.ND April 1985
 .TL
 Back end table for the Intel 8080 micro-processor
 .AU

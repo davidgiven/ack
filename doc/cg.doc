@@ -1,5 +1,6 @@
 .\" $Header$
 .RP
+.ND Nov 1984
 .TL
 The table driven code generator from 
 .br
@@ -17,6 +18,11 @@ The Amsterdam Compiler Kit is such a collection of tools.
 This document provides a description of the internal workings
 of the table driven code generator in the Amsterdam Compiler Kit,
 and a description of syntax and semantics of the driving table.
+.PP
+>>>  NOTE  <<<
+.br
+This document pertains to the \fBold\fP code generator.  Refer to the
+"Second Revised Edition" for the new code generator.
 .AE
 .NH 1
 Introduction
