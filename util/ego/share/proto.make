@@ -85,7 +85,7 @@ $(SRC_DIR)/pop_push.h: \
 
 show: \
 	$(SRC_DIR)/show.c
-	 $(UCC) $(UCFLAGS) $(ULDFLAGS) -o show show.c $(UTIL_HOME)/lib.bin/em_data.$(ULIBSUF)
+	 $(UCC) $(UCFLAGS) $(ULDFLAGS) -o show $(SRC_DIR)/show.c $(UTIL_HOME)/lib.bin/em_data.$(ULIBSUF)
 
 pr:
 	@pr $(PRFILES)

@@ -55,7 +55,7 @@ offset getoff()
 {
 	register offset n;
 
-	n = (unsigned) getshort();
+	n = getshort() & 0xFFFF;
 	n |= ((offset) getshort() ) << 16;
 	return n;
 }
