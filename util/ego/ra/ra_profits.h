@@ -7,5 +7,5 @@
 extern compute_profits();/* (alloc_p alloclist)
 			 * Compute the profits attribute of every allocation.
 			 */
-short regsave_cost(); 	/* (short regs[], *time_out, *space_out)
+extern regsave_cost(); 	/* (short regs[], *time_out, *space_out)
 			 */
