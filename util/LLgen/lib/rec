@@ -104,8 +104,6 @@ LLsafeerror(t)
 	int	t;
 #endif
 {
-	register int i;
-
 	if (t == EOFILE && LLsymb <= 0) return;
 #ifdef LL_NEWMESS
 	if (t == EOFILE) {
