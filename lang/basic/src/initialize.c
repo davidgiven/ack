@@ -19,7 +19,7 @@ File	*datfile;
 initialize()
 {
 	register char *cindex, *cptr;
-        int result1, result2, result3;
+        int result1, result2;
 
 	(void) sprint(tmpfname,"%s/abc%d",TMP_DIR,getpid());
 	/* Find the basename */
