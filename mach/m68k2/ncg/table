@@ -2220,7 +2220,7 @@ with regX any4+address-areg-RA_REG
 	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
 with exact regX STACK
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
-    gen	move {post_inc4, sp},{areg,regvar($2,reg_pointer)}
+    gen	move_l {post_inc4, sp},{areg,regvar($2,reg_pointer)}
 	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
 with exact regX regAcon	
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
@@ -5148,7 +5148,7 @@ with test_set_int
 	clr_i %a
 	bra {slabel,2f}
 	1:
-	move {small_const,1},%a
+	move_i {small_const,1},%a
 	2:
 			yields	%a
 #if WORD_SIZE==2
@@ -5162,7 +5162,7 @@ with test_set1 + test_set2
 	clr_i %a
 	bra {slabel,2f}
 	1:
-	move {small_const,1},%a
+	move_i {small_const,1},%a
 	2:
 			yields	%a
 
@@ -5178,7 +5178,7 @@ with test_set_int
 	clr_i %a
 	bra {slabel,2f}
 	1:
-	move {small_const,1},%a
+	move_i {small_const,1},%a
 	2:
 			yields	%a
 #if WORD_SIZE==2
@@ -5192,7 +5192,7 @@ with test_set1 + test_set2
 	clr_i %a
 	bra {slabel,2f}
 	1:
-	move {small_const,1},%a
+	move_i {small_const,1},%a
 	2:
 			yields	%a
 
