@@ -86,8 +86,8 @@ string salloc(),strcpy(),strcat();
 string mycat(s1,s2) register string s1,s2; {
 	register string s;
 
-	if (s1==0) return(s2);
-	if (s2==0) return(s1);
+	if (s1==0 || *s1=='\0') return(s2);
+	if (s2==0 || *s2=='\0') return(s1);
 	s=salloc(strlen(s1)+strlen(s2)+1);
 	strcpy(s,s1);
 	strcat(s,"+");
