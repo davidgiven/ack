@@ -119,7 +119,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	idfsize.h ifdepth.h inputtype.h macbuf.h lint.h \
 	nobitfield.h nopp.h nocross.h \
 	nparams.h numsize.h parbufsize.h pathlength.h Lpars.h \
-	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h static.h \
+	strsize.h trgt_sizes.h textsize.h use_tmp.h spec_arith.h static.h \
 	regcount.h
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
@@ -296,8 +296,8 @@ main.o: proto.h
 main.o: sizes.h
 main.o: spec_arith.h
 main.o: specials.h
-main.o: target_sizes.h
 main.o: tokenname.h
+main.o: trgt_sizes.h
 main.o: type.h
 main.o: use_tmp.h
 idf.o: LLlex.h
@@ -326,7 +326,7 @@ idf.o: spec_arith.h
 idf.o: specials.h
 idf.o: stack.h
 idf.o: struct.h
-idf.o: target_sizes.h
+idf.o: trgt_sizes.h
 idf.o: type.h
 declarator.o: Lpars.h
 declarator.o: arith.h
@@ -345,7 +345,7 @@ declarator.o: nopp.h
 declarator.o: proto.h
 declarator.o: sizes.h
 declarator.o: spec_arith.h
-declarator.o: target_sizes.h
+declarator.o: trgt_sizes.h
 declarator.o: type.h
 decspecs.o: Lpars.h
 decspecs.o: arith.h
@@ -379,7 +379,7 @@ struct.o: sizes.h
 struct.o: spec_arith.h
 struct.o: stack.h
 struct.o: struct.h
-struct.o: target_sizes.h
+struct.o: trgt_sizes.h
 struct.o: type.h
 expr.o: LLlex.h
 expr.o: Lpars.h
@@ -401,7 +401,7 @@ expr.o: nocross.h
 expr.o: nopp.h
 expr.o: sizes.h
 expr.o: spec_arith.h
-expr.o: target_sizes.h
+expr.o: trgt_sizes.h
 expr.o: type.h
 expr.o: use_tmp.h
 ch3.o: Lpars.h
@@ -445,7 +445,7 @@ cstoper.o: nocross.h
 cstoper.o: nopp.h
 cstoper.o: sizes.h
 cstoper.o: spec_arith.h
-cstoper.o: target_sizes.h
+cstoper.o: trgt_sizes.h
 cstoper.o: type.h
 fltcstoper.o: Lpars.h
 fltcstoper.o: arith.h
@@ -459,7 +459,7 @@ fltcstoper.o: nocross.h
 fltcstoper.o: nopp.h
 fltcstoper.o: sizes.h
 fltcstoper.o: spec_arith.h
-fltcstoper.o: target_sizes.h
+fltcstoper.o: trgt_sizes.h
 fltcstoper.o: type.h
 arith.o: Lpars.h
 arith.o: arith.h
@@ -477,7 +477,7 @@ arith.o: nopp.h
 arith.o: proto.h
 arith.o: sizes.h
 arith.o: spec_arith.h
-arith.o: target_sizes.h
+arith.o: trgt_sizes.h
 arith.o: type.h
 code.o: Lpars.h
 code.o: arith.h
@@ -505,7 +505,7 @@ code.o: spec_arith.h
 code.o: specials.h
 code.o: stack.h
 code.o: stmt.h
-code.o: target_sizes.h
+code.o: trgt_sizes.h
 code.o: type.h
 code.o: use_tmp.h
 dumpidf.o: Lpars.h
@@ -554,7 +554,7 @@ field.o: nocross.h
 field.o: nopp.h
 field.o: sizes.h
 field.o: spec_arith.h
-field.o: target_sizes.h
+field.o: trgt_sizes.h
 field.o: type.h
 tokenname.o: LLlex.h
 tokenname.o: Lpars.h
@@ -583,7 +583,7 @@ LLlex.o: numsize.h
 LLlex.o: sizes.h
 LLlex.o: spec_arith.h
 LLlex.o: strsize.h
-LLlex.o: target_sizes.h
+LLlex.o: trgt_sizes.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
 LLmessage.o: arith.h
@@ -652,7 +652,7 @@ options.o: nocross.h
 options.o: nopp.h
 options.o: sizes.h
 options.o: spec_arith.h
-options.o: target_sizes.h
+options.o: trgt_sizes.h
 options.o: use_tmp.h
 skip.o: LLlex.h
 skip.o: arith.h
@@ -691,7 +691,7 @@ type.o: nopp.h
 type.o: proto.h
 type.o: sizes.h
 type.o: spec_arith.h
-type.o: target_sizes.h
+type.o: trgt_sizes.h
 type.o: type.h
 ch3mon.o: Lpars.h
 ch3mon.o: arith.h
@@ -707,7 +707,7 @@ ch3mon.o: nocross.h
 ch3mon.o: nopp.h
 ch3mon.o: sizes.h
 ch3mon.o: spec_arith.h
-ch3mon.o: target_sizes.h
+ch3mon.o: trgt_sizes.h
 ch3mon.o: type.h
 label.o: Lpars.h
 label.o: arith.h
@@ -742,7 +742,7 @@ eval.o: sizes.h
 eval.o: spec_arith.h
 eval.o: specials.h
 eval.o: stack.h
-eval.o: target_sizes.h
+eval.o: trgt_sizes.h
 eval.o: type.h
 switch.o: Lpars.h
 switch.o: arith.h
@@ -760,7 +760,7 @@ switch.o: nopp.h
 switch.o: sizes.h
 switch.o: spec_arith.h
 switch.o: switch.h
-switch.o: target_sizes.h
+switch.o: trgt_sizes.h
 switch.o: type.h
 conversion.o: Lpars.h
 conversion.o: arith.h
@@ -769,7 +769,7 @@ conversion.o: nobitfield.h
 conversion.o: nocross.h
 conversion.o: sizes.h
 conversion.o: spec_arith.h
-conversion.o: target_sizes.h
+conversion.o: trgt_sizes.h
 conversion.o: type.h
 util.o: Lpars.h
 util.o: align.h
@@ -780,7 +780,7 @@ util.o: nocross.h
 util.o: regcount.h
 util.o: sizes.h
 util.o: stack.h
-util.o: target_sizes.h
+util.o: trgt_sizes.h
 util.o: use_tmp.h
 util.o: util.h
 proto.o: Lpars.h
@@ -806,26 +806,11 @@ proto.o: proto.h
 proto.o: spec_arith.h
 proto.o: stack.h
 proto.o: struct.h
-proto.o: target_sizes.h
+proto.o: trgt_sizes.h
 proto.o: type.h
-pragma.o: LLlex.h
-pragma.o: Lpars.h
-pragma.o: arith.h
-pragma.o: assert.h
-pragma.o: botch_free.h
-pragma.o: class.h
 pragma.o: debug.h
-pragma.o: file_info.h
 pragma.o: idf.h
-pragma.o: idfsize.h
-pragma.o: ifdepth.h
-pragma.o: input.h
-pragma.o: macro.h
 pragma.o: nopp.h
-pragma.o: nparams.h
-pragma.o: parbufsize.h
-pragma.o: spec_arith.h
-pragma.o: textsize.h
 blocks.o: Lpars.h
 blocks.o: align.h
 blocks.o: arith.h
@@ -836,7 +821,7 @@ blocks.o: nocross.h
 blocks.o: sizes.h
 blocks.o: spec_arith.h
 blocks.o: stack.h
-blocks.o: target_sizes.h
+blocks.o: trgt_sizes.h
 dataflow.o: dataflow.h
 l_lint.o: LLlex.h
 l_lint.o: Lpars.h
@@ -984,7 +969,7 @@ declar.o: proto.h
 declar.o: sizes.h
 declar.o: spec_arith.h
 declar.o: struct.h
-declar.o: target_sizes.h
+declar.o: trgt_sizes.h
 declar.o: type.h
 statement.o: LLlex.h
 statement.o: Lpars.h
@@ -1020,7 +1005,7 @@ expression.o: nocross.h
 expression.o: nopp.h
 expression.o: sizes.h
 expression.o: spec_arith.h
-expression.o: target_sizes.h
+expression.o: trgt_sizes.h
 expression.o: type.h
 program.o: LLlex.h
 program.o: Lpars.h
@@ -1063,7 +1048,7 @@ ival.o: proto.h
 ival.o: sizes.h
 ival.o: spec_arith.h
 ival.o: struct.h
-ival.o: target_sizes.h
+ival.o: trgt_sizes.h
 ival.o: type.h
 char.o: class.h
 symbol2str.o: Lpars.h

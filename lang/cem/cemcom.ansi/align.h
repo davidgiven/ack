@@ -6,7 +6,7 @@
 /*	 A L I G N M E N T   D E F I N I T I O N S	*/
 
 #include "nocross.h"
-#include "target_sizes.h"
+#include "trgt_sizes.h"
 
 #ifndef NOCROSS
 extern int

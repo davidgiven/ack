@@ -9,7 +9,7 @@
 #include	<system.h>
 #include	"debug.h"
 #include	"nopp.h"
-#include	"target_sizes.h"
+#include	"trgt_sizes.h"
 #include	"use_tmp.h"
 #include	"inputtype.h"
 #include	"input.h"

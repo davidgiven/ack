@@ -46,7 +46,7 @@
 					the storage of a string		*/
 
 
-!File: target_sizes.h
+!File: trgt_sizes.h
 #define MAXSIZE		8	/* the maximum of the SZ_* constants	*/
 
 /* target machine sizes	*/

@@ -6,7 +6,7 @@
 /* VARIOUS TARGET MACHINE SIZE DESCRIPTORS */
 
 #include "nocross.h"
-#include "target_sizes.h"
+#include "trgt_sizes.h"
 
 #ifndef NOCROSS
 extern arith

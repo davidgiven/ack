@@ -9,7 +9,7 @@
 #include	"debug.h"
 #include	"assert.h"
 #include	<alloc.h>
-#include	"target_sizes.h"
+#include	"trgt_sizes.h"
 #include	"idf.h"
 #include	<flt_arith.h>
 #include	"arith.h"
