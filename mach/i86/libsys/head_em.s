@@ -3,7 +3,7 @@
 .define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
-.define EXIT
+.define EXIT, BRK
 .extern _end
 
 ERANGE          = 1
