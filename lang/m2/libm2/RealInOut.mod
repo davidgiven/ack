@@ -17,7 +17,7 @@ IMPLEMENTATION MODULE RealInOut;
   BEGIN
 	IF ndigits > MAXWIDTH THEN ndigits := MAXWIDTH; END;
 	IF ndigits < 10 THEN ndigits := 10; END;
-	RealConversions.RealToString(arg, ndigits, -(ndigits - 7), buf, ok);
+	RealConversions.RealToString(arg, ndigits, -INTEGER(ndigits - 7), buf, ok);
 	InOut.WriteString(buf);
   END WriteReal;
 

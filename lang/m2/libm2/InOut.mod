@@ -183,7 +183,6 @@ IMPLEMENTATION MODULE InOut ;
 		       VAR buf : ARRAY OF CHAR);
   VAR	i : INTEGER;
 	j : CARDINAL;
-	ch: CHAR;
   BEGIN
 	Done := TRUE;
 	IF isatty(0) THEN

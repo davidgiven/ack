@@ -34,9 +34,11 @@ BEGIN
 END exp;
 
 PROCEDURE entier(x: REAL): INTEGER;
+  VAR i: INTEGER;
 BEGIN
 	IF x < 0.0 THEN
-		RETURN - TRUNC(-x);
+		i := TRUNC(-x);
+		RETURN -i;
 	END;
 	RETURN TRUNC(x);
 END entier;

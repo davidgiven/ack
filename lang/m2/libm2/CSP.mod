@@ -147,7 +147,7 @@ IMPLEMENTATION MODULE CSP;
 
   PROCEDURE COEND;
   (* End of a COBEGIN .. COEND structure *)
-    VAR	aux: ProcessType;
+    (* VAR	aux: ProcessType; *)
   BEGIN
 	IF cp^.sons > 0 THEN
 		DoTransfer
@@ -219,7 +219,7 @@ IMPLEMENTATION MODULE CSP;
   PROCEDURE Send(data: ARRAY OF BYTE; VAR ch: Channel);
   (* Send a message with the data to the cvhannel ch *)
     VAR	m: ByteAddress;
-	aux: ProcessType;
+	(* aux: ProcessType; *)
 	i: CARDINAL;
   BEGIN
 	WITH ch^ DO
@@ -295,7 +295,7 @@ IMPLEMENTATION MODULE CSP;
   PROCEDURE GUARD(cond: BOOLEAN; ch: Channel;
 		  VAR dest: ARRAY OF BYTE): BOOLEAN;
   (* Evaluates a guard, including reception management *)
-    VAR	aux: ProcessType;
+    (* VAR	aux: ProcessType; *)
   BEGIN
 	IF NOT cond THEN
 		RETURN FALSE

@@ -53,7 +53,6 @@ PROCEDURE Delete(VAR str: ARRAY OF CHAR; inx, len: CARDINAL);
    string are deleted.
 *)
 VAR	length: CARDINAL;
-	i : CARDINAL;
 BEGIN
 	IF len = 0 THEN RETURN; END;
 	length := Length(str);
