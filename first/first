@@ -58,7 +58,7 @@ m68_unisoft|m68k2)	ACM=m68k2 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k2 ;;
 m68_sysV_0|mantra)	ACM=mantra ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68k4 ;;
 m68020)		ACM=m68020 ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68020 ;;
 sparc)		ACM=sparc ; SYS=BSD4_2; BYTE_ORDER=3210 ; MACH=sparc ;;
-sparc_solaris)	ACM=sparc_solaris ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=solaris ;;
+sparc_solaris)	ACM=sparc_solaris ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=sparc_solaris ;;
 i86)		ACM=i86 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
 xenix3)		ACM=xenix3 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
 minix)		ACM=minix ; SYS=V7; BYTE_ORDER=0123 ; MACH=i86 ;;
