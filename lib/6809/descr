@@ -10,16 +10,8 @@ var M=6809
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
 var CPP_F=
-var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
+var INCLUDES=-I{EM}/include/_tail_mon
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
-name be
-	from .m.g
-	to .s
-	program {EM}/lib/{M}/be
-	args <
-	stdout
-	need .e
-end
 name as
 	from .s
 	to .o
