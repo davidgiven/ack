@@ -85,9 +85,8 @@ AddInclDir(text)
 					(unsigned)(mDEF * sizeof(char *)));
 	}
 
-	i = ndirs++;
-	while (new) {
-		register char *tmp = DEFPATH[i];
+	for (i = ndirs++; i <= nDEF; i++) {
+		char *tmp = DEFPATH[i];
 
 		DEFPATH[i++] = new;
 		new = tmp;
