@@ -1,0 +1,2 @@
+MACH=`(cd .. ; basename \`pwd\`)`
+cmp $1 ../../../lib/${MACH}/$1

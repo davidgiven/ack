@@ -1,0 +1,7 @@
+MACH=`(cd .. ; basename \`pwd\`)`
+if cp $1 ../../../lib/${MACH}/$1
+then
+	set -
+	ranlib ../../../lib/${MACH}/$1 >/dev/null 2>&1
+	exit 0
+fi
