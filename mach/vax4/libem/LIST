@@ -69,4 +69,3 @@ strlb.s
 mon.s
 fat.s
 trp.s
-vars.s
