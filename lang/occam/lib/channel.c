@@ -72,10 +72,10 @@ void chan_out(v, c) long v; register chan *c;
 			tty.c_lflag |= (ECHO|ICANON);
 			ioctl(fileno(fp), TCSETA, &tty);
 #else
-			ioctl(fileno(fp), TIOCGETP, &tty);
+			gtty(fileno(fp), &tty);
 			tty.sg_flags&= ~CBREAK;
 			tty.sg_flags|= ECHO|CRMOD;
-			ioctl(fileno(fp), TIOCSETN, &tty);
+			stty(fileno(fp), &tty);
 #endif
 		} else
 		if (v==C_F_RAW) {
@@ -88,10 +88,10 @@ void chan_out(v, c) long v; register chan *c;
 			tty.c_lflag &= ~(ECHO|ICANON);
 			ioctl(fileno(fp), TCSETA, &tty);
 #else
-			ioctl(fileno(fp), TIOCGETP ,&tty);
+			gtty(fileno(fp), ,&tty);
 			tty.sg_flags|= CBREAK;
 			tty.sg_flags&= ~(ECHO|CRMOD);
-			ioctl(fileno(fp), TIOCSETN, &tty);
+			stty(fileno(fp), &tty);
 #endif
 		}
 	}	break;
