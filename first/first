@@ -265,6 +265,7 @@ ABC
 	done
 	( cd ../modules/src/malloc
 	  ed - param.h <<ABC
+	  cp param.h param.h.orig
 /STORE/s/define/undef/
 w
 q
@@ -272,6 +273,12 @@ ABC
 	)
 	( cd ../lang/m2/comp
 	  cp SmallPars Parameters
+	  cp Makefile Makefile.orig
+	  ed - Makefile <<ABC
+/MALLOC/s/=/=#/
+w
+q
+ABC
 	)
 	;;
 *)	( cd ../lang/cem/cemcom
