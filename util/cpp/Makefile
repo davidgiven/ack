@@ -134,7 +134,7 @@ lint:	cfiles
 	lint -bx $(CDEFS) $(SRC) >lint.out
 
 clean:
-	rm -f $(LCSRC) $(OBJ) $(GENERATED) $(GSRC) $(GHSRC) chtab.o chtab
+	rm -f $(LCSRC) $(OBJ) $(GENERATED) $(GSRC) $(GHSRC) chtab.o chtab cpp Out
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h Lpars.h bits.h charoffset.h class.h dobits.h file_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h
