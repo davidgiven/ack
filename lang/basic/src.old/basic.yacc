@@ -362,10 +362,10 @@ printlist: expression			{ printstmt($1); $$=1;}
 pokestmt: POKESYM expression ',' expression	{pokestmt($2,$4);}
 	;
 randomizestmt:	RANDOMIZESYM 
-			{ emcode("cal","$_randomize");}
+			{ emcode("cal","$_randomi");}
 	| 	RANDOMIZESYM expression
 			 { conversion($2,INTTYPE);
-			  emcode("cal","$_setrandom");
+			  emcode("cal","$_setrand");
 			  emcode("asp",EMINTSIZE);}
 
 readstmt:	READSYM {setchannel(0);} variable	{ readelm($3);}
