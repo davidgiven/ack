@@ -273,7 +273,7 @@ _Xutime:	move.l	(sp)+,.retaddr
 
 _Xaccess:	move.l	(sp)+,.retaddr
 #ifndef lword
-		bsr	st248
+		bsr	st243
 #endif
 		jsr	_access
 		lea	8(sp),sp
@@ -472,7 +472,7 @@ st248:		move.l	(sp),-(sp)
 		move.w	8(sp),d0
 		ext.l	d0
 		move.l	d0,4(sp)
-		move.w	12(sp),d0
+		move.w	10(sp),d0
 		ext.l	d0
 		move.l	d0,8(sp)
 		rts
