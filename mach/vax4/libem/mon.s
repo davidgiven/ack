@@ -7,7 +7,7 @@
 
 .set sigvec,108
 
-.globl .mon
+.globl	.mon
 
 .mon:
 	movl	(sp)+,r2	# return address in r2
@@ -65,23 +65,22 @@ L0:
 	# 0 arguments.
 Lsync:
 Lpause:
-Lpause:
 	clrl	(ap)+
 Lnores:
-	jsb	syscall
+	jsb	Lsyscall
 	movl	r3,ap
 	jmp	(r2)
 Lgetpid:
 	clrl	(ap)+
 Lr0:
-	jsb	syscall
+	jsb	Lsyscall
 	pushl	r0
 	jmp	(r2)
 Lgetuid:
 Lgetgid:
 	clrl	(ap)+
 Lr0r1:
-	jsb	syscall
+	jsb	Lsyscall
 	pushl	r0
 	pushl	r1
 	jmp	(r2)
@@ -90,7 +89,7 @@ Lwait:
 Lfork:
 	clrl	(ap)+
 Ler0r1:
-	jsb	syscall
+	jsb	Lsyscall
 	pushl	r0
 	pushl	r1
 	clrl	-(sp)
@@ -117,7 +116,7 @@ Lchroot:
 	cvtbl	$1,(ap)+
 	MOVL
 Le:
-	jsb	syscall
+	jsb	Lsyscall
 	clrl	-(sp)
 	jmp	(r2)
 Lalarm:
@@ -142,7 +141,7 @@ Ldup:
 	cvtbl	$2,(ap)+
 	MOVQ
 Ler0:
-	jsb	syscall
+	jsb	Lsyscall
 	pushl	r0
 	clrl	-(sp)
 	jmp	(r2)
@@ -206,7 +205,7 @@ Lcreat:
 	MOVL
 	jbr	Ler0
 
-syscall:
+Lsyscall:
 	movl	$args,ap
 	chmk	(ap)+
 	bcc	L1
