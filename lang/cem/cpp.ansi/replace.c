@@ -512,8 +512,8 @@ macro2buffer(repl, idf, args)
 		result onto the replacement buffer. It deals with the #
 		and ## operators, and inserts the actual parameters.
 		The argument buffer contains the raw argument (needed
-		for the ## operator), and the expanded argument (for
-		all other parameter substitutions).
+		for the # and ## operators), and the expanded argument
+		(for all other parameter substitutions).
 
 		The grammar of the replacement list is:
 
@@ -555,7 +555,7 @@ macro2buffer(repl, idf, args)
 		    ptr++;
 		} while (*ptr != delim || *ptr == '\0');
 		add2repl(repl, *ptr++);
-	    } else if (func && *ptr == '#') {
+	    } else if (*ptr == '#' && (func || *(ptr+1) == '#')) {
 		if (*++ptr == '#') {
 		    register int tmpindex;
 			/* ## - paste operator */
