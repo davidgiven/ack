@@ -104,7 +104,7 @@ case `ack_sys` in
 vax_bsd*)	RMD=pdp ;;
 vax_sys*)	RMD=pdp ;;
 pdp_*)		RMD="vax4"
-		echo "exit 93" > ../bin/ranlib
+		echo 'echo "no ranlib on this system"; exit 93' > ../bin/ranlib
 		chmod +x ../bin/ranlib
 		ranlib > /dev/null 2>&1
 		case X$? in
