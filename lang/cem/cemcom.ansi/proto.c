@@ -465,9 +465,8 @@ call_proto(expp)
 			} else
 				any2parameter(estack[ecnt]);
 		}
-		if (pcnt >= 0 && !(pstack[0]->pl_flag & PL_ELLIPSIS))
+		if (pcnt > 0 || (pcnt == 0 && !(pstack[0]->pl_flag & PL_ELLIPSIS)))
 			expr_error(*expp, "fewer parameters than specified in prototype");
-
 	} else {
 		if (pl && !(pl->pl_flag & PL_VOID))
 			expr_error(*expp, "fewer parameters than specified in prototype");
