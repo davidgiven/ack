@@ -44,7 +44,7 @@ $cc $cflags psdnam.c
 $cc $cflags pspnam.c
 $cc $cflags scon.c
 $cc $cflags ucon.c
-$cc $cflags C_out.c
+$cc $cflags -I../read_em C_out.c
 
 $cc $cflags $1/em.c
 mv em.o em$1.o
