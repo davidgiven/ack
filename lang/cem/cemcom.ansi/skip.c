@@ -88,6 +88,9 @@ SkipToNewLine()
 				continue;
 			}
 		}
+		else if (ch == TOKSEP && InputLevel) {
+			continue;
+		}
 #endif
 		if (!is_wsp(ch))
 			garbage = 1;

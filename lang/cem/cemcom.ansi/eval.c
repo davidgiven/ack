@@ -38,6 +38,7 @@ char *symbol2str();
 char *long2str();
 arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
+extern int	err_occurred; /* error.c */
 
 /*	EVAL() is the main expression-tree evaluator, which turns
 	any legal expression tree into EM code. Parameters:
@@ -71,11 +72,9 @@ EVAL(expr, val, code, true_label, false_label)
 	label true_label, false_label;
 {
 	int vol = (code != TRUE && recurqual(expr->ex_type, TQ_VOLATILE));
-	register int gencode = ((code == TRUE
-				    && (expr->ex_type->tp_size > 0
-					|| expr->ex_type->tp_fund == FUNCTION))
-				|| vol);
+	register int gencode = code == TRUE;
 
+	if (err_occurred) return;
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
 		if (gencode) {
@@ -87,6 +86,10 @@ EVAL(expr, val, code, true_label, false_label)
 				C_bra(expr->VL_VALUE == 0 ? false_label : true_label);
 			}
 			else load_val(expr, val);
+		}
+		else if (vol) {
+			load_val(expr, val);
+			C_asp(ATW(expr->ex_type->tp_size));
 		}
 		break;
 	case String:	/* a string constant	*/
@@ -116,13 +119,6 @@ EVAL(expr, val, code, true_label, false_label)
 		register struct expr *left = expr->OP_LEFT;
 		register struct expr *right = expr->OP_RIGHT;
 		register struct type *tp = expr->OP_TYPE;
-
-		if (tp->tp_fund == ERRONEOUS || (expr->ex_flags & EX_ERROR)) {
-			/* stop immediately */
-			break;
-		}
-		if (tp->tp_fund == VOID)
-			gencode = 0;
 
 		switch (oper) {
 		case '+':
@@ -353,20 +349,19 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 			}
 			break;
-		case '=': {
-			int newcode = tp->tp_size > 0;	/* CJ */
+		case '=':
 #ifndef NOBITFIELD
 			if (left->ex_type->tp_fund == FIELD) {
 				eval_field(expr, gencode);
 				break;
 			}
 #endif NOBITFIELD
-			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			if (gencode && val == RVAL)
 				C_dup(ATW(tp->tp_size));
 			if (left->ex_class != Value) {
-				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
-				if (newcode && gencode && val == LVAL) {
+				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				if (gencode && val == LVAL) {
 					arith tmp = LocalPtrVar();
 					C_dup(pointer_size);
 					StoreLocal(tmp, pointer_size);
@@ -374,15 +369,13 @@ EVAL(expr, val, code, true_label, false_label)
 					LoadLocal(tmp, pointer_size);
 					FreeLocal(tmp);
 				}
-				else if (newcode)
-					store_block(tp->tp_size, tp->tp_align);
+				else store_block(tp->tp_size, tp->tp_align);
 			}
-			else if (newcode) {
+			else {
 				store_val(&(left->EX_VALUE), left->ex_type);
 				if (gencode && val == LVAL) {
-					EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
+					EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
 				}
-			}
 			}
 			break;
 		case PLUSAB:
@@ -402,15 +395,15 @@ EVAL(expr, val, code, true_label, false_label)
 		{
 			arith tmp = 0;
 			int compl;	/* Complexity of left operand */
-			int newcode = left->ex_type->tp_size > 0; /* CJ */
 			int right_done = 0;
+			int dupval;
 #ifndef NOBITFIELD
 			if (left->ex_type->tp_fund == FIELD) {
 				eval_field(expr, gencode);
 				break;
 			}
 #endif NOBITFIELD
-			if (newcode && left->ex_class == Value) {
+			if (left->ex_class == Value) {
 				compl = 0; /* Value */
 			}
 			else if (left->ex_depth == 1 &&
@@ -428,61 +421,54 @@ EVAL(expr, val, code, true_label, false_label)
 			    (oper == PLUSAB || oper == TIMESAB ||
 			     oper == ANDAB || oper == XORAB || oper == ORAB)) {
 				right_done = 1;
-				EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			}
 			if (compl == 0) {
 				load_val(left, RVAL);
 			}
 			else
 			if (compl == 1) {
-				EVAL(left, RVAL, newcode, NO_LABEL, NO_LABEL);
+				EVAL(left, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			}
 			else {
-				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
-				if (newcode) {
-					tmp = LocalPtrVar();
-					C_dup(pointer_size);
-					StoreLocal(tmp, pointer_size);
+				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				tmp = LocalPtrVar();
+				C_dup(pointer_size);
+				StoreLocal(tmp, pointer_size);
+				C_loi(left->ex_type->tp_size);
+			}
+			if (gencode && (oper == POSTINCR ||
+					oper == POSTDECR))
+				C_dup(ATW(left->ex_type->tp_size));
+			conversion(left->ex_type, tp);
+			if (! right_done) {
+				EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			}
+			dupval = gencode && oper != POSTINCR &&
+					oper != POSTDECR;
+			assop(tp, oper);
+			conversion(tp, left->ex_type);
+			if (compl == 0) {
+				store_val(&(left->EX_VALUE),
+					left->ex_type);
+				if (dupval) load_val(left, RVAL);
+			}
+			else if (compl == 1) {
+				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				C_sti(left->ex_type->tp_size);
+				if (dupval) {
+					EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
 					C_loi(left->ex_type->tp_size);
 				}
 			}
-			if (newcode) {
-				if (gencode && (oper == POSTINCR ||
-						oper == POSTDECR))
-					C_dup(ATW(left->ex_type->tp_size));
-				conversion(left->ex_type, tp);
-			}
-			if (! right_done) {
-				EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
-			}
-			if (newcode) {
-				int dupval = gencode && oper != POSTINCR &&
-						oper != POSTDECR;
-				assop(tp, oper);
-				conversion(tp, left->ex_type);
-				if (compl == 0) {
-					store_val(&(left->EX_VALUE),
-						left->ex_type);
-					if (dupval) load_val(left, RVAL);
-				}
-				else if (compl == 1) {
-					EVAL(left, LVAL,1, NO_LABEL, NO_LABEL);
-					C_sti(left->ex_type->tp_size);
-					if (dupval) {
-						EVAL(left, LVAL, 1, NO_LABEL,
-							NO_LABEL);
-						C_loi(left->ex_type->tp_size);
-					}
-				}
-				else {
+			else {
+				LoadLocal(tmp, pointer_size);
+				C_sti(left->ex_type->tp_size);
+				if (dupval) {
 					LoadLocal(tmp, pointer_size);
-					C_sti(left->ex_type->tp_size);
-					if (dupval) {
-						LoadLocal(tmp, pointer_size);
-						C_loi(left->ex_type->tp_size);
-					}
-					FreeLocal(tmp);
+					C_loi(left->ex_type->tp_size);
 				}
+				FreeLocal(tmp);
 			}
 			break;
 		}
@@ -509,14 +495,12 @@ EVAL(expr, val, code, true_label, false_label)
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					arith size = ex->OP_RIGHT->ex_type->tp_size;
-					EVAL(ex->OP_RIGHT, RVAL, size > 0,
+					EVAL(ex->OP_RIGHT, RVAL, TRUE,
 							NO_LABEL, NO_LABEL);
-					ParSize += ATW(size);
+					ParSize += ATW(ex->OP_RIGHT->ex_type->tp_size);
 					ex = ex->OP_LEFT;
 				}
-				EVAL(ex, RVAL, ex->ex_type->tp_size > 0,
-						NO_LABEL, NO_LABEL);
+				EVAL(ex, RVAL, TRUE, NO_LABEL, NO_LABEL);
 				ParSize += ATW(ex->ex_type->tp_size);
 			}
 			if (ISNAME(left)) {
@@ -664,8 +648,6 @@ EVAL(expr, val, code, true_label, false_label)
 		crash("(EVAL) bad expression class");
 	}
 	if (expr->ex_flags & EX_VOLATILE || vol) C_nop();
-	if (vol) C_asp(expr->ex_type->tp_size);
-
 }
 
 /*	compare() serves as an auxiliary function of EVAL	*/
@@ -829,8 +811,6 @@ assop(type, oper)
 		C_loc(pointer_size);
 		C_cuu();
 		C_ads(pointer_size);
-		break;
-	case ERRONEOUS:
 		break;
 	default:
 		crash("(assop) bad type %s\n", symbol2str(type->tp_fund));
