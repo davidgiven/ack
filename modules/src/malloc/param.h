@@ -5,7 +5,7 @@
  */
 #include	"size_type.h"
 
-/*#	define	NON_STANDARD	/*	If defined, the contents of a block
+#	undef	NON_STANDARD	/*	If defined, the contents of a block
 					will NOT be left undisturbed after it
 					is freed, as opposed to what it says
 					in the manual (malloc(2)).
@@ -16,14 +16,14 @@
 					implementation.
 				*/
 
-/*#	define	ASSERT		/*	If defined, some inexpensive tests
+#	undef	ASSERT		/*	If defined, some inexpensive tests
 					will be made to ensure the
 					correctness of some sensitive data.
 					It often turns an uncontrolled crash
 					into a controlled one.
 				*/
 
-/*#	define	CHECK		/*	If defined, extensive and expensive
+#	undef	CHECK		/*	If defined, extensive and expensive
 					tests will be done, inculding a
 					checksum on the mallinks (chunk
 					information blocks).  The resulting
@@ -36,7 +36,7 @@
 					form; it aborts afterwards if n != 0.
 				*/
 
-/*#	define	EXTERN		/*	If defined, all static names will
+#	undef	EXTERN		/*	If defined, all static names will
 					become extern, which is a help in
 					using adb(1) or prof(1)
 				*/
