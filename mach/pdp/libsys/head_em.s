@@ -3,6 +3,7 @@
 .define  LINO_AD,FILN_AD
 .define  ERANGE,ESET,EHEAP,EILLINS,ECASE
 .define  hol0,trppc~,trpim~,reghp~,.limhp
+.define EXIT,WRITE,BRK
 ! $Header$
 
 #define float 1
@@ -45,10 +46,14 @@ ECASE   = 024
 1:
 	mov     r0,4(sp)
 	jsr     pc,__m_a_i_n
-! next two lines for as long as tail needs printf
-!	mov     r0,-(sp)
-!	jsr     pc,*$_exit
+	mov	r0,-(sp)
+EXIT:
+	jsr	pc,__exit
 	sys     1
+
+WRITE:	jmp	__write
+
+BRK:	jmp	__brk
 
 	.sect .data
 hol0:   .data2 0,0     ! line no
