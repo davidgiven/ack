@@ -610,7 +610,7 @@ check_formals(idf, dc)
 		}
 		while(fm && pl) {
 		    if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type)
-					, pl->pl_type, 0)) {
+					, pl->pl_type, -1)) {
 			if (!(pl->pl_flag & PL_ERRGIVEN))
 			    error("incorrect type for parameter %s"
 						, fm->fm_idf->id_text);

@@ -170,6 +170,7 @@ ch3cast(expp, oper, tp)
 		expression of class Type.
 	*/
 	register struct type *oldtp;
+	int qual_lev;
 
 	if (oper == RETURN && tp->tp_fund == VOID) {
 		expr_strict(*expp, "return <expression> in function returning void");
@@ -195,8 +196,19 @@ ch3cast(expp, oper, tp)
 	}
 	else
 #endif NOBITFIELD
-	if (equal_type(tp, oldtp, oper != CAST)) {
+	if (oper == CASTAB || oper == '=' || oper == RETURN) {
+		qual_lev = -2;
+	} else if (oper == CAST) qual_lev = -999;	/* ??? hack */
+	else qual_lev = -1;
+
+	if (equal_type(tp, oldtp, qual_lev)) {
 		/* life is easy */
+		if (qual_lev == -2 && tp->tp_fund == POINTER) {
+			if ((tp->tp_up->tp_typequal & oldtp->tp_up->tp_typequal)
+			    != oldtp->tp_up->tp_typequal) {
+				expr_strict( *expp, "qualifier error");
+			}
+		}
 		(*expp)->ex_type = tp;	/* so qualifiers are allright */
 	}
 	else
@@ -336,11 +348,11 @@ ch3cast(expp, oper, tp)
 
 /*	Determine whether two types are equal.
 */
-equal_type(tp, otp, check_qual)
+equal_type(tp, otp, qual_lev)
 	register struct type *tp, *otp;
-	int check_qual;
+	int qual_lev;
 {
-	if (tp == otp)
+	 if (tp == otp)
 		return 1;
 	if (!tp
 	    || !otp
@@ -351,6 +363,10 @@ equal_type(tp, otp, check_qual)
 	if (tp->tp_fund != ARRAY) {
 		if (tp->tp_size != otp->tp_size)
 			return 0;
+	}
+	if (qual_lev >= 0) {
+		if (tp->tp_typequal != otp->tp_typequal)
+			strict("illegal qualifiers");
 	}
 
 	switch (tp->tp_fund) {
@@ -367,7 +383,7 @@ equal_type(tp, otp, check_qual)
 			if (!legal_mixture(tp, otp))
 				return 0;
 		}
-		return equal_type(tp->tp_up, otp->tp_up, 0);
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1);
 
 	case ARRAY:
 		/*	If one type is an array of known size, the composite
@@ -376,28 +392,13 @@ equal_type(tp, otp, check_qual)
 		if (tp->tp_size != otp->tp_size &&
 		     (tp->tp_size != -1 && otp->tp_size != -1))
 			return 0;
-		return equal_type(tp->tp_up, otp->tp_up, check_qual);
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev); /* ??? +1 */
 
 	case POINTER:
-		if (equal_type(tp->tp_up, otp->tp_up, check_qual)) {
-		    if (check_qual) {
-			if (otp->tp_up->tp_typequal & TQ_CONST) {
-			    if (!(tp->tp_up->tp_typequal & TQ_CONST)) {
-				strict("illegal use of pointer to const object");
-			    }
-			}
-			if (otp->tp_up->tp_typequal & TQ_VOLATILE) {
-			    if (!(tp->tp_up->tp_typequal & TQ_VOLATILE)) {
-				strict("illegal use of pointer to volatile object");
-			    }
-			}
-		    }
-		    return 1;
-		}
-		else return 0;
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1);
 
 	case FIELD:
-		return equal_type(tp->tp_up, otp->tp_up, check_qual);
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev); /* ??? +1 */
 
 	case STRUCT:
 	case UNION:
@@ -426,7 +427,7 @@ check_pseudoproto(pl, opl)
 		return 0;
 	}
 	while (pl && opl) {
-	    if (!equal_type(pl->pl_type, opl->pl_type, 0)) {
+	    if (!equal_type(pl->pl_type, opl->pl_type, -1)) {
 		if (!(pl->pl_flag & PL_ERRGIVEN)
 		    && !(opl->pl_flag & PL_ERRGIVEN))
 			error("incorrect type for parameter %s of definition",
@@ -500,7 +501,7 @@ equal_proto(pl, opl)
 	while ( pl && opl) {
 
 	    if ((pl->pl_flag & ~PL_ERRGIVEN) != (opl->pl_flag & ~PL_ERRGIVEN) ||
-	        !equal_type(pl->pl_type, opl->pl_type, 0))
+	        !equal_type(pl->pl_type, opl->pl_type, -1))
 		return 0;
 
 	    pl = pl->next;
