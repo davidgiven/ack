@@ -3,7 +3,6 @@ static char rcsid2[] = "$Header$";
 #endif
 
 #include "nopt.h"
-#include <system.h>
 
 extern struct dfa OO_checknext[];	/* Initialized in dfa.c */
 extern struct dfa *OO_base[];		/* Initialized in dfa.c */
