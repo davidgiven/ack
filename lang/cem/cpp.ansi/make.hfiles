@@ -9,7 +9,7 @@ case $# in
 esac
 
 (
-IFCOMMAND="if (<\$FN) 2>/dev/null;\
+IFCOMMAND="if [ -r \$FN ] ;\
 	then	if cmp -s \$FN \$TMP;\
 		then	rm \$TMP;\
 		else	mv \$TMP \$FN;\
