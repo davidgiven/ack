@@ -23,6 +23,10 @@
 #include "../../../h/em_spec.h"
 #include "../share/parser.h"
 
+#define newlvbx()	(bext_p) newstruct(bext_lv)
+#define oldlvbx(x)	oldstruct(bext_lv,x)
+
+
 /* TEMPORARY: should be put in ../../../h/em_mes.h: */
 #define ms_liv 9
 #define ms_ded 10
