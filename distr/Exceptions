@@ -1,8 +1,6 @@
-++ ./doc/proto.make made
+++ ./doc/install.pr made
 ++ ./doc/int/.distr made
-++ ./h/em_mnem.h not present
-++ ./h/em_pseu.h not present
-++ ./h/em_spec.h not present
+++ ./etc/new_table_done made
 ++ ./lang/cem/cemcom.ansi/Version.c made
 ++ ./lang/cem/libcc.ansi/stdlib/malloc.c made
 ++ ./lang/cem/cemcom/Version.c made
@@ -13,8 +11,5 @@
 ++ ./mach/sparc_solaris/libem/LIST made
 ++ ./util/LLgen/src/LLgen.c.dist made
 ++ ./util/cpp/Version.c made
-++ ./util/data/em_flag.c not present
-++ ./util/data/em_mnem.c not present
-++ ./util/data/em_pseu.c not present
 ++ ./util/ego/share/pop_push.h made
 ++ ./util/grind/ops.c made

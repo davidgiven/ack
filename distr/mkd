@@ -1,6 +1,9 @@
 case $1 in
 .)	;;
-*)	mkdir $DESTDIR/$1
+*)	if [ -d $DESTDIR/$1 ]
+	then	:
+	else	mkdir $DESTDIR/$1
+	fi
 	;;
 esac
 p=$REPDIR/$1

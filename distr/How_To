@@ -42,8 +42,8 @@ Now, the tree contains all the files in the distribution, but it also contains
 files that should not be in the distribution, especially the files created
 by CVS.
 That is why we now give the command:
-	dtar cdf distr5 .
-The file distr5 is the one you should put on tape!
+	dtar cdf distr .
+The file distr is the one you should put on tape!
 But,.... before doing that: Try it out!
 Repeat the process described in the installation manual.
 Only if that succeeds you are sure that you included the files needed.
