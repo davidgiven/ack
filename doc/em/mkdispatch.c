@@ -274,6 +274,7 @@ checkall() {
 			else if ( flag&OP_POS )
 				posc[opc]++ ;
 			break ;
+		case OP16U :
 		case OP32 :
 		case OP64 :
 			break ;
@@ -437,7 +438,7 @@ writeout() {
 	i = 0;
 	while (lcodes[i] != -1) {
 		if (!(i % 8)) printf("\n%d", i);
-		printf("\t%s", ename(ecodes[i]));
+		printf("\t%s", ename(lcodes[i]));
 		i++;
 	}
 	while (i++ % 8) putchar('\t');
@@ -454,8 +455,10 @@ prx(flg,low,opc)
 	case OPNO:
 		putchar('z');
 		break;
-	case OP16:
 	case OP16U:
+		putchar('u');
+		break;
+	case OP16:
 		if (flg&OP_POS) putchar('p');
 		else if (flg&OP_NEG) putchar('n');
 		else putchar('l');

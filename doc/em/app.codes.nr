@@ -120,6 +120,8 @@ The following suffices exist:
 no arguments
 .PT .l
 16-bit argument
+.PT .u
+16-bit unsigned argument
 .PT .lw
 16-bit argument divided by the wordsize
 .PT .p
