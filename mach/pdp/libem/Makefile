@@ -1,15 +1,14 @@
-l=../lib
 
 install:	cp
 
 cp:             all
-		cp head_em $l/head_em
-		cp tail_em $l/tail_em
+		../../install head_em
+		../../install tail_em
 		rm -f head_em tail_em
 
 cmp:            all
-		cmp head_em $l/head_em
-		cmp tail_em $l/tail_em
+		-../../compare head_em
+		-../../compare tail_em
 		rm -f head_em tail_em
 
 distr:
