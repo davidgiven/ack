@@ -621,7 +621,7 @@ getlabel(c, p)
 PRIVATE struct e_instr *
 gethead()
 {
-	register int c, i;
+	register int c;
 	register struct e_instr *p = &emhead;
 
 	argnum = 1;

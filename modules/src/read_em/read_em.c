@@ -80,9 +80,11 @@ static struct string *i_strings;		/* Index of last one used */
 static struct e_args *argp;	/* Indicates arguments yet to be
 				   delivered
 				*/
+#ifdef COMPACT
 static arith strleft;		/* count # of chars left to read
 				   in a string
 				*/
+#endif
 
 static int state;		/* What state are we in? */
 #define CON	01		/* Reading a CON */
@@ -122,6 +124,7 @@ xerror(s)
 	if (!EM_error) EM_error = s;
 }
 
+#ifdef COMPACT
 PRIVATE
 xfatal(s)
 	char *s;
@@ -130,7 +133,6 @@ xfatal(s)
 	if (!EM_error) EM_error = s;
 }
 
-#ifdef COMPACT
 #include "readk.c"
 #else not COMPACT
 #include "reade.c"
@@ -176,8 +178,6 @@ EXPORT
 EM_close()
 {
 	
-	register struct string *pstr;
-
 	if (fd != STDIN) {
 		sys_close(fd);
 		fd = STDIN;

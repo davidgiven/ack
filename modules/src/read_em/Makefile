@@ -3,7 +3,8 @@ MODULES = $(EMHOME)/modules
 HDIR =	$(MODULES)/h
 EMHDIR = $(EMHOME)/h
 INCLUDES = -I$(HDIR) -I$(EMHDIR)
-CFLAGS = -O $(INCLUDES) -DPRIVATE=static -DEXPORT=
+DEFINES = -DPRIVATE=static -DEXPORT=
+CFLAGS = -O $(INCLUDES) $(DEFINES)
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 
@@ -11,10 +12,18 @@ TARGETS =	libread_emk.a\
 		libread_emkV.a\
 		libread_emeV.a
 
+ESRCFILES =	read_em.c\
+		mkcalls.c\
+		EM_vars.c
+
+KSRCFILES =	read_em.c\
+		mkcalls.c\
+		EM_vars.c
+
 SRCFILES =	em_comp.h\
 		read_em.c\
 		reade.c\
-		readk.c\
+		readk.c \
 		mkcalls.c\
 		EM_vars.c
 
@@ -84,3 +93,8 @@ C_mnem:		m_C_mnem argtype
 
 C_mnem_narg:	m_C_mnem_na argtype
 		sh m_C_mnem_na > C_mnem_narg
+
+lintlib:	C_mnem C_mnem_narg
+		lint $(INCLUDES) $(DEFINES) -DCOMPACT -DCHECKING -Cread_emkV $(KSRCFILES)
+		lint $(INCLUDES) $(DEFINES) -DCHECKING -Cread_emeV $(ESRCFILES)
+		mv llib-lread_emeV.ln llib-lread_emkV.ln $(MODULES)/lib

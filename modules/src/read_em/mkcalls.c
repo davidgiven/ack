@@ -308,7 +308,7 @@ EM_dopseudo(opcode, args)
 					break;
 				default:
 					EM_error = "Illegal argument type";
-					return 0;
+					return;
 			}
 			break;
 		case ps_rom:
@@ -344,7 +344,7 @@ EM_dopseudo(opcode, args)
 					break;
 				default:
 					EM_error = "Illegal argument type";
-					return 0;
+					return;
 			}
 			break;
 		default: 

@@ -71,7 +71,7 @@ getarg(typset)
 		ap->em_noff = 0;
 		ap->em_argtype = nof_ptyp;
 #ifdef CHECKING
-		if (ap->em_dlb < 0 && !EM_error) {
+		if (ap->em_dlb > 32767 && !EM_error) {
 			EM_error = "Illegal data label";
 			break;
 		}
@@ -87,7 +87,7 @@ getarg(typset)
 		ap->em_ilb = get16();
 		ap->em_argtype = ilb_ptyp;
 #ifdef CHECKING
-		if (ap->em_ilb < 0 && !EM_error) {
+		if (ap->em_ilb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label";
 			break;
 		}
@@ -326,7 +326,7 @@ gethead()
 		p->em_type = EM_DEFILB;
 		p->em_deflb = get16();
 #ifdef CHECKING
-		if (p->em_deflb < 0 && !EM_error) {
+		if (p->em_deflb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label definition";
 		}
 #endif CHECKING
@@ -341,7 +341,7 @@ gethead()
 		p->em_type = EM_DEFDLB;
 		p->em_deflb = get16();
 #ifdef CHECKING
-		if (p->em_deflb < 0 && !EM_error) {
+		if (p->em_deflb > 32767 && !EM_error) {
 			EM_error = "Illegal data label definition";
 		}
 #endif CHECKING
