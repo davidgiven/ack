@@ -28,13 +28,27 @@ preprocess(fn)
 	register int c;
 	register char *op = _obuf;
 	register char *ob = &_obuf[OBUFSIZE];
-	int lineno = 32767;	/* force line directive */
+	char Xbuf[256];
+	int lineno = 0;
 	extern char options[];
 
 #define flush(X)	(sys_write(STDOUT,_obuf,X))
 #define echo(ch) 	if (op == ob) { Xflush(); op = _obuf; } *op++ = (ch);
 #define newline()	echo('\n')
 
+	if (! options['P']) {
+		/* Generate a line directive communicating the
+		   source filename
+		*/
+		register char *p = Xbuf;
+
+		sprint(p, "%s 1 \"%s\"\n",
+			LINE_PREFIX,
+			FileName);
+		while (*p) {
+			echo(*p++);
+		}
+	}
 	for (;;) {
 		LineNumber++;
 		lineno++;
@@ -49,7 +63,6 @@ preprocess(fn)
 			fn = FileName;
 			lineno = LineNumber;
 			if (! options['P']) {
-				char Xbuf[256];
 				register char *p = Xbuf;
 
 				sprint(p, "%s %d \"%s\"\n",
