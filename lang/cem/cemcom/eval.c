@@ -7,6 +7,7 @@
 
 #include	"nofloat.h"
 #include	<em.h>
+#include	<em_reg.h>
 #include	"debug.h"
 #include	"nobitfield.h"
 #include	"dataflow.h"
@@ -31,7 +32,8 @@
 
 char *symbol2str();
 char *long2str();
-arith tmp_pointer_var();
+arith NewLocal();	/* util.c */
+#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, 0)
 
 /*	EVAL() is the main expression-tree evaluator, which turns
 	any legal expression tree into EM code. Parameters:
@@ -366,7 +368,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case PLUSPLUS:
 		case MINMIN:
 		{
-			arith old_offset, tmp;
+			arith tmp;
 			int compl;	/* Complexity of left operand */
 			int newcode = left->ex_type->tp_size > 0; /* CJ */
 #ifndef NOBITFIELD
@@ -389,10 +391,9 @@ EVAL(expr, val, code, true_label, false_label)
 				compl = 2; /* otherwise */
 				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
 				if (newcode) {
-					tmp = tmp_pointer_var(&old_offset);
+					tmp = LocalPtrVar();
 					C_dup(pointer_size);
-					C_lal(tmp);
-					C_sti(pointer_size);
+					StoreLocal(tmp, pointer_size);
 					C_loi(left->ex_type->tp_size);
 				}
 			}
@@ -423,15 +424,13 @@ EVAL(expr, val, code, true_label, false_label)
 					}
 				}
 				else {
-					C_lal(tmp);	/* always init'd */
-					C_loi(pointer_size);
+					LoadLocal(tmp, pointer_size);
 					C_sti(left->ex_type->tp_size);
 					if (dupval) {
-						C_lal(tmp);
-						C_loi(pointer_size);
+						LoadLocal(tmp, pointer_size);
 						C_loi(left->ex_type->tp_size);
 					}
-					free_tmp_var(old_offset);
+					FreeLocal(tmp);
 				}
 			}
 			break;
@@ -477,7 +476,7 @@ EVAL(expr, val, code, true_label, false_label)
 			if (gencode) {
 				if (is_struct_or_union(tp->tp_fund)) {
 					C_lfr(pointer_size);
-					load_block(tp->tp_size, tp->tp_align);
+					load_block(tp->tp_size, word_align);
 				}
 				else
 					C_lfr(ATW(tp->tp_size));
@@ -758,33 +757,6 @@ assop(type, oper)
 	}
 }
 
-/*	tmp_pointer_var() returns the EM address of a new temporary
-	pointer variable needed at increment, decrement and assignment
-	operations to store the address of some variable or lvalue-expression.
-*/
-arith
-tmp_pointer_var(oldoffset)
-	arith *oldoffset;	/* previous allocated address	*/
-{
-	register struct stack_level *stl = local_level;
-
-	*oldoffset = stl->sl_local_offset;
-	stl->sl_local_offset =
-		- align(-stl->sl_local_offset + pointer_size, pointer_align);
-	if (stl->sl_local_offset < stl->sl_max_block)
-		stl->sl_max_block = stl->sl_local_offset;
-	return stl->sl_local_offset;
-}
-
-/*	free_tmp_var() returns the address allocated by tmp_pointer_var()
-	and resets the last allocated address.
-*/
-free_tmp_var(oldoffset)
-	arith oldoffset;
-{
-	local_level->sl_local_offset = oldoffset;
-}
-
 /*	store_val() generates code for a store operation.
 	There are four ways of storing data:
 	- into a global variable
@@ -828,15 +800,11 @@ store_val(vl, tp)
 		}
 		else {
 			ASSERT(df->df_sc != STATIC);
-			if (inword)
-				C_stl(df->df_address + val);
-			else
-			if (indword)
-				C_sdl(df->df_address + val);
+			if (inword || indword)
+				StoreLocal(df->df_address + val, size);
 			else {
-				C_lal(df->df_address + val);
+				AddrLocal(df->df_address + val);
 				store_block(size, tpalign);
-				df->df_register = REG_NONE;
 			}
 		}
 	}
@@ -943,21 +911,16 @@ load_val(expr, rlval)
 		else {
 			ASSERT(df->df_sc != STATIC);
 			if (rvalue) {
-				if (inword)
-					C_lol(df->df_address + val);
-				else
-				if (indword)
-					C_ldl(df->df_address + val);
+				if (inword || indword)
+					LoadLocal(df->df_address + val, size);
 				else {
-					C_lal(df->df_address + val);
+					AddrLocal(df->df_address + val);
 					load_block(size, tpalign);
-					df->df_register = REG_NONE;
 				}
 			}
 			else {
-				C_lal(df->df_address);
+				AddrLocal(df->df_address);
 				C_adp(val);
-				df->df_register = REG_NONE;
 			}
 		}
 	}

@@ -1,0 +1,10 @@
+struct localvar {
+	struct localvar	*next;
+	arith		t_offset;	/* offset from LocalBase */
+	arith		t_size;
+	int		t_align;
+	int		t_regtype;
+	int		t_count;
+};
+
+/* ALLOCDEF "localvar" 10 */

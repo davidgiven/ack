@@ -6,6 +6,7 @@
 /*	B L O C K   S T O R I N G   A N D   L O A D I N G	*/
 
 #include <em.h>
+#include <em_reg.h>
 #include "arith.h"
 #include "sizes.h"
 #include "atw.h"
@@ -13,7 +14,8 @@
 #ifndef STB
 #include "label.h"
 #include "stack.h"
-extern arith tmp_pointer_var();
+extern arith NewLocal();
+#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, 0)
 #endif STB
 
 /*	Because EM does not support the loading and storing of
@@ -58,22 +60,20 @@ store_block(sz, al)
 		C_sti(sz);
 	else {
 #ifndef STB
-		arith src, dst, src_offs, dst_offs;
+		arith src, dst;
 
 		/* allocate two pointer temporaries */
-		src = tmp_pointer_var(&src_offs);
-		dst = tmp_pointer_var(&dst_offs);
+		src = LocalPtrVar();
+		dst = LocalPtrVar();
 
 		/* load the addresses */
-		C_lal(dst);
-		C_sti(pointer_size);
+		StoreLocal(dst, pointer_size);
 		C_lor((arith)1);	/* push current sp */
-		C_lal(src);
-		C_sti(pointer_size);
+		StoreLocal(src, pointer_size);
 		copy_loop(sz, src, dst);
 		C_asp(ATW(sz));
-		free_tmp_var(dst_offs);
-		free_tmp_var(src_offs);
+		FreeLocal(dst);
+		FreeLocal(src);
 #else STB
 		/*	address of destination lies on the stack	*/
 
@@ -103,21 +103,19 @@ load_block(sz, al)
 		C_loi(esz);
 	else {
 #ifndef STB
-		arith src, dst, src_offs, dst_offs;
+		arith src, dst;
 
 		/* allocate two pointer temporaries */
-		src = tmp_pointer_var(&src_offs);
-		dst = tmp_pointer_var(&dst_offs);
+		src = LocalPtrVar();
+		dst = LocalPtrVar();
 
-		C_lal(src);
-		C_sti(pointer_size);
+		StoreLocal(src, pointer_size);
 		C_asp(-esz);		/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
-		C_lal(dst);
-		C_sti(pointer_size);
+		StoreLocal(dst, pointer_size);
 		copy_loop(sz, src, dst);
-		free_tmp_var(dst_offs);
-		free_tmp_var(src_offs);
+		FreeLocal(dst);
+		FreeLocal(src);
 #else STB
 		C_asp(-(esz - pointer_size));	/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
@@ -143,19 +141,15 @@ copy_loop(sz, src, dst)
 	C_dup(word_size);
 	C_zle(l_stop);
 	C_dec();
-	C_lal(src);
-	C_loi(pointer_size);
+	LoadLocal(src, pointer_size);
 	C_dup(pointer_size);
 	C_adp((arith)1);
-	C_lal(src);
-	C_sti(pointer_size);
+	StoreLocal(src, pointer_size);
 	C_loi((arith)1);
-	C_lal(dst);
-	C_loi(pointer_size);
+	LoadLocal(dst, pointer_size);
 	C_dup(pointer_size);
 	C_adp((arith)1);
-	C_lal(dst);
-	C_sti(pointer_size);
+	StoreLocal(dst, pointer_size);
 	C_sti((arith)1);
 	C_bra(l_cont);
 	C_df_ilb(l_stop);

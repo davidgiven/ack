@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
+#include	<em_reg.h>
 #include	"nofloat.h"
 #include	"debug.h"
 #include	"idfsize.h"
@@ -31,6 +32,7 @@
 
 int idfsize = IDFSIZE;
 extern char options[];
+extern arith NewLocal();
 
 char sp_occurred[SP_TOTAL];	/* indicate occurrence of special id	*/
 
@@ -292,7 +294,6 @@ declare_idf(ds, dc, lvl)
 		def->df_formal_array = formal_array;
 		def->df_sc = sc;
 		def->df_level = L_FORMAL2;	/* CJ */
-		if (sc == REGISTER) def->df_register = REG_BONUS;
 	}
 	else
 	if (	lvl >= L_LOCAL &&
@@ -318,8 +319,6 @@ declare_idf(ds, dc, lvl)
 		newdef->df_level = lvl;
 		newdef->df_type = type;
 		newdef->df_sc = sc;
-		if (lvl == L_FORMAL1)	/* CJ */
-			newdef->df_register = REG_DEFAULT;
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);
@@ -340,14 +339,13 @@ declare_idf(ds, dc, lvl)
 						idf->id_text);
 				/** type = idf->id_def->df_type = int_type; **/
 				}
-				newdef->df_register =
-					(sc == REGISTER) ? REG_BONUS
-					: REG_DEFAULT;
 				newdef->df_address =
-				stl->sl_max_block =
-				stl->sl_local_offset =
-					-align(-stl->sl_local_offset +
-						type->tp_size, type->tp_align);
+					NewLocal(type->tp_size,
+						 type->tp_align,
+						 regtype(type),
+						 (sc == REGISTER) ? REG_BONUS
+						 : REG_DEFAULT
+						 );
 				break;
 			case STATIC:
 				newdef->df_address = (arith) data_label();
@@ -615,8 +613,31 @@ declare_formals(fp)
 		formal_cvt(def); /* cvt int to char or short, if necessary */
 		se = se->next;
 		def->df_level = L_FORMAL2;	/* CJ */
+		RegisterAccount(def->df_address, def->df_type->tp_size,
+				regtype(def->df_type),
+				(def->df_sc == REGISTER ? REG_BONUS
+				: REG_DEFAULT)
+				);
 	}
 	*fp = f_offset;
+}
+
+int
+regtype(tp)
+	struct type *tp;
+{
+	switch(tp->tp_fund) {
+	case INT:
+		return reg_any;
+#ifndef NOFLOAT
+	case FLOAT:
+	case DOUBLE:
+		return reg_float;
+#endif NOFLOAT
+	case POINTER:
+		return reg_pointer;
+	}
+	return -1;
 }
 
 add_def(idf, sc, tp, lvl)

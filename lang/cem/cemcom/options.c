@@ -30,9 +30,6 @@ extern int inc_total;
 
 extern char options[];
 extern int idfsize;
-#ifdef USE_TMP
-extern char *tmpfdir;	/* main.c */
-#endif USE_TMP
 
 int txt2int();
 
@@ -163,14 +160,6 @@ deleted, is now a debug-flag
 			fatal("maximum identifier length is %d", IDFSIZE);
 		break;
 
-	case 'N' :
-#ifdef USE_TMP
-		options['N'] = 1;
-#else USE_TMP
-		warning("-N option ignored");
-#endif USE_TMP
-		break;
-
 #ifdef ___XXX___
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
 #ifndef NOPP
@@ -183,15 +172,17 @@ deleted, is now a debug-flag
 #endif ___XXX___
 
 #ifdef USE_TMP
-	case 'T' :
+	case 'T' : {
+		extern char *C_tmpdir;
 		if (*text)
-			tmpfdir = text;
+			C_tmpdir = text;
 		else
-			tmpfdir = ".";
+			C_tmpdir = ".";
 #else USE_TMP
 		warning("-T option ignored");
 #endif USE_TMP
 		break;
+	}
 		
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP

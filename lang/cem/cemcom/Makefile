@@ -58,7 +58,7 @@ CSRC =	main.c idf.c declarator.c decspecs.c struct.c \
 	tokenname.c LLlex.c LLmessage.c \
 	input.c domacro.c replace.c init.c options.c \
 	scan.c skip.c stack.c type.c ch7mon.c label.c eval.c \
-	switch.c conversion.c \
+	switch.c conversion.c util.c \
 	blocks.c dataflow.c Version.c
 COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	expr.o ch7.o ch7bin.o cstoper.o arith.o \
@@ -66,7 +66,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	tokenname.o LLlex.o LLmessage.o \
 	input.o domacro.o replace.o init.o options.o \
 	scan.o skip.o stack.o type.o ch7mon.o label.o eval.o \
-	switch.o conversion.o \
+	switch.o conversion.o util.o \
 	blocks.o dataflow.o Version.o
 
 # Objects of other generated C files
@@ -74,11 +74,11 @@ GCSRC =	char.c symbol2str.c next.c
 GOBJ =	char.o symbol2str.o next.o
 
 STRSRC = code.str declar.str decspecs.str def.str expr.str field.str \
-	estack.str \
+	estack.str util.str \
 	idf.str macro.str stack.str stmt.str struct.str switch.str type.str
 # generated source files
 GHSTRSRC = code.h declar.h decspecs.h def.h expr.h field.h \
-	estack.h \
+	estack.h util.h \
 	idf.h macro.h stack.h stmt.h struct.h switch.h type.h
 GSRC =	$(GCSRC)  $(GHSTRSRC)
 
@@ -185,6 +185,7 @@ struct.h:	make.allocd
 switch.h:	make.allocd
 type.h:		make.allocd
 estack.h:	make.allocd
+util.h:		make.allocd
 
 depend:	Cfiles
 	sed '/^#AUTOAUTO/,$$d' makefile >makefile.new
@@ -441,7 +442,6 @@ error.o: nofloat.h
 error.o: nopp.h
 error.o: spec_arith.h
 error.o: tokenname.h
-error.o: use_tmp.h
 field.o: Lpars.h
 field.o: arith.h
 field.o: assert.h
@@ -677,6 +677,15 @@ conversion.o: sizes.h
 conversion.o: spec_arith.h
 conversion.o: target_sizes.h
 conversion.o: type.h
+util.o: align.h
+util.o: atw.h
+util.o: nocross.h
+util.o: nofloat.h
+util.o: sizes.h
+util.o: stack.h
+util.o: target_sizes.h
+util.o: use_tmp.h
+util.o: util.h
 blocks.o: align.h
 blocks.o: arith.h
 blocks.o: atw.h

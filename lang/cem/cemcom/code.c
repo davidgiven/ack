@@ -40,6 +40,12 @@ label datlab_count = 1;
 int fp_used;
 #endif NOFLOAT
 
+#ifdef USE_TMP
+static int	tmp_id;
+static int	pro_id;
+static char	*pro_name;
+#endif USE_TMP
+
 extern char options[];
 char *symbol2str();
 
@@ -52,16 +58,11 @@ init_code(dst_file)
 	C_init(word_size, pointer_size); /* initialise EM module */
 	if (C_open(dst_file) == 0)
 		fatal("cannot write to %s\n", dst_file);
-#ifdef USE_TMP
-	if (options['N'])
-#endif	USE_TMP
-	famous_first_words();
-}
-
-famous_first_words()
-{
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+#ifdef USE_TMP
+	C_insertpart(tmp_id = C_getid());
+#endif	USE_TMP
 }
 
 static struct string_cst *str_list = 0;
@@ -84,11 +85,13 @@ code_string(val, len, dlb)
 def_strings(sc)
 	register struct string_cst *sc;
 {
-	if (sc) {
-		def_strings(sc->next);
+	while (sc) {
+		struct string_cst *sc1 = sc;
+
 		C_df_dlb(sc->sc_dlb);
 		str_cst(sc->sc_value, sc->sc_len);
-		free_string_cst(sc);
+		sc = sc->next;
+		free_string_cst(sc1);
 	}
 }
 
@@ -97,6 +100,12 @@ end_code()
 	/*	end_code() performs the actions to be taken when closing
 		the output stream.
 	*/
+#ifndef NOFLOAT
+	if (fp_used) {
+		/* floating point used	*/
+		C_ms_flt();
+	}
+#endif NOFLOAT
 	def_strings(str_list);
 	str_list = 0;
 	C_ms_src((int)(LineNumber - 2), FileName);
@@ -104,18 +113,15 @@ end_code()
 }
 
 #ifdef	USE_TMP
-prepend_scopes(dst_file)
-	char *dst_file;
+prepend_scopes()
 {
 	/*	prepend_scopes() runs down the list of global idf's
 		and generates those exa's, exp's, ina's and inp's
-		that superior hindsight has provided, on the file dst_file.
+		that superior hindsight has provided.
 	*/
 	register struct stack_entry *se = local_level->sl_entry;
 
-	if (C_open(dst_file) == 0)
-		fatal("cannot create %s", dst_file ? dst_file : "stdout");
-	famous_first_words();
+	C_beginpart(tmp_id);
 	while (se != 0)	{
 		register struct idf *id = se->se_idf;
 		register struct def *df = id->id_def;
@@ -124,7 +130,7 @@ prepend_scopes(dst_file)
 			code_scope(id->id_text, df);
 		se = se->next;
 	}
-	C_close();
+	C_endpart(tmp_id);
 }
 #endif	USE_TMP
 
@@ -156,8 +162,9 @@ code_scope(text, def)
 }
 
 static label return_label;
-static char return_expr_occurred;
+/* static char return_expr_occurred; */
 static struct type *func_tp;
+static arith func_size;
 static label func_res_label;
 static char *last_fn_given = "";
 static label file_name_label;
@@ -174,12 +181,9 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 			does not fit in the return area
 		-	a fil pseudo instruction
 	*/
-	arith size;
 	register struct type *tp = def->df_type;
 
-#ifdef USE_TMP
-	if (options['N']) code_scope(name,def);
-#else USE_TMP
+#ifndef USE_TMP
 	code_scope(name, def);
 #endif	USE_TMP
 #ifdef	DATAFLOW
@@ -194,11 +198,16 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	else
 		tp = tp->tp_up;
 	func_tp = tp;
-	size = ATW(tp->tp_size);
+	func_size = ATW(tp->tp_size);
+#ifndef USE_TMP
 	C_pro_narg(name);
+#else
+	pro_name = name;
+	C_insertpart(pro_id = C_getid());
+#endif
 	if (is_struct_or_union(tp->tp_fund))	{
 		C_df_dlb(func_res_label = data_label());
-		C_bss_cst(size, (arith)0, 1);
+		C_bss_cst(func_size, (arith)0, 1);
 	}
 	else
 		func_res_label = 0;
@@ -208,7 +217,8 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	*/
 	lab_count = (label) 1;
 	return_label = text_label();
-	return_expr_occurred = 0;
+	/* return_expr_occurred = 0; */
+	LocalInit();
 	prc_entry(name);
 	if (! options['L'])	{	/* profiling */
 		if (strcmp(last_fn_given, FileName) != 0)	{
@@ -223,8 +233,8 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	}
 }
 
-end_proc(fbytes, nbytes)
-	arith fbytes, nbytes;
+end_proc(fbytes)
+	arith fbytes;
 {
 	/*	end_proc() deals with the code to be generated at the end of
 		a function, as there is:
@@ -238,47 +248,57 @@ end_proc(fbytes, nbytes)
 		-	use of special identifiers such as "setjmp"
 		-	"end" + number of bytes used for local variables
 	*/
-	static int mes_flt_given = 0;	/* once for the whole program */
+	arith nbytes;
 
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaEndFunction();
 #endif	DATAFLOW
 	prc_exit();
-	C_ret((arith)0);
-	if (return_expr_occurred != 0)	{
-		C_df_ilb(return_label);
-		prc_exit();
-		if (func_res_label != 0)	{
-			C_lae_dlb(func_res_label, (arith)0);
-			store_block(func_tp->tp_size, func_tp->tp_align);
-			C_lae_dlb(func_res_label, (arith)0);
-			C_ret(pointer_size);
-		}
-		else
-			C_ret(ATW(func_tp->tp_size));
+	C_asp(-func_size);		/* arbitrary return value */
+	C_df_ilb(return_label);
+	prc_exit();
+	if (func_res_label != 0)	{
+		C_lae_dlb(func_res_label, (arith)0);
+		store_block(func_size, func_tp->tp_align);
+		C_lae_dlb(func_res_label, (arith)0);
+		C_ret(pointer_size);
 	}
-#ifndef NOFLOAT
-	if (fp_used && mes_flt_given == 0)	{
-		/* floating point used	*/
-		C_ms_flt();
-		mes_flt_given++;
-	}
-#endif NOFLOAT
+	else
+		C_ret(func_size);
+
+	/* getting the number of "local" bytes is posponed until here,
+	   because copying the function result in "func_res_label" may
+	   need temporaries! However, local_level is now L_FORMAL2, because
+	   L_LOCAL is already unstacked. Therefore, "unstack_level" must
+	   also pass "sl_max_block" to the level above L_LOCAL.
+	*/
+	nbytes = ATW(- local_level->sl_max_block);
+#ifdef USE_TMP
+	C_beginpart(pro_id);
+	C_pro(pro_name, nbytes);
+#endif
 	C_ms_par(fbytes);		/* # bytes for formals		*/
 	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
 		C_ms_gto();
 		sp_occurred[SP_SETJMP] = 0;
 	}
-	C_end(ATW(nbytes));
+#ifdef USE_TMP
+	C_endpart(pro_id);
+#endif
+	LocalFinish();
+	C_end(nbytes);
 }
 
 do_return()
 {
-	/*	do_return generates a direct return */
-	/*	isn't a jump to the return label smarter ??? */
-	prc_exit();
-	C_ret((arith)0);
+	/*	do_return handles the case of a return without expression.
+		This version branches to the return label, which is
+		probably smarter than generating a direct return.
+		Return sequences may be expensive.
+	*/
+	C_asp(-func_size);	/* arbitrary return value */
+	C_bra(return_label);
 }
 
 do_return_expr(expr)
@@ -290,7 +310,7 @@ do_return_expr(expr)
 	ch7cast(&expr, RETURN, func_tp);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	C_bra(return_label);
-	return_expr_occurred = 1;
+	/* return_expr_occurred = 1; */
 }
 
 code_declaration(idf, expr, lvl, sc)
@@ -322,7 +342,6 @@ code_declaration(idf, expr, lvl, sc)
 		while at the same time forbidding
 			extern int a = 5;
 	*/
-	char *text = idf->id_text;
 	register struct def *def = idf->id_def;
 	register arith size = def->df_type->tp_size;
 	int def_sc = def->df_sc;
@@ -330,7 +349,7 @@ code_declaration(idf, expr, lvl, sc)
 	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
 		return;
 	if (sc == EXTERN && expr && !is_anon_idf(idf))
-		error("%s is extern; cannot initialize", text);
+		error("%s is extern; cannot initialize", idf->id_text);
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
@@ -339,12 +358,11 @@ code_declaration(idf, expr, lvl, sc)
 		)
 			def->df_alloc = ALLOC_SEEN;
 		if (expr) {	/* code only if initialized */
-#ifdef USE_TMP
-			if (options['N'])
+#ifndef USE_TMP
+			code_scope(idf->id_text, def);
 #endif USE_TMP
-			code_scope(text, def);
 			def->df_alloc = ALLOC_DONE;
-			C_df_dnam(text);
+			C_df_dnam(idf->id_text);
 		}
 	}
 	else
@@ -364,7 +382,7 @@ code_declaration(idf, expr, lvl, sc)
 			}
 			else {	/* produce blank space */
 				if (size <= 0) {
-					error("size of %s unknown", text);
+					error("size of %s unknown", idf->id_text);
 					size = (arith)0;
 				}
 				C_bss_cst(ATW(size), (arith)0, 1);
@@ -374,10 +392,9 @@ code_declaration(idf, expr, lvl, sc)
 		case GLOBAL:
 		case IMPLICIT:
 			/* we are sure there is no expression */
-#ifdef	USE_TMP
-			if (options['N'])
+#ifndef	USE_TMP
+			code_scope(idf->id_text, def);
 #endif	USE_TMP
-			code_scope(text, def);
 			break;
 		case AUTO:
 		case REGISTER:
@@ -399,8 +416,8 @@ loc_init(expr, id)
 		expression expr to the local variable described by id.
 		It frees the expression afterwards.
 	*/
-	register struct type *tp = id->id_def->df_type;
 	register struct expr *e = expr;
+	register struct type *tp = id->id_def->df_type;
 	
 	ASSERT(id->id_def->df_sc != STATIC);
 	switch (tp->tp_fund)	{
@@ -446,10 +463,9 @@ bss(idf)
 	*/
 	arith size = idf->id_def->df_type->tp_size;
 	
-#ifdef	USE_TMP
-	if (options['N'])
-#endif	USE_TMP
+#ifndef	USE_TMP
 	code_scope(idf->id_text, idf->id_def);
+#endif	USE_TMP
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:
 	*/
@@ -475,13 +491,11 @@ formal_cvt(df)
 	if (tp->tp_size != int_size &&
 		(tp->tp_fund == CHAR || tp->tp_fund == SHORT)
 	) {
-		C_lol(df->df_address);
+		LoadLocal(df->df_address, int_size);
 		/* conversion(int_type, df->df_type); ???
 		   No, you can't do this on the stack! (CJ)
 		*/
-		C_lal(df->df_address);
-		C_sti(tp->tp_size);
-		df->df_register = REG_NONE;
+		StoreLocal(df->df_address, tp->tp_size);
 	}
 }
 
@@ -563,15 +577,15 @@ unstack_stmt()
 	free_stmt_block(sbp);
 }
 
-static label l1;
+static label prc_name;
 
 prc_entry(name)
 	char *name;
 {
 	if (options['p']) {
-		C_df_dlb(l1 = data_label());
+		C_df_dlb(prc_name = data_label());
 		C_rom_scon(name, (arith) (strlen(name) + 1));
-		C_lae_dlb(l1, (arith) 0);
+		C_lae_dlb(prc_name, (arith) 0);
 		C_cal("procentry");
 		C_asp(pointer_size);
 	}
@@ -580,7 +594,7 @@ prc_entry(name)
 prc_exit()
 {
 	if (options['p']) {
-		C_lae_dlb(l1, (arith) 0);
+		C_lae_dlb(prc_name, (arith) 0);
 		C_cal("procexit");
 		C_asp(pointer_size);
 	}

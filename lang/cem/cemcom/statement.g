@@ -37,7 +37,7 @@ statement
 |
 	label ':' statement
 |
-	compound_statement((arith *)0)
+	compound_statement
 |
 	if_statement
 |
@@ -353,7 +353,7 @@ jump
 		}
 ;
 
-compound_statement(arith *nbytes;):
+compound_statement:
 	'{'
 		{
 			stack_level();
@@ -366,8 +366,6 @@ compound_statement(arith *nbytes;):
 	]*
 	'}'
 		{
-			if (nbytes)
-				*nbytes = (- local_level->sl_max_block);
 			unstack_level();
 		}
 ;

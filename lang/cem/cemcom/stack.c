@@ -8,7 +8,6 @@
 #include	"nofloat.h"
 #include	<system.h>
 #include	<em.h>
-#include	<em_reg.h>
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -50,8 +49,7 @@ stack_level()	{
 	loclev->sl_next = stl;
 	stl->sl_previous = loclev;
 	stl->sl_level = ++level;
-	stl->sl_local_offset =
-	stl->sl_max_block = loclev->sl_local_offset;
+	stl->sl_max_block = loclev->sl_max_block;
 	local_level = stl;
 }
 
@@ -115,36 +113,8 @@ unstack_level()
 			/* unlink it from the def list under the idf block */
 			if (def->df_sc == LABEL)
 				unstack_label(idf);
-			else
-			if (level == L_LOCAL || level == L_FORMAL1)	{
-				if (	def->df_register != REG_NONE &&
-					def->df_sc != STATIC &&
-					def->df_type->tp_size > 0 &&
-					options['n'] == 0
-				)	{
-					int reg;
-					
-					switch (def->df_type->tp_fund)	{
-					
-					case POINTER:
-						reg = reg_pointer;
-						break;
-#ifndef NOFLOAT
-					case FLOAT:
-					case DOUBLE:
-						reg = reg_float;
-						break;
-#endif NOFLOAT
-					default:
-						reg = reg_any;
-						break;
-					}
-					C_ms_reg(def->df_address,
-						def->df_type->tp_size,
-						reg, def->df_register
-					);
-				}
-			}
+			else if (def->df_sc == REGISTER || def->df_sc == AUTO)
+				FreeLocal(def->df_address);
 			idf->id_def = def->next;
 			free_def(def);
 			update_ahead(idf);
@@ -173,9 +143,7 @@ unstack_level()
 	*/
 	lastlvl = local_level;
 	local_level = local_level->sl_previous;
-	if (	level > L_LOCAL
-	&&	lastlvl->sl_max_block < local_level->sl_max_block
-	)	{
+	if (level >= L_LOCAL)	{
 		local_level->sl_max_block = lastlvl->sl_max_block;
 	}
 	free_stack_level(lastlvl);

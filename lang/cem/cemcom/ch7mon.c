@@ -86,7 +86,6 @@ ch7mon(oper, expp)
 					"& on register variable not allowed");
 					break;	/* break case '&' */
 				}
-				def->df_register = REG_NONE;
 			}
 			(*expp)->ex_type = pointer_to((*expp)->ex_type);
 			(*expp)->ex_lvalue = 0;

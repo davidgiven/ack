@@ -15,7 +15,6 @@ struct def	{		/* for ordinary tags */
 					FORMAL, AUTO,
 					ENUM, LABEL
 				*/
-	int df_register;	/* REG_NONE, REG_DEFAULT or REG_BONUS	*/
 	char df_initialized;	/* an initialization has been generated */
 	char df_alloc;		/* 0, ALLOC_SEEN or ALLOC_DONE */
 	char df_used;		/* set if idf is used */
@@ -26,8 +25,7 @@ struct def	{		/* for ordinary tags */
 #define	ALLOC_SEEN	1	/* an allocating declaration has been seen */
 #define	ALLOC_DONE	2	/* the allocating declaration has been done */
 
-#define REG_NONE	0	/* no register candidate */
-#define REG_DEFAULT	1	/* register candidate, not declared as such */
+#define REG_DEFAULT	0	/* register candidate, not declared as such */
 #define REG_BONUS	10	/* register candidate, declared as such */
 
 /* ALLOCDEF "def" 50 */

@@ -125,20 +125,9 @@ char *source = 0;
 
 char *nmlist = 0;
 
-#ifdef USE_TMP
-extern char *strcpy(), *strcat();
-extern char *mktemp();		/* library routine	*/
-char *tmpfdir = "/tmp";		/* where to keep the temporary file */
-static char *tmpfname = "/Cem.XXXXXX";
-char *tmpfile = 0;
-#endif USE_TMP
-
 compile(argc, argv)
 	char *argv[];
 {
-#ifdef USE_TMP
-	char tmpf[256];
-#endif
 	char *result;
 	register char *destination = 0;
 
@@ -175,14 +164,6 @@ compile(argc, argv)
 		FileName = "standard input";
 	}
 
-#ifdef USE_TMP
-	if (! options['N']) {
-		strcpy(tmpf, tmpfdir);
-		strcat(tmpf, tmpfname);
-		tmpfile = mktemp(tmpf);
-	}
-#endif USE_TMP
-
 	if (destination && strcmp(destination, "-") == 0)
 		destination = 0;
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
@@ -204,25 +185,15 @@ compile(argc, argv)
 #endif DEBUG
 	{
 
-#ifdef	USE_TMP
-		if (!options['N']) {
-			init_code(tmpfile);
-		}
-		else
-#endif	USE_TMP
 		init_code(destination);
 
 		/* compile the source text			*/
 		C_program();
-		end_code();
 
 #ifdef USE_TMP
-		if (! options['N']) {
-			prepend_scopes(destination);
-			AppendFile(tmpfile, destination);
-			sys_remove(tmpfile);
-		}
+		prepend_scopes();
 #endif USE_TMP
+		end_code();
 
 #ifdef	DEBUG
 		if (options['u'])	{
@@ -398,33 +369,6 @@ preprocess()
 }
 #endif NOPP
 #endif DEBUG
-
-#ifdef USE_TMP
-AppendFile(src, dst)
-	char *src, *dst;
-{
-	File *fp_src, *fp_dst;
-	char buf[BUFSIZ];
-	int n;
-
-	if (sys_open(src, OP_READ, &fp_src) == 0)
-		fatal("cannot read %s", src);
-	if (dst) {
-		if (sys_open(dst, OP_APPEND, &fp_dst) == 0)
-			fatal("cannot write to %s", src);
-	}
-	else
-		fp_dst = STDOUT;
-	while (sys_read(fp_src, buf, BUFSIZ, &n) != 0 && n > 0)
-		if (sys_write(fp_dst, buf, n) == 0)
-			fatal("(AppendFile) write error");
-	if (n != 0)
-		fatal("(AppendFile) read error");
-	sys_close(fp_src);
-	if (fp_dst != STDOUT)
-		sys_close(fp_dst);
-}
-#endif USE_TMP
 
 No_Mem()
 {

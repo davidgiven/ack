@@ -9,6 +9,7 @@
 
 #ifndef NOBITFIELD
 #include	<em.h>
+#include	<em_reg.h>
 #include	"debug.h"
 #include	"arith.h"
 #include	"type.h"
@@ -18,10 +19,11 @@
 #include	"assert.h"
 #include	"expr.h"
 #include	"sizes.h"
+#include	"align.h"
 #include	"Lpars.h"
 #include	"field.h"
 
-arith tmp_pointer_var();	/* eval.c	*/
+arith NewLocal();		/* util.c	*/
 char *symbol2str();		/* symbol2str.c	*/
 
 /*	Eval_field() evaluates expressions involving bit fields.
@@ -45,7 +47,7 @@ eval_field(expr, code)
 	register struct expr *rightop = expr->OP_RIGHT;
 	register struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
-	arith old_offset, tmpvar;
+	arith tmpvar;
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
 	arith asize = atype->tp_size;
 
@@ -75,18 +77,17 @@ eval_field(expr, code)
 			store_val(&(leftop->ex_object.ex_value), atype);
 		}
 		else	{			/* complex case	*/
-			tmpvar = tmp_pointer_var(&old_offset);
+			tmpvar = NewLocal(pointer_size, pointer_align, 
+					  reg_pointer, 0);
 			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
-			C_lal(tmpvar);
-			C_sti(pointer_size);
+			StoreLocal(tmpvar, pointer_size);
 			C_loi(asize);
 			C_and(asize);
 			C_ior(asize);
-			C_lal(tmpvar);
-			C_loi(pointer_size);
+			LoadLocal(tmpvar, pointer_size);
 			C_sti(asize);
-			free_tmp_var(old_offset);
+			FreeLocal(tmpvar);
 		}
 	}
 	else {		/* treat ++F as F += 1 and --F as F -= 1	*/
@@ -96,11 +97,11 @@ eval_field(expr, code)
 		if (leftop->ex_depth == 0)	/* simple case	*/
 			load_val(leftop, RVAL);
 		else	{			/* complex case	*/
-			tmpvar = tmp_pointer_var(&old_offset);
+			tmpvar = NewLocal(pointer_size, pointer_align, 
+					  reg_pointer, 0);
 			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
-			C_lal(tmpvar);
-			C_sti(pointer_size);
+			StoreLocal(tmpvar, pointer_size);
 			C_loi(asize);
 		}
 		if (atype->tp_unsigned) {
@@ -146,15 +147,13 @@ eval_field(expr, code)
 			store_val(&(leftop->ex_object.ex_value), atype);
 		}
 		else	{
-			C_lal(tmpvar);
-			C_loi(pointer_size);
+			LoadLocal(tmpvar, pointer_size);
 			C_loi(asize);
 			C_and(asize);
 			C_ior(asize);
-			C_lal(tmpvar);
-			C_loi(pointer_size);
+			LoadLocal(tmpvar, pointer_size);
 			C_sti(asize);
-			free_tmp_var(old_offset);
+			FreeLocal(tmpvar);
 		}
 	}
 	if (code == TRUE) {

@@ -167,7 +167,6 @@ dumpdefs(def, opt)
 		print("L%d: %s %s%s%s%s%s %lo;",
 			def->df_level,
 			symbol2str(def->df_sc),
-			(def->df_register != REG_NONE) ? "reg " : "",
 			def->df_initialized ? "init'd " : "",
 			def->df_used ? "used " : "",
 			type2str(def->df_type),

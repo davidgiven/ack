@@ -180,10 +180,10 @@ function(struct declarator *dc;)
 	{
 		declare_formals(&fbytes);
 	}
-	compound_statement(&nbytes)
+	compound_statement
 	{
+		end_proc(fbytes);
 		unstack_level();	/* L_FORMAL2 declarations */
 		unstack_level();	/* L_FORMAL1 declarations */
-		end_proc(fbytes, nbytes);
 	}
 ;

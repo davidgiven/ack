@@ -9,7 +9,6 @@
 #include	<em.h>
 
 #include	"nopp.h"
-#include	"use_tmp.h"
 #include	"errout.h"
 #include	"debug.h"
 
@@ -116,13 +115,7 @@ fatal(fmt, args)
 	char *fmt;
 	int args;
 {
-#ifdef	USE_TMP
-	extern char *tmpfile;	/* main.c	*/
-
-	if (tmpfile)
-		sys_remove(tmpfile);	/* may not successful!	*/
-#endif	USE_TMP
-
+	if (C_busy()) C_close();
 	_error(FATAL, NILEXPR, fmt, &args);
 	sys_stop(S_EXIT);
 }
