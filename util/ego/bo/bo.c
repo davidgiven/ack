@@ -136,8 +136,7 @@ STATIC bo_optloop(p,b,x,bra,bcc)
 		if (l == (line_p) 0) {
 			prevb->b_start = bra;
 		} else {
-			if (INSTR(l) == op_bra &&
-			    INSTRLAB(l) == INSTRLAB(bra)) {
+		      	if ((em_flag[INSTR(l)-sp_fmnem]&EM_FLO) == FLO_T) {
 				oldline(bra);
 			} else {
 				appnd_line(bra,l);
