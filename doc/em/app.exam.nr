@@ -1,7 +1,7 @@
-.BP
+.bp
 .AP "AN EXAMPLE PROGRAM"
-.A 1 0
-.NA
+.PP
+.na
 .ta 4n 8n 12n 16n 20n
 .nf
  1	program example(output);
@@ -45,12 +45,12 @@
 39		test(r)
 40	end.
 .fi
-.AD
-.BP
+.ad
+.bp
 The EM code as produced by the Pascal-VU compiler is given below. Comments
 have been added manually.  Note that this code has already been  optimized.
-.A 1 0
-.NA
+.LP
+.na
 .nf
 .ta 1n 24n
 	mes 2,2,2	; wordsize 2, pointersize 2
@@ -231,14 +231,13 @@ have been added manually.  Note that this code has already been  optimized.
 	end 0
 	mes 5	; reals were used
 .fi
-.AD
-.A 1 0
+.ad
+.PP
 The compact code corresponding to the above program is listed below.
 Read it horizontally, line by line, not column by column.
 Each number represents a byte of compact code, printed in decimal.
 The first two bytes form the magic word.
-.N 1
-.IS 3
+.LP
 .Dr 33
  173   0 159 122 122 122 255 242   1 161 250 124 116  46 112   0
  255 156 245  40   2 245   0 128 120 155 249 123 115 117 109 160
@@ -274,4 +273,3 @@ The first two bytes form the magic word.
  116   8 122  69 120  20 249 124  95 104 108 116   8 122 152 120
  159 124 160 255 159 125 255
 .De
-.IE

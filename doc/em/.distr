@@ -1,9 +1,7 @@
-Makefile
+proto.make
 READ_ME
-addend.n
 app.codes.nr
 app.exam.nr
-app.int.nr
 assem.nr
 cont.nr
 descr.nr

@@ -1,6 +1,6 @@
-.BP
-.SN 4
-.S1 "DATA ADDRESS SPACE"
+.bp
+.P1 "DATA ADDRESS SPACE"
+.PP
 The data address space is divided into three parts, called 'areas',
 each with its own addressing method:
 global data area,
@@ -9,24 +9,24 @@ and heap data area.
 These data areas must be part of the same
 address space because all data is accessed by
 the same type of pointers.
-.P
+.PP
 Space for global data is reserved using several pseudoinstructions in the
 assembly language, as described in
 the next paragraph and chapter 11.
 The size of the global data area is fixed per program.
-.A
+.QQ
 Global data is addressed absolutely in the machine language.
 Many instructions are available to address global data.
 They all have an absolute address as argument.
 Examples are LOE, LAE and STE.
-.P
+.PP
 Part of the global data area is initialized by the
 compiler, the
 rest is not initialized at all or is initialized
 with a value, typically \-32768 or 0.
 Part of the initialized global data may be made read-only
 if the implementation supports protection.
-.P
+.PP
 The local data area is used as a stack,
 which grows from high to low addresses
 and contains some data for each active procedure
@@ -44,14 +44,14 @@ Variables in other active procedures are addressed by following
 the chain of statically enclosing procedures using the LXL or LXA instruction.
 The variables in dynamically enclosing procedures can be
 addressed with the use of the DCH instruction.
-.A
+.QQ
 Many instructions have offsets to LB as argument,
 for instance LOL, LAL and STL.
 The arguments of these instructions range from \-1 to some
 (negative) minimum
 for the access of local storage and from 0 to some (positive)
 maximum for parameter access.
-.P
+.PP
 The procedure call instructions CAL and CAI each create a new frame
 on the stack.
 Each procedure has an assembly-time parameter specifying
@@ -62,7 +62,7 @@ Each procedure, therefore, starts with a stack with the local variables
 already allocated.
 The return instructions RET and RTT remove a frame.
 The actual parameters must be removed by the calling procedure.
-.P
+.PP
 RET may copy some words from the stack of
 the returning procedure to an unnamed 'function return area'.
 This area is available for 'READ-ONCE' access using the LFR instruction.
@@ -86,7 +86,7 @@ area is twice the pointer size,
 because we want to be able to handle 'procedure instance
 identifiers' which consist of a procedure identifier and the LB
 of a frame belonging to that procedure.
-.P
+.PP
 The heap data area grows upwards, to higher numbered
 addresses.
 It is initially empty.
@@ -96,7 +96,8 @@ The heap pointer may be manipulated
 by the LOR and STR instructions.
 The heap can only be addressed indirectly,
 by pointers derived from previous values of HP.
-.S2 "Global data area"
+.P2 "Global data area"
+.PP
 The initial size of the global data area is determined at assembly time.
 Global data is allocated by several
 pseudoinstructions in the EM assembly
@@ -109,7 +110,7 @@ under certain conditions, several blocks are allocated
 in a single fragment.
 This guarantees that the bytes of these blocks
 are consecutive.
-.P
+.PP
 Global data is addressed absolutely in binary
 machine language.
 Most compilers, however,
@@ -124,7 +125,7 @@ It is the task of the assembler/loader to
 translate these labels into absolute addresses.
 These labels may also be used
 in CON and ROM pseudoinstructions to initialize pointers.
-.P
+.PP
 The pseudoinstruction CON allocates initialized data.
 ROM acts like CON but indicates that the initialized data will
 not change during execution of the program.
@@ -134,7 +135,7 @@ data.
 The pseudoinstruction HOL is similar to BSS,
 but it alters the meaning of subsequent absolute addressing in
 the assembly language.
-.P
+.PP
 Another type of global data is a small block,
 called the ABS block, with an implementation defined size.
 Storage in this type of block can only be addressed
@@ -146,7 +147,7 @@ update this counter.
 A pointer at location 4 points to a string containing the
 current source file name.
 The instruction FIL can be used to update the pointer.
-.P
+.PP
 All numeric arguments of the instructions that address
 the global data area refer to locations in the
 ABS block unless
@@ -158,7 +159,7 @@ Thus LOE 0 loads the zeroth word of the most recent HOL, unless no HOL has
 appeared in the current file so
 far, in which case it loads the zeroth word of the
 ABS fragment.
-.P
+.PP
 The global data area is highly fragmented.
 The ABS block and each HOL and BSS block are separate fragments.
 The way fragments are formed from CON and ROM blocks is more complex.
@@ -169,12 +170,11 @@ allocated consecutively in a single fragment, unless
 these CON pseudos are separated in the assembly language program
 by a data label definition or one or more of the following pseudos:
 .DS
-
-     ROM, BSS, HOL and END
-
+ROM, BSS, HOL and END
 .DE
 An analogous rule holds for ROM pseudos.
-.S2 "Local data area"
+.P2 "Local data area"
+.PP
 The local data area consists of a sequence of frames, one for
 each active procedure.
 Below the frame of the current procedure resides the
@@ -183,17 +183,15 @@ Frames are generated by procedure calls and are
 removed by procedure returns.
 A procedure frame consists of six 'zones':
 .DS
-
-  1.  The return status block
-  2.  The local variables and compiler temporaries
-  3.  The register save block
-  4.  The dynamic local generators
-  5.  The operand stack.
-  6.  The parameters of a procedure one level deeper
-
+1.  The return status block
+2.  The local variables and compiler temporaries
+3.  The register save block
+4.  The dynamic local generators
+5.  The operand stack.
+6.  The parameters of a procedure one level deeper
 .DE
 A sample frame is shown in Figure 1.
-.P
+.PP
 Before a procedure call is performed the actual
 parameters are pushed onto the stack of the calling procedure.
 The exact details are compiler dependent.
@@ -216,11 +214,11 @@ These instructions assume that this parameter contains the LB of
 the statically enclosing procedure.
 Procedures that do not have a dynamically enclosing procedure
 do not need a static link at offset 0.
-.P
+.PP
 Two instructions are available to perform procedure calls, CAL
 and CAI.
 Several tasks are performed by these call instructions.
-.A
+.QQ
 First, a part of the status of the calling procedure is
 saved on the stack in the return status block.
 This block should contain the return address of the calling
@@ -235,12 +233,12 @@ The stack frames need not be contiguous then and the first
 status save area can contain the parameter base AB,
 which has the value of SP just after the last parameter has
 been pushed.
-.A
+.QQ
 Second, the LB is changed to point to the
 first word above the local variables.
 The new LB is a copy of the SP after the return status
 block has been pushed.
-.A
+.QQ
 Third, the amount of local storage needed by the procedure is
 reserved.
 The parameters and local storage are accessed by the same instructions.
@@ -256,28 +254,28 @@ The initial value of the allocated words is
 not defined, but implementations that check for undefined
 values will probably initialize them with a
 special 'undefined' pattern, typically \-32768.
-.A
+.QQ
 Fourth, any EM implementation is allowed to reserve a variable size
 block beneath the local variables.
 This block could, for example, be used to save a variable number
 of registers.
-.A
+.QQ
 Finally, the address of the entry point of the called procedure
 is loaded into the Program Counter.
-.P
+.PP
 The ASP instruction can be used to allocate further (dynamic)
 local storage.
 The base address of such storage must be obtained with a LOR~SP
 instruction.
 This same instruction ASP may also be used
 to remove some words from the stack.
-.P
+.PP
 There is a version of ASP, called ASS, which fetches the number
 of bytes to allocate from the stack.
 It can be used to allocate space for local
 objects whose size is unknown at compile time,
 so called 'dynamic local generators'.
-.P
+.PP
 Control is returned to the calling procedure with a RET instruction.
 Any return value is then copied to the 'function return area'.
 The frame created by the call is deallocated and the status of
@@ -293,7 +291,7 @@ Violating this restriction might result in hard to detect
 errors.
 The calling procedure has to remove the parameters from the stack.
 This can be done with the aforementioned ASP instruction.
-.P
+.PP
 Each procedure frame is a separate fragment.
 Because any fragment may be placed anywhere in memory,
 procedure frames need not be contiguous.
@@ -345,7 +343,8 @@ procedure frames need not be contiguous.
 .Df
 Figure 1. A sample procedure frame and parameters.
 .De
-.S2 "Heap data area"
+.P2 "Heap data area"
+.PP
 The heap area starts empty, with HP
 pointing to the low end of it.
 HP always contains a word address.
@@ -360,7 +359,7 @@ are allocated to the heap.
 The heap may not grow into a part of memory that is already allocated.
 When this is attempted, the STR instruction will cause a trap to occur.
 In this case, HP retains its old value.
-.P
+.PP
 The only way to address the heap is indirectly.
 Whenever an object is allocated by increasing HP,
 then the old HP value must be saved and can be used later to address
@@ -370,7 +369,7 @@ is no longer part of the heap, then an attempt to access
 the object is not allowed.
 Furthermore, if the heap pointer is increased again to above
 the object address, then access to the old object gives undefined results.
-.P
+.PP
 The heap is a single fragment.
 All bytes have consecutive addresses.
 No limits are imposed on the size of the heap as long as it fits

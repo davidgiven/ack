@@ -1,6 +1,6 @@
-.BP
-.SN 10
-.S1 "EM MACHINE LANGUAGE"
+.bp
+.P1 "EM MACHINE LANGUAGE"
+.PP
 The EM machine language is designed to make program text compact
 and to make decoding easy.
 Compact program text has many advantages: programs execute faster,
@@ -11,16 +11,18 @@ that it is feasible to use interpreters as long as EM hardware
 machines are not available.
 This chapter is irrelevant when back ends are used to
 produce executable target machine code.
-.S2 "Instruction encoding"
+.P2 "Instruction encoding"
+.PP
 A design goal of EM is to make the
 program text as compact as possible.
 Decoding must be easy, however.
 The encoding is fully byte oriented, without any small bit fields.
 There are 256 primary opcodes, two of which are an escape to
 two groups of 256 secondary opcodes each.
-.A
+.QQ
 EM instructions without arguments have a single opcode assigned,
 possibly escaped:
+.ta 12n 24n
 .Dr 6
          |--------------|
          |    opcode    |
@@ -37,7 +39,7 @@ Several instructions have an address from the global data area
 as argument.
 Other instructions have different opcodes for positive
 and negative arguments.
-.N 1
+.LP
 There is always an opcode that takes the next two bytes as argument,
 high byte first:
 .Dr 6
@@ -94,7 +96,7 @@ several different encodings are available.
 It is the task of the assembler to select the shortest of these.
 The savings by these mini and shortie
 opcodes are considerable, about 55%.
-.P
+.PP
 Further improvements are possible:
 the arguments of
 many instructions are a multiple of the wordsize.
@@ -106,26 +108,24 @@ The arguments of some other instructions
 rarely or never assume the value 0, but start at 1.
 The value 1 is then encoded as 0,
 2 as 1 and so on.
-.P
+.PP
 Assigning opcodes to instructions by the assembler is completely
 table driven.
 For details see appendix B.
-.S2 "Procedure descriptors"
+.P2 "Procedure descriptors"
+.PP
 The procedure identifiers used in the interpreter are indices
 into a table of procedure descriptors.
 Each descriptor contains:
-.IS 6
-.PS - 4
-.PT 1.
+.IP 1.
 the number of bytes to be reserved for locals at each
 invocation.
-.N
+.br
 This is a pointer-sized integer.
-.PT 2.
+.IP 2.
 the start address of the procedure
-.PE
-.IE
-.S2 "Load format"
+.P2 "Load format"
+.PP
 The EM machine language load format defines the interface between
 the EM assembler/loader and the EM machine itself.
 A load file consists of a header, the program text to be executed,
@@ -133,7 +133,7 @@ a description of the global data area and the procedure descriptor table,
 in this order.
 All integers in the load file are presented with the
 least significant byte first.
-.P
+.PP
 The header has two parts: the first half (eight 16-bit integers)
 aids in selecting
 the correct EM machine or interpreter.
@@ -141,68 +141,59 @@ Some EM machines, for instance, may have hardware floating point
 instructions.
 .N
 The header entries are as follows (bit 0 is rightmost):
-.IS 2
-.VS 1 0
-.PS 1 4 "" :
-.PT
+.IP 1:
 magic number (07255)
-.PT
+.IP 2:
 flag bits with the following meaning:
-.PS - 7 "" :
-.PT bit 0
+.RS
+.IP "bit 0"
 TEST; test for integer overflow etc.
-.PT bit 1
+.IP "bit 1"
 PROFILE; for each source line: count the number of memory
 cycles executed.
-.PT bit 2
+.IP "bit 2"
 FLOW; for each source line: set a bit in a bit map table if
 instructions on that line are executed.
-.PT bit 3
+.IP "bit 3"
 COUNT; for each source line: increment a counter if that line
 is entered.
-.PT bit 4
+.IP "bit 4"
 REALS; set if a program uses floating point instructions.
-.PT bit 5
+.IP "bit 5"
 EXTRA; more tests during compiler debugging.
-.PE
-.PT
+.RE
+.IP 3:
 number of unresolved references.
-.PT
+.IP 4:
 version number; used to detect obsolete EM load files.
-.PT
+.IP 5:
 wordsize ; the number of bytes in each machine word.
-.PT
+.IP 6:
 pointer size ; the number of bytes available for addressing.
-.PT
+.IP 7:
 unused
-.PT
+.IP 8:
 unused
-.PE
-.IE
+.LP
 The second part of the header (eight entries, of pointer size bytes each)
 describes the load file itself:
-.IS 2
-.PS 1 4 "" :
-.PT
+.IP 1:
 NTEXT; the program text size in bytes.
-.PT
+.IP 2:
 NDATA; the number of load-file descriptors (see below).
-.PT
+.IP 3:
 NPROC; the number of entries in the procedure descriptor table.
-.PT
+.IP 4:
 ENTRY; procedure number of the procedure to start with.
-.PT
+.IP 5:
 NLINE; the maximum source line number.
-.PT
+.IP 6:
 SZDATA; the address of the lowest uninitialized data byte.
-.PT
+.IP 7:
 unused
-.PT
+.IP 8:
 unused
-.PE
-.IE
-.VS
-.P
+.PP
 The program text consists of NTEXT bytes.
 NTEXT is always a multiple of the wordsize.
 The first byte of the program text is the
@@ -212,7 +203,7 @@ Pointers into the program text are found in the procedure descriptor
 table where relocation is simple and in the global data area.
 The initialization of the global data area allows easy
 relocation of pointers into both address spaces.
-.P
+.PP
 The global data area is described by the NDATA descriptors.
 Each descriptor describes a number of consecutive words (of~wordsize)
 and consists of a sequence of bytes.
@@ -220,7 +211,7 @@ While reading the descriptors from the load file, one can
 initialize the global data area from low to high addresses.
 The size of the initialized data area is given by SZDATA,
 this number can be used to check the initialization.
-.N
+.br
 The header of each descriptor consists of a byte, describing the type,
 and a count.
 The number of bytes used for this (unsigned) count depends on the
@@ -232,31 +223,22 @@ At load time an interpreter can
 perform any conversion deemed necessary, such as
 reordering bytes in integers
 and pointers and adding base addresses to pointers.
-.A
+.QQ
 In the following pictures we show a graphical notation of the
 initializers.
 The leftmost rectangle represents the leading byte.
-.N 1
-.VS 1 0
-.DS
-.PS - 4 " "
+.LP
 Fields marked with
-.N 1
-.PT n
-contain a pointer-sized integer used as a count
-.PT m
-contain a one-byte integer used as a count
-.PT b
-contain a one-byte integer
-.PT w
-contain a wordsized integer
-.PT p
-contain a data or instruction pointer
-.PT s
-contain a null terminated ASCII string
-.PE 1
-.DE 0
-.VS
+.TS
+tab(:);
+l l.
+n:contain a pointer-sized integer used as a count
+m:contain a one-byte integer used as a count
+b:contain a one-byte integer
+w:contain a wordsized integer
+p:contain a data or instruction pointer
+s:contain a null terminated ASCII string
+.TE
 .Dr 6
     -------------------
     | 0 |      n      |           repeat last initialization n times
@@ -316,8 +298,7 @@ contain a null terminated ASCII string
     | 8 | m |        s      |     initialized float of size m
     -------------------------
 .De
-.PS - 8
-.PT type~0:
+.IP type~0: 10
 If the last initialization initialized k bytes starting
 at address \fIa\fP, do the same initialization again n times,
 starting at \fIa\fP+k, \fIa\fP+2*k, .... \fIa\fP+n*k.
@@ -328,43 +309,43 @@ pointer,
 in all other descriptors the first byte is followed by a one-byte count.
 This descriptor must be preceded by a descriptor of
 another type.
-.PT type~1:
+.IP type~1: 10
 Reserve m words, not explicitly initialized (BSS and HOL).
-.PT type~2:
+.IP type~2: 10
 The m bytes following the descriptor header are
 initializers for the next m bytes of the
 global data area.
 m is divisible by the wordsize.
-.PT type~3:
+.IP type~3: 10
 The m words following the header are initializers for the next m words of the
 global data area.
-.PT type~4:
+.IP type~4: 10
 The m data address space pointers following the header are
 initializers for the next
 m data pointers in the global data area.
 Interpreters that represent EM pointers by
 target machine addresses must relocate all data pointers.
-.PT type~5:
+.IP type~5: 10
 The m instruction address space pointers following the header are
 initializers for the next
 m instruction pointers in the global data area.
 Interpreters that represent EM instruction pointers by
 target machine addresses must relocate these pointers.
-.PT type~6:
+.IP type~6: 10
 The m bytes following the header form
 a signed integer number with a size of m bytes,
 which is an initializer for the next m bytes
 of the global data area.
 m is governed by the same restrictions as for
 transfer of objects to/from memory.
-.PT type~7:
+.IP type~7: 10
 The m bytes following the header form
 an unsigned integer number with a size of m bytes,
 which is an initializer for the next m bytes
 of the global data area.
 m is governed by the same restrictions as for
 transfer of objects to/from memory.
-.PT type~8:
+.IP type~8: 10
 The header is followed by an ASCII string, null terminated, to
 initialize, in global data,
 a floating point number with a size of m bytes.
@@ -372,8 +353,7 @@ m is governed by the same restrictions as for
 transfer of objects to/from memory.
 The ASCII string contains the notation of a real as used in the
 Pascal language.
-.PE
-.P
+.PP
 The NPROC procedure descriptors on the load file consist of
 an instruction space address (of~pointer~size) and
 an integer (of~pointer~size) specifying the number of bytes for

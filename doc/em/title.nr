@@ -1,6 +1,4 @@
-.po 0
-.TP 1
-.ll 79n
+.LP
 \&
 .sp 10
 .ce 4
@@ -25,12 +23,9 @@ Abstract
 .ti +5
 EM is a family of intermediate languages
 designed for producing portable compilers.
-A program called
-.B front end
+A program called \fBfront end\fP
 translates source programs to EM.
-Another program,
-.B back
-.BW end ,
+Another program, \fBback end\fP,
 translates EM to the assembly language of the target machine.
 Alternatively, the EM program can be assembled to a highly
 efficient binary format for interpretation.

@@ -1,6 +1,6 @@
-.BP
-.SN 11
-.S1 "EM ASSEMBLY LANGUAGE"
+.bp
+.P1 "EM ASSEMBLY LANGUAGE"
+.PP
 We use two representations for assembly language programs,
 one is in ASCII and the other is the compact assembly language.
 The latter needs less space than the first for the same program
@@ -16,7 +16,8 @@ The last part lists the EM instructions with the type of
 arguments allowed and an indication of the function.
 Appendix A gives a detailed description of the effect of all
 instructions in the form of a Pascal program.
-.S2 "ASCII assembly language"
+.P2 "ASCII assembly language"
+.PP
 An assembly language program consists of a series of lines, each
 line may be blank, contain one (pseudo)instruction or contain one
 label.
@@ -25,13 +26,13 @@ Upper case is used in this
 document merely to distinguish keywords from the surrounding prose.
 Comment is allowed at the end of each line and starts with a semicolon ";".
 This kind of comment does not exist in the compact form.
-.A
+.QQ
 Labels must be placed all by themselves on a line and start in
 column 1.
 There are two kinds of labels, instruction and data labels.
 Instruction labels are unsigned positive integers.
 The scope of an instruction label is its procedure.
-.A
+.QQ
 The pseudoinstructions CON, ROM and BSS may be preceded by a
 line containing a
 1\-8 character data label, the first character of which is a
@@ -46,13 +47,13 @@ These labels are considered as a special case and handled
 more efficiently in compact assembly language (see below).
 Note that a data label on its own or two consecutive labels are not
 allowed.
-.P
+.PP
 Each statement may contain an instruction mnemonic or pseudoinstruction.
 These must begin in column 2 or later (not column 1) and must be followed
 by a space, tab, semicolon or LF.
 Everything on the line following a semicolon is
 taken as a comment.
-.P
+.PP
 Each input file contains one module.
 A module may contain many procedures,
 which may be nested.
@@ -62,14 +63,15 @@ collection of instructions and pseudoinstructions and finally an END
 statement.
 Pseudoinstructions are also allowed between procedures.
 They do not belong to a specific procedure.
-.P
+.PP
 All constants in EM are interpreted in the decimal base.
 The ASCII assembly language accepts constant expressions
 wherever constants are allowed.
 The operators recognized are: +, \-, *, % and / with the usual
 precedence order.
 Use of the parentheses ( and ) to alter the precedence order is allowed.
-.S3 "Instruction arguments"
+.P3 "Instruction arguments"
+.PP
 Unlike many other assembly languages, the EM assembly
 language requires all arguments of normal and pseudoinstructions
 to be either a constant or an identifier, but not a combination
@@ -87,7 +89,7 @@ It is not allowed to add or subtract from instruction labels or procedure
 identifiers,
 which certainly is not a severe restriction and greatly aids
 optimization.
-.P
+.PP
 Instruction arguments can be constants,
 data labels, data labels offsetted by a constant, instruction
 labels and procedure identifiers.
@@ -98,7 +100,7 @@ that fit in a word.
 Arguments used as offsets to pointers should fit in a
 pointer-sized integer.
 Finally, arguments to LDC should fit in a double-word integer.
-.P
+.PP
 Several instructions have two possible forms:
 with an explicit argument and with an implicit argument on top of the stack.
 The size of the implicit argument is the wordsize.
@@ -109,7 +111,7 @@ integers on top of the stack are to be compared.
 on top of the stack that specifies the size of the integers to
 be compared.
 Thus the following two sequences are equivalent:
-.N 1
+.KS
 .TS
 center, tab(:) ;
 l r 30 l r.
@@ -118,16 +120,18 @@ LDL:\-14:LDL:\-14
 ::LOC:4
 CMI:4:CMI:
 ZEQ:*1:ZEQ:*1
-.TE 1
+.TE
+.KE
 Section 11.1.6 shows the arguments allowed for each instruction.
-.S3 "Pseudoinstruction arguments"
+.P3 "Pseudoinstruction arguments"
+.PP
 Pseudoinstruction arguments can be divided in two classes:
 Initializers and others.
 The following initializers are allowed: signed integer constants,
 unsigned integer constants, floating-point constants, strings,
 data labels, data labels offsetted by a constant, instruction
 labels and procedure identifiers.
-.P
+.PP
 Constant initializers in BSS, HOL, CON and ROM pseudoinstructions
 can be followed by a letter I, U or F.
 This indicator
@@ -142,10 +146,9 @@ As in instruction arguments, initializers include expressions of the form:
 \&"LABEL+offset" and "LABEL\-offset".
 The offset must be an unsigned decimal constant.
 The 'IUF' indicators cannot be used in the offsets.
-.P
+.PP
 Data labels are referred to by their name.
-.P
-
+.PP
 Strings are surrounded by double quotes (").
 Semicolon's in string do not indicate the start of comment.
 In the ASCII representation the escape character \e (backslash)
@@ -153,7 +156,6 @@ alters the meaning of subsequent character(s).
 This feature allows inclusion of zeroes, graphic characters and
 the double quote in the string.
 The following escape sequences exist:
-.DS
 .TS
 center, tab(:);
 l l l.
@@ -166,7 +168,6 @@ backslash:\e:\e\e
 double quote:":\e"
 bit pattern:\fBddd\fP:\e\fBddd\fP
 .TE
-.DE
 The escape \fB\eddd\fP consists of the backslash followed by 1,
 2, or 3 octal digits specifying the value of
 the desired character.
@@ -176,17 +177,18 @@ the backslash is ignored.
 Example: CON "hello\e012\e0".
 Each string element initializes a single byte.
 The ASCII character set is used to map characters onto values.
-.P
+.PP
 Instruction labels are referred to as *1, *2, etc.  in both branch
 instructions and as initializers.
-.P
+.PP
 The notation $procname means the identifier for the procedure
 with the specified name.
 This identifier has the size of a pointer.
-.S3 Notation
+.P3 Notation
+.PP
 First, the notation used for the arguments, classes of
 instructions and pseudoinstructions.
-.IS 2
+.DS
 .TS
 tab(:);
 l l l.
@@ -204,9 +206,10 @@ l l l.
 <...>+:\&=:one or more of <...>
 [...]:\&=:optional ...
 .TE
-.IE
-.S3 "Pseudoinstructions"
-.S4 "Storage declaration"
+.DE
+.P3 "Pseudoinstructions"
+.P4 "Storage declaration"
+.PP
 Initialized global data is allocated by the pseudoinstruction CON,
 which needs at least one argument.
 Each argument is used to allocate and initialize a number of
@@ -215,7 +218,7 @@ The number of bytes to be allocated and the alignment depend on the type
 of the argument.
 For each argument, an integral number of words,
 determined by the argument type, is allocated and initialized.
-.P
+.PP
 The pseudoinstruction ROM is the same as CON,
 except that it guarantees that the initialized words
 will not change during the execution of the program.
@@ -223,7 +226,7 @@ This information allows optimizers to do
 certain calculations such as array indexing and
 subrange checking at compile time instead
 of at run time.
-.P
+.PP
 The pseudoinstruction BSS allocates
 uninitialized global data or large blocks of data initialized
 by the same value.
@@ -239,14 +242,14 @@ the second byte by 1 etc. in assembly language.
 The assembler/loader adds the base address of
 the HOL block to these numbers to obtain the
 absolute address in the machine language.
-.P
+.PP
 The scope of a HOL block starts at the HOL pseudo and
 ends at the next HOL pseudo or at the end of a module
 whatever comes first.
 Each instruction falls in the scope of at most one
 HOL block, the current HOL block.
 It is not allowed to have more than one HOL block per procedure.
-.P
+.PP
 The alignment restrictions are enforced by the
 pseudoinstructions.
 All initializers are aligned on a multiple of their size or the wordsize
@@ -257,52 +260,51 @@ Switching to another type of fragment or placing a label forces
 word-alignment.
 There are three types of fragments in global data space: CON, ROM and
 BSS/HOL.
-.N 1
-.IS 2
-.PS - 4
-.PT "BSS <cst1>,<val>,<cst2>"
+.IP "BSS <cst1>,<val>,<cst2>"
+.br
 Reserve <cst1> bytes.
 <val> is the value used to initialize the area.
 <cst1> must be a multiple of the size of <val>.
 <cst2> is 0 if the initialization is not strictly necessary,
 1 if it is.
-.PT "HOL <cst1>,<val>,<cst2>"
+.IP "HOL <cst1>,<val>,<cst2>"
+.br
 Idem, but all following absolute global data references will
 refer to this block.
 Only one HOL is allowed per procedure,
 it has to be placed before the first instruction.
-.PT "CON <val>+"
+.IP "CON <val>+"
+.br
 Assemble global data words initialized with the <val> constants.
-.PT "ROM <val>+"
+.IP "ROM <val>+"
+.br
 Idem, but the initialized data will never be changed by the program.
-.PE
-.IE
-.S4 "Partitioning"
+.P4 "Partitioning"
+.PP
 Two pseudoinstructions partition the input into procedures:
-.IS 2
-.PS - 4
-.PT "PRO <pro>[,<cst>]"
+.IP "PRO <pro>[,<cst>]"
+.br
 Start of procedure.
 <pro> is the procedure name.
 <cst> is the number of bytes for locals.
 The number of bytes for locals must be specified in the PRO or
 END pseudoinstruction.
 When specified in both, they must be identical.
-.PT "END  [<cst>]"
+.IP "END  [<cst>]"
+.br
 End of Procedure.
 <cst> is the number of bytes for locals.
 The number of bytes for locals must be specified in either the PRO or
 END pseudoinstruction or both.
-.PE
-.IE
-.S4 "Visibility"
+.P4 "Visibility"
+.PP
 Names of data and procedures in an EM module can either be
 internal or external.
 External names are known outside the module and are used to link
 several pieces of a program.
 Internal names are not known outside the modules they are used in.
 Other modules will not 'see' an internal name.
-.A
+.QQ
 To reduce the number of passes needed,
 it must be known at the first occurrence whether
 a name is internal or external.
@@ -312,47 +314,51 @@ If the first occurrence of a name is a reference,
 the name is considered to be external.
 If the first occurrence is in one of the following pseudoinstructions,
 the effect of the pseudo has precedence.
-.IS 2
-.PS - 4
-.PT "EXA <dlb>"
+.IP "EXA <dlb>"
+.br
 External name.
 <dlb> is known, possibly defined, outside this module.
 Note that <dlb> may be defined in the same module.
-.PT "EXP <pro>"
+.IP "EXP <pro>"
+.br
 External procedure identifier.
 Note that <pro> may be defined in the same module.
-.PT "INA <dlb>"
+.IP "INA <dlb>"
+.br
 Internal name.
 <dlb> is internal to this module and must be defined in this module.
-.PT "INP <pro>"
+.IP "INP <pro>"
+.br
 Internal procedure.
 <pro> is internal to this module and must be defined in this module.
-.PE
-.IE
-.S4 "Miscellaneous"
+.P4 "Miscellaneous"
+.PP
 Two other pseudoinstructions provide miscellaneous features:
-.IS 2
-.PS - 4
-.PT "EXC <cst1>,<cst2>"
+.IP "EXC <cst1>,<cst2>"
+.br
 Two blocks of instructions preceding this one are
 interchanged before being processed.
 <cst1> gives the number of lines of the first block.
 <cst2> gives the number of lines of the second one.
 Blank and pure comment lines do not count.
 This instruction is obsolete. Its use is strongly discouraged.
-.PT "MES <cst>[,<par>]*"
+.IP "MES <cst>[,<par>]*"
+.br
 A special type of comment.
 Used by compilers to communicate with the
 optimizer, assembler, etc. as follows:
-.VS 1 0
-.PS - 4
-.PT "MES 0"
+.RS
+.IP "MES 0"
+.br
 An error has occurred, stop further processing.
-.PT "MES 1"
+.IP "MES 1"
+.br
 Suppress optimization.
-.PT "MES 2,<cst1>,<cst2>"
+.IP "MES 2,<cst1>,<cst2>"
+.br
 Use wordsize <cst1> and pointer size <cst2>.
-.PT "MES 3,<cst1>,<cst2>,<cst3>,<cst4>"
+.IP "MES 3,<cst1>,<cst2>,<cst3>,<cst4>"
+.br
 Indicates that a local variable is never referenced indirectly.
 Used to indicate that a register may be used for a specific
 variable.
@@ -361,51 +367,57 @@ and offset from LB if negative.
 <cst2> gives the size of the variable.
 <cst3> indicates the class of the variable.
 The following values are currently recognized:
-.PS
-.PT 0
-The variable can be used for anything.
-.PT 1
-The variable is used as a loopindex.
-.PT 2
-The variable is used as a pointer.
-.PT 3
-The variable is used as a floating point number.
-.PE 0
+.br
+0\0\0\0The variable can be used for anything.
+.br
+1\0\0\0The variable is used as a loopindex.
+.br
+2\0\0\0The variable is used as a pointer.
+.br
+3\0\0\0The variable is used as a floating point number.
+.br
 <cst4> gives the priority of the variable,
 higher numbers indicate better candidates.
-.PT "MES 4,<cst>,<str>"
+.IP "MES 4,<cst>,<str>"
+.br
 Number of source lines in file <str> (for profiler).
-.PT "MES 5"
+.IP "MES 5"
+.br
 Floating point used.
-.PT "MES 6,<val>*"
+.IP "MES 6,<val>*"
+.br
 Comment.  Used to provide comments in compact assembly language.
-.PT "MES 7,....."
+.IP "MES 7,....."
+.br
 Reserved.
-.PT "MES 8,<pro>[,<dlb>]..."
+.IP "MES 8,<pro>[,<dlb>]..."
+.br
 Library module. Indicates that the module may only be loaded
 if it is useful, that is, if it can satisfy any unresolved
 references during the loading process.
 May not be preceded by any other pseudo, except MES's.
-.PT "MES 9,<cst>"
+.IP "MES 9,<cst>"
+.br
 Guarantees that no more than <cst> bytes of parameters are
 accessed, either directly or indirectly.
-.PT "MES 10,<cst>[,<par>]*
+.IP "MES 10,<cst>[,<par>]*
+.br
 This message number is reserved for the global optimizer.
 It inserts these messages in its output as hints to backends.
 <cst> indicates the type of hint.
-.PT "MES 11"
+.IP "MES 11"
+.br
 Procedures containing this message are possible destinations of
 non-local goto's with the GTO instruction.
 Some backends keep locals in registers,
 the locals in this procedure should not be kept in registers and
 all registers containing locals of other procedures should be
 saved upon entry to this procedure.
-.PE 1
-.VS
+.RE
+.IP ""
 Each backend is free to skip irrelevant MES pseudos.
-.PE
-.IE
-.S2 "The Compact Assembly Language"
+.P2 "The Compact Assembly Language"
+.PP
 The assembler accepts input in a highly encoded form.
 This
 form is intended to reduce the amount of file transport between the
@@ -414,16 +426,14 @@ and back ends, and also reduces the amount of storage required for storing
 libraries.
 Libraries are stored as archived compact assembly language, not machine
 language.
-.P
+.PP
 When beginning to read the input, the assembler is in neutral state, and
 expects either a label or an instruction (including the pseudoinstructions).
 The meaning of the next byte(s) when in neutral state is as follows, where
 b1, b2
 etc. represent the succeeding bytes.
-.N 1
-.DS
 .TS
-tab(:) ;
+tab(:);
 rw17 4 l.
 0:Reserved for future use
 1\-129:Machine instructions, see Appendix A, alphabetical list
@@ -433,38 +443,31 @@ rw17 4 l.
 180\-239:Instruction labels 0 \- 59  (180 is local label 0 etc.)
 240\-244:See the Common Table below
 245\-255:Not used
-.TE 1
-.DE 0
+.TE
 After a label, the assembler is back in neutral state; it can immediately
 accept another label or an instruction in the next byte.
 No linefeeds are used to separate lines.
-.P
+.PP
 If an opcode expects no arguments,
 the assembler is back in neutral state after
 reading the one byte containing the instruction number.
 If it has one or
 more arguments (only pseudos have more than 1), the arguments follow directly,
 encoded as follows:
-.N 1
-.IS 2
 .TS
 tab(:);
 r l.
 0\-239:Offsets from \-120 to 119
-
 240\-255:See the Common Table below
-.TE 1
+.TE
 Absence of an optional argument is indicated by a special
 byte.
-.IE 2
-.NE 7
-.CS
-Common Table for Neutral State and Arguments
-.CE
 .TS
 tab(:);
+c s s s
 c c s c
 l4 l l4 l.
+Common Table for Neutral State and Arguments
 class:bytes:description
 
 <ilb>:240:b1:Instruction label b1  (Not used for branches)
@@ -486,7 +489,7 @@ class:bytes:description
 <end>:255::Delimiter for argument lists or
 :::indicates absence of optional argument
 .TE 1
-.P
+.PP
 The bytes specifying the value of a 16, 32 or 64 bit constant
 are presented in two's complement notation, with the least
 significant byte first. For example: the value of a 32 bit
@@ -494,25 +497,22 @@ constant is ((s4*256+b3)*256+b2)*256+b1, where s4 is b4\-256 if
 b4 is greater than 128 else s4 takes the value of b4.
 A <string> consists of a <cst> immediately followed by
 a sequence of bytes with length <cst>.
-.P
+.PP
 .ne 8
 The pseudoinstructions fall into several categories, depending on their
 arguments:
-.N 1
 .DS
- Group 1 \- EXC, BSS, HOL have a known number of arguments
- Group 2 \- EXA, EXP, INA, INP have a string as argument
- Group 3 \- CON, MES, ROM have a variable number of various things
- Group 4 \- END, PRO have a trailing optional argument.
-.DE 1
+Group 1 \- EXC, BSS, HOL have a known number of arguments
+Group 2 \- EXA, EXP, INA, INP have a string as argument
+Group 3 \- CON, MES, ROM have a variable number of various things
+Group 4 \- END, PRO have a trailing optional argument.
+.DE
 Groups 1 and 2
 use the encoding described above.
 Group 3 also uses the encoding listed above, with an <end> byte after the
 last argument to indicate the end of the list.
 Group 4 uses
 an <end> byte if the trailing argument is not present.
-.N 2
-.IS 2
 .TS
 tab(|);
 l s l
@@ -523,18 +523,17 @@ Example  ASCII|Example compact
 
 2||182
 1||181
- LOC|10|69 130
- LOC|\-10|69 110
- LOC|300|69 245 44 1
- BRA|*19|18 139
+\0LOC|10|69 130
+\0LOC|\-10|69 110
+\0LOC|300|69 245 44 1
+\0BRA|*19|18 139
 300||241 44 1
 .3||242 3
- CON|4,9,*2,$foo|151 124 129 240 2 249 123 102 111 111 255
- CON|.35|151 242 35 255
-.TE 0
-.IE 0
-.S2 "Assembly language instruction list"
-.P
+\0CON|4,9,*2,$foo|151 124 129 240 2 249 123 102 111 111 255
+\0CON|.35|151 242 35 255
+.TE
+.P2 "Assembly language instruction list"
+.PP
 For each instruction in the list the range of argument values
 in the assembly language is given.
 The column headed \fIassem\fP contains the mnemonics defined
@@ -558,7 +557,7 @@ are indicated by letters:
 .ds z \fBz\fP
 .ds o \fBo\fP
 .ds - \fB\-\fP
-.N 1
+.sp
 .TS
 tab(:);
 c s l l
@@ -579,8 +578,8 @@ l l 15 l l.
 \&\*b:ilb:>= 0:label number
 \&\*r:cst:0,1,2:register number
 \&\*-:::no argument
-.TE 1
-.P
+.TE
+.PP
 The * at the rationale for \*w indicates that the argument
 can either be given as argument or on top of the stack.
 If the argument is omitted, the argument is fetched from the
@@ -589,8 +588,7 @@ it is assumed to be a wordsized unsigned integer.
 Instructions that check for undefined integer or floating-point
 values and underflow or overflow
 are indicated below by (*).
-.N 1
-.VS 0 0
+.sp 1
 .DS
 .ta 12n
 GROUP 1 \- LOAD
@@ -687,7 +685,7 @@ GROUP 7 \- INCREMENT/DECREMENT/ZERO
   ZER \*w :	Load \*w zero bytes
 .DE
 
-.DS				\" ???
+.DS
 GROUP 8 \- CONVERT    (stack:	source, source size, dest. size (top))
 
   CII \*- :	Convert integer to integer (*)
@@ -744,7 +742,7 @@ GROUP 12 \- COMPARE
   TGT \*- :	True if greater, i.e. iff top of stack > 0
 .DE
 
-.DS				\" ???
+.DS
 GROUP 13 \- BRANCH
 
   BRA \*b :	Branch unconditionally to label \*b
@@ -801,5 +799,4 @@ GROUP 15 \- MISCELLANEOUS
   SIM \*- :	Store 16 bit ignore mask
   STR \*r :	Store register (0=LB, 1=SP, 2=HP)
   TRP \*- :	Cause trap to occur (Error number on stack)
-.DE 0
-.VS
+.DE

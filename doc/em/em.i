@@ -1,3 +1,10 @@
+.bp
+.AP "EM INTERPRETER"
+.nf
+.ft CW
+.lg 0
+.nr x \w'        '
+.ta \nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu
 
 { This  is an interpreter for EM.  It serves as  the official machine
   definition.  This interpreter must run on a machine which supports
@@ -1666,3 +1673,6 @@ case insr of
   writeln('halt with exit status: ',exitstatus:1);
   doident;
 end.
+.ft P
+.lg 1
+.fi

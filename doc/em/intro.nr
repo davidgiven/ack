@@ -1,48 +1,42 @@
-.BP
-.S1 "INTRODUCTION"
+.bp
+.P1 "INTRODUCTION"
+.PP
 EM is a family of intermediate languages designed for producing
 portable compilers.
-The general strategy is for a program called
-.B front end
+The general strategy is for a program called \fBfront end\fP
 to translate the source program to EM.
-Another program,
-.B back
-.BW end
+Another program, \fBback end\fP,
 translates EM to target assembly language.
 Alternatively, the EM code can be assembled to a binary form
 and interpreted.
 These considerations led to the following goals:
-.IS 2 10
-.PS 1 4
-.PT
+.IP 1
 The design should allow translation to,
 or interpretation on, a wide range of existing machines.
 Design decisions should be delayed as far as possible
 and the implications of these decisions should
 be localized as much as possible.
-.N
+.br
 The current microcomputer technology offers 8, 16 and 32 bit machines
 with various sizes of address space.
 EM should be flexible enough to be useful on most of these
 machines.
 The differences between the members of the EM family should only
 concern the wordsize and address space size.
-.PT
+.IP 2
 The architecture should ease the task of code generation for
 high level languages such as Pascal, C, Ada, Algol 68, BCPL.
-.PT
+.IP 3
 The instruction set used by the interpreter should be compact,
 to reduce the amount of memory needed
 for program storage, and to reduce the time needed to transmit
 programs over communication lines.
-.PT
+.IP 3
 It should be designed with microprogrammed implementations in
 mind; in particular, the use of many short fields within
 instruction opcodes should be avoided, because their extraction by the
 microprogram or conversion to other instruction formats is inefficient.
-.PE
-.IE
-.A
+.PP
 The basic architecture is based on the concept of a stack. The stack
 is used for procedure return addresses, actual parameters, local variables,
 and arithmetic operations.
@@ -61,7 +55,7 @@ stack.
 For all types except pointers,
 these instructions have the object size
 as argument.
-.P
+.PP
 There are no visible general registers used for arithmetic operands
 etc. This is in contrast to most third generation computers, which usually
 have 8 or 16 general registers. The decision not to have a group of
@@ -69,11 +63,11 @@ general registers was fully intentional, and follows W.L. Van der
 Poel's dictum that a machine should have 0, 1, or an infinite
 number of any feature. General registers have two primary uses: to hold
 intermediate results of complicated expressions, e.g.
-.IS 5 0 1
+.DS
 ((a*b + c*d)/e + f*g/h) * i
-.IE 1
+.DE
 and to hold local variables.
-.P
+.PP
 Various studies
 have shown that the average expression has fewer than two operands,
 making the former use of registers of doubtful value. The present trend
@@ -81,11 +75,9 @@ toward structured programs consisting of many small
 procedures greatly reduces the value of registers to hold local variables
 because the large number of procedure calls implies a large overhead in
 saving and restoring the registers at every call.
-.P
+.PP
 Although there are no general purpose registers, there are a
 few internal registers with specific functions as follows:
-.IS 2
-.N 1
 .TS
 tab(:);
 l 1 l l l.
@@ -94,9 +86,8 @@ LB:\-:Local Base:Points to base of the local variables
 :::in the current procedure.
 SP:\-:Stack Pointer:Points to the highest occupied word on the stack.
 HP:\-:Heap Pointer:Points to the top of the heap area.
-.TE 1
-.IE
-.A
+.TE
+.PP
 Furthermore, reverse Polish code is much easier to generate than
 multi-register machine code, especially if highly efficient code is
 desired.
@@ -106,7 +97,7 @@ An EM machine can
 achieve high performance by keeping part of the stack
 in high speed storage (a cache or microprogram scratchpad memory) rather
 than in primary memory.
-.P
+.PP
 Again according to van der Poel's dictum,
 all EM instructions have zero or one argument.
 We believe that instructions needing two arguments
@@ -116,11 +107,11 @@ circumstances as well.
 Moreover, these two instructions together often
 have a shorter encoding than the single
 instruction before.
-.P
+.PP
 This document describes EM at three different levels:
 the abstract level, the assembly language level and
 the machine language level.
-.A
+.QQ
 The most important level is that of the abstract EM architecture.
 This level deals with the basic design issues.
 Only the functional capabilities of instructions are relevant, not their
@@ -128,14 +119,14 @@ format or encoding.
 Most chapters of this document refer to the abstract level
 and it is explicitly stated whenever
 another level is described.
-.A
+.QQ
 The assembly language is intended for the compiler writer.
 It presents a more or less orthogonal instruction
 set and provides symbolic names for data.
 Moreover, it facilitates the linking of
 separately compiled 'modules' into a single program
 by providing several pseudoinstructions.
-.A
+.QQ
 The machine language is designed for interpretation with a compact
 program text and easy decoding.
 The binary representation of the machine language instruction set is
@@ -144,7 +135,7 @@ Frequent instructions have a short opcode.
 The encoding is fully byte oriented.
 These bytes do not contain small bit fields, because
 bit fields would slow down decoding considerably.
-.P
+.PP
 A common use for EM is for producing portable (cross) compilers.
 When used this way, the compilers produce
 EM assembly language as their output.
@@ -156,7 +147,7 @@ machine language instructions is irrelevant.
 On the other hand, when writing an interpreter for EM machine language
 programs, the interpreter must deal with the machine language
 and not with the symbolic assembly language.
-.P
+.PP
 As mentioned above, the
 current microcomputer technology offers 8, 16 and 32 bit
 machines with address spaces ranging from
