@@ -99,19 +99,20 @@ do_pragma()
 	LineNumber++;
 }
 
+char Xbuf[256];
+
 preprocess(fn)
 	char *fn;
 {
 	register int c;
 	register char *op = _obuf;
 	register char *ob = &_obuf[OBUFSIZE];
-	char Xbuf[256];
 	int lineno = 0;
 	int startline;
 
 #define flush(X)	(sys_write(STDOUT,_obuf,X))
 #define echo(ch) 	if (op == ob) { Xflush(); op = _obuf; } *op++ = (ch);
-#define newline()	echo('\n')
+#define newline()	op--; while (op >= _obuf && (*op == ' ' || *op == '\t')) op--; op++; echo('\n')
 
 	if (!options['P']) {
 		/* Generate a line directive communicating the
@@ -133,11 +134,16 @@ preprocess(fn)
 			lineno = LineNumber;				\
 			if (! options['P']) {				\
 				register char *p = Xbuf;		\
-									\
-				sprint(p, "\n%s %d \"%s\"\n",		\
+				sprint(Xbuf, "%s %d \"%s\"\n",		\
 					LINE_PREFIX,			\
 					LineNumber,			\
 					FileName);			\
+				op--;					\
+				while (op >= _obuf			\
+				       && (class(*op) == STSKIP		\
+					   || *op == '\n')) op--;	\
+				op++;					\
+				newline();				\
 				while (*p) {				\
 					echo(*p++);			\
 				}					\
@@ -235,7 +241,7 @@ preprocess(fn)
 			/* switch on character */
 			switch(class(c)) {
 			case STNL:
-				echo(c);
+				newline();
 				break;
 			case STSTR:
 			case STCHAR:
