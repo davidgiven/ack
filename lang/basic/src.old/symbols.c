@@ -41,10 +41,10 @@ char *str;
 		s= s->nextsym;
 	}
 	/* not found, create an emty slot */
-	s=  (Symbol *) salloc(sizeof(Symbol));
+	/*NOSTRICT*/ s=  (Symbol *) salloc(sizeof(Symbol));
 	s->symtype= DEFAULTTYPE;
 	s->nextsym= firstsym;
-	s->symname= (char *) salloc(strlen(str)+1);
+	s->symname= (char *) salloc((unsigned)(strlen(str)+1));
 	strcpy(s->symname,str);
 	firstsym= s;
 	if(debug) printf("%s allocated\n",str);
@@ -214,7 +214,7 @@ int type;
 	while(s)
 	{
 		firstsym = s->nextsym;
-		free(s);
+		/*NOSTRICT*/ free((char *)s);
 		s= firstsym;
 	}
 	firstsym= alternate;
