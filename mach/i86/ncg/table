@@ -2587,13 +2587,13 @@ with REG rmorconst STACK
       jne {label,$3}
 
 pat ldc cms teq $2==4 && loww($1)==0 && highw($1)==0
-with rmorconst REG STACK
+with rmorconst REG
 uses REG = {ANYCON, 0}
   gen or %2,%1
       jne {label,1f}
       inc %a
       1:			yields %a
-with REG rmorconst STACK
+with REG rmorconst
 uses REG = {ANYCON, 0}
   gen or %1,%2
       jne {label,1f}
@@ -2601,12 +2601,12 @@ uses REG = {ANYCON, 0}
       1:			yields %a
 
 pat ldc cms tne $2==4 && loww($1)==0 && highw($1)==0
-with rmorconst REG STACK
+with rmorconst REG
   gen or %2,%1
       je {label,1f}
       mov %2,{ANYCON,1}
       1:			yields %2
-with REG rmorconst STACK
+with REG rmorconst
   gen or %1,%2
       je {label,1f}
       mov %2,{ANYCON,1}
