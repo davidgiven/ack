@@ -10,8 +10,8 @@
 
 /*
 	putbyte(), C_open() and C_close() are the basic routines for
-	respectively write on, open and close the output file.
-	The put_*() functions serve as formatting functions of the
+	respectively write on, open and close the outpt file.
+	The C_pt_*() functions serve as formatting functions of the
 	various EM language constructs.
 	See "Description of a Machine Architecture for use with
 	Block Structured Languages" par. 11.2 for the meaning of these
@@ -19,17 +19,36 @@
 */
 
 static File *ofp = 0;
+static char obuf[BUFSIZ];
+static char *opp = obuf;
+
+static
+flush() {
+	if (sys_write(ofp, &obuf[0], opp - &obuf[0]) == 0) {
+		C_failed();
+	}
+	opp = &obuf[0];
+}
+
+#define Xputbyte(c)	if (opp == &obuf[BUFSIZ]) flush(); *opp++ = (c)
+
+static
+C_putbyte(b)
+	int b;
+{
+	Xputbyte(b);
+}
 
 C_init(w, p)
 	arith w, p;
 {
 }
 
-C_open(nm)	/* open file for readable code output	*/
+C_open(nm)	/* open file for readable code outpt	*/
 	char *nm;
 {
 	if (nm == 0)
-		ofp = STDOUT;	/* standard output	*/
+		ofp = STDOUT;	/* standard outpt	*/
 	else
 	if (sys_open(nm, OP_WRITE, &ofp) == 0)
 		return 0;
@@ -38,6 +57,7 @@ C_open(nm)	/* open file for readable code output	*/
 
 C_close()
 {
+	if (opp != obuf) flush();
 	if (ofp != STDOUT)
 		sys_close(ofp);
 	ofp = 0;
@@ -52,29 +72,49 @@ C_magic()
 {
 }
 
+
 /***    the readable code generating routines	***/
 
-put_ilb(l)
+static char buf[512];
+
+static
+wrs(s)
+	register char *s;
+{
+	while (*s) C_putbyte(*s++);
+}
+
+C_pt_dnam(s)
+	char *s;
+{
+	wrs(s);
+}
+
+C_pt_ilb(l)
 	label l;
 {
-	_prnt("*%ld", (long) l);
+	sprint(buf, "*%ld", (long) l);
+	wrs(buf);
 }
 
 extern char em_mnem[][4];
 extern char em_pseu[][4];
 
-put_op(x)
+C_pt_op(x)
 {
-	_prnt(" %s ", em_mnem[x - sp_fmnem]);
+	C_putbyte(' ');
+	wrs(em_mnem[x - sp_fmnem]);
+	C_putbyte(' ');
 }
 
-put_cst(l)
+C_pt_cst(l)
 	arith l;
 {
-	_prnt("%ld", (long) l);
+	sprint(buf, "%ld", (long) l);
+	wrs(buf);
 }
 
-put_scon(x, y)
+C_pt_scon(x, y)
 	char *x;
 	arith y;
 {
@@ -83,71 +123,76 @@ put_scon(x, y)
 	register char *p, *q = &sbuf[0];
 	char *bts2str();
 
+	C_putbyte('\'');
 	p = bts2str(x, (int) y, buf);
 	while (*p) {
 		if (*p == '\'')
-			*q++ = '\\';
-		*q++ = *p++;
+			C_putbyte('\\');
+		C_putbyte(*p++);
 	}
-	*q = '\0';
-	_prnt("'%s'", sbuf);
+	C_putbyte('\'');
 }
 
-put_ps(x)
+C_pt_ps(x)
 {
-	_prnt(" %s ", em_pseu[x - sp_fpseu]);
+	C_putbyte(' ');
+	wrs(em_pseu[x - sp_fpseu]);
+	C_putbyte(' ');
 }
 
-put_dlb(l)
+C_pt_dlb(l)
 	label l;
 {
-	_prnt(".%ld", (long) l);
+	sprint(buf, ".%ld", (long) l);
+	wrs(buf);
 }
 
-put_doff(l, v)
+C_pt_doff(l, v)
 	label l;
 	arith v;
 {
-	if (v == 0) put_dlb(l);
-	else _prnt(".%ld+%ld", (long) l, (long) v);
+	C_pt_dlb(l);
+	if (v != 0) {
+		sprint(buf,"+%ld", (long) v);
+		wrs(buf);
+	}
 }
 
-put_noff(s, v)
+C_pt_noff(s, v)
 	char *s;
 	arith v;
 {
-	if (v == 0) _prnt(s);
-	else _prnt("%s+%ld", s, (long) v);
+	wrs(s);
+	if (v != 0) {
+		sprint(buf,"+%ld", (long) v);
+		wrs(buf);
+	}
 }
 
-put_pnam(s)
+C_pt_pnam(s)
 	char *s;
 {
-	_prnt("$%s", s);
+	C_putbyte('$');
+	wrs(s);
 }
 
-put_dfilb(l)
+C_pt_dfilb(l)
 	label l;
 {
-	_prnt("%ld", (long) l);
+	sprint(buf, "%ld", (long) l);
+	wrs(buf);
 }
 
-put_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
+C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 	int sp;
 	char *v;
 	arith sz;
 {
-	_prnt("%s%c%ld", v, sp == sp_icon ? 'I' : sp == sp_ucon ? 'U' : 'F',
-		(long) sz);
+	wrs(v);
+	C_putbyte(sp == sp_icon ? 'I' : sp == sp_ucon ? 'U' : 'F');
+	C_pt_cst(sz);
 }
 
-_prnt(fmt, args)
-	char *fmt;
-	int args;
-{
-	doprnt(ofp, fmt, (int *)&args);
-}
-
-put_nl() { _prnt("\n"); }
-put_comma() { _prnt(","); }
-put_ccend() { _prnt(" ?"); }
+C_pt_nl() { C_putbyte('\n'); }
+C_pt_comma() { C_putbyte(','); }
+C_pt_ccend() { wrs(" ?"); }
