@@ -27,7 +27,6 @@
 #include	"level.h"
 #ifdef	LINT
 #include	"l_lint.h"
-#include	"l_state.h"
 #endif	LINT
 
 extern char options[];

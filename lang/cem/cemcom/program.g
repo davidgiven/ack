@@ -58,7 +58,7 @@
 #include	"expr.h"
 #include	"def.h"
 #ifdef	LINT
-#include	"l_state.h"
+#include	"l_lint.h"
 #endif	LINT
 
 #ifndef NOPP
@@ -205,11 +205,11 @@ function(struct decspecs *ds; struct declarator *dc;)
 	{
 		end_proc(fbytes);
 #ifdef	LINT
-		lint_return_stmt(0);	/* implicit return at end of function */
+		lint_implicit_return();
 #endif	LINT
 		unstack_level();	/* L_FORMAL2 declarations */
 #ifdef	LINT
-		check_args_used();
+		lint_end_formals();
 #endif	LINT
 		unstack_level();	/* L_FORMAL1 declarations */
 #ifdef	LINT

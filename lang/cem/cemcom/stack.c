@@ -101,7 +101,7 @@ unstack_level()
 #endif	DEBUG
 
 #ifdef	LINT
-	lint_local_level(local_level);
+	lint_end_local(local_level);
 #endif	LINT
 
 	/*	The implementation below is more careful than strictly
@@ -177,7 +177,7 @@ unstack_world()
 	register struct stack_entry *se = local_level->sl_entry;
 
 #ifdef	LINT
-	lint_global_level(local_level);
+	lint_end_global(local_level);
 #endif	LINT
 
 	open_name_list();

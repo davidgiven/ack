@@ -353,7 +353,7 @@ declare_idf(ds, dc, lvl)
 		newdef->df_file = idf->id_file;
 		newdef->df_line = idf->id_line;
 #ifdef	LINT
-		newdef->df_set = (type->tp_fund == ARRAY);
+		newdef->df_set = 0;
 		newdef->df_firstbrace = 0;
 #endif	LINT
 
@@ -490,11 +490,17 @@ global_redecl(idf, new_sc, tp)
 				error("cannot redeclare %s to static",
 					idf->id_text);
 			else	{
+#ifdef	LINT			/* warn unconditionally */
+				warning("%s redeclared to static",
+						idf->id_text);
+#else	LINT
 #ifndef NOROPTION
+				/* warn conditionally */
 				if (options['R'])
 					warning("%s redeclared to static",
 						idf->id_text);
-#endif
+#endif	NOROPTION
+#endif	LINT
 				def->df_sc = STATIC;
 			}
 			break;

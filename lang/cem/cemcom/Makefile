@@ -929,7 +929,6 @@ declar.o: field.h
 declar.o: file_info.h
 declar.o: idf.h
 declar.o: l_lint.h
-declar.o: l_state.h
 declar.o: label.h
 declar.o: level.h
 declar.o: lint.h
@@ -953,7 +952,6 @@ statement.o: expr.h
 statement.o: file_info.h
 statement.o: idf.h
 statement.o: l_lint.h
-statement.o: l_state.h
 statement.o: label.h
 statement.o: lint.h
 statement.o: nobitfield.h
@@ -986,7 +984,7 @@ program.o: def.h
 program.o: expr.h
 program.o: file_info.h
 program.o: idf.h
-program.o: l_state.h
+program.o: l_lint.h
 program.o: label.h
 program.o: lint.h
 program.o: nobitfield.h

@@ -255,14 +255,6 @@ oper2state(expr, val, used)
 	case GREATEREQ:
 	case EQUAL:
 	case NOTEQUAL:
-		lint_relop(left, right, oper);
-		lint_relop(right, left, 
-			oper == '<' ? '>' :
-			oper == '>' ? '<' :
-			oper == LESSEQ ? GREATEREQ :
-			oper == GREATEREQ ? LESSEQ :
-			oper
-		);
 		goto dyadic;
 
 	/* dyadic operators */
@@ -338,11 +330,16 @@ expr_ignored(expr)
 		break;
 
 	case Value:
-		hwarning("value as statement");
+		if (expr->VL_CLASS == Const) {
+			hwarning("constant expression ignored");
+		}
+		else {
+			hwarning("value ignored");
+		}
 		break;
 
 	default:			/* String Float */
-		hwarning("constant as statement");
+		hwarning("constant ignored");
 		break;
 	}
 }
