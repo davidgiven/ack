@@ -196,12 +196,11 @@ wr_ohead(head)
 		BEGINSEEK(PARTDBUG, off);
 #endif
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outhead) != SZ_HEAD)
 #endif
 	{
-		char buf[SZ_HEAD];
-		register char *c = buf;
+		register char *c = (char *) head;
 
 		put2(head->oh_magic, c);	c += 2;
 		put2(head->oh_stamp, c);	c += 2;
@@ -211,53 +210,36 @@ wr_ohead(head)
 		put2(head->oh_nname, c);	c += 2;
 		put4(head->oh_nemit, c);	c += 4;
 		put4(head->oh_nchar, c);
-		OUTWRITE(PARTEMIT, buf, (long) SZ_HEAD);
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-	else {
-		OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
-	}
-#endif
+	OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
 }
 
-wr_sect(sect, cnt1)
-	register struct outsect	*sect;
+wr_sect(s, cnt1)
+	struct outsect	*s;
 	unsigned int	cnt1;
 {
 	register unsigned int cnt = cnt1;
-	char buf[MAXSECT * SZ_SECT];
-	register char *c = buf;
+	register struct outsect	*sect = s;
+	register char *c = (char *) sect;
 
 	while (cnt--) {
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+		if (offcnt >= 1 && offcnt < SECTCNT) {
+			BEGINSEEK(PARTEMIT+offcnt, sect->os_foff);
+		}
+		offset[offcnt++] = sect->os_foff;
+#if BYTE_ORDER == 0x0123
 		if (sizeof(struct outsect) != SZ_SECT)
 #endif
 		{
 			put4(sect->os_base, c);	c += 4;
 			put4(sect->os_size, c);	c += 4;
 			put4(sect->os_foff, c);	c += 4;
-		}
-		if (offcnt >= 1 && offcnt < SECTCNT) {
-			BEGINSEEK(PARTEMIT+offcnt, sect->os_foff);
-		}
-		offset[offcnt++] = sect->os_foff;
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-		if (sizeof(struct outsect) != SZ_SECT)
-#endif
-		{
 			put4(sect->os_flen, c);	c += 4;
 			put4(sect->os_lign, c);	c += 4;
 		}
 		sect++;
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-	if (sizeof(struct outsect) != SZ_SECT)
-#endif
-		OUTWRITE(PARTEMIT, buf, (long) cnt1 * SZ_SECT);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-	else
-		OUTWRITE(PARTEMIT, (char *) (sect - cnt1), (long) cnt1 * SZ_SECT);
-#endif
+	OUTWRITE(PARTEMIT, (char *) s, (long) cnt1 * SZ_SECT);
 }
 
 wr_outsect(s)
@@ -304,7 +286,7 @@ wr_relo(relo, cnt)
 	unsigned int cnt;
 {
 
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outrelo) != SZ_RELO)
 #endif
 	while (cnt)
@@ -329,7 +311,7 @@ wr_relo(relo, cnt)
 			__wr_flush(&__parts[PARTRELO]);
 		}
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	else {
 		OUTWRITE(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
 	}
@@ -340,7 +322,7 @@ wr_name(name, cnt)
 	register struct outname	*name;
 	unsigned int cnt;
 {
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outname) != SZ_NAME)
 #endif
 	while (cnt)
@@ -363,7 +345,7 @@ wr_name(name, cnt)
 		__parts[PARTNAME].pnow = c;
 		if (cnt) __wr_flush(&__parts[PARTNAME]);
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	else {
 		OUTWRITE(PARTNAME, (char *) name, (long)cnt * SZ_NAME);
 	}

@@ -108,7 +108,7 @@ rd_ohead(head)
 	register long off;
 
 	OUTREAD(PARTEMIT, (char *) head, (long) SZ_HEAD);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outhead) != SZ_HEAD)
 #endif
 	{
@@ -154,22 +154,17 @@ rd_sect(sect, cnt)
 	offcnt += cnt;
 	while (cnt--) {
 		sect--;
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 		if (sizeof(struct outsect) != SZ_SECT)
 #endif
 		{
 			c -= 4; sect->os_lign = get4(c);
 			c -= 4; sect->os_flen = get4(c);
 			c -= 4; sect->os_foff = get4(c);
-		}
-		offset[--offcnt] = sect->os_foff + rd_base;
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-		if (sizeof(struct outsect) != SZ_SECT)
-#endif
-		{
 			c -= 4; sect->os_size = get4(c);
 			c -= 4; sect->os_base = get4(c);
 		}
+		offset[--offcnt] = sect->os_foff + rd_base;
 	}
 }
 
@@ -196,7 +191,7 @@ rd_relo(relo, cnt)
 {
 
 	OUTREAD(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outrelo) != SZ_RELO)
 #endif
 	{
@@ -219,7 +214,7 @@ rd_name(name, cnt)
 {
 
 	OUTREAD(PARTNAME, (char *) name, (long) cnt * SZ_NAME);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof(struct outname) != SZ_NAME)
 #endif
 	{

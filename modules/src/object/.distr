@@ -1,5 +1,4 @@
-Makefile
-byte_order.c
+proto.make
 object.3
 object.h
 rd.c

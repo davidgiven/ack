@@ -7,30 +7,21 @@
 #include "object.h"
 
 wr_ranlib(fd, ran, cnt)
-	register struct ranlib	*ran;
+	struct ranlib	*ran;
 	register long	cnt;
 {
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof (struct ranlib) != SZ_RAN)
 #endif
 	{
-		char buf[100 * SZ_RAN];
+		register struct ranlib *r = ran;
+		register char *c = (char *) r;
 
-		while (cnt) {
-			register int i = (cnt > 100) ? 100 : cnt;
-			register char *c = buf;
-			long j = i * SZ_RAN;
-
-			cnt -= i;
-			while (i--) {
-				put4(ran->ran_off,c); c += 4;
-				put4(ran->ran_pos,c); c += 4;
-				ran++;
-			}
-			wr_bytes(fd, buf, j);
+		while (cnt--) {
+			put4(r->ran_off,c); c += 4;
+			put4(r->ran_pos,c); c += 4;
+			r++;
 		}
 	}
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
-	else	wr_bytes(fd, (char *) ran, cnt * SZ_RAN);
-#endif
+	wr_bytes(fd, (char *) ran, cnt * SZ_RAN);
 }

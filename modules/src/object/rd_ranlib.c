@@ -11,16 +11,17 @@ rd_ranlib(fd, ran, cnt)
 	register long	cnt;
 {
 	rd_bytes(fd, (char *) ran, cnt * SZ_RAN);
-#if ! (BYTES_REVERSED || WORDS_REVERSED)
+#if BYTE_ORDER == 0x0123
 	if (sizeof (struct ranlib) != SZ_RAN)
 #endif
 	{
-		register char *c = (char *) ran;
+		register char *c = (char *) ran + cnt * SZ_RAN;
 
+		ran += cnt;
 		while (cnt--) {
-			ran->ran_off = get4(c); c += 4;
-			ran->ran_pos = get4(c); c += 4;
-			ran++;
+			ran--;
+			c -= 4; ran->ran_pos = get4(c);
+			c -= 4; ran->ran_off = get4(c);
 		}
 	}
 }
