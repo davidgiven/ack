@@ -1936,8 +1936,6 @@ OK
  lor SP
  lal -4
  sti PS
- loc 24
- ass WS
  lal -8
  loi PS
  lal -4
@@ -1945,6 +1943,14 @@ OK
  sbs WS
  loc 24
  bne *1
+ loc 24
+ ass WS
+OK
+ lor SP
+ lal -8
+ loi PS
+ cmp
+ zne *1
 OK
 TEST 083: test blm
 HOL 28
