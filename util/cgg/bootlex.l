@@ -10,10 +10,6 @@ static char rcsid2[]="$Header$";
  * Author: Hans van Staveren
  */
 
-#undef input
-#undef output
-#undef unput
-
 #define MAXBACKUP 50
 
 #include <stdio.h>
@@ -25,6 +21,10 @@ static char rcsid2[]="$Header$";
 
 #include "booth.h"
 #include "y.tab.h"
+
+int lineno = 1;
+extern char *iname;
+extern char *scopy();
 %}
 
 %p 2000
@@ -113,8 +113,8 @@ return			return(RETURN);
                         }
 [a-z]                   {yylval.yy_char = yytext[0]; return(LCASELETTER);}
 [0-9]*                  {yylval.yy_int = atoi(yytext);return(NUMBER);}
-(\"|"%)")               { char *p; int c,tipe;
-                          p=yytext;
+(\"|"%)")               { char *p; int c,tipe; char stringbuf[BUFSIZ];
+                          p=stringbuf;
                           for (;;) {
                                 c = input();
                                 switch(c) {
@@ -138,54 +138,30 @@ return			return(RETURN);
                           }
                         endstr:
                           *p++ = 0;
-                          yylval.yy_string = scopy(yytext);
+                          yylval.yy_string = scopy(stringbuf);
                           return(tipe);
                         }
-^\#.*$			|
-[ \t]*                  |
-\n                      ;
+^\#(line)?[ \t]*[0-9]+[ \t]+\".*\".*$   {
+                          int ind,ind2;
+                          for (ind=0; yytext[ind] < '0' || yytext[ind]>'9'; ind++)
+				;
+                          lineno=atoi(&yytext[ind])-1;
+                          for(;yytext[ind]!='"';ind++)
+                                ;
+                          for(ind2=ind+1;yytext[ind2]!='"';ind2++)
+                                ;
+                          yytext[ind2]=0;
+                          if (!iname || strcmp(yytext+ind+1,iname)!=0)
+                                iname=scopy(yytext+ind+1);
+                        }
+[ \t]*                  ;
+\n                      { lineno++; }
 .                       return(yytext[0]);
 %%
 
-char linebuf[256];
-char prevbuf[256];
-int linep;
-int linepos;    /* corrected for tabs */
-char charstack[MAXBACKUP];
-int nbackup=0;
-
-output(c) {
-
-        assert(0);
-}
-
-input() {
-
-        if(nbackup)
-                return(charstack[--nbackup]);
-        if(linebuf[linep]==0) {
-                strcpy(prevbuf,linebuf);
-                if(fgets(linebuf,256,stdin)==NULL)
-                        return(0);
-                lino++;
-                linepos=linep=0;
-        }
-        if (linebuf[linep] == '\t')
-                linepos = (linepos+8) & ~07;
-        else    linepos++;
-        return(linebuf[linep++]);
-}
-
-unput(c) {
-
-        chktabsiz(nbackup,MAXBACKUP,"Lexical backup table");
-        charstack[nbackup++] = c;
-}
-
 yyerror(s,a1,a2,a3,a4) string s; {
 
-        fprintf(stderr,"%d\t%s%d\t%s\t%*c   ",lino-1,prevbuf,lino,linebuf,
-                linepos-1,'^');
+	fprintf(stderr,"\"%s\", line %d:",iname ? iname : "",lineno);
 	fprintf(stderr,s,a1,a2,a3,a4);
 	fprintf(stderr,"\n");
         nerrors++;

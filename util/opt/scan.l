@@ -27,7 +27,8 @@ rom		return(ROM);
 		int m;
 		m = mlookup(yytext);
 		if (m==0) {
-			REJECT;
+			yyless(1);
+			return yytext[0];
 		} else {
 			yylval.y_int = m;
 			return(MNEM);

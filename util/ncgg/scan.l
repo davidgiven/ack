@@ -12,6 +12,7 @@ int   myatoi();
 
 int lineno=1;
 extern char *filename;
+#undef yywrap
 %}
 
 %%
@@ -39,11 +40,6 @@ extern char *filename;
 			  if (strcmp(yytext+ind+1,filename)!=0)
 				filename=mystrcpy(yytext+ind+1);
 			}
-[a-z]{3}		{ if (!emhere || (yylval.yy_int=mlookup(yytext))==0)
-				REJECT;
-			  return(EMMNEM);
-			}
-
 "=="			return(CMPEQ);
 "!="			return(CMPNE);
 "<"			return(CMPLT);
@@ -65,6 +61,11 @@ extern char *filename;
 \%[a-z]			{ yylval.yy_int = yytext[1]-'a'; return(ALLREG); }
 [0-9]+|0x[0-9A-Fa-f]+	{ yylval.yy_int = myatoi(yytext); return(NUMBER); }
 [_A-Za-z][_A-Za-z0-9]*	{ register symbol *sy_p;
+			  if (yyleng==3 &&
+			      emhere &&
+			      (yylval.yy_int=mlookup(yytext))!=0) {
+				return(EMMNEM);
+			  }
     			  if ((sy_p=lookup(yytext,symkeyw,justlooking))!=0)
 				 return(sy_p->sy_value.syv_keywno); 
 			  yylval.yy_str = mystrcpy(yytext); return(IDENT);
