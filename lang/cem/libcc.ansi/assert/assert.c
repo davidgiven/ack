@@ -7,9 +7,8 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 
-void __bad_assertion(const char *expr, const char *file, int line) {
+void __bad_assertion(const char *mess) {
 
-	fprintf(stderr,"Assertion \"%s\" failed, file \"%s\", line %d\n",
-			expr, file, line);
+	fputs(mess, stderr);
 	abort();
 }
