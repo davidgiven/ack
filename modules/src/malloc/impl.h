@@ -56,6 +56,10 @@ typedef union _inf mallink;
 #define	checksum_of(ml)		(_checksum_of(ml))
 #endif	CHECK
 
+#define new_mallink(ml)		( _log_prev_of(ml) = 0, \
+				  _log_next_of(ml) = 0, \
+				  _phys_prev_of(ml) = 0, \
+				  _this_size_of(ml) = 0 )
 
 #define	block_of_mallink(ml)	((char *)ml)
 #define	mallink_of_block(addr)	((mallink *)addr)

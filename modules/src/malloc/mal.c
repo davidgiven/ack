@@ -232,6 +232,20 @@ realloc(addr, n)
 	}
 	ml = mallink_of_block(addr);
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
+#ifdef STORE
+	if (in_store(ml)) {
+		register mallink *stp = store[(size_of(ml) >> LOG_MIN_SIZE) - 1];
+		mallink *stp1 = 0;
+		while (ml != stp)	{
+			stp1 = stp;
+			stp = log_next_of(stp);
+		}
+		stp = log_next_of(stp);
+		if (! stp1) store[(size_of(ml) >> LOG_MIN_SIZE) - 1] = stp;
+		else set_log_next(stp1, stp);
+		set_store(ml, 0);
+	}
+#endif
 	if (free_of(ml)) {
 		unlink_free_chunk(ml);
 		set_free(ml, 0);		/* user reallocs free block */

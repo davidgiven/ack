@@ -32,6 +32,7 @@ create_chunk(p, n)
 	
 	assert(!last || p == (char *)phys_next_of(last) - mallink_size());
 	ml = (mallink *)(p + mallink_size());	/* bump ml */
+	new_mallink(ml);
 	started_working_on(ml);
 	set_free(ml, 1);
 	set_phys_prev(ml, last);
@@ -60,6 +61,7 @@ truncate(ml, size)
 	register mallink *new = (mallink *)((char *)ml + size);
 	register mallink *ph_next = phys_next_of(ml);
 
+	new_mallink(new);
 	set_free(new, 1);
 	set_phys_prev(new, ml);
 	set_phys_next(new, ph_next);
