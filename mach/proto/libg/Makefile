@@ -37,5 +37,5 @@ tail_$(PREF)$(SUB):
 	@-rm barrier.[oeskm]
 	@echo OK
 	-rm -f tail_$(PREF)$(SUB)
-	MACH="$(MACH)" MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) \
+	MACH="$(MACH)" MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) SRC=$(SRC) \
 		march $(HOME)/$(SRC) tail_$(PREF)$(SUB)
