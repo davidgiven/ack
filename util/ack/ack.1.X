@@ -182,6 +182,9 @@ Cross jumping.
 .IP \-s<num>
 Give an indication to the IL phase, how much bigger the program may get.
 The IL phase will not make the program bigger when given \-s0.
+.IP \-a
+Indicate to the IL phase that it is offered the whole program. This allows
+IL to throw away routines that it has substituted inline.
 .IP \-Q
 Give some statistics.
 .IP \-T
