@@ -1,7 +1,7 @@
 EM = ../../..
 CEGLIB = $(EM)/lib/ceg
 UTIL = $(CEGLIB)/util
-UtilList = create_ofiles make_as make_obj make_own update_ceg
+UtilList = make_as make_obj make_own
 
 all:
 
