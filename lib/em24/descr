@@ -10,7 +10,7 @@ var NAME=int24
 var LIB=lib/int24/tail_
 var RT=lib/int24/head_
 var SIZE_FLAG=-sm
-var CPP_F=-Dunix
+var CPP_F=-Dunix=unix
 var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name asld
 	from .k.m.a.g
