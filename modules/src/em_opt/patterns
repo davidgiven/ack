@@ -206,14 +206,6 @@ loc 32  mlu w  :        loc 5   slu w
 loc 64  mlu w  :        loc 6   slu w
 loc 128  mlu w  :       loc 7   slu w
 loc 256  mlu w  :       loc 8   slu w
-loc 2  dvi w  : 	loc 1   sri w
-loc 4  dvi w  : 	loc 2   sri w
-loc 8  dvi w  : 	loc 3   sri w
-loc 16  dvi w  :        loc 4   sri w
-loc 32  dvi w  :        loc 5   sri w
-loc 64  dvi w  :        loc 6   sri w
-loc 128  dvi w  :       loc 7   sri w
-loc 256  dvi w  :       loc 8   sri w
 loc 2  dvu w  : 	loc 1   sru w
 loc 4  dvu w  : 	loc 2   sru w
 loc 8  dvu w  : 	loc 3   sru w
