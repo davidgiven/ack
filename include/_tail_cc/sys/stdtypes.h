@@ -8,6 +8,7 @@
 #ifndef	__STDTYPES_H__
 #define	__STDTYPES_H__
 
+typedef long	sigset_t;	/* for <signal.h> on SUN's */
 typedef	long	time_t;
 typedef	long	size_t;
 
