@@ -23,7 +23,7 @@
 ..
 .de Df				\" Drawing Footer
 .N 1
-.FT P
+.ft R
 .CS
 .lg 1
 ..
@@ -32,4 +32,8 @@
 .CE
 .AD
 .N \\$1
+..
+.\" macro for exponents, added by Ceriel Jacobs
+.de Ex				\" Exponent $1 $2 [$3]
+\\$1\v'-0.5m'\s-2\\$2\s+2\v'0.5m'\\$3
 ..

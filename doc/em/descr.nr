@@ -18,9 +18,9 @@ Range check descriptors consist of two integers:
 .IS 2
 .PS 1 4 "" .
 .PT
-lower bound~~~~~~~signed
+lower bound	signed
 .PT
-upper bound~~~~~~~signed
+upper bound	signed
 .PE
 .IE
 The range check instruction checks an integer on the stack against
@@ -34,11 +34,11 @@ Array descriptors contain the following three integers:
 .IS 2
 .PS 1 4 "" .
 .PT
-lower bound~~~~~~~~~~~~~~~~~~~~~signed
+lower bound		signed
 .PT
-upper bound \- lower bound~~~~~~~unsigned
+upper bound \- lower bound	unsigned
 .PT
-number of bytes per element~~~~~unsigned
+number of bytes per element	unsigned
 .PE
 .IE
 The array instructions LAR, SAR and AAR have the pointer to the start
@@ -88,7 +88,7 @@ value of LB after the jump
 .IE
 GTO replaces the loads PC, SP and LB from the descriptor,
 thereby jumping to a procedure
-and removing zeor or more frames from the stack.
+and removing zero or more frames from the stack.
 The LB, SP and PC in the descriptor must belong to a
 dynamically enclosing procedure,
 because some EM implementations will need to backtrack through

@@ -70,7 +70,7 @@ The result of a LFR is only defined if the size used to fetch
 is identical to the size used in the last return.
 The instruction ASP, used to remove the parameters from the
 stack, the branch instruction BRA and the non-local goto
-instrucion GTO are the only ones that leave the contents of
+instruction GTO are the only ones that leave the contents of
 the 'function return area' intact.
 All other instructions are allowed to destroy the function
 return area.

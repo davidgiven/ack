@@ -2,7 +2,10 @@
 .AP "EM INTERPRETER"
 .nf
 .ft CW
-.ta 8 16 24 32 40 48 56 64 72 80
+.lg 0
+.nr x \w'        '
+.ta \nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu +\nxu
 .so em.i
 .ft P
+.lg 1
 .fi

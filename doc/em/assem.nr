@@ -168,7 +168,7 @@ bit pattern:\fBddd\fP:\e\fBddd\fP
 .TE
 .DE
 The escape \fB\eddd\fP consists of the backslash followed by 1,
-2, or 3 octal digits specifing the value of
+2, or 3 octal digits specifying the value of
 the desired character.
 If the character following a backslash is not one of those
 specified,
@@ -206,11 +206,11 @@ l l l.
 .TE
 .IE
 .S3 "Pseudoinstructions"
-.S4 Storage declaration
+.S4 "Storage declaration"
 Initialized global data is allocated by the pseudoinstruction CON,
 which needs at least one argument.
 Each argument is used to allocate and initialize a number of
-consequtive bytes in data memory.
+consecutive bytes in data memory.
 The number of bytes to be allocated and the alignment depend on the type
 of the argument.
 For each argument, an integral number of words,
@@ -257,7 +257,7 @@ Switching to another type of fragment or placing a label forces
 word-alignment.
 There are three types of fragments in global data space: CON, ROM and
 BSS/HOL.
-.N 2
+.N 1
 .IS 2
 .PS - 4
 .PT "BSS <cst1>,<val>,<cst2>"
@@ -277,7 +277,7 @@ Assemble global data words initialized with the <val> constants.
 Idem, but the initialized data will never be changed by the program.
 .PE
 .IE
-.S4 Partitioning
+.S4 "Partitioning"
 Two pseudoinstructions partition the input into procedures:
 .IS 2
 .PS - 4
@@ -295,7 +295,7 @@ The number of bytes for locals must be specified in either the PRO or
 END pseudoinstruction or both.
 .PE
 .IE
-.S4 Visibility
+.S4 "Visibility"
 Names of data and procedures in an EM module can either be
 internal or external.
 External names are known outside the module and are used to link
@@ -329,7 +329,7 @@ Internal procedure.
 <pro> is internal to this module and must be defined in this module.
 .PE
 .IE
-.S4 Miscellaneous
+.S4 "Miscellaneous"
 Two other pseudoinstructions provide miscellaneous features:
 .IS 2
 .PS - 4
@@ -339,6 +339,7 @@ interchanged before being processed.
 <cst1> gives the number of lines of the first block.
 <cst2> gives the number of lines of the second one.
 Blank and pure comment lines do not count.
+This instruction is obsolete. Its use is strongly discouraged.
 .PT "MES <cst>[,<par>]*"
 A special type of comment.
 Used by compilers to communicate with the
@@ -400,7 +401,7 @@ the locals in this procedure should not be kept in registers and
 all registers containing locals of other procedures should be
 saved upon entry to this procedure.
 .PE 1
-.VS 1 1
+.VS
 Each backend is free to skip irrelevant MES pseudos.
 .PE
 .IE
@@ -456,6 +457,7 @@ r l.
 Absence of an optional argument is indicated by a special
 byte.
 .IE 2
+.NE 7
 .CS
 Common Table for Neutral State and Arguments
 .CE
@@ -490,7 +492,7 @@ are presented in two's complement notation, with the least
 significant byte first. For example: the value of a 32 bit
 constant is ((s4*256+b3)*256+b2)*256+b1, where s4 is b4\-256 if
 b4 is greater than 128 else s4 takes the value of b4.
-A <string> consists of a <cst> inmediatly followed by
+A <string> consists of a <cst> immediately followed by
 a sequence of bytes with length <cst>.
 .P
 .ne 8
@@ -588,6 +590,7 @@ Instructions that check for undefined integer or floating-point
 values and underflow or overflow
 are indicated below by (*).
 .N 1
+.VS 0 0
 .DS
 .ta 12n
 GROUP 1 \- LOAD
@@ -799,3 +802,4 @@ GROUP 15 \- MISCELLANEOUS
   STR \*r :	Store register (0=LB, 1=SP, 2=HP)
   TRP \*- :	Cause trap to occur (Error number on stack)
 .DE 0
+.VS

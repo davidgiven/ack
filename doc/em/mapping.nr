@@ -195,7 +195,6 @@ LOI:1:pop:r0:pop:r0
 LOE:40:push:eb+40:push:eb-41
 .TE
 .DE
-.BP
 .P
 The translation for the two implementations, if the target machine address is
 used as pointer representation, is:

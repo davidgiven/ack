@@ -159,8 +159,11 @@ and not with the symbolic assembly language.
 .P
 As mentioned above, the
 current microcomputer technology offers 8, 16 and 32 bit
-machines with address spaces ranging from 2\v'-0.5m'16\v'0.5m'
-to 2\v'-0.5m'32\v'0.5m' bytes.
+machines with address spaces ranging from
+.Ex 2 16
+to
+.Ex 2 32
+bytes.
 Having one size of pointers and integers restricts
 the usefulness of the language.
 We decided to have a different language for each combination of

@@ -1,7 +1,8 @@
 .po 0
 .TP 1
 .ll 79n
-.sp 15
+\&
+.sp 10
 .ce 4
 DESCRIPTION OF A MACHINE
 ARCHITECTURE FOR  USE WITH

@@ -22,19 +22,15 @@ two groups of 256 secondary opcodes each.
 EM instructions without arguments have a single opcode assigned,
 possibly escaped:
 .Dr 6
-
          |--------------|
          |    opcode    |
          |--------------|
-
 .De
 		or
 .Dr 6
-
          |--------------|--------------|
          |    escape    |     opcode   |
          |--------------|--------------|
-
 .De
 The encoding for instructions with an argument is more complex.
 Several instructions have an address from the global data area
@@ -45,37 +41,29 @@ and negative arguments.
 There is always an opcode that takes the next two bytes as argument,
 high byte first:
 .Dr 6
-
          |--------------|--------------|--------------|
          |    opcode    |    hibyte    |    lobyte    |
          |--------------|--------------|--------------|
-
 .De
 		or
 .Dr 6
-
          |--------------|--------------|--------------|--------------|
          |    escape    |    opcode    |    hibyte    |    lobyte    |
          |--------------|--------------|--------------|--------------|
-
 .De
 An extra escape is provided for instructions with four or eight byte arguments.
 .Dr 6
-
-  |--------------|--------------|--------------|   |--------------|
-  |    ESCAPE    |    opcode    |    hibyte    |...|    lobyte    |
-  |--------------|--------------|--------------|   |--------------|
-
+         |--------------|--------------|--------------|   |--------------|
+         |    ESCAPE    |    opcode    |    hibyte    |...|    lobyte    |
+         |--------------|--------------|--------------|   |--------------|
 .De
 For most instructions some argument values predominate.
 The most frequent combinations of instruction and argument
 will be encoded in a single byte, called a mini:
 .Dr 6
-
          |---------------|
          |opcode+argument|  (mini)
          |---------------|
-
 .De
 The number of minis is restricted, because only
 254 primary opcodes are available.
@@ -90,19 +78,15 @@ into a single opcode.
 These opcodes are called shorties.
 Shorties may be escaped.
 .Dr 6
-
          |--------------|--------------|
          | opcode+high  |    lobyte    |  (shortie)
          |--------------|--------------|
-
 .De
 		or
 .Dr 6
-
          |--------------|--------------|--------------|
          |    escape    | opcode+high  |    lobyte    |
          |--------------|--------------|--------------|
-
 .De
 Escaped shorties are useless if the normal encoding has a primary opcode.
 Note that for some instruction-argument combinations
@@ -136,7 +120,7 @@ Each descriptor contains:
 the number of bytes to be reserved for locals at each
 invocation.
 .N
-This is a pointer-szied integer.
+This is a pointer-sized integer.
 .PT 2.
 the start address of the procedure
 .PE
@@ -217,6 +201,7 @@ unused
 unused
 .PE
 .IE
+.VS
 .P
 The program text consists of NTEXT bytes.
 NTEXT is always a multiple of the wordsize.
@@ -247,12 +232,12 @@ At load time an interpreter can
 perform any conversion deemed necessary, such as
 reordering bytes in integers
 and pointers and adding base addresses to pointers.
-.BP
 .A
 In the following pictures we show a graphical notation of the
 initializers.
 The leftmost rectangle represents the leading byte.
 .N 1
+.VS 1 0
 .DS
 .PS - 4 " "
 Fields marked with
@@ -271,9 +256,8 @@ contain a data or instruction pointer
 contain a null terminated ASCII string
 .PE 1
 .DE 0
-.VS 1 1
+.VS
 .Dr 6
-
     -------------------
     | 0 |      n      |           repeat last initialization n times
     -------------------
@@ -331,7 +315,7 @@ contain a null terminated ASCII string
     -------------------------
     | 8 | m |        s      |     initialized float of size m
     -------------------------
-.De 3
+.De
 .PS - 8
 .PT type~0:
 If the last initialization initialized k bytes starting

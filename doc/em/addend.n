@@ -736,6 +736,7 @@ interchanged before being processed.
 <num1> gives the number of lines of the first block.
 <num2> gives the number of lines of the second one.
 Blank and pure comment lines do not count.
+This instruction is obsolete. Its use is strongly discouraged.
 .OU
 .sp
   MES <num>,<val>* 

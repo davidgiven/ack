@@ -154,7 +154,7 @@ mini with <num> as argument
 mini with <num>*wordsize as argument
 .PE 1
 <num> is a possibly negative integer.
-.VS 1 1
+.VS
 .IE
 The dispatch table for the 256 primary opcodes:
 .N 1

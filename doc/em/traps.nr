@@ -8,7 +8,7 @@ This mechanism uses five instructions: LIM, SIM, SIG, TRP and RTT.
 This section of the manual may be omitted on the first reading since it
 presupposes knowledge of the EM instruction set.
 .P
-The action taken when a trap occures is determined by the value
+The action taken when a trap occurs is determined by the value
 of an internal EM trap register.
 This register contains a pointer to a procedure.
 Initially the pointer used is zero and all traps halt the
@@ -124,7 +124,7 @@ ersave
 msave
 	bss 2,0,0	; Room to save previous value of trap mask
 
-	pro calcule,0	; entry point
+	pro $calcule,0	; entry point
 	lxl 0	; fill in non-local goto descriptor with LB
 	ste jmpbuf+4
 	lor 1	; and SP
@@ -151,11 +151,11 @@ jmpbuf
 	con *1,0,0
 	end
 .DE 0
-.VS 1 1
+.VS
 .DS
 Example of catch procedure
 .ta 1n 24n
-	pro catch,0	; Local procedure that must catch the overflow trap
+	pro $catch,0	; Local procedure that must catch the overflow trap
 	lol 2	; Load trap number
 	loc 4	; check for overflow
 	bne *1	; if other trap, call higher trap procedure

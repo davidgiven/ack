@@ -141,7 +141,7 @@ have been added manually.  Note that this code has already been  optimized.
 	lol 0
 	adp 2
 	sti 8	; r.r2 :=
-	lni	; lin 23 prior to optimization
+	lni	; lin 30 prior to optimization
 	lal \-224
 	lol \-4
 	lae .2
@@ -176,7 +176,7 @@ have been added manually.  Note that this code has already been  optimized.
 	sti 8	; r2 := x + y
 	loc 0
 	sil \-226	; r1 := 0
-	lin 34	; note the abscence of the unnecesary jump
+	lin 34	; note the absence of the unnecessary jump
 	lae 22	; address of output structure
 	lol \-4
 	cal $_wri	; write integer with default width
