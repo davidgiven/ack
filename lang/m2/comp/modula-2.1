@@ -1,4 +1,4 @@
-.TH MODULA\-2 1 
+.TH MODULA\-2 1ACK
 .ad
 .SH NAME
 Modula-2 \- ACK Modula-2 compiler
@@ -42,13 +42,13 @@ needed.
 For more details on the \fIack\fR program see \fIack\fR(1).
 .SH DEFINITION MODULES
 "Standard" definition modules can be found in
-the directories \fB~em/lib/m2\fR or \fB~em/lib/\fImach\fB/m2\fR.
+the directory \fB~em/lib/m2\fR.
 .PP
 When the compiler needs a definition module, it is first searched for
 in the current directory, then in the directories given to it by the
 \-\fBI\fR flag
 in the order given,
-and then in the directories mentioned above.
+and then in the directory mentioned above.
 .SH FLAGS
 The \fIack\fR(1) program recognizes (among others) the following
 flags, that are passed to the Modula-2 compiler:
@@ -58,7 +58,7 @@ append \fIdirname\fR to the list of directories where definition modules
 are looked for. 
 .IP \fB\-I\fP
 don't look in
-the directories \fB~em/lib/m2\fR or \fB~em/lib/\fImach\fB/m2\fR.
+the directory \fB~em/lib/m2\fR.
 .IP \fB\-M\fP\fIn\fP
 set maximum identifier length to \fIn\fR. The minimum value of \fIn\fR
 is 14, because the keyword "IMPLEMENTATION" is that long.
@@ -82,7 +82,7 @@ allow for warning messages whose class is a member of \fIclasses\fR.
 make all procedure names global, so that \fIadb\fR(1) understands them.
 .LP
 .SH SEE ALSO
-\fIack\fR(1), \fIem_m2\fR(1)
+\fIack\fR(1), \fIem_m2\fR(6)
 .SH FILES
 .IR ~em/lib/em_m2 :
 binary of the Modula-2 compiler.
