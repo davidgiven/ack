@@ -21,7 +21,7 @@ strhp~:
 	bcs	3f
 1:	jmp	(r0)
 3:	mov	$EHEAP,-(sp)
-	jsr	trp~
+	jsr	pc,trp~
 	jmp	(r0)
 .sect .data
 2:	sys	break; .data2 _end
