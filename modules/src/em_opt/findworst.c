@@ -23,11 +23,14 @@ findworst(patt,repl)
 	/*	and a goto to state 0.
 	/* c)	pattern of form: ri ri+1 ... rn pc ... pd
 	/*	i.e. a suffix of <repl> starts a pattern.
-	/*	requires a backup of n-i+1 instructions and a goto to state 0.
+	/*	requires a backup of j-i+1 instructions and a goto to state 0.
+	/* d)   pattern of the form: ri ri+1 ... rj
+	/*	i.e. a substring of <repl> is a complete pattern
+	/*	requires a backup of j-i+1 instructions and a goto to state 0.
 	*/
 	int n = repl.m_len;
 	int diff = patt.m_len - repl.m_len;
-	int first,i;
+	int first,i,j;
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
@@ -54,6 +57,16 @@ findworst(patt,repl)
 			if((first=leftmatch(patterns[s],repl,i,n)) &&
 			   (first==1)) {
 				UPDATEWORST(n-i+1);
+			}
+		}
+		/* look for case d */
+		for(i=2;i<=n;i++) {
+			for(j=n-1;j>i;j--) {
+				if((first=leftmatch(patterns[s],repl,i,j)) &&
+				   (first==1)&&
+				   (j-i+1 == patterns[s].m_len)) {
+					UPDATEWORST(n-i+1);
+				}
 			}
 		}
 	}

@@ -5,6 +5,7 @@ COMPARE =	$(EMHOME)/modules/compare
 LINT	=	lint
 BINDIR	=	$(EMHOME)/lib
 LIBOPT =	libemopt.a
+LIBCEOPT =	libemoptCE.a
 
 # set HOWMUCH to head -20 to limit number of patterns used
 #HOWMUCH =	head -20
@@ -26,7 +27,7 @@ CMD =		'$(CC) -c $(CFLAGS)'
 
 .SUFFIXES:	.d .r
 
-.r.d:		; CMD=$(CMD); export CMD; awk -f makefuns.awk $*.r | sh
+.r.d:		; CMD=$(CMD); export CMD; awk -f makefuns.awk $*.r | sh -x
 		touch $@
 
 CSRC =		main.c nopt.c mkstrct.c aux.c outputdfa.c outcalls.c\
@@ -99,6 +100,12 @@ $(LIBOPT):	dfadummy $(NOFILES) mkstrct.o pseudo.d incalls.d
 		rm -f $(LIBOPT)
 		ar rc $(LIBOPT) O_*.o $(NOFILES) mkstrct.o
 		-sh -c 'ranlib $(LIBOPT)'
+
+libCEopt.a:
+		make clean
+		make PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
+		mv $(LIBOPT) libCEopt.a
+		make clean
 
 dfadummy:	patterns parser
 		-/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
