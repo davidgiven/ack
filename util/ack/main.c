@@ -121,13 +121,12 @@ char *getsuffix() {
 varinit() {
 	/* initialize the string variables */
 	register char *envstr ;
-	extern char em_dir[];
+	extern char *em_dir;
 
 	if ( envstr=getenv("ACKDIR") ) {
-		setsvar(keeps(HOME),keeps(envstr)) ;
-	} else {
-		setsvar(keeps(HOME),keeps(em_dir)) ;
+		em_dir = keeps(envstr);
 	}
+	setsvar(keeps(HOME),em_dir) ;
 	setpvar(keeps(SRC),srcvar)  ;
 	setpvar(keeps(SUFFIX),getsuffix) ;
 }

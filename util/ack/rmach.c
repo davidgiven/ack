@@ -260,9 +260,7 @@ static  int             incore ;
 static  growstring      rline ;
 static  FILE            *infile ;
 static  char            *inptr ;
-char			em_dir[100] = EM_DIR;	/* this way it is easier to
-						 *     patch ...
-						 */
+char			*em_dir = EM_DIR;
 
 open_in(name) register char *name ; {
 	register dmach *cmac ;
