@@ -241,7 +241,8 @@ char **argv;
 				}
 				break;
 			default:
-				continue;
+				sprintf(cs1, "??");
+				sprintf(cs2, " ?");
 			}
 
 			printf("%8lx %s %s %s\n",nbufp[n].on_valu,cs1,cs2,nbufp[n].on_mptr);
