@@ -3,7 +3,11 @@ CEM=i86 -DNOFLOAT
 head:
 	echo use run
 
-diffs:  $P.pcc.r $P.cc.r $P.cem.r
+diffs:	$P.cc.r $P.cem.r
+	echo two compiler diff
+	-diff $P.*.r
+
+diffs3:  $P.pcc.r $P.cc.r $P.cem.r
 	echo three compiler diff
 	-diff3 $P.*.r | tee diffs
 egen:   $P.e
@@ -47,4 +51,4 @@ opr:
 	make pr | opr
 
 clean:
-	-rm -f $P.[kmsoe] core a.out *.old
+	-rm -f $P.[kmsoe] $P.*.r core a.out *.old
