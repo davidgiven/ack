@@ -54,7 +54,7 @@
  asp EM_WSIZE		; drop size
  str 0			; LB
  sim			; ignore mask
- lae EM_PSIZE
+ lae 4
  sti EM_PSIZE
  ste 0			; line and file
  loc 0
