@@ -855,6 +855,7 @@ used(resource,use,max) char *resource; {
 
 statistics() {
 	extern char *end,*sbrk();
+	extern int nnodes, maxempatlen,maxrule;
 
 	used("Registers",nregs,MAXREGS);
 	used("Properties",nprops,MAXPROPS);
