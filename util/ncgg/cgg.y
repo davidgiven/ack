@@ -20,6 +20,7 @@ int startline;
 int npatterns;
 int att_type;
 int patindex[MAXPATTERNS];
+extern set_t l_sets[];
 
 int emhere=0;	/* lexical analyzer flag */
 int optexact=0;	/* Inside "with exact" rule */
@@ -742,6 +743,9 @@ setlist
 		{ NEXT(tokpatlen,TOKPATMAX,"Stack pattern");
 		  tokpatset[tokpatlen-1] = $2;
 		  checkunstacking($2);
+		  if (l_sets[$2].set_size == 0) {
+			error("Tokenset is empty or has elements with different sizes");
+		  }
 		}
 	;
 kills
