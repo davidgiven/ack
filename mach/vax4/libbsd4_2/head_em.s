@@ -38,6 +38,13 @@ a2:
 sig8:
 	.word	0x0000
 	pushl	8(ap)
+	movl	$m3,ap
+	chmk	(ap)+		# restore default handler
+	movl	$m5,ap
+	chmk	(ap)+		# get current signal mask
+	andl3	d0,$0xffffff7f,m4+6	# and remove the 8th bit
+	movl	$m4,ap
+	chmk	(ap)+		# and 
 	movl	(sp)+,ap
 	pushl	tab [ap]
 	jsb	.trp
@@ -51,6 +58,20 @@ m1:
 	.long	3
 	.long	8
 	.long	m1a
+	.long	0
+m3:
+	.word	SYS_sigvec
+	.long	3
+	.long	8
+	.long	0
+	.long	0
+m4:
+	.word	SYS_sigsetmask
+	.long	1
+	.long	0
+m5:
+	.word	SYS_sigblock
+	.long	1
 	.long	0
 m1a:
 	.long	sig8
