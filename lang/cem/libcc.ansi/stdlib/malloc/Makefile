@@ -1,4 +1,3 @@
-EMHOME = ../../../../..
 DIR = .
 MALLOC_C = $(DIR)/malloc.c
 MALLOC_O = $(DIR)/malloc.o
