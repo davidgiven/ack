@@ -140,7 +140,7 @@ expand_macro(repl, idf)
 		ch = GetChar();
 		ch = skipspaces(ch,1);
 		if (ch != '(') {	/* no replacement if no () */
-			UnGetChar();
+			ChPushBack(ch);
 			return 0;
 		} else
 			getactuals(repl, idf);
@@ -185,11 +185,11 @@ expand_defined(repl)
 	if ((class(ch) != STIDF) && (class(ch) != STELL)) {
 		error("identifier missing");
 		if (parens && ch != ')') error(") missing");
-		if (!parens || ch != ')') UnGetChar();
+		if (!parens || ch != ')') ChPushBack(ch);
 		add2repl(repl,'0');
 		return;
 	}
-	UnGetChar();
+	ChPushBack(ch);
 	str = GetIdentifier(0);
 	if (str) {
 		id = findidf(str);
@@ -198,7 +198,7 @@ expand_defined(repl)
 	ch = GetChar();
 	ch = skipspaces(ch, 0);
 	if (parens && ch != ')') error(") missing");
-	if (!parens || ch != ')') UnGetChar();
+	if (!parens || ch != ')') ChPushBack(ch);
 	add2repl(repl, (id && id->id_macro) ? '1' : '0');
 	add2repl(repl, ' ');
 }
