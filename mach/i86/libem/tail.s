@@ -3,9 +3,9 @@
 
         ! $Header$
 	.text
-	.align 2
 endtext:
 _etext:
+	.align 2
 	.data
 	.align 2
 enddata:
