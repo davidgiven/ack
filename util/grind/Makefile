@@ -1,2 +1,2 @@
 distr:
-	make.ops < operators.ot
+	make.ops operators.ot

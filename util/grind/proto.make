@@ -183,4 +183,4 @@ chtab.c:	$(SRC_DIR)/char.ct
 		$(TABGEN) -f$(SRC_DIR)/char.ct >chtab.c
 
 ops.c ops.h:	$(SRC_DIR)/operators.ot $(SRC_DIR)/make.ops
-		$(SRC_DIR)/make.ops < $(SRC_DIR)/operators.ot
+		$(SRC_DIR)/make.ops $(SRC_DIR)/operators.ot
