@@ -447,7 +447,7 @@ WalkStat(nd, exit_label)
 	case '(':
 		if (ChkCall(nd)) {
 			if (nd->nd_type != 0) {
-				node_error(nd, "procedure call expected");
+				node_error(nd, "illegal function call");
 				break;
 			}
 			CodeCall(nd);
