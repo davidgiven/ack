@@ -158,13 +158,13 @@ One of the most fundamental operations in EM is ``loc c'', load the value of c
 on the stack. To expand this instruction the 
 tables contain the following information:
 .DS
-EM_table   : \f5
+EM_table   : \fCW
    C_loc   ==>   "pushl $$$1".
      /* $1 refers to the first argument of C_loc. 
       * $$ is a quoted $. */
 
 
-\fRas_table   :\f5
+\fRas_table   :\fCW
    pushl  src : CONST   ==> 
                          @text1( 0xd0);
                          @text1( 0xef);
@@ -174,7 +174,7 @@ EM_table   : \f5
 .LP
 The as_table is transformed in the following routine:
 .DS
-\f5
+\fCW
 pushl_instr(src)
 t_operand *src;    
 /* ``t_operand'' is a struct defined by the 
@@ -189,7 +189,7 @@ t_operand *src;
 .DE
 Using ``pushl_instr()'', the following routine is generated from the EM_table:
 .DS
-\f5
+\fCW
 C_loc( c)
 arith c;
 /* text1() and text4() are library routines that fill the
@@ -335,7 +335,7 @@ the speed of the actual code expander. Finally, actions can be grouped into
 a list of actions; actions are separated by a semicolon and terminated 
 by a ``.''.
 .DS
-\f5
+\fCW
 C_nop   ==> .            
        /* Empty action list : no operation. */
 
@@ -362,7 +362,7 @@ action list.
 .LP
 The following example illustrates the usage of labels.
 .DS
-\f5
+\fCW
    /* Compare the two top elements on the stack. */
 C_cmp      ==>     "pop bx";           
                    "pop cx";          
@@ -397,7 +397,7 @@ The value of the $\fIi\fR argument referring to a parameter ($\fIi\fR >= 0)
 is increased by ``EM_BSIZE''. ``EM_BSIZE'' is the size of the return status block
 and must be defined in the file ``mach.h'' (see section 3.3). For example :
 .DS
-\f5
+\fCW
 C_lol   ==>     "push $1(bp)". 
        /* automatic conversion of $1 */
 \fR
@@ -409,7 +409,7 @@ transformed into a unique assembly name. To prevent name clashes with library
 names the table writer has to provide the
 conversions in the file ``mach.h''. For example :
 .DS
-\f5
+\fCW
 C_bra   ==>     "jmp $1". 
         /* automatic conversion of $1 */
         /* type arith is converted to string */
@@ -435,7 +435,7 @@ The boolean expressions in a COND_SEQUENCE must be C expressions. Besides the
 ordinary C operators and constants, $\fIi\fR references can be used 
 in an expression. 
 .DS
-\f5
+\fCW
     /* Load address of LB $1 levels back. */
 C_lxl                                 
     $1 == 0    ==>    "pushl fp".
@@ -454,7 +454,7 @@ these variants together. For this purpose the ``..'' notation is introduced.
 For the code expander there is no difference between the 
 following instructions. 
 .DS
-\f5
+\fCW
 C_loe_dlb    ==>    "pushl $1 + $2".
 C_loe_dnam   ==>    "pushl $1 + $2".
 C_loe        ==>    "pushl $1 + $2".
@@ -462,7 +462,7 @@ C_loe        ==>    "pushl $1 + $2".
 .DE
 So it can be written in the following way.
 .DS
-\f5
+\fCW
 C_loe..      ==>    "pushl $1 + $2".
 \fR
 .DE
@@ -481,16 +481,16 @@ Most pseudo instructions are machine independent and are provided
 by \fBceg\fR. The table writer has only to supply the following functions,
 which are used to build a stackframe:
 .DS
-\f5
-prolog()
+\fCW
+C_prolog()
 /* Performs the prolog, for example save 
  * return address */
 
-locals( n) 
+C_locals( n) 
 arith n;
 /* Allocate n bytes for locals on the stack */
 
-jump( label)
+C_jump( label)
 char *label;
 /* Generates code for a jump to ``label'' */
 \fR
@@ -512,11 +512,11 @@ C_rom_icon, C_con_icon, C_bss_icon, C_hol_icon can be abbreviated by ..icon.
 This also holds for ..ucon and ..fcon.
 For example :
 .DS
-\f5
+\fCW
 \\.\\.icon
     $2 == 1   ==>  gen1( (ONE_BYTE) atoi( $1)).
     $2 == 2   ==>  gen2( (TWO_BYTES) atoi( $1)).
-    $2 == 4   ==>  gen4( (FOUR_BYTES) atoi( $1)).
+    $2 == 4   ==>  gen4( (FOUR_BYTES) atol( $1)).
     default   ==>   arg_error( "..icon", $2).
 \fR
 .DE
@@ -533,13 +533,13 @@ the following constants and functions :
 .TS
 tab(#);
 l c lw(10c).
-prolog()#:#T{
+C_prolog()#:#T{
 Do prolog
 T}
-jump( l)#:#T{
+C_jump( l)#:#T{
 Perform a jump to label l
 T}
-locals( n)#:#T{
+C_locals( n)#:#T{
 Allocate n bytes on the stack
 T}
 #
@@ -575,13 +575,13 @@ Size of base block in bytes on the target machine
 T}
 #
 ONE_BYTE#:#T{
-\\C type that occupies one byte on the machine where the \fBce\fR runs
+\\C suitable type that can hold one byte on the machine where the \fBce\fR runs
 T}
 TWO_BYTES#:#T{
-\\C type that occupies two bytes on the machine where the \fBce\fR runs
+\\C suitable type that can hold two bytes on the machine where the \fBce\fR runs
 T}
 FOUR_BYTES#:#T{
-\\C type that occupies four bytes on the machine where the \fBce\fR runs
+\\C suitable type that can hold four bytes on the machine where the \fBce\fR runs
 T}
 #
 BSS_INIT#:#T{
@@ -607,8 +607,8 @@ An example of the file ``mach.h'' for the vax4.
 .TS
 tab(:);
 l l l.
-#define : ONE_BYTE : char
-#define : TWO_BYTES : short
+#define : ONE_BYTE : int
+#define : TWO_BYTES : int
 #define : FOUR_BYTES : long
 :
 #define : EM_WSIZE : 4
@@ -630,13 +630,13 @@ There are three primitives that have to be defined by the table writer, either
 as functions in the file ``mach.c'' or as rules in the EM_table.
 For example, for the 8086 they look like this:
 .DS
-\f5
-jump       ==>       "jmp $1".
+\fCW
+C_jump       ==>       "jmp $1".
 
-prolog     ==>       "push bp";
+C_prolog     ==>       "push bp";
                      "mov bp, sp".
 
-locals     
+C_locals     
   $1  == 0   ==>     .
   $1  == 2   ==>     "push ax".
   $1  == 4   ==>     "push ax";
@@ -668,6 +668,10 @@ T}
 BSS_FMT#:#T{
 Print format to allocate space in the bss segment. The format must 
 contain %ld (number of bytes).
+T}
+COMM_FMT#:#T{
+Print format to declare a "common". The format must contain a %s (name to be declared
+common), followed by a %ld (number of bytes).
 T}
 
 SEGTXT_FMT#:#T{
@@ -777,7 +781,7 @@ right hand side gives the corresponding actions as \fBback\fR-primitives or as
 functions defined by the table writer, which call \fBback-primitives\fR.
 Two simple examples from the VAX as_table and the 8086 as_table, resp.:
 .DS
-\f5
+\fCW
 movl src, dst  ==> @text1( 0xd0);
                    gen_operand( src); 
                    gen_operand( dst). 
@@ -818,7 +822,7 @@ that each mnemonic is mentioned only once in the as_table, otherwise
 .PP
 The following example shows the usage of type fields.
 .DS 
-\f5
+\fCW
  mov dst:REG, src:EADDR  ==>  
           @text1( 0x8b);                /* opcode */
           mod_RM( %d(dst->reg), src). /* operands */
@@ -828,8 +832,8 @@ The following example shows the usage of type fields.
           mod_RM( %d(src->reg), dst). /* operands */
 \fR
 .DE
-The table-writer must supply the restriction functions, \f5REG\fR and
-\f5EADDR\fR in the previous example, in ``as.c'' or ''as.h''.
+The table-writer must supply the restriction functions, \fCWREG\fR and
+\fCWEADDR\fR in the previous example, in ``as.c'' or ''as.h''.
 .NH 3 
 The function of the @-sign and the if-statement.
 .PP
@@ -838,7 +842,7 @@ Since the as_table is
 interpreted on two levels, during code expander generation and during code
 expander execution, two levels of calls are present in it. A function-call
 without an ``@''-sign
-is called during code expander generation (e.g., the \f5gen_operand()\fR in the
+is called during code expander generation (e.g., the \fCWgen_operand()\fR in the
 first example). 
 A function call with an ``@''-sign is called during code 
 expander execution (e.g.,
@@ -850,7 +854,7 @@ can be replaced by ``move x, y'').
 In this case flags need to be set, unset, and tested during the execution of
 the compiler:
 .DS L
-\f5
+\fCW
 PUSH src  ==>   /* save in ax */
                 mov_instr( AX_oper, src);  
                 /* set flag */
@@ -858,7 +862,7 @@ PUSH src  ==>   /* save in ax */
 \fR
 .DE
 .DS
-\f5
+\fCW
 POP dst   ==>   @if ( push_waiting)
                        /* ``mov_instr'' is asg-generated */
                        mov_instr( dst, AX_oper);      
@@ -885,7 +889,7 @@ run time of the \fBce\fR. In such a condition one may of course refer
 to the ''$\fIi\fR'' arguments. For example, constants can be 
 packed into one or two byte arguments as follows:
 .DS 
-\f5
+\fCW
 mov dst:ACCU, src:DATA ==> 
                        @if ( fits_byte( %$(dst->expr)))
                             @text1( 0xc0);
@@ -932,7 +936,7 @@ PRINT
 .VS -4
 .LP
 The three cases differ only in the conversion field. The printformat conversion
-applies to ordinary operands. The ``$%'' applies to operands that contain
+applies to ordinary operands. The ``%$'' applies to operands that contain
 a ``$\fIi\fR''. The expression between parentheses must result in a pointer to
 a char. The
 result of ``%$'' is of the type of ``$\fIi\fR''. The ``%dist''
@@ -944,7 +948,7 @@ The following example illustrates the usage of ``%$''. (For an
 example that illustrates the usage of ordinary fields see
 the section on ``User supplied definitions and functions'').
 .DS
-\f5
+\fCW
 jmp dst ==> 
     @text1( 0xe9);
     @reloc2( %$(dst->lab), %$(dst->off), PC_REL).
@@ -965,7 +969,7 @@ and reloc4()
 calls, saving space and time (no relocation at compiler run time). 
 The following example illustrates the usage of ``%dist''.
 .DS 
-\f5
+\fCW
  jmp dst:ILB    ==> /* label in an instruction list */
      @text1( 0xeb);          
      @text1( %dist( dst->lab)).
@@ -1008,7 +1012,7 @@ below).
 If the default assemble() does not work the way the table writer wants, he
 can supply his own version of it. Assemble() has the following arguments:
 .DS
-\f5
+\fCW
 assemble( instruction )
     char *instruction;
 \fR
@@ -1023,7 +1027,7 @@ required on a block of assembly instructions, the table writer only has to
 rewrite this function to get a new \fBceg\fR that obliges to his wishes.
 The function block_assemble has the following arguments:
 .DS
-\f5
+\fCW
 block_assemble( instructions, nr, first, last)
       char   **instruction;
       int      nr, first, last;
@@ -1049,7 +1053,7 @@ The following example shows the representative and essential parts of the
 .nr VS 12
 .LP
 .DS L
-\f5
+\fCW
 /* Constants and type definitions in as.h */
 
 #define        UNKNOWN                0
@@ -1097,7 +1101,7 @@ extern struct t_operand saved_op, *AX_oper;
 .nr PS 10
 .nr VS 12
 .DS L
-\f5
+\fCW
 
 /* Some functions in as.c. */
 
@@ -1257,7 +1261,7 @@ for ``as_table'', ``as.h'', and ``as.c'' at this moment.
 .IP \0\03:
 type
 .br
-\f5
+\fCW
 install_ceg -as
 \fR
 .br
@@ -1268,7 +1272,7 @@ one for each
 EM-instruction. All these files will be compiled and put in a library called
 \fBce.a\fR.
 .br
-The option \f5-as\fR means that a \fBback\fR-library will be 
+The option \fCW-as\fR means that a \fBback\fR-library will be 
 generated (in the directory ``back'') that
 supports the generation of assembly language. The library is named ``back.a''.
 .IP \0\04:
@@ -1280,8 +1284,8 @@ tested (e.g., by running the compiler on the EM test set). If an error occurs,
 change the EM_table and type
 .IP
 .br
-\f5
-update\fR \fBC_instr
+\fCW
+update_ceg\fR \fBC_instr
 \fR
 .br
 .LP
@@ -1301,13 +1305,13 @@ Write the ``as_table'', ``as.h'', and ``as.c'' files.
 .IP \0\03:
 type
 .sp
-\f5 install_ceg -obj \fR
+\fCW install_ceg -obj \fR
 .sp
-The option \f5-obj\fR means that ``back.a'' will contain a library 
+The option \fCW-obj\fR means that ``back.a'' will contain a library 
 for generating
 ACK.OUT(5ACK) object files, see appendix B. 
 If the writer does not want to use the default ``back.a'',
-the \f5-obj\fR flag must omitted and a ``back.a'' should be supplied that
+the \fCW-obj\fR flag must omitted and a ``back.a'' should be supplied that
 generates the generates object code in the desired format.
 .IP \0\04:
 Link a front end, ``ce.a'', and ``back.a'' together resulting in a compiler
@@ -1318,12 +1322,12 @@ Then there are two ways to proceed:
 .IP \0\01:
 recompile the whole EM_table,
 .sp
-\f5 update ALL \fR
+\fCW update_ceg ALL \fR
 .sp
 .IP \0\02:
 recompile just the few EM-instructions that contained the error,
 .sp
-\f5  update \fBC_instr\fR
+\fCW  update_ceg \fBC_instr\fR
 .sp
 where \fBC_instr\fR is an erroneous EM-instruction.
 This has to be done for every EM-instruction that contained the erroneous
@@ -1346,6 +1350,11 @@ Appendix A, \fRthe \fBback\fR-primitives
 This appendix describes the routines available to generate relocatable
 object code. If the default back.a is used, the object code is in 
 ACK.OUT(5ACK) format.
+In de default back.a, the names defined here are remapped to more hidden names,
+to avoid name conflicts with for instance names used in the front-end. This
+remapping is done in an include-file, "back.h". If you implement your own
+back.a library, you are advised to do the same thing. You need some parts of
+the default "back.h" anyway.
 .nr PS 10
 .nr VS 12
 .PP
@@ -1388,6 +1397,11 @@ gen4( l)#:
 #
 bss( n)#:#T{
 Put n bytes in bss-segment, value is BSS_INIT.
+T}
+common( n)#:#T{
+If there is a saved label, generate a "common" for it, of size
+n. Otherwise, it is equivalent to bss(n).
+(see also the save_label routine).
 T}
 .TE
 .VS -4
@@ -1449,9 +1463,6 @@ open_back( f)#:#T{
 Directs output to file ``f'', if f is the null pointer output must be given on
 standard output.
 T}
-output_back()#:#T{
-End of the job, flush output.
-T}
 close_back()#:#T{
 close output stream.
 T}
@@ -1460,6 +1471,62 @@ Only used with user-written back-library, gives the opportunity to initialize.
 T}
 end_back()#:#T{
 Only used with user-written back-library.
+T}
+.TE
+.VS -4
+.IP A5.
+Label generation routines; with int n; arith g; char *l; These routines all
+return a "char *" to a static area, which is overwritten at each call.
+.VS +4
+.TS
+tab(#);
+l c lw(10c).
+extnd_pro( n)#:#T{
+Label set at the end of procedure \fIn\fP, to generate space for locals.
+T}
+extnd_start( n)#:#T{
+Label set at the beginning of procedure \fIn\fP, to jump back to after generating
+space for locals.
+T}
+extnd_name( l)#:#T{
+Create a name for a procedure named \fIl\fP.
+T}
+extnd_dnam( l)#:#T{
+Create a name for an external variable named \fIl\fP.
+T}
+extnd_dlb( g)#:#T{
+Create a name for numeric data label \fIg\fP.
+T}
+extnd_ilb( l, n)#:#T{
+Create a name for instruction label \fIl\fP in procedure \fIn\fP.
+T}
+extnd_hol( n)#:#T{
+Create a name for HOL block number \fIn\fP.
+T}
+extnd_part( n)#:#T{
+Create a unique label for the C_insertpart mechanism.
+T}
+extnd_cont( n)#:#T{
+Create another unique label for the C_insertpart mechanism.
+T}
+.TE
+.VS -4
+.IP A6.
+Some miscellaneous routines, with char *l; 
+.VS +4
+.TS
+tab(#);
+l c lw(10c).
+save_label( l)#:#T{
+Save label \fIl\fP. Unfortunately, in EM when you see a label, you don't
+know yet in which segment it will end up. The save_label/dump_label mechanism
+is there to solve this problem.
+T}
+dump_label()#:#T{
+If there is a label saved, force definition for it now.
+T}
+align_word()#:#T{
+Align to a word boundary, if the current segment is not a text segment.
 T}
 .TE
 .VS -4
