@@ -15,7 +15,9 @@ extern	outshort();		/* (short i)
 extern outoff();		/* (offset off)
 				 * Write an offset to curoutp
 				 */
-
+extern	outproc();		/* (proc_p p)
+				 * Write a procid to curoutp
+				 */
 extern	putdtable();		/* (dblock_p head, FILE *df)
 				 * Write the data block table to file df,
 				 * preceded by its length.

@@ -140,9 +140,11 @@ no_action() { }
 
 core_usage()
 {
+#ifdef DEBUG
 	if (core_flag) {
 		coreusage();
 	}
+#endif
 }
 
 report(s,n)

@@ -70,7 +70,6 @@ badassertion(file,line) char *file; unsigned line; {
 	fprintf(stderr,"assertion failed file %s, line %u\n",file,line);
 	error("assertion");
 }
-#endif
 /* Valid Address */
 
 VA(a)  short *a; {
@@ -148,3 +147,4 @@ VP(p) proc_p p; {
 		error("VP: unlikely p_nrlabels: %d", nrlabs);
 	}
 }
+#endif

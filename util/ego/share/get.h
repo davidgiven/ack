@@ -56,3 +56,11 @@ extern bool	 getunit();		/* (FILE *gf,*lf; short kind_out;
 					 * variable 'mesregs'. The proc read
 					 * is returned in p_out.
 					 */
+extern		message();		/* (line_p lnp)
+					 * See if  lnp is some useful message.
+	 				 * (e.g. a message telling that a
+					 * certain local variable will never be
+					 * referenced indirectly, so it may be
+					 * put in a register.
+					 * If so, add it to the mesregs set.)
+	 				 */

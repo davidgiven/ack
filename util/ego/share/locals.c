@@ -182,7 +182,7 @@ make_localtab(p)
 
 
 
-STATIC find_local(off,nr_out,found_out)
+find_local(off,nr_out,found_out)
 	offset off;
 	short  *nr_out;
 	bool   *found_out;

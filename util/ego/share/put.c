@@ -124,7 +124,7 @@ STATIC outobject(obj) obj_p obj; {
 }
 
 
-STATIC outproc(p) proc_p p; {
+outproc(p) proc_p p; {
 	outshort((short) p->p_id);
 }
 

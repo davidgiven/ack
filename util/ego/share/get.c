@@ -427,7 +427,7 @@ line_p read_line(p_out)
 }
 
 
-STATIC message(lnp)
+message(lnp)
 	line_p lnp;
 {
 	/* See if  lnp is some useful message.

@@ -6,7 +6,7 @@
 /* D E B U G G I N G   T O O L S */
 
 /* TEMPORARY: */
-#define DEBUG
+/* #define DEBUG */
 
 extern int		linecount;	/* # lines in this file */
 extern bool		verbose_flag;  /* generate verbose output ? */
