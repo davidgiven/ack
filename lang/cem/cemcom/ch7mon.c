@@ -148,7 +148,7 @@ ch7mon(oper, expp)
 		if (ISNAME(*expp) && (*expp)->VL_IDF->id_def->df_formal_array)
 			warning("sizeof formal array %s is sizeof pointer!",
 				(*expp)->VL_IDF->id_text);
-		expr = intexpr((*expp)->ex_type == string_type ?
+		expr = intexpr((*expp)->ex_class == String ?
 				   (arith)((*expp)->SG_LEN) :
 				   size_of_type((*expp)->ex_type, "object"),
 				INT);
