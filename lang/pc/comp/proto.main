@@ -17,7 +17,8 @@ LINTLIBDIR =	$(UTIL_HOME)/modules/lib
 MALLOC =	$(LIBDIR)/malloc.$(SUF)
 
 EMLIB =		$(LIBDIR)/libem_mes.$(LIBSUF) \
-		$(LIBDIR)/libem$(PRODUCE).$(LIBSUF)
+		$(LIBDIR)/libem$(PRODUCE).$(LIBSUF) \
+		$(TARGET_HOME)/lib.bin/em_data.$(LIBSUF)
 
 MODLIB =	$(LIBDIR)/libinput.$(LIBSUF) \
 		$(LIBDIR)/libassert.$(LIBSUF) \
