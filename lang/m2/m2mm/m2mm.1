@@ -20,10 +20,10 @@ without an argument will make all these programs.
 In the makefile, the variables \fBMOD\fP, \fBM2FLAGS\fP, \fBIFLAGS\fP, \fBLIBS\fP, and
 \fBSUFFIX\fP will be defined.
 The generated rules have the following form:
-.DS
-\fIname\fP.$(SUFFIX): ...
-	$(MOD) -c $(M2FLAGS) $(IFLAGS) \fIname\fP.mod
-.DE
+.IP "\fIname\fP.$(SUFFIX): ..."
+.br
+$(MOD) -c $(M2FLAGS) $(IFLAGS) \fIname\fP.mod
+.PP
 .I M2mm
 recognizes the following options:
 .IP \fB-I\fP\fIdir\fP
