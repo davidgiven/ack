@@ -1,4 +1,4 @@
-tail_em.a
+libem_s.a
 dup.s
 aar.s
 lar.s
