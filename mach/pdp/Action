@@ -7,6 +7,9 @@ end
 name "PDP 11 target optimizer"
 dir top
 end
+name "PDP 11 conversion program"
+dir cv
+end
 name "PDP 11 interpreter"
 system pdp*
 dir int
