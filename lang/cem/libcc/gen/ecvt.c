@@ -52,9 +52,9 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 			   the conversion to "int" truncates
 			*/
 			if (pe >= &buf1[NDIGITS]) {
-				pb = &buf1[NDIGITS-10];
-				while (pb > buf1) *--pb = *--pe;
-				pe = &buf[NDIGITS-10];
+				pb = &buf1[10];
+				pe = &buf1[0];
+				while (pb < &buf1[NDIGITS]) *pe++ = *pb++;
 			}
 			*pe++ = (int)((value+.05) * 10) + '0';
 			pointpos++;

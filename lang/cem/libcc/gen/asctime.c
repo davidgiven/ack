@@ -28,20 +28,20 @@ asctime(tm)
 	pb = two_digits(
 		two_digits(
 		   two_digits(
-		      two_digits(pb, tm->tm_mday),
-		      tm->tm_hour),
-		   tm->tm_min),
-		tm->tm_sec);
+		      two_digits(pb, tm->tm_mday, 0),
+		      tm->tm_hour, 1),
+		   tm->tm_min, 1),
+		tm->tm_sec, 1);
 	four_digits(pb, tm->tm_year+1900);
 	return(buf);
 }
 
 static char *
-two_digits(pb, i)
+two_digits(pb, i, nospace)
 	register char *pb;
 {
 	*pb = (i / 10) % 10 + '0';
-	if (*pb == '0') *pb = ' ';
+	if (!nospace && *pb == '0') *pb = ' ';
 	pb++;
 	*pb++ = (i % 10) + '0';
 	return ++pb;
