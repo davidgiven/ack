@@ -135,10 +135,7 @@ EVAL(expr, val, code, true_label, false_label)
 						C_adi(tp->tp_size);
 					break;
 				case POINTER:
-					C_loc(right->ex_type->tp_size);
-					C_loc(pointer_size);
-					C_cuu();
-					C_ads(pointer_size);
+					ptr_add(right->ex_type->tp_size);
 					break;
 				case FLOAT:
 				case DOUBLE:
@@ -191,10 +188,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_sbs(pointer_size);
 				else {
 					C_ngi(right->ex_type->tp_size);
-					C_loc(right->ex_type->tp_size);
-					C_loc(pointer_size);
-					C_cuu();
-					C_ads(pointer_size);
+					ptr_add(right->ex_type->tp_size);
 				}
 				break;
 			case FLOAT:
@@ -805,14 +799,22 @@ assop(type, oper)
 	case POINTER:
 		if (oper == MINAB || oper == MINMIN || oper == POSTDECR)
 			C_ngi(size);
-		C_loc(size);
-		C_loc(pointer_size);
-		C_cuu();
-		C_ads(pointer_size);
+		ptr_add(size);
 		break;
 	default:
 		crash("(assop) bad type %s\n", symbol2str(type->tp_fund));
 	}
+}
+
+ptr_add(size)
+	arith size;
+{
+	if (size != pointer_size) {
+		C_loc(size);
+		C_loc(pointer_size);
+		C_cuu();
+	}
+	C_ads(pointer_size);
 }
 
 /*	store_val() generates code for a store operation.
