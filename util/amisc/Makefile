@@ -17,6 +17,9 @@ asize:	asize.c
 	$(CC) $(CFLAGS) -o asize asize.c $(LIBS)
 astrip: astrip.c
 	$(CC) $(CFLAGS) -o astrip astrip.c $(LIBS)
+#not installed:
+ashow:	ashow.c
+	$(CC) $(CFLAGS) -o ashow ashow.c $(LIBS)
 
 install:	all
 	for i in $(ALL); do rm -f $(BINDIR)/$$i; cp $$i $(BINDIR)/$$i; done
