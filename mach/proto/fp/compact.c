@@ -63,12 +63,15 @@ dbl_over:			trap(EFOVFL);
 		DBL->_s.p2      |= (f->m1 << DBL_LUNPACK); /* plus 10 == 32 */
 
 		/* if not exact then round to nearest	*/
+		/* on a tie, round to even */
 
 #ifdef EXCEPTION_INEXACT
 		if ((f->m2 & DBL_EXACT) != 0) {
 		    INEXACT();
 #endif
-		    if (f->m2 & DBL_ROUNDUP)	{
+		    if (((f->m2 & DBL_EXACT) > DBL_ROUNDUP)
+			|| ((f->m2 & DBL_EXACT) == DBL_ROUNDUP
+			    && (f->m2 & (DBL_ROUNDUP << 1)))) {
 			DBL->_s.p2++;	/* rounding up	*/
 			if (DBL->_s.p2 == 0L) { /* carry out	*/
 			    DBL->_s.p1.fract++;
@@ -153,12 +156,15 @@ sgl_over:			trap(EFOVFL);
 		SGL->fract = (f->m1 >> SGL_RUNPACK);
 
 		/* check for rounding to nearest	*/
+		/* on a tie, round to even		*/
 #ifdef EXCEPTION_INEXACT
 		if (f->m2 != 0 ||
 		    (f->m1 & SGL_EXACT) != 0L) {
 			INEXACT();
 #endif
-			if (f->m1 & SGL_ROUNDUP) {
+		        if (((f->m1 & SGL_EXACT) > SGL_ROUNDUP)
+			    || ((f->m1 & SGL_EXACT) == SGL_ROUNDUP
+			        && (f->m1 & (SGL_ROUNDUP << 1)))) {
 				SGL->fract++;
 				if (f->exp == 0 && (f->m1 & ~SGL_MASK)) {
 					f->exp++;

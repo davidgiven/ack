@@ -42,16 +42,6 @@ int	size;
 	int	leadbit = 0;
 
 	cpt1 = (char *) from;
-	if (((DOUBLE *) cpt1)->_s.p1.fract == 0L ||
-	    ((DOUBLE *) cpt1)->_s.p1.fract == 0x80000000) 	{
-		if (size == sizeof(SINGLE))	{
-zero:			zrf_ext(to);
-			return;
-		}
-		else if (((DOUBLE *) cpt1)->_s.p2 == 0L)
-			goto zero;
-	}
-/*	there is a number to convert so lets get started	*/
 
 #if FL_MSL_AT_LOW_ADDRESS
 #if FL_MSW_AT_LOW_ADDRESS
@@ -86,6 +76,13 @@ zero:			zrf_ext(to);
 		cpt1 += 4;
 		to->m1 = get4(cpt1);
 #endif
+		if (to->exp == 1 && to->m1 == 0 && tmp == 0) {
+			to->exp = 0;
+			to->sign = 0;
+			to->m1 = 0;
+			to->m2 = 0;
+			return;
+		}
 		to->m1 <<= DBL_M1LEFT;		/* shift	*/
 		to->exp -= DBL_BIAS;		/* remove bias	*/
 		to->m1 |= (tmp>>DBL_RPACK);	/* plus 10 == 32	*/
@@ -94,6 +91,13 @@ zero:			zrf_ext(to);
 	else	{	/* size == sizeof(SINGLE)		*/
 		to->m1 = get4(cpt1);
 		to->m1  <<= SGL_M1LEFT;	/* shift	*/
+		if (to->exp == 1 && to->m1 == 0) {
+			to->exp = 0;
+			to->sign = 0;
+			to->m1 = 0;
+			to->m2 = 0;
+			return;
+		}
 		to->exp -= SGL_BIAS;		/* remove bias	*/
 		to->m2 = 0L;
 	}
