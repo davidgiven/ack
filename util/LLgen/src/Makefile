@@ -15,8 +15,17 @@ all:		parser
 		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)" "PROF=$(PROF)"
 
 parser:		$(GFILES)
-		-LLgen $(LLOPT) $(GFILES)
-# must continue when installing LLgen
+		LLgen $(LLOPT) $(GFILES)
+		@touch parser
+
+first:		firstparser
+		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)" "PROF=$(PROF)"
+
+firstparser:
+		cp LLgen.c.dist LLgen.c
+		cp tokens.c.dist tokens.c
+		cp Lpars.c.dist Lpars.c
+		cp Lpars.h.dist Lpars.h
 		@touch parser
 
 LLgen:		$(OBJECTS)
@@ -30,11 +39,15 @@ lint:
 		$(LINT) $(INCLUDES) $(CFILES)
 
 clean:
-		-rm -f *.o LL.temp LL.xxx LL.output LLgen
+		-rm -f *.o LL.temp LL.xxx LL.output LLgen LLgen.c tokens.c Lpars.[ch]
 
 distr:
 		-rm -f parser
 		make parser
+		cp Lpars.c Lpars.c.dist
+		cp Lpars.h Lpars.h.dist
+		cp LLgen.c LLgen.c.dist
+		cp tokens.c tokens.c.dist
 
 # The next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO

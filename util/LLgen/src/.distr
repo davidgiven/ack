@@ -1,10 +1,9 @@
-parser
 cclass.c
 cclass.h
-LLgen.c
+LLgen.c.dist
 LLgen.g
-Lpars.c
-Lpars.h
+Lpars.c.dist
+Lpars.h.dist
 Makefile
 alloc.c
 assert.h
@@ -20,6 +19,6 @@ name.c
 reach.c
 sets.c
 sets.h
-tokens.c
+tokens.c.dist
 tokens.g
 types.h

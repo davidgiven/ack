@@ -14,6 +14,14 @@ install:
 	cd src; make
 	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
 	cp src/LLgen $(INSTALLDIR)/LLgen
+	cp lib/rec $(LIBDIR)/rec
+	cp lib/incl $(LIBDIR)/incl
+	cp LLgen.1 $(MANDIR)/LLgen.1
+
+firstinstall:
+	cd src; make first
+	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
+	cp src/LLgen $(INSTALLDIR)/LLgen
 	-mkdir $(LIBDIR)
 	cp lib/rec $(LIBDIR)/rec
 	cp lib/incl $(LIBDIR)/incl

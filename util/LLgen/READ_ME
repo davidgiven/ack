@@ -13,7 +13,7 @@ To install LLgen, proceed as follows:
   library files, INSTALLDIR should be set to the directory where LLgen
   is to be put.
 - now type 
-	make install
+	make firstinstall
 - This should do all the work.
 
 LLgen.1 contains a man-page.
