@@ -425,6 +425,10 @@ Registers are allocated by asking for a property,
 so if for some reason in later parts of the table
 one particular register must be allocated it
 has to have a unique property.
+.PP
+There is a bug in the codegenerator that can be circumvented by
+providing a dummy property at the start of the property list.
+The example has not been updated to show this.
 .NH 2
 Register definition
 .PP
