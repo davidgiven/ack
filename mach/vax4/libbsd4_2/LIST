@@ -28,6 +28,7 @@ _execve.s
 _getrusage.s
 _lseek.s
 _sigblock.s
+_sigvec.s
 accept.s
 access.s
 acct.s
