@@ -252,6 +252,9 @@ init()
 		pa_type = long_type;
 	else
 		fatal("pointer size incompatible with any integral size");
+
+	if (int_size != word_size)
+		fatal("int_size and word_size are not equal");
 	if (short_size > int_size || int_size > long_size)
 		fatal("sizes of short/int/long decreasing");
 

@@ -24,6 +24,14 @@ extern char options[];
 
 static struct switch_hdr *switch_stack = 0;
 
+/* (EB 86.05.20) The following rules hold for switch statements:
+	- the expression E in "switch(E)" is cast to 'int' (RM 9.7)
+	- the expression E in "case E:" must be 'int' (RM 9.7)
+	- the values in the CSA/CSB tables are words (EM 7.4)
+
+	For simplicity, we suppose int_size == word_size.
+*/
+
 code_startswitch(expr)
 	struct expr *expr;
 {
@@ -38,7 +46,8 @@ code_startswitch(expr)
 	switch (fund)	{
 	case LONG:
 		if (options['R'])
-			warning("long in switch");
+			warning("long in switch (cast to int)");
+		int2int(&expr, int_type);
 		break;
 	case DOUBLE:
 		error("float/double in switch");
@@ -129,13 +138,11 @@ code_case(expr)
 		error("case statement not in switch");
 		return;
 	}
-	
 	if (expr->ex_flags & EX_ERROR)	{
 		/* is probably 0 anyway */
 		return;
 	}
-	expr->ex_type = sh->sh_type;
-	cut_size(expr);
+	ch7cast(&expr, SWITCH, sh->sh_type);
 	ce = new_case_entry();
 	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val = expr->VL_VALUE;
