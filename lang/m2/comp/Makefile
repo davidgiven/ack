@@ -52,7 +52,7 @@ NEXTFILES = def.H type.H node.H scope.C tmpvar.C casestat.C
 #EXCLEXCLEXCLEXCL
 
 all:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make $(CURRDIR)/main ; else sh Resolve main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
 install:	all
@@ -77,7 +77,7 @@ clean:
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xlint ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)
