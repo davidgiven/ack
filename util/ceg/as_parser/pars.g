@@ -1,3 +1,42 @@
+/* This file contains the description of the 'as_table' parser.
+ * It transforms every entry into a C-funtion, for example :
+ *
+ *	and dst:REG, src:EADDR  ==>     @text1( 0x23);
+ *					mod_RM( dst->reg, src).
+ *
+ *	... dst:ACCU, src:DATA  ==>     @text1( 0x25);
+ *					@text2(
+ *					%$(src->expr)).
+ *
+ * Will be transformed into :
+ *
+ * 	and_instr( dst, src)
+ *	struct t_operand *dst, *src;
+ *	{
+ *		if (  REG( dst) && EADDR( src)) {
+ *			 cur_pos += 1;
+ *			 fprint( outfile, "text1( 0x23)");
+ *			 fprint( outfile, ";");
+ *			 mod_RM( dst->reg, src);
+ *		}
+ *		else if ( ACCU( dst) && DATA( src)) {
+ *			cur_pos += 1;
+ *			fprint( outfile, "text1( 0x25)");
+ *			fprint( outfile, ";");
+ *			cur_pos += 2;
+ *			fprint( outfile, "text2( ");
+ *			eval( src->expr);
+ *			fprint( outfile, ")");
+ *			fprint( outfile, ";");
+ *		}
+ *		else
+ *			error( "No match for and");
+ *	}
+ * 
+ * At the end of the table a list is generated enumerating all the assembler
+ * mnemonics and their corresponding function names.
+ */
+
 {
 
 #include "decl.h"
@@ -56,6 +95,10 @@ action		: if_statement
 		| call			
 		| subroutine
 		;
+
+/* A function call is just an identifier followed by an expression surrounded
+ * by '(' and ')'. CONDITION is a token that matches this construct;
+ */
 
 subroutine	: IDENTIFIER		{ yymorfg=1;}
 		  CONDITION		{ pr_subroutine( yytext);}
