@@ -544,6 +544,7 @@ doassign(line,star,length) char *line, *star ; {
 		break ;
 	}
 	gr_throw(&temp) ;
+	gr_add(&name,0) ; gr_add(&varval,0) ;
 	setsvar(gr_final(&name),gr_final(&varval)) ;
 }
 
