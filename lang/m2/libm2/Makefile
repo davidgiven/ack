@@ -9,6 +9,13 @@ SOURCES =	ASCII.def EM.def MathLib0.def Processes.def \
 		Epilogue.def Streams.def ArraySort.def
 
 all:
+clean:
+cmp:
+
+pr:
+		@pr Makefile $(SOURCES)
+opr:
+		make pr | opr
 
 install:
 		-mkdir $(DEFDIR)
