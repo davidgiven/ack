@@ -3,6 +3,7 @@ while true
 do
   (echo ' mes 2,2,2
  pro $foo,0';cat;echo ' end') >t.e
-  npc -2=${1-opt} -O -2 t.e;npc -D t.m
+  ack -Ropt=${1-opt} -O -c.m t.e;ack -c.e t.m
   cat t.e
+  echo '===== next case (interrupt to stop) ====='
 done
