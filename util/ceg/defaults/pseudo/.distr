@@ -16,3 +16,4 @@ C_magic.c
 C_open.c
 C_pro.c
 C_pro_narg.c
+C_insertpart.c
