@@ -1,9 +1,9 @@
 .define	endtext, enddata, endbss, _etext, _edata, _end
 
 	.text
-	.align 2
 endtext:
 _etext:
+	.align 2
 	.data
 	.align 2
 enddata:
