@@ -188,7 +188,7 @@ put_locals(name, nnames)
 		}
 		iname++;
 	}
-	wr_name(name, oname - name);
+	wr_name(name, (unsigned int) (oname - name));
 }
 
 /*

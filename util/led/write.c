@@ -61,7 +61,6 @@ sectname(sectindex)
  */
 end_write()
 {
-	register ushort		cnt;
 	register struct outname	*name;
 	register int		sectindex;
 	extern ushort		NGlobals;
@@ -69,7 +68,6 @@ end_write()
 
 	assert(!incore);
 	assert(!(flagword & SFLAG));
-	cnt = NGlobals;
 	name = (struct outname *)address(ALLOGLOB, (ind_t)0);
 	namecpy(name, NGlobals, off_char);
 	wr_name(name, NGlobals);

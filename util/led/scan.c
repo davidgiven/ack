@@ -63,6 +63,7 @@ int
 getfile(filename)
 	char		*filename;
 {
+	unsigned int	rd_unsigned2();
 	struct ar_hdr	archive_header;
 	ushort		magic_number;
 #ifdef SYMDBUG
@@ -515,7 +516,7 @@ modulsize(head)
 
 static struct outrelo	*walkrelo;
 static unsigned short cnt_relos;
-static unsigned short index;
+static unsigned short relind;
 #define _RELSIZ	64
 
 startrelo(head)
@@ -528,7 +529,7 @@ startrelo(head)
 		walkrelo = (struct outrelo *)address(ALLORELO, reloindex);
 	}
 	else {
-		index = _RELSIZ;
+		relind = _RELSIZ;
 		rd_rew_relos(head);
 		cnt_relos = head->oh_nrelo;
 	}
@@ -542,14 +543,14 @@ nextrelo()
 	if (incore)
 		return walkrelo++;
 
-	if (index == _RELSIZ) {
+	if (relind == _RELSIZ) {
 		int i = cnt_relos >= _RELSIZ ? _RELSIZ : cnt_relos;
 
 		cnt_relos -= i;
 		rd_relo(relobuf, i);
-		index = 0;
+		relind = 0;
 	}
-	return &relobuf[index++];
+	return &relobuf[relind++];
 }
 
 /* ------------------------------------------------------------------------- */

@@ -46,7 +46,6 @@ static ind_t refused;
 sbreak(incr)
 	ind_t incr;
 {
-	extern char	*sbrk();
 	extern char	*brk();
 	unsigned int	inc;
 
@@ -54,14 +53,14 @@ sbreak(incr)
 
 	inc = incr;
 	if ((refused && refused < incr) ||
-	    inc != incr ||
-	    BASE + inc < BASE ||
-	    (int) brk(BASE + inc) == -1) {
+	    (sizeof(char *) < sizeof(long) &&
+	     (inc != incr || BASE + inc < BASE)) ||
+	    (int) brk(BASE + incr) == -1) {
 		if (!refused || refused > incr)
 			refused = incr;
 		return -1;
 	}
-	BASE += inc;
+	BASE += incr;
 	return 0;
 }
 
@@ -74,7 +73,6 @@ init_core()
 	register char		*base;
 	register ind_t		total_size;
 	register struct memory	*mem;
-	extern char		*brk();
 	extern char		*sbrk();
 
 #include "mach.c"
