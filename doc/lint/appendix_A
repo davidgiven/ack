@@ -1,0 +1,58 @@
+.ds
+.SH
+Appendix A
+.LP
+.SH
+The warnings
+.LP
+.SH
+Pass one warnings
+.DS
+.ft CW
+%s may be used before set
+maybe %s used before set
+%s unused in function %s
+%s set but not used in function %s
+argument %s unused in function %s
+static [variable, function] %s unused
+%s declared extern but never used
+
+long conversion may lose accuracy
+comparison of unsigned with negative constant
+unsigned comparison with 0?
+degenerate unsigned comparison
+nonportable character comparison
+possible pointer alignment problem
+
+%s evaluation order undefined
+
+null effect
+constant in conditional context
+use if-else construction
+while (0) ?
+do ... while (0) ?
+[case, default] statement in strange context
+
+function %s has return(e); and return;
+statement not reached
+function %s declared %s but no value returned
+
+declare the VARARGS args you want checked!
+.ft P
+.DE
+.SH
+Pass two warnings
+.DS
+.ft CW
+%s variable # of args
+%s arg %d used inconsistently
+%s multiply defined
+%s value declared inconsistently
+%s used but not defined
+%s defined (%s(%d)) but never used
+%s declared but never defined
+%s value is used but none is returned
+%s returns value which is [sometimes, always] ignored
+%s also defined in library
+.ft P
+.DE

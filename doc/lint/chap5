@@ -1,0 +1,107 @@
+.NH 1
+How to make lint shut up
+.PP
+It can be very annoying having
+.I lint
+warn about questionable constructs of which the programmer already is
+aware.
+There should be a mechanism to give 
+.I lint
+some extra information in the source code.
+This could be done by introducing some special keywords, which
+would have a special meaning to
+.I lint.
+This is a bad solution, because these keywords would cause existing
+C compilers not to work on these programs.
+A neater solution is to invent some comments having a special
+meaning to 
+.I lint.
+We call these comments 
+.I pseudocomments.
+The pseudocomments have no meaning to existing C compilers, so
+compilers will not have to be rewritten for C programs containing
+the previously proposed special keywords.
+The following pseudocomments are recognized by 
+.I lint.
+.LP
+\f(CW/* VARARGS\fIn\fP */\fR
+.br
+.in 5
+The next function can be called with a variable number of arguments.
+Only check the first \fIn\fP arguments.
+The \fIn\fP must follow the word \f(CWVARARGS\fP immediately.
+This pseudocomment is useful for functions like e.g. printf.
+(The definition of the function printf should be preceded by
+\f(CW/*\ VARARGS1\ */\fP.)
+.in
+.LP
+\f(CW/* VARARGS */\fP
+.br
+.in 5
+Means the same as \f(CW/* VARARGS0 */\fP.
+.in
+.LP
+\f(CW/* ARGSUSED */\fP
+.br
+.in 5
+Don't complain about unused arguments in the next function.
+When we are developing a program we sometimes write functions of
+which we do not yet use the arguments.
+Because we do want to use
+.I lint
+on these programs, it is nice to have this pseudocomment.
+.in
+.LP
+\f(CW/* NOTREACHED */\fP
+.br
+.in 5
+.I Lint
+makes no attempt to discover functions which never return,
+although it \fIis\fP possible to find functions that don't return.
+This would require a transitive closure with respect to the already
+known \fInot-returning\fP functions; an inacceptable time consuming
+process.
+To make 
+.I lint
+aware of a function that doesn't return, a call of this function
+should be followed by the pseudocomment \f(CW/*\ NOTREACHED\ */\fP.
+This pseudocomment can also be used to indicate that some case part
+inside a switch (especially a default part) can't be reached.
+The above mentioned cases of use of this pseudocomment are
+examples. 
+The comment can be used just to indicate that some part of the
+program can't be reached.
+It sometimes is necessary to introduce an extra compound statement
+to get the right effect. 
+See figure 9.
+.KF
+.DS B
+.ft CW
+        if (cond)
+                /* if part */ ;
+        else {
+                error();  /* doesn't return */
+                /* NOTREACHED */
+        }
+/* Without  the compound  else  part, lint  would  assume
+ * the statement after the if statement to be NOTREACHED,
+ * instead of the end of the else part.
+ */
+.I
+.DE
+.ce
+figure\ 9.
+.R
+.KE
+.in
+.LP
+\f(CW/* LINTLIBRARY */\fP
+.br
+.in 5
+All definitions following this comment are assumed to be library
+definitions.
+It shuts off complaints about unused functions and variables.
+See also section 4.2.7 for how to use this comment for generating
+lint libraries.
+.in
+.bp

@@ -1,0 +1,979 @@
+.NH 1
+How lint checks
+.NH 2
+The first pass first pass data structure
+.PP
+The data structure of
+.I cem
+is changed a little and some structures have been added.
+.NH 3
+The changes
+.NH 4
+Idf descriptor
+.PP
+A member
+.ft CW
+id_line
+.R
+is added
+to the
+.I idf
+selector.
+This line number is used for some warnings.
+.NH 4
+Def descriptor
+.PP
+The
+.I def
+selector is extended with the members
+.ft CW
+df_set
+.R and
+df_line.
+.R
+The
+.ft CW
+df_used
+.R
+member did exist already, but was only used for code generation.
+This usage is eliminated so it can be used by
+.I lint.
+The meaning of these members should be clear.
+.NH 3
+The additions
+.NH 4
+Lint_stack_entry descriptor
+.DS B
+.ft CW
+struct lint_stack_entry {
+        struct lint_stack_entry *next;
+        struct lint_stack_entry *previous;
+        short ls_class;
+        int ls_level;
+        struct state *ls_current;
+        union {
+                struct state *S_if;
+                struct state *S_end;
+                struct switch_states switch_state;
+        } ls_states;
+};
+.R
+.DE
+.PP
+Structure to simulate a stacking mechanism.
+.IP \f(CWnext\fP 15
+Pointer to the entry on top of this one.
+.IP \f(CWprevious\fP
+Pointer to the entry beneath this one.
+.IP \f(CWls_class\fP
+The class of statement this entry belongs to.
+Possible classes are \f(CWIF\fP, \f(CWWHILE\fP, \f(CWDO\fP,
+\f(CWFOR\fP, \f(CWSWITCH\fP and \f(CWCASE\fP.
+.IP \f(CWls_level\fP
+The level the corresponding statement is nested.
+.IP \f(CWls_current\fP
+A pointer to the state descriptor which describes the state
+of the function (the state of the automatic variables, if the next
+statement can be reached, et cetera) if control passes the
+flow of control to the part of the program currently parsed.
+The initialization of this state is as follows
+.RS
+.IP
+If \f(CWls_class\fP in [\f(CWIF\fP, \f(CWSWITCH\fP] the state
+after parsing the conditional expression.
+.IP
+If \f(CWls_class\fP in [\f(CWWHILE\fP, \f(CWFOR\fP] the state
+after parsing the code between the brackets.
+.IP
+If \f(CWls_class\fP in [\f(CWDO\fP, \f(CWCASE\fP] the state at
+entrance of the statement after the \f(CWDO\fP or \f(CWCASE\fP
+token.
+.RE
+.IP \f(CWls_states\fP 15
+Union of pointers to state descriptors containing different information
+for different values of \f(CWls_class\fP.
+.RS
+.IP
+If \f(CWls_class\fP is \f(CWIF\fP and in case of parsing an else part,
+\f(CWls_states.S_if\fP points to the state that is reached after the
+if part.
+.IP
+If \f(CWls_class\fP in [\f(CWWHILE\fP, \f(CWFOR\fP, \f(CWDO\fP]
+then \f(CWls_states.S_end\fP contains a conservative description
+of the state of the program after `jumping'
+to the end of the statement after the \f(CWWHILE\fP, \f(CWDO\fP
+or \f(CWFOR\fP token.
+I.e. the state at reaching a break (not inside a switch) or
+continue statement.
+.IP
+If ls_class is \f(CWSWITCH\fP, \f(CWls_states\fP is used as a structure
+.DS B
+.ft CW
+struct switch_states {
+        struct state S_case;
+        struct state S_break;
+};
+.R
+.DE
+containing two pointers to state descriptors.
+\f(CWls_states.switch_state.S_case\fP contains
+a conservative description
+of the state of the program after \f(CWcase ... case\fP
+parts are parsed.
+\f(CWls_states.switch_state.S_break\fP the state after parsing
+all the \f(CWcase ... break\fP parts.
+The reason for \f(CWls_states.switch_state.default_met\fP should be
+self-explanatory.
+.IP
+In case \f(CWls_class\fP is \f(CWCASE\fP, \f(CWls_states\fP is not used.
+.RE
+.NH 4
+State descriptor
+.DS B
+.ft CW
+struct state {
+        struct state *next;
+        struct auto_def *st_auto_list;
+        int st_nrchd;
+        int st_warned;
+};
+.R
+.DE
+.IP \f(CWst_auto_list\fP 15
+Pointer to a list of definitions of the automatic variables whose
+scope contain the current position in the program.
+.IP \f(CWst_nrchd\fP
+True if the next statement can't be reached.
+.IP \f(CWst_warned\fP
+True if a warning has already been given.
+.NH 4
+Auto_def descriptor
+.DS B
+.ft CW
+struct auto_def {
+        struct auto_def *next;
+        struct idf *ad_idf;
+        struct def *ad_def;
+        int ad_used;
+        int ad_set;
+        int ad_maybe_set;
+};
+.R
+.DE
+.IP \f(CWnext\fP 15
+Points to the next auto_definition of the list.
+.IP \f(CWad_idf\fP
+Pointer to the idf descriptor associated with this auto_definition.
+.IP \f(CWad_def\fP
+Ditto for def descriptor.
+.IP \f(CWad_used\fP
+Indicates the state of this automatic variable.
+Ditto for \f(CWad_set\fP and \f(CWad_maybe_set\fP.
+Only one of \f(CWad_set\fP and \f(CWad_maybe_set\fP may be true.
+.NH 4
+Expr_state descriptor
+.DS B
+.ft CW
+struct expr_state {
+        struct expr_state *next;
+        struct idf *es_idf;
+        arith es_offset;
+        int es_used;
+        int es_set;
+};
+.R
+.DE
+.PP
+This structure is introduced to keep track of which variables,
+array entries and structure members (union members) are set
+and/or used in evaluating an expression.
+.IP \f(CWnext\fP 15
+Pointer to the next descriptor of this list.
+.IP \f(CWes_idf\fP
+Pointer to the idf descriptor this descriptor belongs to.
+.IP \f(CWes_offset\fP
+In case of an array, a structure or union, this member contains
+the offset the compiler would generate for locating the array
+entry or structure/union member.
+.IP \f(CWes_used\fP
+True if the indicated memory location is used in evaluating the
+expression.
+.IP \f(CWes_set\fP
+Ditto for set.
+.NH 4
+Outdef descriptor
+.DS B
+.ft CW
+struct outdef {
+        int od_class;
+        char *od_name;
+        char *od_file;
+        unsigned int od_line;
+        int od_nrargs;
+        struct tp_entry *od_entry;
+        int od_returns;
+        struct type *od_type;
+};
+.DE
+.R
+.PP
+As structures of this type are not allocated dynamically by a
+storage allocator, it contains no next member.
+An outdef can be given to to \f(CWoutput_def()\fP to be passed to the
+second pass.
+Basically this forms the interface with the second pass.
+.IP \f(CWod_class\fP 15
+Indicates what kind of definition it is.
+Possible classes are \f(CWEFDF\fP, \f(CWEVDF\fP, \f(CWSFDF\fP,
+\f(CWSVDF\fP, \f(CWLFDF\fP, \f(CWLVDF\fP,
+\f(CWEFDC\fP, \f(CWEVDC\fP, \f(CWIFDC\fP, \f(CWFC\fP, \f(CWVU\fP.
+([\f(CWE\fPxternal, \f(CWS\fPtatic, \f(CWL\fPibrary, \f(CWI\fPmplicit]
+[\f(CWF\fPunction, \f(CWV\fPariable]
+[\f(CWD\fPe\f(CWF\fPinition, \f(CWD\fPe\f(CWC\fPlaration,
+\f(CWC\fPall, \f(CWU\fPsage])
+.IP \f(CWod_name\fP
+The name of the function or variable.
+.IP \f(CWod_file\fP
+The file this definition comes from.
+.IP \f(CWod_nrargs\fP
+If \f(CWod_class\fP is one of \f(CWEFDF\fP, \f(CWSFDF\fP or
+\f(CWLFDF\fP, this member contains the
+number of arguments this function has.
+If the function was preceded by the pseudocomment
+\f(CW/*\ VARARGS\ */\fP,
+\f(CWod_nrargs\fP gets the value \f(CW-1-n\fP.
+.IP \f(CWod_entry\fP
+A pointer to a list of \f(CWod_nrargs\fP cells, each containing a
+pointer to the type descriptor of an argument. (\f(CW-1-od_nrargs\fP
+cells if
+\f(CWod_nrargs < 0\fP.)
+\f(CWTp_entry\fP is defined as
+.DS B
+.ft CW
+struct tp_entry {
+        struct tp_entry *next; /* pointer to next cell */
+        struct type *te_type;  /* an argument type     */
+};
+.R
+.DE
+.IP \f(CWod_returns\fP 15
+For classes \f(CWEFDF\fP, \f(CWSFDF\fP and \f(CWLFDF\fP this
+member tells if the function returns an expression or not.
+In case \f(CWod_class\fP is \f(CWFC\fP it is true if the value
+of the function is used, false otherwise.
+For other classes this member is not used.
+.IP \f(CWod_type\fP
+A pointer to the type of the function or variable defined or
+declared.
+Not used for classes \f(CWFC\fP and \f(CWVU\fP.
+.NH 2
+The first pass checking mechanism
+.PP
+In the description of the implementation of the pass one 
+warnings, it is assumed that the reader is familiar with the
+\fILLgen\fP parser generator, as described in [6].
+.NH 3
+Used and/or set variables
+.PP
+To be able to give warnings like
+.ft CW
+%s used before set
+.R
+and
+.ft CW
+%s set but not used in function %s
+.R
+, there needs to be a way to keep track of the state of a variable.
+A first approach to do this was by adding two fields to the
+\fIdef\fP selector: 
+.ft CW
+df_set
+.R
+and
+.ft CW
+df_used.
+.R
+While parsing the program, each time an expression was met
+this expression was analyzed and the fields of each \fIdef\fP
+selector were possibly set during this analysis.
+This analysis was done by passing each expression to a
+function 
+.ft CW
+lint_expr
+.R
+, which walks the expression tree in a way similar to the function
+\f(CWEVAL\fP in the file \fIeval.c\fP of the original
+.I
+cem
+.R
+compiler.
+This approach has one big disadvantage: it is impossible to keep
+track of the flow of control of the program.
+No warning will be given for the program fragment of figure 3.
+.KF
+.DS B
+.ft CW
+func()
+{
+        int i;
+
+        if (cond)
+                i = 0;
+        else
+                use(i);  /* i may be used before set */
+}
+.I
+.DE
+.br
+.ce
+figure\ 3.
+.R
+.KE
+.PP
+It is clear that it would be nice having
+.I lint
+warn for this construction.
+.PP
+This was done in the second approach.
+When there was a choice between two statements, each statement
+was parsed with its own copy of the state at entrance of the
+.I
+choosing statement.
+.R
+A state consisted of the state of the automatic variables
+(including register variables).
+In addition to the possibilities of being used and set,
+a variable could be \fImaybe set\fP.
+These states were passed between the statement parsing routines
+using the \fILLgen\fP parameter mechanism.
+At the end of a choosing statement, the two states were merged
+into one state, which became the state after this statement.
+The construction of figure 4 was now detected, but switch
+statements still gave problems and continue and break statements
+were not understood.
+The main problem of a switch statement is, that the closing bracket
+(`\f(CW)\fP') has to be followed by a \fIstatement\fP.
+The syntax shows no choice of statements, as is the case with
+if, while, do and for statements.
+Using the \fILLgen\fP parameter mechanism, it is not a trivial
+task to parse the different case parts of a switch statement
+with the same initial state and to merge the results into one
+state.
+This observation led to the third and final approach, as described
+next.
+.PP
+Instead of passing the state of the program through the statements
+parsing routines using the \fILLgen\fP parameters, a special stack is
+introduced, the
+.I lint_stack.
+When a choosing statement is parsed, an entry is pushed on the stack
+containing the information that is needed to keep track of the
+state of the program.
+Each entry contains a description of the
+.I current
+state of the program and a field that indicates what part of the
+program the parser is currently parsing.
+For all the possible choosing statements I describe the actions
+to be taken.
+.PP
+At entrance of an if statement, an entry is pushed on the stack
+with the current state being a copy of the current state of the
+stack element one below.
+The class of this entry is \f(CWIF\fP.
+At reaching the else part, the current state is moved to
+another place in this stack entry (to \f(CWS_IF\fP), and a new copy
+of the current state at entrance of this if statement is made.
+At the end of the else part, the two states are merged into
+one state, the new current state, and the \f(CWIF\fP entry is
+popped from the stack.
+If there is no else part, then the state that is reached after
+parsing the if part is merged with the current state at entrance
+of the if statement into the new current state.
+.PP
+At entrance of a while statement a \f(CWWHILE\fP entry is pushed
+on the stack containing a copy of the current state.
+If a continue or break statement is met in the while statement,
+the state at reaching this continue or break statement is
+merged with a special state in the \f(CWWHILE\fP entry, called
+\f(CWS_END\fP.
+(If \f(CWS_END\fP did not yet contain a state, the state is copied
+to \f(CWS_END\fP.)
+At the end of the while statement this \f(CWS_END\fP is merged with the 
+current state, which result is merged with the state at entrance
+of the while statement into the new current state.
+.PP
+A for statement is treated similarly.
+A do statement is treated the same way too, except that \f(CWS_END\fP
+isn't merged with the state at entrance of the do statement,
+but becomes the new current state.
+.PP
+For switch statements a \f(CWSWITCH\fP entry is pushed on the stack.
+Apart from the current state, this entry contains two other
+states, \f(CWS_BREAK\fP and \f(CWS_CASE\fP.
+\f(CWS_BREAK\fP initially contains no state, \f(CWS_CASE\fP
+initially contains a
+copy of the current state at entrance of the switch statement.
+After parsing a case label, a \f(CWCASE\fP entry is pushed on the stack,
+containing a copy of the current state.
+If, after zero or more statements, we meet another case label,
+the state at reaching this case label is merged with \f(CWS_CASE\fP
+of the \f(CWSWITCH\fP entry below and a new copy of the state
+at entrance
+of the switch statement is put in the \f(CWCASE\fP entry.
+If we meet a break statement, we merge the current state with
+\f(CWS_BREAK\fP of the \f(CWSWITCH\fP entry below and pop the
+\f(CWCASE\fP entry.
+In addition to this, the occurrence of a default statement
+inside the switch statement is recorded in the \f(CWSWITCH\fP entry.
+At the end of the switch statement we check if we have met a
+default statement.
+If not, \f(CWS_BREAK\fP is merged with the current state at entrance
+of the switch statement. (Because it is possible that no case
+label will be chosen.)
+Next the \f(CWS_CASE\fP is `special_merged' with \f(CWS_BREAK\fP
+into the new current state.
+For more details about these merge functions see the sources.
+.PP
+With the approach described above, 
+.I lint
+is aware of the flow
+of control in the program.
+There still are some doubtful constructions
+.I lint
+will not detect and there are some constructions (although rare)
+for which
+.I lint
+gives an incorrect warning (see figure 4).
+.KF
+.DS B
+.ft CW
+{
+        int i;
+
+        for (;;) {
+                if (cond) {
+                        i = 0;
+                        break;
+                }
+        }
+        use(i);
+        /* lint warns: maybe i used before set
+         * although  the  fragment  is correct
+         */
+}
+.DE
+.br
+.I
+.ce
+figure\ 4.
+.R
+.KE
+.PP
+A nice advantage of the method is, that the parser stays clear,
+i.e. it isn't extended with extra parameters which must pass the
+states.
+In this way the parser still is very readable and we have a nice
+interface with
+.I lint
+using function calls.
+.NH 3
+Undefined evaluation orders
+.PP
+In expressions the values of some variables are used and some
+variables are set.
+Of course, the same holds for subexpressions.
+The compiler is allowed to choose the order of evaluation of
+subexpressions involving a commutative and associative operator
+(\f(CW*\fP, \f(CW+\fP, \f(CW&\fP, \f(CW|\fP, \f(CW^\fP),
+the comma in a parameter list or an assignment operator.
+In section 3.4 it is made clear that this will lead to
+statements with ambiguous semantics.
+.PP
+The way these constructs are detected is rather straight forward.
+The function which parses an expression (\f(CWlint_expr\fP)
+returns a linked
+list containing information telling which variables are set and
+which variables are used.
+A variable is indicated by its
+.I idf
+descriptor and an
+.I offset.
+This offset is needed for discriminating entries of the same
+array and members of the same structure or union, so it is
+possible to warn about the statement
+.ft CW
+a[b[0]]\ =\ b[0]++;.
+.R
+When \f(CWlint_expr\fP meets a commutative operator (with respect to the
+evaluation order), it calls itself recursively with the operands
+of the operator as expression.
+The returned results are checked for undefined evaluation orders
+and are put together.
+This is done by the function \f(CWcheck_and_merge\fP.
+.NH 3
+Useless statements
+.PP
+Statements which compute a value that is not used,
+are said to have a \fInull effect\fP.
+Examples are \f(CWx = 2, 3;\fP, \f(CWf() + g();\fP and
+\f(CW*p++;\fP.
+(\f(CW*\fP and \f(CW++\fP have the same precedence and associate
+from right to left.)
+.PP
+A conditional expression computes a value too.
+If this value isn't used, it is better to use an if-else
+statement.
+So, if
+.I lint
+sees
+.DS B
+.ft CW
+b ? f() : g();
+.R
+.DE
+.LP
+it warns \f(CWuse if-else construction\fP.
+.NH 3
+Not-reachable statements
+.PP
+The algorithm to detect not-reachable statements (including not
+reachable initializations) is as follows.
+Statements after a label and a case statement and the compound
+statement of a function are always reachable.
+Other statements are not-reachable after:
+.QS
+.RS
+.IP - 1
+a goto statement
+.IP -
+a return statement
+.IP -
+a break statement
+.IP -
+a continue statement
+.IP -
+a switch statement
+.IP -
+an endless loop (a while, do or for loop with a conditional
+which always evaluates to true and without a break statement)
+.IP -
+an if-else statement of which both if part and else part
+end up in a not-reachable state
+.IP -
+a switch statement of which all \f(CWcase ... break\fP parts
+(including
+a \f(CWdefault ... break\fP part) end up in a not-reachable state
+.IP -
+the pseudocomment \f(CW/*\ NOTREACHED\ */\fP
+.RE
+.QE
+.PP
+The algorithm is easily implemented using the \f(CWst_nrchd\fP selector
+in the
+.I state
+descriptor.
+The \f(CWst_warned\fP selector is used to prevent superfluous warnings.
+To detect an endless loop, after a while (<true>), for (..;<true>;..)
+and do part the current state of the stack entry beneath the top one
+is set to not reached.
+If, in the statement following, a break statement is met, this same
+state is set to reached.
+If the while (<cond>) part of the do statement is met, this state
+is set to reached if <cond> doesn't evaluates to true.
+The detection of not-reachable statements after a switch statement
+is done in a similar way.
+In addition it is checked if a default statement isn't met, in
+which case the statement after the switch statement can be reached.
+The warning \f(CWstatement not reached\fP is not given for compound
+statements.
+If
+.I lint
+did, it would warn for the compound statement in a switch statement,
+which would be incorrect.
+.PP
+Not-reachable statements are still interpreted by
+.I lint.
+I.e. when
+.I lint
+warns that some statement can't be reached, it assumes this is
+not what the programmer really wants and it ignores this fact.
+In this way a lot of useless warnings are prevented in the case of
+a not-reachable statement.
+See figure 5.
+.KF
+.DS B
+.ft CW
+{
+        int i;
+
+        for (;;) {
+                /* A loop in which the programmer
+                 * forgot to introduce a conditional
+                 * break statement.
+                 * Suppose i is not used in this part.
+                 */
+        }
+        /* some more code in which i is used */
+}
+/* The warning "statement not reached" highlights the bug.
+ * An additional warning "i unused in function %s" is 
+ * formally correct, but doesn't provide the programmer
+ * with useful information.
+ */
+.DE
+.I
+.ce
+figure\ 5.
+.R
+.KE
+.NH 3
+Functions returning expressions and just returning
+.PP
+Each time a return statement is met,
+.I lint
+checks if an expression is returned or not.
+If a function has a return with expression and a return without
+expression,
+.I lint
+warns
+.ft CW
+function %s has return(e); and return;.
+.R
+If the flow of control can
+.I
+fall through
+.R
+the end of the compound statement of a function, this indicates
+an implicit return statement without an expression.
+If the end of the compound statement of the function can be reached,
+.I lint
+introduces this implicit return statement without expression.
+.PP
+Sometimes the programmer knows for sure that all case parts inside
+a switch statement include all possible cases, so he doesn't
+introduce a default statement.
+This can lead to an incorrect warning.
+Figure 6 shows how to prevent this warning.
+.KF
+.DS B
+.ft CW
+            func()
+            {
+                    switch (cond) {
+                    case 0: return(e0);
+                    case 1: return(e1);
+                    }
+                    /* NOTREACHED */
+            }
+/* no warning: "function func has return(e); and return; */
+.DE
+.I
+.ce
+figure\ 6.
+.R
+.KE
+.PP
+The pseudocomment \f(CW/*\ NOTREACHED\ */\fP can also be used to tell
+.I lint
+that some function doesn't return. See figure 7.
+.KS
+.DS B
+.ft CW
+  func()
+  {
+          switch (cond) {
+          case 0: return(e0);
+          case 1: return(e1);
+          default: error();   /* calls exit or abort */
+                   /* NOTREACHED */
+          }
+  }
+/* no warning: "function func has return(e); and return;" */
+.I
+.DE
+.ce
+figure\ 7.
+.R
+.KE
+.NH 3
+Output definitions for the second pass
+.PP
+The first pass can only process one program file.
+To be able to process a program that spreads over more than one file,
+the first pass outputs definitions that are processed by a second
+pass.
+The format of such a definition is different for different classes:
+.PP
+For class in {EFDF, SFDF, LFDF}
+.DS C
+<name>:<class>:<file>:<line>:<nr of args>:<type of args>:<returns value>:<type>
+.DE
+.LP
+A negative \fInr of args\fP indicates that the function can be called with
+a varying number of arguments.
+.PP
+For class = FC
+.DS C
+<name>:<class>:<file>:<line>:<value is used>:<type>
+.DE
+.LP
+The \fIvalue is used\fP part can have three meanings:
+the value of the function is ignored;
+the value of the function is used;
+the value of the function is cast to type \fIvoid\fP.
+.PP
+For other classes
+.DS C
+<name>:<class>:<file>:<line>:<type>
+.DE
+.LP
+Definitions of class VU (Variable Usage) are only output for \fIused\fP
+global variables.
+.PP
+Structure and union types that are output to the intermediate file
+are simplified.
+(The following occurrences of \fIstructure\fP should be
+read as \fIstructure or union\fP and \fIstruct\fP as \fIstruct or
+union\fP.)
+Structures that are identified by a \fIstructure tag\fP are output
+to the intermediate file as \f(CWstruct <tag>\fP.
+Structures without a structure tag are output as
+\f(CWstruct {<mems>}\fP with \f(CW<mems>\fP a semicolon-separated
+list of types of the members of this structure.
+An alternative way would be to output the complete structure definition.
+However, this gives practical problems.
+It is allowed to define some object of a structure type with a
+structure tag, without this structure being defined at that place.
+The first approach leaves errors, such as in figure 8, undetected.
+.KF
+.DS B
+.ft CW
+    "a.c"                           "b.c"
+
+struct str {                    struct str {
+        float f;                        int i;
+} s;                            };
+
+main()                          func(s)
+{                                       struct str s;
+        func(s);                {}
+}
+.I
+.DE
+.ce
+figure\ 8.
+.R
+.KE
+.PP
+To be able to detect these errors, the first pass should also output
+definitions of structure tags.
+The example of figure 8 would then get a warning like
+.ft CW
+structure str defined inconsistently
+.R
+.PP
+More information on these definitions in section 4.3 and 4.4.
+.NH 3
+Generating libraries
+.PP
+.I Lint
+knows the library `-lc', `-lm' and `-lcurses'.
+If a program uses some other library, it is possible to generate
+a corresponding \fIlint library\fP.
+To do this, precede all the C source files of this library by
+the pseudocomment \f(CW/*\ LINTLIBRARY\ */\fP.
+Then feed these files one by one to the first pass of
+.I lint
+collecting the standard output in a file and ignoring the warnings.
+The resulting file contains library definitions of the functions
+and external variables defined in the library sources, and not more
+than that.
+If this file is called `llib-l\fIname\fP.ln
+.I lint
+can be told to search the library by passing it as argument in
+the command line `-llib-l\fIname\fP.ln.
+The implementation of this feature is simple.
+.PP
+As soon as the pseudocomment \f(CW/*\ LINTLIBRARY\ */\fP is met,
+only function and variable definitions are output with class LFDF
+and LVDF respectively.
+Other definitions, which otherwise would have been output, are
+discarded.
+.PP
+Instead of generating a special lint library file, one can make a
+file containing the library definitions and starting with
+\f(CW/* LINTLIBRARY */\fP.
+This file can then be passed to
+.I lint
+just by its name.
+This method isn't as efficient as the first one.
+.NH 3
+Interpreting the pseudocomments
+.PP
+The interpretation of the pseudocomments is done by the lexical
+analyzer, because this part of the program already took care of the
+comments. 
+At first sight this seems very easy: as soon as some pseudocomment
+is met, raise the corresponding flag.
+Unfortunately this doesn't work.
+The lexical analyzer is a \fIone token look ahead scanner\fP.
+This causes the above procedure to raise the flags one token too
+soon.
+A solution to get the right effect is to reserve two flags per
+pseudocomment.
+The first is set as soon as the corresponding pseudocomment is 
+scanned.
+At the returning of each token this flag is moved to the second flag.
+The delay in this way achieved makes the pseudocomments have effect
+at the correct place.
+.NH 2
+The second pass data structure
+.NH 3
+Inp_def descriptor
+.DS B
+.ft CW
+struct inp_def {
+        struct inp_def *next;
+        int id_class;
+        char id_name[NAMESIZE];
+        char id_file[FNAMESIZE];
+        unsigned int id_line;
+        int id_nrargs;
+        char argtps[ARGSTPSSIZE];
+        int id_returns;
+        char id_type[TYPESIZE];
+        int id_called;
+        int id_used;
+        int id_ignored;
+        int id_voided;
+};
+.R
+.DE
+.PP
+This description is almost similar to the \fIoutdef\fP descriptor as
+described in 4.1.2.5.
+There are some differences too.
+.IP \f(CWnext\fP 15
+As structures of this type are allocated dynamically, this field
+is added so the same memory allocator as used in the first pass can be
+used.
+.LP
+\f(CWid_called
+.br
+id_used
+.br
+id_ignored\fP
+.IP \f(CWid_voided\fP 15
+Some additional fields only used for function definitions.Their
+meaning should be clear.
+.PP
+The other fields have the same meaning as the corresponding fields
+in the \fIoutdef\fP descriptor.
+Some attention should be paid to \f(CWid_argtps\fP and \f(CWid_type\fP.
+These members have type \f(CWarray of char\fP, in contrast to
+their counterparts in the \fIoutdef\fP descriptor.
+The only operation performed on types is a check on equality.
+Types are output by the first pass as a string describing the type.
+The type of \f(CWi\fP in \f(CWint *i();\fP e.g. is output as
+\f(CWint *()\fP.
+Such a string is best put in an \f(CWarray of char\fP to be compared
+easily.
+.NH 2
+The second pass checking mechanism
+.PP
+After all the definitions that are output by the first pass are
+sorted by name, the definitions belonging to one name are ordered
+as follows.
+.QS
+.RS
+.IP - 1
+external definitions
+.IP -
+static definitions
+.IP -
+library definitions
+.IP -
+declarations
+.IP -
+function calls
+.IP -
+variable usages
+.RE
+.QE
+.PP
+The main program of the second pass is easily explained.
+For all different names, do the following.
+First read the definitions.
+If there is more than one definition, check for conflicts.
+Then read the declarations, function calls and variable usages and
+check them against the definitions.
+After having processed all the declarations, function calls and
+variable usages, check the definitions to see if they are used
+correctly.
+The next three paragraphs will explain the three most important
+functions of the program.
+.NH 3
+Read_defs()
+.PP
+This function reads all definitions belonging to the same name.
+Only one external definition is allowed, so if there are more, a
+warning is given.
+In different files it is allowed to define static functions or
+variables with the same name.
+So if a static function is read, \f(CWread_defs\fP checks if there isn't
+already an external definition, and if not it puts the static
+definition in the list of static definitions, to be used later.
+If no external or static definitions are met, a library definition is
+taken as definition.
+If a function or a variable is defined with the same name as a function
+or a variable in a library (which is allowed)
+.I lint
+gives a warning.
+Of course it is also possible that there is no definition at all.
+In that case \f(CWcheck\fP will warn.
+.NH 3
+Check()
+.PP
+\f(CWCheck\fP verifies declarations, function calls and variable
+usages against the definitions.
+For each of these entries the corresponding definition is looked up.
+As there may be more than one static definition, first a static
+definition from the same file as the entry is searched.
+If not present, the external definition (which may be a library
+definition) is taken as definition.
+If no definition can be found and the current entry is an external
+declaration,
+.I lint
+warns.
+However in the case of an implicit function declaration
+.I lint
+will not warn, because
+we will get a warning \f(CW%s used but not defined\fP later on.
+Next a check is done if the declarations are consistent with their
+definitions.
+After the declarations, the function calls and variable usages are
+verified against their corresponding definitions.
+If no definition exists,
+.I lint
+warns.
+Else the field \f(CWid_called\fP is set to 1.
+(For variable definitions this should be interpreted as \fIused\fP.)
+For variable usages this will be all.
+If we are processing a function call we also check the number and types
+of the arguments and we warn for function values which are used from
+functions that don't return a value.
+For each function call we administrate if a function value is used,
+ignored or voided.
+.NH 3
+Check_usage()
+.PP
+Checks if the external definition and static definitions are used
+correctly.
+If a function or variable is defined but never used,
+.I lint
+warns, except for library definitions.
+Functions, which return a value but whose value is always or
+sometimes ignored, get a warning.
+(A function value which is voided (cast to void) is not ignored,
+but it isn't used either.)
+.bp
