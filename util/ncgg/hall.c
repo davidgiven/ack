@@ -57,7 +57,7 @@ card(sp) register short *sp; {
 	register sum,i;
 	
 	sum=0;
-	for(i=0;i<8*SETSIZE;i++)
+	for(i=0;i<8*sizeof(short)*SETSIZE;i++)
 		if (BIT(sp,i))
 			sum++;
 	return(sum);
