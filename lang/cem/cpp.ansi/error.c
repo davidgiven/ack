@@ -6,7 +6,11 @@
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
 #include	<system.h>
+#if __STDC__
+#include	<stdarg.h>
+#else
 #include	<varargs.h>
+#endif
 
 #include	"arith.h"
 #include	"errout.h"
@@ -28,6 +32,70 @@ err_hdr(s)
 	else	fprint(ERROUT, s);
 }
 
+#if __STDC__
+/*VARARGS*/
+error(char *fmt, ...)
+{
+	va_list ap;
+
+	err_occurred = 1;
+	err_hdr("");
+	va_start(ap, fmt);
+	doprnt(ERROUT, fmt, ap);
+	fprint(ERROUT, "\n");
+	va_end(ap);
+}
+
+/*VARARGS*/
+warning(char *fmt, ...)
+{
+	va_list ap;
+
+	err_hdr("(warning) ");
+	va_start(ap, fmt);
+	doprnt(ERROUT, fmt, ap);
+	fprint(ERROUT, "\n");
+	va_end(ap);
+}
+
+/*VARARGS*/
+strict(char *fmt, ...)
+{
+	va_list ap;
+
+	err_hdr("(strict) ");
+	va_start(ap, fmt);
+	doprnt(ERROUT, fmt, ap);
+	fprint(ERROUT, "\n");
+	va_end(ap);
+}
+
+/*VARARGS*/
+crash(char *fmt, ...)
+{
+	va_list ap;
+
+	err_hdr("CRASH\007 ");
+	va_start(ap, fmt);
+	doprnt(ERROUT, fmt, ap);
+	fprint(ERROUT, "\n");
+	va_end(ap);
+	sys_stop(S_ABORT);
+}
+
+/*VARARGS*/
+fatal(char *fmt, ...)
+{
+	va_list ap;
+
+	err_hdr("fatal error -- ");
+	va_start(ap, fmt);
+	doprnt(ERROUT, fmt, ap);
+	fprint(ERROUT, "\n");
+	va_end(ap);
+	sys_stop(S_EXIT);
+}
+#else
 /*VARARGS*/
 error(va_alist)
 	va_dcl
@@ -105,3 +173,4 @@ fatal(va_alist)
 	va_end(ap);
 	sys_stop(S_EXIT);
 }
+#endif
