@@ -48,7 +48,7 @@ FILE *fp;
 				break;
 			}
 		}
-		free(fp);
+		if (fp != &_stdin && fp != &_stdout && fp != &_stderr) free(fp);
 		return NULL;
 	}
 

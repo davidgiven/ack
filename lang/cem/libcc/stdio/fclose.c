@@ -17,7 +17,7 @@ FILE *fp;
 	close(fileno(fp));
 	if ( io_testflag(fp,IO_MYBUF) && fp->_buf )
 		free( fp->_buf );
-	free(fp);
+	if (fp != &_stdin && fp != &_stdout && fp != &_stderr) free(fp);
 	return(NULL);
 }
 
