@@ -1,4 +1,3 @@
-.so /usr/lib/tmac/tmac.kun
 .SS 10
 .if n .LL 78
 .RP
