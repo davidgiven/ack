@@ -32,9 +32,9 @@
 
 long str2long();
 
-struct token	dot,
+t_token		dot,
 		aside;
-struct type	*toktype;
+t_type		*toktype;
 int		idfsize = IDFSIZE;
 int		ForeignFlag;
 #ifdef DEBUG
@@ -236,7 +236,7 @@ LLlex()
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
 	*/
-	register struct token *tk = &dot;
+	register t_token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 2];
 	register int ch, nch;
 
@@ -339,7 +339,7 @@ again:
 	case STIDF:
 	{
 		register char *tag = &buf[0];
-		register struct idf *id;
+		register t_idf *id;
 
 		do	{
 			if (tag - buf < idfsize) *tag++ = ch;

@@ -45,6 +45,8 @@ struct desig {
 				*/
 };
 
+typedef struct desig	t_desig;
+
 /* ALLOCDEF "desig" 5 */
 
 /* The next structure describes the designator in a with-statement.
@@ -56,7 +58,7 @@ struct withdesig {
 	struct scope *w_scope;	/* scope in which fields of this record
 				   reside
 				*/
-	struct desig w_desig;	/* a desig structure for this particular
+	t_desig w_desig;	/* a desig structure for this particular
 				   designator
 				*/
 };

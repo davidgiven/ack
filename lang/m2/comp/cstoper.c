@@ -38,12 +38,12 @@ extern char options[];
 static char ovflow[] = "overflow in constant expression";
 
 cstunary(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result restored in expp.
 	*/
-	register struct node *right = expp->nd_right;
+	register t_node *right = expp->nd_right;
 
 	switch(expp->nd_symb) {
 	/* Should not get here
@@ -75,7 +75,7 @@ cstunary(expp)
 }
 
 cstbin(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in
@@ -236,10 +236,11 @@ cstbin(expp)
 }
 
 cstset(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
+	extern arith *MkSet();
 	register arith *set1, *set2;
-	arith *resultset = 0;
+	register arith *resultset;
 	register unsigned int setsize;
 	register int j;
 
@@ -259,114 +260,90 @@ cstset(expp)
 		expp->nd_INT = (expp->nd_left->nd_INT >= 0 &&
 				expp->nd_left->nd_INT < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
-		free((char *) set2);
+		FreeSet(set2);
 		expp->nd_symb = INTEGER;
-	}
-	else {
-		set1 = expp->nd_left->nd_set;
-		resultset = set1;
-		expp->nd_left->nd_set = 0;
-		switch(expp->nd_symb) {
-		case '+':
-			/* Set union
-			*/
-			for (j = 0; j < setsize; j++) {
-				*set1++ |= *set2++;
-			}
-			break;
-
-		case '-':
-			/* Set difference
-			*/
-			for (j = 0; j < setsize; j++) {
-				*set1++ &= ~*set2++;
-			}
-			break;
-
-		case '*':
-			/* Set intersection
-			*/
-			for (j = 0; j < setsize; j++) {
-				*set1++ &= *set2++;
-			}
-			break;
-
-		case '/':
-			/* Symmetric set difference
-			*/
-			for (j = 0; j < setsize; j++) {
-				*set1++ ^= *set2++;
-			}
-			break;
-
-		case GREATEREQUAL:
-		case LESSEQUAL:
-		case '=':
-		case '#':
-			/* Constant set comparisons
-			*/
-			expp->nd_left->nd_set = set1;	/* may be disposed of */
-			for (j = 0; j < setsize; j++) {
-				switch(expp->nd_symb) {
-				case GREATEREQUAL:
-					if ((*set1 | *set2++) != *set1) break;
-					set1++;
-					continue;
-				case LESSEQUAL:
-					if ((*set2 | *set1++) != *set2) break;
-					set2++;
-					continue;
-				case '=':
-				case '#':
-					if (*set1++ != *set2++) break;
-					continue;
-				}
-				break;
-			}
-			if (j < setsize) {
-				expp->nd_INT = expp->nd_symb == '#';
-			}
-			else {
-				expp->nd_INT = expp->nd_symb != '#';
-			}
-			expp->nd_class = Value;
-			expp->nd_symb = INTEGER;
-			freesets(expp);
-			return;
-		default:
-			crash("(cstset)");
-		}
-		freesets(expp);
-		expp->nd_class = Set;
-		expp->nd_set = resultset;
+		FreeNode(expp->nd_left);
+		FreeNode(expp->nd_right);
+		expp->nd_left = expp->nd_right = 0;
 		return;
 	}
-	FreeNode(expp->nd_left);
-	FreeNode(expp->nd_right);
-	expp->nd_left = expp->nd_right = 0;
-}
 
-freesets(expp)
-	register struct node *expp;
-{
-	if (expp->nd_right->nd_set) {
-		free((char *) expp->nd_right->nd_set);
+	set1 = expp->nd_left->nd_set;
+	switch(expp->nd_symb) {
+	case '+': /* Set union */
+	case '-': /* Set difference */
+	case '*': /* Set intersection */
+	case '/': /* Symmetric set difference */
+		expp->nd_set = resultset = MkSet(setsize * (unsigned) word_size);
+		for (j = 0; j < setsize; j++) {
+			switch(expp->nd_symb) {
+			case '+':
+				*resultset = *set1++ | *set2++;
+				break;
+			case '-':
+				*resultset = *set1++ & ~*set2++;
+				break;
+			case '*':
+				*resultset = *set1++ & *set2++;
+				break;
+			case '/':
+				*resultset = *set1++ ^ *set2++;
+				break;
+			}
+			resultset++;
+		}
+		expp->nd_class = Set;
+		break;
+
+	case GREATEREQUAL:
+	case LESSEQUAL:
+	case '=':
+	case '#':
+		/* Constant set comparisons
+		*/
+		for (j = 0; j < setsize; j++) {
+			switch(expp->nd_symb) {
+			case GREATEREQUAL:
+				if ((*set1 | *set2++) != *set1) break;
+				set1++;
+				continue;
+			case LESSEQUAL:
+				if ((*set2 | *set1++) != *set2) break;
+				set2++;
+				continue;
+			case '=':
+			case '#':
+				if (*set1++ != *set2++) break;
+				continue;
+			}
+			break;
+		}
+		if (j < setsize) {
+			expp->nd_INT = expp->nd_symb == '#';
+		}
+		else {
+			expp->nd_INT = expp->nd_symb != '#';
+		}
+		expp->nd_class = Value;
+		expp->nd_symb = INTEGER;
+		break;
+	default:
+		crash("(cstset)");
 	}
-	if (expp->nd_left->nd_set) {
-		free((char *) expp->nd_left->nd_set);
-	}
+	FreeSet(expp->nd_left->nd_set);
+	FreeSet(expp->nd_right->nd_set);
 	FreeNode(expp->nd_left);
 	FreeNode(expp->nd_right);
 	expp->nd_left = expp->nd_right = 0;
 }
 
 cstcall(expp, call)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
 	*/
-	register struct node *expr = 0;
+	register t_node *expr = 0;
 
 	assert(expp->nd_class == Call);
 
@@ -440,13 +417,13 @@ cstcall(expp, call)
 }
 
 CutSize(expr)
-	register struct node *expr;
+	register t_node *expr;
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
 	register arith o1 = expr->nd_INT;
-	register struct type *tp = BaseType(expr->nd_type);
+	register t_type *tp = BaseType(expr->nd_type);
 	int uns;
 	int size = tp->tp_size;
 

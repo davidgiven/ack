@@ -128,15 +128,15 @@ struct def	{		/* list of definitions for a name */
 	} df_value;
 };
 
+typedef struct def	t_def;
 /* ALLOCDEF "def" 50 */
 
-extern struct def
+extern t_def
 	*define(),
 	*DefineLocalModule(),
 	*MkDef(),
-	*DeclProc();
-
-extern struct def
+	*DeclProc(),
 	*lookup(),
 	*lookfor();
-#define NULLDEF ((struct def *) 0)
+
+#define NULLDEF ((t_def *) 0)

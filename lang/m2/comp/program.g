@@ -48,8 +48,8 @@
 
 ModuleDeclaration
 {
-	register struct def *df;
-	struct node *exportlist = 0;
+	register t_def *df;
+	t_node *exportlist = 0;
 	int qualified;
 } :
 	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
@@ -66,7 +66,7 @@ ModuleDeclaration
 			}
 ;
 
-priority(register struct def *df;):
+priority(register t_def *df;):
 	[
 		'[' ConstExpression(&(df->mod_priority)) ']'
 			{ if (!(df->mod_priority->nd_type->tp_fund &
@@ -80,7 +80,7 @@ priority(register struct def *df;):
 	]
 ;
 
-export(int *QUALflag; struct node **ExportList;):
+export(int *QUALflag; t_node **ExportList;):
 	EXPORT
 	[
 		QUALIFIED
@@ -93,10 +93,10 @@ export(int *QUALflag; struct node **ExportList;):
 
 import(int local;)
 {
-	struct node *ImportList;
-	register struct node *FromId = 0;
-	register struct def *df;
-	extern struct def *GetDefinitionModule();
+	t_node *ImportList;
+	register t_node *FromId = 0;
+	register t_def *df;
+	extern t_def *GetDefinitionModule();
 } :
 	[ FROM
 	  IDENT		{ FromId = dot2leaf(Name);
@@ -120,10 +120,10 @@ import(int local;)
 
 DefinitionModule
 {
-	register struct def *df;
-	struct node *exportlist;
+	register t_def *df;
+	t_node *exportlist;
 	int dummy;
-	extern struct idf *DefId;
+	extern t_idf *DefId;
 	extern int ForeignFlag;
 } :
 	DEFINITION
@@ -157,7 +157,7 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 		/* empty */
 	]
 	definition* END IDENT
-			{ register struct def *df1 = CurrentScope->sc_def;
+			{ register t_def *df1 = CurrentScope->sc_def;
 			  while (df1) {
 				/* Make all definitions "QUALIFIED EXPORT" */
 				df1->df_flags |= D_QEXPORTED;
@@ -172,8 +172,8 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 
 definition
 {
-	register struct def *df;
-	struct def *dummy;
+	register t_def *df;
+	t_def *dummy;
 } :
 	CONST [ %persistent ConstantDeclaration ';' ]*
 |
@@ -202,8 +202,8 @@ definition
 
 ProgramModule
 {
-	extern struct def *GetDefinitionModule();
-	register struct def *df;
+	extern t_def *GetDefinitionModule();
+	register t_def *df;
 } :
 	MODULE
 	IDENT	{ if (state == IMPLEMENTATION) {

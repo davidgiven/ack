@@ -27,14 +27,14 @@
 
 STATIC
 DefInFront(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Put definition "df" in front of the list of definitions
 		in its scope.
 		This is neccessary because in some cases the order in this
 		list is important.
 	*/
-	register struct def *df1 = df->df_scope->sc_def;
+	register t_def *df1 = df->df_scope->sc_def;
 
 	if (df1 != df) {
 		/* Definition "df" is not in front of the list
@@ -58,15 +58,15 @@ DefInFront(df)
 	}
 }
 
-struct def *
+t_def *
 MkDef(id, scope, kind)
-	register struct idf *id;
+	register t_idf *id;
 	register struct scope *scope;
 {
 	/*	Create a new definition structure in scope "scope", with
 		id "id" and kind "kind".
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	df = new_def();
 	df->df_idf = id;
@@ -82,9 +82,9 @@ MkDef(id, scope, kind)
 	return df;
 }
 
-struct def *
+t_def *
 define(id, scope, kind)
-	register struct idf *id;
+	register t_idf *id;
 	register struct scope *scope;
 	int kind;
 {
@@ -93,7 +93,7 @@ define(id, scope, kind)
 		If so, then check for the cases in which this is legal,
 		and otherwise give an error message.
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	df = lookup(id, scope, 1);
 	if (	/* Already in this scope */
@@ -180,13 +180,13 @@ define(id, scope, kind)
 }
 
 RemoveImports(pdf)
-	register struct def **pdf;
+	register t_def **pdf;
 {
 	/*	Remove all imports from a definition module. This is
 		neccesary because the implementation module might import
 		them again.
 	*/
-	register struct def *df = *pdf;
+	register t_def *df = *pdf;
 
 	while (df) {
 		if (df->df_kind == D_IMPORT) {
@@ -202,12 +202,12 @@ RemoveImports(pdf)
 }
 
 RemoveFromIdList(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Remove definition "df" from the definition list
 	*/
-	register struct idf *id = df->df_idf;
-	register struct def *df1;
+	register t_idf *id = df->df_idf;
+	register t_def *df1;
 
 	if ((df1 = id->id_def) == df) id->id_def = df->df_next;
 	else {
@@ -219,15 +219,15 @@ RemoveFromIdList(df)
 	}
 }
 
-struct def *
+t_def *
 DeclProc(type, id)
-	register struct idf *id;
+	register t_idf *id;
 {
 	/*	A procedure is declared, either in a definition or a program
 		module. Create a def structure for it (if neccessary).
 		Also create a name for it.
 	*/
-	register struct def *df;
+	register t_def *df;
 	register struct scope *scope;
 	extern char *sprint();
 	static int nmcount;
@@ -286,8 +286,8 @@ DeclProc(type, id)
 }
 
 EndProc(df, id)
-	register struct def *df;
-	struct idf *id;
+	register t_def *df;
+	t_idf *id;
 {
 	/*	The end of a procedure declaration.
 		Check that the closing identifier matches the name of the
@@ -304,14 +304,14 @@ EndProc(df, id)
 	}
 }
 
-struct def *
+t_def *
 DefineLocalModule(id)
-	struct idf *id;
+	t_idf *id;
 {
 	/*	Create a definition for a local module. Also give it
 		a name to be used for code generation.
 	*/
-	register struct def *df = define(id, CurrentScope, D_MODULE);
+	register t_def *df = define(id, CurrentScope, D_MODULE);
 	register struct scope *sc;
 	static int modulecount = 0;
 	char buf[256];
@@ -352,8 +352,8 @@ DefineLocalModule(id)
 }
 
 CheckWithDef(df, tp)
-	register struct def *df;
-	struct type *tp;
+	register t_def *df;
+	t_type *tp;
 {
 	/*	Check the header of a procedure declaration against a
 		possible earlier definition in the definition module.
@@ -374,7 +374,7 @@ CheckWithDef(df, tp)
 
 #ifdef DEBUG
 PrDef(df)
-	register struct def *df;
+	register t_def *df;
 {
 	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }

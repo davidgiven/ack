@@ -18,3 +18,6 @@ extern int	(*DesigChkTable[])();	/* table of designator checking
 
 #define	ChkExpression(expp)	((*ExprChkTable[(expp)->nd_class])(expp))
 #define ChkDesignator(expp)	((*DesigChkTable[(expp)->nd_class])(expp))
+
+#define inc_refcount(s)		(*((s) - 1) += 1)
+#define refcount(s)		(*((s) - 1))

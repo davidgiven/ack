@@ -41,11 +41,13 @@ struct node {
 #define nd_REL		nd_token.TOK_REL
 };
 
+typedef struct node	t_node;
+
 /* ALLOCDEF "node" 50 */
 
-extern struct node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf();
+extern t_node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf();
 
-#define NULLNODE ((struct node *) 0)
+#define NULLNODE ((t_node *) 0)
 
 #define HASSELECTORS	002
 #define VARIABLE	004

@@ -82,7 +82,7 @@ InitScope()
 
 STATIC
 chk_proc(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Called at scope closing. Check all definitions, and if one
 		is a D_PROCHEAD, the procedure was not defined.
@@ -106,18 +106,18 @@ chk_proc(df)
 
 STATIC
 chk_forw(pdf)
-	struct def **pdf;
+	t_def **pdf;
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
 		them, and otherwise move them to the enclosing scope.
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	while (df = *pdf) {
 		if (df->df_kind == D_FORWTYPE) {
-			register struct def *df1 = df;
-			register struct node *nd = df->df_forw_node;
+			register t_def *df1 = df;
+			register t_node *nd = df->df_forw_node;
 
 			*pdf = df->df_nextinscope;
 			RemoveFromIdList(df);
@@ -134,7 +134,7 @@ node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 			continue;
 		}
 		else if (df->df_kind == D_FTYPE) {
-			register struct node *nd = df->df_forw_node;
+			register t_node *nd = df->df_forw_node;
 
 			df->df_kind = D_TYPE;
 			while (nd) {
@@ -163,7 +163,7 @@ df->df_idf->id_text);
 				*/
 				register struct scopelist *ls =
 						nextvisible(CurrVis);
-				struct def *df1 = df->df_nextinscope;
+				t_def *df1 = df->df_nextinscope;
 	
 				if (df->df_kind == D_FORWMODULE) {
 					df->for_vis->sc_next = ls;
@@ -180,14 +180,14 @@ df->df_idf->id_text);
 }
 
 Reverse(pdf)
-	struct def **pdf;
+	t_def **pdf;
 {
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
 		Also, while we're at it, remove uninteresting definitions
 		from this list.
 	*/
-	register struct def *df, *df1;
+	register t_def *df, *df1;
 #define INTERESTING D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE
 
 	df = 0;
@@ -195,7 +195,7 @@ Reverse(pdf)
 
 	while (df1) {
 		if (df1->df_kind & INTERESTING) {
-			struct def *prev = df;
+			t_def *prev = df;
 
 			df = df1;
 			df1 = df1->df_nextinscope;
@@ -228,7 +228,7 @@ close_scope(flag)
 
 #ifdef DEBUG
 DumpScope(df)
-	register struct def *df;
+	register t_def *df;
 {
 	while (df) {
 		PrDef(df);

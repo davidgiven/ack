@@ -59,3 +59,9 @@
 
 !File: density.h
 #define DENSITY	3		/* see casestat.C for an explanation */
+
+
+!File: squeeze.h
+#undef SQUEEZE 1		/* define on "small" machines */
+
+

@@ -73,7 +73,7 @@ error(fmt, args)
 
 /*VARARGS2*/
 node_error(node, fmt, args)
-	struct node *node;
+	t_node *node;
 	char *fmt;
 {
 	_error(ERROR, node, fmt, &args);
@@ -89,7 +89,7 @@ warning(class, fmt, args)
 
 /*VARARGS2*/
 node_warning(node, class, fmt, args)
-	struct node *node;
+	t_node *node;
 	char *fmt;
 {
 	warn_class = class;
@@ -137,7 +137,7 @@ crash(fmt, args)
 
 _error(class, node, fmt, argv)
 	int class;
-	struct node *node;
+	t_node *node;
 	char *fmt;
 	int argv[];
 {

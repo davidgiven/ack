@@ -23,9 +23,9 @@
 #include	"type.h"
 #include	"misc.h"
 
-struct def *
+t_def *
 lookup(id, scope, import)
-	register struct idf *id;
+	register t_idf *id;
 	struct scope *scope;
 {
 	/*	Look up a definition of an identifier in scope "scope".
@@ -33,7 +33,7 @@ lookup(id, scope, import)
 		Return a pointer to its "def" structure if it exists,
 		otherwise return 0.
 	*/
-	register struct def *df, *df1;
+	register t_def *df, *df1;
 
 	/* Look in the chain of definitions of this "id" for one with scope
 	   "scope".
@@ -62,16 +62,16 @@ lookup(id, scope, import)
 	return df;
 }
 
-struct def *
+t_def *
 lookfor(id, vis, give_error)
-	register struct node *id;
+	register t_node *id;
 	struct scopelist *vis;
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
 		if "give_error" is set, give an error message.
 	*/
-	register struct def *df;
+	register t_def *df;
 	register struct scopelist *sc = vis;
 
 	while (sc) {

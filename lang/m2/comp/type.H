@@ -99,9 +99,11 @@ struct type	{
 	} tp_value;
 };
 
+typedef struct type t_type;
+
 /* ALLOCDEF "type" 50 */
 
-extern struct type
+extern t_type
 	*bool_type,
 	*char_type,
 	*int_type,
@@ -140,7 +142,7 @@ extern arith
 extern arith
 	align();		/* type.c */
 
-struct type
+extern t_type
 	*construct_type(),
 	*standard_type(),
 	*set_type(),
@@ -150,7 +152,7 @@ struct type
 	*qualified_type(),
 	*RemoveEqual();	/* All from type.c */
 
-#define NULLTYPE ((struct type *) 0)
+#define NULLTYPE ((t_type *) 0)
 
 #define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->tp_size==0)
 #define bounded(tpx)		((tpx)->tp_fund & T_INDEX)

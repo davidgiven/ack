@@ -21,14 +21,14 @@
 #include	"type.h"
 #include	"node.h"
 
-struct node *
+t_node *
 MkNode(class, left, right, token)
-	struct node *left, *right;
-	struct token *token;
+	t_node *left, *right;
+	t_token *token;
 {
 	/*	Create a node and initialize it with the given parameters
 	*/
-	register struct node *nd = new_node();
+	register t_node *nd = new_node();
 
 	nd->nd_left = left;
 	nd->nd_right = right;
@@ -37,32 +37,32 @@ MkNode(class, left, right, token)
 	return nd;
 }
 
-struct node *
+t_node *
 dot2node(class, left, right)
-	struct node *left, *right;
+	t_node *left, *right;
 {
 	return MkNode(class, left, right, &dot);
 }
 
-struct node *
+t_node *
 MkLeaf(class, token)
-	struct token *token;
+	t_token *token;
 {
-	register struct node *nd = new_node();
+	register t_node *nd = new_node();
 
 	nd->nd_token = *token;
 	nd->nd_class = class;
 	return nd;
 }
 
-struct node *
+t_node *
 dot2leaf(class)
 {
 	return MkLeaf(class, &dot);
 }
 
 FreeNode(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
 	/*	Put nodes that are no longer needed back onto the free
 		list
@@ -74,7 +74,7 @@ FreeNode(nd)
 }
 
 NodeCrash(expp)
-	struct node *expp;
+	t_node *expp;
 {
 	crash("Illegal node %d", expp->nd_class);
 }
@@ -91,7 +91,7 @@ indnt(lvl)
 }
 
 printnode(nd, lvl)
-	register struct node *nd;
+	register t_node *nd;
 {
 	indnt(lvl);
 	print("Class: %d; Symbol: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
@@ -104,7 +104,7 @@ printnode(nd, lvl)
 }
 
 PrNode(nd, lvl)
-	register struct node *nd;
+	register t_node *nd;
 {
 	if (! nd) {
 		indnt(lvl); print("<nilnode>\n");

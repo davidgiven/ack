@@ -32,13 +32,15 @@ struct token	{
 	} tk_data;
 };
 
+typedef struct token	t_token;
+
 #define TOK_IDF	tk_data.tk_idf
 #define TOK_STR	tk_data.tk_str->s_str
 #define TOK_SLE tk_data.tk_str->s_length
 #define TOK_INT	tk_data.tk_int
 #define TOK_REL tk_data.tk_real
 
-extern struct token dot, aside;
+extern t_token dot, aside;
 extern struct type *toktype;
 
 #define DOT	dot.tk_symb

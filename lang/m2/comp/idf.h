@@ -19,3 +19,5 @@ struct id_u {
 #define id_def		id_user.id_df
 
 #include	<idf_pkg.spec>
+
+typedef struct idf	t_idf;

@@ -24,7 +24,7 @@
 #include	"Lpars.h"
 
 extern char		*symbol2str();
-extern struct idf	*gen_anon_idf();
+extern t_idf		*gen_anon_idf();
 
 LLmessage(tk)
 	register int tk;
@@ -32,7 +32,7 @@ LLmessage(tk)
 	if (tk > 0)	{
 		/* if (tk > 0), it represents the token to be inserted.
 		*/
-		register struct token *dotp = &dot;
+		register t_token *dotp = &dot;
 
 		error("%s missing", symbol2str(tk));
 

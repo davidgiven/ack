@@ -24,6 +24,7 @@
 #include	<assert.h>
 #include	<alloc.h>
 
+#include	"squeeze.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -31,65 +32,74 @@
 #include	"desig.h"
 #include	"node.h"
 #include	"warning.h"
+#include	"walk.h"
 
 extern int	proclevel;
 
 int
 WordOrDouble(ds, size)
-	register struct desig *ds;
+	register t_desig *ds;
 	arith size;
 {
-	return ((int) (ds->dsg_offset) % (int) word_size == 0 &&
-		( (int) size == (int) word_size ||
-		  (int) size == (int) dword_size));
+	if ((int) (ds->dsg_offset) % (int) word_size == 0) {
+		if (size == word_size) return 1;
+		if (size == dword_size) return 2;
+	}
+	return 0;
 }
 
 int
 DoLoad(ds, size)
-	register struct desig *ds;
+	register t_desig *ds;
 	arith size;
 {
-	if (! WordOrDouble(ds, size)) return 0;
-	if (ds->dsg_name) {
-		if ((int) size == (int) word_size) {
+	switch (WordOrDouble(ds, size)) {
+	default:
+		return 0;
+	case 1:
+		if (ds->dsg_name) {
 			C_loe_dnam(ds->dsg_name, ds->dsg_offset);
 		}
-		else	C_lde_dnam(ds->dsg_name, ds->dsg_offset);
-	}
-	else {
-		if ((int) size == (int) word_size) {
-			C_lol(ds->dsg_offset);
+		else	C_lol(ds->dsg_offset);
+		break;
+	case 2:
+		if (ds->dsg_name) {
+			C_lde_dnam(ds->dsg_name, ds->dsg_offset);
 		}
 		else	C_ldl(ds->dsg_offset);
+		break;
 	}
 	return 1;
 }
 
 int
 DoStore(ds, size)
-	register struct desig *ds;
+	register t_desig *ds;
 	arith size;
 {
-	if (! WordOrDouble(ds, size)) return 0;
-	if (ds->dsg_name) {
-		if ((int) size == (int) word_size) {
+	switch (WordOrDouble(ds, size)) {
+	default:
+		return 0;
+	case 1:
+		if (ds->dsg_name) {
 			C_ste_dnam(ds->dsg_name, ds->dsg_offset);
 		}
-		else	C_sde_dnam(ds->dsg_name, ds->dsg_offset);
-	}
-	else {
-		if ((int) size == (int) word_size) {
-			C_stl(ds->dsg_offset);
+		else	C_stl(ds->dsg_offset);
+		break;
+	case 2:
+		if (ds->dsg_name) {
+			C_sde_dnam(ds->dsg_name, ds->dsg_offset);
 		}
 		else	C_sdl(ds->dsg_offset);
+		break;
 	}
 	return 1;
 }
 
 STATIC int
 properly(ds, tp)
-	register struct desig *ds;
-	register struct type *tp;
+	register t_desig *ds;
+	register t_type *tp;
 {
 	/*	Check if it is allowed to load or store the value indicated
 		by "ds" with LOI/STI.
@@ -115,8 +125,8 @@ properly(ds, tp)
 }
 
 CodeValue(ds, tp)
-	register struct desig *ds;
-	register struct type *tp;
+	register t_desig *ds;
+	register t_type *tp;
 {
 	/*	Generate code to load the value of the designator described
 		in "ds"
@@ -167,10 +177,10 @@ CodeValue(ds, tp)
 }
 
 ChkForFOR(nd)
-	struct node *nd;
+	t_node *nd;
 {
 	if (nd->nd_class == Def) {
-		register struct def *df = nd->nd_def;
+		register t_def *df = nd->nd_def;
 
 		if (df->df_flags & D_FORLOOP) {
 			node_warning(nd,
@@ -182,13 +192,13 @@ ChkForFOR(nd)
 }
 
 CodeStore(ds, tp)
-	register struct desig *ds;
-	register struct type *tp;
+	register t_desig *ds;
+	register t_type *tp;
 {
 	/*	Generate code to store the value on the stack in the designator
 		described in "ds"
 	*/
-	struct desig save;
+	t_desig save;
 
 	save = *ds;
 
@@ -220,10 +230,10 @@ CodeStore(ds, tp)
 }
 
 CodeCopy(lhs, rhs, sz, psize)
-	register struct desig *lhs, *rhs;
+	register t_desig *lhs, *rhs;
 	arith sz, *psize;
 {
-	struct desig l, r;
+	t_desig l, r;
 
 	l = *lhs; r = *rhs;
 	*psize -= sz;
@@ -236,12 +246,12 @@ CodeCopy(lhs, rhs, sz, psize)
 }
 
 CodeMove(rhs, left, rtp)
-	register struct desig *rhs;
-	register struct node *left;
-	struct type *rtp;
+	register t_desig *rhs;
+	register t_node *left;
+	t_type *rtp;
 {
-	register struct desig *lhs = new_desig();
-	register struct type *tp = left->nd_type;
+	register t_desig *lhs = new_desig();
+	register t_type *tp = left->nd_type;
 	int	loadedflag = 0;
 
 	/*	Generate code for an assignment. Testing of type
@@ -297,7 +307,7 @@ CodeMove(rhs, left, rtp)
 			if (size > 3*dword_size) {
 				/*	Do a block move
 				*/
-				struct desig l, r;
+				t_desig l, r;
 				arith sz;
 
 				sz = (size / word_size) * word_size;
@@ -365,7 +375,7 @@ CodeMove(rhs, left, rtp)
 }
 
 CodeAddress(ds)
-	register struct desig *ds;
+	register t_desig *ds;
 {
 	/*	Generate code to load the address of the designator described
 	   	in "ds"
@@ -404,8 +414,8 @@ CodeAddress(ds)
 }
 
 CodeFieldDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+	register t_def *df;
+	register t_desig *ds;
 {
 	/* Generate code for a field designator. Only the code common for
 	   address as well as value computation is generated, and the
@@ -455,8 +465,8 @@ CodeFieldDesig(df, ds)
 }
 
 CodeVarDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+	register t_def *df;
+	register t_desig *ds;
 {
 	/*	Generate code for a variable represented by a "def" structure.
 		Of course, there are numerous cases: the variable is local,
@@ -532,13 +542,13 @@ CodeVarDesig(df, ds)
 }
 
 CodeDesig(nd, ds)
-	register struct node *nd;
-	register struct desig *ds;
+	register t_node *nd;
+	register t_desig *ds;
 {
 	/*	Generate code for a designator. Use divide and conquer
 		principle
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	switch(nd->nd_class) {	/* Divide */
 	case Def:
@@ -579,7 +589,7 @@ CodeDesig(nd, ds)
 			else	C_lal(df->var_off + pointer_size);
 		}
 		else	{
-			C_lae_dlb(nd->nd_left->nd_type->arr_descr, (arith) 0);
+			c_lae_dlb(nd->nd_left->nd_type->arr_descr);
 		}
 		ds->dsg_kind = DSG_INDEXED;
 		break;

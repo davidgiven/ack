@@ -29,7 +29,7 @@ extern char *sprint();
 
 int
 TstTypeEquiv(tp1, tp2)
-	struct type *tp1, *tp2;
+	t_type *tp1, *tp2;
 {
 	/*	test if two types are equivalent.
 	*/
@@ -43,7 +43,7 @@ TstTypeEquiv(tp1, tp2)
 
 int
 TstParEquiv(tp1, tp2)
-	register struct type *tp1, *tp2;
+	register t_type *tp1, *tp2;
 {
 	/*	test if two parameter types are equivalent. This routine
 		is used to check if two different procedure declarations
@@ -66,7 +66,7 @@ TstParEquiv(tp1, tp2)
 
 int
 TstProcEquiv(tp1, tp2)
-	struct type *tp1, *tp2;
+	t_type *tp1, *tp2;
 {
 	/*	Test if two procedure types are equivalent. This routine
 		may also be used for the testing of assignment compatibility
@@ -98,7 +98,7 @@ TstProcEquiv(tp1, tp2)
 
 int
 TstCompat(tp1, tp2)
-	register struct type *tp1, *tp2;
+	register t_type *tp1, *tp2;
 {
 	/*	test if two types are compatible. See section 6.3 of the
 		Modula-2 Report for a definition of "compatible".
@@ -110,7 +110,7 @@ TstCompat(tp1, tp2)
 	tp2 = BaseType(tp2);
 	if (tp2 != intorcard_type &&
 	    (tp1 == intorcard_type || tp1 == address_type)) {
-		struct type *tmp = tp2;
+		t_type *tmp = tp2;
 		
 		tp2 = tp1;
 		tp1 = tmp;
@@ -132,12 +132,12 @@ TstCompat(tp1, tp2)
 
 int
 TstAssCompat(tp1, tp2)
-	register struct type *tp1, *tp2;
+	register t_type *tp1, *tp2;
 {
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
 	*/
-	register struct type *tp;
+	register t_type *tp;
 
 	if (TstCompat(tp1, tp2)) return 1;
 
@@ -179,9 +179,9 @@ TstAssCompat(tp1, tp2)
 
 int
 TstParCompat(parno, formaltype, VARflag, nd, edf)
-	register struct type *formaltype;
-	struct node **nd;
-	struct def *edf;
+	register t_type *formaltype;
+	t_node **nd;
+	t_def *edf;
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
@@ -190,7 +190,7 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 		may do too.
 		Or: a WORD may do.
 	*/
-	register struct type *actualtype = (*nd)->nd_type;
+	register t_type *actualtype = (*nd)->nd_type;
 	char ebuf[256];
 	char ebuf1[256];
 
@@ -258,8 +258,8 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 }
 
 CompatCheck(nd, tp, message, fc)
-	struct node **nd;
-	struct type *tp;
+	t_node **nd;
+	t_type *tp;
 	char *message;
 	int (*fc)();
 {
@@ -274,8 +274,8 @@ CompatCheck(nd, tp, message, fc)
 }
 
 ChkAssCompat(nd, tp, message)
-	struct node **nd;
-	struct type *tp;
+	t_node **nd;
+	t_type *tp;
 	char *message;
 {
 	/*	Check assignment compatibility of node "nd" with type "tp".
@@ -286,8 +286,8 @@ ChkAssCompat(nd, tp, message)
 }
 
 ChkCompat(nd, tp, message)
-	struct node **nd;
-	struct type *tp;
+	t_node **nd;
+	t_type *tp;
 	char *message;
 {
 	/*	Check compatibility of node "nd" with type "tp".

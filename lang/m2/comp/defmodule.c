@@ -32,7 +32,7 @@
 long	sys_filesize();
 #endif
 
-struct idf *DefId;
+t_idf *DefId;
 
 char *
 getwdir(fn)
@@ -80,16 +80,16 @@ GetFile(name)
 	return 1;
 }
 
-struct def *
+t_def *
 GetDefinitionModule(id, incr)
-	register struct idf *id;
+	register t_idf *id;
 {
 	/*	Return a pointer to the "def" structure of the definition
 		module indicated by "id".
 		We may have to read the definition module itself.
 		Also increment level by "incr".
 	*/
-	register struct def *df;
+	register t_def *df;
 	static int level;
 	struct scopelist *vis;
 	char *fn = FileName;
@@ -124,9 +124,9 @@ GetDefinitionModule(id, incr)
 					   remember its name because we have 
 					   to call its initialization routine
 					*/
-					static struct node *nd_end;
-					register struct node *n;
-					extern struct node *Modules;
+					static t_node *nd_end;
+					register t_node *n;
+					extern t_node *Modules;
 
 					n = dot2leaf(Name);
 					n->nd_IDF = id;

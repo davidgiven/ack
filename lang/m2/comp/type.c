@@ -19,6 +19,7 @@
 #include	<em_label.h>
 #include	<em_code.h>
 
+#include	"squeeze.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -52,7 +53,7 @@ arith
 	double_size = SZ_DOUBLE,
 	pointer_size = SZ_POINTER;
 
-struct type
+t_type
 	*bool_type,
 	*char_type,
 	*int_type,
@@ -68,15 +69,15 @@ struct type
 	*std_type,
 	*error_type;
 
-struct type *
+t_type *
 construct_type(fund, tp)
 	int fund;
-	register struct type *tp;
+	register t_type *tp;
 {
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
 	*/
-	register struct type *dtp = new_type();
+	register t_type *dtp = new_type();
 
 	switch (dtp->tp_fund = fund)	{
 	case T_PROCEDURE:
@@ -121,13 +122,13 @@ align(pos, al)
 	return pos;
 }
 
-struct type *
+t_type *
 standard_type(fund, align, size)
 	int fund;
 	int align;
 	arith size;
 {
-	register struct type *tp = new_type();
+	register t_type *tp = new_type();
 
 	tp->tp_fund = fund;
 	tp->tp_align = align;
@@ -143,7 +144,7 @@ InitTypes()
 {
 	/*	Initialize the predefined types
 	*/
-	register struct type *tp;
+	register t_type *tp;
 
 	/* first, do some checking
 	*/
@@ -215,7 +216,7 @@ InitTypes()
 
 STATIC
 u_small(tp, n)
-	register struct type *tp;
+	register t_type *tp;
 	arith n;
 {
 	if (ufit(n, 1)) {
@@ -228,11 +229,11 @@ u_small(tp, n)
 	}
 }
 
-struct type *
+t_type *
 enum_type(EnumList)
-	struct node *EnumList;
+	t_node *EnumList;
 {
-	register struct type *tp =
+	register t_type *tp =
 		standard_type(T_ENUMERATION, int_align, int_size);
 
 	EnterEnumList(EnumList, tp);
@@ -243,11 +244,11 @@ enum_type(EnumList)
 	return tp;
 }
 
-struct type *
+t_type *
 qualified_type(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
-	register struct def *df;
+	register t_def *df;
 
 	if (ChkDesignator(nd)) {
 		if (nd->nd_class != Def) {
@@ -276,7 +277,7 @@ node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
 }
 
 chk_basesubrange(tp, base)
-	register struct type *tp, *base;
+	register t_type *tp, *base;
 {
 	/*	A subrange had a specified base. Check that the bases conform.
 	*/
@@ -330,17 +331,17 @@ chk_bounds(l1, l2, fund)
 	       );
 }
 
-struct type *
+t_type *
 subr_type(lb, ub)
-	register struct node *lb;
-	struct node *ub;
+	register t_node *lb;
+	t_node *ub;
 {
 	/*	Construct a subrange type from the constant expressions
 		indicated by "lb" and "ub", but first perform some
 		checks
 	*/
-	register struct type *tp = BaseType(lb->nd_type);
-	register struct type *res;
+	register t_type *tp = BaseType(lb->nd_type);
+	register t_type *res;
 
 	if (tp == intorcard_type) {
 		/* Lower bound >= 0; in this case, the base type is CARDINAL,
@@ -389,13 +390,13 @@ subr_type(lb, ub)
 	return res;
 }
 
-struct type *
+t_type *
 proc_type(result_type, parameters, n_bytes_params)
-	struct type *result_type;
+	t_type *result_type;
 	struct paramlist *parameters;
 	arith n_bytes_params;
 {
-	register struct type *tp = construct_type(T_PROCEDURE, result_type);
+	register t_type *tp = construct_type(T_PROCEDURE, result_type);
 
 	tp->prc_params = parameters;
 	tp->prc_nbpar = n_bytes_params;
@@ -403,7 +404,7 @@ proc_type(result_type, parameters, n_bytes_params)
 }
 
 genrck(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	/*	generate a range check descriptor for type "tp" when
 		neccessary. Return its label.
@@ -426,12 +427,12 @@ genrck(tp)
 		C_rom_cst(lb);
 		C_rom_cst(ub);
 	}
-	C_lae_dlb(ol, (arith) 0);
+	c_lae_dlb(ol);
 	C_rck(word_size);
 }
 
 getbounds(tp, plo, phi)
-	register struct type *tp;
+	register t_type *tp;
 	arith *plo, *phi;
 {
 	/*	Get the bounds of a bounded type
@@ -449,9 +450,9 @@ getbounds(tp, plo, phi)
 	}
 }
 
-struct type *
+t_type *
 set_type(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
@@ -477,7 +478,7 @@ set_type(tp)
 
 arith
 ArrayElSize(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	/* Align element size to alignment requirement of element type.
 	   Also make sure that its size is either a dividor of the word_size,
@@ -497,12 +498,12 @@ ArrayElSize(tp)
 }
 
 ArraySizes(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
-	register struct type *index_type = IndexType(tp);
-	register struct type *elem_type = tp->arr_elem;
+	register t_type *index_type = IndexType(tp);
+	register t_type *elem_type = tp->arr_elem;
 	arith lo, hi, diff;
 
 	tp->arr_elsize = ArrayElSize(elem_type);
@@ -531,7 +532,7 @@ ArraySizes(tp)
 }
 
 FreeType(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	/*	Release type structures indicated by "tp".
 		This procedure is only called for types, constructed with
@@ -553,9 +554,9 @@ FreeType(tp)
 }
 
 DeclareType(nd, df, tp)
-	register struct def *df;
-	register struct type *tp;
-	struct node *nd;
+	register t_def *df;
+	register t_type *tp;
+	t_node *nd;
 {
 	/*	A type with type-description "tp" is declared and must
 		be bound to definition "df".
@@ -563,7 +564,7 @@ DeclareType(nd, df, tp)
 		"df" is already bound. In that case, it is either an opaque
 		type, or an error message was given when "df" was created.
 	*/
-	register struct type *df_tp = df->df_type;
+	register t_type *df_tp = df->df_type;
 
 	if (df_tp && df_tp->tp_fund == T_HIDDEN) {
 	  	if (! (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
@@ -586,9 +587,9 @@ DeclareType(nd, df, tp)
 	else	df->df_type = tp;
 }
 
-struct type *
+t_type *
 RemoveEqual(tpx)
-	register struct type *tpx;
+	register t_type *tpx;
 {
 
 	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->tp_next;
@@ -597,29 +598,26 @@ RemoveEqual(tpx)
 
 int
 type_or_forward(ptp)
-	struct type **ptp;
+	t_type **ptp;
 {
 	/*	POINTER TO IDENTIFIER construction. The IDENTIFIER resides
 		in "dot". This routine handles the different cases.
 	*/
-	register struct node *nd;
-	register struct def *df, *df1;
+	register t_node *nd;
+	register t_def *df, *df1;
 
 	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1))) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
 		if (df1->df_kind == D_FORWTYPE) {
-			nd = new_node();
-			nd->nd_token = dot;
-			nd->nd_right = df1->df_forw_node;
+			nd = dot2node(NULLNODE, df1->df_forw_node, 0);
 			df1->df_forw_node = nd;
 			nd->nd_type = *ptp;
 		}
 		return 1;
 	}
-	nd = new_node();
-	nd->nd_token = dot;
+	nd = dot2leaf(0);
 	if ((df1 = lookfor(nd, CurrVis, 0))->df_kind == D_MODULE) {
 		/* A Modulename in one of the enclosing scopes.
 		   It is not clear from the language definition that
@@ -629,7 +627,7 @@ type_or_forward(ptp)
 		   one token.
 		   ???
 		*/
-		free_node(nd);
+		FreeNode(nd);
 		return 1;
 	}
 	/*	Enter a forward reference into a list belonging to the
@@ -641,7 +639,7 @@ type_or_forward(ptp)
 
 	if (df->df_kind == D_TYPE) {
 		(*ptp)->tp_next = df->df_type;
-		free_node(nd);
+		FreeNode(nd);
 		return 0;
 	}
 	nd->nd_type = *ptp;
@@ -679,7 +677,7 @@ lcm(m, n)
 
 #ifdef DEBUG
 DumpType(tp)
-	register struct type *tp;
+	register t_type *tp;
 {
 	if (!tp) return;
 

@@ -21,6 +21,7 @@
 #include	<assert.h>
 #include	<alloc.h>
 
+#include	"squeeze.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -39,7 +40,7 @@ int		fp_used;
 
 STATIC char *
 NameOfProc(df)
-	register struct def *df;
+	register t_def *df;
 {
 
 	assert(df->df_kind & (D_PROCHEAD|D_PROCEDURE));
@@ -68,14 +69,14 @@ CodeConst(cst, size)
 /*
 		C_df_dlb(++data_label);
 		C_rom_icon(long2str((long) cst), (arith) size);
-		C_lae_dlb(data_label, (arith) 0);
+		c_lae_dlb(data_label);
 		C_loi((arith) size);
 */
 	}
 }
 
 CodeString(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
@@ -84,15 +85,15 @@ CodeString(nd)
 	}
 	C_df_dlb(++data_label);
 	C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
-	C_lae_dlb(data_label, (arith) 0);
+	c_lae_dlb(data_label);
 }
 
 CodeExpr(nd, ds, true_label, false_label)
-	register struct node *nd;
-	register struct desig *ds;
+	register t_node *nd;
+	register t_desig *ds;
 	label true_label, false_label;
 {
-	register struct type *tp = nd->nd_type;
+	register t_type *tp = nd->nd_type;
 
 	if (tp->tp_fund == T_REAL) fp_used = 1;
 	switch(nd->nd_class) {
@@ -126,7 +127,7 @@ CodeExpr(nd, ds, true_label, false_label)
 		case REAL:
 			C_df_dlb(++data_label);
 			C_rom_fcon(nd->nd_REL, tp->tp_size);
-			C_lae_dlb(data_label, (arith) 0);
+			c_lae_dlb(data_label);
 			C_loi(tp->tp_size);
 			break;
 		case STRING:
@@ -154,8 +155,7 @@ CodeExpr(nd, ds, true_label, false_label)
 		for (; i; i--) { 
 			C_loc(*--st);
 		}
-		free((char *) nd->nd_set);
-		nd->nd_set = 0;
+		FreeSet(nd->nd_set);
 		CodeSet(nd);
 		}
 		break;
@@ -174,7 +174,7 @@ CodeExpr(nd, ds, true_label, false_label)
 }
 
 CodeCoercion(t1, t2)
-	register struct type *t1, *t2;
+	register t_type *t1, *t2;
 {
 	register int fund1, fund2;
 	arith sz1 = t1->tp_size;
@@ -208,7 +208,7 @@ CodeCoercion(t1, t2)
 	case T_INTEGER:
 		if (sz1 < word_size) {
 			C_loc(sz1);
-			C_loc(word_size);
+			c_loc((int) word_size);
 			C_cii();
 		}
 		switch(fund2) {
@@ -222,7 +222,7 @@ CodeCoercion(t1, t2)
 		case T_CARDINAL:
 			if (t1->tp_size != word_size) {
 				C_loc(t1->tp_size);
-				C_loc(word_size);
+				c_loc((int) word_size);
 				C_ciu();
 			}
 			break;
@@ -242,20 +242,20 @@ CodeCoercion(t1, t2)
 		case T_CARDINAL:
 		case T_INTORCARD:
 			if (t2->tp_size > word_size) {
-				C_loc(word_size);
+				c_loc((int) word_size);
 				C_loc(t2->tp_size);
 				C_cuu();
 			}
 			break;
 		case T_INTEGER:
 			if (fund1 == T_CARDINAL || t2->tp_size != word_size) {
-				C_loc(word_size);
+				c_loc((int) word_size);
 				C_loc(t2->tp_size);
 				C_cui();
 			}
 			break;
 		case T_REAL:
-			C_loc(word_size);
+			c_loc((int) word_size);
 			C_loc(t2->tp_size);
 			C_cuf();
 			break;
@@ -286,7 +286,7 @@ CodeCoercion(t1, t2)
 				C_zrf(t1->tp_size);
 				C_cmf(t1->tp_size);
 				C_zge(lb);
-				C_loc((arith) ECONV);
+				c_loc(ECONV);
 				C_trp();
 				C_df_ilb(lb);
 			}
@@ -302,14 +302,14 @@ CodeCoercion(t1, t2)
 }
 
 CodeCall(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
 	/*	Generate code for a procedure call. Checking of parameters
 		and result is already done.
 	*/
-	register struct node *left = nd->nd_left;
-	register struct node *right = nd->nd_right;
-	register struct type *result_tp;
+	register t_node *left = nd->nd_left;
+	register t_node *right = nd->nd_right;
+	register t_type *result_tp;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -360,11 +360,11 @@ CodeCall(nd)
 
 CodeParameters(param, arg)
 	struct paramlist *param;
-	struct node *arg;
+	t_node *arg;
 {
-	register struct type *tp;
-	register struct node *left;
-	register struct type *left_type;
+	register t_type *tp;
+	register t_node *left;
+	register t_type *left_type;
 
 	assert(param != 0 && arg != 0);
 
@@ -376,7 +376,7 @@ CodeParameters(param, arg)
 	left = arg->nd_left;
 	left_type = left->nd_type;
 	if (IsConformantArray(tp)) {
-		register struct type *elem = tp->arr_elem;
+		register t_type *elem = tp->arr_elem;
 
 		C_loc(tp->arr_elsize);
 		if (IsConformantArray(left_type)) {
@@ -388,9 +388,9 @@ CodeParameters(param, arg)
 				C_loc(left_type->arr_elem->tp_size);
 				C_mli(word_size);
 				if (elem == word_type) {
-					C_loc(word_size - 1);
+					c_loc((int) word_size - 1);
 					C_adi(word_size);
-					C_loc(word_size);
+					c_loc((int) word_size);
 					C_dvi(word_size);
 				}
 				else {
@@ -412,7 +412,7 @@ CodeParameters(param, arg)
 			getbounds(IndexType(left_type), &lb, &ub);
 			C_loc(ub - lb);
 		}
-		C_loc((arith) 0);
+		c_loc(0);
 		if (left->nd_symb == STRING) {
 			CodeString(left);
 		}
@@ -447,8 +447,8 @@ CodeParameters(param, arg)
 }
 
 CodePString(nd, tp)
-	struct node *nd;
-	struct type *tp;
+	t_node *nd;
+	t_type *tp;
 {
 	arith szarg = WA(nd->nd_type->tp_size);
 	register arith zersz = WA(tp->tp_size) - szarg;
@@ -463,11 +463,11 @@ CodePString(nd, tp)
 }
 
 CodeStd(nd)
-	struct node *nd;
+	t_node *nd;
 {
-	register struct node *arg = nd->nd_right;
-	register struct node *left = 0;
-	register struct type *tp;
+	register t_node *arg = nd->nd_right;
+	register t_node *left = 0;
+	register t_type *tp;
 	int std = nd->nd_left->nd_def->df_value.df_stdname;
 
 	if (arg) {
@@ -493,7 +493,7 @@ CodeStd(nd)
 
 	case S_CAP:
 		CodePExpr(left);
-		C_loc((arith) 0137);	/* ASCII assumed */
+		c_loc(0137);	/* ASCII assumed */
 		C_and(word_size);
 		break;
 
@@ -514,7 +514,7 @@ CodeStd(nd)
 	case S_ODD:
 		CodePExpr(left);
 		if (tp->tp_size == word_size) {
-			C_loc((arith) 1);
+			c_loc(1);
 			C_and(word_size);
 		}
 		else {
@@ -541,7 +541,7 @@ CodeStd(nd)
 			CodeCoercion(arg->nd_left->nd_type, tp);
 		}
 		else	{
-			C_loc((arith) 1);
+			c_loc(1);
 			CodeCoercion(intorcard_type, tp);
 		}
 		if (std == S_DEC) {
@@ -585,7 +585,7 @@ CodeStd(nd)
 }
 
 RangeCheck(tpl, tpr)
-	register struct type *tpl, *tpr;
+	register t_type *tpl, *tpr;
 {
 	/*	Generate a range check if neccessary
 	*/
@@ -621,14 +621,14 @@ RangeCheck(tpl, tpr)
 
 		C_dup(word_size);
 		C_zge(lb);
-		C_loc((arith) ECONV);
+		c_loc(ECONV);
 		C_trp();
 		C_df_ilb(lb);
 	}
 }
 
 Operands(leftop, rightop)
-	register struct node *leftop, *rightop;
+	register t_node *leftop, *rightop;
 {
 
 	CodePExpr(leftop);
@@ -636,13 +636,13 @@ Operands(leftop, rightop)
 }
 
 CodeOper(expr, true_label, false_label)
-	register struct node *expr;	/* the expression tree itself	*/
+	register t_node *expr;	/* the expression tree itself	*/
 	label true_label;
 	label false_label;	/* labels to jump to in logical expr's	*/
 {
-	register struct node *leftop = expr->nd_left;
-	register struct node *rightop = expr->nd_right;
-	register struct type *tp = expr->nd_type;
+	register t_node *leftop = expr->nd_left;
+	register t_node *rightop = expr->nd_right;
+	register t_type *tp = expr->nd_type;
 
 	switch (expr->nd_symb)	{
 	case '+':
@@ -830,7 +830,7 @@ CodeOper(expr, true_label, false_label)
 	case OR:
 	case AND: {
 		label  l_maybe = ++text_label, l_end;
-		struct desig *Des = new_desig();
+		t_desig *Des = new_desig();
 		int genlabels = 0;
 
 		if (true_label == NO_LABEL)	{
@@ -850,10 +850,10 @@ CodeOper(expr, true_label, false_label)
 		CodeExpr(rightop, Des, true_label, false_label);
 		if (genlabels) {
 			C_df_ilb(true_label);
-			C_loc((arith)1);
+			c_loc(1);
 			C_bra(l_end);
 			C_df_ilb(false_label);
-			C_loc((arith)0);
+			c_loc(0);
 			C_df_ilb(l_end);
 		}
 		free_desig(Des);
@@ -922,9 +922,9 @@ truthvalue(relop)
 }
 
 CodeUoper(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
-	register struct type *tp = nd->nd_type;
+	register t_type *tp = nd->nd_type;
 
 	CodePExpr(nd->nd_right);
 	switch(nd->nd_symb) {
@@ -954,9 +954,9 @@ CodeUoper(nd)
 }
 
 CodeSet(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
-	register struct type *tp = nd->nd_type;
+	register t_type *tp = nd->nd_type;
 
 	nd = nd->nd_right;
 	while (nd) {
@@ -968,10 +968,10 @@ CodeSet(nd)
 }
 
 CodeEl(nd, tp)
-	register struct node *nd;
-	register struct type *tp;
+	register t_node *nd;
+	register t_type *tp;
 {
-	register struct type *eltype = ElementType(tp);
+	register t_type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
 		C_loc(tp->tp_size);	/* push size */
@@ -991,12 +991,12 @@ CodeEl(nd, tp)
 }
 
 CodePExpr(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
 	/*	Generate code to push the value of the expression "nd"
 		on the stack.
 	*/
-	register struct desig *designator = new_desig();
+	register t_desig *designator = new_desig();
 
 	CodeExpr(nd, designator, NO_LABEL, NO_LABEL);
 	CodeValue(designator, nd->nd_type);
@@ -1004,13 +1004,13 @@ CodePExpr(nd)
 }
 
 CodeDAddress(nd)
-	struct node *nd;
+	t_node *nd;
 {
 	/*	Generate code to push the address of the designator "nd"
 		on the stack.
 	*/
 
-	register struct desig *designator = new_desig();
+	register t_desig *designator = new_desig();
 
 	ChkForFOR(nd);
 	CodeDesig(nd, designator);
@@ -1019,13 +1019,13 @@ CodeDAddress(nd)
 }
 
 CodeDStore(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
 	/*	Generate code to store the expression on the stack into the
 		designator "nd".
 	*/
 
-	register struct desig *designator = new_desig();
+	register t_desig *designator = new_desig();
 
 	ChkForFOR(nd);
 	CodeDesig(nd, designator);
@@ -1034,7 +1034,7 @@ CodeDStore(nd)
 }
 
 DoHIGH(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Get the high index of a conformant array, indicated by "nd".
 		The high index is the second field in the descriptor of
@@ -1055,3 +1055,16 @@ DoHIGH(df)
 	}
 	else	C_lol(highoff);
 }
+
+#ifdef SQUEEZE
+c_loc(n)
+{
+	C_loc((arith) n);
+}
+
+c_lae_dlb(l)
+	label l;
+{
+	C_lae_dlb(l, (arith) 0);
+}
+#endif

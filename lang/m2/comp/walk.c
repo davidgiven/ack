@@ -23,6 +23,7 @@
 #include	<assert.h>
 #include	<alloc.h>
 
+#include	"squeeze.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -37,18 +38,31 @@
 #include	"walk.h"
 #include	"warning.h"
 
-extern arith	NewPtr();
-extern arith	NewInt();
-extern int	proclevel;
-label		text_label;
-label		data_label = 1;
-static struct type *func_type;
-struct withdesig *WithDesigs;
-struct node	*Modules;
-static struct node	*priority;
+extern arith		NewPtr();
+extern arith		NewInt();
+extern int		proclevel;
+label			text_label;
+label			data_label = 1;
+static t_type		*func_type;
+struct withdesig	*WithDesigs;
+t_node		*Modules;
+static arith		priority;
 
 #define	NO_EXIT_LABEL	((label) 0)
 #define RETURN_LABEL	((label) 1)
+
+LblWalkNode(lbl, nd, exit)
+	label lbl, exit;
+	register t_node *nd;
+{
+	/*	Generate code for node "nd", after generating instruction
+		label "lbl". "exit" is the exit label for the closest
+		enclosing LOOP.
+	*/
+
+	C_df_ilb(lbl);
+	WalkNode(nd, exit);
+}
 
 STATIC
 DoPriority()
@@ -57,10 +71,8 @@ DoPriority()
 		the runtime system
 	*/
 
-	register struct node *p;
-
-	if (p = priority) {
-		C_loc(p->nd_INT);
+	if (priority) {
+		C_loc(priority);
 		C_cal("_stackprio");
 		C_asp(word_size);
 	}
@@ -92,7 +104,7 @@ DoProfil()
 }
 
 WalkModule(module)
-	register struct def *module;
+	register t_def *module;
 {
 	/*	Walk through a module, and all its local definitions.
 		Also generate code for its body.
@@ -102,7 +114,7 @@ WalkModule(module)
 	struct scopelist *savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
-	priority = module->mod_priority;
+	priority = module->mod_priority ? module->mod_priority->nd_INT : 0;
 	sc = CurrentScope;
 
 	/* Walk through it's local definitions
@@ -124,7 +136,7 @@ WalkModule(module)
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		register struct node *nd = Modules;
+		register t_node *nd = Modules;
 
 		if (state == IMPLEMENTATION) {
 			/* We don't actually prevent recursive calls,
@@ -159,14 +171,14 @@ WalkModule(module)
 }
 
 WalkProcedure(procedure)
-	register struct def *procedure;
+	register t_def *procedure;
 {
 	/*	Walk through the definition of a procedure and all its
 		local definitions, checking and generating code.
 	*/
 	struct scopelist *savevis = CurrVis;
 	register struct scope *sc = procedure->prc_vis->sc_scope;
-	register struct type *tp;
+	register t_type *tp;
 	register struct paramlist *param;
 	label func_res_label = 0;
 	arith StackAdjustment = 0;
@@ -276,7 +288,7 @@ WalkProcedure(procedure)
 	WalkNode(procedure->prc_body, NO_EXIT_LABEL);
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	if (func_res_size) {
-		C_loc((arith) M2_NORESULT);
+		c_loc(M2_NORESULT);
 		C_trp();
 		C_asp(-func_res_size);
 	}
@@ -285,7 +297,7 @@ WalkProcedure(procedure)
 		/* Fill the data area reserved for the function result
 		   with the result
 		*/
-		C_lae_dlb(func_res_label, (arith) 0);
+		c_lae_dlb(func_res_label);
 		C_sti(func_res_size);
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
@@ -293,7 +305,7 @@ WalkProcedure(procedure)
 			C_lol(StackAdjustment);
 			C_str((arith) 1);
 		}
-		C_lae_dlb(func_res_label, (arith) 0);
+		c_lae_dlb(func_res_label);
 		func_res_size = pointer_size;
 	}
 	else if (StackAdjustment) {
@@ -323,7 +335,7 @@ WalkProcedure(procedure)
 }
 
 WalkDef(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Walk through a list of definitions
 	*/
@@ -352,7 +364,7 @@ WalkDef(df)
 }
 
 MkCalls(df)
-	register struct def *df;
+	register t_def *df;
 {
 	/*	Generate calls to initialization routines of modules
 	*/
@@ -367,7 +379,7 @@ MkCalls(df)
 }
 
 WalkLink(nd, exit_label)
-	register struct node *nd;
+	register t_node *nd;
 	label exit_label;
 {
 	/*	Walk node "nd", which is a link.
@@ -381,44 +393,39 @@ WalkLink(nd, exit_label)
 	WalkNode(nd, exit_label);
 }
 
-WalkCall(nd)
-	register struct node *nd;
-{
-	assert(nd->nd_class == Call);
-
-	if (! options['L']) C_lin((arith) nd->nd_lineno);
-	if (ChkCall(nd)) {
-		if (nd->nd_type != 0) {
-			node_error(nd, "procedure call expected");
-			return;
-		}
-		CodeCall(nd);
-	}
-}
-
 STATIC
 ForLoopVarExpr(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
-	register struct type *tp = nd->nd_type;
+	register t_type *tp = nd->nd_type;
 
 	CodePExpr(nd);
 	CodeCoercion(tp, BaseType(tp));
 }
 
 WalkStat(nd, exit_label)
-	register struct node *nd;
+	register t_node *nd;
 	label exit_label;
 {
 	/*	Walk through a statement, generating code for it.
 	*/
-	register struct node *left = nd->nd_left;
-	register struct node *right = nd->nd_right;
+	register t_node *left = nd->nd_left;
+	register t_node *right = nd->nd_right;
 
 	assert(nd->nd_class == Stat);
 
 	if (! options['L'] && nd->nd_lineno) C_lin((arith) nd->nd_lineno);
 	switch(nd->nd_symb) {
+	case '(':
+		if (ChkCall(nd)) {
+			if (nd->nd_type != 0) {
+				node_error(nd, "procedure call expected");
+				break;
+			}
+			CodeCall(nd);
+		}
+		break;
+
 	case ';':
 		break;
 
@@ -431,15 +438,13 @@ WalkStat(nd, exit_label)
 
 			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
-			C_df_ilb(l3);
-			WalkNode(right->nd_left, exit_label);
+			LblWalkNode(l3, right->nd_left, exit_label);
 
 			if (right->nd_right) {	/* ELSE part */
 				label l2 = ++text_label;
 
 				C_bra(l2);
-				C_df_ilb(l1);
-				WalkNode(right->nd_right, exit_label);
+				LblWalkNode(l1, right->nd_right, exit_label);
 				l1 = l2;
 			}
 			C_df_ilb(l1);
@@ -457,8 +462,7 @@ WalkStat(nd, exit_label)
 
 			C_df_ilb(loop);
 			ExpectBool(left, dummy, exit);
-			C_df_ilb(dummy);
-			WalkNode(right, exit_label);
+			LblWalkNode(dummy, right, exit_label);
 			C_bra(loop);
 			C_df_ilb(exit);
 			break;
@@ -467,8 +471,7 @@ WalkStat(nd, exit_label)
 	case REPEAT:
 		{	label loop = ++text_label, exit = ++text_label;
 
-			C_df_ilb(loop);
-			WalkNode(left, exit_label);
+			LblWalkNode(loop, left, exit_label);
 			ExpectBool(right, exit, loop);
 			C_df_ilb(exit);
 			break;
@@ -477,8 +480,7 @@ WalkStat(nd, exit_label)
 	case LOOP:
 		{	label loop = ++text_label, exit = ++text_label;
 
-			C_df_ilb(loop);
-			WalkNode(right, exit);
+			LblWalkNode(loop, right, exit);
 			C_bra(loop);
 			C_df_ilb(exit);
 			break;
@@ -488,13 +490,13 @@ WalkStat(nd, exit_label)
 		{
 			arith tmp = NewInt();
 			arith tmp2;
-			register struct node *fnd;
+			register t_node *fnd;
 			int good_forvar;
 			label l1 = ++text_label;
 			label l2 = ++text_label;
 			int uns = 0;
 			arith stepsize;
-			struct type *bstp;
+			t_type *bstp;
 
 			good_forvar = DoForInit(nd);
 			if ((stepsize = left->nd_INT) == 0) {
@@ -551,7 +553,7 @@ WalkStat(nd, exit_label)
 					C_lol(tmp);
 					C_zeq(l2);
 					C_lol(tmp);
-					C_loc((arith) 1);
+					c_loc(1);
 					C_sbu(int_size);
 					C_stl(tmp);
 					C_loc(left->nd_INT);
@@ -575,7 +577,7 @@ WalkStat(nd, exit_label)
 		{
 			struct scopelist link;
 			struct withdesig wds;
-			struct desig ds;
+			t_desig ds;
 
 			if (! WalkDesignator(left, &ds)) break;
 			if (left->nd_type->tp_fund != T_RECORD) {
@@ -640,7 +642,7 @@ extern int	NodeCrash();
 
 STATIC
 WalkOption(nd)
-	struct node *nd;
+	t_node *nd;
 {
 	/* Set option indicated by node "nd"
 	*/
@@ -654,7 +656,7 @@ int (*WalkTable[])() = {
 	NodeCrash,
 	NodeCrash,
 	NodeCrash,
-	WalkCall,
+	NodeCrash,
 	NodeCrash,
 	NodeCrash,
 	NodeCrash,
@@ -665,13 +667,13 @@ int (*WalkTable[])() = {
 };
 
 ExpectBool(nd, true_label, false_label)
-	register struct node *nd;
+	register t_node *nd;
 	label true_label, false_label;
 {
 	/*	"nd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
-	register struct desig *ds = new_desig();
+	register t_desig *ds = new_desig();
 
 	if (ChkExpression(nd)) {
 		if (nd->nd_type != bool_type && nd->nd_type != error_type) {
@@ -685,25 +687,25 @@ ExpectBool(nd, true_label, false_label)
 
 int
 WalkDesignator(nd, ds)
-	struct node *nd;
-	struct desig *ds;
+	t_node *nd;
+	t_desig *ds;
 {
 	/*	Check designator and generate code for it
 	*/
 
 	if (! ChkVariable(nd)) return 0;
 
-	clear((char *) ds, sizeof(struct desig));
+	clear((char *) ds, sizeof(t_desig));
 	CodeDesig(nd, ds);
 	return 1;
 }
 
 DoForInit(nd)
-	register struct node *nd;
+	register t_node *nd;
 {
-	register struct node *left = nd->nd_left;
-	register struct def *df;
-	struct type *tpl, *tpr;
+	register t_node *left = nd->nd_left;
+	register t_def *df;
+	t_type *tpl, *tpr;
 
 	nd->nd_left = nd->nd_right = 0;
 	nd->nd_class = Name;
@@ -761,16 +763,16 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 }
 
 DoAssign(left, right)
-	register struct node *left;
-	struct node *right;
+	register t_node *left;
+	t_node *right;
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
 	   it sais that the left hand side is evaluated first.
 	   DAMN THE BOOK!
 	*/
-	register struct desig *dsr;
-	register struct type *tp;
+	register t_desig *dsr;
+	register t_type *tp;
 
 	if (! (ChkExpression(right) & ChkVariable(left))) return;
 	tp = left->nd_type;
@@ -797,9 +799,9 @@ DoAssign(left, right)
 }
 
 RegisterMessages(df)
-	register struct def *df;
+	register t_def *df;
 {
-	register struct type *tp;
+	register t_type *tp;
 	arith sz;
 	int regtype = -1;
 

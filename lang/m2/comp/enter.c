@@ -27,16 +27,16 @@
 #include	"misc.h"
 #include	"f_info.h"
 
-struct def *
+t_def *
 Enter(name, kind, type, pnam)
 	char *name;
-	struct type *type;
+	t_type *type;
 {
 	/*	Enter a definition for "name" with kind "kind" and type
 		"type" in the Current Scope. If it is a standard name, also
 		put its number in the definition structure.
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
@@ -46,7 +46,7 @@ Enter(name, kind, type, pnam)
 
 EnterType(name, type)
 	char *name;
-	struct type *type;
+	t_type *type;
 {
 	/*	Enter a type definition for "name"  and type
 		"type" in the Current Scope.
@@ -56,8 +56,8 @@ EnterType(name, type)
 }
 
 EnterEnumList(Idlist, type)
-	struct node *Idlist;
-	register struct type *type;
+	t_node *Idlist;
+	register t_type *type;
 {
 	/*	Put a list of enumeration literals in the symbol table.
 		They all have type "type".
@@ -66,8 +66,8 @@ EnterEnumList(Idlist, type)
 		be exported, in which case its literals must also be exported.
 		Thus, we need an easy way to get to them.
 	*/
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	register t_def *df;
+	register t_node *idlist = Idlist;
 
 	type->enm_ncst = 0;
 	for (; idlist; idlist = idlist->nd_left) {
@@ -81,8 +81,8 @@ EnterEnumList(Idlist, type)
 }
 
 EnterFieldList(Idlist, type, scope, addr)
-	struct node *Idlist;
-	register struct type *type;
+	t_node *Idlist;
+	register t_type *type;
 	struct scope *scope;
 	arith *addr;
 {
@@ -91,8 +91,8 @@ EnterFieldList(Idlist, type, scope, addr)
 		Mark them as QUALIFIED EXPORT, because that's exactly what
 		fields are, you can get to them by qualifying them.
 	*/
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	register t_def *df;
+	register t_node *idlist = Idlist;
 
 	for (; idlist; idlist = idlist->nd_left) {
 		df = define(idlist->nd_IDF, scope, D_FIELD);
@@ -105,16 +105,16 @@ EnterFieldList(Idlist, type, scope, addr)
 }
 
 EnterVarList(Idlist, type, local)
-	struct node *Idlist;
-	struct type *type;
+	t_node *Idlist;
+	t_type *type;
 {
 	/*	Enter a list of identifiers representing variables into the
 		name list. "type" represents the type of the variables.
 		"local" is set if the variables are declared local to a
 		procedure.
 	*/
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	register t_def *df;
+	register t_node *idlist = Idlist;
 	register struct scopelist *sc = CurrVis;
 	char buf[256];
 	extern char *sprint();
@@ -132,7 +132,7 @@ EnterVarList(Idlist, type, local)
 		if (idlist->nd_left) {
 			/* An address was supplied
 			*/
-			register struct type *tp = idlist->nd_left->nd_type;
+			register t_type *tp = idlist->nd_left->nd_type;
 
 			df->df_flags |= D_ADDRGIVEN | D_NOREG;
 			if (tp != error_type && !(tp->tp_fund & T_CARDINAL)){
@@ -180,8 +180,8 @@ EnterVarList(Idlist, type, local)
 
 EnterParamList(ppr, Idlist, type, VARp, off)
 	struct paramlist **ppr;
-	struct node *Idlist;
-	struct type *type;
+	t_node *Idlist;
+	t_type *type;
 	int VARp;
 	arith *off;
 {
@@ -190,9 +190,9 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		"VARp" indicates D_VARPAR or D_VALPAR.
 	*/
 	register struct paramlist *pr;
-	register struct def *df;
-	register struct node *idlist = Idlist;
-	struct node *dummy = 0;
+	register t_def *df;
+	register t_node *idlist = Idlist;
+	t_node *dummy = 0;
 	static struct paramlist *last;
 
 	if (! idlist) {
@@ -231,7 +231,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 
 STATIC
 DoImport(df, scope)
-	register struct def *df;
+	register t_def *df;
 	struct scope *scope;
 {
 	/*	Definition "df" is imported to scope "scope".
@@ -268,8 +268,8 @@ DoImport(df, scope)
 
 STATIC struct scopelist *
 ForwModule(df, nd)
-	register struct def *df;
-	struct node *nd;
+	register t_def *df;
+	t_node *nd;
 {
 	/*	An import is done from a not yet defined module "df".
 		We could also end up here for not found DEFINITION MODULES.
@@ -295,15 +295,15 @@ ForwModule(df, nd)
 	return vis;
 }
 
-STATIC struct def *
+STATIC t_def *
 ForwDef(ids, scope)
-	register struct node *ids;
+	register t_node *ids;
 	struct scope *scope;
 {
 	/*	Enter a forward definition of "ids" in scope "scope",
 		if it is not already defined.
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	if (!(df = lookup(ids->nd_IDF, scope, 1))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
@@ -313,15 +313,15 @@ ForwDef(ids, scope)
 }
 
 EnterExportList(Idlist, qualified)
-	struct node *Idlist;
+	t_node *Idlist;
 {
 	/*	From the current scope, the list of identifiers "ids" is
 		exported. Note this fact. If the export is not qualified, make
 		all the "ids" visible in the enclosing scope by defining them
 		in this scope as "imported".
 	*/
-	register struct node *idlist = Idlist;
-	register struct def *df, *df1;
+	register t_node *idlist = Idlist;
+	register t_def *df, *df1;
 
 	for (;idlist; idlist = idlist->nd_left) {
 		df = lookup(idlist->nd_IDF, CurrentScope, 0);
@@ -389,15 +389,15 @@ EnterExportList(Idlist, qualified)
 }
 
 EnterFromImportList(Idlist, FromDef, FromId)
-	struct node *Idlist;
-	register struct def *FromDef;
-	struct node *FromId;
+	t_node *Idlist;
+	register t_def *FromDef;
+	t_node *FromId;
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
-	register struct node *idlist = Idlist;
+	register t_node *idlist = Idlist;
 	register struct scopelist *vis;
-	register struct def *df;
+	register t_def *df;
 	char *module_name = FromDef->df_idf->id_text;
 	int forwflag = 0;
 
@@ -454,16 +454,16 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 }
 
 EnterImportList(Idlist, local)
-	struct node *Idlist;
+	t_node *Idlist;
 {
 	/*	Import "Idlist" from the enclosing scope.
 		An exception must be made for imports of the compilation unit.
 		In this case, definition modules must be read for "Idlist".
 		This case is indicated by the value 0 of the "local" flag.
 	*/
-	register struct node *idlist = Idlist;
+	register t_node *idlist = Idlist;
 	struct scope *sc = enclosing(CurrVis)->sc_scope;
-	extern struct def *GetDefinitionModule();
+	extern t_def *GetDefinitionModule();
 	struct f_info f;
 	
 	f = file_info;

@@ -24,6 +24,7 @@
 #include	<alloc.h>
 #include	<assert.h>
 
+#include	"squeeze.h"
 #include	"Lpars.h"
 #include	"type.h"
 #include	"LLlex.h"
@@ -38,7 +39,7 @@ struct switch_hdr	{
 	label sh_break;			/* label of statement after this one */
 	label sh_default;		/* label of ELSE part, or 0 */
 	int sh_nrofentries;		/* number of cases */
-	struct type *sh_type;		/* type of case expression */
+	t_type *sh_type;		/* type of case expression */
 	arith sh_lowerbd;		/* lowest case label */
 	arith sh_upperbd;		/* highest case label */
 	struct case_entry *sh_entries;	/* the cases with their generated
@@ -65,7 +66,7 @@ struct case_entry	{
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
 
 CaseCode(nd, exitlabel)
-	struct node *nd;
+	t_node *nd;
 	label exitlabel;
 {
 	/*	Check the expression, stack a new case header and
@@ -74,7 +75,7 @@ CaseCode(nd, exitlabel)
 		LOOP-statement, or 0.
 	*/
 	register struct switch_hdr *sh = new_switch_hdr();
-	register struct node *pnode = nd;
+	register t_node *pnode = nd;
 	register struct case_entry *ce;
 	register arith val;
 	label CaseDescrLab;
@@ -151,7 +152,7 @@ CaseCode(nd, exitlabel)
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
 			else C_rom_ucon("0", pointer_size);
 		}
-		C_lae_dlb(CaseDescrLab, (arith)0);	/* perform the switch */
+		c_lae_dlb(CaseDescrLab);	/* perform the switch */
 		C_csa(word_size);
 	}
 	else	{ 
@@ -164,7 +165,7 @@ CaseCode(nd, exitlabel)
 			C_rom_cst(ce->ce_value);
 			C_rom_ilb(ce->ce_label);
 		}
-		C_lae_dlb(CaseDescrLab, (arith)0);	/* perform the switch */
+		c_lae_dlb(CaseDescrLab);	/* perform the switch */
 		C_csb(word_size);
 	}
 
@@ -174,8 +175,9 @@ CaseCode(nd, exitlabel)
 	while (pnode = pnode->nd_right) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
-				C_df_ilb(pnode->nd_lab);
-				WalkNode(pnode->nd_left->nd_right, exitlabel);
+				LblWalkNode(pnode->nd_lab,
+					    pnode->nd_left->nd_right,
+					    exitlabel);
 				C_bra(sh->sh_break);
 			}
 		}
@@ -184,8 +186,7 @@ CaseCode(nd, exitlabel)
 			*/
 			assert(sh->sh_default != 0);
 
-			C_df_ilb(sh->sh_default);
-			WalkNode(pnode, exitlabel);
+			LblWalkNode(sh->sh_default, pnode, exitlabel);
 			break;
 		}
 	}
@@ -214,7 +215,7 @@ FreeSh(sh)
 
 AddCases(sh, node, lbl)
 	struct switch_hdr *sh;
-	register struct node *node;
+	register t_node *node;
 	label lbl;
 {
 	/*	Add case labels to the case label list
@@ -246,7 +247,7 @@ AddCases(sh, node, lbl)
 
 AddOneCase(sh, node, lbl)
 	register struct switch_hdr *sh;
-	struct node *node;
+	t_node *node;
 	label lbl;
 {
 	register struct case_entry *ce = new_case_entry();

@@ -102,7 +102,7 @@ reserve(resv)
 	/*	The names of the tokens described in resv are entered
 		as reserved words.
 	*/
-	register struct idf *p;
+	register t_idf *p;
 
 	while (resv->tn_symbol)	{
 		p = str2idf(resv->tn_name, 0);

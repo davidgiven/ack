@@ -20,7 +20,7 @@
 #include	"node.h"
 
 match_id(id1, id2)
-	register struct idf *id1, *id2;
+	register t_idf *id1, *id2;
 {
 	/*	Check that identifiers id1 and id2 are equal. If they
 		are not, check that we did'nt generate them in the
@@ -34,14 +34,14 @@ match_id(id1, id2)
 	}
 }
 
-struct idf *
+t_idf *
 gen_anon_idf()
 {
 	/*	A new idf is created out of nowhere, to serve as an
 		anonymous name.
 	*/
 	static int name_cnt;
-	char buff[100];
+	char buff[512];
 	char *sprint();
 
 	sprint(buff, "#%d in %s, line %u",
@@ -51,7 +51,7 @@ gen_anon_idf()
 
 not_declared(what, id, where)
 	char *what, *where;
-	register struct node *id;
+	register t_node *id;
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message

@@ -36,34 +36,37 @@ extern char *symbol2str();
 extern char *sprint();
 
 STATIC int
-Xerror(nd, mess, edf)
-	struct node *nd;
-	char *mess;
-	register struct def *edf;
+df_error(nd, mess, edf)
+	t_node		*nd;		/* node on which error occurred */
+	char		*mess;		/* error message */
+	register t_def	*edf;		/* do we have a name? */
 {
 	if (edf) {
 		if (edf->df_kind != D_ERROR)  {
 			node_error(nd,"\"%s\": %s", edf->df_idf->id_text, mess);
 		}
 	}
-	else node_error(nd, "%s", mess);
+	else node_error(nd, mess);
 	return 0;
 }
 
 MkCoercion(pnd, tp)
-	struct node **pnd;
-	register struct type *tp;
+	t_node		**pnd;
+	register t_type	*tp;
 {
-	register struct node *nd = *pnd;
-	register struct type *nd_tp = nd->nd_type;
-	extern int pass_1;
-	int w = 0;
+	/*	Make a coercion from the node indicated by *pnd to the
+		type indicated by tp.
+	*/
+	register t_node	*nd = *pnd;
+	register t_type	*nd_tp = nd->nd_type;
+	extern int	pass_1;
+	int		w = 0;
 
-	if (nd_tp == tp) return;
-	if (nd_tp->tp_fund == T_STRING) return;
+	if (nd_tp == tp || nd_tp->tp_fund == T_STRING /* Why ??? */) return;
 	nd_tp = BaseType(nd_tp);
 	if (nd->nd_class == Value &&
-	    (nd_tp->tp_fund != T_REAL && tp->tp_fund != T_REAL)) {
+	    nd_tp->tp_fund != T_REAL &&
+	    tp->tp_fund != T_REAL) {
 		switch(tp->tp_fund) {
 		case T_SUBRANGE:
 			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
@@ -123,7 +126,7 @@ MkCoercion(pnd, tp)
 
 int
 ChkVariable(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check that "expp" indicates an item that can be
 		assigned to.
@@ -132,17 +135,17 @@ ChkVariable(expp)
 	return ChkDesignator(expp) &&
 		( expp->nd_class != Def ||
 	    	  ( expp->nd_def->df_kind & (D_FIELD|D_VARIABLE)) ||
-		  Xerror(expp, "variable expected", expp->nd_def));
+		  df_error(expp, "variable expected", expp->nd_def));
 }
 
 STATIC int
 ChkArrow(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check an application of the '^' operator.
 		The operand must be a variable of a pointer type.
 	*/
-	register struct type *tp;
+	register t_type *tp;
 
 	assert(expp->nd_class == Arrow);
 	assert(expp->nd_symb == '^');
@@ -164,7 +167,7 @@ ChkArrow(expp)
 
 STATIC int
 ChkArr(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check an array selection.
 		The left hand side must be a variable of an array type,
@@ -172,7 +175,7 @@ ChkArr(expp)
 		assignment compatible with the array-index.
 	*/
 
-	register struct type *tpl;
+	register t_type *tpl;
 
 	assert(expp->nd_class == Arrsel);
 	assert(expp->nd_symb == '[');
@@ -180,6 +183,8 @@ ChkArr(expp)
 	expp->nd_type = error_type;
 
 	if (! (ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right))) {
+		/* Bitwise and, because we want them both evaluated.
+		*/
 		return 0;
 	}
 
@@ -204,7 +209,7 @@ ChkArr(expp)
 #ifdef DEBUG
 STATIC int
 ChkValue(expp)
-	struct node *expp;
+	t_node *expp;
 {
 	switch(expp->nd_symb) {
 	case REAL:
@@ -221,12 +226,12 @@ ChkValue(expp)
 
 STATIC int
 ChkLinkOrName(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check either an ID or a construction of the form
 		ID.ID [ .ID ]*
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	expp->nd_type = error_type;
 
@@ -239,7 +244,7 @@ ChkLinkOrName(expp)
 		/*	A selection from a record or a module.
 			Modules also have a record type.
 		*/
-		register struct node *left = expp->nd_left;
+		register t_node *left = expp->nd_left;
 
 		assert(expp->nd_symb == '.');
 
@@ -250,7 +255,7 @@ ChkLinkOrName(expp)
 		    !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
-			return Xerror(left, "illegal selection", left->nd_def);
+			return df_error(left, "illegal selection", left->nd_def);
 		}
 		if (left->nd_type->tp_fund != T_RECORD) {
 			node_error(left, "illegal selection");
@@ -268,7 +273,9 @@ ChkLinkOrName(expp)
 			/* Fields of a record are always D_QEXPORTED,
 			   so ...
 			*/
-Xerror(expp, "not exported from qualifying module", df);
+			df_error(expp,
+			       "not exported from qualifying module",
+			       df);
 		}
 
 		if (!(left->nd_class == Def &&
@@ -286,12 +293,12 @@ Xerror(expp, "not exported from qualifying module", df);
 
 STATIC int
 ChkExLinkOrName(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check either an ID or an ID.ID [.ID]* occurring in an
 		expression.
 	*/
-	register struct def *df;
+	register t_def *df;
 
 	if (! ChkLinkOrName(expp)) return 0;
 
@@ -302,6 +309,7 @@ ChkExLinkOrName(expp)
 		*/
 		if (df->df_type->tp_fund == T_SET) {
 			expp->nd_class = Set;
+			inc_refcount(expp->nd_set);
 		}
 		else	expp->nd_class = Value;
 		if (df->df_kind == D_ENUM) {
@@ -314,23 +322,11 @@ ChkExLinkOrName(expp)
 			assert(df->df_kind == D_CONST);
 			expp->nd_token = df->con_const;
 			expp->nd_lineno = ln;
-			if (expp->nd_class == Set) {
-				register int i =
-					(unsigned) expp->nd_type->tp_size /
-					(unsigned) word_size;
-				register arith *p, *q;
-
-				p = expp->nd_set;
-				q = (arith *) Malloc((unsigned) i * sizeof(arith));
-				expp->nd_set = q;
-				while (i--) *q++ = *p++;
-			}
 		}
 	}
 
 	if (!(df->df_kind & D_VALUE)) {
-		Xerror(expp, "value expected", df);
-		return 0;
+		return df_error(expp, "value expected", df);
 	}
 
 	if (df->df_kind == D_PROCEDURE) {
@@ -341,7 +337,8 @@ ChkExLinkOrName(expp)
 			/* Address of standard or nested procedure
 			   taken.
 			*/
-node_error(expp, "standard or local procedures may not be assigned");
+			node_error(expp,
+			   "standard or local procedures may not be assigned");
 			return 0;
 		}
 	}
@@ -351,8 +348,8 @@ node_error(expp, "standard or local procedures may not be assigned");
 
 STATIC int
 ChkEl(expr, tp)
-	register struct node **expr;
-	struct type *tp;
+	register t_node **expr;
+	t_type *tp;
 {
 
 	return ChkExpression(*expr) && ChkCompat(expr, tp, "set element");
@@ -360,15 +357,15 @@ ChkEl(expr, tp)
 
 STATIC int
 ChkElement(expp, tp, set)
-	struct node **expp;
-	struct type *tp;
+	t_node **expp;
+	t_type *tp;
 	arith *set;
 {
 	/*	Check elements of a set. This routine may call itself
 		recursively.
 		Also try to compute the set!
 	*/
-	register struct node *expr = *expp;
+	register t_node *expr = *expp;
 	register unsigned int i;
 	arith lo, hi, low, high;
 
@@ -419,17 +416,38 @@ ChkElement(expp, tp, set)
 	return 1;
 }
 
+arith *
+MkSet(size)
+	unsigned size;
+{
+	register arith	*s;
+
+	size += sizeof(arith);
+	s = (arith *) Malloc(size);
+	clear((char *) s , size);
+	s++;
+	inc_refcount(s);
+	return s;
+}
+
+FreeSet(s)
+	register arith *s;
+{
+	if (refcount(s) <= 0) {
+		free((char *) (s-1));
+	}
+}
+
 STATIC int
 ChkSet(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
 		compile time. Unfortunately this is all rather complicated.
 	*/
-	register struct type *tp;
-	register struct node *nd;
-	register struct def *df;
-	unsigned size;
+	register t_type *tp;
+	register t_node *nd;
+	register t_def *df;
 	int retval = 1;
 	int SetIsConstant = 1;
 
@@ -449,10 +467,7 @@ ChkSet(expp)
 
 		if (!is_type(df) ||
 	   	    (df->df_type->tp_fund != T_SET)) {
-			if (df->df_kind != D_ERROR) {
-				Xerror(nd, "not a SET type", df);
-			}
-			return 0;
+			return df_error(nd, "not a SET type", df);
 		}
 		tp = df->df_type;
 		FreeNode(nd);
@@ -466,9 +481,8 @@ ChkSet(expp)
 	/* Now check the elements given, and try to compute a constant set.
 	   First allocate room for the set.
 	*/
-	size = tp->tp_size * (sizeof(arith) / word_size);
-	expp->nd_set = (arith *) Malloc(size);
-	clear((char *) (expp->nd_set) , size);
+
+	expp->nd_set = MkSet((unsigned)(tp->tp_size) * (sizeof(arith) / (int) word_size));
 
 	/* Now check the elements, one by one
 	*/
@@ -490,25 +504,26 @@ ChkSet(expp)
 	return retval;
 }
 
-STATIC struct node *
+STATIC t_node *
 nextarg(argp, edf)
-	struct node **argp;
-	struct def *edf;
+	t_node **argp;
+	t_def *edf;
 {
-	register struct node *arg = (*argp)->nd_right;
+	register t_node *arg = (*argp)->nd_right;
 
 	if (! arg) {
-		return (struct node *)Xerror(*argp, "too few arguments supplied", edf);
+		return (t_node *)
+			  df_error(*argp, "too few arguments supplied", edf);
 	}
 
 	*argp = arg;
 	return arg->nd_left;
 }
 
-STATIC struct node *
+STATIC t_node *
 getarg(argp, bases, designator, edf)
-	struct node **argp;
-	struct def *edf;
+	t_node **argp;
+	t_def *edf;
 {
 	/*	This routine is used to fetch the next argument from an
 		argument list. The argument list is indicated by "argp".
@@ -518,9 +533,10 @@ getarg(argp, bases, designator, edf)
 		that it must be a designator and may not be a register
 		variable.
 	*/
-	register struct node *left = nextarg(argp, edf);
+	register t_node *left = nextarg(argp, edf);
 
-	if (!left || (designator ? !ChkVariable(left) : !ChkExpression(left))) {
+	if (! left ||
+	    ! (designator ? ChkVariable(left) : ChkExpression(left))) {
 		return 0;
 	}
 
@@ -529,38 +545,40 @@ getarg(argp, bases, designator, edf)
 	}
 
 	if (bases) {
-		struct type *tp = BaseType(left->nd_type);
+		t_type *tp = BaseType(left->nd_type);
 
-		MkCoercion(&((*argp)->nd_left), tp);
+		if (! designator) MkCoercion(&((*argp)->nd_left), tp);
 		left = (*argp)->nd_left;
 		if (!(tp->tp_fund & bases)) {
-			return (struct node *)Xerror(left, "unexpected parameter type", edf);
+			return (t_node *)
+			  df_error(left, "unexpected parameter type", edf);
 		}
 	}
 
 	return left;
 }
 
-STATIC struct node *
+STATIC t_node *
 getname(argp, kinds, bases, edf)
-	struct node **argp;
-	struct def *edf;
+	t_node **argp;
+	t_def *edf;
 {
 	/*	Get the next argument from argument list "argp".
 		The argument must indicate a definition, and the
 		definition kind must be one of "kinds".
 	*/
-	register struct node *left = nextarg(argp, edf);
+	register t_node *left = nextarg(argp, edf);
 
 	if (!left || ! ChkDesignator(left)) return 0;
 
 	if (left->nd_class != Def) {
-		return (struct node *)Xerror(left, "identifier expected", edf);
+		return (t_node *)df_error(left, "identifier expected", edf);
 	}
 
 	if (!(left->nd_def->df_kind & kinds) ||
 	    (bases && !(left->nd_type->tp_fund & bases))) {
-		return (struct node *)Xerror(left, "unexpected parameter type", edf);
+		return (t_node *)
+			df_error(left, "unexpected parameter type", edf);
 	}
 
 	return left;
@@ -568,12 +586,12 @@ getname(argp, kinds, bases, edf)
 
 STATIC int
 ChkProcCall(expp)
-	struct node *expp;
+	t_node *expp;
 {
 	/*	Check a procedure call
 	*/
-	register struct node *left;
-	struct def *edf = 0;
+	register t_node *left;
+	t_def *edf = 0;
 	register struct paramlist *param;
 	int retval = 1;
 	int cnt = 0;
@@ -613,7 +631,7 @@ ChkProcCall(expp)
 	}
 
 	if (expp->nd_right) {
-		Xerror(expp->nd_right, "too many parameters supplied", edf);
+		df_error(expp->nd_right, "too many parameters supplied", edf);
 		while (expp->nd_right) {
 			getarg(&expp, 0, 0, edf);
 		}
@@ -625,7 +643,7 @@ ChkProcCall(expp)
 
 int
 ChkFunCall(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check a call that must have a result
 	*/
@@ -642,13 +660,13 @@ ChkFunCall(expp)
 
 int
 ChkCall(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check something that looks like a procedure or function call.
 		Of course this does not have to be a call at all,
 		it may also be a cast or a standard procedure call.
 	*/
-	register struct node *left = expp->nd_left;
+	register t_node *left = expp->nd_left;
 	STATIC int ChkStandard();
 	STATIC int ChkCast();
 
@@ -683,9 +701,9 @@ ChkCall(expp)
 	return ChkProcCall(expp);
 }
 
-STATIC struct type *
+STATIC t_type *
 ResultOfOperation(operator, tp)
-	struct type *tp;
+	t_type *tp;
 {
 	/*	Return the result type of the binary operation "operator",
 		with operand type "tp".
@@ -744,7 +762,7 @@ AllowedTypes(operator)
 
 STATIC int
 ChkAddress(tpl, tpr)
-	register struct type *tpl, *tpr;
+	register t_type *tpl, *tpr;
 {
 	/*	Check that either "tpl" or "tpr" are both of type
 		address_type, or that one of them is, but the other is
@@ -764,12 +782,12 @@ ChkAddress(tpl, tpr)
 
 STATIC int
 ChkBinOper(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check a binary operation.
 	*/
-	register struct node *left, *right;
-	register struct type *tpl, *tpr;
+	register t_node *left, *right;
+	register t_type *tpl, *tpr;
 	int allowed;
 	int retval;
 
@@ -873,12 +891,12 @@ ChkBinOper(expp)
 
 STATIC int
 ChkUnOper(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check an unary operation.
 	*/
-	register struct node *right = expp->nd_right;
-	register struct type *tpr;
+	register t_node *right = expp->nd_right;
+	register t_type *tpr;
 
 	if (expp->nd_symb == '(') {
 		*expp = *right;
@@ -896,7 +914,9 @@ ChkUnOper(expp)
 	switch(expp->nd_symb) {
 	case '+':
 		if (!(tpr->tp_fund & T_NUMERIC)) break;
-		/* fall through */
+		*expp = *right;
+		free_node(right);
+		return 1;
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
@@ -935,15 +955,15 @@ ChkUnOper(expp)
 	return 0;
 }
 
-STATIC struct node *
+STATIC t_node *
 getvariable(argp, edf)
-	struct node **argp;
-	struct def *edf;
+	t_node **argp;
+	t_def *edf;
 {
 	/*	Get the next argument from argument list "argp".
 		It must obey the rules of "ChkVariable".
 	*/
-	register struct node *left = nextarg(argp, edf);
+	register t_node *left = nextarg(argp, edf);
 
 	if (!left || !ChkVariable(left)) return 0;
 
@@ -952,14 +972,14 @@ getvariable(argp, edf)
 
 STATIC int
 ChkStandard(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check a call of a standard procedure or function
 	*/
-	struct node *arg = expp;
-	register struct node *left = expp->nd_left;
-	register struct def *edf = left->nd_def;
-	struct type *basetype;
+	t_node *arg = expp;
+	register t_node *left = expp->nd_left;
+	register t_def *edf = left->nd_def;
+	t_type *basetype;
 	int free_it = 0;
 
 	assert(left->nd_class == Def);
@@ -1010,8 +1030,8 @@ ChkStandard(expp)
 
 	case S_SHORT:
 	case S_LONG: {
-		struct type *tp;
-		struct type *s1, *s2, *d1, *d2;
+		t_type *tp;
+		t_type *s1, *s2, *d1, *d2;
 
 		if (edf->df_value.df_stdname == S_SHORT) {
 			s1 = longint_type;
@@ -1037,7 +1057,7 @@ ChkStandard(expp)
 			MkCoercion(&(arg->nd_left), d2);
 		}
 		else {
-			Xerror(left, "unexpected parameter type", edf);
+			df_error(left, "unexpected parameter type", edf);
 			break;
 		}
 		free_it = 1;
@@ -1056,7 +1076,7 @@ ChkStandard(expp)
 			break;
 		}
 		if (left->nd_symb != STRING) {
-			return Xerror(left,"array parameter expected", edf);
+			return df_error(left,"array parameter expected", edf);
 		}
 		expp->nd_type = card_type;
 		expp->nd_class = Value;
@@ -1105,12 +1125,12 @@ ChkStandard(expp)
 		expp->nd_type = 0;
 		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
-			return Xerror(left, "pointer variable expected", edf);
+			return df_error(left, "pointer variable expected", edf);
 		}
 		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
 		{
-			struct token dt;
-			struct node *nd;
+			t_token dt;
+			t_node *nd;
 
 			dt.TOK_INT = PointedtoType(left->nd_type)->tp_size;
 			dt.tk_symb = INTEGER;
@@ -1121,9 +1141,9 @@ ChkStandard(expp)
 			arg->nd_right = MkNode(Link, nd, NULLNODE, &dt);
 			/* Ignore other arguments to NEW and/or DISPOSE ??? */
 
-			FreeNode(expp->nd_left);
 			dt.tk_symb = IDENT;
 			dt.tk_lineno = expp->nd_left->nd_lineno;
+			FreeNode(expp->nd_left);
 			dt.TOK_IDF = str2idf(edf->df_value.df_stdname==S_NEW ?
 						"ALLOCATE" : "DEALLOCATE", 0);
 			expp->nd_left = MkLeaf(Name, &dt);
@@ -1178,7 +1198,7 @@ ChkStandard(expp)
 		expp->nd_type = 0;
 		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
-			return Xerror(left,"illegal parameter type", edf);
+			return df_error(left,"illegal parameter type", edf);
 		}
 		if (arg->nd_right) {
 			if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
@@ -1192,14 +1212,14 @@ ChkStandard(expp)
 	case S_EXCL:
 	case S_INCL:
 		{
-		register struct type *tp;
-		struct node *dummy;
+		register t_type *tp;
+		t_node *dummy;
 
 		expp->nd_type = 0;
 		if (!(left = getvariable(&arg, edf))) return 0;
 		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
-			return Xerror(arg, "SET parameter expected", edf);
+			return df_error(arg, "SET parameter expected", edf);
 		}
 		if (!(dummy = getarg(&arg, 0, 0, edf))) return 0;
 		if (!ChkAssCompat(&dummy, ElementType(tp), "EXCL/INCL")) {
@@ -1220,7 +1240,7 @@ ChkStandard(expp)
 	}
 
 	if (arg->nd_right) {
-		return Xerror(arg->nd_right, "too many parameters supplied", edf);
+		return df_error(arg->nd_right, "too many parameters supplied", edf);
 	}
 
 	if (free_it) {
@@ -1235,7 +1255,7 @@ ChkStandard(expp)
 
 STATIC int
 ChkCast(expp)
-	register struct node *expp;
+	register t_node *expp;
 {
 	/*	Check a cast and perform it if the argument is constant.
 		If the sizes don't match, only complain if at least one of them
@@ -1244,12 +1264,12 @@ ChkCast(expp)
 		is no problem as such values take a word on the EM stack
 		anyway.
 	*/
-	register struct node *left = expp->nd_left;
-	register struct node *arg = expp->nd_right;
-	register struct type *lefttype = left->nd_type;
+	register t_node *left = expp->nd_left;
+	register t_node *arg = expp->nd_right;
+	register t_type *lefttype = left->nd_type;
 
 	if ((! arg) || arg->nd_right) {
-		return Xerror(expp, "type cast must have 1 parameter", left->nd_def);
+		return df_error(expp, "type cast must have 1 parameter", left->nd_def);
 	}
 
 	if (! ChkExpression(arg->nd_left)) return 0;
@@ -1260,7 +1280,7 @@ ChkCast(expp)
 	if (arg->nd_type->tp_size != lefttype->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
 	     lefttype->tp_size > word_size)) {
-		Xerror(expp, "unequal sizes in type cast", left->nd_def);
+		df_error(expp, "unequal sizes in type cast", left->nd_def);
 	}
 
 	if (arg->nd_class == Value) {
@@ -1275,8 +1295,8 @@ ChkCast(expp)
 }
 
 TryToString(nd, tp)
-	register struct node *nd;
-	struct type *tp;
+	register t_node *nd;
+	t_type *tp;
 {
 	/*	Try a coercion from character constant to string.
 	*/
@@ -1296,7 +1316,7 @@ TryToString(nd, tp)
 
 STATIC int
 no_desig(expp)
-	struct node *expp;
+	t_node *expp;
 {
 	node_error(expp, "designator expected");
 	return 0;

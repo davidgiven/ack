@@ -37,11 +37,12 @@ char		*ProgName;
 char		**DEFPATH;
 int		nDEF, mDEF;
 int		pass_1;
-struct def 	*Defined;
+t_def	 	*Defined;
 extern int 	err_occurred;
 extern int 	Roption;
 extern int	fp_used;		/* set if floating point used */
-struct node	*EmptyStatement;
+static t_node	_emptystat = { NULLNODE, NULLNODE, Stat, NULLTYPE, { ';' }};
+t_node		*EmptyStatement = &_emptystat;
 
 main(argc, argv)
 	register char **argv;
@@ -88,8 +89,6 @@ Compile(src, dst)
 	InitScope();
 	InitTypes();
 	AddStandards();
-	EmptyStatement = dot2leaf(Stat);
-	EmptyStatement->nd_symb = ';';
 	Roption = options['R'];
 #ifdef DEBUG
 	if (options['l']) {
@@ -124,7 +123,7 @@ Compile(src, dst)
 #ifdef DEBUG
 LexScan()
 {
-	register struct token *tkp = &dot;
+	register t_token *tkp = &dot;
 	extern char *symbol2str();
 
 	while (LLlex() > 0) {
@@ -184,13 +183,13 @@ static struct stdproc {
 	{ 0,		0 }
 };
 
-extern struct def *Enter();
+extern t_def *Enter();
 
 AddStandards()
 {
-	register struct def *df;
+	register t_def *df;
 	register struct stdproc *p;
-	static struct token nilconst = { INTEGER, 0};
+	static t_token nilconst = { INTEGER, 0};
 
 	for (p = stdproc; p->st_nam != 0; p++) {
 		Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con);
