@@ -60,7 +60,12 @@ MACH = $MACH
 
 if [ $TARGET_HOME = $UTIL_HOME ]
 then	
-	sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+	if [ -f /bin/ranlib -o -f /usr/bin/ranlib -o -f /usr/ucb/ranlib ]
+	then
+		sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+	else
+		sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
+	fi
 	if [ -f /bin/arch ]
 	then
 		case `/bin/arch` in
@@ -78,7 +83,12 @@ else
 	case $know_target in
 	1)	sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "/cc-and-mkdep.ack/s/^..//" -e "s/^CC=cc/CC=acc -m$ACM/" -e "s/^# AR=aal/AR=aal/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
 		;;
-	*)	sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+	*)	if [ -f /bin/ranlib -o -f /usr/bin/ranlib -o -f /usr/ucb/ranlib ]
+		then
+			sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+		else
+			sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
+		fi
 		;;
 	esac
 	sed "s/^#U/U/" < $FDIR/util_comp >> make_macros

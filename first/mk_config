@@ -31,12 +31,6 @@ do
 	fi
 done
 
-cd $SRC_HOME/util/ceg/util
-for i in make_*
-do
-	mk_makefile $i > $CONFIG/util/ceg/util/$i
-done
-
 cd $CONFIG
 
 for i in lang/cem/cemcom.ansi lang/cem/cemcom lang/m2/comp

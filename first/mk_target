@@ -13,9 +13,10 @@ create_dir $TARGET_HOME/modules/pkg
 create_dir $TARGET_HOME/modules/lib
 create_dir $TARGET_HOME/bin
 
-( cd $SRC_HOME/modules/h ; tar cf - . ) | ( cd $TARGET_HOME/modules/h ; tar xf - )
+cp_dir $SRC_HOME/modules/h $TARGET_HOME/modules/h
 cp local.h em_path.h $TARGET_HOME/config
-( cd $SRC_HOME/bin ; tar cf - . ) | ( cd $TARGET_HOME/bin ; tar xf - )
+cp_dir $SRC_HOME/bin $TARGET_HOME/bin
+cp $CONFIG/bin/cp_dir $TARGET_HOME/bin/cp_dir
 echo "echo $SYSNAME" > $TARGET_HOME/bin/ack_sys
 chmod +x $TARGET_HOME/bin/ack_sys
 
@@ -33,10 +34,10 @@ create_dir $TARGET_HOME/include
 create_dir $TARGET_HOME/doc
 
 cp $SRC_HOME/etc/ip_spec.t $TARGET_HOME/etc/ip_spec.t
-( cd $SRC_HOME/lib ; tar cf - . ) | ( cd $TARGET_HOME/lib ; tar xf - )
-( cd $SRC_HOME/include ; tar cf - . ) | ( cd $TARGET_HOME/include ; tar xf - )
-( cd $SRC_HOME/h ; tar cf - . ) | ( cd $TARGET_HOME/h ; tar xf - )
-( cd $SRC_HOME/doc ; tar cf - . ) | ( cd $TARGET_HOME/doc ; tar xf - )
+cp_dir $SRC_HOME/lib $TARGET_HOME/lib
+cp_dir $SRC_HOME/h $TARGET_HOME/h
+cp_dir $SRC_HOME/doc $TARGET_HOME/doc
+cp_dir $SRC_HOME/include $TARGET_HOME/include
 
 cd $TARGET_HOME
 find . -type f -exec chmod +w {} \;

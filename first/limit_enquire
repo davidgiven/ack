@@ -27,14 +27,30 @@ to disable installation of the machine-independent part"
 		;;
 	esac
 done
+OLD_DIS_LANG="$DISABLE_LANG"
+DISABLE_LANG=
+case X$OLD_DIS_LANG in
+X)	;;
+*)	set $OLD_DIS_LANG
+	;;
+esac
 for i in Modula-2 Pascal Occam Basic ANSI-C C Fortran
 do
+    DEF=y
+    if [ $# != 0 -a X$i = X$1 ]
+    then
+	DEF=n
+	shift
+    fi
     while :
     do
-	echo $E_FLAG "Do you want to install $i? (y/n) $E_SFX"
+	echo $E_FLAG "Do you want to install $i? (y/n) [$DEF] $E_SFX"
 	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$DEF";;
+	esac
 	case X$ANS in
-	Xj*|Xy*|X)
+	Xj*|Xy*)
 		echo "$i will be installed"
 		echo
 		break
@@ -49,10 +65,20 @@ do
 	esac
     done
 done
+OLD_DIS_SUP="$DISABLE_SUP"
 DISABLE_SUP=
 set $MACH_LIST
 while test $# != 0
 do
+    DEF=y
+    for i in $OLD_DIS_SUP
+    do
+	if [ X$i = X$1 ]
+	then
+		DEF=n
+		break
+	fi
+    done
     while :
     do
 	case $1 in
@@ -66,10 +92,13 @@ m68k4, pmds4, sun2, and mantra."
 	m68020)	echo "not installing m68020 will disable installation of sun3."
 		;;
 	esac
-	echo $E_FLAG "Do you want to install the $1 support? (y/n) $E_SFX"
+	echo $E_FLAG "Do you want to install the $1 support? (y/n) [$DEF] $E_SFX"
 	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$DEF";;
+	esac
 	case X$ANS in
-	Xj*|Xy*|X)
+	Xj*|Xy*)
 		echo "The $1 support will be installed"
 		echo
 		case $1 in
@@ -147,7 +176,7 @@ then
         		'')     ANS="$DO_FAST" ;;
         		esac
         		case X$ANS in
-        		Xj*|Xy*|X)
+        		Xj*|Xy*)
 				DO_FAST=y
 				echo "The fast compilers will be installed"
 				break

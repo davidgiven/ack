@@ -136,7 +136,6 @@ esac
 
 echo "Your default machine to compile for is $ACM"
 
-DISABLE_LANG=
 echo "Installation of the complete ACK takes a long time. Limiting the
 number of languages, runtime libraries, back-ends, and assemblers to be
 installed may save a lot of time. If you want to install everything,

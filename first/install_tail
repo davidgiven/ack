@@ -10,6 +10,7 @@ echo "PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb; export PATH" > $
 cat $SRC_HOME/TakeAction >> $CONFIG/bin/TakeAction
 sed '/^#PARAMS/r make_macros' < $SRC_HOME/first/mk_makefile > $CONFIG/bin/mk_makefile
 cp $SRC_HOME/first/create_dir $CONFIG/bin/create_dir
+cp $SRC_HOME/first/cp_dir $CONFIG/bin/cp_dir
 chmod +x $CONFIG/bin/*
 
 $SRC_HOME/first/mk_config
