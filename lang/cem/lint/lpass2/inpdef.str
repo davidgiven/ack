@@ -1,0 +1,22 @@
+#define NAMESIZE 100
+#define FNAMESIZE 100
+#define ARGTPSSIZE 2000
+#define TYPESIZE 1000
+
+struct inpdef {
+	struct inpdef *next;
+	int id_class;
+	char id_name[NAMESIZE];
+	char id_file[FNAMESIZE];
+	unsigned int id_line;
+	int id_nrargs;
+	char id_argtps[ARGTPSSIZE];
+	int id_returns;
+	char id_type[TYPESIZE];
+	int id_called;
+	int id_used;
+	int id_ignored;
+	int id_voided;
+};
+
+/* ALLOCDEF "inpdef" 10 */
