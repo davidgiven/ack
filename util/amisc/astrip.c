@@ -93,15 +93,15 @@ char *name;
 	rd_close();
 	close(fw);
 	size += SZ_HEAD;
-	fw = open(name, 1);
-	if (fw < 0) {
-		fprintf(stderr, "astrip: cannot write %s\n", name);
-		return(1);
-	}
 	if (! rd_open(tname)) {
 		fprintf(stderr, "astrip: cannot read temp file %s\n", tname);
-		close(fw);
 		return(2);
+	}
+	fw = creat(name, 0777);
+	if (fw < 0) {
+		fprintf(stderr, "astrip: cannot write %s\n", name);
+		rd_close();
+		return(1);
 	}
 	if(copy(tname, name, size, rd_fd(), fw)) {
 		close(fw);
