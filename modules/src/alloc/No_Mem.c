@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include	<system.h>
+#include	"alloc.h"
 
 No_Mem()
 {

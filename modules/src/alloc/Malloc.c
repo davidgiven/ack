@@ -10,6 +10,11 @@
 	char *Malloc(n)		: allocate n bytes
 */
 
+#if __STDC__
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
 #include	"alloc.h"
 
 char *

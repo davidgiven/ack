@@ -8,6 +8,12 @@
 		The counterpart, st_free, is a macro, defined in alloc.h
 */
 
+#if __STDC__
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
+
 #include	"alloc.h"
 
 char *

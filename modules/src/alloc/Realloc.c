@@ -10,6 +10,13 @@
 	char *Realloc(ptr, n)	: reallocate buffer to n bytes
 */
 
+#if __STDC__
+#include <stdlib.h>
+#else
+extern char *malloc();
+extern char *realloc();
+#endif
+
 #include	"alloc.h"
 
 char *

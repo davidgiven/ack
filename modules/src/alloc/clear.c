@@ -6,7 +6,13 @@
 /*	clear - clear a block of memory, and try to do it fast.
 */
 
+#include "alloc.h"
+
 /* instead of Calloc: */
+
+#if __STDC__
+void
+#endif
 clear(ptr, n)
 	register char *ptr;
 	register unsigned int n;
