@@ -4,7 +4,6 @@
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
 .extern _end
-.extern np
 
 ERANGE          = 1
 ESET            = 2
@@ -26,11 +25,6 @@ begtext:
 	push ax
 	push bx
 	push cx
-	mov (np),begbss
-	mov bx,endbss
-	push bx
-	call _brk	! allocate space for bss
-	pop si
 	xor bp,bp
 	call    _m_a_i_n
 	int 0x81     

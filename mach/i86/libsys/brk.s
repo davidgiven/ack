@@ -3,7 +3,7 @@
 .define xbrk
 .define np
 .extern _brk
-.extern xbrk
+.extern xbrk,endbss
 .extern np, cerror
 _brk:	
 	mov bx,sp
@@ -35,5 +35,5 @@ xbrk:
 	pop di
 	ret
 .sect .data
-np: .data2 0
+np: .data2 endbss
 .sect .text
