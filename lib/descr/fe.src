@@ -29,7 +29,7 @@ name cem
 	mapflag -p CEM_F={DEM_F?} -p
 	args {CPP_F?} {CEM_F?} {INCLUDES?} -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
 -DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
-{CC_ALIGN?-Vw{w\}.{w\}i{w\}.{w\}p{p\}.{w\}f{f\}.{w\}s{s\}.{s\}l{l\}.{w\}d{d\}.{w\}} < >
+-Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} {CC_ALIGN?} < >
 	rts .c
 	need .c
 	callname acc
