@@ -182,7 +182,7 @@ init_unixheader()
 	 */
 }
 
-static 
+static
 convert_reloc( a_relo, u_relo)
 register struct outrelo *a_relo;
 register struct relocation_info *u_relo;
@@ -217,26 +217,8 @@ register struct relocation_info *u_relo;
 	return retval;
 }
 
-
-/*
-int convert_length( length)
-int length;
-{
-	if ( length & RELO1)
-		return( 0);
-	else if ( length & RELO2)
-		return( 1);
-	else if ( length & RELO4)
-		return( 2);
-	else
-		fprint( STDERR, "convert_length(): size is impossible %d\n",
-			length);
-}
-*/
-
 #define 	n_mptr 		n_un.n_name
 #define 	n_str		n_un.n_strx
-
 
 static
 convert_name( a_name, u_name)
