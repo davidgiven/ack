@@ -32,6 +32,7 @@ fatal(str)
 char *str;
 {
 	Xerror("FATAL",str);
+	unlink(tmpfname);
 	exit(-1);
 }
 notyetimpl()
