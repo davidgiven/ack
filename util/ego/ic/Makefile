@@ -6,27 +6,16 @@ SHARE=../share
 MALLOC=
 IC=.
 OBJECTS=ic.o ic_aux.o ic_lookup.o ic_io.o ic_lib.o
-MOBJECTS=ic.m ic_aux.m ic_lookup.m ic_io.m ic_lib.m
 SHOBJECTS=$(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/aux.o
-MSHOBJECTS=$(SHARE)/put.m $(SHARE)/alloc.m $(SHARE)/global.m $(SHARE)/debug.m $(SHARE)/files.m $(SHARE)/map.m $(SHARE)/lset.m $(SHARE)/cset.m
 SRC=ic.h ic_aux.h ic_lib.h ic_lookup.h ic_io.h ic.c ic_aux.c ic_lib.c ic_lookup.c ic_io.c
-.SUFFIXES: .m
-.c.m:
-	ack -O -L -c.m $(CFLAGS) $<
-.c.o:
-	cc $(CFLAGS) -c $<
 all:	$(OBJECTS)
 ic: \
 	$(OBJECTS) $(SHOBJECTS)
-	 cc -i -o ic $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a $(MALLOC)
-optim:	$(MOBJECTS) $(MSHOBJECTS) 
-	 ego IC CF $(F) CA $(MOBJECTS) $(MSHOBJECTS)
-	 ack -O -o ic.ego -.c lfile.m $(EML)/em_data.a
+	 $(CC) -i -o ic $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a $(MALLOC)
 	 
 lpr:
 	pr $(SRC) | lpr
-dumpflop:
-	tar -uf /mnt/ego/ic/ic.tarf $(SRC) Makefile
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 ic.o:	../../../h/em_flag.h
