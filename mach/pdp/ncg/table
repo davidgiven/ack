@@ -30,7 +30,8 @@ PROGRAMCOUNTER
 REGISTERS
 
 r0					: GENREG,REG.
-r2,r4					: GENREG,REG regvar.
+r2					: GENREG,REG regvar.
+r4					: GENREG,REG regvar.
 r1,r3					: GENREG,REG,ODDREG.
 r01("r0")=r0+r1				: REGPAIR.
 fr0("r0"),fr1("r1"),fr2("r2"),fr3("r3") : GENFREG,FLTREG.

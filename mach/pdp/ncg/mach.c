@@ -3,19 +3,8 @@ static char rcsid[] = "$Header$";
 #endif
 
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
- *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
  * Author: Hans van Staveren
  */
@@ -24,11 +13,13 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the PDP-11
  */
 
+/* #define REGPATCH		/* save all registers in markblock */
+
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
 		part_size++;
-	if (part_size == 2)
+	if (part_size == TEM_WSIZE)
 		part_flush();
 	if (sz == 1) {
 		w &= 0xFF;
@@ -43,23 +34,66 @@ con_part(sz,w) register sz; word w; {
 }
 
 con_mult(sz) word sz; {
-	long l;
+	long l, atol();
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
+#ifdef ACK_ASS
+	fprintf(codefile,".data4 %s\n",str);
+#else
 	l = atol(str);
 	fprintf(codefile,"\t%o;%o\n",(int)(l>>16),(int)l);
+#endif
 }
 
-con_float() {
-	double f;
-	register short *p,i;
+/*
+ * The next function is difficult to do when not running on a PDP 11 or VAX
+ * The strategy followed is to assume the code generator is running on a PDP 11
+ * unless the ACK_ASS define  is on.
+ */
 
-	/*
-	 * This code is correct only when the code generator is
-	 * run on a PDP-11 or VAX-11 since it assumes native
-	 * floating point format is PDP-11 format.
-	 */
+con_float() {
+#ifdef ACK_ASS
+	double f, f1;
+	double atof(), frexp(), modf();
+	int i, j;
+	int sign = 0;
+	int fraction ;
+
+	if (argval != 4 && argval != 8)
+		fatal("bad fcon size");
+	f = atof(str);
+	f = frexp(f, &i);
+	if (f < 0) {
+		f = -f;
+		sign = 1;
+	}
+	while (f < 0.5) {
+		f += f;
+		i --;
+	}
+	f = modf(2 * f, &f1); /* hidden bit */
+	i = (i + 128) & 0377;
+	fraction = (sign << 15) | (i << 7);
+	for (j = 6; j>= 0; j--) {
+		if (f >= 0.5) fraction |= (1 << j);
+		f = modf(2*f, &f1);
+	}
+	fprintf(codefile, ".data2 0%o", fraction);
+	for (i = argval / 2 - 1; i; i--) {
+		fraction = 0;
+		for (j = 15; j>= 0; j--) {
+			if (f >= 0.5) fraction |= (1 << j);
+			f = modf(2*f, &f1);
+		}
+		fprintf(codefile, ", 0%o", fraction);
+	}
+	putc('\n', codefile);
+#else
+	double f;
+	double atof();
+	int i;
+	short *p;
 
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
@@ -71,6 +105,7 @@ con_float() {
 		i = *p++;
 	}
 	fprintf(codefile,"\t%o;%o\n",i,*p++);
+#endif
 }
 
 #ifdef REGVARS
@@ -85,11 +120,6 @@ int n_regvars;
 
 regscore(off,size,typ,score,totyp) long off; {
 
-	/*
-	 * This function is full of magic constants.
-	 * They are a result of experimentation.
-	 */
-
 	if (size != 2)
 		return(-1);
 	score -= 1;	/* allow for save/restore */
@@ -101,7 +131,7 @@ regscore(off,size,typ,score,totyp) long off; {
 		score = 10*score+50;	/* Guestimate */
 	else
 		score *= 10;
-	return(score);	/* 10 * estimated # of words of profit */
+	return(score);	/* estimated # of words of profit */
 }
 
 i_regsave() {
@@ -114,6 +144,9 @@ f_regsave() {
 	register i;
 
 	if (n_regvars==0 || lbytes==0) {
+#ifdef REGPATCH
+		fprintf(codefile,"mov r2,-(sp)\nmov r4,-(sp)\n");
+#endif
 		fprintf(codefile,"mov r5,-(sp)\nmov sp,r5\n");
 		if (lbytes == 2)
 			fprintf(codefile,"tst -(sp)\n");
@@ -137,7 +170,16 @@ f_regsave() {
 
 regsave(regstr,off,size) char *regstr; long off; {
 
-	fprintf(codefile,"/ Local %ld into %s\n",off,regstr);
+	fprintf(codefile,"%c Local %ld into %s\n",COMMENTCHAR,off,regstr);
+/* commented away 
+#ifndef REGPATCH
+	fprintf(codefile,"mov %s,-(sp)\n",regstr);
+#endif
+	strcat(Rstring,regstr);
+	if (off>=0)
+		fprintf(codefile,"mov 0%lo(r5),%s\n",off,regstr);
+end of commented away */
+
 	strcat(Rstring,regstr);
 	regadm[n_regvars].ra_str = regstr;
 	regadm[n_regvars].ra_off = off;
@@ -146,7 +188,11 @@ regsave(regstr,off,size) char *regstr; long off; {
 
 regreturn() {
 
+#ifdef REGPATCH
+	fprintf(codefile,"jmp eret\n");
+#else
 	fprintf(codefile,"jmp RT%s\n",Rstring);
+#endif
 }
 
 #endif
@@ -154,6 +200,9 @@ regreturn() {
 prolog(nlocals) full nlocals; {
 
 #ifndef REGVARS
+#ifdef REGPATCH
+	fprintf(codefile,"mov r2,-(sp)\nmov r4,-(sp)\n");
+#endif
 	fprintf(codefile,"mov r5,-(sp)\nmov sp,r5\n");
 	if (nlocals == 0)
 		return;
@@ -187,7 +236,11 @@ mes(type) word type; {
 				return ;
 			default:
 				strarg(argt) ;
+#ifdef ACK_ASS
+				fprintf(codefile,".define %s\n",argstr) ;
+#else
 				fprintf(codefile,".globl %s\n",argstr) ;
+#endif
 				break ;
 			}
 		}
@@ -198,8 +251,15 @@ mes(type) word type; {
 }
 
 char    *segname[] = {
+#ifdef ACK_ASS
+	".sect .text",        /* SEGTXT */
+	".sect .data",        /* SEGCON */
+	".sect .rom",         /* SEGROM */
+	".sect .bss"          /* SEGBSS */
+#else
 	".text",        /* SEGTXT */
 	".data",        /* SEGCON */
 	".data",        /* SEGROM */
 	".bss"          /* SEGBSS */
+#endif
 };
