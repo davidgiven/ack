@@ -50,13 +50,14 @@ ProcedureHeading(struct def **pdf; int type;)
 ;
 
 block(struct node **pnd;) :
-	declaration*
-	[		{ return_occurred = 0; }
+	[	%persistent
+		declaration
+	]*
+			{ return_occurred = 0; *pnd = 0; }
+	[	%persistent
 		BEGIN
 		StatementSequence(pnd)
-	|
-			{ *pnd = 0; }
-	]
+	]?
 	END
 ;
 
@@ -72,7 +73,7 @@ declaration:
 	ModuleDeclaration ';'
 ;
 
-FormalParameters(struct paramlist *ppr; arith *parmaddr; struct type **ptp;):
+FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
 	'('
 	[
 		FPSection(ppr, parmaddr)
@@ -160,10 +161,15 @@ enumeration(struct type **ptp;)
 } :
 	'(' IdentList(&EnumList) ')'
 		{
-		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
+		  *ptp = standard_type(T_ENUMERATION, int_align, int_size);
 		  EnterEnumList(EnumList, *ptp);
-		  if ((*ptp)->enm_ncst > 256) { /* ??? is this reasonable ??? */
-			error("too many enumeration literals");
+		  if (ufit((*ptp)->enm_ncst-1, 1)) {
+			(*ptp)->tp_size = 1;
+			(*ptp)->tp_align = 1;
+		  }
+		  else if (ufit((*ptp)->enm_ncst-1, short_size)) {
+			(*ptp)->tp_size = short_size;
+			(*ptp)->tp_align = short_align;
 		  }
 		}
 ;
@@ -263,7 +269,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	/* Also accept old fashioned Modula-2 syntax, but give a warning.
 	   Sorry for the complicated code.
 	*/
-	[ qualident(0, (struct def **) 0, (char *) 0, &nd1)
+	[ qualident(&nd1)
 			{ nd = nd1; }
 	  [ ':' qualtype(&tp)
 			/* This is correct, in both kinds of Modula-2, if
@@ -387,7 +393,7 @@ PointerType(struct type **ptp;)
 } :
 	POINTER TO
 			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
-	[ %if	( lookup(dot.TOK_IDF, CurrentScope)
+	[ %if	( lookup(dot.TOK_IDF, CurrentScope, 1)
 			/* Either a Module or a Type, but in both cases defined
 		   	   in this scope, so this is the correct identification
 			*/
@@ -422,17 +428,33 @@ PointerType(struct type **ptp;)
 
 qualtype(struct type **ptp;)
 {
-	struct def *df = 0;
+	register struct node *nd;
+	struct node *nd1;		/* because &nd is illegal */
 } :
-	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
-			{ if (df && !(*ptp = df->df_type)) {
-				error("type \"%s\" not declared",
-				       df->df_idf->id_text);
-				*ptp = error_type;
-		  	  }
+	qualident(&nd1)
+		{ nd = nd1;
+		  *ptp = error_type;
+		  if (ChkDesignator(nd)) {
+			if (nd->nd_class != Def) {
+				node_error(nd, "type expected");
 			}
-;
+			else {
+				register struct def *df = nd->nd_def;
 
+				if (df->df_kind&(D_ISTYPE|D_FORWARD|D_ERROR)) {
+				    if (! df->df_type) {
+node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
+				    }
+				    else *ptp = df->df_type;
+				}
+				else {
+node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
+				}
+			}
+		  }
+		  FreeNode(nd);
+		}
+;
 
 ProcedureType(struct type **ptp;)
 {

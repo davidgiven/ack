@@ -72,7 +72,7 @@ cstbin(expp)
 	*/
 	register arith o1 = expp->nd_left->nd_INT;
 	register arith o2 = expp->nd_right->nd_INT;
-	register int uns = expp->nd_type != int_type;
+	register int uns = expp->nd_left->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
 	assert(expp->nd_left->nd_class == Value);

@@ -31,39 +31,13 @@ number(struct node **p;) :
 			}
 ;
 
-qualident(int types;
-	  struct def **pdf;
-	  char *str;
-	  struct node **p;
-	 )
+qualident(struct node **p;)
 {
-	struct node *nd;
 } :
-	IDENT	{ nd = MkLeaf(Name, &dot); }
+	IDENT	{ *p = MkLeaf(Name, &dot); }
 	[
-		selector(&nd)
+		selector(p)
 	]*
-		{ if (types && ChkDesignator(nd)) {
-			if (nd->nd_class != Def) {
-				node_error(nd, "%s expected", str);
-			}
-			else {
-				register struct def *df = nd->nd_def;
-
-		  		if ( !((types|D_ERROR) & df->df_kind)) {
-				    if (df->df_kind == D_FORWARD) {
-					not_declared(str, nd, "");
-				    }
-				    else {
-node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
-				    }
-				}
-				if (pdf) *pdf = df;
-			}
-		  }
-		  if (!p) FreeNode(nd);
-		  else *p = nd;
-		}
 ;
 
 selector(struct node **pnd;):
@@ -167,7 +141,7 @@ factor(register struct node **p;)
 {
 	struct node *nd;
 } :
-	qualident(0, (struct def **) 0, (char *) 0, p)
+	qualident(p)
 	[
 		designator_tail(p)?
 		[
@@ -231,7 +205,7 @@ element(struct node *nd;)
 
 designator(struct node **pnd;)
 :
-	qualident(0, (struct def **) 0, (char *) 0, pnd)
+	qualident(pnd)
 	designator_tail(pnd)?
 ;
 

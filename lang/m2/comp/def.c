@@ -91,14 +91,14 @@ define(id, scope, kind)
 	*/
 	register struct def *df;
 
-	df = lookup(id, scope);
+	df = lookup(id, scope, 1);
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
 		( 
 		  scopeclosed(scope)
 		&&
-		  (df = lookup(id, PervasiveScope)))
+		  (df = lookup(id, PervasiveScope, 1)))
 	   ) {
 		switch(df->df_kind) {
 		case D_HIDDEN:
@@ -234,7 +234,7 @@ DeclProc(type, id)
 	else {
 		char *name;
 
-		df = lookup(id, CurrentScope);
+		df = lookup(id, CurrentScope, 1);
 		if (df && df->df_kind == D_PROCHEAD) {
 			/* C_exp already generated when we saw the definition
 			   in the definition module

@@ -76,10 +76,12 @@ GetString(upto)
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
 	register int ch;
-	register struct string *str = (struct string *) Malloc(sizeof(struct string));
+	register struct string *str = (struct string *)
+			Malloc((unsigned) sizeof(struct string));
 	register char *p;
+	register int len;
 	
-	str->s_length = ISTRSIZE;
+	len = ISTRSIZE;
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	while (LoadChar(ch), ch != upto)	{
 		if (class(ch) == STNL)	{
@@ -95,15 +97,18 @@ GetString(upto)
 			break;
 		}
 		*p++ = ch;
-		if (p - str->s_str == str->s_length)	{
+		if (p - str->s_str == len)	{
 			str->s_str = Srealloc(str->s_str,
-				(unsigned int) str->s_length + RSTRSIZE);
-			p = str->s_str + str->s_length;
-			str->s_length += RSTRSIZE;
+				(unsigned int) len + RSTRSIZE);
+			p = str->s_str + len;
+			len += RSTRSIZE;
 		}
 	}
-	*p = '\0';
 	str->s_length = p - str->s_str;
+	while (p - str->s_str < len) *p++ = '\0';
+	if (str->s_length == 0) str->s_length = 1;	/* ??? string length
+							   at least 1 ???
+						   	*/
 	return str;
 }
 
@@ -172,7 +177,7 @@ linedirective() {
 		 * Remember the file name
 		 */
 		if (!eofseen && strcmp(FileName,buf)) {
-			FileName = Salloc(buf,strlen(buf) + 1);
+			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
 		}
 	}
 	if (eofseen) {

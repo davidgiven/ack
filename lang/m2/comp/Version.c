@@ -1,1 +1,1 @@
-char Version[] = "Version 0.7";
+char Version[] = "ACK Modula-2 compiler Version 0.8";

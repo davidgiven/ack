@@ -636,9 +636,9 @@ DoForInit(nd, left)
 	nd->nd_class = Name;
 	nd->nd_symb = IDENT;
 
-	if (! ChkVariable(nd) ||
-	    ! WalkExpr(left->nd_left) ||
-	    ! ChkExpression(left->nd_right)) return 0;
+	if (!( ChkVariable(nd) &
+	       WalkExpr(left->nd_left) &
+	       ChkExpression(left->nd_right))) return 0;
 
 	df = nd->nd_def;
 	if (df->df_kind == D_FIELD) {
@@ -696,17 +696,17 @@ DoAssign(nd, left, right)
 	*/
 	struct desig dsl, dsr;
 
-	if (! ChkExpression(right) || ! ChkVariable(left)) return;
+	if (! (ChkExpression(right) & ChkVariable(left))) return;
 
 	if (right->nd_symb == STRING) TryToString(right, left->nd_type);
 	dsr = InitDesig;
-	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
 
 	if (! TstAssCompat(left->nd_type, right->nd_type)) {
 		node_error(nd, "type incompatibility in assignment");
 		return;
 	}
 
+	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
 	if (complex(right->nd_type)) {
 		CodeAddress(&dsr);
 	}

@@ -90,9 +90,8 @@ struct def	{		/* list of definitions for a name */
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	char df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
-#define D_USED		0x02	/* set if used */
-#define D_DEFINED	0x04	/* set if it is assigned a value */
-#define D_REFERRED	0x08	/* set if it is referred to */
+#define D_USED		0x02	/* set if used (future use ???) */
+#define D_DEFINED	0x04	/* set if it is assigned a value (future use ???) */
 #define D_VARPAR	0x10	/* set if it is a VAR parameter */
 #define D_VALPAR	0x20	/* set if it is a value parameter */
 #define D_EXPORTED	0x40	/* set if exported */

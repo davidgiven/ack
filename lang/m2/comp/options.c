@@ -10,6 +10,13 @@
 #include	"main.h"
 #include	"warning.h"
 
+#define	MINIDFSIZE	14
+
+#if MINIDFSIZE < 14
+You fouled up! MINIDFSIZE has to be at least 14 or the compiler will not
+recognize some keywords!
+#endif
+
 extern int	idfsize;
 static int	ndirs;
 int		warning_classes;
@@ -72,8 +79,14 @@ DoOption(text)
 		idfsize = txt2int(&t);
 		if (*t || idfsize <= 0)
 			fatal("malformed -M option");
-		if (idfsize > IDFSIZE)
-			fatal("maximum identifier length is %d", IDFSIZE);
+		if (idfsize > IDFSIZE) {
+			idfsize = IDFSIZE;
+			warning(W_ORDINARY,"maximum identifier length is %d", IDFSIZE);
+		}
+		if (idfsize < MINIDFSIZE) {
+			warning(W_ORDINARY, "minimum identifier length is %d", MINIDFSIZE);
+			idfsize = MINIDFSIZE;
+		}
 		}
 		break;
 
@@ -112,6 +125,10 @@ DoOption(text)
 			case 'i':	/* int		*/
 				if (size != (arith)0) int_size = size;
 				if (align != 0) int_align = align;
+				break;
+			case 's':	/* short (subranges) */
+				if (size != 0) short_size = size;
+				if (align != 0) short_align = align;
 				break;
 			case 'l':	/* longint	*/
 				if (size != (arith)0) long_size = size;

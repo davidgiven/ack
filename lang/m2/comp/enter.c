@@ -273,7 +273,7 @@ ForwDef(ids, scope)
 	*/
 	register struct def *df;
 
-	if (!(df = lookup(ids->nd_IDF, scope))) {
+	if (!(df = lookup(ids->nd_IDF, scope, 1))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
 		df->for_node = MkLeaf(Name, &(ids->nd_token));
 	}
@@ -292,9 +292,7 @@ EnterExportList(Idlist, qualified)
 	register struct def *df, *df1;
 
 	for (;idlist; idlist = idlist->next) {
-		extern struct def *NoImportlookup();
-
-		df = NoImportlookup(idlist->nd_IDF, CurrentScope);
+		df = lookup(idlist->nd_IDF, CurrentScope, 0);
 
 		if (!df) {
 			/* undefined item in export list
@@ -332,7 +330,7 @@ EnterExportList(Idlist, qualified)
 			   scope imports it.
 			*/
 			df1 = lookup(idlist->nd_IDF,
-				     enclosing(CurrVis)->sc_scope);
+				     enclosing(CurrVis)->sc_scope, 1);
 			if (df1) {
 				/* It was already defined in the enclosing
 				   scope. There are two legal possibilities,
@@ -402,7 +400,7 @@ EnterFromImportList(Idlist, FromDef, FromId)
 
 	for (; idlist; idlist = idlist->next) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
-		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope))) {
+		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 1))) {
 		    not_declared("identifier", idlist, " in qualifying module");
 		    df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
 		}
@@ -434,7 +432,7 @@ EnterImportList(Idlist, local)
 	for (; idlist; idlist = idlist->next) {
 		DoImport(local ?
 				ForwDef(idlist, sc) :
-				GetDefinitionModule(idlist->nd_IDF) ,
+				GetDefinitionModule(idlist->nd_IDF, 1) ,
 			 CurrentScope);
 	}
 	FreeNode(Idlist);

@@ -16,6 +16,7 @@
 #include	"main.h"
 #include	"node.h"
 #include	"type.h"
+#include	"misc.h"
 
 #ifdef DEBUG
 long	sys_filesize();
@@ -57,7 +58,7 @@ GetDefinitionModule(id, incr)
 	struct scopelist *vis;
 
 	level += incr;
-	df = lookup(id, GlobalScope);
+	df = lookup(id, GlobalScope, 1);
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
 		*/
@@ -66,7 +67,7 @@ GetDefinitionModule(id, incr)
 		}
 		else {
 			open_scope(CLOSEDSCOPE);
-			if (GetFile(id->id_text)) {
+			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 				DefModule();
 				if (level == 1) {
 					/* The module is directly imported by
@@ -90,13 +91,16 @@ GetDefinitionModule(id, incr)
 			vis = CurrVis;
 			close_scope(SC_CHKFORW);
 		}
-		df = lookup(id, GlobalScope);
+		df = lookup(id, GlobalScope, 1);
 		if (! df) {
 			df = MkDef(id, GlobalScope, D_ERROR);
 			df->df_type = error_type;
-			df->mod_vis = CurrVis;
-			return df;
+			df->mod_vis = vis;
 		}
+	}
+	else if (df == Defined) {
+		error("cannot import from currently defined module");
+		df->df_kind = D_ERROR;
 	}
 	assert(df);
 	level -= incr;

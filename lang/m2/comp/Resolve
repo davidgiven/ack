@@ -20,10 +20,10 @@ then
 	:
 else	mkdir ../Xsrc
 fi
-make clashes
+make longnames
 : remove code generating routines from the clashes list as they are defines.
 : code generating routine names start with C_
-sed '/^C_/d' < clashes > tmp$$
+sed '/^C_/d' < longnames > tmp$$
 cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
 rm -f tmp$$
 PW=`pwd`

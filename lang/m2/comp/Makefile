@@ -64,8 +64,8 @@ lint:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
-clashes:	$(SRC) $(HFILES)
-	sh -c 'if test -f clashes ; then cclash -l7 clashes $? > Xclashes ; mv Xclashes clashes ; else cclash -l7 $? > clashes ; fi'
+longnames:	$(SRC) $(HFILES)
+	sh -c 'if test -f longnames ; then prid -l7 longnames $? > Xlongnames ; mv Xlongnames longnames ; else prid -l7 $? > longnames ; fi'
 
 # entry points not to be used directly
 

@@ -219,7 +219,6 @@ CodeVarDesig(df, ds)
 	*/
 	assert(ds->dsg_kind == DSG_INIT);
 
-	SetUsed(df);
 	if (df->var_addrgiven) {
 		/* the programmer specified an address in the declaration of
 		   the variable. Generate code to push the address.
@@ -293,7 +292,6 @@ CodeDesig(nd, ds)
 	case Def:
 		df = nd->nd_def;
 
-		SetUsed(df);
 		switch(df->df_kind) {
 		case D_FIELD:
 			CodeFieldDesig(df, ds);

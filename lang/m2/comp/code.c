@@ -65,6 +65,7 @@ CodeString(nd)
 	}
 }
 
+STATIC
 CodePadString(nd, sz)
 	register struct node *nd;
 	arith sz;
@@ -96,7 +97,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	if (tp->tp_fund == T_REAL) fp_used = 1;
 	switch(nd->nd_class) {
 	case Def:
-		if (nd->nd_def->df_kind == D_PROCEDURE) {
+		if (nd->nd_def->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
 			C_lpi(NameOfProc(nd->nd_def));
 			ds->dsg_kind = DSG_LOADED;
 			break;
@@ -380,7 +381,7 @@ CodeParameters(param, arg)
 			}
 		}
 		else if (left->nd_symb == STRING) {
-			C_loc(left->nd_SLE - 1);
+			C_loc(left->nd_SLE);
 		}
 		else if (tp->arr_elem == word_type) {
 			C_loc((left_type->tp_size+word_size-1) / word_size - 1);
@@ -403,8 +404,10 @@ CodeParameters(param, arg)
 		if (left_type->tp_fund == T_STRING) {
 			CodePadString(left, tp->tp_size);
 		}
-		else CodePExpr(left);
-		RangeCheck(left_type, tp);
+		else {
+			CodePExpr(left);
+			RangeCheck(left_type, tp);
+		}
 	}
 }
 
@@ -413,7 +416,7 @@ CodeStd(nd)
 {
 	register struct node *arg = nd->nd_right;
 	register struct node *left = 0;
-	register struct type *tp = 0;
+	register struct type *tp;
 	int std = nd->nd_left->nd_def->df_value.df_stdname;
 
 	if (arg) {
@@ -426,15 +429,11 @@ CodeStd(nd)
 	case S_ABS:
 		CodePExpr(left);
 		if (tp->tp_fund == T_INTEGER) {
-			if (tp->tp_size == int_size) {
-				C_cal("_absi");
-			}
+			if (tp->tp_size == int_size) C_cal("_absi");
 			else	C_cal("_absl");
 		}
 		else if (tp->tp_fund == T_REAL) {
-			if (tp->tp_size == float_size) {
-				C_cal("_absf");
-			}
+			if (tp->tp_size == float_size) C_cal("_absf");
 			else	C_cal("_absd");
 		}
 		C_asp(tp->tp_size);

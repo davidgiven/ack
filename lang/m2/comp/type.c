@@ -21,6 +21,7 @@
 
 int
 	word_align = AL_WORD,
+	short_align = AL_SHORT,
 	int_align = AL_INT,
 	long_align = AL_LONG,
 	float_align = AL_FLOAT,
@@ -32,6 +33,7 @@ arith
 	word_size = SZ_WORD,
 	dword_size = 2 * SZ_WORD,
 	int_size = SZ_INT,
+	short_size = SZ_SHORT,
 	long_size = SZ_LONG,
 	float_size = SZ_FLOAT,
 	double_size = SZ_DOUBLE,
@@ -280,6 +282,27 @@ subr_type(lb, ub)
 	res->sub_ub = ub->nd_INT;
 	res->tp_size = tp->tp_size;
 	res->tp_align = tp->tp_align;
+	if (tp == card_type) {
+		if (ufit(res->sub_ub, 1)) {
+			res->tp_size = 1;
+			res->tp_align = 1;
+		}
+		else if (ufit(res->sub_ub, 2)) {
+			res->tp_size = short_size;
+			res->tp_align = short_align;
+		}
+	}
+	else if (tp == int_type) {
+		if (fit(res->sub_lb, 1) && fit(res->sub_ub, 1)) {
+			res->tp_size = 1;
+			res->tp_align = 1;
+		}
+		else if (fit(res->sub_lb, short_size) &&
+			 fit(res->sub_ub, short_size)) {
+			res->tp_size = short_size;
+			res->tp_align = short_align;
+		}
+	}
 	return res;
 }
 

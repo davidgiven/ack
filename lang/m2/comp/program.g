@@ -133,7 +133,7 @@ DefinitionModule
 			modules. Issue a warning.
 		*/
 			{ 
-node_warning(exportlist, W_ORDINARY, "export list in definition module ignored");
+node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignored");
 				FreeNode(exportlist);
 			}
 	|
@@ -183,7 +183,7 @@ definition
 
 ProgramModule
 {
-	struct def *GetDefinitionModule();
+	extern struct def *GetDefinitionModule();
 	register struct def *df;
 } :
 	MODULE
@@ -210,7 +210,9 @@ ProgramModule
 ;
 
 Module:
-				{ open_scope(CLOSEDSCOPE); }
+				{ open_scope(CLOSEDSCOPE);
+				  warning(W_ORDINARY, "Compiling a definition module");
+				}
 	DefinitionModule
 				{ close_scope(SC_CHKFORW); }
 |

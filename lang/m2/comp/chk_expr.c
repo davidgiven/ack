@@ -25,6 +25,20 @@
 
 extern char *symbol2str();
 
+STATIC
+Xerror(nd, mess, edf)
+	struct node *nd;
+	char *mess;
+	struct def *edf;
+{
+	if (edf) {
+		if (edf->df_kind != D_ERROR)  {
+			node_error(nd, "\"%s\": %s", edf->df_idf->id_text, mess);
+		}
+	}
+	else	node_error(nd, "%s", mess);
+}
+
 int
 ChkVariable(expp)
 	register struct node *expp;
@@ -37,7 +51,7 @@ ChkVariable(expp)
 
 	if (expp->nd_class == Def &&
 	    !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
-		node_error(expp, "variable expected");
+		Xerror(expp, "variable expected", expp->nd_def);
 		return 0;
 	}
 
@@ -63,7 +77,7 @@ ChkArrow(expp)
 	tp = expp->nd_right->nd_type;
 
 	if (tp->tp_fund != T_POINTER) {
-		node_error(expp, "illegal operand for unary operator \"^\"");
+		node_error(expp, "\"^\": illegal operand");
 		return 0;
 	}
 
@@ -82,22 +96,18 @@ ChkArr(expp)
 	*/
 
 	register struct type *tpl, *tpr;
+	int retval;
 
 	assert(expp->nd_class == Arrsel);
 	assert(expp->nd_symb == '[');
 
 	expp->nd_type = error_type;
 
-	if ( 
-	     !ChkVariable(expp->nd_left)
-	   ||
-	     !ChkExpression(expp->nd_right)
-	   ||
-	     expp->nd_left->nd_type == error_type
-	   )	return 0;
+	retval = ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right);
 
 	tpl = expp->nd_left->nd_type;
 	tpr = expp->nd_right->nd_type;
+	if (tpl == error_type || tpr == error_type) return 0;
 
 	if (tpl->tp_fund != T_ARRAY) {
 		node_error(expp, "not indexing an ARRAY type");
@@ -116,7 +126,7 @@ ChkArr(expp)
 	}
 
 	expp->nd_type = RemoveEqual(tpl->arr_elem);
-	return 1;
+	return retval;
 }
 
 #ifdef DEBUG
@@ -168,11 +178,11 @@ ChkLinkOrName(expp)
 		     !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
-			node_error(left, "illegal selection");
+			Xerror(left, "illegal selection", left->nd_def);
 			return 0;
 		}
 
-		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope))) {
+		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, 1))) {
 			id_not_declared(expp);
 			return 0;
 		}
@@ -184,9 +194,7 @@ ChkLinkOrName(expp)
 				/* Fields of a record are always D_QEXPORTED,
 				   so ...
 				*/
-node_error(expp, "identifier \"%s\" not exported from qualifying module",
-df->df_idf->id_text);
-				return 0;
+Xerror(expp, "not exported from qualifying module", df);
 			}
 		}
 
@@ -202,7 +210,6 @@ df->df_idf->id_text);
 	assert(expp->nd_class == Def);
 
 	df = expp->nd_def;
-	if (df->df_kind == D_ERROR) return 0;
 
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		/* Replace an enum-literal or a CONST identifier by its value.
@@ -220,8 +227,7 @@ df->df_idf->id_text);
 			expp->nd_lineno = ln;
 		}
 	}
-
-	return 1;
+	return df->df_kind != D_ERROR;
 }
 
 STATIC int
@@ -238,7 +244,7 @@ ChkExLinkOrName(expp)
 	df = expp->nd_def;
 
 	if (!(df->df_kind & D_VALUE)) {
-		node_error(expp, "value expected");
+		Xerror(expp, "value expected", df);
 	}
 
 	if (df->df_kind == D_PROCEDURE) {
@@ -352,19 +358,18 @@ ChkSet(expp)
 		/* A type was given. Check it out
 		*/
 		if (! ChkDesignator(nd)) return 0;
-
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
 
 		if (!is_type(df) ||
-		    (df->df_type->tp_fund != T_SET)) {
+	   	    (df->df_type->tp_fund != T_SET)) {
 			if (df->df_kind != D_ERROR) {
-node_error(expp, "type specifier does not represent a set type");
+				Xerror(expp, "not a set type", df);
 			}
 			return 0;
 		}
 		tp = df->df_type;
-		FreeNode(expp->nd_left);
+		FreeNode(nd);
 		expp->nd_left = 0;
 	}
 	else	tp = bitset_type;
@@ -412,8 +417,9 @@ node_error(expp, "type specifier does not represent a set type");
 }
 
 STATIC struct node *
-getarg(argp, bases, designator)
+getarg(argp, bases, designator, edf)
 	struct node **argp;
+	struct def *edf;
 {
 	/*	This routine is used to fetch the next argument from an
 		argument list. The argument list is indicated by "argp".
@@ -427,7 +433,7 @@ getarg(argp, bases, designator)
 	register struct node *left;
 
 	if (! arg) {
-		node_error(*argp, "too few arguments supplied");
+		Xerror(*argp, "too few arguments supplied", edf);
 		return 0;
 	}
 
@@ -443,7 +449,7 @@ getarg(argp, bases, designator)
 
 	if (bases) {
 		if (!(BaseType(left->nd_type)->tp_fund & bases)) {
-			node_error(arg, "unexpected type");
+			Xerror(arg, "unexpected parameter type", edf);
 			return 0;
 		}
 	}
@@ -453,8 +459,9 @@ getarg(argp, bases, designator)
 }
 
 STATIC struct node *
-getname(argp, kinds)
+getname(argp, kinds, bases, edf)
 	struct node **argp;
+	struct def *edf;
 {
 	/*	Get the next argument from argument list "argp".
 		The argument must indicate a definition, and the
@@ -464,7 +471,7 @@ getname(argp, kinds)
 	register struct node *left;
 
 	if (!arg->nd_right) {
-		node_error(arg, "too few arguments supplied");
+		Xerror(arg, "too few arguments supplied", edf);
 		return 0;
 	}
 
@@ -473,13 +480,20 @@ getname(argp, kinds)
 	if (! ChkDesignator(left)) return 0;
 
 	if (left->nd_class != Def && left->nd_class != LinkDef) {
-		node_error(arg, "identifier expected");
+		Xerror(arg, "identifier expected", edf);
 		return 0;
 	}
 
 	if (!(left->nd_def->df_kind & kinds)) {
-		node_error(arg, "unexpected type");
+		Xerror(arg, "unexpected parameter type", edf);
 		return 0;
+	}
+
+	if (bases) {
+		if (!(left->nd_type->tp_fund & bases)) {
+			Xerror(arg, "unexpected parameter type", edf);
+			return 0;
+		}
 	}
 
 	*argp = arg;
@@ -493,16 +507,25 @@ ChkProcCall(expp)
 	/*	Check a procedure call
 	*/
 	register struct node *left;
-	struct node *arg;
+	struct def *edf = 0;
 	register struct paramlist *param;
+	char ebuf[256];
+	int retval = 1;
+	int cnt = 0;
 
 	left = expp->nd_left;
+	if (left->nd_class == Def || left->nd_class == LinkDef) {
+		edf = left->nd_def;
+	}
 	expp->nd_type = RemoveEqual(ResultType(left->nd_type));
 
 	/* Check parameter list
 	*/
 	for (param = ParamList(left->nd_type); param; param = param->next) {
-		if (!(left = getarg(&expp, 0, IsVarParam(param)))) return 0;
+		if (!(left = getarg(&expp, 0, IsVarParam(param), edf))) {
+			return 0;
+		}
+		cnt++;
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
@@ -510,17 +533,19 @@ ChkProcCall(expp)
 				   left->nd_type,
 				   IsVarParam(param),
 				   left)) {
-node_error(left, "type incompatibility in parameter");
-			return 0;
+			sprint(ebuf, "type incompatibility in parameter %d",
+					cnt);
+			Xerror(left, ebuf, edf);
+			retval = 0;
 		}
 	}
 
 	if (expp->nd_right) {
-		node_error(expp->nd_right, "too many parameters supplied");
+		Xerror(expp->nd_right, "too many parameters supplied", edf);
 		return 0;
 	}
 
-	return 1;
+	return retval;
 }
 
 int
@@ -659,11 +684,12 @@ ChkBinOper(expp)
 	register struct node *left, *right;
 	struct type *tpl, *tpr;
 	int allowed;
+	int retval;
 
 	left = expp->nd_left;
 	right = expp->nd_right;
 
-	if (!ChkExpression(left) || !ChkExpression(right)) return 0;
+	retval = ChkExpression(left) & ChkExpression(right);
 
 	tpl = BaseType(left->nd_type);
 	tpr = BaseType(right->nd_type);
@@ -695,24 +721,27 @@ ChkBinOper(expp)
 		if (!TstAssCompat(tpl, ElementType(tpr))) {
 			/* Assignment compatible ???
 			   I don't know! Should we be allowed to check
-			   if a CARDINAL is a member of a BITSET???
+			   if a INTEGER is a member of a BITSET???
 			*/
 
-node_error(expp, "incompatible types for operator \"IN\"");
+			node_error(expp, "\"IN\": incompatible types");
 			return 0;
 		}
 		if (left->nd_class == Value && right->nd_class == Set) {
 			cstset(expp);
 		}
-		return 1;
+		return retval;
 	}
+
+	if (!retval) return 0;
 
 	allowed = AllowedTypes(expp->nd_symb);
 
 	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed)) {
 	    	if (!((T_CARDINAL & allowed) &&
 	             ChkAddress(tpl, tpr))) {
-node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+			node_error(expp, "\"%s\": illegal operand type(s)", 
+				     symbol2str(expp->nd_symb));
 			return 0;
 		}
 		if (expp->nd_type->tp_fund & T_CARDINAL) {
@@ -721,16 +750,15 @@ node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_
 	}
 
 	if (Boolean(expp->nd_symb) && tpl != bool_type) {
-node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
-	    
+		node_error(expp, "\"%s\": illegal operand type(s)",
+			     symbol2str(expp->nd_symb));
 		return 0;
 	}
 
 	/* Operands must be compatible (distilled from Def 8.2)
 	*/
 	if (!TstCompat(tpl, tpr)) {
-		node_error(expp, "incompatible types for operator \"%s\"",
-					symbol2str(expp->nd_symb));
+		node_error(expp, "\"%s\": incompatible types", symbol2str(expp->nd_symb));
 		return 0;
 	}
 
@@ -810,14 +838,14 @@ ChkUnOper(expp)
 	default:
 		crash("ChkUnOper");
 	}
-	node_error(expp, "illegal operand for unary operator \"%s\"",
-			symbol2str(expp->nd_symb));
+	node_error(expp, "\"%s\": illegal operand", symbol2str(expp->nd_symb));
 	return 0;
 }
 
 STATIC struct node *
-getvariable(argp)
+getvariable(argp, edf)
 	struct node **argp;
+	struct def *edf;
 {
 	/*	Get the next argument from argument list "argp".
 		It must obey the rules of "ChkVariable".
@@ -826,7 +854,7 @@ getvariable(argp)
 
 	arg = arg->nd_right;
 	if (!arg) {
-		node_error(arg, "too few parameters supplied");
+		Xerror(arg, "too few parameters supplied", edf);
 		return 0;
 	}
 
@@ -844,14 +872,16 @@ ChkStandard(expp, left)
 	/*	Check a call of a standard procedure or function
 	*/
 	struct node *arg = expp;
+	register struct def *edf;
 	int std;
 
 	assert(left->nd_class == Def);
 	std = left->nd_def->df_value.df_stdname;
+	edf = left->nd_def;
 
 	switch(std) {
 	case S_ABS:
-		if (!(left = getarg(&arg, T_NUMERIC, 0))) return 0;
+		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
 		expp->nd_type = left->nd_type;
 		if (left->nd_class == Value &&
 		    expp->nd_type->tp_fund != T_REAL) {
@@ -861,28 +891,31 @@ ChkStandard(expp, left)
 
 	case S_CAP:
 		expp->nd_type = char_type;
-		if (!(left = getarg(&arg, T_CHAR, 0))) return 0;
+		if (!(left = getarg(&arg, T_CHAR, 0, edf))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_CAP);
 		break;
 
 	case S_CHR:
 		expp->nd_type = char_type;
-		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_CHR);
 		break;
 
 	case S_FLOAT:
 		expp->nd_type = real_type;
-		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
 		break;
 
 	case S_HIGH:
-		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0))) return 0;
+		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0, edf))) {
+			return 0;
+		}
 		if (IsConformantArray(left->nd_type)) {
-			/* A conformant array has no explicit index type
-			   ??? So, what can we use as index-type ???
+			/* A conformant array has no explicit index type,
+			   but it is a subrange with lower bound 0, so
+			   it is of type CARDINAL !!!
 			*/
-			expp->nd_type = intorcard_type;
+			expp->nd_type = card_type;
 			break;
 		}
 		if (left->nd_type->tp_fund == T_ARRAY) {
@@ -890,14 +923,17 @@ ChkStandard(expp, left)
 			cstcall(expp, S_MAX);
 			break;
 		}
-		if (left->nd_type->tp_fund == T_CHAR) {
-			if (left->nd_symb != STRING) {
-				node_error(left,"HIGH: array parameter expected");
-				return 0;
-			}
+		if (left->nd_symb != STRING) {
+			Xerror(left,"array parameter expected", edf);
+			return 0;
 		}
-		expp->nd_type = intorcard_type;
+		expp->nd_type = card_type;
 		expp->nd_class = Value;
+		/* Notice that we could disallow HIGH("") here by checking
+		   that left->nd_type->tp_fund != T_CHAR || left->nd_INT != 0.
+		   ??? For the time being, we don't. !!!
+		   Maybe the empty string should not be allowed at all.
+		*/
 		expp->nd_INT = left->nd_type->tp_fund == T_CHAR ? 0 :
 					left->nd_SLE - 1;
 		expp->nd_symb = INTEGER;
@@ -905,9 +941,7 @@ ChkStandard(expp, left)
 
 	case S_MAX:
 	case S_MIN:
-		if (!(left = getname(&arg, D_ISTYPE))) return 0;
-		if (!(left->nd_type->tp_fund & (T_DISCRETE))) {
-node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
+		if (!(left = getname(&arg, D_ISTYPE, T_DISCRETE, edf))) {
 			return 0;
 		}
 		expp->nd_type = left->nd_type;
@@ -915,17 +949,13 @@ node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 		break;
 
 	case S_ODD:
-		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
 		expp->nd_type = bool_type;
 		if (left->nd_class == Value) cstcall(expp, S_ODD);
 		break;
 
 	case S_ORD:
-		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
-		if (left->nd_type->tp_size > word_size) {
-			node_error(left, "illegal type in argument of ORD");
-			return 0;
-		}
+		if (!(left = getarg(&arg, T_DISCRETE, 0, edf))) return 0;
 		expp->nd_type = card_type;
 		if (left->nd_class == Value) cstcall(expp, S_ORD);
 		break;
@@ -937,12 +967,12 @@ node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 
 			if (!warning_given) {
 				warning_given = 1;
-	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are old-fashioned");
+	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are obsolete");
 			}
 		}
-		if (! (left = getvariable(&arg))) return 0;
+		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
-			node_error(left, "pointer variable expected");
+			Xerror(left, "pointer variable expected", edf);
 			return 0;
 		}
 		if (left->nd_class == Def) {
@@ -974,23 +1004,19 @@ node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
 		expp->nd_type = intorcard_type;
-		if (! getname(&arg, D_FIELD|D_VARIABLE|D_ISTYPE)) return 0;
+		if (! getname(&arg, D_FIELD|D_VARIABLE|D_ISTYPE, 0, edf)) {
+			return 0;
+		}
 		cstcall(expp, S_SIZE);
 		break;
 
 	case S_TRUNC:
 		expp->nd_type = card_type;
-		if (!(left = getarg(&arg, T_REAL, 0))) return 0;
+		if (!(left = getarg(&arg, T_REAL, 0, edf))) return 0;
 		break;
 
 	case S_VAL:
-		{
-		struct type *tp;
-
-		if (!(left = getname(&arg, D_ISTYPE))) return 0;
-		tp = left->nd_def->df_type;
-		if (!(tp->tp_fund & T_DISCRETE)) {
-			node_error(arg, "unexpected type");
+		if (!(left = getname(&arg, D_ISTYPE, T_DISCRETE, edf))) {
 			return 0;
 		}
 		expp->nd_type = left->nd_def->df_type;
@@ -998,26 +1024,25 @@ node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 		arg->nd_right = 0;
 		FreeNode(arg);
 		arg = expp;
-		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_VAL);
 		break;
-		}
 
 	case S_ADR:
 		expp->nd_type = address_type;
-		if (!(left = getarg(&arg, 0, 1))) return 0;
+		if (!(left = getarg(&arg, 0, 1, edf))) return 0;
 		break;
 
 	case S_DEC:
 	case S_INC:
 		expp->nd_type = 0;
-		if (! (left = getvariable(&arg))) return 0;
+		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
-node_error(left,"illegal type in argument of %s",std == S_INC ? "INC" : "DEC");
+			Xerror(left,"illegal parameter type", edf);
 			return 0;
 		}
 		if (arg->nd_right) {
-			if (! getarg(&arg, T_INTORCARD, 0)) return 0;
+			if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
 		}
 		break;
 
@@ -1031,18 +1056,18 @@ node_error(left,"illegal type in argument of %s",std == S_INC ? "INC" : "DEC");
 		struct type *tp;
 
 		expp->nd_type = 0;
-		if (!(left = getvariable(&arg))) return 0;
+		if (!(left = getvariable(&arg, edf))) return 0;
 		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
-node_error(arg, "%s expects a SET parameter", std == S_EXCL ? "EXCL" : "INCL");
+			Xerror(arg, "SET parameter expected", edf);
 			return 0;
 		}
-		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
+		if (!(left = getarg(&arg, T_DISCRETE, 0, edf))) return 0;
 		if (!TstAssCompat(ElementType(tp), left->nd_type)) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???
 			*/
-			node_error(arg, "unexpected type");
+			Xerror(arg, "unexpected parameter type", edf);
 			return 0;
 		}
 		break;
@@ -1053,7 +1078,7 @@ node_error(arg, "%s expects a SET parameter", std == S_EXCL ? "EXCL" : "INCL");
 	}
 
 	if (arg->nd_right) {
-		node_error(arg->nd_right, "too many parameters supplied");
+		Xerror(arg->nd_right, "too many parameters supplied", edf);
 		return 0;
 	}
 
@@ -1074,7 +1099,7 @@ ChkCast(expp, left)
 	register struct node *arg = expp->nd_right;
 
 	if ((! arg) || arg->nd_right) {
-node_error(expp, "only one parameter expected in type cast");
+		Xerror(expp, "too many parameters in type cast", left->nd_def);
 		return 0;
 	}
 
@@ -1084,7 +1109,7 @@ node_error(expp, "only one parameter expected in type cast");
 	if (arg->nd_type->tp_size != left->nd_type->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
 	     left->nd_type->tp_size > word_size)) {
-		node_error(expp, "unequal sizes in type cast");
+		Xerror(expp, "unequal sizes in type cast", left->nd_def);
 	}
 
 	if (arg->nd_class == Value) {
@@ -1132,8 +1157,7 @@ no_desig(expp)
 }
 
 STATIC int
-done_before(expp)
-	struct node *expp;
+done_before()
 {
 	return 1;
 }

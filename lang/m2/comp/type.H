@@ -103,6 +103,7 @@ extern struct type
 
 extern int
 	word_align,
+	short_align,
 	int_align,
 	long_align,
 	float_align,
@@ -113,6 +114,7 @@ extern int
 extern arith
 	word_size,
 	dword_size,
+	short_size,
 	int_size,
 	long_size,
 	float_size,
@@ -149,3 +151,8 @@ struct type
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
+
+extern long full_mask[];
+
+#define fit(n, i)	(((n) + (0x80<<(((i)-1)*8)) & ~full_mask[(i)]) == 0)
+#define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)
