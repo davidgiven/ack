@@ -5,3 +5,6 @@
 
 /* The default machine used by ack, acc, apc */
 #	define	ACKM		"vax4"
+
+/* size of local machine, either 0 (for 16 bit address space), or 1 */
+#	define BIGMACHINE	1
