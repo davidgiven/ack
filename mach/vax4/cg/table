@@ -2261,7 +2261,7 @@ loc loc cif sdl $1==4 && $2==8 && inreg($4)==2
 			"cvtld\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif /* REGVARS */
+#endif
 */
 loc loc cif sdl $1==4 && $2==8 && $4<0
 		| source4 |
@@ -2295,7 +2295,7 @@ loc loc cff sdl $1==4 && $2==8 && inreg($4)==2
 			"cvtfd\t%[1],%(regvar($4)%)"
 			erase(regvar($4))
 			setcc(regvar($4))	|	| |
-#endif /* REGVARS */
+#endif
 */
 loc loc cff sdl $1==4 && $2==8 && $4<0
 		| source4 |
