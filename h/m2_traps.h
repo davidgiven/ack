@@ -3,3 +3,4 @@
 #define M2_NORESULT	66
 #define M2_UOVFL	67
 #define M2_FORCH	68
+#define M2_UUVFL	69
