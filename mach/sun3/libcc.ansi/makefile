@@ -7,14 +7,21 @@ SUB=
 LIBC="PREF=$(PREF)" "SUB=$(SUB)"
 OLIB=tail_$(PREF)$(SUB)
 
-install: cplibc
+install: cplibc cphead
 
-cplibc:
+cplibc: libsrc
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=`homefromsubdir $(EMHOME)`" tailcp
+
+cphead: head_$(PREF).e
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=$(EMHOME)" headcp
+
+head_$(PREF).e: libsrc
+
+libsrc: $(EMHOME)/lang/cem/libcc.ansi/libsrc .
 	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
 	tar xf libsrc
-	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tailcp
 
-cmp:	cmplibc
+cmp:	cmplibc cmphead
 	-../../compare $(OLIB)
 
 cmplibc:
@@ -22,8 +29,11 @@ cmplibc:
 	tar xf libsrc
 	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tail
 
+cmphead: head_$(PREF).e
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" head
+
 clean:
-	rm -rf `cat LIST` LIST OLIST MakeArch Makefile make.proto libsrc
+	rm -rf `cat LIST` LIST OLIST MakeArch Makefile make.proto libsrc head_$(PREF).[e$(SUF)]
 
 opr:
 	make pr | opr
