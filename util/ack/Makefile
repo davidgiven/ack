@@ -18,9 +18,9 @@ BINDIR=$(EMHOME)/bin
 MANDIR=$(EMHOME)/man
 MODDIR=$(EMHOME)/modules/lib
 
-head:   ack
+head:   ack ack.1
 
-install:	ack
+install:	ack ack.1
 		rm -f $(BINDIR)/ack
 		cp ack $(BINDIR)/ack
 		-cd $(BINDIR) ; \
@@ -29,13 +29,16 @@ install:	ack
 		rm -f $(MANDIR)/man/ack.1
 		cp ack.1 $(MANDIR)/man/ack.1
 
-cmp:		ack
+cmp:		ack ack.1
 		-cmp ack $(BINDIR)/ack
 		(cd pc ; make cmp )
 		-cmp ack.1 $(MANDIR)/ack.1
 
+ack.1:		ack.1.X
+		tbl < ack.1.X > ack.1
+
 clean:
-		-rm -f *.old *.o ack
+		-rm -f *.old *.o ack ack.1
 		(cd pc ; make clean )
 
 ack:    $(OBJ)
