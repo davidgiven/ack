@@ -33,7 +33,6 @@ name "M68020 Modula-2 library"
 dir libm2
 end
 name "M68020 VME131 System V/68 R2V2.1 conversion"
-system m68020
 dir cv
 end
 name "M68020 floating point library"
