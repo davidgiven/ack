@@ -1426,20 +1426,26 @@ proc lolcxxstl example lol loc and stl
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen xxx* {const, $2}, {LOCAL, $1}
 
+/*
 pat lol loc adi stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("add.l")
 pat lol loc adu stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("add.l")
+	peephole optimizer replaces these
+*/
 pat lol loc sbi stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("sub.l")
 pat lol loc sbu stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("sub.l")
+/*
 pat lol loc and stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("and.l")
 pat lol loc ior stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("or.l")
 pat lol loc xor stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("eor.l")
+	peephole optimizer replaces these
+*/
 #ifdef TBL68020
 pat lol loc dvi stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("divs.l")
@@ -1455,16 +1461,22 @@ proc lolcxxxstl example lol loc adi stl
     kills all_indir, LOCAL %bd==$1
     gen xxx* {const, $2}, {LOCAL, $1}
 
+/*
 pat lol loc adi stl $1==$4 && $3==4	call lolcxxxstl("add.l")
 pat lol loc adu stl $1==$4 && $3==4	call lolcxxxstl("add.l")
+	peephole optimizer replaces these
+*/
 pat lol loc sbi stl $1==$4 && $3==4	call lolcxxxstl("sub.l")
 pat lol loc sbu stl $1==$4 && $3==4	call lolcxxxstl("sub.l")
+/*
 pat lol loc and stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
 					call lolcxxxstl("and.l")
 pat lol loc ior stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
 					call lolcxxxstl("or.l")
 pat lol loc xor stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
 					call lolcxxxstl("eor.l")
+	peephole optimizer replaces these
+*/
 
 proc lilcxxsil example lil loc and sil
     kills allexceptcon
@@ -1513,47 +1525,62 @@ proc loecxxxste example loe loc adi ste
     kills posextern
     gen xxx* {const, $2}, {absolute4, $1}
 
+/*
 pat loe loc adi ste $1==$4 && $3==4	call loecxxxste("add.l")
 pat loe loc adu ste $1==$4 && $3==4	call loecxxxste("add.l")
+	peephole optimizer replaces these
+*/
 pat loe loc sbi ste $1==$4 && $3==4	call loecxxxste("sub.l")
 pat loe loc sbu ste $1==$4 && $3==4	call loecxxxste("sub.l")
+/*
 pat loe loc and ste $1==$4 && $3==4	call loecxxxste("and.l")
 pat loe loc ior ste $1==$4 && $3==4	call loecxxxste("or.l")
 pat loe loc xor ste $1==$4 && $3==4	call loecxxxste("eor.l")
+	peephole optimizer replaces these
+*/
 
 proc lolrxxstl example lol lol and stl
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen xxx* {LOCAL, $2}, {LOCAL, $1}
 
-pat lol lol adi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+/* pat lol lol adi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("add.l")
 pat lol lol adu stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("add.l")
+	peephole optimizer replaces these
+*/
 pat lol lol sbi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("sub.l")
 pat lol lol sbu stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("sub.l")
+/*
 pat lol lol and stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("and.l")
 pat lol lol ior stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("or.l")
 pat lol lol xor stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
 					call lolrxxstl("eor.l")
+	peephole optimizer replaces these
+*/
 
 proc lolrxxxstl example lol lol adi stl
     kills all_indir, LOCAL %bd==$1
     gen xxx* {LOCAL, $2}, {LOCAL, $1}
 
+/*
 pat lol lol adi stl $1==$4 && $3==4 && inreg($2)==reg_any
 					call lolrxxxstl("add.l")
 pat lol lol adu stl $1==$4 && $3==4 && inreg($2)==reg_any
 					call lolrxxxstl("add.l")
+	peephole optimizer replaces these
+*/
 pat lol lol ads stl $1==$4 && $3==4 && inreg($2)==reg_any
 					call lolrxxxstl("add.l")
 pat lol lol sbi stl $1==$4 && $3==4 && inreg($2)==reg_any
 					call lolrxxxstl("sub.l")
 pat lol lol sbu stl $1==$4 && $3==4 && inreg($2)==reg_any
 					call lolrxxxstl("sub.l")
+/*
 pat lol lol and stl $1==$4 && $3==4 && inreg($2)==reg_any && inreg($1)!=reg_pointer
 					call lolrxxxstl("and.l")
 pat lol lol ior stl $1==$4 && $3==4 && inreg($2)==reg_any &&
@@ -1562,6 +1589,8 @@ pat lol lol ior stl $1==$4 && $3==4 && inreg($2)==reg_any &&
 pat lol lol xor stl $1==$4 && $3==4 && inreg($2)==reg_any &&
 			inreg($1)!=reg_pointer
 					call lolrxxxstl("eor.l")
+	peephole optimizer replaces these
+*/
 
 proc lilrxxsil example lil lol and sil
     kills allexceptcon
@@ -1655,7 +1684,12 @@ pat sbi stl $1==4 && inreg($2)==reg_any	call xxxstl("sub.l")
 pat sbu stl $1==4 && inreg($2)==reg_any	call xxxstl("sub.l")
 pat and stl $1==4 && inreg($2)==reg_any	call xxxstl("and.l")
 pat ior stl $1==4 && inreg($2)==reg_any	call xxxstl("or.l")
-pat xor stl $1==4 && inreg($2)==reg_any	call xxxstl("eor.l")
+
+pat xor stl $1==4 && inreg($2)==reg_any
+with D_REG any4
+    kills regvar($2, reg_any), use_index %xreg==regvar($2, reg_any)
+    gen	move %2,{dreg4, regvar($2)}
+	eor_l %1,{dreg4, regvar($2)}
 
 pat ads stl $1==4 && inreg($2)==reg_pointer
 with any4-areg-RA_REG any4+address-areg-RA_REG
@@ -1750,7 +1784,9 @@ pat sbi dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("sub.l")
 pat sbu dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("sub.l")
 pat and dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("and.l")
 pat ior dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("or.l")
-pat xor dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("eor.l")
+/* pat xor dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("eor.l")
+	incorrect for eor.l !!!
+*/
 
 pat dup stl $1==4 && inreg($2)==reg_any
 with any4
@@ -4243,13 +4279,21 @@ with DD_REG AA_REG AA_REG
 	2:
 
 pat csa $1==4
+#if TBL68020
 with any4 D_REG+LOCAL+const+ILOCAL+absolute4 STACK
+#else
+with any4 D_REG+LOCAL+const+absolute4 STACK
+#endif
     gen move %1,a0
 	move %2,d0
 	jmp {absolute4, ".csa"}
 
 pat csb $1==4
+#if TBL68020
 with any4 D_REG+LOCAL+const+ILOCAL+absolute4 STACK
+#else
+with any4 D_REG+LOCAL+const+absolute4 STACK
+#endif
     gen move %1,a0
 	move %2,d0
 	jmp {absolute4, ".csb"}
