@@ -23,7 +23,7 @@ int empatlen,emmnem[EMPATMAX];
 int empatexpr;
 int tokpatlen,tokpatset[TOKPATMAX],tokpatro[TOKPATMAX];
 int nallreg,allreg[MAXALLREG];
-int cursetno;
+int cursetno = -1;
 int allsetno;
 int inproc=0;	/* scanning "procedure" */
 int callproc=0;

@@ -114,5 +114,14 @@ set_t setdiff(s1,s2) set_t s1,s2; {
 		result.set_size = 0;
 	for(i=0;i<SETSIZE;i++)
 		result.set_val[i] = s1.set_val[i] & ~ s2.set_val[i];
+	/* make sure that we don't loose the lowest bit of the set, which
+	   indicates that it contains registers
+	*/
+	for (i=1;i <= nregs; i++) {
+		if (BIT(result.set_val, i)) {
+			BIS(result.set_val,0);
+			break;
+		}
+	}
 	return(result);
 }

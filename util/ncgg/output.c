@@ -155,7 +155,7 @@ codenl() {
 }
 #endif
 int prevind=0;
-int npatbytes=0;
+int npatbytes= -1;
 char pattern[MAXPATBYTES];
 int pathash[256];
 
@@ -170,7 +170,7 @@ outpatterns() {
 	if (!inproc) {
 		patbyte(0);
 		patshort(prevind);
-		prevind = npatbytes-3;
+		prevind = npatbytes-2;
 		patbyte(empatlen);
 		for(i=0;i<empatlen;i++)
 			patbyte(emmnem[i]);
@@ -207,7 +207,8 @@ patshort(n) {
 
 patbyte(n) {
 
-	pattern[npatbytes++]=n;
+	NEXT(npatbytes, MAXPATBYTES, "Pattern bytes");
+	pattern[npatbytes]=n;
 }
 
 hashpatterns() {
@@ -572,8 +573,8 @@ outars() {
 		fprintf(ctable,"char coderules[%d];\n",codeindex);
 		fprintf(ctable,"int ncodebytes=%d;\n",codeindex);
 	}
-	fprintf(ctable,"char pattern[%d]={\n",npatbytes);
-	for(i=0;i<npatbytes;i++) {
+	fprintf(ctable,"char pattern[%d]={\n",npatbytes+1);
+	for(i=0;i<=npatbytes;i++) {
 		fprintf(ctable,"%d,%c",pattern[i]&BMASK,i%16==15 ? '\n' : ' ');
 	}
 	fprintf(ctable,"};\n\n");
@@ -851,7 +852,7 @@ statistics() {
 	used("1->1 Coercions",ncoercs,MAXCOERCS);
 	used("Splitting coercions",nsplit,MAXSPLCOERC);
 	used("Register variables",maxregvars,MAXREGVAR);
-	used("Pat bytes",npatbytes,MAXPATBYTES);
+	used("Pat bytes",npatbytes+1,MAXPATBYTES);
 	if (tabledebug)
 		used("Source lines",maxline,MAXSOURCELINES);
 	fprintf(stderr,"%ldK heap used\n",((long) (sbrk(0)-end+1023))/1024);

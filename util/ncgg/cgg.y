@@ -18,6 +18,7 @@ extern int lineno;
 int instline,saveline;
 int startline;
 int npatterns;
+int att_type;
 int patindex[MAXPATTERNS];
 
 int emhere=0;	/* lexical analyzer flag */
@@ -27,6 +28,9 @@ int saferulefound=0;
 int maxempatlen=0;
 int maxrule=0;
 struct varinfo *defcost;
+int Xstackflag=0; /* set in coercions, moves, and tests. %1 means something
+		     different then.
+		   */
 
 struct varinfo *gen_inst(),*gen_move(),*gen_test(),*gen_preturn(),*gen_tlab();
 struct varinfo *make_erase();
@@ -35,7 +39,7 @@ expr_t perc_ident_expr(),sum_expr(),regvar_expr();
 
 set_t ident_to_set(),setproduct(),setsum(),setdiff();
 
-iocc_t subr_iocc(),tokm_iocc(),ident_iocc(),all_iocc(),descr_iocc();
+iocc_t subr_iocc(),tokm_iocc(),ident_iocc(),all_iocc(),percident_iocc(), descr_iocc();
 
 extern int narexpr;
 extern expr_t arexp[];
@@ -81,7 +85,7 @@ iocc_t iops[20];
 %token TIMEFACTOR SIZEFACTOR
 %token COST
 %type <yy_varinfo> prop_list property ident_list ident_list_el
-%type <yy_varinfo> att_list att_list_el structdecl optcost optformat
+%type <yy_varinfo> att_list att_list_el att_list_el_list structdecl optcost optformat
 %type <yy_varinfo> kills allocates yields leaving
 %type <yy_varinfo> generates kill_list kill_list_el uselist uselist_el genlist yieldlist
 %type <yy_varinfo> leavelist leavelist_el gen_instruction
@@ -300,10 +304,24 @@ att_list
 		{ $1->vi_next = $2; $$ = $1; }
 	;
 att_list_el
-	: att_list_el_type IDENT ';'
-		{ NEW ($$,struct varinfo);
-		  $$->vi_next = 0;
-		  $$->vi_int[0] = $1;
+	: att_list_el_type IDENT
+		{ NEW ($<yy_varinfo>$,struct varinfo);
+		  $<yy_varinfo>$->vi_int[0] = $1;
+		  $<yy_varinfo>$->vi_str[0] = $2;
+		  att_type = $1;
+		}
+	  att_list_el_list ';'
+		{ $<yy_varinfo>3->vi_next = $4;
+		  $$ = $<yy_varinfo>3;
+		}
+	;
+att_list_el_list
+	: /* empty */
+		{ $$ = 0; }
+	| ',' IDENT att_list_el_list
+		{ NEW($$, struct varinfo);
+		  $$->vi_next = $3;
+		  $$->vi_int[0] = att_type;
 		  $$->vi_str[0] = $2;
 		}
 	;
@@ -446,7 +464,8 @@ erase_list_el
 /* Now the moves */
 
 moves
-	: MOVES movedeflist
+	: MOVES
+	  movedeflist
 	| /* empty */
 	;
 movedeflist
@@ -457,19 +476,30 @@ movedeflist_el
 	: FROM
 		{startline = lineno; }
 	  tokenset_no
-		{ cursetno = $3; }
-	  optexpr TO tokenset_no
-	  	{ cursetno = $7;
+		{ Xstackflag = 1;
+		  cursetno = $3;
+		}
+	  optexpr
+		{ Xstackflag = 0;
+		  cursetno = -1;
+		}
+	  TO tokenset_no
+	  	{ cursetno = $8;
 		  tokpatlen=2;
 		  tokpatset[0] = $3;
-		  tokpatset[1] = $7;
+		  tokpatset[1] = $8;
 		  tokpatro[0] = 1;
+		  Xstackflag = 1;
 		}
-	optexpr GEN genlist
+	optexpr
+		{ Xstackflag = 0;
+		  cursetno = -1;
+		}
+	GEN genlist
 		{ tokpatlen=0;
 		  tokpatro[0]=0;
-		  n_move($3,$5,$7,$9,$11);
-		  freevi($11);
+		  n_move($3,$5,$8,$10,$13);
+		  freevi($13);
 		}
 	| error
 	;
@@ -477,7 +507,10 @@ movedeflist_el
 /* Now the test part */
 
 tests
-	: TESTS testdeflist
+	: TESTS
+		{ Xstackflag = 1; }
+	  testdeflist
+		{ Xstackflag = 0; }
 	| /* empty */
 	;
 testdeflist
@@ -498,6 +531,7 @@ testdeflist_el
 		  tokpatro[0] = 0;
 		  n_test($4,$6,$8);
 		  freevi($8);
+		  cursetno = -1;
 		}
 	| error
 	;
@@ -505,7 +539,10 @@ testdeflist_el
 /* Now the stacks */
 
 stacks
-	: STACKINGRULES stackdeflist
+	: STACKINGRULES
+		{ Xstackflag = 1; }
+	  stackdeflist
+		{ Xstackflag = 0; }
 	;
 stackdeflist
 	: stackdeflist_el
@@ -524,6 +561,7 @@ stackdeflist_el
 		{ tokpatro[0] = 0;
 		  n_stack($3,$5,$8,$10);
 		  freevi($10);
+		  cursetno = -1;
 		}
 	;
 optuses
@@ -536,7 +574,10 @@ optuses
 /* Now the one-to-one coercion rules */
 
 coercs
-	: COERCIONS coercdeflist
+	: COERCIONS
+		{ Xstackflag = 1; }
+	  coercdeflist
+		{ Xstackflag = 0; }
 	;
 coercdeflist
 	: coercdeflist_el
@@ -566,6 +607,7 @@ coercdeflist_el
 		  n_coerc($3,$5,$6,$7,$8);
 		  freevi($6);
 		  freevi($7);
+		  cursetno = -1;
 		}
 	;
 
@@ -722,6 +764,7 @@ kill_list_el
 		  $$->vi_next = 0;
 		  $$->vi_int[0]=$1;
 		  $$->vi_int[1]=$3;
+		  cursetno = -1;
 		}
 	;
 allocates
@@ -864,6 +907,13 @@ tokeninstance
 		{ $$ = ident_iocc($1); free($1);}
 	| allreg subreg
 		{ $$ = all_iocc($1,$2); }
+	| PERC_IDENT
+		{ if (cursetno < 0) {
+			error("%%<ident> not allowed here");
+		  }
+		  $$ = percident_iocc($1);
+		  free($1);
+		}
 	| '{' IDENT attlist '}'
 		{ $$ = descr_iocc($2); free($2); }
 	;
@@ -883,12 +933,12 @@ emarg
 	;
 tokarg
 	: PERCENT
-		{ if ($1<1 || $1>tokpatlen) {
+		{ $$ = $1;
+		  if ($1<1 || $1>tokpatlen) {
 			error("Only %d tokens in stackpattern",tokpatlen);
 			$$ =1;
-		  } else {
-			  $$ = $1;
 		  }
+		  if (Xstackflag) $$ = 0;
 		}
 	;
 subreg
@@ -928,7 +978,12 @@ expr
 	| allreg subreg
 		{ $$ = all_expr($1,$2); }
 	| PERC_IDENT
-		{ $$ = perc_ident_expr($1); free($1); }
+		{ if (cursetno < 0) {
+			error("%%<ident> not allowed here");
+		  }
+		  $$ = perc_ident_expr($1);
+		  free($1);
+		}
 	| DEFINED '(' expr ')'
 		{ $$ = make_expr(TYPBOOL,EX_DEFINED,i_expr($3),0); }
 	| SAMESIGN '(' expr ',' expr ')'
@@ -943,6 +998,13 @@ expr
 		{ $$ = make_expr(TYPINT,EX_LOWW,$3-1,0); }
 	| HIGHW '(' emarg ')'
 		{ $$ = make_expr(TYPINT,EX_HIGHW,$3-1,0); }
+/* Excluded, because it causes a shift-reduce conflict
+   (problems with a tokenset_no followed by an optexpr)
+	| '-' expr %prec UMINUS
+		{ $$ = make_expr(TYPINT,EX_CON, 0, 0);
+		  $$ = make_expr(TYPINT,EX_MINUS,i_expr($$),i_expr($2)); 
+		}
+*/
 	| '(' expr ')'
 		{ $$ = $2; }
 	| expr CMPEQ expr

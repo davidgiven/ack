@@ -3,23 +3,25 @@
 CFILES=cgg.c subr.c main.c coerc.c enterkeyw.c error.c emlookup.c expr.c instruct.c iocc.c lookup.c output.c set.c strlookup.c var.c hall.c
 OFILES=cgg.o subr.o main.o coerc.o enterkeyw.o error.o emlookup.o expr.o instruct.o iocc.o lookup.o set.o strlookup.o var.o hall.o
 SOURCES=*.h cgg.y scan.l cvtkeywords keywords coerc.c emlookup.c error.c expr.c hall.c instruct.c iocc.c lookup.c main.c output.c set.c strlookup.c subr.c var.c
-EMH=../../h
-CFLAGS=-I$(EMH)
+EMHOME=../..
+EMH=$(EMHOME)/h
+CFLAGS=-O -I$(EMH)
 YFLAGS=-v -d
 LDFLAGS=-i
 
 
 cgg:	cgg.o $(OFILES) output.o
-	cc $(LDFLAGS) $(OFILES) output.o ../../lib/em_data.a -ll -o cgg
+	cc $(LDFLAGS) $(OFILES) output.o $(EMHOME)/lib/em_data.a -ll -o cgg
 
 install:	cgg
-	cp cgg ../../lib/ncgg
+	rm -f $(EMHOME)/lib/ncgg
+	cp cgg $(EMHOME)/lib/ncgg
 
 cmp:	cgg
-	cmp cgg ../../lib/ncgg
+	cmp cgg $(EMHOME)/lib/ncgg
 
 debugcgg:	cgg.o $(OFILES) debugoutput.o
-	cc $(LDFLAGS) $(OFILES) debugoutput.o ../../lib/em_data.a -ll -o cgg
+	cc $(LDFLAGS) $(OFILES) debugoutput.o $(EMHOME)/lib/em_data.a -ll -o cgg
 
 cgg.o:	scan.c
 
@@ -43,8 +45,8 @@ clean:
 pr:
 	pr $(SOURCES)
 
-lpr:
-	make pr|lpr
+opr:
+	-make pr|opr
 
 depend:
 	makedepend

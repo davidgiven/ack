@@ -68,7 +68,8 @@ expr_t subreg_expr(tokarg,subreg) {
 	expr_t result;
 
 	result.ex_typ = TYPREG;
-	subregset(l_sets[tokpatset[tokarg-1]].set_val,subreg,result.ex_regset);
+	subregset(l_sets[tokpatset[tokarg > 0 ? tokarg-1 : tokarg]].set_val,
+		  subreg,result.ex_regset);
 	result.ex_index = ex_lookup(EX_SUBREG,tokarg,subreg);
 	return(result);
 }
@@ -106,6 +107,7 @@ int *typp;
 	int typesdiffer=0;
 	int res_j= -1;
 
+	if (setno < 0) return 0;
 	sp = l_sets[setno].set_val;
 	for (i=1;i<nregs;i++) if (BIT(sp,i)) {
 		error("Set in %s contains %s, which is not a token",
@@ -167,9 +169,10 @@ expr_t memb_expr(setno,name,appearance,tokarg) char *name,*appearance; {
 
 expr_t tokm_expr(tokarg,name) char *name; {
 	char app[100];
+	int tokarg1 = tokarg > 0 ? tokarg : 1;
 
-	sprintf(app,"%%%d.%s",tokarg,name);
-	return(memb_expr(tokpatset[tokarg-1],name,app,tokarg));
+	sprintf(app,"%%%d.%s",tokarg1,name);
+	return(memb_expr(tokpatset[tokarg1-1],name,app,tokarg));
 }
 
 expr_t perc_ident_expr(name) char *name; {

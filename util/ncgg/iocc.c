@@ -30,6 +30,7 @@ iocc_t subr_iocc(tokarg,subreg) {
 	insta.in_info[0] = tokarg;
 	insta.in_info[1] = subreg;
 	result.in_index = instalookup(insta,2);
+	if (tokarg < 1) tokarg = 1;
 	if (subreg==0)
 		for (i=0;i<SETSIZE;i++)
 			result.in_set[i] = l_sets[tokpatset[tokarg-1]].set_val[i];
@@ -48,17 +49,36 @@ iocc_t tokm_iocc(tokarg,ident) char *ident; {
 	char app[100];
 	int dummy;
 	
-	sprintf(app,"%%%d.%s",tokarg,ident);
 	for(i=0;i<SETSIZE;i++)
 		result.in_set[i] = 0;
 	insta.in_which = IN_MEMB;
 	insta.in_info[0] = tokarg;
+	if (tokarg < 1) tokarg = 1;
+	sprintf(app,"%%%d.%s",tokarg,ident);
 	insta.in_info[1] = 1+membset(tokpatset[tokarg-1],ident,result.in_set,
 				    app,TYPREG,&dummy);
 	result.in_index = instalookup(insta,2);
 	return(result);
 }
+
+iocc_t percident_iocc(ident) char *ident; {
+	iocc_t result;
+	inst_t insta;
+	register i;
+	char app[100];
+	int dummy;
 	
+	for(i=0;i<SETSIZE;i++)
+		result.in_set[i] = 0;
+	insta.in_which = IN_MEMB;
+	insta.in_info[0] = 0;
+	sprintf(app,"%%%s",ident);
+	insta.in_info[1] = 1+membset(cursetno,ident,result.in_set,
+				    app,TYPREG,&dummy);
+	result.in_index = instalookup(insta,2);
+	return(result);
+}
+
 iocc_t ident_iocc(ident) char *ident; {
 	iocc_t result;
 	inst_t insta;

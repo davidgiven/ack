@@ -20,7 +20,7 @@ n_proc(name) char *name; {
 	extern int npatbytes;
 
 	sy_p = lookup(name,symproc,newsymbol);
-	sy_p->sy_value.syv_procoff = npatbytes;
+	sy_p->sy_value.syv_procoff = npatbytes + 1;
 }
 
 struct varinfo *

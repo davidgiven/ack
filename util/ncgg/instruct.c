@@ -55,6 +55,7 @@ onlyreg(argno) {
 	register bitno;
 	register short *sp;
 	
+	if (! argno) argno++;
 	sp = l_sets[tokpatset[argno-1]].set_val;
 	for(bitno=nregs;bitno<nregs+ntokens;bitno++)
 		if (BIT(sp,bitno))
@@ -65,6 +66,7 @@ onlyreg(argno) {
 makescratch(argno) {
 	set_t s;
 
+	if (! argno) argno++;
 	if (tokpatro[argno-1])
 		error("Instruction destroys %%%d, not allowed here",argno);
 	s = l_sets[tokpatset[argno-1]];
