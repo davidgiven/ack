@@ -88,7 +88,7 @@ void chan_out(v, c) long v; register chan *c;
 			tty.c_lflag &= ~(ECHO|ICANON);
 			ioctl(fileno(fp), TCSETA, &tty);
 #else
-			gtty(fileno(fp), ,&tty);
+			gtty(fileno(fp),&tty);
 			tty.sg_flags|= CBREAK;
 			tty.sg_flags&= ~(ECHO|CRMOD);
 			stty(fileno(fp), &tty);
