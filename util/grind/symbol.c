@@ -285,16 +285,14 @@ static
 pr_scopes(sc)
   p_scope	sc;
 {
-  while (sc && ! sc->sc_definedby) {
-	sc = sc->sc_static_encl;
-  }
-  if (sc) {
-	pr_scopes(sc->sc_static_encl);
-	if (sc->sc_definedby->sy_class == FILESYM &&
+  if (! sc) return;
+  pr_scopes(sc->sc_static_encl);
+  if (sc->sc_definedby) {
+  	if (sc->sc_definedby->sy_class == FILESYM &&
 	    sc->sc_definedby->sy_file->f_base) {
 		fprintf(db_out, "%s`", sc->sc_definedby->sy_file->f_base->sy_idf->id_text);
-	}
-	else fprintf(db_out, "%s`", sc->sc_definedby->sy_idf->id_text);
+  	}
+  	else fprintf(db_out, "%s`", sc->sc_definedby->sy_idf->id_text);
   }
 }
 

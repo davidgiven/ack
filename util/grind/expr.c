@@ -165,8 +165,9 @@ get_v(a, pbuf, size)
 		return 0;
 	}
 	if (! get_bytes(size, a, *pbuf)) return 0;
+  	return 1;
   }
-  return 1;
+  return 0;
 }
 
 /* static int	get_value(p_symbol sym; char **pbuf; long *psize);

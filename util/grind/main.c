@@ -87,7 +87,6 @@ main(argc, argv)
   }
   AckObj = argv[1] ? argv[1] : "a.out";
   if (argc == 3) AObj = argv[2];
-  init_idf();
   init_types();
   init_scope();
   init_languages();

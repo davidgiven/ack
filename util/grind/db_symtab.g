@@ -745,7 +745,9 @@ DbRead(f)
   register struct outname *n;
   register struct outname *line_file = 0;
   long OffsetStrings;
-  int had_lbrac = 0;
+  int lbrac_required = 0;
+  int needs_newscope = 0;
+  int lbrac_level = 0;
 
   /* Open file, read header, and check magic word */
   if (! rd_open(f)) {
@@ -828,16 +830,14 @@ DbRead(f)
 			    CurrentScope->sc_bp_opp = n->on_valu;
 			    if (! CurrentScope->sc_start) {
 				CurrentScope->sc_start = n->on_valu;
-				if (CurrentScope->sc_has_activation_record) {
-					add_scope_addr(CurrentScope);
-				}
+				add_scope_addr(CurrentScope);
 			    }
 			}
 			saw_code = 1;
 			add_position_addr(line_file->on_mptr, n);
 			break;
 		case N_LBRAC:	/* block, desc = nesting level */
-			if (had_lbrac) {
+			if (lbrac_level && ! lbrac_required) {
 				open_scope((p_symbol) 0, 0);
 				saw_code = 0;
 			}
@@ -846,10 +846,11 @@ DbRead(f)
 					get_scope_from_addr(n->on_valu);
 
 				if (!sc || sc->sc_bp_opp) {
-					had_lbrac = 1;
 				}
 				else CurrentScope = sc;
 			}
+			lbrac_level++;
+			needs_newscope = 1;
 			break;
 #ifdef N_SCOPE
 		case N_SCOPE:
@@ -859,8 +860,9 @@ DbRead(f)
 			break;
 #endif
 		case N_RBRAC:	/* end block, desc = nesting level */
-			had_lbrac = 0;
 			if (CurrentScope != FileScope) close_scope();
+			needs_newscope = 1;
+			if (--lbrac_level == 0) needs_newscope = 0;
 			saw_code = 0;
 			break;
 		case N_FUN:	/* function, value = address */
@@ -871,10 +873,11 @@ DbRead(f)
 		case N_SSYM:	/* struct/union el, value = offset */
 		case N_PSYM:	/* parameter, value = offset from AP */
 		case N_LSYM:	/* local sym, value = offset from FP */
-			if (had_lbrac) {
+			if (needs_newscope) {
 				open_scope((p_symbol) 0, 0);
 				saw_code = 0;
-				had_lbrac = 0;
+				needs_newscope = 0;
+				lbrac_required = 1;
 			}
 			if (n->on_mptr && strindex(n->on_mptr, ':')) {
 				n = DbString(n);
