@@ -139,6 +139,7 @@ addrelo(relo, names, valu_out)
 		extern int		hash();
 		extern struct outname	*searchname();
 		extern ushort		indexof();
+		extern struct outhead	outhead; 
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));
 		if (name == (struct outname *)0)
@@ -148,7 +149,11 @@ addrelo(relo, names, valu_out)
 			index += indexof(name);
 		} else {
 			valu += name->on_valu;
-			index += NGlobals + (name->on_type & S_TYP) - S_MIN;
+			if ((name->on_type & S_TYP) == S_ABS) {
+				index += NGlobals + outhead.oh_nsect;
+			}
+			else	index += NGlobals +
+					(name->on_type & S_TYP) - S_MIN;
 		}
 	}
 	*valu_out = valu;

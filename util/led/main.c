@@ -162,9 +162,11 @@ first_pass(argv)
 			break;
 		case 'c':
 			/*
-			 * Might be used in combination with 'r', to produce
-			 * relocatable output, but handle commons now.
+			 * Leave relocation information in the output, so that
+			 * a next pass can see where relocation was done. The 
+			 * resulting output however is no longer relocatable.
 			 */
+			flagword &= ~RFLAG;
 			flagword |= CFLAG;
 			break;
 #ifndef NDEBUG
@@ -188,6 +190,7 @@ first_pass(argv)
 			 * given to common symbols, and suppresses the
 			 * `Undefined:' diagnostic.
 			 */
+			if (flagword & CFLAG) break;
 			if (flagword & SFLAG)
 				warning("-r contradicts -s: -s ignored");
 			flagword |= RFLAG;
@@ -360,7 +363,7 @@ evaluate()
 {
 	norm_commons();
 	complete_sections();
-	if (!(flagword & RFLAG))
+	if (!(flagword&RFLAG))
 		change_names();
 }
 
@@ -407,7 +410,7 @@ norm_commons()
 		}
 		name++;
 	}
-	if ((flagword & RFLAG) && !(flagword & CFLAG)) return;
+	if (flagword & RFLAG) return;
 
 	/*
 	 * RFLAG is off, so we need not produce relocatable output.
@@ -454,18 +457,17 @@ complete_sections()
 		sc->os_foff = foff;
 		foff += sc->os_flen;
 
-		if ((flagword & RFLAG) && !(flagword & CFLAG))
+		if (flagword & RFLAG)
 			continue;
 
 		sc->os_size += sect_comm[sectindex];
-		if (flagword & RFLAG) continue;
 		sc->os_lign =
 			tstbit(sectindex, lignmap) ? sect_lign[sectindex] : 1;
 		if (tstbit(sectindex, basemap)) {
 			base = sect_base[sectindex];
-			if (base % sc->os_lign)
+			if (sc->os_lign && base % sc->os_lign)
 				fatal("base not aligned");
-		} else {
+		} else if (sc->os_lign) {
 			base += sc->os_lign - 1;
 			base -= base % sc->os_lign;
 		}

@@ -583,7 +583,7 @@ write_bytes()
 	/*
 	 * The rest depends on the flags.
 	 */
-	if (flagword & RFLAG)
+	if (flagword & (RFLAG|CFLAG))
 		wr_relo((struct outrelo *) mems[ALLORELO].mem_base,
 			outhead.oh_nrelo);
 	if (!(flagword & SFLAG)) {

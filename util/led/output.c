@@ -30,7 +30,7 @@ beginoutput()
 	if (incore)
 		generate_section_names();
 
-	if (!(flagword & RFLAG))
+	if (!(flagword & (CFLAG|RFLAG)))
 		outhead.oh_nrelo = (ushort)0;
 	if (flagword & SFLAG) {
 		outhead.oh_nname = (ushort)0;

@@ -97,12 +97,10 @@ run.
 This flag suppresses the `Undefined:' diagnostic.
 .TP
 .B \-c
-Only effective in combination with
-.BR \-r .
-Indicates that relocatable output must be produced, but commons must
+Indicates that relocation information must be produced, but commons must
 be resolved.
 This may be useful for machines that need a last relocation step
-at load time.
+at load time. This flag disables the \fB\-r\fP flag.
 .TP
 .B  \-s
 `Strip' the output, that is, remove the name table

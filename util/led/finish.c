@@ -119,7 +119,7 @@ handle_relos(head, sects, names)
 						 * Write out the (probably changed)
 						 * relocation information.
 						 */
-						if (flagword & RFLAG)
+						if (flagword & (RFLAG|CFLAG))
 							wr_relo(relo, 1);
 					}
 				    }
@@ -151,7 +151,7 @@ handle_relos(head, sects, names)
 						 * Write out the (probably changed)
 						 * relocation information.
 						 */
-						if (flagword & RFLAG)
+						if (flagword & (RFLAG|CFLAG))
 							wr_relo(relo, 1);
 					    }
 					}
