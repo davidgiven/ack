@@ -1,6 +1,6 @@
 SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=m68k4" "SUF=$(SUF)"
+MACHDEF="MACH=m68k4" "SUF=$(SUF)" "ASAR=aal"
 PCDEF="PREF=ocm" "SUB=" "SRC=lang/occam/lib"
 
 install:
