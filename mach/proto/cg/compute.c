@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -157,7 +161,7 @@ result_t compute(node) node_p node; {
 		return(dollar[node->ex_lnode-1]);
 	case EX_CON:
 		result.e_typ = EV_INT;
-		result.e_v.e_con = ((long) node->ex_rnode << 16) | node->ex_lnode;
+		result.e_v.e_con = ((long) node->ex_rnode << 16) | ((long)node->ex_lnode&0xffff);
 		return(result);
 	case EX_REG:
 		result.e_typ = EV_REG;
