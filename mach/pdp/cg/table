@@ -572,7 +572,8 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 			allocate(%[1],REG=%[1])	| %[2] %[a] | adi 2 |
 ...		| NC source1 CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
 			allocate(REG={CONST2, 0})
-			"bisb %[1],%[a]"	| %[2] %[a] | adi 2 |
+			"bisb %[1],%[a]"
+			erase(%[a])		| %[2] %[a] | adi 2 |
 ...		| NC regconst2 CONST2 | |
 					   {regconst2,%[1.reg],
 					      tostring(%[2.num])+"+"+%[1.ind]} | |
@@ -1063,7 +1064,8 @@ lol adi stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
 			allocate(REG={CONST2, 0})
 			remove(regvar($1))
-			"bisb (%(regvar($1)%))+,%[a]"	| %[a]	| |
+			"bisb (%(regvar($1)%))+,%[a]"
+			erase(%[a])			| %[a]	| |
 lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
 			allocate(REG)
 			remove(regvar($1))
