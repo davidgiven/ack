@@ -19,6 +19,15 @@ do_local_relocation()
 	for ( rp = reloc_info; rp < relo; rp++) {
 		register struct outname *np = &symbol_table[rp->or_nami];
 
+		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
+			long sz = np->on_valu;
+
+			switchseg(SEGBSS);
+			align_word();
+			np->on_type &= (~S_COM);
+			np->on_valu = cur_value();
+			bss(sz);
+		}
 		if ( np->on_valu  != -1 && ! (np->on_type & S_COM)) {
 			register char *sect;
 

@@ -126,6 +126,15 @@ reduce_name_table()
 	for (i = 0; i < nname; i++, np++) {
 		int old_diff_index = diff_index[i-1];
 
+		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
+			long sz = np->on_valu;
+
+			switchseg(SEGBSS);
+			align_word();
+			np->on_type &= (~S_COM);
+			np->on_valu = cur_value();
+			bss(sz);
+		}
 		if (removable(np)) {
 			diff_index[i] = old_diff_index + 1;
 		}
