@@ -102,7 +102,9 @@ extern struct outhead	outhead;
 #endif
 
 /* forward function declarations */
+#ifdef ASLD
 extern char	*readident();
+#endif
 extern char	*remember();
 extern item_t	*fb_shift();
 extern item_t	*fb_alloc();

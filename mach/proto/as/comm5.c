@@ -271,17 +271,26 @@ register c;
 	return(c>>8);
 }
 
-inident(c)
-char c;
-{
-	register char *p;
-	register item_t *ip;
+static char name[NAMEMAX+1];
 
-	p = readident(c);
-	ip = item_search(p);
+inident(c)
+register  c;
+{
+	register char *p = name;
+	register item_t *ip;
+	register n = NAMEMAX;
+
+	do {
+		if (--n >= 0)
+			*p++ = c;
+		c = nextchar();
+	} while (ISALNUM(c));
+	*p = '\0';
+	peekc = c;
+	ip = item_search(name);
 	if (ip == 0) {
 		ip = item_alloc(S_UND);
-		ip->i_name = remember(p);
+		ip->i_name = remember(name);
 		/* printf("ident %s %o\n", ip->i_name, ip); */
 		unresolved++;
 		item_insert(ip, H_LOCAL + (hashindex%H_SIZE));
@@ -294,11 +303,11 @@ char c;
 	return(IDENT);
 }
 
+#ifdef ASLD
 char *
 readident(c)
 register c;
 {
-	static char name[NAMEMAX+1];
 	register n = NAMEMAX;
 	register char *p = name;
 
@@ -311,6 +320,7 @@ register c;
 	peekc = c;
 	return(name);
 }
+#endif
 
 innumber(c)
 register c;
@@ -471,7 +481,7 @@ register char *p;
 
 item_t *
 item_search(p)
-register char *p;
+char *p;
 {
 	register h;
 	register item_t *ip;

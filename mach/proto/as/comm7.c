@@ -17,7 +17,7 @@ load(ip)
 register item_t *ip;
 {
 #ifdef ASLD
-	register short typ;
+	register typ;
 
 	typ = ip->i_type & S_TYP;
 	if ((typ -= S_MIN) < 0)		/* S_UND or S_ABS */
@@ -41,7 +41,7 @@ register item_t *ip;
 valu_t val;
 {
 #ifdef ASLD
-	register short typ;
+	register typ;
 
 	typ = ip->i_type & S_TYP;
 	if ((typ -= S_MIN) >= 0)
@@ -232,6 +232,7 @@ small(fitsmall, gain)
 
 emit1(arg)
 {
+	static int olddottyp = -1;
 #ifdef LISTING
 	if (listeoln) {
 		if (listflag & 1) {
@@ -253,7 +254,10 @@ emit1(arg)
 		DOTSCT->s_zero = 0;
 		break;
 	case PASS_3:
-		wr_outsect(DOTTYP-S_MIN);
+		if (DOTTYP != olddottyp) {
+			wr_outsect(DOTTYP-S_MIN);
+			olddottyp = DOTTYP;
+		}
 		while (DOTSCT->s_zero) {
 			wr_putc(0);
 			DOTSCT->s_zero--;
@@ -292,9 +296,19 @@ int n;
 	case 1:
 		emit1((int)val); break;
 	case 2:
-		emit2((int)val); break;
+#ifdef BYTES_REVERSED
+		emit1(((int)val>>8)); emit1((int)val);
+#else
+		emit1((int)val); emit1(((int)val>>8));
+#endif
+		break;
 	case 4:
-		emit4((long)val); break;
+#ifdef WORDS_REVERSED
+		emit2((int)(val>>16)); emit2((int)(val));
+#else
+		emit2((int)(val)); emit2((int)(val>>16));
+#endif
+		break;
 	default:
 		assert(0);
 	}

@@ -448,7 +448,7 @@ char *s;
          * the user is familiar with. Moreover, it is not reproducable.
          */
         if ((sflag & (SYM_EXT|SYM_LOC|SYM_LAB)) && PASS_SYMB)
-                newsymb(s, S_MOD, (short)0, (valu_t)0);
+                newsymb(s, S_MOD, 0, (valu_t)0);
 #endif
 #ifdef LISTING
 	listtemp = 0;
@@ -531,7 +531,7 @@ commfinish()
 				newsymb(
 					ip->i_name,
 					ip->i_type & (S_EXT|S_TYP),
-					(short)0,
+					0,
 					load(ip)
 				);
 #else not ASLD
@@ -549,7 +549,7 @@ commfinish()
 			newsymb(
 				ip->i_name,
 				ip->i_type,
-				(short) 0,
+				0,
 				cp->c_size
 			);
 		}
@@ -574,7 +574,7 @@ commfinish()
 			newsymb(
 				ip->i_name,
 				S_EXT|S_UND,
-				(short)0,
+				0,
 				(valu_t)0
 			);
 		}
@@ -587,8 +587,8 @@ commfinish()
 			ip = sp->s_item;
 			newsymb(
 				ip->i_name,
-				(short)(ip->i_type | S_SCT),
-				(short)0,
+				(ip->i_type | S_SCT),
+				0,
 				load(ip)
 			);
 		}

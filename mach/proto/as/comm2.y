@@ -92,7 +92,8 @@ static item_t	*last_it, *o_it;
 /* ========== Machine independent rules ========== */
 
 #ifdef LISTING
-#define	LISTLINE(n)	listline(n)
+#define	LISTLINE(n)	if (listflag) listline(n); \
+			else if (listtemp) { listflag = listtemp; listeoln = 1; }
 #else
 #define	LISTLINE(n)	/* empty */
 #endif LISTING
@@ -229,8 +230,8 @@ operation
 						hllino++;
 					newsymb(
 						(char *)0,
-						(short)(DOTTYP | S_LIN),
-						(short)hllino,
+						(DOTTYP | S_LIN),
+						hllino,
 						(valu_t)DOTVAL
 					);
 				}
@@ -240,8 +241,8 @@ operation
 					hllino = 0;
 					newsymb(
 						stringbuf,
-						(short)(DOTTYP | S_FIL),
-						(short)0,
+						(DOTTYP | S_FIL),
+						0,
 						(valu_t)DOTVAL
 					);
 				}

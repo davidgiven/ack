@@ -14,7 +14,7 @@
 
 newequate(ip, typ)
 register item_t *ip;
-register short typ;
+register int typ;
 {
 	typ &= ~S_EXT;
 	if (typ & S_COM)
@@ -69,7 +69,7 @@ register item_t *ip;
 		newsymb(
 			ip->i_name,
 			ip->i_type & (S_EXT|S_TYP),
-			(short)0,
+			0,
 			load(ip)
 		);
 }
@@ -97,7 +97,7 @@ register item_t *ip;
 newsect(ip)
 register item_t *ip;
 {
-	register short typ;
+	register int typ;
 	register sect_t *sp = NULL;
 
 	typ = ip->i_type & S_TYP;
@@ -184,7 +184,7 @@ valu_t val;
 }
 
 switchsect(newtyp)
-short newtyp;
+int newtyp;
 {
 	register sect_t *sp;
 	
@@ -243,7 +243,6 @@ valu_t bytes;
 
 #ifdef RELOCATION
 newrelo(s, n)
-short s;
 {
 	int	iscomm;
 	struct outrelo	outrelo;
@@ -328,8 +327,6 @@ new_string(s)
 
 newsymb(name, type, desc, valu)
 register char *name;
-short type;
-short desc;
 valu_t valu;
 {
 	struct outname outname;

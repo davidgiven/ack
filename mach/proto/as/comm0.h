@@ -135,7 +135,7 @@ _include	<signal.h>
 #endif
 
 /* symbol table management */
-#define	H_SIZE		256		/* hash size */
+#define	H_SIZE		307		/* hash size, must be od */
 #define	H_KEY		(0*H_SIZE)	/* key symbol headers */
 #define	H_LOCAL		(1*H_SIZE)	/* module symbol headers */
 #ifdef ASLD
