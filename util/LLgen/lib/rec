@@ -57,8 +57,13 @@ LLerror(t) {
 
 #ifdef LL_NEWMESS
 	if (t == EOFILE) {
-		LLmessage(-1);
-		while ((LLsymb = LL_LEXI()) > 0) /* nothing */ ;
+#ifdef LL_USERHOOK
+		LLuserhook(EOFILE);
+#endif LL_USERHOOK
+		if (LLsymb != EOFILE) {
+			LLmessage(-1);
+			while ((LLsymb = LL_LEXI()) > 0) /* nothing */ ;
+		}
 		return;
 	}
 #endif
@@ -98,6 +103,14 @@ LLskip() {
 	return LLdoskip(0);
 }
 
+LLuserhook(exp)
+{
+	int old = LLsymb;
+	LL_USERHOOK(exp);
+	LLread();
+	return LLsymb != old;
+}
+
 LLdoskip(exp) {
 #endif LL_USERHOOK
 	register int i;
@@ -106,22 +119,19 @@ LLdoskip(exp) {
 
 	retval = 0;
 	for (;;) {
+#ifdef LL_USERHOOK
+		if (LLuserhook(exp)) continue;
+#endif LL_USERHOOK
 		if (LLtcnt[LLcsymb] != 0) return retval;
 		LLi = LLcsymb >> 3;
 		LLb = 1 << (LLcsymb & 07);
 		for (i = LL_NSETS - 1; i >= 0; i--) {
 			if (LLscnt[i] != 0) {
-				if (LLsets[LL_SSIZE*i+LLi] & LLb) return retval;
+				if (LLsets[LL_SSIZE*i+LLi] & LLb) {
+					return retval;
+				}
 			}
 		}
-#ifdef LL_USERHOOK
-		{
-			int old = LLsymb;
-			LL_USERHOOK(exp);
-			LLread();
-			if (LLsymb != old) continue;
-		}
-#endif LL_USERHOOK
 		LLmessage(0);
 		retval = 1;
 		LLread();
