@@ -6,25 +6,18 @@ struct module {
 	arith mo_priority;	/* priority of a module */
 	struct scopelist *mo_vis;/* scope of this module */
 	struct node *mo_body;	/* body of this module */
-	int mo_number;		/* number of this module */
 #define mod_priority	df_value.df_module.mo_priority
 #define mod_vis		df_value.df_module.mo_vis
 #define mod_body	df_value.df_module.mo_body
-#define mod_number	df_value.df_module.mo_number
 };
 
 struct variable {
 	arith va_off;		/* address or offset of variable */
 	char *va_name;		/* name of variable if given */
 	char va_addrgiven;	/* an address was given in the program */
-	char va_noreg;		/* may not be in a register */
-	short va_number;	/* number of this variable in definition module
-				*/
 #define var_off		df_value.df_variable.va_off
 #define var_name	df_value.df_variable.va_name
 #define var_addrgiven	df_value.df_variable.va_addrgiven
-#define var_noreg	df_value.df_variable.va_noreg
-#define var_number	df_value.df_variable.va_number
 };
 
 struct constant {
@@ -52,11 +45,9 @@ struct field {
 
 struct dfproc {
 	struct scopelist *pr_vis; /* scope of procedure */
-	short pr_level;		/* depth level of this procedure */
 	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
 #define prc_vis		df_value.df_proc.pr_vis
-#define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
 };

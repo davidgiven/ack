@@ -20,7 +20,7 @@ static char *RcsId = "$Header$";
 
 struct scope *PervasiveScope, *GlobalScope;
 struct scopelist *CurrVis;
-static int scp_level;
+extern int proclevel;
 static struct scopelist *PervVis;
 
 /* STATICALLOCDEF "scope" */
@@ -36,7 +36,7 @@ open_scope(scopetype)
 
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
-	sc->sc_level = scp_level++;
+	sc->sc_level = proclevel;
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
 	sc->sc_off = 0;
@@ -57,7 +57,7 @@ init_scope()
 	sc->sc_scopeclosed = 0;
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
-	sc->sc_level = scp_level++;
+	sc->sc_level = proclevel;
 	PervasiveScope = sc;
 	ls->next = 0;
 	ls->sc_encl = 0;
@@ -228,7 +228,6 @@ close_scope(flag)
 		if (flag & SC_REVERSE) Reverse(&(sc->sc_def));
 	}
 	CurrVis = enclosing(CurrVis);
-	scp_level = CurrentScope->sc_level;
 }
 
 #ifdef DEBUG

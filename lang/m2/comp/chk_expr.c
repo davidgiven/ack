@@ -461,6 +461,8 @@ chk_designator(expp, flag)
 			return 0;
 		}
 		else {
+			expp->nd_right->nd_class = Def;
+			expp->nd_right->nd_def = df;
 			expp->nd_type = df->df_type;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 node_error(expp->nd_right,

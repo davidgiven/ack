@@ -105,7 +105,7 @@ EnterVarList(IdList, type, local)
 	/*	Enter a list of identifiers representing variables into the
 		name list. "type" represents the type of the variables.
 		"local" is set if the variables are declared local to a
-		procedure
+		procedure.
 	*/
 	register struct def *df;
 	register struct scopelist *sc;
@@ -143,14 +143,15 @@ node_error(IdList->nd_left,"Illegal type for address");
 						type->tp_align);
 			df->var_off = sc->sc_scope->sc_off;
 		}
-		else if (!DefinitionModule &&
-			 CurrVis != Defined->mod_vis) {	
+		else if (!DefinitionModule && CurrVis != Defined->mod_vis) {	
 			/* variable list belongs to an internal global
-			   module. Align offset and add size
+			   module.
+			   Align offset and add size
 			*/
 			sc->sc_scope->sc_off =
 				align(sc->sc_scope->sc_off, type->tp_align);
 			df->var_off = sc->sc_scope->sc_off;
+			df->var_name = 0;
 			sc->sc_scope->sc_off += type->tp_size;
 		}
 		else {
@@ -160,6 +161,7 @@ node_error(IdList->nd_left,"Illegal type for address");
 					    df->df_idf->id_text);
 			df->var_name = Malloc((unsigned)(strlen(buf)+1));
 			strcpy(df->var_name, buf);
+
  			if (DefinitionModule) {
 				C_exa_dnam(df->var_name);
 			}
@@ -167,6 +169,7 @@ node_error(IdList->nd_left,"Illegal type for address");
 				C_ina_dnam(df->var_name);
 			}
 		}
+
 		IdList = IdList->nd_right;
 	}
 }

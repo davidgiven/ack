@@ -67,16 +67,18 @@ ModuleDeclaration
 			  	open_scope(CLOSEDSCOPE);
 			  	df->mod_vis = CurrVis;
 			  }
-			  else	CurrVis = df->mod_vis;
+			  else {
+				CurrVis = df->mod_vis;
+				CurrentScope->sc_level = proclevel;
+			  }
 
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
-			  df->mod_number = ++modulecount;
-			  sprint(buf, "__%d%s", df->mod_number, id->id_text);
+			  sprint(buf, "__%d%s", ++modulecount, id->id_text);
 			  CurrentScope->sc_name =
 				Malloc((unsigned) (strlen(buf) + 1));
 			  strcpy(CurrentScope->sc_name, buf);
-			  C_ina_dnam(&buf[1]);
+			  if (! proclevel) C_ina_dnam(&buf[1]);
 			  C_inp(buf);
 			}
 	priority(&(df->mod_priority))?
@@ -161,7 +163,6 @@ DefinitionModule
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
 			  if (!Defined) Defined = df;
 			  df->mod_vis = CurrVis;
-			  df->mod_number = 0;
 			  CurrentScope->sc_name = id->id_text;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
@@ -253,7 +254,6 @@ ProgramModule(int state;)
 		  	Defined = df;
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
-			df->mod_number = 0;
 			CurrentScope->sc_name = id->id_text;
 		  }
 		}

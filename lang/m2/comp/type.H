@@ -112,6 +112,7 @@ extern int
 
 extern arith
 	word_size,
+	dword_size,
 	int_size,
 	long_size,
 	float_size,

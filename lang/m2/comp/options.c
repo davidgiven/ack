@@ -64,7 +64,10 @@ DoOption(text)
 			switch (c)	{
 
 			case 'w':	/* word		*/
-				if (size != (arith)0) word_size = size;
+				if (size != (arith)0) {
+					word_size = size;
+					dword_size = 2 * size;
+				}
 				if (align != 0) word_align = align;
 				break;
 			case 'i':	/* int		*/

@@ -84,7 +84,7 @@ Compile(src, dst)
 		return 1;
 	}
 #endif DEBUG
-	(void) open_scope(CLOSEDSCOPE);
+	open_scope(CLOSEDSCOPE);
 	GlobalScope = CurrentScope;
 	C_init(word_size, pointer_size);
 	if (! C_open(dst)) {

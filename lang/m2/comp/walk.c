@@ -21,12 +21,14 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
+#include	"desig.h"
 
 extern arith	align();
-static int	prclev = 0;
+extern int	proclevel;
 static label	instructionlabel;
 static char	return_expr_occurred;
 static struct type *func_type;
+struct withdesig *WithDesigs;
 
 label
 text_label()
@@ -54,7 +56,7 @@ WalkModule(module)
 	vis = CurrVis;
 	CurrVis = module->mod_vis;
 
-	if (!prclev && module->mod_number) {
+	if (!proclevel && module != Defined) {
 		/* This module is a local module, but not within a
 		   procedure. Generate code to allocate storage for its
 		   variables. This is done by generating a "bss",
@@ -63,6 +65,8 @@ WalkModule(module)
 		arith size = align(CurrentScope->sc_off, word_align);
 
 		if (size == 0) size = word_size;
+		/* WHY ??? because we generated an INA for it ??? */
+
 		C_df_dnam(&(CurrentScope->sc_name[1]));
 		C_bss_cst(size, (arith) 0, 0);
 	}
@@ -109,7 +113,7 @@ WalkProcedure(procedure)
 	*/
 	struct scopelist *vis = CurrVis;
 
-	prclev++;
+	proclevel++;
 	CurrVis = procedure->prc_vis;
 	
 	WalkDef(CurrentScope->sc_def);
@@ -133,9 +137,9 @@ node_error(procedure->prc_body,"function procedure does not return a value");
 		C_ret((int) align(func_type->tp_size, word_align));
 	}
 	else	C_ret(0);
-	C_end((int) align(-CurrentScope->sc_off, word_align));
+	C_end(align(-CurrentScope->sc_off, word_align));
 	CurrVis = vis;
-	prclev--;
+	proclevel--;
 }
 
 WalkDef(df)
@@ -295,6 +299,7 @@ WalkStat(nd, lab)
 	case WITH:
 		{
 			struct scopelist link;
+			struct withdesig wds;
 
 			WalkDesignator(left);
 			if (left->nd_type->tp_fund != T_RECORD) {
@@ -302,12 +307,23 @@ WalkStat(nd, lab)
 				break;
 			}
 
-			link.sc_scope = left->nd_type->rec_scope;
+			wds.w_next = WithDesigs;
+			WithDesigs = &wds;
+			wds.w_scope = left->nd_type->rec_scope;
+			/* 
+			   Decide here wether to use a temporary variable or
+			   not, depending on the value of Desig.
+			   Suggestion: temporary if Desig != DSG_FIXED
+
+			   And then:
+			   wds.w_desig = Desig; ???
+			*/
+			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
 			CurrVis = &link;
 			WalkNode(right, lab);
 			CurrVis = link.next;
-			/* ??? */
+			WithDesigs = wds.w_next;
 			break;
 		}
 

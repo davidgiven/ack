@@ -99,7 +99,7 @@ node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
-walk.o: LLlex.h Lpars.h debug.h def.h main.h node.h scope.h type.h
+walk.o: LLlex.h Lpars.h debug.h def.h desig.h main.h node.h scope.h type.h
 casestat.o: LLlex.h Lpars.h debug.h density.h node.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h

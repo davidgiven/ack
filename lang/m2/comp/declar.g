@@ -33,7 +33,6 @@ ProcedureDeclaration
 } :
 	ProcedureHeading(&df, D_PROCEDURE)
 			{
-			  df->prc_level = proclevel++;
 			  currentdef = df;
 			}
 	';' block(&(df->prc_body)) IDENT
@@ -55,8 +54,9 @@ ProcedureHeading(struct def **pdf; int type;)
 } :
 	PROCEDURE IDENT
 		{
+		  if (type == D_PROCEDURE) proclevel++;
 		  df = DeclProc(type);
-		  if (proclevel) {
+		  if (proclevel > 1) {
 			/* Room for static link
 			*/
 			df->prc_nbpar = pointer_size;
@@ -242,7 +242,7 @@ enumeration(struct type **ptp;)
 		{
 		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
 		  EnterIdList(EnumList, D_ENUM, 0, *ptp,
-				CurrentScope, (arith *) 0);
+				 CurrentScope, (arith *) 0);
 		  FreeNode(EnumList);
 		  if ((*ptp)->enm_ncst > 256) {
 			if (word_size == 1) {

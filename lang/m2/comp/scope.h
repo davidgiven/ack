@@ -27,8 +27,8 @@ struct scope {
 
 struct scopelist {
 	struct scopelist *next;
-	struct scopelist *sc_encl;
 	struct scope *sc_scope;
+	struct scopelist *sc_encl;
 };
 
 extern struct scope

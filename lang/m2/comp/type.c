@@ -34,6 +34,7 @@ int
 
 arith
 	word_size = SZ_WORD,
+	dword_size = 2 * SZ_WORD,
 	int_size = SZ_INT,
 	long_size = SZ_LONG,
 	float_size = SZ_FLOAT,
