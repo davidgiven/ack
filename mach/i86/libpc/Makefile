@@ -1,5 +1,5 @@
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=i86" "SUF=s"
+MACHDEF="MACH=i86" "SUF=o" "ASAR=aal"
 PCDEF="PREF=pc" "SUB=" "SRC=lang/pc/libpc"
 
 install:
@@ -11,7 +11,7 @@ cmp:
 	-../../compare tail_pc
 
 clean:
-		-rm -f *.old *.[ce$(SUF)] tail* head*
+	-rm -f *.old *.[ce$(SUF)] tail* head*
 
 opr:
 	make pr | opr
