@@ -81,7 +81,7 @@ indexed() {
 
 	if (mrg_2 & ~7)
 		serror("register error");
-	if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
+	if (exp_2.typ != S_ABS || fitb((short)exp_2.val) == 0)
 		mrg_2 |= 0200;
 	else if (exp_2.val != 0 || mrg_2 == 6)
 		mrg_2 |= 0100;
@@ -131,7 +131,7 @@ pushop(opc) register opc; {
 		emit1(0120 | opc<<3 | (mrg_1&7));
 	} else if (opc == 0) {
 		if (mrg_1 & 040) {	/* 070 ??? */
-			if (small(exp_1.typ == S_ABS && fitb(exp_1.val),1)) {
+			if (small(exp_1.typ == S_ABS && fitb((short)exp_1.val),1)) {
 				emit1(0152);
 				emit1((int) exp_1.val);
 			} else {
@@ -165,7 +165,7 @@ addop(opc) register opc; {
 	} else if (mrg_2 & 040) {
 		if ((opc&1) == 0) {
 			emit1(0200);
-		} else if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0 ||
+		} else if (exp_2.typ != S_ABS || fitb((short)exp_2.val) == 0 ||
 			   opc==011 || opc==041 || opc==061 ) {
 			emit1(0201);
 		} else {
@@ -328,7 +328,7 @@ imul(opc)
 	if (exp_2.typ != S_ABS || ((mrg_2 & 040) == 0)) {
 		serror("bad operand");
 	} else {
-		if (small(exp_2.typ == S_ABS && fitb(exp_2.val),1)) {
+		if (small(exp_2.typ == S_ABS && fitb((short)exp_2.val),1)) {
 			emit1(0153);
 			ea_1((mrg_2&7)<<3);
 			emit1((int)exp_2.val);
