@@ -38,8 +38,8 @@ char		options[128];
 int		DefinitionModule; 
 char		*ProgName;
 char		**DEFPATH;
-int		nDEF, mDEF;
-int		pass_1;
+int		nDEF = 1, mDEF = 10;
+int		pass_1 = 1;
 t_def	 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
@@ -53,10 +53,7 @@ main(argc, argv)
 	register char **Nargv = &argv[0];
 
 	ProgName = *argv++;
-	warning_classes = W_INITIAL;
-	DEFPATH = (char **) Malloc(10 * sizeof(char *));
-	mDEF = 10;
-	nDEF = 1;
+	DEFPATH = (char **) Malloc(mDEF * sizeof(char *));
 
 	while (--argc > 0) {
 		if (**argv == '-')
@@ -105,7 +102,6 @@ Compile(src, dst)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CheckForLineDirective();
-	pass_1 = 1;
 	CompUnit();
 	C_ms_src((int)LineNumber - 1, FileName);
 	if (!err_occurred) {
@@ -225,9 +221,7 @@ AddStandards()
 	df = Enter("TRUE", D_ENUM, bool_type, 0);
 	df->enm_val = 1;
 	df->enm_next = Enter("FALSE", D_ENUM, bool_type, 0);
-	df = df->enm_next;
-	df->enm_val = 0;
-	df->enm_next = 0;
+	assert(df->enm_next->enm_val == 0 && df->enm_next->enm_next == 0);
 }
 
 do_SYSTEM()

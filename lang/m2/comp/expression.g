@@ -51,7 +51,7 @@ qualident(t_node **p;)
 	]*
 ;
 
-selector(t_node **pnd;):
+selector(register t_node **pnd;):
 	'.'	{ *pnd = dot2node(Link,*pnd,NULLNODE); }
 	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
 ;
@@ -94,7 +94,7 @@ ConstExpression(t_node **pnd;)
 		}
 ;
 
-expression(t_node **pnd;)
+expression(register t_node **pnd;)
 {
 } :
 	SimpleExpression(pnd)
@@ -113,7 +113,7 @@ relation:
 ;
 */
 
-SimpleExpression(t_node **pnd;)
+SimpleExpression(register t_node **pnd;)
 {
 	register t_node *nd = 0;
 } :
@@ -168,7 +168,8 @@ MulOperator:
 
 factor(register t_node **p;)
 {
-	t_node *nd;
+	register t_node *nd;
+	t_node *nd1;
 } :
 	qualident(p)
 	[
@@ -179,8 +180,8 @@ factor(register t_node **p;)
 		|
 		]
 	|
-		bare_set(&nd)
-			{ nd->nd_left = *p; *p = nd; }
+		bare_set(&nd1)
+			{ nd = nd1; nd->nd_left = *p; *p = nd; }
 	]
 |
 	bare_set(p)
@@ -241,18 +242,15 @@ ActualParameters(t_node **pnd;):
 	'(' ExpList(pnd)? ')'
 ;
 
-element(register t_node *nd;)
-{
-	t_node *nd1;
-} :
-	expression(&nd1)
+element(register t_node *nd;) :
+	expression(&(nd->nd_right))
 	[
 		UPTO
-			{ nd1 = dot2node(Link, nd1, NULLNODE);}
-		expression(&(nd1->nd_right))
+			{ nd->nd_right = dot2node(Link, nd->nd_right, NULLNODE);}
+		expression(&(nd->nd_right->nd_right))
 	|
 	]
-			{ nd->nd_right = dot2node(Link, nd1, NULLNODE);
+			{ nd->nd_right = dot2node(Link, nd, NULLNODE);
 			  nd->nd_right->nd_symb = ',';
 			}
 ;
@@ -263,7 +261,7 @@ designator(t_node **pnd;)
 	designator_tail(pnd)
 ;
 
-designator_tail(t_node **pnd;):
+designator_tail(register t_node **pnd;):
 	visible_designator_tail(pnd)
 	[ %persistent
 		%default
@@ -278,19 +276,16 @@ visible_designator_tail(t_node **pnd;)
 {
 	register t_node *nd = *pnd;
 }:
-[
 	'['		{ nd = dot2node(Arrsel, nd, NULLNODE); }
 		expression(&(nd->nd_right))
 		[
 			','
 			{ nd = dot2node(Arrsel, nd, NULLNODE);
-			  nd->nd_symb = '[';
 			}
 			expression(&(nd->nd_right))
 		]*
 	']'
-|
-	'^'		{ nd = dot2node(Arrow, NULLNODE, nd); }
-]
 			{ *pnd = nd; }
+|
+	'^'		{ *pnd = dot2node(Arrow, NULLNODE, nd); }
 ;

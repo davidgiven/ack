@@ -33,7 +33,7 @@ recognize some keywords!
 
 extern int	idfsize;
 static int	ndirs = 1;
-int		warning_classes;
+int		warning_classes = W_INITIAL;
 
 DoOption(text)
 	register char *text;

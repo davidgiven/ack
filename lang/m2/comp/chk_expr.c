@@ -178,7 +178,7 @@ ChkArr(expp, flags)
 	register t_type *tpl;
 
 	assert(expp->nd_class == Arrsel);
-	assert(expp->nd_symb == '[');
+	assert(expp->nd_symb == '[' || expp->nd_symb == ',');
 
 	expp->nd_type = error_type;
 

@@ -642,7 +642,7 @@ CodeDesig(nd, ds)
 		break;
 
 	case Arrsel:
-		assert(nd->nd_symb == '[');
+		assert(nd->nd_symb == '[' || nd->nd_symb == ',');
 
 		CodeDesig(nd->nd_left, ds);
 		CodeAddress(ds);

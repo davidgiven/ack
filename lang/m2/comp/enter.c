@@ -236,7 +236,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 STATIC t_def *DoImport();
 
 ImportEffects(idef, scope, flag)
-	t_def *idef;
+	register t_def *idef;
 	t_scope *scope;
 {
 	/*	Handle side effects of an import:
@@ -256,6 +256,7 @@ ImportEffects(idef, scope, flag)
 		/* Also import all enumeration literals
 		*/
 		for (df = tp->enm_enums; df; df = df->enm_next) {
+			df->df_flags |= D_QEXPORTED;
 			if (! DoImport(df, scope, flag|D_USED)) assert(0);
 				/* don't complain when not used ... */
 		}
@@ -292,7 +293,7 @@ DoImport(df, scope, flag)
 {
 	/*	Definition "df" is imported to scope "scope".
 	*/
-	t_def *idef = define(df->df_idf, scope, D_IMPORT);
+	register t_def *idef = define(df->df_idf, scope, D_IMPORT);
 
 	idef->imp_def = df;
 	idef->df_flags |= flag;
@@ -310,7 +311,7 @@ ForwModule(df, nd)
 		We could also end up here for not found DEFINITION MODULES.
 		Create a declaration and a scope for this module.
 	*/
-	t_scopelist *vis;
+	register t_scopelist *vis;
 
 	if (df->df_scope != GlobalScope) {
 		df->df_scope = enclosing(CurrVis)->sc_scope;
@@ -456,7 +457,7 @@ EnterFromImportList(idlist, FromDef, FromId)
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
-	register t_scope *sc;
+	t_scope *sc;
 	register t_def *df;
 	char *module_name = FromDef->df_idf->id_text;
 
