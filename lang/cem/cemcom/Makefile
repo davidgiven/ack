@@ -10,7 +10,6 @@ CID = $(EMHOME)/bin/cid
 # Libraries and EM interface definitions
 SYSLIB = $(EMHOME)/modules/lib/libsystem.a
 EMKLIB = $(EMHOME)/modules/lib/libemk.a $(EMHOME)/lib/em_data.a
-EMOLIB = $(EMHOME)/modules/lib/libemopt.a
 EMELIB = $(EMHOME)/modules/lib/libeme.a $(EMHOME)/lib/em_data.a
 STRLIB = $(EMHOME)/modules/lib/libstring.a
 PRTLIB = $(EMHOME)/modules/lib/libprint.a
@@ -20,6 +19,11 @@ EMMESCELIB = $(EMHOME)/modules/lib/libem_mesCE.a
 MACH = sun3
 EMCELIB = $(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/modules/lib/libflt.a \
+		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a
+EMOCELIB = $(EMHOME)/modules/lib/libCEopt.a $(EMHOME)/lib/$(MACH)/ce.a \
+		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/modules/lib/libflt.a \
 		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a
 INPLIB = $(EMHOME)/modules/lib/libinput.a
 ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
@@ -28,7 +32,7 @@ LIBS = $(INPLIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
-OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
+OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOCELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 CELIBS = $(INPLIB) $(EMMESCELIB) $(EMCELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
@@ -144,15 +148,13 @@ Emain:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else mach=$(MACH); export mach; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o PEEPHOLE
 
 CEmain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else mach=$(MACH); export mach; EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o CODE_EXPANDER
 
 Lnt:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
@@ -163,9 +165,6 @@ install:	Main
 	rm -f $(EMHOME)/lib/em_cemcom $(EMHOME)/man/em_cemcom.6
 	cp $(CURRDIR)main $(EMHOME)/lib/em_cemcom
 	cp $(CURRDIR)cemcom.1 $(EMHOME)/man/em_cemcom.6
-
-Oinstall:	Omain
-	cp $(CURRDIR)omain $(EMHOME)/lib/em_cemcomO
 
 cmp:	Main
 	-cmp $(CURRDIR)main $(EMHOME)/lib/em_cemcom
