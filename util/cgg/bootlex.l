@@ -139,6 +139,7 @@ return			return(RETURN);
                           yylval.yy_string = scopy(yytext);
                           return(tipe);
                         }
+^\#.*$			|
 [ \t]*                  |
 \n                      ;
 .                       return(yytext[0]);
