@@ -33,7 +33,7 @@ name led
 	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i SEPID=-b1:0
-	args (.e:{HEAD}={ALIGN} {SEPID?} {EM}/{RT}em) \
+	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
 ({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \

@@ -33,7 +33,7 @@ name led
 	to .out
 	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
-	args (.e:{HEAD}= {ALIGN} {EM}/{RT}em) \
+	args {ALIGN} (.e:{HEAD}= {EM}/{RT}em) \
 ({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \

@@ -45,7 +45,7 @@ name led
 	mapflag -i ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
 	mapflag -n ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
 	mapflag -nr ALIGN=-a0:2 -a1:0x8000 -a2:2 -a3:2
-	args (.e:{HEAD}= {ALIGN} {EM}/lib/pmds/head_em) \
+	args  {ALIGN} (.e:{HEAD}={EM}/lib/pmds/head_em) \
 ({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
