@@ -41,6 +41,9 @@ convert ()
 	int i;
 
 	rd_ohead(&head);
+	if (head.oh_flags & HF_LINK) {
+		fatal("%s contains unresolved references\n",s);
+	}
 	rd_sect(sect, head.oh_nsect);
 	for (i = 0; i < head.oh_nsect; i++) {
 		rd_outsect(i);
@@ -107,8 +110,9 @@ int b;
 	}
 
 fatal (s,a)
+	char *s, *a;
 	{
-	printf (s,a);
+	fprintf (stderr,s,a);
 	exit (-1);
 	}
 

@@ -2,6 +2,7 @@
  * Download Z80 load module into the NASCOM
  *
  * Johan Stevenson, Vrije Universiteit, Amsterdam
+ * Adapted (untested) to new ack.out format by
  * Ceriel Jacobs, Vrije Universiteit, Amsterdam
  */
 #include	<stdio.h>
@@ -63,11 +64,11 @@ main(argc,argv) char **argv; {
 	if (argc == 2)
 		s = argv[1];
 	else if (argc != 1) {
-		fprintf(stderr,"usage: %s [flags] [object file]\n",argv[0]);
+		fprintf(stderr,"usage: %s [flags] [object file]\n",progname);
 		stop(-1);
 	}
 	if (! rd_open(s)) {
-		fprintf(stderr,"%s: can't open %s\n",argv[0],s);
+		fprintf(stderr,"%s: can't open %s\n",progname,s);
 		stop(-1);
 	}
 	if (nascom) {
@@ -88,6 +89,10 @@ main(argc,argv) char **argv; {
 		sleep(5);
 	}
 	rd_ohead(&ohead);
+	if (ohead.oh_flags & HF_LINK) {
+		fprintf(stderr,"%s: %s contains unresolved references\n",progname,s);
+		stop(-1);
+	}
 	rd_sect(sect, ohead.oh_nsect);
 	for (i = 0; i < ohead.oh_nsect; i++) {
 		rd_outsect(i);
