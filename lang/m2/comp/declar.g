@@ -404,6 +404,9 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 				ChkCompat(pnd, *ptp, "case label");
 			  }
 			  nd = *pnd;
+			  if (! (nd->nd_type->tp_fund & T_DISCRETE)) {
+				node_error(nd, "illegal type in case label");
+			  }
 			}
 	[
 		UPTO	{ *pnd = nd = dot2node(Link,nd,NULLNODE);

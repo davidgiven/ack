@@ -538,6 +538,9 @@ ArraySizes(tp)
 	diff = hi - lo;
 
 	tp->tp_size = (diff + 1) * tp->arr_elsize;
+	if (! fit(tp->tp_size, (int) word_size)) {
+		error("array too large");
+	}
 
 	/* generate descriptor and remember label.
 	*/
