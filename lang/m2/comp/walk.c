@@ -229,6 +229,7 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(procscope->sc_name);
+	C_ms_par(procedure->df_type->prc_nbpar);
 	TmpOpen(procscope);
 	DoPriority();
 	DoFilename();		/* ??? only when this procedure is exported? */
