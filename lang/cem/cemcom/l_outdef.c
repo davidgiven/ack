@@ -32,6 +32,7 @@
 
 extern char *bts2str();
 extern char *symbol2str();
+extern char *strindex();
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;
@@ -433,7 +434,18 @@ outargtype(tp)
 	case STRUCT:
 	case UNION:
 	case ENUM:
-		printf("%s %s", symbol2str(tp->tp_fund), tp->tp_idf->id_text);
+		/* watch out for anonymous identifiers; the count field does
+		   not have to be the same for all compilation units.
+		   Remove it, so that pass 2 does not see it. The only
+		   problem with this is that pass2 will not see a difference
+		   between two non-tagged types declared on the same line.
+		*/
+		printf("%s ", symbol2str(tp->tp_fund));
+		if (is_anon_idf(tp->tp_idf)) {
+			/* skip the #<num>, replace it by '#anonymous id' */
+			printf("#anonymous id%s", strindex(tp->tp_idf->id_text, ' '));
+		}
+		else printf(tp->tp_idf->id_text);
 		break;
 
 	case CHAR:
