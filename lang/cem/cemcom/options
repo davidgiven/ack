@@ -4,6 +4,7 @@ C	while running preprocessor, copy comment
 d	perform a small dataflow analysis
 D	see identifier following as a macro
 E	run preprocessor only
+i	suppress /usr/include include files in dependency list
 I	expand include table with directory name following
 m	generate file.o: file1.h format dependency lines
 M	set identifier length
@@ -12,7 +13,6 @@ L	don't generate linenumbers and filename indications
 p	trace
 P	in running the preprocessor do not output '# line' lines
 R	restricted C
-s	suppress /usr/include include files in dependency list
 T	take path following as directory for storing temporary file(s)
 U	undefine predefined name
 V	set objectsize and alignment requirements

@@ -96,7 +96,7 @@ next_option:			/* to allow combined one-char options */
 			dep_file = text;
 		}
 		break;
-	case 's':
+	case 'i':
 	case 'm':
 		options[opt] = 1;
 		break;

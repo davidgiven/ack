@@ -43,16 +43,16 @@ and at each return to call the routine
 .BE procexit .
 These routines are supplied with one parameter, a pointer to a
 string containing the name of the procedure.
-.IP -\fBA\fR[\fIfile\fR]
+.IP \fB\-A\fR[\fIfile\fR]
 .br
 if \fIfile\fR is not given, generate a list
 of makefile dependencies and write them to the standard output.
 If \fIfile\fP is given,
 generate the list of makefile dependencies on file \fIfile\fP.
-.IP -\fBs\fR
+.IP \fB\-i\fR
 when generating makefile dependencies, do not include files from
 /usr/include.
-.IP -\fBm\fR
+.IP \fB\-m\fR
 when generating makefile dependencies, generate them in the following format:
 .RS
 .IP "file.o: file1.h"
