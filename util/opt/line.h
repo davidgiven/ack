@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define NARGBYTES	14
 struct argbytes {
 	argb_p	ab_next;

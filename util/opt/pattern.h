@@ -1,3 +1,5 @@
+/* $Header$ */
+
 /*
  * pattern contains the optimization patterns in an apparently
  * unordered fashion. All patterns follow each other unaligned.

@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define IDL	8
 
 struct sym {

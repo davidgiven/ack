@@ -1,3 +1,4 @@
+: '$Header$'
 for extension in c y
 do
     for file in *.$extension

@@ -1,3 +1,4 @@
+# $Header$
 loc adi loc sbi $2==w && $4==w: loc $1-$3 adi w
 ldc adi ldc sbi $2==2*w && $4==2*w:     ldc $1-$3 adi 2*w
 loc adi loc adi $2==w && $4==w: loc $1+$3 adi w
@@ -438,8 +439,8 @@ lal loi lal sti $2==$4 && $2>4*w && ( $3<=$1-$2 || $3>=$1+$2 ) :
 lae loi lae sti $2==$4 && $2>4*w && ( !defined($1==$3) || $3<=$1-$2 || $3>=$1+$2 ) :
 	lae $1 lae $3 blm $2
 loc loc loc cif $1==0 && $2==w :	zrf $3
-loc loc loc cii $2==w && $3==2*w : ldc $1
-loc loc loc ciu $1>=0 && $2==w && $3==2*w : ldc $1
+loc loc loc ciu $1>=0 && $2==w && $3==2*w :	ldc $1
+loc loc loc cii $2==w && $3==2*w :	ldc $1
 loi loc inn $1==$3 && $2>=0 && $2<$1*8 : 
 	lof ($2/(8*w))*w loc $2&(8*w-1) inn w
 ldl loc inn $3==2*w && $2>=0 && $2<16*w : 

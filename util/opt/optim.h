@@ -1,3 +1,5 @@
+/* $Header$ */
+
 /* #define DIAGOPT /* if defined diagnostics are produced */
 #ifdef DIAGOPT
 #define OPTIM(x) optim(x)

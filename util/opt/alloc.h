@@ -1,3 +1,5 @@
+/* $Header$ */
+
 extern line_p 	newline();
 extern offset	*newrom();
 extern sym_p	newsym();

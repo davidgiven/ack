@@ -1,3 +1,5 @@
+/* $Header$ */
+
 typedef char byte;
 typedef char bool;
 typedef struct line line_t;

@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define LONGOFF		/* if defined long offsets are used */
 
 #define TRUE	1

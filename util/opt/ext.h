@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #ifndef FILE
 #include <stdio.h>
 #endif

@@ -1,4 +1,8 @@
 %{
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
