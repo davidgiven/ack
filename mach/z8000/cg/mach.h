@@ -17,9 +17,9 @@
 #define dlb_fmt         "_%d"
 #define hol_fmt         "hol%d"
 
-#define hol_off         "%d+hol%d"
+#define hol_off         "%ld+hol%d"
 
-#define con_cst(x)      fprintf(codefile,"\t.data2 %d\n",x)
+#define con_cst(x)      fprintf(codefile,"\t.data2 %ld\n",x)
 #define con_ilb(x)      fprintf(codefile,"\t.data2 %s\n",x)
 #define con_dlb(x)      fprintf(codefile,"\t.data2 %s\n",x)
 
