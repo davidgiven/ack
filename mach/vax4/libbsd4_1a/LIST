@@ -1,4 +1,7 @@
 tail_mon.a
+exit.c
+gtty.c
+stty.c
 _exit.s
 access.s
 acct.s
