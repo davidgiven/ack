@@ -1,3 +1,7 @@
+To run this test, first copy makefile.std to makefile, and adapt the
+CEM variable; set it to the compiler you want to test.
+Then type: sh run > out 2>&1 &
+
 The test are subdivided into several directories.
 Only the directory ctgen contains more than one program, but it
 is an exception anyhow.

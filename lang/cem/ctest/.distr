@@ -20,6 +20,5 @@ ctstruct
 ctsys
 ctsetjmp
 local.h
-makefile
 makefile.std
 run
