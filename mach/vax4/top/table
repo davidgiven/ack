@@ -1,12 +1,11 @@
 /* VAX descriptor table for ACK target optimizer,
- * Prolog prototype
  */
 
 /* tunable constants-> */
 
 MAXOP			4;
 MAXLINELEN		50;
-LABEL_STARTER		'L';
+LABEL_STARTER		'I';
 OPC_TERMINATOR		'	';
 
 %%;
@@ -18,7 +17,7 @@ CONST		{VAL[0] == '$'};
 NUM,NUM1	{is_number(VAL)};
 REG		{is_register(VAL)};
 SREG		{is_scratchreg(VAL)};
-LAB,LAB2	{VAL[0] == 'L'};
+LAB,LAB2	{VAL[0] == LABEL_STARTER};
 A,B		{no_side_effects(VAL) };
 X,Y,LOG		{TRUE};
 
