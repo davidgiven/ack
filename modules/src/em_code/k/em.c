@@ -13,67 +13,12 @@
 #define	put32(x)	put16((int) x); put16((int) (x >> 16))
 
 /*
-	C_putbyte(), C_open() and C_close() are the basic routines for
-	respectively write on, open and close the output file.
 	The C_pt_*() functions serve as formatting functions of the
 	various EM language constructs.
 	See "Description of a Machine Architecture for use with
 	Block Structured Languages" par. 11.2 for the meaning of these
 	names.
 */
-
-/* supply a kind of buffered output */
-
-static char obuf[BUFSIZ];
-static char *opp = &obuf[0];
-static File *ofp = 0;
-
-static
-flush() {
-	if (sys_write(ofp, &obuf[0], opp - &obuf[0]) == 0) {
-		C_failed();
-	}
-	opp = &obuf[0];
-}
-
-#define Xputbyte(c)	if (opp == &obuf[BUFSIZ]) flush(); *opp++ = (c)
-
-C_putbyte(b)
-	int b;
-{
-	Xputbyte(b);
-}
-
-#define C_putbyte(c) Xputbyte(c)
-
-C_init(w, p)
-	arith w, p;
-{
-}
-
-C_open(nm)	/* open file for compact code output	*/
-	char *nm;
-{
-	if (nm == 0)
-		ofp = STDOUT;	/* standard output	*/
-	else
-	if (sys_open(nm, OP_WRITE, &ofp) == 0)
-		return 0;
-	return 1;
-}
-
-C_close()
-{
-	if (opp != &obuf[0]) flush();
-	if (ofp != STDOUT)
-		sys_close(ofp);
-	ofp = 0;
-}
-
-C_busy()
-{
-	return ofp != 0; /* true if code is being generated */
-}
 
 C_magic()
 {

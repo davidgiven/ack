@@ -5,8 +5,8 @@
  */
 #include <system.h>
 
-C_failed()
+C_internal_error()
 {
-	sys_write(STDERR,"read, write, or open failed\n",28);
+	sys_write(STDERR,"internal error\n",15);
 	sys_stop(S_EXIT);
 }

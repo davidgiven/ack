@@ -9,8 +9,6 @@
 #include "em_private.h"
 
 /*
-	putbyte(), C_open() and C_close() are the basic routines for
-	respectively write on, open and close the outpt file.
 	The C_pt_*() functions serve as formatting functions of the
 	various EM language constructs.
 	See "Description of a Machine Architecture for use with
@@ -18,64 +16,11 @@
 	names.
 */
 
-static File *ofp = 0;
-static char obuf[BUFSIZ];
-static char *opp = obuf;
-
-static
-flush() {
-	if (sys_write(ofp, &obuf[0], opp - &obuf[0]) == 0) {
-		C_failed();
-	}
-	opp = &obuf[0];
-}
-
-#define Xputbyte(c)	if (opp == &obuf[BUFSIZ]) flush(); *opp++ = (c)
-
-static
-C_putbyte(b)
-	int b;
-{
-	Xputbyte(b);
-}
-
-C_init(w, p)
-	arith w, p;
-{
-}
-
-C_open(nm)	/* open file for readable code outpt	*/
-	char *nm;
-{
-	if (nm == 0)
-		ofp = STDOUT;	/* standard outpt	*/
-	else
-	if (sys_open(nm, OP_WRITE, &ofp) == 0)
-		return 0;
-	return 1;
-}
-
-C_close()
-{
-	if (opp != obuf) flush();
-	if (ofp != STDOUT)
-		sys_close(ofp);
-	ofp = 0;
-}
-
-C_busy()
-{
-	return ofp != 0; /* true if code is being generated */
-}
-
 C_magic()
 {
 }
 
-
 /***    the readable code generating routines	***/
-
-static char buf[512];
 
 static
 wrs(s)
@@ -93,6 +38,8 @@ C_pt_dnam(s)
 C_pt_ilb(l)
 	label l;
 {
+	char buf[16];
+
 	sprint(buf, "*%ld", (long) l);
 	wrs(buf);
 }
@@ -110,6 +57,8 @@ C_pt_op(x)
 C_pt_cst(l)
 	arith l;
 {
+	char buf[16];
+
 	sprint(buf, "%ld", (long) l);
 	wrs(buf);
 }
@@ -118,13 +67,12 @@ C_pt_scon(x, y)
 	char *x;
 	arith y;
 {
-	char buf[1024];
-	char sbuf[1024];
-	register char *p, *q = &sbuf[0];
+	char xbuf[1024];
+	register char *p;
 	char *bts2str();
 
 	C_putbyte('\'');
-	p = bts2str(x, (int) y, buf);
+	p = bts2str(x, (int) y, xbuf);
 	while (*p) {
 		if (*p == '\'')
 			C_putbyte('\\');
@@ -143,6 +91,8 @@ C_pt_ps(x)
 C_pt_dlb(l)
 	label l;
 {
+	char buf[16];
+
 	sprint(buf, ".%ld", (long) l);
 	wrs(buf);
 }
@@ -151,6 +101,8 @@ C_pt_doff(l, v)
 	label l;
 	arith v;
 {
+	char buf[16];
+
 	C_pt_dlb(l);
 	if (v != 0) {
 		sprint(buf,"+%ld", (long) v);
@@ -162,6 +114,8 @@ C_pt_noff(s, v)
 	char *s;
 	arith v;
 {
+	char buf[16];
+
 	wrs(s);
 	if (v != 0) {
 		sprint(buf,"+%ld", (long) v);
@@ -179,6 +133,8 @@ C_pt_pnam(s)
 C_pt_dfilb(l)
 	label l;
 {
+	char buf[16];
+
 	sprint(buf, "%ld", (long) l);
 	wrs(buf);
 }

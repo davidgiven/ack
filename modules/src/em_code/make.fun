@@ -37,16 +37,14 @@ g:^NAME:s:^NAME \(.*\)$:cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h \1.c:
 1i
 cat >make.sh <<'--EOF--'
 : script for making lib
-rm -f *.o
+rm -f C_*.o
 .
 $a
 rm -f libem$1.a
-ar rc libem$1.a *.o
-cc -c -O -I$1 -I. -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
-cc -c -O -I$EMHOME/modules/h -I$EMHOME/h failed.c
+cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
 mv em.o em$1.o
-ar r libem$1.a em$1.o failed.o
-rm -f *.o
+ar rc libem$1.a C_*.o em$1.o insert.o io.o failed.o internerr.o getid.o
+rm -f C_*.o
 --EOF--
 .
 1,$p

@@ -6,3 +6,8 @@ k
 make.em.gen
 make.fun
 failed.c
+getid.c
+insert.c
+internerr.c
+io.c
+insert.h

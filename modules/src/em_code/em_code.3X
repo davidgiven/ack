@@ -1,4 +1,4 @@
-.TH EM_CODE 3ACK "86/04/02"
+.TH EM_CODE 3ACK "$Revision$"
 .ad
 .SH NAME
 emcode \- EM code interface for compilers
@@ -53,6 +53,17 @@ emcode \- EM code interface for compilers
 .BI C_ mnem _dlb()
 .BI C_ mnem _dnam()
 .BI C_ mnem _narg()
+.PP
+.B C_insertpart(id)
+.B int id;
+.PP
+.B C_beginpart(id)
+.B int id;
+.PP
+.B C_endpart(id)
+.B int id;
+.PP
+.B int C_getid()
 .fi
 .SH DESCRIPTION
 This package provides a procedural EM code interface to be used in
@@ -386,6 +397,33 @@ is a numeric label.
 The latter two routines have the (possibly zero) offset
 .I o
 as second parameter.
+.PP
+The
+.IR C_insertpart ,
+.IR C_beginpart ,
+and
+.I C_endpart
+routines together implement a mechanism for re-arranging the generated code.
+A call to
+.I C_insertpart
+indicates that part
+.I id
+is to be inserted at the current position.
+The routines
+.I C_beginpart
+and
+.I C_endpart
+indicate begin and end of part
+.IR id .
+The order in which the parts are defined is not significant.
+However, when
+.I C_close
+is called, all parts that have been inserted, must also be defined.
+.PP
+The routine
+.I C_getid
+can be used to obtain a valid and unique part
+.IR id .
 .SH FILES
 .nf
 ~em/modules/h/em.h
@@ -394,11 +432,11 @@ as second parameter.
 .fi
 .SH MODULES
 .nf
-libemk.a: system(3L), string(3L)
-libeme.a: print(3L), system(3L), string(3L)
+libemk.a: alloc(3), system(3), string(3)
+libeme.a: alloc(3), print(3), system(3), string(3)
 .fi
 .SH SEE ALSO
-read_em(3L), em_mes(3L)
+read_em(3), em_mes(3)
 .SH REFERENCES
 .IP [EM] 6
 Andrew S. Tanenbaum, Hans van Staveren, Ed G. Keizer, Johan W. Stevenson,
@@ -410,14 +448,18 @@ Informatica Rapport IR-81, Vrije Universiteit, Amsterdam, 1983.
 .I C_open
 returns 1 if the open is successful and 0 if not.
 .PP
-When a write fails, the routine
+When a read, write or open fails, the routine
 .I C_failed
 is called. The user can override its default definition by supplying his
 own. The default just gives an error message and quits.
+.PP
+When an error occurs with the
+.I C_insertpart
+mechanism, the routine
+.I C_internal_error
+is called. Again, the user can override its default definition by supplying his
+own. Such errors, however, are caused by a programming error of the user.
 .SH BUGS
 It is not possible to indicate that the argument of
 .B C_con_cst ()
 must be seen as an unsigned value.
-.PP
-.I C_failed
-is never called when generating readable EM code.
