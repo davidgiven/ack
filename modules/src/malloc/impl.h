@@ -28,7 +28,7 @@ ALIGNMENT must be a dividor of MIN_SIZE
 
 union _inf {
 	union _inf *ptr;
-	unsigned int ui;
+	size_type ui;
 };
 
 typedef union _inf mallink;

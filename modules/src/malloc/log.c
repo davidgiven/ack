@@ -22,7 +22,7 @@ link_free_chunk(ml)
 		chain.
 	*/
 	register mallink **mlp = &free_list[-1];
-	register unsigned int n = size_of(ml);
+	register size_type n = size_of(ml);
 	register mallink *ml1;
 
 	assert(n < (1L << LOG_MAX_SIZE));
@@ -59,7 +59,7 @@ unlink_free_chunk(ml)
 	if (!prev)	{
 		/* it is the first in the chain */
 		register mallink **mlp = &free_list[-1];
-		register unsigned int n = size_of(ml);
+		register size_type n = size_of(ml);
 
 		assert(n < (1L << LOG_MAX_SIZE));
 		do {

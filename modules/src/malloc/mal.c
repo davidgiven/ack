@@ -96,10 +96,16 @@ malloc(n)
 			SBRK((int) (align((size_type) p) - (size_type) p));
 		}
 
-		p = SBRK((int)req);
+		/* SBRK takes an int; sorry ... */
+		if ((int) req < 0) {
+			p = ILL_BREAK;
+		}
+		else {
+			p = SBRK((int)req);
+		}
 		if (p == ILL_BREAK) {
 			req = n + mallink_size();
-			p = SBRK((int)req);
+			if ((int) req >= 0) p = SBRK((int)req);
 		}
 		if (p == ILL_BREAK)	{
 			/*	Now this is bad.  The system will not give us
@@ -238,7 +244,7 @@ realloc(addr, n)
 	register unsigned int n;
 {check_mallinks("realloc entry");{
 	register mallink *ml, *ph_next;
-	register unsigned int size;
+	register size_type size;
 
 	if (addr == 0) {
 		/*	Behave like most Unix realloc's when handed a
