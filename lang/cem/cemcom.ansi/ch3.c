@@ -170,7 +170,7 @@ ch3cast(expp, oper, tp)
 		expression of class Type.
 	*/
 	register struct type *oldtp;
-	int qual_lev;
+	int qual_lev, ascompat = 0;
 
 	if (oper == RETURN && tp->tp_fund == VOID) {
 		expr_strict(*expp, "return <expression> in function returning void");
@@ -196,14 +196,28 @@ ch3cast(expp, oper, tp)
 		return;
 	}
 #endif NOBITFIELD
-	if (oper == CASTAB || oper == '=' || oper == RETURN) {
-		qual_lev = -2;
-	} else if (oper == CAST) qual_lev = -999;	/* ??? hack */
-	else qual_lev = -1;
+	switch (oper) {
+	default:	qual_lev = -1; break;
+	case CAST:	qual_lev = -999; break;		/* ??? hack */
+	case CASTAB:
+	case '=':
+	case RETURN:	ascompat = 1;		/* assignment compatibility */
+		/* fallthrough */
+	case '-':
+	case '<':
+	case '>':
+	case LESSEQ:
+	case GREATEREQ:
+	case EQUAL:
+	case NOTEQUAL:
+	case ':':
+			qual_lev = -2;
+			break;
+	}
 
 	if (equal_type(tp, oldtp, qual_lev)) {
 		/* life is easy */
-		if (qual_lev == -2 && tp->tp_fund == POINTER) {
+		if (ascompat && tp->tp_fund == POINTER) {
 			if ((tp->tp_up->tp_typequal & oldtp->tp_up->tp_typequal)
 			    != oldtp->tp_up->tp_typequal) {
 				expr_strict( *expp, "qualifier error");
@@ -377,13 +391,10 @@ equal_type(tp, otp, qual_lev)
 	if (!tp
 	    || !otp
 	    || (tp->tp_fund != otp->tp_fund)
+	    || (tp->tp_size != otp->tp_size)
 	    || (tp->tp_unsigned != otp->tp_unsigned)
 	    || (tp->tp_align != otp->tp_align))
 		return 0;
-	if (tp->tp_fund != ARRAY) {
-		if (tp->tp_size != otp->tp_size)
-			return 0;
-	}
 	if (qual_lev >= 0) {
 		if (tp->tp_typequal != otp->tp_typequal)
 			strict("illegal qualifiers");

@@ -92,15 +92,14 @@ postfix_expression(register struct expr **expp;)
 	|
 		[ '.' | ARROW ]			{ oper = DOT; }
 		identifier(&idf)		{ ch3sel(expp, oper, idf); }
-	]*
-	[
+	|
 		[
 			PLUSPLUS	{ oper = POSTINCR; }
 		|
 			MINMIN		{ oper = POSTDECR; }
 		]
 		    { ch3incr(expp, oper); }
-	]?
+	]*
 ;
 
 parameter_list(struct expr **expp;)

@@ -549,6 +549,7 @@ macro2buffer(repl, idf, args)
 	int err = 0;
 	char *stringify();
 
+	ASSERT(ptr[idf->id_macro->mc_length] == '\0');
 	while (*ptr) {
 	    if (*ptr == '\'' || *ptr == '"') {
 		register int delim = *ptr;

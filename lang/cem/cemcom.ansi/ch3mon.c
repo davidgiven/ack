@@ -28,7 +28,8 @@ ch3mon(oper, expp)
 	*/
 	register struct expr *expr;
 
-	any2opnd(expp, oper);
+	if (oper != PLUSPLUS && oper != MINMIN)
+		any2opnd(expp, oper);
 
 	switch (oper)	{
 	case '*':			/* 3.3.3.2 */
