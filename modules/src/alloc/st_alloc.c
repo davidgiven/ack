@@ -37,6 +37,17 @@ st_alloc(phead, size, count)
 	*phead = (char *) (((_PALLOC_)p)->_A_next);
 	retval = p;
 	q = (long *) p;
+	while (size >= 8*sizeof(long)) {
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		size -= 8*sizeof(long);
+	}
 	while (size >= sizeof(long)) {
 		*q++ = 0;
 		size -= sizeof(long);

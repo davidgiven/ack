@@ -13,6 +13,18 @@ clear(ptr, n)
 {
 	register long *q = (long *) ptr;
 
+	while (n >= 8*sizeof (long))	{
+			/* high-speed clear loop */
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		*q++ = 0;
+		n -= 8*sizeof (long);
+	}
 	while (n >= sizeof (long))	{
 			/* high-speed clear loop */
 		*q++ = 0;

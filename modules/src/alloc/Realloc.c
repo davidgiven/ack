@@ -17,7 +17,10 @@ Realloc(ptr, sz)
 	char ptr[];
 	unsigned int sz;
 {
-	register char *mptr = realloc(ptr, sz);
+	register char *mptr;
+
+	if (!ptr) mptr = malloc(sz);
+	else mptr = realloc(ptr, sz);
 	if (sz && mptr == 0) No_Mem();
 	return mptr;
 }

@@ -56,7 +56,8 @@ bytes, initialized with the null-terminated string \fIstr\fR.
 .PP
 \fIRealloc\fR changes the size of
 the block at \fIbuf\fR to \fIsize\fR bytes, and returns a pointer to the
-(possibly moved) block.
+(possibly moved) block. If \fIbuf\fP is a null pointer, \fIRealloc\fP
+behaves as \fIMalloc\fP.
 .PP
 \fISrealloc\fR reallocates
 the string at \fIstr\fR to \fIsize\fR bytes.
