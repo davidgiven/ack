@@ -21,7 +21,7 @@
 char *strcpy(), *strcat();
 char *long2str();
 
-PRIVATE struct mlist *ReplaceList;	/* list of currently active macros */
+PRIVATE struct mlist *ReplList;	/* list of currently active macros */
 
 EXPORT int
 replace(idef)
@@ -82,8 +82,8 @@ replace(idef)
 				reptext = "0";
 			InsertText(reptext, 1);
 
-			repl->next = ReplaceList;
-			ReplaceList = repl;
+			repl->next = ReplList;
+			ReplList = repl;
 			repl->m_mac = mac;
 			return 1;
 		}
@@ -103,8 +103,8 @@ replace(idef)
 		repl->m_repl = reptext;
 	}
 	InsertText(reptext, size);
-	repl->next = ReplaceList;
-	ReplaceList = repl;
+	repl->next = ReplList;
+	ReplList = repl;
 	return 1;
 }
 
@@ -190,7 +190,7 @@ macro2buffer(idef, actpars, siztext)
 EXPORT
 DoUnstack()
 {
-	register struct mlist *p = ReplaceList;
+	register struct mlist *p = ReplList;
 
 	while (p->m_unstack) p = p->next;
 	p->m_unstack = 1;
@@ -200,7 +200,7 @@ DoUnstack()
 EXPORT
 EnableMacros()
 {
-	register struct mlist *p = ReplaceList, *prev = 0;
+	register struct mlist *p = ReplList, *prev = 0;
 	int cnt = 0;
 
 	assert(Unstacked > 0);
@@ -211,7 +211,7 @@ EnableMacros()
 			p->m_mac->mc_flag &= ~NOREPLACE;
 			if (p->m_mac->mc_count) p->m_mac->mc_count--;
 			if (p->m_repl) free(p->m_repl);
-			if (! prev) ReplaceList = nxt;
+			if (! prev) ReplList = nxt;
 			else prev->next = nxt;
 			free_mlist(p);
 			cnt++;
