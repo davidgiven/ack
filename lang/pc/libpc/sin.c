@@ -1,75 +1,112 @@
+/*
+ * (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* $Header$ */
 
-extern double	_fif();
-
-/*
-	C program for floating point sin/cos.
-	Calls _fif.
-	There are no error exits.
-	Coefficients are #3370 from Hart & Cheney (18.80D).
-*/
-
-static double twoopi	= 0.63661977236758134308;
-static double p0	=  .1357884097877375669092680e8;
-static double p1	= -.4942908100902844161158627e7;
-static double p2	=  .4401030535375266501944918e6;
-static double p3	= -.1384727249982452873054457e5;
-static double p4	=  .1459688406665768722226959e3;
-static double q0	=  .8644558652922534429915149e7;
-static double q1	=  .4081792252343299749395779e6;
-static double q2	=  .9463096101538208180571257e4;
-static double q3	=  .1326534908786136358911494e3;
+#include <math.h>
 
 static double
-sinus(arg, quad)
-double arg;
-int quad;
+sinus(x, quadrant)
+	double x;
 {
-	double e, f;
-	double ysq;
-	double x,y;
-	int k;
-	double temp1, temp2;
+	/*	sin(0.5*pi*x) = x * P(x*x)/Q(x*x) for x in [0,1] */
+	/*	Hart & Cheney # 3374 */
 
-	x = arg;
-	if(x<0) {
+	static double p[6] = {
+		 0.4857791909822798473837058825e+10,
+		-0.1808816670894030772075877725e+10,
+		 0.1724314784722489597789244188e+09,
+		-0.6351331748520454245913645971e+07,
+		 0.1002087631419532326179108883e+06,
+		-0.5830988897678192576148973679e+03
+	};
+
+	static double q[6] = {
+		 0.3092566379840468199410228418e+10,
+		 0.1202384907680254190870913060e+09,
+		 0.2321427631602460953669856368e+07,
+		 0.2848331644063908832127222835e+05,
+		 0.2287602116741682420054505174e+03,
+		 0.1000000000000000000000000000e+01
+	};
+
+	double xsqr;
+	int t;
+
+	if (x < 0) {
+		quadrant += 2;
 		x = -x;
-		quad = quad + 2;
 	}
-	x = x*twoopi;	/*underflow?*/
-	if(x>32764){
-		y = _fif(x, 10.0, &e);
-		e = e + quad;
-		_fif(0.25, e, &f);
-		quad = e - 4*f;
-	}else{
-		k = x;
-		y = x - k;
-		quad = (quad + k) & 03;
+	if (M_PI_2 - x == M_PI_2) {
+		switch(quadrant) {
+		case 0:
+		case 2:
+			return 0.0;
+		case 1:
+			return 1.0;
+		case 3:
+			return -1.0;
+		}
 	}
-	if (quad & 01)
-		y = 1-y;
-	if(quad > 1)
-		y = -y;
+	if (x >= M_2PI) {
+	    if (x <= 0x7fffffff) {
+		/*	Use extended precision to calculate reduced argument.
+			Split 2pi in 2 parts a1 and a2, of which the first only
+			uses some bits of the mantissa, so that n * a1 is
+			exactly representable, where n is the integer part of
+			x/pi.
+			Here we used 12 bits of the mantissa for a1.
+			Also split x in integer part x1 and fraction part x2.
+			We then compute x-n*2pi as ((x1 - n*a1) + x2) - n*a2.
+		*/
+#define A1 6.2822265625
+#define A2 0.00095874467958647692528676655900576
+		double n = (long) (x / M_2PI);
+		double x1 = (long) x;
+		double x2 = x - x1;
+		x = x1 - n * A1;
+		x += x2;
+		x -= n * A2;
+#undef A1
+#undef A2
+	    }
+	    else {
+		extern double _fif();
+		double dummy;
 
-	ysq = y*y;
-	temp1 = ((((p4*ysq+p3)*ysq+p2)*ysq+p1)*ysq+p0)*y;
-	temp2 = ((((ysq+q3)*ysq+q2)*ysq+q1)*ysq+q0);
-	return(temp1/temp2);
+		x = _fif(x/M_2PI, 1.0, &dummy) * M_2PI;
+	    }
+	}
+	x /= M_PI_2;
+	t = x;
+	x -= t;
+	quadrant = (quadrant + (int)(t % 4)) % 4;
+	if (quadrant & 01) {
+		x = 1 - x;
+	}
+	if (quadrant > 1) {
+		x = -x;
+	}
+	xsqr = x * x;
+	x = x * POLYNOM5(xsqr, p) / POLYNOM5(xsqr, q);
+	return x;
 }
 
 double
-_cos(arg)
-double arg;
+_sin(x)
+	double x;
 {
-	if(arg<0)
-		arg = -arg;
-	return(sinus(arg, 1));
+	return sinus(x, 0);
 }
 
 double
-_sin(arg)
-double arg;
+_cos(x)
+	double x;
 {
-	return(sinus(arg, 0));
+	if (x < 0) x = -x;
+	return sinus(x, 1);
 }

@@ -1,59 +1,55 @@
+/*
+ * (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* $Header$ */
 
-#include	<pc_err.h>
-
-extern double	_fef();
-extern		_trp();
-
-/*
-	log returns the natural logarithm of its floating
-	point argument.
-
-	The coefficients are #2705 from Hart & Cheney. (19.38D)
-
-	It calls _fef.
-*/
-
-#define	HUGE	1.701411733192644270e38
-
-static double log2	= 0.693147180559945309e0;
-static double sqrto2	= 0.707106781186547524e0;
-static double p0	= -.240139179559210510e2;
-static double p1	= 0.309572928215376501e2;
-static double p2	= -.963769093368686593e1;
-static double p3	= 0.421087371217979714e0;
-static double q0	= -.120069589779605255e2;
-static double q1	= 0.194809660700889731e2;
-static double q2	= -.891110902798312337e1;
+#include <math.h>
+#include <pc_err.h>
+extern	_trp();
 
 double
-_log(arg)
-double arg;
+_log(x)
+	double x;
 {
-	double x,z, zsq, temp;
-	int exp;
-
-	if(arg <= 0) {
-		_trp(ELOG);
-		return(-HUGE);
-	}
-	x = _fef(arg,&exp);
-	/*
-	while(x < 0.5) {
-		x =* 2;
-		exp--;
-	}
+	/* log(x) = z*P(z*z)/Q(z*z), z = (x-1)/(x+1), x in [1/sqrt(2), sqrt(2)]
 	*/
-	if(x<sqrto2) {
-		x *= 2;
-		exp--;
+	/*	Hart & Cheney #2707 */
+
+	static double p[5] = {
+		 0.7504094990777122217455611007e+02,
+		-0.1345669115050430235318253537e+03,
+		 0.7413719213248602512779336470e+02,
+		-0.1277249755012330819984385000e+02,
+		 0.3327108381087686938144000000e+00
+	};
+
+	static double q[5] = {
+		 0.3752047495388561108727775374e+02,
+		-0.7979028073715004879439951583e+02,
+		 0.5616126132118257292058560360e+02,
+		-0.1450868091858082685362325000e+02,
+		 0.1000000000000000000000000000e+01
+	};
+
+	extern double _fef();
+	double z, zsqr;
+	int exponent;
+
+	if (x <= 0) {
+		_trp(ELOG);
+		return -HUGE;
 	}
 
+	x = _fef(x, &exponent);
+	while (x < M_1_SQRT2) {
+		x += x;
+		exponent--;
+	}
 	z = (x-1)/(x+1);
-	zsq = z*z;
-
-	temp = ((p3*zsq + p2)*zsq + p1)*zsq + p0;
-	temp = temp/(((zsq + q2)*zsq + q1)*zsq + q0);
-	temp = temp*z + exp*log2;
-	return(temp);
+	zsqr = z*z;
+	return z * POLYNOM4(zsqr, p) / POLYNOM4(zsqr, q) + exponent * M_LN2;
 }
