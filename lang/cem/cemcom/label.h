@@ -1,7 +1,8 @@
 /* $Header$ */
 /*		L A B E L   D E F I N I T I O N				*/
 
-#define	label		unsigned int
+#include <em_label.h>		/* obtain definition of "label" */
+
 #define	NO_LABEL	(label) 0
 
 extern label lab_count;

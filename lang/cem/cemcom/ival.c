@@ -1,11 +1,12 @@
 /* $Header$ */
 /* CODE FOR THE INITIALISATION OF GLOBAL VARIABLES */
 
+#include	<em.h>
+
 #include	"debug.h"
 #include	"nobitfield.h"
 
 #include	"string.h"
-#include	"em.h"
 #include	"arith.h"
 #include	"align.h"
 #include	"label.h"
@@ -48,7 +49,7 @@ do_ival(tpp, expr)
 	*/
 	while (strings != 0) {
 		C_df_dlb(strings->SG_DATLAB);
-		C_con_scon(strings->SG_VALUE, (arith)0);
+		C_con_scon(strings->SG_VALUE, (arith)strings->SG_LEN);
 		strings = strings->next;
 	}
 }
@@ -97,32 +98,25 @@ IVAL(tpp, expr)
 		*/
 		if (tp->tp_up->tp_fund == CHAR && expr->ex_class == String)
 			init_string(tpp, expr);
-		else	{
-			/* " int i[24] = 12;"	*/
+		else /* " int i[24] = 12;"	*/
 			check_and_pad(expr, tpp);
-		}
 		return 0;	/* nothing left	*/
 	case STRUCT:
 		/* struct initialisation */
 		if (valid_type(tp, "struct") == 0)
 			return 0;
-		if (ISCOMMA(expr))	{
-			/* list of initialisation expressions	*/
+		if (ISCOMMA(expr)) /* list of initialisation expressions */
 			return do_struct(expr, tp);
-		}
 		/* "struct foo f = 12;"	*/
 		check_and_pad(expr, tpp);
 		return 0;
 	case UNION:
-		/* sorry, but ....	*/
 		error("union initialisation not allowed");
 		return 0;
 	case ERRONEOUS:
 		return 0;
-	default:
-		/* fundamental type	*/
-		if (ISCOMMA(expr))	{
-			/* " int i = {12};"	*/
+	default: /* fundamental type	*/
+		if (ISCOMMA(expr))	{ /* " int i = {12};"	*/
 			if (IVAL(tpp, expr->OP_LEFT) != 0)
 				too_many_initialisers(expr);
 			/*	return remainings of the list for the
@@ -500,7 +494,7 @@ check_ival(expr, type)
 		{
 			label datlab = data_label();
 			
-			C_ina_pt(datlab);
+			C_ina_dlb(datlab);
 			C_con_dlb(datlab, (arith)0);
 			expr->SG_DATLAB = datlab;
 			store_string(expr);
@@ -557,8 +551,6 @@ check_ival(expr, type)
 
 /*	init_string() initialises an array of characters by specifying
 	a string constant.
-	Escaped characters should be converted into its corresponding
-	ASCII character value. E.g. '\000' -> (char) 0.
 	Alignment is taken care of.
 */
 init_string(tpp, expr)
@@ -570,7 +562,7 @@ init_string(tpp, expr)
 	char *s = expr->SG_VALUE;
 	arith ntopad;
 
-	length = prepare_string(s);
+	length = expr->SG_LEN;
 	if (tp->tp_size == (arith)-1)	{
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
@@ -591,73 +583,6 @@ init_string(tpp, expr)
 	/* pad the allocated memory (the alignment has been calculated)	*/
 	while (ntopad-- > 0)
 		con_byte(0);
-}
-
-/*	prepare_string() strips the escaped characters of a
-	string and replaces them by the ascii characters they stand for.
-	The ascii length of the resulting string is returned, including the
-	terminating null-character.
-*/
-int
-prepare_string(str)
-	register char *str;
-{
-	register char *t = str;
-	register count = 1;	/* there's always a null at the end !	*/
-
-	while (*str) {
-		count++;
-		if (*str == '\\') {
-			switch (*++str) {
-			case 'b':
-				*t++ = '\b';
-				str++;
-				break;
-			case 'f':
-				*t++ = '\f';
-				str++;
-				break;
-			case 'n':
-				*t++ = '\n';
-				str++;
-				break;
-			case 'r':
-				*t++ = '\r';
-				str++;
-				break;
-			case 't':
-				*t++ = '\t';
-				str++;
-				break;
-
-			/* octal value of:	*/
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			{
-				register cnt = 0, oct = 0;
-
-				do
-					oct = oct * 8 + *str - '0';
-				while (is_oct(*++str) && ++cnt < 3);
-				*t++ = (char) oct;
-				break;
-			}
-			default:
-				*t++ = *str++;
-				break;
-			}
-		}
-		else
-			*t++ = *str++;
-	}
-	*t = '\0';	/* don't forget this one !!!	*/
-	return count;
 }
 
 #ifndef NOBITFIELD

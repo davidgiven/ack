@@ -11,7 +11,8 @@ struct value	{
 };
 
 struct string	{
-	char *sg_value;		/* string of characters repr. the constant */
+	char *sg_value;		/* row of bytes repr. the constant */
+	int sg_len;		/* length of the row */
 	label sg_datlab;	/* global data-label			*/
 };
 
@@ -55,6 +56,7 @@ struct expr	{
 #define	VL_VALUE	ex_object.ex_value.vl_value
 #define	VL_IDF		ex_object.ex_value.vl_idf
 #define	SG_VALUE	ex_object.ex_string.sg_value
+#define SG_LEN		ex_object.ex_string.sg_len
 #define	SG_DATLAB	ex_object.ex_string.sg_datlab
 #define	FL_VALUE	ex_object.ex_float.fl_value
 #define	FL_DATLAB	ex_object.ex_float.fl_datlab

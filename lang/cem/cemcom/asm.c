@@ -1,8 +1,9 @@
 /* $Header$ */
 /*		A S M			*/
 
-asm_seen(s)
+asm_seen(s, l)
 	char *s;
+	int l;
 {
 	/*	'asm' '(' string ')' ';'
 	*/

@@ -229,7 +229,7 @@ do_include()
 
 	AccFileSpecifier = 1;
 	if (((tok = GetToken(&tk)) == FILESPECIFIER) || tok == STRING)
-		filenm = tk.tk_str;
+		filenm = tk.tk_bts;
 	else {
 		lexerror("bad include syntax");
 		filenm = (char *)0;
@@ -393,7 +393,7 @@ do_line(l)
 	LineNumber = l;
 	/* is there a filespecifier?	*/
 	if (GetToken(&tk) == STRING)
-		FileName = tk.tk_str;
+		FileName = tk.tk_bts;
 	SkipRestOfLine();
 }
 
@@ -652,7 +652,7 @@ domacro()
 	}
 	LineNumber = tk.tk_ival;
 	if ((tok = GetToken(&tk)) == STRING)
-		FileName = tk.tk_str;
+		FileName = tk.tk_bts;
 	else
 	if (tok != EOI) {
 		error("illegal # line");

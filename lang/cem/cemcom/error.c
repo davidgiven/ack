@@ -2,6 +2,8 @@
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
 #include	<system.h>
+#include	<em.h>
+
 #include	"nopp.h"
 #include	"use_tmp.h"
 #include	"errout.h"
@@ -13,7 +15,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"LLlex.h"
-#include	"em.h"
 
 /*	This file contains the (non-portable) error-message and diagnostic
 	functions.  Beware, they are called with a variable number of

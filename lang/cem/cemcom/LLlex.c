@@ -189,8 +189,12 @@ go_on:	/* rescan, the following character has been read	*/
 		case '<':
 			if (AccFileSpecifier) {
 				PushBack();	/* pushback nch */
-				ptok->tk_str =
-					string_token("file specifier", '>');
+				ptok->tk_bts =
+					string_token(
+						"file specifier",
+						'>',
+						&(ptok->tk_len)
+					);
 				return ptok->tk_symb = FILESPECIFIER;
 			}
 			if (nch == '<')
@@ -310,6 +314,8 @@ go_on:	/* rescan, the following character has been read	*/
 			}
 			if (ch == '\\') {
 				LoadChar(ch);
+				if (ch == '\n')
+					LineNumber++;
 				ch = quoted(ch);
 			}
 			val = val*256 + ch;
@@ -323,7 +329,7 @@ go_on:	/* rescan, the following character has been read	*/
 		return ptok->tk_symb = INTEGER;
 	}
 	case STSTR:					/* string	*/
-		ptok->tk_str = string_token("string", '"');
+		ptok->tk_bts = string_token("string", '"', &(ptok->tk_len));
 		return ptok->tk_symb = STRING;
 	case STNUM:				/* a numeric constant	*/
 	{
@@ -466,8 +472,9 @@ skipcomment()
 }
 
 char *
-string_token(nm, stop_char)
+string_token(nm, stop_char, plen)
 	char *nm;
+	int *plen;
 {
 	register int ch;
 	register int str_size;
@@ -486,28 +493,18 @@ string_token(nm, stop_char)
 			break;
 		}
 		if (ch == '\\') {
-			register int nch;
-			
-			LoadChar(nch);
-			if (nch == '\n') {
+			LoadChar(ch);
+			if (ch == '\n')
 				LineNumber++;
-				LoadChar(ch);
-				continue;
-			}
-			else {
-				str[pos++] = '\\';
-				if (pos == str_size)
-					str = Srealloc(str,
-						str_size += RSTRSIZE);
-				ch = nch;
-			}
+			ch = quoted(ch);
 		}
 		str[pos++] = ch;
 		if (pos == str_size)
 			str = Srealloc(str, str_size += RSTRSIZE);
 		LoadChar(ch);
 	}
-	str[pos++] = '\0';
+	str[pos++] = '\0'; /* for filenames etc. */
+	*plen = pos;
 	return str;
 }
 

@@ -200,7 +200,8 @@ string2expr(expr)
 	expr->ex_type = string_type;
 	expr->ex_lvalue = 0;
 	expr->ex_class = String;
-	expr->SG_VALUE = dot.tk_str;
+	expr->SG_VALUE = dot.tk_bts;
+	expr->SG_LEN = dot.tk_len;
 	expr->SG_DATLAB = 0;
 }
 

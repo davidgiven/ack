@@ -13,7 +13,7 @@
 
 #ifndef	SPECIAL_ARITHMETICS
 
-#define	arith	long				/* native */
+#include <em_arith.h>		/* obtain definition of "arith"	*/
 
 #else	SPECIAL_ARITHMETICS
 

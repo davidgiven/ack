@@ -1,6 +1,8 @@
 /* $Header$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	<em.h>
+
 #include	"debug.h"
 #include	"botch_free.h"
 #include	"density.h"
@@ -15,7 +17,6 @@
 #include	"assert.h"
 #include	"expr.h"
 #include	"type.h"
-#include	"em.h"
 
 extern char options[];
 

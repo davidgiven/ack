@@ -12,6 +12,8 @@
 		compare()
 */
 
+#include	<em.h>
+
 #include	"debug.h"
 #include	"nobitfield.h"
 
@@ -32,7 +34,6 @@
 #include	"align.h"
 #include	"mes.h"
 #include	"atw.h"
-#include	"em.h"
 
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 #define	roundup(n)	((n) < word_size ? word_size : (n))
@@ -90,7 +91,7 @@ EVAL(expr, val, code, true_label, false_label)
 			label datlab = data_label();
 			
 			C_df_dlb(datlab);
-			C_con_scon(expr->SG_VALUE, (arith)0);
+			C_con_scon(expr->SG_VALUE, (arith)expr->SG_LEN);
 			C_lae_dlb(datlab, (arith)0);
 		}
 		break;

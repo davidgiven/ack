@@ -13,7 +13,10 @@ struct token	{
 	unsigned int tok_line;	/* the line it (probably) comes from */
 	union	{
 		struct idf *tok_idf;	/* for IDENTIFIER & TYPE_IDENTIFIER */
-		char *tok_str;		/* for STRING: text	*/
+		struct	{		/* for STRING */
+			char *tok_bts;	/* row of bytes	*/
+			int tok_len;	/* length of row of bytes */
+		} tok_string;
 		struct	{		/* for INTEGER */
 			int tok_fund;	/* INT or LONG */
 			arith tok_ival;
@@ -26,7 +29,8 @@ struct token	{
 #define tk_file	tok_file
 #define tk_line	tok_line
 #define tk_idf	tok_data.tok_idf
-#define tk_str	tok_data.tok_str
+#define tk_bts	tok_data.tok_string.tok_bts
+#define tk_len	tok_data.tok_string.tok_len
 #define tk_fund	tok_data.tok_integer.tok_fund
 #define tk_ival	tok_data.tok_integer.tok_ival
 #define tk_fval	tok_data.tok_fval

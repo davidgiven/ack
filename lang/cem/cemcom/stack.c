@@ -1,11 +1,14 @@
 /* DERIVED FROM $Header$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
+#include	<system.h>
+#include	<em.h>
+#include	<em_reg.h>
+
 #include	"debug.h"
 #include	"use_tmp.h"
 #include	"botch_free.h"
 
-#include	<system.h>
 #include	"alloc.h"
 #include	"Lpars.h"
 #include	"arith.h"
@@ -17,7 +20,6 @@
 #include	"storage.h"
 #include	"level.h"
 #include	"mes.h"
-#include	"em.h"
 
 /* #include	<em_reg.h> */
 

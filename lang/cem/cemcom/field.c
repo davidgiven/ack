@@ -4,6 +4,8 @@
 #include	"nobitfield.h"
 
 #ifndef NOBITFIELD
+#include	<em.h>
+
 #include	"debug.h"
 
 #include	"arith.h"
@@ -16,7 +18,6 @@
 #include	"sizes.h"
 #include	"Lpars.h"
 #include	"field.h"
-#include	"em.h"
 
 arith tmp_pointer_var();	/* eval.c	*/
 char *symbol2str();		/* symbol2str.c	*/

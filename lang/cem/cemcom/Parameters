@@ -95,10 +95,6 @@
 #define DEBUG		1	/* perform various self-tests		*/
 
 
-!File: proc_intf.h
-#define PROC_INTF	1	/* compile with procedural EM interface	*/
-
-
 !File: use_tmp.h
 #define USE_TMP		1	/* collect exa, exp, ina and inp commands
 					and let them precede the rest of

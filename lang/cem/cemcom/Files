@@ -34,9 +34,6 @@ decspecs.str
 def.str
 domacro.c
 dumpidf.c
-em.c
-em.h
-emcode.def
 error.c
 eval.c
 expr.c
@@ -58,8 +55,6 @@ level.h
 macro.str
 main.c
 make.allocd
-make.emfun
-make.emmac
 make.hfiles
 make.next
 make.tokcase

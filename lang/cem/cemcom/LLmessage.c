@@ -37,7 +37,8 @@ insert_token(tk)
 		dot.tk_idf = str2idf("int");
 		break;
 	case STRING:
-		dot.tk_str = Salloc("", 1);
+		dot.tk_bts = Salloc("", 1);
+		dot.tk_len = 1;
 		break;
 	case INTEGER:
 		dot.tk_fund = INT;

@@ -1,6 +1,8 @@
 /* $Header$ */
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
+#include	<em.h>
+
 #include	"dataflow.h"
 #include	"use_tmp.h"
 #include	"botch_free.h"
@@ -15,7 +17,6 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"stack.h"
-#include	"em.h"
 #include	"level.h"
 #include	"decspecs.h"
 #include	"declar.h"
@@ -113,13 +114,13 @@ code_scope(text, def)
 		if (fund == FUNCTION)
 			C_exp(text);
 		else
-			C_exa(text);
+			C_exa_dnam(text);
 		break;
 	case STATIC:
 		if (fund == FUNCTION)
 			C_inp(text);
 		else
-			C_ina(text);
+			C_ina_dnam(text);
 		break;
 	}
 }
@@ -175,7 +176,10 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
 			C_df_dlb(file_name_label = data_label());
-			C_con_scon(last_fn_given = FileName, (arith)0);
+			C_con_scon(
+				last_fn_given = FileName,
+				(arith)(strlen(FileName) + 1)
+			);
 		}
 		/* enable debug trace of EM source */
 		C_fil_dlb(file_name_label, (arith)0);

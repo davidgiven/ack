@@ -321,31 +321,24 @@ preprocess()
 				printf("\n#line %ld \"%s\"\n",
 					lastlineno, lastfilenm);
 		}
-
 		switch (DOT)	{
-
 		case IDENTIFIER:
 		case TYPE_IDENTIFIER:
 			printf(dot.tk_idf->id_text);
 			printf(" ");
 			break;
-
 		case STRING:
-			printf("\"%s\" ", dot.tk_str);
+			printf("\"%s\" ", dot.tk_bts);
 			break;
-
 		case INTEGER:
 			printf("%ld ", dot.tk_ival);
 			break;
-
 		case FLOATING:
 			printf("%s ", dot.tk_fval);
 			break;
-
 		case EOI:
 		case EOF:
 			return;
-
 		default:	/* very expensive...	*/
 			printf("%s ", symbol2str(DOT));
 		}

@@ -2,6 +2,8 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
+#include	<em.h>
+
 #include	"debug.h"
 #include	"botch_free.h"
 
@@ -13,7 +15,6 @@
 #include	"expr.h"
 #include	"code.h"
 #include	"storage.h"
-#include	"em.h"
 #include	"stack.h"
 #include	"def.h"
 
@@ -386,16 +387,18 @@ compound_statement(arith *nbytes;):
 ;
 
 asm_statement
-	{	char *asm_string;
+	{	char *asm_bts;
+		int asm_len;
 	}
 :
 	ASM
 	'('
 	STRING
-		{	asm_string = dot.tk_str;
+		{	asm_bts = dot.tk_bts;
+			asm_len = dot.tk_len;
 		}
 	')'
 	';'
-		{	asm_seen(asm_string);
+		{	asm_seen(asm_bts, asm_len);
 		}
 ;
