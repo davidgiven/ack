@@ -7,7 +7,7 @@
 
 #include "booth.h"
 
-char *strncpy(), strcpy(), sprintf();
+char *strncpy(), *strcpy(), *sprintf();
 
 char * myalloc(n) {
 	register char *p;
