@@ -23,7 +23,7 @@ savemagic()
 		return;
 
 	if ((p = core_alloc(ALLOMODL, (long)sizeof(ushort))) != (char *)0) {
-		*(ushort *)p = ARMAG;
+		*(ushort *)p = AALMAG;
 		core_position += sizeof(ushort);
 	}
 }
