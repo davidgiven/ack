@@ -52,7 +52,11 @@ int nr;
 	fprintf(tmpfile,"%d\n",currline->emlabel);
 	fprintf(tmpfile," lin %d\n",nr);
 	emlinecount += 2;
-	if( tronoff || traceflag) emcode("cal","$_trace");
+	if( tronoff || traceflag) {
+		emcode("loc",itoa(nr));
+		emcode("cal","$_trace");
+		emcode("asp","EM_WSIZE");
+	}
 }
 
 emcode(operation,params)
