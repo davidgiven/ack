@@ -248,9 +248,11 @@ short s;
 		return;
 	s &= ~S_DOT;
 	assert((s & ~(S_COM|S_VAR|S_TYP)) == 0);
+#ifdef ASLD
 #ifndef THREE_PASS
 	if (s == S_UND)
 		serror("bad relocation");
+#endif
 #endif
 	/*
 	 * always relocation info if S_VAR to solve problems with:
