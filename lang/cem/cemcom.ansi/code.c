@@ -624,7 +624,9 @@ bss(idf)
 #endif /* DBSYMTAB */
 	if (df->df_type->tp_size <= 0) {
 		if (df->df_sc != STATIC &&
-		    df->df_type->tp_fund == ARRAY && df->df_type->tp_up) {
+		    df->df_type->tp_fund == ARRAY &&
+		    df->df_type->tp_up &&
+		    df->df_type->tp_up->tp_size >= 0) {
 			C_df_dnam(idf->id_text);
 			C_bss_cst(ATW(df->df_type->tp_up->tp_size), (arith)0, 1);
 		}

@@ -490,7 +490,9 @@ struct_declaration_pack(register struct type *stp;)
 	'{'
 	struct_declaration(stp, &sdefp, &size)+
 	'}'
-	{stp->tp_size = align(size, stp->tp_align);}
+	{stp->tp_size = align(size, stp->tp_align);
+	 completed(stp);
+	}
 ;
 
 struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)

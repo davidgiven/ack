@@ -105,12 +105,7 @@ construct_type(fund, tp, qual, count, pl)
 		if (tp->tp_fund == VOID) {
 			error("cannot construct array of void");
 			count = (arith) -1;
-		} else if (count >= 0 && tp->tp_size < 0)	{
-			error("cannot construct array of unknown type");
-			count = (arith)-1;
 		}
-		if (count > (arith)0)
-			count *= tp->tp_size;
 		dtp = array_of(tp, count, qual);
 		break;
 	default:
@@ -199,17 +194,21 @@ array_of(tp, count, qual)
 	register struct type *dtp = tp->tp_array;
 
 	/* look for a type with the right size */
-	while (dtp && (dtp->tp_size != count || dtp->tp_typequal != qual))
+	while (dtp && (dtp->tp_nel != count || dtp->tp_typequal != qual))
 		dtp = dtp->next;
 
 	if (!dtp)	{
 		dtp = create_type(ARRAY);
 		dtp->tp_up = tp;
-		dtp->tp_size = count;
+		dtp->tp_nel = count;
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_typequal = qual;
 		dtp->next = tp->tp_array;
 		tp->tp_array = dtp;
+		if (tp->tp_size >= 0 && count >= 0) {
+			dtp->tp_size = count * tp->tp_size;
+		}
+		else	dtp->tp_size = -1;
 	}
 	return dtp;
 }
@@ -285,4 +284,17 @@ standard_type(fund, sgn, algn, sz)
 	tp->tp_size = sz;
 
 	return tp;
+}
+
+completed(tp)
+	struct type *tp;
+{
+	register struct type *atp = tp->tp_array;
+
+	while (atp) {
+		if (atp->tp_nel >= 0) {
+			atp->tp_size = atp->tp_nel * tp->tp_size;
+		}
+		atp = atp->next;
+	}
 }

@@ -33,6 +33,7 @@ struct type	{
 		/* tp__up: from FIELD, POINTER, ARRAY or FUNCTION to fund. */
 		struct type *tp__up;
 		union {
+		    arith tp__nel;	/* # of elements for array */
 		    /* tp__field: field descriptor if fund == FIELD */
 		    struct field *tp__field;
 		    struct {
@@ -49,6 +50,7 @@ struct type	{
 #define tp_sdef		tp_union.tp_istagged.tp__sdef
 #define tp_up		tp_union.tp_nottagged.tp__up
 #define tp_field	tp_union.tp_nottagged.tp_f.tp__field
+#define tp_nel		tp_union.tp_nottagged.tp_f.tp__nel
 #define tp_proto	tp_union.tp_nottagged.tp_f.tp_isfunc.tp__proto
 #define tp_pseudoproto	tp_union.tp_nottagged.tp_f.tp_isfunc.tp__pseudoproto
 
