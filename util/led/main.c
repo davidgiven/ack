@@ -416,31 +416,35 @@ complete_sections()
 {
 	register long	base = 0;
 	register long	foff;
+	register struct outsect *sc;
 	register int	sectindex;
 
 	foff = SZ_HEAD + outhead.oh_nsect * SZ_SECT;
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++) {
 		relorig[sectindex].org_size = (long)0;
-		outsect[sectindex].os_foff = foff;
-		foff += outsect[sectindex].os_flen;
+		sc = &outsect[sectindex];
+		sc->os_foff = foff;
+		foff += sc->os_flen;
 
 		if ((flagword & RFLAG) && !(flagword & CFLAG))
 			continue;
 
-		outsect[sectindex].os_size += sect_comm[sectindex];
+		sc->os_size += sect_comm[sectindex];
 		if (flagword & RFLAG) continue;
-		outsect[sectindex].os_lign =
+		sc->os_lign =
 			tstbit(sectindex, lignmap) ? sect_lign[sectindex] : 1;
+		sc->os_size += sc->os_lign - 1;
+		sc->os_size -= sc->os_size % sc->os_lign;
 		if (tstbit(sectindex, basemap)) {
 			base = sect_base[sectindex];
-			if (base % outsect[sectindex].os_lign)
+			if (base % sc->os_lign)
 				fatal("base not aligned");
 		} else {
-			base += outsect[sectindex].os_lign - 1;
-			base -= base % outsect[sectindex].os_lign;
+			base += sc->os_lign - 1;
+			base -= base % sc->os_lign;
 		}
-		outsect[sectindex].os_base = base;
-		base += outsect[sectindex].os_size;
+		sc->os_base = base;
+		base += sc->os_size;
 	}
 }
 

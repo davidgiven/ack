@@ -4,12 +4,12 @@
 
 #	Definitions for the making programs.
 
-EM = ../..
-LIBDIR= $(EM)/lib
-PREFLAGS=  -I$(EM)/h -DNDEBUG -DNASSERT
+EMHOME = ../..
+LIBDIR= $(EMHOME)/lib
+PREFLAGS=  -I$(EMHOME)/h -DNDEBUG -DNASSERT
 CFLAGS	= $(PREFLAGS) -O
 LDFLAGS	= -i
-LDLIBS = $(EM)/modules/lib/libstring.a $(EM)/modules/lib/libobject.a
+LDLIBS = $(EMHOME)/modules/lib/libstring.a $(EMHOME)/modules/lib/libobject.a
 LINTFLAGS=-phbxa $(PREFLAGS)
 PR	= pr
 PRFLAGS	=
@@ -28,10 +28,10 @@ led:	$(OFILES)
 	$(CC) $(LDFLAGS) $(OFILES) $(LDLIBS) -o led
 
 install:led
-	rm -f $(LIBDIR)/em_led $(EM)/man/led.6 $(EM)/man/ack.out.5
+	rm -f $(LIBDIR)/em_led $(EMHOME)/man/led.6 $(EMHOME)/man/ack.out.5
 	cp led $(LIBDIR)/em_led
-	cp led.6 $(EM)/man/led.6
-	cp ack.out.5 $(EM)/man/ack.out.5
+	cp led.6 $(EMHOME)/man/led.6
+	cp ack.out.5 $(EMHOME)/man/ack.out.5
 
 cmp:	led
 	cmp led $(LIBDIR)/em_led

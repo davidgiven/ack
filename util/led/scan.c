@@ -211,6 +211,7 @@ direct_alloc(head)
 	struct outhead	*head;
 {
 	ind_t		sectindex = IND_SECT(*head);
+	register struct outsect *sects;
 	ushort		nsect = head->oh_nsect;
 	long		size, rest;
 	extern ind_t	hard_alloc();
@@ -228,7 +229,14 @@ direct_alloc(head)
 	size = modulsize(head) - sizeof(struct outhead) - rest;
 	if (hard_alloc(ALLOMODL, size) == BADOFF)
 		fatal("no space for module");
-	rd_sect((struct outsect *)modulptr(sectindex), nsect);
+	rd_sect(sects = ((struct outsect *)modulptr(sectindex)), nsect);
+	while (nsect--) {
+		if (sects->os_lign > 1) {
+			sects->os_size += sects->os_lign - 1;
+			sects->os_size -= sects->os_size % sects->os_lign;
+		}
+		sects++;
+	}
 
 	return incore && alloc(ALLOMODL, rest) != BADOFF;
 }
@@ -415,7 +423,7 @@ static
 read_modul()
 {
 	struct outhead	*head;
-	struct outsect	*sects;
+	register struct outsect	*sects;
 	struct outname	*names;
 	char		*chars;
 	ind_t		sectindex, nameindex, charindex;
@@ -446,6 +454,13 @@ read_modul()
 	chars = modulptr(charindex);
 
 	rd_sect(sects, nsect);
+	while (nsect--) {
+		if (sects->os_lign > 1) {
+			sects->os_size += sects->os_lign - 1;
+			sects->os_size -= sects->os_size % sects->os_lign;
+		}
+		sects++;
+	}
 	rd_name(names, nname);
 	rd_string(chars, nchar);
 }
