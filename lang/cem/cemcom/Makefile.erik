@@ -2,9 +2,9 @@
 #	M A K E F I L E   F O R   A C K   C - C O M P I L E R
 
 # Machine and environ dependent definitions
-EM = /user1/erikb/em#				# ACK tree on this machine
+EM = /usr/em#				# ACK tree on this machine
 DESTINATION = /user1/$$USER/bin#		# where to put the stuff
-MKDEP = /user1/erikb/bin/mkdep#			# dependency generator
+MKDEP = $(EM)/bin/mkdep#			# dependency generator
 MAP =
 #MAP = -DInsertFile=ins_file -DInsertText=ins_text#	# bug in m68k2 back end
 SIM = /user1/dick/bin/sim#			# Dicks sim program
