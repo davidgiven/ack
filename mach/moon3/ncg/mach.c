@@ -125,7 +125,10 @@ f_regsave()
 #ifdef TBL68020
 	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
 #else
-	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
+	if (nlocals > 32768) {
+		fprintf(codefile, "move.l a6,-(sp)\nmove.l sp,a6\nsub #%ld,sp\ntst.b -40(sp)\n", nlocals);
+	}
+	else	fprintf(codefile,"link\ta6,#-%ld\ntst.b -40(sp)\n",nlocals);
 #endif
 	if (regnr > 1) {
 		fputs("movem.l ", codefile);
