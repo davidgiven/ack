@@ -577,7 +577,11 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 	if (e->m1 != 0) {
 		register struct EXTEND *pp = &big_ten_powers[1];
 
-		while(cmp_ext(e,pp) >= 0) pp++;
+		while(cmp_ext(e,pp) >= 0) {
+			pp++;
+			findex = pp - big_ten_powers;
+			if (findex >= BTP) break;
+		}
 		pp--;
 		findex = pp - big_ten_powers;
 		mul_ext(e,&r_big_ten_powers[findex],e);
