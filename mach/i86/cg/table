@@ -815,71 +815,40 @@ sru !defined($1)| X_ACC |
  *						*
  ************************************************/
 
-adf $1==4	| |
-			remove(ALL)
-			"call .adf4"		    |	    | |
-adf $1==8	| |
-			remove(ALL)
-			"call .adf8"		    |	    | |
-adf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .adf" erase(%[1])	    |	    | |
-sbf $1==4	| |
-			remove(ALL)
-			"call .sbf4"		    |	    | |
-sbf $1==8	| |
-			remove(ALL)
-			"call .sbf8"		    |	    | |
-sbf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .sbf" erase(%[1])	    |	    | |
-mlf $1==4	| |
-			remove(ALL)
-			"call .mlf4"		    |	    | |
-mlf $1==8	| |
-			remove(ALL)
-			"call .mlf8"		    |	    | |
-mlf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .mlf" erase(%[1])	    |	    | |
-dvf $1==4	| |
-			remove(ALL)
-			"call .dvf4"		    |	    | |
-dvf $1==8	| |
-			remove(ALL)
-			"call .dvf8"		    |	    | |
-dvf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .dvf" erase(%[1])	    |	    | |
-ngf $1==4	| |
-			remove(ALL)
-			"call .ngf4"		    |	    | |
-ngf $1==8	| |
-			remove(ALL)
-			"call .ngf8"		    |	    | |
-ngf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .ngf" erase(%[1])	    |	    | |
-fif $1==4	| |
-			remove(ALL)
-			"call .fif4"		    |	    | |
-fif $1==8	| |
-			remove(ALL)
-			"call .fif8"		    |	    | |
-fif !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .fif" erase(%[1])	    |	    | |
+/* Floating point stuff
+ * Arithmetic instructions
+ */
+ 
+adf $1==4	| | | | cal ".adf4" asp 4 |
+adf $1==8	| | | | cal ".adf8" asp 8 |
+sbf $1==4	| | | | cal ".sbf4" asp 4 |
+sbf $1==8	| | | | cal ".sbf8" asp 8 |
+mlf $1==4	| | | | cal ".mlf4" asp 4 |
+mlf $1==8	| | | | cal ".mlf8" asp 8 |
+dvf $1==4	| | | | cal ".dvf4" asp 4 |
+dvf $1==8	| | | | cal ".dvf8" asp 8 |
+ngf $1==4	| | | | cal ".ngf4" |
+ngf $1==8	| | | | cal ".ngf8" |
+fif $1==4	| | | | cal ".fif4" |
+fif $1==8	| | | | cal ".fif8" |
 fef $1==4	| |
-			remove(ALL)
-			"call .fef4"		    |	    | |
+		remove(ALL)
+		"pop bx"
+		"pop ax"
+		"push ax"
+		"push ax"
+		"push bx"	| | cal ".fef4" |
 fef $1==8	| |
-			remove(ALL)
-			"call .fef8"		    |	    | |
-fef !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .fef" erase(%[1])	    |	    | |
-
-
+		remove(ALL)
+		"pop ax"
+		"pop bx"
+		"pop cx"
+		"pop dx"
+		"push dx"
+		"push dx"
+		"push cx"
+		"push bx"
+		"push ax"	| | cal ".fef8" |
 
 /****************************************
  * Group 6 : pointer arithmetic.	*
@@ -1088,15 +1057,6 @@ zrl		| |	remove(indexed)
 						     |	    | |
 zre		| |	remove(indirects)
 			move({ANYCON,0},{EXTERN2,$1})|	    | |
-zrf $1==4	| |
-			remove(ALL)
-			"call .zrf4"		    |	    | |
-zrf $1==8	| |
-			remove(ALL)
-			"call .zrf8"		    |	    | |
-zrf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .zrf" erase(%[1])	    |	    | |
 zer $1==2	| |			       | {ANYCON,0} | |
 zer $1==4	| |		    | {ANYCON,0} {ANYCON,0} | |
 zer $1==6	| |		    | {ANYCON,0} {ANYCON,0}
@@ -1533,21 +1493,6 @@ cuu		| CXREG DXREG X_ACC |
 			remove(ALL)
 			"call .cuu"
 			erase(%[3])		     | %[3] | |
-cif		| CXREG DXREG |
-			remove(ALL)
-			"call .cif"			  | | |
-cuf		| CXREG DXREG |
-			remove(ALL)
-			"call .cuf"			  | | |
-cfi		| CXREG DXREG |
-			remove(ALL)
-			"call .cfi"			  | | |
-cfu		| CXREG DXREG |
-			remove(ALL)
-			"call .cfu"			  | | |
-cff		| CXREG DXREG |
-			remove(ALL)
-			"call .cff"			  | | |
 loc loc cii $1==1 && $2==2	| X_ACC |
 			 "cbw"
 			 samecc 		    | ax  | |(1,2)
@@ -1576,6 +1521,120 @@ loc loc cuu $1==$2		| |		|	|	|
 loc loc cuu $1==2 && $2==4	| a_word |
 			allocate(REG={ANYCON,0})| %[a] %[1] | |
 loc loc cuu $1==4 && $2==2	| a_word a_word |    | %[1] | |
+
+/*
+ * Floating point stuff
+ * Conversion
+ */
+loc loc cif	$1==2 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"		| | cal ".cif4" |
+loc loc cif	$1==4 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"		| | cal ".cif4" asp 2 |
+loc loc cif	$1==2 && $2==8 | |
+			remove(ALL)
+			"pop ax"
+			"push ax"
+			"push ax"
+			"push ax"
+			"mov ax,$1"
+			"push ax"		| | cal ".cif8" |
+loc loc cif	$1==4 && $2==8 | |
+			remove(ALL)
+			"pop ax"
+			"pop dx"
+			"push ax"
+			"push ax"
+			"push dx"
+			"mov ax,$1"
+			"push ax"		| | cal ".cif8" |
+loc loc cuf	$1==2 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"		| | cal ".cuf4" |
+loc loc cuf	$1==4 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"		| | cal ".cuf4" asp 2 |
+loc loc cuf	$1==2 && $2==8 | |
+			remove(ALL)
+			"pop ax"
+			"push ax"
+			"push ax"
+			"push ax"
+			"mov ax,$1"
+			"push ax"		| | cal ".cuf8" |
+loc loc cuf	$1==4 && $2==8 | |
+			remove(ALL)
+			"pop ax"
+			"pop dx"
+			"push ax"
+			"push ax"
+			"push dx"
+			"mov ax,$1"
+			"push ax"		| | cal ".cuf8" |
+loc loc cfi	$1==4 && $2==2 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfi" asp 8 lfr 2 |
+loc loc cfi	$1==4 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfi" asp 4 |
+loc loc cfi	$1==8 && $2==2 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfi" asp 12 lfr 2 |
+loc loc cfi	$1==8 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfi" asp 8 |
+loc loc cfu	$1==4 && $2==2 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfu" asp 6 |
+loc loc cfu	$1==4 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfu" asp 4 |
+loc loc cfu	$1==8 && $2==2 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfu" asp 10 |
+loc loc cfu	$1==8 && $2==4 | |
+			remove(ALL)
+			"mov ax,$1"
+			"push ax"
+			"mov ax,$2"
+			"push ax"		| | cal ".cfu" asp 8 |
+loc loc cff	$1==8 && $2==4 | |
+			remove(ALL)		| | cal ".cff4" asp 4 |
+loc loc cff	$1==4 && $2==8 | |
+			remove(ALL)
+			"pop bx"
+			"pop dx"
+			"xor ax,ax"
+			"push ax"
+			"push ax"
+			"push dx"
+			"push bx"		| | cal ".cff8" |
 
 /****************************************
  * Group 9 : Logical instructions	*
@@ -1981,15 +2040,19 @@ cms !defined($1)| X_CXREG |
 			remove(ALL)
 			"call .cms"
 			erase(cx)		       | cx | |
-cmf $1==4	| |
-			remove(ALL)
-			"call .cmf4"		    |	    | |
-cmf $1==8	| |
-			remove(ALL)
-			"call .cmf8"		    |	    | |
-cmf !defined($1)	| X_CXREG |
-			remove(ALL)
-			"call .cmf" erase(%[1])	    |	    | |
+
+/*
+ * Floating point
+ * Comparision
+ */
+
+cmf $1==4	| | remove(ALL) | | cal ".cmf4" asp 8 lfr 2 |
+cmf $1==8	| | remove(ALL) | | cal ".cmf8" asp 16 lfr 2 |
+/*
+ * Floating Point
+ * Zero Constants
+ */
+zrf		| | | | zer $1 |
 
 /* The costs with cmp are the cost of the 8086 cmp instruction */
 cmp		| NO register rmorconst |
