@@ -44,7 +44,7 @@ ModuleDeclaration
 	int qualified;
 } :
 	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
-	priority(&(df->mod_priority))?
+	priority(df)
 	';'
 	import(1)*
 	export(&qualified, &exportlist)?
@@ -57,19 +57,21 @@ ModuleDeclaration
 			}
 ;
 
-priority(arith *pprio;)
+priority(register struct def *df;)
 {
 	register struct node *nd;
-	struct node *nd1;		/* &nd is illegal */
 } :
-	'[' ConstExpression(&nd1) ']'
-			{ nd = nd1;
-			  if (!(nd->nd_type->tp_fund & T_CARDINAL)) {
-				node_error(nd, "illegal priority");
+	[
+		'[' ConstExpression(&(df->mod_priority)) ']'
+			{ if (!(df->mod_priority->nd_type->tp_fund &
+				T_CARDINAL)) {
+				node_error(df->mod_priority,
+					   "illegal priority");
 			  }
-			  *pprio = nd->nd_INT;
-			  FreeNode(nd);
 			}
+	|
+			{ df->mod_priority = 0; }
+	]
 ;
 
 export(int *QUALflag; struct node **ExportList;):
@@ -121,7 +123,7 @@ DefinitionModule
 			  if (!Defined) Defined = df;
 			  CurrentScope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
-			  df->df_type = standard_type(T_RECORD, 1, (arith) 0);
+			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  DefinitionModule++;
 			}
@@ -194,14 +196,14 @@ ProgramModule
 			RemoveImports(&(CurrentScope->sc_def));
 		  }
 		  else {
-			Defined = df = define(dot.TOK_IDF, CurrentScope, D_MODULE);
+			Defined = df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "_M2M";
 		  }
 		  CurrentScope->sc_definedby = df;
 		}
-	priority(&(df->mod_priority))?
+	priority(df)
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
 		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);

@@ -14,8 +14,8 @@
 #include	"def.h"
 #include	"node.h"
 
-struct scope *PervasiveScope, *GlobalScope;
-struct scopelist *CurrVis;
+struct scope *PervasiveScope;
+struct scopelist *CurrVis, *GlobalVis;
 extern int proclevel;
 static struct scopelist *PervVis;
 extern char options[];
@@ -85,9 +85,14 @@ chk_proc(df)
 {
 	/*	Called at scope closing. Check all definitions, and if one
 		is a D_PROCHEAD, the procedure was not defined.
+		Also check that hidden types are defined.
 	*/
 	while (df) {
-		if (df->df_kind == D_PROCHEAD) {
+		if (df->df_kind == D_HIDDEN) {
+			error("hidden type \"%s\" not declared",
+				df->df_idf->id_text);
+		}
+		else if (df->df_kind == D_PROCHEAD) {
 			/* A not defined procedure
 			*/
 			error("procedure \"%s\" not defined",
@@ -121,6 +126,7 @@ node_error(df1->df_forw_node, "\"%s\" is not a type", df1->df_idf->id_text);
 			df1->df_forw_type->next = df->df_type;
 			FreeNode(df1->df_forw_node);
 			free_def(df1);
+			continue;
 		}
 		else if (df->df_kind == D_FTYPE) {
 			df->df_kind = D_TYPE;

@@ -34,9 +34,28 @@ label		data_label;
 static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
+static struct node	*priority;
 
 #define	NO_EXIT_LABEL	((label) 0)
 #define RETURN_LABEL	((label) 1)
+
+STATIC
+DoPriority()
+{
+	if (priority) {
+		C_loc(priority->nd_INT);
+		C_cal("_stackprio");
+		C_asp(word_size);
+	}
+}
+
+STATIC
+EndPriority()
+{
+	if (priority) {
+		C_cal("_unstackprio");
+	}
+}
 
 STATIC
 DoProfil()
@@ -67,6 +86,7 @@ WalkModule(module)
 	struct scopelist *savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
+	priority = module->mod_priority;
 	sc = CurrentScope;
 
 	/* Walk through it's local definitions
@@ -81,6 +101,7 @@ WalkModule(module)
 	text_label = 1;		/* label at end of initialization routine */
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
+	DoPriority();
 	DoProfil();
 	if (module == Defined) {
 		/* Body of implementation or program module.
@@ -113,6 +134,7 @@ WalkModule(module)
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	WalkNode(module->mod_body, NO_EXIT_LABEL);
 	C_df_ilb(RETURN_LABEL);
+	EndPriority();
 	C_ret((arith) 0);
 	C_end(-sc->sc_off);
 	proclevel--;
@@ -146,6 +168,7 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(sc->sc_name);
+	DoPriority();
 	DoProfil();
 	TmpOpen(sc);
 
@@ -277,6 +300,7 @@ WalkProcedure(procedure)
 			C_ass(word_size);
 		}
 		C_lae_dlb(func_res_label, (arith) 0);
+		EndPriority();
 		C_ret(pointer_size);
 	}
 	else if (tp) {
@@ -292,6 +316,7 @@ WalkProcedure(procedure)
 			C_lal(retsav);
 			C_loi(func_res_size);
 		}
+		EndPriority();
 		C_ret(func_res_size);
 	}
 	else	{
@@ -299,6 +324,7 @@ WalkProcedure(procedure)
 			C_lol(StackAdjustment);
 			C_ass(word_size);
 		}
+		EndPriority();
 		C_ret((arith) 0);
 	}
 	if (StackAdjustment) FreeInt(StackAdjustment);
@@ -324,7 +350,7 @@ WalkDef(df)
 			WalkProcedure(df);
 			break;
 		case D_VARIABLE:
-			if (!proclevel) {
+			if (!proclevel  && !df->var_addrgiven) {
 				C_df_dnam(df->var_name);
 				C_bss_cst(
 					WA(df->df_type->tp_size),
@@ -554,11 +580,7 @@ node_error(right, "type incompatibility in RETURN statement");
 				break;
 			}
 			if (right->nd_type->tp_fund == T_STRING) {
-				arith strsize = WA(right->nd_type->tp_size);
-
-				C_zer(WA(func_type->tp_size) - strsize);
-				CodePExpr(right);
-				C_loi(strsize);
+				CodePString(right, func_type);
 			}
 			else	CodePExpr(right);
 		}

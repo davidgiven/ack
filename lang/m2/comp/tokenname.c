@@ -14,7 +14,7 @@
 struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{IDENT, "identifier"},
 	{STRING, "string"},
-	{INTEGER, "integer"},
+	{INTEGER, "number"},
 	{REAL, "real"},
 	{0, ""}
 };

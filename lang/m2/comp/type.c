@@ -473,9 +473,10 @@ FreeType(tp)
 	free_type(tp);
 }
 
-DeclareType(df, tp)
+DeclareType(nd, df, tp)
 	register struct def *df;
 	register struct type *tp;
+	struct node *nd;
 {
 	/*	A type with type-description "tp" is declared and must
 		be bound to definition "df".
@@ -486,7 +487,9 @@ DeclareType(df, tp)
 
 	if (df->df_type && df->df_type->tp_fund == T_HIDDEN) {
 	  	if (! (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
-error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+			node_error(nd,
+				   "opaque type \"%s\" is not a pointer type",
+				   df->df_idf->id_text);
 		}
 		df->df_type->next = tp;
 		df->df_type->tp_fund = T_EQUAL;
@@ -495,7 +498,9 @@ error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 		}
 		if (tp == df->df_type) {
 			/* Circular definition! */
-error("opaque type \"%s\" has a circular definition", df->df_idf->id_text);
+			node_error(nd,
+				 "opaque type \"%s\" has a circular definition",
+				 df->df_idf->id_text);
 		}
 	}
 	else	df->df_type = tp;

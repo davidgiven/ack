@@ -401,21 +401,28 @@ CodeParameters(param, arg)
 		return;
 	}
 	if (left_type->tp_fund == T_STRING) {
-		register arith szarg = WA(left_type->tp_size);
-		arith sz = WA(tp->tp_size);
-
-		if (szarg != sz) {
-			/* null padding required */
-			assert(szarg < sz);
-			C_zer(sz - szarg);
-		}
-		CodeString(left);	/* push address of string */
-		C_loi(szarg);
+		CodePString(left, tp);
 		return;
 	}
 	CodePExpr(left);
 	RangeCheck(tp, left_type);
 	CodeCoercion(left_type, tp);
+}
+
+CodePString(nd, tp)
+	struct node *nd;
+	struct type *tp;
+{
+	arith szarg = WA(nd->nd_type->tp_size);
+	register arith zersz = WA(tp->tp_size) - szarg;
+
+	if (zersz) {
+		/* null padding required */
+		assert(zersz > 0);
+		C_zer(zersz);
+	}
+	CodeString(nd);	/* push address of string */
+	C_loi(szarg);
 }
 
 CodeStd(nd)
@@ -731,8 +738,8 @@ CodeOper(expr, true_label, false_label)
 			C_cmi(tp->tp_size);
 			break;
 		case T_POINTER:
-		case T_EQUAL:
 		case T_HIDDEN:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_cmu(tp->tp_size);

@@ -141,8 +141,8 @@ type.o: LLlex.h const.h debug.h debugcst.h def.h idf.h maxset.h node.h scope.h t
 def.o: LLlex.h Lpars.h debug.h debugcst.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h debugcst.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
-enter.o: LLlex.h debug.h debugcst.h def.h idf.h main.h node.h scope.h type.h
-defmodule.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h input.h inputtype.h main.h node.h scope.h type.h
+enter.o: LLlex.h debug.h debugcst.h def.h idf.h main.h misc.h node.h scope.h type.h
+defmodule.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h input.h inputtype.h main.h misc.h node.h scope.h type.h
 typequiv.o: LLlex.h debug.h debugcst.h def.h node.h type.h warning.h
 node.o: LLlex.h debug.h debugcst.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h debugcst.h idf.h node.h standards.h target_sizes.h type.h warning.h

@@ -81,15 +81,15 @@ Compile(src, dst)
 		return 1;
 	}
 #endif DEBUG
-	open_scope(CLOSEDSCOPE);
-	GlobalScope = CurrentScope;
+	open_scope(OPENSCOPE);
+	GlobalVis = CurrVis;
+	close_scope(0);
 	C_init(word_size, pointer_size);
 	if (! C_open(dst)) fatal("could not open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CompUnit();
 	C_ms_src((arith) (LineNumber - 1), FileName);
-	close_scope(SC_REVERSE);
 	if (!err_occurred) {
 		C_exp(Defined->mod_vis->sc_scope->sc_name);
 		WalkModule(Defined);

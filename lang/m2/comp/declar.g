@@ -116,10 +116,15 @@ TypeDeclaration
 {
 	struct def *df;
 	struct type *tp;
+	struct node *nd;
 }:
-	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
+	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
+			  nd = MkLeaf(Name, &dot);
+			}
 	'=' type(&tp)
-			{ DeclareType(df, tp); }
+			{ DeclareType(nd, df, tp);
+			  free_node(nd);
+			}
 ;
 
 type(struct type **ptp;):
@@ -239,7 +244,11 @@ RecordType(struct type **ptp;)
 		  close_scope(0);
 		}
 	FieldListSequence(scope, &size, &xalign)
-		{ *ptp = standard_type(T_RECORD, xalign, size);
+		{ if (size == 0) {
+			warning(W_ORDINARY, "empty record declaration");
+			size = 1;
+		  }
+		  *ptp = standard_type(T_RECORD, xalign, size);
 		  (*ptp)->rec_scope = scope;
 		}
 	END

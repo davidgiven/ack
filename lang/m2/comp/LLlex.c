@@ -411,8 +411,20 @@ again1:
 				/* Fall through */
 				
 			case End:
-				*np++ = '\0';
-				tk->TOK_INT = str2long(&buf[1], base);
+				*np = '\0';
+				if (np >= &buf[NUMSIZE]) {
+					tk->TOK_INT = 1;
+					lexerror("constant too long");
+				}
+				else {
+					np = &buf[1];
+					while (*np == '0') np++;
+					tk->TOK_INT = str2long(np, base);
+					if (strlen(np) > 14 /* ??? */ ||
+				    	    tk->TOK_INT < 0) {
+lexwarning(W_ORDINARY, "overflow in constant");
+					}
+				}
 				if (ch == 'C' && base == 8) {
 					toktype = char_type;
 					if (tk->TOK_INT<0 || tk->TOK_INT>255) {

@@ -15,6 +15,7 @@
 #include	"LLlex.h"
 #include	"node.h"
 #include	"main.h"
+#include	"misc.h"
 
 struct def *
 Enter(name, kind, type, pnam)
@@ -351,14 +352,8 @@ EnterExportList(Idlist, qualified)
 				}
 				if (df1->df_kind == D_HIDDEN &&
 				    df->df_kind == D_TYPE) {
-					if (df->df_type->tp_fund != T_POINTER) {
-						node_error(idlist,
-"opaque type \"%s\" is not a pointer type",
-							df->df_idf->id_text);
-					}
-					assert(df1->df_type->next == NULLTYPE);
+					DeclareType(idlist, df1, df->df_type);
 					df1->df_kind = D_TYPE;
-					df1->df_type->next = df->df_type;
 					continue;
 				}
 			}
@@ -379,6 +374,7 @@ EnterFromImportList(Idlist, FromDef, FromId)
 	register struct node *idlist = Idlist;
 	register struct scopelist *vis;
 	register struct def *df;
+	char *module_name = FromDef->df_idf->id_text;
 	int forwflag = 0;
 
 	switch(FromDef->df_kind) {
@@ -399,27 +395,31 @@ EnterFromImportList(Idlist, FromDef, FromId)
 	case D_MODULE:
 		vis = FromDef->mod_vis;
 		if (vis == CurrVis) {
-node_error(FromId, "cannot import from current module \"%s\"",
-		        	FromDef->df_idf->id_text);
+node_error(FromId, "cannot import from current module \"%s\"", module_name);
 			return;
 		}
 		break;
 	default:
-node_error(FromId, "identifier \"%s\" does not represent a module",
-		       FromDef->df_idf->id_text);
+node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 		return;
 	}
 
 	for (; idlist; idlist = idlist->next) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
 		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 1))) {
-		    not_declared("identifier", idlist, " in qualifying module");
-		    df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
+			if (! is_anon_idf(idlist->nd_IDF)) {
+				node_error(idlist,
+			"identifier \"%s\" not declared in module \"%s\"",
+					idlist->nd_IDF->id_text,
+					module_name);
+			}
+			df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
 		}
 		else if (! (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 			node_error(idlist,
-			"identifier \"%s\" not exported from qualifying module",
-			idlist->nd_IDF->id_text);
+			"identifier \"%s\" not exported from module \"%s\"",
+			idlist->nd_IDF->id_text,
+			module_name);
 			df->df_flags |= D_QEXPORTED;
 		}
 		DoImport(df, CurrentScope);

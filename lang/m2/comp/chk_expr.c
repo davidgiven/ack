@@ -994,23 +994,24 @@ ChkStandard(expp, left)
 		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
 		{
 			struct token dt;
+			register struct token *tk = &dt;
 			struct node *nd;
 
-			dt.TOK_INT = PointedtoType(left->nd_type)->tp_size;
-			dt.tk_symb = INTEGER;
-			dt.tk_lineno = left->nd_lineno;
+			tk->TOK_INT = PointedtoType(left->nd_type)->tp_size;
+			tk->tk_symb = INTEGER;
+			tk->tk_lineno = left->nd_lineno;
 			nd = MkLeaf(Value, &dt);
 			nd->nd_type = card_type;
-			dt.tk_symb = ',';
-			arg->nd_right = MkNode(Link, nd, NULLNODE, &dt);
+			tk->tk_symb = ',';
+			arg->nd_right = MkNode(Link, nd, NULLNODE, tk);
 			/* Ignore other arguments to NEW and/or DISPOSE ??? */
 
 			FreeNode(expp->nd_left);
-			dt.tk_symb = IDENT;
-			dt.tk_lineno = expp->nd_left->nd_lineno;
-			dt.TOK_IDF = str2idf(std == S_NEW ?
+			tk->tk_symb = IDENT;
+			tk->tk_lineno = expp->nd_left->nd_lineno;
+			tk->TOK_IDF = str2idf(std == S_NEW ?
 						"ALLOCATE" : "DEALLOCATE", 0);
-			expp->nd_left = MkLeaf(Name, &dt);
+			expp->nd_left = MkLeaf(Name, tk);
 		}
 		return ChkCall(expp);
 
@@ -1145,7 +1146,7 @@ ChkCast(expp, left)
 }
 
 TryToString(nd, tp)
-	struct node *nd;
+	register struct node *nd;
 	struct type *tp;
 {
 	/*	Try a coercion from character constant to string.

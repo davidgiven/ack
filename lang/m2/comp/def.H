@@ -1,7 +1,7 @@
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
 
 struct module {
-	arith mo_priority;	/* priority of a module */
+	struct node *mo_priority;/* priority of a module */
 	struct scopelist *mo_vis;/* scope of this module */
 	struct node *mo_body;	/* body of this module */
 #define mod_priority	df_value.df_module.mo_priority

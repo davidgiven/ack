@@ -30,13 +30,13 @@ struct scopelist {
 };
 
 extern struct scope
-	*PervasiveScope,
-	*GlobalScope;
+	*PervasiveScope;
 
 extern struct scopelist
-	*CurrVis;
+	*CurrVis, *GlobalVis;
 
 #define CurrentScope	(CurrVis->sc_scope)
+#define GlobalScope	(GlobalVis->sc_scope)
 #define enclosing(x)	((x)->sc_encl)
 #define scopeclosed(x)	((x)->sc_scopeclosed)
 #define nextvisible(x)	((x)->next)		/* use with scopelists */
