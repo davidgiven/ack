@@ -32,7 +32,7 @@ getwdir(fn)
 		*p = '/';
 		return fn;
 	}
-	else return ".";
+	else return "";
 }
 
 int	NoUnstack;
