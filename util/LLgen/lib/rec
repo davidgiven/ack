@@ -28,10 +28,13 @@ extern		LLoldlevel();
 
 #ifdef LL_USERHOOK
 static		LLdoskip();
+static int	LLuserhook():
 #endif
 
 #ifndef LL_FASTER
-LLscan(t) {
+LLscan(t)
+	int	t;
+{
 	/*
 	 * Check if the next symbol is equal to the parameter
 	 */
@@ -53,7 +56,9 @@ LLread() {
 	/* NOTREACHED */
 }
 
-LLerror(t) {
+LLerror(t)
+	int	t;
+{
 	register int i;
 
 	if (t == EOFILE && LLsymb <= 0) return;
@@ -61,7 +66,7 @@ LLerror(t) {
 	if (t == EOFILE) {
 #ifdef LL_USERHOOK
 		static int lst[] = { EOFILE, 0 };
-		LLuserhook(EOFILE, lst);
+		if (LLuserhook(EOFILE, lst)) /* nothing */;
 #endif LL_USERHOOK
 		if (LLsymb != EOFILE && LLsymb > 0) {
 			LLmessage(-1);
@@ -95,7 +100,9 @@ LLfirst(x, d) {
 }
 # endif
 
-LLnext(n) {
+LLnext(n)
+	int	n;
+{
 	/*	returns: 0 if the current symbol is'nt skipped, and it
 			 is'nt a member of "n",
 			 1 if we have a new symbol, but it is'nt a member,
@@ -125,6 +132,7 @@ LLskip() {
 
 static int
 LLuserhook(exp, list)
+	int exp;
 	int *list;
 {
 	int old = LLsymb;
@@ -160,7 +168,9 @@ LLmklist(list)
 }
 
 static
-LLdoskip(exp) {
+LLdoskip(exp)
+	int	exp;
+{
 	int LLx;
 	int list[LL_NTERMINALS+1];
 #endif LL_USERHOOK
@@ -224,7 +234,9 @@ LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
 	LLtincr(0);
 }
 
-LLoldlevel(LLsinfo) unsigned int *LLsinfo; {
+LLoldlevel(LLsinfo)
+	unsigned int *LLsinfo;
+{
 	register int i;
 
 	LLtdecr(0);
