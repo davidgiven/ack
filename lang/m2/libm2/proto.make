@@ -18,10 +18,12 @@ clean:
 cmp:
 
 pr:
-		@pr Makefile $(SOURCES)
+		@pr $(SRC_DIR)/proto.make
+		for i in $(SOURCES) ; do pr $(SRC_DIR)/$$i ; done
+
 opr:
 		make pr | opr
 
 install:
 		-mkdir $(DEFDIR)
-		for i in $(SOURCES) ; do cp $$i $(DEFDIR)/$$i ; done
+		for i in $(SOURCES) ; do cp $(SRC_DIR)/$$i $(DEFDIR)/$$i ; done
