@@ -72,7 +72,8 @@ parameter_list(struct expr **expp;)
 :
 	assignment_expression(expp)
 	{any2opnd(expp, PARCOMMA);}
-	[	','
+	[ %persistent
+		','
 		assignment_expression(&e1)
 		{any2opnd(&e1, PARCOMMA);}
 		{ch7bin(expp, PARCOMMA, e1);}

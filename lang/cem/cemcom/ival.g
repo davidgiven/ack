@@ -557,8 +557,8 @@ ch_array(tpp, ex)
 	struct expr *ex;
 {
 	register struct type *tp = *tpp;
-	register arith length = ex->SG_LEN;
-	char *s;
+	register int length = ex->SG_LEN, i;
+	register char *to, *from, *s;
 
 	ASSERT(ex->ex_class == String);
 	if (tp->tp_size == (arith)-1) {
@@ -575,10 +575,14 @@ ch_array(tpp, ex)
 	}
 	/* throw out the characters of the already prepared string	*/
 	s = Malloc((unsigned) (length));
-	clear(s, (int) (length));
-	strncpy(s, ex->SG_VALUE, (int) length);
+	clear(s, length);
+	i = length <= ex->SG_LEN ? length : ex->SG_LEN;
+	to = s; from = ex->SG_VALUE;
+	while(--i >= 0) {
+		*to++ = *from++;
+	}
 	free(ex->SG_VALUE);
-	str_cst(s, (int) (length));
+	str_cst(s, length);
 	free(s);
 }
 

@@ -167,12 +167,18 @@ skip_block(to_endif)
 			on the same level.
 		*/
 		switch(tk.tk_idf->id_resmac) {
+		default:
+			SkipRestOfLine();
+			break;
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
 			push_if();
+			SkipRestOfLine();
 			break;
 		case K_ELIF:
+			if (ifstack[nestlevel])
+				lexwarning("#elif without corresponding #if");
 			if (! to_endif && nestlevel == skiplevel) {
 				nestlevel--;
 				push_if();
@@ -181,12 +187,15 @@ skip_block(to_endif)
 					return;
 				}
 			}
+			else SkipRestOfLine();
 			break;
 		case K_ELSE:
+			if (ifstack[nestlevel])
+				lexwarning("#else without corresponding #if");
+			SkipRestOfLine();
 			if (! to_endif) {
 				++(ifstack[nestlevel]);
 				if (nestlevel == skiplevel) {
-					SkipRestOfLine();
 					NoUnstack--;
 					return;
 				}
@@ -194,8 +203,8 @@ skip_block(to_endif)
 			break;
 		case K_ENDIF:
 			ASSERT(nestlevel > nestlow);
+			SkipRestOfLine();
 			if (nestlevel == skiplevel) {
-				SkipRestOfLine();
 				nestlevel--;
 				NoUnstack--;
 				return;

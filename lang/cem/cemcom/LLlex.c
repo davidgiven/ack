@@ -321,7 +321,7 @@ firstline:
 		while (ch != '\'') {
 			if (ch == '\n') {
 				lexerror("newline in character constant");
-				LineNumber++;
+				PushBack();
 				break;
 			}
 			if (ch == '\\') {
@@ -522,7 +522,7 @@ string_token(nm, stop_char, plen)
 	while (ch != stop_char) {
 		if (ch == '\n') {
 			lexerror("newline in %s", nm);
-			LineNumber++;
+			PushBack();
 			break;
 		}
 		if (ch == EOI) {

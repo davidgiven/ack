@@ -291,7 +291,7 @@ arrayer(arith *sizep;)
 
 formal_list (struct formal **fmp;)
 :
-	formal(fmp) [ ',' formal(fmp) ]*
+	formal(fmp) [ %persistent ',' formal(fmp) ]*
 ;
 
 formal(struct formal **fmp;)
