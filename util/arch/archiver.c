@@ -29,20 +29,18 @@ static char RcsId[] = "$Header$";
 #include <ranlib.h>
 #include <out.h>
 #define MAGIC_NUMBER	AALMAG
-#ifdef AAL
 long	offset;
 struct ranlib *tab;
-long	tnum = 0;
+unsigned int	tnum = 0;
 char	*tstrtab;
-long	tssiz = 0;
+unsigned int	tssiz = 0;
 char	*malloc(), *realloc(), *strcpy(), *strncpy();
-long	lseek();
 long	time();
 unsigned int tabsz, strtabsz;
-#endif AAL
 #else
 #define MAGIC_NUMBER	ARMAG
 #endif
+long	lseek();
 
 #define odd(nr)		(nr & 01)
 #define even(nr)	(odd(nr) ? nr + 1 : nr)
@@ -583,13 +581,13 @@ write_symdef()
 	for (i = 0; i < sizeof(arbuf.ar_name); i++)
 		arbuf.ar_name[i] = '\0';
 	strcpy(arbuf.ar_name, SYMDEF);
-	arbuf.ar_size = 4 + 2 * 4 * tnum + 4 + tssiz;
+	arbuf.ar_size = 4 + 2 * 4 * (long)tnum + 4 + (long)tssiz;
 	time(&arbuf.ar_date);
 	arbuf.ar_uid = getuid();
 	arbuf.ar_gid = getgid();
 	arbuf.ar_mode = 0444;
 	wr_arhdr(ar_fd,&arbuf);
-	wr_long(ar_fd, tnum);
+	wr_long(ar_fd, (long) tnum);
 	/*
 	 * Account for the space occupied by the magic number
 	 * and the ranlib table.
@@ -599,9 +597,9 @@ write_symdef()
 		ran->ran_pos += delta;
 	}
 
-	wr_ranlib(ar_fd, tab, tnum);
-	wr_long(ar_fd, tssiz);
-	wr_bytes(ar_fd, tstrtab, tssiz);
+	wr_ranlib(ar_fd, tab, (long) tnum);
+	wr_long(ar_fd, (long) tssiz);
+	wr_bytes(ar_fd, tstrtab, (long) tssiz);
 }
 
 /*
@@ -650,7 +648,7 @@ do_names(headp)
 	register int	nnames = headp->oh_nname;
 #define NNAMES 100
 	struct outname	namebuf[NNAMES];
-	char *xxx;
+	long xxx = OFF_CHAR(*headp);
 
 	if (	headp->oh_nchar != (unsigned int)headp->oh_nchar ||
 		(strings = malloc((unsigned int)headp->oh_nchar)) == (char *)0
@@ -658,7 +656,6 @@ do_names(headp)
 		error(TRUE, "string table too big\n");
 	}
 	rd_string(strings, headp->oh_nchar);
-	xxx = strings - OFF_CHAR(*headp);
 	while (nnames) {
 		int i = nnames >= NNAMES ? NNAMES : nnames;
 		register struct outname *p = namebuf;
@@ -666,9 +663,12 @@ do_names(headp)
 		nnames -= i;
 		rd_name(namebuf, i);
 		while (i--) {
-			if (p->on_foff == (long)0)
+			long off = p->on_foff - xxx;
+			if (p->on_foff == (long)0) {
+				p++;
 				continue; /* An unrecognizable name. */
-			p->on_mptr = xxx + p->on_foff;
+			}
+			p->on_mptr = strings + off;
 			/*
 			 * Only enter names that are exported and are really
 			 * defined. Also enter common names. Note, that
