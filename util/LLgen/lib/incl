@@ -10,11 +10,11 @@
 extern int LLsymb;
 
 #define LL_SAFE(x)	/* Nothing */
-#define LL_SSCANDONE(x)	if (LLsymb != x) LLsafeerror(x); else
-#define LL_SCANDONE(x)	if (LLsymb != x) LLerror(x); else
+#define LL_SSCANDONE(x)	if (LLsymb != x) LLsafeerror(x)
+#define LL_SCANDONE(x)	if (LLsymb != x) LLerror(x)
 #define LL_NOSCANDONE(x) LLscan(x)
 #ifdef LL_FASTER
-#define LLscan(x)	if ((LLsymb = LL_LEXI()) != x) LLerror(x); else
+#define LLscan(x)	if ((LLsymb = LL_LEXI()) != x) LLerror(x)
 #endif
 
 extern unsigned int LLscnt[];

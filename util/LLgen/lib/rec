@@ -13,7 +13,10 @@ int		LLcsymb, LLsymb;
 static int	LLlevel;
 
 #if LL_ANSI_C
+#define LL_VOIDCST (void)
 void	LLmessage(int);
+#else
+#define LL_VOIDCST
 #endif
 #ifdef LL_USERHOOK
 #if LL_ANSI_C
@@ -72,7 +75,7 @@ LLerror(t)
 	if (t == EOFILE) {
 #ifdef LL_USERHOOK
 		static int lst[] = { EOFILE, 0 };
-		if (LLuserhook(EOFILE, lst)) /* nothing */;
+		LL_VOIDCST LLuserhook(EOFILE, lst);
 #endif /* LL_USERHOOK */
 		if (LLsymb != EOFILE && LLsymb > 0) {
 			LLmessage(-1);
@@ -89,9 +92,9 @@ LLerror(t)
 	i = LLindex[t];
 	LLtcnt[i]++;
 #ifdef LL_USERHOOK
-	if (LLdoskip(t)) /* nothing */;
+	LL_VOIDCST LLdoskip(t);
 #else
-	if (LLskip()) /* nothing */;
+	LL_VOIDCST LLskip();
 #endif
 	LLtcnt[i]--;
 	if (LLsymb != t) LLmessage(t);
@@ -109,7 +112,7 @@ LLsafeerror(t)
 	if (t == EOFILE) {
 #ifdef LL_USERHOOK
 		static int lst[] = { EOFILE, 0 };
-		if (LLuserhook(EOFILE, lst)) /* nothing */;
+		LL_VOIDCST LLuserhook(EOFILE, lst);
 #endif /* LL_USERHOOK */
 		if (LLsymb != EOFILE && LLsymb > 0) {
 			LLmessage(-1);
