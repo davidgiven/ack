@@ -261,13 +261,13 @@ writef(addr,sz,cnt)
  */
 emits(section) struct outsect *section ; {
 	char		*p;
-	char		*calloc();
+	char		*calloc(), *malloc();
 	long sz = section->os_flen;
 
 	rd_outsect(section - outsect);
 	while (sz) {
 		unsigned int i = (sz >= 0x4000 ? 0x4000 : sz);
-		if (!(p = calloc(i, 1))) {
+		if (!(p = malloc(i))) {
 			fatal("No memory.\n");
 		}
 		rd_emit(p, i);
@@ -279,16 +279,18 @@ emits(section) struct outsect *section ; {
 	}
 
 	sz = section->os_size - section->os_flen;
-	while (sz) {
-		unsigned int i = (sz >= 0x4000 ? 0x4000 : sz);
-		if (!(p = calloc(i, 1))) {
+	if (sz) {
+		if (!(p = calloc(0x4000, 1))) {
 			fatal("No memory.\n");
 		}
-		if (write(output, p, i) < i) {
-			fatal("write error.\n");
+		while (sz) {
+			unsigned int i = (sz >= 0x4000 ? 0x4000 : sz);
+			if (write(output, p, i) < i) {
+				fatal("write error.\n");
+			}
+			sz -= i;
 		}
 		free(p);
-		sz -= i;
 	}
 }
 
