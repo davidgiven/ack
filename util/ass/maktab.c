@@ -182,6 +182,8 @@ int decflag(str) char *str ; {
 		check(type) ; type=OP32 ; break ;
 	case '8' :
 		check(type) ; type=OP64 ; break ;
+	case 'u':
+		check(type) ; type=OP16U ; break ;
 	case 'e' :
 		check(escape) ; escape=0 ; break ;
 	case 'N' :
@@ -202,6 +204,7 @@ int decflag(str) char *str ; {
 		if ( escape!=ILLGL ) error("Conflicting escapes") ;
 		escape=ILLGL ;
 	case OP16 :
+	case OP16U :
 	case OP8 :
 	case OPSHORT :
 	case OPNO :
@@ -284,6 +287,7 @@ int oplength(a) struct opform *a ; {
 	case OPMINI  : break ;
 	case OP8     :
 	case OPSHORT : cnt++ ; break ;
+	case OP16U   :
 	case OP16    : cnt+=2 ; break ;
 	case OP32    : cnt+=5 ; break ;
 	case OP64    : cnt+=9 ; break ;
@@ -339,6 +343,7 @@ checkall() {
 			else if ( flag&OP_POS )
 				posc[opc]++ ;
 			break ;
+		case OP16U :
 		case OP32 :
 		case OP64 :
 			break ;

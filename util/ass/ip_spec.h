@@ -15,6 +15,7 @@
 #define OP16    4       /* 2  2-byte signed operand */
 #define OP32    5       /* 4  4-byte signed operand */
 #define OP64    6       /* 8  8-byte signed operand */
+#define OP16U	7	/* u  2-byte unsigned operand */
 
 #define OPESC   010     /* e  escaped opcode */
 #define OPWORD  020     /* w  operand is word multiple */

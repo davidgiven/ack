@@ -149,6 +149,7 @@ genop(startc,value,i_flag) char *startc ; cons_t value ; int i_flag ; {
 		put8((char)value) ;
 		break ;
 	case OP16:
+	case OP16U:
 		put16(int_cast value) ;
 		break ;
 	case OP32:

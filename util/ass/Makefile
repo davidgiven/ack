@@ -68,8 +68,8 @@ asscm.o:        ass00.h
 
 asstb.o:        asstb.c
 
-asstb.c:        maktab ip_spec.t
-		maktab ip_spec.t asstb.c
+asstb.c:        maktab $d/etc/ip_spec.t
+		maktab $d/etc/ip_spec.t asstb.c
 
 maktab:         maktab.c $h/em_spec.h ip_spec.h $h/em_flag.h \
 		$l/em_data.a
@@ -83,4 +83,4 @@ opr:
 
 pr:
 		@(pr ass00.h assex.h ip_spec.h ass?0.c ass[rcd]?.c \
-		maktab.c ; pr -3 ip_spec.t)
+		maktab.c)

@@ -13,7 +13,6 @@ assda.c
 assex.h
 assrl.c
 ip_spec.h
-ip_spec.t
 maktab.c
 asprint.p
 em_ass.6
