@@ -91,11 +91,11 @@ all:	test
 
 install:	$(INT)
 	cp $(INT) $(TARGET_HOME)/bin/int
-	cp int.1 $(TARGET_HOME)/man/int.1
+	cp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1
 
 cmp:	$(INT)
 	-cmp $(INT) $(TARGET_HOME)/bin/int
-	-cmp int.1 $(TARGET_HOME)/man/int.1
+	-cmp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1
 
 test:	$(INT) test/awa.em22 test/awa.em24 test/awa.em44
 	@rm -f int.mess
