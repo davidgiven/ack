@@ -157,8 +157,7 @@ char *name;
 file_header()
 {
 	out( "#define CODE_EXPANDER\n");
-	out( "#include <em.h>\n");
 	out( "#include \"mach.h\"\n");
 	out( "#include \"back.h\"\n\n");
-	out( "extern int holno, procno;\n\n");
+	out( "extern int B_holno, B_procno;\n\n");
 }
