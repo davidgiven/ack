@@ -11,3 +11,6 @@
 #define	LISTING		/* enable listing facilities */
 #define RELOCATION	/* generate relocation info */
 #define DEBUG 0
+
+#undef valu_t
+#define valu_t long

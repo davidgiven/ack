@@ -88,19 +88,18 @@ indexed() {
 
 branch(opc,exp) register opc; expr_t exp; {
 	register sm,dist;
-	int saving;
+	int saving = opc == 0353 ? 1 : 3;
 
 	dist = exp.val - (DOTVAL + 2);
 	if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))
 		dist -= DOTGAIN;
-	sm = fitb(dist);
+	sm = dist > 0 ? fitb(dist-saving) : fitb(dist);
 	if ((exp.typ & ~S_DOT) != DOTTYP)
 		sm = 0;
 	if ((opc & 0370) == 0340) {
 		fit(sm);
 		sm = 1;
 	} else {
-		saving = opc == 0353 ? 1 : 3;
 		if ((sm = small(sm,saving)) == 0) {
 			if (opc != 0353) {
 				emit1(opc^1);
