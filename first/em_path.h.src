@@ -1,0 +1,10 @@
+#define TMP_DIR         "/usr/tmp"      /* Intended as a common dir. for */
+					/* ALL temporary files */
+
+/* The trailing " is intentionally missing ! */
+#define EM_HOME		"/usr/em
+#define EM_DIR          EM_HOME"	/* The root directory for EM stuff */
+#define PEM_PATH        EM_HOME/lib/pc_pem"
+#define ERR_PATH        EM_HOME/etc/pc_errors"
+#define RTERR_PATH	EM_HOME/etc/pc_rt_errors"
+#define ACK_DIR         EM_HOME/lib/ack"
