@@ -338,7 +338,7 @@ msave
  lim                    ; get current ignore mask
  ste msave              ; save it
  lim
- loc 4                  ; bit for EFOVFL
+ loc 16                  ; bit for EFOVFL
  ior 2                  ; set in mask
  sim                    ; ignore EFOVFL from now on
  lpi $catch             ; load procedure identifier
