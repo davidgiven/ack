@@ -321,15 +321,11 @@ index	:	'(' R16 '+' expr ')'
 			}
 	|	'(' R16 '-' expr ')'
 			{
-#ifdef ASLD
 				if ($2!=IX && $2!=IY) serror("register error");
 				fit(fitb($4.val));
 				exp_ind = $4;
 				RELOMOVE(rel_ind, relonami);
 				$$ = $2;
-#else ASLD
-				serror("relocation error");
-#endif ASLD
 			}
 	;
 ind	:	indir
