@@ -131,10 +131,7 @@ intrf() {
 		if ( strcmp(ty_name,PROG)==0 ) {
 			if ( new->t_prog ) twice=YES ;
 			bline= scanb(bol);                /* Scan for \ */
-			vline= scanvars(gr_start(bline)); /* Scan for {} */
-			gr_throw(&bline);
-			new->t_prog= gr_final(&vline);
-			clr_noscan(new->t_prog);
+                      new->t_prog= gr_final(&bline);
 		} else
 		if ( strcmp(ty_name,MAPF)==0 ) {
 			/* First read the mapflags line

@@ -7,6 +7,7 @@
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
+#include "grows.h"
 #include "data.h"
 #include <signal.h>
 
@@ -15,6 +16,8 @@ static char rcs_id[] = "$Header$" ;
 #endif
 
 #define ARG_MORE  40            /* The size of args chunks to allocate */
+
+extern growstring scanvars();
 
 static char      **arglist ;    /* The first argument */
 static unsigned  argcount ;     /* The current number of arguments */
@@ -28,7 +31,11 @@ int do_run() {
 
 int runphase(phase) register trf *phase ; {
 	register list_elem *elem ;
+      char *prog ; int result ;
+      growstring bline ;
 
+      bline=scanvars(phase->t_prog) ;
+      prog=gr_final(&bline) ;
 	if ( v_flag || debug ) {
 		if ( v_flag==1 && !debug ) {
 			vprint("%s",phase->t_name) ;
@@ -43,7 +50,7 @@ int runphase(phase) register trf *phase ; {
 			}
 		} else {
 			/* list all args */
-			vprint("%s",phase->t_prog) ;
+                      vprint("%s",prog) ;
 			scanlist(l_first(phase->t_flags), elem) {
 				vprint(" %s",l_content(*elem)) ;
 			}
@@ -62,10 +69,12 @@ int runphase(phase) register trf *phase ; {
 		x_arg(l_content(*elem)) ;
 	}
 	x_arg( (char *)0 ) ;
-	return run_exec(phase) ;
+      result=run_exec(phase,prog) ;
+      throws(&prog) ;
+      return result ;
 }
 
-int run_exec(phase) trf *phase ; {
+int run_exec(phase,prog) trf *phase ; char *prog ; {
 	int status, child, waitchild ;
 
 	do_flush();
@@ -91,7 +100,7 @@ int run_exec(phase) trf *phase ; {
 				quit(-5) ;
 			default:
 				error("%s died with signal %d",
-					phase->t_prog,status&0177) ;
+                                      prog,status&0177) ;
 			}
 			/* The assumption is that processes voluntarely
 			   dying with a non-zero status already produced
@@ -124,9 +133,9 @@ int run_exec(phase) trf *phase ; {
 			exit(1) ;
 		}
 	}
-	execv(phase->t_prog,arglist) ;
+      execv(prog,arglist) ;
 	if ( phase->t_stdout ) { close(1) ; dup(2) ; }
-	error("Cannot execute %s",phase->t_prog) ;
+      error("Cannot execute %s",prog) ;
 	exit(1) ;
 	/*NOTREACHED*/
 }
