@@ -664,12 +664,12 @@ find_cs()
 
 /******** A C T I O N S : I F ********/
 
-start_if_part(const)
+start_if_part(cst)
 {
 	register struct lint_stack_entry *new = mk_lint_stack_entry(IF);
 
 	dbg_lint_stack("start_if_part");
-	if (const)
+	if (cst)
 		hwarning("condition in if statement is constant");
 
 	lint_push(new);
@@ -761,20 +761,20 @@ start_for_stmt(expr)
 }
 
 PRIVATE
-start_loop_stmt(looptype, const, cond)
+start_loop_stmt(looptype, cst, cond)
 {
-/*	If const, the condition is a constant and its value is cond
+/*	If cst, the condition is a constant and its value is cond
 */
 	register struct lint_stack_entry *new = mk_lint_stack_entry(looptype);
 
 	dbg_lint_stack("start_loop_stmt");
-	if (const && !cond) {
+	if (cst && !cond) {
 		/* while (0) | for (;0;) */
 		hwarning("condition in %s statement is always false",
 						symbol2str(looptype));
 		new->ls_current->st_notreached = 1;
 	}
-	if (const && cond) {
+	if (cst && cond) {
 		/* while (1) | for (;;) | do */
 		/*	omitting the copy for LS_LOOP will force this loop
 			to be treated as a do loop
@@ -785,7 +785,7 @@ start_loop_stmt(looptype, const, cond)
 	else {
 		new->LS_LOOP = copy_state(top_ls->ls_current, level);
 	}
-	new->LS_TEST = (!const ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
+	new->LS_TEST = (!cst ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
 	lint_push(new);
 
 /*	ls_current:	the state at the start of the body
@@ -829,16 +829,16 @@ end_loop_stmt()
 	lint_pop();
 }
 
-end_do_stmt(const, cond)
+end_do_stmt(cst, cond)
 {
 	register struct lint_stack_entry *lse = find_wdf();
 
 	dbg_lint_stack("end_do_stmt");
-	if (const && !cond) {
+	if (cst && !cond) {
 		/* do ... while (0) */
 		hwarning("condition in do statement is always false");
 	}
-	lse->LS_TEST = (!const ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
+	lse->LS_TEST = (!cst ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
 	end_loop_stmt();
 
 }
@@ -858,7 +858,7 @@ lint_continue_stmt()
 
 /******** A C T I O N S : S W I T C H ********/
 
-start_switch_part(const)
+start_switch_part(cst)
 {
 /* ls_current of a SWITCH entry has different meaning from ls_current of
  * other entries. It keeps track of which variables are used in all
@@ -868,7 +868,7 @@ start_switch_part(const)
 	register struct lint_stack_entry *new = mk_lint_stack_entry(SWITCH);
 
 	dbg_lint_stack("start_switch_part");
-	if (const)
+	if (cst)
 		hwarning("value in switch statement is constant");
 
 	new->LS_CASE = copy_state(top_ls->ls_current, level);
