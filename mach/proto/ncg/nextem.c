@@ -72,7 +72,7 @@ byte *trypat(bp,len) register byte *bp; {
 		for (i=0;i<patlen;i++) {
 			fprintf(stderr," %3.3s",em_mnem[emp[i].em_instr-sp_fmnem]);
 			if (emp[i].em_soper)
-				printf(" %s",emp[i].em_soper);
+				fprintf(stderr," %s",emp[i].em_soper);
 		}
 		fprintf(stderr,"\n");
 	}
