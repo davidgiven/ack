@@ -16,5 +16,5 @@ main(argc) {
 
 	sprintf(copy,"cp pem%d%d.m pem.m", EM_WSIZE, EM_PSIZE) ;
 	printf("%s\n",copy) ;
-	return system(copy) ;
+	exit(system(copy)) ;
 }
