@@ -93,9 +93,14 @@ outregs() {
 incregusage(off) offset off; {
 	register reg_p rp;
 
+#ifndef GLOBAL_OPT
+	/* If we're optimizing the output of the global optimizer
+	 * we must not change the count fields of the register messages.
+	 */
 	for(rp=curpro.freg; rp != (reg_p) 0; rp=rp->r_next)
 		if (rp->r_par[0]==off) {
 			rp->r_par[3]++;
 			return;
 		}
+#endif
 }
