@@ -10,7 +10,6 @@ list.c
 list.h
 main.c
 mktables.c
-pc
 rmach.c
 run.c
 scan.c

@@ -26,13 +26,11 @@ install:	ack ack.1
 		cp ack $(BINDIR)/ack
 		-cd $(BINDIR) ; \
 		for i in $(INTABLES) $(LNTABLES) ; do rm -f $$i ; ln ack $$i ; done
-		(cd pc ; make install )
 		rm -f $(MANDIR)/ack.1
 		cp ack.1 $(MANDIR)/ack.1
 
 cmp:		ack ack.1
 		-cmp ack $(BINDIR)/ack
-		(cd pc ; make cmp )
 		-cmp ack.1 $(MANDIR)/ack.1
 
 ack.1:		ack.1.X
@@ -41,7 +39,6 @@ ack.1:		ack.1.X
 
 clean:
 		-rm -f *.old *.o ack ack.1
-		(cd pc ; make clean )
 
 ack:    $(OBJ)
 	$(CC) $(LDFLAGS) -o ack $(OBJ) $(MODDIR)/libstring.a
@@ -70,7 +67,6 @@ mktables:       mktables.c
 
 pr:
 	@pr Makefile $(HFILES) $(DSRC)
-	@(cd pc ; make pr)
 
 opr:
 	make pr | opr
