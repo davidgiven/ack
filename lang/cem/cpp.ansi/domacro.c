@@ -484,7 +484,7 @@ do_undef(argstr)
 			free(str);
 			if (SkipToNewLine()) {
 				if (!options['o'])
-					strict("garbage following #else");
+					strict("garbage following #undef");
 			}
 		}
 	}
