@@ -1,25 +1,25 @@
 # $Header$
+all:            libem_o.a
+
 install:	cp
 
 cp:             all
-		../../install tail_em
-		rm -f tail_em
+		../../install libem_o.a tail_em
 
 cmp:            all
-		-../../compare tail_em
-		rm -f tail_em
+		-../../compare libem_o.a tail_em
 
-all:            tail_em
-
-tail_em:
+libem_o.a:	libem_s.a
 		ASAR=ar ; export ASAR ;\
 		RANLIB=ranlib ; export RANLIB ;\
-		march . tail_em
+		march . libem_o.a
 
 clean:
-		rm -f *.o
+		rm -f *.o libem_o.a
+
 opr:
 		make pr | opr
+
 pr:
 		@pr `pwd`/Makefile
-		@pr -l33 `tail +1 LIST|sort`
+		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
