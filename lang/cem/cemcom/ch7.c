@@ -121,11 +121,9 @@ ch7sel(expp, oper, idf)
 						intexpr(sd->sd_offset, INT));
 		}
 	}
-	else	{
-		/* oper == ARROW */
+	else /* oper == ARROW */
 		*expp = new_oper(sd->sd_type,
 			*expp, oper, intexpr(sd->sd_offset, INT));
-	}
 	(*expp)->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
 }
 
@@ -135,44 +133,7 @@ ch7incr(expp, oper)
 	/*	The monadic prefix/postfix incr/decr operator oper is
 		applied to *expp.
 	*/
-	arith addend;
-	struct expr *expr;
-	register int fund = (*expp)->ex_type->tp_fund;
-
-	if (!(*expp)->ex_lvalue)	{
-		expr_error(*expp, "no lvalue with %s", symbol2str(oper));
-		return;
-	}
-	if (fund == ENUM)	{
-		expr_warning(*expp, "%s on enum", symbol2str(oper));
-		addend = (arith)1;
-	}
-	else
-	if (is_arith_type((*expp)->ex_type))
-		addend = (arith)1;
-	else
-	if (fund == POINTER)
-		addend = size_of_type((*expp)->ex_type->tp_up, "object");
-#ifndef NOBITFIELD
-	else
-	if (fund == FIELD)
-		addend = (arith)1;
-#endif NOBITFIELD
-	else	{
-		expr_error(*expp, "%s on %s",
-				symbol2str(oper),
-				symbol2str((*expp)->ex_type->tp_fund)
-			);
-		return;
-	}
-	expr = intexpr(addend, INT);
-	ch7cast(&expr, CAST, (*expp)->ex_type);
-#ifndef NOBITFIELD
-	if (fund == FIELD)
-		*expp = new_oper((*expp)->ex_type->tp_up, *expp, oper, expr);
-	else
-#endif NOBITFIELD
-		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
+	ch7asgn(expp, oper, intexpr((arith)1, INT));
 }
 
 ch7cast(expp, oper, tp)
@@ -293,10 +254,8 @@ ch7cast(expp, oper, tp)
 			(*expp)->ex_type = tp;
 	}
 	else
-	if (oldtp->tp_fund == ERRONEOUS)	{
-		/* we just won't look */
-		(*expp)->ex_type = tp;		/* brute force */
-	}
+	if (oldtp->tp_fund == ERRONEOUS) /* we just won't look */
+		(*expp)->ex_type = tp;	/* brute force */
 	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
 		expr_warning(*expp, "dubious conversion based on equal size");
@@ -365,7 +324,6 @@ ch7asgn(expp, oper, expr)
 		else
 			expr = extmp;
 	}
-
 #ifndef NOBITFIELD
 	if (fund == FIELD)
 		*expp = new_oper((*expp)->ex_type->tp_up, *expp, oper, expr);
@@ -374,7 +332,6 @@ ch7asgn(expp, oper, expr)
 #else NOBITFIELD
 	*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 #endif NOBITFIELD
-
 	(*expp)->OP_TYPE = tp;	/* for EVAL() */
 }
 

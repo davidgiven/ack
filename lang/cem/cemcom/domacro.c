@@ -17,7 +17,6 @@
 #include	"parbufsize.h"	
 #include	"textsize.h"	
 #include	"idfsize.h"	
-
 #include	"assert.h"
 #include	"alloc.h"
 #include	"class.h"
@@ -301,14 +300,10 @@ PRIVATE
 do_elif()
 {
 	if (nestlevel < 0 || (ifstack[nestlevel])) {
-		/* invalid elif encountered..		*/
 		lexerror("#elif without corresponding #if");
 		SkipRestOfLine();
 	}
-	else {
-		/*	restart at this level as if a #if
-			is detected.
-		*/
+	else { /* restart at this level as if a #if is detected.  */
 		nestlevel--;
 		push_if();
 		skip_block();
@@ -377,8 +372,7 @@ do_undef()
 		if (id && id->id_macro) { /* forget the macro */
 			free_macro(id->id_macro);
 			id->id_macro = (struct macro *) 0;
-		}
-		/* else: don't complain */
+		} /* else: don't complain */
 	}
 	else
 		lexerror("illegal #undef construction");
@@ -470,8 +464,7 @@ macro_def(id, text, nformals, length, flags)
 			if (macroeq(newdef->mc_text, text))
 				return;
 			lexwarning("redefine \"%s\"", id->id_text);
-		}
-		/* else: overwrite pre-definition	*/
+		} /* else: overwrite pre-definition	*/
 	}
 	else
 		id->id_macro = newdef = new_macro();

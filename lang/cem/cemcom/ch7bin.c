@@ -82,16 +82,6 @@ ch7bin(expp, oper, expr)
 		break;
 	case '%':
 	case MODAB:
-/*** NB  "not float" means "integral" !!!
-		fund = arithbalance(expp, oper, &expr);
-		if (fund == DOUBLE)	{
-			expr_error(*expp, "floating operand to %s", 
-				symbol2str(oper));
-			erroneous2int(expp);
-		}
-		else
-			non_commutative_binop(expp, oper, expr);
-***/
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
 		fund = arithbalance(expp, oper, &expr);
@@ -111,21 +101,19 @@ ch7bin(expp, oper, expr)
 		non_commutative_binop(expp, oper, expr);
 		break;
 	case '+':
-		if (expr->ex_type->tp_fund == POINTER)	{
-			/* swap operands */
+		if (expr->ex_type->tp_fund == POINTER)	{ /* swap operands */
 			struct expr *etmp = expr;
 			expr = *expp;
 			*expp = etmp;
 		}
 		/*FALLTHROUGH*/
 	case PLUSAB:
+	case POSTINCR:
+	case PLUSPLUS:
 		if ((*expp)->ex_type->tp_fund == POINTER)	{
 			pointer_arithmetic(expp, oper, &expr);
-			if (	expr->ex_type->tp_size !=
-				(*expp)->ex_type->tp_size
-			)	{
+			if (expr->ex_type->tp_size != (*expp)->ex_type->tp_size)
 				ch7cast(&expr, CAST, (*expp)->ex_type);
-			}
 			pointer_binary(expp, oper, expr);
 		}
 		else	{
@@ -138,6 +126,8 @@ ch7bin(expp, oper, expr)
 		break;
 	case '-':
 	case MINAB:
+	case POSTDECR:
+	case MINMIN:
 		if ((*expp)->ex_type->tp_fund == POINTER)	{
 			if (expr->ex_type->tp_fund == POINTER)
 				pntminuspnt(expp, oper, expr);
@@ -231,13 +221,11 @@ ch7bin(expp, oper, expr)
 		if (	is_struct_or_union((*expp)->ex_type->tp_fund)
 		||	is_struct_or_union(expr->ex_type->tp_fund)
 		)	{
-			if ((*expp)->ex_type != expr->ex_type)	{
+			if ((*expp)->ex_type != expr->ex_type)
 				expr_error(*expp, "illegal balance");
-			}
 		}
-		else	{
+		else
 			relbalance(expp, oper, &expr);
-		}
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 		break;
 	case '?':

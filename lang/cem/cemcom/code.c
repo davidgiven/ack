@@ -28,16 +28,15 @@
 #include	"atw.h"
 #include	"assert.h"
 
-static struct stmt_block *stmt_stack;
-
-char *symbol2str();
-#ifndef NOFLOAT
-int fp_used;
-#endif NOFLOAT
 label lab_count = 1;
 label datlab_count = 1;
 
+#ifndef NOFLOAT
+int fp_used;
+#endif NOFLOAT
+
 extern char options[];
+char *symbol2str();
 
 init_code(dst_file)
 	char *dst_file;
@@ -112,16 +111,11 @@ prepend_scopes(dst_file)
 		fatal("cannot create %s", dst_file ? dst_file : "stdout");
 	famous_first_words();
 	while (se != 0)	{
-		register struct idf *idf = se->se_idf;
-		register struct def *def = idf->id_def;
+		register struct idf *id = se->se_idf;
+		register struct def *df = id->id_def;
 		
-		if (def &&
-			(	def->df_initialized ||
-				def->df_used ||
-				def->df_alloc
-			)
-		)
-			code_scope(idf->id_text, def);
+		if (df && (df->df_initialized || df->df_used || df->df_alloc))
+			code_scope(id->id_text, df);
 		se = se->next;
 	}
 	C_close();
@@ -198,7 +192,6 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	}
 	else
 		func_res_label = 0;
-
 	/*	Special arrangements if the function result doesn't fit in
 		the function return area of the EM machine.  The size of
 		the function return area is implementation dependent.
@@ -206,15 +199,12 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	lab_count = (label) 1;
 	return_label = text_label();
 	return_expr_occurred = 0;
-
 	if (options['p'])	{	/* profiling */
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
 			C_df_dlb(file_name_label = data_label());
-			C_con_scon(
-				last_fn_given = FileName,
-				(arith)(strlen(FileName) + 1)
-			);
+			C_con_scon(last_fn_given = FileName,
+				(arith)(strlen(FileName) + 1));
 		}
 		/* enable debug trace of EM source */
 		C_fil_dlb(file_name_label, (arith)0);
@@ -345,17 +335,14 @@ code_declaration(idf, expr, lvl, sc)
 	}
 	else
 	if (lvl >= L_LOCAL)	{	/* local variable	*/
-		/* they are STATIC, EXTERN, GLOBAL, IMPLICIT, AUTO or
-		   REGISTER
-		*/
+		/* STATIC, EXTERN, GLOBAL, IMPLICIT, AUTO or REGISTER */
 		switch (def_sc)	{
 		case STATIC:
 			/*	they are handled on the spot and get an
 				integer label in EM.
 			*/
 			C_df_dlb((label)def->df_address);
-			if (expr)	{
-				/* there is an initialisation	*/
+			if (expr) { /* there is an initialisation */
 				do_ival(&(def->df_type), expr);
 				free_expression(expr);
 			}
@@ -364,8 +351,7 @@ code_declaration(idf, expr, lvl, sc)
 					error("size of %s unknown", text);
 					size = (arith)0;
 				}
-				C_bss_cst(align(size, word_align),
-							(arith)0, 1);
+				C_bss_cst(align(size, word_align), (arith)0, 1);
 			}
 			break;
 		case EXTERN:
@@ -399,7 +385,6 @@ loc_init(expr, id)
 	register struct type *tp = id->id_def->df_type;
 	
 	ASSERT(id->id_def->df_sc != STATIC);
-	/* automatic aggregates cannot be initialised. */
 	switch (tp->tp_fund)	{
 	case ARRAY:
 	case STRUCT:
@@ -408,7 +393,6 @@ loc_init(expr, id)
 		free_expression(expr);
 		return;
 	}
-	
 	if (ISCOMMA(expr))	{	/* embraced: int i = {12};	*/
 		if (options['R'])	{
 			if (ISCOMMA(expr->OP_LEFT)) /* int i = {{1}} */
@@ -463,14 +447,15 @@ formal_cvt(df)
 	*/
 	register struct type *tp = df->df_type;
 
-	if (tp->tp_size != int_size)
-		if (tp->tp_fund == CHAR || tp->tp_fund == SHORT) {
-			C_lol(df->df_address);
-			conversion(int_type, df->df_type);
-			C_lal(df->df_address);
-			C_sti(tp->tp_size);
-			df->df_register = REG_NONE;
-		}
+	if (tp->tp_size != int_size &&
+		(tp->tp_fund == CHAR || tp->tp_fund == SHORT)
+	) {
+		C_lol(df->df_address);
+		/* conversion(int_type, df->df_type); ??? */
+		C_lal(df->df_address);
+		C_sti(tp->tp_size);
+		df->df_register = REG_NONE;
+	}
 }
 
 code_expr(expr, val, code, tlbl, flbl)
@@ -478,8 +463,7 @@ code_expr(expr, val, code, tlbl, flbl)
 	label tlbl, flbl;
 {
 	/*	code_expr() is the parser's interface to the expression code
-		generator.
-		If line number trace is wanted, it generates a
+		generator.  If line number trace is wanted, it generates a
 		lin instruction.  EVAL() is called directly.
 	*/
 	if (options['p'])	/* profiling	*/
@@ -493,6 +477,8 @@ code_expr(expr, val, code, tlbl, flbl)
 	EM labels where a subsequent break or continue causes
 	the program to jump to.
 */
+static struct stmt_block *stmt_stack;	/* top of statement stack */
+
 /*	code_break() generates EM code needed at the occurrence of "break":
 	it generates a branch instruction to the break label of the
 	innermost statement in which break has a meaning.
@@ -504,11 +490,10 @@ code_break()
 {
 	register struct stmt_block *stmt_block = stmt_stack;
 
-	if (stmt_block)	{
+	if (stmt_block)
 		C_bra(stmt_block->st_break);
-		return;
-	}
-	error("break not inside for, while, do or switch");
+	else
+		error("break not inside for, while, do or switch");
 }
 
 /*	code_continue() generates EM code needed at the occurrence of

@@ -201,7 +201,6 @@ declare_idf(ds, dc, lvl)
 	/* some additional work for formal definitions */
 	if (lvl == L_FORMAL2)	{
 		switch (type->tp_fund)	{
-	
 		case FUNCTION:
 			warning("%s is a function; cannot be formal",
 				idf->id_text);
@@ -227,7 +226,6 @@ declare_idf(ds, dc, lvl)
 			break;
 		}
 	}
-	
 	/*	The tests on types, postponed from do_decspecs(), can now
 		be performed.
 	*/
@@ -241,23 +239,15 @@ declare_idf(ds, dc, lvl)
 			ds->ds_sc = sc = GLOBAL;
 		}
 	}
-	else	{				/* non-FUNCTION */
+	else	/* non-FUNCTION */
 		if (sc == 0)
-			sc =
-				lvl == L_GLOBAL ?
-					GLOBAL :
-				lvl == L_FORMAL1 || lvl == L_FORMAL2 ?
-					FORMAL :
-					AUTO;
-	}
-	
-	if (options['R'])	{
-		/* some special K & R tests */
-		
+			sc =	lvl == L_GLOBAL ? GLOBAL
+				: lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL
+				: AUTO;
+	if (options['R']) { /* some special K & R tests */
 		/* is it also an enum? */
 		if (idf->id_enum && idf->id_enum->tg_level == level)
 			warning("%s is also an enum tag", idf->id_text);
-		
 		/* is it a universal typedef? */
 		if (def && def->df_level == L_UNIVERSAL)
 			warning("redeclaring reserved word %s", idf->id_text);
@@ -299,15 +289,13 @@ declare_idf(ds, dc, lvl)
 		*/
 		if (	options['R'] &&
 			(sc == STATIC && type->tp_fund == FUNCTION)
-		)	{
+		)
 			if (!is_anon_idf(idf))
 				warning("non-global static function %s",
 					idf->id_text);
-		}
 		declare_idf(ds, dc, L_GLOBAL);
 	}
-	else	{
-		/* fill in the def block */
+	else	{ /* fill in the def block */
 		register struct def *newdef = new_def();
 
 		clear((char *)newdef, sizeof(struct def));
@@ -315,24 +303,19 @@ declare_idf(ds, dc, lvl)
 		newdef->df_level = lvl;
 		newdef->df_type = type;
 		newdef->df_sc = sc;
-
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);
 		stack_idf(idf, stl);
-		
 		/*	We now calculate the address.
 			Globals have names and don't get addresses, they
 			get numbers instead (through data_label()).
 			Formals are handled by declare_formals().
 			So here we hand out local addresses only.
 		*/
-
 		if (lvl >= L_LOCAL)	{
+			ASSERT(sc);
 			switch (sc)	{
-			case 0:
-				crash("local sc == 0");
-				break;
 			case REGISTER:
 			case AUTO:
 				if (type->tp_size == (arith)-1) {
@@ -341,8 +324,8 @@ declare_idf(ds, dc, lvl)
 				/** type = idf->id_def->df_type = int_type; **/
 				}
 				idf->id_def->df_register =
-					(sc == REGISTER)
-						? REG_BONUS : REG_DEFAULT;
+					(sc == REGISTER) ? REG_BONUS
+					: REG_DEFAULT;
 				idf->id_def->df_address =
 				stl->sl_max_block =
 				stl->sl_local_offset =
@@ -358,17 +341,17 @@ declare_idf(ds, dc, lvl)
 }
 
 actual_declaration(sc, tp)
+	int sc;
 	struct type *tp;
 {
 	/*	An actual_declaration needs space, right here and now.
 	*/
 	register int fund = tp->tp_fund;
 	
-	/* virtual declarations */
-	if (sc == ENUM || sc == TYPEDEF)
+	if (sc == ENUM || sc == TYPEDEF) /* virtual declarations */
 		return 0;
-	/* allocation solved in other ways */
 	if (fund == FUNCTION || fund == ARRAY)
+		/* allocation solved in other ways */
 		return 0;
 	/* to be allocated */
 	return 1;
@@ -388,7 +371,6 @@ global_redecl(idf, new_sc, tp)
 
 	if (tp != def->df_type)	{
 		register struct type *otp = def->df_type;
-
 		if (	tp->tp_fund != ARRAY || otp->tp_fund != ARRAY ||
 			tp->tp_up != otp->tp_up
 		)	{
@@ -409,9 +391,8 @@ global_redecl(idf, new_sc, tp)
 			error("inconsistent size in redeclaration of array %s",
 				idf->id_text);
 	}
-
-	/*	Now we may be able to update the storage class.	*/
-	/*	Clean out this mess as soon as we know all the possibilities
+	/*	Now we may be able to update the storage class.
+		Clean out this mess as soon as we know all the possibilities
 		for new_sc.
 		For now we have:
 			EXTERN:		we have seen the word "extern"
@@ -424,7 +405,6 @@ global_redecl(idf, new_sc, tp)
 	*/
 	if (new_sc == IMPLICIT)
 		return;			/* no new information */
-	
 	switch (def->df_sc)	{	/* the old storage class */
 	case EXTERN:
 		switch (new_sc)	{	/* the new storage class */
@@ -456,10 +436,9 @@ global_redecl(idf, new_sc, tp)
 		case GLOBAL:
 			break;
 		case STATIC:
-			if (def->df_initialized)	{
+			if (def->df_initialized)
 				error("cannot redeclare %s to static",
 					idf->id_text);
-			}
 			else	{
 				if (options['R'])
 					warning("%s redeclared to static",
@@ -475,10 +454,9 @@ global_redecl(idf, new_sc, tp)
 	case STATIC:
 		switch (new_sc)	{	/* the new storage class */
 		case EXTERN:
-			if (def->df_initialized)	{
+			if (def->df_initialized)
 				error("cannot redeclare %s to extern",
 					idf->id_text);
-			}
 			else	{
 				warning("%s redeclared to extern",
 					idf->id_text);
@@ -531,11 +509,9 @@ good_formal(def, idf)
 	/*	Succeeds if def is a proper L_FORMAL1 definition and
 		gives an error message otherwise.
 	*/
-	if (!def || def->df_level != L_FORMAL1)	{
-		/* not in parameter list */
+	if (!def || def->df_level != L_FORMAL1)	{ /* not in parameter list */
 		if (!is_anon_idf(idf))
-			error("%s not in parameter list",
-				idf->id_text);
+			error("%s not in parameter list", idf->id_text);
 		return 0;
 	}
 	return 1;
@@ -610,17 +586,12 @@ declare_formals(fp)
 		register struct def *def = se->se_idf->id_def;
 		
 		def->df_address = f_offset;
-
 		/*	the alignment convention for parameters is: align on
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
 		f_offset = align(f_offset + def->df_type->tp_size, word_align);
-
-		/*	the following is absurd: any char or short formal
-			must be converted from integer to that type
-		*/
-		formal_cvt(def);
+		formal_cvt(def); /* cvt int to char or short, if necessary */
 		se = se->next;
 	}
 	*fp = f_offset;

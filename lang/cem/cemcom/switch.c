@@ -27,7 +27,6 @@ static struct switch_hdr *switch_stack = 0;
 	- the expression E in "switch(E)" is cast to 'int' (RM 9.7)
 	- the expression E in "case E:" must be 'int' (RM 9.7)
 	- the values in the CSA/CSB tables are words (EM 7.4)
-
 	For simplicity, we suppose int_size == word_size.
 */
 
@@ -42,7 +41,7 @@ code_startswitch(expp)
 	register struct switch_hdr *sh = new_switch_hdr();
 	int fund = any2arith(expp, SWITCH);	/* INT, LONG or DOUBLE */
 	
-	switch (fund)	{
+	switch (fund) {
 	case LONG:
 		if (options['R'])
 			warning("long in switch (cast to int)");
@@ -55,7 +54,6 @@ code_startswitch(expp)
 		break;
 #endif NOFLOAT
 	}
-	
 	stack_stmt(l_break, NO_LABEL);
 	sh->sh_break = l_break;
 	sh->sh_default = 0;
@@ -66,8 +64,8 @@ code_startswitch(expp)
 	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
+	/* evaluate the switch expr.	*/
 	code_expr(*expp, RVAL, TRUE, NO_LABEL, NO_LABEL);
-					/* evaluate the switch expr.	*/
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
 
@@ -93,7 +91,7 @@ code_endswitch()
 		ce = sh->sh_entries;
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			ASSERT(ce);
-			if (val == ce->ce_value)	{
+			if (val == ce->ce_value) {
 				C_rom_ilb(ce->ce_label);
 				ce = ce->next;
 			}
@@ -103,9 +101,9 @@ code_endswitch()
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(sh->sh_type->tp_size);
 	}
-	else	{ /* CSB */
+	else { /* CSB */
 		C_rom_cst((arith)sh->sh_nrofentries);
-		for (ce = sh->sh_entries; ce; ce = ce->next)	{
+		for (ce = sh->sh_entries; ce; ce = ce->next) {
 			/* generate the entries: value + prog.label	*/
 			C_rom_cst(ce->ce_value);
 			C_rom_ilb(ce->ce_label);
@@ -115,11 +113,9 @@ code_endswitch()
 	}
 	C_df_ilb(sh->sh_break);
 	switch_stack = sh->next;	/* unstack the switch descriptor */
-	
-	/* free the allocated switch structure	*/
-	ce = sh->sh_entries;
-	while (ce)	{
+	for (ce = sh->sh_entries; ce;) { /* free allocated switch structure */
 		register struct case_entry *tmp = ce->next;
+
 		free_case_entry(ce);
 		ce = tmp;
 	}
@@ -135,28 +131,23 @@ code_case(expr)
 	register struct switch_hdr *sh = switch_stack;
 	
 	ASSERT(is_cp_cst(expr));
-	if (sh == 0)	{
+	if (sh == 0) {
 		error("case statement not in switch");
 		return;
 	}
-	if (expr->ex_flags & EX_ERROR)	{
-		/* is probably 0 anyway */
+	if (expr->ex_flags & EX_ERROR) /* is probably 0 anyway */
 		return;
-	}
 	ch7cast(&expr, SWITCH, sh->sh_type);
 	ce = new_case_entry();
 	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val = expr->VL_VALUE;
-	if (sh->sh_entries == 0)	{
-		/* first case entry	*/
+	if (sh->sh_entries == 0) { /* first case entry	*/
 		ce->next = (struct case_entry *) 0;
 		sh->sh_entries = ce;
 		sh->sh_lowerbd = sh->sh_upperbd = val;
 		sh->sh_nrofentries = 1;
 	}
-	else	{
-		/* second etc. case entry		*/
-		/* find the proper place to put ce into the list	*/
+	else { /* second etc. case entry; put ce into proper place */
 		register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
 		
 		if (val < sh->sh_lowerbd)
@@ -164,37 +155,34 @@ code_case(expr)
 		else
 		if (val > sh->sh_upperbd)
 			sh->sh_upperbd = val;
-		while (c1 && c1->ce_value < ce->ce_value)	{
+		while (c1 && c1->ce_value < ce->ce_value) {
 			c2 = c1;
 			c1 = c1->next;
 		}
 		/*	At this point three cases are possible:
-			1: c1 != 0 && c2 != 0:
-				insert ce somewhere in the middle
-			2: c1 != 0 && c2 == 0:
-				insert ce right after the head
-			3: c1 == 0 && c2 != 0:
-				append ce to last element
+			1: c1 != 0 && c2 != 0: insert ce somewhere in the middle
+			2: c1 != 0 && c2 == 0: insert ce right after the head
+			3: c1 == 0 && c2 != 0: append ce to last element
 			The case c1 == 0 && c2 == 0 cannot occur, since
-			the list is guaranteed not to be empty.
+			the list is guaranteed to be non-empty.
 		*/
-		if (c1)	{
-			if (c1->ce_value == ce->ce_value)	{
+		if (c1) {
+			if (c1->ce_value == ce->ce_value) {
 				error("multiple case entry for value %ld",
 					ce->ce_value);
 				free_case_entry(ce);
 				return;
 			}
-			if (c2)	{
+			if (c2) {
 				ce->next = c2->next;
 				c2->next = ce;
 			}
-			else	{
+			else {
 				ce->next = sh->sh_entries;
 				sh->sh_entries = ce;
 			}
 		}
-		else	{
+		else {
 			ASSERT(c2);
 			ce->next = (struct case_entry *) 0;
 			c2->next = ce;
@@ -207,13 +195,11 @@ code_default()
 {
 	register struct switch_hdr *sh = switch_stack;
 
-	if (sh == 0)	{
+	if (sh == 0)
 		error("default not in switch");
-		return;
-	}
-	if (sh->sh_default != 0)	{
+	else
+	if (sh->sh_default != 0)
 		error("multiple entry for default in switch");
-		return;
-	}
-	C_df_ilb(sh->sh_default = text_label());
+	else
+		C_df_ilb(sh->sh_default = text_label());
 }

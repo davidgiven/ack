@@ -1,7 +1,7 @@
 /* $Header$ */
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
-#include	"botch_free.h"	/* UF */
+#include	"botch_free.h"
 #include	"alloc.h"
 #include	"arith.h"
 #include	"type.h"

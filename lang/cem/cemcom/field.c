@@ -5,9 +5,7 @@
 
 #ifndef NOBITFIELD
 #include	<em.h>
-
 #include	"debug.h"
-
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"
@@ -27,39 +25,33 @@ char *symbol2str();		/* symbol2str.c	*/
 	tree and are therefore dealt with in this function.
 	The actions taken at any operation are described clearly by the
 	code for this actions.
-	Note: the bitfields are packed in target machine integers!
+	Notes
+	[1]	the bitfields are packed in target machine integers!
+	[2]	op is either an assignment operator or an increment/
+		decrement operator
+	[3]	atype: the type in which the bitfield arithmetic is done;
+		and in which bitfields are stored!
 */
 eval_field(expr, code)
 	struct expr *expr;
 	int code;
 {
 	int op = expr->OP_OPER;
-	struct expr *leftop = expr->OP_LEFT;
-	struct expr *rightop = expr->OP_RIGHT;
-	struct field *fd = leftop->ex_type->tp_field;
+	register struct expr *leftop = expr->OP_LEFT;
+	register struct expr *rightop = expr->OP_RIGHT;
+	register struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
 	arith old_offset, tmpvar;
-
-	/*	The type in which the bitfield arithmetic is done;
-		AND IN WHICH BITFIELDS ARE STORED!
-	*/
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
 	arith asize = atype->tp_size;
 
 	/* First some assertions to be sure that the rest is legal */
 	ASSERT(asize == word_size);	/* make sure that C_loc() is legal */
 	ASSERT(leftop->ex_type->tp_fund == FIELD);
-
 	leftop->ex_type = atype;	/* this is cheating but it works... */
-
-	/*	Note that op is either an assignment operator or an increment/
-		decrement operator
-	*/
 	if (op == '=') {
-		/*	F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f)
-		*/
+		/* F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f) */
 		ASSERT(tp == rightop->ex_type);
-
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		C_loc(fd->fd_mask);
@@ -116,10 +108,9 @@ eval_field(expr, code)
 		C_and(asize);
 		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
 			C_dup(asize);
-
-		/* the 'op' operation: */
 		conversion(atype, rightop->ex_type);
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		/* the 'op' operation: */
 		if (op == PLUSPLUS || op == POSTINCR)
 			assop(rightop->ex_type, PLUSAB);
 		else
@@ -128,7 +119,6 @@ eval_field(expr, code)
 		else
 			assop(rightop->ex_type, op);
 		conversion(rightop->ex_type, atype);
-
 		C_loc(fd->fd_mask);
 		C_and(asize);
 		if (code == TRUE && op != POSTINCR && op != POSTDECR)

@@ -92,14 +92,14 @@ rank_of(oper)
 }
 
 int
-rank_of_expression(expr)
-	register struct expr *expr;
+rank_of_expression(ex)
+	register struct expr *ex;
 {
 	/*	Returns the rank of the top node in the expression.
 	*/
-	if (!expr || (expr->ex_flags & EX_PARENS) || expr->ex_class != Oper)
+	if (!ex || (ex->ex_flags & EX_PARENS) || ex->ex_class != Oper)
 		return 0;
-	return rank_of(expr->OP_OPER);
+	return rank_of(ex->OP_OPER);
 }
 
 check_conditional(expr, oper, pos_descr)
@@ -158,15 +158,12 @@ idf2expr(expr)
 	register struct def *def = idf->id_def;
 	
 	if (def == 0)	{
-		if (AHEAD == '(')	{
-			/* Function call, so declare the name IMPLICITly. */
-			/* See RM 13. */
-			add_def(idf, IMPLICIT, funint_type, level);
-		}
+		if (AHEAD == '(') /* function call, declare name IMPLICITly */
+			add_def(idf, IMPLICIT, funint_type, level); /* RM 13 */
 		else	{
 			if (!is_anon_idf(idf))
 				error("%s undefined", idf->id_text);
-			/* Declare the idf anyway */
+			/* declare idf anyway */
 			add_def(idf, 0, error_type, level);
 		}
 		def = idf->id_def;
@@ -254,25 +251,24 @@ intexpr(ivalue, fund)
 	clear((char *)expr, sizeof(struct expr));
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
-	
 	fill_int_expr(expr, ivalue, fund);
 	return expr;
 }
 
-fill_int_expr(expr, ivalue, fund)
-	register struct expr *expr;
+fill_int_expr(ex, ivalue, fund)
+	register struct expr *ex;
 	arith ivalue;
 	int fund;
 {
 	/*	Details derived from ivalue and fund are put into the
-		constant integer expression expr.
+		constant integer expression ex.
 	*/
 	switch (fund) {
 	case INT:
-		expr->ex_type = int_type;
+		ex->ex_type = int_type;
 		break;
 	case LONG:
-		expr->ex_type = long_type;
+		ex->ex_type = long_type;
 		break;
 	case UNSIGNED:
 		/*	We cannot make a test like
@@ -284,20 +280,18 @@ fill_int_expr(expr, ivalue, fund)
 			answer.  We assume that the type "unsigned long"
 			is not part of portable C !
 		*/
-		expr->ex_type = 
-			(ivalue & ~max_unsigned) ? long_type : uint_type;
+		ex->ex_type = (ivalue & ~max_unsigned) ? long_type : uint_type;
 		break;
 	case INTEGER:
-		expr->ex_type = (ivalue <= max_int) ? int_type : long_type;
+		ex->ex_type = (ivalue <= max_int) ? int_type : long_type;
 		break;
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
 	}
-	expr->ex_class = Value;
-	expr->VL_CLASS = Const;
-	expr->VL_VALUE = ivalue;
-	
-	cut_size(expr);
+	ex->ex_class = Value;
+	ex->VL_CLASS = Const;
+	ex->VL_VALUE = ivalue;
+	cut_size(ex);
 }
 
 struct expr *
@@ -344,8 +338,7 @@ new_oper(tp, e1, oper, e2)
 		int e1_flags = e1 ? e1->ex_flags : 0;
 		
 		expr->ex_depth =
-			(e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth)
-				+ 1;
+			(e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth) + 1;
 		expr->ex_flags = (e1_flags | e2->ex_flags) & ~EX_PARENS;
 	}
 	op = &expr->ex_object.ex_oper;
@@ -353,7 +346,6 @@ new_oper(tp, e1, oper, e2)
 	op->op_oper = oper;
 	op->op_left = e1;
 	op->op_right = e2;
-
 	return expr;
 }
 
@@ -397,17 +389,14 @@ chk_cst_expr(expp)
 #endif	DEBUG
 	if (	fund != CHAR && fund != SHORT && fund != INT &&
 		fund != ENUM && fund != LONG
-	)	{
+	)
 		expr_error(expr, "non-numerical constant expression"), err++;
-	}
 	else
 	if (!is_ld_cst(expr))
 		expr_error(expr, "expression is not constant"), err++;
-	
 	if (options['R'])	{
 		if (flags & EX_CAST)
-			expr_warning(expr,
-				"cast in constant expression");
+			expr_warning(expr, "cast in constant expression");
 		if (flags & EX_LOGICAL)
 			expr_warning(expr,
 				"logical operator in constant expression");
@@ -475,11 +464,11 @@ free_expression(expr)
 {
 	/*	The expression expr is freed recursively.
 	*/
-	if (!expr)
-		return;
-	if (expr->ex_class == Oper)	{
-		free_expression(expr->OP_LEFT);
-		free_expression(expr->OP_RIGHT);
+	if (expr) {
+		if (expr->ex_class == Oper)	{
+			free_expression(expr->OP_LEFT);
+			free_expression(expr->OP_RIGHT);
+		}
+		free_expr(expr);
 	}
-	free_expr(expr);
 }

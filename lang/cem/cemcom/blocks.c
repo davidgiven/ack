@@ -1,10 +1,14 @@
 /* $Header$ */
 /*	B L O C K   S T O R I N G   A N D   L O A D I N G	*/
 
-#include	<em.h>
-#include	"arith.h"
-#include	"sizes.h"
-#include	"atw.h"
+#include <em.h>
+#include "arith.h"
+#include "sizes.h"
+#include "atw.h"
+#ifndef STB
+#include "label.h"
+#include "stack.h"
+#endif STB
 
 /*	Because EM does not support the loading and storing of
 	objects having other sizes than word fragment and multiple,
@@ -38,17 +42,33 @@ store_block(sz, al)
 	arith sz;
 	int al;
 {
-	/* Next condition contains Lots of Irritating Stupid Parentheses
-	*/
 	if (
 		((sz == al) && (word_align % al == 0)) ||
 		(
 			(sz % word_size == 0 || word_size % sz == 0) &&
 			(al % word_align == 0)
 		)
-	)
+	)	/* Lots of Irritating Stupid Parentheses */
 		C_sti(sz);
-	else	{
+	else {
+#ifndef STB
+		arith src, dst, src_offs, dst_offs;
+
+		/* allocate two pointer temporaries */
+		src = tmp_pointer_var(&src_offs);
+		dst = tmp_pointer_var(&dst_offs);
+
+		/* load the addresses */
+		C_lal(dst);
+		C_sti(pointer_size);
+		C_lor((arith)1);	/* push current sp */
+		C_lal(src);
+		C_sti(pointer_size);
+		copy_loop(sz, src, dst);
+		C_asp(ATW(sz));
+		free_tmp_var(dst_offs);
+		free_tmp_var(src_offs);
+#else STB
 		/*	address of destination lies on the stack	*/
 
 		/*	push address of first byte of block on stack onto
@@ -60,6 +80,7 @@ store_block(sz, al)
 		C_loc(sz);		/* number of bytes to transfer	*/
 		C_cal("__stb");		/* call transfer routine	*/
 		C_asp(pointer_size + pointer_size + int_size + ATW(sz));
+#endif STB
 	}
 }
 
@@ -75,7 +96,23 @@ load_block(sz, al)
 	if (al % word_align == 0)
 		C_loi(esz);
 	else {
-		/* do not try to understand this...	*/
+#ifndef STB
+		arith src, dst, src_offs, dst_offs;
+
+		/* allocate two pointer temporaries */
+		src = tmp_pointer_var(&src_offs);
+		dst = tmp_pointer_var(&dst_offs);
+
+		C_lal(src);
+		C_sti(pointer_size);
+		C_asp(-esz);		/* allocate stack block */
+		C_lor((arith)1);	/* push & of stack block as dst	*/
+		C_lal(dst);
+		C_sti(pointer_size);
+		copy_loop(sz, src, dst);
+		free_tmp_var(dst_offs);
+		free_tmp_var(src_offs);
+#else STB
 		C_asp(-(esz - pointer_size));	/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
 		C_dup(pointer_size);		/* fetch source address	*/
@@ -84,5 +121,38 @@ load_block(sz, al)
 		C_loc(sz);			/* # bytes to copy	*/
 		C_cal("__stb");			/* library copy routine	*/
 		C_asp(int_size + pointer_size + pointer_size);
+#endif STB
 	}
 }
+
+#ifndef STB
+copy_loop(sz, src, dst)
+	arith sz, src, dst;
+{
+	/* generate inline byte-copy loop */
+	label l_cont = text_label(), l_stop = text_label();
+
+	C_loc(sz);		/* amount of bytes */
+	C_df_ilb(l_cont);
+	C_dup(word_size);
+	C_zle(l_stop);
+	C_dec();
+	C_lal(src);
+	C_loi(pointer_size);
+	C_dup(pointer_size);
+	C_adp((arith)1);
+	C_lal(src);
+	C_sti(pointer_size);
+	C_loi((arith)1);
+	C_lal(dst);
+	C_loi(pointer_size);
+	C_dup(pointer_size);
+	C_adp((arith)1);
+	C_lal(dst);
+	C_sti(pointer_size);
+	C_sti((arith)1);
+	C_bra(l_cont);
+	C_df_ilb(l_stop);
+	C_asp(word_size);
+}
+#endif STB

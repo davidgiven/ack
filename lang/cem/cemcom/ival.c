@@ -24,7 +24,6 @@
 
 char *symbol2str();
 char *long2str();
-
 struct expr *do_array(), *do_struct(), *IVAL();
 
 /*	do_ival() performs the initialisation of a global variable
@@ -58,26 +57,23 @@ IVAL(tpp, ex)
 	register struct type *tp = *tpp;
 	
 	switch (tp->tp_fund) {
-	case ARRAY:
-		/* array initialisation	*/
+	case ARRAY: /* array initialisation	*/
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return 0;
 		if (ISCOMMA(ex)) /* list of initialisation expressions */
 			return do_array(ex, tpp);
-		/* catch initialisations like char s[] = "I am a string" */
 		if (tp->tp_up->tp_fund == CHAR && ex->ex_class == String)
+			/* initialisation like char s[] = "I am a string" */
 			ch_array(tpp, ex);
 		else /* " int i[24] = 12;"	*/
 			check_and_pad(ex, tpp);
 		break;
-	case STRUCT:
-		/* struct initialisation */
+	case STRUCT: /* struct initialisation */
 		if (valid_type(tp, "struct") == 0)
 			return 0;
 		if (ISCOMMA(ex)) /* list of initialisation expressions */
 			return do_struct(ex, tp);
-		/* "struct foo f = 12;"	*/
-		check_and_pad(ex, tpp);
+		check_and_pad(ex, tpp); /* "struct foo f = 12;"	*/
 		break;
 	case UNION:
 		error("union initialisation not allowed");
@@ -85,7 +81,7 @@ IVAL(tpp, ex)
 	case ERRONEOUS:
 		break;
 	default: /* fundamental type	*/
-		if (ISCOMMA(ex))	{ /* " int i = {12};"	*/
+		if (ISCOMMA(ex)) { /* " int i = {12};"	*/
 			if (IVAL(tpp, ex->OP_LEFT) != 0)
 				too_many_initialisers(ex);
 			/*	return remainings of the list for the
@@ -94,8 +90,7 @@ IVAL(tpp, ex)
 			*/
 			return ex->OP_RIGHT;
 		}
-		/* "int i = 12;"	*/
-		check_ival(ex, tp);
+		check_ival(ex, tp); /* "int i = 12;" */
 		break;
 	}
 	return 0;
@@ -131,8 +126,7 @@ do_array(ex, tpp)
 		is completely foolish, we did it!! (no applause, thank you)
 	*/
 	if (tp->tp_up->tp_fund == CHAR) {
-		register struct expr *f = ex->OP_LEFT;
-		register struct expr *g = 0;
+		register struct expr *f = ex->OP_LEFT, *g = NILEXPR;
 
 		while (ISCOMMA(f)) {	/* eat the brackets!!!	*/
 			g = f;
@@ -150,8 +144,7 @@ do_array(ex, tpp)
 		/* declared with unknown size: [] */
 		for (elem_count = 0; ex; elem_count++) {
 			/* eat whole initialisation expression	*/
-			if (ISCOMMA(ex->OP_LEFT)) {
-				/* the member expression is embraced	*/
+			if (ISCOMMA(ex->OP_LEFT)) { /* embraced member */
 				if (IVAL(&(tp->tp_up), ex->OP_LEFT) != 0)
 					too_many_initialisers(ex);
 				ex = ex->OP_RIGHT;
@@ -172,15 +165,13 @@ do_array(ex, tpp)
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
 
 		for (elem_count = 0; elem_count < dim && ex; elem_count++) {
-			if (ISCOMMA(ex->OP_LEFT)) {
-				/* embraced member initialisation	*/
+			if (ISCOMMA(ex->OP_LEFT)) { /* embraced member */
 				if (IVAL(&(tp->tp_up), ex->OP_LEFT) != 0)
 					too_many_initialisers(ex);
 				ex = ex->OP_RIGHT;
 			}
 			else {
 				if (aggregate_type(tp->tp_up))
-					/* the member is an aggregate	*/
 					ex = IVAL(&(tp->tp_up), ex);
 				else {
 					check_ival(ex->OP_LEFT, tp->tp_up);
@@ -194,7 +185,7 @@ do_array(ex, tpp)
 				is returned
 			*/
 			return ex;
-		if ((ex == 0) && elem_count < dim) {
+		if ((ex == 0) && elem_count < dim)
 			/*	the expression tree is completely absorbed
 				but there are still members which must be
 				initialised with zeroes
@@ -202,7 +193,6 @@ do_array(ex, tpp)
 			do
 				pad(tp->tp_up);
 			while (++elem_count < dim);
-		}
 	}
 	return 0;
 }
@@ -245,16 +235,14 @@ do_struct(ex, tp)
 						definition.
 					*/
 					put_bf(sd->sd_type, (arith)0);
-				else {
-					/* fundamental type, not embraced */
+				else { /* fundamental type, not embraced */
 					check_ival(ex->OP_LEFT, sd->sd_type);
 					ex = ex->OP_RIGHT;
 				}
 #endif NOBITFIELD
 			}
 		}
-		/* align upto the next selector	boundary	*/
-		if (sd->sd_sdef)
+		if (sd->sd_sdef) /* align upto the next selector boundary */
 			bytes_upto_here += zero_bytes(sd);
 		if (last_offset != sd->sd_offset) {
 			/* don't take the field-width more than once	*/
@@ -266,9 +254,7 @@ do_struct(ex, tp)
 	}
 	/* perfect fit if (ex && (sd == 0)) holds	*/
 	if ((ex == 0) && (sd != 0)) {
-		/*	there are selectors left which must be padded with
-			zeroes
-		*/
+		/* there are selectors left which must be padded with zeroes */
 		do {
 			pad(sd->sd_type);
 			/* take care of the alignment restrictions	*/
@@ -307,7 +293,7 @@ check_and_pad(ex, tpp)
 			*/
 			tp = *tpp = construct_type(ARRAY, tp->tp_up, (arith)1);
 		else {
-			register dim = tp->tp_size / tp->tp_up->tp_size;
+			register int dim = tp->tp_size / tp->tp_up->tp_size;
 			/* pad remaining members with zeroes */
 			while (--dim > 0)
 				pad(tp->tp_up);
@@ -320,7 +306,7 @@ check_and_pad(ex, tpp)
 		if (valid_type(tp, "struct") == 0)
 			return;
 		check_and_pad(ex, &(sd->sd_type));
-		/* Next selector is aligned by adding extra zeroes */
+		/* next selector is aligned by adding extra zeroes */
 		if (sd->sd_sdef)
 			zero_bytes(sd);
 		while (sd = sd->sd_sdef) { /* pad remaining selectors	*/
@@ -346,10 +332,8 @@ pad(tp)
 
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return;
-
 		dim = tp->tp_size / tp->tp_up->tp_size;
-
-		/* Assume the dimension is known	*/
+		/* assume dimension is known	*/
 		while (dim-- > 0)
 			pad(tp->tp_up);
 		break;
@@ -360,7 +344,6 @@ pad(tp)
 
 		if (valid_type(tp, "struct") == 0)
 			return;
-
 		do {
 			pad(sdef->sd_type);
 			if (sdef->sd_sdef)
@@ -462,10 +445,8 @@ check_ival(ex, tp)
 			/* float f = 1; */
 			ex = ex->OP_RIGHT;
 			if (is_cp_cst(ex))
-				C_con_fcon(
-					long2str((long)ex->VL_VALUE, 10),
-					tp->tp_size
-				);
+				C_con_fcon(long2str((long)ex->VL_VALUE, 10),
+					tp->tp_size);
 			else 
 				illegal_init_cst(ex);
 		}
@@ -509,7 +490,7 @@ ch_array(tpp, ex)
 
 	ASSERT(ex->ex_class == String);
 	length = ex->SG_LEN;
-	if (tp->tp_size == (arith)-1)	{
+	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
 		ntopad = align(tp->tp_size, word_align) - tp->tp_size;
@@ -591,8 +572,7 @@ zero_bytes(sd)
 	/*	fills the space between a selector of a struct
 		and the next selector of that struct with zero-bytes.
 	*/
-	register int n =
-		sd->sd_sdef->sd_offset - sd->sd_offset -
+	register int n = sd->sd_sdef->sd_offset - sd->sd_offset -
 		size_of_type(sd->sd_type, "struct member");
 	register count = n;
 

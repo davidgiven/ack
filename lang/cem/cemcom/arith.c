@@ -423,6 +423,10 @@ is_asgn_op(oper)
 	case ANDAB:
 	case ORAB:
 	case XORAB:
+	case PLUSPLUS:
+	case POSTINCR:
+	case MINMIN:
+	case POSTDECR:
 		return 1;
 	default:
 		return 0;

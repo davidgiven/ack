@@ -7,7 +7,6 @@
 #include	"debug.h"	/* UF */
 #include	"pathlength.h"	/* UF */
 #include	"strsize.h"	/* UF */
-
 #include	"alloc.h"
 #include	"idf.h"
 #include	"input.h"
@@ -52,13 +51,11 @@ replace(idef)
 		}
 		actpars = getactuals(idef);	/* get act.param. list	*/
 	}
-	if ((flags & PREDEF) && (UnknownIdIsZero == 0))
-		/* don't replace this one...	*/
-			return 0;
+	if ((flags & PREDEF) && (UnknownIdIsZero == 0)) /* don't replace */
+		return 0;
 	if (flags & FUNC)	/* this macro leads to special action	*/
 		macro_func(idef);
-	/* create and input buffer	*/
-	reptext = macro2buffer(idef, actpars, &size);
+	reptext = macro2buffer(idef, actpars, &size); /* create input buffer */
 	InsertText(reptext, size);
 	return 1;
 }
@@ -74,8 +71,7 @@ macro_func(idef)
 		replacement texts must be evaluated at the time they are
 		used.
 	*/
-	/* This switch is very blunt...	*/
-	switch (idef->id_text[2]) {
+	switch (idef->id_text[2]) { /* This switch is very blunt... */
 	case 'F' :			/* __FILE__	*/
 		FilNamBuf[0] = '"';
 		strcpy(&FilNamBuf[1], FileName);
@@ -126,8 +122,7 @@ macro2buffer(idef, actpars, siztext)
 			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
-					text = Srealloc(text,
-							size += RSTRSIZE);
+					text = Srealloc(text, size += RSTRSIZE);
 			}
 		}
 		else {
