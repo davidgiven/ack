@@ -117,8 +117,7 @@ EVAL(expr, val, code, true_label, false_label)
 				int + int, pointer + int, pointer + long,
 				long + long, double + double
 			*/
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode) {
 				switch (tp->tp_fund) {
 				case INT:
@@ -169,8 +168,7 @@ EVAL(expr, val, code, true_label, false_label)
 				int - int, pointer - int, pointer - long,
 				pointer - pointer, long - long, double - double
 			*/
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (!gencode)
 				break;
 			switch (tp->tp_fund) {
@@ -207,34 +205,31 @@ EVAL(expr, val, code, true_label, false_label)
 				if (gencode && right->ex_class == String) {
 					C_loi((arith)1);
 				}
+				break;
 			}
-			else { /* binary */
-				EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
-				if (gencode)
-					switch (tp->tp_fund) {
-					case INT:
-					case LONG:
-					case POINTER:
-						if (tp->tp_unsigned)
-							C_mlu(tp->tp_size);
-						else
-							C_mli(tp->tp_size);
-						break;
-					case FLOAT:
-					case DOUBLE:
-					case LNGDBL:
-						/*C_mlf(double_size);*/
-						C_mlf(tp->tp_size);
-						break;
-					default:
-						crash("bad type *");
-					}
+			operands(expr, gencode);
+			if (gencode) {
+				switch (tp->tp_fund) {
+				case INT:
+				case LONG:
+				case POINTER:
+					if (tp->tp_unsigned)
+						C_mlu(tp->tp_size);
+					else
+						C_mli(tp->tp_size);
+					break;
+				case FLOAT:
+				case DOUBLE:
+				case LNGDBL:
+					C_mlf(tp->tp_size);
+					break;
+				default:
+					crash("bad type *");
+				}
 			}
 			break;
 		case '/':
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode)
 				switch (tp->tp_fund) {
 				case INT:
@@ -256,8 +251,7 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 			break;
 		case '%':
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			ASSERT(tp->tp_fund==INT || tp->tp_fund==LONG);
 			if (gencode)
 				if (tp->tp_unsigned)
@@ -266,8 +260,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_rmi(tp->tp_size);
 			break;
 		case LEFT:
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_slu(tp->tp_size);
@@ -275,8 +268,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_sli(tp->tp_size);
 			break;
 		case RIGHT:
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_sru(tp->tp_size);
@@ -289,8 +281,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case GREATEREQ:
 		case EQUAL:
 		case NOTEQUAL:
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode) {
 				/* The operands have the same type */
 				arith size = left->ex_type->tp_size;
@@ -330,8 +321,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case '|':
 		case '^':
 			/* both operands should have type int	*/
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			operands(expr, gencode);
 			if (gencode) {
 				arith size = tp->tp_size;
 
@@ -487,11 +477,10 @@ EVAL(expr, val, code, true_label, false_label)
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					register struct expr *rght = ex->OP_RIGHT;
-					EVAL(rght, RVAL,
-					     rght->ex_type->tp_size > 0,
+					arith size = ex->OP_RIGHT->ex_type->tp_size;
+					EVAL(ex->OP_RIGHT, RVAL, size > 0,
 							NO_LABEL, NO_LABEL);
-					ParSize += ATW(rght->ex_type->tp_size);
+					ParSize += ATW(size);
 					ex = ex->OP_LEFT;
 				}
 				EVAL(ex, RVAL, ex->ex_type->tp_size > 0,
@@ -531,17 +520,13 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		}
 		case '.':
-			EVAL(left, LVAL, gencode, NO_LABEL, NO_LABEL);
+		case ARROW:
+			EVAL(left, oper == '.' ? LVAL : RVAL, gencode,
+				NO_LABEL, NO_LABEL);
 			ASSERT(is_cp_cst(right));
 			if (gencode) {
 				C_adp(right->VL_VALUE);
 			}
-			break;
-		case ARROW:
-			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
-			ASSERT(is_cp_cst(right));
-			if (gencode)
-				C_adp(right->VL_VALUE);
 			break;
 		case ',':
 			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
@@ -816,10 +801,8 @@ assop(type, oper)
 */
 store_val(vl, tp)
 	register struct value *vl;
-	struct type *tp;
+	register struct type *tp;
 {
-	arith size = tp->tp_size;
-	int tpalign = tp->tp_align;
 	int al_on_word;
 	register int inword;
 	register int indword;
@@ -827,12 +810,12 @@ store_val(vl, tp)
 
 	if (vl->vl_class == Const) {	/* absolute addressing */
 		load_cst(val, pointer_size);
-		store_block(size, tpalign);
+		store_block(tp->tp_size, tp->tp_align);
 		return;
 	}
-	al_on_word = (tpalign % word_align == 0);
-	if (!(inword = (size == word_size && al_on_word)))
-		indword = (size == dword_size && al_on_word);
+	al_on_word = (tp->tp_align % word_align == 0);
+	if (!(inword = (tp->tp_size == word_size && al_on_word)))
+		indword = (tp->tp_size == dword_size && al_on_word);
 	if (vl->vl_class == Name) {
 		register struct idf *id = vl->vl_data.vl_idf;
 		register struct def *df = id->id_def;
@@ -849,16 +832,16 @@ store_val(vl, tp)
 				C_sde_dnam(id->id_text, val);
 			else {
 				C_lae_dnam(id->id_text, val);
-				store_block(size, tpalign);
+				store_block(tp->tp_size, tp->tp_align);
 			}
 		}
 		else {
 			ASSERT(df->df_sc != STATIC);
 			if (inword || indword)
-				StoreLocal(df->df_address + val, size);
+				StoreLocal(df->df_address + val, tp->tp_size);
 			else {
 				AddrLocal(df->df_address + val);
-				store_block(size, tpalign);
+				store_block(tp->tp_size, tp->tp_align);
 			}
 		}
 	}
@@ -873,7 +856,7 @@ store_val(vl, tp)
 			C_sde_dlb(dlb, val);
 		else {
 			C_lae_dlb(dlb, val);
-			store_block(size, tpalign);
+			store_block(tp->tp_size, tp->tp_align);
 		}
 	}
 }
@@ -894,8 +877,6 @@ load_val(expr, rlval)
 {
 	register struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
-	arith size = tp->tp_size;
-	int tpalign = tp->tp_align;
 	int al_on_word;
 	register int inword, indword;
 	register arith val = expr->VL_VALUE;
@@ -903,16 +884,16 @@ load_val(expr, rlval)
 	if (expr->VL_CLASS == Const) {
 		if (rvalue) { /* absolute addressing */
 			load_cst(val, pointer_size);
-			load_block(size, tpalign);
+			load_block(tp->tp_size, tp->tp_align);
 		}
 		else	/* integer, unsigned, long, enum etc	*/
-			load_cst(val, size);
+			load_cst(val, tp->tp_size);
 		return;
 	}
 	if (rvalue) {
-		al_on_word = (tpalign % word_align == 0);
-		if (!(inword = (size == word_size && al_on_word)))
-			indword = (size == dword_size && al_on_word);
+		al_on_word = (tp->tp_align % word_align == 0);
+		if (!(inword = (tp->tp_size == word_size && al_on_word)))
+			indword = (tp->tp_size == dword_size && al_on_word);
 	}
 	if (expr->VL_CLASS == Label) {
 		if (rvalue) {
@@ -923,7 +904,7 @@ load_val(expr, rlval)
 				C_lde_dlb(expr->VL_LBL, val);
 			else {
 				C_lae_dlb(expr->VL_LBL, val);
-				load_block(size, tpalign);
+				load_block(tp->tp_size, tp->tp_align);
 			}
 
 		}
@@ -959,7 +940,7 @@ load_val(expr, rlval)
 					C_lde_dnam(id->id_text, val);
 				else {
 					C_lae_dnam(id->id_text, val);
-					load_block(size, tpalign);
+					load_block(tp->tp_size, tp->tp_align);
 				}
 			}
 			else {
@@ -971,10 +952,10 @@ load_val(expr, rlval)
 			/* ASSERT(df->df_sc != STATIC); */
 			if (rvalue) {
 				if (inword || indword)
-					LoadLocal(df->df_address + val, size);
+					LoadLocal(df->df_address + val, tp->tp_size);
 				else {
 					AddrLocal(df->df_address + val);
-					load_block(size, tpalign);
+					load_block(tp->tp_size, tp->tp_align);
 				}
 			}
 			else {
@@ -1003,5 +984,11 @@ load_cst(val, siz)
 	}
 }
 
+operands(expr, gencode)
+	register struct expr *expr;
+{
+	EVAL(expr->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
+	EVAL(expr->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);
+}
 #endif	LINT
 
