@@ -6,14 +6,12 @@ static char rcsid2[] = "$Header$";
 extern int OO_maxpattern;	/* Initialized from patterns in dfa.c */
 #define MAXBACKUP	50
 #define MAXOUTPUT	200
-#define MAXFREEI	200
 #define MAXSTRING	1000
 
 extern char	em_mnem[][4];
 extern char	em_pseu[][4];
 
-p_instr		*OO_freeiqueue;
-p_instr		*OO_nxtifree;
+p_instr		OO_freeq;
 p_instr		*OO_patternqueue;
 p_instr		*OO_nxtpatt;
 p_instr		*OO_bkupqueue;
@@ -25,7 +23,6 @@ static p_instr	*lastbackup;
 static p_instr	*outputqueue;
 static p_instr	*nextoutput;
 static p_instr	*lastoutput;
-static p_instr	*lastifree;
 static char	*strqueue;
 static char	*nextstr;
 static char	*laststr;
@@ -88,9 +85,6 @@ allocmem()
 		(p_instr *)Malloc(MAXOUTPUT*sizeof(p_instr));
 	lastoutput = outputqueue + MAXOUTPUT - 1;
 	OO_noutput = 0;
-	OO_nxtifree = OO_freeiqueue =
-		(p_instr *)Malloc(MAXFREEI*sizeof(p_instr));
-	lastifree = OO_freeiqueue + MAXFREEI - 1;
 	nextstr = strqueue =
 		(char *)Malloc(MAXSTRING*sizeof(char));
 	laststr = strqueue + MAXSTRING - 1;
@@ -101,27 +95,13 @@ allocmem()
 	OO_OTHER->em_argtype = 0;
 }
 
-OO_free(p)
-	p_instr	p;
-{
-	if(OO_nxtifree > lastifree) {
-#ifdef DEBUG
-		fprintf(stderr,"Warning: Overflow of free intr. queue.\n");
-		fprintf(stderr,"Ignored free of ");
-		prtinst(p);
-		fprintf(stderr,"\n");
-		printstate("Freea overflow");
-#endif
-		return;
-	}
-	*OO_nxtifree++ = p;
-}
-
 OO_nfree(n)
 	register int n;
 {
+	register p_instr *p = OO_nxtpatt = OO_patternqueue;
 	while(n--) {
-		OO_free(*--OO_nxtpatt);
+		OO_free(*p);	/* OO_free is macro so don't use *p++ */
+		p++;
 	}
 	OO_state = 0;
 }

@@ -63,6 +63,7 @@ main(argc,argv)
 		default:
 			FLUSHDFA();
 			EM_mkcalls(p);
+			OO_free(p);
 			break;
 		case EM_EOF:
 			goto got_eof;

@@ -21,11 +21,10 @@ typedef struct e_instr *p_instr;
 				*OO_nxtpatt++ = OO_OTHER; OO_dfa(OTHER);\
 			} else if(OO_noutput) OO_flush();
 
-#define GETINSTR() (OO_nxtifree>OO_freeiqueue)?*(--OO_nxtifree):\
-			((p_instr)Malloc(sizeof(struct e_instr)))
+#define GETINSTR() ((p_instr)st_alloc((char **)&OO_freeq,sizeof(struct e_instr),20))
+#define OO_free(p) st_free((p),&OO_freeq,sizeof(struct e_instr))
 
-extern p_instr	*OO_freeiqueue;
-extern p_instr	*OO_nxtifree;
+extern p_instr	OO_freeq;
 extern p_instr	*OO_patternqueue;
 extern p_instr	*OO_nxtpatt;
 extern p_instr	*OO_bkupqueue;
