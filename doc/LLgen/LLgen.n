@@ -10,7 +10,6 @@
 \}\
 \}
 .cs 5 22u
-.RP
 .ND
 .EQ
 delim @@
@@ -631,13 +630,14 @@ C-program. It should eventually call one of the startsymbol
 routines.
 .PP
 The routine \fILLmessage\fR must accept one
-parameter, whose value is a token number, zero or negative.
+parameter, whose value is a token number, zero or -1.
 .br
 A zero parameter indicates that the current token (the one in
 the external variable \fILLsymb\fR) is deleted.
 .br
-A negative parameter indicates that a stack overflow occurred.
-This usually is a fatal error.
+A -1 parameter indicates that the parser expected end of file, but did'nt get
+it.
+The parser will then skip tokens until end of file is detected.
 .br
 A parameter that is a token number (a positive parameter)
 indicates that this
