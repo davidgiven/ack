@@ -1,6 +1,7 @@
 .define EARRAY,ERANGE,EILLINS,EILLSIZE,ECASE,EMON,EHEAP
 .define hol0,trapproc,trpim,argv,hp,.reghp,envp,begbss,ignmask
 .define savebc,savede,savehl,saveix,saveaf,saveiy,ebadmon
+.define WRITE,EXIT
 .sect .text
 .sect .rom
 .sect .data
@@ -45,8 +46,10 @@
 	ld bc,1
 	push bc
 	call __m_a_i_n
-
+EXIT:
 	jp 0x20
+WRITE:
+	jp __write
 
 .sect .bss
 begbss:
