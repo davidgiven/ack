@@ -128,6 +128,7 @@ int __flushbuf(int _c, FILE *_stream);
 
 #if	defined(__BSD4_2) || defined(__USG) || defined(_POSIX_SOURCE)
 int fileno(FILE *_stream);
+FILE *fdopen(int fildes, const char *type);
 #define	fileno(stream)		((stream)->_fd)
 #endif	/* __BSD4_2 || __USG || _POSIX_SOURCE */
 
