@@ -67,7 +67,7 @@ replace(idef)
 		LoadChar(c);
 		c = skipspaces(c,1);
 		if (c != '(') {		/* no replacement if no ()	*/
-			error("macro %s needs arguments",
+			warning("macro %s needs arguments",
 				idef->id_text);
 			PushBack();
 			return 0;

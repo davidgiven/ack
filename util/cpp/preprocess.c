@@ -81,6 +81,7 @@ preprocess(fn)
 		for (;;) {
 			if (c & 0200)  {
 				if (c == EOI) {
+					newline();
 					flush(op-_obuf);
 					return;
 				}
@@ -102,6 +103,7 @@ preprocess(fn)
 							echo(c);
 						}
 						else if (c == EOI) {
+							newline();
 							flush(op - _obuf);
 							return;
 						}
@@ -149,6 +151,7 @@ preprocess(fn)
 						break;
 					}
 					else if (c == EOI) {
+						newline();
 						flush(op-_obuf);
 						return;
 					}
@@ -161,8 +164,7 @@ preprocess(fn)
 						}
 						else if (c == '\'') escaped = 1;
 					}
-				}
-				while (escaped || c != stopc);
+				} while (escaped || c != stopc);
 				echo(c);
 				if (c == '\n')
 					break;	/* Don't eat # */
