@@ -6,5 +6,6 @@ libend
 libem
 libfp
 libsys
+libdb
 ncg
 mach_params
