@@ -1,69 +1,64 @@
 EM_TABLE=../../../etc/em_table
-echo "switch(opcode) {"
+echo "switch(p->em_opcode) {"
+echo '	default: EM_error = "Illegal mnemonic"; break;'
 for i in - cdflnorswz p b
 do
 	list=`./argtype $i $EM_TABLE`
 	case $i in
 	-)	args='()'
-		echo "/* no arguments */"
+		echo "	/* no arguments */"
 		;;
 	cdflnorswz)
-		args='(arg->em_cst)'
-		echo "/* one integer constant argument */"
+		args='(p->em_cst)'
+		echo "	/* one integer constant argument */"
 		;;
 	p)
-		args='(arg->em_pnam)'
-		echo "/* a procedure name argument */"
+		args='(p->em_pnam)'
+		echo "	/* a procedure name argument */"
 		;;
 	b)
 
 : Grumbl, an instruction label as argument is encoded in a sp_cst2
 
-		args='((label) (arg->em_cst))'
-		echo "/* An instruction label argument */"
+		args='((label) (p->em_cst))'
+		echo "	/* An instruction label argument */"
 		;;
 	esac
 	for i in $list
 	do
-		cat << EOF
-	case op_$i:
-		C_$i$args;
-		break;
-EOF
+		echo "	case op_$i:"
 	done
+	echo "		(*C_funcs[p->em_opcode])$args; break;"
 done
 list=`./argtype g $EM_TABLE`
+for i in $list
+do
+	echo "	case op_$i:"
+done
 cat << 'EOF'
-	default:
-/* a "g" argument */
-		if (arg->em_argtype == nof_ptyp) {
-			switch(opcode) {
-				default:
-					EM_error = "Illegal mnemonic";
-					break;
+	/* a "g" argument */
+		if (p->em_argtype == nof_ptyp) {
+			switch(p->em_opcode) {
 EOF
 for i in $list
 do
 	cat << EOF
 				case op_$i:
-					C_${i}_dlb(arg->em_dlb, arg->em_noff);
+					C_${i}_dlb(p->em_dlb, p->em_off);
 					break;
 EOF
 done
 cat << 'EOF'
 			}
 		}
-		else if (arg->em_argtype == sof_ptyp) {
-			switch(opcode) {
-				default:
-					EM_error = "Illegal mnemonic";
-					break;
+		else if (p->em_argtype == sof_ptyp) {
+			switch(p->em_opcode) {
 EOF
 for i in $list
 do
 	cat << EOF
 				case op_$i:
-					C_${i}_dnam(arg->em_dnam, arg->em_soff);
+					C_${i}_dnam(p->em_dnam, p->em_off);
 					break;
 EOF
 done
@@ -71,21 +66,8 @@ cat << 'EOF'
 			}
 		}
 		else /*argtype == cst_ptyp */ {
-			switch(opcode) {
-				default:
-					EM_error = "Illegal mnemonic";
-					break;
-EOF
-for i in $list
-do
-	cat << EOF
-				case op_$i:
-					C_$i(arg->em_cst);
-					break;
-EOF
-done
-cat << 'EOF'
-			}
+			(*C_funcs[p->em_opcode])(p->em_cst);
+			break;
 		}
 }
 EOF

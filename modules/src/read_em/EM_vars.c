@@ -6,6 +6,11 @@
 
 /* Variables must be declared somewhere ... */
 
+#include <em_arith.h>
+
 char	*EM_error;
 char	*EM_filename;
 unsigned int EM_lineno;
+int	EM_wordsize, EM_pointersize;
+arith	em_holorbsssize;
+int	em_holorbssinit;

@@ -169,7 +169,7 @@ getname()
 	register struct string *s;
 	register int c;
 
-	s = stringentry();
+	s = &string;
 	p = s->str;
 	c = getbyte();
 
@@ -200,7 +200,7 @@ getstring()
 	register int c;
 	static int termc;
 
-	s = stringentry();
+	s = &string;
 	p = s->str;
 
 	if (!(state & INSTRING)) {	/* Not reading a string yet */
@@ -241,19 +241,20 @@ getstring()
 	return s;
 }
 
-PRIVATE struct e_args *gettyp();
+PRIVATE gettyp();
 
 PRIVATE int
 offsetted(argtyp, ap)
 	arith *ap;
 {
 	register int c;
-	register struct e_args *ap1;
 
 	if ((c = nospace()) == '+' || c == '-') {
-		ap1 = gettyp(cst_ptyp);
-		if (c == '-') *ap = -(ap1->em_cst);
-		else *ap = ap1->em_cst;
+		struct e_arg dummy;
+
+		gettyp(cst_ptyp, &dummy);
+		if (c == '-') *ap = -(dummy.ema_cst);
+		else *ap = dummy.ema_cst;
 		return sp_doff;
 	}
 	else	*ap = 0;
@@ -265,16 +266,15 @@ offsetted(argtyp, ap)
 PRIVATE int
 getnumber(c, ap)
 	register int c;
-	register struct e_args *ap;
+	register struct e_arg *ap;
 {
-	register char *p;
+	char str[STRSIZ + 1];
+	register char *p = str;
 	int n;
-	register struct string *s = stringentry();
 	int expsign;
 	long str2long();
 
-	p = s->str;
-	ap->em_argtype = cst_ptyp;
+	ap->ems_argtype = cst_ptyp;
 	expsign = 0;
 
 	if (c == '+' || c == '-') {
@@ -285,16 +285,14 @@ getnumber(c, ap)
 	if (! isdigit(c)) {
 		ungetbyte(c);
 		syntax("digit expected");
-		i_strings--;
 		return sp_cst4;
 	}
 
 	n = sp_cst4;
 
 	for (;;) {
-		if (p >= &(s->str[STRSIZ])) {
+		if (p >= &(str[STRSIZ])) {
 			syntax("number too long");
-			i_strings--;
 			return sp_cst4;
 		}
 
@@ -325,26 +323,29 @@ getnumber(c, ap)
 	}	
 
 	if (c == 'I' || c == 'U' || c == 'F') {
-		ap->em_str = s->str;
-		ap->em_size = gettyp(cst_ptyp)->em_cst;
+		struct e_arg dummy;
+
+		strcpy(string.str, str);
+		ap->ema_string = string.str;
+		gettyp(cst_ptyp, &dummy);
+		ap->ems_szoroff = dummy.ema_cst;
 
 		switch(c) {
 		case 'I':
-			ap->em_argtype = ico_ptyp;
+			ap->ems_argtype = ico_ptyp;
 			return sp_icon;
 		case 'U':
-			ap->em_argtype = uco_ptyp;
+			ap->ems_argtype = uco_ptyp;
 			return sp_ucon;
 		case 'F':
-			ap->em_argtype = fco_ptyp;
+			ap->ems_argtype = fco_ptyp;
 			return sp_fcon;
 		}
 		assert(0);
 	}
 
 	ungetbyte(c);
-	ap->em_cst = (arith) str2long(s->str, 10);
-	i_strings--;	
+	ap->ema_cst = (arith) str2long(str, 10);
 	return sp_cst4;
 }
 
@@ -353,7 +354,7 @@ PRIVATE int getexpr();
 PRIVATE int
 getfactor(c, ap)
 	register int c;
-	register struct e_args *ap;
+	register struct e_arg *ap;
 {
 	if (c == '(') {
 		if (getexpr(nospace(), ap) != sp_cst4) {
@@ -371,7 +372,7 @@ getfactor(c, ap)
 PRIVATE int
 getterm(c, ap) 
 	register int c;
-	register struct e_args *ap;
+	register struct e_arg *ap;
 {
 	arith left;
 
@@ -383,15 +384,15 @@ getterm(c, ap)
 			break;
 		}
 
-		left = ap->em_cst;
+		left = ap->ema_cst;
 		if (getfactor(nospace(), ap) != sp_cst4) {
 			syntax("factor expected");
 			break;
 		}
 
-		if (c == '*') ap->em_cst *= left;
-		else if (c == '/') ap->em_cst = left / ap->em_cst;
-		else	ap->em_cst = left % ap->em_cst;
+		if (c == '*') ap->ema_cst *= left;
+		else if (c == '/') ap->ema_cst = left / ap->ema_cst;
+		else	ap->ema_cst = left % ap->ema_cst;
 	}
 	return sp_cst4;
 }
@@ -399,7 +400,7 @@ getterm(c, ap)
 PRIVATE int
 getexpr(c, ap)
 	register int c;
-	register struct e_args *ap;
+	register struct e_arg *ap;
 {
 	arith left;
 
@@ -411,14 +412,14 @@ getexpr(c, ap)
 			break;
 		}
 
-		left = ap->em_cst;
+		left = ap->ema_cst;
 		if (getterm(nospace(), ap) != sp_cst4) {
 			syntax("term expected");
 			break;
 		}
 
-		if (c == '+') ap->em_cst += left;
-		else ap->em_cst = left - ap->em_cst;
+		if (c == '+') ap->ema_cst += left;
+		else ap->ema_cst = left - ap->ema_cst;
 	}
 	return sp_cst4;
 }
@@ -426,25 +427,22 @@ getexpr(c, ap)
 PRIVATE int
 get15u()
 {
-	register struct e_args *ap = argentry();
+	struct e_arg dummy;
 
-	ap->em_next = 0;
-	if (getnumber(getbyte(), ap) != sp_cst4) {
+	if (getnumber(getbyte(), &dummy) != sp_cst4) {
 		syntax("integer expected");
 	}
-	else check((ap->em_cst & ~077777) == 0);
-	i_emargs--;
-	return (int) (ap->em_cst);
+	else check((dummy.ema_cst & ~077777) == 0);
+	return (int) (dummy.ema_cst);
 }
 
-PRIVATE struct e_args *
-gettyp(typset)
+PRIVATE
+gettyp(typset, ap)
+	register struct e_arg *ap;
 {
 	register int c, t;
-	register struct e_args *ap = argentry();
 	register int argtyp;
 
-	ap->em_next = 0;
 	if ((c = nospace()) == '\n') {
 		ungetbyte(c);
 		out("newline\n");
@@ -453,31 +451,31 @@ gettyp(typset)
 	else if (isdigit(c) || c == '+' || c == '-' || c == '(') {
 		out("expr\n");
 		argtyp = getexpr(c, ap);
-		if (argtyp == sp_cst4 && fit16i(ap->em_cst)) argtyp = sp_cst2;
+		if (argtyp == sp_cst4 && fit16i(ap->ema_cst)) argtyp = sp_cst2;
 	}
 	else if (isalpha(c) || c == '_') {
 		out("name\n");
 		ungetbyte(c);
-		ap->em_dnam = getname()->str;
-		ap->em_argtype = sof_ptyp;
-		argtyp = offsetted(sp_dnam, &(ap->em_soff));
+		ap->ema_dnam = getname()->str;
+		ap->ems_argtype = sof_ptyp;
+		argtyp = offsetted(sp_dnam, &(ap->ems_szoroff));
 	}
 	else if (c == '.') {
 		out(".label\n");
-		ap->em_dlb = get15u();
-		ap->em_argtype = nof_ptyp;
-		argtyp = offsetted(sp_dlb2, &(ap->em_noff));
+		ap->ema_dlb = get15u();
+		ap->ems_argtype = nof_ptyp;
+		argtyp = offsetted(sp_dlb2, &(ap->ems_szoroff));
 	}
 	else if (c == '*') {
 		out("*label\n");
-		ap->em_ilb = get15u();
-		ap->em_argtype = ilb_ptyp;
+		ap->ema_ilb = get15u();
+		ap->ems_argtype = ilb_ptyp;
 		argtyp = sp_ilb2;
 	}
 	else if (c == '$') {
 		out("$name\n");
-		ap->em_pnam = getname()->str;
-		ap->em_argtype = pro_ptyp;
+		ap->ema_pnam = getname()->str;
+		ap->ems_argtype = pro_ptyp;
 		argtyp = sp_pnam;
 	}
 	else if (c == '"' || c == '\'') {
@@ -486,34 +484,38 @@ gettyp(typset)
 		out("string\n");
 		ungetbyte(c);
 		s = getstring(0);
-		ap->em_str = s->str;
-		ap->em_size = s->length;	
-		ap->em_argtype = str_ptyp;
+		ap->ema_string = s->str;
+		ap->ems_szoroff = s->length;	
+		ap->ems_argtype = str_ptyp;
 		argtyp = sp_scon;
 	}
 	else if (c == '?') {
 		out("?\n");
 		argtyp = sp_cend;
+		ap->ems_argtype = 0;
 	}
 	else {
 		/* c != '\n', so "ungetbyte" not neccesary */
 		syntax("operand expected");
-		return ap;
+		return;
 	}
 
 	t = argtyp - sp_fspec;
 	assert(t >= 0 && t < 16);
 	if ((typset & (1 << t)) == 0) {
 		syntax("Bad argument type");
-		return ap;
+		return;
 	}
 
-	if (argtyp == sp_cend) return 0;
-	return ap;
+	if (argtyp == sp_cend) {
+		ap->ems_argtype = 0;
+	}
+	return;
 }
 
-PRIVATE struct e_args *
-getarg(typset)
+PRIVATE
+getarg(typset, ap)
+	struct e_arg *ap;
 {
 	register int c;
 
@@ -527,7 +529,7 @@ getarg(typset)
 		}
 	}
 	argnum++;
-	return gettyp(typset);
+	return gettyp(typset, ap);
 }
 
 /* getmnem: We found the start of either an instruction or a pseudo.
@@ -573,23 +575,19 @@ getmnem(c, p)
 		p->em_type = EM_PSEU;
 		break;
 	}
-	i_strings--;
 }
 
 PRIVATE
 line_line()
 {
-	register struct e_args *ap;
 	static char filebuf[STRSIZ + 1];
 	char *btscpy();
+	struct e_arg dummy;
 
-	ap = gettyp(ptyp(sp_cst2));
-	EM_lineno = ap->em_cst;
-	i_emargs--;
-	ap = gettyp(str_ptyp);
-	btscpy(filebuf, ap->em_str, (int) ap->em_size);
-	i_emargs--;
-	i_strings--;
+	gettyp(ptyp(sp_cst2), &dummy);
+	EM_lineno = dummy.ema_cst;
+	gettyp(str_ptyp, &dummy);
+	btscpy(filebuf, dummy.ema_string, (int) dummy.ems_szoroff);
 	EM_filename = filebuf;
 }
 
@@ -597,32 +595,29 @@ PRIVATE
 getlabel(c, p)
 	register struct e_instr *p;
 {
-	register struct e_args *ap;
 
 	ungetbyte(c);
-	ap = gettyp(lab_ptyp|ptyp(sp_cst2));
-	switch(ap->em_argtype) {
+	gettyp(lab_ptyp|ptyp(sp_cst2), &(p->em_arg));
+	switch(p->em_argtype) {
 	case cst_ptyp:
 		p->em_type = EM_DEFILB;
-		p->em_deflb = ap->em_cst;
+		p->em_ilb = p->em_cst;
 		break;
 	case sof_ptyp:
 		p->em_type = EM_DEFDNAM;
-		p->em_defdnam = ap->em_dnam;
 		break;
 	case nof_ptyp:
 		p->em_type = EM_DEFDLB;
-		p->em_deflb = ap->em_dlb;
 		break;
 	}
 	checkeol();
 }
 
-PRIVATE struct e_instr *
-gethead()
+PRIVATE
+gethead(p)
+	struct e_instr *p;
 {
 	register int c;
-	register struct e_instr *p = &emhead;
 
 	argnum = 1;
 	for (;;) {	
@@ -632,20 +627,23 @@ gethead()
 			do	c = getbyte();
 			while (c != '\n' && c != EOF);
 		}
-		if (c == EOF) return 0;
+		if (c == EOF) {
+			p->em_type = EM_EOF;
+			return;
+		}
 		if (c == '\n') continue;
 		if (isspace(c)) {
 			c = nospace();
 			if (isalpha(c) || c == '_') {
 				getmnem(c, p);
-				return p;
+				return;
 			}
 			ungetbyte(c);
 		}
 		else if (c == '#') line_line();
 		else {
 			getlabel(c, p);
-			return p;
+			return;
 		}
 		checkeol();
 	}

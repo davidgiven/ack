@@ -21,6 +21,8 @@
 extern char em_flag[];	/* One per EM instruction: indicates parameter kind */
 extern short em_ptyp[];	/* One per parameter kind: indicates parameter type */
 
+#include "C_funcs"
+
 static int listtype = 0;	/* indicates pseudo when generating code for
 				   variable length argument lists
 				   (only for MES)
@@ -31,45 +33,41 @@ static int listtype = 0;	/* indicates pseudo when generating code for
 	The argument must be of a type allowed by "typset".
 	Return a pointer to the next argument.
 */
-PRIVATE struct e_args *
-c_getarg(args, typset)
-	register struct e_args *args;
+PRIVATE
+checkarg(arg, typset)
+	register struct e_arg *arg;
 {
 
-	if (((!typset) && args) ||
-	    ((!args) && typset)) {
+	if (((!typset) && arg->ems_argtype) ||
+	    ((!arg->ems_argtype) && typset)) {
 		/* End of arguments expected, but there are more, or
 		   an argument expected, but there is none
 		*/
 		EM_error = "Illegal number of parameters";
-		return 0;
+		return;
 	}
 
-	if (!args) return 0;
-	if (!(args->em_argtype & typset)) {
+	if (!(arg->ems_argtype & typset)) {
 		/* Type error */
 		EM_error = "Illegal parameter type";
 	}
-
-	return args->em_next;
 }
 #else not CHECKING
-#define c_getarg(arg, x)	((arg) ? (arg)->em_next : (arg))
+#define c_getarg(arg, x)
 #endif CHECKING
 
 /*	EM_doinstr: An EM instruction
 */
 PRIVATE
-EM_doinstr(opcode, arg)
-	register struct e_args *arg;
+EM_doinstr(p)
+	register struct e_instr *p;
 {
 	register int parametertype;	/* parametertype of the instruction */
-	register struct e_args *args;
 
-	parametertype = em_flag[opcode-sp_fmnem] & EM_PAR;
+	parametertype = em_flag[p->em_opcode-sp_fmnem] & EM_PAR;
 #ifdef CHECKING
 	if (parametertype != PAR_NO && parametertype != PAR_W) {
-		if (!arg) {
+		if (p->em_argtype == 0) {
 			EM_error = "Illegal number of parameters";
 			return;
 		}
@@ -79,13 +77,11 @@ EM_doinstr(opcode, arg)
 		case PAR_NO:
 			break;
 		default:
-			args = c_getarg(arg, em_ptyp[parametertype]);
-			args = c_getarg(args, 0);
+			checkarg(&(p->em_arg), em_ptyp[parametertype]);
 			break;
 		case PAR_W:
-			if (arg) {
-				args = c_getarg(arg, cst_ptyp);
-				args = c_getarg(args, 0);
+			if (p->em_argtype != 0) {
+				checkarg(&(p->em_arg), cst_ptyp);
 			}
 			else {
 #include "C_mnem_narg"
@@ -97,73 +93,62 @@ EM_doinstr(opcode, arg)
 }
 
 PRIVATE
-EM_dopseudo(opcode, args)
-	register struct e_args *args;
+EM_dopseudo(p)
+	register struct e_instr *p;
 {
-	register struct e_args *arg;
 
-	switch(opcode) {
+	switch(p->em_opcode) {
 		case ps_exc: {
-			register struct e_args *args2;
-
-			arg = c_getarg(args, cst_ptyp);
-			args2 = c_getarg(arg, cst_ptyp);
-			args2 = c_getarg(args2, 0);
-			C_exc(args->em_cst, arg->em_cst);
+			C_exc(p->em_exc1, p->em_exc2);
 			break;
 		}
 		case ps_hol: {
-			register struct e_args *args2, *args3;
-
-			arg = c_getarg(args, cst_ptyp);
-			args2 = c_getarg(arg, par_ptyp);
-			args3 = c_getarg(args2, cst_ptyp);
-			args3 = c_getarg(args3, 0);
-			switch(arg->em_argtype) {
+			checkarg(&(p->em_arg), par_ptyp);
+			switch(p->em_argtype) {
 			    case cst_ptyp:
-				C_hol_cst(args->em_cst,
-					  arg->em_cst,
-					  (int) (args2->em_cst));
+				C_hol_cst(em_holsize,
+					  p->em_cst,
+					  em_holinit);
 				break;
 			    case ico_ptyp:
-				C_hol_icon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size, 
-					   (int)(args2->em_cst));
+				C_hol_icon(em_holsize,
+					   p->em_string,
+					   p->em_size, 
+					   em_holinit);
 				break;
 			    case uco_ptyp:
-				C_hol_ucon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size,
-					   (int)(args2->em_cst));
+				C_hol_ucon(em_holsize,
+					   p->em_string,
+					   p->em_size,
+					   em_holinit);
 				break;
 			    case fco_ptyp:
-				C_hol_fcon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size, 
-					   (int)(args2->em_cst));
+				C_hol_fcon(em_holsize,
+					   p->em_string,
+					   p->em_size, 
+					   em_holinit);
 				break;
 			    case sof_ptyp:
-				C_hol_dnam(args->em_cst,
-					   arg->em_dnam,
-					   arg->em_soff, 
-					   (int)(args2->em_cst));
+				C_hol_dnam(em_holsize,
+					   p->em_dnam,
+					   p->em_off, 
+					   em_holinit);
 				break;
 			    case nof_ptyp:
-				C_hol_dlb(args->em_cst,
-					  arg->em_dlb,
-					  arg->em_noff, 
-					  (int)(args2->em_cst));
+				C_hol_dlb(em_holsize,
+					  p->em_dlb,
+					  p->em_off, 
+					  em_holinit);
 				break;
 			    case ilb_ptyp:
-				C_hol_ilb(args->em_cst,
-					  arg->em_ilb, 
-					  (int)(args2->em_cst));
+				C_hol_ilb(em_holsize,
+					  p->em_ilb, 
+					  em_holinit);
 				break;
 			    case pro_ptyp:
-				C_hol_pnam(args->em_cst, 
-					   arg->em_pnam, 
-					   (int)(args2->em_cst));
+				C_hol_pnam(em_holsize,
+					   p->em_pnam, 
+					   em_holinit);
 				break;
 			    default:
 				EM_error = "Illegal parameter type";
@@ -172,57 +157,52 @@ EM_dopseudo(opcode, args)
 			break;
 		}
 		case ps_bss: {
-			register struct e_args *args2, *args3;
-
-			arg = c_getarg(args, cst_ptyp);
-			args2 = c_getarg(arg, par_ptyp);
-			args3 = c_getarg(args2, cst_ptyp);
-			args3 = c_getarg(args3, 0);
-			switch(arg->em_argtype) {
+			checkarg(&(p->em_arg), par_ptyp);
+			switch(p->em_argtype) {
 			    case cst_ptyp:
-				C_bss_cst(args->em_cst,
-					  arg->em_cst,
-					  (int)(args2->em_cst));
+				C_bss_cst(em_bsssize,
+					  p->em_cst,
+					  em_bssinit);
 				break;
 			    case ico_ptyp:
-				C_bss_icon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size, 
-					   (int)(args2->em_cst));
+				C_bss_icon(em_bsssize,
+					   p->em_string,
+					   p->em_size, 
+					   em_bssinit);
 				break;
 			    case uco_ptyp:
-				C_bss_ucon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size,
-					   (int)(args2->em_cst));
+				C_bss_ucon(em_bsssize,
+					   p->em_string,
+					   p->em_size,
+					   em_bssinit);
 				break;
 			    case fco_ptyp:
-				C_bss_fcon(args->em_cst,
-					   arg->em_str,
-					   arg->em_size, 
-					   (int)(args2->em_cst));
+				C_bss_fcon(em_bsssize,
+					   p->em_string,
+					   p->em_size, 
+					   em_bssinit);
 				break;
 			    case sof_ptyp:
-				C_bss_dnam(args->em_cst,
-					   arg->em_dnam,
-					   arg->em_soff, 
-					   (int)(args2->em_cst));
+				C_bss_dnam(em_bsssize,
+					   p->em_dnam,
+					   p->em_off, 
+					   em_bssinit);
 				break;
 			    case nof_ptyp:
-				C_bss_dlb(args->em_cst,
-					  arg->em_dlb,
-					  arg->em_noff, 
-					  (int)(args2->em_cst));
+				C_bss_dlb(em_bsssize,
+					  p->em_dlb,
+					  p->em_off, 
+					  em_bssinit);
 				break;
 			    case ilb_ptyp:
-				C_bss_ilb(args->em_cst,
-					  arg->em_ilb, 
-					  (int)(args2->em_cst));
+				C_bss_ilb(em_bsssize,
+					  p->em_ilb, 
+					  em_bssinit);
 				break;
 			    case pro_ptyp:
-				C_bss_pnam(args->em_cst, 
-					   arg->em_pnam, 
-					   (int)(args2->em_cst));
+				C_bss_pnam(em_bsssize, 
+					   p->em_pnam, 
+					   em_bssinit);
 				break;
 			    default:
 				EM_error = "Illegal parameter type";
@@ -231,80 +211,72 @@ EM_dopseudo(opcode, args)
 			break;
 		}
 		case ps_end:
-			if (args) {
-				arg = c_getarg(args, cst_ptyp);
-				arg = c_getarg(arg, 0);
-				C_end(args->em_cst);
+			if (p->em_argtype != 0) {
+				checkarg(&(p->em_arg), cst_ptyp);
+				C_end(p->em_cst);
 				break;
 			}
 			C_end_narg();
 			break;
 		case ps_exa:
 		case ps_ina:
-			arg = c_getarg(args, lab_ptyp);
-			arg = c_getarg(arg, 0);
-			if (args->em_argtype == nof_ptyp) {
-				if (opcode == ps_exa) {
-					C_exa_dlb(args->em_dlb);
+			checkarg(&(p->em_arg), lab_ptyp);
+			if (p->em_argtype == nof_ptyp) {
+				if (p->em_opcode == ps_exa) {
+					C_exa_dlb(p->em_dlb);
 				}
-				else	C_ina_dlb(args->em_dlb);
+				else	C_ina_dlb(p->em_dlb);
 				break;
 			}
-			if (opcode == ps_exa) {
-				C_exa_dnam(args->em_dnam);
+			if (p->em_opcode == ps_exa) {
+				C_exa_dnam(p->em_dnam);
 			}
-			else	C_ina_dnam(args->em_dnam);
+			else	C_ina_dnam(p->em_dnam);
 			break;
 		case ps_exp:
+			checkarg(&(p->em_arg), pro_ptyp);
+			C_exp(p->em_pnam);
+			break;
 		case ps_inp:
-			arg = c_getarg(args, pro_ptyp);
-			arg = c_getarg(arg, 0);
-			if (opcode == ps_exp) {
-				C_exp(args->em_pnam);
-			}
-			else	C_inp(args->em_pnam);
+			checkarg(&(p->em_arg), pro_ptyp);
+			C_inp(p->em_pnam);
 			break;
 		case ps_pro:
-			arg = c_getarg(args, pro_ptyp);
-			if (arg) {
-				struct e_args *args2;
-
-				args2 = c_getarg(arg, cst_ptyp);
-				args2 = c_getarg(args2, 0);
-				C_pro(args->em_pnam, arg->em_cst);
+			checkarg(&(p->em_arg), pro_ptyp);
+			if (p->em_size >= 0) {
+				C_pro(p->em_pnam, p->em_size);
 			}
-			else	C_pro_narg(args->em_pnam);
+			else	C_pro_narg(p->em_pnam);
 			break;
 		case ps_con:
-			arg = c_getarg(args, val_ptyp);
-			arg = c_getarg(arg, 0);
-			switch(args->em_argtype) {
+			checkarg(&(p->em_arg), val_ptyp);
+			switch(p->em_argtype) {
 				case ilb_ptyp:
-					C_con_ilb(args->em_ilb);
+					C_con_ilb(p->em_ilb);
 					break;
 				case nof_ptyp:
-					C_con_dlb(args->em_dlb, args->em_noff);
+					C_con_dlb(p->em_dlb, p->em_off);
 					break;
 				case sof_ptyp:
-					C_con_dnam(args->em_dnam, args->em_soff);
+					C_con_dnam(p->em_dnam, p->em_off);
 					break;
 				case cst_ptyp:
-					C_con_cst(args->em_cst);
+					C_con_cst(p->em_cst);
 					break;
 				case pro_ptyp:
-					C_con_pnam(args->em_pnam);
+					C_con_pnam(p->em_pnam);
 					break;
 				case str_ptyp:
-					C_con_scon(args->em_str, args->em_size);
+					C_con_scon(p->em_string, p->em_size);
 					break;
 				case ico_ptyp:
-					C_con_icon(args->em_str, args->em_size);
+					C_con_icon(p->em_string, p->em_size);
 					break;
 				case uco_ptyp:
-					C_con_ucon(args->em_str, args->em_size);
+					C_con_ucon(p->em_string, p->em_size);
 					break;
 				case fco_ptyp:
-					C_con_fcon(args->em_str, args->em_size);
+					C_con_fcon(p->em_string, p->em_size);
 					break;
 				default:
 					EM_error = "Illegal argument type";
@@ -312,35 +284,34 @@ EM_dopseudo(opcode, args)
 			}
 			break;
 		case ps_rom:
-			arg = c_getarg(args, val_ptyp);
-			arg = c_getarg(arg, 0);
-			switch(args->em_argtype) {
+			checkarg(&(p->em_arg), val_ptyp);
+			switch(p->em_argtype) {
 				case ilb_ptyp:
-					C_rom_ilb(args->em_ilb);
+					C_rom_ilb(p->em_ilb);
 					break;
 				case nof_ptyp:
-					C_rom_dlb(args->em_dlb, args->em_noff);
+					C_rom_dlb(p->em_dlb, p->em_off);
 					break;
 				case sof_ptyp:
-					C_rom_dnam(args->em_dnam, args->em_soff);
+					C_rom_dnam(p->em_dnam, p->em_off);
 					break;
 				case cst_ptyp:
-					C_rom_cst(args->em_cst);
+					C_rom_cst(p->em_cst);
 					break;
 				case pro_ptyp:
-					C_rom_pnam(args->em_pnam);
+					C_rom_pnam(p->em_pnam);
 					break;
 				case str_ptyp:
-					C_rom_scon(args->em_str, args->em_size);
+					C_rom_scon(p->em_string, p->em_size);
 					break;
 				case ico_ptyp:
-					C_rom_icon(args->em_str, args->em_size);
+					C_rom_icon(p->em_string, p->em_size);
 					break;
 				case uco_ptyp:
-					C_rom_ucon(args->em_str, args->em_size);
+					C_rom_ucon(p->em_string, p->em_size);
 					break;
 				case fco_ptyp:
-					C_rom_fcon(args->em_str, args->em_size);
+					C_rom_fcon(p->em_string, p->em_size);
 					break;
 				default:
 					EM_error = "Illegal argument type";
@@ -354,40 +325,37 @@ EM_dopseudo(opcode, args)
 }
 
 PRIVATE
-EM_docon(args)
-	register struct e_args *args;
+EM_docon(p)
+	register struct e_instr *p;
 {
-	register struct e_args *arg;
-
-	arg = c_getarg(args, val_ptyp);
-	arg = c_getarg(arg, 0);
-	switch(args->em_argtype) {
+	checkarg(&(p->em_arg), val_ptyp);
+	switch(p->em_argtype) {
 		case ilb_ptyp:
-			C_ilb(args->em_ilb);
+			C_ilb(p->em_ilb);
 			break;
 		case nof_ptyp:
-			C_dlb(args->em_dlb, args->em_noff);
+			C_dlb(p->em_dlb, p->em_off);
 			break;
 		case sof_ptyp:
-			C_dnam(args->em_dnam, args->em_soff);
+			C_dnam(p->em_dnam, p->em_off);
 			break;
 		case cst_ptyp:
-			C_cst(args->em_cst);
+			C_cst(p->em_cst);
 			break;
 		case pro_ptyp:
-			C_pnam(args->em_pnam);
+			C_pnam(p->em_pnam);
 			break;
 		case str_ptyp:
-			C_scon(args->em_str, args->em_size);
+			C_scon(p->em_string, p->em_size);
 			break;
 		case ico_ptyp:
-			C_icon(args->em_str, args->em_size);
+			C_icon(p->em_string, p->em_size);
 			break;
 		case uco_ptyp:
-			C_ucon(args->em_str, args->em_size);
+			C_ucon(p->em_string, p->em_size);
 			break;
 		case fco_ptyp:
-			C_fcon(args->em_str, args->em_size);
+			C_fcon(p->em_string, p->em_size);
 			break;
 		default:
 			EM_error = "Illegal argument type";
@@ -396,18 +364,16 @@ EM_docon(args)
 }
 
 PRIVATE
-EM_dostartmes(args)
-	register struct e_args *args;
+EM_dostartmes(p)
+	register struct e_instr *p;
 {
-	register struct e_args *arg;
 
 	if (listtype) {
 		EM_error = "Message not ended";
 		return;
 	}
-	arg = c_getarg(args, cst_ptyp);
-	arg = c_getarg(arg, 0);
-	C_mes_begin((int) (args->em_cst));
+	checkarg(&(p->em_arg), cst_ptyp);
+	C_mes_begin((int) (p->em_cst));
 	listtype = ps_mes;
 }
 
@@ -429,27 +395,27 @@ EM_mkcalls(line)
 			break;
 		case EM_MNEM:
 			/* normal instruction */
-			EM_doinstr(line->em_opcode, line->em_args);
+			EM_doinstr(line);
 			break;
 		case EM_DEFILB:
 			/* defining occurrence of an instruction label */
-			C_df_ilb(line->em_deflb);
+			C_df_ilb(line->em_ilb);
 			break;
 		case EM_DEFDLB:
 			/* defining occurrence of a global data label */
-			C_df_dlb(line->em_deflb);
+			C_df_dlb(line->em_dlb);
 			break;
 		case EM_DEFDNAM:
 			/* defining occurrence of a non-numeric data label */
-			C_df_dnam(line->em_defdnam);
+			C_df_dnam(line->em_dnam);
 			break;
 		case EM_PSEU:
 			/* pseudo */
-			EM_dopseudo(line->em_opcode, line->em_args);
+			EM_dopseudo(line);
 			break;
 		case EM_STARTMES:
 			/* start of a MES pseudo */
-			EM_dostartmes(line->em_arg);
+			EM_dostartmes(line);
 			break;
 		case EM_MESARG:
 		case EM_ENDMES:
@@ -460,7 +426,7 @@ EM_mkcalls(line)
 			}
 #endif
 			if (line->em_type == EM_MESARG) {
-				EM_docon(line->em_arg);
+				EM_docon(line);
 				break;
 			}
 			C_mes_end();

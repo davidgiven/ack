@@ -60,26 +60,17 @@ _fill()
 	}
 }
 
-#define NARGS	3		/* Maximum number of arguments */
 #define STRSIZ	256		/* Maximum length of strings */
 
-static struct e_instr emhead;	/* Where we put the head */
-static struct e_args emargs[NARGS+2];	/* Where we put the arguments.
-					   We need some more because some
-					   arguments are constructed
-					*/
-static struct e_args *i_emargs;
-#define argentry()	(i_emargs++)
+static struct e_instr *emhead;	/* Where we put the head */
+static struct e_instr aheads[3];
+static int ahead;
+
 static struct string {
 	int length;
 	char str[STRSIZ + 1];
-} strings[NARGS];		/* Room for strings */
-static struct string *i_strings;		/* Index of last one used */
-#define stringentry()	(i_strings++)
+} string;
 
-static struct e_args *argp;	/* Indicates arguments yet to be
-				   delivered
-				*/
 #ifdef COMPACT
 static arith strleft;		/* count # of chars left to read
 				   in a string
@@ -104,11 +95,10 @@ static long wordmask[] = {	/* allowed bits in a word */
 };
 
 static int wsize, psize;	/* word size and pointer size */
-int EM_wordsize, EM_pointersize;
 
 #ifdef CHECKING
 static char *argrange = "Argument range error";
-#define check(expr) (expr || !EM_error || (EM_error = argrange))
+#define check(expr) (expr || EM_error || (EM_error = argrange))
 #else not CHECKING
 #define check(x)	/* nothing */
 #endif CHECKING
@@ -120,7 +110,7 @@ PRIVATE
 xerror(s)
 	char *s;
 {
-	if (emhead.em_type != EM_FATAL) emhead.em_type = EM_ERROR;
+	if (emhead->em_type != EM_FATAL) emhead->em_type = EM_ERROR;
 	if (!EM_error) EM_error = s;
 }
 
@@ -129,7 +119,7 @@ PRIVATE
 xfatal(s)
 	char *s;
 {
-	emhead.em_type = EM_FATAL;
+	emhead->em_type = EM_FATAL;
 	if (!EM_error) EM_error = s;
 }
 
@@ -196,68 +186,59 @@ PRIVATE
 startmes(p)
 	register struct e_instr *p;
 {
-	register struct e_args *ap;
 
-	ap = getarg(cst_ptyp);
-	p->em_arg = ap;
+	getarg(cst_ptyp, &(p->em_arg));
 	state = MES;
 
-	if (ap->em_cst == ms_emx) {
+	if (p->em_cst == ms_emx) {
 		if (wsize || psize) {
 			if (!EM_error) EM_error = "Duplicate ms_emx";
 		}
-		argp = ap = getarg(cst_ptyp);
-		wsize = ap->em_cst;
-		EM_wordsize = ap->em_cst;
-		ap->em_next = getarg(cst_ptyp);
-		ap = ap->em_next;
-		psize = ap->em_cst;
-		EM_pointersize = ap->em_cst;
+		p = &aheads[ahead++];
+		getarg(cst_ptyp, &(p->em_arg));
+		wsize = p->em_cst;
+		EM_wordsize = p->em_cst;
+		p->em_type = EM_MESARG;
+		p = &aheads[ahead++];
+		getarg(cst_ptyp, &(p->em_arg));
+		psize = p->em_cst;
+		EM_pointersize = p->em_cst;
+		p->em_type = EM_MESARG;
 	}
 }
 
 
 /* EM_getinstr: read an "EM_line"
 */
-EXPORT struct e_instr *
-EM_getinstr()
+EXPORT int
+EM_getinstr(p)
+	register struct e_instr *p;
 {
-	register struct e_instr *p = &emhead;
-	register struct e_args *args;
 
-	i_emargs = emargs;
-	i_strings = strings;
 	EM_error = 0;
+	if (ahead) {
+		*p = aheads[--ahead];
+		return 1;
+	}
+	emhead = p;
 #ifdef CHECKING
 	if (!EM_initialized) {
 		EM_error = "Initialization not done";
 		p->em_type = EM_FATAL;
-		return p;
+		return 0;
 	}
 #endif CHECKING
 
-	if (argp) {	/* We have some arguments left to deliver */
-		args = argp;
-		argp = args->em_next;
-		p->em_type = EM_MESARG;
-		p->em_arg = args;
-		args->em_next = 0;
-		return p;
-	}
-
 	if (!state) {		/* All clear, get a new line */
-		p = gethead();
-		if (!p) {	/* End of file */
-			return p;
-		}
+		gethead(p);
 		switch(p->em_type) {
+		case EM_EOF:
+			return EM_error == 0;
 		case EM_MNEM: {
 			register int i,j;
-			register struct e_args *ap;
 			extern char em_flag[];
 			extern short em_ptyp[];	
 
-			p->em_args = 0;
 			j = em_flag[p->em_opcode - sp_fmnem] & EM_PAR;
 			i = em_ptyp[j];
 			if (j == PAR_NO) {	/* No arguments */
@@ -266,11 +247,11 @@ EM_getinstr()
 #ifndef COMPACT
 			if (j == PAR_B) i = ptyp(sp_ilb2);
 #endif COMPACT
-			ap = getarg(i);
+			getarg(i, &(p->em_arg));
 #ifndef COMPACT
 			if (j == PAR_B) {
-				ap->em_cst = ap->em_ilb;
-				ap->em_argtype = cst_ptyp;
+				p->em_cst = p->em_ilb;
+				p->em_argtype = cst_ptyp;
 			}
 #endif COMPACT
 			/* range checking
@@ -278,48 +259,47 @@ EM_getinstr()
 #ifdef CHECKING
 			if (wsize <= 4 && psize <= 4) switch(j) {
 			case PAR_B:
-				check(ap->em_cst <= 32767);
+				check(p->em_cst <= 32767);
 				/* Fall through */
 			case PAR_N:
-				check(ap->em_cst >= 0);
+				check(p->em_cst >= 0);
 				break;
 			case PAR_G:
-				if (ap->em_argtype == cst_ptyp) {
-					check(ap->em_cst >= 0);
+				if (p->em_argtype == cst_ptyp) {
+					check(p->em_cst >= 0);
 				}
 				/* Fall through */
 			case PAR_F:
 				/* ??? not in original em_decode or em_encode */
 			case PAR_L:
-			{	arith m = ap->em_cst >= 0 ? ap->em_cst :
-							    - ap->em_cst;
+			{	arith m = p->em_cst >= 0 ? p->em_cst :
+							    - p->em_cst;
 
 				/* Check that the number fits in a pointer */
 				check((m & ~wordmask[psize]) == 0);
 				break;
 			}
 			case PAR_W:
-				if (!ap) break;
-				check((ap->em_cst & ~wordmask[wsize]) == 0);
+				if (p->em_argtype == 0) break;
+				check((p->em_cst & ~wordmask[wsize]) == 0);
 				/* Fall through */
 			case PAR_S:
-				check(ap->em_cst > 0);
+				check(p->em_cst > 0);
 				/* Fall through */
 			case PAR_Z:
-				check(ap->em_cst >= 0 &&
-				      ap->em_cst % wsize == 0);
+				check(p->em_cst >= 0 &&
+				      p->em_cst % wsize == 0);
 				break;
 			case PAR_O:
-				check(ap->em_cst > 0 &&
-		      		      ( ap->em_cst % wsize == 0 ||
-					wsize % ap->em_cst == 0));
+				check(p->em_cst > 0 &&
+		      		      ( p->em_cst % wsize == 0 ||
+					wsize % p->em_cst == 0));
 				break;
 			case PAR_R:
-				check(ap->em_cst >= 0 && ap->em_cst <= 2);
+				check(p->em_cst >= 0 && p->em_cst <= 2);
 				break;
 			}
 #endif CHECKING
-			p->em_args = ap;
 #ifndef COMPACT
 			checkeol();
 #endif COMPACT
@@ -332,18 +312,20 @@ EM_getinstr()
 			   type ROM or CON is in process
 			*/
 			{
-			register struct e_args *ap = 0, *ap1;
+			struct e_arg dummy;
 
 			switch(p->em_opcode) {
 			case ps_bss:
 			case ps_hol:
-				ap = getarg(cst_ptyp);
-				ap->em_next = ap1 = getarg(par_ptyp);
-				ap->em_next->em_next = ap1 = getarg(cst_ptyp);
+				getarg(cst_ptyp, &dummy);
+				em_holsize = dummy.ema_cst;
+				getarg(par_ptyp, &(p->em_arg));
+				getarg(cst_ptyp, &dummy);
+				em_holinit = dummy.ema_cst;
 #ifdef CHECKING
 				/* Check that the last value is 0 or 1
 				*/
-				if (ap1->em_cst != 1 && ap1->em_cst != 0) {
+				if (em_holinit != 1 && em_holinit != 0) {
 				  if (! EM_error)
 				   EM_error="Third argument of hol/bss not 0/1";
 				}
@@ -351,36 +333,41 @@ EM_getinstr()
 				break;
 			case ps_exa:
 			case ps_ina:
-				ap = getarg(lab_ptyp);
+				getarg(lab_ptyp, &(p->em_arg));
 				break;
 			case ps_exp:
 			case ps_inp:
-				ap = getarg(pro_ptyp);
+				getarg(pro_ptyp, &(p->em_arg));
 				break;
 			case ps_exc:
-				ap = getarg(cst_ptyp);
-				ap->em_next = getarg(cst_ptyp);
+				getarg(cst_ptyp, &dummy);
+				p->em_exc1 = dummy.ema_cst;
+				getarg(cst_ptyp, &dummy);
+				p->em_exc2 = dummy.ema_cst;
 				break;
 			case ps_pro:
-				ap = getarg(pro_ptyp);
-				ap->em_next = getarg(cst_ptyp|ptyp(sp_cend));
+				getarg(pro_ptyp, &(p->em_arg));
+				getarg(cst_ptyp|ptyp(sp_cend), &dummy);
+				if (dummy.ems_argtype == 0) {
+					p->em_off = -1;
+				}
+				else	p->em_off = dummy.ema_cst;
 				break;
 			case ps_end:
-				ap = getarg(cst_ptyp|ptyp(sp_cend));
+				getarg(cst_ptyp|ptyp(sp_cend), &(p->em_arg));
 				break;
 			case ps_con:
-				ap = getarg(val_ptyp);
+				getarg(val_ptyp, &(p->em_arg));
 				state |= CON;
 				break;
 			case ps_rom:
-				ap = getarg(val_ptyp);
+				getarg(val_ptyp, &(p->em_arg));
 				state |= ROM;
 				break;
 			default:
 				xerror("Bad pseudo");
 				break;
 			}
-			p->em_args = ap;
 			}
 #ifndef COMPACT
 			if (p->em_opcode != ps_con && p->em_opcode != ps_rom) {
@@ -397,7 +384,7 @@ EM_getinstr()
 			psize = 2;
 			EM_error = "EM code should start with mes 2";
 		}
-		return p;
+		return EM_error == 0;
 	}
 
 	if (state & INSTRING) {	/* We already delivered part of a string.
@@ -406,11 +393,9 @@ EM_getinstr()
 		register struct string *s;
 		
 		s = getstring(0);
-		args = argentry();
-		args->em_next = 0;
-		args->em_argtype = str_ptyp;
-		args->em_str = s->str;
-		args->em_size = s->length;
+		p->em_argtype = str_ptyp;
+		p->em_string = s->str;
+		p->em_size = s->length;
 		switch(state & PSEUMASK) {
 		default:
 			assert(0);
@@ -418,50 +403,45 @@ EM_getinstr()
 			if (!EM_error)
 				EM_error = "String too long in message";
 			p->em_type = EM_MESARG;
-			p->em_arg = args;
 			break;
 		case CON:
 			p->em_type = EM_PSEU;
 			p->em_opcode = ps_con;
-			p->em_args = args;
 			break;
 		case ROM:
 			p->em_type = EM_PSEU;
 			p->em_opcode = ps_rom;
-			p->em_args = args;
 			break;
 		}
-		return p;
+		return EM_error == 0;
 	}
 
 	/* Here, we are in a state reading arguments */
-	args = getarg(any_ptyp);
+	getarg(any_ptyp, &(p->em_arg));
 	if (EM_error && p->em_type != EM_FATAL) {
-		return p;
+		return 0;
 	}
-	if (!args) {	/* No more arguments */
+	if (p->em_argtype == 0) {	/* No more arguments */
 #ifndef COMPACT
 		checkeol();
 #endif
 		if (state == MES) {
 			state = 0;
 			p->em_type = EM_ENDMES;
-			return p;
+			return EM_error == 0;
 		}
 		/* Here, we have to get the next instruction */
 		state = 0;
-		return EM_getinstr();
+		return EM_getinstr(p);
 	}
 
 	/* Here, there was an argument */
 	if (state == MES) {
 		p->em_type = EM_MESARG;
-		p->em_arg = args;
-		return p;
+		return EM_error == 0;
 	}
 	p->em_type = EM_PSEU;
-	p->em_args = args;
 	if (state == CON) p->em_opcode = ps_con;
 	else	p->em_opcode = ps_rom;
-	return p;
+	return EM_error == 0;
 }

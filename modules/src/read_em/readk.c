@@ -39,39 +39,38 @@ get32()
 PRIVATE struct string *getstring();
 
 /* getarg : read an argument of any type, and check it against "typset"
-   if neccesary. Return a pointer to the argument.
+   if neccesary. Put result in "ap".
 */
-PRIVATE struct e_args *
-getarg(typset)
+PRIVATE
+getarg(typset, ap)
+	register struct e_arg *ap;
 {
-	register struct e_args *ap = argentry();
 	register int i = getbyte();
 #ifdef CHECKING
 	int argtyp;
 #endif CHECKING
 
-	ap->em_next = 0;
 	switch(i) {
 	default:
 		if (i < sp_fcst0+sp_ncst0 && i >= sp_fcst0) { /* A cst */
-			ap->em_cst = i - sp_zcst0;
-			ap->em_argtype = cst_ptyp;
+			ap->ema_cst = i - sp_zcst0;
+			ap->ems_argtype = cst_ptyp;
 			i = sp_cst2;
 		}
 		break;
 
 	case sp_dlb1:	/* Numeric data label encoded in one byte */
-		ap->em_dlb = getbyte();
-		ap->em_noff = 0;
-		ap->em_argtype = nof_ptyp;
+		ap->ema_dlb = getbyte();
+		ap->ems_szoroff = 0;
+		ap->ems_argtype = nof_ptyp;
 		break;
 
 	case sp_dlb2:	/* Numeric data label encoded in two bytes */
-		ap->em_dlb = get16();
-		ap->em_noff = 0;
-		ap->em_argtype = nof_ptyp;
+		ap->ema_dlb = get16();
+		ap->ems_szoroff = 0;
+		ap->ems_argtype = nof_ptyp;
 #ifdef CHECKING
-		if (ap->em_dlb > 32767 && !EM_error) {
+		if (ap->ema_dlb > 32767 && !EM_error) {
 			EM_error = "Illegal data label";
 			break;
 		}
@@ -79,15 +78,15 @@ getarg(typset)
 		break;
 
 	case sp_ilb1:	/* Instruction label encoded in one byte */
-		ap->em_ilb = getbyte();
-		ap->em_argtype = ilb_ptyp;
+		ap->ema_ilb = getbyte();
+		ap->ems_argtype = ilb_ptyp;
 		break;
 
 	case sp_ilb2:	/* Instruction label encoded in two bytes */
-		ap->em_ilb = get16();
-		ap->em_argtype = ilb_ptyp;
+		ap->ema_ilb = get16();
+		ap->ems_argtype = ilb_ptyp;
 #ifdef CHECKING
-		if (ap->em_ilb > 32767 && !EM_error) {
+		if (ap->ema_ilb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label";
 			break;
 		}
@@ -95,13 +94,13 @@ getarg(typset)
 		break;
 
 	case sp_cst2:	/* A cst encoded in two bytes */
-		ap->em_cst = get16();
-		ap->em_argtype = cst_ptyp;
+		ap->ema_cst = get16();
+		ap->ems_argtype = cst_ptyp;
 		break;
 
 	case sp_cst4:	/* A cst encoded in four bytes */
-		ap->em_cst = get32();
-		ap->em_argtype = cst_ptyp;
+		ap->ema_cst = get32();
+		ap->ems_argtype = cst_ptyp;
 		break;
 
 	case sp_pnam:	/* A procedure name */
@@ -114,8 +113,8 @@ getarg(typset)
 			xerror("Procedure name too long");
 		}
 #endif CHECKING
-		ap->em_pnam = p->str;
-		ap->em_argtype = pro_ptyp;
+		ap->ema_pnam = p->str;
+		ap->ems_argtype = pro_ptyp;
 		break;
 	}
 
@@ -129,25 +128,19 @@ getarg(typset)
 			xerror("Data label too long");
 		}
 #endif CHECKING
-		ap->em_dnam = p->str;
-		ap->em_soff = 0;
-		ap->em_argtype = sof_ptyp;
+		ap->ema_dnam = p->str;
+		ap->ems_szoroff = 0;
+		ap->ems_argtype = sof_ptyp;
 		break;
 	}
 
 	case sp_doff:	/* A data label + offset */
 	{
-		register struct e_args *ap1;
+		struct e_arg dummy;
 
-		ap1 = getarg(lab_ptyp);
-		*ap = *ap1;
-		i_emargs--;
-		ap1 = getarg(cst_ptyp);
-		if (ap->em_argtype == sof_ptyp) {	/* non-numeric label */
-			ap->em_soff = ap1->em_cst;
-		}
-		else	ap->em_noff = ap1->em_cst;
-		i_emargs--;
+		getarg(lab_ptyp, ap);
+		getarg(cst_ptyp, &dummy);
+		ap->ems_szoroff = dummy.ema_cst;
 		break;
 	}
 
@@ -157,16 +150,16 @@ getarg(typset)
 	{
 		register struct string *p;
 
-		ap->em_size = getarg(cst_ptyp)->em_cst;
-		i_emargs--;
+		getarg(cst_ptyp, ap);
+		ap->ems_szoroff = ap->ema_cst;
 		p = getstring(0);
 #ifdef CHECKING
 		if (state & INSTRING) {
 			xerror("Numeric constant too long");
 		}
 #endif CHECKING
-		ap->em_argtype = ptyp(i);
-		ap->em_str = p->str;
+		ap->ems_argtype = ptyp(i);
+		ap->ema_string = p->str;
 		break;
 	}
 
@@ -175,34 +168,37 @@ getarg(typset)
 		register struct string *p;
 
 		p = getstring(0);
-		ap->em_argtype = str_ptyp;
-		ap->em_str = p->str;
-		ap->em_size = p->length;
+		ap->ems_argtype = str_ptyp;
+		ap->ema_string = p->str;
+		ap->ems_szoroff = p->length;
 		break;
 	}
 	}
 #ifdef CHECKING
 	argtyp = i;
-	if (EM_error) return 0;
+	if (EM_error) return;
 
 	if (i == EOF) {
 		xfatal("Unexpected EOF");
-		return 0;
+		return;
 	}
 
 	if ((i -= sp_fspec) < 0 || i >= 16) {
 		xerror("Illegal byte");
-		return 0;
+		return;
 	}
 
 	if ((typset & (1 << i)) == 0 && !EM_error) {
 		EM_error = "Bad argument type";
 	}
-	if (argtyp == sp_cend) return 0;
+	if (argtyp == sp_cend) {
+		ap->ems_argtype = 0;
+	}
 #else not CHECKING
-	if (i == sp_cend) return 0;
+	if (i == sp_cend) {
+		ap->ems_argtype = 0;
+	}
 #endif CHECKING
-	return ap;
 }
 
 #ifdef CHECKING
@@ -238,13 +234,14 @@ getstring(isident)
 {
 	register char *p;
 	register int n;
-	register struct string *s;
+	register struct string *s = &string;
 
 	if (!(state & INSTRING)) {	/* Not reading a string yet */
-		struct e_args *ap = getarg(cst_ptyp);
+		struct e_arg dummy;
+
+		getarg(cst_ptyp, &dummy);
 					/* Read length of string */
-		i_emargs--;
-		strleft = ap->em_cst;
+		strleft = dummy.ema_cst;
 #ifdef CHECKING
 		if (strleft < 0) {
 			xerror("Negative length in string");
@@ -252,8 +249,6 @@ getstring(isident)
 		}
 #endif CHECKING
 	}
-
-	s = stringentry();
 
 	if (strleft <= STRSIZ) {	/* Handle the whole string */
 		n = strleft;
@@ -286,11 +281,11 @@ getstring(isident)
 
 /* gethead: read the start of an EM-line
 */
-PRIVATE struct e_instr *
-gethead()
+PRIVATE
+gethead(p)
+	register struct e_instr *p;
 {
 	register int i;
-	register struct e_instr *p = &emhead;
 
 	EM_lineno++;
 
@@ -298,7 +293,7 @@ gethead()
 		/* A mnemonic */
 		p->em_type = EM_MNEM;
 		p->em_opcode = i;
-		return p;
+		return;
 	}
 
 	if (i < sp_fpseu+sp_npseu && i >= sp_fpseu) {	/* A pseudo */
@@ -307,26 +302,26 @@ gethead()
 		}
 		else	p->em_type = EM_PSEU;
 		p->em_opcode = i;
-		return p;
+		return;
 	}
 
 	if (i < sp_filb0+sp_nilb0 && i >= sp_filb0) {	/* Instruction label */
 		p->em_type = EM_DEFILB;
-		p->em_deflb = i - sp_filb0;
-		return p;
+		p->em_ilb = i - sp_filb0;
+		return;
 	}
 
 	switch(i) {
 	case sp_ilb1:	/* Instruction label */
 		p->em_type = EM_DEFILB;
-		p->em_deflb = getbyte();
+		p->em_ilb = getbyte();
 		break;
 
 	case sp_ilb2:	/* Instruction label */
 		p->em_type = EM_DEFILB;
-		p->em_deflb = get16();
+		p->em_ilb = get16();
 #ifdef CHECKING
-		if (p->em_deflb > 32767 && !EM_error) {
+		if (p->em_ilb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label definition";
 		}
 #endif CHECKING
@@ -334,14 +329,14 @@ gethead()
 
 	case sp_dlb1:	/* Numeric data label */
 		p->em_type = EM_DEFDLB;
-		p->em_deflb = getbyte();
+		p->em_dlb = getbyte();
 		break;
 
 	case sp_dlb2:	/* Numeric data label */
 		p->em_type = EM_DEFDLB;
-		p->em_deflb = get16();
+		p->em_dlb = get16();
 #ifdef CHECKING
-		if (p->em_deflb > 32767 && !EM_error) {
+		if (p->em_dlb > 32767 && !EM_error) {
 			EM_error = "Illegal data label definition";
 		}
 #endif CHECKING
@@ -353,19 +348,20 @@ gethead()
 
 		p->em_type = EM_DEFDNAM;
 		if (!(s = getstring(1))) {
-			p->em_defdnam = "";
+			p->em_dnam = "";
 		}
-		else	p->em_defdnam = s->str;
+		else	p->em_dnam = s->str;
 		break;
 	}		
 
 	case EOF:	/* End of file */
-		return 0;
+		p->em_type = EM_EOF;
+		return;
 
 	default:
 		xerror("Unknown opcode");
 		break;
 	}
 
-	return p;
+	return;
 }
