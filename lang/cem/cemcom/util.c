@@ -178,7 +178,9 @@ LoadLocal(off, sz)
 {
 	register struct localvar *p = find_reg(off);
 
+#ifdef USE_TMP
 	if (p) p->t_count++;
+#endif
 	if (sz == word_size) C_lol(off);
 	else if (sz == dword_size) C_ldl(off);
 	else {
@@ -193,7 +195,9 @@ StoreLocal(off, sz)
 {
 	register struct localvar *p = find_reg(off);
 
+#ifdef USE_TMP
 	if (p) p->t_count++;
+#endif
 	if (sz == word_size) C_stl(off);
 	else if (sz == dword_size) C_sdl(off);
 	else {
