@@ -148,7 +148,7 @@ _catch(erno) unsigned erno; {
 		if (_write(2,q,(int)(p-q)) < 0)
 			;
 	}
-	_exit(erno);
+	_exit(erno+1);
 error:
 	_trp(erno);
 }

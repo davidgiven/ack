@@ -88,12 +88,12 @@ catch(trapno)
 		signal(__signo, SIG_DFL);
 		_cleanup();
 		kill(getpid(), __signo);
-		_exit(trapno);
+		_exit(trapno+1);
 	}
 #endif
 	if (trapno != M2_FORCH) {
 		_cleanup();
-		_exit(trapno);
+		_exit(trapno+1);
 	}
 	SIG(catch);
 }
