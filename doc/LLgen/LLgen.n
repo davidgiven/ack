@@ -338,7 +338,12 @@ grammar rule.
 .PP
 In order to facilitate communication between the actions and
 \fILLparse\fR,
-the parsing routines can be given C-like parameters. So, for example
+the parsing routines can be given C-like parameters.
+Each parameter must be declared separately, and each of these declarations must
+end with a semicolon.
+For the last parameter, the semicolon is optional.
+.PP
+So, for example
 .nf
 .ft CW
 .sp 1
@@ -921,7 +926,7 @@ stat    {       int     ident, val; } :
         | '\en'
         ;
 
-expr(int level, int *val;) {       int     expr; } :
+expr(int level; int *val;) {       int     expr; } :
           factor(val)
           [ %while (prio(tok.t_tokno) >= level)
                     /* Swallow operators as long as their priority is
