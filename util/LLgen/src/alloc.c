@@ -62,7 +62,7 @@ ralloc(p,size) p_mem p; unsigned size; {
 }
 
 p_mem
-new_mem(p) p_info p; {
+new_mem(p) register p_info p; {
 	/*
 	   This routine implements arrays that can grow.
 	   It must be called every time a new element is added to it.
@@ -75,7 +75,7 @@ new_mem(p) p_info p; {
 	 */
 	p_mem	rp;
 	unsigned sz;
-	
+
 	if (p->i_max >= p->i_top) {	/* No more free elements */
 		sz = p->i_size;
 		p->i_size += p->i_incr * p->i_esize;
