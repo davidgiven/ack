@@ -1,6 +1,14 @@
 .\"	$Header$
 .\"	Run this paper off with
 .\"	refer [options] -p LLgen.refs LLgen.doc | [n]eqn | tbl | (nt)roff -ms
+.if '\*(>.'' \{\
+.	if '\*(.>'' \{\
+.		if n .ds >. .
+.		if n .ds >, ,
+.		if t .ds .> .
+.		if t .ds ,> ,\
+\}\
+\}
 .cs 5 22u
 .RP
 .ND
@@ -147,7 +155,7 @@ We can describe the syntax of an ECF syntax with an ECF syntax :
 .ft 5
 grammar         : rule +
                 ;
-.ft P
+.ft R
 .DE
 This grammar rule states that a grammar consists of one or more
 rules.
@@ -155,7 +163,7 @@ rules.
 .ft 5
 rule            : nonterminal ':' productionrule ';'
                 ;
-.ft P
+.ft R
 .DE
 A rule consists of a left hand side, the nonterminal,
 followed by ":",
@@ -165,7 +173,7 @@ the \fBproduce symbol\fR, followed by a production rule, followed by a
 .ft 5
 productionrule  : production [ '|' production ]*
                 ;
-.ft P
+.ft R
 .DE
 A production rule consists of one or
 more alternative productions separated by "|". This symbol is called the
@@ -174,7 +182,7 @@ more alternative productions separated by "|". This symbol is called the
 .ft 5
 production      : term *
                 ;
-.ft P
+.ft R
 .DE
 A production consists of a possibly empty list of terms.
 So, empty productions are allowed.
@@ -182,7 +190,7 @@ So, empty productions are allowed.
 .ft 5
 term            : element repeats
                 ;
-.ft P
+.ft R
 .DE
 A term is an element, possibly with a repeat specification.
 .DS
@@ -191,7 +199,7 @@ element         : LITERAL
                 | IDENTIFIER
                 | '[' productionrule ']'
                 ;
-.ft P
+.ft R
 .DE
 An element can be a LITERAL, which basically is a single character
 between apostrophes, it can be an IDENTIFIER, which is either a
@@ -203,7 +211,7 @@ repeats         : '?'
                 | [ '*' | '+' ] NUMBER ?
                 | NUMBER ?
                 ;
-.ft P
+.ft R
 .DE
 These are the repeat specifications discussed above. Notice that
 this specification may be empty.
@@ -283,7 +291,7 @@ by writing
 .ft 5
 .sp 1
 %token  name1, name2, . . . ;
-.ft P
+.ft R
 .fi
 .PP
 \fILLparse\fR is designed to recognize special nonterminal
@@ -297,7 +305,7 @@ legal, f.i.:
 .ft 5
 .sp 1
 %start LLparse, specification ;
-.ft P
+.ft R
 .fi
 .sp 1
 declares "specification" as a start symbol and associates the
@@ -354,7 +362,7 @@ expr(int *pval;) { int fact; } :
                  */
         ;
 .sp 1
-.ft P
+.ft R
 .fi
 is a rule to recognize a number of factors, separated by "+", and
 to compute their sum.
@@ -391,7 +399,7 @@ Error Recovery
 The error recovery technique used by \fILLgen\fR is a
 modification of the one presented in .
 .[
-Rohrich
+automatic construction error correcting
 .]
 It is based on \fBdefault choices\fR, which just are
 what the word says, default choices at
@@ -461,14 +469,14 @@ in which the term appears, and
 .nf
                 term+
 .fi
-.ft P
+.ft R
 .sp 1
 is treated as
 .sp 1
 .nf
 .ft 5
                 term term* .
-.ft P
+.ft R
 .fi
 .PP
 It is also clear, that it can never be the default choice to do
@@ -485,7 +493,7 @@ For instance, the rule
 .nf
 commandlist : command* ;
 .fi
-.ft P
+.ft R
 .sp 1
 could be changed to
 .sp 1
@@ -493,7 +501,7 @@ could be changed to
 .nf
 commandlist : [ %persistent command ]* ;
 .fi
-.ft P
+.ft R
 .sp 1
 The effects of this in case of a syntax error are twofold:
 The set @T@ mentioned above will be extended as if "command" were
@@ -544,7 +552,7 @@ The conflicts can be examined by inspecting the verbose
 The conflicts can be resolved by rewriting the grammar
 or by using \fBconflict resolvers\fR.
 The mechanism described here is based on the attributed parsing
-of.
+of .
 .[
 milton
 .]
@@ -587,7 +595,7 @@ nonterminal, f.i.:
 .nf
 .ft 5
 %first fmac, nonterm ;
-.ft P
+.ft R
 .sp 1
 .fi
 declares "fmac" as a macro with one parameter, whose value
@@ -654,7 +662,7 @@ only once in the grammar specification, f.i.:
 .nf
 .ft 5
 %lexical scanner ;
-.ft P
+.ft R
 .fi
 .sp 1
 declares "scanner" as the name of the lexical analyzer.
@@ -793,7 +801,7 @@ repeats : /* empty */
         ;
 
 .fi
-.ft P
+.ft R
 .bp
 .SH
 Appendix B : An example
@@ -821,8 +829,8 @@ nonterminal, no matter how many priority levels there are.
 {
 #include <stdio.h>
 #include <ctype.h>
-#define MAXPRIO		5
-#define prio(op)	(ptab[op])
+#define MAXPRIO      5
+#define prio(op)     (ptab[op])
 
 struct token {
         int     t_tokno;        /* token number */
@@ -956,7 +964,7 @@ main() {
         return parse();
 }   }
 .fi
-.ft P
+.ft R
 .bp
 .SH
 Appendix C. How to use \fILLgen\fR.
@@ -1014,4 +1022,4 @@ decl.o:         Lpars.h
 expr.o:         Lpars.h
 
 .fi
-.ft P
+.ft R
