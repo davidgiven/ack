@@ -1,7 +1,12 @@
 #include <ctype.h>
 #include <system.h>
 #include <stdio.h>
+#if __STDC__
+#include <stdarg.h>
+extern error(char *, ...);
+#else
 #include <varargs.h>
+#endif
 #include "as.h"
 #include "const.h"
 
@@ -224,6 +229,22 @@ char *mnem;
 
 /*** Error ****************************************************************/
 
+#if __STDC__
+/*VARARGS*/
+error(char *fmt, ...)
+{
+	va_list args;
+	extern int yylineno;
+	extern int nerrors;
+
+	va_start(args, fmt);
+		fprint( STDERR, "ERROR in line %d :	", yylineno);
+		doprnt( STDERR, fmt, args);
+		fprint( STDERR, "\n");
+	va_end(args);
+	nerrors++;
+}
+#else
 /*VARARGS*/
 error(va_alist)
 	va_dcl
@@ -241,3 +262,4 @@ error(va_alist)
 	va_end(args);
 	nerrors++;
 }
+#endif

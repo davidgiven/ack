@@ -21,9 +21,14 @@
 
 #include <errno.h>
 #include <signal.h>
-#include <varargs.h>
 #include <stdio.h>
 #include <em_path.h>
+#if __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 
 /*
 	Version producing cc-compatible .o files in one pass.
@@ -117,7 +122,11 @@ int c_flag = 0;
 int v_flag = 0;
 int O_flag = 0;
 
+#if __STDC__
+char *mkstr(char *, ...);
+#else
 char *mkstr();
+#endif
 char *malloc();
 char *alloc();
 char *extension();
@@ -483,6 +492,32 @@ concat(al1, al2)
 	}
 }
 
+#if __STDC__
+/*VARARGS*/
+char *
+mkstr(char *dst, ...)
+{
+	va_list ap;
+
+	va_start(ap, dst);
+	{
+		register char *p;
+		register char *q;
+
+		q = dst;
+		p = va_arg(ap, char *);
+
+		while (p) {
+			while (*q++ = *p++);
+			q--;
+			p = va_arg(ap, char *);
+		}
+	}
+	va_end(ap);
+
+	return dst;
+}
+#else
 /*VARARGS*/
 char *
 mkstr(va_alist)
@@ -509,6 +544,7 @@ mkstr(va_alist)
 
 	return dst;
 }
+#endif
 
 basename(str, dst)
 	char *str;

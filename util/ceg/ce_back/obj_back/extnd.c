@@ -4,7 +4,11 @@
 #include "header.h"
 #include "back.h"
 #include "mach.h"
+#if __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 /* Mysprint() stores the string directly in the string_arae. This saves
  * a copy action. It is assumed that the strings stored in the string-table
@@ -13,6 +17,22 @@
 
 #define MAXSTRLEN	1024
 
+#if __STDC__
+/*VARARGS*/
+static int mysprint(char *fmt, ...)
+{
+	va_list args;
+	int retval;
+
+	va_start(args, fmt);
+	while (string + MAXSTRLEN - string_area > size_string)
+		mem_string();
+	retval = _format(string, fmt, args);
+	string[retval] = '\0';
+	va_end(args);
+	return retval;
+}
+#else
 /*VARARGS*/
 static int mysprint(va_alist)
 	va_dcl
@@ -30,6 +50,7 @@ static int mysprint(va_alist)
 	va_end(args);
 	return retval;
 }
+#endif
 
 /* The extnd_*()s make a name unique. The resulting string is directly stored
  * in the symbol_table (by mysprint()). Later additional fields in the 

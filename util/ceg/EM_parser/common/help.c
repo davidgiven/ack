@@ -1,6 +1,11 @@
 #include <ctype.h>
 #include <system.h>
+#if __STDC__
+#include <stdarg.h>
+extern out(char *, ...);
+#else
 #include <varargs.h>
+#endif
 
 #define CODE_EXPANDER
 #include "em.h"
@@ -99,6 +104,17 @@ int seg;
 	}
 }
 
+#if __STDC__
+/*VARARGS*/
+out(char *fmt, ...)
+{
+        va_list pvar;
+ 
+        va_start(pvar, fmt);
+        doprnt( outfile, fmt, pvar);
+        va_end(pvar);
+}
+#else
 /*VARARGS*/
 out(va_alist)
 va_dcl
@@ -111,6 +127,7 @@ va_dcl
         doprnt( outfile, fmt, pvar);
         va_end(pvar);
 }
+#endif
 
 char *suffix( str, suf)
 char *str, *suf;

@@ -1,4 +1,10 @@
-#include "varargs.h"
+#if __STDC__
+#include <stdarg.h>
+extern out(char *, ...);
+extern error(char *, ...);
+#else
+#include <varargs.h>
+#endif
 #include "decl.h"
 
 /* All the functions in this file will be called by the parser.
@@ -208,6 +214,32 @@ operand_clean()
 	n_ops = 0;
 }
 
+#if __STDC__
+/*VARARGS*/
+out(char *fmt, ...)
+{
+	va_list pvar;
+
+	va_start(pvar, fmt);
+	doprnt( outfile, fmt, pvar);
+	va_end(pvar);
+}
+
+extern int nerrors;
+
+/*VARARGS*/
+error(char *fmt, ...)
+{
+	va_list pvar;
+
+	nerrors++;
+	va_start(pvar, fmt);
+	fprint( STDERR, "!! ERROR :	");
+	doprnt( STDERR, fmt, pvar);
+	fprint( STDERR, "	!!\n");
+	va_end(pvar);
+}
+#else
 /*VARARGS*/
 out(va_alist)
 va_dcl
@@ -238,6 +270,7 @@ va_dcl
 	fprint( STDERR, "	!!\n");
 	va_end(pvar);
 }
+#endif
 
 inc_ops()
 {
