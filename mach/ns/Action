@@ -7,21 +7,9 @@ end
 name "NS16032 EM library"
 dir libem
 end
+name "NS16032 etext,edata,end library"
+dir libend
+end
 name "NS16032 system call library"
-dir libsys
-end
-name "NS16032 C libraries"
-dir libcc
-end
-name "NS16032 Pascal library"
-dir libpc
-end
-name "NS16032 Basic library"
-dir libbc
-end
-name "NS16032 Occam library"
-dir liboc
-end
-name "NS16032 Modula-2 library"
-dir libm2
+dir libmon
 end
