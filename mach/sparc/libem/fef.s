@@ -22,6 +22,12 @@ fef8:
 	and	%o0,%o2,%o1
 	set	16382,%o3
 	sub	%o1,%o3,%o1
+	set	1024,%o2
+	cmp	%o1,%o2
+	bl	1f
+	nop
+	mov	%o2,%o1
+1:
 	st	%o1,[%l0]
 	set	0x8000,%o2
 	and	%o0,%o2,%o0
