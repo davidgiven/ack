@@ -1,6 +1,0 @@
-.SUFFIXES: .o .e .c .m .s
-
-.c.o .e.o .c.m .e.m .c.s .e.s:
-	$(CC) $(CFLAGS) -c $<
-
-fake:

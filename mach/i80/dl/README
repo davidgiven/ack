@@ -1,5 +1,0 @@
-This directory contains files mccpm.c and nascom.c.
-The first one downloads the mc/cpm
-computer, using the standard Intel hex-dump format.	
-The output appears on standard output.
-The latter does the same for the Nascom.

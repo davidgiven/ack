@@ -1,3 +1,0 @@
-menu
-enter date
-<null>

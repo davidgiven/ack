@@ -1,5 +1,0 @@
-This directory contains the back-library that generates object code.
-
-The setup is similar to the assembly version.
-
-The table writer should define some constants in his "mach.h".

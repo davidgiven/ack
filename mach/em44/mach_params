@@ -1,5 +1,0 @@
-MACH=em44
-SUF=m
-ASAR=arch
-RANLIB=:
-MACHFL=-O -DUFS

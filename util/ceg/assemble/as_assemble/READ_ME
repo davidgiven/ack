@@ -1,4 +1,0 @@
-This directory contains the assembly part of the code expander generator.
-
-This version is used to generate code expanders that generate assembly
-instructions instead of object code.

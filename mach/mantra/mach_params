@@ -1,5 +1,0 @@
-MACH=mantra
-SUF=o
-ASAR=aal
-RANLIB=:
-MACHFL=-O -DUFS

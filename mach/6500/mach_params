@@ -1,5 +1,0 @@
-MACH=6500
-SUF=s
-ASAR=arch
-RANLIB=:
-MACHFL=-O -DUFS

@@ -1,3 +1,0 @@
-p=/proj/em/Work
-sh TakeAction 'make distr' $p/distr/Action
-sh TakeAction 'make distr' $p/distr/Action1

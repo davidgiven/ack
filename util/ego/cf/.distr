@@ -1,9 +1,0 @@
-proto.make
-cf.c
-cf.h
-cf_idom.c
-cf_idom.h
-cf_loop.c
-cf_loop.h
-cf_succ.c
-cf_succ.h
