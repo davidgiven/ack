@@ -1,3 +1,4 @@
+proto.make
 assert.h
 codegen.c
 compute.c
