@@ -403,12 +403,9 @@ from Xreg_off
   gen add %1.reg,{CONSTR,%1.off}	yields %1.reg
 
 from halfindir
-  uses reusing %1,ADDREG
+  uses reusing %1,REG
   gen move %1,%a			yields %a
 
-from halfindir
-  uses REG
-  gen move %1,%a			yields %a
 /************************
  * From source to token *
  ************************/
@@ -2407,19 +2404,72 @@ pat lae aar $2==2 && defined(rom($1,1))
   gen mul %b 		yields %1
    				leaving adp 0-rom($1,1)*rom($1,3) ads 2
  
+pat loc sli ads sti $1==1 && $2==2 && $3==2
+with ADDREG rmorconst
+  gen sal %1,{ANYCON,1}
+  add %1,%2			yields %1	leaving sti $4
+with REG ADDREG
+  gen sal %1,{ANYCON,1}
+      add %2,%1			yields %2	leaving sti $4
+
 pat loc sli ads $1==1 && $2==2 && $3==2
-with ADDREG
-  gen sal %1,{ANYCON,1}		yields %1	leaving ads 2
+with ADDREG rmorconst
+  gen sal %1,{ANYCON,1}
+  add %1,%2			yields %1
+with REG ADDREG
+  gen sal %1,{ANYCON,1}
+      add %2,%1			yields %2
+with REG rmorconst
+  gen sal %1,{ANYCON,1}
+  add %1,%2			yields %1
+
+pat loc sli ads sti $1==2 && $2==2 && $3==2
+with ADDREG rmorconst
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      add %1,%2			yields %1	leaving sti $4
+with REG ADDREG
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      add %2,%1			yields %2	leaving sti $4
 
 pat loc sli ads $1==2 && $2==2 && $3==2
-with ADDREG
+with ADDREG rmorconst
   gen sal %1,{ANYCON,1}
-      sal %1,{ANYCON,1}		yields %1	leaving ads 2
+      sal %1,{ANYCON,1}
+      add %1,%2			yields %1
+with REG ADDREG
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      add %2,%1			yields %2
+with REG rmorconst
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}
+      add %1,%2			yields %1
+
+pat loc sli ads sti $2==2 && $3==2
+with ADDREG rmorconst
+uses CXREG={ANYCON,$1}
+  gen sal %1,cl
+      add %1,%2			yields %1	leaving sti $4
+with REG ADDREG
+uses CXREG={ANYCON,$1}
+  gen sal %1,cl
+      add %2,%1			yields %2	leaving sti $4
 
 pat loc sli ads $2==2 && $3==2
-with ADDREG
+with ADDREG rmorconst
 uses CXREG={ANYCON,$1}
-  gen sal %1,cl			yields %1	leaving ads 2
+  gen sal %1,cl
+      add %1,%2			yields %1
+with REG ADDREG
+uses CXREG={ANYCON,$1}
+  gen sal %1,cl
+      add %2,%1			yields %2
+with REG rmorconst
+uses CXREG={ANYCON,$1}
+  gen sal %1,cl
+      add %1,%2			yields %1
 
 pat aar $1==2
   with AREG ACC
