@@ -170,7 +170,7 @@ char *match_ch( c, str, instr)
 char *skip_string( ptr)
 	char *ptr;
 {
-	while  ( isalnum( *ptr) || ( !isspace( *ptr) && *ptr != ':'))
+	while  ( *ptr != '\0' && !isspace( *ptr) && *ptr != ':')
 		ptr++;
 	return( ptr);
 }
@@ -196,6 +196,8 @@ char *mnem;
 {
 	int low, mid, high, rel;
 
+	process_mnemonic( mnem);
+
 	low = 0;
 	high = n_mnems-1;
 
@@ -213,7 +215,6 @@ char *mnem;
 			/* pas op, mid is naar beneden afgerond !! */
 			low = ( mid == low ? low + 1: mid);
 	}
-	process_mnemonic( mnem);
 	( *( instruction[ mid]))( &operand[0], &operand[1], &operand[2], 
 			      	  &operand[3]);
 }
