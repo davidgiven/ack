@@ -2,6 +2,7 @@
 d=../..
 h=$d/h
 l=$d/lib
+ar=ar
 
 OBJ=em_mnem.o em_pseu.o em_flag.o em_ptyp.o
 
@@ -10,7 +11,7 @@ DATA_PATH=em_data.a
 CFLAGS=-O -I$h
 
 $(DATA_PATH):   $(OBJ)
-		ar rv $(DATA_PATH) $(OBJ)
+		$(ar) rv $(DATA_PATH) $(OBJ)
 		-sh -c 'ranlib $(DATA_PATH)'
 
 em_flag.o:      $h/em_flag.h
