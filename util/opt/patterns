@@ -740,24 +740,21 @@ LLP LLP adp SLP sti $2==$4 && (!notreg($2) || $5!=p):
 LEP LEP adp SEP sti $2==$4 && $5!=p:
 	LEP $1 sti $5 LEP $2 adp $3 SEP $4
 #ifndef INT
-dup stl $1==w : stl $2 lol $2
-dup ste $1==w : ste $2 loe $2
-dup sil $1==w : sil $2 lil $2
-dup LEP sti $1==w && $3==w : LEP $2 sti w LEP $2 loi w
-dup LLP stf $1==w : LLP $2 stf $3 LLP $2 lof $3
-dup LEP stf $1==w : LEP $2 stf $3 LEP $2 lof $3
-dup sdl $1==2*w : sdl $2 ldl $2
-dup sde $1==2*w : sde $2 lde $2
-dup LLP sti $1==2*w && $3==2*w : LLP $2 sti 2*w LLP $2 loi 2*w
-dup LEP sti $1==2*w && $3==2*w : LEP $2 sti 2*w LEP $2 loi 2*w
-dup LLP sdf $1==2*w : LLP $2 sdf $3 LLP $2 ldf $3
-dup LEP sdf $1==2*w : LEP $2 sdf $3 LEP $2 ldf $3
-lol dup $2==w : lol $1 lol $1
-loe dup $2==w : loe $1 loe $1
-lil dup $2==w : lil $1 lil $1
-LEP loi dup $2==w && $3==w : LEP $1 loi w LEP $1 loi w
-ldl dup $2==2*w : ldl $1 ldl $1
-lde dup $2==2*w : lde $1 lde $1
+stl lol $1==$2 : dup w stl $1
+ste loe $1==$2 : dup w ste $1
+sil lil $1==$2 : dup w sil $1
+sdl ldl $1==$2 : dup 2*w sdl $1
+sde lde $1==$2 : dup 2*w sde $1
+
+lol lol $1==$2 : lol $1 dup w
+loe loe $1==$2 : loe $1 dup w
+lil lil $1==$2 : lil $1 dup w
+ldl ldl $1==$2 : ldl $1 dup 2*w
+lde lde $1==$2 : lde $1 dup 2*w
+LLP lof LLP lof $1==$3 && $2==$4 : LLP $1 lof $2 dup w
+LEP lof LEP lof $1==$3 && $2==$4 : LEP $1 lof $2 dup w
+LEP loi LEP loi $1==$3 && $2==$4 && $2==w : LEP $1 loi $2 dup w
+
 #endif
 adp SLP LLP adp $1+$4==0 && $2==$3 : dup p adp $1 SLP $2
 adp SEP LEP adp $1+$4==0 && $2==$3 : dup p adp $1 SEP $2
