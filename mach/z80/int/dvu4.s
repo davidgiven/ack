@@ -1,4 +1,9 @@
 .define .dvu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 4-byte divide routine for z80
 ! parameters:
@@ -129,9 +134,9 @@
 	ld hl,(.retaddr)
 	jp (hl)		! return
 
-.data
-.flag:		.byte 0
-.low:		.word 0
-.iysave:	.word 0
-.retaddr:	.word 0
-.result:	.word 0
+.sect .data
+.flag:		.data1 0
+.low:		.data2 0
+.iysave:	.data2 0
+.retaddr:	.data2 0
+.result:	.data2 0

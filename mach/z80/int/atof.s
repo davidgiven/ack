@@ -1,10 +1,16 @@
-	.data
+.define atof
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+	.sect .data
 ! Set of variables
 
-big:	.byte 0
-	.byte 0
-	.byte 0x40
-	.byte 24	! 2^23
+big:	.data1 0
+	.data1 0
+	.data1 0x40
+	.data1 24	! 2^23
 negfrac:.space 1
 negexp:	.space 1
 begzero:
@@ -15,17 +21,17 @@ eexp:	.space 2
 flexp:	.space 4
 exp5:	.space 4
 endzero:
-ten:	.byte 0
-	.byte 0
-	.byte 0x50
-	.byte 4		! 10
-dig:	.byte 0
-	.byte 0
-fildig:	.byte 0		! here a number from 0 to 31 will be converted flt.
-	.byte 7
+ten:	.data1 0
+	.data1 0
+	.data1 0x50
+	.data1 4		! 10
+dig:	.data1 0
+	.data1 0
+fildig:	.data1 0		! here a number from 0 to 31 will be converted flt.
+	.data1 7
 bexp:	.space 2
 
-	.text
+	.sect .text
 atof:			! entry with stringpointer in hl
 			! exit with pointer to float in hl
 	push ix
@@ -177,25 +183,25 @@ atof:			! entry with stringpointer in hl
 1:	bit 0,l
 	jr z,2f
 	call xflt
-	.word flexp,exp5,fpmult,4,flexp
+	.data2 flexp,exp5,fpmult,4,flexp
 2:	sra h
 	rr l
 	ld a,h
 	or l
 	jr z,3f
 	call xflt
-	.word exp5,exp5,fpmult,4,exp5
+	.data2 exp5,exp5,fpmult,4,exp5
 	jr 1b
 3:	ld hl,negexp
 	ld a,(bexp)
 	bit 7,(hl)
 	jr z,1f
 	call xflt
-	.word flexp,fl,fpdiv,4,fl
+	.data2 flexp,fl,fpdiv,4,fl
 	neg
 	jr 2f
 1:	call xflt
-	.word flexp,fl,fpmult,4,fl
+	.data2 flexp,fl,fpmult,4,fl
 2:	ld b,a
 	ld a,(fl+3)
 	add a,b
@@ -204,9 +210,9 @@ atof:			! entry with stringpointer in hl
 	bit 7,a
 	jr z,1f
 	call xflt
-	.word fl,fl,fpcomp,4,fl
+	.data2 fl,fl,fpcomp,4,fl
 1:	call xflt
-	.word fl,fl,fpnorm,4,fl
+	.data2 fl,fl,fpnorm,4,fl
 	ld hl,fl
 	pop af
 	pop de
@@ -217,19 +223,19 @@ atof:			! entry with stringpointer in hl
 
 cmpbigfl:
 	call xflt
-	.word big,fl,fpcmf,0
+	.data2 big,fl,fpcmf,0
 	ld a,(fpac+1)
 	bit 7,a
 	ret
 mulandadd:
 	call xflt
-	.word fl,ten,fpmult,4,fl
+	.data2 fl,ten,fpmult,4,fl
 	ld a,7
 	ld (fildig+1),a
 	call xflt
-	.word dig,dig,fpnorm,4,dig
+	.data2 dig,dig,fpnorm,4,dig
 	call xflt
-	.word fl,dig,fpadd,4,fl
+	.data2 fl,dig,fpadd,4,fl
 	ret
 
 xflt:
@@ -278,3 +284,4 @@ xflt:
 	pop af
 	ex (sp),iy
 	ret
+.align 256

@@ -1,3 +1,9 @@
+.define .dvi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .dvi4:
 	pop hl
 	ld (retaddr),hl
@@ -66,9 +72,9 @@
 	push bc
 	push de
 	jp (iy)
-.data
-	.flag1: .byte 0
-	.flag2: .byte 0
-	retaddr:.word 0
-	.savebc: .word 0
-	.savede: .word 0
+.sect .data
+	.flag1: .data1 0
+	.flag2: .data1 0
+	retaddr:.data2 0
+	.savebc: .data2 0
+	.savede: .data2 0

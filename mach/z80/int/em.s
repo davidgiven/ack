@@ -1,4 +1,9 @@
 #
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! This program is an EM interpreter for the Z80.
 ! Register pair bc is used to hold lb.
 ! Register ix is used to hold the EM program counter.
@@ -56,8 +61,6 @@
 
 !--------------------------- Initialization ---------------------------
 
-	.base 0x100
-
 	jp init		! 3 byte instruction.
 
 !------------------------- MAIN DISPATCH ------------------------------
@@ -66,535 +69,276 @@
 ! must be put on a page boundary
 
 
-dispat = . - 3	! base of dispatch table
-!	.byte	loc.0	/256
-!	.byte	loc.1	/256
-!	.byte	loc.2	/256
-	.byte	loc.3	/256
-	.byte	loc.4	/256
-	.byte	loc.5	/256
-	.byte	loc.6	/256
-	.byte	loc.7	/256
-	.byte	loc.8	/256
-	.byte	loc.9	/256
-	.byte	loc.10	/256
-	.byte	loc.11	/256
-	.byte	loc.12	/256
-	.byte	loc.13	/256
-	.byte	loc.14	/256
-	.byte	loc.15	/256
-	.byte	loc.16	/256
-	.byte	loc.17	/256
-	.byte	loc.18	/256
-	.byte	loc.19	/256
-	.byte	loc.20	/256
-	.byte	loc.21	/256
-	.byte	loc.22	/256
-	.byte	loc.23	/256
-	.byte	loc.24	/256
-	.byte	loc.25	/256
-	.byte	loc.26	/256
-	.byte	loc.27	/256
-	.byte	loc.28	/256
-	.byte	loc.29	/256
-	.byte	loc.30	/256
-	.byte	loc.31	/256
-	.byte	loc.32	/256
-	.byte	loc.33	/256
-	.byte	aar.2	/256
-	.byte	adf.s0	/256
-	.byte	adi.2	/256
-	.byte	adi.4	/256
-	.byte	adp.l	/256
-	.byte	adp.1	/256
-	.byte	adp.2	/256
-	.byte	adp.s0	/256
-	.byte	adp.sm1	/256
-	.byte	ads.2	/256
-	.byte	and.2	/256
-	.byte	asp.2	/256
-	.byte	asp.4	/256
-	.byte	asp.6	/256
-	.byte	asp.8	/256
-	.byte	asp.10	/256
-	.byte	asp.w0	/256
-	.byte	beq.l	/256
-	.byte	beq.s0	/256
-	.byte	bge.s0	/256
-	.byte	bgt.s0	/256
-	.byte	ble.s0	/256
-	.byte	blm.s0	/256
-	.byte	blt.s0	/256
-	.byte	bne.s0	/256
-	.byte	bra.l	/256
-	.byte	bra.sm1	/256
-	.byte	bra.sm2	/256
-	.byte	bra.s0	/256
-	.byte	bra.s1	/256
-	.byte	cal.1	/256
-	.byte	cal.2	/256
-	.byte	cal.3	/256
-	.byte	cal.4	/256
-	.byte	cal.5	/256
-	.byte	cal.6	/256
-	.byte	cal.7	/256
-	.byte	cal.8	/256
-	.byte	cal.9	/256
-	.byte	cal.10	/256
-	.byte	cal.11	/256
-	.byte	cal.12	/256
-	.byte	cal.13	/256
-	.byte	cal.14	/256
-	.byte	cal.15	/256
-	.byte	cal.16	/256
-	.byte	cal.17	/256
-	.byte	cal.18	/256
-	.byte	cal.19	/256
-	.byte	cal.20	/256
-	.byte	cal.21	/256
-	.byte	cal.22	/256
-	.byte	cal.23	/256
-	.byte	cal.24	/256
-	.byte	cal.25	/256
-	.byte	cal.26	/256
-	.byte	cal.27	/256
-	.byte	cal.28	/256
-	.byte	cal.s0	/256
-	.byte	cff.z	/256
-	.byte	cif.z	/256
-	.byte	cii.z	/256
-	.byte	cmf.s0	/256
-	.byte	cmi.2	/256
-	.byte	cmi.4	/256
-	.byte	cmp.z	/256
-	.byte	cms.s0	/256
-	.byte	csa.2	/256
-	.byte	csb.2	/256
-	.byte	dec.z	/256
-	.byte	dee.w0	/256
-	.byte	del.wm1	/256
-	.byte	dup.2	/256
-	.byte	dvf.s0	/256
-	.byte	dvi.2	/256
-	.byte	fil.l	/256
-	.byte	inc.z	/256
-	.byte	ine.l	/256
-	.byte	ine.w0	/256
-	.byte	inl.m2	/256
-	.byte	inl.m4	/256
-	.byte	inl.m6	/256
-	.byte	inl.wm1	/256
-	.byte	inn.s0	/256
-	.byte	ior.2	/256
-	.byte	ior.s0	/256
-	.byte	lae.l	/256
-	.byte	lae.w0	/256
-	.byte	lae.w1	/256
-	.byte	lae.w2	/256
-	.byte	lae.w3	/256
-	.byte	lae.w4	/256
-	.byte	lae.w5	/256
-	.byte	lae.w6	/256
-	.byte	lal.p	/256
-	.byte	lal.n	/256
-	.byte	lal.0	/256
-	.byte	lal.m1	/256
-	.byte	lal.w0	/256
-	.byte	lal.wm1	/256
-	.byte	lal.wm2	/256
-	.byte	lar.2	/256
-	.byte	ldc.0	/256
-	.byte	lde.l	/256
-	.byte	lde.w0	/256
-	.byte	ldl.0	/256
-	.byte	ldl.wm1	/256
-	.byte	lfr.2	/256
-	.byte	lfr.4	/256
-	.byte	lfr.s0	/256
-	.byte	lil.wm1	/256
-	.byte	lil.w0	/256
-	.byte	lil.0	/256
-	.byte	lil.2	/256
-	.byte	lin.l	/256
-	.byte	lin.s0	/256
-	.byte	lni.z	/256
-	.byte	loc.l	/256
-	.byte	loc.m1	/256
-	.byte	loc.s0	/256
-	.byte	loc.sm1	/256
-	.byte	loe.l	/256
-	.byte	loe.w0	/256
-	.byte	loe.w1	/256
-	.byte	loe.w2	/256
-	.byte	loe.w3	/256
-	.byte	loe.w4	/256
-	.byte	lof.l	/256
-	.byte	lof.2	/256
-	.byte	lof.4	/256
-	.byte	lof.6	/256
-	.byte	lof.8	/256
-	.byte	lof.s0	/256
-	.byte	loi.l	/256
-	.byte	loi.1	/256
-	.byte	loi.2	/256
-	.byte	loi.4	/256
-	.byte	loi.6	/256
-	.byte	loi.8	/256
-	.byte	loi.s0	/256
-	.byte	lol.p	/256
-	.byte	lol.n	/256
-	.byte	lol.0	/256
-	.byte	lol.2	/256
-	.byte	lol.4	/256
-	.byte	lol.6	/256
-	.byte	lol.m2	/256
-	.byte	lol.m4	/256
-	.byte	lol.m6	/256
-	.byte	lol.m8	/256
-	.byte	lol.m10	/256
-	.byte	lol.m12	/256
-	.byte	lol.m14	/256
-	.byte	lol.m16	/256
-	.byte	lol.w0	/256
-	.byte	lol.wm1	/256
-	.byte	lxa.1	/256
-	.byte	lxl.1	/256
-	.byte	lxl.2	/256
-	.byte	mlf.s0	/256
-	.byte	mli.2	/256
-	.byte	mli.4	/256
-	.byte	rck.2	/256
-	.byte	ret.0	/256
-	.byte	ret.2	/256
-	.byte	ret.s0	/256
-	.byte	rmi.2	/256
-	.byte	sar.2	/256
-	.byte	sbf.s0	/256
-	.byte	sbi.2	/256
-	.byte	sbi.4	/256
-	.byte	sdl.wm1	/256
-	.byte	set.s0	/256
-	.byte	sil.wm1	/256
-	.byte	sil.w0	/256
-	.byte	sli.2	/256
-	.byte	ste.l	/256
-	.byte	ste.w0	/256
-	.byte	ste.w1	/256
-	.byte	ste.w2	/256
-	.byte	stf.l	/256
-	.byte	stf.2	/256
-	.byte	stf.4	/256
-	.byte	stf.s0	/256
-	.byte	sti.1	/256
-	.byte	sti.2	/256
-	.byte	sti.4	/256
-	.byte	sti.6	/256
-	.byte	sti.8	/256
-	.byte	sti.s0	/256
-	.byte	stl.p	/256
-	.byte	stl.n	/256
-	.byte	stl.p0	/256
-	.byte	stl.p2	/256
-	.byte	stl.m2	/256
-	.byte	stl.m4	/256
-	.byte	stl.m6	/256
-	.byte	stl.m8	/256
-	.byte	stl.m10	/256
-	.byte	stl.wm1	/256
-	.byte	teq.z	/256
-	.byte	tgt.z	/256
-	.byte	tlt.z	/256
-	.byte	tne.z	/256
-	.byte	zeq.l	/256
-	.byte	zeq.s0	/256
-	.byte	zeq.s1	/256
-	.byte	zer.s0	/256
-	.byte	zge.s0	/256
-	.byte	zgt.s0	/256
-	.byte	zle.s0	/256
-	.byte	zlt.s0	/256
-	.byte	zne.s0	/256
-	.byte	zne.sm1	/256
-	.byte	zre.l	/256
-	.byte	zre.w0	/256
-	.byte	zrl.m2	/256
-	.byte	zrl.m4	/256
-	.byte	zrl.wm1	/256
-	.byte	zrl.n	/256
-	.byte	loop1	/256
-	.byte	loop2	/256
-
-	.errnz .-dispat-256
-
-	.byte	loc.0	%256
-	.byte	loc.1	%256
-	.byte	loc.2	%256
-	.byte	loc.3	%256
-	.byte	loc.4	%256
-	.byte	loc.5	%256
-	.byte	loc.6	%256
-	.byte	loc.7	%256
-	.byte	loc.8	%256
-	.byte	loc.9	%256
-	.byte	loc.10	%256
-	.byte	loc.11	%256
-	.byte	loc.12	%256
-	.byte	loc.13	%256
-	.byte	loc.14	%256
-	.byte	loc.15	%256
-	.byte	loc.16	%256
-	.byte	loc.17	%256
-	.byte	loc.18	%256
-	.byte	loc.19	%256
-	.byte	loc.20	%256
-	.byte	loc.21	%256
-	.byte	loc.22	%256
-	.byte	loc.23	%256
-	.byte	loc.24	%256
-	.byte	loc.25	%256
-	.byte	loc.26	%256
-	.byte	loc.27	%256
-	.byte	loc.28	%256
-	.byte	loc.29	%256
-	.byte	loc.30	%256
-	.byte	loc.31	%256
-	.byte	loc.32	%256
-	.byte	loc.33	%256
-	.byte	aar.2	%256
-	.byte	adf.s0	%256
-	.byte	adi.2	%256
-	.byte	adi.4	%256
-	.byte	adp.l	%256
-	.byte	adp.1	%256
-	.byte	adp.2	%256
-	.byte	adp.s0	%256
-	.byte	adp.sm1	%256
-	.byte	ads.2	%256
-	.byte	and.2	%256
-	.byte	asp.2	%256
-	.byte	asp.4	%256
-	.byte	asp.6	%256
-	.byte	asp.8	%256
-	.byte	asp.10	%256
-	.byte	asp.w0	%256
-	.byte	beq.l	%256
-	.byte	beq.s0	%256
-	.byte	bge.s0	%256
-	.byte	bgt.s0	%256
-	.byte	ble.s0	%256
-	.byte	blm.s0	%256
-	.byte	blt.s0	%256
-	.byte	bne.s0	%256
-	.byte	bra.l	%256
-	.byte	bra.sm1	%256
-	.byte	bra.sm2	%256
-	.byte	bra.s0	%256
-	.byte	bra.s1	%256
-	.byte	cal.1	%256
-	.byte	cal.2	%256
-	.byte	cal.3	%256
-	.byte	cal.4	%256
-	.byte	cal.5	%256
-	.byte	cal.6	%256
-	.byte	cal.7	%256
-	.byte	cal.8	%256
-	.byte	cal.9	%256
-	.byte	cal.10	%256
-	.byte	cal.11	%256
-	.byte	cal.12	%256
-	.byte	cal.13	%256
-	.byte	cal.14	%256
-	.byte	cal.15	%256
-	.byte	cal.16	%256
-	.byte	cal.17	%256
-	.byte	cal.18	%256
-	.byte	cal.19	%256
-	.byte	cal.20	%256
-	.byte	cal.21	%256
-	.byte	cal.22	%256
-	.byte	cal.23	%256
-	.byte	cal.24	%256
-	.byte	cal.25	%256
-	.byte	cal.26	%256
-	.byte	cal.27	%256
-	.byte	cal.28	%256
-	.byte	cal.s0	%256
-	.byte	cff.z	%256
-	.byte	cif.z	%256
-	.byte	cii.z	%256
-	.byte	cmf.s0	%256
-	.byte	cmi.2	%256
-	.byte	cmi.4	%256
-	.byte	cmp.z	%256
-	.byte	cms.s0	%256
-	.byte	csa.2	%256
-	.byte	csb.2	%256
-	.byte	dec.z	%256
-	.byte	dee.w0	%256
-	.byte	del.wm1	%256
-	.byte	dup.2	%256
-	.byte	dvf.s0	%256
-	.byte	dvi.2	%256
-	.byte	fil.l	%256
-	.byte	inc.z	%256
-	.byte	ine.l	%256
-	.byte	ine.w0	%256
-	.byte	inl.m2	%256
-	.byte	inl.m4	%256
-	.byte	inl.m6	%256
-	.byte	inl.wm1	%256
-	.byte	inn.s0	%256
-	.byte	ior.2	%256
-	.byte	ior.s0	%256
-	.byte	lae.l	%256
-	.byte	lae.w0	%256
-	.byte	lae.w1	%256
-	.byte	lae.w2	%256
-	.byte	lae.w3	%256
-	.byte	lae.w4	%256
-	.byte	lae.w5	%256
-	.byte	lae.w6	%256
-	.byte	lal.p	%256
-	.byte	lal.n	%256
-	.byte	lal.0	%256
-	.byte	lal.m1	%256
-	.byte	lal.w0	%256
-	.byte	lal.wm1	%256
-	.byte	lal.wm2	%256
-	.byte	lar.2	%256
-	.byte	ldc.0	%256
-	.byte	lde.l	%256
-	.byte	lde.w0	%256
-	.byte	ldl.0	%256
-	.byte	ldl.wm1	%256
-	.byte	lfr.2	%256
-	.byte	lfr.4	%256
-	.byte	lfr.s0	%256
-	.byte	lil.wm1	%256
-	.byte	lil.w0	%256
-	.byte	lil.0	%256
-	.byte	lil.2	%256
-	.byte	lin.l	%256
-	.byte	lin.s0	%256
-	.byte	lni.z	%256
-	.byte	loc.l	%256
-	.byte	loc.m1	%256
-	.byte	loc.s0	%256
-	.byte	loc.sm1	%256
-	.byte	loe.l	%256
-	.byte	loe.w0	%256
-	.byte	loe.w1	%256
-	.byte	loe.w2	%256
-	.byte	loe.w3	%256
-	.byte	loe.w4	%256
-	.byte	lof.l	%256
-	.byte	lof.2	%256
-	.byte	lof.4	%256
-	.byte	lof.6	%256
-	.byte	lof.8	%256
-	.byte	lof.s0	%256
-	.byte	loi.l	%256
-	.byte	loi.1	%256
-	.byte	loi.2	%256
-	.byte	loi.4	%256
-	.byte	loi.6	%256
-	.byte	loi.8	%256
-	.byte	loi.s0	%256
-	.byte	lol.p	%256
-	.byte	lol.n	%256
-	.byte	lol.0	%256
-	.byte	lol.2	%256
-	.byte	lol.4	%256
-	.byte	lol.6	%256
-	.byte	lol.m2	%256
-	.byte	lol.m4	%256
-	.byte	lol.m6	%256
-	.byte	lol.m8	%256
-	.byte	lol.m10	%256
-	.byte	lol.m12	%256
-	.byte	lol.m14	%256
-	.byte	lol.m16	%256
-	.byte	lol.w0	%256
-	.byte	lol.wm1	%256
-	.byte	lxa.1	%256
-	.byte	lxl.1	%256
-	.byte	lxl.2	%256
-	.byte	mlf.s0	%256
-	.byte	mli.2	%256
-	.byte	mli.4	%256
-	.byte	rck.2	%256
-	.byte	ret.0	%256
-	.byte	ret.2	%256
-	.byte	ret.s0	%256
-	.byte	rmi.2	%256
-	.byte	sar.2	%256
-	.byte	sbf.s0	%256
-	.byte	sbi.2	%256
-	.byte	sbi.4	%256
-	.byte	sdl.wm1	%256
-	.byte	set.s0	%256
-	.byte	sil.wm1	%256
-	.byte	sil.w0	%256
-	.byte	sli.2	%256
-	.byte	ste.l	%256
-	.byte	ste.w0	%256
-	.byte	ste.w1	%256
-	.byte	ste.w2	%256
-	.byte	stf.l	%256
-	.byte	stf.2	%256
-	.byte	stf.4	%256
-	.byte	stf.s0	%256
-	.byte	sti.1	%256
-	.byte	sti.2	%256
-	.byte	sti.4	%256
-	.byte	sti.6	%256
-	.byte	sti.8	%256
-	.byte	sti.s0	%256
-	.byte	stl.p	%256
-	.byte	stl.n	%256
-	.byte	stl.p0	%256
-	.byte	stl.p2	%256
-	.byte	stl.m2	%256
-	.byte	stl.m4	%256
-	.byte	stl.m6	%256
-	.byte	stl.m8	%256
-	.byte	stl.m10	%256
-	.byte	stl.wm1	%256
-	.byte	teq.z	%256
-	.byte	tgt.z	%256
-	.byte	tlt.z	%256
-	.byte	tne.z	%256
-	.byte	zeq.l	%256
-	.byte	zeq.s0	%256
-	.byte	zeq.s1	%256
-	.byte	zer.s0	%256
-	.byte	zge.s0	%256
-	.byte	zgt.s0	%256
-	.byte	zle.s0	%256
-	.byte	zlt.s0	%256
-	.byte	zne.s0	%256
-	.byte	zne.sm1	%256
-	.byte	zre.l	%256
-	.byte	zre.w0	%256
-	.byte	zrl.m2	%256
-	.byte	zrl.m4	%256
-	.byte	zrl.wm1	%256
-	.byte	zrl.n	%256
-	.byte	loop1	%256
-	.byte	loop2	%256
-
-	.errnz .-dispat-512
+.data1 0		! fourth byte
+dispat = . - 4	! base of dispatch table
+!	.data2	loc.0
+!	.data2	loc.1
+	.data2	loc.2
+	.data2	loc.3
+	.data2	loc.4
+	.data2	loc.5
+	.data2	loc.6
+	.data2	loc.7
+	.data2	loc.8
+	.data2	loc.9
+	.data2	loc.10
+	.data2	loc.11
+	.data2	loc.12
+	.data2	loc.13
+	.data2	loc.14
+	.data2	loc.15
+	.data2	loc.16
+	.data2	loc.17
+	.data2	loc.18
+	.data2	loc.19
+	.data2	loc.20
+	.data2	loc.21
+	.data2	loc.22
+	.data2	loc.23
+	.data2	loc.24
+	.data2	loc.25
+	.data2	loc.26
+	.data2	loc.27
+	.data2	loc.28
+	.data2	loc.29
+	.data2	loc.30
+	.data2	loc.31
+	.data2	loc.32
+	.data2	loc.33
+	.data2	aar.2
+	.data2	adf.s0
+	.data2	adi.2
+	.data2	adi.4
+	.data2	adp.l
+	.data2	adp.1
+	.data2	adp.2
+	.data2	adp.s0
+	.data2	adp.sm1
+	.data2	ads.2
+	.data2	and.2
+	.data2	asp.2
+	.data2	asp.4
+	.data2	asp.6
+	.data2	asp.8
+	.data2	asp.10
+	.data2	asp.w0
+	.data2	beq.l
+	.data2	beq.s0
+	.data2	bge.s0
+	.data2	bgt.s0
+	.data2	ble.s0
+	.data2	blm.s0
+	.data2	blt.s0
+	.data2	bne.s0
+	.data2	bra.l
+	.data2	bra.sm1
+	.data2	bra.sm2
+	.data2	bra.s0
+	.data2	bra.s1
+	.data2	cal.1
+	.data2	cal.2
+	.data2	cal.3
+	.data2	cal.4
+	.data2	cal.5
+	.data2	cal.6
+	.data2	cal.7
+	.data2	cal.8
+	.data2	cal.9
+	.data2	cal.10
+	.data2	cal.11
+	.data2	cal.12
+	.data2	cal.13
+	.data2	cal.14
+	.data2	cal.15
+	.data2	cal.16
+	.data2	cal.17
+	.data2	cal.18
+	.data2	cal.19
+	.data2	cal.20
+	.data2	cal.21
+	.data2	cal.22
+	.data2	cal.23
+	.data2	cal.24
+	.data2	cal.25
+	.data2	cal.26
+	.data2	cal.27
+	.data2	cal.28
+	.data2	cal.s0
+	.data2	cff.z
+	.data2	cif.z
+	.data2	cii.z
+	.data2	cmf.s0
+	.data2	cmi.2
+	.data2	cmi.4
+	.data2	cmp.z
+	.data2	cms.s0
+	.data2	csa.2
+	.data2	csb.2
+	.data2	dec.z
+	.data2	dee.w0
+	.data2	del.wm1
+	.data2	dup.2
+	.data2	dvf.s0
+	.data2	dvi.2
+	.data2	fil.l
+	.data2	inc.z
+	.data2	ine.l
+	.data2	ine.w0
+	.data2	inl.m2
+	.data2	inl.m4
+	.data2	inl.m6
+	.data2	inl.wm1
+	.data2	inn.s0
+	.data2	ior.2
+	.data2	ior.s0
+	.data2	lae.l
+	.data2	lae.w0
+	.data2	lae.w1
+	.data2	lae.w2
+	.data2	lae.w3
+	.data2	lae.w4
+	.data2	lae.w5
+	.data2	lae.w6
+	.data2	lal.p
+	.data2	lal.n
+	.data2	lal.0
+	.data2	lal.m1
+	.data2	lal.w0
+	.data2	lal.wm1
+	.data2	lal.wm2
+	.data2	lar.2
+	.data2	ldc.0
+	.data2	lde.l
+	.data2	lde.w0
+	.data2	ldl.0
+	.data2	ldl.wm1
+	.data2	lfr.2
+	.data2	lfr.4
+	.data2	lfr.s0
+	.data2	lil.wm1
+	.data2	lil.w0
+	.data2	lil.0
+	.data2	lil.2
+	.data2	lin.l
+	.data2	lin.s0
+	.data2	lni.z
+	.data2	loc.l
+	.data2	loc.m1
+	.data2	loc.s0
+	.data2	loc.sm1
+	.data2	loe.l
+	.data2	loe.w0
+	.data2	loe.w1
+	.data2	loe.w2
+	.data2	loe.w3
+	.data2	loe.w4
+	.data2	lof.l
+	.data2	lof.2
+	.data2	lof.4
+	.data2	lof.6
+	.data2	lof.8
+	.data2	lof.s0
+	.data2	loi.l
+	.data2	loi.1
+	.data2	loi.2
+	.data2	loi.4
+	.data2	loi.6
+	.data2	loi.8
+	.data2	loi.s0
+	.data2	lol.p
+	.data2	lol.n
+	.data2	lol.0
+	.data2	lol.2
+	.data2	lol.4
+	.data2	lol.6
+	.data2	lol.m2
+	.data2	lol.m4
+	.data2	lol.m6
+	.data2	lol.m8
+	.data2	lol.m10
+	.data2	lol.m12
+	.data2	lol.m14
+	.data2	lol.m16
+	.data2	lol.w0
+	.data2	lol.wm1
+	.data2	lxa.1
+	.data2	lxl.1
+	.data2	lxl.2
+	.data2	mlf.s0
+	.data2	mli.2
+	.data2	mli.4
+	.data2	rck.2
+	.data2	ret.0
+	.data2	ret.2
+	.data2	ret.s0
+	.data2	rmi.2
+	.data2	sar.2
+	.data2	sbf.s0
+	.data2	sbi.2
+	.data2	sbi.4
+	.data2	sdl.wm1
+	.data2	set.s0
+	.data2	sil.wm1
+	.data2	sil.w0
+	.data2	sli.2
+	.data2	ste.l
+	.data2	ste.w0
+	.data2	ste.w1
+	.data2	ste.w2
+	.data2	stf.l
+	.data2	stf.2
+	.data2	stf.4
+	.data2	stf.s0
+	.data2	sti.1
+	.data2	sti.2
+	.data2	sti.4
+	.data2	sti.6
+	.data2	sti.8
+	.data2	sti.s0
+	.data2	stl.p
+	.data2	stl.n
+	.data2	stl.p0
+	.data2	stl.p2
+	.data2	stl.m2
+	.data2	stl.m4
+	.data2	stl.m6
+	.data2	stl.m8
+	.data2	stl.m10
+	.data2	stl.wm1
+	.data2	teq.z
+	.data2	tgt.z
+	.data2	tlt.z
+	.data2	tne.z
+	.data2	zeq.l
+	.data2	zeq.s0
+	.data2	zeq.s1
+	.data2	zer.s0
+	.data2	zge.s0
+	.data2	zgt.s0
+	.data2	zle.s0
+	.data2	zlt.s0
+	.data2	zne.s0
+	.data2	zne.sm1
+	.data2	zre.l
+	.data2	zre.w0
+	.data2	zrl.m2
+	.data2	zrl.m4
+	.data2	zrl.wm1
+	.data2	zrl.n
+	.data2	loop1
+	.data2	loop2
 
 !----------------- END OF MAIN DISPATCH -------------------------------
 
+xxx:
+	.data2	loc.0
+	.data2	loc.1
 init:
 	ld sp,(bdos+1)	! address of fbase
-	ld hl,dispat
-	ld (hl),loc.0/256
-	inc hl
-	ld (hl),loc.1/256
-	inc hl
-	ld (hl),loc.2/256
+	ld hl,xxx
+	ld de,dispat
+	ld bc,4
+	ldir
 	call uxinit
 warmstart:
 	ld sp,(bdos+1)	! address of fbase
@@ -642,7 +386,7 @@ warmstart:
 	jr nz,1b
 			! now program text has been read,so start read-
 	ld iy,0		! ing data descriptors, (nextp) (was hl) is
-	ld ix,eb+eb%2	! pointer into DMA,ix is pointer into global
+	ld ix,eb	! pointer into DMA,ix is pointer into global
 	! data area,iy is #bytes pushed in last instr (used for repeat)
 rddata:	ld hl,(ndata)
 	ld a,h
@@ -716,7 +460,7 @@ rddata:	ld hl,(ndata)
 	jr z,3f
 	ld hl,(pb)
 	jr 4f
-3:	ld hl,eb+eb%2
+3:	ld hl,eb
 	jr 4f
 2:	ld hl,0
 4:	ld (ntext),hl	! ntext is used here to hold base address of
@@ -845,17 +589,18 @@ getb:	push hl		! getb reads 1 byte in register c from standard
 !------------------------- Main loop of the interpreter ---------------
 
 phl:	push hl
-loop:
-	.errnz dispat%256
-	ld l,(ix)	! l = opcode byte
-	inc ix		! advance program counter
-	ld h,dispat/256	! hl=address of high byte of jumpaddress
-	ld d,(hl)	! d=high byte of jump address
-	inc h		! hl=address of low byte of jumpaddress
-	ld e,(hl)	! de=jumpaddress
-	xor a		! clear a and carry
-	ld h,a		! and clear h
-	ex de,hl	! d:=0; hl:=jumpaddress
+loop:	ld e,(ix)	! e = opcode byte
+	inc ix		! advance EM program counter to next byte
+	ld hl,dispat	! hl = address of dispatching table
+	xor a
+	ld d,a
+	add hl,de	! compute address of routine for this opcode
+	add hl,de	! hl = address of routine to dispatch to
+	ld d,(hl)	! e = low byte of routine address
+	inc hl		! hl now points to 2nd byte of routine address
+	ld h,(hl)	! h = high byte of routine address
+	ld l,d		! hl = address of routine
+	ld d,a
 	jp (hl)		! go execute the routine
 
 loop1:	ld e,(ix)	! e = opcode byte
@@ -1022,7 +767,7 @@ loe.w2:	inc d
 loe.w1:	inc d
 loe.w0:	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr ipsh
@@ -1099,7 +844,7 @@ lae.w2: inc d
 lae.w1: inc d
 lae.w0: ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr phl
@@ -1108,7 +853,7 @@ lae.l:	ld d,(ix)
 	inc ix
 	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	jr phl
 
@@ -1163,7 +908,7 @@ lxl.s:	ld a,(ix)
 	inc hl
 	inc hl
 	inc hl
-	.errnz .-2b-zone
+	.assert [ .-2b-zone] == 0
 	ld e,(hl)
 	inc hl
 	ld h,(hl)
@@ -1192,7 +937,7 @@ lxa.s:	ld a,(ix)
 
 lpb.z:
 	pop hl
-	.errnz zone/256
+	.assert [ zone/256] == 0
 	ld e,zone
 	add hl,de
 	jr phl
@@ -1275,7 +1020,7 @@ lde.w2:	inc d
 lde.w1:	inc d
 lde.w0:	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr dipsh
@@ -1382,7 +1127,7 @@ ste.w2:	inc d
 ste.w1:	inc d
 ste.w0:	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr ipop
@@ -1491,7 +1236,7 @@ sde.l:	ld d,(ix)
 	inc ix
 	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 2:	add hl,de
 1:	pop de
 	ld (hl),e
@@ -1518,7 +1263,7 @@ adi.z: adu.z:
 	pop de
 9:
 	call chk24
-	.word adi.2,adi.4
+	.data2 adi.2,adi.4
 adi.l: adu.l:
 	ld d,(ix)	! I guess a routine chk24.l could do this job
 	inc ix
@@ -1562,7 +1307,7 @@ sbi.z: sbu.z:
 	pop de
 9:
 	call chk24
-	.word sbi.2,sbi.4
+	.data2 sbi.2,sbi.4
 sbi.l: sbu.l:
 	ld d,(ix)
 	inc ix
@@ -1586,7 +1331,7 @@ ngi.z:
 	pop de
 9:
 	call chk24
-	.word ngi.2,ngi.4
+	.data2 ngi.2,ngi.4
 ngi.l:
 	ld d,(ix)
 	inc ix
@@ -1604,7 +1349,7 @@ mli.z: mlu.z:
 	pop de
 9:
 	call chk24
-	.word mli.2,mli.4
+	.data2 mli.2,mli.4
 mli.l: mlu.l:
 	ld d,(ix)
 	inc ix
@@ -1643,7 +1388,7 @@ dvi.z:
 	pop de
 9:
 	call chk24
-	.word dvi.2,dvi.4
+	.data2 dvi.2,dvi.4
 dvi.l:
 	ld d,(ix)
 	inc ix
@@ -1708,7 +1453,7 @@ dvu.z:
 	pop de
 9:
 	call chk24
-	.word dvu.2,dvu.4
+	.data2 dvu.2,dvu.4
 dvu.l:
 	ld d,(ix)
 	inc ix
@@ -1750,7 +1495,7 @@ rmi.z:
 	pop de
 9:
 	call chk24
-	.word rmi.2,rmi.4
+	.data2 rmi.2,rmi.4
 rmi.l:
 	ld d,(ix)
 	inc ix
@@ -1835,7 +1580,7 @@ rmu.z:
 	pop de
 9:
 	call chk24
-	.word rmu.2,rmu.4
+	.data2 rmu.2,rmu.4
 rmu.l:
 	ld d,(ix)
 	inc ix
@@ -1876,7 +1621,7 @@ slu.z: sli.z:
 	pop de
 9:
 	call chk24
-	.word sli.2,sli.4
+	.data2 sli.2,sli.4
 slu.l:
 sli.l:
 	ld d,(ix)
@@ -1922,7 +1667,7 @@ sri.z:
 	pop de
 9:
 	call chk24
-	.word sri.2,sri.4
+	.data2 sri.2,sri.4
 sri.l:
 	ld d,(ix)
 	inc ix
@@ -1968,7 +1713,7 @@ sru.z:
 	pop de
 9:
 	call chk24
-	.word sru.2,sru.4
+	.data2 sru.2,sru.4
 sru.l:
 	ld d,(ix)
 	inc ix
@@ -2014,7 +1759,7 @@ rol.z:
 	pop de
 9:
 	call chk24
-	.word rol.2,rol.4
+	.data2 rol.2,rol.4
 rol.l:
 	ld d,(ix)
 	inc ix
@@ -2057,7 +1802,7 @@ ror.z:
 	pop de
 9:
 	call chk24
-	.word ror.2,ror.4
+	.data2 ror.2,ror.4
 ror.l:
 	ld d,(ix)
 	inc ix
@@ -2162,7 +1907,7 @@ ine.w2:	inc d
 ine.w1:	inc d
 ine.w0:	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr 1b
@@ -2202,7 +1947,7 @@ dee.w2:	inc d
 dee.w1:	inc d
 dee.w0:	ld e,(ix)
 	inc ix
-	ld hl,eb+eb%2
+	ld hl,eb
 	add hl,de
 	add hl,de
 	jr 1b
@@ -3008,15 +2753,15 @@ cal.s0:	ld e,(ix)
 	inc ix
 cal:	push ix		! entry point for main program of interpreter
 	push bc
-	ld hl,(eb+eb%2)
+	ld hl,(eb)
 	push hl
-	ld hl,(eb+eb%2+4)
+	ld hl,(ebp4)
 	push hl
 ! temporary tracing facility
 ! NOP it if you don't want it
 	push de
-	ld de,(eb+eb%2+4)
-	ld hl,(eb+eb%2)
+	ld de,(ebp4)
+	ld hl,(eb)
 	call prline
 	pop de
 ! end of temporary tracing
@@ -3105,9 +2850,9 @@ ret.0:
 	ld l,c
 	ld sp,hl
 	pop hl
-	ld (eb+eb%2+4),hl
+	ld (ebp4),hl
 	pop hl
-	ld (eb+eb%2),hl
+	ld (eb),hl
 	pop bc		! old LB
 	pop ix		! reta
 	push ix		! check to see if reta = boot (= 0)
@@ -3151,8 +2896,8 @@ trp.z:
 	ld c,printstring
 	ld de,2f
 	call bdos
-	ld de,(eb+eb%2+4)
-	ld hl,(eb+eb%2)
+	ld de,(ebp4)
+	ld hl,(eb)
 	call prline
 0:
 	pop iy		! LB
@@ -3222,7 +2967,7 @@ rtt.z=ret.0
 
 nop.z:	push bc
 	ld iy,1f+12
-	ld hl,(eb+eb%2)
+	ld hl,(eb)
 	call octnr
 	ld iy,1f+20
 	ld hl,0
@@ -3460,29 +3205,29 @@ lin.l:	ld d,(ix)
 	inc ix
 lin.s0:	ld e,(ix)
 	inc ix
-	ld (eb+eb%2),de
+	ld (eb),de
 	jr loop
 
 
 ! FIL
 fil.z:	pop hl
 1:
-	ld (eb+eb%2+4),hl
+	ld (ebp4),hl
 	jr loop
 
 fil.l:	ld h,(ix)
 	inc ix
 	ld l,(ix)
 	inc ix
-	ld de,eb+eb%2
+	ld de,eb
 	add hl,de
 	jr 1b
 
 
 ! LNI
-lni.z:	ld hl,(eb+eb%2)
+lni.z:	ld hl,(eb)
 	inc hl
-	ld (eb+eb%2),hl
+	ld (eb),hl
 	jr loop
 
 
@@ -3672,7 +3417,7 @@ docmf:
 cfi.z:
 	pop de
 	call chk24
-	.word 1f,0f
+	.data2 1f,0f
 1:	ld iy,1f
 	jr pop4
 1:	pop hl
@@ -3702,7 +3447,7 @@ cif.z:
 1:
 	pop de
 	call chk24
-	.word 1f,0f
+	.data2 1f,0f
 1:	pop hl
 	ld (fpac),hl
 	push bc
@@ -3998,19 +3743,19 @@ long2:	ld a,(ix)
 	zcount=41
 	zsave=42
 
-	.errnz filefcb
+	.assert [ filefcb] == 0
 
 0:	.space maxfiles*filesize
 	filearea = 0b+128
 sibuf:
-	.word 0
+	.data2 0
 	.space 82
 siptr:	.space 2
 saveargs:
 	.space 128
 argv:	.space 40		! not more than 20 args
 argc:	.space 2
-ttymode:.byte 9,9,8,21;.short 06310+RAW*040	! raw = 040
+ttymode:.data1 9,9,8,21;.data2 06310+RAW*040	! raw = 040
 
 uxinit:
 	xor a
@@ -4068,8 +3813,9 @@ makeargv:
 	jr 4b
 9:	push ix
 	pop hl
-	ld de,-argv
-	add hl,de
+	ld de,argv
+	or a
+	sbc hl,de
 	srl h;rr l
 	ld (argc),hl
 	ld (ix+0),0
@@ -4094,70 +3840,70 @@ mon.z:
 	jp (hl)
 
 systab:	
-	.word ux_indir
-	.word ux_exit
-	.word ux_fork
-	.word ux_read
-	.word ux_write
-	.word ux_open
-	.word ux_close
-	.word ux_wait
-	.word ux_creat
-	.word ux_link
-	.word ux_unlink
-	.word ux_exec
-	.word ux_chdir
-	.word ux_time
-	.word ux_mknod
-	.word ux_chmod
-	.word ux_chown
-	.word ux_break
-	.word ux_stat
-	.word ux_seek
-	.word ux_getpid
-	.word ux_mount
-	.word ux_umount
-	.word ux_setuid
-	.word ux_getuid
-	.word ux_stime
-	.word ux_ptrace
-	.word ux_alarm
-	.word ux_fstat
-	.word ux_pause
-	.word ux_utime
-	.word ux_stty
-	.word ux_gtty
-	.word ux_access
-	.word ux_nice
-	.word ux_ftime
-	.word ux_sync
-	.word ux_kill
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word ux_dup
-	.word ux_pipe
-	.word ux_times
-	.word ux_prof
-	.word ux_unused
-	.word ux_setgid
-	.word ux_getgid
-	.word ux_sig
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word ux_ioctl
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word ux_exece
-	.word ux_umask
-	.word ux_chroot
-	.word unimpld
-	.word unimpld
+	.data2 ux_indir
+	.data2 ux_exit
+	.data2 ux_fork
+	.data2 ux_read
+	.data2 ux_write
+	.data2 ux_open
+	.data2 ux_close
+	.data2 ux_wait
+	.data2 ux_creat
+	.data2 ux_link
+	.data2 ux_unlink
+	.data2 ux_exec
+	.data2 ux_chdir
+	.data2 ux_time
+	.data2 ux_mknod
+	.data2 ux_chmod
+	.data2 ux_chown
+	.data2 ux_break
+	.data2 ux_stat
+	.data2 ux_seek
+	.data2 ux_getpid
+	.data2 ux_mount
+	.data2 ux_umount
+	.data2 ux_setuid
+	.data2 ux_getuid
+	.data2 ux_stime
+	.data2 ux_ptrace
+	.data2 ux_alarm
+	.data2 ux_fstat
+	.data2 ux_pause
+	.data2 ux_utime
+	.data2 ux_stty
+	.data2 ux_gtty
+	.data2 ux_access
+	.data2 ux_nice
+	.data2 ux_ftime
+	.data2 ux_sync
+	.data2 ux_kill
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 ux_dup
+	.data2 ux_pipe
+	.data2 ux_times
+	.data2 ux_prof
+	.data2 ux_unused
+	.data2 ux_setgid
+	.data2 ux_getgid
+	.data2 ux_sig
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 ux_ioctl
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 ux_exece
+	.data2 ux_umask
+	.data2 ux_chroot
+	.data2 unimpld
+	.data2 unimpld
 
 emptyfile:
 	! searches for a free filestructure
@@ -4884,49 +4630,49 @@ ux_exece:
 
 
 dispat1:	! base for escaped opcodes
-.word	aar.l,	aar.z,	adf.l,	adf.z,	adi.l,	adi.z,	ads.l,	ads.z
-.word	adu.l,	adu.z,	and.l,	and.z,	asp.l,	ass.l,	ass.z,	bge.l
-.word	bgt.l,	ble.l,	blm.l,	bls.l,	bls.z,	blt.l,	bne.l,	cai.z
-.word	cal.l,	cfi.z,	cfu.z,	ciu.z,	cmf.l,	cmf.z,	cmi.l,	cmi.z
-.word	cms.l,	cms.z,	cmu.l,	cmu.z,	com.l,	com.z,	csa.l,	csa.z
-.word	csb.l,	csb.z,	cuf.z,	cui.z,	cuu.z,	dee.l,	del.p,	del.n
-.word	dup.l,	dus.l,	dus.z,	dvf.l,	dvf.z,	dvi.l,	dvi.z,	dvu.l
-.word	dvu.z,	fef.l,	fef.z,	fif.l,	fif.z,	inl.p,	inl.n,	inn.l
-.word	inn.z,	ior.l,	ior.z,	lar.l,	lar.z,	ldc.l,	ldf.l,	ldl.p
-.word	ldl.n,	lfr.l,	lil.p,	lil.n,	lim.z,	los.l,	los.z,	lor.s0
-.word	lpi.l,	lxa.l,	lxl.l,	mlf.l,	mlf.z,	mli.l,	mli.z,	mlu.l
-.word	mlu.z,	mon.z,	ngf.l,	ngf.z,	ngi.l,	ngi.z,	nop.z,	rck.l
-.word	rck.z,	ret.l,	rmi.l,	rmi.z,	rmu.l,	rmu.z,	rol.l,	rol.z
-.word	ror.l,	ror.z,	rtt.z,	sar.l,	sar.z,	sbf.l,	sbf.z,	sbi.l
-.word	sbi.z,	sbs.l,	sbs.z,	sbu.l,	sbu.z,	sde.l,	sdf.l,	sdl.p
-.word	sdl.n,	set.l,	set.z,	sig.z,	sil.p,	sil.n,	sim.z,	sli.l
-.word	sli.z,	slu.l,	slu.z,	sri.l,	sri.z,	sru.l,	sru.z,	sti.l
-.word	sts.l,	sts.z,	str.s0,	tge.z,	tle.z,	trp.z,	xor.l,	xor.z
-.word	zer.l,	zer.z,	zge.l,	zgt.l,	zle.l,	zlt.l,	zne.l,	zrf.l
-.word	zrf.z,	zrl.p,	dch.z,	exg.s0,	exg.l,	exg.z,	lpb.z
+.data2	aar.l,	aar.z,	adf.l,	adf.z,	adi.l,	adi.z,	ads.l,	ads.z
+.data2	adu.l,	adu.z,	and.l,	and.z,	asp.l,	ass.l,	ass.z,	bge.l
+.data2	bgt.l,	ble.l,	blm.l,	bls.l,	bls.z,	blt.l,	bne.l,	cai.z
+.data2	cal.l,	cfi.z,	cfu.z,	ciu.z,	cmf.l,	cmf.z,	cmi.l,	cmi.z
+.data2	cms.l,	cms.z,	cmu.l,	cmu.z,	com.l,	com.z,	csa.l,	csa.z
+.data2	csb.l,	csb.z,	cuf.z,	cui.z,	cuu.z,	dee.l,	del.p,	del.n
+.data2	dup.l,	dus.l,	dus.z,	dvf.l,	dvf.z,	dvi.l,	dvi.z,	dvu.l
+.data2	dvu.z,	fef.l,	fef.z,	fif.l,	fif.z,	inl.p,	inl.n,	inn.l
+.data2	inn.z,	ior.l,	ior.z,	lar.l,	lar.z,	ldc.l,	ldf.l,	ldl.p
+.data2	ldl.n,	lfr.l,	lil.p,	lil.n,	lim.z,	los.l,	los.z,	lor.s0
+.data2	lpi.l,	lxa.l,	lxl.l,	mlf.l,	mlf.z,	mli.l,	mli.z,	mlu.l
+.data2	mlu.z,	mon.z,	ngf.l,	ngf.z,	ngi.l,	ngi.z,	nop.z,	rck.l
+.data2	rck.z,	ret.l,	rmi.l,	rmi.z,	rmu.l,	rmu.z,	rol.l,	rol.z
+.data2	ror.l,	ror.z,	rtt.z,	sar.l,	sar.z,	sbf.l,	sbf.z,	sbi.l
+.data2	sbi.z,	sbs.l,	sbs.z,	sbu.l,	sbu.z,	sde.l,	sdf.l,	sdl.p
+.data2	sdl.n,	set.l,	set.z,	sig.z,	sil.p,	sil.n,	sim.z,	sli.l
+.data2	sli.z,	slu.l,	slu.z,	sri.l,	sri.z,	sru.l,	sru.z,	sti.l
+.data2	sts.l,	sts.z,	str.s0,	tge.z,	tle.z,	trp.z,	xor.l,	xor.z
+.data2	zer.l,	zer.z,	zge.l,	zgt.l,	zle.l,	zlt.l,	zne.l,	zrf.l
+.data2	zrf.z,	zrl.p,	dch.z,	exg.s0,	exg.l,	exg.z,	lpb.z
 
 dispat2:	! base for 4 byte offsets
-.word	ldc.f
+.data2	ldc.f
 
 
-ignmask: .word 0	! ignore mask (variable)
-retarea: .word 0	! base of buffer for result values (max 8 bytes)
-	 .word 0
-	 .word 0
-	 .word 0
+ignmask: .data2 0	! ignore mask (variable)
+retarea: .data2 0	! base of buffer for result values (max 8 bytes)
+	 .data2 0
+	 .data2 0
+	 .data2 0
 
 trapproc:
-	.word 0
+	.data2 0
 
-nextp:	.byte 0
+nextp:	.data1 0
 
 header:
-ntext:	.word 0
-ndata:	.word 0
-nproc:	.word 0
-entry:	.word 0
-nline:	.word 0
+ntext:	.data2 0
+ndata:	.data2 0
+nproc:	.data2 0
+entry:	.data2 0
+nline:	.data2 0
 
-hp:	.word 0
-pb:	.word 0
-pd:	.word 0
+hp:	.data2 0
+pb:	.data2 0
+pd:	.data2 0
