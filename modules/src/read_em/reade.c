@@ -619,7 +619,12 @@ gethead()
 	argnum = 1;
 	for (;;) {	
 		EM_lineno++;
-		if ((c = getbyte()) == EOF) return 0;
+		c = getbyte();
+		if (c == COMMENTSTARTER) {
+			do	c = getbyte();
+			while (c != '\n' && c != EOF);
+		}
+		if (c == EOF) return 0;
 		if (c == '\n') continue;
 		if (isspace(c)) {
 			c = nospace();
