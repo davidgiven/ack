@@ -68,7 +68,7 @@ con_float() {
 	double frexp(), modf();
 	int j;
 	int sign = 0;
-	int fraction ;
+	int fraction[4] ;
 #else OWNFLOAT
 	char *p;
 #endif OWNFLOAT
@@ -111,30 +111,48 @@ con_float() {
 	if (argval == 4) {
 #endif IEEEFLOAT
 		i = (i + 128) & 0377;
-		fraction = (sign << 15) | (i << 7);
+		fraction[0] = (sign << 15) | (i << 7);
 		for (j = 6; j>= 0; j--) {
-			if (f >= 0.5) fraction |= (1 << j);
+			if (f >= 0.5) fraction[0] |= (1 << j);
 			f = modf(2*f, &f1);
 		}
 #ifdef IEEEFLOAT
 	}
 	else {
 		i = (i + 1024) & 03777;
-		fraction = (sign << 15) | (i << 4);
+		fraction[0] = (sign << 15) | (i << 4);
 		for (j = 3; j>= 0; j--) {
-			if (f >= 0.5) fraction |= (1 << j);
+			if (f >= 0.5) fraction[0] |= (1 << j);
 			f = modf(2*f, &f1);
 		}
 	}
 #endif IEEEFLOAT
-	fprintf(codefile, ".data1 0%o, 0%o", (fraction>>8)&0377, fraction&0377);
-	for (i = argval / 2 - 1; i; i--) {
-		fraction = 0;
+	for (i = 1; i < argval / 2; i++) {
+		fraction[i] = 0;
 		for (j = 15; j>= 0; j--) {
-			if (f >= 0.5) fraction |= (1 << j);
+			if (f >= 0.5) fraction[i] |= (1 << j);
 			f = modf(2*f, &f1);
 		}
-		fprintf(codefile, ", 0%o, 0%o", (fraction>>8)&0377, fraction&0377);
+	}
+	if (f >= 0.5) {
+		for (i = argval/2 - 1; i >= 0; i--) {
+			for (j = 0; j < 16; j++) {
+				if (fraction[i] & (1 << j)) {
+					fraction[i] &= ~(1 << j);
+				}
+				else {
+					fraction[i] |= (1 << j);
+					break;
+				}
+			}
+			if (j != 16) break;
+		}
+	}
+	for (i = 0; i < argval/2; i++) {
+		fprintf(codefile,
+			i != 0 ? ", 0%o, 0%o" : ".data1 0%o, 0%o", 
+			(fraction[i]>>8)&0377,
+			fraction[i]&0377);
 	}
 #endif OWNFLOAT
 	putc('\n', codefile);
