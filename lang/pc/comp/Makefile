@@ -1,0 +1,376 @@
+# make iso-pascal "compiler"
+EMHOME =	../../..
+MHDIR =		$(EMHOME)/modules/h
+PKGDIR =	$(EMHOME)/modules/pkg
+LIBDIR =	$(EMHOME)/modules/lib
+OBJECTCODE =	$(LIBDIR)/libemk.a $(EMHOME)/lib/em_data.a
+LLGEN =		$(EMHOME)/bin/LLgen
+MKDEP =		$(EMHOME)/bin/mkdep
+CURRDIR =	.
+CC =		fcc
+PRINTER =	vu45
+
+INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
+
+GFILES =	tokenfile.g declar.g expression.g program.g statement.g
+LLGENOPTIONS =
+PROFILE =
+CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
+LINTFLAGS = -DSTATIC=
+MALLOC = $(LIBDIR)/malloc.o
+LFLAGS = $(PROFILE)
+LSRC =	declar.c expression.c program.c statement.c tokenfile.c
+LOBJ =	declar.o expression.o program.o statement.o tokenfile.o
+CSRC =	LLlex.c LLmessage.c body.c char.c chk_expr.c code.c\
+	cstoper.c def.c desig.c enter.c error.c idf.c input.c label.c\
+	lookup.c main.c misc.c next.c node.c options.c readwrite.c\
+	scope.c symbol2str.c tokenname.c type.c typequiv.c progs.c
+COBJ =	LLlex.o LLmessage.o body.o casestat.o char.o chk_expr.o code.o\
+	cstoper.o def.o desig.o enter.o error.o idf.o input.o label.o\
+	lookup.o main.o misc.o next.o node.o options.o readwrite.o\
+	scope.o symbol2str.o tmpvar.o tokenname.o type.o typequiv.o progs.o
+OBJ =	Lpars.o $(COBJ) $(LOBJ)
+
+# Keep the next entries up to date!
+GENCFILES=	Lpars.c declar.c expression.c program.c statement.c\
+	tokenfile.c symbol2str.c casestat.c tmpvar.c
+SRC =	Lpars.c $(CSRC) $(GENCFILES)
+GENGFILES=	tokenfile.g
+GENHFILES=	Lpars.h debugcst.h density.h errout.h idfsize.h inputtype.h\
+	numsize.h strsize.h def.h type.h desig.h scope.h node.h\
+	target_sizes.h
+HFILES=		LLlex.h chk_expr.h class.h const.h debug.h def.h desig.h\
+	f_info.h idf.h input.h main.h misc.h node.h required.h scope.h\
+	tokenname.h type.h $(GENHFILES)
+#
+GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
+NEXTFILES = def.H desig.H node.H scope.H type.H casestat.C tmpvar.C
+
+#EXCLEXCLEXCLEXCL
+
+all:	Cfiles
+	make $(CURRDIR)/main
+
+clean:
+	rm -f *.o main $(GENFILES) hfiles Cfiles LLfiles
+
+# entry points not to be used directly
+
+Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES) Makefile
+	echo $(SRC) $(HFILES) > Cfiles
+
+LLfiles:	$(GFILES)
+	$(LLGEN) $(LLGENOPTIONS) $(GFILES)
+	@touch LLfiles
+
+hfiles:	Parameters make.hfiles
+	make.hfiles Parameters
+	touch hfiles
+
+lint:	Cfiles
+	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
+
+tokenfile.g:	tokenname.c make.tokfile
+	make.tokfile < tokenname.c > tokenfile.g
+
+symbol2str.c:	tokenname.c make.tokcase
+	make.tokcase < tokenname.c > symbol2str.c
+
+.SUFFIXES:	.H .h
+.H.h:
+		./make.allocd < $*.H > $*.h
+
+.SUFFIXES:	.C .c
+.C.c:
+		./make.allocd < $*.C > $*.c
+
+def.h:		make.allocd
+type.h:		make.allocd
+node.h:		make.allocd
+scope.h:	make.allocd
+desig.h:	make.allocd
+casestat.c:	make.allocd
+tmpvar.c:	make.allocd
+
+next.c:		$(NEXTFILES) ./make.next
+		./make.next $(NEXTFILES) > next.c
+
+char.c:	char.tab tab
+	tab -fchar.tab > char.c
+
+tab:
+	$(CC) tab.c -o tab
+depend:
+	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
+	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
+	$(MKDEP) $(SRC) |\
+		sed 's/\.c:/\.o:/' >> Makefile.new
+	mv Makefile Makefile.old
+	mv Makefile.new Makefile
+
+print:	$(CSRC) $(GFILES) $(HFILES)	# print recently changed files
+	pr -t $? | rpr $(PRINTER)
+	@touch print
+
+xref:	
+	ctags -x $(CSRC) $(HFILES) | sed "s/).*/)/">Xref
+
+#INCLINCLINCLINCL
+
+$(CURRDIR)/main:	$(OBJ)
+	-mv main main.old
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libassert.a $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
+	size $(CURRDIR)/main.old
+	size $(CURRDIR)/main
+
+#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
+Lpars.o: Lpars.h
+LLlex.o: LLlex.h
+LLlex.o: Lpars.h
+LLlex.o: class.h
+LLlex.o: const.h
+LLlex.o: debug.h
+LLlex.o: debugcst.h
+LLlex.o: f_info.h
+LLlex.o: idf.h
+LLlex.o: idfsize.h
+LLlex.o: input.h
+LLlex.o: inputtype.h
+LLlex.o: main.h
+LLlex.o: numsize.h
+LLlex.o: strsize.h
+LLlex.o: type.h
+LLmessage.o: LLlex.h
+LLmessage.o: Lpars.h
+LLmessage.o: idf.h
+LLmessage.o: type.h
+body.o: LLlex.h
+body.o: chk_expr.h
+body.o: debug.h
+body.o: debugcst.h
+body.o: def.h
+body.o: desig.h
+body.o: idf.h
+body.o: main.h
+body.o: node.h
+body.o: scope.h
+body.o: type.h
+casestat.o: LLlex.h
+casestat.o: Lpars.h
+casestat.o: chk_expr.h
+casestat.o: debug.h
+casestat.o: debugcst.h
+casestat.o: density.h
+casestat.o: main.h
+casestat.o: node.h
+casestat.o: type.h
+char.o: class.h
+chk_expr.o: LLlex.h
+chk_expr.o: Lpars.h
+chk_expr.o: chk_expr.h
+chk_expr.o: const.h
+chk_expr.o: debug.h
+chk_expr.o: debugcst.h
+chk_expr.o: def.h
+chk_expr.o: idf.h
+chk_expr.o: main.h
+chk_expr.o: misc.h
+chk_expr.o: node.h
+chk_expr.o: required.h
+chk_expr.o: scope.h
+chk_expr.o: type.h
+code.o: LLlex.h
+code.o: Lpars.h
+code.o: debug.h
+code.o: debugcst.h
+code.o: def.h
+code.o: desig.h
+code.o: main.h
+code.o: node.h
+code.o: required.h
+code.o: scope.h
+code.o: type.h
+cstoper.o: LLlex.h
+cstoper.o: Lpars.h
+cstoper.o: const.h
+cstoper.o: debug.h
+cstoper.o: debugcst.h
+cstoper.o: node.h
+cstoper.o: required.h
+cstoper.o: target_sizes.h
+cstoper.o: type.h
+def.o: LLlex.h
+def.o: debug.h
+def.o: debugcst.h
+def.o: def.h
+def.o: idf.h
+def.o: main.h
+def.o: misc.h
+def.o: node.h
+def.o: scope.h
+def.o: type.h
+desig.o: LLlex.h
+desig.o: debug.h
+desig.o: debugcst.h
+desig.o: def.h
+desig.o: desig.h
+desig.o: main.h
+desig.o: node.h
+desig.o: scope.h
+desig.o: type.h
+enter.o: LLlex.h
+enter.o: def.h
+enter.o: idf.h
+enter.o: main.h
+enter.o: node.h
+enter.o: scope.h
+enter.o: type.h
+error.o: LLlex.h
+error.o: debug.h
+error.o: debugcst.h
+error.o: errout.h
+error.o: f_info.h
+error.o: input.h
+error.o: inputtype.h
+error.o: main.h
+error.o: node.h
+idf.o: idf.h
+input.o: f_info.h
+input.o: idf.h
+input.o: input.h
+input.o: inputtype.h
+label.o: LLlex.h
+label.o: def.h
+label.o: idf.h
+label.o: main.h
+label.o: node.h
+label.o: scope.h
+label.o: type.h
+lookup.o: LLlex.h
+lookup.o: def.h
+lookup.o: idf.h
+lookup.o: misc.h
+lookup.o: node.h
+lookup.o: scope.h
+lookup.o: type.h
+main.o: LLlex.h
+main.o: Lpars.h
+main.o: const.h
+main.o: debug.h
+main.o: debugcst.h
+main.o: def.h
+main.o: f_info.h
+main.o: idf.h
+main.o: input.h
+main.o: inputtype.h
+main.o: main.h
+main.o: node.h
+main.o: required.h
+main.o: tokenname.h
+main.o: type.h
+misc.o: LLlex.h
+misc.o: f_info.h
+misc.o: idf.h
+misc.o: main.h
+misc.o: misc.h
+misc.o: node.h
+next.o: debug.h
+next.o: debugcst.h
+node.o: LLlex.h
+node.o: debug.h
+node.o: debugcst.h
+node.o: node.h
+node.o: type.h
+options.o: class.h
+options.o: const.h
+options.o: idfsize.h
+options.o: main.h
+options.o: type.h
+readwrite.o: LLlex.h
+readwrite.o: debug.h
+readwrite.o: debugcst.h
+readwrite.o: def.h
+readwrite.o: main.h
+readwrite.o: node.h
+readwrite.o: scope.h
+readwrite.o: type.h
+scope.o: LLlex.h
+scope.o: debug.h
+scope.o: debugcst.h
+scope.o: def.h
+scope.o: idf.h
+scope.o: misc.h
+scope.o: node.h
+scope.o: scope.h
+scope.o: type.h
+symbol2str.o: Lpars.h
+tmpvar.o: debug.h
+tmpvar.o: debugcst.h
+tmpvar.o: def.h
+tmpvar.o: main.h
+tmpvar.o: scope.h
+tmpvar.o: type.h
+tokenname.o: Lpars.h
+tokenname.o: idf.h
+tokenname.o: tokenname.h
+type.o: LLlex.h
+type.o: const.h
+type.o: debug.h
+type.o: debugcst.h
+type.o: def.h
+type.o: idf.h
+type.o: main.h
+type.o: node.h
+type.o: scope.h
+type.o: target_sizes.h
+type.o: type.h
+typequiv.o: LLlex.h
+typequiv.o: debug.h
+typequiv.o: debugcst.h
+typequiv.o: def.h
+typequiv.o: node.h
+typequiv.o: type.h
+progs.o: LLlex.h
+progs.o: debug.h
+progs.o: debugcst.h
+progs.o: def.h
+progs.o: main.h
+progs.o: scope.h
+progs.o: type.h
+declar.o: LLlex.h
+declar.o: Lpars.h
+declar.o: chk_expr.h
+declar.o: def.h
+declar.o: idf.h
+declar.o: main.h
+declar.o: misc.h
+declar.o: node.h
+declar.o: scope.h
+declar.o: type.h
+expression.o: LLlex.h
+expression.o: Lpars.h
+expression.o: chk_expr.h
+expression.o: debug.h
+expression.o: debugcst.h
+expression.o: def.h
+expression.o: main.h
+expression.o: node.h
+expression.o: scope.h
+expression.o: type.h
+program.o: LLlex.h
+program.o: Lpars.h
+program.o: def.h
+program.o: main.h
+program.o: node.h
+program.o: scope.h
+statement.o: LLlex.h
+statement.o: Lpars.h
+statement.o: chk_expr.h
+statement.o: def.h
+statement.o: desig.h
+statement.o: idf.h
+statement.o: main.h
+statement.o: node.h
+statement.o: scope.h
+statement.o: type.h
+tokenfile.o: Lpars.h
