@@ -21,8 +21,10 @@ name cpp
 	mapflag -ansi ANSI_C=.ansi
 	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
 		-D__{NAME} \
-		({ANSI_C?}:.ansi={SYSINCLUDES?} {ANSI_C_INCLUDES} {INCLUDES?}) \
-		({ANSI_C?.c}:{SUFFIX}={SYSINCLUDES?} {C_INCLUDES} {INCLUDES?}) \
+		{SYSINCLUDES?} \
+		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
+		{C_INCLUDES} \
+		{INCLUDES?} \
 		({ANSI_C?.xx}:.xx=-D{NAME} \
 		-DEM_WSIZE={w} -DEM_PSIZE={p} \
 		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
@@ -31,6 +33,22 @@ name cpp
 		<
 	stdout
 	prep is
+end
+name f77
+	from .f
+	to .c
+	program {EM}/lib.bin/f2c
+	mapflag -ansi F2_F={F2_F?} -A
+	mapflag -w* F2_F={F2_F?} -w*
+	args \
+		{F2_F?}
+	stdin
+	stdout
+	prep cond
+	rts .f
+	need .f
+	callname f77
+	callname f2c
 end
 name cem
 	from .c
@@ -58,7 +76,7 @@ name cem
 		{CPP_F?} \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
-		({ANSI_C?.c}:.c={C_INCLUDES}) \
+		{C_INCLUDES} \
 		{INCLUDES?} \
 		({ANSI_C?}:.ansi=-D__{NAME}) \
 		({ANSI_C?.xx}:.xx=-D{NAME}) \

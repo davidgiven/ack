@@ -58,6 +58,7 @@ name led
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.mod={EM}/{RT}m2) \
+		({RTS}:.f={EM}/{RT}ac) \
 		({RTS}:.p.8={EM}/{RT}pc) \
 		-o > < \
 		(.8:{TAIL}={EM}/{LIB}a68s) \
@@ -65,6 +66,7 @@ name led
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.f:{TAIL}={EM}/{LIB}f77 {EM}/{LIB}ac) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
