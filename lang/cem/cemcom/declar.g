@@ -200,10 +200,10 @@ initializer(struct idf *idf; int sc;)
 				free_expression(expr);
 				expr = 0;
 			}
-			code_declaration(idf, expr, level, sc);
 #ifdef	DEBUG
 			print_expr("initializer-expression", expr);
 #endif	DEBUG
+			code_declaration(idf, expr, level, sc);
 	  	}
 	  	init_idf(idf);
 	}
