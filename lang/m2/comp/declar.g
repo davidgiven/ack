@@ -128,8 +128,7 @@ FormalParameters(int doparams;
 	]?
 	')'
 			{ *tp = 0; }
-	[	':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type",
-							(struct node **) 0)
+	[	':' qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 			{ *tp = df->df_type;
 			}
 	]?
@@ -169,7 +168,7 @@ FormalType(struct type **tp;)
 } :
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
-	qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 		{ if (ARRAYflag) {
 			*tp = construct_type(T_ARRAY, NULLTYPE);
 			(*tp)->arr_elem = df->df_type;
@@ -186,14 +185,19 @@ TypeDeclaration
 	struct def *df;
 	struct type *tp;
 }:
-	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
+	IDENT		{ df = lookup(dot.TOK_IDF, CurrentScope);
+			  if (!df) df = define( dot.TOK_IDF,
+						CurrentScope,
+						D_TYPE);
+			}
 	'=' type(&tp)
-			{ if (df->df_type) free_type(df->df_type);
+			{ if (df->df_type) free_type(df->df_type); /* ??? */
 			  df->df_type = tp;
-			  if (df->df_kind == D_HTYPE &&
+			  if (df->df_kind == D_HIDDEN &&
 			      tp->tp_fund != T_POINTER) {
 error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 			  }
+			  df->df_kind = D_TYPE;
 			}
 ;
 
@@ -215,7 +219,7 @@ SimpleType(struct type **ptp;)
 {
 	struct def *df;
 } :
-	qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 	[
 		/* nothing */
 			{ *ptp = df->df_type; }
@@ -237,22 +241,16 @@ SimpleType(struct type **ptp;)
 enumeration(struct type **ptp;)
 {
 	struct node *EnumList;
+	register struct type *tp;
 } :
 	'(' IdentList(&EnumList) ')'
 		{
-		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
-		  EnterIdList(EnumList, D_ENUM, 0, *ptp,
+		  *ptp = tp = standard_type(T_ENUMERATION, 1, (arith) 1);
+		  EnterIdList(EnumList, D_ENUM, 0, tp,
 				 CurrentScope, (arith *) 0);
 		  FreeNode(EnumList);
-		  if ((*ptp)->enm_ncst > 256) {
-			if (word_size == 1) {
-				error("Too many enumeration literals");
-			}
-			else {
-				/* ??? This is crummy */
-				(*ptp)->tp_size = word_size;
-				(*ptp)->tp_align = word_align;
-			}
+		  if (tp->enm_ncst > 256) {
+			error("Too many enumeration literals");
 		  }
 		}
 ;
@@ -284,7 +282,8 @@ SubrangeType(struct type **ptp;)
 	'[' ConstExpression(&nd1)
 	UPTO ConstExpression(&nd2)
 	']'
-			{ *ptp = subr_type(nd1, nd2); }
+			{ *ptp = subr_type(nd1, nd2);
+			}
 ;
 
 ArrayType(struct type **ptp;)
@@ -298,8 +297,8 @@ ArrayType(struct type **ptp;)
 			}
 	[
 		',' SimpleType(&tp)
-			{ tp2 = tp2->arr_elem = 
-				construct_type(T_ARRAY, tp);
+			{ tp2->arr_elem = construct_type(T_ARRAY, tp);
+			  tp2 = tp2->arr_elem;
 			}
 	]* OF type(&tp)
 			{ tp2->arr_elem = tp;
@@ -365,8 +364,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			  }
 			  else	id = nd->nd_IDF;
 			}
-		':' qualident(D_TYPE|D_HTYPE|D_HIDDEN,
-			      &df, "type", (struct node **) 0)
+		':' qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 		|
 			/* Old fashioned! the first qualident now represents
 			   the type
@@ -374,10 +372,10 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				{ warning("Old fashioned Modula-2 syntax!");
 				  id = gen_anon_idf();
 				  df = ill_df;
-				  if (chk_designator(nd, 0) &&
+				  if (chk_designator(nd, 0, D_REFERRED) &&
 				      (nd->nd_class != Def ||
 				       !(nd->nd_def->df_kind &
-					 (D_ERROR|D_TYPE|D_HTYPE|D_HIDDEN)))) {
+					 (D_ERROR|D_ISTYPE)))) {
 					node_error(nd, "type expected");
 				  }
 				  else df = nd->nd_def;
@@ -386,7 +384,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 		]
 	|
 		/* Aha, third edition? */
-		':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+		':' qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 				{ id = gen_anon_idf(); }
 	]
 				{ tp = df->df_type;
@@ -489,7 +487,7 @@ PointerType(struct type **ptp;)
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-		qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+		qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 				{
 				  if (!df->df_type) {
 					error("type \"%s\" not declared",
@@ -555,7 +553,7 @@ FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 				{ p->next = 0; }
 	]?
 	')'
-	[ ':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+	[ ':' qualident(D_TYPE, &df, "type", (struct node **) 0)
 				{ *ptp = df->df_type; }
 	]?
 ;

@@ -16,7 +16,7 @@ struct enume {
 	label en_rck;		/* Label of range check descriptor */
 #define enm_enums	tp_value.tp_enum.en_enums
 #define enm_ncst	tp_value.tp_enum.en_ncst
-#define enm_rck		tp_value.tp_enum.enm_rck
+#define enm_rck		tp_value.tp_enum.en_rck
 };
 
 struct subrange {
@@ -68,9 +68,10 @@ struct type	{
 #define T_ARRAY		0x2000
 #define T_STRING	0x4000
 #define T_INTORCARD	(T_INTEGER|T_CARDINAL)
-#define T_DISCRETE	(T_ENUMERATION|T_INTORCARD|T_CHAR)
 #define T_NUMERIC	(T_INTORCARD|T_REAL)
 #define T_INDEX		(T_ENUMERATION|T_CHAR|T_SUBRANGE)
+#define T_DISCRETE	(T_INDEX|T_INTORCARD)
+#define T_PRCRESULT	(T_DISCRETE|T_REAL|T_POINTER|T_WORD)
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {
@@ -131,3 +132,7 @@ struct type
 #define NULLTYPE ((struct type *) 0)
 
 #define IsConformantArray(tpx)	((tpx)->tp_fund == T_ARRAY && (tpx)->next == 0)
+#define bounded(tpx)	((tpx)->tp_fund & T_INDEX)
+#define complex(tpx)	((tpx)->tp_fund & (T_RECORD|T_ARRAY))
+#define returntype(tpx)	(((tpx)->tp_fund & T_PRCRESULT) ||\
+		((tpx)->tp_fund == T_SET && (tpx)->tp_size <= dword_size))

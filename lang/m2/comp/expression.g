@@ -25,6 +25,7 @@ number(struct node **p;)
 	struct type *tp;
 } :
 [
+	%default
 	INTEGER		{ tp = numtype; }
 |
 	REAL		{ tp = real_type; }
@@ -46,7 +47,7 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 			{ if (types) {
 				df = ill_df;
 
-				if (chk_designator(nd, 0)) {
+				if (chk_designator(nd, 0, D_REFERRED)) {
 				    if (nd->nd_class != Def) {
 					node_error(nd, "%s expected", str);
 				    }
@@ -113,9 +114,7 @@ expression(struct node **pnd;)
 	SimpleExpression(pnd)
 	[
 		/* relation */
-		[ '=' | '#' | UNEQUAL | '<' | LESSEQUAL | '>' |
-		  GREATEREQUAL | IN
-		]
+		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
 			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
 		SimpleExpression(&((*pnd)->nd_right))
 	]?
@@ -123,7 +122,7 @@ expression(struct node **pnd;)
 
 /* Inline in expression
 relation:
-	'=' | '#' | UNEQUAL | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN
+	'=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN
 ;
 */
 
@@ -184,9 +183,7 @@ factor(struct node **p;)
 		]?
 	|
 		bare_set(&nd)
-			{ nd->nd_left = *p;
-			  *p = nd;
-			}
+			{ nd->nd_left = *p; *p = nd; }
 	]
 |
 	bare_set(p)
@@ -200,9 +197,9 @@ factor(struct node **p;)
 
 			tp = charc_type;
 			i = *(dot.TOK_STR) & 0377;
-			free((char *) dot.tk_data.tk_str);
 			free(dot.TOK_STR);
-			dot.TOK_INT = i;
+			free((char *) dot.tk_data.tk_str);
+			(*p)->nd_INT = i;
 		  }
 		  else	tp = standard_type(T_STRING, 1, dot.TOK_SLE);
 		  (*p)->nd_type = tp;

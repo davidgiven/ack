@@ -63,15 +63,12 @@ CaseCode(nd, exitlabel)
 	register arith val;
 	label tablabel;
 
-	assert(nd->nd_class == Stat && nd->nd_symb == CASE);
+	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
-	WalkExpr(nd->nd_left, NO_LABEL, NO_LABEL);
-	sh->sh_type = nd->nd_left->nd_type;
+	clear((char *) sh, sizeof(*sh));
+	WalkExpr(pnode->nd_left, NO_LABEL, NO_LABEL);
+	sh->sh_type = pnode->nd_left->nd_type;
 	sh->sh_break = text_label();
-	sh->sh_default = 0;
-	sh->sh_nrofentries = 0;
-	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* immaterial ??? */
-	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 
 	/* Now, create case label list
 	*/
@@ -189,6 +186,7 @@ AddCases(sh, node, lbl)
 		if (node->nd_symb == UPTO) {
 			assert(node->nd_left->nd_class == Value);
 			assert(node->nd_right->nd_class == Value);
+
 			v2 = node->nd_right->nd_INT;
 			node->nd_type = node->nd_left->nd_type;
 			for (v1 = node->nd_left->nd_INT; v1 <= v2; v1++) {
@@ -233,9 +231,12 @@ AddOneCase(sh, node, lbl)
 		/* second etc. case entry		*/
 		/* find the proper place to put ce into the list	*/
 		
-		if (ce->ce_value < sh->sh_lowerbd) sh->sh_lowerbd = ce->ce_value;
-		else
-		if (ce->ce_value > sh->sh_upperbd) sh->sh_upperbd = ce->ce_value;
+		if (ce->ce_value < sh->sh_lowerbd) {
+			sh->sh_lowerbd = ce->ce_value;
+		}
+		else if (ce->ce_value > sh->sh_upperbd) {
+			sh->sh_upperbd = ce->ce_value;
+		}
 		while (c1 && c1->ce_value < ce->ce_value)	{
 			c2 = c1;
 			c1 = c1->next;

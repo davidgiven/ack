@@ -81,19 +81,21 @@ struct def	{		/* list of definitions for a name */
 #define D_IMPORT	0x0080	/* an imported definition */
 #define D_PROCHEAD	0x0100	/* a procedure heading in a definition module */
 #define D_HIDDEN	0x0200	/* a hidden type */
-#define D_HTYPE		0x0400	/* definition of a hidden type seen */
 #define D_FORWARD	0x0800	/* not yet defined */
 #define D_UNDEF_IMPORT	0x1000	/* imported from an undefined name */
 #define D_FORWMODULE	0x2000	/* module must be declared later */
 #define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
+#define D_ISTYPE	(D_HIDDEN|D_TYPE)
+#define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	char df_flags;
-#define D_ADDRESS	0x01	/* set if address was taken */
+#define D_NOREG		0x01	/* set if it may not reside in a register */
 #define D_USED		0x02	/* set if used */
 #define D_DEFINED	0x04	/* set if it is assigned a value */
-#define D_VARPAR	0x08	/* set if it is a VAR parameter */
-#define D_VALPAR	0x10	/* set if it is a value parameter */
+#define D_REFERRED	0x08	/* set if it is referred to */
+#define D_VARPAR	0x10	/* set if it is a VAR parameter */
+#define D_VALPAR	0x20	/* set if it is a value parameter */
 #define D_EXPORTED	0x40	/* set if exported */
 #define D_QEXPORTED	0x80	/* set if qualified exported */
 	struct type *df_type;

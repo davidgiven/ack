@@ -4,6 +4,12 @@
 static char *RcsId = "$Header$";
 #endif
 
+/*	Defines the LLmessage routine. LLgen-generated parsers require the
+	existence of a routine of that name.
+	The routine must do syntax-error reporting and must be able to
+	insert tokens in the token stream.
+*/
+
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -12,15 +18,18 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"Lpars.h"
 
-extern char *symbol2str();
-extern struct idf *gen_anon_idf();
-int err_occurred = 0;
+extern char		*symbol2str();
+extern struct idf	*gen_anon_idf();
+int			 err_occurred = 0;
 
 LLmessage(tk)
 	int tk;
 {
 	++err_occurred;
 	if (tk)	{
+		/* if (tk != 0), it represents the token to be inserted.
+		   otherwize, the current token is deleted
+		*/
 		error("%s missing", symbol2str(tk));
 		insert_token(tk);
 	}

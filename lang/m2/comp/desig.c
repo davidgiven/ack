@@ -232,6 +232,7 @@ CodeVarDesig(df, ds)
 		CodeConst(df->var_off, pointer_size);
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = 0;
+		df->df_flags |= D_NOREG;
 		return;
 	}
 
@@ -242,6 +243,7 @@ CodeVarDesig(df, ds)
 		ds->dsg_name = df->var_name;
 		ds->dsg_offset = 0;
 		ds->dsg_kind = DSG_FIXED;
+		df->df_flags |= D_NOREG;
 		return;
 	}
 	
@@ -254,6 +256,7 @@ CodeVarDesig(df, ds)
 		ds->dsg_name = &(sc->sc_name[1]);
 		ds->dsg_offset = df->var_off;
 		ds->dsg_kind = DSG_FIXED;
+		df->df_flags |= D_NOREG;
 		return;
 	}
 
@@ -278,6 +281,7 @@ CodeVarDesig(df, ds)
 		else	C_lxl((arith) (proclevel - sc->sc_level));
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = df->var_off;
+		df->df_flags |= D_NOREG;
 		return;
 	}
 
@@ -304,6 +308,7 @@ CodeDesig(nd, ds)
 	case Def: {
 		register struct def *df = nd->nd_def;
 
+		df->df_flags |= D_USED;
 		switch(df->df_kind) {
 		case D_FIELD:
 			CodeFieldDesig(df, ds);
@@ -335,14 +340,16 @@ CodeDesig(nd, ds)
 		*ds = InitDesig;
 		CodeExpr(nd->nd_right, ds, NO_LABEL, NO_LABEL);
 		CodeValue(ds, nd->nd_right->nd_type->tp_size);
-		CodeCoercion(nd->nd_right->nd_type, int_type);
+		if (nd->nd_right->nd_type->tp_size > word_size) {
+			CodeCoercion(nd->nd_right->nd_type, int_type);
+		}
 		if (IsConformantArray(nd->nd_left->nd_type)) {
 			/* ??? */
 		}
 		else	{
 			/* load address of descriptor
 			*/
-			/* ??? */
+			C_lae_dlb(nd->nd_left->nd_type->arr_descr, (arith) 0);
 		}
 		ds->dsg_kind = DSG_INDEXED;
 		break;

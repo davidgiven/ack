@@ -166,7 +166,7 @@ rem_forwards(fo)
 
 	while (f = fo) {
 		df = lookfor(&(f->fo_tok), CurrVis, 1);
-		if (!(df->df_kind & (D_TYPE|D_HTYPE|D_ERROR))) {
+		if (!(df->df_kind & (D_TYPE|D_ERROR))) {
 			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
 			      df->df_idf->id_text);
 		}

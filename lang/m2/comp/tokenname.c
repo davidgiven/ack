@@ -24,7 +24,6 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 };
 
 struct tokenname tkcomp[] =	{	/* names of the composite tokens */
-	{UNEQUAL, "<>"},
 	{LESSEQUAL, "<="},
 	{GREATEREQUAL, ">="},
 	{UPTO, ".."},

@@ -45,7 +45,7 @@ cstunary(expp)
 		o1 = !o1;
 		break;
 	default:
-		assert(0);
+		crash("(cstunary)");
 	}
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
@@ -159,7 +159,7 @@ cstbin(expp)
 			);
 		}
 		else
-			o1 = o1 < o2;
+			o1 = (o1 < o2);
 		break;
 
 	case '>':
@@ -170,7 +170,7 @@ cstbin(expp)
 			);
 		}
 		else
-			o1 = o1 > o2;
+			o1 = (o1 > o2);
 		break;
 	case LESSEQUAL:
 		if (uns)	{
@@ -180,7 +180,7 @@ cstbin(expp)
 			);
 		}
 		else
-			o1 = o1 <= o2;
+			o1 = (o1 <= o2);
 		break;
 	case GREATEREQUAL:
 		if (uns)	{
@@ -190,27 +190,27 @@ cstbin(expp)
 			);
 		}
 		else
-			o1 = o1 >= o2;
+			o1 = (o1 >= o2);
 		break;
 	case '=':
-		o1 = o1 == o2;
+		o1 = (o1 == o2);
 		break;
 	case '#':
-	case UNEQUAL:
-		o1 = o1 != o2;
+		o1 = (o1 != o2);
 		break;
 	case AND:
 	case '&':
-		o1 = o1 && o2;
+		o1 = (o1 && o2);
 		break;
 	case OR:
-		o1 = o1 || o2;
+		o1 = (o1 || o2);
 		break;
 	default:
-		assert(0);
+		crash("(cstbin)");
 	}
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
+	if (expp->nd_type == bool_type) expp->nd_symb = INTEGER;
 	expp->nd_INT = o1;
 	CutSize(expp);
 	FreeNode(expp->nd_left);
@@ -222,6 +222,7 @@ cstset(expp)
 	register struct node *expp;
 {
 	register arith *set1 = 0, *set2;
+	arith *resultset = 0;
 	register int setsize, j;
 
 	assert(expp->nd_right->nd_class == Set);
@@ -233,32 +234,59 @@ cstset(expp)
 		arith i;
 
 		assert(expp->nd_left->nd_class == Value);
+
 		i = expp->nd_left->nd_INT;
-		expp->nd_INT = (i >= 0 &&
+		expp->nd_INT = (i >= 0 && set2 != 0 &&
 		    i < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
-		    free((char *) set2);
+		if (set2) free((char *) set2);
 	}
 	else {
 		set1 = expp->nd_left->nd_set;
+		resultset = set1;
+		expp->nd_left->nd_set = 0;
 		switch(expp->nd_symb) {
 		case '+':
-			for (j = 0; j < setsize; j++) {
+			if (!set1) {
+				resultset = set2;
+				expp->nd_right->nd_set = 0;
+				break;
+			}
+			if (set2) for (j = 0; j < setsize; j++) {
 				*set1++ |= *set2++;
 			}
 			break;
 		case '-':
+			if (!set1 || !set2) {
+				/* The set from which something is substracted
+				   is already empty, or the set that is
+				   substracted is empty
+				*/
+				break;
+			}
 			for (j = 0; j < setsize; j++) {
 				*set1++ &= ~*set2++;
 			}
 			break;
 		case '*':
+			if (!set1) break;
+			if (!set2) {
+				resultset = set2;
+				expp->nd_right->nd_set = 0;
+				break;
+			}
+
 			for (j = 0; j < setsize; j++) {
 				*set1++ &= *set2++;
 			}
 			break;
 		case '/':
-			for (j = 0; j < setsize; j++) {
+			if (!set1) {
+				resultset = set2;
+				expp->nd_right->nd_set = 0;
+				break;
+			}
+			if (set2) for (j = 0; j < setsize; j++) {
 				*set1++ ^= *set2++;
 			}
 			break;
@@ -266,42 +294,62 @@ cstset(expp)
 		case LESSEQUAL:
 		case '=':
 		case '#':
-		case UNEQUAL:
 			/* Clumsy, but who cares? Nobody writes these things! */
+			expp->nd_left->nd_set = set1;
 			for (j = 0; j < setsize; j++) {
 				switch(expp->nd_symb) {
 				case GREATEREQUAL:
+					if (!set2) {j = setsize; break; }
+					if (!set1) break;
 					if ((*set1 | *set2++) != *set1) break;
 					set1++;
 					continue;
 				case LESSEQUAL:
+					if (!set1) {j = setsize; break; }
+					if (!set2) break;
 					if ((*set2 | *set1++) != *set2) break;
 					set2++;
 					continue;
 				case '=':
 				case '#':
-				case UNEQUAL:
+					if (!set1 && !set2) {
+						j = setsize; break;
+					}
+					if (!set1 || !set2) break;
 					if (*set1++ != *set2++) break;
 					continue;
 				}
-				expp->nd_INT = expp->nd_symb != '=';
+				if (j < setsize) {
+					expp->nd_INT = expp->nd_symb == '#';
+				}
+				else {
+			 		expp->nd_INT = expp->nd_symb != '#';
+				}
 				break;
 			}
-			if (j == setsize) expp->nd_INT = expp->nd_symb == '=';
 			expp->nd_class = Value;
 			expp->nd_symb = INTEGER;
-			free((char *) expp->nd_left->nd_set);
-			free((char *) expp->nd_right->nd_set);
+			if (expp->nd_left->nd_set) {
+				free((char *) expp->nd_left->nd_set);
+			}
+			if (expp->nd_right->nd_set) {
+				free((char *) expp->nd_right->nd_set);
+			}
 			FreeNode(expp->nd_left);
 			FreeNode(expp->nd_right);
 			expp->nd_left = expp->nd_right = 0;
 			return;
 		default:
-			assert(0);
+			crash("(cstset)");
 		}
-		free((char *) expp->nd_right->nd_set);
+		if (expp->nd_right->nd_set) {
+			free((char *) expp->nd_right->nd_set);
+		}
+		if (expp->nd_left->nd_set) {
+			free((char *) expp->nd_left->nd_set);
+		}
 		expp->nd_class = Set;
-		expp->nd_set = expp->nd_left->nd_set;
+		expp->nd_set = resultset;
 	}
 	FreeNode(expp->nd_left);
 	FreeNode(expp->nd_right);
@@ -405,7 +453,7 @@ cstcall(expp, call)
 		else CutSize(expp);
 		break;
 	default:
-		assert(0);
+		crash("(cstcall)");
 	}
 	FreeNode(expr);
 	FreeNode(expp->nd_left);

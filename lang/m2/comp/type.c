@@ -61,6 +61,8 @@ struct paramlist *h_paramlist;
 
 struct type *h_type;
 
+extern label	data_label();
+
 struct type *
 create_type(fund)
 	register int fund;
@@ -117,7 +119,7 @@ construct_type(fund, tp)
 		break;
 
 	default:
-		assert(0);
+		crash("funny type constructor");
 	}
 
 	return dtp;
@@ -325,6 +327,52 @@ subr_type(lb, ub)
 	return res;
 }
 
+label
+getrck(tp)
+	register struct type *tp;
+{
+	/*	generate a range check descriptor for type "tp" when
+		neccessary. Return its label
+	*/
+
+	assert(bounded(tp));
+
+	if (tp->tp_fund == T_SUBRANGE) {
+		if (tp->sub_rck == (label) 0) {
+			tp->sub_rck = data_label();
+			C_df_dlb(tp->sub_rck);
+			C_rom_cst(tp->sub_lb);
+			C_rom_cst(tp->sub_ub);
+		}
+		return tp->sub_rck;
+	}
+	if (tp->enm_rck == (label) 0) {
+		tp->enm_rck = data_label();
+		C_df_dlb(tp->enm_rck);
+		C_rom_cst((arith) 0);
+		C_rom_cst((arith) (tp->enm_ncst - 1));
+	}
+	return tp->enm_rck;
+}
+
+getbounds(tp, plo, phi)
+	register struct type *tp;
+	arith *plo, *phi;
+{
+	/*	Get the bounds of a bounded type
+	*/
+
+	assert(bounded(tp));
+
+	if (tp->tp_fund == T_SUBRANGE) {
+		*plo = tp->sub_lb;
+		*phi = tp->sub_ub;
+	}
+	else {
+		*plo = 0;
+		*phi = tp->enm_ncst - 1;
+	}
+}
 struct type *
 set_type(tp)
 	struct type *tp;
@@ -385,18 +433,30 @@ ArraySizes(tp)
 
 	/* find out HIGH, LOW and size of ARRAY
 	*/
+	tp->arr_descr = data_label();
+	C_df_dlb(tp->arr_descr);
+
 	switch(index_type->tp_fund) {
 	case T_SUBRANGE:
 		tp->tp_size = elem_size *
 			(index_type->sub_ub - index_type->sub_lb + 1);
+		C_rom_cst(index_type->sub_lb);
+		C_rom_cst(index_type->sub_ub - index_type->sub_lb);
 		break;
+
 	case T_CHAR:
 	case T_ENUMERATION:
 		tp->tp_size = elem_size * index_type->enm_ncst;
+		C_rom_cst((arith) 0);
+		C_rom_cst((arith) (index_type->enm_ncst - 1));
 		break;
+
 	default:
-		assert(0);
+		crash("Funny index type");
 	}
+	
+	C_rom_cst(elem_size);
+
 	/* ??? overflow checking ???
 	*/
 }

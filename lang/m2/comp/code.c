@@ -52,14 +52,14 @@ CodeString(nd)
 	struct node *nd;
 {
 	label lab;
-	
+
 	if (nd->nd_type == charc_type) {
 		C_loc(nd->nd_INT);
 		return;
 	}
 	C_df_dlb(lab = data_label());
 	C_rom_scon(nd->nd_STR, nd->nd_SLE);
-	C_lae_dlb(lab);
+	C_lae_dlb(lab, (arith) 0);
 }
 
 CodeReal(nd)
@@ -69,7 +69,7 @@ CodeReal(nd)
 	
 	C_df_dlb(lab = data_label());
 	C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
-	C_lae_dlb(lab);
+	C_lae_dlb(lab, (arith) 0);
 	C_loi(nd->nd_type->tp_size);
 }
 
@@ -139,12 +139,16 @@ CodeExpr(nd, ds, true_label, false_label)
 		int i;
 
 		st = nd->nd_set;
-		for (i = nd->nd_type->tp_size / word_size, st = nd->nd_set + i;
+		ds->dsg_kind = DSG_LOADED;
+		if (!st) {
+			C_zer(nd->nd_type->tp_size);
+			break;
+		}
+		for (i = nd->nd_type->tp_size / word_size, st += i;
 		     i > 0;
 		     i--) { 
 			C_loc(*--st);
 		}
-		ds->dsg_kind = DSG_LOADED;
 		}
 		break;
 
@@ -166,9 +170,97 @@ CodeExpr(nd, ds, true_label, false_label)
 }
 
 CodeCoercion(t1, t2)
-	struct type *t1, *t2;
+	register struct type *t1, *t2;
 {
-	/* ??? */
+	int fund1, fund2;
+
+	if (t1 == t2) return;
+	if (t1->tp_fund == T_SUBRANGE) t1 = t1->next;
+	if (t2->tp_fund == T_SUBRANGE) t2 = t2->next;
+	if ((fund1 = t1->tp_fund) == T_WORD) fund1 = T_INTEGER;
+	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
+	switch(fund1) {
+	case T_INTEGER:
+		switch(fund2) {
+		case T_INTEGER:
+			if (t2->tp_size != t1->tp_size) {
+				C_loc(t1->tp_size);
+				C_loc(t2->tp_size);
+				C_cii();
+			}
+			break;
+		case T_ENUMERATION:
+		case T_CHAR:
+		case T_CARDINAL:
+			if (t1->tp_size != word_size) {
+				C_loc(t1->tp_size);
+				C_loc(word_size);
+				C_ciu();
+			}
+			break;
+		case T_REAL:
+			C_loc(t1->tp_size);
+			C_loc(t2->tp_size);
+			C_cif();
+			break;
+		default:
+			crash("Funny integer conversion");
+		}
+		break;
+
+	case T_CHAR:
+	case T_ENUMERATION:
+	case T_CARDINAL:
+		switch(fund2) {
+		case T_ENUMERATION:
+		case T_CHAR:
+		case T_CARDINAL:
+		case T_POINTER:
+			if (t2->tp_size > word_size) {
+				C_loc(word_size);
+				C_loc(t2->tp_size);
+				C_cuu();
+			}
+			break;
+		case T_INTEGER:
+			C_loc(t1->tp_size);
+			C_loc(t2->tp_size);
+			C_cui();
+			break;
+		case T_REAL:
+			C_loc(t1->tp_size);
+			C_loc(t2->tp_size);
+			C_cuf();
+			break;
+		default:
+			crash("Funny cardinal conversion");
+		}
+		break;
+
+	case T_REAL:
+		switch(fund2) {
+		case T_REAL:
+			if (t2->tp_size != t1->tp_size) {
+				C_loc(t1->tp_size);
+				C_loc(t2->tp_size);
+				C_cff();
+			}
+			break;
+		case T_INTEGER:
+			C_loc(t1->tp_size);
+			C_loc(t2->tp_size);
+			C_cfi();
+			break;
+		case T_CARDINAL:
+			C_loc(t1->tp_size);
+			C_loc(t2->tp_size);
+			C_cfu();
+			break;
+		default:
+			crash("Funny REAL conversion");
+		}
+		break;
+	}
 }
 
 CodeCall(nd)
@@ -190,13 +282,12 @@ CodeCall(nd)
 	}	
 	tp = left->nd_type;
 
-	if (left->nd_class == Def &&
-	    (left->nd_def->df_kind & (D_TYPE|D_HTYPE|D_HIDDEN))) {
+	if (left->nd_class == Def && is_type(left->nd_def)) {
 		/* it was just a cast. Simply ignore it
 		*/
 		Des = InitDesig;
 		CodeExpr(nd->nd_right->nd_left, &Des, NO_LABEL, NO_LABEL);
-		CodeValue(&Des);
+		CodeValue(&Des, tp->tp_size);
 		*nd = *(nd->nd_right->nd_left);
 		nd->nd_type = left->nd_def->df_type;
 		return;
@@ -216,6 +307,7 @@ CodeCall(nd)
 		else {
 			CodeExpr(arg->nd_left, &Des, NO_LABEL, NO_LABEL);
 			CodeValue(&Des, arg->nd_left->nd_type->tp_size);
+			CheckAssign(arg->nd_left->nd_type, param->par_type);
 			pushed += align(arg->nd_left->nd_type->tp_size, word_align);
 		}
 		/* ??? Conformant arrays */
@@ -249,16 +341,55 @@ CodeStd(nd)
 	/* ??? */
 }
 
-CodeAssign(nd, dst, dss)
+CodeAssign(nd, dss, dst)
 	struct node *nd;
 	struct desig *dst, *dss;
 {
 	/*	Generate code for an assignment. Testing of type
 		compatibility and the like is already done.
 	*/
-	
-	CodeCoercion(nd->nd_right->nd_type, nd->nd_left->nd_type);
-	/* ??? */
+
+	if (dss->dsg_kind == DSG_LOADED) {
+		CodeStore(dst, nd->nd_left->nd_type->tp_size);
+	}
+	else {
+		CodeAddress(dst);
+		C_blm(nd->nd_left->nd_type->tp_size);
+	}
+}
+
+CheckAssign(tpl, tpr)
+	register struct type *tpl, *tpr;
+{
+	/*	Generate a range check if neccessary
+	*/
+
+	arith llo, lhi, rlo, rhi;
+	label l = 0;
+	extern label getrck();
+
+	if (bounded(tpl)) {
+		/* in this case we might need a range check */
+		if (!bounded(tpr)) {
+			/* yes, we need one */
+			l = getrck(tpl);
+		}
+		else {
+			/* both types are restricted. check the bounds
+			   to see wether we need a range check
+			*/
+			getbounds(tpl, &llo, &lhi);
+			getbounds(tpr, &rlo, &rhi);
+			if (llo > rlo || lhi < rhi) {
+				l = getrck(tpl);
+			}
+		}
+
+		if (l) {
+			C_lae_dlb(l, (arith) 0);
+			C_rck(word_size);
+		}
+	}
 }
 
 Operands(leftop, rightop)
@@ -415,29 +546,44 @@ CodeOper(expr, true_label, false_label)
 	case '>':
 	case GREATEREQUAL:
 	case '=':
-	case UNEQUAL:
 	case '#':
 		Operands(leftop, rightop);
 		CodeCoercion(rightop->nd_type, leftop->nd_type);
+		tp = leftop->nd_type;	/* Not the result type! */
+		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
-			C_cmi(leftop->nd_type->tp_size);
+			C_cmi(tp->tp_size);
 			break;
 		case T_POINTER:
 			C_cmp();
 			break;
 		case T_CARDINAL:
-			C_cmu(leftop->nd_type->tp_size);
+			C_cmu(tp->tp_size);
 			break;
 		case T_ENUMERATION:
 		case T_CHAR:
 			C_cmu(word_size);
 			break;
 		case T_REAL:
-			C_cmf(leftop->nd_type->tp_size);
+			C_cmf(tp->tp_size);
 			break;
 		case T_SET:
-			C_cms(leftop->nd_type->tp_size);
+			if (oper == GREATEREQUAL) {
+				/* A >= B is the same as A equals A + B
+				*/
+				C_dup(2*tp->tp_size);
+				C_asp(tp->tp_size);
+				C_zer(tp->tp_size);
+			}
+			else if (oper == LESSEQUAL) {
+				/* A <= B is the same as A - B = {}
+				*/
+				C_com(tp->tp_size);
+				C_and(tp->tp_size);
+				C_ior(tp->tp_size);
+			}
+			C_cms(tp->tp_size);
 			break;
 		default:
 			crash("bad type COMPARE");
@@ -451,9 +597,13 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case IN:
-		Operands(leftop, rightop);
-		CodeCoercion(rightop->nd_type, word_type);
-		C_inn(leftop->nd_type->tp_size);
+		/* In this case, evaluate right hand side first! The
+		   INN instruction expects the bit number on top of the
+		   stack
+		*/
+		Operands(rightop, leftop);
+		CodeCoercion(leftop->nd_type, word_type);
+		C_inn(rightop->nd_type->tp_size);
 		break;
 	case AND:
 	case '&':
@@ -544,7 +694,6 @@ compare(relop, lbl)
 	case '=':
 		C_zeq(lbl);
 		break;
-	case UNEQUAL:
 	case '#':
 		C_zne(lbl);
 		break;
@@ -573,7 +722,6 @@ truthvalue(relop)
 	case '=':
 		C_teq();
 		break;
-	case UNEQUAL:
 	case '#':
 		C_tne();
 		break;
@@ -643,7 +791,7 @@ CodeEl(nd, tp)
 
 		Des = InitDesig;
 		CodeExpr(nd, &Des, NO_LABEL, NO_LABEL);
-		CodeValue(nd, word_size);
+		CodeValue(&Des, word_size);
 		C_set(tp->tp_size);
 	}
 }

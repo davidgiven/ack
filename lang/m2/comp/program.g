@@ -231,7 +231,7 @@ Semicolon:
 			{ warning("; expected"); }
 ;
 
-ProgramModule(int state;)
+ProgramModule
 {
 	struct idf *id;
 	struct def *GetDefinitionModule();
@@ -267,16 +267,15 @@ ProgramModule(int state;)
 	'.'
 ;
 
-Module
-{
-	int state = PROGRAM;
-} :
+Module:
 	DefinitionModule
 |
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }
-	]?
-	ProgramModule(state)
+	|
+				{ state = PROGRAM; }
+	]
+	ProgramModule
 ;
 
 CompilationUnit:

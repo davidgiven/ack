@@ -67,27 +67,23 @@ EnterIdList(idlist, kind, flags, type, scope, addr)
 			int xalign = type->tp_align;
 
 			if (xalign < word_align && kind != D_FIELD) {
+				/* variables are at least word aligned
+				*/
 				xalign = word_align;
 			}
 
 			if (*addr >= 0) {
-				if (scope->sc_level) {
+				if (scope->sc_level && kind != D_FIELD) {
 					/* alignment of parameters is on
 					   word boundaries. We cannot do any
 					   better, because we don't know the
 					   alignment of the stack pointer when
 					   starting to push parameters
 					*/
-					off = *addr;
-					*addr = align(off, word_align);
+					xalign = word_align;
 				}
-				else {
-					/* for global variables we can honour
-					   the alignment requirements totally.
-					*/
-					off = align(*addr, xalign);
-					*addr = off + type->tp_size;
-				}
+				off = align(*addr, xalign);
+				*addr = off + type->tp_size;
 			}
 			else {
 				off = -align(-*addr-type->tp_size, xalign);

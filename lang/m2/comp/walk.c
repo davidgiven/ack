@@ -23,14 +23,17 @@ static char *RcsId = "$Header$";
 #include	"Lpars.h"
 #include	"desig.h"
 #include	"f_info.h"
+#include	"idf.h"
 
 extern arith	align();
 extern arith	NewPtr();
+extern arith	NewInt();
 extern int	proclevel;
 static label	instructionlabel;
 static char	return_expr_occurred;
 static struct type *func_type;
 struct withdesig *WithDesigs;
+struct node	*Modules;
 
 label
 text_label()
@@ -88,7 +91,9 @@ WalkModule(module)
 		/* WHY ??? because we generated an INA for it ??? */
 
 		C_df_dnam(&(sc->sc_name[1]));
+		size = align(size, word_align);
 		C_bss_cst(size, (arith) 0, 0);
+		C_exp(sc->sc_name);
 	}
 	else if (CurrVis == Defined->mod_vis) {
 		/* This module is the module currently being compiled.
@@ -98,10 +103,14 @@ WalkModule(module)
 		while (df) {
 			if (df->df_kind == D_VARIABLE) {
 				C_df_dnam(df->var_name);
-				C_bss_cst(df->df_type->tp_size, (arith) 0, 0);
+				C_bss_cst(
+					align(df->df_type->tp_size, word_align),
+					(arith) 0, 0);
 			}
 			df = df->df_nextinscope;
 		}
+		if (state == PROGRAM) C_exp("main");
+		else C_exp(sc->sc_name);
 	}
 
 	/* Now, walk through it's local definitions
@@ -115,26 +124,55 @@ WalkModule(module)
 	sc->sc_off = 0;
 	instructionlabel = 2;
 	func_type = 0;
-	C_pro_narg(sc->sc_name);
+	C_pro_narg(state == PROGRAM ? "main" : sc->sc_name);
 	DoProfil();
+	if (CurrVis == Defined->mod_vis) {
+		/* Body of implementation or program module.
+		   Call initialization routines of imported modules.
+		   Also prevent recursive calls of this one.
+		*/
+		label l1 = data_label(), l2 = text_label();
+		struct node *nd;
+
+		/* we don't actually prevent recursive calls, but do nothing
+		   if called recursively
+		*/
+		C_df_dlb(l1);
+		C_bss_cst(word_size, (arith) 0, 1);
+		C_loe_dlb(l1, (arith) 0);
+		C_zeq(l2);
+		C_ret((arith) 0);
+		C_df_ilb(l2);
+		C_loc((arith) 1);
+		C_ste_dlb(l1, (arith) 0);
+
+		nd = Modules;
+		while (nd) {
+			C_cal(nd->nd_IDF->id_text);
+			nd = nd->next;
+		}
+	}
 	MkCalls(sc->sc_def);
+	proclevel++;
 	WalkNode(module->mod_body, (label) 0);
 	C_df_ilb((label) 1);
-	C_ret(0);
+	C_ret((arith) 0);
 	C_end(-sc->sc_off);
+	proclevel--;
 	TmpClose();
 
 	CurrVis = vis;
 }
 
 WalkProcedure(procedure)
-	struct def *procedure;
+	register struct def *procedure;
 {
 	/*	Walk through the definition of a procedure and all its
 		local definitions
 	*/
 	struct scopelist *vis = CurrVis;
 	register struct scope *sc;
+	register struct type *res_type;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -152,16 +190,19 @@ WalkProcedure(procedure)
 	MkCalls(sc->sc_def);
 	return_expr_occurred = 0;
 	instructionlabel = 2;
-	func_type = procedure->df_type->next;
+	func_type = res_type = procedure->df_type->next;
+	if (! returntype(res_type)) {
+		node_error(procedure->prc_body, "illegal result type");
+	}
 	WalkNode(procedure->prc_body, (label) 0);
 	C_df_ilb((label) 1);
-	if (func_type) {
+	if (res_type) {
 		if (! return_expr_occurred) {
 node_error(procedure->prc_body,"function procedure does not return a value");
 		}
-		C_ret((int) align(func_type->tp_size, word_align));
+		C_ret(align(res_type->tp_size, word_align));
 	}
-	else	C_ret(0);
+	else	C_ret((arith) 0);
 	C_end(-sc->sc_off);
 	TmpClose();
 	CurrVis = vis;
@@ -195,6 +236,7 @@ MkCalls(df)
 		if (df->df_kind == D_MODULE) {
 			C_lxl((arith) 0);
 			C_cal(df->mod_vis->sc_scope->sc_name);
+			C_asp(pointer_size);
 		}
 		df = df->df_nextinscope;
 	}
@@ -246,20 +288,8 @@ WalkStat(nd, lab)
 	assert(nd->nd_class == Stat);
 
 	switch(nd->nd_symb) {
-	case BECOMES: {
-		struct desig ds;
-
-		WalkExpr(right, NO_LABEL, NO_LABEL);
-		ds = Desig;
-		WalkDesignator(left);	/* May we do it in this order??? */
-
-		if (! TstAssCompat(left->nd_type, right->nd_type)) {
-			node_error(nd, "type incompatibility in assignment");
-			break;
-		}
-
-		CodeAssign(nd, &ds, pds);
-		}
+	case BECOMES:
+		DoAssign(nd, left, right, 0);
 		break;
 
 	case IF:
@@ -327,8 +357,61 @@ WalkStat(nd, lab)
 		}
 
 	case FOR:
-		/* ??? */
-		WalkNode(right, lab);
+		{
+			arith tmp = 0;
+			struct node *fnd;
+			label l1 = instructionlabel++;
+			label l2 = instructionlabel++;
+			arith incr = 1;
+			arith size;
+
+			assert(left->nd_symb == TO);
+			assert(left->nd_left->nd_symb == BECOMES);
+
+			DoAssign(left->nd_left,
+				 left->nd_left->nd_left,
+				 left->nd_left->nd_right, 1);
+			fnd = left->nd_right;
+			if (fnd->nd_symb == BY) {
+				incr = fnd->nd_left->nd_INT;
+				fnd = fnd->nd_right;
+			}
+			if (! chk_expr(fnd)) return;
+			size = fnd->nd_type->tp_size;
+			if (fnd->nd_class != Value) {
+				*pds = InitDesig;
+				CodeExpr(fnd, pds, NO_LABEL, NO_LABEL);
+				CodeValue(pds, size);
+				tmp = NewInt();
+				C_stl(tmp);
+			}
+			if (!TstCompat(left->nd_left->nd_left->nd_type,
+				       fnd->nd_type)) {
+node_error(fnd, "type incompatibility in limit of FOR loop");
+				break;
+			}
+			C_bra(l1);
+			C_df_ilb(l2);
+			WalkNode(right, lab);
+			*pds = InitDesig;
+			C_loc(incr);
+			CodeDesig(left->nd_left->nd_left, pds);
+			CodeValue(pds, size);
+			C_adi(int_size);
+			*pds = InitDesig;
+			CodeDesig(left->nd_left->nd_left, pds);
+			CodeStore(pds, size);
+			C_df_ilb(l1);
+			*pds = InitDesig;
+			CodeDesig(left->nd_left->nd_left, pds);
+			CodeValue(pds, size);
+			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
+			if (incr > 0) {
+				C_ble(l2);
+			}
+			else	C_bge(l2);
+			if (tmp) FreeInt(tmp);
+		}
 		break;
 
 	case WITH:
@@ -358,7 +441,7 @@ WalkStat(nd, lab)
 				pds->dsg_kind = DSG_PFIXED;
 				/* the record is indirectly available */
 			}
-			wds.w_desig = Desig;
+			wds.w_desig = *pds;
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
 			CurrVis = &link;
@@ -432,10 +515,47 @@ WalkDesignator(nd)
 
 	DO_DEBUG(1, (DumpTree(nd), print("\n")));
 
-	if (! chk_designator(nd, DESIGNATOR|VARIABLE)) return;
+	if (! chk_designator(nd, DESIGNATOR|VARIABLE, D_DEFINED)) return;
 
 	Desig = InitDesig;
 	CodeDesig(nd, &Desig);
+
+}
+
+DoAssign(nd, left, right, forloopass)
+	struct node *nd;
+	register struct node *left, *right;
+{
+		/* May we do it in this order (expression first) ??? */
+	struct desig ds;
+
+	WalkExpr(right, NO_LABEL, NO_LABEL);
+	if (! chk_designator(left, DESIGNATOR|VARIABLE, D_DEFINED)) return;
+
+	if (forloopass) {
+		if (! TstCompat(left->nd_type, right->nd_type)) {
+			node_error(nd, "type incompatibility in FOR loop");
+			return;
+		}
+		/* Test if the left hand side may be a for loop variable ??? */
+	}
+	else if (! TstAssCompat(left->nd_type, right->nd_type)) {
+		node_error(nd, "type incompatibility in assignment");
+		return;
+	}
+
+	if (complex(right->nd_type)) {
+		CodeAddress(&Desig);
+	}
+	else {
+		CodeValue(&Desig, right->nd_type->tp_size);
+		CheckAssign(left->nd_type, right->nd_type);
+	}
+	ds = Desig;
+	Desig = InitDesig;
+	CodeDesig(left, &Desig);
+
+	CodeAssign(nd, &ds, &Desig);
 }
 
 #ifdef DEBUG

@@ -38,7 +38,7 @@ chk_expr(expp)
 	switch(expp->nd_class) {
 	case Oper:
 		if (expp->nd_symb == '[') {
-			return chk_designator(expp, DESIGNATOR|VARIABLE);
+			return chk_designator(expp, DESIGNATOR|VARIABLE, D_NOREG|D_USED);
 		}
 
 		return	chk_expr(expp->nd_left) &&
@@ -47,7 +47,7 @@ chk_expr(expp)
 
 	case Uoper:
 		if (expp->nd_symb == '^') {
-			return chk_designator(expp, DESIGNATOR|VARIABLE);
+			return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
 		}
 
 		return	chk_expr(expp->nd_right) &&
@@ -69,13 +69,13 @@ chk_expr(expp)
 		return chk_set(expp);
 
 	case Name:
-		return chk_designator(expp, VALUE);
+		return chk_designator(expp, VALUE, D_USED);
 
 	case Call:
 		return chk_call(expp);
 
 	case Link:
-		return chk_designator(expp, DESIGNATOR|VALUE);
+		return chk_designator(expp, DESIGNATOR|VALUE, D_USED|D_NOREG);
 
 	default:
 		assert(0);
@@ -94,6 +94,7 @@ chk_set(expp)
 	struct def *df;
 	register struct node *nd;
 	arith *set;
+	unsigned size;
 
 	assert(expp->nd_symb == SET);
 
@@ -102,7 +103,7 @@ chk_set(expp)
 	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		if (! chk_designator(nd, 0)) return 0;
+		if (! chk_designator(nd, 0, D_USED)) return 0;
 
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
@@ -117,24 +118,32 @@ chk_set(expp)
 		expp->nd_left = 0;
 	}
 	else	tp = bitset_type;
+	expp->nd_type = tp;
+
+	nd = expp->nd_right;
 
 	/* Now check the elements given, and try to compute a constant set.
-	   First allocate room for the set
+	   First allocate room for the set, but only if it is'nt empty.
 	*/
-	set = (arith *)
-		Malloc((unsigned) (tp->tp_size * sizeof(arith) / word_size));
+	if (! nd) {
+		/* The resulting set IS empty, so we just return
+		*/
+		expp->nd_class = Set;
+		expp->nd_set = 0;
+		return 1;
+	}
+	size = tp->tp_size * (sizeof(arith) / word_size);
+	set = (arith *) Malloc(size);
+	clear((char *) set, size);
 
 	/* Now check the elements, one by one
 	*/
-	nd = expp->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
 		if (!chk_el(nd->nd_left, tp->next, &set)) return 0;
 		nd = nd->nd_right;
 	}
-
-	expp->nd_type = tp;
 
 	if (set) {
 		/* Yes, it was a constant set, and we managed to compute it!
@@ -255,7 +264,7 @@ getarg(argp, bases, designator)
 	}
 	argp = argp->nd_right;
 	if ((!designator && !chk_expr(argp->nd_left)) ||
-	    (designator && !chk_designator(argp->nd_left, DESIGNATOR))) {
+	    (designator && !chk_designator(argp->nd_left, DESIGNATOR, D_REFERRED))) {
 		return 0;
 	}
 	tp = argp->nd_left->nd_type;
@@ -276,7 +285,7 @@ getname(argp, kinds)
 		return 0;
 	}
 	argp = argp->nd_right;
-	if (! chk_designator(argp->nd_left, 0)) return 0;
+	if (! chk_designator(argp->nd_left, 0, D_REFERRED)) return 0;
 
 	assert(argp->nd_left->nd_class == Def);
 
@@ -303,10 +312,9 @@ chk_call(expp)
 	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
-	if (! chk_designator(left, 0)) return 0;
+	if (! chk_designator(left, 0, D_USED)) return 0;
 
-	if (left->nd_class == Def &&
-	    (left->nd_def->df_kind & (D_HTYPE|D_TYPE|D_HIDDEN))) {
+	if (left->nd_class == Def && is_type(left->nd_def)) {
 		/* It was a type cast. This is of course not portable.
 		*/
 		arg = expp->nd_right;
@@ -359,10 +367,21 @@ chk_proccall(expp)
 {
 	/*	Check a procedure call
 	*/
-	register struct node *left = expp->nd_left;
+	register struct node *left;
 	register struct node *arg;
 	register struct paramlist *param;
 
+	left = 0;
+	arg = expp->nd_right;
+	/* First, reverse the order in the argument list */
+	while (arg) {
+		expp->nd_right = arg;
+		arg = arg->nd_right;
+		expp->nd_right->nd_right = left;
+		left = expp->nd_right;
+	}
+
+	left = expp->nd_left;
 	arg = expp;
 	arg->nd_type = left->nd_type->next;
 	param = left->nd_type->prc_params;
@@ -375,6 +394,9 @@ chk_proccall(expp)
 				   param->par_var)) {
 node_error(arg->nd_left, "type incompatibility in parameter");
 			return 0;
+		}
+		if (param->par_var && arg->nd_left->nd_class == Def) {
+			arg->nd_left->nd_def->df_flags |= D_NOREG;
 		}
 
 		param = param->next;
@@ -422,7 +444,7 @@ FlagCheck(expp, df, flag)
 }
 
 int
-chk_designator(expp, flag)
+chk_designator(expp, flag, dflags)
 	register struct node *expp;
 {
 	/*	Find the name indicated by "expp", starting from the current
@@ -435,6 +457,8 @@ chk_designator(expp, flag)
 		and '^' are allowed for this designator.
 		Also contained may be the flag HASSELECTORS, indicating that
 		the result must have selectors.
+		"dflags" contains some flags that must be set at the definition
+		found.
 	*/
 	register struct def *df;
 	register struct type *tp;
@@ -454,7 +478,8 @@ chk_designator(expp, flag)
 		assert(expp->nd_right->nd_class == Name);
 
 		if (! chk_designator(expp->nd_left,
-				     (flag|HASSELECTORS))) return 0;
+				     flag|HASSELECTORS,
+				     dflags|D_NOREG)) return 0;
 
 		tp = expp->nd_left->nd_type;
 
@@ -512,6 +537,8 @@ df->df_idf->id_text);
 			}
 		}
 
+		df->df_flags |= dflags;
+
 		return 1;
 	}
 
@@ -526,7 +553,7 @@ df->df_idf->id_text);
 		assert(expp->nd_symb == '[');
 
 		if ( 
-		    	!chk_designator(expp->nd_left, DESIGNATOR|VARIABLE)
+		    	!chk_designator(expp->nd_left, DESIGNATOR|VARIABLE, dflags|D_NOREG)
 		   ||
 		    	!chk_expr(expp->nd_right)
 		   ||
@@ -558,7 +585,7 @@ df->df_idf->id_text);
 	if (expp->nd_class == Uoper) {
 		assert(expp->nd_symb == '^');
 
-		if (! chk_designator(expp->nd_right, DESIGNATOR|VARIABLE)) {
+		if (! chk_designator(expp->nd_right, DESIGNATOR|VARIABLE, dflags)) {
 			return 0;
 		}
 
@@ -703,7 +730,6 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	case '=':
 	case '#':
-	case UNEQUAL:
 	case GREATEREQUAL:
 	case LESSEQUAL:
 	case '<':
@@ -732,7 +758,6 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 		case T_POINTER:
 			if (chk_address(tpl, tpr) ||
 			    expp->nd_symb == '=' ||
-			    expp->nd_symb == UNEQUAL ||
 			    expp->nd_symb == '#') return 1;
 			break;
 
@@ -790,6 +815,7 @@ chk_uoper(expp)
 	case '+':
 		if (tpr->tp_fund & T_NUMERIC) {
 			expp->nd_token = right->nd_token;
+			expp->nd_class = right->nd_class;
 			FreeNode(right);
 			expp->nd_right = 0;
 			return 1;
@@ -809,10 +835,14 @@ chk_uoper(expp)
 		else if (tpr->tp_fund == T_REAL) {
 			if (right->nd_class == Value) {
 				expp->nd_token = right->nd_token;
+				expp->nd_class = Value;
 				if (*(expp->nd_REL) == '-') {
 					expp->nd_REL++;
 				}
-				else	expp->nd_REL--;
+				else {
+					expp->nd_REL--;
+					*(expp->nd_REL) = '-';
+				}
 				FreeNode(right);
 				expp->nd_right = 0;
 			}
@@ -853,7 +883,7 @@ getvariable(arg)
 
 	left = arg->nd_left;
 
-	if (! chk_designator(left, DESIGNATOR)) return 0;
+	if (! chk_designator(left, DESIGNATOR, D_REFERRED)) return 0;
 	if (left->nd_class == Oper || left->nd_class == Uoper) {
 		return arg;
 	}
@@ -941,7 +971,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
 		expp->nd_type = intorcard_type;
-		arg = getname(arg, D_FIELD|D_VARIABLE|D_TYPE|D_HIDDEN|D_HTYPE);
+		arg = getname(arg, D_FIELD|D_VARIABLE|D_ISTYPE);
 		if (!arg) return 0;
 		cstcall(expp, S_SIZE);
 		break;
@@ -955,7 +985,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 		{
 		struct type *tp;
 
-		if (!(arg = getname(arg, D_HIDDEN|D_HTYPE|D_TYPE))) return 0;
+		if (!(arg = getname(arg, D_ISTYPE))) return 0;
 		tp = arg->nd_left->nd_def->df_type;
 		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 		if (!(tp->tp_fund & T_DISCRETE)) {

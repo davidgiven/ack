@@ -31,7 +31,7 @@ MkNode(class, left, right, token)
 	nd->nd_right = right;
 	nd->nd_token = *token;
 	nd->nd_class = class;
-	nd->nd_type = NULLTYPE;
+	nd->nd_type = error_type;
 	DO_DEBUG(4,(debug("Create node:"), PrNode(nd)));
 	return nd;
 }

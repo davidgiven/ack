@@ -18,6 +18,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"Lpars.h"
 
 struct def *h_def;		/* Pointer to free list of def structures */
 
@@ -80,7 +81,7 @@ define(id, scope, kind)
 		switch(df->df_kind) {
 		case D_HIDDEN:
 			if (kind == D_TYPE && !DefinitionModule) {
-				df->df_kind = D_HTYPE;
+				df->df_kind = D_TYPE;
 				return df;
 			}
 			break;
@@ -94,6 +95,7 @@ define(id, scope, kind)
 				FreeNode(df->for_node);
 				df->mod_vis = df->for_vis;
 				df->df_kind = kind;
+				DefInFront(df);
 				return df;
 			}
 			break;
@@ -241,9 +243,9 @@ df->df_idf->id_text);
 			else if (df1 && df1->df_kind == D_HIDDEN) {
 				if (df->df_kind == D_TYPE) {
 					if (df->df_type->tp_fund != T_POINTER) {
-error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 					}
-					df->df_kind = D_HTYPE;
+					df->df_kind = D_TYPE;
 					df1->df_kind = D_IMPORT;
 					df1->imp_def = df;
 					continue;
@@ -436,8 +438,10 @@ DeclProc(type)
 		module. Create a def structure for it (if neccessary)
 	*/
 	register struct def *df;
-	extern char *sprint(), *Malloc(), *strcpy();
 	static int nmcount = 0;
+	extern char *Malloc();
+	extern char *strcpy();
+	extern char *sprint();
 	char buf[256];
 
 	assert(type & (D_PROCEDURE | D_PROCHEAD));
@@ -462,6 +466,7 @@ DeclProc(type)
 			open_scope(OPENSCOPE);
 			CurrentScope->sc_name = df->for_name;
 			df->prc_vis = CurrVis;
+			DefInFront(df);
 		}
 		else {
 			df = define(dot.TOK_IDF, CurrentScope, type);
@@ -490,6 +495,46 @@ InitProc(nd, df)
 	*/
 	df->mod_body = nd;
 	/* Keep it this way, or really create a procedure out of it??? */
+}
+
+AddModule(id)
+	struct idf *id;
+{
+	/*	Add the name of a module to the Module list. This list is
+		maintained to create the initialization routine of the
+		program/implementation module currently defined.
+	*/
+	static struct node *nd_end;	/* to remember end of list */
+	register struct node *n;
+	extern struct node *Modules;
+
+	n = MkNode(Name, NULLNODE, NULLNODE, &dot);
+	n->nd_IDF = id;
+	n->nd_symb = IDENT;
+	if (nd_end) nd_end->next = n;
+	nd_end = n;
+	if (!Modules) Modules = n;
+}
+
+DefInFront(df)
+	register struct def *df;
+{
+	/*	Put definition "df" in front of the list of definitions
+		in its scope.
+		This is neccessary because in some cases the order in this
+		list is important.
+	*/
+	register struct def *df1;
+
+	if (df->df_scope->sc_def != df) {
+		df1 = df->df_scope->sc_def;
+		while (df1 && df1->df_nextinscope != df) {
+			df1 = df1->df_nextinscope;
+		}
+		if (df1) df1->df_nextinscope = df->df_nextinscope;
+		df->df_nextinscope = df->df_scope->sc_def;
+		df->df_scope->sc_def = df;
+	}
 }
 
 #ifdef DEBUG

@@ -17,3 +17,4 @@ extern struct def *Defined;
 			   compilation
 			*/
 extern char *DEFPATH[];	/* search path for DEFINITION MODULE's */
+extern int state;	/* either IMPLEMENTATION or PROGRAM */

@@ -23,13 +23,14 @@ static char *RcsId = "$Header$";
 #include	"tokenname.h"
 #include	"node.h"
 
+int	state;			/* either IMPLEMENTATION or PROGRAM */
 char	options[128];
 int	DefinitionModule; 
 int	SYSTEMModule = 0;
 char	*ProgName;
-extern int err_occurred;
 char	*DEFPATH[NDIRS+1];
 struct def *Defined;
+extern int err_occurred;
 
 main(argc, argv)
 	char *argv[];
@@ -93,6 +94,7 @@ Compile(src, dst)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CompUnit();
+	close_scope(SC_REVERSE);
 	if (err_occurred) {
 		C_close();
 		return 0;

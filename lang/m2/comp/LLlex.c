@@ -182,10 +182,6 @@ again:
 			if (nch == '=')	{
 				return tk->tk_symb = LESSEQUAL;
 			}
-			else
-			if (nch == '>') {
-				return tk->tk_symb = '#';
-			}
 			PushBack(nch);
 			return tk->tk_symb = ch;
 

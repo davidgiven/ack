@@ -11,7 +11,7 @@ LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
 GEN =	LLgen
 GENOPTIONS =
-PROFILE =
+PROFILE = 
 CFLAGS = $(PROFILE) $(INCLUDES)
 LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
@@ -91,7 +91,7 @@ tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h inputtype.h
 type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h target_sizes.h type.h
-def.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
+def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
@@ -101,10 +101,11 @@ node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
-walk.o: LLlex.h Lpars.h debug.h def.h desig.h main.h node.h scope.h type.h
+walk.o: LLlex.h Lpars.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h
 casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h type.h
+tmpvar.o: debug.h def.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h
