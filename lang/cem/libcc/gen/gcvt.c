@@ -2,7 +2,7 @@
 #ifndef NOFLOAT
 extern char	*ecvt();
 
-#define NDIGINEXP	2
+#define NDIGINEXP(exp)	(((exp) >= 100 || (exp) <= -100) ? 3 : 2)
 
 char *
 gcvt(value, ndigit, buf)
@@ -18,7 +18,7 @@ gcvt(value, ndigit, buf)
 	s2 = buf;
 	if (sign) *s2++ = '-';
 	for (i = ndigit - 1; i > 0 && s1[i] == '0'; i--) ndigit--;
-	if (dp - ndigit > NDIGINEXP + 2 || dp < -NDIGINEXP - 1) {
+	if (dp - ndigit > NDIGINEXP(dp) + 2 || dp < -NDIGINEXP(dp) - 1) {
 		/* Use E format, otherwise we need too many '0''s */
 		dp--;
 		*s2++ = *s1++;
@@ -30,8 +30,9 @@ gcvt(value, ndigit, buf)
 			dp = -dp;
 		}
 		else	 *s2++ = '+';
-		s2 += NDIGINEXP;
-		for (i = NDIGINEXP; i > 0; i--) {
+		s2 += NDIGINEXP(dp);
+		*s2 = 0;
+		for (i = NDIGINEXP(dp); i > 0; i--) {
 			*--s2 = dp % 10 + '0';
 			dp /= 10;
 		}
