@@ -81,7 +81,6 @@ toward structured programs consisting of many small
 procedures greatly reduces the value of registers to hold local variables
 because the large number of procedure calls implies a large overhead in
 saving and restoring the registers at every call.
-.BP
 .P
 Although there are no general purpose registers, there are a
 few internal registers with specific functions as follows:
@@ -89,10 +88,10 @@ few internal registers with specific functions as follows:
 .N 1
 .TS
 tab(:);
-l 1 l l.
+l 1 l l l.
 PC:\-:Program Counter:Pointer to next instruction
-LB:\-:Local Base:Points to base of the local variables \
-in the current procedure.
+LB:\-:Local Base:Points to base of the local variables
+:::in the current procedure.
 SP:\-:Stack Pointer:Points to the highest occupied word on the stack.
 HP:\-:Heap Pointer:Points to the top of the heap area.
 .TE 1

@@ -343,7 +343,7 @@ procedure frames need not be contiguous.
                 |         parameter  0          | <\- SP
                 |===============================|
 .Df
-          Figure 1. A sample procedure frame and parameters.
+Figure 1. A sample procedure frame and parameters.
 .De
 .S2 "Heap data area"
 The heap area starts empty, with HP

@@ -1,3 +1,4 @@
+
 { This  is an interpreter for EM.  It serves as  the official machine
   definition.  This interpreter must run on a machine which supports
   arithmetic with words and memory offsets.
@@ -30,7 +31,7 @@
        to object size in bits - 1.  The effect of a  count  not in this
        range is undefined.
 }
-.BP
+.bp
 {$i256} {$d+}
 program em(tables,prog,input,output);
 

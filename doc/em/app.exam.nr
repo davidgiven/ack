@@ -1,7 +1,9 @@
 .BP
 .AP "AN EXAMPLE PROGRAM"
-.DS B
+.A 1 0
+.NA
 .ta 4n 8n 12n 16n 20n
+.nf
  1	program example(output);
  2	{This program just demonstrates typical EM code.}
  3	type rec = record r1: integer; r2:real; r3: boolean end;
@@ -42,14 +44,17 @@
 38		mi := 99;
 39		test(r)
 40	end.
-.DE 0
+.fi
+.AD
 .BP
 The EM code as produced by the Pascal-VU compiler is given below. Comments
 have been added manually.  Note that this code has already been  optimized.
-.DS B
+.A 1 0
+.NA
+.nf
 .ta 1n 24n
 	mes 2,2,2	; wordsize 2, pointersize 2
-.1
+\&.1
 	rom 't.p\e000'	; the name of the source file
 	hol 552,\-32768,0	; externals and buf occupy 552 bytes
 	exp $sum	; sum can be called from other modules
@@ -59,13 +64,13 @@ have been added manually.  Note that this code has already been  optimized.
 	adi 2	; add them
 	ret 2	; return the result
 	end 2	; end of procedure ( still two bytes local storage )
-.2
+\&.2
 	rom 1,99,2	; descriptor of array a[]
 	exp $test	; the compiler exports all level 0 procedures
 	pro $test,226	; procedure test, 226 bytes local storage
-.3
+\&.3
 	rom 4.8F8	; assemble Floating point 4.8 (8 bytes) in
-.4		; global storage
+\&.4		; global storage
 	rom 0.5F8	; same for 0.5
 	mes 3,\-226,2,2	; compiler temporary not referenced by address
 	mes 3,\-24,2,0	; the same is true for i, j, b and c in test
@@ -106,7 +111,7 @@ have been added manually.  Note that this code has already been  optimized.
 	lni	; lin 26 prior to optimization
 	loc 1
 	stl \-2	; for i:= 1
- 2
+2
 	lol \-2
 	dup 2
 	mli 2	; i*i
@@ -119,7 +124,7 @@ have been added manually.  Note that this code has already been  optimized.
 	beq *3	; to 100 do
 	inl \-2	; increment i and loop
 	bra *2
- 3
+3
 	lin 27
 	lol \-4
 	loc 27
@@ -146,7 +151,7 @@ have been added manually.  Note that this code has already been  optimized.
 	asp 4	; remove parameters from stack
 	lfr 2	; get function result
 	stl \-2	; i :=
- 4
+4
 	lin 31
 	lol \-2
 	zle *5	; while i > 0 do
@@ -156,7 +161,7 @@ have been added manually.  Note that this code has already been  optimized.
 	stl \-4	; j := j + r.r1
 	del \-2	; i := i - 1
 	bra *4	; loop
- 5
+5
 	lin 32
 	lol 0
 	stl \-226	; make copy of address of r
@@ -199,9 +204,9 @@ have been added manually.  Note that this code has already been  optimized.
 	end 226
 	exp $_main
 	pro $_main,0	; main program
-.6
+\&.6
 	con 2,\-1,22	; description of external files
-.5
+\&.5
 	rom 15.96F8
 	fil .1	; maintain source file name
 	lae .6	; description of external files
@@ -225,7 +230,9 @@ have been added manually.  Note that this code has already been  optimized.
 	asp 2
 	end 0
 	mes 5	; reals were used
-.DE 0
+.fi
+.AD
+.A 1 0
 The compact code corresponding to the above program is listed below.
 Read it horizontally, line by line, not column by column.
 Each number represents a byte of compact code, printed in decimal.
