@@ -221,9 +221,16 @@ realloc(addr, n)
 	char *addr;
 	register unsigned int n;
 {check_mallinks("realloc entry");{
-	register mallink *ml = mallink_of_block(addr), *ph_next;
+	register mallink *ml, *ph_next;
 	register unsigned int size;
 
+	if (addr == 0) {
+		/*	Behave like most Unix realloc's when handed a
+			null-pointer
+		*/
+		return malloc(n);
+	}
+	ml = mallink_of_block(addr);
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
 	if (free_of(ml)) {
 		unlink_free_chunk(ml);
