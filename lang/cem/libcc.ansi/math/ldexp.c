@@ -5,6 +5,8 @@
 /* $Header$ */
 
 #include	<math.h>
+#include	<float.h>
+#include	<errno.h>
 
 double
 ldexp(double fl, int exp)
@@ -12,6 +14,7 @@ ldexp(double fl, int exp)
 	int sign = 1;
 	int currexp;
 
+	if (fl == 0.0) return 0.0;
 	if (fl<0) {
 		fl = -fl;
 		sign = -1;
@@ -19,6 +22,10 @@ ldexp(double fl, int exp)
 	fl = frexp(fl,&currexp);
 	exp += currexp;
 	if (exp > 0) {
+		if (exp > DBL_MAX_EXP) {
+			errno = ERANGE;
+			return sign * HUGE_VAL;
+		}
 		while (exp>30) {
 			fl *= (double) (1L << 30);
 			exp -= 30;
@@ -26,6 +33,10 @@ ldexp(double fl, int exp)
 		fl *= (double) (1L << exp);
 	}
 	else	{
+		/* number need not be normalized */
+		if (exp < DBL_MIN_EXP - DBL_MANT_DIG) {
+			return 0.0;
+		}
 		while (exp<-30) {
 			fl /= (double) (1L << 30);
 			exp += 30;

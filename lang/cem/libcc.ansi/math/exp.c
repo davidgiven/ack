@@ -38,11 +38,11 @@ exp(double x)
 
 	if (x <= M_LN_MIN_D) {
 		if (x < M_LN_MIN_D) errno = ERANGE;
-		return DBL_MIN;
+		return 0.0;
 	}
 	if (x >= M_LN_MAX_D) {
 		if (x > M_LN_MAX_D) errno = ERANGE;
-		return DBL_MAX;
+		return HUGE_VAL;
 	}
 
 	if (negative) x = -x;
