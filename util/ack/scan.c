@@ -24,24 +24,23 @@
 static char rcs_id[] = "$Header$" ;
 #endif
 
-enum f_path setpath() { /* Try to find a transformation path */
+enum f_path getpath(first) register trf **first ; {
+	/* Try to find a transformation path */
 
 	start_scan();
 	/*
 		The end result is the setting of the t_do flags
-		in the transformation list.
+		in the transformation list and the chaining of
+		the consequtive phases with the t_next field.
 		The list is scanned for possible transformations
-		stopping at stopsuffix or a combine transformation.
+		stopping at stopsuffix or the last transformation in the list.
 		The scan flags are set by this process.
 		When a transformation is found, it is compared with
-		the last transformation found, if better (or the first)
-		the scan bits are copied to the t_do bits, except for
-		the combiner which is remembered in a global pointer.
-		At the end of all transformations for all files, the combiner
-		is called, unless errors occurred.
+		the last transformation found. If better (or the first)
+		the scan bits are copied to the t_do bits.
 	*/
 	try(l_first(tr_list),p_suffix);
-	return scan_end();
+	return scan_end(first);
 }
 
 /******************** data used only while scanning *******************/
@@ -51,9 +50,6 @@ static  int     last_ncount;    /* The # of non-optimizing transformations
 
 static  int     last_ocount;    /* The # of optimizing transformations in the
 				   best path sofar */
-static  int     com_err;        /* Complain only once about multiple linkers*/
-
-static  trf     *final;         /* The last non-combining transformation */
 
 static  int     suf_found;      /* Was the suffix at least recognized ? */
 
@@ -63,10 +59,8 @@ start_scan() {
 	register list_elem *scan ;
 
 	scanlist(l_first(tr_list),scan) {
-		t_cont(*scan)->t_do=NO ; t_cont(*scan)->t_scan=NO ;
-		t_cont(*scan)->t_keep=NO ;
+		t_cont(*scan)->t_scan=NO ;
 	}
-	final= (trf *)0 ;
 	suf_found= 0 ;
 #ifdef DEBUG
 	if ( debug>=3 ) vprint("Scan_start\n");
@@ -80,7 +74,7 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 	register trf  *trafo ;
 	/* Try to find a transformation path starting at f_scan for a
 	   file with the indicated suffix.
-	   If the suffix is already reached or the combiner is found
+	   If the suffix is already reached or a combiner is found
 	   call scan_found() to OK the scan.
 	   If a transformation is found it calls itself recursively
 	   with as starting point the next transformation in the list.
@@ -113,23 +107,31 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 					return ;
 				}
 			}
-			if ( trafo->t_combine ) {
-				if ( stopsuffix ) {
-					trafo->t_scan=NO;
-					if ( *stopsuffix ) return ;
-				} else {
-					if( combiner &&
-					    combiner!=trafo && !com_err ){
-					       com_err++ ;
-werror("Multiple linkers present %s and %s",
-	trafo->t_name,combiner->t_name) ;
-					} else {
-						combiner=trafo;
-					}
+			if ( trafo->t_do ) {
+				/* We know what happens from this phase on,
+				   so take a shortcut.
+				*/
+				register trf *sneak ;
+				sneak= trafo ;
+				while( sneak=sneak->t_next ) {
+					sneak->t_scan=YES ;
 				}
 				scan_found() ;
-			} else {
+				sneak= trafo ;
+				while( sneak=sneak->t_next ) {
+					sneak->t_scan=NO ;
+				}
+				return ;
+			}
+			if ( trafo->t_linker && stopsuffix && !*stopsuffix ) {
+				trafo->t_scan=NO ;
+				scan_found() ;
+				return ;
+			}
+			if ( l_next(*scan) ) {
 				try(l_next(*scan),trafo->t_out);
+			} else {
+				if ( !stopsuffix ) scan_found() ;
 			}
 			trafo->t_scan= NO ;
 		}
@@ -139,9 +141,7 @@ werror("Multiple linkers present %s and %s",
 scan_found() {
 	register list_elem *scan;
 	int ncount, ocount ;
-	register trf *keepit ;
 
-	keepit= (trf *)0 ;
 	suf_found= 1;
 #ifdef DEBUG
 	if ( debug>=3 ) vprint("Scan found\n") ;
@@ -154,9 +154,6 @@ scan_found() {
 			if ( debug>=4 ) vprint("%s-",t_cont(*scan)->t_name) ;
 #endif
 			if( t_cont(*scan)->t_optim ) ocount++ ;else ncount++ ;
-			if ( !(t_cont(*scan)->t_combine) ) {
-				keepit= t_cont(*scan) ;
-			}
 		}
 	}
 #ifdef DEBUG
@@ -178,10 +175,9 @@ scan_found() {
 		if ( debug>=3 ) vprint("Better\n");
 #endif
 		scanlist(l_first(tr_list),scan) {
-			t_cont(*scan)->t_do=t_cont(*scan)->t_scan;
+			t_cont(*scan)->t_bscan=t_cont(*scan)->t_scan;
 		}
 		last_ncount=ncount; last_ocount=ocount;
-		if ( keepit ) final=keepit ;
 	}
 }
 
@@ -208,11 +204,13 @@ int satisfy(trafo,suffix) register trf *trafo; char *suffix ; {
 	return 0 ;
 }
 
-enum f_path scan_end() {    /* Finalization */
+enum f_path scan_end(first) trf **first ; {    /* Finalization */
 	/* Return value indicating whether a transformation was found */
 	/* Set the flags for the transformation up to, but not including,
 	   the combiner
 	*/
+	register trf *prev, *curr ;
+	register list_elem *scan;
 
 #ifdef DEBUG
 	if ( debug>=3 ) vprint("End_scan\n");
@@ -221,17 +219,29 @@ enum f_path scan_end() {    /* Finalization */
 #ifdef DEBUG
 	if ( debug>=2 ) vprint("Transformation found\n");
 #endif
+	prev= (trf *)0 ; *first= prev ;
+	scanlist(l_first(tr_list),scan) {
+		curr= t_cont(*scan) ;
+		if ( curr->t_bscan ) {
+			if ( prev ) {
+				prev->t_next= curr ;
+				if ( curr->t_linker ) prev->t_keep=YES ;
+			} else {
+				*first= curr ;
+			}
+			if ( curr->t_do ) {
+				return F_OK ;
+			}
+			curr->t_do=YES ;
+			prev=curr ;
+		}
+	}
 	if ( cpp_trafo && stopsuffix &&
 	     strcmp(stopsuffix,cpp_trafo->t_out)==0 ) {
-		final= cpp_trafo ;
+		cpp_trafo->t_keep=YES ;
 	}
-	/* There might not be a final when the file can be eaten
-	   by the combiner
-	*/
-	if ( final ) final->t_keep=YES ;
-	if ( combiner ) {
-		if ( !combiner->t_do ) error("Combiner YES/NO");
-		combiner->t_do=NO ;
+	if ( prev ) {
+		prev->t_keep=YES ;
 	}
 	return F_OK ;
 }
