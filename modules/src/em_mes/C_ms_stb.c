@@ -12,6 +12,7 @@ C_ms_stb_cst(s, e1, e2, e3)
 	arith	e3;
 {
 	C_mes_begin(ms_stb);
+	if (s) C_scon(s, (arith) (strlen(s)+1));
 	C_cst((arith)e1);
 	C_cst((arith)e2);
 	C_cst(e3);
@@ -25,6 +26,7 @@ C_ms_stb_dlb(s, e1, e2, l, off)
 	arith	off;
 {
 	C_mes_begin(ms_stb);
+	if (s) C_scon(s, (arith) (strlen(s)+1));
 	C_cst((arith)e1);
 	C_cst((arith)e2);
 	C_dlb(l, off);
@@ -38,6 +40,7 @@ C_ms_stb_dnam(s, e1, e2, l, off)
 	arith	off;
 {
 	C_mes_begin(ms_stb);
+	if (s) C_scon(s, (arith) (strlen(s)+1));
 	C_cst((arith)e1);
 	C_cst((arith)e2);
 	C_dnam(l, off);
@@ -50,6 +53,7 @@ C_ms_stb_ilb(s, e1, e2, l)
 	label	l;
 {
 	C_mes_begin(ms_stb);
+	if (s) C_scon(s, (arith) (strlen(s)+1));
 	C_cst((arith)e1);
 	C_cst((arith)e2);
 	C_ilb(l);
@@ -62,6 +66,7 @@ C_ms_stb_pnam(s, e1, e2, p)
 	char	*p;
 {
 	C_mes_begin(ms_stb);
+	if (s) C_scon(s, (arith) (strlen(s)+1));
 	C_cst((arith)e1);
 	C_cst((arith)e2);
 	C_pnam(p);

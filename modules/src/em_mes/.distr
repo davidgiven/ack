@@ -8,5 +8,7 @@ C_ms_opt.c
 C_ms_par.c
 C_ms_reg.c
 C_ms_src.c
+C_ms_std.c
+C_ms_stb.c
 Makefile
 em_mes.3

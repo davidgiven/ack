@@ -10,10 +10,10 @@ LIBSUF = a
 
 SRC =	C_ms_err.c C_ms_opt.c C_ms_emx.c C_ms_reg.c C_ms_src.c\
 	C_ms_flt.c C_ms_com.c C_ms_par.c C_ms_ego.c C_ms_gto.c\
-	C_ms_stb.c C_ms_lin.c
+	C_ms_stb.c C_ms_std.c
 OBJ =	C_ms_err.$(SUF) C_ms_opt.$(SUF) C_ms_emx.$(SUF) C_ms_reg.$(SUF) C_ms_src.$(SUF)\
 	C_ms_flt.$(SUF) C_ms_com.$(SUF) C_ms_par.$(SUF) C_ms_ego.$(SUF) C_ms_gto.$(SUF)\
-	C_ms_stb.$(SUF) C_ms_lin.$(SUF)
+	C_ms_stb.$(SUF) C_ms_std.$(SUF)
 
 .SUFFIXES: .$(SUF)
 .c.$(SUF):
