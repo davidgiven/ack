@@ -2,15 +2,15 @@
 MACH=i86
 install: 	all
 		../../install head_em.o head_em
-		../../install libem_o.a tail_em
+		../../install tail_em
 		../../install end.o end_em
 
 cmp:		all
 		-../../compare head_em.o head_em
-		-../../compare libem_o.a tail_em
+		-../../compare tail_em
 		-../../compare end.o end_em
 
-all:            head_em.o libem_o.a end.o
+all:            head_em.o tail_em end.o
 
 end.o:		end.s
 		$(MACH) -I../../../h -c end.s
@@ -18,9 +18,9 @@ end.o:		end.s
 head_em.o:      head_em.s
 		$(MACH) -I../../../h -c head_em.s
 
-libem_o.a:	libem_s.a
+tail_em:	tail_em.a
 		ASAR=aal ; export ASAR ;\
-		march . libem_o.a
+		march . tail_em
 
 clean:
 		rm -f *.o
@@ -29,5 +29,5 @@ opr :
 
 pr:
 		@pr `pwd`/head_em.s
-		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
+		@arch pv tail_em.a | pr -h `pwd`/tail_em.a
 		@pr `pwd`/end.s
