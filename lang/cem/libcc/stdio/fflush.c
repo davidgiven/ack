@@ -6,7 +6,9 @@ FILE *iop;
 {
 	int count, c1;
 
-	if ( io_testflag(iop,IO_UNBUFF) || !io_testflag(iop,IO_WRITEMODE) ) 
+	if (!iop->_buf ||
+	    io_testflag(iop,IO_UNBUFF) ||
+	    !io_testflag(iop,IO_WRITEMODE) ) 
 		return(0);
 
 	count = BUFSIZ - iop->_count;
