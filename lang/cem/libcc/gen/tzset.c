@@ -40,11 +40,16 @@ tzset()
 	__daylight = tzon.tz_dsttime;
 #else
 #ifndef __USG
+#if minix || minixST
+	__timezone = 0L;
+	__daylight = 0;
+#else
 	struct timeb time;
 
 	ftime(&time);
 	__timezone = time.timezone*60L;
 	__daylight = time.dstflag;
+#endif
 #endif
 #endif
 
