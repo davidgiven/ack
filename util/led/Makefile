@@ -28,6 +28,7 @@ led:	$(OFILES)
 	$(CC) $(LDFLAGS) $(OFILES) $(LDLIBS) -o led
 
 install:led
+	rm -f $(LIBDIR)/em_led $(EM)/man/led.6
 	cp led $(LIBDIR)/em_led
 	cp led.6 $(EM)/man/led.6
 	cp ack.out.5 $(EM)/man/ack.out.5
