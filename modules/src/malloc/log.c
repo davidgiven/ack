@@ -25,7 +25,7 @@ link_free_chunk(ml)
 	register unsigned int n = size_of(ml);
 	register mallink *ml1;
 
-	assert(n < (1 << LOG_MAX_SIZE));
+	assert(n < (1L << LOG_MAX_SIZE));
 
 	do {
 		n >>= 1;
@@ -61,7 +61,7 @@ unlink_free_chunk(ml)
 		register mallink **mlp = &free_list[-1];
 		register unsigned int n = size_of(ml);
 
-		assert(n < (1 << LOG_MAX_SIZE));
+		assert(n < (1L << LOG_MAX_SIZE));
 		do {
 			n >>= 1;
 			mlp++;

@@ -68,7 +68,7 @@ malloc(n)
 		*/
 		register unsigned int n1 = n;
 
-		assert(n1 < (1 << LOG_MAX_SIZE));
+		assert(n1 < (1L << LOG_MAX_SIZE));
 		min_class = 0;
 
 		do {
