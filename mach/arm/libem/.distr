@@ -2,4 +2,4 @@ LIST
 Makefile
 end.s
 head_em.s
-tail_em.a
+libem_s.a
