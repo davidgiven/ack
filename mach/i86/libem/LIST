@@ -17,7 +17,7 @@ dvi4.s
 dvu.s
 dvu4.s
 exg.s
-fakfp.s
+fp8087.s
 gto.s
 iaar.s
 ilar.s
