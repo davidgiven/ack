@@ -15,6 +15,8 @@ void
 qsort(void *base, size_t nel, size_t width,
       int (*compar)(const void *, const void *))
 {
+	/* when nel is 0, the expression '(nel - 1) * width' is wrong */
+	if (!nel) return;
 	qcompar = (int (*)(const char *, const char *)) compar;
 	qsort1(base, (char *)base + (nel - 1) * width, width);
 }
