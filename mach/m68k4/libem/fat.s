@@ -1,11 +1,11 @@
-.define	.fat
+.define	.fatal
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
 	.sect .text
-.fat:
+.fatal:
 	jsr	.trp	
 	jmp	EXIT
 .align 2

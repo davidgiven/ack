@@ -21,7 +21,7 @@
 	move.l	a1,d1		! default jump address
 	bne	4f
 	move.l	#ECASE,-(sp)
-	jmp	.fat
+	jmp	.fatal
 3:
 	move.l	(a0)+,a1	! get jump address
 4:

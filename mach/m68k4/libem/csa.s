@@ -27,6 +27,6 @@
 	rts			! not a real rts
 2:
 	move.w	#ECASE,-(sp)
-	jmp	.fat
+	jmp	.fatal
 
 .align 2

@@ -26,5 +26,5 @@
 	rts
 4:
 	move.w	#EILLINS,-(sp)
-	jmp	.fat
+	jmp	.fatal
 .align 2
