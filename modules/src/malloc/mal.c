@@ -49,6 +49,7 @@ malloc(n)
 			*stp = log_next_of(ml);
 			set_store(ml, 0);
 			check_mallinks("malloc fast exit");
+			assert(! in_store(ml));
 			return block_of_mallink(ml);
 		}
 	}
@@ -139,6 +140,9 @@ malloc(n)
 	stopped_working_on(ml);
 	check_mallinks("malloc exit");
 	check_work_empty("malloc exit");
+#ifdef STORE
+	assert(! in_store(ml));
+#endif
 	return block_of_mallink(ml);
 }}
 
@@ -273,6 +277,9 @@ realloc(addr, n)
 		while (size--) *l1++ = *l2++;
 		free(addr);
 		check_work_empty("mv_realloc");
+#ifdef STORE
+		assert(! in_store(new));
+#endif
 		return new;
 	}
 	/* it helped, but maybe too well */
@@ -283,6 +290,9 @@ realloc(addr, n)
 	stopped_working_on(ml);
 	check_mallinks("realloc exit");
 	check_work_empty("realloc");
+#ifdef STORE
+	assert(! in_store(ml));
+#endif
 	return addr;
 }}
 
