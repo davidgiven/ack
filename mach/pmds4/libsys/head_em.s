@@ -39,7 +39,7 @@ begtext:
 EXIT:
 
 	move.l	d0,-(sp)
-	jsr _exit
+	jsr __exit
 	! As a temporary measure
 	jsr .trp
 	

@@ -53,6 +53,7 @@ begtext:
 	jsr	_m_a_i_n
 	add	#012,sp
 EXIT:
+	move.l	d0,-(sp)
 	jsr	__exit
 
 	.sect .data

@@ -54,7 +54,7 @@ begtext:
 	add	#012,sp
 EXIT:
 	move.l	d0,-(sp)
-	jsr	_exit
+	jsr	__exit
 
 	.sect .data
 begdata:

@@ -54,6 +54,7 @@ begtext:
 	jsr	_m_a_i_n
 	add	#010,sp
 EXIT:
+	move.w	d0,-(sp)
 	jsr	__exit
 
 	.sect .data
