@@ -201,7 +201,7 @@ CaseCode(nd, exitlabel, end_reached)
 				rval |= LblWalkNode((label) pnode->nd_LEFT->nd_lab,
 					    pnode->nd_LEFT->nd_RIGHT,
 					    exitlabel, end_reached);
-				C_bra(sh->sh_break);
+				c_bra(sh->sh_break);
 			}
 		}
 		else {
@@ -313,7 +313,7 @@ AddOneCase(sh, lnode, rnode, lbl)
 			C_zgt(cont);
 		}
 		C_asp(int_size);
-		C_bra(lbl);
+		c_bra(lbl);
 		C_df_ilb(cont);
 		ce->ce_label = 0;
 	}

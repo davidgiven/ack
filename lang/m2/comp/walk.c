@@ -384,7 +384,7 @@ WalkProcedure(procedure)
 #else
 	cd_init = ++text_label;
 	cd_body = ++text_label;
-	C_bra(cd_init);
+	c_bra(cd_init);
 	def_ilb(cd_body);
 #endif
 
@@ -399,7 +399,7 @@ WalkProcedure(procedure)
 			C_asp(-func_res_size);
 		}
 #ifndef USE_INSERT
-		C_bra(RETURN_LABEL);
+		c_bra(RETURN_LABEL);
 #endif
 	}
 
@@ -458,7 +458,7 @@ WalkProcedure(procedure)
 #ifdef USE_INSERT
 	C_endpart(partno);
 #else
-	C_bra(cd_body);
+	c_bra(cd_body);
 #endif
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	def_ilb(RETURN_LABEL);	/* label at end */
@@ -660,7 +660,7 @@ WalkStat(nd, exit_label, end_reached)
 			if (right->nd_RIGHT) {	/* ELSE part */
 				label l2 = ++text_label;
 
-				C_bra(l2);
+				c_bra(l2);
 				end_reached = end_r | LblWalkNode(l1, right->nd_RIGHT, exit_label, end_reached);
 				l1 = l2;
 			}
@@ -678,7 +678,7 @@ WalkStat(nd, exit_label, end_reached)
 				exit = ++text_label,
 				dummy = ++text_label;
 
-			C_bra(dummy);
+			c_bra(dummy);
 			end_reached |= LblWalkNode(loop, right, exit_label, end_reached);
 			def_ilb(dummy);
 			ExpectBool(&(nd->nd_LEFT), loop, exit);
@@ -702,7 +702,7 @@ WalkStat(nd, exit_label, end_reached)
 				end_reached &= REACH_FLAG;
 			}
 			else	end_reached = 0;
-			C_bra(loop);
+			c_bra(loop);
 			def_ilb(exit);
 			break;
 		}
@@ -794,7 +794,7 @@ WalkStat(nd, exit_label, end_reached)
 				end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
 				loopid->nd_def->df_flags &= ~D_FORLOOP;
 			}
-			C_bra(l1);
+			c_bra(l1);
 			def_ilb(l2);
 			FreeInt(tmp);
 		}
@@ -842,7 +842,7 @@ WalkStat(nd, exit_label, end_reached)
 		assert(exit_label != 0);
 
 		if (end_reached & REACH_FLAG) end_reached = EXIT_FLAG;
-		C_bra(exit_label);
+		c_bra(exit_label);
 		break;
 
 	case RETURN:
@@ -862,7 +862,7 @@ WalkStat(nd, exit_label, end_reached)
 			}
 			else	CodePExpr(right);
 		}
-		C_bra(RETURN_LABEL);
+		c_bra(RETURN_LABEL);
 		break;
 
 	default:

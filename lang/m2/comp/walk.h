@@ -25,4 +25,5 @@ extern label	data_label;
 #define c_loc(x)	C_loc((arith) (x))
 #define c_lae_dlb(x)	C_lae_dlb(x,(arith) 0)
 #define CAL(nm, sz)	(C_cal(nm), C_asp((arith)(sz)))
+#define c_bra(x)	C_bra((label) (x))
 #endif

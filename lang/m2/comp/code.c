@@ -164,7 +164,7 @@ CodeExpr(nd, ds, true_label, false_label)
 		*/
 		CodeValue(ds, tp);
 		C_zne(true_label);
-		C_bra(false_label);
+		c_bra(false_label);
 	}
 }
 
@@ -911,7 +911,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		if (true_label != NO_LABEL)	{
 			compare(expr->nd_symb, true_label);
-			C_bra(false_label);
+			c_bra(false_label);
 			break;
 		}
 		truthvalue(expr->nd_symb);
@@ -923,30 +923,56 @@ CodeOper(expr, true_label, false_label)
 		   INN instruction expects the bit number on top of the
 		   stack
 		*/
-		label l_toolarge = NO_LABEL;
+		label l_toolarge = NO_LABEL, l_cont = NO_LABEL;
+		t_type *ltp = leftop->nd_type;
 
-		CodePExpr(rightop);
-		CodePExpr(leftop);
-		C_loc(rightop->nd_type->set_low);
-		C_sbu(word_size);
-		if (needs_rangecheck(ElementType(rightop->nd_type), leftop->nd_type)) {
-			l_toolarge = ++text_label;
-			C_dup(word_size);
-			C_loc(rightop->nd_type->tp_size*8);
-			C_cmu(word_size);
-			C_zge(l_toolarge);
+		if (leftop->nd_symb == COERCION) {
+			/* Could be coercion to word_type. */
+			ltp = leftop->nd_RIGHT->nd_type;
+		}
+		if (leftop->nd_class == Value) {
+			if (! in_range(leftop->nd_INT, ElementType(rightop->nd_type))) {
+				if (true_label != NO_LABEL) {
+					c_bra(false_label);
+				}
+				else	c_loc(0);
+				break;
+			}
+			CodePExpr(rightop);
+			C_loc(rightop->nd_type->set_low-leftop->nd_INT);
+		}
+		else {
+			CodePExpr(rightop);
+			CodePExpr(leftop);
+			C_loc(rightop->nd_type->set_low);
+			C_sbu(word_size);
+			if (needs_rangecheck(ElementType(rightop->nd_type), ltp)) {
+				l_toolarge = ++text_label;
+				C_dup(word_size);
+				C_loc(rightop->nd_type->tp_size*8);
+				C_cmu(word_size);
+				C_zge(l_toolarge);
+			}
 		}
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != NO_LABEL) {
 			C_zne(true_label);
-			C_bra(false_label);
+			c_bra(false_label);
+		}
+		else {
+			l_cont =  ++text_label;
+			c_bra(l_cont);
 		}
 		if (l_toolarge != NO_LABEL) {
+			def_ilb(l_toolarge);
 			C_asp(word_size+rightop->nd_type->tp_size);
 			if (true_label != NO_LABEL) {
-				C_bra(false_label);
+				c_bra(false_label);
 			}
-			c_loc(0);
+			else	c_loc(0);
+		}
+		if (l_cont != NO_LABEL) {
+			def_ilb(l_cont);
 		}
 		break;
 		}
@@ -973,7 +999,7 @@ CodeOper(expr, true_label, false_label)
 		if (l_end != NO_LABEL) {
 			def_ilb(true_label);
 			c_loc(1);
-			C_bra(l_end);
+			c_bra(l_end);
 			def_ilb(false_label);
 			c_loc(0);
 			def_ilb(l_end);
@@ -1107,7 +1133,7 @@ CodeEl(nd, tp, null_set)
 		if (eltype->tp_fund == T_SUBRANGE) {
 			C_loc(eltype->sub_ub);
 		}
-		else	C_loc((arith) (eltype->enm_ncst - 1));
+		else	C_loc(eltype->enm_ncst - 1);
 		Operands(nd);
 		CAL("LtoUset", 5 * (int) word_size);
 		/* library routine to fill set */
@@ -1201,6 +1227,12 @@ DoHIGH(df)
 }
 
 #ifdef SQUEEZE
+c_bra(l)
+	label l;
+{
+	C_bra((label) l);
+}
+
 c_loc(n)
 {
 	C_loc((arith) n);
