@@ -125,7 +125,7 @@ argument(arg) char *arg; {
 		return;
 	}
 	inpoff = 2;
-	if ((w = get16()) == sp_magic )
+	if ((w = getu16()) == sp_magic )
 		read_compact();
 	else if (w == ARMAG) {
 		archmode = TRUE;
@@ -241,7 +241,7 @@ archive() {
 			*p++ = get8();
 		for (i=0;i<8;i++) get8();
 		archhdr.ar_size= ((long)get16()<<16) ;
-		archhdr.ar_size+= (unsigned)get16();
+		archhdr.ar_size+= getu16();
 		inpoff = 0;     libeof = archhdr.ar_size;
 		/*
 		 * UNIX archiveheader is read now, now process the contents
@@ -250,7 +250,7 @@ archive() {
 		 * The variable libeof is used by get8() to check
 		 * whether or not we try to pass the library-boundary.
 		 */
-		if ( get16() == sp_magic ) {
+		if ( getu16() == sp_magic ) {
 			read_compact();
 		} else
 			error("bad archive entry");
@@ -323,9 +323,9 @@ initproc() {
 	pstate.s_fline= lnp_cast 0 ;
 	pstate.s_fdata= l_data ;
 	pstate.s_locl = (locl_t (*)[])
-		getarea(LOCLABSIZE * sizeof (*pstate.s_locl)[0]);
+		getarea(LOCLABSIZE * sizeof (*(pstate.s_locl))[0]);
 	zero(chp_cast pstate.s_locl,
-		LOCLABSIZE * (unsigned) sizeof (*pstate.s_locl)[0]);
+		LOCLABSIZE * (unsigned) sizeof (*(pstate.s_locl))[0]);
 	if ( memflg>2 ) memuse() ;
 }
 
