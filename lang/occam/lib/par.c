@@ -1,5 +1,5 @@
 /*	par.c - Routines to simulate parallelism */
-#include "process.h"
+#include "ocm_proc.h"
 
 static void search_next(), DEADLOCK();
 

@@ -1,5 +1,5 @@
 /*	co.c - Routines to handle coroutines */
-#include "process.h"
+#include "ocm_proc.h"
 
 static void search(), RESUMERR();
 

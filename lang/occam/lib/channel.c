@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <sgtty.h>
-#include "channel.h"
+#include "ocm_chan.h"
 
 static void disaster();
 
@@ -53,16 +53,16 @@ void chan_out(v, c) long v; register chan *c;
 			putc( (int) v, fp);
 		else
 		if (v==C_F_TEXT) {
-			ioctl(fileno(fp), TIOCGETP, &tty);
+			gtty(fileno(fp), &tty);
 			tty.sg_flags&= ~CBREAK;
 			tty.sg_flags|= ECHO|CRMOD;
-			ioctl(fileno(fp), TIOCSETN, &tty);
+			stty(fileno(fp), &tty);
 		} else
 		if (v==C_F_RAW) {
-			ioctl(fileno(fp), TIOCGETP, &tty);
+			gtty(fileno(fp), &tty);
 			tty.sg_flags|= CBREAK;
 			tty.sg_flags&= ~(ECHO|CRMOD);
-			ioctl(fileno(fp), TIOCSETN, &tty);
+			stty(fileno(fp), &tty);
 		}
 	}	break;
 	case C_T_CHAN:

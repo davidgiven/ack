@@ -1,5 +1,5 @@
 /*	builtin.c - built in named processes */
-#include "channel.h"
+#include "ocm_chan.h"
 #ifndef nil
 #define nil 0
 #endif

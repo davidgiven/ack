@@ -1,5 +1,5 @@
 /*	ocrt.c - Occam runtime support */
-#include "channel.h"
+#include "ocm_chan.h"
 
 int chandes[]= { 0, 0, sizeof(int)+sizeof(long) };
 int worddes[]= { 0, 0, sizeof(long) };
@@ -28,15 +28,15 @@ void catch(sig, file, line) int sig; char *file; int line;
 	abort();
 }
 
-chan file[_NFILE];
-FILE *unix_file[_NFILE];
+chan file[20];
+FILE *unix_file[20];
 
 void initfile()
 {
 	register i;
 	register chan *c=file;
 
-	for (i=0; i<_NFILE; i++) {
+	for (i=0; i<20; i++) {
 		c->type=C_T_FILE;
 		c->f.flgs=0;
 		(c++)->f.index=i;

@@ -1,7 +1,7 @@
 /*	parco.c	- Common routines for simulating parallelism or coroutines on
  *		  machines with downward growing stacks
  */
-#include "process.h"
+#include "ocm_proc.h"
 
 struct procgroup *group=nil, *highest_group;
 
