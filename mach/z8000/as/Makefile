@@ -1,9 +1,9 @@
 # $Header$
-EM	= ../../..
-h	= $(EM)/h
-LIBOBJ	= $(EM)/modules/lib/libobject.a
-CDIR	= $(EM)/mach/proto/as
-CPP	= $(EM)/lib/cpp
+EMHOME	= ../../..
+h	= $(EMHOME)/h
+LIBOBJ	= $(EMHOME)/modules/lib/libobject.a
+CDIR	= $(EMHOME)/mach/proto/as
+CPP	= $(EMHOME)/lib/cpp
 DEF	=
 
 FFLAG	=
