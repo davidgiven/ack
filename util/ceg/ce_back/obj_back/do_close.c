@@ -2,7 +2,7 @@
 #include <arch.h>
 #include <ranlib.h>
 	
-do_close()
+close_back()
 {
 	output();
 
