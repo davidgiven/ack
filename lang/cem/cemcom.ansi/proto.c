@@ -402,7 +402,7 @@ call_proto(expp)
 	if (left != NILEXPR) {		/* in case of an error */
 		register struct type *tp = left->ex_type;
 
-		while (tp && tp->tp_fund != FUNCTION)
+		while (tp && tp->tp_fund != FUNCTION && tp != error_type)
 			tp = tp->tp_up;
 		if (tp && tp->tp_proto)
 			pl = tp->tp_proto;
