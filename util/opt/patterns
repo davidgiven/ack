@@ -12,6 +12,10 @@ loc adu loc sbu $2==w && $4==w: loc $1-$3 adu w
 ldc adu ldc sbu $2==2*w && $4==2*w:     ldc $1-$3 adu 2*w
 loc adu loc adu $2==w && $4==w: loc $1+$3 adu w
 ldc adu ldc adu $2==2*w && $4==2*w:     ldc $1+$3 adu 2*w
+loc mli loc mli $2==w && $4==w && sfit($1*$3,8*w):	loc $1*$3 mli w
+loc mlu loc mlu $2==w && $4==w && ufit($1*$3,8*w):	loc $1*$3 mlu w
+ldc mli ldc mli $2==2*w && $4==2*w && sfit($1*$3,16*w):	ldc $1*$3 mli 2*w
+ldc mlu ldc mlu $2==2*w && $4==2*w && ufit($1*$3,16*w):	ldc $1*$3 mlu 2*w
 /*
 loc adi loc mli $2==w && $4==w:	loc $3 mli w loc $1*$3 adi w
 loc adi loc sli $2==w && $4==w && $3==1: loc $3 sli w loc 2*$1 adi w
@@ -263,6 +267,23 @@ ldc mlu $1==32 && $2==2*w:        loc 5   slu 2*w
 ldc mlu $1==64 && $2==2*w:        loc 6   slu 2*w
 ldc mlu $1==128 && $2==2*w:       loc 7   slu 2*w
 ldc mlu $1==256 && $2==2*w:       loc 8   slu 2*w
+/* The following patterns will not work on dvi */
+loc dvu $1==2 && $2==w:		loc 1	sru w
+loc dvu $1==4 && $2==w:		loc 2	sru w
+loc dvu $1==8 && $2==w:		loc 3	sru w
+loc dvu $1==16 && $2==w:	loc 4	sru w
+loc dvu $1==32 && $2==w:	loc 5	sru w
+loc dvu $1==64 && $2==w:	loc 6	sru w
+loc dvu $1==128 && $2==w:	loc 7	sru w
+loc dvu $1==256 && $2==w:	loc 8	sru w
+ldc dvu $1==2 && $2==2*w:	loc 1	sru 2*w		/* not ldc 1 */
+ldc dvu $1==4 && $2==2*w:	loc 2	sru 2*w
+ldc dvu $1==8 && $2==2*w:	loc 3	sru 2*w
+ldc dvu $1==16 && $2==2*w:	loc 4	sru 2*w
+ldc dvu $1==32 && $2==2*w:	loc 5	sru 2*w
+ldc dvu $1==64 && $2==2*w:	loc 6	sru 2*w
+ldc dvu $1==128 && $2==2*w:	loc 7	sru 2*w
+ldc dvu $1==256 && $2==2*w:	loc 8	sru 2*w
 loc adi !defined($2):   adi $1
 loc sbi !defined($2):   sbi $1
 loc mli !defined($2):   mli $1
