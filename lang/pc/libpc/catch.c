@@ -21,6 +21,7 @@
 #include	<pc_file.h>
 
 #define	MESLEN		30
+#define PATHLEN		100
 
 extern struct file	*_curfil;
 
@@ -45,6 +46,7 @@ _catch(erno) unsigned erno; {
 	int		fd;
 	char		*pp[8];
 	char		mes[MESLEN];
+	char		filename[PATHLEN];
 	char		c;
 
 	qq = pp;
@@ -66,7 +68,12 @@ _catch(erno) unsigned erno; {
 		*qq++ = _curfil->fname;
 		*qq++ = ": ";
 	}
-	if ((fd=open(RTERR_PATH,0))<0)
+	if ( (i=strtobuf(EM_DIR,filename,PATHLEN)) >= PATHLEN-1 ||
+	     (filename[i]='/' ,
+	      strtobuf(RTERR_PATH,filename+i+1,PATHLEN-i-1) >= PATHLEN-i-1
+	     ) )
+		goto error;
+	if ((fd=open(filename,0))<0)
 		goto error;
 	/* skip to correct message */
 	for(i=0;i<erno;i++)
