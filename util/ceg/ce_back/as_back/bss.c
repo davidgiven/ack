@@ -1,5 +1,4 @@
 #include "header.h"
-#include <em.h>
 
 common(n)
 arith n;
