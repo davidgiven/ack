@@ -2,7 +2,7 @@ copyright
 deffile
 em.c
 em.1
-Makefile
+proto.make
 mloop0
 mloop1
 mloop2
