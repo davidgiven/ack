@@ -131,6 +131,8 @@ putlines(lnp) register line_p lnp; {
 			curlin = -2;
 			break;
 		default:
+			if ((em_flag[instr-sp_fmnem]&EM_FLO)==FLO_P)
+				curlin = -2;
 			outinst(instr);
 		}
 processoperand:
