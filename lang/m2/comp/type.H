@@ -127,6 +127,28 @@ extern t_type
 	*std_type,
 	*error_type;		/* All from type.c */
 
+#include "nocross.h"
+#ifdef NOCROSS
+#include "target_sizes.h"
+#define	word_align	(AL_WORD)
+#define	short_align	(AL_SHORT)
+#define	int_align	(AL_INT)
+#define	long_align	(AL_LONG)
+#define	float_align	(AL_FLOAT)
+#define	double_align	(AL_DOUBLE)
+#define	pointer_align	(AL_POINTER)
+#define	struct_align	(AL_STRUCT)
+
+#define	word_size	(SZ_WORD)
+#define	dword_size	(2 * SZ_WORD)
+#define	int_size	(SZ_INT)
+#define	short_size	(SZ_SHORT)
+#define	long_size	(SZ_LONG)
+#define	float_size	(SZ_FLOAT)
+#define	double_size	(SZ_DOUBLE)
+#define	pointer_size	(SZ_POINTER)
+#else NOCROSS
+
 extern int
 	word_align,
 	short_align,
@@ -146,6 +168,7 @@ extern arith
 	float_size,
 	double_size,
 	pointer_size;		/* All from type.c */
+#endif NOCROSS
 
 extern arith
 	align();		/* type.c */

@@ -9,7 +9,6 @@
 
 /* $Header$ */
 
-#include	"target_sizes.h"
 #include	"debug.h"
 
 #include	<assert.h>
@@ -30,6 +29,8 @@
 #include	"chk_expr.h"
 #include	"warning.h"
 
+#ifndef NOCROSS
+#include	"target_sizes.h"
 int
 	word_align = AL_WORD,
 	short_align = AL_SHORT,
@@ -49,6 +50,7 @@ arith
 	float_size = SZ_FLOAT,
 	double_size = SZ_DOUBLE,
 	pointer_size = SZ_POINTER;
+#endif
 
 t_type
 	*bool_type,

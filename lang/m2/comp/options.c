@@ -20,6 +20,7 @@
 #include	"main.h"
 #include	"warning.h"
 #include	"squeeze.h"
+#include	"nocross.h"
 
 #define	MINIDFSIZE	14
 
@@ -144,6 +145,7 @@ DoOption(text)
 		break;
 
 	case 'V' :	/* set object sizes and alignment requirements	*/
+#ifndef NOCROSS
 	{
 		register int size;
 		register int align;
@@ -217,8 +219,9 @@ DoOption(text)
 				break;
 			}
 		}
-		break;
 	}
+#endif NOCROSS
+	break;
 	}
 }
 

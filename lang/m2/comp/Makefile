@@ -39,7 +39,7 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 GENH=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
-	inputtype.h density.h squeeze.h \
+	inputtype.h density.h squeeze.h nocross.h \
 	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h f_info.h idf.h\
@@ -127,7 +127,7 @@ char.c: char.tab tab
 tab: 
 	$(CC) tab.c -o tab
 
-depend:
+depend:	Cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
 	$(MKDEP) $(SRC) |\
@@ -165,8 +165,10 @@ LLlex.o: idf.h
 LLlex.o: idfsize.h
 LLlex.o: input.h
 LLlex.o: inputtype.h
+LLlex.o: nocross.h
 LLlex.o: numsize.h
 LLlex.o: strsize.h
+LLlex.o: target_sizes.h
 LLlex.o: type.h
 LLlex.o: warning.h
 LLmessage.o: LLlex.h
@@ -181,6 +183,7 @@ error.o: input.h
 error.o: inputtype.h
 error.o: main.h
 error.o: node.h
+error.o: squeeze.h
 error.o: strict3rd.h
 error.o: warning.h
 main.o: LLlex.h
@@ -193,10 +196,12 @@ main.o: f_info.h
 main.o: idf.h
 main.o: input.h
 main.o: inputtype.h
+main.o: nocross.h
 main.o: node.h
 main.o: scope.h
 main.o: standards.h
 main.o: strict3rd.h
+main.o: target_sizes.h
 main.o: tokenname.h
 main.o: type.h
 main.o: warning.h
@@ -214,6 +219,7 @@ type.o: debug.h
 type.o: debugcst.h
 type.o: def.h
 type.o: idf.h
+type.o: nocross.h
 type.o: node.h
 type.o: scope.h
 type.o: squeeze.h
@@ -228,8 +234,10 @@ def.o: debugcst.h
 def.o: def.h
 def.o: idf.h
 def.o: main.h
+def.o: nocross.h
 def.o: node.h
 def.o: scope.h
+def.o: target_sizes.h
 def.o: type.h
 misc.o: LLlex.h
 misc.o: f_info.h
@@ -244,8 +252,10 @@ enter.o: f_info.h
 enter.o: idf.h
 enter.o: main.h
 enter.o: misc.h
+enter.o: nocross.h
 enter.o: node.h
 enter.o: scope.h
+enter.o: target_sizes.h
 enter.o: type.h
 defmodule.o: LLlex.h
 defmodule.o: Lpars.h
@@ -258,8 +268,10 @@ defmodule.o: input.h
 defmodule.o: inputtype.h
 defmodule.o: main.h
 defmodule.o: misc.h
+defmodule.o: nocross.h
 defmodule.o: node.h
 defmodule.o: scope.h
+defmodule.o: target_sizes.h
 defmodule.o: type.h
 typequiv.o: LLlex.h
 typequiv.o: debug.h
@@ -267,21 +279,26 @@ typequiv.o: debugcst.h
 typequiv.o: def.h
 typequiv.o: idf.h
 typequiv.o: main.h
+typequiv.o: nocross.h
 typequiv.o: node.h
 typequiv.o: strict3rd.h
+typequiv.o: target_sizes.h
 typequiv.o: type.h
 typequiv.o: warning.h
 node.o: LLlex.h
 node.o: debug.h
 node.o: debugcst.h
 node.o: def.h
+node.o: nocross.h
 node.o: node.h
+node.o: target_sizes.h
 node.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
 cstoper.o: idf.h
+cstoper.o: nocross.h
 cstoper.o: node.h
 cstoper.o: standards.h
 cstoper.o: target_sizes.h
@@ -297,15 +314,21 @@ chk_expr.o: def.h
 chk_expr.o: idf.h
 chk_expr.o: main.h
 chk_expr.o: misc.h
+chk_expr.o: nocross.h
 chk_expr.o: node.h
 chk_expr.o: scope.h
+chk_expr.o: squeeze.h
 chk_expr.o: standards.h
 chk_expr.o: strict3rd.h
+chk_expr.o: target_sizes.h
 chk_expr.o: type.h
 chk_expr.o: warning.h
 options.o: idfsize.h
 options.o: main.h
+options.o: nocross.h
+options.o: squeeze.h
 options.o: strict3rd.h
+options.o: target_sizes.h
 options.o: type.h
 options.o: warning.h
 walk.o: LLlex.h
@@ -319,10 +342,12 @@ walk.o: f_info.h
 walk.o: idf.h
 walk.o: main.h
 walk.o: misc.h
+walk.o: nocross.h
 walk.o: node.h
 walk.o: scope.h
 walk.o: squeeze.h
 walk.o: strict3rd.h
+walk.o: target_sizes.h
 walk.o: type.h
 walk.o: walk.h
 walk.o: warning.h
@@ -331,9 +356,11 @@ desig.o: debug.h
 desig.o: debugcst.h
 desig.o: def.h
 desig.o: desig.h
+desig.o: nocross.h
 desig.o: node.h
 desig.o: scope.h
 desig.o: squeeze.h
+desig.o: target_sizes.h
 desig.o: type.h
 desig.o: walk.h
 desig.o: warning.h
@@ -343,10 +370,12 @@ code.o: debug.h
 code.o: debugcst.h
 code.o: def.h
 code.o: desig.h
+code.o: nocross.h
 code.o: node.h
 code.o: scope.h
 code.o: squeeze.h
 code.o: standards.h
+code.o: target_sizes.h
 code.o: type.h
 code.o: walk.h
 lookup.o: LLlex.h
@@ -355,8 +384,10 @@ lookup.o: debugcst.h
 lookup.o: def.h
 lookup.o: idf.h
 lookup.o: misc.h
+lookup.o: nocross.h
 lookup.o: node.h
 lookup.o: scope.h
+lookup.o: target_sizes.h
 lookup.o: type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h
@@ -367,9 +398,11 @@ program.o: def.h
 program.o: f_info.h
 program.o: idf.h
 program.o: main.h
+program.o: nocross.h
 program.o: node.h
 program.o: scope.h
 program.o: strict3rd.h
+program.o: target_sizes.h
 program.o: type.h
 program.o: warning.h
 declar.o: LLlex.h
@@ -381,9 +414,12 @@ declar.o: def.h
 declar.o: idf.h
 declar.o: main.h
 declar.o: misc.h
+declar.o: nocross.h
 declar.o: node.h
 declar.o: scope.h
+declar.o: squeeze.h
 declar.o: strict3rd.h
+declar.o: target_sizes.h
 declar.o: type.h
 declar.o: warning.h
 expression.o: LLlex.h
@@ -394,15 +430,19 @@ expression.o: debug.h
 expression.o: debugcst.h
 expression.o: def.h
 expression.o: idf.h
+expression.o: nocross.h
 expression.o: node.h
+expression.o: target_sizes.h
 expression.o: type.h
 expression.o: warning.h
 statement.o: LLlex.h
 statement.o: Lpars.h
 statement.o: def.h
 statement.o: idf.h
+statement.o: nocross.h
 statement.o: node.h
 statement.o: scope.h
+statement.o: target_sizes.h
 statement.o: type.h
 symbol2str.o: Lpars.h
 char.o: class.h
@@ -415,8 +455,10 @@ casestat.o: debugcst.h
 casestat.o: def.h
 casestat.o: density.h
 casestat.o: desig.h
+casestat.o: nocross.h
 casestat.o: node.h
 casestat.o: squeeze.h
+casestat.o: target_sizes.h
 casestat.o: type.h
 casestat.o: walk.h
 tmpvar.o: LLlex.h
@@ -424,15 +466,19 @@ tmpvar.o: debug.h
 tmpvar.o: debugcst.h
 tmpvar.o: def.h
 tmpvar.o: main.h
+tmpvar.o: nocross.h
 tmpvar.o: scope.h
+tmpvar.o: target_sizes.h
 tmpvar.o: type.h
 scope.o: LLlex.h
 scope.o: debug.h
 scope.o: debugcst.h
 scope.o: def.h
 scope.o: idf.h
+scope.o: nocross.h
 scope.o: node.h
 scope.o: scope.h
+scope.o: target_sizes.h
 scope.o: type.h
 next.o: debug.h
 next.o: debugcst.h
