@@ -1,3 +1,4 @@
+# $Revision$
 var w=2
 var p=2
 var s=2
@@ -6,16 +7,16 @@ var f=4
 var d=8
 var M=pdp
 var NAME=pdp
-var LIB=mach/pdp/lib/tail_
-var RT=mach/pdp/lib/head_
-var CCP_F=-Dunix
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var CPP_F=-Dunix
 var INCLUDES=-I{EM}/include -I/usr/include
 name be
-	from .m
+	from .m.g
 	to .s
-	program {EM}/lib/{M}_cg
+	program {EM}/lib/{M}/cg
 	args <
-	prop >
+	stdout
 	need .e
 end
 name as
@@ -23,17 +24,19 @@ name as
 	to .o
 	program /bin/as
 	args - -o > <
-	prop m
+	prep cond
 end
 name ld
 	from .o.a
-	to a.out
+	to .out
+	outfile a.out
 	program /bin/ld
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
-		(.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.e:{TAIL}={EM}/{LIB}em) (.c.p:{TAIL}=/lib/libc.a)
-	prop C
+	linker
 end
