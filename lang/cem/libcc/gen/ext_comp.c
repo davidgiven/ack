@@ -608,18 +608,20 @@ _ext_str_cvt(e, ndigit, decpt, sign, ecvtflag)
 		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
 	while (p <= pe) {
-		if (e->exp >= 0) {
+		if (e->exp >= 0 && e->m1 != 0) {
 			struct EXTEND x;
 
 			x.m2 = 0; x.exp = e->exp;
 			x.sign = 1;
 			x.m1 = e->m1>>(31-e->exp);
 			*p++ = (x.m1) + '0';
-			x.m1 = x.m1 << (31-e->exp);
-			add_ext(e, &x, e);
+			if (x.m1) {
+				x.m1 = x.m1 << (31-e->exp);
+				add_ext(e, &x, e);
+			}
 		}
 		else *p++ = '0';
-		mul_ext(e, &ten_powers[1], e);
+		if (e->m1) mul_ext(e, &ten_powers[1], e);
 	}
 	if (pe >= buf) {
 		p = pe;
