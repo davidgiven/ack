@@ -13,7 +13,7 @@ end
 name "NS16032 C libraries"
 dir libcc
 end
-name "NS16032 PC library"
+name "NS16032 Pascal library"
 dir libpc
 end
 name "NS16032 Basic library"
