@@ -9,8 +9,6 @@
 
 /* $Header$ */
 
-extern char options[];	/* indicating which options were given */
-
 extern char **DEFPATH;	/* search path for DEFINITION MODULE's */
 extern int mDEF, nDEF;
 extern int state;	/* either IMPLEMENTATION or PROGRAM */

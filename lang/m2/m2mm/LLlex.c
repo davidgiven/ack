@@ -24,7 +24,6 @@ int		idfsize = IDFSIZE;
 int		ForeignFlag;
 
 static int	eofseen;
-extern char	options[];
 
 STATIC
 SkipComment()
@@ -83,7 +82,6 @@ GetString(upto)
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
 	register int ch;
-	register char *p;
 	
 	while (LoadChar(ch), ch != upto)	{
 		if (class(ch) == STNL)	{

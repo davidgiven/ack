@@ -232,6 +232,6 @@ CompilationUnit:
 identifier(struct idf **id;):
 	IDENT
 				{ extern char idfbuf[];
-				  *id = str2idf(idfbuf);
+				  *id = str2idf(idfbuf, 1);
 				}
 ;

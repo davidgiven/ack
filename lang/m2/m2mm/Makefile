@@ -37,9 +37,11 @@ all:	Cfiles
 
 install:	all
 	cp m2mm $(EMHOME)/bin
+	cp m2mm.1 $(EMHOME)/man
 
 cmp:	all
-	cmp m2mm $(EMHOME)/bin/m2mm
+	-cmp m2mm $(EMHOME)/bin/m2mm
+	-cmp m2mm.1 $(EMHOME)/man/m2mm.1
 
 opr:
 	make "EMHOME="$(EMHOME) pr | opr

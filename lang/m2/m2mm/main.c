@@ -21,8 +21,6 @@
 #include	"tokenname.h"
 
 int		state;			/* either IMPLEMENTATION or PROGRAM */
-char		options[128];
-int		DefinitionModule; 
 char		*ProgName;
 char		**DEFPATH;
 int		nDEF, mDEF;
@@ -121,6 +119,8 @@ Add(parglist, f, d, copy)
 {
 	register struct file_list *a = *parglist, *b = 0;
 
+	if (f == 0) return;
+
 	while (a && strcmp(a->a_filename, f) != 0) {
 		b = a;
 		a = a->a_next;
@@ -153,6 +153,7 @@ ProcessArgs()
 			ForeignFlag = 0;
 			if (! InsertFile(a->a_filename, DEFPATH, &fn)) {
 				Gerror("Could not find %s", a->a_filename);
+				a->a_filename = "";
 				a = a->a_next;
 				continue;
 			}
@@ -163,12 +164,10 @@ ProcessArgs()
 		else if (p && strcmp(p, ".mod") == 0) {
 			if (! InsertFile(a->a_filename, DEFPATH, &fn)) {
 				Gerror("Could not find %s", a->a_filename);
-				*p = 0;		/* prevent from being used
-						   later
-						*/
+				*p = 0;
 				a->a_filename = Salloc(a->a_filename,
 							strlen(a->a_filename) + 
-							11);
+							(unsigned)11);
 				strcat(a->a_filename, ".$(SUFFIX)");
 				a = a->a_next;
 				continue;
@@ -185,11 +184,6 @@ ProcessArgs()
 No_Mem()
 {
 	fatal("out of memory");
-}
-
-C_failed()
-{
-	fatal("write failed");
 }
 
 AddToList(name, ext)
@@ -319,15 +313,17 @@ print_dep()
 				print("%s: \\\n\t", obj);
 				pr_arg(arg);
 				for (a = id->id_mdependson; a; a = a->a_next) {
-					print(" \\\n\t");
-					pr_arg(a);
+					if (*(a->a_filename)) {
+						print(" \\\n\t");
+						pr_arg(a);
+					}
 				}
 				print("\n\t$(MOD) -c $(M2FLAGS) $(IFLAGS) ");
 				pr_arg(arg);
 				print("\n");
 			}
 		}
-		arg = arg->a_next;
+	    	arg = arg->a_next;
 	}
 }
 
@@ -379,13 +375,13 @@ pr_prog_dep(id)
 {
 	register struct file_list *p;
 
-	print("\nOBS_%s = ", id->id_text);
+	print("\nOBS_%s =", id->id_text);
 	for (p = id->id_mdependson; p; p = p->a_next) {
-		if (module_in_arglist(p->a_filename)) {
-			print("\\\n\t%s.$(SUFFIX)", p->a_filename);
+		if (module_in_arglist(p->a_filename) || ! p->a_dir) {
+			print(" \\\n\t%s.$(SUFFIX)", p->a_filename);
 		}
 		else if (! is_library_dir(p->a_dir))  {
-			print("\\\n\t%s/%s.$(SUFFIX)", p->a_dir, p->a_filename);
+			print(" \\\n\t%s/%s.$(SUFFIX)", p->a_dir, p->a_filename);
 		}
 	}
 	print("\n\n");
