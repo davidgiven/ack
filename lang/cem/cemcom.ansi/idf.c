@@ -317,7 +317,7 @@ declare_idf(ds, dc, lvl)
 			break;
 		case L_FORMAL2:	/* formal definition */
 		default:	/* local */
-			error("%s redeclared", idf->id_text);
+			if (sc != EXTERN) error("%s redeclared", idf->id_text);
 			break;
 		}
 	}
