@@ -1,7 +1,10 @@
-PC_TAIL=tail_pc.a
+# $Header$
 
 head:
 	echo This Makefile needs arguments
+
+distr:
+	rm `head -1 LIST`; arch cr `head -1 LIST` `tail +2 LIST`
 
 clean:
 	rm -f *.old
@@ -10,5 +13,4 @@ opr:
 	make pr | opr
 
 pr:
-	@pr `echo * | sed s/$(PC_TAIL)//`
-	@ar pv $(PC_TAIL) | pr -h $(PC_TAIL)
+	@pr Makefile *.[ec]
