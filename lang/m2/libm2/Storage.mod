@@ -44,13 +44,13 @@ IMPLEMENTATION MODULE Storage;
 
   CONST
 	UNIT = SIZE(ALIGNTYPE);
-	USED = BucketPtr(1);
 
   VAR
 	FreeLists: ARRAY[0..NLISTS] OF BucketPtr;	(* small blocks *)
 	Llist: BucketPtr;				(* others *)
 	Compacted: BOOLEAN;		(* avoid recursive reorganization *)
 	FirstBlock: BucketPtr;
+	USED: ADDRESS;
 
   PROCEDURE MyAllocate(size: CARDINAL) : ADDRESS;
     VAR	nu : INTEGER;
@@ -187,7 +187,7 @@ IMPLEMENTATION MODULE Storage;
   BEGIN
 	IF (a = NIL) THEN RETURN; END;
 	p := a - UNIT;
-	IF (p^.BNEXT # USED) THEN RETURN; END;
+	IF (p^.BNEXT # BucketPtr(USED)) THEN RETURN; END;
 	WITH p^ DO
 		IF BSIZE <= NLISTS THEN
 			BNEXT := FreeLists[BSIZE];
@@ -283,9 +283,10 @@ IMPLEMENTATION MODULE Storage;
 	END;
 	Llist := NIL;
 	brk := sbrk(0);
-	brk := sbrk(UNIT - INTEGER(brk MOD UNIT));
+	brk := sbrk(UNIT - brk MOD UNIT);
 	FirstBlock := sbrk(0);
 	Compacted := FALSE;
+	USED := 1;
   END InitStorage;
 
 BEGIN

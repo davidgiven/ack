@@ -46,6 +46,7 @@ static struct errm {
 	{ M2_UOVFL,	"cardinal overflow"},
 	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
 	{ M2_UUVFL,	"cardinal underflow"},
+	{ M2_INTERNAL,	"internal error; ask an expert for help"},
 	{ -1,		0}
 };
 

@@ -10,6 +10,12 @@
 */
 #include <m2_traps.h>
 
+#if EM_WSIZE==EM_PSIZE
+typedef unsigned pcnt;
+#else
+typedef unsigned long pcnt;
+#endif
+
 struct descr {
 	char *addr;
 	int low;
@@ -24,7 +30,7 @@ char *
 _new_stackptr(pdescr, a)
 	register struct descr *pdescr;
 {
-	unsigned int size = (((pdescr->highminlow + 1) * pdescr->size +
+	pcnt size = (((pdescr->highminlow + 1) * pdescr->size +
 				(EM_WSIZE - 1)) & ~(EM_WSIZE - 1));
 
 	if (ppdescr >= &descrs[10]) {
@@ -43,7 +49,7 @@ _copy_array(p, a)
 	register char *p;
 {
 	register char *q;
-	register unsigned int sz;
+	register pcnt sz;
 	char dummy;
 
 	ppdescr--;

@@ -16,6 +16,7 @@ DEFINITION MODULE Traps;
 				   in loop
 				*)
 	ERRCARDUVFL =	69;	(* CARDINAL underflow *)
+	ERRINTERNAL =	70;	(* Internal error; should not happen *)
 
   TYPE	TrapHandler = EM.TrapHandler;
 

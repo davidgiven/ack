@@ -23,9 +23,10 @@
  exa _MainLB
  exa _StackSize
  exp $_catch
+ inp $trap_handler
 
 _handler
- bss EM_PSIZE,0,0
+ con $_catch
 _environ
  bss EM_PSIZE,0,0
 _argv
@@ -44,16 +45,6 @@ _StackSize
  bss EM_WSIZE,0,0
 mainroutine
  bss 2*EM_PSIZE,0,0
-
- inp $trap_handler
- pro $trap_handler,0
- lol 0	; trap number
- lae _handler
- loi EM_PSIZE
- cai
- asp EM_WSIZE
- rtt
- end 0
 
  exp $m_a_i_n
  pro $m_a_i_n, STACKSIZE
@@ -99,3 +90,15 @@ mainroutine
  loc 0			; should not get here
  ret EM_WSIZE
  end
+
+ pro $trap_handler,0
+ lol 0	; trap number
+ lae _handler
+ loi EM_PSIZE
+ cai
+ lpi $trap_handler
+ sig
+ asp EM_PSIZE+EM_WSIZE
+ rtt
+ end 0
+

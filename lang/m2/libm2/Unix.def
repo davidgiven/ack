@@ -10,9 +10,9 @@ DEFINITION MODULE Unix;
 (* Type needed for Signal *)
   TYPE SignalPrc = PROCEDURE(INTEGER):INTEGER;
   CONST
-	SIGDFL = SignalPrc(0);
-	SIGIGN = SignalPrc(1);
-	ILLBREAK = ADDRESS(-1);
+	SIGDFL = SignalPrc(NIL);
+	SIGIGN = SignalPrc(NIL+1);
+	ILLBREAK = ADDRESS(NIL-1);
 
   VAR errno: INTEGER;
 (* Possible values of errno: *)
@@ -93,7 +93,7 @@ DEFINITION MODULE Unix;
   PROCEDURE ptrace(request, pid, addr, data: WORD) : INTEGER;
   PROCEDURE read(fildes: INTEGER;
 		 buf: ADDRESS;
-		 nbyte: INTEGER) : INTEGER;
+		 nbyte: CARDINAL) : INTEGER;
   PROCEDURE setuid(uid: INTEGER) : INTEGER;
   PROCEDURE setgid(gid: INTEGER) : INTEGER;
   PROCEDURE signal(sig: INTEGER;

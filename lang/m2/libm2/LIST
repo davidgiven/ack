@@ -29,6 +29,7 @@ transfer.e
 store.c
 confarray.c
 load.c
+blockmove.c
 stackprio.c
 ChkCards.e
 EM.e
