@@ -77,6 +77,16 @@ float_cst(str, sz, buf)
 		e.flt_exp += 127;
 		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
 #ifdef IEEEFLOAT
+		if (e.flt_mantissa.flt_l_32 & 0x80) {
+			/* rounding */
+			if ((e.flt_mantissa.flt_h_32 & 0xffffff00) == 0xffffff00) {
+				e.flt_exp++;
+				e.flt_mantissa.flt_h_32 = 0x80000000;
+			}
+			else {
+				e.flt_mantissa.flt_h_32 += 0x80;
+			}
+		}
 		if (e.flt_exp >= 255) {
 			overflow = 1;
 			e.flt_exp = 255;
@@ -111,6 +121,19 @@ float_cst(str, sz, buf)
 	else {
 		e.flt_exp += 1023;
 		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
+		if (e.flt_mantissa.flt_l_32 & 0x400) {
+			/* rounding */
+			if ((e.flt_mantissa.flt_l_32 & 0xfffff800) == 0xfffff800) {
+				e.flt_mantissa.flt_l_32 = 0;
+				if ((e.flt_mantissa.flt_h_32 += 1) == 0) {
+					e.flt_exp++;
+					e.flt_mantissa.flt_h_32 = 0x80000000;
+				}
+			}
+			else {
+				e.flt_mantissa.flt_l_32 += 0x400;
+			}
+		}
 		if (e.flt_exp >= 2047) {
 			overflow = 1;
 			e.flt_exp = 2047;
@@ -134,15 +157,7 @@ float_cst(str, sz, buf)
 		flt_b64_sft(&(e.flt_mantissa), -53);
 	}
 #endif
-	i = sz-1;
-	if (! overflow && (e.flt_mantissa.flt_h_32 & 0x80000000)) for (; i>=0; i--) {
-		if ((buf[i] &0377) != 0377) {
-			buf[i]++;
-			break;
-		}
-		else buf[i] = 0;
-	}
-	if (overflow || i < 0) {
+	if (overflow) {
 		return 2;
 	}
 	return 0;
