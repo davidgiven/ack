@@ -364,6 +364,11 @@ code_declaration(idf, expr, lvl, sc)
 		return;
 	if (sc == EXTERN && expr && !is_anon_idf(idf))
 		error("%s is extern; cannot initialize", idf->id_text);
+#ifndef USE_TMP
+	if (def->df_type->tp_fund == FUNCTION) {
+		code_scope(idf->id_text, def);
+	}
+#endif
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
