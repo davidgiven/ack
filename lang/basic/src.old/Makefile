@@ -5,7 +5,7 @@ h=$d/h
 l=$d/lib
 INSTALL=$l/em_bem
 
-CFLAGS = -I$h
+CFLAGS = -I$h -O
 
 FILES= bem.o y.tab.o symbols.o initialize.o compile.o \
 	parsepar.o yywrap.o gencode.o util.o graph.o \
