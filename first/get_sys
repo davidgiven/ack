@@ -1,4 +1,4 @@
-$FDIR/rm -f em_path.h
+rm -f em_path.h
 echo "You will now be asked for the root directory of the ACK sources.
 This directory will not be changed by the installation process.
 "
@@ -98,12 +98,12 @@ do
 case $ANS in
 '')	ANS="$CURRENT";;
 esac
-case $ANS in
-j*|y*)	UTIL_HOME=$TARGET_HOME
+case X$ANS in
+Xj*|Xy*|X)	UTIL_HOME=$TARGET_HOME
 	CURRENT=y
 	break
 	;;
-n*)	CURRENT=n
+Xn*)	CURRENT=n
 	echo "You will now be asked for the root directory of ACK on the current machine.
 This tree will not be changed by the installation process.
 "

@@ -1,7 +1,5 @@
 set -e
 
-. macros
-
 : machine-dependant stuff
 
 create_dir $TARGET_HOME

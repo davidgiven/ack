@@ -155,7 +155,7 @@ do
 	'')	ANS="$LIMIT";;
 	esac
 	case X$ANS in
-	Xj*|Xy*)
+	Xj*|Xy|X*)
 		LIMIT=y
 		. $FDIR/limit_enquire
 		break
@@ -172,24 +172,30 @@ done
 
 . $FDIR/get_makepars
 
-echo TARGET_HOME=\"$TARGET_HOME\" > macros
-echo UTIL_HOME=\"$UTIL_HOME\" >> macros
-echo SRC_HOME=\"$SRC_HOME\" >> macros
-echo SYSNAME=\"$SYSNAME\" >> macros
-echo ACM=\"$ACM\" >> macros
-echo CURRENT=\"$CURRENT\" >> macros
-echo SYS=\"$SYS\" >> macros
-echo LIMIT=\"$LIMIT\" >> macros
-echo CONFIG=\"$CONFIG\" >> macros
-echo DISABLE_LANG=\"$DISABLE_LANG\" >> macros
-echo DISABLE_SUP=\"$DISABLE_SUP\" >> macros
-echo DO_MACHINE_INDEP=\"$DO_MACHINE_INDEP\" >> macros
-echo MACH_LIST=\"$MACH_LIST\" >> macros
-echo SYSVAX=\"$SYSVAX\" >> macros
-echo WS=\"$WS\" >> macros
-echo PS=\"$PS\" >> macros
+echo "TARGET_HOME=\"$TARGET_HOME\"; export TARGET_HOME" > macros
+echo "UTIL_HOME=\"$UTIL_HOME\"; export UTIL_HOME" >> macros
+echo "SRC_HOME=\"$SRC_HOME\"; export SRC_HOME" >> macros
+echo "SYSNAME=\"$SYSNAME\"; export SYSNAME" >> macros
+echo "ACM=\"$ACM\"; export ACM" >> macros
+echo "CURRENT=\"$CURRENT\"; export CURRENT" >> macros
+echo "SYS=\"$SYS\"; export SYS" >> macros
+echo "LIMIT=\"$LIMIT\"; export LIMIT" >> macros
+echo "CONFIG=\"$CONFIG\"; export CONFIG" >> macros
+echo "DISABLE_LANG=\"$DISABLE_LANG\"; export DISABLE_LANG" >> macros
+echo "DISABLE_SUP=\"$DISABLE_SUP\"; export DISABLE_SUP" >> macros
+echo "DO_MACHINE_INDEP=\"$DO_MACHINE_INDEP\"; export DO_MACHINE_INDEP" >> macros
+echo "MACH_LIST=\"$MACH_LIST\"; export MACH_LIST" >> macros
+echo "SYSVAX=\"$SYSVAX\"; export SYSVAX" >> macros
+echo "WS=\"$WS\"; export WS" >> macros
+echo "PS=\"$PS\"; export PS" >> macros
 
 cat macros $FDIR/install_tail > INSTALL
 chmod +x INSTALL
 
+echo "
+A shell-script called 'INSTALL' has been created. Running it
+installs ACK. Note that this may take a (very) long time, so run it
+in the background, with its output redirected, f.i.:
+	sh INSTALL > INSTALL.out 2>&1 &
+"
 exit 0

@@ -11,11 +11,15 @@ to disable installation of the machine-independent part"
 	case $ANS in
 	'')	ANS="$DO_MACHINE_INDEP" ;;
 	esac
-	case $ANS in
-	j*|y*)	DO_MACHINE_INDEP=y
+	case X$ANS in
+	Xj*|Xy*|X)	DO_MACHINE_INDEP=y
+		echo "machine-independent part will be installed"
+		echo
 		break
 		;;
-	n*)	DO_MACHINE_INDEP=n
+	Xn*)	DO_MACHINE_INDEP=n
+		echo "machine-independent part will not be installed"
+		echo
 		break
 		;;
 	*)	./echo "I do not understand your answer ($ANS). Try again."
@@ -30,12 +34,16 @@ do
 	. $FDIR/get_answer
 	case X$ANS in
 	Xj*|Xy*|X)
+		echo "$i will be installed"
+		echo
 		break
 		;;
 	Xn*)	DISABLE_LANG=$DISABLE_LANG" $i"
+		echo "$i will not be installed"
+		echo
 		break
 		;;
-	*)	./echo "I do not understand your answer ($ANS). Try again."
+	*)	echo "I do not understand your answer ($ANS). Try again."
 		;;
 	esac
     done
@@ -47,20 +55,22 @@ do
     while :
     do
 	case $1 in
-	i86)	./echo "not installing i86 will disable installation of xenix3 and minix."
+	i86)	echo "not installing i86 will disable installation of xenix3 and minix."
 		;;
-	m68k2)	./echo "not installing m68k2 will disable installation of pmds, minixST,
+	m68k2)	echo "not installing m68k2 will disable installation of pmds, minixST,
 m68k4, pmds4, sun2, and mantra."
 		;;
-	m68k4)	./echo "not installing m68k4 will disable installation of pmds4, sun2, and mantra."
+	m68k4)	echo "not installing m68k4 will disable installation of pmds4, sun2, and mantra."
 		;;
-	m68020)	./echo "not installing m68020 will disable installation of sun3."
+	m68020)	echo "not installing m68020 will disable installation of sun3."
 		;;
 	esac
 	./echo -n "Do you want to install the $1 support? (y/n) "
 	. $FDIR/get_answer
 	case X$ANS in
 	Xj*|Xy*|X)
+		echo "The $1 support will be installed"
+		echo
 		case $1 in
 		vax4)	case $SYSNAME in
 			vax_bsd4_1a)	SYSVAX=libbsd4_1a
@@ -71,7 +81,7 @@ m68k4, pmds4, sun2, and mantra."
 					;;
 			*)		if [ $DO_MACHINE_INDEP = y ]
 					then
-						. get_sysvax
+						. $FDIR/get_sysvax
 					fi
 					;;
 			esac
@@ -79,6 +89,8 @@ m68k4, pmds4, sun2, and mantra."
 		break
 		;;
 	Xn*)	DISABLE_SUP=$DISABLE_SUP" $1"
+		echo "The $1 support will not be installed"
+		echo
 		case $1 in
 		i86)
 			shift

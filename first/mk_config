@@ -1,40 +1,12 @@
-: This script creates a configuration tree.
-: Should be called with 3 parameters: the configuration root, the source
-: root, and a file containing the makefile definitions.
-
 set -e
 
-USAGE="Usage: $0 <config_root> <source_root> <macro_file>"
-
-case $# in
-3)	;;
-*)	echo $USAGE 1>&2
-	exit 1
-	;;
-esac
-
-CONFIG=$1
-SRC_HOME=$2
-MACROS=$3
-
-if [ -d $SRC_HOME ]
-then :
-else echo "$0: $SRC_HOME is not a directory" 1>&2
-     exit 2
-fi
+MACROS=$1
 
 if [ -f $MACROS ]
 then :
 else echo "$0: $MACROS not found" 1>&2
      exit 3
 fi
-
-case ${CONFIG}XX${MACROS}XX${SRC_HOME} in
-/*XX/*XX/*)	;;
-*)	echo "$0: all arguments should be absolute path names" 1>&2
-	exit 4
-	;;
-esac
 
 create_dir $CONFIG
 

@@ -1,4 +1,3 @@
-. macros
 for i in $DISABLE_LANG
 do
 	ed - $CONFIG/Action <<EOF

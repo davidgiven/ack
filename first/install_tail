@@ -3,7 +3,7 @@ set -e
 PATH=::$SRC_HOME/first:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb
 export PATH
 
-mk_config $CONFIG $SRC_HOME `pwd`/make_macros
+mk_config `pwd`/make_macros
 
 mk_target
 
