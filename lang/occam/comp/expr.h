@@ -36,7 +36,7 @@ struct expr {
 
 		struct symbol *var;
 
-		long const;
+		long cst;
 
 		int tab;
 

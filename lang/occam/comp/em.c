@@ -121,9 +121,9 @@ void cvw()
 	}
 }
 
-void Loc(const) long const;
+void Loc(cst) long cst;
 {
-	if (vz>wz) C_ldc((arith) const); else C_loc((arith) const);
+	if (vz>wz) C_ldc((arith) cst); else C_loc((arith) cst);
 }
 
 void Lol(offset) int offset;

@@ -27,8 +27,8 @@ struct expr *new_node(op, left, right, byte)
 	if (op!=FOR && constant(left) && (right==nil || constant(right))) {
 		register long lc, rc;
 
-		lc=left->u.const;
-		if (right) rc=right->u.const; else rc = 0;
+		lc=left->u.cst;
+		if (right) rc=right->u.cst; else rc = 0;
 
 		switch (op) {
 		case '+':	lc+=rc; break;
@@ -61,7 +61,7 @@ struct expr *new_node(op, left, right, byte)
 		}
 		destroy(right);
 
-		left->u.const=lc;
+		left->u.cst=lc;
 		return left;
 	} else {
 		register struct expr *pe;
@@ -128,8 +128,8 @@ struct expr *new_var(var)
 	return pe;
 }
 
-struct expr *new_const(const)
-	long const;
+struct expr *new_const(cst)
+	long cst;
 /* Make a constant, which is a VALUE, of course. */
 {
 	register struct expr *pe;
@@ -138,7 +138,7 @@ struct expr *new_const(const)
 
 	pe->kind=E_CONST;
 	pe->type=T_VALUE;
-	pe->u.const=const;
+	pe->u.cst=cst;
 
 	return pe;
 }
@@ -389,7 +389,7 @@ static void subscriptable(l, r, byte, atype, arr_siz)
 		if (r->u.node.right->kind!=E_CONST)
 			report("slice must be of constant size");
 		else
-			*arr_siz=r->u.node.right->u.const;
+			*arr_siz=r->u.node.right->u.cst;
 		used(r->u.node.left);
 	} else
 		used(r);

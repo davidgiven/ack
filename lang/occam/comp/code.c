@@ -131,7 +131,7 @@ void code_val(e) register struct expr *e;
 		}
 		}break;
 	case E_CONST:
-		Loc(e->u.const);
+		Loc(e->u.cst);
 		break;
 	case E_NOW:
 		cal("now");
@@ -172,7 +172,7 @@ static void subscript(e, av) register struct expr *e; enum addr_val av;
 			lsiz-=(e->arr_siz -1);
 
 		if (constant(index)) {
-			if (index->u.const<0 || index->u.const>=lsiz) {
+			if (index->u.cst<0 || index->u.cst>=lsiz) {
 				warning("constant index outside vector");
 				lin();
 				loc(0);
@@ -189,7 +189,7 @@ static void subscript(e, av) register struct expr *e; enum addr_val av;
 		}
 	}
 	if (constant(index)) {
-		register offset=index->u.const;
+		register offset=index->u.cst;
 
 		if ((left->type&T_TYPE)==T_CHAN)
 			offset*=(wz+vz);
@@ -518,9 +518,9 @@ void rep_init(v, e1, e2, r_info)
 	Stl(v->s_info.vc.offset);
 
 	if (!constant(e1) || !constant(e2)) {
-		if (constant(e2) && word_constant(e2->u.const)) {
+		if (constant(e2) && word_constant(e2->u.cst)) {
 			r_info->counter=memory(wz);
-			loc((int) e2->u.const);
+			loc((int) e2->u.cst);
 			stl(r_info->counter);
 		} else {
 			r_info->counter=memory(vz);
@@ -528,7 +528,7 @@ void rep_init(v, e1, e2, r_info)
 			Stl(r_info->counter);
 		}
 	}
-	if (!constant(e2) || e2->u.const<=0L)
+	if (!constant(e2) || e2->u.cst<=0L)
 		branch(&r_info->END);
 	Label(new_label(&r_info->BEGIN));
 }
@@ -544,7 +544,7 @@ void rep_test(v, e1, e2, r_info)
 
 	if (constant(e1) && constant(e2)) {
 		Lol(v->s_info.vc.offset);
-		Loc(e1->u.const+e2->u.const);
+		Loc(e1->u.cst+e2->u.cst);
 		if (vz>wz) {
 			cmi();
 			zlt(r_info->BEGIN);
@@ -552,7 +552,7 @@ void rep_test(v, e1, e2, r_info)
 			blt(r_info->BEGIN);
 		Label(r_info->END);
 	} else {
-		if (constant(e2) && word_constant(e2->u.const)) {
+		if (constant(e2) && word_constant(e2->u.cst)) {
 			del(r_info->counter);
 			Label(r_info->END);
 			lol(r_info->counter);

@@ -281,7 +281,7 @@ subscript(register *byte; register struct expr **e; )
 						destroy(e1);
 						e1=new_const(0L);
 					} else
-					if (e1->u.const<=0)
+					if (e1->u.cst<=0)
 						nonpositive(siz);
 					*e=new_node(FOR, *e, e1, *byte);
 					slice=1;
@@ -304,10 +304,10 @@ chan	{ register type, arr_siz=1; register char *name; struct expr *e; }:
 					if (!constant(e))
 						nonconst(siz);
 					else
-					if (e->u.const<0)
+					if (e->u.cst<0)
 						nonpositive(siz);
 					else
-						arr_siz=e->u.const;
+						arr_siz=e->u.cst;
 					destroy(e);
 					type|=T_ARR;
 				}
@@ -331,10 +331,10 @@ var				{	register type, byte=0, arr_siz=1;
 					if (!constant(e))
 						nonconst(siz);
 					else
-					if (e->u.const<=0)
+					if (e->u.cst<=0)
 						nonpositive(siz);
 					else
-						arr_siz=e->u.const;
+						arr_siz=e->u.cst;
 					destroy(e);
 					type|=T_ARR|byte;
 				}
@@ -550,14 +550,14 @@ table(register struct expr **e;)
 	  expression(&e1)	{	if (!constant(e1))
 						nonconst("table element");
 					else
-						table_add(&apt, e1->u.const);
+						table_add(&apt, e1->u.cst);
 					destroy(e1);
 				}
 	  [	  ',' expression(&e1)
 				{	if (!constant(e1))
 						nonconst("table element");
 					else
-						table_add(&apt, e1->u.const);
+						table_add(&apt, e1->u.cst);
 					destroy(e1);
 				}
 	  ]*
