@@ -92,6 +92,7 @@ C_putbyte(c)
 #define C_putbyte Xputbyte
 #endif
 
+/*ARGSUSED*/
 C_init(w, p)
 	arith w, p;
 {
