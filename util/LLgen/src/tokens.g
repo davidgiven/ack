@@ -115,7 +115,6 @@ scanner() {
 	register int	ch;		/* Current char */
 	register char *p = ltext;
 	int		reserved = 0;	/* reserved word? */
-	int		last;		/* Char before current char */
 	char		*max = &ltext[LTEXTSZ - 1];
 
 	if (ch = savedtok.t_tokno) {
@@ -138,13 +137,16 @@ scanner() {
 		switch(c_class[ch]) {
 		  case ISLIT :
 			for (;;) {
-				last = ch;
 				ch = input();
 				if (ch == '\n' || ch == EOF) {
 					error(linecount,"missing '");
 					break;
 				}
-				if (ch == '\'' && last != '\\') break;
+				if (ch == '\'') break;
+				if (ch == '\\') {
+					*p++ = ch;
+					ch = input();
+				}
 				*p++ = ch;
 				if (p > max) p--;
 			}
