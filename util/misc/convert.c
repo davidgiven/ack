@@ -55,10 +55,10 @@ main(argc,argv)
 		if (p->em_type == EM_FATAL) {
 			fatal("%s", EM_error);
 		}
-		if (p->em_type == EM_ERROR) {
+		if (EM_error) {
 			error("%s", EM_error);
 		}
-		if (!EM_mkcalls(p)) {
+		if (p->em_type != EM_ERROR && !EM_mkcalls(p)) {
 			error("%s", EM_error);
 		}
 		p = EM_getinstr();
