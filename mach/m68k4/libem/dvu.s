@@ -6,28 +6,28 @@
 
  ! unsigned long divide
  ! register usage:
- ! 	 : d0 divisor
+ ! 	 : d2 divisor
  !         d1 dividend
  ! exit  : d1 quotient
- !         d2 remainder
+ !         d0 remainder
 	.sect .text
 .dvu:
-	move.l	4(sp),d0
+	move.l	4(sp),d2
 	move.l	8(sp),d1
 	move.l	d3,-(sp)
-	tst.l	d0
+	tst.l	d2
 	bne	0f
 	move.w	#EIDIVZ,-(sp)
 	jsr	.trp
 0:
-	clr.l	d2
+	clr.l	d0
 	move.l	#31,d3
 3:
 	lsl.l	#1,d1
-	roxl.l	#1,d2
-	cmp.l	d0,d2
+	roxl.l	#1,d0
+	cmp.l	d2,d0
 	blt	4f
-	sub.l	d0,d2
+	sub.l	d2,d0
 	add	#1,d1
 4:
 	dbf	d3,3b
