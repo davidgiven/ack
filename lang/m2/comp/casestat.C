@@ -63,7 +63,18 @@ struct case_entry	{
    might also be reasonable. On these machines the density of jump tables
    may be lower.
 */
-#define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
+
+compact(nr, low, up)
+	arith low, up;
+{
+	/*	Careful! up - low might not fit in an arith. And then,
+		the test "up-low < 0" might also not work to detect this
+		situation! Or is this just a bug in the M68020/M68000?
+	*/
+	arith diff = up - low;
+
+	return (nr != 0 && diff >= 0 && diff / nr <= (DENSITY - 1));
+}
 
 CaseCode(nd, exitlabel)
 	t_node *nd;
@@ -252,6 +263,7 @@ AddOneCase(sh, node, lbl)
 {
 	register struct case_entry *ce = new_case_entry();
 	register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
+	int fund = sh->sh_type->tp_fund;
 
 	ce->ce_label = lbl;
 	ce->ce_value = node->nd_INT;
@@ -272,13 +284,13 @@ AddOneCase(sh, node, lbl)
 		   find the proper place to put ce into the list
 		*/
 		
-		if (ce->ce_value < sh->sh_lowerbd) {
+		if (chk_bounds(ce->ce_value, sh->sh_lowerbd, fund)) {
 			sh->sh_lowerbd = ce->ce_value;
 		}
-		else if (ce->ce_value > sh->sh_upperbd) {
+		else if (! chk_bounds(ce->ce_value, sh->sh_upperbd, fund)) {
 			sh->sh_upperbd = ce->ce_value;
 		}
-		while (c1 && c1->ce_value < ce->ce_value)	{
+		while (c1 && !chk_bounds(ce->ce_value, c1->ce_value, fund)) {
 			c2 = c1;
 			c1 = c1->ce_next;
 		}
