@@ -26,7 +26,7 @@ name cem
 	mapflag -D* CPP_F={CPP_F?} -D*
 	mapflag -M* CEM_F={CEM_F?} -M*
 	mapflag -L CEM_F={CEM_F?} -L
-	mapflag -K CEM_F={CEM_F?} -R
+	mapflag -KR CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
 	mapflag -p CEM_F={DEM_F?} -p
 	mapflag -V CEM_F={DEM_F?} -V*
