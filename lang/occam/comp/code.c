@@ -501,7 +501,7 @@ void epilogue(proc) register struct symbol *proc;
 
 	curr_level--;
 	ret(0);
-	_end(-min_offset);
+	x_end(-min_offset);
 }
 
 void rep_init(v, e1, e2, r_info)
@@ -606,7 +606,7 @@ void trailer()
 	else {
 		loc(0);
 		ret(wz);
-		_end(-min_offset);
+		x_end(-min_offset);
 	}
 	closefile();
 }

@@ -19,7 +19,7 @@ void Txx(), xxi(), Stl(), Inl(), Del(), Loe();
 void cmi(), ngi(), and(), ior(), xor(), sli(), sri(), com(), lar(), lxl();
 void lxa(), lfr(), ste(), lae(), aar(), lal(), adp(), ldc0(), zeq(), zne();
 void zlt(), zgt(), blm(), sti(), cal(), asp(), loc(), lor0(), loi(), pro();
-void ret(), _end(), stl(), laedot(), del(), lol(), ldl(), meswp(), meserr();
+void ret(), x_end(), stl(), laedot(), del(), lol(), ldl(), meswp(), meserr();
 void init_rt(), exp(), rom(), blt(), magic(), lin(), tst(), fil(), trp();
 void main_fil(), init(), openfile(), closefile(), maxdes();
 

@@ -316,7 +316,7 @@ void cal(lab) char *lab;	{	C_cal(lab); }
 void cmi()			{	C_cmi((arith) vz); }
 void com()			{	C_com((arith) vz); }
 void del(offset) int offset;	{	C_del((arith) offset); }
-void _end(size) int size;	{	C_end((arith) size); }
+void x_end(size) int size;	{	C_end((arith) size); }
 void exp(lab) char *lab;	{	C_exp(lab); }
 void ior()			{	C_ior((arith) vz); }
 void lae(lab, offset) char *lab; int offset;
