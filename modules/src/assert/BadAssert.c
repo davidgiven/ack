@@ -24,6 +24,7 @@ wr_num(fd, n)
 	sys_write(fd, s, 1);
 }
 
+int
 _BadAssertion(file, lineno, assertion)
 	char *file, *assertion;
 	int lineno;
@@ -36,4 +37,5 @@ _BadAssertion(file, lineno, assertion)
 	sys_write(STDERR, assertion, strlen(assertion));
 	sys_write(STDERR, "\" failed\n", 9);
 	sys_stop(S_ABORT);
+	return 0;
 }
