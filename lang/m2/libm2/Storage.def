@@ -31,7 +31,11 @@ DEFINITION MODULE Storage;
 	(* Identical to DEALLOCATE *)
 
 	PROCEDURE Available(size : CARDINAL) : BOOLEAN;
-	(* Return TRUE if an area with the given size could be allocated.
+	(* Return TRUE if a contiguous area with the given size could be
+	   allocated.
+	   Notice that this only indicates if an ALLOCATE of this size
+	   would succeed, and that it gives no indication of the total
+	   available memory.
 	*)
 
 END Storage.
