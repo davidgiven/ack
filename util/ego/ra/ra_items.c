@@ -85,6 +85,7 @@ fill_item(item,l)
 	line_p l;
 {
 	item->it_type = item_type(l); 
+	item->it_desirable = TRUE;
 	switch(item->it_type) {
 		case GLOBL_ADDR:
 			item->i_t.it_obj = OBJ(l);
