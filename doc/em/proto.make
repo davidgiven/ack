@@ -30,7 +30,7 @@ FILES = $(SRC_DIR)/macr.nr \
 IOP=$(SRC_HOME)/etc/ip_spec.t#			# to construct itables from
 
 $(TARGET_DIR)/em.doc:	$(FILES) itables dispatdummy
-	$(TBL) $(FILES) > $(TARGET_DIR)/em.doc
+	$(TBL) $(FILES) | soelim > $(TARGET_DIR)/em.doc
 
 itables: $(IOP) $(SRC_DIR)/ip.awk
 	awk -f $(SRC_DIR)/ip.awk $(IOP) | sed 's/-/\\-/g' | $(TBL) >itables
