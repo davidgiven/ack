@@ -42,6 +42,22 @@ PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 
 int	nestlevel = -1;
 
+PRIVATE do_include();
+PRIVATE ifexpr();
+PRIVATE do_define();
+PRIVATE push_if();
+PRIVATE do_elif();
+PRIVATE do_else();
+PRIVATE do_endif();
+PRIVATE do_if();
+PRIVATE do_ifdef();
+PRIVATE do_undef();
+PRIVATE int getparams();
+PRIVATE char *get_text();
+PRIVATE int macroeq();
+PRIVATE SkipRestOfLine();
+PRIVATE do_line();
+
 struct idf *
 GetIdentifier()
 {
@@ -318,7 +334,6 @@ do_define()
 	char *repl_text;	/* start of the replacement text	*/
 	int length;		/* length of the replacement text	*/
 	register ch;
-	char *get_text();
 
 	/* read the #defined macro's name	*/
 	if (!(id = GetIdentifier())) {
@@ -663,7 +678,7 @@ get_text(formals, length)
 	as strings, without taking care of the leading and trailing
 	blanks (spaces and tabs).
 */
-PRIVATE
+PRIVATE int
 macroeq(s, t)
 	register char *s, *t;
 {

@@ -28,6 +28,10 @@ extern int InputLevel;
 
 PRIVATE struct mlist	*ReplaceList;	/* list of currently active macros */
 
+PRIVATE macro_func();
+PRIVATE char *macro2buffer();
+extern char **getactuals();
+
 EXPORT int
 replace(idef)
 	register struct idf *idef;
@@ -44,8 +48,8 @@ replace(idef)
 	register struct macro *mac = idef->id_macro;
 	register struct mlist *repl;
 	register int c;
-	char **actpars, **getactuals();
-	char *reptext, *macro2buffer();
+	char **actpars;
+	char *reptext;
 	int size;
 
 	if (mac->mc_flag & NOREPLACE) {
