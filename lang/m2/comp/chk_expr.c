@@ -238,10 +238,10 @@ ChkLinkOrName(expp, flags)
 	expp->nd_type = error_type;
 
 	if (expp->nd_class == Name) {
-		expp->nd_def = df = lookfor(expp, CurrVis, 1);
+		df = lookfor(expp, CurrVis, 1, flags);
+		expp->nd_def = df;
 		expp->nd_class = Def;
 		expp->nd_type = RemoveEqual(df->df_type);
-		df->df_flags |= flags;
 	}
 	else if (expp->nd_class == Link) {
 		/*	A selection from a record or a module.
@@ -265,11 +265,10 @@ ChkLinkOrName(expp, flags)
 			return 0;
 		}
 
-		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, 1))) {
+		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, 1, flags))) {
 			id_not_declared(expp);
 			return 0;
 		}
-		df->df_flags |= flags;
 		expp->nd_def = df;
 		expp->nd_type = RemoveEqual(df->df_type);
 		expp->nd_class = Def;
@@ -467,7 +466,7 @@ ChkSet(expp)
 	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		if (! ChkDesignator(nd)) return 0;
+		if (! ChkDesig(nd, D_USED)) return 0;
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
 
@@ -575,7 +574,7 @@ getname(argp, kinds, bases, edf)
 	*/
 	register t_node *left = nextarg(argp, edf);
 
-	if (!left || ! ChkDesignator(left)) return 0;
+	if (!left || ! ChkDesig(left, D_USED)) return 0;
 
 	if (left->nd_class != Def) {
 		return (t_node *)df_error(left, "identifier expected", edf);
@@ -1121,6 +1120,7 @@ ChkStandard(expp)
 		free_it = 1;
 		break;
 
+#ifndef STRICT_3RD_ED
 	case S_NEW:
 	case S_DISPOSE:
 		{
@@ -1128,19 +1128,17 @@ ChkStandard(expp)
 
 			if (!warning_given) {
 				warning_given = 1;
-#ifndef STRICT_3RD_ED
 				if (! options['3'])
 	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are obsolete");
 				else
-#endif
 	node_error(expp, "NEW and DISPOSE are obsolete");
 			}
 		}
-#ifdef STRICT_3RD_ED
-		return 0;
-#else
+		left = getvariable(&arg,
+			edf,
+			edf->df_value.df_stdname == S_NEW ? D_DEFINED : D_USED);
 		expp->nd_type = 0;
-		if (! (left = getvariable(&arg, edf,D_DEFINED))) return 0;
+		if (! left) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
 			return df_error(left, "pointer variable expected", edf);
 		}

@@ -318,6 +318,7 @@ walk.o: desig.h
 walk.o: f_info.h
 walk.o: idf.h
 walk.o: main.h
+walk.o: misc.h
 walk.o: node.h
 walk.o: scope.h
 walk.o: squeeze.h

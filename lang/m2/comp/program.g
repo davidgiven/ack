@@ -101,7 +101,9 @@ import(int local;)
 } :
 	[ FROM
 	  IDENT		{ FromId = dot2leaf(Name);
-			  if (local) df = lookfor(FromId,enclosing(CurrVis),0);
+			  if (local) {
+				df = lookfor(FromId,enclosing(CurrVis),0,D_USED);
+			  }
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
 	]?

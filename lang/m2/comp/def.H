@@ -98,13 +98,15 @@ struct def	{		/* list of definitions for a name */
 #define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
+#define D_IMP_BY_EXP	0x8000	/* imported definition by export */
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
+#define D_IMPORTED	(D_IMPORT|D_IMP_BY_EXP)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	unsigned short  df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
-#define D_USED		0x02	/* set if used (future use ???) */
-#define D_DEFINED	0x04	/* set if it is assigned a value (future use ???) */
+#define D_USED		0x02	/* set if used */
+#define D_DEFINED	0x04	/* set if it is assigned a value */
 #define D_VARPAR	0x08	/* set if it is a VAR parameter */
 #define D_VALPAR	0x10	/* set if it is a value parameter */
 #define D_EXPORTED	0x20	/* set if exported */

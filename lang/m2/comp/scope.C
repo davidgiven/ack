@@ -121,7 +121,7 @@ chk_forw(pdf)
 
 			*pdf = df->df_nextinscope;
 			RemoveFromIdList(df);
-			df = lookfor(nd, CurrVis, 1);
+			df = lookfor(nd, CurrVis, 1, 0);
 			if (! df->df_kind & (D_ERROR|D_FTYPE|D_TYPE)) {
 node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 			}
@@ -217,9 +217,8 @@ close_scope(flag)
 
 	assert(sc != 0);
 
-	if (! sc->sc_end) {
-		sc->sc_end = dot2leaf(Link);
-	}
+	FreeNode(sc->sc_end);
+	sc->sc_end = dot2leaf(Link);
 
 	if (flag) {
 		DO_DEBUG(options['S'],(print("List of definitions in currently ended scope:\n"), DumpScope(sc->sc_def)));

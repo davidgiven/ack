@@ -71,12 +71,16 @@ This is useful for interpreters that use the "real" MIN(INTEGER) to
 indicate "undefined".
 .IP \fB-R\fR
 disable all range checks.
+.IP \fB-3\fR
+only accept Modula-2 programs that strictly conform to [1].
 .LP
 .SH FILES
 .IR ~em/lib/em_m2 :
 binary of the Modula-2 compiler.
 .SH SEE ALSO
 \fIack\fR(1), \fImodula-2\fR(1)
+.IP [1]
+N. Wirth, \fIProgramming in Modula-2\fP, 3rd edition, Springer Verlag.
 .SH DIAGNOSTICS
 All warning and error messages are written on standard error output.
 .SH REMARKS

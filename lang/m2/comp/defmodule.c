@@ -97,14 +97,14 @@ GetDefinitionModule(id, incr)
 	t_scope *newsc = CurrentScope;
 
 	level += incr;
-	df = lookup(id, GlobalScope, 1);
+	df = lookup(id, GlobalScope, 1, 0);
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
 		*/
 		DefId = id;
 		if (!strcmp(id->id_text, "SYSTEM")) {
 			do_SYSTEM();
-			df = lookup(id, GlobalScope, 1);
+			df = lookup(id, GlobalScope, 1, 0);
 		}
 		else {
 			extern int ForeignFlag;
@@ -115,7 +115,7 @@ GetDefinitionModule(id, incr)
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 
 				DefModule();
-				df = lookup(id, GlobalScope, 1);
+				df = lookup(id, GlobalScope, 1, 0);
 				if (level == 1 &&
 				    (!df || !(df->df_flags & D_FOREIGN))) {
 					/* The module is directly imported by
@@ -137,7 +137,7 @@ GetDefinitionModule(id, incr)
 				}
 			}
 			else {
-				df = lookup(id, GlobalScope, 1);
+				df = lookup(id, GlobalScope, 1, 0);
 				newsc->sc_name = id->id_text;
 			}
 			vis = CurrVis;

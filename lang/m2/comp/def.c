@@ -73,7 +73,6 @@ MkDef(id, scope, kind)
 	df->df_scope = scope;
 	df->df_kind = kind;
 	df->df_next = id->id_def;
-	df->df_flags = D_USED | D_DEFINED;
 	id->id_def = df;
 	if (kind == D_ERROR || kind == D_FORWARD) df->df_type = error_type;
 
@@ -97,14 +96,14 @@ define(id, scope, kind)
 	*/
 	register t_def *df;
 
-	df = lookup(id, scope, 1);
+	df = lookup(id, scope, 1, 0);
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
 		( 
 		  scopeclosed(scope)
 		&&
-		  (df = lookup(id, PervasiveScope, 1)))
+		  (df = lookup(id, PervasiveScope, 1, 0)))
 	   ) {
 		switch(df->df_kind) {
 		case D_HIDDEN:
@@ -191,7 +190,7 @@ RemoveImports(pdf)
 	register t_def *df = *pdf;
 
 	while (df) {
-		if (df->df_kind == D_IMPORT) {
+		if (df->df_kind & D_IMPORTED) {
 			RemoveFromIdList(df);
 			*pdf = df->df_nextinscope;
 			free_def(df);
@@ -260,7 +259,7 @@ DeclProc(type, id)
 	else {
 		char *name;
 
-		df = lookup(id, CurrentScope, 1);
+		df = lookup(id, CurrentScope, 1, 0);
 		if (df && df->df_kind == D_PROCHEAD) {
 			/* C_exp already generated when we saw the definition
 			   in the definition module

@@ -24,7 +24,7 @@
 #include	"misc.h"
 
 t_def *
-lookup(id, scope, import)
+lookup(id, scope, import, flags)
 	register t_idf *id;
 	t_scope *scope;
 {
@@ -52,8 +52,9 @@ lookup(id, scope, import)
 			df->df_next = id->id_def;
 			id->id_def = df;
 		}
+		df->df_flags |= flags;
 		if (import) {
-			while (df->df_kind == D_IMPORT) {
+			while (df->df_kind & D_IMPORTED) {
 				assert(df->imp_def != 0);
 				df = df->imp_def;
 			}
@@ -63,24 +64,24 @@ lookup(id, scope, import)
 }
 
 t_def *
-lookfor(id, vis, give_error)
+lookfor(id, vis, message, flags)
 	register t_node *id;
 	t_scopelist *vis;
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
-		if "give_error" is set, give an error message.
+		if message is set, give an error message
 	*/
 	register t_def *df;
 	register t_scopelist *sc = vis;
 
 	while (sc) {
-		df = lookup(id->nd_IDF, sc->sc_scope, 1);
+		df = lookup(id->nd_IDF, sc->sc_scope, 1, flags);
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
 
-	if (give_error) id_not_declared(id);
+	if (message) id_not_declared(id);
 
 	df = MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
 	return df;

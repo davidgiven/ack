@@ -233,7 +233,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 }
 
 STATIC
-DoImport(df, scope)
+DoImport(df, scope, kind)
 	register t_def *df;
 	t_scope *scope;
 {
@@ -241,9 +241,9 @@ DoImport(df, scope)
 		Handle the case that it is an enumeration type or a module.
 	*/
 
-	define(df->df_idf, scope, D_IMPORT)->imp_def = df;
+	define(df->df_idf, scope, kind)->imp_def = df;
 
-	while (df->df_kind == D_IMPORT) {
+	while (df->df_kind & D_IMPORTED) {
 		df = df->imp_def;
 	}
 
@@ -251,7 +251,12 @@ DoImport(df, scope)
 		/* Also import all enumeration literals
 		*/
 		for (df = df->df_type->enm_enums; df; df = df->enm_next) {
-			define(df->df_idf, scope, D_IMPORT)->imp_def = df;
+			register t_def *df1 = define(df->df_idf, scope, kind);
+			
+			df1->imp_def = df;
+			df1->df_flags |= D_USED;/* don't complain when these
+						   are not used
+						*/
 		}
 	}
 	else if (df->df_kind == D_MODULE) {
@@ -267,7 +272,12 @@ DoImport(df, scope)
 		     df;
 		     df = df->df_nextinscope) {
 			if (df->df_flags & D_EXPORTED) {
-				define(df->df_idf,scope,D_IMPORT)->imp_def = df;
+				register t_def *df1 =
+					define(df->df_idf, scope, kind);
+			
+				df1->imp_def = df;
+				df1->df_flags |= D_USED;
+				/* don't complain when these are not used */
 			}
 		}
 	}
@@ -312,7 +322,7 @@ ForwDef(ids, scope)
 	*/
 	register t_def *df;
 
-	if (!(df = lookup(ids->nd_IDF, scope, 0))) {
+	if (!(df = lookup(ids->nd_IDF, scope, 0, 0))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
 		df->for_node = MkLeaf(Name, &(ids->nd_token));
 	}
@@ -331,7 +341,7 @@ EnterExportList(Idlist, qualified)
 	register t_def *df, *df1;
 
 	for (;idlist; idlist = idlist->nd_left) {
-		df = lookup(idlist->nd_IDF, CurrentScope, 0);
+		df = lookup(idlist->nd_IDF, CurrentScope, 0, 0);
 
 		if (!df) {
 			/* undefined item in export list
@@ -356,9 +366,9 @@ EnterExportList(Idlist, qualified)
 			*/
 			df1 = CurrentScope->sc_definedby->df_idf->id_def;
 			while (df1) {
-				if (df1->df_kind == D_IMPORT &&
+				if ((df1->df_kind & D_IMPORTED) &&
 				    df1->imp_def == CurrentScope->sc_definedby) {
-					DoImport(df, df1->df_scope);
+					DoImport(df, df1->df_scope, D_IMP_BY_EXP);
 				}
 				df1 = df1->df_next;
 			}
@@ -367,7 +377,7 @@ EnterExportList(Idlist, qualified)
 			   scope imports it.
 			*/
 			df1 = lookup(idlist->nd_IDF,
-				     enclosing(CurrVis)->sc_scope, 1);
+				     enclosing(CurrVis)->sc_scope, 1, 0);
 			if (df1) {
 				/* It was already defined in the enclosing
 				   scope. There are two legal possibilities,
@@ -375,12 +385,12 @@ EnterExportList(Idlist, qualified)
 				*/
 				t_def *df2 = df;
 
-				while (df2->df_kind == D_IMPORT) {
+				while (df2->df_kind & D_IMPORTED) {
 					df2 = df2->imp_def;
 				}
 				if (df1->df_kind == D_PROCHEAD &&
 				     df2->df_kind == D_PROCEDURE) {
-					df1->df_kind = D_IMPORT;
+					df1->df_kind = D_IMP_BY_EXP;
 					df1->imp_def = df;
 					continue;
 				}
@@ -392,7 +402,7 @@ EnterExportList(Idlist, qualified)
 				}
 			}
 
-			DoImport(df, enclosing(CurrVis)->sc_scope);
+			DoImport(df, enclosing(CurrVis)->sc_scope, D_IMP_BY_EXP);
 		}
 	}
 	FreeNode(Idlist);
@@ -439,7 +449,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 
 	for (; idlist; idlist = idlist->nd_left) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
-		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 0))) {
+		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 0, 0))) {
 			if (! is_anon_idf(idlist->nd_IDF)) {
 				node_error(idlist,
 			"identifier \"%s\" not declared in module \"%s\"",
@@ -455,7 +465,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 			module_name);
 			df->df_flags |= D_QEXPORTED;
 		}
-		DoImport(df, CurrentScope);
+		DoImport(df, CurrentScope, D_IMPORT);
 	}
 
 	if (!forwflag) FreeNode(FromId);
@@ -473,7 +483,7 @@ EnterGlobalImportList(idlist)
 	f = file_info;
 
 	for (; idlist; idlist = idlist->nd_left) {
-		DoImport(GetDefinitionModule(idlist->nd_IDF, 1), CurrentScope);
+		DoImport(GetDefinitionModule(idlist->nd_IDF, 1), CurrentScope, D_IMPORT);
 		file_info = f;
 	}
 }
@@ -484,13 +494,8 @@ EnterImportList(idlist)
 	/*	Import "idlist" from the enclosing scope.
 	*/
 	t_scope *sc = enclosing(CurrVis)->sc_scope;
-	extern t_def *GetDefinitionModule();
 
 	for (; idlist; idlist = idlist->nd_left) {
-		t_def *df;
-
-		DoImport(ForwDef(idlist, sc), CurrentScope);
-		df = lookup(idlist->nd_def, CurrentScope, 0);
-		df->df_flags |= D_EXPORTED;
+		DoImport(ForwDef(idlist, sc), CurrentScope, D_IMPORT);
 	}
 }

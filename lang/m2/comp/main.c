@@ -168,8 +168,10 @@ static struct stdproc {
 	{ "DEC",	S_DEC },
 	{ "INC",	S_INC },
 	{ "VAL",	S_VAL },
+#ifndef STRICT_3RD_ED
 	{ "NEW",	S_NEW },
 	{ "DISPOSE",	S_DISPOSE },
+#endif
 	{ "TRUNC",	S_TRUNC },
 	{ "SIZE",	S_SIZE },
 	{ "ORD",	S_ORD },

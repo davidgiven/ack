@@ -250,7 +250,7 @@ qualified_type(nd)
 {
 	register t_def *df;
 
-	if (ChkDesignator(nd)) {
+	if (ChkDesig(nd, D_USED)) {
 		if (nd->nd_class != Def) {
 			node_error(nd, "type expected");
 			FreeNode(nd);
@@ -606,7 +606,7 @@ type_or_forward(ptp)
 	register t_node *nd;
 	register t_def *df, *df1;
 
-	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1))) {
+	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1, D_USED))) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
@@ -618,7 +618,7 @@ type_or_forward(ptp)
 		return 1;
 	}
 	nd = dot2leaf(0);
-	if ((df1 = lookfor(nd, CurrVis, 0))->df_kind == D_MODULE) {
+	if ((df1 = lookfor(nd, CurrVis, 0, D_USED))->df_kind == D_MODULE) {
 		/* A Modulename in one of the enclosing scopes.
 		   It is not clear from the language definition that
 		   it is correct to handle these like this, but

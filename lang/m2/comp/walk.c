@@ -37,6 +37,7 @@
 #include	"idf.h"
 #include	"chk_expr.h"
 #include	"walk.h"
+#include	"misc.h"
 #include	"warning.h"
 
 extern arith		NewPtr();
@@ -767,7 +768,6 @@ DoForInit(nd)
 	  if (!TstCompat(df->df_type, tpl) ||
 	      !TstCompat(df->df_type, tpr)) {
 node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
-		node_error(nd, "compatibility required in FOR statement");
 	  }
 	} else
 #endif
@@ -851,11 +851,27 @@ static int
 UseWarnings(df)
 	register t_def *df;
 {
-	if (df->df_kind & (D_IMPORT | D_VARIABLE | D_PROCEDURE)) {
+	if (is_anon_idf(df->df_idf)) return;
+	if (df->df_kind & (D_IMPORTED | D_VARIABLE | D_PROCEDURE)) {
 		struct node *nd;
 
 		if (df->df_flags & (D_EXPORTED | D_QEXPORTED)) return;
-		if (df->df_kind == D_IMPORT) df = df->imp_def;
+		if (df->df_kind & D_IMPORTED) {
+			register t_def *df1 = df->imp_def;
+
+			df1->df_flags |= df->df_flags & (D_USED|D_DEFINED);
+			if (df->df_kind == D_IMPORT) {
+				if (! (df->df_flags & (D_USED | D_DEFINED))) {
+					node_warning(
+						df->df_scope->sc_end,
+						W_ORDINARY,
+						"identifier \"%s\" imported but not used/assigned",
+						df->df_idf->id_text);
+				}
+				return;
+			}
+			df = df1;
+		}
 		if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE))) return;
 		nd = df->df_scope->sc_end;
 		if (! (df->df_flags & D_DEFINED)) {
