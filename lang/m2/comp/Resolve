@@ -15,6 +15,9 @@ main)	target=$currdir/$1
 omain)	target=$currdir/$1
 	options=-DPEEPHOLE
 	;;
+cemain)	target=$currdir/$1
+	options=-DCODE_EXPANDER
+	;;
 Xlint)	target=$1
 	;;
 *)	echo "$0: $1: Illegal argument" 1>&2
