@@ -6,23 +6,23 @@
 
 #include	<stdlib.h>
 
-extern char **environ;
+extern const char **environ;
 
 char *
 getenv(const char *name)
 {
-	register char **v = environ;
-	register char *p, *q;
+	register const char **v = environ;
+	register const char *p, *q;
 
-	if (v == (char **)NULL || name == (char *)NULL)
+	if (v == NULL || name == NULL)
 		return (char *)NULL;
-	while ((p = *v++) != (char *)NULL) {
+	while ((p = *v++) != NULL) {
 		q = name;
 		while (*q && (*q++ == *p++))
 			/* EMPTY */ ;
 		if (*q || (*p != '='))
 			continue;
-		return(p+1);
+		return (char *)p + 1;
 	}
-	return((char *)NULL);
+	return (char *)NULL;
 }

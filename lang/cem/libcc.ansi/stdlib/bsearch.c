@@ -11,18 +11,18 @@ bsearch(register const void *key, register const void *base,
 	register size_t nmemb, register size_t size,
 	int (*compar)(const void *, const void *))
 {
-	register void *mid_point;
+	register const void *mid_point;
 	register int  cmp;
 
 	while (nmemb > 0) {
-		mid_point = base + size * (nmemb >> 1);
+		mid_point = (char *)base + size * (nmemb >> 1);
 		if ((cmp = (*compar)(key, mid_point)) == 0)
-			return(mid_point);
+			return (void *)mid_point;
 		if (cmp >= 0) {
-			base  = mid_point + size;
+			base  = (char *)mid_point + size;
 			nmemb = (nmemb - 1) >> 1;
 		} else
 			nmemb >>= 1;
 	}
-	return((void *)NULL);
+	return (void *)NULL;
 }

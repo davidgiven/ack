@@ -6,24 +6,24 @@
 
 #include	<stdlib.h>
 
-static	void qsort1(void *, void *, size_t);
-static	int (*qcompar)(const void *, const void *);
-static	void qexchange(void *, void *, size_t);
-static	void q3exchange(void *, void *, void *, size_t);
+static	void qsort1(char *, char *, size_t);
+static	int (*qcompar)(const char *, const char *);
+static	void qexchange(char *, char *, size_t);
+static	void q3exchange(char *, char *, char *, size_t);
 
 void
 qsort(void *base, size_t nel, size_t width,
       int (*compar)(const void *, const void *))
 {
-	qcompar = compar;
-	qsort1(base, base + (nel - 1) * width, width);
+	qcompar = (int (*)(const char *, const char *)) compar;
+	qsort1(base, (char *)base + (nel - 1) * width, width);
 }
 
 static void
-qsort1(void *a1, void *a2, register size_t width)
+qsort1(char *a1, char *a2, register size_t width)
 {
-	register const void *left, *right;
-	register const void *lefteq, *righteq;
+	register char *left, *right;
+	register char *lefteq, *righteq;
 	int cmp;
 
 	for (;;) {
@@ -110,7 +110,7 @@ again:
 }
 
 static void
-qexchange(register void *p, register void *q,
+qexchange(register char *p, register char *q,
 	  register size_t n)
 {
 	register int c;
@@ -123,7 +123,7 @@ qexchange(register void *p, register void *q,
 }
 
 static void
-q3exchange(register void *p, register void *q, register void *r,
+q3exchange(register char *p, register char *q, register char *r,
 	   register size_t n)
 {
 	register int c;

@@ -4,39 +4,32 @@
  */
 /* $Header$ */
 
+#include	<stdio.h>
 #include	<stdlib.h>
 
 #define	NEXITS	32
 
-static void (*functab[NEXITS])(void);
-static int funccnt = 0;
+void (*__functab[NEXITS])(void);
+int __funccnt = 0;
 
-extern void _cleanup(void);
 extern void _exit(int);
+/* only fflush when there is output */
+int (*_fflush)(FILE *stream) = NULL;
 
 static void
 _calls(void)
 {
-	register int i = funccnt;
+	register int i = __funccnt;
 	
 	/* "Called in reversed order of their registration" */
 	while (--i >= 0)
-		(*functab[i])();
+		(*__functab[i])();
 }
 
 void
 exit(int status)
 {
 	_calls();
-	_cleanup() ;
+	if (_fflush) _fflush((FILE *)NULL) ;
 	_exit(status) ;
-}
-
-int
-atexit(void (*func)(void))
-{
-	if (funccnt >= NEXITS)
-		return 1;
-	functab[funccnt++] = func;
-	return 0;
 }

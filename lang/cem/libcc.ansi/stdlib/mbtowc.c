@@ -8,15 +8,11 @@
 #include	<limits.h>
 
 int
-mbtowc(register wchar_t *pwc, register const char *s, size_t n)
+mbtowc(wchar_t *pwc, register const char *s, size_t n)
 {
-	if (s == (char *)NULL)
-		return 0;
-	if (*s == '\0')
-		return 0;
-	if (n < 1 || n > MB_CUR_MAX)
-		return -1;
-	if (pwc != (wchar_t *)NULL)
-		*pwc = *s;
-	return MB_CUR_MAX;
+	if (s == (const char *)NULL) return 0;
+	if (*s == '\0') return 0;
+	if (n <= 0) return 0;
+	if (pwc) *pwc = *s;
+	return (*s != 0);
 }

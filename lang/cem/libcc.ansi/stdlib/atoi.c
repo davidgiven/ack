@@ -5,9 +5,14 @@
 /* $Header$ */
 
 #include	<stdlib.h>
+#include	<errno.h>
 
 int
 atoi(const char *nptr)
 {
-	return (int)strtol(nptr, (char **)NULL, 10);
+	int i, e = errno;
+
+	i = (int)strtol(nptr, (char **)NULL, 10);
+	errno = e;
+	return i;
 }

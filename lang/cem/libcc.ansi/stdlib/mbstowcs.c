@@ -5,20 +5,16 @@
 /* $Header$ */
 
 #include	<stdlib.h>
-#include	<locale.h>
-#include	<limits.h>
 
 size_t
 mbstowcs(register wchar_t *pwcs, register const char *s, size_t n)
 {
-	register int i = 0;
+	register int i = n;
 
-	while (i < n) {
-		i++;
-		*pwcs++ = *s++;
-		if (*s == '\0')
-			return i;
+	while (--i >= 0) {
+		if (!(*pwcs++ = *s++))
+			return n - i - 1;
 	}
-	return n;
+	return n - i;
 }
 

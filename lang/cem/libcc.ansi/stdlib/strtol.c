@@ -4,50 +4,95 @@
  */
 /* $Header$ */
 
-#include	<stdlib.h>
 #include	<ctype.h>
+#include	<errno.h>
+#include	<limits.h>
+#include	<stdlib.h>
+
+static unsigned long
+string2long(register const char *nptr, char **endptr,
+			int base, int is_signed);
 
 long int
-strtol(register const char *p, char **pp, int base)
+strtol(register const char *nptr, char **endptr, int base)
 {
-	register long val, v;
-	register int c;
-	int sign = 1;
-
-	if (pp) *pp = p;
-	while (isspace(*p)) p++;
-	c = *p;
-
-	switch (c) {
-	case '-':
-		sign = -1;
-		/* fallthrough */
-	case '+':
-		p++;
-	}
-
-	/* this is bizare */
-	if (base==16 && *p=='0' && (*(p+1)=='x' || *(p+1)=='X'))
-		p += 2;
-
-	while (isdigit(c = *p++) || isalpha(c)) {
-		if (isalpha(c))
-			v = 10 + (isupper(c) ? c - 'A' : c - 'a');
-		else
-			v = c - '0';
-		if (v >= base) {
-			p--;
-			break;
-		}
-		val = (val * base) + v;
-	}
-	if (pp) *pp = p-1;
-	return sign * val;
+	return (signed long)string2long(nptr, endptr, base, 1);
 }
 
-
 unsigned long int
-strtoul(register const char *p, char **pp, int base)
+strtoul(register const char *nptr, char **endptr, int base)
 {
-	return (unsigned long)strtol(p, pp, base);
+	return (unsigned long)string2long(nptr, endptr, base, 0);
+}
+
+static unsigned long
+string2long(register const char *nptr, char ** const endptr,
+			int base, int is_signed)
+{
+	register int v;
+	register unsigned long val = 0;
+	register int c;
+	int ovfl = 0, sign = 1;
+	const char *startnptr = nptr, *nrstart;
+
+	if (endptr) *endptr = (char *)nptr;
+	while (isspace(*nptr)) nptr++;
+	c = *nptr;
+
+	if (c == '-' || c == '+') {
+		if (c == '-') sign = -1;
+		nptr++;
+	}
+	nrstart = nptr;			/* start of the number */
+
+	/* When base is 0, the syntax determines the actual base */
+	if (base == 0)
+		if (*nptr == '0')
+			if (*++nptr == 'x' || *nptr == 'X') {
+				base = 16;
+				nptr++;
+			}
+			else	base = 8;
+		else	base = 10;
+	else if (base==16 && *nptr=='0' && (*++nptr =='x' || *nptr =='X'))
+		nptr++;
+
+	while (isdigit(c = *nptr) || isalpha(c)) {
+		if (!ovfl) {
+			if (isalpha(c))
+				v = 10 + (isupper(c) ? c - 'A' : c - 'a');
+			else
+				v = c - '0';
+			if (v >= base) break;
+			if (val > (ULONG_MAX - v) / base) ovfl++;
+			val = (val * base) + v;
+		}
+		nptr++;
+	}
+	if (endptr) {
+		if (nrstart == nptr) *endptr = (char *)startnptr;
+		else *endptr = (char *)nptr;
+	}
+
+	/* We can't represent a negative unsigned long, nor a long that
+	 * is smaller than LONG_MIN or larger than LONG_MAX.
+	 */
+	if (!ovfl) {
+		if (!is_signed)
+			if (sign < 0 && val != 0)
+				ovfl++;
+			else if (((sign < 0 && val > -LONG_MIN)
+				    || (sign > 0 && val > LONG_MAX)))
+				ovfl++;
+	}
+
+	if (ovfl) {
+		errno = ERANGE;
+		if (is_signed)
+			if (sign < 0) return LONG_MIN;
+			else return LONG_MAX;
+		else return ULONG_MAX;
+	}
+	if (is_signed)	return (unsigned long) sign * val;
+	else return val;
 }

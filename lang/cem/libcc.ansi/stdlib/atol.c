@@ -5,9 +5,15 @@
 /* $Header$ */
 
 #include	<stdlib.h>
+#include	<errno.h>
 
 long
 atol(const char *nptr)
 {
-	return strtol(nptr, (char **)NULL, 10);
+	long l;
+	int e = errno;
+
+	l = strtol(nptr, (char **)NULL, 10);
+	errno = e;
+	return l;
 }

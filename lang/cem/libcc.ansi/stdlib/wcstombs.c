@@ -11,13 +11,11 @@
 size_t
 wcstombs(register char *s, register const wchar_t *pwcs, size_t n)
 {
-	register int i = 0;
+	register int i = n;
 
-	while (i < n) {
-		i++;
-		*s++ = *pwcs++;
-		if (*s == '\0')
-			return i;
+	while (--i >= 0) {
+		if (!(*s++ = *pwcs))
+			return n - i - 1;
 	}
-	return n;
+	return n - i;
 }

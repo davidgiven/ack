@@ -7,14 +7,12 @@
 #include	<stdlib.h>
 #include	<limits.h>
 
+#define	CHAR_SHIFT	8
+
 int
 mblen(const char *s, size_t n)
 {
-	if (s == (char *)NULL)
-		return 0;
-	if (*s == '\0')
-		return 0;
-	if (n < 1 || n > MB_CUR_MAX)
-		return -1;
-	return MB_LEN_MAX;
+	if (s == (const char *)NULL) return 0;	/* no state dependent codings */
+	if (n <= 0) return 0;
+	return (*s != 0);
 }

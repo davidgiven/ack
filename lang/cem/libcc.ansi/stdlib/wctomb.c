@@ -10,10 +10,8 @@
 int
 wctomb(char *s, wchar_t wchar)
 {
-	if (s != (char *)NULL) {
-		*s = wchar;
-		return MB_LEN_MAX;
-	} else
-		return 0;
-}
+	if (!s) return 0;		/* no state dependent codings */
 
+	*s = wchar;
+	return (wchar != 0);
+}
