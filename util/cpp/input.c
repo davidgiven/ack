@@ -41,7 +41,7 @@ int	InputLevel;
 
 AtEoIT()
 {
-	if (NoUnstack) warning("unexpected EOF");
+	/* if (NoUnstack) warning("unexpected EOF"); ??? */
 	InputLevel--;
 	DoUnstack();
 	return 0;
