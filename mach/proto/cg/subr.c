@@ -519,15 +519,15 @@ c3_p findcoerc(tp,tep) token_p tp; set_p tep; {
 }
 
 
-error(s,a1,a2,a3,a4) char *s; {
+error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
-	fatal(s,a1,a2,a3,a4);
+	fatal(s,a1,a2,a3,a4,a5,a6,a7,a8);
 }
 
-fatal(s,a1,a2,a3,a4) char *s; {
+fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
 	fprintf(stderr,"Error: ");
-	fprintf(stderr,s,a1,a2,a3,a4);
+	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
 	fprintf(stderr,"\n");
 	out_finish();
 	abort();
