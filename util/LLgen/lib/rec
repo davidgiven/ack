@@ -57,6 +57,7 @@ LLerror(t) {
 
 #ifdef LL_NEWMESS
 	if (t == EOFILE) {
+		while ((LLsymb = LL_LEXI()) > 0) /* nothing */ ;
 		LLmessage(-1);
 		return;
 	}
