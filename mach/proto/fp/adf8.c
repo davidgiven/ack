@@ -16,7 +16,6 @@ adf8(s2,s1)
 _double	s1,s2;
 {
 	EXTEND	e1,e2;
-	int	swap;
 
 	if (s1.__double[0] == 0 && s1.__double[1] == 0) {
 		s1 = s2;
@@ -28,28 +27,7 @@ _double	s1,s2;
 
 	extend(&s1,&e1,sizeof(_double));
 	extend(&s2,&e2,sizeof(_double));
-			/* adjust mantissas to equal powers */
-	if (e1.sign ^ e2.sign)	{ /* signs are different */
-			/* determine which is largest number	*/
-		swap = (e2.exp >  e1.exp) ? 1 : (e2.exp < e1.exp) ? 0 :
-		       (e2.m1  >  e1.m1 ) ? 1 : (e2.m1  < e1.m1 ) ? 0 :
-		       (e2.m2  >  e1.m2 ) ? 1 : 0;
-			/* adjust mantissas to equal powers */
-		sft_ext(&e1,&e2);
-			/* subtract the extended formats	*/
-		if (swap)	{	/* &e2 is the largest number */
-			sub_ext(&e2,&e1);
-			e1 = e2;
-		}
-		else	{
-			sub_ext(&e1,&e2);
-		}
-	}
-	else	{
-			/* adjust mantissas to equal powers */
-		sft_ext(&e1,&e2);
-		add_ext(&e1,&e2);
-	}
+	add_ext(&e1,&e2);
 	compact(&e1,&s1,sizeof(_double));
 	return(s1);
 }

@@ -17,13 +17,6 @@
 nrm_ext(e1)
 EXTEND	*e1;
 {
-	register unsigned long	*mant_1;
-	register unsigned long	*mant_2;
-
-	/* local CAST conversion	*/
-	mant_1 = (unsigned long *) &e1->m1;
-	mant_2 = (unsigned long *) &e1->m2;
-
 		/* we assume that the mantissa != 0	*/
 		/* if it is then just return		*/
 		/* to let it be a problem elsewhere	*/
@@ -32,24 +25,25 @@ EXTEND	*e1;
 		/* infinite loop is generated when	*/
 		/* mantissa is zero			*/
 
-	if ((*mant_1 | *mant_2) == 0L)
+	if ((e1->m1 | e1->m2) == 0L)
 		return;
 
 		/* if top word is zero mov low word	*/
 		/* to top word, adjust exponent value	*/
-	if (*mant_1 == 0L)	{
-		*mant_1++ = e1->m2;
-		*mant_1-- = 0L;
+	if (e1->m1 == 0L)	{
+		e1->m1 = e1->m2;
+		e1->m2 = 0L;
 		e1->exp -= 32;
 	}
-	while ((*mant_1 & NORMBIT) == 0) {
-		e1->exp--;
-		*mant_1 <<= 1;
-		if ((*mant_2 & CARRYBIT) == 0)
-				;	/* empty statement */
-		else	{
-			*mant_1 += 1;
+	if ((e1->m1 & NORMBIT) == 0) {
+		unsigned long l = ((unsigned long)NORMBIT >> 1);
+		int cnt = -1;
+
+		while (! (l & e1->m1)) {
+			l >>= 1;
+			cnt--;
 		}
-		*mant_2 <<= 1;
+		e1->exp += cnt;
+		b64_sft(&(e1->m1), cnt);
 	}
 }

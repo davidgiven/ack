@@ -8,21 +8,44 @@
 /*
 	SUBTRACT 2 EXTENDED FORMAT NUMBERS
 */
-        /*
-         * adf (addition routines) use this rather than
-         * add_ext when the signs of the numbers are different.
-         * sub_ext requires that e1 >= e2 on entry
-         * otherwise nonsense results. If you use this routine
-         * make certain this requirement is met.
-         */
 
 #include "FP_types.h"
 sub_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-	if (e2->m2 > e1->m2)
-		e1->m1 -= 1;	/* carry in */
-	e1->m1 -= e2->m1;
-	e1->m2 -= e2->m2;
+	if ((e2->m1 | e2->m2) == 0L) {
+		return;
+	}
+	if ((e1->m1 | e1->m2) == 0L) {
+		*e1 = *e2;
+		e1->sign = e2->sign ? 0 : 1;
+		return;
+	}
+	sft_ext(e1, e2);
+	if (e1->sign != e2->sign) {
+		/* e1 - e2 = e1 + (-e2) */
+		if (b64_add(&e1->m1,&e2->m1)) { /* addition carry */
+                	b64_rsft(&e1->m1);      /* shift mantissa one bit RIGHT */
+                	e1->m1 |= 0x80000000L;  /* set max bit  */
+                	e1->exp++;              /* increase the exponent */
+        	}
+	}
+        else if (e2->m1 > e1->m1 ||
+                 (e2->m1 == e1->m1 && e2->m2 > e1->m2)) {
+		/*	abs(e2) > abs(e1) */
+		if (e1->m2 > e2->m2) {
+			e2->m1 -= 1;	/* carry in */
+		}
+		e2->m1 -= e1->m1;
+		e2->m2 -= e1->m2;
+		*e1 = *e2;
+		e1->sign = e2->sign ? 0 : 1;
+	}
+	else {
+		if (e2->m2 > e1->m2)
+			e1->m1 -= 1;	/* carry in */
+		e1->m1 -= e2->m1;
+		e1->m2 -= e2->m2;
+	}
 	nrm_ext(e1);
 }

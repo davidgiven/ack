@@ -8,6 +8,7 @@
 /*
 	SHIFT TWO EXTENDED NUMBERS INTO PROPER
 	ALIGNMENT FOR ADDITION (exponents are equal)
+	Numbers should not be zero on entry.
 */
 
 #include "FP_types.h"
@@ -17,7 +18,6 @@ EXTEND	*e1,*e2;
 {
 	register	EXTEND	*s;
 	register	int	diff;
-			long	tmp;
 
 	diff = e1->exp - e2->exp;
 
@@ -34,27 +34,5 @@ EXTEND	*e1,*e2;
 		s = e2;
 
 	s->exp += diff;
-
-	if (diff > 63)	{	/* no relative value */
-		s->m1 = 0L;
-		s->m2 = 0L;
-		return;
-	}
-
-	if (diff > 32)	{
-		diff -= 32;
-		s->m2 = s->m1;
-		s->m1 = 0L;
-	}
-	if (diff)	{
-		if (s->m1)	{
-			tmp = s->m1;
-			tmp <<= (32-diff);
-			s->m1 >>= diff;
-		}
-		else
-			tmp = 0L;
-		s->m2 >>= diff;
-		s->m2 |= tmp;
-	}
+	b64_sft(&(s->m1), diff);
 }
