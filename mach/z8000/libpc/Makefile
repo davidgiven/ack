@@ -1,4 +1,4 @@
-MAKEFILE=Makef.pr.l
+MAKEFILE=../../proto/libg/Makefile
 MACHDEF="MACH=z8000" "SUF=s"
 PCDEF="PREF=pc" "SUB=" "SRC=lang/pc/libpc"
 
