@@ -525,7 +525,7 @@ WalkStat(nd, exit_label)
 	case FOR:
 		{
 			arith tmp = NewInt();
-			arith tmp2 = 0;
+			arith tmp2 = NewInt();
 			register t_node *fnd;
 			int good_forvar;
 			label l1 = ++text_label;
@@ -548,11 +548,13 @@ WalkStat(nd, exit_label)
 				C_stl(tmp);
 				CodePExpr(left->nd_left);
 				C_dup(int_size);
-				CodeDStore(nd);
+				C_stl(tmp2);
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
 				C_zgt(l2);
+				C_lol(tmp2);
+				CodeDStore(nd);
 				C_lol(tmp);
 				ForLoopVarExpr(nd);
 				if (left->nd_INT >= 0) {
@@ -570,13 +572,12 @@ WalkStat(nd, exit_label)
 				nd->nd_def->df_flags |= D_FORLOOP;
 				def_ilb(l1);
 				if (! options['R']) {
-					tmp2 = NewInt();
 					ForLoopVarExpr(nd);
 					C_stl(tmp2);
 				}
 				WalkNode(right, exit_label);
 				nd->nd_def->df_flags &= ~D_FORLOOP;
-				if (tmp2 != 0) {
+				if (! options['R']) {
 					label x = ++text_label;
 					C_lol(tmp2);
 					ForLoopVarExpr(nd);
@@ -584,8 +585,8 @@ WalkStat(nd, exit_label)
 					c_loc(M2_FORCH);
 					C_trp();
 					def_ilb(x);
-					FreeInt(tmp2);
 				}
+				FreeInt(tmp2);
 				if (stepsize) {
 					C_lol(tmp);
 					C_zeq(l2);
