@@ -233,6 +233,20 @@ CheckForLineDirective()
 	LineNumber = i;
 }
 
+STATIC
+CheckForLet()
+{
+	register int ch;
+
+	LoadChar(ch);
+	if (ch != EOI) {
+		if (class(ch) == STIDF) {
+			lexerror("token separator required between identifier and number");
+		}
+		PushBack();
+	}
+}
+
 int
 LLlex()
 {
@@ -507,6 +521,7 @@ again:
 					    tk->TOK_INT < 0) {
 lexwarning(W_ORDINARY, "character constant out of range");
 					}
+					CheckForLet();
 					return tk->tk_symb = INTEGER;
 				}
 				if (ch == 'D' && base == 10) {
@@ -528,6 +543,7 @@ lexwarning(W_ORDINARY, "character constant out of range");
 				}
 				if (ovfl)
 lexwarning(W_ORDINARY, "overflow in constant");
+				CheckForLet();
 				return tk->tk_symb = INTEGER;
 				}
 
@@ -602,6 +618,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 			lexerror("real constant too long");
 		}
 		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;
+		CheckForLet();
 		return tk->tk_symb = REAL;
 
 		/*NOTREACHED*/
