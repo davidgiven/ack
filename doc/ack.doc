@@ -391,7 +391,11 @@ var p=2	# pointersize 2
 var s=2	# short size 2
 var l=4	# long size 4
 var f=4	# float size 4
-var d=8	# douã⁄XY¬H»\ùŸàö[Hòe startoff
+var d=8	# double size 8
+var M=int	# Unused in this example
+var NAME=int22	# for cpp (NAME=int results in #define int 1)
+var LIB=mach/int/lib/tail_	# part of file name for libraries
+var RT=mach/int/lib/head_	# part of file name for run-time startoff
 var SIZE_FLAG=\-sm	# default internal table size flag
 var INCLUDES=\-I{EM}/include	# use {EM}/include for #include files
 name asld	# Assembler/loader
