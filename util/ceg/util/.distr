@@ -1,4 +1,4 @@
-Makefile
+proto.make
 install_ceg
 make_asobj
 make_back
