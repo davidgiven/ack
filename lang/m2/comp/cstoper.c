@@ -39,6 +39,9 @@ cstunary(expp)
 		break;
 	case '-':
 		o1 = -o1;
+		if (expp->nd_type->tp_fund == T_INTORCARD) {
+			expp->nd_type = int_type;
+		}
 		break;
 	case NOT:
 	case '~':
@@ -149,6 +152,9 @@ cstbin(expp)
 
 	case '-':
 		o1 -= o2;
+		if (expp->nd_type->tp_fund == T_INTORCARD) {
+			if (o1 < 0) expp->nd_type = int_type;
+		}
 		break;
 
 	case '<':

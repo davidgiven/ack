@@ -390,11 +390,12 @@ idn->nd_IDF->id_text);
 			else if (!(df = lookup(ids->nd_IDF, vis->sc_scope))) {
 node_error(ids, "identifier \"%s\" not declared in qualifying module",
 ids->nd_IDF->id_text);
-				df = ill_df;
+				df = define(ids->nd_IDF,vis->sc_scope,D_ERROR);
 			}
 			else if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
 node_error(ids,"identifier \"%s\" not exported from qualifying module",
 ids->nd_IDF->id_text);
+				df->df_flags |= D_QEXPORTED;
 			}
 		}
 		else {
@@ -459,9 +460,8 @@ DeclProc(type)
 		Also create a name for it.
 	*/
 	register struct def *df;
-	static int nmcount = 0;
-	extern char *strcpy();
 	extern char *sprint();
+	static int nmcount;
 	char buf[256];
 
 	assert(type & (D_PROCEDURE | D_PROCHEAD));
@@ -472,8 +472,7 @@ DeclProc(type)
 		df = define(dot.TOK_IDF, CurrentScope, type);
 		df->for_node = MkLeaf(Name, &dot);
 		sprint(buf,"%s_%s",CurrentScope->sc_name,df->df_idf->id_text);
-		df->for_name = Malloc((unsigned) (strlen(buf)+1));
-		strcpy(df->for_name, buf);
+		df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
 		C_exp(df->for_name);
 		open_scope(OPENSCOPE);
 	}
@@ -491,16 +490,11 @@ DeclProc(type)
 		}
 		else {
 			df = define(dot.TOK_IDF, CurrentScope, type);
-			if (CurrVis != Defined->mod_vis) {
-				sprint(buf, "_%d_%s", ++nmcount,
-					df->df_idf->id_text);
-			}
-			else	sprint(buf, "%s_%s",CurrentScope->sc_name,
-						df->df_idf->id_text);
 			open_scope(OPENSCOPE);
 			df->prc_vis = CurrVis;
-			CurrentScope->sc_name = Malloc((unsigned)(strlen(buf)+1));
-			strcpy(CurrentScope->sc_name, buf);
+			sprint(buf,"_%d_%s",++nmcount,df->df_idf->id_text);
+			CurrentScope->sc_name = 
+				Salloc(buf, (unsigned)(strlen(buf)+1));
 			C_inp(buf);
 		}
 	}

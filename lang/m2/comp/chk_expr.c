@@ -68,14 +68,33 @@ chk_expr(expp)
 	case Xset:
 		return chk_set(expp);
 
+	case Link:
 	case Name:
-		return chk_designator(expp, VALUE, D_USED);
+		if (chk_designator(expp, VALUE|DESIGNATOR, D_USED)) {
+			if (expp->nd_class == Def &&
+			    expp->nd_def->df_kind == D_PROCEDURE) {
+				/* Check that this procedure is one that we
+				   may take the address from.
+				*/
+				if (expp->nd_def->df_type == std_type) {
+					/* Standard procedure. Illegal */
+node_error(expp, "address of standard procedure taken");
+					return 0;
+				}
+				if (expp->nd_def->df_scope->sc_level > 0) {
+					/* Address of nested procedure taken.
+					   Illegal.
+					*/
+node_error(expp, "address of a procedure local to another one taken");
+					return 0;
+				}
+			}
+			return 1;
+		}
+		return 0;
 
 	case Call:
 		return chk_call(expp);
-
-	case Link:
-		return chk_designator(expp, DESIGNATOR|VALUE, D_USED|D_NOREG);
 
 	default:
 		crash("(chk_expr)");
@@ -312,7 +331,6 @@ chk_call(expp)
 		it may also be a cast or a standard procedure call.
 	*/
 	register struct node *left;
-	register struct node *arg;
 
 	/* First, get the name of the function or procedure
 	*/
@@ -340,7 +358,8 @@ chk_call(expp)
 		*/
 		return chk_proccall(expp);
 	}
-	node_error(expp->nd_left, "procedure, type, or function expected");
+
+	node_error(left, "procedure, type, or function expected");
 	return 0;
 }
 
@@ -420,7 +439,7 @@ FlagCheck(expp, df, flag)
 	}
 
 	if ((flag & VALUE) &&
-	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_CONST|D_ENUM)))) {
+	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_CONST|D_ENUM|D_PROCEDURE)))) {
 		node_error(expp, "value expected");
 		return 0;
 	}
@@ -584,6 +603,62 @@ symbol2str(expp->nd_symb));
 	return 0;
 }
 
+struct type *
+ResultOfOperation(operator, tp)
+	struct type *tp;
+{
+	switch(operator) {
+	case '=':
+	case '#':
+	case GREATEREQUAL:
+	case LESSEQUAL:
+	case '<':
+	case '>':
+	case IN:
+		return bool_type;
+	}
+
+	return tp;
+}
+
+int
+Boolean(operator)
+{
+	return operator == OR || operator == AND || operator == '&';
+}
+
+int
+AllowedTypes(operator)
+{
+	switch(operator) {
+	case '+':
+	case '-':
+	case '*':
+		return T_NUMERIC|T_SET;
+	case '/':
+		return T_REAL|T_SET;
+	case DIV:
+	case MOD:
+		return T_INTORCARD;
+	case OR:
+	case AND:
+	case '&':
+		return T_ENUMERATION;
+	case '=':
+	case '#':
+		return T_POINTER|T_HIDDEN|T_SET|T_NUMERIC|T_ENUMERATION|T_CHAR;
+	case GREATEREQUAL:
+	case LESSEQUAL:
+		return T_SET|T_NUMERIC|T_CHAR|T_ENUMERATION;
+	case '<':
+	case '>':
+		return T_NUMERIC|T_CHAR|T_ENUMERATION;
+	default:
+		crash("(AllowedTypes)");
+	}
+	/*NOTREACHED*/
+}
+
 int
 chk_oper(expp)
 	register struct node *expp;
@@ -594,8 +669,11 @@ chk_oper(expp)
 	register struct node *right = expp->nd_right;
 	struct type *tpl = left->nd_type;
 	struct type *tpr = right->nd_type;
-	int errval = 1;
-	
+	int allowed;
+
+	if (tpl->tp_fund == T_SUBRANGE) tpl = tpl->next;
+	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
+
 	if (tpl == intorcard_type) {
 		if (tpr == int_type || tpr == card_type) {
 			 left->nd_type = tpl = tpr;
@@ -606,11 +684,11 @@ chk_oper(expp)
 			right->nd_type = tpr = tpl;
 		}
 	}
-	expp->nd_type = error_type;
+
+	expp->nd_type = ResultOfOperation(expp->nd_symb, tpl);
 
 	if (expp->nd_symb == IN) {
 		/* Handle this one specially */
-		expp->nd_type = bool_type;
 		if (tpr->tp_fund != T_SET) {
 node_error(expp, "RHS of IN operator not a SET type");
 			return 0;
@@ -630,9 +708,6 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 		return 1;
 	}
 
-	if (tpl->tp_fund == T_SUBRANGE) tpl = tpl->next;
-	expp->nd_type = tpl;
-
 	/* Operands must be compatible (distilled from Def 8.2)
 	*/
 	if (!TstCompat(tpl, tpr)) {
@@ -641,128 +716,28 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 		return 0;
 	}
 
-	switch(expp->nd_symb) {
-	case '+':
-	case '-':
-	case '*':
-		switch(tpl->tp_fund) {
-		case T_POINTER:
-			if (! chk_address(tpl, tpr)) break;
-			/* Fall through */
-		case T_INTEGER:
-		case T_CARDINAL:
-		case T_INTORCARD:
-			if (left->nd_class==Value && right->nd_class==Value) {
-				cstbin(expp);
-			}
-			return 1;
-
-		case T_SET:
-			if (left->nd_class == Set && right->nd_class == Set) {
-				cstset(expp);
-			}
-			/* Fall through */
-
-		case T_REAL:
-			return 1;
+	allowed = AllowedTypes(expp->nd_symb);
+	if (!(tpl->tp_fund & allowed) || 
+	    (tpl != bool_type && Boolean(expp->nd_symb))) {
+		if (!(tpl->tp_fund == T_POINTER &&
+		      (T_CARDINAL & allowed) &&
+		      chk_address(tpl, tpr))) {
+node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+			return 0;
 		}
-		break;
-
-	case '/':
-		switch(tpl->tp_fund) {
-		case T_SET:
-			if (left->nd_class == Set && right->nd_class == Set) {
-				cstset(expp);
-			}
-			/* Fall through */
-
-		case T_REAL:
-			return 1;
-		}
-		break;
-
-	case DIV:
-	case MOD:
-		switch(tpl->tp_fund) {
-		case T_POINTER:
-			if (! chk_address(tpl, tpr)) break;
-			/* Fall through */
-		case T_INTEGER:
-		case T_CARDINAL:
-		case T_INTORCARD:
-			if (left->nd_class==Value && right->nd_class==Value) {
-				cstbin(expp);
-			}
-			return 1;
-		}
-		break;
-
-	case OR:
-	case AND:
-	case '&':
-		if (tpl == bool_type) {
-			if (left->nd_class==Value && right->nd_class==Value) {
-				cstbin(expp);
-			}
-			return 1;
-		}
-		errval = 3;
-		break;
-
-	case '=':
-	case '#':
-	case GREATEREQUAL:
-	case LESSEQUAL:
-	case '<':
-	case '>':
-		expp->nd_type = bool_type;
-		switch(tpl->tp_fund) {
-		case T_SET:
-			if (expp->nd_symb == '<' || expp->nd_symb == '>') {
-				break;
-			}
-			if (left->nd_class == Set && right->nd_class == Set) {
-				cstset(expp);
-			}
-			return 1;
-
-		case T_INTEGER:
-		case T_CARDINAL:
-		case T_ENUMERATION:	/* includes boolean */
-		case T_CHAR:
-		case T_INTORCARD:
-			if (left->nd_class==Value && right->nd_class==Value) {
-				cstbin(expp);
-			}
-			return 1;
-
-		case T_HIDDEN:
-		case T_POINTER:
-			if (chk_address(tpl, tpr) ||
-			    expp->nd_symb == '=' ||
-			    expp->nd_symb == '#') return 1;
-			break;
-
-		case T_REAL:
-			return 1;
-		}
-
-	default:
-		assert(0);
 	}
-	switch(errval) {
-	case 1:
-		node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
-		break;
 
-	case 3:
-		node_error(expp, "BOOLEAN type(s) expected");
-		break;
-
-	default:
-		assert(0);
+	if (tpl->tp_fund == T_SET) {
+	    	if (left->nd_class == Set && right->nd_class == Set) {
+			cstset(expp);
+		}
 	}
-	return 0;
+	else if ( tpl->tp_fund != T_REAL &&
+		  left->nd_class == Value && right->nd_class == Value) {
+		cstbin(expp);
+	}
+
+	return 1;
 }
 
 int

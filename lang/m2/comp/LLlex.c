@@ -29,7 +29,6 @@ struct token dot, aside;
 struct type *toktype;
 struct string string;
 int idfsize = IDFSIZE;
-extern label	data_label();
 
 static
 SkipComment()
@@ -51,21 +50,15 @@ SkipComment()
 			if (ch == '*') {
 				++NestLevel;
 			}
-			else {
-				continue;
-			}
+			else	continue;
 		}
 		else
 		if (ch == '*') {
 			LoadChar(ch);
 			if (ch == ')') {
-				if (NestLevel-- == 0) {
-					return;
-				}
+				if (NestLevel-- == 0) return;
 			}
-			else {
-				continue;
-			}
+			else	continue;
 		}
 		LoadChar(ch);
 	}
@@ -198,7 +191,7 @@ again:
 			return tk->tk_symb = ch;
 
 		default :
-			assert(0);
+			crash("(LLlex, STCOMP)");
 		}
 
 	case STIDF:
@@ -216,7 +209,6 @@ again:
 		*tg++ = '\0';
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
-		if (!id) fatal("Out of memory");
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;
 	}
 
@@ -413,7 +405,7 @@ Sdec:
 
 	case STCHAR:
 	default:
-		assert(0);
+		crash("(LLlex) Impossible character class");
 	}
 	/*NOTREACHED*/
 }

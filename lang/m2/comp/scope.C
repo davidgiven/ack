@@ -36,7 +36,7 @@ open_scope(scopetype)
 	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 
-	clear((char *) sc, sizeof (*sc));
+	clear((char *) sc, sizeof (struct scope));
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
 	sc->sc_level = proclevel;
 	if (scopetype == OPENSCOPE) {
@@ -48,7 +48,7 @@ open_scope(scopetype)
 	CurrVis = ls;
 }
 
-init_scope()
+InitScope()
 {
 	register struct scope *sc = new_scope();
 	register struct scopelist *ls = new_scopelist();

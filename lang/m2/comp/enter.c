@@ -118,7 +118,7 @@ EnterVarList(IdList, type, local)
 	register struct def *df;
 	register struct scopelist *sc;
 	char buf[256];
-	extern char *sprint(), *Malloc(), *strcpy();
+	extern char *sprint();
 
 	sc = CurrVis;
 
@@ -151,24 +151,12 @@ node_error(IdList->nd_left,"Illegal type for address");
 						type->tp_align);
 			df->var_off = sc->sc_scope->sc_off;
 		}
-		else if (!DefinitionModule && CurrVis != Defined->mod_vis) {	
-			/* variable list belongs to an internal global
-			   module.
-			   Align offset and add size
-			*/
-			sc->sc_scope->sc_off =
-				align(sc->sc_scope->sc_off, type->tp_align);
-			df->var_off = sc->sc_scope->sc_off;
-			df->var_name = 0;
-			sc->sc_scope->sc_off += type->tp_size;
-		}
 		else {
 			/* Global name, possibly external
 			*/
 			sprint(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
-			df->var_name = Malloc((unsigned)(strlen(buf)+1));
-			strcpy(df->var_name, buf);
+			df->var_name = Salloc(buf, (unsigned)(strlen(buf)+1));
 
  			if (DefinitionModule) {
 				C_exa_dnam(df->var_name);

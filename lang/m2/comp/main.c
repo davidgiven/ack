@@ -23,14 +23,15 @@ static char *RcsId = "$Header$";
 #include	"tokenname.h"
 #include	"node.h"
 
-int	state;			/* either IMPLEMENTATION or PROGRAM */
-char	options[128];
-int	DefinitionModule; 
-int	SYSTEMModule = 0;
-char	*ProgName;
-char	*DEFPATH[NDIRS+1];
-struct def *Defined;
-extern int err_occurred;
+int		state;			/* either IMPLEMENTATION or PROGRAM */
+char		options[128];
+int		DefinitionModule; 
+int		SYSTEMModule = 0;
+char		*ProgName;
+char		*DEFPATH[NDIRS+1];
+struct def 	*Defined;
+extern int 	err_occurred;
+extern int	fp_used;		/* set if floating point used */
 
 main(argc, argv)
 	char *argv[];
@@ -75,8 +76,8 @@ Compile(src, dst)
 	init_idf();
 	InitCst();
 	reserve(tkidf);
-	init_scope();
-	init_types();
+	InitScope();
+	InitTypes();
 	InitDef();
 	AddStandards();
 #ifdef DEBUG
@@ -94,12 +95,16 @@ Compile(src, dst)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CompUnit();
+	C_ms_src((arith) (LineNumber - 1), FileName);
 	close_scope(SC_REVERSE);
 	if (err_occurred) {
 		C_close();
 		return 0;
 	}
 	WalkModule(Defined);
+	if (fp_used) {
+		C_ms_flt();
+	}
 	C_close();
 #ifdef DEBUG
 	if (options['m']) MemUse();
@@ -210,15 +215,7 @@ END SYSTEM.\n";
 	}
 	SYSTEMModule = 1;
 	DefModule();
-	close_scope(0);
 	SYSTEMModule = 0;
-}
-
-AtEoIT()
-{
-	/*	Make the end of the text noticable
-	*/
-	return 1;
 }
 
 #ifdef DEBUG

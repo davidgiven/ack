@@ -49,7 +49,7 @@ ModuleDeclaration
 	struct node *nd;
 	struct node *exportlist = 0;
 	int qualified;
-	extern char *sprint(), *Malloc(), *strcpy();
+	extern char *sprint();
 } :
 	MODULE IDENT	{
 			  id = dot.TOK_IDF;
@@ -67,10 +67,9 @@ ModuleDeclaration
 
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
-			  sprint(buf, "__%d%s", ++modulecount, id->id_text);
+			  sprint(buf, "_%d%s", ++modulecount, id->id_text);
 			  CurrentScope->sc_name =
-				Malloc((unsigned) (strlen(buf) + 1));
-			  strcpy(CurrentScope->sc_name, buf);
+				Salloc(buf, (unsigned) (strlen(buf) + 1));
 			  if (! proclevel) C_ina_dnam(&buf[1]);
 			  C_inp(buf);
 			}
@@ -177,7 +176,7 @@ DefinitionModule
 				df->df_flags |= D_QEXPORTED;
 				df = df->df_nextinscope;
 			  }
-			  if (!SYSTEMModule) close_scope(SC_CHKFORW);
+			  close_scope(SC_CHKFORW);
 			  DefinitionModule--;
 			  match_id(id, dot.TOK_IDF);
 			}

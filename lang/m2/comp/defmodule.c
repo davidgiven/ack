@@ -31,11 +31,9 @@ GetFile(name)
 	char buf[256];
 	char *strcpy(), *strcat();
 
-	(void) strcpy(buf, name);
-	if (strlen(buf) > 10) {
-		(void) strcpy(&buf[10], ".def");
-	}
-	else	(void) strcat(buf, ".def");
+	strcpy(buf, name);
+	buf[10] = '\0';			/* maximum length */
+	strcat(buf, ".def");
 	if (! InsertFile(buf, DEFPATH, &(FileName))) {
 		fatal("Could'nt find a DEFINITION MODULE for \"%s\"", name);
 	}
@@ -79,12 +77,4 @@ GetDefinitionModule(id)
 	assert(df != 0 && df->df_kind == D_MODULE);
 	level--;
 	return df;
-}
-
-AtEoIF()
-{
-	/*	Make the unstacking of input streams noticable by the
-	   	lexical analyzer
-	*/
-	return 1;
 }

@@ -22,7 +22,6 @@ static char *RcsId = "$Header$";
 #include	"main.h"
 
 int		proclevel = 0;	/* nesting level of procedures */
-extern char	*sprint();
 }
 
 ProcedureDeclaration
@@ -566,23 +565,22 @@ ConstantDeclaration
 VariableDeclaration
 {
 	struct node *VarList;
+	register struct node *nd;
 	struct type *tp;
 } :
-	IdentAddrList(&VarList)
+	IdentAddr(&VarList)
+			{ nd = VarList; }
+	[
+		',' IdentAddr(&(nd->nd_right))
+			{ nd = nd->nd_right; }
+	]*
 	':' type(&tp)
 			{ EnterVarList(VarList, tp, proclevel > 0);
 			  FreeNode(VarList);
 			}
 ;
 
-IdentAddrList(struct node **pnd;)
-{
-} :
+IdentAddr(struct node **pnd;) :
 	IDENT		{ *pnd = MkLeaf(Name, &dot); }
-	ConstExpression(&(*pnd)->nd_left)?
-	[		{ pnd = &((*pnd)->nd_right); }
-		',' IDENT
-			{ *pnd = MkLeaf(Name, &dot); }
-		ConstExpression(&(*pnd)->nd_left)?
-	]*
+	ConstExpression(&((*pnd)->nd_left))?
 ;

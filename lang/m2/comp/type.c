@@ -153,7 +153,7 @@ standard_type(fund, align, size)
 	return tp;
 }
 
-init_types()
+InitTypes()
 {
 	/*	Initialize the predefined types
 	*/
@@ -434,7 +434,7 @@ ArrayElSize(tp)
 	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
 	algn = align(tp->tp_size, tp->tp_align);
 	if (!(algn % word_size == 0 || word_size % algn == 0)) {
-		algn = align(algn, word_size);
+		algn = align(algn, (int) word_size);
 	}
 	return algn;
 }

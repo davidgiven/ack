@@ -246,19 +246,6 @@ CodeVarDesig(df, ds)
 		df->df_flags |= D_NOREG;
 		return;
 	}
-	
-	if (sc->sc_level == 0) {
-		/* the variable is global, but declared in a module local
-		   to the implementation or program module.
-		   Such variables can be accessed through an offset from
-		   the name of the module.
-		*/
-		ds->dsg_name = &(sc->sc_name[1]);
-		ds->dsg_offset = df->var_off;
-		ds->dsg_kind = DSG_FIXED;
-		df->df_flags |= D_NOREG;
-		return;
-	}
 
 	if (sc->sc_level != proclevel) {
 		/* the variable is local to a statically enclosing procedure.
@@ -349,7 +336,7 @@ CodeDesig(nd, ds)
 
 			df = nd->nd_left->nd_def;
 			if (proclevel > df->df_scope->sc_level) {
-				C_lxa(proclevel - df->df_scope->sc_level);
+				C_lxa((arith) (proclevel - df->df_scope->sc_level));
 				C_adp(df->var_off + pointer_size);
 			}
 			else	C_lal(df->var_off + pointer_size);

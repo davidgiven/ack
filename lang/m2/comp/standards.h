@@ -22,7 +22,7 @@
 
 /* Standard procedures and functions defined in the SYSTEM module ... */
 
-#define S_ADR	20
-#define S_TSIZE	21
-#define S_NEWPROCESS	22
-#define S_TRANSFER	23
+#define S_ADR	50
+#define S_TSIZE	51
+#define S_NEWPROCESS	52
+#define S_TRANSFER	53

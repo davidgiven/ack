@@ -175,7 +175,6 @@ factor(struct node **p;)
 {
 	struct def *df;
 	struct node *nd;
-	register struct type *tp;
 } :
 	qualident(0, &df, (char *) 0, p)
 	[

@@ -27,6 +27,7 @@ extern label	text_label();
 extern char	*long2str();
 extern char	*symbol2str();
 extern int	proclevel;
+int		fp_used;
 
 CodeConst(cst, size)
 	arith cst, size;
@@ -43,7 +44,7 @@ CodeConst(cst, size)
 	}
 	else {
 		C_df_dlb(dlab = data_label());
-		C_rom_icon(long2str((long) cst), 10);
+		C_rom_icon(long2str((long) cst), size);
 		C_lae_dlb(dlab, (arith) 0);
 		C_loi(size);
 	}
@@ -59,7 +60,7 @@ CodeString(nd)
 	}
 	else {
 		C_df_dlb(lab = data_label());
-		C_rom_scon(nd->nd_STR, align(nd->nd_SLE + 1, word_size));
+		C_rom_scon(nd->nd_STR, align(nd->nd_SLE + 1, (int) word_size));
 		C_lae_dlb(lab, (arith) 0);
 	}
 }
@@ -80,11 +81,8 @@ CodePadString(nd, sz)
 		assert(sizearg < sz);
 		C_zer(sz - sizearg);
 	}
-	C_asp(-sizearg);	/* room for string */
 	CodeString(nd);		/* push address of string */
-	C_lor((arith) 1);	/* load stack pointer */
-	C_adp(pointer_size);	/* and compute target address from it */
-	C_blm(sizearg);		/* and copy */
+	C_loi(sizearg);
 }
 
 CodeReal(nd)
@@ -103,7 +101,9 @@ CodeExpr(nd, ds, true_label, false_label)
 	register struct desig *ds;
 	label true_label, false_label;
 {
+	register struct type *tp = nd->nd_type;
 
+	if (tp->tp_fund == T_REAL) fp_used = 1;
 	switch(nd->nd_class) {
 	case Def:
 		if (nd->nd_def->df_kind == D_PROCEDURE) {
@@ -147,7 +147,7 @@ CodeExpr(nd, ds, true_label, false_label)
 			CodeString(nd);
 			break;
 		case INTEGER:
-			CodeConst(nd->nd_INT, nd->nd_type->tp_size);
+			CodeConst(nd->nd_INT, tp->tp_size);
 			break;
 		default:
 			crash("Value error");
@@ -167,12 +167,10 @@ CodeExpr(nd, ds, true_label, false_label)
 		st = nd->nd_set;
 		ds->dsg_kind = DSG_LOADED;
 		if (!st) {
-			C_zer(nd->nd_type->tp_size);
+			C_zer(tp->tp_size);
 			break;
 		}
-		for (i = nd->nd_type->tp_size / word_size, st += i;
-		     i > 0;
-		     i--) { 
+		for (i = tp->tp_size / word_size, st += i; i > 0; i--) { 
 			C_loc(*--st);
 		}
 		}
@@ -188,7 +186,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	}
 
 	if (true_label != 0) {
-		CodeValue(ds, nd->nd_type->tp_size);
+		CodeValue(ds, tp->tp_size);
 		*ds = InitDesig;
 		C_zne(true_label);
 		C_bra(false_label);
@@ -250,12 +248,12 @@ CodeCoercion(t1, t2)
 			}
 			break;
 		case T_INTEGER:
-			C_loc(t1->tp_size);
+			C_loc(word_size);
 			C_loc(t2->tp_size);
 			C_cui();
 			break;
 		case T_REAL:
-			C_loc(t1->tp_size);
+			C_loc(word_size);
 			C_loc(t2->tp_size);
 			C_cuf();
 			break;
@@ -322,40 +320,43 @@ CodeCall(nd)
 		tp = TypeOfParam(param);
 		arg = arg->nd_right;
 		assert(arg != 0);
+		left = arg->nd_left;
 		if (IsConformantArray(tp)) {
 			C_loc(tp->arr_elsize);
-			if (IsConformantArray(arg->nd_left->nd_type)) {
-				DoHIGH(arg->nd_left);
+			if (IsConformantArray(left->nd_type)) {
+				DoHIGH(left);
 			}
-			else if (arg->nd_left->nd_symb == STRING) {
-				C_loc(arg->nd_left->nd_SLE);
+			else if (left->nd_symb == STRING) {
+				C_loc(left->nd_SLE);
 			}
 			else if (tp->arr_elem == word_type) {
-				C_loc(arg->nd_left->nd_type->tp_size / word_size - 1);
+				C_loc(left->nd_type->tp_size / word_size - 1);
 			}
-			else	C_loc(arg->nd_left->nd_type->tp_size /
+			else	C_loc(left->nd_type->tp_size /
 				      tp->arr_elsize - 1);
-			C_loc(0);
-			if (arg->nd_left->nd_symb == STRING) {
-				CodeString(arg->nd_left);
+			C_loc((arith) 0);
+			if (left->nd_symb == STRING) {
+				CodeString(left);
 			}
-			else	CodeDAddress(arg->nd_left);
+			else	CodeDAddress(left);
 			pushed += pointer_size + 3 * word_size;
 		}
 		else if (IsVarParam(param)) {
-			CodeDAddress(arg->nd_left);
+			CodeDAddress(left);
 			pushed += pointer_size;
 		}
 		else {
-			if (arg->nd_left->nd_type->tp_fund == T_STRING) {
-				CodePadString(arg->nd_left,
+			if (left->nd_type->tp_fund == T_STRING) {
+				CodePadString(left,
 					      align(tp->tp_size, word_align));
 			}
-			else CodePExpr(arg->nd_left);
-			CheckAssign(arg->nd_left->nd_type, tp);
+			else CodePExpr(left);
+			CheckAssign(left->nd_type, tp);
 			pushed += align(tp->tp_size, word_align);
 		}
 	}
+
+	left = nd->nd_left;
 
 	if (left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) {
 		if (left->nd_def->df_scope->sc_level > 0) {
@@ -944,15 +945,13 @@ CodeSet(nd)
 {
 	struct type *tp = nd->nd_type;
 
+	C_zer(nd->nd_type->tp_size);	/* empty set */
 	nd = nd->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
 		CodeEl(nd->nd_left, tp);
 		nd = nd->nd_right;
-		if (nd) {
-			C_ior(tp->tp_size);
-		}
 	}
 }
 
@@ -962,19 +961,19 @@ CodeEl(nd, tp)
 {
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
-		C_zer(tp->tp_size);	/* empty set */
-		C_lor((arith) 1);	/* SP: address of set */
+		C_loc(tp->tp_size);	/* push size */
 		if (tp->next->tp_fund == T_SUBRANGE) {
 			C_loc(tp->next->sub_ub);
 		}
-		else	C_loc(tp->next->enm_ncst - 1);
+		else	C_loc((arith) (tp->next->enm_ncst - 1));
 		Operands(nd->nd_left, nd->nd_right);
 		C_cal("_LtoUset");	/* library routine to fill set */
-		C_asp(2 * word_size + pointer_size);
+		C_asp(4 * word_size);
 	}
 	else {
 		CodePExpr(nd);
 		C_set(tp->tp_size);
+		C_ior(tp->tp_size);
 	}
 }
 

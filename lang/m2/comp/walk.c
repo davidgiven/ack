@@ -78,26 +78,10 @@ WalkModule(module)
 	CurrVis = module->mod_vis;
 	sc = CurrentScope;
 
-	if (!proclevel && module != Defined) {
-		/* This module is a local module, but not within a
-		   procedure. Generate code to allocate storage for its
-		   variables. This is done by generating a "bss",
-		   with label "_<modulenumber><modulename>".
-		*/
-		arith size = align(sc->sc_off, word_align);
-
-		if (size == 0) size = word_size;
-		/* WHY ??? because we generated an INA for it ??? */
-
-		C_df_dnam(&(sc->sc_name[1]));
-		size = align(size, word_align);
-		C_bss_cst(size, (arith) 0, 0);
-		C_exp(sc->sc_name);
-	}
-	else if (CurrVis == Defined->mod_vis) {
-		/* This module is the module currently being compiled.
-		   Again, generate code to allocate storage for its
-		   variables, which all have an explicit name.
+	if (!proclevel) {
+		/* This module is a glocal module.
+		   Generate code to allocate storage for its variables.
+		   They all have an explicit name.
 		*/
 		while (df) {
 			if (df->df_kind == D_VARIABLE) {
@@ -369,11 +353,9 @@ WalkStat(nd, lab)
 			struct node *fnd;
 			label l1 = instructionlabel++;
 			label l2 = instructionlabel++;
-			arith size;
 
 			if (! DoForInit(nd, left)) break;
 			fnd = left->nd_right;
-			size = fnd->nd_type->tp_size;
 			if (fnd->nd_class != Value) {
 				CodePExpr(fnd);
 				tmp = NewInt();
@@ -513,7 +495,7 @@ DoForInit(nd, left)
 
 	if (! chk_designator(nd, VARIABLE, D_DEFINED) ||
 	    ! chk_expr(left->nd_left) ||
-	    ! chk_expr(left->nd_right)) return;
+	    ! chk_expr(left->nd_right)) return 0;
 
 	if (nd->nd_type->tp_size > word_size ||
 	    !(nd->nd_type->tp_fund & T_DISCRETE)) {
@@ -533,6 +515,8 @@ node_warning(nd, "old-fashioned! compatibility required in FOR statement");
 
 	CodePExpr(left->nd_left);
 	CodeDStore(nd);
+
+	return 1;
 }
 
 DoAssign(nd, left, right)
