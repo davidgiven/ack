@@ -425,7 +425,10 @@ again:
 					if (np < &buf[NUMSIZE]) *np++ = 'D';
 					state = Hex;
 				}
-				else	state = End;
+				else {
+					state = End;
+					PushBack();
+				}
 				break;
 
 			case Hex:
