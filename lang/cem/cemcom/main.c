@@ -28,7 +28,7 @@
 #include	"nocross.h"
 #include	"sizes.h"
 #include	"align.h"
-#include	<assert.h>
+#include	"assert.h"
 #include	"macro.h"
 
 extern struct tokenname tkidf[], tkother[];
@@ -171,7 +171,7 @@ char *source;
 	fatal("could not open %s", dep_file);
     }
     while (p) {
-	assert(p->id_resmac == K_FILE);
+	ASSERT(p->id_resmac == K_FILE);
 	dependency(p->id_text, source);
 	p = (struct idf *) (p->id_file);
     }
