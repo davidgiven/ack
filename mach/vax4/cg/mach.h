@@ -22,5 +22,4 @@
 #define con_ilb(x)	fprintf(codefile,".long\t%s\n",x)
 #define con_dlb(x)	fprintf(codefile,".long\t%s\n",x)
 
-#define id_first	'_'
 #define BSS_INIT	0
