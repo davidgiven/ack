@@ -141,7 +141,7 @@ n_stack(s,e,p,vi) struct varinfo *vi; {
 	c1p->c1_codep = codeindex;
 	dopattern(0,VI_NULL,VI_NULL,vi,VI_NULL,VI_NULL);
 
-	if (e==0 && p==0)
+	if (e==0 && p== -1)
 		sp = ustackset.set_val;
 	else
 		sp = cstackset.set_val;
