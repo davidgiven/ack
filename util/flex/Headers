@@ -1,0 +1,25 @@
+This file contains the original RCS Headers. Unfortunately, RCS will destroy
+them as soon as we bring our version under RCS. This file lives under RCS as
+well, so all occurences of a $ followed by Header are changed into $header.
+
+Makefile:# @(#) $header: /usr/fsys/odin/a/vern/flex/RCS/Makefile,v 2.9 90/05/26 17:28:44 vern Exp $ (LBL)
+README:// $header: /usr/fsys/odin/a/vern/flex/RCS/README,v 2.8 90/05/26 17:31:27 vern Exp $
+ccl.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/ccl.c,v 2.5 90/06/27 23:48:13 vern Exp $ (LBL)";
+dfa.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/dfa.c,v 2.7 90/06/27 23:48:15 vern Exp $ (LBL)";
+ecs.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/ecs.c,v 2.5 90/06/27 23:48:17 vern Exp $ (LBL)";
+flex.skel: * $header: /usr/fsys/odin/a/vern/flex/RCS/flex.skel,v 2.16 90/08/03 14:09:36 vern Exp $
+flexdef.h:/* @(#) $header: /usr/fsys/odin/a/vern/flex/RCS/flexdef.h,v 2.10 90/08/03 14:09:52 vern Exp $ (LBL) */
+gen.c:    "@(#) $header: /usr/helios/u0/vern/flex/RCS/gen.c,v 2.10 90/08/29 12:11:13 vern Exp $ (LBL)";
+initscan.c: * $header: /usr/fsys/odin/a/vern/flex/RCS/flex.skel,v 2.16 90/08/03 14:09:36 vern Exp $
+initscan.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/scan.l,v 2.9 90/06/27 23:48:34 vern Exp $ (LBL)";
+libmain.c:/* $header: /usr/fsys/odin/a/vern/flex/RCS/libmain.c,v 1.2 90/05/26 16:50:08 vern Exp $ */
+main.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/main.c,v 2.9 90/06/27 23:48:24 vern Exp $ (LBL)";
+misc.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/misc.c,v 2.9 90/08/14 00:10:24 vern Exp $ (LBL)";
+nfa.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/nfa.c,v 2.6 90/06/27 23:48:29 vern Exp $ (LBL)";
+parse.y:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/parse.y,v 2.7 90/06/27 23:48:31 vern Exp $ (LBL)";
+scan.c: * $header: /usr/fsys/odin/a/vern/flex/RCS/flex.skel,v 2.16 90/08/03 14:09:36 vern Exp $
+scan.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/scan.l,v 2.9 90/06/27 23:48:34 vern Exp $ (LBL)";
+scan.l:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/scan.l,v 2.9 90/06/27 23:48:34 vern Exp $ (LBL)";
+sym.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/sym.c,v 2.4 90/06/27 23:48:36 vern Exp $ (LBL)";
+tblcmp.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/tblcmp.c,v 2.5 90/06/27 23:48:38 vern Exp $ (LBL)";
+yylex.c:    "@(#) $header: /usr/fsys/odin/a/vern/flex/RCS/yylex.c,v 2.5 90/06/27 23:48:40 vern Exp $ (LBL)";
