@@ -20,3 +20,9 @@ end
 name "ego share pop_push file"
 dir util/ego/share
 end
+name "create .distr file for interpreter"
+dir util/int
+end
+name "create .distr file for interpreter docs"
+dir doc/int
+end
