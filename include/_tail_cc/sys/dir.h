@@ -3,7 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#ifdef BSD4_2
+#ifdef __BSD4_2
 #define MAXNAMLEN 255
 #else
 #define MAXNAMLEN 14
