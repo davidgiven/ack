@@ -273,6 +273,12 @@ fill_int_expr(ex, ivalue, fund)
 	case INT:
 		ex->ex_type = int_type;
 		break;
+	case INTEGER:
+		if (ivalue >= 0 && ivalue <= max_int) {
+			ex->ex_type = int_type;
+			break;
+		}
+		/*FALL THROUGH*/
 	case LONG:
 		ex->ex_type = 
 			(ivalue & (1L << (8*long_size - 1))) ? ulong_type
@@ -295,11 +301,6 @@ fill_int_expr(ex, ivalue, fund)
 					ulong_type : long_type
 			      ) : uint_type
 			  ) : int_type;
-		break;
-	case INTEGER:
-		ex->ex_type = (ivalue <= max_int) ? int_type 
-			: (ivalue & (1L << (8*long_size - 1))) ? ulong_type
-				: long_type;
 		break;
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
