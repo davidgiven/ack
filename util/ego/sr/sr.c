@@ -136,7 +136,7 @@ STATIC opt_proc(p)
 	 */
 
 	Lindex i;
-	loop_p lp,outermost;
+	loop_p lp,outermost = 0;
 	int min_level;
 
 	for (;;) {
@@ -149,7 +149,7 @@ STATIC opt_proc(p)
 				outermost = lp;
 			}
 		}
-		if (min_level == 1000) break;
+		if (! outermost) break;
 		do_loop(outermost);
 		outermost->LP_DONE = TRUE;
 		OUTTRACE("loop %d processed",outermost->lp_id);
