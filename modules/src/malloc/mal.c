@@ -291,7 +291,7 @@ realloc(addr, n)
 		free(addr);
 		check_work_empty("mv_realloc");
 #ifdef STORE
-		assert(! in_store(new));
+		assert(! in_store(mallink_of_block(new)));
 #endif
 		return new;
 	}
