@@ -65,7 +65,7 @@ static getline ()
 
 static skip_period () 
 {
-	while (*_buf != ':')
+	while (*_buf && *_buf != ':')
 		_buf++;
 
 	*_buf++ = '\0';
