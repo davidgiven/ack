@@ -1,3 +1,4 @@
+/* $Header$ */
 extern double	_fif();
 
 /*

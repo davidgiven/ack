@@ -1,5 +1,6 @@
 #define PROC    0
 
+; $Header$
  mes 2,EM_WSIZE,EM_PSIZE
 
 ; _sig is called with one parameter:

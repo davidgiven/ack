@@ -1,3 +1,4 @@
+/* $Header$ */
 /* function strbuf(var b:charbuf):string; */
 
 char *strbuf(s) char *s; {

@@ -1,3 +1,4 @@
+/* $Header$ */
 /* function uread(fd:integer; var b:buf; n:integer):integer; */
 
 extern int	read();

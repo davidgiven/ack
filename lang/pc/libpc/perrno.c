@@ -1,3 +1,4 @@
+/* $Header$ */
 /* function perrno:integer; extern; */
 
 extern int	errno;

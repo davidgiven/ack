@@ -1,3 +1,4 @@
+/* $Header$ */
 /* function uwrite(fd:integer; var b:buf; n:integer):integer; */
 
 extern int	write();
