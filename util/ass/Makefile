@@ -1,11 +1,12 @@
 d=../..
-l=$d/lib
+l=$d/mach/m68k2/lib
 h=$d/h
 ASS_PATH=$l/em_ass
+CC=pmds
 
-SEP_OPT=-i
+SEP_OPT=-n
 
-CFLAGS=-O
+CFLAGS=-O -.c
 
 all:            ass$(SEP_OPT)
 
@@ -28,15 +29,15 @@ lint:           ass00.c ass30.c ass40.c ass50.c ass60.c ass70.c \
 ass-n:       ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
-		cc -n $(CFLAGS) -o ass-n \
+		$(CC) $(CFLAGS) -s -o ass-n \
 			ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
-			$l/em_data.a
+			$l/em_data.a >ass.symb
 
 ass-i:       ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
-		cc -i $(CFLAGS) -o ass-i \
+		$(CC) -i $(CFLAGS) -o ass-i \
 			ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
@@ -67,10 +68,7 @@ asstb.c:        maktab ip_spec.t
 
 maktab:         maktab.c $h/em_spec.h ip_spec.h $h/em_flag.h \
 		$l/em_data.a
-		cc -O -o maktab maktab.c $l/em_data.a
-
-asprint:	asprint.p
-		apc -w -o asprint asprint.p
+		$(CC) -O -o maktab maktab.c $l/em_data.a
 
 opr:
 		make pr ^ opr
