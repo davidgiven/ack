@@ -62,7 +62,7 @@ IMPLEMENTATION MODULE Storage;
 	pc: POINTER TO CHAR;
 	brk : ADDRESS;
   BEGIN
-	IF size > CARDINAL(MAX(INTEGER)) THEN
+	IF size > CARDINAL(MAX(INTEGER)-2*UNIT + 1) THEN
 		RETURN NIL;
 	END;
 	nu := (size + (UNIT-1)) DIV UNIT;
@@ -179,19 +179,19 @@ IMPLEMENTATION MODULE Storage;
 	RETURN ADR(p^.BSTORE);
   END MyAllocate;
 
-  PROCEDURE Allocate(VAR a: ADDRESS; size: CARDINAL);
-  BEGIN
-	ALLOCATE(a, size);
-  END Allocate;
-
   PROCEDURE ALLOCATE(VAR a: ADDRESS; size: CARDINAL);
+  BEGIN
+	Allocate(a, size);
+  END ALLOCATE;
+
+  PROCEDURE Allocate(VAR a: ADDRESS; size: CARDINAL);
   BEGIN
 	a := MyAllocate(size);
 	IF a = NIL THEN
 		Message("out of core");
 		HALT;
 	END;
-  END ALLOCATE;
+  END Allocate;
 
   PROCEDURE Available(size: CARDINAL): BOOLEAN;
     VAR	a: ADDRESS;
@@ -204,12 +204,12 @@ IMPLEMENTATION MODULE Storage;
 	RETURN FALSE;
   END Available;
 
-  PROCEDURE Deallocate(VAR a: ADDRESS; size: CARDINAL);
-  BEGIN
-	DEALLOCATE(a, size);
-  END Deallocate;
-
   PROCEDURE DEALLOCATE(VAR a: ADDRESS; size: CARDINAL);
+  BEGIN
+	Deallocate(a, size);
+  END DEALLOCATE;
+
+  PROCEDURE Deallocate(VAR a: ADDRESS; size: CARDINAL);
     VAR	p: BucketPtr;
 	pc: POINTER TO CHAR;
   BEGIN
@@ -241,7 +241,7 @@ IMPLEMENTATION MODULE Storage;
 		END;
 	END;
 	a := NIL
-  END DEALLOCATE;
+  END Deallocate;
 
   PROCEDURE ReOrganize();
     VAR lastblock: BucketPtr;
