@@ -1,8 +1,8 @@
 #include <sgtty.h>
 int
-gtty(fildes,argp)
+_gtty(fildes,argp)
 	int fildes ;
 	struct sgttyb *argp ;
 {
-	return ioctl(fildes,TIOCGETP,argp) ;
+	return _ioctl(fildes,TIOCGETP,argp) ;
 }
