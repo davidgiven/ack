@@ -1,0 +1,52 @@
+# $Header$
+
+# C compilation part. Not to be called directly.
+# Instead, it is to be called by the Makefile.
+# SRC_DIR, UTIL_HOME, TARGET_HOME, CC, COPTIONS, LINT, LINTOPTIONS, LDOPTIONS,
+# CC_AND_MKDEP, SUF, LIBSUF should be set here.
+
+#PARAMS		do not remove this line!
+
+MDIR =		$(TARGET_HOME)/modules
+LIBDIR =	$(MDIR)/lib
+LINTLIBDIR =	$(UTIL_HOME)/modules/lib
+
+MALLOC =	$(LIBDIR)/malloc.$(SUF)
+
+MODLIB =	$(LIBDIR)/libinput.$(LIBSUF) \
+		$(LIBDIR)/liballoc.$(LIBSUF) \
+		$(MALLOC) \
+		$(LIBDIR)/libprint.$(LIBSUF) \
+		$(LIBDIR)/libstring.$(LIBSUF) \
+		$(LIBDIR)/libsystem.$(LIBSUF)
+
+LIBS =		$(MODLIB)
+
+LINTLIBS =	$(LINTLIBDIR)/$(LINTPREF)input.$(LINTSUF) \
+		$(LINTLIBDIR)/$(LINTPREF)alloc.$(LINTSUF) \
+		$(LINTLIBDIR)/$(LINTPREF)print.$(LINTSUF) \
+		$(LINTLIBDIR)/$(LINTPREF)string.$(LINTSUF) \
+		$(LINTLIBDIR)/$(LINTPREF)system.$(LINTSUF)
+
+PROFILE =
+INCLUDES =	-I. -I$(SRC_DIR) -I$(TARGET_HOME)/modules/h -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(TARGET_HOME)/modules/pkg
+CFLAGS =	$(PROFILE) $(INCLUDES) $(COPTIONS)
+LINTFLAGS =	$(INCLUDES) $(LINTOPTIONS)
+LDFLAGS =	$(PROFILE) $(LDOPTIONS)
+
+# C_SRC and OBJ should be set here.
+#LISTS		do not remove this line!
+
+all:		main
+
+clean:
+		rm -f *.$(SUF) main
+
+lint:
+		$(LINT) $(LINTFLAGS) $(C_SRC) $(LINTLIBS)
+
+main:		$(OBJ)
+		$(CC) $(LDFLAGS) $(OBJ) $(LIBS) -o main
+
+# do not remove the next line; it is used for generating dependencies
+#DEPENDENCIES
