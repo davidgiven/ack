@@ -73,14 +73,19 @@ erasereg(regno) {
 	register struct reginfo *rp;
 	register int i;
 
-#if MAXMEMBERS==0
+#if MAXMEMBERS!=0
+	if (regno == 1)	 { /* condition codes */
+#endif
 	rp = &machregs[regno];
 	rp->r_contents.t_token = 0;
 	for (i=0;i<TOKENSIZE;i++)
 		rp->r_contents.t_att[i].aw = 0;
 
+#if MAXMEMBERS == 0
 	awayreg(regno);
+
 #else
+	} else
 	for (rp=machregs;rp<machregs+NREGS;rp++)
 		if (rp->r_clash[regno>>4]&(1<<(regno&017))) {
 			rp->r_contents.t_token = 0;
