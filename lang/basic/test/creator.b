@@ -1,6 +1,5 @@
   10 rem The Creator
   20 rem 80 micro jan 1983
-  70 clear 3000
   80 print"This is the Creator. It will allow you to generate"
   90 print"a progam which will create and access a data file."
  100 print"For later use. Please type the proposed program name."
