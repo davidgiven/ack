@@ -17,14 +17,6 @@ The resulting file.com can be used as an argument to the interpreter.
 This implementation has been tested but is not guaranteed to be complete.
 Simple UNIX-system calls have been implemented but anything except
 terminal I/O has not been thoroughly tested.
-Please send any errors in the implementation to
-Hans van Staveren
-Vrije Universiteit
-Wiskundig Seminarium
-De Boelelaan 1081
-1081 HV  Amsterdam
-Holland
-..!decvax!mcvax!vu44!sater
 
 Also, some changes have been made to convert the interpreter to the
 new assembler syntax. This has never been tested, because we don't have

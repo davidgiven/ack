@@ -9,9 +9,11 @@ var M=em22
 var NAME=em22
 var LIB=lib/em22/tail_
 var RT=lib/em22/head_
-var SIZE_FLAG=-sm
-var CPP_F=-DCPM=CPM
-var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
+var SIZE_FLAG=
+var CPP_F=-Dunix
+var INCLUDES=-I{EM}/include/_tail_mon
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+var OLD_C_LIB={C_LIB}
 name asld
 	from .k.m.a.g
 	to .out
@@ -21,11 +23,21 @@ name asld
 	mapflag -+* ASS_F={ASS_F?} -+*
 	mapflag --* ASS_F={ASS_F?} --*
 	mapflag -s* SIZE_FLAG=-s*
+	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args {SIZE_FLAG} \
-		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
+		({RTS}:.mod={EM}/{RT}m2) \
+		({RTS}:.p={EM}/{RT}pc) \
+		-o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
-		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.b.c.p:{TAIL}={EM}/{LIB}mon)
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
+		(.b.c.ocm.mod.p.e:{TAIL}={EM}/{LIB}mon) \
+		({RTS}{ANSI?}:.cansi={EM}/lib/em22/end_em)
 	linker
 end
