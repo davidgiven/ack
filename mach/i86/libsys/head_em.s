@@ -2,7 +2,7 @@
 
 .define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
-.define ERANGE,ESET,EHEAP,ECASE,EILLINS
+.define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
 .extern _end
 .extern np
 
