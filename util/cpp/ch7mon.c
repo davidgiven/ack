@@ -6,9 +6,10 @@
 /* EVALUATION OF MONADIC OPERATORS */
 
 #include	"Lpars.h"
+#include	<em_arith.h>
 
 ch7mon(oper, pval)
-	register int *pval;
+	register arith *pval;
 {
 	switch (oper)	{
 	case '~':

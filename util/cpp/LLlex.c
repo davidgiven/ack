@@ -26,6 +26,7 @@ int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 
 char *string_token();
+char *strcpy();
 
 PushLex()
 {
@@ -192,7 +193,8 @@ go_on:
 	}
 	case STCHAR:				/* character constant	*/
 	{
-		register int val = 0, size = 0;
+		register arith val = 0;
+		register int size = 0;
 
 		LoadChar(c);
 		if (c == '\'')
@@ -216,7 +218,7 @@ go_on:
 			size++;
 			LoadChar(c);
 		}
-		if (size > sizeof(int))
+		if (size > sizeof(arith))
 			error("character constant too long");
 		ptok->tk_val = val;
 		return ptok->tk_symb = INTEGER;
@@ -226,7 +228,7 @@ go_on:
 		register char *np = &buf[1];
 		register int base = 10;
 		register int vch;
-		register int val = 0;
+		register arith val = 0;
 
 		if (c == '0') {
 			*np++ = c;
@@ -319,6 +321,7 @@ string_token(nm, stop_char)
 		LoadChar(c);
 	}
 	str[pos++] = '\0'; /* for filenames etc. */
+	str = Srealloc(str, pos);
 	return str;
 }
 

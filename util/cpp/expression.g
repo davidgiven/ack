@@ -10,8 +10,9 @@
 
 {
 #include	"LLlex.h"
+#include	<em_arith.h>
 
-extern int ifval;
+extern arith ifval;
 }
 
 if_expression
@@ -20,14 +21,14 @@ if_expression
 ;
 
 /* 7.1 */
-primary(int *pval;)
+primary(arith *pval;)
 :
 	constant(pval)
 |
 	'(' expression(pval) ')'
 ;
 
-unary(int *pval;)
+unary(arith *pval;)
 	{int oper;}
 :
 	unop(&oper)
@@ -37,8 +38,8 @@ unary(int *pval;)
 	primary(pval)
 ;
 
-binary_expression(int maxrank; int *pval;)
-	{int oper; int val1;}
+binary_expression(int maxrank; arith *pval;)
+	{int oper; arith val1;}
 :
 	unary(pval)
 	[%while (rank_of(DOT) <= maxrank)
@@ -51,8 +52,8 @@ binary_expression(int maxrank; int *pval;)
 ;
 
 /* 7.13 */
-conditional_expression(int *pval;)
-	{int val1 = 0, val2 = 0;}
+conditional_expression(arith *pval;)
+	{arith val1 = 0, val2 = 0;}
 :
 	/* allow all binary operators */
 	binary_expression(rank_of('?') - 1, pval)
@@ -65,14 +66,14 @@ conditional_expression(int *pval;)
 ;
 
 /* 7.14 */
-assignment_expression(int *pval;)
+assignment_expression(arith *pval;)
 :
 	conditional_expression(pval)
 ;
 
 /* 7.15 */
-expression(int *pval;)
-	{int val1;}
+expression(arith *pval;)
+	{arith val1;}
 :
 	assignment_expression(pval)
 	[	','
@@ -119,11 +120,11 @@ binop(int *oper;) :
 	{*oper = DOT;}
 ;
 
-constant(int *pval;) :
+constant(arith *pval;) :
 	INTEGER
 	{*pval = dot.tk_val;}
 ;
 
-constant_expression (int *pval;) :
+constant_expression (arith *pval;) :
 	assignment_expression(pval)
 ;

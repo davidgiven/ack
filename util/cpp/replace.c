@@ -10,7 +10,6 @@
 #include	"textsize.h"	/* UF */
 
 #include	<alloc.h>
-#include	<em_arith.h>
 #include	<assert.h>
 #include	"idf.h"
 #include	"input.h"
@@ -185,7 +184,7 @@ macro2buffer(idef, actpars, siztext)
 	}
 	text[pos] = '\0';
 	*siztext = pos;
-	return text;
+	return Srealloc(text, pos+1);
 }
 
 EXPORT

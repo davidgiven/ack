@@ -6,7 +6,6 @@
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
 #include	"interface.h"
-#include	<em_arith.h>
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"debug.h"
@@ -258,7 +257,7 @@ do_include()
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
-			error("cannot find include file \"%s\"", filenm);
+			fatal("cannot find include file \"%s\"", filenm);
 		}
 		else {
 			WorkingDir = getwdir(result);
@@ -645,13 +644,12 @@ get_text(formals, length)
 						text_size <<= 1);
 			}
 			else {
-				int sz = idp - id_buf;
+				int sz = idp - id_buf + 1;
 
 				idp = id_buf;
 
-				while (pos + sz >= text_size)
-					text = Srealloc(text,
-						text_size <<= 1);
+				while (pos + sz >= text_size) text_size <<= 1;
+				text = Srealloc(text, text_size);
 				while (text[pos++] = *idp++) ;
 				pos--;
 			}
@@ -664,6 +662,7 @@ get_text(formals, length)
 		}
 	}
 	text[pos++] = '\0';
+	text = Srealloc(text, pos);
 	*length = pos - 1;
 	return text;
 }

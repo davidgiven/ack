@@ -6,9 +6,10 @@
 /* EVALUATION OF BINARY OPERATORS */
 
 #include	"Lpars.h"
+#include	<em_arith.h>
 
 ch7bin(pval, oper, val)
-	register int *pval, val;
+	register arith *pval, val;
 	int oper;
 {
 	switch (oper)	{

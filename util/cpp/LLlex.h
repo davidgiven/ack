@@ -10,11 +10,13 @@
 	to it.
 */
 
+#include <em_arith.h>
+
 /* the structure of a token:	*/
 struct token	{
 	int tok_symb;		/* the token itself */
 	union {
-		int tok_val;		/* numeric values */
+		arith tok_val;		/* numeric values */
 		char *tok_str;		/* string/filespecifier */
 	} tok_data;
 };

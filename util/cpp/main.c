@@ -6,6 +6,7 @@
 /* MAIN PROGRAM */
 
 #include <alloc.h>
+#include <em_arith.h>
 #include "file_info.h"
 #include "idfsize.h"
 
@@ -14,7 +15,7 @@ extern char *getwdir();
 extern int err_occurred;
 int idfsize = IDFSIZE;
 
-int ifval;
+arith ifval;
 
 char *prog_name;
 
