@@ -11,7 +11,6 @@
 	blt	1f
 	add.l	#0x400, d1
 	and.l	#~0x3ff, d1
-	move.l	d1, .limhp
 	move.l	d1, -(sp)
 	jsr	_brk		! allocate 1K bytes of extra storage
 	add.l	#4, sp
