@@ -33,10 +33,8 @@
 
 
 !File: strsize.h
-#define ISTRSIZE	32	/* minimum number of bytes allocated for
+#define ISTRSIZE	16	/* minimum number of bytes allocated for
 					storing a string		*/
-#define RSTRSIZE	32	/* step size in enlarging the memory for
-					the storage of a string		*/
 
 
 !File: botch_free.h
@@ -52,8 +50,7 @@
 
 
 !File: textsize.h
-#define ITEXTSIZE	64	/* 1st piece of memory for repl. text	*/
-#define RTEXTSIZE	64	/* stepsize for enlarging repl.text	*/
+#define ITEXTSIZE	16	/* 1st piece of memory for repl. text	*/
 
 
 !File: inputtype.h

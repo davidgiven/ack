@@ -157,7 +157,7 @@ macro2buffer(idef, actpars, siztext)
 		If there are no parameters, this function behaves
 		the same as strcpy().
 	*/
-	register int size = idef->id_macro->mc_length + ITEXTSIZE;
+	register unsigned int size = idef->id_macro->mc_length + ITEXTSIZE;
 	register char *text = Malloc(size);
 	register int pos = 0;
 	register char *ptr = idef->id_macro->mc_text;
@@ -174,13 +174,13 @@ macro2buffer(idef, actpars, siztext)
 			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
-					text = Srealloc(text, size += RTEXTSIZE);
+					text = Srealloc(text, size <<= 1);
 			}
 		}
 		else {
 			text[pos++] = *ptr++;
 			if (pos == size)
-				text = Srealloc(text, size += RTEXTSIZE);
+				text = Srealloc(text, size <<= 1);
 		}
 	}
 	text[pos] = '\0';

@@ -186,7 +186,7 @@ go_on:
 			ptok->tk_val = 0;
 			return ptok->tk_symb = INTEGER;
 		}
-		ptok->tk_str = Malloc(idfsize + 1);
+		ptok->tk_str = Malloc(tg - buf);
 		strcpy(ptok->tk_str, buf);
 		return ptok->tk_symb = IDENTIFIER;
 	}
@@ -290,7 +290,7 @@ string_token(nm, stop_char)
 	char *nm;
 {
 	register int c;
-	register int str_size;
+	register unsigned int str_size;
 	register char *str = Malloc(str_size = ISTRSIZE);
 	register int pos = 0;
 	
@@ -316,7 +316,7 @@ string_token(nm, stop_char)
 		}
 		str[pos++] = c;
 		if (pos == str_size)
-			str = Srealloc(str, str_size += RSTRSIZE);
+			str = Srealloc(str, str_size <<= 1);
 		LoadChar(c);
 	}
 	str[pos++] = '\0'; /* for filenames etc. */

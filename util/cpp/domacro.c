@@ -586,9 +586,9 @@ get_text(formals, length)
 		parameter.  Other tokens will not be seen as such.
 	*/
 	register int c;
-	register int text_size;
+	register unsigned int text_size;
 	char *text = Malloc(text_size = ITEXTSIZE);
-	register int pos = 0;
+	register unsigned int pos = 0;
 
 	LoadChar(c);
 
@@ -607,7 +607,7 @@ get_text(formals, length)
 			else
 				text[pos++] = '\\';
 			if (pos == text_size)
-				text = Srealloc(text, text_size += RTEXTSIZE);
+				text = Srealloc(text, text_size <<= 1);
 		}
 		else
 		if ( c == '/') {
@@ -620,43 +620,45 @@ get_text(formals, length)
 			else
 				text[pos++] = '/';
 			if (pos == text_size)
-				text = Srealloc(text, text_size += RTEXTSIZE);
+				text = Srealloc(text, text_size <<= 1);
 		}
 		else
 		if (formals && class(c) == STIDF) {
 			char id_buf[IDFSIZE + 1];
-			register id_size = 0;
-			register n;
+			register char *idp = id_buf;
+			int n;
 
 			/* read identifier: it may be a formal parameter */
-			id_buf[id_size++] = c;
+			*idp++ = c;
 			do {
 				LoadChar(c);
-				if (id_size <= IDFSIZE)
-					id_buf[id_size++] = c;
+				if (idp <= &id_buf[IDFSIZE])
+					*idp++ = c;
 			} while (in_idf(c));
-			id_buf[--id_size] = '\0';
+			*--idp = '\0';
 			if (n = find_name(id_buf, formals)) {
 				/* construct the formal parameter mark	*/
 				text[pos++] = FORMALP | (char) n;
 				if (pos == text_size)
 					text = Srealloc(text,
-						text_size += RTEXTSIZE);
+						text_size <<= 1);
 			}
 			else {
-				register char *ptr = &id_buf[0];
+				int sz = idp - id_buf;
 
-				while (pos + id_size >= text_size)
+				idp = id_buf;
+
+				while (pos + sz >= text_size)
 					text = Srealloc(text,
-						text_size += RTEXTSIZE);
-				while (text[pos++] = *ptr++) ;
+						text_size <<= 1);
+				while (text[pos++] = *idp++) ;
 				pos--;
 			}
 		}
 		else {
 			text[pos++] = c;
 			if (pos == text_size)
-				text = Srealloc(text, text_size += RTEXTSIZE);
+				text = Srealloc(text, text_size <<= 1);
 			LoadChar(c);
 		}
 	}
