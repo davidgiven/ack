@@ -1,4 +1,8 @@
 %{
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *
@@ -69,3 +73,4 @@ rom		return(ROM);
 \n		{ lino++; return(yytext[0]); }
 :[ \t]*\n[ \t]+	{ lino++; return(':'); }
 ^"# "[0-9]+.*\n	{ lino=atoi(yytext+2); }
+^\#.*\n		{ lino++; }
