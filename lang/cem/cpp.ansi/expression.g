@@ -32,7 +32,7 @@ unary(arith *pval;)
 :
 	unop(&oper)
 	unary(pval)
-	{ ch7mon(oper, pval); }
+	{ ch3mon(oper, pval); }
 |
 	primary(pval)
 ;
@@ -45,7 +45,7 @@ binary_expression(int maxrank; arith *pval;)
 		binop(&oper)
 		binary_expression(rank_of(oper)-1, &val1)
 		{
-			ch7bin(pval, oper, val1);
+			ch3bin(pval, oper, val1);
 		}
 	]*
 ;
@@ -78,7 +78,7 @@ expression(arith *pval;)
 	[	','
 		assignment_expression(&val1)
 		{
-			ch7bin(pval, ',', val1);
+			ch3bin(pval, ',', val1);
 		}
 	]*
 ;

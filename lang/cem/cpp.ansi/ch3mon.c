@@ -8,7 +8,7 @@
 #include	"Lpars.h"
 #include	"arith.h"
 
-ch7mon(oper, pval)
+ch3mon(oper, pval)
 	register arith *pval;
 {
 	switch (oper)	{

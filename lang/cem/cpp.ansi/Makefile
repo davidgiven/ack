@@ -42,10 +42,10 @@ LCSRC = tokenfile.c expression.c Lpars.c
 LOBJ =	tokenfile.o expression.o Lpars.o
 
 # Objects of hand-written C files
-CSRC =	LLlex.c LLmessage.c ch7bin.c ch7mon.c domacro.c \
+CSRC =	LLlex.c LLmessage.c ch3bin.c ch3mon.c domacro.c \
 	error.c idf.c init.c input.c main.c options.c \
 	preprocess.c replace.c skip.c tokenname.c expr.c
-COBJ =	LLlex.o LLmessage.o ch7bin.o ch7mon.o domacro.o \
+COBJ =	LLlex.o LLmessage.o ch3bin.o ch3mon.o domacro.o \
 	error.o idf.o init.o input.o main.o options.o \
 	preprocess.o replace.o skip.o tokenname.o next.o expr.o
 
@@ -94,7 +94,7 @@ next.c:	make.next $(STRSRC)
 	./make.next $(STRSRC) >next.c
 
 macro.h:	make.allocd
-repl.h:		make.allocd
+replace.h:		make.allocd
 
 LLfiles: $(LSRC)
 	$(GEN) $(GENOPTIONS) $(LSRC)
@@ -171,10 +171,10 @@ LLlex.o: strsize.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
 LLmessage.o: file_info.h
-ch7bin.o: Lpars.h
-ch7bin.o: arith.h
-ch7mon.o: Lpars.h
-ch7mon.o: arith.h
+ch3bin.o: Lpars.h
+ch3bin.o: arith.h
+ch3mon.o: Lpars.h
+ch3mon.o: arith.h
 domacro.o: LLlex.h
 domacro.o: Lpars.h
 domacro.o: arith.h

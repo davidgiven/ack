@@ -8,7 +8,7 @@
 #include	"Lpars.h"
 #include	"arith.h"
 
-ch7bin(pval, oper, val)
+ch3bin(pval, oper, val)
 	register arith *pval, val;
 	int oper;
 {
