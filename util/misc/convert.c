@@ -53,9 +53,8 @@ main(argc,argv)
 		}
 		if (p->em_type == EM_ERROR) {
 			error("EM_getinstr: %s", EM_error);
-			continue;
 		}
-		if (!EM_mkcalls(p)) {
+		else if (!EM_mkcalls(p)) {
 			error("EM_mkcalls: %s", EM_error);
 		}
 		p = EM_getinstr();
