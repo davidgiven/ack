@@ -226,7 +226,7 @@ register struct t_operand *op;
 					}
 				}
 				else {
-					@as_const(%$(op->const));
+					@__as_const(%$(op->const));
 				}
 				break;
 		case REGISTER: 	@text1( %d(0x50 | op->num));
@@ -253,7 +253,7 @@ register struct t_operand *op;
 					}
 				}
 				else {
-					@as_indexed(%$(op->index) , %d(op->num));
+					@__as_indexed(%$(op->index) , %d(op->num));
 				}
 				break;
 		case LABEL : 	@text1( 0xef);

@@ -13,37 +13,17 @@ int arg;
 }
 #endif
 
-#define OWNFLOAT	/* compile on VAX, generate code for VAX FP ... */
-
 con_float(str, argval)
 	char *str;
 	int argval;
 {
-#ifdef NOFLOAT
-
-static int been_here;
-	if (argval != 4 && argval != 8)
-		arg_error("fcon", argval);
-	if (argval == 8)
-		gen4((FOUR_BYTES) 0);
-	gen4((FOUR_BYTES) 0);
-	if ( !been_here++)
-	{
-	fprint(STDERR, "Warning : dummy float-constant(s)\n");
-	}
-#else
 	double f;
 	double atof();
 	int i;
 	int j;
 	double frexp();
-#ifndef OWNFLOAT
-	int sign = 0;
-	int fraction[4] ;
-#else OWNFLOAT
 	float fl;
 	char *p;
-#endif OWNFLOAT
 
 	if (argval!= 4 && argval!= 8)	{
 		arg_error("fcon", argval);
@@ -55,7 +35,6 @@ static int been_here;
 		gen4((FOUR_BYTES) 0);
 		return;
 	}
-#ifdef OWNFLOAT
 	if (argval == 4) {
 		/* careful: avoid overflow */
 		fl = frexp(f, &i);
@@ -86,77 +65,9 @@ static int been_here;
 	for (i = argval-1; i; i--) {
 		gen1(*p++&0377);
 	}
-#else OWNFLOAT
-	f = frexp(f, &i);
-	if (f < 0) {
-		f = -f;
-		sign = 1;
-	}
-	while (f < 0.5) {
-		f += f;
-		i --;
-	}
-	f = 2*f - 1.0;		/* hidden bit */
-	i--;			/* exponent is one lower for SUN floating point! */
-#ifdef IEEEFLOAT
-	if (argval == 4) {
-#endif IEEEFLOAT
-		i = (i + 128) & 0377;
-		fraction[0] = (sign << 15) | (i << 7);
-		for (j = 6; j>= 0; j--) {
-			f *= 2;
-			if (f >= 1.0) {
-				f -= 1.0;
-				fraction[0] |= (1 << j);
-			}
-		}
-#ifdef IEEEFLOAT
-	}
-	else {
-		i = (i + 1024) & 03777;
-		fraction[0] = (sign << 15) | (i << 4);
-		for (j = 3; j>= 0; j--) {
-			f *= 2;
-			if (f >= 1.0) {
-				fraction[0] |= (1 << j);
-				f -= 1.0;
-			}
-		}
-	}
-#endif IEEEFLOAT
-	for (i = 1; i < argval / 2; i++) {
-		fraction[i] = 0;
-		for (j = 15; j>= 0; j--) {
-			f *= 2;
-			if (f >= 1.0) {
-				fraction[i] |= (1 << j);
-				f -= 1.0;
-			}
-		}
-	}
-	if (f >= 0.5) {
-		for (i = argval/2 - 1; i >= 0; i--) {
-			for (j = 0; j < 16; j++) {
-				if (fraction[i] & (1 << j)) {
-					fraction[i] &= ~(1 << j);
-				}
-				else {
-					fraction[i] |= (1 << j);
-					break;
-				}
-			}
-			if (j != 16) break;
-		}
-	}
-	for (i = 0; i < argval/2; i++) {
-		gen1(fraction[i]&0377);
-		gen1((fraction[i]>>8)&0377);
-	}
-#endif OWNFLOAT
-#endif
 }
 
-as_indexed(val, num)
+__as_indexed(val, num)
 {
 	if (fit_byte(val)) {
 		text1( 0xa0 | num);
@@ -170,7 +81,7 @@ as_indexed(val, num)
 	}
 }
 
-as_const(val)
+__as_const(val)
 {
 	if (fit_6bits(val)) {
 		text1(val);
