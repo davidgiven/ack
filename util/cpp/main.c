@@ -84,7 +84,7 @@ compile(argc, argv)
 	}
 
 	if (!InsertFile(source, (char **) 0, &dummy)) /* read the source file	*/
-		fatal("%s: no source file %s\n", prog_name, 
+		fatal("%s: no source file %s", prog_name, 
 			source ? source : "stdin");
 	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
