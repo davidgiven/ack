@@ -129,7 +129,11 @@ oper	:	NOOP_1
 				emit2((int)($2.val));
 			}
 	|	SETCC ea_2
-			{	emit1(0xF); emit1($1|0x90); ea_2(0);}
+			{	if (reg_2 & (IS_R32|IS_RSEG)) {
+					serror("register error");
+				}
+				emit1(0xF); emit1($1|0x90); ea_2(0);
+			}
 	|	XCHG ea_ea
 			{	xchg($1);}
 	|	TEST ea_ea
