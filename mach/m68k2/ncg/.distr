@@ -1,9 +1,6 @@
-Makefile
 README
 instrmacs.h
 mach.c
 mach.h
-table
+table_link
 whichone.h
-tables1.c
-tables1.h
