@@ -5,8 +5,10 @@
 EM = /user1/erikb/em#				# ACK tree on this machine
 DESTINATION = /user1/$$USER/bin#		# where to put the stuff
 MKDEP = /user1/erikb/bin/mkdep#			# dependency generator
-MAP = -DInsertFile=ins_file -DInsertText=ins_text#	# bug in m68k2 back end
+MAP =
+#MAP = -DInsertFile=ins_file -DInsertText=ins_text#	# bug in m68k2 back end
 SIM = /user1/dick/bin/sim#			# Dicks sim program
+LINT = /usr/new/lint
 
 # Libraries and EM interface definitions
 SYSLIB = $(EM)/modules/lib/libsystem.a
@@ -20,6 +22,15 @@ LIBS = $(CH3LIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
 ELIBS = $(CH3LIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
 LIB_INCLUDES = $(EM)/modules/h
 EM_INCLUDES = $(EM)/h
+SYSLLIB = $(EM)/modules/lib/llib-lsys.ln
+EMKLLIB = $(EM)/modules/lib/llib-lemk.ln
+EMELLIB = $(EM)/modules/lib/llib-leme.ln
+STRLLIB = $(EM)/modules/lib/llib-lstr.ln
+PRTLLIB = $(EM)/modules/lib/llib-lprint.ln
+EMMESLLIB = $(EM)/modules/lib/llib-lmes.ln
+CH3LLIB = $(EM)/modules/lib/llib-lch3.ln
+LINTLIBS =
+#LINTLIBS = $(CH3LLIB) $(EMMESLLIB) $(EMKLLIB) $(PRTLLIB) $(STRLLIB) $(SYSLLIB)
 
 # Where to install the compiler and its driver
 CEMCOM = $(DESTINATION)/cemcom
@@ -91,7 +102,7 @@ cem:	cem.c
 	$(CC) -O cem.c $(SYSLIB) -o cem
 
 lint.cem: cem.c
-	lint -abx cem.c
+	$(LINT) -bx cem.c
 
 hfiles: ./make.hfiles Parameters
 	./make.hfiles Parameters
@@ -176,7 +187,7 @@ lxref:
 lint:	lint.main lint.cem lint.tab
 
 lint.main: cfiles
-	lint -bx $(CDEFS) `sources $(OBJ)` >lint.out
+	$(LINT) -bx $(CDEFS) `sources $(OBJ)` $(LINTLIBS) >lint.out
 
 cchk:
 	cchk `sources $(COBJ)`
@@ -188,7 +199,7 @@ tab:
 	$(CC) tab.c -o tab
 
 lint.tab:
-	lint -abx tab.c
+	$(LINT) -abx tab.c
 
 sim:	cfiles
 	$(SIM) $(SIMFLAGS) `sources $(COBJ)` $(GSRC) $(LSRC)
