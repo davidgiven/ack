@@ -948,7 +948,7 @@ expr(int level, *val;) {       int     expr; } :
 	;
 
 factor(int *val;):
-          | '(' expr(1,val) ')'
+            '(' expr(1,val) ')'
           | '-' expr(MAXPRIO+1,val)
                                 {       *val = -*val; }
           | number(val)
