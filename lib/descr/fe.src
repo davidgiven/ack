@@ -29,7 +29,7 @@ name cem
 	callname cc
 end
 var PC_PCPATH={EM}/lib/pc_pem
-var PC_ERRPATH={EM}/etc/pc_rt_errors
+var PC_ERRPATH={EM}/etc/pc_errors
 name pc
 	from .p
 	to .k
