@@ -1,5 +1,4 @@
 Makefile
-README
 basic.g
 basic.lex
 bem.c
