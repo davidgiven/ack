@@ -16,7 +16,8 @@ compare:	all
 		$(COMPARE) man/em_code.3
 
 em_code.3:	em_code.3X
-		-sh -c 'if tbl < em_code.3X > em_code.3 ; then exit 0 ; else cp em_code.3X em_code.3 ; exit 0 ; fi'
+		-sh -c 'tbl < em_code.3X > em_code.3'
+		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
 libeme.a:	make.sh e/em_private.h e/em.c e/C_failed.c
 		EMHOME=$(EMHOME); export EMHOME; sh make.sh e
