@@ -1207,7 +1207,7 @@ end end;
 
 procedure temporary(fsp:sp;r:integer);
 begin inita(fsp,negaddr(fsp));
-  genreg(sizeof(fsp,wordmult),a.pos.ad,r)
+  if r>=0 then genreg(sizeof(fsp,wordmult),a.pos.ad,r)
 end;
 
 procedure genhol;
@@ -2780,7 +2780,8 @@ begin with b do begin
 	begin
 	  if not spset then
 	    begin spset:=true;
-	      temporary(nilptr,reg_pointer); ssp:=a.pos.ad;
+	      gencst(ps_mes,ms_gto); argend;
+	      temporary(nilptr,-1); ssp:=a.pos.ad;
 	      gencst(op_lor,1); store
 	    end;
 	  argdlb(llp^.labdlb); lino:=lino+1; genop(ps_rom);
