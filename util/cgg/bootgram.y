@@ -1876,7 +1876,12 @@ finishio() {
 		p=codestrings[i];
 		fprintf(cfile,"\t\"");
 		while (*p) {
-			fprintf(cfile, !isascii(*p) || iscntrl(*p) ? "\\%03o" : "%c", (*p)&BMASK);
+			register int c = (*p) & BMASK;
+			if (! isascii(c) || iscntrl(c)) {
+				fprintf(cfile,"\\%c%c%c",((c>>6) &03)+'0',
+					((c>>3)&07)+'0',(c&07)+'0');
+			}
+			else	putc(c, cfile);
 			p++;
 		}
 		fprintf(cfile,"\",\n");
@@ -1944,7 +1949,7 @@ finishio() {
 			c3coercs[i].c3_codep);
 	fprintf(cfile,"};\n\n");
 	for (i=0;i<nprops;i++) {
-		fprintf(cfile,"struct reginfo *rlist%02d[] = {\n",i);
+		fprintf(cfile,"struct reginfo *rlist%d[] = {\n",i);
 		for (j=2;j<=nmachregs;j++) {
 			if (machregs[j-1]->rregvar<0 && 
 			    (machprops[i].propset.set_val[j>>4]&(1<<(j&017))))
@@ -1954,7 +1959,7 @@ finishio() {
 	}
 	fprintf(cfile,"struct reginfo **reglist[] = {\n");
 	for (i=0;i<nprops;i++) {
-		fprintf(cfile,"\trlist%02d,\n",i);
+		fprintf(cfile,"\trlist%d,\n",i);
 	}
 	fprintf(cfile,"};\n");
 	fprintf(cfile,"unsigned cc1 = %u;\n",cc1);
