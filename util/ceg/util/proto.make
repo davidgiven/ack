@@ -12,14 +12,13 @@ all:
 install:
 	-mkdir $(CEGLIB)
 	-mkdir $(UTIL)
-	for i in $(UtilList) ; do cp $$i $(UTIL)/$$i ; done
+	for i in $(UtilList) ; do mk_makefile $(SRC_DIR)/$$i > $(UTIL)/$$i ; done
 	{ echo TARGET_HOME=$(TARGET_HOME); cat $(SRC_DIR)/install_ceg ; } > $(TARGET_HOME)/bin/install_ceg
 	chmod +x $(TARGET_HOME)/bin/install_ceg
 	{ echo TARGET_HOME=$(TARGET_HOME); echo SUF=$(SUF); echo LIBSUF=$(LIBSUF); cat $(SRC_DIR)/update_ceg ; } > $(TARGET_HOME)/bin/update_ceg
 	chmod +x $(TARGET_HOME)/bin/update_ceg
 
 cmp:
-	-for i in $(UtilList) ; do cmp $$i $(UTIL)/$$i ; done
 
 clean:
 
