@@ -107,6 +107,11 @@ domacro()
 		case K_UNDEF:				/* "undef"	*/
 			do_undef();
 			break;
+		case K_PRAGMA:				/* "pragma"	*/
+			/*	ignore for now
+			*/
+			SkipRestOfLine();
+			break;
 		default:
 			/* invalid word seen after the '#'	*/
 			lexerror("%s: unknown control", tk.tk_idf->id_text);

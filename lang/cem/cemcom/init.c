@@ -29,6 +29,7 @@ PRIVATE struct mkey	{
 	{"include",	K_INCLUDE},
 	{"line",	K_LINE},
 	{"undef",	K_UNDEF},
+	{"pragma",	K_PRAGMA},
 	{0,		K_UNKNOWN}
 };
 
