@@ -51,7 +51,8 @@ register FILE *fp;
 		return NULL;
 	}
 	fp->_count = 0;
-	if (fp->_buf && (flags | IO_WRITEMODE)) fp->_count = BUFSIZ;
+	if (fp->_buf && !(flags & IO_UNBUFF) && (flags & IO_WRITEMODE)) 
+		fp->_count = BUFSIZ;
 	fp->_fd = fd;
 	fp->_flags = flags;
 	return(fp);
