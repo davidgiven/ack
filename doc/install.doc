@@ -33,6 +33,10 @@ Installation on machine's without this feature, like PDP 11/34,
 PDP 11/60 requires extensive surgery on some programs and is
 thought of as impossible.
 See section 7 for installation on other systems.
+.PP
+On small machines, like the PDP-11, the Modula-2 front-end is only available
+for 2 byte integer, 2 byte pointer machines, so you can not cross-compile
+Modula-2 programs for f.i. a MC68000, on a PDP-11.
 .NH
 Restoring tree
 .PP
