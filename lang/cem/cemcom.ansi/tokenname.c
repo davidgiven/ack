@@ -102,13 +102,6 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 
 #ifdef	____
 struct tokenname tkfunny[] =	{	/* internal keywords */
-/* The following may be removed after testing:
-	{Q_VOID, "void"},
-	{Q_CHAR, "char"},
-	{Q_INT, "int"},
-	{Q_FLOAT, "float"},
-	{Q_DOUBLE, "double"},
-*/
 	{LNGDBL, "long double"},
 	{ULONG, "unsigned long"},
 
@@ -116,7 +109,6 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{FUNCTION, "function"},
 	{POINTER, "pointer"},
 	{FIELD, "field"},
-	{NEWLINE, "newline"},
 
 	{GLOBAL, "global"},
 	{IMPLICIT, "implicit"},
