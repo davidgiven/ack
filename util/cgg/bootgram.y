@@ -22,22 +22,31 @@ static char rcsid[]="$Header$";
  * Author: Hans van Staveren
  */
 
+#ifdef vax | vax2 | vax4
+#define BIG
+#endif
+
+#ifdef BIG
+#define BORS(x,y) x
+#else
+#define BORS(x,y) y
+#endif
 /* Tunable constants */
 
 #define MAXALLREG 5             /* Maximum number of allocates per rule */
-#define MAXREGS 32              /* Total number of registers */
+#define MAXREGS BORS(36,32)     /* Total number of registers */
 #define MAXREGVARS 8		/* Maximum regvars per type */
 #define MAXPROPS 16             /* Total number of register properties */
-#define MAXTOKENS 32            /* Different kind of tokens */
-#define MAXSETS 80              /* Number of tokenexpressions definable */
+#define MAXTOKENS BORS(75,32)   /* Different kind of tokens */
+#define MAXSETS BORS(100,80)    /* Number of tokenexpressions definable */
 #define MAXEMPATLEN 25		/* Maximum length of EM-pattern/replacement */
 #define TOKENSIZE 5             /* Maximum number of fields in token struct */
-#define MAXINSTANCE 120         /* Maximum number of different tokeninstances */
-#define MAXSTRINGS 400          /* Maximum number of different codestrings */
-#define MAXPATTERN 6000         /* Maximum number of bytes in pattern[] */
-#define MAXNODES 350            /* Maximum number of expression nodes */
+#define MAXINSTANCE BORS(175,120) /* Maximum number of different tokeninstances */
+#define MAXSTRINGS BORS(600,400)/* Maximum number of different codestrings */
+#define MAXPATTERN BORS(7000,6000) /* Maximum number of bytes in pattern[] */
+#define MAXNODES BORS(450,350)  /* Maximum number of expression nodes */
 #define MAXMEMBERS 2            /* Maximum number of subregisters per reg */
-#define NMOVES 30               /* Maximum number of move definitions */
+#define NMOVES BORS(50,30)      /* Maximum number of move definitions */
 #define MAXC1   20              /* Maximum of coercions type 1 */
 #define MAXC2   20              /* Maximum of coercions type 2 */
 #define MAXC3   20              /* Maximum of coercions type 3 */
@@ -279,9 +288,15 @@ int rvnumbers[4][MAXREGVARS];	/* The register numbers */
 %nonassoc '$'
 %%
 machinespec
-	: constants registersection tokensection
+	: rcsid constants registersection tokensection
 		{ inbetween(); }
 	  expressionsection codesection movesection testsection stacksection
+	;
+
+rcsid
+	: /* empty */
+	| STRING
+		{ strlookup($1); }
 	;
 
 constants
