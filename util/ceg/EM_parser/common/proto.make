@@ -13,7 +13,7 @@ OFILES = pars.$(SUF) Lpars.$(SUF) scan.$(SUF) mylex.$(SUF) default.$(SUF) \
 	 C_instr2.$(SUF) help.$(SUF) eval.$(SUF) action.$(SUF)
 
 IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I. -I$(SRC_DIR)
-CFLAGS = $(COPTIONS) $(IFILES)
+CFLAGS = $(COPTIONS) $(IFILES) -DNDEBUG
 
 all :	dummy
 	make $(OFILES)

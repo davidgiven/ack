@@ -73,7 +73,7 @@ char *str;
 header( instr)
 char *instr;
 {
-	out( "%s%s", instr, C_instr_info->header);
+	out( "void %s%s", instr, C_instr_info->header);
 	def_admn( instr);
 }
 
