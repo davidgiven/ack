@@ -131,7 +131,8 @@ define(id, scope, kind)
 			/* An opaque type. We may now have found the
 			   definition of this type.
 			*/
-			if (kind == D_TYPE && !DefinitionModule) {
+			if (kind == D_TYPE && df->df_scope == CurrentScope &&
+			    !DefinitionModule) {
 				df->df_kind = D_TYPE;
 				return df;
 			}
