@@ -425,7 +425,7 @@ flt_flt2str(e, buf, bufsize)
 	char *buf;
 {
 
-#define NDIG	20
+#define NDIG	19
 	int sign, dp;
 	register int i;
 	register char *s1;
