@@ -10,5 +10,5 @@ C_ms_reg.c
 C_ms_src.c
 C_ms_std.c
 C_ms_stb.c
-Makefile
+proto.make
 em_mes.3

@@ -11,10 +11,8 @@ do
 		exit 1
 	fi
 done
-echo "+$cc $cflags -I../read_em C_out.c"
-if $cc $cflags -I../read_em C_out.c ; then : ; else exit 1 ; fi
-echo "+$ar rc libem$target.$libsuf $list"
-if $ar rc libem$target.$libsuf $list
+echo "+$ar r libem$target.$libsuf $list"
+if $ar r libem$target.$libsuf $list
 then
 	:
 else

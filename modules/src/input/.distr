@@ -1,6 +1,6 @@
 AtEoIF.c
 AtEoIT.c
-Makefile
+proto.make
 inp_pkg.body
 inp_pkg.spec
 input.3

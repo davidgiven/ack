@@ -1,4 +1,4 @@
-Makefile
+proto.make
 C_out.c
 bhcst.c
 bhdlb.c

@@ -1,4 +1,4 @@
-Makefile
+proto.make
 bts2str.c
 btscat.c
 btscmp.c

@@ -1,4 +1,4 @@
-Makefile
+proto.make
 aux.c
 em_nopt.6
 em_opt.3
