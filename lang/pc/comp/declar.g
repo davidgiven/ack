@@ -21,7 +21,6 @@
 #include	"type.h"
 #include	"dbsymtab.h"
 
-#define	offsetof(type, field)	(int) &(((type *)0)->field)
 #define	PC_BUFSIZ	(sizeof(struct file) - (int)((struct file *)0)->bufadr)
 
 int proclevel = 0;		/* nesting level of procedures */

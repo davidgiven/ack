@@ -9,6 +9,8 @@
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<system.h>
+#include	<print.h>
 
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -24,6 +26,7 @@
 #include	"type.h"
 
 extern char *symbol2str();
+STATIC int ChkUnOper();
 
 STATIC
 Xerror(nd, mess)
@@ -728,7 +731,6 @@ ChkVarPar(nd, name)
 	*/
 	static char err_mes[80];
 	char *message = (char *) 0;
-	extern char *sprint();
 
 	if( !ChkVariable(nd) ) return 0;
 
