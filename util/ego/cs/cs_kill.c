@@ -224,6 +224,12 @@ STATIC kill_local(enp, indir)
 					}
 				}
 				break;
+			case ENALOCBASE:
+			case ENAARGBASE:
+				if (enp->en_loc == 0 && rep->en_levels >= 1) {
+					rep->en_vn = newvalnum();
+				}
+				break;
 		}
 	}
 }

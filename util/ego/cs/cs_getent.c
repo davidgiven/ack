@@ -210,8 +210,11 @@ entity_p getentity(lnp, l_out)
 			break;
 		case ENALOCBASE:
 		case ENAARGBASE:
-			en.en_static = TRUE;
 			en.en_levels = off_set(lnp);
+			if (en.en_levels == 0) {
+				/* otherwise the program could change it */
+				en.en_static = TRUE;
+			}
 			break;
 		case ENPROC:
 			en.en_pro = PROC(lnp);
