@@ -872,8 +872,11 @@ UseWarnings(df)
 					node_warning(
 						df->df_scope->sc_end,
 						W_ORDINARY,
-						"identifier \"%s\" imported but not used/assigned",
-						df->df_idf->id_text);
+						"identifier \"%s\" imported but not %s",
+						df->df_idf->id_text,
+						df1->df_kind == D_VARIABLE ?
+							"used/assigned" :
+							"used");
 				}
 				return;
 			}

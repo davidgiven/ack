@@ -427,6 +427,7 @@ again:
 				}
 				else {
 					state = End;
+					ch = 'D';
 					PushBack();
 				}
 				break;
