@@ -335,7 +335,7 @@ _Xsetgid:	move.l	(sp)+,.retaddr
 		bra	sys3
 
 _Xgetgid:	move.l	(sp)+,.retaddr
-		jsr	_getpid
+		jsr	_getgid
 		bra	sys7
 
 _Xsignal:	move.l	(sp)+,.retaddr
