@@ -6,7 +6,7 @@ break = 17
 
 _sbrk:
 	.data2	0x0000
-	movl	Ind,r0
+	movl	.limhp,r0
 	tstl	4(ap)
 	jeql	3f
 	addl3	r0,4(ap),-(sp)
@@ -19,8 +19,8 @@ _sbrk:
 1:
 	jmp 	cerror
 2:
-	movl	Ind,r0
-	addl2	4(r3),Ind
+	movl	.limhp,r0
+	addl2	4(r3),.limhp
 3:
 	ret
 
@@ -32,9 +32,6 @@ _brk:
 	bcc 	1f
 	jmp 	cerror
 1:
-	movl	4(ap),Ind
+	movl	4(ap),.limhp
 	clrl	r0
 	ret
-
-	.sect .data
-Ind:	.data4	_end
