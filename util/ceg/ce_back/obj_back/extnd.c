@@ -119,3 +119,12 @@ int d;
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
+
+
+char *extnd_main( d)
+int d;
+{
+	string_lengte = mysprint( "%cmcnt%x", GENLAB, d);
+        index_symbol_table = find_sym( string, STORE_STRING);
+	return( symbol_table[ index_symbol_table].on_foff + string_area);
+}

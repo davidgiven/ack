@@ -109,3 +109,11 @@ int d;
 	sprint( name, "cont%x", d);
 	return( name);
 }
+
+
+char *extnd_main( d)
+int d;
+{
+	sprint( name, "main%x", d);
+	return( name);
+}
