@@ -215,13 +215,12 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		else	df = new_def();
 		pr->par_def = df;
 		df->df_type = type;
-		df->df_flags |= (VARp | D_DEFINED);
-		if (df->df_flags & D_VARPAR) df->df_flags |= D_USED;
+		df->df_flags |= VARp;
 
 		if (IsConformantArray(type)) {
 			/* we need room for the base address and a descriptor
 			*/
-			*off += pointer_size + 3 * word_size;
+			*off += pointer_size + word_size + dword_size;
 		}
 		else if (VARp == D_VARPAR) {
 			*off += pointer_size;

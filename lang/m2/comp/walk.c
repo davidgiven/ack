@@ -897,24 +897,33 @@ UseWarnings(df)
 	if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST))) {
 		return;
 	}
-	switch(df->df_flags & (D_USED|D_DEFINED)) {
+	switch(df->df_flags & (D_USED|D_DEFINED|D_VALPAR|D_VARPAR)) {
 	case 0:
+	case D_VALPAR:
+	case D_VARPAR:
 		warning = "never used/assigned";
+		break;
+	case D_USED|D_VARPAR:
+		warning = "never assigned, could be value parameter";
 		break;
 	case D_USED:
 		warning = "never assigned";
 		break;
 	case D_DEFINED:
+	case D_DEFINED|D_VALPAR:
 		warning = "never used";
 		break;
-	case D_USED|D_DEFINED:
+	default:
 		return;
 	}
 warn:
 	if (warning) {
 		node_warning(df->df_scope->sc_end,
 			     W_ORDINARY,
-			     "identifier \"%s\" %s",
+			     "%s \"%s\" %s",
+			     (df->df_flags & D_VALPAR) ? "value parameter" :
+			      (df->df_flags & D_VARPAR) ? "variable parameter" :
+			       "identifier",
 			     df->df_idf->id_text, warning);
 	}
 }
