@@ -200,16 +200,20 @@ add_exponent(e, exp)
 	int neg = exp < 0;
 	int divsz, modsz;
 	flt_arith x;
+	int	status;
 
 	if (neg) exp = -exp;
 	divsz = exp / SMALLSZ;
 	modsz = exp % SMALLSZ;
 	flt_mul(e, (neg ? r_10pow : s10pow) + modsz, &x);
+	if (flt_status) status = flt_status;
 	while (divsz >= BIGSZ) {
 		flt_mul(&x, neg ? &r_big_10pow[BIGSZ-1] : &big_10pow[BIGSZ-1],&x);
+		if (flt_status) status = flt_status;
 		divsz -= BIGSZ-1;
 	}
 	flt_mul(&x, (neg ? r_big_10pow : big_10pow) + divsz, e);
+	if (flt_status) status = flt_status;
 }
 
 flt_str2flt(s, e)
