@@ -26,10 +26,11 @@ struct descr {
 static struct descr *descrs[10];
 static struct descr **ppdescr = descrs;
 
-char *
-new_stackptr(pdescr, a)
-	register struct descr *pdescr;
+pcnt
+new_stackptr(pdscr, a)
+	struct descr *pdscr;
 {
+	register struct descr *pdescr = pdscr;
 	pcnt size = (((pdescr->highminlow + 1) * pdescr->size +
 				(EM_WSIZE - 1)) & ~(EM_WSIZE - 1));
 
@@ -38,16 +39,17 @@ new_stackptr(pdescr, a)
 		TRP(M2_TOOMANY);
 	}
 	*ppdescr++ = pdescr;
-	if ((char *) &a - (char *) &size > 0) {
+	if ((char *) &a - (char *) &pdscr > 0) {
 		/* stack grows downwards */
-		return (char *) &a - size;
+		return - size;
 	}
-	else	return (char *) &a + size;
+	return size;
 }
 
-copy_array(p, a)
-	register char *p;
+copy_array(pp, a)
+	char *pp;
 {
+	register char *p = pp;
 	register char *q;
 	register pcnt sz;
 	char dummy;
@@ -55,7 +57,7 @@ copy_array(p, a)
 	ppdescr--;
 	sz = ((*ppdescr)->highminlow + 1) * (*ppdescr)->size;
 	
-	if ((char *) &a - (char *) &dummy > 0) {
+	if ((char *) &a - (char *) &pp > 0) {
 		(*ppdescr)->addr = q = (char *) &a;
 	}
 	else	(*ppdescr)->addr = q = (char *) &a - 
