@@ -23,6 +23,7 @@
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_spec.h"
 #include "../../../h/em_flag.h"
+#include "../../../h/em_mes.h"
 #include "../share/def.h"
 #include "cf.h"
 #include "cf_succ.h"
@@ -302,6 +303,17 @@ STATIC interproc_analysis(p)
 		   case op_lxl:
 		   case op_lxa:
 			curproc->p_flags1 |= PF_ENVIRON;
+			break;
+		   case op_lor:
+		   case op_str:
+			if (SHORT(lnp) == 0) {
+				curproc->p_flags1 |= PF_ENVIRON;
+			}
+			break;
+		   case ps_mes:
+			if (aoff(ARG(lnp),0) == ms_gto) {
+				ENTERED_WITH_GTO(curproc);
+			}
 			break;
 		}
 	   }

@@ -236,7 +236,9 @@ control_flow(head)
 		} else {
 		   if (!IS_RETURN(instr)) {
 			if (IS_UNCOND_JUMP(instr)) {
-				succeeds(TARGET(lnp),b);
+				if (instr != op_gto) {
+					succeeds(TARGET(lnp),b);
+				}
 			} else {
 				if (IS_COND_JUMP(instr)) {
 					succeeds(TARGET(lnp),b);
