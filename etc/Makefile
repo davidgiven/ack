@@ -11,6 +11,9 @@ $c/em_pseu.c \
 $c/em_mnem.c
 
 $(FILES):       em_table
+		-mkdir $d/h
+		-mkdir $d/util
+		-mkdir $d/util/data
 		new_table $h $c
 
 install:	$(FILES)
