@@ -257,7 +257,7 @@ intrf() {
 	if ( debug>=3 ) {
 		register list_elem *elem ;
 		vprint("%s: from %s to %s '%s'\n",
-			new->t_name,new->t_in,new->t_out,new->t_prog) ;
+			new->t_name,new->t_in ? new->t_in : "(null)",new->t_out,new->t_prog) ;
 		vprint("\targs: ") ; prns(new->t_argd) ;
 		scanlist( l_first(new->t_mapf), elem ) {
 			vprint("\t%s\n",l_content(*elem)) ;
