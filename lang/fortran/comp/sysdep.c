@@ -350,8 +350,12 @@ dsort(from, to)
 #else
 
  static int
+#ifdef __STDC__
+compare(const void *a, const void *b)
+#else
 compare(a,b)
  char *a, *b;
+#endif
 { return strcmp(*(char **)a, *(char **)b); }
 
 dsort(from, to)
