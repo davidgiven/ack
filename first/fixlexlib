@@ -57,7 +57,8 @@ Xsucces)
 	for i in ../util/opt ../util/cgg ../util/ncgg ../lang/occam/comp
 	do
 	    (	cd $i
-		ed - Makefile << EOF
+		cp Makefile makefile
+		ed - makefile << EOF
 /^LEXLIB/c
 LEXLIB = $LEX
 .

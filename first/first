@@ -34,7 +34,7 @@ echo "/tmp and /usr/tmp ok"
 echo setting ACK HOME Directory in ../h/em_path.h ...
 rm -f em_path.h
 HM=`cd ..; pwd`
-sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"$HM\"@" <../h/em_path.h >em_path.h
+sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"$HM\"@" <em_path.h.src >em_path.h
 if cmp ../h/em_path.h em_path.h >/dev/null 2>&1
 then
 	: Don't touch ../h/em_path.h, it's already correct
@@ -118,6 +118,8 @@ fi
 : "Take action according to the system used"
 : 'Prevent the use of the system assembler on for certain systems'
 : 'prevent the use of ranlib on pdp 11s'
+cp ../lib/vax4/descr.src ../lib/vax4/descr
+cp ../lib/descr/fe.src ../lib/descr/fe
 echo "take some actions according to system used ..."
 case `ack_sys` in
 pdp_*)		RMD="vax4"
@@ -134,7 +136,6 @@ do
 	echo "disabling use of local assembler and loader for $i"
 	if grep '^name as$' descr >/dev/null 2>&1
 	then
-	cp descr descr.orig
 ed - descr <<'ABC'
 /^name as$/;/^end$/d
 /^name ld$/;/^end$/d
@@ -146,7 +147,6 @@ ABC
 done
 case `ack_sys` in
 vax_bsd4_2)	( cd ../lib/vax4
-		  cp descr descr.orig
 		  ed - descr <<'ABC'
 /CPP_F/s/$/ -D__BSD4_2/
 w
@@ -155,7 +155,6 @@ ABC
 		)
 		;;
 vax_sysV_2)	( cd ../lib/vax4
-		  cp descr descr.orig
 		  ed - descr <<'ABC'
 /CPP_F/s/$/ -D__USG/
 w
@@ -182,7 +181,7 @@ SMALL)		ACM=i86 ; BM = 0 ; SYS=SYS_5 ;;
 *)		ACM=m68k2 ; SYS=SYS_5 ;;
 esac
 rm -f local.h
-sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < ../h/local.h >local.h
+sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < local.h.src >local.h
 if cmp -s ../h/local.h local.h
 then
 	echo "../h/local.h already correct"
@@ -236,7 +235,7 @@ xenix3)
 	echo 'not recognize its own line directives.'
 	echo 'You can remove this "cc" script from the EM bin directory'
 	echo 'when installation is done.'
-	cp cc.xenix cc.xenix.orig
+	cp cc.xenix.src cc.xenix
 	ed - cc.xenix <<ABC
 /EMHOME/s/=.*/=$HM/
 w
@@ -246,17 +245,17 @@ ABC
 	chmod +x ../bin/cc
 	echo "code-generators and peephole optimizer need more stack than the default."
 	echo "adapting LDFLAGS in Makefiles"
-	for i in ../mach/*/*cg/Makefile
+	for i in ../mach/*/*cg
 	do
-		cp $i $i.orig
-		ed - $i <<ABC
+		cp $i/Makefile $i/makefile
+		ed - $i/makefile <<ABC
 /LDFLAGS/s/$/ -F 3000/
 w
 q
 ABC
 	done
-	cp ../util/opt/Makefile ../util/opt/Makefile.orig
-	ed - ../util/opt/Makefile <<ABC
+	cp ../util/opt/Makefile ../util/opt/makefile
+	ed - ../util/opt/makefile <<ABC
 /LDFLAGS/s/$/-F 2000/
 w
 q
@@ -266,7 +265,13 @@ ABC
 	do
 		if grep -s "name asopt" $i
 		then
-			cp $i $i.top
+			if [ -f $i.top ]
+			then
+				:
+			else
+				mv $i $i.top
+			fi
+			cp $i.top $i
 			ed - $i <<ABC
 /name asopt/;/^end/d
 w
@@ -277,9 +282,9 @@ ABC
 	echo "the -l option in cc command puts library in wrong place."
 	echo "this is a problem with the lex library for the occam compiler."
 	echo "changing Makefile for Occam compiler"
-	cp ../lang/occam/comp/Makefile ../lang/occam/comp/Makefile.orig
-	ed - ../lang/occam/comp/Makefile <<ABC
-/LEXLIB/s.-l[a-z]*./lib/Slibl.a.
+	cp ../lang/occam/comp/Makefile ../lang/occam/comp/makefile
+	ed - ../lang/occam/comp/makefile <<ABC
+/LEXLIB/s;-l.*;/lib/Slibl.a;
 w
 q
 ABC
@@ -290,20 +295,20 @@ X0)
 	echo "set some installation pararmeters for small machines"
 	( cd ../lang/cem/cemcom
 	  cp SmallPars Parameters
-	  cp makefile makefile.orig
+	  cp Makefile makefile
 	  ed - makefile <<ABC
 /MALLOC/s/=/=#/
 w
 q
 ABC
 	  cd ../../../util/cpp
-	  ed - Makefile <<ABC
+	  cp Makefile makefile
+	  ed - makefile <<ABC
 /MALLOC/s/=/=#/
 w
 q
 ABC
 	  cd ../../lib/descr
-	  cp fe fe.orig
 	  ed - fe << ABC
 /em_cemcom/i
 	prep always
@@ -322,7 +327,13 @@ ABC
 	)
 	done
 	( cd ../modules/src/malloc
-	  cp param.h param.h.orig
+	  if [ -f param.h.orig ]
+	  then
+		:
+	  else
+	  	mv param.h param.h.orig
+	  fi
+	  cp param.h.orig param.h
 	  ed - param.h <<ABC
 /STORE/s/define/undef/
 w
@@ -331,8 +342,8 @@ ABC
 	)
 	( cd ../lang/m2/comp
 	  cp SmallPars Parameters
-	  cp Makefile Makefile.orig
-	  ed - Makefile <<ABC
+	  cp Makefile makefile
+	  ed - makefile <<ABC
 /MALLOC/s/=/=#/
 w
 q
@@ -342,7 +353,13 @@ ABC
 	  : machines with word or pointer size not 2
 	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
 	  do
-	  cp $i/Action $i/Action.orig
+	  if [ -f $i/Action.orig ]
+	  then
+		:
+	  else
+		mv $i/Action $i/Action.orig
+	  fi
+	  cp $i/Action.orig $i/Action
 	  ed - $i/Action <<ABC
 /odula-2/;/^end/s/^/!/
 w
@@ -351,7 +368,13 @@ ABC
 	  done
 	)
 	( cd ..
-	  cp Action Action.orig
+	  if [ -f Action.orig ]
+	  then
+		:
+	  else
+		mv Action Action.orig
+	  fi
+	  cp Action.orig Action
 	  ed - Action <<ABC
 /EM interpreter in C/;/^end/s/^/!/
 w

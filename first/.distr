@@ -4,4 +4,6 @@ first
 did_first
 myecho.c
 fixlexlib
-cc.xenix
+cc.xenix.src
+local.h.src
+em_path.h.src
