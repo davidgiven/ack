@@ -570,7 +570,10 @@ DoSIGz()
 
 	LOG(("@M6 DoSIGz()"));
 	spoilFRA();
-	npush(TrapPI, psize);
+	if (OnTrap == TR_HALT) {
+		npush(-2L, psize);
+	}
+	else	npush(TrapPI, psize);
 	if (tpi == -2) {
 		OnTrap = TR_HALT;
 		TrapPI = 0;

@@ -1,3 +1,6 @@
+26-Jan-90  Ceriel Jacobs (ceriel) at ceriel
+	Fixed so that two consecutive SIG's have no effect.
+
  8-Dec-89  Ceriel Jacobs (ceriel) at ceriel
 	Bug fix: one of the many ZRL encodings was decoded wrong.
 
