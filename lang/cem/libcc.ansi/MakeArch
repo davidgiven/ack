@@ -37,6 +37,7 @@ then
 	echo MakeArch >> OLIST
 	echo Makefile >> OLIST
 	echo make.proto >> OLIST
+	echo head_ac.e >> OLIST
 fi
 
 DIRS=`cat LIST`

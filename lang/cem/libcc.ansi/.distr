@@ -4,6 +4,7 @@ Makefile
 assert
 ctype
 errno
+head_ac.e
 headers
 locale
 make.proto

@@ -21,6 +21,13 @@ clean:
 	(cd ctype; make clean)
 	(cd stdlib; make clean)
 
+headcp:	head
+	../../install head_$(PREF).$(SUF) head_$(PREF)
+	rm -f head_$(PREF).$(SUF)
+
+head:	head_$(PREF).e
+	make -r -f make.proto "CC=$(MACH)" "CFLAGS=-I$(EMHOME)/h $(MACHFL)" head_$(PREF).$(SUF)
+
 tail:	lib
 
 tailcp: tail
