@@ -3,7 +3,7 @@ OBJLIB=$(EMHOME)/modules/lib/libobject.a
 
 head:	cv
 
-cv:	conv.c
+cv:	cv.c
 	$(CC) -I$(EMHOME)/h -o cv cv.c $(OBJLIB)
 
 install:	head
