@@ -1,7 +1,6 @@
 #include <ctype.h>
 #include <system.h>
 #include "em_decl.h"
-#include "as.h"
 
 /* This file contains the assemble routine that generates assembly code.
  * As 'str' is in assembly format this is a easy job. Only operands 
@@ -32,8 +31,9 @@ char *str;
 			      	else {  
 					nr = atoi( str+1) - 1;
 					*b_ptr = '\0';
-					out( "%s%s\", %s);", buf,
+					out( "%s%s\", %s%s);", buf,
 						   arg_format( nr),
+						   C_instr_info->arg_type[nr] == ARITH ? "(long)" : "",
 						   C_instr_info->arg_conv[nr]);
 				        out( "fprint( codefile,\"");
 					b_ptr = buf;
@@ -53,8 +53,9 @@ char *arg_format( nr)
 int nr;
 {
 	switch ( C_instr_info->arg_type[nr]) {
-	  case ARITH : return( ARITH_FMT);
+	  case ARITH : return( "%ld");
 	  case STRING: return( "%s");
-	  case INT   : return( INT_FMT);
+	  case INT   : return( "%d");
 	}
+	/*NOTREACHED*/
 }
