@@ -20,7 +20,8 @@ _pfloat(r,s,n,b)
 	if (dp<=0)
 		*s++ = '0';
 	for (i=dp; i>0; i--)
-		*s++ = *s1++;
+		if (*s1) *s++ = *s1++;
+		else *s++ = '0';
 	if ((i=n) > 0)
 		*s++ = '.';
 	while (++dp <= 0) {
@@ -29,7 +30,8 @@ _pfloat(r,s,n,b)
 		*s++ = '0';
 	}
 	while (--i >= 0)
-		*s++ = *s1++;
+		if (*s1) *s++ = *s1++;
+		else *s++ = '0';
 	return(s);
 }
 
@@ -46,7 +48,8 @@ char *_pscien(r,s,n,b) float r; register char *s; {
 	*s++ = *s1++;
 	*s++ = '.';
 	while (--n>0)
-		*s++ = *s1++;
+		if (*s1) *s++ = *s1++;
+		else *s++ = '0';
 	*s++ = 'e';
 	if ( r ) --dp ;
 	if ( dp<0 ) {
