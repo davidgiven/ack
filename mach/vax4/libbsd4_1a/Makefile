@@ -1,30 +1,31 @@
 # $Header$
+all:            head_em.o libmon_o.a
+
 install:	cp
 
 cp:             all
-		../../install head_em
-		../../install tail_mon
-		rm -f head_em tail_mon
+		../../install head_em.o head_em
+		../../install libmon_o.a tail_mon
 
 cmp:            all
-		-../../compare head_em
-		-../../compare tail_mon
-		rm -f head_em tail_mon
+		-../../compare head_em.o head_em
+		-../../compare libmon_o.a tail_mon
 
-all:            head_em tail_mon
 
-head_em:        head_em.s
-		vax4 -I../../../h -c head_em.s ; mv head_em.o head_em
+head_em.o:      head_em.s
+		vax4 -I../../../h -c head_em.s
 
-tail_mon:
+libmon_o.a:	libmon_s.a
 		ASAR=ar ; export ASAR ;\
 		RANLIB=ranlib ; export RANLIB ;\
-		march . tail_mon
+		march . libmon_o.a
 
 clean:
-		rm -f *.o
+		rm -f *.o libmon_o.a
+
 opr:
 		make pr | opr
+
 pr:
 		@pr `pwd`/Makefile `pwd`/head_em.s
-		@pr -l33 `tail +1 LIST|sort`
+		@arch pv libmon_s.a | pr -h `pwd`/libmon_s.a
