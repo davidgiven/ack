@@ -3,7 +3,6 @@ static char rcsid[] = "$Header$";
 #endif
 
 #include <stdio.h>
-#include <signal.h>
 #include <out.h>
 #include "const.h"
 
@@ -21,16 +20,6 @@ stop()
 	}
 
 	exit(exitstatus);
-}
-
-trap_signals()
-{
-	static int	trap_them[] = { SIGHUP, SIGINT, SIGQUIT, SIGTERM, 0 };
-	register int	*ip;
-
-	for (ip = trap_them; *ip; ip++)
-		if (signal(*ip, stop) == SIG_IGN)
-			signal(*ip, SIG_IGN);	/* Oops, reset. */
 }
 
 /* VARARGS1 */

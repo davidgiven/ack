@@ -35,7 +35,6 @@ beginoutput()
 		outhead.oh_nname = NLocals + NGlobals + outhead.oh_nsect;
 		outhead.oh_nchar = NLChars + NGChars;
 	}
-	trap_signals();
 	if (!incore)
 		begin_write();
 }
