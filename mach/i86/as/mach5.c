@@ -11,7 +11,7 @@ ea_1(param) {
 	emit1(mrg_1 | param);
 	switch(mrg_1 >> 6) {
 	case 0:
-		if (mrg_1 == 6) {
+		if (mrg_1 == 6 || (mrg_1 & 040)) {
 #ifdef RELOCATION
 			RELOMOVE(relonami, rel_1);
 			newrelo(exp_1.typ, RELO2);
@@ -138,7 +138,12 @@ addop(opc) register opc; {
 	if (mrg_2 >= 0300) {
 		emit1(opc); ea_1((mrg_2&7)<<3);
 	} else if ((mrg_2 & 040) && mrg_1 == 0300) {
-		emit1(opc | 4); emitx((opc&1)+1,exp_2.val);
+		emit1(opc | 4);
+#ifdef RELOCATION
+		RELOMOVE(relonami, rel_2);
+		newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+		emitx(exp_2.val, (opc&1)+1);
 	} else if (mrg_2 & 040) {
 		if ((opc&1) == 0) {
 			emit1(0200);
@@ -148,9 +153,15 @@ addop(opc) register opc; {
 		} else {
 			emit1(0203); opc &= ~1;
 		}
-		ea_1(opc & 070); emitx((opc&1)+1,exp_2.val);
+		ea_1(opc & 070);
+#ifdef RELOCATION
+			RELOMOVE(relonami, rel_2);
+			newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+		emitx(exp_2.val, (opc&1)+1);
 	} else if (mrg_1 >= 0300) {
-		emit1(opc | 2); ea_2((mrg_1&7)<<3);
+		emit1(opc | 2);
+		ea_2((mrg_1&7)<<3);
 	} else
 		badsyntax();
 }
@@ -185,6 +196,7 @@ callop(opc) register opc; {
 	regsize(1);
 	if (mrg_1 & 040) {
 		if (opc == (040+(0351<<8))) {
+			RELOMOVE(relonami, rel_1);
 			branch(0353,exp_1);
 		} else {
 			exp_1.val -= (DOTVAL+3);
@@ -219,9 +231,20 @@ test(opc) register opc; {
 	if ((mrg_1 & 040) || mrg_2 >= 0300)
 		reverse();
 	if ((mrg_2 & 040) && mrg_1 == 0300) {
-		emit1(0250 | opc); emitx((opc&1)+1,exp_2.val);
+		emit1(0250 | opc);
+#ifdef RELOCATION
+			RELOMOVE(relonami, rel_2);
+			newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+		emitx(exp_2.val, (opc&1)+1);
 	} else if (mrg_2 & 040) {
-		emit1(0366 | opc); ea_1(0<<3); emitx((opc&1)+1,exp_2.val);
+		emit1(0366 | opc);
+		ea_1(0<<3);
+#ifdef RELOCATION
+			RELOMOVE(relonami, rel_2);
+			newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+		emitx(exp_2.val, (opc&1)+1);
 	} else if (mrg_1 >= 0300) {
 		emit1(0204 | opc); ea_2((mrg_1&7)<<3);
 	} else
@@ -238,10 +261,18 @@ mov(opc) register opc; {
 	} else if (mrg_2 & 040) {
 		if (mrg_1 >= 0300) {
 			emit1(0260 | opc<<3 | (mrg_1&7)); 
-			emitx((opc&1)+1,exp_2.val);
+#ifdef RELOCATION
+			RELOMOVE(relonami, rel_2);
+			newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+			emitx(exp_2.val, (opc&1)+1);
 		} else {
 			emit1(0306 | opc); ea_1(0<<3); 
-			emitx((opc&1)+1,exp_2.val);
+#ifdef RELOCATION
+			RELOMOVE(relonami, rel_2);
+			newrelo(exp_2.typ, (opc&1)? RELO2 : RELO1);
+#endif
+			emitx(exp_2.val, (opc&1)+1);
 		}
 	} else if (mrg_2 == 0300 && mrg_1 == 6) {
 		emit1(0242 | opc);
@@ -253,8 +284,8 @@ mov(opc) register opc; {
 	} else if (mrg_1 == 0300 && mrg_2 == 6) {
 		emit1(0240 | opc);
 #ifdef RELOCATION
-		RELOMOVE(relonami, rel_1);
-		newrelo(exp_1.typ, RELO2);
+		RELOMOVE(relonami, rel_2);
+		newrelo(exp_2.typ, RELO2);
 #endif
 		emit2(exp_2.val);
 	} else if (mrg_2 >= 0300) {

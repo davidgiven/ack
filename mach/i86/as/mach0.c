@@ -1,4 +1,3 @@
-#define DUK
 #define RCSID0 "$Header$"
 
 /*
@@ -6,5 +5,5 @@
  */
 #define	THREE_PASS	/* branch and offset optimization */
 #define	LISTING		/* enable listing facilities */
-#define RELOCATION
-#define NOLD
+#define RELOCATION	/* generate relocation info */
+#define DEBUG 0
