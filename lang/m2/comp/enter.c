@@ -393,10 +393,8 @@ EnterFromImportList(Idlist, FromDef)
 	for (; idlist; idlist = idlist->next) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
 		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope))) {
-			node_error(idlist, 
-			  "identifier \"%s\" not declared in qualifying module",
-			  idlist->nd_IDF->id_text);
-			df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
+		    not_declared("identifier", idlist, " in qualifying module");
+		    df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
 		}
 		else if (! (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 			node_error(idlist,

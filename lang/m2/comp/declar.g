@@ -219,7 +219,7 @@ ArrayType(struct type **ptp;)
 RecordType(struct type **ptp;)
 {
 	register struct scope *scope;
-	arith size;
+	arith size = 0;
 	int xalign = struct_align;
 }
 :
@@ -301,9 +301,10 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			  	}
 			  	df->df_type = tp;
 			  	df->fld_off = align(*cnt, tp->tp_align);
-			  	*cnt = tcnt = df->fld_off + tp->tp_size;
+			  	*cnt = df->fld_off + tp->tp_size;
 			  	df->df_flags |= D_QEXPORTED;
 			  }
+			  tcnt = *cnt;
 			}
 	OF variant(scope, &tcnt, tp, palign)
 			{ max = tcnt; tcnt = *cnt; }

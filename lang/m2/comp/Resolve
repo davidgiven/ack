@@ -1,3 +1,6 @@
+: create a directory Xsrc with name clashes resolved
+: and run make in that directory
+
 case $# in
 1)	
 	;;
@@ -6,7 +9,7 @@ case $# in
 	;;
 esac
 case $1 in
-main|Xlint)
+../comp/main|Xlint)
 	;;
 *)	echo "$0: $1: Illegal argument" 1>&2
 	exit 1
@@ -18,8 +21,10 @@ then
 else	mkdir ../Xsrc
 fi
 make clashes
+: remove code generating routines from the clashes list as they are defines.
+: code generating routine names start with C_
 sed '/^C_/d' < clashes > tmp$$
-./cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
+cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
 rm -f tmp$$
 PW=`pwd`
 cd ../Xsrc
@@ -30,13 +35,17 @@ else
 	mv Xclashes clashes
 fi
 rm -f Makefile
+ed - $PW/Makefile <<'EOF'
+/^#EXCLEXCL/,/^#INCLINCL/d
+w Makefile
+q
+EOF
 for i in `cat $PW/Cfiles`
 do
 	cat >> Makefile <<EOF
+
 $i:	clashes $PW/$i
 	cid -Fclashes < $PW/$i > $i
-
 EOF
 done
-make `cat $PW/Cfiles`
-make -f $PW/Makefile $1
+make $1

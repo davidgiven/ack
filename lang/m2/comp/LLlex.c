@@ -113,6 +113,7 @@ LLlex()
 	register struct token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 2];
 	register int ch, nch;
+	static int eofseen;
 
 	toktype = error_type;
 
@@ -124,10 +125,16 @@ LLlex()
 
 	tk->tk_lineno = LineNumber;
 
+	if (eofseen) {
+		eofseen = 0;
+		ch = EOI;
+	}
+	else {
 again:
-	LoadChar(ch);
-	if ((ch & 0200) && ch != EOI) {
-		fatal("non-ascii '\\%03o' read", ch & 0377);
+		LoadChar(ch);
+		if ((ch & 0200) && ch != EOI) {
+			fatal("non-ascii '\\%03o' read", ch & 0377);
+		}
 	}
 
 	switch (class(ch))	{
@@ -159,9 +166,8 @@ again:
 				SkipComment();
 				goto again;
 			}
-			else	{
-				PushBack(nch);
-			}
+			else if (nch == EOI) eofseen = 1;
+			else PushBack(nch);
 		}
 		return tk->tk_symb = ch;
 
@@ -200,7 +206,8 @@ again:
 		default :
 			crash("(LLlex, STCOMP)");
 		}
-		PushBack(nch);
+		if (nch == EOI) eofseen = 1;
+		else PushBack(nch);
 		return tk->tk_symb = ch;
 
 	case STIDF:
@@ -213,7 +220,8 @@ again:
 			LoadChar(ch);
 		} while(in_idf(ch));
 
-		if (ch != EOI) PushBack(ch);
+		if (ch == EOI) eofseen = 1;
+		else PushBack(ch);
 		*tag++ = '\0';
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
@@ -279,6 +287,7 @@ again:
 				else {
 					state = End;
 					if (ch == 'H') base = 16;
+					else if (ch == EOI) eofseen = 1;
 					else PushBack(ch);
 				}
 				break;
@@ -292,7 +301,8 @@ again:
 				state = End;
 				if (ch != 'H') {
 					lexerror("H expected after hex number");
-					PushBack(ch);
+					if (ch == EOI) eofseen = 1;
+					else PushBack(ch);
 				}
 				break;
 
@@ -308,7 +318,8 @@ again:
 					state = Hex;
 					break;
 				}
-				PushBack(ch);
+				if (ch == EOI) eofseen = 1;
+				else PushBack(ch);
 				ch = *--np;
 				*np++ = '\0';
 				base = 8;
@@ -384,7 +395,8 @@ lexwarning("Character constant out of range");
 		}
 
 		*np++ = '\0';
-		PushBack(ch);
+		if (ch == EOI) eofseen = 1;
+		else PushBack(ch);
 
 		if (np >= &buf[NUMSIZE]) {
 			tk->TOK_REL = Salloc("0.0", 5);

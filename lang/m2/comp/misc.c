@@ -40,7 +40,8 @@ gen_anon_idf()
 	return str2idf(buff, 1);
 }
 
-id_not_declared(id)
+not_declared(what, id, where)
+	char *what, *where;
 	register struct node *id;
 {
 	/*	The identifier "id" is not declared. If it is not generated,
@@ -48,6 +49,9 @@ id_not_declared(id)
 	*/
 	if (!is_anon_idf(id->nd_IDF)) {
 		node_error(id,
-			"identifier \"%s\" not declared", id->nd_IDF->id_text);
+		 	   "%s \"%s\" not declared%s",
+			   what,
+			   id->nd_IDF->id_text,
+			   where);
 	}
 }

@@ -1,5 +1,5 @@
 # make modula-2 "compiler"
-EMDIR =		/usr/ceriel/em
+EMDIR =		../../..
 MHDIR =		$(EMDIR)/modules/h
 PKGDIR =	$(EMDIR)/modules/pkg
 LIBDIR =	$(EMDIR)/modules/lib
@@ -45,12 +45,17 @@ HFILES=		LLlex.h\
 #
 GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
 
+#EXCLEXCLEXCLEXCL
+
 all:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make main ; else sh Resolve main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make ../comp/main ; else sh Resolve ../comp/main ; fi'
 	@rm -f nmclash.o a.out
 
+install:	all
+	cp main $(EMDIR)/lib/em_m2
+
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes main
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
@@ -61,9 +66,6 @@ clashes:	$(SRC) $(HFILES)
 	sh -c 'if test -f clashes ; then cclash -l7 clashes $? > Xclashes ; mv Xclashes clashes ; else cclash -l7 $? > clashes ; fi'
 
 # entry points not to be used directly
-
-Xlint:
-	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
 
 Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES)
 	echo $(SRC) $(HFILES) > Cfiles
@@ -76,39 +78,35 @@ hfiles:	Parameters make.hfiles
 	make.hfiles Parameters
 	touch hfiles
 
-main:	$(OBJ) ../src/Makefile
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/dickmalloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../src/main
-	size ../src/main
-
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile <tokenname.c >tokenfile.g
 
-symbol2str.c:	../src/tokenname.c ../src/make.tokcase
-	../src/make.tokcase <../src/tokenname.c >symbol2str.c
+symbol2str.c:	tokenname.c make.tokcase
+	make.tokcase <tokenname.c >symbol2str.c
 
-def.h:		../src/def.H ../src/make.allocd
-		../src/make.allocd < ../src/def.H > def.h
+def.h:		def.H make.allocd
+		make.allocd < def.H > def.h
 
-type.h:		../src/type.H ../src/make.allocd
-		../src/make.allocd < ../src/type.H > type.h
+type.h:		type.H make.allocd
+		make.allocd < type.H > type.h
 
-node.h:		../src/node.H ../src/make.allocd
-		../src/make.allocd < ../src/node.H > node.h
+node.h:		node.H make.allocd
+		make.allocd < node.H > node.h
 
-scope.c:	../src/scope.C ../src/make.allocd
-		../src/make.allocd < ../src/scope.C > scope.c
+scope.c:	scope.C make.allocd
+		make.allocd < scope.C > scope.c
 
-tmpvar.c:	../src/tmpvar.C ../src/make.allocd
-		../src/make.allocd < ../src/tmpvar.C > tmpvar.c
+tmpvar.c:	tmpvar.C make.allocd
+		make.allocd < tmpvar.C > tmpvar.c
 
-casestat.c:	../src/casestat.C ../src/make.allocd
-		../src/make.allocd < ../src/casestat.C > casestat.c
+casestat.c:	casestat.C make.allocd
+		make.allocd < casestat.C > casestat.c
 
-char.c: ../src/char.tab ../src/tab
-	../src/tab -fchar.tab >char.c
+char.c: char.tab tab
+	tab -fchar.tab >char.c
 
-../src/tab: 
-	$(CC) ../src/tab.c -o ../src/tab
+tab: 
+	$(CC) tab.c -o tab
 
 depend:
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
@@ -117,6 +115,15 @@ depend:
 		sed 's/\.c:/\.o:/' >> Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
+
+#INCLINCLINCLINCL
+
+Xlint:
+	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
+
+../comp/main:	$(OBJ) ../comp/Makefile
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../comp/main
+	size ../comp/main
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h Lpars.h class.h const.h debug.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
@@ -137,14 +144,14 @@ defmodule.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h ma
 typequiv.o: LLlex.h debug.h def.h node.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
-chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
+chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h misc.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
 walk.o: LLlex.h Lpars.h chk_expr.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h walk.h
 casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h walk.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h walk.h
 tmpvar.o: debug.h def.h main.h scope.h type.h
-lookup.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
+lookup.o: LLlex.h debug.h def.h idf.h misc.h node.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h chk_expr.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h

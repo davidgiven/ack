@@ -12,6 +12,7 @@
 #include	"LLlex.h"
 #include	"node.h"
 #include	"type.h"
+#include	"misc.h"
 
 struct def *
 lookup(id, scope)

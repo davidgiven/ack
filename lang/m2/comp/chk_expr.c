@@ -20,6 +20,7 @@
 #include	"const.h"
 #include	"standards.h"
 #include	"chk_expr.h"
+#include	"misc.h"
 
 extern char *symbol2str();
 
@@ -875,17 +876,30 @@ ChkStandard(expp, left)
 		break;
 
 	case S_HIGH:
-		if (!(left = getarg(&arg, T_ARRAY, 0))) return 0;
+		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0))) return 0;
 		if (IsConformantArray(left->nd_type)) {
 			/* A conformant array has no explicit index type
 			   ??? So, what can we use as index-type ???
 			*/
 			expp->nd_type = intorcard_type;
+			break;
 		}
-		else {
+		if (left->nd_type->tp_fund == T_ARRAY) {
 			expp->nd_type = IndexType(left->nd_type);
 			cstcall(expp, S_MAX);
+			break;
 		}
+		if (left->nd_type->tp_fund == T_CHAR) {
+			if (left->nd_symb != STRING) {
+				node_error(left,"HIGH: array parameter expected");
+				return 0;
+			}
+		}
+		expp->nd_type = intorcard_type;
+		expp->nd_class = Value;
+		expp->nd_INT = left->nd_type->tp_fund == T_CHAR ? 0 :
+					left->nd_SLE - 1;
+		expp->nd_symb = INTEGER;
 		break;
 
 	case S_MAX:

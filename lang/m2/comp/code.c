@@ -380,7 +380,7 @@ CodeParameters(param, arg)
 			}
 		}
 		else if (left->nd_symb == STRING) {
-			C_loc(left->nd_SLE);
+			C_loc(left->nd_SLE - 1);
 		}
 		else if (tp->arr_elem == word_type) {
 			C_loc((left_type->tp_size+word_size-1) / word_size - 1);

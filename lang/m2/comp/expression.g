@@ -49,7 +49,7 @@ qualident(int types;
 
 		  		if ( !((types|D_ERROR) & df->df_kind)) {
 				    if (df->df_kind == D_FORWARD) {
-node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
+					not_declared(str, nd, "");
 				    }
 				    else {
 node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
