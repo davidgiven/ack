@@ -1,0 +1,3 @@
+name "Mantra M68000 4-4 system call library"
+dir libsys
+end
