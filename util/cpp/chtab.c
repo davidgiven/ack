@@ -58,9 +58,9 @@ MkCharIndex()
 		exit(1);
 	}
 	if (signedch) {
-		fputs("#define CharOffset	128\n");
+		fputs("#define CharOffset	128\n", fp);
 	}
-	else	fputs("#define CharOffset	0\n");
+	else	fputs("#define CharOffset	0\n", fp);
 	fclose(fp);
 }
 
