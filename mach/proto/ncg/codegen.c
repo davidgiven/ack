@@ -312,7 +312,7 @@ if (Debug)
 		if (!match(tp,&machsets[tokexp[i]],0)) {
 			cp = findcoerc(tp, &machsets[tokexp[i]]);
 #ifndef NDEBUG
-if (Debug>1) fprintf(stderr,"findcoerc returns %d at position %d\n",cp,i);
+if (Debug>1) fprintf(stderr,"findcoerc returns 0x%x at position %d\n",(unsigned)cp,i);
 #endif
 			if (cp==0) {
 				for (j=0;j<nregneeded;j++)
