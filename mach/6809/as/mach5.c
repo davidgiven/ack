@@ -35,7 +35,8 @@ expr_t		exp;
 	emit1(opc);
 	if (sm == 0) {
 #ifdef RELOCATION
-		newrelo(exp.typ, RELPC|RELO2|RELBR);
+		if (rflag != 0 && PASS_RELO)
+			newrelo(exp.typ, RELPC|RELO2|RELBR);
 #endif
 		emit2(dist);
 	} else
@@ -93,7 +94,8 @@ expr_t		exp;
 	} else {
 		emit1(0x89 + reg + ind);
 #ifdef RELOCATION
-		newrelo(exp.typ, RELO2|RELBR);
+		if (rflag != 0 && PASS_RELO)
+			newrelo(exp.typ, RELO2|RELBR);
 #endif
 		emit2(exp.val);
 	}

@@ -35,7 +35,8 @@ operation
 			{	emit1(0x10); emit1($1);
 				$2.val -= (DOTVAL+2);
 #ifdef RELOCATION
-				newrelo($2.typ, RELPC|RELO2|RELBR);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($2.typ, RELPC|RELO2|RELBR);
 #endif
 				emit2($2.val);
 			}
@@ -44,7 +45,8 @@ operation
 			{	emit1($1);
 				$2.val -= (DOTVAL+2);
 #ifdef RELOCATION
-				newrelo($2.typ, RELPC|RELO2|RELBR);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($2.typ, RELPC|RELO2|RELBR);
 #endif
 				emit2($2.val);
 			}
@@ -52,7 +54,8 @@ operation
 		IMMED '#' expr
 			{	emit1($1);
 #ifdef RELOCATION
-				newrelo($3.typ, RELO1);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($3.typ, RELO1);
 #endif
 				emit1($3.val);
 			}
@@ -64,13 +67,15 @@ operation
 				case 0x0C:
 				case 0x0E:
 #ifdef RELOCATION
-					newrelo($3.typ, RELO2|RELBR);
+					if (rflag != 0 && PASS_RELO)
+						newrelo($3.typ, RELO2|RELBR);
 #endif
 					emit2($3.val);
-						break;
+					break;
 				default:
 #ifdef RELOCATION
-					newrelo($3.typ, RELO1);
+					if (rflag != 0 && PASS_RELO)
+						newrelo($3.typ, RELO1);
 #endif
 					emit1($3.val);
 					break;
@@ -83,7 +88,8 @@ operation
 				else
 					emit1or2($1 - 0x10);
 #ifdef RELOCATION
-				newrelo($3.typ, RELO1);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($3.typ, RELO1);
 #endif
 				emit1($3.val);
 			}
@@ -91,7 +97,8 @@ operation
 		XOP '>' expr
 			{	emit1or2($1 + 0x10);
 #ifdef RELOCATION
-				newrelo($3.typ, RELO2|RELBR);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($3.typ, RELO2|RELBR);
 #endif
 				emit2($3.val);
 			}
@@ -129,7 +136,8 @@ operation
 			{	emit1or2($1);
 				emit1(0x9F);
 #ifdef RELOCATION
-				newrelo($3.typ, RELO2|RELBR);
+				if (rflag != 0 && PASS_RELO)
+					newrelo($3.typ, RELO2|RELBR);
 #endif
 				emit2($3.val);
 			}
@@ -158,7 +166,8 @@ operation
 				} else {
 					emit1or2($1 + 0x10);
 #ifdef RELOCATION
-					newrelo($2.typ, RELO2|RELBR);
+					if (rflag != 0 && PASS_RELO)
+						newrelo($2.typ, RELO2|RELBR);
 #endif
 					emit2($2.val);
 				}
