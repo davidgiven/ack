@@ -6,22 +6,23 @@ var f=4
 var d=8
 var NAME=m6500
 var M=6500
-var LIB=mach/6500/lib/tail_
-var RT=mach/6500/lib/head_
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
 var INCLUDES=-I{EM}/include -I/usr/include
 name be
-	from .m
+	from .m.g
 	to .s
-	program {EM}/lib/{M}_be
+	program {EM}/lib/{M}/be
 	args <
-	prop >
+	stdout
 	need .e
 end
 name asld
 	from .s.a
-	to a.out
-	program {EM}/lib/{M}_as
+	to .out
+	outfile a.out
+	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) -o > (.e:{TAIL}={EM}/{LIB}em)
-	prop C
+	linker
 end
