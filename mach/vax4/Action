@@ -4,6 +4,10 @@ end
 name "Vax target optimizer"
 dir top
 end
+name "Vax code expander library"
+system vax*
+dir ce
+end
 name "Vax 4-4 C libraries"
 system vax*
 dir libcc
