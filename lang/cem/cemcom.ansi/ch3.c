@@ -147,9 +147,11 @@ ch3sel(expp, oper, idf)
 		exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
 		exp->ex_flags &= ~EX_ILVALUE;
 	}
-	if (sd->sd_type->tp_typequal & TQ_CONST)
+	if ((sd->sd_type->tp_typequal & TQ_CONST)
+	    || (tp->tp_typequal & TQ_CONST))
 		exp->ex_flags |= EX_READONLY;
-	if (sd->sd_type->tp_typequal & TQ_VOLATILE)
+	if ((sd->sd_type->tp_typequal & TQ_VOLATILE)
+	    || (tp->tp_typequal & TQ_VOLATILE))
 		exp->ex_flags |= EX_VOLATILE;
 	if (oper == '.' && exp->ex_flags & EX_READONLY)  {
 		exp->ex_type = qualifier_type(exp->ex_type, TQ_CONST);
