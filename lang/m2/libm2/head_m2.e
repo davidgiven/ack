@@ -13,35 +13,35 @@
 
 #define STACKSIZE	2048	/* maximum stack size for a coroutine */
 
- exa _handler
- exa _environ
- exa _argv
- exa _argc
- exa _CurrentProcess
- exa _MainProcess
- exa _StackBase
- exa _MainLB
- exa _StackSize
- exp $_catch
+ exa handler
+ exa environ
+ exa argv
+ exa argc
+ exa CurrentProcess
+ exa MainProcess
+ exa StackBase
+ exa MainLB
+ exa StackSize
+ exp $catch
  inp $trap_handler
 
-_handler
- con $_catch
-_environ
+handler
+ con $catch
+environ
  bss EM_PSIZE,0,0
-_argv
+argv
  bss EM_PSIZE,0,0
-_argc
+argc
  bss EM_WSIZE,0,0
-_CurrentProcess
+CurrentProcess
  bss EM_PSIZE,0,0
-_MainProcess
+MainProcess
  bss EM_PSIZE,0,0
-_StackBase
+StackBase
  bss EM_PSIZE,0,0
-_MainLB
+MainLB
  bss EM_PSIZE,0,0
-_StackSize
+StackSize
  bss EM_WSIZE,0,0
 mainroutine
  bss 2*EM_PSIZE,0,0
@@ -50,50 +50,50 @@ mainroutine
  pro $m_a_i_n, STACKSIZE
 
  loc STACKSIZE
- ste _StackSize
+ ste StackSize
 
  lor 0
- lae _MainLB
+ lae MainLB
  sti EM_PSIZE
 
  lal -EM_WSIZE
  adp EM_WSIZE
- lae _StackBase
+ lae StackBase
  sti EM_PSIZE
 
  lae mainroutine
  adp 2*EM_PSIZE
  dup EM_PSIZE
- lae _CurrentProcess
+ lae CurrentProcess
  sti EM_PSIZE
- lae _MainProcess
+ lae MainProcess
  sti EM_PSIZE
 
  lal EM_WSIZE+EM_PSIZE
  loi EM_PSIZE
- lae _environ		; save environment pointer
+ lae environ		; save environment pointer
  sti EM_PSIZE
 
  lal EM_WSIZE
  loi EM_PSIZE
- lae _argv		; save argument pointer
+ lae argv		; save argument pointer
  sti EM_PSIZE
 
  lol 0
- ste _argc		; save argument count
+ ste argc		; save argument count
 
  lpi $trap_handler
  sig
  asp EM_PSIZE
- cal $_M2M
- cal $_halt
+ cal $__M2M_
+ cal $halt
  loc 0			; should not get here
  ret EM_WSIZE
  end
 
  pro $trap_handler,0
  lol 0	; trap number
- lae _handler
+ lae handler
  loi EM_PSIZE
  cai
  lpi $trap_handler

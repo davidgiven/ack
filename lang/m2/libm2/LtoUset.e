@@ -10,7 +10,7 @@
 ;
  mes 2,EM_WSIZE,EM_PSIZE
 
- ; _LtoUset is called for set displays containing { expr1 .. expr2 }.
+ ; LtoUset is called for set displays containing { expr1 .. expr2 }.
  ; It has six parameters, of which the caller must pop five:
  ; - The set in which bits must be set.
  ; - the lower bound of the set type.
@@ -25,8 +25,8 @@
 #define USETSIZ 2*EM_WSIZE
 #define LWB	EM_WSIZE
 #define UPB	0
- exp $_LtoUset
- pro $_LtoUset,0
+ exp $LtoUset
+ pro $LtoUset,0
  lal SETBASE	; address of initial set
  lol SETSIZE
  los EM_WSIZE	; load initial set

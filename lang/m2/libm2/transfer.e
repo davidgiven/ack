@@ -57,18 +57,18 @@
  ; place in the stack. Therefore, in the runtime startoff a piece of the
  ; stack is allocated for coroutines.
 
- exp $_SYSTEM_NEWPROCESS
- exp $_SYSTEM_TRANSFER
- inp $_ChkSize
+ exp $_SYSTEM__NEWPROCESS
+ exp $_SYSTEM__TRANSFER
+ inp $ChkSize
 
- pro $_SYSTEM_NEWPROCESS, 0
+ pro $_SYSTEM__NEWPROCESS, 0
 
  ; This procedure only initializes the area used for saving the stack.
  ; Its definition is:
  ;	PROCEDURE NEWPROCESS(P:PROC; A:ADDRESS; n:CARDINAL; VAR p1:ADDRESS);
 
  lol 2*EM_PSIZE		; size of frame (n)
- cal $_ChkSize
+ cal $ChkSize
  asp EM_WSIZE
  lfr EM_WSIZE
  sil EM_PSIZE		; store size in area (indicated by A)
@@ -89,10 +89,10 @@
  ret 0
  end 0
 
-_target
+target
  bss EM_PSIZE, 0, 0
 
- pro $_SYSTEM_TRANSFER, 0
+ pro $_SYSTEM__TRANSFER, 0
 
  ; This procedure does all the hard work.
  ; It must save the current environment, and restore the one to which the
@@ -107,7 +107,7 @@ _target
  loi EM_PSIZE
  loi EM_PSIZE	; address of target coroutine
  dup EM_PSIZE
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
  dup EM_PSIZE
  lal 0
@@ -119,69 +119,69 @@ _target
  asp EM_PSIZE
  ret 0		; just return
 1
- lae _target
- sti EM_PSIZE	; store it in _target
+ lae target
+ sti EM_PSIZE	; store it in target
 
 		; Now, we save the current stack
 		; Use local base from main program
 
  lor 0		; load LB
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
  adp -2*EM_PSIZE
  sti EM_PSIZE	; save it
  lor 1		; load SP
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
  adp -EM_PSIZE
  sti EM_PSIZE	; save it
 		; Now, we must find a stack we can temporarily use.
 		; Just take the one from the main program.
- lae _MainProcess
+ lae MainProcess
  loi EM_PSIZE
  adp -EM_PSIZE
  loi EM_PSIZE
  str 1		; temporary stackpointer
 
- lae _MainLB
+ lae MainLB
  loi EM_PSIZE
  str 0
 
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
- lae _MainProcess
+ lae MainProcess
  loi EM_PSIZE
  cmp
  zeq *2
 
- lae _StackBase
+ lae StackBase
  loi EM_PSIZE
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
  adp -3*EM_PSIZE-EM_WSIZE
  loi EM_WSIZE	; get size
  ngi EM_WSIZE
  ads EM_WSIZE	; gives source address
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE	; destination address
- lae _CurrentProcess
+ lae CurrentProcess
  loi EM_PSIZE
  adp -3*EM_PSIZE-EM_WSIZE
  loi EM_WSIZE
  bls EM_WSIZE	; copy
 
 2
- lae _target
+ lae target
  loi EM_PSIZE
  dup EM_PSIZE
- lae _CurrentProcess
+ lae CurrentProcess
  sti EM_PSIZE	; store target process descriptor in _CurrentProcess
- lae _MainProcess
+ lae MainProcess
  loi EM_PSIZE
  cmp
  zeq *4
 		; Now check if the coroutine was called before
- lae _target
+ lae target
  loi EM_PSIZE
  adp -3*EM_PSIZE
  loi EM_PSIZE
@@ -189,45 +189,45 @@ _target
  cmp
  zeq *5
 		; No, it was'nt
- lae _StackBase
+ lae StackBase
  loi EM_PSIZE
  str 1		; new stack pointer
- lae _target
+ lae target
  loi EM_PSIZE
  adp -3*EM_PSIZE
  loi EM_PSIZE
  zer EM_PSIZE
- lae _target
+ lae target
  loi EM_PSIZE
  adp -3*EM_PSIZE
  sti EM_PSIZE
  cai
  loc 0
- cal $_exit
+ cal $exit
  ret 0
 5
- lae _target
+ lae target
  loi EM_PSIZE	; push source address
- lae _StackBase
+ lae StackBase
  loi EM_PSIZE	; subtract size from this and we have the destination address
- lae _target
+ lae target
  loi EM_PSIZE
  adp -3*EM_PSIZE-EM_WSIZE
  loi EM_WSIZE
  ngi EM_WSIZE
  ads EM_WSIZE	; got it
- lae _target
+ lae target
  loi EM_PSIZE
  adp -3*EM_PSIZE-EM_WSIZE
  loi EM_WSIZE
  bls EM_WSIZE
 4
- lae _target
+ lae target
  loi EM_PSIZE
  adp -2*EM_PSIZE
  loi EM_PSIZE
  str 0		; restore LB
- lae _target
+ lae target
  loi EM_PSIZE
  adp -EM_PSIZE
  loi EM_PSIZE
@@ -235,13 +235,13 @@ _target
  ret 0
  end 0
 
- pro $_ChkSize, 0
+ pro $ChkSize, 0
  lol 0
  loc 3*EM_PSIZE+EM_WSIZE
  sbi EM_WSIZE
  dup EM_WSIZE
  stl 0
- loe _StackSize
+ loe StackSize
  cmu EM_WSIZE
  zle *1
  loc M2_TOOLARGE	; trap number for "stack size too large"

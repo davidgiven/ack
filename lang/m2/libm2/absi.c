@@ -9,7 +9,7 @@
   Version:	$Header$
 */
 
-_absi(i)
+absi(i)
 {
 	return i >= 0 ? i : -i;
 }

@@ -9,8 +9,8 @@
 ; Version:	$Header$
 ;
  mes 2,EM_WSIZE,EM_PSIZE
- exp $_absf
- pro $_absf,0
+ exp $absf
+ pro $absf,0
  mes 5
  mes 9,8
  lal 0

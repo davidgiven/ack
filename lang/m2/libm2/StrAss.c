@@ -9,7 +9,7 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Header$
 */
-_StringAssign(dstsiz, srcsiz, dstaddr, srcaddr)
+StringAssign(dstsiz, srcsiz, dstaddr, srcaddr)
 	register char *dstaddr, *srcaddr;
 {
 	while (srcsiz > 0) {

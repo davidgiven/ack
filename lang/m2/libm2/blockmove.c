@@ -15,7 +15,7 @@ typedef unsigned pcnt;
 typedef unsigned long pcnt;
 #endif
 
-_blockmove(siz, dst, src)
+blockmove(siz, dst, src)
 	pcnt siz;
 	register char *dst, *src;
 {

@@ -74,14 +74,14 @@
 ;       - procedure instance identifier (PROC)
 ; and returns the old traphandler.
 
- exa _handler
+ exa handler
  exp $SIG
  pro $SIG, 0
- lae _handler
+ lae handler
  loi EM_PSIZE
  lal PROC
  loi EM_PSIZE
- lae _handler
+ lae handler
  sti EM_PSIZE
  ret EM_PSIZE
  end ?

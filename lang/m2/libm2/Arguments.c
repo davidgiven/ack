@@ -9,9 +9,9 @@
   Version:	$Header$
 */
 
-extern char **_argv, **_environ;
-extern int _argc;
-unsigned int Arguments_Argc;
+extern char **argv, **environ;
+extern int argc;
+unsigned int _Arguments__Argc;
 
 static char *
 findname(s1, s2)
@@ -42,27 +42,27 @@ scopy(src, dst, max)
 	return i + 1;
 }
 
-Arguments()
+_Arguments_()
 {
-	Arguments_Argc = _argc;
+	_Arguments__Argc = argc;
 }
 
 unsigned
-_Arguments_Argv(n, argument, l, u, s)
+_Arguments__Argv(n, argument, l, u, s)
 	unsigned int u;
 	char *argument;
 {
 
-	if (n >= _argc) return 0;
-	return scopy(_argv[n], argument, u);
+	if (n >= argc) return 0;
+	return scopy(argv[n], argument, u);
 }
 
 unsigned
-_Arguments_GetEnv(name, nn, nu, ns, value, l, u, s)
+_Arguments__GetEnv(name, nn, nu, ns, value, l, u, s)
 	char *name, *value;
 	unsigned int nu, u;
 {
-	register char **p = _environ;
+	register char **p = environ;
 	register char *v = 0;
 
 	while (*p && !(v = findname(name, *p++))) {

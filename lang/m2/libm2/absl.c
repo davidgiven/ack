@@ -9,7 +9,7 @@
   Version:	$Header$
 */
 long
-_absl(i)
+absl(i)
 	long i;
 {
 	return i >= 0 ? i : -i;

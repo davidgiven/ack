@@ -8,10 +8,20 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Header$
 */
-_stackprio(n)
+
+static unsigned prio;
+
+stackprio(n)
+	unsigned n;
 {
+	unsigned old = prio;
+
+	if (n > prio) prio = n;
+	return old;
 }
 
-_unstackprio()
+unstackprio(n)
+	unsigned n;
 {
+	prio = n;
 }

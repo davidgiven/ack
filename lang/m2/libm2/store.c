@@ -17,7 +17,7 @@ typedef unsigned pcnt;
 typedef long pcnt;
 #endif
 
-_store(siz, addr, p)
+store(siz, addr, p)
 	register char *addr;
 	register pcnt siz;
 {

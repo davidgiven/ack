@@ -34,7 +34,7 @@ CallAtEnd(p)
 	return 1;
 }
 
-_halt()
+halt()
 {
 	exit(0);
 }

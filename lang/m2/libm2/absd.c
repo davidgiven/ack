@@ -10,7 +10,7 @@
 */
 #ifndef NOFLOAT
 double
-_absd(i)
+absd(i)
 	double i;
 {
 	return i >= 0 ? i : -i;

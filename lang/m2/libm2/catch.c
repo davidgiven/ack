@@ -52,7 +52,7 @@ static struct errm {
 
 extern			exit();
 
-_catch(trapno)
+catch(trapno)
 	int trapno;
 {
 	register struct errm *ep = &errors[0];
@@ -64,7 +64,7 @@ _catch(trapno)
 	while (ep->errno != trapno && ep->errmes != 0) ep++;
 	if (p = ep->errmes) {
 		while (*p) p++;
-		_Traps_Message(ep->errmes, 0, (int) (p - ep->errmes), 1);
+		_Traps__Message(ep->errmes, 0, (int) (p - ep->errmes), 1);
 	}
 	else {
 		int i = trapno;
@@ -81,8 +81,8 @@ _catch(trapno)
 		while (i /= 10);
 		while (s > buf) *p++ = *--s;
 		*p = 0;
-		_Traps_Message(q, 0, (int) (p - q), 1);
+		_Traps__Message(q, 0, (int) (p - q), 1);
 	}
 	if (trapno != M2_FORCH) exit(trapno);
-	SIG(_catch);
+	SIG(catch);
 }

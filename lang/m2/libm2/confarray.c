@@ -27,7 +27,7 @@ static struct descr *descrs[10];
 static struct descr **ppdescr = descrs;
 
 char *
-_new_stackptr(pdescr, a)
+new_stackptr(pdescr, a)
 	register struct descr *pdescr;
 {
 	pcnt size = (((pdescr->highminlow + 1) * pdescr->size +
@@ -45,7 +45,7 @@ _new_stackptr(pdescr, a)
 	else	return (char *) &a + size;
 }
 
-_copy_array(p, a)
+copy_array(p, a)
 	register char *p;
 {
 	register char *q;
