@@ -642,10 +642,11 @@ basicblock(alpp) line_p *alpp; {
 		}
 		if (lpp == next) {
 			count++;
-			if (count > 100) {
+			if (count > 1000) {
 				/* probably loop in table */
 				fprintf(stderr, "Warning: possible loop in patterns; call an expert\n");
 				next = &((*lpp)->l_next);
+				count = 0;
 			}
 		}
 		else	count = 0;
