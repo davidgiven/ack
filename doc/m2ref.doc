@@ -355,7 +355,12 @@ The detection of this error depends on the EM implementation.
 All current EM implementations detect this error.
 .IP "stack size of process too large"
 .br
-The current implementation limits the stack size of processes to 1024 bytes.
+This is most likely to happen if the reserved space for a coroutine stack
+is too small. In this case, increase the size of the area given to
+\fCWNEWPROCESS\fP. It can also happen if the stack needed for the main
+process is too large and there are coroutines. In this case, the only fix is
+to reduce the stack size needed by the main process, f.i. by avoiding local
+arrays.
 .IP "too many nested traps + handlers"
 .br
 This error can only occur when the user has installed his own trap handler.
@@ -395,6 +400,11 @@ The descriptor is pushed first.
 If the parameter is a value parameter, the called routine must make sure
 that its value is never changed, for instance by making its own copy
 of the array. The Modula-2 compiler does exactly this.
+.PP
+When the size of the return value of a function procedure is larger than
+the maximum of \fCWSIZE(LONGREAL)\fP and twice the word-size, the caller
+reserves this space on the stack, above the parameters. Callee then stores
+its result there, and returns no other value.
 .NH 1
 References
 .IP [1]
