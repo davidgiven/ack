@@ -122,7 +122,10 @@ EVAL(expr, val, code, true_label, false_label)
 						C_adi(tp->tp_size);
 					break;
 				case POINTER:
-					C_ads(right->ex_type->tp_size);
+					C_loc(right->ex_type->tp_size);
+					C_loc(pointer_size);
+					C_ciu();
+					C_ads(pointer_size);
 					break;
 #ifndef NOFLOAT
 				case DOUBLE:
@@ -176,7 +179,10 @@ EVAL(expr, val, code, true_label, false_label)
 					C_sbs(pointer_size);
 				else {
 					C_ngi(right->ex_type->tp_size);
-					C_ads(right->ex_type->tp_size);
+					C_loc(right->ex_type->tp_size);
+					C_loc(pointer_size);
+					C_ciu();
+					C_ads(pointer_size);
 				}
 				break;
 #ifndef NOFLOAT
@@ -748,7 +754,10 @@ assop(type, oper)
 	case POINTER:
 		if (oper == MINAB || oper == MINMIN || oper == POSTDECR)
 			C_ngi(size);
-		C_ads(size);
+		C_loc(size);
+		C_loc(pointer_size);
+		C_ciu();
+		C_ads(pointer_size);
 		break;
 	case ERRONEOUS:
 		break;

@@ -78,7 +78,7 @@
 
 
 !File: debug.h
-#undef DEBUG		1	/* perform various self-tests		*/
+#define DEBUG		1	/* perform various self-tests		*/
 
 
 !File: use_tmp.h
