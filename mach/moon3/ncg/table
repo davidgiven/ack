@@ -2818,12 +2818,7 @@ pat loc loc cfi	leaving loc $1 loc $2 cal ".cfi" asp 8+($1-4)
 pat loc loc cfu	leaving loc $1 loc $2 cal ".cfu" asp 8+($1-4)
 pat loc loc cff	$1==8 && $2==4 leaving cal ".cff4" asp 4
 pat loc loc cff	$1==4 && $2==8
-	kills ALL
-	gen
-		move_l {indirect4, sp}, d0
-		clr_l {indirect4, sp}
-		move_l d0, {pre_dec4, sp}
-	leaving cal ".cff8"
+	leaving loc 0 exg 4 cal ".cff8"
 
 /************************************************
  * Group 9: logical instructions		*
