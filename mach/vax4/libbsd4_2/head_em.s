@@ -6,6 +6,7 @@
 .sect .text
 .define	hol0
 .define	.reghp
+.define	.limhp
 .define	.trppc
 .define	.trpim
 
@@ -83,6 +84,8 @@ Im2:
 	.data4	1
 	.data4	0
 .reghp:
+	.data4	_end
+.limhp:
 	.data4	_end
 hol0:
 	.space	8
