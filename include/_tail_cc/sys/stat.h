@@ -13,15 +13,15 @@ struct	stat {
 	dev_t	st_rdev;
 	off_t	st_size;
 	time_t	st_atime;
-#ifdef BSD4_2
+#ifdef __BSD4_2
 	long	st_spare1;
 #endif
 	time_t	st_mtime;
-#ifdef BSD4_2
+#ifdef __BSD4_2
 	long	st_spare2;
 #endif
 	time_t	st_ctime;
-#ifdef BSD4_2
+#ifdef __BSD4_2
 	long	st_spare3;
 	long	st_blksize;
 	long	st_blocks;
@@ -34,8 +34,8 @@ struct	stat {
 #define	  S_IFCHR	0020000
 #define	  S_IFBLK	0060000
 #define	  S_IFREG	0100000
-#ifndef BSD4_2
-#ifndef USG
+#ifndef __BSD4_2
+#ifndef __USG
 #define	  S_IFMPC	0030000
 #define	  S_IFMPB	0070000
 #else
