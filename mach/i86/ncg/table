@@ -1065,6 +1065,22 @@ pat loe loc sbu $2==0-1 && $3==2		leaving loe $1 inc
 pat lil loc sbu $2==0-1 && $3==2		leaving lil $1 inc
 pat mlu					leaving mli $1
 
+pat loe loc loe adu ste $1==$3 && $1==$5 && $4==2
+uses REG = {EXTERN2, $1}
+				yields %a leaving loc $2 loe $3 adu 2 ste $3
+
+pat lol loc lol adu stl $1==$3 && $1==$5 && $4==2
+uses REG = {LOCAL, $1, 2}
+				yields %a leaving loc $2 lol $3 adu 2 stl $3
+
+pat loe loc loe adi ste $1==$3 && $1==$5 && $4==2
+uses REG = {EXTERN2, $1}
+				yields %a leaving loc $2 loe $3 adi 2 ste $3
+
+pat lol loc lol adi stl $1==$3 && $1==$5 && $4==2
+uses REG = {LOCAL, $1, 2}
+				yields %a leaving loc $2 lol $3 adi 2 stl $3
+
 pat dvu $1==2
 with rmnoacc rmorconst
 uses reusing %2, ACC=%2,  DXREG={ANYCON,0}
