@@ -13,6 +13,11 @@ __sbrk:
 	push	ax
 	call	__brkctl
 	add	sp,8
+	cmp	ax,-1
+	je	1f
+1:
+	mov	dx,4(bp)
+	add	(.limhp),dx
 	pop	bp
 	ret
 
