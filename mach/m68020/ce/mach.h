@@ -14,7 +14,7 @@
 #define NAME_FMT	"_%s"
 #define DNAM_FMT	"_%s"
 #define DLB_FMT		"_%ld"
-#define	ILB_FMT		"I%03d%ld"
+#define	ILB_FMT		"I%x_%lx"
 #define HOL_FMT		"hol%d"
 
 #define	ALIGN_FMT		".align\n"

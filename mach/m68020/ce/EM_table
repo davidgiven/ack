@@ -187,9 +187,9 @@ C_sri
 /******************************************************************************/
 
 
-C_adu		::= 	C_adi( w).
+C_adu		==> 	C_adi( w).
 
-C_sbu		::= 	C_sbi( w).
+C_sbu		==> 	C_sbi( w).
 
 C_mlu
 	$1 == 4		==>	"move.l (sp)+, d0";
@@ -211,7 +211,7 @@ C_rmu
 				"move.l d2, -(sp)".
 	default		==> 	arg_error( "rmu", $1).
 
-C_slu		::= 	C_sli( w).
+C_slu		==> 	C_sli( w).
 
 C_sru
 	$1 == 4		==> 	"move.l (sp)+, d0";
@@ -228,47 +228,47 @@ C_sru
 /******************************************************************************/
 
 C_adf	
-	$1 == 4		::=	C_cal( "adf4");
+	$1 == 4		==>	C_cal( "adf4");
 				C_asp( (arith) 4).
-	$1 == 8		::=	C_cal( "adf8");
+	$1 == 8		==>	C_cal( "adf8");
 				C_asp( (arith) 8).
 	default		==>	arg_error( "adf", $1).
 
 C_sbf	
-	$1 == 4		::=	C_cal( "sbf4");
+	$1 == 4		==>	C_cal( "sbf4");
 				C_asp( (arith) 4).
-	$1 == 8		::=	C_cal( "sbf8");
+	$1 == 8		==>	C_cal( "sbf8");
 				C_asp( (arith) 8).
 	default		==>	arg_error( "sbf", $1).
 
 C_mlf	
-	$1 == 4		::=	C_cal( "mlf4");
+	$1 == 4		==>	C_cal( "mlf4");
 				C_asp( (arith) 4).
-	$1 == 8		::=	C_cal( "mlf8");
+	$1 == 8		==>	C_cal( "mlf8");
 				C_asp( (arith) 8).
 	default		==>	arg_error( "mlf", $1).
 
 C_dvf	
-	$1 == 4		::=	C_cal( "dvf4");
+	$1 == 4		==>	C_cal( "dvf4");
 				C_asp( (arith) 4).
-	$1 == 8		::=	C_cal( "dvf8");
+	$1 == 8		==>	C_cal( "dvf8");
 				C_asp( (arith) 8).
 	default		==>	arg_error( "dvf", $1).
 
 C_ngf	
-	$1 == 4		::=	C_cal( "ngf4").
-	$1 == 8		::=	C_cal( "ngf8").
+	$1 == 4		==>	C_cal( "ngf4").
+	$1 == 8		==>	C_cal( "ngf8").
 	default		==>	arg_error( "ngf", $1).
 
 C_fif	
-	$1 == 4		::=	C_cal( "fif4").
-	$1 == 8		::=	C_cal( "fif8").
+	$1 == 4		==>	C_cal( "fif4").
+	$1 == 8		==>	C_cal( "fif8").
 	default		==>	arg_error( "fif", $1).
 
 C_fef	
-	$1 == 4		::=	C_dup( (arith) 4);
+	$1 == 4		==>	C_dup( (arith) 4);
 				C_cal( "fef4").
-	$1 == 8		::=	"move.l (sp)+, d0";
+	$1 == 8		==>	"move.l (sp)+, d0";
 				"move.l (sp)+, d1";
 				"move.l d0, -(sp)";
 				"move.l d1, -(sp)";
@@ -318,7 +318,7 @@ C_zrl		==>	"clr.l ($1, a6)".
 
 C_zre..		==> 	"clr.l ($1+$2)".
 
-C_zrf 		::=	C_zer( $1).
+C_zrf 		==>	C_zer( $1).
 
 C_zer
   	$1 == 4		==>	"clr.l -(sp)".
@@ -357,9 +357,9 @@ C_cii		==> 	"   move.l (sp), d0";
 
 C_cuu		==> 	"jsr (.cuu) ".
 
-C_ciu		::=	C_cuu().
+C_ciu		==>	C_cuu().
 
-C_cui		::=	C_cuu().
+C_cui		==>	C_cuu().
 
 /******************************************************************************/
 /*									      */
@@ -530,7 +530,7 @@ C_cms_narg	==> 	"move.l (sp)+, d0";
 			"jsr (.cms)";
 			"move.l d0, -(sp)".
 
-C_cmp		::=	C_cmu( (arith)4).
+C_cmp		==>	C_cmu( (arith)4).
 
 C_tlt		==> 	"move.l (sp)+, d0";
 			"move.l #1, -(sp)";
@@ -704,7 +704,7 @@ C_csb
 	$1 == 4		==>	"jmp (.csb)".
   	default		==>	arg_error( "csb", $1).
 
-C_dch		::=	C_loi( (arith)4).
+C_dch		==>	C_loi( (arith)4).
 
 C_dup		
   	$1 == 4		==>	"move.l (sp), -(sp)".
@@ -749,7 +749,7 @@ C_lor
   	$1 == 2		==>	"move.l (.reghp), -(sp)".
 	default		==>	arg_error( "lor", $1).
 
-C_lpb		::=	C_adp( (arith)8).
+C_lpb		==>	C_adp( (arith)8).
 
 C_mon		==>	"jsr (.mon)".
 
@@ -765,7 +765,7 @@ C_rck
 				"1: move.l d0, -(sp)".
   	default		==>	arg_error( "rck", $1).
 
-C_rtt		::=	C_ret( (arith)0).
+C_rtt		==>	C_ret( (arith)0).
 
 C_sig		==>	"move.l (.trppc), a0";
 			"move.l (sp)+, (.trppc)";
