@@ -86,6 +86,9 @@ end
 name "ANSI-C header files"
 dir lang/cem/libcc.ansi
 end
+name "Pascal frontend"
+dir lang/pc/comp
+end
 name "Basic frontend"
 dir lang/basic/src
 end
@@ -100,6 +103,12 @@ dir lang/m2/libm2
 end
 name "Modula-2 makefile generator"
 dir lang/m2/m2mm
+end
+name "EM interpreter in C"
+dir util/int
+end
+name "Symbolic debugger"
+dir util/grind
 end
 name "Intel 8086 support"
 dir mach/i86
@@ -209,13 +218,7 @@ name "Zilog Z8000 support"
 dir mach/z8000
 indir
 end
-name "Pascal frontend"
-dir lang/pc/comp
-end
 name "Motorola 68000 interpreters"
 system "m68*|sun*"
 dir mach/mantra/int
-end
-name "EM interpreter in C"
-dir util/int
 end
