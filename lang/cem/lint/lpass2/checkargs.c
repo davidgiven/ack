@@ -21,7 +21,7 @@ PRIVATE chk_argtps();
 PRIVATE char *next_argtype();
 PRIVATE int type_match();
 PRIVATE form_type();
-PRIVATE conv_format(id, act, form)
+PRIVATE conv_format(id, act, form);
 
 int
 type_equal(act, form)
