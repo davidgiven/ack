@@ -296,6 +296,26 @@ subr_type(lb, ub)
 	res = construct_type(T_SUBRANGE, tp);
 	res->sub_lb = lb->nd_INT;
 	res->sub_ub = ub->nd_INT;
+	if (res->sub_lb >= 0) {
+		if (ufit(res->sub_ub, 1)) {
+			res->tp_psize = 1;
+			res->tp_palign = 1;
+		}
+		else if (ufit(res->sub_ub, 2)) {
+			res->tp_psize = 2;
+			res->tp_palign = 2 < word_align ? 2 : word_align;
+		}
+	}
+	else {
+		if (fit(res->sub_lb, 1) && fit(res->sub_ub, 1)) {
+			res->tp_psize = 1;
+			res->tp_palign = 1;
+		}
+		else if (fit(res->sub_lb, 2) && fit(res->sub_ub, 2)) {
+			res->tp_psize = 2;
+			res->tp_palign = 2 < word_align ? 2 : word_align;
+		}
+	}
 
 	return res;
 }

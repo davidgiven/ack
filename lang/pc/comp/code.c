@@ -116,10 +116,8 @@ CodeBeginBlock(df)
 
 	TmpOpen(df->prc_vis->sc_scope);
 
-	switch( df->df_kind )	{
-
-	case D_MODULE : break; /* nothing */
-	case D_PROGRAM :
+	if ( df->df_kind == D_MODULE) /* nothing */ ;
+	else if (df->df_kind == D_PROGRAM ) {
 		C_exp("m_a_i_n");
 		C_pro_narg("m_a_i_n");
 		C_ms_par((arith) 0);
@@ -133,11 +131,8 @@ CodeBeginBlock(df)
 		C_loc((arith) (1 << EFUNFL));
 		C_ior(int_size);
 		C_sim();
-
-		break;
-
-	case D_PROCEDURE :
-	case D_FUNCTION :	{
+	}
+	else if (df->df_kind & (D_PROCEDURE | D_FUNCTION)) {
 		struct type *tp;
 		register struct paramlist *param;
 
@@ -162,7 +157,7 @@ CodeBeginBlock(df)
 			C_zer((arith) int_size);
 			C_stl(df->prc_bool);
 		}
-		for( param = ParamList(df->df_type); param; param = param->next)
+		for( param = ParamList(df->df_type); param; param = param->next) {
 			if( !IsVarParam(param) )	{
 				tp = TypeOfParam(param);
 
@@ -213,10 +208,9 @@ CodeBeginBlock(df)
 					C_stl(param->par_def->var_off);
 				}
 			}
-		break;
+		}
 	}
-
-	default :
+	else {
 		crash("(CodeBeginBlock)");
 		/*NOTREACHED*/
 	}
@@ -233,57 +227,51 @@ CodeEndBlock(df, StackAdjustment)
 	register struct def *df;
 	arith StackAdjustment;
 {
-	switch( df->df_kind )	{
-		case D_PROGRAM :
-			C_loc((arith) 0);
-			C_cal("_hlt");
-			break;
+	if( df->df_kind == D_PROGRAM) {
+		C_loc((arith) 0);
+		C_cal("_hlt");
+	}
+	else if (df->df_kind & (D_PROCEDURE | D_FUNCTION)) {
+		struct type *tp;
 
-		case D_PROCEDURE :
-		case D_FUNCTION :	{
-			struct type *tp;
-
-			if( StackAdjustment )	{
-				/* remove copies of conformant arrays */
-				C_lol(StackAdjustment);
-				C_ass(word_size);
-				FreeInt(StackAdjustment);
-			}
-			if( !options['n'] )
-				RegisterMessages(df->prc_vis->sc_scope->sc_def);
-
-			if( options['t'] ) {
-				C_lae_dlb(df->prc_label,(arith)0);
-				C_cal("procexit");
-				C_asp(pointer_size);
-			}
-			if( tp = ResultType(df->df_type) )	{
-				if( !options['R'] ) {
-					C_lin(LineNumber);
-					C_lol(df->prc_bool);
-					C_cal("_nfa");
-					C_asp(word_size);
-				}
-				if( tp->tp_size == word_size )
-					C_lol(-tp->tp_size);
-				if( tp->tp_size == 2 * word_size )
-					C_ldl(-tp->tp_size);
-				else {
-					C_lal(-tp->tp_size);
-					C_loi(tp->tp_size);
-				}
-
-				C_ret(tp->tp_size);
-			}
-			else
-				C_ret((arith) 0);
-
-			break;
+		if( StackAdjustment )	{
+			/* remove copies of conformant arrays */
+			C_lol(StackAdjustment);
+			C_ass(word_size);
+			FreeInt(StackAdjustment);
 		}
+		if( !options['n'] )
+			RegisterMessages(df->prc_vis->sc_scope->sc_def);
 
-		default :
-			crash("(CodeEndBlock)");
-			/*NOTREACHED*/
+		if( options['t'] ) {
+			C_lae_dlb(df->prc_label,(arith)0);
+			C_cal("procexit");
+			C_asp(pointer_size);
+		}
+		if( tp = ResultType(df->df_type) )	{
+			if( !options['R'] ) {
+				C_lin(LineNumber);
+				C_lol(df->prc_bool);
+				C_cal("_nfa");
+				C_asp(word_size);
+			}
+			if( tp->tp_size == word_size )
+				C_lol(-tp->tp_size);
+			if( tp->tp_size == 2 * word_size )
+				C_ldl(-tp->tp_size);
+			else {
+				C_lal(-tp->tp_size);
+				C_loi(tp->tp_size);
+			}
+
+			C_ret(tp->tp_size);
+		}
+		else
+			C_ret((arith) 0);
+	}
+	else {
+		crash("(CodeEndBlock)");
+		/*NOTREACHED*/
 	}
 
 	C_end(- df->prc_vis->sc_scope->sc_off);

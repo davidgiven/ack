@@ -53,14 +53,20 @@ define(id, scope, kind)
 	register struct def *df;
 
 	if( df = lookup(id, scope, 0) )	{
-		switch( df->df_kind )	{
-
-		    case D_INUSE :
+		if (df->df_kind == D_INUSE) {
 			if( kind != D_INUSE ) {
 			    error("\"%s\" already used in this block",
 							id->id_text);
 			}
 			return MkDef(id, scope, kind);
+		}
+		if (df->df_kind == D_ERROR ) {
+			/* used in forward references */
+			df->df_kind = kind;
+			return df;
+		}
+		/* other cases fit in an int (assume at least 2 bytes) */
+		switch((int) df->df_kind )	{
 
 		    case D_LABEL :
 			/* generate error message somewhere else */
@@ -96,10 +102,6 @@ define(id, scope, kind)
 								id->id_text);
 			return NULLDEF;
 
-		    case D_ERROR :
-			/* used in forward references */
-			df->df_kind = kind;
-			return df;
 		}
 		if( kind != D_ERROR )
 			/* avoid spurious error messages */
@@ -129,22 +131,19 @@ DoDirective(directive, nd, tp, scl, function)
 		return;
 	}
 
-	switch( df->df_kind)	{
-		case D_FORWARD:
-			kind = function ? D_FWFUNCTION : D_FWPROCEDURE;
-			inp = (proclevel > 1);
-			break;
-
-		case D_EXTERN:
-			kind = function ? D_FUNCTION : D_PROCEDURE;
-			inp = 0;
-			ext = 1;
-			break;
-
-		default:
-			node_error(nd, "\"%s\" unknown directive",
-							directive->id_text);
-			return;
+	if (df->df_kind == D_FORWARD) {
+		kind = function ? D_FWFUNCTION : D_FWPROCEDURE;
+		inp = (proclevel > 1);
+	}
+	else if (df->df_kind == D_EXTERN) {
+		kind = function ? D_FUNCTION : D_PROCEDURE;
+		inp = 0;
+		ext = 1;
+	}
+	else {
+		node_error(nd, "\"%s\" unknown directive",
+						directive->id_text);
+		return;
 	}
 
 	if( df = define(nd->nd_IDF, CurrentScope, kind) )	{

@@ -161,7 +161,7 @@ CodeValue(ds, tp)
 
 	switch( ds->dsg_kind )	{
 	case DSG_LOADED:
-		break;
+		return;
 
 	case DSG_FIXED:
 		if( ds->dsg_offset % word_size == 0 ) {
@@ -199,6 +199,12 @@ CodeValue(ds, tp)
 		/*NOTREACHED*/
 	}
 
+	if (size < word_size && tp->tp_fund == T_SUBRANGE &&
+	    BaseType(tp)->tp_fund == T_INTEGER && tp->sub_lb < 0) {
+		C_loc(size);
+		C_loc(word_size);
+		C_cii();
+	}
 	ds->dsg_kind = DSG_LOADED;
 }
 
@@ -502,7 +508,7 @@ CodeDesig(nd, ds)
 	case Def:
 		df = nd->nd_def;
 
-		switch( df->df_kind )	{
+		switch( (int) df->df_kind )	{
 		case D_FIELD:
 			CodeFieldDesig(df, ds);
 			break;

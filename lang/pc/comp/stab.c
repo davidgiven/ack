@@ -306,7 +306,7 @@ stb_string(df, kind)
 			     N_LSYM,
 			     tp == void_type || tp->tp_size > 32767
 			       ? 0
-			       : (int)tp->tp_size,
+			       : (IsPacked(tp) ? (int) tp->tp_psize : (int)tp->tp_size),
 			     (arith) 0);
 		break;
 	case D_CONST:
