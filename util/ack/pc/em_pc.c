@@ -94,7 +94,7 @@ int     atoi();
 void    exit();
 void    sleep();
 void    execv();
-char    *sbrk();
+char    *malloc();
 int     chdir();
 int     fork();
 int     wait();
@@ -397,7 +397,7 @@ int list(p,q) char *p,*q; {
 			return(0);
 		}
 	if (index == 0) {
-		index = (int *) sbrk(MAXERNO * sizeof index[0]);
+		index = (int *) malloc(MAXERNO * sizeof index[0]);
 		fillindex();
 	}
 	if ((inpfil = fopen(p,"r")) == NULL)
@@ -457,10 +457,10 @@ int nextline(printing) {
 
 	listlino++;
 	ch = getc(inpfil);
-	if (ch == '#') {
-		if (lineline(printing) == 0)
-			fatal("bad line directive");
-		return(1);
+	while (ch == '#') {
+		if (lineline(printing) == 1)
+			return(1);
+		ch = getc(inpfil);
 	}
 	listrela++;
 	if (listfnam == source)
@@ -482,35 +482,61 @@ lineline(printing) {
 	register ch;
 	register char *p,*q;
 	static char line[100];
+	int ln;
 
 	p = line;
 	while ((ch = getc(inpfil)) != '\n') {
-		if (ch == EOF || p == &line[100-1])
+		if (ch == EOF || p == &line[100-1]) {
+			*p = 0;
+			listlino++;
+			listrela++;
+			if (listfnam == source)
+				listorig++;
+			if (printing) {
+				printf("%5d\t#%s", listorig,  p);
+				putchar(ch);
+			}
+			while (ch != EOF && ch != '\n') {
+				ch = getc(inpfil);
+				if (ch != EOF && printing) putchar(ch);
+			}
 			return(0);
+		}
 		*p++ = ch;
 	}
 	*p = '\0'; p = line;
-	if (printing)
-		printf("\t#%s\n",p);
-	if ((listrela = atoi(p)-1) < 0)
-		return(0);
-	while ((ch = *p++) != '"')
-		if (ch == '\0')
-			return(0);
-	q = p;
-	while (ch = *p++) {
+	ln = atoi(p)-1;
+	if (ln >= 0) {
+		while ((ch = *p++) != '"' && ch != '\0')
+			;
 		if (ch == '"') {
-			*--p = '\0';
-			if ( source ) {
-				listfnam = strcmp(q,source)==0 ? source : q;
-				return(1);
-			}
-			source=q ; listfnam=q ;
-			return 1 ;
-		}
-		if (ch == '/')
 			q = p;
+			while (ch = *p++) {
+				if (ch == '"') {
+					*--p = '\0';
+					listrela = ln;
+					if ( source ) {
+						listfnam = strcmp(q,source)==0 ? source : q;
+					}
+					else {
+						source=q ; listfnam=q ;
+					}
+					listlino++;
+					if (printing)
+						printf("\t#%s\n",p);
+					return 1 ;
+				}
+				if (ch == '/')
+					q = p;
+			}
+		}
 	}
+	listlino++;
+	listrela++;
+	if (listfnam == source)
+		listorig++;
+	if (printing)
+		printf("%5d\t#%s\n",listorig, p);
 	return(0);
 }
 
