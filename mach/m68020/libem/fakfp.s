@@ -35,5 +35,5 @@
 .cmf4:
 .cmf8:
 	move.l	#18,-(sp)
-	jsr	.trp
+	jsr	(.trp)
 	rts
