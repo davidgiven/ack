@@ -1,3 +1,4 @@
 errno.h
 signal.h
+sgtty.h
 sys
