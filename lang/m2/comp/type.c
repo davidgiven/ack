@@ -290,7 +290,7 @@ chk_basesubrange(tp, base)
 		int fund = base->tp_next->tp_fund;
 
 		if (! chk_bounds(base->sub_lb, tp->sub_lb, fund) || 
-		    ! chk_bounds(base->sub_ub, tp->sub_ub, fund)) {
+		    ! chk_bounds(tp->sub_ub, base->sub_ub, fund)) {
 			error("base type has insufficient range");
 		}
 		base = base->tp_next;
