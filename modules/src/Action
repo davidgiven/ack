@@ -16,9 +16,6 @@ end
 name "fast, linear time malloc"
 dir malloc
 end
-name "EM messages generation module"
-dir em_mes
-end
 name "identifier table module"
 dir idf
 end
@@ -33,4 +30,7 @@ dir read_em
 end
 name "EM code generation module"
 dir em_code
+end
+name "EM messages generation module"
+dir em_mes
 end
