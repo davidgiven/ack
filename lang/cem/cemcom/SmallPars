@@ -1,3 +1,7 @@
+!File: lint.h
+#undef	LINT		1	/* if defined, 'lint' is produced	*/
+
+
 !File: pathlength.h
 #define PATHLENGTH	1024	/* max. length of path to file		*/
 

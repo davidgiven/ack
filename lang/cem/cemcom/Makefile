@@ -140,12 +140,14 @@ Emain:	Cfiles
 Omain:	Cfiles
 	rm -f *.o
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
-	@rm -f nmclash.o a.out *.o
+	@rm -f nmclash.o a.out
+	mv *.o PEEPHOLE
 
 CEmain:	Cfiles
 	rm -f *.o
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)/cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
-	@rm -f nmclash.o a.out *.o
+	@rm -f nmclash.o a.out
+	mv *.o CODE_EXPANDER
 
 Lnt:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
