@@ -407,6 +407,7 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			  if (*ptp != 0 && ChkCompat(pnd, *ptp, "case label")) {
 			  }
 			  nd = *pnd;
+			  nd->nd_type = BaseType(nd->nd_type);	/* ??? */
 			  if (! (nd->nd_type->tp_fund & T_DISCRETE) ||
 			      nd->nd_type->tp_size > word_size) {
 				node_error(nd, "illegal type in case label");
@@ -423,7 +424,7 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			  }
 			  else if (! chk_bounds(nd->nd_left->nd_INT,
 						nd->nd_right->nd_INT,
-						BaseType(nd->nd_type)->tp_fund)) {
+						nd->nd_type->tp_fund)) {
 			    node_error(nd,
 			   "lower bound exceeds upper bound in case label range");
 			  }
