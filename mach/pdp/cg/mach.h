@@ -8,7 +8,7 @@
  * or for the standard UNIX V7 assembler.
  * If on code is generated for the ACK assembler.
  */
-/* #define ACK_ASS	/* code for ACK assembler */
+#define ACK_ASS	/* code for ACK assembler */
 
 #ifdef ACK_ASS
 #define COMMENTCHAR '!'

@@ -50,24 +50,50 @@ con_mult(sz) word sz; {
  * The next function is difficult to do when not running on a PDP 11 or VAX
  * The strategy followed is to assume the code generator is running on a PDP 11
  * unless the ACK_ASS define  is on.
- * In the last case floating point constants are simply not handled
  */
 
 con_float() {
 #ifdef ACK_ASS
-	static int been_here;
+	double f, f1;
+	double atof(), frexp(), modf();
+	int i, j;
+	int sign = 0;
+	int fraction ;
 
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
-	fprintf(codefile,".data4\t");
-	if (argval == 8)
-		fprintf(codefile,"F_DUM,");
-	fprintf(codefile,"F_DUM\n");
-	if ( !been_here++)
-		fprintf(stderr,"Warning : dummy float-constant(s)\n");
+	f = atof(str);
+	f = frexp(f, &i);
+	if (f < 0) {
+		f = -f;
+		sign = 1;
+	}
+	while (f < 0.5) {
+		f += f;
+		i --;
+	}
+	f = modf(2 * f, &f1); /* hidden bit */
+	i = (i + 128) & 0377;
+	fraction = (sign << 15) | (i << 7);
+	for (j = 6; j>= 0; j--) {
+		if (f >= 0.5) fraction |= (1 << j);
+		f = modf(2*f, &f1);
+	}
+	fprintf(codefile, ".data2 0%o", fraction);
+	for (i = argval / 2 - 1; i; i--) {
+		fraction = 0;
+		for (j = 15; j>= 0; j--) {
+			if (f >= 0.5) fraction |= (1 << j);
+			f = modf(2*f, &f1);
+		}
+		fprintf(codefile, ", 0%o", fraction);
+	}
+	putc('\n', codefile);
 #else
 	double f;
-	register short *p,i;
+	double atof();
+	int i;
+	short *p;
 
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
