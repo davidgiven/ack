@@ -52,7 +52,7 @@ IMPLEMENTATION MODULE Conversions;
 	IF (num < 0) AND (num >= -MAX(INTEGER)) THEN
 		ConvertNum(-num, len, 10, TRUE, str);
 	ELSE
-		ConvertNum(CARDINAL(num), len, 10, FALSE, str);
+		ConvertNum(CARDINAL(num), len, 10, num < 0, str);
 	END;
   END ConvertInteger; 
 
