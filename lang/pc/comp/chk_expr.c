@@ -65,15 +65,16 @@ MarkUsed(nd)
 	}
 
 	if( nd && nd->nd_class == Def ) {
-		if( !((nd->nd_def->df_flags & D_VARPAR) ||
-		    (nd->nd_def->df_kind == D_FIELD)) ) {
-			if( !(nd->nd_def->df_flags & D_SET) &&
-			    (nd->nd_def->df_scope == CurrentScope) )
-				if( !is_anon_idf(nd->nd_def->df_idf) ) {
+		register struct def *df = nd->nd_def;
+
+		if( df->df_kind != D_FIELD ) {
+			if( !(df->df_flags & (D_SET|D_VARPAR)) &&
+			    (df->df_scope == CurrentScope) )
+				if( !is_anon_idf(df->df_idf) ) {
 					warning("\"%s\" used before set",
-						nd->nd_def->df_idf->id_text);
+						df->df_idf->id_text);
 				}
-			nd->nd_def->df_flags |= (D_USED | D_SET);
+			df->df_flags |= (D_USED | D_SET);
 		}
 	}
 }
@@ -779,15 +780,17 @@ getarg(argp, bases, varaccess, name, paramtp)
 		else return 0;
 	}
 	else if( varaccess ) {
-	    if( !ChkVarPar(left, name) )
-		    return 0;
+	    if( !ChkVarPar(left, name) ) {
+		MarkUsed(left);
+		return 0;
+	    }
 	}
 	else if( !ChkExpression(left) ) {
 		MarkUsed(left);
 		return 0;
 	}
 
-	if( !varaccess ) MarkUsed(left);
+	MarkUsed(left);
 
 	if( !varaccess &&  bases == T_INTEGER &&
 		    BaseType(left->nd_type)->tp_fund == T_LONG) {
