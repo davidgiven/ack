@@ -59,11 +59,16 @@ string
 libpath(s) string s; {
 	/* Must deliver a full pathname to the library file "s" */
 
-	static char buf[100];
+	register string p;
+	register length;
+	p_mem alloc();
 	string strcpy(), strcat();
+	static string subdir = "/lib/LLgen/";
 
-	strcpy(buf,EM_DIR);
-	strcat(buf,"/lib/LLgen/");
-	strcat(buf,s);
-	return buf;
+	length = strlen(EM_DIR) + strlen(subdir) + strlen(s) + 1;
+	p = (string) alloc((unsigned) length);
+	strcpy(p,EM_DIR);
+	strcat(p,subdir);
+	strcat(p,s);
+	return p;
 }
