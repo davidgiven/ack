@@ -8,9 +8,6 @@ installing ACK under UniSoft Unix:
    included in the Unisoft distribution, although it is standard V7 Unix).
    The file can be copied from the ACK-tree:
      cp /usr/em/include/assert.h /usr/include
-3) The file /lib/libln.a is called /lib/libl.a in Unisoft Unix.
-   The easiest way to fix this is to link the latter to the former:
-     ln /lib/libl.a /lib/libln.a
 
 The UniSoft C compiler we used contains a bug that will cause
 incorrect translations of the files getline.c and putline.c in

@@ -1,10 +1,7 @@
 Action
 ncg
-libbc
-libcc
 libem
-libpc
-libsys
-liboc
+libend
 libfp
-libm2
+libsys
+mach_params

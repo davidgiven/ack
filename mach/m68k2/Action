@@ -4,33 +4,24 @@ end
 name "Motorola 68000 2-4 backend"
 dir ncg
 end
-name "Motorola 68000 2-4 conversion program"
-dir cv
-end
 name "Motorola 68000 target optimizer"
 dir top
 end
-name "Motorola 68000 2-4 C libraries"
-dir libcc
+name "Motorola 68000 2-4 conversion program"
+dir cv
 end
 name "Motorola 68000 2-4 EM library"
 dir libem
 end
-name "Motorola 68000 2-4 Pascal library"
-dir libpc
+name "Motorola 68000 2-4 etext,edata,end library"
+dir libend
+end
+name "Motorola 68000 2-4 floating point library"
+dir libfp
 end
 name "Motorola 68000 2-4 System library"
 dir libsys
 end
-name "Motorola 68000 2-4 Basic library"
-dir libbc
-end
-name "Motorola 68000 2-4 Occam library"
-dir liboc
-end
-name "Motorola 68000 2-4 Modula-2 library"
-dir libm2
-end
-name "Motorola 68000 2-4 floating point library"
-dir libfp
+name "Motorola 68000 2-4 conversion program"
+dir cv
 end

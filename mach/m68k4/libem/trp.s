@@ -33,7 +33,6 @@
 	pea	fmt
 	jsr	.diagnos
 	add	#4,sp
-	jsr	__cleanup
 	jmp	EXIT
 
 	.sect .data

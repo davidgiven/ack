@@ -5,12 +5,9 @@ as
 ncg
 cv
 dl
-libcc
 libem
-libpc
+libend
 libsys
-libbc
 top
-liboc
 libfp
-libm2
+mach_params
