@@ -27,7 +27,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib.bin/{M}/top
+	program {EM}/lib.bin/m68k2/top
 	args
 	optimizer
 	stdin
@@ -36,7 +36,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib.bin/{M}/as
+	program {EM}/lib.bin/m68k2/as
 	args - -o > <
 	prep cond
 end
