@@ -1,7 +1,8 @@
 CFLAGS=-O -I../../../h
+LDFLAGS = -i
 
 cv:             cv.o
-		$(CC) -o cv -n cv.o
+		$(CC) -o cv $(LDFLAGS) cv.o
 
 install:	ins_cv
 ins_cv:		cv
