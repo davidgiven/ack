@@ -311,7 +311,7 @@ call name (acc, cc, apc or pc) or by the \fB\-.suffix\fP flag.
 .IP \fIneed\fP
 .br
 This \-~optional~\- keyword indicates that the rest of the line must be
-concatenated to the NEEDS variable.
+concatenated to the HEAD and TAIL variables.
 This is done once for every transformation used or indicated
 by one of the program call names mentioned above or indicated
 by the \fB\-.suffix\fP flag.
