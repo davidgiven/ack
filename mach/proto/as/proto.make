@@ -61,11 +61,15 @@ $(COBJ):	y.tab.h
 $(COBJ) as.y:	$(CDIR)/comm0.h $(MDIR)/mach0.c
 $(COBJ) as.y:	$(CDIR)/comm1.h $(MDIR)/mach1.c
 as.y:		$(MDIR)/mach2.c
-comm3.$(SUF):	$(MDIR)/mach3.c
 as.y:		$(MDIR)/mach4.c
+as.$(SUF):	as.c
+		$(CC) -c $(CFLAGS) $(CDIR)/as.c
+comm8.$(SUF):	$(CDIR)/comm8.c
+		$(CC) -c $(CFLAGS) $(CDIR)/comm8.c
 comm8.$(SUF):	$(MDIR)/mach5.c
 comm3.$(SUF):	$(CDIR)/comm3.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm3.c
+comm3.$(SUF):	$(MDIR)/mach3.c
 comm4.$(SUF):	$(CDIR)/comm4.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm4.c
 comm5.$(SUF):	$(CDIR)/comm5.c
@@ -74,5 +78,3 @@ comm6.$(SUF):	$(CDIR)/comm6.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm6.c
 comm7.$(SUF):	$(CDIR)/comm7.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm7.c
-comm8.$(SUF):	$(CDIR)/comm8.c
-		$(CC) -c $(CFLAGS) $(CDIR)/comm8.c
