@@ -179,9 +179,11 @@ str_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 		bcc	3f					!break
 		cmp.l	tblmax,d1 ;	bcs	4f
 5:		move.l	d1,hp	;	jmp	(a4)
-3:		move.l	d1,-(sp) ;	add.l	#1280,(sp)
+3:		move.l	d1,-(sp)
+		move.l	d1,-(sp) ;	add.l	#1280,(sp)
 		bsr	_Xbreak ;	testen	(sp)+
-4:		bne	e_heap	;	bra	5b
+4:		bne	e_heap	;
+		move.l	(sp)+,d1 ;	bra	5b
 
 !----------------------------------------------------------------------------
 rck_z:		mov	(sp)+,d0 ;	bra	0f
