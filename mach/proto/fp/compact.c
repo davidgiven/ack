@@ -1,4 +1,4 @@
-/*
+e
   (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
@@ -36,7 +36,8 @@ int	size;
 		if (f->exp > DBL_MAX)	{
 dbl_over:			trap(EFOVFL);
 			f->exp = DBL_MAX;
-			f->m1 = f->m2 = 0L;
+			f->m1 = 0xffffffffL;
+			f->m2 = DBL_ZERO;
 			if (error++)
 				return;
 		}
@@ -121,7 +122,8 @@ dbl_over:			trap(EFOVFL);
 		if (f->exp > SGL_MAX)	{
 sgl_over:			trap(EFOVFL);
 			f->exp = SGL_MAX;
-			f->m1 = f->m2 = 0L;
+			f->m1 = SGL_ZERO;
+			f->m2 = 0L;
 			if (error++)
 				return;
 		}
