@@ -1040,6 +1040,17 @@ Argument to be formatted will be 'full'.
 .IP off_fmt
 Format to be used for integer part of label+constant,
 argument will be 'full'.
+.IP fmt_ilb(ip,il,s)
+Must use the numbers 
+.I ip
+and 
+.I il
+which are a procedure number
+and a label number respectively and copy a string to
+.I s
+that must be unique for that combination.
+This procedure is optional, if it is not given ilb_fmt
+must be defined as below.
 .IP ilb_fmt
 Format to be used for creation of unique instruction labels.
 Arguments will be a unique procedure number (int) and the label
@@ -1070,6 +1081,14 @@ into the datastream.
 .IP con_dlb(s)
 Must generate output that will put the address of the data label
 into the datastream.
+.IP fmt_id(sf,st)
+Must take the string in
+.I sf
+which is a nonnumeric global label, and transform it into a copy made to
+.I st
+which will not collide with reserved assembler words and system labels.
+This procedure is optional, if it is not given the id_first macro is used
+as defined below.
 .IP id_first
 Must be a character.
 This is prepended to all nonnumeric global labels if their length
