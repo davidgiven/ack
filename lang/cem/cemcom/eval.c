@@ -198,8 +198,12 @@ EVAL(expr, val, code, true_label, false_label)
 			}
 			break;
 		case '*':
-			if (left == 0) /* unary */
+			if (left == 0) { /* unary */
 				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+				if (gencode && right->ex_class == String) {
+					C_loi((arith)1);
+				}
+			}
 			else { /* binary */
 				EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
 				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);

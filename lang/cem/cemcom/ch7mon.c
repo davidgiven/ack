@@ -40,7 +40,7 @@ ch7mon(oper, expp)
 		}
 		else {
 			expr = *expp;
-			if (expr->ex_lvalue == 0)
+			if (expr->ex_lvalue == 0 && expr->ex_class != String)
 				/* dereference in administration only */
 				expr->ex_type = expr->ex_type->tp_up;
 			else	/* runtime code */

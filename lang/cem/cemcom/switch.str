@@ -12,6 +12,7 @@ struct switch_hdr	{
 	label sh_table;
 	int sh_nrofentries;
 	struct type *sh_type;
+	struct expr *sh_expr;
 	arith sh_lowerbd;
 	arith sh_upperbd;
 	struct case_entry *sh_entries;

@@ -79,10 +79,9 @@ code_startswitch(expp)
 	sh->sh_type = (*expp)->ex_type;	/* the expression switched	*/
 	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* immaterial ??? */
 	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
+	sh->sh_expr = *expp;
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
-	/* evaluate the switch expr.	*/
-	code_expr(*expp, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
 
@@ -96,6 +95,8 @@ code_endswitch()
 		sh->sh_default = sh->sh_break;
 	C_bra(sh->sh_break);		/* skip the switch table now	*/
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
+	/* evaluate the switch expr.	*/
+	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
 	C_rom_ilb(sh->sh_default);
