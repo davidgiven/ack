@@ -19,7 +19,7 @@ RETC=0
 do
 	eval set $LINE
 	case x"$1" in
-	x#*)	;;
+	x!*)	;;
 	xname)		SYS="$2"
 			ACTION='make $PAR'
 			DIR=.
