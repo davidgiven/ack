@@ -70,8 +70,6 @@ _penvp
  lol 0
  loc EFDIVZ
  beq *1
- bra *2
-2
  lol 0
  trp
  bra *3
@@ -84,7 +82,7 @@ _penvp
 3
  lpi $_ctch_
  sig
- asp EM_WSIZE
+ asp EM_PSIZE
  rtt
  end 0
 #endif
