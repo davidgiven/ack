@@ -253,7 +253,7 @@ flt_str2flt(s, e)
 	while (c = *s++, isdigit(c) || (c == '.' && ! dotseen++)) {
 		if (c == '.') continue;
 		digitseen = 1;
-		if (e->m1 <= 0x7FFFFFFF/5) {
+		if (e->m1 >= 0 && e->m1 <= 0x7FFFFFFF/5) {
 			struct flt_mantissa	a1;
 
 			a1 = e->flt_mantissa;
@@ -415,7 +415,7 @@ flt_flt2str(e, buf, bufsize)
                 if (*s1) *s++ = *s1++;
                 else *s++ = '0';
 	}
-        if ((e->m1 | e->m2) || e->flt_exp == EXT_MIN || e->flt_exp == EXT_MAX) {
+        if (e->m1 | e->m2) {
 		--dp ;
 	}
 	if (dp != 0) {

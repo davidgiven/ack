@@ -22,7 +22,8 @@ flt_div(e1,e2,e3)
 	if ((e2->m1 | e2->m2) == 0) {
 		flt_status = FLT_DIV0;
 		e3->flt_exp = EXT_MAX;
-		e3->m1 = e3->m2 = 0L;
+		e3->m1 = 0x80000000;
+		e3->m2 = 0L;
 		return;
 	}
 	if ((e1->m1 | e1->m2) == 0) {	/* 0 / anything == 0 */

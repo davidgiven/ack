@@ -10,8 +10,11 @@
 flt_nrm(e)
 	register flt_arith *e;
 {
-	if ((e->m1 | e->m2) == 0L)
+	if ((e->m1 | e->m2) == 0L) {
+		e->flt_exp = 0;
+		e->flt_sign = 0;
 		return;
+	}
 
 	/* if top word is zero mov low word	*/
 	/* to top word, adjust exponent value	*/
