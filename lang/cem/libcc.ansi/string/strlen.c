@@ -9,7 +9,7 @@
 size_t
 strlen(register const char *s)
 {
-	char *org = s;
+	const char *org = s;
 
 	while (*s++)
 		/* EMPTY */ ;

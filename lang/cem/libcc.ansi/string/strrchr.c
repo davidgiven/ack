@@ -9,7 +9,7 @@
 char *
 strrchr(register const char *s, int c)
 {
-	register char *result;
+	register const char *result;
 	register char c1 = (char) c;
 
 	result = (char *)NULL;
@@ -18,5 +18,5 @@ strrchr(register const char *s, int c)
 			result = s;
 	} while (*s++);
 
-	return(result);
+	return (char *)result;
 }

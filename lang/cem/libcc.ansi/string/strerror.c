@@ -14,5 +14,5 @@ strerror(register int errnum)
 
   	if (errnum < 0 || errnum >= _sys_nerr)
 		return "unknown error";
-	return _sys_errlist[errnum];
+	return (char *)_sys_errlist[errnum];
 }

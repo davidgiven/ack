@@ -9,13 +9,13 @@
 char *
 strpbrk(register const char *string, register const char *brk)
 {
-	register char *s1;
+	register const char *s1;
 
 	while (*string) {
 		for (s1 = brk; *s1 && *s1 != *string; s1++)
 			/* EMPTY */ ;
 		if (*s1)
-			return string;
+			return (char *)string;
 		string++;
 	}
 	return (char *)NULL;

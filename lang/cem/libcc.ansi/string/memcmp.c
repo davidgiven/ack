@@ -7,12 +7,14 @@
 #include	<string.h>
 
 int
-memcmp(register const void *s1, register const void *s2, size_t n)
+memcmp(const void *s1, const void *s2, size_t n)
 {
+	register const char *p1 = s1, *p2 = s2;
+
 	while (n > 0) {
 		n--;
-		if (*s1++ != *s2++)
-			return *--s1 - *--s2;
+		if (*p1++ != *p2++)
+			return *--p1 - *--p2;
 	}
 	return 0;
 }

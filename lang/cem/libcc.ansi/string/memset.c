@@ -9,7 +9,7 @@
 void *
 memset(void *s, int c, register size_t n)
 {
-	register void *s1 = s;
+	register char *s1 = s;
 
 	while (n > 0) {
 		n--;

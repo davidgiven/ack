@@ -9,11 +9,13 @@
 void *
 memcpy(register void *s1, register const void *s2, register size_t n)
 {
-	void *ret = s1;
+	register char *p1 = s1;
+	register const char *p2 = s2;
+
 
 	while (n > 0) {
 		n--;
-		*s1++ = *s2++;
+		*p1++ = *p2++;
 	}
-	return ret;
+	return s1;
 }

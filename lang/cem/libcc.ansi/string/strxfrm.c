@@ -9,7 +9,7 @@
 size_t
 strxfrm(register char *s1, register const char *s2, register size_t n)
 {
-	char *save = s2;
+	const char *save = s2;
 
 	while (*s2) {
 		if (n > 1) {

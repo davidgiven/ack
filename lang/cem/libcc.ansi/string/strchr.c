@@ -13,7 +13,7 @@ strchr(register const char *s, int c)
 
 	do {
 		if (*s == c1)
-			return s;
+			return (char *)s;
 	} while (*s++ != '\0');
 
 	return (char *)NULL;

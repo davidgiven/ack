@@ -7,22 +7,23 @@
 #include	<string.h>
 
 void *
-memmove(register void *s1, register const void *s2, register size_t n)
+memmove(void *s1, const void *s2, register size_t n)
 {
-	void *ret = s1;
+	register char *p1 = s1;
+	register const char *p2 = s2;
 
-	if (s2 <= s1 && s2 + (n-1) >= s1) {
+	if (p2 <= p1 && p2 + (n-1) >= p1) {
 		/* overlap, copy backwards */
-		s1 += n;
-		s2 += n;
+		p1 += n;
+		p2 += n;
 		while (n > 0) {
 			n--;
-			*--s1 = *--s2;
+			*--p1 = *--p2;
 		}
 	} else
 		while (n > 0) {
 			n--;
-			*s1++ = *s2++;
+			*p1++ = *p2++;
 		}
-	return ret;
+	return s1;
 }

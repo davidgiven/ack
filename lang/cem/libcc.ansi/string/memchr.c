@@ -9,13 +9,13 @@
 void *
 memchr(const void *s, int c, register size_t n)
 {
-	register unsigned char *s1 = (unsigned char *)s;
+	register const unsigned char *s1 = s;
 	unsigned char c1 = (unsigned char) c;
 	
 	while (n > 0) {
 		n--;
 		if (*s1++ == c1)
-			return (void *) --s1;
+			return (void *) (s1 - 1);
 	}
-	return (void *) NULL;
+	return NULL;
 }
