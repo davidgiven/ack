@@ -26,7 +26,7 @@ struct symbol {
 	ind_t	sy_next;
 };
 
-#define NHASH	256		/* Size of hash table. Should be even. */
+#define NHASH	307		/* Size of hash table. Must be odd. */
 
 static ind_t	hashtable[NHASH];
 
@@ -134,12 +134,12 @@ int
 hash(p)
 	register char		*p;
 {
-	register unsigned int	h = 0;
+	register unsigned short	h = 0;
 	register int		c;
 
 	while (c = *p++) {
 		h <<= 2;
 		h += c;
 	}
-	return h & (NHASH - 1);
+	return h % NHASH;
 }
