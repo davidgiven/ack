@@ -61,7 +61,6 @@ static int been_here;
 con_float() {
 	double f;
 	double atof();
-	float fl;
 	int i;
 #ifndef OWNFLOAT
 	double f1;
@@ -70,6 +69,7 @@ con_float() {
 	int sign = 0;
 	int fraction[4] ;
 #else OWNFLOAT
+	float fl;
 	char *p;
 #endif OWNFLOAT
 
@@ -265,15 +265,15 @@ f_regsave()
 	save();
 }
 
-regsave(str,off,size)
-	char *str;
+regsave(s,off,size)
+	char *s;
 	long off;
 {
 	assert (regnr < 9);
-	regsav[regnr].rs_reg = str;
+	regsav[regnr].rs_reg = s;
 	regsav[regnr].rs_off = off;
 	regsav[regnr++].rs_size = size;
-	fprintf(codefile, "!Local %ld into %s\n",off,str);
+	fprintf(codefile, "!Local %ld into %s\n",off,s);
 }
 
 regreturn()
