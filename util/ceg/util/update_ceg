@@ -1,28 +1,28 @@
-make -f ce_makefile ceg/ceg
+MAKE=../../../lib/ceg/util/make_ce
+
+make -f ceg/Makefile
 
 for i
 do
 	case $i in
-	  ALL) make -f ce_makefile EM_instr ce.a;
-	       exit 0;;
+	  ALL) make -f $MAKE ce.a
+	       exit 0
+	       ;;
 
-	  *.o) make -f ce_makefile ce/$i;
-	       ar r ce.a $i;;
+	  *.o) make -f $MAKE ce/$i
+	       ;;
 
-	  *..) ( cd ce; ../../../../lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
-	       F=`basename $i ..`;
+	  *..) ( cd ce; ../../../../lib/cpp -P ../EM_table |  ../ceg/ceg -c $i)
+	       F=`basename $i ..`
 	       U="_dnam"
 	       V="_dlb"
-	       make -f ce_makefile ce/$F.o ce/$F$U.o ce/"$F$V.o";
-	       echo ar r ce.a ce/$F.o ce/"$F$U.o" ce/"$F$V.o";
-	       ar r ce.a ce/$F.o ce/$F$U.o ce/"$F$U.o";;
+	       make -f $MAKE ce/$F.o ce/$F$U.o ce/"$F$V.o"
+	       ;;
 
-	    *) ( cd ce; ../../../../lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
-	       make -f ce_makefile ce/$i.o;
-	       echo ar r ce.a ce/$i.o;
-	       ar r ce.a ce/$i.o;;
+	    *) ( cd ce; ../../../../lib/cpp -P ../EM_table | ../ceg/ceg -c $i)
+	       make -f $MAKE ce/$i.o
+	       ;;
 	esac
 done
-
-echo ranlib ce.a
-ranlib ce.a
+touch ce/dummy
+make -f $MAKE ce.a

@@ -1,0 +1,13 @@
+EM	= ../../../..
+CEG	= $(EM)/lib/ceg
+BACK	= $(CEG)/ce_back/$(OBJ)_back
+
+AR	= ar
+
+all:	back.a
+
+back.a:	mach.h
+	-mkdir back
+	cd back;cp $(BACK)/*h . ; cp $(BACK)/Makefile . ; make ; cd ..
+	$(AR) r back.a back/*o
+	-sh -c 'ranlib back.a'

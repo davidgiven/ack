@@ -1,0 +1,30 @@
+EM = ../../../..
+CEG = $(EM)/lib/ceg
+
+AS   = $(CEG)/as_parser
+DEF = $(CEG)/defaults
+
+AR = ar
+CC = cc
+
+IFILES	= -I. -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back
+
+CFLAGS = -O $(IFILES)
+
+.c.o:	mach.h back.a
+	cd ce ; $(CC) -c $(CFLAGS) ../$*.c ; cd ..
+
+all:	ce.a
+
+ce.a:	ce/dummy
+	$(AR) r ce.a ce/*.o
+	-sh -c 'ranlib ce.a'
+
+ce/dummy:	ce/dummy1 mach.h back.a
+	cd ce ; $(CC) -c $(CFLAGS) *.c ; touch dummy ; cd ..
+
+ce/dummy1:	ceg/ceg EM_table
+	-mkdir ce
+	-ln mach.c ce/mach.c
+	cd ce ; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table ; cp $(DEF)/*.c . ; cp $(DEF)/*/*.c . ; cd ..
+	cd ce ; $(EM)/lib/cpp -P ../EM_table | ../ceg/ceg -l ; touch dummy1 ; cd ..
