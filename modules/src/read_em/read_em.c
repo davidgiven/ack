@@ -251,12 +251,11 @@ EM_getinstr(p)
 			i = em_ptyp[j];
 			if (j == PAR_NO) {	/* No arguments */
 				p->em_argtype = 0;
-				break;
 			}
 #ifndef COMPACT
 			if (j == PAR_B) i = ptyp(sp_ilb2);
 #endif COMPACT
-			getarg(i, &(p->em_arg));
+			if (j != PAR_NO) getarg(i, &(p->em_arg));
 #ifndef COMPACT
 			if (j == PAR_B) {
 				p->em_cst = p->em_ilb;
