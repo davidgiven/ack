@@ -727,12 +727,20 @@ type_or_forward(ptp)
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-		if (df1->df_kind == D_FORWTYPE) {
+		switch(df1->df_kind) {
+		case D_FORWARD:
+			FreeNode(df1->for_node);
+			df1->df_kind = D_FORWTYPE;
+			df1->df_forw_node = 0;
+			/* Fall through */
+		case D_FORWTYPE:
 			nd = dot2node(0, NULLNODE, df1->df_forw_node);
 			df1->df_forw_node = nd;
 			nd->nd_type = *ptp;
+			return 0;
+		default:
+			return 1;
 		}
-		return 1;
 	}
 	nd = dot2leaf(0);
 	if ((df1 = lookfor(nd, CurrVis, 0, D_USED))->df_kind == D_MODULE) {
