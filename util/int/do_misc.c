@@ -436,6 +436,9 @@ PRIVATE index_jump(nbytes)
 
 	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes)) {
 		nPC = mem_ldip(cdp + (2 * nbytes) + ((t_index + 1) * psize));
+		if (nPC == 0) {
+			trap(ECASE);
+		}
 	}
 	else if ((nPC = mem_ldip(cdp)) == 0) {
 		trap(ECASE);
