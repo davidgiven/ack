@@ -17,13 +17,42 @@
    and 0 if all went well.
    If neither IEEEFLOAT nor PDPFLOAT are defined, the return value is not
    trustworthy.
+
+   Unfortunately, the IEEE standard does not define the byte-order.
+   depends on the #defines
+	FL_MSL_AT_LOW_ADDRESS	1 if most significant long is at low address
+	FL_MSW_AT_LOW_ADDRESS	1 if most significant word is at low address
+	FL_MSB_AT_LOW_ADDRESS	1 if most significant byte is at low address
 */
 #ifdef IEEEFLOAT
 #define USE_FLT
 #endif
 #ifdef PDPFLOAT
 #define USE_FLT
+#undef FL_MSL_AT_LOW_ADDRESS
+#define FL_MSL_AT_LOW_ADDRESS 1
+#undef FL_MSW_AT_LOW_ADDRESS
+#define FL_MSW_AT_LOW_ADDRESS 1
+#undef FL_MSB_AT_LOW_ADDRESS
+#define FL_MSB_AT_LOW_ADDRESS 0
 #endif
+
+#define I0 ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
+#define I1 ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 1 : 0))
+#define I2 ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 2 : 0) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
+#define I3 ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 2 : 0) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 1 : 0))
+#define I4 ((FL_MSL_AT_LOW_ADDRESS ? 4 : 0) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
+#define I5 ((FL_MSL_AT_LOW_ADDRESS ? 4 : 0) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 1 : 0))
+#define I6 ((FL_MSL_AT_LOW_ADDRESS ? 4 : 0) + (FL_MSW_AT_LOW_ADDRESS ? 2 : 0) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
+#define I7 ((FL_MSL_AT_LOW_ADDRESS ? 4 : 0) + (FL_MSW_AT_LOW_ADDRESS ? 2 : 0) \
+		+ (FL_MSB_AT_LOW_ADDRESS ? 1 : 0))
 
 #ifndef USE_FLT
 static int
@@ -100,17 +129,17 @@ float_cst(str, sz, buf)
 			}
 		}
 #endif
-		buf[0] = (e.flt_sign << 7) | (e.flt_exp >> 1);
-		buf[1] = ((e.flt_exp&1) << 7) |
+		buf[I0] = (e.flt_sign << 7) | (e.flt_exp >> 1);
+		buf[I1] = ((e.flt_exp&1) << 7) |
 				((e.flt_mantissa.flt_h_32 & 0x7fffffff) >> 24);
-		buf[2] = e.flt_mantissa.flt_h_32 >> 16;
-		buf[3] = e.flt_mantissa.flt_h_32 >> 8;
+		buf[I2] = e.flt_mantissa.flt_h_32 >> 16;
+		buf[I3] = e.flt_mantissa.flt_h_32 >> 8;
 #ifndef IEEEFLOAT
 		if (sz == 8) {
-			buf[4] = e.flt_mantissa.flt_h_32;
-			buf[5] = e.flt_mantissa.flt_l_32 >> 24;
-			buf[6] = e.flt_mantissa.flt_l_32 >> 16;
-			buf[7] = e.flt_mantissa.flt_l_32 >> 8;
+			buf[I4] = e.flt_mantissa.flt_h_32;
+			buf[I5] = e.flt_mantissa.flt_l_32 >> 24;
+			buf[I6] = e.flt_mantissa.flt_l_32 >> 16;
+			buf[I7] = e.flt_mantissa.flt_l_32 >> 8;
 			flt_b64_sft(&(e.flt_mantissa), -56);
 		}
 		else
@@ -146,15 +175,23 @@ float_cst(str, sz, buf)
 				e.flt_exp = 0;
 			}
 		}
-		buf[0] = (e.flt_sign << 7) | (e.flt_exp >> 4);
-		buf[1] = ((e.flt_exp & 017)<< 4) | ((e.flt_mantissa.flt_h_32 >> 27) & 017);
-		buf[2] = e.flt_mantissa.flt_h_32 >> 19;
-		buf[3] = e.flt_mantissa.flt_h_32 >> 11;
-		buf[4] = e.flt_mantissa.flt_h_32 >> 3;
-		buf[5] = (e.flt_mantissa.flt_h_32 << 5) | ((e.flt_mantissa.flt_l_32 >> 27) & 037);
-		buf[6] = e.flt_mantissa.flt_l_32 >> 19;
-		buf[7] = e.flt_mantissa.flt_l_32 >> 11;
+		buf[I0] = (e.flt_sign << 7) | (e.flt_exp >> 4);
+		buf[I1] = ((e.flt_exp & 017)<< 4) | ((e.flt_mantissa.flt_h_32 >> 27) & 017);
+		buf[I2] = e.flt_mantissa.flt_h_32 >> 19;
+		buf[I3] = e.flt_mantissa.flt_h_32 >> 11;
+		buf[I4] = e.flt_mantissa.flt_h_32 >> 3;
+		buf[I5] = (e.flt_mantissa.flt_h_32 << 5) | ((e.flt_mantissa.flt_l_32 >> 27) & 037);
+		buf[I6] = e.flt_mantissa.flt_l_32 >> 19;
+		buf[I7] = e.flt_mantissa.flt_l_32 >> 11;
 		flt_b64_sft(&(e.flt_mantissa), -53);
+	}
+#endif
+#if ! FL_MSL_AT_LOW_ADDRESS
+	if (sz == 4) {
+		buf[I4] = buf[I0];
+		buf[I5] = buf[I1];
+		buf[I6] = buf[I2];
+		buf[I7] = buf[I3];
 	}
 #endif
 	if (overflow) {
