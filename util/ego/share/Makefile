@@ -6,7 +6,7 @@ SHARE=../share
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
-LINTFLAGS=-phbac
+LINTFLAGS=-hbac
 
 SRC=\
 types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c\

@@ -7,7 +7,7 @@ CPP=$(EMLIB)/cpp
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
-LINTFLAGS=-phbac
+LINTFLAGS=-hbac
 
 SOURCES = i86.descr m68k2.descr pdp.descr vax4.descr m68k4.descr m68020.descr
 
