@@ -4,6 +4,9 @@
  */
 /* $Header$ */
 
+#if	defined(_POSIX_SOURCE)
+#include	<sys/types.h>
+#endif
 #include	<stdlib.h>
 #include	<signal.h>
 

@@ -4,6 +4,9 @@
  */
 /* $Header$ */
 
+#if	defined(_POSIX_SOURCE)
+#include	<sys/types.h>
+#endif
 #include	<signal.h>
 
 int _kill(int pid, int sig);
