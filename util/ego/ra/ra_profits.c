@@ -229,7 +229,7 @@ compute_profits(alloclist,time_opt)
 			}
 			t = cnt * time - dyn_inits(alloc->al_inits) * otime;
 			sc = (time_opt ? t : s);
-			if (sc >= maxsc) {
+			if (sc > maxsc) {
 				maxsc = sc;
 				alloc->al_regtype = rtyp;
 				alloc->al_profits = sc;
