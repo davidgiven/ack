@@ -252,6 +252,7 @@ i386)
 w
 q
 ABC
+	)
 	;;
 xenix3)
 	echo "Xenix cannot handle our Makefiles; install our own make ..."
