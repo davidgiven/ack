@@ -4,6 +4,7 @@
 .sect .data
 .sect .bss
 .extern _execl
+		.sect .text
 _execl:		link a6,#0
 		tst.b -132(sp)
 		move.l _environ,-(sp)

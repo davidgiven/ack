@@ -5,6 +5,7 @@
 .sect .bss
 .extern _signal
 NSIG=32
+	.sect .text
 _signal:
 	move.w	4(sp), d0
 	ext.l	d0
