@@ -5,6 +5,9 @@ emcode \- EM code interface for compilers
 .nf
 .B #include <em.h>
 .PP
+.B C_init(wsize, psize)
+.B arith wsize, psize;
+.PP
 .B int C_open(filename)
 .B C_close()
 .B int C_busy()
@@ -73,6 +76,15 @@ and
 unsigned int
 for
 .BR label .
+.PP
+.B C_init()
+should be called to initialize the module.
+.I Wsize
+is the word size and
+.I psize
+the pointer size on the target machine.
+Checking implementations of this module use these values to check
+whether arguments of an instruction are legal.
 .PP
 .BI C_open( filename )
 should be invoked as initialiser for
