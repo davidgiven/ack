@@ -5,6 +5,7 @@
 #include "back.h"
 
 static reduce_name_table();
+static convert_outname();
 
 static int nrelo;
 
@@ -159,10 +160,11 @@ reduce_name_table()
 wr_fatal()
 {
 	fprint( STDERR, "write failed\n");
-	abort();
+	sys_stop(S_ABORT);
 }
 
 
+static
 convert_outname( header)
 struct outhead *header;
 {

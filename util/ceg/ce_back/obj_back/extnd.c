@@ -4,6 +4,32 @@
 #include "header.h"
 #include "data.h"
 #include "mach.h"
+#include <varargs.h>
+
+/* Mysprint() stores the string directly in the string_arae. This saves
+ * a copy action. It is assumed that the strings stored in the string-table
+ * are never longer than MAXSTRLEN bytes.
+ */
+
+#define MAXSTRLEN	1024
+
+/*VARARGS*/
+static int mysprint(va_alist)
+	va_dcl
+{
+	char *fmt;
+	va_list args;
+	int retval;
+
+	va_start(args);
+	fmt = va_arg(args, char *);
+	while (string + MAXSTRLEN - string_area > size_string)
+		mem_string();
+	retval = _format(string, fmt, args);
+	string[retval] = '\0';
+	va_end(args);
+	return retval;
+}
 
 /* The extnd_*()s make a name unique. The resulting string is directly stored
  * in the symbol_table (by mysprint()). Later additional fields in the 
@@ -12,22 +38,21 @@
  */
 
 extern int 	string_lengte, index_symbol_table;
-int 		procno = 0, holno = 0;
 
 
-char *extnd_pro( procno)
-int procno;
+char *extnd_pro( prcno)
+int prcno;
 {
-	string_lengte = mysprint( "%cprc%d", GENLAB, procno);
+	string_lengte = mysprint( "%cprc%d", GENLAB, prcno);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
 
 
-char *extnd_start( procno)
-int procno;
+char *extnd_start( prcno)
+int prcno;
 {
-	string_lengte = mysprint( "%cstrt%d", GENLAB, procno);
+	string_lengte = mysprint( "%cstrt%d", GENLAB, prcno);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
@@ -60,10 +85,10 @@ arith g;
 }
 
 
-char *extnd_ilb( l)
+char *extnd_ilb( l, prcno)
 arith l;
 {
-	string_lengte = mysprint( ILB_FMT, procno, (arith) l);
+	string_lengte = mysprint( ILB_FMT, prcno, (arith) l);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }

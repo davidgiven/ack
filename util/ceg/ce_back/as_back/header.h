@@ -3,5 +3,3 @@
 #include "back.h"
 
 extern int cur_seg;
-
-extern holno, procno;

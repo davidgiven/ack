@@ -10,7 +10,7 @@
 con4( l)
 FOUR_BYTES l;
 {
-	if ((_data_cnt -= 4) < 0) mem_data();
+	if ((data_cnt -= 4) < 0) mem_data();
 #ifdef WORDS_REVERSED
 	con2( (int)(l>>16));
 	con2( (int) l);
@@ -19,5 +19,3 @@ FOUR_BYTES l;
 	con2( (int) (l>>16));
 #endif
 }
-
-

@@ -4,7 +4,7 @@
 
 /* This file contains low-level routines for generating assembly code. */
 
-int procno = 0, holno = 0, cur_seg = -1, saved = FALSE;
+int cur_seg = -1, saved = FALSE;
 char name[256], labeltje[256];
 
 File *codefile;
@@ -41,18 +41,18 @@ dump_label()
 }
 
 
-char *extnd_pro( procno)
-int procno;
+char *extnd_pro( prcno)
+int prcno;
 {
-	sprint( name, "pro%d", procno);
+	sprint( name, "pro%d", prcno);
 	return( name);
 }
 
 
-char *extnd_start( procno)
-int procno;
+char *extnd_start( prcno)
+int prcno;
 {
-	sprint( name, "start%d", procno);
+	sprint( name, "start%d", prcno);
 	return( name);
 }
 
@@ -81,10 +81,10 @@ arith g;
 }
 
 
-char *extnd_ilb( l)
+char *extnd_ilb( l, prcno)
 arith l;
 {
-	sprint( name, ILB_FMT, procno, (arith) l);
+	sprint( name, ILB_FMT, prcno, (arith) l);
         return( name);
 }
 

@@ -3,14 +3,7 @@
 #include "back.h"
 #include "header.h"
 
-
-end_back()
-{
-	finish_tables();                 
-	do_local_relocation();
-}
-
-
+static
 finish_tables()
 
 /* Prepare tables for do_local_relocation() and output().
@@ -23,7 +16,6 @@ finish_tables()
 	define_segments();  
 }
 
-
 static char *seg_name[] = {
 		".text",
 		".rom",
@@ -31,7 +23,7 @@ static char *seg_name[] = {
 		".bss"
 	};
 
-
+static
 define_segments()
 {
 	int i, s;
@@ -42,3 +34,8 @@ define_segments()
 	}
 }
 
+end_back()
+{
+	finish_tables();                 
+	do_local_relocation();
+}

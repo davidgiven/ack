@@ -2,7 +2,7 @@
 #include "header.h"
 #include "back.h"
 
-int  Label, label_waiting; 
+int  _Label, _Label_waiting; 
 
 save_label( lab)
 char *lab;
@@ -13,18 +13,18 @@ char *lab;
  * is not allowed.
  */
 {
-	Label = find_sym( lab, SYMBOL_DEFINITION);
-	label_waiting = 1;
+	_Label = find_sym( lab, SYMBOL_DEFINITION);
+	_Label_waiting = 1;
 }
 
 
 dump_label()
 {
-	if ( label_waiting) {
+	if ( _Label_waiting) {
 		align_word();
-	        symbol_table[ Label].on_valu = cur_value();
-	        symbol_table[ Label].on_type |= ( S_MIN + conv_seg( cur_seg));
-		label_waiting = 0;
+	        symbol_table[ _Label].on_valu = cur_value();
+	        symbol_table[ _Label].on_type |= ( S_MIN + conv_seg( cur_seg));
+		_Label_waiting = 0;
 	}
 }
 

@@ -5,10 +5,10 @@
 common(n)
 arith n;
 {
-	extern int Label, label_waiting;
-	register struct outname *nm = &symbol_table[Label];
+	extern int _Label, _Label_waiting;
+	register struct outname *nm = &symbol_table[_Label];
 
-	if (label_waiting) {
+	if (_Label_waiting) {
 		/*	If possible, generate a common. Local commons must
 			be delt with later.
 		*/
@@ -16,7 +16,7 @@ arith n;
 		if (n > nm->on_valu) {
 			nm->on_valu = n;
 		}
-		label_waiting = 0;
+		_Label_waiting = 0;
 		return;
 	}
 	switchseg(SEGBSS);

@@ -71,7 +71,7 @@ do_local_relocation()
 				put1( sect, rp->or_addr, (char) newval);
 			}
 			else
-				print( STDERR, "do_relo() : bad relocation size\n");
+				fprint( STDERR, "do_relo() : bad relocation size\n");
 			rp->or_nami = seg_index((np->on_type & S_TYP) - S_MIN);
 	 		/* print( 
 				"reloc %s adrr=%ld sect=%ld oldval=%ld newval=%ld def = %ld\n",

@@ -18,7 +18,6 @@ init_back.c
 label.c
 memory.c
 misc.c
-mysprint.c
 output.c
 reloc1.c
 reloc2.c
