@@ -5,6 +5,7 @@
 install:
 	-rm -f $(TARGET_HOME)/bin/march
 	cp $(SRC_HOME)/util/shf/march.sh $(TARGET_HOME)/bin/march
+	chmod +w $(TARGET_HOME)/bin/march
 
 clean:
 	@echo always clean
