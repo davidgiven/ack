@@ -4,3 +4,11 @@ end
 name "Sun 3 M68020 systemcall library"
 dir libsys
 end
+name "Sun3 code expander library"
+system "sun3"
+dir ce
+end
+name "Sun3 code expander support library"
+system "sun3"
+dir libce
+end
