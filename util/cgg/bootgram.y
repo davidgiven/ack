@@ -43,7 +43,7 @@ static char rcsid[]="$Header$";
 #define TOKENSIZE 5             /* Maximum number of fields in token struct */
 #define MAXINSTANCE BORS(250,120) /* Maximum number of different tokeninstances */
 #define MAXSTRINGS BORS(800,400)/* Maximum number of different codestrings */
-#define MAXPATTERN BORS(7000,6000) /* Maximum number of bytes in pattern[] */
+#define MAXPATTERN BORS(8000,6000) /* Maximum number of bytes in pattern[] */
 #define MAXNODES BORS(450,400)  /* Maximum number of expression nodes */
 #define MAXMEMBERS 2            /* Maximum number of subregisters per reg */
 #define NMOVES BORS(50,30)      /* Maximum number of move definitions */
