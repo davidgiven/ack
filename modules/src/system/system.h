@@ -3,6 +3,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* RCS: $Header$ */
+#ifndef __SYSTEM_INCLUDED__
+#define __SYSTEM_INCLUDED__
 
 struct _sys_fildes {
 	int o_fd;	/* UNIX filedescriptor */
@@ -42,3 +44,4 @@ extern File _sys_ftab[];
 
 /* system's idea of block */
 #define BUFSIZ	1024
+#endif __SYSTEM_INCLUDED__

@@ -3,6 +3,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
+#ifndef __EMCOMP_INCLUDED__
+#define __EMCOMP_INCLUDED__
 
 struct e_arg {
 	int	ema_argtype;		/* type of this argument */
@@ -70,3 +72,4 @@ extern unsigned int
 	EM_lineno;
 extern int
 	EM_wordsize, EM_pointersize;
+#endif __EMCOMP_INCLUDED__
