@@ -4,6 +4,9 @@ end
 name "PDP 11 backend"
 dir cg
 end
+name "PDP 11 target optimizer"
+dir top
+end
 name "PDP 11 interpreter"
 system pdp*
 dir int
@@ -15,6 +18,10 @@ end
 name "PDP 11 EM library"
 system pdp*
 dir libem
+end
+name "PDP 11 systemcall library"
+system pdp*
+dir libsys
 end
 name "PDP 11 Pascal library"
 system pdp*
