@@ -208,7 +208,7 @@ arrayer(arith *sizep;)
 		[
 			constant_expression(&expr)
 			{
-				array_subscript(expr);
+				check_array_subscript(expr);
 				*sizep = expr->VL_VALUE;
 				free_expression(expr);
 			}

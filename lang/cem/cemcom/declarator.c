@@ -89,7 +89,7 @@ reject_params(dc)
 	}
 }
 
-array_subscript(expr)
+check_array_subscript(expr)
 	register struct expr *expr;
 {
 	arith size = expr->VL_VALUE;
@@ -104,7 +104,7 @@ array_subscript(expr)
 		expr->VL_VALUE = (arith)-1;
 	}
 	else
-	if (size & ~max_unsigned) {	/* absolute ridiculous */
+	if (size & ~max_unsigned) {	/* absolutely ridiculous */
 		expr_error(expr, "overflow in array size");
 		expr->VL_VALUE = (arith)1;
 	}

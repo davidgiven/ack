@@ -141,24 +141,27 @@ any2arith(expp, oper)
 	case LONG:
 		break;
 	case ENUM:
+		/* test the admissibility of the operator */
 		if (	is_test_op(oper) || oper == '=' || oper == PARCOMMA ||
-			oper == ',' || oper == ':' ||
-			( !options['R'] && 
-				(is_arith_op(oper) || is_asgn_op(oper))
-			)
-		)
-			{}
+			oper == ',' || oper == ':'
+		)	{
+			/* allowed by K & R */
+		}
+		else
+		if (!options['R'])	{
+			/* allowed by us */
+		}
 		else
 			expr_warning(*expp, "%s on enum", symbol2str(oper));
 		int2int(expp, int_type);
 		break;
-#ifndef NOFLOAT
+#ifndef	NOFLOAT
 	case FLOAT:
 		float2float(expp, double_type);
 		break;
 	case DOUBLE:
 		break;
-#endif NOFLOAT
+#endif	NOFLOAT
 #ifndef NOBITFIELD
 	case FIELD:
 		field2arith(expp);
