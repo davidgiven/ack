@@ -224,14 +224,7 @@ deleted, is now a debug-flag
 		
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
-		register struct idf *idef;
-
-		if (*text)	{
-			if ((idef = str2idf(text))->id_macro) {
-				free_macro(idef->id_macro);
-				idef->id_macro = (struct macro *) 0;
-			}
-		}
+		if (*text) do_undef(str2idf(text));
 #else NOPP
 		warning("-U option ignored");
 #endif NOPP

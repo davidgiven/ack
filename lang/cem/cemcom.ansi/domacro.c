@@ -123,7 +123,7 @@ domacro()
 			do_pragma();
 			break;
 		case K_UNDEF:				/* "undef"	*/
-			do_undef();
+			do_undef((struct idf *) 0);
 			break;
 		default:
 			/* invalid word seen after the '#'	*/
@@ -422,12 +422,14 @@ do_ifdef(how)
 		SkipToNewLine();
 }
 
-do_undef()
+/* argidf != NULL when the undef came from a -U option */
+do_undef(argidf)
+	struct idf *argidf;
 {
-	register struct idf *id;
+	register struct idf *id = argidf;
 
 	/* Forget a macro definition.	*/
-	if (id = GetIdentifier(1)) {
+	if (id || (id = GetIdentifier(1))) {
 		if (id->id_macro) { /* forget the macro */
 			if (id->id_macro->mc_flag & NOUNDEF) {
 				lexerror("it is not allowed to undef %s", id->id_text);
@@ -437,7 +439,7 @@ do_undef()
 				id->id_macro = (struct macro *) 0;
 			}
 		} /* else: don't complain */
-		SkipToNewLine();
+		if (!argidf) SkipToNewLine();
 	}
 	else
 		lexerror("illegal #undef construction");

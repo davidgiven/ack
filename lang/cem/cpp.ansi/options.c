@@ -109,14 +109,7 @@ do_option(text)
 		options['P'] = 1;
 		break;
 	case 'U' :	/* -Uname :	undefine predefined	*/
-		if (*text)	{
-			register struct idf *idef = findidf(text);
-
-			if (idef && idef->id_macro) {
-				free_macro(idef->id_macro);
-				idef->id_macro = (struct macro *) 0;
-			}
-		}
+		if (*text) do_undef(text);
 		break;
 	}
 }
