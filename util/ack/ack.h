@@ -7,7 +7,7 @@
 /****************************************************************************/
 
 #define FRONTENDS       "fe"    /* The front-end definitions */
-#define ACKNAME         "AckXXXXXX"     /* Handed to mktemp for temp. files */
+#define TMPNAME         "Ack%04x"     /* Naming of temp. files */
 
 /****************************************************************************/
 /*         Internal mnemonics, should not be tinkered with                  */
@@ -55,6 +55,8 @@ typedef struct {
 	int     p_keep:1;       /* The file should be thrown away after use */
 } path ;
 
+#define p_cont(elem) ((path *)l_content(elem))
+
 /* Return values of setpath() */
 enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
 
@@ -64,14 +66,14 @@ extern char *index();
 extern char *rindex();
 extern char *strcpy();
 extern char *strcat();
-extern char *mktemp();
+extern int  getpid();
 extern int  unlink();
 extern int  close();
 extern int  open();
 extern int  creat();
 
 /* Own routines */
-enum f_path setpath();
+enum f_path getpath();
 enum f_path scan_end();
 extern int  noodstop();
 extern char *getvar();
@@ -83,7 +85,7 @@ extern char *getcore();
 extern char *changecore();
 #define freecore(area)  free(area)
 
-/* #define DEBUG	1	/* Allow debugging of Ack */
+#define DEBUG	1	/* Allow debugging of Ack */
 
 #ifndef DEBUG
 #  define debug 0       /* To surprise all these 'if ( debug ) 's */
