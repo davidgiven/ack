@@ -116,16 +116,23 @@ char *parse_operand( ptr, n_ops, instr)
 	char *ptr, *instr;
 	int  n_ops;
 {
-	char *op = ptr;
+	char *op = ptr,
+	     *last;
 
 	ptr = skip_operand( ptr, instr);
 	if ( *ptr != '\0')  {
-		if ( *ptr == ',') 
-			*ptr++ = '\0';
+		if ( *ptr == ',')  {
+			for( last=ptr-1; isspace( *last); last--) 
+				;
+			*(last+1) = '\0';
+		}
 		else {
+			fprintf(stderr, "strange operand format: %s\n", ptr);
+			/* 
 			*ptr++ = '\0';
 			ptr = skip_space( ptr);
 			if  ( *ptr != '\0') ptr++;   /* skip ';' */
+  			*/
 		}
 		ptr = skip_space( ptr);
 	}
