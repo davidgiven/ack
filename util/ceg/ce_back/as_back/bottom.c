@@ -95,3 +95,19 @@ int hol;
 	sprint( name, HOL_FMT, hol);
         return( name);
 }
+
+
+char *extnd_part( d)
+int d;
+{
+	sprint( name, "part%x", (arith) d);
+	return( name);
+}
+
+
+char *extnd_cont( d)
+int d;
+{
+	sprint( name, "cont%x", (arith) d);
+	return( name);
+}
