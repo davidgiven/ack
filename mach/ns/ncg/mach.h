@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define ex_ap(y)        fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)        /* nothing */
 

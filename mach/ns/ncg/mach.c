@@ -1,3 +1,8 @@
+
+#ifndef NORCSID
+static char rcsid[] = "$Header$" ;
+#endif
+
 con_part(sz, w)
 	register int	sz;
 	word		w;
