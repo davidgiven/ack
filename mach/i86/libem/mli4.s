@@ -20,6 +20,7 @@ yh=4
 	pop	dx
 	add     dx,ax           ! xh*yl+xl*yh
 	mov     ax,cx
+	mov	cx,dx
 	mul     yl(bx)           ! xl*yl
 	add     dx,cx
 	ret	4

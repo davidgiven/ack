@@ -10,7 +10,7 @@
 1:
 	add	bx,4
 	dec     cx
-	jl      2f
+	jl      4f
 	cmp     ax,(bx)
 	jne     1b
 	mov	bx,2(bx)
@@ -24,3 +24,6 @@
 	jmp     .fat
 3:
 	jmp     bx
+4:
+	mov	bx,dx
+	jmp	2b
