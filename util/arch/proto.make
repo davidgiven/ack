@@ -45,13 +45,11 @@ lint:
 		$(LINT) $(LINTFLAGS) -DAAL $(SRC_DIR)/archiver.c $(LINTLIBS)
 
 install :       all
-		rm -f $(EMBIN)/arch $(EMBIN)/aal
 		cp aal $(EMBIN)/aal
 		cp arch $(EMBIN)/arch
-		rm -f $(EMMAN)/arch.1 $(EMMAN)/aal.1 $(EMMAN)/arch.5
-		cp $(SRC_DIR)/aal.1 $(EMMAN)/aal.1
-		cp $(SRC_DIR)/arch.1 $(EMMAN)/arch.1
-		cp $(SRC_DIR)/arch.5 $(EMMAN)/arch.5
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/aal.1 $(SRC_DIR)/arch.1 $(SRC_DIR)/arch.5 $(EMMAN) ; \
+		fi
 
 cmp :           all
 		-cmp aal $(EMBIN)/aal
