@@ -171,7 +171,7 @@ idf2expr(expr)
 			add_def(idf, IMPLICIT, funint_type, level); /* RM 13 */
 		else	{
 			if (!is_anon_idf(idf))
-				error("%s undefined", idf->id_text);
+				error("identifier %s undefined", idf->id_text);
 			/* declare idf anyway */
 			add_def(idf, 0, error_type, level);
 		}

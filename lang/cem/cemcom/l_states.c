@@ -151,7 +151,7 @@ lint_1_local(idf, def)
 	&&	!def->df_used
 	&&	!is_anon_idf(idf)
 	) {
-		def_warning(def, "%s %s not used anywhere in function %s",
+		def_warning(def, "%s %s not applied anywhere in function %s",
 			symbol2str(sc), idf->id_text, func_name);
 	}
 
@@ -309,7 +309,8 @@ change_state(idf, to_state)
 	case USED:
 		if (!a->ad_set) {
 			if (!is_anon_idf(idf)) {
-				warning("%s%s uninitialized", idf->id_text,
+				warning("variable %s%s uninitialized",
+					idf->id_text,
 					(a->ad_maybe_set ? " possibly" : "")
 				);
 			}
@@ -342,7 +343,7 @@ add_auto(idf)	/* to current state on top of lint_stack */
 		a = new_auto_def();
 
 		a->ad_idf = idf;
-		a->ad_def = idf->id_def;
+		a->ad_def = def;
 		a->ad_used = def->df_used;
 		a->ad_set = def->df_set;
 
@@ -361,16 +362,19 @@ check_autos()
 
 	ASSERT(!(a && a->ad_def->df_level > level));
 	while (a && a->ad_def->df_level == level) {
-		if (!a->ad_used && !is_anon_idf(a->ad_idf)) {
-			if (a->ad_set || a->ad_maybe_set) {
-				def_warning(a->ad_def,
+		struct idf *idf = a->ad_idf;
+		struct def *def = idf->id_def;
+
+		if (!def->df_used && !is_anon_idf(idf)) {
+			if (def->df_set || a->ad_maybe_set) {
+				def_warning(def,
 					"%s set but not used in function %s",
-					a->ad_idf->id_text, func_name);
+					idf->id_text, func_name);
 			}
 			else {
-				def_warning(a->ad_def,
+				def_warning(def,
 					"%s not used anywhere in function %s",
-					a->ad_idf->id_text, func_name);
+					idf->id_text, func_name);
 			}
 		}
 
@@ -1217,6 +1221,24 @@ lint_pop()
 /* FOR DEBUGGING */
 
 PRIVATE
+print_autos(a)
+	struct auto_def *a;
+{
+	while (a) {
+		struct idf *idf = a->ad_idf;
+		struct def *def = idf->id_def;
+
+		print("%s", idf->id_text);
+		print("(lvl=%d)", a->ad_def->df_level);
+		print("(u%ds%dm%d U%dS%d) ",
+			a->ad_used, a->ad_set, a->ad_maybe_set,
+			def->df_used, def->df_set
+		);
+		a = a->next;
+	}
+}
+
+PRIVATE
 pr_lint_state(nm, st)
 	char *nm;
 	struct state *st;
@@ -1241,7 +1263,7 @@ print_lint_stack(msg)
 	while (lse) {
 		print("  |-------------- level %d ------------\n",
 					lse->ls_level);
-		pr_lint_state("  |cur", lse->ls_current);
+		pr_lint_state("  |current", lse->ls_current);
 
 		print("  |class == %s\n",
 			lse->ls_class ? symbol2str(lse->ls_class) : "{");
@@ -1277,16 +1299,6 @@ print_lint_stack(msg)
 	print("  |--------------\n\n");
 }
 
-print_autos(a)
-	register struct auto_def *a;
-{
-	while (a) {
-		print("%s", a->ad_idf->id_text);
-		print("(lvl=%d)", a->ad_def->df_level);
-		print("(U%dS%dM%d) ", a->ad_used, a->ad_set, a->ad_maybe_set);
-		a = a->next;
-	}
-}
 #endif	DEBUG
 
 #endif	LINT
