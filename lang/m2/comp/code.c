@@ -178,16 +178,22 @@ CodeCoercion(t1, t2)
 {
 	register int fund1, fund2;
 	arith sz1 = t1->tp_size;
+	arith sz2;
 
 	t1 = BaseType(t1);
 	t2 = BaseType(t2);
+	sz2 = t2->tp_size;
 	switch(fund1 = t1->tp_fund) {
 	case T_WORD:
 		fund1 = T_INTEGER;
 		break;
 	case T_CHAR:
-	case T_EQUAL:
 	case T_ENUMERATION:
+	case T_CARDINAL:
+	case T_INTORCARD:
+		if (sz1 < word_size) sz1 = word_size;
+		/* fall through */
+	case T_EQUAL:
 	case T_POINTER:
 		fund1 = T_CARDINAL;
 		break;
@@ -197,8 +203,10 @@ CodeCoercion(t1, t2)
 		fund2 = T_INTEGER;
 		break;
 	case T_CHAR:
-	case T_EQUAL:
 	case T_ENUMERATION:
+		sz2 = word_size;
+		/* fall through */
+	case T_EQUAL:
 	case T_POINTER:
 		fund2 = T_CARDINAL;
 		break;
@@ -210,101 +218,83 @@ CodeCoercion(t1, t2)
 			c_loc((int)sz1);
 			c_loc((int) word_size);
 			C_cii();
+			sz1 = word_size;
 		}
-		switch(fund2) {
-		case T_INTEGER:
-#ifndef SQUEEZE
-			if (t2->tp_size != t1->tp_size)
-#endif
-			{
-				c_loc((int)(t1->tp_size));
-				c_loc((int)(t2->tp_size));
-				C_cii();
-			}
-			break;
-		case T_CARDINAL:
-#ifndef SQUEEZE
-			if (t1->tp_size != word_size)
-#endif
-			{
-				c_loc((int)(t1->tp_size));
-				c_loc((int) word_size);
-				C_ciu();
-			}
-			break;
-		case T_REAL:
-			c_loc((int)(t1->tp_size));
-			c_loc((int)(t2->tp_size));
+		if (fund2 == T_REAL) {
+			c_loc((int)sz1);
+			c_loc((int)sz2);
 			C_cif();
 			break;
-		default:
-			crash("Funny integer conversion");
+		}
+		if (sz2 != sz1) {
+			c_loc((int)sz1);
+			c_loc((int)sz2);
+			switch(fund2) {
+			case T_INTEGER:
+				C_cii();
+				break;
+			case T_CARDINAL:
+				C_ciu();
+				break;
+			default:
+				crash("Funny integer conversion");
+			}
 		}
 		break;
 
 	case T_CARDINAL:
 	case T_INTORCARD:
-		switch(fund2) {
-		case T_CARDINAL:
-		case T_INTORCARD:
-			if (t2->tp_size > word_size) {
-				c_loc((int) word_size);
-				c_loc((int)(t2->tp_size));
-				C_cuu();
-			}
-			break;
-		case T_INTEGER:
-			if (fund1 == T_CARDINAL
-#ifndef SQUEEZE
-			    || t2->tp_size != word_size
-#endif
-			   ) {
-				c_loc((int) word_size);
-				c_loc((int)(t2->tp_size));
-				C_cui();
-			}
-			break;
-		case T_REAL:
-			c_loc((int) word_size);
-			c_loc((int)(t2->tp_size));
+		if (fund2 == T_REAL) {
+			c_loc((int)sz1);
+			c_loc((int)sz2);
 			C_cuf();
 			break;
-		default:
-			crash("Funny cardinal conversion");
+		}
+		if (sz1 != sz2) {
+			c_loc((int)sz1);
+			c_loc((int)sz2);
+			switch(fund2) {
+			case T_CARDINAL:
+			case T_INTORCARD:
+				C_cuu();
+				break;
+			case T_INTEGER:
+				C_cui();
+				break;
+			default:
+				crash("Funny cardinal conversion");
+			}
 		}
 		break;
 
 	case T_REAL:
 		switch(fund2) {
 		case T_REAL:
-#ifndef SQUEEZE
-			if (t2->tp_size != t1->tp_size)
-#endif
-			{
-				c_loc((int)(t1->tp_size));
-				c_loc((int)(t2->tp_size));
+			if (sz1 != sz2) {
+				c_loc((int)sz1);
+				c_loc((int)sz2);
 				C_cff();
 			}
 			break;
 		case T_INTEGER:
-			c_loc((int)(t1->tp_size));
-			c_loc((int)(t2->tp_size));
+			c_loc((int)sz1);
+			c_loc((int)sz2);
 			C_cfi();
 			break;
 		case T_CARDINAL:
 			if (! options['R']) {
 				label lb = ++text_label;
 
-				C_dup(t1->tp_size);
-				C_zrf(t1->tp_size);
-				C_cmf(t1->tp_size);
+				C_dup(sz1);
+				C_zrf(sz1);
+				C_cmf(sz1);
 				C_zge(lb);
 				c_loc(ECONV);
 				C_trp();
 				def_ilb(lb);
 			}
-			c_loc((int)(t1->tp_size));
-			c_loc((int)(t2->tp_size));
+			c_loc((int)sz1);
+			c_loc((int)sz2);
 			C_cfu();
 			break;
 		default:
@@ -422,9 +412,7 @@ CodeParameters(param, arg)
 			C_loc(left_type->tp_size - 1);
 		}
 		else {
-			arith lb, ub;
-			getbounds(IndexType(left_type), &lb, &ub);
-			C_loc(ub - lb);
+			C_loc(left_type->arr_high - left_type->arr_low);
 		}
 		c_loc(0);
 		if (left->nd_symb == STRING) {
@@ -696,6 +684,8 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_POINTER:
 		case T_EQUAL:
+			C_ads(rightop->nd_type->tp_size);
+			break;
 		case T_CARDINAL:
 		case T_INTORCARD:
 			addu(tp->tp_size);
@@ -716,9 +706,14 @@ CodeOper(expr, true_label, false_label)
 		case T_REAL:
 			C_sbf(tp->tp_size);
 			break;
+		case T_CARDINAL:
+			if (rightop->nd_type == address_type) {
+				C_sbs(pointer_size);
+				break;
+			}
+			/* fall through */
 		case T_POINTER:
 		case T_EQUAL:
-		case T_CARDINAL:
 		case T_INTORCARD:
 			subu(tp->tp_size);
 			break;
@@ -1101,7 +1096,8 @@ DoHIGH(df)
 	assert(IsConformantArray(df->df_type));
 
 	highoff = df->var_off		/* base address and descriptor */
-		  + 2 * word_size;	/* skip base and first field of
+		  + word_size + pointer_size;
+					/* skip base and first field of
 					   descriptor
 					*/
 	if (df->df_scope->sc_level < proclevel) {
