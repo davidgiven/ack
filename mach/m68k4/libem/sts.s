@@ -1,11 +1,14 @@
 .define .sts
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : # bytes
 	! a0 : destination address
-	.text
+	.sect .text
 .sts:
-	movem.l	d0/a0,.savreg
-	move.l	(sp)+,.savret
+	move.l	(sp)+,a1
 	move.l	(sp)+,d0
 	move.l	(sp)+,a0
 	cmp	#1,d0
@@ -27,7 +30,5 @@
 	move.l	(sp)+,(a0)+
 	dbf	d0,3b
 4:
-	movem.l	.savreg,d0/a0
-	move.l	.savret,-(sp)
-	rts
+	jmp	(a1)
 .align 2

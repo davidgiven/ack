@@ -1,6 +1,10 @@
 .define	.cfi,.cif,.cfu,.cuf,.cff
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 
 	! this is a dummy float conversion routine
 .cfi:
@@ -13,4 +17,5 @@
 	sub	(sp)+,d0	! diff. in sizes
 	sub	d0,sp
 	jmp	(a0)
+
 .align 2

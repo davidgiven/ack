@@ -1,78 +1,125 @@
+.sect .text;.sect .rom;.sect .data;.sect .bss
+.define _printn
 .define _printf
-.define _putchar
-.define _getal
-.define _char
-.bss
-_getal:
-	.space	12
-_char:
-	.space	1
-	.align  2
-.data
-sav:
-	.long	0
-.text
-_printf:
-	movem.l	d0/d1/d2/a0/a1/a2/a3/a4/a5/a6,.savreg
-	move.l	(sp)+,sav	!return address
-	move.l	sp,a6		!a6 <- address of arguments
-	move.l	(a6)+,a5	!a5 <- address of format
-	clr.l	d0		!d0 <- char to be printed
-next:	move.b	(a5)+,d0
-	beq	out
-	cmp.b	#'%',d0
-	beq	procnt
-put:	move.l	d0,-(sp)
-	jsr	_putchar	!argument is long en op de stack
-	tst.l	(sp)+
-	jmp	next
-
-procnt:	move.b	(a5)+,d0
-	cmp.b	#'d',d0		!NOTE: %d means unsigned.
-	beq	digit
-	cmp.b	#'s',d0
-	beq	string
-	cmp.b	#'%',d0		!second % has to be printed.
-	beq	put
-	tst.b	-(a5)		!normal char should be printed
-	jmp	next
-
-string:	move.l	(a6)+,a2	!a2 <- address of string
-sloop:	move.b	(a2)+,d0
-	beq	next
-	move.l	d0,-(sp)
-	jsr	_putchar	!argument is long en op de stack
-	tst.l	(sp)+
-	jmp	sloop
-
-digit:	move.l	(a6)+,d1	!d1 <- integer
-	move.l	#_getal+12,a3	!a3 <- ptr to last part of buf
-	move.b	#0,-(a3)	!stringterminator
-dloop:	move.l	d1,-(sp)
-	move.l	#10,-(sp)
-	jsr	.dvu		!d1 <- quotient d2 <- remainder
-	add.l	#'0',d2
-	move.b	d2,-(a3)
-	tst.l	d1		!if quotient = 0 then ready
-	bne	dloop
-	move.l	a3,a2
-	jmp	sloop		!print digitstring.
-
-out:
-	move.l	sav,-(sp)
-	movem.l	.savreg,d0/d1/d2/a0/a1/a2/a3/a4/a5/a6
-	rts
-
-
+.extern _printf
+.sect .text
 _putchar:
-	movem.l	d0,.savreg
-	move.l	4(sp),d0
-	move.b	d0,_char
-	move.l	#1,-(sp)
-	move.l	#_char,-(sp)
-	move.l	#1,-(sp)
-	jsr	_write
-	add.l	#12,sp
-	movem.l	.savreg,d0
-	rts
-.align 2
+move.l	#1,-(sp)
+pea	9(sp)
+move.l	#1,-(sp)
+jsr	_write
+add.l	#12,sp
+rts
+_printf:
+tst.b -56(sp)
+link	a6,#-16
+!Local -4 into d7
+!Local -12 into d6
+!Local -8 into a5
+!Local 8 into a4
+!Local -16 into a3
+movem.l d7/d6/a5/a4/a3,-(sp)
+move.l 8(a6),a4
+lea 12(a6),a1
+move.l a1, a5
+I0014:
+move.l a4, a0
+add.l #1,a4
+clr.l d0
+move.b (a0),d0
+move.l d0, d7
+cmp.l #37,d7
+beq I0015
+tst.l d7
+beq I0012
+move.l d7,-(sp)
+jsr _putchar
+add #4,sp
+jmp I0014
+I0015:
+move.l a4, a0
+add.l #1,a4
+clr.l d0
+move.b (a0),d0
+move.l d0, d7
+cmp.l #100,d7
+beq I0018
+cmp.l #117,d7
+bne I0017
+I0018:
+move.l a5, a0
+add.l #4,a5
+move.l (a0), d6
+cmp.l #100,d7
+bne I0019
+tst.l d6
+bge I0019
+clr.l d2
+sub.l d6,d2
+move.l d2, d6
+pea 45
+jsr _putchar
+add #4,sp
+I0019:
+move.l d6,-(sp)
+jsr _printn
+add #4,sp
+jmp I0014
+I0017:
+cmp.l #115,d7
+bne I0014
+move.l a5, a0
+add.l #4,a5
+move.l (a0), a3
+I001c:
+move.l a3, a0
+add.l #1,a3
+clr.l d0
+move.b (a0),d0
+move.l d0, d7
+tst.l d7
+beq I0014
+move.l d7,-(sp)
+jsr _putchar
+add #4,sp
+jmp I001c
+I0012:
+movem.l (sp)+,d7/d6/a5/a4/a3
+unlk a6
+rts
+.extern _printn
+_printn:
+tst.b -44(sp)
+link	a6,#-4
+!Local -4 into d7
+move.l d7,-(sp)
+.sect .data
+_14:
+.data4	808530483
+.data4	875902519
+.data4	943259648
+.sect .text
+move.l 8(a6),-(sp)
+pea 10
+jsr .dvu
+move.l d1, d7
+tst.l d7
+beq I0023
+move.l d7,-(sp)
+jsr _printn
+add #4,sp
+I0023:
+pea _14
+move.l 8(a6),-(sp)
+pea 10
+jsr .dvu
+move.l (sp)+,a1
+add.l d2,a1
+clr.l d0
+move.b (a1),d0
+move.l d0,-(sp)
+jsr _putchar
+add #4,sp
+move.l (sp)+,d7
+unlk a6
+rts

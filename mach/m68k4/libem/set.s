@@ -1,11 +1,14 @@
 .define .set
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : setsize in bytes
 	! d1 : bitnumber
-	.text
+	.sect .text
 .set:
-	movem.l	d1/d2/a1,.savreg
-	move.l	(sp)+,.savret
+	move.l	(sp)+,a0
 	move.l	(sp)+,d1
 	move.l	d0,d2
 	asr.l	#2,d2
@@ -20,13 +23,10 @@
 	cmp.l	d0,d2
 	bcs	1f
 	move.w	#ESET,-(sp)
-	move.l	.savret,-(sp)
-	jmp	.trp
+	jsr	.trp
 1:
 	add.l	d2,a1
 	move.l	(a1),d2
 	bset	d1,d2
 	move.l	d2,(a1)
-	movem.l	.savreg,d1/d2/a1
-	move.l	.savret,-(sp)
-	rts
+	jmp	(a0)

@@ -1,18 +1,22 @@
 .extern _errno
-.data
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .data
 _errno:
 .extern _lseek
 .short	0
-.text
+.sect .text
 _lseek:
 link	a6,#-0
-.data
+.sect .data
 _13:
 .short	29561
 .short	29489
 .short	11875
 .short	0
-.text
+.sect .text
 move.l #_13,.filn
 move.w #8,.lino
 move.w #0,-(sp)

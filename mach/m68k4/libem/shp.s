@@ -1,9 +1,12 @@
 .define	.strhp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .strhp:
-	move.l	d0,.savreg
-	move.l	(sp)+,.savret
+	move.l	(sp)+,a0
 	move.l	(sp)+,d0	! heap pointer
 	move.l	d0,.reghp
 	cmp.l	.limhp,d0
@@ -14,9 +17,7 @@
 	cmp.l	d0,sp
 	ble	2f
 1:
-	move.l	.savreg,d0
-	move.l	.savret,-(sp)
-	rts
+	jmp	(a0)
 2:
 	move.w	#EHEAP,-(sp)
 	jmp	.fat

@@ -1,11 +1,14 @@
 .define .los
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : # bytes
 	! a0 : source address
-	.text
+	.sect .text
 .los:
-	movem.l	d0/a0,.savreg
-	move.l	(sp)+,.savret
+	move.l	(sp)+,a1
 	move.l	(sp)+,d0
 	move.l	(sp)+,a0
 	cmp.l	#1,d0
@@ -30,7 +33,5 @@
 	sub.l	#1,d0
 	bgt	4b
 3:
-	movem.l	.savreg,d0/a0
-	move.l	.savret,-(sp)
-	rts
+	jmp	(a1)
 .align 2

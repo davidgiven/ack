@@ -1,6 +1,10 @@
 .define .nop
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .nop:
 	pea	4(sp)
 	move.l	hol0,-(sp)
@@ -9,6 +13,6 @@
 	add.l	#12,sp
 	rts
 
-	.data
+	.sect .data
 fmt:	.asciz "test %d, sp %d\n"
 .align 2

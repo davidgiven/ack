@@ -1,8 +1,12 @@
 .define	.cms
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 contains set size
 
-	.text
+	.sect .text
 .cms:
 	move.l	(sp)+,a2	! return address
 	move.l	sp,a0

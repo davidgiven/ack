@@ -1,12 +1,15 @@
 .define	.cmi, .cmi_
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! NUM == 4
 	! result in d1
-	.text
+	.sect .text
 .cmi:
 .cmi_:
-	move.l	(sp)+,.savret
-	move.l	d0,.savd0
+	move.l	(sp)+,d2
 	move.l	#1,d1
 	move.l	(sp)+,d0
 	cmp.l	(sp)+,d0
@@ -16,7 +19,7 @@
 	ble	2f
 	neg.l	d1
 	2:
-	move.l	.savd0,d0
-	move.l	.savret,-(sp)
+	move.l	d2,-(sp)
 	rts
+
 .align 2

@@ -1,12 +1,15 @@
 .define .mli
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 
-	.text
+	.sect .text
 .mli:
-	move.l	d5,.savmli
-	move.l	(sp)+,.retmli
-	move.l	(sp)+,d1
-	move.l	(sp)+,d0
+	move.l	4(sp),d1
+	move.l	8(sp),d0
+	move.l	d5,-(sp)
 	clr	d5
 	tst.l	d0
 	bpl	1f
@@ -26,11 +29,9 @@
 	neg.l	d1
 	negx.l	d0
 3:
-	move.l	.savmli,d5
-	move.l	.retmli,-(sp)
-	rts
-.data
-.savmli:	.long 0
-.retmli:	.long 0
-.text
+	move.l	(sp)+,d5
+	move.l	(sp)+,a0
+	add.l	#8,sp
+	jmp	(a0)
+
 .align 2

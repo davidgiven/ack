@@ -1,9 +1,12 @@
 .define	.cmp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .cmp:
-	move.l	(sp)+,.savret	! return address
-	move.l	d0,.savd0
+	move.l	(sp)+,d2	! return address
 	move.l	#1,d1
 	move.l	(sp)+,d0
 	cmp.l	(sp)+,d0
@@ -13,7 +16,7 @@
 	bcs	2f
 	neg.l	d1
 	2:
-	move.l	.savd0,d0
-	move.l	.savret,-(sp)
+	move.l	d2,-(sp)
 	rts
+
 .align 2

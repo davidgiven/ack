@@ -1,4 +1,4 @@
-tail_em.a
+libem_s.a
 ari.s
 ara.s
 cvf.s
@@ -30,4 +30,3 @@ trp.s
 dia.s
 printf.s
 dvu.s
-sav.s

@@ -1,9 +1,13 @@
 .define	.outch1,.outch2,.inch1,.inch2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	! a0,d4 used
+	! a0,d0 used
 	! character in d1
 
-	.text
+	.sect .text
 .inch1:
 	move.l	#acia1,a0
 	bra	.inch
@@ -23,11 +27,10 @@
 .outch2:
 	move.l	#acia2,a0
 .outch:
-	move.b	(a0),d4
-	asr	#2,d4
+	move.b	(a0),d0
+	asr	#2,d0
 	bcc	.outch
 	move.b	d1,2(a0)
 	rts
-
 
 .align 2

@@ -1,6 +1,10 @@
 .define .ret
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .ret:
 	beq 3f
 	cmp #2,d0

@@ -1,4 +1,8 @@
 .define .dvu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! unsigned long divide
  ! register usage:
@@ -6,12 +10,11 @@
  !         d1 dividend
  ! exit  : d1 quotient
  !         d2 remainder
-	.text
+	.sect .text
 .dvu:
-	movem.l	d0/d3,.savreg
-	move.l	(sp)+,.savret
-	move.l	(sp)+,d0
-	move.l	(sp)+,d1
+	move.l	4(sp),d0
+	move.l	8(sp),d1
+	move.l	d3,-(sp)
 	tst.l	d0
 	bne	0f
 	move.w	#EIDIVZ,-(sp)
@@ -28,7 +31,10 @@
 	add	#1,d1
 4:
 	dbf	d3,3b
-	movem.l .savreg,d0/d3
-	move.l	.savret,-(sp)
+	move.l	(sp)+,d3
+	move.l	(sp)+,a0
+	add.l	#8,sp
+	move.l	a0,-(sp)
 	rts
+
 .align 2

@@ -1,20 +1,24 @@
 .define .mlu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! entry : d0 multiplicand
  !         d1 multiplier
  ! exit  : d0 high order result
  !         d1 low order result
 
-	.text
+	.sect .text
 .mlu:
-	move.l	(sp)+,.savret
-	move.l	(sp)+,d1
-	move.l	(sp)+,d0
+	movem.l	d3/d4/d6,-(sp)
+	move.l	16(sp),d1
+	move.l	20(sp),d0
 	cmp.l	#32768,d0
 	bgt	1f
 	cmp.l	#32768,d1
 	bls	2f
-1:	movem.l	d2/d3/d4/d6,.savreg
+1:
 	move.l	d1,d3
 	move.l	d1,d2
 	swap	d2
@@ -36,12 +40,13 @@
 	swap	d2
 	swap	d3
 	add.l	d2,d0
-	add.l	d3,d0
-	movem.l	.savreg,d2/d3/d4/d6
-	move.l	.savret,-(sp)
-	rts
+	add.l	d3,a0
+	bra	3f
 2:	mulu	d0,d1
 	clr	d0
-	move.l	.savret,-(sp)
-	rts
+3:
+	movem.l	(sp)+,d3/d4/d6
+	move.l	(sp)+,a0
+	add	#8,sp
+	jmp	(a0)
 .align 2

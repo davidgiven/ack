@@ -1,8 +1,11 @@
 .define .csa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .csa:
-	movem.l	d0/a0/a1/a2,.savreg
 	move.l	(sp)+,a0	! case descriptor
 	move.l	(sp)+,d0	! index
 	move.l	(a0)+,a1	! default address
@@ -21,9 +24,9 @@
 	beq	2f
 	move.l	a1,-(sp)	! jump address
 3:
-	movem.l	.savreg,d0/a0/a1/a2
 	rts			! not a real rts
 2:
 	move.w	#ECASE,-(sp)
 	jmp	.fat
+
 .align 2

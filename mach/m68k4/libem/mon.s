@@ -1,12 +1,17 @@
 .define .mon
-	.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+
+	.sect .text
 .mon:
 	move.l	(sp)+,a0
 	pea	fmt
 	jsr	.diagnos
-	add	#6,sp
+	add	#8,sp
 	jmp	EXIT
 
-	.data
+	.sect .data
 fmt:	.asciz "system call %d not implemented"
 .align 2

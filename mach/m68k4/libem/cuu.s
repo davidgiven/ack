@@ -1,8 +1,12 @@
 .define	.ciu
 .define	.cui
 .define	.cuu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .ciu:
 .cui:
 .cuu:
@@ -18,4 +22,5 @@
 	clr	-(sp)
 	dbf	d0,2b
 	jmp	(a0)
+
 .align 2

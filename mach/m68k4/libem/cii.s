@@ -1,8 +1,11 @@
 .define	.cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .cii:
-	movem.l	a0/d0/d1,.savreg
 	move.l	(sp)+,a0	! return address
 	move	(sp)+,d0	! destination size
 	sub	(sp)+,d0	! destination - source size
@@ -19,6 +22,6 @@
 	dbf	d0,2b
 3:
 	move.l	a0,-(sp)
-	movem.l	.savreg,a0/d0/d1
 	rts
+
 .align 2

@@ -1,10 +1,13 @@
 .define .exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : exchange size in bytes
-	.text
+	.sect .text
 .exg:
-	move.l	(sp)+,.savret
-	movem.l	d1/a1/a2,.savreg
+	move.l	(sp)+,d2
 	move.l	sp,a1
 	sub.l	d0,sp
 	move.l	sp,a2
@@ -21,6 +24,5 @@
 	sub	#1,d1
 	bgt	1b
 	move.l	a1,sp
-	movem.l	.savreg,d1/a1/a2
-	move.l	.savret,-(sp)
+	move.l	d2,-(sp)
 	rts

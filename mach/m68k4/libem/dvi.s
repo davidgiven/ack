@@ -1,12 +1,15 @@
 .define .dvi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! signed long divide
-	.text
+	.sect .text
 .dvi:
-	movem.l	d0/d4,.savdvi
-	move.l	(sp)+,.retdvi
-	move.l	(sp)+,d0
-	move.l	(sp)+,d1
+	move.l	4(sp),d0
+	move.l	8(sp),d1
+	move.l	d4,-(sp)
 	clr.l	d4
 	tst.l	d0	! divisor
 	bpl	1f
@@ -32,11 +35,10 @@
 	bpl	6f
 	neg.l	d2	! remainder
 6:
-	movem.l .savdvi,d0/d4
-	move.l	.retdvi,-(sp)
+	move.l	(sp)+,d4
+	move.l	(sp)+,a0
+	add.l	#8,sp
+	move.l	a0,-(sp)
 	rts
-.data
-.savdvi:	.space 12
-.retdvi:	.long 0
-.text
+
 .align 2

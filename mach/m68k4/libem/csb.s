@@ -1,8 +1,11 @@
 .define .csb
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .csb:
-	movem.l	d0/d1/a0/a1,.savreg
 	move.l	(sp)+,a0	! case descriptor
 	move.l	(sp)+,d0	! index
 	move.l	(a0)+,a1	! default jump address
@@ -23,6 +26,5 @@
 	move.l	(a0)+,a1	! get jump address
 4:
 	move.l	a1,-(sp)
-	movem.l	.savreg,d0/d1/a0/a1
 	rts
 .align 2

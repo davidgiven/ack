@@ -1,6 +1,10 @@
 .define .lfr
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .lfr:
 	move.l (sp)+,a0
 	cmp #2,d7
