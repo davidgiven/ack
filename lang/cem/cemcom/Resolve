@@ -48,20 +48,20 @@ then
 else
 	mv Xclashes clashes
 fi
-rm -f makefile
+rm -f Makefile
 for i in `cat $PW/Cfiles`
 do
-	cat >> makefile <<EOF
+	cat >> Makefile <<EOF
 
 $i:	clashes $PW/$i
 	cid -Fclashes < $PW/$i > $i
 EOF
 done
 make EMHOME=$EMHOME `cat $PW/Cfiles`
-rm -f makefile
-ed - $PW/makefile <<'EOF'
+rm -f Makefile
+ed - $PW/Makefile <<'EOF'
 /^#EXCLEXCL/,/^#INCLINCL/d
-w makefile
+w Makefile
 q
 EOF
 make EMHOME=$EMHOME COPTIONS=$options CURRDIR=$PW $target
