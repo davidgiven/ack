@@ -20,7 +20,7 @@
 #define ms_ego	10	/* Hint from EM Global Optimizer                     */
 #define ms_gto	11	/* Dangerous procedure, uses nonlocal goto	     */
 #define ms_stb	12	/* symbol table entry (for debugger)		     */
-#define ms_lin	13	/* line number indication (for debugger symbol table)*/
+#define ms_std	13	/* symbol table entry (for debugger) referring to dot */
 #define ms_sth  14      /* Height of the stack at a certain label	     */
 
 /*

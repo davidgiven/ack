@@ -79,7 +79,8 @@ struct outname {
 #define S_UND	0x0000		/* undefined item */
 #define S_ABS	0x0001		/* absolute item */
 #define S_MIN	0x0002		/* first user section */
-#define S_MAX	S_TYP		/* last user section */
+#define S_MAX	(S_TYP-1)	/* last user section */
+#define S_CRS	S_TYP		/* on_valu is symbol index which contains value */
 
 /*
  * S_ETC field values
@@ -89,6 +90,9 @@ struct outname {
 #define S_FIL	0x0300		/* hll source file item */
 #define S_MOD	0x0400		/* ass source file item */
 #define S_COM	0x1000		/* Common name. */
+#define S_STB	0xe000		/* entries with any of these bits set are
+				   reserved for debuggers
+				*/
 
 /*
  * structure format strings
