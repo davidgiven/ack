@@ -12,6 +12,7 @@
 #include "../share/lset.h"
 #include "../share/get.h"
 #include "../../../h/em_mnem.h"
+#include "il_aux.h"
 #include "il3_aux.h"
 #include "il3_change.h"
 #include "il3_subst.h"

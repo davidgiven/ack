@@ -10,6 +10,7 @@
 #include "../../../h/em_mnem.h"
 #include "../../../h/em_pseu.h"
 #include "../share/map.h"
+#include "il_aux.h"
 #include "il1_anal.h"
 #include "il2_aux.h"
 #include "il3_subst.h"
