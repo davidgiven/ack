@@ -1264,6 +1264,11 @@ zrf		| |			| |	  zer $1 |
 /* G R O U P  VIII :   C O N V E R T   */
 
 
+loc loc cii $1==$2 | | | | |
+loc loc cuu $1==$2 | | | | |
+loc loc ciu $1==$2 | | | | |
+loc loc cui $1==$2 | | | | |
+
 cii | |		remove(ALL)
 		"jsr .cii"
 				| | |
