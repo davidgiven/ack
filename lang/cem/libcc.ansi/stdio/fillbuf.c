@@ -18,8 +18,14 @@ __fillbuf(register FILE *stream)
 	stream->_count = 0;
 	if (fileno(stream) < 0) return EOF;
 	if (io_testflag(stream, (_IOEOF | _IOERR ))) return EOF; 
-	if (!io_testflag(stream, _IOREAD)) return EOF;
-	if (io_testflag(stream, _IOWRITING)) return EOF;
+	if (!io_testflag(stream, _IOREAD)) {
+		stream->_flags |= _IOERR;
+		return EOF;
+	}
+	if (io_testflag(stream, _IOWRITING)) {
+		stream->_flags |= _IOERR;
+		return EOF;
+	}
 
 	if (!io_testflag(stream, _IOREADING))
 		stream->_flags |= _IOREADING;
