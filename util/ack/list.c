@@ -36,6 +36,9 @@ Routines:
 
 	l_clear(header)      Delete an whole list.
 		header          List header, list_head *
+	
+	l_throw(header)	     Delete a list of strings.
+		header          List header, list_head *
 
 */
 
