@@ -54,9 +54,9 @@ lino:
 filn:
 	.word	0	! filn
 reghp:
-	.word	_end
+	.word	__end
 limhp:
-	.word	_end
+	.word	__end
 trppc:
 	.word	0
 trpim:

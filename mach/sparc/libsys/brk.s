@@ -1,6 +1,6 @@
 .global _brk, __brk
 
 _brk:	
-	set	__brk,%o7
-	jmp	%o7
+	set	__brk,%o0
+	jmp	%o0
 	nop

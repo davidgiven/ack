@@ -61,7 +61,6 @@ fchmod.s
 fchown.s
 fchroot.s
 fcntl.s
-fif.s
 flock.s
 fork.s
 fstat.s

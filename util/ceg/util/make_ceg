@@ -12,7 +12,7 @@ AS   = $(CEG)/as_parser
 EVAL = $(CEG)/as_parser/eval
 DEF = $(CEG)/defaults
 
-IFILES	= -I. -I$(SRC_DIR) -I$(AS) -I$(Em) -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I../back
+IFILES	= -I. -I$(SRC_DIR) -I.. -I$(AS) -I$(Em) -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I../back
 
 CFLAGS = $(COPTIONS) $(IFILES)
 LDFLAGS = $(LDOPTIONS)
@@ -25,19 +25,19 @@ CEG_LIBS = $(TARGET_HOME)/modules/lib/liballoc.$(LIBSUF)\
 all:	ceg/ceg
 
 obj_list:	ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)
-		echo 'ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)' > list
+		echo 'ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)' > ceg/list
 
 as_list:	ceg/as_lib.$(LIBSUF)
-		echo 'ceg/as_lib.$(LIBSUF)' > list
+		echo 'ceg/as_lib.$(LIBSUF)' > ceg/list
 
-list:		$(OBJ)_list
+ceg/list:		$(OBJ)_list
 
-ceg/ceg:	list
-		$(CC) $(LDFLAGS) -o ceg/ceg $(Em)/*.$(SUF) `cat list` $(CEG_LIBS)
+ceg/ceg:	ceg/list
+		$(CC) $(LDFLAGS) -o ceg/ceg $(Em)/*.$(SUF) `cat ceg/list` $(CEG_LIBS)
 
 ceg/as_lib.$(LIBSUF):
 	-mkdir ceg
-	cd ceg ; cp $(CEG)/util/make_ceg_$(OBJ) Makefile ; cd ..
+	cp $(CEG)/util/make_ceg ceg/Makefile
 	cd ceg ; cp $(ASMAIN)/* . ; $(CC) -c $(CFLAGS) *.c; $(AR) r as_lib.$(LIBSUF) *.$(SUF) ; cd ..
 	$(RANLIB) ceg/as_lib.$(LIBSUF)
 

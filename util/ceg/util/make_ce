@@ -10,7 +10,7 @@ CEG = $(EM)/lib.bin/ceg
 AS   = $(CEG)/as_parser
 DEF = $(CEG)/defaults
 
-IFILES	= -I. -I$(SRC_DIR) -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(SRC_HOME)/mach
+IFILES	= -I. -I$(SRC_DIR) -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(SRC_HOME)/mach
 
 CFLAGS = $(COPTIONS) $(IFILES)
 
@@ -30,4 +30,5 @@ ce/dummy1:	ceg/ceg $(SRC_DIR)/EM_table $(SRC_DIR)/mach.c
 	-mkdir ce
 	-cp $(SRC_DIR)/mach.c ce/mach.c
 	cd ce ; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table ; cp $(DEF)/*.c . ; cp $(DEF)/*/*.c . ; cd ..
+	if [ -d $(SRC_DIR)/ce.src ] ; then cd ce ; cp $(SRC_DIR)/ce.src/*.c . ; cd .. ; fi
 	cd ce ; $(EM)/lib.bin/cpp -P $(SRC_DIR)/EM_table | ../ceg/ceg -l ; touch dummy1 ; cd ..

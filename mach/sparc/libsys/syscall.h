@@ -56,7 +56,7 @@
 #define SYS_getpgrp 81
 #define SYS_setpgrp 82
 #define SYS_setitimer 83
-#define SYS_wait 84
+#define SYS_wait4 84
 #define SYS_swapon 85
 #define SYS_getitimer 86
 #define SYS_gethostname 87
