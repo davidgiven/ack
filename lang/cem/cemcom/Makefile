@@ -87,7 +87,8 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	idfsize.h ifdepth.h inputtype.h lapbuf.h \
 	nobitfield.h nofloat.h nopp.h noRoption.h nocross.h \
 	nparams.h numsize.h parbufsize.h pathlength.h Lpars.h \
-	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h static.h
+	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h static.h \
+	regcount.h
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h faulty.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
@@ -681,6 +682,7 @@ conversion.o: type.h
 util.o: align.h
 util.o: nocross.h
 util.o: nofloat.h
+util.o: regcount.h
 util.o: sizes.h
 util.o: stack.h
 util.o: target_sizes.h

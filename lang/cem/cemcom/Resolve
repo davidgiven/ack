@@ -10,9 +10,14 @@ case $# in
 	;;
 esac
 PW=`pwd`
+options=
 case $1 in
 main|emain)
 	target=$PW/$1
+	;;
+omain)
+	target=$PW/$1
+	options=-DPEEPHOLE
 	;;
 Xlint)
 	target=$1
@@ -55,4 +60,4 @@ ed - $PW/makefile <<'EOF'
 w makefile
 q
 EOF
-make EMHOME=$EMHOME CURRDIR=$PW $target
+make EMHOME=$EMHOME COPTIONS=$options CURRDIR=$PW $target

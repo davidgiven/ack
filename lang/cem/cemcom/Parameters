@@ -129,3 +129,7 @@
 #undef NOCROSS		1	/* if NOT defined, cross compiler */
 
 
+!File: regcount.h
+#undef REGCOUNT		1	/* count occurrences for register messages */
+
+

@@ -18,6 +18,7 @@
 
 #include	"util.h"
 #include	"use_tmp.h"
+#include	"regcount.h"
 #include	"sizes.h"
 #include	"align.h"
 #include	"stack.h"
@@ -26,6 +27,11 @@ static struct localvar	*FreeTmps;
 #ifdef USE_TMP
 static int	loc_id;
 #endif USE_TMP
+
+#ifdef PEEPHOLE
+#undef REGCOUNTING
+#define REGCOUNTING 1
+#endif
 
 extern char options[];
 
@@ -179,7 +185,9 @@ LoadLocal(off, sz)
 	register struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
+#ifdef REGCOUNTING
 	if (p) p->t_count++;
+#endif
 #endif
 	if (sz == word_size) C_lol(off);
 	else if (sz == dword_size) C_ldl(off);
@@ -196,7 +204,9 @@ StoreLocal(off, sz)
 	register struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
+#ifdef REGCOUNTING
 	if (p) p->t_count++;
+#endif
 #endif
 	if (sz == word_size) C_stl(off);
 	else if (sz == dword_size) C_sdl(off);
