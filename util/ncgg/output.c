@@ -121,6 +121,9 @@ errorexit() {
 #define codeint(x) fprintf(code," %d",x)
 #define codenl() fprintf(code,"\n")
 #else
+#define codenl()
+#define code8nl(x) code8(x)
+
 code8(x) {
 
 	codeindex++;
@@ -128,11 +131,6 @@ code8(x) {
 		fprintf(ctable,"%d,",x&0377);
 	else
 		putc(x,code);
-}
-
-code8nl(x) {
-
-	code8(x);
 }
 
 code53(x,y) {
@@ -151,8 +149,6 @@ codeint(x) {
 	}
 }
 
-codenl() {
-}
 #endif
 int prevind=0;
 int npatbytes= -1;
@@ -686,12 +682,14 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			code53(DO_REMOVE,1);
 			codeint(vp->vi_int[0]);
 			codeint(vp->vi_int[1]);
-			codenl();
-		} else {
+		} else if (vp->vi_int[1] >= 0) {
 			code53(DO_REMOVE,0);
 			codeint(vp->vi_int[0]);
-			codenl();
+		} else {
+			code8(DO_RREMOVE);
+			codeint(vp->vi_int[0]);
 		}
+		codenl();
 	}
 	nremoves=0;
 	for(vp=generates;vp!=0;vp=vp->vi_next) {

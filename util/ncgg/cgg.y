@@ -95,7 +95,7 @@ iocc_t iops[20];
 %type <yy_int> register propno att_list_el_type tokenset_no
 %type <yy_int> adornlist optstar optuses optregvar regvartype optregvartype
 %type <yy_int> emarg tokarg subreg allreg optsecondstring
-%type <yy_expr> expr
+%type <yy_expr> expr regvarexpr
 %type <yy_iocc> tokeninstance
 %type <yy_int> optexpr optexact optstack
 %type <yy_set> tokenset
@@ -770,7 +770,14 @@ kill_list_el
 		  $$->vi_int[1]=$3;
 		  cursetno = -1;
 		}
-	;
+	| regvarexpr
+	 	{ NEW($$,struct varinfo);
+		  $$->vi_next = 0;
+		  $$->vi_int[0] = -($1.ex_index + 1);
+		  $$->vi_int[1] = 0;
+		}
+	; 
+
 allocates
 	: /* empty */
 		{ $$ = 0; nallreg=0;}
@@ -1055,7 +1062,11 @@ expr
 		{ $$ = make_expr(TYPINT,EX_INREG,i_expr($3),0); }
 	| regvartype
 		{ $$ = make_expr(TYPINT,EX_CON, $1+1, 0); }
-	| REGVAR '(' expr optregvartype ')'
+	| regvarexpr
+	;
+
+regvarexpr
+	: REGVAR '(' expr optregvartype ')'
 		{ $$ = regvar_expr($3,$4); }
 	;
 
