@@ -623,7 +623,12 @@ bss(idf)
 	}
 #endif /* DBSYMTAB */
 	if (df->df_type->tp_size <= 0) {
-		error("size of %s unknown (\"%s\", line %d)"
+		if (df->df_sc != STATIC &&
+		    df->df_type->tp_fund == ARRAY && df->df_type->next) {
+			C_df_dnam(idf->id_text);
+			C_bss_cst(ATW(df->df_type->next->tp_size), (arith)0, 1);
+		}
+		else error("size of %s unknown (\"%s\", line %d)"
 			, idf->id_text, df->df_file, df->df_line);
 	} else {
 		C_df_dnam(idf->id_text);
