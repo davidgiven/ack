@@ -17,6 +17,7 @@ static char rcs_ack[] = RCS_ACK ;
 #endif
 
 static int sigs[] = { SIGINT, SIGHUP, SIGTERM, 0 } ;
+static int arg_count;
 
 extern  char    *getenv();
 
@@ -66,6 +67,9 @@ main(argc,argv) char **argv ; {
 		}
 	}
 
+	scanlist ( l_first(arguments), elem ) {
+		arg_count++;
+	}
 
 	scanlist ( l_first(arguments), elem ) {
 		if ( !process(l_content(*elem)) && !k_flag ) exit(1) ;
@@ -312,7 +316,7 @@ process(arg) char *arg ; {
 		return 1 ;
 	}
 	in= orig ;
-	if ( !nill_flag ) {
+	if ( !nill_flag && arg_count > 1 ) {
 		printf("%s\n",arg) ;
 	}
 	return startrf(phase) ;
