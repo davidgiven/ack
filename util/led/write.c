@@ -17,6 +17,9 @@ static char rcsid[] = "$Header$";
 #include "memory.h"
 #include "orig.h"
 
+static			openoutput();
+static			wrt_head();
+static			wrt_sect();
 extern long		lseek();
 
 #define WRITE		1	/* Argument to open(). */

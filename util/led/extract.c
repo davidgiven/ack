@@ -10,6 +10,12 @@ static char rcsid[] = "$Header$";
 #include "orig.h"
 #include "scan.h"
 
+static		get_name();
+static		process();
+static		getexternal();
+static		redefine();
+static		transfer();
+
 /*
  * Get section sizes and symboltable information from present module.
  */

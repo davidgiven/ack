@@ -37,6 +37,17 @@ long		objectsize;
 static long	align();
 static char	*modulbase;
 static long	modulsize();
+static		scan_modul();
+static bool	all_alloc();
+static bool	direct_alloc();
+static bool	indirect_alloc();
+static bool	putemitindex();
+static bool	putreloindex();
+#ifdef SYMDBUG
+static bool	putdbugindex();
+#endif SYMDBUG
+static		get_indirect();
+static		read_modul();
 
 /*
  * Open the file with name `filename' (if necessary) and examine the first

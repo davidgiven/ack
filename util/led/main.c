@@ -16,6 +16,21 @@ static char rcsid[] = "$Header$";
 
 extern bool	incore;
 
+static			initializations();
+static			first_pass();
+static long		number();
+static			setlign();
+static			setbase();
+static struct outname	*makename();
+static			pass1();
+static			evaluate();
+static			norm_commons();
+static			complete_sections();
+static			change_names();
+static bool		tstbit();
+static			second_pass();
+static			pass2();
+
 main(argc, argv)
 	int	argc;
 	char	**argv;
@@ -27,7 +42,7 @@ main(argc, argv)
 	beginoutput();
 	second_pass(argv);
 	endoutput();
-	exit(0);
+	stop();
 }
 
 char		*progname;	/* Name this program was invoked with. */
@@ -75,11 +90,9 @@ first_pass(argv)
 	int			sectno;
 	int			h;
 	extern int		atoi();
-	extern long		number();
 	extern char		*index();
 	extern int		hash();
 	extern struct outname	*searchname();
-	extern struct outname	*makename();
 
 	while (*++argv) {
 		argp = *argv;
@@ -382,7 +395,6 @@ complete_sections()
 	register long	base = 0;
 	register long	foff;
 	register int	sectindex;
-	extern bool	tstbit();
 
 	foff = SZ_HEAD + outhead.oh_nsect * SZ_SECT;
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++) {
@@ -552,3 +564,9 @@ pass2(file)
 	}
 	closefile(file);
 }
+
+#ifdef NDEBUG
+
+dummy() { ; }
+
+#endif

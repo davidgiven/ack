@@ -8,8 +8,8 @@ static char rcsid[] = "$Header$";
 #include "const.h"
 
 static short	nerrors = 0;
+static		diag();
 
-static
 stop()
 {
 	extern char	*outputname;
@@ -61,6 +61,8 @@ diag(tail, format, a1, a2, a3, a4)
 {
 	extern char	*progname, *archname, *modulname; 
 
+extern int errno;
+fprintf(stderr, "errno = %d\n", errno);
 	fprintf(stderr, "%s: ", progname);
 	if (archname)
 		fprintf(stderr, "%s: ", archname);

@@ -15,6 +15,14 @@ static char rcsid[] = "$Header$";
 #include "debug.h"
 #include "memory.h"
 
+static		copy_down();
+static		copy_up();
+static		free_saved_moduls();
+static		writelong();
+static		sectswap();
+static		reloswap();
+static		namecpy();
+
 struct memory	mems[NMEMS];
 
 bool	incore = TRUE;	/* TRUE while everything can be kept in core. */
@@ -32,11 +40,13 @@ init_core()
 	register ind_t		total_size;
 	register struct memory	*mem;
 	extern char		*sbrk();
+	extern char		*brk();
+char *BASE;
 
 #include "mach.c"
 
 	total_size = (ind_t)0;	/* Will accumulate the sizes. */
-	base = sbrk(0);		/* First free. */
+	BASE = base = sbrk(0);		/* First free. */
 	for (mem = mems; mem < &mems[NMEMS]; mem++) {
 		mem->mem_base = base;
 		mem->mem_full = (ind_t)0;
@@ -59,7 +69,7 @@ init_core()
 	mems[ALLOLCHR].mem_full = 1;
 	mems[ALLOGCHR].mem_full = 1;
 
-	if (total_size != (int)total_size || (int)sbrk((int)total_size) == -1) {
+	if (brk(BASE + total_size) == (char *) -1) {
 		incore = FALSE;	/* In core strategy failed. */
 		if ((int)sbrk(AT_LEAST) == -1)
 			fatal("no core at all");
@@ -80,7 +90,7 @@ move_up(piece, incr)
 	extern char		*sbrk();
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
-	if (incr != (int)incr || (int)sbrk((int)incr) == -1)
+	if (incr != (int)incr || sbrk((int)incr) == (char *) -1)
 		return FALSE;
 
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)

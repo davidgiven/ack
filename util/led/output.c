@@ -6,6 +6,8 @@ static char rcsid[] = "$Header$";
 #include "const.h"
 #include "memory.h"
 
+static			generate_section_names();
+
 extern struct outhead	outhead;
 extern bool		incore;
 extern int		flagword;

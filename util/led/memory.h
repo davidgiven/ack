@@ -19,7 +19,7 @@
 
 #define INCRSIZE	1024
 
-typedef unsigned int	ind_t;
+typedef long		ind_t;
 #define BADOFF		((ind_t)-1)
 
 struct memory {

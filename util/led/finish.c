@@ -12,6 +12,11 @@ static char rcsid[] = "$Header$";
 extern bool	incore;
 extern int	flagword;
 
+static		adjust_names();
+static		handle_relos();
+static		put_locals();
+static		compute_origins();
+
 /*
  * We know all there is to know about the current module.
  * Now we relocate the values in the emitted bytes and write
