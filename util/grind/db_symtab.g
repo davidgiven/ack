@@ -786,6 +786,7 @@ DbRead(f)
 				/* another N_SO follows ... */
 				break;
 			}
+			clean_tp_tab();
 			while (CurrentScope != PervasiveScope) {
 				close_scope();
 			}
@@ -796,7 +797,6 @@ DbRead(f)
 			open_scope(sym, 0);
 			sym->sy_file->f_scope = CurrentScope;
 			FileScope = CurrentScope;
-			clean_tp_tab();
 			/* fall through */
 		case N_SOL:
 			if (! line_file) line_file = n;

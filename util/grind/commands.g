@@ -45,6 +45,7 @@ commands
     int give_prompt;
   }
 :
+			{ errorgiven = 0; }
   [ %persistent command_line(&com)
     [	'\n'		{ give_prompt = 1; }
     |	%default ';'	{ give_prompt = 0; }
@@ -109,7 +110,9 @@ command_line(p_tree *p;)
 | FIND qualified_name(p){ *p = mknode(OP_FIND, *p); }
 | WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
 | able_command(p)
-| '!'			{ shellescape(); }
+| '!'			{ shellescape();
+			  errorgiven = 1; /* to prevent execution of lastcomm */
+			}
 |
 ]
 ;

@@ -158,7 +158,7 @@ convert(pbuf, psize, ptp, tp, size)
 	malloc_succeeded(*pbuf);
   }
   if ((*ptp)->ty_class == T_SUBRANGE) *ptp = (*ptp)->ty_base;
-  switch((*ptp)->ty_class) {
+  if (tp && *ptp) switch((*ptp)->ty_class) {
   case T_INTEGER:
   case T_UNSIGNED:
   case T_POINTER:
@@ -1154,6 +1154,12 @@ eval_expr(p, pbuf, psize, ptp)
 	}
 	*psize = 0;
   }
+  else {
+	if ((*ptp)->ty_class == T_CROSS) {
+		*ptp = (*ptp)->ty_cross;
+		if (! *ptp) *ptp = void_type;
+	}
+  }
   return retval;
 }
 
@@ -1221,6 +1227,18 @@ eval_desig(p, paddr, psize, ptp)
   }
   if (! retval) {
 	*psize = 0;
+  }
+  else {
+	if ((*ptp)->ty_class == T_CROSS) {
+		*ptp = (*ptp)->ty_cross;
+		if (! *ptp) {
+			*ptp = void_type;
+			print_node(p, 0);
+			fputs(" designator has unknown type\n", db_out);
+			retval = 0;
+			*psize = 0;
+		}
+	}
   }
   return retval;
 }

@@ -5,6 +5,7 @@
 #include <alloc.h>
 #include <assert.h>
 
+#include "idf.h"
 #include "type.h"
 #include "sizes.h"
 #include "symbol.h"
@@ -275,7 +276,7 @@ init_types()
  */
 static struct tp_index {
   unsigned	len;
-  p_type	*row;
+  p_type	**row;
 } *list_row;
 static unsigned list_len;
 
@@ -301,16 +302,19 @@ tp_lookup(type_index)
   }
   p = &list_row[type_index[0]];
   while (type_index[1] >= p->len) {
+	int indx = p->len/NINCR;
+	p->len += NINCR;
 	if (p->len) {
-		p->row = (p_type *) Realloc((char *) p->row,
-				(p->len += NINCR) * sizeof(p_type));
+		p->row = (p_type **) Realloc((char *) p->row,
+				(unsigned) (indx + 1) * sizeof(p_type *));
 	}
-	else	p->row = (p_type *) Malloc((p->len = NINCR) * sizeof(p_type));
-	for (i = NINCR; i > 0; i--) {
-		p->row[p->len - i] = 0;
+	else	p->row = (p_type **) Malloc(sizeof(p_type *));
+	p->row[indx] = (p_type *) Malloc(NINCR * sizeof(p_type));
+	for (i = NINCR-1; i >= 0; i--) {
+		p->row[indx][i] = 0;
 	}
   }
-  return &(p->row[type_index[1]]);
+  return &(p->row[type_index[1]/NINCR][type_index[1]%NINCR]);
 }
 
 clean_tp_tab()
@@ -322,10 +326,18 @@ clean_tp_tab()
 		register int j = list_row[i].len;
 		if (j) {
 			while (--j > 0) {
-				p_type p = list_row[i].row[j];
+				p_type p = list_row[i].row[j/NINCR][j%NINCR];
 				if (p && p->ty_class == 0) {
-					error("incomplete type (%d,%d) 0x%x", i, j, &list_row[i].row[j]);
+					error("%s: incomplete type (%d,%d)",
+					      listfile->sy_idf->id_text,
+					      i,
+					      j);
 				}
+			}
+			j = list_row[i].len;
+			while (j > 0) {
+				free((char *) list_row[i].row[j/NINCR-1]);
+				j -= NINCR;
 			}
 			free((char *) list_row[i].row);
 		}

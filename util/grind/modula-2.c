@@ -72,6 +72,7 @@ static int
 print_char(c)
   int	c;
 {
+  c &= 0377;
   fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "%oC", c);
 }
 

@@ -350,6 +350,7 @@ resolve_cross(tp)
 	    sym->sy_type->ty_size == tp->ty_class &&
 	    scope_encloses(tp->ty_sym->sy_scope, sym->sy_scope)) {
 		sym->sy_type->ty_cross = tp;
+		sym->sy_type->ty_size = tp->ty_size;
 	}
 	sym = sym->sy_next;
   }

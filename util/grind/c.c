@@ -73,6 +73,7 @@ static int
 printchar(c, esc)
   int	c;
 {
+  c &= 0377;
   switch(c) {
   case '\n':
 	fputs("\\n", db_out);
