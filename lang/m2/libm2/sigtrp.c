@@ -10,9 +10,7 @@
   Version:	$Header$
 */
 
-#ifndef em22
-#ifndef em24
-#ifndef em44
+#if !defined(__em22) && !defined(__em24) && !defined(__em44)
 
 #define EM_trap(n) TRP(n)	/* define to whatever is needed to cause the trap */
 
@@ -81,6 +79,4 @@ sigtrp(trapno, signo)
 
 	return oldtrap;
 }
-#endif
-#endif
 #endif

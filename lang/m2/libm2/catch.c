@@ -82,9 +82,7 @@ catch(trapno)
 		*p = 0;
 		_Traps__Message(q, 0, (int) (p - q), 1);
 	}
-#ifndef em24
-#ifndef em44
-#ifndef em22
+#if !defined(__em24) && !defined(__em44) && !defined(__em22)
 	if (trapno == M2_UNIXSIG) {
 		extern int __signo;
 		signal(__signo, SIG_DFL);
@@ -92,8 +90,6 @@ catch(trapno)
 		kill(getpid(), __signo);
 		_exit(trapno);
 	}
-#endif
-#endif
 #endif
 	if (trapno != M2_FORCH) {
 		_cleanup();

@@ -31,7 +31,7 @@ init()
 	sigtrp(M2_UNIXSIG, SIGALRM);
 	sigtrp(M2_UNIXSIG, SIGTERM);
 }
-#if em22 || em24 || em44
+#if defined(__em22) || defined(__em24) || defined(__em44)
 killbss()
 {
 }
