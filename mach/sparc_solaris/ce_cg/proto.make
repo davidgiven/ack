@@ -14,6 +14,7 @@ CFLAGS=$(INCLUDE) -DCODE_EXPANDER $(COPTIONS)
 LDFLAGS=$(LDOPTIONS)
 LDLIBS=$(LIB_DIR)/libread_emk.$(LIBSUF) $(CE_A) $(BACK_A) \
 	$(LIB_DIR)/libprint.$(LIBSUF) $(LIB_DIR)/libstring.$(LIBSUF) \
+	$(LIB_DIR)//libassert.$(LIBSUF) \
 	$(LIB_DIR)/liballoc.$(LIBSUF) $(LIB_DIR)/libsystem.$(LIBSUF) \
 	$(EM_LIB)/em_data.$(LIBSUF) $(LIB_DIR)/libflt.$(LIBSUF)
 
