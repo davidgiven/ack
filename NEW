@@ -1,6 +1,6 @@
 It is not wise to mix files created by the previous version of the Kit
 with files belonging to this version, although that might sometimes work.
-Many problems with the previous distribution are fixed.
+Many problems with the previous distribution have been fixed.
 The major additions are:
 
 	- a new language: Modula-2
