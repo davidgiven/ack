@@ -38,6 +38,7 @@
 #define DO_SETCC	22
 #define DO_TOSTACK	23
 #define DO_KILLREG	24
+#define DO_LABDEF	25
 
 #ifndef MAXATT
 #define MAXATT TOKENSIZE
@@ -130,6 +131,8 @@ typedef struct exprnode *node_p;
 #define EX_XOR		42
 #define EX_AND		43
 #define EX_ISROM	44
+#define EX_STACKHEIGHT	45
+#define EX_FALLTHROUGH	46
 
 
 typedef struct {        /* to stack coercions */

@@ -21,6 +21,7 @@
 #define ms_gto	11	/* Dangerous procedure, uses nonlocal goto	     */
 #define ms_stb	12	/* symbol table entry (for debugger)		     */
 #define ms_lin	13	/* line number indication (for debugger symbol table)*/
+#define ms_sth  14      /* Height of the stack at a certain label	     */
 
 /*
  * for details about ms_reg, see em_reg.h
