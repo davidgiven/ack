@@ -567,15 +567,10 @@ outdefs() {
 	passon("EM_WSIZE");
 	passon("EM_PSIZE");
 	passon("EM_BSIZE");
-	if ((sy_p=lookup("FORMAT",symsconst,justlooking))!=0)
+	if ((sy_p=lookup("FORMAT",symsconst,justlooking))!=0) {
 		wrdfmt = l_strings[sy_p->sy_value.syv_stringno];
-	else if (wordsize<=2)
-		wrdfmt = "%d";
-	else
-		wrdfmt = "%ld";
-	fprintf(ctable,"char wrd_fmt[]= \"%s\";\n", wrdfmt);
-	fprintf(htable,"#define WRD_FMT wrd_fmt\n");
-	fprintf(htable,"extern char wrd_fmt[];\n");
+		fprintf(htable,"#define WRD_FMT \"%s\"\n",wrdfmt);
+	}
 	cdef("MAXALLREG",maxallreg);
 	cdef("SETSIZE",setsize);
 	cdef("NREGS",nregs);
