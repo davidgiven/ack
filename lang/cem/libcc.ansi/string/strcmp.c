@@ -16,5 +16,5 @@ strcmp(register const char *s1, register const char *s2)
 	}
 	if (*s1 == '\0') return -1;
 	if (*--s2 == '\0') return 1;
-	return *s1 - *s2;
+	return (unsigned char) *s1 - (unsigned char) *s2;
 }
