@@ -10,9 +10,9 @@ s/FN/main/
 /LSTART/c\
 	bfs.bf1=1 ; bfs.bf2=8 ;
 /[XYZS]/s/.*/& ; printf("%s#","&"@) ;/
-/Z1/s/#/ %d&/
+/Z1/s/#/ %u&/
 /Z1/s/@/, Z1&/
-/Z2/s/#/ %d&/
+/Z2/s/#/ %u&/
 /Z2/s/@/, Z2&/
 /Z1/s/^/Z1 = 255 ; /
 /Z2/s/^/Z2 = 3 ; /
