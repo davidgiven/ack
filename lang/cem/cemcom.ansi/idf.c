@@ -293,15 +293,17 @@ declare_idf(ds, dc, lvl)
 #ifdef	LINT
 	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
 #endif	LINT
+	if (def && lvl == L_LOCAL && def->df_level == L_FORMAL2) {
+		error("%s redeclared", idf->id_text);
+	}
 
-	if ((def && 
+	if (def && 
 	    ( def->df_level == lvl ||
-	      ( lvl != L_GLOBAL && def->df_level > lvl )
-	    ))
-	   || (lvl == L_GLOBAL
-	       && def && def->df_level == L_PROTO
+	      ( lvl != L_GLOBAL && def->df_level > lvl ) ||
+	      (lvl == L_GLOBAL
+	       && def->df_level == L_PROTO
 	       && def->next && def->next->df_level == L_GLOBAL)
-	   )	{
+	   ))	{
 		/*	There is already a declaration for idf on this
 			level, or even more inside.
 			The rules differ for different levels.
