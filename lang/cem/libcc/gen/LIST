@@ -4,6 +4,7 @@ atof.c
 strtod.c
 atoi.c
 atol.c
+strtol.c
 bcmp.c
 bfill.c
 bmove.c
