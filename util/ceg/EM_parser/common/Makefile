@@ -25,6 +25,7 @@ install:	all
 	-mkdir $(OBJLIB)
 	-mkdir $(ASLIB)
 	cp $(OFILES) $(ASLIB)
+	for i in $(OFILES) ; do rm -f $(OBJLIB)/$$i ; done
 	for i in $(OFILES) ; do ln $(ASLIB)/$$i $(OBJLIB)/$$i ; done
 
 cmp:	all
