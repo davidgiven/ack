@@ -89,14 +89,14 @@ bool try_hashentry(list,window)
 	int *list;
 	queue window;
 {
-	int *pp;
+	register int *pp;
 	patdescr_p p;
 
 	for (pp = list; *pp != -1; pp++) {
 		p = &patterns[*pp];
 		if (check_pattern(p,window) &&
 		    check_operands(p,window) &&
-		    check_constraint(p-patterns)) {
+		    check_constraint(*pp)) {
 			xform(p,window);
 			return TRUE;
 		}
@@ -131,8 +131,8 @@ int hash(w)
 */
 
 	for (sum=i=0,p=ip->opc;*p;i += 3)
-		sum += (*p++)<<(i&07);
-	return(sum%127);
+		sum += (*p++)<<(i&03);
+	return(sum%128);
 }
 
 /* Fill the working window until it contains at least 'len' items.
@@ -140,9 +140,9 @@ int hash(w)
  */
 
 fill_window(w,len)
-	queue w;
+	register queue w;
 {
-	instr_p ip;
+	register instr_p ip;
 
 	while(qlength(w) < len) {
 		if ((ip = read_instr()) == NIL) break;
@@ -166,7 +166,7 @@ write_first(w)
 /* Try to recognize the opcode part of an instruction */
 
 set_opcode(ip)
-	instr_p ip;
+	register instr_p ip;
 {
 	register char *p,*q;
 	char *qlim;
@@ -227,8 +227,8 @@ bool check_operands(p,w)
 	patdescr_p p;
 	queue w;
 {
-	instr_p ip;
-	idescr_p id_p;
+	register instr_p ip;
+	register idescr_p id_p;
 	int n;
 
 	/* fprintf(stderr,"try pattern %d\n",p-patterns); */
@@ -295,9 +295,9 @@ bool opmatch(t,s)
 /* Try to recognize the operands of an instruction */
 
 bool split_operands(ip)
-	instr_p ip;
+	register instr_p ip;
 {
-	int i;
+	register int i;
 	bool res;
 
 	if (strcmp(ip->opc,"labdef") ==0) {
@@ -313,9 +313,9 @@ bool split_operands(ip)
 
 
 labeldef(ip)
-	instr_p ip;
+	register instr_p ip;
 {
-	char *p;
+	register char *p;
 	int oplen;
 
 	p = ip->rest_line;
@@ -409,7 +409,7 @@ bool rstrip(str,ctxt)
 
 bool unify(str,v)
 	char *str;
-	struct variable *v;
+	register struct variable *v;
 {
 	if (v->vstate == UNINSTANTIATED) {
 		v->vstate = INSTANTIATED;
@@ -447,10 +447,10 @@ xform(p,w)
  */
 
 replacement(p,w)
-	patdescr_p p;
+	register patdescr_p p;
 	queue w;
 {
-	idescr_p id_p;
+	register idescr_p id_p;
 
 	for (id_p = &p->repl[p->replen-1]; id_p >= p->repl; id_p--) {
 		insert(w,gen_instr(id_p));
@@ -470,7 +470,7 @@ instr_p gen_instr(id_p)
 {
 	char *opc;
 	instr_p ip;
-	templ_p t;
+	register templ_p t;
 	register char *s;
 	bool islabdef;
 	int n;
