@@ -39,6 +39,19 @@ MkNode(class, left, right, token)
 	return nd;
 }
 
+struct node *
+MkLeaf(class, token)
+	struct token *token;
+{
+	register struct node *nd = new_node();
+
+	nd->nd_left = nd->nd_right = 0;
+	nd->nd_token = *token;
+	nd->nd_type = error_type;
+	nd->nd_class = class;
+	return nd;
+}
+
 FreeNode(nd)
 	register struct node *nd;
 {

@@ -21,18 +21,20 @@ struct enume {
 };
 
 struct subrange {
-	arith su_lb, su_ub;	/* Lower bound and upper bound */
-	label su_rck;		/* Label of range check descriptor */
+	arith su_lb, su_ub;	/* lower bound and upper bound */
+	label su_rck;		/* label of range check descriptor */
 #define sub_lb	tp_value.tp_subrange.su_lb
 #define sub_ub	tp_value.tp_subrange.su_ub
 #define sub_rck	tp_value.tp_subrange.su_rck
 };
 
 struct array {
-	struct type *ar_elem;	/* Type of elements */
-	label ar_descr;		/* Label of array descriptor */
+	struct type *ar_elem;	/* type of elements */
+	label ar_descr;		/* label of array descriptor */
+	arith ar_elsize;	/* size of elements */
 #define arr_elem	tp_value.tp_arr.ar_elem
 #define arr_descr	tp_value.tp_arr.ar_descr
+#define arr_elsize	tp_value.tp_arr.ar_elsize
 };
 
 struct record {
@@ -59,7 +61,7 @@ struct type	{
 #define T_CARDINAL	0x0008
 /* #define T_LONGINT	0x0010 */
 #define T_REAL		0x0020
-/* #define T_LONGREAL	0x0040 */
+#define T_HIDDEN	0x0040
 #define T_POINTER	0x0080
 #define T_CHAR		0x0100
 #define T_WORD		0x0200
@@ -89,7 +91,6 @@ struct type	{
 extern struct type
 	*bool_type,
 	*char_type,
-	*charc_type,
 	*int_type,
 	*card_type,
 	*longint_type,
@@ -132,7 +133,7 @@ struct type
 
 #define NULLTYPE ((struct type *) 0)
 
-#define IsConformantArray(tpx)	((tpx)->tp_fund == T_ARRAY && (tpx)->next == 0)
+#define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->next==0)
 #define bounded(tpx)	((tpx)->tp_fund & T_INDEX)
 #define complex(tpx)	((tpx)->tp_fund & (T_RECORD|T_ARRAY))
 #define returntype(tpx)	(((tpx)->tp_fund & T_PRCRESULT) ||\

@@ -19,11 +19,6 @@ static  char *RcsId = "$Header$";
 #include	"type.h"
 #include	"node.h"
 
-static int DEFofIMPL = 0;	/* Flag indicating that we are currently
-				   parsing the definition module of the
-				   implementation module currently being
-				   compiled
-				*/
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -132,7 +127,7 @@ import(int local;)
 	struct node *id = 0;
 } :
 	[ FROM
-	  IDENT		{ id = MkNode(Value, NULLNODE, NULLNODE, &dot); }
+	  IDENT		{ id = MkLeaf(Value, &dot); }
 	]?
 	IMPORT IdentList(&ImportList) ';'
 	/*
@@ -176,12 +171,6 @@ DefinitionModule
 	*/
 	definition* END IDENT
 			{
-			  if (DEFofIMPL) {
-				/* Just read the definition module of the
-				   implementation module being compiled
-				*/
-				RemImports(&(CurrentScope->sc_def));
-			  }
 			  df = CurrentScope->sc_def;
 			  while (df) {
 				/* Make all definitions "QUALIFIED EXPORT" */
@@ -211,7 +200,7 @@ definition
 	       It is restricted to pointer types.
 	    */
 	    		{ df->df_kind = D_HIDDEN;
-			  df->df_type = construct_type(T_POINTER, NULLTYPE);
+			  df->df_type = construct_type(T_HIDDEN, NULLTYPE);
 			}
 	  ]
 	  Semicolon
@@ -239,11 +228,10 @@ ProgramModule
 	IDENT	{ 
 		  id = dot.TOK_IDF;
 		  if (state == IMPLEMENTATION) {
-			DEFofIMPL = 1;
 			df = GetDefinitionModule(id);
 			CurrVis = df->mod_vis;
 			CurrentScope = CurrVis->sc_scope;
-			DEFofIMPL = 0;
+			RemoveImports(&(CurrentScope->sc_def));
 		  }
 		  else {
 			df = define(id, CurrentScope, D_MODULE);

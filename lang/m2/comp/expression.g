@@ -26,48 +26,51 @@ number(struct node **p;)
 } :
 [
 	%default
-	INTEGER		{ tp = numtype; }
+	INTEGER		{ tp = toktype; }
 |
 	REAL		{ tp = real_type; }
-]			{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
+]			{ *p = MkLeaf(Value, &dot);
 			  (*p)->nd_type = tp;
 			}
 ;
 
-qualident(int types; struct def **pdf; char *str; struct node **p;)
+qualident(int types;
+	  struct def **pdf;
+	  char *str;
+	  struct node **p;
+	 )
 {
 	register struct def *df;
 	struct node *nd;
 } :
-	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot);
-			}
+	IDENT	{ nd = MkLeaf(Name, &dot); }
 	[
 		selector(&nd)
 	]*
-			{ if (types) {
-				df = ill_df;
+		{ if (types) {
+			df = ill_df;
 
-				if (chk_designator(nd, 0, D_REFERRED)) {
-				    if (nd->nd_class != Def) {
-					node_error(nd, "%s expected", str);
+			if (chk_designator(nd, 0, D_REFERRED)) {
+			    if (nd->nd_class != Def) {
+				node_error(nd, "%s expected", str);
+			    }
+			    else {
+				df = nd->nd_def;
+		  		if ( !((types|D_ERROR) & df->df_kind)) {
+				    if (df->df_kind == D_FORWARD) {
+node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
 				    }
 				    else {
-					df = nd->nd_def;
-			  		if ( !((types|D_ERROR) & df->df_kind)) {
-					    if (df->df_kind == D_FORWARD) {
-node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
-					    }
-					    else {
 node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
-					    }
-					}
 				    }
 				}
-				*pdf = df;
-			  }
-			  if (!p) FreeNode(nd);
-			  else *p = nd;
+			    }
 			}
+			*pdf = df;
+		  }
+		  if (!p) FreeNode(nd);
+		  else *p = nd;
+		}
 ;
 
 selector(struct node **pnd;):
@@ -84,7 +87,7 @@ ExpList(struct node **pnd;)
 				  nd = &((*pnd)->nd_right);
 				}
 	[
-		','		{ *nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
+		','		{ *nd = MkLeaf(Link, &dot);
 				}
 		expression(&(*nd)->nd_left)
 				{ nd = &((*nd)->nd_right); }
@@ -131,7 +134,7 @@ SimpleExpression(struct node **pnd;)
 } :
 	[
 		[ '+' | '-' ]
-			{ *pnd = MkNode(Uoper, NULLNODE, NULLNODE, &dot);
+			{ *pnd = MkLeaf(Uoper, &dot);
 			  pnd = &((*pnd)->nd_right);
 			}
 	]?
@@ -191,23 +194,13 @@ factor(struct node **p;)
 	number(p)
 |
 	STRING	{
-		  *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
-		  if (dot.TOK_SLE == 1) {
-			int i;
-
-			tp = charc_type;
-			i = *(dot.TOK_STR) & 0377;
-			free(dot.TOK_STR);
-			free((char *) dot.tk_data.tk_str);
-			(*p)->nd_INT = i;
-		  }
-		  else	tp = standard_type(T_STRING, 1, dot.TOK_SLE);
-		  (*p)->nd_type = tp;
+		  *p = MkLeaf(Value, &dot);
+		  (*p)->nd_type = toktype;
 		}
 |
 	'(' expression(p) ')'
 |
-	NOT		{ *p = MkNode(Uoper, NULLNODE, NULLNODE, &dot); }
+	NOT		{ *p = MkLeaf(Uoper, &dot); }
 	factor(&((*p)->nd_right))
 ;
 
@@ -217,7 +210,7 @@ bare_set(struct node **pnd;)
 } :
 	'{'		{
 			  dot.tk_symb = SET;
-			  *pnd = nd = MkNode(Xset, NULLNODE, NULLNODE, &dot);
+			  *pnd = nd = MkLeaf(Xset, &dot);
 			  nd->nd_type = bitset_type;
 			}
 	[

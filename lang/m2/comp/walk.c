@@ -25,7 +25,6 @@ static char *RcsId = "$Header$";
 #include	"f_info.h"
 #include	"idf.h"
 
-extern arith	align();
 extern arith	NewPtr();
 extern arith	NewInt();
 extern int	proclevel;
@@ -58,7 +57,7 @@ DoProfil()
 		if (!filename_label) {
 			filename_label = data_label();
 			C_df_dlb(filename_label);
-			C_rom_scon(FileName, (arith) strlen(FileName));
+			C_rom_scon(FileName, (arith) (strlen(FileName) + 1));
 		}
 
 		C_fil_dlb(filename_label, (arith) 0);
@@ -131,20 +130,22 @@ WalkModule(module)
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		label l1 = data_label(), l2 = text_label();
 		struct node *nd;
 
-		/* we don't actually prevent recursive calls, but do nothing
-		   if called recursively
-		*/
-		C_df_dlb(l1);
-		C_bss_cst(word_size, (arith) 0, 1);
-		C_loe_dlb(l1, (arith) 0);
-		C_zeq(l2);
-		C_ret((arith) 0);
-		C_df_ilb(l2);
-		C_loc((arith) 1);
-		C_ste_dlb(l1, (arith) 0);
+		if (state == IMPLEMENTATION) {
+			label l1 = data_label(), l2 = text_label();
+			/* we don't actually prevent recursive calls,
+			   but do nothing if called recursively
+			*/
+			C_df_dlb(l1);
+			C_bss_cst(word_size, (arith) 0, 1);
+			C_loe_dlb(l1, (arith) 0);
+			C_zeq(l2);
+			C_ret((arith) 0);
+			C_df_ilb(l2);
+			C_loc((arith) 1);
+			C_ste_dlb(l1, (arith) 0);
+		}
 
 		nd = Modules;
 		while (nd) {
@@ -278,7 +279,7 @@ WalkStat(nd, lab)
 		return;
 	}
 
-	if (options['L']) C_lin((arith) nd->nd_lineno);
+	if (! options['L']) C_lin((arith) nd->nd_lineno);
 
 	if (nd->nd_class == Call) {
 		if (chk_call(nd)) {
@@ -541,8 +542,11 @@ DoAssign(nd, left, right)
 	/* May we do it in this order (expression first) ??? */
 	struct desig ds;
 
-	WalkExpr(right, NO_LABEL, NO_LABEL);
+	if (!chk_expr(right)) return;
 	if (! chk_designator(left, DESIGNATOR|VARIABLE, D_DEFINED)) return;
+	TryToString(right, left->nd_type);
+	Desig = InitDesig;
+	CodeExpr(right, &Desig, NO_LABEL, NO_LABEL);
 
 	if (! TstAssCompat(left->nd_type, right->nd_type)) {
 		node_error(nd, "type incompatibility in assignment");

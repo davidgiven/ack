@@ -33,7 +33,7 @@ struct node {
 
 /* ALLOCDEF "node" */
 
-extern struct node *MkNode();
+extern struct node *MkNode(), *MkLeaf();
 
 #define NULLNODE ((struct node *) 0)
 

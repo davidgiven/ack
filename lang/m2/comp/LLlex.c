@@ -26,9 +26,10 @@ static char *RcsId = "$Header$";
 long str2long();
 
 struct token dot, aside;
-struct type *numtype;
+struct type *toktype;
 struct string string;
 int idfsize = IDFSIZE;
+extern label	data_label();
 
 static
 SkipComment()
@@ -111,10 +112,10 @@ LLlex()
 		The putting aside of tokens is taken into account.
 	*/
 	register struct token *tk = &dot;
-	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
+	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 2];
 	register int ch, nch;
 
-	numtype = error_type;
+	toktype = error_type;
 	if (ASIDE)	{	/* a token is put aside		*/
 		*tk = aside;
 		ASIDE = 0;
@@ -221,9 +222,16 @@ again:
 
 	case STSTR:
 		GetString(ch);
-		tk->tk_data.tk_str = (struct string *)
+		if (string.s_length == 1) {
+			tk->TOK_INT = *(string.s_str) & 0377;
+			toktype = char_type;
+		}
+		else {
+			tk->tk_data.tk_str = (struct string *)
 				Malloc(sizeof (struct string));
-		*(tk->tk_data.tk_str) = string;
+			*(tk->tk_data.tk_str) = string;
+			toktype = standard_type(T_STRING, 1, string.s_length);
+		}
 		return tk->tk_symb = STRING;
 
 	case STNUM:
@@ -252,9 +260,9 @@ again:
 Shex:			*np++ = '\0';
 			tk->TOK_INT = str2long(&buf[1], 16);
 			if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
-				numtype = intorcard_type;
+				toktype = intorcard_type;
 			}
-			else	numtype = card_type;
+			else	toktype = card_type;
 			return tk->tk_symb = INTEGER;
 
 		case '8':
@@ -290,15 +298,15 @@ Shex:			*np++ = '\0';
 			*np++ = '\0';
 			tk->TOK_INT = str2long(&buf[1], 8);
 			if (ch == 'C') {
-				numtype = char_type;
+				toktype = char_type;
 				if (tk->TOK_INT < 0 || tk->TOK_INT > 255) {
 lexwarning("Character constant out of range");
 				}
 			}
 			else if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
-				numtype = intorcard_type;
+				toktype = intorcard_type;
 			}
-			else	numtype = card_type;
+			else	toktype = card_type;
 			return tk->tk_symb = INTEGER;
 
 		case 'A':
@@ -380,12 +388,10 @@ Sreal:
 			PushBack(ch);
 
 			if (np == &buf[NUMSIZE + 1]) {
-				lexerror("floating constant too long");
 				tk->TOK_REL = Salloc("0.0", 5);
+				lexerror("floating constant too long");
 			}
-			else {
-				tk->TOK_REL = Salloc(buf, np - buf) + 1;
-			}
+			else	tk->TOK_REL = Salloc(buf, np - buf) + 1;
 			return tk->tk_symb = REAL;
 
 		default:
@@ -394,9 +400,9 @@ Sdec:
 			*np++ = '\0';
 			tk->TOK_INT = str2long(&buf[1], 10);
 			if (tk->TOK_INT < 0 || tk->TOK_INT > max_int) {
-				numtype = card_type;
+				toktype = card_type;
 			}
-			else	numtype = intorcard_type;
+			else	toktype = intorcard_type;
 			return tk->tk_symb = INTEGER;
 		}
 		/*NOTREACHED*/

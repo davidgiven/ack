@@ -61,7 +61,7 @@ chk_expr(expp)
 			return 1;
 
 		default:
-			assert(0);
+			crash("(chk_expr(Value))");
 		}
 		break;
 
@@ -78,7 +78,7 @@ chk_expr(expp)
 		return chk_designator(expp, DESIGNATOR|VALUE, D_USED|D_NOREG);
 
 	default:
-		assert(0);
+		crash("(chk_expr)");
 	}
 	/*NOTREACHED*/
 }
@@ -90,9 +90,9 @@ chk_set(expp)
 	/*	Check the legality of a SET aggregate, and try to evaluate it
 		compile time. Unfortunately this is all rather complicated.
 	*/
-	struct type *tp;
-	struct def *df;
+	register struct type *tp;
 	register struct node *nd;
+	register struct def *df;
 	arith *set;
 	unsigned size;
 
@@ -110,7 +110,7 @@ chk_set(expp)
 
 		if (!(df->df_kind & (D_TYPE|D_ERROR)) ||
 		    (df->df_type->tp_fund != T_SET)) {
-			node_error(expp, "specifier does not represent a set type");
+node_error(expp, "specifier does not represent a set type");
 			return 0;
 		}
 		tp = df->df_type;
@@ -163,16 +163,16 @@ chk_set(expp)
 int
 chk_el(expp, tp, set)
 	register struct node *expp;
-	struct type *tp;
+	register struct type *tp;
 	arith **set;
 {
 	/*	Check elements of a set. This routine may call itself
 		recursively.
 		Also try to compute the set!
 	*/
-	register int i;
 	register struct node *left = expp->nd_left;
 	register struct node *right = expp->nd_right;
+	register int i;
 
 	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
@@ -370,7 +370,9 @@ chk_proccall(expp)
 
 	while (param) {
 		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
-
+		if (left->nd_symb == STRING) {
+			TryToString(left, TypeOfParam(param));
+		}
 		if (! TstParCompat(TypeOfParam(param),
 				   left->nd_type,
 				   IsVarParam(param),
@@ -734,6 +736,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 			}
 			return 1;
 
+		case T_HIDDEN:
 		case T_POINTER:
 			if (chk_address(tpl, tpr) ||
 			    expp->nd_symb == '=' ||
@@ -812,16 +815,13 @@ chk_uoper(expp)
 			return 1;
 		}
 		else if (tpr->tp_fund == T_REAL) {
+			expp->nd_type = tpr;
 			if (right->nd_class == Value) {
-				expp->nd_token = right->nd_token;
+				if (*(right->nd_REL) == '-') (right->nd_REL)++;
+				else (right->nd_REL)--;
 				expp->nd_class = Value;
-				if (*(expp->nd_REL) == '-') {
-					expp->nd_REL++;
-				}
-				else {
-					expp->nd_REL--;
-					*(expp->nd_REL) = '-';
-				}
+				expp->nd_symb = REAL;
+				expp->nd_REL = right->nd_REL;
 				FreeNode(right);
 				expp->nd_right = 0;
 			}
@@ -901,7 +901,10 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 	case S_ABS:
 		if (!(left = getarg(&arg, T_NUMERIC, 0))) return 0;
 		expp->nd_type = left->nd_type;
-		if (left->nd_class == Value) cstcall(expp, S_ABS);
+		if (left->nd_class == Value &&
+		    expp->nd_type->tp_fund != T_REAL) {
+			cstcall(expp, S_ABS);
+		}
 		break;
 
 	case S_CAP:
@@ -1084,4 +1087,21 @@ node_error(expp, "only one parameter expected in type cast");
 	else expp->nd_type = left->nd_type;
 
 	return 1;
+}
+
+TryToString(nd, tp)
+	struct node *nd;
+	struct type *tp;
+{
+	/*	Try a coercion from character constant to string */
+	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
+		int ch = nd->nd_INT;
+
+		nd->nd_type = standard_type(T_STRING, 1, (arith) 2);
+		nd->nd_token.tk_data.tk_str = 
+			(struct string *) Malloc(sizeof(struct string));
+		nd->nd_STR = Salloc("X", 2);
+		*(nd->nd_STR) = ch;
+		nd->nd_SLE = 1;
+	}
 }

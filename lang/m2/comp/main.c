@@ -111,27 +111,27 @@ Compile(src, dst)
 #ifdef DEBUG
 LexScan()
 {
-	register int symb;
-	char *symbol2str();
+	register struct token *tkp = &dot;
+	extern char *symbol2str();
 
-	while ((symb = LLlex()) > 0) {
-		print(">>> %s ", symbol2str(symb));
-		switch(symb) {
+	while (LLlex() > 0) {
+		print(">>> %s ", symbol2str(tkp->tk_symb));
+		switch(tkp->tk_symb) {
 
 		case IDENT:
-			print("%s\n", dot.TOK_IDF->id_text);
+			print("%s\n", tkp->TOK_IDF->id_text);
 			break;
 		
 		case INTEGER:
-			print("%ld\n", dot.TOK_INT);
+			print("%ld\n", tkp->TOK_INT);
 			break;
 		
 		case REAL:
-			print("%s\n", dot.TOK_REL);
+			print("%s\n", tkp->TOK_REL);
 			break;
-		
+
 		case STRING:
-			print("\"%s\"\n", dot.TOK_STR);
+			print("\"%s\"\n", tkp->TOK_STR);
 			break;
 
 		default:

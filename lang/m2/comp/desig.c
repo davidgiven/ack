@@ -268,7 +268,8 @@ CodeVarDesig(df, ds)
 			/* value or var parameter
 			*/
 			C_lxa((arith) (proclevel - sc->sc_level));
-			if (df->df_flags & D_VARPAR) {
+			if ((df->df_flags & D_VARPAR) ||
+			    IsConformantArray(df->df_type)) {
 				/* var parameter
 				*/
 				C_adp(df->var_off);
@@ -287,7 +288,7 @@ CodeVarDesig(df, ds)
 
 	/* Now, finally, we have a local variable or a local parameter
 	*/
-	if (df->df_flags & D_VARPAR) {
+	if ((df->df_flags & D_VARPAR) || IsConformantArray(df->df_type)) {
 		/* a var parameter; address directly accessible.
 		*/
 		ds->dsg_kind = DSG_PFIXED;
@@ -303,10 +304,11 @@ CodeDesig(nd, ds)
 	/*	Generate code for a designator. Use divide and conquer
 		principle
 	*/
+	register struct def *df;
 
 	switch(nd->nd_class) {	/* Divide */
-	case Def: {
-		register struct def *df = nd->nd_def;
+	case Def:
+		df = nd->nd_def;
 
 		df->df_flags |= D_USED;
 		switch(df->df_kind) {
@@ -320,7 +322,6 @@ CodeDesig(nd, ds)
 
 		default:
 			crash("(CodeDesig) Def");
-		}
 		}
 		break;
 
@@ -336,18 +337,24 @@ CodeDesig(nd, ds)
 
 		CodeDesig(nd->nd_left, ds);
 		CodeAddress(ds);
-		*ds = InitDesig;
-		CodeExpr(nd->nd_right, ds, NO_LABEL, NO_LABEL);
-		CodeValue(ds, nd->nd_right->nd_type->tp_size);
+		CodePExpr(nd->nd_right);
 		if (nd->nd_right->nd_type->tp_size > word_size) {
 			CodeCoercion(nd->nd_right->nd_type, int_type);
 		}
+
+		/* Now load address of descriptor
+		*/
 		if (IsConformantArray(nd->nd_left->nd_type)) {
-			/* ??? */
+			assert(nd->nd_left->nd_class == Def);
+
+			df = nd->nd_left->nd_def;
+			if (proclevel > df->df_scope->sc_level) {
+				C_lxa(proclevel - df->df_scope->sc_level);
+				C_adp(df->var_off + pointer_size);
+			}
+			else	C_lal(df->var_off + pointer_size);
 		}
 		else	{
-			/* load address of descriptor
-			*/
 			C_lae_dlb(nd->nd_left->nd_type->arr_descr, (arith) 0);
 		}
 		ds->dsg_kind = DSG_INDEXED;

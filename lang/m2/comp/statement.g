@@ -18,11 +18,10 @@ static char *RcsId = "$Header$";
 static int	loopcount = 0;	/* Count nested loops */
 }
 
-statement(struct node **pnd;)
+statement(register struct node **pnd;)
 {
 	register struct node *nd;
 } :
-				{ *pnd = 0; }
 [
 	/*
 	 * This part is not in the reference grammar. The reference grammar
@@ -61,11 +60,13 @@ statement(struct node **pnd;)
 |
 	EXIT
 			{ if (!loopcount) error("EXIT not in a LOOP");
-			  *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
+			  *pnd = MkLeaf(Stat, &dot);
 			}
 |
 	ReturnStatement(pnd)
-]?
+|
+	/* empty */	{ *pnd = 0; }
+]
 ;
 
 /*
@@ -80,7 +81,9 @@ ProcedureCall:
 ;
 */
 
-StatementSequence(struct node **pnd;):
+StatementSequence(register struct node **pnd;)
+{
+} :
 	statement(pnd)
 	[
 		';'	{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
@@ -94,21 +97,21 @@ IfStatement(struct node **pnd;)
 {
 	register struct node *nd;
 } :
-	IF		{ nd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
+	IF		{ nd = MkLeaf(Stat, &dot);
 			  *pnd = nd;
 			}
 	expression(&(nd->nd_left))
-	THEN		{ nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
-			  (*pnd)->nd_right = nd;
+	THEN		{ nd->nd_right = MkLeaf(Link, &dot);
+			  nd = nd->nd_right;
 			}
 	StatementSequence(&(nd->nd_left))
 	[
-		ELSIF	{ nd->nd_right = MkNode(Stat,NULLNODE,NULLNODE,&dot);
+		ELSIF	{ nd->nd_right = MkLeaf(Stat, &dot);
 			  nd = nd->nd_right;
 			  nd->nd_symb = IF;
 			}
 		expression(&(nd->nd_left))
-		THEN	{ nd->nd_right = MkNode(Link,NULLNODE,NULLNODE,&dot);
+		THEN	{ nd->nd_right = MkLeaf(Link, &dot);
 			  nd = nd->nd_right;
 			}
 		StatementSequence(&(nd->nd_left))
@@ -125,7 +128,7 @@ CaseStatement(struct node **pnd;)
 	register struct node *nd;
 	struct type *tp = 0;
 } :
-	CASE		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	CASE		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	expression(&(nd->nd_left))
 	OF
 	case(&(nd->nd_right), &tp)
@@ -140,12 +143,10 @@ CaseStatement(struct node **pnd;)
 ;
 
 case(struct node **pnd; struct type **ptp;) :
-			{ *pnd = 0; }
 	[ CaseLabelList(ptp, pnd)
 	  ':'		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
 	  StatementSequence(&((*pnd)->nd_right))
 	]?
-				/* This rule is changed in new modula-2 */
 			{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
 			  (*pnd)->nd_symb = '|';
 			}
@@ -155,7 +156,7 @@ WhileStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	WHILE		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	WHILE		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	expression(&(nd->nd_left))
 	DO
 	StatementSequence(&(nd->nd_right))
@@ -166,7 +167,7 @@ RepeatStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	REPEAT		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	REPEAT		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	StatementSequence(&(nd->nd_left))
 	UNTIL
 	expression(&(nd->nd_right))
@@ -177,10 +178,10 @@ ForStatement(struct node **pnd;)
 	register struct node *nd;
 	struct node *dummy;
 }:
-	FOR		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
-	IDENT		{ (*pnd)->nd_IDF = dot.TOK_IDF; }
-	BECOMES		{ nd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
-			  (*pnd)->nd_left = nd;
+	FOR		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	IDENT		{ nd->nd_IDF = dot.TOK_IDF; }
+	BECOMES		{ nd->nd_left = MkLeaf(Stat, &dot);
+			  nd = nd->nd_left;
 			}
 	expression(&(nd->nd_left))
 	TO
@@ -204,7 +205,7 @@ ForStatement(struct node **pnd;)
 ;
 
 LoopStatement(struct node **pnd;):
-	LOOP		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	LOOP		{ *pnd = MkLeaf(Stat, &dot); }
 	StatementSequence(&((*pnd)->nd_right))
 	END
 ;
@@ -213,7 +214,7 @@ WithStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	WITH		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	WITH		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	designator(&(nd->nd_left))
 	DO
 	StatementSequence(&(nd->nd_right))
@@ -226,7 +227,7 @@ ReturnStatement(struct node **pnd;)
 	register struct node *nd;
 } :
 
-	RETURN		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	[
 		expression(&(nd->nd_right))
 			{ if (scopeclosed(CurrentScope)) {

@@ -54,7 +54,7 @@ ProcedureHeading(struct def **pdf; int type;)
 		{
 		  df = DeclProc(type);
 		  tp = construct_type(T_PROCEDURE, tp);
-		  if (proclevel) {
+		  if (proclevel > 1) {
 			/* Room for static link
 			*/
 			tp->prc_nbpar = pointer_size;
@@ -134,10 +134,10 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 {
 	struct node *FPList;
 	struct type *tp;
-	int VARp = 0;
+	int VARp = D_VALPAR;
 } :
 	[
-		VAR	{ VARp = 1; }
+		VAR	{ VARp = D_VARPAR; }
 	]?
 	IdentList(&FPList) ':' FormalType(&tp)
 		{
@@ -146,43 +146,48 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 		}
 ;
 
-FormalType(struct type **tp;)
+FormalType(struct type **ptp;)
 {
 	struct def *df;
 	int ARRAYflag = 0;
+	register struct type *tp;
+	extern arith ArrayElSize();
 } :
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
 	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 		{ if (ARRAYflag) {
-			*tp = construct_type(T_ARRAY, NULLTYPE);
-			(*tp)->arr_elem = df->df_type;
-			(*tp)->tp_align = lcm(word_align, pointer_align);
-			(*tp)->tp_size = align(pointer_size + word_size,
-						(*tp)->tp_align);
+			*ptp = tp = construct_type(T_ARRAY, NULLTYPE);
+			tp->arr_elem = df->df_type;
+			tp->arr_elsize = ArrayElSize(df->df_type);
+			tp->tp_align = lcm(word_align, pointer_align);
 		  }
-		  else	*tp = df->df_type;
+		  else	*ptp = df->df_type;
 		}
 ;
 
 TypeDeclaration
 {
-	struct def *df;
+	register struct def *df;
 	struct type *tp;
 }:
 	IDENT		{ df = lookup(dot.TOK_IDF, CurrentScope);
-			  if (!df) df = define( dot.TOK_IDF,
-						CurrentScope,
-						D_TYPE);
+			  if (!df) df = define(dot.TOK_IDF,CurrentScope,D_TYPE);
 			}
 	'=' type(&tp)
-			{ if (df->df_type) free_type(df->df_type); /* ??? */
-			  df->df_type = tp;
-			  if (df->df_kind == D_HIDDEN &&
-			      tp->tp_fund != T_POINTER) {
+			{ 
+			  if (df->df_kind == D_HIDDEN) {
+			  	if (tp->tp_fund != T_POINTER) {
 error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+				}
+				df->df_kind = D_TYPE;
+				*(df->df_type) = *tp;
+				free_type(tp);
 			  }
-			  df->df_kind = D_TYPE;
+			  else {	
+			  	df->df_type = tp;
+			  	df->df_kind = D_TYPE;
+			  }
 			}
 ;
 
@@ -235,6 +240,7 @@ enumeration(struct type **ptp;)
 				 CurrentScope, (arith *) 0);
 		  FreeNode(EnumList);
 		  if (tp->enm_ncst > 256) {
+			/* ??? is this reasonable ??? */
 			error("Too many enumeration literals");
 		  }
 		}
@@ -244,12 +250,12 @@ IdentList(struct node **p;)
 {
 	register struct node *q;
 } :
-	IDENT		{ q = MkNode(Value, NULLNODE, NULLNODE, &dot);
+	IDENT		{ q = MkLeaf(Value, &dot);
 			  *p = q;
 			}
 	[
 		',' IDENT
-			{ q->next = MkNode(Value,NULLNODE,NULLNODE,&dot);
+			{ q->next = MkLeaf(Value, &dot);
 			  q = q->next;
 			}
 	]*
@@ -572,11 +578,11 @@ VariableDeclaration
 IdentAddrList(struct node **pnd;)
 {
 } :
-	IDENT		{ *pnd = MkNode(Name, NULLNODE, NULLNODE, &dot); }
+	IDENT		{ *pnd = MkLeaf(Name, &dot); }
 	ConstExpression(&(*pnd)->nd_left)?
 	[		{ pnd = &((*pnd)->nd_right); }
 		',' IDENT
-			{ *pnd = MkNode(Name, NULLNODE, NULLNODE, &dot); }
+			{ *pnd = MkLeaf(Name, &dot); }
 		ConstExpression(&(*pnd)->nd_left)?
 	]*
 ;

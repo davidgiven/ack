@@ -374,12 +374,6 @@ cstcall(expp, call)
 	expp->nd_symb = INTEGER;
 	switch(call) {
 	case S_ABS:
-		if (expr->nd_type->tp_fund == T_REAL) {
-			expp->nd_symb = REAL;
-			expp->nd_REL = expr->nd_REL;
-			if (*(expr->nd_REL) == '-') (expp->nd_REL)++;
-			break;
-		}
 		if (expr->nd_INT < 0) expp->nd_INT = - expr->nd_INT;
 		else expp->nd_INT = expr->nd_INT;
 		CutSize(expp);

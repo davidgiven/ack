@@ -45,7 +45,6 @@ arith
 struct type
 	*bool_type,
 	*char_type,
-	*charc_type,
 	*int_type,
 	*card_type,
 	*longint_type,
@@ -72,7 +71,7 @@ extern label	data_label();
 
 struct type *
 create_type(fund)
-	register int fund;
+	int fund;
 {
 	/*	A brand new struct type is created, and its tp_fund set
 		to fund.
@@ -81,29 +80,29 @@ create_type(fund)
 
 	clear((char *)ntp, sizeof(struct type));
 	ntp->tp_fund = fund;
-	ntp->tp_size = (arith)-1;
 
 	return ntp;
 }
 
 struct type *
 construct_type(fund, tp)
-	struct type *tp;
+	int fund;
+	register struct type *tp;
 {
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
 	*/
-	struct type *dtp = create_type(fund);
+	register struct type *dtp = create_type(fund);
 
 	switch (fund)	{
 	case T_PROCEDURE:
 	case T_POINTER:
+	case T_HIDDEN:
 		dtp->tp_align = pointer_align;
 		dtp->tp_size = pointer_size;
 		dtp->next = tp;
 		if (fund == T_PROCEDURE && tp) {
-			if (tp != bitset_type &&
-			    !(tp->tp_fund&(T_NUMERIC|T_INDEX|T_WORD|T_POINTER))) {
+			if (! returntype(tp)) {
 				error("illegal procedure result type");
 			}
 		}
@@ -142,7 +141,9 @@ align(pos, al)
 
 struct type *
 standard_type(fund, align, size)
-	int align; arith size;
+	int fund;
+	int align;
+	arith size;
 {
 	register struct type *tp = create_type(fund);
 
@@ -161,15 +162,19 @@ init_types()
 	/* first, do some checking
 	*/
 	if (int_size != word_size) {
-		fatal("Integer size not equal to word size");
+		fatal("integer size not equal to word size");
 	}
 
-	if (long_size < int_size) {
-		fatal("Long integer size smaller than integer size");
+	if (long_size < int_size || long_size % word_size != 0) {
+		fatal("illegal long integer size");
 	}
 
 	if (double_size < float_size) {
-		fatal("Long real size smaller than real size");
+		fatal("long real size smaller than real size");
+	}
+
+	if (!pointer_size || pointer_size % word_size != 0) {
+		fatal("illegal pointer size");
 	}
 
 	/* character type
@@ -177,12 +182,6 @@ init_types()
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
 	
-	/* character constant type, different from character type because
-	   of compatibility with character array's
-	*/
-	charc_type = standard_type(T_CHAR, 1, (arith) 1);
-	charc_type->enm_ncst = 256;
-
 	/* boolean type
 	*/
 	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);
@@ -226,28 +225,36 @@ ParamList(ppr, ids, tp, VARp, off)
 	register struct node *ids;
 	struct paramlist **ppr;
 	struct type *tp;
+	int VARp;
 	arith *off;
 {
 	/*	Create (part of) a parameterlist of a procedure.
 		"ids" indicates the list of identifiers, "tp" their type, and
-		"VARp" is set when the parameters are VAR-parameters.
-*/
+		"VARp" indicates D_VARPAR or D_VALPAR.
+	*/
 	register struct paramlist *pr;
 	register struct def *df;
-	struct paramlist *pstart;
 
-	while (ids) {
+	for ( ; ids; ids = ids->next) {
 		pr = new_paramlist();
 		pr->next = *ppr;
 		*ppr = pr;
 		df = define(ids->nd_IDF, CurrentScope, D_VARIABLE);
 		pr->par_def = df;
 		df->df_type = tp;
-		if (VARp) df->df_flags = D_VARPAR;
-		else	df->df_flags = D_VALPAR;
 		df->var_off = align(*off, word_align);
-		*off = df->var_off + tp->tp_size;
-		ids = ids->next;
+		df->df_flags = VARp;
+		if (IsConformantArray(tp)) {
+			/* we need room for the base address and a descriptor
+			*/
+			*off = df->var_off + pointer_size + 3 * word_size;
+		}
+		else if (VARp == D_VARPAR) {
+			*off = df->var_off + pointer_size;
+		}
+		else {
+			*off = df->var_off + tp->tp_size;
+		}
 	}
 }
 
@@ -267,7 +274,7 @@ chk_basesubrange(tp, base)
 		base = base->next;
 	}
 
-	if (base->tp_fund == T_ENUMERATION || base->tp_fund == T_CHAR) {
+	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
 		if (tp->next != base) {
 			error("Specified base does not conform");
 		}
@@ -384,7 +391,7 @@ getbounds(tp, plo, phi)
 }
 struct type *
 set_type(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
@@ -414,22 +421,33 @@ set_type(tp)
 	return tp;
 }
 
+arith
+ArrayElSize(tp)
+	register struct type *tp;
+{
+	/* Align element size to alignment requirement of element type.
+	   Also make sure that its size is either a dividor of the word_size,
+	   or a multiple of it.
+	*/
+	arith algn;
+
+	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
+	algn = align(tp->tp_size, tp->tp_align);
+	if (!(algn % word_size == 0 || word_size % algn == 0)) {
+		algn = align(algn, word_size);
+	}
+	return algn;
+}
+
 ArraySizes(tp)
 	register struct type *tp;
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
-	arith elem_size;
 	register struct type *index_type = tp->next;
 	register struct type *elem_type = tp->arr_elem;
 
-	if (elem_type->tp_fund == T_ARRAY) {
-		ArraySizes(elem_type);
-	}
-
-	/* align element size to alignment requirement of element type
-	*/
-	elem_size = align(elem_type->tp_size, elem_type->tp_align);
+	tp->arr_elsize = ArrayElSize(elem_type);
 	tp->tp_align = elem_type->tp_align;
 
 	/* check index type
@@ -447,7 +465,7 @@ ArraySizes(tp)
 
 	switch(index_type->tp_fund) {
 	case T_SUBRANGE:
-		tp->tp_size = elem_size *
+		tp->tp_size = tp->arr_elsize *
 			(index_type->sub_ub - index_type->sub_lb + 1);
 		C_rom_cst(index_type->sub_lb);
 		C_rom_cst(index_type->sub_ub - index_type->sub_lb);
@@ -455,7 +473,7 @@ ArraySizes(tp)
 
 	case T_CHAR:
 	case T_ENUMERATION:
-		tp->tp_size = elem_size * index_type->enm_ncst;
+		tp->tp_size = tp->arr_elsize * index_type->enm_ncst;
 		C_rom_cst((arith) 0);
 		C_rom_cst((arith) (index_type->enm_ncst - 1));
 		break;
@@ -464,7 +482,7 @@ ArraySizes(tp)
 		crash("Funny index type");
 	}
 	
-	C_rom_cst(elem_size);
+	C_rom_cst(tp->arr_elsize);
 
 	/* ??? overflow checking ???
 	*/
@@ -473,7 +491,9 @@ ArraySizes(tp)
 FreeType(tp)
 	struct type *tp;
 {
-	/*	Release type structures indicated by "tp"
+	/*	Release type structures indicated by "tp".
+		This procedure is only called for types, constructed with
+		T_PROCEDURE.
 	*/
 	register struct paramlist *pr, *pr1;
 

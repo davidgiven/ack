@@ -48,6 +48,7 @@ struct dfproc {
 	struct node *pr_body;	/* body of this procedure */
 #define prc_vis		df_value.df_proc.pr_vis
 #define prc_body	df_value.df_proc.pr_body
+#define NameOfProc(xdf)	((xdf)->prc_vis->sc_scope->sc_name)
 };
 
 struct import {

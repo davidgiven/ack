@@ -25,10 +25,10 @@ struct token	{
 #define TOK_STR	tk_data.tk_str->s_str
 #define TOK_SLE tk_data.tk_str->s_length
 #define TOK_INT	tk_data.tk_int
-#define TOK_REL	tk_data.tk_real
+#define TOK_REL tk_data.tk_real
 
 extern struct token dot, aside;
-extern struct type *numtype;
+extern struct type *toktype;
 
 #define DOT	dot.tk_symb
 #define ASIDE	aside.tk_symb
