@@ -76,6 +76,7 @@ vax_bsd4_2	VAX11 with BSD4.2
 vax_sysV_2	VAX11 with System V.2
 pc_ix		IBM PC with PC/IX
 xenix3		IBM AT running Microsoft Xenix V3.2
+i386		Intel 80386 system running Xenix System V
 m68_unisoft	Motorola 68000 with Unisoft UNIX
 sun3		Sun 3 M68020 workstation 
 sun2		Sun 2 M68000 workstation
@@ -90,7 +91,7 @@ system type: "
 		echo echo "$SYSNAME" >../bin/ack_sys
 		chmod +x ../bin/ack_sys
 		case `ack_sys` in
-		pdp_v7|vax_bsd4_1a|vax_bsd4_2|vax_sysV_2|pc_ix|m68_unisoft|sun3|sun2|m68_sysV_0|xenix3|m68020) ;;
+		pdp_v7|vax_bsd4_1a|vax_bsd4_2|vax_sysV_2|pc_ix|m68_unisoft|sun3|sun2|m68_sysV_0|xenix3|i386|m68020) ;;
 		*)	echo None of the software especially intended for the named systems will work ;;
 		esac
 	else
@@ -175,6 +176,7 @@ vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ;;
 vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ;;
 pc_ix)		ACM=i86 ; BM=0 ; SYS=SYS_5 ;;
 xenix3)		ACM=xenix3 ; BM=0; SYS=SYS_5 ;;
+i386)		ACM=i386 ; SYS=SYS_5 ;;
 sun3)		ACM=sun3 ; SYS=BSD4_2 ;;
 sun2)		ACM=sun2 ; SYS=BSD4_2 ;;
 m68_unisoft)	ACM=m68k2 ; SYS=V7 ;;
@@ -242,6 +244,14 @@ vax_sysV_2)
 	  rm -f libsys/*
 	  cp libsysV_2/* libsys
 	)
+	;;
+i386)
+	( cd ../lib/descr
+	  ed - fe << ABC
+1,$s/-D{NAME}/-D{NAME} -DNO_PROTOTYPE/
+w
+q
+ABC
 	;;
 xenix3)
 	echo "Xenix cannot handle our Makefiles; install our own make ..."
@@ -378,7 +388,7 @@ ABC
 	)
 	( cd ../mach
 	  : machines with word or pointer size not 2
-	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
+	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4 i386
 	  do
 	  if test -f $i/Action.orig
 	  then
@@ -403,6 +413,8 @@ ABC
 	  fi
 	  cp Action.orig Action
 	  ed - Action <<ABC
+/Peephole optimizer libraries/;/^end/s/^/!/
+/Bootstrap for code expanders/;/^end/s/^/!/
 /EM interpreter in C/;/^end/s/^/!/
 w
 q
@@ -478,7 +490,7 @@ do
     done
 done
 DISABLE_SUP=
-set i86 xenix3 minix 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 ns pdp s2650 vax4 z80 z8000
+set i86 xenix3 minix i386 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 ns pdp s2650 vax4 z80 z8000
 while test $# != 0
 do
     while :
