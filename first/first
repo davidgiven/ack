@@ -324,7 +324,7 @@ ABC
 esac
 case X$BM in
 X0)
-	echo "set some installation pararmeters for small machines"
+	echo "set some installation parameters for small machines"
 	( cd ../lang/cem/cemcom
 	  cp SmallPars Parameters
 	  cp Makefile makefile
@@ -416,7 +416,7 @@ q
 ABC
 	)
 	;;
-*)	( echo "set some installation pararmeters for big machines"
+*)	( echo "set some installation parameters for big machines"
 	  cd ../lang/cem/cemcom
 	  cp BigPars Parameters
 	  cd ../../m2/comp
