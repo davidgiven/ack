@@ -2,9 +2,7 @@ Action
 as
 cg
 dl
-libcc
 libem
-libpc
-libbc
-liboc
-libm2
+libend
+libmon
+mach_params
