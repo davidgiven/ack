@@ -21,11 +21,11 @@ PUBLIC char *sbrk(incr)
 int incr;
 {
   char *newsize, *oldsize;
-  extern int endv, dorgv;
 
   oldsize = brksize;
   newsize = brksize + incr;
-  if (incr > 0 && newsize < oldsize) return( (char *) -1);
+  if (incr > 0 && newsize < oldsize || incr < 0 && newsize > oldsize)
+	return( (char *) -1);
   if (brk(newsize) == 0)
 	return(oldsize);
   else

@@ -1,6 +1,6 @@
 #include "lib.h"
 
-char *nullptr[1];		/* the EXEC calls need a zero pointer */
+extern char **environ;			/* environment pointer */
 
 #define	PTRSIZE	sizeof(char *)
 
@@ -8,7 +8,7 @@ PUBLIC int execl(name, arg0)
 char *name;
 char *arg0;
 {
-  return execve(name, &arg0, nullptr);
+  return execve(name, &arg0, environ);
 }
 
 PUBLIC int execle(name, argv)
@@ -23,7 +23,7 @@ char *name, *argv;
 PUBLIC int execv(name, argv)
 char *name, *argv[];
 {
-  return execve(name, argv, nullptr);
+  return execve(name, argv, environ);
 }
 
 

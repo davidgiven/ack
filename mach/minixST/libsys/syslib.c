@@ -150,6 +150,18 @@ phys_clicks *basep, *sizep;	/* base and size for free_mem() */
 #endif
 
 
+PUBLIC sys_kill(proc, sig)
+int proc;			/* which proc has exited */
+int sig;			/* signal number: 1 - 16 */
+{
+/* A proc has to be signaled via MM.  Tell the kernel. */
+
+  M.m6_i1 = proc;
+  M.m6_i2 = sig;
+  callx(SYSTASK, SYS_KILL);
+}
+
+
 PUBLIC int tell_fs(what, p1, p2, p3)
 int what, p1, p2, p3;
 {
