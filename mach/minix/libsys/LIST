@@ -55,6 +55,7 @@ unlink.s
 utime.s
 wait.s
 write.s
+sendrec.s
 _exit.c
 _access.c
 _alarm.c
@@ -117,5 +118,7 @@ _unlink.c
 _utime.c
 _wait.c
 _write.c
+_sendrec.s
+brksize.s
 vectab.c
 errno.c

@@ -1,5 +1,5 @@
-.define _brksize
-.sect .text; .sect .rom; .sect .data
-.extern endbss, _brksize
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.define __brksize
 .sect .data
-_brksize: .data2 endbss
+.extern endbss, __brksize
+__brksize: .data2 endbss
