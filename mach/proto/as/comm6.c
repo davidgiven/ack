@@ -165,7 +165,7 @@ valu_t val;
 		/* printf("declare %s: %o\n", ip->i_name, DOTTYP); */
 		if ((ip->i_type & ~S_EXT) == S_UND) {
 			--unresolved;
-			ip->i_type = S_COM|S_EXT|DOTTYP;
+			ip->i_type = S_COM|DOTTYP|(ip->i_type&S_EXT);
 #ifdef ASLD
 			ip->i_valu = val;
 		} else if (ip->i_type == (S_COM|S_EXT|DOTTYP)) {
@@ -185,7 +185,7 @@ valu_t val;
 		 */
 		ip->i_valu = outhead.oh_nname;
 #ifdef DUK
-	newsymb(ip->i_name, S_COM|S_EXT|DOTTYP, (short)0, val);
+	newsymb(ip->i_name, S_COM|DOTTYP|(ip->i_type&S_EXT), (short)0, val);
 #else DUK
 	newsymb(ip->i_name, S_EXT|DOTTYP, (short)0, val);
 #endif DUK
