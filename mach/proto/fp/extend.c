@@ -61,9 +61,9 @@ zero:			zrf_ext(to);
 #endif
 #else
 #if FL_MSW_AT_LOW_ADDRESS
-	to->exp = uget2(cpt1+4);
+	to->exp = uget2(cpt1+(size == sizeof(DOUBLE) ? 4 : 0));
 #else
-	to->exp = uget2(cpt1+6);
+	to->exp = uget2(cpt1+(size == sizeof(DOUBLE) ? 6 : 2));
 #endif
 #endif
 	to->sign = (to->exp & 0x8000);	/* set sign bit */
