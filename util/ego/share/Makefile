@@ -67,6 +67,11 @@ opr:
 	make pr | opr
 
 clean:
+	@echo "make clean does not remove anything, because it is also done"
+	@echo "by the installation script, and this directory should not be"
+	@echo "cleaned. Type 'make oclean' instead."
+
+oclean:
 	rm -f makeclassdef classdefs.h makewordlen wordlen.h *.o Out out nohup.out *.m
 
 lint:
