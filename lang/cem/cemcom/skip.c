@@ -21,9 +21,13 @@ skipspaces(ch, skipnl)
 		non-space character.
 	*/
 	for (;;) {
-		while (class(ch) == STSKIP || (skipnl && class(ch) == STNL))
+		while (class(ch) == STSKIP)
 			LoadChar(ch);
-
+		if (skipnl && class(ch) == STNL) {
+			LoadChar(ch);
+			++LineNumber;
+			continue;
+		}
 		/* How about "\\\n"?????????	*/
 
 		if (ch == '/') {
