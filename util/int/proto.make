@@ -128,12 +128,15 @@ switch/PrCases:
 	(cd switch; make PrCases)
 
 test/awa.em22:
+	cp $(SRC_DIR)/test/*.[pc] test
 	(cd test; make awa.em22)
 
 test/awa.em24:
+	cp $(SRC_DIR)/test/*.[pc] test
 	(cd test; make awa.em24)
 
 test/awa.em44:
+	cp $(SRC_DIR)/test/*.[pc] test
 	(cd test; make awa.em44)
 
 
