@@ -81,3 +81,5 @@ typedef struct SYMBOL{
 	int	parmsize;
 	int	isparam;
 } Symbol;
+
+extern	Symbol *srchsymbol();

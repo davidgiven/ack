@@ -32,3 +32,5 @@ extern Linerecord	*firstline,
 		*currline, 
 		*lastline;
 extern List	*forwardlabel;
+
+extern List	*gosublabel();
