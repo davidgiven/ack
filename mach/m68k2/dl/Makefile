@@ -1,21 +1,22 @@
-CFLAGS=-O
+EMHOME=../../..
+OBJLIB=$(EMHOME)/modules/lib/libobject.a
 
-cv:             cv.o
-		$(CC) -o cv -n cv.o
+head:	dl
 
-install:	ins_cv
-ins_cv:		cv
-		../../install cv
+dl:	dl.c
+	$(CC) -I$(EMHOME)/h -o dl dl.c $(OBJLIB)
 
-cmp:		cmp_cv
-cmp_cv:		cv
-		-../../compare cv
+install:	head
+	@echo Nothing is installed
 
-opr:
-		make pr | opr
-
-pr:
-		@pr `pwd`/cv.c
+cmp:	head
+	@echo Nothing is compared
 
 clean:
-		-rm -f *.o *.old cv
+	rm -f *.o
+
+pr:
+	@pr `pwd`/Makefile `pwd`/dl.c
+
+opr:
+	make pr | opr

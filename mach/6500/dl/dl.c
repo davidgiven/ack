@@ -15,11 +15,9 @@
  *
  */
 
-#include	<sgtty.h>
 #include	<stdio.h>
 #include	<assert.h>
-
-struct sgttyb	tty;
+#include	<out.h>
 
 #define	DATTYPE		0
 #define	EOFTYPE		1
@@ -38,9 +36,13 @@ char	*progname;
 
 char	hex[] = "0123456789ABCDEF";
 
+struct outhead ohead;
+struct outsect sect[MAXSECT];
+
 main(argc,argv) char **argv; {
-	register nd,pc,sg,osg,first;
+	int i,nd,pc,first;
 	register char *s;
+
 
 	progname = argv[0];
 	if (argc > 3)
@@ -48,28 +50,49 @@ main(argc,argv) char **argv; {
 	s = "a.out";
 	if (argc >= 2)
 		s = argv[1];
-	if (freopen(s,"r",stdin) == NULL)
-		fatal("can't open %s",s);
+	if (! rd_open(s)) {
+		fprintf(stderr,"%s: can't open %s\n",progname,s);
+		exit(-1);
+	}
+	rd_ohead(&ohead);
+	if (ohead.oh_flags & HF_LINK) {
+		fprintf(stderr,"%s: %s contains unresolved references\n",progname,s);
+		exit(-1);
+	}
+	rd_sect(sect, ohead.oh_nsect);
 	ttyfd = 1;
-	first = 1; osg = 0;
-	for (;;) {
-		pc = get2c(stdin);
-		if (feof(stdin))
-			break;
-		sg = get2c(stdin);
-		nd = get2c(stdin);
-		if (first) {
-			first = 0;
+	first = 1;
+	for (i = 0; i < ohead.oh_nsect; i++) {
+		rd_outsect(i);
+		pc = sect[i].os_base;
+		while (sect[i].os_size) {
+			unsigned int sz = 8096, fl;
+			extern char *calloc();
+			register char *buf;
+			char *pbuf;
+
+			if (sz > sect[i].os_size) sz = sect[i].os_size;
+			sect[i].os_size -= sz;
+			pbuf = buf = calloc(sz, 1);
+			if (fl = sect[i].os_flen) {
+				if (fl > sz) fl = sz;
+				sect[i].os_flen -= fl;
+
+				rd_emit(buf, (long) fl);
+			}
+			while (sz >= MAXBYTE) {
+				data(MAXBYTE, (int) pc, buf);
+				sz -= MAXBYTE;
+				buf += MAXBYTE;
+				pc += MAXBYTE;
+				first = 0;
+			}
+			if (sz > 0) {
+				data(sz, (int) pc, buf);
+				first = 0;
+			}
+			free(pbuf);
 		}
-		assert(sg == osg);
-		while (nd > MAXBYTE) {
-			data(MAXBYTE,pc);
-			nd -= MAXBYTE;
-			pc += MAXBYTE;
-		}
-		if (nd > 0)
-			data(nd,pc);
-		assert(feof(stdin) == 0);
 	}
 	if (first == 0)
 		eof();
@@ -78,11 +101,13 @@ main(argc,argv) char **argv; {
 			reply();
 }
 
-data(nd,pc) {
+data(nd,pc, buf)
+	register char *buf;
+{
 
 	newline(nd,pc,DATTYPE);
 	do
-		byte(getc(stdin));
+		byte(*buf++);
 	while (--nd);
 	endline();
 }
@@ -132,27 +157,22 @@ b &= 0377;
 	put(hex[b & 017]);
 }
 
-put(c) {
+put(c)
+	char c;
+{
 
 	write(ttyfd,&c,1);
 }
 
 reply() {
 	register i;
-	int c;
+	char c;
 
 	if (echo == 0)
 		return;
 	i = read(ttyfd,&c,1);
 	assert(i > 0);
 	write(1,&c,1);
-}
-
-get2c(f) FILE *f; {
-	register c;
-
-	c = getc(f);
-	return((getc(f) << 8) | c);
 }
 
 fatal(s,a) {
@@ -162,3 +182,5 @@ fatal(s,a) {
 	fprintf(stderr,"\n");
 	exit(-1);
 }
+
+rd_fatal() { fatal("read error"); }
