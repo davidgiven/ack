@@ -63,12 +63,10 @@ MkCoercion(pnd, tp)
 	if (nd_tp->tp_fund == T_STRING) return;
 	nd_tp = BaseType(nd_tp);
 	if (nd->nd_class == Value) {
+		if (nd_tp->tp_fund == T_REAL && tp->tp_fund != T_REAL) goto Out;
 		switch(tp->tp_fund) {
 		case T_REAL:
-			if (nd_tp->tp_fund == T_REAL) {
-				break;
-			}
-			goto Out;
+			break;
 		case T_SUBRANGE:
 			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
 				BaseType(tp)->tp_fund) ||
@@ -92,8 +90,7 @@ MkCoercion(pnd, tp)
 		case T_INTORCARD:
 		case T_CARDINAL:
 		case T_POINTER:
-			if ((nd_tp->tp_fund == T_INTEGER &&
-			     nd->nd_INT < 0) ||
+			if ((nd_tp->tp_fund == T_INTEGER && nd->nd_INT < 0) ||
 			    (nd->nd_INT & ~full_mask[(int)(tp->tp_size)])) {
 				node_warning(nd,
 					     W_ORDINARY,

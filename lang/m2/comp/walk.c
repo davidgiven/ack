@@ -501,9 +501,6 @@ WalkStat(nd, exit_label)
 					     W_ORDINARY,
 					     "zero stepsize in FOR loop");
 			}
-			if (stepsize < 0) {
-				stepsize = -stepsize;
-			}
 			fnd = left->nd_right;
 			if (good_forvar) {
 				bstp = BaseType(nd->nd_type);
@@ -523,6 +520,7 @@ WalkStat(nd, exit_label)
 					ForLoopVarExpr(nd);
 				}
 				else {
+					stepsize = -stepsize;
 					C_zlt(l2);
 					ForLoopVarExpr(nd);
 					C_lol(tmp);
@@ -531,8 +529,6 @@ WalkStat(nd, exit_label)
 				if (stepsize) {
 					C_loc(stepsize);
 					C_dvu(int_size);
-					C_loc((arith) 1);
-					C_adu(int_size);
 				}
 				C_stl(tmp);
 				nd->nd_def->df_flags |= D_FORLOOP;
@@ -540,13 +536,13 @@ WalkStat(nd, exit_label)
 			}
 			WalkNode(right, exit_label);
 			nd->nd_def->df_flags &= ~D_FORLOOP;
-			if (stepsize && good_forvar) {	
+			if (good_forvar && stepsize) {	
+				C_lol(tmp);
+				C_zeq(l2);
 				C_lol(tmp);
 				C_loc((arith) 1);
 				C_sbu(int_size);
 				C_stl(tmp);
-				C_lol(tmp);
-				C_zeq(l2);
 				C_loc(left->nd_INT);
 				ForLoopVarExpr(nd);
 				C_adu(int_size);
