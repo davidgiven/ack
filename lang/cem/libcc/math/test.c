@@ -38,6 +38,8 @@ testsqrt()
 	double x, val;
 	extern double sqrt();
 
+	printf("testing sqrt ... \n");
+
 	dotest("sqrt(%.1f)", 2.0, sqrt(2.0), SQRT2);
 	dotest("sqrt(%.1f)", 10.0, sqrt(10.0), SQRT10);
 
@@ -60,6 +62,8 @@ testtrig()
 
 	double x;
 	extern double sin(), cos(), tan(), asin(), acos(), atan(), fabs();
+
+	printf("testing sin, cos, tan, asin, acos, atan ... \n");
 
 	dotest("sin(0)", 0.0, sin(0.0), SIN0);
 	dotest("sin(pi/24)", M_PI/24 , sin(M_PI/24), SINPI_24);
@@ -129,6 +133,7 @@ testexplog()
 	extern double exp(), log();
 	double x;
 
+	printf("testing exp and log ...\n");
 	dotest("exp(%.2f)", -1.0, exp(-1.0), EXPMIN1);
 	dotest("exp(%.2f)", -0.25, exp(-0.25), EXPMIN1_4);
 	dotest("exp(%.2f)", 0.0, exp(0.0), EXP0);
@@ -151,6 +156,7 @@ testgamma()
 	double x, xfac;
 	extern double gamma(), exp();
 
+	printf("testing gamma ...\n");
 	for (x = 1.0, xfac = 1.0; x < 30.0; x += 1.0) {
 		dotest("exp(gamma(%.2f))", x, exp(gamma(x)), xfac);
 		xfac *= x;
@@ -171,6 +177,8 @@ testbessel()
 	double x;
 	extern char *sprintf();
 	char buf[100];
+
+	printf("testing bessel ...\n");
 
 	dotest("j0(pi/4)", M_PI_4, j0(M_PI_4), J0__PI_4);
 	dotest("j0(pi/2)", M_PI_2, j0(M_PI_2), J0__PI_2);
