@@ -4,17 +4,11 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*	st_alloc - get a structure from a free list. If no structures left,
-		create new ones. The structures for which this works are
-		supposed to have as their first tag the string "next", which
-		should be a pointer type.
+		create new ones.
 		The counterpart, st_free, is a macro, defined in alloc.h
 */
 
 #include	"alloc.h"
-
-struct xxx	{
-	char *next;
-};
 
 char *
 st_alloc(phead, size, count)
@@ -28,15 +22,15 @@ st_alloc(phead, size, count)
 	if (*phead == 0)	{
 
 		p = Malloc(size * count);
-		((struct xxx *) p)->next = 0;
+		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
 			p += size;
-			((struct xxx *) p)->next = p - size;
+			((_PALLOC_) p)->_A_next = p - size;
 		}
 		*phead = p;
 	}
 	else	p = *phead;
-	*phead = ((struct xxx *)p)->next;
+	*phead = ((_PALLOC_)p)->_A_next;
 	retval = p;
 	if (size >= sizeof(long)) {
 		q = (long *) p;

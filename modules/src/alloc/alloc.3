@@ -67,8 +67,7 @@ All these routines use \fImalloc\fR and \fIrealloc\fR.
 \fIFree\fR can be used on pointers returned by these routines.
 .PP
 \fISt_alloc\fR and \fIst_free\fR provide a mechanism for maintaining free lists
-of structures, whose first field is a pointer called \fBnext\fR.
-This field is used to chain free structures together.
+of structures.
 \fISt_alloc\fR takes three parameters: \fIphead\fR is a pointer to a field
 containing the head of the free list, \fIsize\fR contains the size of the
 structures, and \fIcount\fR indicates how many new structures must be allocated
@@ -93,3 +92,12 @@ malloc(3)
 call a routine \fINo_Mem\fR if there is no memory available. This routine
 is not supposed to return. A default one, that
 gives an error message and stops execution, is provided.
+.SH BUGS
+The
+.I st_alloc
+mechanism only works for structures that are large enough to contain one
+pointer.
+Also,
+.I st_free
+actually is a macro, and references its arguments more than once, so they
+better not have side-effects.

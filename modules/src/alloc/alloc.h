@@ -20,9 +20,17 @@ extern char *malloc(), *realloc();
 
 /*	S T R U C T U R E - S T O R A G E  D E F I N I T I O N S	*/
 
+typedef struct _ALLOC_ {
+	struct _ALLOC_ *_A_next;
+} *_PALLOC_;
+
+#define	_A_st_free(ptr, phead, size)	(((_PALLOC_)ptr)->_A_next = \
+						(_PALLOC_)(*phead), \
+					 *((_PALLOC_ *)phead) = \
+						(_PALLOC_) ptr)
 #ifndef	BOTCH_FREE
-#define	st_free(ptr, phead, size)	(ptr->next = *phead, *phead = ptr)
+#define st_free(ptr, phead, size)	_A_st_free(ptr, phead, size)
 #else	def BOTCH_FREE
 #define	st_free(ptr, phead, size)	(botch((char *)(ptr), size), \
-						ptr->next = *phead, *phead = ptr)
+						_A_st_free(ptr, phead, size))
 #endif	BOTCH_FREE
