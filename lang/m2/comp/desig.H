@@ -17,7 +17,7 @@
 */
 
 struct desig {
-	int	dsg_kind;
+	short	dsg_kind;
 #define DSG_INIT	0	/* don't know anything yet */
 #define DSG_LOADED	1	/* designator loaded  on top of the stack */
 #define DSG_PLOADED	2	/* designator accessible through pointer on

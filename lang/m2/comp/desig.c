@@ -34,13 +34,18 @@
 #include	"walk.h"
 
 extern int	proclevel;
+extern arith	NewPtr();
+extern char	options[];
 
 int
 WordOrDouble(ds, size)
-	register t_desig *ds;
+	t_desig *ds;
 	arith size;
 {
-	if ((int) (ds->dsg_offset) % (int) word_size == 0) {
+	/*	Check if designator is suitable for word or double-word
+		operation
+	*/
+	if ((int) (ds->dsg_offset) % word_align == 0) {
 		if (size == word_size) return 1;
 		if (size == dword_size) return 2;
 	}
@@ -52,6 +57,9 @@ DoLoad(ds, size)
 	register t_desig *ds;
 	arith size;
 {
+	/*	Try to load designator with word or double-word operation.
+		Return 0 if not done
+	*/
 	switch (WordOrDouble(ds, size)) {
 	default:
 		return 0;
@@ -76,6 +84,9 @@ DoStore(ds, size)
 	register t_desig *ds;
 	arith size;
 {
+	/*	Try to store designator with word or double-word operation.
+		Return 0 if not done
+	*/
 	switch (WordOrDouble(ds, size)) {
 	default:
 		return 0;
@@ -95,32 +106,55 @@ DoStore(ds, size)
 	return 1;
 }
 
-STATIC int
-properly(ds, tp)
-	register t_desig *ds;
+int
+word_multiple(tp)
 	register t_type *tp;
 {
-	/*	Check if it is allowed to load or store the value indicated
-		by "ds" with LOI/STI.
-		- if the size is not either a multiple or a dividor of the
-		  wordsize, then not.
-		- if the alignment is at least "word" then OK.
-		- if size is dividor of word_size and alignment >= size then OK.
-		- otherwise check alignment of address. This can only be done
-		  with DSG_FIXED.
+	/*	Return 1 if the type indicated by tp has a size that is a
+		multiple of the word_size and is also word_aligned
+	*/
+	return  (int)(tp->tp_size) % (int)word_size == 0 &&
+		tp->tp_align >= word_align;
+}
+
+int
+word_dividor(tp)
+	register t_type *tp;
+{
+	/*	Return 1 if the type indicated by tp has a size that is a proper
+		dividor of the word_size, and has alignment >= size or
+		alignment >= word_align
+	*/
+	return	tp->tp_size < word_size && 
+		(int)word_size % (int)(tp->tp_size) == 0 &&
+		(tp->tp_align >= word_align ||
+		 tp->tp_align >= (int)(tp->tp_size));
+}
+
+#define USE_LOI_STI	0
+#define USE_LOS_STS	1
+#define USE_LOAD_STORE	2
+#define USE_BLM		3	/* like USE_LOI_STI, but more restricted:
+				   multiple of word_size only
+				*/
+
+STATIC int
+type_to_stack(tp)
+	register t_type *tp;
+{
+	/*	Find out how to load or store the value indicated by "ds".
+		There are three ways:
+		- with LOI/STI
+		- with LOS/STS
+		- with calls to _load/_store
 	*/
 
-	int szmodword = (int) (tp->tp_size) % (int) word_size;
-						/* 0 if multiple of wordsize */
-	int wordmodsz = word_size % tp->tp_size;/* 0 if dividor of wordsize */
-
-	if (szmodword && wordmodsz) return 0;
-	if (tp->tp_align >= word_align) return 1;
-	if (szmodword && tp->tp_align >= szmodword) return 1;
-
-	return ds->dsg_kind == DSG_FIXED &&
-	       ((! szmodword && (int) (ds->dsg_offset) % word_align == 0) ||
-		(! wordmodsz && ds->dsg_offset % tp->tp_size == 0));
+	if (! word_multiple(tp)) {
+		if (word_dividor(tp)) return USE_LOI_STI;
+		return USE_LOAD_STORE;
+	}
+	if (! fit(tp->tp_size, (int) word_size)) return USE_LOS_STS;
+	return USE_BLM;
 }
 
 CodeValue(ds, tp)
@@ -128,7 +162,7 @@ CodeValue(ds, tp)
 	register t_type *tp;
 {
 	/*	Generate code to load the value of the designator described
-		in "ds"
+		in "ds".
 	*/
 	arith sz;
 
@@ -141,27 +175,41 @@ CodeValue(ds, tp)
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
-		sz = WA(tp->tp_size);
-		if (properly(ds, tp)) {
+		switch (type_to_stack(tp)) {
+		case USE_BLM:
+		case USE_LOI_STI:
 			CodeAddress(ds);
 			C_loi(tp->tp_size);
 			break;
-		}
-		if (ds->dsg_kind == DSG_PLOADED) {
-			sz -= pointer_size;
+		case USE_LOS_STS:
+			CodeAddress(ds);
+			CodeConst(tp->tp_size, (int)pointer_size);
+			C_los(pointer_size);
+			break;
+		case USE_LOAD_STORE:
+			sz = WA(tp->tp_size);
+			if (ds->dsg_kind == DSG_PLOADED) {
+				arith tmp = NewPtr();
 
-			C_asp(-sz);
-			C_lor((arith) 1);
-			C_adp(sz);
-			C_loi(pointer_size);
+				CodeAddress(ds);
+				C_lal(tmp);
+				C_sti(pointer_size);
+				CodeConst(-sz, (int) pointer_size);
+				C_ass(pointer_size);
+				C_lal(tmp);
+				C_loi(pointer_size);
+				FreePtr(tmp);
+			}
+			else  {
+				CodeConst(-sz, (int) pointer_size);
+				C_ass(pointer_size);
+			}
+			CodeAddress(ds);
+			CodeConst(tp->tp_size, (int) pointer_size);
+			C_cal("_load");
+			C_asp(pointer_size + pointer_size);
+			break;
 		}
-		else  {
-			C_asp(-sz);
-		}
-		CodeAddress(ds);
-		C_loc(tp->tp_size);
-		C_cal("_load");
-		C_asp(2 * word_size);
 		break;
 
 	case DSG_INDEXED:
@@ -178,6 +226,8 @@ CodeValue(ds, tp)
 ChkForFOR(nd)
 	t_node *nd;
 {
+	/*	Check for an assignment to a FOR-loop control variable
+	*/
 	if (nd->nd_class == Def) {
 		register t_def *df = nd->nd_def;
 
@@ -186,6 +236,7 @@ ChkForFOR(nd)
 				     W_ORDINARY,
 				     "assignment to FOR-loop control variable");
 			df->df_flags &= ~D_FORLOOP;
+					/* only procude warning once */
 		}
 	}
 }
@@ -208,13 +259,23 @@ CodeStore(ds, tp)
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(&save);
-		if (properly(ds, tp)) {
+		switch (type_to_stack(tp)) {
+		case USE_BLM:
+		case USE_LOI_STI:
 			C_sti(tp->tp_size);
 			break;
+		case USE_LOS_STS:
+			CodeConst(tp->tp_size, (int) pointer_size);
+			C_sts(pointer_size);
+			break;
+		case USE_LOAD_STORE:
+			CodeConst(tp->tp_size, (int) pointer_size);
+			C_cal("_store");
+			CodeConst(pointer_size + pointer_size + WA(tp->tp_size),
+			  	(int) pointer_size);
+			C_ass(pointer_size);
+			break;
 		}
-		C_loc(tp->tp_size);
-		C_cal("_store");
-		C_asp(2 * word_size + WA(tp->tp_size));
 		break;
 
 	case DSG_INDEXED:
@@ -232,6 +293,9 @@ CodeCopy(lhs, rhs, sz, psize)
 	register t_desig *lhs, *rhs;
 	arith sz, *psize;
 {
+	/*	Do part of a copy, which is assumed to be "reasonable",
+		so that it can be done with LOI/STI or BLM.
+	*/
 	t_desig l, r;
 
 	l = *lhs; r = *rhs;
@@ -239,9 +303,15 @@ CodeCopy(lhs, rhs, sz, psize)
 	lhs->dsg_offset += sz;
 	rhs->dsg_offset += sz;
 	CodeAddress(&r);
-	C_loi(sz);
-	CodeAddress(&l);
-	C_sti(sz);
+	if (sz <= dword_size) {
+		C_loi(sz);
+		CodeAddress(&l);
+		C_sti(sz);
+	}
+	else {
+		CodeAddress(&l);
+		C_blm(sz);
+	}
 }
 
 CodeMove(rhs, left, rtp)
@@ -249,53 +319,42 @@ CodeMove(rhs, left, rtp)
 	register t_node *left;
 	t_type *rtp;
 {
-	register t_desig *lhs = new_desig();
-	register t_type *tp = left->nd_type;
-	int	loadedflag = 0;
-
 	/*	Generate code for an assignment. Testing of type
 		compatibility and the like is already done.
 		Go through some (considerable) trouble to see if a BLM can be
 		generated.
 	*/
+	register t_desig *lhs = new_desig();
+	register t_type *tp = left->nd_type;
 
 	ChkForFOR(left);
 	switch(rhs->dsg_kind) {
 	case DSG_LOADED:
 		CodeDesig(left, lhs);
 		if (rtp->tp_fund == T_STRING) {
+			/* size of a string literal fits in an
+			   int of size word_size
+			*/
 			CodeAddress(lhs);
 			C_loc(rtp->tp_size);
 			C_loc(tp->tp_size);
 			C_cal("_StringAssign");
-			C_asp(word_size << 2);
+			C_asp(pointer_size + pointer_size + dword_size);
 			break;
 		}
 		CodeStore(lhs, tp);
 		break;
-	case DSG_PLOADED:
-	case DSG_PFIXED:
-		CodeAddress(rhs);
-		if ((int) (tp->tp_size) % (int) word_size == 0 &&
-		    tp->tp_align >= (int) word_size) {
-			CodeDesig(left, lhs);
-			CodeAddress(lhs);
-			C_blm(tp->tp_size);
-			break;
-		}
-		CodeValue(rhs, tp);
-		CodeDStore(left);
-		break;
 	case DSG_FIXED:
-		CodeDesig(left, lhs);
 		if (lhs->dsg_kind == DSG_FIXED &&
+		    fit(tp->tp_size, (int) word_size) &&
 		    (int) (lhs->dsg_offset) % (int) word_size ==
 		    (int) (rhs->dsg_offset) % (int) word_size) {
 			register int sz;
 			arith size = tp->tp_size;
 
+			CodeDesig(left, lhs);
 			while (size &&
-			       (sz = ((int)(lhs->dsg_offset) % (int)word_size))) {
+			       (sz = ((int)(lhs->dsg_offset)%(int)word_size))) {
 				/*	First copy up to word-aligned
 					boundaries
 				*/
@@ -306,19 +365,13 @@ CodeMove(rhs, left, rtp)
 			if (size > 3*dword_size) {
 				/*	Do a block move
 				*/
-				t_desig l, r;
 				arith sz;
 
-				sz = (size / word_size) * word_size;
-				l = *lhs; r = *rhs;
-				CodeAddress(&r);
-				CodeAddress(&l);
-				C_blm((arith) sz);
-				rhs->dsg_offset += sz;
-				lhs->dsg_offset += sz;
-				size -= sz;
+				sz = size - size % word_size;
+				CodeCopy(lhs, rhs, sz, &size);
 			}
-			else for (sz = (int) dword_size; sz; sz -= (int) word_size) {
+			else for (sz = (int) dword_size;
+				  sz; sz -= (int) word_size) {
 				while (size >= sz) {
 					/*	Then copy dwords, words.
 						Depend on peephole optimizer
@@ -337,36 +390,28 @@ CodeMove(rhs, left, rtp)
 			}
 			break;
 		}
-		if (lhs->dsg_kind == DSG_PLOADED ||
-		    lhs->dsg_kind == DSG_INDEXED) {
-			CodeAddress(lhs);
-			loadedflag = 1;
-		}
-		if ((int)(tp->tp_size) % (int) word_size == 0 &&
-		    tp->tp_align >= word_size) {
-			CodeAddress(rhs);
-			if (loadedflag) C_exg(pointer_size);
-			else CodeAddress(lhs);
+		/* Fall through */
+	case DSG_PLOADED:
+	case DSG_PFIXED:
+		CodeAddress(rhs);
+		CodeDesig(left, lhs);
+		CodeAddress(lhs);
+		switch (type_to_stack(tp)) {
+		case USE_BLM:
 			C_blm(tp->tp_size);
 			break;
-		}
-		{
-			arith tmp;
-			extern arith NewPtr();
-
-			if (loadedflag) {	
-				tmp = NewPtr();
-				lhs->dsg_offset = tmp;
-				lhs->dsg_name = 0;
-				lhs->dsg_kind = DSG_PFIXED;
-				lhs->dsg_def = 0;
-				C_stl(tmp);		/* address of lhs */
-			}
-			CodeValue(rhs, tp);
-			CodeStore(lhs, tp);
-			if (loadedflag) FreePtr(tmp);
+		case USE_LOS_STS:
+			CodeConst(tp->tp_size, (int) pointer_size);
+			C_bls(pointer_size);
+			break;
+		case USE_LOAD_STORE:
+		case USE_LOI_STI:
+			CodeConst(tp->tp_size, (int) pointer_size);
+			C_cal("_blockmove");
+			C_asp(3 * pointer_size);
 			break;
 		}
+		break;
 	default:
 		crash("CodeMove");
 	}
@@ -397,7 +442,9 @@ CodeAddress(ds)
 		break;
 		
 	case DSG_PFIXED:
-		DoLoad(ds, word_size);
+		if (! DoLoad(ds, pointer_size)) {
+			assert(0);
+		}
 		break;
 
 	case DSG_INDEXED:
@@ -582,13 +629,18 @@ CodeDesig(nd, ds)
 
 			df = nd->nd_left->nd_def;
 			if (proclevel > df->df_scope->sc_level) {
-				C_lxa((arith) (proclevel - df->df_scope->sc_level));
-				C_adp(df->var_off + pointer_size);
+			    C_lxa((arith) (proclevel - df->df_scope->sc_level));
+			    C_adp(df->var_off + pointer_size);
 			}
 			else	C_lal(df->var_off + pointer_size);
 		}
 		else	{
+			C_loc(nd->nd_left->nd_type->arr_low);
+			C_sbu(int_size);
 			c_lae_dlb(nd->nd_left->nd_type->arr_descr);
+		}
+		if (options['A']) {
+			C_cal("rcka");
 		}
 		ds->dsg_kind = DSG_INDEXED;
 		break;

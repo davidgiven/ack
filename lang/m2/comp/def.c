@@ -256,7 +256,7 @@ DeclProc(type, id)
 			df->for_name = id->id_text;
 		}
 		else {
-			sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
+			sprint(buf,"_%s_%s",CurrentScope->sc_name,id->id_text);
 			df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
 		}
 		if (CurrVis == Defined->mod_vis) {

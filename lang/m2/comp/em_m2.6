@@ -68,6 +68,12 @@ This is useful for interpreters that use the "real" MIN(INTEGER) to
 indicate "undefined".
 .IP \fB-R\fR
 disable all range checks.
+.IP \fB-A\fR
+enable extra array bound checks, for machines that do not implement the
+EM ones.
+.IP \fB-U\fR
+allow for underscores within identifiers. Identifiers may not start with
+an underscore, even if this flag is given.
 .IP \fB-3\fR
 only accept Modula-2 programs that strictly conform to [1].
 .LP

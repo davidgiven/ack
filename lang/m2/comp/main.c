@@ -16,6 +16,7 @@
 #include	<em_label.h>
 #include	<em_code.h>
 #include	<alloc.h>
+#include	<assert.h>
 
 #include	"strict3rd.h"
 #include	"input.h"
@@ -196,7 +197,9 @@ AddStandards()
 	static t_token nilconst = { INTEGER, 0};
 
 	for (p = stdproc; p->st_nam != 0; p++) {
-		Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con);
+		if (! Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con)) {
+			assert(0);
+		}
 	}
 
 	EnterType("CHAR", char_type);
@@ -229,8 +232,12 @@ do_SYSTEM()
 	EnterType("WORD", word_type);
 	EnterType("BYTE", byte_type);
 	EnterType("ADDRESS",address_type);
-	Enter("ADR", D_PROCEDURE, std_type, S_ADR);
-	Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
+	if (! Enter("ADR", D_PROCEDURE, std_type, S_ADR)) {
+		assert(0);
+	}
+	if (! Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE)) {
+		assert(0);
+	}
 	if (!InsertText(systemtext, sizeof(systemtext) - 1)) {
 		fatal("could not insert text");
 	}

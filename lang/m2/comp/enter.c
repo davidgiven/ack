@@ -52,7 +52,9 @@ EnterType(name, type)
 		"type" in the Current Scope.
 	*/
 
-	Enter(name, D_TYPE, type, 0);
+	if (! Enter(name, D_TYPE, type, 0)) {
+		assert(0);
+	}
 }
 
 EnterEnumList(Idlist, type)
@@ -158,7 +160,7 @@ EnterVarList(Idlist, type, local)
 				df->var_name = df->df_idf->id_text;
 			}
 			else {
-				sprint(buf,"%s_%s", sc->sc_scope->sc_name,
+				sprint(buf,"_%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
 				df->var_name = Salloc(buf,
 						(unsigned)(strlen(buf)+1));
@@ -473,7 +475,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 			module_name);
 			df->df_flags |= D_QEXPORTED;
 		}
-		DoImport(df, CurrentScope);
+		if (! DoImport(df, CurrentScope)) assert(0);
 	}
 
 	if (!forwflag) FreeNode(FromId);
@@ -493,10 +495,10 @@ EnterImportList(idlist, local)
 	f = file_info;
 
 	for (; idlist; idlist = idlist->nd_left) {
-		DoImport(local ?
+		if (! DoImport(local ?
 			   ForwDef(idlist, sc) :
 			   GetDefinitionModule(idlist->nd_IDF, 1), 
-			 CurrentScope);
+			 CurrentScope)) assert(0);
 		file_info = f;
 	}
 }
