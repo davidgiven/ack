@@ -4,6 +4,12 @@ DEFINITION MODULE Processes;
   From:		"Programming in Modula-2", 3rd, corrected edition, by N. Wirth
   Version:	$Header$
 *)
+(*
+  As discussed in "Unfair Process Scheduling in Modula-2", by
+  D. Hemmendinger, SIGplan Notices Volume 23 nr 3, march 1988,
+  the scheduler in this module is unfair, in that in some circumstances
+  ready-to-run processes never get a turn.
+*)
 
 	TYPE SIGNAL;
 
