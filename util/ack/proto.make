@@ -162,7 +162,7 @@ rmach.$(SUF):	$(SRC_DIR)/dmach.h
 rmach.$(SUF):	$(SRC_DIR)/grows.h
 rmach.$(SUF):	$(SRC_DIR)/trans.h
 rmach.$(SUF):	$(SRC_DIR)/list.h
-rmach.$(SUF):	$(HDIR)/em_path.h
+rmach.$(SUF):	$(TARGET_HOME)/config/em_path.h
 rmach.$(SUF):	$(SRC_DIR)/ack.h
 run.$(SUF):	$(SRC_DIR)/run.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/run.c
@@ -177,7 +177,7 @@ grows.$(SUF):	$(SRC_DIR)/grows.h
 grows.$(SUF):	$(SRC_DIR)/ack.h
 files.$(SUF):	$(SRC_DIR)/files.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/files.c
-files.$(SUF):	$(HDIR)/em_path.h
+files.$(SUF):	$(TARGET_HOME)/config/em_path.h
 files.$(SUF):	$(SRC_DIR)/data.h
 files.$(SUF):	$(SRC_DIR)/grows.h
 files.$(SUF):	$(SRC_DIR)/trans.h
