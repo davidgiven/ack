@@ -144,3 +144,7 @@
 #undef REGCOUNT		1	/* count occurrences for register messages */
 
 
+!File: dbsymtab.h
+#undef DBSYMTAB		1	/* debugger support */
+
+
