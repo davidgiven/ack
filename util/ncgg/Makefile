@@ -6,7 +6,8 @@ SOURCES=*.h cgg.y scan.l cvtkeywords keywords coerc.c emlookup.c error.c expr.c 
 EMHOME=../..
 EMH=$(EMHOME)/h
 MANDIR=$(EMHOME)/man
-CFLAGS=-O -I$(EMH)
+INCLUDES=-I$(EMH)
+CFLAGS=-O $(INCLUDES)
 YFLAGS=-v -d
 LDFLAGS=-i
 
@@ -39,7 +40,7 @@ debugoutput.c:	output.c
 	cp output.c debugoutput.c
 
 lint:	$(CFILES)
-	lint $(CFLAGS) $(CFILES)
+	lint $(INCLUDES) $(CFILES)
 	touch lint
 
 clean:
