@@ -1,4 +1,4 @@
-# $Header$
+/* $Header$ */
 loc adi loc sbi $2==w && $4==w: loc $1-$3 adi w
 ldc adi ldc sbi $2==2*w && $4==2*w:     ldc $1-$3 adi 2*w
 loc adi loc adi $2==w && $4==w: loc $1+$3 adi w
