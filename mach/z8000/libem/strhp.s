@@ -8,8 +8,11 @@
 strhp:
 	popl	RR2, *RR14
 	pop	R0, *RR14
-	ld	reghp, R0	!heappointer must be < stackpointer.
 	cp	R0, R15
-	jp	ULT, *RR2
+	jp	ULT, 1f
 	push	*RR14, $EHEAP
-	jr	fatal
+	calr	trp
+	jp	*RR2
+1:
+	ld	reghp, R0
+	jp	*RR2
