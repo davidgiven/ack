@@ -1422,11 +1422,12 @@ loc loc cui	| |		|		| loc $1 loc $2 cuu	|
 loc loc cuu $1==2 && $2==4      | | | {CONST2,0} | |
 loc loc cuu $1==4 && $2==2      | source2 |             |   | |
 loc loc cuu $1==$2 | |		|		| |
-loc loc cfi     | |             |               | loc $1 loc $2 cfu     |
-loc loc cfu $1==4 && $2==2      | FLT_REG |     | {ftoint,%[1]} | |
-loc loc cfu $1==4 && $2==4      | FLT_REG |     | {ftolong,%[1]} | |
-loc loc cfu $1==8 && $2==2      | DBL_REG |     | {ftoint,%[1]} | |
-loc loc cfu $1==8 && $2==4      | DBL_REG |     | {ftolong,%[1]} | |
+loc loc cfu $1==4		| FLT_REG |	| {ftolong,%[1]} | loc 4 loc $2 cuu |
+loc loc cfu $1==8		| DBL_REG |	| {ftolong,%[1]} | loc 4 loc $2 cuu |
+loc loc cfi $1==4 && $2==2      | FLT_REG |     | {ftoint,%[1]} | |
+loc loc cfi $1==4 && $2==4      | FLT_REG |     | {ftolong,%[1]} | |
+loc loc cfi $1==8 && $2==2      | DBL_REG |     | {ftoint,%[1]} | |
+loc loc cfi $1==8 && $2==4      | DBL_REG |     | {ftolong,%[1]} | |
 loc loc cif $1==2 && $2==4      | source2 |
 			allocate(FLT_REG)
 			"movif %[1],%[a]"

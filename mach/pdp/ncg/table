@@ -1304,18 +1304,24 @@ pat loc loc cuu $1==2 && $2==4			leaving loc 0
 pat loc loc cuu $1==4 && $2==2
 with src2
 
-pat loc loc cfi					leaving loc $1 loc $2 cfu
+pat loc loc cfu $1==4
+with FLTREG				yields {ftolong,%1}
+						leaving loc 4 loc $2 cuu
 
-pat loc loc cfu $1==4 && $2==2
+pat loc loc cfu $1==8
+with DBLREG				yields {ftolong,%1}
+						leaving loc 4 loc $2 cuu
+
+pat loc loc cfi $1==4 && $2==2
 with FLTREG				yields {ftoint,%1}
 
-pat loc loc cfu $1==4 && $2==4
+pat loc loc cfi $1==4 && $2==4
 with FLTREG				yields {ftolong,%1}
 
-pat loc loc cfu $1==8 && $2==2
+pat loc loc cfi $1==8 && $2==2
 with DBLREG				yields {ftoint,%1.1} 
 
-pat loc loc cfu $1==8 && $2==4
+pat loc loc cfi $1==8 && $2==4
 with DBLREG				yields {ftolong,%1.1}
 
 pat loc loc cif $1==2 && $2==4
