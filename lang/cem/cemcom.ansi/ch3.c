@@ -531,7 +531,7 @@ legal_mixture(tp, otp, diag)
 	}
 
 	if (prot->pl_flag & PL_ELLIPSIS) {
-		if (diag && !(prot->pl_flag & PL_ERRGIVEN)) {
+		if (prot->pl_flag & PL_ERRGIVEN) {
 			if (pl)
 				error("illegal ellipsis terminator");
 			else	error("ellipsis terminator in previous (prototype) declaration");
