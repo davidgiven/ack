@@ -6,7 +6,7 @@ MON="PREF=mon" "SRC=lang/cem/libcc/mon"
 LIBM="PREF=m" "SRC=lang/cem/libcc/libm"
 LIBLN="PREF=ln" "SRC=lang/cem/libcc/libln"
 
-install:	cpstdio cpgen cpmon
+install:	cpstdio cpgen 
 
 cpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tailcp
