@@ -78,7 +78,7 @@ oper	:	NOOP_1
 	|	LSHFT	ea_1 ',' R32 ',' ea_2
 			{	extshft($1, $4);}
 	|	EXTEND R32 ',' ea_2
-			{	emit1(0xF); emit1($1|1); ea_2($2<<3);}
+			{	emit1(0xF); emit1($1); ea_2($2<<3);}
 	|	EXTOP R32 ',' ea_2
 			{	emit1(0xF); emit1($1); ea_2($2<<3);}
 	|	EXTOP1 ea_1

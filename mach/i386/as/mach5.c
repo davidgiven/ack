@@ -14,13 +14,7 @@ ea_1(param) {
 		return;
 	}
 	if (is_reg(reg_1)) {
-		switch(reg_1&07) {
-		case 4:
-			emit1(0300 | param | 04);
-			emit1(0300 | 0100);
-		default:
-			emit1(0300 | param | (reg_1&07));
-		}
+		emit1(0300 | param | (reg_1&07));
 		return;
 	}
 	if (rm_1 == 04) {
@@ -142,6 +136,7 @@ ebranch(opc,exp)
 	register long dist;
 	int saving = address_long ? 4 : 2;
 
+	if (opc == 0353) saving--;
 	dist = exp.val - (DOTVAL + 2);
 	if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))
 		dist -= DOTGAIN;
@@ -149,14 +144,24 @@ ebranch(opc,exp)
 	if ((exp.typ & ~S_DOT) != DOTTYP)
 		sm = 0;
 	if ((sm = small(sm,saving)) == 0) {
-		emit1(0xF);
-		emit1(opc | 0x80);
-		dist -= 2;
+		if (opc == 0353) {
+			emit1(0xe9);
+		}
+		else {
+			emit1(0xF);
+			emit1(opc | 0x80);
+		}
+		dist -= saving;
 		exp.val = dist;
-		adsize_exp(exp);
+		adsize_exp(exp, RELPC);
 	}
 	else {
-		emit1(opc | 0x70);
+		if (opc == 0353) {
+			emit1(opc);
+		}
+		else {
+			emit1(opc | 0x70);
+		}
 		emit1((int)dist);
 	}
 }
@@ -237,12 +242,12 @@ opsize_exp(exp, nobyte)
 	}
 }
 
-adsize_exp(exp)
+adsize_exp(exp, relpc)
 	expr_t exp;
 {
 	if (address_long) {
 #ifdef RELOCATION
-		newrelo(exp.typ, RELO4 | RELPC);
+		newrelo(exp.typ, RELO4 | relpc);
 #endif
 		emit4((long)(exp.val));
 	}
@@ -251,7 +256,7 @@ adsize_exp(exp)
 			warning("offset does not fit in 2 bytes; remove prefix");
 		}
 #ifdef RELOCATION
-		newrelo(exp.typ, RELO2 | RELPC);
+		newrelo(exp.typ, RELO2 | relpc);
 #endif
 		emit2((int)(exp.val));
 	}
@@ -342,10 +347,10 @@ callop(opc)
 			RELOMOVE(relonami, rel_1);
 			ebranch(0353,exp_1);
 		} else {
-			exp_1.val -= (DOTVAL+3);
+			exp_1.val -= (DOTVAL+3 + (address_long ? 2 : 0));
 			emit1(opc>>8);
 			RELOMOVE(relonami, rel_1);
-			adsize_exp(exp_1);
+			adsize_exp(exp_1, RELPC);
 		}
 	} else {
 		emit1(0377); ea_1(opc&070);
@@ -419,12 +424,12 @@ mov(opc)
 		/* from accumulator to memory  (displacement) */
 		emit1(0242 | opc);
 		RELOMOVE(relonami, rel_1);
-		adsize_exp(exp_1);
+		adsize_exp(exp_1, 0);
 	} else if (rm_2 == 05 && is_acc(reg_1)) {
 		/* from memory (displacement) to accumulator */
 		emit1(0240 | opc);
 		RELOMOVE(relonami, rel_2);
-		adsize_exp(exp_2);
+		adsize_exp(exp_2, 0);
 	} else if (is_reg(reg_2)) {
 		/* from register to memory or register */
 		emit1(0210 | opc); ea_1((reg_2&7)<<3);
@@ -520,7 +525,7 @@ imul(reg)
 		if (reg == 0) {
 			/* how lucky we are, the target is the ax register */
 			emit1(0367);
-			ea_2(06 << 3);
+			ea_2(050);
 		}
 		else {
 			/* another register ... */
