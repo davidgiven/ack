@@ -22,6 +22,7 @@ int d;
 	char *s;
 	swtxt();
 
+	C_jump(extnd_main( d));
 	symbol_definition(s = extnd_part( d));
 	set_local_visible(s);
 }
@@ -31,9 +32,12 @@ C_endpart( d)
 int d;
 
 {
+	char *s;
 	swtxt();
 
 	C_jump(extnd_cont( d));
+	symbol_definition(s = extnd_main( d));
+	set_local_visible(s);
 }
 
 
