@@ -222,15 +222,22 @@ preprocess(fn)
 					if (tg < maxpos) {
 						cpy;
 					}
+					else break;
 					load;
 				}
 			endidf:
 				PushBack();
 				*tg = '\0';	/* mark the end of the identifier */
 				idef = findidf(buf);
-				if ((idef && idef->id_macro && replace(idef))) {
-					LoadChar(c);
-					continue;
+				if (idef && idef->id_macro) {
+					do {
+						LoadChar(c);
+					} while  (in_idf(c));
+					PushBack();
+					if (replace(idef)) {
+						LoadChar(c);
+						continue;
+					}
 				}
 			nomac:
 				*tg = 0;
