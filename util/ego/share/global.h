@@ -12,8 +12,8 @@ extern int ws;		/* word size	*/
 /* number of bits in a byte */
 #define BYTELENGTH 8
 
-/* number of bits in a word */
-#define WORDLENGTH 32
+/* number of bits in a word, defined in automatically generated file */
+#include "../share/wordlen.h"
 
 #if BYTELENGTH==8
 #define DIVBL(a)	((a) >> 3)
