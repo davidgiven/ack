@@ -1,4 +1,4 @@
-: '$Header$'
+: '$Id$'
 
 : Resolve name clashes in the files on the argument list. If these
 : files reside in another directory, a copy is made in the current

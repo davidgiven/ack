@@ -1,4 +1,4 @@
-: '$Header$'
+: '$Id$'
 
 : Create a lint library file. The name of the library file is constructed
 : from the first argument. The second argument indicates the directory where

@@ -1,4 +1,4 @@
-: $Header$
+: $Id$
 
 : remove dependencies from a makefile, write result on standard output.
 : we cannot do this directly in a makefile because some make versions
