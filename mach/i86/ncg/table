@@ -450,22 +450,53 @@ pat ldc					yields {ANYCON,highw($1)}
 
 pat lol					yields {LOCAL,$1,2}
 
+pat stl lol $1==$2
+#ifdef REGVARS
+	&& inreg($1) <= 0
+#endif
+						leaving dup 2 stl $1
+
+pat sdl ldl $1==$2				leaving dup 4 sdl $1
+
 pat lol lol $1==$2
 #ifdef REGVARS
 	    && inreg($1) <= 0
 #endif
-  uses GENREG = {LOCAL, $1, 2}		yields %a %a
+						leaving lol $1 dup 2
+
+#ifdef REGVARS
+pat lol lol stl $1==$2 && inreg($1) <= 0 && inreg($3) > 0
+kills regvar($3)
+gen	move {LOCAL,$1,2}, {LOCAL,$3,2}
+					yields {LOCAL,$3,2}
+#endif
 
 pat loe					yields {EXTERN2,$1}
 
-pat loe loe $1==$2
-  uses GENREG = {EXTERN2, $1}		yields %a %a
+pat ste loe $1==$2				leaving dup 2 ste $1
+
+pat sde lde $1==$2				leaving dup 4 sde $1
+
+pat loe loe $1==$2				leaving loe $1 dup 2
+
+#ifdef REGVARS
+pat loe loe stl $1==$2 && inreg($3) > 0
+kills regvar($3)
+gen	move {EXTERN2,$1}, {LOCAL,$3,2}
+					yields {LOCAL,$3,2}
+#endif
 
 #ifdef REGVARS
 pat lil inreg($1) > 0			yields {ind_reg2, regvar($1)}
 #endif
 pat lil	
   uses ADDREG={ind_regoff2,bp,$1}    	yields {ind_reg2,%a}
+
+pat lil lil $1==$2				leaving lil $1 dup 2
+
+pat lil lil stl $1==$2				leaving lil $1 stl $3 lol $3
+
+pat sil lil $1==$2				leaving dup 2 lil $1
 
 pat lof	
   with exact reg_off		yields {ind_regoff2,%1.reg,%1.off+$1}
@@ -599,7 +630,7 @@ pat stl inreg($1)==reg_any
 pat stl
   with regorconst
   kills indexed,locals %ind>=$1 && %ind<$1+2
-  gen move %1,{ind_regoff2,bp,$1}
+  gen move %1,{LOCAL,$1,2}
   with exact STACK
   kills ALL
   gen pop {ind_regoff2,bp,$1}
@@ -799,7 +830,13 @@ pat sdf
  ****************************************************************/
 
 pat adi $1==2
-with EXACT REG rmorconst
+#ifdef REGVARS
+with exact ANYCON IREG
+				yields {Rreg_off,%2,%1.val}
+with exact IREG ANYCON
+				yields {Rreg_off,%1,%2.val}
+#endif
+with REG rmorconst
   gen add %1,%2			yields %1
 with rmorconst REG
   gen add %2,%1			yields %2
@@ -1121,6 +1158,12 @@ with exact RADDREG	yields {Rreg_off, %1, $1}
 with REG
   gen add %1,{ANYCON,$1}	yields %1
 
+pat ads stl $1==2			leaving adi 2 stl $2
+pat ads ste $1==2			leaving adi 2 ste $2
+pat ads sil $1==2			leaving adi 2 sil $2
+pat ads lol stf $1==2			leaving adi 2 lol $2 stf $3
+pat ads loe stf $1==2			leaving adi 2 loe $2 stf $3
+
 pat ads $1==2
 with exact ANYCON Rreg_off
 			yields {Rreg_off,%2.reg,%2.off+%1.val}
@@ -1162,9 +1205,9 @@ with exact rmorconst ADDR_EXTERN
 with exact ADDR_EXTERN rmorconst
   uses reusing %2,ADDREG=%2
 			yields {Xreg_off,%a,%1.off}
-with rm ADDREG
+with rmorconst ADDREG
   gen add %2,%1		yields %2
-with ADDREG rm
+with ADDREG rmorconst
   gen add %1,%2		yields %1
 
 pat sbs $1==2
@@ -1340,6 +1383,21 @@ gen neg {LOCAL, $1, 2}
  
 pat lol ads stl $1==$3 && $2==2		leaving lol $1 adi $2 stl $1
 
+pat lol lol adp stl loi stl $1==$2 && $2==$4 && $5<=2
+					leaving lol $1 loi $5 stl $6 lol $2 adp $3 stl $4
+
+#ifdef REGVARS
+pat lol lol adp stl loi $1==$2 && $2==$4 && $5==1 && inreg($1) > 0
+uses REG1 = {ind_reg1, regvar($1)}
+				yields %a
+					leaving lol $2 adp $3 stl $4
+
+pat lol lol adp stl loi $1==$2 && $2==$4 && $5==2 && inreg($1) > 0
+uses REG = {ind_reg2, regvar($1)}
+				yields %a
+					leaving lol $2 adp $3 stl $4
+#endif
+
 pat lol lol adp stl $1==$2 && $2==$4
 uses ADDREG={LOCAL,$1,2}	yields %a
 					leaving lol $2 adp $3 stl $2
@@ -1428,6 +1486,29 @@ gen neg {ind_reg2, %a}
 pat lil ads sil $1==$3 && $2==2		leaving lil $1 adi $2 sil $3
 
 #ifdef REGVARS
+pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_any
+uses ADDREG={ind_reg2, regvar($1)}
+				yields %a
+					leaving lil $1 adp $3 sil $4
+
+pat lil lil inc sil $1==$2 && $1==$4 && inreg($1)==reg_any
+uses REG={ind_reg2, regvar($1)}
+				yields %a
+					leaving lil $1 inc sil $4
+
+pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_any
+uses REG={ind_reg2, regvar($1)}
+				yields %a
+					leaving lil $1 dec sil $4
+
+pat lil inc sil $1==$3 && inreg($1)==reg_any
+kills referals
+gen inc {ind_reg2, regvar($1)}
+
+pat lil dec sil $1==$3 && inreg($1)==reg_any
+kills referals
+gen dec {ind_reg2, regvar($1)}
+
 pat lil adp sil $1==$3 && $2==1 && inreg($1)==reg_any
 kills referals
 gen inc {ind_reg2, regvar($1)}
@@ -1533,6 +1614,24 @@ pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2
 			leaving lol $1 lof $2 adi $3 lol $4 stf $5
 
 #ifdef REGVARS
+pat lol lof lol lof adp lol stf 
+	$1==$3 && $1==$6 && $2==$4 && $2==$7 && inreg($1)==reg_any
+uses ADDREG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 adp $5 lol $6 stf $7
+
+pat lol lof lol lof inc lol stf
+	$1==$3 && $1==$6 && $2==$4 && $2==$7 && inreg($1)==reg_any
+uses REG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 adp 1 lol $6 stf $7
+
+pat lol lof lol lof dec lol stf
+	$1==$3 && $1==$6 && $2==$4 && $2==$7 && inreg($1)==reg_any
+uses REG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 adp (0-1) lol $6 stf $7
+
 pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1 && inreg($1)==reg_any
 kills referals
 gen inc {ind_regoff2, regvar($1), $2}
@@ -1646,10 +1745,6 @@ pat loe dee $1==$2
 uses ADDREG={EXTERN2,$1}	yields %a
 					leaving dee $1
 
-pat loe adp ste $1==$3
-kills indirects
-gen add {EXTERN2, $1}, {ANYCON,$2}
-
 pat loe adp ste $1==$3 && $2==1
 kills indirects
 gen inc {EXTERN2, $1}
@@ -1657,6 +1752,10 @@ gen inc {EXTERN2, $1}
 pat loe adp ste $1==$3 && $2==0-1
 kills indirects
 gen dec {EXTERN2, $1}
+
+pat loe adp ste $1==$3
+kills indirects
+gen add {EXTERN2, $1}, {ANYCON,$2}
 
 pat loe and ste $1==$3 && $2==2
 with regorconst
@@ -1746,6 +1845,11 @@ pat cuu
 with CXREG DXREG ACC
 kills ALL
 gen joehoe {label,".cuu"}		yields %3
+
+pat loc loc cii loc and zeq $4<256 && $4>=0 && $5==2 && $1==1 && $2==2
+		leaving loc $4 and $5 zeq $6
+pat loc loc cii loc and zne $4<256 && $4>=0 && $5==2 && $1==1 && $2==2
+		leaving loc $4 and $5 zne $6
 
 pat loc loc cii $1==1 && $2==2
 with ACC
@@ -1838,7 +1942,7 @@ uses REG={ANYCON,0}
  ********************************************************************/
 
 pat and $1==2
-with EXACT REG rmorconst
+with REG rmorconst
   gen and %1,%2				yields %1
 with rmorconst REG
   gen and %2,%1				yields %2
@@ -1862,7 +1966,7 @@ kills ALL
   gen joehoe {label, ".and"}
 
 pat ior $1==2
-with EXACT REG rmorconst
+with REG rmorconst
   gen or %1,%2				yields %1
 with rmorconst REG
   gen or %2,%1				yields %2
@@ -1886,7 +1990,7 @@ kills ALL
   gen joehoe {label, ".ior"}
 
 pat xor $1==2
-with EXACT REG rmorconst
+with REG rmorconst
   gen xor %1,%2				yields %1
 with rmorconst REG
   gen xor %2,%1				yields %2
@@ -2268,7 +2372,7 @@ uses REG = {ANYCON,0}
       jxx[1] {label,1f}
       inc %a
       1:                            yields %a
-with EXACT rm regorconst
+with rm regorconst
 uses REG = {ANYCON,0}
   gen cmp %1,%2
       jxx[2] {label,1f}
@@ -2294,8 +2398,7 @@ proc cmxzxx example cmp zlt
 with regorconst rm STACK
   gen cmp %2,%1
       jxx[1] {label,$2}
-with EXACT rm regorconst
-  kills ALL
+with rm regorconst STACK
   gen cmp %1,%2
       jxx[2] {label,$2}
 
@@ -2311,8 +2414,14 @@ pat cms zne $1==2   call cmxzxx("jne","jne")
 pat ldc cmi zlt highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst	yields %2	leaving zlt $3
 
+pat ldc cmi tlt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst	yields %2	leaving tlt
+
 pat ldc cmi zge highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst	yields %2	leaving zge $3
+
+pat ldc cmi tge highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst	yields %2	leaving tge $3
 
 pat ldc cms zeq $2==4 && loww($1)==0 && highw($1)==0
 with rmorconst REG STACK
@@ -2386,8 +2495,7 @@ pat and zeq $1==2 call andzxx("je")
 pat and zne $1==2 call andzxx("jne")
 
 proc locandzxx example loc and zeq
-with exact rm12
-  kills ALL
+with rm12 STACK
   gen testb %1,{ANYCON,$1}
       jxx* {label,$3}
 with GENREG STACK
@@ -2402,8 +2510,7 @@ pat loc and zeq $1<256 && $1>=0 && $2==2 call locandzxx("je")
 pat loc and zne $1<256 && $1>=0 && $2==2 call locandzxx("jne")
 
 proc locbxx example loc beq
-with exact rm1
-kills ALL
+with rm1 STACK
   gen cmpb %1,{ANYCON,$1}
       jxx* {label,$2}
 with rm STACK
@@ -2414,8 +2521,7 @@ pat loc beq $1<256 && $1>=0 call locbxx("je")
 pat loc bne $1<256 && $1>=0 call locbxx("jne")
 
 proc loccmuzxx example loc cmu zeq
-with exact rm1
-kills ALL
+with rm1 STACK
   gen cmpb %1,{ANYCON,$1}
       jxx* {label,$3}
 with rm STACK
@@ -2435,11 +2541,9 @@ pat bra
 
 proc bxx example blt
 with regorconst rm STACK
-  kills ALL
   gen cmp %2,%1
       jxx[1] {label,$1}
-with EXACT rm regorconst
-  kills ALL
+with rm regorconst STACK
   gen cmp %1,%2
       jxx[2] {label,$1}
 
@@ -2483,6 +2587,13 @@ pat cai
   with rm
   kills ALL
   gen joehoe %1
+
+#ifdef REGVARS
+pat lfr adi stl $1==2 && $2==2 && inreg($3) > 0
+  kills ALL
+  gen pop {LOCAL,$3,2}
+      add {LOCAL,$3,2}, ax
+#endif
 
 pat lfr $1==2			yields ax
 
