@@ -13,7 +13,7 @@ DEF	=
 MDIR	= $(SRC_HOME)/mach/$(MACH)/as
 
 FFLAG	=
-INCL	= -I$(CDIR) -I$(MDIR) -I$h $(DEF)
+INCL	= -I$(CDIR) -I$(MDIR) -I$h -I. $(DEF)
 CFLAGS	= $(FFLAG) $(INCL) $(COPTIONS)
 YFLAGS	= -d
 LDFLAGS	= $(FFLAG) $(LDOPTIONS)
