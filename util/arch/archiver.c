@@ -14,6 +14,7 @@ static char RcsId[] = "$Header$";
  *	  t: print contents of archive
  *	  p: print named files
  *	  l: temporaries in current directory instead of /tmp
+ *	  c: don't give "create" message
  */
 
 #include <sys/types.h>
@@ -68,6 +69,7 @@ BOOL show_fl;
 BOOL pr_fl;
 BOOL rep_fl;
 BOOL del_fl;
+BOOL nocr_fl;
 BOOL local_fl;
 
 int ar_fd;
@@ -86,9 +88,9 @@ usage()
 	error(TRUE, "usage: %s %s archive [file] ...\n",
 		progname,
 #ifdef AAL
-		"[adrtxvl]"
+		"[acdrtxvl]"
 #else
-		"[adprtxvl]"
+		"[acdprtxvl]"
 #endif
 		);
 }
@@ -148,7 +150,7 @@ register int mode;
   if ((fd = open(name, mode)) < 0) {
 	if (mode == APPEND) {
 		close(open_archive(name, CREATE));
-		error(FALSE, "%s: creating %s\n", progname, name);
+		if (!nocr_fl) error(FALSE, "%s: creating %s\n", progname, name);
 		return open_archive(name, APPEND);
 	}
 	error(TRUE, "cannot open %s\n", name);
@@ -192,6 +194,9 @@ char *argv[];
 			break;
 		case 'a' :
 			app_fl = TRUE;
+			break;
+		case 'c' :
+			nocr_fl = TRUE;
 			break;
 #ifndef AAL
 		case 'p' :
