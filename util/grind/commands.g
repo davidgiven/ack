@@ -19,6 +19,7 @@
 
 extern char	*Salloc();
 extern char	*strindex();
+extern char	*strcpy();
 extern FILE	*db_in;
 extern int	disable_intr;
 extern p_tree	run_command, print_command;

@@ -189,8 +189,8 @@ do_help(p)
 
 /* implementation of dump/restore commands */
 
-extern long	pointer_size;
 extern p_tree	get_from_item_list();
+extern t_addr	get_dump();
 
 struct dump {
   char	*globals, *stack;
@@ -209,12 +209,12 @@ do_dump(p)
 	error("could not allocate enough memory");
 	return;
   }
-  if (! get_dump(&d->mglobal, &d->globals, &d->mstack, &d->stack)) {
+  p->t_address = get_dump(&d->mglobal, &d->globals, &d->mstack, &d->stack);
+  if (! p->t_address) {
 	free((char *) d);
 	return;
   }
   p->t_args[0] = (struct tree *) d;
-  p->t_address = (t_addr) get_int(d->mglobal.m_buf+PC_OFF*pointer_size, pointer_size, T_UNSIGNED);
   add_to_item_list(p);
   d->next = last_dump;
   last_dump = d;
@@ -597,11 +597,11 @@ do_regs(p)
   }
   fprintf(db_out, "EM registers %d levels back:\n", n);
   fprintf(db_out, "\tLocalBase =\t0x%lx\n\tArgumentBase =\t0x%lx\n", 
-		(long) buf[LB_OFF], (long) buf[AB_OFF]);
+		(long) buf[0], (long) buf[1]);
   fprintf(db_out, "\tProgramCounter=\t0x%lx\n\tHeapPointer = \t0x%lx\n",
-		(long) buf[PC_OFF],
-		(long) buf[HP_OFF]);
-  fprintf(db_out, "\tStackPointer =\t0x%lx\n", (long) buf[SP_OFF]);
+		(long) buf[2],
+		(long) buf[3]);
+  fprintf(db_out, "\tStackPointer =\t0x%lx\n", (long) buf[4]);
 }
 
 /* ------------------------------------------------------------- */
@@ -623,8 +623,8 @@ do_where(p)
   if (p && p->t_ival < 0) {
 	for (;;) {
 		buf = get_EM_regs(i++);
-		if (! buf || ! buf[AB_OFF]) break;
-		PC = buf[PC_OFF];
+		if (! buf || ! buf[1]) break;
+		PC = buf[2];
 		sc = base_scope(get_scope_from_addr(PC));
 		if (! sc || sc->sc_start > PC) break;
 		if (interrupted) return;
@@ -640,8 +640,8 @@ do_where(p)
 
 	if (interrupted) return;
 	if (! (buf = get_EM_regs(i++))) break;
-	AB = buf[AB_OFF];
-	PC = buf[PC_OFF];
+	AB = buf[1];
+	PC = buf[2];
 	if (! AB) break;
 	sc = base_scope(get_scope_from_addr(PC));
 	if (! sc || sc->sc_start > PC) break;

@@ -53,12 +53,12 @@ get_addr(sym, psize)
 		if (! (EM_regs = get_EM_regs(i++))) {
 			return 0;
 		}
-		if (! EM_regs[AB_OFF]) {
+		if (! EM_regs[1]) {
 			error("%s not available", sym->sy_idf->id_text);
 			return 0;
 		}
-		sc = base_scope(get_scope_from_addr(EM_regs[PC_OFF]));
-		if (! sc || sc->sc_start > EM_regs[PC_OFF]) {
+		sc = base_scope(get_scope_from_addr(EM_regs[2]));
+		if (! sc || sc->sc_start > EM_regs[2]) {
 			error("%s not available", sym->sy_idf->id_text);
 			sc = 0;
 			return 0;
@@ -68,7 +68,7 @@ get_addr(sym, psize)
 
 	if (sym->sy_class == LOCVAR) {
 		/* Either local variable or value parameter */
-		return EM_regs[sym->sy_name.nm_value < 0 ? LB_OFF : AB_OFF] +
+		return EM_regs[sym->sy_name.nm_value < 0 ? 0 : 1] +
 				  (t_addr) sym->sy_name.nm_value;
 	}
 
@@ -87,7 +87,7 @@ get_addr(sym, psize)
 			error("could not allocate enough memory");
 			break;
 		}
-		if (! get_bytes(size, EM_regs[AB_OFF], AB)) {
+		if (! get_bytes(size, EM_regs[1], AB)) {
 			break;
 		}
 		if ((size = tp->ty_size) == 0) {

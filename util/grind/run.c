@@ -48,17 +48,46 @@ static int	uputm(), ugetm();
 static t_addr	curr_stop;
 p_tree		run_command;
 
+static
+ITOBUF(p, l, sz)
+  register char	*p;
+  long	l;
+  int sz;
+{
+  register int i;
+
+  p +=sz;
+  for (i = sz; i > 0; i--) {
+	*--p = l;
+	l >>= 8;
+  }
+}
+
+static long
+BUFTOI(p, sz)
+  register char	*p;
+  int sz;
+{
+  register long	l = 0;
+  register int i;
+
+  for (i = sz; i>0; i--) {
+	l = (l << 8) | (*p++ & 0377);
+  }
+  return l;
+}
+
 int
 init_run()
 {
   /* take file descriptors so that listing cannot take them */
   int i;
 
-  for (i = IN_FD; i <= OUT_FD; i++) close(i);
+  for (i = 3; i <= 6; i++) close(i);
   if (pipe(fild1) < 0 ||
       pipe(fild2) < 0 ||
-      fild1[0] != IN_FD ||
-      fild2[1] != OUT_FD) {
+      fild1[0] != 3 ||
+      fild2[1] != 6) {
 	return 0;
   }
   to_child = fild1[1];
@@ -189,7 +218,7 @@ start_child(p)
 		init_run();
 		return 0;
 	}
-	curr_stop = m.m_size;
+	curr_stop = BUFTOI(m.m_buf+1, (int) PS);
 	CurrentScope = get_scope_from_addr(curr_stop);
   }
   perform_items();
@@ -374,7 +403,7 @@ could_send(m, stop_message)
 			if (! level) {
 				child_interrupted = 0;
 				interrupted = 0;
-				stopped("interrupted", (t_addr) answer.m_size);
+				stopped("interrupted", (t_addr) BUFTOI(answer.m_buf+1, (int)PS));
 			}
 			return 1;
 		}
@@ -395,8 +424,8 @@ could_send(m, stop_message)
 		level--;
 		return 1;
 	}
-	a = answer.m_size;
-	type = answer.m_type;
+	a = BUFTOI(answer.m_buf+1, (int)PS);
+	type = answer.m_type & 0377;
 	if (m->m_type & M_DB_RUN) {
 		/* run command */
 		CurrentScope = get_scope_from_addr((t_addr) a);
@@ -408,7 +437,7 @@ could_send(m, stop_message)
 			   have gotten END_SS.
 			   So, continue.
 			*/
-			if ((m->m_type & ~ M_DB_SS) != M_CONT) {
+			if ((m->m_type & 0177) != M_CONT) {
 				m->m_type = M_CONT | (m->m_type & M_DB_SS);
 			}
 			continue;
@@ -437,8 +466,8 @@ getbytes(size, from, to, kind)
   struct message_hdr	m;
 
   m.m_type = kind;
-  m.m_size = size;
-  put_int(m.m_buf, pointer_size, (long)from);
+  ITOBUF(m.m_buf+1, size, (int) LS);
+  ITOBUF(m.m_buf+LS+1, (long)from, (int) PS);
 
   if (! could_send(&m, 0)) {
 	return 0;
@@ -452,7 +481,7 @@ getbytes(size, from, to, kind)
 	error("interrupted");
 	return 0;
   case M_DATA:
-  	return ureceive(to, answer.m_size);
+  	return ureceive(to, BUFTOI(answer.m_buf+1, (int)LS));
   default:
 	assert(0);
   }
@@ -476,7 +505,7 @@ get_string(size, from, to)
 {
   int retval = getbytes(size, from, to, M_GETSTR);
 
-  to[(int)answer.m_size] = 0;
+  to[(int)BUFTOI(answer.m_buf+1, (int)LS)] = 0;
   return retval;
 }
 
@@ -488,8 +517,8 @@ set_bytes(size, from, to)
   struct message_hdr	m;
 
   m.m_type = M_SETBYTES;
-  m.m_size = size;
-  put_int(m.m_buf, pointer_size, (long) to);
+  ITOBUF(m.m_buf+1, size, (int) LS);
+  ITOBUF(m.m_buf+LS+1, (long) to, (int) PS);
 
   if (! uputm(&m) || ! usend(from, size) || ! ugetm(&m)) {
 	return;
@@ -508,12 +537,13 @@ set_bytes(size, from, to)
   }
 }
 
-int
+t_addr
 get_dump(globmessage, globbuf, stackmessage, stackbuf)
   struct message_hdr *globmessage, *stackmessage;
   char **globbuf, **stackbuf;
 {
   struct message_hdr	m;
+  long sz;
 
   m.m_type = M_DUMP;
   if (! could_send(&m, 0)) {
@@ -533,27 +563,28 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
   }
 
   *globmessage = answer;
-  *globbuf = malloc((unsigned) answer.m_size);
-  if (! ureceive(*globbuf, answer.m_size) || ! ugetm(stackmessage)) {
+  sz = BUFTOI(answer.m_buf+1, (int)LS);
+  *globbuf = malloc((unsigned) sz);
+  if (! ureceive(*globbuf, sz) || ! ugetm(stackmessage)) {
 	if (*globbuf) free(*globbuf);
 	return 0;
   }
   assert(stackmessage->m_type == M_DSTACK);
-  *stackbuf = malloc((unsigned) stackmessage->m_size);
-  if (! ureceive(*stackbuf, stackmessage->m_size)) {
+  sz = BUFTOI(stackmessage->m_buf+1, (int)LS);
+  *stackbuf = malloc((unsigned) sz);
+  if (! ureceive(*stackbuf, sz)) {
 	if (*globbuf) free(*globbuf);
 	if (*stackbuf) free(*stackbuf);
 	return 0;
   }
-  put_int(globmessage->m_buf+SP_OFF*pointer_size, pointer_size,
-	 get_int(stackmessage->m_buf+SP_OFF*pointer_size, pointer_size, T_UNSIGNED));
+  ITOBUF(globmessage->m_buf+SP_OFF, BUFTOI(stackmessage->m_buf+SP_OFF, (int)PS), (int) PS);
   if (! *globbuf || ! *stackbuf) {
 	error("could not allocate enough memory");
 	if (*globbuf) free(*globbuf);
 	if (*stackbuf) free(*stackbuf);
 	return 0;
   }
-  return 1;
+  return BUFTOI(globmessage->m_buf+PC_OFF, (int)PS);
 }
 
 int
@@ -569,9 +600,12 @@ put_dump(globmessage, globbuf, stackmessage, stackbuf)
 	start_child(run_command);
 	restoring = 0;
   }
-  retval =	uputm(globmessage) && usend(globbuf, globmessage->m_size) &&
-		uputm(stackmessage) && usend(stackbuf, stackmessage->m_size) &&
-		ugetm(&m) && stopped("restored", m.m_size);
+  retval =	uputm(globmessage)
+		&& usend(globbuf, BUFTOI(globmessage->m_buf+1, (int) LS))
+		&& uputm(stackmessage)
+		&& usend(stackbuf, BUFTOI(stackmessage->m_buf+1, (int) LS))
+		&& ugetm(&m)
+		&& stopped("restored", BUFTOI(m.m_buf+1, (int) PS));
   return retval;
 }
 
@@ -584,7 +618,7 @@ get_EM_regs(level)
   register t_addr *to = &buf[0];
 
   m.m_type = M_GETEMREGS;
-  m.m_size = level;
+  ITOBUF(m.m_buf+1, (long) level, (int) LS);
 
   if (! could_send(&m, 0)) {
 	return 0;
@@ -601,11 +635,11 @@ get_EM_regs(level)
   default:
 	assert(0);
   }
-  *to++ = (t_addr) get_int(answer.m_buf, pointer_size, T_UNSIGNED);
-  *to++ = (t_addr) get_int(answer.m_buf+pointer_size, pointer_size, T_UNSIGNED);
-  *to++ = (t_addr) get_int(answer.m_buf+2*pointer_size, pointer_size, T_UNSIGNED);
-  *to++ = (t_addr) get_int(answer.m_buf+3*pointer_size, pointer_size, T_UNSIGNED);
-  *to++ = (t_addr) get_int(answer.m_buf+4*pointer_size, pointer_size, T_UNSIGNED);
+  *to++ = (t_addr) BUFTOI(answer.m_buf+LB_OFF, (int)PS);
+  *to++ = (t_addr) BUFTOI(answer.m_buf+AB_OFF, (int)PS);
+  *to++ = (t_addr) BUFTOI(answer.m_buf+PC_OFF, (int)PS);
+  *to++ = (t_addr) BUFTOI(answer.m_buf+HP_OFF, (int)PS);
+  *to++ = (t_addr) BUFTOI(answer.m_buf+PC_OFF, (int)PS);
   return buf;
 }
 
@@ -616,8 +650,7 @@ set_pc(PC)
   struct message_hdr	m;
 
   m.m_type = M_SETEMREGS;
-  m.m_size = 0;
-  put_int(m.m_buf+PC_OFF*pointer_size, pointer_size, (long)PC);
+  ITOBUF(m.m_buf+PC_OFF, (long)PC, (int)PS);
   if (! could_send(&m, 0)) return 0;
   switch(answer.m_type) {
   case M_FAIL:
@@ -641,7 +674,6 @@ send_cont(stop_message)
   struct message_hdr	m;
 
   m.m_type = (M_CONT | (db_ss ? M_DB_SS : 0));
-  m.m_size = 0;
   return could_send(&m, stop_message) && child_pid;
 }
 
@@ -653,7 +685,7 @@ singlestep(type, count)
   struct message_hdr	m;
 
   m.m_type = type | (db_ss ? M_DB_SS : 0);
-  m.m_size = count;
+  ITOBUF(m.m_buf+1, count, (int) LS);
   single_stepping = 1;
   if (could_send(&m, 1) && child_pid) return 1;
   single_stepping = 0;
@@ -668,7 +700,7 @@ set_or_clear_breakpoint(a, type)
   struct message_hdr m;
 
   m.m_type = type;
-  m.m_size = a;
+  ITOBUF(m.m_buf+1, (long) a, (int) PS);
   if (debug) printf("%s breakpoint at 0x%lx\n", type == M_SETBP ? "setting" : "clearing", (long) a);
   if (child_pid && ! could_send(&m, 0)) {
   }
@@ -684,8 +716,8 @@ set_or_clear_trace(start, end, type)
   struct message_hdr m;
 
   m.m_type = type;
-  put_int(m.m_buf, pointer_size, (long)start);
-  put_int(m.m_buf+pointer_size, pointer_size, (long)end);
+  ITOBUF(m.m_buf+1, (long)start, (int) PS);
+  ITOBUF(m.m_buf+PS+1, (long)end, (int) PS);
   if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == M_SETTRACE ? "setting" : "clearing", (long) start, (long) end);
   if (child_pid && ! could_send(&m, 0)) {
 	return 0;
