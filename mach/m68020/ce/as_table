@@ -126,8 +126,8 @@ jsr dst				==> code_instr( 0x4, 0x7, 0x2, dst).
 
 lea src, dst:A_REG		==> code_instr( 0x4, dst->reg, 0x7, src).
 
-link reg:A_REG, displ:IMMEDIATE	==> @text2( 0x4e50 | %d(reg->reg));
-				    @text2( %$(displ->expr)).
+link reg:A_REG, displ:IMMEDIATE	==> @text2( 0x4808 | %d(reg->reg));
+				    @text4( %$(displ->expr)).
 
 lsr_l cnt:D_REG, dst:D_REG	==> @text2( 0xe0a8 | (%d(dst->reg) & 0x7) |
 					    ((%d(cnt->reg) & 0x7) << 9)).
