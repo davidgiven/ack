@@ -18,6 +18,6 @@ Realloc(ptr, sz)
 	unsigned int sz;
 {
 	register char *mptr = realloc(ptr, sz);
-	if (mptr == 0) No_Mem();
+	if (sz && mptr == 0) No_Mem();
 	return mptr;
 }

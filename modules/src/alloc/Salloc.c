@@ -24,7 +24,7 @@ Salloc(str, sz)
 	char *res = malloc(sz);
 	register char *m = res;
 
-	if (m == 0) No_Mem();
+	if (sz && m == 0) No_Mem();
 	while (sz--)
 		*m++ = *str++;
 	return res;

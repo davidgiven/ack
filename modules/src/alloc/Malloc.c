@@ -18,6 +18,6 @@ Malloc(sz)
 {
 	register char *res = malloc(sz);
 	
-	if (res == 0) No_Mem();
+	if (sz && res == 0) No_Mem();
 	return res;
 }
