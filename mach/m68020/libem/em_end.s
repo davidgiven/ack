@@ -11,7 +11,7 @@
 	.align 4
 .sect .bss
 	.align 4
-.sect .end ! only for declaration of _end and endbss.
+.sect .end ! only for declaration of _end, __end and endbss.
 
 	.sect .text
 endtext:
