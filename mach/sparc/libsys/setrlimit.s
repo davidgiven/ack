@@ -1,4 +1,4 @@
 #include "SYS.h"
 
-SYS_call_1(setrlimit)
+SYS_call_2(setrlimit)
 
