@@ -90,7 +90,7 @@ register item_t *ip;
 	if (store(ip, (valu_t) DOTVAL) == 0)
 		return;
 #ifdef THREE_PASS
-	assert(pass != PASS_2 || oldval - ip->i_valu == DOTGAIN);
+	assert(pass != PASS_2 || oldval - (ADDR_T) ip->i_valu == DOTGAIN);
 #endif
 }
 
