@@ -196,7 +196,8 @@ if (Debug)
 				SAVEST;
 				mincost = costlimit-totalcost+1;
 				for(i=0;i<npos;i++) {
-					t=codegen(&coderules[pos[i]],ply,FALSE,mincost,0);
+					t=codegen(&coderules[pos[i]],ply,FALSE,
+					    costlimit<MAXINT?mincost:MAXINT,0);
 #ifndef NDEBUG
 if (Debug)
 	fprintf(stderr,"mincost %u,cost %u,pos %d\n",mincost,t,i);
@@ -405,7 +406,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 			if (Debug>2)
 				fprintf(stderr,"Continuing match after coercions\n");
 #endif
-			t += codegen(codep,ply,FALSE,mincost-t,0);
+			t += codegen(codep,ply,FALSE,mincost<MAXINT?mincost-t:MAXINT,0);
 		}
 		if ( t<mincost && tokpatlen<=stackheight ) {
 			mincost = t;
@@ -633,7 +634,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 					erasereg(pos2[j]);
 				}
 				if (t<mincost)
-					t += codegen(codep,ply,FALSE,mincost-t,0);
+					t += codegen(codep,ply,FALSE,mincost<MAXINT?mincost-t:MAXINT,0);
 				if (t<mincost) {
 					mincost=t;
 					decision=pos2[j];

@@ -171,7 +171,8 @@ if (Debug)
 				SAVEST;
 				mincost = costlimit-totalcost+1;
 				for(i=0;i<npos;i++) {
-					t=codegen(&coderules[pos[i]],ply,FALSE,mincost,0);
+					t=codegen(&coderules[pos[i]],ply,FALSE,
+						  costlimit<MAXINT?mincost:MAXINT,0);
 #ifndef NDEBUG
 if (Debug)
 	fprintf(stderr,"mincost %u,cost %u,pos %d\n",mincost,t,i);
@@ -343,7 +344,7 @@ if(Debug>1) { fprintf(stderr,"Next tuple %d,%d,%d,%d\n",
 if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t); 
 #endif
 		if (t<mincost)
-			t += codegen(codep,ply,FALSE,mincost-t,0);
+			t += codegen(codep,ply,FALSE,mincost<MAXINT?mincost-t:MAXINT,0);
 		if (t<mincost) {
 			mincost = t;
 			besttup = tup;
@@ -522,7 +523,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 					erasereg(pos2[j]);
 				}
 				if (t<mincost)
-					t += codegen(codep,ply,FALSE,mincost-t,0);
+					t += codegen(codep,ply,FALSE,mincost<MAXINT?mincost-t:MAXINT,0);
 				if (t<mincost) {
 					mincost=t;
 					decision=pos2[j];
