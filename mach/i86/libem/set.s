@@ -15,7 +15,7 @@
 	xor	di,di
 	sar	cx,1
 1:
-	mov     dx,4(bx)(di)
+	mov     4(bx)(di),dx
 	add	di,2
 	loop	1b
 !endif
