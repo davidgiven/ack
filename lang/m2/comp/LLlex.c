@@ -4,6 +4,7 @@ static char *RcsId = "$Header$";
 
 #include	<alloc.h>
 #include	<em_arith.h>
+#include	<assert.h>
 #include	"input.h"
 #include	"f_info.h"
 #include	"Lpars.h"
@@ -179,7 +180,7 @@ again:
 			return tk->tk_symb = ch;
 
 		default :
-			crash("bad STCOMP");
+			assert(0);
 		}
 
 	case STIDF:
@@ -373,7 +374,7 @@ Sdec:
 
 	case STCHAR:
 	default:
-		crash("bad character class %d", class(ch));
+		assert(0);
 	}
 	/*NOTREACHED*/
 }

@@ -118,7 +118,7 @@ rem_forwards(fo)
 	savetok = dot;
 	while (f = fo) {
 		dot = f->fo_tok;
-		df = lookfor(dot.TOK_IDF, 1);
+		df = lookfor(dot.TOK_IDF, currscope, 1);
 		if (!(df->df_kind & (D_TYPE | D_HTYPE | D_ERROR))) {
 			error("identifier \"%s\" not a type", df->df_idf->id_text);
 		}

@@ -21,11 +21,12 @@ number:
 qualident(int types; struct def **pdf; char *str;)
 {
 	int scope;
+	int  module;
 	register struct def *df;
 	struct def *lookfor();
 } :
 	IDENT		{ if (types) {
-				*pdf = df = lookfor(dot.TOK_IDF, 1);
+				*pdf = df = lookfor(dot.TOK_IDF, currscope, 1);
 				if (df->df_kind == D_ERROR) types = 0;
 			  }
 			}
@@ -38,12 +39,18 @@ qualident(int types; struct def **pdf; char *str;)
 		/* selector */
 		'.' IDENT
 			{ if (types) {
+				module = (df->df_kind == D_MODULE);
 				df = lookup(dot.TOK_IDF, scope);
 				if (!df) {
 					error("identifier \"%s\" not declared",
 					      dot.TOK_IDF->id_text);
 					types = 0;
 					df = ill_df;
+				}
+				else
+				if (module &&
+				    !(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
+					error("identifier \"%s\" not exported from qualifying module", dot.TOK_IDF->id_text);
 				}
 			  }
 			}

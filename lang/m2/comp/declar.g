@@ -130,7 +130,12 @@ TypeDeclaration
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	'=' type(&tp)
-			{ df->df_type = tp; }
+			{ df->df_type = tp;
+			  if ((df->df_flags&D_EXPORTED) &&
+			      tp->tp_fund == ENUMERATION) {
+				exprt_literals(tp->enm_enums, enclosing(currscope));
+			  }
+			}
 ;
 
 type(struct type **ptp;):
@@ -338,7 +343,7 @@ PointerType(struct type **ptp;)
 				  }
 				  else	tp = df->df_type;
 				}
-	| %if (df = lookfor(dot.TOK_IDF, 0), df->df_kind == D_MODULE)
+	| %if (df = lookfor(dot.TOK_IDF, currscope, 0), df->df_kind == D_MODULE)
 		type(&tp)
 	|
 		IDENT

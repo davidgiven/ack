@@ -38,8 +38,8 @@ struct field {
 };
 
 struct import {
-	int im_scopenr;		/* Scope number from which imported */
-#define imp_scopenr	df_value.df_import.im_scopenr
+	struct def *im_def;	/* Scope number from which imported */
+#define imp_def		df_value.df_import.im_def
 };
 
 struct def	{		/* list of definitions for a name */

@@ -60,16 +60,18 @@ EnterIdList(idlist, kind, flags, type, scope)
 	}
 }
 
-/*	Look for an identifier in the current visibility range.
-	If it is not defined, give an error message, and
-	create a dummy definition.
-*/
 struct def *
-lookfor(id, give_error)
+lookfor(id, scope, give_error)
 	struct idf *id;
+	struct scope *scope;
 {
-	register struct scope *sc = currscope;
+	/*	Look for an identifier in the visibility range started by
+		"scope".
+		If it is not defined, give an error message, and
+		create a dummy definition.
+	*/
 	struct def *df;
+	register struct scope *sc = scope;
 
 	while (sc) {
 		df = lookup(id, sc->sc_scope);
@@ -77,5 +79,5 @@ lookfor(id, give_error)
 		sc = nextvisible(sc);
 	}
 	if (give_error) error("Identifier \"%s\" not declared", id->id_text);
-	return define(id, CurrentScope, D_ERROR);
+	return define(id, scope->sc_scope, D_ERROR);
 }

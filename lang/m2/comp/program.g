@@ -35,9 +35,13 @@ static  char *RcsId = "$Header$";
 ModuleDeclaration
 {
 	struct idf *id;
+	struct def *df;
 } :
-	MODULE IDENT		{ open_scope(CLOSEDSCOPE, 0);
+	MODULE IDENT		{
 				  id = dot.TOK_IDF;
+				  df = define(id, CurrentScope, D_MODULE);
+				  open_scope(CLOSEDSCOPE, 0);
+				  df->mod_scope = CurrentScope;
 				}
 	priority? ';'
 	import(1)*
