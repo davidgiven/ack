@@ -21,6 +21,7 @@ struct t_operand {
 #define IS_LOC_LBL		12
 #define IS_IND_REG		13
 #define IS_IND_REG_DISPL	14
+#define IS_IND_REG_EDISPL	15
 
 #define QUICK( op)	(op->type == IS_QUICK)
 #define IMMEDIATE( op)	(op->type == IS_IMMEDIATE)

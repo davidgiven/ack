@@ -113,8 +113,15 @@ register struct t_operand *op;
 				for ( ; *str == ' '; str++)
 					;
 				op->reg = reg_val( str);
-				if ( *(str+2) == ')')		/*  (4, a0)  */
-					op->type = IS_IND_REG_DISPL;
+				if ( *(str+2) == ')') {		/*  (4, a0)  */
+					int i = atoi(op->expr);
+					if ((*(op->expr) == '-' ||
+					     isdigit(*(op->expr))) &&
+					    i <= 32767 && i >= -32768) {
+						op->type = IS_IND_REG_DISPL;
+					}
+					else	op->type = IS_IND_REG_EDISPL;
+				}
 				else {			 /*  (0, sp, d0.l*1)  */
 					op->type = IS_3_OPS;
 					for ( str++; *++str != ',';)
@@ -218,6 +225,8 @@ register struct t_operand *eaddr;
 
 	  case IS_IND_REG_DISPL : return( 0x28 | eaddr->reg);
 
+	  case IS_IND_REG_EDISPL: return( 0x30 | eaddr->reg);
+
 	  case IS_GLOB_LBL      : return( 0x39);
 
 	  case IS_3_OPS         : if ( isdigit( *(eaddr->expr)) &&
@@ -231,7 +240,7 @@ register struct t_operand *eaddr;
 	  case IS_IMMEDIATE	: return( 0x3c);
 
 	  default		: fprintf( stderr,
-					   "mode_reg(), verkeerde operand %d\n",
+					   "mode_reg(), wrong operand %d\n",
 					   eaddr->type);
 				  abort();
 				  break;
@@ -264,6 +273,10 @@ register struct t_operand *eaddr;
 				  break;
 
 	  case IS_IND_REG_DISPL : @text2( %$( eaddr->expr));
+				  break;
+
+	  case IS_IND_REG_EDISPL :@text2(0x0170);
+				  @text4( %$( eaddr->expr));
 				  break;
 
 	  case IS_GLOB_LBL      : @reloc4( %$(eaddr->lbl),
@@ -313,11 +326,18 @@ struct t_operand *eaddr;
 }
 
 
+/* The attempts to optimize the instruction size when it cannot be done
+   at code-expander generation time is actually quite dangerous, because
+   it may not happen between references to and definitions of (corresponding)
+   local labels. The reason for this is that these offsets are computed
+   at code-expander generation time. Unfortunately, no warning is given,
+   so this has to be checked by hand.
+*/
 code_instr( opcode, field1, field2, eaddr)
 int opcode, field1, field2;
 struct t_operand *eaddr;
 {
-	if (eaddr->type == IS_IND_REG_DISPL) {
+	if (eaddr->type == IS_IND_REG_EDISPL) {
 		@__instr_code(%d(((opcode & 0xf) << 12) | ((field1 & 0x7) << 9) |
 			        ((field2 & 0x7) << 6)),
 			      %d(eaddr->reg), %$(eaddr->expr));
@@ -333,8 +353,8 @@ code_move( size, src, dst)
 int size;
 struct t_operand *src, *dst;
 {
-	if (src->type == IS_IND_REG_DISPL) {
-		if (dst->type == IS_IND_REG_DISPL) {
+	if (src->type == IS_IND_REG_EDISPL) {
+		if (dst->type == IS_IND_REG_EDISPL) {
 			@__moveXX(%d( ((size & 0x3) << 12)),
 				 %d(dst->reg), %$(dst->expr),
 				 %d(src->reg), %$(src->expr));
@@ -344,7 +364,7 @@ struct t_operand *src, *dst;
 				 %d(src->reg), %$(src->expr));
 		}
 	}
-	else if (dst->type == IS_IND_REG_DISPL) {
+	else if (dst->type == IS_IND_REG_EDISPL) {
 		@__move_X(%d( ((size & 0x3) << 12) | (mode_reg( src) & 0x3f)),
 			 %d(dst->reg), %$(dst->expr));
 	}
