@@ -106,13 +106,22 @@ rep_loc(id)
 	}
 }
 
-/* VARARGS1 */
-panic(fmt, args)
-	char *fmt;
+/* VARARGS */
+panic(va_alist)				/* fmt, args */
+	va_dcl
 {
-	fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
-	doprnt(ERROUT, fmt, &args);
-	fprint(ERROUT, "\n");
+	va_list ap;
+
+	va_start(ap);
+	{
+		char *fmt = va_arg(ap, char *);
+
+		fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
+		doprnt(ERROUT, fmt, ap);
+		fprint(ERROUT, "\n");
+	}
+	va_end(ap);
+
 	exit(1);
 }
 
