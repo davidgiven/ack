@@ -51,7 +51,7 @@ instruction
 					ea_2(SIZE_W, DTA);
 				}
 				else {	/* 32 bit dividend or product */
-					T_EMIT2((016000 | ($1 & ~1)) | mrg_2,
+					T_EMIT2((046000 | ($1 & ~1)) | mrg_2,
 								0, 0, 0);
 					T_EMIT2(($1&1)<<11 | $5<<12 | $5,
 								0, 0, 0);
@@ -61,7 +61,7 @@ instruction
 	|	DIVMUL sizedef ea ',' DREG ':' DREG
 			{		/* 64 bit dividend or product */
 				checksize($2, 4);
-				T_EMIT2((016000 | ($1 & ~1)) | mrg_2, 0, 0, 0);
+				T_EMIT2((046000 | ($1 & ~1)) | mrg_2, 0, 0, 0);
 				T_EMIT2(($1&1)<<11 | $7<<12 | $5 | 02000,0,0,0);
 				ea_2(SIZE_L, DTA);
 			}
