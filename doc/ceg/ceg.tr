@@ -1509,6 +1509,9 @@ T}
 extnd_cont( n)#:#T{
 Create another unique label for the C_insertpart mechanism.
 T}
+extnd_main( n)#:#T{
+Create yet another unique label for the C_insertpart mechanism.
+T}
 .TE
 .VS -4
 .IP A6.
