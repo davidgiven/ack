@@ -15,7 +15,7 @@ ch3bin(pval, oper, val)
 	switch (oper)	{
 	case '%':
 		if (val == 0)
-			error("% by 0");
+			error("%% by 0");
 		else
 			*pval = *pval % val;
 		break;

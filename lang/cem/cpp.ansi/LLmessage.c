@@ -12,7 +12,6 @@
 extern char *symbol2str();
 
 LLmessage(tk)	{
-	err_occurred = 1;
 	if (tk < 0)
 		error("garbage at end of line");
 	else if (tk)	{

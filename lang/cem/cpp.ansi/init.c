@@ -53,7 +53,7 @@ init_pp()
 		register struct mkey *mk = &mkey[0];
 
 		while (mk->mk_reserved)	{
-			register struct idf *idf = str2idf(mk->mk_reserved);
+			register struct idf *idf = str2idf(mk->mk_reserved, 0);
 			
 			if (idf->id_resmac)
 				fatal("maximum identifier length insufficient");
