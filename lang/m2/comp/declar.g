@@ -21,6 +21,7 @@ ProcedureDeclaration
 	ProcedureHeading(&df, D_PROCEDURE)
 	';' block IDENT
 			{ match_id(dot.TOK_IDF, df->df_idf);
+			  df->prc_scope = CurrentScope->sc_scope;
 			  close_scope();
 			}
 ;
@@ -28,19 +29,37 @@ ProcedureDeclaration
 ProcedureHeading(struct def **pdf; int type;)
 {
 	struct type *tp;
+	struct type *tp1 = 0;
 	struct paramlist *params = 0;
+	register struct def *df;
 } :
 	PROCEDURE IDENT
 			{ assert(type & (D_PROCEDURE | D_PROCHEAD));
-			  *pdf = define(dot.TOK_IDF, CurrentScope, type);
-			  if (type == D_PROCEDURE) {
+			  if (type == D_PROCHEAD) {
+				df = define(dot.TOK_IDF, CurrentScope, type);
+			  }
+			  else {
+				df = lookup(dot.TOK_IDF,
+						CurrentScope->sc_scope);
+				if (df && df->df_kind == D_PROCHEAD) {
+					df->df_kind = type;
+					tp1 = df->df_type;
+				}
+				else {
+					df = define(dot.TOK_IDF,
+						CurrentScope, type);
+				}
 				open_scope(OPENSCOPE, 0);
 			  }
 			}
 	FormalParameters(type == D_PROCEDURE, &params, &tp)?
 			{
-			  (*pdf)->df_type = tp = construct_type(PROCEDURE, tp);
+			  df->df_type = tp = construct_type(PROCEDURE, tp);
 			  tp->prc_params = params;
+			  if (tp1 && !TstTypeEquiv(tp, tp1)) {
+error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
+			  }
+			  *pdf = df;
 			}
 ;
 
@@ -283,6 +302,9 @@ FieldList(struct scope *scope;)
 } :
 [
 	IdentList(&FldList) ':' type(&tp)
+			{ EnterIdList(FldList, D_FIELD, 0, tp, scope);
+			  FreeIdList(FldList);
+			}
 |
 	CASE
 	[
@@ -370,7 +392,7 @@ ProcedureType(struct type **ptp;)
 	struct type *tp = 0;
 } :
 	PROCEDURE FormalTypeList(&pr, &tp)?
-			{ *ptp = construct_type(PROCEDURE, tp);
+			{ *ptp = construct_type(PROCVAR, tp);
 			  (*ptp)->prc_params = pr;
 			}
 ;

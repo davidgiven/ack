@@ -18,6 +18,7 @@ static char *RcsId = "$Header$";
 long str2long();
 
 struct token dot, aside;
+struct string string;
 
 static
 SkipComment()
@@ -59,16 +60,16 @@ SkipComment()
 	}
 }
 
-static char *
+static
 GetString(upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
 	register int ch;
-	int str_size;
-	char *str = Malloc(str_size = 32);
-	register int pos = 0;
+	register struct string *str = &string;
+	register char *p;
 	
+	str->s_str = p = Malloc(str->s_length = 32);
 	LoadChar(ch);
 	while (ch != upto)	{
 		if (class(ch) == STNL)	{
@@ -80,14 +81,15 @@ GetString(upto)
 			lexerror("end-of-file in string");
 			break;
 		}
-		str[pos++] = ch;
-		if (pos == str_size)	{
-			str = Srealloc(str, str_size += 8);
+		*p++ = ch;
+		if (p - str->s_str == str->s_length)	{
+			str->s_str = Srealloc(str->s_str, str->s_length += 8);
+			p = str->s_str + (str->s_length - 8);
 		}
 		LoadChar(ch);
 	}
-	str[pos] = '\0';
-	return str;
+	*p = '\0';
+	str->s_length = p - str->s_str;
 }
 
 int
@@ -106,13 +108,14 @@ LLlex()
 		return tk->tk_symb;
 	}
 	tk->tk_lineno = LineNumber;
+	tk->tk_filename = FileName;
 
 again:
 	LoadChar(ch);
 	if ((ch & 0200) && ch != EOI) {
 		fatal("non-ascii '\\%03o' read", ch & 0377);
 	}
-	
+
 	switch (class(ch))	{
 
 	case STSKIP:
@@ -205,7 +208,8 @@ again:
 	}
 
 	case STSTR:
-		tk->TOK_STR = GetString(ch);
+		GetString(ch);
+		tk->tk_data.tk_str = string;
 		return tk->tk_symb = STRING;
 
 	case STNUM:

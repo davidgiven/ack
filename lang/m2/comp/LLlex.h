@@ -2,24 +2,27 @@
 
 /* $Header$ */
 
+struct string {
+	int s_length;		/* length of a string */
+	char *s_str;		/* the string itself */
+};
+
 struct token	{
 	int tk_symb;		/* token itself	*/
+	char *tk_filename;	/* filename in which it occurred */
 	int tk_lineno;		/* linenumber on which it occurred */
 	union {
 		struct idf *tk_idf;	/* IDENT	*/
-		char *tk_str;		/* STRING	*/
-		struct {		/* INTEGER	*/
-			struct type *tk_type;	/* type	*/
-			arith tk_value;	/* value	*/
-		} tk_int;
+		struct string tk_str;	/* STRING	*/
+		arith tk_int;		/* INTEGER	*/
 		char *tk_real;		/* REAL		*/
 	} tk_data;
 };
 
 #define TOK_IDF	tk_data.tk_idf
-#define TOK_STR	tk_data.tk_str
-#define TOK_ITP	tk_data.tk_int.tk_type
-#define TOK_INT	tk_data.tk_int.tk_value
+#define TOK_STR	tk_data.tk_str.s_str
+#define TOK_SLE tk_data.tk_str.s_length
+#define TOK_INT	tk_data.tk_int
 #define TOK_REL	tk_data.tk_real
 
 extern struct token dot, aside;

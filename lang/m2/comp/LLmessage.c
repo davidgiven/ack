@@ -37,10 +37,10 @@ insert_token(tk)
 		dot.TOK_IDF = gen_anon_idf();
 		break;
 	case STRING:
+		dot.TOK_SLE = 1;
 		dot.TOK_STR = Salloc("", 1);
 		break;
 	case INTEGER:
-/*		dot.TOK_ITP = INT; */
 		dot.TOK_INT = 1;
 		break;
 	case REAL:

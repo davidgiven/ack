@@ -1,5 +1,7 @@
 /* D E F I N I T I O N   M O D U L E S */
 
+static char *RcsId = "$Header$";
+
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>

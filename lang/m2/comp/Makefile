@@ -17,7 +17,7 @@ LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
-	scope.o misc.o enter.o defmodule.o
+	scope.o misc.o enter.o defmodule.o typequiv.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -83,6 +83,7 @@ scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
 enter.o: def.h idf.h misc.h scope.h type.h
 defmodule.o: LLlex.h def.h f_info.h idf.h input.h scope.h
+typequiv.o: Lpars.h def.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h scope.h type.h
