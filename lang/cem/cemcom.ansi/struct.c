@@ -188,7 +188,10 @@ declare_struct(fund, idf, tpp)
 	if (tg
 	    && tg->tg_type->tp_size < 0
 	    && tg->tg_type->tp_fund == fund
-	    && tg->tg_level == level) {
+	    && (tg->tg_level == level
+		|| (level >= L_FORMAL2
+		    && level <= L_LOCAL
+		    && tg->tg_level == L_FORMAL2))) {
 		/*	An unfinished declaration has preceded it.
 			We just fill in the answer.
 		 */
