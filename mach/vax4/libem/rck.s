@@ -1,13 +1,14 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .rck
 
-        # $Header$
+        ! $Header$
 
-.globl .rck
 
 .rck:
 	cmpl    r0,$4
-	bneq	Lerr
+	bneq	Ierr
 	jmp	.rck4
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

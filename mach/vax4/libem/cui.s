@@ -1,18 +1,19 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cui
 
-        # $Header$
+        ! $Header$
 
-.globl .cui
 
 .cui:
 	movl    (sp)+,r1
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	jmp     (r1)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

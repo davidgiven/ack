@@ -1,23 +1,24 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cmu
 
-        # $Header$
+        ! $Header$
 
-.globl .cmu
 
 .cmu:
 	movl    (sp)+,r1
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	clrl    r0
 	cmpl    (sp)+,(sp)+
-	beqlu   L1
-	bgtru   L2
+	beqlu   I1
+	bgtru   I2
 	incl    r0
-	brb     L1
-L2:
+	br     I1
+I2:
 	decl    r0
-L1:
+I1:
 	jmp     (r1)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

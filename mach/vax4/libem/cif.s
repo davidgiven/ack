@@ -1,27 +1,28 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .cif
 
-        # $Header$
+        ! $Header$
 
-.globl  .cif
 
 .cif:
 	movl    (sp)+,r1
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Ldbl
+	bneq    Idbl
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	cvtlf   (sp)+,-(sp)
 	jmp     (r1)
-Ldbl:
+Idbl:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    Ierr
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	cvtld   (sp)+,-(sp)
 	jmp     (r1)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

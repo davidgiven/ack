@@ -1,15 +1,17 @@
-        # $Header$
-.globl	.fat
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define	.fat
+
+        ! $Header$
 
 .fat:
 	pushl	(sp)
 	jsb	.trp
-	movl	$L1,ap
+	movl	$I1,ap
 	movl	(sp)+,6(ap)
 	chmk	(ap)+
 	halt
 
-	.data
-L1:	.word	1
-	.long	1
-	.long	0
+	.sect .rom
+I1:	.data2	1
+	.data4	1
+	.data4	0

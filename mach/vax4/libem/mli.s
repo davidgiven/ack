@@ -1,15 +1,16 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .mli
 
-        # $Header$
+        ! $Header$
 
-.globl .mli
 
 .mli:
 	movl	(sp)+,r1
 	cmpl	r0,$4
-	bneq	L1
+	bneq	I1
 	mull2	(sp)+,(sp)
 	jmp	(r1)
-L1:
+I1:
 	pushl	$EILLINS
 	jmp	.fat

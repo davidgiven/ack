@@ -1,5 +1,7 @@
-        # $Header$
-.globl  .sar4
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .sar4
+
+        ! $Header$
 
 .sar4:
 	movl    (sp)+,r2
@@ -10,17 +12,17 @@
 	mull2	r1,r0
 	addl2   (sp)+,r0
 	cmpl	r1,$1
-	bgtr	L3
+	bgtr	I3
 	cvtlb   (sp)+,(r0)
 	jmp     (r2)
-L3:
+I3:
 	cmpl	r1,$2
-	bgtr	L2
+	bgtr	I2
 	cvtlw	(sp)+,(r0)
 	jmp	(r2)
-L2:
+I2:
 	ashl    $-2,r1,r1
-L1:
+I1:
 	movl    (sp)+,(r0)+
-	sobgtr  r1,L1
+	sobgtr  r1,I1
 	jmp     (r2)

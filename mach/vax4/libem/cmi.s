@@ -1,23 +1,23 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cmi
 
-        # $Header$
-
-.globl .cmi
+        ! $Header$
 
 .cmi:
 	movl    (sp)+,r1
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    Ierr
 	clrl    r0
 	cmpl    (sp)+,(sp)+
-	beql    L1
-	bgtr    L2
+	beql    I1
+	bgtr    I2
 	incl    r0
-	brb     L1
-L2:
+	br     I1
+I2:
 	decl    r0
-L1:
+I1:
 	jmp     (r1)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

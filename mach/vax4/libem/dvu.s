@@ -1,13 +1,14 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .dvu
 
-        # $Header$
+        ! $Header$
 
-.globl .dvu
 
 .dvu:
 	cmpl    r0,$4
-	bneq	Lerr
+	bneq	Ierr
 	jmp	.dvu4
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

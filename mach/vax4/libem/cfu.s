@@ -1,37 +1,38 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cfu
 
-        # $Header$
+        ! $Header$
 
-.globl .cfu
 
 .cfu:
 	movl    (sp)+,r2
 	movpsl  r1
 	bicl2   $~040,r1
-	bicpsw  $040            # integer overflow traps must be ignored
+	bicpsw  $040            ! integer overflow traps must be ignored
 	movl    (sp)+,r0
 	cmpl    (sp),$4
-	bneq    Lddt
+	bneq    1f
 	tstl    (sp)+
 	tstf    (sp)
-	bgeq    L1
+	bgeq    5f
 	mnegf   (sp),(sp)
-L1:
+5:
 	cvtfl   (sp)+,-(sp)
-L2:
+2:
 	cmpl    r0,$4
-	bneq    Lerr
-	bispsw  r1              # restore trap enable bit
+	bneq    4f
+	bispsw  r1              ! restore trap enable bit
 	jmp     (r2)
-Lddt:
+1:
 	cmpl    (sp)+,$8
-	bneq    Lerr
+	bneq    4f
 	tstd    (sp)
-	bgeq    L3
+	bgeq    3f
 	mnegd   (sp),(sp)
-L3:
+3:
 	cvtdl   (sp)+,-(sp)
-	brb     L2
-Lerr:
+	br      2b
+4:
 	pushl	$EILLINS
 	jmp     .fat

@@ -1,20 +1,21 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define	.adf
 
-        # $Header$
+        ! $Header$
 
-.globl	.adf
 
 .adf:
 	movl	(sp)+,r1
 	cmpl	r0,$4
-	bneq	L1
+	bneq	1f
 	addf2	(sp)+,(sp)
 	jmp	(r1)
-L1:
+1:
 	cmpl	r0,$8
-	bneq	L2
+	bneq	2f
 	addd2	(sp)+,(sp)
 	jmp	(r1)
-L2:
+2:
 	pushl	$EILLINS
 	jmp	.fat

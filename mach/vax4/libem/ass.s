@@ -1,16 +1,17 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .ass
 
-        # $Header$
+        ! $Header$
 
-.globl .ass
 
 .ass:
 	movl    (sp)+,r1
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    1f
 	movl    (sp)+,r0
 	addl2   r0,sp
 	jmp     (r1)
-Lerr:
+1:
 	pushl	$EILLINS
 	jmp     .fat

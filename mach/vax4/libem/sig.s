@@ -1,5 +1,7 @@
-        # $Header$
-.globl  .sig
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .sig
+
+        ! $Header$
 
 .sig:
 	movl    (sp)+,r1

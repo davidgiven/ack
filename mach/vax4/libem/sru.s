@@ -1,8 +1,9 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .sru
 
-        # $Header$
+        ! $Header$
 
-.globl .sru
 
 .sru:
 	movl    (sp)+,r3

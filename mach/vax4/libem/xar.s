@@ -1,28 +1,27 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .lar
+.define  .sar
+.define  .aar
 
-        # $Header$
+        ! $Header$
 
-.globl  .lar
 
 .lar:
 	cmpl    r0,$4
-	bneq    Lillins
+	bneq    Iillins
 	jmp     .lar4
-
-.globl  .sar
 
 .sar:
 	cmpl    r0,$4
-	bneq    Lillins
+	bneq    Iillins
 	jmp     .sar4
-
-.globl  .aar
 
 .aar:
 	cmpl    r0,$4
-	bneq    Lillins
+	bneq    Iillins
 	jmp     .aar4
 
-Lillins:
+Iillins:
 	pushl	$EILLINS
 	jmp     .fat

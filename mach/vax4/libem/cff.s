@@ -1,33 +1,34 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cff
 
-        # $Header$
+        ! $Header$
 
-.globl .cff
 
 .cff:
 	movl    (sp)+,r1
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Ldtd
+	bneq    1f
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lddf
+	bneq    2f
 	jmp     (r1)
-Lddf:
+2:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    4f
 	cvtdf   (sp)+,-(sp)
 	jmp     (r1)
-Ldtd:
+1:
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lddd
+	bneq    3f
 	cvtfd   (sp)+,-(sp)
 	jmp     (r1)
-Lddd:
+3:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    4f
 	jmp     (r1)
-Lerr:
+4:
 	pushl	$EILLINS
 	jmp     .fat

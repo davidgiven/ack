@@ -1,25 +1,28 @@
 # $Header$
-all:            libem_o.a
+MACH=vax4
+all:            libem_o.a end.o
 
-install:	cp
-
-cp:             all
+install: 	all
 		../../install libem_o.a tail_em
+		../../install end.o end_em
 
-cmp:            all
+cmp:		all
 		-../../compare libem_o.a tail_em
+		-../../compare end.o end_em
+
+end.o:		end.s
+		$(MACH) -I../../../h -c end.s
 
 libem_o.a:	libem_s.a
-		ASAR=ar ; export ASAR ;\
-		RANLIB=ranlib ; export RANLIB ;\
+		ASAR=aal ; export ASAR ;\
 		march . libem_o.a
 
 clean:
 		rm -f *.o libem_o.a
 
-opr:
+opr :
 		make pr | opr
 
 pr:
-		@pr `pwd`/Makefile
 		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
+		@pr `pwd`/end.s

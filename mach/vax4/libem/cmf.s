@@ -1,30 +1,31 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cmf
 
-        # $Header$
+        ! $Header$
 
-.globl .cmf
 
 .cmf:
 	movl    (sp)+,r1
 	cmpl    r0,$4
-	bneq    L1
+	bneq    I1
 	clrl    r0
 	cmpf    (sp)+,(sp)+
-	brb     L3
-L1:
+	br     I3
+I1:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    Ierr
 	clrl    r0
 	cmpd    (sp)+,(sp)+
-L3:
-	beql    L2
-	bgtr    L4
+I3:
+	beql    I2
+	bgtr    I4
 	incl    r0
-	brb     L2
-L4:
+	br     I2
+I4:
 	decl    r0
-L2:
+I2:
 	jmp     (r1)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

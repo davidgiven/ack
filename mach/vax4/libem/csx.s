@@ -1,21 +1,21 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .csa
+.define .csb
 
-        # $Header$
+        ! $Header$
 
-.globl .csa
 
 .csa:
 	cmpl    r0,$4
-	bneq	Lillins
+	bneq	Iillins
 	jmp	.csa4
-
-.globl .csb
 
 .csb:
 	cmpl    r0,$4
-	bneq	Lillins
+	bneq	Iillins
 	jmp	.csb4
 
-Lillins:
+Iillins:
 	pushl	$EILLINS
 	jmp     .fat

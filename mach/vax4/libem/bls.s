@@ -1,29 +1,30 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .bls
 
-        # $Header$
+        ! $Header$
 
-.globl .bls
 
 .bls:
 	movl	(sp)+,r3
 	cmpl	r0,$4
-	bneq	Lerr
-	movl	(sp)+,r0	# number of bytes in r0
-	movl	(sp)+,r1	# addresses in r1, r2
+	bneq	5f
+	movl	(sp)+,r0	! number of bytes in r0
+	movl	(sp)+,r1	! addresses in r1, r2
 	movl	(sp)+,r2
-	blbc	r0,L1
+	blbc	r0,1f
 	movb	(r2)+,(r1)+
-L1:
-	bbc	$1,r0,L2
+1:
+	bbc	$1,r0,2f
 	movw	(r2)+,(r1)+
-L2:
+2:
 	ashl	$-2,r0,r0
-	beql	L4
-L3:
+	beql	4f
+3:
 	movl	(r2)+,(r1)+
-	sobgtr	r0,L3
-L4:
+	sobgtr	r0,3b
+4:
 	jmp	(r3)
-Lerr:
+5:
 	pushl	$EILLINS
 	jmp	.fat

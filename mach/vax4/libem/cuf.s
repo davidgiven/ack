@@ -1,34 +1,35 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .cuf
 
-        # $Header$
+        ! $Header$
 
-.globl .cuf
 
 .cuf:
 	movl    (sp)+,r2
 	movl    (sp)+,r0
 	movl    (sp)+,r1
 	cmpl    r1,$4
-	bneq    Lerr
+	bneq    Ierr
 	cmpl    r0,$4
-	bneq    Ldld
+	bneq    Idld
 	cvtlf   (sp)+,-(sp)
-	bgeq    Lout
-	addf2	Ltwo32f,(sp)
-Lout:
+	bgeq    Iout
+	addf2	Itwo32f,(sp)
+Iout:
 	jmp     (r2)
-Ldld:
+Idld:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    Ierr
 	cvtld   (sp)+,-(sp)
-	bgeq    Lout
-	addd2   Ltwo32F,(sp)
+	bgeq    Iout
+	addd2   Itwo32F,(sp)
 	jmp     (r2)
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat
-.data
-Ltwo32f:
-	.float	0f4294967296.0
-Ltwo32F:
-	.double	0f4294967296.0
+.sect .rom
+Itwo32f:
+	.data1 0200,0117,00,00
+Itwo32F:
+	.data1 0200,0117,00,00,00,00,00,00

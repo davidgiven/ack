@@ -1,12 +1,14 @@
-        # $Header$
-.globl .sim
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .sim
+
+        ! $Header$
 
 .sim:
 	movl    (sp)+,r0
-	movl    (sp)+,.trpim    # store ignore mask
-	bbc     $5,.trpim,L3    # floating underflow to be ignored?
+	movl    (sp)+,.trpim    ! store ignore mask
+	bbc     $5,.trpim,I3    ! floating underflow to be ignored?
 	bicpsw  $0100
 	jmp     (r0)
-L3:
-	bispsw  $0100           # enable underflow trap
+I3:
+	bispsw  $0100           ! enable underflow trap
 	jmp     (r0)

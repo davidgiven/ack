@@ -1,24 +1,25 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .cfi
 
-        # $Header$
+        ! $Header$
 
-.globl  .cfi
 
 .cfi:
 	movl    (sp)+,r1
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lerr
+	bneq    1f
 	movl    (sp)+,r0
 	cmpl    r0,$4
-	bneq    Lddl
+	bneq    2f
 	cvtfl	(sp)+,-(sp)
 	jmp     (r1)
-Lddl:
+2:
 	cmpl    r0,$8
-	bneq    Lerr
+	bneq    1f
 	cvtdl	(sp)+,-(sp)
 	jmp     (r1)
-Lerr:
+1:
 	pushl	$EILLINS
 	jmp     .fat

@@ -1,13 +1,15 @@
-.globl  hol0
-.globl  .reghp
-.globl  .trppc
-.globl  .trpim
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .data
+.define  hol0
+.define  .reghp
+.define  .trppc
+.define  .trpim
 
 hol0:
         .space  8
 .trppc:
         .space  4
 .trpim:
-        .long   0
+        .data4   0
 .reghp:
-        .long   _end
+        .data4   _end

@@ -1,15 +1,16 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define .rmu
 
-        # $Header$
+        ! $Header$
 
-.globl .rmu
 
 .rmu:
 	cmpl    r0,$4
-	bneq	Lerr
+	bneq	Ierr
 	jsb	.rmu4
 	pushl	r0
 	rsb
-Lerr:
+Ierr:
 	pushl	$EILLINS
 	jmp     .fat

@@ -1,24 +1,27 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define	.fif
 
-        # $Header$
+        ! $Header$
 
-.globl	.fif
+.sect .rom
+Ione: .data1 0200, 077, 00, 00, 00, 00, 00, 00
 
 .fif:
 	movl	(sp)+,r2
 	cmpl	r0,$4
-	bneq	L1
+	bneq	I1
 	mulf3	(sp)+,(sp)+,r0
-	emodf	r0,$0,$0f1.0,r1,-(sp)
+	emodf	r0,$0,Ione,r1,-(sp)
 	subf3	(sp),r0,-(sp)
 	jmp	(r2)
-L1:
+I1:
 	cmpl	r0,$8
-	bneq	L2
+	bneq	I2
 	muld3	(sp)+,(sp)+,r0
-	emodd	r0,$0,$0f1.0,r0,-(sp)
+	emodd	r0,$0,Ione,r0,-(sp)
 	subd3	(sp),r0,-(sp)
 	jmp	(r2)
-L2:
+I2:
 	pushl	$EILLINS
 	jmp	.fat

@@ -1,8 +1,9 @@
 #include "em_abs.h"
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  .nop
 
-        # $Header$
+        ! $Header$
 
-.globl  .nop
 
 .nop:
 	movl	hol0+LINO_AD,r0

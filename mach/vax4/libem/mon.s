@@ -1,6 +1,8 @@
-	# $Header$
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define	.mon
 
-.globl	.mon
+	! $Header$
+
 
 .mon:
 	pushl	$EBADMON
