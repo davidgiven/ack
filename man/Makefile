@@ -11,10 +11,10 @@ all:
 
 install:
 	for i in *.[1-8] ; do \
-		num=expr $$i : '.*\.\([1-8]\)' ; \
+		num=`expr $$i : '.*\.\([1-8]\)'` ; \
 		if test -f $(MANDIR)/man$$num/$$i ; \
-			then cat head $$i > $(MANDIR)/man$$num/em_$$i ; \
-		else cat head $$i $(MANDIR)/man$$num/$$i ; \
+		then cat head $$i > $(MANDIR)/man$$num/em_$$i ; \
+		else cat head $$i > $(MANDIR)/man$$num/$$i ; \
 		fi ; \
 	done
 
