@@ -1,22 +1,22 @@
 .\" $Header$
-.TH 6500_AS 1
+.TH 6500_AS 1ACK
 .SH NAME
 6500_as \- assembler for Mostek 6500
 .SH SYNOPSIS
-/usr/em/lib/6500_as [options] argument ...
+~em/lib/6500/as [options] argument ...
 .SH DESCRIPTION
 This assembler is made with the general framework
-described in \fIuni_ass\fP(6).
-.SH "SEGMENTS and TYPES"
-An additional segment, the \fIzeropage\fP, can be started by the
-\&\fI.zero\fP pseudo-instruction.
+described in \fIuni_ass\fP(6). It is an assembler-loader.
+.SH "SECTIONS and TYPES"
+An additional section, the \fIzeropage\fP, can be started by the
+\&\fI.sect .zero\fP pseudo-instruction.
 Some adressing-modes require an address between 0 and 255.
-Such an address must be defined with the means of the \fI.zero\fP
+Such an address must be defined with the means of the \fI.sect .zero\fP
 pseudo-instruction.
 A plain number between 0 and 255 is not allowed.
 The assembler will complain that it must be a zero page expression.
 .IP example
-\&.zero
+\&.sect .zero
 .br
 answer: .space 1
 .br
