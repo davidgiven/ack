@@ -205,10 +205,11 @@ declare_idf(ds, dc, lvl)
 				   but it has to be:
 				*/
 				extern char *symbol2str();
-				if (type->tp_fund != VOID)
+				if (type->tp_fund != VOID) {
+				    if (level != L_GLOBAL)
 					error("unknown %s-type",
 						symbol2str(type->tp_fund));
-				else	error("void is not a complete type");
+				} else	error("void is not a complete type");
 			}
 			else if (type->tp_fund != LABEL) {
 				/* CJ */

@@ -73,7 +73,7 @@ adds_db_str(s)
 }
 
 static
-stb_type(tp, assign_num)
+stb_type(tp)
 	register struct type	*tp;
 {
 	char		buf[128];
@@ -84,18 +84,19 @@ stb_type(tp, assign_num)
 		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
 		return;
 	}
-	if (tp->tp_dbindex == 0 && assign_num) {
-		tp->tp_dbindex = ++stb_count;
-	}
-	if (tp->tp_dbindex > 0) {
-		adds_db_str(sprint(buf, "%d=", tp->tp_dbindex));
-	}
-	if (tp == void_type) {
-		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
+	if (tp->tp_dbindex < 0 && tp->tp_size < 0) {
+		adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
 		return;
 	}
+	if (tp->tp_dbindex <= 0) {
+		tp->tp_dbindex = ++stb_count;
+	}
+	adds_db_str(sprint(buf, "%d=", tp->tp_dbindex));
 	switch(tp->tp_fund) {
 	/* simple types ... */
+	case VOID:
+		adds_db_str(sprint(buf, "%d", void_type->tp_dbindex));
+		break;
 	case INT:
 	case LONG:
 	case CHAR:
@@ -128,14 +129,14 @@ stb_type(tp, assign_num)
 	/* constructed types ... */
 	case POINTER:
 		addc_db_str('*');
-		stb_type(tp->tp_up, 0);
+		stb_type(tp->tp_up);
 		break;
 	case ARRAY:
 		if (tp->tp_size > 0) {
 			adds_db_str("ar");
-			stb_type(int_type, 0);
+			stb_type(int_type);
 			adds_db_str(sprint(buf, ";0;%ld;", tp->tp_size / tp->tp_up->tp_size - 1));
-			stb_type(tp->tp_up, 0);
+			stb_type(tp->tp_up);
 		}
 		break;
 	case ENUM:
@@ -143,6 +144,7 @@ stb_type(tp, assign_num)
 			adds_db_str(sprint(buf,
 					   "xe%s:",
 					   tp->tp_idf->id_text));
+			tp->tp_dbindex = -tp->tp_dbindex;
 			break;
 		}
 		addc_db_str('e');
@@ -173,6 +175,7 @@ stb_type(tp, assign_num)
 					   "x%c%s:",
 					   tp->tp_fund == STRUCT ? 's' : 'u',
 					   tp->tp_idf->id_text));
+			tp->tp_dbindex = -tp->tp_dbindex;
 			break;
 		}
 		adds_db_str(sprint(buf,
@@ -186,14 +189,14 @@ stb_type(tp, assign_num)
 				adds_db_str(sdef->sd_idf->id_text);
 				addc_db_str(':');
 				if (sdef->sd_type->tp_fund == FIELD) {
-					stb_type(sdef->sd_type->tp_up, 0);
+					stb_type(sdef->sd_type->tp_up);
 					adds_db_str(sprint(buf,
 						",%ld,%ld;",
 						sdef->sd_offset*8+sdef->sd_type->tp_field->fd_shift,
 						sdef->sd_type->tp_field->fd_width));
 				}
 				else {
-					stb_type(sdef->sd_type, 0);
+					stb_type(sdef->sd_type);
 					adds_db_str(sprint(buf,
 						",%ld,%ld;",
 						sdef->sd_offset*8,
@@ -206,7 +209,7 @@ stb_type(tp, assign_num)
 		break;
 	case FUNCTION:
 		addc_db_str('f');
-		stb_type(tp->tp_up, 0);
+		stb_type(tp->tp_up);
 	}
 }
 
@@ -217,7 +220,7 @@ stb_tag(tg, str)
 	create_db_str();
 	adds_db_str(str);
 	adds_db_str(":T");
-	stb_type(tg->tg_type, 1);
+	stb_type(tg->tg_type);
 	addc_db_str(';');
 	C_ms_stb_cst(db_str.base,
 		     N_LSYM,
@@ -234,7 +237,7 @@ stb_typedef(tp, str)
 	create_db_str();
 	adds_db_str(str);
 	adds_db_str(":t");
-	stb_type(tp, 1);
+	stb_type(tp);
 	addc_db_str(';');
 	C_ms_stb_cst(db_str.base,
 		     N_LSYM,
@@ -256,7 +259,7 @@ stb_string(df, kind, str)
 	switch(kind) {
 	case FUNCTION:
 		addc_db_str(df->df_sc == STATIC ? 'f' : 'F');
-		stb_type(tp->tp_up, 0);
+		stb_type(tp->tp_up);
 		addc_db_str(';');
 		C_ms_stb_pnam(db_str.base, N_FUN, 1 /* proclevel */, str);
 		break;
@@ -265,7 +268,7 @@ stb_string(df, kind, str)
 		    (df->df_sc == REGISTER && df->df_address >= 0)) {
 						/* value parameter */
 			addc_db_str('p');
-			stb_type(tp, 0);
+			stb_type(tp);
 			addc_db_str(';');
 			C_ms_stb_cst(db_str.base, N_PSYM, 0, df->df_address);
 		}
@@ -282,7 +285,7 @@ stb_string(df, kind, str)
 			else {
 				addc_db_str('G');
 			}
-			stb_type(tp, 0);
+			stb_type(tp);
 			addc_db_str(';');
 			if (df->df_sc == STATIC && df->df_level >= L_LOCAL) {
 				C_ms_stb_dlb(db_str.base, N_LCSYM, 0, (label) df->df_address, (arith) 0);
@@ -292,7 +295,7 @@ stb_string(df, kind, str)
 			}
 		}
 		else {	/* local variable */
-			stb_type(tp, 1);	/* assign type num to avoid
+			stb_type(tp);	/* assign type num to avoid
 						   difficult to parse string */
 			addc_db_str(';');
 			C_ms_stb_cst(db_str.base, N_LSYM, 0, df->df_address);

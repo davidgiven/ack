@@ -177,7 +177,7 @@ add_dependency(s)
 char *s;
 {
     register struct idf *p = str2idf(s);
-    
+
     if (! p->id_resmac) {
 	p->id_resmac = K_FILE;
 	p->id_file = (char *) file_head;
@@ -269,6 +269,14 @@ compile(argc, argv)
 	init();
 	LineNumber = 0;
 	nestlow = -1;
+
+#ifndef	LINT
+	init_code(destination
+		  && strcmp(destination, "-") != 0
+			? destination
+			: 0);
+#endif	LINT
+
 #ifndef NOPP
 	WorkingDir = getwdir(source);
 	PushLex();			/* initialize lex machine */
@@ -284,11 +292,6 @@ compile(argc, argv)
 #endif NOPP
 #endif DEBUG
 	{
-#ifndef	LINT
-		init_code(destination && strcmp(destination, "-") != 0 ?
-					destination : 0);
-#endif	LINT
-
 		/* compile the source text			*/
 		C_program();
 
@@ -380,7 +383,7 @@ init_specials(si)
 {
 	while (si->si_identifier)	{
 		struct idf *idf = str2idf(si->si_identifier);
-		
+
 		if (idf->id_special)
 			fatal("maximum identifier length insufficient");
 		idf->id_special = si->si_flag;

@@ -161,6 +161,7 @@ gen_simple_exp(tpp, expp)
 		check_and_pad(expp, tpp);
 		break;
 	case ERRONEOUS:
+	case FUNCTION:
 	case VOID:
 		gen_error = pack_level;
 		break;

@@ -26,6 +26,11 @@
 #include	"macro.h"
 #include	"macbuf.h"
 #include	"replace.h"
+#include	"dbsymtab.h"
+#ifdef DBSYMTAB
+#include	<stb.h>
+int		IncludeLevel = 0;
+#endif
 
 extern char options[];
 extern	char **inctable;	/* list of include directories		*/
@@ -313,6 +318,12 @@ do_include()
 			FileName = result;
 			LineNumber = 0;
 			nestlow = nestlevel;
+#ifdef DBSYMTAB
+			IncludeLevel++;
+			if (options['g']) {
+				C_ms_std(FileName, N_BINCL, 0);
+			}
+#endif /* DBSYMTAB */
 		}
 	}
 }
@@ -777,24 +788,14 @@ do_line(l)
 {
 	struct token tk;
 	int t = GetToken(&tk);
-	static char *saved_name = (char *)0;
 
 	if (t != EOI) SkipToNewLine();
 	LineNumber = l;		/* the number of the next input line */
 	if (t == STRING) {	/* is there a filespecifier? */
-		extern char *source;	/* defined in main.c */
-
-		if (FileName != source) {	/* source points into argv */
-			/* Since we are looking one token ahead, we can't
-			 * free the string when it is mentioned in dot.
-			 */
-			if (dot.tok_file != FileName) {
-				free(FileName);
-			} else if (dot.tok_file != saved_name) {
-				if (saved_name) free(saved_name);
-				saved_name = dot.tok_file;
-			}
-		}
+		/*
+		 * Do not attempt to free the old string, since it might
+		 * be used in a def structure.
+		 */
 		FileName = tk.tk_bts;
 	}
 }

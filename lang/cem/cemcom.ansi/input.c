@@ -15,7 +15,14 @@ struct file_info	finfo;
 #include "nopp.h"
 #include <inp_pkg.body>
 
+#include        "dbsymtab.h"
 #ifndef NOPP
+#ifdef DBSYMTAB
+#include        <stb.h>
+extern int      IncludeLevel;
+extern char	options[];
+#endif
+
 char *
 getwdir(fn)
 	register char *fn;
@@ -65,6 +72,12 @@ AtEoIF()
 	if (NoUnstack) lexerror("unexpected EOF");
 #ifndef NOPP
 	nestlevel = nestlow;
+#ifdef DBSYMTAB
+	if (options['g'] && IncludeLevel > 0) {
+		C_ms_std(FileName, N_EINCL, 0);
+	}
+	IncludeLevel--;
 #endif
+#endif /* NOPP */
 	return 0;
 }
