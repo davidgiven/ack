@@ -506,7 +506,7 @@ This script consists of the file TakeAction in the Kit's root
 directory and a few files called Action in some directories.
 The Action files describe in a very simple form which actions
 have to be performed in which directories.
-The default action is to start "make install".
+The default action is to start "make install && make clean".
 The output of each make is diverted to a file called "Out"
 in the same directory as the make was started in.
 If the make was successful (return code 0) the Out file is removed
