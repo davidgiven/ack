@@ -27,7 +27,7 @@ L1:
 L2:
 	# Put the (octal) trapnumber in the zeroes in Lemes[].
 
-	movl	$Lemesend-1,r1	# Addres after last '0'.
+	movl	$Lemesend-9,r1	# Addres after last '0'.
 	movl	$5,r2		# Max number of digits.
 	movl	(sp),r0		# Trap number in r0.
 L3:
@@ -42,7 +42,7 @@ L3:
 	bpt
 .data
 Lemes:
-.byte 'E,'r,'r,' ,'0,'0,'0,'0,'0,0xa
+.byte 'E,'M,' ,'t,'r,'a,'p,' ,'0,'0,'0,'0,'0,' ,'(,'o,'c,'t,'a,'l,'),0xa
 Lemesend:
 .align 2
 Lwr:
