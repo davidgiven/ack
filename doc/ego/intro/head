@@ -1,0 +1,7 @@
+.ND
+.ll 80m
+.nr LL 80m
+.nr tl 78m
+.tr ~ 
+.ds >. .
+.ds [. " \[
