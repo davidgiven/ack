@@ -442,7 +442,7 @@ char *mess;
   }
 
   if (verbose)
-	show(mess, name);
+	show(mess, member.ar_name);
   close(src_fd);
 }
 
