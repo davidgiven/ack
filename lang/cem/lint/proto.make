@@ -9,3 +9,9 @@ all:
 
 install:
 	for i in $(DIRS) ; do cd $$i ; make install ; cd .. ; done
+
+clean:
+	for i in $(DIRS) ; do cd $$i ; make clean ; cd .. ; done
+
+cmp:
+	for i in $(DIRS) ; do cd $$i ; make cmp ; cd .. ; done
