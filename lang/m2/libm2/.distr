@@ -6,7 +6,6 @@ Conversion.def
 EM.def
 PascalIO.def
 InOut.def
-Makefile
 Mathlib.def
 MathLib0.def
 Processes.def
@@ -27,3 +26,4 @@ ArraySort.def
 StripUnix.def
 Termcap.def
 XXTermcap.def
+proto.make
