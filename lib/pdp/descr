@@ -37,6 +37,6 @@ name ld
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.e:{TAIL}={EM}/{LIB}em) (.c.p:{TAIL}=/lib/libc.a)
+		(.e:{TAIL}={EM}/{LIB}em) (.b.c.p:{TAIL}=/lib/libc.a)
 	linker
 end
