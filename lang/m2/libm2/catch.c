@@ -93,7 +93,7 @@ catch(trapno)
 		signal(__signo, SIG_DFL);
 		_cleanup();
 		kill(getpid(), __signo);
-		_exit(trapno);
+		exit(trapno);
 	}
 #endif
 #endif

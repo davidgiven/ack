@@ -20,6 +20,7 @@ _cleanup()
 	for (i = 0; i < callindex; i++) {
 		(*proclist[i])();
 	}
+	callindex = 0;
 }
 
 CallAtEnd(p)
