@@ -70,7 +70,7 @@ int runphase(phase) register trf *phase ; {
 	}
 	x_arg( (char *)0 ) ;
       result=run_exec(phase,prog) ;
-      throws(&prog) ;
+      throws(prog) ;
       return result ;
 }
 
