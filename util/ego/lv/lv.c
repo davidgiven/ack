@@ -26,15 +26,13 @@
 #include "../../../h/em_mnem.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_spec.h"
+#include "../../../h/em_mes.h"
+#include "../../../h/em_ego.h"
 #include "../share/parser.h"
 
 #define newlvbx()	(bext_p) newstruct(bext_lv)
 #define oldlvbx(x)	oldstruct(bext_lv,x)
 
-
-/* TEMPORARY: should be put in ../../../h/em_mes.h: */
-#define ms_liv 9
-#define ms_ded 10
 
 short nrglobals;
 short nrvars;
@@ -292,8 +290,8 @@ STATIC line_p make_mesg(mesg,loc)
 {
 	/* Create a line for a message stating that
 	 * local variable loc is live/dead. This message
-	 * looks like: "mes ms_liv,off,size" or
-	 * "mes ms_ded,off,size".
+	 * looks like: "mes ms_ego,ego_live,off,size" or
+	 * "mes ms_ego,ego_dead,off,size".
 	 */
 
 	line_p l = newline(OPLIST);
@@ -301,6 +299,8 @@ STATIC line_p make_mesg(mesg,loc)
 
 	l->l_instr = ps_mes;
 	ap = ARG(l) = newarg(ARGOFF);
+	ap->a_a.a_offset = ms_ego;
+	ap = ap->a_next = newarg(ARGOFF);
 	ap->a_a.a_offset = mesg;
 	ap = ap->a_next = newarg(ARGOFF);
 	ap->a_a.a_offset = loc->lc_off;
@@ -335,7 +335,7 @@ STATIC block_entry(b,prev)
 			}
 			is_live = Cis_elem(vn,L_IN(b));
 			if (was_live != is_live) {
-				app_block(make_mesg((is_live?ms_liv:ms_ded),loc),b);
+				app_block(make_mesg((is_live?ego_live:ego_dead),loc),b);
 			}
 		}
 	}
@@ -396,18 +396,18 @@ STATIC definition(l,useless_out,v_out,mesgflag)
 				same register for this variable as for 
 				another variable, that is alive at this point.
 				If this variable is dead after the assignment,
-				the two messages (ms_liv, ms_ded) are right
+				the two messages (ego_live, ego_dead) are right
 				after each other. Luckily, this IS an interval.
 			*/
 			if (!mesgflag) {
-				appnd_line(make_mesg(ms_liv,loc), l);
+				appnd_line(make_mesg(ego_live,loc), l);
 				l = l->l_next;
 			}
 			if (IS_LIVE(loc)) {
 				DEAD(loc);
 			} else {
 				if (!mesgflag) {
-					appnd_line(make_mesg(ms_ded, loc), l);
+					appnd_line(make_mesg(ego_dead, loc), l);
 				}
 				*useless_out = TRUE;
 			}
@@ -436,7 +436,7 @@ STATIC use(l,mesgflag)
 		loc = locals[TO_LOCAL(v)];
 		if (IS_REGVAR(loc) && IS_DEAD(loc)) {
 			if (!mesgflag) {
-				appnd_line(make_mesg(ms_ded,loc), l);
+				appnd_line(make_mesg(ego_dead,loc), l);
 			}
 			LIVE(loc);
 		}
