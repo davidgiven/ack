@@ -24,9 +24,6 @@ C_alloc()
 	return &b;
 }
 
-arith C_holsize, C_bsssize;
-int C_holinit, C_bssinit;
-
 int
 C_out(p)
 	register struct e_instr *p;
@@ -168,17 +165,17 @@ pseudo(p)
 		break;
 
 	case ps_bss:
-		CST(C_bsssize);
+		CST(EM_bsssize);
 		arg(p, 1);
 		COMMA();
-		CST((arith) C_bssinit);
+		CST((arith) EM_bssinit);
 		break;
 
 	case ps_hol:
-		CST(C_holsize);
+		CST(EM_holsize);
 		arg(p, 1);
 		COMMA();
-		CST((arith) C_holinit);
+		CST((arith) EM_holinit);
 		break;
 
 	case ps_pro:
