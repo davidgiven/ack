@@ -67,9 +67,9 @@ List	*datalist=0;
 datastmt()
 {
 	List *l,*l1;
-	l= (List *) salloc(sizeof(List));
+	/*NOSTRICT*/ l= (List *) salloc(sizeof(List));
 	l->linenr= currline->linenr;
-	l->emlabel= (long) ftell(datfile);
+	/*NOSTRICT?*/ l->emlabel= (long) ftell(datfile);
 	if( datalist==0) 
 	{
 		datalist=l;
