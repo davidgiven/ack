@@ -48,7 +48,9 @@ The last type is designed for interpretation; it is obtained by calling
 the compiler as \fIem22\fP, \fIem24\fP, or \fIem44\fP.
 Compilation time for interpretation is fast and gives many
 runtime checks,
-but execution is about seven times slower.
+but execution with \fIem\fP(1) is about seven times slower.
+Execution with \fIint\fP(1) is even slower than that, but available on
+more machines.
 Which combinations of languages and machines are allowed varies
 in time and depends on the installation.
 .PP
@@ -127,7 +129,7 @@ Tell the C-compiler to conform to "Kernighan & Ritchie" C.
 .IP \-ansi
 Tell \fIack\fP to use the ANSI C compiler instead of the old one.
 .IP \-fp
-Use floating point package, if not for VAX or PDP.
+Use the software floating point package, if present.
 .SB preprocessing
 .IP \-I\fIdir\fP
 \&\`#include\' files whose names do not begin with \`/\' are
