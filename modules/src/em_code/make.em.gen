@@ -1,17 +1,17 @@
-echo "% this part is generated from $1 at: " `date`
+echo "/* this part is generated from $1 at: " `date` "*/"
 ed - $1 <<'EOI' 
 1,/^$/d
 1,/^$/d
 1,$s/^\(...\)	\(.\).*/\1:\2/
-g/:d/s/^\(...\):\(.\).*/C_\1	| arith:\2	| OP(op_\1); CST(\2); NL()/
-g/:[cslnfzor]/s/^\(...\):\(.\).*/C_\1	| arith:\2	| OP(op_\1); CST(\2); NL()/
-g/:w/s/^\(...\).*/C_\1	| arith:w	| OP(op_\1); CST(w); NL()\
-C_\1_narg	| 	| OP(op_\1); CCEND(); NL()/
-g/:g/s/^\(...\).*/C_\1	| arith:g	| OP(op_\1); CST(g); NL()\
-C_\1_dnam	| char *:g arith:o	| OP(op_\1); NOFF(g,o); NL()\
-C_\1_dlb	| label:g arith:o	| OP(op_\1); DOFF(g,o); NL()/
-g/:p/s/^\(...\).*/C_\1	| char *:p	| OP(op_\1); PNAM(p); NL()/
-g/:b/s/^\(...\).*/C_\1	| label:b	| OP(op_\1); CILB(b); NL()/
-g/:-/s/^\(...\).*/C_\1	| 	| OP(op_\1); NL()/
+g/:d/s/^\(...\):\(.\).*/#define C_\1(c) CC_opcst(op_\1, c)/
+g/:[cslnfzor]/s/^\(...\):\(.\).*/#define C_\1(c) CC_opcst(op_\1, c)/
+g/:w/s/^\(...\).*/#define C_\1(w) CC_opcst(op_\1, w)\
+#define C_\1_narg() CC_opnarg(op_\1)/
+g/:g/s/^\(...\).*/#define C_\1(g) CC_opcst(op_\1, g)\
+#define C_\1_dnam(g, o) CC_opdnam(op_\1, g, o)\
+#define C_\1_dlb(g, o) CC_opdlb(op_\1, g, o)/
+g/:p/s/^\(...\).*/#define C_\1(p) CC_oppnam(op_\1, p)/
+g/:b/s/^\(...\).*/#define C_\1(b) CC_opilb(op_\1, b)/
+g/:-/s/^\(...\).*/#define C_\1() CC_op(op_\1)/
 1,$p
 EOI
