@@ -44,7 +44,7 @@ int	NoUnstack;
 AtEoIT()
 {
 #ifndef NOPP
-	if (NoUnstack) lexerror("unexpected EOF");
+	if (NoUnstack) lexwarning("unexpected EOF");
 	DoUnstack();
 #endif NOPP
 	return 0;
@@ -52,6 +52,12 @@ AtEoIT()
 
 AtEoIF()
 {
-	if (NoUnstack) lexerror("unexpected EOF");
+#ifndef NOPP
+	extern int nestlevel;
+
+	if (nestlevel != -1) lexwarning("missing #endif");
+	else
+#endif NOPP
+	if (NoUnstack) lexwarning("unexpected EOF");
 	return 0;
 }
