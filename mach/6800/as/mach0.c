@@ -1,4 +1,3 @@
-#define DUK
 #define RCSID0 "$Header$"
 
 /*
@@ -10,4 +9,3 @@
 #define THREE_PASS
 #define	LISTING
 #define RELOCATION
-#define NOLD
