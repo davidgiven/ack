@@ -270,13 +270,51 @@ AddOneCase(sh, lnode, rnode, lbl)
 	register struct case_entry *ce = new_case_entry();
 	register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
 	int fund = sh->sh_type->tp_fund;
+	arith diff;
 
-	ce->ce_label = lbl;
-	ce->ce_low = lnode->nd_INT;
-	ce->ce_up = rnode->nd_INT;
 	if (! ChkCompat(&lnode, sh->sh_type, "case") ||
 	    ! ChkCompat(&rnode, sh->sh_type, "case")) {
 	}
+	diff = rnode->nd_INT - lnode->nd_INT;
+#define MAXRANGE	100
+	if (diff < 0 || diff > MAXRANGE) {
+		/* This is a bit of a hack, but it prevents the compiler
+		   from crashing on things like
+		   CASE a OF
+		     10 .. MAX(CARDINAL): ....
+		   
+		   If the range covers more than MAXRANGE cases, this case
+		   is dealt with separately.
+		*/
+		label cont = ++text_label;
+
+		C_dup(int_size);
+		C_loc(lnode->nd_INT);
+		if (fund == T_INTEGER) {
+			C_blt(cont);
+		}
+		else {
+			C_cmu(int_size);
+			C_zlt(cont);
+		}
+		C_dup(int_size);
+		C_loc(rnode->nd_INT);
+		if (fund == T_INTEGER) {
+			C_bgt(cont);
+		}
+		else {
+			C_cmu(int_size);
+			C_zgt(cont);
+		}
+		C_asp(int_size);
+		C_bra(lbl);
+		C_df_ilb(cont);
+		free_case_entry(ce);
+		return;
+	}
+	ce->ce_label = lbl;
+	ce->ce_low = lnode->nd_INT;
+	ce->ce_up = rnode->nd_INT;
 	if (sh->sh_entries == 0)	{
 		/* first case entry
 		*/
