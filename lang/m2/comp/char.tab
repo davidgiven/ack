@@ -7,8 +7,8 @@
 %
 %C
 STGARB:\000-\200
-STSKIP: \r\t
-STNL:\012\013\014
+STSKIP: \r\t\013\014\015
+STNL:\012
 STSIMP:#&()*+,-/;=[]^{|}~
 STCOMP:.:<>
 STIDF:a-zA-Z

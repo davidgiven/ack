@@ -9,8 +9,8 @@
 %
 %C
 STGARB:\000-\200
-STSKIP:\r \t
-STNL:\n\f\013
+STSKIP:\r \t\013\f
+STNL:\n
 STCOMP:!&+-<=>|
 STSIMP:%()*,/:;?[]^{}~
 STCHAR:'
