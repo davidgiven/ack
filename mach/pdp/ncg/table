@@ -8,7 +8,7 @@ EM_BSIZE=4
 
 SL=4
 
-FORMAT = "0%o"
+FORMAT = "0%lo"
 TIMEFACTOR = 1/300
 
 illins = "Illegal"
@@ -1309,7 +1309,7 @@ with FLTREG				yields {ftolong,%1}
 						leaving loc 4 loc $2 cuu
 
 pat loc loc cfu $1==8
-with DBLREG				yields {ftolong,%1}
+with DBLREG				yields {ftolong,%1.1}
 						leaving loc 4 loc $2 cuu
 
 pat loc loc cfi $1==4 && $2==2
