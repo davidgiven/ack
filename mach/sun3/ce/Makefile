@@ -1,6 +1,7 @@
 EMHOME=../../..
 BACK=$(EMHOME)/lib/ceg/ce_back
 CEG = $(EMHOME)/lib/ceg/util
+AR = ar
 
 all:	back.a
 	make -f $(CEG)/make_own
@@ -28,10 +29,10 @@ dclean:
 	make -f $(CEG)/make_own dclean
 	rm -rf back
 
-back.a :
+back.a:	do_close.c do_open.c end_back.c misc.c output.c relocation.c
 	-mkdir back
 	cp $(BACK)/obj_back/*h back
 	cp Make.back back/Makefile
 	cd back; make ; cd ..
-	ar r back.a back/*o;
+	$(AR) r back.a back/*o;
 	-sh -c 'ranlib back.a'
