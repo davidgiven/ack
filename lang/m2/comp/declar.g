@@ -35,6 +35,7 @@ int		return_occurred;	/* set if a return occurs in a block */
 
 }
 
+/* inline in declaration: need space
 ProcedureDeclaration
 {
 	struct def *df;
@@ -47,6 +48,7 @@ ProcedureDeclaration
 				--proclevel;
 			}
 ;
+*/
 
 ProcedureHeading(struct def **pdf; int type;)
 {
@@ -56,7 +58,18 @@ ProcedureHeading(struct def **pdf; int type;)
 } :
 	PROCEDURE IDENT
 			{ *pdf = DeclProc(type, dot.TOK_IDF); }
-	FormalParameters(&pr, &parmaddr, &tp)?
+	[
+		'('
+		[
+			FPSection(&pr, &parmaddr)
+			[
+				';' FPSection(&pr, &parmaddr)
+			]*
+		]?
+		')'
+		[	':' qualtype(&tp)
+		]?
+	]?
 			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
 			  if (tp && IsConstructed(tp)) {
 warning(W_STRICT, "procedure \"%s\" has a constructed result type",
@@ -77,18 +90,30 @@ block(struct node **pnd;) :
 	END
 ;
 
-declaration:
+declaration
+{
+	struct def *df;
+} :
 	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE [ TypeDeclaration ';' ]*
 |
 	VAR [ VariableDeclaration ';' ]*
 |
-	ProcedureDeclaration ';'
+			{	++proclevel; }
+	ProcedureHeading(&df, D_PROCEDURE)
+	';'
+	block(&(df->prc_body))
+	IDENT
+			{	EndProc(df, dot.TOK_IDF);
+				--proclevel;
+			}
+	';'
 |
 	ModuleDeclaration ';'
 ;
 
+/* inline in procedureheading: need space
 FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
 	'('
 	[
@@ -101,6 +126,7 @@ FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
 	[	':' qualtype(ptp)
 	]?
 ;
+*/
 
 FPSection(struct paramlist **ppr; arith *parmaddr;)
 {

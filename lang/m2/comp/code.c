@@ -17,6 +17,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<em_code.h>
+#include	<em_abs.h>
 #include	<assert.h>
 
 #include	"type.h"
@@ -396,7 +397,7 @@ CodeParameters(param, arg)
 		return;
 	}
 	CodePExpr(left);
-	CodeCheckExpr(left, tp);
+	CodeCheckExpr(left_type, tp);
 }
 
 CodeCheckExpr(tp1, tp2)
@@ -586,6 +587,18 @@ RangeCheck(tpl, tpr)
 			}
 		}
 	}
+	else if (tpl->tp_size <= tpr->tp_size &&
+		 ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
+		  (tpr->tp_fund == T_INTEGER && tpl == card_type))) {
+		label lb = ++text_label;
+
+		C_dup(word_size);
+		C_zge(lb);
+		C_loc((arith) ECONV);
+		C_trp();
+		C_df_ilb(lb);
+	}
+
 }
 
 Operands(leftop, rightop, tp)
