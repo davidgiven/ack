@@ -128,10 +128,10 @@ go(argc,argv,initialize,optimize,phase_machinit,proc_flag)
 	fclose(gf2);
 	f = openfile(dname2,"w");
 	putdtable(fdblock,f);
-	fclose(f);
+	/* fclose(f); done by putdtable */
 	f = openfile(pname2,"w");
 	putptable(fproc,f,TRUE);
-	fclose(f);
+	/* fclose(f); done by putptable */
 	core_usage();
 }
 
