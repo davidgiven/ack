@@ -2,15 +2,15 @@
 .define __sigtramp
 __sigtramp:
 	movem.l	d0/d1/a0/a1,-(sp)
-	move.l	_sigfunc,d1
-	move.l	0x14(sp),d0
+	move.l	#__sigfunc,d1
+	move.l	0x10(sp),d0
 	lsl.l	#2,d0
 	add.l	d1,d0
 	move.l	d0,a0
 	move.l	(a0),a0
-	move.l	0x1c(sp),-(sp)
-	move.l	0x1c(sp),-(sp)
-	move.l	0x1c(sp),-(sp)
+	move.l	0x18(sp),-(sp)
+	move.l	0x18(sp),-(sp)
+	move.l	0x18(sp),-(sp)
 	jsr	(a0)
 	add.l	#12,sp
 	movem.l	(sp)+,d0/d1/a0/a1
