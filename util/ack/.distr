@@ -2,16 +2,13 @@ Makefile
 ack.h
 data.c
 data.h
-dmach.c
 dmach.h
 files.c
 grows.c
 grows.h
-intable.c
 list.c
 list.h
 main.c
-malloc.c
 mktables.c
 pc
 rmach.c
@@ -21,3 +18,4 @@ svars.c
 trans.c
 trans.h
 util.c
+ack.1.X
