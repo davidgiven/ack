@@ -1,6 +1,8 @@
 .ND
 .tr ~
 .ds >. .
+.ds [. [
+.ds .] ]
 .TL
 The ACK Target Optimizer
 .AU
