@@ -19,19 +19,15 @@
 
 #include <m2_traps.h>
 
-#if EM_WSIZE == EM_PSIZE
-#define ptrsiz unsigned
-#else
-#define ptrsiz unsigned long
-#endif
-
 #define MAXMAIN	2048
 
 struct proc {
-	ptrsiz size;		/* size of saved stackframe(s) */
+	unsigned size;		/* size of saved stackframe(s) */
 	int (*proc)();		/* address of coroutine procedure */
 	char *brk;		/* stack break of this coroutine */
 };
+
+extern unsigned topsize();
 
 static struct proc mainproc[MAXMAIN/sizeof(struct proc) + 1];
 
@@ -54,7 +50,7 @@ _SYSTEM__NEWPROCESS(p, a, n, p1)
 		must be level 0 procedures without parameters.
 	*/
 	char *brk = 0;
-	ptrsiz sz = topsize(&brk);
+	unsigned sz = topsize(&brk);
 
 	if (sz + sizeof(struct proc) > n) {
 		/* not enough space */
@@ -86,7 +82,7 @@ _SYSTEM__TRANSFER(a, b)
 		descriptor in the space indicated by "a", and transfering to
 		the coroutine in descriptor "b".
 	*/
-	ptrsiz size;
+	unsigned size;
 
 	if (! curproc) {
 		/* the current coroutine is the main process;

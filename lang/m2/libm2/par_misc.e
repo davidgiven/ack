@@ -21,7 +21,7 @@
  ; This implementation assumes a continuous stack growing downwards
 
  exp $topsize
- pro $topsize, 2*EM_WSIZE+4*EM_PSIZE
+ pro $topsize, 3*EM_WSIZE+3*EM_PSIZE
  ; local space for line-number, ignoremask, filename, stack-break, size,
  ; and stack-pointer (see the topsave routine)
  mes 11
@@ -46,9 +46,9 @@
 			; the whole frame.
 
  lor 1			; stack-break  SP
- sbs EM_PSIZE		; stack-break-SP
- ret EM_PSIZE		; return size of block to be saved
- end 2*EM_WSIZE+4*EM_PSIZE
+ sbs EM_WSIZE		; stack-break-SP
+ ret EM_WSIZE		; return size of block to be saved
+ end 3*EM_WSIZE+3*EM_PSIZE
 
  exp $topsave
  pro $topsave, 0
@@ -62,20 +62,18 @@
  loi EM_PSIZE		; stack-break
  lpb
  lor 1
- sbs EM_PSIZE
- loc EM_PSIZE
- adu EM_PSIZE		; gives size
- dup EM_PSIZE
- lal 0
- sti EM_PSIZE		; save size
+ sbs EM_WSIZE
+ loc EM_WSIZE
+ adu EM_WSIZE		; gives size
+ dup EM_WSIZE
+ stl 0			; save size
  lor 1			; SP (the SP BEFORE pushing)
  lor 1			; SP (address of stack top to save)
  lal EM_PSIZE		; area
  loi EM_PSIZE
- lal 0			; size
- loi EM_PSIZE
- bls EM_PSIZE		; move whole block
- asp 4*EM_PSIZE+2*EM_WSIZE	; remove the lot from the stack
+ lol 0			; size
+ bls EM_WSIZE		; move whole block
+ asp 3*EM_PSIZE+3*EM_WSIZE	; remove the lot from the stack
  loc 1
  ret EM_WSIZE			; return 1
  end 0
@@ -117,10 +115,10 @@ sv
  lae sv
  loi EM_PSIZE
  adp EM_PSIZE
- loi EM_PSIZE		; size of block
- bls EM_PSIZE		; move block back (SP becomes the SP AFTER again, 
+ loi EM_WSIZE		; size of block
+ bls EM_WSIZE		; move block back (SP becomes the SP AFTER again, 
 			; because of the asp -EM_PSIZE!)
- asp 2*EM_PSIZE		; drop size + SP
+ asp EM_PSIZE+EM_WSIZE	; drop size + SP
  str 0			; restore local base
  sim			; ignore mask
  lae 4
