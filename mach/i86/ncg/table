@@ -449,6 +449,9 @@ PATTERNS
 
 pat loc					yields {ANYCON,$1}
 
+pat ldc loww($1)==0 && highw($1)==0
+uses REG = {ANYCON, 0}			yields %a %a
+
 pat ldc					yields {ANYCON,highw($1)}
 				       	       {ANYCON,loww($1)}
 
@@ -1997,6 +2000,8 @@ with rmorconst REG
 
 pat loc and $1==65535 && $2==2
 
+pat loc and $1==0 && $2==2		leaving asp 2 loc 0
+
 pat and $1==4
 with EXACT REG REG rmorconst rmorconst
   gen and %1,%3
@@ -2005,9 +2010,13 @@ with rmorconst rmorconst REG REG
   gen and %3,%1
       and %4,%2				yields %4 %3
 
-pat ldc and highw($1)==(0-1) && $2==4
-with REG
-  gen and %1,{ANYCON, loww($1)}		yields %1
+pat ldc and highw($1)==(0-1) && $2==4	leaving loc loww($1) and 2
+
+pat ldc and loww($1)==0 && $2==4	leaving asp 2 loc highw($1) and 2 loc 0
+
+pat ldc and loww($1)==65535 && $2==4
+with rmorconst REG
+  gen and %2,{ANYCON, highw($1)}	yields %2 %1
 
 pat ldc and highw($1)==0 && $2==4
 with REG rmorconst
@@ -2029,6 +2038,10 @@ with REG rmorconst
 with rmorconst REG
   gen or %2,%1				yields %2
 
+pat loc ior $1==0 && $2==2
+
+pat loc ior $1==65535 && $2==2		leaving asp 2 loc $1
+
 pat ior $1==4
 with EXACT REG REG rmorconst rmorconst
   gen or %1,%3
@@ -2041,9 +2054,13 @@ pat ldc ior highw($1)==(0-1) && $2==4
 with REG rmorconst
   gen or %1,{ANYCON, loww($1)}		yields {ANYCON,0-1} %1
 
-pat ldc ior highw($1)==0 && $2==4
-with REG
-  gen or %1,{ANYCON, loww($1)}		yields %1
+pat ldc ior highw($1)==0 && $2==4	leaving loc loww($1) ior 2
+
+pat ldc ior loww($1)==65535 && $2==4	leaving asp 2 loc highw($1) ior 2 loc 0-1
+
+pat ldc ior loww($1)==0 && $2==4
+with rmorconst REG
+  gen or %2,{ANYCON, highw($1)}		yields %2 %1
 
 pat ior defined($1)
 kills ALL
@@ -2471,6 +2488,32 @@ pat cmp zgt         call cmxzxx("ja","jb")
 pat cms zeq $1==2   call cmxzxx("je","je")
 pat cms zne $1==2   call cmxzxx("jne","jne")
 
+proc cmx4zxx example cmi zlt
+with regorconst regorconst rm rm STACK
+  gen cmp %4,%2
+      jxx[1] {label,$2}
+      jne {label,1f}
+      cmp %3,%1
+      jxx[2] {label,$2}
+      1:
+with rm rm regorconst regorconst STACK
+  gen cmp %2,%4
+      jxx[3] {label,$2}
+      jne {label,1f}
+      cmp %1,%3
+      jxx[4] {label,$2}
+      1:
+
+pat cmi zlt $1==4	call cmx4zxx("jl", "jb", "jg", "ja")
+pat cmi zle $1==4	call cmx4zxx("jl", "jbe", "jg", "jae")
+pat cmi zgt $1==4	call cmx4zxx("jg", "ja", "jl", "jb")
+pat cmi zge $1==4	call cmx4zxx("jg", "jae", "jl", "jbe")
+
+pat cmu zlt $1==4	call cmx4zxx("jb", "jb", "ja", "ja")
+pat cmu zle $1==4	call cmx4zxx("jb", "jbe", "ja", "jae")
+pat cmu zgt $1==4	call cmx4zxx("ja", "ja", "jb", "jb")
+pat cmu zge $1==4	call cmx4zxx("ja", "jae", "jb", "jbe")
+
 pat ldc cmi zlt highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst	yields %2	leaving zlt $3
 
@@ -2482,16 +2525,6 @@ with rmorconst rmorconst	yields %2	leaving zge $3
 
 pat ldc cmi tge highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst	yields %2	leaving tge $3
-
-pat ldc cmi zle highw($1)==0 && loww($1)==0 && $2==4
-with rmorconst rmorconst
-uses REG = {ANYCON, 0}
-  gen cmp %a,%2
-      jg {label,$3}
-      jl {label,1f}
-      cmp %a,%1
-      je {label,$3}
-      1:
 
 pat ldc cmi tle highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst
@@ -2505,16 +2538,6 @@ uses REG = {ANYCON, 0}
       inc %a
       1:			yields %a
 
-pat ldc cmi zgt highw($1)==0 && loww($1)==0 && $2==4
-with rmorconst rmorconst
-uses REG = {ANYCON, 0}
-  gen cmp %a,%2
-      jl {label,$3}
-      jg {label,1f}
-      cmp %a,%1
-      jne {label,$3}
-      1:
-
 pat ldc cmi tgt highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst
 uses REG = {ANYCON, 0}
@@ -2526,16 +2549,6 @@ uses REG = {ANYCON, 0}
       2:
       inc %a
       1:			yields %a
-
-pat ldc cmu zgt highw($1)==0 && loww($1)==0 && $2==4
-with rmorconst rmorconst
-uses REG = {ANYCON, 0}
-  gen cmp %a,%2
-      jl {label,$3}
-      jg {label,1f}
-      cmp %a,%1
-      jne {label,$3}
-      1:
 
 pat ldc cmu tgt highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst
@@ -2565,6 +2578,32 @@ with REG rmorconst STACK
   gen or %1,%2
       jne {label,$3}
 
+pat ldc cms teq $2==4 && loww($1)==0 && highw($1)==0
+with rmorconst REG STACK
+uses REG = {ANYCON, 0}
+  gen or %2,%1
+      jne {label,1f}
+      inc %a
+      1:			yields %a
+with REG rmorconst STACK
+uses REG = {ANYCON, 0}
+  gen or %1,%2
+      jne {label,1f}
+      inc %a
+      1:			yields %a
+
+pat ldc cms tne $2==4 && loww($1)==0 && highw($1)==0
+with rmorconst REG STACK
+  gen or %2,%1
+      je {label,1f}
+      inc %2
+      1:			yields %2
+with REG rmorconst STACK
+  gen or %1,%2
+      je {label,1f}
+      inc %1
+      1:			yields %1
+
 pat ldc cms zeq $2==4 && loww($1)==65535 && highw($1)==(0-1)
 with rmorconst REG STACK
   gen and %2,%1
@@ -2585,21 +2624,6 @@ with REG rmorconst STACK
       cmp %1,{ANYCON,0-1}
       jne {label,$3}
 
-pat ldc cms zeq $2==4
-with rm rm STACK
-  gen cmp %1, {ANYCON, loww($1)}
-      jne {label,1f}
-      cmp %2, {ANYCON, highw($1)}
-      je {label,$3}
-      1:
-
-pat ldc cms zne $2==4
-with rm rm STACK
-  gen cmp %1, {ANYCON, loww($1)}
-      jne {label,$3}
-      cmp %2, {ANYCON, highw($1)}
-      jne {label,$3}
-
 pat cms zne $1==4
 with regorconst regorconst rm rm STACK
   gen cmp %3,%1
@@ -2607,7 +2631,6 @@ with regorconst regorconst rm rm STACK
       cmp %4,%2
       jne {label,$2}
 with rm rm regorconst regorconst STACK
-kills ALL
   gen cmp %1,%3
       jne {label,$2}
       cmp %2,%4
@@ -2621,7 +2644,6 @@ with regorconst regorconst rm rm STACK
       je {label,$2}
       1:
 with rm rm regorconst regorconst STACK
-kills ALL
   gen cmp %1,%3
       jne {label,1f}
       cmp %2,%4
