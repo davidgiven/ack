@@ -2,7 +2,8 @@ EMHOME = ../../..
 MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
-CFLAGS = -O -I$(EMHOME)/h
+INCLUDES = -I$(EMHOME)/h
+CFLAGS = -O $(INCLUDES)
 CFILES =	rd_arhdr.c wr_arhdr.c \
 		rd_ranlib.c wr_ranlib.c \
 		rd_bytes.c wr_bytes.c \
@@ -52,6 +53,10 @@ byte_order:	byte_order.o
 byte_order.h:	byte_order
 		byte_order > byte_order.h
 
+lintlib:	byte_order.h
+		lint $(INCLUDES) -Cobject $(CFILES)
+		mv llib-lobject.ln $(MODULES)/lib
+		
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTO
 rd_arhdr.o: byte_order.h object.h
 wr_arhdr.o: byte_order.h object.h

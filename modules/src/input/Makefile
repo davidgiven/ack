@@ -33,3 +33,7 @@ opr:
 
 clean:
 		rm -f *.[oa]
+
+lintlib:
+		lint -Cinput AtEoIF.c AtEoIT.c
+		mv llib-linput.ln $(MODULES)/lib

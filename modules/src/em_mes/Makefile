@@ -6,7 +6,8 @@ SRC =	C_ms_err.c C_ms_opt.c C_ms_emx.c C_ms_reg.c C_ms_src.c\
 	C_ms_flt.c C_ms_com.c C_ms_par.c C_ms_ego.c C_ms_gto.c
 OBJ =	C_ms_err.o C_ms_opt.o C_ms_emx.o C_ms_reg.o C_ms_src.o\
 	C_ms_flt.o C_ms_com.o C_ms_par.o C_ms_ego.o C_ms_gto.o
-CFLAGS=-I$(EMHOME)/h -I$(HDIR) -O
+INCLUDES=-I$(EMHOME)/h -I$(HDIR)
+CFLAGS = $(INCLUDES) -O
 
 all:		libem_mes.a
 
@@ -31,3 +32,7 @@ opr:
 
 clean:
 		rm -f *.[oa]
+
+lintlib:
+		lint $(INCLUDES) -Cem_mes $(SRC)
+		mv llib-lem_mes.ln $(EMHOME)/modules/lib
