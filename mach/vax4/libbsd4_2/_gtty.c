@@ -1,6 +1,6 @@
 #include <sgtty.h>
 int
-gtty(fildes,argp)
+_gtty(fildes,argp)
 	int fildes ;
 	struct sgttyb *argp ;
 {
