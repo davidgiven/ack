@@ -1,6 +1,8 @@
 /* $Header$ */
 #ifdef LL_DEBUG
-#define LL_assert(x) if(!(x)) LL_badassertion("x",__FILE__,__LINE__)
+#include <assert.h>
+#include <stdio.h>
+#define LL_assert(x)	assert(x)
 #else
 #define LL_assert(x)	/* nothing */
 #endif
@@ -14,8 +16,6 @@ extern int LLsymb;
 #ifdef LL_FASTER
 #define LLscan(x)	if ((LLsymb = LL_LEXI()) != x) LLerror(x); else
 #endif
-
-# include "Lpars.h"
 
 extern unsigned int LLscnt[];
 extern unsigned int LLtcnt[];

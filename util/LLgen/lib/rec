@@ -7,10 +7,6 @@
 static char *rcsid = "$Header$";
 # endif
 
-# ifdef LL_DEBUG
-# include <stdio.h>
-# endif
-
 unsigned int	LLtcnt[LL_NTERMINALS];
 unsigned int	LLscnt[LL_NSETS];
 int		LLcsymb, LLsymb;
@@ -20,7 +16,7 @@ static int	LLlevel;
 extern		LLread();
 extern int	LLskip();
 extern int	LLnext();
-#ifndef LLscan
+#ifndef LL_FASTER
 extern		LLscan();
 #endif
 extern		LLerror();
@@ -30,7 +26,11 @@ extern int	LLfirst();
 extern		LLnewlevel();
 extern		LLoldlevel();
 
-#ifndef LLscan
+#ifdef LL_USERHOOK
+static		LLdoskip();
+#endif
+
+#ifndef LL_FASTER
 LLscan(t) {
 	/*
 	 * Check if the next symbol is equal to the parameter
@@ -123,6 +123,7 @@ LLskip() {
 	return LLdoskip(0);
 }
 
+static int
 LLuserhook(exp, list)
 	int *list;
 {
@@ -132,6 +133,7 @@ LLuserhook(exp, list)
 	return LLsymb != old;
 }
 
+static
 LLmklist(list)
 	register int *list;
 {
@@ -157,6 +159,7 @@ LLmklist(list)
 	*list = 0;
 }
 
+static
 LLdoskip(exp) {
 	int LLx;
 	int list[LL_NTERMINALS+1];
@@ -240,11 +243,3 @@ LLoldlevel(LLsinfo) unsigned int *LLsinfo; {
 		LLcsymb = (int) LLsinfo[LL_NSETS+LL_NTERMINALS+1];
 	}
 }
-
-# ifdef LL_DEBUG
-LL_badassertion(asstr,file,line) char *asstr, *file; {
-
-	fprintf(stderr,"Assertion \"%s\" failed %s(%d)\n",asstr,file,line);
-	abort();
-}
-# endif
