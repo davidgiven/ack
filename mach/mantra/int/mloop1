@@ -217,27 +217,152 @@ bra	zre_qw	; bra	zrl_qpw	; bra	zrl_qnw
 .errnz .-dispae2-220
 
 !------------------------------------------------------------------------------
-!	timeinf	tables,	first the unescaped opcodes
-!	these tables are parallel to the tables	dispat , dispae1 and dispae2
-!	Each entry contains a reasonable estimate of
-!	the number of processor state cycles needed to
-!	execute	that instruction. The exact amount cannot be
-!	supplied, since	this can depend	rather heavily on the
-!	size of	the object in set, array case instructions etc.
-!	The table timeinf also contains, added to each entry,
-!	the number of processor state cycles needed to find the instruction.
-!	This number is currently 22.Also the number of processor state
-!	cycles to return from the instruction is included.
-!	The number is computed for
-!	the case that all check	and runinf options are off.
+!	timeinf	tables,	first the unescaped opcodes these tables are parallel
+!	to the tables	dispat , dispae1 and dispae2 .Each entry contains a
+!	reasonable estimate of the number of processor state cycles needed to
+!	execute	that instruction. The exact amount cannot be supplied, since
+!	this can depend	rather heavily on the size of the object in set, array
+!	case instructions etc. 	The table timeinf also contains, added to each
+!	entry, the number of processor state cycles needed to find the
+!	instruction. This number is currently 22 .Also the number of processor
+!	state cycles to return from the instruction is included. The number is
+!	computed for the case that all check and runinf options are off.
+!	For escape1 and escape2 in timeinf the full decoding is listed .
+!	In timeinf1 and timeinf2 only a rough estimate is given for the
+!	processor state cycles needed to execute the instruction and to return
+!	from it .
 !------------------------------------------------------------------------------
 
 #if prof
 
 	.data
-
+#ifdef lword
 timeinf:
-.long 33 ; .long 35 ; .long 35 ; .long 35 
+.long 32 ; .long 37 ; .long 37 ; .long 37 
+.long 37 ; .long 37 ; .long 37 ; .long 37
+.long 37 ; .long 37 ; .long 37 ; .long 37 
+.long 37 ; .long 37 ; .long 37 ; .long 37
+.long 37 ; .long 37 ; .long 37 ; .long 37 
+.long 37 ; .long 37 ; .long 37 ; .long 37
+.long 37 ; .long 37 ; .long 37 ; .long 37 
+.long 37 ; .long 37 ; .long 37 ; .long 37
+.long 37 ; .long 37 ; .long 134 ; .long 00 
+.long 42 ; .long 00 ; .long 56 ; .long 40
+.long 40 ; .long 42 ; .long 42 ; .long 42 
+.long 42 ; .long 38 ; .long 38 ; .long 38
+.long 38 ; .long 38 ; .long 42 ; .long 71 
+.long 52 ; .long 52 ; .long 52 ; .long 52
+.long 118 ; .long 52 ; .long 52 ; .long 55 
+.long 45 ; .long 45 ; .long 36 ; .long 43
+.long 231 ; .long 231 ; .long 231 ; .long 231 
+.long 231 ; .long 231 ; .long 231 ; .long 231
+.long 231 ; .long 231 ; .long 231 ; .long 231 
+.long 231 ; .long 231 ; .long 231 ; .long 231
+.long 231 ; .long 231 ; .long 231 ; .long 231 
+.long 231 ; .long 231 ; .long 231 ; .long 231
+.long 231 ; .long 231 ; .long 231 ; .long 231 
+.long 233 ; .long 00 ; .long 00 ; .long 75
+.long 00 ; .long 58 ; .long 00 ; .long 54
+.long 91 ; .long 113 ; .long 116 ; .long 38
+.long 59 ; .long 59 ; .long 36 ; .long 00 
+.long 1100 ; .long 77; .long 32 ; .long 66
+.long 51 ; .long 45 ; .long 49 ; .long 49 
+.long 53 ; .long 127 ; .long 52 ; .long 152
+.long 54 ; .long 57 ; .long 57 ; .long 57 
+.long 57 ; .long 57 ; .long 57 ; .long 57
+.long 72 ; .long 61 ; .long 34 ; .long 37 
+.long 59 ; .long 51 ; .long 58 ; .long 178
+.long 48 ; .long 83 ; .long 66 ; .long 50 
+.long 66 ; .long 63 ; .long 88 ; .long 140
+.long 60 ; .long 62 ; .long 44 ; .long 44
+.long 66 ; .long 49 ; .long 41 ; .long 52
+.long 36 ; .long 38 ; .long 42 ; .long 69
+.long 63 ; .long 63 ; .long 63 ; .long 63
+.long 63 ; .long 66 ; .long 54 ; .long 59 
+.long 59 ; .long 59 ; .long 57 ; .long 276
+.long 44 ; .long 75 ; .long 91 ; .long 107
+.long 123 ; .long 193 ; .long 68 ; .long 68
+.long 38 ; .long 38 ; .long 38 ; .long 38 
+.long 38 ; .long 38 ; .long 38 ; .long 38
+.long 38 ; .long 38 ; .long 38 ; .long 38
+.long 50 ; .long 50 ; .long 58 ; .long 38
+.long 64 ; .long 00 ; .long 205 ; .long 00
+.long 64 ; .long 79 ; .long 112 ; .long 171
+.long 1094 ; .long 136 ; .long 00 ; .long 38
+.long 00 ; .long 66 ; .long 144 ; .long 60
+.long 62 ; .long 57 ; .long 71 ; .long 54
+.long 61 ; .long 61 ; .long 72 ; .long 47
+.long 54 ; .long 60 ; .long 46 ; .long 58
+.long 73 ; .long 88; .long 103 ; .long 181
+.long 68 ; .long 73 ; .long 38 ; .long 38 
+.long 38 ; .long 38 ; .long 38 ; .long 38
+.long 38 ; .long 54 ; .long 47 ; .long 47 
+.long 47 ; .long 47 ; .long 56 ; .long 47
+.long 50 ; .long 91 ; .long 47 ; .long 47 
+.long 47 ; .long 47 ; .long 47 ; .long 51
+.long 71 ; .long 54 ; .long 38 ; .long 38
+.long 54 ; .long 73 ; .long 63 ; .long 99 
+
+timeinf1:
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 58
+.long 63 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+.long 40 ; .long 40 ; .long 40 ; .long 40 
+
+timeinf2:
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29 ; .long 29
+.long 29 ; .long 29 ; .long 29 ; .long 29 
+.long 29 ; .long 29 ; .long 29  
+#else
+timeinf:
+.long 30 ; .long 35 ; .long 35 ; .long 35 
 .long 35 ; .long 35 ; .long 35 ; .long 35
 .long 35 ; .long 35 ; .long 35 ; .long 35 
 .long 35 ; .long 35 ; .long 35 ; .long 35
@@ -262,103 +387,103 @@ timeinf:
 .long 211 ; .long 211 ; .long 211 ; .long 211 
 .long 213 ; .long 00 ; .long 00 ; .long 66
 .long 00 ; .long 50 ; .long 54 ; .long 54
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00 
+.long 75 ; .long 105 ; .long 106 ; .long 34
+.long 53 ; .long 54 ; .long 32 ; .long 00 
+.long 146 ; .long 77; .long 30 ; .long 61
+.long 47 ; .long 43 ; .long 43 ; .long 43 
+.long 49 ; .long 104 ; .long 36 ; .long 121
+.long 54 ; .long 56 ; .long 56 ; .long 56 
+.long 56 ; .long 56 ; .long 56 ; .long 56
+.long 72 ; .long 61 ; .long 34 ; .long 37 
+.long 58 ; .long 50 ; .long 57 ; .long 160
+.long 40 ; .long 73 ; .long 56 ; .long 42 
+.long 56 ; .long 59 ; .long 80 ; .long 111
+.long 54 ; .long 56 ; .long 40 ; .long 40 
+.long 66 ; .long 49 ; .long 41 ; .long 50
+.long 32 ; .long 36 ; .long 38 ; .long 63 
+.long 57 ; .long 57 ; .long 57 ; .long 57
+.long 57 ; .long 62 ; .long 48 ; .long 53 
+.long 53 ; .long 53 ; .long 53 ; .long 227
+.long 42 ; .long 69 ; .long 83 ; .long 97 
+.long 111 ; .long 160 ; .long 62 ; .long 62
+.long 34 ; .long 34 ; .long 34 ; .long 34 
+.long 34 ; .long 34 ; .long 34 ; .long 34
+.long 34 ; .long 34 ; .long 34 ; .long 34 
+.long 45 ; .long 45 ; .long 58 ; .long 38
+.long 64 ; .long 00 ; .long 71 ; .long 200 
+.long 56 ; .long 79 ; .long 103 ; .long 156
+.long 148 ; .long 121 ; .long 00 ; .long 34 
+.long 38 ; .long 57 ; .long 128 ; .long 55
+.long 57 ; .long 50 ; .long 66 ; .long 49 
+.long 56 ; .long 56 ; .long 68 ; .long 43
+.long 50 ; .long 56 ; .long 46 ; .long 54 
+.long 65 ; .long 76; .long 87 ; .long 138
+.long 63 ; .long 68 ; .long 34 ; .long 34 
+.long 34 ; .long 34 ; .long 34 ; .long 34
+.long 34 ; .long 49 ; .long 41 ; .long 41 
+.long 41 ; .long 41 ; .long 54 ; .long 45
+.long 48 ; .long 73 ; .long 45 ; .long 45 
+.long 45 ; .long 45 ; .long 45 ; .long 49
+.long 66 ; .long 49 ; .long 34 ; .long 34 
+.long 49 ; .long 68 ; .long 63 ; .long 99 
 
 timeinf1:
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00 
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 49
+.long 54 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35
+.long 35 ; .long 35 ; .long 35 ; .long 35 
+.long 35 ; .long 35 ; .long 35 ; .long 35 
 
 timeinf2:
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00 ; .long 00
-.long 00 ; .long 00 ; .long 00 ; .long 00 
-.long 00 ; .long 00 ; .long 00  
-
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25 ; .long 25
+.long 25 ; .long 25 ; .long 25 ; .long 25 
+.long 25 ; .long 25 ; .long 25  
+#endif
 #endif
 	.text
