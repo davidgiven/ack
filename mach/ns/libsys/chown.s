@@ -1,6 +1,11 @@
 .define _chown
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chown
-.text
+.sect .text
 _chown:
 enter[], 0
 addr 8(fp),r7

@@ -1,6 +1,11 @@
 .define _access
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _access
-.text
+.sect .text
 _access:
 enter[], 0
 movd 12(fp),tos

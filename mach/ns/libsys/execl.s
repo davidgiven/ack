@@ -1,6 +1,11 @@
 .define _execl
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _execl
-.text
+.sect .text
 _execl:
 enter[], 0
 movd @__penvp,tos

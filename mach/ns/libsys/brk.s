@@ -1,6 +1,11 @@
 .define _brk
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _brk
-.text
+.sect .text
 _brk:
 enter[], 0
 movd 8(fp),@.reghp

@@ -1,6 +1,11 @@
 .define _dup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _dup
-.text
+.sect .text
 _dup:
 enter[], 0
 movd 8(fp),tos

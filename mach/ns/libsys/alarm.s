@@ -1,6 +1,11 @@
 .define _alarm
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _alarm
-.text
+.sect .text
 _alarm:
 enter[], 0
 movd 8(fp),tos

@@ -1,6 +1,11 @@
 .define _execve
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _execve
-.text
+.sect .text
 _execve:
 enter[], 0
 addr 8(fp),r7

@@ -2,16 +2,19 @@
 .define .ignmask, .trpreg
 .define .stop
 .define ERANGE,EILLINS,ECASE
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-base	= 0x10000
 topmem	= 0xFFFFFF
 
 ERANGE 	= 1
 EILLINS	= 18
 ECASE	= 20
 
-	.base base
-	.text
+	.sect .text
 
 	movd begbss, r7
 	movd endbss, r6
@@ -30,21 +33,21 @@ ECASE	= 20
 	jsr @.putchar
 	bpt
 
-.bss
+.sect .bss
 begbss:
-.data
+.sect .data
 hol0:
-	.long 0
-	.long 0
+	.data4 0
+	.data4 0
 argv:
-	.long 3f
+	.data4 3f
 envp:
-	.long 0
+	.data4 0
 3:
 	.asciz 'PROGRAM'
 .reghp:
-	.long endbss
+	.data4 endbss
 .ignmask:
-	.short 0
+	.data2 0
 .trpreg:
-	.long 0
+	.data4 0

@@ -1,6 +1,11 @@
 .define _read
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _read
-.text
+.sect .text
 _read:
 enter[], 0
 save [r0,r1,r2,r3]

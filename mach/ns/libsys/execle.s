@@ -1,6 +1,11 @@
 .define _execle
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _execle
-.text
+.sect .text
 _execle:
 enter[], 0
 addr 12(fp),tos

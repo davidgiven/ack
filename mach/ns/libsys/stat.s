@@ -1,6 +1,11 @@
 .define _stat
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _stat
-.text
+.sect .text
 _stat:
 enter[], 0
 movd 12(fp),tos

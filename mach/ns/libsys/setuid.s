@@ -1,6 +1,11 @@
 .define _setuid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _setuid
-.text
+.sect .text
 _setuid:
 enter[], 0
 movd 8(fp),tos

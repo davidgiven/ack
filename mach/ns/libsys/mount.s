@@ -1,6 +1,11 @@
 .define _mount
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mount
-.text
+.sect .text
 _mount:
 enter[], 0
 addr 8(fp),r7

@@ -1,6 +1,11 @@
 .define _mpxcall
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mpxcall
-.text
+.sect .text
 _mpxcall:
 enter[], 0
 movd 12(fp),tos

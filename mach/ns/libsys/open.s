@@ -1,6 +1,11 @@
 .define _open
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _open
-.text
+.sect .text
 _open:
 enter[], 0
 movd 12(fp),tos

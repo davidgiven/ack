@@ -1,6 +1,11 @@
 .define _nice
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _nice
-.text
+.sect .text
 _nice:
 enter[], 0
 movd 8(fp),tos

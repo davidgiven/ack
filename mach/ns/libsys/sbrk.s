@@ -1,6 +1,11 @@
 .define _sbrk
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _sbrk
-.text
+.sect .text
 _sbrk:
 enter[], 0
 movd @.reghp,r7

@@ -1,6 +1,11 @@
 .define _getgid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _getgid
-.text
+.sect .text
 _getgid:
 enter[], 0
 movd 47,tos

@@ -1,6 +1,11 @@
 .define _exit
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _exit
-.text
+.sect .text
 _exit:
 enter[], 0
 jsr @__cleanup

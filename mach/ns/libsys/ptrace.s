@@ -1,6 +1,11 @@
 .define _ptrace
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _ptrace
-.text
+.sect .text
 _ptrace:
 enter[], 0
 xord @_errno,@_errno

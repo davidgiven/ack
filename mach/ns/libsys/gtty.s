@@ -1,6 +1,11 @@
 .define _gtty
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _gtty
-.text
+.sect .text
 _gtty:
 enter[], 0
 movd 12(fp),tos

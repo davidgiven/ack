@@ -1,6 +1,11 @@
 .define __exit
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern __exit
-.text
+.sect .text
 __exit:
 enter[], 0
 movd 8(fp),tos

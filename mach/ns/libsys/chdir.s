@@ -1,6 +1,11 @@
 .define _chdir
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chdir
-.text
+.sect .text
 _chdir:
 enter[], 0
 movd 8(fp),tos

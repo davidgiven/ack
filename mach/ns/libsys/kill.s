@@ -1,6 +1,11 @@
 .define _kill
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _kill
-.text
+.sect .text
 _kill:
 enter[], 0
 movd 12(fp),tos

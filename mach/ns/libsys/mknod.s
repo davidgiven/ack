@@ -1,6 +1,11 @@
 .define _mknod
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mknod
-.text
+.sect .text
 _mknod:
 enter[], 0
 addr 8(fp),r7

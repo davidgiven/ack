@@ -1,6 +1,11 @@
 .define _ioctl
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _ioctl
-.text
+.sect .text
 _ioctl:
 enter[], 0
 addr 8(fp),r7

@@ -1,6 +1,11 @@
 .define _getegid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _getegid
-.text
+.sect .text
 _getegid:
 enter[], 0
 movd 47,tos

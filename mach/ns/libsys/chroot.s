@@ -1,6 +1,11 @@
 .define _chroot
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chroot
-.text
+.sect .text
 _chroot:
 enter[], 0
 movd 8(fp),tos

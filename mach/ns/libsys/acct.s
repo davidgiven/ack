@@ -1,6 +1,11 @@
 .define _acct
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _acct
-.text
+.sect .text
 _acct:
 enter[], 0
 movd 8(fp),tos

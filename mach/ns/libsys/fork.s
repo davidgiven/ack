@@ -1,10 +1,15 @@
 .define _fork
 .define _par_uid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _par_uid
-.bss
+.sect .bss
 _par_uid:.space	4
 .extern _fork
-.text
+.sect .text
 _fork:
 enter[], 0
 movd 2,tos

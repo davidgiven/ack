@@ -1,9 +1,14 @@
 .define __setsig
-.bss
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+.sect .bss
 _save:.space	4
 _trf:.space	4
 .extern __setsig
-.text
+.sect .text
 __setsig:
 enter[], 0
 movd 8(fp),@_trf

@@ -1,6 +1,11 @@
 .define _link
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _link
-.text
+.sect .text
 _link:
 enter[], 0
 movd 12(fp),tos

@@ -1,6 +1,11 @@
 .define _ftime
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _ftime
-.text
+.sect .text
 _ftime:
 enter[], 0
 movd 8(fp),tos

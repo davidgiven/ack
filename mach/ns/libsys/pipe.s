@@ -1,6 +1,11 @@
 .define _pipe
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _pipe
-.text
+.sect .text
 _pipe:
 enter[], 0
 movd 42,tos

@@ -1,6 +1,11 @@
 .define _lock
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _lock
-.text
+.sect .text
 _lock:
 enter[], 0
 movd 8(fp),tos

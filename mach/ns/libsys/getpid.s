@@ -1,6 +1,11 @@
 .define _getpid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _getpid
-.text
+.sect .text
 _getpid:
 enter[], 0
 movd 20,tos

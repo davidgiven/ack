@@ -1,6 +1,11 @@
 .define _lseek
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _lseek
-.text
+.sect .text
 _lseek:
 enter[], 0
 addr 8(fp),r7
