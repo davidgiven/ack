@@ -4,15 +4,15 @@
 .sect .data
 .sect .bss
 
-	.sect .text
+.sect .text
 .nop:
 	pea	4(sp)
-	move.l	hol0,-(sp)
+	move.l	.lino,-(sp)
 	pea	fmt
 	jsr	.diagnos
-	add.l	#12,sp
+	lea	12(sp),sp
 	rts
 
 	.sect .data
-fmt:	.asciz "test %d, sp %d\n"
+fmt:	.asciz "test %d, sp 0x%x.\n"
 .align 2

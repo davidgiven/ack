@@ -4,14 +4,14 @@
 .sect .data
 .sect .bss
 
-	.sect .text
+.sect .text
 .mon:
 	move.l	(sp)+,a0
 	pea	fmt
 	jsr	.diagnos
-	add	#8,sp
+	add.l	#8,sp
 	jmp	EXIT
 
 	.sect .data
-fmt:	.asciz "system call %d not implemented"
+fmt:	.asciz "system call %d not implemented\n"
 .align 2
