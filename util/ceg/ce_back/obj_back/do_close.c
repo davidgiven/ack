@@ -4,7 +4,7 @@
 	
 close_back()
 {
-	output();
+	output_back();
 
 	wr_close();
 }

@@ -1,6 +1,6 @@
 #include "header.h"
 
-do_close()
+close_back()
 {
 	sys_close( codefile);
 }

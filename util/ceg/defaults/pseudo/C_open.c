@@ -10,7 +10,7 @@ char *filename;
 {
 	assert( !busy);
 
-	if ( !do_open( filename)) {
+	if ( !open_back( filename)) {
 		fprint( STDERR, "Couldn't open %s\n", filename);
 		return( 0);
 	}

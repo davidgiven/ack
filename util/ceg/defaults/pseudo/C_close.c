@@ -9,6 +9,6 @@ C_close()
 	assert( busy);
 
 	end_back();
-        do_close();
+        close_back();
 	busy = 0;
 }
