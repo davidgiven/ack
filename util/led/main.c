@@ -190,7 +190,7 @@ first_pass(argv)
 				entername(makename(*argv), h);
 			break;
 		default:
-			fatal("bad flag letter %c", *argp);
+			warning("bad flag letter %c", *argp);
 			break;
 		}
 	}
