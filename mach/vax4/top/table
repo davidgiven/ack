@@ -93,8 +93,6 @@ subw2 $-NUM,X			->	addw2 $NUM,X;
 subl2 $-NUM,X			->	addl2 $NUM,X;
 subw3 $-NUM,X,Y			->	addw3 $NUM,X,Y;
 subl3 $-NUM,X,Y			->	addl3 $NUM,X,Y;
-subw3 X,$-NUM,Y			->	addw3 $NUM,X,Y;
-subl3 X,$-NUM,Y			->	addl3 $NUM,X,Y;
 
 /* use special instructions */
 
