@@ -1,4 +1,5 @@
-EM=/proj/em/Work
+EM=../../../..
+LIB=$(EM)/lib/ceg/EM_parser/as_EM_pars
 
 OFILES = dist.o error.o
 
@@ -8,5 +9,17 @@ CC = cc
 .c.o :
 	$(CC) $(IFILES) -c $<
 
-em_parser : $(OFILES)
-	  touch em_parser
+all :	$(OFILES)
+
+install:	all
+	cp $(OFILES) $(LIB)
+
+cmp:	all
+	for i in $(OFILES) ; do cmp $$i $(LIB)/$$i ; done
+
+clean:
+	rm -f *.o
+
+opr:
+
+pr:
