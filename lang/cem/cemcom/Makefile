@@ -23,16 +23,16 @@ ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 LIB_INCLUDES = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
 EM_INCLUDES = -I$(EMHOME)/h
-SYSLLIB = $(EMHOME)/modules/lib/llib-lsys.ln
+SYSLLIB = $(EMHOME)/modules/lib/llib-lsystem.ln
 EMKLLIB = $(EMHOME)/modules/lib/llib-lemk.ln
 EMELLIB = $(EMHOME)/modules/lib/llib-leme.ln
-STRLLIB = $(EMHOME)/modules/lib/llib-lstr.ln
+STRLLIB = $(EMHOME)/modules/lib/llib-lstring.ln
 PRTLLIB = $(EMHOME)/modules/lib/llib-lprint.ln
-EMMESLLIB = $(EMHOME)/modules/lib/llib-lmes.ln
+EMMESLLIB = $(EMHOME)/modules/lib/llib-lem_mes.ln
 INPLLIB = $(EMHOME)/modules/lib/llib-linput.ln
 ALLOCLLIB = $(EMHOME)/modules/lib/llib-lalloc.ln
-LINTLIBS =
-#LINTLIBS = $(EMMESLLIB) $(EMKLLIB) $(PRTLLIB) $(STRLLIB) $(SYSLLIB) $(ALLOCLLIB)
+#LINTLIBS =
+LINTLIBS = $(EMMESLLIB) $(EMKLLIB) $(PRTLLIB) $(STRLLIB) $(ALLOCLLIB) $(SYSLLIB)
 CURRDIR = .
 
 COPTIONS =

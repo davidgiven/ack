@@ -337,9 +337,7 @@ check_and_pad(expp, tpp)
 	struct type **tpp;
 	struct expr **expp;
 {
-	/* ex is of a fundamental type	*/
 	register struct type *tp = *tpp;
-	register struct expr *ex = *expp;
 
 	if (tp->tp_fund == ARRAY) {
 		check_and_pad(expp, &(tp->tp_up));	/* first member	*/

@@ -38,7 +38,6 @@ ch7bin(expp, oper, expr)
 	any2opnd(expp, oper);
 	any2opnd(&expr, oper);
 	switch (oper)	{
-		int fund;
 	case '[':				/* RM 7.1 */
 		/* RM 14.3 states that indexing follows the commutative laws */
 		switch ((*expp)->ex_type->tp_fund)	{
@@ -102,7 +101,7 @@ ch7bin(expp, oper, expr)
 	case '/':
 	case DIVAB:
 	case TIMESAB:
-		fund = arithbalance(expp, oper, &expr);
+		arithbalance(expp, oper, &expr);
 		non_commutative_binop(expp, oper, expr);
 		break;
 	case '&':
@@ -112,7 +111,7 @@ ch7bin(expp, oper, expr)
 		opnd2integral(&expr, oper);
 		/* Fall through */
 	case '*':
-		fund = arithbalance(expp, oper, &expr);
+		arithbalance(expp, oper, &expr);
 		commutative_binop(expp, oper, expr);
 		break;
 	case '+':
@@ -132,7 +131,7 @@ ch7bin(expp, oper, expr)
 			pointer_binary(expp, oper, expr);
 		}
 		else	{
-			fund = arithbalance(expp, oper, &expr);
+			arithbalance(expp, oper, &expr);
 			if (oper == '+')
 				commutative_binop(expp, oper, expr);
 			else
@@ -152,7 +151,7 @@ ch7bin(expp, oper, expr)
 			}
 		}
 		else	{
-			fund = arithbalance(expp, oper, &expr);
+			arithbalance(expp, oper, &expr);
 			non_commutative_binop(expp, oper, expr);
 		}
 		break;
@@ -162,7 +161,7 @@ ch7bin(expp, oper, expr)
 	case RIGHTAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		fund = arithbalance(expp, oper, &expr); /* ch. 7.5 */
+		arithbalance(expp, oper, &expr); /* ch. 7.5 */
 		ch7cast(&expr, oper, int_type); /* cvt. rightop to int */
 		non_commutative_binop(expp, oper, expr);
 		break;

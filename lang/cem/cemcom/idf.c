@@ -263,7 +263,11 @@ declare_idf(ds, dc, lvl)
 			warning("redeclaring reserved word %s", idf->id_text);
 	}
 #endif
-	if (def && def->df_level >= lvl)	{
+	if (def && 
+	    ( def->df_level == lvl ||
+	      ( lvl != L_GLOBAL && def->df_level > lvl )
+	    )
+	   )	{
 		/*	There is already a declaration for idf on this
 			level, or even more inside.
 			The rules differ for different levels.
