@@ -38,10 +38,9 @@ conversion(from_type, to_type)
 	int to_cnvtype = convtype(to_type);
 
 	if ((int)to_size < (int)word_size) to_size = word_size;
-	if ((int)from_size == (int)to_size && from_cnvtype == to_cnvtype)
-		return;
-	switch (from_cnvtype)	{
-	case T_SIGNED:
+	if ((int)from_size != (int)to_size || from_cnvtype != to_cnvtype) {
+	    switch (from_cnvtype)	{
+	    case T_SIGNED:
 		switch (to_cnvtype)	{
 		case T_SIGNED:
 			C_loc(from_size);
@@ -71,7 +70,7 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
-	case T_UNSIGNED:
+	    case T_UNSIGNED:
 		if ((int)from_size < (int)word_size) from_size = word_size;
 		C_loc(from_size);
 		C_loc(to_size);
@@ -87,7 +86,7 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
-	case T_FLOATING:
+	    case T_FLOATING:
 		C_loc(from_size);
 		C_loc(to_size);
 		switch (to_cnvtype)	{
@@ -102,9 +101,10 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
-	default:
+	    default:
 		crash("(conversion) illegal type conversion");
 		/*NOTREACHED*/
+	    }
 	}
 	if ((int)(to_type->tp_size) < (int)word_size
 	    && to_cnvtype != T_FLOATING
