@@ -38,8 +38,8 @@
 
 /* Machine and/or language dependent parameters: */
 
-bool ovfl_harmful;
-bool arrbound_harmful;
+int ovfl_harmful;
+int arrbound_harmful;
 
 int Ssr;  /* #optimizations found */
 

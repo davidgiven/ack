@@ -55,10 +55,10 @@ struct code_info {
 
 /* Parameters to be provided by environment: */
 
-extern bool ovfl_harmful;  /* Does overflow during multiplication
+extern int ovfl_harmful;  /* Does overflow during multiplication
 			    * cause a trap ?
 			    */
-extern bool arrbound_harmful;  /* Is it harmful to take the address of
+extern int arrbound_harmful;  /* Is it harmful to take the address of
 				* a non-existing array element ?
 				*/
 extern int Ssr;  /* #optimizations found */
