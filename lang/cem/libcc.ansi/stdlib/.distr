@@ -14,7 +14,6 @@ ext_fmt.h
 getenv.c
 labs.c
 ldiv.c
-malloc.c
 mblen.c
 mbstowcs.c
 mbtowc.c
@@ -26,3 +25,4 @@ system.c
 wcstombs.c
 wctomb.c
 malloc
+malloc.c
