@@ -340,16 +340,28 @@ stb_string(df, kind)
 			adds_db_str(sprint(buf, "c%ld;", df->con_const.TOK_INT));
 			break;
 		case T_REAL:
+			addc_db_str('r');
 			if (! df->con_const.TOK_REAL) {
 				char buf2[FLT_STRLEN];
 
 				flt_flt2str(&df->con_const.TOK_RVAL, buf2, FLT_STRLEN);
-				adds_db_str(sprint(buf, "r%s;", buf2));
+				adds_db_str(buf2);
 			}
-			else adds_db_str(sprint(buf, "r%s;", df->con_const.TOK_REAL));
+			else adds_db_str(df->con_const.TOK_REAL);
+			addc_db_str(';');
 			break;
-		case T_STRING:
-			adds_db_str(sprint(buf, "s'%s';", df->con_const.TOK_STR));
+		case T_STRING: {
+			register char *p = df->con_const.TOK_STR;
+
+			adds_db_str("s'");
+			while (*p) {
+				if (*p == '\'' || *p == '\\') {
+					addc_db_str('\\');
+				}
+				addc_db_str(*p++);
+			}
+			adds_db_str("';");
+			}
 			break;
 		case T_ENUMERATION:
 			addc_db_str('e');
