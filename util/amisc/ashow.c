@@ -71,11 +71,15 @@ show(headp)
 	 */
 	name = (struct outname *) myalloc(headp->oh_nname * SZ_NAME);
 	string = myalloc((unsigned) headp->oh_nchar);
+	rd_name(name, headp->oh_nname);
 	for (np = &name[0]; np < &name[headp->oh_nname]; np++) {
-		rd_name(np, 1);
-		if (np->on_foff != 0)
-			np->on_mptr = string + np->on_foff - OFF_CHAR(*headp);
-/* 			                  	  Weird:  ^^^^^^^^^^^^^^^^^^^ */
+		if (np->on_foff != 0) {
+			np->on_foff -= OFF_CHAR(*headp);
+			if (np->on_foff >= headp->oh_nchar || np->on_foff < 0) {
+				np->on_mptr = "????";
+			}
+			else np->on_mptr = string + np->on_foff;
+		}
 	}
 	/*
 	 * Transfer strings from file to core.
@@ -162,7 +166,7 @@ showname(namep)
 		printf("\tabsolute\n");
 		break;
 	default:
-		printf("\tin section %ld\n", (namep->on_type & S_TYP) - S_MIN);
+		printf("\tin section %d\n", (namep->on_type & S_TYP) - S_MIN);
 		break;
 	}
 	if (namep->on_type & S_EXT) printf("\texternal\n");
