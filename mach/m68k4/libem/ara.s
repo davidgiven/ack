@@ -12,26 +12,25 @@
 	! a1 : base address
 	.sect .text
 .aar:
-	move.l	(sp)+,d2	! return address
-	move.l	(sp)+,a0	! descriptor address
-	move.l	(sp)+,d0	! index
-	move.l	(sp)+,a1	! base address
+	move.l	4(sp),a0	! descriptor address
+	move.l	8(sp),d0	! index
+	move.l	12(sp),a1	! base address
 	sub.l	(a0),d0		! index - lower bound : relative index
 	move.l	8(a0),-(sp)	! # bytes / element
 	move.l	d0,-(sp)
 	jsr	.mlu
 	add.l	d1,a1		! address of element
+	move.l	(sp)+,a0	! return address
+	add.l	#12,sp		! pop arguments
 	move.l	a1,-(sp)	! returned on stack
-	move.l	d2,-(sp)
-	rts
+	jmp	(a0)
 
 .lar:
 	! register usage: like .aar
 
-	move.l	(sp)+,d2	! return address
-	move.l	(sp)+,a0
-	move.l	(sp)+,d0
-	move.l	(sp)+,a1
+	move.l	4(sp),a0
+	move.l	8(sp),d0
+	move.l	12(sp),a1
 	sub.l	(a0),d0
 	move.l	d0,-(sp)
 	move.l	8(a0),d0
@@ -39,6 +38,8 @@
 	jsr	.mlu
 	add.l	d1,a1		! address of element
 	add.l	8(a0),a1	! a1++ because of predecrement
+	move.l	(sp)+,a0	! return address
+	add.l	#12,sp		! pop parameters
 	clr.l	d1		!?nodig?
 	asr	#1,d0
 	bne	3f
@@ -57,23 +58,22 @@
 	move.l	 -(a1),-(sp)	! 4n byte element (n = 1,2,...)
 	dbf 	d0,1b
 5:
-	move.l	d2,-(sp)
-	rts
-
+	jmp	(a0)
 
 .sar:
 	!register usage: same as lar
 
-	move.l	(sp)+,d2
-	move.l	(sp)+,a0
-	move.l	(sp)+,d0
-	move.l	(sp)+,a1
+	move.l	4(sp),a0
+	move.l	8(sp),d0
+	move.l	12(sp),a1
 	sub.l	(a0),d0
 	move.l	d0,-(sp)
 	move.l	8(a0),d0	! # bytes / element
 	move.l	d0,-(sp)
 	jsr	.mlu
 	add.l	d1,a1
+	move.l	(sp)+,a0	! return address
+	add.l	#12,sp		! pop parameters
 	clr.l	d1		!?nodig?
 	asr	#1,d0
 	bne	3f
@@ -92,7 +92,6 @@
 	move.l	(sp)+,(a1)+	! 4n byte element (n = 1,2,...)
 	dbf	d0,1b
 4:
-	move.l	d2,-(sp)
-	rts
+	jmp	(a0)
 
 .align 2

@@ -1,11 +1,14 @@
-.sect .text;.sect .rom;.sect .data;.sect .bss
 .define _printn
 .define _printf
 .extern _printf
+.sect .text;.sect .rom;.sect .data;.sect .bss
 .sect .text
 _putchar:
 move.l	#1,-(sp)
-pea	9(sp)
+lea	8(sp),a0
+move.l	8(sp),d0
+move.b	d0,(a0)
+move.l	a0,-(sp)
 move.l	#1,-(sp)
 jsr	_write
 add.l	#12,sp
