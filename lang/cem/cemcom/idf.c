@@ -63,11 +63,18 @@ idf_hashed(tg, size, hc)
 	register struct idf **hook = &idf_hashtable[hc], *notch;
 
 	while ((notch = *hook))	{
-		register cmp = strcmp(tg, notch->id_text);
+		register char *s1 = tg;
+		register char *cp = notch->id_text;
+		register int cmp;
+
+		while (!(cmp = (*s1 - *cp++))) {
+			if (*s1++ == '\0') {
+				break;
+			}
+		}
 
 		if (cmp < 0)
 			break;
-		else
 		if (cmp == 0)	{
 			/*	suppose that special identifiers, as
 				"setjmp", are already inserted
@@ -75,8 +82,7 @@ idf_hashed(tg, size, hc)
 			sp_occurred[notch->id_special] = 1;
 			return notch;
 		}
-		else
-			hook = &notch->next;
+		hook = &notch->next;
 	}
 	/* a new struct idf must be inserted at the hook */
 	notch = new_idf();
