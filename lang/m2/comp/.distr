@@ -1,7 +1,8 @@
 LLlex.c
 LLlex.h
 LLmessage.c
-Makefile
+proto.make
+proto.main
 BigPars
 SmallPars
 Resolve
