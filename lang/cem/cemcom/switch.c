@@ -28,6 +28,7 @@
 #include	"noRoption.h"
 
 extern char options[];
+int density = DENSITY;
 
 compact(nr, low, up)
 	arith low, up;
@@ -38,7 +39,7 @@ compact(nr, low, up)
 	*/
 	arith diff = up - low;
 
-	return (nr == 0 || (diff >= 0 && diff / nr <= (DENSITY - 1)));
+	return (nr == 0 || (diff >= 0 && diff / nr <= (density - 1)));
 }
 
 static struct switch_hdr *switch_stack = 0;

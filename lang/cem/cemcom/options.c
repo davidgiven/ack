@@ -38,6 +38,7 @@ char loptions[128];			/* one for every char	*/
 #endif	LINT
 
 extern int idfsize;
+extern int density;
 
 static int txt2int();
 
@@ -337,6 +338,9 @@ deleted, is now a debug-flag
 		break;
 	}
 #endif NOCROSS
+	case 'S':
+		density = txt2int(&text);
+		break;
 #endif	LINT
 	}
 }

@@ -13,6 +13,7 @@ L	don't generate linenumbers and filename indications
 p	trace
 P	in running the preprocessor do not output '# line' lines
 R	restricted C
+S	density for CSA/CSB
 T	take path following as directory for storing temporary file(s)
 U	undefine predefined name
 V	set objectsize and alignment requirements
