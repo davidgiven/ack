@@ -106,7 +106,7 @@ name abc
 	mapflag -L ABC_F={ABC_F?} -L
 	mapflag -E ABC_F={ABC_F?} -E
 #	mapflag -d ABC_F={ABC_F?} -d
-	args {ABC_F?} < > {SOURCE}
+	args -Vw{w}p{p}f{d} {ABC_F?} < > {SOURCE}
 	prep cond
 	rts .b
 	need .b
