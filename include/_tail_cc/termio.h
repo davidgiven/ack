@@ -4,7 +4,7 @@
 #define	VMIN	4
 #define	VTIME	5
 
-#define	INLCR	0000100
+#define	ICRNL	0000400
 
 #define	ONLCR	0000004
 
