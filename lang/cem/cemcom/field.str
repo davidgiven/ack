@@ -9,4 +9,4 @@ struct field	{	/* for field specifiers	*/
 	struct sdef *fd_sdef;	/* upward pointer	*/
 };
 
-/* ALLOCDEF "field" */
+/* ALLOCDEF "field" 50 */

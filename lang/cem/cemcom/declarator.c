@@ -2,12 +2,11 @@
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
 #include	"botch_free.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"arith.h"
 #include	"type.h"
 #include	"Lpars.h"
 #include	"declar.h"
-#include	"storage.h"
 #include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
@@ -43,7 +42,6 @@ add_decl_unary(dc, fund, count, fm)
 	*/
 	register struct decl_unary *new = new_decl_unary();
 
-	clear((char *)new, sizeof(struct decl_unary));
 	new->next = dc->dc_decl_unary;
 	new->du_fund = fund;
 	new->du_count = count;

@@ -26,4 +26,4 @@ struct def	{		/* for ordinary tags */
 #define REG_DEFAULT	1	/* register candidate, not declared as such */
 #define REG_BONUS	10	/* register candidate, declared as such */
 
-/* ALLOCDEF "def" */
+/* ALLOCDEF "def" 50 */

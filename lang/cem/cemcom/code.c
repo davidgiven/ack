@@ -1,18 +1,18 @@
 /* $Header$ */
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
-#include	"nofloat.h"
 #include	<em.h>
+#include	"botch_free.h"
+#include	<alloc.h>
+#include	"nofloat.h"
 #include	"dataflow.h"
 #include	"use_tmp.h"
-#include	"botch_free.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"
 #include	"label.h"
 #include	"code.h"
 #include	"stmt.h"
-#include	"alloc.h"
 #include	"def.h"
 #include	"expr.h"
 #include	"sizes.h"
@@ -24,7 +24,6 @@
 #include	"mes.h"
 #include	"LLlex.h"
 #include	"specials.h"
-#include	"storage.h"
 #include	"atw.h"
 #include	"assert.h"
 
@@ -47,9 +46,10 @@ init_code(dst_file)
 	C_init(word_size, pointer_size); /* initialise EM module */
 	if (C_open(dst_file) == 0)
 		fatal("cannot write to %s\n", dst_file);
-#ifndef	USE_TMP
-	famous_first_words();
+#ifdef USE_TMP
+	if (options['N'])
 #endif	USE_TMP
+	famous_first_words();
 }
 
 famous_first_words()
@@ -171,7 +171,9 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	arith size;
 	register struct type *tp = def->df_type;
 
-#ifndef	USE_TMP
+#ifdef USE_TMP
+	if (options['N']) code_scope(name,def);
+#else USE_TMP
 	code_scope(name, def);
 #endif	USE_TMP
 #ifdef	DATAFLOW
@@ -326,9 +328,10 @@ code_declaration(idf, expr, lvl, sc)
 		)
 			def->df_alloc = ALLOC_SEEN;
 		if (expr) {	/* code only if initialized */
-#ifndef	USE_TMP
+#ifdef USE_TMP
+			if (options['N'])
+#endif USE_TMP
 			code_scope(text, def);
-#endif	USE_TMP
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(text);
 			do_ival(&(def->df_type), expr);
@@ -364,9 +367,10 @@ code_declaration(idf, expr, lvl, sc)
 		case GLOBAL:
 		case IMPLICIT:
 			/* we are sure there is no expression */
-#ifndef	USE_TMP
-			code_scope(text, def);
+#ifdef	USE_TMP
+			if (options['N'])
 #endif	USE_TMP
+			code_scope(text, def);
 			break;
 		case AUTO:
 		case REGISTER:
@@ -433,9 +437,10 @@ bss(idf)
 	*/
 	arith size = idf->id_def->df_type->tp_size;
 	
-#ifndef	USE_TMP
-	code_scope(idf->id_text, idf->id_def);
+#ifdef	USE_TMP
+	if (options['N'])
 #endif	USE_TMP
+	code_scope(idf->id_text, idf->id_def);
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:
 	*/

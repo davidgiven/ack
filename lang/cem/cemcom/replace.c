@@ -7,7 +7,7 @@
 #include	"debug.h"	/* UF */
 #include	"pathlength.h"	/* UF */
 #include	"strsize.h"	/* UF */
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"idf.h"
 #include	"input.h"
 #include	"macro.h"

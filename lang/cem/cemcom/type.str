@@ -44,4 +44,4 @@ extern struct type *pa_type;	/* type.c	*/
 
 extern arith size_of_type(), align();
 
-/* ALLOCDEF "type" */
+/* ALLOCDEF "type" 50 */

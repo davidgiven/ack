@@ -7,17 +7,16 @@
 	semantics of C is a mess.
 */
 
-#include	"nofloat.h"
 #include	"botch_free.h"
+#include	<alloc.h>
+#include	"nofloat.h"
 #include	"nobitfield.h"
-#include	"alloc.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
-#include	"storage.h"
 #include	"field.h"
 #include	"mes.h"
 
@@ -202,7 +201,6 @@ arith2arith(tp, oper, expr)
 	*/
 	register struct expr *new = new_expr();
 	
-	clear((char *)new, sizeof(struct expr));
 	new->ex_file = expr->ex_file;
 	new->ex_line = expr->ex_line;
 	new->ex_type = tp;

@@ -7,4 +7,4 @@ struct stmt_block	{
 	label st_continue;
 };
 
-/* ALLOCDEF "stmt_block" */
+/* ALLOCDEF "stmt_block" 5 */

@@ -16,14 +16,14 @@ struct stack_level	{
 	int sl_level;
 };
 
-/* ALLOCDEF "stack_level" */
+/* ALLOCDEF "stack_level" 5 */
 
 struct stack_entry	{
 	struct stack_entry *next;
 	struct idf *se_idf;
 };
 
-/* ALLOCDEF "stack_entry" */
+/* ALLOCDEF "stack_entry" 5 */
 
 extern struct stack_level *local_level;
 extern struct stack_level *stack_level_of();

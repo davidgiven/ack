@@ -10,6 +10,6 @@ struct decspecs	{
 	int ds_unsigned;	/* 0 or 1 */
 };
 
-/* ALLOCDEF "decspecs" */
+/* ALLOCDEF "decspecs" 50 */
 
 extern struct decspecs null_decspecs;

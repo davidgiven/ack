@@ -1,6 +1,7 @@
 /* $Header$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	<alloc.h>
 #include	"nofloat.h"
 #include	"idfsize.h"
 #include	"numsize.h"
@@ -8,7 +9,6 @@
 #include	"strsize.h"
 #include	"nopp.h"
 #include	"input.h"
-#include	"alloc.h"
 #include	"arith.h"
 #include	"def.h"
 #include	"idf.h"

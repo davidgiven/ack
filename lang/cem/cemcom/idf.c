@@ -6,7 +6,7 @@
 #include	"idfsize.h"
 #include	"botch_free.h"
 #include	"nopp.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"arith.h"
 #include	"align.h"
 #include	"LLlex.h"
@@ -23,7 +23,6 @@
 #include	"Lpars.h"
 #include	"assert.h"
 #include	"specials.h"	/* registration of special identifiers	*/
-#include	"storage.h"
 
 int idfsize = IDFSIZE;
 extern char options[];
@@ -73,7 +72,6 @@ idf_hashed(tg, size, hc)
 	}
 	/* a new struct idf must be inserted at the hook */
 	notch = new_idf();
-	clear((char *)notch, sizeof(struct idf));
 	notch->next = *hook;
 	*hook = notch;		/* hooked in */
 	notch->id_text = Salloc(tg, size);
@@ -303,7 +301,6 @@ declare_idf(ds, dc, lvl)
 	else	{ /* fill in the def block */
 		register struct def *newdef = new_def();
 
-		clear((char *)newdef, sizeof(struct def));
 		newdef->next = def;
 		newdef->df_level = lvl;
 		newdef->df_type = type;

@@ -2,6 +2,7 @@
 /*	DECLARATION SYNTAX PARSER	*/
 
 {
+#include	<alloc.h>
 #include	"nobitfield.h"
 #include	"debug.h"
 #include	"arith.h"
@@ -16,7 +17,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
-#include	"storage.h"
 
 extern char options[];
 }

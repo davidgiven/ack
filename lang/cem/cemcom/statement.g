@@ -14,7 +14,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"
-#include	"storage.h"
 #include	"stack.h"
 #include	"def.h"
 

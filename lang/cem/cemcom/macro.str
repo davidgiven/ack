@@ -27,7 +27,7 @@ struct macro	{
 	char	mc_flag;	/* marking this macro		*/
 };
 
-/* ALLOCDEF "macro" */
+/* ALLOCDEF "macro" 20 */
 
 /* `token' numbers of keywords of command-line processor
 */

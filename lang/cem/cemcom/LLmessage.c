@@ -1,9 +1,9 @@
 /* $Header$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
+#include	<alloc.h>
 #include	"nofloat.h"
 #include	"idf.h"
-#include	"alloc.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -12,9 +12,10 @@ extern char *symbol2str();
 
 LLmessage(tk)	{
 	err_occurred = 1;
-	if (tk < 0)
-		fatal("parser administration overflow");
-	if (tk)	{
+	if (tk < 0)	{
+		error("end of file expected");
+	}
+	else if (tk)	{
 		error("%s missing", symbol2str(tk));
 		insert_token(tk);
 	}

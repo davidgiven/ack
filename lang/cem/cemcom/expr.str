@@ -101,6 +101,6 @@ struct expr	{
 
 extern struct expr *intexpr(), *new_oper();
 
-/* ALLOCDEF "expr" */
+/* ALLOCDEF "expr" 50 */
 
 #define	ISCOMMA(e) ((e)->ex_class == Oper && (e)->OP_OPER == INITCOMMA)

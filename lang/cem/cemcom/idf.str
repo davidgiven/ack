@@ -37,7 +37,7 @@ struct idf	{
 	int id_special;		/* special action needed at occurrence	*/
 };
 
-/* ALLOCDEF "idf" */
+/* ALLOCDEF "idf" 50 */
 
 extern struct idf *str2idf(), *idf_hashed();
 

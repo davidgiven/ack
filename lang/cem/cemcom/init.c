@@ -5,7 +5,7 @@
 
 #ifndef NOPP
 #include	<system.h>
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"

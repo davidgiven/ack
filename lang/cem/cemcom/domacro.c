@@ -18,10 +18,9 @@
 #include	"textsize.h"	
 #include	"idfsize.h"	
 #include	"assert.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
-#include	"storage.h"
 
 IMPORT char *inctable[];	/* list of include directories		*/
 IMPORT char *getwdir();

@@ -13,7 +13,7 @@ struct declarator	{
 	struct formal *dc_formal;	/* params for function	*/
 };
 
-/* ALLOCDEF "declarator" */
+/* ALLOCDEF "declarator" 50 */
 
 
 struct formal	{			/* list of formals */
@@ -21,7 +21,7 @@ struct formal	{			/* list of formals */
 	struct idf *fm_idf;
 };
 
-/* ALLOCDEF "formal" */
+/* ALLOCDEF "formal" 5 */
 
 #define	NO_PARAMS ((struct formal *) 0)
 
@@ -31,7 +31,7 @@ struct decl_unary	{
 	arith du_count;			/* for ARRAYs only	*/
 };
 
-/* ALLOCDEF "decl_unary" */
+/* ALLOCDEF "decl_unary" 10 */
 
 extern struct type *declare_type();
 extern struct declarator null_declarator;

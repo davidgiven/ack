@@ -5,6 +5,7 @@
 #include	<em.h>
 #include	"debug.h"
 #include	"botch_free.h"
+#include	<alloc.h>
 #include	"density.h"
 #include	"Lpars.h"
 #include	"idf.h"
@@ -12,7 +13,6 @@
 #include	"arith.h"
 #include	"switch.h"
 #include	"code.h"
-#include	"storage.h"
 #include	"assert.h"
 #include	"expr.h"
 #include	"type.h"

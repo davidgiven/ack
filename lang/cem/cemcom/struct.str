@@ -11,7 +11,7 @@ struct sdef	{		/* for selectors */
 	arith sd_offset;
 };
 
-/* ALLOCDEF "sdef" */
+/* ALLOCDEF "sdef" 50 */
 
 struct tag	{		/* for struct-, union- and enum tags */
 	struct tag *next;
@@ -21,6 +21,6 @@ struct tag	{		/* for struct-, union- and enum tags */
 };
 
 
-/* ALLOCDEF "tag" */
+/* ALLOCDEF "tag" 50 */
 
 struct sdef *idf2sdef();

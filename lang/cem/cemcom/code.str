@@ -8,7 +8,7 @@ struct string_cst	{	/* storing string constants */
 	label sc_dlb;
 };
 
-/* ALLOCDEF "string_cst" */
+/* ALLOCDEF "string_cst" 10 */
 
 #define	LVAL	0
 #define	RVAL	1

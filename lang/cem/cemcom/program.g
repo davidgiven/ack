@@ -42,7 +42,6 @@
 
 {
 #include	"nopp.h"
-#include	"alloc.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"idf.h"

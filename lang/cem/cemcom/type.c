@@ -3,7 +3,8 @@
 
 #include	"nofloat.h"
 #include	"nobitfield.h"
-#include	"alloc.h"
+#include	"botch_free.h"
+#include	<alloc.h>
 #include	"Lpars.h"
 #include	"arith.h"
 #include	"type.h"
@@ -11,7 +12,6 @@
 #include	"def.h"
 #include	"sizes.h"
 #include	"align.h"
-#include	"storage.h"
 
 struct type *function_of(), *array_of();
 #ifndef NOBITFIELD
@@ -44,7 +44,6 @@ create_type(fund)
 	*/
 	register struct type *ntp = new_type();
 
-	clear((char *)ntp, sizeof(struct type));
 	ntp->tp_fund = fund;
 	ntp->tp_size = (arith)-1;
 

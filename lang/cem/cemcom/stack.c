@@ -6,9 +6,8 @@
 #include	<em.h>
 #include	<em_reg.h>
 #include	"debug.h"
-#include	"use_tmp.h"
 #include	"botch_free.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"Lpars.h"
 #include	"arith.h"
 #include	"stack.h"
@@ -16,7 +15,6 @@
 #include	"idf.h"
 #include	"def.h"
 #include	"struct.h"
-#include	"storage.h"
 #include	"level.h"
 #include	"mes.h"
 
@@ -43,7 +41,6 @@ stack_level()	{
 	*/
 	register struct stack_level *stl = new_stack_level();
 	
-	clear((char *)stl, sizeof(struct stack_level));
 	local_level->sl_next = stl;
 	stl->sl_previous = local_level;
 	stl->sl_level = ++level;
@@ -60,7 +57,6 @@ stack_idf(idf, stl)
 	*/
 	register struct stack_entry *se = new_stack_entry();
 
-	clear((char *)se, sizeof(struct stack_entry));
 	/* link it into the stack level */
 	se->next = stl->sl_entry;
 	se->se_idf = idf;

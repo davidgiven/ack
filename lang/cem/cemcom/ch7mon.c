@@ -1,15 +1,15 @@
 /* $Header$ */
 /* SEMANTIC ANALYSIS (CHAPTER 7RM) -- MONADIC OPERATORS */
 
+#include	"botch_free.h"
+#include	<alloc.h>
 #include	"nofloat.h"
 #include	"nobitfield.h"
-#include	"botch_free.h"
 #include	"Lpars.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"label.h"
 #include	"expr.h"
-#include	"storage.h"
 #include	"idf.h"
 #include	"def.h"
 

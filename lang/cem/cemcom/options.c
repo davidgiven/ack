@@ -1,6 +1,8 @@
 /* $Header$ */
 /*	U S E R   O P T I O N - H A N D L I N G		*/
 
+#include	"botch_free.h"
+#include	<alloc.h>
 #include	"nofloat.h"
 #include	"nopp.h"
 #include	"idfsize.h"
@@ -12,7 +14,6 @@
 #include	"arith.h"
 #include	"sizes.h"
 #include	"align.h"
-#include	"storage.h"
 #include	"use_tmp.h"
 
 #ifndef NOPP
@@ -124,6 +125,14 @@ do_option(text)
 			fatal("malformed -M option");
 		if (idfsize > IDFSIZE)
 			fatal("maximum identifier length is %d", IDFSIZE);
+		break;
+
+	case 'N' :
+#ifdef USE_TMP
+		options['N'] = 1;
+#else USE_TMP
+		warning("-N option ignored");
+#endif USE_TMP
 		break;
 
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/

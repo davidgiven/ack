@@ -3,7 +3,7 @@
 
 #include	"nofloat.h"
 #include	"botch_free.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"idf.h"
 #include	"arith.h"
 #include	"def.h"
@@ -14,7 +14,6 @@
 #include	"Lpars.h"
 #include	"decspecs.h"
 #include	"declar.h"
-#include	"storage.h"
 #include	"sizes.h"
 #include	"level.h"
 
@@ -122,7 +121,6 @@ dot2expr(expp)
 		pointer to which is stored in *expp.
 	*/
 	*expp = new_expr();
-	clear((char *)*expp, sizeof(struct expr));
 	(*expp)->ex_file = dot.tk_file;
 	(*expp)->ex_line = dot.tk_line;
 	switch (DOT)	{
@@ -248,7 +246,6 @@ intexpr(ivalue, fund)
 	*/
 	register struct expr *expr = new_expr();
 	
-	clear((char *)expr, sizeof(struct expr));
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
 	fill_int_expr(expr, ivalue, fund);
@@ -308,7 +305,6 @@ new_oper(tp, e1, oper, e2)
 	register struct expr *expr = new_expr();
 	register struct oper *op;
 
-	clear((char *)expr, sizeof(struct expr));
 	if (e2)	{
 		register struct expr *e = e2;
 		

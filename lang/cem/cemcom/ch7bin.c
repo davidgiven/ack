@@ -1,8 +1,9 @@
 /* $Header$ */
 /* SEMANTIC ANALYSIS (CHAPTER 7RM)  --  BINARY OPERATORS */
 
-#include	"nofloat.h"
 #include	"botch_free.h"
+#include	<alloc.h>
+#include	"nofloat.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
@@ -10,7 +11,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
-#include	"storage.h"
 
 extern char options[];
 extern char *symbol2str();

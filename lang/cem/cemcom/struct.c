@@ -4,6 +4,7 @@
 #include	"nobitfield.h"
 #include	"debug.h"
 #include	"botch_free.h"
+#include	<alloc.h>
 #include	"arith.h"
 #include	"stack.h"
 #include	"idf.h"
@@ -15,7 +16,6 @@
 #include	"Lpars.h"
 #include	"align.h"
 #include	"level.h"
-#include	"storage.h"
 #include	"assert.h"
 #include	"sizes.h"
 
@@ -308,7 +308,6 @@ idf2sdef(idf, tp)
 	if (!is_anon_idf(idf))
 		error("unknown selector %s", idf->id_text);
 	*sdefp = sdef = new_sdef();
-	clear((char *)sdef, sizeof(struct sdef));
 	sdef->sd_idf = idf;
 	sdef->sd_stype = sdef->sd_type = error_type;
 	return sdef;

@@ -6,7 +6,6 @@
 #include	"nopp.h"
 #include	"target_sizes.h"
 #include	"debug.h"
-#include	"myalloc.h"
 #include	"use_tmp.h"
 #include	"maxincl.h"
 #include	"inputtype.h"
@@ -19,7 +18,7 @@
 #include	"tokenname.h"
 #include	"Lpars.h"
 #include	"LLlex.h"
-#include	"alloc.h"
+#include	<alloc.h>
 #include	"specials.h"
 
 extern struct tokenname tkidf[], tkother[];
@@ -79,10 +78,6 @@ main(argc, argv)
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
 
-#ifdef	OWNALLOC
-	init_mem();
-#endif	OWNALLOC
-
 	init_hmask();
 
 #ifndef NOPP
@@ -105,12 +100,6 @@ main(argc, argv)
 		argc--, argv++;
 	}
 	compile(argc - 1, &argv[1]);
-
-#ifdef	OWNALLOC
-#ifdef	DEBUG
-	mem_stat();
-#endif	DEBUG
-#endif	OWNALLOC
 
 #ifdef	DEBUG
 	hash_stat();
@@ -164,9 +153,11 @@ compile(argc, argv)
 	source = strcmp(argv[0], "-") ? argv[0] : 0;
 
 #ifdef USE_TMP
-	strcpy(tmpf, tmpfdir);
-	strcat(tmpf, tmpfname);
-	tmpfile = mktemp(tmpf);
+	if (! options['N']) {
+		strcpy(tmpf, tmpfdir);
+		strcat(tmpf, tmpfname);
+		tmpfile = mktemp(tmpf);
+	}
 #endif USE_TMP
 
 	if (destination && strcmp(destination, "-") == 0)
@@ -189,7 +180,11 @@ compile(argc, argv)
 #endif NOPP
 
 #ifdef	USE_TMP
-		init_code(tmpfile);
+		if (!options['N']) {
+			init_code(tmpfile);
+		}
+		else
+			init_code(destination);
 #else	USE_TMP
 		init_code(destination);
 #endif	USE_TMP
@@ -199,9 +194,11 @@ compile(argc, argv)
 		end_code();
 
 #ifdef USE_TMP
-		prepend_scopes(destination);
-		AppendFile(tmpfile, destination);
-		sys_remove(tmpfile);
+		if (! options['N']) {
+			prepend_scopes(destination);
+			AppendFile(tmpfile, destination);
+			sys_remove(tmpfile);
+		}
 #endif USE_TMP
 
 #ifdef	DEBUG
