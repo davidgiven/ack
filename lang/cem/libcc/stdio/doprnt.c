@@ -5,6 +5,7 @@
 #ifndef NOFLOAT
 extern char     *_pfloat();
 extern char     *_pscien();
+extern char     *gcvt();
 #endif
 
 # define wsize(par) ( (sizeof par) / sizeof (int) )
@@ -74,6 +75,7 @@ _doprnt(fmt,ap,stream)
 #endif
 #ifndef NOFLOAT
 	double          dbl ;
+	int		capitalE = 0;
 #endif
 	int             inte ;
 	unsigned int    uint ;
@@ -200,6 +202,9 @@ _doprnt(fmt,ap,stream)
 			}
 			break;
 #ifndef NOFLOAT
+		case 'E':
+			capitalE = 1;
+			/* fall through */
 		case 'e':
 			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
 			dbl = va_arg(ap, double);
@@ -210,6 +215,14 @@ _doprnt(fmt,ap,stream)
 			dbl = va_arg(ap, double);
 			s = _pfloat(dbl,s,ndigit,ndfnd);
 			break;
+		case 'G':
+			capitalE = 1;
+			/* fall through */
+		case 'g':
+			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
+			dbl = va_arg(ap, double);
+			s = gcvt(dbl, ndigit+1, s) + strlen(s);
+			break;
 #endif
 		case 'r':
 			ap = va_arg(ap, char *);
@@ -217,6 +230,14 @@ _doprnt(fmt,ap,stream)
 			fmt=oldfmt;
 			continue;
 		}
+#ifndef NOFLOAT
+		if (capitalE) {
+			register char *p = buf;
+			capitalE=0;
+			while (*p && *p != 'e') p++;
+			if (*p == 'e') *p = 'E';
+		}
+#endif
 		j = s - s1;
 		if ((c = width - j) > 0)
 			if (rjust == 0)
