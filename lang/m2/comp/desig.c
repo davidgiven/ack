@@ -341,6 +341,8 @@ CodeCopy(lhs, rhs, sz, psize)
 	}
 }
 
+t_desig null_desig;
+
 CodeMove(rhs, left, rtp)
 	register t_desig *rhs;
 	register t_node *left;
@@ -351,31 +353,32 @@ CodeMove(rhs, left, rtp)
 		Go through some (considerable) trouble to see if a BLM can be
 		generated.
 	*/
-	register t_desig *lhs = new_desig();
+	t_desig lhs;
 	register t_type *tp = left->nd_type;
 	int loadedflag = 0;
 
+	lhs = null_desig;
 	ChkForFOR(left);
 	switch(rhs->dsg_kind) {
 	case DSG_LOADED:
-		CodeDesig(left, lhs);
+		CodeDesig(left, &lhs);
 		if (rtp->tp_fund == T_STRING) {
 			/* size of a string literal fits in an
 			   int of size word_size
 			*/
-			CodeAddress(lhs);
+			CodeAddress(&lhs);
 			C_loc(rtp->tp_size);
 			C_loc(tp->tp_size);
 			CAL("StringAssign", (int)pointer_size + (int)pointer_size + (int)dword_size);
 			break;
 		}
-		CodeStore(lhs, tp);
+		CodeStore(&lhs, tp);
 		break;
 	case DSG_FIXED:
-		CodeDesig(left, lhs);
-		if (lhs->dsg_kind == DSG_FIXED &&
+		CodeDesig(left, &lhs);
+		if (lhs.dsg_kind == DSG_FIXED &&
 		    fit(tp->tp_size, (int) word_size) &&
-		    (int) (lhs->dsg_offset) % word_align ==
+		    (int) (lhs.dsg_offset) % word_align ==
 		    (int) (rhs->dsg_offset) % word_align) {
 			register int sz = 1;
 			arith size = tp->tp_size;
@@ -384,16 +387,16 @@ CodeMove(rhs, left, rtp)
 				/*	First copy up to word-aligned
 					boundaries
 				*/
-				if (!((int)(lhs->dsg_offset)%(sz+sz))) {
+				if (!((int)(lhs.dsg_offset)%(sz+sz))) {
 					sz += sz;
 				}
-				else	CodeCopy(lhs, rhs, (arith) sz, &size);
+				else	CodeCopy(&lhs, rhs, (arith) sz, &size);
 			}
 			/*	Now copy the bulk
 			*/
 			sz = (int) size % (int) word_size;
 			size -= sz;
-			CodeCopy(lhs, rhs, size, &size);
+			CodeCopy(&lhs, rhs, size, &size);
 			size = sz;
 			sz = word_size;
 			while (size) {
@@ -401,12 +404,12 @@ CodeMove(rhs, left, rtp)
 				*/
 				sz >>= 1;
 				if (size >= sz) {
-					CodeCopy(lhs, rhs, (arith) sz, &size);
+					CodeCopy(&lhs, rhs, (arith) sz, &size);
 				}
 			}
 			break;
 		}
-		CodeAddress(lhs);
+		CodeAddress(&lhs);
 		loadedflag = 1;
 		/* Fall through */
 	case DSG_PLOADED:
@@ -417,8 +420,8 @@ CodeMove(rhs, left, rtp)
 			C_exg(pointer_size);
 		}
 		else {
-			CodeDesig(left, lhs);
-			CodeAddress(lhs);
+			CodeDesig(left, &lhs);
+			CodeAddress(&lhs);
 		}
 		switch (suitable_move(tp)) {
 		case USE_BLM:
@@ -440,7 +443,6 @@ CodeMove(rhs, left, rtp)
 	default:
 		crash("CodeMove");
 	}
-	free_desig(lhs);
 }
 
 CodeAddress(ds)

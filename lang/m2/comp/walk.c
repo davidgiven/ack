@@ -857,6 +857,8 @@ int (*WalkTable[])() = {
 	WalkLink,
 };
 
+extern t_desig null_desig;
+
 ExpectBool(pnd, true_label, false_label)
 	register t_node **pnd;
 	label true_label, false_label;
@@ -864,17 +866,17 @@ ExpectBool(pnd, true_label, false_label)
 	/*	"pnd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
-	register t_desig *ds = new_desig();
+	t_desig ds;
 
+	ds = null_desig;
 	if (ChkExpression(pnd)) {
 		if ((*pnd)->nd_type != bool_type &&
 		    (*pnd)->nd_type != error_type) {
 			node_error(*pnd, "boolean expression expected");
 		}
 
-		CodeExpr(*pnd, ds,  true_label, false_label);
+		CodeExpr(*pnd, &ds,  true_label, false_label);
 	}
-	free_desig(ds);
 }
 
 int
@@ -887,7 +889,7 @@ WalkDesignator(pnd, ds, flags)
 
 	if (! ChkVariable(pnd, flags)) return 0;
 
-	clear((char *) ds, sizeof(t_desig));
+	*ds = null_desig;
 	CodeDesig(*pnd, ds);
 	return 1;
 }
@@ -967,7 +969,7 @@ DoAssign(nd)
 	   it sais that the left hand side is evaluated first.
 	   DAMN THE BOOK!
 	*/
-	register t_desig *dsr;
+	t_desig dsr;
 	register t_type *tp;
 
 	if (! (ChkExpression(&(nd->nd_RIGHT)) &
@@ -979,20 +981,19 @@ DoAssign(nd)
 	if (! ChkAssCompat(&(nd->nd_RIGHT), tp, "assignment")) {
 		return;
 	}
-	dsr = new_desig();
+	dsr = null_desig;
 
-#define StackNeededFor(ds)	((ds)->dsg_kind == DSG_PLOADED \
-				  || (ds)->dsg_kind == DSG_INDEXED)
-	CodeExpr(nd->nd_RIGHT, dsr, NO_LABEL, NO_LABEL);
+#define StackNeededFor(ds)	((ds).dsg_kind == DSG_PLOADED \
+				  || (ds).dsg_kind == DSG_INDEXED)
+	CodeExpr(nd->nd_RIGHT, &dsr, NO_LABEL, NO_LABEL);
 	tp = nd->nd_RIGHT->nd_type;
 	if (complex(tp)) {
-		if (StackNeededFor(dsr)) CodeAddress(dsr);
+		if (StackNeededFor(dsr)) CodeAddress(&dsr);
 	}
 	else {
-		CodeValue(dsr, tp);
+		CodeValue(&dsr, tp);
 	}
-	CodeMove(dsr, nd->nd_LEFT, tp);
-	free_desig(dsr);
+	CodeMove(&dsr, nd->nd_LEFT, tp);
 }
 
 static

@@ -20,7 +20,7 @@ def.H
 def.c
 defmodule.c
 desig.c
-desig.H
+desig.h
 em_m2.6
 enter.c
 error.c

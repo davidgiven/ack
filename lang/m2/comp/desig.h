@@ -17,7 +17,7 @@
 */
 
 struct desig {
-	int	dsg_kind;
+	short	dsg_kind;
 #define DSG_INIT	0	/* don't know anything yet */
 #define DSG_LOADED	1	/* designator loaded  on top of the stack */
 #define DSG_PLOADED	2	/* designator accessible through pointer on
@@ -45,21 +45,23 @@ struct desig {
 				*/
 };
 
+typedef struct desig	t_desig;
+
 /* The next structure describes the designator in a with-statement.
    We have a linked list of them, as with-statements may be nested.
 */
 
 struct withdesig {
 	struct withdesig *w_next;
+	int w_flags;		/* D_USED|D_DEFINED */
 	struct scope *w_scope;	/* scope in which fields of this record
 				   reside
 				*/
-	struct desig w_desig;	/* a desig structure for this particular
+	t_desig w_desig;	/* a desig structure for this particular
 				   designator
 				*/
 };
 
 extern struct withdesig	*WithDesigs;
-extern struct desig	InitDesig;
 
 #define NO_LABEL	((label) 0)

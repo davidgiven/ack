@@ -36,6 +36,7 @@ extern char	*long2str();
 extern char	*symbol2str();
 extern int	proclevel;
 extern char	options[];
+extern t_desig	null_desig;
 int		fp_used;
 
 CodeConst(cst, size)
@@ -880,7 +881,9 @@ CodeOper(expr, true_label, false_label)
 	case OR:
 	case AND: {
 		label  l_maybe = ++text_label, l_end = NO_LABEL;
-		t_desig *Des = new_desig();
+		t_desig Des;
+
+		Des = null_desig;
 
 		if (true_label == NO_LABEL)	{
 			true_label = ++text_label;
@@ -889,12 +892,12 @@ CodeOper(expr, true_label, false_label)
 		}
 
 		if (expr->nd_symb == OR) {
-			CodeExpr(leftop, Des, true_label, l_maybe);
+			CodeExpr(leftop, &Des, true_label, l_maybe);
 		}
-		else	CodeExpr(leftop, Des, l_maybe, false_label);
+		else	CodeExpr(leftop, &Des, l_maybe, false_label);
 		def_ilb(l_maybe);
-		clear((char *) Des, sizeof(t_desig));
-		CodeExpr(rightop, Des, true_label, false_label);
+		Des = null_desig;
+		CodeExpr(rightop, &Des, true_label, false_label);
 		if (l_end != NO_LABEL) {
 			def_ilb(true_label);
 			c_loc(1);
@@ -903,7 +906,6 @@ CodeOper(expr, true_label, false_label)
 			c_loc(0);
 			def_ilb(l_end);
 		}
-		free_desig(Des);
 		break;
 		}
 	default:
@@ -1048,11 +1050,11 @@ CodePExpr(nd)
 	/*	Generate code to push the value of the expression "nd"
 		on the stack.
 	*/
-	register t_desig *designator = new_desig();
+	t_desig designator;
 
-	CodeExpr(nd, designator, NO_LABEL, NO_LABEL);
-	CodeValue(designator, nd->nd_type);
-	free_desig(designator);
+	designator = null_desig;
+	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
+	CodeValue(&designator, nd->nd_type);
 }
 
 CodeDAddress(nd, chk_controlvar)
@@ -1062,14 +1064,15 @@ CodeDAddress(nd, chk_controlvar)
 		on the stack.
 	*/
 
-	register t_desig *designator = new_desig();
+	t_desig designator;
 	int chkptr;
 
+	designator = null_desig;
 	if (chk_controlvar) ChkForFOR(nd);
-	CodeDesig(nd, designator);
-	chkptr = designator->dsg_kind==DSG_PLOADED ||
-		 designator->dsg_kind==DSG_PFIXED;
-	CodeAddress(designator);
+	CodeDesig(nd, &designator);
+	chkptr = designator.dsg_kind==DSG_PLOADED ||
+		 designator.dsg_kind==DSG_PFIXED;
+	CodeAddress(&designator);
 
 	/*	Generate dummy use of pointer, to get possible error message
 		as soon as possible
@@ -1079,7 +1082,6 @@ CodeDAddress(nd, chk_controlvar)
 		C_loi((arith) 1);
 		C_asp(word_size);
 	}
-	free_desig(designator);
 }
 
 CodeDStore(nd)
@@ -1089,12 +1091,12 @@ CodeDStore(nd)
 		designator "nd".
 	*/
 
-	register t_desig *designator = new_desig();
+	t_desig designator;
 
+	designator = null_desig;
 	ChkForFOR(nd);
-	CodeDesig(nd, designator);
-	CodeStore(designator, nd->nd_type);
-	free_desig(designator);
+	CodeDesig(nd, &designator);
+	CodeStore(&designator, nd->nd_type);
 }
 
 DoHIGH(df)

@@ -490,11 +490,13 @@ arith *
 MkSet(size)
 	unsigned size;
 {
-	register arith	*s;
+	register arith	*s, *t;
 
-	s = (arith *) Malloc(size);
+	s = t = (arith *) Malloc(size);
 	clear((char *) s , size);
 	s++;
+	size /= sizeof(arith);
+	while (size--) *t++ = 0;
 	inc_refcount(s);
 	return s;
 }
