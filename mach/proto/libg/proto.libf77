@@ -29,7 +29,7 @@ tail:
 		   do echo $$i/$$j >> OLIST ; \
 		   done ; \
 		done
-		$(AR) r tail_f77 `cat OLIST`
+		$(ASAR) r tail_f77 `cat OLIST`
 		$(RANLIB) tail_f77
 
 install:	all

@@ -40,7 +40,7 @@ tail:
 		   do echo $$i/$$j >> OLIST ; \
 		   done ; \
 		done
-		$(AR) r tail_ac `cat OLIST`
+		$(ASAR) r tail_ac `cat OLIST`
 		$(RANLIB) tail_ac
 
 install:	all
