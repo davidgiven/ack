@@ -1007,99 +1007,99 @@ pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==1 && $5==1 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc1, regvar($1, reg_pointer)}
 
 pat lol loi lol adp stl $1==$3 && $1==$5 && $2==1 && $4==1 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc1, regvar($1, reg_pointer)}
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==2 && $5==2 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc2, regvar($1, reg_pointer)}
 
 pat lol loi lol adp stl $1==$3 && $1==$5 && $2==2 && $4==2 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc2, regvar($1, reg_pointer)}
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==4 && $5==4 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc4, regvar($1, reg_pointer)}
 
 pat lil lol adp stl $1==$2 && $1==$4 && $3==4 && inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{post_inc4, regvar($1, reg_pointer)}
 
 pat lol lol adp stl sti $1==$2 && $1==$4 && $3==1 && $5==1 &&
 						inreg($1)==reg_pointer
 with data1
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {post_inc1, regvar($1, reg_pointer)}
 
 pat lol sti lol adp stl $1==$3 && $1==$5 && $2==1 && $4==1 &&
 						inreg($1)==reg_pointer
 with data1
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {post_inc1, regvar($1, reg_pointer)}
 
 pat lol lol adp stl sti $1==$2 && $1==$4 && $3==2 && $5==2 &&
 						inreg($1)==reg_pointer
 with any2
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {post_inc2, regvar($1, reg_pointer)}
 
 pat lol sti lol adp stl $1==$3 && $1==$5 && $2==2 && $4==2 &&
 						inreg($1)==reg_pointer
 with any2
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {post_inc2, regvar($1, reg_pointer)}
 
 pat lol lol adp stl sti $1==$2 && $1==$4 && $3==4 && $5==4 &&
 						inreg($1)==reg_pointer
 with any4
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move_l %1, {post_inc4, regvar($1, reg_pointer)}
 
 pat sil lol adp stl $1==$2 && $1==$4 && $3==4 && inreg($1)==reg_pointer
 with any4
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move_l %1, {post_inc4, regvar($1, reg_pointer)}
 
 pat lol adp stl lol loi $1==$3 && $1==$4 && $2==0-1 && $5==1 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{pre_dec1, regvar($1, reg_pointer)}
 
 pat lol adp stl lol loi $1==$3 && $1==$4 && $2==0-2 && $5==2 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{pre_dec2, regvar($1, reg_pointer)}
 
 pat lol adp stl lil $1==$3 && $1==$4 && $2==0-4 &&
 						inreg($1)==reg_pointer
-    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    kills regvar($1, reg_pointer)
 			yields	{pre_dec4, regvar($1, reg_pointer)}
 
 pat lol adp stl lol sti $1==$3 && $1==$4 && $2==0-1 && $5==1 &&
 						inreg($1)==reg_pointer
 with data1
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {pre_dec1, regvar($1, reg_pointer)}
 
 pat lol adp stl lol sti $1==$3 && $1==$4 && $2==0-2 && $5==2 &&
 						inreg($1)==reg_pointer
 with any2
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {pre_dec2, regvar($1, reg_pointer)}
 
 pat lol adp stl sil $1==$3 && $1==$4 && $2==0-4 &&
 						inreg($1)==reg_pointer
 with any4
-    kills allexceptcon
+    kills allexceptcon, regvar($1, reg_pointer)
     gen move_l %1, {pre_dec4, regvar($1, reg_pointer)}
 
 
@@ -2559,7 +2559,7 @@ with A_REG A_REG
 
 pat blm $1>8
 with AA_REG AA_REG
-    kills allexceptcon
+    kills ALL
     uses DD_REG={const, $1/4 -1}
     gen 1:
 	move_l {post_inc4, %2}, {post_inc4, %1}
@@ -2567,7 +2567,7 @@ with AA_REG AA_REG
 
 pat bls $1==4
 with DD_REG AA_REG AA_REG
-    kills allexceptcon
+    kills allexceptcon, AA_REG
     gen asr_l {shconst, 2}, %1
 	beq {slabel, 2f}
 	sub_l {const, 1}, %1
