@@ -744,7 +744,7 @@ To repeat a certain part of the installation, look in
 the Action file, which resides in the root of the configuration tree,
 for the directory in which that part is to be found.
 If that directory contains an Action file issue the command
-"sh $SRC_HOME/TakeAction", otherwise type "make install".
+"sh $CONFIG/bin/TakeAction", otherwise type "make install".
 .NH
 Commands
 .PP
