@@ -1,0 +1,33 @@
+struct num {
+	num_p	n_next;
+	unsigned n_number;
+	unsigned n_jumps;
+	num_p	n_repl;
+	short	n_flags;
+	line_p	n_line;
+};
+
+/* contents of .n_flags */
+#define NUMDATA		000001
+#define NUMREACH	000002
+#define NUMKNOWN	000004
+#define NUMMARK		000010
+#define NUMSCAN		000020
+
+#define NNUMHASH	37
+extern num_p	numlookup();
+
+struct regs {
+	reg_p	r_next;
+	offset	r_par[4];
+};
+
+typedef struct proinf {
+	offset	localbytes;
+	line_p	lastline;
+	sym_p	symbol;
+	reg_p	freg;
+	num_p	numhash[NNUMHASH];
+} proinf;
+
+extern proinf curpro;
