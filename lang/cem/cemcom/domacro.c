@@ -134,7 +134,7 @@ skip_block()
 			seen.
 	*/
 	register int ch;
-	register skiplevel = nestlevel;	/* current nesting level	*/
+	register int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
 
 	NoUnstack++;
@@ -530,10 +530,10 @@ get_text(formals, length)
 		identifiers, because they might be replaced by some actual
 		parameter.  Other tokens will not be seen as such.
 	*/
-	register c;
-	register text_size;
+	register int c;
+	register int text_size;
 	char *text = Malloc(text_size = ITEXTSIZE);
-	register pos = 0;
+	register int pos = 0;
 
 	LoadChar(c);
 

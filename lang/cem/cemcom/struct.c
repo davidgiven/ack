@@ -158,7 +158,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 }
 
 check_selector(idf, stp)
-	struct idf *idf;
+	register struct idf *idf;
 	struct type *stp;	/* the type of the struct */
 {
 	/*	checks if idf occurs already as a selector in

@@ -169,6 +169,7 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		-	a fil pseudo instruction
 	*/
 	arith size;
+	register struct type *tp = def->df_type;
 
 #ifndef	USE_TMP
 	code_scope(name, def);
@@ -178,15 +179,16 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		DfaStartFunction(name);
 #endif	DATAFLOW
 
-	if (def->df_type->tp_fund != FUNCTION) {
+	if (tp->tp_fund != FUNCTION) {
 		error("making function body for non-function");
-		func_tp = error_type;
+		tp = error_type;
 	}
 	else
-		func_tp = def->df_type->tp_up;
-	size = ATW(func_tp->tp_size);
+		tp = tp->tp_up;
+	func_tp = tp;
+	size = ATW(tp->tp_size);
 	C_pro_narg(name);
-	if (is_struct_or_union(func_tp->tp_fund))	{
+	if (is_struct_or_union(tp->tp_fund))	{
 		C_df_dlb(func_res_label = data_label());
 		C_bss_cst(size, (arith)0, 1);
 	}
@@ -309,7 +311,7 @@ code_declaration(idf, expr, lvl, sc)
 	*/
 	char *text = idf->id_text;
 	register struct def *def = idf->id_def;
-	arith size = def->df_type->tp_size;
+	register arith size = def->df_type->tp_size;
 	int def_sc = def->df_sc;
 	
 	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
@@ -387,6 +389,7 @@ loc_init(expr, id)
 		It frees the expression afterwards.
 	*/
 	register struct type *tp = id->id_def->df_type;
+	register struct expr *e = expr;
 	
 	ASSERT(id->id_def->df_sc != STATIC);
 	switch (tp->tp_fund)	{
@@ -394,20 +397,20 @@ loc_init(expr, id)
 	case STRUCT:
 	case UNION:
 		error("no automatic aggregate initialisation");
-		free_expression(expr);
+		free_expression(e);
 		return;
 	}
-	if (ISCOMMA(expr))	{	/* embraced: int i = {12};	*/
+	if (ISCOMMA(e))	{	/* embraced: int i = {12};	*/
 		if (options['R'])	{
-			if (ISCOMMA(expr->OP_LEFT)) /* int i = {{1}} */
-				expr_error(expr, "extra braces not allowed");
+			if (ISCOMMA(e->OP_LEFT)) /* int i = {{1}} */
+				expr_error(e, "extra braces not allowed");
 			else
-			if (expr->OP_RIGHT != 0) /* int i = {1 , 2} */
-				expr_error(expr, "too many initializers");
+			if (e->OP_RIGHT != 0) /* int i = {1 , 2} */
+				expr_error(e, "too many initializers");
 		}
-		while (expr)	{
-			loc_init(expr->OP_LEFT, id);
-			expr = expr->OP_RIGHT;
+		while (e)	{
+			loc_init(e->OP_LEFT, id);
+			e = e->OP_RIGHT;
 		}
 	}
 	else	{	/* not embraced	*/
@@ -428,11 +431,10 @@ bss(idf)
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
-	register struct def *def = idf->id_def;
-	arith size = def->df_type->tp_size;
+	arith size = idf->id_def->df_type->tp_size;
 	
 #ifndef	USE_TMP
-	code_scope(idf->id_text, def);
+	code_scope(idf->id_text, idf->id_def);
 #endif	USE_TMP
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:

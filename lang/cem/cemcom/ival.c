@@ -25,6 +25,7 @@
 char *symbol2str();
 char *long2str();
 struct expr *do_array(), *do_struct(), *IVAL();
+extern char options[];
 
 /*	do_ival() performs the initialisation of a global variable
 	of type tp with the initialisation expression expr by calling IVAL().
@@ -325,59 +326,40 @@ check_and_pad(ex, tpp)
 pad(tp)
 	register struct type *tp;
 {
+	register arith sz = tp->tp_size;
+
 	switch (tp->tp_fund) {
 	case ARRAY:
-	{
-		register long dim;
-
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return;
-		dim = tp->tp_size / tp->tp_up->tp_size;
-		/* assume dimension is known	*/
-		while (dim-- > 0)
-			pad(tp->tp_up);
 		break;
-	}
 	case STRUCT:
-	{
-		register struct sdef *sdef = tp->tp_sdef;
-
 		if (valid_type(tp, "struct") == 0)
 			return;
-		do {
-			pad(sdef->sd_type);
-			if (sdef->sd_sdef)
-				zero_bytes(sdef);
-		} while (sdef = sdef->sd_sdef);
 		break;
-	}
+	case UNION:
+		if (valid_type(tp, "union") == 0)
+			return;
+		if (options['R']) {
+			warning("initialisation of unions not allowed");
+		}
+		break;
 #ifndef NOBITFIELD
 	case FIELD:
 		put_bf(tp, (arith)0);
-		break;
+		return;
 #endif NOBITFIELD
-	case INT:
-	case SHORT:
-	case LONG:
-	case CHAR:
-	case ENUM:
-	case POINTER:
-		C_con_ucon("0",  tp->tp_size);
-		break;
-#ifndef NOFLOAT
-	case FLOAT:
-	case DOUBLE:
-		C_con_fcon("0", tp->tp_size);
-		break;
-#endif NOFLOAT
-	case UNION:
-		error("initialisation of unions not allowed");
-		break;
 	case ERRONEOUS:
-		break;
-	default:
-		crash("(generate) bad fundamental type %s\n",
-			symbol2str(tp->tp_fund));
+		return;
+	}
+
+	while (sz >= word_size) {
+		C_con_cst((arith) 0);
+		sz -= word_size;
+	}
+	while (sz) {
+		C_con_icon("0", (arith) 1);
+		sz--;
 	}
 }
 
@@ -387,8 +369,8 @@ pad(tp)
 	No further comment is needed to explain the internal structure
 	of this straightforward function.
 */
-check_ival(ex, tp)
-	struct expr *ex;
+check_ival(expr, tp)
+	register struct expr *expr;
 	register struct type *tp;
 {
 	/*	The philosophy here is that ch7cast puts an explicit
@@ -396,6 +378,7 @@ check_ival(ex, tp)
 		are not compatible.  In this case, the initialisation
 		expression is no longer a constant.
 	*/
+	struct expr *ex = expr;
 	
 	switch (tp->tp_fund) {
 	case CHAR:
@@ -405,66 +388,68 @@ check_ival(ex, tp)
 	case ENUM:
 	case POINTER:
 		ch7cast(&ex, '=', tp);
+		expr = ex;
 #ifdef DEBUG
-		print_expr("init-expr after cast", ex);
+		print_expr("init-expr after cast", expr);
 #endif DEBUG
-		if (!is_ld_cst(ex))
-			illegal_init_cst(ex);
+		if (!is_ld_cst(expr))
+			illegal_init_cst(expr);
 		else
-		if (ex->VL_CLASS == Const)
-			con_int(ex);
+		if (expr->VL_CLASS == Const)
+			con_int(expr);
 		else
-		if (ex->VL_CLASS == Name) {
-			register struct idf *id = ex->VL_IDF;
-			register struct def *df = id->id_def;
+		if (expr->VL_CLASS == Name) {
+			register struct idf *idf = expr->VL_IDF;
 
-			if (df->df_level >= L_LOCAL)
-				illegal_init_cst(ex);
+			if (idf->id_def->df_level >= L_LOCAL)
+				illegal_init_cst(expr);
 			else	/* e.g., int f(); int p = f; */
-			if (df->df_type->tp_fund == FUNCTION)
-				C_con_pnam(id->id_text);
+			if (idf->id_def->df_type->tp_fund == FUNCTION)
+				C_con_pnam(idf->id_text);
 			else	/* e.g., int a; int *p = &a; */
-				C_con_dnam(id->id_text, ex->VL_VALUE);
+				C_con_dnam(idf->id_text, expr->VL_VALUE);
 		}
 		else {
-			ASSERT(ex->VL_CLASS == Label);
-			C_con_dlb(ex->VL_LBL, ex->VL_VALUE);
+			ASSERT(expr->VL_CLASS == Label);
+			C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
 #ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		ch7cast(&ex, '=', tp);
+		expr = ex;
 #ifdef DEBUG
-		print_expr("init-expr after cast", ex);
+		print_expr("init-expr after cast", expr);
 #endif DEBUG
-		if (ex->ex_class == Float)
-			C_con_fcon(ex->FL_VALUE, ex->ex_type->tp_size);
+		if (expr->ex_class == Float)
+			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 		else
-		if (ex->ex_class == Oper && ex->OP_OPER == INT2FLOAT) {
+		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			/* float f = 1; */
-			ex = ex->OP_RIGHT;
-			if (is_cp_cst(ex))
-				C_con_fcon(long2str((long)ex->VL_VALUE, 10),
+			expr = expr->OP_RIGHT;
+			if (is_cp_cst(expr))
+				C_con_fcon(long2str((long)expr->VL_VALUE, 10),
 					tp->tp_size);
 			else 
-				illegal_init_cst(ex);
+				illegal_init_cst(expr);
 		}
 		else
-			illegal_init_cst(ex);
+			illegal_init_cst(expr);
 		break;
 #endif NOFLOAT
 
 #ifndef NOBITFIELD
 	case FIELD:
 		ch7cast(&ex, '=', tp->tp_up);
+		expr = ex;
 #ifdef DEBUG
-		print_expr("init-expr after cast", ex);
+		print_expr("init-expr after cast", expr);
 #endif DEBUG
-		if (is_cp_cst(ex))
-			put_bf(tp, ex->VL_VALUE);
+		if (is_cp_cst(expr))
+			put_bf(tp, expr->VL_VALUE);
 		else
-			illegal_init_cst(ex);
+			illegal_init_cst(expr);
 		break;
 #endif NOBITFIELD
 
@@ -574,7 +559,7 @@ zero_bytes(sd)
 	*/
 	register int n = sd->sd_sdef->sd_offset - sd->sd_offset -
 		size_of_type(sd->sd_type, "struct member");
-	register count = n;
+	register int count = n;
 
 	while (n-- > 0)
 		con_nullbyte();

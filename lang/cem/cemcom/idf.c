@@ -426,7 +426,6 @@ global_redecl(idf, new_sc, tp)
 			else	{
 				warning("%s redeclared to static",
 						idf->id_text);
-				def->df_sc = STATIC;
 			}
 			def->df_sc = new_sc;
 			break;

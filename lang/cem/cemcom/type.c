@@ -37,7 +37,7 @@ struct type *pa_type;	/* Pointer-Arithmetic type	*/
 
 struct type *
 create_type(fund)
-	register int fund;
+	int fund;
 {
 	/*	A brand new struct type is created, and its tp_fund set
 		to fund.
@@ -180,7 +180,7 @@ size_of_type(tp, nm)
 }
 
 idf2type(idf, tpp)
-	register struct idf *idf;
+	struct idf *idf;
 	struct type **tpp;
 {
 	/*	Decoding  a typedef-ed identifier: if the size is yet
@@ -188,16 +188,15 @@ idf2type(idf, tpp)
 		prevent garbage at the initialisation of arrays with
 		unknown size.
 	*/
-	if (	idf->id_def->df_type->tp_size < (arith)0 &&
-		idf->id_def->df_type->tp_fund == ARRAY
-	)	{
-		struct type *ntp = new_type();
-		*ntp = *(idf->id_def->df_type);
+	register struct type *tp = idf->id_def->df_type;
+
+	if (	tp->tp_size < (arith)0 && tp->tp_fund == ARRAY)	{
+		*tpp = new_type();
+		**tpp = *tp;
 			/* this is really a structure assignment, AAGH!!! */
-		*tpp = ntp;
 	}
 	else	{
-		*tpp = idf->id_def->df_type;
+		*tpp = tp;
 	}
 }
 

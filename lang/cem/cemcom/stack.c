@@ -251,7 +251,8 @@ unstack_world()
 		)	{
 			/* space must be allocated */
 			bss(idf);
-			namelist(idf->id_text);		/* may be common */
+			if (def->df_sc != STATIC)
+				namelist(idf->id_text);	/* may be common */
 			def->df_alloc = ALLOC_DONE;	/* see Note below */
 		}
 		se = se->next;
