@@ -9,7 +9,7 @@ install:	all
 	cp $(TARGETS) $(EMBIN)
 
 clean:
-	rm -f *.o
+	rm -f *.o $(TARGETS)
 
 mkdep:	mkdep.o
 	$(CC) $(LDFLAGS) -o mkdep mkdep.o
