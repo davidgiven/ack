@@ -11,7 +11,7 @@ FE=fe
 INTABLES=pdp int
 LNTABLES=acc apc abc ocm vax4 i86 m68k2 m68k4 pmds pmds4 mantra \
 	m68020 z8000 int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 \
-	sun3
+	sun3 sun2
 INCLUDES=-I$(EMHOME)/h
 CFLAGS=-O $(INCLUDES)
 LDFLAGS=-i
@@ -36,7 +36,8 @@ cmp:		ack ack.1
 		-cmp ack.1 $(MANDIR)/ack.1
 
 ack.1:		ack.1.X
-		-sh -c 'if tbl < ack.1.X > ack.1 ; then exit 0 ; else cp ack.1.X ack.1 ; exit 0 ; fi
+		-sh -c 'tbl < ack.1.X > ack.1'
+		-sh -c 'if test -s ack.1 ; then : ; else cp ack.1.X ack.1 ; fi'
 
 clean:
 		-rm -f *.old *.o ack ack.1
