@@ -12,6 +12,8 @@ var RT=lib/{M}/head_
 var CPP_F=-D__unix -D__USG
 var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b1:0x1880000
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+# bitfields reversed for compatibility with (g)cc.
+var CC_ALIGN=-Vr
 var OLD_C_LIB={C_LIB}
 var MACHOPT_F=-m10
 name be
