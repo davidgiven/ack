@@ -20,13 +20,33 @@
 
 extern		_wstrin();
 
-_wsi(w,i,f) int w,i; struct file *f; {
-	char *p; int j; char buf[6];
+#if EM_WSIZE==4
+#define SZ 11
+#define MININT -2147483648
+#define STRMININT "-2147483648"
+#endif
+#if EM_WSIZE==2
+#define SZ 6
+#define MININT -32768
+#define STRMININT "-32768"
+#endif
+#if EM_WSIZE==1
+#define SZ 4
+#define MININT -128
+#define STRMININT "-128"
+#endif
 
-	p = &buf[6];
+#ifndef STRMININT
+Something wrong here!
+#endif
+
+_wsi(w,i,f) int w,i; struct file *f; {
+	char *p; int j; char buf[SZ];
+
+	p = &buf[SZ];
 	if ((j=i) < 0) {
-		if (i == -32768) {
-			_wstrin(w,6,"-32768",f);
+		if (i == MININT) {
+			_wstrin(w,SZ,STRMININT,f);
 			return;
 		}
 		j = -j;
@@ -36,9 +56,9 @@ _wsi(w,i,f) int w,i; struct file *f; {
 	while (j /= 10);
 	if (i<0)
 		*--p = '-';
-	_wstrin(w,&buf[6]-p,p,f);
+	_wstrin(w,&buf[SZ]-p,p,f);
 }
 
 _wri(i,f) int i; struct file *f; {
-	_wsi(6,i,f);
+	_wsi(SZ,i,f);
 }

@@ -39,7 +39,7 @@ _unp(ad,zd,i,ap,zp) int i; struct descr *ad,*zd; char *ap,*zp; {
 	ap += (i * ad->size);
 	i = (zd->diff + 1) * zd->size;
 	if (zd->size == 1) {
-		assert(ad->size == 2);
+		assert(ad->size == EM_WSIZE);
 		while (--i >= 0)
 			*((int *)ap)++ = *zp++;
 	} else {
