@@ -1661,6 +1661,33 @@ pat loe lof and loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("and")
 pat loe lof ior loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("or")
 pat loe lof xor loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("xor")
 
+proc leiuxxsei example loe loi inc loe sti
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen uxx* {ind_reg2, %a}
+    killreg %a
+
+pat loe loi ngi loe sti $1==$4 && $2==2 && $5==2 && $3==2
+							call leiuxxsei("neg")
+pat loe loi com loe sti $1==$4 && $2==2 && $5==2 && $3==2
+							call leiuxxsei("not")
+pat loe loi dec loe sti $1==$4 && $2==2 && $5==2	call leiuxxsei("dec")
+pat loe loi inc loe sti $1==$4 && $2==2 && $5==2	call leiuxxsei("inc")
+
+proc leixxxsei example loe loi adi loe sti
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen axx* {ind_reg2, %a}, %1
+    killreg %a
+
+pat loe loi adi loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("add")
+pat loe loi adu loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("add")
+pat loe loi ads loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("add")
+pat loe loi and loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("and")
+pat loe loi ior loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("or")
+pat loe loi xor loe sti $1==$4 && $2==$5 && $2==2 && $3==2	call leixxxsei("xor")
+
 #ifdef REGVARS
 proc lolcrxxstl example lol loc sbi stl
   kills regvar($1)
@@ -1839,7 +1866,8 @@ pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
 	leaving lol $1 lof $2 inc lol $4 stf $5
 pat lol lof adp lol stf $1==$4 && $2==$5 && $3==(0-1)
 	leaving lol $1 lof $2 dec lol $4 stf $5
-
+pat lol lof adp lol stf $1==$4 && $2==$5	
+	leaving loc $3 lol $1 lof $2 adi 2 lol $4 stf $5
 
 #ifdef REGVARS
 pat lol lof lol lof adp lol stf 
@@ -1859,10 +1887,98 @@ pat lol lof lol lof dec lol stf
 uses REG={ind_regoff2, regvar($1), $2}
 				yields %a
 					leaving lol $1 lof $2 dec lol $6 stf $7
+
+pat lol lof dup adp lol stf 
+	$1==$5 && $2==$6 && $3==2 && inreg($1)==reg_any
+uses ADDREG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 adp $4 lol $1 stf $2
+
+pat lol lof dup inc lol stf 
+	$1==$5 && $2==$6 && $3==2 && inreg($1)==reg_any
+uses REG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 inc lol $1 stf $2
+
+pat lol lof dup dec lol stf 
+	$1==$5 && $2==$6 && $3==2 && inreg($1)==reg_any
+uses REG={ind_regoff2, regvar($1), $2}
+				yields %a
+					leaving lol $1 lof $2 dec lol $1 stf $2
+
 #endif
 
-pat lol lof adp lol stf $1==$4 && $2==$5	
-			leaving loc $3 lol $1 lof $2 adi 2 lol $4 stf $5
+pat lol lof dup adp lol stf
+	$1==$5 && $2==$6 && $3==2 && $4==1
+kills referals
+uses ADDREG={LOCAL,$1,2}, REG
+gen move {ind_regoff2, %a, $2},%b
+    inc {ind_regoff2, %a, $2}
+				yields %b
+
+pat loe lof dup adp loe stf
+	$1==$5 && $2==$6 && $3==2 && $4==1
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_regoff2, %a, $2},%b
+    inc {ind_regoff2, %a, $2}
+				yields %b
+
+pat loe loi dup adp loe sti
+	$1==$5 && $2==$6 && $3==2 && $2==2 && $4==1
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_reg2, %a},%b
+    inc {ind_reg2, %a}
+				yields %b
+
+pat lol lof dup adp lol stf
+	$1==$5 && $2==$6 && $3==2 && $4==(0-1)
+kills referals
+uses ADDREG={LOCAL,$1,2}, REG
+gen move {ind_regoff2, %a, $2},%b
+    dec {ind_regoff2, %a, $2}
+				yields %b
+
+pat loe lof dup adp loe stf
+	$1==$5 && $2==$6 && $3==2 && $4==(0-1)
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_regoff2, %a, $2},%b
+    dec {ind_regoff2, %a, $2}
+				yields %b
+
+pat loe loi dup adp loe sti
+	$1==$5 && $2==$6 && $3==2 && $2==2 && $4==(0-1)
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_reg2, %a},%b
+    dec {ind_reg2, %a}
+				yields %b
+
+pat lol lof dup adp lol stf
+	$1==$5 && $2==$6 && $3==2
+kills referals
+uses ADDREG={LOCAL,$1,2}, REG
+gen move {ind_regoff2, %a, $2},%b
+    add {ind_regoff2, %a, $2}, {ANYCON, $4}
+				yields %b
+
+pat loe lof dup adp loe stf
+	$1==$5 && $2==$6 && $3==2
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_regoff2, %a, $2},%b
+    add {ind_regoff2, %a, $2}, {ANYCON, $4}
+				yields %b
+
+pat loe loi dup adp loe sti
+	$1==$5 && $2==$6 && $3==2 && $2==2
+kills referals
+uses ADDREG={EXTERN2,$1}, REG
+gen move {ind_reg2, %a},%b
+    add {ind_reg2, %a}, {ANYCON, $4}
+				yields %b
 
 pat loe ngi ste $1==$3 && $2==2
 kills indirects
@@ -1895,14 +2011,19 @@ kills indirects
 gen not {EXTERN2, $1}
 
 pat loe lof adp loe stf $1==$4 && $2==$5 && $3==1
-					leaving loe $1 lof $2 inc loe $1 stf $2
-
+	leaving loe $1 lof $2 inc loe $1 stf $2
 pat loe lof adp loe stf $1==$4 && $2==$5 && $3==0-1
-					leaving loe $1 lof $2 dec loe $1 stf $2
-
+	leaving loe $1 lof $2 dec loe $1 stf $2
 pat loe lof adp loe stf $1==$4 && $2==$5
-				leaving loc $3 loe $1 lof $2 adi 2 loe $1 stf $2
-				
+	leaving loc $3 loe $1 lof $2 adi 2 loe $1 stf $2
+
+pat loe loi adp loe sti $1==$4 && $2==$5 && $3==1 && $2==2
+	leaving loe $1 loi $2 inc loe $1 sti $2
+pat loe loi adp loe sti $1==$4 && $2==$5 && $3==0-1 && $2==2
+	leaving loe $1 loi $2 dec loe $1 sti $2
+pat loe loi adp loe sti $1==$4 && $2==$5 && $2==2
+	leaving loc $3 loe $1 loi $2 adi 2 loe $1 sti $2
+
 /*******************************************************************
  *  Group 8: Convert Instructions                                  *
  *******************************************************************/
@@ -2037,6 +2158,9 @@ with rmorconst REG
   gen and %2,%1				yields %2
 
 pat loc and $1==65535 && $2==2
+
+pat loc and $1==255 && $2==2
+with GENREG				yields %1.1
 
 pat loc and $1==0 && $2==2		leaving asp 2 loc 0
 
