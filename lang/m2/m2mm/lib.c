@@ -41,6 +41,10 @@ is_library_dir(d)
 	return 0;
 }
 
+#ifndef DEF_DIR
+#define DEF_DIR	"lib/m2"
+#endif
+
 init_lib()
 {
 	extern char *strcat();

@@ -73,6 +73,10 @@ getwdir(fn)
 
 static struct file_list *arglist;
 
+#ifndef M2COMPILER
+#define M2COMPILER	"m2"
+#endif
+
 char *mflags = "";
 char *compiler = M2COMPILER;
 char *suff = "o";
