@@ -1,9 +1,9 @@
-name "Ack.out --> SUN 68020 a.out format conversion program"
+name "Ack.out --> Sun 3 M68020 a.out format conversion program"
 dir cv
 end
-name "SUN 68020 systemcall library"
+name "Sun 3 M68020 systemcall library"
 dir libsys
 end
-name "SUN 68020 C libraries"
+name "Sun 3 M68020 C libraries"
 dir libcc
 end
