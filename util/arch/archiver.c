@@ -222,7 +222,7 @@ char *argv[];
 	}
   }
 
-  if (needs_arg)
+  if (needs_arg && argc <= 3)
 	usage();
   if (local_fl) strcpy(temp_arch, "ar.XXXXXX");
   else	strcpy(temp_arch, "/tmp/ar.XXXXXX");
