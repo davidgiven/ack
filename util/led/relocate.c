@@ -160,11 +160,12 @@ addrelo(relo, names, valu_out)
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-relocate(head, emit, names, relo)
+relocate(head, emit, names, relo, off)
 	struct outhead	*head;
 	char		*emit;
 	struct outname	names[];
 	struct outrelo	*relo;
+	long		off;
 {
 	long		valu;
 	int		sectindex = relo->or_sect - S_MIN;
@@ -173,7 +174,7 @@ relocate(head, emit, names, relo)
 	/*
 	 * Pick up previous value at location to be relocated.
 	 */
-	valu = getvalu(emit + relo->or_addr, relo->or_type);
+	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
 	/*
 	 * Or_nami is an index in the name table of the considered module.
 	 * The name of which it is an index can be:
@@ -204,7 +205,7 @@ relocate(head, emit, names, relo)
 	/*
 	 * Now put the value back.
 	 */
-	putvalu(valu, emit + relo->or_addr, relo->or_type);
+	putvalu(valu, emit + (relo->or_addr - off), relo->or_type);
 
 	/*
 	 * We must change the offset within the section of the value to be

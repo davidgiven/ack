@@ -31,6 +31,8 @@
 	mems[ALLOMODL].mem_left = 32 * K;
 	mems[ALLORANL].mem_left = 4 * K;
 #else
+#undef INCRSIZE
+#define INCRSIZE 256
 	mems[ALLOEMIT + 0].mem_left = 8 * K;
 	mems[ALLOEMIT + 1].mem_left = 2 * K;
 	mems[ALLOEMIT + 2].mem_left = 4 * K;

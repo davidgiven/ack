@@ -100,18 +100,21 @@ handle_relos(head, sects, names)
 				sectindex = relo->or_sect - S_MIN;
 				emit = getemit(head, sects, sectindex);
 			}
-			relocate(head, emit, names, relo);
+			relocate(head, emit, names, relo, 0L);
 			relo++;
 		}
 	} else {
 		for (sectindex = 0; sectindex < head->oh_nsect; sectindex++) {
 			if (sects[sectindex].os_flen) {
+				wrt_nulls(sectindex, zeros[sectindex]);
+				zeros[sectindex] = 0;
 				emit = getemit(head, sects, sectindex);
-				nrelo = head->oh_nrelo; startrelo(head);
-				while (nrelo--) {
+				if (emit) {
+				    nrelo = head->oh_nrelo; startrelo(head);
+				    while (nrelo--) {
 					relo = nextrelo();
 					if (relo->or_sect - S_MIN == sectindex) {
-						relocate(head,emit,names,relo);
+						relocate(head,emit,names,relo,0L);
 						/*
 						 * Write out the (probably changed)
 						 * relocation information.
@@ -119,16 +122,48 @@ handle_relos(head, sects, names)
 						if (flagword & RFLAG)
 							wr_relo(relo, 1);
 					}
+				    }
+				    wrt_emit(emit, sectindex,
+					sects[sectindex].os_flen);
 				}
-				wrt_nulls(sectindex, zeros[sectindex]);
-				zeros[sectindex] = 0;
-				wrt_emit(emit, sectindex, sects[sectindex].os_flen);
+				else {
+				    long sz = sects[sectindex].os_flen;
+				    long sf = 0;
+				    long blksz;
+				    char *getblk();
+
+				    emit = getblk(sz, &blksz, sectindex);
+				    while (sz) {
+					long sz2 = sz > blksz ? blksz : sz;
+
+					rd_emit(emit, sz2);
+				    	nrelo = head->oh_nrelo; startrelo(head);
+				    	while (nrelo--) {
+					    relo = nextrelo();
+					    if (relo->or_sect-S_MIN==sectindex
+						&&
+						relo->or_addr >= sf
+						&&
+						relo->or_addr < sf + sz2){
+						relocate(head,emit,names,relo,
+							 sf);
+						/*
+						 * Write out the (probably changed)
+						 * relocation information.
+						 */
+						if (flagword & RFLAG)
+							wr_relo(relo, 1);
+					    }
+					}
+				        wrt_emit(emit, sectindex, sz2);
+					sz -= sz2;
+					sf += sz2;
+				    }
+				}
+				endemit(emit);
 			}
 			zeros[sectindex] += sects[sectindex].os_size -
 					    sects[sectindex].os_flen;
-			/*
-			 * XXX We should be able to free the emitted bytes.
-			 */
 		}
 	}
 }

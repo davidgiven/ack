@@ -556,7 +556,7 @@ getemit(head, sects, sectindex)
 	if (!incore) {
 		ret = core_alloc(ALLOMODL, sects[sectindex].os_flen);
 		if (ret == (char *)0)
-			fatal("no space for section contents");
+			return 0;
 		rd_outsect(sectindex);
 		rd_emit(ret, sects[sectindex].os_flen);
 		return ret;
@@ -567,4 +567,35 @@ getemit(head, sects, sectindex)
 	 */
 	off = *((ind_t *)(modulbase + IND_EMIT(*head)) + sectindex);
 	return address(ALLOEMIT + sectindex, off);
+}
+
+char *
+getblk(totalsz, pblksz, sectindex)
+	long	totalsz;
+	long	*pblksz;
+	int	sectindex;
+{
+	char	*ret;
+	long	sz = (1L << 30);
+
+	assert(!incore);
+
+	while (sz >= totalsz) sz >>= 1;
+	while (sz) {
+		ret = core_alloc(ALLOMODL, sz);
+		if (ret != (char *) 0) {
+			rd_outsect(sectindex);
+			*pblksz = sz;
+			return ret;
+		}
+		sz >>= 1;
+	}
+	fatal("no space for section contents");
+	return (char *) 0;
+}
+
+endemit(emit)
+	char	*emit;
+{
+	core_free(ALLOMODL, emit);
 }

@@ -56,7 +56,8 @@ sbreak(incr)
 	    inc != incr ||
 	    BASE + inc < BASE ||
 	    (int) brk(BASE + inc) == -1) {
-		refused = refused && refused > incr ? incr : refused;
+		if (!refused || refused > incr)
+			refused = incr;
 		return -1;
 	}
 	BASE = sbrk(0);
@@ -133,10 +134,10 @@ init_core()
 
 /*
  * Allocate an extra block of `incr' bytes and move all pieces with index
- * higher than `piece' up with the size of the block. Return whether the
- * allocate succeeded.
+ * higher than `piece' up with the size of the block.
+ * Move up as much as possible, if "incr" fails.
  */
-static bool
+static ind_t
 move_up(piece, incr)
 	register int		piece;
 	register ind_t		incr;
@@ -144,14 +145,18 @@ move_up(piece, incr)
 	register struct memory	*mem;
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
-	if (sbreak(incr) == -1)
-		return FALSE;
+	while (incr > 0 && sbreak(incr) == -1)
+		incr -= INCRSIZE;
 
+	if (incr <= 0) {
+		incr = 0;
+		return (ind_t) 0;
+	}
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
 		copy_up(mem, incr);
 
 	mems[piece].mem_left += incr;
-	return TRUE;
+	return incr;
 }
 
 extern int	passnumber;
@@ -368,12 +373,12 @@ alloc(piece, size)
 	if (size != (ind_t)size)
 		return BADOFF;
 
-	while (left + incr < size)
-		incr += INCRSIZE;
-	
+	if (size - left > 0)
+		incr = ((size - left + (INCRSIZE - 1)) / INCRSIZE) * INCRSIZE;
+
 	if (incr == 0 ||
-	    (incr < left + full && move_up(piece, left + full)) ||
-	    move_up(piece, incr) ||
+	    (incr < left + full && (incr -= move_up(piece, left + full)) <= 0) ||
+	    move_up(piece, incr) == incr ||
 	    compact(piece, size, alloctype)) {
 		mems[piece].mem_full += size;
 		mems[piece].mem_left -= size;
@@ -477,9 +482,27 @@ core_alloc(piece, size)
 {
 	register ind_t	off;
 
-	if ((off = alloc(piece, size)) == BADOFF)
-		return (char *)0;
+	if ((off = alloc(piece, size)) == BADOFF) {
+		int sv = alloctype;
+
+		alloctype = FORCED;
+		off = alloc(piece, size);
+		alloctype = sv;
+		if (off == BADOFF)
+			return (char *)0;
+	}
 	return address(piece, off);
+}
+
+core_free(piece, p)
+	int	piece;
+	char	*p;
+{
+	char	*q = address(piece, mems[piece].mem_full);
+
+	assert(p < q);
+	mems[piece].mem_full -= ((ind_t)q - (ind_t)p);
+	mems[piece].mem_left += ((ind_t)q - (ind_t)p);
 }
 
 /*
