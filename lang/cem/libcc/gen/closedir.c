@@ -7,9 +7,9 @@
 closedir(dirp)
 register DIR *dirp;
 {
-	close(dirp->dd_fd);
+	if (dirp->dd_fd >= 0) close(dirp->dd_fd);
 	dirp->dd_fd = -1;
-	dirp->dd_loc = 0;
+	dirp->dd_loc = -1;
 	free(dirp->dd_buf);
 	free((char *)dirp);
 }

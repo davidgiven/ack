@@ -25,21 +25,22 @@ register DIR *dirp;
 	static struct direct dir;
 
 	for (;;) {
-		if (dirp->dd_loc == 0) {
+		if (dirp->dd_loc == -1) {
 			dirp->dd_size = read(dirp->dd_fd, dirp->dd_buf, 
 					     dirp->dd_bsize);
 			if (dirp->dd_size <= 0) {
 				dirp->dd_size = 0;
 				return NULL;
 			}
+			dirp->dd_loc = 0;
 #ifdef __BSD4_2
 			if (! ((struct direct *) dirp->dd_buf)->d_ino) {
-				dirp->dd_loc += ((struct direct *)dirp->dd_buf)->d_reclen;
+				dirp->dd_loc = ((struct direct *)dirp->dd_buf)->d_reclen;
 			}
 #endif
 		}
 		if (dirp->dd_loc >= dirp->dd_size) {
-			dirp->dd_loc = 0;
+			dirp->dd_loc = -1;
 			continue;
 		}
 		dp = (struct olddirect *) (dirp->dd_buf + dirp->dd_loc);

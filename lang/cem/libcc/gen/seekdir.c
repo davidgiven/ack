@@ -18,13 +18,13 @@ long loc;
 		return;
 	offset = loc % dirp->dd_bsize;
 	base = loc - offset;
-	if (dirp->dd_loc != 0 && offset != 0 &&
+	if (dirp->dd_loc != -1 &&
 	    (curloc - (curloc % dirp->dd_bsize)) ==  base) {
 		dirp->dd_loc = offset;
 		return;
 	}
 	(void) lseek(dirp->dd_fd, base, 0);
-	dirp->dd_loc = 0;
+	dirp->dd_loc = -1;
 	dirp->dd_size = 0;
 	while (dirp->dd_loc < offset) {
 		if (readdir(dirp) == (struct direct *) 0)

@@ -21,9 +21,14 @@ char *name;
 		close (fd);
 		return NULL;
 	}
-	if ((int) stbuf.st_size == stbuf.st_size &&
+	if ((unsigned) stbuf.st_size == stbuf.st_size &&
 	    (dirp->dd_buf = malloc((unsigned) stbuf.st_size))) {
 		dirp->dd_bsize = stbuf.st_size;
+		read(fd, dirp->dd_buf, dirp->dd_bsize);
+		close(fd);
+		dirp->dd_fd = -2;
+		dirp->dd_loc = 0;
+		return dirp;
 	}
 	else if (dirp->dd_buf = malloc(8*DIRBLKSIZ)) {
 		dirp->dd_bsize = 8 * DIRBLKSIZ;
@@ -37,6 +42,6 @@ char *name;
 		return NULL;
 	}
 	dirp->dd_fd = fd;
-	dirp->dd_loc = 0;
+	dirp->dd_loc = -1;
 	return dirp;
 }
