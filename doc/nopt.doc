@@ -188,6 +188,7 @@ The general form of an expression is:
 			| 'offset' '(' patarg ')'
 			| patarg
 			| 'p'
+			| 'w2'
 			| 'w'
 			| INTEGER
 			;
@@ -221,7 +222,11 @@ The
 .I w
 and
 .I p
-refer to the word size and pointer size (in bytes) respectively. The
+refer to the word size and pointer size (in bytes) respectively.
+The
+.I w2
+refers to twice the word size.
+The
 various function test for:
 .IP sfit 10
 the first argument fits as a signed value of
