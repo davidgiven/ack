@@ -39,10 +39,10 @@ cmp :	all
 
 install:all
 	-size opt $(EMHOME)/lib/em_opt
-	rm -f $(EMHOME)/lib/opt
+	rm -f $(EMHOME)/lib/em_opt
 	cp opt $(EMHOME)/lib/em_opt
 	-size opt2 $(EMHOME)/lib/em_opt2
-	rm -f $(EMHOME)/lib/opt2
+	rm -f $(EMHOME)/lib/em_opt2
 	cp opt2 $(EMHOME)/lib/em_opt2
 
 pattern.c:      patterns mktab
