@@ -1,4 +1,4 @@
-.global $errno, cerror, _cerror
+.global $errno, cerror, _cerror, errno
 
 .type _cerror, #function
 
@@ -15,4 +15,6 @@ _cerror:
 
 .section ".data"
 $errno:
+	.long	0
+errno:
 	.long	0
