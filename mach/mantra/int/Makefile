@@ -32,3 +32,20 @@ $Pc2tl.s:	$Pc
 	prep $Pc $Pc2tl.s
 $Pe2tl.s:	$Pe
 	prep $Pe $Pe2tl.s
+
+install:	em2tl
+	rm -f ../../../bin/em
+	cp em2tl ../../../bin/em
+
+cmp:		em2tl
+	cmp em2tl ../../../bin/em
+
+clean:
+	rm -f em2tl *.s temp.c
+
+opr:
+	make pr | opr
+
+pr:
+	@pr `pwd`/makefile `pwd`/prep
+	@pr `pwd`/header `pwd/deffile `pwd`/$P?
