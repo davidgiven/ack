@@ -687,8 +687,8 @@ RangeCheck(tpl, tpr)
 		return;
 	}
 	tpr = BaseType(tpr);
-	if ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
-	     (tpr->tp_fund == T_INTEGER && tpl == card_type)) {
+	if ((tpl->tp_fund == T_INTEGER && tpr->tp_fund == T_CARDINAL) ||
+	     (tpr->tp_fund == T_INTEGER && tpl->tp_fund == T_CARDINAL)) {
 		label lb = ++text_label;
 
 		C_dup(tpr->tp_size);
@@ -865,7 +865,7 @@ CodeOper(expr, true_label, false_label)
 
 		Operands(expr);
 		tp = BaseType(leftop->nd_type);
-		if (tp == intorcard_type) tp = BaseType(rightop->nd_type);
+		if (tp->tp_fund == T_INTORCARD) tp = BaseType(rightop->nd_type);
 		size = tp->tp_size;
 		switch (tp->tp_fund)	{
 		case T_INTEGER:

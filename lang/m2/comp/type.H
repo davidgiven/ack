@@ -136,6 +136,7 @@ extern t_type
 	*byte_type,
 	*address_type,
 	*intorcard_type,
+	*longintorcard_type,
 	*bitset_type,
 	*void_type,
 	*std_type,

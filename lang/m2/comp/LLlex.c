@@ -529,12 +529,30 @@ lexwarning(W_ORDINARY, "character constant out of range");
 					return tk->tk_symb = INTEGER;
 				}
 				if (ch == 'D' && base == 10) {
+				    if (options['l']) {
+					/* Local extension: LONGCARD exists,
+					   so internally also longintorcard_type
+					   exists.
+					*/
+					toktype = longcard_type;
+					if (ovfl == 0 && tk->TOK_INT >= 0 &&
+					    tk->TOK_INT<=max_int[(int)long_size]) {
+					    toktype = longintorcard_type;
+				        }
+				        else if (! chk_bounds(tk->TOK_INT,
+						      full_mask[(int)long_size],
+						      T_CARDINAL)) {
+					    ovfl = 1;
+				        }
+				    }
+				    else {
 					if (ovfl != 0 ||
 					    tk->TOK_INT > max_int[(int)long_size] ||
 					    tk->TOK_INT < 0) {
 						ovfl = 1;
 					}
 					toktype = longint_type;
+				    }
 				}
 				else if (ovfl == 0 && tk->TOK_INT >= 0 &&
 					 tk->TOK_INT<=max_int[(int)int_size]) {
@@ -543,7 +561,7 @@ lexwarning(W_ORDINARY, "character constant out of range");
 				else if (! chk_bounds(tk->TOK_INT,
 						      full_mask[(int)int_size],
 						      T_CARDINAL)) {
-							ovfl = 1;
+					ovfl = 1;
 				}
 				if (ovfl)
 lexwarning(W_ORDINARY, "overflow in constant");

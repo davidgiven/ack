@@ -615,8 +615,8 @@ cstcall(expp, call)
 		if (tp->tp_fund == T_INTEGER) {
 			expr->nd_INT = max_int[(int)(tp->tp_size)];
 		}
-		else if (tp == card_type) {
-			expr->nd_INT = full_mask[(int)(int_size)];
+		else if (tp->tp_fund == T_CARDINAL) {
+			expr->nd_INT = full_mask[(int)(tp->tp_size)];
 		}
 		else if (tp->tp_fund == T_SUBRANGE) {
 			expr->nd_INT = tp->sub_ub;

@@ -65,8 +65,8 @@ make all procedure names global, so that \fIadb\fR(1) understands them.
 .IP \fB\-g\fR
 produce a DBX-style symbol table.
 .IP \fB\-l\fR
-enable local extensions. Currently, the only local extension consists of
-procedure constants.
+enable local extensions. Currently, there are two local extensions:
+procedure constants, and the type LONGCARD.
 .IP \fB\-s\fR
 make INTEGER ranges symmetric, t.i., MIN(INTEGER) = - MAX(INTEGER).
 This is useful for interpreters that use the "real" MIN(INTEGER) to

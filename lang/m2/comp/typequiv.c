@@ -111,8 +111,8 @@ TstCompat(tp1, tp2)
 
 	tp1 = BaseType(tp1);
 	tp2 = BaseType(tp2);
-	if (tp2 != intorcard_type &&
-	    (tp1 == intorcard_type || tp1 == address_type)) {
+	if (tp2->tp_fund != T_INTORCARD &&
+	    (tp1->tp_fund == T_INTORCARD || tp1 == address_type)) {
 		t_type *tmp = tp2;
 		
 		tp2 = tp1;
@@ -126,9 +126,14 @@ TstCompat(tp1, tp2)
 		   (tp1 == int_type || tp1 == card_type || tp1 == address_type)
 		)
 	    ||
+		(  tp2 == longintorcard_type
+		&&
+		   (tp1 == longint_type || tp1 == longcard_type || tp1 == address_type)
+		)
+	    ||
 		(  tp2 == address_type
 		&& 
-	          ( tp1 == card_type || tp1->tp_fund == T_POINTER)
+	          ( tp1->tp_fund == T_CARDINAL || tp1->tp_fund == T_POINTER)
 		)
 	;
 }

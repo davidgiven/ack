@@ -221,6 +221,10 @@ AddStandards()
 	EnterType("REAL", real_type);
 	EnterType("LONGREAL", longreal_type);
 	EnterType("CARDINAL", card_type);
+	if (options['l']) {
+		/* local extension: LONGCARD. */
+		EnterType("LONGCARD", longcard_type);
+	}
 	EnterType("(void)", void_type);
 	df = Enter("NIL", D_CONST, address_type, 0);
 	df->con_const = nilconst;

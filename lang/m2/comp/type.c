@@ -70,6 +70,7 @@ t_type
 	*byte_type,
 	*address_type,
 	*intorcard_type,
+	*longintorcard_type,
 	*bitset_type,
 	*void_type,
 	*std_type,
@@ -187,6 +188,7 @@ InitTypes()
 	longcard_type = standard_type(T_CARDINAL, long_align, long_size);
 	card_type = standard_type(T_CARDINAL, int_align, int_size);
 	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
+	longintorcard_type = standard_type(T_INTORCARD, long_align, long_size);
 
 	/* floating types
 	*/
@@ -844,13 +846,13 @@ t_type *
 intorcard(left, right)
 	register t_type *left, *right;
 {
-	if (left == intorcard_type) {
+	if (left->tp_fund == T_INTORCARD) {
 		t_type *tmp = left;
 		left = right;
 		right = tmp;
 	}
-	if (right == intorcard_type) {
-		if (left == int_type || left == card_type) {
+	if (right->tp_fund == T_INTORCARD) {
+		if (left->tp_fund == T_INTEGER || left->tp_fund == T_CARDINAL) {
 			return left;
 		}
 	}

@@ -921,10 +921,10 @@ ChkBinOper(expp)
 	tpr = BaseType(exp->nd_RIGHT->nd_type);
 
 	if (intorcard(tpl, tpr) != 0) {
-		if (tpl == intorcard_type) {
+		if (tpl->tp_fund == T_INTORCARD) {
 			 exp->nd_LEFT->nd_type = tpl = tpr;
 		}
-		if (tpr == intorcard_type) {
+		if (tpr->tp_fund == T_INTORCARD) {
 			exp->nd_RIGHT->nd_type = tpr = tpl;
 		}
 	}
@@ -1052,6 +1052,9 @@ ChkUnOper(expp)
 			if (tpr == intorcard_type) {
 				exp->nd_type = int_type;
 			}
+			else if (tpr == longintorcard_type) {
+				exp->nd_type = longint_type;
+			}
 			if (right->nd_class == Value) {
 				cstunary(expp);
 			}
@@ -1166,7 +1169,7 @@ ChkStandard(expp)
 	case S_SHORT:
 	case S_LONG: {
 		t_type *tp;
-		t_type *s1, *s2, *d1, *d2;
+		t_type *s1, *s2, *s3, *d1, *d2, *d3;
 
 		if (!(arg = getarg(&arglink, 0, 0, edf))) {
 			return 0;
@@ -1178,12 +1181,16 @@ ChkStandard(expp)
 			d1 = int_type;
 			s2 = longreal_type;
 			d2 = real_type;
+			s3 = longcard_type;
+			d3 = card_type;
 		}
 		else {
 			d1 = longint_type;
 			s1 = int_type;
 			d2 = longreal_type;
 			s2 = real_type;
+			d3 = longcard_type;
+			s3 = card_type;
 		}
 
 		if (tp == s1) {
@@ -1191,6 +1198,9 @@ ChkStandard(expp)
 		}
 		else if (tp == s2) {
 			MkCoercion(&(arglink->nd_LEFT), d2);
+		}
+		else if (options['l'] && tp == s3) {
+			MkCoercion(&(arglink->nd_LEFT), d3);
 		}
 		else {
 			df_error(arg, "unexpected parameter type", edf);
@@ -1330,7 +1340,8 @@ ChkStandard(expp)
 		if (! getarg(&arglink, T_REAL, 0, edf)) return 0;
 		MkCoercion(&(arglink->nd_LEFT),
 			   edf->df_value.df_stdname == S_TRUNCD ?
-				longint_type : card_type);
+				options['l'] ? longcard_type : longint_type
+					: card_type);
 		free_it = 1;
 		break;
 
