@@ -2719,7 +2719,24 @@ pat loc cmu zne $1<256 && $1>=0 && $2==2 call loccmuzxx("jne")
  *  Group 13 : Branch Instructions                                 *
  *******************************************************************/
 
-pat bra
+pat lab stackheight($1)==2 && !fallthrough($1)
+  with STACK
+  gen labeldef $1                 yields ax
+
+pat lab stackheight($1)==2 && fallthrough($1)
+  with ACC STACK
+  gen labeldef $1                 yields ax
+
+pat lab stackheight($1)!=2
+  with STACK
+  kills ALL
+  gen labeldef $1
+
+pat bra stackheight($1)==2
+  with ACC STACK
+  gen jmp {label,$1}
+
+pat bra stackheight($1)!=2
   with STACK
   gen jmp {label,$1}
 
