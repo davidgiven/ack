@@ -1,4 +1,4 @@
-name "Motorola 68000 2-4 assembler"
+name "Motorola 68000 assembler"
 dir as
 end
 name "Motorola 68000 2-4 backend"
