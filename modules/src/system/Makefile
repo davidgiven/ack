@@ -5,6 +5,7 @@ COMPARE = $(MODULES)/compare
 LIBSYS	= libsystem.a
 INCLUDES = -I.
 CFLAGS	= $(INCLUDES) -O
+AR = ar
 OBJ	= access.o break.o chmode.o close.o create.o filesize.o \
 	modtime.o lock.o open.o read.o remove.o stop.o \
 	system.o time.o unlock.o write.o seek.o
@@ -17,7 +18,7 @@ all:		$(LIBSYS)
 
 $(LIBSYS):	$(OBJ)
 		rm -f $(LIBSYS)
-		ar r $(LIBSYS) $(OBJ)
+		$(AR) r $(LIBSYS) $(OBJ)
 		-sh -c 'ranlib $(LIBSYS)'
 
 install:	all
