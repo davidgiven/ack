@@ -42,18 +42,25 @@ extern	RENAME();
 extern string	libpath();
 
 UNLINK(x) string x; {
+	/* Must remove the file "x" */
+
 	unlink(x);	/* systemcall to remove file */
 }
 
 RENAME(x,y) string x,y; {
+	/* Must move the file "x" to the file "y" */
+
 	unlink(y);
 	if(link(x,y)!=0)fatal(1,"Cannot link to %s",y);
 	unlink(x);
 }
 
 string
-libpath(s) char *s; {
+libpath(s) string s; {
+	/* Must deliver a full pathname to the library file "s" */
+
 	static char buf[100];
+	string strcpy(), strcat();
 
 	strcpy(buf,EM_DIR);
 	strcat(buf,"/lib/LLgen/");
