@@ -21,9 +21,9 @@ operation
 	;
 instruction
 	:	bcdx DREG ',' DREG
-			{	T_EMIT2($1 | $2 | $4<<9,0,0,0);}
+			{	emit2($1 | $2 | $4<<9);}
 	|	bcdx '-' '(' AREG ')' ',' '-' '(' AREG ')'
-			{	T_EMIT2($1 | $4 | $9<<9 | 010,0,0,0);}
+			{	emit2($1 | $4 | $9<<9 | 010);}
 	|	ADD sizedef ea_ea
 			{	add($1, $2);}
 	|	AND sizenon ea_ea
@@ -92,10 +92,10 @@ instruction
 				ea_2($1&0300, $1&017);
 			}
 	|	OP_NOOP
-			{	T_EMIT2($1,0,0,0);}
+			{	emit2($1);}
 	|	OP_EXT SIZE DREG
 			{	checksize($2, ($1 & 0400) ? 4 : (2|4));
-				T_EMIT2($1 | $2+0100 | $3,0,0,0);
+				emit2($1 | $2+0100 | $3);
 			}
 	|	OP_RANGE sizedef ea ',' reg
 			{	T_EMIT2(0300 | ($2<<3) | mrg_2,0,0,0);
@@ -107,7 +107,7 @@ instruction
 				T_EMIT2($1 | ($2>>6)+1,0,0,0);
 				ea_2($2, 0);
 			}
-	|	TRAPCC	{	T_EMIT2($1 | 4,0,0,0);}
+	|	TRAPCC	{	emit2($1 | 4);}
 	|	PACK '-' '(' AREG ')' ',' '-' '(' AREG ')' ',' imm
 			{	T_EMIT2($1 | 8 | $4 | $9<<9, 0, 0, 0);
 				ea_2(SIZE_W, 0);
@@ -169,7 +169,7 @@ instruction
 					);
 			}
 	|	SWAP DREG
-			{	T_EMIT2(044100 | $2,0,0,0);}
+			{	emit2(044100 | $2);}
 	|	OP_IMM imm
 			{	T_EMIT2($1, 0, 0, 0);
 				ea_2(SIZE_W, 0);
@@ -177,14 +177,14 @@ instruction
 	|	LINK sizenon AREG ',' imm
 			{	link_instr($2, $3);}
 	|	UNLK AREG
-			{	T_EMIT2(047130 | $2,0,0,0);}
+			{	emit2(047130 | $2);}
 	|	TRAP '#' absexp
 			{	fit(fit4($3));
-				T_EMIT2(047100|low4($3),0,0,0);
+				emit2(047100|low4($3));
 			}
 	|	BKPT '#' absexp
 			{	fit(($3 & ~07) == 0);
-				T_EMIT2(044110 | low3($3),0,0,0);
+				emit2(044110 | low3($3));
 			}
 	|	CALLM '#' absexp ',' ea
 			{	fit(fitb($3));
@@ -193,7 +193,7 @@ instruction
 				ea_2(SIZE_L, CTR);
 			}
 	|	RTM reg
-			{	T_EMIT2(03300 | $2, 0, 0, 0);}
+			{	emit2(03300 | $2);}
 	|	CAS sizedef DREG ',' DREG ',' ea
 			{	T_EMIT2(04300 | (($2+0100)<<3) | mrg_2,0,0,0);
 				T_EMIT2($3 | ($5<<6),0,0,0);
@@ -202,9 +202,9 @@ instruction
 	|	CAS2 sizedef DREG ':' DREG ',' DREG ':' DREG ','
 					'(' reg ')' ':' '(' reg ')'
 			{	checksize($2 , 2|4);
-				T_EMIT2(04374 | (($2+0100)<<3),0,0,0);
-				T_EMIT2($3 | ($7<<6) | ($12<<12),0,0,0);
-				T_EMIT2($5 | ($9<<6) | ($16<<12),0,0,0);
+				emit2(04374 | (($2+0100)<<3));
+				emit2($3 | ($7<<6) | ($12<<12));
+				emit2($5 | ($9<<6) | ($16<<12));
 			}
 	|	fp_op
 	|	mm_op
@@ -654,10 +654,68 @@ mm_op1	:   /* Coprocessor instructions; syntax may be changed (please).
 				ea_2($3, 0);
 			}
 	|	CPTRAPCC cp_cond
-			{	T_EMIT2($1 | co_id | 4,0,0,0);
-				T_EMIT2($2,0,0,0);
+			{	emit2($1 | co_id | 4);
+				emit2($2);
+			}
+	/* M68030 MMU instructions */
+	|	PFLUSHA
+			{	emit2(0170000);
+				emit2($1);
+			}
+	|	PFLUSH fc ',' mask
+			{	emit2(0170000);
+				emit2($1|010000|($4<<5)|$2);
+			}
+	|	PFLUSH fc ',' mask ',' ea
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|014000|($4<<5)|$2, 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
+			}
+	|	PTEST fc ',' ea ',' mask
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|($6<<10)|$2, 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
+			}
+	|	PTEST fc ',' ea ',' mask ',' AREG
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|($6<<10)|$2|0400|($8<<5), 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
+			}
+	|	PLOAD fc ',' ea
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|$2, 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
+			}
+	|	PMOVE MREG ',' ea
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|$2|01000, 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
+			}
+	|	PMOVE ea ',' MREG
+			{	T_EMIT2(0170000|mrg_2, 0, 0, 0);
+				T_EMIT2($1|$4, 0, 0, 0);
+				ea_2(SIZE_L, DTA|CTR);
 			}
 	;
+
+mask	:	'#' absexp
+			{	fit(fit3($2));
+				$$ = low3($2);
+			}
+	;
+
+fc	:	'#' absexp
+			{	fit(fit3($2));
+				$$ = (020|low3($2));
+			}
+	|	DREG
+			{	$$ = (010|$1); }
+	|	CREG
+			{	if ($1 > 1) serror("illegal control register");
+				$$ = ($1&01);
+			}
+	;
+
 cp_cond	:	DOT absexp
 			{	fit(fit6($2));
 				$$ = low6($2);

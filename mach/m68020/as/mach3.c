@@ -232,6 +232,7 @@
 0,	CP,		06000,		"c6",
 0,	CP,		07000,		"c7",
 
+/* ???? what is this ???? */
 0,	CPGEN,		0170000,	".gen",
 0,	CPSCC,		0170100,	".s",
 0,	CPDBCC,		0170110,	".db",
@@ -240,6 +241,27 @@
 					        */
 0,	CPSAVREST,	0170400,	".save",
 0,	CPSAVREST,	0170500,	".restore",
+/* ???? end of what is this ???? */
+
+/* M68030 MMU registers */
+0,	MREG,		0040000,	"tc",
+0,	MREG,		0044000,	"srp",
+0,	MREG,		0046000,	"crp",
+0,	MREG,		0060000,	"mmusr",
+0,	MREG,		0060000,	"psr",
+0,	MREG,		0004000,	"tt0",
+0,	MREG,		0006000,	"tt1",
+
+/* M68030 MMU instructions */
+
+0,	PFLUSHA,	0022000,	"pflusha",
+0,	PFLUSH,		0020000,	"pflush",
+0,	PLOAD,		0021000,	"ploadr",
+0,	PLOAD,		0020000,	"ploadw",
+0,	PTEST,		0101000,	"ptestr",
+0,	PTEST,		0100000,	"ptestw",
+0,	PMOVE,		0000000,	"pmove",
+0,	PMOVE,		0000400,	"pmovefd",
 
 /* floating point coprocessor ... */
 

@@ -10,6 +10,7 @@
 %token <y_word> SIZE
 %token <y_word> DREG
 %token <y_word> AREG
+%token <y_word> MREG
 %token <y_word> PC
 %token <y_word> CREG
 %token <y_word> SPEC
@@ -74,9 +75,14 @@
 %token <y_word> FSAVRES
 %token <y_word> FTRAPCC
 %token <y_word> FSIZE
+%token <y_word> PFLUSHA
+%token <y_word> PFLUSH
+%token <y_word> PLOAD
+%token <y_word> PTEST
+%token <y_word> PMOVE
 
 %type <y_word> bcdx op_ea regs rrange 
 %type <y_word> reg sizedef sizenon creg
 %type <y_word> off_width abs31 bd_areg_index
-%type <y_word> areg_index areg scale cp_cond
+%type <y_word> areg_index areg scale cp_cond fc mask
 %type <y_word> fsize fregs fcregs frlist frrange
