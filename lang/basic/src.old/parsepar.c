@@ -15,12 +15,13 @@ parseparams(argc,argv)
 int argc;
 char **argv;
 {
+	int files=0 ;
 	int i;
 	char *ext;
 
 	if(argc< 4)
 	{
-	fprintf(stderr,"usage %s <flags> <file>.i <file>.e <source>\n", argv[0]);
+	fprintf(stderr,"usage %s <flags> <file> <file> <source>\n", argv[0]);
 	exit(-1);
 	}
 	for(i=1;i<argc;i++)
@@ -40,15 +41,12 @@ char **argv;
 		case 'E': listing++; break;	/* generate full listing */
 		} else {
 			/* new input file */
-			ext= argv[i]+strlen(argv[i])-1;
-			if( *(ext-1) != '.')
-				/* should be the source file name */
-				program= argv[i];
-			else
-			if( *ext == 'i')
-				inpfile= argv[i];
-		 	else
-			if( *ext == 'e')
-				outfile= argv[i];
+			switch ( files++ ) {
+			case 0: inpfile= argv[i]; break;
+			case 1: outfile= argv[i]; break;
+			case 2: /* should be the source file name */
+				program= argv[i]; break;
+			default:fatal("Too many file arguments") ;
+			}
 		}
 }
