@@ -6,7 +6,7 @@ CEG=$(TARGET_HOME)/lib.bin/ceg
 SOURCE=$(CEG)/ce_back/obj_back
 
 IDIRS=-I.\
-      -I..\
+      -I$(SRC_DIR)\
       -I$(TARGET_HOME)/h\
       -I$(TARGET_HOME)/modules/h
 
@@ -31,13 +31,13 @@ con2.$(SUF) : data.h back.h header.h $(SOURCE)/con2.c
 con4.$(SUF) : data.h back.h header.h $(SOURCE)/con4.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/con4.c
 
-relocation.$(SUF) : data.h back.h ../mach.h $(SOURCE)/relocation.c
+relocation.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/relocation.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/relocation.c
 
-do_open.$(SUF) : data.h back.h ../mach.h $(SOURCE)/do_open.c
+do_open.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/do_open.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/do_open.c
 
-do_close.$(SUF) : data.h back.h ../mach.h $(SOURCE)/do_close.c
+do_close.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/do_close.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/do_close.c
 
 gen1.$(SUF) : data.h back.h header.h $(SOURCE)/gen1.c
@@ -49,13 +49,13 @@ gen2.$(SUF) : data.h back.h header.h $(SOURCE)/gen2.c
 gen4.$(SUF) : data.h back.h header.h $(SOURCE)/gen4.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/gen4.c
 
-init_back.$(SUF) : data.h back.h ../mach.h $(SOURCE)/init_back.c
+init_back.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/init_back.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/init_back.c
 
-end_back.$(SUF) : data.h back.h ../mach.h $(SOURCE)/end_back.c
+end_back.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/end_back.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/end_back.c
 
-output.$(SUF) : data.h back.h ../mach.h $(SOURCE)/output.c
+output.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/output.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/output.c
 
 reloc1.$(SUF) : data.h back.h header.h $(SOURCE)/reloc1.c
@@ -73,36 +73,36 @@ rom2.$(SUF) : data.h back.h header.h $(SOURCE)/rom2.c
 rom4.$(SUF) : data.h back.h header.h $(SOURCE)/rom4.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/rom4.c
 
-set_global.$(SUF) : data.h back.h ../mach.h $(SOURCE)/set_global.c
+set_global.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/set_global.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/set_global.c
 
-set_local.$(SUF) : data.h back.h ../mach.h $(SOURCE)/set_local.c
+set_local.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/set_local.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/set_local.c
 
-switchseg.$(SUF) : data.h back.h ../mach.h $(SOURCE)/switchseg.c
+switchseg.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/switchseg.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/switchseg.c
 
-symboldef.$(SUF) : data.h back.h ../mach.h $(SOURCE)/symboldef.c
+symboldef.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/symboldef.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/symboldef.c
 
-text2.$(SUF) : data.h back.h ../mach.h $(SOURCE)/text2.c
+text2.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/text2.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/text2.c
 
-text4.$(SUF) : data.h back.h ../mach.h $(SOURCE)/text4.c
+text4.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/text4.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/text4.c
 
-symtable.$(SUF) : data.h back.h ../mach.h $(SOURCE)/symtable.c
+symtable.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/symtable.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/symtable.c
 
-extnd.$(SUF) : data.h back.h ../mach.h $(SOURCE)/extnd.c
+extnd.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/extnd.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/extnd.c
 
-misc.$(SUF) : data.h back.h ../mach.h $(SOURCE)/misc.c
+misc.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/misc.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/misc.c
 
-label.$(SUF) : data.h back.h ../mach.h $(SOURCE)/label.c
+label.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/label.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/label.c
 
-common.$(SUF) : data.h back.h ../mach.h $(SOURCE)/common.c
+common.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/common.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/common.c
 
