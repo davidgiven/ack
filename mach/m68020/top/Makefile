@@ -5,8 +5,8 @@ CFLAGS=$(PREFLAGS) $(PFLAGS) -O -DNDEBUG
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
 CDIR=$(EM)/mach/proto/top
-CFILES=$(CDIR)/top.c $(CDIR)/queue.c gen.c
-OFILES=top.o queue.o gen.o
+CFILES=$(CDIR)/top.c $(CDIR)/queue.c
+OFILES=top.o queue.o
 
 all:	gen.c
 	make top
@@ -14,7 +14,7 @@ all:	gen.c
 top:	$(OFILES)
 	$(CC) $(LDFLAGS) $(OFILES)  $(LIBS) -o top
 
-top.o:	$(CDIR)/top.c
+top.o:	$(CDIR)/top.c gen.c
 	$(CC) -c $(CFLAGS) $(CDIR)/top.c
 
 queue.o: $(CDIR)/queue.c
