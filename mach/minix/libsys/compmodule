@@ -1,4 +1,0 @@
-if minix -c -L -LIB $1 1>&2
-then echo `basename $1 $2`.o
-else exit 1
-fi

@@ -1,1 +1,0 @@
-troff -ms -n15 hints.doc test.doc compar.doc improv.doc his.doc reference.doc > p15-19.dit

@@ -1,7 +1,0 @@
-: '$Id$'
-
-: Compile and make dependencies. First argument is the file on which the
-: dependencies must be produced. This version is for the SUN cc.
-n=$1
-shift
-exec $CC -Qpath $UTIL_HOME/lib.bin -Qoption cpp -d$n -Qoption cpp -m $*

@@ -1,1 +1,0 @@
-pic ab+intro.doc internal.doc transpem.doc | troff -ms > p1-9.dit

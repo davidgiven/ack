@@ -1,1 +1,0 @@
-make "P=test2" "CEM=${CEM-acc}" "RUN=${RUN-}" -fsk ../makefile ${1-gen}

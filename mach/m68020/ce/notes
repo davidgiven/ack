@@ -1,8 +1,0 @@
-Helaas het framework kan niet tegen mnemonics met '.' erin, bijv.
-	add.l
-	move.w
-
-Oplossing:
-
-Alle punten door underscores vervangen in 'as_table' en process_menemonic()
-aangepast zodat ook de punten uit de 'EM_table' omgewzet worden in underscores.
