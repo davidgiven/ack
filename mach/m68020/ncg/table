@@ -836,10 +836,6 @@ from t_regAcon
 			yields	%a
 #endif TBL68020
 
-from t_address
-    uses reusing %1, AA_REG = %1
-			yields	%a
-
 from any4
     uses reusing %1, DD_REG = %1
 			yields	%a
@@ -847,6 +843,11 @@ from any4
 from any4
     uses reusing %1, AA_REG = %1
 			yields	%a
+
+from t_address
+    uses reusing %1, AA_REG = %1
+			yields	%a
+
 #if TBL68881
 from data4
     uses reusing %1, FS_REG = %1
