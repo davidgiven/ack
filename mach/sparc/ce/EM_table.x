@@ -2840,6 +2840,8 @@ C_com_narg	==>
 					"not	$a, $b";
 					"st	$b, [$reg_sp+$i_str]";
 				}
+				free_reg(b);
+				free_reg(a);
 			}
 			else
 				arg_error ("com", n);
@@ -2885,39 +2887,36 @@ C_rol
 				n= n % 32;
 				if (n)
 				{
-					a= alloc_reg();
-					pop_reg_as(a);
+					a= pop_reg();
 					b= alloc_reg();
 					c= alloc_reg();
 					sprint(n_str, "%d", n);
 					"sll	$a, $n_str, $b";
 					sprint(n_str, "%d", 32-n);
 					"srl	$a, $n_str, $c";
-					"or	$b, $c, $a";
-					push_reg(a);
+					"or	$b, $c, $c";
+					free_reg(a);
 					free_reg(b);
-					free_reg(c);
+					push_reg(c);
 				}
 			}
 		}
 		else
 		{
-			a= alloc_reg();
-			pop_reg_as(a);
-			b= alloc_reg();
-			pop_reg_as(b);
+			a= pop_reg();
+			b= pop_reg();
 			c= alloc_reg();
 			d= alloc_reg();
 			"and	$a, 31, $c";
-			"mov	32, $a";
-			"sub	$a, $c, $d";
-			"sll	$b, $c, $a";
-			"srl	$b, $d, $c";
-			"or	$a, $c, $b";
+			"mov	32, $d";
+			"sub	$d, $c, $d";
+			"sll	$b, $c, $c";
+			"srl	$b, $d, $d";
+			"or	$c, $d, $d";
 			free_reg(a);
-			push_reg(b);
+			free_reg(b);
 			free_reg(c);
-			free_reg(d);
+			push_ref(d);
 		}
 	}.
 	default		==>
@@ -2947,39 +2946,36 @@ C_ror
 				n= n % 32;
 				if (n)
 				{
-					a= alloc_reg();
-					pop_reg_as(a);
+					a= pop_reg();
 					b= alloc_reg();
 					c= alloc_reg();
 					sprint(n_str, "%d", n);
 					"srl	$a, $n_str, $b";
 					sprint(n_str, "%d", 32-n);
 					"sll	$a, $n_str, $c";
-					"or	$b, $c, $a";
-					push_reg(a);
+					"or	$b, $c, $c";
+					free_reg(a);
 					free_reg(b);
-					free_reg(c);
+					push_reg(c);
 				}
 			}
 		}
 		else
 		{
-			a= alloc_reg();
-			pop_reg_as(a);
-			b= alloc_reg();
-			pop_reg_as(b);
+			a= pop_reg();
+			b= pop_reg();
 			c= alloc_reg();
 			d= alloc_reg();
 			"and	$a, 31, $c";
-			"mov	32, $a";
-			"sub	$a, $c, $d";
-			"srl	$b, $c, $a";
-			"sll	$b, $d, $c";
-			"or	$a, $c, $b";
+			"mov	32, $d";
+			"sub	$d, $c, $d";
+			"srl	$b, $c, $c";
+			"sll	$b, $d, $d";
+			"or	$c, $d, $d";
 			free_reg(a);
-			push_reg(b);
+			free_reg(b);
 			free_reg(c);
-			free_reg(d);
+			push_reg(d);
 		}
 	}.
 	default		==>
@@ -3159,10 +3155,10 @@ C_set_narg	==>
 				"bnz	1b";
 				"st	%g0, [$reg_sp+$a]";	/* HACK delay */
 				"andn	$b, 31, $c";
-				"and	$b, 31, $b";
+				"and	$b, 31, $d";
 				"srl	$c, 3, $c";
 				"set	1, $a";
-				"sll	$a, $b, $d";
+				"sll	$a, $d, $d";
 				"st	$d, [$reg_sp+$c]";
 				free_reg(a);
 				free_reg(b);
@@ -3172,8 +3168,7 @@ C_set_narg	==>
 		} else {
 			a= alloc_reg();
 			pop_reg_as(a);
-			b= alloc_reg();
-			pop_reg_as(b);
+			b= pop_reg();
 			flush_cache();
 			c= alloc_reg();
 			d= alloc_reg();
@@ -3183,10 +3178,10 @@ C_set_narg	==>
 			"bnz	1b";
 			"st	%g0, [$reg_sp+$a]";	/* HACK delay */
 			"andn	$b, 31, $c";
-			"and	$b, 31, $b";
+			"and	$b, 31, $d";
 			"srl	$c, 3, $c";
 			"set	1, $a";
-			"sll	$a, $b, $d";
+			"sll	$a, $d, $d";
 			"st	$d, [$reg_sp+$c]";
 			free_reg(a);
 			free_reg(b);
@@ -4050,6 +4045,7 @@ C_bls
 		reg_t b;
 		reg_t c;
 		reg_t d;
+		reg_t e;
 		reg_t ao_reg;
 		reg_t bo_reg;
 		int n;
@@ -4139,16 +4135,20 @@ C_bls
 				b= pop_reg();	/* src */
 				c= alloc_reg();
 				d= alloc_reg();
-				"set	$n_str, $c";
+				e = alloc_reg();
+				"set	$n_str-4, $c";
+				"set	-4, $e";
 			"1:";
-				"deccc	4, $c";
-				"ld	[$b+$c], $d";
+				"inc	4, $e";
+				"ld	[$b+$e], $d";
+				"cmp	$e,$c";
 				"bnz	1b";
-				"st	$d, [$a+$c]";
+				"st	$d, [$a+$e]";
 				free_reg(a);
 				free_reg(b);
 				free_reg(c);
 				free_reg(d);
+				free_reg(e);
 			}
 		}
 		else
@@ -4159,15 +4159,21 @@ C_bls
 			a= pop_reg();	/* dest */
 			b= pop_reg();	/* src */
 			d= alloc_reg();
+			e= alloc_reg();
+			"ba	2f";
+			"clr	$e";
 		"1:";
-			"deccc	4, $c";
-			"ld	[$b+$c], $d";
+			"st	$d, [$a+$e]";
+			"inc	4, $e";
+		"2:";
+			"cmp	$e, $c"
 			"bnz	1b";
-			"st	$d, [$a+$c]";
+			"ld	[$b+$e], $d";
 			free_reg(a);
 			free_reg(b);
 			free_reg(c);
 			free_reg(d);
+			free_reg(e);
 		}
 	}.
 
