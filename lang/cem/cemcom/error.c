@@ -6,7 +6,11 @@
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
 #include	"lint.h"
+#if __STDC__
+#include	<stdarg.h>
+#else
 #include	<varargs.h>
+#endif
 #include	<system.h>
 #ifndef	LINT
 #include	<em.h>
@@ -56,6 +60,167 @@ extern char loptions[];
 
 static _error();
 
+#if __STDC__
+/*VARARGS*/
+error(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(ERROR, dot.tk_file, dot.tk_line, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+expr_error(struct expr *expr, char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		if (!(expr->ex_flags & EX_ERROR)) {
+			/* to prevent proliferation */
+			_error(ERROR, expr->ex_file, expr->ex_line, fmt, ap);
+			expr->ex_flags |= EX_ERROR;
+		}
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+warning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+expr_warning(struct expr *expr, char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		if (!(expr->ex_flags & EX_ERROR)) {
+			/* to prevent proliferation */
+			_error(WARNING, expr->ex_file, expr->ex_line, fmt, ap);
+		}
+	}
+	va_end(ap);
+}
+
+#ifdef	LINT
+
+/*VARARGS*/
+def_warning(struct def *def, char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(WARNING, def->df_file, def->df_line, fmt, ap);
+	}
+	va_end(ap);
+}
+
+
+/*VARARGS*/
+hwarning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		if (loptions['h'])
+			_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+awarning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		if (loptions['a'])
+			_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
+	}
+	va_end(ap);
+}
+
+#endif	/* LINT */
+
+/*VARARGS*/
+lexerror(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(ERROR, FileName, LineNumber, fmt, ap);
+	}
+	va_end(ap);
+}
+
+#ifndef	NOPP
+/*VARARGS*/
+lexwarning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(WARNING, FileName, LineNumber, fmt, ap);
+	}
+	va_end(ap);
+}
+#endif	/* NOPP */
+
+/*VARARGS*/
+crash(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(CRASH, FileName, LineNumber, fmt, ap);
+	}
+	va_end(ap);
+
+	C_close();
+#ifdef	DEBUG
+	sys_stop(S_ABORT);
+#else	/* DEBUG */
+	sys_stop(S_EXIT);
+#endif	/* DEBUG */
+	/* NOTREACHED */
+}
+
+/*VARARGS*/
+fatal(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(FATAL, FileName, LineNumber, fmt, ap);
+	}
+	va_end(ap);
+
+	if (C_busy()) C_close();
+	sys_stop(S_EXIT);
+	/*NOTREACHED*/
+}
+#else
 /*VARARGS*/
 error(va_alist)				/* fmt, args */
 	va_dcl
@@ -64,7 +229,8 @@ error(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(ERROR, dot.tk_file, dot.tk_line, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(ERROR, dot.tk_file, dot.tk_line, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -78,10 +244,11 @@ expr_error(va_alist)			/* expr, fmt, args */
 	va_start(ap);
 	{
 		register struct expr *expr = va_arg(ap, struct expr *);
+		char *fmt = va_arg(ap, char *);
 
 		if (!(expr->ex_flags & EX_ERROR)) {
 			/* to prevent proliferation */
-			_error(ERROR, expr->ex_file, expr->ex_line, ap);
+			_error(ERROR, expr->ex_file, expr->ex_line, fmt, ap);
 			expr->ex_flags |= EX_ERROR;
 		}
 	}
@@ -96,7 +263,8 @@ warning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(WARNING, dot.tk_file, dot.tk_line, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -110,10 +278,11 @@ expr_warning(va_alist)			/* expr, fmt, args */
 	va_start(ap);
 	{
 		struct expr *expr = va_arg(ap, struct expr *);
+		char *fmt = va_arg(ap, char *);
 
 		if (!(expr->ex_flags & EX_ERROR)) {
 			/* to prevent proliferation */
-			_error(WARNING, expr->ex_file, expr->ex_line, ap);
+			_error(WARNING, expr->ex_file, expr->ex_line, fmt, ap);
 		}
 	}
 	va_end(ap);
@@ -130,8 +299,9 @@ def_warning(va_alist)			/* def, fmt, args */
 	va_start(ap);
 	{
 		register struct def *def = va_arg(ap, struct def *);
+		char *fmt = va_arg(ap, char *);
 
-		_error(WARNING, def->df_file, def->df_line, ap);
+		_error(WARNING, def->df_file, def->df_line, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -145,8 +315,9 @@ hwarning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
+		char *fmt = va_arg(ap, char *);
 		if (loptions['h'])
-			_error(WARNING, dot.tk_file, dot.tk_line, ap);
+			_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -159,8 +330,9 @@ awarning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
+		char *fmt = va_arg(ap, char *);
 		if (loptions['a'])
-			_error(WARNING, dot.tk_file, dot.tk_line, ap);
+			_error(WARNING, dot.tk_file, dot.tk_line, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -175,7 +347,8 @@ lexerror(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(ERROR, FileName, LineNumber, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(ERROR, FileName, LineNumber, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -189,7 +362,8 @@ lexwarning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(WARNING, FileName, LineNumber, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(WARNING, FileName, LineNumber, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -203,7 +377,8 @@ crash(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(CRASH, FileName, LineNumber, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(CRASH, FileName, LineNumber, fmt, ap);
 	}
 	va_end(ap);
 
@@ -224,7 +399,8 @@ fatal(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(FATAL, FileName, LineNumber, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(FATAL, FileName, LineNumber, fmt, ap);
 	}
 	va_end(ap);
 
@@ -232,16 +408,17 @@ fatal(va_alist)				/* fmt, args */
 	sys_stop(S_EXIT);
 	/*NOTREACHED*/
 }
+#endif
 
 static
-_error(class, fn, ln, ap)
+_error(class, fn, ln, fmt, ap)
 	int class;
 	char *fn;
 	unsigned int ln;
+	char *fmt;
 	va_list ap;
 {
 	char *remark;
-	char *fmt = va_arg(ap, char *);
 
 	/* check visibility of message */
 	switch (class)	{
