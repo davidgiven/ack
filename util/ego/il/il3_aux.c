@@ -21,7 +21,7 @@ line_p last_line(lines)
 
 	register line_p l;
 
-	assert (l != (line_p) 0);
+	assert (lines != (line_p) 0);
 	for (l = lines; l->l_next != (line_p) 0; l = l->l_next);
 	return l;
 }
