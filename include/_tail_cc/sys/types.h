@@ -3,6 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+#ifndef __TYPES_H__
+#define __TYPES_H__
+
 /*
  * Basic system types and major/minor device constructing/busting macros.
  */
@@ -43,3 +47,5 @@ typedef unsigned char	uchar_t;
 typedef short		cnt_t;
 typedef long		paddr_t;
 typedef long		key_t;
+
+#endif /* __TYPES_H__ */
