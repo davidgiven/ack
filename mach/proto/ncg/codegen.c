@@ -565,14 +565,18 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			 * property. If none then some stacking has to take place.
 			 */
 			if (npos==0) {
-				if (stackheight<=tokpatlen) {
-					if (!toplevel) {
-						BROKE();
-					} else
-						fatal("No regs available");
-				}
-				totalcost += stackupto( &fakestack[0],ply,toplevel);
-				CHKCOST();
+  				if (stackheight<=tokpatlen) {
+  					if (!toplevel) {
+  						BROKE();
+ 					} else {
+ 						if (paniced)
+ 							fatal("No regs available");
+ 						totalcost += stackupto( &fakestack[0],ply,toplevel);
+ 						goto panic;
+ 					}
+  				}
+  				totalcost += stackupto( &fakestack[0],ply,toplevel);
+  				CHKCOST();
 			}
 		} while (npos==0);
 		if (!exactmatch) {
