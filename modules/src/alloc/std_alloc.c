@@ -19,8 +19,12 @@ std_alloc(phead, size, count, pcnt)
 	register char *p;
 
 	if (*phead == 0)	{
-
-		p = Malloc(size * count);
+		while (count >= 1 && (p = malloc(size * count)) == 0) {
+			count >>= 1;
+		}
+		if (p == 0) {
+			No_Mem();
+		}
 		*pcnt += count;
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {

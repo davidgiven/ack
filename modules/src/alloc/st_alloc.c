@@ -20,7 +20,12 @@ st_alloc(phead, size, count)
 	char *retval;
 
 	if (*phead == 0)	{
-		p = Malloc(size * count);
+		while (count >= 1 && (p = malloc(size * count)) == 0) {
+			count >>= 1;
+		}
+		if (p == 0) {
+			No_Mem();
+		}
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
 			p += size;
