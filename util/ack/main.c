@@ -75,7 +75,7 @@ main(argc,argv) char **argv ; {
 		if ( !process(l_content(*elem)) && !k_flag ) exit(1) ;
 	}
 	orig.p_path= (char *)0 ;
-	if ( !rts ) rts="" ;
+	if ( !rts ) rts="." ;
 	setsvar(keeps(RTS),rts) ;
 	if ( linker ) getmapflags(linker) ;
 
