@@ -46,6 +46,7 @@ exp(x)
 		if (x > M_LN_MAX_D) errno = ERANGE;
 		return M_MAX_D;
 	}
+	if (negative) x = -x;
 
 	/* ??? avoid underflow ??? */
 
@@ -56,6 +57,10 @@ exp(x)
 		double	x2 = x - x1;
 
 		g = ((x1-xn*0.693359375)+x2) - xn*(-2.1219444005469058277e-4);
+	}
+	if (negative) {
+		g = -g;
+		n = -n;
 	}
 	xn = g * g;
 	x = g * POLYNOM2(xn, p);

@@ -40,7 +40,7 @@ asin_acos(x, cosfl)
 		x = -x;
 	}
 	if (x > 0.5) {
-		i = 1 - cosfl;
+		i = 1;
 		if (x > 1) {
 			errno = EDOM;
 			return 0;
@@ -51,16 +51,18 @@ asin_acos(x, cosfl)
 	}
 	else {
 		/* ??? avoid underflow ??? */
+		i = 0;
 		g = x * x;
 	}
 	x += x * g * POLYNOM4(g, p) / POLYNOM5(g, q);
-	if (i == 1) {
-		if (cosfl == 0 || ! negative) {
-			x = (x + M_PI_4) + M_PI_4;
-		}
-		else if (cosfl && negative) {
-			x = (x + M_PI_2) + M_PI_2;
-		}
+	if (cosfl) {
+		if (! negative) x = -x;
+	}
+	if ((cosfl == 0) == (i == 1)) {
+		x = (x + M_PI_4) + M_PI_4;
+	}
+	else if (cosfl && negative && i == 1) {
+		x = (x + M_PI_2) + M_PI_2;
 	}
 	if (! cosfl && negative) x = -x;
 	return x;
