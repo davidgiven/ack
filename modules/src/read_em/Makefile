@@ -7,6 +7,7 @@ DEFINES = -DPRIVATE=static -DEXPORT=
 CFLAGS = -O $(INCLUDES) $(DEFINES)
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
+AR = ar
 
 TARGETS =	libread_emk.a\
 		libread_emkV.a\
@@ -61,15 +62,15 @@ clean:
 		rm -f *.o *.a C_mnem C_mnem_narg
 
 libread_emk.a:	$(K_OFILES)
-		ar r libread_emk.a $(K_OFILES)
+		$(AR) r libread_emk.a $(K_OFILES)
 		-sh -c 'ranlib libread_emk.a'
 
 libread_emkV.a:	$(KV_OFILES)
-		ar r libread_emkV.a $(KV_OFILES)
+		$(AR) r libread_emkV.a $(KV_OFILES)
 		-sh -c 'ranlib libread_emkV.a'
 
 libread_emeV.a:	$(EV_OFILES)
-		ar r libread_emeV.a $(EV_OFILES)
+		$(AR) r libread_emeV.a $(EV_OFILES)
 		-sh -c 'ranlib libread_emeV.a'
 
 read_emk.o:	read_em.c em_comp.h readk.c
