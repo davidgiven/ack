@@ -1,4 +1,4 @@
-/user/t63/em/lib/sun3/tail_a68stail_a68s.a
+tail_a68s.a
 errorr.p
 global.p
 safeaccess.p
@@ -117,3 +117,4 @@ exp.c
 ln.c
 maxr.c
 cleanup.c
+run68g.p

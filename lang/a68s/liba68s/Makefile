@@ -109,7 +109,7 @@ liba68s$(w)$(p): $(EOFILES) $(COFILES) $(LIBOFILES) $(SOFILES) run68g.o
 		sh -c '$${RANLIB-:} liba68s$(w)$(p)'
 
 check$(w)$(p):
-		/bin/make clean
+		/bin/make -f $(EMROOT)/lang/a68s/liba68s/Makefile clean
 		echo >> check$(w)$(p)
 
 checkseq:
