@@ -7,12 +7,12 @@ break = 17
 .align	1
 __sbrk:
 	.data2	0x0000
-	addl3	Ibrk,4(ap),-(sp)
+	addl3	.limhp,4(ap),-(sp)
 	bcc	1f
 	movl	$0xFFFFFFFF,(sp)	! will cause an error (I hope)
 1:
-	movl	Ibrk,r3
-	calls	$1,_brk
+	movl	.limhp,r3
+	calls	$1,__brk
 	tstl	r0
 	blss	1f
 	movl	r3,r0
@@ -26,9 +26,6 @@ __brk:
 	bcc 	1f
 	jmp 	errmon
 1:
-	movl	4(ap),Ibrk
+	movl	4(ap),.limhp
 	clrl	r0
 	ret
-
-.sect .data
-Ibrk:	.data4	endbss
