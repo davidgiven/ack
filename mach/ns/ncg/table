@@ -545,7 +545,7 @@ with REG STACK
         acbd {const4, 0-4}, %a, {label, "1b"}
 
 pat los $1==4
-with STACK
+kills ALL
     gen jsr {absolute4, ".los"}
 
 pat ldl					yields {DLOCAL, $1}
@@ -757,7 +757,7 @@ with REG STACK
 	acbd {const4, 0-4}, %a, {label, "1b"}
 
 pat sts
-with STACK
+kills ALL
     gen jsr {absolute4, ".sts"}
 
 pat sdl
@@ -1006,11 +1006,11 @@ with src4 src4
         meid %2, %a			yields %a.1
  
 pat dvu $1 == 4
-with STACK
+kills ALL
     gen jsr {absolute4, ".dvu"}		yields r0
 
 pat rmu $1 == 4
-with STACK
+kills ALL
     gen jsr {absolute4, ".rmu"}		yields r0
 
 pat slu						leaving sli $1
@@ -1295,7 +1295,7 @@ uses reusing %1, REG
     gen movxwd %1, %a				yields %a
 
 pat cii
-with STACK
+kills ALL
     gen jsr {absolute4, ".cii"}
 
 pat cui
@@ -1313,7 +1313,7 @@ uses REG
     gen roundfd %1, %a				yields %a
 
 pat cfi
-with STACK
+kills ALL
     gen jsr {absolute4, ".cfi"}
 
 pat loc loc cif $1==4 && $2==8
@@ -1327,7 +1327,7 @@ uses FREG
     gen movdf %1, %a				yields %a
 
 pat cif
-with STACK
+kills ALL
     gen jsr {absolute4, ".cif"}
 
 pat cuf
@@ -1348,7 +1348,7 @@ uses FREG
     gen movlf %1, %a				yields %a
 
 pat cff
-with STACK
+kills ALL
     gen jsr {absolute4, ".cff"}
  
 #else
@@ -1728,27 +1728,30 @@ pat lae lar defined(rom($1,3))
 					loi rom($1,3)
 
 pat aar defined($1)
-with STACK
+kills ALL
 gen jsr {absolute4, ".aar"}
 
 pat lar defined($1)
-with STACK
+kills ALL
 gen jsr {absolute4, ".lar"}
 
 pat sar defined($1)
-with STACK
+kills ALL
 gen jsr {absolute4, ".sar"}
 
 pat aar !defined($1)
 with src4 STACK
+kills ALL
 gen jsr {absolute4, ".aar"}
 
 pat lar !defined($1)
 with src4 STACK
+kills ALL
 gen jsr {absolute4, ".lar"}
 
 pat sar !defined($1)
 with src4 STACK
+kills ALL
 gen jsr {absolute4, ".sar"}
 
 /*****************************************************************
@@ -1857,19 +1860,19 @@ with src4 src4
 	2:				yields %a
 
 pat cmu defined($1)
-with STACK
+kills ALL
     gen move {const4, $1}, {TOS}
 	jsr {absolute4, ".cmu"}		yields r1
 
 pat cms $1==4				leaving cmi $1
 
 pat cms $1!=4
-with STACK
+kills ALL
 gen move {const4, $1}, {TOS}
     jsr {absolute4, ".cms"}		yields r1
 
 pat cms !defined($1)
-with STACK
+kills ALL
 gen jsr {absolute4, ".cms"}		yields r1
 
 pat cmp
@@ -2001,11 +2004,12 @@ pat zgt				call zxx("blt")
  *****************************************************************/
 
 pat cal
-with STACK
+kills ALL
     gen jsr {absolute4, $1}
 
 pat cai
 with REG STACK
+kills ALL
     gen jsr %1
 
 pat ret $1==0
@@ -2091,24 +2095,26 @@ kills ALL
 
 pat lae csa $2==4
 with src4 STACK
+kills ALL
     gen move %1, r0
 	move {addr_external, $1}, r1
 	jsr {absolute4, ".csa"}
 
 pat csa
-with STACK
+kills ALL
     gen movd {TOS}, r1
 	movd {TOS}, r0
 	jsr {absolute4, ".csa"}
 
 pat lae csb $2==4
 with src4 STACK
+kills ALL
     gen move %1, r0
 	move {addr_external, $1}, r1
 	jsr {absolute4, ".csb"}
 
 pat csb
-with STACK
+kills ALL
     gen movd {TOS}, r1
 	movd {TOS}, r0
 	jsr {absolute4, ".csb"}
@@ -2124,12 +2130,13 @@ with exact DLOCAL			yields %1 %1
 with exact absolute8			yields %1 %1
 
 pat dup $1>8
-with STACK
+kills ALL
     gen move {const4, $1}, r0
 	jsr {absolute4, ".dup"}
 
 pat dus $1==4
 with src4 STACK
+kills ALL
     gen move %1, r0
 	jsr {absolute4, ".dup"}
 
@@ -2140,7 +2147,7 @@ pat exg $1==8
 with src4 src4 src4 src4		yields %2 %1 %4 %3
 
 pat exg
-with STACK
+kills ALL
     gen move {const4, $1}, r0
 	jsr {absolute4, ".exg"}
 
@@ -2170,17 +2177,17 @@ pat lor $1==2				yields {absolute4, ".reghp"}
 pat lpb					leaving adp 8
 
 pat mon
-with STACK
+kills ALL
 gen jsr {absolute4, ".mon"}
 
 pat nop
-with STACK
+kills ALL
     gen move {absolute4, "hol0"}, {TOS}
 	jsr {absolute4, ".print"}
 	jsr {absolute4, ".prnl"}
 
 pat rck $1==4
-with STACK
+kills ALL
     gen jsr {absolute4, ".rck"}
 
 pat rtt					leaving ret 0
@@ -2208,5 +2215,5 @@ with src4
 gen move %1, {absolute4, ".reghp"}
 
 pat trp
-with STACK
+kills ALL
     gen jsr {absolute4, ".trp"}
