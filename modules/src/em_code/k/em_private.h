@@ -35,7 +35,7 @@
 #define	WCON(x,y,z)	put_wcon((x), (y), (z))
 #define COMMA()
 #define NL()
-#define CILB(x)		CST(x)
+#define CILB(x)		CST((arith) x)
 
 #define	put_cend()	putbyte(sp_cend)
 #define	put_op(x)	putbyte(x)
