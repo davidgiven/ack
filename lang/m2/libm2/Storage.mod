@@ -203,7 +203,7 @@ IMPLEMENTATION MODULE Storage;
   BEGIN
 	a:= MyAllocate(size);
 	IF a # NIL THEN
-		DEALLOCATE(a, size);
+		Deallocate(a, size);
 		RETURN TRUE;
 	END;
 	RETURN FALSE;
@@ -324,9 +324,12 @@ IMPLEMENTATION MODULE Storage;
 					BNEXT := Llist;
 					Llist := b;
 				END;
+				b := ADDRESS(b) + (BSIZE+1) * UNIT;
+			ELSE
+				b := ADDRESS(b) + 
+					((BSIZE + (UNIT - 1)) DIV UNIT + 1) * UNIT;
 			END;
 		END;
-		b := ADDRESS(b) + (b^.BSIZE+1) * UNIT;
 	END;
   END ReOrganize;
 
