@@ -1,6 +1,6 @@
 EM_table
 Make.back
-Makefile
+proto.make
 as.c
 as.h
 as_table
