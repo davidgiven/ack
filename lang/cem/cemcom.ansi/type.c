@@ -290,7 +290,18 @@ completed(tp)
 	struct type *tp;
 {
 	register struct type *atp = tp->tp_array;
+	register struct type *etp = tp;
 
+	switch(etp->tp_fund) {
+	case STRUCT:
+	case UNION:
+	case ENUM:
+		while (etp = etp->next) {
+			if (! etp->tp_sdef) etp->tp_sdef = tp->tp_sdef;
+			etp->tp_size = tp->tp_size;
+		}
+		break;
+	}
 	while (atp) {
 		if (atp->tp_nel >= 0) {
 			atp->tp_size = atp->tp_nel * tp->tp_size;

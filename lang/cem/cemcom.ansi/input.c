@@ -14,6 +14,7 @@
 struct file_info	finfo;
 #include "nopp.h"
 #include <inp_pkg.body>
+#include <alloc.h>
 
 #include        "dbsymtab.h"
 #ifndef NOPP
