@@ -40,7 +40,7 @@ unsigned stackupto();
 string tostring();
 
 #ifdef NDEBUG
-#define DEBUG()
+#define DEBUG(xxxxx)
 #else
 #include <stdio.h>
 #define DEBUG(string) {if(Debug) fprintf(stderr,"%-*d%s\n",4*level,level,string);}
