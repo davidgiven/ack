@@ -1,0 +1,374 @@
+Fri Feb 15 14:24:12 MET 1985
+***** ctconv
+acc -DNOFLOAT conv.c
+conv.c
+"conv.c", line 48: warning: Overflow in constant expression
+running conv.cem
+comparing conv
+2a3,4
+> (float) 12 = 12.000000
+> (int) 3.14 = 3
+11,$c13,$
+< 	char   255, int    255, unsigned    377, long         255
+< 	char   255, int    255, unsigned    377, long         255
+< From integer
+< 	char   192, int    -64, unsigned 177700, long         -64
+< From long
+< 	char   253, int     -3, unsigned 177775, long          -3
+< a[l] (l==3) -17
+< a[3l] -17
+---
+> 					float 127.000000
+> 	char   255, int    255, unsigned    377, long         255
+> 					float 255.000000
+> 	char   255, int    255, unsigned    377, long         255
+> 					float 255.000000
+> From integer
+> 	char   192, int    -64, unsigned 177700, long         -64
+> 					float -64.000000
+> From long
+> 	char   253, int     -3, unsigned 177775, long          -3
+> 					float -3.000000
+> From float
+> 	char   121, int    121, unsigned    171, long         121, float 121.500000
+> 	char     0, int      0, unsigned      0, long           0, float 0.000100
+> 	int  32766, unsigned  77776, long       32766, float 32766.000000
+> 	long  1223432064, float 1223432064.000000
+> a[l] (l==3) -17
+> a[3l] -17
+***** ctdecl
+acc -DNOFLOAT decl.c
+decl.c
+running decl.cem
+comparing decl
+***** ctdivers
+acc -DNOFLOAT ops.c
+ops.c
+running ops.cem
+comparing ops
+***** cterr
+acc -DNOFLOAT bugs.c
+bugs.c
+"bugs.c", line 98: warning: Overflow in constant expression
+running bugs.cem
+comparing bugs
+***** ctest1
+acc -DNOFLOAT test.c
+test.c
+running test.cem
+comparing test
+1,$c1,$
+< End of test program, 10 tests completed, 0 errors detected
+---
+> End of test program, 11 tests completed, 0 errors detected
+***** ctest2
+acc -DNOFLOAT t7.c
+t7.c
+"t7.c", line 163: warning: statement not reached
+"t7.c", line 180: warning: statement not reached
+"t7.c", line 184: warning: statement not reached
+"t7.c", line 188: warning: statement not reached
+"t7.c", line 192: warning: statement not reached
+"t7.c", line 196: warning: statement not reached
+"t7.c", line 200: warning: statement not reached
+"t7.c", line 207: warning: statement not reached
+"t7.c", line 209: warning: statement not reached
+"t7.c", line 213: warning: statement not reached
+"t7.c", line 215: warning: statement not reached
+"t7.c", line 289: warning: statement not reached
+"t7.c", line 296: warning: statement not reached
+"t7.c", line 302: warning: statement not reached
+"t7.c", line 309: warning: statement not reached
+"t7.c", line 345: warning: statement not reached
+"t7.c", line 346: warning: statement not reached
+"t7.c", line 347: warning: statement not reached
+"t7.c", line 348: warning: statement not reached
+"t7.c", line 350: warning: statement not reached
+"t7.c", line 454: warning: statement not reached
+"t7.c", line 563: warning: statement not reached
+"t7.c", line 591: warning: statement not reached
+running t7.cem
+comparing t7
+***** ctest3
+acc -DNOFLOAT test2.c
+test2.c
+running test2.cem
+comparing test2
+***** ctest5
+acc -DNOFLOAT test1.c
+test1.c
+"test1.c", line 386: warning: illegal pointer combination
+"test1.c", line 387: warning: illegal pointer combination
+"test1.c", line 388: warning: illegal pointer combination
+"test1.c", line 400: warning: illegal pointer combination
+"test1.c", line 423: warning: illegal pointer combination
+"test1.c", line 424: warning: illegal pointer combination
+"test1.c", line 425: warning: illegal pointer combination
+"test1.c", line 437: warning: illegal pointer combination
+running test1.cem
+comparing test1
+1,$c1,$
+< program test1
+< 10 tests completed. Number of errors = 0
+---
+> error 13 in test 11 
+> program test1
+> 11 tests completed. Number of errors = 1
+***** ctgen
+sed -f bf.sed <OPS >bf.c
+acc -DNOFLOAT bf.c
+bf.c
+running bf.cem
+comparing bf
+sed -f cel.sed <OPS >cel.c
+acc -DNOFLOAT cel.c
+cel.c
+running cel.cem
+comparing cel
+sed -f clu.sed <OPS >clu.c
+acc -DNOFLOAT clu.c
+clu.c
+"clu.c", line 60: warning: Overflow in constant expression
+"clu.c", line 66: warning: Overflow in constant expression
+running clu.cem
+comparing clu
+sed -f ec.sed <OPS >ec.c
+acc -DNOFLOAT ec.c
+ec.c
+"ec.c", line 58: warning: Overflow in constant expression
+"ec.c", line 64: warning: Overflow in constant expression
+running ec.cem
+comparing ec
+sed -f ef.sed <OPS >ef.c
+acc -DNOFLOAT ef.c
+ef.c
+running ef.cem
+comparing ef
+sed -f ei.sed <OPS >ei.c
+acc -DNOFLOAT ei.c
+ei.c
+"ei.c", line 22: warning: Overflow in constant expression
+"ei.c", line 65: warning: Overflow in constant expression
+"ei.c", line 108: warning: Overflow in constant expression
+running ei.cem
+comparing ei
+sed -f el.sed <OPS >el.c
+acc -DNOFLOAT el.c
+el.c
+running el.cem
+comparing el
+sed -f eu.sed <OPS >eu.c
+acc -DNOFLOAT eu.c
+eu.c
+"eu.c", line 58: warning: Overflow in constant expression
+"eu.c", line 64: warning: Overflow in constant expression
+running eu.cem
+comparing eu
+sed -f id.sed <OPS >id.c
+acc -DNOFLOAT id.c
+id.c
+running id.cem
+comparing id
+sed -f lc.sed <OPS >lc.c
+acc -DNOFLOAT lc.c
+lc.c
+"lc.c", line 60: warning: Overflow in constant expression
+"lc.c", line 66: warning: Overflow in constant expression
+running lc.cem
+comparing lc
+sed -f ld.sed <OPS >ld.c
+acc -DNOFLOAT ld.c
+ld.c
+running ld.cem
+comparing ld
+sed -f lf.sed <OPS >lf.c
+acc -DNOFLOAT lf.c
+lf.c
+running lf.cem
+comparing lf
+sed -f li.sed <OPS >li.c
+acc -DNOFLOAT li.c
+li.c
+"li.c", line 22: warning: Overflow in constant expression
+"li.c", line 67: warning: Overflow in constant expression
+"li.c", line 112: warning: Overflow in constant expression
+running li.cem
+comparing li
+sed -f ll.sed <OPS >ll.c
+acc -DNOFLOAT ll.c
+ll.c
+running ll.cem
+comparing ll
+sed -f lu.sed <OPS >lu.c
+acc -DNOFLOAT lu.c
+lu.c
+running lu.cem
+comparing lu
+***** ctill
+----- All program(s) in this directory should fail to compile.
+acc -DNOFLOAT noarg.c
+noarg.c
+"noarg.c", line 10: declared argument name is missing
+*** Error code 1
+`gen' not remade because of errors
+***** ctinit
+acc -DNOFLOAT init.c
+init.c
+"init.c", line 183: warning: Overflow in constant expression (U-)
+running init.cem
+comparing init
+41,$c41,$
+< long
+< 
+< lo1	14
+< lo2	-17
+< lo3	2147483647
+< lo4	-2147483648
+< lo5	0
+< lo6	1
+< 
+< structures
+< 
+< 	 st1          sta[0..2]
+< s_i	              0              1              2              3
+< s_ca[0]	              0             97              0              0
+< s_ca[1]	              0             98              0              0
+< s_ca[2]	              0             99              0              0
+< s_l	              0             10              0              0
+< (sta[0].s_s1)->s_i = 1
+< 
+< bit fields:
+< 
+< sizeof stb 6
+< stb	1 2 3 4 3 6 7
+< 
+---
+> Floats:
+> 
+> fl1	0.00000000000000000000e+00
+> fl2	2.00000000000000000000e+00
+> fl2	2.00000000000000000000e+00
+> fl4	4.00000000000000000000e+00
+> fl5	2.93873587705571892581e-39
+> fl6	1.70141173319264427000e+38
+> fl7	0.00000000000000000000e+00
+>     fla1                    fla2                    fla3
+>             1.000000e+00           -1.000000e+00            1.100000e+01
+>             3.000000e+00           -3.000000e+00            0.000000e+00
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             2.000000e+00           -2.000000e+00            1.200000e+01
+>             4.000000e+00           -4.000000e+00            0.000000e+00
+>             6.000000e+00           -6.000000e+00            0.000000e+00
+>             3.000000e+00           -3.000000e+00            1.300000e+01
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             7.000000e+00           -7.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            1.400000e+01
+>             0.000000e+00            0.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            0.000000e+00
+> 
+> Doubles:
+> 
+> dbl1	0.00000000000000000000e+00
+> dbl2	2.00000000000000000000e+00
+> dbl2	2.00000000000000000000e+00
+> dbl4	4.00000000000000000000e+00
+> dbl5	2.93873600000000034793e-39
+> dbl6	1.70141170000000000000e+38
+> dbl7	0.00000000000000000000e+00
+>     dbla1                    dbla2                    dbla3
+>             1.000000e+00           -1.000000e+00            1.100000e+01
+>             3.000000e+00           -3.000000e+00            0.000000e+00
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             2.000000e+00           -2.000000e+00            1.200000e+01
+>             4.000000e+00           -4.000000e+00            0.000000e+00
+>             6.000000e+00           -6.000000e+00            0.000000e+00
+>             3.000000e+00           -3.000000e+00            1.300000e+01
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             7.000000e+00           -7.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            1.400000e+01
+>             0.000000e+00            0.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            0.000000e+00
+> 
+> long
+> 
+> lo1	14
+> lo2	-17
+> lo3	2147483647
+> lo4	-2147483648
+> lo5	0
+> lo6	1
+> 
+> structures
+> 
+> 	 st1          sta[0..2]
+> s_i	              0              1              2              3
+> s_ca[0]	              0             97              0              0
+> s_ca[1]	              0             98              0              0
+> s_ca[2]	              0             99              0              0
+> s_l	              0             10              0              0
+> s_f	   0.000000e+00  -1.000000e+01   0.000000e+00   0.000000e+00
+> 
+> (sta[0].s_s1)->s_i = 1
+> 
+> bit fields:
+> 
+> sizeof stb 6
+> stb	1 2 3 4 3 6 7
+> 
+***** ctmargt
+acc -DNOFLOAT margt.c
+margt.c
+running margt.cem
+comparing margt
+5,$c5,$
+< 	BELL=
+< 	BIN=/user0/keie/bin
+< 	CDPATH=:/usr/em/util:/usr/em/mach:/usr/em/lang
+< 	DIT=/user0/keie/ditroff/troff/a.out
+< 	HOME=/usr/em
+< 	MAILHEADER=To: botter!vu44!mcvax!%t
+< Subject: Re: %S
+< Newsgroups: %n
+< In-Reply-To: %i
+< %(%[references]!=^$?References\: %[references]
+< )Organization: %o
+< Cc:
+< Bcc: 
+< 
+< 
+< 	PATH=:/user0/keie/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new
+< 	SHELL=/usr/local/dsh
+< 	TERM=d80
+< 	TERMCAP=ME|ampex|d80|dialogue|dialogue80:am:bs:pt:if=/usr/lib/tabset/stdcrt:cl=\E;:cm=\E=%+\040%+\040:al=10\EE:ic=3\EQ:im=:ei=:dl=10\ER:dc=\EW:is=\EA:ho=^^:ce=\ET:cd=\EY:so=\Ej:se=\Ek:us=\El:ue=\Em:ul:li#24:co#80:nd=^L:up=^K:we=\Eo:ws=\En
+< 	USER=keie
+---
+> 	HOME=/other/keie
+> 	PATH=:/other/keie/bin:/bin:/usr/bin
+> 	TERM=MiniBee
+***** ctprof
+test profiling
+procentry.c
+acc -DNOFLOAT tp.c procentry.k
+tp.c
+procentry.k
+running tp
+comparing tp
+***** ctstruct
+acc -DNOFLOAT str.c
+str.c
+running str.cem
+comparing str
+***** ctsys
+acc -DNOFLOAT tfork.c
+tfork.c
+running tfork.cem
+comparing tfork
+1,$c1,$
+< childno 5207
+< Child 5207, status 0x800
+< fork/wait ok
+---
+> childno N
+> Child N, status 0x800
+> fork/wait ok
+Fri Feb 15 15:55:48 MET 1985

@@ -1,0 +1,233 @@
+Fri Feb 15 12:15:05 MET 1985
+***** ctconv
+acc conv.c
+conv.c
+"conv.c", line 48: warning: Overflow in constant expression
+running conv.cem
+comparing conv
+***** ctdecl
+acc decl.c
+decl.c
+running decl.cem
+comparing decl
+***** ctdivers
+acc ops.c
+ops.c
+running ops.cem
+comparing ops
+***** cterr
+acc bugs.c
+bugs.c
+"bugs.c", line 98: warning: Overflow in constant expression
+running bugs.cem
+comparing bugs
+***** ctest1
+acc test.c
+test.c
+running test.cem
+comparing test
+***** ctest2
+acc t7.c
+t7.c
+"t7.c", line 163: warning: statement not reached
+"t7.c", line 180: warning: statement not reached
+"t7.c", line 184: warning: statement not reached
+"t7.c", line 188: warning: statement not reached
+"t7.c", line 192: warning: statement not reached
+"t7.c", line 196: warning: statement not reached
+"t7.c", line 200: warning: statement not reached
+"t7.c", line 207: warning: statement not reached
+"t7.c", line 209: warning: statement not reached
+"t7.c", line 213: warning: statement not reached
+"t7.c", line 215: warning: statement not reached
+"t7.c", line 289: warning: statement not reached
+"t7.c", line 296: warning: statement not reached
+"t7.c", line 302: warning: statement not reached
+"t7.c", line 309: warning: statement not reached
+"t7.c", line 345: warning: statement not reached
+"t7.c", line 346: warning: statement not reached
+"t7.c", line 347: warning: statement not reached
+"t7.c", line 348: warning: statement not reached
+"t7.c", line 350: warning: statement not reached
+"t7.c", line 454: warning: statement not reached
+"t7.c", line 563: warning: statement not reached
+"t7.c", line 591: warning: statement not reached
+running t7.cem
+comparing t7
+***** ctest3
+acc test2.c
+test2.c
+running test2.cem
+comparing test2
+***** ctest5
+acc test1.c
+test1.c
+"test1.c", line 386: warning: illegal pointer combination
+"test1.c", line 387: warning: illegal pointer combination
+"test1.c", line 388: warning: illegal pointer combination
+"test1.c", line 400: warning: illegal pointer combination
+"test1.c", line 423: warning: illegal pointer combination
+"test1.c", line 424: warning: illegal pointer combination
+"test1.c", line 425: warning: illegal pointer combination
+"test1.c", line 437: warning: illegal pointer combination
+running test1.cem
+comparing test1
+***** ctgen
+sed -f bf.sed <OPS >bf.c
+acc bf.c
+bf.c
+running bf.cem
+comparing bf
+sed -f cel.sed <OPS >cel.c
+acc cel.c
+cel.c
+running cel.cem
+comparing cel
+sed -f clu.sed <OPS >clu.c
+acc clu.c
+clu.c
+"clu.c", line 60: warning: Overflow in constant expression
+"clu.c", line 66: warning: Overflow in constant expression
+running clu.cem
+comparing clu
+sed -f ec.sed <OPS >ec.c
+acc ec.c
+ec.c
+"ec.c", line 58: warning: Overflow in constant expression
+"ec.c", line 64: warning: Overflow in constant expression
+running ec.cem
+comparing ec
+sed -f ef.sed <OPS >ef.c
+acc ef.c
+ef.c
+running ef.cem
+comparing ef
+sed -f ei.sed <OPS >ei.c
+acc ei.c
+ei.c
+"ei.c", line 22: warning: Overflow in constant expression
+"ei.c", line 65: warning: Overflow in constant expression
+"ei.c", line 108: warning: Overflow in constant expression
+running ei.cem
+comparing ei
+sed -f el.sed <OPS >el.c
+acc el.c
+el.c
+running el.cem
+comparing el
+sed -f eu.sed <OPS >eu.c
+acc eu.c
+eu.c
+"eu.c", line 58: warning: Overflow in constant expression
+"eu.c", line 64: warning: Overflow in constant expression
+running eu.cem
+comparing eu
+sed -f id.sed <OPS >id.c
+acc id.c
+id.c
+running id.cem
+comparing id
+sed -f lc.sed <OPS >lc.c
+acc lc.c
+lc.c
+"lc.c", line 60: warning: Overflow in constant expression
+"lc.c", line 66: warning: Overflow in constant expression
+running lc.cem
+comparing lc
+sed -f ld.sed <OPS >ld.c
+acc ld.c
+ld.c
+running ld.cem
+comparing ld
+sed -f lf.sed <OPS >lf.c
+acc lf.c
+lf.c
+running lf.cem
+comparing lf
+sed -f li.sed <OPS >li.c
+acc li.c
+li.c
+"li.c", line 22: warning: Overflow in constant expression
+"li.c", line 67: warning: Overflow in constant expression
+"li.c", line 112: warning: Overflow in constant expression
+running li.cem
+comparing li
+sed -f ll.sed <OPS >ll.c
+acc ll.c
+ll.c
+running ll.cem
+comparing ll
+sed -f lu.sed <OPS >lu.c
+acc lu.c
+lu.c
+running lu.cem
+comparing lu
+***** ctill
+----- All program(s) in this directory should fail to compile.
+acc noarg.c
+noarg.c
+"noarg.c", line 10: declared argument name is missing
+*** Error code 1
+`gen' not remade because of errors
+***** ctinit
+acc init.c
+init.c
+"init.c", line 183: warning: Overflow in constant expression (U-)
+running init.cem
+comparing init
+***** ctmargt
+acc margt.c
+margt.c
+running margt.cem
+comparing margt
+5,$c5,$
+< 	BELL=
+< 	BIN=/usr/em/bin
+< 	CDPATH=:/usr/em/util:/usr/em/mach:/usr/em/lang
+< 	DIT=/usr/em/ditroff/troff/a.out
+< 	HOME=/usr/em
+< 	MAILHEADER=To: botter!vu44!mcvax!%t
+< Subject: Re: %S
+< Newsgroups: %n
+< In-Reply-To: %i
+< %(%[references]!=^$?References\: %[references]
+< )Organization: %o
+< Cc:
+< Bcc: 
+< 
+< 
+< 	PATH=:/usr/em/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new
+< 	SHELL=/usr/local/dsh
+< 	TERM=d80
+< 	USER=keie
+---
+> 	HOME=/other/keie
+> 	PATH=:/other/keie/bin:/bin:/usr/bin
+> 	TERM=MiniBee
+***** ctprof
+test profiling
+procentry.c
+acc tp.c procentry.k
+tp.c
+procentry.k
+running tp
+comparing tp
+***** ctstruct
+acc str.c
+str.c
+running str.cem
+comparing str
+***** ctsys
+acc tfork.c
+tfork.c
+running tfork.cem
+comparing tfork
+1,$c1,$
+< childno 1928
+< Child 1928, status 0x800
+< fork/wait ok
+---
+> childno N
+> Child N, status 0x800
+> fork/wait ok
+Fri Feb 15 13:29:05 MET 1985
