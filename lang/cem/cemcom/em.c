@@ -37,6 +37,10 @@ putbyte(b)	/* shouldn't putbyte() be a macro ??? (EB)	*/
 	*opp++ = (char) b;
 }
 
+C_init(wsize, psize)
+	arith wsize, psize;
+{}
+
 C_open(nm)	/* open file for compact code output	*/
 	char *nm;
 {
