@@ -418,31 +418,31 @@ not checked.
 For those who wish the use the interface between C and Pascal we
 give an incomplete list of corresponding formal parameters in C and Pascal.
 .sp 1
-.ta 8 37
-.nf
-	Pascal	C
-	a:integer	int a
-	a:char	int a
-	a:boolean	int a
-	a:real	double a
-	a:^type	type *a
-	var a:type	type *a
-	procedure a(pars)	struct {
-		     void (*a)() ;
-		     char *static_link ;
-		}
-	function a(pars):type	struct {
-		     type (*a)() ;
-		     char *static_link ;
-		}
-.fi
+.TS
+l l.
+Pascal	C
+a:integer	int a
+a:char	int a
+a:boolean	int a
+a:real	double a
+a:^type	type *a
+var a:type	type *a
+procedure a(pars)	struct {
+	     void (*a)() ;
+	     char *static_link ;
+	}
+function a(pars):type	struct {
+	     type (*a)() ;
+	     char *static_link ;
+	}
+.TE
 The Pascal runtime system uses the following algorithm when calling
 function/procedures passed as parameters.
-.nf
-.ta 8 16
-	if ( static_link ) (*a)(static_link,pars) ;
-	else               (*a)(pars) ;
-.fi
+.TS
+l l.
+if ( static_link )	(*a)(static_link,pars) ;
+else	(*a)(pars) ;
+.TE
 .IT 6.7.2.1
 The order of evaluation of the operands of a dyadic operator
 shall be implementation-dependent.

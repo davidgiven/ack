@@ -56,10 +56,10 @@ The words are not interpreted by the compiler.
 .SH
 2.4.1 Integer Constants
 .PP
-An octal or hex constant which is less than or equal to the largest unsigned
-(target) machine integer is taken to be \f5unsigned\fP.
-An octal or hex constant which exceeds the largest unsigned (target) machine
-integer is taken to be \f5long\fP.
+The type of an integer constant is the first of the corresponding list
+in which its value can be represented. Decimal: \f5int, long, unsigned long\fP;
+octal or hexadecimal: \f5int, unsigned, long, unsigned long\fP; suffixed by
+the letter L or l: \f5long, unsigned long\fP.
 .SH
 2.4.3 Character Constants
 .PP

@@ -28,7 +28,7 @@ v7bugs.$(SUF):	v7bugs.doc
 install.$(SUF):	install.doc
 		$(TBL) install.doc | $(NROFF) $(MS) >$@
 pcref.$(SUF):	pcref.doc
-		$(NROFF) pcref.doc >$@
+		$(TBL) pcref.doc | $(NROFF) >$@
 val.$(SUF):	val.doc
 		$(NROFF) val.doc >$@
 6500.$(SUF):	6500.doc
