@@ -38,5 +38,6 @@ g/_load4/s//.load4/g
 g/_store4/s//.store4/g
 g/_b32_add/s//.b32_add/g
 g/_b64_add/s//.b64_add/g
+g/_b64_sft/s//.b64_sft/g
 w
 q
