@@ -17,14 +17,15 @@ HFILES=$h/em_mnem.h $h/em_spec.h $h/em_pseu.h $h/em_flag.h $h/em_ptyp.h  \
 	$h/em_mes.h $(mh)/em.h $(mh)/em_comp.h
 
 CFLAGS=-O -I$(mh) -I$h
+LDFLAGS = -i
 
 all:            $(DEC_PATH) $(ENC_PATH)
 
 $(DEC_PATH):    decode.o $(DATA_PATH)
-		cc -n -o $(DEC_PATH) decode.o $(DECLIBS) $(DATA_PATH)
+		cc $(LDFLAGS) -o $(DEC_PATH) decode.o $(DECLIBS) $(DATA_PATH)
 
 $(ENC_PATH):    encode.o $(DATA_PATH)
-		cc -n -o $(ENC_PATH) encode.o $(ENCLIBS) $(DATA_PATH)
+		cc $(LDFLAGS) -o $(ENC_PATH) encode.o $(ENCLIBS) $(DATA_PATH)
 
 convert.o:	$(HFILES)
 

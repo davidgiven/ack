@@ -7,14 +7,15 @@ LIBS =	$(LIB)/libobject.a $(LIB)/libprint.a \
 	$(LIB)/libstring.a $(LIB)/libsystem.a
 
 CFLAGS=-O -I$(EMH)
+LDFLAGS = -i
 
 all:            arch aal
 
 arch:		arch.o
-		$(CC) -n -o arch arch.o $(LIBS)
+		$(CC) $(LDFLAGS) -o arch arch.o $(LIBS)
 
 aal:		aal.o
-		$(CC) -i -o aal aal.o $(LIBS)
+		$(CC) $(LDFLAGS) -o aal aal.o $(LIBS)
 
 arch.o:         $(EMH)/arch.h archiver.c
 		$(CC) $(CFLAGS) -c archiver.c
