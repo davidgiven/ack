@@ -146,7 +146,6 @@ int
 _doprnt(register const char *fmt, va_list ap, FILE *stream)
 {
 	register char	*s;
-	unsigned int	uint;
 	register int	j;
 	int		i, c, width, precision, zfill, flags, between_fill;
 	int		nrchars=0;
@@ -262,11 +261,7 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 			s = o_print(&ap, flags, s, c, precision, 1);
 			break;
 		case 'c':
-			uint = va_arg(ap, unsigned int);
-			for ( i= sizeof(uint) -1 ; i>=0 ; i-- ) {
-				if ( *s = uint%256 ) s++;
-				uint/= 256 ;
-			}
+			*s++ = va_arg(ap, int);
 			break;
 #ifndef NOFLOAT
 		case 'G':
