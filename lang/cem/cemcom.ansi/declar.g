@@ -499,7 +499,7 @@ struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)
 	type_specifier(&tp) struct_declarator_list(tp, stp, sdefpp, szp) ';'
 ;
 
-struct_declarator_list(struct type *tp, *stp;
+struct_declarator_list(struct type *tp; struct type *stp;
 			struct sdef ***sdefpp; arith *szp;)
 :
 	struct_declarator(tp, stp, sdefpp, szp)

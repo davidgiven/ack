@@ -157,7 +157,7 @@ conditional(register *END; )	{	struct symbol *v;
 	  ]
 	;
 
-replicator(register struct symbol **s; register struct expr **e1, **e2; )
+replicator(register struct symbol **s; register struct expr **e1; register struct expr **e2; )
 				{	register char *index; }:
 	  IDENTIFIER		{	index=token.t_sval; }
 	  '=' '[' val_expr(e1) FOR val_expr(e2) ']'

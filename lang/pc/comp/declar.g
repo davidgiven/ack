@@ -721,7 +721,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 			}
 ;
 
-VariantTail(register struct scope *scope; arith *tcnt, *max, *cnt;
+VariantTail(register struct scope *scope; arith *tcnt; arith *max; arith *cnt;
 		int *palign; unsigned short packed; struct selector *sel;):
 	/* This is a new rule because the grammar specified by the standard
 	 * is not exactly LL(1).
@@ -982,7 +982,7 @@ UnpackedConformantArraySchema(register struct type **ptp;)
 				}
 ;
 
-Index_TypeSpecification(register struct type **ptp, *tp;)
+Index_TypeSpecification(register struct type **ptp; register struct type *tp;)
 {
 	register struct def *df1, *df2;
 } :

@@ -445,7 +445,7 @@ struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)
 	]
 ;
 
-struct_declarator_list(struct type *tp, *stp;
+struct_declarator_list(struct type *tp; struct type *stp;
 			struct sdef ***sdefpp; arith *szp;)
 :
 	struct_declarator(tp, stp, sdefpp, szp)
