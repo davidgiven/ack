@@ -1,7 +1,8 @@
 # (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+# $Header$
 callname ack
 name cpp
-	# no from, it's governed by the P property
+	# no from, this is a preprocessor
 	to .i
 	program {EM}/lib/cpp
 	mapflag -I* CPP_F={CPP_F?} -I*
@@ -9,7 +10,8 @@ name cpp
 	mapflag -D* CPP_F={CPP_F?} -D*
 	args {CPP_F?} {INCLUDES?} -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
 -DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} <
-	prop >P
+	stdout
+	prep is
 end
 name cem
 	from .c
@@ -18,12 +20,16 @@ name cem
 	mapflag -p CEM_F={CEM_F?} -Xp
 	mapflag -L CEM_F={CEM_F?} -l
 	args -Vw{w}i{w}p{p}f{f}s{s}l{l}d{d} {CEM_F?}
-	prop <>p
+	stdin
+	stdout
+	prep always
 	rts .c
 	need .c
 	callname acc
 	callname cc
 end
+var PC_PCPATH={EM}/lib/pc_pem
+var PC_ERRPATH={EM}/etc/pc_rt_errors
 name pc
 	from .p
 	to .k
@@ -34,8 +40,10 @@ name pc
 	mapflag -e PC_F={PC_F?} -e
 	mapflag -{*} PC_F={PC_F?} -\{*}
 	mapflag -L PC_F={PC_F?} -\{l-}
-	args -Vw{w}p{p}f{d}l{l} {PC_F?} < > {SOURCE}
-	prop m
+	mapflag -Pr* PC_ERRPATH=*
+	mapflag -Pr* PC_PCPATH=*
+	args -Vw{w}p{p}f{d}l{l} -R{PC_PCPATH} -r{PC_ERRPATH} {PC_F?} < > {SOURCE}
+	prep cond
 	rts .p
 	need .p
 	callname apc
@@ -49,9 +57,9 @@ name pc
 	mapflag -w ABC_F={ABC_F?} -w
 	mapflag -L ABC_F={ABC_F?} -L
 	mapflag -E ABC_F={ABC_F?} -E
-	mapflag -d ABC_F={ABC_F?} -d
+#	mapflag -d ABC_F={ABC_F?} -d
 	args {ABC_F?} < > {SOURCE}
-	prop p
+	prep always
 	rts .b
 	need .b
 	callname abc
@@ -61,7 +69,8 @@ name encode
 	to .k
 	program {EM}/lib/em_encode
 	args <
-	prop >m
+	prep cond
+	stdout
 end
 name opt
 	from .k
@@ -69,21 +78,13 @@ name opt
 	program {EM}/lib/em_opt
 	mapflag -LIB OPT_F={OPT_F?} -L
 	args {OPT_F?} <
-	prop >O
-end
-name ego
-	from .m.ma
-	to .g
-	program /bin/sh
-	mapflag -Q* EGO_F={EGO_F?} -Q*
-	args {EM}/lib/em_ego {EGO_F?} -P {EM}/util/ego \
--M{EM}/lib/ego/{M}descr <
-	prop OC>
+	stdout
+	optimizer
 end
 name decode
 	from .k.m.g
 	to .e
 	program {EM}/lib/em_decode
 	args <
-	prop >
+	stdout
 end
