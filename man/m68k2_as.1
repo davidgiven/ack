@@ -19,40 +19,40 @@ a status register (sr), and a condition codes register (ccr) which is actually
 just the low order byte of the status register.
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name)
 
-reg		contents of `reg' is operand, where `reg' is
+reg		contents of \fIreg\fP is operand, where \fIreg\fP is
 		one of the registers mentioned above (register direct)
 
-(areg)		contents of `areg' is address of operand, where
-		`areg' is an address-register
+(areg)		contents of \fIareg\fP is address of operand, where
+		\fIareg\fP is an address-register
 		(address register indirect)
 
 (areg)+		same as (areg), but after the address is used,
-		`areg' is incremented by the operand length
+		\fIareg\fP is incremented by the operand length
 		(postincrement)
 
 -(areg)		same as (areg), but before the address is used,
-		`areg' is decremented by the operand length
+		\fIareg\fP is decremented by the operand length
 		(predecrement)
 
 expr(areg)
-expr(pc)	`expr' + the contents of the register yields the
+expr(pc)	\fIexpr\fP + the contents of the register yields the
 		address of the operand (displacement)
 
 expr(areg, ireg)
-expr(pc, ireg)	`expr' + the contents of the register + the contents
-		of `ireg' yields the address of the operand. `ireg' is
+expr(pc, ireg)	\fIexpr\fP + the contents of the register + the contents
+		of \fIireg\fP yields the address of the operand. \fIireg\fP is
 		an address- or a data-register.
-		`ireg' may be followed by .w or .l indicating whether
+		\fIireg\fP may be followed by .w or .l indicating whether
 		the size of the index is a word or a long
 		(displacement with index)
 
-expr		`expr' is the address of the operand
+expr		\fIexpr\fP is the address of the operand
 		(absolute address)
 
-#expr		`expr' is the operand (immediate)
+#expr		\fIexpr\fP is the operand (immediate)
 .fi
 
 Some instructions have as operand a register list. This list consists of 
@@ -72,7 +72,7 @@ MC68000 16-bit microprocessor User's manual, Motorola Inc, 1979
 .SH EXAMPLE
 .sp 2
 .nf
-.ta 8 16 24 32 40 48 56 64
+.ta 8n 16n 24n 32n 40n 48n 56n 64n
 	.define	.cii
 	
 		.text

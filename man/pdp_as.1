@@ -11,13 +11,13 @@ described in \fIuni_ass\fP(6).
 .SH SYNTAX
 .IP registers
 The pdp11 has seven general registers, numbered r0 through r7. 
-Of these, r6 is the stack pointer and can also be referenced to by `sp',
-r7 is the program counter and has `pc' as synonym. There are also six
+Of these, r6 is the stack pointer and can also be referenced to by \fIsp\fP,
+r7 is the program counter and has \fIpc\fP as synonym. There are also six
 floating-point registers fr0 through fr5, but the names r0 through r5 can
 also be used. From the context will be derived what kind of register is meant.
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name)
 
 reg		contents of register reg is operand.
@@ -75,7 +75,7 @@ in the handbook mentioned below. Synonyms ending in "d" for instructions ending
 in "f" are not recognized. Some instructions have different names; the mapping
 is as below.
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 
 handbook		pdp_as
 
@@ -105,7 +105,7 @@ This instruction is synonymous with trap.
 .SH EXAMPLE
 An example of pdp11 assembly code.
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 
 !this is the routine that reads numbers into r0
 !the number is terminated by any non digit

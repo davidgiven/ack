@@ -2,9 +2,9 @@
 .de SB
 .\" SuBheader
 .sp 1
+.PP
 .nr Sf \\n(.f
 .ft B
-.PP
 \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
 .ft \\n(Sf
 .sp 1
@@ -22,6 +22,8 @@ ack \- Amsterdam Compiler Kit
 .br
 \fBabc\fP arguments
 .br
+\fBint\fP arguments
+.br
 \fImachine\fP arguments
 .SH DESCRIPTION
 This program transforms sources in several
@@ -38,7 +40,8 @@ are also automatically included.
 Two types of load files can be distinguished,
 \fIa.out\fP files containing machine code and \fIe.out\fP
 files containing virtual EM machine code.
-The last type is designed for interpretation.
+The last type is designed for interpretation; it is obtained by calling
+the compiler as \fIint\fP.
 Compilation time for interpretation is fast and gives many
 runtime checks,
 but execution is about seven times slower.

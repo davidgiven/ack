@@ -10,8 +10,8 @@ described in \fIuni_ass\fP(6).
 .SH SYNTAX
 .IP instructions
 Instruction mnemonics are implemented exactly as described in
-`Z8000 PLZ/ASM Assembly Language Programming Manual' and
-`AmZ8001/2 Processor Instruction Set'.
+\fIZ8000 PLZ/ASM Assembly Language Programming Manual\fP and
+\fIAmZ8001/2 Processor Instruction Set\fP.
 .IP registers
 The z8000 has sixteen 16-bit general purpose registers specified
 as R0 through R15.  All sixteen registers can be used as accumulators.
@@ -24,9 +24,9 @@ indirect, index or base-address register.
 It is also possible to address registers as groups of 8, 32 or 64 bits.
 These registers are specified as follows.
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 - RH0, RL0, RH1, RL1, ..., RH7, RL7  for  8-bit  regis-
-  ters. (`H' stands for high-order byte, and `L' stands
+  ters. (\fIH\fP stands for high-order byte, and \fIL\fP stands
   for low-order byte within a  word  register).   These
   registers overlap 16-bit registers R0 through R7.
 - RR0, RR2, ..., RR14 for 32-bit register pairs.
@@ -35,7 +35,7 @@ These registers are specified as follows.
 Besides register pair RR14 is used as stackpointer.
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name-mnemonic)
 
 $expr		the value of expr is the operand.
@@ -108,7 +108,7 @@ a corresponding `normal' jump/call (JP/CALL).
 .SH EXAMPLE
 An example of z8000 assembly code.
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 
 !   This z8000 assembly routine converts a positive number
 !(in R1) to a string representing the number and puts this
@@ -145,16 +145,16 @@ AmZ8001/2 Processor Instruction Set, 1979.
 .SH BUGS
 You cannot use (reg16) instead of 0(reg16).
 .br
-Condition codes `Z' (meaning zero), `C' (meaning carry) and <nothing>
+Condition codes \fIZ\fP (meaning zero), \fIC\fP (meaning carry) and <nothing>
 (meaning always false) are not implemented.
 The first two because they also represent flags and the third one
 because it's useless.
-So for `Z'/`C' use `EQ'/`ULT'.
+So for \fIZ\fP/\fIC\fP use \fIEQ\fP/\fIULT\fP.
 .br
 The z8000 assembly instruction set as described in the book
-`AmZ8001/2 Processor Instruction Set' differs from the one
-described in the manual `Z8000 PLZ/ASM Assembly Language Programming
-Manual' in that the book includes CLRL, LDL (format F5.1) and
+\fIAmZ8001/2 Processor Instruction Set\fP differs from the one
+described in the manual \fIZ8000 PLZ/ASM Assembly Language Programming
+Manual\fP in that the book includes CLRL, LDL (format F5.1) and
 PUSHL (format F5.1) which all in fact do not (!) work.
 .br
 On the other side the book excludes SIN, SIND, SINDR, SINI, SINIR,

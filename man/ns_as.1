@@ -62,7 +62,7 @@ The convention used to indicate offset length by appending :B, :W or :D
 to offsets is not implemented.
 The assembler tries to find out the minimal size needed for any constant
 in an operand of the instruction placed in the text segment.
-Offsets in instructions outside '.text' are always four bytes.
+Offsets in instructions outside \fI.text\fP are always four bytes.
 .PP
 All special operands, e.g. register list, configuration list, have
 the same format as in the Programmers Reference Manual.
@@ -90,7 +90,7 @@ Two different possibilities are given for the encoding of
 the instructions movsu and movus.
 .SH EXAMPLE
 .nf
-.ta 12 20 28 36
+.ta 12n 20n 28n 36n
 
 00000000 0E0B02		setcfg	[ m ]
 		label:

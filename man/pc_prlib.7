@@ -4,7 +4,7 @@
 .SH NAME
 pc_prlib \- library of Pascal runtime routines
 .SH SYNOPSIS
-.ta 11
+.ta 11n
 type    alpha=packed array[1..8] of char;
 .br
         pstring= ^packed array[] of char;
@@ -310,16 +310,18 @@ Array operations:
 The only useful form of packing implemented, is packing bytes into words.
 All other forms of packing and unpacking result in a plain copy.
 .IP _pac
-Pack an unpacked array 'a' into a packed array 'z'. 'ap' and 'zp'
-are pointers to 'a' and 'z'. 'ad' and 'zd'
-are pointers to the descriptors of 'a' and 'z'. 'i' is
-the index in 'a' of the first element to be packed.
-Pack until 'z' is full.
+Pack an unpacked array \fIa\fP into a packed array \fIz\fP.
+\fIap\fP and \fIzp\fP
+are pointers to \fIa\fP and \fIz\fP. \fIad\fP and \fIzd\fP
+are pointers to the descriptors of \fIa\fP and \fIz\fP. \fIi\fP is
+the index in \fIa\fP of the first element to be packed.
+Pack until \fIz\fP is full.
 .PD 0
 .IP _unp
-Unpack 'z' into 'a'. 'ap', 'zp', 'ad' and 'zd' are as for _pac. 'i' is
-the index in 'a' where the first element of 'z' is copied into.
-Unpack all elements of 'z'.
+Unpack \fIz\fP into \fIa\fP.
+\fIap\fP, \fIzp\fP, \fIad\fP and \fIzd\fP are as for _pac. \fIi\fP is
+the index in \fIa\fP where the first element of \fIz\fP is copied into.
+Unpack all elements of \fIz\fP.
 .IP _asz
 Compute array size. Used for copying conformant arrays.
 .PD
@@ -331,12 +333,13 @@ The compiler allows you to verify assertions.
 It generates a call to the routine _ass to check the assertion at runtime.
 Another feature of the compiler is that it enables you to trace the
 procedure calling sequence. If the correct option is turned on, then
-a call to the procedure 'procentry' is generated at the start of each
-compiled procedure or function. Likewise, the routine 'procexit' is called
+a call to the procedure \fIprocentry\fP is generated at the start of each
+compiled procedure or function. Likewise, the routine \fIprocexit\fP is called
 just before a procedure or function exits.
-Default procedure 'procentry' and 'procexit' are available in this library.
+Default procedure \fIprocentry\fP
+and \fIprocexit\fP are available in this library.
 .IP _ass 10
-If 'b' is zero, then change eb[0] to 'line'
+If \fIb\fP is zero, then change eb[0] to \fIline\fP
 (to give an error message with source line number) and call the error routine.
 .PD 0
 .IP procentry
@@ -489,7 +492,7 @@ Close a file. Closing of files is done for local files when the procedure
 in which they are declared exits.
 The compiler only closes local files if they are not part of a structured type.
 Files allocated in the heap are not closed when they are deallocated.
-There is an external routine 'pclose' in libP(VII), that may be called
+There is an external routine \fIpclose\fP in libP(VII), that may be called
 explicitly to do the closing in these cases.
 Closing may be necessary to flush buffers or to keep the number of
 simultaneously opened files below NFILES.
@@ -548,40 +551,40 @@ fetch the next character first.
 Write a character, not preceeded by spaces.
 .IP _wsc
 Write a character, left padded with spaces up to a field width
-of 'w'.
+of \fIw\fP.
 .IP _wri
 Write an integer, left padded with spaces up to a field width
 of 6.
 .IP _wsi
 Write an integer, left padded with spaces up to a field width
-of 'w'.
+of \fIw\fP.
 .IP _wrl
 Write a long, left padded with spaces up to a field width
 of 11.
 .IP _wsl
 Write a long, left padded with spaces up to a field width
-of 'w'.
+of \fIw\fP.
 .IP _wrr
 Write a real in scientific format,
 left padded with spaces up to a field width of 13.
 .IP _wsr
 Write a real in scientific format,
-left padded with spaces up to a field width of 'w'.
+left padded with spaces up to a field width of \fIw\fP.
 .IP _wrf
-Write a real in fixed point format, with exactly 'ndigit' digits
+Write a real in fixed point format, with exactly \fIndigit\fP digits
 behind the decimal point, the last one rounded; it is left padded up to
-a field width of 'w'.
+a field width of \fIw\fP.
 .IP _wrs
-Write a string of length 'l', without additional spaces.
+Write a string of length \fIl\fP, without additional spaces.
 .IP _wss
-Write a string of length 'l', left padded up to a field
-width of 'w'.
+Write a string of length \fIl\fP, left padded up to a field
+width of \fIw\fP.
 .IP _wrb
 Write a boolean, represented by "true" or "false", left padded
 up to a field width of 5.
 .IP _wsb
 Write a boolean, represented by "true" or "false", left padded
-up to a field width of 'w'.
+up to a field width of \fIw\fP.
 .IP _wrz
 Write a C-type string up to the zero-byte.
 .IP _wsz
@@ -670,7 +673,7 @@ ISO/TC97/SC5-N462, received November 1979.
 .IP [4]
 Ed Keizer, "The Amsterdam Compiler Kit reference manual".
 .br
-(try 'nroff /usr/emi/doc/pcref.doc').
+(try \fInroff /usr/emi/doc/pcref.doc\fP).
 .IP [5]
 ack(I), pc_pem(VI)
 .PD
@@ -723,7 +726,7 @@ array bound error in pack
 .IP 70
 array bound error in unpack
 .IP 71
-only positive j in 'i mod j'
+only positive j in \fIi mod j\fP
 .IP 72
 file not yet open
 .IP 73

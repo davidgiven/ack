@@ -34,28 +34,28 @@ This is used for efficient address encoding of some addressing
 mode (see below).
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name)
 
-reg		The operand of the instruction is in `reg'.
+reg		The operand of the instruction is in \fIreg\fP.
 
-reglist		`reglist' is a either list of registers, seperated
+reglist		\fIreglist\fP is a either list of registers, seperated
 		by ','s, or the word "all". It encodes in a register
 		save mask, where "all" means all registers, that can
 		be used by the push-pull instructions pshs, pshu,
 		puls, and pulu.
 
-<expr		The one-byte value of `expr' is an address within
+<expr		The one-byte value of \fIexpr\fP is an address within
 		a 256-byte page. The particular page in use is
-		indicated by the contents of dp, so `expr' is the
+		indicated by the contents of dp, so \fIexpr\fP is the
 		low byte of the effective address of the operand,
 		and dp the high byte. (direct)
 
->expr		The two-byte value of `expr' is the exact memory
+>expr		The two-byte value of \fIexpr\fP is the exact memory
 		address. Not that this mode always requires one
 		byte more than "<expr". (extended)
 
-expr		The value of `expr' is an address.
+expr		The value of \fIexpr\fP is an address.
 		Except for long branches, this value is examined
 		first to see if a short encoding is possible.
 		When the instruction is a short branch, the value
@@ -68,58 +68,58 @@ expr		The value of `expr' is an address.
 		"<expr", else by ">expr".
 		(relative for branch-instructions)
 
-#expr		The value of `expr' is one- or two-byte immediate
+#expr		The value of \fIexpr\fP is one- or two-byte immediate
 		data. (immediate)
 
-(expr)		The value of `expr' is a pointer to the address
+(expr)		The value of \fIexpr\fP is a pointer to the address
 		of the operand. (indirect)
 
-expr, reg	The value of `expr' added to the contents of `reg'
+expr, reg	The value of \fIexpr\fP added to the contents of \fIreg\fP
 		(which must be a 16-bit register) yields the
 		effective address of the operand.
 		(constant-offset indexed)
 
-, ireg		The contents of `ireg' (which must be indexable)
+, ireg		The contents of \fIireg\fP (which must be indexable)
 		yields the effective address of the operand.
 		(constant-offset indexed)
 
-(expr, reg)	The value of `expr' added to the contents of `reg'
+(expr, reg)	The value of \fIexpr\fP added to the contents of \fIreg\fP
 		(which must be a 16-bit register) yields a pointer
 		to the effective address of the operand.
 		(constant-offset indexed indirect)
 
-(, ireg)	The contents of `ireg' (which must be indexable)
+(, ireg)	The contents of \fIireg\fP (which must be indexable)
 		yields a pointer to the effective address of the
 		operand. (constant-offset indexed indirect)
 
-ac, ireg	The contents of `ac' (which must be an accumulator)
-		added to the contents of `ireg' (which must be
+ac, ireg	The contents of \fIac\fP (which must be an accumulator)
+		added to the contents of \fIireg\fP (which must be
 		indexable) yields the effective address of the
 		operand. (accumulator indexed)
 
-(ac, ireg)	The contents of `ac' (which must be an accumulator)
-		added to the contents of `ireg' (which must be
+(ac, ireg)	The contents of \fIac\fP (which must be an accumulator)
+		added to the contents of \fIireg\fP (which must be
 		indexable) yields a pointer to the effective address
 		of the operand. (accumulator indexed indirect)
 
 ,ireg+
-,ireg++		The contents of `ireg' (which must be indexable) is
+,ireg++		The contents of \fIireg\fP (which must be indexable) is
 		used as effective address of the operand. After that
 		it is incremented by 1 (+) or 2 (++).
 		(auto-increment)
 
-(,ireg++)	The contents of `ireg' (which must be indexable) is
+(,ireg++)	The contents of \fIireg\fP (which must be indexable) is
 		used as a pointer to the effective address of the
 		operand. After that it is incremented by 2.
 		(auto-increment indirect)
 
 ,-ireg
-,--ireg		`ireg' (which must be indexable) is decremented
+,--ireg		\fIireg\fP (which must be indexable) is decremented
 		by 1 (-) or 2 (--). After that, its contents is used
 		as effective address of the operand.
 		(auto-decrement)
 
-(,--ireg)	`ireg (which must be indexable) is decremented by 2.
+(,--ireg)	\fIireg\fP (which must be indexable) is decremented by 2.
 		After that, its contents is used as a pointer to the
 		effective address of the operand.
 		(auto-decrement indirect)
@@ -133,7 +133,7 @@ MC6809 preliminary programming manual, Motorola Inc., First Edition, 1979
 .SH EXAMPLE
 An example of 6809 assembly code.
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 	contby = 80
 
 	compgo:	lda	#contby

@@ -23,11 +23,11 @@ contents of the accumulator and flag register can be exchanged with the contents
 of their alternates by the "ex af, af2"-instruction.
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning
 
 expr		dependent on the instruction, the
-		value of `expr' can be immediate
+		value of \fIexpr\fP can be immediate
 		data or the address of the operand.
 		There is no special notation for
 		immediate data.
@@ -35,16 +35,16 @@ expr		dependent on the instruction, the
 (ireg + expr)
 (ireg - expr)	the contents of ireg (which must be
 		one of the index-registers) + or -
-		the - one byte - value of `expr'
+		the - one byte - value of \fIexpr\fP
 		yield the address of the operand.
 
-(expr)		the value of `expr' is the address of
+(expr)		the value of \fIexpr\fP is the address of
 		the operand.
 
-reg		the contents of `reg' - one of the above-
+reg		the contents of \fIreg\fP - one of the above-
 		mentioned registers - is the operand.
 
-(reg)		the contents of `reg' - one of the 16-bit
+(reg)		the contents of \fIreg\fP - one of the 16-bit
 		registers except pc - is the address of
 		the operand.
 

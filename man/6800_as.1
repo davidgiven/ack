@@ -15,7 +15,7 @@ to accumulator A, has an "a" as last character. In the same way a "b" means
 that the instruction uses B as accumulator.
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name)
 
 #expr		with cpx, ldx, lds a 2-byte value,
@@ -40,7 +40,7 @@ Adam Osborne and Associates Inc., 1977
 An example of Motorola 6800 assembly code.
 .sp 2
 .nf
-.ta 8 16 32 40 48 56 64
+.ta 8n 16n 32n 40n 48n 56n 64n
 	.data
 	val:	0
 	.text
@@ -52,4 +52,4 @@ An example of Motorola 6800 assembly code.
 .fi
 .SH BUGS
 You have to specify whether an address fits in one byte
-with the token `<'. It should be done automatically.
+with the token \fI<\fP. It should be done automatically.

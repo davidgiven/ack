@@ -4,7 +4,7 @@
 .SH NAME
 libpc \- library of external routines for Pascal programs
 .SH SYNOPSIS
-.ta 11
+.ta 11n
 const   bufsize = ?;
 .br
 type    br1 =  1..bufsize;
@@ -90,7 +90,7 @@ Returns a pointer to the i-th environment string (i>=0). Returns nil
 if i is beyond the end of the environment list (UNIX version 7).
 .IP argshift
 Effectively deletes the first argument from the argument list.
-Its function is equivalent to 'shift' in the UNIX shell: argv[2] becomes
+Its function is equivalent to \fIshift\fP in the UNIX shell: argv[2] becomes
 argv[1], argv[3] becomes argv[2], etc.
 It is a useful procedure to skip optional flag arguments.
 Note that the matching of arguments and files
@@ -163,26 +163,27 @@ Trap generates the trap passed as argument (0..252).
 The trap numbers 128..252 may be used freely. The others are reserved.
 .PD 0
 .IP encaps
-Encapsulate the execution of 'p' with the trap handler 'q'.
-Encaps replaces the previous trap handler by 'q', calls 'p' and restores
-the previous handler when 'p' returns.
-If, during the execution of 'p', a trap occurs,
-then 'q' is called with the trap number as parameter.
-For the duration of 'q' the previous trap handler is restored, so that
-you may handle only some of the errors in 'q'. All the other errors must
-then be raised again by a call to 'trap'.
+Encapsulate the execution of \fIp\fP with the trap handler \fIq\fP.
+Encaps replaces the previous trap handler by \fIq\fP, calls \fIp\fP
+and restores
+the previous handler when \fIp\fP returns.
+If, during the execution of \fIp\fP, a trap occurs,
+then \fIq\fP is called with the trap number as parameter.
+For the duration of \fIq\fP the previous trap handler is restored, so that
+you may handle only some of the errors in \fIq\fP. All the other errors must
+then be raised again by a call to \fItrap\fP.
 .br
 Encapsulations may be nested: you may encapsulate a procedure while executing
 an encapsulated routine.
 .br
 Jumping out of an encapsulated procedure (non-local goto) is dangerous,
 because the previous trap handler must be restored.
-Therefore, you may only jump out of procedure 'p' from inside 'q' and
+Therefore, you may only jump out of procedure \fIp\fP from inside \fIq\fP and
 you may only jump out of one level of encapsulation.
 If you want to exit several levels of encapsulation, use traps.
 See pc_emlib(VII) and pc_prlib(VII) for lists of trap numbers
 for EM machine errors and Pascal run time system errors.
-Note that 'p' may not have parameters.
+Note that \fIp\fP may not have parameters.
 .PD
 .PP
 .RE

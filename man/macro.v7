@@ -1,6 +1,8 @@
 .\" $Header$
 .de TH
 .PD
+.br
+.bp
 .lc
 .nr in 5
 .de hd
@@ -29,7 +31,7 @@
 .sp \\n(pdu
 .ne 2
 .fi
-\s+3\fB\\$1\fP\s0
+\fB\\$1\fP
 .br
 ..
 .de LP

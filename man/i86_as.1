@@ -14,7 +14,8 @@ An address on the Intel 8086 consists of two pieces:
 a segment number and an offset. A memory address is computed as
 the segment number shifted left 4 bits + the offset.
 Assembly language addresses only give the offset, with the exception of
-the address of an inter-segment jump or call (see `addressing modes' below).
+the address of an inter-segment jump or call (see \fIaddressing modes\fP
+below).
 For each segment type (.org, .text, .data, or .bss) the segment number
 must be given with the .sbase pseudo-instruction.
 The syntax is:
@@ -40,10 +41,10 @@ Two index registers: si (source index) and di (destination index).
 Four segment registers: cs (code), ds (data), ss (stack), and es (extra).
 .IP "addressing modes"
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning
 
-expr		the value of `expr' is immediate data or
+expr		the value of \fIexpr\fP is immediate data or
 		an address offset. There is no special
 		notation for immediate data.
 
@@ -54,22 +55,22 @@ register	one of the aforementioned general registers
 (expr)		the value of expr is the address of the operand.
 
 (reg)
-expr (reg)	the value of `expr' (if present) + the contents of
-		`reg' (which must be a pointer or an index register)
+expr (reg)	the value of \fIexpr\fP (if present) + the contents of
+		\fIreg\fP (which must be a pointer or an index register)
 		is the address of the operand.
 
 (preg) (ireg)
 expr (preg) (ireg)
-		the value of `expr' (if present) + the contents of
-		`preg' (which must be a pointer register) + the
-		contents of `ireg' (which must be an index register)
+		the value of \fIexpr\fP (if present) + the contents of
+		\fIpreg\fP (which must be a pointer register) + the
+		contents of \fIireg\fP (which must be an index register)
 		is the address of the operand.
 
 The next addressing mode is only allowed with the instructions
 "callf" or "jmpf".
 
-expr : expr	the value of the first `expr' is a segment number,
-		the value of the second `expr' is an address offset.
+expr : expr	the value of the first \fIexpr\fP is a segment number,
+		the value of the second \fIexpr\fP is an address offset.
 		The (absolute) address of the operand is computed
 		as described above.
 .fi
@@ -90,7 +91,7 @@ ack(1),
 MCS-86 assembly language reference manual, 1978, Intel Corporation
 .SH EXAMPLE
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 An example of Intel 8086 assembly language:
 
 	_panic:

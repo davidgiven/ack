@@ -27,7 +27,7 @@ range it is replaced by a reversed condition branch, followed by
 a jump, automatically.
 .sp
 .nf
-.ta 8 16 24 32 40 48
+.ta 8n 16n 24n 32n 40n 48n
 syntax		meaning (name)
 
 #expr		a one byte value (immediate)
@@ -68,26 +68,26 @@ Prentice-Hall, Inc., 1983, (ISBN 0-13-541375-3).
 An example of Motorola 6805 assembly code.
 .sp 2
 .nf
-.ta 8 16 32 40 48 56 64
-.dram
-one:	.space	1		! a-port
-.dprom
-c1:	.byte	1
-.text
-start:	ldx	#c1		! load address of c1
-	txa
-	sta	one
-	add	c1		! add one
-	brset	1,one,whoop	! jif bit one of aport 
-	bset	1,one		! set it now
-.data
-	.ascii	"unused string"
-.text
-whoop:	nop
-.org 0xff8
-	.word	start		! set vector address
-.text	
-	nop			! resume code
+.ta 8n 16n 32n 40n 48n 56n 64n
+	.dram
+	one:	.space	1		! a-port
+	.dprom
+	c1:	.byte	1
+	.text
+	start:	ldx	#c1		! load address of c1
+		txa
+		sta	one
+		add	c1		! add one
+		brset	1,one,whoop	! jif bit one of aport 
+		bset	1,one		! set it now
+	.data
+		.ascii	"unused string"
+	.text
+	whoop:	nop
+	.org 0xff8
+		.word	start		! set vector address
+	.text	
+		nop			! resume code
 .fi
 .SH AUTHOR
 Written by Gijs Mos.
