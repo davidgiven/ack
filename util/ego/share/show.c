@@ -173,7 +173,6 @@ showp()
 			if (all == 1) {
 				printf("	changed ="); showcset();
 				printf(format,"c_flags =",getshort());
-				printf("	used ="); showcset();
 				printf(format,"u_flags =",getshort());
 				printf("	calling ="); showcset();
 			}
