@@ -22,17 +22,17 @@ RESFILES= \
 		$(NROFF) $(MS) $< > $@
 
 crefman.$(SUF):	crefman.doc
-		$(EQN) $? | $(NROFF) $(MS) >$@
+		$(EQN) crefman.doc | $(NROFF) $(MS) >$@
 v7bugs.$(SUF):	v7bugs.doc
-		$(NROFF) $? >$@
+		$(NROFF) v7bugs.doc >$@
 install.$(SUF):	install.doc
-		$(TBL) $? | $(NROFF) $(MS) >$@
+		$(TBL) install.doc | $(NROFF) $(MS) >$@
 pcref.$(SUF):	pcref.doc
-		$(NROFF) $? >$@
+		$(NROFF) pcref.doc >$@
 val.$(SUF):	val.doc
-		$(NROFF) $? >$@
+		$(NROFF) val.doc >$@
 6500.$(SUF):	6500.doc
-		$(TBL) $? | $(NROFF) $(MS) >$@
+		$(TBL) 6500.doc | $(NROFF) $(MS) >$@
 LLgen.doc:	LLgen.X
 LLgen.X:
 		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER)
