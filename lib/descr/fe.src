@@ -1,4 +1,5 @@
 # (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+callname ack
 name cpp
 	# no from, it's governed by the P property
 	to .i
@@ -20,6 +21,8 @@ name cem
 	prop <>p
 	rts .c
 	need .c
+	callname acc
+	callname cc
 end
 name pc
 	from .p
@@ -35,8 +38,25 @@ name pc
 	prop m
 	rts .p
 	need .p
+	callname apc
+	callname pc
  end
- name encode
+ name abc
+	from .b
+	to .e
+	program /usr/mk/bin/bem
+	mapflag -h ABC_F={ABC_F?} -h
+	mapflag -w ABC_F={ABC_F?} -w
+	mapflag -L ABC_F={ABC_F?} -L
+	mapflag -E ABC_F={ABC_F?} -E
+	mapflag -d ABC_F={ABC_F?} -d
+	args {ABC_F?} < > {SOURCE}
+	prop p
+	rts .b
+	need .b
+	callname abc
+end
+name encode
 	from .e
 	to .k
 	program {EM}/lib/em_encode
@@ -51,8 +71,17 @@ name opt
 	args {OPT_F?} <
 	prop >O
 end
+name ego
+	from .m.ma
+	to .g
+	program /bin/sh
+	mapflag -Q* EGO_F={EGO_F?} -Q*
+	args {EM}/lib/em_ego {EGO_F?} -P {EM}/util/ego \
+-M{EM}/lib/ego/{M}descr <
+	prop OC>
+end
 name decode
-	from .k.m
+	from .k.m.g
 	to .e
 	program {EM}/lib/em_decode
 	args <
