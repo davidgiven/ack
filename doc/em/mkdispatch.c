@@ -1,17 +1,6 @@
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
- *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
  */
 
@@ -68,7 +57,7 @@ main(argc,argv) char **argv ; {
 	if ( nerror==0 ) {
 		writeout();
 	}
-	return nerror ;
+	exit(nerror) ;
 }
 
 readin() {
@@ -420,43 +409,36 @@ pushback(c) {
 writeout() {
 	register int i;
 
-	printf("DISPATCH\n");
+	printf("DISPATCH1");
 	for (i = 0; i < 256;) {
-		if (!(i % 8)) printf("%d\t", i);
-		printf(ename(codes[i]));
+		if (!(i % 8)) printf("\n%d", i);
+		printf("\t%s", ename(codes[i]));
 		if (i < 254) {
 			prx(flags[i],lows[i],i);
 		}
-		else	putchar('\t');
 		i++;
-		if (!(i % 8)) putchar('\n');
 	}
 
-	printf("DISPATCH2\n");
+	printf("\nDISPATCH2");
 	for (i = 0; i < 256;) {
-		int x = 0;
 		if (ecodes[i] != -1) {
-			if (!(i % 8)) printf("%d\t", i);
-			printf(ename(ecodes[i]));
+			if (!(i % 8)) printf("\n%d", i);
+			printf("\t%s", ename(ecodes[i]));
 			prx(eflags[i],elows[i],i);
 		}
-		else x = 1;
+		else break;
 		i++;
-		if (!(i % 8)) {
-			putchar('\n');
-			if (x) break;
-		}
 	}
 
-	printf("DISPATCH3\n");
+	printf("\nDISPATCH3");
 	i = 0;
 	while (lcodes[i] != -1) {
-		if (!(i % 8)) printf("%d\t", i);
-		printf("%s\t", ename(ecodes[i]));
+		if (!(i % 8)) printf("\n%d", i);
+		printf("\t%s", ename(ecodes[i]));
 		i++;
-		if (!(i % 8)) putchar('\n');
 	}
-	if (i % 8) putchar('\n');
+	while (i++ % 8) putchar('\t');
+	putchar('\n');
 }
 
 prx(flg,low,opc)
@@ -485,5 +467,4 @@ prx(flg,low,opc)
 		printf("%d",arg);
 		if((flg&OPTYPE) == OPMINI && (flg & OPWORD)) putchar('W');
 	}
-	putchar('\t');
 }
