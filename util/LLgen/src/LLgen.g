@@ -82,7 +82,8 @@ spec	:		{	acount = 0; }
 			{	/*
 				 * Put an endmarker in temporary file
 				 */
-				fprintf(fact,"%c%c",'\0', '\0');
+				putc('\0', fact);
+				putc('\0', fact);
 			}
 	;
 
@@ -482,7 +483,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	if (!level) {
 		saved = linecount;
 		nparams = 0;			/* count comma's */
-		fprintf(f,"%c# line %d \"%s\"\n", '\0', linecount,f_input);
+		putc('\0',f);
+		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
 	}
 	if (level || flag == 1) putc(ch1,f);
 	for (;;) {
