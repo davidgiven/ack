@@ -18,8 +18,8 @@
 #include	<em_code.h>
 #include	<stb.h>
 
-#include	"strict3rd.h"
 #include	"dbsymtab.h"
+#include	"strict3rd.h"
 #include	"main.h"
 #include	"idf.h"
 #include	"LLlex.h"
@@ -64,16 +64,8 @@ ModuleDeclaration
 	';'
 	import(1)*
 	export(&qualified, &exportlist)
-			{
-#ifdef DBSYMTAB
-			  if (options['g']) stb_string(df, D_MODULE);
-#endif /* DBSYMTAB */
-			}
 	block(&(df->mod_body))
 	IDENT		{ EnterExportList(exportlist, qualified);
-#ifdef DBSYMTAB
-			  if (options['g']) stb_string(df, D_END);
-#endif /* DBSYMTAB */
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(df->df_idf, dot.TOK_IDF);
 			}
@@ -166,9 +158,6 @@ DefinitionModule
 			  DefinitionModule++;
 			  if (!Defined) {
 				Defined = df;
-#ifdef DBSYMTAB
-				if (options['g']) stb_string(df, D_MODULE);
-#endif /* DBSYMTAB */
 			  }
 			}
 	';'
@@ -219,12 +208,12 @@ definition
 			  df->df_type = construct_type(T_HIDDEN, NULLTYPE);
 			}
 	  ]
-	  ';'
 			{
 #ifdef DBSYMTAB
-			  if (options['g']) stb_string(df, D_TYPE);
-#endif /* DBSYMTAB */
+				if (options['g']) stb_string(df, D_TYPE);
+#endif
 			}
+	  ';'
 	]*
 |
 	VAR [ %persistent VariableDeclaration ';' ]*
@@ -254,26 +243,12 @@ ProgramModule
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "__M2M_";
 		  	CurrentScope->sc_definedby = df;
-#ifdef DBSYMTAB
-			if (options['g']) stb_string(df, D_MODULE);
-#endif /* DBSYMTAB */
 		  }
 		}
 	priority(&(df->mod_priority))
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
 		{
-#ifdef DBSYMTAB
-		  if (options['g']) {
-			if (state == PROGRAM) {
-				C_ms_stb_cst(df->df_idf->id_text,
-					     N_MAIN,
-					     0,
-					     (arith) 0);
-			}
-			stb_string(df, D_END);
-		  }
-#endif /* DBSYMTAB */
 		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(df->df_idf, dot.TOK_IDF);
 		}

@@ -60,6 +60,9 @@ static int		oldlineno;
 
 static int		RegisterMessage();
 static int		WalkDef();
+#ifdef DBSYMTAB
+static int		stabdef();
+#endif
 static int		MkCalls();
 static int		UseWarnings();
 
@@ -194,6 +197,19 @@ WalkModule(module)
 	text_label = 1;		/* label at end of initialization routine */
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
+#ifdef DBSYMTAB
+	if (options['g']) {
+		stb_string(module, D_MODULE);
+		WalkDefList(sc->sc_def, stabdef);
+		if (state == PROGRAM && module == Defined) {
+			C_ms_stb_cst(module->df_idf->id_text,
+				     N_MAIN,
+				     0,
+				     (arith) 0);
+		}
+		stb_string(module, D_END);
+	}
+#endif
 	DoPriority();
 	if (module == Defined) {
 		/* Body of implementation or program module.
@@ -317,6 +333,9 @@ WalkProcedure(procedure)
 	C_pro_narg(procedure->prc_name);
 #ifdef DBSYMTAB
 	if (options['g']) {
+		stb_string(procedure, D_PROCEDURE);
+		WalkDefList(procscope->sc_def, stabdef);
+		stb_string(procedure, D_PEND);
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
 	}
 #endif /* DBSYMTAB */
@@ -487,6 +506,9 @@ WalkProcedure(procedure)
 	C_pro(procedure->prc_name, -procscope->sc_off);
 #ifdef DBSYMTAB
 	if (options['g']) {
+		stb_string(procedure, D_PROCEDURE);
+		WalkDefList(procscope->sc_def, stabdef);
+		stb_string(procedure, D_PEND);
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
 	}
 #endif /* DBSYMTAB */
@@ -1115,3 +1137,17 @@ WalkDefList(df, proc)
 		(*proc)(df);
 	}
 }
+
+#ifdef DBSYMTAB
+static int
+stabdef(df)
+	t_def	*df;
+{
+	switch(df->df_kind) {
+	case D_CONST:
+	case D_VARIABLE:
+		stb_string(df, df->df_kind);
+		break;
+	}
+}
+#endif

@@ -271,11 +271,13 @@ print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif
 
+void
 No_Mem()
 {
 	fatal("out of memory");
 }
 
+void
 C_failed()
 {
 	fatal("write failed");

@@ -183,9 +183,6 @@ EnterVarList(Idlist, type, local)
 				C_ina_dnam(df->var_name);
 			}
 		}
-#ifdef DBSYMTAB
-		if (options['g']) stb_string(df, D_VARIABLE);
-#endif /* DBSYMTAB */
 	}
 	FreeNode(Idlist);
 }

@@ -18,7 +18,6 @@
 #include	<assert.h>
 
 #include	"strict3rd.h"
-#include	"dbsymtab.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -114,17 +113,11 @@ declaration
 			{	++proclevel; }
 	ProcedureHeading(&df, D_PROCEDURE)
 			{	
-#ifdef DBSYMTAB
-				if (options['g']) stb_string(df, D_PROCEDURE);
-#endif /* DBSYMTAB */
 			}
 	';'
 	block(&(df->prc_body))
 	IDENT
 			{
-#ifdef DBSYMTAB
-				if (options['g']) stb_string(df, D_PEND);
-#endif /* DBSYMTAB */
 				EndProc(df, dot.TOK_IDF);
 				--proclevel;
 			}
@@ -540,9 +533,6 @@ ConstantDeclaration
 			  df->con_const = nd->nd_token;
 			  df->df_type = nd->nd_type;
 			  FreeNode(nd);
-#ifdef DBSYMTAB
-			  if (options['g']) stb_string(df, D_CONST);
-#endif /* DBSYMTAB */
 			}
 ;
 
