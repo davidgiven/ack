@@ -20,7 +20,9 @@ static char rcsid[] = "$Header$";
 
 chrefcount(regno,amount,tflag) {
 	register struct reginfo *rp;
+#if MAXMEMBERS != 0
 	register i;
+#endif
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0
@@ -40,7 +42,9 @@ chrefcount(regno,amount,tflag) {
 
 getrefcount(regno) {
 	register struct reginfo *rp;
+#if MAXMEMBERS != 0
 	register i,maxcount;
+#endif
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0

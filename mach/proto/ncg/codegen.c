@@ -256,7 +256,9 @@ if (Debug)
 	c3_p regcp[MAXCREG];
 	rl_p regls[MAXCREG];
 	c3_p cp,findcoerc();
+#ifdef MAXSPLIT
 	int sret;
+#endif
 	int stackpad;
 	struct perm *tup,*ntup,*besttup,*tuples();
 

@@ -52,7 +52,9 @@ instance(instno,token) register token_p token; {
 	register inst_p inp;
 	int i;
 	register token_p tp;
+#if MAXMEMBERS != 0
 	struct reginfo *rp;
+#endif
 	int regno;
 	result_t result;
 
@@ -145,7 +147,9 @@ instance(instno,token) register token_p token; {
 cinstance(instno,token,tp,regno) register token_p token,tp; {
 	register inst_p inp;
 	int i;
+#if MAXMEMBERS != 0
 	struct reginfo *rp;
+#endif
 	result_t result;
 	int sh; /* saved stackheight */
 
