@@ -18,6 +18,7 @@ out.h
 stb.h
 pc_err.h
 pc_file.h
+pc_math.h
 ranlib.h
 ocm_chan.h
 ocm_parco.h
