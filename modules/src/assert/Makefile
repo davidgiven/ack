@@ -1,7 +1,8 @@
 EMHOME=../../..
 MODULES=$(EMHOME)/modules
 HDIR =	$(MODULES)/h
-CFLAGS = -I$(HDIR) -O
+INCLUDES = -I$(HDIR)
+CFLAGS = $(INCLUDES) -O
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 
@@ -29,3 +30,7 @@ opr:
 
 clean:
 		rm -f *.[oa]
+
+lintlib:
+		lint $(INCLUDES) -Cassert BadAssert.c
+		mv llib-lassert.ln $(MODULES)/lib

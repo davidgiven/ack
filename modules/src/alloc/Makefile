@@ -2,16 +2,18 @@ EMHOME=../../..
 HDIR = $(EMHOME)/modules/h
 INSTALL=$(EMHOME)/modules/install
 COMPARE=$(EMHOME)/modules/compare
+INCLUDES = -I. -I$(HDIR)
 
-CFLAGS = -O -I. -I$(HDIR)
+CFLAGS = -O $(INCLUDES)
 
-SOURCES =	alloc.h\
-		Malloc.c\
+CSRC =		Malloc.c\
 		botch.c\
 		clear.c\
 		st_alloc.c\
 		std_alloc.c \
 		No_Mem.c
+SOURCES =	alloc.h\
+		$(CSRC)
 
 OBJECTS =	botch.o clear.o st_alloc.o Malloc.o std_alloc.o No_Mem.o
 
@@ -40,6 +42,9 @@ opr:
 clean:
 		rm -f *.[oa]
 
+lintlib:
+		lint $(INCLUDES) -Calloc $(CSRC)
+		mv llib-lalloc.ln $(EMHOME)/modules/lib
 st_alloc.o:	alloc.h 
 std_alloc.o:	alloc.h 
 Malloc.o:	alloc.h

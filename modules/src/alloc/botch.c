@@ -7,15 +7,13 @@
 		to check if freed memory is used inappopriately.
 */
 
-#include <assert.h>
 #include "in_all.h"
 
 EXPORT
 botch(ptr, n)
-	char *ptr;
-	int n;
+	register char *ptr;
+	register int n;
 {
-	assert((long)ptr % sizeof (long) == 0);
 	while (n >= sizeof (long))	{	
 			/* high-speed botch loop */
 		*(long *)ptr = 025252525252L;

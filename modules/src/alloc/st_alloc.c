@@ -22,6 +22,7 @@ st_alloc(phead, size, count)
 	register unsigned int size;
 {
 	register char *p;
+	register long *q;
 	char *retval;
 
 	if (*phead == 0)	{
@@ -38,7 +39,7 @@ st_alloc(phead, size, count)
 	*phead = ((struct xxx *)p)->next;
 	retval = p;
 	if (size >= sizeof(long)) {
-		register long *q = (long *) p;
+		q = (long *) p;
 		do {
 			*q++ = 0;
 			size -= sizeof(long);

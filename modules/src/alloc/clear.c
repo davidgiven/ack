@@ -6,7 +6,6 @@
 /*	clear - clear a block of memory, and try to do it fast.
 */
 
-#include <assert.h>
 #include "in_all.h"
 
 /* instead of Calloc: */
@@ -17,7 +16,6 @@ clear(ptr, n)
 {
 	register long *q = (long *) ptr;
 
-	assert((long)q % sizeof (long) == 0);
 	while (n >= sizeof (long))	{
 			/* high-speed clear loop */
 		*q++ = 0;
