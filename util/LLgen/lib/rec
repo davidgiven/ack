@@ -218,6 +218,20 @@ LLsafeerror(t)
 		nc_done = 1;
 		LLsymb = EOFILE;
 	}
+	/* A little kludge here; when using non-correcting recovery
+         * it can happen that a program is correct but incomplete.
+         * Here, we test this, and make sure the appropriate
+         * message is generated
+         */
+        if (! nc_done) {
+                int oldLLsymb;
+                oldLLsymb = LLsymb;
+                LLsymb = EOFILE;
+                LLmessage(0);
+                nc_done = 1;
+        /* Not really, but to prevent more than 1 error message */
+                LLsymb = oldLLsymb;
+        }
 #endif
 	LLmessage(t);
 }
