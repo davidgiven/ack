@@ -18,7 +18,11 @@
 */
 
 extern char *Salloc(), *Malloc(), *Srealloc(), *Realloc();
+#if __STDC__
+extern void *malloc(), *realloc();
+#else
 extern char *malloc(), *realloc();
+#endif
 
 /*	S T R U C T U R E - S T O R A G E  D E F I N I T I O N S	*/
 
