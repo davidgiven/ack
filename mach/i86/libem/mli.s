@@ -29,7 +29,7 @@
 	mov	8(bx),cx
 	pop	ax
 	pop	dx
-	jsr    .mli4
+	call   .mli4
 	pop	bx
 	push	dx
 	push	ax
