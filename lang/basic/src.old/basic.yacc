@@ -440,7 +440,8 @@ factor  : INTVALUE			{$$=loadint(ival);}
 	| funcname			{ $$=fcnend(0);}
 	| funcname funccall ')'	{ $$=fcnend($2);}
 	| MIDSYM '$' midparms	
-	{	emcode("cal","$_mid");
+	{	warning("Unsupported function call");
+		emcode("cal","$_mid");
 		emcode("asp",EMINTSIZE);
 		emcode("asp",EMINTSIZE);
 		emcode("asp",EMPTRSIZE);
