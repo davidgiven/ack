@@ -548,6 +548,7 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 	static char buf[NDIGITS+1];
 	register char *p = buf;
 	register char *pe;
+	int findex = 0;
 
 	if (ndigit < 0) ndigit = 0;
 	if (ndigit > NDIGITS) ndigit = NDIGITS;
@@ -566,27 +567,31 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 
 		while(cmp_ext(e,pp) >= 0) pp++;
 		pp--;
-		mul_ext(e,&r_big_ten_powers[pp-big_ten_powers],e);
-		*decpt += (pp - big_ten_powers) * TP;
+		findex = pp - big_ten_powers;
+		mul_ext(e,&r_big_ten_powers[findex],e);
+		*decpt += findex * TP;
 		pp = &ten_powers[1];
 		while(pp < &ten_powers[TP] && cmp_ext(e, pp) >= 0) pp++;
 		pp--;
-		mul_ext(e, &r_ten_powers[pp-ten_powers], e);
-		*decpt += pp - ten_powers;
+		findex = pp - ten_powers;
+		*decpt += findex;
 
 		if (cmp_ext(e, &ten_powers[0]) < 0) {
 			pp = &r_big_ten_powers[1];
 			while(cmp_ext(e,pp) < 0) pp++;
 			pp--;
-			mul_ext(e, &big_ten_powers[pp - r_big_ten_powers], e);
-			*decpt -= (pp - r_big_ten_powers) * TP;
+			findex = pp - r_big_ten_powers;
+			mul_ext(e, &big_ten_powers[findex], e);
+			*decpt -= findex * TP;
 			/* here, value >= 10 ** -28 */
 			mul_ext(e, &ten_powers[1], e);
 			(*decpt)--;
 			pp = &r_ten_powers[0];
 			while(cmp_ext(e, pp) < 0) pp++;
-			mul_ext(e, &ten_powers[pp - r_ten_powers], e);
-			*decpt -= pp - r_ten_powers;
+			findex = pp - r_ten_powers;
+			mul_ext(e, &ten_powers[findex], e);
+			*decpt -= findex;
+			findex = 0;
 		}
 		(*decpt)++;	/* because now value in [1.0, 10.0) */
 	}
@@ -596,6 +601,26 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
 	while (p <= pe) {
+		if (findex) {
+			struct EXTEND tc, oldtc;
+			int count = 0;
+
+			oldtc.exp = 0;
+			oldtc.sign = 0;
+			oldtc.m1 = 0;
+			oldtc.m2 = 0;
+			tc = ten_powers[findex];
+			while (cmp_ext(e, &tc) >= 0) {
+				oldtc = tc;
+				add_ext(&tc, &ten_powers[findex], &tc);
+				count++;
+			}
+			*p++ = count + '0';
+			oldtc.sign = 1;
+			add_ext(e, &oldtc, e);
+			findex--;
+			continue;
+		}
 		if (e->exp >= 0 && e->m1 != 0) {
 			struct EXTEND x;
 
