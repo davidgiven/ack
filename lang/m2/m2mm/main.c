@@ -208,6 +208,7 @@ ProcessArgs()
 	}
 }
 
+void
 No_Mem()
 {
 	fatal("out of memory");

@@ -151,6 +151,7 @@ dependency(s, source)
 	else	fprint(dep_fd, "%s\n", s);
 }
 
+void
 No_Mem()				/* called by alloc package */
 {
 	fatal("out of memory");

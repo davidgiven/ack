@@ -749,6 +749,7 @@ static void check_assoc(prev_op, op) register prev_op, op;
 	}
 }
 
+void
 No_Mem()
 {
 	fatal("out of memory");
