@@ -260,7 +260,7 @@ ABC
 	  do
 	  cp $i/Action $i/Action.orig
 	  ed - $i/Action <<ABC
-/odula-2/,/^end/s/^/!/
+/odula-2/;/^end/s/^/!/
 w
 q
 ABC
