@@ -9,7 +9,6 @@ install:
 
 cmp:
 	make -f $(MAKEFILE) $(BCDEF) $(MACHDEF) tail
-	-../../compare head_bc
 	-../../compare tail_bc
 
 clean:
