@@ -153,7 +153,8 @@ outputdotrans()
 					fprint(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 				}
 			}
-			fprint(ofile,"\t\treturn;\n");
+			if(!seennontested)
+				fprint(ofile,"\t\treturn;\n");
 		}
 	fprint(ofile,"\t}\n");
 	for(i=longestpattern;i>0;i--)
