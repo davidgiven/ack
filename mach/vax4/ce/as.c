@@ -10,7 +10,7 @@
 
 /* Een constraint-function */
 
-const( arg)
+cst( arg)
 struct t_operand *arg;
 {
 	return( arg->type == CONST);
@@ -22,12 +22,12 @@ struct t_operand *arg;
 
 /*    decode_operand() recognizes the follwing assembly-argumnets:
  
-	$const   		: CONST
+	$cst 	  		: CONST
 	register		: REGISTER
 	-(register)		: AUTO_DEC
 	(register)+		: AUTO_INC
         (register)		: REG_DEF
-	index(register)         : IND_REG
+	indx(register)          : IND_REG
 	label+offset		: LABEL
 	label[b|f]		: L_ILB
  */
@@ -69,7 +69,7 @@ register struct t_operand *op;
 
 	if  ( arg[0] == '~' ) {
 		op->type = CONST;
-		op->const = arg+1;
+		op->cst = arg+1;
 	}
 	else if ( is_reg( arg, &(op->num)) ) {
 		op->type = REGISTER;
@@ -97,7 +97,7 @@ register struct t_operand *op;
 			op->type = IND_REG;
 			arg = ind( ind_buf[ n_index], arg);
 			if ( is_reg( arg+1, &(op->num)))
-				op->index = ind_buf[ n_index];
+				op->indx = ind_buf[ n_index];
 			else
 				fprint( STDERR, "unknown argtype %s\n", arg);
 		}
@@ -214,19 +214,19 @@ register struct t_operand *op;
 {
 	switch( op->type) {
 		case CONST :
-				if (isdigit(op->const[0])) {
+				if (isdigit(op->cst[0])) {
 					long l, atol();
-					l = atol(op->const);
+					l = atol(op->cst);
 					if (fit_6bits(l)) {
-						@text1(%$(op->const));
+						@text1(%$(op->cst));
 					}
 					else {
 						@text1( 0x8f);
-						@text4( %$(op->const));
+						@text4( %$(op->cst));
 					}
 				}
 				else {
-					@__as_const(%$(op->const));
+					@__as_const(%$(op->cst));
 				}
 				break;
 		case REGISTER: 	@text1( %d(0x50 | op->num));
@@ -238,22 +238,22 @@ register struct t_operand *op;
 		case AUTO_INC : @text1( %d(0x80 | op->num));
 			  	break;
 		case IND_REG :
-				if (isdigit(op->index[0])) {
+				if (isdigit(op->indx[0])) {
 					long l, atol();
-					l = atol(op->index);
+					l = atol(op->indx);
 					if (fit_byte(l)) {
 						@text1( %d(0xa0 | op->num));
-			  			@text1( %$(op->index));
+			  			@text1( %$(op->indx));
 					} else if (fit_word(l)) {
 						@text1( %d(0xc0 | op->num));
-			  			@text2( %$(op->index));
+			  			@text2( %$(op->indx));
 					} else {
 						@text1( %d(0xe0 | op->num));
-			  			@text4( %$(op->index));
+			  			@text4( %$(op->indx));
 					}
 				}
 				else {
-					@__as_indexed(%$(op->index) , %d(op->num));
+					@__as_indexed(%$(op->indx) , %d(op->num));
 				}
 				break;
 		case LABEL : 	@text1( 0xef);

@@ -21,7 +21,8 @@
 
 struct t_operand {
 		int type, num;
-		char *lab, *index, *const, *offset;
+		char *lab, *indx, *cst, *offset;
+		/* Changed names of identifiers "index" and "const" */
 	};
 
 #define fit_6bits(val)		((unsigned long)(val) < 64)

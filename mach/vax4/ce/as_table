@@ -107,9 +107,9 @@ br 	l_ilb		==>
 			@text1( 0x11);
 			gen_operand( l_ilb).
 
-calls	n : const , pro	==>
+calls	n : cst , pro	==>
 			@text1( 0xfb);
-			@text1( %$(n->const));
+			@text1( %$(n->cst));
 			gen_operand( pro).
 
 clrl 	src		==>
@@ -217,7 +217,7 @@ movl	src, dst	==>
 			gen_operand( src);
 			gen_operand( dst).
 
-movq	src : const, dst	==>
+movq	src : cst, dst	==>
 			@text1( 0x7d);
 			gen_operand( src);
 			@text4( 0);
