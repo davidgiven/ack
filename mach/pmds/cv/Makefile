@@ -1,29 +1,19 @@
 CFLAGS=-O
 
-pmcv:		pmcv.o
-		$(CC) -o pmcv -n pmcv.o
+cv:		cv.o
+		$(CC) -o cv -n cv.o
 
-pmcv.c:
-		case `ack_sys` in \
-		vax*)	cp vax_cv.c pmcv.c ;; \
-		pdp*)	cp pdp_cv.c pmcv.c ;; \
-		*)	echo "A conversion program should be present in `pwd`/pmcv.c" ;\
-			exit 9 ;; \
-		esac
+install:	cv
+		../../install cv
 
-install:	ins_pmcv
-ins_pmcv:	pmcv
-		../../install pmcv
-
-cmp:		cmp_pmcv
-cmp_pmcv:	pmcv
-		-../../compare pmcv
+cmp:		cv
+		-../../compare cv
 
 opr:
 		make pr | opr
 
 pr:
-		@pr `pwd`/pmcv.c
+		@pr `pwd`/cv.c
 
 clean:
-		-rm -f *.o *.old pmcv
+		-rm -f *.o *.old cv
