@@ -10,6 +10,8 @@ EQN=eqn
 REFER=refer
 TBL=tbl
 
+all:	$(TARGET_HOME)/doc/LLgen.doc $(TARGET_HOME)/doc/LLgen_NCER.doc
+
 $(TARGET_HOME)/doc/LLgen.doc:	$(SRC_DIR)/LLgen.n $(SRC_DIR)/LLgen.refs
 	$(REFER) -sA+T -p $(SRC_DIR)/LLgen.refs $(SRC_DIR)/LLgen.n | $(EQN) | $(TBL) > $@
 

@@ -6,6 +6,7 @@ TBL=tbl
 EQN=eqn
 PIC=pic
 REFER=refer
+GRAP=grap
 
 RESFILES= \
 	$(TARGET_HOME)/doc/toolkit.doc \
@@ -18,6 +19,7 @@ RESFILES= \
 	$(TARGET_HOME)/doc/ncg.doc \
 	$(TARGET_HOME)/doc/regadd.doc \
 	$(TARGET_HOME)/doc/LLgen.doc \
+	$(TARGET_HOME)/doc/LLgen_NCER.doc \
 	$(TARGET_HOME)/doc/pascal.doc \
 	$(TARGET_HOME)/doc/basic.doc \
 	$(TARGET_HOME)/doc/crefman.doc \
@@ -73,7 +75,11 @@ $(TARGET_HOME)/doc/regadd.doc:	$(SRC_HOME)/doc/regadd.doc
 
 $(TARGET_HOME)/doc/LLgen.doc:	LLgen.X
 LLgen.X:
-		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) 
+		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "GRAP="$(GRAP)
+
+$(TARGET_HOME)/doc/LLgen_NCER.doc:	LLgen_NCER.X
+LLgen_NCER.X:
+		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "GRAP="$(GRAP)
 
 $(TARGET_HOME)/doc/basic.doc:	$(SRC_HOME)/doc/basic.doc
 		cat $(SRC_HOME)/doc/basic.doc >$@
