@@ -13,6 +13,12 @@ end
 name "C utilities"
 dir util/cmisc
 end
+name "Flex lexical analyzer generator"
+dir util/flex
+end
+name "Yacc parser generator"
+dir util/byacc
+end
 name "Modules"
 dir modules/src
 indir
