@@ -14,11 +14,12 @@ StorageList = C_bss_cst.c C_bss_dlb.c C_bss_dnam.c C_bss_ilb.c C_bss_pnam.c \
 		C_hol_pnam.c C_rom_cst.c C_rom_dlb.c C_rom_dnam.c C_rom_ilb.c \
 		C_rom_pnam.c C_rom_scon.c
 
-all:
+all:	C_out.c
 
 clean:
+	rm -f C_out.c C_mnem C_mnem_narg
 
-install:
+install:	all
 	-mkdir $(CEGLIB)
 	-mkdir $(DEF)
 	-mkdir $(DEF)/message
@@ -30,6 +31,7 @@ install:
 	for i in $(NotimplList) ; do cp not_impl/$$i $(DEF)/not_impl/$$i ; done
 	for i in $(PseudoList) ; do cp pseudo/$$i $(DEF)/pseudo/$$i ; done
 	for i in $(StorageList) ; do cp storage/$$i $(DEF)/storage/$$i ; done
+	cp C_out.c $(DEF)/C_out.c
 
 cmp:
 	-cmp pseudo_vars.c $(DEF)/pseudo_vars.c
@@ -37,6 +39,7 @@ cmp:
 	-for i in $(NotimplList) ; do cmp not_impl/$$i $(DEF)/not_impl/$$i ; done
 	-for i in $(PseudoList) ; do cmp pseudo/$$i $(DEF)/pseudo/$$i ; done
 	-for i in $(StorageList) ; do cmp storage/$$i $(DEF)/storage/$$i ; done
+	-cmp C_out.c $(DEF)/C_out.c
 
 pr:
 	@for i in $(MessageList) ; do pr message/$$i ; done
@@ -46,3 +49,12 @@ pr:
 
 opr:
 	make pr | opr
+
+C_out.c:	C_out_skel.c C_mnem C_mnem_narg mk_C_out
+	mk_C_out > C_out.c
+
+C_mnem:		m_C_mnem argtype
+		sh m_C_mnem > C_mnem
+
+C_mnem_narg:	m_C_mnem_na argtype
+		sh m_C_mnem_na > C_mnem_narg
