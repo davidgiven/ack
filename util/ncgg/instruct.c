@@ -41,6 +41,16 @@ struct varinfo * generase(n) {
 	return(vi);
 }
 
+struct varinfo * genremove(n) {
+	struct varinfo *vi;
+
+	NEW(vi,struct varinfo);
+	vi->vi_next = VI_NULL;
+	vi->vi_int[0] = INSREMOVE;
+	vi->vi_int[1] = n;
+	return(vi);
+}
+
 onlyreg(argno) {
 	register bitno;
 	register short *sp;
@@ -157,13 +167,15 @@ found:
 			break;
 		case IN_S_DESCR:
 		case IN_D_DESCR:
-			vi->vi_next = generase(
-				       ex_lookup(
-				        EX_REGVAR,insta->in_info[1],0
-				       )
-				      );
+			{ int temp;
+
+			temp=ex_lookup(EX_REGVAR,insta->in_info[1],0);
+			vi->vi_next = generase(temp);
+			vi = vi->vi_next;
+			vi->vi_next = genremove(temp);
 			vi = vi->vi_next;
 			break;
+			}
 		}
 		break;
 	    }
@@ -171,8 +183,11 @@ found:
 	for (eravi=ip->i_erases;eravi != VI_NULL;eravi=eravi->vi_next) {
 		if (eravi->vi_int[0] < 0)
 			vi->vi_next = setcoco(0);
-		else
+		else {
 			vi->vi_next = generase(eravi->vi_int[0]);
+			vi=vi->vi_next;
+			vi->vi_next = genremove(eravi->vi_int[0]);
+		}
 		vi=vi->vi_next;
 	}
 	return(retval);
