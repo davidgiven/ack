@@ -39,12 +39,10 @@ cleanup() {
 		error("temp file disappeared");
 	outshort(sp_magic);
 	/* Attempt to first output the word_size message */
-	/* commented out for the time being
 	while ((c = getc(infile)) != sp_cend && c != EOF) {
 		putc(c, outfile);
 	}
 	if (c == sp_cend) putc(c, outfile);
-	*/
 	outinst(ps_mes);
 	outint(ms_ext);
 	for (spp=symhash;spp< &symhash[NSYMHASH];spp++)
