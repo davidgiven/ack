@@ -53,7 +53,7 @@ name led
 	({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
-		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.mod:{TAIL}={EM}/{NLIB}m2) \
 		(.ocm:{TAIL}={EM}/{NLIB}ocm) \
 		(.ocm.b.c:{TAIL}={EM}/{NLIB}cc.1s {EM}/{NLIB}cc.2g) \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{NLIB}mon {EM}/lib/{M}/end_em)
