@@ -1,4 +1,4 @@
-if vax4 -O -c -I../../../h -I. $1 1>&2
+if vax4 -O -c -L -I../../../h -I. $1 1>&2
 then echo `basename $1 $2`.o
 else exit 1
 fi
