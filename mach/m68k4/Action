@@ -1,5 +1,5 @@
 name "M68000 4-4 backend"
-dir cg
+dir ncg
 end
 name "M68000 4-4 EM library"
 dir libem
