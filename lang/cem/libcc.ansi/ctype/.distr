@@ -1,4 +1,4 @@
 LIST
 Makefile
 char.tab
-genfiles.c
+genfiles
