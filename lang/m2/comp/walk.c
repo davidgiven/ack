@@ -336,6 +336,30 @@ WalkProcedure(procedure)
 
 	text_label = 1;		/* label at end of procedure */
 
+	/* Check if we must save the stack pointer */
+	for (param = ParamList(procedure->df_type);
+	     param;
+	     param = param->par_next) {
+		if (! IsVarParam(param)) {
+			tp = TypeOfParam(param);
+
+			if ( IsConformantArray(tp)) {
+				/* First time we get here
+				*/
+				if (func_type && !too_big) {
+					/* Some local space, only
+					   needed if the value itself
+					   is returned
+					*/
+					retsav= TmpSpace(func_res_size, 1);
+				}
+				StackAdjustment = NewPtr();
+				C_lor((arith) 1);
+				STL(StackAdjustment, pointer_size);
+			}
+		}
+	}
+
 #ifdef USE_INSERT
 	C_insertpart(partno);
 #else
@@ -400,20 +424,6 @@ WalkProcedure(procedure)
 			   the stack adjusted, the return value pushed
 			   again, and then RET
 			*/
-			if (! StackAdjustment) {
-				/* First time we get here
-				*/
-				if (func_type && !too_big) {
-					/* Some local space, only
-					   needed if the value itself
-					   is returned
-					*/
-					retsav= TmpSpace(func_res_size, 1);
-				}
-				StackAdjustment = NewPtr();
-				C_lor((arith) 1);
-				STL(StackAdjustment, pointer_size);
-			}
 			/* First compute new stackpointer */
 			C_lal(param->par_def->var_off);
 			CAL("new_stackptr", (int)pointer_size);
