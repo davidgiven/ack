@@ -25,6 +25,5 @@ misc.c
 options.c
 program.g
 statement.g
-tab.c
 tokenname.c
 tokenname.h

@@ -5,11 +5,10 @@
 %
 %	CHARACTER CLASSES
 %
-%C
-STGARB:\000-\200
-STSKIP: \r\t
-STNL:\012\013\014
-STSIMP:#&()*+,-/;=[]^{|}~
+%iSTGARB
+STSKIP: \t\013\014\015
+STNL:\012
+STSIMP:-#&()*+,/;=[]^{|}~
 STCOMP:.:<>
 STIDF:a-zA-Z
 STSTR:"'
@@ -40,7 +39,7 @@ STEOI:\200
 %	ISHEX
 %
 %C
-1:a-fA-F
+1:A-F0-9
 %Tchar ishex[] = {
 %p
 %T};

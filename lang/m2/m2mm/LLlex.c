@@ -23,8 +23,6 @@ struct token	dot,
 int		idfsize = IDFSIZE;
 int		ForeignFlag;
 
-static int	eofseen;
-
 STATIC
 SkipComment()
 {
@@ -111,10 +109,6 @@ getch()
 		}
 		break;
 	}
-	if (ch == EOI) {
-		eofseen = 1;
-		return '\n';
-	}
 	return ch;
 }
 
@@ -135,7 +129,7 @@ CheckForLineDirective()
 		 * Do not skip newlines
 		 */
 		ch = getch();
-		if (class(ch) == STNL) {
+		if (class(ch) == STNL || class(ch) == STEOI) {
 			LineNumber++;
 			error(s_error);
 			return;
@@ -145,12 +139,13 @@ CheckForLineDirective()
 		i = i*10 + (ch - '0');
 		ch = getch();
 	}
-	while (ch != '"' && class(ch) != STNL) ch = getch();
+	while (ch != '"' && class(ch) != STNL && class(ch) != STEOI)
+		ch = getch();
 	if (ch == '"') {
 		c = buf;
 		do {
 			*c++ = ch = getch();
-			if (class(ch) == STNL) {
+			if (class(ch) == STNL || class(ch) == STEOI) {
 				LineNumber++;
 				error(s_error);
 				return;
@@ -159,15 +154,15 @@ CheckForLineDirective()
 		*--c = '\0';
 		do {
 			ch = getch();
-		} while (class(ch) != STNL);
+		} while (class(ch) != STNL && class(ch) != STEOI);
 		/*
 		 * Remember the file name
 		 */
-		if (!eofseen && strcmp(FileName,buf)) {
+		if (class(ch) == STNL && strcmp(FileName,buf)) {
 			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
 		}
 	}
-	if (eofseen) {
+	if (class(ch) == STEOI) {
 		error(s_error);
 		return;
 	}
@@ -191,20 +186,8 @@ LLlex()
 		return tk->tk_symb;
 	}
 
-again1:
-	if (eofseen) {
-		eofseen = 0;
-		ch = EOI;
-	}
-	else {
 again:
-		LoadChar(ch);
-		if ((ch & 0200) && ch != EOI) {
-			error("non-ascii '\\%03o' read", ch & 0377);
-			goto again;
-		}
-	}
-
+	ch = getch();
 	tk->tk_lineno = LineNumber;
 
 	switch (class(ch))	{
@@ -212,7 +195,7 @@ again:
 	case STNL:
 		LineNumber++;
 		CheckForLineDirective();
-		goto again1;
+		goto again;
 
 	case STSKIP:
 		goto again;
@@ -231,8 +214,7 @@ again:
 				SkipComment();
 				goto again;
 			}
-			else if (nch == EOI) eofseen = 1;
-			else PushBack();
+			PushBack();
 		}
 		if (ch == '&') return tk->tk_symb = AND;
 		if (ch == '~') return tk->tk_symb = NOT;
@@ -272,8 +254,7 @@ again:
 		default :
 			crash("(LLlex, STCOMP)");
 		}
-		if (nch == EOI) eofseen = 1;
-		else PushBack();
+		PushBack();
 		return tk->tk_symb = ch;
 
 	case STIDF:
@@ -286,8 +267,7 @@ again:
 			LoadChar(ch);
 		} while(in_idf(ch));
 
-		if (ch == EOI) eofseen = 1;
-		else PushBack();
+		PushBack();
 		*tag++ = '\0';
 
 		tk->TOK_IDF = id = findidf(idfbuf);
@@ -329,9 +309,7 @@ again:
 				else if (ch == '.') state = OptReal;
 				else {
 					state = End;
-					if (ch == 'H') ;
-					else if (ch == EOI) eofseen = 1;
-					else PushBack();
+					if (ch != 'H') PushBack();
 				}
 				break;
 
@@ -354,8 +332,7 @@ again:
 				state = End;
 				if (ch != 'H') {
 					lexerror("H expected after hex number");
-					if (ch == EOI) eofseen = 1;
-					else PushBack();
+					PushBack();
 				}
 				break;
 
@@ -369,8 +346,7 @@ again:
 					state = Hex;
 					break;
 				}
-				if (ch == EOI) eofseen = 1;
-				else PushBack();
+				PushBack();
 				/* Fall through */
 				
 			case End:
@@ -427,8 +403,7 @@ again:
 		}
 
 noscale:
-		if (ch == EOI) eofseen = 1;
-		else PushBack();
+		PushBack();
 
 		return tk->tk_symb = REAL;
 

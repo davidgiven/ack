@@ -50,7 +50,7 @@ pr:
 	@pr Makefile $(GF) $(HFILES) $(CSRC)
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles Cfiles tab LL.output m2mm
+	rm -f $(OBJ) $(GENFILES) LLfiles Cfiles LL.output m2mm
 
 lint:	Cfiles
 	lint $(INCLUDES) $(LINTFLAGS) $(SRC) \
@@ -73,11 +73,8 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	make.tokcase <tokenname.c >symbol2str.c
 
-char.c: char.tab tab
-	tab -fchar.tab >char.c
-
-tab: 
-	$(CC) tab.c -o tab
+char.c: char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab >char.c
 
 depend:	Cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
