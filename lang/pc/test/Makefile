@@ -1,3 +1,5 @@
+# $Header$
+
 all:            testC testI
 
 testI:
@@ -7,6 +9,7 @@ testI:
 		int t4.p; em
 		int t5.p; em
 		int tstenc.p; em
+		int tstgto.p; em
 		rm -f e.out f?
 
 testC:
@@ -16,6 +19,7 @@ testC:
 		apc t4.p; a.out
 		apc t5.p; a.out
 		apc tstenc.p; a.out
+		apc tstgto.p; a.out
 		rm -f a.out f?
 
 install cmp:
