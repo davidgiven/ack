@@ -17,7 +17,7 @@ strhp~:
 	bic	$01777,r1
 	mov	r1,-(sp)
 	mov	r1,2f
-	jsr	pc,__brk
+	jsr	pc,BRK
 	tst	(sp)+
 	tst	r0
 	blt	3f

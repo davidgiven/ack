@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define prf~
-.extern save~,retu~,hol0,_printf
+.extern save~,retu~,hol0,printf~
 ! $Header$
 
 prf~:

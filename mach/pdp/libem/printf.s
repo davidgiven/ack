@@ -1,9 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
-.define _printf
+.define printf~
 ! $Header$
-
-write	= 4
 
 printf~:
 	mov	r2,-(sp)
@@ -54,7 +52,7 @@ ready:
 	mov	r4,-(sp)
 	mov	$buff,-(sp)
 	mov	$01,-(sp)
-	jsr	pc,__write
+	jsr	pc,WRITE
 	add	$06,sp
 	mov	(sp)+,r4
 	mov	(sp)+,r3
