@@ -759,6 +759,10 @@ STATIC int nsafes(p) register p_nont p; {
 	i = getntsafe(p);
 	if (i != NOSAFETY) {
 		i = do_safes(p->n_rule, i, &ch);
+		if (i < SCANDONE) i = SCANDONE;
+		/* After a nonterminal, we only know whether a scan was done
+		   or not
+		*/
 		if (getntout(p) != i) {
 			ch = 1;
 			setntout(p,i);
