@@ -1,5 +1,6 @@
 It is not wise to mix files created by the previous version of the Kit
 with files belonging to this version, although that might sometimes work.
+Many problems with the previous distribution are fixed.
 The major additions are:
 
 	- a new language: Modula-2
@@ -7,12 +8,14 @@ The major additions are:
 	  small model
 	- floating point package, usable with most back-ends
 	- cross-compilation to a Microsoft Xenix V3 80286 system
+	- cross-compilation to a PC running Minix
+	- cross-compilation to an Atari ST running Minix
 
 				Ceriel J.H. Jacobs
 				Dept. of Math. and Computer Science
 				Vrije Universiteit
-				Postbus 7161
-				1007 MC  Amsterdam
+				De Boelelaan 1081
+				1081 HV  Amsterdam
 				The Netherlands
 
 				(UseNet: ceriel@cs.vu.nl)
