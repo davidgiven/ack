@@ -20,8 +20,6 @@ _U:G-Z
 _L:g-z
 %T#include	<ctype.h>
 %T
-%Tint __x;
-%T
 %Tchar __ctype[] = {
 %T0,
 %p
