@@ -9,7 +9,7 @@ var M=vax4
 var NAME=vax4
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix=unix -Dvax=vax
+var CPP_F=-Dunix -Dvax
 var INCLUDES=-I{EM}/include/_tail_cc
 name be
 	from .m.g

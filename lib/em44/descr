@@ -10,7 +10,7 @@ var NAME=em44
 var LIB=lib/em44/tail_
 var RT=lib/em44/head_
 var SIZE_FLAG=-sm
-var CPP_F=-Dunix=unix
+var CPP_F=-Dunix
 var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name asld
 	from .k.m.a.g

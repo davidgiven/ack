@@ -9,7 +9,7 @@ var NAME=m68k2
 var M=m68k2
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix=unix -Dm68000=m68000
+var CPP_F=-Dunix -Dm68000
 var INCLUDES=-I{EM}/include/_tail_cc
 # 407 align is the default
 var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
