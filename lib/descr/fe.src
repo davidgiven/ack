@@ -2,7 +2,7 @@
 name cpp
 	# no from, it's governed by the P property
 	to .i
-	program {EM}/lib/cpp.new
+	program {EM}/lib/cpp
 	mapflag -I* CPP_F={CPP_F?} -I*
 	mapflag -U* CPP_F={CPP_F?} -U*
 	mapflag -D* CPP_F={CPP_F?} -D*
