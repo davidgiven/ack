@@ -7,8 +7,6 @@
 /*
  * Motorola 68000/68010 options
  */
-#undef	BITMAX
-#define	BITMAX	8000
 
 #define	THREE_PASS		/* branch and offset optimization */
 #define	BYTES_REVERSED		/* high order byte has lowest address */

@@ -16,8 +16,6 @@
 #define	addr_t		long
 #undef	ALIGNSECT
 #define ALIGNSECT 	2
-#undef BITMAX
-#define BITMAX		16000	/* many optimizations possible */
 
 #undef	VALWIDTH
 #define	VALWIDTH	8
