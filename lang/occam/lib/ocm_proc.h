@@ -1,3 +1,4 @@
+/* $Header$ */
 /*	process.h - Define administration types and functions
  *
  *      This file is to be included by implementors of the higher

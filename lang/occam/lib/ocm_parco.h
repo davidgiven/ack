@@ -1,3 +1,4 @@
+/* $Header$ */
 /*	parco.h - Define names for simulation routines
  *
  *      This file is to be included by users of the higher-level routines

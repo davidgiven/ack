@@ -1,3 +1,4 @@
+/* $Header$ */
 /*	channel.h - channel definitions */
 #include <stdio.h>
 #include "parco.h"

@@ -1,3 +1,4 @@
+/* $Header$ */
 /*	channel.c - basic channel handling routines */
 #include <errno.h>
 #include <signal.h>

@@ -1,3 +1,4 @@
+/* $Header$ */
 /*	chan_struct.c - channel routines for more structured objects */
 #include "ocm_chan.h"
 
