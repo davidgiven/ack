@@ -1,0 +1,5 @@
+MACH=sparc_solaris
+SUF=o
+ASAR=ar
+RANLIB=:
+MACHFL=-O -DNFS

@@ -1,0 +1,24 @@
+name "Sparc Solaris code expander library"
+system "sparc_solaris"
+dir ce
+end
+name "Sparc Solaris code expander"
+system "sparc_solaris"
+dir ce_cg
+end
+name "Sparc Solaris EM library"
+system "sparc_solaris"
+dir libem
+end
+name "Sparc Solaris end library"
+system "sparc_solaris"
+dir libend
+end
+name "Sparc Solaris system call library"
+system "sparc_solaris"
+dir libsys
+end
+name "Sparc Solaris debugger support library"
+system "sparc_solaris"
+dir libdb
+end
