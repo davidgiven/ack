@@ -14,7 +14,7 @@ LEXLIB=-ll
 
 
 cgg:	cgg.o $(OFILES) output.o
-	cc $(LDFLAGS) $(OFILES) output.o $(EMHOME)/lib/em_data.a $(LEXLIB) -o cgg
+	$(CC) $(LDFLAGS) $(OFILES) output.o $(EMHOME)/lib/em_data.a $(LEXLIB) -o cgg
 
 install:	cgg
 	rm -f $(EMHOME)/lib/ncgg
@@ -27,7 +27,7 @@ cmp:	cgg
 	-cmp ncgg.6 $(MANDIR)/ncgg.6
 
 debugcgg:	cgg.o $(OFILES) debugoutput.o
-	cc $(LDFLAGS) $(OFILES) debugoutput.o $(EMHOME)/lib/em_data.a -ll -o cgg
+	$(CC) $(LDFLAGS) $(OFILES) debugoutput.o $(EMHOME)/lib/em_data.a -ll -o cgg
 
 cgg.o:	scan.c
 
