@@ -163,7 +163,7 @@ main(argc,argv) register string	argv[]; {
 		fprintf(stderr, "number of tokens: %d\n", ntokens);
 		fprintf(stderr, "number of term structures: %d\n", nterms);
 		fprintf(stderr, "number of alternation structures: %d\n", nalts);
-		fprintf(stderr, "total memory used: %d\n", sbrk(0) - (char *) &end);
+		fprintf(stderr, "total memory used: %u\n", sbrk(0) - (char *) &end);
 	}
 	exit(0);
 }
