@@ -18,13 +18,13 @@
 %token ELSESYM
 %token FIELDSYM
 %token FORSYM
-%token FUNCTION
-%token FUNCTID
+%token <integer> FUNCTION
+%token <Sptr> FUNCTID
 %token INKEYSYM
 %token GETSYM
 %token GOSUBSYM
 %token GOTOSYM
-%token IFSYM
+%token <integer> IFSYM
 %token INPUTSYM
 %token LETSYM
 %token LINESYM
@@ -48,7 +48,7 @@
 %token SWAPSYM
 %token THENSYM
 %token TOSYM
-%token TRONOFFSYM
+%token <integer> TRONOFFSYM
 %token USINGSYM
 %token USRSYM
 %token WHILESYM
@@ -59,16 +59,22 @@
 %token INTVALUE
 %token FLTVALUE
 %token DBLVALUE
-%token STRVALUE
+%token <integer> STRVALUE
 %token UNARYSYM
-%token IDENTIFIER
+%token <Sptr> IDENTIFIER
 %token ANDSYM
 %token ORSYM
 %token VARPTR
 
-%left BOOLOP
+%type <Sptr> arraydcl identifier indexed
+%type <cptr> getput
+%type <integer> exprlist expression negation compare sum term factor
+%type <integer> parmlist variable printlist inputtail funcname funccall
+
+%left <integer> BOOLOP
 %left NOTSYM
-%left RELOP '=' '<' '>' LESYM GESYM NESYM
+%left '=' '<' '>' LESYM GESYM NESYM
+%left <integer> RELOP
 %left '+' '-'
 %left '*' '/' '\\' MODSYM
 %left '^'
@@ -78,16 +84,20 @@
 #define YYDEBUG
 #include "bem.h"
 
-int	ival;		/* parser temporary values */
+typedef union {
+	int	integer ;
+	Symbol	*Sptr ;
+	char	*cptr ;
+} YYSTYPE ;
+
+int	ival;
 double  dval;
 char	*sval;
 int 	e1,e2;
-int	chann;		/* input/output channel */
 
 char	*formatstring;	/* formatstring used for printing */
 Symbol	*s;		/* Symbol dummy */
 %}
-/* We need to type things properly  to limit complaints of lint*/
 %%
 programline	: INTVALUE {newblock(ival); newemblock(ival);} stmts EOLN
 		| '#' INTVALUE STRVALUE EOLN
@@ -148,11 +158,11 @@ illegalstmt:	ILLEGAL 		{illegalcmd();}
 
 callstmt:	CALLSYM	IDENTIFIER parmlist ')'
 	{ 
-		emcode("cal",proclabel(((Symbol *) $2)->symname));
+		emcode("cal",proclabel($2->symname));
 		while($3 -- >0) emcode("asp",EMPTRSIZE);
 	}
 	|	CALLSYM	IDENTIFIER 
-	{ 	emcode("cal",proclabel(((Symbol *) $2)->symname));}
+	{ 	emcode("cal",proclabel($2->symname));}
 
 parmlist: '(' variable	{ $$=1;}
 	| parmlist ',' variable	{ $$= $1+1;}
@@ -163,10 +173,10 @@ clearstmt:	CLEARSYM			{warning("statement ignored");}
 closestmt:	CLOSESYM filelist		
 	|	CLOSESYM	{emcode("cal","$_close");}
 
-filelist:	cross intvalue			{ emcode("loc",$2);
+filelist:	cross intvalue			{ emcode("loc",itoa(ival));
 						 emcode("cal","$_clochn");
 						 emcode("asp",EMINTSIZE);}
-	|	filelist ',' cross intvalue 	{ emcode("loc",$4);
+	|	filelist ',' cross intvalue 	{ emcode("loc",itoa(ival));
 						 emcode("cal","$_clochn");
 						 emcode("asp",EMINTSIZE);}
 
@@ -204,11 +214,11 @@ dimstmt:	DIMSYM arraydcl ')'		{dclarray($2);}
 	|	dimstmt ',' arraydcl ')'	{dclarray($3);}
 	;
 
-arraydcl : IDENTIFIER '(' INTVALUE	{$$=$1; s= (Symbol *) $1;
+arraydcl : IDENTIFIER '(' INTVALUE	{$$=$1; s= $1;
 					 s->dimlimit[s->dimensions]=ival;
 					 s->dimensions++;
 					}
-	| arraydcl ',' INTVALUE		{$$=$1; s=(Symbol *) $1;
+	| arraydcl ',' INTVALUE		{$$=$1; s= $1;
 					 if(s->dimensions<MAXDIMENSIONS)
 					 {
 						 s->dimlimit[s->dimensions]=ival;
@@ -234,7 +244,7 @@ step	: STEPSYM expression		{forstep($2);}
 	;
 
 nextstmt: NEXTSYM IDENTIFIER			{nextstmt($2);}
-	| NEXTSYM				{ nextstmt(0);}
+	| NEXTSYM				{ nextstmt((Symbol *)0);}
 	| nextstmt ',' IDENTIFIER		{ nextstmt($3);}
 
 getstmt:	getput  	{emcode("loc",itoa(0));
@@ -246,8 +256,8 @@ getstmt:	getput  	{emcode("loc",itoa(0));
 				  emcode("cal",$1);
 				  emcode("asp",EMINTSIZE);
 				}
-getput: GETSYM	cross intvalue { setchannel(ival); $$= (YYSTYPE)"$_getrec";}
-	| PUTSYM cross intvalue { setchannel(ival); $$= (YYSTYPE)"$_putsym";}
+getput: GETSYM	cross intvalue { setchannel(ival); $$= "$_getrec";}
+	| PUTSYM cross intvalue { setchannel(ival); $$= "$_putsym";}
 
 gosubstmt:	GOSUBSYM INTVALUE		{gosubstmt(ival);}
 
@@ -329,7 +339,7 @@ mode	: expression ',' 	{conversion($1,STRINGTYPE);}
 	| ','			{ emcode("lae","_iomode");}
 	;
 
-optionstmt:	OPTIONSYM BASESYM intvalue { optionbase($3);}
+optionstmt:	OPTIONSYM BASESYM intvalue { optionbase(ival);}
 
 printstmt:	PRINTSYM 		{setchannel(-1);emcode("cal","$_nl");}
 	| 	PRINTSYM file format printlist 
@@ -431,7 +441,10 @@ factor  : INTVALUE			{$$=loadint(ival);}
 	| funcname funccall ')'	{ $$=fcnend($2);}
 	| MIDSYM '$' midparms	
 	{	emcode("cal","$_mid");
-		emcode("asp",itoa($3));
+		emcode("asp",EMINTSIZE);
+		emcode("asp",EMINTSIZE);
+		emcode("asp",EMPTRSIZE);
+		/* emcode("asp",itoa($3)); */
 		emcode("lfr",EMPTRSIZE);
 		$$= STRINGTYPE;
 	}
