@@ -39,7 +39,6 @@ _fork.s
 Xstat.c
 _Xstat.c
 fstat.s
-_fstat.s
 fstatfs.s
 fsync.s
 ftime.c
