@@ -1,4 +1,3 @@
-#define DUK
 #define RCSID0 "$Header$"
 
 /*
@@ -7,4 +6,3 @@
 #define	THREE_PASS		/* distinguish short and long branches */
 #define	LISTING			/* enable listing facilities */
 #define RELOCATION
-#define NOLD
