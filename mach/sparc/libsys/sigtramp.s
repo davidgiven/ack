@@ -48,6 +48,7 @@ __sigtramp:
 
 	call	%g2
 	nop
+	add	%fp, %g4, %sp		! cannot trust %sp after call
 	ld      [%fp + 0x5c], %o3
 	ld      [%fp + 0x58], %i0
 	ld      [%sp + 0xe4], %l1

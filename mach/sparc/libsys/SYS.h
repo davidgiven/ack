@@ -82,7 +82,7 @@ SYS.h
 	LABEL(x); \
 	BODY(x)
 
-#define BODY(x) \
+#define BODY1(x) \
 	sys_call(x); \
 	ta	%g0; \
 	bgeu 0f; \
@@ -90,7 +90,9 @@ SYS.h
 	or      %o5, %lo(cerror), %o5; \
 	jmp	%o5; \
 	nop; \
-0:; \
+0:;
+#define BODY(x) \
+	BODY1(x) \
 	retl; \
 	nop
 

@@ -9,6 +9,7 @@
 #define SYS_write 4
 #define SYS_open 5
 #define SYS_close 6
+#define SYS_wait4 7
 #define SYS_creat 8
 #define SYS_link 9
 #define SYS_unlink 10
@@ -56,7 +57,6 @@
 #define SYS_getpgrp 81
 #define SYS_setpgrp 82
 #define SYS_setitimer 83
-#define SYS_wait4 84
 #define SYS_swapon 85
 #define SYS_getitimer 86
 #define SYS_gethostname 87
