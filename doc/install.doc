@@ -1,5 +1,7 @@
 .\" $Header$
-.nr PD 1v
+.if n .nr PD 1v
+.if n .nr LL 78m
+.if n .ll 78m
 .TL
 Amsterdam Compiler Kit Installation Guide
 .AU
@@ -15,15 +17,20 @@ This document
 describes the process of installing Amsterdam Compiler Kit.
 It depends on your combination of hard- and software how
 hard it will be to install the Kit.
-This description is intended for a PDP 11/44 running
+This description is intended for a VAX running BSD 4.1
 .UX
-Version 7.
-Installation on other PDP 11's should be easy, as long
+\.
+Installation on VAX BSD4.2/4.3 systems,
+Sun-3 systems, and some System V systems
+should be easy.
+Installation on PDP 11's running
+.UX
+Version 7, BSD 2.8, or 2.9
+should also be easy, as long
 as they have separate instruction and data space.
 Installation on machine's without this feature, like PDP 11/34,
 PDP 11/60 requires extensive surgery on some programs and is
 thought of as impossible.
-Installation on VAX'en running BSD4.1 should also be easy.
 See section 7 for installation on other systems.
 .NH
 Restoring tree
@@ -34,7 +41,7 @@ distribution tree structure is restored.
 Proceed as follows
 .IP "  \-" 10
 Create a directory, for example /usr/em, on a device
-with at least 15 Megabytes left.
+with at least 25 Megabytes left.
 .IP "  \-"
 Change to that directory (cd ...); it will be the working directory.
 .IP "  \-"
@@ -79,11 +86,15 @@ Make in this directory creates most of the files in "h"
 and "util/data".
 This make should only be called when the EM definition is
 changed.
-.IP "include"
+.IP "include/_tail_cc"
 .br
-More or less system independent include files needed by modules
+Include files needed by modules
 in the C library from lang/cem/libcc.
 Especially needed for "stdio".
+.IP "inlude/_tail_mon"
+.br
+More or less system independent include files needed by modules
+in the library lang/cem/libcc/mon.
 .IP "h"
 .br
 The #include files for:
@@ -113,24 +124,45 @@ pc_file.h	Macro's used in file handling in Pascal
 pc_size.h	Sizes of objects used by Pascal compiler and
 	run-time system.
 em_reg.h	Definition of names for register types.
+ocm_chan.h	Used by the occam run-time system
+ocm_parco.h	Used by the occam run-time system
+ocm_proc.h	Used by the occam run-time system
 .TE
+.IP "modules"
+.br
+root of a tree containing modules for compiler writers.
+.IP "modules/man"
+.br
+manual pages for all modules.
+.IP "modules/lib"
+.br
+contains module objects.
+.IP "modules/src"
+.br
+contains sources of the modules, each module in its own directory.
+.IP "modules/h"
+.br
+include files for some of the modules.
+.IP "modules/pkg"
+.br
+include files for some of the modules.
 .IP "doc"
 .br
-This directory contains the unformatted documents for the kit.
+This directory contains the unformatted documents for the Kit.
 A list of the available documents can be found in the last section.
-.IP "doc/em.doc"
+.IP "doc/em"
 .br
 The EM-manual IR-81
-.IP "doc/em.doc/int"
+.IP "doc/em/int"
 .br
 The EM interpreter written in Pascal
 .IP "mkun"
 .br
 The PUBMAC macro package for nroff/troff from the Katholieke Universiteit at
 Nijmegen.
-It is used for the EM reference manual,
-the Makefile installs the macro package in
-/usr/lib/tmac/tmac.mkun*.
+It is used for the EM reference manual.
+The Makefile installs the macro package in
+/usr/lib/tmac.
 This package is in the public domain.
 .IP "mach"
 .br
@@ -142,16 +174,19 @@ These directories have subdirectories named:
 .in +3n
 .TS
 l l.
-cg	the backend   ( *.m => *.s )
-ncg	the new backend   ( *.m => *.s )
-as	the assembler ( *.s + libraries => a.out )
+cg	the backend   (*.m => *.s)
+ncg	the new backend   (*.m => *.s)
+as	the assembler (*.s => *.o) or
+	assembler/linker (*.s + libraries => a.out)
 cv	Conversion programs for a.out files.
 dl	Down-load programs
+top	the target optimizer
 
-libem	Sources for EM runtime system, intended to depend only on CPU type
+libem	Sources for EM runtime system, only depending on CPU type
 libbc	Used to create Basic run-time system and libraries
 libcc	Used to create C run-time system and libraries
 libpc	Used to create Pascal run-time system and libraries
+liboc	Used to create Occam run-time system and libraries
 libsys	Sources for system-dependent EM library
 test	Various tests
 
@@ -166,6 +201,7 @@ l l.
 mach/proto/cg	Current backend sources.
 mach/proto/ncg	New backend sources.
 mach/proto/as	Assembler sources.
+mach/proto/top	Target optimizer sources.
 mach/proto/libg	Makefile for compiling libraries.
 .TE
 .IP "emtest"
@@ -182,7 +218,7 @@ Just there to group the directories for all front-ends
 Pascal front-end
 .IP "lang/pc/libpc"
 .br
-Source of Pascal run-time system ( in EM or C )
+Source of Pascal run-time system (in EM or C)
 .IP "lang/pc/test"
 .br
 Some test programs written in Pascal
@@ -205,7 +241,7 @@ Stdio sources
 .IP "lang/cem/libcc/mon"
 .br
 Sources for routines in chapter II, written in EM
-.IP "lang/cem/comp"
+.IP "lang/cem/cemcom"
 .br
 The compiler proper
 .IP "lang/cem/ctest"
@@ -226,6 +262,18 @@ Basic run-time library source.
 .IP "lang/basic/test"
 .br
 Various Basic programs.
+.IP "lang/occam"
+.br
+Occam front-end.
+.IP "lang/occam/comp"
+.br
+The compiler proper.
+.IP "lang/occam/lib"
+.br
+Source of Occam run-time system (in EM or C).
+.IP "lang/occam/test"
+.br
+Some Occam programs.
 .IP "util"
 .br
 Contains directories with sources for various utilities
@@ -234,20 +282,26 @@ Contains directories with sources for various utilities
 The program used for translation with the Kit.
 .IP "util/opt"
 .br
-EM peephole optimizer (*.k => *.m)
+EM peephole optimizer (*.k => *.m).
+.IP "util/ego"
+.br
+The global optimizer.
+.IP "util/topgen"
+.br
+The target optimizer generator..
 .IP "util/misc"
 .br
-Decode (*.[km] => *.e) + encode (*.e => *.k)
+Decode (*.[km] => *.e) + encode (*.e => *.k).
 .IP "util/data"
 .br
-The C-code for `lib/em_data.a`
-These sources are created by the Makefile in `etc`
+The C-code for `lib/em_data.a`.
+These sources are created by the Makefile in `etc`.
 .IP "util/ass"
 .br
-The EM assembler ( *.[km] + libraries => e.out )
+The EM assembler (*.[km] + libraries => e.out).
 .IP "util/arch"
 .br
-The archiver to be used for ALL EM utilities
+The archivers to be used for ALL EM utilities.
 .IP "util/cgg"
 .br
 A program needed for compiling backends.
@@ -256,13 +310,24 @@ A program needed for compiling backends.
 A program needed for compiling the newest backends.
 .IP "util/cpp"
 .br
-The V7 C preprocessor.
+The C preprocessor.
 .IP "util/shf"
 .br
 Various shell files.
 .IP "util/LLgen"
 .br
 The extended LL(1) parser generator.
+.IP "util/amisc"
+.br
+Contains some programs handling ACK a.out format, such as anm, asize.
+.IP "util/cmisc"
+.br
+Contains some programs to help in resolving name conflicts, and
+a dependency generator for makefiles.
+.IP "util/led"
+.br
+The ACK link-editor, reading ACK relocatable a.out format, and writing
+ACK a.out format.
 .ne 4
 .LP
 All pathnames mentioned in the text of this document are relative to the
@@ -274,7 +339,8 @@ Adapting ACK to your system
 Before compiling the sources in the Kit some installation dependent
 actions have to be taken.
 Most of these are performed by an interactive shell script in the file
-first in a directory of the same name.
+.I first
+in a directory of the same name.
 .LP
 These actions are:
 .sp 1
@@ -297,19 +363,22 @@ c c c
 l l l.
 answer	system type	default machine
 pdp_v7	PDP11 with sep I/D and version 7	pdp
-vax_bsd4_1a	VAX11 with BSD4.1a	vax2
-vax_bsd4_1c	VAX11 with BSD4.1c	vax2
-vax_bsd4_2	VAX11 with BSD4.2	vax2
-pc_ix	IBM PC with PC/IX	ix
+vax_bsd4_1a	VAX11 with BSD4.1a	vax4
+vax_bsd4_2	VAX11 with BSD4.2	vax4
+vax_sysV_2	VAX11 with System V.2	vax4
+pc_ix	IBM PC with PC/IX	i86
 m68_unisoft	Motorola 68000 with Unisoft UNIX	m68k2
 m68_pmds	Philips PMDS	pmds
+m68_sysV_0	68000 with Uniplus UNIX System V.0	mantra
+sun3	Sun 3 Motorola 68020 workstation	sun3
+sun2	Sun 2 Motorola 68010 workstation	sun2
 ANY	Neither of the above	m68k2
 .TE
 .sp 1
-As mentioned before the installation on VAX'en and PDP11's should
-be easy.
-The pc_ix and m68 systems are also known to behave reasonably,
-but the installation procedure has not been extensively tested.
+For some of these, the installation procedure has not been tested, as
+we don't have them. However,
+the pdp_v7, vax_bsd4_1a, pc_ix, sun3 and m68 systems are known to behave
+reasonably.
 For ANY you can use any name you fancy,
 but the Kit will not be able to compile programs for your system.
 If you want to do that you have to read the section about "compilation
@@ -323,38 +392,30 @@ See also the section 8.2.
 Automatically editing a few description files that tell
 ACK to use your system's assembler.
 On both the PDP and the VAX the Kit uses the native assembler and linker.
-The description files in lib/pdp/descr, lib/vax2/descr and
+The description files in lib/pdp/descr and
 lib/vax4/descr have to be altered to prevent
 attempts to assemble programs with unsuitable assemblers.
 The original descr files are copied to descr.orig.
 .IP \-
-Automatically installing the special include directory for vax2.
-This will only be done on VAX systems.
-The shell scripts needed by ACK for the vax2 backend differ slightly
-from the one issued by Berkeley.
-.br
-Note: this has only been tested under BSD4.1a.
-.IP \-
-Automatically editing the system.h file in mach/vax[24]/libem.
-Again, only on VAXen.
-These files reflect whether you have BSD4.1a, BSD4.1c or BSD4.2.
-.LP
-.sp 1
-Some actions still have to be done by hand.
-.sp 1
-.IP \-
-The VAX backends cannot be booted on systems
+The VAX backend cannot be booted on systems
 with a 16-bit address space systems.
 The program lib/cgg needs more memory than available to transform
 the table into files suitable for the C-compiler.
 Therefore files tables1.h and tables1.c have been provided in
-the directories mach/vax[24]/cg.
-These must be copied to tables.h and tables.c on their respective
-directories to get working code-generators for the VAX on PDP11's.
+the directory mach/vax4/cg.
+These must be copied to tables.h and tables.c
+to get working code-generators for the VAX on PDP11's.
 You will hardly be able to use these, because the 
 code generated by these programs cannot be
 assembled and loaded without a native VAX assembler,
 but its nice to be able to look at the code produced.
+.IP \-
+For the m68k2 backend, the same problem occurs, and the same
+solution is chosen.
+.LP
+.sp 1
+Some actions still have to be done by hand.
+.sp 1
 .IP \-
 The installation of the PUBMAC macro package is not done
 automatically because you needs super-user privileges to do
@@ -366,10 +427,14 @@ UNIX V7 as originally distributed contains a few bugs that
 prevent correct execution of some of the larger programs.
 See the section named "Fixes for the UNIX V7 system"
 about what to do.
+Berkeley 2.8 or 2.9 may also have some of these bugs.
 .IP \-
 The manual files for the Kit can be copied to their
 appropriate place in the system by giving the command "make install"
-in the man directory.
+in the man directory, but only 
+.B after
+running the installation of the
+Kit itself.
 .NH
 Compiling the Kit
 .PP
@@ -435,111 +500,117 @@ The backends for the other machines are known to run our own
 test programs,
 but might reveal errors when more heavily used.
 .NH 2
-An example output of TakaAction.
+An example output of TakeAction.
 .PP
 .DS
 System definition -- done
 EM definition -- done
-C preprocessor -- done
+LL(1) Parser generator -- done
 EM definition library -- done
+C utilities -- done
+system-call interface module -- done
+string routines module -- done
+formatted print module -- done
+assertion module -- done
+memory allocation module -- done
+fast, linear time malloc -- done
+EM messages generation module -- done
+identifier table module -- done
+input module -- done
+ACK-object reading and writing module -- done
+EM-code reading module -- done
+EM code generation module -- done
+Modules -- done
+C preprocessor -- done
+ACK object utilities -- done
 Encode/Decode -- done
 Shell files in bin -- done
 EM assembler -- done
 EM Peephole optimizer -- done
+	.
+	.
+	.
+EM Global optimizer -- done
 ACK archiver -- done
 Program 'ack' -- done
 Bootstrap for backend tables -- done
-LL(1) Parser generator -- done
 Bootstrap for newest form of backend tables -- done
+LED link editor -- done
+TOPGEN target optimizer generator -- done
 C frontend -- done
 Basic frontend -- done
+Occam frontend -- done
 Intel 8086 assembler -- done
 Intel 8086 backend -- done
-Intel 8086 download program(s) -- done
 Intel 8086 C libraries -- done
 Intel 8086 EM library -- done
 Intel 8086 Pascal library -- done
-Intel 8086 Stand-alone io library -- done
+Intel 8086 PC/IX systemcall library -- done
 Intel 8086 Basic library -- done
+Intel 8086 Occam library -- done
+Intel 8086 conversion program from ack.out --> PC/IX a.out -- done
 Intel 8086 support -- done
-MSC6500 assembler -- done
-MSC6500 backend -- done
-MSC6500 download program(s) -- done
-MSC6500 C libraries -- done
-MSC6500 EM library -- done
-MSC6500 Pascal library -- done
-MSC6500 Basic library -- done
-MSC6500 support -- done
-Motorola 6800 assembler -- done
-Motorola 6800 support -- done
-Motorola 6805 assembler -- done
-Motorola 6805 support -- done
-Motorola 6809 assembler -- done
-Motorola 6809 support -- done
-Intel 8080 assembler -- done
-Intel 8080 support -- done
-2-2 Interpreter C libraries -- done
-2-2 Interpreter Pascal library -- done
-2-2 Interpreter Basic library -- done
-2-2 Interpreter support -- done
-2-4 Interpreter C libraries -- done
-2-4 Interpreter Pascal library -- done
-2-4 Interpreter Basic library -- done
-2-4 Interpreter support -- done
-4-4 Interpreter C libraries -- done
-4-4 Interpreter Pascal library -- done
-4-4 Interpreter Basic library -- done
-4-4 Interpreter support -- done
-Sorry, IBM PC/IX conversion program(s) can only be made on pc_ix systems
-IBM PC/IX support -- done
-Motorola 68000 2-4 assembler -- done
+	.
+	.
+	.
+Motorola 68000 assembler -- done
 Motorola 68000 2-4 backend -- done
-Sorry, Motorola 68000 interpreters can only be made on m68* systems
-Sorry, the m68k? conversion program has to be translated on the target machine
+Motorola 68000 2-4 conversion program -- done
+Motorola 68000 target optimizer -- done
 Motorola 68000 2-4 C libraries -- done
 Motorola 68000 2-4 EM library -- done
 Motorola 68000 2-4 Pascal library -- done
 Motorola 68000 2-4 System library -- done
 Motorola 68000 2-4 Basic library -- done
-Motorola 68000 2-4 support, see mach/m68k2/Out
-NS16032 assembler -- done
-NS16032 support -- done
+Motorola 68000 2-4 Occam library -- done
+Sorry, Motorola 68000 interpreters can only be made on m68* systems
+Motorola 68000 2-4 support -- done
+	.
+	.
+	.
 PDP 11 assembler -- done
 PDP 11 backend -- done
-PDP 11 interpreter -- done
-PDP 11 C libraries -- done
-PDP 11 EM library -- done
-PDP 11 Pascal library -- done
-PDP 11 Basic library -- done
+PDP 11 target optimizer -- done
+Sorry, PDP 11 interpreter can only be made on pdp* systems
+Sorry, PDP 11 C libraries can only be made on pdp* systems
+Sorry, PDP 11 EM library can only be made on pdp* systems
+Sorry, PDP 11 systemcall library can only be made on pdp* systems
+Sorry, PDP 11 Pascal library can only be made on pdp* systems
+Sorry, PDP 11 Basic library can only be made on pdp* systems
+Sorry, PDP 11 Occam library can only be made on pdp* systems
 PDP 11 support -- done
-PMDS download program(s) -- done
-PMDS EM library -- done
-PMDS support -- done
-Signetics 6502 assembler -- done
-Signetics 2650 support -- done
-Vax 2-4 backend -- done
-Sorry, Vax 2-4 Basic library can only be made on vax* systems
-Sorry, Vax 2-4 C libraries can only be made on vax* systems
-Sorry, Vax 2-4 EM library can only be made on vax* systems
-Sorry, Vax 2-4 Pascal library can only be made on vax* systems
-Vax 2-4 support -- done
+	.
+	.
+	.
 Vax 4-4 backend -- done
 Sorry, Vax 4-4 C libraries can only be made on vax* systems
 Sorry, Vax 4-4 EM library can only be made on vax* systems
-Sorry, Vax 4-4 Pascal library can only be made on vax* systems
+Sorry, Vax 4-4 Occam library can only be made on vax* systems
 Sorry, Vax 4-4 Basic library can only be made on vax* systems
-Vax 4-4 support, see mach/vax4/Out
-Z80 assembler -- done
-Z80 support -- done
-Zilog Z8000 assembler -- done
-Zilog Z8000 backend -- done
-Zilog Z8000 C libraries -- done
-Zilog Z8000 EM library -- done
-Zilog Z8000 Pascal library -- done
-Zilog Z8000 Basic library -- done
-Zilog Z8000 support -- done
-Nascon download program(s) -- done
-Nascom support -- done
+Sorry, Vax 4-4 systemcall interface can only be made on vax* systems
+Vax target optimizer -- done
+Vax 4-4 support -- done
+M68020 assembler -- done
+M68020 backend -- done
+M68020 EM library -- done
+M68020 system call library -- done
+M68020 C libraries -- done
+M68020 PC library -- done
+M68020 Basic library -- done
+M68020 Occam library -- done
+Sorry, M68020 VME131 System V/68 R2V2.1 conversion can only be made on m68020 systems
+M68020 System V/68 support -- done
+Ack.out --> Sun 3 M68020 a.out format conversion program -- done
+Sun 3 M68020 systemcall library -- done
+Sun 3 M68020 C libraries -- done
+Sun 3 M68020 support -- done
+Ack.out --> Sun 2 M68000 a.out format conversion program -- done
+Sun 2 M68000 systemcall library -- done
+Sun 2 M68000 C libraries -- done
+Sun 2 M68000 support -- done
+	.
+	.
+	.
 Failed for Pascal frontend, see lang/pc/pem/Out
 .DE
 .PP
@@ -552,14 +623,14 @@ Only the Pascal frontend failed to compile in this example.
 If you want to repeat a certain part of the installation, look in
 the Action file for the directory in which that part is to be found.
 If that directory contains an Action file issue the command
-"sh EMHOME/TakeAction", otherwise type "make install".
+"sh EM_DIR/TakeAction", otherwise type "make install".
 .NH
 Commands
 .PP
 The following commands are available in the bin directory after compilation
-of the kit:
+of the Kit:
 .sp 1
-.IP "\fIack\fP, \fIacc\fP, \fIabc\fP, \fIapc\fP and their links"
+.IP "\fIack\fP, \fIacc\fP, \fIabc\fP, \fIapc\fP, \fIocm\fP and their links"
 .br
 The names mentioned here can be used to compile Pascal, C, etc... programs.
 Most of the links can be used to generate code for a particular
@@ -567,7 +638,10 @@ machine.
 See also the section about "Machines".
 .IP \fIarch\fP
 .br
-The archiver used for the EM- and universal assembler.
+The archiver used for the EM- and universal assembler/loader.
+.IP \fIaal\fP
+.br
+The archiver used for ACK objects.
 .IP \fIem\fP
 .br
 This program selects a interpreter to execute an e.out file.
@@ -587,6 +661,17 @@ not feasible on your system. (Like translating PDP assembly).
 .IP \fImarch\fP
 .br
 A shell script used while compiling libraries.
+.IP "\fIasize\fP, \fIanm\fP, \fIastrip\fP"
+.br
+Do the same as \fIsize\fP, \fInm\fP and \fIstrip\fP, but for ACK object format.
+.IP \fImkdep\fP
+.br
+A dependency generator for makefiles.
+.IP "\fIcid\fP, \fIprid\fP, \fIcclash\fP"
+.br
+Some utilities for handling name clashes in C programs. Some
+systems have C-compilers with only 7 or 8 characters significant in
+identifiers.
 .sp 1
 .LP
 We currently make the Kit available to our users by telling
@@ -625,52 +710,83 @@ command	system	i/p	languages	fp	dir	remarks
 pdp	PDP/UNIX V7	2/2	C	*	pdp	needs sep. I/D
 			Pascal			No assembler
 			Basic
-
-vax2	VAX/BSD 4.?	2/4	C	*	vax2	No assembler
-			Pascal
-			Basic
+			Occam
 
 vax4	VAX/BSD 4.?	4/4	C	*	vax4	No assembler
+	System V.2		Pascal
 			Basic
+			Occam
 
 m68k2	M68000/Unisoft	2/4	C		m68k2
 			Pascal
 			Basic
+			Occam
 
-m68k4	M68000/PMDS	4/4	C		m68k2
-			Basic		m68k4
+m68k4	M68000/Unisoft	4/4	C		m68k4
+			Pascal		m68k2
+			Basic
+			Occam
 
-pmds	M68000/PMDS	2/2	C		pmds	Philips Micro
+pmds	M68000/PMDS	2/4	C		pmds	Philips Micro
 			Pascal		m68k2	Devel. System
 			Basic
+			Occam
 
-i86	Bare 8086	2/2	C		i86	For ISBC 86/12A
-			Pascal
-			Basic
+pmds4	M68000/PMDS	4/4	C		pmds4	Philips Micro
+			Pascal		m68k2	Devel. System
+			Basic		m68k4
+			Occam
 
-ix	IBM PC/IX	2/2	C		ix	IBM PC with PC/IX
-			Pascal		i86	Causes kernel crashes
+mantra	M68000/SysV.0	4/4	C		mantra
+			Pascal		m68k2
+			Basic		m68k4
+			Occam
+
+m68020	M68020/V/68	4/4	C		m68020
+	R2V2.1		Pascal
 			Basic
+			Occam
+
+sun3	SUN 3 R3.2	4/4	C		sun3
+			Pascal		m68020
+			Basic
+			Occam
+
+sun2	SUN 2 ???	4/4	C		sun2
+			Pascal		m68k4
+			Basic		m68k2
+			Occam
+
+i86	IBM PC/IX	2/2	C		i86	IBM PC with PC/IX
+			Pascal			Causes kernel crashes
+			Basic
+			Occam
 
 z8000	Zilog 8000	2/2	C		z8000	Central Data
 			Pascal			CPU board
-			Basic
+			Basic			Uses assembler/loader
+			Occam
 
 int						Same as int22
 int22	EM machine	2/2	C	*	int22	Needs interpreter
 			Pascal
 			Basic
+			Occam
 
 int24	EM machine	2/4	C	*	int24	Needs interpreter
 			Pascal
 			Basic
+			Occam
 
 int44	EM machine	4/4	C	*	int44	Needs interpreter
-			Basic
-
-6500	6502/BBC	2/2	C		6500
 			Pascal
 			Basic
+			Occam
+
+6500	6502/BBC	2/2	C		6500	Uses assembler/loader
+			Pascal
+			Basic
+			Occam
 
 6800	Bare 6800				6800	Assembler only
 
@@ -678,15 +794,20 @@ int44	EM machine	4/4	C	*	int44	Needs interpreter
 
 6809	Bare 6809				6809	Assembler only
 
-ns	Bare NS16032				ns	Assembler only
+ns	Bare NS16032	4/4	C		ns
+			Pascal
+			Basic
+			Occam
 
 i80	Hermac/z80	2/2	C		i80
 			Pascal
 			Basic
+			Occam
 
 z80	Hermac/z80	2/2	C		z80	\fIi80\fP is faster
 			Pascal
 			Basic
+			Occam
 
 s2650	Signetics 2650				s2650	Assembler only
 .TE
@@ -712,15 +833,8 @@ for C and Basic programs on any UNIX machine.
 The presence of most UNIX utilities is essential for compilation.
 A few of the programs you certainly need are: C-compiler, Yacc, sed,
 make and lex.
-Except the Pascal compiler proper all programs 
+Except for the Pascal compiler proper all programs 
 can be translated on a normal UNIX system, like V7, BSD4.1.
-.PP
-We know there are certain problems with System V.
-Some of the character/string routines are named differently,
-ctype(3) seems to have a different naming scheme.
-The most annoying thing is that in printf format strings the
-role of the format %03x is taken by something like %.3x.
-Several programs suffer from this format change.
 .NH 2
 Backend
 .PP
@@ -737,63 +851,41 @@ Pascal
 When you can produce executable code it is also possible to boot the Pascal
 Compiler,
 which is written in Pascal itself.
-The Kit contains the compact code files for the 2/2 and 2/4
+The Kit contains the compact code files for the 2/2, 4/4 and 2/4
 versions of the Pascal compiler.
-The current version of this compiler can only be used on machines
-with a 16-bit word size and 16- or 32-bit pointers.
 The Makefile automatically tries to boot the Pascal compiler
 from one of these compact code files, if the compiler proves
 unable to compile itself.
 .NH 2
-Universal assembler
+Universal assembler/loader, link editor
 .PP
 The native assemblers and loaders are used on PDP-11 and VAX.
 The description files in lib/*/descr for other systems use our
-universal assembler.
-The load file produced by this assembler is not directly
+universal assembler and for most machines our link editor.
+The load file produced is not directly
 usable in any system known to us,
 but has to be converted before it can be put to use.
 The \fIcv\fP programs convert our a.out format into
 executable files.
 The \fIdl\fP programs present for some machines unravel
-these our a.out files and transmit commands to load memory
+our a.out files and transmit commands to load memory
 to a microprocessor over a serial line.
-The file man/a.out.5 contains a description of the format of
-the universal assembler load file,
-it might be useful to those who wish or need to write their
+The file man/ack.out.5 contains a description of the format of
+the universal assembler load file.
+It might be useful to those who wish or need to write their
 own conversion programs.
-.LP
-One warning has to be issued here.
-The universal assembler a.out files contain integers and/or
-longs with the bytes in the order your own system uses.
-Copying these files to machines with a different byte order
-will not always produce the desired results.
+Also, a module is included to read and write our a.out format.
+See modules/man/object.3.
 .NH 2
 Compiling libraries
 .PP
-The Kit contains sources for part II and III of the C-library,
-they have been grabbed from our V7 system and sometimes
-altered in a EM dependent way or replaced altogether when the original
-was in assembly.
+The Kit contains sources for part II and III of the C-library.
 These files can be used to make libraries for the Ack C-compiler.
 The recompilation process uses a few include files.
-The include directory in the EM home directory contains a few more
-or less system independent include files.
-Some backends, like the vax2 backend also need a few include files
-of their own, replacing ones in /usr/include.
-The include files are sought in lib/*/include.
-The system dependent include files are fetched from /usr/include
-on the system you use to recompile.
-This may lead to several problems.
-Sometimes the system differs so much from V7 that certain manifest constants
-do not exist any more.
-At other times these include files were written for a compiler without
-a restriction on name length.
-In that case \- I've seen it happen \- people tend to use differing
-identifiers that are identical in the first eight characters.
-All these problems you have to solve yourself,
-the libraries are only included as an extra and too much system
-dependent to give any guarantees.
+The include directory in the EM home directory contains the include files
+it needs.
+An effort has been made to make the part III stuff as system independent as
+possible.
 .NH
 Options
 .NH 2
@@ -801,10 +893,10 @@ Default machine
 .PP
 There is one important option in h/local.h.
 The utility \fIack\fP uses a default machine name when called
-as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP or \fIack\fP.
+as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP, \fIocm\fP, or \fIack\fP.
 The machine name used for default is determined by the
 definition of ACKM in h/local.h.
-The Kit is distributed with "pdp" as the default machine,
+The Kit is distributed with "vax4" as the default machine,
 but the shell script "first" in the directory "first" alters this
 to suit your own system.
 There is nothing against using the Kit as a cross-compiler
@@ -819,7 +911,7 @@ needs.
 Pathnames
 .PP
 Absolute pathnames are concentrated in "h/em_path.h".
-Only the Pascal runtime system and the utility \fIack\fP use
+Only the Pascal runtime system and the utilities \fIack\fP and \fILLgen\fP use
 absolute pathnames to access files in the Kit.
 The tree is distributed with /usr/em as the working
 directory.
@@ -889,9 +981,10 @@ to the bin and lib directories.
 Fixes for the UNIX V7 system
 .PP
 UNIX System V7 has a few bugs that prevent a part of or the whole Kit
-from working properly.
+from working properly. Berkeley 2.8 and/or 2.9 may also suffer from this
+problem.
 To be honest, we do not know which of the following changes are
-essential to the functioning of our Kit.
+essential to the functioning of our Kit. The change to "ld" is.
 .PP
 The file "doc/v7bugs.doc" gives for each of the following bugs
 a small test program and a diff listing of the source files that have to be
@@ -961,7 +1054,7 @@ process.
 The differences will be presented on standard output.
 The contents of the result files depend on the wordsize,
 the xx.cem.g files on the distribution are intended for a
-16-bit machine.
+32-bit machine.
 .IP Basic
 .br
 The directory lang/basic/test contains some forty basic programs.
@@ -973,7 +1066,7 @@ If it compiles its output is compared to a file with suffix .g
 which contains the output to be expected.
 The make should be started with its standard input diverted
 to /dev/null.
-An example of the output od a make is present in the file Out.std.
+An example of the output of a make is present in the file Out.std.
 .NH
 Documentation
 .PP
@@ -984,18 +1077,19 @@ following commands:
 cd man
 make install
 .DE
+but do this \fBafter\fR compiling the Kit.
 .LP
 Several documents are provided:
 .TS
 l l.
-doc/toolkit.doc	general overview
-doc/em.doc	description of the EM machine architecture
+doc/toolkit.doc	general overview (CACM article)
+doc/em	description of the EM machine architecture
 doc/ack.doc	format of machine description files (lib/*/descr)
 doc/basic.doc	Basic reference manual
 doc/pcref.doc	Pascal-frontend reference manual
 doc/val.doc	results of running the Pascal Validation Suite
-doc/cref.doc	C-frontend manual
-doc/LLgen.doc	description of the LL(1) parser generator.
+doc/crefman.doc	C-frontend description
+doc/LLgen	description of the LL(1) parser generator.
 doc/peep.doc	internal documentation for the peephole optimizer
 doc/cg.doc	documentation for backend writers and maintainers
 doc/regadd.doc	addendum to previous document describing register variables
@@ -1004,8 +1098,15 @@ doc/v7bugs.doc	bugs in the V7 system and how to fix them
 doc/6500.doc	MSC 6500 backend description.
 doc/i80.doc	Intel 8080 backend description.
 doc/z80.doc	Zilog Z80 backend description.
+doc/m68020.doc	Motorola M68000/M68020 backend description
+doc/occam	Occam-frontend description
+doc/ego	Global Optimizer description
+doc/top	Target Optimizer description
 doc/install.doc	this document
 doc/install.pr	this document (formatted)
 .TE
+.PP
+The names in this list without a suffix are in fact a subdirectory.
+Use the Makefile to get readable copies.
 .LP
 Good luck.
