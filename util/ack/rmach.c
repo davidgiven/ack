@@ -102,6 +102,21 @@ setlist(name) char *name ; {
 #endif
 }
 
+static int inoptlist(nm)
+	char *nm ;
+{
+	register char *p=Optlist ;
+
+	while ( p && *p ) {
+		register char *q=nm ;
+
+		while ( *q!='\0' && *q++==*p ) p++ ;
+		if ( *q=='\0' && ( *p=='\0' || *p==',' ) ) return 1 ;
+		while ( *p!='\0' && *p++!=',' ) /* nothing */ ;
+	}
+	return 0;
+}
+
 intrf() {
 	register trf *new ;
 	register char *ptr ;
@@ -266,6 +281,10 @@ intrf() {
 		if ( new->t_needed ) vprint("\tneeded: %s\n",new->t_needed) ;
 	}
 #endif
+	if ( new->t_optim && inoptlist(new->t_name) ) {
+		new->t_priority++ ;
+		if ( new->t_priority < 0 ) new->t_priority=0 ;
+	}
 	l_add(&tr_list,(char *)new) ;
 }
 
