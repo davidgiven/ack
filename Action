@@ -4,9 +4,9 @@ action did_first
 failure "You have to run the shell script first in the directory first"
 fatal
 end
-name	"EM definition"
-dir etc
-end
+! name	"EM definition"
+! dir etc
+! end
 name "EM definition library"
 dir util/data
 end
@@ -70,6 +70,15 @@ dir util/topgen
 end
 name "C frontend"
 dir lang/cem/cemcom
+end
+name "ANSI-C frontend"
+dir lang/cem/cemcom.ansi
+end
+name "ANSI-C preprocessor"
+dir lang/cem/cpp.ansi
+end
+name "ANSI-C header files"
+dir lang/cem/libcc.ansi
 end
 name "Basic frontend"
 dir lang/basic/src
