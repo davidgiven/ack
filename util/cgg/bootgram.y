@@ -22,11 +22,9 @@ static char rcsid[]="$Header$";
  * Author: Hans van Staveren
  */
 
-#ifdef vax | vax2 | vax4
-#define BIG
-#endif
+#include <local.h>
 
-#ifdef BIG
+#if BIGMACHINE
 #define BORS(x,y) x
 #else
 #define BORS(x,y) y
