@@ -13,15 +13,15 @@ end
 name "EM definition library"
 dir util/data
 end
+name "C utilities"
+dir util/cmisc
+end
 name "Modules"
 dir modules/src
 indir
 end
 name "C preprocessor"
 dir util/cpp
-end
-name "C utilities"
-dir util/cmisc
 end
 name "ACK object utilities"
 dir util/amisc
