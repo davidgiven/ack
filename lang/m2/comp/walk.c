@@ -280,7 +280,15 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	TmpOpen(procscope);
-	C_insertpart(partno2);
+	C_insertpart(partno2);	/* procedure header */
+	/* generate code for filename only when the procedure can be
+	   exported, either directly or by taking the address.
+	   This cannot be done if the level is bigger than one (because in
+	   this case it is a nested procedure).
+	*/
+	DoFilename(procscope->sc_level == 1);
+	DoPriority();
+
 	C_insertpart(partno);
 
 	text_label = 1;		/* label at end of procedure */
@@ -288,13 +296,6 @@ WalkProcedure(procedure)
 	end_reached = WalkNode(procedure->prc_body, NO_EXIT_LABEL, REACH_FLAG);
 
 	C_beginpart(partno);
-	DoPriority();
-	/* generate code for filename only when the procedure can be
-	   exported, either directly or by taking the address.
-	   This cannot be done if the level is bigger than one (because in
-	   this case it is a nested procedure).
-	*/
-	DoFilename(procscope->sc_level == 1);
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
