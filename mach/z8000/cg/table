@@ -1819,7 +1819,7 @@ STACKS:
 		"push *RR14, %[a]"
 		"clrb *RR14"
 		samecc,		(4,17)		)
-(src1,,		".data\n1:\t.word 0\n.text"
+(src1,,		".sect data\n1:\t.data2 0\n.text"
 		"ld 1b, R0"
 		"ldk R0, $$0"
 		"ldb RL0, %[1]"
@@ -1834,7 +1834,7 @@ STACKS:
 (im4,,		"push *RR14, %[1]"
 		"push *RR14, $$0"
 		samecc,		(8,24)	)  /* there is no pushl ir,im */
-(double,,	".data\n1:\t.long %[1]\n.text"
+(double,,	".sect .data\n1:\t.data4 %[1]\n.text"
 		"pushl *RR14, 1b"
 		samecc,		(6,20)		)
 (src4,,		"pushl *RR14, %[1]"
