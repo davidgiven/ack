@@ -1,15 +1,11 @@
 AMAKELIB = { . , /usr/local/lib/amake } ;
 
+%include std-amake.amk ;
 %include ack-defs.amk ;
-%include common.amk ;
 %include cc_hh_tools.amk ;
 %include tok_tools.amk ;
 %include op_tools.amk ;
 %include char_tools.amk ;
-%include LLgen.amk ;
-%include cc-c.amk ;
-%include loader.amk ;
-%include lint.amk ;
 
 %default grind ;
 
@@ -20,9 +16,9 @@ TOKENNAMES = tokenname.c [
 ];
 
 DBS_LLTARGETS = {
-	db_symtab.c[type=C-src],
-	DBSpars.c[type=C-src],
-	DBSpars.h[type=C-incl]
+	db_symtab.c,
+	DBSpars.c,
+	DBSpars.h
 } ;
 
 DBS_LLSRC = {
@@ -30,10 +26,10 @@ DBS_LLSRC = {
 } ;
 
 CMD_LLTARGETS = {
-	tokenfile.c[type=C-src],
-	commands.c[type=C-src],
-	Lpars.c[type=C-src],
-	Lpars.h[type=C-incl]
+	tokenfile.c,
+	commands.c,
+	Lpars.c,
+	Lpars.h
 } ;
 
 CMD_LLSRC = {
@@ -42,8 +38,8 @@ CMD_LLSRC = {
 } ;
 
 GENNEXTSRC = {
-	file.h[type=C-incl],
-	next.c[type=C-src]
+	file.h,
+	next.c
 } ;
 
 CSRC = {
