@@ -279,14 +279,14 @@ end_proc(fbytes)
 		DfaEndFunction();
 #endif	DATAFLOW
 	C_df_ilb(return2_label);
-	if (return_expr_occurred) C_asp(-func_size);
+	if (return_expr_occurred && func_res_label == 0) {
+			C_asp(-func_size);
+	}
 	C_df_ilb(return_label);
 	prc_exit();
 #ifndef	LINT
 	if (return_expr_occurred) {
 		if (func_res_label != 0)	{
-			C_lae_dlb(func_res_label, (arith)0);
-			store_block(func_size, func_type->tp_align);
 			C_lae_dlb(func_res_label, (arith)0);
 			C_ret(pointer_size);
 		}
@@ -347,6 +347,10 @@ do_return_expr(expr)
 	*/
 	ch3cast(&expr, RETURN, func_type);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	if (func_res_label != 0) {
+		C_lae_dlb(func_res_label, (arith)0);
+		store_block(func_size, func_type->tp_align);
+	}
 	C_bra(return_label);
 	return_expr_occurred = 1;
 }

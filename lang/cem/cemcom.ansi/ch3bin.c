@@ -27,8 +27,13 @@ extern char *symbol2str();
 	depending on the constancy of the operands.
 */
 
-#define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
+/*
+ * Although the relational operators are generally not commutative, we can
+ * switch the arguments if the operator is adapted (e.g. < becomes >)
+ */
 #define non_commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 0)
+#define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
+#define non_commutative_relop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 
 ch3bin(expp, oper, expr)
 	register struct expr **expp;
@@ -182,7 +187,7 @@ ch3bin(expp, oper, expr)
 	case EQUAL:
 	case NOTEQUAL:
 		relbalance(expp, oper, &expr);
-		non_commutative_binop(expp, oper, expr);
+		non_commutative_relop(expp, oper, expr);
 		(*expp)->ex_type = int_type;
 		break;
 
@@ -301,6 +306,23 @@ pntminuspnt(expp, oper, expr)
 	if (int_size != pointer_size) (*expp)->ex_flags |= EX_PTRDIFF;
 }
 
+/*
+ * The function arg_switched() returns the operator that should be used
+ * when the arguments are switched.  This is special for some relational
+ * operators.
+ */
+int
+arg_switched(oper)
+{
+	switch (oper) {
+	case '<':	return '>';
+	case '>':	return '<';
+	case LESSEQ:	return GREATEREQ;
+	case GREATEREQ:	return LESSEQ;
+	default:	return oper;
+	}
+}
+
 mk_binop(expp, oper, expr, commutative)
 	struct expr **expp;
 	register struct expr *expr;
@@ -315,14 +337,13 @@ mk_binop(expp, oper, expr, commutative)
 		cstbin(expp, oper, expr);
 	else if (is_fp_cst(expr) && is_fp_cst(ex))
 		fltcstbin(expp, oper, expr);
-	else	{
-		*expp = (commutative &&
-			  ! (ex->ex_flags & EX_VOLATILE) &&
-			  ( expr->ex_depth > ex->ex_depth ||
-			    (expr->ex_flags & EX_SIDEEFFECTS) ||
-			    is_cp_cst(ex)))
-			    ? new_oper(ex->ex_type, expr, oper, ex)
-			    : new_oper(ex->ex_type, ex, oper, expr);
+	else {
+		*expp = (commutative
+			&& !(ex->ex_flags & EX_VOLATILE)
+			&& ( expr->ex_depth > ex->ex_depth
+			    || is_cp_cst(ex)))
+			? new_oper(ex->ex_type, expr, arg_switched(oper), ex)
+			: new_oper(ex->ex_type, ex, oper, expr);
 	}
 }
 

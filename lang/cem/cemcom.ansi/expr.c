@@ -383,6 +383,13 @@ new_oper(tp, e1, oper, e2)
 		expr->ex_flags = (e1_flags | e2->ex_flags)
 			& ~(EX_PARENS | EX_READONLY | EX_VOLATILE );
 	}
+	/*
+	 * A function call should be evaluated first when possible.  Just say
+	 * that the expression tree is very deep.
+	 */
+	if (oper == '(') {
+		expr->ex_depth = 50;
+	}
 	op = &expr->ex_object.ex_oper;
 	op->op_type = tp;
 	op->op_oper = oper;

@@ -67,13 +67,13 @@ declaration
 		short typedef yepp;
 	makes all hope of writing a specific grammar for typedefs illusory.
 */
-/*	Accept a single declaration specifier.  Then accept zero or more
-	type-specifiers.  There can be a conflict on both TYPE_IDENTIFIER
-	and IDENTIFIER.
+/*      Accept a single declaration specifier.  Then accept zero or more
+	declaration specifiers.  There can be a conflict on both
+	TYPE_IDENTIFIER and IDENTIFIER.
 	The following rule is used:
-	When we see a TYPE_IDENTIFIER, we accept it if no type-specifier
-	was given, and it is not directly followed by an identifier.
-	If no type-dpecifier was given, it is taken as the identifier being
+	When we see a TYPE_IDENTIFIER, we accept it if no type-specifier was
+	given, and it is not directly followed by an identifier.  If a
+	type-specifier was given, it is taken as the identifier being
 	declared.  If it is followed by an identifier, we assume that an
 	error has been  made, (e.g. unsigned typedeffed_int x;) and that
 	this will be detected later on.
