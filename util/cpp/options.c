@@ -28,7 +28,6 @@ do_option(text)
 {
 	switch(*text++)	{
 	case '-':
-	case 'x':
 		options[*text] = 1;
 		break;
 	case 'u':
@@ -54,6 +53,11 @@ do_option(text)
 			do_preprocess = 0;
 		}
 		break;
+	case 'm':
+	case 'i':
+		options[*(text-1)] = 1;
+		break;
+
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
 		register char *cp = text, *name, *mactext;

@@ -140,7 +140,7 @@ add_dependency(s)
 dependency(s, source)
 	char *s, *source;
 {
-	if (options['s'] && !strncmp(s, "/usr/include/", 13)) {
+	if (options['i'] && !strncmp(s, "/usr/include/", 13)) {
 		return;
 	}
 	if (options['m'] && source) {
