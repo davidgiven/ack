@@ -62,11 +62,9 @@ MkCoercion(pnd, tp)
 	if (nd_tp == tp) return;
 	if (nd_tp->tp_fund == T_STRING) return;
 	nd_tp = BaseType(nd_tp);
-	if (nd->nd_class == Value) {
-		if (nd_tp->tp_fund == T_REAL && tp->tp_fund != T_REAL) goto Out;
+	if (nd->nd_class == Value &&
+	    (nd_tp->tp_fund != T_REAL && tp->tp_fund != REAL)) {
 		switch(tp->tp_fund) {
-		case T_REAL:
-			break;
 		case T_SUBRANGE:
 			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
 				BaseType(tp)->tp_fund) ||
@@ -118,7 +116,6 @@ MkCoercion(pnd, tp)
 			return;
 		}
 	}
-Out:
 	*pnd = nd = MkNode(Uoper, NULLNODE, nd, &(nd->nd_token));
 	nd->nd_symb = COERCION;
 	nd->nd_type = tp;
