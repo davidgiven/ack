@@ -26,18 +26,18 @@ ucon	252
 fcon	253
 cend	255
 
-bss	0
-con	1
-end	2
-exa	3
-exc	4
-exp	5
-hol	6
-ina	7
-inp	8
-mes	9
-pro	10
-rom	11
+bss	0	nvt
+con	1	a+
+end	2	n?
+exa	3	e
+exc	4	nn
+exp	5	p
+hol	6	nvt
+ina	7	e
+inp	8	p
+mes	9	na*
+pro	10	pn?
+rom	11	a+
 
 aar	w-	-p-a-p+p
 adf	w-	-a-a+a
