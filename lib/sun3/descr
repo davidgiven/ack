@@ -5,6 +5,7 @@ var s=2
 var l=4
 var f=4
 var d=8
+var CC_ALIGN=-Vw{w}.{s}i{w}.{s}p{p}.{s}s{s}.{s}l{l}.{s}f{f}.{w}d{d}.{w}S{s}U{s}
 var NAME=sun
 var M=m68020
 var P=sun3
