@@ -67,10 +67,10 @@ malloc(n)
 		assert(n1 < (1 << LOG_MAX_SIZE));
 		min_class = 0;
 
-		while (n1 >= MIN_SIZE) {
+		do {
 			n1 >>= 1;
 			min_class++;
-		}
+		} while (n1 >= MIN_SIZE);
 	}
 
 	if (min_class >= MAX_FLIST)
@@ -81,7 +81,8 @@ malloc(n)
 		register char *p;
 #define	GRABSIZE	4096		/* Power of 2 */
 		register unsigned int req =
-			(n+mallink_size()+GRABSIZE-1)&~(GRABSIZE-1);
+			((MIN_SIZE<<min_class)+ mallink_size() + GRABSIZE - 1) &
+				~(GRABSIZE-1);
 	
 		if (!ml_last)	{
 			/* first align SBRK() */
