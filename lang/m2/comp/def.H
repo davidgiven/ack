@@ -113,6 +113,8 @@ struct def	{		/* list of definitions for a name */
 	} df_value;
 };
 
+#define SetUsed(df)	((df)->df_flags |= D_USED)
+
 /* ALLOCDEF "def" */
 
 extern struct def

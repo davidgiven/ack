@@ -15,6 +15,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"type.h"
 
 struct def *
 lookup(id, scope)
@@ -73,5 +74,7 @@ lookfor(id, vis, give_error)
 
 	if (give_error) id_not_declared(id);
 
-	return MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
+	df = MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
+	df->df_type = error_type;
+	return df;
 }

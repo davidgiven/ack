@@ -172,6 +172,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	static struct paramlist *last;
 
 	if (! idlist) {
+		/* Can only happen when a procedure type is defined */
 		dummy = Idlist = idlist = MkLeaf(Name, &dot);
 	}
 	for ( ; idlist; idlist = idlist->next) {
@@ -182,7 +183,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		}
 		else	last->next = pr;
 		last = pr;
-		if (idlist != dummy) {
+		if (!DefinitionModule && idlist != dummy) {
 			df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 			df->var_off = *off;
 		}
@@ -222,22 +223,20 @@ DoImport(df, scope)
 	if (df->df_kind == D_TYPE && df->df_type->tp_fund == T_ENUMERATION) {
 		/* Also import all enumeration literals
 		*/
-		df = df->df_type->enm_enums;
-		while (df) {
+		for (df = df->df_type->enm_enums; df; df = df->enm_next) {
 			define(df->df_idf, scope, D_IMPORT)->imp_def = df;
-			df = df->enm_next;
 		}
 	}
 	else if (df->df_kind == D_MODULE) {
 		/* Also import all definitions that are exported from this
 		   module
 		*/
-		df = df->mod_vis->sc_scope->sc_def;
-		while (df) {
+		for (df = df->mod_vis->sc_scope->sc_def;
+		     df;
+		     df = df->df_nextinscope) {
 			if (df->df_flags & D_EXPORTED) {
 				define(df->df_idf,scope,D_IMPORT)->imp_def = df;
 			}
-			df = df->df_nextinscope;
 		}
 	}
 }
@@ -337,16 +336,20 @@ idlist->nd_IDF->id_text);
 				   scope. There are two legal possibilities,
 				   which are examined below.
 				*/
-				if ((df1->df_kind == D_PROCHEAD &&
-				     df->df_kind == D_PROCEDURE) ||
-				    (df1->df_kind == D_HIDDEN &&
-				     df->df_kind == D_TYPE)) {
-					if (df->df_kind == D_TYPE &&
-					    df->df_type->tp_fund != T_POINTER) {
-node_error(idlist, "opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
-					}
+				if (df1->df_kind == D_PROCHEAD &&
+				     df->df_kind == D_PROCEDURE) {
 					df1->df_kind = D_IMPORT;
 					df1->imp_def = df;
+					continue;
+				}
+				if (df1->df_kind == D_HIDDEN &&
+				    df->df_kind == D_TYPE) {
+					if (df->df_type->tp_fund != T_POINTER) {
+node_error(idlist, "opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+					}
+					assert(df1->df_type->next == NULLTYPE);
+					df1->df_kind = D_TYPE;
+					df1->df_type->next = df->df_type;
 					continue;
 				}
 			}

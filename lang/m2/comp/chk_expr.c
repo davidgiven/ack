@@ -64,7 +64,7 @@ ChkArrow(expp)
 		return 0;
 	}
 
-	expp->nd_type = PointedtoType(tp);
+	expp->nd_type = RemoveEqual(PointedtoType(tp));
 	return 1;
 }
 
@@ -106,7 +106,7 @@ ChkArr(expp)
 		return 0;
 	}
 
-	expp->nd_type = tpl->arr_elem;
+	expp->nd_type = RemoveEqual(tpl->arr_elem);
 	return 1;
 }
 
@@ -137,7 +137,7 @@ ChkLinkOrName(expp)
 	if (expp->nd_class == Name) {
 		expp->nd_def = lookfor(expp, CurrVis, 1);
 		expp->nd_class = Def;
-		expp->nd_type = expp->nd_def->df_type;
+		expp->nd_type = RemoveEqual(expp->nd_def->df_type);
 	}
 	else if (expp->nd_class == Link) {
 		register struct node *left = expp->nd_left;
@@ -161,7 +161,7 @@ ChkLinkOrName(expp)
 		}
 		else {
 			expp->nd_def = df;
-			expp->nd_type = df->df_type;
+			expp->nd_type = RemoveEqual(df->df_type);
 			expp->nd_class = LinkDef;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 				/* Fields of a record are always D_QEXPORTED,
@@ -418,19 +418,17 @@ getarg(argp, bases, designator)
 		variable.
 	*/
 	struct type *tp;
-	register struct node *arg = *argp;
+	register struct node *arg = (*argp)->nd_right;
 	register struct node *left;
 
-	if (! arg->nd_right) {
-		node_error(arg, "too few arguments supplied");
+	if (! arg) {
+		node_error(*argp, "too few arguments supplied");
 		return 0;
 	}
 
-	arg = arg->nd_right;
 	left = arg->nd_left;
 
-	if ((!designator && !ChkExpression(left)) ||
-	    (designator && !ChkVariable(left))) {
+	if (designator ? !ChkVariable(left) : !ChkExpression(left)) {
 		return 0;
 	}
 
@@ -438,11 +436,12 @@ getarg(argp, bases, designator)
 		left->nd_def->df_flags |= D_NOREG;
 	}
 
-	tp = BaseType(left->nd_type);
-
-	if (bases && !(tp->tp_fund & bases)) {
-		node_error(arg, "unexpected type");
-		return 0;
+	if (bases) {
+		tp = BaseType(left->nd_type);
+		if (!(tp->tp_fund & bases)) {
+			node_error(arg, "unexpected type");
+			return 0;
+		}
 	}
 
 	*argp = arg;
@@ -489,14 +488,14 @@ ChkProcCall(expp)
 
 	left = expp->nd_left;
 	arg = expp;
-	expp->nd_type = ResultType(left->nd_type);
+	expp->nd_type = RemoveEqual(ResultType(left->nd_type));
 
 	for (param = ParamList(left->nd_type); param; param = param->next) {
 		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
-		if (! TstParCompat(TypeOfParam(param),
+		if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
 				   left->nd_type,
 				   IsVarParam(param),
 				   left)) {
@@ -689,15 +688,29 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 	}
 
 	allowed = AllowedTypes(expp->nd_symb);
-	if (!(tpl->tp_fund & allowed) || 
-	    (tpl != bool_type && Boolean(expp->nd_symb))) {
-		if (!(tpl->tp_fund == T_POINTER &&
-		      (T_CARDINAL & allowed) &&
-		      ChkAddress(tpl, tpr))) {
+
+	/* Check that the application of the operator is allowed on the type
+	   of the operands.
+	   There are two tricky parts:
+	   - Boolean operators are only allowed on boolean operands, but
+	     the "allowed-mask" of "AllowedTypes" can only indicate
+	     an enumeration type.
+	   - All operations that are allowed on CARDINALS are also allowed
+	     on ADDRESS.
+	*/
+	if (Boolean(expp->nd_symb) && tpl != bool_type) {
+node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+	    
+		return 0;
+	}
+	if (!(tpl->tp_fund & allowed)) {
+	    	if (!(tpl->tp_fund == T_POINTER &&
+	      	     (T_CARDINAL & allowed) &&
+	             ChkAddress(tpl, tpr))) {
 node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
 			return 0;
 		}
-		expp->nd_type = card_type;
+		if (expp->nd_type == card_type) expp->nd_type = address_type;
 	}
 
 	if (tpl->tp_fund == T_SET) {
@@ -1058,6 +1071,9 @@ TryToString(nd, tp)
 {
 	/*	Try a coercion from character constant to string.
 	*/
+
+	assert(nd->nd_symb == STRING);
+
 	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
 		int ch = nd->nd_INT;
 

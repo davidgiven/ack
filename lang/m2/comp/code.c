@@ -55,7 +55,7 @@ CodeString(nd)
 {
 	label lab;
 
-	if (nd->nd_type == char_type) {
+	if (nd->nd_type->tp_fund != T_STRING) {
 		C_loc(nd->nd_INT);
 	}
 	else {
@@ -237,6 +237,7 @@ CodeCoercion(t1, t2)
 		case T_CHAR:
 		case T_CARDINAL:
 		case T_POINTER:
+		case T_EQUAL:
 		case T_INTORCARD:
 			if (t2->tp_size > word_size) {
 				C_loc(word_size);
@@ -353,7 +354,7 @@ CodeParameters(param, arg)
 	register struct type *tp;
 	register struct node *left;
 	register struct type *left_type;
-	
+
 	assert(param != 0 && arg != 0);
 
 	if (param->next) {
@@ -406,7 +407,7 @@ CodeParameters(param, arg)
 			CodePadString(left, tp->tp_size);
 		}
 		else CodePExpr(left);
-		CheckAssign(left_type, tp);
+		RangeCheck(left_type, tp);
 	}
 }
 
@@ -451,7 +452,7 @@ CodeStd(nd)
 
 	case S_CHR:
 		CodePExpr(left);
-		CheckAssign(char_type, tp);
+		RangeCheck(char_type, tp);
 		break;
 
 	case S_FLOAT:
@@ -489,7 +490,7 @@ CodeStd(nd)
 
 	case S_VAL:
 		CodePExpr(left);
-		CheckAssign(nd->nd_type, tp);
+		RangeCheck(nd->nd_type, tp);
 		break;
 
 	case S_ADR:
@@ -510,7 +511,7 @@ CodeStd(nd)
 				if (tp->tp_fund == T_INTEGER) C_adi(word_size);
 				else	C_adu(word_size);
 			}
-			CheckAssign(tp, int_type);
+			RangeCheck(tp, int_type);
 		}
 		else {
 			CodeCoercion(int_type, tp);
@@ -576,7 +577,7 @@ CodeAssign(nd, dss, dst)
 	C_blm(nd->nd_left->nd_type->tp_size);
 }
 
-CheckAssign(tpl, tpr)
+RangeCheck(tpl, tpr)
 	register struct type *tpl, *tpr;
 {
 	/*	Generate a range check if neccessary
@@ -634,6 +635,7 @@ CodeOper(expr, true_label, false_label)
 			C_adf(tp->tp_size);
 			break;
 		case T_POINTER:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_adu(tp->tp_size);
@@ -655,6 +657,7 @@ CodeOper(expr, true_label, false_label)
 			C_sbf(tp->tp_size);
 			break;
 		case T_POINTER:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_sbu(tp->tp_size);
@@ -674,6 +677,7 @@ CodeOper(expr, true_label, false_label)
 			C_mli(tp->tp_size);
 			break;
 		case T_POINTER:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_mlu(tp->tp_size);
@@ -708,6 +712,7 @@ CodeOper(expr, true_label, false_label)
 			C_dvi(tp->tp_size);
 			break;
 		case T_POINTER:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_dvu(tp->tp_size);
@@ -723,6 +728,7 @@ CodeOper(expr, true_label, false_label)
 			C_rmi(tp->tp_size);
 			break;
 		case T_POINTER:
+		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_rmu(tp->tp_size);
@@ -744,8 +750,9 @@ CodeOper(expr, true_label, false_label)
 		case T_INTEGER:
 			C_cmi(tp->tp_size);
 			break;
-		case T_HIDDEN:
 		case T_POINTER:
+		case T_EQUAL:
+		case T_HIDDEN:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_cmu(tp->tp_size);

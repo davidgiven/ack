@@ -31,7 +31,7 @@ int		return_occurred;	/* set if a return occurred in a
 ProcedureDeclaration
 {
 	register struct def *df;
-	struct def *df1;
+	struct def *df1;		/* only exists because &df is illegal */
 } :
 			{ ++proclevel;
 			  return_occurred = 0;
@@ -53,9 +53,10 @@ error("function procedure %s does not return a value", df->df_idf->id_text);
 ProcedureHeading(struct def **pdf; int type;)
 {
 	struct paramlist *params = 0;
-	struct type *tp = 0;
+	register struct type *tp;
+	struct type *tp1 = 0;
 	register struct def *df;
-	arith NBytesParams;
+	arith NBytesParams;		/* parameter offset counter */
 } :
 	PROCEDURE IDENT
 		{ df = DeclProc(type);
@@ -64,8 +65,8 @@ ProcedureHeading(struct def **pdf; int type;)
 		  }
 		  else	NBytesParams = 0;
 		}
-	FormalParameters(&params, &tp, &NBytesParams)?
-		{ tp = construct_type(T_PROCEDURE, tp);
+	FormalParameters(&params, &tp1, &NBytesParams)?
+		{ tp = construct_type(T_PROCEDURE, tp1);
 		  tp->prc_params = params;
 		  tp->prc_nbpar = NBytesParams;
 		  if (df->df_type) {
@@ -151,7 +152,7 @@ TypeDeclaration
 	struct def *df;
 	struct type *tp;
 }:
-	IDENT		{ df = define(dot.TOK_IDF,CurrentScope,D_TYPE); }
+	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	'=' type(&tp)
 			{ DeclareType(df, tp); }
 ;
@@ -398,9 +399,7 @@ node_error(nd1,"type incompatibility in case label");
 				}
 ;
 
-SetType(struct type **ptp;)
-{
-} :
+SetType(struct type **ptp;) :
 	SET OF SimpleType(ptp)
 			{ *ptp = set_type(*ptp); }
 ;
@@ -411,7 +410,6 @@ SetType(struct type **ptp;)
 */
 PointerType(struct type **ptp;)
 {
-	register struct def *df;
 	register struct node *nd;
 } :
 	POINTER TO
@@ -422,10 +420,9 @@ PointerType(struct type **ptp;)
 		*/
 		qualtype(&((*ptp)->next))
 	| %if ( nd = new_node(), nd->nd_token = dot,
-		df = lookfor(nd, CurrVis, 0),
-	        df->df_kind == D_MODULE)
+		lookfor(nd, CurrVis, 0)->df_kind == D_MODULE)
+			{ if (dot.tk_symb == IDENT) free_node(nd); }
 		type(&((*ptp)->next)) 
-			{ free_node(nd); }
 	|
 		IDENT	{ Forward(nd, (*ptp)); }
 	]
@@ -436,11 +433,10 @@ qualtype(struct type **ptp;)
 	struct def *df;
 } :
 	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
-		{ if (!df->df_type) {
+		{ if (!(*ptp = df->df_type)) {
 			error("type \"%s\" not declared", df->df_idf->id_text);
 			*ptp = error_type;
 		  }
-		  else	*ptp = df->df_type;
 		}
 ;
 

@@ -11,7 +11,7 @@ INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
 LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
 LLGENOPTIONS =
-PROFILE = 
+PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 LFLAGS = $(PROFILE)
@@ -52,13 +52,13 @@ lint:	Cfiles
 	@rm -f nmclash.o a.out
 
 mkdep:	mkdep.o
-	$(CC) -o mkdep mkdep.o
+	$(CC) $(LFLAGS) -o mkdep mkdep.o
 
 cclash:	cclash.o
-	$(CC) -o cclash cclash.o
+	$(CC) $(LFLAGS) -o cclash cclash.o
 
 cid:	cid.o
-	$(CC) -o cid cid.o
+	$(CC) $(LFLAGS) -o cid cid.o
 
 # entry points not to be used directly
 

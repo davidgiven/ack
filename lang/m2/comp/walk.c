@@ -38,6 +38,9 @@ static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
 
+#define	NO_EXIT_LABEL	((label) 0)
+#define RETURN_LABEL	((label) 1)
+
 STATIC
 DoProfil()
 {
@@ -59,6 +62,7 @@ WalkModule(module)
 {
 	/*	Walk through a module, and all its local definitions.
 		Also generate code for its body.
+		This code is collected in an initialization routine.
 	*/
 	register struct scope *sc;
 	struct scopelist *savevis = CurrVis;
@@ -75,7 +79,7 @@ WalkModule(module)
 	   this module.
 	*/
 	sc->sc_off = 0;		/* no locals (yet) */
-	text_label = 1;
+	text_label = 1;		/* label at end of initialization routine */
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
 	DoProfil();
@@ -93,10 +97,12 @@ WalkModule(module)
 			*/
 			C_df_dlb(l1);
 			C_bss_cst(word_size, (arith) 0, 1);
+			/* if this one is set to non-zero, the initialization
+			   was already done.
+			*/
 			C_loe_dlb(l1, (arith) 0);
-			C_zne((label) 1);
-			C_loc((arith) 1);
-			C_ste_dlb(l1, (arith) 0);
+			C_zne(RETURN_LABEL);
+			C_ine_dlb(l1, (arith) 0);
 			/* Prevent this module from calling its own
 			   initialization routine
 			*/
@@ -111,8 +117,8 @@ WalkModule(module)
 	MkCalls(sc->sc_def);
 	proclevel++;
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
-	WalkNode(module->mod_body, (label) 0);
-	C_df_ilb((label) 1);
+	WalkNode(module->mod_body, NO_EXIT_LABEL);
+	C_df_ilb(RETURN_LABEL);
 	C_ret((arith) 0);
 	C_end(-sc->sc_off);
 	proclevel--;
@@ -132,8 +138,9 @@ WalkProcedure(procedure)
 	register struct type *tp;
 	register struct paramlist *param;
 	label func_res_label = 0;
-	arith tmpvar1 = 0;
+	arith StackAdjustment = 0;
 	arith retsav = 0;
+	arith func_res_size = 0;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -152,10 +159,18 @@ WalkProcedure(procedure)
 	func_type = tp = ResultType(procedure->df_type);
 
 	if (tp && IsConstructed(tp)) {
+		/* The result type of this procedure is constructed.
+		   The actual procedure will return a pointer to a global
+		   data area in which the function result is stored.
+		   Notice that this does make the code non-reentrant.
+		   Here, we create the data area for the function result.
+		*/
 		func_res_label = ++data_label;
 		C_df_dlb(func_res_label);
 		C_bss_cst(tp->tp_size, (arith) 0, 0);
 	}
+
+	if (tp) func_res_size = WA(tp->tp_size);
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -192,22 +207,25 @@ WalkProcedure(procedure)
 				*/
 				arith tmpvar = NewInt();
 
-				if (! tmpvar1) {
+				if (! StackAdjustment) {
+					/* First time we get here
+					*/
 					if (tp && !func_res_label) {
 						/* Some local space, only
 						   needed if the value itself
 						   is returned
 						*/
-						sc->sc_off -= WA(tp->tp_size);
+						sc->sc_off -= func_res_size;
 						retsav = sc->sc_off;
 					}
-					tmpvar1 = NewInt();
+					StackAdjustment = NewInt();
 					C_loc((arith) 0);
-					C_stl(tmpvar1);
+					C_stl(StackAdjustment);
 				}
-				/* First compute the size */
+				/* First compute the size of the array */
 				C_lol(param->par_def->var_off +
 				      pointer_size + word_size);
+						/* upper - lower */
 				C_inc();	/* gives number of elements */
 				C_loc(tp->arr_elem->tp_size);
 				C_cal("_wa");
@@ -219,15 +237,22 @@ WalkProcedure(procedure)
 						/* size in bytes */
 				C_stl(tmpvar);
 				C_lol(tmpvar);
-				C_dup(word_size);
-				C_lol(tmpvar1);
+				C_lol(tmpvar);
+				C_lol(StackAdjustment);
 				C_adi(word_size);
-				C_stl(tmpvar1);	/* remember all stack adjustments */
+				C_stl(StackAdjustment);
+						/* remember stack adjustments */
 				C_ngi(word_size);
+						/* Assumption: stack grows
+						   downwards!! ???
+						*/
 				C_ass(word_size);
 						/* adjusted stack pointer */
 				C_lor((arith) 1);
-						/* destination address */
+						/* destination address (sp),
+						   also assumes stack grows
+						   downwards ???
+						*/
 				C_lal(param->par_def->var_off);
 				C_loi(pointer_size);
 						/* push source address */
@@ -237,7 +262,9 @@ WalkProcedure(procedure)
 				C_bls(word_size);
 						/* copy */
 				C_lor((arith) 1);	
-						/* push new address of array */
+						/* push new address of array
+						   ... downwards ... ???
+						*/
 				C_lal(param->par_def->var_off);
 				C_sti(pointer_size);
 				FreeInt(tmpvar);
@@ -245,41 +272,50 @@ WalkProcedure(procedure)
 		}
 	}
 
-	text_label = 1;
+	text_label = 1;		/* label at end of procedure */
 
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
-	WalkNode(procedure->prc_body, (label) 0);
-	C_df_ilb((label) 1);
+	WalkNode(procedure->prc_body, NO_EXIT_LABEL);
+	C_df_ilb(RETURN_LABEL);	/* label at end */
 	tp = func_type;
 	if (func_res_label) {
+		/* Fill the data area reserved for the function result
+		   with the result
+		*/
 		C_lae_dlb(func_res_label, (arith) 0);
 		C_sti(tp->tp_size);
-		if (tmpvar1) {
-			C_lol(tmpvar1);
+		if (StackAdjustment) {
+			/* Remove copies of conformant arrays
+			*/
+			C_lol(StackAdjustment);
 			C_ass(word_size);
 		}
 		C_lae_dlb(func_res_label, (arith) 0);
 		C_ret(pointer_size);
 	}
 	else if (tp) {
-		if (tmpvar1) {
+		if (StackAdjustment) {
+			/* First save the function result in a safe place.
+			   Then remove copies of conformant arrays,
+			   and put function result back on the stack
+			*/
 			C_lal(retsav);
-			C_sti(WA(tp->tp_size));
-			C_lol(tmpvar1);
+			C_sti(func_res_size);
+			C_lol(StackAdjustment);
 			C_ass(word_size);
 			C_lal(retsav);
-			C_loi(WA(tp->tp_size));
+			C_loi(func_res_size);
 		}
-		C_ret(WA(tp->tp_size));
+		C_ret(func_res_size);
 	}
 	else	{
-		if (tmpvar1) {
-			C_lol(tmpvar1);
+		if (StackAdjustment) {
+			C_lol(StackAdjustment);
 			C_ass(word_size);
 		}
 		C_ret((arith) 0);
 	}
-	if (tmpvar1) FreeInt(tmpvar1);
+	if (StackAdjustment) FreeInt(StackAdjustment);
 	if (! options['n']) RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
@@ -293,20 +329,26 @@ WalkDef(df)
 	/*	Walk through a list of definitions
 	*/
 
-	while (df) {
-		if (df->df_kind == D_MODULE) {
+	for ( ; df; df = df->df_nextinscope) {
+		switch(df->df_kind) {
+		case D_MODULE:
 			WalkModule(df);
-		}
-		else if (df->df_kind == D_PROCEDURE) {
+			break;
+		case D_PROCEDURE:
 			WalkProcedure(df);
+			break;
+		case D_VARIABLE:
+			if (!proclevel) {
+				C_df_dnam(df->var_name);
+				C_bss_cst(
+					WA(df->df_type->tp_size),
+					(arith) 0, 0);
+			}
+			break;
+		default:
+			/* nothing */
+			;
 		}
-		else if (!proclevel && df->df_kind == D_VARIABLE) {
-			C_df_dnam(df->var_name);
-			C_bss_cst(
-				WA(df->df_type->tp_size),
-				(arith) 0, 0);
-		}
-		df = df->df_nextinscope;
 	}
 }
 
@@ -316,31 +358,28 @@ MkCalls(df)
 	/*	Generate calls to initialization routines of modules
 	*/
 
-	while (df) {
+	for ( ; df; df = df->df_nextinscope) {
 		if (df->df_kind == D_MODULE) {
 			C_lxl((arith) 0);
 			C_cal(df->mod_vis->sc_scope->sc_name);
 			C_asp(pointer_size);
 		}
-		df = df->df_nextinscope;
 	}
 }
 
-WalkLink(nd, lab)
+WalkLink(nd, exit_label)
 	register struct node *nd;
-	label lab;
+	label exit_label;
 {
 	/*	Walk node "nd", which is a link.
-		"lab" represents the label that must be jumped to on
-		encountering an EXIT statement.
 	*/
 
 	while (nd && nd->nd_class == Link) {	 /* statement list */
-		WalkNode(nd->nd_left, lab);
+		WalkNode(nd->nd_left, exit_label);
 		nd = nd->nd_right;
 	}
 
-	WalkNode(nd, lab);
+	WalkNode(nd, exit_label);
 }
 
 WalkCall(nd)
@@ -358,13 +397,11 @@ WalkCall(nd)
 	}
 }
 
-WalkStat(nd, lab)
+WalkStat(nd, exit_label)
 	struct node *nd;
-	label lab;
+	label exit_label;
 {
 	/*	Walk through a statement, generating code for it.
-		"lab" represents the label that must be jumped to on
-		encountering an EXIT statement.
 	*/
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
@@ -386,12 +423,12 @@ WalkStat(nd, lab)
 			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
 			C_df_ilb(l3);
-			WalkNode(right->nd_left, lab);
+			WalkNode(right->nd_left, exit_label);
 
 			if (right->nd_right) {	/* ELSE part */
 				C_bra(l2);
 				C_df_ilb(l1);
-				WalkNode(right->nd_right, lab);
+				WalkNode(right->nd_right, exit_label);
 				C_df_ilb(l2);
 			}
 			else	C_df_ilb(l1);
@@ -399,7 +436,7 @@ WalkStat(nd, lab)
 		}
 
 	case CASE:
-		CaseCode(nd, lab);
+		CaseCode(nd, exit_label);
 		break;
 
 	case WHILE:
@@ -411,7 +448,7 @@ WalkStat(nd, lab)
 			C_df_ilb(l1);
 			ExpectBool(left, l3, l2);
 			C_df_ilb(l3);
-			WalkNode(right, lab);
+			WalkNode(right, exit_label);
 			C_bra(l1);
 			C_df_ilb(l2);
 			break;
@@ -423,7 +460,7 @@ WalkStat(nd, lab)
 			l1 = ++text_label;
 			l2 = ++text_label;
 			C_df_ilb(l1);
-			WalkNode(left, lab);
+			WalkNode(left, exit_label);
 			ExpectBool(right, l2, l1);
 			C_df_ilb(l2);
 			break;
@@ -457,9 +494,9 @@ WalkStat(nd, lab)
 			}
 			C_bra(l1);
 			C_df_ilb(l2);
-			CheckAssign(nd->nd_type, int_type);
+			RangeCheck(nd->nd_type, int_type);
 			CodeDStore(nd);
-			WalkNode(right, lab);
+			WalkNode(right, exit_label);
 			CodePExpr(nd);
 			C_loc(left->nd_INT);
 			C_adi(int_size);
@@ -493,8 +530,7 @@ WalkStat(nd, lab)
 			wds.w_scope = left->nd_type->rec_scope;
 			CodeAddress(&ds);
 			ds.dsg_kind = DSG_FIXED;
-			/* Create a designator structure for the
-			   temporary.
+			/* Create a designator structure for the temporary.
 			*/
 			ds.dsg_offset = tmp = NewPtr();
 			ds.dsg_name = 0;
@@ -505,7 +541,7 @@ WalkStat(nd, lab)
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
 			CurrVis = &link;
-			WalkNode(right, lab);
+			WalkNode(right, exit_label);
 			CurrVis = link.next;
 			WithDesigs = wds.w_next;
 			FreePtr(tmp);
@@ -513,9 +549,9 @@ WalkStat(nd, lab)
 		}
 
 	case EXIT:
-		assert(lab != 0);
+		assert(exit_label != 0);
 
-		C_bra(lab);
+		C_bra(exit_label);
 		break;
 
 	case RETURN:
@@ -529,7 +565,7 @@ WalkStat(nd, lab)
 node_error(right, "type incompatibility in RETURN statement");
 			}
 		}
-		C_bra((label) 1);
+		C_bra(RETURN_LABEL);
 		break;
 
 	default:
@@ -576,7 +612,7 @@ ExpectBool(nd, true_label, false_label)
 
 int
 WalkExpr(nd)
-	struct node *nd;
+	register struct node *nd;
 {
 	/*	Check an expression and generate code for it
 	*/
@@ -664,12 +700,15 @@ DoAssign(nd, left, right)
 	struct node *nd;
 	register struct node *left, *right;
 {
-	/* May we do it in this order (expression first) ??? */
+	/* May we do it in this order (expression first) ???
+	   The reference manual sais nothing about it, but the book does:
+	   it sais that the left hand side is evaluated first.
+	*/
 	struct desig dsl, dsr;
 
 	if (! ChkExpression(right)) return;
 	if (! ChkVariable(left)) return;
-	TryToString(right, left->nd_type);
+	if (right->nd_symb == STRING) TryToString(right, left->nd_type);
 	dsr = InitDesig;
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
 
@@ -683,7 +722,7 @@ DoAssign(nd, left, right)
 	}
 	else {
 		CodeValue(&dsr, right->nd_type->tp_size);
-		CheckAssign(left->nd_type, right->nd_type);
+		RangeCheck(left->nd_type, right->nd_type);
 	}
 	dsl = InitDesig;
 	CodeDesig(left, &dsl);
@@ -702,12 +741,11 @@ RegisterMessages(df)
 			*/
 			tp = BaseType(df->df_type);
 			if ((df->df_flags & D_VARPAR) ||
-				 tp->tp_fund == T_POINTER) {
+				 (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
 				C_ms_reg(df->var_off, pointer_size,
 					 reg_pointer, 0);
 			}
-			else if ((tp->tp_fund & T_NUMERIC) &&
-			     tp->tp_size <= dword_size) {
+			else if (tp->tp_fund & T_NUMERIC) {
 				C_ms_reg(df->var_off,
 					 tp->tp_size,
 					 tp->tp_fund == T_REAL ?

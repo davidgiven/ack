@@ -52,14 +52,14 @@ struct proc {
 
 struct type	{
 	struct type *next;	/* used with ARRAY, PROCEDURE, POINTER, SET,
-				   SUBRANGE
+				   SUBRANGE, EQUAL
 				*/
 	int tp_fund;		/* fundamental type  or constructor */
 #define T_RECORD	0x0001
 #define	T_ENUMERATION	0x0002
 #define	T_INTEGER	0x0004
 #define T_CARDINAL	0x0008
-/* #define T_LONGINT	0x0010 */
+#define T_EQUAL		0x0010
 #define T_REAL		0x0020
 #define T_HIDDEN	0x0040
 #define T_POINTER	0x0080
@@ -129,7 +129,8 @@ struct type
 	*construct_type(),
 	*standard_type(),
 	*set_type(),
-	*subr_type();	/* All from type.c */
+	*subr_type(),
+	*RemoveEqual();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)
 
@@ -147,6 +148,6 @@ struct type
 					(tpx)->next)
 #define PointedtoType(tpx)	(assert((tpx)->tp_fund == T_POINTER),\
 					(tpx)->next)
-#define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next\
-							      : (tpx))
+#define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next : \
+					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)

@@ -85,7 +85,7 @@ StatementSequence(register struct node **pnd;)
 	struct node *nd;
 } :
 	statement(pnd)
-	[
+	[ %persistent
 		';' statement(&nd)
 			{ if (nd) {
 				*pnd = MkNode(Link, *pnd, nd, &dot);

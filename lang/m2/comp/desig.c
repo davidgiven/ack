@@ -166,18 +166,17 @@ CodeFieldDesig(df, ds)
 	   in "ds". "df" indicates the definition of the field.
 	*/
 
-	register struct withdesig *wds;
 
 	if (ds->dsg_kind == DSG_INIT) {
 		/* In a WITH statement. We must find the designator in the
 		   WITH statement, and act as if the field is a selection
 		   of this designator.
 		   So, first find the right WITH statement, which is the
-		   first one of the proper record type.
-		   Notice that the proper record type is recognized by its
-		   scope indication.
+		   first one of the proper record type, which is
+		   recognized by its scope indication.
 		*/
-		wds = WithDesigs;
+		register struct withdesig *wds = WithDesigs;
+
 		assert(wds != 0);
 
 		while (wds->w_scope != df->df_scope) {
@@ -225,7 +224,7 @@ CodeVarDesig(df, ds)
 	*/
 	assert(ds->dsg_kind == DSG_INIT);
 
-	df->df_flags |= D_USED;
+	SetUsed(df);
 	if (df->var_addrgiven) {
 		/* the programmer specified an address in the declaration of
 		   the variable. Generate code to push the address.
@@ -258,7 +257,9 @@ CodeVarDesig(df, ds)
 			C_lxa((arith) (proclevel - sc->sc_level));
 			if ((df->df_flags & D_VARPAR) ||
 			    IsConformantArray(df->df_type)) {
-				/* var parameter
+				/* var parameter or conformant array.
+				   For conformant array's, the address is
+				   passed.
 				*/
 				C_adp(df->var_off);
 				C_loi(pointer_size);
@@ -297,7 +298,7 @@ CodeDesig(nd, ds)
 	case Def:
 		df = nd->nd_def;
 
-		df->df_flags |= D_USED;
+		SetUsed(df);
 		switch(df->df_kind) {
 		case D_FIELD:
 			CodeFieldDesig(df, ds);

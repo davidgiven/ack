@@ -224,6 +224,8 @@ chk_basesubrange(tp, base)
 	/*	A subrange had a specified base. Check that the bases conform.
 	*/
 
+	assert(tp->tp_fund == T_SUBRANGE);
+
 	if (base->tp_fund == T_SUBRANGE) {
 		/* Check that the bounds of "tp" fall within the range
 		   of "base".
@@ -231,22 +233,22 @@ chk_basesubrange(tp, base)
 		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
 			error("Base type has insufficient range");
 		}
-		base = BaseType(base);
+		base = base->next;
 	}
 
 	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
-		if (BaseType(tp) != base) {
+		if (tp->next != base) {
 			error("Specified base does not conform");
 		}
 	}
 	else if (base != card_type && base != int_type) {
 		error("Illegal base for a subrange");
 	}
-	else if (base == int_type && BaseType(tp) == card_type &&
+	else if (base == int_type && tp->next == card_type &&
 		 (tp->sub_ub > max_int || tp->sub_ub < 0)) {
 		error("Upperbound to large for type INTEGER");
 	}
-	else if (base != BaseType(tp) && base != int_type) {
+	else if (base != tp->next && base != int_type) {
 		error("Specified base does not conform");
 	}
 
@@ -462,22 +464,29 @@ DeclareType(df, tp)
 	*/
 
 	if (df->df_type && df->df_type->tp_fund == T_HIDDEN) {
-	  	if (tp->tp_fund != T_POINTER) {
+	  	if (! (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
 error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 		}
-		/* Careful now ... we might have declarations
-		   referring to the hidden type.
-		*/
-		*(df->df_type) = *tp;
-		if (! tp->next) {
-			/* It also contains a forward reference,
-			   so update the forwardlist
-			*/
-			ChForward(tp, df->df_type);
+		df->df_type->next = tp;
+		df->df_type->tp_fund = T_EQUAL;
+		while (tp != df->df_type && tp->tp_fund == T_EQUAL) {
+			tp = tp->next;
 		}
-		free_type(tp);
+		if (tp == df->df_type) {
+			/* Circular definition! */
+error("opaque type \"%s\" has a circular definition", df->df_idf->id_text);
+		}
 	}
 	else	df->df_type = tp;
+}
+
+struct type *
+RemoveEqual(tpx)
+	register struct type *tpx;
+{
+
+	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->next;
+	return tpx;
 }
 
 int
@@ -532,6 +541,10 @@ DumpType(tp)
 		print("CARDINAL"); break;
 	case T_REAL:
 		print("REAL"); break;
+	case T_HIDDEN:
+		print("HIDDEN"); break;
+	case T_EQUAL:
+		print("EQUAL"); break;
 	case T_POINTER:
 		print("POINTER"); break;
 	case T_CHAR:

@@ -90,19 +90,6 @@ Forward(tk, ptp)
 	CurrentScope->sc_forw = f;
 }
 
-ChForward(was, becomes)
-	struct type *was, *becomes;
-{
-	/*	The declaration of a hidden type had a forward reference.
-		In this case, the "forwards" list must be adapted.
-	*/
-	register struct forwards *f = CurrentScope->sc_forw;
-
-	while (f && f->fo_ptyp != was) f = f->next;
-	assert(f != 0);
-	f->fo_ptyp = becomes;
-}
-
 STATIC
 chk_proc(df)
 	register struct def *df;
@@ -114,7 +101,7 @@ chk_proc(df)
 		if (df->df_kind == D_PROCHEAD) {
 			/* A not defined procedure
 			*/
-node_error(df->for_node, "procedure \"%s\" not defined", df->df_idf->id_text);
+error("procedure \"%s\" not defined", df->df_idf->id_text);
 			FreeNode(df->for_node);
 		}
 		df = df->df_nextinscope;

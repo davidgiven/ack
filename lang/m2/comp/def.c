@@ -60,6 +60,7 @@ InitDef()
 	struct idf *gen_anon_idf();
 
 	ill_df = MkDef(gen_anon_idf(), CurrentScope, D_ERROR);
+	ill_df->df_type = error_type;
 }
 
 struct def *
@@ -204,7 +205,6 @@ DeclProc(type)
 		sprint(buf,"%s_%s",CurrentScope->sc_name,df->df_idf->id_text);
 		df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
 		if (CurrVis == Defined->mod_vis) C_exp(df->for_name);
-		open_scope(OPENSCOPE);
 	}
 	else {
 		df = lookup(dot.TOK_IDF, CurrentScope);

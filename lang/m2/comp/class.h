@@ -29,10 +29,10 @@
 	class.  This is implemented as a collection of tables to speed up
 	the decision whether a character has a special meaning.
 */
-#define	in_idf(ch)	(inidf[ch])
-#define	is_oct(ch)	(isoct[ch])
-#define	is_dig(ch)	(isdig[ch])
-#define	is_hex(ch)	(ishex[ch])
+#define	in_idf(ch)	((unsigned)ch < 0177 && inidf[ch])
+#define	is_oct(ch)	((unsigned)ch < 0177 && isoct[ch])
+#define	is_dig(ch)	((unsigned)ch < 0177 && isdig[ch])
+#define	is_hex(ch)	((unsigned)ch < 0177 && ishex[ch])
 
 extern char tkclass[];
 extern char inidf[], isoct[], isdig[], ishex[];

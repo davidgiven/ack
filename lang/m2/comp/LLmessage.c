@@ -20,12 +20,11 @@ static char *RcsId = "$Header$";
 
 extern char		*symbol2str();
 extern struct idf	*gen_anon_idf();
-int			 err_occurred = 0;
+extern int		err_occurred;
 
 LLmessage(tk)
 	int tk;
 {
-	++err_occurred;
 	if (tk)	{
 		/* if (tk != 0), it represents the token to be inserted.
 		   otherwize, the current token is deleted

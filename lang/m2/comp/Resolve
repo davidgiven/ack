@@ -1,0 +1,43 @@
+case $# in
+1)	
+	;;
+*)	echo "$0: one argument expected" 1>&2
+	exit 1
+	;;
+esac
+case $1 in
+main)
+	;;
+Xlint)
+	;;
+*)	echo "$0: $1: Illegal argument" 1>&2
+	exit 1
+	;;
+esac
+if test -d ../Xsrc
+then
+	:
+else	mkdir ../Xsrc
+fi
+make cclash
+make cid
+./cclash -c -l7 `cat Cfiles` > clashes
+sed '/^C_/d' < clashes > ../Xsrc/Xclashes
+cd ../Xsrc
+if cmp -s Xclashes clashes
+then
+	:
+else
+	mv Xclashes clashes
+fi
+rm -f Makefile
+for i in `cat ../src/Cfiles`
+do
+	cat >> Makefile <<EOF
+$i:	clashes ../src/$i
+	../src/cid -Fclashes < ../src/$i > $i
+
+EOF
+done
+make `cat ../src/Cfiles`
+make -f ../src/Makefile $1

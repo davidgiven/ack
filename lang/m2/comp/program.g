@@ -193,7 +193,6 @@ definition
 	VAR [ VariableDeclaration Semicolon ]*
 |
 	ProcedureHeading(&dummy, D_PROCHEAD)
-			{ close_scope(0); }
 	Semicolon
 ;
 

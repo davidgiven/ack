@@ -2,13 +2,17 @@
 
 /* $Header$ */
 
+/* Structure to store a string constant
+*/
 struct string {
-	arith s_length;		/* length of a string */
-	char *s_str;		/* the string itself */
+	arith s_length;			/* length of a string */
+	char *s_str;			/* the string itself */
 };
 
+/* Token structure. Keep it small, as it is part of a parse-tree node
+*/
 struct token	{
-	short tk_symb;		/* token itself	*/
+	short tk_symb;			/* token itself	*/
 	unsigned short tk_lineno;	/* linenumber on which it occurred */
 	union {
 		struct idf *tk_idf;	/* IDENT	*/

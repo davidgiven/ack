@@ -24,10 +24,14 @@ DoOption(text)
 	default:
 		options[text[-1]]++;	/* flags, debug options etc.	*/
 		break;
+					/* recognized flags:
+						-L: don't generate fil/lin
+						-p: generate procentry/procexit
+						-w: no warnings
+						-n: no register messages
+					   and many more if DEBUG
+					*/
 
-	case 'L' :	/* don't generate fil/lin */
-		options['L'] = 1;
-		break;
 
 	case 'M':	/* maximum identifier length */
 		idfsize = txt2int(&text);
@@ -35,10 +39,6 @@ DoOption(text)
 			fatal("malformed -M option");
 		if (idfsize > IDFSIZE)
 			fatal("maximum identifier length is %d", IDFSIZE);
-		break;
-
-	case 'p' :	/* generate profiling code procentry/procexit ???? */
-		options['p'] = 1;
 		break;
 
 	case 'I' :
@@ -99,14 +99,6 @@ DoOption(text)
 		}
 		break;
 	}
-
-	case 'n':
-		options['n'] = 1;	/* use no registers	*/
-		break;
-
-	case 'w':
-		options['w'] = 1;	/* no warnings will be given	*/
-		break;
 	}
 }
 

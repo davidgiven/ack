@@ -25,10 +25,10 @@ static char *RcsId = "$Header$";
 
 long str2long();
 
-struct token dot, aside;
-struct type *toktype;
-struct string string;
-int idfsize = IDFSIZE;
+struct token	dot,
+		aside;
+struct type	*toktype;
+int		 idfsize = IDFSIZE;
 #ifdef DEBUG
 extern int	cntlines;
 #endif
@@ -40,10 +40,9 @@ SkipComment()
 		Note that comments may be nested (par. 3.5).
 	*/
 	register int ch;
-	register int NestLevel = 0;
 
-	LoadChar(ch);
 	for (;;) {
+		LoadChar(ch);
 		if (class(ch) == STNL) {
 			LineNumber++;
 #ifdef DEBUG
@@ -52,32 +51,26 @@ SkipComment()
 		}
 		else if (ch == '(') {
 			LoadChar(ch);
-			if (ch == '*') ++NestLevel;
-			else	continue;
+			if (ch == '*') SkipComment();
 		}
 		else if (ch == '*') {
 			LoadChar(ch);
-			if (ch == ')') {
-				if (NestLevel-- == 0) return;
-			}
-			else	continue;
+			if (ch == ')') break;
 		}
-		LoadChar(ch);
 	}
 }
 
-STATIC
+STATIC struct string *
 GetString(upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
 	register int ch;
-	register struct string *str = &string;
+	register struct string *str = (struct string *) Malloc(sizeof(struct string));
 	register char *p;
 	
 	str->s_str = p = Malloc((unsigned int) (str->s_length = ISTRSIZE));
-	LoadChar(ch);
-	while (ch != upto)	{
+	while (LoadChar(ch), ch != upto)	{
 		if (class(ch) == STNL)	{
 			lexerror("newline in string");
 			LineNumber++;
@@ -86,7 +79,7 @@ GetString(upto)
 #endif
 			break;
 		}
-		if (ch == EOI) {
+		if (ch == EOI)	{
 			lexerror("end-of-file in string");
 			break;
 		}
@@ -97,10 +90,10 @@ GetString(upto)
 			p = str->s_str + str->s_length;
 			str->s_length += RSTRSIZE;
 		}
-		LoadChar(ch);
 	}
 	*p = '\0';
 	str->s_length = p - str->s_str;
+	return str;
 }
 
 int
@@ -131,15 +124,15 @@ again:
 
 	switch (class(ch))	{
 
-	case STSKIP:
-		goto again;
-
 	case STNL:
 		LineNumber++;
 #ifdef DEBUG
 		cntlines++;
 #endif
 		tk->tk_lineno++;
+		/* Fall Through */
+
+	case STSKIP:
 		goto again;
 
 	case STGARB:
@@ -172,15 +165,13 @@ again:
 			if (nch == '.')	{
 				return tk->tk_symb = UPTO;
 			}
-			PushBack(nch);
-			return tk->tk_symb = ch;
+			break;
 
 		case ':':
 			if (nch == '=')	{
 				return tk->tk_symb = BECOMES;
 			}
-			PushBack(nch);
-			return tk->tk_symb = ch;
+			break;
 
 		case '<':
 			if (nch == '=')	{
@@ -190,50 +181,52 @@ again:
 				lexwarning("'<>' is old-fashioned; use '#'");
 				return tk->tk_symb = '#';
 			}
-			PushBack(nch);
-			return tk->tk_symb = ch;
+			break;
 
 		case '>':
 			if (nch == '=')	{
 				return tk->tk_symb = GREATEREQUAL;
 			}
-			PushBack(nch);
-			return tk->tk_symb = ch;
+			break;
 
 		default :
 			crash("(LLlex, STCOMP)");
 		}
+		PushBack(nch);
+		return tk->tk_symb = ch;
 
 	case STIDF:
 	{
-		register char *tg = &buf[0];
+		register char *tag = &buf[0];
 		register struct idf *id;
 
 		do	{
-			if (tg - buf < idfsize) *tg++ = ch;
+			if (tag - buf < idfsize) *tag++ = ch;
 			LoadChar(ch);
 		} while(in_idf(ch));
 
 		if (ch != EOI) PushBack(ch);
-		*tg++ = '\0';
+		*tag++ = '\0';
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;
 	}
 
-	case STSTR:
-		GetString(ch);
-		if (string.s_length == 1) {
-			tk->TOK_INT = *(string.s_str) & 0377;
+	case STSTR: {
+		register struct string *str = GetString(ch);
+
+		if (str->s_length == 1) {
+			tk->TOK_INT = *(str->s_str) & 0377;
 			toktype = char_type;
+			free(str->s_str);
+			free((char *) str);
 		}
 		else {
-			tk->tk_data.tk_str = (struct string *)
-				Malloc(sizeof (struct string));
-			*(tk->tk_data.tk_str) = string;
-			toktype = standard_type(T_STRING, 1, string.s_length);
+			tk->tk_data.tk_str = str;
+			toktype = standard_type(T_STRING, 1, str->s_length);
 		}
 		return tk->tk_symb = STRING;
+		}
 
 	case STNUM:
 	{
@@ -241,172 +234,157 @@ again:
 			is that we don't know the base in advance so we
 			have to read the number with the help of a rather
 			complex finite automaton.
-			Excuses for the very ugly code!
 		*/
+		enum statetp {Oct,Hex,Dec,OctEndOrHex,End,OptReal,Real};
+		register enum statetp state;
+		register int base;
 		register char *np = &buf[1];
 					/* allow a '-' to be added	*/
 
 		buf[0] = '-';
 		*np++ = ch;
-		
+		state = is_oct(ch) ? Oct : Dec;
 		LoadChar(ch);
-		while (is_oct(ch))	{
-			if (np < &buf[NUMSIZE]) {
-				*np++ = ch;
-			}
-			LoadChar(ch);
-		}
-		switch (ch) {
-		case 'H':
-Shex:			*np++ = '\0';
-			tk->TOK_INT = str2long(&buf[1], 16);
-			if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
-				toktype = intorcard_type;
-			}
-			else	toktype = card_type;
-			return tk->tk_symb = INTEGER;
-
-		case '8':
-		case '9':
-			do {
-				if (np < &buf[NUMSIZE]) {
-					*np++ = ch;
+		for (;;) {
+			switch(state) {
+			case Oct:
+				while (is_oct(ch))	{
+					if (np < &buf[NUMSIZE]) *np++ = ch;
+					LoadChar(ch);
 				}
-				LoadChar(ch);
-			} while (is_dig(ch));
-
-			if (is_hex(ch))
-				goto S2;
-			if (ch == 'H')
-				goto Shex;
-			if (ch == '.')
-				goto Sreal;
-			PushBack(ch);
-			goto Sdec;
-
-		case 'B':
-		case 'C':
-			if (np < &buf[NUMSIZE]) {
-				*np++ = ch;
-			}
-			LoadChar(ch);
-			if (ch == 'H')
-				goto Shex;
-			if (is_hex(ch))
-				goto S2;
-			PushBack(ch);
-			ch = *--np;
-			*np++ = '\0';
-			tk->TOK_INT = str2long(&buf[1], 8);
-			if (ch == 'C') {
-				toktype = char_type;
-				if (tk->TOK_INT < 0 || tk->TOK_INT > 255) {
-lexwarning("Character constant out of range");
+				if (ch == 'B' || ch == 'C') {
+					base = 8;
+					state = OctEndOrHex;
+					break;
 				}
-			}
-			else if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
-				toktype = intorcard_type;
-			}
-			else	toktype = card_type;
-			return tk->tk_symb = INTEGER;
-
-		case 'A':
-		case 'D':
-		case 'E':
-		case 'F':
-S2:
-			do {
-				if (np < &buf[NUMSIZE]) {
-					*np++ = ch;
-				}
-				LoadChar(ch);
-			} while (is_hex(ch));
-			if (ch != 'H') {
-				lexerror("H expected after hex number");
-				PushBack(ch);
-			}
-			goto Shex;
-
-		case '.':
-Sreal:
-			/*	This '.' could be the first of the '..'
-				token. At this point, we need a look-ahead
-				of two characters.
-			*/
-			LoadChar(ch);
-			if (ch == '.') {
-				/*	Indeed the '..' token
-				*/
-				PushBack(ch);
-				PushBack(ch);
-				goto Sdec;
-			}
-
-			/* a real constant */
-			if (np < &buf[NUMSIZE]) {
-				*np++ = '.';
-			}
-
-			if (is_dig(ch)) {
-				/* 	Fractional part
-				*/
-				do {
+				/* Fall Through */
+			case Dec:
+				base = 10;
+				while (is_dig(ch))	{
 					if (np < &buf[NUMSIZE]) {
 						*np++ = ch;
 					}
+					LoadChar(ch);
+				}
+				if (is_hex(ch)) state = Hex;
+				else if (ch == '.') state = OptReal;
+				else {
+					state = End;
+					if (ch == 'H') base = 16;
+					else PushBack(ch);
+				}
+				break;
+
+			case Hex:
+				while (is_hex(ch))	{
+					if (np < &buf[NUMSIZE]) *np++ = ch;
+					LoadChar(ch);
+				}
+				base = 16;
+				state = End;
+				if (ch != 'H') {
+					lexerror("H expected after hex number");
+					PushBack(ch);
+				}
+				break;
+
+			case OctEndOrHex:
+				if (np < &buf[NUMSIZE]) *np++ = ch;
+				LoadChar(ch);
+				if (ch == 'H') {
+					base = 16;
+					state = End;
+					break;
+				}
+				if (is_hex(ch)) {
+					state = Hex;
+					break;
+				}
+				PushBack(ch);
+				ch = *--np;
+				*np++ = '\0';
+				base = 8;
+				/* Fall through */
+				
+			case End:
+				*np++ = '\0';
+				tk->TOK_INT = str2long(&buf[1], base);
+				if (ch == 'C' && base == 8) {
+					toktype = char_type;
+					if (tk->TOK_INT<0 || tk->TOK_INT>255) {
+lexwarning("Character constant out of range");
+					}
+				}
+				else if (tk->TOK_INT>=0 &&
+					 tk->TOK_INT<=max_int) {
+					toktype = intorcard_type;
+				}
+				else	toktype = card_type;
+				return tk->tk_symb = INTEGER;
+
+			case OptReal:
+				/*	The '.' could be the first of the '..'
+					token. At this point, we need a
+					look-ahead of two characters.
+				*/
+				LoadChar(ch);
+				if (ch == '.') {
+					/*	Indeed the '..' token
+					*/
+					PushBack(ch);
+					PushBack(ch);
+					state = End;
+					base = 10;
+					break;
+				}
+				state = Real;
+				break;
+			}
+			if (state == Real) break;
+		}
+
+		/* a real real constant */
+		if (np < &buf[NUMSIZE]) *np++ = '.';
+
+		while (is_dig(ch)) {
+			/* 	Fractional part
+			*/
+			if (np < &buf[NUMSIZE]) *np++ = ch;
+			LoadChar(ch);
+		}
+
+		if (ch == 'E') {
+			/*	Scale factor
+			*/
+			if (np < &buf[NUMSIZE]) *np++ = 'E';
+			LoadChar(ch);
+			if (ch == '+' || ch == '-') {
+				/*	Signed scalefactor
+				*/
+				if (np < &buf[NUMSIZE]) *np++ = ch;
+				LoadChar(ch);
+			}
+			if (is_dig(ch)) {
+				do {
+					if (np < &buf[NUMSIZE]) *np++ = ch;
 					LoadChar(ch);
 				} while (is_dig(ch));
 			}
-			
-			if (ch == 'E') {
-				/*	Scale factor
-				*/
-				if (np < &buf[NUMSIZE]) {
-					*np++ = 'E';
-				}
-				LoadChar(ch);
-				if (ch == '+' || ch == '-') {
-					/*	Signed scalefactor
-					*/
-					if (np < &buf[NUMSIZE]) {
-						*np++ = ch;
-					}
-					LoadChar(ch);
-				}
-				if (is_dig(ch)) {
-					do {
-						if (np < &buf[NUMSIZE]) {
-							*np++ = ch;
-						}
-						LoadChar(ch);
-					} while (is_dig(ch));
-				}
-				else {
-					lexerror("bad scale factor");
-				}
+			else {
+				lexerror("bad scale factor");
 			}
-
-			PushBack(ch);
-
-			if (np == &buf[NUMSIZE + 1]) {
-				tk->TOK_REL = Salloc("0.0", 5);
-				lexerror("floating constant too long");
-			}
-			else	tk->TOK_REL = Salloc(buf, np - buf) + 1;
-			toktype = real_type;
-			return tk->tk_symb = REAL;
-
-		default:
-			PushBack(ch);
-Sdec:
-			*np++ = '\0';
-			tk->TOK_INT = str2long(&buf[1], 10);
-			if (tk->TOK_INT < 0 || tk->TOK_INT > max_int) {
-				toktype = card_type;
-			}
-			else	toktype = intorcard_type;
-			return tk->tk_symb = INTEGER;
 		}
+
+		PushBack(ch);
+
+		if (np >= &buf[NUMSIZE]) {
+			tk->TOK_REL = Salloc("0.0", 5);
+			lexerror("floating constant too long");
+		}
+		else	tk->TOK_REL = Salloc(buf, np - buf) + 1;
+		toktype = real_type;
+		return tk->tk_symb = REAL;
+
 		/*NOTREACHED*/
 	}
 
