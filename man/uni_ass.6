@@ -1,3 +1,4 @@
+\" $Header$
 .tr ~
 .TH UNI_ASS VI
 .ad
@@ -74,10 +75,9 @@ In the final stages of the assembly the text, data and bss
 segments are concatenated in that order after the length of
 each segment has been made a multiple of a machine dependent
 constant.
-The first segment (text) starts at location 0.
-.br
-The start address of each segment can be set by the .base
-pseudo-instruction.
+The first segment (text) starts at the location that is given
+as an argument to the .base pseudo-instruction.
+The default is 0.
 .sp
 The labels defined in a particular segment
 have the type of that
@@ -248,8 +248,8 @@ The value of the expression must be absolute.
 .Pu ".bss"
 Start an segment of the indicated type.
 .Pu ".base \fIexpresssion\fP"
-Set the starting address of the current segment to the value of
-the expression.
+Set the starting address of the first of the consecutive segments 
+(text) to the value of the expression.
 The expression must be absolute.
 .Pu ".errnz \fIexpression\fP"
 Stop with a fatal error message when the value of the
