@@ -23,7 +23,8 @@
 	blt	2f
 	move.l	a0, -(sp)
 	move.l	#ESET, -(sp)	! bitnumber too large
-	jmp	.trp
+	jsr	.trp
+	rts
 2:
 	bset	d0, 0(sp, d2.l)
 	jmp	(a0)
