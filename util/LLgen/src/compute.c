@@ -22,9 +22,7 @@
 # include "extern.h"
 # include "sets.h"
 # include "assert.h"
-# ifndef NDEBUG
 # include "io.h"
-# endif
 
 # ifndef NORCSID
 static string rcsid = "$Header$";
@@ -53,7 +51,6 @@ STATIC int nfollow();
 STATIC follow();
 STATIC co_dirsymb();
 STATIC co_others();
-STATIC int ncomplength();
 STATIC do_lengthcomp();
 STATIC complength();
 STATIC add();
@@ -472,6 +469,18 @@ static p_length length;
 # define INFINITY 32767
 
 STATIC
+ncomplength(p)
+	register p_nont p;
+{
+	register p_length pl = &length[p - nonterms];
+	int x = pl->cnt;
+
+	pl->cnt = -1;
+	complength(p->n_rule, pl);
+	return pl->cnt < INFINITY && x == INFINITY;
+}
+
+STATIC
 do_lengthcomp() {
 	/*
 	 * Compute the minimum length of a terminal production for each
@@ -484,13 +493,17 @@ do_lengthcomp() {
 	 */
 	register p_length pl;
 	register p_nont p;
+	register p_start st;
+	int change = 1;
 	p_mem alloc();
 
 	length = (p_length) alloc((unsigned) (nnonterms * sizeof(*length)));
 	for (pl = &length[nnonterms-1]; pl >= length; pl--) {
 		pl->val = pl->cnt = INFINITY;
 	}
+
 	co_trans(ncomplength);
+
 	pl = length;
 	for (p = nonterms; p < maxnt; p++, pl++) {
 		if (pl->cnt == INFINITY) {
@@ -501,54 +514,45 @@ do_lengthcomp() {
 	free ((p_mem) length);
 }
 
-STATIC int
-ncomplength(p) register p_nont p; {
-	register p_length l;
-
-	l = &length[p - nonterms];
-	if (l->cnt == INFINITY) {
-		complength(p->n_rule, l);
-		if (l->cnt != INFINITY) return 1;
-	}
-	return 0;
-}
-
 STATIC
-complength(p,le) register p_gram p; register p_length le; {
+complength(p,le) register p_gram p; p_length le; {
 	/*
 	 * Walk grammar rule p, computing minimum lengths
 	 */
 	register p_link l;
 	register p_term q;
 	t_length i;
+	t_length X;
 
-	le->cnt = 0;
-	le->val = 0;
+	X.cnt = 0;
+	X.val = 0;
 	for (;;) {
 		switch (g_gettype(p)) {
-		  case EORULE :
-			return;
 		  case LITERAL :
 		  case TERMINAL :
-		  	if (!le->cnt) add(le, 1, g_getcont(p));
-			else add(le, 1, 0);
+		  	if (!X.cnt) add(&X, 1, g_getcont(p));
+			else add(&X, 1, 0);
 			break;
 		  case ALTERNATION :
 
-			le->cnt = INFINITY;
-			le->val = INFINITY;
+			X.cnt = INFINITY;
+			X.val = INFINITY;
 			while (g_gettype(p) != EORULE) {
 				l = &links[g_getcont(p)];
 				complength(l->l_rule,&i);
 				if (l->l_flag & DEF) {
-					*le = i;
-					return;
+					X = i;
+					break;
 				}
-				if (compare(&i, le) < 0) {
-					*le = i;
+				if (compare(&i, &X) < 0) {
+					X = i;
 				}
 				p++;
 			}
+			/* Fall through */
+		  case EORULE :
+			le->cnt = X.cnt;
+			le->val = X.val;
 			return;
 		  case TERM : {
 			register int rep;
@@ -558,28 +562,35 @@ complength(p,le) register p_gram p; register p_length le; {
 			if ((q->t_flags&PERSISTENT) || 
 			    rep==FIXED || rep==PLUS) {
 				complength(q->t_rule,&i);
-				add(le, i.cnt, i.val);
-				if (i.cnt == 0) le->val += ntokens;
+				add(&X, i.cnt, i.val);
+				if (i.cnt == 0) X.val += ntokens;
 				if (rep == FIXED && r_getnum(q) > 0) {
 					for (rep = r_getnum(q) - 1;
 					     rep > 0; rep--) {
-						add(le, i.cnt, i.val);
+						add(&X, i.cnt, i.val);
 					}
 				}
 			}
 			else {
 				/* Empty producing term on this path */
-				 le->val += ntokens;
+				 X.val += ntokens;
 			}
 			break; }
 		  case NONTERM : {
-			register p_length temp;
+			int nn = g_getnont(p);
+			register p_length pl = &length[nn];
+			int x = pl->cnt;
 
-			temp = &length[g_getnont(p)];
-			add(le, temp->cnt, temp->val);
-			if (temp->cnt == 0) {
+			if (x == INFINITY) {
+				pl->cnt = -1;
+				complength(nonterms[nn].n_rule,pl);
+				x = pl->cnt;
+			}
+			else if (x == -1) x = INFINITY;
+			add(&X, x, pl->val);
+			if (x == 0) {
 				/* Empty producing nonterminal */
-				le->val += ntokens;
+				X.val += ntokens;
 			}}
 		}
 		p++;
@@ -589,7 +600,7 @@ complength(p,le) register p_gram p; register p_length le; {
 STATIC
 add(a, c, v) register p_length a; {
 
-	if (c == INFINITY) {
+	if (a->cnt == INFINITY || c == INFINITY) {
 		a->cnt = INFINITY;
 		return;
 	}
