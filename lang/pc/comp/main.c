@@ -223,8 +223,8 @@ AddRequired()
 		(void) Enter("string", D_TYPE, string_type, 0);
 
 	/* DIRECTIVES */
-	(void) Enter("forward", D_FORWARD, NULLTYPE, 0);
-	(void) Enter("extern", D_EXTERN, NULLTYPE, 0);
+	(void) Enter("forward", D_FORWARD, error_type, 0);
+	(void) Enter("extern", D_EXTERN, error_type, 0);
 
 	/* CONSTANTS */
 	/* nil is TOKEN and thus part of the grammar */
