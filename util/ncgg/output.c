@@ -877,5 +877,5 @@ statistics() {
 	used("Pat bytes",npatbytes+1,MAXPATBYTES);
 	if (tabledebug)
 		used("Source lines",maxline,MAXSOURCELINES);
-	fprintf(stderr,"%ldK heap used\n",((long) (sbrk(0)-end+1023))/1024);
+	fprintf(stderr,"%ldK heap used\n",((long) (sbrk(0)-(char *) &end+1023))/1024);
 }
