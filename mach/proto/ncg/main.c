@@ -85,6 +85,7 @@ main(argc,argv) char **argv; {
 	out_init(argv[1]);
 	readcodebytes();
 	itokcost();
+	in_start();
 	codegen(startupcode,maxply,TRUE,MAXINT,0);
 	error("Bombed out of codegen");
 }

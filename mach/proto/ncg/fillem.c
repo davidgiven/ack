@@ -111,6 +111,12 @@ in_init(filename) char *filename; {
 		error("Bad format %s",filename);
 }
 
+in_start() {
+#ifdef modhead
+	fprintf(codefile,"%s",modhead) ;
+#endif
+}
+
 in_finish() {
 }
 
