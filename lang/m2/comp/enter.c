@@ -240,8 +240,9 @@ DoImport(df, scope, kind)
 	/*	Definition "df" is imported to scope "scope".
 		Handle the case that it is an enumeration type or a module.
 	*/
+	register t_def *idef = define(df->df_idf, scope, kind);
 
-	define(df->df_idf, scope, kind)->imp_def = df;
+	idef->imp_def = df;
 
 	while (df->df_kind & D_IMPORTED) {
 		df = df->imp_def;
@@ -258,6 +259,7 @@ DoImport(df, scope, kind)
 						   are not used
 						*/
 		}
+		idef->df_flags |= D_USED;	/* don't complain ... */
 	}
 	else if (df->df_kind == D_MODULE) {
 		/* Also import all definitions that are exported from this
@@ -280,6 +282,7 @@ DoImport(df, scope, kind)
 				/* don't complain when these are not used */
 			}
 		}
+		idef->df_flags |= D_USED;	/* don't complain ... */
 	}
 }
 
