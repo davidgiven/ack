@@ -195,7 +195,7 @@ union ptr_union *argp;		/* our argument list */
 			  for (c = Xtable; c < &Xtable[128]; c++) *c = 0;
 			}
 			while (*format && *format != ']') {
-				Xtable[*format] = 1;
+				Xtable[*format++] = 1;
 			}
 			if (!*format)
 				goto quit;
