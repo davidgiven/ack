@@ -11,9 +11,11 @@ name cpp
 	mapflag -P CPP_F={CPP_F?} -P
 	mapflag -C CPP_F={CPP_F?} -C
 	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
-	({SUFFIX}:.c={INCLUDES?}) \
-	-D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
--DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} <
+		({SUFFIX}:.c={INCLUDES?}) \
+		-D{NAME} \
+		-DEM_WSIZE={w} -DEM_PSIZE={p} \
+		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
+		<
 	stdout
 	prep is
 end
@@ -31,11 +33,13 @@ name cem
 	mapflag -p CEM_F={CEM_F?} -p
 	mapflag -V* CEM_F={CEM_F?} -V*
 	args \
-{CPP_F?} {INCLUDES?}  \
--D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
--DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
--Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} {CC_ALIGN?} \
-{CEM_F?} < >
+		{CPP_F?} {INCLUDES?}  \
+		-D{NAME} \
+		-DEM_WSIZE={w} -DEM_PSIZE={p} \
+		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
+		-Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} \
+		{CC_ALIGN?} \
+		{CEM_F?} < >
 	rts .c
 	need .c
 	callname acc
@@ -55,9 +59,10 @@ name pc
 	mapflag -A  PC_F={PC_F?} -A
 #	mapflag -R  PC_F={PC_F?} -R
 	mapflag --* PC_F={PC_F?} -*
-#default size and alignment for longs are 4
 #range checks can only be disabled through comments
-	args -Vw{w}.{w}i{w}.{w}l{l}.{w}p{p}.{w}f{d}.{w}S{w}.{w} {PC_F?} < > {SOURCE}
+	args \
+		-Vw{w}.{w}i{w}.{w}l{l}.{w}p{p}.{w}f{d}.{w}S{w}.{w} \
+		{PC_F?} < > {SOURCE}
 	prep cond
 	rts .p
 	need .p
@@ -78,9 +83,10 @@ name m2
 	mapflag -Xs M2_F={M2_F?} -s
 	mapflag -V* M2_F={M2_F?} -V*
 	mapflag --* M2_F={M2_F?} -*
-	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
-	-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
-	{M2_ALIGN?} {M2_F?} < >
+	args \
+		{M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
+		-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
+		{M2_ALIGN?} {M2_F?} < >
 	prep cond
 	rts .mod
 	need .mod
@@ -170,8 +176,9 @@ name ego
 	mapflag -s* EGO_F={EGO_F?} -s*
 	mapflag -a* EGO_F={EGO_F?} -a*
 	mapflag -O* EGO_F={EGO_F?} -O*
-	args {EGO} {EM} {EGO_F?} -P {EM}/lib/ego \
--M{EM}/lib/ego/{M}descr <
+	args \
+		{EGO} {EM} {EGO_F?} -P {EM}/lib/ego \
+		-M{EM}/lib/ego/{M}descr <
 	optimizer 2
 	stdout
 	combiner
