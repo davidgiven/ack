@@ -76,31 +76,38 @@ replace(idef)
 		}
 		if (mac->mc_flag & FUNC) {
 			struct idf *param;
-			extern struct idf *GetIdentifier();
+			char *nam;
+			extern char *GetIdentifier();
+			extern struct idf *str2idf();
 
 			UnknownIdIsZero = 0;
-			param = GetIdentifier();
+			nam = GetIdentifier();
+			if (nam) {
+				param = findidf(nam);
+			}
+			else	param = 0;
 			UnknownIdIsZero = 1;
 			if (c == '(') {
 				LoadChar(c);
 				c = skipspaces(c, 0);
 				if (c != ')') error(") missing");
 			}
-			if (! param) {
+			if (! nam) {
 				error("identifier missing");
 			}
 			repl = new_mlist();
 			if (param && param->id_macro) 
-				reptext = "1";
+				reptext = "1 ";
 			else
-				reptext = "0";
-			InsertText(reptext, 1);
+				reptext = "0 ";
+			InsertText(reptext, 2);
 			InputLevel++;
 			repl->m_level = InputLevel;
 
 			repl->next = ReplList;
 			ReplList = repl;
 			repl->m_mac = mac;
+			if (nam) free(nam);
 			return 1;
 		}
 		actpars = getactuals(idef);	/* get act.param. list	*/
