@@ -964,10 +964,33 @@ RegisterMessage(df)
 }
 
 static
+df_warning(nd, df, warning)
+	t_node	*nd;
+	t_def	*df;
+	char	*warning;
+{
+	if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST|D_PROCHEAD))) {
+		return;
+	}
+	if (warning) {
+		node_warning(nd,
+			     W_ORDINARY,
+			     "%s \"%s\" %s",
+			     (df->df_flags & D_VALPAR) ? "value parameter" :
+			      (df->df_flags & D_VARPAR) ? "variable parameter" :
+			       (df->df_kind == D_VARIABLE) ? "variable" :
+				(df->df_kind == D_TYPE) ? "type" :
+				 (df->df_kind == D_CONST) ? "constant" :
+				  "procedure",
+			     df->df_idf->id_text, warning);
+	}
+}
+
+static
 UseWarnings(df)
 	register t_def *df;
 {
-	char *warning = 0;
+	t_node	*nd = df->df_scope->sc_end;
 
 	if (is_anon_idf(df->df_idf) ||
 	    !(df->df_kind&(D_IMPORTED|D_VARIABLE|D_PROCEDURE|D_CONST|D_TYPE)) ||
@@ -981,55 +1004,39 @@ UseWarnings(df)
 		df1->df_flags |= df->df_flags & (D_USED|D_DEFINED);
 		if (df->df_kind == D_INUSE) return;
 		if ( !(df->df_flags & D_IMP_BY_EXP)) {
-			if (! (df->df_flags & (D_USED | D_DEFINED))) {
-				if (df1->df_kind == D_VARIABLE) {
-					warning = "imported but not used/assigned";
-				}
-				else	warning = "imported but not used";
-				goto warn;
+			if (df->df_flags & (D_USED | D_DEFINED)) {
+				return;
 			}
+			df_warning(nd,
+				   df1,
+				   df1->df_kind == D_VARIABLE ?
+					"imported but not used/assigned" :
+					"imported but not used");
 			return;
 		}
 		df = df1;
-	}
-	if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST))) {
-		return;
+		nd = df->df_scope->sc_end;
 	}
 	switch(df->df_flags & (D_USED|D_DEFINED|D_VALPAR|D_VARPAR)) {
 	case 0:
 	case D_VARPAR:
-		warning = "never used/assigned";
+		df_warning(nd, df,"never used/assigned");
 		break;
 	case D_USED|D_VARPAR:
 #ifdef PASS_BIG_VAL_AS_VAR
 		if (df->df_type->tp_fund != T_EQUAL) {
-			warning = "never assigned, could be value parameter";
+			df_warning(nd, df,"never assigned, could be value parameter");
 		}
 #endif
 		break;
 	case D_USED:
-		warning = "never assigned";
+		df_warning(nd, df,"never assigned");
 		break;
 	case D_VALPAR:
 	case D_DEFINED:
 	case D_DEFINED|D_VALPAR:
-		warning = "never used";
+		df_warning(nd, df,"never used");
 		break;
-	default:
-		return;
-	}
-warn:
-	if (warning) {
-		node_warning(df->df_scope->sc_end,
-			     W_ORDINARY,
-			     "%s \"%s\" %s",
-			     (df->df_flags & D_VALPAR) ? "value parameter" :
-			      (df->df_flags & D_VARPAR) ? "variable parameter" :
-			       (df->df_kind == D_VARIABLE) ? "variable" :
-				(df->df_kind == D_TYPE) ? "type" :
-				 (df->df_kind == D_CONST) ? "constant" :
-				  "procedure",
-			     df->df_idf->id_text, warning);
 	}
 }
 
