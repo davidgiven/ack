@@ -1,5 +1,2 @@
 LIST
-Makefile
-end.s
-head_em.s
 libem_s.a

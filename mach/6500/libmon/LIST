@@ -1,0 +1,7 @@
+libmon_s.a
+print.s
+printhex.s
+printstack.s
+mon.s
+read.s
+write.s

@@ -18,10 +18,6 @@ mli4.s
 mlu.s
 mlu4.s
 mul4.s
-mon.s
-write.s
-printstack.s
-printhex.s
 rmi.s
 rmi4.s
 div4.s
@@ -52,7 +48,6 @@ testFFh.s
 trap.s
 ldi.s
 data.s
-print.s
 zri.s
 locaddr.s
 and.s
@@ -76,7 +71,6 @@ lxa1.s
 lxa2.s
 lxl.s
 pro.s
-read.s
 rol.s
 rol4.s
 ror.s

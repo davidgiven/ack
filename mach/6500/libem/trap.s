@@ -130,10 +130,6 @@ Mtrap:
 	ldx #[EBADGTO].l
 	jsr Mprint
 errorend:
-	ldx STACK
-	dex
-	dex
-	txs
-	rts
-
-
+	ldx TRAPVAL
+	jsr Push
+	jsr __exit
