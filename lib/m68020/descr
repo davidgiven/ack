@@ -45,6 +45,7 @@ name led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -fp LIBFP={EM}/{LIB}fp
 	mapflag -ansi C_LIB={EM}/{LIB}ac
+	mapflag -g LIBDB={EM}/{LIB}db
 	args {ALIGN} (.e:{HEAD}= {EM}/{RT}em) \
 		({RTS}:.ocm.b={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
@@ -59,6 +60,7 @@ name led
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
+		{LIBDB?} \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
