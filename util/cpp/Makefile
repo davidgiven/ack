@@ -148,7 +148,7 @@ init.o: charoffset.h class.h idf.h interface.h macro.h
 input.o: file_info.h input.h inputtype.h
 main.o: file_info.h idfsize.h
 options.o: charoffset.h class.h idf.h idfsize.h macro.h maxincl.h
-preprocess.o: LLlex.h bits.h charoffset.h class.h dobits.h file_info.h idf.h idfsize.h input.h inputtype.h maxincl.h obufsize.h
+preprocess.o: LLlex.h bits.h charoffset.h class.h dobits.h file_info.h idf.h idfsize.h input.h inputtype.h line_prefix.h maxincl.h obufsize.h
 replace.o: LLlex.h charoffset.h class.h debug.h file_info.h idf.h input.h inputtype.h interface.h macro.h pathlength.h textsize.h
 scan.o: charoffset.h class.h idf.h input.h inputtype.h interface.h lapbuf.h macro.h nparams.h
 skip.o: LLlex.h charoffset.h class.h file_info.h input.h inputtype.h
