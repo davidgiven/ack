@@ -8,6 +8,7 @@
 #include	"debug.h"
 #include	"errout.h"
 
+#include	<varargs.h>
 #include	<em_arith.h>
 #include	<em_code.h>
 #include	<em_label.h>
@@ -46,71 +47,125 @@ extern char *symbol2str();
 */
 
 #ifdef DEBUG
-/*VARARGS1*/
-debug(fmt, args)
-	char *fmt;
+/*VARARGS*/
+debug(va_alist)
+	va_dcl
 {
-	_error(VDEBUG, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(VDEBUG, NULLNODE, ap);
+	}
+	va_end(ap);
 }
 #endif DEBUG
 
-/*VARARGS1*/
-error(fmt, args)
-	char *fmt;
+/*VARARGS*/
+error(va_alist)
+	va_dcl
 {
-	_error(ERROR, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(ERROR, NULLNODE, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS2*/
-node_error(node, fmt, args)
-	struct node *node;
-	char *fmt;
+/*VARARGS*/
+node_error(va_alist)
+	va_dcl
 {
-	_error(ERROR, node, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		struct node *node = va_arg(ap, struct node *);
+		_error(ERROR, node, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS1*/
-warning(fmt, args)
-	char *fmt;
+/*VARARGS*/
+warning(va_alist)
+	va_dcl
 {
-	if( !options['w'] ) _error(WARNING, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(WARNING, NULLNODE, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS2*/
-node_warning(node, fmt, args)
-	struct node *node;
-	char *fmt;
+/*VARARGS*/
+node_warning(va_alist)
+	va_dcl
 {
-	if( !options['w'] ) _error(WARNING, node, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		struct node *node = va_arg(ap, struct node *);
+		_error(WARNING, node, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS1*/
-lexerror(fmt, args)
-	char *fmt;
+/*VARARGS*/
+lexerror(va_alist)
+	va_dcl
 {
-	_error(LEXERROR, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(LEXERROR, NULLNODE, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS1*/
-lexwarning(fmt, args) 
-	char *fmt;
+/*VARARGS*/
+lexwarning(va_alist)
+	va_dcl
 {
-	if( !options['w'] ) _error(LEXWARNING, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(LEXWARNING, NULLNODE, ap);
+	}
+	va_end(ap);
 }
 
-/*VARARGS1*/
-fatal(fmt, args)
-	char *fmt;
+/*VARARGS*/
+fatal(va_alist)
+	va_dcl
 {
-	_error(FATAL, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(FATAL, NULLNODE, ap);
+	}
+	va_end(ap);
 	sys_stop(S_EXIT);
 }
 
-/*VARARGS1*/
-crash(fmt, args)
-	char *fmt;
+/*VARARGS*/
+crash(va_alist)
+	va_dcl
 {
-	_error(CRASH, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	{
+		_error(CRASH, NULLNODE, ap);
+	}
+	va_end(ap);
 #ifdef DEBUG
 	sys_stop(S_ABORT);
 #else
@@ -118,11 +173,10 @@ crash(fmt, args)
 #endif
 }
 
-_error(class, node, fmt, argv)
+_error(class, node, ap)
 	int class;
 	struct node *node;
-	char *fmt;
-	int argv[];
+	register va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
@@ -132,6 +186,7 @@ _error(class, node, fmt, argv)
 	static char * last_fn = 0;
 	static int e_seen = 0, w_seen = 0;
 	register char *remark = 0;
+	char *fmt;
 
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
@@ -152,6 +207,7 @@ _error(class, node, fmt, argv)
 	switch( class )	{
 		case WARNING:
 		case LEXWARNING:
+			if (options['w']) return;
 			remark = "(warning)";
 			break;
 		case CRASH:
@@ -184,6 +240,7 @@ _error(class, node, fmt, argv)
 			break;
 	}
 
+	fmt = va_arg(ap, char *);
 #ifdef DEBUG
 	if( class != VDEBUG )	{
 #endif
@@ -217,6 +274,6 @@ _error(class, node, fmt, argv)
 
 	if( remark ) fprint(ERROUT, "%s ", remark);
 
-	doprnt(ERROUT, fmt, argv);		/* contents of error */
+	doprnt(ERROUT, fmt, ap);		/* contents of error */
 	fprint(ERROUT, "\n");
 }
