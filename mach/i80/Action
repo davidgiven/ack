@@ -1,3 +1,24 @@
 name "Intel 8080 assembler"
 dir as
 end
+name "Intel 8080 code generator"
+dir cg
+end
+name "Intel 8080 download programs"
+dir dl
+end
+name "Intel 8080 Basic library"
+dir libbc
+end
+name "Intel 8080 C libraries"
+dir libcc
+end
+name "Intel 8080 EM library"
+dir libem
+end
+name "Intel 8080 Pascal library"
+dir libpc
+end
+name "Intel 8080 System library"
+dir libsys
+end
