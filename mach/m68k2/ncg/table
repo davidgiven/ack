@@ -5879,8 +5879,8 @@ with STACK
 /*     gen jsr {absolute4, ".nop"} */
 
 #if WORD_SIZE==2
-#ifdef TBL68020
 pat rck $1==2
+#ifdef TBL68020
 with ext_addr D_REG
     gen cmp2_w {absolute2, %1.bd}, %2
 	bcc {slabel, 1f}
