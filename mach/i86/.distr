@@ -8,3 +8,5 @@ libpc
 libsys
 as
 liboc
+libfp
+ncg
