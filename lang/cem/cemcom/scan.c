@@ -34,7 +34,7 @@ PRIVATE char *aptr;	/* pointer to last inserted character in apbuf	*/
 
 PRIVATE int nr_of_params;	/* number of actuals read until now	*/
 
-PRIVATE char **
+char **
 getactuals(idef)
 	register struct idf *idef;
 {

@@ -13,7 +13,7 @@
 #include	"interface.h"
 
 #ifndef NOPP
-PRIVATE int
+int
 skipspaces(ch, skipnl)
 	register int ch;
 {
@@ -58,7 +58,6 @@ skipspaces(ch, skipnl)
 }
 #endif /* NOPP */
 
-PRIVATE 
 skipline()
 {
 	/*	skipline() skips all characters until a newline character
