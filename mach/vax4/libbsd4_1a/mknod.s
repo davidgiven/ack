@@ -6,7 +6,7 @@ _mknod:
 	.word	0x0000
 	chmk	$mknod
 	bcc 	1f
-	jmp 	errmod
+	jmp 	errmon
 1:
 	clrl	r0
 	ret

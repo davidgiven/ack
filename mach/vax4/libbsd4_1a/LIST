@@ -10,6 +10,7 @@ alarm.s
 chdir.s
 chmod.s
 chown.s
+chroot.s
 close.s
 creat.s
 dup.s
