@@ -266,7 +266,7 @@ idf2sdef(idf, tp)
 	
 	/* Follow chain from idf, to meet tp. */
 	while ((sdef = *sdefp))	{
-		if (equal_type(sdef->sd_stype, tp, 0))
+		if (equal_type(sdef->sd_stype, tp, -999))	/* ??? hack */
 			return sdef;
 		sdefp = &(*sdefp)->next;
 	}
