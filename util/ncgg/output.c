@@ -374,6 +374,22 @@ typeconv(n) {
 	return(0);
 }
 
+outfmt(p)
+register char *p;
+{
+	register int c;
+	fprintf(ctable,"\"");
+	while ((c= (*p++&0377))!=0) {
+		if (! isascii(c) || iscntrl(c)) {
+			fprintf(ctable,"\\%c%c%c",
+				((c&~0300)>>6) + '0', ((c&070)>>3)+'0',
+				(c&07)+'0');
+		}
+		else fprintf(ctable, "%c",c);
+	}
+	fprintf(ctable,"\"");
+}
+
 outtokens() {
 	register tokno,i;
 	register token_p tp;
@@ -381,11 +397,13 @@ outtokens() {
 	fprintf(ctable,"tkdef_t tokens[] = {{0},\n");
 	for (tokno=1;tokno<ntokens;tokno++) {
 		tp = l_tokens[tokno];
-		fprintf(ctable,"{%d,{%d,%d},{",
+		fprintf(ctable,"/* %3d */{%d,{%d,%d},{", tokno,
 			tp->tk_size, tp->tk_cost.ct_space, tp->tk_cost.ct_time);
 		for(i=0;i<maxtokensize;i++)
 			fprintf(ctable,"%d,",typeconv(tp->tk_att[i].ta_type));
-		fprintf(ctable,"},%d},\n",tp->tk_format);
+		fprintf(ctable,"},%d},\t/* ",tp->tk_format);
+		outfmt(l_strings[tp->tk_format]);
+		fprintf(ctable," */\n");
 	}
 	fprintf(ctable,"{0}};\n\n");
 }
@@ -412,8 +430,9 @@ outstrings() {
 		fprintf(ctable,"char *tablename = \"%s\";\n",filename);
 	fprintf(ctable,"string codestrings[] = {\n");
 	for(i=0;i<nstrings;i++) {
-		p= l_strings[i];
-		fprintf(ctable,"\t\"");
+		fprintf(ctable,"\t");
+		outfmt(l_strings[i]);
+#if 0
 		while ((c= (*p++&0377))!=0) {
 			if (! isascii(c) || iscntrl(c)) {
 				fprintf(ctable,"\\%c%c%c",
@@ -423,6 +442,8 @@ outstrings() {
 			else fprintf(ctable, "%c",c);
 		}
 		fprintf(ctable,"\",\n");
+#endif
+		fprintf(ctable,",\n");
 	}
 	fprintf(ctable,"};\n\n");
 }
@@ -435,7 +456,7 @@ outsets() {
 
 	fprintf(ctable,"set_t machsets[] = {\n");
 	for (sp=l_sets;sp< &l_sets[nsets]; sp++) {
-		fprintf(ctable,"{%3d,{",sp->set_size);
+		fprintf(ctable,"/* %3ld */ {%3d,{",(long)(sp-l_sets),sp->set_size);
 		for (i=0;i<setsize;i++)
 			fprintf(ctable,"0x%x,",sp->set_val[i]&0xFFFF);
 		fprintf(ctable,"}},\n");
