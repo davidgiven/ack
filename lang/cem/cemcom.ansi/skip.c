@@ -59,11 +59,10 @@ skipspaces(ch, skipnl)
 }
 #endif NOPP
 
-SkipToNewLine(garbage)
-	int garbage;
+SkipToNewLine()
 {
 	register int ch;
-	register int pstrict = 0;
+	register int garbage = 0;
 
 	while ((ch = GetChar()) != '\n') {
 		if (ch == '/') {
@@ -76,9 +75,9 @@ SkipToNewLine(garbage)
 				continue;
 			}
 		}
-		if (garbage && !is_wsp(ch))
-			pstrict = 1;
+		if (!is_wsp(ch))
+			garbage = 1;
 	}
 	++LineNumber;
-	return pstrict;
+	return garbage;
 }

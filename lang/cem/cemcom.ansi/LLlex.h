@@ -50,7 +50,6 @@ extern int UnknownIdIsZero;	/* "LLlex.c"	*/
 #endif NOPP
 extern int EoiForNewline;	/* "LLlex.c"	*/
 extern int AccFileSpecifier;	/* "LLlex.c"	*/
-extern int SkipEscNewline;	/* "LLlex.c"	*/
 extern int File_Inserted;	/* "LLlex.c"	*/
 
 extern int NoUnstack;		/* buffer.c	*/

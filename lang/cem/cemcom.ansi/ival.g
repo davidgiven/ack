@@ -577,7 +577,7 @@ ch_array(tpp, ex)
 	}
 	/* throw out the characters of the already prepared string	*/
 	s = Malloc((unsigned) (length));
-	clear(s, length);
+	clear(s, (unsigned)length);
 	i = length <= ex->SG_LEN ? length : ex->SG_LEN;
 	to = s; from = ex->SG_VALUE;
 	while(--i >= 0) {

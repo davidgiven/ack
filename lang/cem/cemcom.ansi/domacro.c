@@ -52,7 +52,7 @@ GetIdentifier(skiponerr)
 	ReplaceMacros = 1;
 	UnknownIdIsZero = tmp;
 	if (tok != IDENTIFIER) {
-		if (skiponerr && tok != EOI) SkipToNewLine(0);
+		if (skiponerr && tok != EOI) SkipToNewLine();
 		return (struct idf *)0;
 	}
 	return tk.tk_idf;
@@ -108,7 +108,7 @@ domacro()
 			*/
 			if (GetToken(&tk) != INTEGER) {
 				error("bad #line syntax");
-				SkipToNewLine(0);
+				SkipToNewLine();
 			}
 			else
 				do_line((unsigned int)tk.tk_ival);
@@ -125,7 +125,7 @@ domacro()
 		default:
 			/* invalid word seen after the '#'	*/
 			lexerror("%s: unknown control", tk.tk_idf->id_text);
-			SkipToNewLine(0);
+			SkipToNewLine();
 		}
 		break;
 	case INTEGER:		/* # <integer> [<filespecifier>]?	*/
@@ -135,7 +135,7 @@ domacro()
 		break;
 	default:	/* invalid token following '#'		*/
 		lexerror("illegal # line");
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	EoiForNewline = 0;
 }
@@ -167,14 +167,14 @@ int to_endif;
 				return;
 			}
 			UnGetChar();
-			SkipToNewLine(0);
+			SkipToNewLine();
 			continue;
 		}
 		ReplaceMacros = 0;
 		toknum = GetToken(&tk);
 		ReplaceMacros = 1;
 		if (toknum != IDENTIFIER) {
-			SkipToNewLine(0);
+			SkipToNewLine();
 			continue;
 		}
 		/*	an IDENTIFIER: look for #if, #ifdef and #ifndef
@@ -184,13 +184,13 @@ int to_endif;
 		*/
 		switch(tk.tk_idf->id_resmac) {
 		default:
-			SkipToNewLine(0);
+			SkipToNewLine();
 			break;
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
 			push_if();
-			SkipToNewLine(0);
+			SkipToNewLine();
 			break;
 		case K_ELIF:
 			if (ifstack[nestlevel])
@@ -203,30 +203,30 @@ int to_endif;
 					return;
 				}
 			}
-			else SkipToNewLine(0);	/* otherwise done in ifexpr() */
+			else SkipToNewLine();	/* otherwise done in ifexpr() */
 			break;
 		case K_ELSE:
 			if (ifstack[nestlevel])
 				lexerror("#else after #else");
 			++(ifstack[nestlevel]);
 			if (!to_endif && nestlevel == skiplevel) {
-				if (SkipToNewLine(1))
+				if (SkipToNewLine())
 					strict("garbage following #else");
 				NoUnstack--;
 				return;
 			}
-			else SkipToNewLine(0);
+			else SkipToNewLine();
 			break;
 		case K_ENDIF:
 			ASSERT(nestlevel > nestlow);
 			if (nestlevel == skiplevel) {
-				if (SkipToNewLine(1))
+				if (SkipToNewLine())
 					strict("garbage following #endif");
 				nestlevel--;
 				NoUnstack--;
 				return;
 			}
-			else SkipToNewLine(0);
+			else SkipToNewLine();
 			nestlevel--;
 			break;
 		}
@@ -273,7 +273,7 @@ do_include()
 		filenm = (char *)0;
 	}
 	AccFileSpecifier = 0;
-	SkipToNewLine(0);
+	SkipToNewLine();
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
@@ -313,7 +313,7 @@ do_define()
 	ch = GetChar();
 	if (ch == '(') {
 		if ((nformals = getparams(formals, parbuf)) == -1) {
-			SkipToNewLine(0);
+			SkipToNewLine();
 			return;	/* an error occurred	*/
 		}
 		ch = GetChar();
@@ -348,12 +348,12 @@ do_elif()
 {
 	if (nestlevel <= nestlow) {
 		lexerror("#elif without corresponding #if");
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	else {		/* restart at this level as if a #if is detected.  */
 		if (ifstack[nestlevel]) {
 			lexerror("#elif after #else");
-			SkipToNewLine(0);
+			SkipToNewLine();
 		}
 		nestlevel--;
 		push_if();
@@ -363,7 +363,7 @@ do_elif()
 
 do_else()
 {
-	if (SkipToNewLine(1))
+	if (SkipToNewLine())
 		strict("garbage following #else");
 	if (nestlevel <= nestlow)
 		lexerror("#else without corresponding #if");
@@ -378,7 +378,7 @@ do_else()
 
 do_endif()
 {
-	if (SkipToNewLine(1))
+	if (SkipToNewLine())
 		strict("garbage following #endif");
 	if (nestlevel <= nestlow)	{
 		lexerror("#endif without corresponding #if");
@@ -409,7 +409,7 @@ do_ifdef(how)
 	if (how ^ (id && id->id_macro != 0))
 		skip_block(0);
 	else if (id)
-		SkipToNewLine(0);
+		SkipToNewLine();
 }
 
 do_undef()
@@ -427,7 +427,7 @@ do_undef()
 				id->id_macro = (struct macro *) 0;
 			}
 		} /* else: don't complain */
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 	else
 		lexerror("illegal #undef construction");
@@ -707,7 +707,7 @@ GetIdentifier(skiponerr)
 
 	tok = GetToken(&tk);
 	if (tok != IDENTIFIER) {
-		if (skiponerr && tok != EOI) SkipToNewLine(0);
+		if (skiponerr && tok != EOI) SkipToNewLine();
 		return (struct idf *)0;
 	}
 	return tk.tk_idf;
@@ -723,7 +723,7 @@ domacro()
 		if (strcmp(tk.tk_idf->id_text, "line")
 		    && strcmp(tk.tk_idf->id_text, "pragma")) {
 			error("illegal # line");
-			SkipToNewLine(0);
+			SkipToNewLine();
 			return;
 		}
 		else if ( !strcmp(tk.tk_idf->id_text, "pragma")) {
@@ -735,7 +735,7 @@ domacro()
 	}
 	if (tok != INTEGER) {
 		error("illegal # line");
-		SkipToNewLine(0);
+		SkipToNewLine();
 		return;
 	}
 	do_line((unsigned int) tk.tk_ival);
@@ -752,5 +752,5 @@ do_line(l)
 	LineNumber = l - 1;	/* the number of the next input line */
 	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
 		FileName = tk.tk_bts;
-	SkipToNewLine(0);
+	SkipToNewLine();
 }

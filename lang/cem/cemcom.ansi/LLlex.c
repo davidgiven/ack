@@ -581,7 +581,7 @@ quoted(ch)
 
 			for (;;) {
 				ch = GetChar();
-				if (vch = val_in_base(ch, 16), vch == -1)
+				if (vch = hex_val(ch), vch == -1)
 					break;
 				hex = hex * 16 + vch;
 			}
@@ -605,22 +605,12 @@ quoted(ch)
 
 
 int
-val_in_base(ch, base)
+hex_val(ch)
 	register int ch;
 {
-	switch (base) {
-	case 8:
-		return (is_dig(ch) && ch < '9') ? ch - '0' : -1;
-	case 10:
-		return is_dig(ch) ? ch - '0' : -1;
-	case 16:
-		return is_dig(ch) ? ch - '0'
+	return is_dig(ch) ? ch - '0'
 			: is_hex(ch) ? (ch - 'a' + 10) & 017
 			: -1;
-	default:
-		fatal("(val_in_base) illegal base value %d", base);
-		/* NOTREACHED */
-	}
 }
 
 
@@ -763,10 +753,7 @@ struct token *ptok;
 	ubound = max_arith / (base / 2);
 
 	while (is_hex(*cp)) {
-		dig = is_dig(*cp) ? *cp - '0'
-				    : (( *cp >= 'A' && *cp <= 'F' ? *cp - 'A'
-								: *cp - 'a')
-					+ 10) ;
+		dig = hex_val(*cp);
 		if (dig >= base) {
 			malformed++;			/* ignore */
 		}

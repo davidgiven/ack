@@ -110,19 +110,22 @@ other_specifier(register struct decspecs *ds;)
 	}
 |
 	/*	This qualifier applies to the top type.
-		E.g. const float * is a pointer to const float.
+		E.g. volatile float * is a pointer to volatile float.
 	*/
-	[ VOLATILE | CONST ]
-	{	if (DOT == VOLATILE) {
-			if (ds->ds_typequal & TQ_VOLATILE)
-				error("repeated type qualifier");
-			ds->ds_typequal |= TQ_VOLATILE;
-		}
-		if (DOT == CONST) {
-			if (ds->ds_typequal & TQ_CONST)
-				error("repeated type qualifier");
-			ds->ds_typequal |= TQ_CONST;
-		}
+	VOLATILE
+	{	if (ds->ds_typequal & TQ_VOLATILE)
+			error("repeated type qualifier");
+		ds->ds_typequal |= TQ_VOLATILE;
+	}
+|
+	/*	This qualifier applies to the top type.
+		E.g. volatile float * is a pointer to volatile float.
+	*/
+	CONST
+	{
+		if (ds->ds_typequal & TQ_CONST)
+			error("repeated type qualifier");
+		ds->ds_typequal |= TQ_CONST;
 	}
 ;
 
@@ -692,28 +695,20 @@ pointer(int *qual;)
 /* 3.5.4 */
 type_qualifier_list(int *qual;)
 :
-[
-	[ VOLATILE | CONST ]
-	{ *qual = (DOT == VOLATILE) ? TQ_VOLATILE : TQ_CONST; }
-	[
-		[ VOLATILE | CONST ]
-		{	if (DOT == VOLATILE) {
-				if (*qual & TQ_VOLATILE)
-					error("repeated type qualifier");
-				*qual |= TQ_VOLATILE;
-			}
-			if (DOT == CONST) {
-				if (*qual & TQ_CONST)
-					error("repeated type qualifier");
-				*qual |= TQ_CONST;
-			}
-		}
-					
-	]*
-|
-	empty
 	{ *qual = 0; }
-]
+	[
+		VOLATILE
+		{	if (*qual & TQ_VOLATILE)
+				error("repeated type qualifier");
+			*qual |= TQ_VOLATILE;
+		}
+	|
+		CONST
+		{	if (*qual & TQ_CONST)
+				error("repeated type qualifier");
+			*qual |= TQ_CONST;
+		}
+	]*
 ;
 
 empty:

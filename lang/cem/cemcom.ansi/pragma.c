@@ -58,6 +58,6 @@ do_pragma()
 		default:
 			break;
 		}
-		SkipToNewLine(0);
+		SkipToNewLine();
 	}
 }

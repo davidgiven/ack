@@ -342,14 +342,11 @@ equal_type(tp, otp, check_qual)
 {
 	if (tp == otp)
 		return 1;
-	if (!tp || !otp)
-		return 0;
-
-	if (tp->tp_fund != otp->tp_fund)
-		return 0;
-	if (tp->tp_unsigned != otp->tp_unsigned)
-		return 0;
-	if (tp->tp_align != otp->tp_align)
+	if (!tp
+	    || !otp
+	    || (tp->tp_fund != otp->tp_fund)
+	    || (tp->tp_unsigned != otp->tp_unsigned)
+	    || (tp->tp_align != otp->tp_align))
 		return 0;
 	if (tp->tp_fund != ARRAY /* && tp->tp_fund != STRUCT */ ) {	/* UNION ??? */
 		if (tp->tp_size != otp->tp_size)
