@@ -1,3 +1,8 @@
+/* This file contains functions to handle %d, %$, %dist constructs in the
+ * as_table.
+ */
+
+
 pr_text_with_conversions( str)
 char *str;
 {
@@ -15,6 +20,9 @@ char *str;
 
 char *next_conversion( str)
 char *str;
+
+/* Look for a %-sign, but not in a comment or string! */
+
 {
 	char *match();
 
@@ -29,18 +37,24 @@ char *str;
 	return( *str == '%' ? str : (char *)0);
 }
 
+
 char *match( c, str)
 char c, *str;
+
+/* Look for charcter 'c', but watch out for things like \n */
+
 {
 	while ( *str && ( *str != c || *(str-1) == '\\'))
 		str++;
 	return( *str ? str : str-1);
 }
 
+
 char *match_bracket( str)
 char *str;
 
 /* find ')', but look at nesting '('-')' pairs, return position of ')'.
+ * Skip strings and comments.
  */
 {
 	int depth;
@@ -75,7 +89,7 @@ char *pr_conversion( str)
 char *str;
 
 /* str points to '%'-sign, returns pointer to first character AFTER the
- * conversion
+ * conversion. %$ will result in a call of eval(), %d will call dist().
  */
 {
 	char *start, *ptr, *match_bracket(), *find();
