@@ -334,6 +334,9 @@ lint_ptr_conv(from, to)
 	if (from == to)
 		return;
 
+	if (to == VOID)
+		return;
+
 	if (to == CHAR)
 		return;
 
