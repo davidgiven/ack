@@ -166,7 +166,7 @@ suitable_move(tp)
 	register t_type *tp;
 {
 	/*	Find out how to load or store the value indicated by "ds".
-		There are three ways:
+		There are four ways:
 		- suitable for BLM/LOI/STI
 		- suitable for LOI/STI
 		- suitable for LOS/STS/BLS
@@ -214,10 +214,7 @@ CodeValue(ds, tp)
 			break;
 		case USE_LOAD_STORE:
 			sz = WA(tp->tp_size);
-#ifndef SQUEEZE
-			if (ds->dsg_kind != DSG_PFIXED)
-#endif
-			{
+			if (ds->dsg_kind != DSG_PFIXED) {
 				arith tmp = NewPtr();
 
 				CodeAddress(ds);
@@ -227,13 +224,11 @@ CodeValue(ds, tp)
 				LOL(tmp, pointer_size);
 				FreePtr(tmp);
 			}
-#ifndef SQUEEZE
 			else  {
 				CodeConst(-sz, (int) pointer_size);
 				C_ass(pointer_size);
+				CodeAddress(ds);
 			}
-#endif
-			CodeAddress(ds);
 			CodeConst(tp->tp_size, (int) pointer_size);
 			CAL("load", (int)pointer_size + (int)pointer_size);
 			break;
@@ -587,8 +582,7 @@ CodeVarDesig(df, ds)
 			C_lxa((arith) difflevel);
 			if ((df->df_flags & D_VARPAR) ||
 			    IsConformantArray(df->df_type)) {
-				/* var parameter, big parameter,
-				   or conformant array.
+				/* var parameter or conformant array.
 				   The address is passed.
 				*/
 				C_adp(df->var_off);
