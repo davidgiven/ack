@@ -12,9 +12,9 @@ _flushbuf(c, iop)
 					iop->_flags |= IO_UNBUFF;
 				}
 				else {
-					extern unsigned char __stdout[];
+					extern unsigned char _sobuf[];
 
-					iop->_buf = iop->_ptr = __stdout;
+					iop->_buf = iop->_ptr = _sobuf;
 					iop->_count = BUFSIZ;
 				}
 			}
