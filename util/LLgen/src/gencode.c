@@ -303,6 +303,7 @@ controlline() {
 	assert(l == '\0');
 	do {
 		l = getc(f1);
+		if (l == EOF) fatal(0, "temp file mangled");
 		putc(l,f2);
 	} while ( l != '\n' ) ;
 }
