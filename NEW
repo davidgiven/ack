@@ -1,21 +1,12 @@
-What's new:
-	A lot of things have changed since the previous distribution.
 It is not wise to mix files created by the previous version of the Kit
 with files belonging to this version, although that might sometimes work.
-The major changes are:
-	- a new C-compiler and runtime system
-	- a new C preprocessor
-	- new assembler framework, allowing the generation of relocatable
-	  object code for most processors
-	- new versions of all assemblers, using the new assembler framework
-	- a new link-editor, linking is now a separate and fast phase for most
-	  machines
-	- improved Pascal compiler, now also handles 4-byte wordsize
-	- Motorola M68020 backend and assembler
-	- Support for (some) SUN systems
-	- improved version of LL(1) parser generator, producing faster code
-	- a new language: Occam
-	- better System V support, the Kit should now just compile and run
+The major additions are:
+
+	- a new language: Modula-2
+	- a much improved 8086 back-end; unfortunately still only
+	  small model
+	- floating point package, usable with most back-ends
+	- cross-compilation to a Microsoft Xenix V3 80286 system
 
 				Ceriel J.H. Jacobs
 				Dept. of Math. and Computer Science

@@ -166,6 +166,10 @@ name "Mantra M68000 System V.0 support"
 dir mach/mantra
 indir
 end
+name "Atari ST Minix support"
+dir mach/minixST
+indir
+end
 name "Z80 support"
 dir mach/z80
 indir
