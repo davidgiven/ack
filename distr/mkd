@@ -1,0 +1,1 @@
+mkdir $DESTDIR/$1/$2

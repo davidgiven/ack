@@ -1,0 +1,25 @@
+: ${CDIR=.}
+if test ! -r .distr
+then
+	echo ++ no .distr in $CDIR
+        exit 0
+fi
+${DS-:} $CDIR
+for i in `cat .distr`
+do
+        if test -d $i
+        then
+                ( if cd $i
+		  then 
+			${DD-:} $CDIR $i
+			CDIR=$CDIR/$i
+			export CDIR
+			exec /usr/em/distr/dwalk
+		  else
+			echo ++ Could not access $CDIR/$i
+		  fi
+		)
+	else
+		${DF-:} $CDIR $i
+        fi
+done

@@ -1,0 +1,15 @@
+name "Installation manual"
+dir doc
+end
+name "EM documentation"
+dir doc/em.doc
+end
+name "Pascal bootstrap files"
+dir lang/pc/pem
+end
+name "LLgen bootstrap files"
+dir util/LLgen
+end
+name "MSC6500 vend_library"
+dir mach/6500/libem
+end

@@ -1,0 +1,23 @@
+if co -q -rdistr2 $DESTDIR/$1/$2 >/dev/null 2>&1
+then
+	chmod +w $DESTDIR/$1/$2
+elif co -q $DESTDIR/$1/$2 >/dev/null 2>&1
+then
+	chmod +w $DESTDIR/$1/$2
+	echo -- $1/$2 no distr2 yet
+elif grep LIST .distr >/dev/null 2>&1 &&
+     (test "$2" = "`head -1 $DESTDIR/$1/LIST`") >/dev/null 2>&1 &&
+     ${DA-false} "$1" "$2"
+then
+:	Fetched library contents one by one and put them together
+elif cp $2 $DESTDIR/$1/$2 >/dev/null 2>&1
+then
+	echo -- $1/$2 no RCS file
+else
+	echo ++ $1/$2 not present
+fi
+case $2 in
+LIST)	if (test -r $DESTDIR/$1/`head -1 $DESTDIR/$1/LIST`) >/dev/null 2>&1
+	then echo ++ LIST files must be in .distr before their libraries!!!
+	fi ;;
+esac

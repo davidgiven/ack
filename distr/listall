@@ -1,0 +1,10 @@
+case $# in
+0)	DIR=. ;;
+1)	DIR=$1 ;;
+*)	echo $0 [directory] ; exit 1 ;;
+esac
+DD=`pwd`/listall.d
+DW=`pwd`/dwalk
+export DD
+cd $DIR
+$DW
