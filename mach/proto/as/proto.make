@@ -63,7 +63,7 @@ $(COBJ) as.y:	$(CDIR)/comm1.h $(MDIR)/mach1.c
 as.y:		$(MDIR)/mach2.c
 as.y:		$(MDIR)/mach4.c
 as.$(SUF):	as.c
-		$(CC) -c $(CFLAGS) $(CDIR)/as.c
+		$(CC) -c $(CFLAGS) as.c
 comm8.$(SUF):	$(CDIR)/comm8.c
 		$(CC) -c $(CFLAGS) $(CDIR)/comm8.c
 comm8.$(SUF):	$(MDIR)/mach5.c
