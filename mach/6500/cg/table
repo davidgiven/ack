@@ -2202,6 +2202,87 @@ lol lal sti $1==$2 && $3==1 | | | | | /* throw away funny C-proc-prolog */
 		"jsr Pop"
 					| %[a] | |
 
+/* FLOATING POINT
+ * Every EM floating point instruction is translated
+ * into a library call. At present, these library
+ * routines generate an 'Illegal EM instruction' trap.
+ */
+
+
+adf $1==4	| STACK |
+		"jsr Adf4"
+					| | |
+adf $1==8	| STACK |
+		"jsr Adf8"		| | |
+
+sbf $1==4	| STACK |
+		"jsr Sbf4"
+					| | |
+sbf $1==8	| STACK |
+		"jsr Sbf8"		| | |
+
+mlf $1==4	| STACK |
+		"jsr Mlf4"
+					| | |
+mlf $1==8	| STACK |
+		"jsr Mlf8"		| | |
+
+dvf $1==4	| STACK |
+		"jsr Dvf4"
+					| | |
+dvf $1==8	| STACK |
+		"jsr Dvf8"		| | |
+
+ngf $1==4	| STACK |
+		"jsr Ngf4"
+					| | |
+ngf $1==8	| STACK |
+		"jsr Ngf8"		| | |
+
+zrf $1==4	| STACK |
+		"jsr Zrf4"
+					| | |
+zrf $1==8	| STACK |
+		"jsr Zrf8"		| | |
+
+cmf $1==4	| STACK |
+		"jsr Cmf4"
+					| | |
+cmf $1==8	| STACK |
+		"jsr Cmf8"		| | |
+
+fef $1==4	| STACK |
+		"jsr Fef4"
+					| | |
+fef $1==8	| STACK |
+		"jsr Fef8"		| | |
+
+fif $1==4	| STACK |
+		"jsr Fif4"
+					| | |
+fif $1==8	| STACK |
+		"jsr Fif8"		| | |
+
+cfi 		| STACK |
+		"jsr Cfi"		| | |
+
+cif 		| STACK |
+		"jsr Cif"		| | |
+
+cuf 		| STACK |
+		"jsr Cuf"		| | |
+
+cff 		| STACK |
+		"jsr Cff"		| | |
+
+cfu 		| STACK |
+		"jsr Cfu"		| | |
+
+lfr $1==8	| STACK |
+		"jsr Lfr8"		| | |
+
+ret $1==8	| STACK |
+		"jmp Ret8"		| | |
 
 /*************\
 *  M O V E S  *
