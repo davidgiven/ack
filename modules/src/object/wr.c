@@ -158,9 +158,6 @@ wr_open(f)
 wr_close()
 {
 	register struct fil *ptr;
-#ifndef OUTSEEK
-	register int *fdp;
-#endif /* not OUTSEEK */
 
 	for (ptr = &__parts[PARTEMIT]; ptr < &__parts[NPARTS]; ptr++) {
 		__wr_flush(ptr);
@@ -338,8 +335,6 @@ wr_name(name, cnt)
 	register struct outname	*name;
 	unsigned int cnt;
 {
-	register unsigned int i = cnt;
-
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	if (sizeof(struct outname) != SZ_NAME)
 #endif
