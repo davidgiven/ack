@@ -92,12 +92,14 @@ mainroutine
  end
 
  pro $trap_handler,0
+ lpi $trap_handler
+ sig
  lol 0	; trap number
  lae handler
  loi EM_PSIZE
+ lpi $catch
+ sti EM_PSIZE
  cai
- lpi $trap_handler
- sig
  asp EM_PSIZE+EM_WSIZE
  rtt
  end 0

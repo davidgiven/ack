@@ -23,6 +23,8 @@ DEFINITION MODULE Traps;
   PROCEDURE InstallTrapHandler(t: TrapHandler): TrapHandler;
   (* Install a new trap handler, and return the previous one.
      Parameter of trap handler is the trap number.
+     When a trap occurs, the default trap handler is re-installed before
+     calling the new handler.
   *)
 
   PROCEDURE Message(str: ARRAY OF CHAR);
