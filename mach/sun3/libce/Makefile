@@ -1,5 +1,7 @@
 # $Header$
 
+EMHOME=../../..
+
 EMOBJ =	aar.o cii.o cmi.o cms.o cmu.o csa.o csb.o cuu.o dia.o exg.o fat.o \
 	inn.o lar.o los.o mon.o nop.o sar.o set.o shp.o sts.o trp.o trpstr.o
 
@@ -30,5 +32,5 @@ pr:
 
 opr:
 
-$(EMOBJ):	../../../lib/m68020/tail_em
-	aal x ../../../lib/m68020/tail_em $(EMOBJ)
+$(EMOBJ):	$(EMHOME)/lib/m68020/tail_em
+	aal x $(EMHOME)/lib/m68020/tail_em $(EMOBJ)
