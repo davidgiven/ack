@@ -34,11 +34,11 @@ WalkModule(module)
 	/*	Walk through a module, and all its local definitions.
 		Also generate code for its body.
 	*/
-	register struct def *df = module->mod_scope->sc_def;
-	struct scope *scope;
+	register struct def *df = module->mod_vis->sc_scope->sc_def;
+	struct scopelist *vis;
 
-	scope = CurrentScope;
-	CurrentScope = module->mod_scope;
+	vis = CurrVis;
+	CurrVis = module->mod_vis;
 
 	if (!prclev && module->mod_number) {
 		/* This module is a local module, but not within a
@@ -46,13 +46,13 @@ WalkModule(module)
 		   variables. This is done by generating a "bss",
 		   with label "_<modulenumber><modulename>".
 		*/
-		arith size = align(CurrentScope->sc_off, word_size);
+		arith size = align(CurrentScope->sc_off, word_align);
 
 		if (size == 0) size = word_size;
 		C_df_dnam(&(CurrentScope->sc_name[1]));
 		C_bss_cst(size, (arith) 0, 0);
 	}
-	else if (CurrentScope == Defined->mod_scope) {
+	else if (CurrVis == Defined->mod_vis) {
 		/* This module is the module currently being compiled.
 		   Again, generate code to allocate storage for its
 		   variables, which all have an explicit name.
@@ -83,9 +83,9 @@ WalkModule(module)
 	WalkNode(module->mod_body, (label) 0);
 	C_df_ilb(return_label);
 	C_ret((label) 0);
-	C_end(align(-CurrentScope->sc_off, word_size));
+	C_end(align(-CurrentScope->sc_off, word_align));
 
-	CurrentScope = scope;
+	CurrVis = vis;
 }
 
 WalkProcedure(procedure)
@@ -94,11 +94,10 @@ WalkProcedure(procedure)
 	/*	Walk through the definition of a procedure and all its
 		local definitions
 	*/
-	struct scope *scope = CurrentScope;
-	register struct def *df;
+	struct scopelist *vis = CurrVis;
 
 	prclev++;
-	CurrentScope = procedure->prc_scope;
+	CurrVis = procedure->prc_vis;
 	
 	WalkDef(CurrentScope->sc_def);
 
@@ -117,7 +116,7 @@ WalkProcedure(procedure)
 	if (func_type) C_ret((arith) align(func_type->tp_size, word_align));
 	else C_ret((arith) 0);
 	C_end(align(-CurrentScope->sc_off, word_size));
-	CurrentScope = scope;
+	CurrVis = vis;
 	prclev--;
 }
 
@@ -126,6 +125,7 @@ WalkDef(df)
 {
 	/*	Walk through a list of definitions
 	*/
+
 	while (df) {
 		if (df->df_kind == D_MODULE) {
 			WalkModule(df);
@@ -142,10 +142,11 @@ MkCalls(df)
 {
 	/*	Generate calls to initialization routines of modules
 	*/
+
 	while (df) {
 		if (df->df_kind == D_MODULE) {
 			C_lxl((arith) 0);
-			C_cal(df->mod_scope->sc_name);
+			C_cal(df->mod_vis->sc_scope->sc_name);
 		}
 		df = df->df_nextinscope;
 	}
@@ -160,7 +161,7 @@ WalkNode(nd, lab)
 		"lab" represents the label that must be jumped to on
 		encountering an EXIT statement.
 	*/
-	
+
 	while (nd->nd_class == Link) {	 /* statement list */
 		WalkStat(nd->nd_left, lab);
 		nd = nd->nd_right;
@@ -191,8 +192,13 @@ WalkStat(nd, lab)
 
 	switch(nd->nd_symb) {
 	case BECOMES:
-		WalkExpr(nd->nd_right);
-		WalkDesignator(nd->nd_left);
+		WalkDesignator(left);
+		WalkExpr(right);
+
+		if (! TstAssCompat(left->nd_type, right->nd_type)) {
+			node_error(nd, "type incompatibility in assignment");
+			break;
+		}
 		/* ??? */
 		break;
 
@@ -217,8 +223,23 @@ WalkStat(nd, lab)
 		}
 
 	case CASE:
-		/* ??? */
-		break;
+		{
+			WalkExpr(left);
+
+			while (right) {
+				if (right->nd_class == Link && right->nd_symb == '|') {
+					WalkNode(right->nd_left->nd_right, lab);
+					right = right->nd_right;
+				}
+				else	{
+					WalkNode(right, lab);
+					right = 0;
+				}
+			}
+
+			/* ??? */
+			break;
+		}
 
 	case WHILE:
 		{	label l1, l2;
@@ -259,11 +280,27 @@ WalkStat(nd, lab)
 
 	case FOR:
 		/* ??? */
+		WalkNode(right, lab);
 		break;
 
 	case WITH:
-		/* ??? */
-		break;
+		{
+			struct scopelist link;
+
+			WalkDesignator(left);
+			if (left->nd_type->tp_fund != T_RECORD) {
+				node_error(left, "record variable expected");
+				break;
+			}
+
+			link.sc_scope = left->nd_type->rec_scope;
+			link.next = CurrVis;
+			CurrVis = &link;
+			WalkNode(right, lab);
+			CurrVis = link.next;
+			/* ??? */
+			break;
+		}
 
 	case EXIT:
 		assert(lab != 0);
@@ -274,7 +311,10 @@ WalkStat(nd, lab)
 	case RETURN:
 		if (right) {
 			WalkExpr(right);
-			if (!TstCompat(right->nd_type, func_type)) {
+			/* What kind of compatibility do we need here ???
+			   assignment compatibility?
+			*/
+			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
 			}
 		}

@@ -76,7 +76,7 @@ GetString(upto)
 	register struct string *str = &string;
 	register char *p;
 	
-	str->s_str = p = Malloc(str->s_length = ISTRSIZE);
+	str->s_str = p = Malloc((unsigned int) (str->s_length = ISTRSIZE));
 	LoadChar(ch);
 	while (ch != upto)	{
 		if (class(ch) == STNL)	{
@@ -91,7 +91,7 @@ GetString(upto)
 		*p++ = ch;
 		if (p - str->s_str == str->s_length)	{
 			str->s_str = Srealloc(str->s_str,
-					      str->s_length + RSTRSIZE);
+				(unsigned int) str->s_length + RSTRSIZE);
 			p = str->s_str + str->s_length;
 			str->s_length += RSTRSIZE;
 		}

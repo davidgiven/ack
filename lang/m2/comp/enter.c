@@ -103,17 +103,17 @@ EnterVarList(IdList, type, local)
 		procedure
 	*/
 	register struct def *df;
-	register struct scope *scope;
+	register struct scopelist *sc;
 	char buf[256];
 	extern char *sprint(), *Malloc(), *strcpy();
 
-	scope = CurrentScope;
+	sc = CurrVis;
 
 	if (local) {
 		/* Find the closest enclosing open scope. This
 		   is the procedure that we are dealing with
 		*/
-		while (scope->sc_scopeclosed) scope = scope->next;
+		while (sc->sc_scope->sc_scopeclosed) sc = enclosing(sc);
 	}
 
 	while (IdList) {
@@ -133,23 +133,25 @@ node_error(IdList->nd_left,"Illegal type for address");
 			   as the variable list exists only local to a
 			   procedure
 			*/
-			scope->sc_off = -align(type->tp_size - scope->sc_off,
+			sc->sc_scope->sc_off =
+				-align(type->tp_size - sc->sc_scope->sc_off,
 						type->tp_align);
-			df->var_off = scope->sc_off;
+			df->var_off = sc->sc_scope->sc_off;
 		}
 		else if (!DefinitionModule &&
-			 CurrentScope != Defined->mod_scope) {	
+			 CurrVis != Defined->mod_vis) {	
 			/* variable list belongs to an internal global
 			   module. Align offset and add size
 			*/
-			scope->sc_off = align(scope->sc_off, type->tp_align);
-			df->var_off = scope->sc_off;
-			scope->sc_off += type->tp_size;
+			sc->sc_scope->sc_off =
+				align(sc->sc_scope->sc_off, type->tp_align);
+			df->var_off = sc->sc_scope->sc_off;
+			sc->sc_scope->sc_off += type->tp_size;
 		}
 		else {
 			/* Global name, possibly external
 			*/
-			sprint(buf,"%s_%s", df->df_scope->sc_name,
+			sprint(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
 			df->var_name = Malloc((unsigned)(strlen(buf)+1));
 			strcpy(df->var_name, buf);
@@ -165,26 +167,26 @@ node_error(IdList->nd_left,"Illegal type for address");
 }
 
 struct def *
-lookfor(id, scope, give_error)
+lookfor(id, vis, give_error)
 	struct node *id;
-	struct scope *scope;
+	struct scopelist *vis;
 {
 	/*	Look for an identifier in the visibility range started by
-		"scope".
+		"vis".
 		If it is not defined, maybe give an error message, and
 		create a dummy definition.
 	*/
 	struct def *df;
-	register struct scope *sc = scope;
+	register struct scopelist *sc = vis;
 	struct def *MkDef();
 
 	while (sc) {
-		df = lookup(id->nd_IDF, sc);
+		df = lookup(id->nd_IDF, sc->sc_scope);
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
 
 	if (give_error) id_not_declared(id);
 
-	return MkDef(id->nd_IDF, scope, D_ERROR);
+	return MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
 }

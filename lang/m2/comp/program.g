@@ -52,6 +52,8 @@ ModuleDeclaration
 	static int modulecount = 0;
 	char buf[256];
 	struct node *nd;
+	struct node *exportlist = 0;
+	int qualified;
 	extern char *sprint(), *Malloc(), *strcpy();
 } :
 	MODULE IDENT	{
@@ -59,14 +61,14 @@ ModuleDeclaration
 			  df = define(id, CurrentScope, D_MODULE);
 			  currentdef = df;
 
-			  if (!df->mod_scope) {	
+			  if (!df->mod_vis) {	
 			  	open_scope(CLOSEDSCOPE);
-			  	df->mod_scope = CurrentScope;
+			  	df->mod_vis = CurrVis;
 			  }
-			  else	CurrentScope = df->mod_scope;
+			  else	CurrVis = df->mod_vis;
 
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
-			  df->df_type->rec_scope = df->mod_scope;
+			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  df->mod_number = ++modulecount;
 			  sprint(buf, "__%d%s", df->mod_number, id->id_text);
 			  CurrentScope->sc_name =
@@ -78,9 +80,13 @@ ModuleDeclaration
 	priority(&(df->mod_priority))?
 	';'
 	import(1)*
-	export(0)?
+	export(&qualified, &exportlist, 0)?
 	block(&nd)
 	IDENT		{ InitProc(nd, df);
+			  if (exportlist) {
+				Export(exportlist, qualified, df);
+			  	FreeNode(exportlist);
+			  }
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(id, dot.TOK_IDF);
 			  currentdef = savecurr;
@@ -100,24 +106,21 @@ priority(arith *pprio;)
 			}
 ;
 
-export(int def;)
+export(int *QUALflag; struct node **ExportList; int def;)
 {
-	struct node *ExportList;
-	int QUALflag = 0;
 } :
 	EXPORT
 	[
 		QUALIFIED
-			{ QUALflag = 1; }
-	]?
-	IdentList(&ExportList) ';'
+			{ *QUALflag = 1; }
+	|
+			{ *QUALflag = 0; }
+	]
+	IdentList(ExportList) ';'
 			{
-			  if (!def) {
-				Export(ExportList, QUALflag);
-			  }
-			  else {
-node_warning(ExportList, "export list in definition module ignored");
-				FreeNode(ExportList);
+			  if (def) {
+node_warning(*ExportList, "export list in definition module ignored");
+				FreeNode(*ExportList);
 			  }
 			}
 ;
@@ -146,6 +149,8 @@ DefinitionModule
 {
 	register struct def *df;
 	struct idf *id;
+	struct node *exportlist;
+	int dummy;
 } :
 	DEFINITION
 	MODULE IDENT	{ 
@@ -153,18 +158,18 @@ DefinitionModule
 			  df = define(id, GlobalScope, D_MODULE);
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
 			  if (!Defined) Defined = df;
-			  df->mod_scope = CurrentScope;
+			  df->mod_vis = CurrVis;
 			  df->mod_number = 0;
 			  CurrentScope->sc_name = id->id_text;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
-			  df->df_type->rec_scope = df->mod_scope;
+			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  DefinitionModule++;
 			  DO_DEBUG(1, debug("Definition module \"%s\" %d",
 					id->id_text, DefinitionModule));
 			}
 	';'
 	import(0)* 
-	export(1)?
+	export(&dummy, &exportlist, 1)?
 	/*	New Modula-2 does not have export lists in definition modules.
 		For the time being, we ignore export lists here, and a
 		warning is issued.
@@ -237,14 +242,15 @@ ProgramModule(int state;)
 			DEFofIMPL = 1;
 			df = GetDefinitionModule(id);
 			currentdef = df;
-			CurrentScope = df->mod_scope;
+			CurrVis = df->mod_vis;
+			CurrentScope = CurrVis->sc_scope;
 			DEFofIMPL = 0;
 		  }
 		  else {
 			df = define(id, CurrentScope, D_MODULE);
 		  	Defined = df;
 			open_scope(CLOSEDSCOPE);
-			df->mod_scope = CurrentScope;
+			df->mod_vis = CurrVis;
 			df->mod_number = 0;
 			CurrentScope->sc_name = id->id_text;
 		  }

@@ -35,11 +35,10 @@ MkDef(id, scope, kind)
 	register struct def *df;
 
 	df = new_def();
-	df->df_flags = 0;
+	clear((char *) df, sizeof (*df));
 	df->df_idf = id;
 	df->df_scope = scope;
 	df->df_kind = kind;
-	df->df_type = 0;
 	df->next = id->id_def;
 	id->id_def = df;
 
@@ -66,8 +65,7 @@ define(id, scope, kind)
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
-		( CurrentScope == scope 
-		&&
+		( 
 		  scopeclosed(scope)
 		&&
 		  (df = lookup(id, PervasiveScope)))
@@ -79,31 +77,40 @@ define(id, scope, kind)
 				return df;
 			}
 			break;
+
 		case D_FORWMODULE:
 			if (kind == D_FORWMODULE) {
 				return df;
 			}
+
 			if (kind == D_MODULE) {
 				FreeNode(df->for_node);
-				df->mod_scope = df->for_scope;
+				df->mod_vis = df->for_vis;
 				df->df_kind = kind;
 				return df;
 			}
 			break;
+
 		case D_FORWARD:
 			if (kind != D_FORWARD) {
 				FreeNode(df->for_node);
 			}
-			/* Fall Through */
+
+			df->df_kind = kind;
+			return df;
+
 		case D_ERROR:
 			df->df_kind = kind;
 			return df;
 		}
+
 		if (kind != D_ERROR) {
 error("identifier \"%s\" already declared", id->id_text);
 		}
+
 		return df;
 	}
+
 	return MkDef(id, scope, kind);
 }
 
@@ -129,7 +136,6 @@ lookup(id, scope)
 				retval = df->imp_def;
 				assert(retval != 0);
 			}
-
 			if (df1) {
 				df1->next = df->next;
 				df->next = id->id_def;
@@ -143,8 +149,38 @@ lookup(id, scope)
 	return 0;
 }
 
-Export(ids, qualified)
+DoImport(df, scope)
+	struct def *df;
+	struct scope *scope;
+{
+	register struct def *df1;
+
+	if (df->df_kind == D_TYPE && df->df_type->tp_fund == T_ENUMERATION) {
+		/* Also import all enumeration literals
+		*/
+		df1 = df->df_type->enm_enums;
+		while (df1) {
+			define(df1->df_idf, scope, D_IMPORT)->imp_def = df1;
+			df1 = df1->enm_next;
+		}
+	}
+	else if (df->df_kind == D_MODULE) {
+		/* Also import all definitions that are exported from this
+		   module
+		*/
+		df1 = df->mod_vis->sc_scope->sc_def;
+		while (df1) {
+			if (df1->df_flags & D_EXPORTED) {
+				define(df1->df_idf, scope, D_IMPORT)->imp_def = df1;
+			}
+			df1 = df1->df_nextinscope;
+		}
+	}
+}
+
+Export(ids, qualified, moddef)
 	register struct node *ids;
+	struct def *moddef;
 {
 	/*	From the current scope, the list of identifiers "ids" is
 		exported. Note this fact. If the export is not qualified, make
@@ -152,47 +188,71 @@ Export(ids, qualified)
 		in this scope as "imported".
 	*/
 	register struct def *df, *df1;
-	struct node *nd = ids;
+	register struct def *impmod;
 
-	while (ids) {
+	for (;ids; ids = ids->next) {
 		df = lookup(ids->nd_IDF, CurrentScope);
-		if (df && (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+
+		if (!df) {
+			/* undefined item in export list
+			*/
+node_error(ids, "identifier \"%s\" not defined", ids->nd_IDF->id_text);
+			continue;
+		}
+
+		if (df->df_flags & (D_EXPORTED|D_QEXPORTED)) {
 node_error(ids, "Identifier \"%s\" occurs more than once in export list",
 df->df_idf->id_text);
 		}
-		else if (!df) {
-			df = define(ids->nd_IDF, CurrentScope, D_FORWARD);
-			df->for_node = MkNode(Name,NULLNODE,NULLNODE,
-					&(ids->nd_token));
-		}
+
 		if (qualified) {
 			df->df_flags |= D_QEXPORTED;
 		}
 		else {
+			/* Export, but not qualified.
+			   Find all imports of the module in which this export
+			   occurs, and export the current definition to it
+			*/
+			impmod = moddef->df_idf->id_def;
+			while (impmod) {
+				if (impmod->df_kind == D_IMPORT &&
+				    impmod->imp_def == moddef) {
+					DoImport(df, impmod->df_scope);
+				}
+				impmod = impmod->next;
+			}
+
 			df->df_flags |= D_EXPORTED;
-			df1 = lookup(ids->nd_IDF, enclosing(CurrentScope));
-			if (! df1 || !(df1->df_kind & (D_PROCHEAD|D_HIDDEN))) {
-				df1 = define(ids->nd_IDF,
-						enclosing(CurrentScope),
+			df1 = lookup(ids->nd_IDF, enclosing(CurrVis)->sc_scope);
+			if (df1 && df1->df_kind == D_PROCHEAD) {
+				if (df->df_kind == D_PROCEDURE) {
+					df1->df_kind = D_IMPORT;
+					df1->imp_def = df;
+					continue;
+				}
+			}
+			else if (df1 && df1->df_kind == D_HIDDEN) {
+				if (df->df_kind == D_TYPE) {
+					if (df->df_type->tp_fund != T_POINTER) {
+error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+					}
+					df->df_kind = D_HTYPE;
+					df1->df_kind = D_IMPORT;
+					df1->imp_def = df;
+					continue;
+				}
+			}
+
+			df1 = define(ids->nd_IDF,
+						enclosing(CurrVis)->sc_scope,
 						D_IMPORT);
-			}
-			else {
-				/* A hidden type or a procedure of which only
-				   the head is seen. Apparently, they are
-				   exported from a local module!
-				*/
-				df->df_kind = df1->df_kind;
-				df->df_value.df_forward = df1->df_value.df_forward;
-				df1->df_kind = D_IMPORT;
-			}
 			df1->imp_def = df;
+			DoImport(df, enclosing(CurrVis)->sc_scope);
 		}
-		ids = ids->next;
 	}
-	FreeNode(nd);
 }
 
-static struct scope *
+static struct scopelist *
 ForwModule(df, idn)
 	register struct def *df;
 	struct node *idn;
@@ -200,22 +260,22 @@ ForwModule(df, idn)
 	/*	An import is done from a not yet defined module "idn".
 		Create a declaration and a scope for this module.
 	*/
-	struct scope *scope;
+	struct scopelist *vis;
 
-	df->df_scope = enclosing(CurrentScope);
+	df->df_scope = enclosing(CurrVis)->sc_scope;
 	df->df_kind = D_FORWMODULE;
 	open_scope(CLOSEDSCOPE);
-	scope = CurrentScope;	/* The new scope, but watch out, it's "next"
+	vis = CurrVis;		/* The new scope, but watch out, it's "sc_encl"
 				   field is not set right. It must indicate the
 				   enclosing scope, but this must be done AFTER
 				   closing this one
 				*/
-	df->for_scope = scope;
+	df->for_vis = vis;
 	df->for_node = MkNode(Name, NULLNODE, NULLNODE, &(idn->nd_token));
 	close_scope(0);	
-	scope->next = df->df_scope;
+	vis->sc_encl = enclosing(CurrVis);
 				/* Here ! */
-	return scope;
+	return vis;
 }
 
 static struct def *
@@ -253,8 +313,7 @@ Import(ids, idn, local)
 		identifiers defined in this module.
 	*/
 	register struct def *df;
-	struct scope *scope = enclosing(CurrentScope);
-	int kind = D_IMPORT;
+	struct scopelist *vis = enclosing(CurrVis);
 	int forwflag = 0;
 #define FROM_MODULE	0
 #define FROM_ENCLOSING	1
@@ -264,7 +323,7 @@ Import(ids, idn, local)
 	if (idn) {
 		imp_kind = FROM_MODULE;
 		if (local) {
-			df = lookfor(idn, scope, 0);
+			df = lookfor(idn, vis, 0);
 			switch(df->df_kind) {
 			case D_ERROR:
 				/* The module from which the import was done
@@ -272,23 +331,22 @@ Import(ids, idn, local)
 				   accept this, but for the time being I will.
 				   ???
 				*/
-				scope = ForwModule(df, idn);
+				vis = ForwModule(df, idn);
 				forwflag = 1;
 				break;
 			case D_FORWMODULE:
-				scope = df->for_scope;
+				vis = df->for_vis;
 				break;
 			case D_MODULE:
-				scope = df->mod_scope;
+				vis = df->mod_vis;
 				break;
 			default:
-				kind = D_ERROR;
 node_error(idn, "identifier \"%s\" does not represent a module",
 idn->nd_IDF->id_text);
 				break;
 			}
 		}
-		else	scope = GetDefinitionModule(idn->nd_IDF)->mod_scope;
+		else	vis = GetDefinitionModule(idn->nd_IDF)->mod_vis;
 
 		FreeNode(idn);
 	}
@@ -297,9 +355,9 @@ idn->nd_IDF->id_text);
 	while (ids) {
 		if (imp_kind == FROM_MODULE) {
 			if (forwflag) {
-				df = ForwDef(ids, scope);
+				df = ForwDef(ids, vis->sc_scope);
 			}
-			else if (!(df = lookup(ids->nd_IDF, scope))) {
+			else if (!(df = lookup(ids->nd_IDF, vis->sc_scope))) {
 node_error(ids, "identifier \"%s\" not declared in qualifying module",
 ids->nd_IDF->id_text);
 				df = ill_df;
@@ -310,38 +368,18 @@ ids->nd_IDF->id_text);
 			}
 		}
 		else {
-			if (local) df = ForwDef(ids, scope);
+			if (local) df = ForwDef(ids, vis->sc_scope);
 			else	df = GetDefinitionModule(ids->nd_IDF);
 		}
 
 DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text,
 df->df_kind));
-		define(ids->nd_IDF, CurrentScope, kind)->imp_def = df;
-		if (df->df_kind == D_TYPE &&
-		    df->df_type->tp_fund == T_ENUMERATION) {
-			/* Also import all enumeration literals
-			*/
-			exprt_literals(df->df_type->enm_enums, CurrentScope);
-		}
+		define(df->df_idf, CurrentScope, D_IMPORT)->imp_def = df;
+		DoImport(df, CurrentScope);
 		ids = ids->next;
 	}
 
 	FreeNode(idn);
-}
-
-exprt_literals(df, toscope)
-	register struct def *df;
-	struct scope *toscope;
-{
-	/*	A list of enumeration literals is exported. This is implemented
-		as an import from the scope "toscope".
-	*/
-	DO_DEBUG(3, debug("enumeration import:"));
-	while (df) {
-		DO_DEBUG(3, debug(df->df_idf->id_text));
-		define(df->df_idf, toscope, D_IMPORT)->imp_def = df;
-		df = df->enm_next;
-	}
 }
 
 RemImports(pdf)
@@ -417,18 +455,18 @@ DeclProc(type)
 			df->df_kind = D_PROCEDURE;
 			open_scope(OPENSCOPE);
 			CurrentScope->sc_name = df->for_name;
-			df->prc_scope = CurrentScope;
+			df->prc_vis = CurrVis;
 		}
 		else {
 			df = define(dot.TOK_IDF, CurrentScope, type);
-			if (CurrentScope != Defined->mod_scope) {
+			if (CurrVis != Defined->mod_vis) {
 				sprint(buf, "_%d_%s", ++nmcount,
 					df->df_idf->id_text);
 			}
-			else	(sprint(buf, "%s_%s",df->df_scope->sc_name,
+			else	(sprint(buf, "%s_%s",CurrentScope->sc_name,
 						df->df_idf->id_text));
 			open_scope(OPENSCOPE);
-			df->prc_scope = CurrentScope;
+			df->prc_vis = CurrVis;
 			CurrentScope->sc_name = Malloc((unsigned)(strlen(buf)+1));
 			strcpy(CurrentScope->sc_name, buf);
 			C_inp(buf);

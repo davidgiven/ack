@@ -39,13 +39,9 @@ TstParEquiv(tp1, tp2)
 		   TstTypeEquiv(tp1, tp2)
 		||
 		   (
-		     tp1->tp_fund == T_ARRAY
+		     IsConformantArray(tp1)
 		   &&
-		     tp1->next == 0
-		   &&
-		     tp2->tp_fund == T_ARRAY
-		   &&
-		     tp2->next == 0
+		     IsConformantArray(tp2)
 		   &&
 		     TstTypeEquiv(tp1->arr_elem, tp2->arr_elem)
 		   );
@@ -61,11 +57,15 @@ TstProcEquiv(tp1, tp2)
 	*/
 	register struct paramlist *p1, *p2;
 
-	if (!TstTypeEquiv(tp1->next, tp2->next)) return 0;
+	/* First check if the result types are equivalent
+	*/
+	if (! TstTypeEquiv(tp1->next, tp2->next)) return 0;
 
 	p1 = tp1->prc_params;
 	p2 = tp2->prc_params;
 
+	/* Now check the parameters
+	*/
 	while (p1 && p2) {
 		if (p1->par_var != p2->par_var ||
 		    !TstParEquiv(p1->par_type, p2->par_type)) return 0;
@@ -123,10 +123,12 @@ TstCompat(tp1, tp2)
 	;
 }
 
-int TstAssCompat(tp1, tp2)
+int
+TstAssCompat(tp1, tp2)
 	struct type *tp1, *tp2;
 {
 	/*	Test if two types are assignment compatible.
+		See Def 9.1.
 	*/
 
 	if (TstCompat(tp1, tp2)) return 1;
@@ -138,24 +140,39 @@ int TstAssCompat(tp1, tp2)
 	    (tp2->tp_fund & T_INTORCARD)) return 1;
 
 	if (tp1 == char_type && tp2 == charc_type) return 1;
-	if (tp1->tp_fund == T_ARRAY && 
-	    (tp2 == charc_type || tp2 == string_type)) {
-		/* Unfortunately the length of the string is not
-		   available here, so this must be tested somewhere else (???)
-		*/
+
+	if (tp1->tp_fund == T_ARRAY) {
+		arith size;
+
+		if (! tp1->next) return 0;
+
+		size = tp1->arr_ub - tp1->arr_lb + 1;
 	    	tp1 = tp1->arr_elem;
 		if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
-		return tp1 == char_type;
+	    	return
+			tp1 == char_type
+		    &&
+			(
+			    tp2 == charc_type
+			||
+			    (tp2->tp_fund == T_STRING && size >= tp2->tp_size)
+			);
 	}
 
 	return 0;
 }
 
-int TstParCompat(formaltype, actualtype, VARflag)
+int
+TstParCompat(formaltype, actualtype, VARflag)
 	struct type *formaltype, *actualtype;
 {
 	/*	Check type compatibility for a parameter in a procedure
-		call
+		call. Ordinary type compatibility is sufficient in any case.
+		Assignment compatibility may do if the parameter is
+		a value parameter.
+		Otherwise, a conformant array may do, or an ARRAY OF WORD
+		may do too.
+		Or: a WORD may do.
 	*/
 
 	return
@@ -163,8 +180,19 @@ int TstParCompat(formaltype, actualtype, VARflag)
 	    ||
 		( !VARflag && TstAssCompat(formaltype, actualtype))
 	    ||
-		(  formaltype->tp_fund == T_ARRAY
-		&& formaltype->next == 0	
-		&& actualtype->tp_fund == T_ARRAY
-		&& TstTypeEquiv(formaltype->arr_elem, actualtype->arr_elem));
+		(  formaltype == word_type && actualtype->tp_size == word_size)
+	    ||
+		(  IsConformantArray(formaltype)
+		&&
+		   (  formaltype->arr_elem == word_type
+		   ||
+		      (  actualtype->tp_fund == T_ARRAY
+		      && TstTypeEquiv(formaltype->arr_elem,actualtype->arr_elem)
+		      )
+		   ||
+		      (  actualtype->tp_fund == T_STRING
+		      && TstTypeEquiv(formaltype->arr_elem, char_type)
+		      )
+		   )
+		);
 }

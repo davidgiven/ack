@@ -4,11 +4,11 @@
 
 struct module {
 	arith mo_priority;	/* priority of a module */
-	struct scope *mo_scope;	/* scope of this module */
+	struct scopelist *mo_vis;/* scope of this module */
 	struct node *mo_body;	/* body of this module */
 	int mo_number;		/* number of this module */
 #define mod_priority	df_value.df_module.mo_priority
-#define mod_scope	df_value.df_module.mo_scope
+#define mod_vis		df_value.df_module.mo_vis
 #define mod_body	df_value.df_module.mo_body
 #define mod_number	df_value.df_module.mo_number
 };
@@ -51,11 +51,11 @@ struct field {
 };
 
 struct dfproc {
-	struct scope *pr_scope;	/* scope of procedure */
+	struct scopelist *pr_vis; /* scope of procedure */
 	short pr_level;		/* depth level of this procedure */
 	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
-#define prc_scope	df_value.df_proc.pr_scope
+#define prc_vis		df_value.df_proc.pr_vis
 #define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
@@ -67,11 +67,12 @@ struct import {
 };
 
 struct dforward {
-	struct scope *fo_scope;
+	struct scopelist *fo_vis;
 	struct node *fo_node;
 	char *fo_name;
 #define for_node	df_value.df_forward.fo_node
-#define for_scope	df_value.df_forward.fo_scope
+#define for_vis		df_value.df_forward.fo_vis
+#define for_scopes	df_value.df_forward.fo_scopes
 #define for_name	df_value.df_forward.fo_name
 };
 

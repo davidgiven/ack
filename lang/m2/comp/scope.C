@@ -16,16 +16,21 @@ static char *RcsId = "$Header$";
 
 #include	"debug.h"
 
-struct scope *CurrentScope, *PervasiveScope, *GlobalScope;
+struct scope *PervasiveScope, *GlobalScope;
+struct scopelist *CurrVis;
 static int scp_level;
+static struct scopelist *PervVis;
 
 /* STATICALLOCDEF "scope" */
+
+/* STATICALLOCDEF "scopelist" */
 
 open_scope(scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
 	register struct scope *sc = new_scope();
+	register struct scopelist *ls = new_scopelist();
 
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
@@ -33,26 +38,30 @@ open_scope(scopetype)
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
 	sc->sc_off = 0;
-	sc->next = 0;
-	DO_DEBUG(1, debug("Opening a %s scope",
-			scopetype == OPENSCOPE ? "open" : "closed"));
-	if (CurrentScope != PervasiveScope) {
-		sc->next = CurrentScope;
+	if (scopetype == OPENSCOPE) {
+		ls->next = CurrVis;
 	}
-	CurrentScope = sc;
+	else	ls->next = PervVis;
+	ls->sc_scope = sc;
+	ls->sc_encl = CurrVis;
+	CurrVis = ls;
 }
 
 init_scope()
 {
 	register struct scope *sc = new_scope();
+	register struct scopelist *ls = new_scopelist();
 
 	sc->sc_scopeclosed = 0;
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
 	sc->sc_level = scp_level++;
-	sc->next = 0;
 	PervasiveScope = sc;
-	CurrentScope = sc;
+	ls->next = 0;
+	ls->sc_encl = 0;
+	ls->sc_scope = PervasiveScope;
+	PervVis = ls;
+	CurrVis = ls;
 }
 
 struct forwards {
@@ -127,15 +136,15 @@ node_error((*pdf)->for_node, "identifier \"%s\" has not been declared",
 				   Maybe the definitions are in the
 				   enclosing scope?
 				*/
-				struct scope *sc;
+				struct scopelist *ls;
 
-				sc = enclosing(CurrentScope);
+				ls = nextvisible(CurrVis);
 				if ((*pdf)->df_kind == D_FORWMODULE) {
-					(*pdf)->for_scope->next = sc;
+					(*pdf)->for_vis->next = ls;
 				}
-				(*pdf)->df_nextinscope = sc->sc_def;
-				sc->sc_def = *pdf;
-				(*pdf)->df_scope = sc;
+				(*pdf)->df_nextinscope = ls->sc_scope->sc_def;
+				ls->sc_scope->sc_def = *pdf;
+				(*pdf)->df_scope = ls->sc_scope;
 				*pdf = df1;
 			}
 		}
@@ -154,7 +163,7 @@ rem_forwards(fo)
 	struct def *lookfor();
 
 	while (f = fo) {
-		df = lookfor(&(f->fo_tok), CurrentScope, 1);
+		df = lookfor(&(f->fo_tok), CurrVis, 1);
 		if (!(df->df_kind & (D_TYPE|D_HTYPE|D_ERROR))) {
 			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
 			      df->df_idf->id_text);
@@ -216,7 +225,7 @@ close_scope(flag)
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));
 		if (flag & SC_REVERSE) Reverse(&(sc->sc_def));
 	}
-	CurrentScope = sc->next;
+	CurrVis = enclosing(CurrVis);
 	scp_level = CurrentScope->sc_level;
 }
 

@@ -25,11 +25,20 @@ struct scope {
 	int sc_level;		/* level of this scope */
 };
 
+struct scopelist {
+	struct scopelist *next;
+	struct scopelist *sc_encl;
+	struct scope *sc_scope;
+};
+
 extern struct scope
-	*CurrentScope,
 	*PervasiveScope,
 	*GlobalScope;
 
-#define enclosing(x)	((x)->next)
+extern struct scopelist
+	*CurrVis;
+
+#define CurrentScope	(CurrVis->sc_scope)
+#define enclosing(x)	((x)->sc_encl)
 #define scopeclosed(x)	((x)->sc_scopeclosed)
-#define nextvisible(x)	(scopeclosed(x) ? PervasiveScope : enclosing(x))
+#define nextvisible(x)	((x)->next)		/* use with scopelists */

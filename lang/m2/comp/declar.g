@@ -37,7 +37,7 @@ ProcedureDeclaration
 	';' block(&(df->prc_body)) IDENT
 			{
 			  match_id(dot.TOK_IDF, df->df_idf);
-			  df->prc_scope = CurrentScope;
+			  df->prc_vis = CurrVis;
 			  close_scope(SC_CHKFORW|SC_REVERSE);
 			  proclevel--;
 			  currentdef = savecurr;
@@ -182,14 +182,9 @@ TypeDeclaration
 	'=' type(&tp)
 			{ if (df->df_type) free_type(df->df_type);
 			  df->df_type = tp;
-			  if ((df->df_flags&D_EXPORTED) &&
-			      tp->tp_fund == T_ENUMERATION) {
-				exprt_literals(tp->enm_enums,
-						enclosing(CurrentScope));
-			  }
 			  if (df->df_kind == D_HTYPE &&
 			      tp->tp_fund != T_POINTER) {
-error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 			  }
 			}
 ;
@@ -493,7 +488,7 @@ PointerType(struct type **ptp;)
 				  else	tp = df->df_type;
 				}
 	| %if ( nd = new_node(), nd->nd_token = dot,
-		df = lookfor(nd, CurrentScope, 0), free_node(nd),
+		df = lookfor(nd, CurrVis, 0), free_node(nd),
 	        df->df_kind == D_MODULE)
 		type(&tp)
 	|

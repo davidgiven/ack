@@ -50,7 +50,6 @@ struct type
 	*word_type,
 	*address_type,
 	*intorcard_type,
-	*string_type,
 	*bitset_type,
 	*std_type,
 	*error_type;
@@ -152,8 +151,8 @@ init_types()
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
 	
-	/* character constant, different from char because of compatibility
-	   with ARRAY OF CHAR
+	/* character constant type, different from character type because
+	   of compatibility with character array's
 	*/
 	charc_type = standard_type(T_CHAR, 1, (arith) 1);
 	charc_type->enm_ncst = 256;
@@ -175,10 +174,6 @@ init_types()
 	*/
 	real_type = standard_type(T_REAL, float_align, float_size);
 	longreal_type = standard_type(T_REAL, double_align, double_size);
-
-	/* string constant type
-	*/
-	string_type = standard_type(T_STRING, 1, (arith) -1);
 
 	/* SYSTEM types
 	*/

@@ -10,7 +10,6 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
-#include	"scope.h"
 #include	"node.h"
 #include	"const.h"
 #include	"type.h"
@@ -170,6 +169,7 @@ factor(struct node **p;)
 {
 	struct def *df;
 	struct node *nd;
+	register struct type *tp;
 } :
 	qualident(0, &df, (char *) 0, p)
 	[
@@ -189,18 +189,20 @@ factor(struct node **p;)
 | %default
 	number(p)
 |
-	STRING		{
-			  *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
-			  if (dot.TOK_SLE == 1) {
-				int i;
+	STRING	{
+		  *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
+		  if (dot.TOK_SLE == 1) {
+			int i;
 
-				i = *(dot.TOK_STR) & 0377;
-				(*p)->nd_type = charc_type;
-				free(dot.TOK_STR);
-				dot.TOK_INT = i;
-			  }
-			  else	(*p)->nd_type = string_type;
-			}
+			tp = charc_type;
+			i = *(dot.TOK_STR) & 0377;
+			free(dot.TOK_STR);
+			free((char *) dot.tk_data.tk_str);
+			dot.TOK_INT = i;
+		  }
+		  else	tp = standard_type(T_STRING, 1, dot.TOK_SLE);
+		  (*p)->nd_type = tp;
+		}
 |
 	'(' expression(p) ')'
 |

@@ -388,6 +388,8 @@ FlagCheck(expp, df, flag)
 		"flag". Here, a definition "df" is checked against it.
 	*/
 
+	if (df->df_kind == D_ERROR) return 0;
+
 	if ((flag & VARIABLE) &&
 	    !(df->df_kind & (D_FIELD|D_VARIABLE))) {
 		node_error(expp, "variable expected");
@@ -432,7 +434,7 @@ chk_designator(expp, flag)
 	expp->nd_type = error_type;
 
 	if (expp->nd_class == Name) {
-		expp->nd_def = lookfor(expp, CurrentScope, 1);
+		expp->nd_def = lookfor(expp, CurrVis, 1);
 		expp->nd_class = Def;
 		expp->nd_type = expp->nd_def->df_type;
 		if (expp->nd_type == error_type) return 0;
@@ -489,8 +491,15 @@ df->df_idf->id_text);
 				expp->nd_symb = INTEGER;
 			}
 			else  {
+				char *fn;
+				int ln;
+
 				assert(df->df_kind == D_CONST);
+				ln = expp->nd_lineno;
+				fn = expp->nd_filename;
 				*expp = *(df->con_const);
+				expp->nd_lineno = ln;
+				expp->nd_filename = fn;
 			}
 		}
 
@@ -591,7 +600,7 @@ node_error(expp, "RHS of IN operator not a SET type");
 		}
 		if (!TstAssCompat(tpl, tpr->next)) {
 			/* Assignment compatible ???
-			   I don't know! Should we be allowed th check
+			   I don't know! Should we be allowed to check
 			   if a CARDINAL is a member of a BITSET???
 			*/
 
@@ -620,6 +629,9 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 	case '-':
 	case '*':
 		switch(tpl->tp_fund) {
+		case T_POINTER:
+			if (tpl != address_type) break;
+			/* Fall through */
 		case T_INTEGER:
 		case T_CARDINAL:
 		case T_INTORCARD:
@@ -654,7 +666,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	case DIV:
 	case MOD:
-		if (tpl->tp_fund & T_INTORCARD) {
+		if ((tpl->tp_fund & T_INTORCARD) || tpl == address_type) {
 			if (left->nd_class==Value && right->nd_class==Value) {
 				cstbin(expp);
 			}
@@ -736,7 +748,8 @@ chk_uoper(expp)
 {
 	/*	Check an unary operation.
 	*/
-	register struct type *tpr = expp->nd_right->nd_type;
+	register struct node *right = expp->nd_right;
+	register struct type *tpr = right->nd_type;
 
 	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
 	expp->nd_type = tpr;
@@ -744,8 +757,8 @@ chk_uoper(expp)
 	switch(expp->nd_symb) {
 	case '+':
 		if (tpr->tp_fund & T_NUMERIC) {
-			expp->nd_token = expp->nd_right->nd_token;
-			FreeNode(expp->nd_right);
+			expp->nd_token = right->nd_token;
+			FreeNode(right);
 			expp->nd_right = 0;
 			return 1;
 		}
@@ -753,19 +766,19 @@ chk_uoper(expp)
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
-			if (expp->nd_right->nd_class == Value) {
+			if (right->nd_class == Value) {
 				cstunary(expp);
 			}
 			return 1;
 		}
 		else if (tpr->tp_fund == T_REAL) {
-			if (expp->nd_right->nd_class == Value) {
-				expp->nd_token = expp->nd_right->nd_token;
+			if (right->nd_class == Value) {
+				expp->nd_token = right->nd_token;
 				if (*(expp->nd_REL) == '-') {
 					expp->nd_REL++;
 				}
 				else	expp->nd_REL--;
-				FreeNode(expp->nd_right);
+				FreeNode(right);
 				expp->nd_right = 0;
 			}
 			return 1;
@@ -775,7 +788,7 @@ chk_uoper(expp)
 	case NOT:
 	case '~':
 		if (tpr == bool_type) {
-			if (expp->nd_right->nd_class == Value) {
+			if (right->nd_class == Value) {
 				cstunary(expp);
 			}
 			return 1;
@@ -794,19 +807,27 @@ struct node *
 getvariable(arg)
 	register struct node *arg;
 {
+	struct def *df;
+	register struct node *left;
+
 	arg = arg->nd_right;
 	if (!arg) {
 		node_error(arg, "too few parameters supplied");
 		return 0;
 	}
 
-	if (! chk_designator(arg->nd_left, DESIGNATOR)) return 0;
-	if (arg->nd_left->nd_class == Oper || arg->nd_left->nd_class == Uoper) {
+	left = arg->nd_left;
+
+	if (! chk_designator(left, DESIGNATOR)) return 0;
+	if (left->nd_class == Oper || left->nd_class == Uoper) {
 		return arg;
 	}
 
-	if (arg->nd_left->nd_class != Def ||
-	    !(arg->nd_left->nd_def->df_kind & (D_VARIABLE|D_FIELD))) {
+	df = 0;
+	if (left->nd_class == Link) df = left->nd_right->nd_def;
+	else if (left->nd_class == Def) df = left->nd_def;
+
+	if (!df || !(df->df_kind & (D_VARIABLE|D_FIELD))) {
 		node_error(arg, "variable expected");
 		return 0;
 	}
@@ -947,7 +968,10 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 			return 0;
 		}
 		if (!(arg = getarg(arg, T_DISCRETE))) return 0;
-		if (!TstCompat(tp->next, arg->nd_left->nd_type)) {
+		if (!TstAssCompat(tp->next, arg->nd_left->nd_type)) {
+			/* What type of compatibility do we want here?
+			   apparently assignment compatibility! ??? ???
+			*/
 			node_error(arg, "unexpected type");
 			return 0;
 		}

@@ -97,7 +97,6 @@ extern struct type
 	*word_type,
 	*address_type,
 	*intorcard_type,
-	*string_type,
 	*bitset_type,
 	*std_type,
 	*error_type;		/* All from type.c */
@@ -130,3 +129,5 @@ struct type
 	*subr_type();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)
+
+#define IsConformantArray(tpx)	((tpx)->tp_fund == T_ARRAY && (tpx)->next == 0)
