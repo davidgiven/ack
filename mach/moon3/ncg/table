@@ -965,14 +965,6 @@ pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
     gen add_l {const, $3}, {offsetted4, regvar($1, reg_pointer), $2}
 
 #ifdef TBL68020
-pat loe lof inc loe stf $1==$4 && $2==$5
-    kills allexceptcon
-    gen add_l {const, 1}, {ABS_off4, $1, $2}
-
-pat loe lof dec loe stf $1==$4 && $2==$5
-    kills allexceptcon
-    gen sub_l {const, 1}, {ABS_off4, $1, $2}
-
 pat loe lof adp loe stf $1==$4 && $2==$5
     kills allexceptcon
     gen add_l {const, $3}, {ABS_off4, $1, $2}
@@ -1489,10 +1481,10 @@ pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
 #ifdef TBL68020
 pat loe lof dup adp loe stf $1==$5 && $2==$6
     kills allexceptcon
-    uses AA_REG = {ABS_off4, $1, $2}
-    gen add_l {const, $4}, {ABS_off4, $1, $2}
-    killreg %a
-			yields	%a
+    uses AA_REG = {abs_con, $1, $2}, AA_REG
+    gen move_l {indirect4, %a}, %b
+	add_l {const, $4}, {indirect4, %a}
+			yields	%b
 #endif
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==4 && $5==4 &&
