@@ -418,7 +418,7 @@ char *mess;
 	error(FALSE, "cannot find %s\n", name);
 	return;
   }
-  else if (S_ISDIR(status.st_mode) {
+  else if (S_ISDIR(status.st_mode)) {
 	error(FALSE, "%s is a directory (ignored)\n", name);
 	return;
   }
