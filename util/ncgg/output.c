@@ -426,6 +426,8 @@ outstrings() {
 	fprintf(ctable,"};\n\n");
 }
 
+extern set_t unstackset;
+
 outsets() {
 	register i;
 	register set_p sp;
@@ -438,6 +440,11 @@ outsets() {
 		fprintf(ctable,"}},\n");
 	}
 	fprintf(ctable,"};\n\n");
+
+	fprintf(ctable, "set_t unstackset = { %3d,{\n", unstackset.set_size);
+	for (i = 0; i<setsize;i++)
+		fprintf(ctable,"0x%x,",unstackset.set_val[i]&0xFFFF);
+	fprintf(ctable,"}};\n\n");
 }
 
 outinstances() {
