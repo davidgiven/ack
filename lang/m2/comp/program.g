@@ -28,6 +28,7 @@
 #include	"node.h"
 #include	"f_info.h"
 #include	"warning.h"
+#include	"misc.h"
 
 extern t_def	*GetDefinitionModule();
 
