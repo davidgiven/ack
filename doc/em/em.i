@@ -240,7 +240,7 @@ begin if (a<0) or (a>maxoffs)
 end;
 
 function argo(a:double):size;
-begin if (a<0) or (a>maxoffs)
+begin if (a<=0) or (a>maxoffs)
 	then trap(EODDZ)
 	else if (a mod wsize<>0) and (wsize mod a<>0) then trap(EODDZ);
       argo:=a ;
