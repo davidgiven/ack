@@ -8,13 +8,13 @@
 #define	ASSERT(b)	/* empty */
 #endif
 
-#if EM_WSIZE == EM_PSIZE
+#if _EM_WSIZE == _EM_PSIZE
 #define	ptrint		int
 #else
 #define	ptrint		long
 #endif
 
-#if EM_PSIZE == 2
+#if _EM_PSIZE == 2
 #define BRKSIZE		1024
 #else
 #define BRKSIZE		4096

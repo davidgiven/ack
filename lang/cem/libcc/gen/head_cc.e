@@ -44,7 +44,7 @@ _penvp
  loi EM_PSIZE
  lae _penvp
  sti EM_PSIZE
-#if unix && ! (em22 || em24 || em44)
+#if __unix && ! (__em22 || __em24 || __em44)
  lpi $_ctch_
  sig
  asp EM_PSIZE
@@ -61,7 +61,7 @@ _penvp
  cal $exit
  end
 
-#if unix && ! (em22 || em24 || em44)
+#if __unix && ! (__em22 || __em24 || __em44)
  exp $_ctch_
  pro $_ctch_,0
  lol 0
