@@ -719,7 +719,7 @@ get_text(formals, length)
 		blank = 0;
 	}
 	*length = repl->r_ptr - repl->r_text;
-	return Realloc(repl->r_text, repl->r_ptr - repl->r_text + 1);
+	return Realloc(repl->r_text, (unsigned)(repl->r_ptr - repl->r_text +1));
 }
 
 /*	macroeq() decides whether two macro replacement texts are

@@ -186,7 +186,7 @@ preprocess(fn)
 			if (c & 0200)  {
 				if (c == EOI) {
 					newline();
-					flush(op-_obuf);
+					flush((int)(op-_obuf));
 					return;
 				}
 				fatal("non-ascii character read");
@@ -215,30 +215,29 @@ preprocess(fn)
 			case STCHAR:
 				{
 				register int stopc = c;
-				int escaped;
+				int escaped = 0;
 
 				do {
 
-					escaped = 0;
 					echo(c);
 					c = GetChar();
 					if (c == '\n') {
+					/* the compiler will complain */
 						break;
 					}
 					else if (c == EOI) {
 						newline();
-						flush(op-_obuf);
+						flush((int)(op-_obuf));
 						return;
 					}
-					if (c == '\\') {
+					if (!escaped && c == '\\') {
 						echo(c);
 						c = GetChar();
 						if (c == '\n') {
 							++LineNumber;
 							lineno++;
-						}
-						else if (c == '\'') escaped = 1;
-					}
+						} else escaped = 1;
+					} else escaped = 0;
 				} while (escaped || c != stopc);
 				echo(c);
 				if (c == '\n')
@@ -389,7 +388,7 @@ int *lineno;
 	for(;;) {
 		if (c == EOI) {
 			newline();
-			flush(op - _obuf);
+			flush((int)(op - _obuf));
 			op = 0;
 			break;
 		}

@@ -252,7 +252,7 @@ garbage:
 			ptok->tk_val = (arith)0;
 			return ptok->tk_symb = INTEGER;
 		}
-		ptok->tk_str = Malloc(tg - buf);
+		ptok->tk_str = Malloc((unsigned)(tg - buf));
 		strcpy(ptok->tk_str, buf);
 		return IDENTIFIER;
 	}

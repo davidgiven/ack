@@ -45,7 +45,7 @@ replace(idf)
 	if (!expand_macro(repl, idf))
 		return 0;
 	InputLevel++;
-	InsertText(repl->r_text, repl->r_ptr - repl->r_text);
+	InsertText(repl->r_text, (int)(repl->r_ptr - repl->r_text));
 	idf->id_macro->mc_flag |= NOREPLACE;
 	repl->r_level = InputLevel;
 	repl->next = ReplaceList;
