@@ -8,7 +8,7 @@ int i;
 	char *buffer ="  ";
 	String *s;
 
-	s= (String *) _newstr(buffer);
+	s= _newstr(buffer);
 	strncpy(s->strval,&i,2);
 	return(s);
 }
@@ -18,7 +18,7 @@ double d;
 	char *buffer ="        ";
 	String *s;
 
-	s= (String *) _newstr(buffer);
+	s= _newstr(buffer);
 	strncpy(s->strval,&d,8);
 	return(s);
 }
