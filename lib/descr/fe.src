@@ -74,7 +74,9 @@ name m2
 	mapflag -M* M2_F={M2_F?} -M*
 	mapflag -x M2_F={M2_F?} -x
 	mapflag -V* M2_F={M2_F?} -V*
-	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} -Vi{w}.{w}p{p}.{w}l{l}.{w} {M2_ALIGN?} {M2_F?} < >
+	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
+	-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w} \
+	{M2_ALIGN?} {M2_F?} < >
 	prep cond
 	rts .mod
 	need .mod
