@@ -49,19 +49,19 @@ main(argc,argv)
 	C_magic();
 	while (p) {
 		if (p->em_type == EM_FATAL) {
-			fatal("EM_getinstr: %s", EM_error);
+			fatal("%s", EM_error);
 		}
 		if (p->em_type == EM_ERROR) {
-			error("EM_getinstr: %s", EM_error);
+			error("%s", EM_error);
 		}
 		else if (!EM_mkcalls(p)) {
-			error("EM_mkcalls: %s", EM_error);
+			error("%s", EM_error);
 		}
 		p = EM_getinstr();
 	}
 	C_close();
 	EM_close();
-	return errors ? 1 : 0;
+	exit(errors);
 }
 
 /* VARARGS */
