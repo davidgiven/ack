@@ -7,14 +7,14 @@ X0)
 		TRY=`.Xlex`
 	else	TRY=-lln
 	fi
-	myecho "trying to find your lex library ..."
+	echo "trying to find your lex library ..."
 	cat > x.l <<'EOF'
 %%
 [A-Z]	putchar(yytext[0]+'a'-'A');
 EOF
 	if lex x.l > /dev/null 2>&1 && cc -c lex.yy.c > /dev/null 2>&1
 	then :
-	else myecho "Sorry, your lex does not seem to work"
+	else echo "Sorry, your lex does not seem to work"
 	     exit 2
 	fi
 	cat > trylib <<'EOF'
@@ -43,12 +43,12 @@ EOF
 	;;
 esac
 case X$FL in
-Xfail)	myecho 'What option do I have to give to cc to get the LEX library?'
-	myecho "I tried " $TRIES "but these don't seem to work."
-	myecho -n 'LEX library option: '
+Xfail)	echo 'What option do I have to give to cc to get the LEX library?'
+	echo "I tried " $TRIES "but these don't seem to work."
+	echo -n 'LEX library option: '
 	if read ANSWER
 	then :
-	else myecho "Sorry, got EOF while reading your answer"
+	else echo "Sorry, got EOF while reading your answer"
 	     exit 9
 	fi
 	exec $0 $ANSWER "$TRIES"

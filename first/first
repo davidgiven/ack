@@ -10,11 +10,12 @@ first)
 esac
 : check $PATH first
 if sh ckpath
-then :
+then
+	echo "PATH is ok"
 else
 	exit 1
 fi
-: check write-ability of /tmp and /usr/tmp
+echo check write-ability of /tmp and /usr/tmp ...
 if ( >/usr/tmp/aaax.$$ )
 then
 	rm /usr/tmp/aaax.$$
@@ -29,29 +30,33 @@ else
 	echo /tmp must exist and be writable.
 	exit 2
 fi
-: set ACK HOME Directory in ../h/em_path.h
+echo "/tmp and /usr/tmp ok"
+echo setting ACK HOME Directory in ../h/em_path.h ...
 rm -f em_path.h
-sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"`cd .. ; pwd`\"@" <../h/em_path.h >em_path.h
+HM=`cd ..; pwd`
+sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"$HM\"@" <../h/em_path.h >em_path.h
 if cmp ../h/em_path.h em_path.h >/dev/null 2>&1
 then
 	: Don't touch ../h/em_path.h, it's already correct
+	echo "../h/em_path.h already correct"
 else
 	rm -f ../h/em_path.h
 	if mv em_path.h ../h >/dev/null 2>&1
-	then : success
+	then	echo "../h/em_path.h replaced"
 	else
 		echo "Sorry, can't replace ../h/em_path.h"
 		exit 7
 	fi
 fi
-: translate myecho
-if cc -o myecho myecho.c > /dev/null 2>&1
+echo compile own echo program, so that we know how it works ...
+if cc -o echo myecho.c > /dev/null 2>&1
 then
-	:
+	echo compilation succeeded
 else
 	echo "Sorry, cc does not seem to work"
 	exit 8
 fi
+cp echo ../bin/echo
 : find cc option for lex library
 if fixlexlib
 then
@@ -64,7 +69,7 @@ if (ack_sys) >/dev/null 2>&1
 then
 	: echo Your system is: `ack_sys`.
 else
-	myecho -n "Give me the type of your system, the current choice is:
+	echo -n "Give me the type of your system, the current choice is:
 pdp_v7		PDP11 with sep I/D and version 7 (or BSD 2.8, 2.9)
 vax_bsd4_1a	VAX11 with BSD4.1a
 vax_bsd4_2	VAX11 with BSD4.2
@@ -93,7 +98,7 @@ system type: "
 		exit 10
 	fi
 fi
-myecho -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
+echo -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
 if read YESNO
 then
 	case $YESNO in
@@ -113,17 +118,12 @@ fi
 : "Take action according to the system used"
 : 'Prevent the use of the system assembler on for certain systems'
 : 'prevent the use of ranlib on pdp 11s'
+echo "take some actions according to system used ..."
 case `ack_sys` in
 pdp_*)		RMD="vax4"
+		echo "disabling use of ranlib; cannot trust its result"
 		echo 'echo "no ranlib on this system"; exit 93' > ../bin/ranlib
 		chmod +x ../bin/ranlib
-		ranlib > /dev/null 2>&1
-		case X$? in
-		X93)	;;
-		*)	echo "Sorry, there still is an error in your PATH."
-			echo "It finds the system ranlib before ours, which is in the ACK bin directory."
-			exit 13
-		esac
 		;;
 vax*)		;;
 *)		RMD="vax4" ;;
@@ -131,6 +131,7 @@ esac
 for i in $RMD
 do
 (	cd ../lib/$i
+	echo "disabling use of local assembler and loader for $i"
 	if grep '^name as$' descr >/dev/null 2>&1
 	then
 	cp descr descr.orig
@@ -163,7 +164,7 @@ ABC
 		)
 		;;
 esac
-: 'Set the default machine in ../h/local.h'
+echo 'Setting the default machine in ../h/local.h ...'
 BM=1
 case `ack_sys` in
 pdp_v7)		ACM=pdp ; BM=0 ; SYS=V7 ;;
@@ -183,9 +184,11 @@ esac
 rm -f local.h
 sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < ../h/local.h >local.h
 if cmp -s ../h/local.h local.h
-then :
+then
+	echo "../h/local.h already correct"
 else
 	cp local.h ../h
+	echo "../h/local.h updated"
 	rm -f local.h
 fi
 echo "Your default machine to compile for is $ACM"
@@ -214,9 +217,77 @@ vax_sysV_2)
 	  cp libsysV_2/* libsys
 	)
 	;;
+xenix3)
+	echo "Xenix cannot handle our Makefiles; install our own make ..."
+	if ( cd ../util/make; make install )
+	then
+		echo "Done"
+	else
+		echo "Sorry, this seems to have failed."
+		echo "You have to install it by hand later, or use the Xenix"
+		echo "make anyway"
+	fi
+	echo "The Xenix C compiler cannot compile some of our programs."
+	echo "It complains about lack of heap space when many #defines are"
+	echo 'used. This is prevented by installing a "cc" shell script in'
+	echo 'the EM bin directory, which runs a .c file through a preprocessor'
+	echo 'before running it through the C compiler proper. Unfortunately,'
+	echo 'line number and filename information is lost. The compiler does'
+	echo 'not recognize its own line directives.'
+	echo 'You can remove this "cc" script from the EM bin directory'
+	echo 'when installation is done.'
+	cp cc.xenix cc.xenix.orig
+	ed - cc.xenix <<ABC
+/EMHOME/s/=.*/=$HM/
+w
+q
+ABC
+	cp cc.xenix ../bin/cc
+	chmod +x ../bin/cc
+	echo "code-generators and peephole optimizer need more stack than the default."
+	echo "adapting LDFLAGS in Makefiles"
+	for i in ../mach/*/*cg/Makefile
+	do
+		cp $i $i.orig
+		ed - $i <<ABC
+/LDFLAGS/s/$/ -F 3000/
+w
+q
+ABC
+	done
+	cp ../util/opt/Makefile ../util/opt/Makefile.orig
+	ed - ../util/opt/Makefile <<ABC
+/LDFLAGS/s/$/-F 2000/
+w
+q
+ABC
+	echo "target optimizers do not work on Xenix; disabling their use"
+	for i in ../lib/*/descr
+	do
+		if grep -s "name asopt" $i
+		then
+			cp $i $i.top
+			ed - $i <<ABC
+/name asopt/;/^end/d
+w
+q
+ABC
+		fi
+	done
+	echo "the -l option in cc command puts library in wrong place."
+	echo "this is a problem with the lex library for the occam compiler."
+	echo "changing Makefile for Occam compiler"
+	cp ../lang/occam/comp/Makefile ../lang/occam/comp/Makefile.orig
+	ed - ../lang/occam/comp/Makefile <<ABC
+/LEXLIB/s.-l[a-z]*./lib/Slibl.a.
+w
+q
+ABC
+	;;
 esac
 case X$BM in
 X0)
+	echo "set some installation pararmeters for small machines"
 	( cd ../lang/cem/cemcom
 	  cp SmallPars Parameters
 	  cp makefile makefile.orig
@@ -288,7 +359,8 @@ q
 ABC
 	)
 	;;
-*)	( cd ../lang/cem/cemcom
+*)	( echo "set some installation pararmeters for big machines"
+	  cd ../lang/cem/cemcom
 	  cp BigPars Parameters
 	  cd ../../m2/comp
 	  cp BigPars Parameters
