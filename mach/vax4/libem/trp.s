@@ -37,7 +37,7 @@ I3:
 	pushl	$Iemesend-Iemes
 	pushab	Iemes
 	pushl	$2
-	calls	$3,__write
+	calls	$3,WRITE
 	bpt
 .sect .data
 Iemes:

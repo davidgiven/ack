@@ -6,5 +6,5 @@
 .fat:
 	pushl	(sp)
 	jsb	.trp
-	calls	$1,__exit
-	halt
+	movl	(sp)+,r0
+	jmp	EXIT
