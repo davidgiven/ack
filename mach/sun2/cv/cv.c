@@ -14,6 +14,11 @@
 #include <assert.h>
 
 long	lseek();
+#if __STDC__
+#include <stdlib.h>
+#else
+char	*calloc(), *malloc();
+#endif
 
 #define	OMAGIC	0407	/* old-fashioned */
 #define	NMAGIC	0410	/* text write protexted */
@@ -285,7 +290,6 @@ writef(addr,sz,cnt)
  */
 emits(section) struct outsect *section ; {
 	char		*p;
-	char		*calloc(), *malloc();
 	long sz = section->os_flen;
 
 	rd_outsect(section - outsect);
@@ -499,7 +503,6 @@ emit_symtab()
 	register struct outname *A;
 	struct sym *MACHnames;
 	register struct sym *M;
-	extern char *malloc(), *calloc();
 	char *chars;
 	long offX = OFF_CHAR(outhead) - 4;
 
