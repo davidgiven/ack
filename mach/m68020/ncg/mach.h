@@ -31,17 +31,10 @@ You must specify the appropriate word size, then REMOVE tables.c
 #define dlb_fmt		"I_%d"
 #define	hol_fmt		"hol%d"
 
-#ifdef TBL68020
-#define loc_off		"(%d,a6)"
-#define arg_off		"(8+%d,a6)"
-#else
-#define loc_off		"%d(a6)"
-#define arg_off		"8+%d(a6)"
-#endif
 #define hol_off		"%ld+hol%d"
 
 #if WORD_SIZE==2
-#define con_cst(x)	fprintf(codefile,".data2\t%d\n",x)
+#define con_cst(x)	fprintf(codefile,".data2\t%ld\n",x)
 #else
 #define con_cst(x)	fprintf(codefile,".data4\t%ld\n",x)
 #endif

@@ -34,8 +34,8 @@ Something very wrong here!
 #define nicesize(x) ((x)==1||(x)==2||(x)==4||(x)==8)
 #define low8(x) ((x) & 0377)
 #define low16(x) ((x) & 0177777)
-#define in_1(x) ((x)>=0-128 && (x)<128)
-#define in_2(x) ((x)>=0-32768 && (x)<32768)
+#define in_1(x) sfit(x,8)
+#define in_2(x) sfit(x,16)
 
 
 EM_WSIZE = WORD_SIZE
@@ -6434,7 +6434,7 @@ with imm_cmp1 STACK
 #if WORD_SIZE!=2
 proc bxx2_in example loc loc cii loc bne
 with imm_cmp2 STACK
-    gen cmp_w {const, low16($4)}, %1
+    gen cmp_w {const, loww($4)}, %1
 	bxx* {llabel, $5}
 #endif
 
