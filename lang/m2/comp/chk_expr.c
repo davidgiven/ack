@@ -72,7 +72,7 @@ MkCoercion(pnd, tp)
 
 	if (nd_tp == tp || nd_tp->tp_fund == T_STRING /* Why ??? */) return;
 	nd_tp = BaseType(nd_tp);
-	if (nd->nd_class == Value) {
+	if (nd->nd_class == Value && nd->nd_type != error_type && tp != error_type) {
 		if (nd_tp->tp_fund == T_REAL) {
 			switch(tp->tp_fund) {
 			case T_REAL:
