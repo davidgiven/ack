@@ -93,10 +93,10 @@ do_option(text)
 				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
 			}
 
-			for(i = inc_pos++; i <= inc_total; i++) {
+			for(i = inc_pos++; i < inc_total; i++) {
 				char *tmp = inctable[i];
 
-				inctable[i++] = new;
+				inctable[i] = new;
 				new = tmp;
 			}
 		}
