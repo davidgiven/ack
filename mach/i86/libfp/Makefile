@@ -1,7 +1,7 @@
 EMHOME=../../..
 SUF=o
 MAKEFILE=$(EMHOME)/mach/proto/fp/Makefile
-MACHDEF="MACH=i86" "CFLAGS=-DIEEEFORMAT" "SUF=$(SUF)" "ASAR=aal"
+MACHDEF="MACH=i86" "SUF=$(SUF)" "ASAR=aal"
 
 all:
 	make -f $(MAKEFILE) $(MACHDEF) all
