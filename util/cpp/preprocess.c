@@ -27,7 +27,7 @@ preprocess(fn)
 	register int c;
 	register char *op = _obuf;
 	register char *ob = &_obuf[OBUFSIZE];
-	int lineno = 0;
+	int lineno = 32767;	/* force line directive */
 	extern char options[];
 
 #define flush(X)	(sys_write(STDOUT,_obuf,X))
@@ -44,17 +44,18 @@ preprocess(fn)
 			newline();
 			LoadChar(c);
 		}
-		if (! options['P'] &&
-		     (lineno != LineNumber || fn != FileName)) {
-			char Xbuf[256];
-			register char *p = Xbuf;
-
+		if (lineno != LineNumber || fn != FileName) {
 			fn = FileName;
 			lineno = LineNumber;
-			sprint(p, "# %d \"%s\"\n", LineNumber,
-							FileName);
-			while (*p) {
-				echo(*p++);
+			if (! options['P']) {
+				char Xbuf[256];
+				register char *p = Xbuf;
+
+				sprint(p, "# %d \"%s\"\n", LineNumber,
+								FileName);
+				while (*p) {
+					echo(*p++);
+				}
 			}
 		}
 		for (;;) {
