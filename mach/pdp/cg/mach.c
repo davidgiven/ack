@@ -49,11 +49,34 @@ con_mult(sz) word sz; {
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
+#ifdef ACK_ASS
+	fprintf(codefile,".long %s\n",str);
+#else
 	l = atol(str);
 	fprintf(codefile,"\t%o;%o\n",(int)(l>>16),(int)l);
+#endif
 }
 
+/*
+ * The next function is difficult to do when not running on a PDP 11 or VAX
+ * The strategy followed is to assume the code generator is running on a PDP 11
+ * unless the ACK_ASS define  is on.
+ * In the last case floating point constants are simply not handled
+ */
+
 con_float() {
+#ifdef ACK_ASS
+	static int been_here;
+
+	if (argval != 4 && argval != 8)
+		fatal("bad fcon size");
+	fprintf(codefile,".long\t");
+	if (argval == 8)
+		fprintf(codefile,"F_DUM,");
+	fprintf(codefile,"F_DUM\n");
+	if ( !been_here++)
+		fprintf(stderr,"Warning : dummy float-constant(s)\n");
+#else
 	double f;
 	register short *p,i;
 
@@ -67,6 +90,7 @@ con_float() {
 		i = *p++;
 	}
 	fprintf(codefile,"\t%o;%o\n",i,*p++);
+#endif
 }
 
 #ifdef REGVARS
@@ -131,7 +155,7 @@ f_regsave() {
 
 regsave(regstr,off,size) char *regstr; long off; {
 
-	fprintf(codefile,"/ Local %ld into %s\n",off,regstr);
+	fprintf(codefile,"%c Local %ld into %s\n",COMMENTCHAR,off,regstr);
 /* commented away 
 #ifndef REGPATCH
 	fprintf(codefile,"mov %s,-(sp)\n",regstr);
@@ -197,7 +221,11 @@ mes(type) word type; {
 				return ;
 			default:
 				strarg(argt) ;
+#ifdef ACK_ASS
+				fprintf(codefile,".define %s\n",argstr) ;
+#else
 				fprintf(codefile,".globl %s\n",argstr) ;
+#endif
 				break ;
 			}
 		}
