@@ -215,6 +215,9 @@ movl REG,A : ANY *A,X,Y		->	movl REG,A : ANY (REG),X,Y;
 movl REG,A : ANY X,*A,Y		->	movl REG,A : ANY X,(REG),Y;
 movl REG,A : ANY X,Y,*A		->	movl REG,A : ANY X,Y,(REG);
 
+/* convert floats, doubles */
+cvtlf X,A : cvtfd A,A           ->      cvtld X,A;
+cvtdf A,B : cvtfd B,A           ->      cvtdf A,B;
 
 %%;
 
