@@ -47,8 +47,12 @@ AtEoIT()
 
 AtEoIF()
 {
+	extern int nestlevel;
+	extern int nestcount;
+	extern int svnestlevel[];
 
-	if (nestlevel != -1) warning("missing #endif");
+	if (nestlevel > svnestlevel[nestcount]) warning("missing #endif");
 	else if (NoUnstack) warning("unexpected EOF");
+	nestlevel = svnestlevel[nestcount--];
 	return 0;
 }

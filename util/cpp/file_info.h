@@ -9,12 +9,10 @@ struct file_info {
 	unsigned int	fil_lino;
 	char		*fil_name;
 	char		*fil_wdir;
-	int		fil_nestlevel;
 };
 
 #define LineNumber	finfo.fil_lino
 #define FileName	finfo.fil_name
 #define WorkingDir	finfo.fil_wdir
-#define nestlevel	finfo.fil_nestlevel
 
 extern struct file_info finfo;	/* input.c */

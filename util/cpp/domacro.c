@@ -30,6 +30,10 @@ PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
 
+int nestlevel = -1;
+int svnestlevel[30] = {-1};
+int nestcount;
+
 PRIVATE char *
 GetIdentifier()
 {
@@ -261,7 +265,7 @@ do_include()
 		}
 		else {
 			WorkingDir = getwdir(result);
-			nestlevel = -1;
+			svnestlevel[++nestcount] = nestlevel;
 			FileName = result;
 			LineNumber = 1;
 		}
@@ -331,7 +335,7 @@ push_if()
 PRIVATE
 do_elif()
 {
-	if (nestlevel < 0 || (ifstack[nestlevel])) {
+	if (nestlevel <= svnestlevel[nestcount] || (ifstack[nestlevel])) {
 		error("#elif without corresponding #if");
 		PushBack();
 		skipline();
@@ -348,7 +352,7 @@ do_else()
 {
 	PushBack();
 	skipline();
-	if (nestlevel < 0 || (ifstack[nestlevel]))
+	if (nestlevel <= svnestlevel[nestcount] || (ifstack[nestlevel]))
 		error("#else without corresponding #if");
 	else {	/* mark this level as else-d		*/
 		++(ifstack[nestlevel]);
@@ -361,7 +365,7 @@ do_endif()
 {
 	PushBack();
 	skipline();
-	if (nestlevel-- < 0)
+	if (nestlevel-- <= svnestlevel[nestcount])
 		error("#endif without corresponding #if");
 }
 

@@ -78,6 +78,5 @@ compile(argc, argv)
 		fatal("%s: no source file %s\n", prog_name, 
 			source ? source : "stdin");
 	if (source) WorkingDir = getwdir(dummy);
-	nestlevel = -1;
 	preprocess(source);
 }
