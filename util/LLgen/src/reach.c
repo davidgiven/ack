@@ -58,7 +58,7 @@ co_reach() {
 	for (p = nonterms; p < maxnt; p++) {
 		if (! p->n_rule) {
 			f_input = p->n_string;
-			fatal(p->n_lineno,"nonterminal %s not defined",
+			error(p->n_lineno,"nonterminal %s not defined",
 				(min_nt_ent + (p - nonterms))->h_name);
 		}
 	}
@@ -93,7 +93,7 @@ reachable(p) register p_nont p; {
 		/*
 		 * Now walk its grammar rule
 		 */
-		reachwalk(p->n_rule);
+		if (p->n_rule) reachwalk(p->n_rule);
 	}
 }
 
