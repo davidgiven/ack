@@ -490,7 +490,7 @@ align(size)
  *	5. the offset of the relocation table.
 #ifdef SYMDBUG
  *	6. the offset of the debugging information.
-#endif /* SYMDBUG */
+#endif
  */
 static long
 modulsize(head)
