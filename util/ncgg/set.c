@@ -7,6 +7,7 @@ static char rcsid[]= "$Header$";
 #include "set.h"
 #include "token.h"
 #include "lookup.h"
+#include "reg.h"
 #include <cgg_cg.h>
 #include "extern.h"
 
@@ -80,14 +81,39 @@ set_t ident_to_set(name) char *name; {
 	return(result);
 }
 
+static
+checksize(s)
+	register set_p s;
+{
+	register int i;
+	register int size = -1;
+
+	s->set_size = 0;
+	for (i = 1; i <= nregs; i++) {
+		if (BIT(s->set_val, i)) {
+			register int sz = l_regs[i].ri_size;
+
+			if (size == -1) size = sz;
+			else if (size != sz) return;
+		}
+	}
+	for (i = 1; i <= ntokens; i++) {
+		if (BIT(s->set_val, i+nregs)) {
+			register int sz = l_tokens[i]->tk_size;
+			if (size == -1) size = sz;
+			else if (size != sz) return;
+		}
+	}
+	if (size != -1) s->set_size = size;
+}
+
 set_t setproduct(s1,s2) set_t s1,s2; {
 	set_t result;
 	register i;
 
-	if ((result.set_size=s1.set_size)==0)
-		result.set_size = s2.set_size;
 	for(i=0;i<SETSIZE;i++)
 		result.set_val[i] = s1.set_val[i] & s2.set_val[i];
+	checksize(&result);
 	return(result);
 }
 
@@ -108,10 +134,6 @@ set_t setdiff(s1,s2) set_t s1,s2; {
 	set_t result;
 	register i;
 
-	if (s1.set_size == s2.set_size)
-		result.set_size = s1.set_size;
-	else
-		result.set_size = 0;
 	for(i=0;i<SETSIZE;i++)
 		result.set_val[i] = s1.set_val[i] & ~ s2.set_val[i];
 	/* make sure that we don't loose the lowest bit of the set, which
@@ -123,5 +145,6 @@ set_t setdiff(s1,s2) set_t s1,s2; {
 			break;
 		}
 	}
+	checksize(&result);
 	return(result);
 }
