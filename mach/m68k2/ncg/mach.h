@@ -19,7 +19,7 @@ and then run "make" again
 #define	pop_fmt		"(sp)+"
 #define cst_fmt		"%ld"
 #define	off_fmt		"%ld"
-#define ilb_fmt		"I%03x%x"
+#define ilb_fmt		"I%x_%x"
 #define dlb_fmt		"_%d"
 #define	hol_fmt		"hol%d"
 
