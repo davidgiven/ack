@@ -17,7 +17,11 @@
 #include	"errout.h"
 #include	"debug.h"
 
+#if __STDC__
+#include	<stdarg.h>
+#else
 #include	<varargs.h>
+#endif
 
 #include	<system.h>
 #include	<em_arith.h>
@@ -59,6 +63,123 @@ extern char *symbol2str();
 	node, whereas other errors use the information in the token.
 */
 
+#if __STDC__
+#ifdef DEBUG
+/*VARARGS*/
+debug(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(VDEBUG, NULLNODE, ap);
+	}
+	va_end(ap);
+}
+#endif /* DEBUG */
+
+/*VARARGS*/
+error(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(ERROR, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+node_error(t_node *node, char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(ERROR, node, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+warning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(WARNING, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+node_warning(t_node *node, char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(WARNING, node, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+lexerror(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(LEXERROR, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+lexwarning(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(LEXWARNING, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+fatal(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(FATAL, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+	sys_stop(S_EXIT);
+}
+
+/*VARARGS*/
+crash(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		_error(CRASH, NULLNODE, fmt, ap);
+	}
+	va_end(ap);
+#ifdef DEBUG
+	sys_stop(S_ABORT);
+#else
+	sys_stop(S_EXIT);
+#endif
+}
+#else
 #ifdef DEBUG
 /*VARARGS*/
 debug(va_alist)
@@ -68,7 +189,8 @@ debug(va_alist)
 
 	va_start(ap);
 	{
-		_error(VDEBUG, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(VDEBUG, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -82,7 +204,8 @@ error(va_alist)
 
 	va_start(ap);
 	{
-		_error(ERROR, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(ERROR, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -96,8 +219,8 @@ node_error(va_alist)
 	va_start(ap);
 	{
 		t_node *node = va_arg(ap, t_node *);
-
-		_error(ERROR, node, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(ERROR, node, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -110,7 +233,8 @@ warning(va_alist)
 
 	va_start(ap);
 	{
-		_error(WARNING, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(WARNING, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -124,7 +248,8 @@ node_warning(va_alist)
 	va_start(ap);
 	{
 		t_node *nd = va_arg(ap, t_node *);
-		_error(WARNING, nd, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(WARNING, nd, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -137,7 +262,8 @@ lexerror(va_alist)
 
 	va_start(ap);
 	{
-		_error(LEXERROR, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(LEXERROR, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -150,7 +276,8 @@ lexwarning(va_alist)
 
 	va_start(ap);
 	{
-		_error(LEXWARNING, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(LEXWARNING, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 }
@@ -163,7 +290,8 @@ fatal(va_alist)
 
 	va_start(ap);
 	{
-		_error(FATAL, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(FATAL, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 	sys_stop(S_EXIT);
@@ -177,7 +305,8 @@ crash(va_alist)
 
 	va_start(ap);
 	{
-		_error(CRASH, NULLNODE, ap);
+		char *fmt = va_arg(ap, char *);
+		_error(CRASH, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
 #ifdef DEBUG
@@ -186,10 +315,12 @@ crash(va_alist)
 	sys_stop(S_EXIT);
 #endif
 }
+#endif
 
-_error(class, node, ap)
+_error(class, node, fmt, ap)
 	int class;
 	t_node *node;
+	char *fmt;
 	register va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
@@ -198,7 +329,6 @@ _error(class, node, ap)
 	unsigned int ln = 0;
 	register char *remark = 0;
 	int warn_class;
-	char *fmt;
 	
 	/* check visibility of message */
 	if (class == ERROR || class == WARNING) {
@@ -273,8 +403,6 @@ _error(class, node, ap)
 		break;
 	}
 
-	fmt  = va_arg(ap, char *);	
-	
 	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
 
 	if (remark) fprint(ERROUT, "%s ", remark);
