@@ -193,7 +193,11 @@ name opt
 	to .m
 	program {EM}/lib.bin/em_opt
 	mapflag -LIB OPT_F={OPT_F?} -L
-	args {OPT_F?} {MACHOPT_F?} <
+# when running the global optimizer, no multiplication optimization here.
+	mapflag -O2 OPT2_F=-m0
+	mapflag -O3 OPT2_F=-m0
+	mapflag -O4 OPT2_F=-m0
+	args {OPT_F?} {MACHOPT_F?} {OPT2_F?} <
 	stdout
 	optimizer
 end
