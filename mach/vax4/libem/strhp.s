@@ -16,7 +16,7 @@
 	bicl2   $0777,r0
 	pushl	r0
 	calls	$1,_brk
-	tst.l	r0
+	tstl	r0
 	beql	I2
 	pushl	$EHEAP
 	jsb     .trp
