@@ -70,13 +70,13 @@ init_pp()
 	tp = localtime(&clock);
 
 	/* __DATE__ */
-	sprintf(dbuf, "\"%.3s %.2d %d\"", months[tp->tm_mon],
+	sprint(dbuf, "\"%s %02d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
 	if (tp->tm_mday < 10) dbuf[5] = ' ';		/* hack */
 	macro_def(str2idf("__DATE__"), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */
-	sprintf(tbuf, "\"%.2d:%.2d:%.2d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
+	sprint(tbuf, "\"%02d:%02d:%02d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
 	macro_def(str2idf("__TIME__"), tbuf, -1, strlen(tbuf), NOUNDEF);
 
 	/* __LINE__	*/

@@ -22,6 +22,7 @@
 #include	"declar.h"
 #include	"sizes.h"
 #include	"level.h"
+#include	"use_tmp.h"
 
 extern char *symbol2str();
 extern char options[];
@@ -157,8 +158,14 @@ idf2expr(expr)
 	}
 	else {
 #ifndef	LINT
-		if (!InSizeof)
-			def->df_used = 1;
+		if (!InSizeof) {
+			if (! def->df_used) {
+#ifndef PREPEND_SCOPES
+				code_scope(idf->id_text, def);
+#endif /* PREPEND_SCOPES */
+				def->df_used = 1;
+			}
+		}
 #endif	LINT
 		expr->ex_type = def->df_type;
 		if (expr->ex_type == error_type) {

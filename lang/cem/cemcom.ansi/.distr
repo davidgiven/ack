@@ -54,6 +54,7 @@ interface.h
 ival.g
 l_brace.str
 l_class.h
+l_comment.h
 l_comment.c
 l_dummy.c
 l_ev_ord.c
@@ -78,8 +79,12 @@ mcomm.c
 mes.h
 options
 options.c
+pragma.c
 program.g
+proto.c
+proto.str
 replace.c
+replace.str
 scan.c
 sizes.h
 skip.c

@@ -17,8 +17,10 @@
 #include	"assert.h"
 
 arith full_mask[MAXSIZE];/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
+#ifndef NOCROSS
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
+#endif /* NOCROSS */
 extern int ResultKnown;
 
 cstbin(expp, oper, expr)
@@ -251,6 +253,8 @@ init_cst()
 	}
 	if ((int)long_size > arith_size)
 		fatal("sizeof (arith) insufficient on this machine");
+#ifndef NOCROSS
 	max_int = full_mask[(int)int_size] & ~(1L << ((int)int_size * 8 - 1));
 	max_unsigned = full_mask[(int)int_size];
+#endif /* NOCROSS */
 }

@@ -51,7 +51,7 @@ eval_field(expr, code)
 	register struct expr *rightop = expr->OP_RIGHT;
 	register struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
-	arith tmpvar;
+	arith tmpvar = 0;
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
 
 	/* First some assertions to be sure that the rest is legal */

@@ -387,7 +387,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case PLUSPLUS:
 		case MINMIN:
 		{
-			arith tmp;
+			arith tmp = 0;
 			int compl;	/* Complexity of left operand */
 			int newcode = left->ex_type->tp_size > 0; /* CJ */
 #ifndef NOBITFIELD
@@ -803,9 +803,8 @@ store_val(vl, tp)
 	register struct value *vl;
 	register struct type *tp;
 {
-	int al_on_word;
-	register int inword;
-	register int indword;
+	register int inword = 0;
+	register int indword = 0;
 	arith val = vl->vl_value;
 
 	if (vl->vl_class == Const) {	/* absolute addressing */
@@ -813,9 +812,10 @@ store_val(vl, tp)
 		store_block(tp->tp_size, tp->tp_align);
 		return;
 	}
-	al_on_word = (tp->tp_align % word_align == 0);
-	if (!(inword = (tp->tp_size == word_size && al_on_word)))
-		indword = (tp->tp_size == dword_size && al_on_word);
+	if (tp->tp_align % word_align == 0) {
+		if (tp->tp_size == word_size) inword = 1;
+		else if (tp->tp_size == dword_size) indword = 1;
+	}
 	if (vl->vl_class == Name) {
 		register struct idf *id = vl->vl_data.vl_idf;
 		register struct def *df = id->id_def;
@@ -877,8 +877,7 @@ load_val(expr, rlval)
 {
 	register struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
-	int al_on_word;
-	register int inword, indword;
+	register int inword = 0, indword = 0;
 	register arith val = expr->VL_VALUE;
 
 	if (expr->VL_CLASS == Const) {
@@ -891,9 +890,10 @@ load_val(expr, rlval)
 		return;
 	}
 	if (rvalue) {
-		al_on_word = (tp->tp_align % word_align == 0);
-		if (!(inword = (tp->tp_size == word_size && al_on_word)))
-			indword = (tp->tp_size == dword_size && al_on_word);
+		if (tp->tp_align % word_align == 0) {
+			if (tp->tp_size == word_size) inword = 1;
+			else if (tp->tp_size == dword_size) indword = 1;
+		}
 	}
 	if (expr->VL_CLASS == Label) {
 		if (rvalue) {

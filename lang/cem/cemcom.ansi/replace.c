@@ -30,6 +30,7 @@
 extern struct idf *GetIdentifier();
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
+extern char *strcat(), *strcpy();
 
 int
 replace(idf)
@@ -221,7 +222,7 @@ getactuals(repl, idf)
 			args->a_expvec[argcnt] = args->a_expptr;
 			args->a_rawvec[argcnt] = args->a_rawptr;
 			if (argcnt == STDC_NPARAMS)
-				strict("number of parameters exceeds ANSI standard");
+				lexstrict("number of parameters exceeds ANSI standard");
 			if (argcnt >= NPARAMS)
 				fatal("argument vector overflow");
 		}

@@ -623,10 +623,10 @@ check_formals(idf, dc)
 			error("incorrect number of parameters");
 		}
 	} else {			/* make a pseudo-prototype */
-		register struct proto *lpl;
+		register struct proto *lpl = new_proto();
 
 		while (fm) {
-			if (pl == 0) pl = lpl = new_proto();
+			if (pl == 0) pl = lpl;
 			else {
 				lpl->next = new_proto();
 				lpl = lpl->next;
@@ -638,7 +638,7 @@ check_formals(idf, dc)
 			fm = fm->next;
 		}
 		if (pl == 0) {		/* make func(void) */
-			pl = new_proto();
+			pl = lpl;
 			pl->pl_type = void_type;
 			pl->pl_flag = PL_VOID;
 		}

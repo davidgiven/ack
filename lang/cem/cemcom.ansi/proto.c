@@ -49,11 +49,11 @@ check_for_void(pl)
 	}
 }
 
-add_proto(pl, ds, dc, level)
+add_proto(pl, ds, dc, lvl)
 	struct proto *pl;
 	struct decspecs *ds;
 	struct declarator *dc;
-	int level;
+	int lvl;
 {
 	/*	The full typed identifier or abstract type, described
 		by the structures decspecs and declarator are turned
@@ -102,7 +102,7 @@ add_proto(pl, ds, dc, level)
 	sc = (ds->ds_sc_given && ds->ds_sc != REGISTER) ?
 				0 : sc == 0 ? FORMAL : REGISTER;
 
-	if (def && (def->df_level == level /* || def->df_level < L_PROTO */ )) {
+	if (def && (def->df_level == lvl /* || def->df_level < L_PROTO */ )) {
 		/* redeclaration at the same level */
 		error("parameter %s redeclared", idf->id_text);
 	} else if (idf != (struct idf *)0) {
@@ -111,7 +111,7 @@ add_proto(pl, ds, dc, level)
 		register struct def *newdef = new_def();
 		
 		newdef->next = def;
-		newdef->df_level = level;
+		newdef->df_level = lvl;
 		newdef->df_sc = sc;
 		newdef->df_type = type;
 		newdef->df_formal_array = formal_array;
@@ -412,9 +412,9 @@ call_proto(expp)
 		/* stack up the parameter expressions */
 		while (right->ex_class == Oper && right->OP_OPER == PARCOMMA) {
 			if (ecnt == STDC_NPARAMS)
-				strict("number of parameters exceeds ANSI limit");
+				expr_strict(right, "number of parameters exceeds ANSI limit");
 			if (ecnt >= NPARAMS-1) {
-				error("too many parameters");
+				expr_error(right, "too many parameters");
 				return;
 			}
 			estack[ecnt++] = &(right->OP_RIGHT);
@@ -427,7 +427,7 @@ call_proto(expp)
 			parameters.
 		*/
 		if (pl && pl->pl_flag & PL_VOID) {
-			strict("no parameters expected");
+			expr_strict(*expp, "no parameters expected");
 			pl = NO_PROTO;
 		}
 
@@ -451,7 +451,7 @@ call_proto(expp)
 				checked nor converted !
 			*/
 			if (pcnt < 0) {
-				error("more parameters than specified in prototype");
+				expr_error(*expp, "more parameters than specified in prototype");
 				break;
 			}
 			else if (!(pstack[pcnt]->pl_flag & PL_ELLIPSIS)) {
@@ -461,10 +461,10 @@ call_proto(expp)
 				any2parameter(estack[ecnt]);
 		}
 		if (pcnt >= 0 && !(pstack[0]->pl_flag & PL_ELLIPSIS))
-			error("less parameters than specified in prototype");
+			expr_error(*expp, "less parameters than specified in prototype");
 
 	} else {
 		if (pl && !(pl->pl_flag & PL_VOID))
-			error("less parameters than specified in prototype");
+			expr_error(*expp, "less parameters than specified in prototype");
 	}
 }

@@ -31,7 +31,7 @@ fltcstbin(expp, oper, expr)
 	*/
 	flt_arith o1, o2;
 	int compar = 0;
-	int cmpval;
+	int cmpval = 0;
 
 	o1 = (*expp)->FL_ARITH;
 	o2 = expr->FL_ARITH;

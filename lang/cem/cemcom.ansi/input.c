@@ -12,7 +12,6 @@
 #define INP_TYPE	struct file_info
 #define INP_VAR		finfo
 struct file_info	finfo;
-extern int		nestlevel;
 #include "nopp.h"
 #include <inp_pkg.body>
 
@@ -42,6 +41,7 @@ getwdir(fn)
 }
 
 int	InputLevel;
+extern int		nestlevel;
 #endif NOPP
 
 int	NoUnstack;

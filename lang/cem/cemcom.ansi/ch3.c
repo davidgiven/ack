@@ -172,7 +172,7 @@ ch3cast(expp, oper, tp)
 	register struct type *oldtp;
 
 	if (oper == RETURN && tp->tp_fund == VOID) {
-		strict("return <expression> in function returning void");
+		expr_strict(*expp, "return <expression> in function returning void");
 		(*expp)->ex_type = void_type;
 		return;
 	}
@@ -554,7 +554,7 @@ ch3asgn(expp, oper, expr)
 	if (!exp->ex_lvalue) {
 		expr_error(exp, "no lvalue in operand of %s", oper_string);
 	} else if (exp->ex_flags & EX_ILVALUE)	{
-		strict("incorrect lvalue in operand of %s", oper_string);
+		expr_strict(exp, "incorrect lvalue in operand of %s", oper_string);
 	} else if (exp->ex_flags & EX_READONLY) {
 		expr_error(exp, "operand of %s is read-only", oper_string);
 	} else if (fund == STRUCT || fund == UNION) {

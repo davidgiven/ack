@@ -16,8 +16,6 @@
 extern char options[];
 extern int level;
 extern char *symbol2str();
-extern char *type2str();
-extern char *qual2str();
 extern struct type *qualifier_type();
 
 struct decspecs null_decspecs;

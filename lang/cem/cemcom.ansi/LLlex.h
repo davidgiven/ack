@@ -41,6 +41,8 @@ struct token	{
 #define tk_fval	tok_data.tok_fval
 
 extern struct token dot, ahead, aside;
+extern int token_nmb;			/* number of the ahead token */
+extern int tk_nmb_at_last_syn_err;	/* token number at last syntax error */
 
 #ifndef NOPP
 extern int ReplaceMacros;	/* "LLlex.c"	*/

@@ -213,7 +213,7 @@ int to_endif;
 			if (!to_endif && nestlevel == skiplevel) {
 				if (SkipToNewLine())
 					if (!options['o'])
-						strict("garbage following #else");
+						lexstrict("garbage following #else");
 				NoUnstack--;
 				return;
 			}
@@ -224,7 +224,7 @@ int to_endif;
 			if (nestlevel == skiplevel) {
 				if (SkipToNewLine())
 					if (!options['o'])
-						strict("garbage following #endif");
+						lexstrict("garbage following #endif");
 				nestlevel--;
 				NoUnstack--;
 				return;
@@ -368,7 +368,7 @@ do_else()
 {
 	if (SkipToNewLine())
 		if (!options['o'])
-			strict("garbage following #else");
+			lexstrict("garbage following #else");
 	if (nestlevel <= nestlow)
 		lexerror("#else without corresponding #if");
 	else {	/* mark this level as else-d */
@@ -384,7 +384,7 @@ do_endif()
 {
 	if (SkipToNewLine())
 		if (!options['o'])
-			strict("garbage following #endif");
+			lexstrict("garbage following #endif");
 	if (nestlevel <= nestlow)	{
 		lexerror("#endif without corresponding #if");
 	}

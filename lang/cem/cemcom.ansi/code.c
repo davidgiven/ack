@@ -375,11 +375,6 @@ code_declaration(idf, expr, lvl, sc)
 	
 	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
 		return;
-#ifndef PREPEND_SCOPES
-	if (fund == FUNCTION) {
-		code_scope(idf->id_text, def);
-	}
-#endif PREPEND_SCOPES
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
@@ -429,9 +424,6 @@ code_declaration(idf, expr, lvl, sc)
 		case GLOBAL:
 		case IMPLICIT:
 			/* we are sure there is no expression */
-#ifndef	PREPEND_SCOPES
-			code_scope(idf->id_text, def);
-#endif	PREPEND_SCOPES
 			break;
 		case AUTO:
 		case REGISTER:

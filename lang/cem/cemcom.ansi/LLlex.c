@@ -25,6 +25,9 @@
 
 /* Data about the token yielded */
 struct token dot, ahead, aside;
+int token_nmb = 0;		/* number of the ahead token */
+int tk_nmb_at_last_syn_err = -5/*ERR_SHADOW*/;
+				/* token number at last syntax error */
 
 #ifndef NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
@@ -42,7 +45,6 @@ int LexSave = 0;		/* last character read by GetChar	*/
 #define	FLG_ESEEN	0x01	/* possibly a floating point number */
 #define	FLG_DOTSEEN	0x02	/* certainly a floating point number */
 extern arith full_mask[];
-extern arith max_int;
 
 #ifndef	NOPP
 static struct token LexStack[MAX_LL_DEPTH];
@@ -114,6 +116,8 @@ GetToken(ptok)
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
 
+	token_nmb++;
+
 	if (File_Inserted) {
 		File_Inserted = 0;
 		goto firstline;
@@ -178,38 +182,35 @@ garbage:
 		case '!':
 			if (nch == '=')
 				return ptok->tk_symb = NOTEQUAL;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '&':
 			if (nch == '&')
 				return ptok->tk_symb = AND;
-			else if (nch == '=')
+			if (nch == '=')
 				return ptok->tk_symb = ANDAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '+':
 			if (nch == '+')
 				return ptok->tk_symb = PLUSPLUS;
-			else if (nch == '=')
+			if (nch == '=')
 				return ptok->tk_symb = PLUSAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '-':
 			if (nch == '-')
 				return ptok->tk_symb = MINMIN;
-			else if (nch == '>')
+			if (nch == '>')
 				return ptok->tk_symb = ARROW;
-			else if (nch == '=')
+			if (nch == '=')
 				return ptok->tk_symb = MINAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '<':
 			if (AccFileSpecifier) {
 				UnGetChar();	/* pushback nch */
 				ptok->tk_bts = string_token("file specifier",
 							'>', &(ptok->tk_len));
 				return ptok->tk_symb = FILESPECIFIER;
-			} else if (nch == '<') {
+			}
+			if (nch == '<') {
 				if ((nch = GetChar()) == '=')
 					return ptok->tk_symb = LEFTAB;
 				UnGetChar();
@@ -217,13 +218,11 @@ garbage:
 			}
 			if (nch == '=')
 				return ptok->tk_symb = LESSEQ;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '=':
 			if (nch == '=')
 				return ptok->tk_symb = EQUAL;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '>':
 			if (nch == '=')
 				return ptok->tk_symb = GREATEREQ;
@@ -233,30 +232,25 @@ garbage:
 				UnGetChar();
 				return ptok->tk_symb = RIGHT;
 			}
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '|':
 			if (nch == '|')
 				return ptok->tk_symb = OR;
-			else if (nch == '=')
+			if (nch == '=')
 				return ptok->tk_symb = ORAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '%':
 			if (nch == '=')
 				return ptok->tk_symb = MODAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '*':
 			if (nch == '=')
 				return ptok->tk_symb = TIMESAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '^':
 			if (nch == '=')
 				return ptok->tk_symb = XORAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		case '/':
 			if (nch == '*'
 #ifndef NOPP
@@ -266,14 +260,15 @@ garbage:
 				skipcomment();
 				goto again;
 			}
-			else if (nch == '=')
+			if (nch == '=')
 				return ptok->tk_symb = DIVAB;
-			UnGetChar();
-			return ptok->tk_symb = ch;
+			break;
 		default:
 			crash("bad class for char 0%o", ch);
 			/* NOTREACHED */
 		}
+		UnGetChar();
+		return ptok->tk_symb = ch;
 	case STCHAR:				/* character constant	*/
 		ptok->tk_ival = char_constant("character");
 		ptok->tk_fund = INT;
@@ -508,7 +503,7 @@ char_constant(nm)
 		ch = GetChar();
 	}
 	if (size > 1)
-		strict("%s constant includes more than one character", nm);
+		lexstrict("%s constant includes more than one character", nm);
 	if (size > (int)int_size)
 		lexerror("%s constant too long", nm);
 	return val;
