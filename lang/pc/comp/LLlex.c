@@ -46,6 +46,7 @@ int tokenseen = 0;	/* Some comment-options must precede any program text */
 CommentOptions()
 {
 	register int ch, ci;
+	int	on_on_minus = 0;
 	/* Parse options inside comments */
 
 	do {
@@ -73,20 +74,19 @@ CommentOptions()
 
 		case 'l':	ci = 'L' ;	/* for indexing */
 			/* fall through */
-		case 'a':			/* assertions */
-		case 't':			/* tracing */
-		case 'A':			/* extra array range-checks */
 		case 'L':			/* FIL & LIN instructions */
 		case 'R':			/* range checks */
-		{
-			int on_on_minus = (ci == 'L' || ci == 'R');
-
+		case 'a':			/* assertions */
+			on_on_minus = 1;
+			/* fall through */
+		case 't':			/* tracing */
+		case 'A':			/* extra array range-checks */
 			LoadChar(ch);
 			if( ch == '-' ) options[ci] = on_on_minus;
 			else if( ch == '+' ) options[ci] = !on_on_minus;
 			else PushBack();
+			on_on_minus = 0;
 			break;
-		}
 
 		case 'i':
 		{
