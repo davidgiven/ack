@@ -1023,6 +1023,7 @@ CodeStd(nd)
 		case R_PACK:	{
 			label lba = tp->arr_ardescr;
 
+
 			CodeDAddress(left);
 			arg = arg->nd_right;
 			left = arg->nd_left;
@@ -1043,6 +1044,12 @@ CodeStd(nd)
 			*/
 			label lba, lbz = tp->arr_ardescr;
 
+			tp = tp->arr_elem;
+			if (tp->tp_fund == T_SUBRANGE &&
+			    tp->sub_lb >= 0) {
+				C_loc((arith) 1);
+			}
+			else	C_loc((arith) 0);
 			CodeDAddress(left);
 			arg = arg->nd_right;
 			left = arg->nd_left;
@@ -1054,7 +1061,7 @@ CodeStd(nd)
 			C_lae_dlb(lbz, (arith) 0);
 			C_lae_dlb(lba, (arith) 0);
 			C_cal("_unp");
-			C_asp(4 * pointer_size + word_size);
+			C_asp(4 * pointer_size + 2 * word_size);
 			break;
 		}
 
