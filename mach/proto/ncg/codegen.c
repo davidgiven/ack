@@ -152,7 +152,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 			int j, nargs;
 			getint(i,bp);
 			getint(nargs,bp);
-			assert(nargs < MAXPROCARG);
+			assert(nargs <= MAXPROCARG);
 			for (j = 0; j < nargs; j++) {
 				getint(procarg[j],bp);
 			}

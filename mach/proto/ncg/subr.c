@@ -324,6 +324,14 @@ distance(cindex) {
 				return(100);
 			if (expsize<toksize)
 				return(99-i);
+
+			/* Now we have a match in size, but it is not exact.
+			   Therefore, make sure that we can at least
+			   create it from the stack!
+			*/
+			if (! from_stack(&machsets[tokexp])) {
+				return MAXINT;
+			}
 		} else
 			exact++;
 	}
