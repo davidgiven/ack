@@ -4,8 +4,8 @@
 # Machine and environ dependent definitions
 EMHOME = ../../..
 CC = /proj/em/Work/bin/fcc.cc
+CC = cc
 CFLOW = cflow
-MAKE = make
 MKDEP = $(EMHOME)/bin/mkdep
 PRID = $(EMHOME)/bin/prid
 CID = $(EMHOME)/bin/cid
@@ -55,7 +55,7 @@ COPTIONS =
 
 # What parser generator to use and how
 GEN = $(EMHOME)/bin/LLgen
-GENOPTIONS = -v
+GENOPTIONS = -vvvx
 
 # Special #defines during compilation
 PROF = #-pg
@@ -128,8 +128,8 @@ SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 LINT = /usr/bin/lint
 LINTFLAGS =
 
-MYLINT = /usr/star/dick/bin/lint	#../lint
-MYLINTFLAGS = #-xh
+MYLINT = ../lpass2/lint
+MYLINTFLAGS = -xh
 
 #EXCLEXCLEXCLEXCL
 
@@ -159,7 +159,6 @@ CEmain:	Cfiles
 
 Lnt:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
-	make "EMHOME="$(EMHOME) $(CURRDIR)lnt
 	@rm -f nmclash.o a.out
 
 install:	Main
@@ -178,7 +177,7 @@ pr:
 	@pr Makefile make.* char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
 
 opr:
-	$(MAKE) pr | opr
+	make pr | opr
 
 clean:
 	rm -f $(OBJ)
@@ -189,11 +188,11 @@ cflow:	Cfiles
 	$(CFLOW) $(CDEFS) $(SRC)
 
 lint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then $(MAKE) "EMHOME="$(EMHOME) Xlint ; else sh Resolve Xlint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
 mylint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then $(MAKE) "EMHOME="$(EMHOME) Xmylint ; else sh Resolve Xmylint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xmylint ; else sh Resolve Xmylint ; fi'
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)

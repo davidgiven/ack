@@ -527,6 +527,18 @@ any2opnd(expp, oper)
 	}
 }
 
+any2parameter(expp)
+	register struct expr **expp;
+{
+	/*	To handle default argument promotions
+	*/
+	any2opnd(expp, '(');
+#ifndef NOFLOAT
+	if ((*expp)->ex_type->tp_fund == FLOAT)
+		float2float(expp, double_type);
+#endif NOFLOAT
+}
+
 #ifndef NOBITFIELD
 field2arith(expp)
 	register struct expr **expp;

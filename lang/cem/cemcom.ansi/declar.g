@@ -518,9 +518,11 @@ abstract_declarator(register struct declarator *dc;)
 	{add_decl_unary(dc, POINTER, qual, (arith)0, NO_PARAMS, NO_PROTO);}
 ;
 
+%first first_of_parameter_type_list, parameter_type_list;
+
 primary_abstract_declarator(struct declarator *dc;)
 :
-[%if (AHEAD == ')')
+[%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD))
 	empty
 |
 	'(' abstract_declarator(dc) ')'
@@ -609,7 +611,7 @@ parameter_declarator(register struct declarator *dc;)
 	primary_parameter_declarator(dc)
 	[
 		'('
-		[ %if(DOT != IDENTIFIER && DOT != ')')
+		[ %if (DOT != IDENTIFIER)
 			parameter_type_list(&pl)
 		|
 			formal_list(&fm)
@@ -629,7 +631,7 @@ parameter_declarator(register struct declarator *dc;)
 
 primary_parameter_declarator(register struct declarator *dc;)
 :
-[ %if(AHEAD == ')')
+[%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD))
 	empty
 |
 	identifier(&dc->dc_idf)

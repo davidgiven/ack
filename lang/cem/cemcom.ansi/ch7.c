@@ -70,13 +70,6 @@ ch7sel(expp, oper, idf)
 			}
 		}
 	} /* oper == ARROW */
-	else { /* oper == '.' */
-		/* filter out illegal expressions "non_lvalue.sel" */
-		if (!exp->ex_lvalue) {
-			expr_error(exp, "dot requires lvalue");
-			return;
-		}
-	}
 	exp = *expp;
 	switch (tp->tp_fund)	{
 	case POINTER:	/* for int *p;	p->next = ...	*/
@@ -126,15 +119,18 @@ ch7sel(expp, oper, idf)
 				if (exp->ex_type == error_type)
 					exp->ex_flags |= EX_ERROR;
 			}
-			else
+			else {
 				exp = new_oper(sd->sd_type, exp, '.',
 						intexpr(sd->sd_offset, INT));
+				exp->ex_lvalue = exp->OP_LEFT->ex_lvalue;
+			}
 		}
 	}
-	else /* oper == ARROW */
+	else { /* oper == ARROW */
 		exp = new_oper(sd->sd_type,
 			exp, oper, intexpr(sd->sd_offset, INT));
-	exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
+		exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
+	}
 	if (sd->sd_type->tp_typequal & TQ_CONST)
 		exp->ex_flags |= EX_READONLY;
 	if (sd->sd_type->tp_typequal & TQ_VOLATILE)

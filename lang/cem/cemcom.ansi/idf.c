@@ -426,7 +426,7 @@ global_redecl(idf, new_sc, tp)
 
 	if (!equal_type(tp, def->df_type))
 		error("redeclaration of %s with different type", idf->id_text);
-	update_proto(tp, def->df_type);
+	else update_proto(tp, def->df_type);
 	if (tp->tp_fund == ARRAY) {
 		/* Multiple array declaration; this may be interesting */
 		if (tp->tp_size < 0)	{		/* new decl has [] */

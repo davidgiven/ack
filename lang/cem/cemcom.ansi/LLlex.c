@@ -349,10 +349,10 @@ firstline:
 				floating point number or field operator or
 				ELLIPSIS.
 			*/
-			ch = GetChar();
-			if (!is_dig(ch)) {	/* . or ... */
-				if (ch == '.') {
-					if ((ch = GetChar()) == '.')
+			vch = GetChar();
+			if (!is_dig(vch)) {	/* . or ... */
+				if (vch == '.') {
+					if ((vch = GetChar()) == '.')
 						return ptok->tk_symb = ELLIPSIS;
 					/* This is funny: we can't push the
 					   second dot back. But then again
@@ -364,12 +364,12 @@ firstline:
 				}
 				UnGetChar();
 				return ptok->tk_symb = '.';
-			} else
-				*np++ = '0';
+			}
+			*np++ = '0';
 			UnGetChar();
 #else
-			if ((ch = GetChar()) == '.') {
-				if ((ch = GetChar()) == '.')
+			if ((vch = GetChar()) == '.') {
+				if ((vch = GetChar()) == '.')
 					return ptok->tk_symb = ELLIPSIS;
 				UnGetChar();
 				lexerror("illegal combination '..'");
@@ -693,6 +693,7 @@ val_in_base(ch, base)
 	case 8:
 		return (is_dig(ch) && ch < '9') ? ch - '0' : -1;
 	case 10:
+		return is_dig(ch) ? ch - '0' : -1;
 	case 16:
 		return is_dig(ch) ? ch - '0'
 			: is_hex(ch) ? (ch - 'a' + 10) & 017

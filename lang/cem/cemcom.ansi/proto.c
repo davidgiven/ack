@@ -168,7 +168,7 @@ declare_protos(idf, dc)
 				break;
 
 			if (!pl->pl_idf || !(def = pl->pl_idf->id_def)) {
-				error("no parameter supplied");
+				error("no parameter identifier supplied");
 				pl = pl->next;
 				continue;
 			}
@@ -221,84 +221,45 @@ update_proto(tp, otp)
 	*/
 	register struct proto *pl, *opl;
 
-#if 0
-	/*	THE FOLLOWING APPROACH IS PRESUMABLY WRONG.
-		THE ONLY THING THIS CODE IS SUPPOSED TO DO
-		IS TO UPDATE THE PROTOTYPELISTS, I HAVEN'T
-		EVEN CONSIDERED THE DISPOSAL OF REDUNDANT
-		SPACE !!.
-		THIS ROUTINE DUMPS CORE. SORRY, BUT IT'S 10
-		P.M. AND I'M SICK AN TIRED OF THIS PROBLEM.
-	*/
-	print("Entering\n");
 	if (tp == otp) {
-		print("OOPS - they are equal\n");
 		return;
 	}
 	if (!tp || !otp) {
-		print("OOPS - Nil pointers tp=@%o otp=@%o\n", tp, otp);
 		return;
 	}
 
-	print("Search function\n");
 	while (tp && tp->tp_fund != FUNCTION) {
-		if (!(tp->tp_up)) {
-			print("TP is NIL\n");
-			return;
-		}
 		tp = tp->tp_up;
-		if (!(otp->tp_up)) {
-			print("OTP is NIL\n");
-			return;
-		}
 		otp = otp->tp_up;
 		if (!tp) return;
 	}
 
-	print("Do it\n");
 	pl = tp->tp_proto;
 	opl = otp->tp_proto;
 	if (pl && opl) {
 		/* both have prototypes */
-		print("Both have proto type\n");
-		print("New proto type list\n");
-		dump_proto(pl);
-		print("Old proto type list\n");
-		dump_proto(opl);
 		while (pl && opl) {
 			update_proto(pl->pl_type, opl->pl_type);
 			pl = pl->next;
-			opl = pl->next;
+			opl = opl->next;
 		}
-		/*free_proto_list(tp->tp_proto);*/
-		tp->tp_proto = otp->tp_proto;
+		free_proto_list(otp->tp_proto);
+		otp->tp_proto = tp->tp_proto;
 	} else if (opl) {
 		/* old decl has type */
-		print("Old decl has type\n");
-		print("Old proto type list\n");
-		dump_proto(opl);
-		tp->tp_proto = opl;
 	} else if (pl) {
 		/* new decl has type */
-		print("New decl has type\n");
-		print("New proto type list\n");
-		dump_proto(pl);
-		print("otp = @%o\n", otp);
 		otp->tp_proto = pl;
-		print("after assign\n");
-	} else
-		print("none has prototype\n");
+	}
 
-	print("Going for another top type\n");
 	update_proto(tp->tp_up, otp->tp_up);
-# endif
 }
 
 free_proto_list(pl)
 	register struct proto *pl;
 {
 	while (pl) {
-		register struct proto *tmp = pl->next;
+		struct proto *tmp = pl->next;
 		free_proto(pl);
 		pl = tmp;
 	}
@@ -355,6 +316,7 @@ call_proto(expp)
 	register struct expr *left = (*expp)->OP_LEFT;
 	register struct expr *right = (*expp)->OP_RIGHT;
 	register struct proto *pl = NO_PROTO;
+	static struct proto ellipsis = { 0, 0, 0, ELLIPSIS };
 
 	if (left != NILEXPR) {	/* in case of an error */
 		register struct type *tp = left->ex_type;
@@ -376,13 +338,11 @@ call_proto(expp)
 
 			if (left->ex_class != Value || left->VL_CLASS != Name) {
 				strict("no prototype supplied");
-				return;
 			}
-			if ((idf = left->VL_IDF)->id_proto)
-				return;
-			strict("'%s' no prototype supplied", idf->id_text);
-			idf->id_proto++;
-			return;
+			else if (! (idf = left->VL_IDF)->id_proto) {
+				strict("'%s' no prototype supplied", idf->id_text);
+				idf->id_proto++;
+			}
 		}
 
 		/* stack up the parameter expressions */
@@ -404,16 +364,22 @@ call_proto(expp)
 		*/
 		if (pl && pl->pl_flag == VOID) {
 			strict("no parameters expected");
-			return;
+			pl = NO_PROTO;
 		}
 
 		/* stack up the prototypes */
-		while (pl) {
-			/* stack prototypes */
-			pstack[pcnt++] = pl;
-			pl = pl->next;
+		if (pl) {
+			do {
+				/* stack prototypes */
+				pstack[pcnt++] = pl;
+				pl = pl->next;
+			} while (pl);
+			pcnt--;
 		}
-		pcnt--;
+		else {
+			pcnt = 0;
+			pstack[0] = &ellipsis;
+		}
 
 		for (--ecnt; ecnt >= 0; ecnt--) {
 			/*	Only the parameters specified in the prototype
@@ -425,11 +391,11 @@ call_proto(expp)
 				error("more parameters than specified in prototype");
 				break;
 			}
-			if (pstack[pcnt]->pl_flag != ELLIPSIS) {
+			else if (pstack[pcnt]->pl_flag != ELLIPSIS) {
 				ch7cast(estack[ecnt],CASTAB,pstack[pcnt]->pl_type);
 				pcnt--;
 			} else
-				break;	/* against unnecessary looping */
+				any2parameter(estack[ecnt]);
 		}
 		if (pcnt >= 0 && pstack[0]->pl_flag != ELLIPSIS)
 			error("less parameters than specified in prototype");
@@ -439,4 +405,3 @@ call_proto(expp)
 			error("less parameters than specified in prototype");
 	}
 }
-

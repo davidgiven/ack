@@ -138,7 +138,6 @@ external_definition
 			';'
 		]
 	|
-		empty
 		{do_decspecs(&Ds);}
 		declarator(&Dc)
 		{

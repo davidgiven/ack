@@ -367,15 +367,27 @@ EVAL(expr, val, code, true_label, false_label)
 			}
 #endif NOBITFIELD
 			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
-			if (gencode)
+			if (gencode && val == RVAL)
 				C_dup(ATW(tp->tp_size));
 			if (left->ex_class != Value) {
 				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
-				if (newcode)
+				if (newcode && gencode && val == LVAL) {
+					arith tmp = LocalPtrVar();
+					C_dup(pointer_size);
+					StoreLocal(tmp, pointer_size);
+					store_block(tp->tp_size, tp->tp_align);
+					LoadLocal(tmp, pointer_size);
+					FreeLocal(tmp);
+				}
+				else if (newcode)
 					store_block(tp->tp_size, tp->tp_align);
 			}
-			else if (newcode)
+			else if (newcode) {
 				store_val(&(left->EX_VALUE), left->ex_type);
+				if (gencode && val == LVAL) {
+					EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
+				}
+			}
 			}
 			break;
 		case PLUSAB:
@@ -517,7 +529,8 @@ EVAL(expr, val, code, true_label, false_label)
 			if (gencode) {
 				if (is_struct_or_union(tp->tp_fund)) {
 					C_lfr(pointer_size);
-					load_block(tp->tp_size, (int) word_size);
+					if (val == RVAL)
+					  load_block(tp->tp_size, (int) word_size);
 				}
 				else
 					C_lfr(ATW(tp->tp_size));
@@ -527,8 +540,13 @@ EVAL(expr, val, code, true_label, false_label)
 		case '.':
 			EVAL(left, LVAL, gencode, NO_LABEL, NO_LABEL);
 			ASSERT(is_cp_cst(right));
-			if (gencode)
+			if (gencode) {
 				C_adp(right->VL_VALUE);
+				if (val == RVAL && expr->ex_lvalue == 0) {
+					load_block(expr->ex_type->tp_size,
+						expr->ex_type->tp_align);
+				}
+			}
 			break;
 		case ARROW:
 			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
@@ -553,10 +571,10 @@ EVAL(expr, val, code, true_label, false_label)
 
 			EVAL(left, RVAL, TRUE, l_true, l_false);
 			C_df_ilb(l_true);
-			EVAL(right->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right->OP_LEFT, val, gencode, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
 			C_df_ilb(l_false);
-			EVAL(right->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right->OP_RIGHT, val, gencode, NO_LABEL, NO_LABEL);
 			C_df_ilb(l_end);
 			break;
 		}
