@@ -1,3 +1,6 @@
+# Script for use of ACK as cross C-compiler on VAX for PMDS machine
+# The output has its int's in the pmds order.
+# Conversion from VU-a.out to PMDS-a.out should still be done on the pmds.
 var w=2
 var p=4
 var s=2
@@ -6,28 +9,41 @@ var f=4
 var d=8
 var NAME=m68k2
 var M=m68k2
-var LIB=mach/m68k2/lib/tail_
-var RT=mach/m68k2/lib/head_
-var CCP_F=-Dunix
-var INCLUDES=-I{EM}/include -I/usr/include
+var PMDS=pmds
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var PMDSLIB=lib/{PMDS}/tail_
+var PMDSRT=lib/{PMDS}/head_
+var INCLUDES=-I{EM}/include
+var CPP_F=-Dunix
 name be
-	from .m
+	from .m.g
 	to .o
-	program {EM}/lib/{M}_cg
+	program {EM}/lib/{M}/cg
 	args <
-	prop >
+	stdout
 	need .e
 end
 name asld
-	from .o.s.a
-	to a.out
-	program {EM}/lib/{M}_as
-	mapflag -l* LNAME={EM}/{LIB}*
-	mapflag -i
-	mapflag -n
-	args (.e:{HEAD}={EM}/{RT}em.pmds) \
+	from .s.a.o
+	to .out
+	program {EM}/lib/{M}/as
+	mapflag -l
+	mapflag -d*
+	mapflag -s*
+	mapflag -n*
+	mapflag -i*
+	args {LFLAG?} (.e:{HEAD}={EM}/{PMDSRT}em) \
 ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 (.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{LIB}mon.pmds {EM}/{LIB}em.vend)
-	prop Cm
+(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{PMDSLIB}mon {EM}/{LIB}em.vend)
+	prep cond
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{PMDS}/pmcv
+	args < >
+	outfile a.out
 end
