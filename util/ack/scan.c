@@ -29,15 +29,13 @@ enum f_path getpath(first) register trf **first ; {
 
 	start_scan();
 	/*
-		The end result is the setting of the t_do flags
-		in the transformation list and the chaining of
+		The end result is the chaining of
 		the consequtive phases with the t_next field.
 		The list is scanned for possible transformations
 		stopping at stopsuffix or the last transformation in the list.
 		The scan flags are set by this process.
 		When a transformation is found, it is compared with
-		the last transformation found. If better (or the first)
-		the scan bits are copied to the t_do bits.
+		the last transformation found.
 	*/
 	try(l_first(tr_list),p_suffix);
 	return scan_end(first);
@@ -107,7 +105,7 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 					return ;
 				}
 			}
-			if ( trafo->t_do ) {
+			if ( trafo->t_next ) {
 				/* We know what happens from this phase on,
 				   so take a shortcut.
 				*/
@@ -229,10 +227,9 @@ enum f_path scan_end(first) trf **first ; {    /* Finalization */
 			} else {
 				*first= curr ;
 			}
-			if ( curr->t_do ) {
+			if ( curr->t_next ) {
 				return F_OK ;
 			}
-			curr->t_do=YES ;
 			prev=curr ;
 		}
 	}
