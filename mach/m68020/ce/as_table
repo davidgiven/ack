@@ -28,43 +28,56 @@ asr_l cnt:QUICK, dst:D_REG	==> @text2( %d( 0xe080 | (cnt->val << 9) |
 ...   cnt:D_REG, dst:D_REG	==> @text2( %d( 0xe0a0 | (cnt->reg << 9) |
 						dst->reg)).
 
-bcc dst:LOC_LBL			==> @text2( 0x6400 | %dist( dst->lbl)).
+bcc dst:LOC_LBL			==> @text1(0x64); 
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x64ff);
 				    code_dist4( dst).
-bcs dst:LOC_LBL			==> @text2( 0x6500 | %dist( dst->lbl)).
+bcs dst:LOC_LBL			==> @text1( 0x65);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x65ff);
 				    code_dist4( dst).
-beq dst:LOC_LBL			==> @text2( 0x6700 | %dist( dst->lbl)).
+beq dst:LOC_LBL			==> @text1( 0x67);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x67ff);
 				    code_dist4( dst).
-bge dst:LOC_LBL			==> @text2( 0x6c00 | %dist( dst->lbl)).
+bge dst:LOC_LBL			==> @text1( 0x6c);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x6cff);
 				    code_dist4( dst).
-bgt dst:LOC_LBL			==> @text2( 0x6e00 | %dist( dst->lbl)).
+bgt dst:LOC_LBL			==> @text1( 0x6e);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x6eff);
 				    code_dist4( dst).
-ble dst:LOC_LBL			==> @text2( 0x6f00 | %dist( dst->lbl)).
+ble dst:LOC_LBL			==> @text1( 0x6f);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x6fff);
 				    code_dist4( dst).
-bls dst:LOC_LBL			==> @text2( 0x6300 | %dist( dst->lbl)).
+bls dst:LOC_LBL			==> @text1( 0x63);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x63ff);
 				    code_dist4( dst).
-blt dst:LOC_LBL			==> @text2( 0x6d00 | %dist( dst->lbl)).
+blt dst:LOC_LBL			==> @text1( 0x6d);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x6dff);
 				    code_dist4( dst).
-bmi dst:LOC_LBL			==> @text2( 0x6b00 | %dist( dst->lbl)).
+bmi dst:LOC_LBL			==> @text1( 0x6b);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x6bff);
 				    code_dist4( dst).
-bne dst:LOC_LBL			==> @text2( 0x6600 | %dist( dst->lbl)).
+bne dst:LOC_LBL			==> @text1( 0x66);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x66ff);
 				    code_dist4( dst).
-bra dst:LOC_LBL			==> @text2( 0x6000 | %dist( dst->lbl)).
+bra dst:LOC_LBL			==> @text1( 0x60);
+				    @text1(%dist( dst->lbl)).
 ... dst:GLOB_LBL		==> @text2( 0x60ff);
 				    code_dist4( dst).
 
 bset nr:D_REG, dst		==> code_instr( 0x0, nr->reg, 0x7, dst).
 
 btst nr:D_REG, dst		==> code_instr( 0x0, nr->reg, 0x4, dst).
+
+bchg nr:D_REG, dst		==> code_instr( 0x0, nr->reg, 0x5, dst).
 
 clr_l dst			==> code_instr( 0x4, 0x1, 0x2, dst).
  
