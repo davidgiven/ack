@@ -2,18 +2,18 @@ d=../..
 h=$d/h
 
 cmp:          
-		(cd pem ; make cmp)
+		(cd comp ; make cmp)
 
 install:      
-		(cd pem ; make install)
+		(cd comp ; make install)
 
 clean:
 		-rm -f *.o *.old
-		(cd pem ; make clean)
+		(cd comp ; make clean)
 
 opr:
 		make pr ^ opr
 
 pr:
-		@(cd pem ; make pr)
+		@(cd comp ; make pr)
 		@(cd libpc ; make pr)
