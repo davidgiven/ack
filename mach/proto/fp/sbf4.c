@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	SUBTRACT TWO FLOATS - SINGLE Precision
+	SUBTRACT TWO FLOATS - SINGLE Precision (SBF 4)
 */
 
 #include	"FP_types.h"

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	return a zero float
+	return a zero float (ZRF 4)
 */
 
 #include "FP_types.h"

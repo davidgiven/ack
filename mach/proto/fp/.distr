@@ -36,8 +36,6 @@ mul_ext.c
 ngf4.c
 ngf8.c
 nrm_ext.c
-prt_dbl.c
-prt_ext.c
 sbf4.c
 sbf8.c
 sft_ext.c

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	ADD TWO FLOATS - DOUBLE
+	ADD TWO FLOATS - DOUBLE (ADF 8)
 */
 
 #include	"FP_types.h"
@@ -16,7 +16,7 @@ adf8(s2,s1)
 _double	s1,s2;
 {
 	EXTEND	e1,e2;
-	short	swap;
+	int	swap;
 
 	if (s1.__double[0] == 0 && s1.__double[1] == 0) {
 		s1 = s2;
@@ -28,10 +28,6 @@ _double	s1,s2;
 
 	extend(&s1,&e1,sizeof(_double));
 	extend(&s2,&e2,sizeof(_double));
-#ifdef	PRT_EXT
-	prt_ext("ADF8: e1",&e1);
-	prt_ext("ADF8: e2",&e2);
-#endif
 			/* adjust mantissas to equal powers */
 	if (e1.sign ^ e2.sign)	{ /* signs are different */
 			/* determine which is largest number	*/
@@ -42,9 +38,6 @@ _double	s1,s2;
 		sft_ext(&e1,&e2);
 			/* subtract the extended formats	*/
 		if (swap)	{	/* &e2 is the largest number */
-#ifdef	PRT_EXT
-	fprintf(stderr,"ADF8: swaps and subtracts extended\n");
-#endif
 			sub_ext(&e2,&e1);
 			e1 = e2;
 		}
@@ -57,9 +50,6 @@ _double	s1,s2;
 		sft_ext(&e1,&e2);
 		add_ext(&e1,&e2);
 	}
-#ifdef	PRT_EXT
-	prt_ext("ADF8: e1 result",&e1);
-#endif
 	compact(&e1,&s1,sizeof(_double));
 	return(s1);
 }

@@ -9,7 +9,7 @@
 
 b64_sft(e1,n)
 B64	*e1;
-short	n;
+int	n;
 {
 	if (n>0) do	{	/* RIGHT shift n bits */
 		e1->l_32 >>= 1;		/* shift 64 bits	*/

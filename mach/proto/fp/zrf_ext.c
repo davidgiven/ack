@@ -15,13 +15,12 @@ zrf_ext(e)
 EXTEND	*e;
 {
 	register short *ipt;
-	register short  i;
-	register short zero = 0;
+	register int  i;
 
 	/*	local CAST conversion	*/
 	ipt = (short *) e;
 
 	i = sizeof(EXTEND)/sizeof(short);
 	while (i--)
-		*ipt++ = zero;
+		*ipt++ = 0;
 }

@@ -41,9 +41,7 @@ LIST =		cff4.$(SUF) cff8.$(SUF) cfu.$(SUF) cmf4.$(SUF) cmf8.$(SUF)\
 		extend.$(SUF) compact.$(SUF)\
 		add_ext.$(SUF) div_ext.$(SUF) mul_ext.$(SUF) nrm_ext.$(SUF)\
 		sft_ext.$(SUF) sub_ext.$(SUF) zrf_ext.$(SUF)\
-		adder.$(SUF) shifter.$(SUF)\
-		prt_dbl.$(SUF)\
-		fptrp.$(SUF) prt_ext.$(SUF)	# debugging
+		adder.$(SUF) shifter.$(SUF) fptrp.$(SUF)
 SLIST =		cff4.s cff8.s cfu.s cmf4.s cmf8.s\
 		cuf4.s cuf8.s\
 		dvf4.s dvf8.s fef4.s fef8.s\
@@ -55,9 +53,7 @@ SLIST =		cff4.s cff8.s cfu.s cmf4.s cmf8.s\
 		extend.s compact.s\
 		add_ext.s div_ext.s mul_ext.s nrm_ext.s\
 		sft_ext.s sub_ext.s zrf_ext.s\
-		adder.s shifter.s\
-		prt_dbl.s\
-		fptrp.s prt_ext.s	# debugging
+		adder.s shifter.s fptrp.s
 
 SRC =		FP_bias.h FP_shift.h FP_trap.h FP_types.h adder.h get_put.h\
 		cff4.c cff8.c cfu.c cmf4.c cmf8.c\
@@ -71,9 +67,7 @@ SRC =		FP_bias.h FP_shift.h FP_trap.h FP_types.h adder.h get_put.h\
 		extend.c compact.c\
 		add_ext.c div_ext.c mul_ext.c nrm_ext.c\
 		sft_ext.c sub_ext.c zrf_ext.c\
-		adder.c shifter.c\
-		prt_dbl.c\
-		fptrp.e prt_ext.c
+		adder.c shifter.c fptrp.e
 
 all:		FP_$(MACH).a
 
@@ -284,13 +278,3 @@ shifter.$(SUF):	$(CDIR)/shifter.c
 	ack -c.s -m$(MACH) $(EMFLAGS) $(CDIR)/shifter.c
 	ed - shifter.s <$(CDIR)/FP.script 
 	ack -c -m$(MACH) $(EMFLAGS) shifter.s
-
-prt_dbl.$(SUF):	$(CDIR)/prt_dbl.c
-	ack -c.s -m$(MACH) $(EMFLAGS) $(CDIR)/prt_dbl.c
-	ed - prt_dbl.s <$(CDIR)/FP.script 
-	ack -c -m$(MACH) $(EMFLAGS) prt_dbl.s
-
-prt_ext.$(SUF):	$(CDIR)/prt_ext.c
-	ack -c.s -m$(MACH) $(EMFLAGS) $(CDIR)/prt_ext.c
-	ed - prt_ext.s <$(CDIR)/FP.script 
-	ack -c -m$(MACH) $(EMFLAGS) prt_ext.s

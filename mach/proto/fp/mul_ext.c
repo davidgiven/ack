@@ -17,17 +17,13 @@
 mul_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-	register short	k,i,j;		/* loop control	*/
+	register int	k,i,j;		/* loop control	*/
 	long  unsigned	*reg[7];
 	long  unsigned	tmp[4];
 	short unsigned	mp[4];	/* multiplier */
 	short unsigned	mc[4];	/* multipcand */
 	B64	low64,tmp64;	/* 64 bit storage	*/
 
-#ifdef	PRT_EXT
-	prt_ext("before MUL_EXT() e1:",e1);
-	prt_ext("before MUL_EXT() e2:",e2);
-#endif
 	/* first save the sign (XOR)			*/
 
 	e1->sign ^= e2->sign;
@@ -66,24 +62,15 @@ EXTEND	*e1,*e2;
 
 					/* check for overflow	*/
 	if (e1->exp >= EXT_MAX)	{
-#ifdef	PRT_EXT
-		prt_ext("EXT_MUL OVERFLOW",e1);
-#endif
 		trap(EFOVFL);
 			/* if caught 			*/
 			/* return signed infinity	*/
 		e1->exp = EXT_MAX;
 infinity:	e1->m1 = e1->m2 =0L;
-#ifdef	PRT_EXT
-		prt_ext("after  MUL_EXT() e1:",e1);
-#endif
 		return;
 	}
 				/* check for underflow	*/
 	if (e1->exp < EXT_MIN)	{
-#ifdef	PRT_EXT
-		prt_ext("EXT_MUL UNDERFLOW",e1);
-#endif
 		trap(EFUNFL);
 		e1->exp = EXT_MIN;
 		goto infinity;
@@ -101,16 +88,6 @@ infinity:	e1->m1 = e1->m2 =0L;
 	mc[1] = (unsigned short) e2->m1;
 	mc[2] = e2->m2 >> 16;
 	mc[3] = (unsigned short) e2->m2;
-# ifdef	DEBUG
-	for(i=0;i<4;i++)
-		printf("%04x",mp[i]);
-	putchar('\r');
-	putchar('\n');
-	for(i=0;i<4;i++)
-		printf("%04x",mc[i]);
-	putchar('\r');
-	putchar('\n');
-# endif
 	/*
 	 *	assign pointers
 	 */
@@ -135,72 +112,24 @@ infinity:	e1->m1 = e1->m2 =0L;
 		for(j=4;j--;) if (mc[j]) {
 			k = i+j;
 			tmp[0] = (long)mp[i] * (long)mc[j];
-# ifdef	PRT_EXT2
-			printf("%04x * %04x == %08X ",mp[i],mc[j],tmp[0]);
-			printf("index == %d ",k);
-			printf("register before add == %08X\n",*reg[k]);
-			fflush(stdout);
-# endif
-#ifdef	PRT_ADD
-	printf("REGISTERS-----\n");
-	printf("%08X %08X %08X %08X\n0000%04x %04x%04x %04x%04x %04x0000\n",
-		*reg[0],*reg[2],*reg[4],*reg[6],
-		(short)(*reg[1]>>16),(short)(*reg[1]),(short)(*reg[3]>>16),
-		(short)(*reg[3]),(short)(*reg[5]>>16),(short)(*reg[5]));
-# endif
 			if (b32_add(reg[k],tmp))	{
 				for(tmp[0] = 0x10000L;k>0;)
 					if (b32_add(reg[--k],tmp) == 0)
 						break;
-#ifdef	PRT_ADD
-	printf("CARRY---------\n");
-	printf("%08X %08X %08X %08X\n0000%04x %04x%04x %04x%04x %04x0000\n",
-		*reg[0],*reg[2],*reg[4],*reg[6],
-		(short)(*reg[1]>>16),(short)(*reg[1]),(short)(*reg[3]>>16),
-		(short)(*reg[3]),(short)(*reg[5]>>16),(short)(*reg[5]));
-#endif
 			}
 		}
 	
 	/*
 	 *	combine the registers to a total
 	 */
-#ifdef	PRT_ADD
-	printf("%08X %08X %08X %08X\n0000%04x %04x%04x %04x%04x %04x0000\n",
-		*reg[0],*reg[2],*reg[4],*reg[6],
-		(short)(*reg[1]>>16),(short)(*reg[1]),(short)(*reg[3]>>16),
-		(short)(*reg[3]),(short)(*reg[5]>>16),(short)(*reg[5]));
-# endif
 	tmp64.h_32 = (*reg[1]>>16);
 	tmp64.l_32 = (*reg[1]<<16) + (*reg[3]>>16);
-# ifdef PRT_ALL
-	printf("%08X%08X tmp64\n",tmp64.h_32,tmp64.l_32);
-	fflush(stdout);
-	printf("%08X%08X e1->m1\n",e1->m1,e1->m2);
-	fflush(stdout);
-# endif
 	b64_add((B64 *)&e1->m1,&tmp64);
-# ifdef PRT_ALL
-	printf("b64_add:\n");
-	printf("%08X%08X e1->m1\n",e1->m1,e1->m2);
-	fflush(stdout);
-# endif
 	tmp64.l_32 = *reg[5]<<16;
 	tmp64.h_32 = (*reg[5]>>16) + (*reg[3]<<16);
 	if (b64_add(&low64,&tmp64))
 		if (++e1->m2 == 0)
 			e1->m1++;
 
-# ifdef PRT_ADD
-	printf("%08X %08X %08X %08X\n",e1->m1,e1->m2,low64.h_32,low64.l_32);
-	fflush(stdout);
-#endif
-#ifdef	PRT_EXT
-	prt_ext("after  MUL_EXT() e1:",e1);
-#endif	PRT_EXT
 	nrm_ext(e1);
-#ifdef	PRT_EXT
-	prt_ext("after  NRM_EXT() e1:",e1);
-	sleep(4);
-#endif	PRT_EXT
 }

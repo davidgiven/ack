@@ -9,7 +9,7 @@
  *	these are the routines the routines to do 32 and  64-bit addition
  */
 
-# ifdef	DEBUG
+# ifdef	EXT_DEBUG
 # include <stdio.h>
 # endif
 
@@ -28,15 +28,15 @@ b64_add(e1,e2)
 		 */
 register	B64	*e1,*e2;
 {
-		register	short	overflow;
-				short	carry;
+		register	int	overflow;
+				int	carry;
 
 			/* add higher pair of 32 bits */
 	overflow = b32_add(&e1->h_32,&e2->h_32);
 
 			/* add lower pair of 32 bits */
 	carry =	   b32_add(&e1->l_32,&e2->l_32);
-# ifdef	DEBUG
+# ifdef	EXT_DEBUG
 	printf("\t\t\t\t\tb64_add: overflow (%d); internal carry(%d)\n",
 					overflow,carry);
 	fflush(stdout);
@@ -55,7 +55,7 @@ register	B64	*e1,*e2;
 b32_add(e1,e2)
 register	unsigned long	*e1,*e2;
 {
-	register	short	carry;
+	register	int	carry;
 
 	if (*e1 & *e2 & MAXBIT) /* both max_bits are set */
 		carry = TRUE;	 /* so there is a carry	*/
@@ -65,7 +65,7 @@ register	unsigned long	*e1,*e2;
 			? UNKNOWN
 				/* both are clear - no carry */
 			: FALSE;
-# ifdef DEBUG
+# ifdef EXT_DEBUG
 	fflush(stdout);
 	printf("\t\t\t\t\tb32_add: overflow before add(%d) test(%d)\n",
 				carry,(*e1&MAXBIT)?FALSE:TRUE);
@@ -73,7 +73,7 @@ register	unsigned long	*e1,*e2;
 # endif
 
 	*e1 += *e2;
-# ifdef DEBUG
+# ifdef EXT_DEBUG
 	printf("%08X\n",*e1);
 	fflush(stdout);
 # endif

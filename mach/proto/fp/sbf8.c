@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	SUBTRACT TWO FLOATS - DOUBLE Precision
+	SUBTRACT TWO FLOATS - DOUBLE Precision (SBF 8)
 */
 
 #include	"FP_types.h"
@@ -22,9 +22,6 @@ _double	s1,s2;
 				/*	s2 = -s2;		*/
 	char unsigned *p;		/* sufficient to access sign bit */
 
-#ifdef	PRT_EXT
-	fprintf(stderr,"SBF8 ():\n");
-#endif
 	if (s2.__double[0] == 0 && s2.__double[1] == 0) {
 		return s1;
 	}
@@ -33,4 +30,3 @@ _double	s1,s2;
 	s1 = adf8(s2,s1);	/* add and return result */
 	return(s1);
 }
-

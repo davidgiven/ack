@@ -7,6 +7,7 @@
 
 /********************************************************/
 /*
+	Type definitions for C Floating Point Package
 	include file for floating point package
 */
 /********************************************************/
@@ -20,6 +21,16 @@
 		EXTEND:	double precision extended format
 */
 /********************************************************/
+
+#ifdef EXT_DEBUG
+#ifndef __FPSTDIO
+#define __FPSTDIO
+#include <stdio.h>
+#endif
+#endif
+
+#ifndef __FPTYPES
+#define __FPTYPES
 typedef	unsigned long	_float;
 
 typedef	union	{
@@ -55,6 +66,4 @@ typedef	struct	{	/* expanded float format	*/
 	unsigned long	m1;
 	unsigned long	m2;	/* includes guard byte	*/
 } EXTEND;
-#ifdef	PRT_EXT
-#include <stdio.h>
 #endif

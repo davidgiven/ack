@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-		NEGATE A FLOATING POINT
+		NEGATE A FLOATING POINT (NGF 4)
 */
 /********************************************************/
 /*
@@ -26,4 +26,3 @@ _float	f;
 		*p ^= 0x80;
 	}
 }
-

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-		CONVERT FLOAT TO UNSIGNED
+		CONVERT FLOAT TO UNSIGNED (CFU m n)
 
 		N.B. The caller must know what it is getting.
 		     A LONG is always returned. If it is an
@@ -27,9 +27,6 @@ _double	src;	/* assume worst case */
 	short	newint, max_exp;
 
 	extend(&src,&buf,ss);	/* get extended format	*/
-#ifdef	PRT_EXT
-	prt_ext("CFU() entry:",&buf);
-#endif	PRT_EXT
 	buf.exp--;		/* additional bias correction */
 	if (buf.exp < 1) {	/* no conversion needed	*/
 		src.__double[ss == 8] = 0L;
@@ -37,9 +34,6 @@ _double	src;	/* assume worst case */
 	}
 	max_exp = (ds << 3);
 	if (buf.exp > max_exp) {
-#ifdef	PRT_EXT
-		prt_ext("CFU() INT OVERFLOW",&buf);
-#endif	PRT_EXT
 		trap(EIOVFL);	/* integer overflow	*/
 		buf.exp %= max_exp;
 	}

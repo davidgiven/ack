@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	CONVERT INTEGER TO FLOAT
+	CONVERT INTEGER TO FLOAT (CUF n 8)
 
 	THIS ROUTINE WORKS BY FILLING AN EXTENDED
 	WITH THE INTEGER VALUE IN EXTENDED FORMAT
@@ -34,9 +34,6 @@ long	src;	/* largest possible integer to convert */
 		i_src = (long) *ipt;
 		buf.exp = 17;
 	}
-#ifdef	PRT_STDERR
-	fprintf(stderr,"CUF8(ds(%d),ss(%d),src(%D))\n\n",8,ss,i_src);
-#endif
 	if (i_src == 0)	{
 		zrf8(&ss);
 		return;
@@ -52,8 +49,5 @@ long	src;	/* largest possible integer to convert */
 
 			/* adjust mantissa field	*/
 	nrm_ext(&buf);
-#ifdef	PRT_STDERR
-	fprintf(stderr,"CUF() buf.exp after nrm_ext() == %d\n\n",buf.exp);
-#endif
 	compact(&buf,(_double *) &ss,8);
 }

@@ -6,13 +6,12 @@
 /* $Header$ */
 
 /*
-	COMPARE	DOUBLES
+	COMPARE	SINGLES (CMF 4)
 */
 
 #include	"FP_types.h"
 #include	"get_put.h"
 
-short
 cmf4(f1,f2)
 _float	f1,f2;
 {

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	MULTIPLY AND DISMEMBER PARTS
+	MULTIPLY AND DISMEMBER PARTS (FIF 4)
 */
 
 #include "FP_types.h"

@@ -6,9 +6,6 @@
 /* $Header$ */
 
 /*
-#define	PRT_EXIT
-#define	PRT_TRAP
-#define	PRT_ENTRY
 	COMPACT EXTEND FORMAT INTO FLOAT OF PROPER SIZE
 */
 
@@ -28,35 +25,23 @@ int	size;
 	SINGLE	*SGL;
 	int	exact;
 
-#ifdef	PRT_ENTRY
-	prt_ext("enter compact:",f);
-#endif	PRT_ENTRY
-	if (size == sizeof(_double))
-/********************************************************/
-/*
-	COMPACT EXTENDED INTO DOUBLE
-*/
-/********************************************************/
-	{
+	if (size == sizeof(_double)) {
+	/*
+	 * COMPACT EXTENDED INTO DOUBLE
+	 */
 		if ((f->m1|(f->m2 & DBL_ZERO)) == 0L)	{
 			zrf8(to);
-			goto leave;
+			return;
 		}
 		f->exp += DBL_BIAS;	/* restore proper bias	*/
 		if (f->exp > DBL_MAX)	{
 dbl_over:			trap(EFOVFL);
-#ifdef	PRT_TRAP
-				prt_ext("FCOMPACT DBL OVERFLOW",f);
-#endif	PRT_TRAP
 			f->exp = DBL_MAX;
 			f->m1 = f->m2 = 0L;
 			if (error++)
 				return;
 		}
 		else if (f->exp < DBL_MIN)	{
-#ifdef	PRT_TRAP
-			prt_ext("FCOMPACT DBL UNDERFLOW",f);
-#endif	PRT_TRAP
 			trap(EFUNFL);
 			f->exp = DBL_MIN;
 			f->m1 = f->m2 = 0L;
@@ -87,14 +72,8 @@ dbl_over:			trap(EFOVFL);
 		    if (f->m2 & DBL_ROUNDUP)	{
 			DBL->_s.p2++;	/* rounding up	*/
 			if (DBL->_s.p2 == 0L) { /* carry out	*/
-#ifdef	PRT_RNDMSG
-			    write(2,"rounding up lsb\n",16);
-#endif	PRT_RNDMSG
 			    DBL->_s.p1.fract++;
 			    if (DBL->_s.p1.fract & DBL_CARRYOUT) { /* carry out */
-#ifdef	PRT_RNDMSG
-				write(2,"shift due to rounding\n",22);
-#endif	PRT_RNDMSG
 				if (DBL->_s.p1.fract & 01)
 				    DBL->_s.p2 = CARRYBIT;
 				DBL->_s.p1.fract >>= 1;
@@ -107,43 +86,36 @@ dbl_over:			trap(EFOVFL);
 		if (f->exp > DBL_MAX)
 		    goto dbl_over;
 
-		/* STORE EXPONENT:			*/
+		/*
+		 * STORE EXPONENT:
+		 *
+		 * 1) clear leading bits (B4-B15)
+		 * 2) shift and store exponent
+		 */
 
-		/* 1) clear leading bits (B4-B15)	*/
 		DBL->_s.p1.fract &= DBL_MASK;
-
-		/* 2) shift and store exponent		*/
 		f->exp <<= DBL_EXPSHIFT;
 		DBL->_s.p1.fract |= ((long) f->exp << EXP_STORE);
 	}
-	else
-/********************************************************/
-/*
-	COMPACT EXTENDED INTO FLOAT
-*/
-/********************************************************/
-	{
+	else {
+		/*
+		 * COMPACT EXTENDED INTO FLOAT
+		 */
 		/* local CAST conversion		*/
 		SGL = (SINGLE *) to;
 		if ((f->m1 & SGL_ZERO) == 0L)	{
 			SGL->fract = 0L;
-			goto leave;
+			return;
 		}
 		f->exp += SGL_BIAS;	/* restore bias	*/
 		if (f->exp > SGL_MAX)	{
 sgl_over:			trap(EFOVFL);
-#ifdef	PRT_TRAP
-				prt_ext("FCOMPACT FLOAT OVERFLOW",f);
-#endif	PRT_TRAP
 			f->exp = SGL_MAX;
 			f->m1 = f->m2 = 0L;
 			if (error++)
 				return;
 		}
 		else if (f->exp < SGL_MIN)	{
-#ifdef	PRT_TRAP
-			prt_ext("FCOMPACT FLOAT UNDERFLOW",f);
-#endif	PRT_TRAP
 			trap(EFUNFL);
 			f->exp = SGL_MIN;
 			f->m1 = f->m2 = 0L;
@@ -167,9 +139,6 @@ sgl_over:			trap(EFOVFL);
 			/* INEXACT(); */
 			if (f->m1 & SGL_ROUNDUP) {
 				SGL->fract++;
-#ifdef	PRT_RNDMSG
-				write(2,"rounding up lsb\n",16);
-#endif	PRT_RNDMSG
 			/* check normal */
 				if (SGL->fract & SGL_CARRYOUT)	{
 					SGL->fract >>= 1;
@@ -180,41 +149,34 @@ sgl_over:			trap(EFOVFL);
 		if (f->exp > SGL_MAX)
 			goto sgl_over;
 
-		/* STORE EXPONENT			*/
-		/* 1) clear leading bit of fraction	*/
-		SGL->fract &= SGL_MASK; /* B23-B31 are 0 */
+		/*
+		 * STORE EXPONENT:
+		 *
+		 * 1) clear leading bit of fraction
+		 * 2) shift and store exponent
+		 */
 
-		/* 2) shift and store exponent		*/
+		SGL->fract &= SGL_MASK; /* B23-B31 are 0 */
 		f->exp <<= SGL_EXPSHIFT;
 		SGL->fract |= ((long) f->exp << EXP_STORE);
 	}
 
-/********************************************************/
-/*
-	STORE SIGN BIT
-*/
-/********************************************************/
+	/*
+	 * STORE SIGN BIT
+	 */
 	if (f->sign)	{
 		SGL = (SINGLE *) to;	/* make sure	*/
 		SGL->fract |= CARRYBIT;
 	}
-/********************************************************/
-/*
-	STORE MANTISSA
-/*
-/********************************************************/
+		
+	/*
+	 * STORE MANTISSA
+	 */
 
 	if (size == sizeof(_double)) {
 		put4(DBL->_s.p1.fract, (char *) &DBL->_s.p1.fract);
 		put4(DBL->_s.p2, (char *) &DBL->_s.p2);
 	}
-		else
+	else
 		put4(SGL->fract, (char *) &SGL->fract);
-
-leave:
-#ifdef	PRT_EXIT
-	prt_ext("exit  compact:",f);
-	prt_dbl((DOUBLE *) to,size); getchar();
-#endif	PRT_EXIT
-	;	/* end of print statement or null statement */
 }

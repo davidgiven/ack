@@ -6,7 +6,6 @@
 /* $Header$ */
 
 /*
-#define	PRT_EXT
 	SHIFT TWO EXTENDED NUMBERS INTO PROPER
 	ALIGNMENT FOR ADDITION (exponents are equal)
 */
@@ -17,13 +16,9 @@ sft_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
 	register	EXTEND	*s;
-	register	short	diff;
+	register	int	diff;
 			long	tmp;
 
-#ifdef	PRT_EXT
-	prt_ext("enter sft_ext e1:",e1);
-	prt_ext("enter sft_ext e2:",e2);
-#endif	PRT_EXT
 	diff = e1->exp - e2->exp;
 
 	if (!diff)
@@ -62,8 +57,4 @@ EXTEND	*e1,*e2;
 		s->m2 >>= diff;
 		s->m2 |= tmp;
 	}
-#ifdef	PRT_EXT
-	prt_ext("exit  sft_ext e1:",e1);
-	prt_ext("exit  sft_ext e2:",e2);
-#endif	PRT_EXT
 }

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
- * Multiply Single Precesion Float
+ * Multiply Single Precesion Float (MLF 4)
  */
 
 #include	"FP_types.h"

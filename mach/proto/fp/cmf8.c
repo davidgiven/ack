@@ -6,13 +6,12 @@
 /* $Header$ */
 
 /*
-	COMPARE	DOUBLES
+	COMPARE	DOUBLES (CMF 8)
 */
 
 #include	"FP_types.h"
 #include	"get_put.h"
 
-short
 cmf8(d1,d2)
 _double	d1,d2;
 {

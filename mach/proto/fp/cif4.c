@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	CONVERT INTEGER TO FLOAT
+	CONVERT INTEGER TO FLOAT (CIF n 4)
 
 	THIS ROUTINE WORKS BY FILLING AN EXTENDED
 	WITH THE INTEGER VALUE IN EXTENDED FORMAT
@@ -38,9 +38,6 @@ long	src;	/* largest possible integer to convert */
 		buf.exp = 17;
 		result = (_float *) &ss;
 	}
-#ifdef	PRT_STDERR
-	fprintf(stderr,"CIF4(ds(%d),ss(%d),src(%D))\n\n",4,ss,i_src);
-#endif
 	if (i_src == 0)	{
 		*result = (_float) 0L;
 		return(0L);
@@ -55,9 +52,6 @@ long	src;	/* largest possible integer to convert */
 	if (ss != sizeof(long))
 		buf.m1 <<= 16;
 	nrm_ext(&buf);		/* adjust mantissa field	*/
-#ifdef	PRT_STDERR
-	fprintf(stderr,"CIF() buf.exp after nrm_ext() == %d\n\n",buf.exp);
-#endif
 	compact(&buf,(_double *) result,4);	/* put on stack */
 	return(*result);
 }

@@ -6,8 +6,6 @@
 /* $Header$ */
 
 /*
-#define	PRT_EXT
-#define	PRT_ALL
 	DIVIDE EXTENDED FORMAT
 */
 
@@ -21,10 +19,7 @@
 	This is a routine to do the work.
 	It is based on the partial products method
 	and makes no use possible machine instructions
-	to divide (hardware dividers).	It is intended
-	that it be rewritten to do so, but expedieancy
-	requires that something be written NOW - and
-	this is it.
+	to divide (hardware dividers).
 */
 /********************************************************/
 
@@ -36,11 +31,6 @@ EXTEND	*e1,*e2;
 			unsigned long	result[2];
 	register	unsigned long	*lp;
 
-#ifdef	PRT_EXT
-	fprintf("stderr:start div_ext:\n");
-	prt_ext("dividend:",e1);
-	prt_ext("divisor :",e2);
-#endif
 	if ((e1->m1 | e1->m2) == 0) {	/* 0 / anything == 0 */
 		e1->exp = 0;	/* make sure */
 		return;
@@ -59,25 +49,32 @@ EXTEND	*e1,*e2;
 	e1->exp -= e2->exp;
 	e1->exp += 2;		/* bias correction	*/
 	if (e1->exp < EXT_MIN)	{
-		error++;
-#ifdef	PRT_EXT
-		prt_ext("DIV_EXT UNDERFLOW",e1);
-#endif	PRT_EXT
+		/*
+		 * Exception 8.4 - Underflow
+		 */
 		trap(EFUNFL);	/* underflow */
 		e1->exp = EXT_MIN;
 		e1->m1 = e1->m2 = 0L;
+		return;
 	}
 	if ((e2->m1 | e2->m2) == 0) {
-		error++;
-#ifdef	PRT_EXT
-		prt_ext("DIV_EXT DIV 0.0",e2);
-#endif	PRT_EXT
+                /*
+                 * Exception 8.2 - Divide by zero
+                 */
 		trap(EFDIVZ);
 		e1->m1 = e1->m2 = 0L;
 		e1->exp = EXT_MAX;
-	}
-	if (error)
 		return;
+	}
+	if (e1->exp >= EXT_MAX) {
+                /*
+                 * Exception 8.3 - Overflow
+                 */
+                trap(EFOVFL);   /* overflow */
+                e1->exp = EXT_MAX;
+                e1->m1 = e1->m2 = 0L;
+                return;
+        }
 
 		/* do division of mantissas	*/
 		/* uses partial product method	*/
@@ -100,10 +97,6 @@ EXTEND	*e1,*e2;
 		/* compare dividend and divisor		*/
 		/* if dividend >= divisor add a bit	*/
 		/* and subtract divisior from dividend	*/
-#ifdef	PRT_ALL
-	prt_ext("dividend:",e1);
-	prt_ext("divisor :",e2);
-#endif
 
 		if ( (e1->m1 < e2->m1) ||
 			((e1->m1 == e2->m1) && (e1->m2 < e2->m2) ))
@@ -115,15 +108,7 @@ EXTEND	*e1,*e2;
 				e1->m1 -= 1;	/* carry in */
 			e1->m1 -= e2->m1;	/* do SUBTRACTION */
 			e1->m2 -= e2->m2;	/*    SUBTRACTION */
-#ifdef	PRT_ALL
-	prt_ext("result  :",e1);
-#endif
 		}
-#ifdef	PRT_ALL
-	fprintf(stderr,"div_ext %d %08X%08X\n\n",64-count,
-		result[0],result[1]);
-	fflush(stderr);
-#endif
 
 		/*	shift dividend left one bit OR	*/
 		/*	IF it equals ZERO we can break out	*/
@@ -146,14 +131,6 @@ EXTEND	*e1,*e2;
 			break;	/* leave loop	*/
 	}	/* end of divide by subtraction loop	*/
 
-	/*	DISPLAY RESULTS FOR DEBUGGING		*/
-#ifdef	PRT_ALL
-	prt_ext("dividend:",e1);
-	prt_ext("divisor :",e2);
-	fprintf(stderr,"div_ext %d %08X%08X\n",64-count,
-		result[0],result[1]);
-#endif
-
 	if (count > 0)	{
 		lp = result;
 		if (count > 31) {	/* move to higher word */
@@ -169,18 +146,20 @@ EXTEND	*e1,*e2;
 			*lp <<= count;
 		}
 	}
-	/*
-	if (error)
-		INEXACT();
-	*/
+#ifdef  EXCEPTION_INEXACT
+        if (error)      {
+                /*
+                 * report here exception 8.5 - Inexact
+                 * from Draft 8.0 of IEEE P754:
+                 * In the absence of an invalid operation exception,
+                 * if the rounded result of an operation is not exact or if
+                 * it overflows without a trap, then the inexact exception
+                 * shall be assigned. The rounded or overflowed result
+                 * shall be delivered to the destination.
+                 */
+                INEXACT();
+#endif
 	e1->m1 = result[0];
 	e1->m2 = result[1];
-#ifdef	PRT_EXT
-	prt_ext("result  :",e1);
-#endif
 	nrm_ext(e1);
-#ifdef	PRT_EXT
-	prt_ext("after nrm:",e1);
-	/*sleep(4);*/
-#endif
 }

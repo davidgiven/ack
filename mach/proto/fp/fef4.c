@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	SEPERATE INTO EXPONENT AND FRACTION
+	SEPERATE INTO EXPONENT AND FRACTION (FEF 4)
 */
 
 #include	"FP_types.h"

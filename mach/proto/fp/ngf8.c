@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-		NEGATE A FLOATING POINT
+		NEGATE A FLOATING POINT (NGF 8)
 */
 /********************************************************/
 /*

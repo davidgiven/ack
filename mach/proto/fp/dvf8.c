@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	DIVIDE TWO FLOATS - DOUBLE Precision
+	DIVIDE TWO FLOATS - DOUBLE Precision (DVF 8)
 */
 
 #include	"FP_types.h"

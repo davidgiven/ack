@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	SEPERATE DOUBLE INTO EXPONENT AND FRACTION
+	SEPERATE DOUBLE INTO EXPONENT AND FRACTION (FEF 8)
 */
 
 #include	"FP_types.h"
@@ -22,16 +22,8 @@ _double	s1;
 	EXTEND	buf;
 	struct fef8_returns *r = (struct fef8_returns *) &s1;
 
-#ifdef	DEBUG
-	printf("FEF8(): ");
-#endif	DEBUG
 	extend(&s1,&buf,sizeof(_double));
 	r->e = buf.exp - 1;
 	buf.exp = 1;
 	compact(&buf,&r->f,sizeof(_double));
-#ifdef	DEBUG
-	printf("exponent = %3d fraction = 0x%08X%08X: ",
-		r->f.__double[0],r->f.__double[1]);
-	printf("FEF8()\n");
-#endif	DEBUG
 }

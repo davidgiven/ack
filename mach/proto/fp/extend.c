@@ -6,9 +6,6 @@
 /* $Header$ */
 
 /*
-#define	PRT_EXIT
-#define	PRT_ENTRY
-#define	PRT_DBL
 	CONVERTS FLOATING POINT TO EXTENDED FORMAT
 
 	Two sizes of FLOATING Point are known:
@@ -45,19 +42,11 @@ int	size;
 	unsigned long	tmp;
 	int	leadbit = 0;
 
-#ifdef	PRT_ENTRY
-	write(2,"entry extend: ",14);
-#ifdef	PRT_DBL
-	prt_dbl(from,size);
-#else
-	write(2,"\n",1);
-#endif	PRT_DBL
-#endif	PRT_ENTRY
 	f = (DOUBLE *) from;	/* local cast conversion */
 	if (f->_s.p1.fract == 0L) 	{
 		if (size == sizeof(SINGLE))	{
 zero:			zrf_ext(to);
-			goto ready;
+			return;
 		}
 		else if (f->_s.p2 == 0L)
 			goto zero;
@@ -95,9 +84,4 @@ zero:			zrf_ext(to);
 	to->m1 |= NORMBIT;				/* set bit L	*/
 	if (leadbit == 0)		/* set or clear Leading Bit	*/
 		to->m1 &= ~NORMBIT;			/* clear bit L	*/
-ready:
-#ifdef	PRT_EXIT
-	prt_ext("exit extend:",to)
-#endif	PRT_EXIT
-	;	/* end of print statement or null statement */
 }
