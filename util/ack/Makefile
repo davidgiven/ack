@@ -6,12 +6,12 @@ DSRC=list.c data.c main.c scan.c svars.c trans.c util.c rmach.c run.c grows.c\
 ISRC=dmach.c intable.c
 OBJ=list.o data.o main.o scan.o svars.o trans.o util.o rmach.o run.o \
     dmach.o intable.o grows.o files.o
-ACKDIR=$(EMHOME)/lib/ack
+ACKDIR=$(EMHOME)/lib/
 FE=fe
 INTABLES=pdp int
-LNTABLES=acc apc abc vax2 vax4 i86 ix m68k2 m68k4 pmds pmds4 z8000\
-int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 
-INCLUDES=-I $(EMHOME)/h
+LNTABLES=acc apc abc vax4 i86 m68k2 m68k4 pmds pmds4 mantra mantra4 \
+	m68020 z8000 int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 
+INCLUDES=-I$(EMHOME)/h
 CFLAGS=-O -n $(INCLUDES)
 BINDIR=$(EMHOME)/bin
 MODDIR=$(EMHOME)/modules/lib
@@ -49,7 +49,7 @@ files.o main.o rmach.o : $(EMHOME)/h/em_path.h
 
 main.o : $(EMHOME)/h/local.h
 
-malloc.o svars.o:	ack.h
+svars.o:	ack.h
 
 dmach.c intable.c: mktables dmach.h
 	: mktables $(ACKDIR) # $(FE) $(INTABLES)
@@ -59,7 +59,7 @@ mktables:       mktables.c
 	cc -o mktables mktables.c
 
 pr:
-	@pr Makefile $(HFILES) $(DSRC) $(ACKDIR)/*
+	@pr Makefile $(HFILES) $(DSRC)
 	@(cd pc ; make pr)
 
 opr:
