@@ -1,4 +1,5 @@
 #include <lib.h>
+#include <unistd.h>
 
 PUBLIC void _exit(status)
 int status;
