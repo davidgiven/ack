@@ -6,7 +6,8 @@ flt_arith \- high precision floating point arithmetic
 .nf
 .B #include <flt_arith.h>
 .PP
-.ta 5m 30m
+.if t .ta 3m 13m 22m
+.if n .ta 5m 25m 40m
 struct flt_mantissa {
 	long	flt_h_32;	/* high order 32 bits of mantissa */
 	long	flt_l_32;	/* low order 32 bits of mantissa */
@@ -15,14 +16,14 @@ struct flt_mantissa {
 typedef struct {
 	short	flt_sign;	/* 0 for positive, 1 for negative */
 	short	flt_exp;	/* between -16384 and 16384 */
-	struct flt_mantissa flt_mantissa;	/* normalized, in [1,2). */
+	struct flt_mantissa	flt_mantissa;	/* normalized, in [1,2). */
 } flt_arith;
 
 extern int	flt_status;
 #define FLT_OVFL	001
 #define FLT_UNFL	002
 #define FLT_DIV0	004
-#define	FLT_NOFLT	010
+#define FLT_NOFLT	010
 #define FLT_BTSM	020
 .PP
 .B flt_add(e1, e2, e3)
