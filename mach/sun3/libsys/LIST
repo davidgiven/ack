@@ -36,9 +36,8 @@ fcntl.s
 flock.s
 fork.s
 _fork.s
-Xstat.c
-_Xstat.c
 fstat.s
+_fstat.s
 fstatfs.s
 fsync.s
 ftime.c
@@ -192,3 +191,4 @@ uname.c
 vadvise.s
 vfork.s
 wait3.s
+__statcvt.s
