@@ -319,23 +319,26 @@ free_proto_list(pl)
 remove_proto_tag(tp)
 struct type *tp;
 {
-	struct idf *ident;
-	struct tag *tg, *otg = 0;
+	register struct idf *ident;
+	register struct tag *tgp, **tgpp;
 
 	while(tp->tp_up) tp = tp->tp_up;
 
 	ident = tp->tp_idf;
-	switch(tp->tp_fund) {
-	case ENUM: tg = ident->id_enum; break;
-	case UNION:
-	case STRUCT: tg = ident->id_struct; break;
+	switch (tp->tp_fund) {
+	case ENUM: tgpp = &(ident->id_enum); break;
+	case STRUCT:
+	case UNION: tgpp = &(ident->id_struct); break;
 	default: return;
 	}
-	while (tg && tg->tg_type != tp) {
-		otg = tg;
-		tg = tg->next;
+
+	while((*tgpp) && (*tgpp)->tg_type != tp) {
+		tgpp = &((*tgpp)->next);
 	}
-	if (tg ->tg_level > L_PROTO) return;
+	ASSERT(*tgpp);
+
+	tgp = *tgpp;
+	if (tgp->tg_level > L_PROTO) return;
 
 #ifdef DEBUG
 	if (options['t'])
@@ -343,26 +346,15 @@ struct type *tp;
 			ident->id_text);
 #endif
 
-	if (!otg) {
-		switch(tp->tp_fund) {
-		case ENUM: ident->id_enum = tg->next; break;
-		case UNION:
-		case STRUCT: ident->id_struct = tg->next; break;
-		}
-		free_tag(tg);
-	}
-	else {
-		otg->next = tg->next;
-		free_tag(tg);
-	}
+	(*tgpp) = tgp->next;
+	free_tag(tgp);
 }
 
 remove_proto_idfs(pl)
 	register struct proto *pl;
 {
 	/*	Remove all the identifier definitions from the
-		prototype list. Keep in account the recursive
-		function definitions.
+		prototype list.
 	*/
 	register struct def *def;
 
@@ -372,21 +364,6 @@ remove_proto_idfs(pl)
 			if (options['t'])
 				print("Removing idf %s from list\n",
 					pl->pl_idf->id_text);
-#endif
-			/*	Remove all the definitions made within
-				a prototype.
-				??? is this really necessary (Hans)
-				wasn't this done before in the declaration
-			*/
-#if 0
-			if (pl->pl_flag & PL_FORMAL) {
-				register struct type *tp = pl->pl_type;
-
-				while (tp && tp->tp_fund != FUNCTION)
-					tp = tp->tp_up;
-				if (tp)
-				    debug("remove_proto_idfs(tp->tp_proto)");
-			}
 #endif
 			def = pl->pl_idf->id_def;
 			if (def && def->df_level <= L_PROTO){
@@ -417,34 +394,34 @@ call_proto(expp)
 	register struct proto *pl = NO_PROTO;
 	static struct proto ellipsis = { 0, 0, 0, PL_ELLIPSIS };
 
-	if (left != NILEXPR) {	/* in case of an error */
+	if (left != NILEXPR) {		/* in case of an error */
 		register struct type *tp = left->ex_type;
 
 		while (tp && tp->tp_fund != FUNCTION)
 			tp = tp->tp_up;
-		pl = (tp && tp->tp_proto) ? tp->tp_proto : NO_PROTO;
+		if (tp && tp->tp_proto)
+			pl = tp->tp_proto;
 	}
 
-	if (right != NILEXPR) { /* function call with parameters */
-		register struct expr *ex = right;
+	if (right != NILEXPR) {		/* function call with parameters */
 		register struct expr **ep = &((*expp)->OP_RIGHT);
 		register int ecnt = 0, pcnt = 0;
 		struct expr **estack[NPARAMS];
 		struct proto *pstack[NPARAMS];
 
 		/* stack up the parameter expressions */
-		while (ex->ex_class == Oper && ex->OP_OPER == PARCOMMA) {
+		while (right->ex_class == Oper && right->OP_OPER == PARCOMMA) {
 			if (ecnt == STDC_NPARAMS)
 				strict("number of parameters exceeds ANSI limit");
 			if (ecnt >= NPARAMS-1) {
 				error("too many parameters");
 				return;
 			}
-			estack[ecnt++] = &(ex->OP_RIGHT);
-			ep = &(ex->OP_LEFT);
-			ex = ex->OP_LEFT;
+			estack[ecnt++] = &(right->OP_RIGHT);
+			ep = &(right->OP_LEFT);
+			right = right->OP_LEFT;
 		}
-		estack[ecnt++] = ep;
+		estack[ecnt] = ep;
 
 		/*	Declarations like int f(void) do not expect any
 			parameters.
@@ -456,19 +433,18 @@ call_proto(expp)
 
 		/* stack up the prototypes */
 		if (pl) {
+			pcnt--;
 			do {
 				/* stack prototypes */
-				pstack[pcnt++] = pl;
+				pstack[++pcnt] = pl;
 				pl = pl->next;
 			} while (pl);
-			pcnt--;
 		}
 		else {
-			pcnt = 0;
 			pstack[0] = &ellipsis;
 		}
 
-		for (--ecnt; ecnt >= 0; ecnt--) {
+		for (ecnt; ecnt >= 0; ecnt--) {
 			/*	Only the parameters specified in the prototype
 				are checked and converted. The parameters that
 				fall under the ellipsis clause are neither

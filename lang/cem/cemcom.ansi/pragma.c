@@ -29,7 +29,7 @@ struct pkey {
 	char *pk_name;
 	int pk_key;
 } pragmas[] = {
-	{"flags",	P_FLAGS},
+	{"cemflags",	P_FLAGS},
 	{0,		P_UNKNOWN}
 };
 

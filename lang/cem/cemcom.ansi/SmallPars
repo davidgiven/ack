@@ -21,7 +21,7 @@
 
 
 !File: nparams.h
-#define	NPARAMS 32	/* maximum number of parameters of macros	*/
+#define	NPARAMS 32	/* maximum number of parameters 		*/
 #define	STDC_NPARAMS 31	/* ANSI limit on number of parameters		*/
 
 

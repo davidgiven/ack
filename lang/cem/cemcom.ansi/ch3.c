@@ -348,7 +348,7 @@ equal_type(tp, otp, check_qual)
 	    || (tp->tp_unsigned != otp->tp_unsigned)
 	    || (tp->tp_align != otp->tp_align))
 		return 0;
-	if (tp->tp_fund != ARRAY /* && tp->tp_fund != STRUCT */ ) {	/* UNION ??? */
+	if (tp->tp_fund != ARRAY) {
 		if (tp->tp_size != otp->tp_size)
 			return 0;
 	}
@@ -516,6 +516,7 @@ struct type *tp;
 	register struct sdef *sdf;
 
 	ASSERT(tp);
+
 	if (tp->tp_typequal & TQ_CONST) return 1;
 	sdf = tp->tp_sdef;
 	while (sdf) {

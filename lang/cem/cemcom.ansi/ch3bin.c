@@ -206,7 +206,7 @@ ch3bin(expp, oper, expr)
 				*expp = intexpr((arith)((oper == AND) ? 0 : 1),
 						INT);
 			}
-			(*expp)->ex_flags |= ex->ex_flags;
+			(*expp)->ex_flags |= ex->ex_flags | EX_ILVALUE;
 			free_expression(ex);
 		}
 		else
@@ -217,7 +217,7 @@ ch3bin(expp, oper, expr)
 				and ((oper == AND) || (oper == OR))
 			*/
 			if ((oper == AND) == (expr->VL_VALUE != (arith)0)) {
-				(*expp)->ex_flags |= expr->ex_flags;
+				(*expp)->ex_flags |= expr->ex_flags | EX_ILVALUE;
 				free_expression(expr);
 			}
 			else {
@@ -297,7 +297,8 @@ pntminuspnt(expp, oper, expr)
 	ch3cast(expp, CAST, pa_type);	/* ptr-ptr: result has pa_type	*/
 	ch3bin(expp, '/',
 		intexpr(size_of_type(up_type, "object"), pa_type->tp_fund));
-	ch3cast(expp, CAST, int_type);	/* result will be an integer expr */
+	ch3cast(expp, CAST, pa_type);	/* result will be an integgral expr */
+					/* cast necessary ??? */
 }
 
 mk_binop(expp, oper, expr, commutative)
