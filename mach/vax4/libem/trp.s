@@ -31,8 +31,8 @@ L2:
 	movl	$5,r2		# Max number of digits.
 	movl	(sp),r0		# Trap number in r0.
 L3:
-	bicw2	$0177770,r0	# Lower 3 bits form lower octal digit.
-	bisb2	r0,-(r1)	# Put them in the '0'.
+	bicw3	$0177770,r0,r3	# Lower 3 bits form lower octal digit.
+	bisb2	r3,-(r1)	# Put them in the '0'.
 	ashl	$-3,r0,r0	# Shift the 3 bits off.
 	sobgtr	r2,L3
 	movl	ap,r2
