@@ -638,7 +638,7 @@ get_text(formals, length)
 			LoadChar(c);
 			if (c == '*') {
 				skipcomment();
-				text[pos++] = ' ';
+				/* text[pos++] = ' '; ??? Why ??? */
 				LoadChar(c);
 			}
 			else
