@@ -71,12 +71,6 @@ extern int	flt_status;
 .B flt_b64_sft(m, n)
 .B struct flt_mantissa *m;
 .B int n;
-.PP
-.B flt_b64_rsft(m)
-.B struct flt_mantissa *m;
-.PP
-.B flt_b64_lsft(m)
-.B struct flt_mantissa *m;
 .SH DESCRIPTION
 This set of routines emulates floating point arithmetic, in a high
 precision. It is intended primarily for compilers that need to evaluate
@@ -253,18 +247,6 @@ If
 is negative, it is a left-shift; If
 .I n
 is positive, it is a right shift.
-.PP
-The routine
-.I flt_b64_rsft
-shifts the mantissa
-.I m
-1 bit right.
-.PP
-The routine
-.I flt_b64_lsft
-shifts the mantissa
-.I m
-1 bit left.
 .SH FILES
 ~em/modules/h/flt_arith.h
 .br
