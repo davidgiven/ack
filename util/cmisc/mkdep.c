@@ -14,8 +14,6 @@ struct namelist *freelist;
 struct namelist *new_namelist();
 struct namelist *nl = 0;
 
-int lflag = 0;	/* produce vertical list of included files */
-
 char *Malloc(u)
 	unsigned u;
 {
@@ -86,20 +84,12 @@ print_namelist(nm, nlp)
 	struct namelist *nlp;
 {
 	if (nlp) {
-		if (lflag) {
-			while (nlp) {
-				printf("%s\n", nlp->name);
-				nlp = nlp->next;
-			}
-		}
-		else {
 			printf("%s:", nm);
 			while (nlp) {
 				printf(" %s", nlp->name);
 				nlp = nlp->next;
 			}
 			printf("\n");
-		}
 	}
 }
 
@@ -109,22 +99,6 @@ main(argc, argv)
 	int err = 0;
 
 	progname = *argv++;
-	if (**argv == '-') {
-		register char *s = *argv++;
-
-		argc--;
-		while (*++s) {
-			switch (*s) {
-			case 'l':
-				lflag = 1;
-				break;
-			default:
-				fprintf(stderr, "use: %s [-l] file ...\n",
-					progname);
-				return 0;
-			}
-		}
-	}
 	while (--argc > 0) {
 		free_namelist(nl);
 		nl = 0;
@@ -133,6 +107,16 @@ main(argc, argv)
 		print_namelist(*argv++, nl);
 	}
 	return err ? 1 : 0;
+}
+
+int
+contains_slash(s)
+	register char *s;
+{
+	while (*s) {
+		if (*s++ == '/') return 1;
+	}
+	return 0;
 }
 
 dofile(fn)
@@ -145,6 +129,12 @@ dofile(fn)
 	if ((fp = fopen(fn, "r")) == 0) {
 		fprintf(stderr, "%s: cannot read %s\n", progname, fn);
 		return 0;
+	}
+
+	if (contains_slash(fn)) {
+		fprintf(stderr, "%s: (warning) %s not in current directory; not checked\n", progname, fn);
+		fclose(fp);
+		return 1;
 	}
 
 	while (fgets(buf, BSIZ, fp) != NULL)
