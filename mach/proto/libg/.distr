@@ -1,6 +1,7 @@
 barrier.c
 proto.libbc
 proto.libfp
+proto.libdb
 proto.libpc
 proto.libcc
 proto.libm2

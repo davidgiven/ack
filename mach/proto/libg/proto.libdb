@@ -1,0 +1,49 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+SRC_DIR = $(SRC_HOME)/mach/$(MACH)/libdb
+CDIR = $(SRC_HOME)/mach/proto/grind
+
+EMFLAGS= -L -LIB -O -I$(SRC_DIR) -I$(CDIR) -I$(SRC_HOME)/util/grind -m$(MACH)
+
+LIST =		atlin.$(SUF) lib.$(SUF)\
+		par_misc.$(SUF) machdep.$(SUF)
+
+SRC =		$(CDIR)/atlin.c $(CDIR)/lib.e\
+		$(CDIR)/par_misc.e $(SRC_DIR)/machdep.s
+
+all:		db_lib.a
+
+install:	tail_fp
+
+tail_fp:	db_lib.a
+		cp db_lib.a $(TARGET_HOME)/lib/$(MACH)/tail_db
+		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_db
+
+clean:
+	rm -f $(LIST) db_lib.a
+
+opr:
+	make pr | opr
+
+pr:
+	@pr $(CDIR)/proto.make $(SRC)
+
+db_lib.a:	$(LIST)
+	$(ASAR) rv $@ $?
+	$(RANLIB) db_lib.a
+
+atlin.$(SUF):	$(CDIR)/atlin.c $(SRC_HOME)/util/grind/message.h
+	ack $(EMFLAGS) -c $(CDIR)/atlin.c
+
+lib.$(SUF):	$(CDIR)/lib.e
+	ack $(EMFLAGS) -c $(CDIR)/lib.e
+
+par_misc.$(SUF):	$(CDIR)/par_misc.e
+	ack $(EMFLAGS) -c $(CDIR)/par_misc.e
+
+machdep.$(SUF):	$(SRC_DIR)/machdep.s
+	ack $(EMFLAGS) -c $(SRC_DIR)/machdep.s
