@@ -16,7 +16,7 @@ fdopen(int fd, const char *mode)
 
 	if (fd < 0) return (FILE *)NULL;
 	for (i = 0; __iotab[i] != 0 ; i++) 
-		if (i >= FOPEN_MAX)
+		if (i >= FOPEN_MAX-1)
 			return (FILE *)NULL;
 
 	switch(*mode++) {
