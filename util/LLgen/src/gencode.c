@@ -100,6 +100,18 @@ mk_tokenlist()
 	return p;
 }
 
+STATIC
+genhdr()
+{
+	if (!firsts) fputs("#define LLNOFIRSTS\n", fpars);
+	if (ansi_c) fputs("#define LL_ANSI_C 1\n", fpars);
+	else {
+		fputs("#if __STDC__ || __cplusplus\n#define LL_ANSI_C 1\n#endif\n", fpars);
+	}
+	fprintf(fpars, "#define LL_LEXI %s\n", lexical);
+	copyfile(incl_file);
+}
+
 gencode(argc) {
 	register p_file p = files;
 	
@@ -115,9 +127,7 @@ gencode(argc) {
 		opentemp(f_input);
 		correct_prefix();
 		/* generate code ... */
-		if (!firsts) fputs("#define LLNOFIRSTS\n", fpars);
-		if (ansi_c) fputs("#define LL_ANSI_C 1\n", fpars);
-		fprintf(fpars, "#define LL_LEXI %s\n", lexical);
+		genhdr();
 		copyfile(incl_file);
 		generate(p);
 		getaction(2);
@@ -171,10 +181,7 @@ genrecovery() {
 	opentemp((string) 0);
 	f = fpars;
 	correct_prefix();
-	if (!firsts) fputs("#define LLNOFIRSTS\n", f);
-	if (ansi_c) fputs("#define LL_ANSI_C 1\n", f);
-	fprintf(f, "#define LL_LEXI %s\n", lexical);
-	copyfile(incl_file);
+	genhdr();
 	for (st = start; st; st = st->ff_next) {
 		/* Make sure that every set the parser needs is in the list
 		 * before generating a define of the number of them!
@@ -192,15 +199,16 @@ genrecovery() {
 		  ntokens);
 	if (onerror) fprintf(f,"#define LL_USERHOOK %s\n", onerror);
 	/* Now generate the routines that call the startsymbols */
-	if (ansi_c) for (st = start; st; st = st->ff_next) {
+	fputs("#if LL_ANSI_C\n", f);
+	for (st = start; st; st = st->ff_next) {
 		p = &nonterms[st->ff_nont];
 		fputs("void ", f);
 		genextname(st->ff_nont, p->n_name, f);
 		fputs("(void);\n", f);
 	}
+	fputs("#endif\n", f);
 	for (st = start; st; st = st->ff_next) {
-		if (ansi_c) fputs("void ", f);
-		fprintf(f, "%s(%s)", st->ff_name, ansi_c ? "void" : "");
+		fprintf(f, "#if LL_ANSI_C\nvoid %s(void)\n#else\n%s()\n#endif\n", st->ff_name, st->ff_name);
 		p = &nonterms[st->ff_nont];
 		fputs(" {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];\n\tLLnewlevel(s);\n\tLLread();\n", f);
 		if (g_gettype(p->n_rule) == ALTERNATION) {
@@ -275,16 +283,21 @@ generate(f) p_file f; {
 		}
 		if (is_first) genprototypes(f);
 		is_first = 0;
-		if (p->n_flags & GENSTATIC) fputs("static ", fpars);
-		if (ansi_c) fputs("void ", fpars);
+		if (p->n_flags & GENSTATIC) fputs("static\n", fpars);
+		fputs("#if LL_ANSI_C\nvoid\n#endif\n", fpars);
 		genextname(s, p->n_name, fpars);
 		if (p->n_flags & PARAMS) {
-			fputs("(\n", fpars);
+			long off = ftell(fact);
+			fputs("(\n#if LL_ANSI_C\n", fpars);
 			controlline();
-			if (ansi_c) getansiparams(1);
-			else getparams();
+			getansiparams(1);
+			fseek(fact, off, 0);
+			fputs("#else\n", fpars);
+			controlline();
+			getparams();
+			fputs("#endif\n{\n", fpars);
 		}
-		else fprintf(fpars, "(%s) {\n", ansi_c ? "void" : "");
+		else fputs("(\n#if LL_ANSI_C\nvoid\n#endif\n) {\n", fpars);
 		if (p->n_flags & LOCALS) getaction(1);
 		i = getntsafe(p);
 		mustpop = NOPOP;
@@ -397,7 +410,7 @@ getparams() {
 				*/
 	fseek(fact,off,0);
 	getaction(0);
-	fprintf(fpars, "%c {\n",add_semi);
+	fprintf(fpars, "%c\n",add_semi);
 }
 
 STATIC
@@ -411,6 +424,7 @@ genprototypes(f)
 	register p_nont	p;
 	long	off = ftell(fact);
 
+	fputs("#if LL_ANSI_C\n", fpars);
 	for (i = 0; i < nnonterms; i++)	{
 		if (! IN(f->f_used, i)) continue;
 		p = &nonterms[i];
@@ -418,21 +432,31 @@ genprototypes(f)
 		    getntparams(p) == 0) {
 			continue;
 		}
-		if (ansi_c || (p->n_flags & GENSTATIC)) {
-			if (p->n_flags & GENSTATIC) fputs("static ", fpars);
-			if (ansi_c) fputs("void ", fpars);
-			genextname(i, p->n_name, fpars);
-			if (! ansi_c) fputs("();\n", fpars);
-			else if (p->n_flags & PARAMS) {
-				fputs("(\n", fpars);
-				fseek(fact, p->n_off, 0);
-				controlline();
-				getansiparams(0);
-				fseek(fact, off, 0);
-			}
-			else fputs("(void);\n", fpars);
+		if (p->n_flags & GENSTATIC) fputs("static ", fpars);
+		fputs("void ", fpars);
+		genextname(i, p->n_name, fpars);
+		if (p->n_flags & PARAMS) {
+			fputs("(\n", fpars);
+			fseek(fact, p->n_off, 0);
+			controlline();
+			getansiparams(0);
 		}
+		else fputs("(void);\n", fpars);
 	}
+	fseek(fact, off, 0);
+	fputs("#else\n", fpars);
+	for (i = 0; i < nnonterms; i++)	{
+		if (! IN(f->f_used, i)) continue;
+		p = &nonterms[i];
+		if (g_gettype(p->n_rule) == EORULE &&
+		    getntparams(p) == 0) {
+			continue;
+		}
+		if (p->n_flags & GENSTATIC) fputs("static ", fpars);
+		genextname(i, p->n_name, fpars);
+		fputs("();\n", fpars);
+	}
+	fputs("#endif\n", fpars);
 }
 
 STATIC
@@ -461,7 +485,7 @@ getansiparams(mkdef) {
 		else if (l == IDENT) fprintf(fpars, "%s", ltext);
 		else fputc(l, fpars);
 	}
-	fprintf(fpars, ") %c\n", mkdef ? '{' : ';');
+	fprintf(fpars, ") %c\n", mkdef ? ' ' : ';');
 }
 
 STATIC

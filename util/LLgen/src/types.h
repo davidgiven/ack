@@ -244,6 +244,6 @@ typedef struct info_alloc {
 
 # ifdef NDEBUG
 # define STATIC static
-# else not NDEBUG
+# else /* not NDEBUG */
 # define STATIC extern
-# endif not NDEBUG
+# endif /* not NDEBUG */

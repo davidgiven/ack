@@ -63,7 +63,7 @@ extern int	ntprint;	/* ntprint = 1 if they must be printed too in
 				 */
 # ifndef NDEBUG
 extern int	debug;
-# endif not NDEBUG
+# endif /* not NDEBUG */
 extern p_file	files,pfile;	/* pointers to file structure.
 				 * "files" points to the start of the
 				 * list */

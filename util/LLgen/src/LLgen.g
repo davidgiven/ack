@@ -504,7 +504,7 @@ expr	: '('		{	copyact('(',')',1,0); }
 	  ')'
 	;
 
-repeats(int *kind, *cnt;)	{	int t1 = 0; } :
+repeats(int *kind; int *cnt;)	{	int t1 = 0; } :
 	  [
 	    '?'		{	*kind = OPT; }
 	  | [ '*'	{	*kind = STAR; }
