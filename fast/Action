@@ -1,5 +1,8 @@
-name "Fast ANSI C compiler"
+name "Fast C compiler"
 dir f_c
+end
+name "Fast ANSI C compiler"
+dir f_c.ansi
 end
 name "Fast Pascal compiler"
 dir f_pc
