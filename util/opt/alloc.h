@@ -40,17 +40,7 @@ extern		oldreg();
  * If the stack segment and the data are separate as on a PDP11 under UNIX
  * it is worth squeezing some shorts out of the stack page.
  */
-#ifndef EM_WSIZE
-/*
- * Compiled with 'standard' C compiler
- */
 #define STACKROOM 3200	/* number of shorts space in stack */
-#else
-/*
- * Compiled with pcc, has trouble with lots of variables
- */
-#define STACKROOM 2000
-#endif
 
 #else
 
