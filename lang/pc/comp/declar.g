@@ -320,7 +320,8 @@ ProcedureHeading(register struct node **pnd; register struct type **ptp;)
 	|
 		/* empty */
 				{ *ptp =
-				    proc_type((struct paramlist *)0, (arith) 0);
+				    proc_type((struct paramlist *)0,
+						(proclevel > 1) ? pointer_size : (arith) 0);
 				}
 	]
 ;
@@ -383,7 +384,7 @@ FunctionHeading(register struct node **pnd; register struct type **ptp;)
 	struct node *fpl = NULLNODE;
 	struct type *tp;
 	struct paramlist *pr = 0;
-	arith nb_pars = 0;
+	arith nb_pars = (proclevel > 1) ? pointer_size : 0;
 } :
 	FUNCTION
 	IDENT			{ *pnd = MkLeaf(Name, &dot);

@@ -157,7 +157,15 @@ DoDirective(directive, nd, tp, scl, function)
 		df->df_type = tp;
 		df->prc_vis = scl;
 		df->prc_name = gen_proc_name(nd->nd_IDF, inp);
-		if( ext ) df->df_flags |= D_EXTERNAL;
+		if( ext ) {
+			if (!(df->df_flags & D_EXTERNAL) && proclevel > 1)
+				tp->prc_nbpar -= pointer_size;
+			/* was added for static link which is not needed now.
+			   But make sure this is done only once (look at the
+			   D_EXTERNAL flag).
+			*/
+			df->df_flags |= D_EXTERNAL;
+		}
 		df->df_flags |= D_SET;
 	}
 }
