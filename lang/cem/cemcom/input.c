@@ -18,7 +18,8 @@ extern int		nestlevel;
 #include	"dbsymtab.h"
 #ifndef NOPP
 #ifdef DBSYMTAB
-#include	<stb.h>
+#include <stb.h>
+#include <em.h>
 extern int	IncludeLevel;
 extern char	options[];
 #endif
@@ -73,7 +74,7 @@ AtEoIF()
 	nestlevel = nestlow;
 #ifdef DBSYMTAB
 	if (options['g'] && IncludeLevel > 0) {
-		C_ms_std(FileName, N_EINCL, 0);
+		C_ms_stb_cst(FileName, N_EINCL, 0, (arith) 0);
 	}
 	IncludeLevel--;
 #endif

@@ -29,6 +29,7 @@
 #include	"dbsymtab.h"
 #ifdef DBSYMTAB
 #include	<stb.h>
+#include	<em.h>
 int		IncludeLevel = 0;
 extern char	options[];
 #endif
@@ -298,7 +299,7 @@ do_include()
 #ifdef DBSYMTAB
 			IncludeLevel++;
 			if (options['g']) {
-				C_ms_std(FileName, N_BINCL, 0);
+				C_ms_stb_cst(FileName, N_BINCL, 0, (arith) 0);
 			}
 #endif /* DBSYMTAB */
 		}

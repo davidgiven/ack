@@ -46,6 +46,7 @@
 
 !File: debugcst.h
 /*#define DEBUG		1	/* perform various self-tests		*/
+#define NDEBUG		1	/* disable assertions			*/
 
 !File: inputtype.h
 #define INP_READ_IN_ONE	1	/* read input file in one	*/
