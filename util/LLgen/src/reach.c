@@ -106,7 +106,7 @@ reachwalk(p) register p_gram p; {
 			register p_nont n = &nonterms[g_getcont(p)];
 
 			reachable(n);
-			if (p->n_rule && g_gettype(n->n_rule) == EORULE &&
+			if (n->n_rule && g_gettype(n->n_rule) == EORULE &&
 			    ! g_getnpar(p) && (getntparams(n) == 0)) {
 				register p_gram np = p;
 				do {
