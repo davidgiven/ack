@@ -321,11 +321,9 @@ Only the pascal runtime system and the utility \fIack\fP use
 absolute pathnames to access files in the kit.
 The tree is distributed with /usr/em as the working
 directory.
-The definition of EM_HOME in em_path.h should be altered to
+The definition of EM_DIR in em_path.h should be altered to
 specify the root
 directory for the Compiler Kit distribution on your system.
-The trailing " in the definition of EM_HOME is intentionally
-missing!
 Em_path.h also specifies which directory should be used for
 temporary files.
 Most programs from the kit do indeed use that directory
@@ -384,11 +382,11 @@ The distribution is tailored to one specific opreating system per CPU type.
 For some of these  CPU's it is possible to tailor the distribution to another
 operating system.
 The steps to be taken are described in READ_ME (or README) files in the
-subdirectories of the directory in EM_HOME/mach for that particular machine.
+subdirectories of the directory in EM_DIR/mach for that particular machine.
 For example: The vax2 distribution is tailoerd to BSD4.1, but has #define's
 for BSD4.1c and BSD4.2.
-For the names and places of these define's look in EM_HOME/mach/vax2/cg and
-EM_HOME/mach/vax2/libem.
+For the names and places of these define's look in EM_DIR/mach/vax2/cg and
+EM_DIR/mach/vax2/libem.
 .NH
 Recompilation
 .PP
@@ -429,7 +427,7 @@ Opr should be an off-line printer daemon.
 On some systems it exists under another name e.g. lpr.
 The easiest way to call such a spooler is using a shell script
 with the name opr that calls lpr.
-This script should be placed in /usr/bin or EM_HOME/bin or
+This script should be placed in /usr/bin or EM_DIR/bin or
 one of the directories in your PATH.
 .IP clean
 remove all files not needed for day-to-day use,
