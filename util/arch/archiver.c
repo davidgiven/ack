@@ -70,6 +70,18 @@ typedef char BOOL;
 #define S_ISDIR(m)	(m & S_IFDIR)		/* is a directory */
 #endif
 
+/* Use Posix names if old-fashioned names are not defined. */
+
+#ifndef S_IREAD
+#define S_IREAD S_IRUSR
+#endif
+#ifndef S_IWRITE
+#define S_IWRITE S_IWUSR
+#endif
+#ifndef S_IEXEC
+#define S_IEXEC S_IXUSR
+#endif
+
 BOOL verbose;
 BOOL app_fl;
 BOOL ex_fl;
