@@ -117,28 +117,27 @@ string tostring(n) register word n; {
 	return(mystrcpy(buf));
 }
 
-result_t undefres= {EV_UNDEF};
-
-result_t compute(node) register node_p node; {
-	result_t leaf1,leaf2,result;
+compute(node, presult) register node_p node; register result_t *presult; {
+	result_t leaf1,leaf2;
 	register token_p tp;
 	int desc;
 	long mask,tmp;
 	int i,tmpreg;
 	glosym_p gp;
 
+	presult->e_typ = EV_UNDEF;
 	desc=opdesc[node->ex_operator];
 	if (desc&LLEAF) {
-		leaf1 = compute(&enodes[node->ex_lnode]);
+		compute(&enodes[node->ex_lnode], &leaf1);
 		if (desc&LDEF && leaf1.e_typ==EV_UNDEF)
-			return(undefres);
+			return;
 	}
 	if (desc&RLEAF) {
-		leaf2 = compute(&enodes[node->ex_rnode]);
+		compute(&enodes[node->ex_rnode], &leaf2);
 		if (desc&RDEF && leaf2.e_typ==EV_UNDEF)
-			return(undefres);
+			return;
 	}
-	result.e_typ=EV_INT;
+	presult->e_typ=EV_INT;
 	switch(node->ex_operator) {
 	default:        assert(FALSE);
 	case EX_TOKFIELD:
@@ -146,207 +145,214 @@ result_t compute(node) register node_p node; {
 			if (curtoken) tp = curtoken;
 			else tp = &fakestack[stackheight-1];
 		else	tp = &fakestack[stackheight-node->ex_lnode];
-		switch(result.e_typ = tokens[tp->t_token].t_type[node->ex_rnode-1]) {
+		switch(presult->e_typ = tokens[tp->t_token].t_type[node->ex_rnode-1]) {
 		default:
 			assert(FALSE);
 		case EV_INT:
-			result.e_v.e_con = tp->t_att[node->ex_rnode-1].aw;
+			presult->e_v.e_con = tp->t_att[node->ex_rnode-1].aw;
 			break;
 		case EV_ADDR:
-			result.e_v.e_addr = tp->t_att[node->ex_rnode-1].aa;
+			presult->e_v.e_addr = tp->t_att[node->ex_rnode-1].aa;
 			break;
 		case EV_REG:
-			result.e_v.e_reg = tp->t_att[node->ex_rnode-1].ar;
+			presult->e_v.e_reg = tp->t_att[node->ex_rnode-1].ar;
 			break;
 		}
-		return(result);
+		return;
 	case EX_ARG:
-		return(dollar[node->ex_lnode-1]);
+		*presult = dollar[node->ex_lnode-1];
+		return;
 	case EX_CON:
-		result.e_typ = EV_INT;
-		result.e_v.e_con = ((long) node->ex_rnode << 16) | ((long)node->ex_lnode&0xffff);
-		return(result);
+		presult->e_typ = EV_INT;
+		presult->e_v.e_con = ((long) node->ex_rnode << 16) | ((long)node->ex_lnode&0xffff);
+		return;
 	case EX_REG:
-		result.e_typ = EV_REG;
-		result.e_v.e_reg = node->ex_lnode;
-		return(result);
+		presult->e_typ = EV_REG;
+		presult->e_v.e_reg = node->ex_lnode;
+		return;
 	case EX_ALLREG:
-		result.e_typ = EV_REG;
-		result.e_v.e_reg = allreg[node->ex_lnode-1];
+		presult->e_typ = EV_REG;
+		presult->e_v.e_reg = allreg[node->ex_lnode-1];
 #if MAXMEMBERS!=0
 		if (node->ex_rnode!=0)
-			result.e_v.e_reg = machregs[result.e_v.e_reg].
+			presult->e_v.e_reg = machregs[presult->e_v.e_reg].
 				r_members[node->ex_rnode-1];
 #endif
-		return(result);
+		return;
 	case EX_SAMESIGN:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_typ = EV_INT;
+		presult->e_typ = EV_INT;
 		if (leaf1.e_v.e_con>=0)
-			result.e_v.e_con= leaf2.e_v.e_con>=0;
+			presult->e_v.e_con= leaf2.e_v.e_con>=0;
 		else
-			result.e_v.e_con= leaf2.e_v.e_con<0;
-		return(result);
+			presult->e_v.e_con= leaf2.e_v.e_con<0;
+		return;
 	case EX_SFIT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
 		mask = 0xFFFFFFFFL;
 		for (i=0;i<leaf2.e_v.e_con-1;i++)
 			mask &= ~(1<<i);
 		tmp = leaf1.e_v.e_con&mask;
-		result.e_v.e_con = tmp==0||tmp==mask;
-		return(result);
+		presult->e_v.e_con = tmp==0||tmp==mask;
+		return;
 	case EX_UFIT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
 		mask = 0xFFFFFFFFL;
 		for (i=0;i<leaf2.e_v.e_con;i++)
 			mask &= ~(1<<i);
-		result.e_v.e_con = (leaf1.e_v.e_con&mask)==0;
-		return(result);
+		presult->e_v.e_con = (leaf1.e_v.e_con&mask)==0;
+		return;
 	case EX_ROM:
 		assert(node->ex_rnode>=0 &&node->ex_rnode<MAXROM);
 		leaf2=dollar[node->ex_lnode];
+		presult->e_typ = EV_UNDEF;
 		if (leaf2.e_typ != EV_ADDR)
-			return(undefres);
+			return;
 		if (leaf2.e_v.e_addr.ea_off!=0)
-			return(undefres);
+			return;
 		gp = lookglo(leaf2.e_v.e_addr.ea_str);
 		if (gp == (glosym_p) 0)
-			return(undefres);
+			return;
 		if ((gp->gl_rom[MAXROM]&(1<<node->ex_rnode))==0)
-			return(undefres);
-		result.e_v.e_con = gp->gl_rom[node->ex_rnode];
-		return(result);
+			return;
+		presult->e_typ = EV_INT;
+		presult->e_v.e_con = gp->gl_rom[node->ex_rnode];
+		return;
 	case EX_ISROM:
 		leaf2=dollar[node->ex_lnode];
 		if (leaf2.e_typ != EV_ADDR)
-			result.e_v.e_con = 0;
+			presult->e_v.e_con = 0;
 		else
-			result.e_v.e_con = lookglo(leaf2.e_v.e_addr.ea_str) != 0;
-		return(result);
+			presult->e_v.e_con = lookglo(leaf2.e_v.e_addr.ea_str) != 0;
+		return;
 	case EX_LOWW:
-		result.e_v.e_con = saveemp[node->ex_lnode].em_u.em_loper&0xFFFF;
-		return(result);
+		presult->e_v.e_con = saveemp[node->ex_lnode].em_u.em_loper&0xFFFF;
+		return;
 	case EX_HIGHW:
-		result.e_v.e_con = saveemp[node->ex_lnode].em_u.em_loper>>16;
-		return(result);
+		presult->e_v.e_con = saveemp[node->ex_lnode].em_u.em_loper>>16;
+		return;
 	case EX_NCPEQ:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con==leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con==leaf2.e_v.e_con;
+		return;
 	case EX_SCPEQ:
 	assert(leaf1.e_typ == EV_ADDR && leaf2.e_typ == EV_ADDR);
-		result.e_v.e_con =
+		presult->e_v.e_con =
 		    (strcmp(leaf1.e_v.e_addr.ea_str,leaf2.e_v.e_addr.ea_str)==0 &&
 		    leaf1.e_v.e_addr.ea_off==leaf2.e_v.e_addr.ea_off);
-		return(result);
+		return;
 	case EX_RCPEQ:
 	assert(leaf1.e_typ == EV_REG && leaf2.e_typ == EV_REG);
-		result.e_v.e_con = leaf1.e_v.e_reg==leaf2.e_v.e_reg;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_reg==leaf2.e_v.e_reg;
+		return;
 	case EX_NCPNE:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con!=leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con!=leaf2.e_v.e_con;
+		return;
 	case EX_SCPNE:
 	assert(leaf1.e_typ == EV_ADDR && leaf2.e_typ == EV_ADDR);
-		result.e_v.e_con =
+		presult->e_v.e_con =
 		    !(strcmp(leaf1.e_v.e_addr.ea_str,leaf2.e_v.e_addr.ea_str)==0 &&
 		    leaf1.e_v.e_addr.ea_off==leaf2.e_v.e_addr.ea_off);
-		return(result);
+		return;
 	case EX_RCPNE:
 	assert(leaf1.e_typ == EV_REG && leaf2.e_typ == EV_REG);
-		result.e_v.e_con = leaf1.e_v.e_reg!=leaf2.e_v.e_reg;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_reg!=leaf2.e_v.e_reg;
+		return;
 	case EX_NCPGT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con>leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con>leaf2.e_v.e_con;
+		return;
 	case EX_NCPGE:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con>=leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con>=leaf2.e_v.e_con;
+		return;
 	case EX_NCPLT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con<leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con<leaf2.e_v.e_con;
+		return;
 	case EX_NCPLE:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con<=leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con<=leaf2.e_v.e_con;
+		return;
 	case EX_OR2:
 	assert(leaf1.e_typ == EV_INT);
-		if (leaf1.e_v.e_con==0)
-			return(compute(&enodes[node->ex_rnode]));
-		return(leaf1);
+		if (leaf1.e_v.e_con==0) {
+			compute(&enodes[node->ex_rnode], presult);
+		}
+		else	*presult = leaf1;
+		return;
 	case EX_AND2:
 	assert(leaf1.e_typ == EV_INT);
-		if (leaf1.e_v.e_con!=0)
-			return(compute(&enodes[node->ex_rnode]));
-		return(leaf1);
+		if (leaf1.e_v.e_con!=0) {
+			compute(&enodes[node->ex_rnode], presult);
+		}
+		else	*presult = leaf1;
+		return;
 	case EX_PLUS:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con=leaf1.e_v.e_con+leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con=leaf1.e_v.e_con+leaf2.e_v.e_con;
+		return;
 	case EX_CAT:
 	assert(leaf1.e_typ == EV_ADDR && leaf2.e_typ == EV_ADDR);
-		result.e_typ = EV_ADDR;
-		result.e_v.e_addr.ea_str = mycat(leaf1.e_v.e_addr.ea_str,leaf2.e_v.e_addr.ea_str);
-		result.e_v.e_addr.ea_off = leaf1.e_v.e_addr.ea_off+leaf2.e_v.e_addr.ea_off;
-		return(result);
+		presult->e_typ = EV_ADDR;
+		presult->e_v.e_addr.ea_str = mycat(leaf1.e_v.e_addr.ea_str,leaf2.e_v.e_addr.ea_str);
+		presult->e_v.e_addr.ea_off = leaf1.e_v.e_addr.ea_off+leaf2.e_v.e_addr.ea_off;
+		return;
 	case EX_MINUS:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con - leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con - leaf2.e_v.e_con;
+		return;
 	case EX_OR:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con | leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con | leaf2.e_v.e_con;
+		return;
 	case EX_XOR:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con ^ leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con ^ leaf2.e_v.e_con;
+		return;
 	case EX_AND:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con & leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con & leaf2.e_v.e_con;
+		return;
 	case EX_TIMES:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con * leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con * leaf2.e_v.e_con;
+		return;
 	case EX_DIVIDE:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con / leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con / leaf2.e_v.e_con;
+		return;
 	case EX_MOD:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con % leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con % leaf2.e_v.e_con;
+		return;
 	case EX_LSHIFT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con << leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con << leaf2.e_v.e_con;
+		return;
 	case EX_RSHIFT:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
-		result.e_v.e_con = leaf1.e_v.e_con >> leaf2.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = leaf1.e_v.e_con >> leaf2.e_v.e_con;
+		return;
 	case EX_NOT:
 	assert(leaf1.e_typ == EV_INT);
-		result.e_v.e_con = !leaf1.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = !leaf1.e_v.e_con;
+		return;
 	case EX_COMP:
 	assert(leaf1.e_typ == EV_INT);
-		result.e_v.e_con = ~leaf1.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = ~leaf1.e_v.e_con;
+		return;
 	case EX_STRING:
-		result.e_typ = EV_ADDR;
-		result.e_v.e_addr.ea_str = codestrings[node->ex_lnode];
-		result.e_v.e_addr.ea_off = 0;
-		return(result);
+		presult->e_typ = EV_ADDR;
+		presult->e_v.e_addr.ea_str = codestrings[node->ex_lnode];
+		presult->e_v.e_addr.ea_off = 0;
+		return;
 	case EX_DEFINED:
-		result.e_v.e_con=leaf1.e_typ!=EV_UNDEF;
-		return(result);
+		presult->e_v.e_con=leaf1.e_typ!=EV_UNDEF;
+		return;
 	case EX_SUBREG:
-		result.e_typ = EV_REG;
+		presult->e_typ = EV_REG;
 		if (node->ex_lnode==0)
 			if (curtoken) tp = curtoken;
 			else tp = &fakestack[stackheight-1];
@@ -357,52 +363,54 @@ result_t compute(node) register node_p node; {
 		if (node->ex_rnode)
 			tmpreg=machregs[tmpreg].r_members[node->ex_rnode-1];
 #endif
-		result.e_v.e_reg=tmpreg;
-		return(result);
+		presult->e_v.e_reg=tmpreg;
+		return;
 	case EX_TOSTRING:
 	assert(leaf1.e_typ == EV_INT);
-		result.e_typ = EV_ADDR;
-		result.e_v.e_addr.ea_str = "";
-		result.e_v.e_addr.ea_off = leaf1.e_v.e_con;
-		return(result);
+		presult->e_typ = EV_ADDR;
+		presult->e_v.e_addr.ea_str = "";
+		presult->e_v.e_addr.ea_off = leaf1.e_v.e_con;
+		return;
 #ifdef REGVARS
 	case EX_INREG:
 	assert(leaf1.e_typ == EV_INT);
-		result.e_v.e_con = isregtyp((long) leaf1.e_v.e_con);
-		return(result);
+		presult->e_v.e_con = isregtyp((long) leaf1.e_v.e_con);
+		return;
 	case EX_REGVAR:
 	assert(leaf1.e_typ == EV_INT);
 		i = isregvar((long) leaf1.e_v.e_con);
-		if (i<=0) 
-			return(undefres);
-		result.e_typ = EV_REG;
-		result.e_v.e_reg=i;
-		return(result);
+		if (i<=0)  {
+			presult->e_typ = EV_UNDEF;
+			return;
+		}
+		presult->e_typ = EV_REG;
+		presult->e_v.e_reg=i;
+		return;
 #endif
 	case EX_UMINUS:
 	assert(leaf1.e_typ == EV_INT);
-		result.e_v.e_con = -leaf1.e_v.e_con;
-		return(result);
+		presult->e_v.e_con = -leaf1.e_v.e_con;
+		return;
 #ifdef USE_TES
 	case EX_TOPELTSIZE:			/* Hans, new */
 	    { register label_p lbl;
 
 		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
 		if (lbl != (label_p)0) {
-		    result.e_v.e_con = lbl->lb_height;
+		    presult->e_v.e_con = lbl->lb_height;
 		} else {
-		    result.e_v.e_con = 0;
+		    presult->e_v.e_con = 0;
 		}
-		return(result);
+		return;
 	    }
 	case EX_FALLTHROUGH:			/* Hans, new */
 	    { register label_p lbl;
 
 		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
 		if (lbl != (label_p)0) {
-		    result.e_v.e_con = lbl->lb_fallthrough;
-		} else result.e_v.e_con = 0;
-		return(result);
+		    presult->e_v.e_con = lbl->lb_fallthrough;
+		} else presult->e_v.e_con = 0;
+		return;
 	    }
 #endif
 	}

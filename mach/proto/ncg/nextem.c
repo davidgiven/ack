@@ -54,7 +54,7 @@ byte *trypat(bp,len) register byte *bp; {
 		struct emline *svp = saveemp;
 
 		saveemp = emp;
-		result = compute(&enodes[i]);
+		compute(&enodes[i], &result);
 		if (result.e_typ != EV_INT || result.e_v.e_con == 0) {
 			saveemp = svp;
 			return(0);

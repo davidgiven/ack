@@ -502,7 +502,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 
 	DEBUG(dokill ? "KILLREG" : "RREMOVE");
 	getint(nodeno,codep);
-	result=compute(&enodes[nodeno]);
+	compute(&enodes[nodeno], &result);
 	if (result.e_typ!=EV_REG)
 		break;
 	if ( in_stack(result.e_v.e_reg) ) BROKE() ; /* Check aside-stack */
@@ -622,9 +622,8 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			 * known contents is available (the others might still
 			 * be useful).
 			 */
-			instance(0,&token2);
 			for (i=0;i<npos;i++)
-				if (eqtoken(&machregs[pos[i]].r_contents,&token2)) {
+				if (machregs[pos[i]].r_contents.t_token == 0) {
 					pos2[exactmatch++] = pos[i];
 				}
 		}
@@ -769,7 +768,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 
 	DEBUG("ERASE");
 	getint(nodeno,codep);
-	result=compute(&enodes[nodeno]);
+	compute(&enodes[nodeno], &result);
 	assert(result.e_typ!=EV_INT && result.e_typ!=EV_ADDR);
 	if (result.e_typ==EV_REG)
 		erasereg(result.e_v.e_reg);
@@ -829,7 +828,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		getint(eminstr,codep);
 		getint(nodeno,codep);
 		emp[i].em_instr = eminstr;
-		result[i] = compute(&enodes[nodeno]);
+		compute(&enodes[nodeno], &result[i]);
 	}
 	for (i=0;i<emrepllen;i++) {
 		switch(result[i].e_typ) {

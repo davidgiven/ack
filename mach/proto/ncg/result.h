@@ -19,5 +19,3 @@ struct result {
 #define EV_ADDR	3
 
 typedef struct result result_t;
-
-extern result_t compute();

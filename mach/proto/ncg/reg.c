@@ -21,7 +21,7 @@ static char rcsid[] = "$Header$";
 chrefcount(regno,amount,tflag) {
 	register struct reginfo *rp;
 #if MAXMEMBERS != 0
-	register i;
+	register i, tmp;
 #endif
 
 	rp= &machregs[regno];
@@ -35,15 +35,15 @@ chrefcount(regno,amount,tflag) {
 #if MAXMEMBERS!=0
 	} else
 		for (i=0;i<MAXMEMBERS;i++)
-			if (rp->r_members[i]!=0)
-				chrefcount(rp->r_members[i],amount,tflag);
+			if ((tmp = rp->r_members[i])!=0)
+				chrefcount(tmp,amount,tflag);
 #endif
 }
 
 getrefcount(regno, tflag) {
 	register struct reginfo *rp;
 #if MAXMEMBERS != 0
-	register i,maxcount;
+	register i,maxcount, tmp;
 #endif
 
 	rp= &machregs[regno];
@@ -55,8 +55,10 @@ getrefcount(regno, tflag) {
 	else {
 		maxcount=0;
 		for (i=0;i<MAXMEMBERS;i++)
-			if (rp->r_members[i]!=0)
-				maxcount=max(maxcount,getrefcount(rp->r_members[i], tflag));
+			if ((tmp=rp->r_members[i])!=0) {
+				tmp = getrefcount(tmp, tflag);
+				if (tmp > maxcount) maxcount = tmp;
+			}
 		return(maxcount);
 	}
 #endif
@@ -65,32 +67,12 @@ getrefcount(regno, tflag) {
 erasereg(regno) {
 	register struct reginfo *rp = &machregs[regno];
 	register int i;
+	register byte *tdpb;
 
 #if MAXMEMBERS==0
 	rp->r_contents.t_token = 0;
-	for (i=0;i<TOKENSIZE;i++)
+	for (i=TOKENSIZE-1;i>=0;i--)
 		rp->r_contents.t_att[i].aw = 0;
-
-	awayreg(regno);
-#else
-	extern short clashlist[];
-	register short *sp = &clashlist[rp->r_iclash];
-
-	rp->r_contents.t_token = 0;
-	while (*sp) {
-		rp = &machregs[*sp];
-		rp->r_contents.t_token = 0;
-		for (i=0;i<TOKENSIZE;i++)
-			rp->r_contents.t_att[i].aw = 0;
-		awayreg(*sp++);
-	}
-#endif
-}
-
-awayreg(regno) {
-	register struct reginfo *rp;
-	register byte *tdpb;
-	register i;
 
 	/* Now erase recursively all registers containing
 	 * something using this one
@@ -103,7 +85,7 @@ awayreg(regno) {
 				   lines
 				*/
 				rp->r_contents.t_token = 0;
-				for (i=0;i<TOKENSIZE;i++)
+				for (i=TOKENSIZE-1;i>=0;i--)
 					rp->r_contents.t_att[i].aw = 0;
 			}
 		} else if (rp->r_contents.t_token > 0) {
@@ -116,12 +98,55 @@ awayreg(regno) {
 					   lines
 					*/
 					rp->r_contents.t_token = 0;
-					for (i=0;i<TOKENSIZE;i++)
+					for (i=TOKENSIZE-1;i>=0;i--)
 						rp->r_contents.t_att[i].aw = 0;
 					break;
 				}
 		}
 	}
+#else
+	extern short clashlist[];
+	register short *sp = &clashlist[rp->r_iclash];
+
+	rp->r_contents.t_token = 0;
+	while (*sp) {
+		rp = &machregs[*sp];
+		rp->r_contents.t_token = 0;
+		for (i=TOKENSIZE-1;i>=0;i--)
+			rp->r_contents.t_att[i].aw = 0;
+		regno = *sp++;
+		/* Now erase recursively all registers containing
+		 * something using this one
+		 */
+		for (rp=machregs;rp<machregs+NREGS;rp++) {
+			if (rp->r_contents.t_token == -1) {
+				if (rp->r_contents.t_att[0].ar == regno) {
+					/* erasereg(rp-machregs);
+					   replaced by the following three
+					   lines
+					*/
+					rp->r_contents.t_token = 0;
+					for (i=TOKENSIZE-1;i>=0;i--)
+						rp->r_contents.t_att[i].aw = 0;
+				}
+			} else if (rp->r_contents.t_token > 0) {
+				tdpb= & (tokens[rp->r_contents.t_token].t_type[0]);
+				for (i=0;i<TOKENSIZE;i++)
+					if (*tdpb++ == EV_REG && 
+					    rp->r_contents.t_att[i].ar == regno) {
+						/* erasereg(rp-machregs);
+						   replaced by the following three
+						   lines
+						*/
+						rp->r_contents.t_token = 0;
+						for (i=TOKENSIZE-1;i>=0;i--)
+							rp->r_contents.t_att[i].aw = 0;
+						break;
+					}
+			}
+		}
+	}
+#endif
 }
 
 cleanregs() {
@@ -130,7 +155,7 @@ cleanregs() {
 
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		rp->r_contents.t_token = 0;
-		for (i=0;i<TOKENSIZE;i++)
+		for (i=TOKENSIZE-1;i>=0;i--)
 			rp->r_contents.t_att[i].aw = 0;
 	}
 }

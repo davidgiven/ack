@@ -30,7 +30,7 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 	if (tp->t_token == -1) {        /* register frame */
 		bitno = tp->t_att[0].ar;
 		if (tep->set_val[bitno>>4]&(1<<(bitno&017)))
-			if (tep->set_val[0]&1 || getrefcount(tp->t_att[0].ar, FALSE)<=1)
+			if (tep->set_val[0]&1 || getrefcount(bitno, FALSE)<=1)
 				goto oklabel;
 		return(0);
 	} else {                /* token frame */
@@ -43,7 +43,7 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 		return(1);
 	ct=curtoken;
 	curtoken=tp;
-	result=compute(&enodes[optexp]);
+	compute(&enodes[optexp], &result);
 	curtoken=ct;
 	return(result.e_v.e_con);
 }
@@ -60,7 +60,7 @@ instance(instno,token) register token_p token; {
 
 	if (instno==0) {
 		token->t_token = 0;
-		for(i=0;i<TOKENSIZE;i++)
+		for (i=TOKENSIZE-1;i>=0;i--)
 			token->t_att[i].aw=0;
 		return;
 	}
@@ -113,12 +113,12 @@ instance(instno,token) register token_p token; {
 #ifdef REGVARS
 	case IN_S_DESCR:
 	case IN_D_DESCR:
-		result=compute(&enodes[inp->in_info[1]]);
+		compute(&enodes[inp->in_info[1]], &result);
 		assert(result.e_typ==EV_INT);
 		if ((regno=isregvar(result.e_v.e_con)) > 0) {
 			token->t_token = -1;
 			token->t_att[0].ar = regno;
-			for(i=1;i<TOKENSIZE;i++)
+			for (i=TOKENSIZE-1;i>0;i--)
 				token->t_att[i].aw = 0;
 			return;
 		}
@@ -131,7 +131,7 @@ instance(instno,token) register token_p token; {
 				assert(tokens[token->t_token].t_type[i]==0);
 				token->t_att[i].aw=0;
 			} else {
-				result=compute(&enodes[inp->in_info[i+1]]);
+				compute(&enodes[inp->in_info[i+1]], &result);
 				assert(tokens[token->t_token].t_type[i]==result.e_typ);
 				if (result.e_typ==EV_INT)
 					token->t_att[i].aw=result.e_v.e_con;
@@ -199,13 +199,13 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 		{	token_p ct = curtoken;
 
 			curtoken = tp;
-			result=compute(&enodes[inp->in_info[1]]);
+			compute(&enodes[inp->in_info[1]], &result);
 			curtoken = ct;
 			assert(result.e_typ==EV_INT);
 			if ((regno=isregvar(result.e_v.e_con)) > 0) {
 				token->t_token = -1;
 				token->t_att[0].ar = regno;
-				for(i=1;i<TOKENSIZE;i++)
+				for (i=TOKENSIZE-1;i>0;i--)
 					token->t_att[i].aw = 0;
 				return;
 			}
@@ -224,7 +224,7 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 				token_p ct = curtoken;
 
 				curtoken = tp;
-				result=compute(&enodes[inp->in_info[i+1]]);
+				compute(&enodes[inp->in_info[i+1]], &result);
 				curtoken = ct;
 				assert(tokens[token->t_token].t_type[i]==result.e_typ);
 				if (result.e_typ==EV_INT)
@@ -419,14 +419,14 @@ instsize(tinstno,tp) token_p tp; {
 
 tref(tp,amount) register token_p tp; {
 	register i;
-	register tkdef_p tdp;
+	register byte *tdpb;
 
 	if (tp->t_token==-1)
 		chrefcount(tp->t_att[0].ar,amount,FALSE);
 	else {
-		tdp= &tokens[tp->t_token];
+		tdpb= &tokens[tp->t_token].t_type[0];
 		for(i=0;i<TOKENSIZE;i++)
-			if (tdp->t_type[i]==EV_REG)
+			if (*tdpb++==EV_REG)
 				chrefcount(tp->t_att[i].ar,amount,FALSE);
 	}
 }
@@ -707,8 +707,3 @@ badassertion(asstr,file,line) char *asstr, *file; {
 	fatal("\"%s\", line %d:Assertion \"%s\" failed",file,line,asstr);
 }
 #endif
-
-max(a,b) {
-
-	return(a>b ? a : b);
-}
