@@ -115,7 +115,7 @@ domacro()
 				the arguments.
 			*/
 			if (GetToken(&tk) != INTEGER) {
-				error("bad #line syntax");
+				lexerror("bad #line syntax");
 				SkipToNewLine();
 			}
 			else
@@ -303,17 +303,17 @@ do_include()
 	if (((tok = GetToken(&tk)) == FILESPECIFIER) || tok == STRING)
 		filenm = tk.tk_bts;
 	else {
-		error("bad include syntax");
+		lexerror("bad include syntax");
 		filenm = (char *)0;
 	}
 	AccFileSpecifier = 0;
 	if (SkipToNewLine()) {
-		error("bad include syntax");
+		lexerror("bad include syntax");
 	}
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
-			error("cannot open include file \"%s\"", filenm);
+			lexerror("cannot open include file \"%s\"", filenm);
 			add_dependency(filenm);
 		}
 		else {
@@ -535,7 +535,7 @@ getparams(buf, parbuf)
 		*/
 		for (pbuf2 = pbuf - 1; pbuf2 >= &buf[0]; pbuf2--) {
 			if (!strcmp(*pbuf2, *pbuf)) {
-				error("formal parameter \"%s\" already used",
+				lexerror("formal parameter \"%s\" already used",
 					*pbuf);
 			}
 		}
@@ -781,7 +781,7 @@ domacro()
 		EoiForNewline = 0;
 		return;
 	}
-	error("illegal # line");
+	lexerror("illegal # line");
 	EoiForNewline = 0;
 	SkipToNewLine();
 }

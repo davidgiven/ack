@@ -37,6 +37,7 @@ char loptions[128];			/* one for every char	*/
 #endif	LINT
 
 extern int idfsize;
+extern int density;
 
 static int txt2int();
 
@@ -291,6 +292,9 @@ next_option:			/* to allow combined one-char options */
 		break;
 	}
 #endif NOCROSS
+	case 'S':
+		density = txt2int(&text);
+		break;
 #endif	LINT
 	}
 }

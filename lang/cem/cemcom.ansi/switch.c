@@ -29,6 +29,8 @@
 
 extern char options[];
 
+int	density = DENSITY;
+
 compact(nr, low, up)
 	arith low, up;
 {
@@ -38,7 +40,7 @@ compact(nr, low, up)
 	*/
 	arith diff = up - low;
 
-	return (nr == 0 || (diff >= 0 && diff / nr <= (DENSITY - 1)));
+	return (nr == 0 || (diff >= 0 && diff / nr <= (density - 1)));
 }
 
 static struct switch_hdr *switch_stack = 0;
@@ -103,10 +105,20 @@ code_endswitch()
 #ifndef LINT
 	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 #endif
-	tablabel = data_label();	/* the rom must have a label	*/
-	C_df_dlb(tablabel);
-	C_rom_ilb(sh->sh_default);
-	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
+	if (sh->sh_nrofentries <= 1) {
+		if (sh->sh_nrofentries) {
+			load_cst(sh->sh_lowerbd, size);
+			C_cms(size);
+			C_zeq(sh->sh_entries->ce_label);
+		}
+		else	C_asp(size);
+		C_bra(sh->sh_default);
+	}
+	else {
+	    tablabel = data_label();	/* the rom must have a label	*/
+	    C_df_dlb(tablabel);
+	    C_rom_ilb(sh->sh_default);
+	    if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 		register arith val;
 
@@ -114,8 +126,7 @@ code_endswitch()
 		C_rom_icon(long2str((long)(sh->sh_upperbd - sh->sh_lowerbd),10),
 				size);
 		ce = sh->sh_entries;
-		if (sh->sh_nrofentries)
-		    for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
+		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			ASSERT(ce);
 			if (val == ce->ce_value) {
 				C_rom_ilb(ce->ce_label);
@@ -126,8 +137,8 @@ code_endswitch()
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(size);
-	}
-	else { /* CSB */
+	    }
+	    else { /* CSB */
 		C_rom_icon(long2str((long)sh->sh_nrofentries,10),size);
 		for (ce = sh->sh_entries; ce; ce = ce->next) {
 			/* generate the entries: value + prog.label	*/
@@ -136,6 +147,7 @@ code_endswitch()
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csb(size);
+	    }
 	}
 	C_df_ilb(sh->sh_break);
 	switch_stack = sh->next;	/* unstack the switch descriptor */
