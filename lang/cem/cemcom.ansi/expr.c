@@ -393,7 +393,7 @@ new_oper(tp, e1, oper, e2)
 }
 
 chk_cst_expr(expp)
-	register struct expr **expp;
+	struct expr **expp;
 {
 	/*	The expression expr is checked for constancy.
 	
@@ -416,26 +416,31 @@ chk_cst_expr(expp)
 		Preprocessor #if) have to be dealt with locally
 	*/
 	register struct expr *expr = *expp;
-	register int fund = expr->ex_type->tp_fund;
-	int err = 0;
 	
 #ifdef	DEBUG
 	print_expr("constant_expression", expr);
 #endif	DEBUG
-	if ( fund != CHAR && fund != SHORT && fund != INT
-	    && fund != ENUM && fund != LONG) {
-		expr_error(expr, "non-numerical constant expression");
-		err++;
-	} else if (!is_ld_cst(expr)) {
+	switch(expr->ex_type->tp_fund) {
+	case CHAR:
+	case SHORT:
+	case INT:
+	case ENUM:
+	case LONG:
+		if (is_ld_cst(expr)) {
+			return;
+		}
 		expr_error(expr, "expression is not constant");
-		err++;
+		break;
+	default:
+		expr_error(expr, "non-numerical constant expression");
+		break;
 	}
-	if (err)
-		erroneous2int(expp);
+	erroneous2int(expp);
 }
 
 init_expression(eppp, expr)
-	register struct expr ***eppp, *expr;
+	register struct expr ***eppp;
+	struct expr *expr;
 {
 	/*	The expression expr is added to the tree designated
 		indirectly by **eppp.
