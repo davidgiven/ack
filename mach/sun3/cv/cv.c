@@ -156,7 +156,7 @@ main(argc, argv)
 		rom_in_data = 1;
 		magic= NMAGIC ;
 		textsize= outsect[TEXTSG].os_size ;
-		datasize= outsect[ROMSG].os_size + outsect[DATASG].os_size ;
+		datasize= outsect[BSSSG].os_base - outsect[ROMSG].os_base ;
 		if (! follows(&outsect[DATASG], &outsect[ROMSG]))
 			fatal("data segment must follow rom\n") ;
 	} else
@@ -164,7 +164,8 @@ main(argc, argv)
 		/* 410/413 file with ROMSG in instruction space */
 		rom_in_data = 0;
 		magic= NMAGIC ;
-		textsize= outsect[TEXTSG].os_size + outsect[ROMSG].os_size ;
+		textsize= (outsect[ROMSG].os_base - outsect[TEXTSG].os_base) +
+				outsect[ROMSG].os_size ;
 		datasize= outsect[DATASG].os_size ;
 		if (! follows(&outsect[ROMSG],&outsect[TEXTSG].os_base))
 			fatal("rom segment must follow text\n") ;
@@ -172,7 +173,7 @@ main(argc, argv)
 		/* Plain 407 file */
 		rom_in_data = 0;
 		magic= OMAGIC ;
-		textsize= outsect[TEXTSG].os_size + outsect[ROMSG].os_size ;
+		textsize= (outsect[DATASG].os_base - outsect[TEXTSG].os_base);
 		datasize= outsect[DATASG].os_size ;
 		if (!unresolved) {
 			if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
