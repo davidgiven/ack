@@ -22,6 +22,7 @@ static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   implementation module currently being
 				   compiled
 				*/
+struct def *currentdef;		/* current definition of module or procedure */
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -46,6 +47,7 @@ ModuleDeclaration
 {
 	struct idf *id;
 	register struct def *df;
+	struct def *savecurr = currentdef;
 	extern int proclevel;
 	static int modulecount = 0;
 	char buf[256];
@@ -54,11 +56,14 @@ ModuleDeclaration
 	MODULE IDENT	{
 			  id = dot.TOK_IDF;
 			  df = define(id, CurrentScope, D_MODULE);
+			  currentdef = df;
+
 			  if (!df->mod_scope) {	
 			  	open_scope(CLOSEDSCOPE);
 			  	df->mod_scope = CurrentScope;
 			  }
 			  else	CurrentScope = df->mod_scope;
+
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_scope;
 			  df->mod_number = ++modulecount;
@@ -74,8 +79,9 @@ ModuleDeclaration
 	import(1)*
 	export(0)?
 	block(&(df->mod_body))
-	IDENT		{ close_scope(SC_CHKFORW|SC_CHKPROC);
+	IDENT		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(id, dot.TOK_IDF);
+			  currentdef = savecurr;
 			}
 ;
 
@@ -198,6 +204,7 @@ definition
 	       It is restricted to pointer types.
 	    */
 	    		{ df->df_kind = D_HIDDEN;
+			  df->df_type = construct_type(T_POINTER, NULLTYPE);
 			}
 	  ]
 	  Semicolon
@@ -226,6 +233,7 @@ ProgramModule(int state;)
 		  if (state == IMPLEMENTATION) {
 			DEFofIMPL = 1;
 			df = GetDefinitionModule(id);
+			currentdef = df;
 			CurrentScope = df->mod_scope;
 			DEFofIMPL = 0;
 		  }
@@ -240,7 +248,7 @@ ProgramModule(int state;)
 	priority(&(df->mod_priority))?
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
-		{ close_scope(SC_CHKFORW|SC_CHKPROC);
+		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(id, dot.TOK_IDF);
 		}
 	'.'

@@ -72,6 +72,7 @@ EnterIdList(idlist, kind, flags, type, scope, addr)
 			}
 			else {
 				assert(kind == D_FIELD);
+
 				df->fld_off = off;
 			}
 		}
@@ -107,6 +108,7 @@ EnterVarList(IdList, type, local)
 	extern char *sprint(), *Malloc(), *strcpy();
 
 	scope = CurrentScope;
+
 	if (local) {
 		/* Find the closest enclosing open scope. This
 		   is the procedure that we are dealing with
@@ -127,22 +129,26 @@ node_error(IdList->nd_left,"Illegal type for address");
 			df->var_off = IdList->nd_left->nd_INT;
 		}
 		else if (local) {
-			arith off;
-
-			/* add aligned size of variable to the offset
+			/* subtract aligned size of variable to the offset,
+			   as the variable list exists only local to a
+			   procedure
 			*/
-			off = scope->sc_off - type->tp_size;
-			off = -align(-off, type->tp_align);
-			df->var_off = off;
-			scope->sc_off = off;
+			scope->sc_off = -align(type->tp_size - scope->sc_off,
+						type->tp_align);
+			df->var_off = scope->sc_off;
 		}
 		else if (!DefinitionModule &&
 			 CurrentScope != Defined->mod_scope) {	
+			/* variable list belongs to an internal global
+			   module. Align offset and add size
+			*/
 			scope->sc_off = align(scope->sc_off, type->tp_align);
 			df->var_off = scope->sc_off;
 			scope->sc_off += type->tp_size;
 		}
 		else {
+			/* Global name, possibly external
+			*/
 			sprint(buf,"%s_%s", df->df_scope->sc_name,
 					    df->df_idf->id_text);
 			df->var_name = Malloc((unsigned)(strlen(buf)+1));

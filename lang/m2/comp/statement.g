@@ -5,11 +5,15 @@ static char *RcsId = "$Header$";
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	"idf.h"
 #include	"LLlex.h"
+#include	"scope.h"
+#include	"def.h"
 #include	"type.h"
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
+extern struct def *currentdef;
 }
 
 statement(struct node **pnd;)
@@ -55,7 +59,7 @@ statement(struct node **pnd;)
 |
 	EXIT
 			{ if (!loopcount) {
-				error("EXIT not in a LOOP");
+error("EXIT not in a LOOP");
 			  }
 			  *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
 			}
@@ -63,6 +67,13 @@ statement(struct node **pnd;)
 	RETURN		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
 	[
 		expression(&(nd->nd_right))
+			{ if (scopeclosed(CurrentScope)) {
+error("a module body has no result value");
+			  }
+			  else if (! currentdef->df_type->next) {
+error("procedure \"%s\" has no result value", currentdef->df_idf->id_text);
+			  }
+			}
 	]?
 ]?
 ;

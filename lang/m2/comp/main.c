@@ -16,6 +16,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"standards.h"
 #include	"tokenname.h"
+#include	"node.h"
 
 #include	"debug.h"
 
@@ -135,6 +136,7 @@ add_standards()
 {
 	register struct def *df;
 	struct def *Enter();
+	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0, 0}};
 
 	(void) Enter("ABS", D_PROCEDURE, std_type, S_ABS);
 	(void) Enter("CAP", D_PROCEDURE, std_type, S_CAP);
@@ -161,7 +163,11 @@ add_standards()
 	(void) Enter("LONGREAL", D_TYPE, longreal_type, 0);
 	(void) Enter("BOOLEAN", D_TYPE, bool_type, 0);
 	(void) Enter("CARDINAL", D_TYPE, card_type, 0);
-	(void) Enter("NIL", D_CONST, address_type, 0);
+	df = Enter("NIL", D_CONST, address_type, 0);
+	df->con_const = &nilnode;
+	nilnode.nd_INT = 0;
+	nilnode.nd_type = address_type;
+
 	(void) Enter("PROC",
 		     D_TYPE,
 		     construct_type(T_PROCEDURE, NULLTYPE),

@@ -6,12 +6,14 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"scope.h"
 #include	"type.h"
 #include	"def.h"
 #include	"node.h"
+
 #include	"debug.h"
 
 struct scope *CurrentScope, *PervasiveScope, *GlobalScope;
@@ -212,7 +214,7 @@ close_scope(flag)
 		DO_DEBUG(2, PrScopeDef(sc->sc_def));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));
-		Reverse(&(sc->sc_def));
+		if (flag & SC_REVERSE) Reverse(&(sc->sc_def));
 	}
 	CurrentScope = sc->next;
 	scp_level = CurrentScope->sc_level;

@@ -73,16 +73,6 @@ define(id, scope, kind)
 		  (df = lookup(id, PervasiveScope)))
 	   ) {
 		switch(df->df_kind) {
-		case D_PROCHEAD:
-			if (kind == D_PROCEDURE) {
-				/* Definition of which the heading was
-				   already seen in a definition module
-				*/
-				df->df_kind = kind;
-				df->prc_name = df->for_name;
-				return df;
-			}
-			break;	
 		case D_HIDDEN:
 			if (kind == D_TYPE && !DefinitionModule) {
 				df->df_kind = D_HTYPE;
@@ -192,6 +182,7 @@ df->df_idf->id_text);
 				   exported from a local module!
 				*/
 				df->df_kind = df1->df_kind;
+				df->df_value.df_forward = df1->df_value.df_forward;
 				df1->df_kind = D_IMPORT;
 			}
 			df1->imp_def = df;
@@ -423,7 +414,10 @@ DeclProc(type)
 			/* C_exp already generated when we saw the definition
 			   in the definition module
 			*/
-			df->df_kind = type;
+			df->df_kind = D_PROCEDURE;
+			open_scope(OPENSCOPE);
+			CurrentScope->sc_name = df->for_name;
+			df->prc_scope = CurrentScope;
 		}
 		else {
 			df = define(dot.TOK_IDF, CurrentScope, type);
@@ -433,12 +427,13 @@ DeclProc(type)
 			}
 			else	(sprint(buf, "%s_%s",df->df_scope->sc_name,
 						df->df_idf->id_text));
-			df->prc_name = Malloc((unsigned)(strlen(buf)+1));
-			strcpy(df->prc_name, buf);
+			open_scope(OPENSCOPE);
+			df->prc_scope = CurrentScope;
+			CurrentScope->sc_name = Malloc((unsigned)(strlen(buf)+1));
+			strcpy(CurrentScope->sc_name, buf);
 			C_inp(buf);
 		}
 		df->prc_nbpar = 0;
-		open_scope(OPENSCOPE);
 	}
 
 	return df;

@@ -38,6 +38,7 @@ cstunary(expp)
 		o1 = -o1;
 		break;
 	case NOT:
+	case '~':
 		o1 = !o1;
 		break;
 	default:
@@ -184,9 +185,11 @@ cstbin(expp)
 		o1 = o1 == o2;
 		break;
 	case '#':
+	case UNEQUAL:
 		o1 = o1 != o2;
 		break;
 	case AND:
+	case '&':
 		o1 = o1 && o2;
 		break;
 	case OR:
@@ -252,6 +255,7 @@ cstset(expp)
 		case LESSEQUAL:
 		case '=':
 		case '#':
+		case UNEQUAL:
 			/* Clumsy, but who cares? Nobody writes these things! */
 			for (j = 0; j < setsize; j++) {
 				switch(expp->nd_symb) {
@@ -265,13 +269,14 @@ cstset(expp)
 					continue;
 				case '=':
 				case '#':
+				case UNEQUAL:
 					if (*set1++ != *set2++) break;
 					continue;
 				}
-				expp->nd_INT = expp->nd_symb == '#';
+				expp->nd_INT = expp->nd_symb != '=';
 				break;
 			}
-			if (j == setsize) expp->nd_INT = expp->nd_symb != '#';
+			if (j == setsize) expp->nd_INT = expp->nd_symb == '=';
 			expp->nd_class = Value;
 			free((char *) expp->nd_left->nd_set);
 			free((char *) expp->nd_right->nd_set);

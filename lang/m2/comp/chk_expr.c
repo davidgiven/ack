@@ -63,6 +63,7 @@ chk_expr(expp)
 
 	case Link:
 		return chk_name(expp);
+
 	default:
 		assert(0);
 	}
@@ -85,32 +86,42 @@ chk_set(expp)
 
 	/* First determine the type of the set
 	*/
-	if (expp->nd_left) {
+	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		findname(expp->nd_left);
-		assert(expp->nd_left->nd_class == Def);
-		df = expp->nd_left->nd_def;
+		findname(nd);
+		assert(nd->nd_class == Def);
+		df = nd->nd_def;
+
 		if (!(df->df_kind & (D_TYPE|D_ERROR)) ||
 		    (df->df_type->tp_fund != T_SET)) {
-			node_error(expp, "illegal set type");
+			node_error(expp, "specifier does not represent a set type");
 			return 0;
 		}
 		tp = df->df_type;
+		FreeNode(expp->nd_left);
+		expp->nd_left = 0;
 	}
 	else	tp = bitset_type;
 
 	/* Now check the elements given, and try to compute a constant set.
+	   First allocate room for the set
 	*/
 	set = (arith *)
 		Malloc((unsigned) (tp->tp_size * sizeof(arith) / word_size));
+
+	/* Now check the elements, one by one
+	*/
 	nd = expp->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
+
 		if (!chk_el(nd->nd_left, tp->next, &set)) return 0;
 		nd = nd->nd_right;
 	}
+
 	expp->nd_type = tp;
+
 	if (set) {
 		/* Yes, it was a constant set, and we managed to compute it!
 		   Notice that at the moment there is no such thing as
@@ -119,10 +130,10 @@ chk_set(expp)
 		*/
 		expp->nd_class = Set;
 		expp->nd_set = set;
-		FreeNode(expp->nd_left);
 		FreeNode(expp->nd_right);
-		expp->nd_left = expp->nd_right = 0;
+		expp->nd_right = 0;
 	}
+
 	return 1;
 }
 
@@ -137,35 +148,38 @@ chk_el(expp, tp, set)
 		Also try to compute the set!
 	*/
 	register int i;
+	register struct node *left = expp->nd_left;
+	register struct node *right = expp->nd_right;
 
 	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (!chk_el(expp->nd_left, tp, set) ||
-		    !chk_el(expp->nd_right, tp, set)) {
+		if (!chk_el(left, tp, set) || !chk_el(right, tp, set)) {
 			return 0;
 		}
-		if (expp->nd_left->nd_class == Value &&
-		    expp->nd_right->nd_class == Value) {
+
+		if (left->nd_class == Value && right->nd_class == Value) {
 			/* We have a constant range. Put all elements in the
 			   set
 			*/
 
-		    	if (expp->nd_left->nd_INT > expp->nd_right->nd_INT) {
+		    	if (left->nd_INT > right->nd_INT) {
 node_error(expp, "lower bound exceeds upper bound in range");
 				return rem_set(set);
 			}
-			
-			if (*set) for (i = expp->nd_left->nd_INT + 1;
-				     i < expp->nd_right->nd_INT; i++) {
-				(*set)[i/wrd_bits] |= (1 << (i % wrd_bits));
+
+			if (*set) {
+				for (i=left->nd_INT+1; i<right->nd_INT; i++) {
+					(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
+				}
 			}
 		}
 		else if (*set) {
 			free((char *) *set);
 			*set = 0;
 		}
+
 		return 1;
 	}
 
@@ -174,12 +188,17 @@ node_error(expp, "lower bound exceeds upper bound in range");
 	if (!chk_expr(expp)) {
 		return rem_set(set);
 	}
+
 	if (!TstCompat(tp, expp->nd_type)) {
 		node_error(expp, "set element has incompatible type");
 		return rem_set(set);
 	}
+
 	if (expp->nd_class == Value) {
+		/* a constant element
+		*/
 		i = expp->nd_INT;
+
 	    	if ((tp->tp_fund != T_ENUMERATION &&
 		     (i < tp->sub_lb || i > tp->sub_ub))
 		   ||
@@ -189,8 +208,10 @@ node_error(expp, "lower bound exceeds upper bound in range");
 			node_error(expp, "set element out of range");
 			return rem_set(set);
 		}
+
 		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
 	}
+
 	return 1;
 }
 
@@ -552,7 +573,7 @@ findname(expp)
 			expp->nd_type = df->df_type;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 node_error(expp->nd_right,
-"identifier \"%s\" not exprted from qualifying module",
+"identifier \"%s\" not exported from qualifying module",
 df->df_idf->id_text);
 			}
 		}
@@ -723,6 +744,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	case OR:
 	case AND:
+	case '&':
 		if (tpl == bool_type) {
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
@@ -735,10 +757,12 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	case '=':
 	case '#':
+	case UNEQUAL:
 	case GREATEREQUAL:
 	case LESSEQUAL:
 	case '<':
 	case '>':
+		expp->nd_type = bool_type;
 		switch(tpl->tp_fund) {
 		case T_SET:
 			if (expp->nd_symb == '<' || expp->nd_symb == '>') {
@@ -762,10 +786,10 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 			return 1;
 
 		case T_POINTER:
-			if (!(expp->nd_symb == '=' || expp->nd_symb == '#')) {
-				break;
-			}
-			/* Fall through */
+			if (expp->nd_symb == '=' ||
+			    expp->nd_symb == UNEQUAL ||
+			    expp->nd_symb == '#') return 1;
+			break;
 
 		case T_REAL:
 			return 1;
@@ -832,6 +856,7 @@ chk_uoper(expp)
 		break;
 
 	case NOT:
+	case '~':
 		if (tpr == bool_type) {
 			if (expp->nd_right->nd_class == Value) {
 				cstunary(expp);

@@ -268,5 +268,5 @@ visible_designator_tail(struct node **pnd;):
 		]*
 	']'
 |
-	'^'		{ *pnd = MkNode(Oper, NULLNODE, *pnd, &dot); }
+	'^'		{ *pnd = MkNode(Uoper, NULLNODE, *pnd, &dot); }
 ;

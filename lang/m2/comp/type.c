@@ -9,6 +9,7 @@ static char *RcsId = "$Header$";
 
 #include	"target_sizes.h"
 #include	"debug.h"
+#include	"maxset.h"
 
 #include	"def.h"
 #include	"type.h"
@@ -131,28 +132,61 @@ standard_type(fund, align, size)
 
 init_types()
 {
+	/*	Initialize the predefined types
+	*/
 	register struct type *tp;
 
+	/* character type
+	*/
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
+	
+	/* character constant, different from char because of compatibility
+	   with ARRAY OF CHAR
+	*/
 	charc_type = standard_type(T_CHAR, 1, (arith) 1);
 	charc_type->enm_ncst = 256;
+
+	/* boolean type
+	*/
 	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);
 	bool_type->enm_ncst = 2;
+
+	/* integer types, also a "intorcard", for integer constants between
+	   0 and MAX(INTEGER)
+	*/
 	int_type = standard_type(T_INTEGER, int_align, int_size);
 	longint_type = standard_type(T_INTEGER, long_align, long_size);
 	card_type = standard_type(T_CARDINAL, int_align, int_size);
+	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
+
+	/* floating types
+	*/
 	real_type = standard_type(T_REAL, float_align, float_size);
 	longreal_type = standard_type(T_REAL, double_align, double_size);
-	word_type = standard_type(T_WORD, word_align, word_size);
-	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
+
+	/* string constant type
+	*/
 	string_type = standard_type(T_STRING, 1, (arith) -1);
+
+	/* SYSTEM types
+	*/
+	word_type = standard_type(T_WORD, word_align, word_size);
 	address_type = construct_type(T_POINTER, word_type);
+
+	/* create BITSET type
+	*/
 	tp = construct_type(T_SUBRANGE, int_type);
 	tp->sub_lb = 0;
 	tp->sub_ub = word_size * 8 - 1;
 	bitset_type = set_type(tp);
+
+	/* a unique type for standard procedures and functions
+	*/
 	std_type = construct_type(T_PROCEDURE, NULLTYPE);
+
+	/* a unique type indicating an error
+	*/
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
 }
 
@@ -183,11 +217,12 @@ ParamList(ids, tp, VARp)
 	return pstart;
 }
 
-/*	A subrange had a specified base. Check that the bases conform ...
-*/
 chk_basesubrange(tp, base)
 	register struct type *tp, *base;
 {
+	/*	A subrange had a specified base. Check that the bases conform.
+	*/
+
 	if (base->tp_fund == T_SUBRANGE) {
 		/* Check that the bounds of "tp" fall within the range
 		   of "base"
@@ -197,6 +232,7 @@ chk_basesubrange(tp, base)
 		}
 		base = base->next;
 	}
+
 	if (base->tp_fund == T_ENUMERATION || base->tp_fund == T_CHAR) {
 		if (tp->next != base) {
 			error("Specified base does not conform");
@@ -212,6 +248,7 @@ chk_basesubrange(tp, base)
 	else if (base != tp->next && base != int_type) {
 		error("Specified base does not conform");
 	}
+
 	tp->next = base;
 	tp->tp_size = base->tp_size;
 	tp->tp_align = base->tp_align;
@@ -233,14 +270,18 @@ subr_type(lb, ub)
 	}
 
 	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
-	if (tp == intorcard_type) tp = card_type;	/* lower bound > 0 */
+
+	if (tp == intorcard_type) {
+		/* Lower bound >= 0; in this case, the base type is CARDINAL,
+		   according to the language definition, par. 6.3
+		*/
+		assert(lb->nd_INT >= 0);
+		tp = card_type;
+	}
 
 	/* Check base type
 	*/
-	if (tp != int_type && tp != card_type && tp != char_type &&
-	    tp->tp_fund != T_ENUMERATION) {
-		/* BOOLEAN is also an ENUMERATION type
-		*/
+	if (! (tp->tp_fund & T_DISCRETE)) {
 		node_error(ub, "Illegal base type for subrange");
 		return error_type;
 	}
@@ -258,10 +299,8 @@ subr_type(lb, ub)
 	res->sub_ub = ub->nd_INT;
 	res->tp_size = tp->tp_size;
 	res->tp_align = tp->tp_align;
-	DO_DEBUG(2,debug("Creating subrange type %ld-%ld", (long)lb->nd_INT,(long)ub->nd_INT));
 	return res;
 }
-#define MAX_SET	1024	/* ??? Maximum number of elements in a set */
 
 struct type *
 set_type(tp)
@@ -273,14 +312,14 @@ set_type(tp)
 	arith lb, ub;
 
 	if (tp->tp_fund == T_SUBRANGE) {
-		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAX_SET - 1) {
+		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAXSET - 1) {
 			error("Set type limits exceeded");
 			return error_type;
 		}
 	}
 	else if (tp->tp_fund == T_ENUMERATION || tp == char_type) {
 		lb = 0;
-		if ((ub = tp->enm_ncst - 1) > MAX_SET - 1) {
+		if ((ub = tp->enm_ncst - 1) > MAXSET - 1) {
 			error("Set type limits exceeded");
 			return error_type;
 		}
@@ -289,6 +328,7 @@ set_type(tp)
 		error("illegal base type for set");
 		return error_type;
 	}
+
 	tp = construct_type(T_SET, tp);
 	tp->tp_size = align(((ub - lb) + 7)/8, word_align);
 	return tp;
@@ -297,40 +337,68 @@ set_type(tp)
 ArraySizes(tp)
 	register struct type *tp;
 {
-	/*	Assign sizes to an array type
+	/*	Assign sizes to an array type, and check index type
 	*/
 	arith elem_size;
-	register struct type *itype = tp->next;	/* the index type */
+	register struct type *index_type = tp->next;
+	register struct type *elem_type = tp->arr_elem;
 
-	if (tp->arr_elem->tp_fund == T_ARRAY) {
-		ArraySizes(tp->arr_elem);
+	if (elem_type->tp_fund == T_ARRAY) {
+		ArraySizes(elem_type);
 	}
 
-	elem_size = align(tp->arr_elem->tp_size, tp->arr_elem->tp_align);
-	tp->tp_align = tp->arr_elem->tp_align;
+	/* align element size to alignment requirement of element type
+	*/
+	elem_size = align(elem_type->tp_size, elem_type->tp_align);
+	tp->tp_align = elem_type->tp_align;
 
-	if (! (itype->tp_fund & T_INDEX)) {
+	/* check index type
+	*/
+	if (! (index_type->tp_fund & T_INDEX)) {
 		error("Illegal index type");
 		tp->tp_size = 0;
 		return;
 	}
 
-	switch(itype->tp_fund) {
+	/* find out HIGH, LOW and size of ARRAY
+	*/
+	switch(index_type->tp_fund) {
 	case T_SUBRANGE:
-		tp->arr_lb = itype->sub_lb;
-		tp->arr_ub = itype->sub_ub;
-		tp->tp_size = elem_size * (itype->sub_ub - itype->sub_lb + 1);
+		tp->arr_lb = index_type->sub_lb;
+		tp->arr_ub = index_type->sub_ub;
+		tp->tp_size = elem_size *
+			(index_type->sub_ub - index_type->sub_lb + 1);
 		break;
 	case T_CHAR:
 	case T_ENUMERATION:
 		tp->arr_lb = 0;
-		tp->arr_ub = itype->enm_ncst - 1;
-		tp->tp_size = elem_size * itype->enm_ncst;
+		tp->arr_ub = index_type->enm_ncst - 1;
+		tp->tp_size = elem_size * index_type->enm_ncst;
 		break;
 	default:
 		assert(0);
 	}
-	/* ??? overflow checking ??? */
+	/* ??? overflow checking ???
+	*/
+}
+
+FreeType(tp)
+	struct type *tp;
+{
+	/*	Release type structures indicated by "tp"
+	*/
+	register struct paramlist *pr, *pr1;
+
+	assert(tp->tp_fund == T_PROCEDURE);
+
+	pr = tp->prc_params;
+	while (pr) {
+		pr1 = pr;
+		pr = pr->next;
+		free_paramlist(pr1);
+	}
+
+	free_type(tp);
 }
 
 int

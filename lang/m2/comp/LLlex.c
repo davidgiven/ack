@@ -182,7 +182,7 @@ again:
 			}
 			else
 			if (nch == '>') {
-				return tk->tk_symb = UNEQUAL;
+				return tk->tk_symb = '#';
 			}
 			PushBack(nch);
 			return tk->tk_symb = ch;
@@ -219,7 +219,9 @@ again:
 
 	case STSTR:
 		GetString(ch);
-		tk->tk_data.tk_str = string;
+		tk->tk_data.tk_str = (struct string *)
+				Malloc(sizeof (struct string));
+		*(tk->tk_data.tk_str) = string;
 		return tk->tk_symb = STRING;
 
 	case STNUM:

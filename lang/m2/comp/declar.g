@@ -7,6 +7,7 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<alloc.h>
 #include	<assert.h>
+
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -18,23 +19,26 @@ static char *RcsId = "$Header$";
 
 int		proclevel = 0;	/* nesting level of procedures */
 extern char	*sprint();
+extern struct def *currentdef;
 }
 
 ProcedureDeclaration
 {
 	struct def *df;
+	struct def *savecurr = currentdef;
 } :
 	ProcedureHeading(&df, D_PROCEDURE)
 			{
 			  df->prc_level = proclevel++;
-
+			  currentdef = df;
 			}
 	';' block(&(df->prc_body)) IDENT
 			{
 			  match_id(dot.TOK_IDF, df->df_idf);
 			  df->prc_scope = CurrentScope;
-			  close_scope(SC_CHKFORW);
+			  close_scope(SC_CHKFORW|SC_REVERSE);
 			  proclevel--;
+			  currentdef = savecurr;
 			}
 ;
 
@@ -53,8 +57,14 @@ ProcedureHeading(struct def **pdf; int type;)
 		{
 		  tp = construct_type(T_PROCEDURE, tp);
 		  tp->prc_params = params;
-		  if (df->df_type && !TstTypeEquiv(tp, df->df_type)) {
+		  if (df->df_type) {
+			/* We already saw a definition of this type
+			   in the definition module.
+			*/
+		  	if (!TstTypeEquiv(tp, df->df_type)) {
 error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
+			}
+			FreeType(df->df_type);
 		  }
 		  df->df_type = tp;
 		  *pdf = df;
@@ -164,7 +174,8 @@ TypeDeclaration
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	'=' type(&tp)
-			{ df->df_type = tp;
+			{ if (df->df_type) free_type(df->df_type);
+			  df->df_type = tp;
 			  if ((df->df_flags&D_EXPORTED) &&
 			      tp->tp_fund == T_ENUMERATION) {
 				exprt_literals(tp->enm_enums,
@@ -327,7 +338,8 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 [
 	IdentList(&FldList) ':' type(&tp)
 			{ *palign = lcm(*palign, tp->tp_align);
-			  EnterIdList(FldList, D_FIELD, 0, tp, scope, cnt);
+			  EnterIdList(FldList, D_FIELD, D_QEXPORTED,
+					tp, scope, cnt);
 			  FreeNode(FldList);
 			}
 |
@@ -373,6 +385,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				  df->df_type = tp;
 				  df->fld_off = align(*cnt, tp->tp_align);
 				  *cnt = tcnt = df->fld_off + tp->tp_size;
+				  df->df_flags |= D_QEXPORTED;
 				}
 	OF variant(scope, &tcnt, tp, palign)
 				{ max = tcnt; tcnt = *cnt; }

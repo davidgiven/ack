@@ -11,6 +11,9 @@
 #define SC_CHKPROC	2	/* Check for forward procedure definitions
 				   when closing a scope
 				*/
+#define SC_REVERSE	4	/* Reverse list of definitions, to get it
+				   back into original order
+				*/
 
 struct scope {
 	struct scope *next;

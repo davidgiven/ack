@@ -13,7 +13,7 @@ struct token	{
 	int tk_lineno;		/* linenumber on which it occurred */
 	union {
 		struct idf *tk_idf;	/* IDENT	*/
-		struct string tk_str;	/* STRING	*/
+		struct string *tk_str;	/* STRING	*/
 		arith tk_int;		/* INTEGER	*/
 		char *tk_real;		/* REAL		*/
 		arith *tk_set;		/* only used in parse tree node */
@@ -22,8 +22,8 @@ struct token	{
 };
 
 #define TOK_IDF	tk_data.tk_idf
-#define TOK_STR	tk_data.tk_str.s_str
-#define TOK_SLE tk_data.tk_str.s_length
+#define TOK_STR	tk_data.tk_str->s_str
+#define TOK_SLE tk_data.tk_str->s_length
 #define TOK_INT	tk_data.tk_int
 #define TOK_REL	tk_data.tk_real
 

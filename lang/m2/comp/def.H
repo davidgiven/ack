@@ -53,14 +53,12 @@ struct field {
 struct dfproc {
 	struct scope *pr_scope;	/* scope of procedure */
 	short pr_level;		/* depth level of this procedure */
-	char *pr_name;		/* name of this procedure */
 	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
 #define prc_scope	df_value.df_proc.pr_scope
 #define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
-#define prc_name	df_value.df_proc.pr_name
 };
 
 struct import {
