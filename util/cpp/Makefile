@@ -104,6 +104,7 @@ cfiles: hfiles LLfiles $(GSRC)
 	@touch cfiles
 
 install: all
+	rm -f $(CEMPP)
 	cp cpp $(CEMPP)
 
 cmp:	all
