@@ -42,7 +42,7 @@ sig8:
 	chmk	(ap)+		# restore default handler
 	movl	$m5,ap
 	chmk	(ap)+		# get current signal mask
-	andl3	d0,$0xffffff7f,m4+6	# and remove the 8th bit
+	bicl3	$0x80,d0,m4+6	# and remove the 8th bit
 	movl	$m4,ap
 	chmk	(ap)+		# and 
 	movl	(sp)+,ap
