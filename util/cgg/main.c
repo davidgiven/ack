@@ -547,7 +547,11 @@ finishio() {
 		while (*p) {
 			register int c = (*p) & BMASK;
 			if (! isascii(c) || iscntrl(c)) {
-				fprintf(cfile,"\\%c%c%c",((c>>6) &03)+'0',
+				/* The next line used to have (c>>6)&03,
+				   but this triggered a bug in GCC 2.4.5
+				   on SPARC.
+				*/
+				fprintf(cfile,"\\%c%c%c",((*p>>6) &03)+'0',
 					((c>>3)&07)+'0',(c&07)+'0');
 			}
 			else	putc(c, cfile);
@@ -559,7 +563,7 @@ finishio() {
 	for(i=0;i<nmachsets;i++) {
 		fprintf(cfile,"{%d,{",machsets[i].set_size);
 		for(j=0;j<setsize;j++)
-			fprintf(cfile,"0%o,",machsets[i].set_val[j]);
+			fprintf(cfile,"0%o,",machsets[i].set_val[j] & 0xFFFF);
 		fprintf(cfile,"}},\n");
 	}
 	fprintf(cfile,"};\n\ninst_t tokeninstances[] = {\n");
