@@ -65,7 +65,6 @@ union ptr_union *argp;		/* our argument list */
 				goto all_done;
 			++format;
 			ic = getc(iop);
-			++done;
 			continue;
 		}
 		++format;
@@ -147,7 +146,7 @@ union ptr_union *argp;		/* our argument list */
 					*(argp++)->uint_p = (unsigned) val;
 			}
 			if (done_some)
-				++done;
+				if (do_assign) ++done;
 			else
 				goto all_done;
 			break;
@@ -160,10 +159,11 @@ union ptr_union *argp;		/* our argument list */
 				ic = getc(iop);
 				done_some = 1;
 			}
-			if (do_assign)
+			if (do_assign) {
 				argp++;	/* done with this one */
-			if (done_some)
-				++done;
+				if (done_some)
+					++done;
+			}
 			break;
 		case 's':
 			if (!widflag)
@@ -209,7 +209,7 @@ union ptr_union *argp;		/* our argument list */
 			}
 			if (do_assign)		/* terminate the string */
 				*(argp++)->chr_p = '\0';	
-			if (done_some)
+			if (done_some && do_assign)
 				++done;
 			else
 				goto all_done;
@@ -258,9 +258,9 @@ union ptr_union *argp;		/* our argument list */
 			}
 			if (c == buffer) goto all_done;
 			*c = 0;
-			done++;
 
 			if (do_assign) {
+				done++;
 				if (longflag)
 					*(argp++)->double_p = atof(buffer);
 				else
