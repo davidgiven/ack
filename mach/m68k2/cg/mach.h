@@ -21,6 +21,8 @@
 #define con_ilb(x)	fprintf(codefile,".data4\t%s\n",x)
 #define con_dlb(x)	fprintf(codefile,".data4\t%s\n",x)
 
+#define fmt_id(fr,to)	sprintf(to, "_%s", fr)
+
 #define modhead		".sect .text;.sect .rom;.sect .data;.sect .bss\n"
 
 #define id_first	'_'
