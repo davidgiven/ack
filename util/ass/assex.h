@@ -47,7 +47,7 @@ extern  char    string[];
  */
 extern  glob_t  *lastglosym;
 extern  glob_t  *curglosym;
-extern  size_t  *oursize;
+extern  siz_t  *oursize;
 extern  relc_t  *f_data;
 extern  relc_t  *l_data;
 extern  relc_t  *f_text;
@@ -109,7 +109,7 @@ extern  char    *progname;
 extern  char    *curfile;
 extern  char    *eout;
 extern  arch_t  archhdr;
-extern  size_t  sizes[];
+extern  siz_t  sizes[];
 
 extern  char    linesize[];
 

@@ -63,7 +63,7 @@ typedef struct loc_label        locl_t;
 typedef struct glob_label       glob_t;
 typedef struct rel              relc_t;
 typedef struct procstat         stat_t;
-typedef struct sizes            size_t;
+typedef struct sizes            siz_t;
 typedef struct ar_hdr           arch_t;
 typedef struct procs            proc_t;
 typedef struct proctab          ptab_t;

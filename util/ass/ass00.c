@@ -49,8 +49,8 @@ main(argc, argv)
 }
 
 getcore() {
-	register size_t *p;
-	size_t bytes;
+	register siz_t *p;
+	siz_t bytes;
 	register unsigned n ;
 	register char *base ;
 
