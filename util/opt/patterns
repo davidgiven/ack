@@ -229,6 +229,7 @@ loc zrf !defined($2):   zrf $1
 loc los $2==w:	loi $1
 loc sts $2==w:	sti $1
 loc ads $2==w:	adp $1
+ldc ads $2==2*w && sfit($1,8*w):	adp $1
 loc ass $2==w:	asp $1
 loc bls $2==w:	blm $1
 loc dus $2==w:	dup $1
