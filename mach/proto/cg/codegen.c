@@ -77,7 +77,8 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 	token_p tp;
 	tkdef_p tdp;
 	int tinstno;
-	struct reginfo *rp,**rpp;
+	register struct reginfo *rp;
+	struct reginfo **rpp;
 	token_t token,mtoken,token2;
 	int propno;
 	int exactmatch;
@@ -92,7 +93,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 	token_p regtp[MAXCREG];
 	c3_p regcp[MAXCREG];
 	rl_p regls[MAXCREG];
-	c3_p cp,findcoerc();
+	c3_p findcoerc();
 	int sret;
 	token_t reptoken[MAXREPLLEN];
 	int emrepllen,eminstr;
@@ -262,7 +263,7 @@ if (Debug)
 	i=0; nregneeded = 0;
 	while (i<tokpatlen && tp>=fakestack) {
 		if (!match(tp,&machsets[tokexp[i]],0)) {
-			cp = findcoerc(tp, &machsets[tokexp[i]]);
+			register c3_p cp = findcoerc(tp, &machsets[tokexp[i]]);
 			if (cp==0) {
 				for (j=0;j<nregneeded;j++)
 					regtp[j] -= (tp-fakestack+1);
@@ -295,7 +296,7 @@ if (Debug)
 			regtp[j] += stackpad;
 		tp = &fakestack[stackpad-1];
 		while (i<tokpatlen && tp>=fakestack) {
-			cp = findcoerc((token_p) 0, &machsets[tokexp[i]]);
+			register c3_p cp = findcoerc((token_p) 0, &machsets[tokexp[i]]);
 			if (cp==0) {
 				assert(!toplevel);
 				for (j=0;j<nregneeded;j++)

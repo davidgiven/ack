@@ -105,7 +105,7 @@ string tostring(n) word n; {
 
 result_t undefres= {EV_UNDEF};
 
-result_t compute(node) node_p node; {
+result_t compute(node) register node_p node; {
 	result_t leaf1,leaf2,result;
 	token_p tp;
 	int desc;
