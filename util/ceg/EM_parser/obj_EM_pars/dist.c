@@ -9,7 +9,7 @@ char *lab;
 /* Just output a reference which must be filled in on a second pass */
 
 {
-	out( "$%s$ - %ld", lab, cur_pos);
+	out( "($%s$ - %ld)", lab, cur_pos);
 }
 
 
