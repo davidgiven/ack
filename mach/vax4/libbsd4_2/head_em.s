@@ -1,5 +1,5 @@
 #include "em_abs.h"
-#include "/usr/include/syscall.h"
+#include "syscall.h"
 
 	# $Header$
 
