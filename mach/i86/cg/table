@@ -714,6 +714,7 @@ loc sli $1==1 && $2==4 | X_REG X_REG |
 			"sal %[1],1"
 			"rcl %[2],1"
 			erase(%[1]) erase(%[2])	    | %[2] %[1] | |
+loc sli $1==16 && $2==4 | rmorconst rmorconst | | %[1] {ANYCON, 0} | |
 sli $1==2	| SHIFT_CREG X_REG |
 			"sal %[2],cl"
 			setcc(%[2]) erase(%[2])     | %[2]  | | (2,8)
@@ -790,10 +791,12 @@ rmu !defined($1)| X_ACC |
 			"call .rmu" erase(%[1])     |	    | |
 */
 slu		| |	|				    | sli $1 |
+loc slu		| |	|				    | loc $1 sli $2 |
 lol loc slu	| |	|				    | lol $1 loc $2 sli $3 |
 loc sru $1==1 && $2==2 | X_REG |
 			"shr %[1],1"
 			setcc(%[1]) erase(%[1])      | %[1] | | (2,2)
+loc sru $1==16 && $2==4 | rmorconst rmorconst | | {ANYCON, 0} %[2] | |
 sru $1==2	| SHIFT_CREG X_REG |
 			"shr %[2],cl"
 			setcc(%[2]) erase(%[2])      | %[2] | | (2,8)
@@ -831,24 +834,18 @@ ngf $1==4	| | | | cal ".ngf4" |
 ngf $1==8	| | | | cal ".ngf8" |
 fif $1==4	| | | | cal ".fif4" |
 fif $1==8	| | | | cal ".fif8" |
-fef $1==4	| |
+fef $1==4	| X_REG X_REG |
 		remove(ALL)
-		"pop bx"
-		"pop ax"
-		"push ax"
-		"push ax"
-		"push bx"	| | cal ".fef4" |
-fef $1==8	| |
+		"push %[2]"
+		"push %[2]"
+		"push %[1]"	| | cal ".fef4" |
+fef $1==8	| X_REG X_REG X_REG X_REG |
 		remove(ALL)
-		"pop ax"
-		"pop bx"
-		"pop cx"
-		"pop dx"
-		"push dx"
-		"push dx"
-		"push cx"
-		"push bx"
-		"push ax"	| | cal ".fef8" |
+		"push %[4]"
+		"push %[4]"
+		"push %[3]"
+		"push %[2]"
+		"push %[1]"	| | cal ".fef8" |
 
 /****************************************
  * Group 6 : pointer arithmetic.	*
@@ -1534,21 +1531,18 @@ loc loc cif	$1==4 && $2==4 | |
 			remove(ALL)
 			"mov ax,$1"
 			"push ax"		| | cal ".cif4" asp 2 |
-loc loc cif	$1==2 && $2==8 | |
+loc loc cif	$1==2 && $2==8 | X_REG |
 			remove(ALL)
-			"pop ax"
-			"push ax"
-			"push ax"
-			"push ax"
+			"push %[1]"
+			"push %[1]"
+			"push %[1]"
 			"mov ax,$1"
 			"push ax"		| | cal ".cif8" |
-loc loc cif	$1==4 && $2==8 | |
+loc loc cif	$1==4 && $2==8 | X_REG X_REG |
 			remove(ALL)
-			"pop ax"
-			"pop dx"
-			"push ax"
-			"push ax"
-			"push dx"
+			"push %[1]"
+			"push %[2]"
+			"push %[1]"
 			"mov ax,$1"
 			"push ax"		| | cal ".cif8" |
 loc loc cuf	$1==2 && $2==4 | |
@@ -1559,21 +1553,18 @@ loc loc cuf	$1==4 && $2==4 | |
 			remove(ALL)
 			"mov ax,$1"
 			"push ax"		| | cal ".cuf4" asp 2 |
-loc loc cuf	$1==2 && $2==8 | |
+loc loc cuf	$1==2 && $2==8 | X_REG |
 			remove(ALL)
-			"pop ax"
-			"push ax"
-			"push ax"
-			"push ax"
+			"push %[1]"
+			"push %[1]"
+			"push %[1]"
 			"mov ax,$1"
 			"push ax"		| | cal ".cuf8" |
-loc loc cuf	$1==4 && $2==8 | |
+loc loc cuf	$1==4 && $2==8 | X_REG X_REG |
 			remove(ALL)
-			"pop ax"
-			"pop dx"
-			"push ax"
-			"push ax"
-			"push dx"
+			"push %[1]"
+			"push %[2]"
+			"push %[1]"
 			"mov ax,$1"
 			"push ax"		| | cal ".cuf8" |
 loc loc cfi	$1==4 && $2==2 | |
@@ -1605,7 +1596,7 @@ loc loc cfu	$1==4 && $2==2 | |
 			"mov ax,$1"
 			"push ax"
 			"mov ax,$2"
-			"push ax"		| | cal ".cfu" asp 6 |
+			"push ax"		| | cal ".cfu" asp 8 lfr 2 |
 loc loc cfu	$1==4 && $2==4 | |
 			remove(ALL)
 			"mov ax,$1"
@@ -1617,7 +1608,7 @@ loc loc cfu	$1==8 && $2==2 | |
 			"mov ax,$1"
 			"push ax"
 			"mov ax,$2"
-			"push ax"		| | cal ".cfu" asp 10 |
+			"push ax"		| | cal ".cfu" asp 12 lfr 2 |
 loc loc cfu	$1==8 && $2==4 | |
 			remove(ALL)
 			"mov ax,$1"
@@ -1626,15 +1617,14 @@ loc loc cfu	$1==8 && $2==4 | |
 			"push ax"		| | cal ".cfu" asp 8 |
 loc loc cff	$1==8 && $2==4 | |
 			remove(ALL)		| | cal ".cff4" asp 4 |
-loc loc cff	$1==4 && $2==8 | |
+loc loc cff	$1==4 && $2==8 | X_REG X_REG |
 			remove(ALL)
-			"pop bx"
-			"pop dx"
-			"xor ax,ax"
-			"push ax"
-			"push ax"
-			"push dx"
-			"push bx"		| | cal ".cff8" |
+			allocate(REG)
+			"xor %[a],%[a]"
+			"push %[a]"
+			"push %[a]"
+			"push %[2]"
+			"push %[1]"		| | cal ".cff8" |
 
 /****************************************
  * Group 9 : Logical instructions	*
