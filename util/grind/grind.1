@@ -75,7 +75,7 @@ uses the current file and function to resolve scope conflicts.
 Their values are updated as files and functions are entered and exited
 during execution.
 Names can also be qualified with procedure- or module names, as in
-\fImodule\fP`\fIproc\fP`\fIname\fP.
+\fImodule\fP`\fIprocedure\fP`\fIname\fP.
 .B Grind
 tries to be intelligent about names; qualification is only needed when
 names are used for more than one object in a program and the current scope
@@ -95,6 +95,12 @@ The second way is to specify a function name, like this:
 .RE
 This indicates the first statement within the named function (except for
 the trace command discussed later).
+The following way is also accepted:
+.RS
+\fBat\fP [ "\fIfilename\fP": ] \fIlinenumber\fP \fBin \fIfunction\fP
+.RE
+In this case, consistency of the information given is checked. This last
+form is useful for "stuffing" output from the status command described later.
 .SS "Commands"
 .TP
 .B ^C
@@ -113,12 +119,18 @@ Repeats the last
 .B run
 command.
 .TP
-\fBcont\fP [ \fBat\fP \fIsourceline\fP ]
+.B "rerun ?"
+Prints the last 
+.B run
+command.
+.TP
+\fBcont\fP [ \fIcount\fP ] [ \fBat\fP \fIsourceline\fP ]
 .ti -0.5i
-\fBc\fP [ \fBat\fP \fIsourceline\fP ]
+\fBc\fP [ \fIcount\fP ] [ \fBat\fP \fIsourceline\fP ]
 .br
 Continue execution from where it stopped, or, if \fIsourceline\fP is
-given, at that source line.
+given, at that source line. If \fIcount\fP is given, pass \fIcount\fP-1
+breakpoints.
 .TP
 \fBtrace\fP [ \fBon\fP \fIexpression\fP ] [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
 .ti -0.5i
@@ -137,6 +149,8 @@ procedure
 If the position is given as \fBat\fP \fIlinenumber\fP,
 then the tracing information is displayed only whenever the source line
 indicated is reached.
+If the position is given as \fBat\fP \fIlinenumber\fP \fBin\fP \fIfunction\fP,
+the behavior is as if it was given as \fBat\fP \fIlinenumber\fP.
 If a condition is given, tracing information is only displayed when
 .I condition
 is true.
@@ -172,11 +186,14 @@ If no condition is given, do this when
 is reached.
 Either a position or a condition (or both) must be given.
 .TP
-\fBprint\fP \fIexpression\fP [ , \fIexpression\fP ] ...
+\fBprint\fP [ \fIexpression\fP [ , \fIexpression\fP ] ... ]
 .ti -0.5i
-\fBp\fP \fIexpression\fP [ , \fIexpression\fP ] ...
+\fBp\fP [ \fIexpression\fP [ , \fIexpression\fP ] ... ]
 .br
-Print the value of each expression.
+Print the value of each expression. If no argument is given, repeat the
+last
+.B print
+command.
 .TP
 \fBdisplay\fP \fIexpression\fP [ , \fIexpression\fP ] ...
 Print the value of each expression whenever the program stops.
@@ -204,17 +221,19 @@ Also display current
 .B dump
 records.
 .TP
-\fBdelete\fP \fIcommandnumber\fP
+\fBdelete\fP [ \fIcommandnumber\fP [ , \fIcommandnumber\fP ... ] ]
 .ti -0.5i
-\fBd\fP \fIcommandnumber\fP
+\fBd\fP [ \fIcommandnumber\fP [ , \fIcommandnumber\fP ... ] ]
 .br
-Remove the command corresponding to \fIcommandnumber\fP
+Remove the commands corresponding to the \fIcommandnumber\fP's given
 (as displayed by
 .BR status ).
+If no argument is given and there is a "current" breakpoint, remove that
+breakpoint.
 .TP
-\fBrestore\fP \fIcommandnumber\fP
+\fBrestore\fP [ \fIcommandnumber\fP ]
 .ti -0.5i
-\fBr\fP \fIcommandnumber\fP
+\fBr\fP [ \fIcommandnumber\fP ]
 .br
 Restore the data corresponding to the dump of \fIcommandnumber\fP
 (as displayed by
@@ -227,6 +246,7 @@ the program handles is not changed.
 Apart from this,
 .B restore
 even works when the program is finished.
+If no \fIcommandnumber\fP is given, the last dump is restored.
 .TP
 \fBstep\fP [ \fIn\fP ]
 .ti -0.5i
@@ -272,11 +292,13 @@ If the types do not match,
 .B grind
 tries to apply conversions.
 .TP
-\fBwhere\fP [ \fIn\fP ]
+\fBwhere\fP [ \fIn\fP | -\fIn\fP ]
 .ti -0.5i
-\fBw\fP [ \fIn\fP ]
+\fBw\fP [ \fIn\fP | -\fIn\fP ]
 .br
 List all, or the top
+.IR n ,
+or the bottom
 .IR n ,
 active functions on the stack.
 .TP
@@ -285,23 +307,76 @@ Print the name of the current source file, or
 change the current source file to
 .IR filename .
 .TP
-\fBlist\fP [ \fIstartline\fP [ , \fIendline\fP ]  | \fIfunction\fP ]
+\fBlist\fP [ \fIstartline\fP | \fIfunction\fP ] [ , \fIcount\fP | - [ \fIendline\fP ] ]
 .ti -0.5i
-\fBl\fP [ \fIstartline\fP [ , \fIendline\fP ]  | \fIfunction\fP ]
+\fBl\fP [ \fIstartline\fP | \fIfunction\fP ] [ , \fIcount\fP | - [ \fIendline\fP ] ]
 .br
-If no arguments are given, list the next ten lines from current source file,
+If no arguments are given, list the next \fIws\fP (default 10) lines from current source file,
 if a
 .I startline
 is given, list from
-.I startline
-through
-.IR endline ,
-or
-list from five lines above, to five lines below
-the first statement of
+.IR startline ,
+if a
+.I function
+is given, list from the first statement of
 .IR function .
+If a \fIcount\fP is given, list \fIcount\fP lines and set \fIws\fP to \fIcount\fP.
+If an \fIendline\fP is given, list up until this line; if a - is given without
+an \fIendline\fP, list up until the end of the file.
+.TP
+\fBhelp\fP [ \fIcommand\fP ]
+.ti -0.5i
+\fB?\fP [ \fIcommand\fP ]
+.br
+Print a summary of \fBgrind\fP commands, or print a message explaining
+\fIcommand\fP.
+.TP
+\fBsource\fP \fIfilename\fP
+.br
+Read and execute \fBgrind\fP commands from \fIfilename\fP. This is useful for
+executing \fBgrind\fP log files created with the \fBlog\fP command.
+.TP
+\fBlog\fP [ \fIfilename\fP | off ]
+.br
+Start logging the \fBgrind\fP commands given on file \fIfilename\fP, or
+stop logging. If no argument is given, the current log file is printed.
+.TP
+\fBdisable\fP [ \fIcommandnumber\fP [ , \fIcommandnumber\fP ... ] ]
+.br
+Disable the commands corresponding to the \fIcommandnumber\fP's given
+(as displayed by
+.BR status ).
+If no argument is given and there is a "current" breakpoint, disable that
+breakpoint.
+Disabling commands keeps them in the status, but makes them inoperative.
+Disabled commands can be enabled again with the \fBenable\fP command.
+.TP
+\fBenable\fP [ \fIcommandnumber\fP [ , \fIcommandnumber\fP ... ] ]
+.br
+Enable the commands corresponding to the \fIcommandnumber\fP's given
+(as displayed by
+.BR status ).
+If no argument is given and there is a "current" breakpoint, enable that
+breakpoint.
+.TP
+\fB!\fP \fIshellcommand\fP
+.br
+Invoke the shell with \fIshellcommand\fP. \fIshellcommand\fP extends to the
+end of the line. In the command, the characters `%' and `!' are replaced
+with the current file name and the previous shell command respectively.
+The sequences `\%' and `\!' are replaced by `%' and `!' respectively.
+.TP
+\fBframe\fP [ \fIcount\fP | + \fIcount\fP | - \fIcount\fP ]
+.br
+The currently active procedure has frame number 0, the one that invoked this
+one has frame number 1, etc. The \fBframe\fP command allows the user to
+examine stack frames beyond the current one. For instance, after giving the
+command `frame 1', variables of the frame invoking the currently active
+procedure can be examined. There is a relative and an absolute version of this
+command.
 .TP
 .B quit
+.br
 Exit
 .BR grind .
 .LP
