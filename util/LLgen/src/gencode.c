@@ -545,7 +545,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 		mustpop = NOPOP;
 	}
 	if (unsafe && hulp1 == lb) {
-		fprintf(f,"L_%d: \n", hulp1);
+		fprintf(f,"L_%d: ;\n", hulp1);
 	}
 	if (safety == SAFE) {
 		/* check if we can avoid to generate the switch */
