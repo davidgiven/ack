@@ -17,7 +17,9 @@ Part
 long
 	C_current_out;
 
+#ifdef INCORE
 static char	*BASE;
+#endif
 static File	*ofp;
 
 #ifndef INCORE
