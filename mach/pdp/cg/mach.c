@@ -45,12 +45,12 @@ con_part(sz,w) register sz; word w; {
 }
 
 con_mult(sz) word sz; {
-	long l;
+	long l, atol();
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
 #ifdef ACK_ASS
-	fprintf(codefile,".long %s\n",str);
+	fprintf(codefile,".data4 %s\n",str);
 #else
 	l = atol(str);
 	fprintf(codefile,"\t%o;%o\n",(int)(l>>16),(int)l);
@@ -70,7 +70,7 @@ con_float() {
 
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
-	fprintf(codefile,".long\t");
+	fprintf(codefile,".data4\t");
 	if (argval == 8)
 		fprintf(codefile,"F_DUM,");
 	fprintf(codefile,"F_DUM\n");
@@ -236,8 +236,15 @@ mes(type) word type; {
 }
 
 char    *segname[] = {
+#ifdef ACK_ASS
+	".sect .text",        /* SEGTXT */
+	".sect .data",        /* SEGCON */
+	".sect .rom",         /* SEGROM */
+	".sect .bss"          /* SEGBSS */
+#else
 	".text",        /* SEGTXT */
 	".data",        /* SEGCON */
 	".data",        /* SEGROM */
 	".bss"          /* SEGBSS */
+#endif
 };

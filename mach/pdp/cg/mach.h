@@ -33,14 +33,20 @@
 #define hol_off		"0%o+hol%d"
 
 #ifdef ACK_ASS
-#define con_cst(x)	fprintf(codefile,".short 0%o\n",x)
-#define con_ilb(x)	fprintf(codefile,".short %s\n",x)
-#define con_dlb(x)	fprintf(codefile,".short %s\n",x)
+#define con_cst(x)	fprintf(codefile,".data2 0%o\n",x)
+#define con_ilb(x)	fprintf(codefile,".data2 %s\n",x)
+#define con_dlb(x)	fprintf(codefile,".data2 %s\n",x)
 #else
 #define con_cst(x)	fprintf(codefile,"0%o\n",x)
 #define con_ilb(x)	fprintf(codefile,"%s\n",x)
 #define con_dlb(x)	fprintf(codefile,"%s\n",x)
 #endif
 
+#ifdef ACK_ASS
+#define modhead		".sect .text; .sect .rom; .sect .data; .sect .bss\n"
+#define fmt_id(f,t)	sprintf(t,"_%s",f)
+#else
 #define id_first	'_'
+#endif
+
 #define BSS_INIT	0
