@@ -43,6 +43,6 @@ tail_$(PREF)$(SUB):
 	@-rm -f barrier.[oeskm] barrier.so
 	@echo OK
 	-rm -f tail_$(PREF)$(SUB)
-	MACH="$(MACH)" MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) SRC=$(SRC) \
+	MACH="$(MACH)" MACHFL="$(MACHFL) -LIB -L" ASAR=$(ASAR) SRC=$(SRC) \
 		RANLIB="$(RANLIB)" SUF="$(SUF)" \
 		march $(SRC_HOME)/$(SRC) tail_$(PREF)$(SUB) $(COMPILE)
