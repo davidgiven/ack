@@ -1833,13 +1833,13 @@ lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==4 && $5==4
 		| source4 |
 			REMEXTANDLOC
 			remove(regvar($1))
-			"movl\t%[1],(%(regvar($1)%))+"
+			move(%[1],{reginc4,regvar($1)})
 			erase(regvar($1))		|	| |
 lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==8 && $5==8
 		| source8 |
 			REMEXTANDLOC
 			remove(regvar($1))
-			"movq\t%[1],(%(regvar($1)%))+"
+			move(%[1],{reginc8,regvar($1)})
 			erase(regvar($1))		|	| |
 lol adp dup stl sti $1==$4 && inreg($1)==2 && $2==(0-1) && $3==4 && $5==1
 		| NC source1 |
@@ -1872,13 +1872,13 @@ lol adp stl sil $1==$4 && inreg($1)==2 && $2==(0-4) && $3==$4
 		| source4 |
 			REMEXTANDLOC
 			remove(regvar($1))
-			"movl\t%[1],-(%(regvar($1)%))"
+			move(%[1],{regdec4,regvar($1)})
 			erase(regvar($1))		|	| |
 lol adp dup stl sti $1==$4 && inreg($1)==2 && $2==(0-8) && $3==4 && $5==8
 		| source8 |
 			REMEXTANDLOC
 			remove(regvar($1))
-			"movq\t%[1],-(%(regvar($1)%))"
+			move(%[1],{regdec8,regvar($1)})
 			erase(regvar($1))		|	| |
 lol lol adp stl $1==$4 && $2==$4 && inreg($1)==2
 		| |	remove(regvar($1))
@@ -4555,7 +4555,7 @@ MOVES:
 				setcc(%[2]),		(2,4)+%[2])
 (FCONST4 %[num]==0,source4,	"clrl\t%[2]"
 				setcc(%[2]),		(2,4)+%[2])
-(FCONST4,source4,		"movl\t%[1],%[2]"
+(FCONST4,source4,		"movf\t%[1],%[2]"
 				setcc(%[2]),		(3,4)+%[1]+%[2])
 (FCONST8 %[num]==0,source8,	"clrq\t%[2]"
 				setcc(%[2]),		(2,4)+%[2])
