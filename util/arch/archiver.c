@@ -9,16 +9,17 @@
 static char RcsId[] = "$Header$";
 
 /*
- * Usage: [arch|aal] [adprtvx] archive [file] ...
+ * Usage: [arch|aal] [qdprtx][vlcu] archive [file] ...
  *	  v: verbose
  *	  x: extract
- *	  a: append
+ *	  q: append
  *	  r: replace (append when not in archive)
  *	  d: delete
  *	  t: print contents of archive
  *	  p: print named files
  *	  l: temporaries in current directory instead of /tmp
  *	  c: don't give "create" message
+ *	  u: replace only if dated later than member in archive
 #ifdef DISTRIBUTION
  *	  D: make distribution: use distr_time, uid=2, gid=2, mode=0644
 #endif
@@ -28,8 +29,8 @@ static char RcsId[] = "$Header$";
 #include <sys/stat.h>
 #include <signal.h>
 #include <arch.h>
-#ifdef AAL
 #include <ranlib.h>
+#ifdef AAL
 #include <out.h>
 #define MAGIC_NUMBER	AALMAG
 long	offset;
@@ -74,6 +75,7 @@ BOOL app_fl;
 BOOL ex_fl;
 BOOL show_fl;
 BOOL pr_fl;
+BOOL u_fl;
 BOOL rep_fl;
 BOOL del_fl;
 BOOL nocr_fl;
@@ -96,13 +98,8 @@ extern char *ctime();
 
 usage()
 {
-	error(TRUE, "usage: %s %s archive [file] ...\n",
-		progname,
-#ifdef AAL
-		"[acdrtxvl]"
-#else
-		"[acdprtxvl]"
-#endif
+	error(TRUE, "usage: %s [qdprtxl][vlc] archive [file] ...\n",
+		progname
 		);
 }
 
@@ -203,19 +200,20 @@ char *argv[];
 		case 'x' :
 			ex_fl = TRUE;
 			break;
-		case 'a' :
+		case 'q' :
 			needs_arg = 1;
 			app_fl = TRUE;
 			break;
 		case 'c' :
 			nocr_fl = TRUE;
 			break;
-#ifndef AAL
+		case 'u':
+			u_fl = TRUE;
+			break;
 		case 'p' :
 			needs_arg = 1;
 			pr_fl = TRUE;
 			break;
-#endif
 		case 'd' :
 			needs_arg = 1;
 			del_fl = TRUE;
@@ -253,6 +251,9 @@ char *argv[];
   if (app_fl + ex_fl + del_fl + rep_fl + show_fl + pr_fl != 1)
 	usage();
   
+  if (u_fl && ! rep_fl)
+	usage();
+
   if (rep_fl || del_fl
 #ifdef AAL
 	|| app_fl
@@ -285,12 +286,10 @@ again:
   if (member.ar_size < 0) {
 	error(TRUE, "archive has member with negative size\n");
   }
-#ifdef AAL
   if (equal(SYMDEF, member.ar_name)) {
 	lseek(ar_fd, member.ar_size, 1);
 	goto again;
   }
-#endif
   return &member;
 }
 
@@ -440,6 +439,11 @@ char *mess;
   }
   else if (S_ISDIR(status.st_mode)) {
 	error(FALSE, "%s is a directory (ignored)\n", name);
+	return;
+  }
+  else if (u_fl && status.st_mtime <= member.ar_date) {
+	wr_arhdr(fd, member);
+	copy_member(member, ar_fd, fd, 0);
 	return;
   }
   else if ((src_fd = open(name, 0)) < 0) {
@@ -619,6 +623,7 @@ write_symdef()
 	register long	delta;
 	MEMBER	arbuf;
 
+	if (! tnum) return;
 	if (odd(tssiz))
 		tstrtab[tssiz++] = '\0';
 	for (i = 0; i < sizeof(arbuf.ar_name); i++)
