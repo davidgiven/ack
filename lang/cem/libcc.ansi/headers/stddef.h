@@ -23,11 +23,7 @@ typedef long	ptrdiff_t;	/* result of substracting two pointers */
 
 #if	!defined(_SIZE_T)
 #define	_SIZE_T
-#if	_EM_WSIZE  == _EM_PSIZE
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#else
-typedef unsigned long	size_t;		/* type returned by sizeof */
-#endif
 #endif	/* _SIZE_T */
 
 #if	!defined(_WCHAR_T)

@@ -13,11 +13,7 @@
 
 #if	!defined(_SIZE_T)
 #define	_SIZE_T
-#if	_EM_WSIZE  == _EM_PSIZE
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#else
-typedef unsigned long	size_t;		/* type returned by sizeof */
-#endif
 #endif	/* _SIZE_T */
 
 void	*memcpy(void *_s1, const void *_s2, size_t _n);
