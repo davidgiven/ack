@@ -10,10 +10,44 @@
  * Mostek 6500 parsing tables.
  */
 
+
+/* From the READ_ME file - translation by Albert Koelmans:
+ * ________________
+ *
+ * De .h en .l extensions van expressies zijn hard nodig.
+ * Ze zorgen er echter ook voor dat er geen relocatable code geproduceerd
+ * kan worden. Beschouw het volgende voorbeeld:
+ *
+ * The .h and .l extensions of expressions are vital.  However, they prevent
+ * relocatable code from being generated.  Consider the following example:
+ *
+ * (file 1)
+ * .sect .text		! 1
+ * lda #[endbss].l		! 2
+ * ldx #[endbss].h		! 3
+ *
+ * (file 2)
+ * .sect .bss		! 4
+ * endbss:			! 5
+ *
+ * Wat voor relocation struct moet er nu voor de instructie in regel 3
+ * worden geproduceerd?
+ * 
+ * What kind of relocation structure needs to be generated for the instruction
+ * in line 3?
+ */
+
 expr
 	:	expr	EXTENSION
 			{ $$.val = ($1.val >> $2) & 0xFF;
+#ifdef RELOCATION
 			  $$.typ = combine($1.typ, S_ABS, '&');
+			                    /* This will generate an 'invalid operator'      */
+			                    /* error if $1.typ is not absolute after pass 1. */
+#else
+			  $$.typ = $1.typ;  /* Even if $1.typ is relocatable, it should be   */
+			                    /* absolute by the final pass.                   */
+#endif RELOCATION
 			}
 	;
 operation
@@ -47,7 +81,7 @@ operation
 #ifdef RELOCATION
 			  newrelo($3.typ, RELO1);
 #endif
-			  emit1($3);
+			  emit1($3.val);
 			}
 	|	LDXOP	expr
 			{ code($2,0xA6,0xAE); }
@@ -58,7 +92,7 @@ operation
 #ifdef RELOCATION
 			  newrelo($3.typ, RELO1);
 #endif
-			  emit1($3);
+			  emit1($3.val);
 			}
 	|	LDYOP	expr
 			{ code($2,0xA4,0xAC); }
@@ -88,7 +122,7 @@ operation
 #ifdef RELOCATION
 			  newrelo($3.typ, RELO1);
 #endif
-			  emit1($3);
+			  emit1($3.val);
 			}
 	|	addop	expr
 			{ code($2,$1+0x05,$1+0x0D); }
@@ -130,7 +164,7 @@ operation
 #ifdef RELOCATION
 			  newrelo($3.typ, RELO1);
 #endif
-			  emit1($3);
+			  emit1($3.val);
 			}
 	|	CPXOP	expr
 			{ code($2,$1+0x04,$1+0x0C); }
