@@ -251,6 +251,10 @@ excluding Stdio
 .IP "lang/cem/libcc/stdio"
 .br
 Stdio sources
+.IP "lang/cem/libcc/math"
+.br
+Sources for mathematical routines, normally available with the
+\fB-lm\fP option to \fIcc\fP.
 .IP "lang/cem/libcc/mon"
 .br
 Sources for routines in chapter II, written in EM
