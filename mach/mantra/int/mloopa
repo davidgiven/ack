@@ -259,12 +259,13 @@ lhalt:
 		bsr	_Xwrite
 		add.l	wrd+4,sp
 		bra	9f
-2:		move.l	#7,-(sp)	!announce new file name
+2:		move.l	a1,-(sp)
+		move.l	#7,-(sp)	!announce new file name
 		pea	mess2
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
-		lea	lasttable,a1
+		move.l	(sp)+,a1
 		move.l	(a1),d7
 		move.l	d7,a0		!keep file pointer in d7
 		clr.l	(a1)+		!this will stop the printing

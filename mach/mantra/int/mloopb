@@ -15,11 +15,13 @@ _sigtrp:	move.l	(sp)+,d2	!save return address
 		move.l	d4,a0
 		add.l	a0,a0
 		add.l	a0,a0
-		lea	sig_trp-4(a0),a1
+		move.l	#sig_trp-4,a1
+		add.l	a0,a1
 		move.l	(a1),d2		!previous trap number in d2
 		comp	#256,d1		!-2 and -1 special
 		bcc	1f
-		move.l	sig_adr-4(a0),d3	!Get the pointer to the trap- 
+		move.l	#sig_adr-4,d3
+		add.l	a0,d3		!Get the pointer to the trap- 
 		bne	2f		!procedure to give as argument to
 sig_bad:	mov	22,-(sp)	!_Xsignal. If pointer 0 trapping is
 		mov	22,-(sp)	!not legal

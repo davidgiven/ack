@@ -342,9 +342,8 @@ _Xsignal:	move.l	(sp)+,.retaddr
 		mov	(sp)+,d4
 		extend	d4
 		move.l	d4,-(sp)
-		move.l	.retaddr,-(sp)
 		jsr	_signal
-		lea	12(sp),sp		!remove arguments
+		lea	8(sp),sp		!remove arguments
 		cmp.l	#-1,d0
 		bne	1f
 		move.l	_errno,d0

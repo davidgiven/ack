@@ -23,7 +23,10 @@
 !---------------------------------------------------------------------------
 
 _m_a_i_n:
-		move.l	sp,topstack
+		move.l	sp,d0
+		add.l	#0x10000,d0		! rough guess. What is the
+						! real top ???
+		move.l	d0,topstack
 		tst.l	(sp)+
 		lea	retarea,a5		!a5 POINTS AT RETURN AREA
 		move.l	nd,-(sp)		!nd contains endbss

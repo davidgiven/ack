@@ -152,8 +152,10 @@ gto_l:		move.l	d6,a0	;	move.b	(a3)+,-(sp)
 		move.l	(a0),a2
 		jmp	(a4)
 
-lim_z:		move.w	ignmask,-(sp) ;	jmp	(a4)
-sim_z:		move.w	(sp)+,ignmask ;	jmp	(a4)
+lim_z:		clr.l	d0; move.w ignmask, d0
+		mov	d0,-(sp) ;	jmp	(a4)
+sim_z:		clr.l	d0; mov (sp)+, d0
+		move.w	d0,ignmask ;	jmp	(a4)
 
 	.sect .bss
 ignmask:  .space 2
