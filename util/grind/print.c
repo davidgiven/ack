@@ -176,10 +176,10 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	for (i = tp->ty_nfields; i; i--, fld++) {
 		long sz = fld->fld_type->ty_size;
 		if (! compressed) fprintf(db_out, "%s = ", fld->fld_name);
-		if (fld->fld_bitsize != sz << 3) {
+		if (fld->fld_bitsize < sz << 3) {
 			/* apparently a bit field */
 			/* ??? */
-			fprintf(db_out, "<bitfield, %d, %d>", fld->fld_bitsize, fld->fld_type->ty_size);
+			fprintf(db_out, "<bitfield, %d, %ld>", fld->fld_bitsize, sz);
 		}
 		else print_val(fld->fld_type, sz, addr+(fld->fld_pos>>3), compressed, indent);
 		if (compressed && i > 1) {

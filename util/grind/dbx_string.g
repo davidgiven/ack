@@ -156,8 +156,10 @@ const_name(p_symbol cst;)
 :
   '='
   [
+/*
 	'b' integer_const(&(cst->sy_const.co_ival))	/* boolean */
-  |
+/*  |
+*/
 	'c' integer_const(&(cst->sy_const.co_ival))	/* character */
 				{ cst->sy_type = char_type; }
   |
@@ -470,14 +472,17 @@ structure_type(register p_type tp;)
 enum_type(register p_type tp;)
   { register struct literal *litp;
     long maxval = 0;
+    register p_symbol s;
   }
 :
-  [			{ litp = get_literal_space(tp);
-			}
+  [			{ litp = get_literal_space(tp); }
 	name(&(litp->lit_name))
 	integer_const(&(litp->lit_val)) ',' 
 			{ if (maxval < litp->lit_val) maxval = litp->lit_val;
 			  AllowName = 1;
+			  s = NewSymbol(litp->lit_name, CurrentScope, CONST, (struct outname *) 0);
+			  s->sy_const.co_ival = litp->lit_val;
+			  s->sy_type = tp;
 			}
   ]*
   ';'			{ end_literal(tp, maxval); }

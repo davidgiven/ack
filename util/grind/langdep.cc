@@ -44,4 +44,7 @@ find_language(suff)
 	if (! strcmp(p->l_suff, suff)) break;
 	p = p->l_next;
   }
+  if (! currlang) {
+	currlang = def_dep;
+  }
 }

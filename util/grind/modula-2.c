@@ -3,18 +3,20 @@
 /* Language dependant support; this one is for Modula-2 */
 
 #include <stdio.h>
+#include <alloc.h>
+#include <assert.h>
 
+#include "position.h"
 #include "class.h"
 #include "langdep.h"
 #include "Lpars.h"
 #include "idf.h"
 #include "token.h"
 #include "expr.h"
+#include "tree.h"
+#include "operator.h"
 
 extern FILE *db_out, *db_in;
-
-extern int
-	get_string();
 
 extern double
 	atof();
@@ -24,12 +26,16 @@ static int
 	get_number(),
 	get_name(),
 	get_token(),
+	get_string(),
+	print_op(),
 	op_prio();
 
 static long
 	array_elsize();
 
 static struct langdep m2 = {
+	1,
+
 	"%ld",
 	"%loB",
 	"%lXH",
@@ -51,7 +57,8 @@ static struct langdep m2 = {
 	get_string,
 	get_name,
 	get_number,
-	get_token
+	get_token,
+	print_op
 };
 
 struct langdep *m2_dep = &m2;
@@ -84,7 +91,33 @@ static int
 op_prio(op)
   int	op;
 {
-  /* ??? to be written ??? */
+  switch(op) {
+  case E_NOT:
+  	return 5;
+
+  case E_SELECT:
+	return 9;
+
+  case E_AND:
+  case E_MUL:
+  case E_DIV:
+  case E_MOD:
+	return 4;
+
+  case E_PLUS:
+  case E_MIN:
+  case E_OR:
+	return 3;
+
+  case E_IN:
+  case E_EQUAL:
+  case E_NOTEQUAL:
+  case E_LTEQUAL:
+  case E_GTEQUAL:
+  case E_LT:
+  case E_GT:
+	return 2;
+  }
   return 1;
 }
 
@@ -369,5 +402,106 @@ get_token(c)
   default:
 	error("illegal character 0%o", c);
 	return LLlex();
+  }
+}
+
+static int 
+get_string(c)
+  int	c;
+{
+  register int ch;
+  char buf[512];
+  register int len = 0;
+
+  while (ch = getc(db_in), ch != c) {
+	if (ch == '\n') {
+		error("newline in string");
+		break;
+	}
+	buf[len++] = ch;
+  }
+  buf[len++] = 0;
+  tok.str = Salloc(buf, (unsigned) len);
+  return STRING;
+}
+
+static int
+print_op(p)
+  p_tree	p;
+{
+  switch(p->t_oper) {
+  case OP_UNOP:
+  	switch(p->t_whichoper) {
+	case E_MIN:
+		fputs("-", db_out);
+		print_node(p->t_args[0], 0);
+		break;
+	case E_PLUS:
+		fputs("+", db_out);
+		print_node(p->t_args[0], 0);
+		break;
+	case E_NOT:
+		fputs("~", db_out);
+		print_node(p->t_args[0], 0);
+		break;
+	case E_DEREF:
+		print_node(p->t_args[0], 0);
+		fputs("^", db_out);
+		break;
+	}
+	break;
+  case OP_BINOP:
+	fputs("(", db_out);
+	print_node(p->t_args[0], 0);
+	switch(p->t_whichoper) {
+	case E_AND:
+		fputs("&", db_out);
+		break;
+	case E_OR:
+		fputs("|", db_out);
+		break;
+	case E_DIV:
+		fputs("/", db_out);
+		break;
+	case E_MOD:
+		fputs(" MOD ", db_out);
+		break;
+	case E_IN:
+		fputs(" IN ", db_out);
+		break;
+	case E_PLUS:
+		fputs("+", db_out);
+		break;
+	case E_MIN:
+		fputs("-", db_out);
+		break;
+	case E_MUL:
+		fputs("*", db_out);
+		break;
+	case E_EQUAL:
+		fputs("=", db_out);
+		break;
+	case E_NOTEQUAL:
+		fputs("#", db_out);
+		break;
+	case E_LTEQUAL:
+		fputs("<=", db_out);
+		break;
+	case E_GTEQUAL:
+		fputs(">=", db_out);
+		break;
+	case E_LT:
+		fputs("<", db_out);
+		break;
+	case E_GT:
+		fputs(">", db_out);
+		break;
+	case E_SELECT:
+		fputs(".", db_out);
+		break;
+	}
+	print_node(p->t_args[1], 0);
+	fputs(")", db_out);
+	break;
   }
 }

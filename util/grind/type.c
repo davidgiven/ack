@@ -12,7 +12,7 @@
 #include "message.h"
 #include "langdep.h"
 
-p_type	int_type, char_type, short_type, long_type;
+p_type	int_type, char_type, short_type, long_type, bool_type;
 p_type	uint_type, uchar_type, ushort_type, ulong_type;
 p_type	void_type, incomplete_type;
 p_type	float_type, double_type;
@@ -49,7 +49,7 @@ struct integer_types {
 };
 
 static struct integer_types i_types[4];
-static struct integer_types u_types[5];
+static struct integer_types u_types[4];
 
 #define ufit(n, nb)	Xfit(n, nb, ubounds)
 #define ifit(n, nb)	Xfit(n, nb, ibounds)
@@ -76,10 +76,14 @@ subrange_type(A, base_index, c1, c2, result_index)
 			return void_type;
 		}
 
-		/* c1 = 0 and c2 = 127 -> char ??? */
-		if (c1 == 0 && c2 == 127) {
+		if ((c1 == 0 || c1 == -128) && c2 == 127) {
 			return char_type;
 		}
+
+		if (c1 == 0 && c2 == 255) {
+			return uchar_type;
+		}
+
 		itself = 1;
 	}
   }
@@ -242,7 +246,6 @@ init_types()
   u_types[0].maxval = max_uns[(int)int_size]; u_types[0].type = uint_type;
   u_types[1].maxval = max_uns[(int)short_size]; u_types[1].type = ushort_type;
   u_types[2].maxval = max_uns[(int)long_size]; u_types[2].type = ulong_type;
-  u_types[3].maxval = max_uns[1]; u_types[3].type = uchar_type;
 }
 
 /*
@@ -323,6 +326,7 @@ end_literal(tp, maxval)
   if (ufit(maxval, 1)) tp->ty_size = 1;
   else if (ufit(maxval, (int)short_size)) tp->ty_size = short_size;
   else tp->ty_size = int_size;
+  if (! bool_type) bool_type = tp;
 }
 
 long

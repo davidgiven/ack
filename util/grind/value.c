@@ -46,10 +46,10 @@ get_value(sym, buf, psize)
 	}
 	break;
   case CONST:
-	*buf = Malloc((unsigned) tp->ty_size);
+	*buf = Malloc((unsigned) size);
 	switch(tp->ty_class) {
 	case T_REAL:
-		if (tp->ty_size != sizeof(double)) {
+		if (size != sizeof(double)) {
 			*((float *) *buf) = sym->sy_const.co_rval;
 		}
 		else	*((double *) *buf) = sym->sy_const.co_rval;
@@ -58,10 +58,10 @@ get_value(sym, buf, psize)
 	case T_SUBRANGE:
 	case T_UNSIGNED:
 	case T_ENUM:
-		if (tp->ty_size == 1) {
+		if (size == 1) {
 			*((char *) *buf) = sym->sy_const.co_ival;
 		}
-		else if (tp->ty_size == 2) {
+		else if (size == 2) {
 			*((short *) *buf) = sym->sy_const.co_ival;
 		}
 		else {
@@ -69,10 +69,10 @@ get_value(sym, buf, psize)
 		}
 		break;
 	case T_SET:
-		memcpy(*buf, sym->sy_const.co_setval, (int) tp->ty_size);
+		memcpy(*buf, sym->sy_const.co_setval, (int) size);
 		break;
 	case T_STRING:
-		memcpy(*buf, sym->sy_const.co_sval, (int) tp->ty_size);
+		memcpy(*buf, sym->sy_const.co_sval, (int) size);
 		break;
 	default:
 		fatal("strange constant");
@@ -140,7 +140,6 @@ get_value(sym, buf, psize)
 		}
 	}
 	*buf = Malloc((unsigned) size);
-	*psize = size;
 	if (get_bytes(size,
 		      (t_addr) BUFTOA(AB+sym->sy_name.nm_value),
 		      *buf)) {
@@ -155,6 +154,7 @@ get_value(sym, buf, psize)
 	*buf = 0;
 	*psize = 0;
   }
+  else *psize = size;
 
   return retval;
 }

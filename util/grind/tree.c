@@ -15,6 +15,7 @@
 #include	"scope.h"
 #include	"symbol.h"
 #include	"langdep.h"
+#include	"type.h"
 
 extern FILE	*db_out;
 extern t_lineno	currline;
@@ -210,13 +211,17 @@ print_node(p, top_level)
 	fputs(p->t_str, db_out);
 	break;
   case OP_INTEGER:
-	fprintf(db_out, "%d", p->t_ival);
+	fprintf(db_out, currlang->decint_fmt, p->t_ival);
 	break;
   case OP_STRING:
-	fprintf(db_out, "%s", p->t_sval);
+	(*currlang->printstring)(p->t_sval);
 	break;
   case OP_REAL:
-	fprintf(db_out, "%.14g", p->t_fval);
+	fprintf(db_out, currlang->real_fmt, p->t_fval);
+	break;
+  case OP_UNOP:
+  case OP_BINOP:
+	(*currlang->printop)(p);
 	break;
   }
   if (top_level) fputs("\n", db_out);
@@ -263,8 +268,8 @@ do_list(p)
 {
   if (currfile) {
 	lines(currfile->sy_file,
-	      p->t_args[0] ? (int) p->t_args[0]->t_ival : (int) currline,
-	      p->t_args[1] ? (int) p->t_args[1]->t_ival : (int) currline+9);
+	      p->t_args[0] ? (int) p->t_args[0]->t_ival : (int) currline-4,
+	      p->t_args[1] ? (int) p->t_args[1]->t_ival : (int) currline+5);
 	currline = p->t_args[1] ? p->t_args[1]->t_ival + 1 : currline + 10;
   }
   else fprintf(db_out, "no current file\n");
@@ -535,7 +540,9 @@ do_delete(p)
 do_print(p)
   p_tree	p;
 {
-  p_symbol sym;
+  char	*buf;
+  long	size;
+  p_type tp;
 
   switch(p->t_oper) {
   case OP_PRINT:
@@ -545,15 +552,14 @@ do_print(p)
 	do_print(p->t_args[0]);
 	do_print(p->t_args[1]);
 	break;
-  case OP_NAME:
-  case OP_SELECT:
-	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST);
-	if (! sym) return;
+  default:
+	if (! eval_expr(p, &buf, &size, &tp)) return;
 	print_node(p, 0);
-	if (! print_sym(sym)) {
-		fputs(" currently not available\n", db_out);
-		break;
-	}
+	fputs(" = ", db_out);
+	print_val(tp, size, buf, 0, 0);
+	if (buf) free(buf);
+	fputs("\n", db_out);
+	break;
   }
 }
 

@@ -16,6 +16,7 @@
 #include	"tree.h"
 #include	"langdep.h"
 #include	"token.h"
+#include	"expr.h"
 
 extern char	*Salloc();
 extern t_lineno	currline;
@@ -278,10 +279,11 @@ factor(p_tree *p;)
 |
   designator(p)
 |
-  PREF_OP		{ *p = mknode(OP_UNOP, (p_tree) 0);
+  			{ *p = mknode(OP_UNOP, (p_tree) 0);
 			  (*p)->t_whichoper = (int) tok.ival;
 			}
-  factor(&(*p)->t_args[0])
+  [ PREF_OP | PREF_OR_BIN_OP ]
+  expression(&(*p)->t_args[0], prio((*p)->t_whichoper))
 ;
 
 designator(p_tree *p;)
@@ -294,7 +296,7 @@ designator(p_tree *p;)
 	name(&(*p)->t_args[1])
   |
 	'['		{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
-			  (*p)->t_whichoper = '[';
+			  (*p)->t_whichoper = E_ARRAY;
 			}
 	expression(&(*p)->t_args[1], 1)
 	']'
@@ -407,14 +409,6 @@ LLlex()
 	if (in_expression) TOK = (*currlang->get_name)(c);
 	else TOK = get_name(c);
 	break;
-  case STDOT:
-	c = getc(db_in);
-	if (c == EOF || class(c) != STNUM) {
-		ungetc(c,db_in);
-		TOK = '.';
-		break;
-	}
-	/* Fall through */
   case STNUM:
 	TOK = (*currlang->get_number)(c);
 	break;
@@ -457,144 +451,6 @@ get_name(c)
   tok.idf = id;
   tok.str = id->id_text;
   return id->id_reserved ? id->id_reserved : NAME;
-}
-
-static int
-quoted(ch)
-  int	ch;
-{
-  /*	quoted() replaces an escaped character sequence by the
-	character meant.
-  */
-  /* first char after backslash already in ch */
-  if (!is_oct(ch)) {		/* a quoted char */
-	switch (ch) {
-	case 'n':
-		ch = '\n';
-		break;
-	case 't':
-		ch = '\t';
-		break;
-	case 'b':
-		ch = '\b';
-		break;
-	case 'r':
-		ch = '\r';
-		break;
-	case 'f':
-		ch = '\f';
-		break;
-	}
-  }
-  else {				/* a quoted octal */
-	register int oct = 0, cnt = 0;
-
-	do {
-		oct = oct*8 + (ch-'0');
-		ch = getc(db_in);
-	} while (is_oct(ch) && ++cnt < 3);
-	ungetc(ch, db_in);
-	ch = oct;
-  }
-  return ch&0377;
-
-}
-
-int 
-get_string(c)
-  int	c;
-{
-  register int ch;
-  char buf[512];
-  register int len = 0;
-
-  while (ch = getc(db_in), ch != c) {
-	if (ch == '\n') {
-		error("newline in string");
-		break;
-	}
-	if (ch == '\\') {
-		ch = getc(db_in);
-		ch = quoted(ch);
-	}
-	buf[len++] = ch;
-  }
-  buf[len++] = 0;
-  tok.str = Salloc(buf, (unsigned) len);
-  return STRING;
-}
-
-static int
-val_in_base(c, base)
-  register int c;
-{
-  return is_dig(c) 
-	? c - '0'
-	: base != 16
-	  ? -1
-	  : is_hex(c)
-	    ? (c - 'a' + 10) & 017
-	    : -1;
-}
-
-int
-get_number(c)
-  register int	c;
-{
-  char buf[512+1];
-  register int base = 10;
-  register char *p = &buf[0];
-  register long val = 0;
-  register int val_c;
-
-  if (c == '0') {
-	/* check if next char is an 'x' or an 'X' */
-	c = getc(db_in);
-	if (c == 'x' || c == 'X') {
-		base = 16;
-		c = getc(db_in);
-	}
-	else	base = 8;
-  }
-  while (val_c = val_in_base(c, base), val_c >= 0) {
-	val = val * base + val_c;
-	if (p - buf < 512) *p++ = c;
-	c = getc(db_in);
-  }
-  if (base == 16 || !((c == '.' || c == 'e' || c == 'E'))) {
-	ungetc(c, db_in);
-	tok.ival = val;
-	return INTEGER;
-  }
-  if (c == '.') {
-	if (p - buf < 512) *p++ = c;
-	c = getc(db_in);
-  }
-  while (is_dig(c)) {
-	if (p - buf < 512) *p++ = c;
-	c = getc(db_in);
-  }
-  if (c == 'e' || c == 'E') {
-	if (p - buf < 512) *p++ = c;
-	c = getc(db_in);
-	if (c == '+' || c == '-') {
-		if (p - buf < 512) *p++ = c;
-		c = getc(db_in);
-	}
-	if (! is_dig(c)) {
-		error("malformed floating constant");
-	}
-	while (is_dig(c)) {
-		if (p - buf < 512) *p++ = c;
-		c = getc(db_in);
-	}
-  }
-  ungetc(c, db_in);
-  *p++ = 0;
-  if (p == &buf[512+1]) {
-	error("floating point constant too long");
-  }
-  return REAL;
 }
 
 extern char * symbol2str();

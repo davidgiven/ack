@@ -12,6 +12,7 @@ static	line_positions();
 extern char	*dirs[];
 extern FILE	*fopen();
 extern FILE	*db_out;
+extern t_lineno	currline;
 #define	window_size	21
 
 static int
@@ -103,7 +104,7 @@ lines(file, l1, l2)
   for (n = l1; n <= l2; n++) {
 	register int	c;
 
-	fprintf(db_out, "%6d  ", n);
+	fprintf(db_out, "%c%5d\t", n == currline ? '>' : ' ', n);
 	do {
 		c = getc(f);
 		if (c != EOF) putc(c, db_out);

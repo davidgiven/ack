@@ -3,6 +3,9 @@
 /* language-dependent routines and formats, together in one structure: */
 
 struct langdep {
+  /* language info: */
+  int	has_bool_type;		/* set if language has a boolean type */
+
   /* formats (for fprintf): */
   char	*decint_fmt;		/* decimal ints (format for long) */
   char	*octint_fmt;		/* octal ints (format for long) */
@@ -28,9 +31,10 @@ struct langdep {
   int	(*get_name)();
   int	(*get_number)();
   int	(*get_token)();
+  int	(*printop)();
 };
 
-extern struct langdep	*m2_dep, *currlang;
+extern struct langdep	*m2_dep, *def_dep, *currlang;
 
 extern int find_language();
 

@@ -61,6 +61,7 @@ CSRC = {
 	value.c,
 	type.c,
 	rd.c,
+	default.c,
 	modula-2.c
 } ;
 
