@@ -8,9 +8,9 @@
 
 #include <em_arith.h>
 
-char	*EM_error;
-char	*EM_filename;
-unsigned int EM_lineno;
-int	EM_wordsize, EM_pointersize;
-arith	EM_holsize;
-int	EM_holinit;
+char	*EM_error = 0;
+char	*EM_filename = 0;
+unsigned int EM_lineno = 0;
+int	EM_wordsize = 0, EM_pointersize = 0;
+arith	EM_holsize = 0;
+int	EM_holinit = 0;
