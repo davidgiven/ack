@@ -7,7 +7,7 @@ OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o n
 CFILES = main.c gencode.c compute.c LLgen.c tokens.c check.c reach.c global.c name.c sets.c Lpars.c alloc.c machdep.c
 FILES =types.h tunable.h extern.h io.h sets.h assert.h tokens.g LLgen.g main.c name.c compute.c sets.c gencode.c global.c check.c reach.c alloc.c machdep.c Makefile
 GFILES = tokens.g LLgen.g
-LINT = lint -b -DNDEBUG
+LINT = lint -b -DNDEBUG -DNORCSID
 
 all:
 		@make parser "LLOPT=$(LLOPT)"
@@ -30,8 +30,9 @@ lint:
 clean:
 		-rm -f *.o LL.temp LL.xxx LL.output LLgen
 
-depend:
-		./makedepend `grep -v '\.h' sources`
+distr:
+		-rm -f parser
+		make parser
 
 # The next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
