@@ -1,76 +1,70 @@
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
- *
+ * Author: Ceriel J.H. Jacobs
  */
 
 /* $Header$ */
 
-/* Author: J.W. Stevenson */
+#include <math.h>
 
-extern	double	_fef();
+#define NITER	5
 
-/*
-	sqrt returns the square root of its floating
-	point argument. Newton's method.
+static double
+ldexp(fl,exp)
+	double fl;
+	int exp;
+{
+	extern double _fef();
+	int sign = 1;
+	int currexp;
 
-	calls _fef
-*/
+	if (fl<0) {
+		fl = -fl;
+		sign = -1;
+	}
+	fl = _fef(fl,&currexp);
+	exp += currexp;
+	if (exp > 0) {
+		while (exp>30) {
+			fl *= (double) (1L << 30);
+			exp -= 30;
+		}
+		fl *= (double) (1L << exp);
+	}
+	else	{
+		while (exp<-30) {
+			fl /= (double) (1L << 30);
+			exp += 30;
+		}
+		fl /= (double) (1L << -exp);
+	}
+	return sign * fl;
+}
 
 double
-_sqt(arg)
-double arg;
+_sqt(x)
+	double x;
 {
-	double x, temp;
-	int exp;
-	int i;
+	extern double _fef();
+	int exponent;
+	double val;
 
-	if(arg <= 0) {
-		if(arg < 0)
-			error(3);
-		return(0);
+	if (x <= 0) {
+		if (x < 0) error(3);
+		return 0;
 	}
-	x = _fef(arg,&exp);
-	/*
-	while(x < 0.5) {
-		x =* 2;
-		exp--;
-	}
-	*/
-	/*
-	 * NOTE
-	 * this wont work on 1's comp
-	 */
-	if(exp & 1) {
-		x *= 2;
-		exp--;
-	}
-	temp = 0.5*(1 + x);
 
-	while(exp > 28) {
-		temp *= (1<<14);
-		exp -= 28;
+	val = _fef(x, &exponent);
+	if (exponent & 1) {
+		exponent--;
+		val *= 2;
 	}
-	while(exp < -28) {
-		temp /= (1<<14);
-		exp += 28;
+	val = ldexp(val + 1.0, exponent/2 - 1);
+	/* was: val = (val + 1.0)/2.0; val = ldexp(val, exponent/2); */
+	for (exponent = NITER - 1; exponent >= 0; exponent--) {
+		val = (val + x / val) / 2.0;
 	}
-	if(exp >= 0)
-		temp *= 1 << (exp/2);
-	else
-		temp /= 1 << (-exp/2);
-	for(i=0; i<=4; i++)
-		temp = 0.5*(temp + arg/temp);
-	return(temp);
+	return val;
 }

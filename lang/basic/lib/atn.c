@@ -1,93 +1,102 @@
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
- *
+ * Author: Ceriel J.H. Jacobs
  */
 
 /* $Header$ */
 
-/* Author: J.W. Stevenson */
-
-/*
-	floating-point arctangent
-
-	atan returns the value of the arctangent of its
-	argument in the range [-pi/2,pi/2].
-
-	there are no error returns.
-
-	coefficients are #5077 from Hart & Cheney. (19.56D)
-*/
-
-
-static double sq2p1	= 2.414213562373095048802e0;
-static double sq2m1	=  .414213562373095048802e0;
-static double pio2	= 1.570796326794896619231e0;
-static double pio4	=  .785398163397448309615e0;
-static double p4	=  .161536412982230228262e2;
-static double p3	=  .26842548195503973794141e3;
-static double p2	=  .11530293515404850115428136e4;
-static double p1	=  .178040631643319697105464587e4;
-static double p0	=  .89678597403663861959987488e3;
-static double q4	=  .5895697050844462222791e2;
-static double q3	=  .536265374031215315104235e3;
-static double q2	=  .16667838148816337184521798e4;
-static double q1	=  .207933497444540981287275926e4;
-static double q0	=  .89678597403663861962481162e3;
-
-/*
-	xatan evaluates a series valid in the
-	range [-0.414...,+0.414...].
-*/
-
-static double
-xatan(arg)
-double arg;
-{
-	double argsq;
-	double value;
-
-	argsq = arg*arg;
-	value = ((((p4*argsq + p3)*argsq + p2)*argsq + p1)*argsq + p0);
-	value = value/(((((argsq + q4)*argsq + q3)*argsq + q2)*argsq + q1)*argsq + q0);
-	return(value*arg);
-}
-
-static double
-satan(arg)
-double arg;
-{
-	if(arg < sq2m1)
-		return(xatan(arg));
-	else if(arg > sq2p1)
-		return(pio2 - xatan(1/arg));
-	else
-		return(pio4 + xatan((arg-1)/(arg+1)));
-}
-
-
-/*
-	atan makes its argument positive and
-	calls the inner routine satan.
-*/
+#include <math.h>
 
 double
-_atn(arg)
-double arg;
+_atn(x)
+	double x;
 {
-	if(arg>0)
-		return(satan(arg));
-	else
-		return(-satan(-arg));
+	/*	The interval [0, infinity) is treated as follows:
+		Define partition points Xi
+			X0 = 0
+			X1 = tan(pi/16)
+			X2 = tan(3pi/16)
+			X3 = tan(5pi/16)
+			X4 = tan(7pi/16)
+			X5 = infinity
+		and evaluation nodes xi
+			x2 = tan(2pi/16)
+			x3 = tan(4pi/16)
+			x4 = tan(6pi/16)
+			x5 = infinity
+		An argument x in [Xn-1, Xn] is now reduced to an argument
+		t in [-X1, X1] by the following formulas:
+			
+			t = 1/xn - (1/(xn*xn) + 1)/((1/xn) + x)
+
+			arctan(x) = arctan(xi) + arctan(t)
+
+		For the interval [0, p/16] an approximation is used:
+			arctan(x) = x * P(x*x)/Q(x*x)
+	*/
+	static struct precomputed {
+		double X;		/* partition point */
+		double arctan;		/* arctan of evaluation node */
+		double one_o_x;		/* 1 / xn */
+		double one_o_xsq_p_1;	/* 1 / (xn*xn) + 1 */
+	} prec[5] = {
+		{ 0.19891236737965800691159762264467622,
+		  0.0,
+		  0.0,		/* these don't matter */
+		  0.0 } ,
+		{ 0.66817863791929891999775768652308076, /* tan(3pi/16)	*/
+		  M_PI_8,
+		  2.41421356237309504880168872420969808,
+		  6.82842712474619009760337744841939616 },
+		{ 1.49660576266548901760113513494247691, /* tan(5pi/16) */
+		  M_PI_4,
+		  1.0,
+		  2.0 },
+		{ 5.02733949212584810451497507106407238, /* tan(7pi/16) */
+		  M_3PI_8,
+		  0.41421356237309504880168872420969808,
+		  1.17157287525380998659662255158060384 },
+		{ MAXDOUBLE,
+		  M_PI_2,
+		  0.0,
+		  1.0 }};
+
+	/*	Hart & Cheney # 5037 */
+
+	static double p[5] = {
+		0.7698297257888171026986294745e+03,
+		0.1557282793158363491416585283e+04,
+		0.1033384651675161628243434662e+04,
+		0.2485841954911840502660889866e+03,
+		0.1566564964979791769948970100e+02
+	};
+
+	static double q[6] = {
+		0.7698297257888171026986294911e+03,
+		0.1813892701754635858982709369e+04,
+		0.1484049607102276827437401170e+04,
+		0.4904645326203706217748848797e+03,
+		0.5593479839280348664778328000e+02,
+		0.1000000000000000000000000000e+01
+	};
+
+	int negative = x < 0.0;
+	register struct precomputed *pr = prec;
+
+	if (negative) {
+		x = -x;
+	}
+	while (x > pr->X) pr++;
+	if (pr != prec) {
+		x = pr->arctan +
+			atan(pr->one_o_x - pr->one_o_xsq_p_1/(pr->one_o_x + x));
+	}
+	else {
+		double xsq = x*x;
+
+		x = x * POLYNOM4(xsq, p)/POLYNOM5(xsq, q);
+	}
+	return negative ? -x : x;
 }

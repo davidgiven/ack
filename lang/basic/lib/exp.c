@@ -1,122 +1,107 @@
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
- *
+ * Author: Ceriel J.H. Jacobs
  */
 
 /* $Header$ */
 
-/* Author: J.W. Stevenson */
-
-extern double	_fif();
-extern double	_fef();
-
-/*
-	exp returns the exponential function of its
-	floating-point argument.
-
-	The coefficients are #1069 from Hart and Cheney. (22.35D)
-*/
-
-#define	HUGE	1.701411733192644270e38
-
-static double p0	=  .2080384346694663001443843411e7;
-static double p1	=  .3028697169744036299076048876e5;
-static double p2	=  .6061485330061080841615584556e2;
-static double q0	=  .6002720360238832528230907598e7;
-static double q1	=  .3277251518082914423057964422e6;
-static double q2	=  .1749287689093076403844945335e4;
-static double log2e	= 1.4426950408889634073599247;
-static double sqrt2	= 1.4142135623730950488016887;
-static double maxf	= 10000.0;
+#include <math.h>
 
 static double
-floor(d)
-double d;
+floor(x)
+	double x;
 {
-	if (d<0) {
-		d = -d;
-		if (_fif(d, 1.0, &d) != 0)
-			d += 1;
-		d = -d;
-	} else
-		_fif(d, 1.0, &d);
-	return(d);
+	extern double _fif();
+	double val;
+
+	return _fif(x, 1,0, &val) < 0 ? val - 1.0 : val ;
+	/*	this also works if _fif always returns a positive
+		fractional part
+	*/
 }
 
 static double
-ldexp(fr,exp)
-double fr;
-int exp;
+ldexp(fl,exp)
+	double fl;
+	int exp;
 {
-	int	neg,i;
+	extern double _fef();
+	int sign = 1;
+	int currexp;
 
-	neg = 1;
-	if (fr < 0) {
-		fr = -fr;
-		neg = -1;
+	if (fl<0) {
+		fl = -fl;
+		sign = -1;
 	}
-	fr = _fef(fr, &i);
-	/*
-	while (fr < 0.5) {
-		fr *= 2;
-		exp--;
+	fl = _fef(fl,&currexp);
+	exp += currexp;
+	if (exp > 0) {
+		while (exp>30) {
+			fl *= (double) (1L << 30);
+			exp -= 30;
+		}
+		fl *= (double) (1L << exp);
 	}
-	*/
-	exp += i;
-	if (exp > 127) {
-		error(3);
-		return(neg * HUGE);
+	else	{
+		while (exp<-30) {
+			fl /= (double) (1L << 30);
+			exp += 30;
+		}
+		fl /= (double) (1L << -exp);
 	}
-	if (exp < -127)
-		return(0);
-	while (exp > 14) {
-		fr *= (1<<14);
-		exp -= 14;
-	}
-	while (exp < -14) {
-		fr /= (1<<14);
-		exp += 14;
-	}
-	if (exp > 0)
-		fr *= (1<<exp);
-	if (exp < 0)
-		fr /= (1<<(-exp));
-	return(neg * fr);
+	return sign * fl;
 }
 
 double
-_exp(arg)
-double arg;
+_exp(x)
+	double x;
 {
-	double fract;
-	double temp1, temp2, xsq;
-	int ent;
+	/*	2**x = (Q(x*x)+x*P(x*x))/(Q(x*x)-x*P(x*x)) for x in [0,0.5] */
+	/*	Hart & Cheney #1069 */
 
-	if(arg == 0)
-		return(1);
-	if(arg < -maxf)
-		return(0);
-	if(arg > maxf) {
-		error(3);
-		return(HUGE);
+	static double p[3] = {
+		 0.2080384346694663001443843411e+07,
+		 0.3028697169744036299076048876e+05,
+		 0.6061485330061080841615584556e+02
+	};
+
+	static double q[4] = {
+		 0.6002720360238832528230907598e+07,
+		 0.3277251518082914423057964422e+06,
+		 0.1749287689093076403844945335e+04,
+		 0.1000000000000000000000000000e+01
+	};
+
+	int negative = x < 0;
+	int ipart, large = 0;
+	double xsqr, xPxx, Qxx;
+
+	if (x < M_LN_MIN_D) {
+		return M_MIN_D;
 	}
-	arg *= log2e;
-	ent = floor(arg);
-	fract = (arg-ent) - 0.5;
-	xsq = fract*fract;
-	temp1 = ((p2*xsq+p1)*xsq+p0)*fract;
-	temp2 = ((xsq+q2)*xsq+q1)*xsq + q0;
-	return(ldexp(sqrt2*(temp2+temp1)/(temp2-temp1), ent));
+	if (x >= M_LN_MAX_D) {
+		if (x > M_LN_MAX_D) error(3);
+		return M_MAX_D;
+	}
+
+	if (negative) {
+		x = -x;
+	}
+	x /= M_LN2;
+	ipart = floor(x);
+	x -= ipart;
+	if (x > 0.5) {
+		large = 1;
+		x -= 0.5;
+	}
+	xsqr = x * x;
+	xPxx = x * POLYNOM2(xsqr, p);
+	Qxx = POLYNOM3(xsqr, q);
+	x = (Qxx + xPxx) / (Qxx - xPxx);
+	if (large) x *= M_SQRT2;
+	x = ldexp(x, ipart);
+	if (negative) return 1.0/x;
+	return x;
 }
