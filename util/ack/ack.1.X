@@ -169,7 +169,7 @@ phases must be executed, using the following flags:
 .IP \-EGO-IL
 Inline substitution.
 .IP \-EGO-CS
-Commom subexpression elimination.
+Common subexpression elimination.
 .IP \-EGO-SR
 Strength reduction.
 .IP \-EGO-UD
@@ -209,7 +209,7 @@ may even be run more than once. However, the following rules must be obeyed:
 .RS
 .IP -
 the Live Variable analysis phase (LV) must be run prior to the
-Register Alloacation phase (SA), as SA uses information produced by LV.
+Register Allocation phase (SA), as SA uses information produced by LV.
 .IP -
 SA should be the last phase.
 .RE
@@ -222,7 +222,7 @@ so it should be run as early as possible.
 .IP -
 Use Definition analysis (UD) may introduce opportunities for LV.
 .IP -
-Strength Reduction (SR) may creaye opportunities for UD.
+Strength Reduction (SR) may create opportunities for UD.
 .RE
 .IP ""
 The global optimizer is a combiner, so, when using it, offer it all the source
@@ -369,7 +369,7 @@ input:name:output:description
 \&.m:ego:.gk:EM global optimizer [10]
 \&.gk:opt2:.g:Second EM peephole optimizer
 \&.m .g:be:.s:backend
-\&.s:asopt:.so:target opotimizer
+\&.s:asopt:.so:target optimizer
 \&.s .so:asld:.out:Assembler/linker, Ack object format
 \&.s .so:as:.o:Assembler, relocatable object
 \&.o:ld:a.out:Linker, machine a.out format
