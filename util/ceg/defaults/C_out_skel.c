@@ -10,6 +10,8 @@
 */
 
 #define CODE_EXPANDER
+#define EXPORT
+#define PRIVATE static
 
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -23,6 +25,7 @@
 extern char em_flag[];	/* One per EM instruction: indicates parameter kind */
 extern short em_ptyp[];	/* One per parameter kind: indicates parameter type */
 static char *C_error;
+char *C_tmpdir;
 
 static int listtype = 0;	/* indicates pseudo when generating code for
 				   variable length argument lists
@@ -97,6 +100,7 @@ EM_doinstr(p)
 #include "C_mnem"
 }
 
+#ifdef ____
 PRIVATE
 EM_dopseudo(p)
 	register struct e_instr *p;
@@ -328,6 +332,7 @@ EM_dopseudo(p)
 			break;
 	}
 }
+#endif
 
 PRIVATE
 EM_docon(p)
@@ -406,6 +411,7 @@ C_out(line)
 			/* defining occurrence of an instruction label */
 			C_df_ilb(line->em_ilb);
 			break;
+#ifdef ____
 		case EM_DEFDLB:
 			/* defining occurrence of a global data label */
 			C_df_dlb(line->em_dlb);
@@ -418,6 +424,7 @@ C_out(line)
 			/* pseudo */
 			EM_dopseudo(line);
 			break;
+#endif
 		case EM_STARTMES:
 			/* start of a MES pseudo */
 			EM_dostartmes(line);

@@ -5,3 +5,8 @@ not_impl
 pseudo
 pseudo_vars.c
 storage
+m_C_mnem
+m_C_mnem_na
+argtype
+C_out_skel.c
+mk_C_out
