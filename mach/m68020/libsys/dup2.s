@@ -5,6 +5,12 @@
 .sect .data
 .sect .bss
 .sect .text
-_dup2:		move.l #0x29,d0
-		add.l #0x40,(4,sp)	! ???
-		jmp (call)
+_dup2:
+link	a6,#0
+move.l (12,a6),-(sp)
+move.l #0,-(sp)
+move.l (8,a6),-(sp)
+jsr _fcntl
+add.l #12,sp
+unlk a6
+rts

@@ -6,9 +6,8 @@
 .sect .bss
 .sect .text
 _execl:		link a6,#0
-		tst.b (-132,sp)
 		move.l (_environ),-(sp)
-		pea (12,sp)
+		pea (12,a6)
 		move.l (8,a6),-(sp)
 		jsr (_execve)
 		add.l #0xC,sp
