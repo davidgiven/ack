@@ -34,7 +34,7 @@ head_$(PREF):  $(HEADSRC)
 tail_$(PREF)$(SUB):
 	@echo translation test
 	@$(MACH) $(MACHFL) $(HOME)/mach/proto/libg/barrier.c
-	@-rm barrier.[oeskm]
+	@-rm -f barrier.[oeskm] barrier.so
 	@echo OK
 	-rm -f tail_$(PREF)$(SUB)
 	MACH="$(MACH)" MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) SRC=$(SRC) \
