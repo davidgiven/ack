@@ -1,5 +1,6 @@
+SUF=s
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=6500" "SUF=s"
+MACHDEF="MACH=6500" "SUF=$(SUF)"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
