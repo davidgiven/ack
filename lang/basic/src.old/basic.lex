@@ -395,7 +395,7 @@ scanstring()
 	fprintf(emfile,"\\000\"\n");
 	i=yylval.integer;
 	yylval.integer= genrom();
-	fprintf(emfile,"l%d,1,%d\n",i,length);
+	fprintf(emfile,"l%d,9999,%d\n",i,length);
 #ifdef YYDEBUG
 	if(yydebug) printf("STRVALUE found\n");
 #endif
