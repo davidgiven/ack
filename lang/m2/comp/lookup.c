@@ -83,6 +83,5 @@ lookfor(id, vis, give_error)
 	if (give_error) id_not_declared(id);
 
 	df = MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
-	df->df_type = error_type;
 	return df;
 }

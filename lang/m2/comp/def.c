@@ -74,6 +74,7 @@ MkDef(id, scope, kind)
 	df->df_kind = kind;
 	df->df_next = id->id_def;
 	id->id_def = df;
+	if (kind == D_ERROR) df->df_type = error_type;
 
 	/* enter the definition in the list of definitions in this scope
 	*/

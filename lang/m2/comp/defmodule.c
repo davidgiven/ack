@@ -145,7 +145,6 @@ GetDefinitionModule(id, incr)
 		}
 		if (! df) {
 			df = MkDef(id, GlobalScope, D_ERROR);
-			df->df_type = error_type;
 			df->mod_vis = vis;
 			newsc->sc_definedby = df;
 		}
