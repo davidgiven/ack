@@ -130,9 +130,13 @@ install:	all
 		@-mkdir $(TARGET_HOME)
 		@-mkdir $(TARGET_HOME)/lib.bin
 		cp main $(TARGET_HOME)/lib.bin/em_cemcom.ansi
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/cemcom.ansi.1 $(TARGET_HOME)/man/cemcom.ansi.6 ; \
+		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_cemcom.ansi
+		-cmp $(SRC_DIR)/cemcom.ansi.1 $(TARGET_HOME)/man/cemcom.ansi.6
 
 opr:
 		make pr | opr
