@@ -173,7 +173,7 @@ skip_block()
 		*/
 		id = findidf(tk.tk_str);
 		free(tk.tk_str);
-		switch(id->id_resmac) {
+		if (id) switch(id->id_resmac) {
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
@@ -298,6 +298,7 @@ do_define()
 		if ((nformals = getparams(formals, parbuf)) == -1) {
 			PushBack();
 			skipline();
+			free(str);
 			return;	/* an error occurred	*/
 		}
 		LoadChar(ch);
@@ -306,10 +307,10 @@ do_define()
 	ch = skipspaces(ch);	/* find first character of the text	*/
 	assert(ch != EOI);
 	if (class(ch) == STNL) {
-		/*	Treat `#define something' as `#define something ""'
+		/*	Treat `#define something' as `#define something "1"'
 		*/
-		repl_text = "";
-		length = 0;
+		repl_text = "1";
+		length = 1;
 	}
 	else {
 		PushBack();
