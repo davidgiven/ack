@@ -601,6 +601,7 @@ getlabel(c, p)
 	switch(p->em_argtype) {
 	case cst_ptyp:
 		p->em_type = EM_DEFILB;
+		p->em_argtype = ilb_ptyp;
 		p->em_ilb = p->em_cst;
 		break;
 	case sof_ptyp:

@@ -307,6 +307,7 @@ gethead(p)
 
 	if (i < sp_filb0+sp_nilb0 && i >= sp_filb0) {	/* Instruction label */
 		p->em_type = EM_DEFILB;
+		p->em_argtype = ilb_ptyp;
 		p->em_ilb = i - sp_filb0;
 		return;
 	}
@@ -314,11 +315,13 @@ gethead(p)
 	switch(i) {
 	case sp_ilb1:	/* Instruction label */
 		p->em_type = EM_DEFILB;
+		p->em_argtype = ilb_ptyp;
 		p->em_ilb = getbyte();
 		break;
 
 	case sp_ilb2:	/* Instruction label */
 		p->em_type = EM_DEFILB;
+		p->em_argtype = ilb_ptyp;
 		p->em_ilb = get16();
 #ifdef CHECKING
 		if (p->em_ilb > 32767 && !EM_error) {
@@ -329,11 +332,13 @@ gethead(p)
 
 	case sp_dlb1:	/* Numeric data label */
 		p->em_type = EM_DEFDLB;
+		p->em_argtype = nof_ptyp;
 		p->em_dlb = getbyte();
 		break;
 
 	case sp_dlb2:	/* Numeric data label */
 		p->em_type = EM_DEFDLB;
+		p->em_argtype = nof_ptyp;
 		p->em_dlb = get16();
 #ifdef CHECKING
 		if (p->em_dlb > 32767 && !EM_error) {
@@ -347,6 +352,7 @@ gethead(p)
 		struct string *s;
 
 		p->em_type = EM_DEFDNAM;
+		p->em_argtype = sof_ptyp;
 		if (!(s = getstring(1))) {
 			p->em_dnam = "";
 		}
