@@ -2,16 +2,50 @@
 #include <stdio.h>
 #include <ctype.h>
 
+/* This file contains the function mylex() which recognizes the following
+ * tokens :
+ *	EOFILE 		
+ *	C_INSTR 	- 'C_loc', 'C_lol', etc.
+ *	DEF_C_INSTR 	- 'C_loe..', 'C_ste..', '..icon, '..fcon', etc
+ *	CONDITION 	- C-expression, for example: '$1 == 481'
+ *	ARROW 		- '==>'
+ *	EQUIV 		- '::='
+ *	CALL 		- C-style functioncall, for example: 'error( 17)'
+ *	ASSEM_INSTR 	- C-style string, for example: '"mov r0, (r1)"'
+ *	DEFAULT 	- 'default'
+ *	ERROR 		- An error occured in one of the tokens.
+ *
+ * If the input matches non of these tokens the next character will be returned.
+ *
+ * Besides mylex() the following variable is exported :
+ *
+ *	char yytext[];	- Contains the string representation of the current
+ *			  token.
+ *	char *next;	- Points to the first free position in yytext[].
+ */
+
+
 #define YYTEXT	256
+char yytext[YYTEXT],	/* string-buffer for the token */
+     *next;		/* points to the first free posistion in yytext[] */
+extern char scanc();
+
 #define FALSE	0
 #define TRUE	1
 
-char yytext[YYTEXT], *next;
-int CD_pos = FALSE;	/* condition or default allowed ? */
+int CD_pos = FALSE;	/* 'CD_pos' is used as a flag to signal if it is
+			 * possible to match a CONDITION or DEFAULT-token at 
+			 * this moment. Thus mylex() knows about the grammar
+			 * of the "EM_table"!!
+			 * This flag is needed because CALL is a subset of
+			 * CONDITION.
+			 */
+
+
 
 int mylex()
 {
-	char c, scanc(), skip_space();
+	char c, skip_space();
 
 	static int special = FALSE;	/* rule with conditions + default ? */
 
@@ -26,7 +60,9 @@ int mylex()
 
 	  case '.' : c = scanc();
 		     backc( c);
-		     if ( c != '.') {	/* geen ..icon o.i.d. */
+		     if ( c != '.') {	/* Just a plain '.', not something like
+					 * '..icon'.
+					 */
 			if ( special)
 				CD_pos = TRUE;
 		     	return( '.');
@@ -54,6 +90,10 @@ int mylex()
 		     }
 		     break;
 	}
+	/* Possible tokens at this place : CONDITION, CALL, C_INSTR,
+	 * DEF_C_INSTR
+	 */
+
 	if ( CD_pos) {
 		read_condition();
 		CD_pos = FALSE;
@@ -100,7 +140,7 @@ int mylex()
 	return( c);
 }
 
-int isletter( c)
+static int isletter( c)
 char c;
 {
 	return( isalpha( c) || isdigit( c) || c == '_');
@@ -118,17 +158,20 @@ static char skip_space()
 
 /* first character has been read */
 
-read_string()
 
-/* de "'s eraf strippen!! */
+static read_string()
 
+/* match something like "mov r0, (r1)".
+ * strip the double quotes off! Inside a string, the character '"' must
+ * be preceded by a '\'.
+ */
 {
 	next--;
 	while( ( *next = scanc()) != '"' || *(next-1) == '\\')
 		next++;
 }
 
-int arrow()
+int arrow() /* '==>' */
 {
 	if ( ( *next++ = scanc()) == '=')
 		if ( ( *next++ = scanc()) == '>')
@@ -140,7 +183,7 @@ int arrow()
 	return( FALSE);
 }
 
-int equiv()
+int equiv() /* '::=' */
 {
 	if ( ( *next++ = scanc()) == ':')
 		if ( ( *next++ = scanc()) == '=')
@@ -152,9 +195,9 @@ int equiv()
 	return( FALSE);
 }
 
-int _default()
+int _default() /* 'default' */
 {
-	char c;
+	char c, skip_space();
 
 	if ( ( *next++ = scanc()) == 'e')
 	    if ( ( *next++ = scanc()) == 'f')
@@ -162,7 +205,7 @@ int _default()
 		    if ( ( *next++ = scanc()) == 'u')
 			if ( ( *next++ = scanc()) == 'l')
 			    if ( ( *next++ = scanc()) == 't')
-				if ( !isletter( c = scanc())) {
+				if ( !isletter( c = skip_space())) {
 					backc( c);
 					return( TRUE);
 				}
@@ -211,6 +254,9 @@ read_call()
 }
 
 read_condition()
+
+/* A CONDITION is followed by either '==>' or '::='.
+ */
 {
 	while ( TRUE) {
 		switch ( *next++ = scanc()) {
@@ -240,7 +286,7 @@ read_condition()
 is_C_INSTR( str)
 char *str;
 {
-	if ( *str == 'C' && *(str+1) == '_')
+	if ( *str == 'C' && *(str+1) == '_')	/* C_xxx */
 		return( TRUE);
 	else if ( strncmp( "locals", str, 6) == 0)
 		return( TRUE);
@@ -255,8 +301,10 @@ char *str;
 is_DEF_C_INSTR( str)
 char *str;
 
-/* Er is gelezen [..][letter]* */
-
+/* yytext[] contains either '..[letter]*' ( 2 dots possibly followed by an
+ * identifer) * or '[letter]+' ( just an identifier)
+ * Try to match something like 'C_loe..' or '..icon'
+ */
 {
 	if ( *str == '.' && *(str+1) == '.')
 		return( next > yytext+1);
