@@ -391,10 +391,15 @@ equal_type(tp, otp, qual_lev)
 	if (!tp
 	    || !otp
 	    || (tp->tp_fund != otp->tp_fund)
-	    || (tp->tp_size != otp->tp_size)
 	    || (tp->tp_unsigned != otp->tp_unsigned)
 	    || (tp->tp_align != otp->tp_align))
 		return 0;
+	if (tp->tp_size != otp->tp_size) {
+		if (tp->tp_fund != ARRAY
+		    || (tp->tp_size != -1 && otp->tp_size != -1))
+			return 0;
+	}
+
 	if (qual_lev >= 0) {
 		if (tp->tp_typequal != otp->tp_typequal)
 			strict("illegal qualifiers");
