@@ -24,7 +24,7 @@ if (ack_sys) >/dev/null 2>&1
 then
 	: echo Your system is: `ack_sys`.
 else
-	echo -n "Give me the name of your system, the current choice is:
+	echo -n "Give me the type of your system, the current choice is:
 pdp_v7		PDP11 with sep I/D and version 7
 vax_bsd4_1a	VAX11 with BSD4.1a
 vax_bsd4_1c	VAX11 with BSD4.1c
