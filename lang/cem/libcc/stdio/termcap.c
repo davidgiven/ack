@@ -55,6 +55,7 @@ char	*name;
 			(void) strcpy(bp, file);
 			return(1);
 		}
+		else file = "/etc/termcap";
 	} else
 		file = "/etc/termcap";
 	if ((fp = fopen(file, "r")) == (FILE *) NULL)
