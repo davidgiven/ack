@@ -221,6 +221,25 @@ cmp(sz)
 		return;
 	}
 	if (mrg_1 == 074 && (mrg_2 & 070) != 010) {
+		if (mrg_2 == 072) {
+			/* In this case, the ea707172 routine changed the
+			   addressing mode to PC-relative. However, this is
+			   not allowed for this instruction. Change it back
+			   to absolute, but also correct for the optimization
+			   that the ea707172 routine thought it made.
+			*/
+			if (pass == PASS_1) {
+				/* In this case, the user wrote it PC-relative.
+				   Error.
+				*/
+				badoperand();
+			}
+			mrg_2 = 071;
+			exp_2.val += DOTVAL+2;
+			if (pass == PASS_2) {
+				DOTGAIN -= 2;
+			}
+		}
 		emit2(06000 | sz | mrg_2);
 		ea_1(sz, 0);
 		ea_2(sz, DTA|ALT);
