@@ -57,11 +57,11 @@
  ; place in the stack. Therefore, in the runtime startoff a piece of the
  ; stack is allocated for coroutines.
 
- exp $SYSTEM_NEWPROCESS
- exp $SYSTEM_TRANSFER
+ exp $_SYSTEM_NEWPROCESS
+ exp $_SYSTEM_TRANSFER
  inp $_ChkSize
 
- pro $SYSTEM_NEWPROCESS, 0
+ pro $_SYSTEM_NEWPROCESS, 0
 
  ; This procedure only initializes the area used for saving the stack.
  ; Its definition is:
@@ -92,7 +92,7 @@
 _target
  bss EM_PSIZE, 0, 0
 
- pro $SYSTEM_TRANSFER, 0
+ pro $_SYSTEM_TRANSFER, 0
 
  ; This procedure does all the hard work.
  ; It must save the current environment, and restore the one to which the

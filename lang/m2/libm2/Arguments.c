@@ -48,7 +48,7 @@ Arguments()
 }
 
 unsigned
-Arguments_Argv(n, argument, l, u, s)
+_Arguments_Argv(n, argument, l, u, s)
 	unsigned int u;
 	char *argument;
 {
@@ -58,7 +58,7 @@ Arguments_Argv(n, argument, l, u, s)
 }
 
 unsigned
-Arguments_GetEnv(name, nn, nu, ns, value, l, u, s)
+_Arguments_GetEnv(name, nn, nu, ns, value, l, u, s)
 	char *name, *value;
 	unsigned int nu, u;
 {
