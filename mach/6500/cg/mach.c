@@ -17,13 +17,11 @@ con_part(sz,w) register sz; word w; {
 }
 
 con_mult(sz) word sz; {
-	long l;
+	long atol();
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
-	l = atol(str);
-	fprintf(codefile,".short\t%d\n",(int) l);
-	fprintf(codefile,".short\t%d\n",(int) (l >> 16));
+	fprintf(codefile,".data4 %ld\n", atol(str));
 }
 
 
@@ -76,8 +74,8 @@ mes(type) word type; {
 }
 
 char    *segname[] = {
-	".text",        /* SEGTXT */
-	".data",        /* SEGCON */
-	".data",        /* SEGROM */
-	".bss"          /* SEGBSS */
+	".sect .text",        /* SEGTXT */
+	".sect .data",        /* SEGCON */
+	".sect .rom",        /* SEGROM */
+	".sect .bss"          /* SEGBSS */
 };
