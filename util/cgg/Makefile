@@ -8,12 +8,12 @@ LIBS=../../lib/em_data.a
 # LEXLIB is system dependent, try -ll or -lln first
 LEXLIB=-lln
 
-cgg:	bootgram.o
-	$(CC) $(LDFLAGS) bootgram.o $(LIBS) $(LEXLIB) -o cgg
+cgg:	bootgram.o main.o bootlex.o
+	$(CC) $(LDFLAGS) bootgram.o main.o bootlex.o $(LIBS) $(LEXLIB) -o cgg
 
 bootgram.c:	bootgram.y
 	@echo expect 1 shift/reduce conflict
-	yacc bootgram.y
+	yacc -d bootgram.y
 	mv y.tab.c bootgram.c
 
 install:	cgg
@@ -22,9 +22,13 @@ install:	cgg
 cmp:		cgg
 	cmp cgg ../../lib/cgg
 
-lint:	bootgram.c
-	lint $(LINTOPTS) bootgram.c
+lint:	bootgram.c main.c bootlex.c
+	lint $(LINTOPTS) bootgram.c main.c bootlex.c
 clean:
-	rm -f bootgram.o bootgram.c bootlex.c cgg
-bootgram.o:	bootlex.c
+	rm -f *.o bootgram.c bootlex.c cgg y.tab.h
+bootgram.o:	booth.h
 bootgram.o:	../../h/cg_pattern.h
+bootlex.o:	booth.h
+bootlex.o:	../../h/cg_pattern.h
+main.o:	booth.h
+main.o:	../../h/cg_pattern.h

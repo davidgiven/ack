@@ -15,6 +15,9 @@ static char rcsid2[]="$Header$";
 #undef unput
 
 #define MAXBACKUP 50
+
+#include "booth.h"
+#include "y.tab.h"
 %}
 
 %p 2000
