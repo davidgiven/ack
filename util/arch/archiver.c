@@ -37,7 +37,7 @@ struct ranlib tab[TABSZ];
 long	tnum = 0;
 char	tstrtab[STRTABSZ];
 long	tssiz = 0;
-char	*malloc(), *strcpy();
+char	*malloc(), *strcpy(), *strncpy();
 long	tell();
 long	time();
 #endif AAL
@@ -444,22 +444,25 @@ extract(member)
 register MEMBER *member;
 {
   int fd = 1;
+  char buf[sizeof(member->ar_name) + 1];
 
-  if (pr_fl == FALSE && (fd = creat(member->ar_name, 0644)) < 0) {
-	error(FALSE, "cannot create %s\n", member->ar_name);
-	return;
+  strncpy(buf, member->ar_name, sizeof(member->ar_name));
+  buf[sizeof(member->ar_name)] = 0;
+  if (pr_fl == FALSE && (fd = creat(buf, 0644)) < 0) {
+	error(FALSE, "cannot create %s\n", buf);
+	fd = -1;
   }
 
   if (verbose) {
-	if (pr_fl == FALSE) show("x - %s\n", member->ar_name);
-	else show("\n<%s>\n\n", member->ar_name);
+	if (pr_fl == FALSE) show("x - %s\n", buf);
+	else show("\n<%s>\n\n", buf);
   }
 
   copy_member(member, ar_fd, fd, 1);
 
-  if (fd != 1)
+  if (fd >= 0 && fd != 1)
   	close(fd);
-  if (pr_fl == FALSE) chmod(member->ar_name, member->ar_mode);
+  if (pr_fl == FALSE) chmod(buf, member->ar_mode);
 }
 
 copy_member(member, from, to, extracting)
@@ -481,15 +484,20 @@ int from, to;
 #endif
   do {
 	rest = mem_size > (long) IO_SIZE ? IO_SIZE : (int) mem_size;
-	if (read(from, io_buffer, rest) != rest)
-		error(TRUE, "read error on %s\n", member->ar_name);
-	mwrite(to, io_buffer, rest);
+	if (read(from, io_buffer, rest) != rest) {
+		char buf[sizeof(member->ar_name) + 1];
+
+		strncpy(buf, member->ar_name, sizeof(member->ar_name));
+		buf[sizeof(member->ar_name)] = 0;
+		error(TRUE, "read error on %s\n", buf);
+	}
+	if (to >= 0) mwrite(to, io_buffer, rest);
 	mem_size -= (long) rest;
   } while (mem_size != 0L);
 
   if (is_odd) {
 	lseek(from, 1L, 1);
-	if (! extracting)
+	if (to >= 0 && ! extracting)
 		lseek(to, 1L, 1);
   }
 }
