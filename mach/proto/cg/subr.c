@@ -59,8 +59,8 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 	return(result.e_v.e_con);
 }
 
-instance(instno,token) token_p token; {
-	inst_p inp;
+instance(instno,token) register token_p token; {
+	register inst_p inp;
 	int i;
 	token_p tp;
 	struct reginfo *rp;
@@ -138,8 +138,8 @@ instance(instno,token) token_p token; {
 	}
 }
 
-cinstance(instno,token,tp,regno) token_p token,tp; {
-	inst_p inp;
+cinstance(instno,token,tp,regno) register token_p token,tp; {
+	register inst_p inp;
 	int i;
 	struct reginfo *rp;
 	result_t result;
