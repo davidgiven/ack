@@ -249,6 +249,7 @@ end_proc(fbytes)
 		-	"end" + number of bytes used for local variables
 	*/
 	arith nbytes;
+	char optionsn = options['n'];
 
 #ifdef	DATAFLOW
 	if (options['d'])
@@ -280,6 +281,7 @@ end_proc(fbytes)
 #endif
 	C_ms_par(fbytes);		/* # bytes for formals		*/
 	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
+		options['n'] = 1;
 		C_ms_gto();
 		sp_occurred[SP_SETJMP] = 0;
 	}
@@ -288,6 +290,7 @@ end_proc(fbytes)
 #endif
 	LocalFinish();
 	C_end(nbytes);
+	options['n'] = optionsn;
 }
 
 do_return()
