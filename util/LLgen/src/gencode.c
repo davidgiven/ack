@@ -1107,7 +1107,7 @@ out_list(tokenlist, listno, casecnt)
 		fprintf(f, "%c%d,", i % 10 == 0 ? '\n': ' ', tokenlist[i]);
 	}
 	fputs(c_arrend, f);
-	fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount);
+	fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listno);
 }
 
 STATIC
