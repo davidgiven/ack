@@ -97,6 +97,33 @@ LLerror(t)
 	if (LLsymb != t) LLmessage(t);
 }
 
+#if LL_ANSI_C
+void LLsafeerror(int t)
+#else
+LLsafeerror(t)
+	int	t;
+#endif
+{
+	register int i;
+
+	if (t == EOFILE && LLsymb <= 0) return;
+#ifdef LL_NEWMESS
+	if (t == EOFILE) {
+#ifdef LL_USERHOOK
+		static int lst[] = { EOFILE, 0 };
+		if (LLuserhook(EOFILE, lst)) /* nothing */;
+#endif /* LL_USERHOOK */
+		if (LLsymb != EOFILE && LLsymb > 0) {
+			LLmessage(-1);
+			while ((LLsymb = LL_LEXI()) > 0 && LLsymb != EOFILE) 
+				/* nothing */ ;
+		}
+		return;
+	}
+#endif
+	LLmessage(t);
+}
+
 #ifndef LLNOFIRSTS
 #if LL_ANSI_C
 int LLfirst(int x, int d) {
