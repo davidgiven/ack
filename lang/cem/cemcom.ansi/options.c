@@ -104,6 +104,7 @@ deleted, is now a debug-flag
 	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP
 		register char *cp = text, *name, *mactext;
+		unsigned maclen;
 
 		if (class(*cp) != STIDF && class(*cp) != STELL) {
 			error("identifier missing in -D%s", text);
@@ -117,20 +118,21 @@ deleted, is now a debug-flag
 		}
 
 		if (!*cp) {			/* -Dname */
-			mactext = "1";
+			maclen = 1;
+			mactext = Salloc("1", 2);
 		}
 		else
 		if (*cp == '=')	{		/* -Dname=text	*/
 			*cp++ = '\0';		/* end of name	*/
-			mactext = cp;
+			maclen = (unsigned) strlen(cp);
+			mactext = Salloc(cp, maclen + 1);
 		}
 		else	{			/* -Dname?? */
 			error("malformed option -D%s", text);
 			break;
 		}
 
-		macro_def(str2idf(name), mactext, -1, strlen(mactext),
-			NOFLAG);
+		macro_def(str2idf(name), mactext, -1, maclen, NOFLAG);
 #else NOPP
 		warning("-D option ignored");
 #endif NOPP
