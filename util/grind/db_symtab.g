@@ -263,6 +263,9 @@ type_name(p_type *t; p_symbol sy;)
 	'='			
 	type(p, type_index, sy)
   |
+				{ if (*t && ! *p) *p = *t; 
+				  else if (*t) **t = **p;
+				}
   ]
 				{ if (*p == 0) *p = new_type();
 				  *t = *p;

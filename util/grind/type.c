@@ -327,7 +327,7 @@ clean_tp_tab()
 				p_type p = list_row[i].row[j/NINCR][j%NINCR];
 				if (p && p->ty_class == 0) {
 					error("%s: incomplete type (%d,%d)",
-					      listfile->sy_idf->id_text,
+					      FileScope->sc_definedby->sy_idf->id_text,
 					      i,
 					      j);
 				}
