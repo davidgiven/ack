@@ -52,13 +52,13 @@ void init_builtins()
 
 	/* DEF EOF= -1, TEXT= -2, RAW= -3: */
 
-	info.const=new_const(-1L);
+	info.t_const=new_const(-1L);
 	insert("EOF", T_CONST|T_BUILTIN, 0, &info);
 
-	info.const=new_const(-2L);
+	info.t_const=new_const(-2L);
 	insert("TEXT", T_CONST|T_BUILTIN, 0, &info);
 
-	info.const=new_const(-3L);
+	info.t_const=new_const(-3L);
 	insert("RAW", T_CONST|T_BUILTIN, 0, &info);
 
 	/* PROC open(VAR fd, VALUE name[], mode[])= .... : */
