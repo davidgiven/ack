@@ -1,3 +1,4 @@
+
 /* C O M M O N   S U B E X P R E S S I O N   E L I M I N A T I O N */
 
 
@@ -41,17 +42,19 @@ STATIC cs_optimize(p)
 	rbp = p->p_start;
 
 	while (rbp != (bblock_p) 0) {
-		bdone = rbp->b_idom;
 		/* First we build a list of common expressions with the
 		 * value numbering algorithm. We take blocks in textual order
 		 * as long as the next block can only be reached through the
-		 * block we have just done.
+		 * block we have just done. Note that if a block is preceded
+		 * by itself, the number of predecessors is greater than 1,
+		 * but the previous block can still be its immediate dominator.
 		 */
-		while (rbp != (bblock_p) 0 && rbp->b_idom == bdone) {
-			vnm(rbp); bdone = rbp;
+		do {	vnm(rbp); bdone = rbp;
 			OUTTRACE("basic block %d processed", bdone->b_id);
 			rbp = rbp->b_next;
-		}
+		} while (rbp != (bblock_p) 0 && rbp->b_idom == bdone &&
+			Lnrelems(rbp->b_pred) == 1
+		);
 		OUTTRACE("value numbering completed", 0);
 		OUTAVAILS(); OUTENTITIES();
 
