@@ -1,7 +1,0 @@
-if (ack_sys ) >/dev/null 2>&1
-then
-	exit 0
-else
-	echo "You need to run 'first' first"
-	exit 1
-fi
