@@ -692,11 +692,15 @@ C_bls
 
 
 C_csa		
-	$1 == 4		==>	"jmp (.csa)".
+	$1 == 4		==>	"move.l (sp)+,a0";
+				"move.l (sp)+,d0";
+				"jmp (.csa)".
   	default		==>	arg_error( "csa", $1).
 
 C_csb		
-	$1 == 4		==>	"jmp (.csb)".
+	$1 == 4		==>	"move.l (sp)+,a0";
+				"move.l (sp)+,d0";
+				"jmp (.csb)".
   	default		==>	arg_error( "csb", $1).
 
 C_dch		==>	C_loi( (arith)4).
