@@ -56,36 +56,33 @@ code_endswitch()
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
-	C_rom_begin();
-	C_ilb(sh->sh_default);
+	C_rom_ilb(sh->sh_default);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 		register arith val;
 
-		C_cst(sh->sh_lowerbd);
-		C_cst(sh->sh_upperbd - sh->sh_lowerbd);
+		C_rom_cst(sh->sh_lowerbd);
+		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			ASSERT(ce);
 			if (val == ce->ce_value)	{
-				C_ilb(ce->ce_label);
+				C_rom_ilb(ce->ce_label);
 				ce = ce->next;
 			}
 			else
-				C_ilb(sh->sh_default);
+				C_rom_ilb(sh->sh_default);
 		}
-		C_rom_end();
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(sh->sh_type->tp_size);
 	}
 	else	{ /* CSB */
-		C_cst((arith)sh->sh_nrofentries);
+		C_rom_cst((arith)sh->sh_nrofentries);
 		for (ce = sh->sh_entries; ce; ce = ce->next)	{
 			/* generate the entries: value + prog.label	*/
-			C_cst(ce->ce_value);
-			C_ilb(ce->ce_label);
+			C_rom_cst(ce->ce_value);
+			C_rom_ilb(ce->ce_label);
 		}
-		C_rom_end();
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csb(sh->sh_type->tp_size);
 	}

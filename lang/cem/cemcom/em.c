@@ -61,30 +61,6 @@ C_busy()
 	return ofd >= 0; /* true if code is being generated */
 }
 
-/*** front end for generating long CON/ROM lists ***/
-static arg_count;
-static arg_rom;
-
-DC_start(rom){
-	arg_count = 0;
-	arg_rom = rom;
-}
-
-DC_check(){
-	if (arg_count++ >= MAX_ARG_CNT) {
-		switch (arg_rom) {
-		case ps_con:
-			C_con_end();
-			C_con_begin();
-			break;
-		case ps_rom:
-			C_rom_end();
-			C_rom_begin();
-			break;
-		}
-	}
-}
-
 /***    the compact code generating routines	***/
 #define	fit16i(x)	((x) >= (long)0xFFFF8000 && (x) <= (long)0x00007FFF)
 #define	fit8u(x)	((x) <= 0xFF)		/* x is already unsigned */

@@ -85,22 +85,35 @@ C_df_ilb(l)	| label l;	| ILB(l)
 C_bss_cst(n, w, i)	| arith n, w; int i;	|
 	PS(ps_bss), DCST(n), CST(w), CST((arith)i)
 %
-C_con_begin()	|	| DC_start(ps_con), PS(ps_con)
-C_con_end()	|	| CEND()
-C_rom_begin()	|	| DC_start(ps_rom), PS(ps_rom)
-C_rom_end()	|	| CEND()
-C_cst(l)	| arith l;	| DC_check(), CST(l)
-C_icon(val, siz)	| char *val; arith siz;	|
-	DC_check(), WCON(sp_icon, val, siz)
-C_ucon(val, siz)	| char *val; arith siz;	|
-	DC_check(), WCON(sp_ucon, val, siz)
-C_fcon(val, siz)	| char *val; arith siz;	|
-	DC_check(), WCON(sp_fcon, val, siz)
-C_scon(str, siz)	| char *str; arith siz;	| DC_check(), CSTR(str)
-C_dnam(str, val)	| char *str; arith val;	| DC_check(), NOFF(str, val)
-C_dlb(l, val)	| label l; arith val;	| DC_check(), DOFF(l, val)
-C_pnam(str)	| char *str;	| DC_check(), PNAM(str)
-C_ilb(l)	| label l;	| DC_check(), ILB(l)
+C_con_icon(val, siz)	| char *val; arith siz;	|
+	PS(ps_con), WCON(sp_icon, val, siz), CEND()
+C_con_ucon(val, siz)	| char *val; arith siz;	|
+	PS(ps_con), WCON(sp_ucon, val, siz), CEND()
+C_con_fcon(val, siz)	| char *val; arith siz;	|
+	PS(ps_con), WCON(sp_fcon, val, siz), CEND()
+C_con_scon(str, siz)	| char *str; arith siz;	| PS(ps_con), CSTR(str), CEND()
+C_con_dnam(str, val)	| char *str; arith val;	|
+	PS(ps_con), NOFF(str, val), CEND()
+C_con_dlb(l, val)	| label l; arith val;	|
+	PS(ps_con), DOFF(l, val), CEND()
+C_con_pnam(str)	| char *str;	| PS(ps_con), PNAM(str), CEND()
+%
+C_rom_cst(l)	| arith l;	| PS(ps_rom), CST(l), CEND()
+C_rom_icon(val, siz)	| char *val; arith siz;	|
+	PS(ps_rom), WCON(sp_icon, val, siz), CEND()
+C_rom_fcon(val, siz)	| char *val; arith siz;	|
+	PS(ps_rom), WCON(sp_fcon, val, siz), CEND()
+C_rom_ilb(l)	| label l;	| PS(ps_rom), ILB(l), CEND()
+%
+C_cst(l)	| arith l;	| CST(l)
+C_icon(val, siz)	| char *val; arith siz;	| WCON(sp_icon, val, siz)
+C_ucon(val, siz)	| char *val; arith siz;	| WCON(sp_ucon, val, siz)
+C_fcon(val, siz)	| char *val; arith siz;	| WCON(sp_fcon, val, siz)
+C_scon(str, siz)	| char *str; arith siz;	| CSTR(str)
+C_dnam(str, val)	| char *str; arith val;	| NOFF(str, val)
+C_dlb(l, val)	| label l; arith val;	| DOFF(l, val)
+C_pnam(str)	| char *str;	| PNAM(str)
+C_ilb(l)	| label l;	| ILB(l)
 %
 C_pro_narg(p1)	| char *p1;	| PS(ps_pro), PNAM(p1), CEND()
 C_end(l)	| arith l;	| PS(ps_end), CST(l)

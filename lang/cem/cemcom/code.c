@@ -174,9 +174,7 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
 			C_df_dlb(file_name_label = data_label());
-			C_con_begin();
-			C_scon(last_fn_given = FileName, (arith)0);
-			C_con_end();
+			C_con_scon(last_fn_given = FileName, (arith)0);
 		}
 		/* enable debug trace of EM source */
 		C_fil_dlb(file_name_label, (arith)0);

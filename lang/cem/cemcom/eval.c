@@ -88,9 +88,7 @@ EVAL(expr, val, code, true_label, false_label)
 			label datlab = data_label();
 			
 			C_df_dlb(datlab);
-			C_con_begin();
-			C_scon(expr->SG_VALUE, (arith)0);
-			C_con_end();
+			C_con_scon(expr->SG_VALUE, (arith)0);
 			C_lae_dlb(datlab, (arith)0);
 		}
 		break;
@@ -100,9 +98,7 @@ EVAL(expr, val, code, true_label, false_label)
 			label datlab = data_label();
 			
 			C_df_dlb(datlab);
-			C_rom_begin();
-			C_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
-			C_rom_end();
+			C_rom_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 			C_lae_dlb(datlab, (arith)0);
 			C_loi(expr->ex_type->tp_size);
 		}
@@ -1019,9 +1015,7 @@ load_cst(val, siz)
 		label datlab;
 
 		C_df_dlb(datlab = data_label());
-		C_rom_begin();
-		C_icon(itos(val), siz);
-		C_rom_end();
+		C_rom_icon(itos(val), siz);
 		C_lae_dlb(datlab, (arith)0);
 		C_loi(siz);
 	}
