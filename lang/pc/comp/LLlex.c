@@ -454,10 +454,11 @@ again:
 #define REAL_MODE	1
 
 		char buf[NUMSIZE+2];
-		register char *np = buf;
+		register char *np = &buf[1];
 		register int state = INT_MODE;
 		extern char *Salloc();
 
+		buf[0] = '-';
 		do	{
 			if( np <= &buf[NUMSIZE] )
 				*np++ = ch;
@@ -526,7 +527,7 @@ again:
 				lexerror("constant too long");
 			}
 			else	{
-				np = buf;
+				np = &buf[1];
 				while (*np == '0')	/* skip leading zeros */
 					np++;
 				tk->TOK_INT = str2long(np, 10);
@@ -545,16 +546,18 @@ again:
 		/* allocate struct for inverse */
 		tk->TOK_RIV = (struct real *) Malloc(sizeof(struct real));
 		tk->TOK_RIV->r_inverse = tk->tk_data.tk_real;
-
-		/* sign */
-		tk->TOK_RSI = 0;
-		tk->TOK_RIV->r_sign = 1;
+		tk->TOK_RLA = 0;
+		tk->TOK_RIV->r_lab = 0;
 
 		if( np > &buf[NUMSIZE+1] )	{
 			tk->TOK_REL = Salloc("0.0", 4);
+			tk->TOK_RIV->r_real = tk->TOK_REL;
 			lexerror("floating constant too long");
 		}
-		else tk->TOK_REL = Salloc(buf,(unsigned) (np - buf));
+		else {
+			tk->TOK_RIV->r_real = Salloc(buf,(unsigned) (np - buf));
+			tk->TOK_REL = tk->TOK_RIV->r_real + 1;
+		}
 
 		toktype = real_type;
 		return tk->tk_symb = REAL;

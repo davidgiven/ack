@@ -62,11 +62,8 @@ LLmessage(tk)
 						Malloc(sizeof(struct real));
 			dotp->TOK_RIV->r_inverse = dotp->tk_data.tk_real;
 
-			/* sign */
-			dotp->TOK_RSI = 0;
-			dotp->TOK_RIV->r_sign = 1;
-
 			dotp->TOK_REL = Salloc("0.0", 4);
+			dotp->TOK_RIV->r_real = dotp->TOK_REL;
 			toktype = real_type;
 			break;
 		}

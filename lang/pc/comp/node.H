@@ -37,7 +37,6 @@ struct node {
 #define nd_REL		nd_token.TOK_REL
 #define nd_RLA		nd_token.TOK_RLA
 #define nd_RIV		nd_token.TOK_RIV
-#define nd_RSI		nd_token.TOK_RSI
 };
 
 /* ALLOCDEF "node" 50 */

@@ -52,9 +52,11 @@ RomString(nd)
 RomReal(nd)
 	register struct node *nd;
 {
-	C_df_dlb(++data_label);
-	C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
-	nd->nd_RLA = nd->nd_RIV->r_lab = data_label;
+	if (! nd->nd_RLA) {
+		C_df_dlb(++data_label);
+		nd->nd_RLA = data_label;
+		C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
+	}
 }
 
 BssVar()
@@ -291,10 +293,9 @@ CodeExpr(nd, ds, true_label)
 			C_loc(nd->nd_INT);
 			break;
 		case REAL:
+			RomReal(nd);
 			C_lae_dlb(nd->nd_RLA, (arith) 0);
 			C_loi(tp->tp_size);
-			if( nd->nd_RSI )
-				C_ngf(tp->tp_size);
 			break;
 		case STRING:
 			if( tp->tp_fund == T_CHAR )

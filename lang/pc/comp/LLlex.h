@@ -14,7 +14,6 @@ struct real {
 	char *r_real;			/* string representation of real */
 	struct real *r_inverse;		/* the inverse of this real */
 	label r_lab;			/* data label of real */
-	int r_sign;			/* positive or negative */
 };
 
 /* Token structure. Keep it small, as it is part of a parse-tree node
@@ -41,7 +40,6 @@ struct token	{
 #define TOK_REL	tk_data.tk_real->r_real
 #define TOK_RIV	tk_data.tk_real->r_inverse
 #define TOK_RLA	tk_data.tk_real->r_lab
-#define TOK_RSI	tk_data.tk_real->r_sign
 
 extern struct token dot, aside;
 extern struct type *toktype, *asidetype;

@@ -45,8 +45,7 @@ Sign(register struct node **pnd;):
 
 UnsignedNumber(register struct node **pnd;):
 	[INTEGER | REAL]	{ *pnd = MkLeaf(Value, &dot);
-				  if( ((*pnd)->nd_type = toktype) == real_type )
-					RomReal(*pnd);
+				  (*pnd)->nd_type = toktype;
 				}
 ;
 
