@@ -1,51 +1,51 @@
-$cc $cflags bhcst.c
-$cc $cflags bhdlb.c
-$cc $cflags bhdnam.c
-$cc $cflags bhfcon.c
-$cc $cflags bhicon.c
-$cc $cflags bhilb.c
-$cc $cflags bhpnam.c
-$cc $cflags bhucon.c
-$cc $cflags crcst.c
-$cc $cflags crdlb.c
-$cc $cflags crdnam.c
-$cc $cflags crfcon.c
-$cc $cflags cricon.c
-$cc $cflags crilb.c
-$cc $cflags crpnam.c
-$cc $cflags crscon.c
-$cc $cflags crucon.c
-$cc $cflags cst.c
-$cc $cflags dfdlb.c
-$cc $cflags dfdnam.c
-$cc $cflags dfilb.c
-$cc $cflags dlb.c
-$cc $cflags dnam.c
-$cc $cflags end.c
-$cc $cflags endarg.c
-$cc $cflags exc.c
-$cc $cflags fcon.c
-$cc $cflags icon.c
-$cc $cflags ilb.c
-$cc $cflags msend.c
-$cc $cflags op.c
-$cc $cflags opcst.c
-$cc $cflags opdlb.c
-$cc $cflags opdnam.c
-$cc $cflags opilb.c
-$cc $cflags opnarg.c
-$cc $cflags oppnam.c
-$cc $cflags pnam.c
-$cc $cflags pro.c
-$cc $cflags pronarg.c
-$cc $cflags msstart.c
-$cc $cflags psdlb.c
-$cc $cflags psdnam.c
-$cc $cflags pspnam.c
-$cc $cflags scon.c
-$cc $cflags ucon.c
-$cc $cflags -I../read_em C_out.c
-
-$cc $cflags $1/em.c
-mv em.o em$1.o
-$ar rc libem$1.a bhcst.o bhdlb.o bhdnam.o bhfcon.o bhicon.o bhilb.o bhpnam.o bhucon.o crcst.o crdlb.o crdnam.o crfcon.o cricon.o crilb.o crpnam.o crscon.o crucon.o cst.o dfdlb.o dfdnam.o dfilb.o dlb.o dnam.o end.o endarg.o exc.o fcon.o getid.o icon.o ilb.o insert.o internerr.o msend.o op.o opcst.o opdlb.o opdnam.o opilb.o opnarg.o oppnam.o pnam.o pro.o pronarg.o msstart.o psdlb.o psdnam.o pspnam.o scon.o ucon.o C_out.o em$1.o failed.o
+if $cc $cflags bhcst.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhdlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhdnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhfcon.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhicon.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhilb.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhpnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags bhucon.c ; then : ; else exit 1 ; fi
+if $cc $cflags crcst.c ; then : ; else exit 1 ; fi
+if $cc $cflags crdlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags crdnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags crfcon.c ; then : ; else exit 1 ; fi
+if $cc $cflags cricon.c ; then : ; else exit 1 ; fi
+if $cc $cflags crilb.c ; then : ; else exit 1 ; fi
+if $cc $cflags crpnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags crscon.c ; then : ; else exit 1 ; fi
+if $cc $cflags crucon.c ; then : ; else exit 1 ; fi
+if $cc $cflags cst.c ; then : ; else exit 1 ; fi
+if $cc $cflags dfdlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags dfdnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags dfilb.c ; then : ; else exit 1 ; fi
+if $cc $cflags dlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags dnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags end.c ; then : ; else exit 1 ; fi
+if $cc $cflags endarg.c ; then : ; else exit 1 ; fi
+if $cc $cflags exc.c ; then : ; else exit 1 ; fi
+if $cc $cflags fcon.c ; then : ; else exit 1 ; fi
+if $cc $cflags icon.c ; then : ; else exit 1 ; fi
+if $cc $cflags ilb.c ; then : ; else exit 1 ; fi
+if $cc $cflags msend.c ; then : ; else exit 1 ; fi
+if $cc $cflags op.c ; then : ; else exit 1 ; fi
+if $cc $cflags opcst.c ; then : ; else exit 1 ; fi
+if $cc $cflags opdlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags opdnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags opilb.c ; then : ; else exit 1 ; fi
+if $cc $cflags opnarg.c ; then : ; else exit 1 ; fi
+if $cc $cflags oppnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags pnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags pro.c ; then : ; else exit 1 ; fi
+if $cc $cflags pronarg.c ; then : ; else exit 1 ; fi
+if $cc $cflags msstart.c ; then : ; else exit 1 ; fi
+if $cc $cflags psdlb.c ; then : ; else exit 1 ; fi
+if $cc $cflags psdnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags pspnam.c ; then : ; else exit 1 ; fi
+if $cc $cflags scon.c ; then : ; else exit 1 ; fi
+if $cc $cflags ucon.c ; then : ; else exit 1 ; fi
+if $cc $cflags -I../read_em C_out.c ; then : ; else exit 1 ; fi
+if  ; then : ; else exit 1 ; fi
+if $cc $cflags $1/em.c ; then : ; else exit 1 ; fi
+if mv em.o em$1.o ; then : ; else exit 1 ; fi
+if $ar rc libem$1.a bhcst.o bhdlb.o bhdnam.o bhfcon.o bhicon.o bhilb.o bhpnam.o bhucon.o crcst.o crdlb.o crdnam.o crfcon.o cricon.o crilb.o crpnam.o crscon.o crucon.o cst.o dfdlb.o dfdnam.o dfilb.o dlb.o dnam.o end.o endarg.o exc.o fcon.o getid.o icon.o ilb.o insert.o internerr.o msend.o op.o opcst.o opdlb.o opdnam.o opilb.o opnarg.o oppnam.o pnam.o pro.o pronarg.o msstart.o psdlb.o psdnam.o pspnam.o scon.o ucon.o C_out.o em$1.o failed.o ; then : ; else exit 1 ; fi
