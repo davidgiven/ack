@@ -12,8 +12,9 @@ var LIB=lib/{P}/tail_
 var RT=lib/{P}/head_
 var PLIB=lib/{M}/tail_
 var PRT=lib/{M}/head_
-var CPP_F=-Dunix=unix -D__BSD4_2
+var CPP_F=-Dunix -Dm68k -Dmc68000 -DM68020 -Dmc68020 -D__BSD4_2
 var INCLUDES=-I{EM}/include/_tail_cc
+var CC_ALIGN=-Vw4.1
 # 413 align is the default, rom in text
 var ALIGN=-a0:4 -a1:4 -a2:0x20000 -a3:4 -b0:0x2020
 name be
