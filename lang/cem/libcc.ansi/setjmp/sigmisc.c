@@ -9,6 +9,7 @@
  * <signal.h>. This is a C-file, which can't be included.
  */
 
+#include	<sys/types.h>
 #include	<signal.h>
 #include	<stddef.h>
 
