@@ -24,6 +24,6 @@
 3:
 	jmp(a0)
 4:
-	move.w	#EILLINS,-(sp)
+	move.l	#EILLINS,-(sp)
 	jmp	.fatal
 .align 2

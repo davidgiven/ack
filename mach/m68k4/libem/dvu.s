@@ -17,7 +17,7 @@
 	move.l	d3,-(sp)
 	tst.l	d2
 	bne	0f
-	move.w	#EIDIVZ,-(sp)
+	move.l	#EIDIVZ,-(sp)
 	jsr	.trp
 0:
 	clr.l	d0
