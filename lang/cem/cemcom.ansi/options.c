@@ -114,20 +114,8 @@ next_option:			/* to allow combined one-char options */
 		goto next_option;
 #endif	LINT
 
-#ifdef	___XXX___
-deleted, is now a debug-flag
-	case 'C' :	/* E option + comment output		*/
-#ifndef	NOPP
-		options['E'] = 1;
-		warning("-C: comment is not output");
-#else NOPP
-		warning("-C option ignored");
-#endif	NOPP
-		break;
-#endif	___XXX___
-
-	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP
+	case 'D' :	{	/* -Dname :	predefine name		*/
 		register char *cp = text, *name, *mactext;
 		unsigned maclen;
 
@@ -158,25 +146,10 @@ deleted, is now a debug-flag
 		}
 
 		macro_def(str2idf(name), mactext, -1, (int)maclen, NOFLAG);
-#else NOPP
-		warning("-D option ignored");
-#endif NOPP
 		break;
 	}
 
-#ifdef ___XXX___
-deleted, is now a debug-flag
-	case 'E' :	/* run preprocessor only, with #<int>	*/
-#ifndef NOPP
-		options['E'] = 1;
-#else NOPP
-		warning("-E option ignored");
-#endif NOPP
-		break;
-#endif ___XXX___
-
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
-#ifndef NOPP
 		if (*text)	{
 			int i;
 			register char *new = text;
@@ -195,10 +168,8 @@ deleted, is now a debug-flag
 			}
 		}
 		else inctable[inc_pos] = 0;
-#else NOPP
-		warning("-I option ignored");
-#endif NOPP
 		break;
+#endif NOPP
 
 	case 'M':	/* maximum identifier length */
 		idfsize = txt2int(&text);
@@ -207,18 +178,6 @@ deleted, is now a debug-flag
 		if (idfsize > IDFSIZE)
 			fatal("maximum identifier length is %d", IDFSIZE);
 		break;
-
-#ifdef ___XXX___
-deleted, is now a debug-flag
-	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
-#ifndef NOPP
-		options['E'] = 1;
-		options['P'] = 1;
-#else NOPP
-		warning("-P option ignored");
-#endif NOPP
-		break;
-#endif ___XXX___
 
 #ifdef	LINT
 	case 'S' : {		/* -Sint :	static scope number for lint */
@@ -241,21 +200,15 @@ deleted, is now a debug-flag
 		break;
 	}
 		
-	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
+	case 'U' :		/* -Uname :	undefine predefined	*/
 		if (*text) do_undef(str2idf(text));
-#else NOPP
-		warning("-U option ignored");
-#endif NOPP
 		break;
-	}
+#endif NOPP
 
 #ifndef	LINT
+#ifndef NOCROSS
 	case 'V' :	/* set object sizes and alignment requirements	*/
-#ifdef NOCROSS
-		warning("-V option ignored");
-		break;
-#else NOCROSS
 	{
 		register arith sz, algn;
 		char c;
