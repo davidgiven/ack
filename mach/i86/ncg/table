@@ -1528,15 +1528,15 @@ kills referals
 gen axx[1] {ind_regoff2, regvar($1), $2}, %1
     axx[2] {ind_regoff2, regvar($1), $2+2}, %2
 
-pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call ldfrxxxsdf("add", "adc")
-pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call ldfrxxxsdf("add", "adc")
-pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call ldfrxxxsdf("and", "and")
-pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call ldfrxxxsdf("or", "or")
-pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call ldfrxxxsdf("xor", "xor")
 
 proc ldirxxxsdi example lol loi adi lol sti
@@ -1545,15 +1545,15 @@ kills referals
 gen axx[1] {ind_reg2, regvar($1)}, %1
     axx[2] {ind_regoff2, regvar($1), 2}, %2
 
-pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_any
 					call ldirxxxsdi("add", "adc")
-pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_any
 					call ldirxxxsdi("add", "adc")
-pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_any
 					call ldirxxxsdi("and", "and")
-pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_any
 					call ldirxxxsdi("or", "or")
-pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_any
 					call ldirxxxsdi("xor", "xor")
 
 proc lofruxxsof example lol lof inc lol stf
@@ -1603,11 +1603,11 @@ gen axx[1] {ind_regoff2, %a, $2}, %1
     axx[2] {ind_regoff2, %a, $2+2}, %2
     killreg %a
 
-pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("add", "adc")
-pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("add", "adc")
-pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("and", "and")
-pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("or", "or")
-pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("xor", "xor")
+pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==4	call ldfxxxsdf("add", "adc")
+pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==4	call ldfxxxsdf("add", "adc")
+pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==4	call ldfxxxsdf("and", "and")
+pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==4	call ldfxxxsdf("or", "or")
+pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==4	call ldfxxxsdf("xor", "xor")
 
 proc ldixxxsdi example lol loi adi lol sti
 with regorconstnoaddr regorconstnoaddr
@@ -1617,15 +1617,15 @@ gen axx[1] {ind_reg2, %a}, %1
     axx[2] {ind_regoff2, %a, 2}, %2
     killreg %a
 
-pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==2
+pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==4
 					call ldixxxsdi("add", "adc")
-pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==2
+pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==4
 					call ldixxxsdi("add", "adc")
-pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==2
+pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==4
 					call ldixxxsdi("and", "and")
-pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==2
+pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==4
 					call ldixxxsdi("or", "or")
-pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==2
+pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==4
 					call ldixxxsdi("xor", "xor")
 
 proc lefuxxsef example loe lof inc loe stf
