@@ -3,6 +3,7 @@ MACHDEF="MACH=vax4" "SUF=o" "ASAR=ar"
 PCDEF="PREF=pc" "SUB=" "SRC=lang/pc/libpc"
 
 install:
+	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(PCDEF) $(MACHDEF) cp
 
 cmp:
