@@ -159,37 +159,11 @@ STATIC getpnames(dumpp)
 }
 
 
-STATIC bool name_exists(name,endp,endd)
-	char *name;
-	proc_p endp;
-	dblock_p endd;
-{
-	/* Search the proctable (from fproc to endp)
-	 * and the data block table (from fdblock to endd)
-	 * to see if the name is already in use.
-	 */
-
-	proc_p p;
-	dblock_p d;
-
-	if (! name) return FALSE;	/* HOL blocks don't have names */
-	for (p = fproc; p != endp; p = p->p_next) {
-		if (strcmp(name,pnames[p->p_id]) == 0) return TRUE;
-	}
-	for (d = fdblock; d != endd; d = d->d_next) {
-		if (dnames[d->d_id] != 0 &&	/* HOL blocks excluded */
-		    strcmp(name,dnames[d->d_id]) == 0) return TRUE;
-	}
-	return FALSE;
-}
-
-
-
-static int nn = 0;
 
 STATIC new_name(s)
 	char **s;
 {
+	static int nn = 0;
 	char buf[20];
 	int len = strlen(*s);
 
@@ -204,7 +178,7 @@ STATIC new_name(s)
 }
 
 
-	
+
 STATIC uniq_names()
 {
 	/* The names of all internal procedures and data blocks
@@ -218,18 +192,18 @@ STATIC uniq_names()
 	dblock_p d;
 
 	for (p = fproc; p != (proc_p) 0; p = p->p_next) {
-		if (!(p->p_flags1 & PF_EXTERNAL) &&
-		    name_exists(pnames[p->p_id],p,fdblock)) {
+		if (!(p->p_flags1 & PF_EXTERNAL)) {
 			new_name(&(pnames[p->p_id]));
 		}
 	}
 	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
-		if (!(d->d_flags1 & DF_EXTERNAL) &&
-		    name_exists(dnames[d->d_id],(proc_p) 0,d) ) {
+		if (!(d->d_flags1 & DF_EXTERNAL) && dnames[d->d_id]) {
 			new_name(&(dnames[d->d_id]));
 		}
 	}
 }
+
+
 main(argc,argv)
 	int argc;
 	char *argv[];

@@ -118,9 +118,13 @@ dblock_p symlookup(name, status)
 			 * list.
 			 */
 			if (strcmp((*spp)->sy_name, name) == 0) {
-				/* found */
-				lastname = (*spp)->sy_name;
-				return ((*spp)->sy_dblock);
+				if (status != DEFINING ||
+				    (*spp)->sy_dblock->d_pseudo == DUNKNOWN) {
+					/* found */
+					lastname = (*spp)->sy_name;
+					return ((*spp)->sy_dblock);
+				}
+				break;
 			} else {
 				spp = &(*spp)->sy_next;
 			}
@@ -130,7 +134,9 @@ dblock_p symlookup(name, status)
 		 * indicating that we don't need this name.
 		 */
 		if (status == IMPORTING) return (dblock_p) 0;
-		*spp = sp = newsym();
+		sp = newsym();
+		sp->sy_next = *spp;
+		*spp = sp;
 		sp->sy_name = (char *) newcore(strlen(name)+1);
 		strcpy(sp->sy_name, name);
 		lastname = sp->sy_name;		/* quick hack to get at
@@ -210,7 +216,11 @@ proc_p proclookup(name, status)
 		 */
 		if (strcmp((*ppp)->pr_name, name) == 0) {
 			/* found */
-			return ((*ppp)->pr_proc);
+			if (status != DEFINING || 
+			    ! ((*ppp)->pr_proc->p_flags1 & PF_BODYSEEN)) {
+				return ((*ppp)->pr_proc);
+			}
+			break;
 		} else {
 			ppp = &(*ppp)->pr_next;
 		}
@@ -220,7 +230,9 @@ proc_p proclookup(name, status)
 	 * return 0, indicating we don't want this proc.
 	 */
 	if (status == IMPORTING) return (proc_p) 0;
-	*ppp = pp = newprc();
+	pp = newprc();
+	pp->pr_next = *ppp;
+	*ppp = pp;
 	pp->pr_name = (char *) newcore(strlen(name)+1);
 	strcpy(pp->pr_name, name);
 	dp = pp->pr_proc = newproc();
