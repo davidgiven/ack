@@ -12,30 +12,58 @@
 
 extern int errno;
 
-
 static double
 asin_acos(x, cosfl)
 	double x;
 {
-	int negative = x < 0;
-	extern double sqrt(), atan();
+	int	negative = x < 0;
+	int	i;
+	double	g;
+	extern double	sqrt();
+	static double p[] = {
+		-0.27368494524164255994e+2,
+		 0.57208227877891731407e+2,
+		-0.39688862997540877339e+2,
+		 0.10152522233806463645e+2,
+		-0.69674573447350646411e+0
+	};
+	static double q[] = {
+		-0.16421096714498560795e+3,
+		 0.41714430248260412556e+3,
+		-0.38186303361750149284e+3,
+		 0.15095270841030604719e+3,
+		-0.23823859153670238830e+2,
+		 1.0
+	};
 
 	if (negative) {
 		x = -x;
 	}
-	if (x > 1) {
-		errno = EDOM;
-		return 0;
+	if (x > 0.5) {
+		i = 1 - cosfl;
+		if (x > 1) {
+			errno = EDOM;
+			return 0;
+		}
+		g = 0.5 - 0.5 * y;
+		y = - sqrt(g);
+		y += y;
 	}
-	if (x == 1) {
-		x = M_PI_2;
+	else {
+		/* ??? avoid underflow ??? */
+		g = y * y;
 	}
-	else x = atan(x/sqrt(1-x*x));
-	if (negative) x = -x;
-	if (cosfl) {
-		return M_PI_2 - x;
+	y += y * g * POLYNOM4(g, x) / POLYNOM5(g, y);
+	if (i == 1) {
+		if (cosfl == 0 || ! negative) {
+			y = (y + M_PI_4) + M_PI_4;
+		}
+		else if (cosfl && negative) {
+			y = (y + M_PI_2) + M_PI_2;
+		}
 	}
-	return x;
+	if (! cosfl && negative) y = -y;
+	return y;
 }
 
 double

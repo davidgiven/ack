@@ -3,7 +3,6 @@ asin.c
 atan2.c
 atan.c
 ceil.c
-cosh.c
 fabs.c
 gamma.c
 hypot.c
