@@ -29,12 +29,12 @@
 #ifndef FILE
 
 extern struct _io_buf {
-    int     _fd;
     int     _count;
     int     _flags;
     unsigned char   *_buf;
     unsigned char   *_ptr;
     int	    _bufsiz;
+    int     _fd;
 }  *_io_table[_NFILES], _stdin, _stdout, _stderr;
 
 
