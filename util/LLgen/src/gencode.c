@@ -73,6 +73,8 @@ STATIC		genincrdecr();
 STATIC		add_cases();
 STATIC int	analyze_switch();
 STATIC		out_list();
+STATIC		genextname();
+STATIC		correct_prefix();
 
 # define NOPOP		-20000
 
@@ -90,8 +92,8 @@ doclose(f)
 STATIC int *
 mk_tokenlist()
 {
-	register int *p = (int *)alloc(ntokens * sizeof(int)) + ntokens;
 	register int i = ntokens;
+	register int *p = (int *)alloc((unsigned)(i * sizeof(int))) + i;
 
 	while (i--) *--p = -1;
 
@@ -111,6 +113,7 @@ gencode(argc) {
 		/* Open temporary */
 		f_input = p->f_name;
 		opentemp(f_input);
+		correct_prefix();
 		/* generate code ... */
 		copyfile(incl_file);
 		generate(p);
@@ -147,7 +150,7 @@ geninclude() {
 		}
 	}
 	doclose(fpars);
-	install(HFILE, ".");
+	install(f_include, ".");
 }
 
 STATIC
@@ -163,6 +166,7 @@ genrecovery() {
 
 	opentemp((string) 0);
 	f = fpars;
+	correct_prefix();
 	copyfile(incl_file);
 	if (!firsts) fputs("#define LLNOFIRSTS\n", f);
 	for (st = start; st; st = st->ff_next) {
@@ -190,9 +194,8 @@ genrecovery() {
 		if (g_gettype(p->n_rule) == ALTERNATION) {
 			genpush(findindex(p->n_contains));
 		}
-		fprintf(f, "\tL%d_%s();\n",
-			st->ff_nont,
-			p->n_name);
+		genextname(st->ff_nont, p->n_name, f);
+		fputs("();\n", f);
 		if (getntout(p) == NOSCANDONE) {
 			fputs("\tLL_NOSCANDONE(EOFILE);\n",f);
 		}
@@ -224,7 +227,7 @@ genrecovery() {
 	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
 	doclose(f);
-	install(RFILE, ".");
+	install(f_rec, ".");
 }
 
 STATIC
@@ -257,12 +260,13 @@ generate(f) p_file f; {
 		    getntparams(p) == 0) {
 			continue;
 		}
-		fprintf(fpars,"L%d_%s (\n",s->o_index,p->n_name);
+		genextname(s->o_index, p->n_name, fpars);
 		if (p->n_flags & PARAMS) {
+			fputs("(\n", fpars);
 			controlline();
 			getparams();
 		}
-		else fputs(") {\n", fpars);
+		else fputs("() {\n", fpars);
 		if (p->n_flags & LOCALS) getaction(1);
 		i = getntsafe(p);
 		mustpop = NOPOP;
@@ -491,12 +495,14 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			     getntsafe(n) <= SAFESCANDONE)) {
 				genpop(findindex(n->n_contains));
 			}
-			fprintf(f,"L%d_%s(\n",g_getcont(p), n->n_name);
+			genextname(g_getcont(p), n->n_name, f);
 			if (g_getnpar(p)) {
+				fputs("(\n", f);
 				controlline();
 				getaction(0);
+				fputs(");\n",f);
 			}
-			fputs(");\n",f);
+			else	fputs("();\n", f);
 			safety = getntout(n);
 			break; }
 		  case TERM :
@@ -604,8 +610,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 	compacted = analyze_switch(tokenlist);
 	if (compacted) {
 		fputs("{", f);
-		out_list(tokenlist, listcount, casecnt);
-		fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount++);
+		out_list(tokenlist, listcount++, casecnt);
 	}
 	else	fputs("switch(LLcsymb) {\n", f);
 	casecnt = 0;
@@ -811,7 +816,6 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	register int	rep_kind = r_getkind(q);
 	int		term_is_persistent = (q->t_flags & PERSISTENT);
 	int		ispushed = NOPOP;
-	int		sw = SAFE;
 
 	if (!(toplevel > 0 && 
 	      (safety == 0 || (!onerror && safety <= SAFESCANDONE)) &&
@@ -858,7 +862,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		ispushed = NOPOP;
 	}
 	if (rep_kind == STAR || rep_kind == OPT) {
-		sw = genswhead(q, rep_kind, rep_count, safety, ispushed);
+		genswhead(q, rep_kind, rep_count, safety, ispushed);
 	}
 	rulecode(q->t_rule,
 		 t_safety(rep_kind,rep_count,term_is_persistent,safety),
@@ -872,7 +876,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		if (rep_count) {
 			fputs("if (!LL_i) break;\n", f);
 		}
-		sw = genswhead(q, rep_kind, rep_count, safety, ispushed);
+		genswhead(q, rep_kind, rep_count, safety, ispushed);
 	}
 	if (rep_kind != OPT && rep_kind != FIXED) fputs("continue;\n", f);
 	if (rep_kind != FIXED) {
@@ -940,8 +944,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	compacted = analyze_switch(tokenlist);
 	fputs("{", f);
 	if (compacted) {
-		out_list(tokenlist, listcount, casecnt);
-		fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount++);
+		out_list(tokenlist, listcount++, casecnt);
 	}
 	else	fputs("switch(LLcsymb) {\n", f);
 	casecnt = 0;
@@ -990,7 +993,6 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 		genpop(ispushed);
 	}
 	free((p_mem) tokenlist);
-	return safeterm;
 }
 
 STATIC
@@ -1132,4 +1134,38 @@ out_list(tokenlist, listno, casecnt)
 		fprintf(f, "%c%d,", i % 10 == 0 ? '\n': ' ', tokenlist[i]);
 	}
 	fputs(c_arrend, f);
+	fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount);
+}
+
+STATIC
+genextname(d, s, f)
+	char *s;
+	FILE *f;
+{
+	fprintf(f, "%s%d_%s", prefix ? prefix : "LL", d, s);
+}
+
+STATIC
+correct_prefix()
+{
+	register FILE *f = fpars;
+	register char *s = prefix;
+
+	if (s) {
+		fprintf(f, "#define LLsymb %ssymb\n", s);
+		fprintf(f, "#define LLerror %serror\n", s);
+		fprintf(f, "#ifndef LL_FASTER\n#define LLscan %sscan\n#endif\n", s);
+		fprintf(f, "#define LLscnt %sscnt\n", s);
+		fprintf(f, "#define LLtcnt %stcnt\n", s);
+		fprintf(f, "#define LLcsymb %scsymb\n", s);
+		fprintf(f, "#define LLread %sread\n", s);
+		fprintf(f, "#define LLskip %sskip\n", s);
+		fprintf(f, "#define LLnext %snext\n", s);
+		fprintf(f, "#define LLfirst %sfirst\n", s);
+		fprintf(f, "#define LLnewlevel %snewlevel\n", s);
+		fprintf(f, "#define LLoldlevel %soldlevel\n", s);
+		fprintf(f, "#define LLlex %slex\n", s);
+		fprintf(f, "#define LLmessage %smessage\n", s);
+	}
+	fprintf(f, "#include \"%s\"\n", f_include);
 }

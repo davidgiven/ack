@@ -140,6 +140,21 @@ def			{	register string p; }
 				else	error(linecount,"Duplicate %%lexical");
 			}
 	  ';'
+	| C_PREFIX C_IDENT
+	  /*
+	   * Prefix of external names (default: LL)
+	   */
+			{	if (!prefix) {
+					prefix = store(lextoken.t_string);
+					if (strlen(prefix) > 6) {
+						error(linecount,
+							"%%prefix too long");
+						prefix[6] = 0;
+					}
+				}
+				else	error(linecount,"Duplicate %%prefix");
+			}
+	  ';'
 	| C_ONERROR C_IDENT
 			{	if (! onerror) {
 					onerror = store(lextoken.t_string);
@@ -230,7 +245,7 @@ productions(p_gram *p;)
 			{	if (n_alts >= max_alts-2) {
 					alt_table = (p_gram ) ralloc(
 						(p_mem) alt_table,
-						(max_alts+=ALTINCR)*sizeof(t_gram));
+						(unsigned)(max_alts+=ALTINCR)*sizeof(t_gram));
 				}
 				if (t & DEF) {
 					if (haddefault) {
@@ -316,7 +331,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 			{	if (n_rules >= max_rules-2) {
 					rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
-						  (max_rules+=RULEINCR)*sizeof(t_gram));
+						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
 				}
 				kind = FIXED;
 				cnt = 0;
@@ -344,7 +359,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 					if (n_rules >= max_rules-2) {
 					    rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
-						  (max_rules+=RULEINCR)*sizeof(t_gram));
+						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
 					}
 				    }
 				    elem = *--(q->t_rule);

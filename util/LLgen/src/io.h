@@ -21,17 +21,19 @@
 
 /* FILES */
 
-# define OUTFILE	"LL.output"	/* -v option */
-# define PARSERFILE	"LL.xxx"	/* This is what we want */
-# define ACTFILE	"LL.temp"	/* temporary file to save actions */
-# define HFILE		"Lpars.h"	/* file for "#define's " */
-# define RFILE		"Lpars.c"	/* Error recovery */
+# define OUTFILE	"%s.output"	/* -v option */
+# define PARSERFILE	"xxxXXXXXX"	/* This is what we want */
+# define ACTFILE	"tempXXXXXX"	/* temporary file to save actions */
+# define HFILE		"%spars.h"	/* file for "#define's " */
+# define RFILE		"%spars.c"	/* Error recovery */
 
 extern FILE *finput;
 extern FILE *fpars;
 extern FILE *fact;
 extern FILE *fout;
-extern string	f_pars;
-extern string	f_temp;
-extern string	f_out;
+extern char	f_pars[];
+extern char	f_temp[];
+extern char	f_out[];
 extern string	f_input;
+extern char	f_include[];
+extern char	f_rec[];

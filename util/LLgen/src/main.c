@@ -36,6 +36,7 @@ extern		fatal();
 extern		comfatal();
 extern		copyfile();
 extern		install();
+extern char	*mktemp();
 # ifndef NDEBUG
 extern		badassertion();
 # endif not NDEBUG
@@ -129,12 +130,21 @@ main(argc,argv) register string	argv[]; {
 # ifndef NDEBUG
 	}
 # endif
+	mktemp(f_temp);
+	mktemp(f_pars);
 	if ((fact = fopen(f_temp,"w")) == NULL) {
 		fputs("Cannot create temporary\n",stderr);
 		exit(1);
 	}
 	name_init();
 	readgrammar(argc,argv);
+	sprintf(f_out, OUTFILE, prefix ? prefix : "LL");
+
+	/* for the following two filenames only one L is used; historical
+	   reasons ...
+	*/
+	sprintf(f_include, HFILE, prefix ? prefix : "L");
+	sprintf(f_rec, RFILE, prefix ? prefix : "L");
 	setinit(ntneeded);
 	maxnt = &nonterms[nnonterms];
 	maxt = &tokens[ntokens];
