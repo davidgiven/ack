@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "assert.h"
 #include "param.h"
 #include "types.h"
@@ -76,9 +80,12 @@ outregs() {
 		}
 		oldreg(rp);
 	}
-	/* Now an empty mes 3 to signal the end. */
+	/* List of register messages is followed by an empty ms_reg
+	 * unless an ms_gto was in this procedure, then the ms_gto
+	 * will be output. Kludgy.
+	 */
 	outinst(ps_mes);
-	outoff((offset)ms_reg);
+	outoff((offset)(curpro.gtoproc? ms_gto : ms_reg));
 	outinst(sp_cend);
 	curpro.freg = (reg_p) 0;
 }
