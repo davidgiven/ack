@@ -41,7 +41,6 @@ eval.c
 expr.c
 expr.str
 expression.g
-faulty.h
 field.c
 field.str
 file_info.h

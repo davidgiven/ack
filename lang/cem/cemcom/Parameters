@@ -74,7 +74,7 @@
 
 
 !File: dataflow.h
-#undef DATAFLOW	1	/* produce some compile-time xref	*/
+#define DATAFLOW	1	/* produce some compile-time xref	*/
 
 
 !File: debug.h
@@ -82,7 +82,7 @@
 
 
 !File: use_tmp.h
-#undef USE_TMP		1	/* collect exa, exp, ina and inp commands
+#define USE_TMP		1	/* collect exa, exp, ina and inp commands
 					and let them precede the rest of
 					the generated compact code	*/
 
@@ -97,11 +97,11 @@
 
 
 !File: inputtype.h
-#undef INP_READ_IN_ONE	1	/* read input file in one	*/
+#define INP_READ_IN_ONE	1	/* read input file in one	*/
 
 
 !File: nopp.h
-#define NOPP		1	/* if NOT defined, use built-int preprocessor */
+#undef NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h
@@ -122,7 +122,7 @@
 
 
 !File: noRoption.h
-#define NOROPTION	1	/* if NOT defined, R option is implemented */
+#undef NOROPTION	1	/* if NOT defined, R option is implemented */
 
 
 !File: nocross.h
