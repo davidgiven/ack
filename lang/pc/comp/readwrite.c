@@ -36,6 +36,7 @@ ChkRead(arg)
 			error("\"%s\": variable-access expected", name);
 			return;
 		}
+		MarkUsed(file);
 	}
 	else if( !(file = ChkStdInOut(name, 0)) )
 		return;
@@ -112,6 +113,7 @@ ChkReadln(arg)
 		else	{
 			file = arg->nd_left;
 			arg = arg->nd_right;
+			MarkUsed(file);
 		}
 	}
 	else if( !(file = ChkStdInOut(name, 0)) )
@@ -159,6 +161,7 @@ ChkWrite(arg)
 			return;
 		}
 		file = expp;
+		MarkUsed(file);
 		arg = arg->nd_right;
 		if( !arg )	{
 			error("\"%s\": expression expected", name);
@@ -211,6 +214,7 @@ ChkWriteln(arg)
 			return;
 		}
 		file = expp;
+		MarkUsed(file);
 		arg = arg->nd_right;
 	}
 	else if( !(file = ChkStdInOut(name, 1)) )
