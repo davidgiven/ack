@@ -56,7 +56,6 @@ char *buffer;
 		}
 		if( *c=='.') *c=0;
 	}
-	strcat(buffer," ");
 }
 _prfnum(f)
 double f;
@@ -68,6 +67,7 @@ double f;
 	_asschn();
 	c= buffer;
 	_str(f,c);
+	strcat(buffer," ");
 	_out(buffer);
 }
 _prstr(str)

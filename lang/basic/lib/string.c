@@ -129,7 +129,7 @@ double	d,f;
 	s->strlength= i;
 	s->strcount=1;
 	s->strval= salloc(i+1);
-	s->strval[i]=0;
+	s->strval[i--]=0;
 	for(; i>=0;i--)
 		s->strval[i]= j;
 	return(s);
@@ -142,7 +142,7 @@ String *s, *s2;
 
 	/*printf("mid called %d %d %s %s\n",i1,i2,s->strval, s2->strval);*/
 	if (i2 < 0 || i1 < -1) error(3);
-	if( s->strlength<i2 || s->strlength < i1+i2) error(3);	/* source string too short */
+	if( s->strlength<i2 || s2->strlength < i1) error(3);	/* source string too short */
 	if( i1== -1) i1= s2->strlength;
 	l= s->strlength - i2+1;
 	if( i1>l ) i1=l;

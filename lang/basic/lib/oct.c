@@ -14,11 +14,16 @@ String *_hex(i)
 int i;
 {
 	char buffer[30];
-	register char *p = buffer;
+
 	sprintf(buffer,"%x",i);
-	while (*p) {
-		if (*p >= 'a' && *p <= 'f') *p += 'A'-'a';
-		p++;
-	}
 	return( (String *)_newstr(buffer));
+}
+
+String *_nstr(f)
+	double f;
+{
+	char buffer[80];
+
+	_str(f, buffer);
+	return (String *) _newstr(buffer);
 }
