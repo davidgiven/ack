@@ -54,8 +54,8 @@ con_mult(sz) word sz; {
 
 con_float() {
 #ifdef ACK_ASS
-	double f, f1;
-	double atof(), frexp(), modf();
+	double f;
+	double atof(), frexp();
 	int i, j;
 	int sign = 0;
 	int fraction ;
@@ -77,19 +77,25 @@ con_float() {
 		f += f;
 		i --;
 	}
-	f = modf(2 * f, &f1); /* hidden bit */
+	f = 2*f - 1.0;		/* hidden bit */
 	i = (i + 128) & 0377;
 	fraction = (sign << 15) | (i << 7);
 	for (j = 6; j>= 0; j--) {
-		if (f >= 0.5) fraction |= (1 << j);
-		f = modf(2*f, &f1);
+		f *= 2;
+		if (f >= 1.0) {
+			fraction |= (1 << j);
+			f -= 1.0;
+		}
 	}
 	fprintf(codefile, ".data2 0%o", fraction);
 	for (i = argval / 2 - 1; i; i--) {
 		fraction = 0;
 		for (j = 15; j>= 0; j--) {
-			if (f >= 0.5) fraction |= (1 << j);
-			f = modf(2*f, &f1);
+			f *= 2;
+			if (f >= 1.0) {
+				fraction |= (1 << j);
+				f -= 1.0;
+			}
 		}
 		fprintf(codefile, ", 0%o", fraction);
 	}
