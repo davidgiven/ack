@@ -466,7 +466,7 @@ Some actions still have to be done by hand.
 .sp 1
 .IP \-
 The installation of the PUBMAC macro package is not done
-automatically because you needs super-user privileges to do
+automatically because you need super-user privileges to do
 that on most systems.
 This macro package is used with several of the documents
 provided in the Kit.
@@ -898,7 +898,7 @@ z80	Hermac/z80	2/2	C		z80	\fIi80\fP is faster
 s2650	Signetics 2650				s2650	Assembler only
 .TE
 .PP
-The commands \fBint\fP, \fBint22\fP, \fBint24\fP and \fBint44\fP
+The commands \fBint22\fP, \fBint24\fP and \fBint44\fP
 produce e.out files with EM machine code which must be interpreted.
 The Kit contains two interpreters: one running under PDP 11/V7 UNIX,
 and one for the M68000, running under the PMDS system, SUN systems, 
@@ -1202,6 +1202,7 @@ doc/m68020.doc	Motorola M68000/M68020 backend description
 doc/occam	Occam-frontend description
 doc/ego	Global Optimizer description
 doc/top	Target Optimizer description
+doc/m2ref.doc	Modula-2 frontend description
 doc/install.doc	this document
 doc/install.pr	this document (formatted)
 .TE
