@@ -24,13 +24,11 @@ libsrc: $(EMHOME)/lang/cem/libcc.ansi/libsrc .
 cmp:	cmplibc cmphead
 	-../../compare $(OLIB)
 
-cmplibc:
-	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
-	tar xf libsrc
-	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tail
+cmplibc: libsrc
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=`homefromsubdir $(EMHOME)`" tail
 
 cmphead: head_$(PREF).e
-	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" head
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=$(EMHOME)" head
 
 clean:
 	rm -rf `cat LIST` LIST OLIST MakeArch Makefile make.proto libsrc head_$(PREF).[e$(SUF)]
