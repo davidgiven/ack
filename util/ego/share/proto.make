@@ -54,7 +54,7 @@ OBS =	alloc.$(SUF) cset.$(SUF) debug.$(SUF) \
 	parser.$(SUF) get.$(SUF) put.$(SUF) aux.$(SUF) stack_chg.$(SUF) \
 	locals.$(SUF) init_glob.$(SUF)
 
-all:		classdefs.h pop_push.h $(OBS)
+all:		classdefs.h $(SRC_DIR)/pop_push.h $(OBS)
 		$(AR) r share.$(LIBSUF) $(OBS)
 		$(RANLIB) share.$(LIBSUF)
 
@@ -63,12 +63,12 @@ install:	all
 		cp share.$(LIBSUF) $(TARGET_HOME)/lib.bin/ego/share.$(LIBSUF)
 		$(RANLIB) $(TARGET_HOME)/lib.bin/ego/share.$(LIBSUF)
 		cp classdefs.h $(TARGET_HOME)/lib.bin/ego/classdefs.h
-		cp pop_push.h $(TARGET_HOME)/lib.bin/ego/pop_push.h
+		cp $(SRC_DIR)/pop_push.h $(TARGET_HOME)/lib.bin/ego/pop_push.h
 
 cmp:		all
 		-cmp share.$(LIBSUF) $(TARGET_HOME)/lib.bin/ego/share.$(LIBSUF)
 		-cmp classdefs.h $(TARGET_HOME)/lib.bin/ego/classdefs.h
-		-cmp pop_push.h $(TARGET_HOME)/lib.bin/ego/pop_push.h
+		-cmp $(SRC_DIR)/pop_push.h $(TARGET_HOME)/lib.bin/ego/pop_push.h
 
 classdefs.h: \
 	makeclassdef \
@@ -79,9 +79,9 @@ makeclassdef: \
 	$(SRC_DIR)/makecldef.c
 	 $(UCC) $(UCFLAGS) $(ULDFLAGS) -o makeclassdef $(SRC_DIR)/makecldef.c
 
-pop_push.h: \
+$(SRC_DIR)/pop_push.h: \
 	$(SRC_HOME)/etc/em_table $(SRC_DIR)/pop_push.awk
-	 awk -f $(SRC_DIR)/pop_push.awk < $(SRC_HOME)/etc/em_table > pop_push.h
+	 awk -f $(SRC_DIR)/pop_push.awk < $(SRC_HOME)/etc/em_table > $(SRC_DIR)/pop_push.h
 
 show: \
 	$(SRC_DIR)/show.c
@@ -94,13 +94,13 @@ opr:
 	make pr | opr
 
 clean:
-	rm -f makeclassdef classdefs.h *.$(SUF) Out out nohup.out
+	rm -f makeclassdef classdefs.h *.$(SUF) Out out nohup.out *.$(LIBSUF) 
 
 lintlib:
 	-mkdir $(TARGET_HOME)/lib.bin/ego
 	$(MK_LINT_LIB) share $(TARGET_HOME)/lib.bin/ego $(CPPFLAGS) $(CFILES)
 
-depend:	pop_push.h classdefs.h
+depend:	$(SRC_DIR)/pop_push.h classdefs.h
 	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
 	echo '#DEPENDENCIES' >>Makefile.new
 	for i in $(CFILES) ; do \
@@ -211,7 +211,7 @@ parser.$(SUF):	$(EMH)/em_mnem.h
 parser.$(SUF):	$(EMH)/em_spec.h
 stack_chg.$(SUF):	$(SRC_DIR)/stack_chg.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/stack_chg.c
-stack_chg.$(SUF):	./pop_push.h
+stack_chg.$(SUF):	$(SRC_DIR)/pop_push.h
 stack_chg.$(SUF):	$(SRC_DIR)/global.h
 stack_chg.$(SUF):	$(SRC_DIR)/debug.h
 stack_chg.$(SUF):	$(SRC_DIR)/types.h
