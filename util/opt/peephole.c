@@ -777,19 +777,19 @@ repl_mul(lp, b, e)
 				newinstr(b, op_exg, sz); b = &((*b)->l_next);
 				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
 				newinstr(b, op_asp, sz); b = &((*b)->l_next);
-				newinstr(b, op_sbu, sz); b = &((*b)->l_next);
-				retval++;
-				newinstr(b, op_exg, sz); b = &((*b)->l_next);
-				newinstr(b, op_loc, n1); b = &((*b)->l_next);
-				newinstr(b, op_slu, sz); b = &((*b)->l_next);
-				retval++;
-				newinstr(b, op_exg, sz); b = &((*b)->l_next);
-				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
-				newinstr(b, op_asp, sz); b = &((*b)->l_next);
-				newinstr(b, op_adu, sz); b = &((*b)->l_next);
-				newinstr(b, op_exg, sz); b = &((*b)->l_next);
-				retval++;
 			}
+			newinstr(b, op_sbu, sz); b = &((*b)->l_next);
+			retval++;
+			newinstr(b, op_exg, sz); b = &((*b)->l_next);
+			newinstr(b, op_loc, n1); b = &((*b)->l_next);
+			newinstr(b, op_slu, sz); b = &((*b)->l_next);
+			retval++;
+			newinstr(b, op_exg, sz); b = &((*b)->l_next);
+			newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
+			newinstr(b, op_asp, sz); b = &((*b)->l_next);
+			newinstr(b, op_adu, sz); b = &((*b)->l_next);
+			newinstr(b, op_exg, sz); b = &((*b)->l_next);
+			retval++;
 			if (n0) {
 				newinstr(b, op_loc, n0); b = &((*b)->l_next);
 				newinstr(b, op_slu, sz); b = &((*b)->l_next);
