@@ -62,8 +62,8 @@ atof(p)
 
 	if (exp != 0) {
 		int oldexp = exp;
-		double exp5 = 5;
-		double correction = 1;
+		double exp5 = 5.0;
+		double correction = 1.0;
 
 		while (exp) {
 			if (exp % 2) correction *= exp5;

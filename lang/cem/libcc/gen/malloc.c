@@ -27,19 +27,29 @@ unsigned len;
   register char *p;
   register int click = CLICK_SIZE;
 
+  p = sbrk(0);
+  len += (char *) ALIGN((vir_bytes) p, sizeof(char *)) - p;
   while (click >= 4) {
-  	p = (char *) ALIGN((vir_bytes) top + sizeof(char *) + len, click)
-							+ BUGFIX;
-	if (p > top && brk(p - BUGFIX) >= 0) break;
-	click >>= 1;
+  	unsigned len1 = ALIGN((vir_bytes) p + len + sizeof(char *), click) - (vir_bytes) p;
+	char *p1 = p;
+  	if (p + len1 + BUGFIX < p || (p1 = sbrk(len1)) == (char *) -1) {
+		click >>= 1;
+		continue;
+	}
+	p = p1;
+  	if (top + sizeof(char *) != p) {
+		/* someone else has done an sbrk */
+		NEXT(top) = (char *) ((vir_bytes) p | BUSY);
+  	} else {
+		for (p = bottom; NEXT(p) != 0; p = (char *) (* (vir_bytes *) p & ~BUSY))
+			;
+	}
+	top = p + len1 - sizeof(char *);
+	NEXT(p) = top;
+	NEXT(top) = 0;
+	return 1;
   }
-  if (click < 4) return(0);
-  top = p - (BUGFIX + sizeof(char *));
-  for (p = bottom; NEXT(p) != 0; p = (char *) (* (vir_bytes *) p & ~BUSY))
-	;
-  NEXT(p) = top;
-  NEXT(top) = 0;
-  return(1);
+  return 0;
 }
 
 char *malloc(size)
@@ -49,7 +59,10 @@ unsigned size;
   register unsigned len = ALIGN(size, sizeof(char *)) + sizeof(char *);
 
   if ((p = bottom) == 0) {
-	top = bottom = p = sbrk(sizeof(char *));
+	p = sbrk(sizeof(char *));
+	sbrk((char *) ALIGN((vir_bytes) p, sizeof(char *)) - p);
+	p = (char *) ALIGN((vir_bytes) p, sizeof(char *));
+	top = bottom = p;
 	NEXT(p) = 0;
   }
   while ((next = NEXT(p)) != 0)

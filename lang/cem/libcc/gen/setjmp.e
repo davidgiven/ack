@@ -2,7 +2,7 @@
  mes 2,EM_WSIZE,EM_PSIZE
 
  exp $setjmp
- pro $setjmp,2*EM_WSIZE
+ pro $setjmp,3*EM_WSIZE
 
 ; setjmp saves the StackPointer and the LocalBase, and the chunk of
 ; memory between the StackPointer and the ArgumentBase, + its size in a
@@ -20,6 +20,13 @@
 ; setjmp does not have register variables, and that it saves all registers
 ; that are available for variables.
 
+#ifdef __BSD4_2
+ loc 0
+ cal $sigblock
+ asp EM_WSIZE
+ lfr EM_WSIZE
+ stl -3*EM_WSIZE
+#endif
  loc 0
  stl -2*EM_WSIZE
  lor 1		; load StackPointer
@@ -65,10 +72,10 @@
  bls EM_WSIZE	; block copy
  loc 0
  ret EM_WSIZE
- end 2*EM_WSIZE
+ end 3*EM_WSIZE
 
  exp $longjmp
- pro $longjmp,2*EM_WSIZE
+ pro $longjmp,3*EM_WSIZE
 
 ; first, find out wether the stack grows upwards
  loc 0
@@ -136,6 +143,13 @@
  str 0		; restore LocalBase
  stl -EM_WSIZE	; saves the return value
  str 1		; restores the StackPointer
+#ifdef __BSD4_2
+ lol -3*EM_WSIZE
+ cal $sigsetmask
+ asp EM_WSIZE
+ lfr EM_WSIZE
+ asp EM_WSIZE
+#endif
  lol -EM_WSIZE
  dup EM_WSIZE
  zne *3
@@ -144,4 +158,4 @@
  loc 1
 3
  ret EM_WSIZE
- end 2*EM_WSIZE
+ end 3*EM_WSIZE
