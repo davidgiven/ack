@@ -1639,10 +1639,7 @@ ciu.z:	mov	(sp)+,r0
 	asr	r0
 	bcc	2f
 	clrb	1(sp)
-2:	tst	(sp)
-.if .test
-	jlt	9f
-.endif
+2:
 6:	tst	r0
 	beq	3f
 	blt	5f
