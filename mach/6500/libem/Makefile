@@ -8,7 +8,7 @@ cmp:		tail_em.s.a tail_em.ve.s.a
 		-../../compare tail_em.s.a tail_em
 		-../../compare tail_em.ve.s.a tail_em.vend
 
-distr:		tail_em.s.a tail_em.ve.s.a
+distr:		tail_em.ve.s.a
 
 tail_em.s.a:
 		arch cr `cat LIST`
