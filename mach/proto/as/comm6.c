@@ -61,7 +61,8 @@ register item_t *ip;
 	flag = SYM_EXT|SYM_LOC;	/* S_EXT not stable in PASS_1 */
 #endif THREE_PASS
 #ifdef GENLAB
-	if (strncmp(ip->i_name, genlab, sizeof(genlab)-1) == 0)
+	if (!(flag & SYM_EXT) &&
+	    strncmp(ip->i_name, genlab, sizeof(genlab)-1) == 0)
 		flag = SYM_LAB;
 #endif GENLAB
 	if (sflag & flag)
