@@ -4,6 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include "param.h"
 #include "tables.h"
+#include "mach.h"
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -64,7 +65,12 @@ main(argc,argv) char **argv; {
 			cc4 /= n;
 			break;
 		default:
+#ifdef MACH_OPTIONS
+			mach_option(argv[0]);
+#else
 			error("Unknown flag %c",argv[0][1]);
+#endif
+			break;
 		}
 	}
 	if (argc > 2)
