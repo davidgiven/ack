@@ -34,13 +34,15 @@ fdopen(int fd, const char *mode)
 	while(*mode) {
 		switch(*mode++) {
 		case 'b':
-			break;
+			continue;
 		case '+':
 			flags |= _IOREAD | _IOWRITE;
-			break;
+			continue;
+		/* The sequence may be followed by aditional characters */
 		default:
-			return (FILE *)NULL;
+			break;
 		}
+		break;
 	}
 
 	if ((stream = (FILE *) malloc(sizeof(FILE))) == NULL) {
