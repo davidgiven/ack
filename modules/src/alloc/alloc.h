@@ -3,6 +3,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef ALLOC_INCLUDED
+#define ALLOC_INCLUDED
 /*	PROGRAM'S INTERFACE TO MEMORY ALLOCATION ROUTINES		*/
 
 /*	This file serves as the interface between the program and the
@@ -34,3 +36,4 @@ typedef struct _ALLOC_ {
 #define	st_free(ptr, phead, size)	(botch((char *)(ptr), size), \
 						_A_st_free(ptr, phead, size))
 #endif	BOTCH_FREE
+#endif ALLOC_INCLUDED
