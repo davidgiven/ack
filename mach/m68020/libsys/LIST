@@ -40,6 +40,7 @@ ptrace.s
 read.s
 setgid.s
 setuid.s
+Xstat.c
 stat.s
 stime.s
 sync.s
