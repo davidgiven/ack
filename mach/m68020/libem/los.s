@@ -26,10 +26,10 @@
 2:
 	add.l	d0, a0		!>=4 bytes
 	asr.l 	#2, d0
-	sub.l	#1, d0
 
 4:	move.l	-(a0), -(sp)	
-	dbf	d0, 4b
+	sub.l	#1, d0
+	bne	4b
 3:
 	jmp	(a1)
 .align 2

@@ -47,10 +47,10 @@ EILLINS=18
 	muls.l	d1, d0
 	add.l	d0, a1		! address of 4n byte element
 	asr.l	#2, d1
-	sub.l	#1, d1
 	move.l	(sp)+,a0
 1:
 	move.l	(sp)+, (a1)+
-	dbf	d1, 1b
+	sub.l	#1, d1
+	bne	1b
 	jmp	(a0)
 .align 2

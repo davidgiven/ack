@@ -45,10 +45,10 @@ EILLINS=18
 	add.l	d0, a1		! address of 4n byte element
 	add.l	d1, a1		! because of predecrement
 	asr.l	#2, d1
-	sub.l	#1, d1
 	move.l	(sp)+,a0
 1:
 	move.l	-(a1), -(sp)
-	dbf	d1, 1b
+	sub.l	#1, d1
+	bne	1b
 	jmp	(a0)
 .align 2

@@ -25,10 +25,10 @@
 	bra	4f
 2:
 	asr.l	#2, d0
-	sub.l	#1, d0
 3:
 	move.l	(sp)+, (a0)+
-	dbf	d0, 3b
+	sub.l	#1, d0
+	bne	3b
 4:
 	jmp	(a1)		! return
 .align 2

@@ -15,10 +15,10 @@ ESET=2
 	move.l	d2, a1
 	move.l	d1, d2
 	asr.l	#2, d2
-	sub.l	#1, d2
 1:
 	clr.l	-(sp)
-	dbf	d2, 1b
+	sub.l	#1, d2
+	bne	1b
 
 	move.l	d0, d2
 	asr.l	#3, d2		! offset from sp in bytes
