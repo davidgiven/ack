@@ -3858,7 +3858,12 @@ with exact STACK
  * Group 15: miscellaneous instructions		*
  ************************************************/
 
-pat asp small($1)
+pat asp $1==4
+with any-pre_post
+with STACK
+    gen add_l {const, $1}, sp
+pat asp $1==8
+with any-pre_post any-pre_post
 with STACK
     gen add_l {const, $1}, sp
 pat asp
