@@ -155,4 +155,4 @@ PrNode(nd, lvl)
 		break;
 	}
 }
-#endif DEBUG
+#endif /* DEBUG */

@@ -163,7 +163,7 @@ extern t_type
 #define	pointer_size	(SZ_POINTER)
 
 #define wrd_bits	(8*(int)word_size)
-#else NOCROSS
+#else /* NOCROSS */
 
 extern int
 	word_align,
@@ -187,7 +187,7 @@ extern arith
 
 extern unsigned int
 	wrd_bits;		/* from cstoper.c */
-#endif NOCROSS
+#endif /* NOCROSS */
 
 extern arith
 	ret_area_size;
@@ -225,14 +225,14 @@ extern t_type
 					(tpx)->tp_next)
 #define SubBaseType(tpx)	(assert((tpx)->tp_fund == T_SUBRANGE), \
 					(tpx)->tp_next)
-#else DEBUG
+#else /* DEBUG */
 #define ResultType(tpx)		((tpx)->tp_next)
 #define ParamList(tpx)		((tpx)->prc_params)
 #define IndexType(tpx)		((tpx)->tp_next)
 #define ElementType(tpx)	((tpx)->tp_next)
 #define PointedtoType(tpx)	((tpx)->tp_next)
 #define SubBaseType(tpx)	((tpx)->tp_next)
-#endif DEBUG
+#endif /* DEBUG */
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->tp_next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)

@@ -105,7 +105,7 @@ Compile(src, dst)
 		LexScan();
 		return 1;
 	}
-#endif DEBUG
+#endif /* DEBUG */
 	open_scope(OPENSCOPE);
 	GlobalVis = CurrVis;
 	close_scope(0);

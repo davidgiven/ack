@@ -304,7 +304,7 @@ WalkProcedure(procedure)
 			too_big = ++data_label;
 			C_df_dlb(too_big);
 			C_bss_cst(func_res_size, (arith)0, 0);
-#endif BIG_RESULT_ON_STACK
+#endif /* BIG_RESULT_ON_STACK */
 		}
 	}
 
@@ -441,7 +441,7 @@ WalkProcedure(procedure)
 		C_lal(procedure->df_type->prc_nbpar);
 #else
 		c_lae_dlb(too_big);
-#endif BIG_RESULT_ON_STACK
+#endif /* BIG_RESULT_ON_STACK */
 		C_sti(func_res_size);
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
@@ -454,7 +454,7 @@ WalkProcedure(procedure)
 #else
 		c_lae_dlb(too_big);
 		func_res_size = pointer_size;
-#endif BIG_RESULT_ON_STACK
+#endif /* BIG_RESULT_ON_STACK */
 	}
 	else if (StackAdjustment) {
 		/* First save the function result in a safe place.

@@ -229,7 +229,7 @@ DoOption(text)
 			}
 		}
 	}
-#endif NOCROSS
+#endif /* NOCROSS */
 	break;
 	}
 }

@@ -389,4 +389,4 @@ PrDef(df)
 {
 	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }
-#endif DEBUG
+#endif /* DEBUG */
