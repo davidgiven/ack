@@ -2062,6 +2062,16 @@ pat cui					leaving cuu
 
 pat cuu
 
+pat loc loc cii zeq $1==1
+with GENREG STACK
+gen test %1.1
+    je {label, $4}
+
+pat loc loc cii zne $1==1
+with GENREG STACK
+gen test %1.1
+    jne {label, $4}
+
 pat loc loc cii loc and zeq $4<256 && $4>=0 && $5==4 && $1==1 && $2==4
 		leaving loc $4 and $5 zeq $6
 pat loc loc cii loc and zne $4<256 && $4>=0 && $5==4 && $1==1 && $2==4
@@ -2620,7 +2630,26 @@ pat loc cmu zne $1<256 && $1>=0 && $2==4 call loccmuzxx("jne")
  *  Group 13 : Branch Instructions				   *
  *******************************************************************/
 
-pat bra
+pat lab topeltsize($1)==4 && !fallthrough($1)
+  with STACK
+  kills ALL
+  gen labeldef $1                 yields eax
+
+pat lab topeltsize($1)==4 && fallthrough($1)
+  with ACC STACK
+  kills ALL
+  gen labeldef $1                 yields eax
+
+pat lab topeltsize($1)!=4
+  with STACK
+  kills ALL
+  gen labeldef $1
+
+pat bra topeltsize($1)==4
+  with ACC STACK
+  gen jmp {label,$1}
+
+pat bra topeltsize($1)!=4
   with STACK
   gen jmp {label,$1}
 

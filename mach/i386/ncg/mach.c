@@ -57,10 +57,16 @@ string holstr(n) word n; {
 }
 */
 
+#ifdef REGVARS
+full lbytes;
+#endif
+
 prolog(nlocals) full nlocals; {
 
 	fputs("push ebp\nmov ebp,esp\n", codefile);
-	if (nlocals == 0) return;
+#ifdef REGVARS
+	lbytes = nlocals;
+#else
 #ifdef NOTDEF
 	probably not better on 386.
 	switch(nlocals) {
@@ -76,6 +82,7 @@ prolog(nlocals) full nlocals; {
 #ifdef NOTDEF
 		break;
 	}
+#endif
 #endif
 }
 
@@ -105,6 +112,22 @@ i_regsave()
 
 f_regsave()
 {
+	if (si_off == -lbytes) lbytes -= 4;
+	if (di_off == -lbytes) lbytes -= 4;
+	if (si_off == -lbytes) lbytes -= 4;
+	if (lbytes) fprintf(codefile, "\tsub\tesp,%ld\n",(long) lbytes);
+	if (firstreg == 1) {
+		fputs("push edi\n", codefile);
+		if (si_off != -1) fputs("push esi\n", codefile);
+	}
+	else if (firstreg == -1) {
+		fputs("push esi\n", codefile);
+		if (di_off != -1) fputs("push edi\n", codefile);
+	}
+	if (si_off >= 0)
+		fprintf(codefile, "mov esi,%ld(ebp)\n", si_off);
+	if (di_off >= 0)
+		fprintf(codefile, "mov edi,%ld(ebp)\n", di_off);
 }
 
 regsave(regstr, off, size)
@@ -114,16 +137,10 @@ regsave(regstr, off, size)
 	if (strcmp(regstr, "esi") == 0) {
 		if (! firstreg) firstreg = -1;
 		si_off = off;
-		fputs("push esi\n", codefile);
-		if (off >= 0)
-			fprintf(codefile, "mov esi,%ld(ebp)\n", off);
 	}
 	else {
 		if (! firstreg) firstreg = 1;
 		di_off = off;
-		fputs("push edi\n", codefile);
-		if (off >= 0)
-			fprintf(codefile, "mov edi,%ld(ebp)\n", off);
 	}
 }
 
