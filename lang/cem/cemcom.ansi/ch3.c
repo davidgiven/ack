@@ -571,11 +571,17 @@ int qual;
 	ASSERT(tp);
 
 	if (tp->tp_typequal & qual) return 1;
-	sdf = tp->tp_sdef;
-	while (sdf) {
-		if (recurqual(sdf->sd_type, qual))
-			return 1;
-		sdf = sdf->sd_sdef;
+	switch(tp->tp_fund) {
+	case UNION:
+	case STRUCT:
+	case ENUM:
+		sdf = tp->tp_sdef;
+		while (sdf) {
+			if (recurqual(sdf->sd_type, qual))
+				return 1;
+			sdf = sdf->sd_sdef;
+		}
+		break;
 	}
 	return 0;
 }
