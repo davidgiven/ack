@@ -10,10 +10,8 @@ int n, *ref_exp;
 	int exp;
 
 	exp= 0;
-	if (n<0)
-		n= -n;
 
-	if (!n)
+	if (n <= 0)
 		return 0;
 
 	while (!(n % 2))
