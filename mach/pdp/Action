@@ -31,3 +31,7 @@ name "PDP 11 Basic library"
 system pdp*
 dir libbc
 end
+name "PDP 11 Occam library"
+system pdp*
+dir liboc
+end
