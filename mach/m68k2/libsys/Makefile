@@ -1,5 +1,6 @@
+# $Header$
 install:
-	ln tail_mon.a tail_mon ; ../../install tail_mon ; rm tail_mon
+	../../install tail_mon.a tail_mon
 
 clean :
 
