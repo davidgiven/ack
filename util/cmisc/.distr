@@ -8,3 +8,5 @@ mkdep.1
 mkdep.c
 prid.1
 prid.c
+tabgen.1
+tabgen.c
