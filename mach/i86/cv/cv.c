@@ -11,12 +11,14 @@
 
 #include <stdio.h>
 
+/* unsigned char: not portable */
+
 struct exec {
-	unsigned char   a_magic[2];
-	unsigned char   a_flags;
-	unsigned char   a_cpu;
-	unsigned char   a_hdrlen;
-	unsigned char   a_unused;
+	char   a_magic[2];
+	char   a_flags;
+	char   a_cpu;
+	char   a_hdrlen;
+	char   a_unused;
 	unsigned short  a_version;
 	long            a_text;
 	long            a_data;
@@ -29,8 +31,8 @@ struct exec {
 struct  nlist
 {       char            n_name[8];
 	long            n_value; 
-	unsigned char   n_sclass;
-	unsigned char   n_numaux;
+	char   n_sclass;
+	char   n_numaux;
 	unsigned short  n_type;
 };
 
