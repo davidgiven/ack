@@ -21,3 +21,5 @@
 #define ALIGNWORD 2
 #undef ALIGNSECT
 #define ALIGNSECT 2
+#undef BITMAX
+#define BITMAX 4000

@@ -52,9 +52,9 @@ operation
 	| FOP_SO opr1
 		{ emit2( $1 | $2); op1($2); }
 	| MOVF fop2 ',' fregister
-		{ emit2(OPSTF | ($4 << 6) | $2); op2($2);}
+		{ emit2(OPLDF | ($4 << 6) | $2); op2($2);}
 	| MOVF fregister ',' fopr1
-		{ emit2(OPLDF | ($2 << 6) | $4); op1($4); }
+		{ emit2(OPSTF | ($2 << 6) | $4); op1($4); }
 	| FOP_SO_FR opr1 ',' fregister
 		{ emit2($1 | ($4 << 6) | $2); op1($2); }
 	| FOP_FR_SO fregister ',' opr1

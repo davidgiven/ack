@@ -70,7 +70,7 @@ ejump(opc, exp) expr_t exp; {
 	else	{
 # endif
 		if (opc != OPBRA)	{
-			emit2((opc^0400) | 04);
+			emit2((opc^0400) | 02);
 		}
 
 		exp_1 = exp;
