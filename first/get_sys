@@ -81,7 +81,8 @@ sun3		Sun 3 M68020 workstation
 sun2		Sun 2 M68000 workstation
 m68_sysV_0	Motorola 68000 with Uniplus System V.0 Unix
 m68020		Motorola M68020 VME131 running Unix System V/68 R2V2.1
-sparc		SUN SPARC workstation
+sparc		SUN SPARC workstation running SunOs 4
+sparc_solaris	SUN SPARC workstation running solaris 2
 ANY		Neither of the above
 "
 echo $E_FLAG "system type: [$SYSNAME] $E_SFX"

@@ -1,12 +1,12 @@
 set -e
 
-PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb:/usr/local/bin
+PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ccs/bin:/usr/ucb:/usr/local/bin
 export PATH
 
 $SRC_HOME/first/create_dir $CONFIG
 $SRC_HOME/first/create_dir $CONFIG/bin
 
-echo "PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb:/usr/local/bin; export PATH" > $CONFIG/bin/TakeAction
+echo "PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ccs/bin:/usr/ucb:/usr/local/bin; export PATH" > $CONFIG/bin/TakeAction
 cat $SRC_HOME/TakeAction >> $CONFIG/bin/TakeAction
 sed '/^#PARAMS/r make_macros' < $SRC_HOME/first/mk_makefile > $CONFIG/bin/mk_makefile
 cp $SRC_HOME/first/create_dir $CONFIG/bin/create_dir

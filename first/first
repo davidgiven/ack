@@ -57,6 +57,7 @@ m68_unisoft|m68k2)	ACM=m68k2 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k2 ;;
 m68_sysV_0|mantra)	ACM=mantra ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68k4 ;;
 m68020)		ACM=m68020 ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68020 ;;
 sparc)		ACM=sparc ; SYS=BSD4_2; BYTE_ORDER=3210 ; MACH=sparc ;;
+sparc_solaris)	ACM=sparc_solaris ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=solaris ;;
 i86)		ACM=i86 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
 xenix3)		ACM=xenix3 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
 minix)		ACM=minix ; SYS=V7; BYTE_ORDER=0123 ; MACH=i86 ;;
@@ -68,7 +69,7 @@ m68k4)		ACM=m68k4 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k4 ;;
 esac
 
 : do not change the order in MACH_LIST. check limit_enquire first.
-MACH_LIST="i86 xenix3 minix i386 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 sparc ns pdp s2650 vax4 z80 z8000 arm"
+MACH_LIST="i86 xenix3 minix i386 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 sparc sparc_solaris ns pdp s2650 vax4 z80 z8000 arm"
 
 while :
 do
@@ -118,8 +119,8 @@ V7|BSD4_1|BSD4_2|SYS_5)
 Choices:
 	V7	for Unix V7, BSD 2.*
 	BSD4_1	for Berkeley 4.1
-	BSD4_2	for Berkeley 4.2, 4.3, SunOS
-	SYS_5	for Xenix, System III, System V'
+	BSD4_2	for Berkeley 4.2, 4.3, SunOs 3, SunOs 4
+	SYS_5	for Xenix, System III, System V, SunOs 5'
 	echo $E_FLAG "Your choice (V7|BSD4_1|BSD4_2|SYS_5): [$OLDSYS] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in

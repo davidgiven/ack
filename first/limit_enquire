@@ -115,6 +115,9 @@ m68k4, pmds4, sun2, and mantra."
 					fi
 					;;
 			esac
+			;;
+		sparc)	shift
+			;;
 		esac
 		break
 		;;
@@ -147,6 +150,10 @@ m68k4, pmds4, sun2, and mantra."
 			DISABLE_SUP=$DISABLE_SUP" $1"
 			shift
 			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		sparc)
 			shift
 			DISABLE_SUP=$DISABLE_SUP" $1"
 			;;

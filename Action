@@ -216,9 +216,14 @@ name "Sun 3 M68020 support"
 dir mach/sun3
 indir
 end
-name "Sun 4 SPARC support"
+name "Sun 4 SPARC SunOs 4 support"
 dir mach/sparc
-system "sparc"
+system "sparc|sparc_solaris"
+indir
+end
+name "Sun 4 SPARC Solaris support"
+dir mach/sparc_solaris
+system "sparc_solaris"
 indir
 end
 name "Sun 2 M68000 support"

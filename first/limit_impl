@@ -85,13 +85,27 @@ do
 				esac
 				;;
 		esac
-	    	( cd $j
-	      	  cat >> Action <<EOF
+		case $j in
+		sparc*)
+			( cd $j
+	      		  cat >> Action <<EOF
+name "$j $i libraries"
+system "$j"
+dir $lib
+end
+EOF
+	        	)
+			;;
+		*)
+	    		( cd $j
+	      		  cat >> Action <<EOF
 name "$j $i libraries"
 dir $lib
 end
 EOF
-	        )
+	       		)
+			;;
+		esac
 	  done
 	)
 done
@@ -169,7 +183,7 @@ then
 	do
 		for j in libem libend libfp libdb libsys libmon libbsd4_2 libbsd4_1a libsysV_2 libce
 		do
-			if grep -s $j $i
+			if fgrep -s $j $i
 			then
 				ed - $i <<EOF
 /$j/;?^name?,/^end/s/^/!/
