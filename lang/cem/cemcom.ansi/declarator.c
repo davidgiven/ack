@@ -102,20 +102,22 @@ reject_params(dc)
 		case of a function definition.
 	*/
 	register struct decl_unary *du = dc->dc_decl_unary;
+	int	err_given = 0;
 
 	if (dc->dc_formal)	{
 		error("non_empty formal parameter pack");
 		free_formals(dc->dc_formal);
 		dc->dc_formal = 0;
-	} else {
-		if (du && du->du_fund == FUNCTION
-		    && !du->du_proto && !options['o']) {
-			warning("old-fashioned function declaration");
-		}
+		err_given = 1;
 	}
 	while (du) {
-		if (du->du_fund == FUNCTION)
-			remove_proto_idfs(du->du_proto);
+		if (du->du_fund == FUNCTION) {
+			if (du->du_proto) remove_proto_idfs(du->du_proto);
+			else if (! err_given && ! options['o']) {
+				err_given = 1;
+				warning("old-fashioned function declaration");
+			}
+		}
 		du = du->next;
 	}
 }
