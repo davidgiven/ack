@@ -25,6 +25,9 @@
 
 /* Data about the token yielded */
 struct token dot, ahead, aside;
+int token_nmb = 0;		/* number of the ahead token */
+int tk_nmb_at_last_syn_err = -5/*ERR_SHADOW*/;
+				/* token number at last syntax error */
 
 #ifndef NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
@@ -104,6 +107,8 @@ GetToken(ptok)
 	*/
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
+
+	token_nmb++;
 
 	if (File_Inserted) {
 		File_Inserted = 0;
@@ -219,37 +224,6 @@ firstline:
 		case '=':
 			if (nch == '=')
 				return ptok->tk_symb = EQUAL;
-			/*	The following piece of code tries to recognise
-				old-fashioned assignment operators `=op'
-			*/
-			switch (nch) {
-			case '+':
-				return ptok->tk_symb = PLUSAB;
-			case '-':
-				return ptok->tk_symb = MINAB;
-			case '*':
-				return ptok->tk_symb = TIMESAB;
-			case '/':
-				return ptok->tk_symb = DIVAB;
-			case '%':
-				return ptok->tk_symb = MODAB;
-			case '>':
-			case '<':
-				LoadChar(ch);
-				if (ch != nch) {
-					PushBack();
-					lexerror("illegal operator '=%c%c'",
-						nch, ch);
-				}
-				return ptok->tk_symb = 
-					nch == '<' ? LEFTAB : RIGHTAB;
-			case '&':
-				return ptok->tk_symb = ANDAB;
-			case '^':
-				return ptok->tk_symb = XORAB;
-			case '|':
-				return ptok->tk_symb = ORAB;
-			}
 			PushBack();
 			return ptok->tk_symb = ch;
 		case '>':

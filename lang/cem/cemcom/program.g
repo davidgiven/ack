@@ -130,11 +130,7 @@ external_definition
 			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
 #endif	LINT
 		}
-		[%if (Dc.dc_idf->id_def->df_type->tp_fund == FUNCTION)
-			/*	int i (1) {2, 3}
-				is a function, not an old-fashioned
-				initialization.
-			*/
+		[
 			function(&Ds, &Dc)
 		|
 			non_function(&Ds, &Dc)

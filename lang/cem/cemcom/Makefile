@@ -135,9 +135,6 @@ SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 LINT = /usr/bin/lint
 LINTFLAGS =
 
-MYLINT = ../lpass2/lint
-MYLINTFLAGS = -xh
-
 #EXCLEXCLEXCLEXCL
 
 .SUFFIXES: .str .h
@@ -188,11 +185,7 @@ clean:
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xlint ; else sh Resolve Xlint ; fi'
-	@rm -f nmclash.o a.out
-
-mylint:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) Xmylint ; else sh Resolve Xmylint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) LINT=$(LINT) Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)
@@ -274,8 +267,6 @@ $(CURRDIR)lnt:		$(OBJ) $(CURRDIR)Makefile
 Xlint:	$(SRC)
 	$(LINT) $(CDEFS) $(LINTFLAGS) $(SRC)
 
-Xmylint:	$(SRC)
-	$(MYLINT) $(CDEFS) $(MYLINTFLAGS) $(SRC)
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 main.o: LLlex.h

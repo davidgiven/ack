@@ -196,15 +196,7 @@ initializer(struct idf *idf; int sc;)
 		if (level == L_FORMAL2)
 			warning("illegal initialization of formal parameter (ignored)");
 	}
-	[
-		'='
-	|
-		empty
-		{warning("old-fashioned initialization, insert =");}
-		/*	This causes trouble at declarator and at
-			external_definition, q.v.
-		*/
-	]
+	'='				/* used to be optional because of V6 */
 	{
 #ifdef	LINT
 		lint_statement();
@@ -247,10 +239,7 @@ declarator(register struct declarator *dc;)
 	}
 :
 	primary_declarator(dc)
-	[%while(1)			/*	int i (M + 2) / 4;
-						is a function, not an
-						old-fashioned initialization.
-					*/
+	[
 		'('
 		formal_list(&fm) ?	/* semantic check later...	*/
 		')'

@@ -307,16 +307,6 @@ asgnop(register int *oper;):
 	'^' '=' {*oper = XORAB;}
 |
 	'|' '=' {*oper = ORAB;}
-|
-	[ PLUSAB | MINAB | TIMESAB | DIVAB | MODAB |
-	  LEFTAB | RIGHTAB | ANDAB | XORAB | ORAB ]
-		{
-			char *symbol2str();
-
-			warning("old-fashioned assignment operator, use %s",
-				symbol2str(DOT));
-			*oper = DOT;
-		}
 ;
 
 constant(struct expr **expp;) :

@@ -236,17 +236,19 @@ _error(class, fn, ln, ap)
 	unsigned int ln;
 	va_list ap;
 {
-	/*	_error attempts to limit the number of error messages
-		for a given line to MAXERR_LINE.
-	*/
-#ifndef	LINT
-	static char *last_fn = 0;
-	static unsigned int last_ln = 0;
-	static int e_seen = 0;
-#endif	LINT
 	char *remark;
 	char *fmt = va_arg(ap, char *);
-	
+
+	/* check visibility of message */
+	switch (class)	{
+	case WARNING:
+	case ERROR:
+		if (token_nmb < tk_nmb_at_last_syn_err + ERR_SHADOW)
+			/* warning or error message overshadowed */
+			return;
+		break;
+	}
+
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
 		values and then decide what to print.
@@ -292,25 +294,6 @@ _error(class, fn, ln, ap)
 		/*NOTREACHED*/;
 	}
 	
-#ifndef	LINT
-	if (ln == last_ln && fn && last_fn && strcmp(fn, last_fn) == 0)	{
-		/* we've seen this place before */
-		e_seen++;
-		if (e_seen == MAXERR_LINE)
-			fmt = "etc ...";
-		else
-		if (e_seen > MAXERR_LINE)
-			/* and too often, I'd say ! */
-			return;
-	}
-	else	{
-		/* brand new place */
-		last_fn = fn;
-		last_ln = ln;
-		e_seen = 0;
-	}
-#endif	LINT
-
 #ifdef	LINT
 	if (	/* there is a file name */
 		fn

@@ -20,11 +20,13 @@ LLmessage(tk)	{
 		error("end of file expected");
 	}
 	else if (tk)	{
-		error("%s missing", symbol2str(tk));
+		error("%s missing before %s", symbol2str(tk), symbol2str(DOT));
 		insert_token(tk);
 	}
-	else
+	else	{
 		error("%s deleted", symbol2str(DOT));
+	}
+	tk_nmb_at_last_syn_err = token_nmb;
 }
 
 insert_token(tk)

@@ -77,15 +77,19 @@ ch7bin(expp, oper, expr)
 #endif NOROPTION
 			ch7mon('*', expp);
 		}
-		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
-			expr_error(*expp, "call of non-function (%s)",
-				symbol2str((*expp)->ex_type->tp_fund));
-			/* leave the expression; it may still serve */
-			free_expression(expr);	/* there go the parameters */
-		}
-		else
+		switch ((*expp)->ex_type->tp_fund)	{
+		case FUNCTION:
 			*expp = new_oper((*expp)->ex_type->tp_up,
 					*expp, '(', expr);
+			break;
+		default:		/* uncallable */
+			expr_error(*expp, "calling an object of type %s",
+				symbol2str((*expp)->ex_type->tp_fund));
+		case ERRONEOUS:		/* uncallable but no message */
+			/* leave the expression; it may still serve */
+			free_expression(expr);	/* there go the parameters */
+			break;
+		}
 		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
 
