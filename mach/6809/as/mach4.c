@@ -129,9 +129,9 @@ operation
 			{	emit1or2($1);
 				emit1(0x9F);
 #ifdef RELOCATION
-				newrelo($3.typ, RELO1);
+				newrelo($3.typ, RELO2|RELBR);
 #endif
-				emit1($3.val);
+				emit2($3.val);
 			}
 	|
 		XOP xmode

@@ -71,11 +71,12 @@ expr_t		exp;
 		sm = fitb(dist);
 		if ((exp.typ & S_TYP) != DOTTYP)
 			sm = 0;
-		if (small(sm,0)) {
+		if (small(sm,1)) {
 			emit1(0x8C + ind);
 			emit1(dist);
 		} else {
 			emit1(0x8D + ind);
+			emit1((dist-1)>>8);
 			emit1(dist - 1);
 		}
 	} else if ((reg = regno(reg)) < 0)
