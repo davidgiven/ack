@@ -1,6 +1,10 @@
 #include <signal.h>
 #include <setjmp.h>
 
+#ifndef NSIG
+#define NSIG _NSIG
+#endif
+
 /* $Header$ */
 
 /* Trap handling */
