@@ -68,14 +68,14 @@ InitScope()
 struct forwards {
 	struct forwards *next;
 	struct node fo_tok;
-	struct type **fo_ptyp;
+	struct type *fo_ptyp;
 };
 
 /* STATICALLOCDEF "forwards" */
 
 Forward(tk, ptp)
 	struct token *tk;
-	struct type **ptp;
+	struct type *ptp;
 {
 	/*	Enter a forward reference into a list belonging to the
 		current scope. This is used for POINTER declarations, which
@@ -88,6 +88,19 @@ Forward(tk, ptp)
 	f->fo_ptyp = ptp;
 	f->next = CurrentScope->sc_forw;
 	CurrentScope->sc_forw = f;
+}
+
+ChForward(was, becomes)
+	struct type *was, *becomes;
+{
+	/*	The declaration of a hidden type had a forward reference.
+		In this case, the "forwards" list must be adapted.
+	*/
+	register struct forwards *f = CurrentScope->sc_forw;
+
+	while (f && f->fo_ptyp != was) f = f->next;
+	assert(f != 0);
+	f->fo_ptyp = becomes;
 }
 
 STATIC
@@ -168,7 +181,7 @@ rem_forwards(fo)
 			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
 			      df->df_idf->id_text);
 		}
-		*(f->fo_ptyp) = df->df_type;
+		f->fo_ptyp->next = df->df_type;
 		fo = f->next;
 		free_forwards(f);
 	}

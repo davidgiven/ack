@@ -181,6 +181,13 @@ error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 				   referring to the hidden type.
 				*/
 				*(df->df_type) = *tp;
+				if (! tp->next) {
+					/* It also contains a forward
+					   reference, so update the forward-
+					   list
+					*/
+					ChForward(tp, df->df_type);
+				}
 				free_type(tp);
 			  }
 			  else	df->df_type = tp;
@@ -457,7 +464,7 @@ PointerType(struct type **ptp;)
 	        df->df_kind == D_MODULE)
 		type(&((*ptp)->next))
 	|
-		IDENT	{ Forward(&dot, &((*ptp)->next)); }
+		IDENT	{ Forward(&dot, (*ptp)); }
 	]
 ;
 

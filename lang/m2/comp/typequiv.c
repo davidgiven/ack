@@ -144,6 +144,11 @@ TstAssCompat(tp1, tp2)
 	if ((tp1->tp_fund & T_INTORCARD) &&
 	    (tp2->tp_fund & T_INTORCARD)) return 1;
 
+	if (tp1->tp_fund == T_PROCEDURE &&
+	    tp2->tp_fund == T_PROCEDURE) {
+		return TstProcEquiv(tp1, tp2);
+	}
+
 	if (tp1->tp_fund == T_ARRAY) {
 		/* check for string
 		*/

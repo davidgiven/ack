@@ -467,7 +467,7 @@ cstcall(expp, call)
 		break;
 
 	case S_SIZE:
-		expp->nd_INT = WA(expr->nd_type->tp_size) / word_size;
+		expp->nd_INT = WA(expr->nd_type->tp_size);
 		break;
 
 	case S_VAL:

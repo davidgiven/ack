@@ -183,6 +183,7 @@ df->df_idf->id_text);
 	assert(expp->nd_class == Def);
 
 	df = expp->nd_def;
+	if (df == ill_df) return 0;
 
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		if (df->df_kind == D_ENUM) {
@@ -429,6 +430,10 @@ getarg(argp, bases, designator)
 	if ((!designator && !ChkExpression(left)) ||
 	    (designator && !ChkVariable(left))) {
 		return 0;
+	}
+
+	if (designator && left->nd_class == Def) {
+		left->nd_def->df_flags |= D_NOREG;
 	}
 
 	tp = BaseType(left->nd_type);
@@ -836,8 +841,9 @@ ChkStandard(expp, left)
 		if (!(left = getarg(&arg, T_ARRAY, 0))) return 0;
 		if (IsConformantArray(left->nd_type)) {
 			/* A conformant array has no explicit index type
+			   ??? So, what can we use as index-type ???
 			*/
-			expp->nd_type = card_type;
+			expp->nd_type = intorcard_type;
 		}
 		else {
 			expp->nd_type = IndexType(left->nd_type);

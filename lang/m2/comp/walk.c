@@ -84,7 +84,7 @@ WalkModule(module)
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		register struct node *nd;
+		register struct node *nd = Modules;
 
 		if (state == IMPLEMENTATION) {
 			label l1 = ++data_label;
@@ -97,9 +97,14 @@ WalkModule(module)
 			C_zne((label) 1);
 			C_loc((arith) 1);
 			C_ste_dlb(l1, (arith) 0);
+			/* Prevent this module from calling its own
+			   initialization routine
+			*/
+			assert(nd->nd_IDF == module->df_idf);
+			nd = nd->next;
 		}
 
-		for (nd = Modules; nd; nd = nd->next) {
+		for (; nd; nd = nd->next) {
 			C_cal(nd->nd_IDF->id_text);
 		}
 	}
@@ -571,7 +576,7 @@ DoAssign(nd, left, right)
 	/* May we do it in this order (expression first) ??? */
 	struct desig dsl, dsr;
 
-	if (!ChkExpression(right)) return;
+	if (! ChkExpression(right)) return;
 	if (! ChkVariable(left)) return;
 	TryToString(right, left->nd_type);
 	dsr = InitDesig;
