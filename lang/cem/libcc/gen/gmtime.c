@@ -8,7 +8,8 @@
 static int monthsize[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 #define SECS_DAY (24*60L*60L)
-#define YEARSIZE(year)	((year) % 4 ? 365 : 366)
+#define LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
+#define YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)
 
 struct tm *
 gmtime(clock)

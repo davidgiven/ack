@@ -5,10 +5,10 @@
 #include <time.h>
 #endif
 
-#define YEARSIZE(year)	((year) % 4 ? 365 : 366)
+#define LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
+#define YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)
 #define FIRSTSUNDAY(t)	(((t)->tm_yday - (t)->tm_wday + 420) % 7)
-#define SUNDAY(day, t)	((day) < 58 ? \
-			  ((day) < FIRSTSUNDAY(t) ? FIRSTSUNDAY(t) :
+
 static int
 last_sunday(d, t)
 	register int d;
@@ -16,7 +16,7 @@ last_sunday(d, t)
 {
 	int first = FIRSTSUNDAY(t);
 
-	if (d >= 58 && YEARSIZE(t->tm_year)) d++;
+	if (d >= 58 && LEAPYEAR(t->tm_year+1900)) d++;
 	if (d < first) return first;
 	return d - (d - first) % 7;
 }
