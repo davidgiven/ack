@@ -21,22 +21,13 @@ flt_arith2flt(n, e, uns)
 	}
 	else	e->flt_sign = 0;
 	if (sizeof(arith) == 4) {
-		if (n < 0) {
-			e->m1 = 1; e->m2 = 0;
-		}
-		else {
-			e->m1 = 0; e->m2 = n;
-		}
+		e->m1 = 0; e->m2 = n;
 	}
 	else {
-		if (n < 0) {
-			e->m2 = 0;
-			e->m1 = (1 << (sizeof(arith)*8-32));
-		}
-		else {
-			e->m2 = n & 0xffffffffL;
-			e->m1 = (n >> 32);
-		}
+		e->m2 = n & 0xffffffffL;
+		n >>= 1;
+		n &= ~((arith) 1 << (8*sizeof(arith)-1));
+		e->m1 = (n >> 31);
 	}
 	if (n == 0) {
 		e->flt_exp = 0;
