@@ -143,7 +143,10 @@ FormalType(struct type **ptp;)
 	extern arith ArrayElSize();
 } :
 	ARRAY OF qualtype(ptp)
-		{ register struct type *tp = construct_type(T_ARRAY, NULLTYPE);
+		{ /* index type of conformant array is "CARDINAL".
+		     Recognize a conformant array by size 0.
+		  */
+		  register struct type *tp = construct_type(T_ARRAY, card_type);
 
 		  tp->arr_elem = *ptp;
 		  *ptp = tp;

@@ -152,7 +152,7 @@ struct type
 
 #define NULLTYPE ((struct type *) 0)
 
-#define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->tp_next==0)
+#define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->tp_size==0)
 #define bounded(tpx)		((tpx)->tp_fund & T_INDEX)
 #define complex(tpx)		((tpx)->tp_fund & (T_RECORD|T_ARRAY))
 #define WA(sz)			(align(sz, (int) word_size))

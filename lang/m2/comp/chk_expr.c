@@ -128,10 +128,9 @@ ChkArr(expp)
 	/* Type of the index must be assignment compatible with
 	   the index type of the array (Def 8.1).
 	   However, the index type of a conformant array is not specified.
-	   Either INTEGER or CARDINAL seems reasonable.
+	   In our implementation it is CARDINAL.
 	*/
-	if (IsConformantArray(tpl) ? !TstAssCompat(card_type, tpr)
-				   : !TstAssCompat(IndexType(tpl), tpr)) {
+	if (!TstAssCompat(IndexType(tpl), tpr)) {
 		node_error(expp, "incompatible index type");
 		return 0;
 	}
@@ -983,17 +982,11 @@ ChkStandard(expp, left)
 		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0, edf))) {
 			return 0;
 		}
-		if (IsConformantArray(left->nd_type)) {
-			/* A conformant array has no explicit index type,
-			   but it is a subrange with lower bound 0, so
-			   it is of type CARDINAL !!!
-			*/
-			expp->nd_type = card_type;
-			break;
-		}
 		if (left->nd_type->tp_fund == T_ARRAY) {
 			expp->nd_type = IndexType(left->nd_type);
-			cstcall(expp, S_MAX);
+			if (! IsConformantArray(left->nd_type)) {
+				cstcall(expp, S_MAX);
+			}
 			break;
 		}
 		if (left->nd_symb != STRING) {
