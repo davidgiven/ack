@@ -1104,6 +1104,22 @@ pat loe loc sbu $2==0-1 && $3==4		leaving loe $1 inc
 pat lil loc sbu $2==0-1 && $3==4		leaving lil $1 inc
 pat mlu					leaving mli $1
 
+pat loe loc loe adu ste $1==$3 && $1==$5 && $4==4
+uses REG = {EXTERN, $1}
+                                yields %a leaving loc $2 loe $3 adu 4 ste $3
+
+pat lol loc lol adu stl $1==$3 && $1==$5 && $4==4
+uses REG = {LOCAL, $1, 4}
+                                yields %a leaving loc $2 lol $3 adu 4 stl $3
+
+pat loe loc loe adi ste $1==$3 && $1==$5 && $4==4
+uses REG = {EXTERN, $1}
+                                yields %a leaving loc $2 loe $3 adi 4 ste $3
+
+pat lol loc lol adi stl $1==$3 && $1==$5 && $4==4
+uses REG = {LOCAL, $1, 4}
+                                yields %a leaving loc $2 lol $3 adi 4 stl $3
+
 pat dvu $1==4
 with noacc ACC
 uses DXREG={ANYCON,0}
@@ -1129,6 +1145,7 @@ gen proccall {label,".rmu"}
 */
 
 pat slu					leaving sli $1
+pat loc slu					leaving loc $1 sli $2
 
 pat sru $1==4
 with SHIFT_CREG REG
@@ -1662,10 +1679,6 @@ pat lil lof dec lil stf $1==$4 && $2==$5 && inreg($1)>0
 	call lifuxxsif("dec")
 pat lil lof inc lil stf $1==$4 && $2==$5 && inreg($1)>0
 	call lifuxxsif("inc")
-pat lil lof adp lil stf $1==$4 && $2==$5 && inreg($1)>0 && $3==1
-	call lifuxxsif("inc")
-pat lil lof adp lil stf $1==$4 && $2==$5 && inreg($1)>0 && $3==(0-1)
-	call lifuxxsif("dec")
 
 proc lifxxxsif example lil lof adi lil stf
 with regorconst
@@ -1869,6 +1882,10 @@ uses REG={indir_r, regvar($1)}
 					leaving lil $1 dec sil $4
 #endif
 
+pat lil adp sil $1==$3 && $2==1         leaving lil $1 inc sil $1
+
+pat lil adp sil $1==$3 && $2==0-1       leaving lil $1 dec sil $1
+
 pat lil adp sil $1==$3			leaving loc $2 lil $1 adi 4 sil $3
 
 #ifdef REGVARS
@@ -1889,10 +1906,102 @@ pat lol lof lol lof dec lol stf
 uses REG={indir_r_off, regvar($1), $2}
 				yields %a
 					leaving lol $1 lof $2 dec lol $6 stf $7
+
+pat lol lof dup adp lol stf
+        $1==$5 && $2==$6 && $3==4 && inreg($1)==reg_any
+uses REG={indir_r_off, regvar($1), $2}
+                                yields %a
+                                        leaving lol $1 lof $2 adp $4 lol $1 stf
+$2
+
+pat lol lof dup inc lol stf
+        $1==$5 && $2==$6 && $3==4 && inreg($1)==reg_any
+uses REG={indir_r_off, regvar($1), $2}
+                                yields %a
+                                        leaving lol $1 lof $2 inc lol $1 stf $2
+
+pat lol lof dup dec lol stf
+        $1==$5 && $2==$6 && $3==4 && inreg($1)==reg_any
+uses REG={indir_r_off, regvar($1), $2}
+                                yields %a
+                                        leaving lol $1 lof $2 dec lol $1 stf $2
+
 #endif
 
 pat lol lof adp lol stf $1==$4 && $2==$5
 			leaving loc $3 lol $1 lof $2 adi 4 lol $4 stf $5
+
+pat lol lof dup adp lol stf
+        $1==$5 && $2==$6 && $3==4 && $4==1
+kills all_mems
+uses REG={LOCAL,$1,4}, REG
+gen move {indir_r_off, %a, $2},%b
+    inc {indir_r_off, %a, $2}
+                                yields %b
+
+pat loe lof dup adp loe stf
+        $1==$5 && $2==$6 && $3==4 && $4==1
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r_off, %a, $2},%b
+    inc {indir_r_off, %a, $2}
+                                yields %b
+
+pat loe loi dup adp loe sti
+        $1==$5 && $2==$6 && $3==4 && $2==4 && $4==1
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r, %a},%b
+    inc {indir_r, %a}
+                                yields %b
+
+pat lol lof dup adp lol stf
+        $1==$5 && $2==$6 && $3==4 && $4==(0-1)
+kills all_mems
+uses REG={LOCAL,$1,4}, REG
+gen move {indir_r_off, %a, $2},%b
+    dec {indir_r_off, %a, $2}
+                                yields %b
+
+pat loe lof dup adp loe stf
+        $1==$5 && $2==$6 && $3==4 && $4==(0-1)
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r_off, %a, $2},%b
+    dec {indir_r_off, %a, $2}
+                                yields %b
+pat loe loi dup adp loe sti
+        $1==$5 && $2==$6 && $3==4 && $2==4 && $4==(0-1)
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r, %a},%b
+    dec {indir_r, %a}
+                                yields %b
+
+pat lol lof dup adp lol stf
+        $1==$5 && $2==$6 && $3==4
+kills all_mems
+uses REG={LOCAL,$1,4}, REG
+gen move {indir_r_off, %a, $2},%b
+    add {indir_r_off, %a, $2}, {ANYCON, $4}
+                                yields %b
+
+pat loe lof dup adp loe stf
+        $1==$5 && $2==$6 && $3==4
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r_off, %a, $2},%b
+    add {indir_r_off, %a, $2}, {ANYCON, $4}
+                                yields %b
+
+pat loe loi dup adp loe sti
+        $1==$5 && $2==$6 && $3==4 && $2==4
+kills all_mems
+uses REG={EXTERN,$1}, REG
+gen move {indir_r, %a},%b
+    add {indir_r, %a}, {ANYCON, $4}
+                                yields %b
+
 
 pat loe ngi ste $1==$3 && $2==4
 kills mem_nonlocals
@@ -1922,8 +2031,22 @@ gen not {EXTERN, $1}
 
 pat loe lof adp loe stf $1==$4 && $2==$5
 				leaving loc $3 loe $1 lof $2 adi 4 loe $1 stf $2
+
+pat loe loi adp loe sti $1==$4 && $2==$5 && $2==4
+				leaving loc $3 loe $1 loi $2 adi 4 loe $1 sti $2
+
+pat lil lof adp lil stf $1==$4 && $2==$5 && $3==1
+				leaving lil $1 lof $2 inc lil $1 stf $2
+pat lil lof adp lil stf $1==$4 && $2==$5 && $3==0-1
+				leaving lil $1 lof $2 dec lil $1 stf $2
 pat lil lof adp lil stf $1==$4 && $2==$5
 				leaving loc $3 lil $1 lof $2 adi 4 lil $1 stf $2
+pat lil loi adp lil sti $1==$4 && $2==$5 && $2==4 && $3==1
+				leaving lil $1 loi $2 inc lil $1 sti $2
+pat lil loi adp lil sti $1==$4 && $2==$5 && $2==4 && $3==0-1
+				leaving lil $1 loi $2 dec lil $1 sti $2
+pat lil loi adp lil sti $1==$4 && $2==$5 && $2==4
+				leaving loc $3 lil $1 loi $2 adi 4 lil $1 sti $2
 
 /*******************************************************************
  *  Group 8: Convert Instructions				   *
