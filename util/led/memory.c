@@ -151,9 +151,12 @@ extern int	passnumber;
  * enough bytes, the first or the second time.
  */
 static bool
-compact(piece, incr, freeze)
+compact(piece, incr, flag)
 	register int		piece;
 	register ind_t		incr;
+#define NORMAL 0
+#define FREEZE 1
+#define FORCED 2
 {
 	register ind_t		gain, size;
 	register struct memory	*mem;
@@ -163,14 +166,14 @@ compact(piece, incr, freeze)
 				   of its occupied memory
 				*/
 
-	debug("compact(%d, %d)\n", piece, (int)incr, 0, 0);
+	debug("compact(%d, %d, %d)\n", piece, (int)incr, flag, 0);
 	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++) {
 		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
 	}
 	/*
 	 * First, check that moving will result in enough space
 	 */
-	if (! freeze) {
+	if (flag != FREEZE) {
 		gain = mems[piece].mem_left & ~(ALIGN - 1);
 		for (mem = &mems[0]; mem <= &mems[NMEMS-1]; mem++) {
 			/* 
@@ -178,7 +181,9 @@ compact(piece, incr, freeze)
 			 * If this does not give us enough, bad luck
 			 */
 			if (mem == &mems[piece]) continue;
-			size = mem->mem_full >> SHIFT_COUNT;
+			if (flag == FORCED)
+				size = 0;
+			else	size = mem->mem_full >> SHIFT_COUNT;
 			if (mem->mem_left > size)
 				gain += (mem->mem_left - size) & ~(ALIGN - 1);
 		}
@@ -190,8 +195,8 @@ compact(piece, incr, freeze)
 		/* Here memory is inserted before a piece. */
 		assert(passnumber == FIRST || gain == (ind_t)0);
 		copy_down(mem, gain);
-		if (freeze || gain < incr) {
-			if (freeze) size = 0;
+		if (flag == FREEZE || gain < incr) {
+			if (flag != NORMAL) size = 0;
 			else size = mem->mem_full >> SHIFT_COUNT;
 			if (mem->mem_left > size) {
 				size = (mem->mem_left - size) & ~(ALIGN - 1);
@@ -212,8 +217,8 @@ compact(piece, incr, freeze)
 
 		for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--) {
 			/* Here memory is appended after a piece. */
-			if (freeze || gain + up < incr) {
-				if (freeze) size = 0;
+			if (flag == FREEZE || gain + up < incr) {
+				if (flag == FREEZE) size = 0;
 				else size = mem->mem_full >> SHIFT_COUNT;
 				if (mem->mem_left > size) {
 					size = (mem->mem_left - size) & ~(ALIGN - 1);
@@ -226,7 +231,7 @@ compact(piece, incr, freeze)
 		gain += up;
 	}
 	mems[piece].mem_left += gain;
-	assert(freeze || gain >= incr);
+	assert(flag == FREEZE || gain >= incr);
 	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++) {
 		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
 	}
@@ -281,6 +286,8 @@ copy_up(mem, dist)
 	mem->mem_base = new;
 }
 
+static int alloctype = NORMAL;
+
 /*
  * Add `size' bytes to the bytes already allocated for `piece'. If it has no
  * free bytes left, ask them from memory or, if that fails, from the free
@@ -306,7 +313,10 @@ alloc(piece, size)
 	while (left + incr < size)
 		incr += INCRSIZE;
 
-	if (incr == 0 || move_up(piece, incr) || compact(piece, size, 0)) {
+	if (incr == 0 ||
+	    (incr < left + full && move_up(piece, left + full)) ||
+	    move_up(piece, incr) ||
+	    compact(piece, size, alloctype)) {
 		mems[piece].mem_full += size;
 		mems[piece].mem_left -= size;
 		return full;
@@ -330,8 +340,11 @@ hard_alloc(piece, size)
 
 	if (size != (ind_t)size)
 		return BADOFF;
-	if ((ret = alloc(piece, size)) != BADOFF)
+	alloctype = FORCED;
+	if ((ret = alloc(piece, size)) != BADOFF) {
+		alloctype = NORMAL;
 		return ret;
+	}
 
 	/*
 	 * Deallocate what we don't need.
@@ -351,7 +364,9 @@ hard_alloc(piece, size)
 	}
 	free_saved_moduls();
 
-	return alloc(piece, size);
+	ret = alloc(piece, size);
+	alloctype = NORMAL;
+	return ret;
 }
 
 /*
@@ -431,7 +446,7 @@ freeze_core()
 			break;
 		}
 	}
-	compact(NMEMS - 1, (ind_t)0, 1);
+	compact(NMEMS - 1, (ind_t)0, FREEZE);
 }
 
 /* ------------------------------------------------------------------------- */
