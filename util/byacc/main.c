@@ -70,6 +70,7 @@ int k;
 }
 
 
+void
 onintr()
 {
     done(1);
