@@ -411,6 +411,7 @@ m68_pmds	Philips PMDS	pmds
 m68_sysV_0	68000 with Uniplus UNIX System V.0	mantra
 sun3	Sun 3 Motorola 68020 workstation	sun3
 sun2	Sun 2 Motorola 68010 workstation	sun2
+SMALL	Neither of the above, small address space	i86
 ANY	Neither of the above	m68k2
 .TE
 .sp 1
