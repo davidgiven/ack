@@ -362,10 +362,10 @@ This is given as
 FORMAT = string
 .DE
 The string must be a valid printf(III) format,
-and defaults to "%d" or "%ld" depending on the wordsize of 
-the machine. For example on the PDP-11 one can use
+and defaults to "%ld".
+For example on the PDP-11 one can use
 .DS
-FORMAT= "0%o"
+FORMAT= "0%lo"
 .DE
 to satisfy the old UNIX assembler that reads octal unless followed by
 a period, and the ACK assembler that follows C conventions.
@@ -1956,7 +1956,7 @@ and TEM_PSIZE.
 The type 'int' is used for things like counters that won't require
 more than 16 bits precision.
 The type 'word' is used among others to assemble datawords and
-is of type 'long' if TEM_WSIZE>2.
+is of type 'long'.
 The type 'full' is used for addresses and is of type 'long' if
 TEM_WSIZE>2 or TEM_PSIZE>2.
 .PP
@@ -2101,9 +2101,9 @@ Example mach.h for the PDP-11
 #define dlb_fmt	"_%d"
 #define hol_fmt	"hol%d"
 
-#define hol_off	"%d.+hol%d"
+#define hol_off	"%ld.+hol%d"
 
-#define con_cst(x)	fprintf(codefile,"%d.\en",x)
+#define con_cst(x)	fprintf(codefile,"%ld.\en",x)
 #define con_ilb(x)	fprintf(codefile,"%s\en",x)
 #define con_dlb(x)	fprintf(codefile,"%s\en",x)
 
