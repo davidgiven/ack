@@ -19,6 +19,9 @@ static char RcsId[] = "$Header$";
  *	  p: print named files
  *	  l: temporaries in current directory instead of /tmp
  *	  c: don't give "create" message
+#ifdef DISTRIBUTION
+ *	  D: make distribution: use distr_time, uid=2, gid=2, mode=0644
+#endif
  */
 
 #include <sys/types.h>
@@ -75,6 +78,10 @@ BOOL rep_fl;
 BOOL del_fl;
 BOOL nocr_fl;
 BOOL local_fl;
+#ifdef DISTRIBUTION
+BOOL distr_fl;
+long distr_time;
+#endif
 
 int ar_fd;
 
@@ -220,6 +227,11 @@ char *argv[];
 		case 'l' :
 			local_fl = TRUE;
 			break;
+#ifdef DISTRIBUTION
+		case 'D' :
+			distr_fl = TRUE;
+			break;
+#endif
 		default :
 			usage();
 	}
@@ -227,6 +239,14 @@ char *argv[];
 
   if (needs_arg && argc <= 3)
 	usage();
+#ifdef DISTRIBUTION
+  if (distr_fl) {
+	struct stat statbuf;
+
+	stat(progname, &statbuf);
+	distr_time = statbuf.st_mtime;
+  }
+#endif
   if (local_fl) strcpy(temp_arch, "ar.XXXXXX");
   else	strcpy(temp_arch, "/tmp/ar.XXXXXX");
 
@@ -433,6 +453,14 @@ char *mess;
   member.ar_mode = status.st_mode;
   member.ar_date = status.st_mtime;
   member.ar_size = status.st_size;
+#ifdef DISTRIBUTION
+  if (distr_fl) {
+	member.ar_uid = 2;
+	member.ar_gid = 2;
+	member.ar_mode = 0644;
+	member.ar_date = distr_time;
+  }
+#endif
   wr_arhdr(fd, &member);
 #ifdef AAL
   do_object(src_fd, member.ar_size);
@@ -601,6 +629,13 @@ write_symdef()
 	arbuf.ar_uid = getuid();
 	arbuf.ar_gid = getgid();
 	arbuf.ar_mode = 0444;
+#ifdef DISTRIBUTION
+	if (distr_fl) {
+		arbuf.ar_uid = 2;
+		arbuf.ar_gid = 2;
+		arbuf.ar_date = distr_time;
+	}
+#endif
 	wr_arhdr(ar_fd,&arbuf);
 	wr_long(ar_fd, (long) tnum);
 	/*

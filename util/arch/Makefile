@@ -6,7 +6,7 @@ LIB = $(EMHOME)/modules/lib
 LIBS =	$(LIB)/libobject.a $(LIB)/libprint.a \
 	$(LIB)/libstring.a $(LIB)/libsystem.a
 
-CFLAGS=-O -I$(EMH)
+CFLAGS=-O -I$(EMH) -DDISTRIBUTION
 LDFLAGS = 
 
 all:            arch aal
