@@ -19,7 +19,7 @@ extern int ws;		/* word size	*/
 
 #if BYTELENGTH==8
 #define DIVBL(a)	((a) >> 3)
-#define MODBL(a)	((a) & 07)
+#define MODBL(a)	((a) & (int)07)
 #else
 #define DIVBL(a)	(a/BYTELENGTH)
 #define MODBL(a)	(a%BYTELENGTH)
@@ -31,12 +31,12 @@ extern int ws;		/* word size	*/
 			  ((a)>>4) : \
 			  (WORDLENGTH==32 ? \
 			    ((a)>>5) : \
-			    ((a)/(8*sizeof(int)))))
+			    ((a)/(8*(int)sizeof(int)))))
 #define MODWL(a)	(WORDLENGTH==16 ? \
-			  ((a)&017) : \
+			  ((a)&(int)017) : \
 			  (WORDLENGTH==32 ? \
-			    ((a)&037) : \
-			    ((a)%(8*sizeof(int)))))
+			    ((a)&(int)037) : \
+			    ((a)%(8*(int)sizeof(int)))))
 
 #define UNKNOWN_SIZE (-1)
 
