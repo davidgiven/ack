@@ -9,6 +9,7 @@
 #include "type.h"
 #include "message.h"
 #include "langdep.h"
+#include "expr.h"
 
 int stack_offset;		/* for up and down commands */
 
@@ -83,7 +84,11 @@ get_addr(sym, psize)
 
 		size = proctype->ty_nbparams;
 		if (has_static_link(sc)) size += pointer_size;
-		AB = Malloc((unsigned) size);
+		AB = malloc((unsigned) size);
+		if (! AB) {
+			error("could not allocate enough memory");
+			break;
+		}
 		if (! get_bytes(size, EM_regs[AB_OFF], AB)) {
 			break;
 		}
@@ -91,7 +96,7 @@ get_addr(sym, psize)
 			size = compute_size(tp, AB);
 			*psize = size;
 		}
-		a = (t_addr) BUFTOA(AB+sym->sy_name.nm_value);
+		a = (t_addr) get_int(AB+sym->sy_name.nm_value, pointer_size, T_UNSIGNED);
 		free(AB);
 		return a;
 	}
@@ -105,7 +110,7 @@ get_addr(sym, psize)
    Return 0 on failure,
 	  1 on success.
    On success, 'buf' contains the value, and 'size' contains the size.
-   For 'buf', storage is allocated by Malloc; this storage must
+   For 'buf', storage is allocated by malloc; this storage must
    be freed by caller (I don't like this any more than you do, but caller
    does not know sizes).
 */
@@ -123,27 +128,20 @@ get_value(sym, buf, psize)
   *buf = 0;
   switch(sym->sy_class) {
   case CONST:
-	*buf = Malloc((unsigned) size);
+	*buf = malloc((unsigned) size);
+	if (! *buf) {
+		error("could not allocate enough memory");
+		break;
+	}
 	switch(tp->ty_class) {
 	case T_REAL:
-		if (size != sizeof(double)) {
-			*((float *) *buf) = sym->sy_const.co_rval;
-		}
-		else	*((double *) *buf) = sym->sy_const.co_rval;
+		put_real(*buf, size, sym->sy_const.co_rval);
 		break;
 	case T_INTEGER:
 	case T_SUBRANGE:
 	case T_UNSIGNED:
 	case T_ENUM:
-		if (size == sizeof(char)) {
-			*((char *) *buf) = sym->sy_const.co_ival;
-		}
-		else if (size == sizeof(short)) {
-			*((short *) *buf) = sym->sy_const.co_ival;
-		}
-		else {
-			*((long *) *buf) = sym->sy_const.co_ival;
-		}
+		put_int(*buf, size, sym->sy_const.co_ival);
 		break;
 	case T_SET:
 		memcpy(*buf, sym->sy_const.co_setval, (int) size);
@@ -162,7 +160,11 @@ get_value(sym, buf, psize)
 	a = get_addr(sym, psize);
 	if (a) {
 		size = *psize;
-		*buf = Malloc((unsigned) size);
+		*buf = malloc((unsigned) size);
+		if (! *buf) {
+			error("Could not allocate enough memory");
+			break;
+		}
 		if (get_bytes(size, a, *buf)) {
 			retval = 1;
 		}

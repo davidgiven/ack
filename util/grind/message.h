@@ -48,12 +48,3 @@ struct message_hdr {
 
 #define IN_FD	3
 #define OUT_FD	6
-
-#define BUFTOL(c)	(*((long *) (c)))
-#define LTOBUF(c,l)	(*((long *) (c)) = (l))
-#define BUFTOA(c)	(*((char **) (c)))
-#define ATOBUF(c,p)	(*((char **) (c)) = (p))
-#define BUFTOS(c)	(*((short *) (c)))
-#define BUFTOI(c)	(*((int *) (c)))
-#define BUFTOF(c)	(*((float *) (c)))
-#define BUFTOD(c)	(*((double *) (c)))

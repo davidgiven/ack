@@ -13,15 +13,15 @@ grind \- source-level debugger for ACK
 .SH DESCRIPTION
 .B Grind
 is a utility for source-level debugging and execution of
-programs written in C or Modula-2 (Pascal will be added later).
+programs written in C, Modula-2, or Pascal.
 Its operation resembles the operation of 
 .IR dbx ,
 a source-level debugger
 available on many Unix systems. However, some
-.B Grind
+.B grind
 commands are not available in
 .IR dbx ,
-and some more
+some more
 .I dbx
 commands are not available in
 .BR grind ,
@@ -48,8 +48,8 @@ Some
 .B grind
 commands take an expression argument.
 .SS Expressions
-.B Grind expressions
-are combinations of variables, constants, and operators.
+.B Grind
+expressions are combinations of variables, constants, and operators.
 The syntax and the operators depend on the source language of the program
 being debugged. However, the type rules are probably less strict than the
 rules of this language. For instance, in Modula-2 one cannot combine
@@ -57,8 +57,6 @@ values of type INTEGER with values of type REAL in an expression without
 using conversion routines. In
 .BR grind ,
 the conversions needed are performed automatically.
-Expressions cannot involve strings, structures, or
-arrays, although elements of structures or arrays may be used.
 .SS Operators
 .LP
 .B Grind
@@ -72,19 +70,19 @@ The syntax and priority of these operators depends on the source language.
 Parentheses can be used for grouping.
 .SS "Scope Rules"
 .LP
-.B dbx
+.B Grind
 uses the current file and function to resolve scope conflicts.
 Their values are updated as files and functions are entered and exited
 during execution.
 Names can also be qualified with procedure- or module names, as in
 \fImodule\fP`\fIproc\fP`\fIname\fP.
 .B Grind
-tries to be intelligent about names, so qualification is only needed when
+tries to be intelligent about names; qualification is only needed when
 names are used for more than one object in a program and the current scope
 does not help.
 .SS "Positions"
 In general, there are two ways to specify a position; the first way is
-to specify filename and linenumber, in a so-called at-clause, like this:
+to specify file name and line number, in a so-called at-clause, like this:
 .RS
 \fBat\fP [ "\fIfilename\fP": ] \fIlinenumber\fP
 .RE
@@ -99,7 +97,7 @@ This indicates the first statement within the named function (except for
 the trace command discussed later).
 .SS "Commands"
 .TP
-.B \s+2^\s0C
+.B ^C
 Interrupt.  Stop the program being debugged and enter
 .BR grind .
 .TP
@@ -114,11 +112,18 @@ and possible redirection of standard input and/or standard output.
 Repeats the last
 .B run
 command.
+.TP
 \fBcont\fP [ \fBat\fP \fIsourceline\fP ]
+.ti -0.5i
+\fBc\fP [ \fBat\fP \fIsourceline\fP ]
+.br
 Continue execution from where it stopped, or, if \fIsourceline\fP is
 given, at that source line.
 .TP
 \fBtrace\fP [ \fBon\fP \fIexpression\fP ] [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
+.ti -0.5i
+\fBt\fP [ \fBon\fP \fIexpression\fP ] [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
+.br
 Display tracing information.
 If no argument is specified, each source line is displayed before
 execution.
@@ -167,10 +172,13 @@ If no condition is given, stop when
 is reached.
 Either a position or a condition (or both) must be given.
 .TP
-\fBprint\fP \fIexpression\fP [ ',' \fIexpression\fP ] ...
+\fBprint\fP \fIexpression\fP [ , \fIexpression\fP ] ...
+.ti -0.5i
+\fBp\fP \fIexpression\fP [ , \fIexpression\fP ] ...
+.br
 Print the value of each expression.
 .TP
-\fBdisplay\fP \fIexpression\fP [ ',' \fIexpression\fP ] ...
+\fBdisplay\fP \fIexpression\fP [ , \fIexpression\fP ] ...
 Print the value of each expression whenever the program stops.
 .TP
 .B dump
@@ -197,11 +205,17 @@ Also display current
 records.
 .TP
 \fBdelete\fP \fIcommandnumber\fP
+.ti -0.5i
+\fBd\fP \fIcommandnumber\fP
+.br
 Remove the command corresponding to \fIcommandnumber\fP
 (as displayed by
 .BR status ).
 .TP
 \fBrestore\fP \fIcommandnumber\fP
+.ti -0.5i
+\fBr\fP \fIcommandnumber\fP
+.br
 Restore the data corresponding to the dump of \fIcommandnumber\fP
 (as displayed by
 .BR status ).
@@ -215,6 +229,9 @@ Apart from this,
 even works when the program is finished.
 .TP
 \fBstep\fP [ \fIn\fP ]
+.ti -0.5i
+\fBs\fP [ \fIn\fP ]
+.br
 Execute the next
 .I n
 source lines.
@@ -224,6 +241,9 @@ is taken to be 1.
 This command steps into functions.
 .TP
 \fBnext\fP [ \fIn\fP ]
+.ti -0.5i
+\fBn\fP [ \fIn\fP ]
+.br
 Execute the next
 .I n
 source lines.
@@ -258,12 +278,14 @@ List all, or the top
 active functions on the stack.
 .TP
 \fBfile\fP [ \fIfilename\fP ]
-.br
 Print the name of the current source file, or
 change the current source file to
 .IR filename .
 .TP
 \fBlist\fP [ \fIstartline\fP [ , \fIendline\fP ]  | \fIfunction\fP ]
+.ti -0.5i
+\fBl\fP [ \fIstartline\fP [ , \fIendline\fP ]  | \fIfunction\fP ]
+.br
 If no arguments are given, list the next ten lines from current source file,
 if a
 .I startline
@@ -279,15 +301,20 @@ the first statement of
 .B quit
 Exit
 .BR grind .
+.LP
+Some commands can be repeated by entering an empty command line: step,
+next, print, list, status, cont.
 .SH ENVIRONMENT
 P.M.
 .SH SEE ALSO
-.BR ack (1ACK).
-.BR led (6ACK).
+.IR ack (1ACK).
+.IR led (6ACK).
+.SH REMARKS
+.LP
+.B Grind
+does not understand the scope of WITH statements. The scope information needed
+is not available in the symbol table.
 .SH BUGS
 .LP
 .B Grind
 does not correctly handle bit-fields.
-.LP
-.B Grind
-does not understand WITH statements.

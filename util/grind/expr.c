@@ -1,6 +1,7 @@
 /* $Header$ */
 
-/* This file contains the expression evaluator. It exports four routines:
+/* This file contains the expression evaluator. It exports the following
+   routines:
    - int eval_cond(p_tree p)
 	This routine evaluates the conditional expression indicated by p
 	and returns 1 if it evaluates to TRUE, or 0 if it could not be
@@ -26,6 +27,16 @@
 	while producing an error message. Otherwise, it returns 1 and
 	the resulting value, type and size are left in pbuf, ptp, and
 	psize, respectively.
+   - long get_int(char *buf, long size, int class)
+	Returns the value of size 'size', residing in 'buf', of 'class'
+	T_INTEGER, T_UNSIGNED, or T_ENUM.
+   - int put_int(char *buf, long size, long value)
+	Stores the value 'value' of size 'size' in 'buf'.
+   - double get_real(char *buf, long size)
+	Returns the real value of size 'size', residing in 'buf'.
+	T_INTEGER, T_UNSIGNED, or T_ENUM.
+   - int put_real(char *buf, long size, double value)
+	Stores the value 'value' of size 'size' in 'buf'.
 */
 
 #include <stdio.h>
@@ -41,10 +52,16 @@
 #include "langdep.h"
 
 extern FILE	*db_out;
+extern char	*strcpy();
+
+#define	malloc_succeeded(p)	if (! (p)) {\
+					error("could not allocate enough memory");\
+					return 0;\
+				}
 
 /* buffer to integer and vice versa routines */
 
-static long
+long
 get_int(buf, size, class)
   char	*buf;
   long	size;
@@ -68,7 +85,6 @@ get_int(buf, size, class)
   return l;
 }
 
-static
 put_int(buf, size, value)
   char	*buf;
   long	size;
@@ -90,7 +106,7 @@ put_int(buf, size, value)
 
 /* buffer to real and vice versa routines */
 
-static double
+double
 get_real(buf, size)
   char	*buf;
   long	size;
@@ -104,7 +120,6 @@ get_real(buf, size)
   /*NOTREACHED*/
 }
 
-static
 put_real(buf, size, value)
   char	*buf;
   long	size;
@@ -138,7 +153,8 @@ convert(pbuf, psize, ptp, tp, size)
 
   if (*ptp == tp) return 1;
   if (size > *psize) {
-	*pbuf = Realloc(*pbuf, (unsigned int) size);
+	*pbuf = realloc(*pbuf, (unsigned int) size);
+	malloc_succeeded(*pbuf);
   }
   if ((*ptp)->ty_class == T_SUBRANGE) *ptp = (*ptp)->ty_base;
   switch((*ptp)->ty_class) {
@@ -298,7 +314,8 @@ do_deref(p, pbuf, psize, ptp)
   t_addr addr;
 
   if (ptr_addr(p, &addr, psize, ptp)) {
-	*pbuf = Malloc((unsigned) *psize);
+	*pbuf = malloc((unsigned) *psize);
+	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, addr, *pbuf)) {
 		error("could not get value");
 	}
@@ -317,7 +334,8 @@ do_addr(p, pbuf, psize, ptp)
   t_addr addr;
 
   if (eval_desig(p->t_args[0], &addr, psize, ptp)) {
-	*pbuf = Malloc((unsigned) pointer_size);
+	*pbuf = malloc((unsigned) pointer_size);
+	malloc_succeeded(*pbuf);
 	put_int(*pbuf, pointer_size, (long) addr);
 	return 1;
   }
@@ -780,8 +798,8 @@ do_cmp(p, pbuf, psize, ptp)
 	}
 	if (*psize < int_size) {
 		*psize = int_size;
-		free(*pbuf);
-		*pbuf = Malloc((unsigned int) int_size);
+		*pbuf = realloc(*pbuf, (unsigned int) int_size);
+		malloc_succeeded(*pbuf);
 	}
 	else	*psize = int_size;
 	if (currlang->has_bool_type) {
@@ -824,7 +842,8 @@ do_in(p, pbuf, psize, ptp)
 	    && l <= (size << 3) 
 	    && (((int *) buf)[(int)(l>>sft)] & (1 << (l & ((1 << sft)-1))));
 	free(buf);
-	*pbuf = Realloc(*pbuf, (unsigned) int_size);
+	*pbuf = realloc(*pbuf, (unsigned) int_size);
+	malloc_succeeded(*pbuf);
 	*psize = int_size;
 	*ptp = currlang->has_bool_type ? bool_type : int_type;
 	put_int(*pbuf, *psize, l);
@@ -889,7 +908,8 @@ do_array(p, pbuf, psize, ptp)
   t_addr	a;
 
   if (array_addr(p, &a, psize, ptp)) {
-	*pbuf = Malloc((unsigned int) *psize);
+	*pbuf = malloc((unsigned int) *psize);
+	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, a, *pbuf)) {
 		return 0;
 	}
@@ -945,7 +965,8 @@ do_select(p, pbuf, psize, ptp)
 {
   t_addr	a;
   if (select_addr(p, &a, psize, ptp)) {
-	*pbuf = Malloc((unsigned int) *psize);
+	*pbuf = malloc((unsigned int) *psize);
+	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, a, *pbuf)) {
 		return 0;
 	}
@@ -1011,26 +1032,29 @@ eval_expr(p, pbuf, psize, ptp)
 	break;
 
   case OP_INTEGER:
-	*pbuf = Malloc(sizeof(long));
-	*psize = sizeof(long);
+	*pbuf = malloc((unsigned int) long_size);
+	malloc_succeeded(*pbuf);
+	*psize = long_size;
 	*ptp = long_type;
-	*((long *) (*pbuf)) = p->t_ival;
+	put_int(*pbuf, long_size, p->t_ival);
 	retval = 1;
 	break;
 
   case OP_REAL:
-	*pbuf = Malloc(sizeof(double));
-	*psize = sizeof(double);
+	*pbuf = malloc((unsigned int) double_size);
+	malloc_succeeded(*pbuf);
+	*psize = double_size;
 	*ptp = double_type;
-	*((double *) (*pbuf)) = p->t_fval;
+	put_real(*pbuf, double_size, p->t_fval);
 	retval = 1;
 	break;
 
   case OP_STRING:
-	*pbuf = Malloc(sizeof(char *));
-	*psize = sizeof(char *);
+	*psize = strlen(p->t_sval)+1;
+	*pbuf = malloc((unsigned int)*psize);
+	malloc_succeeded(*pbuf);
 	*ptp = string_type;
-	*((char **) (*pbuf)) = p->t_sval;
+	strcpy(*pbuf, p->t_sval);
 	retval = 1;
 	break;
 

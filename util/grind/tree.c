@@ -24,7 +24,6 @@ extern long	pointer_size;
 extern char	*strrindex();
 
 p_tree		run_command;
-t_lineno	list_line;
 
 
 /*VARARGS1*/
@@ -107,7 +106,7 @@ freenode(p)
 }
 
 static t_addr
-get_addr(p)
+get_addr_from_node(p)
   p_tree	p;
 {
   t_addr	a = ILL_ADDR;
@@ -132,7 +131,7 @@ get_addr(p)
 	break;
 	
   case OP_IN:
-	a =  get_addr(p->t_args[0]);
+	a =  get_addr_from_node(p->t_args[0]);
 	p->t_address = a;
 	break;
 
@@ -365,7 +364,7 @@ do_list(p)
 		l2 = p->t_args[1]->t_ival;
 	}
 	else {
-  		t_addr	a = get_addr(p->t_args[0]);
+  		t_addr	a = get_addr_from_node(p->t_args[0]);
 		p_position pos;
 
 		if (a == ILL_ADDR) {
@@ -414,7 +413,7 @@ newfile(id)
 do_stop(p)
   p_tree	p;
 {
-  t_addr	a = get_addr(p->t_args[0]);
+  t_addr	a = get_addr_from_node(p->t_args[0]);
 
   if (a == ILL_ADDR) {
 	return;
@@ -437,7 +436,7 @@ do_trace(p)
 
   p->t_address = NO_ADDR;
   if (p->t_args[0]) {
-	a = get_addr(p->t_args[0]);
+	a = get_addr_from_node(p->t_args[0]);
 	if (a == ILL_ADDR) return;
 	if (p->t_args[0]->t_oper == OP_AT) {
 		e = a;
@@ -569,7 +568,7 @@ do_delete(p)
   if (p) switch(p->t_oper) {
   case OP_WHEN:
   case OP_STOP: {
-	t_addr a = get_addr(p->t_args[0]);
+	t_addr a = get_addr_from_node(p->t_args[0]);
 
 	if (a != ILL_ADDR && a != NO_ADDR) {
 		set_or_clear_breakpoint(a, CLRBP);
@@ -577,7 +576,7 @@ do_delete(p)
 	break;
 	}
   case OP_TRACE: {
-	t_addr a = get_addr(p->t_args[0]);
+	t_addr a = get_addr_from_node(p->t_args[0]);
 	
 	if (a != ILL_ADDR && a != NO_ADDR) {
 		t_addr e;

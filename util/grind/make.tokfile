@@ -3,4 +3,4 @@ sed '
 s/.*{//
 s/,.*//
 s/.*/%token	&;/
-'
+' | sort | uniq

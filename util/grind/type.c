@@ -11,6 +11,7 @@
 #include "scope.h"
 #include "message.h"
 #include "langdep.h"
+#include "expr.h"
 
 p_type	int_type, char_type, short_type, long_type, bool_type;
 p_type	uint_type, uchar_type, ushort_type, ulong_type;
@@ -401,11 +402,11 @@ compute_size(tp, AB)
   assert(tp->ty_index->ty_A != 0);
 
   if (tp->ty_index->ty_A & 1) {
-	low = BUFTOI(AB+tp->ty_index->ty_low);
+	low = get_int(AB+tp->ty_index->ty_low, int_size, T_INTEGER);
   } else low = tp->ty_index->ty_low;
   tp->ty_lb = low;
   if (tp->ty_index->ty_A & 2) {
-	high = BUFTOI(AB+tp->ty_index->ty_up);
+	high = get_int(AB+tp->ty_index->ty_up, int_size, T_INTEGER);
   } else high = tp->ty_index->ty_up;
   tp->ty_hb = high;
   return (high - low + 1) * tp->ty_elements->ty_size;

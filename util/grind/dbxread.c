@@ -13,7 +13,6 @@
 #include "scope.h"
 #include "rd.h"
 
-extern char		*Malloc();
 extern char		*strindex();
 extern struct outname	*DbxString();
 

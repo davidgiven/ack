@@ -11,6 +11,7 @@
 #include "symbol.h"
 #include "position.h"
 #include "idf.h"
+#include "expr.h"
 
 extern FILE *db_out;
 extern long float_size, pointer_size, int_size;
@@ -18,7 +19,7 @@ extern long float_size, pointer_size, int_size;
 static
 print_literal(tp, v)
   p_type	tp;
-  int		v;
+  long		v;
 {
   register struct literal *lit = tp->ty_literals;
   register int i;
@@ -75,7 +76,11 @@ print_params(tp, AB, static_link)
   par = tp->ty_params;
   size = tp->ty_nbparams;
   if (static_link) size += pointer_size;
-  param_bytes = p = Malloc((unsigned)size);
+  param_bytes = p = malloc((unsigned)size);
+  if (! p) {
+	error("could not allocate enough memory");
+	return;
+  }
   if (static_link) p += pointer_size;
   if (! get_bytes(size, AB, param_bytes)) {
 	error("no debuggee");
@@ -90,13 +95,19 @@ print_params(tp, AB, static_link)
 		   try and get value.
 		*/
 		char	*q;
+		t_addr	addr = get_int(p, pointer_size, T_UNSIGNED);
 
 		if ((size = par->par_type->ty_size) == 0) {
 			size = compute_size(par->par_type, param_bytes);
 		}
-		q = Malloc((unsigned) size);
-		if (! get_bytes(size, (t_addr) BUFTOA(p), q)) {
-			fprintf(db_out, currlang->addr_fmt, BUFTOA(p));
+		q = malloc((unsigned) size);
+  		if (! q) {
+			error("could not allocate enough memory");
+			free(param_bytes);
+			return;
+  		}
+		if (! get_bytes(size, addr, q)) {
+			fprintf(db_out, currlang->addr_fmt, (long) addr);
 		}
 		else {
 			print_val(par->par_type, size, q, 1, 0);
@@ -176,7 +187,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	for (i = tp->ty_nfields; i; i--, fld++) {
 		long sz = fld->fld_type->ty_size;
 		if (! compressed) fprintf(db_out, "%s = ", fld->fld_name);
-		if (fld->fld_bitsize < sz << 3) {
+		if (fld->fld_bitsize < (sz << 3)) {
 			/* apparently a bit field */
 			/* ??? */
 			fprintf(db_out, "<bitfield, %d, %ld>", fld->fld_bitsize, sz);
@@ -199,14 +210,10 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	fprintf(db_out, "<union>");
 	break;
   case T_ENUM:
-	print_literal(tp,  tp_sz == 1 
-			   ? (*addr & 0xFF)
-			   : tp_sz == 2
-			      ? (BUFTOS(addr) & 0xFFFF)
-			      : (int) BUFTOL(addr));
+	print_literal(tp, get_int(addr, tp_sz, T_ENUM));
 	break;
   case T_PROCEDURE: {
-	register p_scope sc = get_scope_from_addr((t_addr) BUFTOA(addr));
+	register p_scope sc = get_scope_from_addr((t_addr) get_int(addr, pointer_size, T_UNSIGNED));
 
 	if (sc && sc->sc_definedby) {
 		fprintf(db_out, sc->sc_definedby->sy_idf->id_text);
@@ -215,7 +222,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	}
 	/* Fall through */
   case T_POINTER:
-	fprintf(db_out, currlang->addr_fmt, (long) BUFTOA(addr));
+	fprintf(db_out, currlang->addr_fmt, get_int(addr, pointer_size, T_UNSIGNED));
 	break;
   case T_FILE:
 	fprintf(db_out, "<file>");
@@ -226,7 +233,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	long	nelements = tp->ty_size << 3;
 	int	count = 0;
 	int	rsft = 3 + (int_size == 2 ? 1 : 2);
-	long	mask = int_size == 2 ? 0xFFFF : 0xFFFFFFFF;
+	long	mask = int_size == 2 ? 017: 037;
 
 	if (base->ty_class == T_SUBRANGE) base = base->ty_base;
 	if (compressed) {
@@ -241,7 +248,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	}
 	indent += 4;
 	for (i = 0; i < nelements; i++) {
-		if (*((int *) addr + (i >> rsft)) & (1 << (i & mask))) {
+		if (get_int(addr + (i >> rsft), int_size, T_UNSIGNED) & (1 << (i & mask))) {
 			count++;
 			if (count > 1) {
 				if (compressed) {
@@ -258,7 +265,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 				print_unsigned(base, val+i);
 				break;
 			case T_ENUM:
-				print_literal(base, (int)val+i);
+				print_literal(base, val+i);
 				break;
 			default:
 				assert(0);
@@ -272,26 +279,14 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	fprintf(db_out, currlang->close_set_display);
   	}
 	break;
-  case T_REAL: {
-	double val = tp->ty_size == float_size
-		? BUFTOF(addr)
-		: BUFTOD(addr);
-	fprintf(db_out, currlang->real_fmt, val);
+  case T_REAL:
+	fprintf(db_out, currlang->real_fmt, get_real(addr, tp->ty_size));
 	break;
-	}
   case T_UNSIGNED:
-	print_unsigned(tp, tp_sz == 1 
-				? (*addr & 0xFF)
-				: tp_sz == 2
-			  	    ? (BUFTOS(addr) & 0xFFFF)
-			  	    : BUFTOL(addr));
+	print_unsigned(tp, get_int(addr, tp_sz, T_UNSIGNED));
 	break;
   case T_INTEGER:
-	print_integer(tp, tp_sz == 1 
-				? *addr
-				: tp_sz == 2
-			  	    ? BUFTOS(addr)
-			  	    : BUFTOL(addr));
+	print_integer(tp, get_int(addr, tp_sz, T_INTEGER));
 	break;
   case T_STRING:
 	(*currlang->printstring)(addr, (int) tp_sz);

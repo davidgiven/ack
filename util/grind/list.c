@@ -54,18 +54,6 @@ open_file(fn, mode, ffn)
   return NULL;
 }
 
-#define	window_size	21
-/*	Print a window of window_size lines around line "line" of
-	file "file".
-*/
-window(file, line)
-  p_file	file;
-  int		line;
-{
-  lines(file,
-	line + ((window_size >> 1) - window_size), line + (window_size >> 1));
-}
-
 lines(file, l1, l2)
   register p_file file;
   int		l1, l2;

@@ -15,6 +15,8 @@
 #include "symbol.h"
 #include "idf.h"
 #include "scope.h"
+#include "type.h"
+#include "expr.h"
 
 #define MAXARG	128
 
@@ -126,25 +128,26 @@ start_child(p)
 	/* I/O redirection */
 	if (in_redirect) {
 		int fd;
+
 		close(0);
-		if ((fd = open(in_redirect, 0)) < 0) {
+		if ((fd = open(in_redirect, 0)) < 0 ||
+		    (fd != 0 && dup2(fd, 0) < 0)) {
 			error("could not open input file");
-			exit(-1);
+			exit(1);
 		}
 		if (fd != 0) {
-			dup2(fd, 0);
 			close(fd);
 		}
 	}
 	if (out_redirect) {
 		int fd;
 		close(1);
-		if ((fd = creat(in_redirect, 0666)) < 0) {
+		if ((fd = creat(in_redirect, 0666)) < 0 ||
+		    (fd != 1 && dup2(fd, 1) < 0)) {
 			error("could not open output file");
-			exit(-1);
+			exit(1);
 		}
 		if (fd != 1) {
-			dup2(fd, 1);
 			close(fd);
 		}
 	}
@@ -152,7 +155,7 @@ start_child(p)
 	/* and run process to be debugged */
 	execv(AObj, argp);
 	error("could not exec %s", AObj);
-	exit(-1);
+	exit(1);
   }
 
   /* debugger */
@@ -369,7 +372,7 @@ get_bytes(size, from, to)
 
   m.m_type = GETBYTES;
   m.m_size = size;
-  ATOBUF(m.m_buf, (char *) from);
+  put_int(m.m_buf, pointer_size, (long)from);
 
   if (! could_send(&m, 0)) {
 	return 0;
@@ -394,7 +397,7 @@ set_bytes(size, from, to)
 
   m.m_type = SETBYTES;
   m.m_size = size;
-  ATOBUF(m.m_buf, (char *) to);
+  put_int(m.m_buf, pointer_size, (long) to);
 
   return uputm(&m)
 	 && usend(from, size)
@@ -428,8 +431,8 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 	free(*stackbuf);
 	return 0;
   }
-  ATOBUF(globmessage->m_buf+SP_OFF*pointer_size,
-	 BUFTOA(stackmessage->m_buf+SP_OFF*pointer_size));
+  put_int(globmessage->m_buf+SP_OFF*pointer_size, pointer_size,
+	 get_int(stackmessage->m_buf+SP_OFF*pointer_size, pointer_size, T_UNSIGNED));
   return 1;
 }
 
@@ -467,11 +470,11 @@ get_EM_regs(level)
 	return 0;
   }
   if (answer.m_type == FAIL) return 0;
-  *to++ = (t_addr) BUFTOA(answer.m_buf);
-  *to++ = (t_addr) BUFTOA(answer.m_buf+pointer_size);
-  *to++ = (t_addr) BUFTOA(answer.m_buf+2*pointer_size);
-  *to++ = (t_addr) BUFTOA(answer.m_buf+3*pointer_size);
-  *to++ = (t_addr) BUFTOA(answer.m_buf+4*pointer_size);
+  *to++ = (t_addr) get_int(answer.m_buf, pointer_size, T_UNSIGNED);
+  *to++ = (t_addr) get_int(answer.m_buf+pointer_size, pointer_size, T_UNSIGNED);
+  *to++ = (t_addr) get_int(answer.m_buf+2*pointer_size, pointer_size, T_UNSIGNED);
+  *to++ = (t_addr) get_int(answer.m_buf+3*pointer_size, pointer_size, T_UNSIGNED);
+  *to++ = (t_addr) get_int(answer.m_buf+4*pointer_size, pointer_size, T_UNSIGNED);
   return buf;
 }
 
@@ -483,7 +486,7 @@ set_pc(PC)
 
   m.m_type = SETEMREGS;
   m.m_size = 0;
-  ATOBUF(m.m_buf+PC_OFF*pointer_size, (char *)PC);
+  put_int(m.m_buf+PC_OFF*pointer_size, pointer_size, (long)PC);
   return could_send(&m, 0) && answer.m_type != FAIL;
 }
 
@@ -540,8 +543,8 @@ set_or_clear_trace(start, end, type)
   struct message_hdr m;
 
   m.m_type = type;
-  ATOBUF(m.m_buf, (char *) start);
-  ATOBUF(m.m_buf+pointer_size, (char *) end);
+  put_int(m.m_buf, pointer_size, (long)start);
+  put_int(m.m_buf+pointer_size, pointer_size, (long)end);
   if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == SETTRACE ? "setting" : "clearing", (long) start, (long) end);
   if (! could_send(&m, 0)) { }
 

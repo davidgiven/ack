@@ -119,5 +119,5 @@ extern long
 extern p_type	char_type, uchar_type, bool_type, int_type,
 		long_type, double_type, string_type;
 extern p_type	void_type, incomplete_type;
-extern long	int_size, pointer_size;
+extern long	int_size, pointer_size, long_size, double_size;
 

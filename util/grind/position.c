@@ -36,35 +36,6 @@ get_map_from_addr(t)
   return oldp ? oldp : p->f_start->on_valu <= t ? p : 0;
 }
 
-/* extern char *get_filename_from_addr(t_addr t);
-   Returns the source filename that contains the code at the address 't',
-   or 0 if there is no information available, or 't' represents an address
-   below the start address of the first file.
-*/
-char *
-get_filename_from_addr(t)
-  t_addr t;
-{
-  register p_file map = get_map_from_addr(t);
-
-  if (! map) return 0;
-  return map->f_sym->sy_idf->id_text;
-}
-
-/* extern t_lineno get_lineno_from_addr(t_addr t);
-   Returns the source line number of the line that contains the code at address
-   't'.  0 is returned if no source line number could be found.
-*/
-t_lineno
-get_lineno_from_addr(t)
-  t_addr t;
-{
-  p_position p;
-
-  p = get_position_from_addr(t);
-  return p == 0 ? 0 : p->lineno;
-}
-
 /* extern p_position get_position_from_addr(t_addr t);
    Returns a pointer to a structure containing the source position of the code
    at address 't'.  0 is returned if no source position could be found.
@@ -159,21 +130,6 @@ add_position_addr(filename, n)
   map->f_end = n;
   setnext_outname(n, map->f_line_addr[HASH(n->on_desc)]);
   map->f_line_addr[HASH(n->on_desc)] = n;
-}
-
-/* extern struct scope  *get_scope_from_position(p_position p);
-   Returns the scope of the code at position 'p', or 0 if it could not be found.
-*/
-struct scope *
-get_scope_from_position(p)
-  p_position p;
-{
-  t_addr a = get_addr_from_position(p);
-
-  if (a != ILL_ADDR) {
-	return get_scope_from_addr(a);
-  }
-  return 0;
 }
 
 /* extern p_position print_position(t_addr a, int print_function);

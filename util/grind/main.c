@@ -6,6 +6,7 @@
 #include "file.h"
 #include "symbol.h"
 #include "scope.h"
+#include "Lpars.h"
 
 static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
 static char	*progname;
@@ -17,6 +18,18 @@ FILE		*db_in;
 int		debug;
 extern struct tokenname tkidf[];
 extern char	*strindex();
+
+static struct tokenname shorts[] = {
+	{LIST, "l"},
+	{CONT, "c"},
+	{STEP, "s"},
+	{NEXT, "n"},
+	{DELETE, "d"},
+	{PRINT, "p"},
+	{RESTORE, "r"},
+	{TRACE, "t"},
+	{ 0, 0}
+};
 
 main(argc, argv)
   char	*argv[];
@@ -52,6 +65,7 @@ main(argc, argv)
   if (DbxRead(AckObj) && AObj == 0) AObj = AckObj;
   else if (AObj == 0) AObj = "a.out";
   reserve(tkidf);
+  reserve(shorts);
   if (currfile) CurrentScope = currfile->sy_file->f_scope;
   if (! init_run()) {
 	fatal("something wrong with file descriptors");

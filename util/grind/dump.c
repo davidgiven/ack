@@ -7,6 +7,8 @@
 #include "position.h"
 #include "tree.h"
 #include "message.h"
+#include "type.h"
+#include "expr.h"
 
 extern long	pointer_size;
 extern p_tree	get_from_item_list();
@@ -29,7 +31,7 @@ do_dump(p)
 	return;
   }
   p->t_args[0] = (struct tree *) d;
-  p->t_address = (t_addr) BUFTOA(d->mglobal.m_buf+PC_OFF*pointer_size);
+  p->t_address = (t_addr) get_int(d->mglobal.m_buf+PC_OFF*pointer_size, pointer_size, T_UNSIGNED);
   add_to_item_list(p);
 }
 
