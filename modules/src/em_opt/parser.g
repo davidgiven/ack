@@ -1,4 +1,3 @@
-/* $Header$ */
 /* Parser to read optimization patterns of the form:
 		op1 op2 ... test : action
 	or
@@ -13,6 +12,10 @@
 %start	parser, input;
 
 {
+#ifndef NORCSID
+static char rcsidp1[] = "$Header$";
+#endif
+
 #include "parser.h"
 
 #define MAXPRIO 11
@@ -20,14 +23,14 @@
 struct state	*states[MAXSTATES];
 struct action	*actions[MAXSTATES];
 struct mnems	patterns[MAXSTATES];
-int higheststate = 0;			/* Highest state yet allocated */
-struct idf *ops;			/* Chained list of all ops */
-int longestpattern = 0;
-int nerrors = 0;
+int		higheststate = 0;	/* Highest state yet allocated */
+struct idf	*ops;			/* Chained list of all ops */
+int		longestpattern = 0;
+int		nerrors = 0;
 
-static int lencurrpatt;
-static int lenthisrepl;
-static int currentstate;		/* Current state of dfa */
+static int	lencurrpatt;
+static int	lenthisrepl;
+static int	currentstate;		/* Current state of dfa */
 }
 
 input	: /* empty */
@@ -101,9 +104,6 @@ restriction(int argtype; struct exp_node **test;)
 		[ optrelop(&relop) exp(1,test)
 			{
 			*test = mknode(relop,mkleaf(PATARG,lencurrpatt),*test);
-			*test = mknode(LOGAND,
-				mkleaf(DEFINED,lencurrpatt),
-				*test);
 			}
 		| DEFINED
 			{
@@ -280,7 +280,7 @@ argno(int *val;)
 		{
 		*val = lastintval;
 		if(lastintval<0 || (lastintval>lencurrpatt)) {
-			fprint(STDERR ,"Illegal $%d on line %d\n",
+			fprintf(stderr ,"Illegal $%d on line %d\n",
 					lastintval,linenum);
 			nerrors++;
 		}
@@ -390,7 +390,7 @@ dotransition(state, mnem, mnem_list, lenlist)
 		p=(struct state *)Malloc(sizeof(struct state));
 		p->op=mnem;
 		if(++higheststate>MAXSTATES) {
-			fprint("Parser: More than %s states\n",MAXSTATES);
+			fprintf(stderr,"Parser: More than %s states\n",MAXSTATES);
 			sys_stop(S_EXIT);
 		}
 		p->goto_state= higheststate;
@@ -473,12 +473,12 @@ LLmessage(insertedtok)
 	int insertedtok;
 {
 	nerrors++;
-	fprint(STDERR,"parser: syntax error on line %d: ",linenum);
+	fprintf(stderr,"parser: syntax error on line %d: ",linenum);
 	if(insertedtok) {
-		fprint(STDERR,"Inserted token %d\n",insertedtok);
+		fprintf(stderr,"Inserted token %d\n",insertedtok);
 		yyless(0);
 	}
-	else fprint(STDERR,"Deleted token %d\n",LLsymb);
+	else fprintf(stderr,"Deleted token %d\n",LLsymb);
 }
 
 main() {
@@ -487,7 +487,7 @@ main() {
 	patterns[0].m_len = 0;
 	parser();
 	if(nerrors) {
-		fprint(STDERR,"%d errors detected\n",nerrors);
+		fprintf(stderr,"%d errors detected\n",nerrors);
 		sys_stop(S_EXIT);
 	}
 	outputnopt();

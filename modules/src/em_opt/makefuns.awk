@@ -9,16 +9,16 @@ BEGIN		{
 		if(seenproc) {
 			print "}"
 			print "--EOF--"
-			printf "if %s C_%s.c\n",CC,nam
+			printf "if %s O_%s.c\n",CC,nam
 			printf "then :\nelse exit 1\nfi\n"
-			printf "rm -f C_%s.c\n",nam
+			printf "rm -f O_%s.c\n",nam
 		}
 		seenproc = 1
 		$1 = substr($1,1,index($1,"\t")-1);
 		nam = $1
-		printf "cat > C_%s.c << '--EOF--'\n",$1
+		printf "cat > O_%s.c << '--EOF--'\n",$1
 		print "#include \"nopt.h\""
-		printf "C_%s(",$1
+		printf "O_%s(",$1
 		nparms = split($2,parms,":");
 		for(p=1;p<nparms;p++) {
 			if(p!=1) {
@@ -52,8 +52,8 @@ END		{
 		if(seenproc) {
 			print "}"
 			print "--EOF--"
-			printf "if %s C_%s.c\n",CC,nam
+			printf "if %s O_%s.c\n",CC,nam
 			printf "then :\nelse exit 1\nfi\n"
-			printf "rm -f C_%s.c\n",nam
+			printf "rm -f O_%s.c\n",nam
 		}
 		}

@@ -1,5 +1,5 @@
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsidp3[] = "$Header$";
 #endif
 
 #include "parser.h"
@@ -30,7 +30,7 @@ findworst(repl)
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
-		fprint(ofile,"\t\t\tOO_backup(%d);\n", longestpattern-1);
+		fprintf(ofile,"\t\t\tOO_backup(%d);\n", longestpattern-1);
 		return;
 	}
 	for(s=1;s<=higheststate;s++) {
@@ -57,7 +57,7 @@ findworst(repl)
 		}
 	}
 	if(mostbackups)
-		fprint(ofile,"\t\t\tOO_backup(%d);\n",mostbackups);
+		fprintf(ofile,"\t\t\tOO_backup(%d);\n",mostbackups);
 }
 
 findfail(state)
@@ -85,12 +85,12 @@ findfail(state)
 				continue;
 			if((leftmatch(patterns[s],patterns[state],i,n)==1)&&
 				patterns[s].m_len==(n-i+1)) {
-				fprint(ofile,"\t{%d,%d,%d},",i-1,n-i+1,s);
+				fprintf(ofile,"\t{%d,%d,%d},",i-1,n-i+1,s);
 				return;
 			}
 		}
 	}
-	fprint(ofile,"\t{%d,0,0},",n);
+	fprintf(ofile,"\t{%d,0,0},",n);
 }
 
 PRIVATE int

@@ -3,9 +3,9 @@
 #include "Lpars.h"
 #include "parser.h"
 
-struct idf *opval;	/* opcode of returned OPCODE*/
-int lastintval;		/* value of last integer seen */
-int linenum = 1;	/*current line number of input file*/
+struct idf	*opval;		/* opcode of returned OPCODE*/
+int		lastintval;	/* value of last integer seen */
+int		linenum = 1;	/*current line number of input file*/
 %}
 %%
 sfit		return(SFIT);
@@ -19,7 +19,7 @@ samesign	return(SAMESIGN);
 sameext		return(SAMEEXT);
 samenam		return(SAMENAM);
 offset		return(OFFSET);
-[a-z]*		{
+[a-z][a-z][a-z]	{
 		opval = str2idf(yytext,0);
 		return(OPCODE);
 		}

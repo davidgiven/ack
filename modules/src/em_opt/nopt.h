@@ -1,4 +1,5 @@
 /* $Header$ */
+#include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
@@ -10,60 +11,40 @@
 #include <em_comp.h>
 #include <system.h>
 #include <idf_pkg.spec>
-#include <emO_code.h>
+#include "emO_code.h"
 
-#define NULL 0
-#define FLUSHDFA()	if(OO_state) { OO_inop(OTHER); OO_dfa(OTHER); } \
-			else if(OO_noutput) OO_flush();
-#define NEXTEM()	((OO_nxtbackup>OO_bkupqueue)?\
-				((*OO_nxtpatt++ = *(--OO_nxtbackup))->opcode):\
-				0)
+#define OTHER 255
 
-#define op_lab 255
-#define OTHER  254
-#define none_ptyp 0
+#define FLUSHDFA()	if(OO_state) {\
+				*OO_nxtpatt++ = OO_OTHER; OO_dfa(OTHER);\
+			} else if(OO_noutput) OO_flush();
 
+#define GETINSTR() (OO_nxtifree>OO_freeiqueue)?*(--OO_nxtifree):\
+	((p_instr)Malloc(sizeof(struct e_instr)))
 
-struct e_instr *EM_getinstr();
+#define op_lab sp_ilb1
 
-struct instr {
-	int opcode;
-	int argtype;
-	union {
-		arith cst;
-		label lab;
-		char  *pnam;
-		struct {
-			label dlb;
-			arith noff;
-		} ndlb;
-		struct {
-			char  *dnam;
-			arith soff;
-		} sdlb;
-	} val;
-#define acst val.cst
-#define alab val.lab
-#define apnam val.pnam
-#define adlb val.ndlb.dlb
-#define anoff val.ndlb.noff
-#define adnam val.sdlb.dnam
-#define asoff val.sdlb.soff
-};
+typedef struct e_instr *p_instr;
 
-extern struct instr **OO_patternqueue;
-extern struct instr **OO_nxtpatt;
-extern struct instr **OO_bkupqueue;
-extern struct instr **OO_nxtbackup;
-extern int OO_state;
-extern int OO_noutput;	/* number of instructions in output queue */
-extern int OO_WSIZE;	/* wordlength */
-extern int OO_PSIZE;	/* pointer length */
+extern p_instr	*OO_freeiqueue;
+extern p_instr	*OO_nxtifree;
+extern p_instr	*OO_patternqueue;
+extern p_instr	*OO_nxtpatt;
+extern p_instr	*OO_bkupqueue;
+extern p_instr	*OO_nxtbackup;
+extern p_instr	OO_OTHER;
+extern int	OO_state;
+extern int	OO_noutput;	/* number of instructions in output queue */
+extern int	OO_WSIZE;	/* wordlength */
+extern int	OO_PSIZE;	/* pointer length */
 #ifdef STATS
-extern int OO_wrstats;			/* statistics output */
+extern int	OO_wrstats;			/* statistics output */
 #endif
 
-#define CST(p)		(p->acst)
-#define PNAM(p)		(p->apnam)
-#define LAB(p)		(p->alab)
-#define DEFILB(p)	(p->alab)
+extern char	*OO_freestr();
+
+#define CST(p)		(p->em_cst)
+#define PNAM(p)		(p->em_pnam)
+#define LAB(p)		(p->em_ilb)
+#define DEFILB(p)	(p->em_ilb)
+

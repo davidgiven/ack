@@ -1,7 +1,6 @@
 /* $Header$ */
+#include <stdio.h>
 #include <system.h>
-
-#define NULL 0
 
 /* type of arguments expected by each instruction */
 #define NOARG  1
@@ -73,24 +72,24 @@ struct state {
 #define MAXPATTERN	20
 
 /* Parser globals */
-extern struct state *states[MAXSTATES];
-extern struct action *actions[MAXSTATES];
-extern struct mnems patterns[MAXSTATES];
-extern int higheststate;		/* Highest state yet allocated */
-extern struct idf *ops;			/* Chained list of all ops */
-extern int longestpattern;
-extern int nerrors;
-extern File *ofile;
+extern struct state	*states[MAXSTATES];
+extern struct action	*actions[MAXSTATES];
+extern struct mnems	patterns[MAXSTATES];
+extern int		higheststate;	/* Highest state yet allocated */
+extern struct idf	*ops;		/* Chained list of all ops */
+extern int		longestpattern;
+extern int		nerrors;
+extern FILE		*ofile;
 
 /* Lexical analyser globals */
-extern struct idf *opval;	/* opcode of returned OPCODE*/
-extern int lastintval;		/* value of last integer seen */
-extern int	linenum;	/*line number of input file*/
+extern struct idf	*opval;		/* opcode of returned OPCODE*/
+extern int		lastintval;	/* value of last integer seen */
+extern int		linenum;	/*line number of input file*/
 
 /* Functions not returning int */
-char *Malloc();
-struct exp_node *mknode();
-struct exp_node *mkleaf();
-struct exp_node *combinetests();
-struct mnem_list *addelem();
-struct mnem_elem **constructlist();
+char			*Malloc();
+struct exp_node		*mknode();
+struct exp_node		*mkleaf();
+struct exp_node 	*combinetests();
+struct mnem_list	*addelem();
+struct mnem_elem	**constructlist();

@@ -1,5 +1,5 @@
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsidp2[] = "$Header$";
 #endif
 
 #include <em_mnem.h>
