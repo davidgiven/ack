@@ -240,7 +240,7 @@ ProgramModule
 	MODULE
 	IDENT	{ len = strlen(dot.TOK_IDF->id_text);
 		  if (len > 10) len = 10;
-		  if (strncmp(FileName, dot.TOK_IDF->id_text, 10)) {
+		  if (strncmp(FileName, dot.TOK_IDF->id_text, len)) {
 			warning(W_ORDINARY, "modulename %s does not match filename %s", dot.TOK_IDF->id_text, FileName);
 		  }
 		  if (state == IMPLEMENTATION) {
