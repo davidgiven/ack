@@ -141,24 +141,10 @@ external_definition
 	}
 	[ %if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
 		decl_specifiers(&Ds)
-		[
-			declarator(&Dc)
-			{
-				declare_idf(&Ds, &Dc, level);
-#ifdef	LINT
-				lint_ext_def(Dc.dc_idf, Ds.ds_sc);
-#endif	LINT
-			}
-			[
-				function(&Ds, &Dc)
-			|
-				non_function(&Ds, &Dc)
-			]
-		|
-			';'
-		]
 	|
 		{do_decspecs(&Ds);}
+	]
+	[
 		declarator(&Dc)
 		{
 			declare_idf(&Ds, &Dc, level);
@@ -166,7 +152,21 @@ external_definition
 			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
 #endif	LINT
 		}
-		function(&Ds, &Dc)
+		[
+			function(&Ds, &Dc)
+		|
+			{	if (! Ds.ds_sc_given && Ds.ds_notypegiven) {
+					strict("declaration specifiers missing");
+				}
+			}
+			non_function(&Ds, &Dc)
+		]
+	|
+		{	if (! Ds.ds_sc_given && Ds.ds_notypegiven) {
+				strict("declaration missing");
+			}
+		}
+		';'
 	]
 	{remove_declarator(&Dc); flush_strings(); }
 ;

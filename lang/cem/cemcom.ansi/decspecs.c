@@ -30,11 +30,6 @@ do_decspecs(ds)
 	
 	ASSERT(level != L_FORMAL1);
 	
-	/*
-	if (ds->ds_notypegiven && !ds->ds_sc_given)
-		strict("data definition lacking type or storage class");
-	*/
-
 	if (	level == L_GLOBAL &&
 		(ds->ds_sc == AUTO || ds->ds_sc == REGISTER)
 	)	{

@@ -53,7 +53,9 @@ extern arith NewLocal();	/* util.c	*/
 /* global function info */
 char *func_name;
 struct type *func_type;
+#ifdef LINT
 int func_notypegiven;
+#endif
 
 #ifdef USE_TMP
 static int	tmp_id;
@@ -264,7 +266,9 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	else {
 		func_type = def->df_type->tp_up;
 	}
+#ifdef LINT
 	func_notypegiven = ds->ds_notypegiven;
+#endif
 	func_size = ATW(func_type->tp_size);
 	sp_occurred[SP_SETJMP] = 0;
 

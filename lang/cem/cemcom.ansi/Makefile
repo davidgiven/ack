@@ -103,12 +103,12 @@ GOBJ =	char.o symbol2str.o next.o
 # The Sun-3 version is faster when the text-size exceeds 180K! ARRGH
 EXTRA_O =
 
-STRSRC = code.str declar.str decspecs.str def.str expr.str field.str \
+STRSRC = code.str declar.str def.str expr.str field.str \
 	estack.str util.str proto.str replace.str \
 	idf.str macro.str stack.str stmt.str struct.str switch.str type.str \
 	l_brace.str l_state.str l_outdef.str
 # generated source files
-GHSTRSRC = code.h declar.h decspecs.h def.h expr.h field.h \
+GHSTRSRC = code.h declar.h def.h expr.h field.h \
 	estack.h util.h proto.h replace.h \
 	idf.h macro.h stack.h stmt.h struct.h switch.h type.h \
 	l_brace.h l_state.h l_outdef.h
@@ -124,7 +124,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
-	 file_info.h tokenname.h l_em.h l_lint.h
+	 file_info.h tokenname.h l_em.h l_lint.h decspecs.h
 
 HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
@@ -228,7 +228,6 @@ next.c:	make.next $(STRSRC)
 
 code.h:		make.allocd
 declar.h:	make.allocd
-decspecs.h:	make.allocd
 def.h:		make.allocd
 expr.h:		make.allocd
 field.h:	make.allocd

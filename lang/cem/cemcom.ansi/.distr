@@ -31,7 +31,7 @@ declar.g
 declar.str
 declarator.c
 decspecs.c
-decspecs.str
+decspecs.h
 def.str
 domacro.c
 dumpidf.c
