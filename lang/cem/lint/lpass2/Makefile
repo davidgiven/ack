@@ -29,15 +29,15 @@ OBJ =	lpass2.o checkargs.o read.o report.o class.o l_print3ack.o
 
 test:	lpass2
 	lpass2 -xh <.i
-#	make lint
+#	make lint.test
 
 
 lpass2:	$(OBJ) Makefile next.o
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) next.o $(LLIBS) -o lpass2
 	size lpass2
 
-lint:
-	../lint -xh $(CFLAGS) $(SRC) next.c #???
+lint.test:
+	./lint -xh $(CFLAGS) $(SRC) next.c #???
 
 next.c:	$(LPASS1)/make.next inpdef.str
 	$(LPASS1)/make.next inpdef.str > next.c
