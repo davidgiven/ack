@@ -20,7 +20,9 @@ static int	LLlevel;
 extern		LLread();
 extern int	LLskip();
 extern int	LLnext();
+#ifndef LLscan
 extern		LLscan();
+#endif
 extern		LLerror();
 # ifndef LLNOFIRSTS
 extern int	LLfirst();
@@ -28,6 +30,7 @@ extern int	LLfirst();
 extern		LLnewlevel();
 extern		LLoldlevel();
 
+#ifndef LLscan
 LLscan(t) {
 	/*
 	 * Check if the next symbol is equal to the parameter
@@ -40,6 +43,7 @@ LLscan(t) {
 	 */
 	LLerror(t);
 }
+#endif
 
 LLread() {
 	for (;;) {
