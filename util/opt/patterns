@@ -503,4 +503,17 @@ dup LLP sti $1==2*w && $3==2*w : LLP $2 sti 2*w LLP $2 loi 2*w
 dup LEP sti $1==2*w && $3==2*w : LEP $2 sti 2*w LEP $2 loi 2*w
 dup LLP sdf $1==2*w : LLP $2 sdf $3 LLP $2 ldf $3
 dup LEP sdf $1==2*w : LEP $2 sdf $3 LEP $2 ldf $3
+lol dup $2==w : lol $1 lol $1
+loe dup $2==w : loe $1 loe $1
+lil dup $2==w : lil $1 lil $1
+LEP loi dup $2==w && $3==2 : LEP $1 loi w LEP $1 loi w
+ldl dup $2==2*w : ldl $1 ldl $1
+lde dup $2==2*w : lde $1 lde $1
 #endif
+adp SLP LLP adp $1+$4==0 && $2==$3 : dup p adp $1 SLP $2
+adp SEP LEP adp $1+$4==0 && $2==$3 : dup p adp $1 SEP $2
+adp sil lil adp $1+$4==0 && $2==$3 && w==p : dup p adp $1 sil $2
+adp LLP sti LLP loi adp $1+$6==0 && $2==$4 && $3==p && $5==p :
+	dup p adp $1 LLP $2 sti p
+adp LEP sti LEP loi adp $1+$6==0 && $2==$4 && $3==p && $5==p :
+	dup p adp $1 LEP $2 sti p
