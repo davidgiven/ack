@@ -12,7 +12,13 @@
 	move.w	d0,-(sp)
 	cmp	#16,d0
 	bcc	1f
+	cmp	#8,d0
+	bcc	4f
 	btst	d0,.trpim
+	bra	5f
+4:
+	btst	d0,.trpim+1
+5:
 	bne	3f
 1:
 	move.l	.trppc,a0
