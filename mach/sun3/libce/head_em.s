@@ -11,7 +11,7 @@
 
 
 
-! runtime startof for 68020 machine
+! runtime startoff for sun3 machine
 
 
 LINO_AD	= 0
