@@ -12,6 +12,7 @@ FILES = \
 	$(SRC_DIR)/em_label.h \
 	$(SRC_DIR)/em_codeCE.h \
 	$(SRC_DIR)/emO_code.h \
+	$(SRC_DIR)/em_codeO.h \
 	$(SRC_DIR)/em_mesX.h
 
 all:
@@ -21,8 +22,6 @@ install:	all
 		cp $(FILES) $(MOD_DIR)/h
 
 cmp:		all
-		-cmp $(SRC_DIR)/idf_pkg.body $(MOD_DIR)/pkg/idf_pkg.body
-		-cmp $(SRC_DIR)/idf_pkg.spec $(MOD_DIR)/pkg/idf_pkg.spec
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(FILES)
