@@ -47,7 +47,7 @@ SLIST =		cff4.s cff8.s\
 		adder.s shifter.s fptrp.s
 
 SRC =		$(CDIR)/FP_bias.h $(CDIR)/FP_shift.h $(CDIR)/FP_trap.h\
-		$(CDIR)/FP_types.h $(CDIR)/adder.h $(CDIR)/get_put.h\
+		$(CDIR)/FP_types.h $(CDIR)/get_put.h\
 		$(CDIR)/cff4.c $(CDIR)/cff8.c\
 		$(CDIR)/cfu.c\
 		$(CDIR)/cmf4.c $(CDIR)/cmf8.c\
