@@ -2721,10 +2721,12 @@ pat loc cmu zne $1<256 && $1>=0 && $2==2 call loccmuzxx("jne")
 
 pat lab topeltsize($1)==2 && !fallthrough($1)
   with STACK
+  kills ALL
   gen labeldef $1                 yields ax
 
 pat lab topeltsize($1)==2 && fallthrough($1)
   with ACC STACK
+  kills ALL
   gen labeldef $1                 yields ax
 
 pat lab topeltsize($1)!=2
