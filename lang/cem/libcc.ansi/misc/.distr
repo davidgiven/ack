@@ -20,3 +20,4 @@ seekdir.c
 sleep.c
 telldir.c
 termcap.c
+mktemp.c

@@ -18,3 +18,4 @@ rewinddir.c
 seekdir.c
 telldir.c
 isatty.c
+mktemp.c
