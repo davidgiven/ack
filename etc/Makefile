@@ -16,6 +16,7 @@ $(FILES):       em_table
 install:	$(FILES)
 
 distr:		$(FILES)
+		touch new_table_done
 
 opr:
 		make pr ^ opr
