@@ -54,10 +54,15 @@ con_mult(sz) word sz; {
 
 con_float() {
 	register i;
+	static int warning_given;
 
 	i= argval ;
 	if (i!= 4 && i!= 8)
 		fatal("bad fcon size");
+	if (! warning_given) {
+		fprintf(stderr, "Warning: dummy floating point constant(s)\n");
+		warning_given = 1;
+	}
 	while ( i ) {
 		fprintf(codefile," .data2 0,0\n") ;
 		i -=4 ;
