@@ -468,7 +468,7 @@ ok:
 hash(p)
 register char *p;
 {
-	register unsigned h;
+	register unsigned short h;
 	register c;
 
 	h = 0;
