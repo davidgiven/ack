@@ -26,4 +26,4 @@
 #define _CONST
 
 #endif /* __STDC__ */
-#endif __ANSI_H__INCLUDED
+#endif /* __ANSI_H__INCLUDED */
