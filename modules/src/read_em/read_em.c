@@ -217,7 +217,11 @@ EM_getinstr(p)
 
 	EM_error = 0;
 	if (ahead) {
-		*p = aheads[--ahead];
+		register int i;
+
+		ahead--;
+		*p = aheads[0];
+		for (i = 0; i < ahead; i++) aheads[i] = aheads[i+1];
 		return 1;
 	}
 	emhead = p;
