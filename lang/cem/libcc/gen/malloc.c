@@ -27,11 +27,10 @@ unsigned len;
   register char *p;
 
   p = (char *) ALIGN((vir_bytes) top + sizeof(char *) + len, CLICK_SIZE)
-							+ BUGFIX
-							- sizeof(char *);
+							+ BUGFIX;
   if (p < top || brk(p - BUGFIX) < 0)
 	return(0);
-  top = p;
+  top = p - (BUGFIX + sizeof(char *));
   for (p = bottom; NEXT(p) != 0; p = (char *) (* (vir_bytes *) p & ~BUSY))
 	;
   NEXT(p) = top;
