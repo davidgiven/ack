@@ -25,6 +25,9 @@
 #include "../../../h/em_mnem.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_spec.h"
+#include "../../../h/em_flag.h"
+
+extern char em_flag[];
 
 #define LP_BLOCKS	lp_extend->lpx_ra.lpx_blocks
 
@@ -219,7 +222,9 @@ bo_switch(b)
 		    (bra = last_code(b->b_start,TRUE)) != (line_p) 0 &&
 		    INSTR(bra) == op_bra &&
 		    (s->b_next == (bblock_p) 0 ||
-		     !Lis_elem(s->b_next,s->b_succ))) {
+		     !Lis_elem(s->b_next,s->b_succ) ||
+		     ((bra = last_code(s->b_start, TRUE)) != (line_p) 0 &&
+		      (em_flag[INSTR(bra)]&EM_FLO) == FLO_T))) {
 			l = last_code(s->b_start,FALSE);
 			if (INSTR(l) == ps_end) {
 				if (PREV(l) == (line_p) 0) return;
