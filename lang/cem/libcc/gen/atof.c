@@ -68,7 +68,7 @@ atof(p)
 		while (exp) {
 			if (exp % 2) correction *= exp5;
 			exp /= 2;
-			exp5 *= exp5;
+			if (exp != 0) exp5 *= exp5;
 		}
 		if (expsign) fl = fl / correction;
 		else	fl = fl * correction;
