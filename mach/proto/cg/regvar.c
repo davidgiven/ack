@@ -4,6 +4,10 @@
 
 #ifdef REGVARS
 
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "types.h"
 #include <cg_pattern.h>
 #include "data.h"
