@@ -225,7 +225,7 @@ emits(section) struct outsect *section ; {
  */
 names()
 {
-	register ushort	n = outhead.oh_nname - outhead.oh_nsect;
+	register unsigned	n = outhead.oh_nname - outhead.oh_nsect;
 	int		type = 0 ;
 	struct outname  outname ;
 	char		buffer[100] ;

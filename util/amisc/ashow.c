@@ -51,7 +51,7 @@ show(headp)
 	extern char		*myalloc();
 
 	printf("Version %d\n", headp->oh_stamp);
-	showflags(headp->oh_flags);
+	showflags((unsigned) headp->oh_flags);
 	/*
 	 * Show all sections.
 	 */
@@ -98,7 +98,7 @@ show(headp)
  * Show flags from header.
  */
 showflags(flagword)
-	ushort	flagword;
+	unsigned	flagword;
 {
 	if (flagword & HF_LINK) printf("unresolved references left\n");
 }

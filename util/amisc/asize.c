@@ -17,7 +17,7 @@ char **argv;
 {
 	struct outhead	buf;
 	struct outsect	sbuf;
-	ushort		nrsect;
+	unsigned short	nrsect;
 	long		sum;
 	int		gorp;
 
