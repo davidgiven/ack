@@ -9,7 +9,7 @@ UTIL_BIN = \
 SRC_DIR = \
 	$(SRC_HOME)/lang/cem/cemcom.ansi
 FSRC_DIR = \
-	$(SRC_HOME)/fast/f_cem
+	$(SRC_HOME)/fast/f_c
 
 TABGEN=	$(UTIL_BIN)/tabgen
 LLGEN =	$(UTIL_BIN)/LLgen
