@@ -3,6 +3,8 @@ DDUMP=$TMP.dd.$$
 PDUMP=$TMP.pd.$$
 PHASES=''
 FLAGS=''
+EM=$1
+shift
 
 
 while :
@@ -15,7 +17,7 @@ do
         case $A in
 	*.m|*.ma) ICARG="$ICARG $A"; continue;;
 	-P)	OPT="$1"; shift; continue;;
-	-IL)	PHASES="$PHASES il cf " ; continue;;
+	-IL)	PHASES="$PHASES il cf caopt ic cf " ; continue;;
 	-CS)	PHASES="$PHASES cs " ; continue;;
 	-SR)	PHASES="$PHASES sr " ; continue;;
 	-UD)	PHASES="$PHASES ud " ; continue;;
@@ -42,7 +44,7 @@ fi
 for i in $PASSES
 do	INFILES=$OUTFILES
 	OUTFILES="$TMP.p.$c.$$ $TMP.d.$c.$$ $TMP.l.$c.$$ $TMP.b.$c.$$"
-	trap "rm -f $INFILES $OUTFILES $PDUMP $DDUMP; exit 1" 1 2 15
+	trap "rm -f $INFILES $OUTFILES $PDUMP $DDUMP $TMPOPT; exit 1" 1 2 15
 	case $i in
 	ic)	if $OPT/ic $INFILES - - $OUTFILES $ICARG
 		then :
@@ -50,11 +52,23 @@ do	INFILES=$OUTFILES
 		fi ;;
 	ca)	if $OPT/ca $INFILES $PDUMP $DDUMP - -
 		then 
-		rm -f $INFILES $PDUMP $DDUMP
+		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
 		else
-		rm -f $INFILES $PDUMP $DDUMP
+		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
 		exit 1
 		fi;;
+	caopt)	rm -f $TMPOPT
+		TMPOPT=$TMP.o.$$
+		if $OPT/ca $INFILES $PDUMP $DDUMP - - | $EM/lib/em_opt2 > $TMPOPT
+		then
+		rm -f $INFILES $PDUMP $DDUMP
+		else
+		rm -f $INFILES $PDUMP $DDUMP $TMPOPT
+		exit 1
+		fi
+		ICARG=$TMPOPT
+		OUTFILES="$PDUMP $DDUMP"
+		;;
 	*)	if $OPT/$i $INFILES $OUTFILES $FLAGS
 		then 
 		rm -f $INFILES
