@@ -480,20 +480,20 @@ static
 subu(sz)
 	arith sz;
 {
-	if (options['R']) C_sbu(sz);
-	else {
-		CAL((int) sz == (int) word_size ? "subu" : "subul", (int) sz);
+	if (! options['R']) {
+		CAL((int) sz == (int) word_size ? "subuchk" : "subulchk", (int) sz);
 	}
+	C_sbu(sz);
 }
 
 static
 addu(sz)
 	arith sz;
 {
-	if (options['R']) C_adu(sz);
-	else {
-		CAL((int) sz == (int) word_size ? "addu" : "addul", (int) sz);
+	if (! options['R']) {
+		CAL((int) sz == (int) word_size ? "adduchk" : "addulchk", (int) sz);
 	}
+	C_adu(sz);
 }
 
 CodeStd(nd)
@@ -747,13 +747,11 @@ CodeOper(expr, true_label, false_label)
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			if (options['R']) {
-				C_mlu(tp->tp_size);
-			}
-			else {
-				CAL((int)(tp->tp_size) <= (int)word_size ? "mulu" : "mulul",
+			if (! options['R']) {
+				CAL((int)(tp->tp_size) <= (int)word_size ? "muluchk" : "mululchk",
 				    (int)(tp->tp_size));
 			}
+			C_mlu(tp->tp_size);
 			break;
 		case T_REAL:
 			C_mlf(tp->tp_size);
