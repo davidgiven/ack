@@ -1,3 +1,5 @@
+#define CODE_EXPANDER
+#include <em.h>
 #include <assert.h>
 
 extern int locals_created; 
