@@ -2853,7 +2853,7 @@ with rmorconst REG
 with REG rmorconst
   gen or %1,%2
       je {label,1f}
-      mov %2,{ANYCON,1}
+      mov %1,{ANYCON,1}
       1:			yields %1
 
 pat ldc cms zeq $2==4 && loww($1)==65535 && highw($1)==(0-1)
