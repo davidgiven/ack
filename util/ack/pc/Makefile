@@ -1,7 +1,7 @@
-d=../../..
-h=$d/h
+EMHOME=../../..
+h=$(EMHOME)/h
 
-PC_PATH=$d/lib/em_pc
+PC_PATH=$(EMHOME)/lib/em_pc
 
 em_pc:          em_pc.c $h/local.h $h/em_path.h
 		cc -n -o em_pc -O -I$h em_pc.c
