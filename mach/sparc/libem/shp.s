@@ -7,7 +7,7 @@ strhp:				! %o0 = new heap pointer
 	st	%i0, [%o1]	! it'll probably go right, anyway
 	set	limhp, %o1
 	ld	[%o1], %o2
-	cmp	%i0, limhp
+	cmp	%i0, %o2
 	blt	1f
 	nop
 	add	%i0, 0x400, %i0	! extra 1K
