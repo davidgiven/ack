@@ -11,12 +11,15 @@ the stack by the \fIcalling\fR procedure.
 The ASP (Adjust Stack Pointer) instruction is used for this purpose.
 A call in EM is shown in Fig. 8.1
 .DS
-Pascal:                EM:
+.TS
+l l.
+Pascal:	EM:
 
-f(a,2)                 LOC 2
-		       LOE A
-		       CAL F
-		       ASP 4    -- pop 4 bytes
+f(a,2)	LOC 2
+	LOE A
+	CAL F
+	ASP 4    -- pop 4 bytes
+.TE
 
 Fig. 8.1 An example procedure call in Pascal and EM
 .DE
@@ -35,17 +38,20 @@ A stack adjustment may be delayed if there is some other stack adjustment
 later on in the same basic block.
 The two ASPs can be combined into one.
 .DS
-Pascal:           EM:               optimized EM:
+.TS
+l l l.
+Pascal:	EM:	optimized EM:
 
-f(a,2)            LOC 2             LOC 2
-g(3,b,c)          LOE A             LOE A
-		  CAL F             CAL F
-		  ASP 4             LOE C
-		  LOE C             LOE B
-		  LOE B             LOC 3
-		  LOC 3             CAL G
-		  CAL G             ASP 10
-		  ASP 6
+f(a,2)	LOC 2	LOC 2
+g(3,b,c)	LOE A	LOE A
+	CAL F	CAL F
+	ASP 4	LOE C
+	LOE C	LOE B
+	LOE B	LOC 3
+	LOC 3	CAL G
+	CAL G	ASP 10
+	ASP 6
+.TE
 
 Fig. 8.2 An example of local Stack Pollution
 .DE
@@ -85,19 +91,23 @@ the number of bytes pushed since the first ASP.
 .LP
 Condition 1. is not satisfied in Fig. 8.3.
 .DS
-Pascal:               EM:
+.TS
+l l.
+Pascal:	EM:
 
-5 + f(10) + g(30)     LOC 5
-		      LOC 10
-		      CAL F
-		      ASP 2    -- cannot be removed
-		      LFR 2    -- push function result
-		      ADI 2
-		      LOC 30
-		      CAL G
-		      ASP 2
-		      LFR 2
-		      ADI 2
+5 + f(10) + g(30)	LOC 5
+	LOC 10
+	CAL F
+	ASP 2    -- cannot be removed
+	LFR 2    -- push function result
+	ADI 2
+	LOC 30
+	CAL G
+	ASP 2
+	LFR 2
+	ADI 2
+.TE
+
 Fig. 8.3 An illegal transformation
 .DE
 If the first ASP were removed (delayed), the first ADI would add
@@ -105,19 +115,22 @@ If the first ASP were removed (delayed), the first ADI would add
 .sp
 Condition 2. is not satisfied in Fig. 8.4.
 .DS
-Pascal:               EM:
+.TS
+l l.
+Pascal:	EM:
 
-f(10) + 5 * g(30)     LOC 10
-		      CAL F
-		      ASP 2
-		      LFR 2
-		      LOC 5
-		      LOC 30
-		      CAL G
-		      ASP 2
-		      LFR 2
-		      MLI 2   --  5 * g(30)
-		      ADI 2
+f(10) + 5 * g(30)	LOC 10
+	CAL F
+	ASP 2
+	LFR 2
+	LOC 5
+	LOC 30
+	CAL G
+	ASP 2
+	LFR 2
+	MLI 2   --  5 * g(30)
+	ADI 2
+.TE
 
 Fig. 8.4 A second illegal transformation
 .DE

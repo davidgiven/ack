@@ -93,8 +93,11 @@ Objects are recognized by looking at the operands
 of instructions that reference global data.
 If we come across the instructions:
 .DS
-LDE X+6         -- Load Double External
-LAE X+20        -- Load Address External
+.TS
+l l.
+LDE X+6	-- Load Double External
+LAE X+20	-- Load Address External
+.TE
 .DE
 we conclude that the data block
 preceded by the data label X contains an object

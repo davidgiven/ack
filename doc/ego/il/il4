@@ -104,18 +104,21 @@ The following model was developed empirically.
 Assume procedure P calls procedure Q.
 The call takes place in basic block B.
 .DS
-ZP = # zero parameters
-CP = # constant parameters - ZP
-LN = Loop Nesting level (0 if outside any loop)
-F  = \fIif\fR # formal parameters of Q > 0 \fIthen\fR 1 \fIelse\fR 0
-FT = \fIif\fR Q falls through \fIthen\fR 1 \fIelse\fR 0
-S  = size(Q) - 1 - # inline_parameters - F
-L  = \fIif\fR # local variables of P > 0 \fIthen\fR 0 \fIelse\fR -1
-A  = CP + 2 * ZP
-N  = \fIif\fR LN=0 and P is never called from a loop \fIthen\fR 0 \fIelse\fR (LN+1)**2
-FM = \fIif\fR B is a firm block \fIthen\fR 2 \fIelse\fR 1
+.TS
+l l l.
+ZP	\&=	# zero parameters
+CP	\&=	# constant parameters - ZP
+LN	\&=	Loop Nesting level (0 if outside any loop)
+F	\&=	\fIif\fR # formal parameters of Q > 0 \fIthen\fR 1 \fIelse\fR 0
+FT	\&=	\fIif\fR Q falls through \fIthen\fR 1 \fIelse\fR 0
+S	\&=	size(Q) - 1 - # inline_parameters - F
+L	\&=	\fIif\fR # local variables of P > 0 \fIthen\fR 0 \fIelse\fR -1
+A	\&=	CP + 2 * ZP
+N	\&=	\fIif\fR LN=0 and P is never called from a loop \fIthen\fR 0 \fIelse\fR (LN+1)**2
+FM	\&=	\fIif\fR B is a firm block \fIthen\fR 2 \fIelse\fR 1
 
-pay_off = (100/S + FT + F + L + A) * N * FM
+pay_off	\&=	(100/S + FT + F + L + A) * N * FM
+.TE
 .DE
 S stands for the size increase of the program,
 which is slightly less than the size of Q.

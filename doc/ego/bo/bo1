@@ -27,20 +27,23 @@ While-loop optimization
 The straightforward way to translate a while loop is to
 put the test for loop termination at the beginning of the loop.
 .DS
-while cond loop                  LAB1: Test cond
-   body of the loop     --->           Branch On False To LAB2
-end loop                               code for body of loop
-				       Branch To LAB1
-				 LAB2:
+while cond loop                       \kyLAB1: \kxTest cond
+   body of the loop     --->\h'|\nxu'Branch On False To LAB2
+end loop\h'|\nxu'code for body of loop
+\h'|\nxu'Branch To LAB1
+\h'|\nyu'LAB2:
 
 Fig. 10.1 Example of Branch Optimization
 .DE
 If the condition fails at the Nth iteration, the following code
 gets executed (dynamically):
 .DS
-N   *  conditional branch (which fails N-1 times)
-N-1 *  unconditional branch
-N-1 *  body of the loop
+.TS
+l l l.
+N	*	conditional branch (which fails N-1 times)
+N-1	*	unconditional branch
+N-1	*	body of the loop
+.TE
 .DE
 An alternative translation is:
 .DS
@@ -53,9 +56,12 @@ LAB2:
 .DE
 This translation results in the following profile:
 .DS
-N   *  conditional branch (which succeeds N-1 times)
-1   *  unconditional branch
-N-1 *  body of the loop
+.TS
+l l l.
+N	*	conditional branch (which succeeds N-1 times)
+1	*	unconditional branch
+N-1	*	body of the loop
+.TE
 .DE
 So the second translation will be significantly faster if N >> 2.
 If N=2, execution time will be slightly increased.
@@ -79,12 +85,15 @@ the basic block that comes textually next to S must stay
 in that position.
 So the transformation in Fig. 10.2 is illegal.
 .DS
-LAB1: S1              LAB1: S1
-      BRA LAB2        S2
-      ...       -->   BEQ LAB3
-LAB2: S2              ...
-      BEQ LAB3        S3
-      S3
+.TS
+l l l l l.
+LAB1:	S1		LAB1:	S1
+	BRA LAB2			S2
+	...	-->		BEQ LAB3
+LAB2:	S2			...
+	BEQ LAB3			S3
+	S3
+.TE
 
 Fig. 10.2 An illegal transformation of Branch Optimization
 .DE
@@ -118,34 +127,36 @@ the last instruction of S is a conditional branch
 If such a block B is found, the control flow graph is changed
 as depicted in Fig. 10.3.
 .DS
-       |				    |
-       |				    v
-       v				    |
-       |-----<------|			    ----->-----|
-   ____|____	    |				       |
-   |	   |	    |		    |-------|	       |
-   |  S1   |	    |		    |	    v	       |
-   |  Bcc  |	    |		    |	  ....	       |
-|--|	   |	    |		    |		       |
-|  ---------	    |		    |	----|----      |
-|		    |		    |	|	|      |
-|     ....	    ^		    |	|  S2	|      |
-|		    |		    |	|	|      |
-|   ---------	    |		    |	|	|      |
-v   |	    |	    |		    ^	---------      |
-|   |  S2   |	    |		    |	    |	       |
-|   | BRA   |	    |		    |	    |-----<-----
-|   |	    |	    |		    |	    v
-|   ---------	    |		    |	____|____
-|	|	    |		    |	|	|
-|	------>------		    |	|  S1	|
-|				    |	|  Bnn  |
-|-------|			    |	|	|
-	|			    |	----|----
-	v			    |	    |
-				    |----<--|
-					    |
-					    v
+.ft 5
+       |                                    |
+       |                                    v
+       v                                    |
+       |-----<------|                       ----->-----|
+   ____|____        |                                  |
+   |       |        |               |-------|          |
+   |  S1   |        |               |       v          |
+   |  Bcc  |        |               |     ....         |
+|--|       |        |               |                  |
+|  ---------        |               |   ----|----      |
+|                   |               |   |       |      |
+|     ....          ^               |   |  S2   |      |
+|                   |               |   |       |      |
+|   ---------       |               |   |       |      |
+v   |       |       |               ^   ---------      |
+|   |  S2   |       |               |       |          |
+|   | BRA   |       |               |       |-----<-----
+|   |       |       |               |       v
+|   ---------       |               |   ____|____
+|       |           |               |   |       |
+|       ------>------               |   |  S1   |
+|                                   |   |  Bnn  |
+|-------|                           |   |       |
+        |                           |   ----|----
+        v                           |       |
+                                    |----<--|
+                                            |
+                                            v
+.ft R
 
 Fig. 10.3 Transformation of the CFG by Branch Optimization
 .DE

@@ -22,6 +22,6 @@ the driving routine for doing the substitution
 lower level routines that do certain modifications
 .IP 3_aux:
 implements auxiliary procedures used by subphase 3
-.IP aux
+.IP aux:
 implements auxiliary procedures used by several subphases.
 .LP

@@ -26,26 +26,26 @@ There are groups for all sorts of operators:
 unary, binary, and ternary.
 The groups of operators are further partitioned according to the size
 of their operand(s) and result.
-\" .PP
-\" The distinction between operators and expensive loads is not always clear.
-\" The ADP instruction for example,
-\" might seem a unary operator because it pops one item
-\" (a pointer) from the stack.
-\" However, two ADP-instructions which pop an item with the same value number
-\" need not have the same result,
-\" because the attributes (an offset, to be added to the pointer)
-\" can be different.
-\" Is it then a binary operator?
-\" That would give rise to the strange, and undesirable,
-\" situation that some binary operators pop two operands
-\" and others pop one.
-\" The conclusion is inevitable:
-\" we have been fooled by the name (ADd Pointer).
-\" The ADP-instruction is an expensive load.
-\" In this context LAF, meaning Load Address of oFfsetted,
-\" would have been a better name,
-\" corresponding to LOF, like LAL,
-\" Load Address of Local, corresponds to LOL.
+.\" .PP
+.\" The distinction between operators and expensive loads is not always clear.
+.\" The ADP instruction for example,
+.\" might seem a unary operator because it pops one item
+.\" (a pointer) from the stack.
+.\" However, two ADP-instructions which pop an item with the same value number
+.\" need not have the same result,
+.\" because the attributes (an offset, to be added to the pointer)
+.\" can be different.
+.\" Is it then a binary operator?
+.\" That would give rise to the strange, and undesirable,
+.\" situation that some binary operators pop two operands
+.\" and others pop one.
+.\" The conclusion is inevitable:
+.\" we have been fooled by the name (ADd Pointer).
+.\" The ADP-instruction is an expensive load.
+.\" In this context LAF, meaning Load Address of oFfsetted,
+.\" would have been a better name,
+.\" corresponding to LOF, like LAL,
+.\" Load Address of Local, corresponds to LOL.
 .PP
 There are groups for all sorts of stores:
 direct, indirect, array element.
@@ -91,10 +91,13 @@ because EM expressions are postfix.
 When we find an instruction to load an operand,
 we load on the fake-stack a struct with the following information:
 .DS
-(1) the value number of the operand
-(2) the size of the operand
-(3) a pointer to the first line of EM-code
-    that constitutes the operand
+.TS
+l l.
+(1)	the value number of the operand
+(2)	the size of the operand
+(3)	a pointer to the first line of EM-code
+	that constitutes the operand
+.TE
 .DE
 In most cases, (3) will point to the line
 that loaded the operand (e.g. LOL, LOC),
@@ -121,9 +124,12 @@ a recurrence of this expression.
 Not only will the operand(s) be popped from the fake-stack,
 but the following will be pushed:
 .DS
-(1) the value number of the result
-(2) the size of the result
-(3) a pointer to the first line of the expression
+.TS
+l l.
+(1)	the value number of the result
+(2)	the size of the result
+(3)	a pointer to the first line of the expression
+.TE
 .DE
 In this way an item on the fake-stack always contains
 the necessary information.

@@ -1,7 +1,10 @@
 .ND
-.ll 80m
-.nr LL 80m
-.nr tl 78m
+.\".ll 80m
+.\".nr LL 80m
+.\".nr tl 78m
 .tr ~ 
 .ds >. .
-.ds [. " \[
+.ds >, ,
+.ds [. " [
+.ds .] ]
+.cs 5 22

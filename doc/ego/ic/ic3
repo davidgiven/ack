@@ -21,12 +21,15 @@ The syntactic structure of every component
 is described by a set of context free syntax rules,
 with the following conventions:
 .DS
-x               a non-terminal symbol
-A               a terminal symbol (in capitals)
-x: a b c;       a grammar rule
-a | b           a or b
-(a)+            1 or more occurrences of a
-{a}             0 or more occurrences of a
+.TS
+l l.
+x	a non-terminal symbol
+A	a terminal symbol (in capitals)
+x: a b c;	a grammar rule
+a | b	a or b
+(a)+	1 or more occurrences of a
+{a}	0 or more occurrences of a
+.TE
 .DE
 .NH 3
 The object table
@@ -70,21 +73,24 @@ identifying number
 (see previous section for their use).
 .DS
 .UL syntax
-  object_table:
-                {datablock} ;
-  datablock:
-                D_ID            -- unique identifying number
-                PSEUDO          -- one of ROM,CON,BSS,HOL,UNKNOWN
-                SIZE            -- # bytes declared
-                FLAGS
-                {value}         -- contents of rom
-                {object} ;      -- objects of the datablock
-  object:
-                O_ID            -- unique identifying number
-                OFFSET          -- offset within the datablock
-                SIZE ;          -- size of the object in bytes
-  value:
-                argument ;
+.TS
+lw(1i) l l.
+object_table:
+	{datablock} ;
+datablock:
+	D_ID	-- unique identifying number
+	PSEUDO	-- one of ROM,CON,BSS,HOL,UNKNOWN
+	SIZE	-- # bytes declared
+	FLAGS
+	{value}	-- contents of rom
+	{object} ;	-- objects of the datablock
+object:
+	O_ID	-- unique identifying number
+	OFFSET	-- offset within the datablock
+	SIZE ;	-- size of the object in bytes
+value:
+	argument ;
+.TE
 .DE
 A data block has only one flag: "external", indicating
 whether the data label is externally visible.
@@ -102,26 +108,29 @@ The table has one entry for
 every procedure.
 .DS
 .UL syntax
-  procedure_table:
-                {procedure}
-  procedure:
-                P_ID            -- unique identifying number
-                #LABELS         -- number of instruction labels
-                #LOCALS         -- number of bytes for locals 
-		#FORMALS        -- number of bytes for formals
-                FLAGS           -- flag bits
-                calling         -- procedures called by this one
-                change          -- info about global variables changed
-                use ;           -- info about global variables used
-  calling:
-                {P_ID} ;        -- procedures called
-  change:
-                ext             -- external variables changed
-                FLAGS ;
-  use:
-                FLAGS ;
-  ext:
-                {O_ID} ;        -- a set of objects
+.TS
+lw(1i) l l.
+procedure_table:
+	{procedure}
+procedure:
+	P_ID	-- unique identifying number
+	#LABELS	-- number of instruction labels
+	#LOCALS	-- number of bytes for locals 
+	#FORMALS	-- number of bytes for formals
+	FLAGS	-- flag bits
+	calling	-- procedures called by this one
+	change	-- info about global variables changed
+	use ;	-- info about global variables used
+calling:
+	{P_ID} ;	-- procedures called
+change:
+	ext	-- external variables changed
+	FLAGS ;
+use:
+	FLAGS ;
+ext:
+	{O_ID} ;	-- a set of objects
+.TE
 .DE
 .PP
 The number of bytes of formal parameters accessed by
@@ -231,38 +240,41 @@ of arguments), then the list is terminated by a special
 argument of type CEND.
 .DS
 .UL syntax
-  em_text:
-                {line} ;
-  line:
-                INSTR           -- opcode
-                OPTYPE          -- operand type
-                operand ;
-  operand:
-                empty |         -- OPTYPE = NO
-                SHORT |         -- OPTYPE = SHORT
-                OFFSET |        -- OPTYPE = OFFSET
-                LAB_ID |        -- OPTYPE = INSTRLAB
-                O_ID |          -- OPTYPE = OBJECT
-                P_ID |          -- OPTYPE = PROCEDURE
-                {argument} ;    -- OPTYPE = LIST
-  argument:
-                ARGTYPE
-                arg ;
-  arg:
-                empty |         -- ARGTYPE = CEND
-                OFFSET |
-                LAB_ID |
-                O_ID |
-                P_ID |
-                string |        -- ARGTYPE = STRING
-                const ;         -- ARGTYPE = ICON,UCON or FCON
-  string:
-                LENGTH          -- number of characters
-                {CHARACTER} ;
-  const:
-                SIZE            -- number of bytes
-                string ;        -- string representation of (un)signed
-                                -- or floating point constant
+.TS
+lw(1i) l l.
+em_text:
+	{line} ;
+line:
+	INSTR	-- opcode
+	OPTYPE	-- operand type
+	operand ;
+operand:
+	empty |	-- OPTYPE = NO
+	SHORT |	-- OPTYPE = SHORT
+	OFFSET |	-- OPTYPE = OFFSET
+	LAB_ID |	-- OPTYPE = INSTRLAB
+	O_ID |	-- OPTYPE = OBJECT
+	P_ID |	-- OPTYPE = PROCEDURE
+	{argument} ;	-- OPTYPE = LIST
+argument:
+	ARGTYPE
+	arg ;
+arg:
+	empty |	-- ARGTYPE = CEND
+	OFFSET |
+	LAB_ID |
+	O_ID |
+	P_ID |
+	string |	-- ARGTYPE = STRING
+	const ;	-- ARGTYPE = ICON,UCON or FCON
+string:
+	LENGTH	-- number of characters
+	{CHARACTER} ;
+const:
+	SIZE	-- number of bytes
+	string ;	-- string representation of (un)signed
+		-- or floating point constant
+.TE
 .DE
 .NH 3
 The control flow graphs
@@ -306,24 +318,27 @@ the identifiers of every
 that the block belongs to (see next section for loops).
 .DS
 .UL syntax
-  control_flow_graph:
-                {basic_block} ;
-  basic_block:
-                B_ID            -- unique identifying number
-                #INSTR          -- number of EM instructions
-                succ
-                pred
-                idom            -- immediate dominator
-                loops           -- set of loops
-		FLAGS ;         -- flag bits
-  succ:
-                {B_ID} ;
-  pred:
-                {B_ID} ;
-  idom:
-                B_ID ;
-  loops:
-                {LP_ID} ;
+.TS
+lw(1i) l l.
+control_flow_graph:
+	{basic_block} ;
+basic_block:
+	B_ID	-- unique identifying number
+	#INSTR	-- number of EM instructions
+	succ
+	pred
+	idom	-- immediate dominator
+	loops	-- set of loops
+	FLAGS ;	-- flag bits
+succ:
+	{B_ID} ;
+pred:
+	{B_ID} ;
+idom:
+	B_ID ;
+loops:
+	{LP_ID} ;
+.TE
 .DE
 The flag bits can have the values 'firm' and 'strong',
 which are explained below.
@@ -387,28 +402,30 @@ strong nor firm, as it may be skipped during some iterations
 .DS
 loop
        if cond1 then
-	      ... -- this code will not
-		  -- result in a firm or strong block
+	      ... \kx-- this code will not
+		  \h'|\nxu'-- result in a firm or strong block
        end if;
        ...  -- strong (always executed)
        exit when cond2;
-       ...  -- firm (not executed on
-            -- last iteration).
+       ...  \kx-- firm (not executed on last iteration).
 end loop;
 
 Fig. 3.2 Example of firm and strong block
 .DE
 .DS
 .UL syntax
-  looptable:
-                {loop} ;
-  loop:
-                LP_ID           -- unique identifying number
-                LEVEL           -- loop nesting level
-                entry           -- loop entry block
-                end ;
-  entry:
-                B_ID ;
-  end:
-                B_ID ;
+.TS
+lw(1i) l l.
+looptable:
+	{loop} ;
+loop:
+	LP_ID	-- unique identifying number
+	LEVEL	-- loop nesting level
+	entry	-- loop entry block
+	end ;
+entry:
+	B_ID ;
+end:
+	B_ID ;
+.TE
 .DE

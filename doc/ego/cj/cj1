@@ -27,16 +27,18 @@ else
     S3
 
 (pseudo) EM:
-
-TEST COND		TEST COND
-BNE *1			BNE *1
-S1			S1
-S3	   --->		BRA *2
-BRA *2			1:
-1:			S2
-S2			2:
-S3			S3
+.TS
+l l l.
+ TEST COND		 TEST COND
+ BNE *1		 BNE *1
+ S1		 S1
+ S3	--->	 BRA *2
+ BRA *2		1:
+1:		 S2
+ S2		2:
+ S3		 S3
 2:
+.TE
 
 Fig. 9.1 An example of Cross Jumping
 .DE
@@ -54,20 +56,23 @@ as demonstrated by the Fig. 8.2.
 .DS
 	Pascal:
 
-	if cond then
-	   x := f(4)
-	else
-	   x := g(5)
+if cond then
+   x := f(4)
+else
+   x := g(5)
 
 
-	EM:
+EM:
 
-	...                     ...
-	LOC 4			LOC 5
-	CAL F			CAL G
-	ASP 2			ASP 2
-	LFR 2			LFR 2
-	STL X			STL X
+.TS
+l l.
+...	...
+LOC 4	LOC 5
+CAL F	CAL G
+ASP 2	ASP 2
+LFR 2	LFR 2
+STL X	STL X
+.TE
 
 Fig. 9.2 Effectiveness of Cross Jumping
 .DE
@@ -92,37 +97,40 @@ blocks must be split into two.
 The control flow graphs before and after the optimization are shown
 in Fig. 9.3 and Fig. 9.4.
 .DS
+.ft 5
 
-	--------				--------
-	|      |				|      |
-	| S1   |			        | S2   |
-	| S3   |   				| S3   |
-	|      |				|      |
-	--------				--------
-	   |					   |
-	   |------------------|--------------------|
-			      |
-			      v
+        --------                                --------
+        |      |                                |      |
+        | S1   |                                | S2   |
+        | S3   |                                | S3   |
+        |      |                                |      |
+        --------                                --------
+           |                                       |
+           |------------------|--------------------|
+                              |
+                              v
+.ft R
 
 Fig. 9.3 CFG before optimization
 .DE
 .DS
-
-	--------				--------
-	|      |				|      |
-	| S1   |			        | S2   |
-	|      |				|      |
-	--------				--------
-	   |					   |
-	   |--------------------<------------------|
-	   v
-	--------
-	|      |
-	| S3   |
-	|      |
-	--------
-	   |
-	   v
+.ft 5
+        --------                                --------
+        |      |                                |      |
+        | S1   |                                | S2   |
+        |      |                                |      |
+        --------                                --------
+           |                                       |
+           |--------------------<------------------|
+           v
+        --------
+        |      |
+        | S3   |
+        |      |
+        --------
+           |
+           v
+.ft R
 
 Fig. 9.4 CFG after optimization
 .DE

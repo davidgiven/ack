@@ -139,10 +139,10 @@ procedure p (x:integer);
 begin
    x := 20;
 end;
-...
-a := 10;                a := 10;
-p(a);        --->       a := 20;
-write(a);               write(a);
+\&...
+a := 10;                \kxa := 10;
+p(a);        --->       \h'|\nxu'a := 20;
+write(a);               \h'|\nxu'write(a);
 .DE
 .IP 2.
 P changes any of the operands of the

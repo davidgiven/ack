@@ -70,10 +70,13 @@ a common subexpression,
 references to the element itself are replaced by
 indirect references through TMP (see Fig. 7.4).
 .DS
-x := A[i];			TMP := &A[i];
-  . . .			-->	x := *TMP;
-A[i] := y;			   . . .
-				*TMP := y;
+.TS
+l l l.
+x := A[i];		TMP := &A[i];
+  . . .	-->	x := *TMP;
+A[i] := y;		   . . .
+			*TMP := y;
+.TE
 
 Fig. 7.4 Elimination of an array address computation
 .DE

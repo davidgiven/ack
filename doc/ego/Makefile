@@ -16,37 +16,40 @@ CA=ca/ca?
 EGO=$(INTRO) $(OV) $(IC) $(CF) $(IL) $(SR) $(CS) $(SP) $(CJ) $(BO) \
     $(UD) $(LV) $(RA) $(CA)
 REFER=refer
+TROFF=troff
+TBL=tbl
+TARGET=-Tlp
 
-../ego.doc:	$(EGO)
-	 $(REFER) -sA+T -l4,2 $(REFS) intro/head $(EGO) intro/tail > ../ego.doc
+../ego.doc:	refs.opt refs.stat refs.gen intro/head intro/tail $(EGO)
+	 $(REFER) -sA+T -l4,2 $(REFS) intro/head $(EGO) intro/tail | $(TBL) > ../ego.doc
 
-ego.f:	$(EGO)
-	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(EGO) intro/tail | nroff -ms > ego.f
-intro.f:	$(INTRO)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ov/head $(INTRO) intro/tail | nroff -ms > intro.f
-ov.f:	$(OV)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ov/head $(OV) intro/tail | nroff -ms > ov.f
-ic.f:	$(IC)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ic/head $(IC) intro/tail | nroff -ms > ic.f
-cf.f:	$(CF)
-	 $(REFER)  -sA+T -l4,2 $(REFS) cf/head $(CF) intro/tail | nroff -ms > cf.f
-il.f:	$(IL)
-	 $(REFER)  -sA+T -l4,2 $(REFS) il/head $(IL) intro/tail | nroff -ms > il.f
-sr.f:	$(SR)
-	 $(REFER)  -sA+T -l4,2 $(REFS) sr/head $(SR) intro/tail | nroff -ms > sr.f
-cs.f:	$(CS)
-	 $(REFER)	-sA+T -l4,2 $(REFS) cs/head $(CS) intro/tail | nroff -ms > cs.f
-sp.f:	$(SP)
-	 $(REFER)  -sA+T -l4,2 $(REFS) sp/head $(SP) intro/tail | nroff -ms > sp.f
-cj.f:	$(CJ)
-	 $(REFER)  -sA+T -l4,2 $(REFS) cj/head $(CJ) intro/tail | nroff -ms > cj.f
-bo.f:	$(BO)
-	 $(REFER)  -sA+T -l4,2 $(REFS) bo/head $(BO) intro/tail | nroff -ms > bo.f
-ud.f:	$(UD)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ud/head $(UD) intro/tail | nroff -ms > ud.f
-lv.f:	$(LV)
-	 $(REFER)  -sA+T -l4,2 $(REFS) lv/head $(LV) intro/tail | nroff -ms > lv.f
-ra.f:	$(RA)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ra/head $(RA) intro/tail | nroff -ms > ra.f
-ca.f:	$(CA)
-	 $(REFER)  -sA+T -l4,2 $(REFS) ca/head $(CA) intro/tail | nroff -ms > ca.f
+ego.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(EGO)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(EGO) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ego.f
+intro.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(INTRO)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(INTRO) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > intro.f
+ov.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(OV)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(OV) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ov.f
+ic.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(IC)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(IC) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ic.f
+cf.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(CF)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(CF) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > cf.f
+il.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(IL)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(IL) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > il.f
+sr.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(SR)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(SR) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > sr.f
+cs.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(CS)
+	 $(REFER)	-sA+T -l4,2 $(REFS) intro/head $(CS) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > cs.f
+sp.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(SP)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(SP) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > sp.f
+cj.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(CJ)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(CJ) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > cj.f
+bo.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(BO)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(BO) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > bo.f
+ud.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(UD)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(UD) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ud.f
+lv.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(LV)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(LV) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > lv.f
+ra.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(RA)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(RA) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ra.f
+ca.f:	refs.opt refs.stat refs.gen intro/head intro/tail $(CA)
+	 $(REFER)  -sA+T -l4,2 $(REFS) intro/head $(CA) intro/tail | $(TBL) | $(TROFF) $(TARGET) -ms > ca.f

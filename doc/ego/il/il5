@@ -165,19 +165,25 @@ These calls are inherited from the called procedure.
 We will refer to these invocations as \fInested calls\fR
 (see Fig. 5.1).
 .DS
+.TS
+lw(2.5i) l.
 procedure p is
-begin                           .
-     a();                       .
-     b();                       .
+begin	.
+     a();	.
+     b();	.
 end;
+.TE
 
-procedure r is            procedure r is
-begin                     begin
-     x();                      x();
-     p();  -- in line          a();  -- nested call
-     y();                      b();  -- nested call
-end;                           y();
-                          end;
+.TS
+lw(2.5i) l.
+procedure r is	procedure r is
+begin	begin
+     x();	    x();
+     p();  -- in line	    a();  -- nested call
+     y();	    b();  -- nested call
+end;	    y();
+	end;
+.TE
 
 Fig. 5.1 Example of nested procedure calls
 .DE
@@ -224,11 +230,11 @@ All list traversals look like:
 traverse(list)
 {
     for (c = first(list); c != 0; c = CDR(c)) {
-	if (c is marked) {
-	    traverse(CAR(c));
-	} else {
-	    do something with c
-	}
+        if (c is marked) {
+            traverse(CAR(c));
+        } else {
+            do something with c
+        }
     }
 }
 .DE

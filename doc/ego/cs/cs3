@@ -27,10 +27,13 @@ The value number of the result of an expression depends only
 on the kind of operator and the value number(s) of the operand(s).
 The expressions need not be textually equal, as shown in Fig. 7.5.
 .DS
-a := c;		(1)
+.TS
+l l.
+a := c;	(1)
 use(a * b);	(2)
-d := b;		(3)
+d := b;	(3)
 use(c * d);	(4)
+.TE
 
 Fig. 7.5 Different expressions with the same value number
 .DE
@@ -43,9 +46,12 @@ and the operator (*) is the same.
 .PP
 As another example of the value number method, consider Fig. 7.6.
 .DS
+.TS
+l l.
 use(a * b);	(1)
 a := 123;	(2)
 use(a * b);	(3)
+.TE
 
 Fig. 7.6 Identical expressions with the different value numbers
 .DE
@@ -64,7 +70,7 @@ of its operands.
 A table of "available expressions" is used to do this mapping.
 .PP
 CS recognizes the following kinds of EM operands, called \fIentities\fR:
-.IP
+.DS
 - constant
 - local variable
 - external variable
@@ -81,6 +87,7 @@ CS recognizes the following kinds of EM operands, called \fIentities\fR:
 - local base
 - heap pointer
 - ignore mask
+.DE
 .LP
 Whenever a new entity is encountered in the working window,
 it is entered in the symbol table and given a brand new value number.

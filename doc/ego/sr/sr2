@@ -105,11 +105,11 @@ iv_expression * constant
 .IP (2)
 constant * iv_expression
 .IP (3)
-A[iv-expression] :=       (assign to array element)
+A[iv-expression] :=       \kx(assign to array element)
 .IP (4)
-A[iv-expression]          (use array element)
+A[iv-expression]          \h'|\nxu'(use array element)
 .IP (5)
-& A[iv-expression]        (take address of array element)
+& A[iv-expression]        \h'|\nxu'(take address of array element)
 .LP
 (Note that EM has different instructions to use an array element,
 store into one, or take the address of one, resp. LAR, SAR, and AAR).
@@ -171,10 +171,13 @@ replaced by TMP.
 For array optimizations, the replacement
 depends on the form:
 .DS
-\fIform\fR                         \fIreplacement\fR
-(3) A[iv-expr] :=            *TMP :=     (assign indirect)
-(4) A[iv-expr]               *TMP        (use indirect)
-(5) &A[iv-expr]              TMP
+.TS
+l l l.
+\fIform\fR	\fIreplacement\fR
+(3) A[iv-expr] :=	*TMP :=	(assign indirect)
+(4) A[iv-expr]	*TMP	(use indirect)
+(5) &A[iv-expr]	TMP
+.TE
 .DE
 The '*' denotes the indirect operator. (Note that
 EM has different instructions to do
@@ -199,14 +202,17 @@ must be negated.
 .PP
 The transformations are demonstrated by an example.
 .DS
-i := 100;                     i := 100;
-while i > 1 loop              TMP := (6-i) * 5;
-   X := (6-i) * 5 + 2;        while i > 1 loop
-   Y := (6-i) * 5 - 8;   -->     X := TMP + 2;
-   i := i - 3;                   Y := TMP - 8;
-end loop;                        i := i - 3;
-			         TMP := TMP + 15;
-			      end loop;
+.TS
+l l.
+i := 100;	i := 100;
+while i > 1 loop	TMP := (6-i) * 5;
+   X := (6-i) * 5 + 2;	while i > 1 loop
+   Y := (6-i) * 5 - 8;\ \ \ \ \ \ \ -->	   X := TMP + 2;
+   i := i - 3;	   Y := TMP - 8;
+end loop;	   i := i - 3;
+	   TMP := TMP + 15;
+	end loop;
+.TE
 
 Fig. 6.2 Example of complex Strength Reduction transformations
 .DE

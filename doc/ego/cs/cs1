@@ -18,12 +18,15 @@ but in general it will save space too.
 As an example of the application of Common Subexpression Elimination,
 consider the piece of program in Fig. 7.1(a).
 .DS
-x := a * b;          TMP := a * b;       x := a * b;
-CODE;                x := TMP;           CODE
-y := c + a * b;      CODE                y := x;
-                     y := c + TMP;
+.TS
+l l l.
+x := a * b;	TMP := a * b;	x := a * b;
+CODE;	x := TMP;	CODE
+y := c + a * b;	CODE	y := x;
+	y := c + TMP;
 
-   (a)                  (b)                 (c)
+   (a)	   (b)	   (c)
+.TE
 
 Fig. 7.1  Examples of Common Subexpression Elimination
 .DE

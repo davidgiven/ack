@@ -57,24 +57,27 @@ indicating which part of the EM text belongs
 to that block.
 .DS
 .UL syntax
-  intermediate_code:
-                object_table_file
-                proctable_file
-                em_text_file
-                cfg_file ;
-  object_table_file:
-                LENGTH          -- number of objects
-                object_table ;
-  proctable_file:
-                LENGTH          -- number of procedures
-                procedure_table ;
-  em_text_file:
-                em_text ;
-  cfg_file:
-                {per_proc} ;    -- one for every procedure
-  per_proc:
-                BLENGTH         -- number of basic blocks
-                LLENGTH         -- number of loops
-                control_flow_graph
-                looptable ;
+.TS
+lw(1i) l l.
+intermediate_code:
+	object_table_file
+	proctable_file
+	em_text_file
+	cfg_file ;
+object_table_file:
+	LENGTH	-- number of objects
+	object_table ;
+proctable_file:
+	LENGTH	-- number of procedures
+	procedure_table ;
+em_text_file:
+	em_text ;
+cfg_file:
+	{per_proc} ;	-- one for every procedure
+per_proc:
+	BLENGTH	-- number of basic blocks
+	LLENGTH	-- number of loops
+	control_flow_graph
+	looptable ;
+.TE
 .DE

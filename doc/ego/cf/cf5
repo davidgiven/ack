@@ -7,9 +7,12 @@ The optimization below is only possible if
 we know for sure that the call to P cannot
 change A.
 .DS
-A := 10;                        A:= 10;
-P;  -- procedure call    -->    P;
-B := A + 2;                     B := 12;
+.TS
+l l.
+A := 10;	A:= 10;
+P;  -- procedure call    -->	P;
+B := A + 2;	B := 12;
+.TE
 .DE
 Although it is not possible to predict exactly
 all the effects a procedure call has, we may

@@ -63,13 +63,3 @@ present in the input program).
 On the other hand, an identifier may be only internally visible.
 If such an identifier is referenced before being defined,
 an INA or INP pseudo must be emitted prior to its first reference.
-.UH
-Acknowledgements
-.PP
-The author would like to thank Andy Tanenbaum for his guidance,
-Duk Bekema for implementing the Common Subexpression Elimination phase
-and writing the initial documentation of that phase,
-Dick Grune for reading the manuscript of this report
-and Ceriel Jacobs, Ed Keizer, Martin Kersten, Hans van Staveren
-and the members of the S.T.W. user's group for their
-interest and assistance.

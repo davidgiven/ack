@@ -76,11 +76,14 @@ EM is the assembly code of a virtual \fIstack machine\fR.
 All operations are performed on the top of the stack.
 For example, the statement "A := B + 3" may be expressed in EM as:
 .DS
-LOL -4         -- push local variable B
-LOC 3          -- push constant 3
-ADI 2          -- add two 2-byte items on top of
-	       -- the stack and push the result
-STL -2         -- pop A
+.TS
+l l.
+LOL -4	-- push local variable B
+LOC 3	-- push constant 3
+ADI 2	-- add two 2-byte items on top of
+	-- the stack and push the result
+STL -2	-- pop A
+.TE
 .DE
 So EM is essentially a \fIpostfix\fR code.
 .PP

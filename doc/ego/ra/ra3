@@ -225,9 +225,12 @@ allocation.
 To summarize, the number of bytes a certain allocation would
 save is computed as follows:
 .DS
-net_bytes_saved =  bytes_saved - init_cost
-bytes_saved =      #occurrences * gains_per_occ
-init_cost =        #initializations * costs_per_init
+.TS
+l l.
+net_bytes_saved =	bytes_saved - init_cost
+bytes_saved =	#occurrences * gains_per_occ
+init_cost =	#initializations * costs_per_init
+.TE
 .DE
 .PP
 It is inherently more difficult to estimate the execution
