@@ -92,7 +92,7 @@ main(argc, argv)
 	inctable[0] = "";
 	inctable[1] = "/usr/include";
 	inctable[2] = 0;
-	inc_total = 2;
+	inc_total = 3;
 	inc_max = 10;
 
 	init_pp();	/* initialise the preprocessor macros	*/
