@@ -15,6 +15,10 @@
  *
  */
 
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 /*
  * Decode compact EM assembly language
  *

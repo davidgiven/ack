@@ -1,3 +1,5 @@
+# $Header$
+
 d=../..
 h=$d/h
 l=$d/lib
