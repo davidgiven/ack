@@ -92,7 +92,7 @@ preprocess(fn)
 					}
 					for (;;) {
 						LoadChar(c);
-						if (class(c) == STNL) {
+						if (c == '\n') {
 							++LineNumber;
 							++lineno;
 							echo(c);
