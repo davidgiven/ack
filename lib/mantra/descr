@@ -5,7 +5,7 @@ var s=2
 var l=4
 var f=4
 var d=8
-var NAME=mantra4
+var NAME=m68k4
 var M=m68k4
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
@@ -21,8 +21,17 @@ name be
 	stdout
 	need .e
 end
-name as
+name asopt
 	from .s
+	to .so
+	program {EM}/lib/m68k2/top
+	args
+	optimizer
+	stdin
+	stdout
+end
+name as
+	from .s.so
 	to .o
 	program {EM}/lib/m68k2/as
 	args - -o > <
