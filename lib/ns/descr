@@ -1,0 +1,23 @@
+var w=4
+var p=4
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=ns
+var M=ns
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var INCLUDES=-I{EM}/include -I/usr/include
+name asld
+	from .s.a
+	to .out
+	outfile a.out
+	program {EM}/lib/{M}/as
+	mapflag -l* LNAME={EM}/{LIB}*
+	args (.e:{HEAD}={EM}/{RT}em) \
+({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+(.p.c:{TAIL}={EM}/{LIB}mon) (.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}em.vend)
+	linker
+end
