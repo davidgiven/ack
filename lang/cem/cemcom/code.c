@@ -42,6 +42,7 @@ extern char options[];
 init_code(dst_file)
 	char *dst_file;
 {
+	C_init(word_size, pointer_size); /* initialise EM module */
 	if (C_open(dst_file) == 0)
 		fatal("cannot write to %s\n", dst_file);
 #ifndef	USE_TMP
