@@ -15,8 +15,7 @@ CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
 OFILES=codegen.o compute.o equiv.o fillem.o gencode.o glosym.o main.o\
        move.o nextem.o reg.o regvar.o salloc.o state.o subr.o var.o
 
-all:
-	make tables.c
+all:	tables.c
 	make cg
 
 cg: tables.o $(OFILES)
@@ -62,8 +61,7 @@ install: all
 cmp:	 all
 	-../../compare cg
 
-distr:
-	make tables.c
+distr:	tables.c
 	rm -f tables1.[ch]
 	cp tables.c tables1.c
 	cp tables.h tables1.h
