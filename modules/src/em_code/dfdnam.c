@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_dfdnam(s)
 	char *s;
 {

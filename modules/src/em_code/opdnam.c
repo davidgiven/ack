@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_opdnam(opcode, dnam, offset)
 	char *dnam;
 	arith offset;

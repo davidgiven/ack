@@ -4,6 +4,8 @@
    end-pointer.
 */
 
+/* $Header$ */
+
 #include <system.h>
 #include <local.h>
 

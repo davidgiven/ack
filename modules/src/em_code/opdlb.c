@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_opdlb(opcode, dlb, offset)
 	label dlb;
 	arith offset;

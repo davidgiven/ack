@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_crscon(op, v, s)
 	char *v;
 	arith s;

@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_icon(val, siz)
 	char *val;
 	arith siz;

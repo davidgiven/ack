@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_bhcst(op, n, w, i)
 	arith n;
 	arith w;

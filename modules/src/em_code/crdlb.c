@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_crdlb(op, v, off)
 	label v;
 	arith off;

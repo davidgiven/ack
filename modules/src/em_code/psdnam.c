@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_psdnam(op, dnam)
 	char *dnam;
 {

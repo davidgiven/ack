@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_bhpnam(op, n, p, i)
 	arith n;
 	char *p;

@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_bhucon(op, n, s, sz, i)
 	arith n;
 	char *s;

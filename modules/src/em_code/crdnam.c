@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_crdnam(op, s, off)
 	char *s;
 	arith off;

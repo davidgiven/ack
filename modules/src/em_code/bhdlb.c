@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_bhdlb(op, n, s, off, i)
 	arith n;
 	label s;

@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_exc(c1,c2)
 	arith c1,c2;
 {

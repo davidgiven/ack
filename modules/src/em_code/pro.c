@@ -1,5 +1,7 @@
 #include "em_private.h"
 
+/* $Header$ */
+
 CC_pro(pnam, l)
 	char *pnam;
 	arith l;
