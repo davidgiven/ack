@@ -8,7 +8,8 @@ OBJ=list.o data.o main.o scan.o svars.o trans.o util.o rmach.o run.o \
 ACKDIR=../../lib/ack
 FE=fe
 INTABLES=pdp int
-LNTABLES=6500 m68k2 m68k4 6809 8080 acc apc nascom vax2 vax4 z80 i86
+LNTABLES=acc apc abc vax2 vax4 i86 ix m68k2 m68k4 pmds z8000 int22 int24 int44\
+6500 6800 6809 8080 nascom ns s2650 z80 
 CFLAGS=-O -n
 BINDIR=../../bin
 
