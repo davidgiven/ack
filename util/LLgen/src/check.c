@@ -207,7 +207,7 @@ check(p) register p_gram p; {
 			if (empty(q->t_rule)) {
 				q->t_flags |= EMPTYTERM;
 				retval = 1;
-				error(p->g_lineno, "Term produces empty");
+				error(p->g_lineno, "Term with variable repetition count produces empty");
 			}
 			temp = setalloc();
 			setunion(temp,q->t_first);

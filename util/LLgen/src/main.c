@@ -236,7 +236,7 @@ error(lineno,s,t,u) string	s,t,u; {
 
 	++nerrors;
 	if (!lineno) lineno = 1;
-	fprintf(stderr,"\"%s\", line %d : ",f_input, lineno);
+	fprintf(stderr,"\"%s\", line %d: ",f_input, lineno);
 	fprintf(stderr,s,t,u);
 	fputs("\n",stderr);
 }
@@ -249,7 +249,7 @@ warning(lineno,s,t,u) string	s,t,u; {
 
 	if (wflag) return;
 	if (!lineno) lineno = 1;
-	fprintf(stderr,"\"%s\", line %d : (Warning) ",f_input, lineno);
+	fprintf(stderr,"\"%s\", line %d: (Warning) ",f_input, lineno);
 	fprintf(stderr,s,t,u);
 	fputs("\n",stderr);
 }
@@ -339,13 +339,3 @@ install(target, source) string target, source; {
 		RENAME(f_pars,target);
 	}
 }
-
-#ifndef NDEBUG
-badassertion(asstr,file,line) char *asstr, *file; {
-
-	fprintf(stderr,"Assertion \"%s\" failed %s(%d)\n",asstr,file,line);
-	if (fact != NULL) fclose(fact);
-	if (fpars != NULL) fclose(fpars);
-	abort();
-}
-#endif

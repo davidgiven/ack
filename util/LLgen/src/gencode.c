@@ -348,20 +348,27 @@ getparams() {
 	register int l;
 	long ftell();
 	char first;
+	char add_semi = ' ';
 
 	first = ' ';
 	/* save offset in file to be able to copy the declaration later */
 	off = ftell(fact);
 	/* First pass through declaration, find the parameter names */
+	ltext[0] = '\0';
 	while ((l = gettok()) != ENDDECL) {
-		if (l == ';' || l == ',') {
+		if ((l == ';' || l == ',') && ltext[0] != '\0') {
 			/*
 			 * The last identifier found before a ';' or a ','
 			 * must be a parameter
 			 */
 			fprintf(fpars,"%c%s", first, ltext);
 			first = ',';
+			ltext[0] = '\0';
 		}
+	}
+	if (ltext[0] != '\0') {
+		fprintf(fpars, "%c%s", first, ltext);
+		add_semi = ';';
 	}
 	fputs(") ",fpars);
 	/*
@@ -372,7 +379,7 @@ getparams() {
 				*/
 	fseek(fact,off,0);
 	getaction(0);
-	fputs(" {\n",fpars);
+	fprintf(fpars, "%c {\n",add_semi);
 }
 
 STATIC

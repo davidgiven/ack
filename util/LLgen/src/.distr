@@ -6,7 +6,6 @@ Lpars.c.dist
 Lpars.h.dist
 Makefile
 alloc.c
-assert.h
 check.c
 compute.c
 extern.h

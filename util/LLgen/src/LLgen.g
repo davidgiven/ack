@@ -199,7 +199,7 @@ rule			{	register p_nont p;
 				acount = 0;
 				p->n_lineno = linecount;
 			}
-	  [ params(2)	{	p->n_flags |= PARAMS;
+	  [ params	{	p->n_flags |= PARAMS;
 				if (nparams > 15) {
 					error(linecount,"Too many parameters");
 				}
@@ -462,7 +462,7 @@ elem (register p_gram pres;)
 	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
 			}
-	  [ params(0)	{	if (nparams > 14) {
+	  [ params	{	if (nparams > 14) {
 					error(linecount,"Too many parameters");
 				} else	g_setnpar(pres,nparams+1);
 				if (g_gettype(pres) == TERMINAL) {
@@ -480,8 +480,8 @@ elem (register p_gram pres;)
 	  action(1)
 	;
 
-params(int n;)
-	: '('		{	copyact('(',')',n,0); }
+params
+	: '('		{	copyact('(',')',0,0); }
 	  ')'
 	;
 
@@ -541,35 +541,32 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	/*
 	 * Copy an action to file f. Opening bracket is ch1, closing bracket
 	 * is ch2.
-	 * If flag = 1, copy opening and closing parameters too.
-	 * If flag = 2, the copy is a parameter declaration copy.
-	 * Give an error message if not ending on a ';'
+	 * If flag != 0, copy opening and closing parameters too.
 	 */
+	static int	id_seen = 0;
 	register	FILE *f;
 	register	ch;		/* Current char */
 	register	match;		/* used to read strings */
 	int		saved;		/* save linecount */
-	int		semicolon = 0;
 
 	f = fact;
 	if (!level) {
 		saved = linecount;
+		id_seen = 0;
 		nparams = 0;			/* count comma's */
 		putc('\0',f);
 		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
 	}
-	if (level || flag == 1) putc(ch1,f);
+	if (level || flag) putc(ch1,f);
 	for (;;) {
 		ch = input();
+		if (c_class[ch] == ISLET) id_seen = 1;
 		if (ch == ch2) {
 			if (!level) unput(ch);
-			if (level || flag == 1) putc(ch,f);
-			if ((!level) && flag == 2 && !semicolon) {
-				error(linecount,"Missing ';'");
-			}
+			if (level || flag) putc(ch,f);
+			if (id_seen) nparams++;
 			return;
 		}
-		if (c_class[ch] != ISSPA) semicolon = 0;
 		switch(ch) {
 		  case ')':
 		  case '}':
@@ -596,14 +593,13 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			ch = '/';
 			break;
 		  case ';':
-			semicolon = 1;
-			/* Fall through */
 		  case ',':
 			if (!level) {		/*
 						 * Only ','s and ';'s on the
 						 * outer level are counted
 						 */
 				nparams++;
+				id_seen = 0;
 			}
 			break;
 		  case '\'':
