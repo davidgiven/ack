@@ -96,7 +96,6 @@ malloc(n)
 		}
 
 		p = SBRK((int)req);
-		assert((size_type)p == align((size_type)p));
 		if (p == ILL_BREAK) {
 			req = n + mallink_size();
 			p = SBRK((int)req);
@@ -127,6 +126,7 @@ malloc(n)
 #endif STORE
 		}
 		else {
+			assert((size_type)p == align((size_type)p));
 			ml = create_chunk(p, req);
 		}
 		check_mallinks("suitable_chunk, extended");

@@ -50,7 +50,7 @@
 					Otherwise, "sbrk" is called directly.
 				*/
 
-#define	ALIGNMENT	8	
+#define	ALIGNMENT	8
 				/* alignment common to all types */
 #define	LOG_MIN_SIZE	3
 #define	LOG_MAX_SIZE	24
