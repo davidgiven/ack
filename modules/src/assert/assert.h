@@ -7,7 +7,11 @@
 
 #ifdef	DEBUG
 /*	Note: this macro uses parameter substitution inside strings */
+#ifdef __STDC__
+#define	assert(exp)	(exp || _BadAssertion(__FILE__, __LINE__, #exp))
+#else
 #define	assert(exp)	(exp || _BadAssertion(__FILE__, __LINE__, "exp"))
+#endif
 #else
 #define	assert(exp)	(1)
 #endif	DEBUG
