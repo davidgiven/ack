@@ -98,13 +98,13 @@ ldl sdl $1==$2:
 lxa loi lxa sti $3==$1 && $4==$2:
 lxa lof lxa stf $3==$1 && $4==$2:
 lxa ldf lxa sdf $3==$1 && $4==$2:
-lxa stf lxa lof $3==$1 && $4==$2:       dup w   lxa $1  stf $2
-lxa sdf lxa ldf $3==$1 && $4==$2:       dup 2*w lxa $1  sdf $2
+lxa stf lxa lof $1>1 && $3==$1 && $4==$2:       dup w   lxa $1  stf $2
+lxa sdf lxa ldf $1>1 && $3==$1 && $4==$2:       dup 2*w lxa $1  sdf $2
 lxl lof lxl stf $3==$1 && $4==$2:
 lxl ldf lxl sdf $3==$1 && $4==$2:
-lxl stf lxl lof $3==$1 && $4==$2:       dup w   lxl $1  stf $2
-lxl sdf lxl ldf $3==$1 && $4==$2:       dup 2*w lxl $1  sdf $2
-lxa sti lxa loi $3==$1 && $4==$2 && $2%w==0:    dup $2  lxa $1  sti $2
+lxl stf lxl lof $1>1 && $3==$1 && $4==$2:       dup w   lxl $1  stf $2
+lxl sdf lxl ldf $1>1 && $3==$1 && $4==$2:       dup 2*w lxl $1  sdf $2
+lxa sti lxa loi $1>1 && $3==$1 && $4==$2 && $2%w==0:    dup $2  lxa $1  sti $2
 loc adi $1==-1 && $2==w:        dec
 loc dec sfit($1-1,8*w) :	loc $1-1
 loc bgt $1==-1: zge $2
@@ -363,6 +363,7 @@ lol lae aar adp $3==w:  adp $4  lol $1  lae $2  aar w
 loe lae aar adp $3==w:  adp $4  loe $1  lae $2  aar w
 cmi zeq defined($1):    cms $1  zeq $2
 cmi zne defined($1):    cms $1  zne $2
+#ifdef INT
 loe inc dup ste $1==$4 && $3==w:        ine $1  loe $1
 loe dec dup ste $1==$4 && $3==w:        dee $1  loe $1
 lol inc dup stl $1==$4 && $3==w:        inl $1  lol $1
@@ -371,6 +372,7 @@ adp dup SEP adp $1==-$4 && $2==p:       dup p   adp $1   SEP $3
 adp dup SLP adp $1==-$4 && $2==p:       dup p   adp $1   SLP $3
 inc dup ste dec $2==w:  dup w   inc     ste $3
 inc dup stl dec $2==w:  dup w   inc     stl $3
+#endif
 zeq bra lab $1==$3:     zne $2  lab $1
 zge bra lab $1==$3:     zlt $2  lab $1
 zgt bra lab $1==$3:     zle $2  lab $1
@@ -387,8 +389,10 @@ lin lin :       lin $2
 lin lab lin :   lab $2  lin $3
 lin ret :       ret $2
 lin bra :       bra $2
+#ifdef INT
 dup SLP loi $1==p && $3==w:     SLP $2  lil $2
 dup SLP sti $1==p && $3==w:     SLP $2  sil $2
+#endif
 loc cms $1==0 && $2==w: tne
 zer $1==w: loc 0
 loc loc adi $3==w && sfit($1+$2,8*w) : loc $1+$2
@@ -486,7 +490,17 @@ LLP LLP adp SLP sti $2==$4 && (!notreg($2) || $5!=p):
 	LLP $1 sti $5 LLP $2 adp $3 SLP $4
 LEP LEP adp SEP sti $2==$4 && $5!=p:
 	LEP $1 sti $5 LEP $2 adp $3 SEP $4
-lil inc dup sil $1==$4 && $3==w:
-	lil $1 inc sil $1 lil $1
-lil dec dup sil $1==$4 && $3==w:
-	lil $1 dec sil $1 lil $1
+#ifndef INT
+dup stl $1==w : stl $2 lol $2
+dup ste $1==w : ste $2 loe $2
+dup sil $1==w : sil $2 lil $2
+dup LEP sti $1==w && $3==w : LEP $2 sti w LEP $2 loi w
+dup LLP stf $1==w : LLP $2 stf $3 LLP $2 lof $3
+dup LEP stf $1==w : LEP $2 stf $3 LEP $2 lof $3
+dup sdl $1==2*w : sdl $2 ldl $2
+dup sde $1==2*w : sde $2 lde $2
+dup LLP sti $1==2*w && $3==2*w : LLP $2 sti 2*w LLP $2 loi 2*w
+dup LEP sti $1==2*w && $3==2*w : LEP $2 sti 2*w LEP $2 loi 2*w
+dup LLP sdf $1==2*w : LLP $2 sdf $3 LLP $2 ldf $3
+dup LEP sdf $1==2*w : LEP $2 sdf $3 LEP $2 ldf $3
+#endif
