@@ -18,8 +18,11 @@
 	asr.l	#3,d2
 	cmp.l	d0,d2
 	bcc	1f
+	bclr	#0,d2
+	bclr	#1,d2
 	add.l	d2,a0
-	btst	d1,(a0)
+	move.l	(a0),d2
+	btst	d1,d2
 	beq	1f
 	move.l	#1,d0
 	bra	2f

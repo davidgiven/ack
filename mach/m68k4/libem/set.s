@@ -24,6 +24,10 @@
 	move.w	#ESET,-(sp)
 	jsr	.trp
 1:
+	bclr	#0,d2
+	bclr	#1,d2
 	add.l	d2,a1
-	bset	d1,(a1)
+	clr.l	d2
+	bset	d1,d2
+	move.l	d2,(a1)
 	jmp	(a0)
