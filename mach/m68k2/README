@@ -53,9 +53,7 @@ on the kind of target 68000 system.
 
 The m68k2 code generator translates most EM instructions in line.
 For some complex EM instructions it uses assembly routines (stored in the
-library "libem/libem_s.a"). It should be noted that some of these routines
-are not reentrant, because they save registers in a global common
-area (regsav).
+library "libem/libem_s.a").
 
 The generated code does not check for array bound errors, overflow in
 arithmetic operations or division by zero (the latter will cause a hardware
