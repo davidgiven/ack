@@ -1,5 +1,7 @@
-        # $Header$
 #include "em_abs.h"
+
+        # $Header$
+
 .globl  .lar
 
 .lar:

@@ -1,5 +1,4 @@
         # $Header$
-#include "em_abs.h"
 
 .globl	.strlb
 .globl	.gto

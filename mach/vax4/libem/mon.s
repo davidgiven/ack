@@ -1,8 +1,9 @@
-        # $Header$
 #include "system.h"
 #include "em_abs.h"
 #define MOVL	movl	(sp)+,(ap)+
 #define MOVQ	movq	(sp)+,(ap)+
+
+        # $Header$
 
 .set sigvec,108
 
