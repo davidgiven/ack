@@ -132,7 +132,7 @@ main(argc, argv)
 		if (! rd_open(argv[1]))
 			fatal("Can't read %s.\n", argv[1]);
 		break;
-	default:fatal("Usage: %s [-u]  <ACK object> <Sun object>.\n", argv[0]);
+	default:fatal("Usage: %s [-u]  <ACK object> <Sun object>.\n", program);
 	}
 	rd_ohead(&outhead);
 	if (BADMAGIC(outhead))
