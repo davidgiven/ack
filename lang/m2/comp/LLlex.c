@@ -41,7 +41,6 @@ int		ForeignFlag;
 extern int	cntlines;
 #endif
 
-static int	eofseen;
 extern char	options[];
 
 STATIC
@@ -90,7 +89,7 @@ SkipComment()
 		}
 	}
 	for (;;) {
-		if (class(ch) == STNL) {
+		if (!(ch & 0200) && class(ch) == STNL) {
 			LineNumber++;
 #ifdef DEBUG
 			cntlines++;
@@ -111,6 +110,7 @@ SkipComment()
 		}
 		else if (ch == EOI) {
 			lexerror("unterminated comment");
+			PushBack();
 			break;
 		}
 		LoadChar(ch);
@@ -131,7 +131,7 @@ GetString(upto)
 	len = ISTRSIZE;
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	while (LoadChar(ch), ch != upto)	{
-		if (class(ch) == STNL)	{
+		if (!(ch & 0200) && class(ch) == STNL)	{
 			lexerror("newline in string");
 			LineNumber++;
 #ifdef DEBUG
@@ -169,17 +169,8 @@ getch()
 {
 	register int ch;
 
-	for (;;) {
-		LoadChar(ch);
-		if ((ch & 0200) && ch != EOI) {
-			error("non-ascii '\\%03o' read", ch & 0377);
-			continue;
-		}
-		break;
-	}
-	if (ch == EOI) {
-		eofseen = 1;
-		return '\n';
+	while (LoadChar(ch), (ch & 0200) && ch != EOI) {
+		error("non-ascii '\\%03o' read", ch & 0377);
 	}
 	return ch;
 }
@@ -188,7 +179,7 @@ CheckForLineDirective()
 {
 	register int ch = getch();
 	register int	i = 0;
-	char		buf[IDFSIZE + 2];
+	char		buf[IDFSIZE];
 	register char	*c = buf;
 
 
@@ -201,7 +192,7 @@ CheckForLineDirective()
 		 * Do not skip newlines
 		 */
 		ch = getch();
-		if (class(ch) == STNL) {
+		if (class(ch) == STNL || class(ch) == STEOI) {
 			LineNumber++;
 			error(s_error);
 			return;
@@ -211,12 +202,14 @@ CheckForLineDirective()
 		i = i*10 + (ch - '0');
 		ch = getch();
 	}
-	while (ch != '"' && class(ch) != STNL) ch = getch();
+	while (ch != '"' && class(ch) != STNL && class(ch) != STEOI)
+		ch = getch();
 	if (ch == '"') {
 		c = buf;
 		do {
-			*c++ = ch = getch();
-			if (class(ch) == STNL) {
+			ch = getch();
+			if (c < &buf[IDFSIZE]) *c++ = ch;
+			if (class(ch) == STNL || class(ch) == STEOI) {
 				LineNumber++;
 				error(s_error);
 				return;
@@ -225,28 +218,21 @@ CheckForLineDirective()
 		*--c = '\0';
 		do {
 			ch = getch();
-		} while (class(ch) != STNL);
+		} while (class(ch) != STNL && class(ch) != STEOI);
 		/*
 		 * Remember the file name
 		 */
-		if (!eofseen && strcmp(FileName,buf)) {
+		if (class(ch) == STNL && strcmp(FileName,buf)) {
 			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
 		}
 	}
-	if (eofseen) {
+	if (class(ch) == STEOI) {
 		error(s_error);
 		return;
 	}
 	LineNumber = i;
 }
 
-static
-UnloadChar(ch)
-{
-	if (ch == EOI) eofseen = 1;
-	else PushBack();
-}
-	
 int
 LLlex()
 {
@@ -265,20 +251,8 @@ LLlex()
 		return tk->tk_symb;
 	}
 
-again1:
-	if (eofseen) {
-		eofseen = 0;
-		ch = EOI;
-	}
-	else {
 again:
-		LoadChar(ch);
-		if ((ch & 0200) && ch != EOI) {
-			error("non-ascii '\\%03o' read", ch & 0377);
-			goto again;
-		}
-	}
-
+	ch = getch();
 	tk->tk_lineno = LineNumber;
 
 	switch (class(ch))	{
@@ -289,7 +263,7 @@ again:
 		cntlines++;
 #endif
 		CheckForLineDirective();
-		goto again1;
+		goto again;
 
 	case STSKIP:
 		goto again;
@@ -308,7 +282,7 @@ again:
 				SkipComment();
 				goto again;
 			}
-			UnloadChar(nch);
+			PushBack();
 		}
 		if (ch == '&') return tk->tk_symb = AND;
 		if (ch == '~') return tk->tk_symb = NOT;
@@ -348,7 +322,7 @@ again:
 		default :
 			crash("(LLlex, STCOMP)");
 		}
-		UnloadChar(nch);
+		PushBack();
 		return tk->tk_symb = ch;
 
 	case STIDF:
@@ -364,7 +338,7 @@ again:
 			}
 		} while(in_idf(ch));
 
-		UnloadChar(ch);
+		PushBack();
 		*tag = '\0';
 		if (*(tag - 1) == '_') {
 			lexerror("last character of an identifier may not be an underscore");
@@ -436,7 +410,7 @@ again:
 				else {
 					state = End;
 					if (ch == 'H') base = 16;
-					else UnloadChar(ch);
+					else PushBack();
 				}
 				break;
 
@@ -462,7 +436,7 @@ again:
 				state = End;
 				if (ch != 'H') {
 					lexerror("H expected after hex number");
-					UnloadChar(ch);
+					PushBack();
 				}
 				break;
 
@@ -478,7 +452,7 @@ again:
 					state = Hex;
 					break;
 				}
-				UnloadChar(ch);
+				PushBack();
 				ch = *--np;
 				*np++ = '\0';
 				/* Fall through */
@@ -582,7 +556,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 				LoadChar(ch);
 				if (!(ch == '+' || ch == '-' || is_dig(ch)))
 					goto noscale;
-				UnloadChar(ch);
+				PushBack();
 			}
 			if (np < &buf[NUMSIZE]) *np++ = 'E';
 			LoadChar(ch);
@@ -605,7 +579,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 
 noscale:
 		*np++ = '\0';
-		UnloadChar(ch);
+		PushBack();
 
 		if (np >= &buf[NUMSIZE]) {
 			tk->TOK_REL = Salloc("0.0", 5);

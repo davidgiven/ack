@@ -166,13 +166,13 @@ $(CURRDIR)main:	$(OBJ) $(CURRDIR)Makefile
 	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)main
 	-size $(CURRDIR)main
 
-$(CURRDIR)omain:	$(OBJ) $(CURRDIR)Makefile
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
-	size $(CURRDIR)omain
+$(CURRDIR)omain:	$(OBJ) #$(CURRDIR)Makefile
+	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
+	#size $(CURRDIR)omain
 
-$(CURRDIR)cemain:      $(OBJ) $(CURRDIR)Makefile
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)cemain 
-	size $(CURRDIR)cemain
+$(CURRDIR)cemain:      $(OBJ) #$(CURRDIR)Makefile
+	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)cemain 
+	#size $(CURRDIR)cemain
 
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
