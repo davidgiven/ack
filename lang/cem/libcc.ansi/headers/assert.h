@@ -6,12 +6,18 @@
  */
 /* $Header$ */
 
-void __bad_assertion(const char *_expr, const char *_file, int _line);
+void __bad_assertion(const char *_mess);
 
 #undef	assert
+
+#define	__str(x)	# x
+#define	__xstr(x)	__str(x)
 
 #if	defined(NDEBUG)
 #define	assert(ignore)	((void)0)
 #else
-#define assert(expr)	((expr)? (void)0 : __bad_assertion( #expr, __FILE__, __LINE__))
+#define	assert(expr)	((expr)? (void)0 : \
+				__bad_assertion("Assertion \"" #expr \
+				    "\" failed, file " __xstr(__FILE__) \
+				    ", line " __xstr(__LINE__) "\n"))
 #endif	/* NDEBUG */
