@@ -55,7 +55,7 @@ close_scope(doclean)
 	df = CurrentScope->sc_def;
 	if (doclean) while (df) {
 		struct def *next = df->df_nextinscope;
-		remove_def(df);
+		if (! (df->df_flags & (D_VARPAR|D_VALPAR))) remove_def(df);
 		df = next;
 	}
 	CurrVis = CurrVis->next;

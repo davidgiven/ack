@@ -23,8 +23,8 @@ remove_def(df)
 	else {
 		while( df1 && df1->df_next != df ) df1 = df1->df_next;
 		df1->df_next = df->df_next;
-		free_def(df);
 	}
+	free_def(df);
 }
 
 struct def *

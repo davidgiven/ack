@@ -86,8 +86,10 @@ TstCompat(tp1, tp2)
 		if( IsPacked(tp1) != IsPacked(tp2) )
 			return 0;
 		if( TstCompat(ElementType(tp1), ElementType(tp2)) )	{
+			/*
 			if( ElementType(tp1) != ElementType(tp2) )
 				warning("base-types of sets not equal");
+			*/
 			return 1;
 		}
 		else return 0;
