@@ -62,8 +62,8 @@ row	: C_INSTR 		{ set_outfile( yytext); header( yytext);}
 	  [ Dspecial | Dsimple] { handle_defaults();}
 	;
 
-special : CONDITION 		{ question( &yytext[0]);}
-	  simple 		{ out( "}\n");}
+special : 
+				{ out( "if( 0 ) ;\n"); }
 
 	  [ CONDITION 		{ out( "else "); question( &yytext[0]);}
 	    simple 		{ out( "}\n");}
@@ -75,11 +75,14 @@ special : CONDITION 		{ question( &yytext[0]);}
 
 simple	: ARROW 		{ set_segment( segment); save_output();}
 	  actionlist		{ back_patch();}
+        ;
 
+/*
 	| EQUIV			{ no_conversions = TRUE; save_output();}
 	  actionlist		{ no_conversions = FALSE; back_patch();}
 
 	;
+*/
 
 
 actionlist :			{ first_action = TRUE;}
