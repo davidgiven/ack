@@ -884,6 +884,8 @@ ChkProcCall(expp)
 	return retval;
 }
 
+STATIC int ChkStandard();
+
 int
 ChkCall(expp)
 	register struct node *expp;
@@ -896,7 +898,6 @@ ChkCall(expp)
 	/* First, get the name of the function or procedure
 	*/
 	register struct node *left = expp->nd_left;
-	STATIC int ChkStandard();
 
 	expp->nd_type = error_type;
 
