@@ -401,7 +401,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				*str = '\0';	
 			}
 			break;
-#ifndef	NOFLOAT:
+#ifndef	NOFLOAT
 		case 'e':
 		case 'E':
 		case 'f':
