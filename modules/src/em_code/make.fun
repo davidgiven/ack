@@ -46,7 +46,6 @@ mv em.o em$1.o
 rm -f libem$1.a
 ar rc libem$1.a *.o
 rm -f *.o
-rm -f *.c
 --EOF--
 .
 1,$p
