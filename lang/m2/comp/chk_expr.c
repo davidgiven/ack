@@ -719,6 +719,9 @@ ChkFunCall(expp)
 	return 0;
 }
 
+STATIC int ChkStandard();
+STATIC int ChkCast();
+
 int
 ChkCall(expp)
 	register t_node *expp;
@@ -728,8 +731,6 @@ ChkCall(expp)
 		it may also be a cast or a standard procedure call.
 	*/
 	register t_node *left = expp->nd_left;
-	STATIC int ChkStandard();
-	STATIC int ChkCast();
 
 	/* First, get the name of the function or procedure
 	*/
