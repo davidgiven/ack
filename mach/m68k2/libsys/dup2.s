@@ -1,6 +1,11 @@
 .define _dup2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _dup2
-.text
+.sect .text
 _dup2:		move.w #0x29,d0
 		move.w 4(sp),a0
 		move.w 6(sp),d1

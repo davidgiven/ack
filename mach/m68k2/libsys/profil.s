@@ -1,6 +1,11 @@
 .define _profil
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _profil
-.text
+.sect .text
 _profil:	move.w #0x2C,d0
 		move.l 4(sp),a0
 		move.w 8(sp),d1
