@@ -57,8 +57,6 @@ prolog(nlocals) full nlocals; {
 
 	fprintf(codefile,"\tpush\tb\n\tlxi\th,0\n\tdad\tsp\n\tmov\tb,h\n\tmov\tc,l\n");
 	switch (nlocals) {
-	case 8: fprintf(codefile,"\tpush\th\n");
-	case 6: fprintf(codefile,"\tpush\th\n");
 	case 4: fprintf(codefile,"\tpush\th\n");
 	case 2: fprintf(codefile,"\tpush\th\n");
 	case 0: break;
