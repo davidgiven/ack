@@ -22,9 +22,9 @@ install:	install_files
 install_files:
 		for i in $(FILES) ;\
 		do\
-			rm -f $$$(LIB)/$(MIDDLE)/$$i ;\
-			$(RUNSCRIPT) $$i >$$$(LIB)/$(MIDDLE)/$$i ;\
-			chmod -w $$$(LIB)/$(MIDDLE)/$$i ;\
+			rm -f $(LIB)/$(MIDDLE)/$$i ;\
+			$(RUNSCRIPT) $$i >$(LIB)/$(MIDDLE)/$$i ;\
+			chmod -w $(LIB)/$(MIDDLE)/$$i ;\
 		done
 
 clean:
