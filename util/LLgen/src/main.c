@@ -35,9 +35,6 @@ extern		comfatal();
 extern		copyfile();
 extern		install();
 extern char	*mktemp();
-# ifndef NDEBUG
-extern		badassertion();
-# endif not NDEBUG
 
 main(argc,argv) register string	argv[]; {
 	register string arg;

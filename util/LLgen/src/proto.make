@@ -9,6 +9,7 @@ LIBDIRSTR = \"$(LIBDIR)\"
 DEFINES = -DNDEBUG
 CFLAGS = $(DEFINES) $(INCLUDES) $(COPTIONS)
 LDFLAGS=$(LDOPTIONS)
+LINTFLAGS=$(LINTOPTIONS) $(DEFINES) $(INCLUDES) -DNORCSID
 
 LLOPT= # -vvv -x
 
@@ -49,7 +50,7 @@ pr :
 		@pr $(FILES) $(SRC_HOME)/util/LLgen/lib/rec $(SRC_HOME)/util/LLgen/lib/incl
 
 lint: 		parser
-		$(LINT) $(LINTFLAGS) $(INCLUDES) $(CFILES)
+		$(LINT) $(LINTFLAGS) -DLIBDIR=$(LIBDIRSTR) $(CFILES)
 
 clean:
 		-rm -f *.$(SUF) LL.temp LL.xxx LL.output LLgen LLgen.c tokens.c Lpars.[ch] parser

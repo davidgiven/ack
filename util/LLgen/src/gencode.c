@@ -115,6 +115,7 @@ gencode(argc) {
 		opentemp(f_input);
 		correct_prefix();
 		/* generate code ... */
+		if (!firsts) fputs("#define LLNOFIRSTS\n", fpars);
 		if (ansi_c) fputs("#define LL_ANSI_C 1\n", fpars);
 		fprintf(fpars, "#define LL_LEXI %s\n", lexical);
 		copyfile(incl_file);
@@ -441,7 +442,6 @@ getansiparams(mkdef) {
 	 * If a definition has to be produced, "mkdef" is set to 1.
  	 */
 	register int l;
-	char add_semi = ' ';
 	int delayed = 0;
 
 	ltext[0] = '\0';

@@ -38,7 +38,7 @@ pr :
 		@pr $(FILES) ../lib/rec ../lib/incl Makefile
 
 lint: 
-		$(LINT) $(INCLUDES) $(CFILES)
+		$(LINT) $(INCLUDES) -DLIBDIR=$(LIBDIRSTR) $(CFILES)
 
 clean:
 		-rm -f *.o LL.temp LL.xxx LL.output LLgen LLgen.c tokens.c Lpars.[ch] parser
