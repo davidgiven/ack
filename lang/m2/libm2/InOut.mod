@@ -1,44 +1,30 @@
 (*$R-*)
 IMPLEMENTATION MODULE InOut ;
 
-  IMPORT Unix;
+  IMPORT Streams;
   IMPORT Conversions;
   IMPORT Traps;
   FROM TTY IMPORT isatty;
-  FROM SYSTEM IMPORT ADR;
 
-  CONST	BUFSIZ = 1024;		(* Tunable *)
-	TAB = 11C;
+  CONST	TAB = 11C;
 
-  TYPE	IOBuf = RECORD
-			fildes: INTEGER;
-			cnt: INTEGER;
-			maxcnt: INTEGER;
-			bufferedcount: INTEGER;
-			buf: ARRAY [1..BUFSIZ] OF CHAR;
-		END;
-	numbuf = ARRAY[0..255] OF CHAR;
+  TYPE	numbuf = ARRAY[0..255] OF CHAR;
 
-  VAR	ibuf, obuf: IOBuf;
-	unread: BOOLEAN;
+  VAR	unread: BOOLEAN;
 	unreadch: CHAR;
+	CurrIn, CurrOut: Streams.Stream;
+	result: Streams.StreamResult;
 
   PROCEDURE Read(VAR c : CHAR);
+
   BEGIN
 	IF unread THEN
 		unread := FALSE;
 		c := unreadch;
 		Done := TRUE;
 	ELSE
-		WITH ibuf DO
-			IF cnt <= maxcnt THEN
-				c := buf[cnt];
-				INC(cnt);
-				Done := TRUE;
-			ELSE
-				c := FillBuf(ibuf);
-			END;
-		END;
+		Streams.Read(CurrIn, c, result);
+		Done := result = Streams.succeeded;
 	END;
   END Read;
 
@@ -48,135 +34,87 @@ IMPLEMENTATION MODULE InOut ;
 	unreadch := ch;
   END UnRead;
 
-  PROCEDURE FillBuf(VAR ib: IOBuf) : CHAR;
-  VAR c : CHAR;
-  BEGIN
-	WITH ib DO
-		maxcnt := Unix.read(fildes, ADR(buf), bufferedcount);
-		cnt := 2;
-		Done := maxcnt > 0;
-		IF NOT Done THEN
-			c :=  0C;
-		ELSE
-			c :=  buf[1];
-		END;
-	END;
-	RETURN c;
-  END FillBuf;
-
-  PROCEDURE Flush(VAR ob: IOBuf);
-  VAR dummy: INTEGER;
-  BEGIN
-	WITH ob DO
-		dummy := Unix.write(fildes, ADR(buf), cnt);
-		cnt := 0;
-	END;
-  END Flush;
-
   PROCEDURE Write(c: CHAR);
   BEGIN
-	WITH obuf DO
-		INC(cnt);
-		buf[cnt] := c;
-		IF cnt >= bufferedcount THEN
-			Flush(obuf);
-		END;
-	END;
+	Streams.Write(CurrOut, c, result);
   END Write;
 
   PROCEDURE OpenInput(defext: ARRAY OF CHAR);
-  VAR namebuf : ARRAY [1..256] OF CHAR;
+  VAR namebuf : ARRAY [1..128] OF CHAR;
   BEGIN
-	IF ibuf.fildes # 0 THEN
-		CloseInput;
+	IF CurrIn # Streams.InputStream THEN
+		Streams.CloseStream(CurrIn, result);
 	END;
 	MakeFileName("Name of input file: ", defext, namebuf);
 	IF NOT Done THEN RETURN; END;
-	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
-	ELSE
-		WITH ibuf DO
-			fildes := Unix.open(ADR(namebuf), 0);
-			Done := fildes >= 0;
-			maxcnt := 0;
-			cnt := 1;
-		END;
-	END;
+	openinput(namebuf);
   END OpenInput;
 
   PROCEDURE OpenInputFile(filename: ARRAY OF CHAR);
   BEGIN
-	IF ibuf.fildes # 0 THEN
-		CloseInput;
+	IF CurrIn # Streams.InputStream THEN
+		Streams.CloseStream(CurrIn, result);
 	END;
-	IF (filename[0] = '-') AND (filename[1] = 0C) THEN
-	ELSE
-		WITH ibuf DO
-			fildes := Unix.open(ADR(filename), 0);
-			Done := fildes >= 0;
-			maxcnt := 0;
-			cnt := 1;
-		END;
-	END;
+	openinput(filename);
   END OpenInputFile;
+
+  PROCEDURE openinput(VAR namebuf: ARRAY OF CHAR);
+  BEGIN
+	IF (namebuf[0] = '-') AND (namebuf[1] = 0C) THEN
+		CurrIn := Streams.InputStream;
+		Done := TRUE;
+	ELSE
+		Streams.OpenStream(CurrIn, namebuf, Streams.text,
+				   Streams.reading, result);
+		Done := result = Streams.succeeded;
+	END;
+  END openinput;
 
   PROCEDURE CloseInput;
   BEGIN
-	WITH ibuf DO
-		IF (fildes > 0) AND (Unix.close(fildes) < 0) THEN
-			;
-		END;
-		fildes := 0;
-		maxcnt := 0;
-		cnt := 1;
+	IF CurrIn # Streams.InputStream THEN
+		Streams.CloseStream(CurrIn, result);
 	END;
+	CurrIn := Streams.InputStream;
   END CloseInput;
 
   PROCEDURE OpenOutput(defext: ARRAY OF CHAR);
-  VAR namebuf : ARRAY [1..256] OF CHAR;
+  VAR namebuf : ARRAY [1..128] OF CHAR;
   BEGIN
-	IF obuf.fildes # 1 THEN
-		CloseOutput;
+	IF CurrOut # Streams.OutputStream THEN
+		Streams.CloseStream(CurrOut, result);
 	END;
 	MakeFileName("Name of output file: ", defext, namebuf);
 	IF NOT Done THEN RETURN; END;
-	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
-	ELSE	
-		WITH obuf DO
-			fildes := Unix.creat(ADR(namebuf), 666B);
-			Done := fildes >= 0;
-			bufferedcount := BUFSIZ;
-			cnt := 0;
-		END;
-	END;
+	openoutput(namebuf);
   END OpenOutput;
 
   PROCEDURE OpenOutputFile(filename: ARRAY OF CHAR);
   BEGIN
-	IF obuf.fildes # 1 THEN
-		CloseOutput;
+	IF CurrOut # Streams.OutputStream THEN
+		Streams.CloseStream(CurrOut, result);
 	END;
-	IF (filename[0] = '-') AND (filename[1] = 0C) THEN
-	ELSE
-		WITH obuf DO
-			fildes := Unix.creat(ADR(filename), 666B);
-			Done := fildes >= 0;
-			bufferedcount := BUFSIZ;
-			cnt := 0;
-		END;
-	END;
+	openoutput(filename);
   END OpenOutputFile;
+
+  PROCEDURE openoutput(VAR namebuf: ARRAY OF CHAR);
+  BEGIN
+	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
+		CurrOut := Streams.OutputStream;
+		Done := TRUE;
+	ELSE
+		Streams.OpenStream(CurrOut, namebuf, Streams.text,
+				   Streams.writing, result);
+		Done := result = Streams.succeeded;
+	END;
+  END openoutput;
 
   PROCEDURE CloseOutput;
   BEGIN
-	Flush(obuf);
-	WITH obuf DO
-		IF (fildes # 1) AND (Unix.close(fildes) < 0) THEN
-			;
-		END;
-		fildes := 1;
-		bufferedcount := 1;
-		cnt := 0;
+	IF CurrOut # Streams.OutputStream THEN
+		Streams.CloseStream(CurrOut, result);
 	END;
+	CurrOut := Streams.OutputStream;
   END CloseOutput;
 
   PROCEDURE MakeFileName(prompt, defext : ARRAY OF CHAR;
@@ -332,15 +270,14 @@ IMPLEMENTATION MODULE InOut ;
   END ReadString;
 
   PROCEDURE XReadString(VAR s : ARRAY OF CHAR);
-  VAR	i : INTEGER;
-  	j : CARDINAL;
+  VAR	j : CARDINAL;
     	ch : CHAR;
 
   BEGIN
 	j := 0;
 	LOOP
-		i := Unix.read(0, ADR(ch), 1);
-		IF i < 0 THEN
+		Streams.Read(Streams.InputStream, ch, result);
+		IF result # Streams.succeeded THEN
 			EXIT;
 		END;
 		IF ch <= " " THEN
@@ -360,13 +297,10 @@ IMPLEMENTATION MODULE InOut ;
 	i := 0;
 	LOOP
 		IF (i <= HIGH(s)) AND (s[i] # 0C) THEN
-			INC(i);
+			Streams.Write(Streams.OutputStream, s[i], result);
 		ELSE
 			EXIT;
 		END;
-	END;
-	IF Unix.write(1, ADR(s), i) < 0 THEN
-		;
 	END;
   END XWriteString;
 
@@ -419,16 +353,7 @@ IMPLEMENTATION MODULE InOut ;
   END WriteString;
 
 BEGIN	(* InOut initialization *)
+	CurrIn := Streams.InputStream;
+	CurrOut := Streams.OutputStream;
 	unread := FALSE;
-	WITH ibuf DO
-		fildes := 0;
-		bufferedcount := BUFSIZ;
-		maxcnt := 0;
-		cnt := 1;
-	END;
-	WITH obuf DO
-		fildes := 1;
-		bufferedcount := 1;
-		cnt := 0;
-	END;
 END InOut.

@@ -19,6 +19,7 @@ DEFINITION MODULE InOut;
 	   If the filename ends with a '.', append the "defext" extension.
 	   Done := "file was successfully opened".
 	   If open, subsequent output is written to this file.
+	   Files left open at program termination are automatically closed.
 	*)
 
 	PROCEDURE OpenInputFile(filename: ARRAY OF CHAR);
