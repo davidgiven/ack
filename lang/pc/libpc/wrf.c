@@ -64,5 +64,5 @@ _wrf(n,w,r,f) int n,w; double r; struct file *f; {
 		*p++ = (*b ? *b++ : FILL_CHAR);
 		assert(p <= buf+BUFSIZE);
 	}
-	_wstrin(w,p-buf,buf,f);
+	_wstrin(w,(int)(p-buf),buf,f);
 }

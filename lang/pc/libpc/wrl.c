@@ -43,7 +43,7 @@ _wsl(w,l,f) int w; long l; struct file *f; {
 	} while (j /= 10);
 	if (l<0)
 		*--p = '-';
-	_wstrin(w,&buf[11]-p,p,f);
+	_wstrin(w,(int)(&buf[11]-p),p,f);
 }
 
 _wrl(l,f) long l; struct file *f; {

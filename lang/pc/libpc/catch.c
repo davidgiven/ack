@@ -145,7 +145,7 @@ _catch(erno) unsigned erno; {
 		p = q;
 		while (*p)
 			p++;
-		if (_write(2,q,p-q) < 0)
+		if (_write(2,q,(int)(p-q)) < 0)
 			;
 	}
 	_exit(erno);

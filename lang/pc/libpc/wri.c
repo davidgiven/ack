@@ -64,7 +64,7 @@ _wsi(w,i,f) int w,i; struct file *f; {
 	while (j /= 10);
 	if (i<0)
 		*--p = '-';
-	_wstrin(w,&buf[SZ]-p,p,f);
+	_wstrin(w,(int)(&buf[SZ]-p),p,f);
 }
 
 _wri(i,f) int i; struct file *f; {

@@ -59,7 +59,7 @@ _wsr(w,r,f) int w; double r; struct file *f; {
 		*p++ = '0' + (d/10) % 10;
 		*p++ = '0' + d%10;
 	}
-	_wstrin(w,p-buf,buf,f);
+	_wstrin(w,(int)(p-buf),buf,f);
 }
 
 _wrr(r,f) double r; struct file *f; {

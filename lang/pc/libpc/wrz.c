@@ -27,12 +27,12 @@ _wsz(w,s,f) int w; char *s; struct file *f; {
 
 	if (w < 0) _trp(EWIDTH);
 	for (p=s; *p; p++);
-	_wss(w,p-s,s,f);
+	_wss(w,(int)(p-s),s,f);
 }
 
 _wrz(s,f) char *s; struct file *f; {
 	char *p;
 
 	for (p=s; *p; p++);
-	_wrs(p-s,s,f);
+	_wrs((int)(p-s),s,f);
 }
