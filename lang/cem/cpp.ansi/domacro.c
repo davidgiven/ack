@@ -23,6 +23,7 @@
 #include	"macro.h"
 #include	"bits.h"
 
+extern char options[];
 extern	char **inctable;	/* list of include directories		*/
 extern	char *getwdir();
 char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
@@ -225,8 +226,10 @@ int to_endif;
 				error("#else after #else");
 			++(ifstack[nestlevel]);
 			if (!to_endif && nestlevel == skiplevel) {
-				if (SkipToNewLine(1))
-					strict("garbage following #else");
+				if (SkipToNewLine(1)) {
+					if (!options['o'])
+						strict("garbage following #else");
+				}
 				NoUnstack--;
 				return;
 			}
@@ -235,8 +238,10 @@ int to_endif;
 		case K_ENDIF:
 			assert(nestlevel > svnestlevel[nestcount]);
 			if (nestlevel == skiplevel) {
-				if (SkipToNewLine(1))
-					strict("garbage following #endif");
+				if (SkipToNewLine(1)) {
+					if (!options['o'])
+						strict("garbage following #endif");
+				}
 				nestlevel--;
 				NoUnstack--;
 				return;
@@ -377,8 +382,10 @@ do_elif()
 
 do_else()
 {
-	if (SkipToNewLine(1))
-		strict("garbage following #else");
+	if (SkipToNewLine(1)) {
+		if (!options['o'])
+			strict("garbage following #else");
+	}
 	if (nestlevel <= svnestlevel[nestcount])
 		error("#else without corresponding #if");
 	else {	/* mark this level as else-d */
@@ -392,8 +399,10 @@ do_else()
 
 do_endif()
 {
-	if (SkipToNewLine(1))
-		strict("garbage following #endif");
+	if (SkipToNewLine(1)) {
+		if (!options['o'])
+			strict("garbage following #endif");
+	}
 	if (nestlevel <= svnestlevel[nestcount])	{
 		error("#endif without corresponding #if");
 	}

@@ -31,6 +31,9 @@ do_option(text)
 	default:
 		error("illegal option: %c", text[-1]);
 		break;
+	case 'o':	/* ignore garbage after #else or #endif */
+		options['o'] = 1;
+		break;
 	case 'C' :	/* comment output		*/
 		options['C'] = 1;
 		break;

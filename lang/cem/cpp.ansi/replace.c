@@ -532,7 +532,7 @@ macro2buffer(repl, idf, args)
 			    replacement list.
 		    */
 		    if (repl->r_ptr == repl->r_text
-				&& is_wsp(*repl->r_text)) {
+				&& is_wsp(*repl->r_ptr)) {
 			    err = 1;
 			    break;
 		    }
@@ -590,7 +590,7 @@ macro2buffer(repl, idf, args)
 		assert(n > 0);
 
 		/*	This is VERY dirty, we look ahead for the
-			## operater. If it's found we use the raw
+			## operator. If it's found we use the raw
 			argument buffer instead of the expanded
 			one.
 		*/

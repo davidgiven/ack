@@ -205,12 +205,16 @@ preprocess(fn)
 				continue;
 				}
 			case STNUM:
+			/* The following code is quit ugly. This because
+			 * ..3 == . .3 , whereas ...3 == ... 3
+			 */
 				echo(c);
 				if (c == '.') {
 					c = GetChar();
 					if (c == '.') {
 						if ((c = GetChar()) == '.') {
 							echo('.'); echo('.');
+							c = GetChar();
 							continue;
 						}
 						UnGetChar();
