@@ -1,4 +1,3 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
@@ -30,6 +29,8 @@ install:	all
 
 cmp:		all
 
+distr:		pop_push.h
+
 em_files:\
 classdefs.h pop_push.h wordlen.h alloc.m cset.m debug.m\
 files.m go.m global.m lset.m map.m parser.m get.m put.m aux.m stack_chg.m\
@@ -45,8 +46,8 @@ makeclassdef: \
 	 $(CC) -o makeclassdef makecldef.c
 
 pop_push.h: \
-	$(EM)/etc/em_table pop_push.awk
-	 awk -f pop_push.awk < $(EM)/etc/em_table > pop_push.h
+	$(EMHOME)/etc/em_table pop_push.awk
+	 awk -f pop_push.awk < $(EMHOME)/etc/em_table > pop_push.h
 
 wordlen.h: makewordlen 
 	makewordlen > wordlen.h
