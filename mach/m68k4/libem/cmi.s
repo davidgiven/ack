@@ -1,25 +1,29 @@
-.define	.cmi, .cmi_
+.define	.cmi
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
-	! NUM == 4
-	! result in d1
-	.sect .text
+.sect .text
+	! on entry d0: # bytes of 1 block
+	! on exit d0: result
 .cmi:
-.cmi_:
-	move.l	(sp)+,d2
-	move.l	#1,d1
-	move.l	(sp)+,d0
-	cmp.l	(sp)+,d0
-	bne	1f
-	clr.l	d1
-	1:
-	ble	2f
-	neg.l	d1
-	2:
-	move.l	d2,-(sp)
+	move.l	(sp)+, d2	! return address
+	move.l	sp, a0		! address of top block
+	lea	0(sp, d0.l), a1	! address of lower block
+	move.l	d0, d1
+	asr.l	#2, d0
+1:
+	cmp.l	(a0)+, (a1)+
+	bne	2f
+	sub.l	#1, d0
+	bne	1b
+2:
+	bge	3f
+	neg.l	d0		! less
+3:
+	asl.l	#1, d1
+	add.l	d1, sp		! new sp; two blocks popped
+	move.l	d2, -(sp)
 	rts
-
 .align 2
