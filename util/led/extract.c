@@ -209,9 +209,10 @@ redefine(new, old)
 	if (!ISCOMMON(old)) {
 		if (!ISCOMMON(new))
 			error("%s: multiply defined", new->on_mptr);
-
+		/*
 		else if ((new->on_type & S_TYP) != (old->on_type & S_TYP))
 			warning("%s: sections differ", new->on_mptr);
+		*/
 	} else {
 		/* `Old' is common. */
 		if (ISCOMMON(new)) {
