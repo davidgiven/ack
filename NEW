@@ -1,0 +1,17 @@
+What's new:
+	A lot of things have changed since that previous distribution.
+It is not wise to mix files created by the previous version of the Kit
+with files belonging to this version, although that might sometimes work.
+The major additions are:
+	- Basic frontend
+	- New codegenerator
+	- LL(1) parser generator
+	- Vax backend with 4-byte wordsize
+	- Motorola 68000 backend with 4-byte wordsize
+	- Motorola 68000 interpreter for 2- and 4-byte wordsize
+	- Z8000 assembler and backend.
+	- 6805 assembler
+	- NatSem 16032 assembler
+	- Intel 8080 backend
+	- Zilog Z80 backend
+	- Signetics 2650 assembler
