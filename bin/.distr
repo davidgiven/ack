@@ -6,3 +6,4 @@ do_resolve
 lint-lib.ack
 lint-lib.unix
 mk_manpage
+rm_deps

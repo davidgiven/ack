@@ -1,0 +1,8 @@
+: $Header$
+
+: remove dependencies from a makefile, write result on standard output.
+: we cannot do this directly in a makefile because some make versions
+: have # start a comment, always.
+
+sed -e '/^#DEPENDENCIES/,$d' $1
+echo '#DEPENDENCIES'
