@@ -750,7 +750,12 @@ pat stf
   with exact indexed_off STACK
   kills all_mems
   gen pop {indir_indexed_off,%1.reg,%1.scale,%1.off+$1}
-  with exact ADDR_LOCAL				leaving stl %1.ind+$1
+  with ADDR_LOCAL regorconst
+  kills indir,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
+  gen move %2,{LOCAL,%1.ind+$1,4}
+  with exact ADDR_LOCAL
+  kills indir,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
+  gen pop {LOCAL,%1.ind+$1,4}
   with ADDR_EXTERN regorconst
   kills mem_nonlocals
   gen move %2,{EXTERN,%1.off+$1}
@@ -783,8 +788,18 @@ pat sti $1==4
   with exact indexed_off STACK
   kills all_mems
   gen pop {indir_indexed_off,%1.reg,%1.scale,%1.off}
-  with exact ADDR_LOCAL				leaving stl %1.ind
-  with exact ADDR_EXTERN			leaving ste %1.off
+  with ADDR_LOCAL regorconst
+  kills indir,locals %ind+%size > %1.ind && %ind < %1.ind+4
+  gen move %2,{LOCAL,%1.ind,4}
+  with exact ADDR_LOCAL
+  kills indir,locals %ind+%size > %1.ind && %ind < %1.ind+4
+  gen pop {LOCAL,%1.ind,4}
+  with ADDR_EXTERN regorconst
+  kills mem_nonlocals
+  gen move %2,{EXTERN,%1.off}
+  with exact ADDR_EXTERN STACK
+  kills mem_nonlocals
+  gen pop {EXTERN,%1.off}
 
 pat sti $1==1
   with addreg regorconst124
@@ -826,41 +841,7 @@ pat sti $1==2
   kills indir,locals %ind<%1.ind+2 && %ind+%size>%1.ind
   gen move %2,{indir_r_off2,ebp,%1.ind}
 
-pat sti $1==8
-  with addreg regorconst regorconst
-  kills all_mems
-  gen move %2,{indir_r,%1}
-      move %3,{indir_r_off,%1,4}
-  with exact addreg STACK
-  kills all_mems
-  gen pop {indir_r,%1}
-      pop {indir_r_off,%1,4}
-  with reg_off regorconst regorconst
-  kills all_mems
-  gen move %2,{indir_r_off,%1.reg,%1.off}
-      move %3,{indir_r_off,%1.reg,%1.off+4}
-  with exact reg_off STACK
-  kills all_mems
-  gen pop {indir_r_off,%1.reg,%1.off}
-      pop {indir_r_off,%1.reg,%1.off+4}
-  with indexed_r_off regorconst regorconst
-  kills all_mems
-  gen move %2,{indir_indexed_r_off,%1.reg,%1.reg2,%1.scale,%1.off}
-      move %3,{indir_indexed_r_off,%1.reg,%1.reg2,%1.scale,%1.off+4}
-  with exact indexed_r_off STACK
-  kills all_mems
-  gen pop {indir_indexed_r_off,%1.reg,%1.reg2,%1.scale,%1.off}
-      pop {indir_indexed_r_off,%1.reg,%1.reg2,%1.scale,%1.off+4}
-  with indexed_off regorconst regorconst
-  kills all_mems
-  gen move %2,{indir_indexed_off,%1.reg,%1.scale,%1.off}
-      move %3,{indir_indexed_off,%1.reg,%1.scale,%1.off+4}
-  with exact indexed_off STACK
-  kills all_mems
-  gen pop {indir_indexed_off,%1.reg,%1.scale,%1.off}
-      pop {indir_indexed_off,%1.reg,%1.scale,%1.off+4}
-  with exact ADDR_EXTERN		leaving sde %1.off
-  with exact ADDR_LOCAL			leaving sdl %1.ind
+pat sti $1==8			leaving sdf 0
 
 pat sti
   with BXREG
@@ -926,12 +907,22 @@ pat sdf
   kills all_mems
   gen pop {indir_indexed_off,%1.reg,%1.scale,%1.off+$1}
       pop {indir_indexed_off,%1.reg,%1.scale,%1.off+4+$1}
-
-/* Funny things happen when the sign changes in the stl parameters */
-
-  with exact ADDR_LOCAL				leaving stl %1.ind+$1
-							stl %1.ind+$1+4
-  with exact ADDR_EXTERN			leaving sde %1.off+$1
+  with ADDR_LOCAL regorconst regorconst
+  kills indir,locals %ind+%size > $1 && %ind < $1+8
+  gen	move %2,{LOCAL,%1.ind+$1,4}
+	move %3,{LOCAL,%1.ind+$1+4,4}
+  with exact ADDR_LOCAL STACK
+  kills indir,locals %ind+%size > $1 && %ind < $1+8
+  gen	pop {LOCAL,%1.ind+$1,4}
+	pop {LOCAL,%1.ind+$1+4,4}
+  with ADDR_EXTERN regorconst regorconst
+  kills mem_nonlocals
+  gen	move %2,{EXTERN,%1.off+$1}
+	move %3,{EXTERN,%1.off+$1+4}
+  with exact ADDR_EXTERN STACK
+  kills mem_nonlocals
+  gen	pop {EXTERN,%1.off+$1}
+	pop {EXTERN,%1.off+$1+4}
   with halfindir regorconst
   kills all_mems
   gen mov %1,%2			yields %1	leaving stf $1+4
@@ -1446,6 +1437,9 @@ pat lil ngi sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilruxxsil("neg")
 pat lil com sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilruxxsil("not")
 pat lil dec sil $1==$3 && inreg($1)==reg_any		call lilruxxsil("dec")
 pat lil inc sil $1==$3 && inreg($1)==reg_any		call lilruxxsil("inc")
+pat lil adp sil $1==$3 && inreg($1)==reg_any && $2==1	call lilruxxsil("inc")
+pat lil adp sil $1==$3 && inreg($1)==reg_any && $2==(0-1)
+							call lilruxxsil("dec")
 #endif
 
 proc liluxxsil example lil ngi sil
@@ -1458,6 +1452,8 @@ pat lil ngi sil $1==$3 && $2==4		call liluxxsil("neg")
 pat lil com sil $1==$3 && $2==4		call liluxxsil("not")
 pat lil dec sil $1==$3			call liluxxsil("dec")
 pat lil inc sil $1==$3			call liluxxsil("inc")
+pat lil adp sil $1==$3 && $2==1		call liluxxsil("inc")
+pat lil adp sil $1==$3 && $2==(0-1)	call liluxxsil("dec")
 
 proc loexxxste example loe adi ste
 with regorconst
@@ -1496,7 +1492,11 @@ gen uxx* {indir_r_off, regvar($1), $2}
 
 pat lol lof inc lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
 					call lofruxxsof("inc")
+pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_any && $3==1
+					call lofruxxsof("inc")
 pat lol lof dec lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
+					call lofruxxsof("dec")
+pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_any && $3==(0-1)
 					call lofruxxsof("dec")
 pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call lofruxxsof("neg")
@@ -1514,6 +1514,8 @@ pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==4	call lofuxxsof("neg")
 pat lol lof com lol stf $1==$4 && $2==$5 && $3==4	call lofuxxsof("not")
 pat lol lof dec lol stf $1==$4 && $2==$5		call lofuxxsof("dec")
 pat lol lof inc lol stf $1==$4 && $2==$5		call lofuxxsof("inc")
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1	call lofuxxsof("inc")
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==(0-1)	call lofuxxsof("dec")
 
 proc lofxxxsof example lol lof adi lol stf
 with regorconst
@@ -1539,6 +1541,8 @@ pat loe lof ngi loe stf $1==$4 && $2==$5 && $3==4	call lefuxxsef("neg")
 pat loe lof com loe stf $1==$4 && $2==$5 && $3==4	call lefuxxsef("not")
 pat loe lof dec loe stf $1==$4 && $2==$5		call lefuxxsef("dec")
 pat loe lof inc loe stf $1==$4 && $2==$5		call lefuxxsef("inc")
+pat loe lof adp loe stf $1==$4 && $2==$5 && $3==1	call lefuxxsef("inc")
+pat loe lof adp loe stf $1==$4 && $2==$5 && $3==(0-1)	call lefuxxsef("dec")
 
 proc lefxxxsef example loe lof adi loe stf
 with regorconst
@@ -1554,7 +1558,124 @@ pat loe lof and loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("and")
 pat loe lof ior loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("or")
 pat loe lof xor loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("xor")
 
+proc leiuxxsei example loe loi inc loe sti
+kills all_mems
+uses ADDREG={EXTERN,$1}
+gen uxx* {indir_r, %a}
+    killreg %a
+
+pat loe loi ngi loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leiuxxsei("neg")
+pat loe loi com loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leiuxxsei("not")
+pat loe loi dec loe sti $1==$4 && $2==4 && $5==4
+	call leiuxxsei("dec")
+pat loe loi inc loe sti $1==$4 && $2==4 && $5==4
+	call leiuxxsei("inc")
+pat loe loi adp loe sti $1==$4 && $2==4 && $5==4 && $3==1
+	call leiuxxsei("inc")
+pat loe loi adp loe sti $1==$4 && $2==4 && $5==4 && $3==(0-1)
+	call leiuxxsei("dec")
+
+proc leixxxsei example loe loi adi loe sti
+with regorconst
+kills all_mems
+uses ADDREG={EXTERN,$1}
+gen axx* {indir_r, %a}, %1
+    killreg %a
+
+pat loe loi adi loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("add")
+pat loe loi adu loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("add")
+pat loe loi ads loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("add")
+pat loe loi and loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("and")
+pat loe loi ior loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("or")
+pat loe loi xor loe sti $1==$4 && $2==4 && $5==4 && $3==4
+	call leixxxsei("xor")
+
 #ifdef REGVARS
+proc lifuxxsif example lil lof inc lil stf
+kills all_mems
+uses ADDREG={indir_r,regvar($1)}
+gen uxx* {indir_r_off, %a, $2}
+    killreg %a
+
+pat lil lof ngi lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifuxxsif("neg")
+pat lil lof com lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifuxxsif("not")
+pat lil lof dec lil stf $1==$4 && $2==$5 && inreg($1)>0
+	call lifuxxsif("dec")
+pat lil lof inc lil stf $1==$4 && $2==$5 && inreg($1)>0
+	call lifuxxsif("inc")
+pat lil lof adp lil stf $1==$4 && $2==$5 && inreg($1)>0 && $3==1
+	call lifuxxsif("inc")
+pat lil lof adp lil stf $1==$4 && $2==$5 && inreg($1)>0 && $3==(0-1)
+	call lifuxxsif("dec")
+
+proc lifxxxsif example lil lof adi lil stf
+with regorconst
+kills all_mems
+uses ADDREG={indir_r,regvar($1)}
+gen axx* {indir_r_off, %a, $2}, %1
+    killreg %a
+
+pat lil lof adi lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("add")
+pat lil lof adu lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("add")
+pat lil lof ads lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("add")
+pat lil lof and lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("and")
+pat lil lof ior lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("or")
+pat lil lof xor lil stf $1==$4 && $2==$5 && $3==4 && inreg($1)>0
+	call lifxxxsif("xor")
+
+proc liiuxxsii example lil loi inc lil sti
+kills all_mems
+uses ADDREG={indir_r,regvar($1)}
+gen uxx* {indir_r, %a}
+    killreg %a
+
+pat lil loi ngi lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liiuxxsii("neg")
+pat lil loi com lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liiuxxsii("not")
+pat lil loi dec lil sti $1==$4 && $2==4 && $5==4 && inreg($1)>0
+	call liiuxxsii("dec")
+pat lil loi inc lil sti $1==$4 && $2==4 && $5==4 && inreg($1)>0
+	call liiuxxsii("inc")
+pat lil loi adp lil sti $1==$4 && $2==4 && $5==4 && inreg($1)>0 && $3==1
+	call liiuxxsii("inc")
+pat lil loi adp lil sti $1==$4 && $2==4 && $5==4 && inreg($1)>0 && $3==(0-1)
+	call liiuxxsii("dec")
+
+proc liixxxsii example lil loi adi lil sti
+with regorconst
+kills all_mems
+uses ADDREG={indir_r,regvar($1)}
+gen axx* {indir_r, %a}, %1
+    killreg %a
+
+pat lil loi adi lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("add")
+pat lil loi adu lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("add")
+pat lil loi ads lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("add")
+pat lil loi and lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("and")
+pat lil loi ior lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("or")
+pat lil loi xor lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)>0
+	call liixxxsii("xor")
+
 proc lolcrxxstl example lol loc sbi stl
   kills regvar($1)
   gen axx* {LOCAL,$1,4},{ANYCON,$2}
@@ -1600,6 +1721,19 @@ pat loe loc sri ste $1==$4 && $3==4		call loecxxste("sar")
 pat loe loc sru ste $1==$4 && $3==4		call loecxxste("shr")
 
 #ifdef REGVARS
+proc lilcxxsil example lil loc sbi sil
+  kills mem_nonlocals
+  gen axx* {indir_r,regvar($1)},{ANYCON,$2}
+
+pat lil loc sbi sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("sub")
+pat lil loc sbu sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("sub")
+pat lil loc adu sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("add")
+pat lil loc adi sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("add")
+pat lil loc sli sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("sal")
+pat lil loc slu sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("sal")
+pat lil loc sri sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("sar")
+pat lil loc sru sil $1==$4 && $3==4 && inreg($1)>0	call lilcxxsil("shr")
+
 pat lol ngi stl $1==$3 && $2==4 && inreg($1)==reg_any
 kills regvar($1)
 gen neg {LOCAL, $1, 4}
@@ -1672,16 +1806,7 @@ uses REG={indir_r, regvar($1)}
 					leaving lil $1 dec sil $4
 #endif
 
-pat lil adp sil $1==$3 && $2==1		leaving lil $1 inc sil $1
-
-pat lil adp sil $1==$3 && $2==0-1	leaving lil $1 dec sil $1
-
 pat lil adp sil $1==$3			leaving loc $2 lil $1 adi 4 sil $3
-
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
-	leaving lol $1 lof $2 inc lol $4 stf $5
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==(0-1)
-	leaving lol $1 lof $2 dec lol $4 stf $5
 
 #ifdef REGVARS
 pat lol lof lol lof adp lol stf
@@ -1732,14 +1857,10 @@ pat loe com ste $1==$3 && $2==4
 kills mem_nonlocals
 gen not {EXTERN, $1}
 
-pat loe lof adp loe stf $1==$4 && $2==$5 && $3==1
-					leaving loe $1 lof $2 inc loe $1 stf $2
-
-pat loe lof adp loe stf $1==$4 && $2==$5 && $3==0-1
-					leaving loe $1 lof $2 dec loe $1 stf $2
-
 pat loe lof adp loe stf $1==$4 && $2==$5
 				leaving loc $3 loe $1 lof $2 adi 4 loe $1 stf $2
+pat lil lof adp lil stf $1==$4 && $2==$5
+				leaving loc $3 lil $1 lof $2 adi 4 lil $1 stf $2
 
 /*******************************************************************
  *  Group 8: Convert Instructions				   *
