@@ -9,8 +9,8 @@ var NAME=m68k4
 var M=m68k4
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var NLIB=lib/mantra4/tail_
-var NRT=lib/mantra4/head_
+var NLIB=lib/mantra/tail_
+var NRT=lib/mantra/head_
 var CPP_F=-Dunix=unix -Dm68000=m68000
 var INCLUDES=-I{EM}/include/_tail_cc
 # 407 align is the default
