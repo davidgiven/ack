@@ -24,6 +24,7 @@
 /********************************************************
  * Back end tables for Intel 8086			*
  * Author : Ed Keizer					*
+ * Added register variables: Ceriel Jacobs
  *							*
  * wordsize = 2 bytes, pointersize = 2 bytes.		*
  *							*
@@ -2310,8 +2311,6 @@ asp $1==4	| nocoercions : a_word a_word | 	  | | |
 			"pop %[a]" "pop %[a]"
 			erase(%[a]) samecc		  | | | (2,16)
 asp $1==0-2	| |	/* Anything will do */	       | bp | |
-...		| |	remove(ALL)
-			"push lb"			  | | | (1,10)
 asp		| |	remove(ALL)
 			"add sp,$1"			  | | | (4,4)
 ass $1==2	| rmorconst |
