@@ -73,7 +73,8 @@ name m2
 	mapflag -W* M2_F={M2_F?} -W*
 	mapflag -M* M2_F={M2_F?} -M*
 	mapflag -x M2_F={M2_F?} -x
-	mapflag -Xs M2_F={m2_F?} -s
+	mapflag -Xs M2_F={M2_F?} -s
+	mapflag -Xi* M2_F={M2_F?} -i*
 	mapflag -V* M2_F={M2_F?} -V*
 	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
 	-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
