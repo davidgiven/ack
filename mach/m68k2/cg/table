@@ -113,9 +113,9 @@ INDEXED	= {REGISTER reg,ireg;
 ABS		= {STRING addr;}	2 cost=(3,5)  "%[addr]"
 ABS1		= {STRING addr;}	2 cost=(3,5)  "%[addr]"
 IMMEDIATE	= {INT cc;}		2 cost=(1,2) "#%[cc]"
-LOCAL_ADDR	= {INT off;}		4 /* not really addressable */
+LOCAL_ADDR	= {INT off;}		4 cost=(2,6) "%[off](a6)"
 REGOFF_ADDR	= {REGISTER reg;
-		   INT off;}		4 /* not really addressable */
+		   INT off;}		4 cost=(2,6) "%[off](%[reg])"
 EXTERNAL_ADDR	= {STRING off;}		4 cost=(4,4)  "#%[off]"
 INDEX_ADDR	= {REGISTER reg,ireg;
 		   INT di;}		4
@@ -2847,6 +2847,7 @@ MOVES:
 		"move.l %[1],%[2]" setcc(%[2]),(2,2))
 (IMMEDIATE4, ADDREG, "lea %[1.cc],%[2]" nocc, (4,4))
 (EXTERNAL_ADDR, ADDREG, "lea %[1.off],%[2]" nocc, (5,5))
+(LOCAL_ADDR+REGOFF_ADDR, ADDREG, "lea %[1],%[2]" nocc, (5,5))
 (ANY4, DATA_ALT4, "move.l %[1], %[2]"setcc(%[2]),(2,2)+%[1]+%[2])
 (ANY, ADDREG, "move.w %[1], %[2]"samecc,(2,2)+%[1])
 (ANY4,ADDREG, "move.l %[1], %[2]"samecc,(2,2)+%[1])
@@ -2860,8 +2861,7 @@ STACKS:
 (IMMEDIATE %[cc] == 0, , "clr.w -(sp)" setcc(%[1]))
 (ANY, , "move.w %[1],-(sp)" setcc(%[1]), (2,4) + %[1])
 (EXTERNAL_ADDR, , "pea %[1.off]" nocc)
-(LOCAL_ADDR, , "pea %[1.off](a6)" nocc)
-(REGOFF_ADDR, , "pea %[1.off](%[1.reg])" nocc)
+(LOCAL_ADDR+REGOFF_ADDR, , "pea %[1]" nocc)
 (INDEX_ADDR, , "pea %[1.di](%[1.reg],%[1.ireg].w)" nocc)
 (IMMEDIATE4 %[cc] == 0, , "clr.l -(sp)")
 (IMMEDIATE4, , "pea %[1.cc]" nocc)
