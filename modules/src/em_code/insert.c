@@ -9,10 +9,19 @@
    they can be written immediately.
 */
 
+#include <em_path.h>
 #include <alloc.h>
 #include "insert.h"
 
+char		*C_tmpdir = TMP_DIR;
+static Part	*C_stable[TABSIZ];
+
+static char	*C_old_top;
+static char	*C_old_opp;
+
 #ifndef INCORE
+static File	*C_old_ofp;
+
 static int
 getbyte(b)
 	long b;

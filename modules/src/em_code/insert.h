@@ -43,7 +43,7 @@ typedef struct part {
 extern int
 	C_ontmpfile, C_sequential;
 extern Part
-	*C_curr_part, *C_stable[];
+	*C_curr_part;
 #ifdef INCORE
 extern char
 	*C_current_out, *C_BASE;
@@ -59,14 +59,11 @@ extern int (*C_outpart)(), (*C_swtout)(), (*C_swttmp)();
 extern File	*C_ofp;
 
 #ifndef INCORE
-extern File	*C_tfr, *C_old_ofp;
+extern File	*C_tfr;
 extern char	*C_tmpfile;
-extern char	*C_tmpdir;
 #endif
 
 extern char	*C_top;
-extern char	*C_old_top;
-extern char	*C_old_opp;
 extern char	*C_ibuf;
 
 #define put(c)	if (C_opp == C_top) C_flush(); *C_opp++ = (c)

@@ -9,7 +9,6 @@
 	Also contains C_open, C_close
 */
 #include <alloc.h>
-#include <em_path.h>
 #include <em_arith.h>
 #include "insert.h"
 #include "em_private.h"
@@ -17,8 +16,6 @@
 int		C_ontmpfile = 0;
 int		C_sequential = 1;
 Part		*C_curr_part;
-Part		*C_stable[TABSIZ];
-char		*C_tmpdir = TMP_DIR;
 int		(*C_outpart)(), (*C_swtout)(), (*C_swttmp)();
 
 #ifdef INCORE
@@ -28,7 +25,7 @@ char		*C_BASE;
 File		*C_ofp;
 
 #ifndef INCORE
-File		*C_tfr, *C_old_ofp;
+File		*C_tfr;
 char		*C_tmpfile;
 char		*strcpy(), *strcat();
 char		*C_ibuf = 0;
@@ -43,8 +40,6 @@ long		C_current_out;
 
 static char	obuf[BUFFERSIZ];
 char		*C_top = &obuf[BUFFERSIZ];
-char		*C_old_top;
-char		*C_old_opp;
 #ifdef INCORE
 char		*C_current_out = obuf;
 #else
