@@ -2,6 +2,8 @@
 .global dvi4
 .global mathdvi4
 
+EIDIVZ=6
+
 dvi4:
 ! %o0' = %o0 / %o1
 ! %o1' = %o0 % %o1
@@ -167,4 +169,8 @@ mathdvi4:
 	nop
 
 0:					/* divide by zero */
-	ta	2
+	set	EIDIVZ, %o0
+	call	trp
+	nop
+	retl
+	nop
