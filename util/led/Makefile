@@ -14,10 +14,14 @@
 
 #	Definitions for the making programs.
 
-LIBDIR=../../lib
-PREFLAGS= -DNDEBUG -DNASSERT
-CFLAGS	= -O $(PREFLAGS)
-LDFLAGS	=
+M	= /user1/sjoerd/amoeba/libmonix
+X	= /usr/em/lib/l68k2
+CC	= l68k2
+LIBDIR	= ../../lib
+PREFLAGS= -DNDEBUG # -DNASSERT
+CFLAGS	= -L $(PREFLAGS)
+LDFLAGS	= -b0:0x20000 -a0:2 -a1:2 -a2:2 -a3:2 -a4:2 -c.out $M/head.o
+LDLIBS	= $X/tail_cc.1s $X/tail_cc.2g $M/libmonix.a $X/tail_em.rt $X/end_em
 LINTFLAGS=-phbxac $(PREFLAGS)
 PR	= pr
 PRFLAGS	=
@@ -37,7 +41,9 @@ OFILES	= archive.o byte_order.o error.o extract.o finish.o main.o memory.o\
 #	Things that can be made.
 
 led:	$(OFILES)
-	$(CC) $(LDFLAGS) $(OFILES) $(LDLIBS) -o led
+	$(CC) $(LDFLAGS) $(OFILES) $(LDLIBS) -o led.led
+	/user1/sjoerd/amoeba/util/convert led.led led
+	/user1/sjoerd/amoeba/test/load led >/user1/sjoerd/amoeba/test/led.load
 
 mach.c:	mach.c,v
 	co -q mach.c
@@ -78,6 +84,9 @@ depend:
 	done
 	makedepend $(CFILES)
 	rm -f `cat checked.out` checked.out
+
+procentry.o:
+	$(CC) -c -L procentry.c
 
 #	The next lines are generated automatically.
 # AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
