@@ -40,6 +40,7 @@ do_option(text)
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
 		register char *cp = text, *name, *mactext;
+		unsigned maclen;
 
 		if (class(*cp) != STIDF && class(*cp) != STELL)	{
 			error("identifier missing in -D%s", text);
@@ -48,18 +49,20 @@ do_option(text)
 		name = cp;
 		while (*cp && in_idf(*cp))
 			++cp;
-		if (!*cp)			/* -Dname */
-			mactext = "1";
-		else
+		if (!*cp) {			/* -Dname */
+			maclen = 1;
+			mactext = Salloc("1", 2);
+		} else
 		if (*cp == '=')	{		/* -Dname=text	*/
 			*cp++ = '\0';		/* end of name	*/
-			mactext = cp;
+			maclen = strlen(cp);
+			mactext = Salloc(cp, maclen + 1);
 		}
 		else	{			/* -Dname?? */
 			error("malformed option -D%s", text);
 			break;
 		}
-		macro_def(str2idf(name, 0), mactext, -1, strlen(mactext), NOFLAG);
+		macro_def(str2idf(name, 0), mactext, -1, maclen, NOFLAG);
 		break;
 	}
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
