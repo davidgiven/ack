@@ -1,0 +1,15 @@
+
+wordsize: 2
+pointersize: 2
+%%UD
+access costs of global variables:
+	(1 size)
+	default ->	(4,2)
+access costs of local variables:
+	(1 size)
+	default ->	(4,2)
+%%SR
+overflow harmful?:  no
+array bound harmful?:  no
+%%SP
+global stack pollution allowed?: yes
