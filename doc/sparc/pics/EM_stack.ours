@@ -1,0 +1,106 @@
+.ps 10
+.vs 12
+.PS
+boxwid = 1.3
+boxht = 0.25
+down;
+box "floating point" "register dump area" ht 0.6
+box "tmp float store"
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%fp" }
+move .1
+box dotted "gap"
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%LB" }
+move .1
+box "locals"
+box "actual parameter n-1";
+box "." "." "." ht 0.6;
+box "actual parameter 0";
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%SP" }
+move 0.1
+box "large gap" "(>64kb)" ht 1.0
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%sp" }
+move 0.2
+box invis "\\s+2just before call\\s0"
+move 1
+box dotted "gap"
+box invis "0 or 4 bytes" "for stack alignment" with .w at last box.e
+box invis height .7 "when gap is 0 bytes," "%fp == %LB" with .n at 2nd last box.s
+.PF
+.PS
+down;
+move to 2.4,0
+box "floating point" "register dump area" ht 0.6
+box "tmp float store"
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%fp" }
+move .1
+box dotted "gap"
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%LB" }
+move .1
+box "locals"
+box "actual parameter n-1";
+box "." "." "." ht 0.6;
+box "actual parameter 0";
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%SP" }
+move .1
+box dotted "gap"
+move .4
+box "floating point" "register dump area" ht 0.6
+box "tmp float store"
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%sp" }
+move 0.2
+box invis "\\s+2'during' call\\s0"
+.PF
+.PS
+down;
+move to 4.8,0
+box "floating point" "register dump area" ht 0.6
+box "tmp float store"
+box "register dump area" ht 0.6
+move .1
+box dotted "gap"
+move .1
+box "locals"
+box "actual parameter n-1";
+box "." "." "." ht 0.6;
+box "actual parameter 0";
+move .1
+box dotted "gap"
+move .4
+box "floating point" "register dump area" ht 0.6
+box "tmp float store"
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%fp" }
+move .1
+box dotted "gap"
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%LB" }
+move .1
+box "locals"
+box "actual parameter n-1";
+box "." "." "." ht 0.6;
+box "actual parameter 0";
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "%SP" }
+move 0.1
+box "large gap" "(>64kb)" ht 1.0
+box "register dump area" ht 0.6
+{ arrow <- right with .w at 3/4 <last box.e, last box.se>; \
+box invis wid 0.3 "%sp" }
+move 0.2
+box invis "\\s+2after call\\s0"
+.PF
+.ps 12
+.vs 14

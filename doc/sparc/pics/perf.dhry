@@ -1,0 +1,7 @@
+in-line in ../A
+
+3.5 1700 ack w/o opt
+2.8 8770 ack with opt
+16.0 10434 ack -O4
+2.3 7270 \fIcc\fR
+9.0 12500 \fIcc -O4\fR

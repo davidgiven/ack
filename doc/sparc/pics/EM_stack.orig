@@ -1,0 +1,34 @@
+.PS
+.ps -2
+.vs -2
+boxwid = 1.5;
+boxht = 0.24
+down;
+box "actual parameter n-1";
+box "." "." "." ht 0.6;
+box "actual parameter 0";
+move 0.3
+box "return status block";
+{arrow <- right with .w at last box.e; \
+box invis wid 0.3 "LB" }
+down
+move to 2nd last box.s
+move 0.1
+box "local variables"
+box "compiler temporaries"
+move 0.1
+box "register save block"
+move 0.1
+box "dynamic local generators"
+move 0.1
+box "operand"
+box "operand"
+move 0.1
+box "parameter m-1"
+box "." "." "." ht 0.6;
+box "parameter 0" with .n at last box .s
+{ arrow <- right with .w at last box.e; \
+box invis wid 0.3 "SP" }
+.ps +2
+.vs +2
+.PE

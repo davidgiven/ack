@@ -1,0 +1,15 @@
+.so init
+.TL
+.sp 1.2c
+A fast backend for SPARC processors
+.AU
+Philip Homburg
+Raymond Michiels
+.AI
+Dept. of Mathematics and Computer Science
+Vrije Universiteit
+Amsterdam, The Netherlands
+.PP
+.sp 1i
+Afstudeerverslag, 20 augustus 1990
+.bp

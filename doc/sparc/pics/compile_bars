@@ -1,0 +1,49 @@
+.PS
+boxht = 0.5
+boxwid = 1
+moveht = 0.65
+down;
+{
+right;
+box invis "ACK" "w/o" "opt"
+box "cem" "0.7" wid 0.7
+box "opt" "0.4" wid 0.4
+box "be" "1.1" wid 1.1
+box "as" "1.4" wid 1.4
+box "ld" "0.4" wid 0.4
+box invis "4.0" wid 0.5
+}
+move
+{
+right;
+box invis "ACK" "with" "opt"
+box "cem" "0.7" wid 0.7
+box "opt" "0.4" wid 0.4
+box "be" "0.6" wid 0.6
+box "as" "0.7" wid 0.7
+box "ld" "0.4" wid 0.4
+box invis "2.8" wid 0.5
+}
+move
+{
+right;
+box invis "\fIcc\fR"
+box "cpp" "0.2" wid 0.2
+box "ccom" "1.0" wid 1.0
+box "as" "0.7" wid 0.7
+box "ld" "0.4" wid 0.4
+box invis "2.3" wid 0.5
+}
+move
+{
+right;
+box invis "\fIcc -O4\fR"
+box "cpp" "0.2" wid 0.2
+box "ccom" "1.0" wid 1.0
+box "iropt" "5.0 (not to scale!)" wid 1.5
+box "cg" "0.7" wid 0.7
+box "as" "1.7" wid 1.7
+box "ld" "0.4" wid 0.4
+box invis "9.0" wid 0.5
+}
+.PE

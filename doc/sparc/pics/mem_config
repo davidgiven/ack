@@ -1,0 +1,34 @@
+.PS
+boxwid = 1.3
+down
+[
+right
+[
+down;
+box "stack" ht .6
+box "free" ht 1
+box "heap" ht .3
+box "text" ht .5
+]
+move 1
+[
+down;
+box "\s-4SPARC stack\s+4" ht .2
+box "\s-4EM stack\s+4" ht .1
+box "\s-4SPARC stack\s+4" ht .1
+box "\s-4EM stack\s+4" ht .1
+box "\s-4free\s+4" ht .2
+box "\s-4SPARC stack\s+4" ht .1
+box "free" ht .8
+box "heap" ht .3
+box "text" ht .5
+]
+]
+move .3
+[
+right
+box invis "regular \(UX memory layout"
+move 1
+box invis "memory layout for EM"
+]
+.PF

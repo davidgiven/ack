@@ -1,0 +1,468 @@
+.so init
+.hw data-structures
+.nr H1 3
+.NH
+SOLUTIONS
+.NH 2
+Maintaining SPARC speed
+.PP
+In chapter 3 we wrote:
+.sp 0.3
+.nf
+>If we want to generate efficient code, we should at least try to reduce the number of
+>memory references and use registers wherever we can.
+.fi
+.sp 0.3
+In this chapter we will device a strategy to swiftly generate acceptable
+code by using push-pop optimization.
+Note that this is not the push-pop
+optimization already available in the EM-kit, since that is only present
+in the assembler-to-binary part which we do not use
+.[ [
+The Code Expander Generator
+.]].
+Our push-pop optimization
+works more like the fake-stack described in
+.[ [
+The table driven code generator
+.]].
+.NH 3
+Ad-hoc optimization
+.PP
+Before getting involved in any optimization let's have a look at some
+code generated with a straightforward EM to SPARC conversion of the
+C statement: \*(Sif(a[i]);\*(So Note that \*(Si%SP\*(So is an alias
+for a general purpose
+register and acts as the EM stack pointer. It has nothing to do with
+\*(Si%sp\*(So \(em the SPARC stack pointer.
+Analogous \*(Si%LB\*(So is EMs local base pointer.
+.br
+.IP
+.HS
+.TS
+;
+l s l s l
+l1f6 lf6 l2f6 lf6 l.
+EM code	SPARC code	Comment
+
+lae	_a	set	_a, %g1	! load address of external _a
+		dec	4, %SP
+		st	%g1, [%SP]
+
+lol	-4	set	-4, %g1	! load local -4 (i)
+		ld	[%g1+%LB], %g2
+		dec	4, %SP
+		st	%g2, [%SP]
+
+loc	2	set	2, %g1	! load constant 2
+		dec	4, %SP
+		st	%g1, [%SP]
+
+sli	4	ld	[%SP], %g1	! pop shift count
+		ld	[%SP+4], %g2	! pop shiftee
+		sll	%g2, %g1, %g3
+		inc	4, %SP
+		st	%g3, [%SP]	! push 4 * i
+
+ads	4	ld	[%SP], %g1	! add pointer and offset
+		ld	[%SP+4], %g2
+		add	%g1, %g2, %g3
+		inc	4, %SP
+		st	%g3, [%SP]	! push address of _a + (4 * i)
+
+loi	4	ld	[%SP], %g1	! load indirect 4 bytes
+		ld	[%g1], %g2
+		st	%g2, [%SP]	! push a[i]
+cal	_f
+		...
+.TE
+.HS
+.LP
+Although the code is easy understand, it clearly is far from optimal.
+The above code uses approximately 60 clock-cycles\(dg
+.FS
+\(dg In general each instruction only takes one cycle,
+except for \*(Sild\*(So and
+\*(Sist\*(So which may both require additional clock cycles. The exact amount
+of extra cycles needed depends on the SPARC implementation and memory access
+time. Furthermore, the
+\*(Siset\*(So pseudo-instruction is a bit tricky. It takes one cycle when
+its argument lies between -4096 and 4095, and two cycles otherwise.
+.FE
+to push an array-element on the stack,
+something which a 68020 can do in a single instruction. The SPARC
+processor may be fast, but not fast enough to justify the above code.
+.PP
+The same statement can be translated much more efficiently:
+.DS
+.TS
+;
+l2f6 lf6 l.
+sll	%i0, 2, %g2	! multiply index by 4
+set	_a, g3
+ld	[%g2+%g3], %g1	! get contents of a[i]
+dec	4, SP
+st	%g2, [SP]	! push a[i] onto the stack
+.TE
+.DE
+which, instead of 60, uses only 5 clock cycles to retrieve the element
+from memory and 5 additional cycles when the result has to be pushed
+on the stack. Note that when the result is not a parameter it does not
+have to be pushed on the stack. By making efficient use of the SPARC
+registers we can fetch \*(Sia[i]\*(So in only 5 cycles!
+.NH 3
+Analyzing optimization
+.PP
+Instead of ad-hoc optimization we will need something more solid.
+When one tries to optimize the above code in an ad-hoc manner one will
+probably notice the large overhead due to stack access. Almost every EM
+instruction requires at least three SPARC instructions: one to carry out
+the EM instruction and two to pop and push the result from and onto the
+stack. This happens for every instruction, even though the data being pushed
+will probably be needed by the next instruction. To optimize this extensive
+pushing and popping of data we will use the appropriately named push-pop
+optimization.
+.PP
+The idea behind push-pop optimization is to delay the push operation until
+it is almost certain that the data actually has to be pushed.
+As is often the case, the data does not have to be pushed,
+but will be used as input to another EM instruction.
+If we can decide at compile time that this will indeed be
+the case we can save the time of first pushing the data and then popping it
+back again by temporarily storing the data (possibly only during compilation!)
+and using it no sooner than it is actually needed.
+.PP
+The \*(Sisli 4\*(So instruction, for instance, expects two inputs on top of the
+stack: on top a counter and right below that the shiftee (the number
+to be shifted). As a result \*(Sisli\*(So
+pushes 'shiftee << counter' back to the stack. Now consider the following
+sequence, which could be the result of the expression \*(Si4 * i\*(So
+.DS
+.TS
+;
+l1f6 lf6 l.
+lol	-4
+loc	2
+sli	4
+.TE
+.DE
+In the non-optimized situation the \*(Silol\*(So would push
+a local variable (whose offset is -4) on the stack.
+Then the \*(Siloc\*(So pushes a 2 on the stack and finally \*(Sisli\*(So
+retrieves both these numbers to replace then with the result.
+On most machines it is not necessary to
+push the 2 on the stack, since it can be used in the shift instruction
+as an immediately operand. On a SPARC, for instance, one can write
+.DS
+.TS
+;
+l2f6 lf6 l.
+ld	[%LB-4], %g1	! load local variable into register g1
+sll	%g1, 2, %g2	! perform the shift-left-by-2
+.TE
+.DE
+where the output of the \*(Silol\*(So, as well as the immediate operand 2 are used
+in the shift instruction. As suggested before, all of this can be
+achieved with push-pop optimization.
+.NH 3
+A mechanism for push-pop optimization
+.PP
+To implement the above optimization we need some mechanism to
+temporarily store information during compilation.
+We need to be able to store, compare and retrieve information from the
+temporary storage (cache) without any
+loss of information. Before describing all the routines used
+to implement our cache we will first describe how the cache works.
+.PP
+Items in the cache are structures containing an external (\*(Sichar *\*(So),
+two registers (\*(Sireg_t\*(So) and a constant (\*(Siarith\*(So),
+any of which may be 0.
+The value of such a structure is the sum of (the values of)
+its elements. To put a register in the cache, one has to be allocated either
+by calling \*(Sialloc_reg\*(So which returns a free register, by
+\*(Siforced_alloc_reg\*(So which allocates a specific register or any
+of the other routines available to allocate a register. The keep things
+simple, we will not discuss all of the available primitives here.
+When the register
+is then put in the cache by the \*(Sipush_reg\*(So routine, the ownership will
+be transferred from the user to the cache. Ownership is important, because
+only the owner of a register may (and must!) deallocate it. Registers can be
+owned by either an (imaginary) register manager, the cache or the user.
+When the user retrieves a register from the stack with \*(Sipop_reg\*(So for
+instance, ownership is back to the user.
+The user should then call \*(Sifree_reg\*(So
+to transfer ownership to the register manager or call \*(Sipush_reg\*(So
+to give it back to the cache.
+Since the cache behaves itself as a stack we will use the term pop resp. push
+to get items from, resp. put items in the cache.
+.PP
+We shall now present the sets of routines that implement the cache.
+.IP \(bu
+The routines
+.DS
+\*(Si
+reg_t alloc_reg(void)
+reg_t alloc_reg_var(void)
+reg_t alloc_float(void)
+reg_t alloc_float_var(void)
+reg_t alloc_double(void)
+reg_t alloc_double_var(void)
+
+void forced_alloc_reg(reg_t)
+void soft_alloc_reg(reg_t)
+
+void free_reg(reg_t)
+void free_double_reg(reg_t)
+\*(So
+.DE
+allocate and deallocate registers. If there are no more register left,
+i.e. they are owned by the cache,
+one or more registers will be freed by flushing part of the cache
+onto the real stack.
+The \*(Sialloc_xxx_var\*(So primitives try to allocate a register that
+can be used to store local variables. (In the current implementation
+only the input and local registers.) If none can be found \*(SiNULL\*(So
+is returned. \*(Siforced_alloc_reg\*(So forces the allocation of a certain
+register. If it was already in use, its contents are moved to another
+register. Finally \*(Sisoft_alloc_reg\*(So provides the possibility to
+push a register onto the cache and still keep a copy for later use.
+(Used to implement the \*(Sidup 4\*(So for example.)
+.IP \(bu
+The routines
+.DS
+\*(Si
+void push_const(arith)
+arith pop_const(void)
+\*(So
+.DE
+push or pop a constant onto or from the stack. Distinction between
+constants and other types is made so as not to loose any information; constants
+may be used later on as immediate operators, which is not the case
+for other types. If \*(Sipop_const\*(So is called, but the element on top of
+the cache has either one of the external or register fields non-zero a
+fatal error will be reported.
+.IP \(bu
+The routines
+.DS
+\*(Si
+reg_t pop_reg(void)
+reg_t pop_float(void)
+reg_t pop_double(void)
+reg_t pop_reg_c13(char *n)
+
+void pop_reg_as(reg_t)
+
+void push_reg(reg_t)
+\*(So
+.DE
+push or pop a register. These will be used most often since results from one
+EM instruction, which are computed in a register, are often used in the next.
+When the element on top of the cache is more
+than just a register the cache manager
+will generate code to compute the sum of its fields and put the result in a
+register. This register will then be given to the user.
+If the user wants the result is a special register, he should use the
+\*(Sipop_reg_as\*(So routine.
+The \*(Sipop_reg_c13\*(So gives an optional number (as character string) whose
+value can be represented in 13 bits. The constant can then be used as an
+offset for the SPARC \*(Sild\*(So and \*(Sist\*(So instructions.
+.IP \(bu
+The routine
+.DS
+\*(Si
+void push_ext(char *)
+\*(So
+.DE
+pushes an external onto the stack. There is no pop-variant of this one since
+there is no use in popping an external.
+.IP \(bu
+The routines
+.DS
+\*(Si
+void inc_tos(arith n)
+void inc_tos_reg(reg_t r)
+\*(So
+.DE
+increment the element on top of the cache by either the constant \*(Sin\*(So
+or by a register. The latter is useful for pointer addition when referencing
+external memory.
+.KS
+.IP \(bu
+The routine
+.DS
+\*(Si
+int type_of_tos(void)
+\*(So
+.DE
+.KE
+returns the type of the element on top of the cache. This is a combination
+(binary OR) of \*(SiT_ext\*(So, \*(SiT_reg\*(So or \*(SiT_float\*(So,
+\*(SiT_reg2\*(So or \*(SiT_float2\*(So, and \*(SiT_cst\*(So,
+and tells the
+user which of the three fields are non-zero. When the register-fields
+represent \*(Si%g0\*(So, it is considered zero.
+.IP \(bu
+Miscellaneous routines:
+.DS
+\*(Si
+void init_cache(void)
+void cache_need(int)
+void change_reg(void)
+void flush_cache(void)
+\*(So
+.DE
+\*(Siinit_cache\*(So should be called before any
+other cache routines, to initialize some internal datastructures.
+\*(Sicache_need\*(So is used to tell the cache that a certain number
+of register are needed for the next operation. This way the cache can
+load them efficiently in one fell swoop. \*(Sichange_reg\*(So is to be
+called when the user changes a register of which the cache (possibly) has
+co-ownership. Because the contents of registers in the cache are
+not allowed to change the user should call \*(Sichange_reg\*(So to
+instruct the cache to copy the contents to some other register.
+\*(Siflush_cache\*(So writes the cache to the stack and invalidates
+the cache. It should be used before branches,
+before labels and on other places where the stack has to be valid (i.e. where
+every item on the EM-stack should be stored on the real stack, not in some
+virtual cache).
+.NH 3
+Implementing push-pop optimization in the EM_table
+.PP
+As indicated above, there is no regular way to represent the described
+optimization in the EM_table. The only possible escapes from the EM_table
+are function calls, but that is clearly not enough to implement a good
+push-pop optimizer. Therefore we will use a modified version of the EM_table
+format, where the description of, say, the \*(Silol\*(So instruction might look
+like this\(dg:
+.FS
+\(dg This is not the way the \*(Silol\*(So actually looks in the EM_table;
+it only shows how it \fImight\fR look using the forementioned push/pop
+primitives.
+.FE
+.DS
+\*(Si
+reg_t A, B;
+const_str_t n;
+
+alloc_reg(A);
+push_reg(LB);
+inc_tos($1);
+B = pop_reg_c13(n);
+"ld  [$B+$n], $A";
+push_reg(A);
+free_reg(B);
+\*(So
+.DE
+For more details about the exact implementation consult
+appendix B which contains some characteristic excerpts from the EM_table.
+.NH 2
+Stack management
+.PP
+When converting EM code to some executable code there is the problem of
+maintaining multiple stacks. The usual way to do this is described in
+.[ [
+Description of a Machine Architecture
+.]]
+and is shown in figure \*(SN1.
+.KE
+.PS
+copy "pics/EM_stack.orig"
+.PE
+.ce 1
+\fIFigure \*(SN1: usual stack management.
+.KE
+.sp
+.LP
+This means that the EM stack and the hardware stack (used
+for subroutine calls, etc.) are interleaved in memory. On the SPARC, however,
+this brings up a large problem: in the former model it is assumed that the
+resolution of the stack pointer is a word, but this is not the case on the
+SPARC processor. On the SPARC processor the stack-pointer as well as the
+frame-pointer have to be aligned on 8-byte boundaries, so one can not simply
+push a word on the stack and then lower the stack-pointer by 4 bytes!
+.NH 3
+Possible solutions
+.PP
+A simple idea might be to use a swiss-cheese stack; we could
+push a 4-byte word onto the stack and then lower the stack by 8.
+Unfortunately, this is not a very solid solution, because
+pointer-arithmetic involving pointers to objects on the stack would cause
+hard-to-predict anomalies.
+.PP
+Another try would be not to use the hardware stack at all. As long as we
+do not generate subroutine-calls everything will be all right. This
+approach, however, also has some disadvantages: first we would not be able
+to use any of the existing debuggers such as \fIadb\fR, because they all
+assume a regular stack format. Secondly, we would not be able to make use
+of the SPARC's register windows to keep local variables. Finally, doing all the
+administrative work necessary for subroutine calls ourselves instead of
+letting the hardware handle it for us,
+causes unnecessary procedure-call overhead.
+.PP
+Yet another alternative would be to emulate the EM-part of the stack,
+and to let the hardware handle the subroutine call. Since we will
+emulate our own stack, there are no alignment restrictions and because
+we will use the hardware procedure call we can still make use of
+the register windows.
+.NH 3
+Our implementation
+.PP
+To implement the hybrid stack we need two extra registers: one for the
+the EM stack pointer (the forementioned \*(Si%SP\*(So) and one for the
+EM local base pointer (\*(Si%LB\*(So). The most elegant solution would be to
+put both stacks in different segments, so they would not influence
+each other. Unfortunately
+.UX
+lacks the ability to add segments and
+since we will implement our backend under
+.UX,
+we will have to put
+both stacks in the same segment. Exactly how this can be done is shown
+in figure \*(SN2.
+.DS
+.PS
+copy "pics/mem_config"
+.PE
+.ce 1
+\fIFigure \*(SN2: our stack management.\fR
+.DE
+.sp
+During normal procedure execution, the SPARC stack pointer has to point to
+a memory location where the operating system can dump the active part of
+the register window. The rest of the
+register window will be dumped in the therefor pre-allocated (stack) space
+by following the frame
+pointer. When a signal occurs things get even more complicated and
+result in figure \*(SN3.
+.DS
+.PS
+copy "pics/signal_stack"
+.PE
+.ce 1
+\fIFigure \*(SN3: our signal stack.\fR
+.DE
+.PP
+The exact implementation of the stack is shown in figure \*(SN4.
+.KF
+.PS
+copy "pics/EM_stack.ours"
+.PE
+.ce 1
+\fIFigure \*(SN4: stack overview.\fR
+.KE
+.NH 2
+Miscellaneous
+.PP
+As mentioned in the previous chapter, the generated \fI.o\fR-files are
+not compatible with Sun's own object format. The primary reason for
+this is that Sun usually passes the first six parameters of a procedure call
+through registers. If we were to do that too, we would always have
+to fetch the top six words from the stack into registers, even when
+the procedure would not have any parameters at all. Apart from this,
+structure-passing is another exception in Sun's object format which
+makes is impossible to generate object-compatible code.\(dg
+.FS
+\(dg Exactly how Sun passes structures as parameters is described in
+Appendix D of the SPARC Architecture Manual (Software Considerations)
+.FE
+.bp

@@ -1,0 +1,12 @@
+EM_stack.orig
+EM_stack.ours
+compile_bars
+mem_config
+perf
+perf.comp
+perf.d
+perf.dhry
+reg_layout
+run-time_bars
+run-time_bars.bup
+signal_stack
