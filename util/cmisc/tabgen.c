@@ -296,7 +296,6 @@ quoted(pstr)
 	}
 	else	{
 		switch (*str++)	{
-
 		case 'n':
 			ch = '\n';
 			break;
@@ -312,8 +311,12 @@ quoted(pstr)
 		case 'f':
 			ch = '\f';
 			break;
+		case 'v':
+			ch = '\v';
+			break;
 		default :
-			ch = *str;
+			ch = *(str - 1);
+			break;
 		}
 	}
 	*pstr = str;
