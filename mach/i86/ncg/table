@@ -2578,6 +2578,31 @@ uses REG = {ANYCON, 0}
       inc %a
       1:			yields %a
 
+pat loc ldc cms zeq $3==4 && $1==0 && loww($2)==0 && highw($2)==0
+with REG STACK
+  gen test %1
+      je {label,$4}
+
+pat loc ldc cms zne $3==4 && $1==0 && loww($2)==0 && highw($2)==0
+with REG STACK
+  gen test %1
+      jne {label,$4}
+
+pat loc ldc cms teq $3==4 && $1==0 && loww($2)==0 && highw($2)==0
+with REG
+uses REG = {ANYCON, 0}
+  gen test %1
+      jne {label,1f}
+      inc %a
+      1:			yields %a
+
+pat loc ldc cms tne $3==4 && $1==0 && loww($2)==0 && highw($2)==0
+with REG
+  gen test %1
+      je {label,1f}
+      mov %1,{ANYCON,1}
+      1:			yields %1
+
 pat ldc cms zeq $2==4 && loww($1)==0 && highw($1)==0
 with rmorconst REG STACK
   gen or %2,%1
