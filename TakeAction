@@ -1,8 +1,8 @@
 case $# in
-0)	PAR=install ; CMD=Action ;;
+0)	PAR='make install && make clean' ; CMD=Action ;;
 1)	PAR="$1" ; CMD=Action ;;
 2)	PAR="$1" ; CMD="$2" ;;
-*)	echo Syntax: "$0" [param [file]] ; exit 1 ;;
+*)	echo Syntax: "$0" [command [file]] ; exit 1 ;;
 esac
 if test -r "$CMD"
 then :
@@ -21,7 +21,7 @@ do
 	case x"$1" in
 	x!*)	;;
 	xname)		SYS="$2"
-			ACTION='make $PAR'
+			ACTION='$PAR'
 			DIR=.
 			FM=no
 			FAIL='Failed for $SYS, see $DIR/Out'
@@ -72,7 +72,12 @@ do
 					     else RETC=2 ; eval echo $FAIL
 					     fi ;;
 				     *)
-					     if eval "$ACTION >Out 2>&1 </dev/null"
+					     case "$ACTION" in
+					     '$PAR')	ACTION="$PAR"
+							;;
+					     *)		;;
+					     esac
+					     if eval "{ $ACTION ; } >Out 2>&1 </dev/null"
 					     then eval echo $SUCC
 					     else RETC=1 ; X=: ; eval echo $FAIL
 					     fi
