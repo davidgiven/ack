@@ -14,11 +14,16 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .B File *filep;
 .B char *format;
 .PP
-.B sprint(s, format [, arg] ... )
+.B char *sprint(s, format [, arg] ... )
 .B char *s, *format;
 .PP
 .B doprnt(filep, format, args)
 .B File *filep;
+.B char *format;
+.B va_list args;
+.PP
+.B int _format(buf, format, args)
+.B char *buf;
 .B char *format;
 .B va_list args;
 .fi
@@ -90,6 +95,12 @@ Padding takes place only if the specified field width exceeds the actual width.
 The printing routines build the string to be printed internally and use
 .I sys_write
 to print it.
+.PP
+The
+.I _format
+routine builds the string, but does not null-terminate it. It returns the
+length of the string.
+.PP
 .I Doprnt
 takes
 .I args

@@ -8,7 +8,13 @@
 #include <system.h>
 #include "param.h"
 
-/*VARARGS*/
+/*FORMAT0v $
+	%s = char *
+	%l = long
+	%c = int
+	%[uxbo] = unsigned int
+	%d = int
+$ */
 print(va_alist)
 	va_dcl
 {

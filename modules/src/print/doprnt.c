@@ -8,6 +8,13 @@
 #include <varargs.h>
 #include "param.h"
 
+/*FORMAT1 $
+	%s = char *
+	%l = long
+	%c = int
+	%[uxbo] = unsigned int
+	%d = int
+$ */
 doprnt(fp, fmt, argp)
 	File *fp;
 	char *fmt;

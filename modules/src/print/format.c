@@ -6,7 +6,7 @@
 
 #include <varargs.h>
 
-char *long2str();
+extern char *long2str();
 
 static int
 integral(c)
@@ -26,6 +26,13 @@ integral(c)
 	return 0;
 }
 
+/*FORMAT1 $
+	%s = char *
+	%l = long
+	%c = int
+	%[uxbo] = unsigned int
+	%d = int
+$ */
 int
 _format(buf, fmt, argp)
 	char *buf, *fmt;
