@@ -196,8 +196,8 @@ fcnsize()
 	/* generate portable function size */
 	int	i;
 	for(i=0;i<fcn->dimensions;i++)
-		fprintf(tmpfile,"%s+",typesize(fcn->dimlimit[i]));
-	fprintf(tmpfile,"0\n"); emlinecount++;
+		fprintf(Tmpfile,"%s+",typesize(fcn->dimlimit[i]));
+	fprintf(Tmpfile,"0\n"); emlinecount++;
 }
 endscope(type)
 int type;
@@ -208,7 +208,7 @@ int type;
 	conversion(type,fcn->symtype);
 	emcode("ret", typestring(fcn->symtype));
 	/* generate portable EM code */
-	fprintf(tmpfile," end ");
+	fprintf(Tmpfile," end ");
 	fcnsize();
 	s= firstsym;
 	while(s)
@@ -267,9 +267,9 @@ int parmcount;
 		error("not enough parameters");
 	if( parmcount >fcn->dimensions)
 		error("too many parameters");
-	fprintf(tmpfile," cal $_%s\n",fcn->symname);
+	fprintf(Tmpfile," cal $_%s\n",fcn->symname);
 	emlinecount++;
-	fprintf(tmpfile," asp ");
+	fprintf(Tmpfile," asp ");
 	fcnsize();
 	emcode("lfr",typestring(fcn->symtype));
 	type= fcn->symtype;

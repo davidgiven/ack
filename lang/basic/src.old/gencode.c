@@ -36,23 +36,23 @@ int blk1,blk2;
 {
 	/* exchange assembler blocks */
 	if(debug) printf("exchange %d %d %d\n",blk1,blk2,emlinecount);
-	fprintf(tmpfile," exc %d,%d\n",blk2-blk1,emlinecount-blk2);
+	fprintf(Tmpfile," exc %d,%d\n",blk2-blk1,emlinecount-blk2);
 	emlinecount++;
 }
 
-/* routines to manipulate the tmpfile */
+/* routines to manipulate the Tmpfile */
 int	emlinecount;		/* count number of lines generated */
 				/* this value can be used to generate EXC */
 int tronoff=0;
 newemblock(nr)
 int nr;
 {
-	/* save location on tmpfile */
-	currline->offset= ftell(tmpfile);
-	fprintf(tmpfile,"%d\n",currline->emlabel);
+	/* save location on Tmpfile */
+	currline->offset= ftell(Tmpfile);
+	fprintf(Tmpfile,"%d\n",currline->emlabel);
 	emlinecount++;
 	if (! nolins) {
-		fprintf(tmpfile," lin %d\n",nr);
+		fprintf(Tmpfile," lin %d\n",nr);
 		emlinecount++;
 	}
 	if( tronoff || traceflag) {
@@ -65,7 +65,7 @@ int nr;
 emcode(operation,params)
 char *operation,*params;
 {
-	fprintf(tmpfile," %s %s\n",operation,params);
+	fprintf(Tmpfile," %s %s\n",operation,params);
 	emlinecount++;
 }
 /* Handle data statements */
@@ -304,13 +304,13 @@ int elselab;
 
 	nr=genlabel();
 	emcode("bra",instrlabel(nr));
-	fprintf(tmpfile,"%d\n",elselab);
+	fprintf(Tmpfile,"%d\n",elselab);
 	emlinecount++;
 	return(nr);
 }
 elsepart(lab)int lab;
 {
-	fprintf(tmpfile,"%d\n",lab); emlinecount++;
+	fprintf(Tmpfile,"%d\n",lab); emlinecount++;
 }
 /* generate code for the for-statement */
 #define MAXFORDEPTH 20
@@ -425,7 +425,7 @@ int type;
 	emcode("sti",typestring(result));
 	emcode("bra",instrlabel(f->fortst)); 
 	/* increment loop variable */
-	fprintf(tmpfile,"%d\n",f->forinc);
+	fprintf(Tmpfile,"%d\n",f->forinc);
 	emlinecount++;
 	emcode("lae",datalabel(varaddress));
 	loadvar(result);
@@ -437,7 +437,7 @@ int type;
 	emcode("lae",datalabel(varaddress));
 	emcode("sti",typestring(result));
 	/* test boundary */
-	fprintf(tmpfile,"%d\n",f->fortst);
+	fprintf(Tmpfile,"%d\n",f->fortst);
 	emlinecount++;
 	emcode("lae",datalabel(varaddress));
 	loadvar(result);
@@ -457,7 +457,7 @@ Symbol *s;
 	else{
 		/* address of variable is on top of stack ! */
 		emcode("bra",instrlabel(fortable[forcnt].forinc));
-		fprintf(tmpfile,"%d\n",fortable[forcnt].forout);
+		fprintf(Tmpfile,"%d\n",fortable[forcnt].forout);
 		forcnt--;
 	}
 }
@@ -486,7 +486,7 @@ whilestart()
 	newblock(-1);
 	whilelabels[whilecnt][0]= currline->emlabel;
 	whilelabels[whilecnt][1]= genlabel();
-	fprintf(tmpfile,"%d\n", whilelabels[whilecnt][0]);
+	fprintf(Tmpfile,"%d\n", whilelabels[whilecnt][0]);
 	emlinecount++;
 }
 whiletst(exprtype)
@@ -494,7 +494,7 @@ int exprtype;
 {
 	/* test expression type */
 	conversion(exprtype,INTTYPE);
-	fprintf(tmpfile," zeq *%d\n",whilelabels[whilecnt][1]);
+	fprintf(Tmpfile," zeq *%d\n",whilelabels[whilecnt][1]);
 	emlinecount++;
 }
 wend()
@@ -502,8 +502,8 @@ wend()
 	if( whilecnt<1)
 		error("not part of while statement");
 	else{
-		fprintf(tmpfile," bra *%d\n",whilelabels[whilecnt][0]);
-		fprintf(tmpfile,"%d\n",whilelabels[whilecnt][1]);
+		fprintf(Tmpfile," bra *%d\n",whilelabels[whilecnt][0]);
+		fprintf(Tmpfile,"%d\n",whilelabels[whilecnt][1]);
 		emlinecount++;
 		emlinecount++;
 		whilecnt--;

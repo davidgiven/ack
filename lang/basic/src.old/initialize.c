@@ -8,7 +8,7 @@ static char rcs_id[] = "$Header$" ;
 /* generate temporary files etc */
 
 FILE	*emfile;
-FILE	*tmpfile;
+FILE	*Tmpfile;
 FILE	*datfile;
 
 initialize()
@@ -35,8 +35,8 @@ initialize()
 	strcat(datfname,".d");
 	yyin= fopen(inpfile,"r");
 	emfile= fopen(outfile,"w");
-	tmpfile= fopen(tmpfname,"w");
-	if( yyin==NULL || emfile== NULL || tmpfile== NULL )
+	Tmpfile= fopen(tmpfname,"w");
+	if( yyin==NULL || emfile== NULL || Tmpfile== NULL )
 		fatal("Improper file permissions");
 	fillkex();	/* initialize symbol table */
 	fprintf(emfile,"#\n");

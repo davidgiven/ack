@@ -78,8 +78,8 @@ int	nr;
 	/*NOSTRICT*/ l= (Linerecord *) salloc(sizeof(*l));
 	l->emlabel= frwrd? frwrd->emlabel: genlabel();
 	l->linenr= nr;
-	/* save offset into tmpfile too */
-	l->offset = (long) ftell(tmpfile);
+	/* save offset into Tmpfile too */
+	l->offset = (long) ftell(Tmpfile);
 	l->codelines= emlinecount;
 
 	/* insert this record */
@@ -163,7 +163,7 @@ int lab;
 	emcode("cal","$_gosub");	/* administer legal return */
 	emcode("asp",EMINTSIZE);
 	emcode("bra",instrlabel(nr));
-	fprintf(tmpfile,"%d\n",l->emlabel);
+	fprintf(Tmpfile,"%d\n",l->emlabel);
 	emlinecount++;
 }
 genreturns()
@@ -185,7 +185,7 @@ returnstmt()
 {
 	emcode("cal","$_retstmt");	/* ensure legal return*/
 	emcode("lfr",EMINTSIZE);
-	fprintf(tmpfile," lae returns\n");
+	fprintf(Tmpfile," lae returns\n");
 	emlinecount++;
 	emcode("csa",EMINTSIZE);
 }
@@ -219,12 +219,12 @@ int type;
 	/* create descriptor first */
 	descr= genlabel();
 	firstlabel=genlabel();
-	fprintf(tmpfile,"l%d\n",descr); emlinecount++;
-	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
+	fprintf(Tmpfile,"l%d\n",descr); emlinecount++;
+	fprintf(Tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
 	l= jumphead;
 	while( l)
 	{
-		fprintf(tmpfile," rom *%d\n",l->emlabel); emlinecount++;
+		fprintf(Tmpfile," rom *%d\n",l->emlabel); emlinecount++;
 		l= l->nextlist;
 	}
 	jumphead= jumptail=0; jumpcnt=0;
@@ -232,7 +232,7 @@ int type;
 	conversion(type,INTTYPE);
 	emcode("lae",datalabel(descr));
 	emcode("csa",EMINTSIZE);
-	fprintf(tmpfile,"%d\n",firstlabel); emlinecount++;
+	fprintf(Tmpfile,"%d\n",firstlabel); emlinecount++;
 }
 ongosubstmt(type)
 int type;
@@ -243,12 +243,12 @@ int type;
 	/* create descriptor first */
 	descr= genlabel();
 	firstlabel=genlabel();
-	fprintf(tmpfile,"l%d\n",descr); emlinecount++;
-	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
+	fprintf(Tmpfile,"l%d\n",descr); emlinecount++;
+	fprintf(Tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
 	l= jumphead;
 	while( l)
 	{
-		fprintf(tmpfile," rom *%d\n",l->emlabel); emlinecount++;
+		fprintf(Tmpfile," rom *%d\n",l->emlabel); emlinecount++;
 		l= l->nextlist;
 	}
 	jumphead= jumptail=0; jumpcnt=0;
@@ -269,7 +269,7 @@ int type;
 	conversion(type,INTTYPE);
 	emcode("lae",datalabel(descr));
 	emcode("csa",EMINTSIZE);
-	fprintf(tmpfile,"%d\n",firstlabel);
+	fprintf(Tmpfile,"%d\n",firstlabel);
 	emlinecount++;
 }
 
@@ -283,11 +283,11 @@ simpleprogram()
 	/* a small EM programs has been found */
 	prologcode();
 	prolog2();
-	(void) fclose(tmpfile);
-	tmpfile= fopen(tmpfname,"r");
-	if( tmpfile==NULL)
+	(void) fclose(Tmpfile);
+	Tmpfile= fopen(tmpfname,"r");
+	if( Tmpfile==NULL)
 		fatal("tmp file disappeared");
-	while( (length=fread(buf,1,512,tmpfile)) != 0)
+	while( (length=fread(buf,1,512,Tmpfile)) != 0)
 		(void) fwrite(buf,1,length,emfile);
 	epilogcode();
 	(void) unlink(tmpfname);

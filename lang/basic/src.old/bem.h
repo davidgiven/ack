@@ -36,7 +36,7 @@ extern char	tmpfname[MAXFILENAME];	/* temporary statements file */
 
 extern FILE	*emfile;		/* EM output file */
 extern FILE	*datfile;		/* data file */
-extern FILE	*tmpfile;		/* compiler temporary */
+extern FILE	*Tmpfile;		/* compiler temporary */
 extern FILE	*yyin;			/* Compiler input */
 
 extern int	endofinput;
@@ -51,7 +51,7 @@ extern int	threshold;
 extern int	debug;
 extern int 	tronoff;
 
-extern int	emlinecount;		/* counts lines on tmpfile */
+extern int	emlinecount;		/* counts lines on Tmpfile */
 extern int 	dataused;
 extern int	typetable[10];		/* parameters to standard functions */
 

@@ -136,9 +136,9 @@ char *opcode;
 	emcode(opcode,instrlabel(l1));
 	emcode("loc",itoa(0));
 	emcode("bra",instrlabel(l2));
-	fprintf(tmpfile,"%d\n",l1); emlinecount++;
+	fprintf(Tmpfile,"%d\n",l1); emlinecount++;
 	emcode("loc",itoa(-1));
-	fprintf(tmpfile,"%d\n",l2); emlinecount++;
+	fprintf(Tmpfile,"%d\n",l2); emlinecount++;
 }
 relop( ltype,rtype,operator)
 int	ltype,rtype,operator;
@@ -292,10 +292,10 @@ loadptr(s)
 Symbol *s;
 {
 	if( POINTERSIZE==WORDSIZE)
-		fprintf(tmpfile," loe l%d\n",s->symalias);
+		fprintf(Tmpfile," loe l%d\n",s->symalias);
 	else 
 	if( POINTERSIZE== 2*WORDSIZE)
-		fprintf(tmpfile," lde l%d\n",s->symalias);
+		fprintf(Tmpfile," lde l%d\n",s->symalias);
 	else error("loadptr:unexpected pointersize");
 }
 */
@@ -355,10 +355,10 @@ Symbol *s;
 	else{	
 		j= -s->symalias;
 		if(debug) printf("load parm %d\n",j);
-		fprintf(tmpfile," lal ");
+		fprintf(Tmpfile," lal ");
 		for(i=fcn->dimensions;i>j;i--)
-			fprintf(tmpfile,"%s+",typesize(fcn->dimlimit[i-1]));
-		fprintf(tmpfile,"0\n");
+			fprintf(Tmpfile,"%s+",typesize(fcn->dimlimit[i-1]));
+		fprintf(Tmpfile,"0\n");
 		emlinecount++;
 		/*
 		emcode("lal",datalabel(fcn->dimalias[-s->symalias]));
@@ -424,7 +424,7 @@ int	type;
 	conversion(type,INTTYPE);
 	dim--;
 	/* first check index range */
-	fprintf(tmpfile," lae r%d\n",s->dimalias[dim]);
+	fprintf(Tmpfile," lae r%d\n",s->dimalias[dim]);
 	emlinecount++;
 	emcode("rck",EMINTSIZE);
 	emcode("lae",datalabel(s->dimalias[dim]));
