@@ -73,11 +73,11 @@ warn_msg:	M.warn_msg $(APP_A)
 warn.h:		M.warn_h $(APP_A)
 	M.warn_h $(APP_A)
 
-switch/DoCases:	$(IP_SPEC)
-	(cd switch; make IP_SPEC=$(IP_SPEC) DoCases)
+switch/DoCases:
+	(cd switch; make DoCases)
 
-switch/PrCases:	$(IP_SPEC)
-	(cd switch; make IP_SPEC=$(IP_SPEC) PrCases)
+switch/PrCases:	
+	(cd switch; make PrCases)
 
 test/awa.em22:
 	(cd test; make awa.em22)
