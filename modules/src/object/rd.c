@@ -14,6 +14,7 @@ extern long		lseek();
 #define PARTDBUG	4
 #else
 #define PARTDBUG	3
+#endif
 #define	NPARTS		(PARTDBUG + 1)
 
 static long		offset[MAXSECT];
