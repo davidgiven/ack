@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <em_spec.h>
-#include <em_flag.h>
 #include <em_pseu.h>
 #include "types.h"
 #include "def.h"
@@ -28,8 +27,6 @@
 
 
 
-
-extern byte em_flag[];
 
 #define space1()	printf("	")
 char format[] = "	%-11s%d\n";
