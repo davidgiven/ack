@@ -60,7 +60,7 @@ CodeString(nd)
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
-		C_loc(nd->nd_INT);
+		CodeConst(nd->nd_INT, nd->nd_type->tp_size);
 		return;
 	}
 	C_df_dlb(++data_label);

@@ -528,7 +528,15 @@ lexwarning(W_ORDINARY, "character constant out of range");
 					CheckForLet();
 					return tk->tk_symb = INTEGER;
 				}
-				if (ch == 'D' && base == 10) {
+				if (options['l']) {
+					if (base != 10) {
+						LoadChar(ch);
+						if (ch != 'D') {
+							PushBack();
+						}
+					}
+				}
+				if (ch == 'D' && (options['l'] || base == 10)) {
 				    if (options['l']) {
 					/* Local extension: LONGCARD exists,
 					   so internally also longintorcard_type
