@@ -14,7 +14,7 @@
 
 */
 
-char	tmpnam[] = "/tmp/sXXXXXX";
+char	temp_name[] = "/tmp/sXXXXXX";
 char	*tname;
 char	*mktemp();
 FILE	*fopen();
@@ -30,7 +30,7 @@ char **argv;
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
-	tname = mktemp(tmpnam);
+	tname = mktemp(temp_name);
 	while(--argc) {
 		if ((status = strip(argv[argc])) > 1)
 			break;
