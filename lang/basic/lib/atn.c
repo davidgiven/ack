@@ -92,7 +92,7 @@ _atn(x)
 	while (x > pr->X) pr++;
 	if (pr != prec) {
 		x = pr->arctan +
-			atan(pr->one_o_x - pr->one_o_xsq_p_1/(pr->one_o_x + x));
+			_atn(pr->one_o_x - pr->one_o_xsq_p_1/(pr->one_o_x + x));
 	}
 	else {
 		double xsq = x*x;
