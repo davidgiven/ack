@@ -10,7 +10,6 @@
 #include	"nofloat.h"
 #include	"nopp.h"
 #include	"idfsize.h"
-#include	"maxincl.h"
 #include	"nobitfield.h"
 #include	"class.h"
 #include	"macro.h"
@@ -23,8 +22,10 @@
 #include	"noRoption.h"
 
 #ifndef NOPP
-extern char *inctable[MAXINCL];
+extern char **inctable;
 extern int inc_pos;
+extern int inc_max;
+extern int inc_total;
 #endif NOPP
 
 extern char options[];
@@ -126,15 +127,25 @@ deleted, is now a debug-flag
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 #ifndef NOPP
 		if (*text)	{
-			int i = inc_pos++;
+			int i;
 			register char *new = text;
 			
+			if (++inc_total > inc_max) {
+				char **n = (char **)
+				   Malloc((10+inc_max)*sizeof(char *));
+				for (i = 0; i < inc_max; i++) {
+					n[i] = inctable[i];
+				}
+				free((char *) inctable);
+				inctable = n;
+				inc_max += 10;
+			}
+				
+			i = inc_pos++;
 			while (new)	{
 				char *tmp = inctable[i];
 				
 				inctable[i++] = new;
-				if (i == MAXINCL)
-					fatal("too many -I options");
 				new = tmp;
 			}
 		}

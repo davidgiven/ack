@@ -24,10 +24,6 @@
 #define	IFDEPTH	256	/* maximum number of nested if-constructions	*/
 
 
-!File: maxincl.h
-#define	MAXINCL	12	/* maximum number of #include directories	*/
-
-
 !File: density.h
 #define	DENSITY	2	/* see switch.[ch] for an explanation		*/
 

@@ -11,7 +11,6 @@
 #include	"target_sizes.h"
 #include	"debug.h"
 #include	"use_tmp.h"
-#include	"maxincl.h"
 #include	"inputtype.h"
 #include	"input.h"
 #include	"level.h"
@@ -35,11 +34,9 @@ char options[128];			/* one for every char	*/
 
 #ifndef NOPP
 int inc_pos = 1;			/* place where next -I goes */
-char *inctable[MAXINCL] = {		/* list for includes	*/
-	".",
-	"/usr/include",
-	0
-};
+int inc_total = 0;
+int inc_max;
+char **inctable;
 
 extern char *getwdir();
 #endif NOPP
@@ -89,8 +86,14 @@ main(argc, argv)
 	prog_name = argv[0];
 
 	init_hmask();
-
 #ifndef NOPP
+	inctable = (char **) Malloc(10 * sizeof(char *));
+	inctable[0] = ".";
+	inctable[1] = "/usr/include";
+	inctable[2] = 0;
+	inc_total = 2;
+	inc_max = 10;
+
 	init_pp();	/* initialise the preprocessor macros	*/
 #endif NOPP
 
