@@ -233,8 +233,10 @@ INP_mk_filename(dir, file, newname)
 	dst = malloc((unsigned) (strlen(dir) + strlen(file) + 2));
 	if (!dst) return 0;
 	*newname = dst;
-	while (*dst++ = *dir++);
-	*--dst = '/';
+	if (*dir) {
+		while (*dst++ = *dir++);
+		*--dst = '/';
+	}
 	while (*++dst = *file++);
 	return 1;
 }
