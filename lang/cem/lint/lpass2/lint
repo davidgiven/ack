@@ -131,7 +131,7 @@ case "$LIBRARY" in
 		;;
 	esac
 
-	if	/bin/test ! -r $LIBRARY
+	if	test ! -r $LIBRARY
 	then	cp /dev/null $LIBRARY
 	fi
 
