@@ -21,6 +21,9 @@ int val;
 }
 
 #define IEEEFLOAT
+#define FL_MSL_AT_LOW_ADDRESS	0
+#define FL_MSW_AT_LOW_ADDRESS	0
+#define FL_MSB_AT_LOW_ADDRESS	0
 #include <con_float>
 
 /* as long as we generate assembler ...
