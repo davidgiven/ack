@@ -10,7 +10,7 @@
 
 #define	HASHSIZE	256	/* size of hashtable, must be a power of 2 */
 #ifndef IDF_HSIZE
-#define IDF_HSIZE	64	/* # of significant characters for hashing.
+#define IDF_HSIZE	16	/* # of significant characters for hashing.
 				   This is NOT the number of significant
 				   characters!
 				*/
@@ -20,9 +20,9 @@
 #define	HASH_C		153	/* Knuth's c */
 
 #define	HASHMASK		(HASHSIZE-1)	/* since it is a power of 2 */
-#define	STARTHASH()		(0)
-#define	ENHASH(hs,ch,hm)	(hs + (ch ^ hm))
-#define	STOPHASH(hs)		(hs & HASHMASK)
+#define	STARTHASH(hs)		(hs = 0)
+#define	ENHASH(hs,ch,hm)	(hs += (ch ^ hm))
+#define	STOPHASH(hs)		(hs &= HASHMASK)
 
 static char hmask[IDF_HSIZE];
 
@@ -106,11 +106,11 @@ str2idf(tg, cpy)
 	register int hash;
 	int size;
 
-	hash = STARTHASH();
+	STARTHASH(hash);
 	while (*cp && phm < &hmask[IDF_HSIZE]) {
-		hash = ENHASH(hash, *cp++, *phm++);
+		ENHASH(hash, *cp++, *phm++);
 	}
-	hash = STOPHASH(hash);
+	STOPHASH(hash);
 	while (*cp++) /* nothing. Find end of string */ ;
 	size = cp - tg;
 
