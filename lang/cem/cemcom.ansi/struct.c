@@ -329,11 +329,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 		an explicit alignment is given, a new address is needed.
 		Note that the fields are packed into machine words.
 	*/
-#ifdef word_size
-#define bits_in_type	((int)(8*word_size))
-#else
-	int bits_in_type = (int)word_size * 8;
-#endif
+	int bits_in_type = (int) (*fdtpp)->tp_size * 8;
 	static int field_offset = (arith)0;
 	static struct type *current_struct = 0;
 	static int bits_declared;	/* nr of bits used in *field_offset */
