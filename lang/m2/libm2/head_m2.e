@@ -16,9 +16,13 @@
  exa argv
  exa argc
  exa MainLB
+ exa bkillbss
  exp $catch
  exp $init
  inp $trap_handler
+
+bkillbss
+ bss EM_PSIZE,0,0
 
  exp $m_a_i_n
  pro $m_a_i_n, 0

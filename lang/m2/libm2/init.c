@@ -45,8 +45,8 @@ static int blablabla;		/*	We cannot use end, because then also
 
 killbss()
 {
-	extern char *edata;
-	register char *p = (char *) &edata;
+	extern char *bkillbss;
+	register char *p = (char *) &bkillbss;
 
 	while (p < (char *) &blablabla) *p++ = 0x66;
 }
