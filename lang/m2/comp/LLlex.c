@@ -18,6 +18,7 @@
 #include	"type.h"
 #include	"LLlex.h"
 #include	"const.h"
+#include	"warning.h"
 
 long str2long();
 
@@ -28,6 +29,8 @@ int		 idfsize = IDFSIZE;
 #ifdef DEBUG
 extern int	cntlines;
 #endif
+
+static int	eofseen;
 
 STATIC
 SkipComment()
@@ -104,6 +107,81 @@ GetString(upto)
 	return str;
 }
 
+static char *s_error = "illegal line directive";
+
+STATIC int
+getch()
+{
+	register int ch;
+
+	for (;;) {
+		LoadChar(ch);
+		if ((ch & 0200) && ch != EOI) {
+			error("non-ascii '\\%03o' read", ch & 0377);
+			continue;
+		}
+		break;
+	}
+	if (ch == EOI) {
+		eofseen = 1;
+		return '\n';
+	}
+	return ch;
+}
+
+STATIC
+linedirective() {
+	/*	Read a line directive
+	*/
+	register int	ch;
+	register int	i = 0;
+	char		buf[IDFSIZE + 2];
+	register char	*c = buf;
+
+	do {	/*
+		 * Skip to next digit
+		 * Do not skip newlines
+		 */
+		ch = getch();
+		if (class(ch) == STNL) {
+			LineNumber++;
+			error(s_error);
+			return;
+		}
+	} while (class(ch) != STNUM);
+	do  {
+		i = i*10 + (ch - '0');
+		ch = getch();
+	} while (class(ch) == STNUM);
+	while (ch != '"' && class(ch) != STNL) ch = getch();
+	if (ch == '"') {
+		c = buf;
+		do {
+			*c++ = ch = getch();
+			if (class(ch) == STNL) {
+				LineNumber++;
+				error(s_error);
+				return;
+			}
+		} while (ch != '"');
+		*--c = '\0';
+		do {
+			ch = getch();
+		} while (class(ch) != STNL);
+		/*
+		 * Remember the file name
+		 */
+		if (!eofseen && strcmp(FileName,buf)) {
+			FileName = Salloc(buf,strlen(buf) + 1);
+		}
+	}
+	if (eofseen) {
+		error(s_error);
+		return;
+	}
+	LineNumber = i;
+}
+
 int
 LLlex()
 {
@@ -113,7 +191,6 @@ LLlex()
 	register struct token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 2];
 	register int ch, nch;
-	static int eofseen;
 
 	toktype = error_type;
 
@@ -125,6 +202,7 @@ LLlex()
 
 	tk->tk_lineno = LineNumber;
 
+again2:
 	if (eofseen) {
 		eofseen = 0;
 		ch = EOI;
@@ -132,8 +210,10 @@ LLlex()
 	else {
 again:
 		LoadChar(ch);
+again1:
 		if ((ch & 0200) && ch != EOI) {
-			fatal("non-ascii '\\%03o' read", ch & 0377);
+			error("non-ascii '\\%03o' read", ch & 0377);
+			goto again;
 		}
 	}
 
@@ -145,7 +225,10 @@ again:
 		cntlines++;
 #endif
 		tk->tk_lineno++;
-		/* Fall Through */
+		LoadChar(ch);
+		if (ch != '#') goto again1;
+		linedirective();
+		goto again2;
 
 	case STSKIP:
 		goto again;
@@ -192,7 +275,7 @@ again:
 				return tk->tk_symb = LESSEQUAL;
 			}
 			if (nch == '>') {
-				lexwarning("'<>' is old-fashioned; use '#'");
+				lexwarning(W_STRICT, "'<>' is old-fashioned; use '#'");
 				return tk->tk_symb = '#';
 			}
 			break;
@@ -331,7 +414,7 @@ again:
 				if (ch == 'C' && base == 8) {
 					toktype = char_type;
 					if (tk->TOK_INT<0 || tk->TOK_INT>255) {
-lexwarning("Character constant out of range");
+lexwarning(W_ORDINARY, "character constant out of range");
 					}
 				}
 				else if (tk->TOK_INT>=0 &&

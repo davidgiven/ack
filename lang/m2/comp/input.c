@@ -10,16 +10,12 @@ struct f_info	file_info;
 #include	"scope.h"
 #include	<inp_pkg.body>
 
-extern struct idf *CurrentId;
 
 AtEoIF()
 {
 	/*	Make the unstacking of input streams noticable to the
 	   	lexical analyzer
 	*/
-	if (CurrentId && ! lookup(CurrentId, GlobalScope)) {
-fatal("No definition module read for \"%s\"", CurrentId->id_text);
-	}
 	return 1;
 }
 

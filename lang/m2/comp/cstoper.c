@@ -13,6 +13,7 @@
 #include	"node.h"
 #include	"Lpars.h"
 #include	"standards.h"
+#include	"warning.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
@@ -21,6 +22,8 @@ arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
 arith wrd_bits;		/* number of bits in a word */
+
+static char ovflow[] = "overflow in constant expression";
 
 cstunary(expp)
 	register struct node *expp;
@@ -485,7 +488,7 @@ cstcall(expp, call)
 		      || expp->nd_INT >= expp->nd_type->enm_ncst
 		      )
 		    )
-		   )	node_warning(expp,"overflow in constant expression");
+		   )	node_warning(expp, W_ORDINARY, ovflow);
 		else CutSize(expp);
 		break;
 
@@ -512,8 +515,7 @@ CutSize(expr)
 	uns = (tp->tp_fund & (T_CARDINAL|T_CHAR));
 	if (uns) {
 		if (o1 & ~full_mask[size]) {
-			node_warning(expr,
-				"overflow in constant expression");
+			node_warning(expr, W_ORDINARY, ovflow);
 			o1 &= full_mask[size];
 		}
 	}
@@ -522,7 +524,7 @@ CutSize(expr)
 		long remainder = o1 & ~full_mask[size];
 
 		if (remainder != 0 && remainder != ~full_mask[size]) {
-			node_warning(expr, "overflow in constant expression");
+			node_warning(expr, W_ORDINARY, ovflow);
 			o1 <<= nbits;
 			o1 >>= nbits;
 		}

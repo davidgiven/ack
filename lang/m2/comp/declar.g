@@ -17,6 +17,7 @@
 #include	"misc.h"
 #include	"main.h"
 #include	"chk_expr.h"
+#include	"warning.h"
 
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
@@ -162,7 +163,7 @@ enumeration(struct type **ptp;)
 		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
 		  EnterEnumList(EnumList, *ptp);
 		  if ((*ptp)->enm_ncst > 256) { /* ??? is this reasonable ??? */
-			error("Too many enumeration literals");
+			error("too many enumeration literals");
 		  }
 		}
 ;
@@ -277,7 +278,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	  |		/* Old fashioned! the first qualident now represents
 			   the type
 			*/
-			{ warning("Old fashioned Modula-2 syntax; ':' missing");
+			{ warning(W_OLDFASHIONED, "old fashioned Modula-2 syntax; ':' missing");
 			  if (ChkDesignator(nd) &&
 			      (nd->nd_class != Def ||
 			       !(nd->nd_def->df_kind&(D_ERROR|D_ISTYPE)) ||
@@ -297,7 +298,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 								 scope,
 								 D_FIELD);
 			  	if (!(tp->tp_fund & T_DISCRETE)) {
-					error("Illegal type in variant");
+					error("illegal type in variant");
 			  	}
 			  	df->df_type = tp;
 			  	df->fld_off = align(*cnt, tp->tp_align);
@@ -386,18 +387,36 @@ PointerType(struct type **ptp;)
 } :
 	POINTER TO
 			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
-	[ %if ( lookup(dot.TOK_IDF, CurrentScope))
-		/* Either a Module or a Type, but in both cases defined
-		   in this scope, so this is the correct identification
-		*/
-	  qualtype(&((*ptp)->next))
-	| %if ( nd = new_node(),
-		nd->nd_token = dot,
-		lookfor(nd, CurrVis, 0)->df_kind == D_MODULE)
+	[ %if	( lookup(dot.TOK_IDF, CurrentScope)
+			/* Either a Module or a Type, but in both cases defined
+		   	   in this scope, so this is the correct identification
+			*/
+		||
+		  ( nd = new_node(),
+		    nd->nd_token = dot,
+		    lookfor(nd, CurrVis, 0)->df_kind == D_MODULE
+		  )
+			/* A Modulename in one of the enclosing scopes.
+			   It is not clear from the language definition that
+			   it is correct to handle these like this, but
+			   existing compilers do it like this, and the
+			   alternative is difficult with a lookahead of only
+			   one token.
+			   ???
+			*/
+		)
 	  type(&((*ptp)->next)) 
 			{ if (nd) free_node(nd); }
 	|
-	  IDENT		{ Forward(nd, (*ptp)); }
+	  IDENT		{ if (nd) {
+				/* nd could be a null pointer, if we had a
+				   syntax error exactly at this alternation.
+				   MORAL: Be careful with %if resolvers with
+				   side effects!
+				*/
+				Forward(nd, (*ptp));
+			  }
+			}
 	]
 ;
 

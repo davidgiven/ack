@@ -15,13 +15,13 @@
 #include	"f_info.h"
 #include	"main.h"
 #include	"node.h"
+#include	"type.h"
 
 #ifdef DEBUG
 long	sys_filesize();
 #endif
 
-struct idf *	CurrentId;
-
+STATIC
 GetFile(name)
 	char *name;
 {
@@ -35,10 +35,12 @@ GetFile(name)
 	buf[10] = '\0';			/* maximum length */
 	strcat(buf, ".def");
 	if (! InsertFile(buf, DEFPATH, &(FileName))) {
-		fatal("Could'nt find a DEFINITION MODULE for \"%s\"", name);
+		error("could'nt find a DEFINITION MODULE for \"%s\"", name);
+		return 0;
 	}
 	LineNumber = 1;
 	DO_DEBUG(options['F'], debug("File %s : %ld characters", FileName, sys_filesize(FileName)));
+	return 1;
 }
 
 struct def *
@@ -52,6 +54,7 @@ GetDefinitionModule(id, incr)
 	*/
 	struct def *df;
 	static int level;
+	struct scopelist *vis;
 
 	level += incr;
 	df = lookup(id, GlobalScope);
@@ -62,33 +65,40 @@ GetDefinitionModule(id, incr)
 			do_SYSTEM();
 		}
 		else {
-			GetFile(id->id_text);
-			CurrentId = id;
 			open_scope(CLOSEDSCOPE);
-			DefModule();
-			if (level == 1) {
-				/* The module is directly imported by the
-				   currently defined module, so we have to
-				   remember its name because we have to call
-				   its initialization routine
-				*/
-				static struct node *nd_end; /* end of list */
-				register struct node *n;
-				extern struct node *Modules;
+			if (GetFile(id->id_text)) {
+				DefModule();
+				if (level == 1) {
+					/* The module is directly imported by
+					   the currently defined module, so we
+					   have to remember its name because
+					   we have to call its initialization
+					   routine
+					*/
+					static struct node *nd_end;
+					register struct node *n;
+					extern struct node *Modules;
 
-				n = MkLeaf(Name, &dot);
-				n->nd_IDF = id;
-				n->nd_symb = IDENT;
-				if (nd_end) nd_end->next = n;
-				else Modules = n;
-				nd_end = n;
+					n = MkLeaf(Name, &dot);
+					n->nd_IDF = id;
+					n->nd_symb = IDENT;
+					if (nd_end) nd_end->next = n;
+					else Modules = n;
+					nd_end = n;
+				}
 			}
+			vis = CurrVis;
 			close_scope(SC_CHKFORW);
 		}
 		df = lookup(id, GlobalScope);
+		if (! df) {
+			df = MkDef(id, GlobalScope, D_ERROR);
+			df->df_type = error_type;
+			df->mod_vis = CurrVis;
+			return df;
+		}
 	}
-	CurrentId = 0;
-	assert(df && df->df_kind == D_MODULE);
+	assert(df);
 	level -= incr;
 	return df;
 }

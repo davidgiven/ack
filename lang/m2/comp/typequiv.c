@@ -13,6 +13,7 @@
 #include	"def.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"warning.h"
 
 int
 TstTypeEquiv(tp1, tp2)
@@ -218,7 +219,7 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		(  VARflag
 		&& (  TstCompat(formaltype, actualtype)
 		   &&
-(node_warning(nd, "oldfashioned! types of formal and actual must be identical"),
+(node_warning(nd, W_OLDFASHIONED, "types of formal and actual must be identical"),
 		      1)
 		   )
 		)

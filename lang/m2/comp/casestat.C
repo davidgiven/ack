@@ -69,6 +69,7 @@ CaseCode(nd, exitlabel)
 	register struct case_entry *ce;
 	register arith val;
 	label CaseDescrLab;
+	int casecnt = 0;
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
@@ -85,6 +86,7 @@ CaseCode(nd, exitlabel)
 				/* non-empty case
 				*/
 				pnode->nd_lab = ++text_label;
+				casecnt++;
 				if (! AddCases(sh, /* to descriptor */
 					       pnode->nd_left->nd_left,
 						   /* of case labels */
@@ -102,6 +104,17 @@ CaseCode(nd, exitlabel)
 
 			sh->sh_default = ++text_label;
 			break;
+		}
+	}
+
+	if (!casecnt) {
+		/* There were no cases, so we have to check the case-expression
+		   here
+		*/
+		if (! (sh->sh_type->tp_fund & T_DISCRETE)) {
+			node_error(nd, "illegal type in CASE-expression");
+			FreeSh(sh);
+			return;
 		}
 	}
 
@@ -232,7 +245,7 @@ AddOneCase(sh, node, lbl)
 	ce->ce_label = lbl;
 	ce->ce_value = node->nd_INT;
 	if (! TstCompat(sh->sh_type, node->nd_type)) {
-		node_error(node, "Type incompatibility in case");
+		node_error(node, "type incompatibility in case");
 		free_case_entry(ce);
 		return 0;
 	}

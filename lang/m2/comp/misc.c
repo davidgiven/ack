@@ -18,7 +18,7 @@ match_id(id1, id2)
 		first place, and if not, give an error message
 	*/
 	if (id1 != id2 && !is_anon_idf(id1) && !is_anon_idf(id2)) {
-		error("Name \"%s\" does not match block name \"%s\"",
+		error("name \"%s\" does not match block name \"%s\"",
 		      id1->id_text,
 		      id2->id_text
 		);

@@ -8,9 +8,11 @@
 
 #include	"type.h"
 #include	"main.h"
+#include	"warning.h"
 
 extern int	idfsize;
 static int	ndirs;
+int		warning_classes;
 
 DoOption(text)
 	register char *text;
@@ -29,6 +31,41 @@ DoOption(text)
 					*/
 
 
+	case 'w':
+		if (*text) {
+			while (*text) {
+				switch(*text++) {
+				case 'O':
+					warning_classes &= ~W_OLDFASHIONED;
+					break;
+				case 'R':
+					warning_classes &= ~W_STRICT;
+					break;
+				case 'W':
+					warning_classes &= ~W_ORDINARY;
+					break;
+				}
+			}
+		}
+		else warning_classes = 0;
+		break;
+
+	case 'W':
+		while (*text) {
+			switch(*text++) {
+			case 'O':
+				warning_classes |= W_OLDFASHIONED;
+				break;
+			case 'R':
+				warning_classes |= W_STRICT;
+				break;
+			case 'W':
+				warning_classes |= W_ORDINARY;
+				break;
+			}
+		}
+		break;
+
 	case 'M': {	/* maximum identifier length */
 		char *t = text;		/* because &text is illegal */
 
@@ -42,7 +79,7 @@ DoOption(text)
 
 	case 'I' :
 		if (++ndirs >= NDIRS) {
-			fatal("Too many -I options");
+			fatal("too many -I options");
 		}
 		DEFPATH[ndirs] = text;
 		break;

@@ -15,6 +15,7 @@
 #include	"type.h"
 #include	"node.h"
 #include	"f_info.h"
+#include	"warning.h"
 
 }
 /*
@@ -62,7 +63,7 @@ priority(arith *pprio;)
 } :
 	'[' ConstExpression(&nd) ']'
 			{ if (!(nd->nd_type->tp_fund & T_CARDINAL)) {
-				node_error(nd, "Illegal priority");
+				node_error(nd, "illegal priority");
 			  }
 			  *pprio = nd->nd_INT;
 			  FreeNode(nd);
@@ -85,23 +86,16 @@ export(int *QUALflag; struct node **ExportList;)
 import(int local;)
 {
 	struct node *ImportList;
+	struct node *FromId = 0;
 	register struct def *df;
-	int fromid;
 	extern struct def *GetDefinitionModule();
 } :
 	[ FROM
-	  IDENT		{ fromid = 1;
-			  if (local) {
-				struct node *nd = MkLeaf(Name, &dot);
-
-				df = lookfor(nd,enclosing(CurrVis),0);
-				FreeNode(nd);
-			  }
-			  else	df = GetDefinitionModule(dot.TOK_IDF, 1);
+	  IDENT		{ FromId = MkLeaf(Name, &dot);
+			  if (local) df = lookfor(FromId,enclosing(CurrVis),0);
+			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
-	|
-			{ fromid = 0; }
-	]
+	]?
 	IMPORT IdentList(&ImportList) ';'
 	/*
 	   When parsing a global module, this is the place where we must
@@ -109,7 +103,9 @@ import(int local;)
 	   If the FROM clause is present, the identifier in it is a module
 	   name, otherwise the names in the import list are module names.
 	*/
-			{ if (fromid) EnterFromImportList(ImportList, df);
+			{ if (FromId) {
+				EnterFromImportList(ImportList, df, FromId);
+			  }
 			  else EnterImportList(ImportList, local);
 			}
 ;
@@ -137,7 +133,7 @@ DefinitionModule
 			modules. Issue a warning.
 		*/
 			{ 
-node_warning(exportlist, "export list in definition module ignored");
+node_warning(exportlist, W_ORDINARY, "export list in definition module ignored");
 				FreeNode(exportlist);
 			}
 	|
@@ -161,7 +157,7 @@ definition
 	register struct def *df;
 	struct def *dummy;
 } :
-	CONST [ ConstantDeclaration Semicolon ]*
+	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE
 	[ IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
@@ -176,21 +172,13 @@ definition
 			  df->df_type = construct_type(T_HIDDEN, NULLTYPE);
 			}
 	  ]
-	  Semicolon
+	  ';'
 	]*
 |
-	VAR [ VariableDeclaration Semicolon ]*
+	VAR [ VariableDeclaration ';' ]*
 |
 	ProcedureHeading(&dummy, D_PROCHEAD)
-	Semicolon
-;
-
-/*	The next nonterminal is used to relax the grammar a little.
-*/
-Semicolon:
 	';'
-|
-	/* empty */	{ warning("; expected"); }
 ;
 
 ProgramModule

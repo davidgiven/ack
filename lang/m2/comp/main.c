@@ -18,6 +18,7 @@
 #include	"standards.h"
 #include	"tokenname.h"
 #include	"node.h"
+#include	"warning.h"
 
 int		state;			/* either IMPLEMENTATION or PROGRAM */
 char		options[128];
@@ -35,6 +36,7 @@ main(argc, argv)
 	register char **Nargv = &argv[0];
 
 	ProgName = *argv++;
+	warning_classes = W_INITIAL;
 
 	while (--argc > 0) {
 		if (**argv == '-')
@@ -78,7 +80,7 @@ Compile(src, dst)
 	open_scope(CLOSEDSCOPE);
 	GlobalScope = CurrentScope;
 	C_init(word_size, pointer_size);
-	if (! C_open(dst)) fatal("Could not open output file");
+	if (! C_open(dst)) fatal("could not open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CompUnit();
@@ -199,7 +201,7 @@ do_SYSTEM()
 	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
 	(void) Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
 	if (!InsertText(SYSTEM, sizeof(SYSTEM) - 1)) {
-		fatal("Could not insert text");
+		fatal("could not insert text");
 	}
 	DefModule();
 	close_scope(SC_CHKFORW);

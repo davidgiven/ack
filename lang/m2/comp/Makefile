@@ -3,6 +3,7 @@ EMDIR =		../../..
 MHDIR =		$(EMDIR)/modules/h
 PKGDIR =	$(EMDIR)/modules/pkg
 LIBDIR =	$(EMDIR)/modules/lib
+OBJECTCODE =	$(LIBDIR)/libemk.a
 LLGEN =		$(EMDIR)/bin/LLgen
 
 INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
@@ -13,6 +14,7 @@ LLGENOPTIONS =
 PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
+MALLOC = $(LIBDIR)/dickmalloc.o
 LFLAGS = $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
@@ -35,13 +37,13 @@ GENCFILES=	tokenfile.c \
 	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c
 GENGFILES=	tokenfile.g
 GENHFILES=	errout.h\
-	idfsize.h numsize.h strsize.h target_sizes.h debug.h\
+	idfsize.h numsize.h strsize.h target_sizes.h \
 	inputtype.h maxset.h ndir.h density.h\
-	def.h type.h Lpars.h node.h
+	def.h debugcst.h type.h Lpars.h node.h
 HFILES=		LLlex.h\
-	chk_expr.h class.h const.h desig.h f_info.h idf.h\
+	chk_expr.h class.h const.h debug.h desig.h f_info.h idf.h\
 	input.h main.h misc.h scope.h standards.h tokenname.h\
-	walk.h $(GENHFILES)
+	walk.h warning.h $(GENHFILES)
 #
 GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
 
@@ -67,7 +69,7 @@ clashes:	$(SRC) $(HFILES)
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES)
+Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES) Makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 LLfiles:	$(GFILES)
@@ -122,39 +124,39 @@ Xlint:
 	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
 
 ../comp/main:	$(OBJ) ../comp/Makefile
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../comp/main
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o ../comp/main
 	size ../comp/main
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-LLlex.o: LLlex.h Lpars.h class.h const.h debug.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
+LLlex.o: LLlex.h Lpars.h class.h const.h debug.h debugcst.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h warning.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
-error.o: LLlex.h debug.h errout.h f_info.h input.h inputtype.h main.h node.h
-main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h ndir.h node.h scope.h standards.h tokenname.h type.h
+error.o: LLlex.h debug.h debugcst.h errout.h f_info.h input.h inputtype.h main.h node.h warning.h
+main.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h input.h inputtype.h ndir.h node.h scope.h standards.h tokenname.h type.h warning.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: def.h f_info.h idf.h input.h inputtype.h scope.h
-type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h scope.h target_sizes.h type.h walk.h
-def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
-scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
+type.o: LLlex.h const.h debug.h debugcst.h def.h idf.h maxset.h node.h scope.h target_sizes.h type.h walk.h
+def.o: LLlex.h Lpars.h debug.h debugcst.h def.h idf.h main.h node.h scope.h type.h
+scope.o: LLlex.h debug.h debugcst.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
-enter.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
-defmodule.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h node.h scope.h
-typequiv.o: LLlex.h debug.h def.h node.h type.h
-node.o: LLlex.h debug.h def.h node.h type.h
-cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
-chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h misc.h node.h scope.h standards.h type.h
-options.o: idfsize.h main.h ndir.h type.h
-walk.o: LLlex.h Lpars.h chk_expr.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h walk.h
-casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h walk.h
-desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
-code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h walk.h
-tmpvar.o: debug.h def.h main.h scope.h type.h
-lookup.o: LLlex.h debug.h def.h idf.h misc.h node.h scope.h type.h
+enter.o: LLlex.h debug.h debugcst.h def.h idf.h main.h node.h scope.h type.h
+defmodule.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h input.h inputtype.h main.h node.h scope.h type.h
+typequiv.o: LLlex.h debug.h debugcst.h def.h node.h type.h warning.h
+node.o: LLlex.h debug.h debugcst.h def.h node.h type.h
+cstoper.o: LLlex.h Lpars.h debug.h debugcst.h idf.h node.h standards.h target_sizes.h type.h warning.h
+chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h debugcst.h def.h idf.h misc.h node.h scope.h standards.h type.h warning.h
+options.o: idfsize.h main.h ndir.h type.h warning.h
+walk.o: LLlex.h Lpars.h chk_expr.h debug.h debugcst.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h walk.h warning.h
+casestat.o: LLlex.h Lpars.h debug.h debugcst.h density.h desig.h node.h type.h walk.h
+desig.o: LLlex.h debug.h debugcst.h def.h desig.h node.h scope.h type.h
+code.o: LLlex.h Lpars.h debug.h debugcst.h def.h desig.h node.h scope.h standards.h type.h walk.h
+tmpvar.o: debug.h debugcst.h def.h main.h scope.h type.h
+lookup.o: LLlex.h debug.h debugcst.h def.h idf.h misc.h node.h scope.h type.h
 tokenfile.o: Lpars.h
-program.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h main.h node.h scope.h type.h
-declar.o: LLlex.h Lpars.h chk_expr.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h
-expression.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h type.h
+program.o: LLlex.h Lpars.h debug.h debugcst.h def.h f_info.h idf.h main.h node.h scope.h type.h warning.h
+declar.o: LLlex.h Lpars.h chk_expr.h debug.h debugcst.h def.h idf.h main.h misc.h node.h scope.h type.h warning.h
+expression.o: LLlex.h Lpars.h chk_expr.h const.h debug.h debugcst.h def.h idf.h node.h type.h warning.h
 statement.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h
 Lpars.o: Lpars.h

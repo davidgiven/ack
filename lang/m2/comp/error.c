@@ -17,6 +17,7 @@
 #include	"LLlex.h"
 #include	"main.h"
 #include	"node.h"
+#include	"warning.h"
 
 /* error classes */
 #define	ERROR		1
@@ -30,6 +31,7 @@
 #endif
 
 int err_occurred;
+static int warn_class;
 
 extern char *symbol2str();
 
@@ -69,18 +71,20 @@ node_error(node, fmt, args)
 }
 
 /*VARARGS1*/
-warning(fmt, args)
+warning(class, fmt, args)
 	char *fmt;
 {
-	_error(WARNING, NULLNODE, fmt, &args);
+	warn_class = class;
+	if (class & warning_classes) _error(WARNING, NULLNODE, fmt, &args);
 }
 
 /*VARARGS2*/
-node_warning(node, fmt, args)
+node_warning(node, class, fmt, args)
 	struct node *node;
 	char *fmt;
 {
-	_error(WARNING, node, fmt, &args);
+	warn_class = class;
+	if (class & warning_classes) _error(WARNING, node, fmt, &args);
 }
 
 /*VARARGS1*/
@@ -91,10 +95,11 @@ lexerror(fmt, args)
 }
 
 /*VARARGS1*/
-lexwarning(fmt, args) 
+lexwarning(class, fmt, args) 
 	char *fmt;
 {
-	_error(LEXWARNING, NULLNODE, fmt, &args);
+	warn_class = class;
+	if (class & warning_classes) _error(LEXWARNING, NULLNODE, fmt, &args);
 }
 
 /*VARARGS1*/
@@ -149,19 +154,23 @@ _error(class, node, fmt, argv)
 		if (C_busy()) C_ms_err();
 		err_occurred = 1;
 		break;
-	
-	case WARNING:
-	case LEXWARNING:
-		if (options['w'])
-			return;
-		break;
 	}
 
 	/* the remark */
 	switch (class)	{	
 	case WARNING:
 	case LEXWARNING:
-		remark = "(warning)";
+		switch(warn_class) {
+		case W_OLDFASHIONED:
+			remark = "(old-fashioned use)";
+			break;
+		case W_STRICT:
+			remark = "(strict)";
+			break;
+		default:
+			remark = "(warning)";
+			break;
+		}
 		break;
 	case CRASH:
 		remark = "CRASH\007";

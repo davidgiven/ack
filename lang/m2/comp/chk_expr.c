@@ -21,6 +21,7 @@
 #include	"standards.h"
 #include	"chk_expr.h"
 #include	"misc.h"
+#include	"warning.h"
 
 extern char *symbol2str();
 
@@ -936,7 +937,7 @@ node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 
 			if (!warning_given) {
 				warning_given = 1;
-				node_warning(expp, "NEW and DISPOSE are old-fashioned");
+	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are old-fashioned");
 			}
 		}
 		if (! (left = getvariable(&arg))) return 0;

@@ -15,6 +15,9 @@
 #include	"const.h"
 #include	"type.h"
 #include	"chk_expr.h"
+#include	"warning.h"
+
+extern char	options[];
 }
 
 number(struct node **p;) :
@@ -93,7 +96,7 @@ ConstExpression(struct node **pnd;):
 		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
 		  if (ChkExpression(*pnd) &&
 		      ((*pnd)->nd_class != Set && (*pnd)->nd_class != Value)) {
-			error("Constant expression expected");
+			error("constant expression expected");
 		  }
 		  DO_DEBUG(options['X'], print("RESULTS IN\n"));
 		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
@@ -234,7 +237,8 @@ designator(struct node **pnd;)
 
 designator_tail(struct node **pnd;):
 	visible_designator_tail(pnd)
-	[
+	[ %persistent
+		%default
 		selector(pnd)
 	|
 		visible_designator_tail(pnd)

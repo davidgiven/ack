@@ -116,7 +116,7 @@ EnterVarList(Idlist, type, local)
 			df->df_flags |= D_NOREG;
 			if (idlist->nd_left->nd_type != card_type) {
 				node_error(idlist->nd_left,
-					   "Illegal type for address");
+					   "illegal type for address");
 			}
 			df->var_off = idlist->nd_left->nd_INT;
 		}
@@ -235,17 +235,20 @@ DoImport(df, scope)
 }
 
 STATIC struct scopelist *
-ForwModule(df, idn)
+ForwModule(df, nd)
 	register struct def *df;
-	struct node *idn;
+	struct node *nd;
 {
-	/*	An import is done from a not yet defined module "idn".
+	/*	An import is done from a not yet defined module "df".
+		We could also end up here for not found DEFINITION MODULES.
 		Create a declaration and a scope for this module.
 	*/
 	struct scopelist *vis;
 
-	df->df_scope = enclosing(CurrVis)->sc_scope;
-	df->df_kind = D_FORWMODULE;
+	if (df->df_scope != GlobalScope) {
+		df->df_scope = enclosing(CurrVis)->sc_scope;
+		df->df_kind = D_FORWMODULE;
+	}
 	open_scope(CLOSEDSCOPE);
 	vis = CurrVis;		/* The new scope, but watch out, it's "sc_encl"
 				   field is not set right. It must indicate the
@@ -256,7 +259,7 @@ ForwModule(df, idn)
 	vis->sc_encl = enclosing(CurrVis);
 				/* Here ! */
 	df->for_vis = vis;
-	df->for_node = MkLeaf(Name, &(idn->nd_token));
+	df->for_node = nd;
 	return vis;
 }
 
@@ -289,7 +292,9 @@ EnterExportList(Idlist, qualified)
 	register struct def *df, *df1;
 
 	for (;idlist; idlist = idlist->next) {
-		df = lookup(idlist->nd_IDF, CurrentScope);
+		extern struct def *NoImportlookup();
+
+		df = NoImportlookup(idlist->nd_IDF, CurrentScope);
 
 		if (!df) {
 			/* undefined item in export list
@@ -305,6 +310,8 @@ EnterExportList(Idlist, qualified)
 				"multiple occurrences of \"%s\" in export list",
 				idlist->nd_IDF->id_text);
 		}
+
+		if (df->df_kind == D_IMPORT) df = df->imp_def;
 
 		df->df_flags |= qualified;
 		if (qualified == D_EXPORTED) {
@@ -357,9 +364,10 @@ EnterExportList(Idlist, qualified)
 	FreeNode(Idlist);
 }
 
-EnterFromImportList(Idlist, FromDef)
+EnterFromImportList(Idlist, FromDef, FromId)
 	struct node *Idlist;
 	register struct def *FromDef;
+	struct node *FromId;
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
@@ -373,9 +381,11 @@ EnterFromImportList(Idlist, FromDef)
 		/* The module from which the import was done
 		   is not yet declared. I'm not sure if I must
 		   accept this, but for the time being I will.
+		   We also end up here if some definition module could not
+		   be found.
 		   ???
 		*/
-		vis = ForwModule(FromDef, FromDef->df_idf);
+		vis = ForwModule(FromDef, FromId);
 		forwflag = 1;
 		break;
 	case D_FORWMODULE:
@@ -385,7 +395,7 @@ EnterFromImportList(Idlist, FromDef)
 		vis = FromDef->mod_vis;
 		break;
 	default:
-		error("identifier \"%s\" does not represent a module",
+		node_error(FromId, "identifier \"%s\" does not represent a module",
 		       FromDef->df_idf->id_text);
 		break;
 	}
@@ -405,6 +415,7 @@ EnterFromImportList(Idlist, FromDef)
 		DoImport(df, CurrentScope);
 	}
 
+	if (!forwflag) FreeNode(FromId);
 	FreeNode(Idlist);
 }
 

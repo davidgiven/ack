@@ -21,15 +21,16 @@ extern int		err_occurred;
 LLmessage(tk)
 	int tk;
 {
-	if (tk)	{
-		/* if (tk != 0), it represents the token to be inserted.
-		   otherwize, the current token is deleted
+	if (tk > 0)	{
+		/* if (tk > 0), it represents the token to be inserted.
 		*/
 		error("%s missing", symbol2str(tk));
 		insert_token(tk);
 	}
-	else
-		error("%s deleted", symbol2str(dot.tk_symb));
+	else if (tk  < 0) {
+		error("garbage at end of program");
+	}
+	else	error("%s deleted", symbol2str(dot.tk_symb));
 }
 
 insert_token(tk)

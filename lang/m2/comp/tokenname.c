@@ -92,7 +92,7 @@ reserve(resv)
 
 	while (resv->tn_symbol)	{
 		p = str2idf(resv->tn_name, 0);
-		if (!p) fatal("Out of Memory");
+		if (!p) fatal("out of Memory");
 		p->id_reserved = resv->tn_symbol;
 		resv++;
 	}

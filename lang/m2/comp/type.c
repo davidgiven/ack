@@ -107,7 +107,9 @@ align(pos, al)
 	arith pos;
 	int al;
 {
-	return ((pos + al - 1) / al) * al;
+	arith i;
+
+	return pos + ((i = pos % al) ? al - i : 0);
 }
 
 struct type *
@@ -209,25 +211,25 @@ chk_basesubrange(tp, base)
 		   of "base".
 		*/
 		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
-			error("Base type has insufficient range");
+			error("base type has insufficient range");
 		}
 		base = base->next;
 	}
 
 	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
 		if (tp->next != base) {
-			error("Specified base does not conform");
+			error("specified base does not conform");
 		}
 	}
 	else if (base != card_type && base != int_type) {
-		error("Illegal base for a subrange");
+		error("illegal base for a subrange");
 	}
 	else if (base == int_type && tp->next == card_type &&
 		 (tp->sub_ub > max_int || tp->sub_ub < 0)) {
-		error("Upperbound to large for type INTEGER");
+		error("upperbound to large for type INTEGER");
 	}
 	else if (base != tp->next && base != int_type) {
-		error("Specified base does not conform");
+		error("specified base does not conform");
 	}
 
 	tp->next = base;
@@ -246,7 +248,7 @@ subr_type(lb, ub)
 	register struct type *tp = BaseType(lb->nd_type), *res;
 
 	if (!TstCompat(lb->nd_type, ub->nd_type)) {
-		node_error(ub, "Types of subrange bounds not equal");
+		node_error(ub, "types of subrange bounds not equal");
 		return error_type;
 	}
 
@@ -261,14 +263,14 @@ subr_type(lb, ub)
 	/* Check base type
 	*/
 	if (! (tp->tp_fund & T_DISCRETE)) {
-		node_error(ub, "Illegal base type for subrange");
+		node_error(ub, "illegal base type for subrange");
 		return error_type;
 	}
 
 	/* Check bounds
 	*/
 	if (lb->nd_INT > ub->nd_INT) {
-		node_error(ub, "Lower bound exceeds upper bound");
+		node_error(ub, "lower bound exceeds upper bound");
 	}
 
 	/* Now construct resulting type
@@ -361,12 +363,12 @@ set_type(tp)
 	getbounds(tp, &lb, &ub);
 
 	if (lb < 0 || ub > MAXSET-1) {
-		error("Set type limits exceeded");
+		error("set type limits exceeded");
 		return error_type;
 	}
 
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = WA(((ub - lb) + 8)/8);
+	tp->tp_size = WA(((ub - lb) + 8) >> 3);
 	return tp;
 }
 
@@ -406,7 +408,7 @@ ArraySizes(tp)
 	/* check index type
 	*/
 	if (! bounded(index_type)) {
-		error("Illegal index type");
+		error("illegal index type");
 		tp->tp_size = 0;
 		return;
 	}

@@ -24,6 +24,7 @@
 #include	"idf.h"
 #include	"chk_expr.h"
 #include	"walk.h"
+#include	"warning.h"
 
 extern arith	NewPtr();
 extern arith	NewInt();
@@ -147,7 +148,7 @@ WalkProcedure(procedure)
 	DoProfil();
 	TmpOpen(sc);
 
-	func_type = tp = ResultType(procedure->df_type);
+	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
 
 	if (tp && IsConstructed(tp)) {
 		/* The result type of this procedure is constructed.
@@ -678,7 +679,7 @@ DoForInit(nd, left)
 			node_error(nd, "type incompatibility in FOR statement");
 			return 0;
 		}
-node_warning(nd, "old-fashioned! compatibility required in FOR statement");
+node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	}
 
 	return 1;

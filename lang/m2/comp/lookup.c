@@ -52,6 +52,38 @@ lookup(id, scope)
 }
 
 struct def *
+NoImportlookup(id, scope)
+	register struct idf *id;
+	struct scope *scope;
+{
+	/*	Look up a definition of an identifier in scope "scope".
+		Make the "def" list self-organizing.
+		Don't check if the definition is imported!
+	*/
+	register struct def *df, *df1;
+
+	/* Look in the chain of definitions of this "id" for one with scope
+	   "scope".
+	*/
+	for (df = id->id_def, df1 = 0;
+	     df && df->df_scope != scope;
+	     df1 = df, df = df->next) { /* nothing */ }
+
+	if (df) {
+		/* Found it
+		*/
+		if (df1) {
+			/* Put the definition in front
+			*/
+			df1->next = df->next;
+			df->next = id->id_def;
+			id->id_def = df;
+		}
+	}
+	return df;
+}
+
+struct def *
 lookfor(id, vis, give_error)
 	register struct node *id;
 	struct scopelist *vis;

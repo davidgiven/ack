@@ -1,1 +1,1 @@
-char Version[] = "Version 0.6";
+char Version[] = "Version 0.7";

@@ -18,6 +18,7 @@ struct scope *PervasiveScope, *GlobalScope;
 struct scopelist *CurrVis;
 extern int proclevel;
 static struct scopelist *PervVis;
+extern char options[];
 
 /* STATICALLOCDEF "scope" 10 */
 
@@ -107,7 +108,7 @@ chk_proc(df)
 
 STATIC
 chk_forw(pdf)
-	struct def **pdf;
+	register struct def **pdf;
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
