@@ -69,6 +69,28 @@ skipline()
 
 	LoadChar(c);
 	while (class(c) != STNL && c != EOI) {
+		if (class(c) == STSTR || class(c) == STCHAR) {
+			register int stopc = c;
+			int escaped;
+			do {
+				escaped = 0;
+				LoadChar(c);
+				if (class(c) == STNL || c == EOI) {
+					break;
+				}
+				if (c == '\\') {
+					LoadChar(c);
+					if (c == '\n') {
+						++LineNumber;
+					}
+					else escaped = 1;
+				}
+			} while (escaped || c != stopc);
+			if (class(c) != STNL && c != EOI) {
+				LoadChar(c);
+			}
+			continue;
+		}
 		if (c == '\\') {
 			LoadChar(c);
 			if (class(c) == STNL)
