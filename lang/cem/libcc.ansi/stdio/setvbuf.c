@@ -7,11 +7,14 @@
 #include	<stdlib.h>
 #include	"loc_incl.h"
 
+extern int (*_fflush)(FILE *stream);
+
 int
 setvbuf(register FILE *stream, char *buf, int mode, size_t size)
 {
 	int retval = 0;
 
+	_fflush = fflush;
 	if (mode != _IOFBF && mode != _IOLBF && mode != _IONBF)
 		return EOF;
 

@@ -8,15 +8,19 @@
 char *
 gets(char *s)
 {
+	register FILE *stream = stdin;
 	register int ch;
 	register char *ptr;
 
 	ptr = s;
-	while ((ch = getc(stdin)) != EOF && ch != '\n')
+	while ((ch = getc(stream)) != EOF && ch != '\n')
 		*ptr++ = ch;
 
-	if (ch == EOF && ptr==s)
-		return (char *)NULL;
+	if (ch == EOF) {
+		if (feof(stream)) {
+			if (ptr == s) return NULL;
+		} else return NULL;
+	}
 
 	*ptr = '\0';
 	return s;

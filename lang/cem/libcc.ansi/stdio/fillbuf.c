@@ -10,7 +10,7 @@
 int read(int d, char *buf, int nbytes);
 
 int
-_fillbuf(register FILE *stream)
+__fillbuf(register FILE *stream)
 {
 	static unsigned char ch[FOPEN_MAX];
 
@@ -33,16 +33,21 @@ _fillbuf(register FILE *stream)
 			stream->_bufsiz = BUFSIZ;
 		}
 	}
+	if (io_testflag(stream, _IONBF | _IOLBF)) {
+		register int i;
+		for (i = 0; i < FOPEN_MAX; i++) {
+			if (__iotab[i] && io_testflag(__iotab[i], _IOLBF))
+				if (io_testflag(__iotab[i], _IOWRITING))
+					(void) fflush(__iotab[i]);
+		}
+	}
+
 	if (!stream->_buf) {
 		stream->_buf = &ch[fileno(stream)];
 		stream->_bufsiz = 1;
 	}
 	stream->_ptr = stream->_buf;
 	stream->_count = read(stream->_fd, (char *)stream->_buf, stream->_bufsiz);
-	/*
-	fprintf(stderr,"read %d bytes, \"%.*s\"\n"
-		, stream->_count, stream->_count, stream->_buf);
-	*/
 
 	if (stream->_count <= 0){
 		if (stream->_count == 0) {

@@ -5,24 +5,24 @@
 
 #include	<stdio.h>
 
-struct _iobuf _stdin = {
+struct __iobuf __stdin = {
 	0, 0, _IOREAD, 0,
 	(char *)NULL, (unsigned char *)NULL, (unsigned char *)NULL, 
 };
 
-struct _iobuf _stdout = {
-	1, 0, _IOWRITE, 0,
+struct __iobuf __stdout = {
+	0, 1, _IOWRITE, 0,
 	(char *)NULL, (unsigned char *)NULL, (unsigned char *)NULL, 
 };
 
-struct _iobuf _stderr = {
-	2, 0, _IOWRITE | _IONBF, 0,
+struct __iobuf __stderr = {
+	0, 2, _IOWRITE | _IOLBF, 0,
 	(char *)NULL, (unsigned char *)NULL, (unsigned char *)NULL, 
 };
 
-struct  _iobuf  *_iotable[FOPEN_MAX] = {
-	&_stdin,
-	&_stdout,
-	&_stderr,
+FILE *__iotab[FOPEN_MAX] = {
+	&__stdin,
+	&__stdout,
+	&__stderr,
 	0
 };

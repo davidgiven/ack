@@ -15,7 +15,7 @@ fflush(FILE *stream)
 
 	if (!stream) {
 	    for(i= 0; i < FOPEN_MAX; i++)
-		if (_iotable[i] && fflush(_iotable[i]))
+		if (__iotab[i] && fflush(__iotab[i]))
 			retval = EOF;
 	    return retval;
 	}

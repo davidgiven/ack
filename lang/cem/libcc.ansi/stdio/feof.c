@@ -5,10 +5,8 @@
 
 #include	<stdio.h>
 
-#undef	feof
-
 int
-feof(FILE *stream)
+(feof)(FILE *stream)
 {
-	return (stream->_flags & _IOEOF) != 0;
+	return feof(stream);
 }

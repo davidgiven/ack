@@ -6,7 +6,7 @@
 #include	<stdio.h>
 
 char *
-fgets(char *s, int n, FILE *stream)
+fgets(char *s, register int n, register FILE *stream)
 {
 	register int ch;
 	register char *ptr;
@@ -17,8 +17,11 @@ fgets(char *s, int n, FILE *stream)
 		if ( ch == '\n')
 			break;
 	}
-	if (ch == EOF && ptr == s)
-		return (char *)NULL;
+	if (ch == EOF) {
+		if (feof(stream)) {
+			if (ptr == s) return NULL;
+		} else return NULL;
+	}
 	*ptr = '\0';
 	return s;
 }

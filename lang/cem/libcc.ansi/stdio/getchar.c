@@ -5,10 +5,8 @@
 
 #include	<stdio.h>
 
-#undef	getchar
-
 int
-getchar(void)
+(getchar)(void)
 {
-	return getc(stdin);
+	return getchar();
 }

@@ -6,17 +6,19 @@
 #include	<stdio.h>
 
 size_t
-fread(register void *ptr, size_t size, size_t nmemb, FILE *stream)
+fread(void *ptr, size_t size, size_t nmemb, register FILE *stream)
 {
-	int c;
-	size_t ndone = 0, s;
+	register char *cp = ptr;
+	register int c;
+	size_t ndone = 0;
+	register size_t s;
 
 	if (size)
 		while ( ndone < nmemb ) {
 			s = size;
 			do {
 				if ((c = getc(stream)) != EOF)
-					*ptr++ = c;
+					*cp++ = c;
 				else
 					return ndone;
 			} while (--s);

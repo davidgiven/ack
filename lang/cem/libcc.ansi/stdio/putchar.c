@@ -5,10 +5,8 @@
 
 #include	<stdio.h>
 
-#undef	putchar
-
 int
-putchar(int c)
+(putchar)(int c)
 {
-	return putc(c, stdout);
+	return putchar(c);
 }

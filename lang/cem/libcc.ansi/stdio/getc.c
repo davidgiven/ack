@@ -5,10 +5,8 @@
 
 #include	<stdio.h>
 
-#undef	getc
-
 int
-getc(FILE *stream)
+(getc)(FILE *stream)
 {
-	return fgetc(stream);
+	return getc(stream);
 }

@@ -16,8 +16,6 @@ fprintf(FILE *stream, const char *format, ...)
 	va_start(ap, format);
 
 	retval = _doprnt (format, ap, stream);
-	if ( retval >= 0 && io_testflag(stream,_IOLBF) )
-		if (fflush(stream)) return EOF;
 
 	va_end(ap);
 

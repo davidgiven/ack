@@ -5,10 +5,8 @@
 
 #include	<stdio.h>
 
-#undef	ferror
-
 int
-ferror(FILE *stream)
+(ferror)(FILE *stream)
 {
-	return (stream->_flags & _IOERR) != 0;
+	return ferror(stream);
 }

@@ -16,8 +16,6 @@ printf(const char *format, ...)
 	va_start(ap, format);
 
 	retval = _doprnt(format, ap, stdout);
-	if (retval >= 0 && io_testflag(stdout,_IOLBF))
-		if (fflush(stdout)) return EOF;
 
 	va_end(ap);
 

@@ -10,8 +10,9 @@
 #include	"loc_incl.h"
 
 #define	NUMLEN	512
+#define	NR_CHARS	256
 
-static char	Xtable[128];
+static char	Xtable[NR_CHARS];
 static char	inp_buf[NUMLEN];
 
 /* Collect a number of characters which constitite an ordinal number.
@@ -22,58 +23,60 @@ static char	inp_buf[NUMLEN];
  */
 static char *
 o_collect(register int c, register FILE *stream, char type,
-			int width, int *base)
+			int width, int *basep)
 {
 	register char *bufp = inp_buf;
+	register int base;
 
 	switch (type) {
 	case 'i':	/* i means octal, decimal or hexadecimal */
 	case 'p':
 	case 'x':
-	case 'X':	*base = 16;	break;
+	case 'X':	base = 16;	break;
 	case 'd':
-	case 'u':	*base = 10;	break;
-	case 'o':	*base = 8;	break;
-	case 'b':	*base = 2;	break;
+	case 'u':	base = 10;	break;
+	case 'o':	base = 8;	break;
+	case 'b':	base = 2;	break;
 	}
 
 	if (c == '-' || c == '+') {
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if (--width);
+		    c = getc(stream);
 	}
 
-	if (width && c == '0' && *base == 16) {
+	if (width && c == '0' && base == 16) {
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if (--width)
+			c = getc(stream);
 		if (c != 'x' && c != 'X') {
-			if (type == 'i') *base = 8;
+			if (type == 'i') base = 8;
 		}
 		else if (width) {
 			*bufp++ = c;
-			width--;
-			c = getc(stream);
+			if (--width)
+				c = getc(stream);
 		}
 	}
-	else if (type == 'i') *base = 10;
+	else if (type == 'i') base = 10;
 
 	while (width) {
-		if (((*base == 10) && isdigit(c))
-		    || ((*base == 16) && isxdigit(c))
-		    || ((*base == 8) && isdigit(c) && (c < '8'))
-		    || ((*base == 2) && isdigit(c) && (c < '2'))) {
+		if (((base == 10) && isdigit(c))
+		    || ((base == 16) && isxdigit(c))
+		    || ((base == 8) && isdigit(c) && (c < '8'))
+		    || ((base == 2) && isdigit(c) && (c < '2'))) {
 			*bufp++ = c;
-			width--;
-			c = getc(stream);
+			if (--width)
+				c = getc(stream);
 		}
 		else break;
 	}
 
-	if (c != EOF) ungetc(c, stream);
-	if (type == 'i') *base = 0;
-	*bufp-- = '\0';
-	return bufp;
+	if (width && c != EOF) ungetc(c, stream);
+	if (type == 'i') base = 0;
+	*basep = base;
+	*bufp = '\0';
+	return bufp - 1;
 }
 
 #ifndef	NOFLOAT
@@ -82,68 +85,69 @@ o_collect(register int c, register FILE *stream, char type,
  * is encountered, leaving the offending character in the input. This means
  * that 1.el leaves the 'l' in the input queue. Since all detection of
  * format errors is done here, _doscan() doesn't call strtod() when it's
- * not necessary.
+ * not necessary, although the use of the width field can cause incomplete
+ * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
 static char *
-f_collect(register int c, register FILE *stream, int width)
+f_collect(register int c, register FILE *stream, register int width)
 {
 	register char *bufp = inp_buf;
 	int digit_seen = 0;
 
 	if (c == '-' || c == '+') {
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if (--width)
+			c = getc(stream);
 	}
 
 	while (width && isdigit(c)) {
 		digit_seen++;
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if (--width)
+			c = getc(stream);
 	}
 	if (width && c == '.') {
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if(--width)
+			c = getc(stream);
 		while (width && isdigit(c)) {
 			digit_seen++;
 			*bufp++ = c;
-			width--;
-			c = getc(stream);
+			if (--width)
+				c = getc(stream);
 		}
 	}
 
 	if (!digit_seen) {
-		if (c != EOF) ungetc(c, stream);
+		if (width && c != EOF) ungetc(c, stream);
 		return inp_buf - 1;
 	}
 	else digit_seen = 0;
 
 	if (width && (c == 'e' || c == 'E')) {
 		*bufp++ = c;
-		width--;
-		c = getc(stream);
+		if (--width)
+			c = getc(stream);
 		if (width && (c == '+' || c == '-')) {
 			*bufp++ = c;
-			width--;
-			c = getc(stream);
+			if (--width)
+				c = getc(stream);
 		}
 		while (width && isdigit(c)) {
 			digit_seen++;
 			*bufp++ = c;
-			width--;
-			c = getc(stream);
+			if (--width)
+				c = getc(stream);
 		}
 		if (!digit_seen) {
-			if (c != EOF) ungetc(c,stream);
+			if (width && c != EOF) ungetc(c,stream);
 			return inp_buf - 1;
 		}
 	}
 
-	if (c != EOF) ungetc(c, stream);
-	*bufp-- = '\0';
-	return bufp;
+	if (width && c != EOF) ungetc(c, stream);
+	*bufp = '\0';
+	return bufp - 1;
 }
 #endif	/* NOFLOAT */
 
@@ -165,19 +169,14 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 	int		flags;		/* some flags */
 	int		reverse;	/* reverse the checking in [...] */
 	int		kind;
-	register int	ic;
+	register int	ic;		/* the input character */
 #ifndef	NOFLOAT
 	long double	ld_val;
 #endif
 
-	ic = getc(stream);
-	if (ic == EOF)
-		return EOF;
-	ungetc(ic,stream);
-
 	while (1) {
 		if (isspace(*format)) {
-			while (isspace (*format))
+			while (isspace(*format))
 				++format;	/* skip whitespace */
 			ic = getc(stream);
 			nrchars++;
@@ -185,13 +184,14 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				ic = getc(stream);
 				nrchars++;
 			}
+			if (ic != EOF) ungetc(ic,stream);
+			nrchars--;
 		}
-		else {
-			ic = getc(stream);
-			nrchars++;
-		}
-		if (!*format)
-			break;		/* end of format */
+		if (!*format) break;	/* end of format */
+
+		ic = getc(stream);
+		nrchars++;
+
 		if (ic == EOF)
 			return conv ? done : EOF;
 		if (*format != '%') {
@@ -238,8 +238,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 			if (kind == ic) continue;
 			break;
 		case 'n':
-			if (ic != EOF)
-				ungetc(ic, stream);
+			if (ic != EOF) ungetc(ic, stream);
 			nrchars--;
 			if (flags & FL_SHORT)
 				*va_arg(ap, short *) = (short) nrchars;
@@ -258,7 +257,10 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		case 'X':		/* ditto */
 			if (!(flags & FL_WIDTHSPEC))
 				width = NUMLEN;
-			if (!width) return done;
+			if (!width) {
+				if (ic != EOF) ungetc(ic, stream);
+				return done;
+			}
 			str = o_collect(ic, stream, kind, width, &base);
 			if (str < inp_buf) return done;
 			nrchars += str - inp_buf + 1;
@@ -281,20 +283,25 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				width = 1;
 			if (!(flags & FL_NOASSIGN))
 				tmp_string = va_arg(ap, char *);
-			if (!width) return done;
-			if (width && !(flags & FL_NOASSIGN) && (ic != EOF))
+			if (!width) {
+				if (ic != EOF) ungetc(ic, stream);
+				return done;
+			}
+			if (!(flags & FL_NOASSIGN) && (ic != EOF))
 				++done;
 			while (width && ic != EOF) {
 				if (!(flags & FL_NOASSIGN))
 					*tmp_string++ = (char) ic;
-				width--;
-				ic = getc(stream);
-				nrchars++;
+				if (--width) {
+					ic = getc(stream);
+					nrchars++;
+				}
 			}
 
-			if (ic != EOF)
-				ungetc(ic,stream);
-			nrchars--;
+			if (width) {
+				if (ic != EOF) ungetc(ic,stream);
+				nrchars--;
+			}
 			break;
 
 		case 's':
@@ -302,36 +309,45 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				width = 0xffff;
 			if (!(flags & FL_NOASSIGN))
 				tmp_string = va_arg(ap, char *);
-			if (!width) return done;
+			if (!width) {
+				if (ic != EOF) ungetc(ic,stream);
+				return done;
+			}
 			if (!(flags & FL_NOASSIGN))
 				++done;
 			while (width && ic != EOF && !isspace(ic)) {
 				if (!(flags & FL_NOASSIGN))
 					*tmp_string++ = (char) ic;
-				width--;
-				ic = getc(stream);
-				nrchars++;
-				/* terminate the string */
-				if (!(flags & FL_NOASSIGN))
-					*tmp_string = '\0';	
+				if (--width) {
+					ic = getc(stream);
+					nrchars++;
+				}
 			}
-			if (ic != EOF)
-				ungetc(ic,stream);
-			nrchars--;
+			/* terminate the string */
+			if (!(flags & FL_NOASSIGN))
+				*tmp_string = '\0';	
+			if (width) {
+				if (ic != EOF) ungetc(ic,stream);
+				nrchars--;
+			}
 			break;
 
 		case '[':
+		{	int old_nrchars;
 			if (!(flags & FL_WIDTHSPEC))
 				width = 0xffff;
 
-			if (!width) return done;
+			if (!width) {
+				if (ic != EOF) ungetc(ic, stream);
+				return done;
+			}
 			if ( *(++format) == '^' ) {
 				reverse = 1;
 				format++;
 			} else
 				reverse = 0;
 
-			for (tmp_string = Xtable; tmp_string < &Xtable[128]
+			for (tmp_string = Xtable; tmp_string < &Xtable[NR_CHARS]
 							; tmp_string++)
 				*tmp_string = 0;
 
@@ -353,26 +369,37 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					else Xtable['-'] = 1;
 				}
 			}
-			if (!*format)
+			if (!*format) {
+				if (ic != EOF) ungetc(ic,stream);
 				return done;
+			}
 			
+			old_nrchars = nrchars;
 			if (!(flags & FL_NOASSIGN))
 				tmp_string = va_arg(ap, char *);
-			while (width && ic != EOF && (Xtable[ic] ^ reverse)) {
+			if (ic == EOF || !(Xtable[ic] ^ reverse)) {
+				if (ic != EOF) ungetc(ic, stream);
+				return done;
+			}
+
+			 while (width && ic != EOF && (Xtable[ic] ^ reverse)) {
 				if (!(flags & FL_NOASSIGN))
 					*tmp_string++ = (char) ic;
-				width--;
-				ic = getc(stream);
-				nrchars++;
+				if (--width) {
+					ic = getc(stream);
+					nrchars++;
+				}
 			}
-			if (ic != EOF)
-				ungetc(ic, stream);
-			nrchars--;
+			if (width) {
+				if (ic != EOF) ungetc(ic, stream);
+				nrchars--;
+			}
 			if (!(flags & FL_NOASSIGN)) {	/* terminate string */
 				*tmp_string = '\0';	
 				++done;
 			}
 			break;
+		}
 #ifndef	NOFLOAT:
 		case 'e':
 		case 'E':
@@ -402,7 +429,5 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}		/* end switch */
 		++format;
 	}
-	if (ic != EOF)
-		ungetc(ic, stream);
 	return conv ? done : EOF;
 }

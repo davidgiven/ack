@@ -1,4 +1,4 @@
-llib
+loc_incl.h
 tmpfile.c
 tmpnam.c
 rename.c
@@ -15,6 +15,7 @@ vfprintf.c
 vprintf.c
 vsprintf.c
 doprnt.c
+icompute.c
 fscanf.c
 scanf.c
 sscanf.c
@@ -40,6 +41,7 @@ ftell.c
 clearerr.c
 feof.c
 ferror.c
+fileno.c
 fltpr.c
 ecvt.c
 gcvt.c
@@ -47,4 +49,5 @@ fillbuf.c
 fclose.c
 flushbuf.c
 fflush.c
+isatty.c
 data.c

@@ -15,8 +15,8 @@ fclose(FILE *fp)
 	register int i, retval = 0;
 
 	for (i=0; i<FOPEN_MAX; i++)
-		if (fp == _iotable[i]) {
-			_iotable[i] = 0;
+		if (fp == __iotab[i]) {
+			__iotab[i] = 0;
 			break;
 		}
 	if (i >= FOPEN_MAX)

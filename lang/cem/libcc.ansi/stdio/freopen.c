@@ -5,11 +5,23 @@
 
 #include	<stdio.h>
 #include	<stdlib.h>
-#include	<sys/file.h>
 #include	"loc_incl.h"
 
-#define  PMODE    0666
-int open(const char *path, int flags, int mode);
+#define	PMODE		0666
+
+/* Do not "optimize" this file to use the open with O_CREAT if the file
+ * does not exist. The reason is given in fopen.c.
+ */
+#define	O_RDONLY	0
+#define	O_WRONLY	1
+#define	O_RDWR		2
+
+#define	O_CREAT		0x010
+#define	O_TRUNC		0x020
+#define	O_APPEND	0x040
+
+int open(const char *path, int flags);
+int creat(const char *path, int mode);
 int close(int d);
 
 FILE *
@@ -17,57 +29,52 @@ freopen(const char *name, const char *mode, FILE *stream)
 {
 	register int i;
 	int rwmode = 0, rwflags = 0;
-	int fd, flags = stream->_flags & ~(_IOWRITE|_IOREAD|_IOERR|_IOEOF);
+	int fd, flags = stream->_flags & (_IONBF | _IOFBF | _IOLBF | _IOMYBUF);
 
 	(void) fflush(stream);				/* ignore errors */
 	(void) close(fileno(stream));
 
 	switch(*mode++) {
-
 	case 'r':
 		flags |= _IOREAD;	
 		rwmode = O_RDONLY;
 		break;
-
 	case 'w':
 		flags |= _IOWRITE;
 		rwmode = O_WRONLY;
 		rwflags = O_CREAT | O_TRUNC;
 		break;
-
 	case 'a': 
-		flags |= _IOWRITE;
+		flags |= _IOWRITE | _IOAPPEND;
 		rwmode = O_WRONLY;
 		rwflags |= O_APPEND | O_CREAT;
 		break;         
-
 	default:
 		return (FILE *)NULL;
 	}
 
 	while (*mode) {
 		switch(*mode++) {
-
 		case 'b':
 			break;
-
 		case '+':
 			rwmode = O_RDWR;
 			flags |= _IOREAD | _IOWRITE;
 			break;
-
 		default:
 			return (FILE *)NULL;
-
 		}
 	}
 
-	fd = open(name, rwmode | rwflags, PMODE);
+	if ((rwflags & O_TRUNC)
+	    || (((fd = open(name, rwmode)) < 0)
+		    && (flags & _IOWRITE)))
+		fd = creat(name, PMODE);
 
 	if (fd < 0) {
 		for( i = 0; i < FOPEN_MAX; i++) {
-			if (stream == _iotable[i]) {
-				_iotable[i] = 0;
+			if (stream == __iotab[i]) {
+				__iotab[i] = 0;
 				break;
 			}
 		}

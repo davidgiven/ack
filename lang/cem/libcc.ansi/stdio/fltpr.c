@@ -56,7 +56,7 @@ _pscien(long double r, register char *s, int n, int flags)
 	*s++ = *s1++;
 	if ((n > 0) || (flags & FL_ALT))
 		*s++ = '.';
-	while (--n>0)
+	while (--n >= 0)
 		if (*s1) *s++ = *s1++;
 		else *s++ = '0';
 	*s++ = 'e';

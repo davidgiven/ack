@@ -5,12 +5,39 @@
 
 #include	<stdio.h>
 #include	<stdlib.h>
-#include	<sys/file.h>
 #include	"loc_incl.h"
 
 #define	PMODE		0666
 
-int open(const char *path, int flags, int mode);
+/* The next 3 defines are true in all UNIX systems known to me.
+ */
+#define	O_RDONLY	0
+#define	O_WRONLY	1
+#define	O_RDWR		2
+
+/* Since the O_CREAT flag is not available on all systems, we can't get it
+ * from the standard library. Furthermore, even if we know that <fcntl.h>
+ * contains such a flag, it's not sure whether it can be used, since we
+ * might be cross-compiling for another system, which may use an entirely
+ * different value for O_CREAT (or not support such a mode). The safest
+ * thing is to just use the Version 7 semantics for open, and use creat()
+ * whenever necessary.
+ *
+ * Another problem is O_APPEND, for which the same holds. When "a"
+ * open-mode is used, an lseek() to the end is done before every write()
+ * system-call.
+ *
+ * The O_CREAT, O_TRUNC and O_APPEND given here, are only for convenience.
+ * They are not passed to open(), so the values don't have to match a value
+ * from the real world. It is enough when they are unique.
+ */
+#define	O_CREAT		0x010
+#define	O_TRUNC		0x020
+#define	O_APPEND	0x040
+
+int open(const char *path, int flags);
+int creat(const char *path, int mode);
+
 int close(int d);
 
 FILE *
@@ -21,7 +48,7 @@ fopen(const char *name, const char *mode)
 	FILE *stream;
 	int fd, flags = 0;
 
-	for (i = 0; _iotable[i] != 0 ; i++) 
+	for (i = 0; __iotab[i] != 0 ; i++) 
 		if ( i >= FOPEN_MAX )
 			return (FILE *)NULL;
 
@@ -36,7 +63,7 @@ fopen(const char *name, const char *mode)
 		rwflags = O_CREAT | O_TRUNC;
 		break;
 	case 'a': 
-		flags |= _IOWRITE | _IOWRITING;
+		flags |= _IOWRITE | _IOWRITING | _IOAPPEND;
 		rwmode = O_WRONLY;
 		rwflags |= O_APPEND | O_CREAT;
 		break;         
@@ -57,7 +84,13 @@ fopen(const char *name, const char *mode)
 		}
 	}
 
-	fd = open(name, rwmode | rwflags, PMODE);
+	/* Perform a creat() when the file should be truncated or when
+	 * the file is opened for writing and the open() failed.
+	 */
+	if ((rwflags & O_TRUNC)
+	    || (((fd = open(name, rwmode)) < 0)
+		    && (flags & _IOWRITE)))
+		fd = creat(name, PMODE);
 
 	if (fd < 0) return (FILE *)NULL;
 
@@ -66,13 +99,13 @@ fopen(const char *name, const char *mode)
 		return (FILE *)NULL;
 	}
 
-	if ((flags & _IOREAD) && (flags  & _IOWRITE))
+	if ((flags & (_IOREAD | _IOWRITE))  == (_IOREAD | _IOWRITE))
 		flags &= ~(_IOREADING | _IOWRITING);
 
 	stream->_count = 0;
 	stream->_fd = fd;
 	stream->_flags = flags;
 	stream->_buf = NULL;
-	_iotable[i] = stream;
+	__iotab[i] = stream;
 	return stream;
 }

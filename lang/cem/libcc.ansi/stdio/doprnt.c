@@ -9,10 +9,11 @@
 #include	<string.h>
 #include	"loc_incl.h"
 
-static char *
+/* gnum() is used to get the width and precision fields of a format. */
+static const char *
 gnum(register const char *f, int *ip, va_list *app)
 {
-	register int    i, c;
+	register int	i, c;
 
 	if (*f == '*') {
 		*ip = va_arg((*app), int);
@@ -28,27 +29,14 @@ gnum(register const char *f, int *ip, va_list *app)
 	return f;
 }
 
-#if	EM_WSIZE == EM_PSIZE
+#if	_EM_WSIZE == _EM_PSIZE
 #define set_pointer(flags)				/* nothing */
-#elif	EM_LSIZE == EM_PSIZE
+#elif	_EM_LSIZE == _EM_PSIZE
 #define set_pointer(flags)	(flags |= FL_LONG)
 #else
-#define set_pointer(flags)				/* nothing */
 #error garbage pointer size
+#define set_pointer(flags)		/* compilation might continue */
 #endif
-
-char *
-_i_compute(unsigned long val, int base, char *s, int nrdigits)
-{
-	int c;
-
-	c= val % base ;
-	val /= base ;
-	if (val || nrdigits > 0)
-		s = _i_compute(val, base, s, nrdigits - 1);
-	*s++ = (c>9 ? c-10+'a' : c+'0');
-	return s;
-}
 
 /* print an ordinal number */
 static char *
@@ -91,16 +79,14 @@ o_print(va_list *ap, int flags, char *s, char c, int precision, int is_signed)
 		else if (flags & FL_SPACE) *s++ = ' ';
 		unsigned_val = signed_val;
 	}
+	if ((flags & FL_ALT) && (c == 'o')) *s++ = '0';
 	if (!unsigned_val) {
-		if (precision != 0)
-			*s++ = '0';
-		return s;
-	}
-	if (((flags & FL_ALT) && (c == 'x' || c == 'X' || c == 'o'))
-	    || c == 'p') {
+		 if (!precision)
+			return s;
+	} else if (((flags & FL_ALT) && (c == 'x' || c == 'X'))
+		    || c == 'p') {
 		*s++ = '0';
-		if (c != 'o')
-			*s++ = (c == 'X') ? 'X' : 'x';
+		*s++ = (c == 'X' ? 'X' : 'x');
 	}
 
 	switch (c) {
@@ -133,8 +119,7 @@ f_print(va_list *ap, int flags, char *s, char c, int precision)
 	long double ld_val;
 
 	if (flags & FL_LONGDOUBLE) ld_val = va_arg(*ap, long double);
-	else
-	    ld_val = (long double) va_arg(*ap, double);
+	else ld_val = (long double) va_arg(*ap, double);
 
 	switch(c) {
 	case 'f':
@@ -142,7 +127,7 @@ f_print(va_list *ap, int flags, char *s, char c, int precision)
 		break;
 	case 'e':
 	case 'E':
-		s = _pscien(ld_val, s, precision, flags);
+		s = _pscien(ld_val, s, precision , flags);
 		break;
 	case 'g':
 	case 'G':
@@ -160,16 +145,17 @@ f_print(va_list *ap, int flags, char *s, char c, int precision)
 int
 _doprnt(register const char *fmt, va_list ap, FILE *stream)
 {
-	register char   *s;
-	unsigned int    uint;
-	register int    j;
-	int             i, c, width, precision, zfill, flags, between_fill;
+	register char	*s;
+	unsigned int	uint;
+	register int	j;
+	int		i, c, width, precision, zfill, flags, between_fill;
 	int		nrchars=0;
-	char            *oldfmt, *s1, buf[1025];
+	const char	*oldfmt;
+	char		*s1, buf[1025];
 
 	while (c = *fmt++) {
 		if (c != '%') {
-#ifdef  CPM
+#ifdef	CPM
 			if (c == '\n') {
 				if (putc('\r', stream) == EOF)
 					return nrchars ? -nrchars : -1;
@@ -210,15 +196,10 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		}
 		if (!(flags & FL_WIDTHSPEC)) width = 0;
 
-		if (flags & FL_SIGN)
-			flags &= ~FL_SPACE;
+		if (flags & FL_SIGN) flags &= ~FL_SPACE;
 
-		if (flags & (FL_LJUST | FL_PRECSPEC))
-			flags &= ~FL_ZEROFILL;
+		if (flags & FL_LJUST) flags &= ~FL_ZEROFILL;
 
-		zfill = ' ';
-		if (flags & FL_ZEROFILL)
-			zfill = '0';
 
 		s = s1 = buf;
 
@@ -230,7 +211,7 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 
 		switch (c = *fmt++) {
 		default:
-#ifdef  CPM
+#ifdef	CPM
 			if (c == '\n') {
 				if (putc('\r', stream) == EOF)
 					return nrchars ? -nrchars : -1;
@@ -255,7 +236,7 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 				s1 = "(null)";
 			s = s1;
 			while (precision || !(flags & FL_PRECSPEC)) {
-				if (*s ==  '\0')
+				if (*s == '\0')
 					break;
 				s++;
 				precision--;
@@ -270,17 +251,19 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		case 'x':
 		case 'X':
 			if (!(flags & FL_PRECSPEC)) precision = 1;
+			else if (c != 'p') flags &= ~FL_ZEROFILL;
 			s = o_print(&ap, flags, s, c, precision, 0);
 			break;
 		case 'd':
 		case 'i':
 			flags |= FL_SIGNEDCONV;
 			if (!(flags & FL_PRECSPEC)) precision = 1;
+			else flags &= ~FL_ZEROFILL;
 			s = o_print(&ap, flags, s, c, precision, 1);
 			break;
 		case 'c':
 			uint = va_arg(ap, unsigned int);
-			for ( i= sizeof(uint) -1  ; i>=0 ; i-- ) {
+			for ( i= sizeof(uint) -1 ; i>=0 ; i-- ) {
 				if ( *s = uint%256 ) s++;
 				uint/= 256 ;
 			}
@@ -308,6 +291,8 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 			fmt = va_arg(ap, char *);
 			continue;
 		}
+		zfill = ' ';
+		if (flags & FL_ZEROFILL) zfill = '0';
 		j = s - s1;
 
 		/* between_fill is true under the following conditions:

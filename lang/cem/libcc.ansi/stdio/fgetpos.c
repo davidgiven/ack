@@ -4,7 +4,6 @@
 /* $Header$ */
 
 #include	<stdio.h>
-#include	<sys/file.h>
 
 int
 fgetpos(FILE *stream, fpos_t *pos)

@@ -6,20 +6,21 @@
 #include	<stdio.h>
 
 size_t
-fwrite(register const void *ptr, size_t size, size_t nmemb,
+fwrite(const void *ptr, size_t size, size_t nmemb,
 	    register FILE *stream)
 {
-	unsigned s;
-	unsigned ndone = 0;
+	register const unsigned char *cp = ptr;
+	register size_t s;
+	size_t ndone = 0;
 
 	if (size)
 		while ( ndone < nmemb ) {
 			s = size;
 			do {
-				if (putc((int)*(unsigned char *)ptr, stream)
+				if (putc((int)*cp, stream)
 					== EOF)
 					return ndone;
-				ptr++;
+				cp++;
 			} 
 			while (--s);
 			ndone++;

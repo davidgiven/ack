@@ -7,12 +7,17 @@
 #include	<stdlib.h>
 #include	"loc_incl.h"
 
+#include	<sys/types.h>
+
+off_t lseek(int fildes, off_t offset, int whence);
 int write(int d, const char *buf, int nbytes);
 int isatty(int d);
+extern int (*_fflush)(FILE *stream);
 
 int
-_flushbuf(int c, FILE * stream)
+__flushbuf(int c, FILE * stream)
 {
+	_fflush = fflush;
 	if (fileno(stream) < 0) return EOF;
 	if (!io_testflag(stream, _IOWRITE)) return EOF;
 	if (io_testflag(stream, _IOREADING) && !feof(stream)) return EOF;
@@ -25,22 +30,20 @@ _flushbuf(int c, FILE * stream)
 				if (!(stream->_buf =
 					    (unsigned char *) malloc(BUFSIZ))) {
 					stream->_flags |= _IONBF;
-				}
-				else {
+				} else {
 					stream->_flags |= _IOLBF;
 					stream->_bufsiz = BUFSIZ;
 					stream->_count = -1;
 				}
-			}
-			else {
+			} else {
 				if (!(stream->_buf =
 					    (unsigned char *) malloc(BUFSIZ))) {
 					stream->_flags |= _IONBF;
-				}
-				else {
+				} else {
 					stream->_flags |= _IOMYBUF;
 					stream->_bufsiz = BUFSIZ;
-					stream->_count = BUFSIZ - 1;
+					if (!io_testflag(stream, _IOLBF))
+						stream->_count = BUFSIZ - 1;
 				}
 			}
 			stream->_ptr = stream->_buf;
@@ -51,33 +54,48 @@ _flushbuf(int c, FILE * stream)
 		char c1 = c;
 
 		stream->_count = 0;
+		if (io_testflag(stream, _IOAPPEND)) {
+			if (lseek(fileno(stream), 0L, 2) == -1) {
+				stream->_flags |= _IOERR;
+				return EOF;
+			}
+		}
 		if (write(fileno(stream), &c1, 1) != 1) {
 			stream->_flags |= _IOERR;
 			return EOF;
 		}
 		return c;
-	}
-	else if (io_testflag(stream, _IOLBF)) {
+	} else if (io_testflag(stream, _IOLBF)) {
 		*stream->_ptr++ = c;
 		if (c == '\n' || stream->_count == -stream->_bufsiz) {
+			if (io_testflag(stream, _IOAPPEND)) {
+				if (lseek(fileno(stream), 0L, 2) == -1) {
+					stream->_flags |= _IOERR;
+					return EOF;
+				}
+			}
 			if (write(fileno(stream), (char *)stream->_buf,
 					-stream->_count) != -stream->_count) {
 				stream->_flags |= _IOERR;
 				return EOF;
-			}
-			else {
+			} else {
 				stream->_ptr  = stream->_buf;
 				stream->_count = 0;
 			}
 		}
-	}
-	else {
+	} else {
 		int count = stream->_ptr - stream->_buf;
 
 		stream->_count = stream->_bufsiz - 1;
 		stream->_ptr = stream->_buf + 1;
 
 		if (count > 0) {
+			if (io_testflag(stream, _IOAPPEND)) {
+				if (lseek(fileno(stream), 0L, 2) == -1) {
+					stream->_flags |= _IOERR;
+					return EOF;
+				}
+			}
 			if (write(fileno(stream), (char *)stream->_buf, count)
 			    != count) {
 				*(stream->_buf) = c;
@@ -88,14 +106,4 @@ _flushbuf(int c, FILE * stream)
 		*(stream->_buf) = c;
 	}
 	return c;
-}
-
-void
-_cleanup(void)		/* fflush((FILE *)NULL) ??? */
-{
-	register int i;
-
-	for( i = 0; i < FOPEN_MAX; i++ )
-		if (_iotable[i])
-			fclose(_iotable[i]);
 }
