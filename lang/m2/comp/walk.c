@@ -739,7 +739,7 @@ WalkStat(nd, exit_label, end_reached)
 			CurrVis = link.sc_next;
 			WithDesigs = wds.w_next;
 			FreePtr(ds.dsg_offset);
-			WalkDesignator(left, &ds, wds.w_flags & (D_USED|D_DEFINED));
+			ChkDesig(left, wds.w_flags & (D_USED|D_DEFINED));
 			break;
 		}
 
