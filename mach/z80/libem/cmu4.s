@@ -1,4 +1,9 @@
 .define .cmu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 4 byte cmu and cmi routine
 ! parameters:
@@ -56,5 +61,5 @@
 	inc hl
 	ld sp,hl
 	jp (ix)
-.data
-savesp: .word 0
+.sect .data
+savesp: .data2 0

@@ -1,4 +1,9 @@
 .define .set
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! use .unimpld
 
 ! any size sets

@@ -1,4 +1,9 @@
 .define .dvi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 4-byte divide routine for z80
 ! parameters:
@@ -77,9 +82,9 @@
 	push bc
 	push de
 	jp (ix)
-.data
-	.flag1: .byte 0
-	.flag2: .byte 0
-	retaddr:.word 0
-	.savebc: .word 0
-	.savede: .word 0
+.sect .data
+	.flag1: .data1 0
+	.flag2: .data1 0
+	retaddr:.data2 0
+	.savebc: .data2 0
+	.savede: .data2 0

@@ -1,6 +1,11 @@
-
-
 .define .nop
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+
+
 
 ! NOP
 ! changed into output routine to print linenumber

@@ -1,4 +1,9 @@
 .define .csa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! this is not a subroutine, but just a
 ! piece of code that computes the jump-

@@ -1,3 +1,8 @@
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 loop = 100
 dvi4:
 	xor a
@@ -57,6 +62,6 @@ dvi4:
 	push hl
 	push de
 	jp (iy)
-.data
-	.flag1: .byte 0
-	.flag2: .byte 0
+.sect .data
+	.flag1: .data1 0
+	.flag2: .data1 0

@@ -1,4 +1,9 @@
 .define .sts
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! use trp.z
 
 ! object size given by 2-byte integer on

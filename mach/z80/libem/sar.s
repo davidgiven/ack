@@ -1,4 +1,9 @@
 .define .sar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! use .mli2
 ! use .trp.z
 

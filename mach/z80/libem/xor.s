@@ -1,4 +1,9 @@
 .define .xor
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! auxiliary size 'xor'
 ! parameters:

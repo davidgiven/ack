@@ -1,4 +1,9 @@
 .define .mli4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 32-bit multiply routine for z80
 ! parameters:
@@ -70,6 +75,6 @@
 			! on stack!  put return address in hl
 	push ix		! least sign. 2 bytes of result
 	jp (hl)		! return
-.data
-.flag:  .byte 0
+.sect .data
+.flag:  .data1 0
 .mplier: .space 4

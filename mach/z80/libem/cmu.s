@@ -1,4 +1,9 @@
 .define .cmu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! parameters:
 !   hl   :  size (#bytes)

@@ -1,4 +1,9 @@
 .define .dvu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 16-bit divide
 ! parameters:

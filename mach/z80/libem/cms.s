@@ -1,4 +1,9 @@
 .define .cms
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! any size sets
 ! parameters:

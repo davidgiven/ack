@@ -1,4 +1,9 @@
 .define outdec
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! output contents of HL as a sequence
 ! of decimal digits
 outdec:
@@ -47,7 +52,7 @@ convert:
 	pop	bc
 	ret
 table:
-	.short	10000
-	.short	1000
-	.short	100
-	.short	10
+	.data2	10000
+	.data2	1000
+	.data2	100
+	.data2	10

@@ -1,4 +1,9 @@
 .define .aaru
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! AAR NOT DEFINED
 

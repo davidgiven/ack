@@ -1,17 +1,29 @@
 # $Header$
-install:
-	../../install tail_em.a tail_em
-	../../install tail.s end_em
+MACH=z80
+all:		libem_o.a end.o
 
-cmp:
-	-../../compare tail_em.a tail_em
-	-../../compare tail.s end_em
+install: 	all
+		../../install end.o end_em
+		../../install libem_o.a tail_em
 
-clean :
+
+cmp:		all
+		-../../compare end.o end_em
+		-../../compare libem_o.a tail_em
+
+libem_o.a:	libem_s.a
+		ASAR=aal ; export ASAR ;\
+		march . libem_o.a
+
+end.o:		end.s
+		$(MACH) -I../../../h -c end.s
+
+clean:
+		rm -f *.o libem_o.a
 
 opr :
-	make pr | opr
+		make pr | opr
 
 pr:
-	@arch pv tail_em.a | pr -h `pwd`/tail_em.a
-	@pr `pwd`/tail.s
+		@pr `pwd`/end.s
+		@arch pv libem_s.a | pr -h `pwd`/libem_s.a

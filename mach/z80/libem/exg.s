@@ -1,4 +1,9 @@
 .define .exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .exg:	
 	pop ix
 	pop de

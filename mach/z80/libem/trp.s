@@ -1,4 +1,9 @@
 .define .trp.z
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! changed into output routine to print errornumber
 

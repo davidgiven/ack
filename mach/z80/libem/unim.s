@@ -1,4 +1,9 @@
 .define unimpld, e.mon, e.rck, .trp.z, .unimpld
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 .unimpld:
 unimpld:		! used in dispatch table to

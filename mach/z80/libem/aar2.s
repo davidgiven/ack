@@ -1,4 +1,9 @@
 .define .aar2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! special case aar: element size = 2 (statically known)
 ! parameters:

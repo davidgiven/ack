@@ -1,4 +1,9 @@
 .define .and
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! auxiliary size 'and'
 ! parameters:

@@ -1,4 +1,9 @@
 .define .mli2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! 16 bit multiply
 ! parameters:

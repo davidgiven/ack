@@ -1,4 +1,9 @@
 .define .sar2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! special case sar: element size = 2 (statically known)
 ! parameters:

@@ -1,4 +1,9 @@
 .define .gto
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 .gto:
 	ld e,(hl)

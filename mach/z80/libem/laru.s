@@ -1,4 +1,9 @@
 .define .laru
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! LAR NOT DEFINED
 

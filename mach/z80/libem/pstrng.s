@@ -1,6 +1,11 @@
-
-
 .define	pstrng
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+
+
 ! print a string of characters to the console
 ! entry: DE points to string
 !	 string terminator is 0x00

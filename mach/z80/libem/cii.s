@@ -1,4 +1,10 @@
 .define .cii
+.define .cuu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! cii: convert integer to integer
 ! parameters:
@@ -107,7 +113,6 @@
 
 
 
-.define .cuu
 
 ! cuu: convert unsigned to unsigned
 ! parameters:
