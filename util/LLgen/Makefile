@@ -9,6 +9,7 @@ clean:
 
 install:
 	cd src; make
+	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl
 	cp src/LLgen $(INSTALLDIR)/LLgen
 	cp lib/rec $(LIBDIR)/rec
 	cp lib/incl $(LIBDIR)/incl
