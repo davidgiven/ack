@@ -44,6 +44,7 @@ do_option(text)
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
 		options[*(text-1)] = 1;
 		break;
+	case 'A' :	/* for Amake */
 	case 'd' :	/* dependency generation */
 		do_dependencies = 1;
 		if (*text) {
