@@ -40,7 +40,7 @@ STEOI:\200
 %	ISHEX
 %
 %C
-1:a-fA-F
+1:A-F0-9
 %Tchar ishex[] = {
 %p
 %T};
