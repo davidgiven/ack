@@ -5,6 +5,7 @@ static char rcsid[] = "$Header$";
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
+#include "shc.h"
 #include "assert.h"
 #include "alloc.h"
 #include "line.h"
@@ -169,6 +170,16 @@ num_p newnum() {
 oldnum(lp) num_p lp; {
 
 	oldcore((short *) lp,sizeof(num_t));
+}
+
+lblst_p newlblst() {
+
+	return((lblst_p) newcore(sizeof(lblst_t)));
+}
+
+oldlblst(lbp) lblst_p lbp; {
+
+	oldcore((short *) lbp, sizeof(lblst_t));
 }
 
 offset *newrom() {

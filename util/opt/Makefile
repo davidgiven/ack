@@ -1,10 +1,12 @@
 # $Header$
 
 EMHOME=../..
-CFILES=main.c getline.c lookup.c var.c process.c backward.c util.c\
-	alloc.c putline.c cleanup.c peephole.c flow.c reg.c
+CFILES=main.c getline.c lookup.c var.c process.c backward.c util.c \
+	alloc.c putline.c cleanup.c peephole.c flow.c reg.c shc.c \
+	pop_push.c
+
 OFILES=main.o getline.o lookup.o var.o process.o backward.o util.o\
-	alloc.o putline.o cleanup.o peephole.o flow.o
+	alloc.o putline.o cleanup.o peephole.o flow.o shc.o pop_push.o
 ONOGLOB=regnoglob.o
 OGLOB=regglob.o
 LIBS=$(EMHOME)/lib/em_data.a
@@ -19,16 +21,16 @@ LEXLIB=-ll
 
 all:	opt opt2
 
-opt:    $(OFILES) $(ONOGLOB) pattern.o $(LIBS)
+opt:	$(OFILES) $(ONOGLOB) pattern.o $(LIBS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(OFILES) $(ONOGLOB) pattern.o $(LIBS) -o opt
 
-opt2:   $(OFILES) $(OGLOB) pattern.o $(LIBS)
+opt2:	$(OFILES) $(OGLOB) pattern.o $(LIBS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(OFILES) $(OGLOB) pattern.o $(LIBS) -o opt2
 
-test:   opt testopt
+test:	opt testopt
 	testopt
 
-cmp :	all
+cmp:	all
 	-cmp opt $(EMHOME)/lib/em_opt
 	-cmp opt2 $(EMHOME)/lib/em_opt2
 	-cmp em_opt.6 $(EMHOME)/man/em_opt.6
@@ -43,13 +45,16 @@ install:all
 	rm -f $(EMHOME)/man/em_opt.6
 	cp em_opt.6 $(EMHOME)/man/em_opt.6
 
-pattern.c:      patterns mktab
+pattern.c:	patterns mktab
 	$(CPP) patterns | mktab > pattern.c
 
-mktab:  mktab.o $(LIBS)
+mktab:	mktab.o $(LIBS)
 	$(CC) $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
 
 mktab.o:	scan.c optim.h param.h pattern.h types.h
+
+pop_push.c ./pop_push.h: $(EMHOME)/etc/em_table pop_push.awk
+	awk -f pop_push.awk < $(EMHOME)/etc/em_table > pop_push.c
 
 depend: pattern.c
 	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
@@ -61,14 +66,14 @@ depend: pattern.c
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
 
-lint:   $(CFILES) pattern.c
-	$(LINT) $(CFILES) pattern.c>lint 2>&1
+lint:	$(CFILES) pattern.c
+	$(LINT) $(CFLAGS) $(CFILES) pattern.c>lint 2>&1
 
 printall:
 	-pr $(PROPTS) Makefile -n *.h `ls $(CFILES)` mktab.y scan.l patterns|$(OPR)
 	touch print
 
-print:  Makefile *.h $(CFILES) mktab.y scan.l patterns
+print:	Makefile *.h $(CFILES) mktab.y scan.l patterns
 	-pr $(PROPTS) -n $? | $(OPR)
 	touch print
 
@@ -79,7 +84,8 @@ pr:
 	@pr $(PROPTS) -n Makefile *.h $(CFILES) mktab.y scan.l patterns
 
 clean:
-	rm -f *.o opt mktab mktab.c scan.c pattern.c opt2 Out
+	rm -f *.o opt mktab mktab.c scan.c pattern.c opt2 Out \
+		pop_push.c pop_push.h
 
 regnoglob.o:	reg.c
 		$(CC) $(CFLAGS) -c -o regnoglob.o reg.c
@@ -92,6 +98,7 @@ regglob.o:	reg.c
 main.o: alloc.h
 main.o: ext.h
 main.o: param.h
+main.o: shc.h
 main.o: types.h
 getline.o: alloc.h
 getline.o: ext.h
@@ -99,15 +106,18 @@ getline.o: line.h
 getline.o: lookup.h
 getline.o: param.h
 getline.o: proinf.h
+getline.o: shc.h
 getline.o: types.h
 lookup.o: alloc.h
 lookup.o: lookup.h
 lookup.o: param.h
 lookup.o: proinf.h
+lookup.o: shc.h
 lookup.o: types.h
 var.o: lookup.h
 var.o: param.h
 var.o: proinf.h
+var.o: shc.h
 var.o: types.h
 process.o: alloc.h
 process.o: assert.h
@@ -116,6 +126,7 @@ process.o: line.h
 process.o: lookup.h
 process.o: param.h
 process.o: proinf.h
+process.o: shc.h
 process.o: types.h
 backward.o: alloc.h
 backward.o: assert.h
@@ -124,6 +135,7 @@ backward.o: line.h
 backward.o: lookup.h
 backward.o: param.h
 backward.o: proinf.h
+backward.o: shc.h
 backward.o: types.h
 util.o: assert.h
 util.o: ext.h
@@ -131,6 +143,7 @@ util.o: lookup.h
 util.o: optim.h
 util.o: param.h
 util.o: proinf.h
+util.o: shc.h
 util.o: types.h
 alloc.o: alloc.h
 alloc.o: assert.h
@@ -138,6 +151,7 @@ alloc.o: line.h
 alloc.o: lookup.h
 alloc.o: param.h
 alloc.o: proinf.h
+alloc.o: shc.h
 alloc.o: types.h
 putline.o: alloc.h
 putline.o: assert.h
@@ -147,6 +161,7 @@ putline.o: lookup.h
 putline.o: optim.h
 putline.o: param.h
 putline.o: proinf.h
+putline.o: shc.h
 putline.o: types.h
 cleanup.o: assert.h
 cleanup.o: ext.h
@@ -162,6 +177,7 @@ peephole.o: optim.h
 peephole.o: param.h
 peephole.o: pattern.h
 peephole.o: proinf.h
+peephole.o: shc.h
 peephole.o: types.h
 flow.o: alloc.h
 flow.o: ext.h
@@ -169,6 +185,7 @@ flow.o: line.h
 flow.o: optim.h
 flow.o: param.h
 flow.o: proinf.h
+flow.o: shc.h
 flow.o: types.h
 reg.o: alloc.h
 reg.o: assert.h
@@ -176,7 +193,18 @@ reg.o: ext.h
 reg.o: line.h
 reg.o: param.h
 reg.o: proinf.h
+reg.o: shc.h
 reg.o: types.h
+shc.o: alloc.h
+shc.o: assert.h
+shc.o: ext.h
+shc.o: line.h
+shc.o: param.h
+shc.o: pop_push.h
+shc.o: proinf.h
+shc.o: shc.h
+shc.o: types.h
+pop_push.o: pop_push.h
 pattern.o: param.h
 pattern.o: pattern.h
 pattern.o: types.h
@@ -186,6 +214,7 @@ regglob.o: ext.h
 regglob.o: line.h
 regglob.o: param.h
 regglob.o: proinf.h
+regglob.o: shc.h
 regglob.o: types.h
 regnoglob.o: alloc.h
 regnoglob.o: assert.h
@@ -193,4 +222,5 @@ regnoglob.o: ext.h
 regnoglob.o: line.h
 regnoglob.o: param.h
 regnoglob.o: proinf.h
+regnoglob.o: shc.h
 regnoglob.o: types.h

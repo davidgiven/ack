@@ -4,6 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include "param.h"
 #include "types.h"
+#include "shc.h"
 #include "assert.h"
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -41,8 +42,10 @@ process() {
 		    } while (madeopt && ++npasses < 5000);
 		    assert(!madeopt);
 		}
+		do_shc();		/* stackheight computation phase */
 		outpro();		/* generate PRO pseudo */
 		outregs();		/* generate MES ms_reg pseudos */
+		outsth();		/* generate MES ms_sth pseudos */
 	}
 	putlines(pseudos);		/* pseudos first */
 	if (prodepth != 0) {
@@ -101,6 +104,7 @@ symknown() {
 cleanlocals() {
 	register num_p *npp,np,tp;
 
+	delete_labels();
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++) {
 		np = *npp;
 		while (np != (num_p) 0) {
@@ -183,5 +187,19 @@ symvalue() {
 				count += abp->ab_index;
 			break;
 		}
+	}
+}
+
+do_shc()
+{
+	register line_p insptr = instrs, oldlin = NULL;
+
+	init_state();
+	shc_pseudos();
+	while (insptr != NULL) {
+	    insptr->l_prev = oldlin;
+	    oldlin = insptr;
+	    shc_instr(insptr);
+	    insptr = insptr->l_next;
 	}
 }

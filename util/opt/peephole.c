@@ -4,6 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include "param.h"
 #include "types.h"
+#include "shc.h"
 #include "assert.h"
 #include "line.h"
 #include "lookup.h"

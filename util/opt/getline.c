@@ -5,6 +5,7 @@ static char rcsid[] = "$Header$";
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
+#include "shc.h"
 #include "line.h"
 #include "lookup.h"
 #include "alloc.h"
@@ -463,6 +464,12 @@ int inpseudo(n) short n; {
 		case ms_reg:
 			tstinpro();
 			regvar(lnp->l_a.la_arg->a_next);
+			oldline(lnp);
+			lnp=newline(OPNO);
+			n=ps_exc;	/* kludge to force out this line */
+			break;
+		case ms_sth:
+			tstinpro();
 			oldline(lnp);
 			lnp=newline(OPNO);
 			n=ps_exc;	/* kludge to force out this line */
