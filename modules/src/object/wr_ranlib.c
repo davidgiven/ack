@@ -22,7 +22,7 @@ wr_ranlib(fd, ran, cnt)
 				put4(ran->ran_pos,c); c += 4;
 				ran++;
 			}
-			wr_bytes(fd, c, j);
+			wr_bytes(fd, buf, j);
 		}
 	}
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
