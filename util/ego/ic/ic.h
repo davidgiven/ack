@@ -3,6 +3,34 @@
  *  G L O B A L   C O N S T A N T S  &  V A R I A B L E S
  */
 
+
+/* Data structures for Intermediate Code generation */
+
+typedef struct sym *sym_p;
+typedef struct prc *prc_p;
+typedef struct num *num_p;
+
+
+struct sym {
+	sym_p	 sy_next;	/* link					*/
+	char	 sy_name[IDL];	/* name of the symbol			*/
+	dblock_p sy_dblock;	/* pointer to dblock struct		*/
+};
+struct prc {
+	prc_p	 pr_next;	/* link					*/
+	char	 pr_name[IDL];	/* name of the procedure		*/
+	proc_p	 pr_proc;	/* pointer tto proc struct		*/
+};
+
+
+struct num {
+	num_p	 n_next;	/* link					*/
+	unsigned n_number;	/* EM repr. e.g. 120 in 'BRA *120'	*/
+	lab_id	 n_labid;	/* sequential integer repr. of  IC	*/
+};
+
+
+
 /* macros used by ic_lib.c and ic_io.c: */
 
 #define ARCHIVE	0
