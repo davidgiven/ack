@@ -8,6 +8,7 @@ getopt.c
 getpass.c
 getpw.c
 getw.c
+isatty.c
 opendir.c
 popen.c
 putenv.c
