@@ -45,7 +45,7 @@ libobject.$(LIBSUF):	$(OFILES)
 		$(RANLIB) libobject.$(LIBSUF)
 
 lintlib:
-		$(MK_LINT_LIB object $(MOD_DIR)/lib $(INCLUDES) $(CFILES)
+		$(MK_LINT_LIB) object $(MOD_DIR)/lib $(INCLUDES) $(CFILES)
 		
 rd_arhdr.$(SUF):	$(SRC_DIR)/object.h $(SRC_DIR)/rd_arhdr.c
 		$(CC) -c $(CFLAGS) $(SRC_DIR)/rd_arhdr.c
