@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define E_NODE	0
 #define E_VAR	1	/* Variable *or* channel */
 #define E_CONST	2
