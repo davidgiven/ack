@@ -671,8 +671,8 @@ eor_l  "eor.l"	conreg4:ro,	datalt4:rw:cc		cost(2,6).
 eor_w  "eor.w"	conreg2:ro,	datalt2:rw:cc		cost(2,4).
 #endif
 /* in the next two instructions: LOCAL only allowed if register var */
-ext_l  "ext.l"	extend1+extend2+D_REG+LOCAL+D_REG4:rw:cc	cost(2,2).
-ext_w  "ext.w"	extend1+D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
+ext_l  "ext.l"	D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
+ext_w  "ext.w"	D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
 jmp		address+control4			cost(2,0).
 jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
 lea		address+control4:ro, A_REG+areg:wo	cost(2,0).
@@ -1208,11 +1208,11 @@ from memory1
     gen move_b %1, %a	yields	{dreg1, %a}
 
 from extend2
-    gen ext_l	%1	yields	%1.reg
+    gen ext_l	%1.reg	yields	%1.reg
 
 #if WORD_SIZE==2
 from extend1
-    gen ext_w	%1	yields %1.reg
+    gen ext_w	%1.reg	yields %1.reg
 #endif
 
 from extend1_4
@@ -4503,8 +4503,7 @@ pat loc loc ciu	$1==4 && $2==2
 with zero_const4
 				yields {zero_const, 0}
 with any4
-uses reusing %1, DD_REG4
-    gen move %1,%a
+uses reusing %1, DD_REG4 = %1
     				yields	%a.1
 
 pat loc loc cui	$1==2 && $2==4
@@ -6508,15 +6507,15 @@ uses reusing %1,DD_REG4
 #else
 with DD_REG		yields	{extend2, %1}
 with exact memory2
-uses reusing %1,DD_REG
-    gen move %1, %a	yields	{extend2, %a}
+uses reusing %1,DD_REG=%1
+			yields	{extend2, %a}
 #endif
 
 pat loc loc cii $1==1 && $2==WORD_SIZE
 with DD_REG		yields	{extend1, %1}
 with exact memory1
-uses reusing %1,DD_REG
-    gen move %1,%a	yields	{extend1, %a}
+uses reusing %1,DD_REG = %1
+    			yields	{extend1, %a}
 
 #if WORD_SIZE==2
 pat loc loc cii $1==1 && $2==4

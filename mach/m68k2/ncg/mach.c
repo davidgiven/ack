@@ -225,6 +225,7 @@ mes(type) word type ; {
 #else
 			fputs("jsr ___u_LiB\n", codefile);
 #endif
+			cleanregs();	/* debugger might change variables */
 		}
 		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
 		argt = getarg(cst_ptyp);
