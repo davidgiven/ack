@@ -203,6 +203,7 @@ C_rol	::=	not_implemented( "C_rol").
 C_rol_narg	::=	not_implemented( "C_rol_narg").
 C_ror	::=	not_implemented( "C_ror").
 C_ror_narg	::=	not_implemented( "C_ror_narg").
+/*
 C_init	::=	not_implemented( "C_init").
 C_open	::=	not_implemented( "C_open").
 C_close	::=	not_implemented( "C_close").
@@ -265,4 +266,5 @@ C_ilb	::=	not_implemented( "C_ilb").
 C_pnam	::=	not_implemented( "C_pnam").
 C_mes_begin	::=	not_implemented( "C_mes_begin").
 C_mes_end	::=	not_implemented( "C_mes_end").
+*/
 C_exc	::=	not_implemented( "C_exc").
