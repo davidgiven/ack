@@ -1,10 +1,4 @@
 : ${CDIR=.}
-if [ $# = 1 ]
-then
-	${DD-:} $CDIR $1
-else
-	${DD-:} $CDIR
-fi
 ${DF-:} $CDIR .distr
 if test ! -r $DESTDIR/$CDIR/.distr
 then

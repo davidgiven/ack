@@ -6,7 +6,6 @@ proto.main
 BigPars
 SmallPars
 SYSTEM.h
-Version.c
 casestat.C
 char.tab
 chk_expr.c

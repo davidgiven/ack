@@ -22,7 +22,7 @@ GFILES=	$(GEN_G) $(SRC_G)
 SRC_C =	$(SRC_DIR)/LLlex.c $(SRC_DIR)/LLmessage.c $(SRC_DIR)/error.c \
 	$(SRC_DIR)/main.c $(SRC_DIR)/lib.c $(SRC_DIR)/tokenname.c \
 	$(SRC_DIR)/idf.c $(SRC_DIR)/input.c $(SRC_DIR)/misc.c \
-	$(SRC_DIR)/options.c $(SRC_DIR)/Version.c 
+	$(SRC_DIR)/options.c
 GEN_C =	tokenfile.c program.c declar.c expression.c statement.c \
 	symbol2str.c char.c Lpars.c
 CFILES=	$(SRC_C) $(GEN_C)

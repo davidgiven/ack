@@ -26,7 +26,7 @@ SRC_C =	$(SRC_DIR)/LLlex.c $(SRC_DIR)/LLmessage.c $(SRC_DIR)/error.c \
 	$(SRC_DIR)/typequiv.c $(SRC_DIR)/node.c $(SRC_DIR)/cstoper.c \
 	$(SRC_DIR)/chk_expr.c $(SRC_DIR)/options.c $(SRC_DIR)/walk.c \
 	$(SRC_DIR)/desig.c $(SRC_DIR)/code.c $(SRC_DIR)/lookup.c \
-	$(SRC_DIR)/Version.c $(SRC_DIR)/stab.c
+	$(SRC_DIR)/stab.c
 GEN_C =	tokenfile.c program.c declar.c expression.c statement.c \
 	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
 CFILES=	$(SRC_C) $(GEN_C)

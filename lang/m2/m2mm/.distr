@@ -28,4 +28,3 @@ program.g
 statement.g
 tokenname.c
 tokenname.h
-Version.c

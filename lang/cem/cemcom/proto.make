@@ -20,7 +20,6 @@ GEN_G =	tokenfile.g
 GFILES=	$(GEN_G) $(SRC_G)
 
 SRC_C = \
-	$(SRC_DIR)/Version.c \
 	$(SRC_DIR)/LLlex.c \
 	$(SRC_DIR)/LLmessage.c \
 	$(SRC_DIR)/arith.c \

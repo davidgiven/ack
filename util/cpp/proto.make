@@ -42,13 +42,13 @@ LOBJ =	tokenfile.$(SUF) expression.$(SUF) Lpars.$(SUF)
 CSRC =	$(SRC_DIR)/LLlex.c $(SRC_DIR)/LLmessage.c $(SRC_DIR)/ch7bin.c  \
 	$(SRC_DIR)/ch7mon.c $(SRC_DIR)/domacro.c $(SRC_DIR)/error.c \
 	$(SRC_DIR)/idf.c $(SRC_DIR)/init.c $(SRC_DIR)/input.c \
-	$(SRC_DIR)/main.c $(SRC_DIR)/options.c $(SRC_DIR)/Version.c \
+	$(SRC_DIR)/main.c $(SRC_DIR)/options.c \
 	$(SRC_DIR)/preprocess.c $(SRC_DIR)/replace.c $(SRC_DIR)/scan.c \
 	$(SRC_DIR)/skip.c $(SRC_DIR)/tokenname.c $(SRC_DIR)/next.c \
 	$(SRC_DIR)/expr.c
 COBJ =	LLlex.$(SUF) LLmessage.$(SUF) ch7bin.$(SUF) ch7mon.$(SUF) \
 	domacro.$(SUF) error.$(SUF) idf.$(SUF) init.$(SUF) input.$(SUF) \
-	main.$(SUF) options.$(SUF) Version.$(SUF) \
+	main.$(SUF) options.$(SUF) \
 	preprocess.$(SUF) replace.$(SUF) scan.$(SUF) skip.$(SUF) \
 	tokenname.$(SUF) next.$(SUF) expr.$(SUF)
 
@@ -253,8 +253,6 @@ options.$(SUF):	$(SRC_DIR)/macro.h
 options.$(SUF):	$(SRC_DIR)/class.h
 options.$(SUF):	./idfsize.h
 options.$(SUF):	$(TARGET_HOME)/modules/h/alloc.h
-Version.$(SUF):	$(SRC_DIR)/Version.c
-	$(CC) -c $(CFLAGS) $(SRC_DIR)/Version.c
 preprocess.$(SUF):	$(SRC_DIR)/preprocess.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/preprocess.c
 preprocess.$(SUF):	./line_prefix.h

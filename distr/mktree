@@ -16,12 +16,26 @@ case $2 in
 /*)	REPDIR=$2 ;;
 *)	REPDIR=`pwd`/$2 ;;
 esac
+# DD=$DDIR/mkd
+# export DD
+mkdir -p $DESTDIR
+CVSROOT=/usr/proj/em/Repositories
+export CVSROOT
+cd $DESTDIR
+case $# in
+3)
+	cvs checkout world -r $3
+	;;
+2)
+	cvs checkout world
+	;;
+esac
 cd $REPDIR
-DD=$DDIR/mkd
 DF=$DDIR/mkf
 DA=$DDIR/mka
-export DDIR DESTDIR DD DF DA REPDIR
-$DDIR/dwalk $3
+export DDIR DESTDIR DF DA REPDIR
+
+$DDIR/dwalk
 
 cd $DESTDIR
 find . -type d -print | xargs chmod "uog+rx"

@@ -12,7 +12,8 @@ these files.
 
 When all this is correct, use the shell script mktree the extract
 the distribution from the EM tree.
-	sh mktree destination_tree repository_tree > destination_tree/Versions 2>f.attf
+	sh mktree destination_tree repository_tree <distrname> 2>f.attf
+Use the "cvs rtag" command to give the distribution a name first!
 Make sure that the destination tree exists and is empty!
 Failing to do that will almost certainly result in a welter of
 error messages.
