@@ -179,24 +179,25 @@ ch3cast(expp, oper, tp)
 		expression of class Type.
 	*/
 	register struct type *oldtp;
+	register struct expr *exp = *expp;
 	int qual_lev, ascompat = 0;
 
 	if (oper == RETURN && tp->tp_fund == VOID) {
-		expr_strict(*expp, "return <expression> in function returning void");
-		(*expp)->ex_type = void_type;
+		expr_strict(exp, "return <expression> in function returning void");
+		exp->ex_type = void_type;
 		return;
 	}
-	if ((*expp)->ex_type->tp_fund == FUNCTION) {
-		function2pointer(*expp);
+	if (exp->ex_type->tp_fund == FUNCTION) {
+		function2pointer(exp);
 	}
-	if ((*expp)->ex_type->tp_fund == ARRAY)
-		array2pointer(*expp);
-	if ((*expp)->ex_class == String)
-		string2pointer(*expp);
-	oldtp = (*expp)->ex_type;
+	if (exp->ex_type->tp_fund == ARRAY)
+		array2pointer(exp);
+	if (exp->ex_class == String)
+		string2pointer(exp);
+	oldtp = exp->ex_type;
 
-	if (oldtp->tp_size <= 0) {
-		expr_error(*expp,"incomplete type in expression");
+	if (oldtp->tp_size <= 0 && oldtp->tp_fund != VOID) {
+		expr_error(exp,"incomplete type in expression");
 	}
 
 #ifndef NOBITFIELD
@@ -234,15 +235,15 @@ ch3cast(expp, oper, tp)
 		if (ascompat && tp->tp_fund == POINTER) {
 			if ((tp->tp_up->tp_typequal & oldtp->tp_up->tp_typequal)
 			    != oldtp->tp_up->tp_typequal) {
-				expr_strict( *expp, "qualifier error");
+				expr_strict( exp, "qualifier error");
 			}
 		}
-		(*expp)->ex_type = tp;	/* so qualifiers are allright */
+		exp->ex_type = tp;	/* so qualifiers are allright */
 	}
 	else
 	if (tp->tp_fund == VOID) {
 		/* easy again */
-		(*expp)->ex_type = void_type;
+		exp->ex_type = void_type;
 	}
 	else
 	if (is_arith_type(oldtp) && is_arith_type(tp))	{
@@ -252,9 +253,10 @@ ch3cast(expp, oper, tp)
 		if (oldi && i)	{
 #ifdef	LINT
 			if (oper == CAST)
-				(*expp)->ex_type = tp;
-			else
+				exp->ex_type = tp;
+			else {
 				int2int(expp, tp);
+			}
 #else	LINT
 			int2int(expp, tp);
 #endif	LINT
@@ -263,9 +265,10 @@ ch3cast(expp, oper, tp)
 		if (oldi && !i)	{
 #ifdef	LINT
 			if (oper == CAST)
-				(*expp)->ex_type = tp;
-			else
+				exp->ex_type = tp;
+			else {
 				int2float(expp, tp);
+			}
 #else	LINT
 			int2float(expp, tp);
 #endif	LINT
@@ -274,9 +277,10 @@ ch3cast(expp, oper, tp)
 		if (!oldi && i) {
 #ifdef	LINT
 			if (oper == CAST)
-				(*expp)->ex_type = tp;
-			else
+				exp->ex_type = tp;
+			else {
 				float2int(expp, tp);
+			}
 #else	LINT
 			float2int(expp, tp);
 #endif	LINT
@@ -285,9 +289,10 @@ ch3cast(expp, oper, tp)
 			/* !oldi && !i */
 #ifdef	LINT
 			if (oper == CAST)
-				(*expp)->ex_type = tp;
-			else
+				exp->ex_type = tp;
+			else {
 				float2float(expp, tp);
+			}
 #else	LINT
 			float2float(expp, tp);
 #endif	LINT
@@ -312,16 +317,16 @@ ch3cast(expp, oper, tp)
 				break;	/* switch */
 			    }
 			    if (oldtp->tp_up->tp_fund == VOID
-				&& is_cp_cst(*expp)
-				&& (*expp)->VL_VALUE == (arith)0)
+				&& is_cp_cst(exp)
+				&& exp->VL_VALUE == (arith)0)
 				break;	/* switch */
 		    }
 		    /* falltrough */
 		default:
 		    if (oper == CASTAB)
-			    expr_strict(*expp, "incompatible pointers in call");
+			    expr_strict(exp, "incompatible pointers in call");
 		    else
-			    expr_strict(*expp, "incompatible pointers in %s",
+			    expr_strict(exp, "incompatible pointers in %s",
 							symbol2str(oper));
 		    break;
 		case CAST: break;
@@ -330,23 +335,23 @@ ch3cast(expp, oper, tp)
 		if (oper != CAST)
 			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
 #endif	LINT
-		(*expp)->ex_type = tp;	/* free conversion */
+		exp->ex_type = tp;	/* free conversion */
 	}
 	else
 	if (oldtp->tp_fund == POINTER && is_integral_type(tp))	{
 		/* from pointer to integral */
 		if (oper != CAST)
-			expr_warning(*expp,
+			expr_warning(exp,
 				"illegal conversion of pointer to %s",
 				symbol2str(tp->tp_fund));
 		if (oldtp->tp_size > tp->tp_size)
-			expr_warning(*expp,
+			expr_warning(exp,
 				"conversion of pointer to %s loses accuracy",
 				symbol2str(tp->tp_fund));
-		if (oldtp->tp_size != tp->tp_size)
+		if (oldtp->tp_size != tp->tp_size) {
 			int2int(expp, tp);
-		else
-			(*expp)->ex_type = tp;
+		} else
+			exp->ex_type = tp;
 	}
 	else
 	if (tp->tp_fund == POINTER && is_integral_type(oldtp))	{
@@ -359,43 +364,45 @@ ch3cast(expp, oper, tp)
 		case NOTEQUAL:
 		case '=':
 		case RETURN:
-			if (is_cp_cst(*expp) && (*expp)->VL_VALUE == (arith)0)
+			if (is_cp_cst(exp) && exp->VL_VALUE == (arith)0)
 				break;
 		default:
-			expr_warning(*expp,
+			expr_warning(exp,
 				"illegal conversion of %s to pointer",
 				symbol2str(oldtp->tp_fund));
 			break;
 		}
 		if (oldtp->tp_size > tp->tp_size)
-			expr_warning(*expp,
+			expr_warning(exp,
 				"conversion of %s to pointer loses accuracy",
 				symbol2str(oldtp->tp_fund));
-		if (oldtp->tp_size != tp->tp_size)
+		if (oldtp->tp_size != tp->tp_size) {
 			int2int(expp, tp);
-		else
-			(*expp)->ex_type = tp;
+		} else
+			exp->ex_type = tp;
 	}
 	else
 	if (oldtp->tp_fund == ERRONEOUS) {
 		/* we just won't look */
-		(*expp)->ex_type = tp;	/* brute force */
+		exp->ex_type = tp;	/* brute force */
 	}
 	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
-		expr_warning(*expp, "dubious conversion based on equal size");
-		(*expp)->ex_type = tp;		/* brute force */
+		expr_warning(exp, "dubious conversion based on equal size");
+		exp->ex_type = tp;		/* brute force */
 	}
 	else	{
 		if (oldtp->tp_fund != ERRONEOUS && tp->tp_fund != ERRONEOUS)
-			expr_error(*expp, "cannot convert %s to %s",
-				symbol2str(oldtp->tp_fund),
-				symbol2str(tp->tp_fund)
-			);
-		(*expp)->ex_type = tp;		/* brute force */
+			expr_error(exp, "cannot convert %s to %s",
+					symbol2str(oldtp->tp_fund),
+					symbol2str(tp->tp_fund)
+				    );
+		exp->ex_type = tp;		/* brute force */
 	}
+	/* re-initialize exp, since *expp may have changed */
+	exp = *expp;
 	if (oper == CAST) {
-		(*expp)->ex_flags |= EX_ILVALUE;
+		exp->ex_flags |= EX_ILVALUE;
 	}
 }
 
