@@ -326,9 +326,22 @@ if (Debug)
 	tup = tuples(regls,nregneeded);
 	besttup=0;
 	for (; tup != 0; tup = ntup) {
+#ifndef NDEBUG
+if(Debug>1) { fprintf(stderr,"Next tuple %d,%d,%d,%d\n",
+                        tup->p_rar[0],
+                        tup->p_rar[1],
+                        tup->p_rar[2],
+                        tup->p_rar[3]);
+                fprintf(stderr, "totalcost = %u, costlimit = %u, mincost = %u\n",
+                        totalcost, costlimit, mincost);
+        }
+#endif
 		ntup = tup->p_next;
 		for (i=0,t=0;i<nregneeded && t<mincost; i++)
 			t += docoerc(regtp[i],regcp[i],ply,FALSE,tup->p_rar[i]);
+#ifndef NDEBUG   
+if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t); 
+#endif
 		if (t<mincost)
 			t += codegen(codep,ply,FALSE,mincost-t,0);
 		if (t<mincost) {

@@ -30,7 +30,7 @@ main(argc,argv) char **argv; {
 		switch(argv[0][1]) {
 #ifndef NDEBUG
 		case 'd':
-			Debug=1; break;
+			Debug++; break;
 #endif
 		case 'p':
 			maxply = atoi(argv[0]+2);
