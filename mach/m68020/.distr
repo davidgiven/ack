@@ -6,6 +6,7 @@ libend
 libsys
 ncg
 libfp
+libdb
 top
 ce
 mach_params

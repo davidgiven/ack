@@ -20,6 +20,9 @@ end
 name "M68020 floating point library"
 dir libfp
 end
+name "M68020 debugger support library"
+dir libdb
+end
 name "M68020 system call library"
 dir libsys
 end
