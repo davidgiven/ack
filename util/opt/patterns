@@ -1,5 +1,10 @@
 "$Header$"
 loc adi loc sbi $2==w && $4==w: loc $1-$3 adi w
+inc dec:
+inc loc adi $3==w:	loc $1+1 adi w
+inc loc sbi $3==w:	loc $1-1 sbi w
+dec loc adi $3==w:	loc $1-1 adi w
+dec loc sbi $3==w:	loc $1+1 sbi w
 ldc adi ldc sbi $2==2*w && $4==2*w:     ldc $1-$3 adi 2*w
 loc adi loc adi $2==w && $4==w: loc $1+$3 adi w
 ldc adi ldc adi $2==2*w && $4==2*w:     ldc $1+$3 adi 2*w
@@ -24,6 +29,8 @@ cmi zgt $1==w:  bgt $2
 cmi zle $1==w:  ble $2
 cmi zlt $1==w:  blt $2
 cmi zne $1==w:  bne $2
+cmu zeq $1==w:	beq $2
+cmu zne $1==w:	bne $2
 dvi ngi $1==$2: ngi $1  dvi $1
 lae adp :       lae $1+$2
 lae blm $2==w:  loi w   ste $1
@@ -168,7 +175,13 @@ loc mlu $1==1 && $2==w:
 ldc mlu $1==1 && $2==2*w:
 loc sbi $1==1 && $2==w: dec
 loc loe mli $3==w:      loe $2  loc $1  mli w
+loc loe adi loc $3==w:	loe $2 	loc $1 	adi w loc $4
+loc loe adi inc $3==w:	loe $2 	loc $1 	adi w inc
+loc loe adi dec $3==w:	loe $2 	loc $1 	adi w dec
 loc lol mli $3==w:      lol $2  loc $1  mli w
+loc lol adi loc $3==w:	lol $2	loc $1	adi w loc $4
+loc lol adi inc $3==w:	lol $2	loc $1	adi w dec
+loc lol adi dec $3==w:	lol $2	loc $1	adi w dec
 ldc lde mli $3==2*w:    lde $2  ldc $1  mli 2*w
 ldc lde adi $3==2*w:    lde $2  ldc $1  adi 2*w
 ldc ldl mli $3==2*w:    ldl $2  ldc $1  mli 2*w
@@ -368,6 +381,10 @@ zer loc defined($1) && $2==0:   zer $1+w
 #endif
 loi loc and $1==1 && $3==w && ($2&255)==255:    loi 1
 loi loc loc cii $1<w && $2==w: loi $1 loc $2 loc $3 cui
+loi loc loc cii loc and $1==1 && $2==1 && $3==w && $5==255 && $6==w:	loi 1
+loi loc loc cii loc cmi zeq $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:	loi 1 loc $5 cmi w zeq $7
+loi loc loc cii loc cmi zne $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:	loi 1 loc $5 cmi w zne $7
+loi loc loc cii loc loc ciu loc and $1==1 && $2==1 && $3==w && $5==w && $6==w && $8==255 && $9==w:	loi 1
 cmp teq :       cms p   teq
 cmp tne :       cms p   tne
 cmu teq defined($1):    cms $1  teq
