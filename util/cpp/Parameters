@@ -68,10 +68,4 @@
 				*/
 
 
-!File: mkdep.h
-#undef MKDEP		1	/* if defined, preprocessor only outputs
-				   names of files included (not finished yet)
-				*/
-
-
 

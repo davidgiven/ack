@@ -10,13 +10,15 @@
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
-#include	"mkdep.h"
 
 char options[128];			/* one for every char	*/
 int inc_pos = 1;			/* place where next -I goes */
 int inc_max;
 int inc_total;
+int do_preprocess = 1;
+int do_dependencies = 0;
 char **inctable;
+char *dep_file = 0;
 
 extern int idfsize;
 int txt2int();
@@ -26,19 +28,24 @@ do_option(text)
 {
 	switch(*text++)	{
 	case '-':
-#ifdef MKDEP
 	case 'x':
-#endif
 		options[*text] = 1;
 		break;
 	default:
-#ifndef MKDEP
 		error("illegal option: %c", text[-1]);
-#endif
 		break;
 	case 'C' :	/* comment output		*/
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
 		options[*(text-1)] = 1;
+		break;
+	case 'd' :	/* dependency generation */
+		do_dependencies = 1;
+		if (*text) {
+			dep_file = text;
+		}
+		else {
+			do_preprocess = 0;
+		}
 		break;
 	case 'D' :	/* -Dname :	predefine name		*/
 	{

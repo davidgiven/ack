@@ -14,42 +14,32 @@
 #include "idfsize.h"
 #include "bits.h"
 #include "line_prefix.h"
-#include "mkdep.h"
 
 #ifdef DOBITS
 char bits[128];
 #endif
 
-#ifndef MKDEP
 char _obuf[OBUFSIZE];
+extern int do_preprocess;
 
 Xflush()
 {
-	sys_write(STDOUT, _obuf, OBUFSIZE);
+	if (do_preprocess) sys_write(STDOUT, _obuf, OBUFSIZE);
 }
-#endif
 
 preprocess(fn)
 	char *fn;
 {
 	register int c;
-#ifndef MKDEP
 	register char *op = _obuf;
 	register char *ob = &_obuf[OBUFSIZE];
-#endif
 	char Xbuf[256];
 	int lineno = 0;
 	extern char options[];
 
-#ifndef MKDEP
-#define flush(X)	(sys_write(STDOUT,_obuf,X))
+#define flush(X)	(! do_preprocess || sys_write(STDOUT,_obuf,X))
 #define echo(ch) 	if (op == ob) { Xflush(); op = _obuf; } *op++ = (ch);
 #define newline()	echo('\n')
-#else
-#define flush(X)
-#define echo(ch)	(ch)
-#define newline()
-#endif
 
 	if (! options['P']) {
 		/* Generate a line directive communicating the

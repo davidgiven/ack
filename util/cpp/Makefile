@@ -62,7 +62,7 @@ GSRC =	char.c symbol2str.c
 GHSRC =	errout.h idfsize.h ifdepth.h lapbuf.h \
 	nparams.h numsize.h obufsize.h \
 	parbufsize.h pathlength.h strsize.h textsize.h \
-	botch_free.h debug.h inputtype.h dobits.h line_prefix.h mkdep.h
+	botch_free.h debug.h inputtype.h dobits.h line_prefix.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
@@ -172,7 +172,6 @@ domacro.o: input.h
 domacro.o: inputtype.h
 domacro.o: interface.h
 domacro.o: macro.h
-domacro.o: mkdep.h
 domacro.o: nparams.h
 domacro.o: parbufsize.h
 domacro.o: textsize.h
@@ -192,13 +191,11 @@ main.o: file_info.h
 main.o: idf.h
 main.o: idfsize.h
 main.o: macro.h
-main.o: mkdep.h
 options.o: charoffset.h
 options.o: class.h
 options.o: idf.h
 options.o: idfsize.h
 options.o: macro.h
-options.o: mkdep.h
 preprocess.o: LLlex.h
 preprocess.o: bits.h
 preprocess.o: charoffset.h
@@ -210,7 +207,6 @@ preprocess.o: idfsize.h
 preprocess.o: input.h
 preprocess.o: inputtype.h
 preprocess.o: line_prefix.h
-preprocess.o: mkdep.h
 preprocess.o: obufsize.h
 replace.o: LLlex.h
 replace.o: charoffset.h

@@ -8,19 +8,20 @@
 #include <alloc.h>
 #include <em_arith.h>
 #include <assert.h>
+#include <system.h>
 #include "file_info.h"
 #include "idfsize.h"
-#include "mkdep.h"
-#ifdef MKDEP
 #include "idf.h"
 #include "macro.h"
-#endif
 
 extern char *symbol2str();
 extern char *getwdir();
 extern int err_occurred;
+extern int do_dependencies;
+extern char *dep_file;
 int idfsize = IDFSIZE;
 extern char options[];
+static File *dep_fd = STDOUT;
 
 arith ifval;
 
@@ -56,9 +57,6 @@ main(argc, argv)
 		do_option(par);
 		argc--, argv++;
 	}
-#ifdef MKDEP
-	options['P'] = 1;
-#endif
 	compile(argc - 1, &argv[1]);
 	exit(err_occurred);
 }
@@ -89,12 +87,9 @@ compile(argc, argv)
 			source ? source : "stdin");
 	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
-#ifdef MKDEP
-	list_dependencies(source);
-#endif
+	if (do_dependencies) list_dependencies(source);
 }
 
-#ifdef MKDEP
 struct idf	*file_head;
 extern char *strrindex();
 
@@ -120,6 +115,9 @@ list_dependencies(source)
 		}
 		else source = 0; 
 	}
+	if (dep_file && !sys_open(dep_file, OP_WRITE, &dep_fd)) {
+		fatal("could not open %s", dep_file);
+	}
 	while (p) {
 		assert(p->id_resmac == K_FILE);
 		dependency(p->id_text, source);
@@ -140,12 +138,13 @@ add_dependency(s)
 }
 
 dependency(s, source)
-	char *s;
+	char *s, *source;
 {
 	if (options['s'] && !strncmp(s, "/usr/include/", 13)) {
 		return;
 	}
-	if (options['m'] && source) print("%s: ", source);
-	print("%s\n", s);
+	if (options['m'] && source) {
+		fprint(dep_fd, "%s: %s\n", source, s);
+	}
+	else	fprint(dep_fd, "%s\n", s);
 }
-#endif

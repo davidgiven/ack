@@ -30,7 +30,6 @@ as a macro with
 as its replacement text.
 .IP -\fBD\fIname\fR
 the same as -\fBD\fIname\fR=1.
-.IP
 .IP -\fBU\fIname\fR
 .br
 undefine the macro name
@@ -42,9 +41,25 @@ do not generate line directives
 .IP -\fBM\fIn\fR
 set maximum identifier length to
 .IR n .
+.IP -\fBd\fR[\fIfile\fR]
+.br
+if \fIfile\fR is not given, do not preprocess, but instead generate a list
+of makefile dependencies and write them to the standard output.
+If \fIfile\fP is given, generate preprocessor output on standard output,
+and generate the list of makefile dependencies on file \fIfile\fP.
+.IP -\fBxs\fR
+when generating makefile dependencies, do not include files from
+/usr/include.
+.IP -\fBxm\fR
+when generating makefile dependencies, generate them in the following format:
+.RS
+.IP "file.o: file1.h"
+.RE
+.IP ""
+where "file.o" is derived from the source file name. Normally, only a list
+of files included is generated.
 .PP
 The following names are always available unless undefined:
-.RS
 .IP __FILE__
 The input (or #include) file being compiled
 (as a quoted string).
@@ -53,4 +68,3 @@ The line number being compiled.
 .IP __DATE__
 The date and time of compilation as
 a Unix ctime quoted string (the trailing newline is removed).
-.RE
