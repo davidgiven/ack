@@ -107,15 +107,15 @@ dir mach/i80
 indir
 end
 name "2-2 Interpreter support"
-dir mach/int22
+dir mach/em22
 indir
 end
 name "2-4 Interpreter support"
-dir mach/int24
+dir mach/em24
 indir
 end
 name "4-4 Interpreter support"
-dir mach/int44
+dir mach/em24
 indir
 end
 name "Motorola 68000 2-4 support"

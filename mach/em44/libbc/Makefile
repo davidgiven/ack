@@ -1,6 +1,6 @@
 SUF=m
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=int44" "SUF=$(SUF)"
+MACHDEF="MACH=em44" "SUF=$(SUF)"
 BCDEF="PREF=bc" "SUB=" "SRC=lang/basic/lib"
 
 install:

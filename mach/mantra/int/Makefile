@@ -3,7 +3,7 @@ em4_t--- em4_---- em4_t-cp em4_t-c- em4_t--p
 P = mloop
 FILES=deffile $P0 $P1 $P2 $P3 $P4 $P5 $P6 $P7 $P8 $P9 $Pa $Pb $Pc
 CPP=../../../lib/cpp
-b=../../../lib/int
+b=../../../lib/em
 FLTRAP=
 
 all:	$(INTS) em

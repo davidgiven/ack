@@ -43,7 +43,7 @@ Two types of load files can be distinguished,
 \fIa.out\fP files containing machine code and \fIe.out\fP
 files containing virtual EM machine code.
 The last type is designed for interpretation; it is obtained by calling
-the compiler as \fIint22\fP, \fIint24\fP, or \fIint44\fP.
+the compiler as \fIem22\fP, \fIem24\fP, or \fIem44\fP.
 Compilation time for interpretation is fast and gives many
 runtime checks,
 but execution is about seven times slower.

@@ -1,6 +1,6 @@
 Wed Apr 27 13:01:47 MET DST 1988
 ***** ctconv
-int24 -DNOFLOAT conv.c
+em24 -DNOFLOAT conv.c
 conv.c
 "conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
@@ -46,12 +46,12 @@ comparing conv
 > (short) 0x1f010L = 0xfffff010
 *** Error code 1 (ignored)
 ***** ctdecl
-int24 -DNOFLOAT decl.c
+em24 -DNOFLOAT decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-int24 -DNOFLOAT ops.c
+em24 -DNOFLOAT ops.c
 ops.c
 running ops.cem
 comparing ops
@@ -93,13 +93,13 @@ comparing ops
 >  u<<16 32163200000
 *** Error code 1 (ignored)
 ***** cterr
-int24 -DNOFLOAT bugs.c
+em24 -DNOFLOAT bugs.c
 bugs.c
 "bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-int24 -DNOFLOAT test.c
+em24 -DNOFLOAT test.c
 test.c
 running test.cem
 comparing test
@@ -109,19 +109,19 @@ comparing test
 > End of test program, 11 tests completed, 0 errors detected
 *** Error code 1 (ignored)
 ***** ctest2
-int24 -DNOFLOAT t7.c
+em24 -DNOFLOAT t7.c
 t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-int24 -DNOFLOAT test2.c
+em24 -DNOFLOAT test2.c
 test2.c
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 running test2.cem
 comparing test2
 ***** ctest5
-int24 -DNOFLOAT test1.c
+em24 -DNOFLOAT test1.c
 test1.c
 "test1.c", line 375: (warning) incompatible pointers in =
 "test1.c", line 376: (warning) incompatible pointers in =
@@ -143,17 +143,17 @@ comparing test1
 *** Error code 1 (ignored)
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-int24 -DNOFLOAT bf.c
+em24 -DNOFLOAT bf.c
 bf.c
 running bf.cem
 comparing bf
 sed -f cel.sed <OPS >cel.c
-int24 -DNOFLOAT cel.c
+em24 -DNOFLOAT cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-int24 -DNOFLOAT clu.c
+em24 -DNOFLOAT clu.c
 clu.c
 "clu.c", line 60: (warning) overflow in unsigned constant expression
 "clu.c", line 66: (warning) overflow in unsigned constant expression
@@ -251,14 +251,14 @@ comparing clu
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
 *** Error code 1 (ignored)
 sed -f ec.sed <OPS >ec.c
-int24 -DNOFLOAT ec.c
+em24 -DNOFLOAT ec.c
 ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-int24 -DNOFLOAT ef.c
+em24 -DNOFLOAT ef.c
 ef.c
 running ef.cem
 comparing ef
@@ -337,7 +337,7 @@ comparing ef
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f ei.sed <OPS >ei.c
-int24 -DNOFLOAT ei.c
+em24 -DNOFLOAT ei.c
 ei.c
 "ei.c", line 22: (warning) overflow in constant expression
 "ei.c", line 65: (warning) overflow in constant expression
@@ -366,12 +366,12 @@ comparing ei
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
 *** Error code 1 (ignored)
 sed -f el.sed <OPS >el.c
-int24 -DNOFLOAT el.c
+em24 -DNOFLOAT el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-int24 -DNOFLOAT eu.c
+em24 -DNOFLOAT eu.c
 eu.c
 "eu.c", line 58: (warning) overflow in unsigned constant expression
 "eu.c", line 64: (warning) overflow in unsigned constant expression
@@ -469,7 +469,7 @@ comparing eu
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
 *** Error code 1 (ignored)
 sed -f id.sed <OPS >id.c
-int24 -DNOFLOAT id.c
+em24 -DNOFLOAT id.c
 id.c
 running id.cem
 comparing id
@@ -548,14 +548,14 @@ comparing id
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f lc.sed <OPS >lc.c
-int24 -DNOFLOAT lc.c
+em24 -DNOFLOAT lc.c
 lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-int24 -DNOFLOAT ld.c
+em24 -DNOFLOAT ld.c
 ld.c
 running ld.cem
 comparing ld
@@ -634,7 +634,7 @@ comparing ld
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f lf.sed <OPS >lf.c
-int24 -DNOFLOAT lf.c
+em24 -DNOFLOAT lf.c
 lf.c
 running lf.cem
 comparing lf
@@ -713,7 +713,7 @@ comparing lf
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f li.sed <OPS >li.c
-int24 -DNOFLOAT li.c
+em24 -DNOFLOAT li.c
 li.c
 "li.c", line 22: (warning) overflow in constant expression
 "li.c", line 67: (warning) overflow in constant expression
@@ -742,12 +742,12 @@ comparing li
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
 *** Error code 1 (ignored)
 sed -f ll.sed <OPS >ll.c
-int24 -DNOFLOAT ll.c
+em24 -DNOFLOAT ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-int24 -DNOFLOAT lu.c
+em24 -DNOFLOAT lu.c
 lu.c
 running lu.cem
 comparing lu
@@ -844,13 +844,13 @@ comparing lu
 *** Error code 1 (ignored)
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-int24 -DNOFLOAT noarg.c
+em24 -DNOFLOAT noarg.c
 noarg.c
 "noarg.c", line 14: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-int24 -DNOFLOAT init.c
+em24 -DNOFLOAT init.c
 init.c
 "init.c", line 172: (warning) overflow in constant expression
 running init.cem
@@ -955,29 +955,29 @@ comparing init
 > 
 *** Error code 1 (ignored)
 ***** ctmargt
-int24 -DNOFLOAT margt.c
+em24 -DNOFLOAT margt.c
 margt.c
 running margt.cem
 comparing margt
 ***** ctprof
 test profiling
 procentry.c
-int24 -DNOFLOAT tp.c procentry.m
+em24 -DNOFLOAT tp.c procentry.m
 tp.c
 running tp.cem
 comparing tp
 ***** ctsetjmp
-int24 -DNOFLOAT stjmp.c
+em24 -DNOFLOAT stjmp.c
 stjmp.c
 running stjmp.cem
 comparing stjmp
 ***** ctstruct
-int24 -DNOFLOAT str.c
+em24 -DNOFLOAT str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-int24 -DNOFLOAT tfork.c
+em24 -DNOFLOAT tfork.c
 tfork.c
 running tfork.cem
 comparing tfork

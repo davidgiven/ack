@@ -5,10 +5,10 @@ var s=2
 var l=4
 var f=4
 var d=8
-var M=int44
-var NAME=int44
-var LIB=lib/int44/tail_
-var RT=lib/int44/head_
+var M=em44
+var NAME=em44
+var LIB=lib/em44/tail_
+var RT=lib/em44/head_
 var SIZE_FLAG=-sm
 var CPP_F=-Dunix=unix
 var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon

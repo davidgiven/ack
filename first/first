@@ -254,7 +254,7 @@ ABC
 	)
 	( cd ../mach
 	  : machines with word or pointer size not 2
-	  for i in int24 int44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
+	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
 	  do
 	  cp $i/Action $i/Action.orig
 	  ed - $i/Action <<ABC

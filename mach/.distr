@@ -6,9 +6,9 @@ i80
 compare
 i86
 install
-int22
-int24
-int44
+em22
+em24
+em44
 m68k2
 m68k4
 m68020

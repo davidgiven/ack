@@ -85,9 +85,9 @@ catch(trapno)
 		*p = 0;
 		_Traps__Message(q, 0, (int) (p - q), 1);
 	}
-#ifndef int24
-#ifndef int44
-#ifndef int22
+#ifndef em24
+#ifndef em44
+#ifndef em22
 	if (trapno == M2_UNIXSIG) {
 		extern int __signo;
 		signal(__signo, SIG_DFL);

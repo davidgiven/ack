@@ -9,5 +9,5 @@ dvu4.s
 eb.s
 em.s
 fpp.s
-int22
+em22
 mli4.s

@@ -1,6 +1,6 @@
 Thu Apr 28 12:20:53 MET DST 1988
 ***** ctconv
-int24 conv.c
+em24 conv.c
 conv.c
 "conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
@@ -33,12 +33,12 @@ comparing conv
 > 	char    -8, int 75000, unsigned short  22370, long       75000
 *** Error code 1 (ignored)
 ***** ctdecl
-int24 decl.c
+em24 decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-int24 ops.c
+em24 ops.c
 ops.c
 running ops.cem
 comparing ops
@@ -80,30 +80,30 @@ comparing ops
 >  u<<16 32163200000
 *** Error code 1 (ignored)
 ***** cterr
-int24 bugs.c
+em24 bugs.c
 bugs.c
 "bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-int24 test.c
+em24 test.c
 test.c
 running test.cem
 comparing test
 ***** ctest2
-int24 t7.c
+em24 t7.c
 t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-int24 test2.c
+em24 test2.c
 test2.c
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 running test2.cem
 comparing test2
 ***** ctest5
-int24 test1.c
+em24 test1.c
 test1.c
 "test1.c", line 375: (warning) incompatible pointers in =
 "test1.c", line 376: (warning) incompatible pointers in =
@@ -117,17 +117,17 @@ running test1.cem
 comparing test1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-int24 bf.c
+em24 bf.c
 bf.c
 running bf.cem
 comparing bf
 sed -f cel.sed <OPS >cel.c
-int24 cel.c
+em24 cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-int24 clu.c
+em24 clu.c
 clu.c
 "clu.c", line 60: (warning) overflow in unsigned constant expression
 "clu.c", line 66: (warning) overflow in unsigned constant expression
@@ -225,19 +225,19 @@ comparing clu
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
 *** Error code 1 (ignored)
 sed -f ec.sed <OPS >ec.c
-int24 ec.c
+em24 ec.c
 ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-int24 ef.c
+em24 ef.c
 ef.c
 running ef.cem
 comparing ef
 sed -f ei.sed <OPS >ei.c
-int24 ei.c
+em24 ei.c
 ei.c
 "ei.c", line 22: (warning) overflow in constant expression
 "ei.c", line 65: (warning) overflow in constant expression
@@ -266,12 +266,12 @@ comparing ei
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
 *** Error code 1 (ignored)
 sed -f el.sed <OPS >el.c
-int24 el.c
+em24 el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-int24 eu.c
+em24 eu.c
 eu.c
 "eu.c", line 58: (warning) overflow in unsigned constant expression
 "eu.c", line 64: (warning) overflow in unsigned constant expression
@@ -369,29 +369,29 @@ comparing eu
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
 *** Error code 1 (ignored)
 sed -f id.sed <OPS >id.c
-int24 id.c
+em24 id.c
 id.c
 running id.cem
 comparing id
 sed -f lc.sed <OPS >lc.c
-int24 lc.c
+em24 lc.c
 lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-int24 ld.c
+em24 ld.c
 ld.c
 running ld.cem
 comparing ld
 sed -f lf.sed <OPS >lf.c
-int24 lf.c
+em24 lf.c
 lf.c
 running lf.cem
 comparing lf
 sed -f li.sed <OPS >li.c
-int24 li.c
+em24 li.c
 li.c
 "li.c", line 22: (warning) overflow in constant expression
 "li.c", line 67: (warning) overflow in constant expression
@@ -420,12 +420,12 @@ comparing li
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
 *** Error code 1 (ignored)
 sed -f ll.sed <OPS >ll.c
-int24 ll.c
+em24 ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-int24 lu.c
+em24 lu.c
 lu.c
 running lu.cem
 comparing lu
@@ -522,13 +522,13 @@ comparing lu
 *** Error code 1 (ignored)
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-int24 noarg.c
+em24 noarg.c
 noarg.c
 "noarg.c", line 14: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-int24 init.c
+em24 init.c
 init.c
 "init.c", line 172: (warning) overflow in constant expression
 running init.cem
@@ -557,29 +557,29 @@ comparing init
 > 
 *** Error code 1 (ignored)
 ***** ctmargt
-int24 margt.c
+em24 margt.c
 margt.c
 running margt.cem
 comparing margt
 ***** ctprof
 test profiling
 procentry.c
-int24 tp.c procentry.m
+em24 tp.c procentry.m
 tp.c
 running tp.cem
 comparing tp
 ***** ctsetjmp
-int24 stjmp.c
+em24 stjmp.c
 stjmp.c
 running stjmp.cem
 comparing stjmp
 ***** ctstruct
-int24 str.c
+em24 str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-int24 tfork.c
+em24 tfork.c
 tfork.c
 running tfork.cem
 comparing tfork

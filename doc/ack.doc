@@ -393,7 +393,7 @@ var l=4	# long size 4
 var f=4	# float size 4
 var d=8	# double size 8
 var M=int	# Unused in this example
-var NAME=int22	# for cpp (NAME=int results in #define int 1)
+var NAME=em22	# for cpp (NAME=em22 results in #define em22 1)
 var LIB=mach/int/lib/tail_	# part of file name for libraries
 var RT=mach/int/lib/head_	# part of file name for run-time startoff
 var SIZE_FLAG=\-sm	# default internal table size flag
@@ -425,7 +425,7 @@ would result in the following
 calls (with exec(II)):
 .DS X
 .ta 4n
-1)	/lib/cpp \-I../h \-I/usr/em/include \-Dint22 \-DEM_WSIZE=2 \-DEM_PSIZE=2 \e
+1)	/lib/cpp \-I../h \-I/usr/em/include \-Dem22 \-DEM_WSIZE=2 \-DEM_PSIZE=2 \e
 	    \-DEM_SSIZE=2 \-DEM_LSIZE=4 \-DEM_FSIZE=4 \-DEM_DSIZE=8 prog.c
 2)	/usr/em/lib/em_cem \-Vw2i2p2f4s2l4d8 \-l
 3)	/usr/em/lib/em_ass \-sm /usr/em/mach/int/lib/head_cc \-o e.out prog.k

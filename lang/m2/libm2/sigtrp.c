@@ -10,9 +10,9 @@
   Version:	$Header$
 */
 
-#ifndef int22
-#ifndef int24
-#ifndef int44
+#ifndef em22
+#ifndef em24
+#ifndef em44
 
 #define EM_trap(n) TRP(n)	/* define to whatever is needed to cause the trap */
 

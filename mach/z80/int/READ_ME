@@ -5,7 +5,7 @@ which can be obtained by compiling the Pascal library with -DCPM,
 because the UNIX and CP/M conventions
 about end of file and end of line differ.
 Also, the size of "double" must be 4 bytes.
-To accomplish this, use the "int22" ack-description file from this
+To accomplish this, use the "em22" ack-description file from this
 directory, by putting it in the directory where you perform the compilation.
 Then the following sequence can be used to transmit it to CP/M.
 cv <e.out >file.cv

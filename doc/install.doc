@@ -852,19 +852,19 @@ z8000	Zilog 8000	2/2	C		z8000	Central Data
 			Occam
 			Modula-2
 
-int22	EM machine	2/2	C	*	int22	Needs interpreter
+em22	EM machine	2/2	C	*	em22	Needs interpreter
 			Pascal
 			Basic
 			Occam
 			Modula-2
 
-int24	EM machine	2/4	C	*	int24	Needs interpreter
+em24	EM machine	2/4	C	*	em24	Needs interpreter
 			Pascal
 			Basic
 			Occam
 			Modula-2
 
-int44	EM machine	4/4	C	*	int44	Needs interpreter
+em44	EM machine	4/4	C	*	em44	Needs interpreter
 			Pascal
 			Basic
 			Occam
@@ -903,7 +903,7 @@ z80	Hermac/z80	2/2	C		z80	\fIi80\fP is faster
 s2650	Signetics 2650				s2650	Assembler only
 .TE
 .PP
-The commands \fBint22\fP, \fBint24\fP and \fBint44\fP
+The commands \fBem22\fP, \fBem24\fP and \fBem44\fP
 produce e.out files with EM machine code which must be interpreted.
 The Kit contains two interpreters: one running under PDP 11/V7 UNIX,
 and one for the M68000, running under the PMDS system, SUN systems, 
@@ -915,7 +915,7 @@ The interpreter for the M68000 traps if you try to use floating point.
 .LP
 The program \fBem\fP in the bin directory calls the appropriate
 interpreter.
-The interpreters are sought in the int22, int24 and int44
+The interpreters are sought in the em22, em24 and em44
 subdirectories of lib.
 .NH
 Compilation on a different machine.
