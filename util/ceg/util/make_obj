@@ -24,13 +24,13 @@ CEG_LIBS = $(EM)/modules/lib/liballoc.a\
 	( cd ce; $(CC) -c $(CFLAGS) $(IFILES) ../$*.c)
 
 all:    back ceg ce
-        make -f ce_makefile ce.a
-         
+	make -f ce_makefile ce.a
+
 clean:
-        rm -rf ce back ceg ce.a back.a Out 
-         
+	rm -rf ce back ceg ce.a back.a Out 
+
 dclean:
-        rm -rf ce back ceg Out
+	rm -rf ce back ceg Out
 
 ce : ceg/ceg
 	mkdir ce
