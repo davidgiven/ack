@@ -6,8 +6,8 @@
 
 	.sect .text
 .csb:
-	move.l	(sp)+,a0	! case descriptor
-	move.l	(sp)+,d0	! index
+	! case descriptor in a0
+	! index in d0
 	move.l	(a0)+,a1	! default jump address
 	move.l	(a0)+,d1	! # entries
 	beq	2f
