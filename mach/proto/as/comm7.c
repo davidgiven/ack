@@ -198,7 +198,7 @@ small(fitsmall, gain)
 			return(0);
 		}
 		if (pbittab[bitindex] == 0 && pass == PASS_1) {
-			if ((pbittab[bitindex] = malloc(MEMINCR)) == 0) {
+			if ((pbittab[bitindex] = calloc(MEMINCR, 1)) == 0) {
 				static int w2_given;
 
 				if (!w2_given) {

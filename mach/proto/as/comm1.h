@@ -116,6 +116,7 @@ extern FILE	*fftemp();
 extern long	atol();
 extern char	*mktemp();
 extern char	*malloc();
+extern char	*calloc();
 extern char	*getenv();
 extern char	*strncpy();
 
