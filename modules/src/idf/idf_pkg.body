@@ -72,7 +72,7 @@ new_idf(tg, size, cpy)
 	return pidf++;
 }
 
-#ifdef	DEBUG
+#ifdef	IDF_DEBUG
 hash_stat()
 {
 	register int i;
@@ -84,13 +84,13 @@ hash_stat()
 
 		while (notch)	{
 			cnt++;
-			notch = notch->next;
+			notch = notch->id_next;
 		}
 		print("%d %d\n", i, cnt);
 	}
 	print("End hash table tally\n");
 }
-#endif	DEBUG
+#endif	IDF_DEBUG
 
 struct idf *
 str2idf(tg, cpy)
@@ -135,12 +135,12 @@ str2idf(tg, cpy)
 
 		if (cmp == 0) return notch;
 		if (cmp < 0) break;
-		hook = &notch->next;
+		hook = &notch->id_next;
 	}
 	/* a new struct idf must be inserted at the hook */
 	if (cpy < 0) return 0;
 	notch = new_idf(tg, size, cpy);
-	notch->next = *hook;
+	notch->id_next = *hook;
 	*hook = notch;		/* hooked in */
 	return notch;
 }

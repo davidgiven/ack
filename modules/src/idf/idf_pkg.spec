@@ -14,7 +14,7 @@
 #endif
 
 struct idf	{
-	struct idf *next;	/* links idf-structures together */
+	struct idf *id_next;	/* links idf-structures together */
 	char *id_text;		/* string representing the name */
 #ifdef IDF_TYPE
 	IDF_TYPE IDF_NAME;	/* user defined type and selector */
