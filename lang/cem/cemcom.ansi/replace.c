@@ -435,6 +435,10 @@ a_new_line:		ch = GetChar();
 
 			if (ch == '#') {
 				domacro();
+				/* Clear File_Inserted since domacro could
+				 * be called again, which calls GetToken().
+				 */
+				File_Inserted = 0;
 				goto a_new_line;
 			} else if (ch == EOI) {
 				lexerror("unterminated macro call");

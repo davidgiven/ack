@@ -147,7 +147,11 @@ firstline:
 			return ptok->tk_symb = EOI;
 
 		while ((ch = GetChar()),
-			(ch == '#' || ch == '/' || class(ch) == STSKIP)) {
+			(ch == '#'
+#ifndef NOPP
+			|| ch == '/'
+#endif
+			|| class(ch) == STSKIP)) {
 			/* blanks are allowed before hashes */
 			if (ch == '#') {
 				/* a control line follows */
