@@ -336,7 +336,7 @@ print_dep()
 						pr_arg(a);
 					}
 				}
-				print("\n\t$(MOD) -c.$(SUFFIX) $(M2FLAGS) $(IFLAGS) ");
+				print("\n\t$(MOD) -c $(M2FLAGS) $(IFLAGS) ");
 				pr_arg(arg);
 				print("\n");
 			}
