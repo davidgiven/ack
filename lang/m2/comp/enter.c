@@ -362,7 +362,9 @@ ForwDef(ids, scope)
 
 	if (!(df = lookup(ids->nd_IDF, scope, 0, 0))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
-		df->for_node = MkLeaf(Name, &(ids->nd_token));
+		df->for_node = new_node();
+		*(df->for_node) = *ids;
+		df->for_node->nd_NEXT = 0;
 	}
 	return df;
 }

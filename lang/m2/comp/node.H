@@ -51,7 +51,7 @@ typedef struct node	t_node;
 
 /* ALLOCDEF "node" 50 */
 
-extern t_node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf(), *getnode();
+extern t_node *dot2node(), *dot2leaf(), *getnode();
 
 #define NULLNODE ((t_node *) 0)
 

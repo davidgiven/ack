@@ -149,9 +149,14 @@ MkCoercion(pnd, tp)
 			return;
 		}
 	}
-	*pnd = nd = MkNode(Uoper, NULLNODE, nd, &(nd->nd_token));
+	*pnd = nd;
+	nd = getnode(Uoper);
 	nd->nd_symb = COERCION;
 	nd->nd_type = tp;
+	nd->nd_LEFT = NULLNODE;
+	nd->nd_RIGHT = *pnd;
+	nd->nd_lineno = (*pnd)->nd_lineno;
+	*pnd = nd;
 }
 
 int
@@ -1104,8 +1109,8 @@ ChkStandard(expp)
 	/*	Check a call of a standard procedure or function
 	*/
 	register t_node *exp = *expp;
-	t_node *arg = exp;
-	register t_node *left;
+	t_node *arglink = exp;
+	register t_node *arg;
 	register t_def *edf = exp->nd_LEFT->nd_def;
 	int free_it = 0;
 	int isconstant = 0;
@@ -1115,17 +1120,17 @@ ChkStandard(expp)
 	exp->nd_type = error_type;
 	switch(edf->df_value.df_stdname) {
 	case S_ABS:
-		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
-		exp->nd_type = BaseType(left->nd_type);
-		MkCoercion(&(arg->nd_LEFT), exp->nd_type);
-		left = arg->nd_LEFT;
+		if (!(arg = getarg(&arglink, T_NUMERIC, 0, edf))) return 0;
+		exp->nd_type = BaseType(arg->nd_type);
+		MkCoercion(&(arglink->nd_LEFT), exp->nd_type);
+		arg = arglink->nd_LEFT;
 		if (! (exp->nd_type->tp_fund & (T_INTEGER|T_REAL))) {
 			free_it = 1;
 		}
-		if (left->nd_class == Value) {
+		if (arg->nd_class == Value) {
 			switch(exp->nd_type->tp_fund) {
 			case T_REAL:
-				left->nd_RVAL.flt_sign = 0;
+				arg->nd_RVAL.flt_sign = 0;
 				free_it = 1;
 				break;
 			case T_INTEGER:
@@ -1137,13 +1142,14 @@ ChkStandard(expp)
 
 	case S_CAP:
 		exp->nd_type = char_type;
-		if (!(left = getarg(&arg, T_CHAR, 0, edf))) return 0;
-		if (left->nd_class == Value) isconstant = 1;
+		if (!(arg = getarg(&arglink, T_CHAR, 0, edf))) return 0;
+		if (arg->nd_class == Value) isconstant = 1;
 		break;
 
 	case S_FLOATD:
 	case S_FLOAT:
-		if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
+		if (! getarg(&arglink, T_INTORCARD, 0, edf)) return 0;
+		arg = arglink;
 		if (edf->df_value.df_stdname == S_FLOAT) {
 			MkCoercion(&(arg->nd_LEFT), card_type);
 		}
@@ -1159,10 +1165,10 @@ ChkStandard(expp)
 		t_type *tp;
 		t_type *s1, *s2, *d1, *d2;
 
-		if (!(left = getarg(&arg, 0, 0, edf))) {
+		if (!(arg = getarg(&arglink, 0, 0, edf))) {
 			return 0;
 		}
-		tp = BaseType(left->nd_type);
+		tp = BaseType(arg->nd_type);
 
 		if (edf->df_value.df_stdname == S_SHORT) {
 			s1 = longint_type;
@@ -1178,13 +1184,13 @@ ChkStandard(expp)
 		}
 
 		if (tp == s1) {
-			MkCoercion(&(arg->nd_LEFT), d1);
+			MkCoercion(&(arglink->nd_LEFT), d1);
 		}
 		else if (tp == s2) {
-			MkCoercion(&(arg->nd_LEFT), d2);
+			MkCoercion(&(arglink->nd_LEFT), d2);
 		}
 		else {
-			df_error(left, "unexpected parameter type", edf);
+			df_error(arg, "unexpected parameter type", edf);
 			break;
 		}
 		free_it = 1;
@@ -1192,30 +1198,30 @@ ChkStandard(expp)
 		}
 
 	case S_HIGH:
-		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0, edf))) {
+		if (!(arg = getarg(&arglink, T_ARRAY|T_STRING|T_CHAR, 0, edf))) {
 			return 0;
 		}
-		if (left->nd_type->tp_fund == T_ARRAY) {
-			exp->nd_type = IndexType(left->nd_type);
-			if (! IsConformantArray(left->nd_type)) {
-				left->nd_type = exp->nd_type;
+		if (arg->nd_type->tp_fund == T_ARRAY) {
+			exp->nd_type = IndexType(arg->nd_type);
+			if (! IsConformantArray(arg->nd_type)) {
+				arg->nd_type = exp->nd_type;
 				isconstant = 1;
 			}
 			break;
 		}
-		if (left->nd_symb != STRING) {
-			df_error(left,"array parameter expected", edf);
+		if (arg->nd_symb != STRING) {
+			df_error(arg,"array parameter expected", edf);
 			return 0;
 		}
 		exp = getnode(Value);
 		exp->nd_type = card_type;
 		/* Notice that we could disallow HIGH("") here by checking
-		   that left->nd_type->tp_fund != T_CHAR || left->nd_INT != 0.
+		   that arg->nd_type->tp_fund != T_CHAR || arg->nd_INT != 0.
 		   ??? For the time being, we don't. !!!
 		   Maybe the empty string should not be allowed at all.
 		*/
-		exp->nd_INT = left->nd_type->tp_fund == T_CHAR ? 0 :
-					left->nd_SLE - 1;
+		exp->nd_INT = arg->nd_type->tp_fund == T_CHAR ? 0 :
+					arg->nd_SLE - 1;
 		exp->nd_symb = INTEGER;
 		exp->nd_lineno = (*expp)->nd_lineno;
 		(*expp)->nd_RIGHT = 0;
@@ -1225,25 +1231,25 @@ ChkStandard(expp)
 
 	case S_MAX:
 	case S_MIN:
-		if (!(left = getname(&arg, D_ISTYPE, T_DISCRETE, edf))) {
+		if (!(arg = getname(&arglink, D_ISTYPE, T_DISCRETE, edf))) {
 			return 0;
 		}
-		exp->nd_type = left->nd_type;
+		exp->nd_type = arg->nd_type;
 		isconstant = 1;
 		break;
 
 	case S_ODD:
-		if (! (left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
-		MkCoercion(&(arg->nd_LEFT), BaseType(left->nd_type));
+		if (! (arg = getarg(&arglink, T_INTORCARD, 0, edf))) return 0;
+		MkCoercion(&(arglink->nd_LEFT), BaseType(arg->nd_type));
 		exp->nd_type = bool_type;
-		if (arg->nd_LEFT->nd_class == Value) isconstant = 1;
+		if (arglink->nd_LEFT->nd_class == Value) isconstant = 1;
 		break;
 
 	case S_ORD:
-		if (! (left = getarg(&arg, T_NOSUB, 0, edf))) return 0;
+		if (! (arg = getarg(&arglink, T_NOSUB, 0, edf))) return 0;
 		exp->nd_type = card_type;
-		if (left->nd_class == Value) {
-			left->nd_type = card_type;
+		if (arg->nd_class == Value) {
+			arg->nd_type = card_type;
 			free_it = 1;
 		}
 		break;
@@ -1262,56 +1268,55 @@ ChkStandard(expp)
 	node_error(exp, "NEW and DISPOSE are obsolete");
 			}
 		}
-		left = getvariable(&arg, edf, D_USED|D_DEFINED);
 		exp->nd_type = 0;
-		if (! left) return 0;
-		if (! (left->nd_type->tp_fund == T_POINTER)) {
-			df_error(left, "pointer variable expected", edf);
+		arg = getvariable(&arglink, edf, D_USED|D_DEFINED);
+		if (! arg) return 0;
+		if (! (arg->nd_type->tp_fund == T_POINTER)) {
+			df_error(arg, "pointer variable expected", edf);
 			return 0;
 		}
 		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
-		{
-			left = getnode(Value);
+		arglink->nd_RIGHT = arg = getnode(Link);
+		arg->nd_lineno = exp->nd_lineno;
+		arg->nd_symb = ',';
+		arg->nd_LEFT = getnode(Value);
+		arg = arg->nd_LEFT;
+		arg->nd_INT = PointedtoType(arglink->nd_LEFT->nd_type)->tp_size;
+		arg->nd_symb = INTEGER;
+		arg->nd_lineno = exp->nd_lineno;
+		arg->nd_type = card_type;
+		/* Ignore other arguments to NEW and/or DISPOSE ??? */
 
-			left->nd_INT = PointedtoType(arg->nd_LEFT->nd_type)->tp_size;
-			left->nd_symb = INTEGER;
-			left->nd_lineno = exp->nd_lineno;
-			left->nd_type = card_type;
-			arg->nd_RIGHT = MkNode(Link, left, NULLNODE, &(left->nd_token));
-			arg->nd_RIGHT->nd_symb = ',';
-			/* Ignore other arguments to NEW and/or DISPOSE ??? */
-
-			FreeNode(exp->nd_LEFT);
-			exp->nd_LEFT = left = getnode(Name);
-			left->nd_symb = IDENT;
-			left->nd_lineno = exp->nd_lineno;
-			left->nd_IDF = str2idf(edf->df_value.df_stdname==S_NEW ?
-						"ALLOCATE" : "DEALLOCATE", 0);
-		}
+		FreeNode(exp->nd_LEFT);
+		exp->nd_LEFT = arg = getnode(Name);
+		arg->nd_symb = IDENT;
+		arg->nd_lineno = exp->nd_lineno;
+		arg->nd_IDF = str2idf(edf->df_value.df_stdname==S_NEW ?
+					"ALLOCATE" : "DEALLOCATE", 0);
 		return ChkCall(expp);
 #endif
 
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
 		exp->nd_type = intorcard_type;
-		if (!(left = getname(&arg,D_FIELD|D_VARIABLE|D_ISTYPE,0,edf))) {
+		if (!(arg = getname(&arglink,D_FIELD|D_VARIABLE|D_ISTYPE,0,edf))) {
 			return 0;
 		}
-		if (! IsConformantArray(left->nd_type)) isconstant = 1;
+		if (! IsConformantArray(arg->nd_type)) isconstant = 1;
 #ifndef NOSTRICT
 		else node_warning(exp,
 				  W_STRICT,
 				  "%s on conformant array",
-				  exp->nd_LEFT->nd_def->df_idf->id_text);
+				  edf->df_idf->id_text);
 #endif
 #ifndef STRICT_3RD_ED
 		if (! options['3'] && edf->df_value.df_stdname == S_TSIZE) {
-			if (left = arg->nd_RIGHT) {
-				node_warning(left,
+			if (arg = arglink->nd_RIGHT) {
+				node_warning(arg,
 					     W_OLDFASHIONED,
 					     "TSIZE with multiple parameters, only first parameter used");
-				FreeNode(left);
-				arg->nd_RIGHT = 0;
+				FreeNode(arg);
+				arglink->nd_RIGHT = 0;
 			}
 		}
 #endif
@@ -1319,49 +1324,49 @@ ChkStandard(expp)
 
 	case S_TRUNCD:
 	case S_TRUNC:
-		if (! getarg(&arg, T_REAL, 0, edf)) return 0;
-		MkCoercion(&(arg->nd_LEFT),
+		if (! getarg(&arglink, T_REAL, 0, edf)) return 0;
+		MkCoercion(&(arglink->nd_LEFT),
 			   edf->df_value.df_stdname == S_TRUNCD ?
 				longint_type : card_type);
 		free_it = 1;
 		break;
 
 	case S_VAL:
-		if (!(left = getname(&arg, D_ISTYPE, T_NOSUB, edf))) {
+		if (!(arg = getname(&arglink, D_ISTYPE, T_NOSUB, edf))) {
 			return 0;
 		}
-		exp->nd_type = left->nd_def->df_type;
-		exp->nd_RIGHT = arg->nd_RIGHT;
-		arg->nd_RIGHT = 0;
-		FreeNode(arg);
-		arg = exp;
+		exp->nd_type = arg->nd_def->df_type;
+		exp->nd_RIGHT = arglink->nd_RIGHT;
+		arglink->nd_RIGHT = 0;
+		FreeNode(arglink);
+		arglink = exp;
 		/* fall through */
 	case S_CHR:
-		if (! getarg(&arg, T_CARDINAL, 0, edf)) return 0;
+		if (! getarg(&arglink, T_CARDINAL, 0, edf)) return 0;
 		if (edf->df_value.df_stdname == S_CHR) {
 			exp->nd_type = char_type;
 		}
 		if (exp->nd_type != int_type) {
-			MkCoercion(&(arg->nd_LEFT), exp->nd_type);
+			MkCoercion(&(arglink->nd_LEFT), exp->nd_type);
 			free_it = 1;
 		}
 		break;
 
 	case S_ADR:
 		exp->nd_type = address_type;
-		if (! getarg(&arg, 0, 1, edf)) return 0;
+		if (! getarg(&arglink, 0, 1, edf)) return 0;
 		break;
 
 	case S_DEC:
 	case S_INC:
 		exp->nd_type = 0;
-		if (! (left = getvariable(&arg, edf, D_USED|D_DEFINED))) return 0;
-		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
-			df_error(left,"illegal parameter type", edf);
+		if (! (arg = getvariable(&arglink, edf, D_USED|D_DEFINED))) return 0;
+		if (! (arg->nd_type->tp_fund & T_DISCRETE)) {
+			df_error(arg,"illegal parameter type", edf);
 			return 0;
 		}
-		if (arg->nd_RIGHT) {
-			if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
+		if (arglink->nd_RIGHT) {
+			if (! getarg(&arglink, T_INTORCARD, 0, edf)) return 0;
 		}
 		break;
 
@@ -1376,13 +1381,13 @@ ChkStandard(expp)
 		t_node *dummy;
 
 		exp->nd_type = 0;
-		if (!(left = getvariable(&arg, edf, D_USED|D_DEFINED))) return 0;
-		tp = left->nd_type;
+		if (!(arg = getvariable(&arglink, edf, D_USED|D_DEFINED))) return 0;
+		tp = arg->nd_type;
 		if (tp->tp_fund != T_SET) {
 			df_error(arg, "SET parameter expected", edf);
 			return 0;
 		}
-		if (!(dummy = getarg(&arg, 0, 0, edf))) return 0;
+		if (!(dummy = getarg(&arglink, 0, 0, edf))) return 0;
 		if (!ChkAssCompat(&dummy, ElementType(tp), "EXCL/INCL")) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???
@@ -1392,13 +1397,15 @@ ChkStandard(expp)
 			*/
 			return 0;
 		}
-		MkCoercion(&(arg->nd_LEFT), word_type);
+		MkCoercion(&(arglink->nd_LEFT), word_type);
 		break;
 		}
 
 	default:
 		crash("(ChkStandard)");
 	}
+
+	arg = arglink;
 
 	if (arg->nd_RIGHT) {
 		df_error(arg->nd_RIGHT, "too many parameters supplied", edf);

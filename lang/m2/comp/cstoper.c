@@ -503,8 +503,9 @@ cstset(expp)
 	}
 
 	set1 = exp->nd_LEFT->nd_set;
-	*expp = MkLeaf(Set, &(exp->nd_RIGHT->nd_token));
+	*expp = getnode(Set);
 	(*expp)->nd_type = exp->nd_type;
+	(*expp)->nd_lineno = exp->nd_lineno;
 	switch(exp->nd_symb) {
 	case '+': /* Set union */
 	case '-': /* Set difference */

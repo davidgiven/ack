@@ -32,8 +32,6 @@
 #include	"walk.h"
 #include	"bigresult.h"
 
-extern char	*long2str();
-extern char	*symbol2str();
 extern int	proclevel;
 extern char	options[];
 extern t_desig	null_desig;
@@ -54,12 +52,6 @@ CodeConst(cst, size)
 	}
 	else {
 		crash("(CodeConst)");
-/*
-		C_df_dlb(++data_label);
-		C_rom_icon(long2str((long) cst), (arith) size);
-		c_lae_dlb(data_label);
-		C_loi((arith) size);
-*/
 	}
 }
 
@@ -169,11 +161,11 @@ CodeExpr(nd, ds, true_label, false_label)
 }
 
 CodeCoercion(t1, t2)
-	register t_type *t1, *t2;
+	t_type *t1, *t2;
 {
-	register int fund1, fund2;
-	arith sz1 = t1->tp_size;
-	arith sz2;
+	int fund1, fund2;
+	int sz1 = t1->tp_size;
+	int sz2;
 
 	t1 = BaseType(t1);
 	t2 = BaseType(t2);
@@ -186,7 +178,7 @@ CodeCoercion(t1, t2)
 	case T_ENUMERATION:
 	case T_CARDINAL:
 	case T_INTORCARD:
-		if ((int) sz1 < (int) word_size) sz1 = word_size;
+		if (sz1 < (int) word_size) sz1 = word_size;
 		/* fall through */
 	case T_EQUAL:
 	case T_POINTER:
@@ -209,87 +201,76 @@ CodeCoercion(t1, t2)
 
 	switch(fund1) {
 	case T_INTEGER:
-		if ((int) sz1 < (int) word_size) {
-			c_loc((int)sz1);
+		if (sz1 < (int) word_size) {
+			c_loc(sz1);
 			c_loc((int) word_size);
 			C_cii();
 			sz1 = word_size;
 		}
-		if (fund2 == T_REAL) {
-			c_loc((int)sz1);
-			c_loc((int)sz2);
+		c_loc(sz1);
+		c_loc(sz2);
+		switch(fund2) {
+		case T_REAL:
 			C_cif();
 			break;
-		}
-		if ((int) sz2 != (int) sz1) {
-			c_loc((int)sz1);
-			c_loc((int)sz2);
-			switch(fund2) {
-			case T_INTEGER:
-				C_cii();
-				break;
-			case T_CARDINAL:
-				C_ciu();
-				break;
-			default:
-				crash("Funny integer conversion");
-			}
+		case T_INTEGER:
+			C_cii();
+			break;
+		case T_CARDINAL:
+			C_ciu();
+			break;
+		default:
+			crash("Funny integer conversion");
 		}
 		break;
 
 	case T_CARDINAL:
 	case T_INTORCARD:
-		if (fund2 == T_REAL) {
-			c_loc((int)sz1);
-			c_loc((int)sz2);
+		c_loc(sz1);
+		c_loc(sz2);
+		switch(fund2) {
+		case T_REAL:
 			C_cuf();
 			break;
-		}
-		if ((int) sz1 != (int) sz2) {
-			c_loc((int)sz1);
-			c_loc((int)sz2);
-			switch(fund2) {
-			case T_CARDINAL:
-			case T_INTORCARD:
-				C_cuu();
-				break;
-			case T_INTEGER:
-				C_cui();
-				break;
-			default:
-				crash("Funny cardinal conversion");
-			}
+		case T_CARDINAL:
+		case T_INTORCARD:
+			C_cuu();
+			break;
+		case T_INTEGER:
+			C_cui();
+			break;
+		default:
+			crash("Funny cardinal conversion");
 		}
 		break;
 
 	case T_REAL:
 		switch(fund2) {
 		case T_REAL:
-			if ((int) sz1 != (int) sz2) {
-				c_loc((int)sz1);
-				c_loc((int)sz2);
-				C_cff();
-			}
+			c_loc(sz1);
+			c_loc(sz2);
+			C_cff();
 			break;
 		case T_INTEGER:
-			c_loc((int)sz1);
-			c_loc((int)sz2);
+			c_loc(sz1);
+			c_loc(sz2);
 			C_cfi();
 			break;
 		case T_CARDINAL:
 			if (! options['R']) {
 				label lb = ++text_label;
+				arith asz1 = sz1;
 
-				C_dup(sz1);
-				C_zrf(sz1);
-				C_cmf(sz1);
+				C_dup(asz1);
+				C_zrf(asz1);
+				C_cmf(asz1);
 				C_zge(lb);
 				c_loc(ECONV);
 				C_trp();
 				def_ilb(lb);
 			}
-			c_loc((int)sz1);
-			c_loc((int)sz2);
+			c_loc(sz1);
+			c_loc(sz2);
 			C_cfu();
 			break;
 		default:
@@ -332,6 +313,7 @@ CodeCall(nd)
 		register t_def *df = left->nd_def;
 
 		if (df->df_kind == D_CONST) {
+			/* a procedure address */
 			df = df->con_const.tk_data.tk_def;
 		}
 		if (df->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
@@ -392,12 +374,12 @@ CodeParameters(param, arg)
 				   ARRAY OF (WORD|BYTE)
 				*/
 				C_loc(arg_type->arr_elem->tp_size);
-				C_mli(word_size);
+				C_mlu(word_size);
 				if (elem == word_type) {
 					c_loc((int) word_size - 1);
-					C_adi(word_size);
-					c_loc((int) word_size);
-					C_dvi(word_size);
+					C_adu(word_size);
+					c_loc((int) word_size - 1);
+					C_and(word_size);
 				}
 				else {
 					assert(elem == byte_type);
@@ -430,10 +412,11 @@ CodeParameters(param, arg)
 			break;
 		default:{
 			arith tmp, TmpSpace();
+			arith sz = WA(arg->nd_type->tp_size);
 
 			CodePExpr(arg);
-			tmp = TmpSpace(arg->nd_type->tp_size, arg->nd_type->tp_align);
-			STL(tmp, WA(arg->nd_type->tp_size));
+			tmp = TmpSpace(sz, arg->nd_type->tp_align);
+			STL(tmp, sz);
 			C_lal(tmp);
 			}
 			break;
@@ -535,7 +518,7 @@ CodeStd(nd)
 
 	case S_ODD:
 		CodePExpr(left);
-		if (tp->tp_size == word_size) {
+		if ((int) tp->tp_size == (int) word_size) {
 			c_loc(1);
 			C_and(word_size);
 		}
@@ -667,17 +650,18 @@ CodeOper(expr, true_label, false_label)
 {
 	register t_node *leftop = expr->nd_LEFT;
 	register t_node *rightop = expr->nd_RIGHT;
-	register t_type *tp = expr->nd_type;
+	int fund = expr->nd_type->tp_fund;
+	arith size = expr->nd_type->tp_size;
 
 	switch (expr->nd_symb)	{
 	case '+':
 		Operands(expr);
-		switch (tp->tp_fund)	{
+		switch (fund)	{
 		case T_INTEGER:
-			C_adi(tp->tp_size);
+			C_adi(size);
 			break;
 		case T_REAL:
-			C_adf(tp->tp_size);
+			C_adf(size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
@@ -685,10 +669,10 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_CARDINAL:
 		case T_INTORCARD:
-			addu((int) tp->tp_size);
+			addu((int) size);
 			break;
 		case T_SET:
-			C_ior(tp->tp_size);
+			C_ior(size);
 			break;
 		default:
 			crash("bad type +");
@@ -696,17 +680,17 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case '-':
 		Operands(expr);
-		switch (tp->tp_fund)	{
+		switch (fund)	{
 		case T_INTEGER:
-			C_sbi(tp->tp_size);
+			C_sbi(size);
 			break;
 		case T_REAL:
-			C_sbf(tp->tp_size);
+			C_sbf(size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
 			if (rightop->nd_type == address_type) {
-				C_sbs(tp->tp_size);
+				C_sbs(size);
 				break;
 			}
 			C_ngi(rightop->nd_type->tp_size);
@@ -714,11 +698,11 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_INTORCARD:
 		case T_CARDINAL:
-			subu((int) tp->tp_size);
+			subu((int) size);
 			break;
 		case T_SET:
-			C_com(tp->tp_size);
-			C_and(tp->tp_size);
+			C_com(size);
+			C_and(size);
 			break;
 		default:
 			crash("bad type -");
@@ -726,26 +710,26 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case '*':
 		Operands(expr);
-		switch (tp->tp_fund)	{
+		switch (fund)	{
 		case T_INTEGER:
-			C_mli(tp->tp_size);
+			C_mli(size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
 			if (! options['R']) {
-				C_cal((int)(tp->tp_size) <= (int)word_size ?
+				C_cal((int)(size) <= (int)word_size ?
 					"muluchk" :
 					"mululchk");
 			}
-			C_mlu(tp->tp_size);
+			C_mlu(size);
 			break;
 		case T_REAL:
-			C_mlf(tp->tp_size);
+			C_mlf(size);
 			break;
 		case T_SET:
-			C_and(tp->tp_size);
+			C_and(size);
 			break;
 		default:
 			crash("bad type *");
@@ -753,12 +737,12 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case '/':
 		Operands(expr);
-		switch (tp->tp_fund)	{
+		switch (fund)	{
 		case T_REAL:
-			C_dvf(tp->tp_size);
+			C_dvf(size);
 			break;
 		case T_SET:
-			C_xor(tp->tp_size);
+			C_xor(size);
 			break;
 		default:
 			crash("bad type /");
@@ -766,19 +750,19 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case DIV:
 		Operands(expr);
-		switch(tp->tp_fund)	{
+		switch(fund)	{
 		case T_INTEGER:
-			C_cal((int)(tp->tp_size) == (int)word_size 
+			C_cal((int)(size) == (int)word_size 
 				? "dvi"
 				: "dvil");
-			C_asp(2*tp->tp_size);
-			C_lfr(tp->tp_size);
+			C_asp(2*size);
+			C_lfr(size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_dvu(tp->tp_size);
+			C_dvu(size);
 			break;
 		default:
 			crash("bad type DIV");
@@ -786,19 +770,19 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case MOD:
 		Operands(expr);
-		switch(tp->tp_fund)	{
+		switch(fund)	{
 		case T_INTEGER:
-			C_cal((int)(tp->tp_size) == (int)word_size 
+			C_cal((int)(size) == (int)word_size 
 				? "rmi"
 				: "rmil");
-			C_asp(2*tp->tp_size);
-			C_lfr(tp->tp_size);
+			C_asp(2*size);
+			C_lfr(size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_rmu(tp->tp_size);
+			C_rmu(size);
 			break;
 		default:
 			crash("bad type MOD");
@@ -809,13 +793,16 @@ CodeOper(expr, true_label, false_label)
 	case '>':
 	case GREATEREQUAL:
 	case '=':
-	case '#':
+	case '#': {
+		t_type *tp;
+
 		Operands(expr);
 		tp = BaseType(leftop->nd_type);
 		if (tp == intorcard_type) tp = BaseType(rightop->nd_type);
+		size = tp->tp_size;
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
-			C_cmi(tp->tp_size);
+			C_cmi(size);
 			break;
 		case T_POINTER:
 		case T_HIDDEN:
@@ -824,33 +811,33 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_cmu(tp->tp_size);
+			C_cmu(size);
 			break;
 		case T_ENUMERATION:
 		case T_CHAR:
 			C_cmu(word_size);
 			break;
 		case T_REAL:
-			C_cmf(tp->tp_size);
+			C_cmf(size);
 			break;
 		case T_SET:
 			if (expr->nd_symb == GREATEREQUAL) {
 				/* A >= B is the same as A equals A + B
 				*/
-				C_dup(tp->tp_size << 1);
-				C_asp(tp->tp_size);
-				C_ior(tp->tp_size);
+				C_dup(size << 1);
+				C_asp(size);
+				C_ior(size);
 				expr->nd_symb = '=';
 			}
 			else if (expr->nd_symb == LESSEQUAL) {
 				/* A <= B is the same as A - B = {}
 				*/
-				C_com(tp->tp_size);
-				C_and(tp->tp_size);
-				C_zer(tp->tp_size);
+				C_com(size);
+				C_and(size);
+				C_zer(size);
 				expr->nd_symb = '=';
 			}
-			C_cms(tp->tp_size);
+			C_cms(size);
 			break;
 		default:
 			crash("bad type COMPARE");
@@ -862,6 +849,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		truthvalue(expr->nd_symb);
 		break;
+		}
 
 	case IN:
 		/* In this case, evaluate right hand side first! The
@@ -909,7 +897,7 @@ CodeOper(expr, true_label, false_label)
 		break;
 		}
 	default:
-		crash("(CodeOper) Bad operator %s\n",symbol2str(expr->nd_symb));
+		crash("(CodeOper) Bad operator");
 	}
 }
 

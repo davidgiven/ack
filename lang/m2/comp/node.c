@@ -50,33 +50,24 @@ getnode(class)
 }
 
 t_node *
-MkNode(class, left, right, token)
+dot2node(class, left, right)
 	t_node *left, *right;
-	t_token *token;
 {
-	/*	Create a node and initialize it with the given parameters
-	*/
 	register t_node *nd = getnode(class);
 
-	nd->nd_token = *token;
+	nd->nd_symb = dot.tk_symb;
+	nd->nd_lineno = dot.tk_lineno;
 	nd->nd_LEFT = left;
 	nd->nd_RIGHT = right;
 	return nd;
 }
 
 t_node *
-dot2node(class, left, right)
-	t_node *left, *right;
-{
-	return MkNode(class, left, right, &dot);
-}
-
-t_node *
-MkLeaf(class, token)
-	t_token *token;
+dot2leaf(class)
 {
 	register t_node *nd = getnode(class);
-	nd->nd_token = *token;
+
+	nd->nd_token = dot;
 	switch(nsubnodes[class]) {
 	case 1:
 		nd->nd_NEXT = 0;
@@ -87,12 +78,6 @@ MkLeaf(class, token)
 		break;
 	}
 	return nd;
-}
-
-t_node *
-dot2leaf(class)
-{
-	return MkLeaf(class, &dot);
 }
 
 FreeNode(nd)
@@ -114,16 +99,18 @@ FreeNode(nd)
 	free_node(nd);
 }
 
+/*ARGSUSED*/
 NodeCrash(expp)
 	t_node *expp;
 {
-	crash("Illegal node %d", expp->nd_class);
+	crash("(NodeCrash) Illegal node");
 }
 
+/*ARGSUSED*/
 PNodeCrash(expp)
 	t_node **expp;
 {
-	crash("Illegal node %d", (*expp)->nd_class);
+	crash("(PNodeCrash) Illegal node");
 }
 
 #ifdef DEBUG
