@@ -1,5 +1,10 @@
 /*#define DEBUG 1	/* define when debugging */
+#ifdef __solaris__
+#include <sys/asm_linkage.h>
+#else
 #include <sun4/asm_linkage.h>
+#endif
+
 
 #define BYTES_REVERSED
 #define WORDS_REVERSED
@@ -32,9 +37,15 @@
 #define	LONG_FMT  		".word %ld\n"
 #define	BSS_FMT			".skip %ld\n"
 
+#ifdef __solaris__
+#define	SEGTXT_FMT  		".section \".text\"\n"
+#define	SEGDAT_FMT		".section \".data\"\n"
+#define	SEGBSS_FMT		".section \".bss\"\n"
+#else
 #define	SEGTXT_FMT  		".seg \"text\"\n"
 #define	SEGDAT_FMT		".seg \"data\"\n"
 #define	SEGBSS_FMT		".seg \"bss\"\n"
+#endif
 
 #define	SYMBOL_DEF_FMT		"%s:\n"
 #define	GLOBAL_FMT		".global %s\n"
