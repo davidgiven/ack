@@ -25,11 +25,11 @@ head_em.sun.o:	head_em.o
 
 install:	all
 	../../install libext.a tail_ext
-	../../install head_em.sun.o head_em.sun
+	../../install head_em.sun.o head_ext
 
 cmp:	all
 	-../../compare libext.a tail_ext
-	-../../compare head_em.sun.o head_em.sun
+	-../../compare head_em.sun.o head_ext
 
 clean:
 	rm -f *.[oa]
