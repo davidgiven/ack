@@ -21,9 +21,9 @@
 STATIC cset	addr_modes;
 STATIC cset	cheaps;
 STATIC cset	forbidden;
+STATIC cset	sli_counts;
 STATIC short	LX_threshold;
 STATIC short	AR_limit;
-STATIC bool	DO_sli;
 
 STATIC get_instrs(f, s_p)
 	FILE *f;
@@ -100,11 +100,10 @@ cs_machinit(f)
 	fscanf(f, "%d", &space);
 	AR_limit = space;
 
-	/* Read whether we must eliminate an SLI instruction
+	/* Read for what counts we must not eliminate an SLI instruction
 	 * when it is part of an array-index computation.
 	 */
-	fscanf(f, "%d %d", &time, &space);
-	DO_sli = time_space_ratio >= 50 ? time : space;
+	choose_cset(f, &sli_counts, 8 * ws);
 
 	/* Read a set of instructions which we do not want to eliminate.
 	 * Note: only instructions need be given that may in principle
@@ -115,14 +114,19 @@ cs_machinit(f)
 	choose_cset(f, &forbidden, sp_lmnem);
 }
 
-STATIC bool is_index(lnp)
+STATIC bool sli_no_eliminate(lnp)
 	line_p lnp;
 {
 	/* Return whether the SLI-instruction in lnp is part of
-	 * an array-index computation.
+	 * an array-index computation, and should not be eliminated.
 	 */
+	offset cst;
+
 	return	lnp->l_prev != (line_p) 0 && INSTR(lnp->l_prev) == op_loc &&
-		lnp->l_next != (line_p) 0 && INSTR(lnp->l_next) == op_ads;
+		lnp->l_next != (line_p) 0 && INSTR(lnp->l_next) == op_ads &&
+		(cst = off_set(lnp->l_prev)) == (Celem_t) cst &&
+		Cis_elem((Celem_t) cst, sli_counts)
+		;
 }
 
 STATIC bool gains(avp)
@@ -139,7 +143,7 @@ STATIC bool gains(avp)
 		return off_set(avp->av_found) >= LX_threshold;
 
 	if (avp->av_instr == (byte) op_sli)
-		return !is_index(avp->av_found) || DO_sli;
+		return ! sli_no_eliminate(avp->av_found);
 
 	if (Cis_elem(avp->av_instr & BMASK, addr_modes))
 		return instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
