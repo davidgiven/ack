@@ -37,9 +37,10 @@ co_reach() {
 	 * Check for undefined or unreachable nonterminals.
 	 */
 	register p_nont		p;
+	register p_token	t;
 	register p_start	st;
 	register p_file		x;
-	register p_order	s;
+	register int		s;
 
 	/* Check for undefined nonterminals */
 	for (p = nonterms; p < maxnt; p++) {
@@ -63,11 +64,18 @@ co_reach() {
 	 */
 	for (x = files; x < maxfiles; x++) {
 	    f_input = x->f_name;
-	    for (s = x->f_list; s; s = s->o_next) {
-		p = &nonterms[s->o_index];
+	    for (s = x->f_nonterminals; s != -1; s = p->n_next) {
+		p = &nonterms[s];
 		if (! (p->n_flags & REACHABLE)) {
 			warning(p->n_lineno,"nonterminal %s unreachable",
 				p->n_name);
+		}
+	    }
+	    for (s = x->f_terminals; s != -1; s = t->t_next) {
+		t = &tokens[s];
+		if (! (t->t_flags & REACHABLE)) {
+			warning(t->t_lineno,"terminal %s not used",
+				t->t_string);
 		}
 	    }
 	}
@@ -117,6 +125,9 @@ reachwalk(p) register p_gram p; {
 			}
 			break;
 		  }
+		  case TERMINAL:
+			tokens[g_getcont(p)].t_flags |= REACHABLE;
+			break;
 		  case EORULE :
 			return;
 		}

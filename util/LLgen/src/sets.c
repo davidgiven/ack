@@ -44,7 +44,7 @@ p_set		*setptr, *maxptr;
 static t_info	set_info;
 p_mem		alloc();
 
-setinit(ntneeded) {
+setinit(nt_needed) {
 	/*
 	 * Initialises some variables needed for setcomputations
 	 */
@@ -53,7 +53,7 @@ setinit(ntneeded) {
 	nbytes = NBYTES(ntokens);
 	bitset = ALIGN(nbytes);
 	tsetsize = NINTS(bitset);
-	if (ntneeded) {
+	if (nt_needed) {
 		/* nonterminals must be included in the sets */
 		bitset += NBYTES(nnonterms);
 	}

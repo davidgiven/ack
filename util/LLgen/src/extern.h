@@ -45,7 +45,7 @@ extern p_nont	nonterms;	/* the nonterminal array */
 extern p_nont	maxnt;		/* is filled up until here */
 extern p_token	tokens;		/* the token array */
 extern p_token	maxt;		/* is filled up until here */
-extern struct order *sorder, *porder;
+extern int	norder, torder;
 				/* order of nonterminals in the grammar,
 				 * important because actions are copied to
 				 * a temporary file in the order in which they

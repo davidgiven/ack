@@ -55,7 +55,7 @@ conflchecks() {
 	 * must be disjunct.
 	 */
 	register p_nont	p;
-	register p_order s;
+	register int s;
 	p_file		x = files;
 
 	f_input = x->f_name;
@@ -71,15 +71,15 @@ conflchecks() {
 	 */
 	for (; x < maxfiles; x++) {
 	    f_input = x->f_name;
-	    for (s = x->f_list; s; s = s->o_next) {
-		p = &nonterms[s->o_index];
+	    for (s = x->f_nonterminals; s != -1; s = p->n_next) {
+		p = &nonterms[s];
 	        if (check(p->n_rule)) p->n_flags |= VERBOSE;
 	    }
 	}
 	for (x = files; x < maxfiles; x++) {
 	    f_input = x->f_name;
-	    for (s = x->f_list; s; s = s->o_next) {
-		p = &nonterms[s->o_index];
+	    for (s = x->f_nonterminals; s != -1; s = p->n_next) {
+		p = &nonterms[s];
 		if (p->n_flags & RECURSIVE) {
 			error(p->n_lineno,
 				"Recursion in default for nonterminal %s",

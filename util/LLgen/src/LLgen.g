@@ -34,8 +34,7 @@ p_gram		search();
 
 static int	nparams;		/* parameter count for nonterminals */
 static int	acount;			/* count #of global actions */
-static p_order	order,
-		maxorder;
+static int	order;
 static p_term t_list;
 static int t_cnt;
 static p_gram	alt_table;
@@ -49,29 +48,36 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC p_order	neworder();
+STATIC 		newnorder();
+STATIC 		newtorder();
 STATIC		copyact();
 STATIC		mkalt();
 STATIC		mkterm();
 STATIC p_gram	copyrule();
 /* and of course LLparse() */
 
-STATIC p_order
-neworder(index) {
-	register p_order po;
+STATIC
+newnorder(index) {
+	static int porder;
 
-	if ((po = order) == maxorder) {
-		po = (p_order) alloc(20 * sizeof(*order));
-		maxorder = po + 20;
+	if (norder != -1) {
+		nonterms[porder].n_next = index;
 	}
-	order = po + 1;
-	po->o_next = 0;
-	po->o_index = index;
-	if (porder) {
-		porder->o_next = po;
+	else	norder = index;
+	porder = index;
+	nonterms[porder].n_next = -1;
+}
+
+STATIC
+newtorder(index) {
+	static int porder;
+
+	if (torder != -1) {
+		tokens[porder].t_next = index;
 	}
-	else	sorder = po;
-	return po;
+	else	torder = index;
+	porder = index;
+	tokens[porder].t_next = -1;
 }
 
 p_init()
@@ -128,6 +134,12 @@ def			{	register string p; }
 				ff->ff_name = p;
 				ff->ff_next = start;
 				start = ff;
+				while (ff = ff->ff_next) {
+					if (! strcmp(p, ff->ff_name)) {
+						error(linecount, "\"%s\" already used in a %%start", p);
+						break;
+					}
+				}
 			}
 	| C_LEXICAL C_IDENT
 	  /*
@@ -172,7 +184,10 @@ def			{	register string p; }
 	   */
 	;
 
-listel	: C_IDENT	{	search(TERMINAL,lextoken.t_string,ENTERING); }
+listel	: C_IDENT	{	p_gram temp = search(TERMINAL,lextoken.t_string,ENTERING);
+				newtorder(g_getcont(temp));
+				tokens[g_getcont(temp)].t_lineno = linecount;
+			}
 	;
 
 rule			{	register p_nont p;
@@ -194,7 +209,7 @@ rule			{	register p_nont p;
 				 * order to keep track with the actions on the
 				 * temporary file
 				 */
-				porder = neworder(p - nonterms);
+				newnorder(p - nonterms);
 				p->n_count = acount;
 				acount = 0;
 				p->n_lineno = linecount;

@@ -33,7 +33,7 @@ p_token	tokens;
 p_token	maxt;
 int	ntokens;
 int	nterms, nalts;
-p_order	porder, sorder;
+int	norder, torder;
 p_start	start;
 int	linecount;
 int	assval;

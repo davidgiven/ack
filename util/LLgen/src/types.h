@@ -32,6 +32,9 @@ typedef struct token {
 	} t_x;
 # define t_string t_x.t_s
 # define t_num t_x.t_v
+	int	t_flags;
+	int	t_next;
+	int	t_lineno;
 } t_token, *p_token;
 
 /*
@@ -131,6 +134,7 @@ typedef	struct {
 	p_set	n_follow;	/* pointer to the "follow" set	*/
 	p_set	n_contains;	/* pointer to symbols that can be produced */
 	string	n_name;		/* name of nonterminal */
+	int	n_next;		/* index of next nonterminal */
 } t_nont, *p_nont;
 
 /* 
@@ -212,11 +216,6 @@ typedef struct ff_firsts {
 typedef t_first t_start;
 typedef p_first p_start;
 
-typedef struct order {
-	int	o_index;	/* index in nonterminal array */
-	struct order *o_next;
-} t_order, *p_order;
-
 /*
  * structure for file names and info
  */
@@ -226,7 +225,8 @@ typedef struct f_file {
 				 * generated in the target file for this
 				 * grammar file
 				 */
-	struct order *f_list;	/* list of nonterminals in this file  */
+	int f_nonterminals;	/* list of nonterminals in this file  */
+	int f_terminals;	/* list of terminals in this file  */
 } t_file, *p_file;
 
 typedef struct info_alloc {

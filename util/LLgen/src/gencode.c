@@ -235,7 +235,7 @@ generate(f) p_file f; {
 	/*
 	 * Generates a parsing routine for every nonterminal
 	 */
-	register p_order s;
+	register int s;
 	register p_nont	p;
 	int i;
 	register p_first ff;
@@ -249,8 +249,8 @@ generate(f) p_file f; {
 	}
 	
 	/* For every nonterminal generate a function */
-	for (s = f->f_list; s; s = s->o_next) {
-		p = &nonterms[s->o_index];
+	for (s = f->f_nonterminals; s != -1; s = p->n_next) {
+		p = &nonterms[s];
 		/* Generate functions in the order in which the nonterminals
 		 * were defined in the grammar. This is important, because
 		 * of synchronisation with the action file
@@ -260,7 +260,7 @@ generate(f) p_file f; {
 		    getntparams(p) == 0) {
 			continue;
 		}
-		genextname(s->o_index, p->n_name, fpars);
+		genextname(s, p->n_name, fpars);
 		if (p->n_flags & PARAMS) {
 			fputs("(\n", fpars);
 			controlline();
@@ -297,7 +297,7 @@ prset(p) p_set p; {
 	for (;;) {
 		i = (unsigned) *p++;
 		for (k = 0; k < sizeof(int); k++) {
-			fprintf(fpars,"0%o,",(i & 0377));
+			fprintf(fpars,"0%o,",(int)(i & 0377));
 			i >>= 8;
 			if (--j == 0) {
 				fputs("\n",fpars);
@@ -574,6 +574,7 @@ alternation(pp, safety, mustscan, mustpop, lb)
 		p = pp;
 	}
 	while (g_gettype(p) != EORULE) {
+		set = 0;
 		l = g_getlink(p);
 		if (l->l_flag & COND) {
 			if (!(l->l_flag & NOCONF)) {
@@ -884,7 +885,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	register FILE	*f = fpars;
 	p_set		p1;
 	p_set		setalloc();
-	int		hulp1, hulp2;
+	int		hulp1 = 0, hulp2;
 	int		safeterm;
 	int		termissafe = 0;
 	int		casecnt = 0;

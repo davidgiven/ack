@@ -798,16 +798,16 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 			break; }
 		  case ALTERNATION : {
 		  	register p_link l;
-			register int i, f;
+			register int i;
 
-			f = 1;
+			retval = -1;
 			while (g_gettype(p) == ALTERNATION) {
 				l = g_getlink(p);
 				if (safe > SAFE && (l->l_flag & DEF)) {
 					i = do_safes(l->l_rule,SAFESCANDONE,ch);
 				}
 				else	i = do_safes(l->l_rule,SAFE,ch);
-				if (f) retval = i;
+				if (retval == -1) retval = i;
 				else if (i != retval) {
 					if (i == NOSCANDONE ||
 					    retval == NOSCANDONE) {
@@ -816,7 +816,6 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 					else if (i > retval) retval = i;
 				}
 				p++;
-				f = 0;
 			}
 			return retval; }
 		  case NONTERM : {

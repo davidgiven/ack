@@ -171,7 +171,7 @@ main(argc,argv) register string	argv[]; {
 		fprintf(stderr, "number of tokens: %d\n", ntokens);
 		fprintf(stderr, "number of term structures: %d\n", nterms);
 		fprintf(stderr, "number of alternation structures: %d\n", nalts);
-		fprintf(stderr, "total memory used: %u\n", sbrk(0) - (char *) &end);
+		fprintf(stderr, "total memory used: %ld\n", (long)(sbrk(0) - (char *) &end));
 	}
 	exit(0);
 }
@@ -222,10 +222,11 @@ doparse(p) register p_file p; {
 	p->f_name = f_input;
 	p->f_firsts = 0;
 	pfile = p;
-	sorder = 0;
-	porder = 0;
+	torder = -1;
+	norder = -1;
 	LLparse();
-	p->f_list = sorder;
+	p->f_nonterminals = norder;
+	p->f_terminals = torder;
 }
 
 /* VARARGS1 */

@@ -114,7 +114,7 @@ search(type,str,option) register string str; {
 	 * It has type UNKNOWN, LITERAL, TERMINAL or NONTERM.
 	 * option can be ENTERING or BOTH (also looking).
 	 */
-	register int		val;
+	register int		val = 0;
 	register p_entry	p;
 	register int		i;
 	int			type1;
