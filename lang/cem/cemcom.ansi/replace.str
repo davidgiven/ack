@@ -1,0 +1,39 @@
+struct repl {
+	struct	repl *next;
+	struct	args *r_args;		/* replacement parameters */
+	char	r_text[LAPBUF];		/* replacement text */
+	char	*r_ptr;			/* replacement text pointer */
+};
+
+/* ALLOCDEF "repl" 4 */
+
+#define NO_REPL		(struct repl *)0
+
+/*	The implementation of the ## operator is currently very clumsy.
+	When the the ## operator is used the arguments are taken from
+	the raw buffer; this buffer contains a precise copy of the
+	original argument. The fully expanded copy is in the arg buffer.
+	The two copies are here explicitely because:
+
+		#define ABC	f()
+		#define	ABCD	2
+		#define	g(x, y)	x ## y + h(x)
+
+		g(ABC, D);
+
+	In this case we need two copies: one raw copy for the pasting
+	operator, and an expanded one as argument for h().
+*/
+struct args {
+	char	*a_expptr;		/* expanded argument pointer */
+	char	*a_expvec[NPARAMS];	/* expanded argument vector */
+	char	a_expbuf[ARGBUF];	/* expanded argument buffer space */
+	char	*a_rawptr;		/* raw argument pointer */
+	char	*a_rawvec[NPARAMS];	/* raw argument vector */
+	char	a_rawbuf[ARGBUF];	/* raw argument buffer space */
+};
+
+/* ALLOCDEF "args" 2 */
+
+#define NO_ARGS		(struct args *)0
+
