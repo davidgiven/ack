@@ -158,5 +158,5 @@ If the range is sparse, CSB is better.
 
        CSA descriptor                CSB descriptor
 .Df
-      Figure 4. Descriptor layout for CSA and CSB
+Figure 4. Descriptor layout for CSA and CSB
 .De
