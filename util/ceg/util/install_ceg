@@ -1,4 +1,4 @@
-CEG=/usr/star/kaashoek/em/ceg/util
+CEG=../../../lib/ceg/util
 
 case $# in
   1) case $1 in

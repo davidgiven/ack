@@ -1,14 +1,17 @@
-EM = /proj/em/Work
-CEG = /usr/star/kaashoek/em/ceg
+EM = ../../../..
+CEG = $(EM)/lib/ceg
 
 Em   = $(CEG)/EM_parser/obj_EM_pars
-AS   = $(CEG)/as_parser
 ASMAIN = $(CEG)/assemble/obj_assemble
-EVAL = $(CEG)/as_parser/eval
 BACK = $(CEG)/ce_back
+AS   = $(CEG)/as_parser
+EVAL = $(CEG)/as_parser/eval
 DEF = $(CEG)/defaults
 
+AR = ar
 CC = cc
+CFLAGS = -O
+LEXLIB = -ll
 
 IFILES  = -I. -I.. -I$(AS) -I$(Em) -I$(EM)/h -I$(EM)/modules/h -I../back
 
@@ -17,61 +20,69 @@ CEG_LIBS = $(EM)/modules/lib/liballoc.a\
 	   $(EM)/modules/lib/libstring.a\
 	   $(EM)/modules/lib/libsystem.a
 
-.c.o : mach.h back/*h ; ( cd ce; $(CC) -c -O $(IFILES) ../$*.c)
+.c.o : mach.h back/*h
+	( cd ce; $(CC) -c $(CFLAGS) $(IFILES) ../$*.c)
 
-
-install : back ceg ce
+all:    back ceg ce
+        make -f ce_makefile ce.a
+         
+clean:
+        rm -rf ce back ceg *.a Out 
+         
+dclean:
+        rm -rf ce back ceg Out
 
 ce : ceg/ceg
 	mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
-	(cd ce;co $(DEF)/RCS/*.c,v )
-	(cd ce;co $(DEF)/*/RCS/*.c,v)
-	(cd ce; chmod +w *.c)
+	(cd ce; cp $(DEF)/*.c .) 
+	(cd ce; cp $(DEF)/*/*.c .) 
 	ln mach.c ce/mach.c
-	@make EM_instr
+	@make -f ce_makefile EM_instr
 
 ceg : 
 	mkdir ceg
-	(cd ceg;co $(ASMAIN)/RCS/*,v) 
-	(cd ceg;$(CC) -c $(IFILES) *.c; ar r as_lib.a *.o; ranlib as_lib.a)
+	(cd ceg; cp $(ASMAIN)/* .) 
+	(cd ceg;$(CC) -c $(IFILES) *.c; $(AR) r as_lib.a *.o )
+	-(cd ceg; ranlib as_lib.a)
 
 
 back :
 	mkdir back
-	(cd back; co $(BACK)/obj_back/RCS/*h,v $(BACK)/obj_back/RCS/Makefile,v) 
+	(cd back;cp $(BACK)/obj_back/*h . )
+	(cd back;cp $(BACK)/obj_back/Makefile .)
 	( cd back; make)
-	ar r back.a back/*o;
-	ranlib back.a
+	$(AR) r back.a back/*o;
+	-ranlib back.a
 
 
 
 ce.a : ce/*.o
-	ar r ce.a ce/*.o
-	ranlib ce.a
+	$(AR) r ce.a ce/*.o
+	-ranlib ce.a
 
 ce/*.o : mach.h back/*.h
-	(cd ce;$(CC) -c -O $(IFILES) *.c)
+	(cd ce;$(CC) -c $(CFLAGS) $(IFILES) *.c)
 
 EM_instr : ceg/ceg mach.h back/*.h EM_table
-	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
+	( cd ce; $(EM)/lib/cpp -P ../EM_table | ../ceg/ceg -l)
 	( cd ce; $(CEG)/util/create_ofiles)
-	@make ce.a
+	@make -f ce_makefile ce.a
 
 
+ceg/ceg	: ceg/as_lib.a ceg/as_instr.o  ceg/eval_as.o # $(Em)/em_parser
+	(cd ceg; $(CC) -o ceg $(Em)/*.o as_instr.o eval_as.o as_lib.a $(CEG_LIBS) $(LEXLIB) )
 
-ceg/ceg	: $(Em)/em_parser ceg/as_lib.a ceg/as_instr.o ceg/eval_as.o
-	$(CC) -o ceg/ceg $(Em)/*.o ceg/as_instr.o ceg/eval_as.o ceg/as_lib.a\
-       			 $(CEG_LIBS) -ll
+ceg/eval_as.o : ceg/eval_as.c as.h # $(AS)/as_parser.h $(Em)/arg_type.h
+	(cd ceg;$(CC) -c $(IFILES) eval_as.c)
+
+ceg/eval_as.c : as.c # $(EVAL)/eval
+	(cd ceg; $(EVAL)/eval < ../as.c > eval_as.c )
+
 
 ceg/as_instr.o : as.h ceg/*h ceg/as_instr.c
 	(cd ceg;$(CC) -c $(IFILES) as_instr.c)
 
-ceg/as_instr.c : as_table $(AS)/as_parser
-	$(CEG)/util/preproc  as_table| $(AS)/as_parser > ceg/as_instr.c
+ceg/as_instr.c : as_table # $(AS)/as_parser
+	(cd ceg; $(EM)/lib/cpp -P ../as_table| $(AS)/as_parser > as_instr.c)
 
-ceg/eval_as.o : ceg/eval_as.c as.h $(AS)/as_parser.h $(Em)/arg_type.h
-	(cd ceg;$(CC) -c $(IFILES) eval_as.c)
-
-ceg/eval_as.c : as.c $(EVAL)/eval
-	$(EVAL)/eval < as.c > ceg/eval_as.c

@@ -9,7 +9,7 @@ do
 	  *.o) make -f ce_makefile ce/$i;
 	       ar r ce.a $i;;
 
-	  *..) ( cd ce; /lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
+	  *..) ( cd ce; ../../../../lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
 	       F=`basename $i ..`;
 	       U="_dnam"
 	       V="_dlb"
@@ -17,7 +17,7 @@ do
 	       echo ar r ce.a ce/$F.o ce/"$F$U.o" ce/"$F$V.o";
 	       ar r ce.a ce/$F.o ce/$F$U.o ce/"$F$U.o";;
 
-	    *) ( cd ce; /lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
+	    *) ( cd ce; ../../../../lib/cpp ../EM_table| sed "/^#/d"| ../ceg/ceg -c $i);
 	       make -f ce_makefile ce/$i.o;
 	       echo ar r ce.a ce/$i.o;
 	       ar r ce.a ce/$i.o;;
