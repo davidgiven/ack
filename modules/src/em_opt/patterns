@@ -202,6 +202,22 @@ loc 32  mlu w  :        loc 5   slu w
 loc 64  mlu w  :        loc 6   slu w
 loc 128  mlu w  :       loc 7   slu w
 loc 256  mlu w  :       loc 8   slu w
+loc 2  dvi w  : 	loc 1   sri w
+loc 4  dvi w  : 	loc 2   sri w
+loc 8  dvi w  : 	loc 3   sri w
+loc 16  dvi w  :        loc 4   sri w
+loc 32  dvi w  :        loc 5   sri w
+loc 64  dvi w  :        loc 6   sri w
+loc 128  dvi w  :       loc 7   sri w
+loc 256  dvi w  :       loc 8   sri w
+loc 2  dvu w  : 	loc 1   sru w
+loc 4  dvu w  : 	loc 2   sru w
+loc 8  dvu w  : 	loc 3   sru w
+loc 16  dvu w  :        loc 4   sru w
+loc 32  dvu w  :        loc 5   sru w
+loc 64  dvu w  :        loc 6   sru w
+loc 128  dvu w  :       loc 7   sru w
+loc 256  dvu w  :       loc 8   sru w
 loc adi undefined :   adi $1
 loc sbi undefined :   sbi $1
 loc mli undefined :   mli $1
