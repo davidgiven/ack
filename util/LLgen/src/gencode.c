@@ -200,7 +200,7 @@ genrecovery() {
 		fputs("\tLLoldlevel(s);\n}\n",f);
 	}
 	/* Now generate the sets */
-	fputs("char LLsets[] = {\n",f);
+	fputs("static char LLsets[] = {\n",f);
 	for (psetl = setptr; psetl < maxptr; psetl++) prset(*psetl);
 	fputs(c_arrend, f);
 	index = (int *) alloc((unsigned) (assval * sizeof(int)));
@@ -208,14 +208,14 @@ genrecovery() {
 	for (t = tokens; t < maxt; t++) {
 		index[t->t_tokno] = t - tokens;
 	}
-	fputs("short LLindex[] = {\n",f);
+	fputs("static short LLindex[] = {\n",f);
 	for (q = index; q < &index[assval]; q++) {
 		fprintf(f, "%d,\n", *q);
 	}
 	fputs(c_arrend, f);
 	free((p_mem) index);
 	if (onerror) {
-		fputs("short LLtok[] = {\n", f);
+		fputs("static short LLtok[] = {\n", f);
 		for (t = tokens; t < maxt; t++) {
 			fprintf(f, t->t_tokno<0400 ? "'%s',\n" : "%s,\n",t->t_string);
 		}
