@@ -31,7 +31,6 @@ vax_bsd4_1c	VAX11 with BSD4.1c
 vax_bsd4_2	VAX11 with BSD4.2
 pc_ix		IBM PC with PC/IX
 m68_unisoft	Motorola 68000 with Unisoft UNIX
-m68_pmds	Philips PMDS
 ANY		Neither of the above
 
 system type: "
@@ -40,9 +39,8 @@ system type: "
 		echo echo "$SYSNAME" >../bin/ack_sys
 		chmod +x ../bin/ack_sys
 		case `ack_sys` in
-		pdp_v7|vax_bsd4_1[ac]|vax_bsd4_2|pc_ix|m68_unisoft|m68_pmds) ;;
-		*)	echo None of the software especially intended for
-the named systems will work ;;
+		pdp_v7|vax_bsd4_1[ac]|vax_bsd4_2|pc_ix|m68_unisoft) ;;
+		*)	echo None of the software especially intended for the named systems will work ;;
 		esac
 	else
 		echo Sorry, got EOF when reading system name.
@@ -95,7 +93,6 @@ vax_bsd4_1[ac]) ACM=vax2 ;;
 vax_bsd4_2)	ACM=vax2 ;;
 pc_ix)		ACM=ix ;;
 m68_unisoft)	ACM=m68k2 ;;
-m68_pmds) 	ACM=pmds ;;
 *)		ACM=m68k2 ;;
 esac
 rm -f local.h
