@@ -49,6 +49,7 @@ area_t getarea(size) unsigned size ; {
 	unsigned rqsize ;
 	char *malloc() ;
 
+	size = ((size + (sizeof(short) - 1)) / sizeof(short)) * sizeof(short);
 #ifdef MEMUSE
 	m_used += size ;
 	m_free -= size ;
@@ -87,6 +88,7 @@ area_t getarea(size) unsigned size ; {
 freearea(ptr,size) register area_t ptr ; unsigned size ; {
 	register struct freeblock *c_ptr, *l_ptr ;
 
+	size = ((size + (sizeof(short) - 1)) / sizeof(short)) * sizeof(short);
 #ifdef MEMUSE
 	m_free += size ;
 	m_used -= size ;
