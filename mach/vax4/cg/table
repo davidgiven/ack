@@ -4233,14 +4233,14 @@ cms zne $1==4	| |				|	| cmp zne $2 |
  * Group 14 : Procedure call instructions	*
  ************************************************/
 
-cai asp $2%4 == 0 && $2>=0
+cai asp $2%4 == 0 && $2>=0 && $2 < 1024
 		| reg4 |
 			remove(ALL)
 			"calls\t$$%($2/4%),(%[1])"	|	| |
 cai		| reg4 |
 			remove(ALL)
 			"calls\t$$0,(%[1])"		|	| |
-cal asp $2%4 == 0 && $2>=0
+cal asp $2%4 == 0 && $2>=0 && $2 < 1024
 		| |	remove(ALL)
 			"calls\t$$%($2/4%),$1"		|	| |
 cal		| |	remove(ALL)
