@@ -4,7 +4,6 @@ LLmessage.c
 proto.make
 proto.main
 Parameters
-Resolve
 Version.c
 body.c
 casestat.C
@@ -41,7 +40,6 @@ make.tokcase
 make.tokfile
 misc.c
 misc.h
-nmclash.c
 node.H
 node.c
 options
