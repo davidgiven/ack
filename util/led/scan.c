@@ -366,7 +366,9 @@ putdbugindex(dbugoff, ndbugbytes)
  */
 static
 get_indirect(head, sect)
-	register struct outhead	*head;
+	struct outhead	*head;		/* not register! Won't compile on
+					   SCO Xenix 386 if it is!
+					*/
 	register struct outsect	*sect;
 {
 	register ind_t		*emitindex;
