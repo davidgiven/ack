@@ -1,10 +1,8 @@
-#include "mach.h"
-#include "const.h"
-#include "back.h"
+#include "header.h"
 
 /* This file contains low-level routines for generating assembly code. */
 
-int cur_seg = -1, saved = FALSE;
+int cur_seg = -1, saved = 0;
 char name[256], labeltje[256];
 
 File *codefile;
@@ -27,7 +25,7 @@ save_label( l)
 char *l;
 {
 	sprint( labeltje, "%s", l);
-	saved = TRUE;
+	saved = 1;
 }
 
 
@@ -37,7 +35,7 @@ dump_label()
 		align_word();
 		symbol_definition( labeltje);
 	}
-	saved = FALSE;
+	saved = 0;
 }
 
 
@@ -76,7 +74,7 @@ char *s;
 char *extnd_dlb( g)
 arith g;
 {
-	sprint( name, DLB_FMT, (arith)g);
+	sprint( name, DLB_FMT, (long)g);
         return( name);
 }
 
@@ -84,7 +82,7 @@ arith g;
 char *extnd_ilb( l, prcno)
 arith l;
 {
-	sprint( name, ILB_FMT, prcno, (arith) l);
+	sprint( name, ILB_FMT, prcno, (long) l);
         return( name);
 }
 
@@ -100,7 +98,7 @@ int hol;
 char *extnd_part( d)
 int d;
 {
-	sprint( name, "part%x", (arith) d);
+	sprint( name, "part%x", d);
 	return( name);
 }
 
@@ -108,6 +106,6 @@ int d;
 char *extnd_cont( d)
 int d;
 {
-	sprint( name, "cont%x", (arith) d);
+	sprint( name, "cont%x", d);
 	return( name);
 }

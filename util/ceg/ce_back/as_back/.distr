@@ -6,7 +6,6 @@ bss.c
 con1.c
 con2.c
 con4.c
-const.h
 do_close.c
 do_open.c
 end_back.c
