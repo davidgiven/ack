@@ -16,6 +16,6 @@ ucmp(l1,l2)
 		if (l1 > l2 || l1 < 0) return 1;
 		return -1;
 	}
-	if (l1 > 0 || l1 < l2) return -1;
+	if (l1 >= 0 || l1 < l2) return -1;
 	return 1;
 }

@@ -69,7 +69,7 @@ flt_div(e1,e2,e3)
 			long rem;
 			q_est = (0x7FFFFFFF/v1)+((temp&0x7FFFFFFF)/v1);
 			rem = (0x7FFFFFFF%v1)+((temp&0x7FFFFFFF)%v1)+1;
-			while (rem > v1) {
+			while (rem >= v1) {
 				q_est++;
 				rem -= v1;
 			}
