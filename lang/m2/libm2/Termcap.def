@@ -14,19 +14,18 @@
   that are explicit in the C-version, are hidden. These buffers are initialized
   by a call to Tgetent. The "ARRAY OF CHAR" parameters must be null-terminated.
   You can call them with a constant string argument, as these are always
-  null-terminated in our Modula-2 implementation. Also, the strings returned
-  by these routines are null-terminated.
+  null-terminated in our Modula-2 implementation.
+  Unlike the C version, this version takes care of UP, BC, and PC
+  automatically. Only ospeed must still be set by the user.
 *)
 
 DEFINITION MODULE Termcap;
 
-  TYPE	STR = ARRAY[1..32] OF CHAR;
-	PTSTR = POINTER TO STR;
+  TYPE	STRCAP;
 	PUTPROC = PROCEDURE(CHAR);
 
-  VAR	UP, BC: PTSTR;		(* must be null-terminated *)
+  VAR
 	ospeed: INTEGER;	(* see termcap(3), tty(4) *)
-	PC: CHAR;		(* is initially 0C *)
 
   PROCEDURE Tgetent(name: ARRAY OF CHAR) : INTEGER;
 
@@ -34,12 +33,12 @@ DEFINITION MODULE Termcap;
 
   PROCEDURE Tgetflag(id: ARRAY OF CHAR): BOOLEAN;
 
-  PROCEDURE Tgoto(cm: PTSTR; col, line: INTEGER): PTSTR;
+  PROCEDURE Tgoto(cm: STRCAP; col, line: INTEGER): STRCAP;
   (* Result exists until next call to Tgoto *)
 
-  PROCEDURE Tgetstr(id: ARRAY OF CHAR): PTSTR;
+  PROCEDURE Tgetstr(id: ARRAY OF CHAR): STRCAP;
   (* Result exists until next call to Tgetent *)
 
-  PROCEDURE Tputs(cp: PTSTR; affcnt: INTEGER; p: PUTPROC);
+  PROCEDURE Tputs(cp: STRCAP; affcnt: INTEGER; p: PUTPROC);
 
 END Termcap.

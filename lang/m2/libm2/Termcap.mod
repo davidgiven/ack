@@ -15,7 +15,12 @@ IMPLEMENTATION MODULE Termcap;
   IMPORT XXTermcap;
   FROM SYSTEM IMPORT ADR, ADDRESS;
 
+  TYPE	STR = ARRAY[1..32] OF CHAR;
+	STRCAP = POINTER TO STR;
+
   VAR	Buf, Buf1 : ARRAY [1..1024] OF CHAR;
+	UP, BC: STRCAP;
+	PC: CHAR;
       	Initialized: BOOLEAN;
 	BufCnt : INTEGER;
 
@@ -23,10 +28,17 @@ IMPLEMENTATION MODULE Termcap;
   VAR i: INTEGER;
   BEGIN
 	i := XXTermcap.tgetent(ADR(Buf), ADR(name));
-	IF i > 0 THEN
-		Initialized := TRUE
-	END;
 	BufCnt := 1;
+	IF i > 0 THEN
+		Initialized := TRUE;
+		UP := Tgetstr("pc");
+		IF UP # NIL THEN
+			PC := UP^[1];
+		ELSE	PC := 0C;
+		END;
+		UP := Tgetstr("up");
+		BC := Tgetstr("bc");
+	END;
 	RETURN i;
   END Tgetent;
 
@@ -46,14 +58,14 @@ IMPLEMENTATION MODULE Termcap;
 	RETURN XXTermcap.tgetflag(ADR(id)) = 1;
   END Tgetflag;
 
-  PROCEDURE Tgoto(cm: PTSTR; col, line: INTEGER): PTSTR;
+  PROCEDURE Tgoto(cm: STRCAP; col, line: INTEGER): STRCAP;
   BEGIN
 	XXTermcap.UP := UP;
 	XXTermcap.BC := BC;
 	RETURN XXTermcap.tgoto(cm, col, line);
   END Tgoto;
 
-  PROCEDURE Tgetstr(id: ARRAY OF CHAR): PTSTR;
+  PROCEDURE Tgetstr(id: ARRAY OF CHAR): STRCAP;
   VAR a, a2: ADDRESS;
       b: CARDINAL;
   BEGIN
@@ -70,7 +82,7 @@ IMPLEMENTATION MODULE Termcap;
 	RETURN a2;
   END Tgetstr;
 
-  PROCEDURE Tputs(cp: PTSTR; affcnt: INTEGER; p: PUTPROC);
+  PROCEDURE Tputs(cp: STRCAP; affcnt: INTEGER; p: PUTPROC);
   BEGIN
 	XXTermcap.PC := PC;
 	XXTermcap.ospeed := ospeed;
@@ -79,5 +91,4 @@ IMPLEMENTATION MODULE Termcap;
 
 BEGIN
 	Initialized := FALSE;
-	PC := 0C;
 END Termcap.
