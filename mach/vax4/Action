@@ -14,26 +14,11 @@ name "Vax code expander library"
 system vax*
 dir ce
 end
-name "Vax 4-4 C libraries"
-dir libcc
-end
-name "Vax 4-4 ANSI-C libraries"
-dir libcc.ansi
-end
 name "Vax 4-4 EM library"
 dir libem
 end
-name "Vax 4-4 Pascal library"
-dir libpc
-end
-name "Vax 4-4 Occam library"
-dir liboc
-end
-name "Vax 4-4 Modula-2 library"
-dir libm2
-end
-name "Vax 4-4 Basic library"
-dir libbc
+name "Vax 4-4 etext,edata,end library"
+dir libend
 end
 name "Vax 4-4 systemcall interface"
 dir libsys
