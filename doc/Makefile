@@ -79,4 +79,4 @@ clean:
 # It makes a version of the installation manual, suitable for a simple
 # line printer.
 distr:		install.doc
-		tbl install.doc | nroff -Tlpr $(MS) >install.pr
+		tbl install.doc | nroff -Tlp $(MS) >install.pr
