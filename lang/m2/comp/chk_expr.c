@@ -1021,7 +1021,6 @@ ChkStandard(expp)
 	t_node *arg = expp;
 	register t_node *left = expp->nd_left;
 	register t_def *edf = left->nd_def;
-	t_type *basetype;
 	int free_it = 0;
 
 	assert(left->nd_class == Def);
@@ -1030,17 +1029,19 @@ ChkStandard(expp)
 	switch(edf->df_value.df_stdname) {
 	case S_ABS:
 		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
-		basetype = BaseType(left->nd_type);
-		MkCoercion(&(arg->nd_left), basetype);
-		left = arg->nd_left;
-		expp->nd_type = left->nd_type;
-		if (left->nd_class == Value &&
-		    expp->nd_type->tp_fund != T_REAL) {
-			cstcall(expp, S_ABS);
-		}
-		else if (basetype->tp_fund != T_INTEGER &&
-			 basetype->tp_fund != T_REAL) {
+		expp->nd_type = BaseType(left->nd_type);
+		MkCoercion(&(arg->nd_left), expp->nd_type);
+		switch(expp->nd_type->tp_fund) {
+		case T_REAL:
+			break;
+		case T_INTEGER:
+			if (arg->nd_left->nd_class == Value) {
+				cstcall(expp,S_ABS);
+			}
+			break;
+		default:
 			free_it = 1;
+			break;
 		}
 		break;
 
@@ -1048,13 +1049,6 @@ ChkStandard(expp)
 		expp->nd_type = char_type;
 		if (!(left = getarg(&arg, T_CHAR, 0, edf))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_CAP);
-		break;
-
-	case S_CHR:
-		expp->nd_type = char_type;
-		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
-		MkCoercion(&(arg->nd_left), char_type);
-		free_it = 1;
 		break;
 
 	case S_FLOATD:
@@ -1152,9 +1146,13 @@ ChkStandard(expp)
 		break;
 
 	case S_ORD:
-		if (! getarg(&arg, T_DISCRETE, 0, edf)) return 0;
-		MkCoercion(&(arg->nd_left), card_type);
-		free_it = 1;
+		if (! (left = getarg(&arg, T_NOSUB, 0, edf))) return 0;
+		MkCoercion(&(arg->nd_left), BaseType(left->nd_type));
+		expp->nd_type = card_type;
+		if (arg->nd_left->nd_class == Value) {
+			arg->nd_left->nd_type = card_type;
+			free_it = 1;
+		}
 		break;
 
 #ifndef STRICT_3RD_ED
@@ -1220,17 +1218,15 @@ ChkStandard(expp)
 
 	case S_TRUNCD:
 	case S_TRUNC:
-		expp->nd_type = card_type;
-		if (edf->df_value.df_stdname == S_TRUNCD) {
-			expp->nd_type = longint_type;
-		}
 		if (! getarg(&arg, T_REAL, 0, edf)) return 0;
-		MkCoercion(&(arg->nd_left), expp->nd_type);
+		MkCoercion(&(arg->nd_left),
+			   edf->df_value.df_stdname == S_TRUNCD ?
+				longint_type : card_type);
 		free_it = 1;
 		break;
 
 	case S_VAL:
-		if (!(left = getname(&arg, D_ISTYPE, T_DISCRETE, edf))) {
+		if (!(left = getname(&arg, D_ISTYPE, T_NOSUB, edf))) {
 			return 0;
 		}
 		expp->nd_type = left->nd_def->df_type;
@@ -1238,9 +1234,16 @@ ChkStandard(expp)
 		arg->nd_right = 0;
 		FreeNode(arg);
 		arg = expp;
-		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
-		MkCoercion(&(arg->nd_left), expp->nd_type);
-		free_it = 1;
+		/* fall through */
+	case S_CHR:
+		if (! getarg(&arg, T_CARDINAL, 0, edf)) return 0;
+		if (edf->df_value.df_stdname == S_CHR) {
+			expp->nd_type = char_type;
+		}
+		if (expp->nd_type != int_type) {
+			MkCoercion(&(arg->nd_left), expp->nd_type);
+			free_it = 1;
+		}
 		break;
 
 	case S_ADR:
@@ -1344,10 +1347,16 @@ ChkCast(expp)
 		  df);
 	}
 
+	expp->nd_right->nd_left = 0;
+	FreeLR(expp);
 	if (arg->nd_class == Value) {
-		expp->nd_right->nd_left = 0;
-		FreeLR(expp);
 		*expp = *arg;
+		free_node(arg);
+	}
+	else {
+		expp->nd_symb = CAST;
+		expp->nd_class = Uoper;
+		expp->nd_right = arg;
 	}
 	expp->nd_type = lefttype;
 

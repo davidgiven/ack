@@ -319,15 +319,6 @@ CodeCall(nd)
 		return;
 	}	
 
-	if (IsCast(left)) {
-		/* it was just a cast. Simply ignore it
-		*/
-		CodePExpr(right->nd_left);
-		*nd = *(right->nd_left);
-		nd->nd_type = left->nd_def->df_type;
-		return;
-	}
-
 	assert(IsProcCall(left));
 
 	if (right) {
@@ -501,6 +492,11 @@ CodeStd(nd)
 	}
 
 	switch(std) {
+	case S_ORD:
+	case S_VAL:
+		CodePExpr(left);
+		break;
+
 	case S_ABS:
 		CodePExpr(left);
 		if (tp->tp_fund == T_INTEGER) {
@@ -517,8 +513,7 @@ CodeStd(nd)
 
 	case S_CAP:
 		CodePExpr(left);
-		c_loc(0137);	/* ASCII assumed */
-		C_and(word_size);
+		C_cal("cap");
 		break;
 
 	case S_HIGH:
@@ -706,15 +701,17 @@ CodeOper(expr, true_label, false_label)
 		case T_REAL:
 			C_sbf(tp->tp_size);
 			break;
-		case T_CARDINAL:
-			if (rightop->nd_type == address_type) {
-				C_sbs(pointer_size);
-				break;
-			}
-			/* fall through */
 		case T_POINTER:
 		case T_EQUAL:
+			if (rightop->nd_type == address_type) {
+				C_sbs(tp->tp_size);
+				break;
+			}
+			C_ngi(rightop->nd_type->tp_size);
+			C_ads(rightop->nd_type->tp_size);
+			break;
 		case T_INTORCARD:
+		case T_CARDINAL:
 			subu(tp->tp_size);
 			break;
 		case T_SET:
@@ -993,6 +990,8 @@ CodeUoper(nd)
 	case COERCION:
 		CodeCoercion(nd->nd_right->nd_type, tp);
 		RangeCheck(tp, nd->nd_right->nd_type);
+		break;
+	case CAST:
 		break;
 	default:
 		crash("Bad unary operator");
