@@ -17,18 +17,14 @@ opr:	doc.pr
 	make pr | opr
 
 pr:
-	@make "NROFF="$NROFF doc.pr >makepr.out 2>&1
+	@make "NROFF="$(NROFF) TBL=$(TBL) doc.pr >makepr.out 2>&1
 	@cat doc.pr
 
-app.t:	itables em.i
-
-em.i:	int/em.p
-	@echo Sorry, this copy was edited by hand from int/em.p
-
 itables: $(IOP) ip.awk
-	awk -f ip.awk $(IOP) | sed 's/-/\\-/g" | $(TBL) >itables
+	awk -f ip.awk $(IOP) | sed 's/-/\\-/g' | $(TBL) >itables
 
 .SUFFIXES : .pr .nr
 .nr.pr: ; $(TBL) macr.nr $*.nr | $(NROFF) >$@
 
-cont.t intro.t mem.t ispace.t dspace.t mapping.t succ.t descr.t iotrap.t mach.t assem.t kern.t app.t: macr.nr
+clean:
+	rm -f doc.pr itables
