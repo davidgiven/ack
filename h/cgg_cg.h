@@ -129,6 +129,7 @@ typedef struct exprnode *node_p;
 #define EX_OR		41
 #define EX_XOR		42
 #define EX_AND		43
+#define EX_ISROM	44
 
 
 typedef struct {        /* to stack coercions */

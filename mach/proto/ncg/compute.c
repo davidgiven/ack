@@ -71,6 +71,7 @@ char opdesc[] = {
 	LLDEF|RLDEF,		/* EX_OR */
 	LLDEF|RLDEF,		/* EX_XOR */
 	LLDEF|RLDEF,		/* EX_AND */
+	0,			/* EX_ISROM */
 };
 
 string salloc(),strcpy(),strcat();
@@ -207,6 +208,13 @@ result_t compute(node) register node_p node; {
 		if ((gp->gl_rom[MAXROM]&(1<<node->ex_rnode))==0)
 			return(undefres);
 		result.e_v.e_con = gp->gl_rom[node->ex_rnode];
+		return(result);
+	case EX_ISROM:
+		leaf2=dollar[node->ex_lnode];
+		if (leaf2.e_typ != EV_ADDR)
+			result.e_v.e_con = 0;
+		else
+			result.e_v.e_con = lookglo(leaf2.e_v.e_addr.ea_str) != 0;
 		return(result);
 	case EX_LOWW:
 		result.e_v.e_con = saveemp[node->ex_lnode].em_u.em_loper&0xFFFF;

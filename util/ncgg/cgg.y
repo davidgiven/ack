@@ -75,7 +75,7 @@ iocc_t iops[20];
 %token FROM TO
 %token TEST MOVE STACK RETURN
 %token PATTERNS PAT WITH EXACT KILLS USES REUSING GEN YIELDS LEAVING
-%token DEFINED SAMESIGN SFIT UFIT ROM LOWW HIGHW
+%token DEFINED SAMESIGN SFIT UFIT ROM LOWW HIGHW ISROM
 %token CMPEQ CMPNE CMPLT CMPGT CMPLE CMPGE OR2 AND2 LSHIFT RSHIFT NOT COMP
 %token INREG REGVAR REG_ANY REG_FLOAT REG_LOOP REG_POINTER
 %token <yy_int> ADORNACCESS
@@ -1015,6 +1015,8 @@ expr
 		{ $$ = make_expr(TYPBOOL,EX_UFIT,i_expr($3),i_expr($5)); }
 	| ROM '(' emarg ',' NUMBER ')'
 		{ $$ = make_expr(TYPINT,EX_ROM,$3-1,chkincl($5,1,3)-1); }
+	| ISROM '(' emarg ')'
+		{ $$ = make_expr(TYPINT,EX_ISROM,$3-1,0); }
 	| LOWW '(' emarg ')'
 		{ $$ = make_expr(TYPINT,EX_LOWW,$3-1,0); }
 	| HIGHW '(' emarg ')'

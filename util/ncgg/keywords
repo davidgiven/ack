@@ -24,6 +24,7 @@ from	FROM
 gen	GEN
 highw	HIGHW
 inreg	INREG
+is_rom	ISROM
 kills	KILLS
 leaving	LEAVING
 loww	LOWW

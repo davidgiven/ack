@@ -279,7 +279,7 @@ dopseudo() {
 			}
 			break;
 		}
-		if (rommask != 0) {
+		if (nromwords != 0) {
 			romcont[MAXROM]=rommask;
 			enterglo(labstr,romcont);
 		}
