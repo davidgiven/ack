@@ -43,13 +43,13 @@ name ld
 	program /bin/ld
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) \
+		({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) \
 		({RTS}:.mod={EM}/{RT}m2) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
-		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.mod:{TAIL}={EM}/{LIB}m2.1 {EM}/{LIB}m2.2 {EM}/{LIB}m2.3) \
-		(.e:{TAIL}={EM}/{LIB}em) \
-		(.b.c.p.mod:{TAIL}={EM}/{LIB}mon)
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon)
 	linker
 end

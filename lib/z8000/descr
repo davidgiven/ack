@@ -26,11 +26,12 @@ name asld
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i  IFILE={EM}/{RT}i
 	args {IFILE?} (.e:{HEAD}={EM}/{RT}em) \
-({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.b.c.p:{TAIL}={EM}/{LIB}mon) \
+		(.ocm.b.c.p:{TAIL}={EM}/{LIB}mon) \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/lib/z8000/end_em)
 	linker
 end

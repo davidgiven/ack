@@ -41,10 +41,11 @@ name led
 	mapflag -N ALIGN=-a0:2 -a1:2 -a2:2 -a3:2 -b0:0x2000
 	mapflag -r ALIGN=-a0:2 -a1:0x20000 -a2:2 -a3:2 -b0:0x2020
 	args (.e:{HEAD}= {ALIGN} {EM}/{RT}em) \
-({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{PRT}pc) -o > < \
+({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{PRT}pc) -o > < \
 		(.p:{TAIL}={EM}/{PLIB}pc) \
 		(.b:{TAIL}={EM}/{PLIB}bc) \
-		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.ocm:{TAIL}={EM}/{PLIB}ocm) \
+		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
