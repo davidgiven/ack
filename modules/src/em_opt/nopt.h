@@ -59,11 +59,8 @@ extern int OO_state;
 extern int OO_noutput;	/* number of instructions in output queue */
 extern int OO_WSIZE;	/* wordlength */
 extern int OO_PSIZE;	/* pointer length */
-#ifdef DEBUG
-extern int dflag;			/* debugging output */
-#endif
 #ifdef STATS
-extern int sflag;			/* statistics output */
+extern int OO_wrstats;			/* statistics output */
 #endif
 
 #define CST(p)		(p->acst)

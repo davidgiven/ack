@@ -13,23 +13,25 @@ outputnopt()
 		fprint(STDERR,"Couldn't open dfa.c for output\n");
 		sys_stop(S_EXIT);
 	}
-	outputheaders();
-	outputtables();
-	outputdfa();
-	outputdodefault();
-	outputdotrans();
+	outheaders();
+	outtables();
+	outdfa();
+	outdodefault();
+	outdotrans();
 	outputincalls();
 }
 
 PRIVATE
-outputheaders()
+outheaders()
 {
 	fprint(ofile,"#include \"nopt.h\"\n");
+	fprint(ofile,"\n");
+	fprint(ofile,"int maxpattern = %d;\n", longestpattern);
 	fprint(ofile,"\n");
 }
 
 PRIVATE
-outputtables()
+outtables()
 {
 	int s;
 	fprint(ofile,"static struct defact {\n");
@@ -47,7 +49,7 @@ outputtables()
 }
 
 PRIVATE
-outputdfa()
+outdfa()
 {
 	int s;
 	struct idf *op;
@@ -64,7 +66,7 @@ outputdfa()
 		fprint(ofile,"\t\t\tswitch(OO_state) {\n");
 		if(!op->id_startpatt) {
 				fprint(ofile,"\t\t\tcase 0: ");
-				fprint(ofile,"OO_output(*--OO_nxtpatt); ");
+				fprint(ofile,"OO_out(*--OO_nxtpatt); ");
 				fprint(ofile,"break;\n");
 		}
 		for(s=0;s<=higheststate;s++)
@@ -77,12 +79,12 @@ outputdfa()
 					fprint(ofile,"break;\n");
 				}
 			}
-		fprint(ofile,"\t\t\tdefault: defaultaction(); break;\n");
+		fprint(ofile,"\t\t\tdefault: dodefaultaction(); break;\n");
 		fprint(ofile,"\t\t\t}\n");
 		fprint(ofile,"\t\t\tbreak;\n");
 	}
 	fprint(ofile,"\t\tdefault:\n");
-	fprint(ofile,"\t\t\tif(OO_state) defaultaction();\n");
+	fprint(ofile,"\t\t\tif(OO_state) dodefaultaction();\n");
 	fprint(ofile,"\t\t\telse {\n");
 	fprint(ofile,"\t\t\t\tOO_flush();\n");
 	fprint(ofile,"\t\t\t\tOO_mkcalls(*--OO_nxtpatt);\n");
@@ -90,7 +92,7 @@ outputdfa()
 	fprint(ofile,"\t\t\t}\n");
 	fprint(ofile,"\t\t\tbreak;\n");
 	fprint(ofile,"\t\tcase OTHER:\n");
-	fprint(ofile,"\t\t\tif(OO_state) defaultaction();\n");
+	fprint(ofile,"\t\t\tif(OO_state) dodefaultaction();\n");
 	fprint(ofile,"\t\t\telse {\n");
 	fprint(ofile,"\t\t\t\tOO_flush();\n");
 	fprint(ofile,"\t\t\t\tOO_free(*--OO_nxtpatt);\n");
@@ -103,7 +105,7 @@ outputdfa()
 }
 
 PRIVATE
-outputmnems(l)
+outmnems(l)
 	struct mnems l;
 {
 	int i;
@@ -112,7 +114,7 @@ outputmnems(l)
 }
 
 PRIVATE
-outputdotrans()
+outdotrans()
 {
 	int s;
 	int i;
@@ -131,15 +133,15 @@ outputdotrans()
 	for(s=0;s<=higheststate;s++)
 		if(actions[s]!=(struct action *)NULL) {
 			fprint(ofile,"\tcase %d: /*",s);
-			outputmnems(patterns[s]);
+			outmnems(patterns[s]);
 			fprint(ofile," */\n");
 			seennontested=0;
 			for(a=actions[s];a!=(struct action *)NULL;a=a->next) {
 				if(a->test!=(struct exp_node *)NULL) {
 					fprint(ofile,"\t\tif(");
-					outputexp(a->test,s);
+					outexp(a->test,s);
 					fprint(ofile,") {\n");
-					outputoneaction(s,a);
+					outoneaction(s,a);
 					fprint(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 					fprint(ofile,"\t\t}\n");
 				}
@@ -149,7 +151,7 @@ outputdotrans()
 						nerrors++;
 					}
 					seennontested++;
-					outputoneaction(s,a);
+					outoneaction(s,a);
 					fprint(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 				}
 			}
@@ -166,9 +168,9 @@ outputdotrans()
 }
 
 PRIVATE
-outputdodefault()
+outdodefault()
 {
-	fprint(ofile,"\nstatic defaultaction() {\n");
+	fprint(ofile,"\nstatic dodefaultaction() {\n");
 	fprint(ofile,"\tregister struct defact *p = &defaultactions[OO_state];\n");
 	fprint(ofile,"\tOO_pushback(*--OO_nxtpatt);\n");
 	fprint(ofile,"\tOO_dodefault(p->numoutput,p->numcopy);\n");
@@ -177,20 +179,23 @@ outputdodefault()
 }
 
 PRIVATE
-outputoneaction(s,a)
+outoneaction(s,a)
 	int s;
 	struct action *a;
 {
 	fprint(ofile,"\t\t/* ");
 	fprint(ofile," -> ");
-	outputmnems(a->replacement);
+	outmnems(a->replacement);
 	fprint(ofile," */\n");
-	outputrepl(s,patterns[s],a->replacement);
+	fprint(ofile,"#ifdef STATS\n");
+	fprint(ofile,"\t\t\tif(OO_wrstats) fprint(STDERR,\"%d\\n\");\n",a->linenum);
+	fprint(ofile,"#endif\n");
+	outrepl(s,patterns[s],a->replacement);
 	findworst(a->replacement);
 }
 
 PRIVATE
-outputrepl(state,patt,repl)
+outrepl(state,patt,repl)
 	int state;
 	struct mnems patt,repl;
 {
@@ -210,27 +215,27 @@ outputrepl(state,patt,repl)
 		case CST:
 		case CSTOPT:
 			fprint(ofile,"\t\t\tOO_outcst(op_%s,",mnem);
-			outputexp(ri->arg,state);
+			outexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case LAB:
 			fprint(ofile,"\t\t\tOO_outlab(op_%s,",mnem);
-			outputexp(ri->arg,state);
+			outexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case DEFILB:
 			fprint(ofile,"\t\t\tOO_outdefilb(op_%s,",mnem);
-			outputexp(ri->arg,state);
+			outexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case PNAM:
 			fprint(ofile,"\t\t\tOO_outpnam(op_%s,",mnem);
-			outputexp(ri->arg,state);
+			outexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case EXT:
 			fprint(ofile,"\t\t\tOO_outext(op_%s,",mnem);
-			outputexp(ri->arg,state);
+			outexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		}
@@ -238,7 +243,7 @@ outputrepl(state,patt,repl)
 }
 
 PRIVATE
-outputexp(e,state)
+outexp(e,state)
 	struct exp_node *e;
 	int state;
 {
@@ -262,9 +267,9 @@ outputexp(e,state)
 	case LSHIFT:
 	case RSHIFT:
 		fprint(ofile,"(");
-		outputexp(e->exp_left,state);
-		outputop(e->node_type);
-		outputexp(e->exp_right,state);
+		outexp(e->exp_left,state);
+		outop(e->node_type);
+		outexp(e->exp_right,state);
 		fprint(ofile,")");
 		break;
 	case NOT:
@@ -272,8 +277,8 @@ outputexp(e,state)
 	case UPLUS:
 	case UMINUS:
 		fprint(ofile,"(");
-		outputop(e->node_type);
-		outputexp(e->exp_left,state);
+		outop(e->node_type);
+		outexp(e->exp_left,state);
 		fprint(ofile,")");
 		break;
 	case DEFINED:
@@ -284,21 +289,21 @@ outputexp(e,state)
 		break;
 	case COMMA:
 		outext(e->exp_left);
-		fprint(ofile,","); outputexp(e->exp_right,state);
+		fprint(ofile,","); outexp(e->exp_right,state);
 		break;
 	case SAMESIGN:
 	case SFIT:
 	case UFIT:
 	case ROTATE:
-		outputop(e->node_type);
-		outputexp(e->exp_left,state);
+		outop(e->node_type);
+		outexp(e->exp_left,state);
 		fprint(ofile,",");
-		outputexp(e->exp_right,state);
+		outexp(e->exp_right,state);
 		fprint(ofile,")");
 		break;
 	case SAMEEXT:
 	case SAMENAM:
-		outputop(e->node_type);
+		outop(e->node_type);
 		outext(e->exp_left);
 		fprint(ofile,",");
 		outext(e->exp_right,state);
@@ -349,7 +354,7 @@ outext(e)
 }
 
 PRIVATE
-outputop(op)
+outop(op)
 	int op;
 {
 	switch(op) {
@@ -375,11 +380,11 @@ outputop(op)
 	case COMP:	fprint(ofile,"~");	break;
 	case UPLUS:	fprint(ofile,"+");	break;
 	case UMINUS:	fprint(ofile,"-");	break;
-	case SAMESIGN:	fprint(ofile,"OO_samesign(");	break;
+	case SAMESIGN:	fprint(ofile,"OO_signsame(");	break;
 	case SFIT:	fprint(ofile,"OO_sfit(");	break;
 	case UFIT:	fprint(ofile,"OO_ufit(");	break;
 	case ROTATE:	fprint(ofile,"OO_rotate(");	break;
-	case SAMEEXT:	fprint(ofile,"OO_sameext(");	break;
-	case SAMENAM:	fprint(ofile,"OO_samenam(");	break;
+	case SAMEEXT:	fprint(ofile,"OO_extsame(");	break;
+	case SAMENAM:	fprint(ofile,"OO_namsame(");	break;
 	}
 }

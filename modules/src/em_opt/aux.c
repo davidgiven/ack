@@ -12,7 +12,7 @@ OO_rotate(w,amount)
 	return(((w<<amount)&highmask) | ((w >> (8*OO_WSIZE-amount))&lowmask));
 }
 
-OO_samesign(a,b)
+OO_signsame(a,b)
 	int a, b;
 {
 	return( (a ^ b) >= 0);
@@ -38,7 +38,7 @@ OO_ufit(val, nbits)
 	return((val&mask) == 0);
 }
 
-OO_sameext(a1,a2)
+OO_extsame(a1,a2)
 	struct instr *a1, *a2;
 {
 	if(a1->argtype != a2->argtype) return(0);
@@ -56,7 +56,7 @@ OO_sameext(a1,a2)
 	}
 }
 
-OO_samenam(a1,a2)
+OO_namsame(a1,a2)
 	struct instr *a1, *a2;
 {
 	if(a1->argtype != a2->argtype) return(0);

@@ -9,11 +9,11 @@ CSRC = nopt.c aux.c mkcalls.c pseudo.c outputdfa.c outcalls.c\
 
 SRCS = Makefile nopt.h parser.h parser.g syntax.l patterns $(CSRC)
 
-NOFILES=nopt.o dfa.o trans.o incalls.o pseudo.o aux.o mkcalls.o
+NOFILES = nopt.o dfa.o trans.o incalls.o pseudo.o aux.o mkcalls.o
 
-POFILES=parser.o syntax.o outputdfa.o outcalls.o findworst.o initlex.o Lpars.o 
+POFILES = parser.o syntax.o outputdfa.o outcalls.o findworst.o initlex.o Lpars.o
 
-GENFILES=Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
+GENFILES = Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
 		dfa.c dfa.c.save trans.c trans.c.save incalls.c incalls.c.save
 
 all:		$(LIBOPT)
@@ -34,15 +34,18 @@ clean:
 		rm -f $(NOFILES) $(POFILES) $(GENFILES) parser core makerror
 
 # set HOWMUCH to head -20 to limit number of patterns used
-#HOWMUCH=head -20
-HOWMUCH=cat
+#HOWMUCH = head -20
+HOWMUCH = cat
 
-LEXLIB=-ll
-INCLDIR=-I$(EMHOME)/h -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
-PREFLAGS=$(INCLDIR) -DPRIVATE=static
-PROFFLAG=-O
-CFLAGS=$(PREFLAGS) $(PROFFLAG)
-LLOPT=
+LEXLIB = -ll
+INCLDIR = -I$(EMHOME)/h -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
+PREFLAGS = $(INCLDIR) -DPRIVATE=static
+# Enable the next line to produce a version that output's the line number
+# from the patterns file each time an optimization is performed.
+#PREFLAGS = $(PREFLAGS) -DSTATS
+PROFFLAG = -O
+CFLAGS = $(PREFLAGS) $(PROFFLAG)
+LLOPT =
 
 $(LIBOPT):	dfadummy $(NOFILES)
 		rm -f $(LIBOPT)
@@ -63,7 +66,7 @@ dfadummy:	patterns parser
 
 # How to build program to parse patterns table and build c files.
 
-PARSERLIB=$(EMHOME)/lib/em_data.a\
+PARSERLIB = $(EMHOME)/lib/em_data.a\
 		$(EMHOME)/modules/lib/libprint.a\
 		$(EMHOME)/modules/lib/liballoc.a\
 		$(EMHOME)/modules/lib/libstring.a\

@@ -3,7 +3,7 @@ static char rcsid[] = "$Header$";
 #endif
 
 #include "nopt.h"
-#define MAXPATTERN	15
+extern int maxpattern;	/* Initialized from patterns in dfa.c */
 #define MAXBACKUP	50
 #define MAXOUTPUT	200
 #define MAXFREEI	200
@@ -36,21 +36,7 @@ int OO_WSIZE;	/* wordlength */
 int OO_PSIZE;	/* pointer length */
 
 #ifdef STATS
-int sflag = 1;			/* pattern statistics output */
-#endif
-#ifdef COLLECT
-int cflag = 0;			/* internal statistics output */
-#define UPDATEMAX(oldmax,n) if(cflag&&n>oldmax) oldmax=n
-static int numwrites = 0;
-static int numpushs = 0;
-static int numbackups = 0;
-static int numflushes = 0;
-static int numfrees = 0;
-static int numdefaults = 0;
-static int highestbackup = 0, totalbackup = 0;
-static int highestoutput = 0, totaloutput = 0;
-static int highestfreei = 0, totalfreei = 0;
-static int higheststr = 0, totalstr = 0;
+int OO_wrstats = 1;			/* pattern statistics output */
 #endif
 
 C_init(wsize,psize)
@@ -76,10 +62,6 @@ C_magic()
 
 C_close()
 {
-#ifdef COLLECT
-	if(cflag)
-		outputstats();
-#endif
 	O_close();
 }
 
@@ -99,7 +81,7 @@ allocmem()
 {
 	/* Allocate memory for queues on heap */
 	OO_nxtpatt = OO_patternqueue =
-		(struct instr **)Malloc(MAXPATTERN*sizeof(struct instr *));
+		(struct instr **)Malloc(maxpattern*sizeof(struct instr *));
 	OO_nxtbackup = OO_bkupqueue =
 		(struct instr **)Malloc(MAXBACKUP*sizeof(struct instr *));
 	lastbackup = OO_bkupqueue + MAXBACKUP - 1;
@@ -115,58 +97,20 @@ allocmem()
 	laststr = strqueue + MAXSTRING - 1;
 }
 
-#ifdef COLLECT
-PRIVATE
-outputstats()
-{
-	int i;
-	fprint(STDERR,"Total of %d instructions read, %d written\n",numreads,numwrites);
-	fprint(STDERR,"Total of %d calls to flush\n",numflushes);
-	fprint(STDERR,"Total of %d calls to myfree\n",numfrees);
-	fprint(STDERR,"Total of %d instructions pushed back\n",numpushs-numbackups);
-	fprint(STDERR,"Total of %d instructions backed up\n",numbackups);
-	fprint(STDERR,"Total of %d calls to dodefault\n",numdefaults);
-	fprint(STDERR,"Max of highestbackup\t%d\t(%d)\t",highestbackup,MAXBACKUP);
-	printav(totalbackup);
-	fprint(STDERR,"Max of highestoutput\t%d\t(%d)\t",highestoutput,MAXOUTPUT);
-	printav(totaloutput);
-	fprint(STDERR,"Max of highestfreei\t%d\t(%d)\t",highestfreei,MAXFREEI);
-	printav(totalfreei);
-	fprint(STDERR,"Max of higheststr\t%d\t(%d)\t",higheststr,MAXSTRING);
-	printav(totalstr);
-}
-
-PRIVATE
-printav(n)
-	int n;
-{
-	fprint(STDERR,"Av.\t%d.%d\n",n/numflushes,(n*10)%numflushes);
-}
-#endif
-
 OO_free(p)
 	struct instr *p;
 {
-#ifdef DEBUG
-	fprint(STDERR,"about to free ");
-	prtinst(p);
-	fprint(STDERR,"\n");
-#endif
-#ifdef COLLECT
-	if(cflag)
-		numfrees++;
-#endif
 	if(nextifree > lastifree) {
 #ifdef DEBUG
-		fprint(STDERR,"Warning: Overflow of freeiqueue-free arg ignored\n");
+		fprint(STDERR,"Warning: Overflow of free intr. queue.\n");
+		fprint(STDERR,"Ignored free of ");
+		prtinst(p);
+		fprint(STDERR,"\n");
 		printstate("Freea overflow");
 #endif
 		return;
 	}
 	*nextifree++ = p;
-#ifdef COLLECT
-	UPDATEMAX(highestfreei,nextifree-freeiqueue);
-#endif
 }
 
 PRIVATE char *
@@ -179,9 +123,6 @@ freestr(s)
 		fprint(STDERR,"string space overflowed!\n");
 		sys_stop(S_EXIT);
 	}
-#ifdef COLLECT
-	UPDATEMAX(higheststr,nextstr-strqueue);
-#endif
 	return(res);
 }
 
@@ -195,21 +136,8 @@ OO_flush()
 #ifdef DEBUG
 	printstate("Flush");
 #endif
-#ifdef COLLECT
-	if(cflag) {
-		numflushes++;
-		totaloutput += nextoutput-outputqueue;
-		totalbackup += OO_nxtbackup-OO_bkupqueue;
-		totalfreei += nextifree-freeiqueue;
-		totalstr += nextstr-strqueue;
-	}
-#endif
 	if(OO_noutput) {
 		for(p=outputqueue;p<nextoutput;p++) {
-#ifdef COLLECT
-			if(cflag)
-				numwrites++;
-#endif
 			OO_mkcalls(*p);
 			OO_free(*p);
 		}
@@ -226,7 +154,7 @@ OO_outop(opcode)
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = none_ptyp;
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_inop(opcode)
@@ -245,7 +173,7 @@ OO_outcst(opcode,cst)
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = cst;
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_incst(opcode,cst)
@@ -265,7 +193,7 @@ OO_outlab(opcode,lab)
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = lab;
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_inlab(opcode,lab)
@@ -286,7 +214,7 @@ OO_outpnam(opcode,pnam)
 	p->opcode = opcode;
 	p->argtype = pro_ptyp;
 	p->apnam = pnam;
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_inpnam(opcode,pnam)
@@ -308,7 +236,7 @@ OO_outdefilb(opcode,deflb)
 	p->opcode = opcode;
 	p->argtype = lab_ptyp;
 	p->alab = deflb;
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_indefilb(opcode,deflb)
@@ -344,7 +272,7 @@ OO_outext(opcode,arg,soff)
 	default:
 		fatal("Unexpected type %d in outext",arg->argtype);
 	}
-	OO_output(p);
+	OO_out(p);
 }
 
 OO_indnam(opcode,name,off)
@@ -373,22 +301,18 @@ OO_indlb(opcode,lab,off)
 	*OO_nxtpatt++ = p;
 }
 
-OO_output(p)
+OO_out(p)
 	struct instr *p;
 {
 	/* Put the instruction p on the output queue */
 	if(nextoutput > lastoutput) {
 #ifdef DEBUG
-		fprint(STDERR,"Overflow of outputqueue - output flushed\n");
-		printstate("Output overflow");
+		fprint(STDERR,"Warning: Overflow of outputqueue - output flushed\n");
 #endif
 		OO_flush();
 	}
 	OO_noutput++;
 	*nextoutput++ = p;
-#ifdef COLLECT
-	UPDATEMAX(highestoutput,nextoutput-outputqueue);
-#endif
 }
 
 OO_pushback(p)
@@ -403,10 +327,6 @@ OO_pushback(p)
 		return;
 	}
 	*OO_nxtbackup++ = p;
-#ifdef COLLECT
-	UPDATEMAX(highestbackup,OO_nxtbackup-OO_bkupqueue);
-	numpushs++;
-#endif
 }
 
 OO_backup(n)
@@ -414,10 +334,6 @@ OO_backup(n)
 {
 	/* copy (up to) n instructions from output to backup queues */
 	while(n-- && nextoutput>outputqueue) {
-#ifdef COLLECT
-		if(cflag)
-			numbackups++;
-#endif
 		OO_pushback(*(--nextoutput));
 		OO_noutput--;
 	}
@@ -431,16 +347,12 @@ OO_dodefault(numout, numcopy)
 	while(numcopy--) {
 		if(numout) {
 			numout--;
-			OO_output(*p);
+			OO_out(*p);
 		}
 		*p++ = *q++;
 	}
 	OO_nxtpatt = p;
-	while(numout--) OO_output(*p++);
-#ifdef COLLECT
-	if(cflag)
-		numdefaults++;
-#endif
+	while(numout--) OO_out(*p++);
 }
 
 #ifdef DEBUG
