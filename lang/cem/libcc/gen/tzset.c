@@ -1,9 +1,20 @@
 #ifdef BSD4_2
-#include <sys/time.h>
+struct timeval {
+	long tv_sec, tv_usec;
+};
+struct timezone {
+	int tz_minuteswest, tz_dsttime;
+};
 #else
 #ifndef USG
 #include <sys/types.h>
-#include <sys/timeb.h>
+struct timeb
+{
+	time_t	time;
+	ushort	millitm;
+	short	timezone;
+	short	dstflag;
+};
 #endif
 #endif
 
