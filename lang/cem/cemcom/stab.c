@@ -273,6 +273,7 @@ stb_string(df, kind, str)
 		}
 		else if (df->df_sc != AUTO && df->df_sc != REGISTER) {
 						/* global */
+			int stabtp = df->df_initialized ? N_STSYM : N_LCSYM;
 			if (df->df_sc == STATIC) {
 				if (df->df_level >= L_LOCAL) {
 					addc_db_str('V');
@@ -287,10 +288,10 @@ stb_string(df, kind, str)
 			stb_type(tp);
 			addc_db_str(';');
 			if (df->df_sc == STATIC && df->df_level >= L_LOCAL) {
-				C_ms_stb_dlb(db_str.base, N_LCSYM, 0, (label) df->df_address, (arith) 0);
+				C_ms_stb_dlb(db_str.base, stabtp, 0, (label) df->df_address, (arith) 0);
 			}
 			else {
-				C_ms_stb_dnam(db_str.base, N_LCSYM, 0, str, (arith) 0);
+				C_ms_stb_dnam(db_str.base, stabtp, 0, str, (arith) 0);
 			}
 		}
 		else {	/* local variable */
