@@ -412,9 +412,7 @@ arith.o: nofloat.h
 arith.o: nopp.h
 arith.o: spec_arith.h
 arith.o: type.h
-code.o: LLlex.h
 code.o: Lpars.h
-code.o: align.h
 code.o: arith.h
 code.o: assert.h
 code.o: atw.h
@@ -430,7 +428,6 @@ code.o: file_info.h
 code.o: idf.h
 code.o: label.h
 code.o: level.h
-code.o: mes.h
 code.o: noRoption.h
 code.o: nobitfield.h
 code.o: nocross.h

@@ -8,7 +8,6 @@
 #include	<em.h>
 #include	"botch_free.h"
 #include	<alloc.h>
-#include	"nofloat.h"
 #include	"dataflow.h"
 #include	"use_tmp.h"
 #include	"arith.h"
@@ -25,13 +24,11 @@
 #include	"decspecs.h"
 #include	"declar.h"
 #include	"Lpars.h"
-#include	"mes.h"
-#include	"LLlex.h"
 #include	"specials.h"
 #include	"atw.h"
 #include	"assert.h"
-#include	"align.h"
 #include	"noRoption.h"
+#include	"file_info.h"
 
 label lab_count = 1;
 label datlab_count = 1;

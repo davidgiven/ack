@@ -117,7 +117,7 @@ cstbin(expp, oper, expr)
 			break;
 		if (uns)	{
 			o1 >>= 1;
-			o1 & = ~mach_long_sign;
+			o1 &= ~mach_long_sign;
 			o1 >>= (o2-1);
 		}
 		else
