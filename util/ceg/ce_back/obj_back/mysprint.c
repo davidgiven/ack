@@ -3,8 +3,11 @@
 #include <varargs.h>
 
 /* Mysprint() stores the string directly in the string_arae. This saves
- * a copy action.
+ * a copy action. It is assumed that the strings stored in the string-table
+ * are never longer than MAXSTRLEN bytes.
  */
+
+#define MAXSTRLEN	1024
 
 /*VARARGS*/
 int mysprint(va_alist)
@@ -16,7 +19,7 @@ int mysprint(va_alist)
 
 	va_start(args);
 	fmt = va_arg(args, char *);
-	while (string + 1024 - string_area > size_string)
+	while (string + MAXSTRLEN - string_area > size_string)
 		mem_string();
 	retval = _format(string, fmt, args);
 	string[retval] = '\0';

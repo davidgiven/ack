@@ -1,6 +1,7 @@
 #include <system.h>
 #include <out.h>
 #include "back.h"
+#include "data.h"
 
 /* Solve the local references.
  */
@@ -8,9 +9,6 @@
 #define seg_index( s)	( nname - SEGBSS - 1 + s)
 
 long 		get4(); 
-extern short    get2();
-extern char 	get1();
-
 
 do_local_relocation()
 

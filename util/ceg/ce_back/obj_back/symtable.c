@@ -30,6 +30,9 @@ int		string_lengte = 0,
 		index_symbol_table = -1;
 
 struct Hashitem  *Hashitems ; 
+
+/*	MAXHASH must be a power of two ... */
+#define MAXHASH	512
 static int	 Hashtab[ MAXHASH];   
 static int Hash();
 
@@ -38,7 +41,6 @@ int find_sym( sym, isdef)
 char *sym;
 int isdef;
 {
-	register char *p;
 	register struct outname *s;
 	register struct Hashitem *ip;
 	register int h;
@@ -57,8 +59,11 @@ int isdef;
 	h = Hash(sym);
 	for ( ip = Hashtab[h] + Hashitems ; ip != Hashitems; 
 					  ip = (ip->hs_next) + Hashitems) {
+		register char *p = sym, *q;
+
 		s = symbol_table + ip->hs_nami;
-		if (strcmp(sym, (s->on_foff) + string_area) == 0) {
+		q = string_area + s->on_foff;
+		while (*p == *q++) if (*p++ == '\0') {
 		      	if ( (s->on_valu == -2) && (isdef == REFERENCE)) {
 			          s->on_type = S_EXT; 
 			          s->on_valu = -1;
@@ -89,6 +94,8 @@ int isdef;
 	if ( sym == string) 
 	        string += string_lengte;
 	else {    /* zie C_fil, C_lin, C_lni */
+		register char *p;
+
 		string_lengte = 0;
 		for( p=sym; *p != '\0' ; p++) {
 			string_lengte++;
@@ -111,15 +118,14 @@ int isdef;
 
 
 static int Hash(sym)
-register char *sym;
+	char *sym;
 {
 	register unsigned h;
-	register c;
+	register char *s = sym;
 
 	h = 0;
-	while (c = *sym++) {
-		h <<= 2;
-		h += c;
+	while (*s) {
+		h = (h << 2) + *s++;
 	}
-	return (h % MAXHASH);
+	return (h & (MAXHASH - 1));
 }

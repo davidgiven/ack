@@ -26,6 +26,8 @@ extern holno, procno;
 
 #define swtxt()		switchseg( SEGTXT)
 
+#define switchseg(seg)	if ((seg) != cur_seg) swtchsg(seg); else
+
 #define 	PC_REL  	1
 #define 	ABSOLUTE 	!PC_REL
 
@@ -34,8 +36,7 @@ extern holno, procno;
 
 #define MAXTEXT		4096
 #define MAXDATA		2048
-#define	MAXRELO		100
-#define	MAXNAME		100
-#define	MAXSTRING	2048
-#define MAXHASH		256
+#define	MAXRELO		512
+#define	MAXNAME		512
+#define	MAXSTRING	4096
 

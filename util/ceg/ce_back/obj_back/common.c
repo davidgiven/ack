@@ -9,9 +9,9 @@ arith n;
 	register struct outname *nm = &symbol_table[Label];
 
 	if (label_waiting && (nm->on_type & S_EXT)) {
-		symbol_table[Label].on_type |= S_COM | (S_MIN+SEGBSS);
-		if (n > symbol_table[Label].on_valu) {
-			symbol_table[Label].on_valu = n;
+		nm->on_type |= S_COM | (S_MIN+SEGBSS);
+		if (n > nm->on_valu) {
+			nm->on_valu = n;
 		}
 		label_waiting = 0;
 		return;

@@ -1,5 +1,6 @@
 #include <system.h>
 #include <out.h>
+#include "data.h"
 #include "mach.h"
 
 /* Global datastructures : 
@@ -36,26 +37,17 @@ long 		nbss = 0, size_text, size_data, size_reloc, size_symbol,
 		size_string, _text_cnt, _data_cnt;
 
 
-put1(sect,addr,b)
-char *sect;
-long addr;
-char b;
-{
-	sect[addr] = b;
-}
-
-
 put2(sect,addr,w)
 char *sect;
 long addr;
 int w;
 {
 #ifdef BYTES_REVERSED
-	put1(sect,addr,(char) (w>>8));
-	put1(sect,addr+1,(char) w);
+	put1(sect, addr, (w>>8));
+	put1(sect, addr+1, w);
 #else
-	put1(sect,addr,(char) w);
-	put1(sect,addr+1,(char) (w>>8));
+	put1(sect, addr, w);
+	put1(sect, addr+1, (w>>8));
 #endif
 }
 
@@ -66,37 +58,23 @@ long addr;
 long l;
 {
 #ifdef WORDS_REVERSED
-	put2(sect,addr,(short) (l>>16));
-	put2(sect,addr+2,(short) l);
+	put2(sect,addr,(int) (l>>16));
+	put2(sect,addr+2,(int) l);
 #else
-	put2(sect,addr,(short) l);
-	put2(sect,addr+2,(short) (l>>16));
+	put2(sect,addr,(int) l);
+	put2(sect,addr+2,(int) (l>>16));
 #endif
 }
 
-
-char get1( sect, addr)
+int get2(sect,addr)
 char *sect;
 long addr;
 {
-	return( sect[addr]);
-}
-
-
-short get2(sect,addr)
-char *sect;
-long addr;
-{
-	short h,l;
-
 #ifdef BYTES_REVERSED
-	h = sect[addr];
-	l = sect[addr+1];
+	return (get1(sect,addr) << 8) | (get1(sect,addr+1) & 255);
 #else
-	l = sect[addr];
-	h = sect[addr+1];
+	return (get1(sect,addr+1) << 8) | (get1(sect,addr) & 255);
 #endif
-	return( ( h << 8) | ( l & 255));
 }
 
 	
@@ -104,14 +82,9 @@ long get4(sect,addr)
 char *sect;
 long addr;
 {
-	long l,h;
-
 #ifdef WORDS_REVERSED
-	h = get2(sect,addr);
-	l = get2(sect,addr+2);
+	return ((long)get2(sect,addr) << 16) | get2(sect, addr+2);
 #else
-	l = get2(sect,addr);
-	h = get2(sect,addr+2);
+	return ((long)get2(sect,addr+2) << 16) | get2(sect, addr);
 #endif
-	return( ( h << 16) | ( l & 65535L));
 }
