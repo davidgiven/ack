@@ -27,6 +27,7 @@ install:	all
 	-mkdir $(DEF)/pseudo
 	-mkdir $(DEF)/storage
 	cp pseudo_vars.c $(DEF)
+	cp EM_vars.c $(DEF)
 	for i in $(MessageList) ; do cp message/$$i $(DEF)/message/$$i ; done
 	for i in $(NotimplList) ; do cp not_impl/$$i $(DEF)/not_impl/$$i ; done
 	for i in $(PseudoList) ; do cp pseudo/$$i $(DEF)/pseudo/$$i ; done
@@ -35,6 +36,7 @@ install:	all
 
 cmp:
 	-cmp pseudo_vars.c $(DEF)/pseudo_vars.c
+	-cmp EM_vars.c $(DEF)/EM_vars.c
 	-for i in $(MessageList) ; do cmp message/$$i $(DEF)/message/$$i ; done
 	-for i in $(NotimplList) ; do cmp not_impl/$$i $(DEF)/not_impl/$$i ; done
 	-for i in $(PseudoList) ; do cmp pseudo/$$i $(DEF)/pseudo/$$i ; done
