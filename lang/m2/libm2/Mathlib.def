@@ -1,0 +1,66 @@
+DEFINITION MODULE Mathlib;
+
+  (* Some mathematical constants: *)
+
+  CONST
+	(* From:	Handbook of Mathematical Functions
+			Edited by M. Abramowitz and I.A. Stegun
+			National Bureau of Standards
+			Applied Mathematics Series 55
+	*)
+
+	pi	= 3.141592653589793238462643;
+	twicepi	= 6.283185307179586476925286;
+	halfpi	= 1.570796326794896619231322;
+	quartpi	= 0.785398163397448309615661;
+	e	= 2.718281828459045235360287;
+	ln2	= 0.693147180559945309417232;
+	ln10	= 2.302585092994045684017992;
+
+  (* basic functions *)
+
+  PROCEDURE pow(x: REAL; i: INTEGER): REAL;
+
+  PROCEDURE sqrt(x: REAL): REAL;
+
+  PROCEDURE exp(x: REAL): REAL;
+
+  PROCEDURE ln(x: REAL): REAL;	(* natural log *)
+
+  PROCEDURE log(x: REAL): REAL;	(* log with base 10 *)
+
+  (* trigonometric functions; arguments in radians *)
+
+  PROCEDURE sin(x: REAL): REAL;
+
+  PROCEDURE cos(x: REAL): REAL;
+
+  PROCEDURE tan(x: REAL): REAL;
+
+  PROCEDURE arcsin(x: REAL): REAL;
+
+  PROCEDURE arccos(x: REAL): REAL;
+
+  PROCEDURE arctan(x: REAL): REAL;
+
+  (* hyperbolic functions *)
+
+  PROCEDURE sinh(x: REAL): REAL;
+
+  PROCEDURE cosh(x: REAL): REAL;
+
+  PROCEDURE tanh(x: REAL): REAL;
+
+  PROCEDURE arcsinh(x: REAL): REAL;
+
+  PROCEDURE arccosh(x: REAL): REAL;
+
+  PROCEDURE arctanh(x: REAL): REAL;
+
+  (* conversions *)
+
+  PROCEDURE RadianToDegree(x: REAL): REAL;
+
+  PROCEDURE DegreeToRadian(x: REAL): REAL;
+
+END Mathlib.

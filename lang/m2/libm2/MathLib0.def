@@ -1,4 +1,8 @@
 DEFINITION MODULE MathLib0;
+(*
+	Exists for compatibility.
+	A more elaborate math lib can be found in Mathlib.def
+*)
 
 	PROCEDURE sqrt(x : REAL) : REAL;
 

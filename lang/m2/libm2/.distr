@@ -6,6 +6,7 @@ Conversion.def
 FIFFEF.def
 InOut.def
 Makefile
+Mathlib.def
 MathLib0.def
 Processes.def
 RealInOut.def

@@ -2,21 +2,30 @@ IMPLEMENTATION MODULE RealConversions;
 
   FROM FIFFEF IMPORT FIF, FEF;
 
-  PROCEDURE RealToString(r: REAL;
+  PROCEDURE RealToString(arg: REAL;
+		width, digits: INTEGER;
+		VAR str: ARRAY OF CHAR;
+		VAR ok: BOOLEAN);
+  BEGIN
+	LongRealToString(LONG(arg), width, digits, str, ok);
+  END RealToString;
+
+  PROCEDURE LongRealToString(arg: LONGREAL;
 		width, digits: INTEGER;
 		VAR str: ARRAY OF CHAR;
 		VAR ok: BOOLEAN);
     VAR	pointpos: INTEGER;
 	i: CARDINAL;
 	ecvtflag: BOOLEAN;
-	intpart, fractpart: REAL;
+	r, intpart, fractpart: LONGREAL;
 	ind1, ind2 : CARDINAL;
 	sign: BOOLEAN;
 	tmp : CHAR;
 	ndigits: CARDINAL;
-	dummy, dig: REAL;
+	dummy, dig: LONGREAL;
 
   BEGIN
+	r := arg;
 	DEC(width);
 	IF digits < 0 THEN
 		ecvtflag := TRUE;
@@ -27,9 +36,10 @@ IMPLEMENTATION MODULE RealConversions;
 	END;
 	IF HIGH(str) < ndigits + 3 THEN str[0] := 0C; ok := FALSE; RETURN END;
 	pointpos := 0;
-	sign := r < 0.0;
+	sign := r < 0.0D;
 	IF sign THEN r := -r END;
-	r := FIF(r, 1.0, intpart);
+	r := FIF(r, 1.0D, intpart);
+	fractpart := r;
 	pointpos := 0;
 	ind1 := 0;
 	ok := TRUE;
@@ -37,9 +47,9 @@ IMPLEMENTATION MODULE RealConversions;
 	  Do integer part, which is now in "intpart". "r" now contains the
 	  fraction part.
 	*)
-	IF intpart # 0.0 THEN
+	IF intpart # 0.0D THEN
 		ind2 := 0;
-		WHILE intpart # 0.0 DO
+		WHILE intpart # 0.0D DO
 			IF ind2 > HIGH(str) THEN
 				IF NOT ecvtflag THEN
 					str[0] := 0C;
@@ -51,11 +61,11 @@ IMPLEMENTATION MODULE RealConversions;
 				END;
 				DEC(ind2);
 			END;
-			dummy := FIF(FIF(intpart, 0.1, intpart),10.0, dig);
-			IF (dummy > 0.5) AND (dig < 9.0) THEN
-				dig := dig + 1.0;
+			dummy := FIF(FIF(intpart, 0.1D, intpart),10.0D, dig);
+			IF (dummy > 0.5D) AND (dig < 9.0D) THEN
+				dig := dig + 1.0D;
 			END;
-			str[ind2] := CHR(TRUNC(dig+0.5) + ORD('0'));
+			str[ind2] := CHR(TRUNC(dig+0.5D) + ORD('0'));
 			INC(ind2);
 			INC(pointpos);
 		END;
@@ -70,10 +80,10 @@ IMPLEMENTATION MODULE RealConversions;
 		END;
 	ELSE
 		INC(pointpos);
-		IF r > 0.0 THEN
-			WHILE r < 1.0 DO
+		IF r > 0.0D THEN
+			WHILE r < 1.0D DO
 				fractpart := r;
-				r := r * 10.0;
+				r := r * 10.0D;
 				DEC(pointpos);
 			END;
 		END;
@@ -94,7 +104,7 @@ IMPLEMENTATION MODULE RealConversions;
 		RETURN;
 	END;
 	WHILE ind1 <= ind2 DO
-		fractpart := FIF(fractpart, 10.0, r);
+		fractpart := FIF(fractpart, 10.0D, r);
 		str[ind1] := CHR(TRUNC(r)+ORD('0'));
 		INC(ind1);
 	END;
@@ -191,17 +201,26 @@ IMPLEMENTATION MODULE RealConversions;
 	END;
 	IF (ind1+1) <= HIGH(str) THEN str[ind1+1] := 0C; END;
 
-  END RealToString;
+  END LongRealToString;
 
 	
   PROCEDURE StringToReal(str: ARRAY OF CHAR;
 			 VAR r: REAL; VAR ok: BOOLEAN);
+    VAR x: LONGREAL;
+  BEGIN
+	StringToLongReal(str, x, ok);
+	IF ok THEN
+		r := x;
+	END;
+  END StringToReal;
 
-    CONST	BIG = 1.0E17;
+  PROCEDURE StringToLongReal(str: ARRAY OF CHAR;
+			 VAR r: LONGREAL; VAR ok: BOOLEAN);
+    CONST	BIG = 1.0D17;
     TYPE	SETOFCHAR = SET OF CHAR;
     VAR		pow10 : INTEGER;
 		i : INTEGER;
-		e : REAL;
+		e : LONGREAL;
 		ch : CHAR;
 		signed: BOOLEAN;
 		signedexp: BOOLEAN;
@@ -209,11 +228,11 @@ IMPLEMENTATION MODULE RealConversions;
 
     PROCEDURE dig(ch: CARDINAL);
     BEGIN
-	IF r>BIG THEN INC(pow10) ELSE r:= 10.0*r + FLOAT(ch) END;
+	IF r>BIG THEN INC(pow10) ELSE r:= 10.0D*r + FLOATD(ch) END;
     END dig;
 
   BEGIN
-	r := 0.0;
+	r := 0.0D;
 	pow10 := 0;
 	iB := 0;
 	ok := TRUE;
@@ -276,10 +295,10 @@ IMPLEMENTATION MODULE RealConversions;
 		pow10 := pow10 + i;
 	END;
 	IF pow10 < 0 THEN i := -pow10; ELSE i := pow10; END;
-	e := 1.0;
+	e := 1.0D;
 	DEC(i);
 	WHILE i >= 0 DO
-		e := e * 10.0;
+		e := e * 10.0D;
 		DEC(i)
 	END;
 	IF pow10<0 THEN
@@ -289,6 +308,6 @@ IMPLEMENTATION MODULE RealConversions;
 	END;
 	IF signed THEN r := -r; END;
 	IF (iB <= HIGH(str)) AND (ORD(ch) > ORD(' ')) THEN ok := FALSE; END
-  END StringToReal;
+  END StringToLongReal;
 
 END RealConversions.
