@@ -212,10 +212,14 @@ fif_l:		adroff		;	move.w	(a5),d0
 #else
 		checkfsize
 4:
+		move.l	sp,-(sp)
 		jsr	.fif4
+		add.l	#4,sp
 		jmp	(a4)
 8:
+		move.l	sp,-(sp)
 		jsr	.fif8
+		add.l	#4,sp
 		jmp	(a4)
 #endif
 fif_z:
@@ -228,20 +232,16 @@ fef_l:		adroff		;	move.w	(a5),d0
 #else
 		checkfsize
 4:
-		move.l	(sp)+,d0
-		clr.l	-(sp)
-		move.l	d0,-(sp)
+		move.l	sp,-(sp)
+		sub.l	#4,(sp)
 		jsr	.fef4
 #ifndef lword
 		add.l	#2,sp
 #endif		
 		jmp	(a4)
 8:
-		move.l	(sp)+,d0
-		move.l	(sp)+,d1
-		clr.l	-(sp)
-		move.l	d1,-(sp)
-		move.l	d0,-(sp)
+		move.l	sp,-(sp)
+		sub.l	#4,(sp)
 		jsr	.fef8
 #ifndef lword
 		add.l	#2,sp

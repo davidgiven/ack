@@ -1,15 +1,17 @@
+EMHOME=../../..
 INTS=em2_t--- em2_---- em2_t-cp em2_t-c- em2_t--p \
 em4_t--- em4_---- em4_t-cp em4_t-c- em4_t--p
 P = mloop
 FILES=deffile $P0 $P1 $P2 $P3 $P4 $P5 $P6 $P7 $P8 $P9 $Pa $Pb $Pc
-CPP=../../../lib/cpp
-b=../../../lib/em
+CPP=$(EMHOME)/lib/cpp
+b=$(EMHOME)/lib/em
+CFLAGS=-I$(EMHOME)/h -O
 FLTRAP=
 
 all:	$(INTS) em
 
 em:	em.c
-	$(CC) -o em -I../../../h em.c
+	$(CC) $(CFLAGS) -o em em.c
 
 tmp.s:	$(FILES)
 	cat $(FILES) > tmp.s
@@ -46,8 +48,8 @@ em4_t--p:	tmp.s compile con_float.o
 
 con_float.o:	con_float.c
 	case `ack_sys` in m68k2|pmds) \
-		acc -mm68k4 -c -L -O con_float.c;; \
-		*) acc -c -L -O con_float.c;; \
+		acc -I$(EMHOME)/mach -mm68k4 -c -L -O con_float.c;; \
+		*) acc -c -I$(EMHOME)/mach -L -O con_float.c;; \
 	esac
 
 compile:	Makefile

@@ -188,9 +188,9 @@ dofloat:
 		movem.l	a0/a1/d0-d2,-(sp)
 		move.l	a3,-(sp)
 		add.l	d0,a3
+		move.l	d0,-(sp)
 		move.l	a4,-(sp)
 		move.l	a4,flt_label
-		move.l	d0,-(sp)
 		bsr	_con_float
 		lea	12(sp),sp
 		clr.l	flt_label
