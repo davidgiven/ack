@@ -2,6 +2,7 @@
 .sect .text
 .sect .rom
 .sect .data
+fmt:	.asciz "%s\n"
 .sect .bss
 
 	.sect .text
@@ -31,6 +32,7 @@
 9:
 	jsr	(.trpstr)
 	move.l	d0,-(sp)
+	pea	(fmt)
 	jsr	(.diagnos)
 	lea	(4, sp), sp
 	jsr	(_exit)
