@@ -45,7 +45,6 @@
 #endif
 
 int err_occurred;
-static int warn_class;
 
 extern char *symbol2str();
 
@@ -111,7 +110,6 @@ warning(va_alist)
 
 	va_start(ap);
 	{
-		warn_class = va_arg(ap, int);
 		_error(WARNING, NULLNODE, ap);
 	}
 	va_end(ap);
@@ -126,7 +124,6 @@ node_warning(va_alist)
 	va_start(ap);
 	{
 		t_node *nd = va_arg(ap, t_node *);
-		warn_class = va_arg(ap, int);
 		_error(WARNING, nd, ap);
 	}
 	va_end(ap);
@@ -153,7 +150,6 @@ lexwarning(va_alist)
 
 	va_start(ap);
 	{
-		warn_class = va_arg(ap, int);
 		_error(LEXWARNING, NULLNODE, ap);
 	}
 	va_end(ap);
@@ -194,7 +190,7 @@ crash(va_alist)
 _error(class, node, ap)
 	int class;
 	t_node *node;
-	va_list ap;
+	register va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
@@ -204,7 +200,8 @@ _error(class, node, ap)
 	static char * last_fn = 0;
 	static int e_seen = 0;
 	register char *remark = 0;
-	char *fmt = va_arg(ap, char *);
+	int warn_class;
+	char *fmt;
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
@@ -225,6 +222,7 @@ _error(class, node, ap)
 	switch (class)	{	
 	case WARNING:
 	case LEXWARNING:
+		warn_class = va_arg(ap, int);
 		if (! (warn_class & warning_classes)) return;
 		switch(warn_class) {
 #ifndef STRICT_3RD_ED
@@ -271,7 +269,8 @@ _error(class, node, ap)
 		ln = LineNumber;
 		break;
 	}
-	
+
+	fmt  = va_arg(ap, char *);	
 #ifdef DEBUG
 	if (class != VDEBUG) {
 #endif
