@@ -592,6 +592,7 @@ emit_symtab()
 		else M->name = outhead.oh_nchar + 3;	/* pointer to nullbyte */
 		cvlong(&(M->name));
 		cvlong(&(M->value));
+		cvshort(&(M->desc));
 	}
 	writef(MACHnames, sizeof(struct sym), (long) outhead.oh_nname);
 	free(MACHnames);
