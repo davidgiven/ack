@@ -1,0 +1,72 @@
+This file contains a summary of the bugs/features/inconsistencies
+Robbert and Ed found while making the linker usable for the 68000 and amoeba.
+
+There is something wrong with the way the combination of
+assembler and linker handle bss.
+In the original (Duk's) the assembler translated .space and, worse, .align
+to a sequence of zero's. If this sequence was at the end of a segment
+within a module the assembler didn't put zero in the segment but sets
+os_flen to the amount of space initialized before the zero space
+and os_size to the segements size. (os_size - os_flen) is then the
+size of the space filled by zeroes.
+For the sake of clarity, let us call 0...os_flen-1 initialized space
+and os_flen..os_size-1 uninitialized space.
+Now the linker, it does a nasty trick. It gathers the uninitialized space
+of all modules within a segment and puts it consequtively at the end
+of the segment. I think that I understand the reason: This way you can keep
+your resultant a.out smaller and you don't need a special bss segment
+(a la unix). But it is incorrect, the net effect is that the .align's
+at the end of segments within a module do have the desired effect,
+the space thus allocated is removed to 'higher spheres' thereby
+leaving the first items of that segment in the inmediatly following
+modules at unaligned boundaries.
+What should be done is that the linker leaves the initialized and
+the unitialized code alone and regards the whole a a chunk that can be
+relocated. Only producing a difference of os_size and os_flen for
+the zeroes at the very end of the segment. Thereby collapsing all
+.space (and .align) commands into zero space only if they
+are in consequtive modules at the end of the segment, with modules
+NOT containing any initialized data.
+I already, ad-hoc, changed the code of the assembler to producing 'hard'
+zeroes when aligning. The trick could also be done for .space
+but is a bit harder here.
+The reason: .space is also used to allocate space in the BSS segment
+if that produced zeroes in the a.out file (0..bss_size) we would
+have a.out files that are far too large.
+This feature of the linker also caused weird effects for names that
+are defined as the very last in a section within a module, without
+any data (initialized or uninitialezed) after it.
+The names a regarded as pointing into the uninitialized space and
+thus relocated to the end of the section.
+The sequence
+	.sect .data
+begdata:
+	.sect ....
+in an head_em.s resulted in the relocation of begdata to the END
+of the .data segment.
+
+Another problem form the commons:
+1 - Local commons are not handled by led and not produced by as.
+    using .comm for unitialized data is not correct because (from C)
+    two uninitialized static declarations for the same name in
+    different modules will be handled as external commons and thus
+    be overlayed.
+2 - The commons are allocated at the very end of the first pass, after the
+    initialezed data has been allocated in the segments. The order on which
+    the commons are allocated seems to be random. That way it is impossible
+    to produce a label that is guaranteed to point to the last byte (+1)
+    of a segment containing commons.
+    The currently used trick is to declare an extra segment after the
+    segment containing the commons. The first bytre in this segment
+    inmediatly follows the commons and can be used as _end or endbss.
+
+The archiver (aal) with the automatic ranlib is buggy.
+The only thing that seems to work at the moment is creation of a fresh
+archive.
+replacing/adding/deleting modules is likely to produce libraries
+with incorrect ranlib entries.
+The major troublemaker seems to be the extra padding byte at the end
+of odd sized modules.
+
+Led should return a non-zero value when it has found Undefined symbols
+or has another reason for not being able to produce a correct output file.
