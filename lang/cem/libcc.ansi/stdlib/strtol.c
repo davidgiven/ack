@@ -80,7 +80,7 @@ string2long(register const char *nptr, char ** const endptr,
 		 * unsigned long.
 		 */
 		if (is_signed
-		    && (   (sign < 0 && val > -LONG_MIN)
+		    && (   (sign < 0 && val > -(LONG_MIN+1)+(unsigned long) 1)
 			|| (sign > 0 && val > LONG_MAX)))
 		    ovfl++;
 	}
