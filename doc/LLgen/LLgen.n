@@ -59,7 +59,7 @@ It is based on so called \fBdefault choices\fR, which are
 implicitly or explicitly specified by the user.
 .PP
 \fILLgen\fR has succesfully been used to create recognizers for
-Pascal and C.
+Pascal, C, and Modula-2.
 .AE
 .NH
 Introduction
@@ -635,7 +635,7 @@ parameter, whose value is a token number, zero or -1.
 A zero parameter indicates that the current token (the one in
 the external variable \fILLsymb\fR) is deleted.
 .br
-A -1 parameter indicates that the parser expected end of file, but did'nt get
+A -1 parameter indicates that the parser expected end of file, but didn't get
 it.
 The parser will then skip tokens until end of file is detected.
 .br
