@@ -107,7 +107,7 @@ main(argc, argv)
 	int err = 0;
 
 	prog = *argv++;
-	if (**argv == '-') {
+	if (*argv && **argv == '-') {
 		char *opt = &(*argv++)[1];
 
 		if (*opt++ != 'd' || *opt) {
