@@ -142,6 +142,7 @@ _sigsetmask.s
 sigstack.s
 sigtramp.s
 sigvec.c
+_sigvec.c
 socket.s
 socketpair.s
 sstk.s
@@ -151,6 +152,7 @@ swapon.s
 symlink.s
 sync.s
 syscall.s
+_syscall.s
 time.c
 times.c
 _times.c
