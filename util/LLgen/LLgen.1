@@ -6,7 +6,16 @@ LLgen, an extended LL(1) parser generator
 .SH SYNOPSIS
 \fBLLgen\fP
 [
-\fB\-vVxX\fP
+\fB\-vxjw\fP
+]
+[
+\fB\-m\fP\fInum\fP
+]
+[
+\fB\-l\fP\fInum\fP
+]
+[
+\fB\-h\fP\fInum\fP
 ]
 file ...
 .SH DESCRIPTION
@@ -62,35 +71,40 @@ an error reporting routine;
 by
 \fILLgen\fP.
 .PP
-If the
-\fB\-v\fP
-or the
-\fB\-V\fP
-flag is given, the file
-\fILL.output\fP
-is prepared, which contains a description of the conflicts that
+\fILLgen\fP accepts the following flags:
+.IP \fB\-v\fP
+create a file called
+\fILL.output\fP,
+which contains a description of the conflicts that
 were not resolved.
-If it is given more than once,
+If the flag is given more than once,
 \fILLgen\fP
 will be more "verbose".
 If it is given three times, a complete description of the
 grammar will be supplied.
-.PP
-If the
-\fB\-x\fP
-or the
-\fB\-X\fP
-flag is given,
+.IP \fB\-x\fP
 the sets that are computed are extended with the nonterminal
 symbols and these extended sets are also included in the
 \fILL.output\fP
 file.
-.PP
-If the
-\fB\-w\fP
-or the
-\fB\-W\fP
-flag is given, no warnings are given.
+.IP \fB\-w\fP
+no warnings are given.
+.IP \fB\-j\fP
+when this flag is given, \fILLgen\fP will generate dense switches,
+so that the compiler can generate a jump table for it. This will only be
+done for switches that have density between
+\fIlow_percentage\fP and \fIhigh_percentage\fP, as explained below.
+Usually, compilers generate a jumptable when the density of the switch
+is above a certain threshold. If you want jump tables in more cases,
+set \fIhigh_percentage\fP to this threshold, and \fIlow_percentage\fP to
+a minimum threshold. There is a time-space trade-off here.
+.IP \fB\-m\fP\fInum\fP
+minimum number of cases in a switch for the \fB\-j\fP option to be
+effective. The default value is 8.
+.IP \fB\-l\fP\fInum\fP
+The \fIlow_percentage\fP, as described above. Default value is 10.
+.IP \fB\-h\fP\fInum\fP
+The \fIhigh_percentage\fP, as described above. Default value is 30.
 .SH FILES
 LL.output                 verbose output file
 .br
