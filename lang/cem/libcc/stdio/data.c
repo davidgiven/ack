@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-unsigned char  __stdin[BUFSIZ];
-unsigned char  __stdout[BUFSIZ];
+unsigned char  _sobuf[BUFSIZ];
+unsigned char  _sibuf[BUFSIZ];
 
 struct _io_buf _stdin = {
-	0, 0, IO_READMODE , __stdin, __stdin
+	0, 0, IO_READMODE , _sibuf, _sibuf
 };
 
 struct _io_buf _stdout = {
