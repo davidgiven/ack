@@ -377,6 +377,11 @@ alloc(piece, size)
 		return full;
 	if (size != (ind_t)size)
 		return BADOFF;
+	switch(piece) {
+	case ALLOMODL:
+	case ALLORANL:
+		size = int_align(size);
+	}
 
 	if (size - left > 0)
 		incr = ((size - left + (INCRSIZE - 1)) / INCRSIZE) * INCRSIZE;

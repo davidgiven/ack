@@ -26,9 +26,9 @@ savemagic()
 	if (!incore)
 		return;
 
-	if ((p = core_alloc(ALLOMODL, (long)sizeof(ushort))) != (char *)0) {
+	if ((p = core_alloc(ALLOMODL, (long)sizeof(int))) != (char *)0) {
 		*(ushort *)p = AALMAG;
-		core_position += sizeof(ushort);
+		core_position += sizeof(int);
 	}
 }
 
@@ -42,7 +42,7 @@ savehdr(hdr)
 
 	if ((p=core_alloc(ALLOMODL,(long)sizeof(struct ar_hdr)))!=(char *)0) {
 		*(struct ar_hdr *)p = *hdr;
-		core_position += sizeof(struct ar_hdr);
+		core_position += int_align(sizeof(struct ar_hdr));
 	}
 }
 

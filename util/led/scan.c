@@ -104,8 +104,8 @@ getfile(filename)
 			if (strcmp(archive_header.ar_name, SYMDEF))
 				fatal("no table of contents");
 		} else if (incore) {
-			modulbase += sizeof(ushort);
-			core_position += sizeof(ushort);
+			modulbase += sizeof(int);
+			core_position += sizeof(int);
 		}
 		return ARCHIVE;
 	default:
@@ -130,8 +130,8 @@ get_archive_header(archive_header)
 	} else {
 		/* Copy structs. */
 		*archive_header = *(struct ar_hdr *)modulbase;
-		modulbase += sizeof(struct ar_hdr);
-		core_position += sizeof(struct ar_hdr);
+		modulbase += int_align(sizeof(struct ar_hdr));
+		core_position += int_align(sizeof(struct ar_hdr));
 	}
 #ifdef SYMDBUG
 	objectsize = archive_header.ar_size;
@@ -408,9 +408,9 @@ skip_modul(head)
 	register ind_t	skip = modulsize(head);
 
 	if (incore) {
-		core_position += skip;
+		core_position += int_align(skip);
 		if (passnumber == SECOND)
-			modulbase += skip;
+			modulbase += int_align(skip);
 	} else {
 		dealloc(ALLOMODL);
 		core_position = (ind_t)0;
