@@ -263,6 +263,7 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
+		lea	lasttable,a1
 		move.l	(a1),d7
 		move.l	d7,a0		!keep file pointer in d7
 		clr.l	(a1)+		!this will stop the printing
@@ -270,19 +271,23 @@ lhalt:
 3:		add.l	#1,d1
 		tst.b	(a0)+
 		bne	3b
+		move.l	a1,-(sp)
 		move.l	d1,-(sp)
 		move.l	d7,-(sp)
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
+		move.l	(sp)+,a1
 4:		move.l	(a1),d1		!next print line numbers
 		lea	mess3,a0
 		bsr	itoa
+		move.l	a1,-(sp)
 		move.l	#12,-(sp)
 		pea	mess3
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		add.l	wrd+4,sp
+		move.l	(sp)+,a1
 		bsr	nexttab
 		tst.l	(a1)		!in case 0 no more lines
 		beq	9f
