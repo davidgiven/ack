@@ -15,8 +15,8 @@ that can reach B without going through C.
 .PP
 As an example of how the algorithm works,
 consider the piece of program of Fig. 4.1.
-First just look at the program and think for
-yourself what part of the code constitutes the loop.
+First just look at the program and try to
+see what part of the code constitutes the loop.
 .DS
 loop
    if cond then                       1

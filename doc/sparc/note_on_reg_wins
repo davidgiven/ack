@@ -1,15 +1,15 @@
 When developing a fast compiler for the Sun-4 series we have encountered
 rather strange behavior of the Sun kernel.
 
-The problem is that when you have lots of nested procedure calls, (as
+The problem is that with lots of nested procedure calls, (as
 is often the case in compilers and parsers) the registers fill up which
 causes a kernel trap. The kernel will then write out some of the registers
-to memory to make room for another window. When you return from the nested
+to memory to make room for another window. When returning from the nested
 procedure call, just the reverse happens: yet another kernel trap so the
 kernel can load the register from memory.
 
 Unfortunately the kernel only saves or loads a single window (= 16 register)
-on each trap. This means that when you call a procedure recursively it causes
+on each trap. This means that when calling a procedure recursively it causes
 a kernel trap on almost every invocation (except for the first few).
 
 To illustrate this consider the following little program:

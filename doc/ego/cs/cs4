@@ -133,7 +133,7 @@ l l.
 .DE
 In this way an item on the fake-stack always contains
 the necessary information.
-As you see, EM expressions are parsed bottum up.
+EM expressions are parsed bottum up.
 .NH 3
 Updating entities
 .PP

@@ -12,7 +12,7 @@ File inclusion
 .PP
 The C preprocessor is applied to the input file before
 compilation, so that files containing useful \fBPROC\fP and \fBDEF\fP
-declarations can be used in your program by using the \fB#include\fP-directive
+declarations can be used in the program by using the \fB#include\fP-directive
 of the preprocessor.
 .NH 2
 Substitution
@@ -32,8 +32,8 @@ an input or output process. Thus,
 .ft
 .DE
 is not allowed. Because it was easy to add, and it was used by some programs,
-our compiler allows it. (If you prefer portability you are advised not to make
-use of it.)
+our compiler allows it. (If portability is an issue, usage of this feature
+is not advisable).
 .NH 2
 Configuration
 .PP

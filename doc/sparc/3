@@ -65,7 +65,7 @@ peculiarities of the SPARC processor and Sun's C-compiler (henceforth
 simply called \fIcc\fR).
 .PP
 For some reason, the SPARC stack pointer requires alignment
-on 8 bytes, so you cannot push a 4-byte integer on the stack
+on 8 bytes, so it is impossible to push a 4-byte integer on the stack
 and then \*(Sisub 4, %sp\*(So\(dd.
 .FS
 \(dd For more information about SPARC assembler see the Sun-4 Assembly

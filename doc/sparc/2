@@ -48,7 +48,7 @@ provided extremely high performance. All register-to-register operations
 require exactly one clock cycle, and all register-to-memory and
 memory-to-register operations require two clock cycles, one to retrieve
 the instruction and one to access external memory. At a clock speed of
-over 20 MHz this means that you can achieve well over 10 VAX MIPS:
+over 20 MHz this means that well over 10 VAX MIPS can be achieved:
 more than 4 times the speed of a 15 MHz 68020 used in the Sun3/50.
 .PP
 As above, the reader should also have some general knowledge about
