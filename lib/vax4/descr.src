@@ -17,8 +17,15 @@ name be
 	prop >
 	need .e
 end
-name as
+name asopt
 	from .s
+	to .so
+	program /bin/sed
+	args -f {EM}/mach/vax4/cg/sedf
+	prop O<>
+end
+name as
+	from .s.so
 	to .o
 	program /bin/as
 	args - -o > <
@@ -32,6 +39,6 @@ name ld
 	args (.e:{HEAD}={EM}/{RT}em) \
 ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 (.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.e:{TAIL}={EM}/{LIB}em) (.c.p:{TAIL}={EM}/{LIB}mon)
+(.c.p:{TAIL}={EM}/{LIB}mon) (.e:{TAIL}={EM}/{LIB}em)
 	prop C
 end
