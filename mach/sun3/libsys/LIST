@@ -25,6 +25,7 @@ _execl.c
 execle.c
 execv.c
 execve.s
+_execve.s
 exit.c
 exportfs.s
 fchmod.s
