@@ -24,7 +24,7 @@
 extern          (*_sig())();
 extern          _catch();
 #ifndef CPM
-extern int      gtty();
+extern int      _gtty();
 #endif
 
 struct file     **_extfl;
@@ -34,6 +34,7 @@ struct file     *_curfil;       /* points to file struct in case of errors */
 int             _pargc;
 char            **_pargv;
 char            **_penvp;
+int		_fp_hook = 1;	/* This is for Minix, but does not harm others */
 
 _ini(args,c,p,mainlb) char *args,*mainlb; int c; struct file **p; {
 	struct file *f;
@@ -65,7 +66,7 @@ _ini(args,c,p,mainlb) char *args,*mainlb; int c; struct file **p; {
 #ifdef CPM
 		f->count = 1;
 #else
-		f->count = (gtty(1,buf) >= 0 ? 1 : PC_BUFLEN);
+		f->count = (_gtty(1,buf) >= 0 ? 1 : PC_BUFLEN);
 #endif
 		f->buflen = f->count;
 	}

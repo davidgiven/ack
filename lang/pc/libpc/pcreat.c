@@ -23,7 +23,7 @@
 
 extern		_cls();
 extern		_trp();
-extern int	creat();
+extern int	_creat();
 
 /* procedure pcreat(var f:text; s:string); */
 
@@ -36,6 +36,6 @@ pcreat(f,s) struct file *f; char *s; {
 	f->size = 1;
 	f->count = PC_BUFLEN;
 	f->buflen = PC_BUFLEN;
-	if ((f->ufd = creat(s,0644)) < 0)
+	if ((f->ufd = _creat(s,0644)) < 0)
 		_trp(EREWR);
 }

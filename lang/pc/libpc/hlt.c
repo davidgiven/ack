@@ -23,7 +23,7 @@
 extern struct file	**_extfl;
 extern int		_extflc;
 extern			_cls();
-extern			exit();
+extern			_exit();
 
 _hlt(ecode) int ecode; {
 	int i;
@@ -31,5 +31,5 @@ _hlt(ecode) int ecode; {
 	for (i = 0; i < _extflc; i++)
 		if (_extfl[i] != (struct file *) 0)
 			_cls(_extfl[i]);
-	exit(ecode);
+	_exit(ecode);
 }

@@ -23,7 +23,7 @@
 
 extern		_cls();
 extern		_trp();
-extern int	open();
+extern int	_open();
 
 /* procedure popen(var f:text; s:string); */
 
@@ -36,6 +36,6 @@ popen(f,s) struct file *f; char *s; {
 	f->size = 1;
 	f->count = 0;
 	f->buflen = PC_BUFLEN;
-	if ((f->ufd = open(s,0)) < 0)
+	if ((f->ufd = _open(s,0)) < 0)
 		_trp(ERESET);
 }

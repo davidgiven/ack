@@ -31,32 +31,32 @@ extern char		**_penvp;
 extern			_cls();
 extern			_xcls();
 extern			_trp();
-extern int		getpid();
-extern int		creat();
-extern int		open();
-extern int		close();
-extern int		unlink();
-extern long		lseek();
+extern int		_getpid();
+extern int		_creat();
+extern int		_open();
+extern int		_close();
+extern int		_unlink();
+extern long		_lseek();
 
 static int tmpfil() {
 	int i; char *p,*q;
 
-	i = getpid();
+	i = _getpid();
 	p = "/usr/tmp/plf.xxxxx";
 	q = p + 13;
 	do
 		*q++ = (i & 07) + '0';
 	while (i >>= 3);
 	*q = '\0';
-	if ((i = creat(p,0644)) < 0)
-		if ((i = creat(p += 4,0644)) < 0)
-			if ((i = creat(p += 5,0644)) < 0)
+	if ((i = _creat(p,0644)) < 0)
+		if ((i = _creat(p += 4,0644)) < 0)
+			if ((i = _creat(p += 5,0644)) < 0)
 				goto error;
-	if (close(i) != 0)
+	if (_close(i) != 0)
 		goto error;
-	if ((i = open(p,2)) < 0)
+	if ((i = _open(p,2)) < 0)
 		goto error;
-	if (unlink(p) != 0)
+	if (_unlink(p) != 0)
 error:		_trp(EREWR);
 	return(i);
 }
@@ -76,7 +76,7 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 		f->fname = "LOCAL";
 		if ((descr & WRBIT) == 0 && (f->flags & 0377) == MAGIC) {
 			_xcls(f);
-			if (lseek(f->ufd,(long)0,0) == -1)
+			if (_lseek(f->ufd,(long)0,0) == -1)
 				_trp(ERESET);
 		} else {
 			_cls(f);
@@ -90,10 +90,10 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 		f->fname = _pargv[i];
 		_cls(f);
 		if ((descr & WRBIT) == 0) {
-			if ((f->ufd = open(f->fname,0)) < 0)
+			if ((f->ufd = _open(f->fname,0)) < 0)
 				_trp(ERESET);
 		} else {
-			if ((f->ufd = creat(f->fname,0644)) < 0)
+			if ((f->ufd = _creat(f->fname,0644)) < 0)
 				_trp(EREWR);
 		}
 	}

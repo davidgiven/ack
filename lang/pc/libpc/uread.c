@@ -18,8 +18,8 @@
 
 /* function uread(fd:integer; var b:buf; n:integer):integer; */
 
-extern int	read();
+extern int	_read();
 
 int uread(fd,b,n) char *b; int fd,n; {
-	return(read(fd,b,n));
+	return(_read(fd,b,n));
 }

@@ -88,10 +88,8 @@ extern char		**_penvp;
 
 extern char		*_hol0();
 extern			_trp();
-extern			exit();
-extern int		open();
-extern int		read();
-extern int		write();
+extern			_exit();
+extern int		_write();
 
 _catch(erno) unsigned erno; {
 	register struct errm *ep = &errors[0];
@@ -146,10 +144,10 @@ _catch(erno) unsigned erno; {
 		p = q;
 		while (*p)
 			p++;
-		if (write(2,q,p-q) < 0)
+		if (_write(2,q,p-q) < 0)
 			;
 	}
-	exit(erno);
+	_exit(erno);
 error:
 	_trp(erno);
 }

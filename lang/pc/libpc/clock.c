@@ -20,7 +20,7 @@
 
 /* function clock:integer; extern; */
 
-extern int	times();
+extern int	_times();
 
 struct tbuf {
 	long	utime;
@@ -36,7 +36,7 @@ struct tbuf {
 int clock() {
 	struct tbuf t;
 
-	times(&t);
+	_times(&t);
 	return( (int)(t.utime + t.stime) &
 #if EM_WSIZE <= 2
 	077777

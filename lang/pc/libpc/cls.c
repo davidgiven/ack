@@ -25,7 +25,7 @@ extern struct file	*_curfil;
 extern			_trp();
 extern			_flush();
 extern			_outcpt();
-extern int		close();
+extern int		_close();
 
 _xcls(f) struct file *f; {
 
@@ -61,7 +61,7 @@ _cls(f) struct file *f; {
 		return;
 #endif
 	_xcls(f);
-	if (close(f->ufd) != 0)
+	if (_close(f->ufd) != 0)
 		_trp(ECLOSE);
 	f->flags = 0;
 }

@@ -8,7 +8,7 @@
 
 #include	<em_abs.h>
 
-extern trp();
+extern _trp();
 
 struct array_descr	{
 		int		lbound;
@@ -21,5 +21,5 @@ struct array_descr *descr;
 {
 	if( index < descr->lbound ||
 	    index > (int) descr->n_elts_min_one + descr->lbound )
-		_trp(ERANGE);
+		_trp(EARRAY);
 }

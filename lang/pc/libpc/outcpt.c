@@ -25,7 +25,7 @@
 
 extern int	errno;
 extern		_trp();
-extern int	write();
+extern int	_write();
 
 _flush(f) struct file *f; {
 	int i,n;
@@ -35,7 +35,7 @@ _flush(f) struct file *f; {
 	if (n <= 0)
 		return;
 	f->count = f->buflen;
-	if ((i = write(f->ufd,f->bufadr,n)) < 0 && errno == EINTR)
+	if ((i = _write(f->ufd,f->bufadr,n)) < 0 && errno == EINTR)
 		return;
 	if (i != n)
 		_trp(EWRITE);
