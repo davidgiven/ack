@@ -45,21 +45,26 @@ ch3mon(oper, expp)
 		} else {
 			expr = *expp;
 
+			if (expr->ex_type->tp_up->tp_fund != FUNCTION &&
+			    expr->ex_type->tp_up->tp_size <= 0) {
+				expr_error(expr, "incomplete type in expression");
+			}
 			if (is_ld_cst(expr))
 				/* dereference in administration only */
 				expr->ex_type = expr->ex_type->tp_up;
 			else	/* runtime code */
 				*expp = new_oper(expr->ex_type->tp_up, NILEXPR,
 							'*', expr);
-			(*expp)->ex_lvalue = (
-				(*expp)->ex_type->tp_fund != ARRAY &&
-				(*expp)->ex_type->tp_fund != FUNCTION
+			expr = *expp;
+			expr->ex_lvalue = (
+				expr->ex_type->tp_fund != ARRAY &&
+				expr->ex_type->tp_fund != FUNCTION
 				);
-			if ((*expp)->ex_type->tp_typequal & TQ_CONST)
-				(*expp)->ex_flags |= EX_READONLY;
-			if ((*expp)->ex_type->tp_typequal & TQ_VOLATILE)
-				(*expp)->ex_flags |= EX_VOLATILE;
-			(*expp)->ex_flags &= ~EX_ILVALUE;
+			if (expr->ex_type->tp_typequal & TQ_CONST)
+				expr->ex_flags |= EX_READONLY;
+			if (expr->ex_type->tp_typequal & TQ_VOLATILE)
+				expr->ex_flags |= EX_VOLATILE;
+			expr->ex_flags &= ~EX_ILVALUE;
 		}
 		break;
 	case ADDRESSOF:
