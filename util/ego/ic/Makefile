@@ -1,20 +1,43 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=
-DEBUG=../share
-SHARE=../share
-MALLOC=
-IC=.
-OBJECTS=ic.o ic_aux.o ic_lookup.o ic_io.o ic_lib.o
-SHOBJECTS=$(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/aux.o
-SRC=ic.h ic_aux.h ic_lib.h ic_lookup.h ic_io.h ic.c ic_aux.c ic_lib.c ic_lookup.c ic_io.c
-all:	$(OBJECTS)
-ic: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -i -o ic $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a $(MALLOC)
-	 
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+ic.c ic_aux.c ic_lib.c ic_lookup.c ic_io.c
+
+OFILES=\
+ic.o ic_aux.o ic_lookup.o ic_io.o ic_lib.o
+
+HFILES=\
+ic.h ic_aux.h ic_lib.h ic_lookup.h ic_io.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o $(SHR)/debug.o \
+$(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/aux.o
+
+SHARE_MFILES=\
+$(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/debug.m \
+$(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/aux.m
+
+ic:	$(OFILES)
+	$(CC) -o ic $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+ic_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o ic -.c $(LDFLAGS) ic.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
 
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO

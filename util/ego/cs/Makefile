@@ -1,9 +1,3 @@
-# CPPFLAGS=-DVERBOSE -DTRACE
-CPPFLAGS=-DVERBOSE
-CFLAGS=$(CPPFLAGS)
-LDFLAGS=-i
-LINTFLAGS=-phbac $(CPPFLAGS)
-
 EMH=../../../h
 EMLIB=../../../lib
 SHR=../share
@@ -31,11 +25,20 @@ $(SHR)/get.o $(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o $(SHR)/debug.o\
 $(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/aux.o\
 $(SHR)/go.o
 
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/debug.m\
+$(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/aux.m\
+$(SHR)/go.m
+
 cs:	$(OFILES)
 	$(CC) -o cs $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
 
+cs_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o cs -.c $(LDFLAGS) cs.o $(EMLIB)/em_data.a
+
 lint:
-	lint $(LINTFLAGS) $(CFILES)
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
 pr:	$(PRFILES)
 	@pr $?

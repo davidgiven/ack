@@ -1,20 +1,47 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=
-SHARE=../share
-CA=.
-OBJECTS=ca.o ca_put.o
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/aux.o $(SHARE)/debug.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/files.o $(SHARE)/map.o
-SRC=ca.h ca_put.h ca.c ca_put.c
+EMLIB=../../../lib
+SHR=../share
 
-all:	$(OBJECTS)
-ca: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o ca -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+CFILES=\
+ca.c ca_put.c
+
+OFILES=\
+ca.o ca_put.o
+
+HFILES=\
+ca.h ca_put.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/alloc.o $(SHR)/global.o $(SHR)/aux.o $(SHR)/debug.o \
+$(SHR)/lset.o $(SHR)/cset.o $(SHR)/files.o $(SHR)/map.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/aux.m $(SHR)/debug.m \
+$(SHR)/lset.m $(SHR)/cset.m $(SHR)/files.m $(SHR)/map.m
+
+ca:	$(OFILES)
+	$(CC) -o ca $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+ca_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o ca -.c $(LDFLAGS) ca.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 ca.o:	../share/alloc.h
 ca.o:	../share/debug.h
 ca.o:	../share/files.h

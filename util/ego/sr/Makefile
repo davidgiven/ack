@@ -1,19 +1,49 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=-DVERBOSE
-SHARE=../share
-SR=.
-OBJECTS=sr.o sr_expr.o sr_reduce.o sr_iv.o sr_cand.o sr_xform.o sr_aux.o 
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/aux.o $(SHARE)/go.o
-SRC=sr.h sr_iv.h sr_reduce.h sr_cand.h sr_xform.h sr_expr.h sr_aux.h sr.c sr_iv.c sr_reduce.c sr_cand.c sr_xform.c sr_expr.c sr_aux.c
-all:	$(OBJECTS)
-sr: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o sr -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+sr.c sr_iv.c sr_reduce.c sr_cand.c sr_xform.c sr_expr.c sr_aux.c
+
+OFILES=\
+sr.o sr_expr.o sr_reduce.o sr_iv.o sr_cand.o sr_xform.o sr_aux.o 
+
+HFILES=\
+sr.h sr_iv.h sr_reduce.h sr_cand.h sr_xform.h sr_expr.h sr_aux.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o $(SHR)/debug.o \
+$(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/aux.o \
+$(SHR)/go.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/debug.m \
+$(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/aux.m \
+$(SHR)/go.m
+
+sr:	$(OFILES)
+	$(CC) -o sr $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+sr_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o sr -.c $(LDFLAGS) sr.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 sr.o:	../share/alloc.h
 sr.o:	../share/debug.h
 sr.o:	../share/files.h

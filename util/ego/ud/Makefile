@@ -1,19 +1,49 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=
-SHARE=../share
-UD=.
-OBJECTS=ud.o ud_const.o ud_copy.o ud_aux.o ud_defs.o
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/map.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/files.o $(SHARE)/aux.o $(SHARE)/locals.o $(SHARE)/init_glob.o $(SHARE)/go.o
-SRC=ud.h ud_defs.h ud_const.h ud_copy.h ud_aux.h ud.c ud_defs.c ud_const.c ud_copy.c ud_aux.c
-all:	$(OBJECTS)
-ud: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o ud -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+ud.c ud_defs.c ud_const.c ud_copy.c ud_aux.c
+
+OFILES=\
+ud.o ud_const.o ud_copy.o ud_aux.o ud_defs.o
+
+HFILES=\
+ud.h ud_defs.h ud_const.h ud_copy.h ud_aux.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/put.o $(SHR)/map.o $(SHR)/alloc.o $(SHR)/global.o \
+$(SHR)/debug.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/files.o $(SHR)/aux.o \
+$(SHR)/locals.o $(SHR)/init_glob.o $(SHR)/go.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/put.m $(SHR)/map.m $(SHR)/alloc.m $(SHR)/global.m \
+$(SHR)/debug.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/files.m $(SHR)/aux.m \
+$(SHR)/locals.m $(SHR)/init_glob.m $(SHR)/go.m
+
+ud:	$(OFILES)
+	$(CC) -o ud $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+ud_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o ud -.c $(LDFLAGS) ud.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 ud.o:	../../../h/em_pseu.h
 ud.o:	../../../h/em_spec.h
 ud.o:	../share/alloc.h

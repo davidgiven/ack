@@ -1,19 +1,49 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=
-SHARE=../share
-LV=.
-OBJECTS=lv.o
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/aux.o $(SHARE)/put.o $(SHARE)/map.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/parser.o $(SHARE)/files.o $(SHARE)/locals.o $(SHARE)/init_glob.o $(SHARE)/go.o
-SRC=lv.h  lv.c 
-all:	$(OBJECTS)
-lv: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o lv -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+lv.c
+
+OFILES=\
+lv.o
+
+HFILES=\
+lv.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/aux.o $(SHR)/put.o $(SHR)/map.o $(SHR)/alloc.o \
+$(SHR)/global.o $(SHR)/debug.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/parser.o \
+$(SHR)/files.o $(SHR)/locals.o $(SHR)/init_glob.o $(SHR)/go.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/aux.m $(SHR)/put.m $(SHR)/map.m $(SHR)/alloc.m \
+$(SHR)/global.m $(SHR)/debug.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/parser.m \
+$(SHR)/files.m $(SHR)/locals.m $(SHR)/init_glob.m $(SHR)/go.m
+
+lv:	$(OFILES)
+	$(CC) -o lv $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+lv_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o lv -.c $(LDFLAGS) lv.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 lv.o:	../../../h/em_mnem.h
 lv.o:	../../../h/em_pseu.h
 lv.o:	../../../h/em_spec.h

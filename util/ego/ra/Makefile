@@ -1,28 +1,52 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=-DVERBOSE 
-SHARE=../share
-RA=.
-OBJECTS=ra.o ra_items.o ra_lifet.o ra_allocl.o ra_profits.o ra_interv.o ra_pack.o ra_xform.o ra_aux.o
-SHOBJECTS=$(SHARE)/aux.o $(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/go.o
-SRC=ra.h ra_items.h ra_lifet.h ra_allocl.h ra_profits.h ra_interv.h ra_pack.h ra_xform.h ra_aux.h ra.c ra_items.c ra_lifet.c ra_allocl.c ra_profits.c ra_interv.c ra_pack.c ra_xform.c ra_aux.c
-all:	$(OBJECTS)
-itemtab.h: \
-	makeitems \
-	itemtab.src
-	 makeitems $(EMH)/em_mnem.h itemtab.src > itemtab.h
-makeitems: \
-	makeitems.c
-	 $(CC) -o makeitems makeitems.c
-ra: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o ra -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-opr:
-	pr $(SRC) | opr
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+ra.c ra_items.c ra_lifet.c ra_allocl.c ra_profits.c \
+ra_interv.c ra_pack.c ra_xform.c ra_aux.c
+
+OFILES=\
+ra.o ra_items.o ra_lifet.o ra_allocl.o ra_profits.o \
+ra_interv.o ra_pack.o ra_xform.o ra_aux.o
+
+HFILES=\
+ra.h ra_items.h ra_lifet.h ra_allocl.h ra_profits.h \
+ra_interv.h ra_pack.h ra_xform.h ra_aux.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/aux.o $(SHR)/get.o $(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o \
+$(SHR)/debug.o $(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o $(SHR)/cset.o \
+$(SHR)/go.o
+
+SHARE_MFILES=\
+$(SHR)/aux.m $(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m \
+$(SHR)/debug.m $(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m \
+$(SHR)/go.m
+
+ra:	$(OFILES)
+	$(CC) -o ra $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+ra_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o ra -.c $(LDFLAGS) ra.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 ra.o:	../../../h/em_reg.h
 ra.o:	../share/alloc.h
 ra.o:	../share/debug.h

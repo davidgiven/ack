@@ -1,21 +1,52 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=-DVERBOSE
-SHARE=../share
-IL=.
-OBJECTS=il.o il1_anal.o il1_cal.o il1_formal.o il1_aux.o il2_aux.o \
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+il.c il1_anal.c il1_cal.c il1_formal.c il1_aux.c il2_aux.c \
+il3_subst.c il3_change.c il3_aux.c il_aux.c
+
+OFILES=\
+il.o il1_anal.o il1_cal.o il1_formal.o il1_aux.o il2_aux.o \
 il3_change.o il3_subst.o il3_aux.o il_aux.o 
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/parser.o $(SHARE)/aux.o $(SHARE)/go.o
-SRC=il.h il1_anal.h il1_cal.h il1_formal.h il1_aux.h il2_aux.h il3_subst.h il3_change.h il3_aux.h il_aux.h \
-il.c il1_anal.c il1_cal.c il1_formal.c il1_aux.c il2_aux.c il3_subst.c il3_change.c il3_aux.c il_aux.c
-all:	$(OBJECTS)
-il: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o il -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+
+HFILES=\
+il.h il1_anal.h il1_cal.h il1_formal.h il1_aux.h il2_aux.h \
+il3_subst.h il3_change.h il3_aux.h il_aux.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o $(SHR)/debug.o \
+$(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o $(SHR)/cset.o $(SHR)/parser.o \
+$(SHR)/aux.o $(SHR)/go.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/debug.m \
+$(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/parser.m \
+$(SHR)/aux.m $(SHR)/go.m
+
+il:	$(OFILES)
+	$(CC) -o il $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+il_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o il -.c $(LDFLAGS) il.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
+
 il.o:	../../../h/em_mnem.h
 il.o:	../../../h/em_pseu.h
 il.o:	../share/alloc.h

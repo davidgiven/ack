@@ -1,17 +1,46 @@
 EMH=../../../h
-EML=../../../lib
-CFLAGS=
-SHARE=../share
-CF=.
-OBJECTS=cf.o cf_idom.o cf_loop.o cf_succ.o 
-SHOBJECTS=$(SHARE)/get.o $(SHARE)/put.o $(SHARE)/alloc.o $(SHARE)/global.o $(SHARE)/debug.o $(SHARE)/files.o $(SHARE)/map.o $(SHARE)/lset.o $(SHARE)/cset.o $(SHARE)/aux.o
-SRC=cf.h cf_succ.h cf_idom.h cf_loop.h cf.c cf_succ.c cf_idom.c cf_loop.c
-all:	$(OBJECTS)
-cf: \
-	$(OBJECTS) $(SHOBJECTS)
-	 $(CC) -o cf -i $(OBJECTS) $(SHOBJECTS) $(EML)/em_data.a
-lpr:
-	pr $(SRC) | lpr
+EMLIB=../../../lib
+SHR=../share
+
+CFILES=\
+cf.c cf_succ.c cf_idom.c cf_loop.c
+
+OFILES=\
+cf.o cf_idom.o cf_loop.o cf_succ.o 
+
+HFILES=\
+cf.h cf_succ.h cf_idom.h cf_loop.h
+
+PRFILES=\
+$(CFILES) $(HFILES) Makefile
+
+SHARE_OFILES=\
+$(SHR)/get.o $(SHR)/put.o $(SHR)/alloc.o $(SHR)/global.o \
+$(SHR)/debug.o $(SHR)/files.o $(SHR)/map.o $(SHR)/lset.o \
+$(SHR)/cset.o $(SHR)/aux.o
+
+SHARE_MFILES=\
+$(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m \
+$(SHR)/debug.m $(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m \
+$(SHR)/cset.m $(SHR)/aux.m
+
+cf:	$(OFILES)
+	$(CC) -o cf $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
+
+cf_ack:	$(CFILES) $(SHARE_MFILES)
+	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
+	$(CC) -o cf -.c $(LDFLAGS) cf.o $(EMLIB)/em_data.a
+
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 cf.o:	../../../h/em_mnem.h
