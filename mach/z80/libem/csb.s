@@ -19,7 +19,7 @@
 	inc hl
 	ld b,(hl)
 	inc hl
-	push bc		! save default on stack
+	push bc		! save default on stack
 	ld c,(hl)	! bc := #entries
 	inc hl
 	ld b,(hl)
