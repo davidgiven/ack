@@ -55,7 +55,7 @@ EM_WSIZE=2
 EM_PSIZE=2
 EM_BSIZE=SL
 
-TIMEFACTOR= 1/300
+TIMEFACTOR= 1/30
 
 REGISTERS:
 r0      = ("r0", 2), REG.
@@ -95,31 +95,31 @@ TOKENS:
  * Types on the EM-machine      *
  ********************************/
 
-CONST2          = {INT num;}    2 cost=(2,300) "$%[num]"
-LOCAL2          = {INT ind,size;}       2 cost=(2,600) "%[ind](r5)"
-LOCAL4          = {INT ind,size;}       4 cost=(2,1200) "%[ind](r5)"
+CONST2          = {INT num;}    2 cost=(2,30) "$%[num]"
+LOCAL2          = {INT ind,size;}       2 cost=(2,60) "%[ind](r5)"
+LOCAL4          = {INT ind,size;}       4 cost=(2,120) "%[ind](r5)"
 ADDR_LOCAL      = {INT ind;}    2
-ADDR_EXTERNAL   = {STRING ind;} 2 cost=(2,300)  "$%[ind]"
+ADDR_EXTERNAL   = {STRING ind;} 2 cost=(2,30)  "$%[ind]"
 
 /********************************************************
  * Now mostly addressing modes of target machine        *
  ********************************************************/
 
-regdef2 =       {REGISTER reg;} 2 cost=(0,300) "(%[reg])"
-regind2 =       {REGISTER reg; STRING ind;} 2 cost=(2,600) "%[ind](%[reg])"
-reginddef2 =    {REGISTER reg; STRING ind;} 2 cost=(2,1050) "*%[ind](%[reg])"
+regdef2 =       {REGISTER reg;} 2 cost=(0,30) "(%[reg])"
+regind2 =       {REGISTER reg; STRING ind;} 2 cost=(2,60) "%[ind](%[reg])"
+reginddef2 =    {REGISTER reg; STRING ind;} 2 cost=(2,105) "*%[ind](%[reg])"
 regconst2 =     {REGISTER reg; STRING ind;} 2
 /********************************************************
  * This means : add "reg" and "ind" to get address.     *
  * Not really addressable on the PDP 11                 *
  ********************************************************/
-relative2 =     {STRING ind;} 2 cost=(2,600) "%[ind]"
-reldef2 =       {STRING ind;} 2 cost=(2,1050) "*%[ind]"
-regdef1 =       {REGISTER reg;} 2 cost=(0,300) "(%[reg])"
-regind1 =       {REGISTER reg; STRING ind;} 2 cost=(2,600) "%[ind](%[reg])"
-reginddef1 =    {REGISTER reg; STRING ind;} 2 cost=(2,1050) "*%[ind](%[reg])"
-relative1 =     {STRING ind;} 2 cost=(2,600) "%[ind]"
-reldef1 =       {STRING ind;} 2 cost=(2,1050) "*%[ind]"
+relative2 =     {STRING ind;} 2 cost=(2,60) "%[ind]"
+reldef2 =       {STRING ind;} 2 cost=(2,105) "*%[ind]"
+regdef1 =       {REGISTER reg;} 2 cost=(0,30) "(%[reg])"
+regind1 =       {REGISTER reg; STRING ind;} 2 cost=(2,60) "%[ind](%[reg])"
+reginddef1 =    {REGISTER reg; STRING ind;} 2 cost=(2,105) "*%[ind](%[reg])"
+relative1 =     {STRING ind;} 2 cost=(2,60) "%[ind]"
+reldef1 =       {STRING ind;} 2 cost=(2,105) "*%[ind]"
 
 /************************************************************************
  * fto* are floats converted to *, conversion is delayed to be combined *
@@ -133,12 +133,12 @@ ftolong =	{REGISTER reg;} 4
  * ...4 and ...8 are only addressable by the floating point processor.    *
  ************************************************************************/
 
-regind4 =       {REGISTER reg; STRING ind; } 4 cost=(2,3630) "%[ind](%[reg])"
-relative4 =     {STRING ind; } 4 cost=(2,3630) "%[ind]"
-regdef4 =       {REGISTER reg;} 4 cost=(2,3240) "(%[reg])"
-regdef8 =       {REGISTER reg;} 8 cost=(2,5220) "(%[reg])"
-relative8 =     {STRING ind; } 8 cost=(2,5610) "%[ind]"
-regind8 =       {REGISTER reg; STRING ind;} 8 cost=(2,5610) "%[ind](%[reg])"
+regind4 =       {REGISTER reg; STRING ind; } 4 cost=(2,363) "%[ind](%[reg])"
+relative4 =     {STRING ind; } 4 cost=(2,363) "%[ind]"
+regdef4 =       {REGISTER reg;} 4 cost=(2,324) "(%[reg])"
+regdef8 =       {REGISTER reg;} 8 cost=(2,522) "(%[reg])"
+relative8 =     {STRING ind; } 8 cost=(2,561) "%[ind]"
+regind8 =       {REGISTER reg; STRING ind;} 8 cost=(2,561) "%[ind](%[reg])"
 
 TOKENEXPRESSIONS:
 SCR_REG =       REG * SCRATCH
@@ -438,7 +438,7 @@ sti $1==4       | NC dadres2 FLT_REG |
 ...             | SCR_REG STACK |
 			"mov (sp)+,(%[1])+"
 			"mov (sp)+,(%[1])"
-			erase(%[1])                             |       | | (4,2040)
+			erase(%[1])                             |       | | (4,204)
 sti $1==8       | NC dadres2 DBL_REG |
 			INDSTORE
 			"movf %[2],*%[1]"
@@ -483,13 +483,13 @@ sti $1==8       | NC dadres2 DBL_REG |
 			"mov (sp)+,(%[1])+"
 			"mov (sp)+,(%[1])+"
 			"mov (sp)+,(%[1])"
-			erase(%[1])                             |       | | (8,4080)
+			erase(%[1])                             |       | | (8,408)
 sti             | SCR_REG |
 			remove(all)
 			allocate(REG={CONST2,$1/2})
 			"1:\tmov (sp)+,(%[1])+"
 			"sob %[a],1b"
-			erase(%[1]) erase(%[a]) |       | | (8,1500+$1*825)
+			erase(%[1]) erase(%[a]) |       | | (8,150+$1*82)
 lal sti $2>2 && $2<=8	| NC xsource2 | | %[1] | stl $1 lal $1+2 sti $2-2 |
 ...		        | 		        | | {ADDR_LOCAL,$1} | sti $2 |
 sts $1==2       | |
@@ -557,15 +557,15 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 ...		| NC SCR_REG ADDR_EXTERNAL | | {regconst2,%[1],%[2.ind]} | |
 ...		| NC SCR_REG ADDR_LOCAL	|
 			"add r5,%[1]" erase(%[1])	|
-					   {regconst2,%[1],tostring(%[2.ind])} | | (2,450)
+					   {regconst2,%[1],tostring(%[2.ind])} | | (2,45)
 ...		| NC REG ADDR_LOCAL |
 			allocate(REG)
 			"mov r5,%[a]"
 			"add %[1],%[a]"
-			erase(%[a])	| {regconst2,%[a],tostring(%[2.ind])} | | (4,900)
+			erase(%[a])	| {regconst2,%[a],tostring(%[2.ind])} | | (4,90)
 ...		| NC SCR_REG regconst2 |
 			"add %[2.reg],%[1]" erase(%[1]) |
-					   {regconst2,%[1],%[2.ind]} | | (2,450)
+					   {regconst2,%[1],%[2.ind]} | | (2,45)
 ...		| NC CONST2+ADDR_EXTERNAL+ADDR_LOCAL+regconst2 SCR_REG |
 						| %[1] %[2]	| adi 2 |
 ...		| NC source2-REG CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
@@ -583,24 +583,24 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 ...		| NC regconst2 ADDR_LOCAL | 
 			"add r5,%[1.reg]" erase(%[1.reg]) |
 					   {regconst2,%[1.reg],
-					      tostring(%[2.ind])+"+"+%[1.ind]} | | (2,450)
+					      tostring(%[2.ind])+"+"+%[1.ind]} | | (2,45)
 ...		| NC regconst2 regconst2 |
 			"add %[2.reg],%[1.reg]" erase(%[1.reg]) |
-					   {regconst2,%[1.reg],%[2.ind]+"+"+%[1.ind]} | | (2,450)
+					   {regconst2,%[1.reg],%[2.ind]+"+"+%[1.ind]} | | (2,45)
 ...		| NC regconst2 noconst2 |
-			"add %[2],%[1.reg]" erase(%[1.reg]) | %[1] | | (2,450)+%[2]
+			"add %[2],%[1.reg]" erase(%[1.reg]) | %[1] | | (2,45)+%[2]
 ...		| NC SCR_REG noconst2 |
 			"add %[2],%[1]"
-			setcc(%[1])     erase(%[1])     | %[1]  | | (2,450)+%[2]
+			setcc(%[1])     erase(%[1])     | %[1]  | | (2,45)+%[2]
 ...		| NC source2 regconst2 |
 			"add %[1],%[2.reg]"
-			erase(%[2.reg])			| %[2]	| | (2,450)+%[1]
+			erase(%[2.reg])			| %[2]	| | (2,45)+%[1]
 ...		| NC regconst2 source2 |
 			"add %[2],%[1.reg]"
-			erase(%[1.reg])			| %[1]	| | (2,450)+%[2]
+			erase(%[1.reg])			| %[1]	| | (2,45)+%[2]
 ...             | source2 SCR_REG |
 			"add %[1],%[2]"
-			setcc(%[2])     erase(%[2])     | %[2]  | | (2,450)+%[1]
+			setcc(%[2])     erase(%[2])     | %[2]  | | (2,45)+%[1]
 
 ldc adi $2==4 && highw(1)==0 | SCR_REG SCR_REG |
 			"add $$%(loww(1)%),%[2]"
@@ -616,25 +616,25 @@ adi $1==4       | SCR_REG SCR_REG source2 source2 |
 			"adc %[1]"
 			"add %[3],%[1]"
 			setcc(%[1]) erase(%[1]) erase(%[2])
-				| %[2] %[1]              | | (6,1200)+%[4]+%[3]
+				| %[2] %[1]              | | (6,120)+%[4]+%[3]
 ...		| SCR_REG SCR_REG source2 STACK |
 			"add (sp)+,%[2]"
 			"adc %[1]"
 			"add %[3],%[1]"
 			setcc(%[1]) erase(%[1]) erase(%[2])
-				| %[2] %[1]              | | (6,1900)+%[3]
+				| %[2] %[1]              | | (6,190)+%[3]
 ...		| SCR_REG SCR_REG STACK |
 			"add (sp)+,%[1]"
 			"add (sp)+,%[2]"
 			"adc %[1]"
 			setcc(%[1]) erase(%[1]) erase(%[2])
-				| %[2] %[1]		| | (6,2800)
+				| %[2] %[1]		| | (6,280)
 ...             | source2 source2 SCR_REG SCR_REG |
 			"add %[2],%[4]"
 			"adc %[3]"
 			"add %[1],%[3]"
 			setcc(%[3]) erase(%[3]) erase(%[4])
-				| %[4] %[3]              | | (6,1200)+%[1]+%[2]
+				| %[4] %[3]              | | (6,120)+%[1]+%[2]
 #ifdef UNTESTED
 adi !defined($1)| source2 |
 			remove(all)
@@ -644,11 +644,11 @@ adi !defined($1)| source2 |
 loc sbi $2==2	| |					| | loc 0-$1 adi 2 |
 sbi $1==2       | source2 SCR_REG |
 			"sub %[1],%[2]"
-			setcc(%[2])     erase(%[2])     | %[2]  | | (2,450)+%[1]
+			setcc(%[2])     erase(%[2])     | %[2]  | | (2,45)+%[1]
 ...             | NC SCR_REG source2-REG |
 			"sub %[2],%[1]"
 			"neg %[1]"
-			setcc(%[1])     erase(%[1])     | %[1]  | | (4,750)+%[2]
+			setcc(%[1])     erase(%[1])     | %[1]  | | (4,75)+%[2]
 ldc sbi $2==4 && highw(1)==0 | SCR_REG SCR_REG |
 			"sub $$%(loww(1)%),%[2]"
 			"sbc %[1]"
@@ -663,11 +663,11 @@ sbi $1==4       | source2-REG source2-REG SCR_REG SCR_REG |
 			"sbc %[3]"
 			"sub %[1],%[3]"
 			setcc(%[3]) erase(%[3]) erase(%[4])
-				| %[4] %[3]             | | (6,1200)+%[1]+%[2]
+				| %[4] %[3]             | | (6,120)+%[1]+%[2]
 ...		| source2 source2 STACK |
 			"sub %[2],2(sp)"
 			"sbc (sp)"
-			"sub %[1],(sp)"		      | | | (10,2800)+%[1]+%[2]
+			"sub %[1],(sp)"		      | | | (10,280)+%[1]+%[2]
 #ifdef UNTESTED
 sbi !defined($1)| source2 |
 			remove(all)
@@ -676,10 +676,10 @@ sbi !defined($1)| source2 |
 #endif
 mli $1==2       | SCR_ODD_REG source2 |
 			"mul %[2],%[1]"
-			setcc(%[1])     erase(%[1])     | %[1]  | |(2,3300)+%[2]
+			setcc(%[1])     erase(%[1])     | %[1]  | |(2,330)+%[2]
 ...             | source2 SCR_ODD_REG |
 			"mul %[1],%[2]"
-			setcc(%[2])     erase(%[2])     | %[2]  | |(2,3300)+%[1]
+			setcc(%[2])     erase(%[2])     | %[2]  | |(2,330)+%[1]
 mli $1==4       | |     remove(all)
 			"jsr pc,mli4~"
 				| r1 r0                                 | |
@@ -699,7 +699,7 @@ dvi $1==2       | source2 source2 |
 			"mov %[1],-(sp)"
 			"mov %[2],r1"
 			"sxt r0"
-			"div (sp)+,r0"			| r0	 | |(100,10000)
+			"div (sp)+,r0"			| r0	 | |(100,1000)
 dvi $1==4       | |     remove(all)
 			"jsr pc,dvi4~"                  | r1 r0 | |
 #ifdef UNTESTED
@@ -718,7 +718,7 @@ rmi $1==2       | source2 source2 |
 			"mov %[1],-(sp)"
 			"mov %[2],r1"
 			"sxt r0"
-			"div (sp)+,r0"			| r1	 | |(100,10000)
+			"div (sp)+,r0"			| r1	 | |(100,1000)
 rmi $1==4       | |     remove(all)
 			"jsr pc,rmi4~"                  | r1 r0 | |
 #ifdef UNTESTED
@@ -729,13 +729,13 @@ rmi !defined($1)| source2 |
 #endif
 ngi $1==2       | SCR_REG |
 			"neg %[1]"
-			setcc(%[1])     erase(%[1])     | %[1]  | | (2,750)
+			setcc(%[1])     erase(%[1])     | %[1]  | | (2,75)
 ngi $1==4       | SCR_REG SCR_REG |
 			"neg %[1]"
 			"neg %[2]"
 			"sbc %[1]"
 			setcc(%[1]) erase(%[1]) erase(%[2])
-				| %[2] %[1]                     | | (6,1800)
+				| %[2] %[1]                     | | (6,180)
 #ifdef UNTESTED
 ngi !defined($1)| source2 |
 			remove(all)
@@ -866,16 +866,16 @@ sru !defined($1)| source2 |
 
 adf $1==4       | FLT_REG SCR_FLT_REG |
 			"addf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,5000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,500)+%[1]
 ...             | SCR_FLT_REG FLT_REG |
 			"addf %[2],%[1]"
-			samecc erase(%[1])              | %[1] | | (2,5000)+%[2]
+			samecc erase(%[1])              | %[1] | | (2,500)+%[2]
 adf $1==8       | double8 SCR_DBL_REG |
 			"addf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,6000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,600)+%[1]
 ...             | SCR_DBL_REG double8 |
 			"addf %[2],%[1]"
-			samecc erase(%[1])              | %[1] | | (2,6000)+%[2]
+			samecc erase(%[1])              | %[1] | | (2,600)+%[2]
 #ifdef UNTESTED
 adf !defined($1)| source2 |
 			remove(ALL)
@@ -884,10 +884,10 @@ adf !defined($1)| source2 |
 #endif
 sbf $1==4       | FLT_REG SCR_FLT_REG |
 			"subf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,5000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,500)+%[1]
 sbf $1==8       | double8 SCR_DBL_REG |
 			"subf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,6000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,600)+%[1]
 #ifdef UNTESTED
 sbf !defined($1)| source2 |
 			remove(ALL)
@@ -896,16 +896,16 @@ sbf !defined($1)| source2 |
 #endif
 mlf $1==4       | FLT_REG SCR_FLT_REG |
 			"mulf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,7000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,700)+%[1]
 ...             | SCR_FLT_REG FLT_REG |
 			"mulf %[2],%[1]"
-			samecc erase(%[1])              | %[1] | | (2,7000)+%[2]
+			samecc erase(%[1])              | %[1] | | (2,700)+%[2]
 mlf $1==8       | double8 SCR_DBL_REG |
 			"mulf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,10000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,1000)+%[1]
 ...             | SCR_DBL_REG double8 |
 			"mulf %[2],%[1]"
-			samecc erase(%[1])              | %[1] | | (2,10000)+%[2]
+			samecc erase(%[1])              | %[1] | | (2,1000)+%[2]
 #ifdef UNTESTED
 mlf !defined($1)| source2 |
 			remove(ALL)
@@ -914,10 +914,10 @@ mlf !defined($1)| source2 |
 #endif
 dvf $1==4       | FLT_REG SCR_FLT_REG |
 			"divf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,8000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,800)+%[1]
 dvf $1==8       | double8 SCR_DBL_REG |
 			"divf %[1],%[2]"
-			samecc erase(%[2])              | %[2] | | (2,12000)+%[1]
+			samecc erase(%[2])              | %[2] | | (2,1200)+%[1]
 #ifdef UNTESTED
 dvf !defined($1)| source2 |
 			remove(ALL)
@@ -926,10 +926,10 @@ dvf !defined($1)| source2 |
 #endif
 ngf $1==4       | SCR_FLT_REG |
 			"negf %[1]"
-			samecc erase(%[1])              | %[1] | |(2,2700)
+			samecc erase(%[1])              | %[1] | |(2,270)
 ngf $1==8       | SCR_DBL_REG |
 			"negf %[1]"
-			samecc erase(%[1])              | %[1] | |(2,2700)
+			samecc erase(%[1])              | %[1] | |(2,270)
 #ifdef UNTESTED
 ngf !defined($1)| source2 |
 			remove(ALL)
@@ -940,12 +940,12 @@ fif $1==4       | longf4 FLT_REG |
 			allocate(FLT_REG_PAIR)
 			move(%[1],%[a.1])
 			"modf %[2],%[a]"
-			samecc erase(%[a.1])    | %[a.1] %[a.2] | | (2,7500)+%[2]
+			samecc erase(%[a.1])    | %[a.1] %[a.2] | | (2,750)+%[2]
 fif $1==8       | double8 double8 |
 			allocate(DBL_REG_PAIR)
 			move(%[1],%[a.1])
 			"modf %[2],%[a]"
-			samecc erase(%[a.1])    | %[a.1] %[a.2] | | (2,15000)+%[2]
+			samecc erase(%[a.1])    | %[a.1] %[a.2] | | (2,1500)+%[2]
 #ifdef UNTESTED
 fif !defined($1)| source2 |
 			remove(ALL)
@@ -957,13 +957,13 @@ fef $1==4       | FLT_REG |
 			"movei %[1],%[a]"
 			"movie $$0,%[1]"
 			samecc
-			erase(%[1])             |%[1] %[a] | | (4,5000)
+			erase(%[1])             |%[1] %[a] | | (4,500)
 fef $1==8       | DBL_REG |
 			allocate(REG)
 			"movei %[1],%[a]"
 			"movie $$0,%[1]"
 			samecc
-			erase(%[1])             |%[1] %[a] | | (4,5000)
+			erase(%[1])             |%[1] %[a] | | (4,500)
 #ifdef UNTESTED
 fef !defined($1)| source2 |
 			remove(ALL)
@@ -1037,7 +1037,7 @@ del             | |     remove(indordef)
 			setcc({LOCAL2,$1,2})          |       | |
 dee             | |     remove(posextern)
 			"dec $1"
-			setcc({relative2,$1})           |       | | (4,900)
+			setcc({relative2,$1})           |       | | (4,90)
 
 #ifdef REGVARS
 lol loc sbi stl $1==$4 && $3==2 && inreg($1)==2 | | 
@@ -1341,19 +1341,19 @@ loc loe and ste $3==2 && $2==$4 | |
 #ifdef REGVARS
 zrl inreg($1)==2| |     remove(regvar($1))
 			"clr %(regvar($1)%)"
-			erase(regvar($1))          |       | | (4,900)
+			erase(regvar($1))          |       | | (4,90)
 #endif
 zrl             | |     remove(indordef)
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
 			"clr $1(r5)"
-			setcc({LOCAL2,$1,2})          |       | | (4,900)
+			setcc({LOCAL2,$1,2})          |       | | (4,90)
 zre             | |     remove(posextern)
 			"clr $1"
-			setcc({relative2,$1})           |       | | (4,900)
+			setcc({relative2,$1})           |       | | (4,90)
 zrf $1==4       | |     allocate(FLT_REG)
-			"clrf %[a]"             | %[a]  | | (2,2200)
+			"clrf %[a]"             | %[a]  | | (2,220)
 zrf $1==8       | |     allocate(DBL_REG)
-			"clrf %[a]"             | %[a]  | | (2,2400)
+			"clrf %[a]"             | %[a]  | | (2,240)
 zrf !defined($1)| |             |                       | zer |
 zrf defined($1) | |             |                       | zer $1 |
 zer $1==2       | |             | {CONST2, 0}                   | |
@@ -1366,7 +1366,7 @@ zer defined($1) | |     remove(all)
 			move({CONST2,$1/2},r0)
 			"1:\tclr -(sp)"
 			"sob r0,1b"
-			erase(r0)                       |       | |(8,1500+$1*375)
+			erase(r0)                       |       | |(8,150+$1*37)
 zer !defined($1)| SCR_REG |
 			remove(all)
 			"asr %[1]"
@@ -1498,16 +1498,16 @@ loc loc cff $1==8 && $2==4      | DBL_REG |			| %[1.1] | |
 and $1==2 	| CONST2 SCR_REG |
 			"bic $$%(~%[1.num]%),%[2]"
 			setcc(%[2])
-			erase(%[2])		| %[2]  | | (4,750)
+			erase(%[2])		| %[2]  | | (4,75)
 ...		| SCR_REG CONST2 |
 			"bic $$%(~%[2.num]%),%[1]"
 			setcc(%[1])
-			erase(%[1])		| %[1]	| | (4,750)
+			erase(%[1])		| %[1]	| | (4,75)
 ...		| SCR_REG SCR_REG |
 			"com %[1]"
 			"bic %[1],%[2]"
 			setcc(%[2])
-			erase(%[1]) erase(%[2]) | %[2]  | | (4,600)
+			erase(%[1]) erase(%[2]) | %[2]  | | (4,60)
 ldc and $2==4 && highw(1)==0	| source2 SCR_REG |
 			"bic $$%(~loww(1)%),%[2]"
 			erase(%[2])		| %[2] {CONST2, 0} | |
@@ -1530,11 +1530,11 @@ and !defined($1)| source2 |
 ior $1==2       | SCR_REG source2 |
 			"bis %[2],%[1]"
 			setcc(%[1])
-			erase(%[1])                     | %[1]  | | (2,450)+%[2]
+			erase(%[1])                     | %[1]  | | (2,45)+%[2]
 ...             | source2 SCR_REG |
 			"bis %[1],%[2]"
 			setcc(%[2])
-			erase(%[2])                     | %[2]  | | (2,450)+%[1]
+			erase(%[2])                     | %[2]  | | (2,45)+%[1]
 ldc ior $2==4 && highw(1)==0	| source2 SCR_REG |
 			"bis $$%(loww(1)%),%[2]"
 			erase(%[2])		| %[2] %[1] | |
@@ -1564,7 +1564,7 @@ ior defined($1) | |     remove(all)
 			"add sp,%[a]"
 			"1:\tbis (sp)+,(%[a])+"
 			"sob %[b],1b"
-			erase(%[a]) erase(%[b])		|       | | (12,2100+$1*975)
+			erase(%[a]) erase(%[b])		|       | | (12,210+$1*97)
 ior !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG=%[1])
@@ -1576,11 +1576,11 @@ ior !defined($1)| SCR_REG |
 xor $1==2       | REG SCR_REG |
 			"xor %[1],%[2]"
 			setcc(%[2])
-			erase(%[2])                     | %[2]  | | (2,300)
+			erase(%[2])                     | %[2]  | | (2,30)
 ...             | SCR_REG REG |
 			"xor %[2],%[1]"
 			setcc(%[1])
-			erase(%[1])                     | %[1]  | | (2,300)
+			erase(%[1])                     | %[1]  | | (2,30)
 xor defined($1) | |     remove(all)
 			move({CONST2,$1},r0)
 			"jsr pc,xor~"
@@ -1593,13 +1593,13 @@ xor !defined($1)| source2 |
 com $1==2       | SCR_REG |
 			"com %[1]"
 			setcc(%[1])
-			erase(%[1])                     | %[1]  | | (2,300)
+			erase(%[1])                     | %[1]  | | (2,30)
 com defined($1) | |     remove(all)
 			allocate(REG={CONST2,$1/2},REG)
 			"mov sp,%[b]"
 			"1:\tcom (%[b])+"
 			"sob %[a],1b"
-			erase(%[a])                     |       | | (10,1800+$1*825)
+			erase(%[a])                     |       | | (10,180+$1*82)
 com !defined($1)| SCR_REG |
 			remove(all)
 			allocate(REG)
@@ -1650,7 +1650,7 @@ ror !defined($1)| source2 |
 com and $1==2 && $2==2  | source2 SCR_REG |
 			  "bic %[1],%[2]"
 			  setcc(%[2])
-			  erase(%[2])                   | %[2]  | | (2,450)+%[1]
+			  erase(%[2])                   | %[2]  | | (2,45)+%[1]
 com and $1==$2  | |     remove(all)
 			allocate(REG={CONST2,$1},REG)
 			"mov sp,%[b]"
@@ -1658,7 +1658,7 @@ com and $1==$2  | |     remove(all)
 			"asr %[a]"
 			"1:\tbic (sp)+,(%[b])+"
 			"sob %[a],1b"
-			erase(%[a])                     |       | | (12,2100+$1*975)
+			erase(%[a])                     |       | | (12,210+$1*97)
 
 /********************************
  * Group 10 : Set instructions  *
@@ -2730,18 +2730,18 @@ lol lal sti $1==$2 && $3==1| | | | | /* throw away funny C-proc-prolog */
 
 | regconst2 |   allocate(%[1],REG=%[1.reg])
 		"add $$%[1.ind],%[a]"
-		setcc(%[a])                     | %[a]  | |(6,1050)
+		setcc(%[a])                     | %[a]  | |(6,105)
 | ADDR_LOCAL |  allocate(REG)
 		"mov r5,%[a]"
 		"add $$%[1.ind],%[a]"
-		setcc(%[a])                     | %[a]  | |(6,1050)
-| REG |                         | {regconst2, %[1], "0"}  | | (2,600)
+		setcc(%[a])                     | %[a]  | |(6,105)
+| REG |                         | {regconst2, %[1], "0"}  | | (2,60)
 | xsource2 |     allocate(%[1], REG=%[1])        | %[a]  | |
 | xsource2 |     allocate(%[1], REG=%[1])        | {regconst2, %[a], "0"}  | |
 | longf4 |      allocate(FLT_REG)
-		move( %[1],%[a])                | %[a]  | | (20,20000) + %[1]
+		move( %[1],%[a])                | %[a]  | | (20,2000) + %[1]
 | double8 |     allocate(DBL_REG)
-		move(%[1],%[a])         | %[a]  | | (20,30000) + %[1]
+		move(%[1],%[a])         | %[a]  | | (20,3000) + %[1]
 
 /********************************
  * From source1 to source2      *
@@ -2749,7 +2749,7 @@ lol lal sti $1==$2 && $3==1| | | | | /* throw away funny C-proc-prolog */
 
 | source1 |     allocate(REG={CONST2,0})
 		"bisb %[1],%[a]"
-		erase(%[a]) setcc(%[a])          | %[a]  | | (6,1050)+%[1]
+		erase(%[a]) setcc(%[a])          | %[a]  | | (6,105)+%[1]
 
 /********************************
  * From long4 to source2        *
@@ -2777,80 +2777,80 @@ lol lal sti $1==$2 && $3==1| | | | | /* throw away funny C-proc-prolog */
 
 | STACK |       allocate(REG)
 		"mov (sp)+,%[a]"
-		setcc(%[a])                     | %[a]  | | (2,750)
+		setcc(%[a])                     | %[a]  | | (2,75)
 | STACK |       allocate(REG)
 		"mov (sp)+,%[a]"
-		setcc(%[a])                     | {regconst2, %[a], "0"}  | | (2,750)
+		setcc(%[a])                     | {regconst2, %[a], "0"}  | | (2,75)
 | STACK |       allocate(FLT_REG)
 		"movof (sp)+,%[a]"
-		samecc                          | %[a]  | | (20,47400) /* /10  */
+		samecc                          | %[a]  | | (20,4740) /* /10  */
 | STACK |       allocate(DBL_REG)
 		"movf (sp)+,%[a]"
-		samecc                          | %[a]  | | (20,69200) /* /10 */
+		samecc                          | %[a]  | | (20,6920) /* /10 */
 | STACK |       allocate(REG_PAIR)
 		"mov (sp)+,%[a.1]"
 		"mov (sp)+,%[a.2]"
-		setcc(%[a.2])                   | %[a]  | | (4,1500)
+		setcc(%[a.2])                   | %[a]  | | (4,150)
 
 MOVES:
-(CONST2 %[num] == 0, source2, "clr %[2]" setcc(%[2]),(2,300))
-(source2, source2, "mov %[1],%[2]" setcc(%[2]),(2,300)+%[1]+%[2])
-(FLT_REG, longf4-FLT_REG,"movfo %[1],%[2]" samecc, (2,880) + %[2])
-(longf4-FLT_REG,FLT_REG, "movof %[1],%[2]" samecc, (2,1500) + %[2])
-(FLT_REG, FLT_REG, "movf %[1],%[2]" samecc,(2,880))
-(DBL_REG,double8, "movf %[1],%[2]" samecc,(2,880) + %[2])
-(double8,DBL_REG, "movf %[1],%[2]" samecc,(2,1700) + %[1])
-(CONST2 %[num] == 0,source1, "clrb %[2]" setcc(%[2]),(2,450)+%[2])
-(source1or2,source1, "movb %[1],%[2]" setcc(%[2]),(2,300)+%[1]+%[2])
+(CONST2 %[num] == 0, source2, "clr %[2]" setcc(%[2]),(2,30))
+(source2, source2, "mov %[1],%[2]" setcc(%[2]),(2,30)+%[1]+%[2])
+(FLT_REG, longf4-FLT_REG,"movfo %[1],%[2]" samecc, (2,88) + %[2])
+(longf4-FLT_REG,FLT_REG, "movof %[1],%[2]" samecc, (2,150) + %[2])
+(FLT_REG, FLT_REG, "movf %[1],%[2]" samecc,(2,88))
+(DBL_REG,double8, "movf %[1],%[2]" samecc,(2,88) + %[2])
+(double8,DBL_REG, "movf %[1],%[2]" samecc,(2,170) + %[1])
+(CONST2 %[num] == 0,source1, "clrb %[2]" setcc(%[2]),(2,45)+%[2])
+(source1or2,source1, "movb %[1],%[2]" setcc(%[2]),(2,30)+%[1]+%[2])
 (ftoint,source2, "movfi %[1.reg],%[2]" samecc)
 
 TESTS:
-(source2, "tst %[1]" ,(2,300) + %[1])
-(source1, "tstb %[1]",(2,400) + %[1])
-(FLT_REG+DBL_REG, "tstf %[1]\ncfcc" ,(4,2600))
-/* (DBL_REG, "tstf %[1]\ncfcc" ,(4,2600)) */
+(source2, "tst %[1]" ,(2,30) + %[1])
+(source1, "tstb %[1]",(2,40) + %[1])
+(FLT_REG+DBL_REG, "tstf %[1]\ncfcc" ,(4,260))
+/* (DBL_REG, "tstf %[1]\ncfcc" ,(4,260)) */
 
 STACKS:
 ( CONST2 %[num]==0 ,, "clr -(sp)"                                             )
-( source2 ,,     "mov %[1],-(sp)" setcc(%[1]),                    (2,900)+%[1])
-( regconst2 ,,   "mov %[1.reg],-(sp)\nadd $$%[1.ind],(sp)" ,          (6,2250))
-( ADDR_LOCAL,,   "mov r5,-(sp)" "add $$%[1.ind],(sp)",               (6,2250))
-( DBL_REG ,,     "movf %[1],-(sp)" samecc             ,               (2,6100))
-( FLT_REG ,,     "movfo %[1],-(sp)" samecc                          , (2,4120))
-( REG_PAIR ,,    "mov %[1.2],-(sp)" "mov %[1.1],-(sp)"              , (4,1800))
+( source2 ,,     "mov %[1],-(sp)" setcc(%[1]),                    (2,90)+%[1])
+( regconst2 ,,   "mov %[1.reg],-(sp)\nadd $$%[1.ind],(sp)" ,          (6,225))
+( ADDR_LOCAL,,   "mov r5,-(sp)" "add $$%[1.ind],(sp)",               (6,225))
+( DBL_REG ,,     "movf %[1],-(sp)" samecc             ,               (2,610))
+( FLT_REG ,,     "movfo %[1],-(sp)" samecc                          , (2,412))
+( REG_PAIR ,,    "mov %[1.2],-(sp)" "mov %[1.1],-(sp)"              , (4,180))
 ( regind4 ,,     "mov 2+%[1.ind](%[1.reg]),-(sp)"
-		"mov %[1.ind](%[1.reg]),-(sp)"  ,                     (8,3000))
+		"mov %[1.ind](%[1.reg]),-(sp)"  ,                     (8,300))
 ( relative4 ,,   "mov 2+%[1.ind],-(sp)"
-		"mov %[1.ind],-(sp)"            ,                     (8,3000))
+		"mov %[1.ind],-(sp)"            ,                     (8,300))
 ( regdef4 ,,     "mov 2(%[1.reg]),-(sp)"
-		"mov (%[1.reg]),-(sp)"          ,                     (6,2700))
+		"mov (%[1.reg]),-(sp)"          ,                     (6,270))
 ( regind8 ,REG,	move(%[1.reg],%[a])
 		"add $$%(8%)+%[1.ind],%[a]"
 		"mov -(%[a]),-(sp)"
 		"mov -(%[a]),-(sp)"
 		"mov -(%[a]),-(sp)"
 		"mov -(%[a]),-(sp)"
-		erase(%[a])			,                    (14,6000))
+		erase(%[a])			,                    (14,600))
 ( regind8 ,,     "mov 6+%[1.ind](%[1.reg]),-(sp)"
 		"mov 4+%[1.ind](%[1.reg]),-(sp)"
 		"mov 2+%[1.ind](%[1.reg]),-(sp)"
-		"mov %[1.ind](%[1.reg]),-(sp)"  ,                    (16,6000))
+		"mov %[1.ind](%[1.reg]),-(sp)"  ,                    (16,600))
 ( relative8 ,REG,"mov $$%(8%)+%[1.ind],%[a]"
 		"mov -(%[a]),-(sp)"
 		"mov -(%[a]),-(sp)"
 		"mov -(%[a]),-(sp)"
-		"mov -(%[a]),-(sp)"		,                    (12,5000))
+		"mov -(%[a]),-(sp)"		,                    (12,500))
 ( relative8 ,,   "mov 6+%[1.ind],-(sp)"
 		"mov 4+%[1.ind],-(sp)"
 		"mov 2+%[1.ind],-(sp)"
-		"mov %[1.ind],-(sp)"            ,                    (16,6000))
+		"mov %[1.ind],-(sp)"            ,                    (16,600))
 ( regdef8 ,,     "mov 6(%[1.reg]),-(sp)"
 		"mov 4(%[1.reg]),-(sp)"
 		"mov 2(%[1.reg]),-(sp)"
-		"mov (%[1.reg]),-(sp)"          ,                    (14,5700))
+		"mov (%[1.reg]),-(sp)"          ,                    (14,570))
 ( LOCAL4 ,,      "mov 2+%[1.ind](r5),-(sp)"
-		"mov %[1.ind](r5),-(sp)"       ,                     (8,3000))
+		"mov %[1.ind](r5),-(sp)"       ,                     (8,300))
 ( source1 ,,     "clr -(sp)"
-		"movb %[1],(sp)"                ,                (4,1800)+%[1])
+		"movb %[1],(sp)"                ,                (4,180)+%[1])
 ( ftoint ,,	"movfi %[1.reg],-(sp)"		                              )
 ( ftolong ,,	"setl\nmovfi %[1.reg],-(sp)\nseti"                            )
