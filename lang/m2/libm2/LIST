@@ -28,7 +28,8 @@ absf.e
 absi.c
 absl.c
 halt.c
-transfer.e
+SYSTEM.c
+par_misc.e
 init.c
 sigtrp.c
 store.c

@@ -56,5 +56,5 @@ extern int catch();
 
 int (*handler)() = catch;
 char **argv = 0, **environ = 0;
-int argc = 0, StackSize = 0;
-char *CurrentProcess = 0, MainProcess = 0, StackBase = 0, MainLB = 0;
+int argc = 0;
+char *MainLB = 0;

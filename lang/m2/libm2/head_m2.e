@@ -11,45 +11,20 @@
 
  mes 2,EM_WSIZE,EM_PSIZE
 
-#define STACKSIZE	2048	/* maximum stack size for a coroutine */
-
  exa handler
  exa environ
  exa argv
  exa argc
- exa CurrentProcess
- exa MainProcess
- exa StackBase
  exa MainLB
- exa StackSize
  exp $catch
  exp $init
  inp $trap_handler
 
-mainroutine
- bss 2*EM_PSIZE,0,0
-
  exp $m_a_i_n
- pro $m_a_i_n, STACKSIZE
-
- loc STACKSIZE
- ste StackSize
+ pro $m_a_i_n, 0
 
  lor 0
  lae MainLB
- sti EM_PSIZE
-
- lal -EM_WSIZE
- adp EM_WSIZE
- lae StackBase
- sti EM_PSIZE
-
- lae mainroutine
- adp 2*EM_PSIZE
- dup EM_PSIZE
- lae CurrentProcess
- sti EM_PSIZE
- lae MainProcess
  sti EM_PSIZE
 
  lal EM_WSIZE+EM_PSIZE
