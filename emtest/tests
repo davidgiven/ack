@@ -146,11 +146,11 @@ OK
  bne *1
 OK
 TEST 005: test loe, ste
-HOL 8
+HOL 2*WS
 MAIN 0
  loc 95
- ste 4
- loe 4
+ ste WS
+ loe WS
  loc 95
  bne *1
 OK
@@ -162,7 +162,7 @@ OK
 OK
  loc 95
  ste 0
- loe 4
+ loe WS
  loe 0
  bne *1
 OK
@@ -392,7 +392,7 @@ MAIN 20
  bne *1
 OK
 TEST 019: test lde
-HOL 20
+HOL 12+2*WS
 MAIN 0
  loc 70
  ste 12
@@ -442,7 +442,7 @@ MAIN 20
  bne *1
 OK
 TEST 023: test sde
-HOL 20
+HOL 16+2*WS
 MAIN 0
  loc 40
  loc 41
@@ -455,7 +455,7 @@ MAIN 0
  bne *1
 OK
 TEST 024: test sdf
-HOL 20
+HOL 16+2*WS
 MAIN 0
  loc 51
  loc 50
@@ -1707,7 +1707,7 @@ MAIN 12
  bne *1
 OK
 TEST 077: test cal
-HOL 12
+HOL 4+WS
 MAIN 0
  cal $p077
  loe 4
@@ -1721,7 +1721,7 @@ PROC
  ret 0
  end
 TEST 078: test cai
-HOL 12
+HOL 4+WS
 MAIN 0
  lpi $p078
  cai
@@ -1833,7 +1833,7 @@ OK
  bne *1
 OK
 TEST 083: test blm
-HOL 40
+HOL 12+4*WS
 MAIN 32
  loc 61
  ste 12
@@ -1869,7 +1869,7 @@ OK
  bne *1
 OK
 TEST 084: test bls WS
-HOL 40
+HOL 20+2*WS
 MAIN 32
  loc 20
  stl -8
@@ -3293,7 +3293,7 @@ OK
 OK
 #endif
 TEST 120: test cal
-HOL 12
+HOL 4+WS
 MAIN 0
  loc 0
  ste 4
