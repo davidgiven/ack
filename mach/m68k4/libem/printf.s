@@ -12,7 +12,7 @@ sav:
 	.long	0
 .text
 _printf:
-	movem.l	d0/d1/d3/a0/a1/a2/a3/a4/a5/a6,.savreg
+	movem.l	d0/d1/d2/a0/a1/a2/a3/a4/a5/a6,.savreg
 	move.l	(sp)+,sav	!return address
 	move.l	sp,a6		!a6 <- address of arguments
 	move.l	(a6)+,a5	!a5 <- address of format
@@ -49,9 +49,9 @@ digit:	move.l	(a6)+,d1	!d1 <- integer
 	move.b	#0,-(a3)	!stringterminator
 dloop:	move.l	d1,-(sp)
 	move.l	#10,-(sp)
-	jsr	.dvu		!d1 <- quotient d3 <- remainder
-	add.l	#'0',d3
-	move.b	d3,-(a3)
+	jsr	.dvu		!d1 <- quotient d2 <- remainder
+	add.l	#'0',d2
+	move.b	d2,-(a3)
 	tst.l	d1		!if quotient = 0 then ready
 	bne	dloop
 	move.l	a3,a2
@@ -59,7 +59,7 @@ dloop:	move.l	d1,-(sp)
 
 out:
 	move.l	sav,-(sp)
-	movem.l	.savreg,d0/d1/d3/a0/a1/a2/a3/a4/a5/a6
+	movem.l	.savreg,d0/d1/d2/a0/a1/a2/a3/a4/a5/a6
 	rts
 
 
