@@ -30,16 +30,15 @@ static char RcsId[] = "$Header$";
 #include <out.h>
 #define MAGIC_NUMBER	AALMAG
 #ifdef AAL
-#define TABSZ	2000		/* maximum # of ranlib table entries */
-#define STRTABSZ	8*TABSZ	/* maximum size of string table */
 long	offset;
-struct ranlib tab[TABSZ];
+struct ranlib *tab;
 long	tnum = 0;
-char	tstrtab[STRTABSZ];
+char	*tstrtab;
 long	tssiz = 0;
-char	*malloc(), *strcpy(), *strncpy();
+char	*malloc(), *realloc(), *strcpy(), *strncpy();
 long	lseek();
 long	time();
+unsigned int tabsz, strtabsz;
 #endif AAL
 #else
 #define MAGIC_NUMBER	ARMAG
@@ -233,6 +232,13 @@ char *argv[];
      ) {
 	mktemp(temp_arch);
   }
+#ifdef AAL
+  tab = (struct ranlib *) malloc(512 * sizeof(struct ranlib));
+  tstrtab = malloc(4096);
+  if (!tab || !tstrtab) error(TRUE,"Out of core\n");
+  tabsz = 512;
+  strtabsz = 4096;
+#endif
 
   signal(SIGINT, catch);
   get(argc, argv);
@@ -665,11 +671,14 @@ do_names(headp)
 			p->on_mptr = xxx + p->on_foff;
 			/*
 			 * Only enter names that are exported and are really
-			 * defined.
+			 * defined. Also enter common names. Note, that
+			 * this might cause problems when the name is really
+			 * defined in a later file, with a value != 0.
+			 * However, this problem also exists on the Unix
+			 * ranlib archives.
 			 */
 			if (	(p->on_type & S_EXT) &&
-				(p->on_type & S_TYP) != S_UND &&
-				!(p->on_type & S_COM)
+				(p->on_type & S_TYP) != S_UND
 			   )
 				enter_name(p);
 			p++;
@@ -683,16 +692,21 @@ enter_name(namep)
 {
 	register char	*cp;
 
-	if (tnum >= TABSZ) {
-		error(TRUE, "symbol table overflow\n");
+	if (tnum >= tabsz) {
+		tab = (struct ranlib *)
+			realloc((char *) tab, (tabsz += 512) * sizeof(struct ranlib));
+		if (! tab) error(TRUE, "Out of core\n");
 	}
 	tab[tnum].ran_off = tssiz;
 	tab[tnum].ran_pos = offset;
 
-	for (cp = namep->on_mptr; tstrtab[tssiz++] = *cp++;)
-		if (tssiz >= STRTABSZ) {
-			error(TRUE, "string table overflow\n");
+	for (cp = namep->on_mptr; *cp; cp++) {
+		if (tssiz >= strtabsz) {
+			tstrtab = realloc(tstrtab, (strtabsz += 4096));
+			if (! tstrtab) error(TRUE, "string table overflow\n");
 		}
+		tstrtab[tssiz++]  = *cp;
+	}
 	tnum++;
 }
 #endif AAL
