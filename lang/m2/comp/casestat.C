@@ -73,7 +73,7 @@ compact(nr, low, up)
 	*/
 	arith diff = up - low;
 
-	return (nr != 0 && diff >= 0 && diff / nr <= (DENSITY - 1));
+	return (nr == 0 || (diff >= 0 && diff / nr <= (DENSITY - 1)));
 }
 
 CaseCode(nd, exitlabel)
@@ -90,7 +90,6 @@ CaseCode(nd, exitlabel)
 	register struct case_entry *ce;
 	register arith val;
 	label CaseDescrLab;
-	int casecnt = 0;
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
@@ -109,7 +108,6 @@ CaseCode(nd, exitlabel)
 				/* non-empty case
 				*/
 				pnode->nd_lab = ++text_label;
-				casecnt++;
 				if (! AddCases(sh, /* to descriptor */
 					       pnode->nd_left->nd_left,
 						   /* of case labels */
@@ -130,7 +128,7 @@ CaseCode(nd, exitlabel)
 		}
 	}
 
-	if (!casecnt) {
+	if (!sh->sh_nrofentries) {
 		/* There were no cases, so we have to check the case-expression
 		   here
 		*/
@@ -154,7 +152,8 @@ CaseCode(nd, exitlabel)
 		C_rom_cst(sh->sh_lowerbd);
 		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
-		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
+		if (sh->sh_nrofentries)
+		    for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			assert(ce);
 			if (val == ce->ce_value)	{
 				C_rom_ilb(ce->ce_label);
