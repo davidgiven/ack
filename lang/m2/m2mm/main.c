@@ -91,8 +91,9 @@ main(argc, argv)
 
 	ProgName = *argv++;
 	DEFPATH = (char **) Malloc(10 * sizeof(char *));
+	DEFPATH[1] = 0;
 	mDEF = 10;
-	nDEF = 1;
+	nDEF = 2;
 
 	while (--argc > 0) {
 		if (**argv == '-')
