@@ -1,7 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define .trp
-.define .stop
 .extern .trppc
 
 		! ax is trap number
@@ -15,7 +14,7 @@
 	pop     ax
 	ret
 2:
-	call    .stop
+	call	.stop
 
 .stop:
-	jmp	__exit
+	jmp	EXIT
