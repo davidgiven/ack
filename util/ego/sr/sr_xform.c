@@ -93,12 +93,17 @@ STATIC lab_id label(b)
 
 	line_p l;
 
-	assert (b->b_start != (line_p) 0);
-	if (INSTR(b->b_start) == op_lab) return INSTRLAB(b->b_start);
+	if (b->b_start && INSTR(b->b_start) == op_lab) {
+		return INSTRLAB(b->b_start);
+	}
 	/* The block has no label yet. */
 	l = newline(OPINSTRLAB);
+	l->l_instr = op_lab;
 	INSTRLAB(l) = freshlabel();
-	DLINK(l,b->b_start); /* doubly link them */
+	if (b->b_start) {
+		DLINK(l,b->b_start); /* doubly link them */
+	}
+	b->b_start = l;
 	return INSTRLAB(l);
 }
 
@@ -150,6 +155,9 @@ make_header(lp)
 	 * the loop to the entry block now goes to b.
 	 */
 
+	b->b_succ = Lempty_set();
+	b->b_pred = Lempty_set();
+
 	for (i = Lfirst(entry->b_pred); i != (Lindex) 0; i = next ) {
 		next = Lnext(i,entry->b_pred);
 		c = (bblock_p) Lelem(i);
@@ -159,23 +167,18 @@ make_header(lp)
 			Lremove(c,&entry->b_pred);
 			Lremove(entry,&c->b_succ);
 			Ladd(b,&c->b_succ);
+			Ladd(c,&b->b_pred);
 			adjust_jump(b,entry,c);
 		}
 	}
+	assert(lp->LP_INSTR == 0);
+	lp->LP_INSTR = b->b_start;
 	Ladd(b,&entry->b_pred);
-	b->b_succ = Lempty_set();
-	b->b_pred = Lempty_set();
 	Ladd(entry,&b->b_succ);
-	if (curproc->p_start == entry) {
-		/* entry was the first block of curproc */
-		curproc->p_start = b;
-	} else {
-		/* find block before entry block */
-		for (c = curproc->p_start; c->b_next != entry; c = c->b_next);
-		c->b_next = b;
-		Ladd(c,&b->b_pred);
-	}
-	b->b_next = entry;
+	/* put header block at end of procedure */
+	for (c = curproc->p_start; c->b_next != 0; c = c->b_next);
+	c->b_next = b;
+	/* b->b_next = 0; */
 	copy_loops(b,entry,lp);
 	b->b_idom = entry->b_idom;
 	entry->b_idom = b;

@@ -15,6 +15,7 @@
 #include "../../../h/em_mnem.h"
 #include "../share/debug.h"
 #include "../share/alloc.h"
+#include "../share/def.h"
 #include "../share/global.h"
 #include "../share/aux.h"
 #include "sr_aux.h"
@@ -26,6 +27,7 @@
 #include "../../../h/em_reg.h"
 #include "../../../h/em_mes.h"
 #include "../../../h/em_mnem.h"
+#include "../../../h/em_spec.h"
 
 
 
@@ -403,7 +405,39 @@ STATIC code_p available(c,vars)
 	return (code_p) 0;
 }
 
+STATIC fix_header(lp)
+	loop_p lp;
+{
+	/* Check if a header block was added, and if so, add a branch to
+	 * the entry block.
+	 * If it was added, it was added to the end of the procedure, so
+	 * move the END pseudo.
+	 */
+	bblock_p b = curproc->p_start;
 
+	if (lp->LP_HEADER->b_next == 0) {
+		line_p l = last_instr(lp->LP_HEADER);
+		line_p e;
+
+		assert(l != 0);
+		if (INSTR(l) != op_bra) {
+			line_p j = newline(OPINSTRLAB);
+
+			assert(INSTR(lp->lp_entry->b_start) == op_lab);
+			INSTRLAB(j) = INSTRLAB(lp->lp_entry->b_start);
+			j->l_instr = op_bra;
+			DLINK(l, j);
+			l = j;
+		}
+
+		while (b->b_next != lp->LP_HEADER) b = b->b_next;
+		e = last_instr(b);
+		assert(INSTR(e) == ps_end);
+		assert(PREV(e) != 0);
+		PREV(e)->l_next = 0;
+		DLINK(l, e);
+	}
+}
 
 STATIC reduce(code,vars)
 	code_p code;
@@ -456,6 +490,7 @@ STATIC reduce(code,vars)
 		incr_code(code,tmp); /* emit code to increment temp. local */
 		OUTTRACE("emitted increment code",0);
 		Ladd(code,&avail);
+		fix_header(code->co_loop);
 	}
 }
 
