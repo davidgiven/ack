@@ -142,8 +142,9 @@ prepend_scopes()
 		register struct idf *id = se->se_idf;
 		register struct def *df = id->id_def;
 		
-		if (df && (df->df_initialized || df->df_used || df->df_alloc))
+		if (df && (df->df_initialized || df->df_used || df->df_alloc)) {
 			code_scope(id->id_text, df);
+		}
 		se = se->next;
 	}
 #ifdef USE_TMP
@@ -201,6 +202,23 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	register char *name = idf->id_text;
 	register struct def *def = idf->id_def;
 
+	/* idf->id_def does not indicate the right def structure
+	 * when the function being defined has a parameter of the
+	 * same name in an old-style function definition.
+	 */
+	while (def->df_level != L_GLOBAL) def = def->next;
+
+	/* When we have a new-style function definition, the parameters
+	 * are defined first, which means that it may look as if they have
+	 * the greatest scope.  Correct this.
+	 */
+	if (idf->id_def == def && def->next && def->next->df_level == L_PROTO) {
+		struct def *tmpdef = def->next;
+
+		def->next = tmpdef->next;
+		tmpdef->next = def;
+		idf->id_def = tmpdef;
+	}
 #ifndef PREPEND_SCOPES
 	code_scope(name, def);
 #endif	PREPEND_SCOPES

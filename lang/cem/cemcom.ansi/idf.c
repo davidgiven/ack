@@ -288,10 +288,13 @@ declare_idf(ds, dc, lvl)
 	}
 #endif	LINT
 
-	if (def && 
+	if ((def && 
 	    ( def->df_level == lvl ||
 	      ( lvl != L_GLOBAL && def->df_level > lvl )
-	    )
+	    ))
+	   || (lvl == L_GLOBAL
+	       && def && def->df_level == L_PROTO
+	       && def->next && def->next->df_level == L_GLOBAL)
 	   )	{
 		/*	There is already a declaration for idf on this
 			level, or even more inside.
@@ -350,7 +353,6 @@ declare_idf(ds, dc, lvl)
 		newdef->df_set = (type->tp_fund == ARRAY);
 		/* newdef->df_firstbrace = 0; */
 #endif	LINT
-
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);
@@ -415,6 +417,7 @@ global_redecl(idf, new_sc, tp)
 	*/
 	register struct def *def = idf->id_def;
 
+	while (def->df_level != L_GLOBAL) def = def->next;
 	if (!equal_type(tp, def->df_type, 0)) {
 		error("redeclaration of %s with different type", idf->id_text);
 		return;
@@ -551,6 +554,7 @@ init_idf(idf)
 	*/
 	register struct def *def = idf->id_def;	/* the topmost */
 	
+	while (def->df_level <= L_PROTO) def = def->next;
 	if (def->df_initialized)
 		error("multiple initialization of %s", idf->id_text);
 	if (def->df_sc == TYPEDEF)	{

@@ -97,12 +97,21 @@ reject_params(dc)
 	register struct declarator *dc;
 {
 	/*	The declarator is checked to have no parameters, if it
-		is a function.
+		is an old-style function.  If it is a new-style function,
+		the identifiers are removed.  The function is not called in
+		case of a function definition.
 	*/
+	register struct decl_unary *du = dc->dc_decl_unary;
+
 	if (dc->dc_formal)	{
 		error("non_empty formal parameter pack");
 		free_formals(dc->dc_formal);
 		dc->dc_formal = 0;
+	}
+	while (du) {
+		if (du->du_fund == FUNCTION)
+			remove_proto_idfs(du->du_proto);
+		du = du->next;
 	}
 }
 

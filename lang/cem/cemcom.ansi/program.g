@@ -111,6 +111,24 @@ program:
 	used again and again, while the declarator is stored in a struct
 	declarator, only to be passed to declare_idf together with the
 	struct decspecs.
+
+	With the introduction of prototypes, extra problems for the scope
+	administration were introduced as well.  We can have, for example,
+	int x(double x);
+	and
+	int x(double x) { ... use(x) ... }
+	In the first case, the parameter name can be forgotten, whereas in
+	the second case, the parameter should have a block scope.  The
+	problem lies in the fact that the parameter's type is known before
+	the type of the function, which causes the def structure to be on
+	the end of the list.  Our solution is as follows:
+	1-  In case of a declaration, throw the parameter identifier away
+	    before the declaration of the outer x.
+	2-  In case of a definition, the function begin_proc() changes the
+	    def list for the identifier.  This means that declare_idf()
+	    contains an extra test in case we already saw a declaration of
+	    such a function, because this function is called before
+	    begin_proc().
 */
 
 external_definition
@@ -156,7 +174,6 @@ external_definition
 non_function(register struct decspecs *ds; register struct declarator *dc;)
 :
 	{	reject_params(dc);
-		def_proto(dc);
 	}
 	[
 		initializer(dc->dc_idf, ds->ds_sc)

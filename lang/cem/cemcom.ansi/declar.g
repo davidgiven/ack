@@ -193,7 +193,6 @@ init_declarator(register struct decspecs *ds;)
 	declarator(&Dc)
 	{
 		reject_params(&Dc);
-		def_proto(&Dc);
 		declare_idf(ds, &Dc, level);
 #ifdef	LINT
 		lint_declare_idf(Dc.dc_idf, ds->ds_sc);

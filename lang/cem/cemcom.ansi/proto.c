@@ -88,8 +88,6 @@ add_proto(pl, ds, dc, lvl)
 	/*	Perform some special conversions for parameters.
 	*/
 	if (type->tp_fund == FUNCTION) {
-		if (type->tp_proto)
-			remove_proto_idfs(type->tp_proto);
 		type = construct_type(POINTER, type, 0, (arith) 0, NO_PROTO);
 	} else if (type->tp_fund == ARRAY) {
 		type = construct_type(POINTER, type->tp_up, 0, (arith) 0, NO_PROTO);
@@ -247,21 +245,6 @@ declare_protos(dc)
 }
 
 
-def_proto(dc)
-	register struct declarator *dc;
-{
-	/*	Prototype declarations may have arguments, but the idf's
-		in the parameter type list can be ignored.
-	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
-
-	while (du) {
-		if (du->du_fund == FUNCTION)
-			remove_proto_idfs(du->du_proto);
-		du = du->next;
-	}
-}
-
 update_proto(tp, otp)
 	register struct type *tp, *otp;
 {
@@ -368,7 +351,7 @@ remove_proto_idfs(pl)
 					pl->pl_idf->id_text);
 #endif
 			def = pl->pl_idf->id_def;
-			if (def && def->df_level <= L_PROTO){
+			if (def && def->df_level <= L_PROTO) {
 				pl->pl_idf->id_def = def->next;
 				free_def(def);
 			}
