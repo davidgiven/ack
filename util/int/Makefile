@@ -121,12 +121,11 @@ distr:	.distr
 clean:
 	rm -f core mon.out int.mess int.log int.core int.tally \
 		trap_msg warn_msg warn.h tags print \
-		$(OBJ)
+		$(OBJ) $(INT)
 	(cd switch; make clean)
 	(cd switch; make clean)
 
 bare:	clean
-	/bin/rm -f $(INT)
 	(cd switch; make bare)
 
 
