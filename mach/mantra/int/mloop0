@@ -121,6 +121,7 @@ lblbuf:		sub.l	#2048,sp
 datloop:	cmp.l	a4,a1	;	bhi	9f	!Go on filling data
 		bsr	blshift		!shift block down , read next block
 9:		sub.l	#1,ndata ;	blt	finito
+		clr.l	d1
 		move.b	(a4)+,d1 ;	beq	dat0	!type byte in d1
 		move.l	a3,a2	;	move.b	(a4)+,d2  !count byte in d2
 		asl.l	#2,d1	;	move.l	-4(a6,d1),a0

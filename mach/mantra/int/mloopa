@@ -114,7 +114,8 @@ notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
 		bsr	_Xwrite
 		add.l	wrd+4,sp
 !NEXT INFORMATION ABOUT THE LINE NUMBER
-		move.l	(a6),d1
+		clr.l	d1
+		mov	(a6),d1
 		lea	emess+14,a0
 		bsr	itoa
 		move.l	#30,-(sp)
