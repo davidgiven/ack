@@ -5,7 +5,7 @@ LLgen, an extended LL(1) parser generator
 .SH SYNOPSIS
 \fBLLgen\fP
 [
-\fB\-vVxXfF\fP
+\fB\-vVxX\fP
 ]
 file ...
 .SH DESCRIPTION
@@ -84,15 +84,6 @@ the sets that are computed are extended with the nonterminal
 symbols and these extended sets are also included in the
 \fILL.output\fP
 file.
-.PP
-If the
-\fB\-f\fP
-or the
-\fB\-F\fP
-flag is given,
-\fILLgen\fP generates code, that enables the C-compiler to generate jump-
-tables for switches. This option should only be used when a large address
-space is available.
 .SH FILES
 LL.output                 verbose output file
 .br
