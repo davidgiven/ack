@@ -8,11 +8,11 @@ FILE *freopen(name,mode,fp)
 char *name , *mode;
 FILE *fp;
 {
-	FILE *fp;
 	char *malloc();
 	int fd,
 	flags = 0;
 
+	fflush(fp);
 	close(fileno(fp));
 	if (io_testflag(fp, IO_MYBUF) && fp->_buf) free(fp->_buf);
 
