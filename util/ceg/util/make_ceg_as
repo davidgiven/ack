@@ -26,6 +26,6 @@ ceg/ceg:	ceg/as_lib.a
 
 ceg/as_lib.a:
 	-mkdir ceg
-	ce ceg ; cp $(CEG)/util/make_ceg_as Makefile ; cd ..
+	cd ceg ; cp $(CEG)/util/make_ceg_as Makefile ; cd ..
 	cd ceg ; cp $(ASMAIN)/* . ; $(CC) -c $(CFLAGS) *.c; $(AR) r as_lib.a *.o ; cd ..
 	-sh -c 'ranlib ceg/as_lib.a'
