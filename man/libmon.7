@@ -11,12 +11,12 @@ If these routines are used in Pascal programs, then the calling sequence
 requires some attention.
 Some hints may be useful:
 .IP -
-The c-option {$c+} allows you to declare zero-terminated string
+The c-option {$c+} allows declaration of zero-terminated string
 constants in Pascal like "/etc/passwd".
 Moreover, the identifier \fIstring\fP is then defined as type identifier for
 a pointer to these zero-terminated strings.
 .IP -
-The d-option {$d+} allows you to use double precision integers (longs).
+The d-option {$d+} allows the use of double precision integers (longs).
 The lseek system call, for instance, needs a long argument and returns a long result.
 .IP -
 If the system call requires a pointer as argument use a \fIvar\fP parameter.

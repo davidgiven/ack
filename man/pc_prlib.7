@@ -267,9 +267,9 @@ Compute array size. Used for copying conformant arrays.
 .RE
 Debugging facilities:
 .RS
-The compiler allows you to verify assertions.
+The compiler allows for the verification of assertions.
 It generates a call to the routine _ass to check the assertion at runtime.
-Another feature of the compiler is that it enables you to trace the
+Another feature of the compiler is that it enables the user to trace the
 procedure calling sequence. If the correct option is turned on, then
 a call to the procedure \fIprocentry\fP is generated at the start of each
 compiled procedure or function. Likewise, the routine \fIprocexit\fP is called
@@ -293,8 +293,8 @@ Files:
 .RS
 .PP
 Most of the runtime routines are needed for file handling.
-For each file in your Pascal program a record of type file, as described
-above, is allocated, static if your file is declared in the outermost block,
+For each file in the Pascal program a record of type file, as described
+above, is allocated, static if this file is declared in the outermost block,
 dynamic if it is declared in inner blocks.
 The fields in the file record are used for:
 .IP bufadr 10
@@ -454,7 +454,7 @@ Otherwise the ELNBIT is cleared.
 .IP _wdw
 Return the current pointer to the file window.
 .IP _efl
-Test if you reached end of file.
+Test if end of file is reached.
 Is always true for output files.
 .PD
 .PP
