@@ -17,11 +17,11 @@ compare:	all
 em_code.3:	em_code.3X
 		tbl < em_code.3X > em_code.3
 
-libeme.a:	make.sh e/em_private.h e/em.c
+libeme.a:	make.sh e/em_private.h e/em.c e/C_failed.c
 		EMHOME=$(EMHOME); export EMHOME; sh make.sh e
 		-sh -c 'ranlib libeme.a'
 
-libemk.a:	make.sh k/em_private.h k/em.c
+libemk.a:	make.sh k/em_private.h k/em.c k/C_failed.c
 		EMHOME=$(EMHOME); export EMHOME; sh make.sh k
 		-sh -c 'ranlib libemk.a'
 

@@ -408,13 +408,15 @@ Informatica Rapport IR-81, Vrije Universiteit, Amsterdam, 1983.
 .SH DIAGNOSTICS
 .I C_open
 returns 1 if the open is successful and 0 if not.
-The other routines do not give any information about their completion.
+.PP
+When a write fails, the routine
+.I C_failed
+is called. The user can override its default definition by supplying his
+own. The default just gives an error message and quits.
 .SH BUGS
-.IP \(bu
-Feel free to report them to the author.
-.IP \(bu
 It is not possible to indicate that the argument of
 .B C_con_cst ()
 must be seen as an unsigned value.
-.SH AUTHOR
-Erik Baalbergen <erikb@vu44.UUCP>
+.PP
+.I C_failed
+is never called when generating readable EM code.
