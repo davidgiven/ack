@@ -17,19 +17,28 @@
 	November 15, 1984
 
 	This is a routine to do the work.
-	It is based on the partial products method
+	There are two versions: 
+	One is based on the partial products method
 	and makes no use possible machine instructions
 	to divide (hardware dividers).
+	The other is used when USE_DIVIDE is defined. It is much faster on
+	machines with fast 4 byte operations.
 */
 /********************************************************/
 
 div_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-			short	count;
 			short	error = 0;
 			unsigned long	result[2];
 	register	unsigned long	*lp;
+#ifndef USE_DIVIDE
+			short	count;
+#else
+			unsigned short u[9], v[5];
+			register int j;
+			register unsigned short *u_p = u;
+#endif
 
 	if ((e2->m1 | e2->m2) == 0) {
                 /*
@@ -44,6 +53,7 @@ EXTEND	*e1,*e2;
 		e1->exp = 0;	/* make sure */
 		return;
 	}
+#ifndef USE_DIVIDE
 	/*
 	 * numbers are right shifted one bit to make sure
 	 * that m1 is quaranteed to be larger if its
@@ -53,6 +63,7 @@ EXTEND	*e1,*e2;
 	b64_rsft(&e2->m1);	/* 64 bit shift right */
 	e1->exp++;
 	e2->exp++;
+#endif
 	/*	check for underflow, divide by zero, etc	*/
 	e1->sign ^= e2->sign;
 	e1->exp -= e2->exp;
@@ -76,15 +87,14 @@ EXTEND	*e1,*e2;
                 return;
         }
 
+#ifndef USE_DIVIDE
 		/* do division of mantissas	*/
 		/* uses partial product method	*/
 		/* init control variables	*/
 
 	count = 64;
-	lp = result;	/* result[0] == high word	*/
-			/* result[0] == low  word	*/
-	*lp++ = 0L;		/* high word	*/
-	*lp-- = 0L;		/* low word	*/
+	result[0] = 0L;
+	result[1] = 0L;
 
 		/* partial product division loop */
 
@@ -146,6 +156,95 @@ EXTEND	*e1,*e2;
 			*lp <<= count;
 		}
 	}
+#else USE_DIVIDE
+
+	u[4] = (e1->m2 & 1) << 15;
+	b64_rsft(&(e1->m1));
+	u[0] = e1->m1 >> 16;
+	u[1] = e1->m1;
+	u[2] = e1->m2 >> 16;
+	u[3] = e1->m2;
+	u[5] = 0; u[6] = 0; u[7] = 0;
+	v[1] = e2->m1 >> 16;
+	v[2] = e2->m1;
+	v[3] = e2->m2 >> 16;
+	v[4] = e2->m2;
+	result[0] = 0;
+	result[1] = 0;
+	lp = result;
+
+	/*
+	 * Use an algorithm of Knuth (The art of programming, Seminumerical
+	 * algorithms), to divide u by v. u and v are both seen as numbers
+	 * with base 65536. 
+	 */
+	for (j = 0; j <= 3; j++, u_p++) {
+		unsigned long q_est, temp;
+
+		if (j == 2) lp++;
+		if (u_p[0] == 0 && u_p[1] < v[1]) continue;
+		temp = ((unsigned long)u_p[0] << 16) + u_p[1];
+		if (u_p[0] >= v[1]) {
+			q_est = 0x0000FFFFL;
+		}
+		else {
+			q_est = temp / v[1];
+		}
+		temp -= q_est * v[1];
+		while (temp < 0x10000 && v[2]*q_est > ((temp<<16)+u_p[2])) {
+			q_est--;
+			temp += v[1];
+		}
+		/*	Now, according to Knuth, we have an estimate of the
+			quotient, that is either correct or one too big, but
+			almost always correct.
+		*/
+		if (q_est != 0)  {
+			int i;
+			unsigned long k = 0;
+			int borrow = 0;
+
+			for (i = 4; i > 0; i--) {
+				unsigned long tmp = q_est * v[i] + k + borrow;
+				unsigned short md = tmp;
+
+				borrow = (md > u_p[i]);
+				u_p[i] -= md;
+				k = tmp >> 16;
+			}
+			k += borrow;
+			borrow = u_p[0] < k;
+			u_p[0] -= k;
+
+			if (borrow) {
+				/* So, this does not happen often; the estimate
+				   was one too big; correct this
+				*/
+				*lp |= (j & 1) ? (q_est - 1) : ((q_est-1)<<16);
+				borrow = 0;
+				for (i = 4; i > 0; i--) {
+					unsigned long tmp 
+					    = v[i]+(unsigned long)u_p[i]+borrow;
+					
+					u_p[i] = tmp;
+					borrow = tmp >> 16;
+				}
+				u_p[0] += borrow;
+			}
+			else *lp |= (j & 1) ? q_est : (q_est<<16);
+		}
+	}
+#ifdef	EXCEPTION_INEXACT
+	u_p = &u[0];
+	for (j = 7; j >= 0; j--) {
+		if (*u_p++) {
+			error = 1;
+			break;
+		}
+	}
+#endif
+#endif
+
 #ifdef  EXCEPTION_INEXACT
         if (error)      {
                 /*
@@ -161,5 +260,6 @@ EXTEND	*e1,*e2;
 #endif
 	e1->m1 = result[0];
 	e1->m2 = result[1];
+
 	nrm_ext(e1);
 }
