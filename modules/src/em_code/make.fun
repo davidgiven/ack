@@ -42,10 +42,10 @@ rm -f *.o
 $a
 rm -f libem$1.a
 ar rc libem$1.a *.o
-cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
-cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/C_failed.c
+cc -c -O -I$1 -I. -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
+cc -c -O -I$EMHOME/modules/h -I$EMHOME/h failed.c
 mv em.o em$1.o
-ar r libem$1.a em$1.o C_failed.o
+ar r libem$1.a em$1.o failed.o
 rm -f *.o
 --EOF--
 .

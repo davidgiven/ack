@@ -3,7 +3,7 @@ INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
 
 all:		libeme.a libemk.a em_code.3
-		rm -f *.c
+		rm -f C_*.c
 
 install:	all
 		$(INSTALL) lib/libeme.a
@@ -19,11 +19,11 @@ em_code.3:	em_code.3X
 		-sh -c 'tbl < em_code.3X > em_code.3'
 		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
-libeme.a:	make.sh e/em_private.h e/em.c e/C_failed.c
+libeme.a:	make.sh e/em_private.h e/em.c failed.c
 		EMHOME=$(EMHOME); export EMHOME; sh make.sh e
 		-sh -c 'ranlib libeme.a'
 
-libemk.a:	make.sh k/em_private.h k/em.c k/C_failed.c
+libemk.a:	make.sh k/em_private.h k/em.c failed.c
 		EMHOME=$(EMHOME); export EMHOME; sh make.sh k
 		-sh -c 'ranlib libemk.a'
 
@@ -43,5 +43,10 @@ opr:
 # becomes too long for some systems
 clean:
 		rm -f *.o
-		rm -f *.c
+		rm -f C_*.c
 		rm -f *.a em_code.3 em.gen make.sh
+
+lintlib:	make.sh
+		lint -I../../h -I../../../h -Ie -Ceme *.c e/*.c
+		lint -I../../h -I../../../h -Ik -Cemk *.c k/*.c
+		mv llib-leme.ln llib-lemk.ln $(EMHOME)/modules/lib
