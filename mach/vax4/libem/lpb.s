@@ -1,18 +1,25 @@
         # $Header$
+	# special version to work with A68S, by CHL
 .globl	.lpb
-
+        # compute AB, given LB
 .lpb:
 	cmpl	r0,fp
 	bneq	L1
 	moval	4(ap),r0
 	rsb
 L1:
-	movl	fp,r1
+        movl    4(r0),r1        # mask for saved registers
+        addl2   $24,r0          # position of AB if no registers saved
+        movl    $16,r2          # position of first bit to test
 L2:
-	cmpl	12(r1),r0
-	beql	L3
-	movl	12(r1),r1
-	jbr	L2
+        subl3   r2,$28,r3       # remaining size of mask
+        ffs     r2,r3,r1,r2     # find first bit set in mask
+        beql    L3              # no more bits set
+        addl2   $4,r0           # for each saved register
+        incl    r2
+        jbr     L2
 L3:
-	addl3	$4,8(r1),r0	# Argument Base = ap + 4
-	rsb
+        extzv   $30,$2,r1,r2    # Now find out about the stack alignment
+                                # between fp and ap
+        addl2   r2,r0           # add alignment
+        rsb
