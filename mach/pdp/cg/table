@@ -56,7 +56,7 @@ EM_PSIZE=2
 EM_BSIZE=SL
 
 TIMEFACTOR= 1/300
-FORMAT="0%o"
+FORMAT="0%lo"
 
 REGISTERS:
 r0      = ("r0", 2), REG.

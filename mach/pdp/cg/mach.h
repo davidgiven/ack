@@ -34,14 +34,14 @@
 #define dlb_fmt		"_%d"
 #define	hol_fmt		"hol%d"
 
-#define hol_off		"0%o+hol%d"
+#define hol_off		"0%lo+hol%d"
 
 #ifdef ACK_ASS
-#define con_cst(x)	fprintf(codefile,".data2 0%o\n",x)
+#define con_cst(x)	fprintf(codefile,".data2 0%lo\n",x)
 #define con_ilb(x)	fprintf(codefile,".data2 %s\n",x)
 #define con_dlb(x)	fprintf(codefile,".data2 %s\n",x)
 #else
-#define con_cst(x)	fprintf(codefile,"0%o\n",x)
+#define con_cst(x)	fprintf(codefile,"0%lo\n",x)
 #define con_ilb(x)	fprintf(codefile,"%s\n",x)
 #define con_dlb(x)	fprintf(codefile,"%s\n",x)
 #endif
