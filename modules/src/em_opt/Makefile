@@ -4,8 +4,6 @@ INSTALL =	$(EMHOME)/modules/install
 COMPARE =	$(EMHOME)/modules/compare
 LINT	=	lint
 BINDIR	=	$(EMHOME)/lib
-LIBOPT =	libemopt.a
-LIBCEOPT =	libCEopt.a
 
 # set HOWMUCH to head -20 to limit number of patterns used
 #HOWMUCH =	head -20
@@ -20,15 +18,25 @@ PREFLAGS =	$(INCLDIR) -DPRIVATE=static#	 -DDEBUG
 #PREFLAGS =	$(PREFLAGS) -DSTATS
 
 PROFFLAG =	-O
-CFLAGS =	$(PREFLAGS) $(PROFFLAG)
+CFLAGS =	$(PREFLAGS) $(PROFFLAG) $(COPT)
 LINTFLAGS =	$(PREFLAGS) -DNORCSID
 LLOPT =
 CMD =		'$(CC) -c $(CFLAGS)'
+AR = ar
+SUF = o
+LIBSUF = a
+
+LIBOPT =	libemopt.$(LIBSUF)
+LIBCEOPT =	libCEopt.$(LIBSUF)
 
 .SUFFIXES:	.d .r
 
 .r.d:		; CMD=$(CMD); export CMD; awk -f makefuns.awk $*.r | sh -x
 		touch $@
+
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
 CSRC =		main.c nopt.c mkstrct.c aux.c outputdfa.c outcalls.c\
 		findworst.c initlex.c
@@ -36,10 +44,10 @@ CSRC =		main.c nopt.c mkstrct.c aux.c outputdfa.c outcalls.c\
 SRCS =		Makefile nopt.h parser.h parser.g syntax.l pseudo.r\
 		patterns $(CSRC)
 
-NOFILES =	nopt.o mkstrct.o dfa.o trans.o aux.o
+NOFILES =	nopt.$(SUF) mkstrct.$(SUF) dfa.$(SUF) trans.$(SUF) aux.$(SUF)
 
-POFILES =	parser.o syntax.o outputdfa.o outcalls.o findworst.o\
-		initlex.o Lpars.o
+POFILES =	parser.$(SUF) syntax.$(SUF) outputdfa.$(SUF) outcalls.$(SUF) findworst.$(SUF)\
+		initlex.$(SUF) Lpars.$(SUF)
 
 GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
 		dfa.c dfa.c.new trans.c trans.c.new\
@@ -54,8 +62,8 @@ install:	all
 		cp em_nopt $(BINDIR)/em_nopt
 
 cmp:		all
-		$(COMPARE) lib/$(LIBOPT)
-		$(COMPARE) man/em_opt.3
+		-$(COMPARE) lib/$(LIBOPT)
+		-$(COMPARE) man/em_opt.3
 		-cmp em_nopt $(BINDIR)/em_nopt
 
 pr:
@@ -67,24 +75,24 @@ opr:
 lint:		lintparser lintnopt
 
 clean:
-		rm -f O_*.o
+		rm -f O_*.$(SUF)
 		rm -f O_*.c
-		rm -f $(NOFILES) main.o mkstrct.o $(POFILES)
+		rm -f $(NOFILES) main.$(SUF) mkstrct.$(SUF) $(POFILES)
 		rm -f $(GENFILES) parser em_nopt $(LIBOPT)
 
 # How to build stand alone version of the optimizer
 
-NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.a\
-		$(EMHOME)/modules/lib/libemk.a\
-		$(EMHOME)/modules/lib/liballoc.a\
-		$(EMHOME)/modules/lib/malloc.o\
-		$(EMHOME)/modules/lib/libprint.a\
-		$(EMHOME)/modules/lib/libstring.a\
-		$(EMHOME)/modules/lib/libsystem.a\
-		$(EMHOME)/lib/em_data.a
+NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.$(LIBSUF)\
+		$(EMHOME)/modules/lib/libemk.$(LIBSUF)\
+		$(EMHOME)/modules/lib/liballoc.$(LIBSUF)\
+		$(EMHOME)/modules/lib/malloc.$(SUF)\
+		$(EMHOME)/modules/lib/libprint.$(LIBSUF)\
+		$(EMHOME)/modules/lib/libstring.$(LIBSUF)\
+		$(EMHOME)/modules/lib/libsystem.$(LIBSUF)\
+		$(EMHOME)/lib/em_data.$(LIBSUF)
 
-em_nopt:	dfadummy main.o $(NOFILES)
-		$(CC) -o em_nopt main.o $(NOFILES) $(NOPTLIB)
+em_nopt:	dfadummy main.$(SUF) $(NOFILES)
+		$(CC) -o em_nopt main.$(SUF) $(NOFILES) $(NOPTLIB)
 
 OLINT =		main.c mkstrct.c nopt.c aux.c dfa.c trans.c
 
@@ -100,9 +108,9 @@ lintnopt:	dfadummy $(OLINT)
 
 # How to build the library version of the optimizer
 
-$(LIBOPT):	dfadummy $(NOFILES) mkstrct.o pseudo.d incalls.d
+$(LIBOPT):	dfadummy $(NOFILES) mkstrct.$(SUF) pseudo.d incalls.d
 		rm -f $(LIBOPT)
-		ar rc $(LIBOPT) O_*.o $(NOFILES) mkstrct.o
+		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES) mkstrct.$(SUF)
 		-sh -c 'ranlib $(LIBOPT)'
 
 $(LIBCEOPT):
@@ -127,10 +135,10 @@ lintlib:	dfadummy $(LLINT)
 
 # How to build program to parse patterns table and build c files.
 
-PARSERLIB =	$(EMHOME)/lib/em_data.a\
-		$(EMHOME)/modules/lib/liballoc.a\
-		$(EMHOME)/modules/lib/libstring.a\
-		$(EMHOME)/modules/lib/libsystem.a
+PARSERLIB =	$(EMHOME)/lib/em_data.$(LIBSUF)\
+		$(EMHOME)/modules/lib/liballoc.$(LIBSUF)\
+		$(EMHOME)/modules/lib/libstring.$(LIBSUF)\
+		$(EMHOME)/modules/lib/libsystem.$(LIBSUF)
 
 parser:		parserdummy $(POFILES) $(PARSERLIB)
 		$(CC) -o parser $(LDFLAGS) $(POFILES) $(PARSERLIB) $(LEXLIB)
@@ -151,19 +159,19 @@ lintparser:	parserdummy $(PLINT)
 
 # Dependancies
 
-main.o:		nopt.h
-nopt.o:		nopt.h
-mkstrct.o:	nopt.h
-aux.o:		nopt.h
+main.$(SUF):		nopt.h
+nopt.$(SUF):		nopt.h
+mkstrct.$(SUF):	nopt.h
+aux.$(SUF):		nopt.h
 pseudo.d:	nopt.h makefuns.awk
-dfa.o:		nopt.h
-trans.o:	nopt.h
+dfa.$(SUF):		nopt.h
+trans.$(SUF):	nopt.h
 incalls.d:	nopt.h makefuns.awk
 
-parser.o:	Lpars.h parser.h
-Lpars.o:	Lpars.h
-syntax.o:	syntax.l parser.h Lpars.h
-outputdfa.o:	parser.h Lpars.h
-outcalls.o:	parser.h
-findworst.o:	parser.h
-initlex.o:	parser.h
+parser.$(SUF):	Lpars.h parser.h
+Lpars.$(SUF):	Lpars.h
+syntax.$(SUF):	syntax.l parser.h Lpars.h
+outputdfa.$(SUF):	parser.h Lpars.h
+outcalls.$(SUF):	parser.h
+findworst.$(SUF):	parser.h
+initlex.$(SUF):	parser.h
