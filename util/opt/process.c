@@ -4,7 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include "param.h"
 #include "types.h"
-#include "shc.h"
+#include "tes.h"
 #include "assert.h"
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -42,10 +42,10 @@ process() {
 		    } while (madeopt && ++npasses < 5000);
 		    assert(!madeopt);
 		}
-		do_shc();		/* stackheight computation phase */
+		do_tes();		/* top elt. size computation phase */
 		outpro();		/* generate PRO pseudo */
 		outregs();		/* generate MES ms_reg pseudos */
-		outsth();		/* generate MES ms_sth pseudos */
+		outtes();		/* generate MES ms_tes pseudos */
 	}
 	putlines(pseudos);		/* pseudos first */
 	if (prodepth != 0) {
@@ -190,16 +190,16 @@ symvalue() {
 	}
 }
 
-do_shc()
+do_tes()
 {
 	register line_p insptr = instrs, oldlin = NULL;
 
 	init_state();
-	shc_pseudos();
+	tes_pseudos();
 	while (insptr != NULL) {
-	    insptr->l_prev = oldlin;
-	    oldlin = insptr;
-	    shc_instr(insptr);
-	    insptr = insptr->l_next;
+		insptr->l_prev = oldlin;
+		oldlin = insptr;
+		tes_instr(insptr);
+		insptr = insptr->l_next;
 	}
 }

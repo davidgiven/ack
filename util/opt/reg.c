@@ -6,7 +6,7 @@ static char rcsid[] = "$Header$";
 #include "param.h"
 #include "types.h"
 #include "line.h"
-#include "shc.h"
+#include "tes.h"
 #include "proinf.h"
 #include "alloc.h"
 #include <em_spec.h>
@@ -78,22 +78,20 @@ outregs() {
 	curpro.freg = (reg_p) 0;
 }
 
-/* outsth() handles the output of the stackheight messages */
-outsth() {
+/* outtes() handles the output of the top elt. messages */
+outtes() {
 	register lblst_p lp = est_list;
 
-	if (state == NO_STACK_MES) return;
-
 	while(lp != NULL) {
-	    if ((lp->ll_height != 0) && !(lp->ll_num->n_flags & NUMCOND)) {
-		outinst(ps_mes);
-		outoff((offset)ms_sth);
-		outoff((offset)lp->ll_num->n_number);
-		outoff((offset)lp->ll_height);
-		outoff((offset)lp->ll_fallthrough);
-		outinst(sp_cend);
-	    }
-	    lp = lp->ll_next;
+		if ((lp->ll_size != 0) && !(lp->ll_num->n_flags & NUMCOND)) {
+			outinst(ps_mes);
+			outoff((offset)ms_tes);
+			outoff((offset)lp->ll_num->n_number);
+			outoff((offset)lp->ll_size);
+			outoff((offset)lp->ll_fallthrough);
+			outinst(sp_cend);
+		}
+		lp = lp->ll_next;
 	}
 }
 
