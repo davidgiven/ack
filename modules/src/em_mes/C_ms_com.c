@@ -10,5 +10,6 @@ C_ms_com(str)
 	char *str;
 {
 	C_mes_begin(ms_com);
+	C_scon(str, (arith) (strlen(str) + 1));
 	C_mes_end();
 }
