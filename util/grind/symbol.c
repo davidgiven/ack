@@ -16,6 +16,7 @@
 #include	"scope.h"
 #include	"tree.h"
 #include	"operator.h"
+#include	"misc.h"
 
 p_symbol	currfile, listfile;
 

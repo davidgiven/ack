@@ -7,6 +7,7 @@ UTIL_BIN = $(UTIL_HOME)/bin
 TABGEN=	$(UTIL_BIN)/tabgen
 LLGEN =	$(UTIL_BIN)/LLgen
 LLGENOPTIONS = -v
+EXTRALIB =
 
 SRC_G1 =	$(SRC_DIR)/commands.g
 GEN_G1 =	tokenfile.g
@@ -64,7 +65,7 @@ NEXTFILES =	$(SRC_DIR)/file.hh \
 		$(SRC_DIR)/langdep.cc
 
 all:		make.main
-		make -f make.main grind
+		make -f make.main "EXTRALIB="$(EXTRALIB) grind
 
 install:	all
 		cp grind $(TARGET_HOME)/bin/grind

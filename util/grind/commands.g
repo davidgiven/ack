@@ -16,6 +16,7 @@
 #include	"langdep.h"
 #include	"token.h"
 #include	"expr.h"
+#include	"misc.h"
 
 extern char	*Salloc();
 extern char	*strindex();

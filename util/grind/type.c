@@ -11,6 +11,7 @@
 #include "scope.h"
 #include "langdep.h"
 #include "expr.h"
+#include "misc.h"
 
 p_type	int_type, char_type, short_type, long_type, bool_type;
 p_type	uint_type, uchar_type, ushort_type, ulong_type;

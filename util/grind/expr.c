@@ -52,12 +52,14 @@
 #include "langdep.h"
 #include "scope.h"
 #include "idf.h"
+#include "misc.h"
 
 extern FILE	*db_out;
 extern int	stack_offset;
 extern char	*strcpy();
 extern t_addr	*get_EM_regs();
 extern char	*memcpy();
+extern char	*malloc(), *realloc();
 
 #define	malloc_succeeded(p)	if (! (p)) {\
 					error("could not allocate enough memory");\

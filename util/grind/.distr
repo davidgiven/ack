@@ -26,6 +26,7 @@ make.ops
 make.tokcase
 make.tokfile
 message.h
+misc.h
 modula-2.c
 operator.h
 operators.ot

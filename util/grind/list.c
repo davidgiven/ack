@@ -7,6 +7,7 @@
 #include "idf.h"
 #include "file.h"
 #include "symbol.h"
+#include "misc.h"
 
 static	line_positions();
 extern char	*dirs[];

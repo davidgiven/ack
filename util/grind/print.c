@@ -11,9 +11,11 @@
 #include "position.h"
 #include "idf.h"
 #include "expr.h"
+#include "misc.h"
 
 extern FILE *db_out;
 extern char *strindex();
+extern char *malloc();
 
 static
 print_unsigned(tp, v, format)

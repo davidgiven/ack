@@ -1,8 +1,12 @@
 /* $Header$ */
 
 #include <stdio.h>
-#include <varargs.h>
 #include <signal.h>
+#if __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 #include "tokenname.h"
 #include "position.h"
@@ -12,6 +16,7 @@
 #include "Lpars.h"
 #include "type.h"
 #include "langdep.h"
+#include "misc.h"
 
 static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
 char		*progname;
@@ -114,7 +119,58 @@ prompt()
   }
 }
 
+extern int errorgiven;
+
+#if __STDC__
+void
+fatal(char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  {
+	fprintf(db_out, "%s: ", progname);
+	vfprintf(db_out, fmt, ap);
+	fprintf(db_out, "\n");
+  }
+  va_end(ap);
+  exit(1);
+}
+
+void
+error(char *fmt, ...)
+{
+  va_list ap;
+
+  if (! interrupted) {
+  	va_start(ap, fmt);
+  	{
+		fprintf(db_out, "%s: ", progname);
+		vfprintf(db_out, fmt, ap);
+		fprintf(db_out, "\n");
+  	}
+  	va_end(ap);
+  }
+  errorgiven = 1;
+}
+
+void
+warning(char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  {
+	fprintf(db_out, "%s: ", progname);
+	vfprintf(db_out, fmt, ap);
+	fprintf(db_out, "\n");
+  }
+  va_end(ap);
+}
+
+#else
 /*VARARGS*/
+void
 fatal(va_alist)
   va_dcl
 {
@@ -132,9 +188,8 @@ fatal(va_alist)
   exit(1);
 }
 
-extern int errorgiven;
-
 /*VARARGS*/
+void
 error(va_alist)
   va_dcl
 {
@@ -155,6 +210,7 @@ error(va_alist)
 }
 
 /*VARARGS*/
+void
 warning(va_alist)
   va_dcl
 {
@@ -170,12 +226,15 @@ warning(va_alist)
   }
   va_end(ap);
 }
+#endif
 
+void
 rd_fatal()
 {
   fatal("read error in %s", AckObj);
 }
 
+void
 No_Mem()
 {
   fatal("out of memory");

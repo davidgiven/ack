@@ -16,6 +16,7 @@
 #include	"langdep.h"
 #include	"type.h"
 #include	"expr.h"
+#include	"misc.h"
 
 extern FILE	*db_out;
 t_lineno	currline;

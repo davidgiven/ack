@@ -3,9 +3,14 @@
 /* a.out file reading ... */
 
 #include "rd.h"
+#include "misc.h"
+#include <assert.h>
+#include <alloc.h>
 
 #if defined(__sun)
+#if ! defined(sun)
 #define sun
+#endif
 #endif
 
 #if defined(__i386)
@@ -17,13 +22,20 @@
 #endif
 
 #if defined(__sparc)
+#if ! defined(sparc)
 #define sparc
+#endif
 #endif
 
 #if defined(__vax)
 #define vax
 #endif
 
+#if defined(__solaris) || defined(__solaris__)
+#define solaris
+#endif
+
+#if ! defined(solaris)
 #if defined(sun) || defined(vax)
 
 struct exec {
@@ -216,6 +228,7 @@ rd_close()
 }
 
 #endif
+#endif
 
 #if defined(i386)
 #include <stdio.h>
@@ -379,4 +392,249 @@ rd_string(nm, count)
 rd_close()
 {
 }
+#endif
+
+#if defined(solaris)
+#include <libelf.h>
+#include <sys/elf_M32.h>
+#include <stb.h>
+
+struct nlist {
+	union {
+		char	*n_name;
+		long	n_strx;
+	} n_un;
+	unsigned char n_type;
+	char	n_other;
+	short	n_desc;
+	unsigned long n_value;
+};
+
+static int fildes;
+static Elf *elf;
+static Elf32_Ehdr *ehdr;
+static struct nlist *dbtab;
+static char *dbstringtab;
+static Elf32_Sym *tab;
+static char *stringtab;
+static struct outhead hh;
+static struct nlist *maxdn;
+
+#define	N_STAB	0xe0
+
+int
+rd_open(f)
+  char	*f;
+{
+  if ((fildes = open(f, 0)) < 0) return 0;
+  elf_version(EV_CURRENT);
+  if ((elf = elf_begin(fildes, ELF_C_READ, (Elf *) 0)) == 0) {
+	close(fildes);
+	return 0;
+  }
+  if ((ehdr = elf32_getehdr(elf)) == NULL) {
+	elf_end(elf);
+	close(fildes);
+	return 0;
+  }
+  return 1;
+}
+
+rd_ohead(h)
+  struct outhead	*h;
+{
+  Elf_Scn *scn = 0;
+  Elf32_Shdr *shdr;
+  Elf_Data *sectnames;
+  Elf_Data *dt;
+  register struct nlist *dn;
+  register Elf32_Sym *n;
+  long text_offset, data_offset, bss_offset, fun_offset;
+  int fixnamoff = 0, newfixnamoff = 0;
+
+  h->oh_magic = O_CONVERTED;
+  h->oh_stamp = 0;
+  h->oh_nsect = 4;
+  h->oh_nrelo = 0;
+  h->oh_flags = 0;
+  h->oh_nemit = 0;
+  h->oh_nname = 0;
+
+  scn = elf_getscn(elf, (size_t) ehdr->e_shstrndx);
+  sectnames = elf_getdata(scn, (Elf_Data *) 0);
+
+  scn = 0;
+  while ((scn = elf_nextscn(elf, scn)) != 0) {
+	shdr = elf32_getshdr(scn);
+	switch(shdr->sh_type) {
+	case SHT_PROGBITS:
+		/* Get stab symbol table. Elf does not know about it,
+		   and, unfortunately, no relocation is done on it.
+		*/
+		h->oh_nemit += shdr->sh_size;
+		if (! strcmp(".stab", (char *)(sectnames->d_buf)+shdr->sh_name)) {
+  			dt = elf_getdata(scn, (Elf_Data *) 0);
+			if (dt->d_size == 0) {
+				fatal("(part of) symbol table is missing");
+			}
+			dbtab = (struct nlist *) Malloc(dt->d_size);
+			memcpy((char *) dbtab, (char *) dt->d_buf, dt->d_size);
+			maxdn = (struct nlist *)((char *)dbtab+dt->d_size);
+			break;
+		}
+		break;
+
+	case SHT_STRTAB:
+		/* Get the stab string table, as well as the usual string
+		   table.
+		*/
+		if (! strcmp(".stabstr", (char *)(sectnames->d_buf)+shdr->sh_name)) {
+  			dt = elf_getdata(scn, (Elf_Data *) 0);
+			if (dt->d_size == 0) {
+				fatal("(part of) symbol table is missing");
+			}
+			dbstringtab = dt->d_buf;
+			h->oh_nchar = dt->d_size;
+			break;
+		}
+		if (! strcmp(".strtab", (char *)(sectnames->d_buf)+shdr->sh_name)) {
+  			dt = elf_getdata(scn, (Elf_Data *) 0);
+			if (dt->d_size == 0) {
+				fatal("(part of) symbol table is missing");
+			}
+			stringtab = dt->d_buf;
+		}
+		break;
+
+	case SHT_SYMTAB:
+		/* Get the symbol table. */
+		if (! strcmp(".symtab", (char *)(sectnames->d_buf)+shdr->sh_name)) {
+  			dt = elf_getdata(scn, (Elf_Data *) 0);
+			if (dt->d_size == 0) {
+				fatal("(part of) symbol table is missing");
+			}
+			tab = dt->d_buf;
+		}
+		break;
+	}
+  }
+
+  /* Convert offsets in stab symbol table. */
+  n = tab;
+  dn = dbtab;
+  while (dn < maxdn) {
+	int i;
+
+	if (dn->n_un.n_strx) {
+		dn->n_un.n_strx += fixnamoff;
+	}
+	switch(dn->n_type) {
+	case 0:
+		fixnamoff = newfixnamoff;
+		newfixnamoff += dn->n_value;
+		break;
+
+	case N_SO:
+		h->oh_nname++;
+		i = 0;
+		while (i < 3) {
+			while (stringtab[n->st_name] != 'B') n++;
+			if (! strcmp("Btext.text", &(stringtab[n->st_name]))) {
+				text_offset = n->st_value; i++;
+			}
+			else if (! strcmp("Bdata.data", &(stringtab[n->st_name]))) {
+				data_offset = n->st_value; i++;
+			}
+			else if (! strcmp("Bbss.bss", &(stringtab[n->st_name]))) {
+				bss_offset = n->st_value; i++;
+			}
+			n++;
+		}
+		break;
+
+	case N_GSYM:
+		h->oh_nname++;
+		/* Fortunately, we don't use this in ACK, so we don't
+		   have to handle it here. The problem is that we don't know
+		   which segment it comes from.
+		*/
+		break;
+
+	case N_STSYM:
+		h->oh_nname++;
+		dn->n_value += data_offset;
+		break;
+
+	case N_LCSYM:
+		h->oh_nname++;
+		dn->n_value += bss_offset;
+		break;
+
+	case N_FUN:
+		h->oh_nname++;
+		dn->n_value += text_offset;
+		fun_offset = dn->n_value;
+		break;
+
+	case N_MAIN:
+		dn->n_value += text_offset;
+		break;
+
+	case N_LBRAC:
+	case N_RBRAC:
+	case N_SLINE:
+		h->oh_nname++;
+		dn->n_value += fun_offset;
+		break;
+
+	case N_SOL:
+	case N_EINCL:
+	case N_BINCL:
+	case N_PSYM:
+	case N_SSYM:
+	case N_SCOPE:
+	case N_RSYM:
+	case N_LSYM:
+		h->oh_nname++;
+		/* Nothing to be done. */
+		break;
+	}
+	dn++;
+  }
+  hh = *h;
+}
+
+rd_name(nm, count)
+  struct outname	*nm;
+  unsigned int		count;
+{
+  register struct nlist *dn = dbtab;
+  register struct outname *n = nm;
+  while (dn < maxdn) {
+	if (dn->n_type & N_STAB) {
+		n->on_type = dn->n_type << 8;
+		n->on_valu = dn->n_value;
+		n->on_desc = dn->n_desc;
+		if (dn->n_un.n_strx == 0) n->on_foff = 0;
+		else n->on_foff = OFF_CHAR(hh) + dn->n_un.n_strx;
+		n++;
+	}
+	dn++;
+  }
+  free(dbtab);
+}
+
+rd_string(nm, count)
+  char		*nm;
+  long		count;
+{
+  memcpy(nm, dbstringtab, count);
+}
+
+rd_close()
+{
+  elf_end(elf);
+  close(fildes);
+}
+
 #endif

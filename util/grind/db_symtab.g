@@ -16,6 +16,7 @@
 #include	"class.h"
 #include	"idf.h"
 #include	"rd.h"
+#include	"misc.h"
 
 extern char	*strindex();
 extern long	str2long();

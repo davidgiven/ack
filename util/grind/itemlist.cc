@@ -7,6 +7,7 @@
 #include "position.h"
 #include "tree.h"
 #include "operator.h"
+#include "misc.h"
 
 extern FILE	*db_out;
 extern int	db_ss;

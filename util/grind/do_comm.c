@@ -16,6 +16,7 @@
 #include "symbol.h"
 #include "scope.h"
 #include "file.h"
+#include "misc.h"
 
 extern FILE	*db_out;
 extern t_lineno	listline, currline;

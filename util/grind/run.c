@@ -18,10 +18,12 @@
 #include "scope.h"
 #include "type.h"
 #include "expr.h"
+#include "misc.h"
 
 #define MAXARG	128
 
 extern char	*strncpy();
+extern char	*malloc();
 extern struct idf *str2idf();
 
 extern char	*AObj;

@@ -14,6 +14,7 @@
 #include "expr.h"
 #include "tree.h"
 #include "operator.h"
+#include "misc.h"
 
 extern FILE *db_out, *db_in;
 

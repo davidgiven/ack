@@ -11,6 +11,7 @@
 #include	"file.h"
 #include	"idf.h"
 #include	"symbol.h"
+#include	"misc.h"
 
 extern FILE	*db_out;
 

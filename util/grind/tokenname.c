@@ -5,6 +5,7 @@
 #include	"position.h"
 #include	"file.h"
 #include	"idf.h"
+#include	"misc.h"
 
 /*	To centralize the declaration of %tokens, their presence in this
 	file is taken as their declaration. The Makefile will produce
