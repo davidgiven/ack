@@ -29,6 +29,8 @@ message.h
 modula-2.c
 operator.h
 operators.ot
+ops.c
+ops.h
 pascal.c
 position.c
 position.h
