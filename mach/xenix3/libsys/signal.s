@@ -79,45 +79,45 @@ dummy: .space 2
 .sect .text
 tbl:
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 	call	ctch
-.align
+.align 2
 .sect .bss
 table:
 	.space 40
