@@ -2780,7 +2780,7 @@ with STACK
     gen add_l {const, $1}, sp
 pat asp
 with STACK
-    gen move_l {regAcon, sp, $1}, sp
+    gen lea {regAcon, sp, $1}, sp
 
 pat ass $1==4
 with any4 STACK
