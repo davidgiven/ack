@@ -31,8 +31,8 @@ static int	loc_id;
 #endif USE_TMP
 
 #ifdef PEEPHOLE
-#undef REGCOUNTING
-#define REGCOUNTING 1
+#undef REGCOUNT
+#define REGCOUNT 1
 #endif
 
 extern char options[];
@@ -192,7 +192,7 @@ LoadLocal(off, sz)
 	register struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
-#ifdef REGCOUNTING
+#ifdef REGCOUNT
 	if (p) p->t_count++;
 #endif
 #endif
@@ -211,7 +211,7 @@ StoreLocal(off, sz)
 	register struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
-#ifdef REGCOUNTING
+#ifdef REGCOUNT
 	if (p) p->t_count++;
 #endif
 #endif

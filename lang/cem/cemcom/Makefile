@@ -9,17 +9,21 @@ CID = $(EMHOME)/bin/cid
 
 # Libraries and EM interface definitions
 SYSLIB = $(EMHOME)/modules/lib/libsystem.a
-EMKLIB = $(EMHOME)/modules/lib/libemk.a
+EMKLIB = $(EMHOME)/modules/lib/libemk.a $(EMHOME)/lib/em_data.a
+EMOLIB = $(EMHOME)/modules/lib/libemopt.a
 EMELIB = $(EMHOME)/modules/lib/libeme.a $(EMHOME)/lib/em_data.a
 STRLIB = $(EMHOME)/modules/lib/libstring.a
 PRTLIB = $(EMHOME)/modules/lib/libprint.a
 EMMESLIB = $(EMHOME)/modules/lib/libem_mes.a
+EMMESOLIB = $(EMHOME)/modules/lib/libem_mesO.a
 INPLIB = $(EMHOME)/modules/lib/libinput.a
 ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
 MALLOC = $(EMHOME)/modules/lib/malloc.o
 LIBS = $(INPLIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
+	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
+OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 LIB_INCLUDES = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
 EM_INCLUDES = -I$(EMHOME)/h
@@ -118,10 +122,18 @@ Emain:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/emain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve emain ; fi'
 	@rm -f nmclash.o a.out
 
+Omain:	Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	@rm -f nmclash.o a.out *.o
+
 install:	Main
 	rm -f $(EMHOME)/lib/em_cemcom $(EMHOME)/man/em_cemcom.6
 	cp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
 	cp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
+
+Oinstall:	Omain
+	cp $(CURRDIR)/omain $(EMHOME)/lib/em_cemcomO
 
 cmp:	Main
 	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
@@ -204,6 +216,10 @@ $(CURRDIR)/main:	$(OBJ) $(CURRDIR)/makefile
 $(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)/emain 
 	size $(CURRDIR)/emain
+
+$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain 
+	size $(CURRDIR)/omain
 
 Xlint:
 	lint $(CDEFS) $(LINTFLAGS) $(SRC)
