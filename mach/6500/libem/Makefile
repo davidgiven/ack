@@ -8,6 +8,16 @@ cmp:
 	-../../compare e.a tail_em
 	-../../compare libem_s.vend.a tail_em.vend
 
+distr:
+		arch cr `cat LIST`
+
+clean:
+		rm -f *.o
+opr:
+		make pr | opr
+pr:
+		@pr `pwd`/Makefile `pwd`/head_em.s
+		pr -l33 `tail +1 LIST|sort`
 clean :
 
 opr :
