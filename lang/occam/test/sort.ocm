@@ -1,5 +1,5 @@
--- This file contains a recursive call to sorter, so this is not really Occam.
 #include "dec.ocm"
+-- This file contains a recursive call to sorter, so this is not really Occam.
 
 var c:
 seq
