@@ -117,6 +117,10 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE ReadChar(InputText: Text; VAR ch : CHAR);
   BEGIN
 	ch := NextChar(InputText);
+	IF InputText^.eof THEN
+		Traps.Message("unexpected EOF");
+		HALT;
+	END;
 	InputText^.done := FALSE;
   END ReadChar;
 
@@ -140,16 +144,7 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE Get(InputText: Text);
   VAR dummy: CHAR;
   BEGIN
-	WITH InputText^ DO
-		IF type # Preading THEN Error(Preading); END;
-		IF eof THEN
-			Traps.Message("unexpected EOF");
-			HALT;
-		END;
-		IF done THEN done := FALSE;
-		ELSE dummy := NextChar(InputText);
-		END;
-	END;
+	ReadChar(InputText, dummy);
   END Get;
 
   PROCEDURE Eoln(InputText: Text): BOOLEAN;

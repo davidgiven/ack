@@ -20,6 +20,7 @@ Traps.mod
 Arguments.c
 LtoUset.e
 StrAss.c
+cap.c
 absd.c
 absf.e
 absi.c
