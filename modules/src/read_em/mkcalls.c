@@ -111,7 +111,7 @@ EM_dopseudo(opcode, args)
 			register struct e_args *args2, *args3;
 
 			arg = c_getarg(args, cst_ptyp);
-			args2 = c_getarg(arg, arg_ptyp);
+			args2 = c_getarg(arg, par_ptyp);
 			args3 = c_getarg(args2, cst_ptyp);
 			args3 = c_getarg(args3, 0);
 			switch(arg->em_argtype) {
@@ -170,7 +170,7 @@ EM_dopseudo(opcode, args)
 			register struct e_args *args2, *args3;
 
 			arg = c_getarg(args, cst_ptyp);
-			args2 = c_getarg(arg, arg_ptyp);
+			args2 = c_getarg(arg, par_ptyp);
 			args3 = c_getarg(args2, cst_ptyp);
 			args3 = c_getarg(args3, 0);
 			switch(arg->em_argtype) {
