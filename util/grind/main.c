@@ -11,6 +11,7 @@
 #include "scope.h"
 #include "Lpars.h"
 #include "type.h"
+#include "langdep.h"
 
 static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
 char		*progname;
@@ -95,6 +96,9 @@ main(argc, argv)
   reserve(tkidf);
   reserve(shorts);
   init_run();
+  if (! currlang) {
+	fatal("could not determine source language. Recompile with -g?");
+  }
   prompt();
   Commands();
   signal_child(SIGKILL);

@@ -837,12 +837,14 @@ DbRead(f)
 
 				if (sc) CurrentScope = sc;
 			}
-			if (! saw_code && !CurrentScope->sc_bp_opp) {
-			    CurrentScope->sc_bp_opp = n->on_valu;
-			    if (! CurrentScope->sc_start) {
+			else if (! saw_code) {
 				CurrentScope->sc_start = n->on_valu;
 				add_scope_addr(CurrentScope);
-			    }
+			}
+			if (!CurrentScope->sc_bp_opp
+			    || CurrentScope->sc_bp_lineno > n->on_desc) {
+				CurrentScope->sc_bp_opp = n->on_valu;
+				CurrentScope->sc_bp_lineno = n->on_desc;
 			}
 			saw_code = 1;
 			add_position_addr(line_file->on_mptr, n);

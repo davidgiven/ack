@@ -8,6 +8,7 @@ typedef struct scope {
   struct symbol *sc_definedby;		/* symbol defining this scope */
   long		sc_start;		/* start address of code of this scope */
   long		sc_bp_opp;		/* first breakpoint opportunity */
+  int		sc_bp_lineno;		/* linenumber belonging to this bp. */
   short		sc_proclevel;		/* proc level of this scope */
   char		sc_has_activation_record;
 } t_scope, *p_scope;
