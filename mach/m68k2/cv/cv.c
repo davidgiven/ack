@@ -66,6 +66,22 @@ char hdr[HDR_LENGTH] ;
 FILE		*input;
 FILE		*output;
 
+long align(a,b)
+        long a,b;
+{
+        a += b - 1;
+        return a - a % b;
+}
+ 
+int
+follows(pa, pb)
+        register struct outsect *pa, *pb;
+{
+        /* return 1 if pa follows pb */
+ 
+        return pa->os_base == align(pb->os_base+pb->os_size, pa->os_lign);
+}
+
 main(argc, argv)
 	int	argc;
 	char	*argv[];
@@ -114,41 +130,42 @@ main(argc, argv)
 			outsect[TEXT].os_base) ;
 	if ( outsect[BSS].os_flen != 0 )
 		fatal("bss space contains initialized data\n") ;
-	if ( outsect[BSS].os_base != outsect[DATA].os_base+
-					outsect[DATA].os_size )
+	if ( ! follows(&outsect[BSS], &outsect[DATA]))
 		fatal("bss segment must follow data segment\n") ;
 	if ( outsect[ROM].os_lign == 0x8000 ) {
 		/* 410 file with ROM in data space */
+		if ( ! follows(&outsect[DATA], &outsect[ROM]))
+			fatal("data segment must follow rom\n") ;
 		magic= 0410 ;
 		textsize= outsect[TEXT].os_size ;
-		datasize= outsect[ROM].os_size + outsect[DATA].os_size ;
-		if ( outsect[DATA].os_base != outsect[ROM].os_base+
-						outsect[ROM].os_size )
-			fatal("data segment must follow rom\n") ;
+		datasize= outsect[BSS].os_base - outsect[ROM].os_base ;
+		outsect[ROM].os_size = outsect[DATA].os_base - outsect[ROM].os_base;
+		outsect[DATA].os_size = outsect[BSS].os_base - outsect[DATA].os_base;
 	} else
 	if ( outsect[DATA].os_lign == 0x8000 ) {
 		/* 410 file with ROM in instruction space */
-		magic= 0410 ;
-		textsize= outsect[TEXT].os_size + outsect[ROM].os_size ;
-		datasize= outsect[DATA].os_size ;
-		if ( outsect[ROM].os_base != outsect[TEXT].os_base+
-						outsect[TEXT].os_size )
+		if ( ! follows(& outsect[ROM], &outsect[TEXT].os_base))
 			fatal("rom segment must follow text\n") ;
+		magic= 0410 ;
+		outsect[TEXT].os_size = outsect[ROM].os_base - outsect[TEXT].os_base;
+		textsize= outsect[TEXT].os_size + outsect[ROM].os_size ;
+		datasize= outsect[BSS].os_base - outsect[DATA].os_base ;
+		outsect[DATA].os_size = datasize;
 	} else {
 		/* Plain 407 file */
-		magic= 0407 ;
-		textsize= outsect[TEXT].os_size ;
-		datasize= outsect[ROM].os_size + outsect[DATA].os_size ;
-		if ( outsect[ROM].os_base != outsect[TEXT].os_base+
-						outsect[TEXT].os_size )
+		if ( ! follows(& outsect[ROM], &outsect[TEXT]))
 			fatal("rom segment must follow text\n") ;
-		if ( outsect[DATA].os_base != outsect[ROM].os_base+
-						outsect[ROM].os_size )
+		if ( ! follows(& outsect[DATA], &outsect[ROM]))
 			fatal("data segment must follow rom\n") ;
+		magic= 0407 ;
+		outsect[TEXT].os_size = textsize
+			= outsect[ROM].os_base - outsect[TEXT].os_base;
+		outsect[ROM].os_size = outsect[DATA].os_base - outsect[ROM].os_base;
+		outsect[DATA].os_size = outsect[BSS].os_base - outsect[DATA].os_base;
+		datasize= outsect[ROM].os_size + outsect[DATA].os_size ;
 	}
 	if ( outhead.oh_nsect==NSECT ) {
-		if ( outsect[LSECT].os_base != outsect[BSS].os_base+
-						outsect[BSS].os_size )
+		if (! follows(&outsect[LSECT], &outsect[BSS]))
 			fatal("end segment must follow bss\n") ;
 		if ( outsect[LSECT].os_size != 0 )
 			fatal("end segment must be empty\n") ;
