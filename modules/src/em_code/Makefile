@@ -14,8 +14,7 @@ SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
 
 OBS = failed.o insert.o internerr.o getid.o
 
-all:		libeme.a libemk.a em_code.3 em_codeEK.h
-		rm -f C_*.c
+all:		em_codeEK.h libeme.a libemk.a em_code.3
 
 install:	all
 		$(INSTALL) lib/libeme.a
