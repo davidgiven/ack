@@ -398,7 +398,6 @@ again:
 		register enum statetp state;
 		register int base = 8;
 		register char *np = &buf[0];
-					/* allow a '-' to be added	*/
 
 		*np++ = ch;
 		state = is_oct(ch) ? Oct : Dec;
