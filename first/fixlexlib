@@ -1,7 +1,12 @@
 FL=succes
-TRIES='-ll and -lln'
+TRIES=
 case X$# in
 X0)
+	if (.Xlex) > /dev/null 2>&1
+	then
+		TRY=`.Xlex`
+	else	TRY=-lln
+	fi
 	myecho "trying to find your lex library ..."
 	cat > x.l <<'EOF'
 %%
@@ -13,7 +18,7 @@ EOF
 	     exit 2
 	fi
 	cat > trylib <<'EOF'
-if cc $1 lex.yy.c > /dev/null 2>&1
+if cc lex.yy.c $1 > /dev/null 2>&1
 then
 	rm -f lex.yy.* a.out
 	exit 0
@@ -21,14 +26,12 @@ else
 	exit 1
 fi
 EOF
-	if sh trylib -ll
+	if sh trylib $TRY
 	then
-		LEX=-ll
-	elif sh trylib -ln
-	then
-		LEX=-lln
+		LEX=$TRY
 	else
 		FL=fail
+		TRIES=$TRY
 	fi
 	;;
 *)	if sh trylib $1
@@ -67,3 +70,5 @@ EOF
 	;;
 esac
 rm -f x.l trylib
+echo echo "$LEX" > .Xlex
+chmod +x .Xlex
