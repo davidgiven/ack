@@ -1,0 +1,28 @@
+
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
+SHARE=../share
+
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
+
+all:
+
+install:
+	rm -f $(EMLIB)/em_ego
+	cp em_ego $(EMLIB)/em_ego
+
+cmp:	all
+	-cmp em_ego $(EMLIB)/em_ego
+
+pr:
+	@pr em_ego
+
+opr:
+	make pr | opr
+
+clean:
+
