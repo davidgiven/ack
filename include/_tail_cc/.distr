@@ -6,4 +6,7 @@ termio.h
 varargs.h
 math.h
 time.h
+pwd.h
+grp.h
+sgtty.h
 sys
