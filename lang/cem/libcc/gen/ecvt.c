@@ -46,6 +46,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	if (ndigit < 0) ndigit = 0;
 	if (ndigit > NDIGITS) ndigit = NDIGITS;
 	pe = &buf[ndigit];
+	buf[0] = '\0';
 
 	*sign = 0;
 	if (value < 0) {
@@ -83,24 +84,26 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		*p++ = (int)value + '0';
 		value = 10.0 * (value - (int)value);
 	}
-	p = pe;
-	*p += 5;	/* round of at the end */
-	while (*p > '9') {
-		*p = '0';
-		if (p > buf) ++*--p;
-		else {
-			*p = '1';
-			++*decpt;
-			if (! ecvtflag) {
-				/* maybe add another digit at the end,
-				   because the point was shifted right
-				*/
-				if (pe > buf) *pe = '0';
-				pe++;
+	if (pe >= buf) {
+		p = pe;
+		*p += 5;	/* round of at the end */
+		while (*p > '9') {
+			*p = '0';
+			if (p > buf) ++*--p;
+			else {
+				*p = '1';
+				++*decpt;
+				if (! ecvtflag) {
+					/* maybe add another digit at the end,
+					   because the point was shifted right
+					*/
+					if (pe > buf) *pe = '0';
+					pe++;
+				}
 			}
 		}
+		*pe = '\0';
 	}
-	*pe = '\0';
 	return buf;
 }
 #endif
