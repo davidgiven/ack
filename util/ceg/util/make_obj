@@ -21,25 +21,24 @@ CEG_LIBS = $(EM)/modules/lib/liballoc.a\
 
 
 install : back ceg ce
-	make ce.a
 
 ce : ceg/ceg
 	mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
-	cp $(DEF)/*.c ce
-	cp $(DEF)/*/*.c ce
-	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
+	(cd ce;co $(DEF)/RCS/*.c )
+	(cd ce;co $(DEF)/*/RCS/*.c)
 	ln mach.c ce/mach.c
+	@make EM_instr
 
 ceg : 
 	mkdir ceg
-	cp $(ASMAIN)/* ceg
+	(cd ceg;co $(ASMAIN)/RCS/*) 
 	(cd ceg;$(CC) -c $(IFILES) *.c; ar r as_lib.a *.o; ranlib as_lib.a)
 
 
 back :
 	mkdir back
-	cp $(BACK)/obj_back/*h $(BACK)/obj_back/Makefile back
+	(cd back; co $(BACK)/obj_back/RCS/*h $(BACK)/obj_back/RCS/Makefile) 
 	( cd back; make)
 	ar r back.a back/*o;
 	ranlib back.a

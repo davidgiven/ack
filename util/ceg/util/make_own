@@ -24,10 +24,10 @@ install : ceg ce
 ce : ceg/ceg
 	mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
-	cp $(DEF)/*.c ce
-	cp $(DEF)/*/*.c ce
-	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
+	(cd ce;co $(DEF)/*.c )
+	(cd ce;co $(DEF)/*/*.c)
 	ln mach.c ce/mach.c
+	@make EM_instr
 
 ceg : 
 	mkdir ceg
