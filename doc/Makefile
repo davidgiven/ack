@@ -25,7 +25,7 @@ RESFILES= \
 crefman.$(SUF):	crefman.doc
 		$(EQN) $(TARGET) crefman.doc | $(NROFF) $(MS) $(TARGET) >$@
 ansi_C.$(SUF):	ansi_C.doc
-		$(TBL) $(TARGET) ansi_C.doc | $(NROFF) $(MS) $(TARGET) >$@
+		$(TBL) ansi_C.doc | $(NROFF) $(MS) $(TARGET) >$@
 v7bugs.$(SUF):	v7bugs.doc
 		$(NROFF) $(TARGET) v7bugs.doc >$@
 install.$(SUF):	install.doc
@@ -36,6 +36,8 @@ val.$(SUF):	val.doc
 		$(NROFF) $(TARGET) val.doc >$@
 6500.$(SUF):	6500.doc
 		$(TBL) 6500.doc | $(NROFF) $(MS) $(TARGET) >$@
+m68020.$(SUF):	m68020.doc
+		$(EQN) $(TARGET) m68020.doc | $(TBL) | $(NROFF) $(MS) $(TARGET) >$@
 ncg.$(SUF):	ncg.doc
 		$(TBL) ncg.doc | $(NROFF) $(MS) $(TARGET) >$@
 LLgen.doc:	LLgen.X

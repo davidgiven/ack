@@ -206,7 +206,7 @@ The value in the program counter is the address of the extension word.
 .NH 4 
 Immediate Data
 .IP Syntax: 8
-@ \#data @
+@ "\#data" @
 .PP
 This addressing mode requires either one or two words of extension, depending
 on the size of the operation;
