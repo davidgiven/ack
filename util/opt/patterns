@@ -1,13 +1,17 @@
 "$Header$"
-loc adi loc sbi $2==w && $4==w: loc $1-$3 adi w
 inc dec:
 inc loc adi $3==w:	loc $2+1 adi w
 inc loc sbi $3==w:	loc $2-1 sbi w
 dec loc adi $3==w:	loc $2-1 adi w
 dec loc sbi $3==w:	loc $2+1 sbi w
+loc adi loc sbi $2==w && $4==w: loc $1-$3 adi w
 ldc adi ldc sbi $2==2*w && $4==2*w:     ldc $1-$3 adi 2*w
 loc adi loc adi $2==w && $4==w: loc $1+$3 adi w
 ldc adi ldc adi $2==2*w && $4==2*w:     ldc $1+$3 adi 2*w
+loc adu loc sbu $2==w && $4==w: loc $1-$3 adu w
+ldc adu ldc sbu $2==2*w && $4==2*w:     ldc $1-$3 adu 2*w
+loc adu loc adu $2==w && $4==w: loc $1+$3 adu w
+ldc adu ldc adu $2==2*w && $4==2*w:     ldc $1+$3 adu 2*w
 /*
 loc adi loc mli $2==w && $4==w:	loc $3 mli w loc $1*$3 adi w
 loc adi loc sli $2==w && $4==w && $3==1: loc $3 sli w loc 2*$1 adi w
