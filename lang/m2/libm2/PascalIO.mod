@@ -126,6 +126,7 @@ IMPLEMENTATION MODULE PascalIO;
 		IF type # Preading THEN Error(Preading); END;
 		IF NOT done THEN
 			Get(InputText);
+			done := TRUE;
 		END;
 		RETURN ch;
 	END;
@@ -145,7 +146,6 @@ IMPLEMENTATION MODULE PascalIO;
 		ELSE
 			Read(stream, ch, result);
 		END;
-		done := TRUE;
 	END;
   END Get;
 
