@@ -57,7 +57,7 @@ The way the backend table name is determined is more
 convoluted.
 .br
 First, when the last filename in the program call name is not
-one of \fIack\fP, \fIcc\fP, \fIacc\fP, \fIpc\fP or \fIapc\fP,
+one of \fIack\fP or the front-end call-names,
 this filename is used as the backend description name.
 Second, when the \fB\-m\fP is present the \fB\-m\fP is chopped of this
 flag and the rest is used as the backend description name.
@@ -272,7 +272,17 @@ This keyword indicates that the transformation reads from standard input.
 This keyword indicates that the transformation writes on standard output.
 .IP \fIoptimizer\fP
 .br
-This keyword indicates that this transformation is an optimizer.
+The presence of this keyword indicates that this transformation is an optimizer.
+It can be followed by a number, indicating the "level" of the
+optimizer (see description of the -O option in the ack(1ACK) manual page).
+.IP \fIpriority\fP
+.br
+This \-~optional~\- keyword is followed by a number. Positive priority means
+that the transformation is likely to be used, negative priority means that
+the transformation is unlikely to be used.
+Priorities can also be set with a ack(1ACK) command line option.
+Priorities come in handy when there are several implementations of a
+certain transformation. They can then be used to select a default one.
 .IP \fIlinker\fP
 .br
 This keyword indicates that this transformation is the linker.
@@ -392,10 +402,10 @@ var s=2	# short size 2
 var l=4	# long size 4
 var f=4	# float size 4
 var d=8	# double size 8
-var M=int	# Unused in this example
+var M=em22
 var NAME=em22	# for cpp (NAME=em22 results in #define em22 1)
-var LIB=mach/int/lib/tail_	# part of file name for libraries
-var RT=mach/int/lib/head_	# part of file name for run-time startoff
+var LIB=lib/{M}/tail_	# part of file name for libraries
+var RT=lib/{M}/head_	# part of file name for run-time startoff
 var SIZE_FLAG=\-sm	# default internal table size flag
 var INCLUDES=\-I{EM}/include	# use {EM}/include for #include files
 name asld	# Assembler/loader
@@ -420,7 +430,7 @@ name asld	# Assembler/loader
 end
 .DE
 
-The command \fIack \-mint \-v \-v \-I../h \-L \-ly prog.c\fP
+The command \fIack \-mem22 \-v \-v \-I../h \-L \-ly prog.c\fP
 would result in the following
 calls (with exec(II)):
 .DS X
@@ -428,7 +438,7 @@ calls (with exec(II)):
 1)	/lib/cpp \-I../h \-I/usr/em/include \-Dem22 \-DEM_WSIZE=2 \-DEM_PSIZE=2 \e
 	    \-DEM_SSIZE=2 \-DEM_LSIZE=4 \-DEM_FSIZE=4 \-DEM_DSIZE=8 prog.c
 2)	/usr/em/lib/em_cem \-Vw2i2p2f4s2l4d8 \-l
-3)	/usr/em/lib/em_ass \-sm /usr/em/mach/int/lib/head_cc \-o e.out prog.k
-	/usr/em/mach/int/lib/tail_y /usr/em/mach/int/lib/tail_cc.1s
-	/usr/em/mach/int/lib/tail_cc.2g /usr/em/mach/int/lib/tail_mon
+3)	/usr/em/lib/em_ass \-sm /usr/em/lib/em22/head_cc \-o e.out prog.k
+	/usr/em/lib/em22/tail_y /usr/em/lib/em22/tail_cc.1s
+	/usr/em/lib/em22/tail_cc.2g /usr/em/lib/em22/tail_mon
 .DE
