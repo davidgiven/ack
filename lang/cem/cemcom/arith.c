@@ -282,7 +282,7 @@ int2float(expp, tp)
 		exp = *expp;
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		exp->FL_VALUE = Salloc(buf, (unsigned)strlen(buf)+1) + 1;
+		exp->FL_VALUE = Salloc(buf, (unsigned)strlen(buf)+2) + 1;
 		exp->FL_DATLAB = 0;
 	}
 	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
