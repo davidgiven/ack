@@ -53,7 +53,7 @@ eval_field(expr, code)
 	struct type *tp = leftop->ex_type->tp_up;
 	arith tmpvar = 0;
 	struct type *atype = ( tp->tp_unsigned
-				&& fd->fd_width >= 8 * word_size)
+				&& fd->fd_width >= 8 * (int)word_size)
 				    ? uword_type
 				    : word_type;
 
@@ -89,7 +89,7 @@ eval_field(expr, code)
 			C_and(word_size);
 		}
 		else {
-			arith sft = word_size * 8 - fd->fd_width;
+			arith sft = (int)word_size * 8 - fd->fd_width;
 			C_loc(sft - fd->fd_shift);
 			C_sli(word_size);
 			C_loc(sft);
@@ -118,7 +118,7 @@ eval_field(expr, code)
 			retrieval) is on top of stack.
 		*/
 		if (tp->tp_unsigned == 0) {	/* sign extension */
-			register arith shift = word_size * 8 - fd->fd_width;
+			register arith shift = (int)word_size * 8 - fd->fd_width;
 
 			C_loc(shift);
 			C_sli(word_size);

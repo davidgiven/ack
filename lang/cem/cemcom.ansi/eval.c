@@ -1019,10 +1019,10 @@ load_val(expr, rlval)
 load_cst(val, siz)
 	arith val, siz;
 {
-	if (siz <= word_size)
+	if ((int)siz <= (int)word_size)
 		C_loc(val);
 	else
-	if (siz == dword_size)
+	if ((int)siz == (int)dword_size)
 		C_ldc(val);
 	else {
 		label datlab;

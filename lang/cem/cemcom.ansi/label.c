@@ -23,9 +23,9 @@ enter_label(idf, defining)
 		scope, i.e., on the lowest possible level.
 		If defining, the label comes from a label statement.
 	*/
-	if (idf->id_def)	{
-		register struct def *def = idf->id_def;
-		
+	register struct def *def = idf->id_def;
+
+	if (def)	{
 		if (def->df_sc == LABEL)	{
 			if (defining && def->df_initialized)
 				error("redeclaration of label %s",
@@ -41,11 +41,12 @@ enter_label(idf, defining)
 	}
 	else	{
 		add_def(idf, LABEL, label_type, L_LOCAL);
+		def = idf->id_def;
 	}
-	if (idf->id_def->df_address == 0)
-		idf->id_def->df_address = (arith) text_label();
+	if (def->df_address == 0)
+		def->df_address = (arith) text_label();
 	if (defining)
-		idf->id_def->df_initialized = 1;
+		def->df_initialized = 1;
 }
 
 unstack_label(idf)

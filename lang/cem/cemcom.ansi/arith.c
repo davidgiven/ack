@@ -364,7 +364,7 @@ int2float(expp, tp)
 		converted to the floating type tp.
 	*/
 	register struct expr *exp = *expp;
-	int uns = (*expp)->ex_type->tp_unsigned;
+	int uns = exp->ex_type->tp_unsigned;
 	
 	if (is_cp_cst(exp)) {
 		*expp = new_expr();
@@ -596,19 +596,19 @@ field2arith(expp)
 	(*expp)->ex_type = word_type;
 
 	if (tp->tp_unsigned)	{	/* don't worry about the sign bit */
-		if (fd->fd_width >= 8 * word_size)
+		if (fd->fd_width >= 8 * (int)word_size)
 			(*expp)->ex_type = uword_type;
 		ch3bin(expp, RIGHT, intexpr((arith)fd->fd_shift, INT));
 		ch3bin(expp, '&', intexpr(fd->fd_mask, INT));
 	}
 	else	{	/* take care of the sign bit: sign extend if needed */
-		arith bits_in_type = word_size * 8;
+		arith other_bits = (int)word_size * 8 - fd->fd_width;
 
 		ch3bin(expp, LEFT,
-			intexpr(bits_in_type - fd->fd_width - fd->fd_shift,
+			intexpr(other_bits - fd->fd_shift,
 						INT)
 		);
-		ch3bin(expp, RIGHT, intexpr(bits_in_type - fd->fd_width, INT));
+		ch3bin(expp, RIGHT, intexpr(other_bits, INT));
 	}
 }
 #endif NOBITFIELD
