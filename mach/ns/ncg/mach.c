@@ -27,7 +27,7 @@ con_mult(sz)
 {
 	if (sz != 4)
 		fatal("bad icon/ucon size");
-	fprintf(codefile,".long\t%s\n",str);
+	fprintf(codefile,".data4\t%s\n",str);
 }
 
 #ifdef REGVARS
@@ -75,7 +75,7 @@ f_regsave(){
 		fprintf(codefile,"%c%s", c, regadm[i].ra_str);
 		c = ',';
 	}
-	fprintf(codefile, "], %d\n", lbytes);
+	fprintf(codefile, "], %ld\n", lbytes);
 	for (i=0;i<n_regvars;i++)
 		if (regadm[i].ra_off>=0)
 			fprintf(codefile, "movd %ld(fp), %s",
@@ -129,17 +129,17 @@ mes(type) word type ; {
 prolog(nlocals) full nlocals; {
 
 #ifndef REGVARS
-	fprintf(codefile, "enter[], %d\n",nlocals);
+	fprintf(codefile, "enter[], %ld\n",nlocals);
 #else
 	lbytes = nlocals;
 #endif
 }
 
 char *segname[] = {
-	".text",
-	".data",
-	".data",
-	".bss"
+	".sect .text",
+	".sect .data",
+	".sect .rom",
+	".sect .bss"
 };
 
 con_float() {
