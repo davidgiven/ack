@@ -14,15 +14,26 @@ static char rcsid[] = "$Header$";
 
 extern char em_mnem[][4];
 
-struct instr **patternqueue, **nextpatt;
-struct instr **backupqueue, **nextbackup, **lastbackup;
-struct instr **outputqueue, **nextoutput, **lastoutput;
-struct instr **freeiqueue,  **nextifree, **lastifree;
-char *strqueue, *nextstr, *laststr;
+struct instr **OO_patternqueue;
+struct instr **OO_nxtpatt;
+struct instr **OO_bkupqueue;
+struct instr **OO_nxtbackup;
 
-int noutput;	/* number of instructions in output queue */
-int WSIZE;	/* wordlength */
-int PSIZE;	/* pointer length */
+static char *filename;
+static struct instr **lastbackup;
+static struct instr **outputqueue;
+static struct instr **nextoutput;
+static struct instr **lastoutput;
+static struct instr **freeiqueue;
+static struct instr **nextifree;
+static struct instr **lastifree;
+static char *strqueue;
+static char *nextstr;
+static char *laststr;
+
+int OO_noutput;	/* number of instructions in output queue */
+int OO_WSIZE;	/* wordlength */
+int OO_PSIZE;	/* pointer length */
 
 #ifdef STATS
 int sflag = 1;			/* pattern statistics output */
@@ -30,17 +41,16 @@ int sflag = 1;			/* pattern statistics output */
 #ifdef COLLECT
 int cflag = 0;			/* internal statistics output */
 #define UPDATEMAX(oldmax,n) if(cflag&&n>oldmax) oldmax=n
-int numwrites = 0;
-int numnextems = 0;
-int numpushs = 0;
-int numbackups = 0;
-int numflushes = 0;
-int numfrees = 0;
-int numdefaults = 0;
-int highestbackup = 0, totalbackup = 0;
-int highestoutput = 0, totaloutput = 0;
-int highestfreei = 0, totalfreei = 0;
-int higheststr = 0, totalstr = 0;
+static int numwrites = 0;
+static int numpushs = 0;
+static int numbackups = 0;
+static int numflushes = 0;
+static int numfrees = 0;
+static int numdefaults = 0;
+static int highestbackup = 0, totalbackup = 0;
+static int highestoutput = 0, totaloutput = 0;
+static int highestfreei = 0, totalfreei = 0;
+static int higheststr = 0, totalstr = 0;
 #endif
 
 C_init(wsize,psize)
@@ -48,13 +58,14 @@ C_init(wsize,psize)
 {
 	allocmem();
 	O_init(wsize,psize);
-	WSIZE = wsize;
-	PSIZE = psize;
+	OO_WSIZE = wsize;
+	OO_PSIZE = psize;
 }
 
 C_open(fname)
 	char *fname;
 {
+	filename = fname;
 	return(O_open(fname));
 }
 
@@ -73,18 +84,29 @@ C_close()
 }
 
 PRIVATE
+fatal(s,a)
+	char *s;
+	int a;
+{
+	fprint(STDERR, "%s: ", filename ? filename : "standard input");
+	fprint(STDERR,s,a);
+	fprint(STDERR,"\n");
+	sys_stop(S_EXIT);
+}
+
+PRIVATE
 allocmem()
 {
 	/* Allocate memory for queues on heap */
-	nextpatt = patternqueue =
+	OO_nxtpatt = OO_patternqueue =
 		(struct instr **)Malloc(MAXPATTERN*sizeof(struct instr *));
-	nextbackup = backupqueue =
+	OO_nxtbackup = OO_bkupqueue =
 		(struct instr **)Malloc(MAXBACKUP*sizeof(struct instr *));
-	lastbackup = backupqueue + MAXBACKUP - 1;
+	lastbackup = OO_bkupqueue + MAXBACKUP - 1;
 	nextoutput = outputqueue =
 		(struct instr **)Malloc(MAXOUTPUT*sizeof(struct instr *));
 	lastoutput = outputqueue + MAXOUTPUT - 1;
-	noutput = 0;
+	OO_noutput = 0;
 	nextifree = freeiqueue =
 		(struct instr **)Malloc(MAXFREEI*sizeof(struct instr *));
 	lastifree = freeiqueue + MAXFREEI - 1;
@@ -99,7 +121,6 @@ outputstats()
 {
 	int i;
 	fprint(STDERR,"Total of %d instructions read, %d written\n",numreads,numwrites);
-	fprint(STDERR,"Total of %d calls to nextem\n",numnextems);
 	fprint(STDERR,"Total of %d calls to flush\n",numflushes);
 	fprint(STDERR,"Total of %d calls to myfree\n",numfrees);
 	fprint(STDERR,"Total of %d instructions pushed back\n",numpushs-numbackups);
@@ -123,7 +144,7 @@ printav(n)
 }
 #endif
 
-myfree(p)
+OO_free(p)
 	struct instr *p;
 {
 #ifdef DEBUG
@@ -148,12 +169,6 @@ myfree(p)
 #endif
 }
 
-nfree(n)
-{
-	while(n--)
-		myfree(*--nextpatt);
-}
-
 PRIVATE char *
 freestr(s)
 	char *s;
@@ -170,21 +185,7 @@ freestr(s)
 	return(res);
 }
 
-nextem()
-{
-	/*
-	/* Return the next instruction from backup queue else 0.
-	*/
-#ifdef COLLECT
-	if(cflag)
-		numnextems++;
-#endif
-	if(nextbackup>backupqueue)
-		return((*nextpatt++ = *(--nextbackup))->opcode);
-	return(0);
-}
-
-flush()
+OO_flush()
 {
 	/*
 	/* Output all instructions waiting in the output queue and free their
@@ -198,86 +199,86 @@ flush()
 	if(cflag) {
 		numflushes++;
 		totaloutput += nextoutput-outputqueue;
-		totalbackup += nextbackup-backupqueue;
+		totalbackup += OO_nxtbackup-OO_bkupqueue;
 		totalfreei += nextifree-freeiqueue;
 		totalstr += nextstr-strqueue;
 	}
 #endif
-	if(noutput) {
+	if(OO_noutput) {
 		for(p=outputqueue;p<nextoutput;p++) {
 #ifdef COLLECT
 			if(cflag)
 				numwrites++;
 #endif
-			mkcalls(*p);
-			myfree(*p);
+			OO_mkcalls(*p);
+			OO_free(*p);
 		}
 		nextoutput=outputqueue;
-		if(nextbackup==backupqueue)
+		if(OO_nxtbackup==OO_bkupqueue)
 			nextstr = strqueue;
-		noutput = 0;
+		OO_noutput = 0;
 	}
 }
 
-outop(opcode)
+OO_outop(opcode)
 	int opcode;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = none_ptyp;
-	output(p);
+	OO_output(p);
 }
 
-inop(opcode)
+OO_inop(opcode)
 	int opcode;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = none_ptyp;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-outcst(opcode,cst)
+OO_outcst(opcode,cst)
 	int opcode,cst;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = cst;
-	output(p);
+	OO_output(p);
 }
 
-incst(opcode,cst)
+OO_incst(opcode,cst)
 	int opcode,cst;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = cst;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-outlab(opcode,lab)
+OO_outlab(opcode,lab)
 	int opcode,lab;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = lab;
-	output(p);
+	OO_output(p);
 }
 
-inlab(opcode,lab)
+OO_inlab(opcode,lab)
 	int opcode,lab;
 {
 	register struct instr *p = GETINSTR();
 	p->opcode = opcode;
 	p->argtype = cst_ptyp;
 	p->acst = lab;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-outpnam(opcode,pnam)
+OO_outpnam(opcode,pnam)
 	int opcode;
 	char *pnam;
 {
@@ -285,10 +286,10 @@ outpnam(opcode,pnam)
 	p->opcode = opcode;
 	p->argtype = pro_ptyp;
 	p->apnam = pnam;
-	output(p);
+	OO_output(p);
 }
 
-inpnam(opcode,pnam)
+OO_inpnam(opcode,pnam)
 	int opcode;
 	char *pnam;
 {
@@ -296,10 +297,10 @@ inpnam(opcode,pnam)
 	p->opcode = opcode;
 	p->argtype = pro_ptyp;
 	p->apnam = freestr(pnam);
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-outdefilb(opcode,deflb)
+OO_outdefilb(opcode,deflb)
 	int opcode;
 	label deflb;
 {
@@ -307,10 +308,10 @@ outdefilb(opcode,deflb)
 	p->opcode = opcode;
 	p->argtype = lab_ptyp;
 	p->alab = deflb;
-	output(p);
+	OO_output(p);
 }
 
-indefilb(opcode,deflb)
+OO_indefilb(opcode,deflb)
 	int opcode;
 	label deflb;
 {
@@ -318,10 +319,10 @@ indefilb(opcode,deflb)
 	p->opcode = opcode;
 	p->argtype = lab_ptyp;
 	p->alab = deflb;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-outext(opcode,arg,soff)
+OO_outext(opcode,arg,soff)
 	int opcode;
 	struct instr *arg;
 	int soff;
@@ -343,10 +344,10 @@ outext(opcode,arg,soff)
 	default:
 		fatal("Unexpected type %d in outext",arg->argtype);
 	}
-	output(p);
+	OO_output(p);
 }
 
-indnam(opcode,name,off)
+OO_indnam(opcode,name,off)
 	int opcode;
 	char *name;
 	int off;
@@ -356,10 +357,10 @@ indnam(opcode,name,off)
 	p->argtype = sof_ptyp;
 	p->adnam = freestr(name);
 	p->asoff = off;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-indlb(opcode,lab,off)
+OO_indlb(opcode,lab,off)
 	int opcode;
 	label lab;
 	int off;
@@ -369,10 +370,10 @@ indlb(opcode,lab,off)
 	p->argtype = nof_ptyp;
 	p->adlb = lab;
 	p->anoff = off;
-	*nextpatt++ = p;
+	*OO_nxtpatt++ = p;
 }
 
-output(p)
+OO_output(p)
 	struct instr *p;
 {
 	/* Put the instruction p on the output queue */
@@ -381,34 +382,34 @@ output(p)
 		fprint(STDERR,"Overflow of outputqueue - output flushed\n");
 		printstate("Output overflow");
 #endif
-		flush();
+		OO_flush();
 	}
-	noutput++;
+	OO_noutput++;
 	*nextoutput++ = p;
 #ifdef COLLECT
 	UPDATEMAX(highestoutput,nextoutput-outputqueue);
 #endif
 }
 
-pushback(p)
+OO_pushback(p)
 	struct instr *p;
 {
-	/* push instr. p onto backupqueue */
-	if(nextbackup > lastbackup) {
+	/* push instr. p onto bkupqueue */
+	if(OO_nxtbackup > lastbackup) {
 #ifdef DEBUG
-		fprint(STDERR,"Warning: Overflow of backupqueue-backup ignored\n");
+		fprint(STDERR,"Warning: Overflow of bkupqueue-backup ignored\n");
 		printstate("Backup overflow");
 #endif
 		return;
 	}
-	*nextbackup++ = p;
+	*OO_nxtbackup++ = p;
 #ifdef COLLECT
-	UPDATEMAX(highestbackup,nextbackup-backupqueue);
+	UPDATEMAX(highestbackup,OO_nxtbackup-OO_bkupqueue);
 	numpushs++;
 #endif
 }
 
-backup(n)
+OO_backup(n)
 	int n;
 {
 	/* copy (up to) n instructions from output to backup queues */
@@ -417,25 +418,25 @@ backup(n)
 		if(cflag)
 			numbackups++;
 #endif
-		pushback(*(--nextoutput));
-		noutput--;
+		OO_pushback(*(--nextoutput));
+		OO_noutput--;
 	}
 }
 
-dodefault(numout, numcopy)
+OO_dodefault(numout, numcopy)
 	int numout, numcopy;
 {
 	register struct instr **p,**q;
-	q = (p = patternqueue) + numout;
+	q = (p = OO_patternqueue) + numout;
 	while(numcopy--) {
 		if(numout) {
 			numout--;
-			output(*p);
+			OO_output(*p);
 		}
 		*p++ = *q++;
 	}
-	nextpatt = p;
-	while(numout--) output(*p++);
+	OO_nxtpatt = p;
+	while(numout--) OO_output(*p++);
 #ifdef COLLECT
 	if(cflag)
 		numdefaults++;
@@ -453,12 +454,12 @@ printstate(mess)
 	while(p<nextoutput)
 		prtinst(*p++);
 	fprint(STDERR," |==| ");
-	p = patternqueue;
-	while(p<nextpatt)
+	p = OO_patternqueue;
+	while(p<OO_nxtpatt)
 		prtinst(*p++);
 	fprint(STDERR," |==| ");
-	p = backupqueue;
-	while(p<nextbackup)
+	p = OO_bkupqueue;
+	while(p<OO_nxtbackup)
 		prtinst(*p++);
 	fprint(STDERR,"\n");
 }

@@ -6,8 +6,7 @@ static char rcsid[] = "$Header$";
 
 #define UPDATEWORST(backups) if(backups>mostbackups) mostbackups = backups;
 
-findworst(state,repl)
-	int state;
+findworst(repl)
 	struct mnems repl;
 {
 	/*
@@ -31,7 +30,7 @@ findworst(state,repl)
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
-		fprint(ofile,"\t\tbackup(%d);\n", longestpattern-1);
+		fprint(ofile,"\t\t\tOO_backup(%d);\n", longestpattern-1);
 		return;
 	}
 	for(s=1;s<=higheststate;s++) {
@@ -58,7 +57,7 @@ findworst(state,repl)
 		}
 	}
 	if(mostbackups)
-		fprint(ofile,"\t\tbackup(%d);\n",mostbackups);
+		fprint(ofile,"\t\t\tOO_backup(%d);\n",mostbackups);
 }
 
 findfail(state)

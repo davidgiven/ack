@@ -1,24 +1,24 @@
 /* $Header$ */
 #include "nopt.h"
 
-rotate(w,amount)
+OO_rotate(w,amount)
 	int w, amount;
 {
 	long highmask, lowmask;
 	highmask = (long)(-1) << amount;
 	lowmask = ~highmask;
-	if(WSIZE!=4)
-		highmask &= (WSIZE==2)?0xFFFF:0xFF;
-	return(((w<<amount)&highmask) | ((w >> (8*WSIZE-amount))&lowmask));
+	if(OO_WSIZE!=4)
+		highmask &= (OO_WSIZE==2)?0xFFFF:0xFF;
+	return(((w<<amount)&highmask) | ((w >> (8*OO_WSIZE-amount))&lowmask));
 }
 
-samesign(a,b)
+OO_samesign(a,b)
 	int a, b;
 {
 	return( (a ^ b) >= 0);
 }
 
-sfit(val,nbits)
+OO_sfit(val,nbits)
 	int val, nbits;
 {
 	long mask = 0;
@@ -28,7 +28,7 @@ sfit(val,nbits)
 	return(((val&mask) == 0) | (val&mask)==mask);
 }
 
-ufit(val, nbits)
+OO_ufit(val, nbits)
 	int val, nbits;
 {
 	long mask = 0;
@@ -38,7 +38,7 @@ ufit(val, nbits)
 	return((val&mask) == 0);
 }
 
-sameext(a1,a2)
+OO_sameext(a1,a2)
 	struct instr *a1, *a2;
 {
 	if(a1->argtype != a2->argtype) return(0);
@@ -56,7 +56,7 @@ sameext(a1,a2)
 	}
 }
 
-samenam(a1,a2)
+OO_samenam(a1,a2)
 	struct instr *a1, *a2;
 {
 	if(a1->argtype != a2->argtype) return(0);
@@ -72,7 +72,7 @@ samenam(a1,a2)
 	}
 }
 
-offset(a)
+OO_offset(a)
 	struct instr *a;
 {
 	switch(a->argtype) {

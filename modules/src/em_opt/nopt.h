@@ -10,10 +10,14 @@
 #include <em_comp.h>
 #include <system.h>
 #include <idf_pkg.spec>
+#include <emO_code.h>
 
 #define NULL 0
-#define FLUSHDFA()	if(state) { inop(OTHER); dfa(OTHER); } \
-			else if(noutput) flush();
+#define FLUSHDFA()	if(OO_state) { OO_inop(OTHER); OO_dfa(OTHER); } \
+			else if(OO_noutput) OO_flush();
+#define NEXTEM()	((OO_nxtbackup>OO_bkupqueue)?\
+				((*OO_nxtpatt++ = *(--OO_nxtbackup))->opcode):\
+				0)
 
 #define op_lab 255
 #define OTHER  254
@@ -47,11 +51,14 @@ struct instr {
 #define asoff val.sdlb.soff
 };
 
-extern struct instr **patternqueue, **nextpatt;
-extern int state;
-extern int noutput;	/* number of instructions in output queue */
-extern int WSIZE;	/* wordlength */
-extern int PSIZE;	/* pointer length */
+extern struct instr **OO_patternqueue;
+extern struct instr **OO_nxtpatt;
+extern struct instr **OO_bkupqueue;
+extern struct instr **OO_nxtbackup;
+extern int OO_state;
+extern int OO_noutput;	/* number of instructions in output queue */
+extern int OO_WSIZE;	/* wordlength */
+extern int OO_PSIZE;	/* pointer length */
 #ifdef DEBUG
 extern int dflag;			/* debugging output */
 #endif

@@ -32,7 +32,7 @@ PRIVATE
 outputtables()
 {
 	int s;
-	fprint(ofile,"struct defact {\n");
+	fprint(ofile,"static struct defact {\n");
 	fprint(ofile,"\tint numoutput;\n");
 	fprint(ofile,"\tint numcopy;\n");
 	fprint(ofile,"\tint nextstate;\n");
@@ -52,19 +52,19 @@ outputdfa()
 	int s;
 	struct idf *op;
 	struct state *p;
-	fprint(ofile,"int state = 0;\n");
+	fprint(ofile,"int OO_state = 0;\n");
 	fprint(ofile,"\n");
-	fprint(ofile,"dfa(last) int last; {\n");
+	fprint(ofile,"OO_dfa(last) int last; {\n");
 	fprint(ofile,"\twhile(last) {\n");
 	fprint(ofile,"\t\tswitch(last) {\n");
 	for(op=ops;op!=(struct idf *)NULL;op=op->id_nextidf) {
 		if(!op->id_used)
 			continue;
 		fprint(ofile,"\t\tcase op_%s:\n",op->id_text);
-		fprint(ofile,"\t\t\tswitch(state) {\n");
+		fprint(ofile,"\t\t\tswitch(OO_state) {\n");
 		if(!op->id_startpatt) {
 				fprint(ofile,"\t\t\tcase 0: ");
-				fprint(ofile,"output(*--nextpatt); ");
+				fprint(ofile,"OO_output(*--OO_nxtpatt); ");
 				fprint(ofile,"break;\n");
 		}
 		for(s=0;s<=higheststate;s++)
@@ -72,8 +72,8 @@ outputdfa()
 				if(p->op==op) {
 					fprint(ofile,"\t\t\tcase %d: ",s);
 					if(actions[p->goto_state]==(struct action *)NULL)
-						fprint(ofile,"state = %d; ",p->goto_state);
-					else fprint(ofile,"dotrans(%d); ",p->goto_state);
+						fprint(ofile,"OO_state = %d; ",p->goto_state);
+					else fprint(ofile,"OO_dotrans(%d); ",p->goto_state);
 					fprint(ofile,"break;\n");
 				}
 			}
@@ -82,30 +82,29 @@ outputdfa()
 		fprint(ofile,"\t\t\tbreak;\n");
 	}
 	fprint(ofile,"\t\tdefault:\n");
-	fprint(ofile,"\t\t\tif(state) defaultaction();\n");
+	fprint(ofile,"\t\t\tif(OO_state) defaultaction();\n");
 	fprint(ofile,"\t\t\telse {\n");
-	fprint(ofile,"\t\t\t\tflush();\n");
-	fprint(ofile,"\t\t\t\tmkcalls(*--nextpatt);\n");
-	fprint(ofile,"\t\t\t\tmyfree(*nextpatt);\n");
+	fprint(ofile,"\t\t\t\tOO_flush();\n");
+	fprint(ofile,"\t\t\t\tOO_mkcalls(*--OO_nxtpatt);\n");
+	fprint(ofile,"\t\t\t\tOO_free(*OO_nxtpatt);\n");
 	fprint(ofile,"\t\t\t}\n");
 	fprint(ofile,"\t\t\tbreak;\n");
 	fprint(ofile,"\t\tcase OTHER:\n");
-	fprint(ofile,"\t\t\tif(state) defaultaction();\n");
+	fprint(ofile,"\t\t\tif(OO_state) defaultaction();\n");
 	fprint(ofile,"\t\t\telse {\n");
-	fprint(ofile,"\t\t\t\tflush();\n");
-	fprint(ofile,"\t\t\t\tmyfree(*--nextpatt);\n");
+	fprint(ofile,"\t\t\t\tOO_flush();\n");
+	fprint(ofile,"\t\t\t\tOO_free(*--OO_nxtpatt);\n");
 	fprint(ofile,"\t\t\t}\n");
 	fprint(ofile,"\t\t\tbreak;\n");
 	fprint(ofile,"\t\t}\n");
-	fprint(ofile,"\tlast = nextem();\n");
+	fprint(ofile,"\tlast = NEXTEM();\n");
 	fprint(ofile,"\t}\n");
 	fprint(ofile,"}\n");
 }
 
 PRIVATE
-outputmnems(l,state)
+outputmnems(l)
 	struct mnems l;
-	int state;
 {
 	int i;
 	for(i=1;i<=l.m_len;i++) 
@@ -116,6 +115,7 @@ PRIVATE
 outputdotrans()
 {
 	int s;
+	int i;
 	struct state *p;
 	struct action *a;
 	int seennontested;
@@ -124,30 +124,23 @@ outputdotrans()
 		sys_stop(S_EXIT);
 	}
 	fprint(ofile,"#include \"nopt.h\"\n\n");
-	fprint(ofile,"\ndotrans(s) int s; {\n");
-	fprint(ofile,"\tswitch(state=s) {\n");
+	fprint(ofile,"\nOO_dotrans(s) int s; {\n");
+	fprint(ofile,"\tregister struct instr **patt = OO_patternqueue;\n");
+	fprint(ofile,"\tswitch(OO_state=s) {\n");
 	fprint(ofile,"\tdefault: return;\n");
 	for(s=0;s<=higheststate;s++)
 		if(actions[s]!=(struct action *)NULL) {
 			fprint(ofile,"\tcase %d: /*",s);
-			outputmnems(patterns[s],s);
+			outputmnems(patterns[s]);
 			fprint(ofile," */\n");
 			seennontested=0;
 			for(a=actions[s];a!=(struct action *)NULL;a=a->next) {
 				if(a->test!=(struct exp_node *)NULL) {
 					fprint(ofile,"\t\tif(");
 					outputexp(a->test,s);
-					/*
-					/*fprint(ofile,"dotest(%d)",a->linenum);
-					*/
 					fprint(ofile,") {\n");
-					/*
-					/*fprint(ofile,"\t\t\tdoaction(%d);\n",a->linenum);
-					*/
 					outputoneaction(s,a);
-					fprint(ofile,"\t\t\tnfree(%d);\n",patterns[s].m_len);
-					fprint(ofile,"\t\t\tstate=0;\n");
-					fprint(ofile,"\t\t\tbreak;\n");
+					fprint(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 					fprint(ofile,"\t\t}\n");
 				}
 				else {
@@ -156,18 +149,17 @@ outputdotrans()
 						nerrors++;
 					}
 					seennontested++;
-					/*
-					/*fprint(ofile,"\t\t\tdoaction(%d);\n",a->linenum);
-					*/
 					outputoneaction(s,a);
-					fprint(ofile,"\t\tnfree(%d);\n",patterns[s].m_len);
-					fprint(ofile,"\t\tstate=0;\n");
-					fprint(ofile,"\t\tbreak;\n");
+					fprint(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 				}
 			}
-			fprint(ofile,"\t\tbreak;\n");
+			fprint(ofile,"\t\treturn;\n");
 		}
 	fprint(ofile,"\t}\n");
+	for(i=longestpattern;i>0;i--)
+		fprint(ofile," free%d: OO_free(*--OO_nxtpatt);\n",i);
+	fprint(ofile," free0: ;\n");
+	fprint(ofile,"\tOO_state=0;\n");
 	fprint(ofile,"}\n");
 	fprint(ofile,"\n");
 }
@@ -176,10 +168,10 @@ PRIVATE
 outputdodefault()
 {
 	fprint(ofile,"\nstatic defaultaction() {\n");
-	fprint(ofile,"\tregister struct defact *p = &defaultactions[state];\n");
-	fprint(ofile,"\tpushback(*--nextpatt);\n");
-	fprint(ofile,"\tdodefault(p->numoutput,p->numcopy);\n");
-	fprint(ofile,"\tdotrans(p->nextstate);\n");
+	fprint(ofile,"\tregister struct defact *p = &defaultactions[OO_state];\n");
+	fprint(ofile,"\tOO_pushback(*--OO_nxtpatt);\n");
+	fprint(ofile,"\tOO_dodefault(p->numoutput,p->numcopy);\n");
+	fprint(ofile,"\tOO_dotrans(p->nextstate);\n");
 	fprint(ofile,"}\n");
 }
 
@@ -190,10 +182,10 @@ outputoneaction(s,a)
 {
 	fprint(ofile,"\t\t/* ");
 	fprint(ofile," -> ");
-	outputmnems(a->replacement,s);
+	outputmnems(a->replacement);
 	fprint(ofile," */\n");
 	outputrepl(s,patterns[s],a->replacement);
-	findworst(s,a->replacement);
+	findworst(a->replacement);
 }
 
 PRIVATE
@@ -212,31 +204,31 @@ outputrepl(state,patt,repl)
 		char *mnem = ri->op_code->id_text;
 		switch(ri->op_code->id_argfmt) {
 		case NOARG:
-			fprint(ofile,"\t\toutop(op_%s);\n",mnem);
+			fprint(ofile,"\t\tOO_outop(op_%s);\n",mnem);
 			break;
 		case CST:
 		case CSTOPT:
-			fprint(ofile,"\t\toutcst(op_%s,",mnem);
+			fprint(ofile,"\t\tOO_outcst(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case LAB:
-			fprint(ofile,"\t\toutlab(op_%s,",mnem);
+			fprint(ofile,"\t\tOO_outlab(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case DEFILB:
-			fprint(ofile,"\t\toutdefilb(op_%s,",mnem);
+			fprint(ofile,"\t\tOO_outdefilb(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case PNAM:
-			fprint(ofile,"\t\toutpnam(op_%s,",mnem);
+			fprint(ofile,"\t\tOO_outpnam(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case EXT:
-			fprint(ofile,"\t\toutext(op_%s,",mnem);
+			fprint(ofile,"\t\tOO_outext(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
@@ -284,10 +276,10 @@ outputexp(e,state)
 		fprint(ofile,")");
 		break;
 	case DEFINED:
-		fprint(ofile,"(patternqueue[%d]->argtype!=none_ptyp)",e->leaf_val-1);
+		fprint(ofile,"(patt[%d]->argtype!=none_ptyp)",e->leaf_val-1);
 		break;
 	case UNDEFINED:
-		fprint(ofile,"(patternqueue[%d]->argtype==none_ptyp)",e->leaf_val-1);
+		fprint(ofile,"(patt[%d]->argtype==none_ptyp)",e->leaf_val-1);
 		break;
 	case COMMA:
 		outext(e->exp_left);
@@ -319,26 +311,26 @@ outputexp(e,state)
 			break;
 		case CST:
 		case CSTOPT:
-			fprint(ofile,"CST(patternqueue[%d])",e->leaf_val-1);
+			fprint(ofile,"CST(patt[%d])",e->leaf_val-1);
 			break;
 		case LAB:
-			fprint(ofile,"LAB(patternqueue[%d])",e->leaf_val-1);
+			fprint(ofile,"LAB(patt[%d])",e->leaf_val-1);
 			break;
 		case DEFILB:
-			fprint(ofile,"DEFILB(patternqueue[%d])",e->leaf_val-1);
+			fprint(ofile,"DEFILB(patt[%d])",e->leaf_val-1);
 			break;
 		case PNAM:
-			fprint(ofile,"PNAM(patternqueue[%d])",e->leaf_val-1);
+			fprint(ofile,"PNAM(patt[%d])",e->leaf_val-1);
 			break;
 		case EXT:
-			fprint(ofile,"offset(patternqueue[%d])",e->leaf_val-1);
+			fprint(ofile,"OO_offset(patt[%d])",e->leaf_val-1);
 			break;
 		}
 		break;
 	case PSIZE:
-		fprint(ofile,"PSIZE"); break;
+		fprint(ofile,"OO_PSIZE"); break;
 	case WSIZE:
-		fprint(ofile,"WSIZE"); break;
+		fprint(ofile,"OO_WSIZE"); break;
 	case INT:
 		fprint(ofile,"%d",e->leaf_val); break;
 	}
@@ -352,7 +344,7 @@ outext(e)
 		fprint(STDERR,"Internal error in outext of parser\n");
 		nerrors++;
 	}
-	fprint(ofile,"patternqueue[%d]",e->leaf_val-1);
+	fprint(ofile,"patt[%d]",e->leaf_val-1);
 }
 
 PRIVATE
@@ -382,11 +374,11 @@ outputop(op)
 	case COMP:	fprint(ofile,"~");	break;
 	case UPLUS:	fprint(ofile,"+");	break;
 	case UMINUS:	fprint(ofile,"-");	break;
-	case SAMESIGN:	fprint(ofile,"samesign(");	break;
-	case SFIT:	fprint(ofile,"sfit(");	break;
-	case UFIT:	fprint(ofile,"ufit(");	break;
-	case ROTATE:	fprint(ofile,"rotate(");	break;
-	case SAMEEXT:	fprint(ofile,"sameext(");	break;
-	case SAMENAM:	fprint(ofile,"samenam(");	break;
+	case SAMESIGN:	fprint(ofile,"OO_samesign(");	break;
+	case SFIT:	fprint(ofile,"OO_sfit(");	break;
+	case UFIT:	fprint(ofile,"OO_ufit(");	break;
+	case ROTATE:	fprint(ofile,"OO_rotate(");	break;
+	case SAMEEXT:	fprint(ofile,"OO_sameext(");	break;
+	case SAMENAM:	fprint(ofile,"OO_samenam(");	break;
 	}
 }

@@ -21,8 +21,8 @@ outputincalls()
 		case NOARG:
 			fprint(ofile,"\nC_%s() {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tinop(op_%s);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_inop(op_%s);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -33,8 +33,8 @@ outputincalls()
 		case CSTOPT:
 			fprint(ofile,"\nC_%s_narg() {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tinop(op_%s);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_inop(op_%s);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -45,8 +45,8 @@ outputincalls()
 		case CST:
 			fprint(ofile,"\nC_%s(n) int n; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tincst(op_%s,n);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_incst(op_%s,n);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -57,8 +57,8 @@ outputincalls()
 		case DEFILB:
 			fprint(ofile,"\nC_df_ilb(l) label l; {\n");
 			if(op->id_used) {
-				fprint(ofile,"\tindefilb(op_%s,l);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_indefilb(op_%s,l);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -69,8 +69,8 @@ outputincalls()
 		case PNAM:
 			fprint(ofile,"\nC_%s(s) char *s; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tinpnam(op_%s,s);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_inpnam(op_%s,s);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -81,8 +81,8 @@ outputincalls()
 		case LAB:
 			fprint(ofile,"\nC_%s(l) label l; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tinlab(op_%s,l);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_inlab(op_%s,l);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -93,8 +93,8 @@ outputincalls()
 		case EXT:
 			fprint(ofile,"\nC_%s(n) int n; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tincst(op_%s,n);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_incst(op_%s,n);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -103,8 +103,8 @@ outputincalls()
 			fprint(ofile,"}\n",s);
 			fprint(ofile,"\nC_%s_dnam(s,n) char *s; int n; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tindnam(op_%s,s,n);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_indnam(op_%s,s,n);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
@@ -113,8 +113,8 @@ outputincalls()
 			fprint(ofile,"}\n",s);
 			fprint(ofile,"\nC_%s_dlb(l,n) label l; int n; {\n",s);
 			if(op->id_used) {
-				fprint(ofile,"\tindlb(op_%s,l,n);\n",s);
-				fprint(ofile,"\tdfa(op_%s);\n",s);
+				fprint(ofile,"\tOO_indlb(op_%s,l,n);\n",s);
+				fprint(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
 				fprint(ofile,"\tFLUSHDFA();\n");
