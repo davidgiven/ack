@@ -386,7 +386,7 @@ IMPLEMENTATION MODULE Mathlib;
 
                    arctan(x) = arctan(xi) + arctan(t)
 
-          For the interval [0, p/16] an approximation is used:
+          For the interval [0, tan(p/16)] an approximation is used:
                    arctan(x) = x * P(x*x)/Q(x*x)
   *)
   (* Hart & Cheney # 5037 *)
@@ -410,34 +410,34 @@ IMPLEMENTATION MODULE Mathlib;
 	IF NOT arctaninit THEN
 		arctaninit := TRUE;
 		WITH precomp[0] DO
-			X := 0.19891236737965800691159762264467622;
+			X := 0.19891236737965800691159762264467622D;
 			arctan := 0.0D;
 			OneOverXn := 0.0D;
 			OneOverXnSquarePlusone := 0.0D;
 		END;
 		WITH precomp[1] DO
-			X := 0.66817863791929891999775768652308076;
-			arctan := longpi/8.0D;
-			OneOverXn := 2.41421356237309504880168872420969808;
-			OneOverXnSquarePlusone := 6.82842712474619009760337744841939616;
+			X := 0.66817863791929891999775768652308076D;
+			arctan := 0.39269908169872415480783042290993786D;
+			OneOverXn := 2.41421356237309504880168872420969808D;
+			OneOverXnSquarePlusone := 6.82842712474619009760337744841939616D;
 		END;
 		WITH precomp[2] DO
-			X := 1.49660576266548901760113513494247691;
+			X := 1.49660576266548901760113513494247691D;
 			arctan := longquartpi;
 			OneOverXn := 1.0;
 			OneOverXnSquarePlusone := 2.0;
 		END;
 		WITH precomp[3] DO
-			X := 5.02733949212584810451497507106407238;
-			arctan := 3.0D*longpi/8.0D;
-			OneOverXn := 0.41421356237309504880168872420969808;
-			OneOverXnSquarePlusone := 1.17157287525380998659662255158060384;
+			X := 5.02733949212584810451497507106407238D;
+			arctan := 1.17809724509617246442349126872981358D;
+			OneOverXn := 0.41421356237309504880168872420969808D;
+			OneOverXnSquarePlusone := 1.17157287525380998659662255158060384D;
 		END;
 		WITH precomp[4] DO
-			X := 0.0;
+			X := 0.0D;
 			arctan := longhalfpi;
-			OneOverXn := 0.0;
-			OneOverXnSquarePlusone := 1.0;
+			OneOverXn := 0.0D;
+			OneOverXnSquarePlusone := 1.0D;
 		END;
 	END;
 	neg := FALSE;
@@ -446,7 +446,7 @@ IMPLEMENTATION MODULE Mathlib;
 		x := -x;
 	END;
 	i := 0;
-	WHILE (i <= 3) AND (x <= precomp[i].X) DO
+	WHILE (i <= 3) AND (x >= precomp[i].X) DO
 		INC(i);
 	END;
 	IF (i # 0) THEN 
