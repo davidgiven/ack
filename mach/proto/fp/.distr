@@ -5,7 +5,6 @@ FP_trap.h
 FP_types.h
 add_ext.c
 adder.c
-adder.h
 adf4.c
 adf8.c
 cff4.c
