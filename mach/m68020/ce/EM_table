@@ -56,11 +56,12 @@ C_loi
 				"move.l (4,a0),-(sp)";
 				"move.l (a0), -(sp)".
   	$1 % 4 == 0	==>	"move.l (sp)+, a0";
-				"move.l #$1/4-1, d0";
+				"move.l #$1/4, d0";
 				"add.l #$1, a0";	
 				"1:";
 				"move.l -(a0), -(sp)";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 	default		==> 	arg_error( "loi", $1).
 
 
@@ -106,9 +107,10 @@ C_sti
   	$1 == 4		==>	"move.l (sp)+, a0";
 				"move.l (sp)+, (a0)".
   	$1 % 4 == 0  	==>	"move.l (sp)+, a0";
-				"move.l #$1/4-1, d0";
+				"move.l #$1/4, d0";
 				"1:move.l (sp)+, (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 	default		==> 	arg_error( "sti", (arith) $1).
 
 
@@ -326,10 +328,11 @@ C_zer
   	$1 == 4		==>	"clr.l -(sp)".
   	$1 == 8		==>	"clr.l -(sp)";
   				"clr.l -(sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"1:";
 				"clr.l -(sp)";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 /******************************************************************************/
 /*									      */
@@ -418,42 +421,46 @@ C_cuf		==>	"move.l	(sp)+, d0";
 C_and		
   	$1 == 4		==>	"move.l (sp)+, d0";
 				"and.l d0, (sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"lea ($1, sp), a0";
 				"1:";
 				"move.l (sp)+, d1";
 				"and.l d1, (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_ior		
   	$1 == 4		==>	"move.l (sp)+, d0";
 				"or.l d0, (sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"lea ($1, sp), a0";
 				"1:";
 				"move.l (sp)+, d1";
 				"or.l d1, (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_xor		
   	$1 == 4		==>	"move.l (sp)+, d0";
 				"eor.l d0, (sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"lea ($1, sp), a0";
 				"1:";
 				"move.l (sp)+, d1";
 				"eor.l d1, (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_com	
   	$1 == 4		==>	"not.l (sp)".
   	$1 == 8		==>	"not.l (sp)";
 				"not.l (4, sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"move.l sp, a0";
 				"1:";
 				"not.l (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_rol
 	$1 == 4		==>	"move.l (sp)+, d0";
@@ -735,20 +742,22 @@ C_blm
 				"move.l (4, a1), (4, a0)".
   	default		==>	"move.l (sp)+, a0";
 				"move.l (sp)+, a1";
-				"move.l #$1/4-1, d0";
+				"move.l #$1/4, d0";
 				"1:";
 				"move.l (a1)+, (a0)+";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_bls		
   	$1 == 4		==>	"move.l (sp)+, d0";
 				"move.l (sp)+, a0";
 				"move.l (sp)+, a1";
-				"asr.l #2, d1";
+				"asr.l #2, d0";
 				"beq 2f";
 				"1:";
 				"move.l (a1)+, (a0)+";
-				"dbf d0, 1b";
+				"sub.l #1, d0";
+				"bne 1b";
 				"2:".
   	default		==>	arg_error( "bls", $1).
 
@@ -771,20 +780,21 @@ C_dup
   	$1 == 4		==>	"move.l (sp), -(sp)".
   	$1 == 8		==>	"move.l (4, sp), -(sp)";
   				"move.l (4, sp), -(sp)".
-  	default		==>	"move.l #$1/4-1, d0";
+  	default		==>	"move.l #$1/4, d0";
 				"1:";
 				"move.l ($1-4, sp), -(sp)";
-				"dbf d0, 1b".
+				"sub.l #1, d0";
+				"bne 1b".
 
 C_dus		
   	$1 == 4		==>	"move.l (sp)+, d0";
 				"lea (0, sp, d0.l*1), a0";
 				"asr.l #2, d0";
 				"beq 2f";
-				"sub.l #1, d0";
 				"1:";
 				"move.l -(a0), -(sp)";
-				"dbf d0, 1b";
+				"sub.l #1, d0";
+				"bne 1b";
 				"2:".
   	default		==>	arg_error( "dus", $1).
 
