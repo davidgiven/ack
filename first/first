@@ -224,7 +224,6 @@ X0)
 w
 q
 ABC
-	)
 	  cd ../../../lib/descr
 	  cp fe fe.orig
 	  ed - fe << ABC
