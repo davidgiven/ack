@@ -17,6 +17,6 @@ Dvu2:
 	sta ARTH+3
 	ldy #0
 	sty UNSIGN
-	jmp Dvu
+	jmp Duv
 
 
