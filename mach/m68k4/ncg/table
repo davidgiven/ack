@@ -100,6 +100,7 @@ indirect4	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
 post_inc4	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
 pre_dec4	= {A_REG reg;} 4 cost(0,5) "-(" reg ")" .
 dreg4		= {D_REG reg;} 4 cost(0,0) reg .
+areg		= {A_REG reg;} 4 cost(0,0) reg .
 dreg2		= {D_REG reg;} 4 cost(0,0) reg .
 indirect2	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
 post_inc2	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
@@ -368,6 +369,7 @@ immediate4	= consts + ext_addr .
 conreg4		= D_REG + immediate4 .
 conreg2		= dreg2 + consts + D_REG .
 conreg1		= dreg1 + consts + D_REG .
+conreg		= conreg1 + conreg2 + conreg4 .
 shconreg	= D_REG + small_const .
 datalt4		= data4 * alterable4 .
 datalt2		= data2 * alterable2 .
@@ -393,7 +395,7 @@ imm_cmp4	= any4 - immediate4 - A_REG .
 imm_cmp2	= any2 - consts .
 imm_cmp1	= any1 - consts .
 
-test_set4	= data4 - immediate4 + extend2 + extend1 .
+test_set4	= any4 - immediate4 + extend2 + extend1 .
 test_set2	= data2 - consts .
 test_set1	= data1 - consts .
 
@@ -493,12 +495,15 @@ ext_l  "ext.l"	extend1+extend2+D_REG+LOCAL:rw:cc			cost(2,2).
 ext_w  "ext.w"	extend1+D_REG+LOCAL:rw:cc			cost(2,2).
 jmp		address+control4			cost(2,0).
 jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
-lea		address+control4:ro, A_REG:wo		cost(2,0).
+lea		address+control4:ro, A_REG+areg:wo	cost(2,0).
 lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
 lsr_l  "lsr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsr   "lsr #1,"	memalt2:rw:cc				cost(2,4).
-move_l "move.l" any4:ro,	A_REG:wo		cost(2,2).
+/* move_l does not set the condition codes if the destination is an
+   address register!
+*/
+move_l "move.l" any4:ro,	A_REG+areg:wo		cost(2,2).
 move_l "move.l" any4:ro,	alterable4+dreg4:wo:cc	cost(2,2).
 move_w "move.w" any2:ro,	alterable2+dreg4:wo:cc	cost(2,2).
 move_b "move.b" any1:ro,	alterable1+dreg4:wo:cc	cost(2,2).
@@ -967,6 +972,10 @@ pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
 pat loe lof adp loe stf $1==$4 && $2==$5
     kills allexceptcon
     gen add_l {const, $3}, {ABS_off4, $1, $2}
+
+pat loe loi adp loe sti $1==$4 && $2==4 && $5==4
+    kills allexceptcon
+    gen add_l {const, $3}, {ABS_off4, $1, 0}
 #endif
 
 pat lol inl $1==$2 && inreg($1)==reg_any
@@ -1132,6 +1141,24 @@ pat loe lof ior loe stf $1==$4 && $2==$5 && $3==4
 					call lefxxxsef("or.l")
 pat loe lof xor loe stf $1==$4 && $2==$5 && $3==4
 					call lefxxxsef("eor.l")
+
+proc leixxxsei example loe loi and loe sti
+with conreg4-bconst
+    kills allexceptcon
+    gen xxx* %1, {ABS_off4, $1, 0}
+
+pat loe loi adi loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("add.l")
+pat loe loi adu loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("add.l")
+pat loe loi ads loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("add.l")
+pat loe loi and loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("and.l")
+pat loe loi ior loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("or.l")
+pat loe loi xor loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leixxxsei("eor.l")
 #endif
 
 proc lofruxxsof example lol lof inc lol stf
@@ -1173,6 +1200,19 @@ pat loe lof ngi loe stf $1==$4 && $2==$5 && $3==4
 					call lefuxxsef("neg.l")
 pat loe lof com loe stf $1==$4 && $2==$5 && $3==4
 					call lefuxxsef("not.l")
+
+proc leiuxxsei example loe loi inc loe sti
+    kills allexceptcon
+    gen bit* {ABS_off4, $1, 0}
+
+pat loe loi inc loe sti $1==$4 && $2==4 && $5==4
+					call leiuxxsei("add.l #1,")
+pat loe loi dec loe sti $1==$4 && $2==4 && $5==4
+					call leiuxxsei("sub.l #1,")
+pat loe loi ngi loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leiuxxsei("neg.l")
+pat loe loi com loe sti $1==$4 && $2==4 && $5==4 && $3==4
+					call leiuxxsei("not.l")
 #endif
 
 proc lolcxxstl example lol loc and stl
@@ -1439,8 +1479,92 @@ with any4
 pat dup stl $1==4 && inreg($2)==reg_pointer
 with any4
     kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
-    gen move_l %1,{LOCAL, $2}
+    gen move_l %1,{areg, regvar($2, reg_pointer)}
 					yields {LOCAL, $2}
+
+pat dup lol sti lol adp stl zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==1 && $5==1
+    with any1
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_b %1,{post_inc1, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol sti lol adp stl zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==1 && $5==1
+    with any1
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_b %1,{post_inc1, regvar($2,reg_pointer)}
+	beq {llabel, $7}
+
+pat dup lol sti lol adp stl zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==2 && $5==2
+    with any2
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_w %1,{post_inc2, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol sti lol adp stl zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==2 && $5==2
+    with any2
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_w %1,{post_inc2, regvar($2,reg_pointer)}
+	beq {llabel, $7}
+
+pat dup lol sti lol adp stl zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==4 && $5==4
+    with any4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_l %1,{post_inc4, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol sti lol adp stl zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $2==$6 && $3==4 && $5==4
+    with any4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_l %1,{post_inc4, regvar($2,reg_pointer)}
+	beq {llabel, $7}
+
+pat dup lol adp stl lol sti zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==1 && $4==(0-1)
+    with any1
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_b %1,{pre_dec1, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol adp stl lol sti zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==1 && $4==(0-1)
+    with any1
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_b %1,{pre_dec1, regvar($2,reg_pointer)}
+	beq {llabel, $7}
+
+pat dup lol adp stl lol sti zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==2 && $4==(0-2)
+    with any2
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_w %1,{pre_dec2, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol adp stl lol sti zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==2 && $4==(0-2)
+    with any2
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_w %1,{pre_dec2, regvar($2,reg_pointer)}
+	beq {llabel, $7}
+
+pat dup lol adp stl lol sti zne $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==4 && $4==(0-4)
+    with any4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_l %1,{pre_dec4, regvar($2,reg_pointer)}
+	bne {llabel, $7}
+
+pat dup lol adp stl lol sti zeq $1==4 && inreg($2)==reg_pointer &&
+				$2==$4 && $4==$5 && $6==4 && $4==(0-4)
+    with any4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move_l %1,{pre_dec4, regvar($2,reg_pointer)}
+	beq {llabel, $7}
 
 pat lil adp sil $1==$3 && inreg($1)==reg_pointer
     kills allexceptcon
@@ -1474,7 +1598,15 @@ pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     killreg %a
 			yields	%a
 
-pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
+pat lol lof dup adp lol stf sti $3==4 && $1==$5 && $2==$6 && inreg($1)==reg_pointer && $7 <= 4
+    with conreg
+    kills allexceptcon
+    uses AA_REG = {offsetted4, regvar($1, reg_pointer), $2}
+    gen add_l {const, $4}, {offsetted4, regvar($1, reg_pointer), $2}
+    killreg %a
+			yields	%1 %a		leaving sti $7
+
+pat lol lof dup adp lol stf $3==4 && $1==$5 && $2==$6 && inreg($1)==reg_pointer
     kills allexceptcon
     uses AA_REG = {offsetted4, regvar($1, reg_pointer), $2}
     gen add_l {const, $4}, {offsetted4, regvar($1, reg_pointer), $2}
@@ -1482,13 +1614,48 @@ pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
 			yields	%a
 
 #ifdef TBL68020
-pat loe lof dup adp loe stf $1==$5 && $2==$6
+pat loe lof dup adp loe stf sti $3==4 && $1==$5 && $2==$6 && $7 <= 4
+    with conreg
+    kills allexceptcon
+    uses AA_REG = {abs_con, $1, $2}, AA_REG
+    gen move_l {indirect4, %a}, %b
+	add_l {const, $4}, {indirect4, %a}
+			yields	%1 %b		leaving sti $7
+
+pat loe lof dup adp loe stf $3==4 && $1==$5 && $2==$6
     kills allexceptcon
     uses AA_REG = {abs_con, $1, $2}, AA_REG
     gen move_l {indirect4, %a}, %b
 	add_l {const, $4}, {indirect4, %a}
 			yields	%b
+
+pat loe loi dup adp loe sti sti $3==4 && $1==$5 && $2==4 && $6==4 && $7 <= 4
+    with conreg
+    kills allexceptcon
+    uses AA_REG = {absolute, $1}, AA_REG
+    gen move_l {indirect4, %a}, %b
+	add_l {const, $4}, {indirect4, %a}
+			yields	%1 %b		leaving sti $7
+
+pat loe loi dup adp loe sti $3==4 && $1==$5 && $2==4 && $6==4
+    kills allexceptcon
+    uses AA_REG = {absolute4, $1}, AA_REG
+    gen move_l {indirect4, %a}, %b
+	add_l {const, $4}, {indirect4, %a}
+			yields	%b
 #endif
+
+pat lol lol adp stl lae cmp $1==$2 && $2==$4 && inreg($1)==reg_pointer && $3 < 0
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
+    gen	sub_l {const,0-$3},{LOCAL,$1}
+			yields {LOCAL,$1} {ext_addr, $5+$3}
+					leaving cmu 4
+
+pat lol lol adp stl lae cmp $1==$2 && $2==$4 && inreg($1)==reg_pointer && $3 > 0
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
+    gen	add_l {const,$3},{LOCAL,$1}
+			yields {LOCAL,$1} {ext_addr, $5+$3}
+					leaving cmu 4
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==4 && $5==4 &&
 						inreg($1)==reg_pointer
@@ -1658,6 +1825,12 @@ pat loe adp ste $1==$3
     kills posextern
     gen add_l {const, $2}, {absolute4, $1}
 
+pat loc and $1==255 && $2==4
+    with exact absolute4	yields {absolute1,%1.bd+3}
+    with exact offsetted4	yields {offsetted1,%1.reg,%1.bd+3}
+    with exact LOCAL		yields {offsetted1,lb,%1.bd+3}
+    with			yields {const, $1}		leaving and 4
+			
 /************************************************
  * Group 1: load instructions			*
  ************************************************/
@@ -1683,6 +1856,24 @@ pat ldl				leaving lol $1+4 lol $1
 pat loe			yields	{absolute4, $1}
 
 pat loe loe $1==$2		leaving loe $1 dup 4
+
+/* replace ste loe by dup ste, but not if followed by a test ... */
+proc steloezxx example ste loe zne
+with any4-sconsts
+    kills posextern
+    gen move %1, {absolute4, $1}
+	bxx* {llabel, $3}
+with exact STACK
+    kills posextern
+    gen move_l {post_inc4, sp}, {absolute4, $1}
+	bxx* {llabel, $3}
+
+pat ste loe zlt $1==$2			call steloezxx("blt")
+pat ste loe zle	$1==$2			call steloezxx("ble")
+pat ste loe zeq	$1==$2			call steloezxx("beq")
+pat ste loe zne	$1==$2			call steloezxx("bne")
+pat ste loe zge	$1==$2			call steloezxx("bge")
+pat ste loe zgt	$1==$2			call steloezxx("bgt")
 
 pat ste loe $1==$2		leaving dup 4 ste $1
 
@@ -1970,16 +2161,16 @@ with exact STACK
 pat stl inreg($1)==reg_pointer
 with any4-sconsts
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen move %1, {LOCAL, $1}
+    gen move_l %1, {areg, regvar($1, reg_pointer)}
 with exact ext_addr
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen move %1, {LOCAL, $1}
+    gen move_l %1, {areg, regvar($1, reg_pointer)}
 with exact address-ext_addr
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen lea %1, {LOCAL, $1}
+    gen lea %1, {areg, regvar($1, reg_pointer)}
 with exact STACK
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen move_l {post_inc4, sp}, {LOCAL, $1}
+    gen move_l {post_inc4, sp}, {areg, regvar($1, reg_pointer)}
 
 pat stl
 with any4-sconsts
@@ -2450,7 +2641,7 @@ with exact any4 STACK
     uses reusing %1,DD_REG=%1
     gen sub_l {post_inc4, sp}, %a
 	neg_l %a	yields	%a
-with any4 AA_REG
+with any4-bconst AA_REG
     gen sub_l %1, %2	yields	%2
 
 pat mli $1==4
@@ -2621,6 +2812,96 @@ with exact absind_con	yields	{absind_con, %1.sc, %1.xreg, %1.bd, %1.od+$1}
 with exact ext_regX	yields	{ext_regX, %1.sc, %1.xreg, %1.bd+$1}
 #endif TBL68020
 
+pat ads cmp $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving cmu 4
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving cmu 4
+
+pat ads bne $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving bne $2
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving bne $2
+
+pat ads beq $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving beq $2
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving beq $2
+
+pat ads loe bne $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving loe $2 bne $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving loe $2 bne $3
+
+pat ads loe beq $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving loe $2 beq $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving loe $2 beq $3
+
+pat ads loe cmp $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving loe $2 cmu 4
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving loe $2 cmu 4
+
+pat ads lae bne $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lae $2 bne $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lae $2 bne $3
+
+pat ads lae beq $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lae $2 beq $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lae $2 beq $3
+
+pat ads lae cmp $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lae $2 cmu 4
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lae $2 cmu 4
+
+pat ads lal bne $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lal $2 bne $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lal $2 bne $3
+
+pat ads lal beq $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lal $2 beq $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lal $2 beq $3
+
+pat ads lal cmp $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lal $2 cmu 4
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lal $2 cmu 4
+
+pat ads lol bne $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lol $2 bne $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lol $2 bne $3
+
+pat ads lol beq $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lol $2 beq $3
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lol $2 beq $3
+
+pat ads lol cmp $1==4
+with DD_REG any4
+     gen add_l %2, %1	yields	%1	leaving lol $2 cmu 4
+with any4 DD_REG
+     gen add_l %1, %2	yields	%2	leaving lol $2 cmu 4
+
 pat ads $1==4
 with D_REG A_REG	yields	{regAregXcon, %2, %1, 1, 0}
 with D_REG regAcon + t_regAcon
@@ -2679,6 +2960,8 @@ with exact absolute4 ext_regX
 pat sbs $1==4			leaving sbi 4
 
 #ifdef TBL68020
+pat loc slu $2==4		leaving loc $1 sli 4
+
 pat loc sli ads $1==1 && $2==4 && $3==4
 with D_REG		yields	{regX, 2, %1}
 				leaving ads 4
@@ -2697,12 +2980,7 @@ with D_REG		yields	{regX, 8, %1}
  * Group 7: increment / decrement / zero	*
  ************************************************/
 
-pat inc
-with exact STACK
-    gen add_l {const, 1}, {indirect4, sp}
-with DD_REG+AA_REG
-    gen add_l {const, 1}, %1
-			yields	%1
+pat inc					leaving loc 1 adi 4
 
 pat inl inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
@@ -2723,12 +3001,7 @@ pat ine
     kills posextern
     gen add_l {const, 1}, {absolute4, $1}
 
-pat dec
-with exact STACK
-    gen sub_l {const, 1}, {indirect4, sp}
-with DD_REG+AA_REG
-    gen sub_l {const, 1}, %1
-			yields	%1
+pat dec					leaving loc 1 sbi 4
 
 pat del inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
@@ -2755,7 +3028,7 @@ pat zrl inreg($1)==reg_any
 
 pat zrl inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
-    gen move_l {const, 0}, {LOCAL, $1}
+    gen move_l {const, 0}, {areg, regvar($1, reg_pointer)}
 
 pat zrl
     kills all_indir, LOCAL %bd==$1
@@ -3122,23 +3395,31 @@ proc txx
 with test_set4
     uses reusing %1,DD_REG
     gen test %1
-	sxx[1] %a
-	neg_b %a
-			yields	{extend1, %a}
+	bxx[1] {slabel, 1f}
+	clr_l %a
+	bra {slabel, 2f}
+	1:
+	move_l {const,1},%a
+	2:
+			yields	%a
 
 with test_set1 + test_set2
     uses reusing %1,DD_REG
     gen test %1
-	sxx[2] %a
-	neg_b %a
-			yields	{extend1, %a}
+	bxx[2] {slabel, 1f}
+	clr_l %a
+	bra {slabel, 2f}
+	1:
+	move_l {const,1},%a
+	2:
+			yields	%a
 
-pat tlt					call txx("slt", "scs")
-pat tle					call txx("sle", "sls")
-pat teq					call txx("seq", "seq")
-pat tne					call txx("sne", "sne")
-pat tge					call txx("sge", "scc")
-pat tgt					call txx("sgt", "shi")
+pat tlt					call txx("blt", "bcs")
+pat tle					call txx("ble", "bls")
+pat teq					call txx("beq", "beq")
+pat tne					call txx("bne", "bne")
+pat tge					call txx("bge", "bcc")
+pat tgt					call txx("bgt", "bhi")
 
 /*
  * Floating point
@@ -4013,3 +4294,59 @@ pat loc dvu $1==32 && $2==4	leaving loc 5 sru 4
 pat loc dvu $1==64 && $2==4	leaving loc 6 sru 4
 pat loc dvu $1==128 && $2==4	leaving loc 7 sru 4
 pat loc dvu $1==256 && $2==4	leaving loc 8 sru 4
+
+pat loc dvi $1==2 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 1 sri 4
+
+pat loc dvi $1==4 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 2 sri 4
+
+pat loc dvi $1==8 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 3 sri 4
+
+pat loc dvi $1==16 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 4 sri 4
+
+pat loc dvi $1==32 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 5 sri 4
+
+pat loc dvi $1==64 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 6 sri 4
+
+pat loc dvi $1==128 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 7 sri 4
+
+pat loc dvi $1==256 && $2==4
+    with DD_REG
+    gen	test %1
+	bge {slabel,1f}
+	add_l {const,$1-1},%1
+	1: 			yields %1		leaving loc 8 sri 4
