@@ -28,6 +28,16 @@
 #include	"warning.h"
 
 STATIC
+internal(c)
+	register char *c;
+{
+	if (options['x']) {
+		C_exp(c);
+	}
+	else	C_inp(c);
+}
+
+STATIC
 DefInFront(df)
 	register t_def *df;
 {
@@ -256,7 +266,7 @@ DeclProc(type, id)
 			df->for_name = id->id_text;
 		}
 		else {
-			sprint(buf,"_%s_%s",CurrentScope->sc_name,id->id_text);
+			sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
 			df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
 		}
 		if (CurrVis == Defined->mod_vis) {
@@ -281,10 +291,7 @@ DeclProc(type, id)
 			df = define(id, CurrentScope, type);
 			sprint(buf,"_%d_%s",++nmcount,id->id_text);
 			name = Salloc(buf, (unsigned)(strlen(buf)+1));
-			if (options['x']) {
-				C_exp(buf);
-			}
-			else	C_inp(buf);
+			internal(buf);
 			df->df_flags |= D_DEFINED;
 		}
 		open_scope(OPENSCOPE);
@@ -330,7 +337,7 @@ DefineLocalModule(id)
 	extern char *sprint();
 	extern int proclevel;
 
-	sprint(buf, "_%d%s", ++modulecount, id->id_text);
+	sprint(buf, "_%d%s_", ++modulecount, id->id_text);
 
 	if (!df->mod_vis) {	
 		/* We never saw the name of this module before. Create a
@@ -355,11 +362,7 @@ DefineLocalModule(id)
 	/* Generate code that indicates that the initialization procedure
 	   for this module is local.
 	*/
-	if (options['x']) {
-		C_exp(buf);
-	}
-	else	C_inp(buf);
-
+	internal(buf);
 	return df;
 }
 

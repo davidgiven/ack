@@ -128,9 +128,8 @@ GetDefinitionModule(id, incr)
 					register t_node *n;
 					extern t_node *Modules;
 
-					n = dot2leaf(Name);
-					n->nd_IDF = id;
-					n->nd_symb = IDENT;
+					n = dot2leaf(Def);
+					n->nd_def = CurrentScope->sc_definedby;
 					if (nd_end) nd_end->nd_left = n;
 					else Modules = n;
 					nd_end = n;

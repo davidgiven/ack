@@ -63,7 +63,7 @@ TmpSpace(sz, al)
 
 STATIC arith
 NewTmp(plist, sz, al, regtype)
-	struct tmpvar **plist;
+	register struct tmpvar **plist;
 	arith sz;
 {
 	register arith offset;

@@ -74,18 +74,21 @@ LblWalkNode(lbl, nd, exit)
 	WalkNode(nd, exit);
 }
 
+static arith tmpprio;
+
 STATIC
 DoPriority()
 {
 	/*	For the time being (???), handle priorities by calls to
 		the runtime system
 	*/
-	register t_node *pri = priority;
-
-	if (pri) {
-		C_loc(pri->nd_INT);
-		C_cal("_stackprio");
+	if (priority) {
+		tmpprio = NewInt();
+		C_loc(priority->nd_INT);
+		C_cal("stackprio");
 		C_asp(word_size);
+		C_lfr(word_size);
+		C_stl(tmpprio);
 	}
 }
 
@@ -93,7 +96,10 @@ STATIC
 EndPriority()
 {
 	if (priority) {
-		C_cal("_unstackprio");
+		C_lol(tmpprio);
+		C_cal("unstackprio");
+		C_asp(word_size);
+		FreeInt(tmpprio);
 	}
 }
 
@@ -113,8 +119,7 @@ DoLineno(nd)
 	}
 }
 
-DoFilename(nd)
-	t_node *nd;
+DoFilename()
 {
 	static label	filename_label = 0;
 
@@ -128,8 +133,6 @@ DoFilename(nd)
 		}
 
 		C_fil_dlb((label) 1, (arith) 0);
-
-		if (nd) DoLineno(nd);
 	}
 }
 
@@ -160,7 +163,6 @@ WalkModule(module)
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
 	DoPriority();
-	DoFilename(module->mod_body);
 	if (module == Defined) {
 		/* Body of implementation or program module.
 		   Call initialization routines of imported modules.
@@ -183,8 +185,9 @@ WalkModule(module)
 		}
 
 		for (; nd; nd = nd->nd_left) {
-			C_cal(nd->nd_IDF->id_text);
+			C_cal(nd->nd_def->mod_vis->sc_scope->sc_name);
 		}
+		DoFilename();
 	}
 	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
@@ -227,7 +230,7 @@ WalkProcedure(procedure)
 	*/
 	C_pro_narg(procscope->sc_name);
 	DoPriority();
-	DoFilename(procedure->prc_body);
+	DoFilename();		/* ??? only when this procedure is exported? */
 	TmpOpen(procscope);
 
 	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
@@ -300,14 +303,14 @@ WalkProcedure(procedure)
 				}
 				/* First compute new stackpointer */
 				C_lal(param->par_def->var_off);
-				C_cal("_new_stackptr");
+				C_cal("new_stackptr");
 				C_asp(pointer_size);
 				C_lfr(pointer_size);
 				C_str((arith) 1);
 						/* adjusted stack pointer */
 				LOL(param->par_def->var_off, pointer_size);
 						/* push source address */
-				C_cal("_copy_array");
+				C_cal("copy_array");
 						/* copy */
 				C_asp(pointer_size);
 			}
@@ -445,13 +448,13 @@ WalkStat(nd, exit_label)
 	assert(nd->nd_class == Stat);
 
 	DoLineno(nd);
-	if (nd->nd_flags & ROPTION) options['R'] = 1;
-	if (nd->nd_flags & AOPTION) options['A'] = 1;
+	options['R'] = (nd->nd_flags & ROPTION);
+	options['A'] = (nd->nd_flags & AOPTION);
 	switch(nd->nd_symb) {
 	case '(':
 		if (ChkCall(nd)) {
 			if (nd->nd_type != 0) {
-				node_error(nd, "illegal function call");
+				node_error(nd, "procedure call expected instead of function call");
 				break;
 			}
 			CodeCall(nd);
@@ -521,7 +524,7 @@ WalkStat(nd, exit_label)
 	case FOR:
 		{
 			arith tmp = NewInt();
-			arith tmp2;
+			arith tmp2 = 0;
 			register t_node *fnd;
 			int good_forvar;
 			label l1 = ++text_label;
@@ -575,7 +578,7 @@ WalkStat(nd, exit_label)
 			WalkNode(right, exit_label);
 			nd->nd_def->df_flags &= ~D_FORLOOP;
 			if (good_forvar) {
-				if (! options['R']) {
+				if (tmp2 != 0) {
 					label x = ++text_label;
 					C_lol(tmp2);
 					ForLoopVarExpr(nd);

@@ -359,7 +359,8 @@ CodeCall(nd)
 		}
 		else	C_lfr(sz);
 	}
-	DoFilename(nd);
+	DoFilename();
+	DoLineno(nd);
 }
 
 CodeParameters(param, arg)
@@ -503,12 +504,12 @@ CodeStd(nd)
 	case S_ABS:
 		CodePExpr(left);
 		if (tp->tp_fund == T_INTEGER) {
-			if (tp->tp_size == int_size) C_cal("_absi");
-			else	C_cal("_absl");
+			if (tp->tp_size == int_size) C_cal("absi");
+			else	C_cal("absl");
 		}
 		else if (tp->tp_fund == T_REAL) {
-			if (tp->tp_size == float_size) C_cal("_absf");
-			else	C_cal("_absd");
+			if (tp->tp_size == float_size) C_cal("absf");
+			else	C_cal("absd");
 		}
 		C_asp(tp->tp_size);
 		C_lfr(tp->tp_size);
@@ -585,7 +586,7 @@ CodeStd(nd)
 		}
 
 	case S_HALT:
-		C_cal("_halt");
+		C_cal("halt");
 		break;
 
 	case S_INCL:
@@ -1026,7 +1027,7 @@ CodeEl(nd, tp)
 		}
 		else	C_loc((arith) (eltype->enm_ncst - 1));
 		Operands(nd);
-		C_cal("_LtoUset");	/* library routine to fill set */
+		C_cal("LtoUset");	/* library routine to fill set */
 		C_asp(5 * word_size);
 	}
 	else {
@@ -1060,7 +1061,9 @@ CodeDAddress(nd)
 
 	register t_desig *designator = new_desig();
 
-	ChkForFOR(nd);
+	/* ChkForFOR(nd); ??? not quite: wrong for value conformant arrays,
+			  where the parameter is the for-loop control variable
+	*/
 	CodeDesig(nd, designator);
 	CodeAddress(designator);
 	free_desig(designator);

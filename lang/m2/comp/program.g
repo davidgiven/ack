@@ -128,7 +128,9 @@ DefinitionModule
 	int		dummy;
 	extern t_idf	*DefId;
 	extern int	ForeignFlag;
+	extern char	*sprint();
 	register t_scope *currscope = CurrentScope;
+	char buf[512];
 } :
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
@@ -139,7 +141,8 @@ DefinitionModule
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
 					df->df_idf->id_text, DefId->id_text);
 			  }
-			  currscope->sc_name = df->df_idf->id_text;
+			  sprint(buf, "_%s_", df->df_idf->id_text);
+			  currscope->sc_name = Salloc(buf, (unsigned) strlen(buf) + 1);
 			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);
 			  df->df_type->rec_scope = currscope;
@@ -214,7 +217,7 @@ ProgramModule
 			Defined = df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
-			CurrentScope->sc_name = "_M2M";
+			CurrentScope->sc_name = "__M2M_";
 		  	CurrentScope->sc_definedby = df;
 		  }
 		}

@@ -1407,7 +1407,6 @@ int (*ExprChkTable[])() = {
 	done_before,
 	NodeCrash,
 	ChkExLinkOrName,
-	NodeCrash
 };
 
 int (*DesigChkTable[])() = {
@@ -1423,5 +1422,4 @@ int (*DesigChkTable[])() = {
 	done_before,
 	NodeCrash,
 	ChkLinkOrName,
-	NodeCrash
 };

@@ -354,7 +354,10 @@ again:
 
 		if (ch == EOI) eofseen = 1;
 		else PushBack();
-		*tag++ = '\0';
+		*tag = '\0';
+		if (*(tag - 1) == '_') {
+			lexerror("last character of an identifier may not be a '_'");
+		}
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;

@@ -160,7 +160,7 @@ EnterVarList(Idlist, type, local)
 				df->var_name = df->df_idf->id_text;
 			}
 			else {
-				sprint(buf,"_%s_%s", sc->sc_scope->sc_name,
+				sprint(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
 				df->var_name = Salloc(buf,
 						(unsigned)(strlen(buf)+1));

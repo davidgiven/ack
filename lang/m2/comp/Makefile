@@ -292,6 +292,7 @@ node.o: LLlex.h
 node.o: debug.h
 node.o: debugcst.h
 node.o: def.h
+node.o: main.h
 node.o: nocross.h
 node.o: node.h
 node.o: target_sizes.h

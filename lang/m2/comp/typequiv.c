@@ -263,7 +263,7 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 }
 
 CompatCheck(nd, tp, message, fc)
-	t_node **nd;
+	register t_node **nd;
 	t_type *tp;
 	char *message;
 	int (*fc)();

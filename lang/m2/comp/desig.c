@@ -214,7 +214,10 @@ CodeValue(ds, tp)
 			break;
 		case USE_LOAD_STORE:
 			sz = WA(tp->tp_size);
-			if (ds->dsg_kind != DSG_PFIXED) {
+#ifndef SQUEEZE
+			if (ds->dsg_kind != DSG_PFIXED)
+#endif
+			{
 				arith tmp = NewPtr();
 
 				CodeAddress(ds);
@@ -224,13 +227,15 @@ CodeValue(ds, tp)
 				LOL(tmp, pointer_size);
 				FreePtr(tmp);
 			}
+#ifndef SQUEEZE
 			else  {
 				CodeConst(-sz, (int) pointer_size);
 				C_ass(pointer_size);
 			}
+#endif
 			CodeAddress(ds);
 			CodeConst(tp->tp_size, (int) pointer_size);
-			C_cal("_load");
+			C_cal("load");
 			C_asp(pointer_size + pointer_size);
 			break;
 		}
@@ -293,7 +298,7 @@ CodeStore(ds, tp)
 			break;
 		case USE_LOAD_STORE:
 			CodeConst(tp->tp_size, (int) pointer_size);
-			C_cal("_store");
+			C_cal("store");
 			CodeConst(pointer_size + pointer_size + WA(tp->tp_size),
 			  	(int) pointer_size);
 			C_ass(pointer_size);
@@ -362,7 +367,7 @@ CodeMove(rhs, left, rtp)
 			CodeAddress(lhs);
 			C_loc(rtp->tp_size);
 			C_loc(tp->tp_size);
-			C_cal("_StringAssign");
+			C_cal("StringAssign");
 			C_asp(pointer_size + pointer_size + dword_size);
 			break;
 		}
@@ -430,7 +435,7 @@ CodeMove(rhs, left, rtp)
 		case USE_LOAD_STORE:
 		case USE_LOI_STI:
 			CodeConst(tp->tp_size, (int) pointer_size);
-			C_cal("_blockmove");
+			C_cal("blockmove");
 			C_asp(3 * pointer_size);
 			break;
 		}
@@ -543,6 +548,7 @@ CodeVarDesig(df, ds)
 		those of an enclosing procedure, or it is global.
 	*/
 	register t_scope *sc = df->df_scope;
+	int difflevel;
 
 	/* Selections from a module are handled earlier, when identifying
 	   the variable, so ...
@@ -569,16 +575,16 @@ CodeVarDesig(df, ds)
 		return;
 	}
 
-	if (sc->sc_level != proclevel) {
+	if ((difflevel = proclevel - sc->sc_level) != 0) {
 		/* the variable is local to a statically enclosing procedure.
 		*/
-		assert(proclevel > sc->sc_level);
+		assert(difflevel > 0);
 
 		df->df_flags |= D_NOREG;
 		if (df->df_flags & (D_VARPAR|D_VALPAR)) {
 			/* value or var parameter
 			*/
-			C_lxa((arith) (proclevel - sc->sc_level));
+			C_lxa((arith) difflevel);
 			if ((df->df_flags & D_VARPAR) ||
 			    IsConformantArray(df->df_type)) {
 				/* var parameter or conformant array.
@@ -592,7 +598,7 @@ CodeVarDesig(df, ds)
 				return;
 			}
 		}
-		else	C_lxl((arith) (proclevel - sc->sc_level));
+		else	C_lxl((arith) difflevel);
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = df->var_off;
 		return;
@@ -644,23 +650,26 @@ CodeDesig(nd, ds)
 		CodeDesig(nd->nd_left, ds);
 		CodeAddress(ds);
 		CodePExpr(nd->nd_right);
+		nd = nd->nd_left;
 
 		/* Now load address of descriptor
 		*/
-		if (IsConformantArray(nd->nd_left->nd_type)) {
-			assert(nd->nd_left->nd_class == Def);
+		if (IsConformantArray(nd->nd_type)) {
+			arith off;
+			assert(nd->nd_class == Def);
 
-			df = nd->nd_left->nd_def;
+			df = nd->nd_def;
+			off = df->var_off + pointer_size;
 			if (proclevel > df->df_scope->sc_level) {
 			    C_lxa((arith) (proclevel - df->df_scope->sc_level));
-			    C_adp(df->var_off + pointer_size);
+			    C_adp(off);
 			}
-			else	C_lal(df->var_off + pointer_size);
+			else	C_lal(off);
 		}
 		else	{
-			C_loc(nd->nd_left->nd_type->arr_low);
+			C_loc(nd->nd_type->arr_low);
 			C_sbu(int_size);
-			c_lae_dlb(nd->nd_left->nd_type->arr_descr);
+			c_lae_dlb(nd->nd_type->arr_descr);
 		}
 		if (options['A']) {
 			C_cal("rcka");
@@ -671,7 +680,8 @@ CodeDesig(nd, ds)
 	case Arrow:
 		assert(nd->nd_symb == '^');
 
-		CodeDesig(nd->nd_right, ds);
+		nd = nd->nd_right;
+		CodeDesig(nd, ds);
 		switch(ds->dsg_kind) {
 		case DSG_LOADED:
 			ds->dsg_kind = DSG_PLOADED;
@@ -680,7 +690,7 @@ CodeDesig(nd, ds)
 		case DSG_INDEXED:
 		case DSG_PLOADED:
 		case DSG_PFIXED:
-			CodeValue(ds, nd->nd_right->nd_type);
+			CodeValue(ds, nd->nd_type);
 			ds->dsg_kind = DSG_PLOADED;
 			ds->dsg_offset = 0;
 			break;
