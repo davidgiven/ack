@@ -42,7 +42,7 @@ AA_REG		/* allocatable A_REG, may not be a register variable */
 
 REGISTERS
 
-d0, d1, d2			:D_REG, DD_REG.
+d2, d1, d0			:D_REG, DD_REG.
 d3, d4, d5, d6, d7		:D_REG  regvar.
 a0, a1				:A_REG, AA_REG.
 a2, a3, a4, a5			:A_REG  regvar(reg_pointer).
