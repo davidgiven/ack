@@ -8,7 +8,7 @@ name "Motorola 68000 2-4 conversion program"
 dir cv
 end
 name "Motorola 68000 target optimizer"
-dir opt
+dir top
 end
 name "Motorola 68000 2-4 C libraries"
 dir libcc
