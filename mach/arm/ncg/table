@@ -20,8 +20,8 @@
  		     ((0-a)&~0xC000003F)==0||(~(0-a)&~0xFF)==0)
 
 #define illegal(a)    !legal(a)
-#define minlegal(a)    neglegal(a) && (a < 0)
-#define minillegal(a) !neglegal(a) && (a < 0)
+#define minlegal(a)    (a < 0) && neglegal(a)
+#define minillegal(a)  (a < 0) && !neglegal(a)
 
 EM_WSIZE=4
 EM_PSIZE=4
@@ -297,25 +297,25 @@ from const4 to GENREG+LOCAL    /* general case */
           ADD %2, %2, { fitcon,   %1.num & 0xFF0000}
           ADD %2, %2, { fitcon,   %1.num & 0xFF000000}
 
-from regconst legal(%ind) && (%ind > 0) to LOCAL inreg(%ind)==reg_any
+from regconst (%ind > 0) && legal(%ind) to LOCAL inreg(%ind)==reg_any
 	gen ADD %2, %1
 
 from regconst minlegal(%ind) to LOCAL inreg(%ind)==reg_any
 	gen SUB %2, %1.reg, {fitcon, 0-%1.ind}
 
-from lb_local illegal(%ind) to GENREG
-gen move {const4, %1.ind}, R11
-    LDR %2, {lb_regregrel, LB, R11}
-
 from lb_local legal(%ind) to GENREG
 gen LDR %2, {lb_regrel, LB, %1.ind}
 
-from GENREG to lb_local illegal(%ind)
-gen move {const4, %2.ind}, R11
-    STR %1, {lb_regregrel, LB, R11}
+from lb_local to GENREG
+gen move {const4, %1.ind}, R11
+    LDR %2, {lb_regregrel, LB, R11}
 
 from GENREG to lb_local legal(%ind)
 gen STR %1, {lb_regrel, LB, %2.ind}
+
+from GENREG to lb_local
+gen move {const4, %2.ind}, R11
+    STR %1, {lb_regregrel, LB, R11}
 
 from GENREG to address
 	gen STR %1, %2
@@ -376,7 +376,7 @@ from const4 to STACK
 	gen move %1, R11
 	    STMFD {autoid, SP}, {reglist1, R11}
 
-from addr_local legal(%1.ind) to STACK
+from addr_local legal(%ind) to STACK
 	gen ADD R11, LB, {fitcon, %1.ind}
 	    STMFD {autoid, SP}, {reglist1, R11}
 
@@ -385,7 +385,7 @@ from addr_local to STACK
 	    ADD R11, LB, R11
 	    STMFD {autoid, SP}, {reglist1, R11}
 
-from naddr_local legal(%1.ind) to STACK
+from naddr_local legal(%ind) to STACK
 	gen SUB R11, LB, {fitcon, %1.ind}
 	    STMFD {autoid, SP}, {reglist1, R11}
 
@@ -398,7 +398,7 @@ from addr_external to STACK
 	gen ADR R11, %1
 	    STMFD {autoid, SP}, {reglist1, R11}
 
-from regconst legal(%1.ind) && (%ind > 0) to STACK
+from regconst (%ind > 0) && legal(%ind) to STACK
 	gen ADD R11, %1.reg, {fitcon,%1.ind}
 	    STMFD {autoid, SP}, {reglist1, R11}
 
@@ -441,25 +441,25 @@ from LOCAL
 uses GENREG
 gen MOV %a, %1					yields %a
 
-from lb_local illegal(%ind)
-uses GENREG
-gen move {const4, %1.ind}, R11 
-    LDR %a, {lb_regregrel, LB, R11}   		yields %a
-
 from lb_local legal(%ind)
 uses GENREG
-gen LDR %a, {lb_regrel, LB, %1.ind}   		yields %a
+gen LDR %a, {lb_regrel, LB, %ind}   		yields %a
 
-from const4 %1.num < 0
+from lb_local
 uses GENREG
-	gen move {const4, 0-%1.num}, %a
+gen move {const4, %ind}, R11 
+    LDR %a, {lb_regregrel, LB, R11}   		yields %a
+
+from const4 %num < 0
+uses GENREG
+	gen move {const4, 0-%num}, %a
 	    RSB %a, %a, {fitcon, 0}       	yields %a
 
-from const4 illegal(%1.num) && (%1.num >= 0)
+from const4 illegal(%num)
 uses GENREG
 	gen move %1, %a				yields %a
 
-from const4 legal(%1.num) && %1.num >= 0	yields {fitcon, %num}
+from const4 					yields {fitcon, %num}
 
 from STACK
 uses GENREG
@@ -478,70 +478,70 @@ uses GENREG
 	gen move %1, %a
 	    					yields %a
 
-from addr_local legal(%1.ind)
+from addr_local legal(%ind)
 uses GENREG
-	gen ADD %a, LB, {fitcon, %1.ind}	yields %a
+	gen ADD %a, LB, {fitcon, %ind}		yields %a
 
-from addr_local illegal(%1.ind)
+from addr_local
 uses GENREG
-	gen move {const4, %1.ind}, %a
+	gen move {const4, %ind}, %a
 	    ADD %a, LB, %a 			yields %a
 
-from naddr_local legal(%1.ind)
+from naddr_local legal(%ind)
 uses GENREG
-	gen SUB %a, LB, {fitcon, %1.ind}	yields %a
+	gen SUB %a, LB, {fitcon, %ind}		yields %a
 
-from naddr_local illegal(%1.ind)
+from naddr_local
 uses GENREG
-	gen move {const4, %1.ind}, %a
+	gen move {const4, %ind}, %a
 	    SUB %a, LB, %a 			yields %a
 
-from regconst legal(%1.ind) && (%1.ind > 0)
+from regconst (%ind > 0) && legal(%ind)
 uses GENREG
 	gen ADD %a, %1				yields %a
 
-from regconst minlegal(%1.ind)
+from regconst minlegal(%ind)
 uses GENREG
-	gen SUB %a, %1.reg, {fitcon, 0-%1.ind}  yields %a
+	gen SUB %a, %reg, {fitcon, 0-%ind}	yields %a
 
-from regconst minillegal(%1.ind)
+from regconst minillegal(%ind)
 uses GENREG
-	gen move {const4, 0-%1.ind}, %a
-	    SUB %a, %a, %1.reg			yields %a
+	gen move {const4, 0-%ind}, %a
+	    SUB %a, %a, %reg			yields %a
 
-from regconst illegal(%1.ind)
+from regconst
 uses GENREG
-	gen move {const4, %1.ind}, %a
-	    ADD %a, %a, %1.reg			yields %a
+	gen move {const4, %ind}, %a
+	    ADD %a, %a, %reg			yields %a
 
 from regplusreg
 uses GENREG
-	gen ADD %a, %1.reg1, %1.reg2
+	gen ADD %a, %reg1, %reg2
 						yields %a
 
 from regminreg
 uses GENREG
-	gen SUB %a, %1.reg1, %1.reg2
+	gen SUB %a, %reg1, %reg2
 						yields %a
 
 from regplusiSreg
 uses GENREG
-	gen ADD %a, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+	gen ADD %a, %reg1, {imS, %reg2, %S, %shift}
 						yields %a
 
 from regminiSreg
 uses GENREG
-	gen SUB %a, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+	gen SUB %a, %reg1, {imS, %reg2, %S, %shift}
 						yields %a
 
 from regplusrSreg
 uses GENREG
-	gen ADD %a, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+	gen ADD %a, %reg1, {regS, %reg2, %S, %sreg}
 						yields %a
 
 from regminrSreg
 uses GENREG
-	gen SUB %a, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+	gen SUB %a, %reg1, {regS, %reg2, %S, %sreg}
 						yields %a
 
 
@@ -815,9 +815,9 @@ gen LDR %a, {regind, regvar($1)}
 
 pat loc $1 < 0						yields {const4, $1}
 
-pat loc illegal($1) && $1 >= 0				yields {const4, $1}
-
 pat loc legal($1) 					yields {fitcon, $1}
+
+pat loc							yields {const4, $1}
 
 pat ldc	leaving loc 18 trp
 
@@ -2026,7 +2026,7 @@ with STACK
 kills ALL
 gen ADD SP, SP, {fitcon, $1}
 
-pat asp illegal($1)
+pat asp
 with STACK
 kills ALL
 uses GENREG={const4, $1}
