@@ -413,6 +413,11 @@ C_dvf
 			"add sp,8".
   default	==>	arg_error("C_dvf", $1).
 
+C_ngf
+  $1 == 4	==>	"call .ngf4".
+  $1 == 8	==>	"call .ngf8".
+  default	==>	arg_error("C_ngf", $1).
+
 C_fif
   $1 == 4	==>	C_lor((arith)1);
 			"call .fif4";
