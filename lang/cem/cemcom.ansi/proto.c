@@ -77,11 +77,23 @@ add_proto(pl, ds, dc, lvl)
 		if (type->tp_fund != VOID)
 			error("unknown %s-type", symbol2str(type->tp_fund));
 		else {
-			if (idf != (struct idf *)0)
+			if (idf != (struct idf *)0
+			    || ds->ds_sc_given
+			    || ds->ds_typequal) {
 				error("illegal use of void in argument list");
-			else {
-				pl->pl_flag |= PL_VOID;
+				pl->pl_flag |= PL_ERRGIVEN;
 			}
+			/* set PL_VOID anyway */
+			pl->pl_flag |= PL_VOID;
+		}
+	}
+	if (ds->ds_sc_given && ds->ds_sc != REGISTER) {
+		if (!(pl->pl_flag & PL_ERRGIVEN)) {
+		    if (ds->ds_sc != AUTO) {
+			error("illegal storage class in parameter declaration");
+		    } else {
+			warning("illegal storage class in parameter declaration");
+		    }
 		}
 	}
 
@@ -229,11 +241,6 @@ declare_protos(dc)
 				pl = pl->next;
 				continue;
 			}
-
-			/*	Postponed storage class checking.
-			*/
-			if (def->df_sc == 0)
-				error("illegal storage class in parameter declaration");
 
 			def->df_level = L_FORMAL2;
 			stack_idf(pl->pl_idf, stl);
