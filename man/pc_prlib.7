@@ -28,16 +28,6 @@ type	compared=-1..1;
 	    nlocals: integer;
 	end;
 
-function	_bcp(sz:integer; s2,s1:pstring):compared;
-function	_bts(size,high,low:integer; base:^set 0..(8*size-1))
-			:set of 0..(8*size-1);
-procedure	_gto(lb:^integer; p:^gotoinfo);
-
-procedure	_new(size:integer; var p:^integer);
-procedure	_dis(size:integer; var p:^integer);
-procedure	_sav(var p:^integer);
-procedure	_rst(var p:^integer);
-
 type	arrdescr=record
 	    lowbnd:  integer;
 	    diffbnds:integer;
@@ -46,6 +36,18 @@ type	arrdescr=record
 	arr1=array[] of ?;
 	arr2=packed array[] of ?;
 
+function	_bcp(sz:integer; s2,s1:pstring):compared;
+function	_bts(size,high,low:integer; base:^set 0..(8*size-1))
+			:set of 0..(8*size-1);
+procedure	_gto(lb:^integer; p:^gotoinfo);
+procedure	_rcka(a: arrdescr; index : integer);
+procedure	_nfa(bool:integer);
+
+procedure	_new(size:integer; var p:^integer);
+procedure	_dis(size:integer; var p:^integer);
+procedure	_sav(var p:^integer);
+procedure	_rst(var p:^integer);
+
 procedure	_pac(var ad,zd:arrdescr; var zp:arr2; i:integer;
 		      var ap:arr1);
 procedure	_unp(var ad,zd:arrdescr; i:integer; var ap:arr1;
@@ -53,8 +55,8 @@ procedure	_unp(var ad,zd:arrdescr; i:integer; var ap:arr1;
 function	_asz(var dp:arrdescr):integer;
 
 procedure	_ass(line:integer; b:boolean);
-procedure	procentry(var name:alpha);
-procedure	procexit(var name:alpha);
+procedure	procentry(name:pstring);
+procedure	procexit(name:pstring);
 
 const	lowbyte=[0..7];
 	MAGIC  =[1,3,5,7];
@@ -63,23 +65,24 @@ const	lowbyte=[0..7];
 	EOFBIT =[13];
 	TXTBIT =[14];
 	WRBIT  =[15];
+	PC_BUFLEN =1024;
 type	file=record
 	    ptr:	^char;
 	    flags:	set of [0..15];
-	    fname:	string;
+	    fname:	pstring;
 	    ufd:	0..15;
 	    size:	integer;
 	    count:	0..buflen;
-	    buflen:	max(512,size) div size * size;
-	    bufadr:	packed array[1..max(512,size)]
+	    buflen:	max(PC_BUFLEN,size) div size * size;
+	    bufadr:	packed array[1..max(PC_BUFLEN,size)]
 			     of char;
 	end;
 	filep=^file;
 const	NFILES=15;
 	_extfl:^array[] of filep;
 
-procedure	_ini(var args:integer; var hb:integer;
-			    var p:array[] of filep; var mainlb:integer);
+procedure	_ini(args:pstring; var c:integer;
+			     var p:array[] of filep; mainlb:pstring);
 procedure	_hlt(status:0..255);
 
 procedure	_opn(size:integer; f:filep);
@@ -172,6 +175,13 @@ The new EM stack pointer is calculated by adding the number of locals
 to the new local base
 (jumping into statements is not allowed; there are no local generators
 in Pascal!).
+.IP _rcka
+Check if an array reference isn't out of bounds. This is should be done by
+the backends, but some don't.
+.IP _nfa
+Check whether a function is assigned or not. This could have
+been done by the compiler, but that would make the interface between the
+compiler and the run-time library messier.
 .PD
 .PP
 .RE
@@ -264,11 +274,11 @@ If \fIb\fP is zero, then change eb[0] to \fIline\fP
 (to give an error message with source line number) and call the error routine.
 .PD 0
 .IP procentry
-Print the name of the called procedure with up to seven argument words
-in decimal on standard output. Output must be declared in the program heading.
+Print the name of the called procedure on standard output. Output must
+be declared in the program heading.
 .IP procexit
-Print the name of the procedure that is about to exit.
-Same remarks as for procentry.
+Print the name of the procedure that is about to exit. Output must
+be declared in the program heading.
 .PD
 .PP
 .RE
@@ -282,7 +292,7 @@ dynamic if it is declared in inner blocks.
 The fields in the file record are used for:
 .IP bufadr 10
 IO is buffered except for standard input and output if
-terminals are involved. The size of the buffer is the maximum of 512
+terminals are involved. The size of the buffer is the maximum of PC_BUFLEN
 and the file element size.
 .PD 0
 .IP buflen
@@ -344,14 +354,12 @@ Another task of _ini is to initialize the standard input and output files.
 For standard output it must decide whether to buffer or not.
 If standard output is a terminal, then buffering is off by setting
 buflen to 1.
-Two other task of _ini are the copying of two pointers from
-the argument list to global memory, mainlb to _m_lb and hb to _hbase.
+Two other task of _ini are the copying of two variables from
+the argument list to global memory, mainlb to _m_lb and c to _extflc.
 The first contains the local base of the program body, the second
-contains the address of the hol containing the global variables
-of the program.
-A last task of _ini is to set the global variables _argc, _argv and _environ
-from args for
-possible reference later on.
+contains the number of paremeters the program is called with.
+A last task of _ini is to set the global variables _pargc, _pargv and
+_penvp from args for possible reference later on.
 Args points to the argument count placed on the stack by the EM runtime system,
 see chapter 8 in [1].
 .PD 0
@@ -438,7 +446,7 @@ into a space.
 Otherwise the ELNBIT is cleared.
 .IP _wdw
 Return the current pointer to the file window.
-.IP _eof
+.IP _efl
 Test if you reached end of file.
 Is always true for output files.
 .PD
@@ -475,7 +483,7 @@ Write a character, left padded with spaces up to a field width
 of \fIw\fP.
 .IP _wri
 Write an integer, left padded with spaces up to a field width
-of 6.
+of 6 on 2-byte machines and a field width of 11 on 4-byte machines.
 .IP _wsi
 Write an integer, left padded with spaces up to a field width
 of \fIw\fP.
@@ -563,8 +571,8 @@ For heap management (see above).
 For heap management (see above).
 .IP _extfl
 Used to save the argument p of _ini for later reference.
-.IP _hbase
-Used to save the argument hb of _ini for later reference.
+.IP _extflc
+Used to save the argument c of _ini for later reference.
 .IP _m_lb
 Used to store the local base of the main program.
 .IP _curfil
@@ -576,8 +584,6 @@ Used to access the arguments of the main program.
 .SH FILES
 .IP ~em/lib/*/tail_pc 20
 The library used by ack[5] to link programs.
-.IP ~em/etc/pc_rterrors
-The error messages
 .PD
 .SH "SEE ALSO"
 .IP [1]
@@ -589,14 +595,14 @@ block structured languages" Informatica rapport IR-81.
 K.Jensen & N.Wirth
 "PASCAL, User Manual and Report" Springer-Verlag.
 .IP [3]
-An improved version of the ISO standard proposal for the language Pascal
-ISO/TC97/SC5-N462, received November 1979.
+Specification fo Computer programming language Pascal, BS6192: 1982
+(ISO 7185)
 .IP [4]
-Ed Keizer, "The Amsterdam Compiler Kit reference manual".
+J.W. Stevenson, H. van Eck, "Amsterdam Compiler Kit-Pascal reference manual".
 .br
-(try \fInroff ~em/doc/pcref.doc\fP).
+(try \fItbl ~em/doc/pcref.doc | nroff\fP).
 .IP [5]
-ack(1), pc_pem(6)
+ack(1), em_pc(6)
 .PD
 .SH DIAGNOSTICS
 All errors discovered by this runtime system cause an EM TRP instruction
@@ -608,13 +614,7 @@ an EM machine trap or a language or user defined trap occurs.
 One of the first actions in _ini is to specify that the routine _fatal,
 available in this library, will handle traps.
 This routine is called with an error code (0..252) as argument.
-The file "~em/etc/pc_rterrors" is opened and searched for a message
-corresponding with this number.
-If the file can not be opened, or if the error number is not recorded
-in the file, then the same trap is generated again, but without
-a user-defined trap handler, so that the low levels generate an
-error message.
-Otherwise the following information is printed
+The following information is printed
 on file descriptor 2:
 .IP -
 The name of the Pascal program
@@ -652,6 +652,10 @@ only positive j in \fIi mod j\fP
 file not yet open
 .IP 73
 dispose error
+.IP 74
+function not assigned
+.IP 75
+illegal field width
 .sp
 .IP 96
 file xxx: not writable

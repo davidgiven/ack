@@ -23,7 +23,7 @@ type	br1 =  1..bufsize;
 .br
 	filetype = file of ?;
 .br
-	long = record high,low:integer end;
+	long = ?;
 
 {all routines must be declared extern}
 
@@ -72,8 +72,6 @@ procedure	strstore(s:string; i:integer; c:char);
 function	clock:integer;
 .SH DESCRIPTION
 This library contains some often used external routines for Pascal programs.
-Two versions exist: one for the EM interpreter and another one
-that is used when programs are translated into PDP-11 code.
 The routines can be divided into several categories:
 .PP
 Argument control:
