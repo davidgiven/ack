@@ -52,7 +52,7 @@ IMPLEMENTATION MODULE Storage;
 	Compacted: BOOLEAN;		(* avoid recursive reorganization *)
 	FirstBlock: BucketPtr;
 
-  PROCEDURE Allocate(size: CARDINAL) : ADDRESS;
+  PROCEDURE MyAllocate(size: CARDINAL) : ADDRESS;
     VAR	nu : INTEGER;
 	b : INTEGER;
 	p, q: BucketPtr;
@@ -141,7 +141,7 @@ IMPLEMENTATION MODULE Storage;
 	IF brk = ILLBREAK THEN
 		ReOrganize();
 		Compacted := TRUE;
-		brk := Allocate(size);
+		brk := MyAllocate(size);
 		Compacted := FALSE;
 		RETURN brk;
 	END;
@@ -150,11 +150,16 @@ IMPLEMENTATION MODULE Storage;
 	p^.BSIZE := nu;
 	p^.BNEXT := USED;
 	RETURN ADR(p^.BSTORE);
+  END MyAllocate;
+
+  PROCEDURE Allocate(VAR a: ADDRESS; size: CARDINAL);
+  BEGIN
+	ALLOCATE(a, size);
   END Allocate;
 
   PROCEDURE ALLOCATE(VAR a: ADDRESS; size: CARDINAL);
   BEGIN
-	a := Allocate(size);
+	a := MyAllocate(size);
 	IF a = NIL THEN
 		Message("out of core");
 		HALT;
@@ -164,13 +169,18 @@ IMPLEMENTATION MODULE Storage;
   PROCEDURE Available(size: CARDINAL): BOOLEAN;
     VAR	a: ADDRESS;
   BEGIN
-	a:= Allocate(size);
+	a:= MyAllocate(size);
 	IF a # NIL THEN
 		DEALLOCATE(a, size);
 		RETURN TRUE;
 	END;
 	RETURN FALSE;
   END Available;
+
+  PROCEDURE Deallocate(VAR a: ADDRESS; size: CARDINAL);
+  BEGIN
+	DEALLOCATE(a, size);
+  END Deallocate;
 
   PROCEDURE DEALLOCATE(VAR a: ADDRESS; size: CARDINAL);
     VAR	p: BucketPtr;

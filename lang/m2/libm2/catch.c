@@ -45,6 +45,7 @@ static struct errm {
 	{ M2_NORESULT,	"no RETURN from procedure function"},
 	{ M2_UOVFL,	"cardinal overflow"},
 	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
+	{ M2_UUVFL,	"cardinal underflow"},
 	{ -1,		0}
 };
 

@@ -103,7 +103,7 @@
  lol 0
  cmu EM_WSIZE
  zge *1
- loc M2_UOVFL
+ loc M2_UUVFL
  trp
 1
  lol EM_WSIZE
@@ -119,7 +119,7 @@
  ldl 0
  cmu EM_LSIZE
  zge *1
- loc M2_UOVFL
+ loc M2_UUVFL
  trp
 1
  ldl EM_LSIZE

@@ -15,6 +15,7 @@ DEFINITION MODULE Traps;
 	ERRFORLOOP =	68;	(* value of FOR-loop control variable changed
 				   in loop
 				*)
+	ERRCARDUVFL =	69;	(* CARDINAL underflow *)
 
   TYPE	TrapHandler = EM.TrapHandler;
 

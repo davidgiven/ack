@@ -5,6 +5,12 @@ DEFINITION MODULE Storage;
   Version:	$Header$
 *)
 
+(*
+  Wirth's 3rd edition certainly is confusing: mostly it uses Allocate, but
+  the module at the end of the book defines ALLOCATE. To avoid problems,
+  I included them both.
+*)
+
 	FROM SYSTEM IMPORT ADDRESS;
 
 	PROCEDURE ALLOCATE(VAR a : ADDRESS; size : CARDINAL);
@@ -13,10 +19,16 @@ DEFINITION MODULE Storage;
 	   killed.
 	*)
 
+	PROCEDURE Allocate(VAR a : ADDRESS; size : CARDINAL);
+	(* Identical to ALLOCATE *)
+
 	PROCEDURE DEALLOCATE(VAR a : ADDRESS; size : CARDINAL);
 	(* Free the area at address "a" with the given size. The area
 	   must have been allocated by "ALLOCATE", with the same size.
 	*)
+
+	PROCEDURE Deallocate(VAR a : ADDRESS; size : CARDINAL);
+	(* Identical to DEALLOCATE *)
 
 	PROCEDURE Available(size : CARDINAL) : BOOLEAN;
 	(* Return TRUE if an area with the given size could be allocated.

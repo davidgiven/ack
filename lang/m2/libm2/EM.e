@@ -73,13 +73,16 @@
 ; SIG is called with one parameter:
 ;       - procedure instance identifier (PROC)
 ; and returns the old traphandler.
-; only the procedure identifier inside the PROC is used.
 
+ exa _handler
  exp $SIG
  pro $SIG, 0
+ lae _handler
+ loi EM_PSIZE
  lal PROC
  loi EM_PSIZE
- sig
+ lae _handler
+ sti EM_PSIZE
  ret EM_PSIZE
  end ?
 

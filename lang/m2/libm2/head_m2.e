@@ -13,6 +13,7 @@
 
 #define STACKSIZE	2048	/* maximum stack size for a coroutine */
 
+ exa _handler
  exa _environ
  exa _argv
  exa _argc
@@ -23,6 +24,8 @@
  exa _StackSize
  exp $_catch
 
+_handler
+ bss EM_PSIZE,0,0
 _environ
  bss EM_PSIZE,0,0
 _argv
@@ -41,6 +44,16 @@ _StackSize
  bss EM_WSIZE,0,0
 mainroutine
  bss 2*EM_PSIZE,0,0
+
+ inp $trap_handler
+ pro $trap_handler,0
+ lol 0	; trap number
+ lae _handler
+ loi EM_PSIZE
+ cai
+ asp EM_WSIZE
+ rtt
+ end 0
 
  exp $m_a_i_n
  pro $m_a_i_n, STACKSIZE
@@ -78,7 +91,7 @@ mainroutine
  lol 0
  ste _argc		; save argument count
 
- lpi $_catch
+ lpi $trap_handler
  sig
  asp EM_PSIZE
  cal $_M2M
