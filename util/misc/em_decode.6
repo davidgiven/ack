@@ -15,16 +15,14 @@ EM programs in compact form.
 These files are only machine readable.
 A description of this compact form can be found in [1].
 To inspect the code produced by compilers or to patch them for one reason
-or another, you need human readable assembly code.
-Em_decode will do the job for you.
+or another, human readable assembly code is needed.
+Em_decode produces human readable assembly code from the compact form.
 .PP
 Em_decode accepts the normal compact form in both optimized and
-unoptimized form
+unoptimized form.
 .PP
-Sometimes you have to make some special routines directly
-in EM, for instance the routines implementing the system calls.
-At these times you may use em_encode to produce compact routines
-out of these human readable assembly modules.
+Em_encode produces the compact form
+out of these human readable assembly code.
 .PP
 The first argument is the input file.
 The second argument is the output file.
@@ -35,7 +33,7 @@ A.S.Tanenbaum, Ed Keizer, Hans van Staveren & J.W.Stevenson
 "Description of a machine architecture for use of
 block structured languages" Informatica rapport IR-81.
 .IP [2]
-ack(I)
+ack(1)
 .SH DIAGNOSTICS
 Error messages are intended to be self-explanatory.
 .SH AUTHOR

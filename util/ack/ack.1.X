@@ -227,8 +227,8 @@ Use Definition analysis (UD) may introduce opportunities for LV.
 Strength Reduction (SR) may create opportunities for UD.
 .RE
 .IP ""
-The global optimizer is a combiner, so, when using it, offer it all the source
-files of your program. This is not strictly necessary, but it makes the
+The global optimizer is a combiner, so it should be offered all the source
+files of the program. This is not strictly necessary, but it makes the
 global optimizer more effective.
 The current default optimization phases are:
 .RS
@@ -278,7 +278,7 @@ as an option string to the Pascal compiler and supersedes corresponding
 options given in the source file.
 See the ACK reference manual [4] for a list of options.
 .IP "\-+xxx, \-\-xxx"
-When you want to interpret your program, you may select some
+When interpreting programs, these flags are used to select some
 options during interpretation, like test, profile, flow, extra and count.
 A short description of these flags follows:
 .RS
@@ -292,9 +292,9 @@ count the number of times a source line is executed.
 count the memory cycles executed per source line.
 .RE
 .IP "" 5
-Test is on by default, the others are off. Normally, you give these
-flag options each time you run the interpreter.
-The EM assembler/linker gives you the opportunity to change
+Test is on by default, the others are off. Normally, these
+flag options are given each time the interpreter is run.
+The EM assembler/linker offers the opportunity to change
 the defaults per program.
 The changed options are recorded in the "e.out" header.
 These flags \-\- and \-+ are passed to the assembler for this purpose.

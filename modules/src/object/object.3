@@ -271,9 +271,9 @@ initialises for reading an "object file" from file descriptor
 at its current position.
 This is useful for reading an object that resides in an archive.
 It returns 1 if it succeeds, 0 otherwise.
-If you use this entry point for reading, you don't have to call
+When using this entry point for reading,
 .I rd_close
-to close the file. You can close the file yourself.
+does not have to be called.
 .PP
 .I Rd_rew_relo
 rewinds the relocation part, so that it can be read again.
@@ -287,9 +287,10 @@ and interpretes them as an unsigned integer.
 .I Rd_arhdr
 returns 1 if a header was read, and 0 on end-of-file.
 .PP
-When using any of the reading routines, you must define a routine
+When using any of the reading routines, a routine
 named
-.IB rd_fatal .
+.I rd_fatal
+must be defined.
 It is called when a read fails, and is not supposed to return.
 Likewise, a routine
 .I wr_fatal

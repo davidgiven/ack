@@ -126,10 +126,9 @@ and
 .PP
 .B C_busy
 can be invoked in order
-to detect whether EM code is currently being generated, i.e. whether you are
-in between calls to 
+to detect whether EM code is currently being generated, i.e. whether
 .B C_open
-and
+is invoked without a corresponding
 .BR C_close .
 If this is the case, 
 .B C_busy
