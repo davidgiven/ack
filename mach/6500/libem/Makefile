@@ -1,7 +1,7 @@
 all:
-	cp head.s em_head
-	../../install em_head
-	rm -f em_head
-	cp e.a em_tail
-	-../../compare em_tail
-	rm -f em_head em_tail
+	cp head.s head_em
+	../../install head_em
+	rm -f head_em
+	cp e.a tail_em
+	../../install tail_em
+	rm -f head_em tail_em
