@@ -175,8 +175,8 @@ main(argc, argv)
 	exec.x_data = outsect[ROMSG].os_size + outsect[DATASG].os_size;
 	exec.x_bss = outsect[BSSSG].os_size;
 	exec.x_entry = outsect[TEXTSG].os_base;
-	exec.x_cpu = XWSWAP | X8086;
-	exec.x_relsym = 0;
+	exec.x_cpu = XWSWAP | X286;
+	exec.x_relsym = 0144;
 	exec.x_renv = XV3 | XSEG | XFS | XEXEC;
 	if ( outsect[ROMSG].os_base == 0x0 ) {
 		/* Separate I/D */
@@ -200,8 +200,10 @@ main(argc, argv)
 		if ( outsect[LSECT].os_size != 0 )
 			fatal("end segment must be empty\n") ;
 	}
-	ext.xe_stksize = 0x10000L -
-		(outsect[LSECT].os_base - outsect[ROMSG].os_base);
+	ext.xe_stksize = 0x1000;
+	/* Not too big, because "brk" and "sbrk"-allocated memory resides
+	   above the stack!
+	*/
 	ext.xe_segpos = 0140;
 	ext.xe_segsize = (2 + sep_id) * 040;
 	ext.xe_ostype = 1;
