@@ -1,3 +1,4 @@
+"$Header$"
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *
@@ -32,6 +33,7 @@
 
 EM_WSIZE = 2
 EM_PSIZE = 4
+EM_BSIZE = 8
 
 
 
@@ -112,6 +114,8 @@ ABS		= {STRING addr;}	2 cost=(3,5)  "%[addr]"
 ABS1		= {STRING addr;}	2 cost=(3,5)  "%[addr]"
 IMMEDIATE	= {INT cc;}		2 cost=(1,2) "#%[cc]"
 LOCAL_ADDR	= {INT off;}		4 /* not really addressable */
+REGOFF_ADDR	= {REGISTER reg;
+		   INT off;}		4 /* not really addressable */
 EXTERNAL_ADDR	= {STRING off;}		4 cost=(4,4)  "#%[off]"
 INDEX_ADDR	= {REGISTER reg,ireg;
 		   INT di;}		4
@@ -152,7 +156,7 @@ ALT_MEM		=  ALTERABLE * MEMORY
 DATASCR		=  DATAREG * SCRATCH
 ADDSCR		=  ADDREG  * SCRATCH
 MEM_ALL		=  ALL - DATAREG - DATAREG4 - ADDREG - IMMEDIATE - IMMEDIATE4
-		   - LOCAL_ADDR - EXTERNAL_ADDR - DOUBLE - DOUBLEZERO
+		   - LOCAL_ADDR -REGOFF_ADDR - EXTERNAL_ADDR - DOUBLE - DOUBLEZERO
 ALL_ACCESSIBLE	=  IADDREG + IADDREG4 + IADDREG1 + INDEXED + INDEXED4
 
 ANY1		=  DISPL1 + ABS1 + IADDREG1
@@ -204,12 +208,17 @@ lil | |  allocate(ADDREG = {DISPL4,LB,$1})| {IADDREG,%[a]} | |
 lof | ADDREG | | {DISPL,%[1],$1} | |
 ... | nocoercions: EXTERNAL_ADDR | | {ABS,%[1.off]+"+"+tostring($1)} | |
 ... | nocoercions: LOCAL_ADDR    | | {DISPL,LB,%[1.off]+$1} | |
+... | nocoercions: REGOFF_ADDR    | | {DISPL,%[1.reg],%[1.off]+$1} | |
 ldf | ADDREG | | {DISPL4,%[1],$1} | |
 ... | nocoercions: EXTERNAL_ADDR | | {ABS4,%[1.off]+"+"+tostring($1)} | |
 ... | nocoercions: LOCAL_ADDR    | | {DISPL4,LB,%[1.off]+$1} | |
+... | nocoercions: REGOFF_ADDR    | | {DISPL4,%[1.reg],%[1.off]+$1} | |
 lal | | | {LOCAL_ADDR,$1} | |
 | LOCAL_ADDR |	allocate(ADDREG)
 		"lea %[1.off](a6),%[a]"
+		samecc		| %[a] | |
+| REGOFF_ADDR |	allocate(ADDREG)
+		"lea %[1.off](%[1.reg]),%[a]"
 		samecc		| %[a] | |
 lae | | | {EXTERNAL_ADDR,$1} | |
 | EXTERNAL_ADDR |	allocate(ADDREG)
@@ -230,6 +239,7 @@ lxa | STACK |		"move.w #$1,-(sp)"
 			"jsr .lxa"	| A0	| |
 loi $1 == 1 | ADDREG | | {IADDREG1, %[1]} | |
 ...	    | nocoercions: LOCAL_ADDR | | {DISPL1,LB,%[1.off]} | |
+...	    | nocoercions: REGOFF_ADDR | | {DISPL1,%[1.reg],%[1.off]} | |
 ...	    | nocoercions: EXTERNAL_ADDR | | {ABS1,%[1.off]} | |
 loi $1 == 2 | ADDREG | | {IADDREG,%[1]} | |
 loi $1 == 4 | ADDREG | | {IADDREG4,%[1]} | |
@@ -245,7 +255,9 @@ lae loi $2 == 6 | |	remove(ALL)
 lae loi $2 == 8 | |	remove(ALL)
 			"move.l $1+4,-(sp)"
 			"move.l $1,-(sp)"	| | |
-loi $1 > 4  | ADDSCR | remove(ALL)
+loi $1 == 6 | ADDREG |	|  {DISPL,%[1],4} {IADDREG4,%[1]} | |
+loi $1 == 8 | ADDREG |	|  {DISPL4,%[1],4} {IADDREG4,%[1]} | |
+loi $1 > 8  | ADDSCR | remove(ALL)
 		       allocate(DATAREG4= {IMMEDIATE4,$1/2-1})
 		       "add.l #$1,%[1]"
 		       "1:"
@@ -299,10 +311,12 @@ lpi | | | {EXTERNAL_ADDR,$1} | |
 
 
 #ifdef REGVARS
-stl inreg($1)==2 | ANY | remove(regvar($1))
+stl inreg($1)==2 | nocoercions: ANY | remove(regvar($1))
 			 move(%[1],regvar($1))	| | |
+...		 | STACK |
+			 "move.w (sp)+,%(regvar($1)%)"	 | | |
 #endif
-stl | ANY | remove(DISPL,%[reg] == LB && %[dis] == $1)
+stl | nocoercions: ANY | remove(DISPL,%[reg] == LB && %[dis] == $1)
 	    remove(DISPL4,%[reg] == LB && (%[dis] == $1-2 ||
 					   %[dis] == $1))
 	    remove(DISPL1,%[reg] == LB && (%[dis] == $1 ||
@@ -312,6 +326,8 @@ stl | ANY | remove(DISPL,%[reg] == LB && %[dis] == $1)
 	    remove(DISPL1,%[reg] != LB)
 	    remove(ALL_ACCESSIBLE)
 	    move(%[1],{DISPL,LB,$1})	| | |
+...		 | STACK |
+			 "move.w (sp)+,$1(a6)" | | |
 ste | ANY |
 				remove(ABS)
 				remove(ABS4)
@@ -378,6 +394,29 @@ sti $1 == 1
 ...	| nocoercions: LOCAL_ADDR ANY1 |
 		remove(MEM_ALL)
 		move(%[2],{DISPL1,LB,%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR DATAREG |
+		remove(MEM_ALL)
+		move(%[2], {DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR IADDREG |
+		remove(MEM_ALL)
+		move({DISPL,%[2.reg],1}, {DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR DISPL |
+		remove(MEM_ALL)
+		move({DISPL,%[2.reg],%[2.dis]+1}, {DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR INDEXED |
+		remove(MEM_ALL)
+		move({INDEXED,%[2.reg],%[2.ireg],%[2.di]+1},
+			{DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR ABS |
+		remove(MEM_ALL)
+		move({ABS,%[2.addr]+"+1"}, {DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR IMMEDIATE |
+		remove(MEM_ALL)
+		move({IMMEDIATE,(%[2.cc]-((%[2.cc]>>8)<<8)+128)%256-128},
+		     {DISPL1,%[1.reg],%[1.off]}) | | |
+...	| nocoercions: REGOFF_ADDR ANY1 |
+		remove(MEM_ALL)
+		move(%[2],{DISPL1,%[1.reg],%[1.off]}) | | |
 ...	| nocoercions: EXTERNAL_ADDR DATAREG |
 		remove(MEM_ALL)
 		move(%[2], {ABS1,%[1.off]}) | | |
@@ -415,10 +454,13 @@ sts $1 == 2 | |			remove(ALL)
 				"jsr .sts"
 							| | |
 #ifdef REGVARS
-sdl inreg($1)==2 | ANY4 |	remove(regvar($1))
+sdl inreg($1)==2 | nocoercions: ANY4 |	remove(regvar($1))
 				move (%[1],regvar($1))	| | |
+...		 | STACK |
+			 "move.l (sp)+,%(regvar($1)%)"	 | | |
 #endif
-sdl | ANY4 |	remove(DISPL,%[reg] == LB && (%[dis] == $1 || %[dis] == $1+2))
+sdl | nocoercions: ANY4 | 
+		remove(DISPL,%[reg] == LB && (%[dis] == $1 || %[dis] == $1+2))
 		remove(DISPL4,%[reg] == LB && (%[dis] >= $1-2 &&
 						%[dis] <= $1+2))
 		remove(DISPL1,%[reg] == LB && (%[dis] >= $1 &&
@@ -428,6 +470,8 @@ sdl | ANY4 |	remove(DISPL,%[reg] == LB && (%[dis] == $1 || %[dis] == $1+2))
 		remove(DISPL1,%[reg] != LB)
 		remove(ALL_ACCESSIBLE)
 		move(%[1],{DISPL4,LB,$1})		| | |
+...		 | STACK |
+			 "move.l (sp)+,$1(a6)" | | |
 sde | ANY4 |
 				remove(ABS)
 				remove(ABS4)
@@ -555,6 +599,10 @@ ldl ldl adp sdl $1 == $2 && $2 == $4 && inreg($1)==2 | |
 ldl adp sdl $1 == $3  && inreg($1)==2 | |	remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | | 
+ldl loi ldl loi adp ldl sti $2==4&&$4==4&&$7==4&&$1==$3&&$1==$6&&inreg($1)==2
+			| |	remove(MEM_ALL)
+				allocate(ADDREG = {IADDREG4,regvar($1)})
+				"add.l #$5,(%(regvar($1)%))"	| %[a] | |
 loc ldl ads sdl $2 == $4 && $3 == 2  && inreg($2)==2 | |
 				remove(regvar($2))
 				"add.l #$1,%(regvar($2)%)"	
@@ -569,10 +617,12 @@ ldc ldl ads sdl $2 == $4 && $3 == 4  && inreg($2)==2 | |
 				erase(regvar($2))	| | |	
 lil inc sil $1==$3  && inreg($1)==2 | |	
 			remove(MEM_ALL)
-			"add.w #1,(%(regvar($1)%))"	| | |
+			"add.w #1,(%(regvar($1)%))"
+			setcc({IADDREG,regvar($1)})	| | |
 lil dec sil $1==$3  && inreg($1)==2 | |	
 			remove(MEM_ALL)
-			"sub.w #1,(%(regvar($1)%))"	| | |
+			"sub.w #1,(%(regvar($1)%))"
+			setcc({IADDREG,regvar($1)})	| | |
 lol and stl $1 == $3 && $2 == 2  && inreg($1)==2 | ANY |
 				remove(regvar($1))
 				"and.w %[1],%(regvar($1)%)"	
@@ -928,12 +978,24 @@ slu | | | | sli $1 |
 
 /* G R O U P  VI :   P O I N T E R  A R I T H M E T I C  */
 
-adp $1 >= 1 && $1 <= 8	| ADDSCR |	"add.l #$1,%[1]"
+adp $1 >= 1 && $1 <= 8
+	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+" 
+						+ tostring($1)} | |
+...	| nocoercions: LOCAL_ADDR | | {LOCAL_ADDR,%[1.off]+$1} | |
+...	| nocoercions: REGOFF_ADDR | | {REGOFF_ADDR,%[1.reg],%[1.off]+$1}  | |
+...	| nocoercions: ADDREG | | {REGOFF_ADDR,%[1],$1} | |
+...	| ADDSCR |	"add.l #$1,%[1]"
 			erase(%[1])
 			setcc(%[1])			| %[1] | |
-adp  			| ADDSCR |	"lea $1(%[1]),%[1]"
+adp	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+"
+						+ tostring($1)} | |
+...	| nocoercions: LOCAL_ADDR | | {LOCAL_ADDR,%[1.off]+$1} | |
+...	| nocoercions: REGOFF_ADDR | | {REGOFF_ADDR,%[1.reg],%[1.off]+$1}  | |
+...	| nocoercions: ADDREG | | {REGOFF_ADDR,%[1],$1} | |
+...	| ADDSCR |	"lea $1(%[1]),%[1]"
 			erase(%[1])
 			setcc(%[1])			| %[1] | |
+			
 /* The next patterns are for efficient translation of "*p++" in C */
 ldl ldl adp sdl $1 == $2 && $2 == $4 | |
 		allocate(ADDREG={DISPL4,LB,$1})
@@ -1002,10 +1064,12 @@ inc | DATASCR |	"add.w #1,%[1]"
 #ifdef REGVARS
 lil inc sil $1==$3 && inreg($1) == 2 | |
 			remove(MEM_ALL)
-			"add.w #1,(%(regvar($1)%))"	| | |
+			"add.w #1,(%(regvar($1)%))"
+			setcc({IADDREG,regvar($1)})	| | |
 lil dec sil $1==$3 && inreg($1) == 2 | |
 			remove(MEM_ALL)
-			"sub.w #1,(%(regvar($1)%))"	| | |
+			"sub.w #1,(%(regvar($1)%))"
+			setcc({IADDREG,regvar($1)})	| | |
 #endif
 lil inc sil $1==$3 | |	allocate(ADDREG={DISPL4,LB,$1})
 			remove(MEM_ALL)
@@ -2580,6 +2644,7 @@ STACKS:
 (ANY, , "move.w %[1],-(sp)" setcc(%[1]), (2,4) + %[1])
 (EXTERNAL_ADDR, , "pea %[1.off]" nocc)
 (LOCAL_ADDR, , "pea %[1.off](a6)" nocc)
+(REGOFF_ADDR, , "pea %[1.off](%[1.reg])" nocc)
 (INDEX_ADDR, , "pea %[1.di](%[1.reg],%[1.ireg].w)" nocc)
 (IMMEDIATE4 %[cc] == 0, , "clr.l -(sp)")
 (IMMEDIATE4, , "pea %[1.cc]" nocc)
