@@ -1,0 +1,68 @@
+TMP=/usr/tmp/ego
+DDUMP=$TMP.dd.$$
+PDUMP=$TMP.pd.$$
+PHASES=''
+FLAGS=''
+
+
+while :
+do
+        case $# in
+        0)      break ;;
+        esac
+        A="$1"
+        shift
+        case $A in
+	*.m|*.ma) ICARG="$ICARG $A"; continue;;
+	-P)	OPT="$1"; shift; continue;;
+	-IL)	PHASES="$PHASES il cf " ; continue;;
+	-CS)	PHASES="$PHASES cs " ; continue;;
+	-SR)	PHASES="$PHASES sr " ; continue;;
+	-UD)	PHASES="$PHASES ud " ; continue;;
+	-LV)	PHASES="$PHASES lv " ; continue;;
+	-RA)	PHASES="$PHASES ra " ; continue;;
+	-SP)	PHASES="$PHASES sp " ; continue;;
+	-BO)	PHASES="$PHASES bo " ; continue;;
+	-CJ)	PHASES="$PHASES cj " ; continue;;
+	-*)	FLAGS="$FLAGS $A"; continue;;
+	esac
+done
+if test "$PHASES"
+then :
+else PHASES='cj bo sp '
+fi
+PASSES="ic cf $PHASES ca"
+OUTFILES="$PDUMP $DDUMP"
+c=1
+if test "$ICARG"
+then :
+else
+exit 0
+fi
+for i in $PASSES
+do	INFILES=$OUTFILES
+	OUTFILES="$TMP.p.$c.$$ $TMP.d.$c.$$ $TMP.l.$c.$$ $TMP.b.$c.$$"
+	trap "rm -f $INFILES $OUTFILES $PDUMP $DDUMP; exit 1" 1 2 15
+	case $i in
+	ic)	if $OPT/ic/ic $INFILES - - $OUTFILES $ICARG
+		then :
+		else exit 1
+		fi ;;
+	ca)	if $OPT/ca/ca $INFILES $PDUMP $DDUMP - -
+		then 
+		rm -f $INFILES $PDUMP $DDUMP
+		else
+		rm -f $INFILES $PDUMP $DDUMP
+		exit 1
+		fi;;
+	*)	if $OPT/$i/$i $INFILES $OUTFILES $FLAGS
+		then 
+		rm -f $INFILES
+		else 
+		rm -f $INFILES
+		exit 1
+		fi ;;
+	esac
+	c=`expr $c + 1`
+done
+exit 0
