@@ -61,8 +61,6 @@ diag(tail, format, a1, a2, a3, a4)
 {
 	extern char	*progname, *archname, *modulname; 
 
-extern int errno;
-fprintf(stderr, "errno = %d\n", errno);
 	fprintf(stderr, "%s: ", progname);
 	if (archname)
 		fprintf(stderr, "%s: ", archname);
