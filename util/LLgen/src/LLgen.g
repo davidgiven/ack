@@ -38,15 +38,15 @@ static p_order	order,
 		maxorder;
 static p_term t_list;
 static int t_cnt;
-static p_gram   alt_table;
-static int      n_alts;
-static int      max_alts;
+static p_gram	alt_table;
+static int	n_alts;
+static int	max_alts;
 #define ALTINCR 32
 
-static p_gram   rule_table;
-static int      n_rules;
-static int      max_rules;
-#define RULEINCR        32
+static p_gram	rule_table;
+static int	n_rules;
+static int	max_rules;
+#define RULEINCR	32
 
 /* Here are defined : */
 STATIC p_order	neworder();
@@ -73,15 +73,15 @@ neworder(index) {
 	else	sorder = po;
 	return po;
 }
- 
+
 p_init()
 {
-        alt_table = (p_gram )alloc(ALTINCR*sizeof(t_gram));
-        n_alts = 0;
-        max_alts = ALTINCR;
-        rule_table = (p_gram )alloc(RULEINCR*sizeof(t_gram));
-        n_rules = 0;
-        max_rules = RULEINCR;
+	alt_table = (p_gram )alloc(ALTINCR*sizeof(t_gram));
+	n_alts = 0;
+	max_alts = ALTINCR;
+	rule_table = (p_gram )alloc(RULEINCR*sizeof(t_gram));
+	n_rules = 0;
+	max_rules = RULEINCR;
 }
 
 }
@@ -101,7 +101,7 @@ spec	:		{	acount = 0; p_init(); }
 	;
 
 def			{	register string p; }
-	: rule	
+	: rule
 	  /*
 	   * A grammar rule
 	   */
@@ -110,7 +110,7 @@ def			{	register string p; }
 	   * A token declaration
 	   */
 	| C_START C_IDENT
-			{ 	p = store(lextoken.t_string); }
+			{	p = store(lextoken.t_string); }
 	  ',' C_IDENT ';'
 	  /*
 	   * A start symbol declaration
@@ -168,7 +168,7 @@ rule			{	register p_nont p;
 	   * grammar for a production rule
 	   */
 	  C_IDENT	{	temp = search(NONTERM,lextoken.t_string,BOTH);
-	 			p = &nonterms[g_getcont(temp)];
+				p = &nonterms[g_getcont(temp)];
 				if (p->n_rule) {
 					error(linecount,
 "Nonterminal %s already defined", lextoken.t_string);
@@ -183,7 +183,7 @@ rule			{	register p_nont p;
 				p->n_count = acount;
 				acount = 0;
 				p->n_lineno = linecount;
-	  		}
+			}
 	  [ params(2)	{	p->n_flags |= PARAMS;
 				if (nparams > 15) {
 					error(linecount,"Too many parameters");
@@ -198,7 +198,7 @@ rule			{	register p_nont p;
 			 * Do not use p->n_rule now! The nonterms array
 			 * might have been re-allocated.
 			 */
-	  		{	nonterms[g_getcont(temp)].n_rule = rr;}
+			{	nonterms[g_getcont(temp)].n_rule = rr;}
 	;
 
 action(int n;)
@@ -218,20 +218,20 @@ productions(p_gram *p;)
 		int		conflres = 0;
 		int		t = 0;
 		int		haddefault = 0;
-		int             altcnt = 0;
+		int		altcnt = 0;
 		int		o_lc, n_lc;
 	} :
 			{	o_lc = linecount; }
 	  simpleproduction(p,&conflres)
 			{	if (conflres & DEF) haddefault = 1; }
-	  [ 
+	  [
 	    [ '|'	{	n_lc = linecount; }
 	      simpleproduction(&prod,&t)
-			{       if (n_alts >= max_alts-2) {
-                                        alt_table = (p_gram ) ralloc(
-                                                (p_mem) alt_table,
-                                                (max_alts+=ALTINCR)*sizeof(t_gram));
-                                }
+			{	if (n_alts >= max_alts-2) {
+					alt_table = (p_gram ) ralloc(
+						(p_mem) alt_table,
+						(max_alts+=ALTINCR)*sizeof(t_gram));
+				}
 				if (t & DEF) {
 					if (haddefault) {
 						error(n_lc,
@@ -240,7 +240,7 @@ productions(p_gram *p;)
 					haddefault = 1;
 				}
 				mkalt(*p,conflres,o_lc,&alt_table[n_alts++]);
-                                altcnt++;
+				altcnt++;
 				o_lc = n_lc;
 				conflres = t;
 				t = 0;
@@ -250,11 +250,11 @@ productions(p_gram *p;)
 					error(n_lc,
 		"Resolver on last alternative not allowed");
 				}
-	  			mkalt(*p,conflres,n_lc,&alt_table[n_alts++]);
-                                altcnt++;
-                                g_settype((&alt_table[n_alts]),EORULE);
-                                *p = copyrule(&alt_table[n_alts-altcnt],altcnt+1);
-	  		}
+				mkalt(*p,conflres,n_lc,&alt_table[n_alts++]);
+				altcnt++;
+				g_settype((&alt_table[n_alts]),EORULE);
+				*p = copyrule(&alt_table[n_alts-altcnt],altcnt+1);
+			}
 	  |
 			{	if (conflres & ~DEF) {
 					error(o_lc,
@@ -308,15 +308,15 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    /*
 	     * Optional conflict reslover
 	     */
-	      C_IF expr	{	*conflres |= COND; }
+	      C_IF expr {	*conflres |= COND; }
 	    | C_PREFER	{	*conflres |= PREFERING; }
 	    | C_AVOID	{	*conflres |= AVOIDING; }
 	  ]?
 	  [ %persistent elem(&elem)
-	 		{	if (n_rules >= max_rules-2) {
-                                        rule_table = (p_gram) ralloc(
-                                                  (p_mem) rule_table,
-                                                  (max_rules+=RULEINCR)*sizeof(t_gram));
+			{	if (n_rules >= max_rules-2) {
+					rule_table = (p_gram) ralloc(
+						  (p_mem) rule_table,
+						  (max_rules+=RULEINCR)*sizeof(t_gram));
 				}
 				kind = FIXED;
 				cnt = 0;
@@ -324,8 +324,8 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    [ repeats(&kind, &cnt)
 			{	if (g_gettype(&elem) != TERM) {
 					rule_table[n_rules] = elem;
-                                        g_settype((&rule_table[n_rules+1]),EORULE);
-                                        mkterm(copyrule(&rule_table[n_rules],2),
+					g_settype((&rule_table[n_rules+1]),EORULE);
+					mkterm(copyrule(&rule_table[n_rules],2),
 					       0,
 					       elem.g_lineno,
 					       &elem);
@@ -340,19 +340,19 @@ simpleproduction(p_gram *p; register int *conflres;)
 				    g_gettype(q->t_rule) != EORULE) {
 				    while (g_gettype(q->t_rule) != EORULE) {
 					rule_table[n_rules++] = *q->t_rule++;
-                                        elmcnt++;
-                                        if (n_rules >= max_rules-2) {
-                                            rule_table = (p_gram) ralloc(
-                                                  (p_mem) rule_table,
-                                                  (max_rules+=RULEINCR)*sizeof(t_gram));
-                                        }
+					elmcnt++;
+					if (n_rules >= max_rules-2) {
+					    rule_table = (p_gram) ralloc(
+						  (p_mem) rule_table,
+						  (max_rules+=RULEINCR)*sizeof(t_gram));
+					}
 				    }
 				    elem = *--(q->t_rule);
 				    n_rules--;
 				    elmcnt--;
 				    if (q == t_list - 1) {
-				    	t_list--;
-				    	nterms--;
+					t_list--;
+					nterms--;
 					t_cnt++;
 				    }
 				    termdeleted = 1;
@@ -383,24 +383,24 @@ simpleproduction(p_gram *p; register int *conflres;)
 				}
 				termdeleted = 0;
 				elmcnt++;
-                                rule_table[n_rules++] = elem;
+				rule_table[n_rules++] = elem;
 			}
 	  ]*		{	register p_term q;
-	  
+
 				g_settype((&rule_table[n_rules]),EORULE);
-                                *p = 0;
-                                n_rules -= elmcnt;
-                                if (g_gettype(&rule_table[n_rules]) == TERM &&
-                                    elmcnt == 1) {
-                                        q = g_getterm(&rule_table[n_rules]);
-                                        if (r_getkind(q) == FIXED &&
-                                            r_getnum(q) == 0) {
-                                                *p = q->t_rule;
-                                        }
-                                }
-                                if (!*p) *p = copyrule(&rule_table[n_rules],
-                                                elmcnt+1);
-	  		}
+				*p = 0;
+				n_rules -= elmcnt;
+				if (g_gettype(&rule_table[n_rules]) == TERM &&
+				    elmcnt == 1) {
+					q = g_getterm(&rule_table[n_rules]);
+					if (r_getkind(q) == FIXED &&
+					    r_getnum(q) == 0) {
+						*p = q->t_rule;
+					}
+				}
+				if (!*p) *p = copyrule(&rule_table[n_rules],
+						elmcnt+1);
+			}
 	;
 {
 
@@ -411,7 +411,7 @@ mkterm(prod,flags,lc,result) p_gram prod; register p_gram result; {
 	 * a grammar element containing it
 	 */
 	register p_term		q;
-	
+
 	if (! t_cnt) {
 		t_cnt = 50;
 		t_list = (p_term) alloc(50 * sizeof(t_term));
@@ -441,12 +441,12 @@ elem (register p_gram pres;)
 	  ]?
 	  productions(&p1)
 	  ']'		{
-	  			mkterm(p1,t,ln,pres);
+				mkterm(p1,t,ln,pres);
 			}
 	|
 	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
-	 		}
+			}
 	  [ params(0)	{	if (nparams > 14) {
 					error(linecount,"Too many parameters");
 				} else	g_setnpar(pres,nparams+1);
@@ -497,12 +497,12 @@ number(int *t;)
 				if (*t <= 0 || *t >= 8192) {
 					error(linecount,"Illegal number");
 				}
-	  		}
+			}
 	;
 
 firsts	{	register string p; }
 	: C_FIRST C_IDENT
-			{ 	p = store(lextoken.t_string); }
+			{	p = store(lextoken.t_string); }
 	  ',' C_IDENT ';'
 			{	/*
 				 * Store this %first in the list belonging
@@ -527,7 +527,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	 * Copy an action to file f. Opening bracket is ch1, closing bracket
 	 * is ch2.
 	 * If flag = 1, copy opening and closing parameters too.
-	 * If flag = 2, the copy is a parameter declaration copy. 
+	 * If flag = 2, the copy is a parameter declaration copy.
 	 * Give an error message if not ending on a ';'
 	 */
 	register	FILE *f;
@@ -592,8 +592,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			break;
 		  case '\'':
 		  case '"' :
-			/* 
-			 * watch out for brackets in strings, they do not 
+			/*
+			 * watch out for brackets in strings, they do not
 			 * count !
 			 */
 			match = ch;
