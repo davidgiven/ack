@@ -254,6 +254,7 @@ sbb rm:rw:cc, regorconst:ro.
 sbb anyreg:rw:cc, rmorconst:ro.
 shl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
 shr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+sxx rm:rw:cc, ANYCON+SHIFT_CREG:ro.
 #ifdef REGVARS
 sub LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
@@ -1081,7 +1082,6 @@ gen joehoe {label,".rmu"}
 
 pat slu					leaving sli $1
 pat loc slu				leaving loc $1 sli $2
-pat lol loc slu				leaving lol $1 loc $2 sli $3
 
 pat loc sru $1==1 && $2==2
 with REG
@@ -1437,6 +1437,14 @@ pat ldl and sdl $1==$3 && $2==4		call ldlxxxsdl("and", "and")
 pat ldl ior sdl $1==$3 && $2==4		call ldlxxxsdl("or", "or")
 pat ldl xor sdl $1==$3 && $2==4		call ldlxxxsdl("xor", "xor")
 
+proc ldlcxxsdl example ldl ldc sbi sdl
+  kills indexed, locals %ind>=$1 && %ind<$1+2
+  gen axx[1] {LOCAL,$1,2},{ANYCON,loww($2)}
+      axx[2] {LOCAL,$1+2,2},{ANYCON,highw($2)}
+
+pat ldl ldc sbi sdl $1==$4 && $3==4	call ldlcxxsdl("sub", "sbb")
+pat ldl ldc sbu sdl $1==$4 && $3==4	call ldlcxxsdl("sub", "sbb")
+
 proc ldexxxsde example lde adi sde
 with regorconst regorconst
   kills indirects
@@ -1549,6 +1557,35 @@ pat lol loc sri stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
 						call lolcrxxstl("sar")
 pat lol loc sru stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
 						call lolcrxxstl("shr")
+
+proc lolr2shstl example lol loc sli stl
+  kills regvar($1)
+  gen axx* {LOCAL,$1,2},{ANYCON,1}
+      axx* {LOCAL,$1,2},{ANYCON,1}
+
+pat lol loc sli stl $1==$4 && $3==2 && $2==2 && inreg($1)==reg_any
+						call lolr2shstl("sal")
+pat lol loc slu stl $1==$4 && $3==2 && $2==2 && inreg($1)==reg_any
+						call lolr2shstl("sal")
+pat lol loc sri stl $1==$4 && $3==2 && $2==2 && inreg($1)==reg_any
+						call lolr2shstl("sar")
+pat lol loc sru stl $1==$4 && $3==2 && $2==2 && inreg($1)==reg_any
+						call lolr2shstl("shr")
+
+proc lolrcshstl example lol loc sli stl
+  kills regvar($1)
+  uses CXREG = {ANYCON,$2}
+  gen sxx* {LOCAL,$1,2},cl
+
+pat lol loc sli stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolrcshstl("sal")
+pat lol loc slu stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolrcshstl("sal")
+pat lol loc sri stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolrcshstl("sar")
+pat lol loc sru stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolrcshstl("shr")
+
 #endif
 
 proc lolcxxstl example lol loc sbi stl
@@ -1557,29 +1594,44 @@ proc lolcxxstl example lol loc sbi stl
 
 pat lol loc sbi stl $1==$4 && $3==2		call lolcxxstl("sub")
 pat lol loc sbu stl $1==$4 && $3==2		call lolcxxstl("sub")
-pat lol loc sli stl $1==$4 && $3==2		call lolcxxstl("sal")
-pat lol loc slu stl $1==$4 && $3==2		call lolcxxstl("sal")
-pat lol loc sri stl $1==$4 && $3==2		call lolcxxstl("sar")
-pat lol loc sru stl $1==$4 && $3==2		call lolcxxstl("shr")
+pat lol loc sli stl $1==$4 && $3==2 && $2==1	call lolcxxstl("sal")
+pat lol loc slu stl $1==$4 && $3==2 && $2==1	call lolcxxstl("sal")
+pat lol loc sri stl $1==$4 && $3==2 && $2==1	call lolcxxstl("sar")
+pat lol loc sru stl $1==$4 && $3==2 && $2==1	call lolcxxstl("shr")
+
+proc lolcshstl example lol loc sli stl
+  kills indexed, locals %ind>=$1 && %ind<$1+2
+  uses CXREG = {ANYCON,$2}
+  gen sxx* {LOCAL,$1,2},cl
+
+pat lol loc sli stl $1==$4 && $3==2	call lolcshstl("sal")
+pat lol loc slu stl $1==$4 && $3==2	call lolcshstl("sal")
+pat lol loc sri stl $1==$4 && $3==2	call lolcshstl("sar")
+pat lol loc sru stl $1==$4 && $3==2	call lolcshstl("shr")
+
+
+proc loecxxste example loe loc sbi ste
+  kills indirects
+  gen axx* {EXTERN2,$1},{ANYCON,$2}
+
+pat loe loc sbi ste $1==$4 && $3==2		call loecxxste("sub")
+pat loe loc sbu ste $1==$4 && $3==2		call loecxxste("sub")
+pat loe loc sli ste $1==$4 && $3==2 && $2==1	call loecxxste("sal")
+pat loe loc slu ste $1==$4 && $3==2 && $2==1	call loecxxste("sal")
+pat loe loc sri ste $1==$4 && $3==2 && $2==1	call loecxxste("sar")
+pat loe loc sru ste $1==$4 && $3==2 && $2==1	call loecxxste("shr")
+
+proc loecshste example loe loc sli ste
+  kills indirects
+  uses CXREG = {ANYCON,$2}
+  gen sxx* {EXTERN2,$1},cl
+
+pat loe loc sli ste $1==$4 && $3==2	call loecshste("sal")
+pat loe loc slu ste $1==$4 && $3==2	call loecshste("sal")
+pat loe loc sri ste $1==$4 && $3==2	call loecshste("sar")
+pat loe loc sru ste $1==$4 && $3==2	call loecshste("shr")
 
 #ifdef REGVARS
-pat lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  gen sal {LOCAL,$1,2},{ANYCON,1}
-      sal {LOCAL,$1,2},{ANYCON,1}
-pat lol loc sli stl $1==$4 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  uses CXREG={ANYCON,$2}
-  gen sal {LOCAL,$1,2},cl
-pat lol loc sri stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  gen sar {LOCAL,$1,2},{ANYCON,1}
-      sar {LOCAL,$1,2},{ANYCON,1}
-pat lol loc sri stl $1==$4 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  uses CXREG={ANYCON,$2}
-  gen sar {LOCAL,$1,2},cl
-
 pat lol ngi stl $1==$3 && $2==2 && inreg($1)==reg_any
 kills regvar($1)
 gen neg {LOCAL, $1, 2}
