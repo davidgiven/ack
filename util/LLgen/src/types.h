@@ -174,8 +174,8 @@ typedef short t_reps,*p_reps;
  */
 # define r_getkind(q)	((q)->t_repeats&03)
 # define r_getnum(q)	(((q)->t_repeats>>2)&037777)
-# define r_setkind(q,s)	{ assert(((unsigned)(s))<=03);(q)->t_repeats=((q)->t_repi&0177774)|(s);}
-# define r_setnum(q,s)	{ assert(((unsigned)(s))<=037777);(q)->t_repeats=((q)->t_repi&03)|((s)<<2);}
+# define r_setkind(q,s)	{ assert(((unsigned)(s))<=03);(q)->t_repeats=((q)->t_repeats&0177774)|(s);}
+# define r_setnum(q,s)	{ assert(((unsigned)(s))<=037777);(q)->t_repeats=((q)->t_repeats&03)|((s)<<2);}
 
 /*
  * header structure for	a term
