@@ -38,16 +38,9 @@ For each file mentioned there it performes certain actions:
 	      else
    d-               give message that says "not present" (or some such). 
 
-Now you have the tree but not everything is kosher yet.
-Some files derive from other files in the tree, those derivations should
-be done with the use of an already installed distribution.
-The file Action in this directory contains the actions
-we now take.
-
-After running these re-derivation programs the distribution tree starts
-to look like the tree you need.
-There are too many files there though, especially the files created by
-the derivation process.
+Now, the tree contains all the files in the distribution, but it also contains
+files that should not be in the distribution, especially the files created
+by CVS.
 That is why we now give the command:
 	dtar cdf distr5 .
 The file distr5 is the one you should put on tape!
@@ -65,5 +58,8 @@ Updated for 4th distribution by Ceriel Jacobs, 88/4/08.
 And again,
 					Good Luck!
 Updated for 5th distribution by Ceriel Jacobs, 91/19/12.
+And again,
+					Good Luck!
+Updated for 1st upgrade to 5th distribution by Ceriel Jacobs, 91/12/11.
 And again,
 					Good Luck!

@@ -22,3 +22,7 @@ DF=$DDIR/mkf
 DA=$DDIR/mka
 export DDIR DESTDIR DD DF DA REPDIR
 $DDIR/dwalk $3
+
+cd $DESTDIR
+find . -type d -print | xargs chmod "uog+rx"
+chmod -R "og-w,u+w,uog+r" .
