@@ -51,14 +51,12 @@ C_lxa
 
 C_loi
   $1 == 1	==> 	"pop ecx";
-		    	"movzx eax, (ecx)";
+		    	"movzxb eax, (ecx)";
 		    	"push eax".
 
   $1 == 2	==> 	"pop ecx";
-			"xor eax,eax";
-			"o16";
-		    	"mov eax, (ecx)";
-		    	"push (eax)".
+		    	"movzx eax, (ecx)";
+		    	"push eax".
 	 
   $1 == 4	==> 	"pop eax";
 		    	"push (eax)".
@@ -116,8 +114,7 @@ C_sti
 
   $1 == 2	==>	"pop eax";
 		   	"pop ecx";
-			"o16";
-			"mov (eax),ecx".
+			"movw (eax),ecx".
 
   $1 == 4	==>	"pop eax";
 		   	"pop (eax)".
@@ -342,6 +339,11 @@ C_dvf
 			"add esp,8".
   default	==>	arg_error("C_dvf", $1).
 
+C_ngf
+  $1 == 4	==>	"call .ngf4".
+  $1 == 8	==>	"call .ngf8".
+  default	==>	arg_error("C_ngf", $1).
+
 C_fif
   $1 == 4	==>	C_lor((arith)1);
 			"call .fif4";
@@ -356,7 +358,7 @@ C_fef
 			"sub eax,4";
 			"push eax";
 			"call .fef4".
-  $1 == 8	==>	"mov eax,esp"
+  $1 == 8	==>	"mov eax,esp";
 			"sub eax,4";
 			"push eax";
 			"call .fef8".
@@ -1101,6 +1103,6 @@ C_jump			==>	"jmp $1".
 C_prolog		==>	.
 
 C_locals
-	$1 < 32767	==>	"enter $1,0".
-	default		==>	"enter 0,0";
+			==>	"push ebp";
+				"mov ebp,esp";
 				"sub esp, $1".

@@ -55,42 +55,42 @@ jb dst:ILB		==>	@text1( 0x72);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x12);
+				@text1(0x82);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 je dst:ILB		==>	@text1( 0x74);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x14);
+				@text1(0x84);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 jg dst:ILB		==>	@text1( 0x7f);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x1f);
+				@text1(0x8f);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 jge dst:ILB		==>	@text1( 0x7d);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x1d);
+				@text1(0x8d);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 jl dst:ILB		==>	@text1( 0x7c);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x1c);
+				@text1(0x8c);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 jle dst:ILB		==>	@text1( 0x7e);
 				@text1( %dist( dst->lab)).
 
 ... dst:lABEL		==>	@text1(0x0f);
-				@text1(0x1e);
+				@text1(0x8e);
 				@reloc4( %$(dst->lab), %$(dst->off), PC_REL).
 
 jmp dst:ILB		==>	@text1( 0xeb);
@@ -128,8 +128,16 @@ mov dst:REG, src:EADDR	==>	mv_RG_EADDR( dst, src).
 				mod_RM( 0, dst);
 				@reloc4( %$(src->lab), %$(src->off), ABSOLUTE).
 
+movw dst:EADDR, src:REG	==>	@text1( 0x66);	/* operand size prefix */
+				@text1( 0x89);
+				mod_RM( src->reg, dst).
+
 movb dst:EADDR, src:REG	==>	@text1( 0x88);
 				mod_RM( src->reg, dst).
+
+movzxb dst:REG, src:EADDR ==>	@text1(0x0f);
+				@text1(0xb6);
+				mod_RM(dst->reg, src).
 
 movzx dst:REG, src:EADDR ==>	@text1(0x0f);
 				@text1(0xb7);
@@ -143,8 +151,6 @@ neg dst:EADDR		==>	@text1( 0xf7);
 
 not dst:EADDR		==>	@text1( 0xf7);
 				mod_RM( 2, dst).
-
-o16			==>	@text1(0x66).
 
 or dst:REG, src:EADDR	==>	@text1( 0x0b);
 				mod_RM( dst->reg, src).
@@ -167,7 +173,7 @@ push src:REG		==>	R53( 0xa, src->reg).
 
 ... src:DATA		==>	small_const(0x68, src).
 
-... src:lABEL		==>	@emit1(0x68);
+... src:lABEL		==>	@text1(0x68);
 				@reloc4(%$(src->lab), %$(src->off), ABSOLUTE).
 
 ... src:EADDR		==>	@text1( 0xff);

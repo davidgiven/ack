@@ -1,15 +1,15 @@
 EMHOME = ../../..
 CEG = $(EMHOME)/lib/ceg/util
-VERSION = make_obj
+OBJ = obj
 
 all:
-	make -f $(CEG)/$(VERSION)
+	make -f $(CEG)/make_asobj "OBJ="$(OBJ)
 
 install:
-	make -f $(CEG)/$(VERSION) install
+	make -f $(CEG)/make_asobj "OBJ="$(OBJ) install
 
 cmp:
-	-make -f $(CEG)/$(VERSION) cmp
+	-make -f $(CEG)/make_asobj "OBJ="$(OBJ) cmp
 
 pr:
 	@pr Makefile EM_table mach.h mach.c as_table as.h as.c
@@ -19,8 +19,8 @@ opr:
 
 # total cleanup
 clean:
-	make -f $(CEG)/$(VERSION) clean
+	make -f $(CEG)/make_asobj "OBJ="$(OBJ) clean
 
 # only remove ce, ceg, and back directories
 dclean:
-	make -f $(CEG)/$(VERSION) dclean
+	make -f $(CEG)/make_asobj "OBJ="$(OBJ) dclean

@@ -20,6 +20,7 @@ int val;
 	return( val >= -128 && val <= 127);
 }
 
+#define IEEEFLOAT
 #include <con_float>
 
 /* as long as we generate assembler ...
