@@ -9,37 +9,15 @@ AMAKELIB = { . , /usr/local/lib/amake } ;
 
 %default grind ;
 
-TOKENNAMES = tokenname.c [
+%declare tokenname.c [
 	gen_tokens,
 	cc-dest = symbol2str.c,
 	LL-dest = tokenfile.g
 ];
 
-DBS_LLTARGETS = {
-	db_symtab.c,
-	DBSpars.c,
-	DBSpars.h
-} ;
-
-DBS_LLSRC = {
-	db_symtab.g
-} ;
-
-CMD_LLTARGETS = {
-	tokenfile.c,
-	commands.c,
-	Lpars.c,
-	Lpars.h
-} ;
-
 CMD_LLSRC = {
 	tokenname.c,
 	commands.g
-} ;
-
-GENNEXTSRC = {
-	file.h,
-	next.c
 } ;
 
 CSRC = {
@@ -116,14 +94,24 @@ CFLAGS = {
 	$DBFLAGS
 } ;
 
-LINTFLAGS = {
-	$INCLUDES
+DBS_LLTARGETS = {
+	db_symtab.c,
+	DBSpars.c,
+	DBSpars.h
+} ;
+
+DBS_LLSRC = {
+	db_symtab.g
 } ;
 
 %cluster {
 	%targets $DBS_LLTARGETS ;
 	%sources $DBS_LLSRC ;
 	%use LLgen(prefix => DBS) ;
+} ;
+
+LINTFLAGS = {
+	$INCLUDES
 } ;
 
 %cluster {
@@ -134,5 +122,5 @@ LINTFLAGS = {
 
 %cluster {
 	%targets grind[type = program];
-	%sources $CMD_LLSRC + $CSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
+	%sources $CSRC + $CMD_LLSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
 } ;
