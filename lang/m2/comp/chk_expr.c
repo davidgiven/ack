@@ -84,19 +84,12 @@ MkCoercion(pnd, tp)
 	if (nd->nd_class == Value &&
 	    nd_tp->tp_fund != T_REAL &&
 	    tp->tp_fund != T_REAL) {
-		/* Constant expression mot involving REALs */
+		/* Constant expression not involving REALs */
 		switch(tp->tp_fund) {
 		case T_SUBRANGE:
-			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
-				BaseType(tp)->tp_fund) ||
-			    ! chk_bounds(nd->nd_INT, tp->sub_ub,
-				BaseType(tp)->tp_fund)) {
-				wmess = "range bound";
-			}
-			break;
 		case T_ENUMERATION:
 		case T_CHAR:
-			if (nd->nd_INT < 0 || nd->nd_INT >= tp->enm_ncst) {
+			if (! in_range(nd->nd_INT, tp)) {
 				wmess = "range bound";
 			}
 			break;
@@ -109,12 +102,10 @@ MkCoercion(pnd, tp)
 			}
 			break;
 		case T_INTEGER:  {
-			long i = ~max_int[(int)(tp->tp_size)];
+			long i = min_int[(int)(tp->tp_size)];
 			long j = nd->nd_INT & i;
 
-			if ((nd_tp->tp_fund == T_INTEGER &&
-			     j != i && j != 0) ||
-			    (nd_tp->tp_fund != T_INTEGER && j)) {
+			if (j != 0 && (nd_tp->tp_fund != T_INTEGER || j != i)) {
 				wmess = "conversion";
 			}
 			}
@@ -377,7 +368,7 @@ ChkElement(expp, tp, set)
 	register t_node *expr = *expp;
 	t_type *el_type = ElementType(tp);
 	register unsigned int i;
-	arith lo, hi, low, high;
+	arith low, high;
 
 	if (expr->nd_class == Link && expr->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
@@ -407,13 +398,12 @@ ChkElement(expp, tp, set)
 		}
 		low = high = expr->nd_INT;
 	}
-	if (low > high) {
+	if (! chk_bounds(low, high, BaseType(el_type)->tp_fund)) {
 		node_error(expr, "lower bound exceeds upper bound in range");
 		return 0;
 	}
 
-	getbounds(el_type, &lo, &hi);
-	if (low < lo || high > hi) {
+	if (! in_range(low, el_type) || ! in_range(high, el_type)) {
 		node_error(expr, "set element out of range");
 		return 0;
 	}
@@ -665,17 +655,12 @@ ChkFunCall(expp)
 	/*	Check a call that must have a result
 	*/
 
-	if (! ChkCall(expp)) {
-		expp->nd_type = error_type;
-		return 0;
-	}
-
-	if (expp->nd_type == 0) {
+	if (ChkCall(expp)) {
+		if (expp->nd_type != 0) return 1;
 		node_error(expp, "function call expected");
-		expp->nd_type = error_type;
-		return 0;
 	}
-	return 1;
+	expp->nd_type = error_type;
+	return 0;
 }
 
 int

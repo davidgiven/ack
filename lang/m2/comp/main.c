@@ -236,7 +236,6 @@ do_SYSTEM()
 	*/
 	static char systemtext[] = SYSTEMTEXT;
 
-	open_scope(CLOSEDSCOPE);
 	EnterType("WORD", word_type);
 	EnterType("BYTE", byte_type);
 	EnterType("ADDRESS",address_type);
@@ -245,7 +244,6 @@ do_SYSTEM()
 		fatal("could not insert text");
 	}
 	DefModule();
-	close_scope(SC_CHKFORW);
 }
 
 #ifdef DEBUG

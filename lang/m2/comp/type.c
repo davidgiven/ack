@@ -291,31 +291,25 @@ chk_basesubrange(tp, base)
 		/* Check that the bounds of "tp" fall within the range
 		   of "base".
 		*/
-		int fund = base->tp_next->tp_fund;
-
-		if (! chk_bounds(base->sub_lb, tp->sub_lb, fund) || 
-		    ! chk_bounds(tp->sub_ub, base->sub_ub, fund)) {
+		if (! in_range(tp->sub_lb, base) || 
+		    ! in_range(tp->sub_ub, base)) {
 			error("base type has insufficient range");
 		}
 		base = base->tp_next;
 	}
 
-	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
+	if ((base->tp_fund & (T_ENUMERATION|T_CHAR)) || base == card_type) {
 		if (tp->tp_next != base) {
 			error("specified base does not conform");
 		}
 	}
-	else if (base != card_type && base != int_type) {
-		error("illegal base for a subrange");
+	else if (base == int_type) {
+		if (tp->tp_next == card_type &&
+		    ! chk_bounds(tp->sub_ub,max_int[(int)int_size],T_CARDINAL)){
+			error("upperbound to large for type INTEGER");
+		}
 	}
-	else if (base == int_type && tp->tp_next == card_type &&
-		 (tp->sub_ub > max_int[(int) word_size] || tp->sub_ub < 0)) {
-		error("upperbound to large for type INTEGER");
-	}
-	else if (base != tp->tp_next && base != int_type) {
-		error("specified base does not conform");
-	}
-
+	else	error("illegal base for a subrange");
 	tp->tp_next = base;
 }
 
@@ -332,6 +326,28 @@ chk_bounds(l1, l2, fund)
 		(l1 & mach_long_sign ? l2 >= l1 : 1) :
 		(l1 & mach_long_sign ? 0 : l2 >= l1)
 	       );
+}
+
+int
+in_range(i, tp)
+	arith		i;
+	register t_type	*tp;
+{
+	/*	Check that the value i fits in the subrange or enumeration
+		type tp.  Return 1 if so, 0 otherwise
+	*/
+
+	switch(tp->tp_fund) {
+	case T_ENUMERATION:
+	case T_CHAR:
+		return i >= 0 && i < tp->enm_ncst;
+
+	case T_SUBRANGE:
+		return	chk_bounds(i, tp->sub_ub, SubBaseType(tp)->tp_fund) &&
+			chk_bounds(tp->sub_lb, i, SubBaseType(tp)->tp_fund);
+	}
+	assert(0);
+	/*NOTREACHED*/
 }
 
 t_type *
@@ -536,7 +552,7 @@ ArraySizes(tp)
 	/*	Assign sizes to an array type, and check index type
 	*/
 	register t_type *index_type = IndexType(tp);
-	arith lo, hi, diff;
+	arith diff;
 
 	ArrayElSize(tp);
 
@@ -548,10 +564,8 @@ ArraySizes(tp)
 		return;
 	}
 
-	getbounds(index_type, &lo, &hi);
-	tp->arr_low = lo;
-	tp->arr_high = hi;
-	diff = hi - lo;
+	getbounds(index_type, &(tp->arr_low), &(tp->arr_high));
+	diff = tp->arr_high - tp->arr_low;
 
 	if (! fit(diff, (int) int_size)) {
 		error("too many elements in array");

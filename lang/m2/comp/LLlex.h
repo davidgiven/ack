@@ -12,7 +12,7 @@
 /* Structure to store a string constant
 */
 struct string {
-	arith s_length;			/* length of a string */
+	unsigned s_length;		/* length of a string */
 	char *s_str;			/* the string itself */
 };
 

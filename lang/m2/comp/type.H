@@ -206,12 +206,15 @@ extern t_type
 					(tpx)->tp_next)
 #define PointedtoType(tpx)	(assert((tpx)->tp_fund == T_POINTER),\
 					(tpx)->tp_next)
+#define SubBaseType(tpx)	(assert((tpx)->tp_fund == T_SUBRANGE), \
+					(tpx)->tp_next)
 #else DEBUG
 #define ResultType(tpx)		((tpx)->tp_next)
 #define ParamList(tpx)		((tpx)->prc_params)
 #define IndexType(tpx)		((tpx)->tp_next)
 #define ElementType(tpx)	((tpx)->tp_next)
 #define PointedtoType(tpx)	((tpx)->tp_next)
+#define SubBaseType(tpx)	((tpx)->tp_next)
 #endif DEBUG
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->tp_next : \
 					(tpx))

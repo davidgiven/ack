@@ -82,10 +82,10 @@ SkipComment()
 				options[ch] = !on_on_minus;
 				break;
 			}
+			ch = c;
 		}
 			/* fall through */
 		default:
-			PushBack();
 			break;
 		}
 	}
@@ -152,7 +152,8 @@ GetString(upto)
 		}
 	}
 	str->s_length = p - str->s_str;
-	while (p - str->s_str < len) *p++ = '\0';
+	*p = '\0';
+	str->s_str = Realloc(str->s_str, (unsigned)(str->s_length) + 1);
 	if (str->s_length == 0) str->s_length = 1;
 	/* ??? string length at least 1 ??? */
 	return str;
@@ -236,6 +237,13 @@ CheckForLineDirective()
 	LineNumber = i;
 }
 
+static
+UnloadChar(ch)
+{
+	if (ch == EOI) eofseen = 1;
+	else PushBack();
+}
+	
 int
 LLlex()
 {
@@ -297,8 +305,7 @@ again:
 				SkipComment();
 				goto again;
 			}
-			else if (nch == EOI) eofseen = 1;
-			else PushBack();
+			UnloadChar(nch);
 		}
 		if (ch == '&') return tk->tk_symb = AND;
 		if (ch == '~') return tk->tk_symb = NOT;
@@ -338,8 +345,7 @@ again:
 		default :
 			crash("(LLlex, STCOMP)");
 		}
-		if (nch == EOI) eofseen = 1;
-		else PushBack();
+		UnloadChar(nch);
 		return tk->tk_symb = ch;
 
 	case STIDF:
@@ -355,8 +361,7 @@ again:
 			LoadChar(ch);
 		} while(in_idf(ch));
 
-		if (ch == EOI) eofseen = 1;
-		else PushBack();
+		UnloadChar(ch);
 		*tag = '\0';
 		if (*(tag - 1) == '_') {
 			lexerror("last character of an identifier may not be an underscore");
@@ -377,10 +382,10 @@ again:
 		}
 		else {
 			tk->tk_data.tk_str = str;
-			if (! fit(str->s_length, (int) word_size)) {
+			if (! fit((arith)(str->s_length), (int) word_size)) {
 				lexerror("string too long");
 			}
-			toktype = standard_type(T_STRING, 1, str->s_length);
+			toktype = standard_type(T_STRING, 1, (arith)(str->s_length));
 		}
 		return tk->tk_symb = STRING;
 		}
@@ -429,8 +434,7 @@ again:
 				else {
 					state = End;
 					if (ch == 'H') base = 16;
-					else if (ch == EOI) eofseen = 1;
-					else PushBack();
+					UnloadChar(ch);
 				}
 				break;
 
@@ -456,8 +460,7 @@ again:
 				state = End;
 				if (ch != 'H') {
 					lexerror("H expected after hex number");
-					if (ch == EOI) eofseen = 1;
-					else PushBack();
+					UnloadChar(ch);
 				}
 				break;
 
@@ -473,8 +476,7 @@ again:
 					state = Hex;
 					break;
 				}
-				if (ch == EOI) eofseen = 1;
-				else PushBack();
+				UnloadChar(ch);
 				ch = *--np;
 				*np++ = '\0';
 				base = 8;
@@ -593,8 +595,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 
 noscale:
 		*np++ = '\0';
-		if (ch == EOI) eofseen = 1;
-		else PushBack();
+		UnloadChar(ch);
 
 		if (np >= &buf[NUMSIZE]) {
 			tk->TOK_REL = Salloc("0.0", 5);

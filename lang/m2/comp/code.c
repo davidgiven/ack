@@ -83,7 +83,7 @@ CodeString(nd)
 		return;
 	}
 	C_df_dlb(++data_label);
-	C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
+	C_rom_scon(nd->nd_STR, WA((arith)(nd->nd_SLE + 1)));
 	c_lae_dlb(data_label);
 }
 
@@ -395,7 +395,7 @@ CodeParameters(param, arg)
 			}
 		}
 		else if (left->nd_symb == STRING) {
-			C_loc(left->nd_SLE - 1);
+			C_loc((arith)(left->nd_SLE - 1));
 		}
 		else if (elem == word_type) {
 			C_loc((left_type->tp_size+word_size-1) / word_size - 1);
@@ -612,28 +612,25 @@ RangeCheck(tpl, tpr)
 	/*	Generate a range check if neccessary
 	*/
 
-	arith llo, lhi, rlo, rhi;
+	arith rlo, rhi;
 
 	if (options['R']) return;
 
 	if (bounded(tpl)) {
-		/* in this case we might need a range check */
-		if (!bounded(tpr)) {
-			/* yes, we need one */
-			genrck(tpl);
-			return;
-		}
-		/* both types are restricted. check the bounds
+		/* In this case we might need a range check.
+		   If both types are restricted. check the bounds
 		   to see wether we need a range check.
 		   We don't need one if the range of values of the
 		   right hand side is a subset of the range of values
 		   of the left hand side.
 		*/
-		getbounds(tpl, &llo, &lhi);
-		getbounds(tpr, &rlo, &rhi);
-		if (llo > rlo || lhi < rhi) {
-			genrck(tpl);
+		if (bounded(tpr)) {
+			getbounds(tpr, &rlo, &rhi);
+			if (in_range(rlo, tpl) && in_range(rhi, tpl)) {
+				return;
+			}
 		}
+		genrck(tpl);
 		return;
 	}
 	if (tpl->tp_size <= tpr->tp_size &&

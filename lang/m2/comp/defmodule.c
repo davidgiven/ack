@@ -41,10 +41,9 @@ getwdir(fn)
 	register char *p;
 	char *strrindex();
 
-	p = strrindex(fn, '/');
-	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
+	while ((p = strrindex(fn,'/')) && *(p + 1) == '\0') {
+		/* remove trailing /'s */
 		*p = '\0';
-		p = strrindex(fn, '/');
 	}
 
 	if (p) {
@@ -53,7 +52,7 @@ getwdir(fn)
 		*p = '/';
 		return fn;
 	}
-	else return ".";
+	return ".";
 }
 
 STATIC
@@ -101,23 +100,23 @@ GetDefinitionModule(id, incr)
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
 		*/
+		extern int ForeignFlag;
+
+		ForeignFlag = 0;
 		DefId = id;
+		open_scope(CLOSEDSCOPE);
 		if (!strcmp(id->id_text, "SYSTEM")) {
 			do_SYSTEM();
 			df = lookup(id, GlobalScope, D_IMPORTED, 0);
 		}
 		else {
-			extern int ForeignFlag;
-
-			ForeignFlag = 0;
-			open_scope(CLOSEDSCOPE);
 			newsc = CurrentScope;
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 
 				DefModule();
 				df = lookup(id, GlobalScope, D_IMPORTED, 0);
 				if (level == 1 &&
-				    (!df || !(df->df_flags & D_FOREIGN))) {
+				    (df && !(df->df_flags & D_FOREIGN))) {
 					/* The module is directly imported by
 					   the currently defined module, and
 					   is not foreign, so we have to
@@ -129,7 +128,7 @@ GetDefinitionModule(id, incr)
 					extern t_node *Modules;
 
 					n = dot2leaf(Def);
-					n->nd_def = CurrentScope->sc_definedby;
+					n->nd_def = newsc->sc_definedby;
 					if (nd_end) nd_end->nd_left = n;
 					else Modules = n;
 					nd_end = n;
@@ -140,8 +139,8 @@ GetDefinitionModule(id, incr)
 				newsc->sc_name = id->id_text;
 			}
 			vis = CurrVis;
-			close_scope(SC_CHKFORW);
 		}
+		close_scope(SC_CHKFORW);
 		if (! df) {
 			df = MkDef(id, GlobalScope, D_ERROR);
 			df->mod_vis = vis;
