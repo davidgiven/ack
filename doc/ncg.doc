@@ -57,7 +57,7 @@ and the assembly code of the machine at hand.
 .NH 1
 What has changed since version 1 ?
 .PP
-This chapter can be skipped by anyone not familiar with the first version.
+This section can be skipped by anyone not familiar with the first version.
 It is not needed to understand the current version.
 .PP
 This paper describes the second version of the code generator system.
@@ -116,39 +116,40 @@ Alternatively one can think of the real stack as an infinite extension
 at the bottom of the fake stack.
 Both ways, the concatenation of the real stack and the fake stack
 will be the stack as it would have been on a real EM machine (see figure).
-.KF
-.DS L
-.ta 8 16 24 32 40 48 56 64 72
-	   EM machine		 target machine
-
-	|		|	|		|
-	|		|	|		|
-	|		|	|		|
-	|		|	|		|
-	|		|	|   real stack	|
-	|		|	|		|	|
-	|		|	|		|	| growing
-	|    EM stack	|	|		|	|
-	|		|	|_______________|      \e|/
-	|		|	|		|
-	|		|	|		|
-	|		|	|		|
-	|		|	|   fake stack	|
-	|		|	|		|
-	|_______________|	|_______________|
+.TS
+center;
+cw(3.5c) cw(3c) cw(3.5c)
+cw(3.5c) cw(3c) cw(3.5c)
+|cw(3.5c)| cw(3c) |cw(3.5c)| .
+EM machine		target machine
 
 
-.I
-	Relation between EM stack, real stack and fake stack.
-.R
-.DE
-.KE
+
+
+
+		real stack
+	stack
+	grows
+EM stack	\s+2\(br\s0
+	\s+2\(br\s0
+	\s+2\(br\s0	_
+	\s+2\(br\s0
+	\s+2\(da\s0
+		fake stack
+
+
+
+_		_
+.T&
+ci s s.
+Relation between EM stack, real stack and fake stack.
+.TE
 During code generation tokens will be kept on the fake stack as long
 as possible but when they are moved to the real stack,
 by generating code for the push,
-all tokens above\u*\d
+all tokens above\v'-.25m'\(dg\v'.25m'
 .FS
-* in this document the stack is assumed to grow downwards,
+\(dg in this document the stack is assumed to grow downwards,
 although the top of the stack will mean the first element that will
 be popped.
 .FE
@@ -297,8 +298,9 @@ at will to improve legibility.
 Identifiers used in the table have the same syntax as C identifiers,
 upper and lower case considered different, all characters significant.
 Here is a list of reserved words; all of these are unavailable as identifiers.
-.DS L
-.ta 14 28 42 56
+.TS
+box;
+l l l l l.
 ADDR	STACK	from	reg_any	test
 COERCIONS	STACKINGRULES	gen	reg_float	to
 INSTRUCTIONS	TESTS	highw	reg_loop	ufit
@@ -309,7 +311,7 @@ PROPERTIES	cost	loww	reusing
 REGISTERS	defined	move	rom	
 SETS	exact	pat	samesign	
 SIZEFACTOR	example	proc	sfit	
-.DE
+.TE
 C style comments are accepted.
 .DS
 /* this is a comment */
@@ -330,7 +332,7 @@ NAME=value
 .DE
 value being an integer or string.
 Three constants must be defined here:
-.IP EM_WSIZE 10
+.IP EM_WSIZE 14
 Number of bytes in a machine word.
 This is the number of bytes
 a \fBloc\fP instruction will put on the stack.
@@ -368,13 +370,13 @@ FORMAT= "0%o"
 to satisfy the old UNIX assembler that reads octal unless followed by
 a period, and the ACK assembler that follows C conventions.
 .PP
-Tables under control of programs like
+Tables under control of source code control systems like
 .I sccs
 or
 .I rcs
 can put their id-string here, for example
 .DS
-rcsid="$Header$"
+rcsid="$\&Header$"
 .DE
 These strings, like all strings in the table, will eventually
 end up in the binary code generator produced.
@@ -385,6 +387,7 @@ same order of magnitude.
 This can be done as
 .DS
 SIZEFACTOR = C\d3\u/C\d4\u
+.sp
 TIMEFACTOR = C\d1\u/C\d2\u
 .DE
 Above numbers must be read as rational numbers.
@@ -403,32 +406,28 @@ It consists of a list of user-defined
 identifiers optionally followed by the size
 of the property in parentheses, default EM_WSIZE.
 Example for the PDP-11:
-.DS
-.ta 8 16 24 32 40
-PROPERTIES		/* The header word for this section */
+.TS
+l l.
+PROPERTIES	/* The header word for this section */
 
-GENREG			/* All PDP registers */
-REG			/* Normal registers (allocatable) */
-ODDREG			/* All odd registers (allocatable) */
-REGPAIR(4)		/* Register pairs for division */
-FLTREG(4)		/* Floating point registers */
-DBLREG(8)		/* Same, double precision */
-GENFREG(4)		/* generic floating point */
-GENDREG(8)		/* Same, double precision */
-FLTREGPAIR(8)		/* register pair for modf */
-DBLREGPAIR(16)		/* Same, double precision */
-LOCALBASE		/* Guess what */
+GENREG	/* All PDP registers */
+REG	/* Normal registers (allocatable) */
+ODDREG	/* All odd registers (allocatable) */
+REGPAIR(4)	/* Register pairs for division */
+FLTREG(4)	/* Floating point registers */
+DBLREG(8)	/* Same, double precision */
+GENFREG(4)	/* generic floating point */
+GENDREG(8)	/* Same, double precision */
+FLTREGPAIR(8)	/* register pair for modf */
+DBLREGPAIR(16)	/* Same, double precision */
+LOCALBASE	/* Guess what */
 STACKPOINTER
 PROGRAMCOUNTER
-.DE
+.TE
 Registers are allocated by asking for a property,
 so if for some reason in later parts of the table
 one particular register must be allocated it
 has to have a unique property.
-.PP
-There is a bug in the codegenerator that can be circumvented by
-providing a dummy property at the start of the property list.
-The example has not been updated to show this.
 .NH 2
 Register definition
 .PP
@@ -442,22 +441,22 @@ Syntax:
 <register> : ident [ '(' string ')' ] [ '=' ident [ '+' ident ] ]
 .DE
 Example for the PDP-11:
-.DS L
-.ta 8 16 24 32 40 48 56 64
+.TS
+l l.
 REGISTERS
 
-r0,r2,r4				: GENREG,REG.
-r1,r3					: GENREG,REG,ODDREG.
-r01("r0")=r0+r1				: REGPAIR.
-fr0("r0"),fr1("r1"),fr2("r2"),fr3("r3") : GENFREG,FLTREG.
+r0,r2,r4	: GENREG,REG.
+r1,r3	: GENREG,REG,ODDREG.
+r01("r0")=r0+r1	: REGPAIR.
+fr0("r0"),fr1("r1"),fr2("r2"),fr3("r3")	: GENFREG,FLTREG.
 dr0("r0")=fr0,dr1("r1")=fr1,
-	dr2("r2")=fr2,dr3("r3")=fr3 	: GENDREG,DBLREG.
+        dr2("r2")=fr2,dr3("r3")=fr3	: GENDREG,DBLREG.
 fr01("r0")=fr0+fr1,fr23("r2")=fr2+fr3	: FLTREGPAIR.
 dr01("r0")=dr0+dr1,dr23("r2")=dr2+dr3	: DBLREGPAIR.
-lb("r5")				: GENREG,LOCALBASE.
-sp					: GENREG,STACKPOINTER.
-pc					: GENREG,PROGRAMCOUNTER.
-.DE
+lb("r5")	: GENREG,LOCALBASE.
+sp	: GENREG,STACKPOINTER.
+pc	: GENREG,PROGRAMCOUNTER.
+.TE
 .PP
 The names in the left hand lists are names of registers as used
 in the table.
@@ -529,20 +528,21 @@ Tokens should usually be declared for every addressing mode
 of the machine at hand and for every size directly usable in
 a machine instruction.
 Example for the PDP-11 (incomplete):
-.DS L
+.TS
+l l.
 TOKENS
 
-const2 		= { INT num; } 2 cost(2,300) "$" num .
-addr_local 	= { INT ind; } 2 .
-addr_external 	= { ADDR off; } 2 "$" off.
+const2	= { INT num; } 2 cost(2,300) "$" num .
+addr_local	= { INT ind; } 2 .
+addr_external	= { ADDR off; } 2 "$" off.
 
-regdef2 	= { GENREG reg; } 2 "*" reg.
-regind2 	= { GENREG reg; ADDR off; } 2 off "(" reg ")" .
-reginddef2 	= { GENREG reg; ADDR off; } 2 "*" off "(" reg ")" .
+regdef2	= { GENREG reg; } 2 "*" reg.
+regind2	= { GENREG reg; ADDR off; } 2 off "(" reg ")" .
+reginddef2	= { GENREG reg; ADDR off; } 2 "*" off "(" reg ")" .
 regconst2	= { GENREG reg; ADDR off; } 2 .
 relative2	= { ADDR off; } 2 off .
-reldef2		= { ADDR off; } 2 "*" off.
-.DE
+reldef2	= { ADDR off; } 2 "*" off.
+.TE
 .PP
 Types allowed in the struct are ADDR, INT and all register properties.
 The type ADDR means a string and an integer,
@@ -624,21 +624,21 @@ in the remainder of the table,
 but for clarity it is usually better not to.
 .LP
 Example for the PDP-11 (incomplete):
-.DS L
-.ta 8 16 24 32 40 48 56 64
+.TS
+l l.
 SETS
 
-src2		= GENREG + regdef2 + regind2 + reginddef2 + relative2 +
-		  reldef2 + addr_external + const2 + LOCAL + ILOCAL +
-		  autodec + autoinc .
-dst2		= src2 - ( const2 + addr_external ) .
-xsrc2		= src2 + ftoint .
-src1		= regdef1 + regind1 + reginddef1 + relative1 + reldef1 .
-dst1		= src1 .
-src1or2		= src1 + src2 .
-src4		= relative4 + regdef4 + DLOCAL + regind4 .
-dst4		= src4 .
-.DE
+src2	= GENREG + regdef2 + regind2 + reginddef2 + relative2 +
+	\h'\w'= 'u'reldef2 + addr_external + const2 + LOCAL + ILOCAL +
+	\h'\w'= 'u'autodec + autoinc .
+dst2	= src2 - ( const2 + addr_external ) .
+xsrc2	= src2 + ftoint .
+src1	= regdef1 + regind1 + reginddef1 + relative1 + reldef1 .
+dst1	= src1 .
+src1or2	= src1 + src2 .
+src4	= relative4 + regdef4 + DLOCAL + regind4 .
+dst4	= src4 .
+.TE
 Permissible in the set construction are all the usual set operators, i.e.
 .IP +
 set union
@@ -1252,7 +1252,7 @@ The author of
 .I cgg
 could not get 
 .I yacc
-to be silent without it.
+to accept his syntax without it.
 Sorry about this.
 .IP 2)
 a 
@@ -1370,20 +1370,19 @@ A list of examples for the PDP-11 is given here.
 Far from being complete it gives examples of most kinds
 of instructions.
 .DS
-.ta 8 16 24 32 40 48 56 64
-pat loc					yields {const2, $1}
+.ta 7.5c
+pat loc	yields {const2, $1}
 
-pat ldc					yields {const2, loww($1)}
-					       {const2, highw($1)}
+pat ldc	yields {const2, loww($1)} {const2, highw($1)}
 .DE
 These simple patterns just push one or more tokens onto the fake stack.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat lof
-with REG				yields {regind2,%1,$1}
-with exact regconst2 			yields {regind2,%1.reg,$1+%1.off}
-with exact addr_external		yields {relative2,$1+%1.off}
-with exact addr_local			yields {LOCAL, %1.ind + $1,2}
+with REG	yields {regind2,%1,$1}
+with exact regconst2	yields {regind2,%1.reg,$1+%1.off}
+with exact addr_external	yields {relative2,$1+%1.off}
+with exact addr_local	yields {LOCAL, %1.ind + $1,2}
 .DE
 This pattern shows the possibility to do different things
 depending on the fake stack contents,
@@ -1393,13 +1392,12 @@ not preceded by
 that can always be taken after a coercion,
 if necessary.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat lxl $1>3
-uses REG={LOCAL, SL, 2},
-     REG={const2,$1-1}
+uses REG={LOCAL, SL, 2}, REG={const2,$1-1}
 gen 1:
     move {regind2,%a, SL},%a
-    sob %b,{label,1b}			yields %a
+    sob %b,{label,1b}	yields %a
 .DE
 This rule shows register allocation with initialisation,
 and the use of a temporary label.
@@ -1408,7 +1406,7 @@ of the static link,
 that is pushed by the Pascal compiler as the last argument of
 a function.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat stf
 with regconst2 xsrc2
   kills allexeptcon
@@ -1423,7 +1421,7 @@ part in a store instruction.
 The set allexeptcon contains all tokens that can be the destination
 of an indirect store.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat sde
 with exact FLTREG
   kills posextern
@@ -1449,51 +1447,52 @@ The third rule is taken by default,
 resulting in two separate stores,
 nothing better exists on the PDP-11.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat sbi $1==2
 with src2 REG
-  gen sub %1,%2				yields %2
+  gen sub %1,%2	yields %2
 with exact REG src2-REG
   gen sub %2,%1
-      neg %1				yields %1
+      neg %1	yields %1
 .DE
 This rule for
 .I sbi
 has a normal first part,
 and a hand optimized special case as it's second part.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat mli $1==2
 with ODDREG src2
-  gen mul %2,%1				yields %1
+  gen mul %2,%1	yields %1
 with src2 ODDREG
-  gen mul %1,%2				yields %2
+  gen mul %1,%2	yields %2
 .DE
 This shows the general property for rules with commutative
 operators,
 heuristics or look ahead will have to decide which rule is the best.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat loc sli $1==1 && $2==2
 with REG
-gen asl %1				yields %1
+gen asl %1	yields %1
 .DE
 A simple rule involving a longer EM-pattern,
 to make use of a specialized instruction available.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat loc loc cii $1==1 && $2==2
 with src1or2
 uses reusing %1,REG
-gen movb %1,%a				yields %a
+gen movb %1,%a	yields %a
 .DE
 A somewhat more complicated example of the same.
 Note the
 .I reusing
 clause.
 .DS
-.ta 8 16 24 32 40 48 56 64
-pat loc loc loc cii $1>=0 && $2==2 && $3==4	leaving loc $1 loc 0
+.ta 7.5c
+pat loc loc loc cii $1>=0 && $2==2 && $3==4
+	leaving loc $1 loc 0
 .DE
 Shows a trivial example of EM-replacement.
 This is a rule that could be done by the
@@ -1502,40 +1501,40 @@ if word order in longs was defined in EM.
 On a `big-endian' machine the two replacement
 instructions would be the other way around.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat and $1==2
 with const2 REG
-  gen bic {const2,~%1.num},%2		yields %2
+  gen bic {const2,~%1.num},%2	yields %2
 with REG const2
-  gen bic {const2,~%2.num},%1		yields %1
+  gen bic {const2,~%2.num},%1	yields %1
 with REG REG
   gen com %1
-      bic %1,%2				yields %2
+      bic %1,%2	yields %2
 .DE
 Shows the way you have to twist the table,
 if an
 .I and -instruction
 is not available on your machine.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat set $1==2
 with REG
 uses REG={const2,1}
-gen ash %1,%a				yields %a
+gen ash %1,%a	yields %a
 .DE
 Shows the building of a word-size set.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0 
-					leaving adi 2
+	leaving adi 2
 
 pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0 
-					leaving adi 2 adp 0-rom($1,1)
+	leaving adi 2 adp 0-rom($1,1)
 .DE
 Two rules showing the use of the rom pseudo function,
 and some array optimalisation.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat bra
 with STACK
 gen jbr {label, $1}
@@ -1544,7 +1543,7 @@ A simple jump.
 The stack pattern guarantees that everything will be stacked
 before the jump is taken.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat cal
 with STACK
 gen jsr pc,{label, $1}
@@ -1552,9 +1551,9 @@ gen jsr pc,{label, $1}
 A simple call.
 Same comments as previous rule.
 .DS
-.ta 8 16 24 32 40 48 56 64
-pat lfr $1==2				yields r0
-pat lfr $1==4				yields r1 r0
+.ta 7.5c
+pat lfr $1==2	yields r0
+pat lfr $1==4	yields r1 r0
 .DE
 Shows the return area conventions of the PDP-11 table.
 At this point a reminder:
@@ -1564,7 +1563,7 @@ instruction, and some other instructions must leave
 the function return area intact.
 See the defining document for EM for exact information.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat ret $1==0
 with STACK
 gen mov lb,sp
@@ -1578,7 +1577,7 @@ In a table with register variables the
 part would just contain
 .I return .
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat blm
 with REG REG
 uses REG={const2,$1/2}
@@ -1596,15 +1595,15 @@ It uses the marriage thesis from Hall,
 a thesis from combinatorial mathematics,
 to accomplish this.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 pat exg $1==2
-with src2 src2				yields %1 %2
+with src2 src2	yields %1 %2
 .DE
 This rule shows the exchanging of two elements on the fake stack.
 .NH 2
 Code rules using procedures
 .PP
-To start this chapter it must be admitted at once that the
+To start this section it must be admitted at once that the
 word procedure is chosen here mainly for it's advertising
 value.
 It more resembles a glorified goto but this of course can
@@ -1664,12 +1663,12 @@ The string `*' can be used as an equivalent for `[1]'.
 Just in case this is not clear, here is an example for
 a procedure to increment/decrement a register.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 incop REG:rw:cc .	/* in the INSTRUCTIONS part of course */
 
 proc incdec
 with REG
-gen incop* %1				yields %1
+gen incop* %1	yields %1
 .DE
 The procedure is called with parameter "inc" or "dec".
 .PP
@@ -1680,18 +1679,18 @@ call <identifier> '(' string [ ',' string ] ')'
 .DE
 which leads to the following large example:
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 proc bxx example beq
 with src2 src2 STACK
 gen cmp %2,%1
     jxx* {label, $1}
 
-pat blt				call bxx("jlt")
-pat ble				call bxx("jle")
-pat beq				call bxx("jeq")
-pat bne				call bxx("jne")
-pat bgt				call bxx("jgt")
-pat bge				call bxx("jge")
+pat blt	call bxx("jlt")
+pat ble	call bxx("jle")
+pat beq	call bxx("jeq")
+pat bne	call bxx("jne")
+pat bgt	call bxx("jgt")
+pat bge	call bxx("jge")
 .DE
 .NH 2
 Move definitions
@@ -1856,38 +1855,38 @@ The next part of the table defines the coercions that are possible
 on the defined tokens.
 Example for the PDP-11:
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 COERCIONS
 
 from STACK
 uses REG
-gen mov {autoinc,sp},%a			yields %a
+gen mov {autoinc,sp},%a	yields %a
 
 from STACK
 uses DBLREG
-gen movf {autoinc,sp},%a		yields %a
+gen movf {autoinc,sp},%a	yields %a
 
 from STACK
 uses REGPAIR
 gen mov {autoinc,sp},%a.1
-    mov {autoinc,sp},%a.2		yields %a
+    mov {autoinc,sp},%a.2	yields %a
 .DE
 These three coercions just deliver a certain type
 of register by popping it from the real stack.
 .DS
-.ta 8 16 24 32 40 48 56 64
-from LOCAL				yields {regind2,lb,%1.ind}
+.ta 7.5c
+from LOCAL	yields {regind2,lb,%1.ind}
 
-from DLOCAL				yields {regind4,lb,%1.ind}
+from DLOCAL	yields {regind4,lb,%1.ind}
 
-from REG				yields {regconst2, %1, 0}
+from REG	yields {regconst2, %1, 0}
 .DE
 These three are zero-cost rewriting rules.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 from regconst2 %1.off==1
 uses reusing %1,REG=%1.reg
-gen inc %a				yields %a
+gen inc %a	yields %a
 
 from regconst2
 uses reusing %1,REG=%1.reg
@@ -1896,7 +1895,7 @@ gen add {addr_external, %1.off},%a	yields %a
 from addr_local
 uses REG
 gen mov lb,%a
-    add {const2, %1.ind},%a		yields %a
+    add {const2, %1.ind},%a	yields %a
 .DE
 The last three are three different cases of the coercion
 register+constant to register.
@@ -1904,19 +1903,19 @@ Only in the last case is it always necessary to allocate
 an extra register,
 since arithmetic on the localbase is unthinkable.
 .DS
-.ta 8 16 24 32 40 48 56 64
+.ta 7.5c
 from xsrc2
-uses reusing %1, REG=%1			yields %a
+uses reusing %1, REG=%1	yields %a
 
 from longf4
-uses FLTREG=%1				yields %a
+uses FLTREG=%1	yields %a
 
 from double8
-uses DBLREG=%1				yields %a
+uses DBLREG=%1	yields %a
 
 from src1
 uses REG={const2,0}
-gen bisb %1,%a				yields %a
+gen bisb %1,%a	yields %a
 .DE
 These examples show the coercion of different
 tokens to a register of the needed type.
@@ -1925,14 +1924,14 @@ ensure bytes are not sign-extended.
 In EM it is defined that the result of a \fBloi\fP\ 1
 instruction is an integer in the range 0..255.
 .DS
-.ta 8 16 24 32 40 48 56 64
-from REGPAIR				yields %1.2 %1.1
+.ta 7.5c
+from REGPAIR	yields %1.2 %1.1
 
-from regind4				yields {regind2,%1.reg,2+%1.off}
-					       {regind2,%1.reg,%1.off}
+from regind4	yields {regind2,%1.reg,2+%1.off}
+            {regind2,%1.reg,%1.off}
 
-from relative4				yields {relative2,2+%1.off}
-					       {relative2,%1.off}
+from relative4	yields {relative2,2+%1.off}
+            {relative2,%1.off}
 .DE
 The last examples are splitting rules.
 .PP
@@ -2086,23 +2085,23 @@ If omitted no initialization is assumed.
 .NH 3
 Example mach.h for the PDP-11
 .DS L
-.ta 8 16 24 32 40 48 56
+.ta 4c
 #define ex_ap(y)	fprintf(codefile,"\et.globl %s\en",y)
 #define in_ap(y)	/* nothing */
 
 #define newplb(x)	fprintf(codefile,"%s:\en",x)
 #define newilb(x)	fprintf(codefile,"%s:\en",x)
 #define newdlb(x)	fprintf(codefile,"%s:\en",x)
-#define	dlbdlb(x,y)	fprintf(codefile,"%s=%s\en",x,y)
+#define dlbdlb(x,y)	fprintf(codefile,"%s=%s\en",x,y)
 #define newlbss(l,x)	fprintf(codefile,"%s:.=.+%d.\en",l,x);
 
-#define cst_fmt		"$%d."
-#define off_fmt		"%d."
-#define ilb_fmt		"I%02x%x"
-#define dlb_fmt		"_%d"
-#define	hol_fmt		"hol%d"
+#define cst_fmt	"$%d."
+#define off_fmt	"%d."
+#define ilb_fmt	"I%02x%x"
+#define dlb_fmt	"_%d"
+#define hol_fmt	"hol%d"
 
-#define hol_off		"%d.+hol%d"
+#define hol_off	"%d.+hol%d"
 
 #define con_cst(x)	fprintf(codefile,"%d.\en",x)
 #define con_ilb(x)	fprintf(codefile,"%s\en",x)
@@ -2157,7 +2156,7 @@ mes(w_mesno)
 This function is called when a
 .B mes
 pseudo is seen that is not handled by the machine independent part.
-Example below shows all you probably have to know about that.
+The example below shows all you probably have to know about that.
 .IP -
 segname[]
 .br
@@ -2216,7 +2215,7 @@ Example mach.c for the PDP-11
 As an example of the sort of code expected,
 the mach.c for the PDP-11 is presented here.
 .DS L
-.ta 8 16 24 32 40 48 56 64
+.ta 0.5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i
 /*
  * machine dependent back end routines for the PDP-11
  */
