@@ -1177,7 +1177,7 @@ C_lpb		==> 	"pop ax";
 C_mon		==> 	"pop ax";
 			"call .mon".
 
-C_nop		==> 	"call .nop".
+C_nop		==> 	.
 
 C_rck
   $1 == 2	==>	"pop bx";

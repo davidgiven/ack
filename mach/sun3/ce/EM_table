@@ -765,7 +765,7 @@ C_lpb		==>	C_adp( (arith)8).
 
 C_mon		==>	"jsr (.mon)".
 
-C_nop		==>	"jsr (.nop)".
+C_nop		==>	.
 
 C_rck		
   	$1 == 4		==>	"move.l (sp)+, a0";
