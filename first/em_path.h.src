@@ -4,4 +4,4 @@
 /* Access to the ACK tree and parts thereof */
 #define EM_DIR		"/usr/em"	/* The root directory for EM stuff */
 #define RTERR_PATH	"etc/pc_rt_errors"
-#define ACK_PATH	"lib/ack"
+#define ACK_PATH	"lib/descr"
