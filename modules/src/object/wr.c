@@ -1,4 +1,8 @@
 /*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/*
  * You can choose between two strategies:
  *	- Open the output file several times, once for each logical part, and
  *	write to it in multiple places.

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* Integer to String translator
 	-> base is a value from [-16,-2] V [2,16]
 	-> base < 0: see 'val' as unsigned value

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define MININT		(1 << (sizeof(int) * 8 - 1))
 #define MAXCHUNK	(~MININT)	/* Highest count we write(2).	*/
 /* Notice that MAXCHUNK itself might be too large with some compilers.

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define C_lae_dnam _1_C_lae_dnam
 #define C_lae_dlb _2_C_lae_dlb
 #define C_sde_dnam _3_C_sde_dnam

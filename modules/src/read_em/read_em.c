@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	Read_em: a module to read either compact or human readable EM code.
 	Exported are the following routines:
 	EM_open() :	has a parameter representing either a pointer to a

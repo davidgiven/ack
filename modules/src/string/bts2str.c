@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	bts2str() turns a row of bytes b with length n into string s
 	The ASCII set of characters is used.
 	86/03/17 EHB

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	st_alloc - get a structure from a free list. If no structures left,
 		create new ones. The structures for which this works are
 		supposed to have as their first tag the string "next", which

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	This file is ment to be included in the file read_emeV.c.
 	It contains the part that takes care of the reading of human readable
 	EM-code.
