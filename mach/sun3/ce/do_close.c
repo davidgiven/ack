@@ -1,8 +1,8 @@
 #include <system.h>
 
-extern File *out_file;
+extern File *_out_file;
 
 close_back()
 {
-	sys_close( out_file);
+	sys_close( _out_file);
 }

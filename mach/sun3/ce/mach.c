@@ -40,7 +40,7 @@ static int been_here;
 	gen4((FOUR_BYTES) 0);
 	if ( !been_here++)
 	{
-	fputs("Warning : dummy float-constant(s)\n", stderr);
+	fprint(STDERR, "Warning : dummy float-constant(s)\n");
 	}
 #else
 #define IEEEFLOAT

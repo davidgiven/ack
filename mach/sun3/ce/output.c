@@ -3,7 +3,6 @@
 #include <out.h>
 #include "mach.h"
 #include "back.h"
-#include "data.h"
 
 /*	Unportable code. Written for SUN, meant to be run on a SUN.
 */
@@ -11,24 +10,25 @@
 Read above comment ...
 #endif
 
-extern File *out_file;
+extern File *_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
 
-struct exec u_header;
+static struct exec u_header;
 
-long ntext, ndata, nrelo, nchar;
+static long ntext, ndata, nrelo, nchar;
 
-long base_address[SEGBSS+1];
+long _base_address[SEGBSS+1];
 
-int trsize=0, drsize=0;
+static int trsize=0, drsize=0;
 
-struct relocation_info *u_reloc;
+static struct relocation_info *u_reloc;
 
-static reduce_name_table();
+static reduce_name_table(), putbuf(), put_stringtablesize();
+static convert_name(), convert_reloc(), init_unixheader();
 
-output()
+output_back()
 {
 	register int i;
 	register struct nlist *u_name;
@@ -126,15 +126,6 @@ reduce_name_table()
 	for (i = 0; i < nname; i++, np++) {
 		int old_diff_index = diff_index[i-1];
 
-		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
-			long sz = np->on_valu;
-
-			switchseg(SEGBSS);
-			align_word();
-			np->on_type &= (~S_COM);
-			np->on_valu = cur_value();
-			bss(sz);
-		}
 		if (removable(np)) {
 			diff_index[i] = old_diff_index + 1;
 		}
@@ -168,6 +159,7 @@ reduce_name_table()
 	string = q;
 }
 
+static
 init_unixheader()
 {
 	ntext = text - text_area;
@@ -190,6 +182,7 @@ init_unixheader()
 	 */
 }
 
+static 
 convert_reloc( a_relo, u_relo)
 register struct outrelo *a_relo;
 register struct relocation_info *u_relo;
@@ -245,6 +238,7 @@ int length;
 #define 	n_str		n_un.n_strx
 
 
+static
 convert_name( a_name, u_name)
 register struct outname *a_name;
 register struct nlist *u_name;
@@ -278,21 +272,22 @@ register struct nlist *u_name;
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)
 		u_name->n_value = a_name->on_valu + 
-			base_address[( a_name->on_type & S_TYP) - S_MIN];
+			_base_address[( a_name->on_type & S_TYP) - S_MIN];
 	else 
 		 u_name->n_value = 0;
 }
 
+static
 put_stringtablesize( n)
 long n;
 {
 	putbuf( (char *)&n, 4L);
 }
 
-
+static
 putbuf(buf,n)
 char *buf;
 long n;
 {
-	sys_write( out_file, buf, n);
+	sys_write( _out_file, buf, n);
 }

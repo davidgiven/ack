@@ -1,22 +1,35 @@
 #include <out.h>
 #include "mach.h"
-#include "data.h"
 #include "back.h"
 #include "header.h"
 
-static do_algn();
+static finish_tables();
 
 end_back()
 {
-	do_algn();                 
+	finish_tables();                 
 	do_local_relocation();
-	output();
+	output_back();
 }
 
 
 static
-do_algn()
+finish_tables()
 {
+        register struct outname *np = symbol_table;
+        register int i = nname;
+
+        for (; i; i--, np++) {
+                if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {
+                        long sz = np->on_valu;
+
+                        switchseg(SEGBSS);
+                        align_word();
+                        np->on_type &= (~S_COM);
+                        np->on_valu = cur_value();
+                        bss(sz);
+                }
+        }
 	while ( ( text - text_area) % EM_WSIZE != 0 ) 
 		text1( '\0');
 	while ( ( data - data_area) % EM_WSIZE != 0 )
