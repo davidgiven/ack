@@ -17,6 +17,7 @@ X,Y		{TRUE				};
 DREG,DREG2 	{is_dreg(VAL)			};	 /* data register */
 DSREG		{is_dsreg(VAL)			};	/* data register */
 AREG		{is_areg(VAL)			};	/* addressregister */
+FPREG,FPREG2	{is_fpreg(VAL)			};	/* fp register */
 LAB,L1,L2 	{VAL[0] == 'I'			};	/* label */
 BITNO		{TRUE				};
 
@@ -152,6 +153,14 @@ muls.l #NUM,DREG
 asl.l #0,DREG				->	;
 asl.l #1,DREG				->	add.l DREG,DREG ;
 
+
+move.l A,-(sp) : move.l B,-(sp) : fmove.d (sp)+,FPREG
+	{combines_to_double(A,B)}	->	fmove.d B,FPREG ;
+move.l A,-(sp) : move.l B,-(sp) : fmove.d X,FPREG : fmove.d (sp)+,FPREG2
+	{combines_to_double(A,B) &&
+	 strcmp(FPREG,FPREG2) &&
+	 no_part("sp",X) }		->	fmove.d X,FPREG :
+						fmove.d B,FPREG2 ;
 %%;
 
 /* auxiliary routines: */
@@ -208,6 +217,13 @@ int is_dreg(s)
 	register char *s;
 {
 	return *s++ == 'd' && *s >= '0' && *s++ <= '7' && *s == '\0';
+}
+
+int is_fpreg(s)
+	register char *s;
+{
+	return *s++ == 'f' &&  *s++ == 'p' && 
+	       *s >= '0' && *s++ <= '7' && *s == '\0';
 }
 
 int is_dsreg(s)
@@ -270,6 +286,39 @@ int bitno(s,no)
 			return TRUE;
 		}
 		n >>= 1;
+	}
+	return FALSE;
+}
+
+int combines_to_double(a,b)
+	register char *a,*b;
+{
+	/*	recognize (_name+4) combined with (_name),
+		and (offset+4,...) combined with (offset,...)
+	*/
+	if (*a++ == '(' && *b++ == '(') {
+		if (*a == '-' || *a >= '0' && *a <= '9') {
+			int na = atoi(a);
+			int nb = atoi(b);
+
+			if (*a == '-') a++;
+			if (*b == '-') b++;
+			if (na == nb + 4) {
+				while (*a >= '0' && *a <= '9') a++;
+				while (*b >= '0' && *b <= '9') b++;
+				return	!strcmp(a,b) && *a++ == ',' &&
+					*a++ == 'a' && *a++ && *a++ == ')' &&
+					!*a;
+			}
+			return FALSE;
+		}
+		while (*a && *a == *b) {
+			a++;
+			b++;
+		}
+		if (*b++ == ')' && ! *b && *a++ == '+' && *a++ == '4' &&
+		    *a++ == ')' && !*a)
+			return TRUE;
 	}
 	return FALSE;
 }
