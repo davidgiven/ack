@@ -169,6 +169,7 @@ search(type,str,option) register string str; {
 
 		q = &nonterms[nnonterms];
 		q->n_rule = 0;
+		q->n_lineno = linecount;
 		q->n_string = f_input;
 		q->n_follow = 0;
 		q->n_flags = 0;
