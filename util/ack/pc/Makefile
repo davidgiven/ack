@@ -10,6 +10,7 @@ cmp:            em_pc
 		cmp em_pc $(PC_PATH)
 
 install:        em_pc
+		rm -f $(PC_PATH)
 		cp em_pc $(PC_PATH)
 
 lint:

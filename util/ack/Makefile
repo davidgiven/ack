@@ -16,9 +16,10 @@ BINDIR=../../bin
 head:   ack
 
 install:	ack
+		rm -f $(BINDIR)/ack
 		cp ack $(BINDIR)/ack
 		-cd $(BINDIR) ; \
-		for i in $(INTABLES) $(LNTABLES) ; do ln ack $$i ; done
+		for i in $(INTABLES) $(LNTABLES) ; do rm -f $$i ; ln ack $$i ; done
 		(cd pc ; make install )
 
 cmp:		ack
