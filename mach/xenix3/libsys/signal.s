@@ -56,7 +56,10 @@ ctch:
 	push	si
 	push	di
 	mov	ax,2(bp)
+	sub	ax,3
 	sub	ax,tbl
+	shr	ax,1
+	mov	bx,ax
 	shr	ax,1
 	push	ax
 	call	table(bx)
