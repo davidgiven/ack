@@ -18,7 +18,6 @@
 #include "il_aux.h"
 #include "il1_aux.h"
 
-#define CHANGE_INDIR(p)	(p->p_change->c_flags & CF_INDIR)
 #define USE_INDIR(p)	(p->p_use->u_flags & UF_INDIR)
 
 #define IS_INSTR(c)	(c >= sp_fmnem && c <= sp_lmnem)

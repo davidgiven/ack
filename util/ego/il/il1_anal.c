@@ -25,7 +25,6 @@
 #include "il_aux.h"
 #include "../share/put.h"
 
-#define BODY_KNOWN(p)		(p->p_flags1 & (byte) PF_BODYSEEN)
 #define ENVIRON(p)		(p->p_flags1 & (byte) PF_ENVIRON)
 #define RETURN_BLOCK(b)		(Lnrelems(b->b_succ) == 0)
 #define LAST_BLOCK(b)		(b->b_next == (bblock_p) 0)
