@@ -35,7 +35,7 @@ if test "$PHASES"
 then :
 else
 	case $LEVEL in
-	-O2|xxx)PHASES='cj bo sp ' ;;
+	-O2|-O|xxx)PHASES='cj bo sp ' ;;
 	-O3)	PHASES='cs sr cj bo sp ud lv ra ' ;;
 	*)	PHASES='il cf caopt ic cf cs sr cj bo sp ud lv ra ' ;;
 	esac
