@@ -26,7 +26,7 @@ TABGEN	= $(EMHOME)/bin/tabgen
 # What C compiler to use and how
 CC = cc
 COPTIONS = -O
-LDFLAGS = -i
+LDFLAGS =
 
 # What parser generator to use and how
 GEN = $(EMHOME)/bin/LLgen
