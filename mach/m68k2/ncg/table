@@ -12,7 +12,7 @@ rscid = "$Header$"
 			 *				*
 			 ********************************/
 
-#include "whichone.h"
+#include <whichone.h>
 
 #if TBL68881 && ! TBL68020
 Something very wrong here!
