@@ -67,24 +67,15 @@ fltcstbin(expp, oper, expr)
 		case NOTEQUAL:	cmpval = (cmpval != 0);	break;
 		}
 		break;
-	case '%':
-	case LEFT:
-	case RIGHT:
-	case '&':
-	case '|':
-	case '^':
-		/*
-		expr_error(*expp, "floating operand for %s", symbol2str(oper));
-		break;
-		*/
 	default:
-		crash("(fltcstoper) bad operator %s", symbol2str(oper));
-		/*NOTREACHED*/
+		/* in case of situations like a += 3.0; where a undefined */
+		flt_status = 0;
+		break;
 	}
 
 	switch (flt_status) {
 		case 0:
-		case FLT_UNFL:
+		case FLT_UNFL:			/* ignore underflow */
 			break;
 		case FLT_OVFL:
 			if (!ResultKnown)

@@ -37,9 +37,11 @@ ch3mon(oper, expp)
 	case '*':			/* 3.3.3.2 */
 		/* no FIELD type allowed	*/
 		if ((*expp)->ex_type->tp_fund != POINTER) {
+			if ((*expp)->ex_type != error_type) {
 			    expr_error(*expp,
 				    "* applied to non-pointer (%s)",
 				    symbol2str((*expp)->ex_type->tp_fund));
+			}
 		} else {
 			expr = *expp;
 
