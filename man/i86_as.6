@@ -66,8 +66,8 @@ expr : expr	the value of the first \fIexpr\fP is a segment number,
 .fi
 
 .IP instructions
-Each time an address is computed the assembler decide which segment register
-to use. You can override the assembler's choice by prefixing the instruction
+Each time an address is computed the processor decides which segment register
+to use. You can override the processor's choice by prefixing the instruction
 with one of eseg, cseg, sseg, or dseg; these prefixes indicate that the
 assembler should choose es, cs, ss, or ds instead.
 .br
