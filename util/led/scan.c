@@ -28,7 +28,7 @@ static char rcsid[] = "$Header$";
 #endif SYMDBUG
 
 extern long	lseek();
-exterrn char 	*core_alloc();
+extern char 	*core_alloc();
 extern bool	incore;
 extern int	infile;
 extern int	passnumber;
