@@ -2,7 +2,7 @@
 
 #PARAMS		do not remove this line!
 
-SRC_DIR = $(SRC_HOME)/util/ceg/EM_parser/as_parser
+SRC_DIR = $(SRC_HOME)/util/ceg/EM_parser/as_EM_pars
 
 CEGLIB = $(TARGET_HOME)/lib.bin/ceg
 PARLIB = $(CEGLIB)/EM_parser
