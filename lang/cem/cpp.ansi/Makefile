@@ -76,7 +76,7 @@ GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 
 all:	cc
 
-cc:	hfiles LLfiles
+cc:	cfiles
 	make "EMHOME="$(EMHOME) "CC="$(CC) ncpp
 
 hfiles: Parameters char.c
@@ -94,7 +94,7 @@ next.c:	make.next $(STRSRC)
 	./make.next $(STRSRC) >next.c
 
 macro.h:	make.allocd
-replace.h:		make.allocd
+replace.h:	make.allocd
 
 LLfiles: $(LSRC)
 	$(GEN) $(GENOPTIONS) $(LSRC)
@@ -170,6 +170,7 @@ LLlex.o: numsize.h
 LLlex.o: strsize.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
+LLmessage.o: arith.h
 LLmessage.o: file_info.h
 ch3bin.o: Lpars.h
 ch3bin.o: arith.h
@@ -188,11 +189,14 @@ domacro.o: idfsize.h
 domacro.o: ifdepth.h
 domacro.o: input.h
 domacro.o: inputtype.h
+domacro.o: macbuf.h
 domacro.o: macro.h
 domacro.o: nparams.h
 domacro.o: parbufsize.h
+domacro.o: replace.h
 domacro.o: textsize.h
 error.o: LLlex.h
+error.o: arith.h
 error.o: errout.h
 error.o: file_info.h
 idf.o: idf.h
@@ -210,6 +214,7 @@ options.o: idf.h
 options.o: idfsize.h
 options.o: macro.h
 preprocess.o: LLlex.h
+preprocess.o: arith.h
 preprocess.o: bits.h
 preprocess.o: class.h
 preprocess.o: dobits.h
@@ -222,6 +227,7 @@ preprocess.o: line_prefix.h
 preprocess.o: macro.h
 preprocess.o: obufsize.h
 replace.o: LLlex.h
+replace.o: arith.h
 replace.o: class.h
 replace.o: file_info.h
 replace.o: idf.h
@@ -236,12 +242,14 @@ replace.o: pathlength.h
 replace.o: replace.h
 replace.o: strsize.h
 skip.o: LLlex.h
+skip.o: arith.h
 skip.o: class.h
 skip.o: file_info.h
 skip.o: input.h
 skip.o: inputtype.h
 tokenname.o: LLlex.h
 tokenname.o: Lpars.h
+tokenname.o: arith.h
 tokenname.o: file_info.h
 tokenname.o: idf.h
 expr.o: Lpars.h
