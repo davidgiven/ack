@@ -2,16 +2,16 @@
 
 static int monthsize[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-#define SECS_DAY 24*60L*60L
+#define SECS_DAY (24*60L*60L)
 #define YEARSIZE(year)	((year) % 4 ? 365 : 366)
 
 struct tm *
 gmtime(clock)
 	long *clock;
 {
-	unsigned long cl = *clock;
+	long cl = *clock;
 	long dayclock, dayno;
-	struct tm tm_buf;
+	static struct tm tm_buf;
 	register struct tm *pbuf = &tm_buf;
 	register int *months = monthsize;
 	int year = 1970;
@@ -27,7 +27,7 @@ gmtime(clock)
 		dayno -= YEARSIZE(year);
 		year++;
 	}
-	pbuf->tm_year = year;
+	pbuf->tm_year = year - 1900;
 	pbuf->tm_yday = dayno;
 	pbuf->tm_isdst = 0;
 	if (YEARSIZE(year) == 366) monthsize[1] = 29;
