@@ -329,11 +329,12 @@ CodeCall(nd)
 	}
 	C_asp(left->nd_type->prc_nbpar);
 	if (result_tp = ResultType(left->nd_type)) {
+		arith sz = WA(result_tp->tp_size);
 		if (IsConstructed(result_tp)) {
 			C_lfr(pointer_size);
-			C_loi(result_tp->tp_size);
+			C_loi(sz);
 		}
-		else	C_lfr(WA(result_tp->tp_size));
+		else	C_lfr(sz);
 	}
 }
 
@@ -395,8 +396,8 @@ CodeParameters(param, arg)
 		if (left->nd_symb == STRING) {
 			CodeString(left);
 		}
-		else if (left->nd_class == Call) {
-			/* ouch! forgot about this one! */
+		else if (left->nd_class == Call || left->nd_class == Value) {
+			/* ouch! forgot about these ones! */
 			arith tmp, TmpSpace();
 
 			CodePExpr(left);

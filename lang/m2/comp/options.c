@@ -142,7 +142,7 @@ DoOption(text)
 
 	case 'V' :	/* set object sizes and alignment requirements	*/
 	{
-		register arith size;
+		register int size;
 		register int align;
 		char c;
 		char *t;

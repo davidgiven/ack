@@ -430,31 +430,34 @@ qualtype(struct type **ptp;)
 		{ *ptp = qualified_type(nd); }
 ;
 
-ProcedureType(register struct type **ptp;)
+ProcedureType(struct type **ptp;) :
+	PROCEDURE 
+	[
+	  	FormalTypeList(ptp)
+	|
+			{ *ptp = proc_type((struct type *) 0, 
+					   (struct paramlist *) 0,
+					   (arith) 0);
+			}
+	]
+;
+
+FormalTypeList(struct type **ptp;)
 {
 	struct paramlist *pr = 0;
 	arith parmaddr = 0;
-}
-:
-			{ *ptp = 0; }
-	PROCEDURE 
-	[
-	  	FormalTypeList(&pr, &parmaddr, ptp)
-	]?
-			{ *ptp = proc_type(*ptp, pr, parmaddr); }
-;
-
-FormalTypeList(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
+} :
 	'('
 	[
-		VarFormalType(ppr, parmaddr)
+		VarFormalType(&pr, &parmaddr)
 		[
-			',' VarFormalType(ppr, parmaddr)
+			',' VarFormalType(&pr, &parmaddr)
 		]*
 	]?
 	')'
 	[ ':' qualtype(ptp)
 	]?
+			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 
 VarFormalType(struct paramlist **ppr; arith *parmaddr;)
@@ -501,7 +504,7 @@ VariableDeclaration
 			{ EnterVarList(VarList, tp, proclevel > 0); }
 ;
 
-IdentAddr(struct node **pnd;) :
+IdentAddr(register struct node **pnd;) :
 	IDENT		{ *pnd = MkLeaf(Name, &dot); }
 	[	'['
 		ConstExpression(&((*pnd)->nd_left))

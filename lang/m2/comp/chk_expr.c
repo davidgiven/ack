@@ -59,13 +59,9 @@ ChkVariable(expp)
 
 	if (! ChkDesignator(expp)) return 0;
 
-	if (expp->nd_class == Def &&
-	    !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
+	if ((expp->nd_class == Def || expp->nd_class == LinkDef) &&
+	     !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
 		Xerror(expp, "variable expected", expp->nd_def);
-		return 0;
-	}
-	if (expp->nd_class == Value) {
-		node_error(expp, "variable expected");
 		return 0;
 	}
 
@@ -187,8 +183,7 @@ ChkLinkOrName(expp)
 
 		if (! ChkDesignator(left)) return 0;
 
-		if (left->nd_class == Def &&
-		    (left->nd_type->tp_fund != T_RECORD ||
+		if ((left->nd_type->tp_fund != T_RECORD ||
 		    !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
@@ -216,8 +211,7 @@ Xerror(expp, "not exported from qualifying module", df);
 			}
 		}
 
-		if (left->nd_class == Def &&
-		    left->nd_def->df_kind == D_MODULE) {
+		if (left->nd_def->df_kind == D_MODULE) {
 			expp->nd_class = Def;
 			FreeNode(left);
 			expp->nd_left = 0;
@@ -226,6 +220,20 @@ Xerror(expp, "not exported from qualifying module", df);
 	}
 
 	assert(expp->nd_class == Def);
+
+	return df->df_kind != D_ERROR;
+}
+
+STATIC int
+ChkExLinkOrName(expp)
+	register struct node *expp;
+{
+	/*	Check either an ID or an ID.ID [.ID]* occurring in an
+		expression.
+	*/
+	register struct def *df;
+
+	if (! ChkLinkOrName(expp)) return 0;
 
 	df = expp->nd_def;
 
@@ -245,21 +253,6 @@ Xerror(expp, "not exported from qualifying module", df);
 			expp->nd_lineno = ln;
 		}
 	}
-	return df->df_kind != D_ERROR;
-}
-
-STATIC int
-ChkExLinkOrName(expp)
-	register struct node *expp;
-{
-	/*	Check either an ID or an ID.ID [.ID]* occurring in an
-		expression.
-	*/
-	register struct def *df;
-
-	if (! ChkLinkOrName(expp)) return 0;
-	if (expp->nd_class != Def) return 1;
-	df = expp->nd_def;
 
 	if (!(df->df_kind & D_VALUE)) {
 		Xerror(expp, "value expected", df);
@@ -380,13 +373,13 @@ ChkSet(expp)
 		/* A type was given. Check it out
 		*/
 		if (! ChkDesignator(nd)) return 0;
-		assert(nd->nd_class == Def);
+		assert(nd->nd_class == Def || nd->nd_class == LinkDef);
 		df = nd->nd_def;
 
 		if (!is_type(df) ||
 	   	    (df->df_type->tp_fund != T_SET)) {
 			if (df->df_kind != D_ERROR) {
-				Xerror(nd, "not a set type", df);
+				Xerror(nd, "not a SET type", df);
 			}
 			return 0;
 		}
@@ -454,7 +447,7 @@ getarg(argp, bases, designator, edf)
 		return 0;
 	}
 
-	if (designator && left->nd_class == Def) {
+	if (designator && (left->nd_class==Def || left->nd_class==LinkDef)) {
 		left->nd_def->df_flags |= D_NOREG;
 	}
 
@@ -917,9 +910,9 @@ ChkStandard(expp, left)
 	register struct def *edf;
 	int std;
 
-	assert(left->nd_class == Def);
-	std = left->nd_def->df_value.df_stdname;
+	assert(left->nd_class == Def || left->nd_class == LinkDef);
 	edf = left->nd_def;
+	std = edf->df_value.df_stdname;
 
 	switch(std) {
 	case S_ABS:
@@ -1053,30 +1046,26 @@ ChkStandard(expp, left)
 			Xerror(left, "pointer variable expected", edf);
 			return 0;
 		}
-		if (left->nd_class == Def) {
-			left->nd_def->df_flags |= D_NOREG;
-		}
 		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
 		{
 			struct token dt;
-			register struct token *tk = &dt;
 			struct node *nd;
 
-			tk->TOK_INT = PointedtoType(left->nd_type)->tp_size;
-			tk->tk_symb = INTEGER;
-			tk->tk_lineno = left->nd_lineno;
-			nd = MkLeaf(Value, tk);
+			dt.TOK_INT = PointedtoType(left->nd_type)->tp_size;
+			dt.tk_symb = INTEGER;
+			dt.tk_lineno = left->nd_lineno;
+			nd = MkLeaf(Value, &dt);
 			nd->nd_type = card_type;
-			tk->tk_symb = ',';
-			arg->nd_right = MkNode(Link, nd, NULLNODE, tk);
+			dt.tk_symb = ',';
+			arg->nd_right = MkNode(Link, nd, NULLNODE, &dt);
 			/* Ignore other arguments to NEW and/or DISPOSE ??? */
 
 			FreeNode(expp->nd_left);
-			tk->tk_symb = IDENT;
-			tk->tk_lineno = expp->nd_left->nd_lineno;
-			tk->TOK_IDF = str2idf(std == S_NEW ?
+			dt.tk_symb = IDENT;
+			dt.tk_lineno = expp->nd_left->nd_lineno;
+			dt.TOK_IDF = str2idf(std == S_NEW ?
 						"ALLOCATE" : "DEALLOCATE", 0);
-			expp->nd_left = MkLeaf(Name, tk);
+			expp->nd_left = MkLeaf(Name, &dt);
 		}
 		return ChkCall(expp);
 

@@ -127,8 +127,6 @@ standard_type(fund, align, size)
 {
 	register struct type *tp = new_type();
 
-	if (align == 0) align = 1;
-
 	tp->tp_fund = fund;
 	tp->tp_align = align;
 	tp->tp_size = size;

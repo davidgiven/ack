@@ -19,6 +19,7 @@
 #include	<em_label.h>
 #include	<em_reg.h>
 #include	<em_code.h>
+#include	<m2_traps.h>
 #include	<assert.h>
 
 #include	"def.h"
@@ -184,19 +185,22 @@ WalkProcedure(procedure)
 
 	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
 
-	if (tp && IsConstructed(tp)) {
-		/* The result type of this procedure is constructed.
-		   The actual procedure will return a pointer to a global
-		   data area in which the function result is stored.
-		   Notice that this does make the code non-reentrant.
-		   Here, we create the data area for the function result.
-		*/
-		func_res_label = ++data_label;
-		C_df_dlb(func_res_label);
-		C_bss_cst(tp->tp_size, (arith) 0, 0);
+	if (tp) {
+		func_res_size = WA(tp->tp_size);
+		if (IsConstructed(tp)) {
+			/* The result type of this procedure is constructed.
+			   The actual procedure will return a pointer to a
+			   global data area in which the function result is
+			   stored.
+			   Notice that this does make the code non-reentrant.
+			   Here, we create the data area for the function
+			   result.
+			*/
+			func_res_label = ++data_label;
+			C_df_dlb(func_res_label);
+			C_bss_cst(func_res_size, (arith) 0, 0);
+		}
 	}
-
-	if (tp) func_res_size = WA(tp->tp_size);
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -211,13 +215,14 @@ WalkProcedure(procedure)
 	     param;
 	     param = param->next) {
 		if (! IsVarParam(param)) {
-			tp = TypeOfParam(param);
+			register struct type *TpParam = TypeOfParam(param);
 
-			if (! IsConformantArray(tp)) {
-				if (tp->tp_size < word_size) {
+			if (! IsConformantArray(TpParam)) {
+				if (TpParam->tp_size < word_size &&
+				    (int) word_size % (int) TpParam->tp_size == 0) {
 					C_lol(param->par_def->var_off);
 					C_lal(param->par_def->var_off);
-					C_sti(tp->tp_size);
+					C_sti(TpParam->tp_size);
 				}
 			}
 			else {
@@ -266,14 +271,18 @@ WalkProcedure(procedure)
 
 	WalkNode(procedure->prc_body, NO_EXIT_LABEL);
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
+	if (func_res_size) {
+		C_loc((arith) M2_NORESULT);
+		C_trp();
+		C_asp(-func_res_size);
+	}
 	C_df_ilb(RETURN_LABEL);	/* label at end */
-	tp = func_type;
 	if (func_res_label) {
 		/* Fill the data area reserved for the function result
 		   with the result
 		*/
 		C_lae_dlb(func_res_label, (arith) 0);
-		C_sti(tp->tp_size);
+		C_sti(func_res_size);
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
 			*/

@@ -254,7 +254,7 @@ CodeMove(rhs, left, rtp)
 		if (lhs->dsg_kind == DSG_FIXED &&
 		    lhs->dsg_offset % word_size ==
 		    rhs->dsg_offset % word_size) {
-			register arith sz;
+			register int sz;
 			arith size = tp->tp_size;
 
 			while (size && (sz = (lhs->dsg_offset % word_size))) {
@@ -262,8 +262,8 @@ CodeMove(rhs, left, rtp)
 					boundaries
 				*/
 				if (sz < 0) sz = -sz;	/* bloody '%' */
-				while (word_size % sz) sz--;
-				CodeCopy(lhs, rhs, sz, &size);
+				while ((int) word_size % sz) sz--;
+				CodeCopy(lhs, rhs, (arith) sz, &size);
 			}
 			if (size > 3*dword_size) {
 				/*	Do a block move
