@@ -429,7 +429,7 @@ equal_type(tp, otp, qual_lev, diag)
 	}
 
 	if (qual_lev >= 0 && tp->tp_typequal != otp->tp_typequal) {
-		strict("illegal qualifiers");
+		strict("missing or illegal qualifiers");
 	}
 
 	switch (tp->tp_fund) {
