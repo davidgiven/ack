@@ -10,7 +10,7 @@ var NAME=em24
 var LIB=lib/em24/tail_
 var RT=lib/em24/head_
 var SIZE_FLAG=
-var CPP_F=-Dunix
+var CPP_F=-D__unix
 var INCLUDES=-I{EM}/include/_tail_mon
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
@@ -18,7 +18,7 @@ name asld
 	from .k.m.a.g
 	to .out
 	outfile e.out
-	program {EM}/lib/em_ass
+	program {EM}/lib.bin/em_ass
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -+* ASS_F={ASS_F?} -+*
 	mapflag --* ASS_F={ASS_F?} --*
@@ -37,7 +37,7 @@ name asld
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.p.b.mod.ocm.c.e:{TAIL}={EM}/{LIB}mon) \
+		(.p.b.mod.ocm.c:{TAIL}={EM}/{LIB}mon) \
 		({RTS}{ANSI?}:.cansi={EM}/lib/em24/end_em)
 	linker
 end
