@@ -455,7 +455,7 @@ pat lal lof				yields {LOCAL, $1+$2}
 pat lae lof				yields {absolute4, $1+$2}
 
 pat lof
-with exact MEMREG			yields {memregrel4, %1, 0}
+with exact MEMREG			yields {memregrel4, %1, $1}
 with REG				yields {regrel4, %1, $1}
 with exact addr_external		yields {absolute4, %1.disp+$1}
 with exact addr_local			yields {LOCAL, %1.ind+$1}
@@ -2130,14 +2130,13 @@ kills allmincon
 	acbd {const4, 0-4}, %a, {label, "1b"}
 
 pat bls $1==4
-with REG
+with REG REG REG
 kills ALL
     gen 1:
-	movd {memrel4, sp, 4, 0}, {memrel4, sp, 0, 0}
-	addr {memrel4, sp, 0, 4}, {memregrel4, sp, 0}
-	addr {memrel4, sp, 4, 4}, {memregrel4, sp, 4}
+	movd {regrel4, %3, 0}, {regrel4, %2, 0}
+	addr {regrel4, %2, 4}, %2
+	addr {regrel4, %3, 4}, %3
 	acbd {const4, 0-4}, %1, {label, "1b"}
-	adjspd {const4, 0-8}
 
 pat lae csa $2==4
 with src4
