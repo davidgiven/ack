@@ -74,12 +74,14 @@ name cem
 	need .c
 	args \
 		{CPP_F?} \
+		-D__{NAME} \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
 		{INCLUDES?} \
-		({ANSI_C?}:.ansi=-D__{NAME}) \
-		({ANSI_C?.xx}:.xx=-D{NAME}) \
+		({ANSI_C?.xx}:.xx=-D{NAME} \
+		-DEM_WSIZE={w} -DEM_PSIZE={p} \
+		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
 		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
 		-D_EM_SSIZE={s} -D_EM_LSIZE={l} -D_EM_FSIZE={f} -D_EM_DSIZE={d} \
 		-Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} \
