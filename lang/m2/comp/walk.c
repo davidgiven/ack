@@ -48,6 +48,7 @@ extern arith		NewInt();
 extern arith		TmpSpace();
 
 extern int		proclevel;
+extern int		gdb_flag;
 
 label			text_label;
 label			data_label = 1;
@@ -247,7 +248,7 @@ WalkModule(module)
 	proclevel++;
 #ifdef DBSYMTAB
 	if (options['g']) {
-		C_ms_std((char *) 0, N_LBRAC, proclevel);
+		C_ms_std((char *) 0, N_LBRAC, gdb_flag ? 0 : proclevel);
 	}
 #endif /* DBSYMTAB */
 	WalkNode(module->mod_body, NO_EXIT_LABEL, REACH_FLAG);
@@ -257,7 +258,7 @@ WalkModule(module)
 	C_ret((arith) 0);
 #ifdef DBSYMTAB
 	if (options['g']) {
-		C_ms_std((char *) 0, N_RBRAC, proclevel);
+		C_ms_std((char *) 0, N_RBRAC, gdb_flag ? 0 : proclevel);
 	}
 #endif /* DBSYMTAB */
 	C_end(-sc->sc_off);
@@ -336,7 +337,7 @@ WalkProcedure(procedure)
 		stb_string(procedure, D_PROCEDURE);
 		WalkDefList(procscope->sc_def, stabdef);
 		stb_string(procedure, D_PEND);
-		C_ms_std((char *) 0, N_LBRAC, proclevel);
+		C_ms_std((char *) 0, N_LBRAC, gdb_flag ? 0 : proclevel);
 	}
 #endif /* DBSYMTAB */
 	C_ms_par(procedure->df_type->prc_nbpar
@@ -509,7 +510,7 @@ WalkProcedure(procedure)
 		stb_string(procedure, D_PROCEDURE);
 		WalkDefList(procscope->sc_def, stabdef);
 		stb_string(procedure, D_PEND);
-		C_ms_std((char *) 0, N_LBRAC, proclevel);
+		C_ms_std((char *) 0, N_LBRAC, gdb_flag ? 0 : proclevel);
 	}
 #endif /* DBSYMTAB */
 	C_ms_par(procedure->df_type->prc_nbpar
@@ -524,7 +525,7 @@ WalkProcedure(procedure)
 #endif
 #ifdef DBSYMTAB
 	if (options['g']) {
-		C_ms_std((char *) 0, N_RBRAC, proclevel);
+		C_ms_std((char *) 0, N_RBRAC, gdb_flag ? 0 : proclevel);
 	}
 #endif /* DBSYMTAB */
 	C_end(-procscope->sc_off);

@@ -223,6 +223,11 @@ stb_type(tp, assign_num)
 		addc_db_str(';');
 		break;
 	case T_PROCEDURE:
+		if (gdb_flag) {
+			addc_db_str('f');
+			stb_type(tp->tp_next ? tp->tp_next : void_type, 0);
+			break;
+		}
 		addc_db_str('Q');
 		stb_type(tp->tp_next ? tp->tp_next : void_type, 0);
 		{
@@ -281,12 +286,11 @@ stb_string(df, kind)
 		if (gdb_flag) {
 			addc_db_str('F');
 			stb_type(void_type, 0);
-			addc_db_str(';');
 		}
 		else {
 			adds_db_str(sprint(buf, "M%d;", df->mod_vis->sc_count));
 		}
-		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->mod_vis->sc_scope->sc_name);
+		C_ms_stb_pnam(db_str.base, N_FUN, gdb_flag ? 0 : proclevel, df->mod_vis->sc_scope->sc_name);
 		break;
 	case D_PROCEDURE:
 		if (gdb_flag) {
@@ -307,15 +311,8 @@ stb_string(df, kind)
 				sc = enclosing(sc);
 			}
 		}
-		addc_db_str(';');
-		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->prc_vis->sc_scope->sc_name);
-		{
-			register struct paramlist *p = tp->prc_params;
-			while (p) {
-				stb_string(p->par_def, D_VARIABLE);
-				p = p->par_next;
-			}
-		}
+		else addc_db_str(';');
+		C_ms_stb_pnam(db_str.base, N_FUN, gdb_flag ? 0 : proclevel, df->prc_vis->sc_scope->sc_name);
 		break;
 	case D_END:
 		if (gdb_flag) break;
@@ -345,14 +342,21 @@ stb_string(df, kind)
 		}
 		else if (!proclevel ||
 			 (df->df_flags & D_ADDRGIVEN)) {	/* global */
-			addc_db_str('G');
+			int knd = N_LCSYM;
+			if (df->df_flags & D_EXPORTED) {
+				knd = N_GSYM;
+				addc_db_str('G');
+			}
+			else {
+				addc_db_str('S');
+			}
 			stb_type(tp, 0);
 			addc_db_str(';');
 			if (df->df_flags & D_ADDRGIVEN) {
-				C_ms_stb_cst(db_str.base, N_LCSYM, 0, df->var_off);
+				C_ms_stb_cst(db_str.base, knd, 0, df->var_off);
 			}
 			else {
-				C_ms_stb_dnam(db_str.base, N_LCSYM, 0, df->var_name, (arith) 0);
+				C_ms_stb_dnam(db_str.base, knd, 0, df->var_name, (arith) 0);
 			}
 		}
 		else {	/* local variable */
