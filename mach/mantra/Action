@@ -4,6 +4,9 @@ end
 name "Mantra M68000 4-4 C libraries"
 dir libcc
 end
+name "Mantra M68000 4-4 Occam library"
+dir liboc
+end
 name "Mantra M68000 4-4 conversion program"
 dir cv
 end
