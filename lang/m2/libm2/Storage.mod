@@ -67,7 +67,7 @@ IMPLEMENTATION MODULE Storage;
 	END;
 	nu := (size + (UNIT-1)) DIV UNIT;
 	IF nu = 0 THEN
-		RETURN NIL;
+		nu := 1;
 	END;
 	IF nu <= NLISTS THEN
 		b := nu;
