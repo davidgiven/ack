@@ -18,16 +18,10 @@ PRFILES = Makefile descr.sed $(SOURCES)
 all:	$(TARGETS)
 
 install:	all
-	../install i86descr
-	../install m68k2descr
-	../install vax4descr
-	../install pdpdescr
+	for i in $(TARGETS) ; do ../install $$i ; done
 
 cmp:	all
-	-../compare i86descr
-	-../compare m68k2descr
-	-../compare vax4descr
-	-../compare pdpdescr
+	-for i in $(TARGETS) ; do ../compare $$i ; done
 
 pr:
 	@pr $(PRFILES)
