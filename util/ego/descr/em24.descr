@@ -68,6 +68,7 @@ access costs of local variables:
 %%SR
 overflow harmful?:  yes
 array bound harmful?:  yes
+reduce sli if shift count larger than:  0
 %%CS
 #include "../../../h/em_mnem.h"
 first time then space:

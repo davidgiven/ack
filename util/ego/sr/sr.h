@@ -9,11 +9,6 @@
  *
  */
 
-/*#define SLI_REDUCE		/* if defined, shift-lefts are also reduced */
-				/* not defined for the moment; should use
-				 * machine specific information (as should
-				 * reduction of array instructions	*/
-
 typedef struct iv	*iv_p;
 typedef struct code_info *code_p;
 
@@ -70,6 +65,9 @@ extern int ovfl_harmful;  /* Does overflow during multiplication
 extern int arrbound_harmful;  /* Is it harmful to take the address of
 				* a non-existing array element ?
 				*/
+extern int sli_threshold; /* Try to optimize SLI if shift-count larger than
+			    * this
+			    */
 extern int Ssr;  /* #optimizations found */
 
 /* core allocation macros */

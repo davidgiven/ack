@@ -45,10 +45,8 @@ STATIC int regtyp(code)
 	switch(code->co_instr) {
 		case op_mli:
 		case op_mlu:
-#ifdef SLI_REDUCE
 		case op_sli:
 		case op_slu:
-#endif
 			return reg_any;
 		default:
 			return reg_pointer;
@@ -92,10 +90,8 @@ STATIC line_p newcode(code,tmp)
 	switch(code->co_instr) {
 		case op_mli:
 		case op_mlu:
-#ifdef SLI_REDUCE
 		case op_sli:
 		case op_slu:
-#endif
 			/* new code is just a LOL tmp */
 			l = int_line(tmp);
 			l->l_instr = op_lol;
@@ -201,7 +197,6 @@ STATIC init_code(code,tmp)
 			l->l_next = int_line(tmp);
 			l->l_next->l_instr = op_stl;
 			break;
-#ifdef SLI_REDUCE
 		case op_sli:
 		case op_slu:
 			/* reduced code is: iv_expr << lc
@@ -211,7 +206,6 @@ STATIC init_code(code,tmp)
 			l->l_next = int_line(tmp);
 			l->l_next->l_instr = op_stl;
 			break;
-#endif
 		case op_lar:
 		case op_sar:
 			/* reduced code is: ...= A[iv_expr] resp.
@@ -283,7 +277,6 @@ STATIC incr_code(code,tmp)
 			store_tmp = int_line(tmp);
 			store_tmp->l_instr = op_stl;
 			break;
-#ifdef SLI_REDUCE
 		case op_sli:
 		case op_slu:
 			loc = int_line(
@@ -297,7 +290,6 @@ STATIC incr_code(code,tmp)
 			store_tmp = int_line(tmp);
 			store_tmp->l_instr = op_stl;
 			break;
-#endif
 		case op_lar:
 		case op_sar:
 		case op_aar:
@@ -416,10 +408,8 @@ STATIC bool same_code(c1,c2,vars)
 	switch(c1->co_instr) {
 		case op_mli:
 		case op_mlu:
-#ifdef SLI_REDUCE
 		case op_sli:
 		case op_slu:
-#endif
 			return c1->co_instr == c2->co_instr &&
 			off_set(c1->c_o.co_loadlc) ==
 			off_set(c2->c_o.co_loadlc) &&
@@ -616,7 +606,6 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 
 
 
-#ifdef SLI_REDUCE
 STATIC try_leftshift(lp,ivs,vars,b,shft)
 	loop_p   lp;
 	lset	 ivs,vars;
@@ -642,7 +631,7 @@ STATIC try_leftshift(lp,ivs,vars,b,shft)
 	 */
 
 	l2 = PREV(shft); /* Instruction before the shift */
-	if (is_const(l2) &&
+	if (is_const(l2) && off_set(l2) > sli_threshold &&
 		(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign))) {
 			/* recognized "iv << const " */
 			c = newcinfo();
@@ -668,7 +657,6 @@ STATIC try_leftshift(lp,ivs,vars,b,shft)
 }
 
 
-#endif
 STATIC try_array(lp,ivs,vars,b,arr)
 	loop_p   lp;
 	lset	 ivs,vars;
@@ -760,12 +748,10 @@ strength_reduction(lp,ivs,vars)
 			next = l->l_next;
 			if (TYPE(l) == OPSHORT && SHORT(l) == ws) {
 				switch(INSTR(l)) {
-#ifdef SLI_REDUCE
 					case op_sli:
 					case op_slu:
 						try_leftshift(lp,ivs,vars,b,l);
 						break;
-#endif
 					case op_mlu:
 					case op_mli:
 						try_multiply(lp,ivs,vars,b,l);

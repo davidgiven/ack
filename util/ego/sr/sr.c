@@ -24,7 +24,7 @@
 
 /* Strength reduction tries to change expensive operators occurring
  * in a loop into cheaper operators. The expensive operators considered
- * are multiplication and array referencing.
+ * are multiplication, left-shift and array referencing.
  * The transformations can be expressed in C as:
  *
  * [1]:		for (i = e1; i <= e2; i++)
@@ -46,6 +46,7 @@
 
 int ovfl_harmful;
 int arrbound_harmful;
+int sli_threshold;
 
 int Ssr;  /* #optimizations found */
 
@@ -63,6 +64,7 @@ sr_machinit(f)
 	}
 	fscanf(f,"%d",&ovfl_harmful);
 	fscanf(f,"%d",&arrbound_harmful);
+	fscanf(f,"%d",&sli_threshold);
 }
 
 STATIC del_ivs(ivs)
