@@ -24,3 +24,7 @@
 #define clean_push_buf()       if(push_waiting){text1(0x50);push_waiting=FALSE;}
 #define assign( l, r)          l = r
 extern int push_waiting;
+
+#ifndef DEBUG
+#define arg_error(s,i)
+#endif

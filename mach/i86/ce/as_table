@@ -36,6 +36,10 @@ cmp dst:REG, src:EADDR	==>	@text1( 0x3b);
 ... dst:ACCU, src:DATA	==>	@text1( 0x3d);
 				@text2( %$(src->expr)).
 
+... dst:EADDR, src:DATA	==>	@text1( 0x81);
+				mod_RM(7,dst);
+				@text2( %$(src->expr)).
+
 cwd			==>	@text1( 0x99).
 
 dec dst:REG		==>	R53( 9, dst->reg).
