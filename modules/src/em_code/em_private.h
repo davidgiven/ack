@@ -71,10 +71,8 @@
 
 _PROTOTYPE(void C_pt_dnam, (char *));
 _PROTOTYPE(void C_pt_ilb, (label));
-_PROTOTYPE(void C_pt_op, (int));
 _PROTOTYPE(void C_pt_cst, (arith));
 _PROTOTYPE(void C_pt_scon, (char *, arith));
-_PROTOTYPE(void C_pt_ps, (int));
 _PROTOTYPE(void C_pt_dlb, (label));
 _PROTOTYPE(void C_pt_doff, (label, arith));
 _PROTOTYPE(void C_pt_noff, (char *, arith));
@@ -82,6 +80,8 @@ _PROTOTYPE(void C_pt_pnam, (char *));
 _PROTOTYPE(void C_pt_dfilb, (label));
 _PROTOTYPE(void C_pt_wcon, (int, char *, arith));
 #ifdef READABLE_EM
+_PROTOTYPE(void C_pt_ps, (int));
+_PROTOTYPE(void C_pt_op, (int));
 _PROTOTYPE(void C_pt_nl, (void));
 _PROTOTYPE(void C_pt_comma, (void));
 _PROTOTYPE(void C_pt_ccend, (void));
