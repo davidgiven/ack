@@ -48,22 +48,9 @@ typedef union pext_t *pext_p;
 typedef union bext_t *bext_p;
 typedef union lpext_t *lpext_p;
 
-/* Intermediate Code generation */
 
-typedef struct sym *sym_p;
-typedef struct prc *prc_p;
-typedef struct num *num_p;
-
-/* Inline Substitution */
 typedef struct call	*call_p;
-typedef struct actual	*actual_p;
 typedef struct formal	*formal_p;
-typedef struct calcnt	*calcnt_p;
-typedef short call_id;
-
-/* Strength Reduction */
-typedef struct iv	*iv_p;
-typedef struct code_info *code_p;
 
 /* Used-Definition Analysis */
 typedef struct local *local_p;
@@ -288,9 +275,6 @@ union bext_t {
    struct bext_ra {
 	short	 bx_begin;	/* number of first instruction of block	*/
 	short	 bx_end;	/* number of last  instruction of block	*/
-	short	 bx_usecnt;	/* used by minimal_score()		*/
-	short	 bx_dist;	/*  ,,					*/
-	bool	 bx_mark;	/*  ,,					*/
    } bx_ra;
 } ;
 
@@ -392,138 +376,6 @@ struct arg {
 #define	OBJ(lnp)	lnp->l_a.la_obj
 #define	PROC(lnp)	lnp->l_a.la_proc
 #define	ARG(lnp)	lnp->l_a.la_arg
-
-
-/* Data structures for Intermediate Code generation */
-
-
-struct sym {
-	sym_p	 sy_next;	/* link					*/
-	char	 sy_name[IDL];	/* name of the symbol			*/
-	dblock_p sy_dblock;	/* pointer to dblock struct		*/
-};
-struct prc {
-	prc_p	 pr_next;	/* link					*/
-	char	 pr_name[IDL];	/* name of the procedure		*/
-	proc_p	 pr_proc;	/* pointer tto proc struct		*/
-};
-
-
-struct num {
-	num_p	 n_next;	/* link					*/
-	unsigned n_number;	/* EM repr. e.g. 120 in 'BRA *120'	*/
-	lab_id	 n_labid;	/* sequential integer repr. of  IC	*/
-};
-
-
-/* Data structures for Inline Substitution */
-
-struct call {
-	proc_p	 cl_caller;	/* calling procedure			*/
-	call_id	 cl_id;		/* uniquely denotes a CAL instruction	*/
-	proc_p	 cl_proc;	/* the called procedure			*/
-	byte	 cl_looplevel;	/* loop nesting level of the CAL	*/
-	bool	 cl_flags;	/* flag bits				*/
-	short	 cl_ratio;	/* indicates 'speed gain / size lost'	*/
-	call_p	 cl_cdr;	/* link to next call			*/
-	call_p	 cl_car;	/* link to nested calls			*/
-	actual_p cl_actuals;	/* actual parameter expr. trees		*/
-};
-
-#define CLF_INLPARS 017		/* min(15,nr. of inline parameters) */
-#define CLF_SELECTED	020	/* is call selected for expansion? */
-#define CLF_EVER_EXPANDED 040	/* ever expanded? e.g. in a nested call.  */
-#define CLF_FIRM	0100 	/* indicates if the call takes place in a
-				 * firm block of a loop (i.e. one that
-				 * is always executed, except
-				 * -perhaps- at the last iteration).
-				 * Used for heuristics only.
-				 */
-
-struct actual {
-	line_p	 ac_exp;	/* copy of EM text			*/
-				/* 0 for actuals that are not inline	*/
-	offset	 ac_size;	/* number of bytes of parameter		*/
-	bool	 ac_inl;	/* TRUE if it may be expanded in line	*/
-	actual_p ac_next;	/* link					*/
-};
-
-
-struct formal {
-	offset	 f_offset;	/* offsetin bytes			*/
-	byte	 f_flags;	/* flags FF_BAD etc.			*/
-	byte	 f_type;	/* SINGLE, DOUBLE,POINTER,UNKNOWN	*/
-	formal_p f_next;	/* link					*/
-};
-
-
-/* flags of formal: */
-
-#define FF_BAD		01
-#define FF_REG		02
-#define	FF_ONCEUSED	04
-#define FF_OFTENUSED	06
-#define USEMASK		014
-
-/* types of formals: */
-
-#define SINGLE		1
-#define DOUBLE		2
-#define POINTER		3
-#define UNKNOWN		4
-
-/* 'call-count' information keeps track of the number
- * of times one procedure calls another. Conceptually,
- * it may be regarded as a two dimensional array, where
- * calcnt[p,q] is the number of times p calls q. As this
- * matrix would be very dense, we use a more efficient
- * list representation. Every procedure has a list
- * of calcnt structs.
- */
-
-struct calcnt {
-	proc_p	cc_proc;	/* the called procedure */
-	short	cc_count;	/* # times proc. is called in the
-				 * original text of the caller.
-				 */
-	calcnt_p cc_next;	/* link			*/
-};
-
-
-/* Data structures for Strength Reduction */
-
-/* An induction variable */
-
-struct iv {
-	offset	 iv_off;	/* offset of the induction variable */
-	line_p	 iv_incr;	/* pointer to last instr. of EM-code that
-				 * increments the induction variable	*/
-	offset	 iv_step;	/* step value				*/
-};
-
-
-/* All information about a reducible piece of code is collected in
- * a single structure.
- */
-
-struct code_info {
-	loop_p	  co_loop;	/* the loop the code is in		*/
-	bblock_p  co_block;	/* the basic block the code is in	*/
-	line_p	  co_lfirst;	/* first instruction of the code	*/
-	line_p	  co_llast;	/* last  instruction of the code	*/
-	line_p	  co_ivexpr;	/* start of linear expr. using iv	*/
-	line_p	  co_endexpr;	/* end of the expression		*/
-	int	  co_sign;	/* sign of iv in above expr		*/
-	iv_p	  co_iv;	/* the induction variable		*/
-	offset	  co_temp;	/* temporary variable			*/
-	int	  co_tmpsize;	/* size of the temp. variable (ws or ps)*/
-	int	  co_instr;	/* the expensive instruction (mli,lar..)*/
-	union {
-		line_p	co_loadlc;	/* LOC lc instruction (for mult.)*/
-		line_p  co_desc;	/* load address of descriptor
-					 *   (for lar etc.)		*/
-	} c_o;
-};
 
 
 /* Data structures for Use-Definition and Live-Dead Analysis */
