@@ -12,7 +12,7 @@
 EXPORT
 botch(ptr, n)
 	register char *ptr;
-	register int n;
+	register unsigned int n;
 {
 	while (n >= sizeof (long))	{	
 			/* high-speed botch loop */

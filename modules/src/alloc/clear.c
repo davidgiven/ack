@@ -12,7 +12,7 @@
 EXPORT
 clear(ptr, n)
 	register char *ptr;
-	register int n;
+	register unsigned int n;
 {
 	register long *q = (long *) ptr;
 
