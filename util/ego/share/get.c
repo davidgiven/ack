@@ -18,9 +18,7 @@
 #include "../../../h/em_mnem.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_mes.h"
-#include "../../../h/em_flag.h"
 
-extern char em_flag[];
 FILE *curinp;
 block_id lastbid;	/* block identifying number */
 lab_id	 lastlabid;	/* last label identifier */
