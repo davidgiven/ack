@@ -19,7 +19,8 @@ libem_o.a:	libem_s.a
 		march . libem_o.a
 
 clean:
-		rm -f *.o
+		rm -f *.o libem_o.a nohup.out Out
+
 opr :
 		make pr | opr
 
