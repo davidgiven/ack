@@ -301,6 +301,7 @@ prrule(p) register p_gram p; {
 	 */
 	register FILE	*f;
 	int		present = 0;
+	int		firstalt = 1;
 
 	f = fout;
 	for (;;) {
@@ -323,8 +324,15 @@ prrule(p) register p_gram p; {
 				prline("%persistent\n");
 			}
 			if (r_getkind(q) != FIXED) {
+				if (!(q->t_flags & PERSISTENT)) {
+				    prline("> continue repetition on the\n");
+				}
 				printset(q->t_first, c_first);
+				if (q->t_flags & PERSISTENT) {
+				    prline("> continue repetition on the\n");
+				}
 				printset(q->t_contains, c_contains);
+				prline("> terminate repetition on the\n");
 				printset(q->t_follow,c_follow);
 				if (q->t_flags & EMPTYFIRST) {
 				    prline(">>> empty first\n");
@@ -353,9 +361,10 @@ prrule(p) register p_gram p; {
 			register p_link l;
 
 			l = &links[g_getcont(p)];
-			if (g_gettype(p-1) == ALTERNATION) {
-				prline("|\n");
+			if (firstalt) {
+				firstalt = 0;
 			}
+			else	prline("|\n");
 			printset(l->l_symbs,"> alternative on ");
 			cfcheck(l->l_symbs,
 				l->l_others,
