@@ -340,7 +340,7 @@ result_t compute(node) register node_p node; {
 	case EX_TOSTRING:
 	assert(leaf1.e_typ == EV_INT);
 		result.e_typ = EV_ADDR;
-		result.e_v.e_addr.ea_str = 0;
+		result.e_v.e_addr.ea_str = "";
 		result.e_v.e_addr.ea_off = leaf1.e_v.e_con;
 		return(result);
 #ifdef REGVARS
