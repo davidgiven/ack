@@ -27,6 +27,13 @@ cmp:	all
 clean:
 	rm -f *.o mkdep cid cclash prid
 
+pr:
+	@pr `pwd`/Makefile `pwd`/mkdep.c `pwd`/cclash.c `pwd`/cid.c \
+		`pwd`/prid.c `pwd`/GCIPM.c
+
+opr:
+	make pr | opr
+
 mkdep:	mkdep.o
 	$(CC) $(LDFLAGS) -o mkdep mkdep.o
 
