@@ -224,11 +224,11 @@ cstibin(expp)
 		break;
 
 	case LESSEQUAL:
-		o1 = (o2 <= o1);
+		o1 = (o1 <= o2);
 		break;
 
 	case GREATEREQUAL:
-		o1 = (o2 >= o1);
+		o1 = (o1 >= o2);
 		break;
 
 	case '=':
