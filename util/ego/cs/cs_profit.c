@@ -145,6 +145,10 @@ STATIC bool gains(avp)
 	if (avp->av_instr == (byte) op_sli)
 		return ! sli_no_eliminate(avp->av_found);
 
+	if (avp->av_instr == (byte) op_ads &&
+	    avp->av_found->l_prev && INSTR(avp->av_found->l_prev) == op_sli)
+		return ! sli_no_eliminate(avp->av_found->l_prev);
+
 	if (Cis_elem(avp->av_instr & BMASK, addr_modes))
 		return instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
 
