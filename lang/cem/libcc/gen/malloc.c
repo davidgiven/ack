@@ -14,7 +14,11 @@
 #define	ptrint		long
 #endif
 
+#if EM_PSIZE == 2
+#define BRKSIZE		1024
+#else
 #define BRKSIZE		4096
+#endif
 #define	PTRSIZE		sizeof(char *)
 #define Align(x,a)	(((x) + (a - 1)) & ~(a - 1))
 #define NextSlot(p)	(* (char **) ((p) - PTRSIZE))

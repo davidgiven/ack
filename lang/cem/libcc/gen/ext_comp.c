@@ -185,17 +185,14 @@ static int
 cmp_ext(e1, e2)
 	struct EXTEND *e1, *e2;
 {
-	int sign = e1->sign ? -1 : 1;
+	struct EXTEND tmp;
 
-	if (e1->sign > e2->sign) return -1;
-	if (e1->sign < e2->sign) return 1;
-	if (e1->exp < e2->exp) return -sign;
-	if (e1->exp > e2->exp) return sign;
-	if (e1->m1 < e2->m1) return -sign;
-	if (e1->m1 > e2->m1) return sign;
-	if (e1->m2 < e2->m2) return -sign;
-	if (e1->m2 > e2->m2) return sign;
-	return 0;
+	e2->sign = ! e2->sign;
+	add_ext(e1, e2, &tmp);
+	e2->sign = ! e2->sign;
+	if (tmp.m1 == 0 && tmp.m2 == 0) return 0;
+	if (tmp->sign) return -1;
+	return 1;
 }
 
 static
