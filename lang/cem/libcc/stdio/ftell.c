@@ -13,8 +13,6 @@ FILE *iop;
 		adjust -= iop->_count;
 	else if ( io_testflag(iop,IO_WRITEMODE) && iop->_buf && !io_testflag(iop,IO_UNBUFF))
 		adjust = iop->_ptr - iop->_buf;
-	else
-		return(-1);
 	
 	result = lseek(fileno(iop), 0L, 1);
 
