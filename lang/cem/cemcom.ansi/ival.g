@@ -582,8 +582,14 @@ ch_array(tpp, ex)
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
 
-		if (length > dim) {
-			expr_warning(ex, "too many initialisers");
+#ifdef LINT
+		if (length == dim + 1) {
+			    expr_warning(ex, "array is not null-terminated");
+		} else
+#else
+		if (length > dim + 1) {
+#endif
+			expr_strict(ex, "too many initialisers");
 		}
 		length = dim;
 	}

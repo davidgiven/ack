@@ -806,7 +806,7 @@ struct token *ptok;
 			fund = LONG;
 		else	fund = UNSIGNED;
 	} else if((val & full_mask[(int)long_size]) == val) {
-		if (val > 0) fund = LONG;
+		if (val >= 0) fund = LONG;
 		else fund = ULONG;
 	} else {	/* sizeof(arith) is greater than long_size */
 		ASSERT(arith_size > long_size);
