@@ -17,7 +17,7 @@
 #include	"tree.h"
 #include	"operator.h"
 
-p_symbol	currfile;
+p_symbol	currfile, listfile;
 
 extern FILE	*db_out;
 
@@ -141,6 +141,11 @@ def_scope(s)
   case PROC:
   case FUNCTION:
   case MODULE:
+  case TYPE:
+  case VAR:
+  case REGVAR:
+  case LOCVAR:
+  case VARPAR:
 	return s->sy_name.nm_scope;
   }
   return 0;
@@ -163,7 +168,8 @@ consistent(p, sc)
 
   switch(p->t_oper) {
   case OP_NAME:
-	sym = Lookfromscope(p->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc->sc_static_encl);
+#define CLASS	(FILELINK|FILESYM|PROC|FUNCTION|MODULE|TYPE|VAR|REGVAR|LOCVAR|VARPAR)
+	sym = Lookfromscope(p->t_idf, CLASS, sc->sc_static_encl);
 	if (sym) {
 		target_sc = def_scope(sym);
 		while (sc && sc != target_sc) {
@@ -175,7 +181,7 @@ consistent(p, sc)
 
   case OP_SELECT:
 	arg = p->t_args[1];
-	sym = Lookfromscope(arg->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc->sc_static_encl);
+	sym = Lookfromscope(arg->t_idf, CLASS, sc->sc_static_encl);
 	if (sym) {
 		target_sc = def_scope(sym);
 		while (sc && sc != target_sc) {
@@ -322,7 +328,6 @@ pr_sym(s)
 do_find(p)
   p_tree	p;
 {
-  p_symbol	sym = 0;
   register p_symbol s;
   p_tree	arg;
 
@@ -340,7 +345,6 @@ do_find(p)
 	arg = p->t_args[1];
 	assert(arg->t_oper == OP_NAME);
 	s = arg->t_idf->id_def;
-	sym = 0;
 	while (s) {
 		if (consistent(p, s->sy_scope)) {
 			pr_sym(s);

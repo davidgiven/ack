@@ -55,7 +55,7 @@ debugger_string
 
   | /* type name */
 			{ s = NewSymbol(str, CurrentScope, TYPE, currnam); }
-	't' type_name(&(s->sy_type))
+	't' type_name(&(s->sy_type), s)
 			{ if (! s->sy_type->ty_sym) s->sy_type->ty_sym = s; }
 
   | /* tag name (only C?) */
@@ -102,43 +102,43 @@ debugger_string
 				tmp = s->sy_type;
 			  } else s = NewSymbol(str, FileScope, VAR, currnam);
 			}
-	'G' type(&(s->sy_type), (int *) 0)
+	'G' type(&(s->sy_type), (int *) 0, s)
 			{ if (tmp) s->sy_type = tmp; } 
 
   | /* static variable */
 			{ s = NewSymbol(str, CurrentScope, VAR, currnam); }
-	'S' type(&(s->sy_type), (int *) 0)
+	'S' type(&(s->sy_type), (int *) 0, s)
 
   | /* static variable, local scope */
 			{ s = NewSymbol(str, CurrentScope, VAR, currnam); }
-	'V' type(&(s->sy_type), (int *) 0)
+	'V' type(&(s->sy_type), (int *) 0, s)
 
   | /* register variable */
 			{ s = NewSymbol(str, CurrentScope, REGVAR, currnam); }
-	'r' type(&(s->sy_type), (int *) 0)
+	'r' type(&(s->sy_type), (int *) 0, s)
 
   | /* value parameter */
 			{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam); }
-	'p' type(&(s->sy_type), (int *) 0)
+	'p' type(&(s->sy_type), (int *) 0, s)
 			{ add_param_type('p', s); }
 
   | /* value parameter but address passed */
 			{ s = NewSymbol(str, CurrentScope, VARPAR, currnam); }
-	'i' type(&(s->sy_type), (int *) 0)
+	'i' type(&(s->sy_type), (int *) 0, s)
 			{ add_param_type('i', s); }
 
   | /* variable parameter */
 			{ s = NewSymbol(str, CurrentScope, VARPAR, currnam); }
-	'v' type(&(s->sy_type), (int *) 0)
+	'v' type(&(s->sy_type), (int *) 0, s)
 			{ add_param_type('v', s); }
 
   | /* local variable */
 			{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam); }
-	type_name(&(s->sy_type))
+	type_name(&(s->sy_type), s)
 
   | /* function result in Pascal; ignore ??? */
 			{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam); }
-	'X' type_name(&(s->sy_type))
+	'X' type_name(&(s->sy_type), s)
   ]
   ';'?
 ;
@@ -216,13 +216,13 @@ string_const
   STRING			/* has SINGLE quotes! */
 ;
 
-type_name(p_type *t;)
+type_name(p_type *t; p_symbol sy;)
   { int type_index[2]; p_type *p; }
 :
   type_index(type_index)
   [
 	'='			
-	type(t, type_index)
+	type(t, type_index, sy)
 				{ p = tp_lookup(type_index);
 				  if (*p && *p != incomplete_type) {
 					if (!((*p)->ty_flags & T_CROSS))
@@ -261,7 +261,7 @@ tag_name(p_symbol t;)
 :
   type_index(type_index)
   '='				
-  type(&(t->sy_type), type_index)
+  type(&(t->sy_type), type_index, t)
 				{ p = tp_lookup(type_index);
 				  if (*p && *p != incomplete_type) {
 					if (!((*p)->ty_flags & T_CROSS))
@@ -284,7 +284,7 @@ function(p_symbol p;)
 			  p->sy_type->ty_class = T_PROCEDURE;
 			  p->sy_type->ty_size = pointer_size;
 			}
-  type(&(p->sy_type->ty_retval), (int *) 0) 
+  type(&(p->sy_type->ty_retval), (int *) 0, (p_symbol) 0) 
   			{ if (CurrentScope != FileScope &&
 			      saw_code) {
 				/* if saw_code is not set, it is a nested
@@ -321,10 +321,10 @@ routine(p_symbol p;)
 			  CurrentScope->sc_proclevel = currnam->on_desc;
 			}
   INTEGER ';'
-  type(&(p->sy_type->ty_retval), (int *) 0) 
+  type(&(p->sy_type->ty_retval), (int *) 0, (p_symbol) 0) 
 ;
 
-type(p_type *ptp; int *type_index;)
+type(p_type *ptp; int *type_index; p_symbol sy;)
   { register p_type tp = 0;
     p_type t1, t2;
     long ic1, ic2;
@@ -355,7 +355,7 @@ type(p_type *ptp; int *type_index;)
    	 * integer_const.
    	 * Upperbound -1 means unsigned int or unsigned long.
    	 */
-  	'r' type_name(&t1) ';'
+  	'r' type_name(&t1, (p_symbol) 0) ';'
 	[ 'A' integer_const(&ic1)	{ A_used = 1; }
 	| integer_const(&ic1)
 	]
@@ -373,16 +373,16 @@ type(p_type *ptp; int *type_index;)
   	/* array; first type is bound type, next type
    	 * is element type
    	 */
-  	'a' type(&t1, (int *) 0) ';' type(&t2, (int *) 0)
+  	'a' type(&t1, (int *) 0, (p_symbol) 0) ';' type(&t2, (int *) 0, (p_symbol) 0)
 			{ *ptp = array_type(t1, t2); }
   |
   	/* structure type */
   	's'		{ tp = new_type(); tp->ty_class = T_STRUCT; }
-	structure_type(tp)
+	structure_type(tp, sy)
   |
   	/* union type */
   	'u'		{ tp = new_type(); tp->ty_class = T_UNION; }
-	structure_type(tp)
+	structure_type(tp, sy)
   |
   	/* enumeration type */
   	'e'		{ tp = new_type(); tp->ty_class = T_ENUM; }
@@ -392,13 +392,13 @@ type(p_type *ptp; int *type_index;)
   	'*'		{ tp = new_type(); tp->ty_class =T_POINTER;
 			  tp->ty_size = pointer_size;
 			}
-  	type(&(tp->ty_ptrto), (int *) 0)
+  	type(&(tp->ty_ptrto), (int *) 0, (p_symbol) 0)
   |
   	/* function type */
   	'f'		{ tp = new_type(); tp->ty_class = T_PROCEDURE;
 			  tp->ty_size = pointer_size;
 			}
-  	type(&(tp->ty_retval), (int *) 0) 
+  	type(&(tp->ty_retval), (int *) 0, (p_symbol) 0) 
 /*
   	[ %prefer
 		',' param_list(tp)
@@ -410,7 +410,7 @@ type(p_type *ptp; int *type_index;)
   	'Q'		{ tp = new_type(); tp->ty_class = T_PROCEDURE;
 			  tp->ty_size = pointer_size;
 			}
-  	type(&(tp->ty_retval), (int *) 0) 
+  	type(&(tp->ty_retval), (int *) 0, (p_symbol) 0) 
 	',' param_list(tp)
   |
   	/* another procedure type */
@@ -425,7 +425,7 @@ type(p_type *ptp; int *type_index;)
    	 * the second one represents the low bound
    	 */
   	'S'		{ tp = new_type(); tp->ty_class = T_SET; }
-	type(&(tp->ty_setbase), (int *) 0) ';'
+	type(&(tp->ty_setbase), (int *) 0, (p_symbol) 0) ';'
 	[
 		integer_const(&(tp->ty_size)) ';'
 		integer_const(&(tp->ty_setlow)) ';'
@@ -435,9 +435,9 @@ type(p_type *ptp; int *type_index;)
   |
 	/* file type of Pascal */
 	'L'		{ tp = new_type(); tp->ty_class = T_FILE; }
-	type(&(tp->ty_fileof), (int *) 0)
+	type(&(tp->ty_fileof), (int *) 0, (p_symbol) 0)
   |
-  	type_name(ptp)
+  	type_name(ptp, (p_symbol) 0)
 			{ if (type_index &&
 			      *ptp == incomplete_type &&
 			      type_index[0] == last_index[0] &&
@@ -449,19 +449,18 @@ type(p_type *ptp; int *type_index;)
 			{ if (! *ptp) *ptp = tp; }
 ;
 
-structure_type(register p_type tp;)
+structure_type(register p_type tp; p_symbol sy;)
   { register struct fields *fldp;
-    register p_symbol s;
+    char *str;
   }
 :
   integer_const(&(tp->ty_size))		/* size in bytes */
-			{ open_scope((p_symbol) 0, 0); }
-  [			{ fldp = get_field_space(tp); }
-	name(&(fldp->fld_name))
-			{ s = NewSymbol(fldp->fld_name, CurrentScope, FIELD, currnam);
-			  s->sy_field = fldp;
+			{ open_scope(sy, 0);
+			  if (sy) sy->sy_name.nm_scope = CurrentScope;
 			}
-	type(&(fldp->fld_type), (int *) 0) ','
+  [
+	name(&str)	{ fldp = get_field_space(tp, str); }
+	type(&(fldp->fld_type), (int *) 0, (p_symbol) 0) ','
 	integer_const(&(fldp->fld_pos)) ','	/* offset in bits */
 	integer_const(&(fldp->fld_bitsize)) ';'	/* size in bits */
   ]*
@@ -504,7 +503,7 @@ param_list(p_type t;)
   	|	'v'	{ p->par_kind = 'v'; }
   	|	'i' 	{ p->par_kind = 'i'; }
   	]
-  	type(&(p->par_type), (int *) 0) ';'
+  	type(&(p->par_type), (int *) 0, (p_symbol) 0) ';'
 			{ t->ty_nbparams += 
 				param_size(p->par_type, p->par_kind);
 			  p++;
@@ -638,15 +637,23 @@ DBSlex()
 }
 
 static struct fields *
-get_field_space(tp)
+get_field_space(tp, s)
   register p_type tp;
+  char	*s;
 {
+  register struct fields *p;
+  p_symbol	sy;
+
   if (! (tp->ty_nfields & 07)) {
 	tp->ty_fields = (struct fields *)
 		  Realloc((char *) tp->ty_fields,
 			    (tp->ty_nfields+8)*sizeof(struct fields));
   }
-  return &tp->ty_fields[tp->ty_nfields++];
+  p = &tp->ty_fields[tp->ty_nfields++];
+  p->fld_name = s;
+  sy = NewSymbol(s, CurrentScope, FIELD, currnam);
+  sy->sy_field = p;
+  return p;
 }
 
 static

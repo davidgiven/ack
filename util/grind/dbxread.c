@@ -99,7 +99,7 @@ DbxRead(f)
 			saw_code = 0;
 			sym = add_file(n->on_mptr);
 
-			if (! currfile) newfile(sym->sy_idf);
+			if (! listfile) newfile(sym->sy_idf);
 			open_scope(sym, 0);
 			sym->sy_file->f_scope = CurrentScope;
 			FileScope = CurrentScope;

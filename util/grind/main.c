@@ -7,14 +7,13 @@
 #include "symbol.h"
 #include "scope.h"
 
-static char	*usage = "Usage: %s [-d] [<ack.out>] [<a.out>]";
+static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
 static char	*progname;
 char		*AckObj;
 char		*AObj;
 char		*dirs[] = { "", 0 };
 FILE		*db_out;
 FILE		*db_in;
-t_lineno	currline;
 int		debug;
 extern struct tokenname tkidf[];
 extern char	*strindex();

@@ -56,4 +56,4 @@ typedef struct symbol {
 extern p_symbol	NewSymbol(), Lookup(), Lookfromscope(), add_file();
 extern p_symbol identify();
 
-extern p_symbol	currfile;
+extern p_symbol	currfile, listfile;

@@ -13,7 +13,6 @@ extern char	*dirs[];
 extern FILE	*fopen();
 extern FILE	*db_out;
 extern t_lineno	currline;
-#define	window_size	21
 
 static int
 mk_filnm(dir, file, newname)
@@ -55,6 +54,7 @@ open_file(fn, mode, ffn)
   return NULL;
 }
 
+#define	window_size	21
 /*	Print a window of window_size lines around line "line" of
 	file "file".
 */
@@ -103,7 +103,7 @@ lines(file, l1, l2)
   for (n = l1; n <= l2; n++) {
 	register int	c;
 
-	fprintf(db_out, "%c%5d\t", n == currline ? '>' : ' ', n);
+	fprintf(db_out, "%c%5d\t", currfile && file == currfile->sy_file && n == currline ? '>' : ' ', n);
 	do {
 		c = getc(f);
 		if (c != EOF) putc(c, db_out);

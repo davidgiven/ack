@@ -1,0 +1,293 @@
+.\" $Header$
+.TH GRIND 1ACK
+.SH NAME
+grind \- source-level debugger for ACK
+.SH SYNOPSIS
+.B grind
+[
+.I <ACK object file>
+]
+[
+.I <object file>
+]
+.SH DESCRIPTION
+.B Grind
+is a utility for source-level debugging and execution of
+programs written in C or Modula-2 (Pascal will be added later).
+Its operation resembles the operation of 
+.IR dbx ,
+a source-level debugger
+available on many Unix systems. However, some
+.B Grind
+commands are not available in
+.IR dbx ,
+and some more
+.I dbx
+commands are not available in
+.BR grind ,
+and some things are just plain different.
+.LP
+.I <object file>
+is an object file, produced by
+.IR ack (1ACK)
+with the
+.B \-g
+option to include a symbol table.
+.LP
+If no
+.I <object file>
+is specified, "a.out" is used.
+.LP
+For some machines, the debugger does not recognize the object file
+format. For these machines, the result of the
+.IR led (6ACK)
+program must be saved and offered to
+.BR grind .
+.SH USAGE
+Some
+.B grind
+commands take an expression argument.
+.SS Expressions
+.B Grind expressions
+are combinations of variables, constants, and operators.
+The syntax and the operators depend on the source language of the program
+being debugged. However, the type rules are probably less strict than the
+rules of this language. For instance, in Modula-2 one cannot combine
+values of type INTEGER with values of type REAL in an expression without
+using conversion routines. In
+.BR grind ,
+the conversions needed are performed automatically.
+Expressions cannot involve strings, structures, or
+arrays, although elements of structures or arrays may be used.
+.SS Operators
+.LP
+.B Grind
+supports operators for addition, subtraction, multiplication, division,
+remainder, bitwise or, bitwise xor, bitwise and, boolean or,
+boolean and, left-shift, right-shift, address-of, dereference, less than,
+less than or equal, equal, not equal, greater than, greater than or equal,
+selection.
+.LP
+The syntax and priority of these operators depends on the source language.
+Parentheses can be used for grouping.
+.SS "Scope Rules"
+.LP
+.B dbx
+uses the current file and function to resolve scope conflicts.
+Their values are updated as files and functions are entered and exited
+during execution.
+Names can also be qualified with procedure- or module names, as in
+\fImodule\fP`\fIproc\fP`\fIname\fP.
+.B Grind
+tries to be intelligent about names, so qualification is only needed when
+names are used for more than one object in a program and the current scope
+does not help.
+.SS "Positions"
+In general, there are two ways to specify a position; the first way is
+to specify filename and linenumber, in a so-called at-clause, like this:
+.RS
+\fBat\fP [ "\fIfilename\fP": ] \fIlinenumber\fP
+.RE
+The
+.I filename
+part is optional.
+The second way is to specify a function name, like this:
+.RS
+\fBin \fIfunction\fP
+.RE
+This indicates the first statement within the named function (except for
+the trace command discussed later).
+.SS "Commands"
+.TP
+.B \s+2^\s0C
+Interrupt.  Stop the program being debugged and enter
+.BR grind .
+.TP
+\fBrun\fP [ \fIargs\fP ] [ < \fIinfile\fP ] [ > \fIoutfile\fP ]
+Start executing
+.I <object file>
+with command line arguments
+.IR args ,
+and possible redirection of standard input and/or standard output.
+.TP
+.B rerun
+Repeats the last
+.B run
+command.
+\fBcont\fP [ \fBat\fP \fIsourceline\fP ]
+Continue execution from where it stopped, or, if \fIsourceline\fP is
+given, at that source line.
+.TP
+\fBtrace\fP [ \fBon\fP \fIexpression\fP ] [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
+Display tracing information.
+If no argument is specified, each source line is displayed before
+execution.
+In addition, if an \fBon\fP-clause is given, the value of the expression
+is printed.
+If a position is given there are two possibilities: if the position is
+given as \fBin\fP \fIfunction\fP, then the tracing information is
+displayed only while executing the function or
+procedure
+.IR function .
+If the position is given as \fBat\fP \fIlinenumber\fP,
+then the tracing information is displayed only whenever the source line
+indicated is reached.
+If a condition is given, tracing information is only displayed when
+.I condition
+is true.
+.TP
+\fBstop\fP [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ]
+Stop execution when the
+.I position
+is reached, and then when
+.I condition
+becomes true.
+If no position is given, stop when
+.I condition
+becomes true.
+If no condition is given, stop when
+.I position
+is reached.
+Either a position or a condition (or both) must be given.
+.TP
+\fBwhen\fP [ \fIposition\fP ] [ \fBif\fP \fIcondition\fP ] { \fIcommand\fP [ ; \fIcommand ] ... }
+Execute the
+.B grind
+.IR command (s)
+when the
+.I position
+is reached, and then when
+.I condition
+becomes true.
+If no position is given, stop when
+.I condition
+becomes true.
+If no condition is given, stop when
+.I position
+is reached.
+Either a position or a condition (or both) must be given.
+.TP
+\fBprint\fP \fIexpression\fP [ ',' \fIexpression\fP ] ...
+Print the value of each expression.
+.TP
+\fBdisplay\fP \fIexpression\fP [ ',' \fIexpression\fP ] ...
+Print the value of each expression whenever the program stops.
+.TP
+.B dump
+Saves the data (global data + stack) of the program. These data can
+be restore with the
+.B restore
+command discussed later.
+.B Dump
+and
+.B restore
+combinations can be used as a poor man's implementation of an "undo"
+facility.
+.TP
+.B status
+Display active
+.BR trace ,
+.BR stop ,
+.BR when ,
+and
+.B display
+commands, and associated command numbers.
+Also display current
+.B dump
+records.
+.TP
+\fBdelete\fP \fIcommandnumber\fP
+Remove the command corresponding to \fIcommandnumber\fP
+(as displayed by
+.BR status ).
+.TP
+\fBrestore\fP \fIcommandnumber\fP
+Restore the data corresponding to the dump of \fIcommandnumber\fP
+(as displayed by
+.BR status ).
+This restores the values of all variables of the program to the values
+at the time the dump was made. The program counter is also restored.
+This effectively puts the program back into the state it was when the
+dump was made, except for file-handling: the state of the files that
+the program handles is not changed.
+Apart from this,
+.B restore
+even works when the program is finished.
+.TP
+\fBstep\fP [ \fIn\fP ]
+Execute the next
+.I n
+source lines.
+If omitted,
+.I n
+is taken to be 1.
+This command steps into functions.
+.TP
+\fBnext\fP [ \fIn\fP ]
+Execute the next
+.I n
+source lines.
+If omitted,
+.I n
+is taken to be 1.
+.B Next
+steps past function-calls.
+.TP
+\fBwhich\fP \fIname\fP
+Print the fully-qualified name of the given name.
+.TP
+\fBfind\fP \fIname\fP
+Print the fully qualified name of all symbols matching
+.IR name .
+.TP
+\fBset\fP \fIexpression\fP \fBto\fP \fIexpression\fP
+Assign the value of the second
+.I expression
+to the designator indicated by the first
+.IR expression .
+Needless to say, the first
+.I expression
+must indicate a designator (something that can be assigned to).
+If the types do not match,
+.B grind
+tries to apply conversions.
+.TP
+\fBwhere\fP [ \fIn\fP ]
+List all, or the top
+.IR n ,
+active functions on the stack.
+.TP
+\fBfile\fP [ \fIfilename\fP ]
+.br
+Print the name of the current source file, or
+change the current source file to
+.IR filename .
+.TP
+\fBlist\fP [ \fIstartline\fP [ , \fIendline\fP ]  | \fIfunction\fP ]
+If no arguments are given, list the next ten lines from current source file,
+if a
+.I startline
+is given, list from
+.I startline
+through
+.IR endline ,
+or
+list from five lines above, to five lines below
+the first statement of
+.IR function .
+.TP
+.B quit
+Exit
+.BR grind .
+.SH ENVIRONMENT
+P.M.
+.SH SEE ALSO
+.BR ack (1ACK).
+.BR led (6ACK).
+.SH BUGS
+.LP
+.B Grind
+does not correctly handle bit-fields.
+.LP
+.B Grind
+does not understand WITH statements.

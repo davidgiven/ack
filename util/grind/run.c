@@ -19,24 +19,25 @@
 #define MAXARG	128
 
 extern char	*strncpy();
+extern struct idf *str2idf();
+
 extern char	*AObj;
-extern t_lineno	currline;
 extern FILE	*db_out;
 extern int	debug;
-extern struct idf *str2idf();
 extern long	pointer_size;
 
 static int	child_pid;		/* process id of child */
 static int	to_child, from_child;	/* file descriptors for communication */
 static int	child_status;
 static int	restoring;
+static int	fild1[2], fild2[2];	/* pipe file descriptors */
 
 int		db_ss;
+t_lineno	currline, listline;
 
 static int	catch_sigpipe();
 static int	stopped();
 static int	uputm(), ugetm();
-static int	fild1[2], fild2[2];	/* pipe file descriptors */
 
 int
 init_run()
@@ -289,10 +290,8 @@ stopped(s, a)
   if (s) {
 	fprintf(db_out, "%s ", s);
 	pos = print_position((t_addr) a, 1);
-	newfile(str2idf(pos->filename, 1));
-	currline = pos->lineno;
 	fputs("\n", db_out);
-	lines(currfile->sy_file, (int)currline, (int)currline);
+	list_position(pos);
   }
   return 1;
 }

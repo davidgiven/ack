@@ -19,11 +19,13 @@
 #include	"expr.h"
 
 extern FILE	*db_out;
-extern t_lineno	currline;
+extern t_lineno	currline, listline;
 extern long	pointer_size;
 extern char	*strrindex();
 
 p_tree		run_command;
+t_lineno	list_line;
+
 
 /*VARARGS1*/
 p_tree
@@ -104,6 +106,55 @@ freenode(p)
   free_tree(p);
 }
 
+static t_addr
+get_addr(p)
+  p_tree	p;
+{
+  t_addr	a = ILL_ADDR;
+  register p_symbol sym;
+
+  if (! p) return NO_ADDR;
+  if (p->t_address != 0) return p->t_address;
+  switch(p->t_oper) {
+  case OP_AT:
+	if (! p->t_filename &&
+	    (! listfile || ! (p->t_filename = listfile->sy_idf->id_text))) {
+		error("no current file");
+		break;
+	}
+	a = get_addr_from_position(&(p->t_pos));
+	if (a == ILL_ADDR) {
+		error("could not determine address of \"%s\":%d",
+			p->t_filename, p->t_lino);
+		break;
+	}
+	p->t_address = a;
+	break;
+	
+  case OP_IN:
+	a =  get_addr(p->t_args[0]);
+	p->t_address = a;
+	break;
+
+  case OP_NAME:
+  case OP_SELECT:
+	sym = identify(p, FUNCTION|PROC|MODULE);
+	if (! sym) {
+		break;
+	}
+	if (! sym->sy_name.nm_scope || ! sym->sy_name.nm_scope->sc_bp_opp) {
+		error("could not determine address of \"%s\"", p->t_str);
+		break;
+	}
+	a = sym->sy_name.nm_scope->sc_bp_opp;
+	break;
+
+  default:
+	assert(0);
+  }
+  return a;
+}
+
 print_node(p, top_level)
   register p_tree	p;
 {
@@ -169,7 +220,7 @@ print_node(p, top_level)
 	break;
   case OP_WHERE:
 	fputs("where", db_out);
-	if (p->t_ival != 0x7fffffff) fprintf(" %ld", p->t_ival);
+	if (p->t_ival != 0x7fffffff) fprintf(db_out, " %ld", p->t_ival);
 	break;
   case OP_CONT:
 	fputs("cont", db_out);
@@ -301,11 +352,36 @@ eval(p)
 do_list(p)
   p_tree	p;
 {
-  if (currfile) {
-	lines(currfile->sy_file,
-	      p->t_args[0] ? (int) p->t_args[0]->t_ival : (int) currline-4,
-	      p->t_args[1] ? (int) p->t_args[1]->t_ival : (int) currline+5);
-	currline = p->t_args[1] ? p->t_args[1]->t_ival + 1 : currline + 10;
+  int	l1, l2;
+
+  if (! p->t_args[0]) {
+	l1 = listline;
+	l2 = listline + 9;
+  }
+  else {
+	if (p->t_args[0]->t_oper == OP_INTEGER) {
+		l1 = p->t_args[0]->t_ival;
+		assert(p->t_args[1] != 0);
+		l2 = p->t_args[1]->t_ival;
+	}
+	else {
+  		t_addr	a = get_addr(p->t_args[0]);
+		p_position pos;
+
+		if (a == ILL_ADDR) {
+			error("could not determine address");
+			return;
+		}
+		pos = get_position_from_addr(a);
+  		newfile(str2idf(pos->filename, 1));
+		l1 = pos->lineno - 5;
+		if (l1 < 1) l1 = 1;
+		l2 = l1+9;
+	}
+  }
+  if (listfile) {
+	lines(listfile->sy_file, l1, l2);
+	listline = l2+1;
   }
   else fprintf(db_out, "no current file\n");
 }
@@ -316,7 +392,7 @@ do_file(p)
   if (p->t_args[0]) {
 	newfile(p->t_args[0]->t_idf);
   }
-  else if (currfile) fprintf(db_out, "%s\n", currfile->sy_idf->id_text);
+  else if (listfile) fprintf(db_out, "%s\n", listfile->sy_idf->id_text);
   else fprintf(db_out, "no current file\n");
 }
 
@@ -325,69 +401,20 @@ newfile(id)
 {
   register p_symbol sym = Lookup(id, PervasiveScope, FILESYM);
 
-  if (currfile != sym) currline = 1;
-  currfile = sym;
-  if (! currfile) {
-	currline = 1;
-	currfile = add_file(id->id_text);
-	currfile->sy_file->f_scope = FileScope;
+  if (listfile != sym) listline = 1;
+  listfile = sym;
+  if (! listfile) {
+	listline = 1;
+	listfile = add_file(id->id_text);
+	listfile->sy_file->f_scope = FileScope;
   }
   find_language(strrindex(id->id_text, '.'));
-}
-
-static t_addr
-get_pos(p)
-  p_tree	p;
-{
-  t_addr	a = ILL_ADDR;
-  register p_symbol sym;
-
-  if (! p) return NO_ADDR;
-  if (p->t_address != 0) return p->t_address;
-  switch(p->t_oper) {
-  case OP_AT:
-	if (! p->t_filename &&
-	    (! currfile || ! (p->t_filename = currfile->sy_idf->id_text))) {
-		error("no current file");
-		break;
-	}
-	a = get_addr_from_position(&(p->t_pos));
-	if (a == ILL_ADDR) {
-		error("could not determine address of \"%s\":%d",
-			p->t_filename, p->t_lino);
-		break;
-	}
-	p->t_address = a;
-	break;
-	
-  case OP_IN:
-	a =  get_pos(p->t_args[0]);
-	p->t_address = a;
-	break;
-
-  case OP_NAME:
-  case OP_SELECT:
-	sym = identify(p, FUNCTION|PROC|MODULE);
-	if (! sym) {
-		break;
-	}
-	if (! sym->sy_name.nm_scope || ! sym->sy_name.nm_scope->sc_bp_opp) {
-		error("could not determine address of \"%s\"", p->t_str);
-		break;
-	}
-	a = sym->sy_name.nm_scope->sc_bp_opp;
-	break;
-
-  default:
-	assert(0);
-  }
-  return a;
 }
 
 do_stop(p)
   p_tree	p;
 {
-  t_addr	a = get_pos(p->t_args[0]);
+  t_addr	a = get_addr(p->t_args[0]);
 
   if (a == ILL_ADDR) {
 	return;
@@ -410,7 +437,7 @@ do_trace(p)
 
   p->t_address = NO_ADDR;
   if (p->t_args[0]) {
-	a = get_pos(p->t_args[0]);
+	a = get_addr(p->t_args[0]);
 	if (a == ILL_ADDR) return;
 	if (p->t_args[0]->t_oper == OP_AT) {
 		e = a;
@@ -542,7 +569,7 @@ do_delete(p)
   if (p) switch(p->t_oper) {
   case OP_WHEN:
   case OP_STOP: {
-	t_addr a = get_pos(p->t_args[0]);
+	t_addr a = get_addr(p->t_args[0]);
 
 	if (a != ILL_ADDR && a != NO_ADDR) {
 		set_or_clear_breakpoint(a, CLRBP);
@@ -550,7 +577,7 @@ do_delete(p)
 	break;
 	}
   case OP_TRACE: {
-	t_addr a = get_pos(p->t_args[0]);
+	t_addr a = get_addr(p->t_args[0]);
 	
 	if (a != ILL_ADDR && a != NO_ADDR) {
 		t_addr e;
@@ -642,16 +669,20 @@ perform(p, a)
 			break;
 		}
 	}
-	{
-		p_position pos = get_position_from_addr(a);
-
-		newfile(str2idf(pos->filename, 1));
-		currline = pos->lineno;
-		lines(currfile->sy_file, (int)currline, (int)currline);
-		if (p->t_args[2]) do_print(p->t_args[2]);
-	}
+	list_position(get_position_from_addr(a));
+	if (p->t_args[2]) do_print(p->t_args[2]);
 	break;
   default:
 	assert(0);
   }
+}
+
+list_position(pos)
+  p_position	pos;
+{
+  newfile(str2idf(pos->filename, 1));
+  currfile = listfile;
+  currline = pos->lineno;
+  listline = currline-5;
+  lines(currfile->sy_file, (int)currline, (int)currline);
 }

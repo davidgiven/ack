@@ -19,7 +19,6 @@
 #include	"expr.h"
 
 extern char	*Salloc();
-extern t_lineno	currline;
 extern FILE	*db_in;
 
 int		errorgiven;
@@ -126,6 +125,7 @@ list_command(p_tree *p;)
     [ ',' lin_num(&t2)
     |			{ t2 = mknode(OP_INTEGER, t1->t_ival); }
     ]
+  | qualified_name(&t1)
   ]			{ *p = mknode(OP_LIST, t1, t2); }
 ;
 
@@ -348,8 +348,8 @@ position(p_tree *p;)
   AT
   [ STRING		{ str = tok.str; }
     ':'
-  |			{ if (! currfile) str = 0;
-			  else str = currfile->sy_idf->id_text;
+  |			{ if (! listfile) str = 0;
+			  else str = listfile->sy_idf->id_text;
 			}
   ]
   lin_num(&lin)		{ *p = mknode(OP_AT, lin->t_ival, str);
