@@ -88,6 +88,8 @@ opr2
 op2
 	: ari
 		{ $$ = ( RDEFMODE | $1); }
+	| '*' REG
+		{ $$ = ( RDEFMODE | $2); }
 	| ainc
 		{ $$ = ( AIMODE | $1 ); }
 	| adec

@@ -73,7 +73,7 @@ ejump(opc, exp) expr_t exp; {
 			emit2((opc^0400) | 04);
 		}
 
-		exp_1.val = exp.val;
+		exp_1 = exp;
 		im1flag = 1;
 		jump(0100,067);
 # ifdef THREE_PASS
