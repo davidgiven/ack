@@ -50,7 +50,7 @@ pr:
 	@pr Makefile $(GF) $(HFILES) $(CSRC)
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles Cfiles tab LL.output
+	rm -f $(OBJ) $(GENFILES) LLfiles Cfiles tab LL.output m2mm
 
 lint:	Cfiles
 	lint $(INCLUDES) $(LINTFLAGS) $(SRC) \
