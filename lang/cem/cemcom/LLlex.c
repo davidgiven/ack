@@ -39,6 +39,9 @@ int SkipEscNewline = 0;		/* how to interpret backslash-newline	*/
 int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int File_Inserted = 0;		/* a file has just been inserted	*/
+#ifdef LINT
+extern int lint_skip_comment;
+#endif
 
 #define MAX_LL_DEPTH	2
 
@@ -451,8 +454,10 @@ skipcomment()
 	NoUnstack++;
 	LoadChar(c);
 #ifdef	LINT
-	lint_start_comment();
-	lint_comment_char(c);
+	if (! lint_skip_comment) {
+		lint_start_comment();
+		lint_comment_char(c);
+	}
 #endif	/* LINT */
 	do {
 		while (c != '*') {
@@ -462,22 +467,22 @@ skipcomment()
 			if (c == EOI) {
 				NoUnstack--;
 #ifdef	LINT
-				lint_end_comment();
+				if (! lint_skip_comment) lint_end_comment();
 #endif	/* LINT */
 				return;
 			}
 			LoadChar(c);
 #ifdef	LINT
-			lint_comment_char(c);
+			if (! lint_skip_comment) lint_comment_char(c);
 #endif	/* LINT */
 		} /* last Character seen was '*' */
 		LoadChar(c);
 #ifdef	LINT
-		lint_comment_char(c);
+		if (! lint_skip_comment) lint_comment_char(c);
 #endif	/* LINT */
 	} while (c != '/');
 #ifdef	LINT
-	lint_end_comment();
+	if (! lint_skip_comment) lint_end_comment();
 #endif	/* LINT */
 	NoUnstack--;
 }

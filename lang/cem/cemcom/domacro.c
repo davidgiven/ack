@@ -13,6 +13,7 @@
 #include	"idf.h"
 #include	"input.h"
 #include	"nopp.h"
+#include	"lint.h"
 
 #ifndef NOPP
 #include	"ifdepth.h"
@@ -137,6 +138,10 @@ domacro()
 	SkipEscNewline = 0;
 }
 
+#ifdef LINT
+int lint_skip_comment;
+#endif
+
 PRIVATE
 skip_block(to_endif)
 {
@@ -152,12 +157,18 @@ skip_block(to_endif)
 	register int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
 
+#ifdef LINT
+	lint_skip_comment++;
+#endif
 	NoUnstack++;
 	for (;;) {
 		LoadChar(ch);	/* read first character after newline	*/
 		if (ch != '#') {
 			if (ch == EOI) {
 				NoUnstack--;
+#ifdef LINT
+				lint_skip_comment--;
+#endif
 				return;
 			}
 			SkipRestOfLine();
@@ -190,6 +201,9 @@ skip_block(to_endif)
 				push_if();
 				if (ifexpr()) {
 					NoUnstack--;
+#ifdef LINT
+					lint_skip_comment--;
+#endif
 					return;
 				}
 			}
@@ -203,6 +217,9 @@ skip_block(to_endif)
 				++(ifstack[nestlevel]);
 				if (nestlevel == skiplevel) {
 					NoUnstack--;
+#ifdef LINT
+					lint_skip_comment--;
+#endif
 					return;
 				}
 			}
@@ -213,6 +230,9 @@ skip_block(to_endif)
 			if (nestlevel == skiplevel) {
 				nestlevel--;
 				NoUnstack--;
+#ifdef LINT
+				lint_skip_comment--;
+#endif
 				return;
 			}
 			nestlevel--;
