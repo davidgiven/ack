@@ -13,7 +13,7 @@ TARGET=-Tlp
 RESFILES= \
 	toolkit.$(SUF) install.$(SUF) em.$(SUF) ack.$(SUF) v7bugs.$(SUF) \
 	peep.$(SUF) cg.$(SUF) ncg.$(SUF) regadd.$(SUF) LLgen.$(SUF) \
-	basic.$(SUF) crefman.$(SUF) pcref.$(SUF) val.$(SUF) \
+	basic.$(SUF) crefman.$(SUF) pcref.$(SUF) val.$(SUF) ansi_C.$(SUF) \
 	6500.$(SUF) i80.$(SUF) z80.$(SUF) top.$(SUF) ego.$(SUF) \
 	m68020.$(SUF) occam.$(SUF) m2ref.$(SUF) ceg.$(SUF) nopt.$(SUF)
 
@@ -24,6 +24,8 @@ RESFILES= \
 
 crefman.$(SUF):	crefman.doc
 		$(EQN) $(TARGET) crefman.doc | $(NROFF) $(MS) $(TARGET) >$@
+ansi_C.$(SUF):	ansi_C.doc
+		$(TBL) $(TARGET) ansi_C.doc | $(NROFF) $(MS) $(TARGET) >$@
 v7bugs.$(SUF):	v7bugs.doc
 		$(NROFF) $(TARGET) v7bugs.doc >$@
 install.$(SUF):	install.doc
