@@ -235,6 +235,7 @@ main(argc, argv)
 #endif FM2
 #ifdef FCC
 	strcat(INCLUDE, CCINCL);
+	append(&COMPFLAGS, "-L");
 #endif FCC
 #ifdef FPC
 	INCLUDE[0] = '\0';
