@@ -271,7 +271,13 @@ lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
 #if	last
 		bsr	nexttab	;
 		move.l	4(a6),(a1)+	!store new line
-		mov	(a6),(a1)		!number in buffer lasttable
+#if	lword
+		move.l	(a6),(a1)	!number in buffer lasttable
+#else
+		mov	(a6),d0
+		extend	d0
+		move.l	d0,(a1)
+#endif
 #endif
 #if	count
 		move.l	countptr,d1	!LINE NUMBER IN d1
