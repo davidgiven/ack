@@ -178,10 +178,11 @@ firstline:
 #ifndef	NOPP
 garbage:
 #endif
-		if (040 < ch && ch < 0177)
-			lexerror("garbage char %c", ch);
-		else
+		if (040 < ch && ch < 0177) {
+			return ptok->tk_symb = ch;
+		} else {
 			lexerror("garbage char \\%03o", ch);
+		}
 		goto again;
 	case STSIMP:	/* a simple character, no part of compound token*/
 		return ptok->tk_symb = ch;

@@ -548,6 +548,7 @@ macro2buffer(repl, idf, args)
 	*/
 	register char *ptr = idf->id_macro->mc_text;
 	int err = 0;
+	int func = idf->id_macro->mc_nps != -1;
 	char *stringify();
 
 	ASSERT(ptr[idf->id_macro->mc_length] == '\0');
@@ -566,7 +567,7 @@ macro2buffer(repl, idf, args)
 		    ptr++;
 		} while (*ptr != delim || *ptr == '\0');
 		add2repl(repl, *ptr++);
-	    } else if (*ptr == '#') {
+	    } else if (func && *ptr == '#') {
 		if (*++ptr == '#') {
 		    register int tmpindex;
 			/* ## - paste operator */
@@ -631,8 +632,9 @@ macro2buffer(repl, idf, args)
 					repl->r_text[tmpindex] = TOKSEP;
 			    }
 		    }
-		} else			/* # operator */
-		    ptr = stringify(repl, ptr, args);
+		} else {			/* # operator */
+			ptr = stringify(repl, ptr, args);
+		}
 	    } else if (*ptr & FORMALP) {
 		/* insert actual parameter */
 		register int n = *ptr++ & 0177;
@@ -658,8 +660,9 @@ macro2buffer(repl, idf, args)
 
 		if (*(repl->r_ptr - 1) != TOKSEP)
 			add2repl(repl, TOKSEP);
-	    } else
+	    } else {
 		add2repl(repl, *ptr++);
+	    }
 	}
 	if (err)
 		lexerror("illegal use of the ## operator");
