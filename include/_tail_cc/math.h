@@ -26,6 +26,7 @@
 #define M_1_SQRT2	 0.70710678118654752440084436210484904
 #define M_EULER		 0.57721566490153286060651209008240243
 
+#ifndef __NO_DEFS
 extern double exp(), log(), log10(), pow(), sqrt();
 extern double fabs(), ceil(), floor();
 extern double gamma();
@@ -33,6 +34,7 @@ extern double hypot(), cabs();
 extern double j0(), y0(), j1(), y1(), jn(), yn();
 extern double sin(), asin(), tan(), atan(), atan2(), cos(), acos();
 extern double sinh(), tanh(), cosh();
+#endif
 
 #define POLYNOM1(x, a)	((a)[1]*(x)+(a)[0])
 #define POLYNOM2(x, a)	(POLYNOM1((x),(a)+1)*(x)+(a)[0])
