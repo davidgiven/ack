@@ -3,6 +3,7 @@
  */
 /* $Header$ */
 
+#if !defined(_POSIX_SOURCE)
 #include	<stdio.h>
 
 int _link(const char *name1, const char *name2);
@@ -13,3 +14,4 @@ rename(const char *old, const char *new) {
 		return remove(old);
 	else return -1;
 }
+#endif
