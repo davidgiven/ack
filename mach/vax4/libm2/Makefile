@@ -6,6 +6,7 @@ M2LIB = lang/m2/libm2
 MOD="PREF=m2" "SUB=" "SRC=$(M2LIB)"
 
 all:
+		RANLIB=ranlib ; export RANLIB ; \
 		make -f $(MAKEFILE) $(MOD) $(MACHDEF) all
 
 install:	cpmod
