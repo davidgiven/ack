@@ -45,8 +45,9 @@ struct arglist LD_HEAD = {
 };
 
 struct arglist LD_TAIL = {
-	3,
+	4,
 	{
+		"/user1/cem/lib/libc.a",
 		"/user1/cem/lib/stb.o",
 		"/usr/em/lib/vax4/tail_mon",
 		"/usr/em/lib/vax4/tail_em"
@@ -443,7 +444,6 @@ main(argc, argv)
 		append(call, o_FILE);
 		concat(call, &LD_HEAD);
 		concat(call, &LDFILES);
-		append(call, library("c"));
 		concat(call, &LD_TAIL);
 		if (runvec(call, (char *)0)) {
 			register i = GEN_LDFILES.al_argc;
