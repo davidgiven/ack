@@ -7,10 +7,10 @@
 	.sect .text
 .trp:
 	movem.l	d0/d1/a0, -(sp)
-	move.l	(16, sp), a0	! return address
-	move.l	(20, sp), d0	! error number
-	move.l	a0, (20, sp)
-	move.l	d0, (16, sp)
+	move.l	(12, sp), a0	! return address
+	move.l	(16, sp), d0	! error number
+	move.l	a0, (16, sp)
+	move.l	d0, (12, sp)
 	move.l	d0,-(sp)
 	cmp.l	#16, d0
 	bcc	1f
