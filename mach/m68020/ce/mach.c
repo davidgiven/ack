@@ -1,3 +1,4 @@
+#define CODE_EXPANDER
 #include "mach.h"
 #include <back.h>
 #include <system.h>
