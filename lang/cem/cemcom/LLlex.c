@@ -495,6 +495,7 @@ string_token(nm, stop_char, plen)
 			LoadChar(ch);
 			if (ch == '\n') {
 				LineNumber++;
+				LoadChar(ch);
 				continue;
 			}
 			ch = quoted(ch);
