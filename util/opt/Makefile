@@ -36,6 +36,7 @@ test:   opt testopt
 cmp :	all
 	-cmp opt $(EMHOME)/lib/em_opt
 	-cmp opt2 $(EMHOME)/lib/em_opt2
+	-cmp em_opt.6 $(EMHOME)/man/em_opt.6
 
 install:all
 	-size opt $(EMHOME)/lib/em_opt
@@ -44,6 +45,8 @@ install:all
 	-size opt2 $(EMHOME)/lib/em_opt2
 	rm -f $(EMHOME)/lib/em_opt2
 	cp opt2 $(EMHOME)/lib/em_opt2
+	rm -f $(EMHOME)/man/em_opt.6
+	cp em_opt.6 $(EMHOME)/man/em_opt.6
 
 pattern.c:      patterns mktab
 	/lib/cpp patterns | mktab > pattern.c

@@ -2,6 +2,7 @@
 d=../..
 l=$d/lib
 h=$d/h
+m=$d/man
 ASS_PATH=$l/em_ass
 
 SEP_OPT=-i
@@ -14,10 +15,14 @@ clean:
 		-rm -f ass-i ass-n *.o maktab *.old asstb.c
 
 install :       all
+		rm -f $(ASS_PATH)
 		cp ass$(SEP_OPT) $(ASS_PATH)
+		rm -f $m/em_ass.6
+		cp em_ass.6 $m/em_ass.6
 
 cmp :           all
-		cmp ass$(SEP_OPT) $(ASS_PATH)
+		-cmp ass$(SEP_OPT) $(ASS_PATH)
+		-cmp em_ass.6 $m/em_ass.6
 
 lint:           ass00.c ass30.c ass40.c ass50.c ass60.c ass70.c \
 			ass80.c assci.c assda.c assrl.c asstb.c asscm.c
