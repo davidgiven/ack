@@ -1,0 +1,3 @@
+#define BYTES_REVERSED 1
+#define WORDS_REVERSED 0
+#define CHAR_UNSIGNED 0
