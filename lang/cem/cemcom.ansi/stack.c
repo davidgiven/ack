@@ -59,9 +59,18 @@ stack_idf(idf, stl)
 	struct idf *idf;
 	register struct stack_level *stl;
 {
-	/*	The identifier idf is inserted in the stack on level stl.
+	/*	The identifier idf is inserted in the stack on level stl,
+		but only if it is not already present at this level.
 	*/
-	register struct stack_entry *se = new_stack_entry();
+	register struct stack_entry *se;
+	
+	se = stl->sl_entry;
+	while (se) {
+		if (se->se_idf == idf) return;
+		se = se->next;
+	}
+
+	se = new_stack_entry();
 
 	/* link it into the stack level */
 	se->next = stl->sl_entry;

@@ -195,6 +195,10 @@ ch3cast(expp, oper, tp)
 		string2pointer(*expp);
 	oldtp = (*expp)->ex_type;
 
+	if (oldtp->tp_size <= 0) {
+		expr_error(*expp,"incomplete type in expression");
+	}
+
 #ifndef NOBITFIELD
 	if (oldtp->tp_fund == FIELD)	{
 		field2arith(expp);

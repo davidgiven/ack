@@ -264,6 +264,11 @@ initializer(struct idf *idf; int sc;)
 #ifdef	LINT
 			change_state(idf, SET);
 #endif	LINT
+#ifdef	DBSYMTAB
+			if (options['g'] && level >= L_LOCAL && expr) {
+				db_line(expr->ex_file, (int) expr->ex_line);
+			}
+#endif	/* DBSYMTAB */
 			if (autoagg)
 				loc_init((struct expr *) 0, idf);
 			else	code_declaration(idf, expr, level, sc);

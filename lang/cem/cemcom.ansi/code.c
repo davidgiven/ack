@@ -31,7 +31,7 @@
 #include	"specials.h"
 #include	"atw.h"
 #include	"assert.h"
-#include	"file_info.h"
+#include	"LLlex.h"
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	LINT
@@ -267,8 +267,12 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	C_insertpart(pro_id = C_getid());
 #endif
 	if (is_struct_or_union(func_type->tp_fund))	{
-		C_df_dlb(func_res_label = data_label());
-		C_bss_cst(func_size, (arith)0, 1);
+		if (func_size <= 0) {
+			error("unknown return type for function %s", name);
+		} else {
+			C_df_dlb(func_res_label = data_label());
+			C_bss_cst(func_size, (arith)0, 1);
+		}
 	}
 	else
 		func_res_label = 0;
@@ -383,6 +387,9 @@ do_return()
 		probably smarter than generating a direct return.
 		Return sequences may be expensive.
 	*/
+#ifdef DBSYMTAB
+	if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 	C_bra(return2_label);
 }
 
@@ -444,7 +451,6 @@ code_declaration(idf, expr, lvl, sc)
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
 			&& fund != FUNCTION
-			&& size >= 0
 		)
 			def->df_alloc = ALLOC_SEEN;
 		if (expr && def_sc == STATIC && sc == EXTERN) {
@@ -609,8 +615,13 @@ bss(idf)
 		stb_string(df, df->df_sc, idf->id_text);
 	}
 #endif /* DBSYMTAB */
-	C_df_dnam(idf->id_text);
-	C_bss_cst(ATW(df->df_type->tp_size), (arith)0, 1);
+	if (df->df_type->tp_size <= 0) {
+		error("size of %s unknown (\"%s\", line %d)"
+			, idf->id_text, df->df_file, df->df_line);
+	} else {
+		C_df_dnam(idf->id_text);
+		C_bss_cst(ATW(df->df_type->tp_size), (arith)0, 1);
+	}
 }
 
 formal_cvt(hasproto,df)
@@ -655,7 +666,7 @@ code_expr(expr, val, code, tlbl, flbl)
 	if (! options['L'])	/* profiling	*/
 		C_lin((arith)(expr->ex_line));
 #ifdef DBSYMTAB
-	if (options['g']) db_line(expr->ex_file, (int)expr->ex_line);
+	if (options['g']) db_line(expr->ex_file, (unsigned int)expr->ex_line);
 #endif
 
 	EVAL(expr, val, code, tlbl, flbl);
@@ -683,6 +694,9 @@ code_break()
 {
 	register struct stmt_block *stmt_block = stmt_stack;
 
+#ifdef DBSYMTAB
+	if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 	if (stmt_block)
 		C_bra(stmt_block->st_break);
 	else
@@ -700,6 +714,9 @@ code_continue()
 
 	while (stmt_block)	{
 		if (stmt_block->st_continue)	{
+#ifdef DBSYMTAB
+			if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 			C_bra(stmt_block->st_continue);
 			return;
 		}
@@ -754,16 +771,16 @@ prc_exit()
 
 #ifdef DBSYMTAB
 db_line(file, line)
-	char	*file;
-	int	line;
+	char		*file;
+	unsigned int	line;
 {
-	static int	oldline;
+	static unsigned oldline;
 	static char	*oldfile;
 
 	if (file != oldfile || line != oldline) {
-		C_ms_std((char *) 0, N_SLINE, line);
+		C_ms_std((char *) 0, N_SLINE, (int) line);
 		oldline = line;
 		oldfile = file;
 	}
 }
-#endif
+#endif /* DBSYMTAB */
