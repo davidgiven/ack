@@ -33,20 +33,6 @@ begdata:
 hol0:
 	.data2   0,0
 	.data2   0,0
-argv:
-	.data2   3f
-envp:
-	.data2	0
-3:
-	.asciz "PROGRAM"
-.reghp:
-	.data2   endbss
-.limhp:
-	.data2   endbss
-.ignmask:
-	.data2   0
-.trppc:
-	.data2   0
 
 	.sect .bss
 begbss:
