@@ -89,7 +89,7 @@ gtobuf
  lal 0
  loi _EM_PSIZE
  lof 3*_EM_PSIZE
- cal $sigsetmask
+ cal $_sigsetmask
  asp _EM_WSIZE
  lfr _EM_WSIZE
  asp _EM_WSIZE
