@@ -28,18 +28,18 @@ an estimate of the number of memory cycles used per source line.
 This option is expensive in time as well as in memory space.
 The result tables made at run time are dumped onto a file named
 em_runinf. This file is converted to human readable format
-by the program eminform(1) which writes the profiling information
+by the program eminform(1ACK) which writes the profiling information
 on a file called em_profile.
 .IP f
 maintain a bit map of all source lines that have been executed.
-This map is written also onto the file em_runinf and can be interpreted by eminform(1) which writes in this case the file em_flow.
+This map is written also onto the file em_runinf and can be interpreted by eminform(1ACK) which writes in this case the file em_flow.
 This option is almost free in time and space.
 .IP c
 count line usage in tables that
 contains for every source line the number of times it
 was entered.
 These tables are also written onto em_runinf.
-Eminform(1) can be used to convert this information into the
+Eminform(1ACK) can be used to convert this information into the
 file em_count.
 Cheap in time, expensive in memory space.
 .PP
@@ -50,7 +50,7 @@ directory ~em/lib/em22/em_????
 If the interpreter exits with a non-zero exit status, then the line numbers
 of the 64 last executed source lines are dumped on the file
 em_runinf
-in the current directory. Eminform(1) writes this information
+in the current directory. Eminform(1ACK) writes this information
 on the human readable file em_last.
 .SH "FILES"
 .IP ~em/lib/em22/em_???? 35
@@ -67,7 +67,7 @@ source line flow data
 last lines executed
 .PD
 .SH "SEE ALSO"
-eminform(1), ack(1),
+eminform(1ACK), ack(1ACK),
 .SH BUGS
 Most error messages are self explanatory.
 The interpreter stops in case of lack of space with an error
