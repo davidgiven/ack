@@ -37,7 +37,7 @@ then
     fi
     if test $errors = no
     then
-      arch cr $2 $OFILES
+      ${ASAR-arch} cr $2 $OFILES
       rm $OFILES
     else
       echo $2 not made, due to compilation errors
