@@ -4,8 +4,9 @@ MACHDEF="MACH=m68k2" "SUF=$(SUF)" "ASAR=aal"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
+LIBM="PREF=m" "SRC=lang/cem/libcc/math"
 
-install:	cpstdio cpgen
+install:	cpstdio cpgen cplibm
 
 cpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tailcp
@@ -13,8 +14,10 @@ cpgen:
 		make -f $(MAKEFILE) $(GEN) $(MACHDEF) cp
 cpmon:
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tailcp
+cplibm:
+		make -f $(MAKEFILE) $(LIBM) $(MACHDEF) tailcp
 
-cmp:		cmpstdio cmpgen
+cmp:		cmpstdio cmpgen cmplibm
 
 cmpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tail
@@ -27,6 +30,9 @@ cmpgen:
 cmpmon:
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tail
 		-../../compare tail_mon
+cmplibm:
+		make -f $(MAKEFILE) $(LIBM) $(MACHDEF) tail
+		-../../compare tail_m
 
 clean:
 		-rm -f *.old *.[ce$(SUF)] tail* head*

@@ -4,9 +4,9 @@ MACHDEF="MACH=sun3" "SUF=$(SUF)" "ASAR=aal"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
-MATH="PREF=m" "SRC=lang/cem/libcc/math"
+LIBM="PREF=m" "SRC=lang/cem/libcc/math"
 
-install:	cpstdio cpgen cpmath
+install:	cpstdio cpgen cplibm
 
 cpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tailcp
@@ -14,10 +14,10 @@ cpgen:
 		make -f $(MAKEFILE) $(GEN) $(MACHDEF) cp
 cpmon:
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tailcp
-cpmath:
-		make -f $(MAKEFILE) $(MATH) $(MACHDEF) tailcp
+cplibm:
+		make -f $(MAKEFILE) $(LIBM) $(MACHDEF) tailcp
 
-cmp:		cmpstdio cmpgen cmpmath
+cmp:		cmpstdio cmpgen cmplibm
 
 cmpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tail
@@ -30,8 +30,8 @@ cmpgen:
 cmpmon:
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tail
 		-../../compare tail_mon
-cmpmath:
-		make -f $(MAKEFILE) $(MATH) $(MACHDEF) tail
+cmplibm:
+		make -f $(MAKEFILE) $(LIBM) $(MACHDEF) tail
 		-../../compare tail_m
 
 clean:

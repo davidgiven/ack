@@ -4,10 +4,10 @@ MACHDEF="MACH=pdp" "SUF=$(SUF)" "ASAR=aal"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
-LIBM="PREF=m" "SRC=lang/cem/libcc/libm"
+LIBM="PREF=m" "SRC=lang/cem/libcc/math"
 LIBLN="PREF=ln" "SRC=lang/cem/libcc/libln"
 
-install:	cpstdio cpgen
+install:	cpstdio cpgen cplibm
 
 cpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tailcp
@@ -20,7 +20,7 @@ cplibm:
 cplibln:
 		make -f $(MAKEFILE) $(LIBLN) $(MACHDEF) tailcp
 
-cmp:		cmpstdio cmpgen
+cmp:		cmpstdio cmpgen cmplibm
 
 cmpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tail
