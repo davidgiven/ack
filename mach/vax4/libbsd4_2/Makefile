@@ -2,11 +2,11 @@
 install:	cp
 
 cp:             all
-		../../install head_em head_em.o
+		../../install head_em.o head_em
 		../../install tail_mon
 
 cmp:            all
-		-../../compare head_em
+		-../../compare head_em.o head_em
 		-../../compare tail_mon
 
 all:            head_em tail_mon
