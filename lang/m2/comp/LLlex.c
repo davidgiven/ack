@@ -582,7 +582,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 		PushBack();
 
 		if (np >= &buf[NUMSIZE]) {
-			tk->TOK_REL = Salloc("0.0", 5);
+			tk->TOK_REL = Salloc("-0.0", 5)+1;
 			lexerror("real constant too long");
 		}
 		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;

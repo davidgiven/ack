@@ -445,7 +445,7 @@ firstline:
 		buf[0] = '-';	/* good heavens...	*/
 		if (np == &buf[NUMSIZE+1]) {
 			lexerror("floating constant too long");
-			ptok->tk_fval = Salloc("0.0",(unsigned) 5) + 1;
+			ptok->tk_fval = Salloc("-0.0",(unsigned) 5) + 1;
 		}
 		else
 			ptok->tk_fval = Salloc(buf,(unsigned) (np - buf)) + 1;
