@@ -142,10 +142,9 @@ These routines are supplied with one parameter, a pointer
 to a string containing the name of the routine.
 .SB optimizing
 .IP \-O
-Use as many optimizers as possible.
-\fIAck\fP can almost always use the EM peephole optimizer.
-Sometimes the global optimizer or machine-dependent
-optimizers can be used.
+.IP \-Oopt1,opt2,...
+Try to use the named optimizers, or, if no optimizers are given,
+try using the peephole optimizer and a target optimizer.
 .IP \-L
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
@@ -172,7 +171,7 @@ This flag tells the peephole optimizer
 .RF em_opt VI
 to add information about the visibility of the names used
 to each output module.
-This is needed by most
+This is needed by
 assembler/linkers when these modules are to be inserted
 in libraries.
 .SB interpreter
@@ -227,13 +226,14 @@ are passed to the loaders, as for flags.
 .SH PREPROCESSOR
 All C source programs are run through the preprocessor
 before they are fed to the compiler proper.
-Other human readable sources (Pascal programs and
+On larger machines, the compiler has a built in preprocessor.
+Other human readable sources (Pascal or Basic programs and
 machine assembly) are only preprocessed when they start with a \`#\'.
 .PP
 \fIAck\fP adds a few macro definitions when it calls the
 preprocessor.
 These macro\'s contain the word- and pointer-size and the sizes
-of some basic types used by the Pascal and/or C compiler.
+of some basic types used by the Pascal, Basic and/or C compiler.
 All sizes are in bytes.
 .sp 1
 .TS
@@ -248,7 +248,6 @@ The name of the \fImachine\fP or something like it when
 the machine name is numeric is also defined (as 1).
 .PP
 The default directories searched for include files differ for each machine.
-Some machines do not even use \fI/usr/include\fP.
 .SH PROGRAMS
 \fIAck\fP uses one or more programs in each phase of the
 transformation.
@@ -272,14 +271,15 @@ input:name:output:description
 \&.k .m:decode:.e:Produce human readable EM assembly
 \&.k .m:emass:e.out:Linker producing EM machine code [1]
 \&.m:be:.s:backend
-\&.s:asld:a.out:Assembler/linker producing machine code
+\&.s:asld:.out:Assembler/linker producing machine code in Ack a.out format
 \&.s:as:.o:Assembler
 \&.o:ld:a.out:Linker producing machine code
+\&.o:led:.out:Linker producing machine code in Ack a.out format
 .TE
 .in -2
 .SH "SEE ALSO"
 .PD 0
-em_opt(VI), em_ass(VI), em_cg(VI)
+em_opt(6), em_ass(6), em_cg(6), ack.out(5)
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
 Stevenson \fIDescription of a machine architecture for use with
