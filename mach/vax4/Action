@@ -21,5 +21,5 @@ name "Vax 4-4 etext,edata,end library"
 dir libend
 end
 name "Vax 4-4 systemcall interface"
-dir libsys
+dir libbsd4_2
 end
