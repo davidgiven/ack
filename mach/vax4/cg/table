@@ -353,13 +353,13 @@ loi $1==8	| NC adispl |	| {displ8,%[1.reg],%[1.ind]}		| |
 			| {displdefind8,%[1.ireg],%[1.reg],%[1.ind]}	| |
 ...		| reg4 | 	| {regdef8,%[1]}			| |
 loi $1>8 && $1<=16
-...		| NC ADDR_EXTERNAL |    
+		| NC ADDR_EXTERNAL |    
 				| {EXTERNAL8,%[1.ind]+"+"+tostring($1-8)}
 				%[1]				| loi $1-8 |
 ...		| NC ADDR_LOCAL |
 				| {LOCAL8,%[1.reg],%[1.num]+$1-8,8} %[1]
 								| loi $1-8 |	
-		| reg4 | | {displ8,%[1],tostring($1-8)} %[1]	| loi $1-8 |
+...		| reg4 | | {displ8,%[1],tostring($1-8)} %[1]	| loi $1-8 |
 loi		| sreg4 |
 			remove(ALL)
 			allocate(REG={CONST4,$1/4})
@@ -514,10 +514,10 @@ sti $1==4	| NC adispl bigsource4 |
 ...		| NC ADDR_EXTERNAL |		| | ste %[1.ind] |
 ...		| NC LOCAL4 bigsource4 |
 			REMEXTANDLOC
-			move(%[2],{displdef4,%[1.reg],tostring(%[1.num])} | | |
+			move(%[2],{displdef4,%[1.reg],tostring(%[1.num])}) | | |
 ...		| NC regdef4 bigsource4 |
 			REMEXTANDLOC
-			move(%[2],{displdef4,%[1.reg],"0"} |		| |
+			move(%[2],{displdef4,%[1.reg],"0"})	|	| |
 ...		| NC displ4 bigsource4 |
 			REMEXTANDLOC
 			move(%[2],{displdef4,%[1.reg],%[1.ind]}) |	| |
@@ -554,10 +554,10 @@ sti $1==8	| NC adispl bigsource8 |
 			move(%[2],{displdef8,%[1.reg],%[1.ind]}) |	| |
 ...		| NC LOCAL4 bigsource8 |
 			REMEXTANDLOC
-			move(%[2],{displdef8,%[1.reg],tostring(%[1.num])} | | |
+			move(%[2],{displdef8,%[1.reg],tostring(%[1.num])}) | | |
 ...		| NC regdef4 bigsource8 |
 			REMEXTANDLOC
-			move(%[2],{displdef8,%[1.reg],"0"} |		| |
+			move(%[2],{displdef8,%[1.reg],"0"})	|	| |
 ...		| NC EXTERNAL4 bigsource8 |
 			REMEXTANDLOC
 			move(%[2],{reldef8,%[1.ind]})		|	| |
@@ -1281,7 +1281,7 @@ sbf stl $1==4 && inreg($2)==2
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
 #endif REGVARS
-sbf stl $1==4 $2<0
+sbf stl $1==4 && $2<0
 		| source4 source4 |
 			remove(displaced)
 			remove(LOCALS,%[num] <= $2+3 && %[num]+%[size] > $2)
@@ -1527,7 +1527,7 @@ ngf stl $1==4 && inreg($2)==2
 			erase(regvar($2))
 			setcc(regvar($2))	|	| |
 #endif REGVARS
-ngf stl $1==4 $2<0
+ngf stl $1==4 && $2<0
 		| source4 |
 			remove(displaced)
 			remove(LOCALS,%[num] <= $2+3 && %[num]+%[size] > $2)
@@ -1690,7 +1690,7 @@ ads $1==4	| NC reg4 adispl |
 ...		| NC reg4 EXTERNAL4 |
 			| {aextdefind1,%[1],%[2.ind]}		| |
 ...		| NC reg4 reg4 |	| {adisplind1,%[1],%[2],"0"}	| |
-...		| |				| adi 4 |
+...		| |		|		| adi 4 |
 ads		| |		|		| loc $1 loc 4 cii ads 4 |
 ads !defined($1) | |		|		| loc 4 cii ads 4 |
 sbs $1==4	| |		|		| sbu $1 |
@@ -4341,13 +4341,13 @@ csb !defined($1) | source4 |
 			move(%[1],R0)
 			"jmp\t.csb"
 			erase(R0)		|	| |
-dch		| reg4	|	| {displ4,%[1],"12"}	| 	| |
-dup stl $1==4	| |	|	| stl $2 lol $2 |
+dch		| reg4	|	| {displ4,%[1],"12"}	| |
+dup stl $1==4	| 	|			|	| stl $2 lol $2 |
 dup $1==4	| dups4 |		| %[1] %[1]	| |
 #ifdef REGVARS
-dup $1==8	| bigsource8-regch8 |		| %[1] %[1]	| |
+dup $1==8	| bigsource8-regch8 |	| %[1] %[1]	| |
 #else REGVARS
-dup $1==8	| bigsource8 |			| %[1] %[1]	| |
+dup $1==8	| bigsource8 |		| %[1] %[1]	| |
 #endif REGVARS
 dup		| STACK |
 			allocate(REG,REG={CONST1,$1/4})
