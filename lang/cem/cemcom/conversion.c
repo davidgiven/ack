@@ -125,7 +125,7 @@ conversion(from_type, to_type)
 	signed, unsigned or floating
 */
 int
-fundamental(tp)
+fundamental(tp)/* bad name ???*/
 	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
@@ -146,3 +146,4 @@ fundamental(tp)
 	}
 	return 0;
 }
+

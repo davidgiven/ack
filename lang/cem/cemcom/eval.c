@@ -355,8 +355,7 @@ EVAL(expr, val, code, true_label, false_label)
 					store_block(tp->tp_size, tp->tp_align);
 			}
 			else if (newcode)
-				store_val(&(left->ex_object.ex_value),
-					left->ex_type);
+				store_val(&(left->EX_VALUE), left->ex_type);
 			}
 			break;
 		case PLUSAB:
@@ -416,7 +415,7 @@ EVAL(expr, val, code, true_label, false_label)
 				assop(tp, oper);
 				conversion(tp, left->ex_type);
 				if (compl == 0) {
-					store_val(&(left->ex_object.ex_value),
+					store_val(&(left->EX_VALUE),
 						left->ex_type);
 					if (dupval) load_val(left, RVAL);
 				}
@@ -968,3 +967,4 @@ load_cst(val, siz)
 		C_loi(siz);
 	}
 }
+

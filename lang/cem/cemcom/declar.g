@@ -11,6 +11,8 @@
 #include	"debug.h"
 #include	"arith.h"
 #include	"LLlex.h"
+#include	"label.h"
+#include	"code.h"
 #include	"idf.h"
 #include	"type.h"
 #include	"struct.h"
@@ -126,10 +128,10 @@ single_type_specifier(register struct decspecs *ds;):
 	IDENTIFIER
 	{
 		error("%s is not a type identifier", dot.tk_idf->id_text);
-	 	ds->ds_type = error_type;
+		ds->ds_type = error_type;
 		if (dot.tk_idf->id_def) {
-	 		dot.tk_idf->id_def->df_type = error_type;
-	 		dot.tk_idf->id_def->df_sc = TYPEDEF;
+			dot.tk_idf->id_def->df_type = error_type;
+			dot.tk_idf->id_def->df_sc = TYPEDEF;
 		}
 	}
 |
@@ -164,7 +166,9 @@ init_declarator(register struct decspecs *ds;)
 		{ code_declaration(Dc.dc_idf, (struct expr *) 0, level, ds->ds_sc); }
 	]
 ]
-	{remove_declarator(&Dc);}
+	{
+		remove_declarator(&Dc);
+	}
 ;
 
 /* 8.6: initializer */
@@ -189,10 +193,11 @@ initializer(struct idf *idf; int sc;)
 			external_definition, q.v.
 		*/
 	]
-	{	if (globalflag) {
+	{
+		if (globalflag) {
 			struct expr ex;
 			code_declaration(idf, &ex, level, sc);
-	  	}
+		}
 	}
 	initial_value(globalflag ? &(idf->id_def->df_type) : (struct type **)0,
 			&expr)
@@ -205,8 +210,8 @@ initializer(struct idf *idf; int sc;)
 			print_expr("initializer-expression", expr);
 #endif	DEBUG
 			code_declaration(idf, expr, level, sc);
-	  	}
-	  	init_idf(idf);
+		}
+		init_idf(idf);
 	}
 ;
 

@@ -74,7 +74,7 @@ eval_field(expr, code)
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
-			store_val(&(leftop->ex_object.ex_value), atype);
+			store_val(&(leftop->EX_VALUE), atype);
 		}
 		else	{			/* complex case	*/
 			tmpvar = NewLocal(pointer_size, pointer_align, 
@@ -144,7 +144,7 @@ eval_field(expr, code)
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
-			store_val(&(leftop->ex_object.ex_value), atype);
+			store_val(&(leftop->EX_VALUE), atype);
 		}
 		else	{
 			LoadLocal(tmpvar, pointer_size);
@@ -173,3 +173,4 @@ eval_field(expr, code)
 	}
 }
 #endif NOBITFIELD
+

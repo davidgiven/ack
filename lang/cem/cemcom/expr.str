@@ -74,10 +74,11 @@ struct expr	{
 };
 
 /* some abbreviated selections	*/
-#define VL_CLASS	ex_object.ex_value.vl_class
-#define	VL_VALUE	ex_object.ex_value.vl_value
-#define	VL_IDF		ex_object.ex_value.vl_data.vl_idf
-#define	VL_LBL		ex_object.ex_value.vl_data.vl_lbl
+#define EX_VALUE	ex_object.ex_value
+#define VL_CLASS	EX_VALUE.vl_class
+#define	VL_VALUE	EX_VALUE.vl_value
+#define	VL_IDF		EX_VALUE.vl_data.vl_idf
+#define	VL_LBL		EX_VALUE.vl_data.vl_lbl
 #define	SG_VALUE	ex_object.ex_string.sg_value
 #define SG_LEN		ex_object.ex_string.sg_len
 #define	SG_DATLAB	ex_object.ex_string.sg_datlab

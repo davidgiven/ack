@@ -17,6 +17,7 @@
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
+#include	"def.h"
 #include	"LLlex.h"
 
 /*	This file contains the error-message and diagnostic
@@ -36,6 +37,7 @@ int err_occurred = 0;
 
 extern char *symbol2str();
 extern char options[];
+extern char loptions[];
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -48,8 +50,8 @@ extern char options[];
 	expression, whereas other errors use the information in the token.
 */
 
-/*VARARGS1*/
-error(va_alist)
+/*VARARGS*/
+error(va_alist)				/* fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -61,8 +63,8 @@ error(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS2*/
-expr_error(va_alist)
+/*VARARGS*/
+expr_error(va_alist)			/* expr, fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -80,8 +82,8 @@ expr_error(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
-warning(va_alist)
+/*VARARGS*/
+warning(va_alist)			/* fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -93,8 +95,8 @@ warning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS2*/
-expr_warning(va_alist)
+/*VARARGS*/
+expr_warning(va_alist)			/* expr, fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -111,8 +113,8 @@ expr_warning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
-lexerror(va_alist)
+/*VARARGS*/
+lexerror(va_alist)			/* fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -125,8 +127,8 @@ lexerror(va_alist)
 }
 
 #ifndef	NOPP
-/*VARARGS1*/
-lexwarning(va_alist)
+/*VARARGS*/
+lexwarning(va_alist)			/* fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -139,8 +141,8 @@ lexwarning(va_alist)
 }
 #endif	NOPP
 
-/*VARARGS1*/
-crash(va_alist)
+/*VARARGS*/
+crash(va_alist)				/* fmt, args */
 	va_dcl
 {
 	va_list ap;
@@ -157,10 +159,11 @@ crash(va_alist)
 #else	DEBUG
 	sys_stop(S_EXIT);
 #endif	DEBUG
+	/* NOTREACHED */
 }
 
-/*VARARGS1*/
-fatal(va_alist)
+/*VARARGS*/
+fatal(va_alist)				/* fmt, args */
 	va_dcl
 {
 	va_list ap;

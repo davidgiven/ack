@@ -12,6 +12,7 @@
 #include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
+#include	"code.h"
 #include	"noRoption.h"
 
 extern char options[];
@@ -337,5 +338,7 @@ identifier(struct idf **idfp;) :
 |
 	TYPE_IDENTIFIER
 ]
-	{*idfp = dot.tk_idf;}
+	{
+		*idfp = dot.tk_idf;
+	}
 ;

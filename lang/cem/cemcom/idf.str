@@ -5,7 +5,7 @@
 /* $Header$ */
 /* IDENTIFIER DESCRIPTOR */
 
-#include "nopp.h"
+#include	"nopp.h"
 
 /*	Since the % operation in the calculation of the hash function
 	turns out to be expensive, it is replaced by the cheaper XOR (^).

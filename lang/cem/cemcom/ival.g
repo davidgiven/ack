@@ -26,6 +26,7 @@
 #include	"LLlex.h"
 #include	"noRoption.h"
 #include	"estack.h"
+#include	"code.h"
 
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
@@ -47,14 +48,15 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 			{ if (tpp) gen_tpcheck(tpp, 0); }
 [
 	assignment_expression(expp)
-			{ if ((*expp)->ex_type->tp_fund == ARRAY)
+		{
+			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
-			  if (tpp) {
+			if (tpp) {
 			  	gen_simple_exp(tpp, expp);
 			  	free_expression(*expp);
 				*expp = 0;
-			  }
 			}
+		}
 |
 	initial_value_pack(tpp, expp)
 ]

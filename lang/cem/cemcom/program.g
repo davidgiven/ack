@@ -61,7 +61,6 @@
 extern arith ifval;
 #endif NOPP
 
-/*VARARGS*/
 extern error();
 }
 
@@ -121,7 +120,9 @@ external_definition
 	ext_decl_specifiers(&Ds)
 	[
 		declarator(&Dc)
-		{declare_idf(&Ds, &Dc, level);}
+		{
+			declare_idf(&Ds, &Dc, level);
+		}
 		[%if (Dc.dc_idf->id_def->df_type->tp_fund == FUNCTION)
 			/*	int i (1) {2, 3}
 				is a function, not an old-fashioned
@@ -155,6 +156,8 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 	|
 		{ code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
 	]
+	{
+	}
 	[
 		','
 		init_declarator(ds)
@@ -169,7 +172,6 @@ function(struct declarator *dc;)
 	}
 :
 	{	register struct idf *idf = dc->dc_idf;
-		
 		init_idf(idf);
 		stack_level();		/* L_FORMAL1 declarations */
 		declare_params(dc);

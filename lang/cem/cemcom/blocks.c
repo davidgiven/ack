@@ -160,3 +160,4 @@ copy_loop(sz, src, dst)
 	C_asp(word_size);
 }
 #endif STB
+

@@ -52,8 +52,6 @@ PushLex()
 	ASSERT(LexSP < 2);
 	ASSERT(ASIDE == 0);	/* ASIDE = 0;	*/
 	GetToken(&ahead);
-	ahead.tk_line = LineNumber;
-	ahead.tk_file = FileName;
 	LexStack[LexSP++] = dot;
 }
 
@@ -87,9 +85,6 @@ LLlex()
 		else
 			DOT = EOF;
 	}
-	/* keep track of the place of the token in the file	*/
-	ahead.tk_file = FileName;
-	ahead.tk_line = LineNumber;
 	return DOT;
 }
 
@@ -111,6 +106,7 @@ GetToken(ptok)
 		File_Inserted = 0;
 		goto firstline;
 	}
+
 again:	/* rescan the input after an error or replacement	*/
 #ifndef NOPP
 	if (Unstacked) EnableMacros();
@@ -119,10 +115,16 @@ again:	/* rescan the input after an error or replacement	*/
 go_on:	/* rescan, the following character has been read	*/
 	if ((ch & 0200) && ch != EOI) /* stop on non-ascii character */
 		fatal("non-ascii '\\%03o' read", ch & 0377);
+	/* keep track of the place of the token in the file	*/
+	ptok->tk_file = FileName;
+	ptok->tk_line = LineNumber;
+
 	switch (class(ch)) {	/* detect character class	*/
 	case STNL:		/* newline, vertical space or formfeed	*/
 firstline:
 		LineNumber++;			/* also at vs and ff	*/
+		ptok->tk_file = FileName;
+		ptok->tk_line = LineNumber;
 		if (EoiForNewline)	/* called in control line	*/
 			/*	a newline in a control line indicates the
 				end-of-information of the line.

@@ -40,40 +40,40 @@ do_option(text)
 
 	default:
 		fatal("illegal option: %c", *--text);
-
+		break;
 	case '-':
 		options[*text] = 1;	/* flags, debug options etc.	*/
 		break;
 
-#ifdef DATAFLOW
+#ifdef	DATAFLOW
 	case 'd':
-#endif DATAFLOW
+#endif	DATAFLOW
 	case 'p':			/* procentry/procexit */
 	case 'L' :			/* no fil/lin */
 	case 'n':			/* use no registers */
 	case 'w':			/* no warnings will be given */
-#ifndef NOROPTION
+#ifndef	NOROPTION
 	case 'R':			/* strict version */
 #endif
 		options[*(text-1)] = 1;
 		break;
-#ifdef NOROPTION
+#ifdef	NOROPTION
 	case 'R':
 		warning("-R option not implemented");
 		break;
 #endif
 
-#ifdef ___XXX___
+#ifdef	___XXX___
 deleted, is now a debug-flag
 	case 'C' :	/* E option + comment output		*/
-#ifndef NOPP
+#ifndef	NOPP
 		options['E'] = 1;
 		warning("-C: comment is not output");
 #else NOPP
 		warning("-C option ignored");
-#endif NOPP
+#endif	NOPP
 		break;
-#endif ___XXX___
+#endif	___XXX___
 
 	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP

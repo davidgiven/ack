@@ -265,6 +265,7 @@ declare_idf(ds, dc, lvl)
 			warning("redeclaring reserved word %s", idf->id_text);
 	}
 #endif
+
 	if (def && 
 	    ( def->df_level == lvl ||
 	      ( lvl != L_GLOBAL && def->df_level > lvl )

@@ -31,6 +31,8 @@ extern int level;
 
 /* 9 */
 statement
+	{
+	}
 :
 %if (AHEAD != ':')
 	expression_statement
@@ -54,11 +56,15 @@ statement
 	default_statement
 |
 	BREAK
-	{code_break();}
+	{
+		code_break();
+	}
 	';'
 |
 	CONTINUE
-	{code_continue();}
+	{
+		code_continue();
+	}
 	';'
 |
 	return_statement
@@ -261,6 +267,8 @@ for_statement
 	';'
 	expression(&e_incr)?
 	')'
+	{
+	}
 	statement
 		{
 			C_df_ilb(l_continue);
@@ -388,3 +396,4 @@ asm_statement
 		{	code_asm(asm_bts, asm_len);
 		}
 ;
+

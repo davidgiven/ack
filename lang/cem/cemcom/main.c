@@ -175,7 +175,7 @@ compile(argc, argv)
 #ifndef NOPP
 	WorkingDir = getwdir(source);
 #endif NOPP
-	PushLex();
+	PushLex();			/* initialize lex machine */
 
 #ifdef DEBUG
 #ifndef NOPP

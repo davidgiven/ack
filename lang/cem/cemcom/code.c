@@ -464,11 +464,11 @@ loc_init(expr, id)
 
 		ch7cast(&expr, '=', tp);	/* may modify expr */
 		EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
-		free_expression(expr);
 		vl.vl_class = Name;
 		vl.vl_data.vl_idf = id;
 		vl.vl_value = (arith)0;
 		store_val(&vl, tp);
+		free_expression(expr);
 	}
 }
 

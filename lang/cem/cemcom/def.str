@@ -5,6 +5,7 @@
 /* $Header$ */
 /* IDENTIFIER DEFINITION DESCRIPTOR */
 
+
 struct def	{		/* for ordinary tags */
 	struct def *next;
 	int df_level;
