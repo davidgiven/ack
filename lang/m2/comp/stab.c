@@ -305,7 +305,8 @@ stb_string(df, kind)
 			}
 		}
 		else {	/* local variable */
-			stb_type(tp, 0);
+			stb_type(tp, 1);	/* assign type num to avoid
+						   difficult to parse string */
 			addc_db_str(';');
 			C_ms_stb_cst(db_str.base, N_LSYM, 0, df->var_off);
 		}

@@ -51,6 +51,7 @@ program.g
 real.H
 scope.C
 scope.h
+stab.c
 standards.h
 statement.g
 tmpvar.C

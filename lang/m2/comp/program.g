@@ -13,8 +13,8 @@
 #include	"debug.h"
 
 #include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
+#include	<em.h>
+#include	<stb.h>
 
 #include	"strict3rd.h"
 #include	"main.h"
@@ -235,7 +235,15 @@ ProgramModule
 	priority(&(df->mod_priority))
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
-		{ if (options['g']) stb_string(df, D_END);
+		{ if (options['g']) {
+			if (state == PROGRAM) {
+				C_ms_stb_cst(df->df_idf->id_text,
+					     N_MAIN,
+					     0,
+					     (arith) 0);
+			}
+			stb_string(df, D_END);
+		  }
 		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(df->df_idf, dot.TOK_IDF);
 		}
