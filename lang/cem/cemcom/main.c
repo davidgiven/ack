@@ -371,12 +371,13 @@ preprocess()
 #endif NOPP
 #endif DEBUG
 
-No_Mem()
+No_Mem()				/* called by alloc package */
 {
 	fatal("out of memory");
 }
 
-C_failed()
+C_failed()				/* called by EM_code module */
 {
 	fatal("write failed");
 }
+

@@ -63,13 +63,13 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 ;
 
 initial_value_pack(struct type **tpp; struct expr **expp;)
-	{ static int level; }
+	{ static int pack_level; }
 :
 	'{'
-			{ if (level == 0) gen_error = 0; level++; }
+			{ if (pack_level == 0) gen_error = 0; pack_level++; }
 	initial_value_list(tpp, expp)
-			{ level--;
-			  if (! level) {
+			{ pack_level--;
+			  if (!pack_level) {
 				while (p_stack) {
 					struct e_stack *p = p_stack->next;
 

@@ -17,9 +17,6 @@ struct declarator	{
 	struct formal *dc_formal;	/* params for function	*/
 };
 
-/* ALLOCDEF "declarator" 50 */
-
-
 struct formal	{			/* list of formals */
 	struct formal *next;
 	struct idf *fm_idf;

@@ -27,7 +27,6 @@ struct token dot, ahead, aside;
 
 #ifndef NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
-int PreProcKeys = 0;		/* return preprocessor key		*/
 int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 int Unstacked = 0;		/* an unstack is done 			*/

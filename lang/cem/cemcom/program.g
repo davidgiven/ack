@@ -168,7 +168,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 /* 10.1 */
 function(struct declarator *dc;)
 	{
-		arith fbytes, nbytes;
+		arith fbytes;
 	}
 :
 	{	register struct idf *idf = dc->dc_idf;

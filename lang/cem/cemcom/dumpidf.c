@@ -319,8 +319,6 @@ print_expr(msg, expr)
 p1_expr(lvl, expr)
 	register struct expr *expr;
 {
-	extern char *type2str(), *symbol2str();
-
 	p1_indent(lvl);
 	if (!expr)	{
 		print("NILEXPR\n");

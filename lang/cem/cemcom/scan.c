@@ -80,9 +80,9 @@ getactuals(idef)
 }
 
 PRIVATE
-copyact(ch1, ch2, level)
+copyact(ch1, ch2, lvl)
 	char ch1, ch2;
-	int level;
+	int lvl;
 {
 	/*	copyact() is taken from Ceriel Jacobs' LLgen, with
 		permission.  Its task is to build a list of actuals
@@ -90,16 +90,16 @@ copyact(ch1, ch2, level)
 		which the parameters are separated by ',' if there are
 		more than 1. The balancing of '(',')' and '[',']' and
 		'{','}' is taken care of by calling this function
-		recursively. At each level, copyact() reads the input,
+		recursively. At each level lvl, copyact() reads the input,
 		upto the corresponding closing bracket.
 
 		Opening bracket is ch1, closing bracket is ch2. If
-		level != 0, copy opening and closing parameters too.
+		lvl != 0, copy opening and closing parameters too.
 	*/
 	register int ch;		/* Current char */
 	register int match;		/* used to read strings */
 
-	if (level) {
+	if (lvl) {
 		copy(ch1);
 	}
 
@@ -107,7 +107,7 @@ copyact(ch1, ch2, level)
 		LoadChar(ch);
 
 		if (ch == ch2)	{
-			if (level) {
+			if (lvl) {
 				copy(ch);
 			}
 			return;
@@ -124,7 +124,7 @@ copyact(ch1, ch2, level)
 #endif __MATCHING_PAR__
 
 		case '(':
-			copyact('(', ')', level+1);
+			copyact('(', ')', lvl+1);
 			break;
 
 #ifdef __MATCHING_PAR__
@@ -133,11 +133,11 @@ copyact(ch1, ch2, level)
 					#define declare(v, t)	t v
 					declare(v, union{int i, j; float r;});
 			*/
-			copyact('{', '}', level+1);
+			copyact('{', '}', lvl+1);
 			break;
 
 		case '[':
-			copyact('[', ']', level+1);
+			copyact('[', ']', lvl+1);
 			break;
 #endif __MATCHING_PAR__
 
@@ -176,7 +176,7 @@ copyact(ch1, ch2, level)
 			break;
 
 		case ',':
-			if (!level)	{
+			if (!lvl)	{
 				/* next parameter encountered */
 				copy(EOS);
 

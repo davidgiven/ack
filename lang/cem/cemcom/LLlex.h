@@ -51,7 +51,6 @@ extern struct token dot, ahead, aside;
 
 #ifndef NOPP
 extern int ReplaceMacros;	/* "LLlex.c"	*/
-extern int PreProcKeys;		/* "LLlex.c"	*/
 extern int AccDefined;		/* "LLlex.c"	*/
 extern int Unstacked;		/* "LLlex.c"	*/
 extern int UnknownIdIsZero;	/* "LLlex.c"	*/

@@ -212,13 +212,13 @@ align(pos, al)
 }
 
 struct type *
-standard_type(fund, sign, align, size)
-	int align; arith size;
+standard_type(fund, sign, algn, size)
+	int algn; arith size;
 {
 	register struct type *tp = create_type(fund);
 
 	tp->tp_unsigned = sign;
-	tp->tp_align = align;
+	tp->tp_align = algn;
 	tp->tp_size = size;
 
 	return tp;

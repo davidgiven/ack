@@ -42,7 +42,6 @@ do_decspecs(ds)
 	if (level == L_FORMAL2)	{
 		if (ds->ds_sc_given &&
 		    ds->ds_sc != REGISTER){
-			extern char *symbol2str();
 			error("%s formal illegal", symbol2str(ds->ds_sc));
 			ds->ds_sc = FORMAL;
 		}

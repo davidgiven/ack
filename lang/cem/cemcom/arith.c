@@ -28,7 +28,6 @@
 extern char *symbol2str();
 extern char options[];
 
-int
 arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	register struct expr **e1p, **e2p;
 	int oper;
@@ -43,14 +42,16 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 
 	/* Now t1 and t2 are either INT or LONG or DOUBLE */
 #ifndef NOFLOAT
-	if (t1 == DOUBLE && t2 != DOUBLE)
-		t2 = int2float(e2p, double_type);
-	else
-	if (t2 == DOUBLE && t1 != DOUBLE)
-		t1 = int2float(e1p, double_type);
-	else
-	if (t1 == DOUBLE)
-		return DOUBLE;
+	if (t1 == DOUBLE) {
+		if (t2 != DOUBLE)
+			int2float(e2p, double_type);
+		return;
+	}
+	if (t2 == DOUBLE) {
+		if (t1 != DOUBLE)
+			int2float(e1p, double_type);
+		return;
+	}
 #endif NOFLOAT
 
 	/* Now they are INT or LONG */
@@ -70,8 +71,6 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	else
 	if (!u1 && u2)
 		t1 = int2int(e1p, (t2 == LONG) ? ulong_type : uint_type);
-
-	return t1;
 }
 
 relbalance(e1p, oper, e2p)
@@ -262,7 +261,6 @@ int2int(expp, tp)
 }
 
 #ifndef NOFLOAT
-int
 int2float(expp, tp)
 	register struct expr **expp;
 	struct type *tp;
@@ -273,7 +271,6 @@ int2float(expp, tp)
 	
 	fp_used = 1;
 	*expp = arith2arith(tp, INT2FLOAT, *expp);
-	return (*expp)->ex_type->tp_fund;
 }
 
 float2int(expp, tp)
