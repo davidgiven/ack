@@ -70,8 +70,8 @@ yylex()
 putval(c)
 {
 	register valu_t v;
-	register n;
-	register char *p;
+	register n = 0;
+	register char *p = 0;
 
 	assert(c >= 256 && c < 256+128);
 	switch (c) {
@@ -115,7 +115,7 @@ putval(c)
 	case OP_RR:
 	case OP_OO:
 	case OP_AA:
-		n = 0; break;
+		break;
 	default:
 		n = sizeof(word_t);
 		p = (char *) &yylval.y_word; break;
@@ -127,9 +127,9 @@ putval(c)
 
 getval(c)
 {
-	register n;
+	register n = 0;
 	register valu_t v;
-	register char *p;
+	register char *p = 0;
 
 	switch (c) {
 	case CODE1:
@@ -139,7 +139,7 @@ getval(c)
 	case CODE4:
 		n = 4; goto getnum;
 	case NUMBER0:
-		n = 0; c = NUMBER; goto getnum;
+		c = NUMBER; goto getnum;
 	case NUMBER1:
 		n = 1; c = NUMBER; goto getnum;
 	case NUMBER2:
@@ -176,7 +176,7 @@ getval(c)
 	case OP_RR:
 	case OP_OO:
 	case OP_AA:
-		n = 0; break;
+		break;
 	default:
 		n = sizeof(word_t);
 		p = (char *) &yylval.y_word; break;

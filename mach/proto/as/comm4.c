@@ -221,6 +221,7 @@ char **argv;
 }
 
 #ifdef ASLD
+
 archive() {
 	register long offset;
 	struct ar_hdr header;

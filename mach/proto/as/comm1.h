@@ -102,7 +102,6 @@ extern struct outhead	outhead;
 #endif
 
 /* forward function declarations */
-extern char	*libname();
 extern char	*readident();
 extern char	*remember();
 extern item_t	*fb_shift();
@@ -118,6 +117,7 @@ extern long	atol();
 extern char	*mktemp();
 extern char	*malloc();
 extern char	*getenv();
+extern char	*strncpy();
 
 /* ========== Machine dependent C declarations ========== */
 

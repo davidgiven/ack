@@ -237,7 +237,7 @@ emit1(arg)
 #ifdef LISTING
 	if (listeoln) {
 		if (listflag & 1) {
-			listcolm += printx(VALWIDTH, DOTVAL);
+			listcolm += printx(VALWIDTH, (valu_t)DOTVAL);
 			listcolm++;
 			putchar(' ');
 		}
@@ -280,9 +280,9 @@ emit4(arg)
 long arg;
 {
 #ifdef WORDS_REVERSED
-	emit2((arg>>16)); emit2((arg));
+	emit2((int)(arg>>16)); emit2((int)(arg));
 #else
-	emit2((arg)); emit2((arg>>16));
+	emit2((int)(arg)); emit2((int)(arg>>16));
 #endif
 }
 
