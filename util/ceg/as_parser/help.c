@@ -6,7 +6,7 @@
 
 extern char	*strindex();
 
-static struct Op_info { char *name, *type}
+static struct Op_info { char *name, *type; }
 			op_info[ MAX_OPERANDS] = { { 0, 0}};
 
 static int	n_ops = 0;		/* Number of opertands of current
