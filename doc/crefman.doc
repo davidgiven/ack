@@ -32,42 +32,42 @@ programs.
 .SH
 2.3 Keywords
 .SH
-\f5asm\fP
+\f(CWasm\fP
 .PP
-The keyword \f5asm\fP
+The keyword \f(CWasm\fP
 is recognized.
 However, the statement
 .DS
-.ft 5
+.ft CW
 asm(string);
 .ft R
 .DE
 is skipped, while a warning is given.
 .SH
-\f5enum\fP
+\f(CWenum\fP
 .PP
-The \f5enum\fP keyword is recognized and interpreted.
+The \f(CWenum\fP keyword is recognized and interpreted.
 .SH
-\f5entry\fP, \f5fortran\fP
+\f(CWentry\fP, \f(CWfortran\fP
 .PP
-The words \f5entry\fP and \f5fortran\fP
+The words \f(CWentry\fP and \f(CWfortran\fP
 are reserved under the restricted option.
 The words are not interpreted by the compiler.
 .SH
 2.4.1 Integer Constants
 .PP
 The type of an integer constant is the first of the corresponding list
-in which its value can be represented. Decimal: \f5int, long, unsigned long\fP;
-octal or hexadecimal: \f5int, unsigned, long, unsigned long\fP; suffixed by
-the letter L or l: \f5long, unsigned long\fP.
+in which its value can be represented. Decimal: \f(CWint, long, unsigned long\fP;
+octal or hexadecimal: \f(CWint, unsigned, long, unsigned long\fP; suffixed by
+the letter L or l: \f(CWlong, unsigned long\fP.
 .SH
 2.4.3 Character Constants
 .PP
-A character constant is a sequence of 1 up to \f5sizeof(int)\fP characters
+A character constant is a sequence of 1 up to \f(CWsizeof(int)\fP characters
 enclosed in single quotes.
 The value of a character constant '$c sub 1 c sub 2 ... c sub n$'
 is $d sub n + M \(mu d sub {n - 1} + ... + M sup {n - 1} \(mu d sub 2 + M sup n \(mu d sub 1$,
-where M is 1 + maximum unsigned number representable in an \f5unsigned char\fP,
+where M is 1 + maximum unsigned number representable in an \f(CWunsigned char\fP,
 and $d sub i$ is the signed value (ASCII)
 of character $c sub i$.
 .SH
@@ -80,46 +80,46 @@ The compiler does not support compile-time floating point arithmetic.
 The compiler is capable of producing EM code for machines with the following
 properties
 .IP \(bu
-a \f5char\fP is 8 bits
+a \f(CWchar\fP is 8 bits
 .IP \(bu
-the size of \f5int\fP is equal to the word size
+the size of \f(CWint\fP is equal to the word size
 .IP \(bu
-the size of \f5short\fP may not exceed the size of \f5int\fP
+the size of \f(CWshort\fP may not exceed the size of \f(CWint\fP
 .IP \(bu
-the size of \f5int\fP may not exceed the size of \f5long\fP
+the size of \f(CWint\fP may not exceed the size of \f(CWlong\fP
 .IP \(bu
-the size of pointers is equal to the size of either \f5short\fP, \f5int\fP
-or \f5long\fP
+the size of pointers is equal to the size of either \f(CWshort\fP, \f(CWint\fP
+or \f(CWlong\fP
 .LP
 .SH
 4 What's in a name?
 .SH
-\f5char\fP
+\f(CWchar\fP
 .PP
-Objects of type \f5char\fP are taken to be signed.
-The combination \f5unsigned char\fP is legal.
+Objects of type \f(CWchar\fP are taken to be signed.
+The combination \f(CWunsigned char\fP is legal.
 .SH
-\f5unsigned\fP
+\f(CWunsigned\fP
 .PP
-The type combinations \f5unsigned char\fP, \f5unsigned short\fP and
-\f5unsigned long\fP are supported.
+The type combinations \f(CWunsigned char\fP, \f(CWunsigned short\fP and
+\f(CWunsigned long\fP are supported.
 .SH
-\f5enum\fP
+\f(CWenum\fP
 .PP
-The data type \f5enum\fP is implemented as described 
+The data type \f(CWenum\fP is implemented as described 
 in \fIRecent Changes to C\fP (see appendix A).
 .I Cem
-treats enumeration variables as if they were \f5int\fP.
+treats enumeration variables as if they were \f(CWint\fP.
 .SH
-\f5void\fP
+\f(CWvoid\fP
 .PP
-Type \f5void\fP is implemented.
+Type \f(CWvoid\fP is implemented.
 The type specifies an empty set of values, which takes no storage space.
 .SH
 \fRFundamental types\fP
 .PP
 The names of the fundamental types can be redefined by the user, using
-\f5typedef\fP.
+\f(CWtypedef\fP.
 .SH
 7 Expressions
 .PP
@@ -131,7 +131,7 @@ Parameter lists are evaluated from right to left.
 .SH
 7.2 Unary operators
 .PP
-The type of a \f5sizeof\fP expression is \f5unsigned int\fP.
+The type of a \f(CWsizeof\fP expression is \f(CWunsigned int\fP.
 .SH
 7.13 Conditional operator
 .PP
@@ -147,8 +147,8 @@ The types of operands taking part must be the same.
 .SH
 8.2 Type specifiers
 .PP
-The combinations \f5unsigned char\fP, \f5unsigned short\fP
-and \f5unsigned long\fP are implemented.
+The combinations \f(CWunsigned char\fP, \f(CWunsigned short\fP
+and \f(CWunsigned long\fP are implemented.
 .SH
 8.5 Structure and union declarations
 .PP
@@ -157,7 +157,7 @@ are supported, as long as the type fits in a word on the target machine.
 .PP
 Fields are left adjusted by default; the first field is put into the left
 part of a word, the next one on the right side of the first one, etc.
-The \f5-Vr\fP option in the call of the compiler
+The \f(CW-Vr\fP option in the call of the compiler
 causes fields to be right adjusted within a machine word.
 .PP
 The tags of structs and unions occupy a different name space from that of 
@@ -167,12 +167,12 @@ variables and that of member names.
 .PP
 The type of \fIexpression\fP in
 .DS
-.ft 5
-\f5switch (\fP\fIexpression\fP\f5)\fP \fIstatement\fP
+.ft CW
+\f(CWswitch (\fP\fIexpression\fP\f(CW)\fP \fIstatement\fP
 .ft
 .DE
 must be integral.
-A warning is given under the restricted option if the type is \f5long\fP.
+A warning is given under the restricted option if the type is \f(CWlong\fP.
 .SH
 10 External definitions
 .PP
@@ -190,21 +190,21 @@ in \(sc11.1 is walked correctly.
 .SH
 12 Compiler control lines
 .PP
-Lines which do not occur within comment, and with \f5#\fP as first
+Lines which do not occur within comment, and with \f(CW#\fP as first
 character, are interpreted as compiler control line.
 There may be an arbitrary number of spaces, tabs and comments (collectively
-referred as \fIwhite space\fP) following the \f5#\fP.
+referred as \fIwhite space\fP) following the \f(CW#\fP.
 Comments may contain newline characters.
-Control lines with only white space between the \f5#\fP and the line separator
+Control lines with only white space between the \f(CW#\fP and the line separator
 are skipped.
 .PP
-The #\f5include\fP, #\f5ifdef\fP, #\f5ifndef\fP, #\f5undef\fP, #\f5else\fP and
-#\f5endif\fP control lines and line directives consist of a fixed number of
+The #\f(CWinclude\fP, #\f(CWifdef\fP, #\f(CWifndef\fP, #\f(CWundef\fP, #\f(CWelse\fP and
+#\f(CWendif\fP control lines and line directives consist of a fixed number of
 arguments.
 The list of arguments may be followed an arbitrary sequence of characters,
 in which comment is interpreted as such.
-(I.e., the text between \f5/*\fP and \f5*/\fP is skipped, regardless of
-newlines; note that commented-out lines beginning with \f5#\fP are not
+(I.e., the text between \f(CW/*\fP and \f(CW*/\fP is skipped, regardless of
+newlines; note that commented-out lines beginning with \f(CW#\fP are not
 considered to be control lines.)
 .SH
 12.1 Token replacement
@@ -216,10 +216,10 @@ Comments and newline characters, preceeded by a backslash, in the replacement
 text are replaced by a space character.
 .PP
 The actual parameters of a macro are considered tokens and are
-balanced with regard to \f5()\fP, \f5{}\fP and \f5[]\fP.
+balanced with regard to \f(CW()\fP, \f(CW{}\fP and \f(CW[]\fP.
 This prevents the use of macros like
 .DS
-.ft 5
+.ft CW
 CTL([)
 .ft
 .DE
@@ -228,22 +228,22 @@ Formal parameters of a macro must have unique names within the formal-parameter
 list of that macro.
 .PP
 A message is given at the definition of a macro if the macro has 
-already been #\f5defined\fP, while the number of formal parameters differ or
+already been #\f(CWdefined\fP, while the number of formal parameters differ or
 the replacement texts are not equal (apart from leading and trailing
 white space).
 .PP
 Recursive use of macros is detected by the compiler.
 .PP
-Standard #\f5defined\fP macros are
+Standard #\f(CWdefined\fP macros are
 .DS
-\f5__FILE__\fP  name of current input file as string constant
-\f5__DATE__\fP  curent date as string constant; e.g. \f5"Tue Wed  2 14:45:23 1986"\fP
-\f5__LINE__\fP  current line number as an integer
+\f(CW__FILE__\fP  name of current input file as string constant
+\f(CW__DATE__\fP  curent date as string constant; e.g. \f(CW"Tue Wed  2 14:45:23 1986"\fP
+\f(CW__LINE__\fP  current line number as an integer
 .DE
 .PP
 No message is given if \fIidentifier\fP is not known in
 .DS
-.ft 5
+.ft CW
 #undef \fIidentifier\fP
 .ft
 .DE
@@ -254,18 +254,18 @@ A newline character is appended to each file which is included.
 .SH
 12.3 Conditional compilation
 .PP
-The #\f5if\fP, #\f5ifdef\fP and #\f5ifndef\fP control lines may be followed
+The #\f(CWif\fP, #\f(CWifdef\fP and #\f(CWifndef\fP control lines may be followed
 by an arbitrary number of
 .DS
-.ft 5
+.ft CW
 #elif \fIconstant-expression\fP
 .ft
 .DE
-control lines, before the corresponding #\f5else\fP or #\f5endif\fP
+control lines, before the corresponding #\f(CWelse\fP or #\f(CWendif\fP
 is encountered.
 The construct
 .DS
-.ft 5
+.ft CW
 #elif \fIconstant-expression\fP
 some text
 #endif /* corresponding to #elif */
@@ -273,7 +273,7 @@ some text
 .DE
 is equivalent to
 .DS
-.ft 5
+.ft CW
 #else
 #if \fIconstant-expression\fP
 some text
@@ -282,15 +282,15 @@ some text
 .ft
 .DE
 .PP
-The \fIconstant-expression\fP in #\f5if\fP and #\f5elif\fP control lines
+The \fIconstant-expression\fP in #\f(CWif\fP and #\f(CWelif\fP control lines
 may contain the construction
 .DS
-.ft 5
+.ft CW
 defined(\fIidentifier\fP)
 .ft
 .DE
-which is replaced by \f51\fP, if \fIidentifier\fP has been #\f5defined\fP,
-and by \f50\fP, if not.
+which is replaced by \f(CW1\fP, if \fIidentifier\fP has been #\f(CWdefined\fP,
+and by \f(CW0\fP, if not.
 .PP
 Comments in skipped lines are interpreted as such.
 .SH
@@ -298,7 +298,7 @@ Comments in skipped lines are interpreted as such.
 .PP
 Line directives may occur in the following forms:
 .DS
-.ft 5
+.ft CW
 #line \fIconstant\fP
 #line \fIconstant\fP "\fIfilename\fP"
 #\fIconstant\fP
@@ -326,7 +326,7 @@ global variable initialization value
 .IP \(bu
 enum-value specifier
 .IP \(bu
-truth value in \f5#if\fP control line
+truth value in \f(CW#if\fP control line
 .LP
 .PP
 Constant integral expressions are compile-time evaluated while an effort
@@ -354,12 +354,12 @@ Prepend \fIpath\fR to the list of include directories.
 To put the directories "include", "sys/h" and "util/h" into the
 include directory list in that order, the user has to specify
 .DS
-.ft 5
+.ft CW
 -Iinclude -Isys/h -Iutil/h
 .ft R
 .DE
 An empty \fIpath\fP causes the standard include
-directory (usually \f5/usr/include\fP) to be forgotten.
+directory (usually \f(CW/usr/include\fP) to be forgotten.
 .IP \fB\-M\fP\fIn\fP
 .br
 Set maximum significant identifier length to \fIn\fP.
@@ -383,7 +383,7 @@ Create temporary files, if necessary, in directory \fIpath\fP.
 Get rid of the compiler-predefined macro \fIname\fP, i.e.,
 consider
 .DS
-.ft 5
+.ft CW
 #undef \fIname\fP
 .ft R
 .DE
@@ -416,7 +416,7 @@ Some particular flags may be recognized, others may have surprising effects.
 Generate a dependency graph, reflecting the calling structure of functions.
 Lines of the form
 .DS
-.ft 5
+.ft CW
 DFA: \fIcalling-function\fP: \fIcalled-function\fP
 .ft
 .DE
@@ -474,11 +474,11 @@ The syntax is
 .RS
 .I enum-specifier :
 .RS
-\&\f5enum\fP { \fIenum-list\fP }
+\&\f(CWenum\fP { \fIenum-list\fP }
 .br
-\&\f5enum\fP \fIidentifier\fP { \fIenum-list\fP }
+\&\f(CWenum\fP \fIidentifier\fP { \fIenum-list\fP }
 .br
-\&\f5enum\fP \fIidentifier\fP
+\&\f(CWenum\fP \fIidentifier\fP
 .RE
 .sp
 \&\fIenum-list\fP :

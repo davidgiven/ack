@@ -39,35 +39,35 @@ Only one compilation unit per file is accepted.
 .NH 2
 Vocabulary and Representation (section 3)
 .PP
-The input "\f510..\fP" is parsed as two tokens: "\f510\fP" and "\f5..\fP".
+The input "\f(CW10..\fP" is parsed as two tokens: "\f(CW10\fP" and "\f(CW..\fP".
 .PP
-The empty string \f5""\fP has type
+The empty string \f(CW""\fP has type
 .DS
-.ft 5
+.ft CW
 ARRAY [0 .. 0] OF CHAR
 .ft P
 .DE
-and contains one character: \f50C\fP.
+and contains one character: \f(CW0C\fP.
 .PP
-When the text of a comment starts with a '\f5$\fP', it may be a pragma.
+When the text of a comment starts with a '\f(CW$\fP', it may be a pragma.
 Currently, the following pragmas exist:
 .DS
-.ft 5
+.ft CW
 (*$F      (F stands for Foreign) *)
 (*$R[+|-] (Runtime checks, on or off, default on) *)
 (*$A[+|-] (Array bound checks, on or off, default off) *)
 (*$U      (Allow for underscores within identifiers) *)
 .ft P
 .DE
-The Foreign pragma is only meaningful in a \f5DEFINITION MODULE\fP,
+The Foreign pragma is only meaningful in a \f(CWDEFINITION MODULE\fP,
 and indicates that this
-\f5DEFINITION MODULE\fP describes an interface to a module written in another
+\f(CWDEFINITION MODULE\fP describes an interface to a module written in another
 language (for instance C, Pascal, or EM).
 Runtime checks that can be disabled are:
 range checks,
-\f5CARDINAL\fP overflow checks,
-checks when assigning a \f5CARDINAL\fP to an \f5INTEGER\fP and vice versa,
-and checks that \f5FOR\fP-loop control-variables are not changed
+\f(CWCARDINAL\fP overflow checks,
+checks when assigning a \f(CWCARDINAL\fP to an \f(CWINTEGER\fP and vice versa,
+and checks that \f(CWFOR\fP-loop control-variables are not changed
 in the body of the loop.
 Array bound checks can be enabled, because many EM implementations do not
 implement the array bound checking of the EM array instructions.
@@ -75,11 +75,11 @@ When enabled, the compiler generates a check before generating an
 EM array instruction.
 Even when underscores are enabled, they still may not start an identifier.
 .PP
-Constants of type \f5LONGINT\fP are integers with a suffix letter \f5D\fP
-(for instance \f51987D\fP).
-Constants of type \f5LONGREAL\fP have suffix \f5D\fP if a scale factor is missing,
-or have \f5D\fP in place of \f5E\fP in the scale factor (f.i. \f51.0D\fP,
-\f50.314D1\fP).
+Constants of type \f(CWLONGINT\fP are integers with a suffix letter \f(CWD\fP
+(for instance \f(CW1987D\fP).
+Constants of type \f(CWLONGREAL\fP have suffix \f(CWD\fP if a scale factor is missing,
+or have \f(CWD\fP in place of \f(CWE\fP in the scale factor (f.i. \f(CW1.0D\fP,
+\f(CW0.314D1\fP).
 This addition was made, because there was no way to indicate long constants,
 and also because the addition was made in Wirth's newest Modula-2 compiler.
 .NH 2
@@ -99,28 +99,28 @@ Each operand of a constant expression must be a constant:
 a string, a number, a set, an enumeration literal, a qualifier denoting a
 constant expression, a typetransfer with a constant argument, or
 one of the standard procedures 
-\f5ABS\fP, \f5CAP\fP, \f5CHR\fP, \f5LONG\fP, \f5MAX\fP, \f5MIN\fP,
-\f5ODD\fP, \f5ORD\fP,
-\f5SIZE\fP, \f5SHORT\fP, \f5TSIZE\fP, or \f5VAL\fP, with constant argument(s);
-\f5TSIZE\fP and \f5SIZE\fP may also have a variable as argument.
+\f(CWABS\fP, \f(CWCAP\fP, \f(CWCHR\fP, \f(CWLONG\fP, \f(CWMAX\fP, \f(CWMIN\fP,
+\f(CWODD\fP, \f(CWORD\fP,
+\f(CWSIZE\fP, \f(CWSHORT\fP, \f(CWTSIZE\fP, or \f(CWVAL\fP, with constant argument(s);
+\f(CWTSIZE\fP and \f(CWSIZE\fP may also have a variable as argument.
 .PP
 Floating point expressions are never evaluated compile time, because
 the compiler basically functions as a cross-compiler, and thus cannot
 use the floating point instructions of the machine on which it runs.
-Also, \f5MAX(REAL)\fP and \f5MIN(REAL)\fP are not allowed.
+Also, \f(CWMAX(REAL)\fP and \f(CWMIN(REAL)\fP are not allowed.
 .NH 2
 Type declarations (section 6)
 .NH 3
 Basic types (section 6.1)
 .PP
-The type \f5CHAR\fP includes the ASCII character set as a subset.
+The type \f(CWCHAR\fP includes the ASCII character set as a subset.
 Values range from
-\f50C\fP to \f5377C\fP, not from \f50C\fP to \f5177C\fP.
+\f(CW0C\fP to \f(CW377C\fP, not from \f(CW0C\fP to \f(CW177C\fP.
 .NH 3
 Enumerations (section 6.2)
 .PP
 The maximum number of enumeration literals in any one enumeration type
-is \f5MAX(INTEGER)\fP.
+is \f(CWMAX(INTEGER)\fP.
 .NH 3
 Record types (section 6.5)
 .PP
@@ -131,16 +131,16 @@ However, see section 3.
 Set types (section 6.6)
 .PP
 The only limitation imposed by the compiler is that the base type of the
-set must be a subrange type, an enumeration type, \f5CHAR\fP, or
-\f5BOOLEAN\fP.
+set must be a subrange type, an enumeration type, \f(CWCHAR\fP, or
+\f(CWBOOLEAN\fP.
 So, the lower bound may be negative.
 However, if a negative lower bound is used,
 the compiler gives a warning of the \fIrestricted\fP class (see the manual
 page of the compiler).
 .PP
-The standard type \f5BITSET\fP is defined as
+The standard type \f(CWBITSET\fP is defined as
 .DS
-.ft 5
+.ft CW
 TYPE BITSET = SET OF [0 .. 8*SIZE(INTEGER)-1];
 .ft P
 .DE
@@ -152,22 +152,22 @@ Operators (section 8.2)
 Arithmetic operators (section 8.2.1)
 .PP
 The Report does not specify the priority of the unary
-operators \f5+\fP or \f5-\fP:
+operators \f(CW+\fP or \f(CW-\fP:
 It does not specify whether
 .DS
-.ft 5
+.ft CW
 - 1 + 1
 .ft P
 .DE
 means
 .DS
-.ft 5
+.ft CW
 - (1 + 1)
 .ft P
 .DE
 or
 .DS
-.ft 5
+.ft CW
 (-1) + 1
 .ft P
 .DE
@@ -189,8 +189,8 @@ Our compiler certainly chooses an evaluation order, but it is explicitly
 left undefined. Therefore, programs that depend on it, may cease to
 work later.
 .PP
-The types \f5INTEGER\fP and \f5CARDINAL\fP are assignment-compatible with
-\f5LONGINT\fP, and \f5REAL\fP is assignment-compatible with \f5LONGREAL\fP.
+The types \f(CWINTEGER\fP and \f(CWCARDINAL\fP are assignment-compatible with
+\f(CWLONGINT\fP, and \f(CWREAL\fP is assignment-compatible with \f(CWLONGREAL\fP.
 .NH 3
 Case statements (section 9.5)
 .PP
@@ -198,13 +198,13 @@ The size of the type of the case-expression must be less than or equal to
 the word-size.
 .PP
 The Report does not specify what happens if the value of the case-expression
-does not occur as a label of any case, and there is no \f5ELSE\fP-part.
+does not occur as a label of any case, and there is no \f(CWELSE\fP-part.
 In our implementation, this results in a runtime error.
 .NH 3
 For statements (section 9.8)
 .PP
 The Report does not specify the legal types for a control variable.
-Our implementation allows the basic types (except \f5REAL\fP),
+Our implementation allows the basic types (except \f(CWREAL\fP),
 enumeration types, and subranges.
 A runtime warning is generated when the value of the control variable
 is changed by the statement sequence that forms the body of the loop,
@@ -222,33 +222,33 @@ occurs.
 .NH 3
 Standard procedures (section 10.2)
 .PP
-Our implementation supports \f5NEW\fP and \f5DISPOSE\fP
+Our implementation supports \f(CWNEW\fP and \f(CWDISPOSE\fP
 for backwards compatibility,
 but issues warnings for their use. However, see section 3.
 .PP
 Also, some new standard procedures were added, similar to the new standard
 procedures in Wirth's newest compiler:
 .IP \-
-\f5LONG\fP converts an argument of type \f5INTEGER\fP or \f5REAL\fP to the
-types \f5LONGINT\fP or \f5LONGREAL\fP.
+\f(CWLONG\fP converts an argument of type \f(CWINTEGER\fP or \f(CWREAL\fP to the
+types \f(CWLONGINT\fP or \f(CWLONGREAL\fP.
 .IP \-
-\f5SHORT\fP performs the inverse transformation, without range checks.
+\f(CWSHORT\fP performs the inverse transformation, without range checks.
 .IP \-
-\f5FLOATD\fP is analogous to \f5FLOAT\fP, but yields a result of type
-\f5LONGREAL\fP.
+\f(CWFLOATD\fP is analogous to \f(CWFLOAT\fP, but yields a result of type
+\f(CWLONGREAL\fP.
 .IP \-
-\f5TRUNCD\fP is analogous to \f5TRUNC\fP, but yields a result of type
-\f5LONGINT\fP.
+\f(CWTRUNCD\fP is analogous to \f(CWTRUNC\fP, but yields a result of type
+\f(CWLONGINT\fP.
 .NH 2
 System-dependent facilities (section 12)
 .PP
-The type \f5BYTE\fP is added to the \f5SYSTEM\fP module.
+The type \f(CWBYTE\fP is added to the \f(CWSYSTEM\fP module.
 It occupies a storage unit of 8 bits.
-\f5ARRAY OF BYTE\fP has a similar effect to \f5ARRAY OF WORD\fP, but is
-safer. In some obscure cases the \f5ARRAY OF WORD\fP mechanism does not quite
+\f(CWARRAY OF BYTE\fP has a similar effect to \f(CWARRAY OF WORD\fP, but is
+safer. In some obscure cases the \f(CWARRAY OF WORD\fP mechanism does not quite
 work properly.
 .PP
-The procedure \f5IOTRANSFER\fP is not implemented.
+The procedure \f(CWIOTRANSFER\fP is not implemented.
 .NH 1
 Backwards compatibility
 .PP
