@@ -20,6 +20,7 @@ extern short	sflag INIT(SYM_DEF);
 				/* -s option (symbol table info) */
 extern char	*progname;	/* for error messages */
 extern char	*modulename;	/* for error messages */
+extern common_t	*commons;	/* header of commons list */
 
 #ifdef ASLD
 extern short	archmode;	/* scanning archives */
@@ -52,14 +53,6 @@ extern char	temppath[50];
 extern FILE	*input;
 extern FILE	*tempfile;
 
-#ifdef AOUTSEEK
-extern FILE	*aoutfile;
-extern int	aoutpart INIT(-1);
-extern long	aoutseek[PARTS];
-#else
-extern FILE	*aoutfile[PARTS];
-#endif
-
 extern char	stringbuf[STRINGMAX];
 				/* contains last string value */
 
@@ -71,6 +64,8 @@ extern sect_t	sect[SECTMAX];
 extern sect_t	*DOTSCT;	/* &sect[DOTTYP-S_MIN] or NULL */
 extern addr_t	DOTVAL;		/* DOTSCT->s_size + DOTSCT->s_base */
 extern short	DOTTYP;		/* S_MIN..S_MAX or S_UND */
+
+extern ushort	nname;		/* Counts name table index in PASS_3 */
 
 extern item_t	*hashtab[H_TOTAL];
 extern short	hashindex;	/* see item_search() */

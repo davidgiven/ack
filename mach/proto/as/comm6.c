@@ -106,11 +106,11 @@ register item_t *ip;
 		sp = &sect[typ - S_MIN];
 		sp->s_item = ip;
 		sp->s_lign = ALIGNSECT;
-#ifdef DUK
+#ifndef ASLD
 		ip->i_type = typ;
-#else DUK
+#else
 		ip->i_type = typ | S_EXT;
-#endif DUK
+#endif
 		ip->i_valu = 0;
 	} else if (typ >= S_MIN) {
 		sp = &sect[typ - S_MIN];
@@ -142,16 +142,14 @@ valu_t base;
 }
 
 /*
- * NOTE: A rather different solution is used for ASLD and NOLD:
- * ASLD:
+ * NOTE: A rather different solution is used for ASLD and not ASLD:
+ * ASLD, or local commons:
  *   -	maximum length of .comm is recorded in i_valu during PASS_1
  *   -	address of .comm is recorded in i_valu in later passes:
  *	assigned at end of PASS_1, corrected for s_gain at end of PASS_2
- *   -	symbol table entries are produced in commfinish()
- * NOLD:
- *   -	i_valu cannot be used since it is needed for relocation info
- *   -	only one .comm with a particular symbol is allowed per module
- *   -	symbol table entries are produced in newcomm()
+ * not ASLD:
+ *   -	maximum length of .comm is recorded in i_valu during PASS_1
+ *   -	i_valu is used for relocation info during PASS_3
  */
 newcomm(ip, val)
 register item_t *ip;
@@ -165,31 +163,15 @@ valu_t val;
 		/* printf("declare %s: %o\n", ip->i_name, DOTTYP); */
 		if ((ip->i_type & ~S_EXT) == S_UND) {
 			--unresolved;
-			ip->i_type = S_COM|S_EXT|DOTTYP;
-#ifdef ASLD
+			ip->i_type = S_COM|DOTTYP|(ip->i_type&S_EXT);
 			ip->i_valu = val;
-		} else if (ip->i_type == (S_COM|S_EXT|DOTTYP)) {
+			new_common(ip);
+		} else if (ip->i_type == (S_COM|DOTTYP|(ip->i_type&S_EXT))) {
 			if (ip->i_valu < val)
 				ip->i_valu = val;
-#endif
 		} else
 			serror("multiple declared");
 	}
-#ifndef ASLD
-	if (PASS_SYMB == 0)
-		return;
-	if (pass != PASS_3)
-		/*
-		 * save symbol table index
-		 * for possible relocation
-		 */
-		ip->i_valu = outhead.oh_nname;
-#ifdef DUK
-	newsymb(ip->i_name, S_COM|S_EXT|DOTTYP, (short)0, val);
-#else DUK
-	newsymb(ip->i_name, S_EXT|DOTTYP, (short)0, val);
-#endif DUK
-#endif
 }
 
 switchsect(newtyp)
@@ -207,12 +189,7 @@ short newtyp;
 	assert(newtyp >= S_MIN);
 	sp = &sect[newtyp - S_MIN];
 	if (pass == PASS_3) {
-#ifdef AOUTSEEK
-		aoutpart = -1;
-		aoutseek[PARTEMIT] = sp->s_foff + sp->s_size - sp->s_zero;
-#else
-		fseek(aoutfile[PARTEMIT], sp->s_foff + sp->s_size - sp->s_zero, 0);
-#endif
+		wr_outsect(newtyp - S_MIN);
 	}
 	DOTVAL = sp->s_size + sp->s_base;
 	DOTSCT = sp;
@@ -254,9 +231,8 @@ valu_t bytes;
 			DOTGAIN += (bytes - 1) - gap;
 #endif
 	}
-	/* I don't play the os_zero game here, but plainly write out zero's */
-	/* Led abuses trailing zero parts */
-	while (gap--) emit1(0) ;
+	DOTVAL += gap;
+	sp->s_zero += gap;
 }
 
 #ifdef RELOCATION
@@ -264,9 +240,7 @@ newrelo(s, n)
 short s;
 {
 	struct outrelo outrelo;
-#ifdef DUK
 	int	iscomm;
-#endif DUK
 
 	if (rflag == 0)
 		return;
@@ -284,9 +258,7 @@ short s;
 	 *	b=a
 	 *  a:	.data2	0
 	 */
-#ifdef DUK
 	iscomm = s & S_COM;
-#endif DUK
 	s &= ~S_COM;
 	if ((n & RELPC) == 0 && s == S_ABS)
 		return;
@@ -300,11 +272,7 @@ short s;
 	outrelo.or_type = (char)n;
 	outrelo.or_sect = (char)DOTTYP;
 #ifndef ASLD
-#ifdef DUK
 	if (s == S_UND || iscomm) {
-#else DUK
-	if (s == S_UND) {
-#endif DUK
 		assert(relonami != 0);
 		outrelo.or_nami = relonami-1;
 		relonami = 0;
@@ -326,7 +294,7 @@ short s;
 				;
 	}
 	outrelo.or_addr = (long)DOTVAL;
-	putofmt((char *)&outrelo, SF_RELO, PARTRELO);
+	wr_relo(&outrelo, 1);
 }
 #endif
 
@@ -347,17 +315,37 @@ valu_t valu;
 		outhead.oh_nname++;
 		return;
 	}
+	nname++;
 	if (name) {
-		AOUTPART(PARTCHAR);
+		int len = strlen(name) + 1;
+
+		wr_string(name, len);
 		outname.on_foff = outhead.oh_nchar;
-		do {
-			AOUTPUTC(*name, PARTCHAR);
-			outhead.oh_nchar++;
-		} while (*name++);
+		outhead.oh_nchar += len;
 	} else
 		outname.on_foff = 0;
 	outname.on_type = type;
 	outname.on_desc = desc;
 	outname.on_valu = valu & ~((0xFFFFFFFF)<<(8*sizeof(valu_t)));
-	putofmt((char *)&outname, SF_NAME, PARTNAME);
+	wr_name(&outname, 1);
+}
+
+new_common(ip)
+	item_t *ip;
+{
+	register struct common_t *cp;
+	static nleft = 0;
+	static struct common_t *next;
+
+	if (--nleft < 0) {
+		next = (struct common_t *) sbrk(MEMINCR);
+		if ((int) next == -1) {
+			fatal("out of memory");
+		}
+		nleft += (MEMINCR / sizeof (struct common_t));
+	}
+	cp = next++;
+	cp->c_next = commons;
+	cp->c_it = ip;
+	commons = cp;
 }

@@ -229,25 +229,7 @@ datalist
 			{
 #ifdef RELOCATION
 				if (rflag != 0 && PASS_RELO)
-#ifdef DUK
-#ifdef BYTES_REVERSED
-#ifdef WORDS_REVERSED
-					newrelo($1.typ,
-						(int)$<y_word>0 | RELBR | RELWR
-					);
-#else WORDS_REVERSED
-					newrelo($1.typ, (int)$<y_word>0|RELBR);
-#endif WORDS_REVERSED
-#else BYTES_REVERSED
-#ifdef WORDS_REVERSED
-					newrelo($1.typ, (int)$<y_word>0|RELWR);
-#else WORDS_REVERSED
-					newrelo($1.typ, (int)$<y_word>0);
-#endif WORDS_REVERSED
-#endif BYTES_REVERSED
-#else DUK
-					newrelo($1.typ, (int)$<y_word>0);
-#endif DUK
+					newrelo($1.typ, (int)$<y_word>0|MACHREL_BWR);
 #endif
 				emitx($1.val, (int)$<y_word>0);
 			}
@@ -255,25 +237,7 @@ datalist
 			{
 #ifdef RELOCATION
 				if (rflag != 0 && PASS_RELO)
-#ifdef DUK
-#ifdef BYTES_REVERSED
-#ifdef WORDS_REVERSED
-					newrelo($3.typ,
-						(int)$<y_word>0 | RELBR | RELWR
-					);
-#else WORDS_REVERSED
-					newrelo($3.typ, (int)$<y_word>0|RELBR);
-#endif WORDS_REVERSED
-#else BYTES_REVERSED
-#ifdef WORDS_REVERSED
-					newrelo($3.typ, (int)$<y_word>0|RELWR);
-#else WORDS_REVERSED
-					newrelo($3.typ, (int)$<y_word>0);
-#endif WORDS_REVERSED
-#endif BYTES_REVERSED
-#else DUK
-					newrelo($3.typ, (int)$<y_word>0);
-#endif DUK
+					newrelo($3.typ, (int)$<y_word>0|MACHREL_BWR);
 #endif
 				emitx($3.val, (int)$<y_word>0);
 			}

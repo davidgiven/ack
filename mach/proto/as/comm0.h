@@ -15,7 +15,6 @@
  *	DEBUG:		for debugging purposes only
  *	TMPDIR:		directory for temporary files
  *	ASLD:		combined assembler/linker
- *	AOUTSEEK:	seek on a.out instead of multiple opens
  */
 
 /* ========== constants (use #undef, #define in mach0.c) ========== */
@@ -64,10 +63,6 @@
 
 /* ========== default option setting ========== */
 
-#ifndef NOLD
-#define	ASLD		/* default ON */
-#endif
-
 #ifndef ASLD
 #ifndef RELOCATION
 separate linker only possible if relocation info produced
@@ -91,7 +86,7 @@ _include	<signal.h>
 #endif
 
 #ifdef ASLD
-#include	"aar.h"
+#include	"arch.h"
 #endif
 #include	"out.h"
 
@@ -155,6 +150,7 @@ _include	<signal.h>
 
 /* miscellaneous */
 #define	KEYDEFINE	0
+#define KEYSECT		12
 #define	DOTGAIN		DOTSCT->s_gain
 
 /* ========== type declarations ========== */
@@ -178,6 +174,17 @@ struct item_t {
 	valu_t	i_valu;		/* symbol value */
 	char	*i_name;	/* symbol name */
 };
+
+struct common_t {
+	struct common_t *
+		c_next;
+	struct item_t *c_it;
+#ifndef ASLD
+	valu_t	c_size;
+#endif
+};
+
+typedef struct common_t	common_t;
 
 typedef	struct item_t	item_t;
 
@@ -213,24 +220,17 @@ typedef	struct sect_t	sect_t;
 
 /*
  * extra type bits out of S_ETC, internal use only
-#ifndef DUK
- * S_COM:
- *  - symbols declared by .comm
-#endif DUK
  * S_VAR:
  *  - type not known at end of PASS_1 (S_VAR|S_UND)
  *  - value not known at end of PASS_2 (S_VAR|S_ABS)
  * S_DOT:
  *  - dot expression
  */
-#ifndef DUK
-#define	S_COM		0x0100
-#endif DUK
 #define	S_VAR		0x0200
 #define	S_DOT		0x0400
 /* should be tested by preprocessor
  * due to error in preprocessor it cannot
- * test performed at runtime now
+ * test performed at compiletime by a switch now
  * #if (S_ETC|S_COM|S_VAR|S_DOT) != S_ETC
  * incorrect type bits
  * #endif
@@ -243,10 +243,16 @@ typedef	struct sect_t	sect_t;
 #define	PARTCHAR	3
 #define	PARTS		4
 
-#ifdef AOUTSEEK
-#define	AOUTPART(p)	if(aoutpart!=p){aoutpart=p;fseek(aoutfile,aoutseek[p],0);}
-#define	AOUTPUTC(c,p)	{putc(c,aoutfile);aoutseek[p]++;if(ferror(aoutfile))werror();}
+#ifdef BYTES_REVERSED
+#ifdef WORDS_REVERSED
+#define MACHREL_BWR	(RELBR|RELWR)
 #else
-#define	AOUTPART(p)	/* empty */
-#define	AOUTPUTC(c,p)	{putc(c,aoutfile[p]);if(ferror(aoutfile[p]))werror();}
+#define	MACHREL_BWR	(RELBR)
+#endif
+#else
+#ifdef WORDS_REVERSED
+#define	MACHREL_BWR	(RELWR)
+#else
+#define	MACHREL_BWR	(0)
+#endif
 #endif

@@ -9,16 +9,10 @@
 
 #include	"comm1.h"
 
+#undef extern
+
 struct outhead	outhead = {
 	O_MAGIC, O_STAMP, 0
-#ifndef DUK
-#ifdef BYTES_REVERSED
-	| HF_BREV
-#endif
-#ifdef WORDS_REVERSED
-	| HF_WREV
-#endif
-#endif DUK
 };
 
 #include	"y.tab.h"

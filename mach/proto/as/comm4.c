@@ -34,11 +34,14 @@ char **argv;
 		SIGHUP, SIGINT, SIGQUIT, SIGTERM, 0
 	};
 
-	/* this test should be performed by the
-	 * preprocessor, but it cannot
+	/* the next test should be performed by the
+	 * preprocessor, but it cannot, so it is performed by the compiler.
 	 */
-	if ((S_ETC|S_COM|S_VAR|S_DOT) != S_ETC)
-		fatal("incorrect type bits");
+
+	switch(0) {
+	case 1:	break;
+	case (S_ETC|S_COM|S_VAR|S_DOT) != S_ETC : break;
+	}
 
 	progname = *argv++; argc--;
 	for (p = sigs; i = *p++; )
@@ -106,6 +109,7 @@ char **argv;
 	pass_23(PASS_2);
 #endif
 	pass_23(PASS_3);
+	wr_close();
 	stop();
 }
 
@@ -114,11 +118,10 @@ char **argv;
 pass_1(argc, argv)
 char **argv;
 {
-	register i;
 	register char *p;
 	register item_t *ip;
 #ifdef ASLD
-	char armagic[SZMAGIC];
+	char armagic[2];
 #else
 	register nfile = 0;
 #endif
@@ -136,24 +139,25 @@ char **argv;
 		p = *argv++;
 		if (p == 0)
 			continue;
-#ifdef ASLD
+#ifndef ASLD
+		if (nfile != 0)
+			fatal("second source file %s", p);
+		nfile++;
+#endif
 		if (p[0] == '-' && p[1] == '\0') {
 			input = stdin;
 			parse("STDIN");
 			continue;
 		}
-#else
-		if (nfile != 0)
-			fatal("second source file %s", p);
-		nfile++;
-#endif
+
 		if ((input = fopen(p, "r")) == NULL)
 			fatal("can't open %s", p);
 #ifdef ASLD
 		if (
-			fread(armagic, SZMAGIC, 1, input) == 1
+			fread(armagic, 2, 1, input) == 1
 			&&
-			strncmp(armagic, ARMAGIC, SZMAGIC) == 0
+			((armagic[0]&0377) |
+			 ((unsigned)(armagic[1]&0377)<<8)) == ARMAG
 		) {
 			archive();
 			fclose(input);
@@ -168,6 +172,8 @@ char **argv;
 	machfinish(PASS_1);
 #ifdef ASLD
 	if (unresolved) {
+		register int i;
+
 		nerrors++;
 		fflush(stdout);
 		fprintf(stderr, "unresolved references:\n");
@@ -189,40 +195,35 @@ char **argv;
 }
 
 #ifdef ASLD
-archive()
-{
+archive() {
 	register long offset;
-	register i;
-	register long modsize;
-	char modhead[SZMHEAD];
+	struct ar_hdr header;
+	char getsize[AR_TOTAL];
 
 	archmode++;
-	offset = SZMAGIC;
+	offset = 2;
 	for (;;) {
 		if (unresolved == 0)
 			break;
-		fseek(input, offset, 0);
-		if (fread(modhead, SZMHEAD, 1, input) != 1)
+		fseek(input,offset,0);
+		if (fread(getsize,AR_TOTAL,1,input) != 1)
 			break;
-		if (
-			strncmp(&modhead[OFF_BEG], STR_BEG, LEN_BEG)
-			||
-			strncmp(&modhead[OFF_END], STR_END, LEN_END)
-		)
-			fatal("bad archive");
-		offset += SZMHEAD;
-		modsize = atol(&modhead[OFF_SIZ]);
-		archsize = modsize;
+		offset += AR_TOTAL;
+		strncpy(header.ar_name,getsize,sizeof header.ar_name) ;
+		header.ar_size= (((((long) (getsize[AR_SIZE+1]&0377))<<8)+
+				((long) (getsize[AR_SIZE  ]&0377))<<8)+
+				((long) (getsize[AR_SIZE+3]&0377))<<8)+
+				((long) (getsize[AR_SIZE+2]&0377)) ;
+		archsize = header.ar_size;
 		if (needed()) {
-			fseek(input, offset, 0);
-			archsize = modsize;
-			for (i = 0; i < LEN_NAM; i++)
-				if (modhead[OFF_NAM+i] == ' ')
-					break;
-			modhead[OFF_NAM+i] = '\0';
-			parse(remember(&modhead[OFF_NAM]));
+			fseek(input,offset,0);
+			archsize = header.ar_size;
+			header.ar_name[14] = '\0';
+			parse(remember(header.ar_name));
 		}
-		offset += modsize;
+		offset += header.ar_size;
+		while (offset % 2)
+			offset++;
 	}
 	archmode = 0;
 }
@@ -257,6 +258,12 @@ needed()
 			continue;
 		}
 		if (first) {
+			if (ip == &keytab[KEYSECT]) {
+				while ((c = nextchar()) != '\n')
+					;
+				continue;
+			}
+
 			if (ip != &keytab[KEYDEFINE])
 				break;
 			first = 0;
@@ -417,24 +424,12 @@ setupoutput()
 	register sect_t *sp;
 	register long off;
 	struct outsect outsect;
+	register struct outsect *pos = &outsect;
 
-#ifdef AOUTSEEK
-#define AOUTseek(p,o)	{aoutseek[p]=o;}
-	aoutfile = ffcreat(aoutpath);
-#else
-#define	AOUTseek(p,o)	{fseek(aoutfile[p],o,0);}
-	aoutfile[PARTEMIT]=ffcreat(aoutpath);
-#ifdef RELOCATION
-	aoutfile[PARTRELO]=ffcreat(aoutpath);
-#endif
-	aoutfile[PARTNAME]=ffcreat(aoutpath);
-	aoutfile[PARTCHAR]=ffcreat(aoutpath);
-#endif
-	/*
-	 * header generation
-	 */
-	AOUTseek(PARTEMIT, 0);
-	putofmt((char *)&outhead, SF_HEAD, PARTEMIT);
+	if (! wr_open(aoutpath)) {
+		fatal("can't create %s", aoutpath);
+	}
+	wr_ohead(&outhead);
 	/*
 	 * section table generation
 	 */
@@ -442,52 +437,56 @@ setupoutput()
 	off += (long)outhead.oh_nsect * SZ_SECT;
 	for (sp = sect; sp < &sect[outhead.oh_nsect]; sp++) {
 		sp->s_foff = off;
-		outsect.os_base = SETBASE(sp);
-		outsect.os_size = sp->s_size + sp->s_comm;
-		outsect.os_foff = sp->s_foff;
-		outsect.os_flen = sp->s_size - sp->s_zero;
-		outsect.os_lign = sp->s_lign;
-		off += outsect.os_flen;
-		putofmt((char *)&outsect, SF_SECT, PARTEMIT);
+		pos->os_base = SETBASE(sp);
+		pos->os_size = sp->s_size + sp->s_comm;
+		pos->os_foff = sp->s_foff;
+		pos->os_flen = sp->s_size - sp->s_zero;
+		pos->os_lign = sp->s_lign;
+		off += pos->os_flen;
+		wr_sect(pos, 1);
 	}
 #ifdef RELOCATION
-	AOUTseek(PARTRELO, off);
 	off += (long)outhead.oh_nrelo * SZ_RELO;
 #endif
 	if (sflag == 0)
 		return;
-	AOUTseek(PARTNAME, off);
 	off += (long)outhead.oh_nname * SZ_NAME;
-	AOUTseek(PARTCHAR, off);
 	outhead.oh_nchar = off;	/* see newsymb() */
-#undef AOUTseek
 }
 
 commfinish()
 {
-	register i;
+#ifndef ASLD
+	register int i;
+#endif
+	register struct common_t *cp;
 	register item_t *ip;
 	register sect_t *sp;
 	register valu_t addr;
 
 	switchsect(S_UND);
-#ifdef ASLD
 	/*
 	 * assign .comm labels and produce .comm symbol table entries
 	 */
-	for (i = 0; i<H_SIZE; i++)
-		for (ip = hashtab[H_GLOBAL+i]; ip; ip = ip->i_next) {
-			if ((ip->i_type & S_COM) == 0)
-				continue;
+	for (cp = commons; cp; cp = cp->c_next) {
+		ip = cp->c_it;
+#ifndef ASLD
+		if (!( ip->i_type & S_EXT)) {
+#endif
 			sp = &sect[(ip->i_type & S_TYP) - S_MIN];
 			if (pass == PASS_1) {
 				addr = sp->s_size + sp->s_comm;
 				sp->s_comm += ip->i_valu;
 				ip->i_valu = addr;
+#ifndef ASLD
+				ip->i_type &= ~S_COM;
+#endif
 			}
+#ifdef ASLD
 #ifdef THREE_PASS
-			if (pass == PASS_2)
+			if (pass == PASS_2) {
 				ip->i_valu -= sp->s_gain;
+			}
 #endif
 			if ((sflag & SYM_EXT) && PASS_SYMB)
 				newsymb(
@@ -496,8 +495,27 @@ commfinish()
 					(short)0,
 					load(ip)
 				);
+#else not ASLD
+#ifdef THREE_PASS
+			if (pass == PASS_2) {
+				cp->c_size -= sp->s_gain;
+			}
+#endif THREE_PASS
 		}
-#endif
+		if (pass == PASS_1) cp->c_size = ip->i_valu;
+		if (PASS_SYMB) {
+			if (pass != PASS_3 && (ip->i_type & S_EXT)) {
+				ip->i_valu = outhead.oh_nname;
+			}
+			newsymb(
+				ip->i_name,
+				ip->i_type,
+				(short) 0,
+				cp->c_size
+			);
+		}
+#endif not ASLD
+	}
 	if (PASS_SYMB == 0)
 		return;
 #ifndef ASLD
@@ -514,15 +532,14 @@ commfinish()
 				 * for possible relocation
 				 */
 				ip->i_valu = outhead.oh_nname;
-			if (sflag & SYM_SCT)
-				newsymb(
-					ip->i_name,
-					S_EXT|S_UND,
-					(short)0,
-					(valu_t)0
-				);
+			newsymb(
+				ip->i_name,
+				S_EXT|S_UND,
+				(short)0,
+				(valu_t)0
+			);
 		}
-#endif ASLD
+#endif not ASLD
 	/*
 	 * produce symbol table entries for sections
 	 */

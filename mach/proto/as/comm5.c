@@ -162,13 +162,7 @@ getval(c)
 #endif
 	case STRING:
 		p = stringbuf;
-#ifdef DUK
-		*p++ = n = getc(tempfile);
-		p[n] = '\0';
-		break;
-#else DUK
-		*p++ = n = getc(tempfile); break;
-#endif DUK
+		*p++ = n = getc(tempfile); p[n] = '\0'; break;
 	case OP_EQ:
 	case OP_NE:
 	case OP_LE:
@@ -360,18 +354,12 @@ instring(termc)
 			break;
 		if (c == '\\')
 			c = inescape();
-#ifdef DUK
 		if (p >= &stringbuf[STRINGMAX - 1])
-#else DUK
-		if (p >= &stringbuf[STRINGMAX])
-#endif DUK
 			fatal("string buffer overflow");
 		*p++ = c;
 	}
 	stringbuf[0] = p - stringbuf - 1;
-#ifdef DUK
 	*p = '\0';
-#endif DUK
 	return(STRING);
 }
 

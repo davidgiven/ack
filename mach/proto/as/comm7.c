@@ -19,11 +19,7 @@ register item_t *ip;
 		return(ip->i_valu);
 	return(ip->i_valu + sect[typ].s_base);
 #else
-#ifdef DUK
 	if ((ip->i_type & S_TYP) == S_UND || (ip->i_type & S_COM)) {
-#else DUK
-	if ((ip->i_type & S_TYP) == S_UND) {
-#endif DUK
 		if (pass == PASS_3) {
 			if (relonami != 0)
 				serror("relocation error");
@@ -200,6 +196,7 @@ small(fitsmall, gain)
 		assert(fitsmall || (*p & bit) == 0);
 		return(*p & bit);
 	}
+	/*NOTREACHED*/
 }
 #endif
 
@@ -229,12 +226,12 @@ char arg;
 		DOTSCT->s_zero = 0;
 		break;
 	case PASS_3:
-		AOUTPART(PARTEMIT);
+		wr_outsect(DOTTYP-S_MIN);
 		while (DOTSCT->s_zero) {
-			AOUTPUTC(0, PARTEMIT);
+			wr_putc(0);
 			DOTSCT->s_zero--;
 		}
-		AOUTPUTC(arg, PARTEMIT);
+		wr_putc(arg);
 		break;
 	}
 	DOTVAL++;
@@ -262,7 +259,7 @@ long arg;
 
 emitx(val, n)
 valu_t val;
-register n;
+int n;
 {
 	switch (n) {
 	case 1:
@@ -312,7 +309,7 @@ char *s;
 
 FILE *
 fftemp(path, tail)
-char *path;
+char *path, *tail;
 {
 	register char *dir;
 
@@ -326,36 +323,6 @@ char *path;
 	return(ffcreat(mktemp(path)));
 }
 
-putofmt(p, s, part)
-register char	*p;
-register char	*s;
-{
-	register i;
-	register long l;
-
-	AOUTPART(part);
-	while (i = *s++) {
-		switch (i -= '0') {
-/*		case 0: p++; break; */
-		case 1:
-			l = (long) *((char  *)p); p += sizeof(char );
-			break;
-		case 2:
-			l = (long) *((short *)p); p += sizeof(short);
-			break;
-		case 4:
-			l = (long) *((long  *)p); p += sizeof(long );
-			break;
-		default:
-			assert(0);
-		}
-		while (--i >= 0) {
-			AOUTPUTC((int)l, part);
-			l >>= 8;
-		}
-	}
-}
-
 /* ---------- Error handling ---------- */
 
 yyerror(){}		/* we will do our own error printing */
@@ -365,7 +332,7 @@ nosect()
 	fatal("no sections");
 }
 
-werror()
+wr_fatal()
 {
 	fatal("write error");
 }
