@@ -123,7 +123,7 @@ ch3mon(oper, expp)
 
 			(*expp)->VL_VALUE = (oper == '-') ? -o1 :
 			  ((*expp)->ex_type->tp_unsigned ?
-				(~o1) & full_mask[(*expp)->ex_type->tp_size] :
+				(~o1) & full_mask[(int)(*expp)->ex_type->tp_size] :
 				~o1
 			  );
 		}

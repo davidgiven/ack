@@ -64,7 +64,7 @@ NewLocal(sz, al, regtype, sc)
 {
 	register struct localvar *tmp = FreeTmps;
 	struct localvar *prev = 0;
-	register int index;
+	int index;
 
 	while (tmp) {
 		if (tmp->t_align >= al &&
@@ -149,10 +149,12 @@ LocalFinish()
 		}
 		regs[i] = 0;
 	}
+#ifdef PEEPHOLE
 	if (! options['n']) {
 		C_mes_begin(ms_reg);
 		C_mes_end();
 	}
+#endif
 #ifdef USE_TMP
 	C_endpart(loc_id);
 #endif

@@ -28,7 +28,6 @@
 #include	"field.h"
 
 arith NewLocal();		/* util.c	*/
-char *symbol2str();		/* symbol2str.c	*/
 extern arith full_mask[];	/* cstoper.c	*/
 
 /*	Eval_field() evaluates expressions involving bit fields.
@@ -64,35 +63,7 @@ eval_field(expr, code)
 		ASSERT(tp == rightop->ex_type);
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
-		C_loc(fd->fd_mask);
-		C_and(word_size);
-		if (code == TRUE)
-			C_dup(word_size);
-		C_loc((arith)fd->fd_shift);
-		if (atype->tp_unsigned)
-			C_slu(word_size);
-		else
-			C_sli(word_size);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
-		if (leftop->ex_depth == 0)	{	/* simple case	*/
-			load_val(leftop, RVAL);
-			C_and(word_size);
-			C_ior(word_size);
-			store_val(&(leftop->EX_VALUE), atype);
-		}
-		else	{			/* complex case	*/
-			tmpvar = NewLocal(pointer_size, pointer_align, 
-					  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
-			C_dup(pointer_size);
-			StoreLocal(tmpvar, pointer_size);
-			C_loi(word_size);
-			C_and(word_size);
-			C_ior(word_size);
-			LoadLocal(tmpvar, pointer_size);
-			C_sti(word_size);
-			FreeLocal(tmpvar);
-		}
+		store_field(fd, tp->tp_unsigned, code, leftop, (arith) 0);
 	}
 	else {		/* treat ++F as F += 1 and --F as F -= 1	*/
 		/*	F op= e: f = (((((f>>shift)&mask) op e)&mask)<<shift)|
@@ -115,10 +86,10 @@ eval_field(expr, code)
 			C_and(word_size);
 		}
 		else {
-			arith bits_in_type = word_size * 8;
-			C_loc(bits_in_type - (fd->fd_width + fd->fd_shift));
+			arith sft = word_size * 8 - fd->fd_width;
+			C_loc(sft - fd->fd_shift);
 			C_sli(word_size);
-			C_loc(bits_in_type - fd->fd_width);
+			C_loc(sft);
 			C_sri(word_size);
 		}
 		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
@@ -134,31 +105,9 @@ eval_field(expr, code)
 		else
 			assop(rightop->ex_type, op);
 		conversion(rightop->ex_type, atype);
-		C_loc(fd->fd_mask);
-		C_and(word_size);
-		if (code == TRUE && op != POSTINCR && op != POSTDECR)
-			C_dup(word_size);
-		C_loc((arith)fd->fd_shift);
-		if (atype->tp_unsigned)
-			C_slu(word_size);
-		else
-			C_sli(word_size);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
-		if (leftop->ex_depth == 0)	{
-			load_val(leftop, RVAL);
-			C_and(word_size);
-			C_ior(word_size);
-			store_val(&(leftop->EX_VALUE), atype);
-		}
-		else	{
-			LoadLocal(tmpvar, pointer_size);
-			C_loi(word_size);
-			C_and(word_size);
-			C_ior(word_size);
-			LoadLocal(tmpvar, pointer_size);
-			C_sti(word_size);
-			FreeLocal(tmpvar);
-		}
+		store_field(fd, atype->tp_unsigned, 
+			    code == TRUE && op != POSTINCR && op != POSTDECR,
+			    leftop, tmpvar);
 	}
 	if (code == TRUE) {
 		/*	Take care that the effective value stored in
@@ -174,6 +123,46 @@ eval_field(expr, code)
 			C_sri(word_size);
 		}
 		conversion(atype, expr->ex_type);
+	}
+}
+
+store_field(fd, uns, code, leftop, tmpvar)
+	register struct field *fd;
+	int uns;
+	int code;
+	register struct expr *leftop;
+	arith tmpvar;
+{
+	C_loc(fd->fd_mask);
+	C_and(word_size);
+	if (code == TRUE)
+		C_dup(word_size);
+	C_loc((arith)fd->fd_shift);
+	if (uns)
+		C_slu(word_size);
+	else
+		C_sli(word_size);
+	C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
+	if (leftop->ex_depth == 0)	{	/* simple case	*/
+		load_val(leftop, RVAL);
+		C_and(word_size);
+		C_ior(word_size);
+		store_val(&(leftop->EX_VALUE), uns ? uword_type : word_type);
+	}
+	else	{			/* complex case	*/
+		if (! tmpvar) {
+			tmpvar = NewLocal(pointer_size, pointer_align, 
+				  reg_pointer, 0);
+			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+			StoreLocal(tmpvar, pointer_size);
+		}
+		LoadLocal(tmpvar, pointer_size);
+		C_loi(word_size);
+		C_and(word_size);
+		C_ior(word_size);
+		LoadLocal(tmpvar, pointer_size);
+		C_sti(word_size);
+		FreeLocal(tmpvar);
 	}
 }
 #endif NOBITFIELD
