@@ -132,6 +132,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 	if (toplevel) paniced=0;
 	savebp = nextem(toplevel);
     panic:
+	if (toplevel) totalcost = 0;
 	bp = savebp;
 #endif
 	if (bp == 0) {
@@ -168,18 +169,16 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 if (Debug)
 	fprintf(stderr,"distance of pos %d is %u\n",i,dist);
 #endif
-				if (dist<=mindistance) {
+				if (dist<=mindistance
+#ifdef ALLOW_NEXTEM
+				    || paniced
+#endif
+				   ) {
 					if (dist<mindistance) {
 						if(dist==0)
 							goto gotit;
-#ifdef ALLOW_NEXTEM
-						if (! paniced) {
-#endif
-						npos=0;
+						if (! paniced) npos=0;
 						mindistance = dist;
-#ifdef ALLOW_NEXTEM
-						}
-#endif
 					}
 #ifdef ALLOW_NEXTEM
 					if (dist < MAXINT)
@@ -261,7 +260,7 @@ if (Debug)
 #ifdef MAXSPLIT
 	int sret;
 #endif
-	int stackpad;
+	int stackpad = 0;
 	struct perm *tup,*ntup,*besttup,*tuples();
 
 	DEBUG("MATCH");
@@ -358,11 +357,16 @@ if(Debug>1) fprintf(stderr,"Pattern too long, %d with only %d items on stack\n",
 					myfree(regls[j]);
 #ifndef ALLOW_NEXTEM
 				assert(!toplevel);
+				BROKE();
 #else
 				assert(!(toplevel&&paniced));
 				if (paniced) goto normalfailed;
+				totalcost = INFINITY;
+				for (i=0;i<stackheight-stackpad;i++)
+					fakestack[i] = fakestack[i+stackpad];
+				stackheight -= stackpad;
+				goto doreturn;
 #endif
-				BROKE();
 			}
 			if (cp->c3_prop<0) {
 				totalcost+=docoerc(tp,cp,ply,toplevel,0);
