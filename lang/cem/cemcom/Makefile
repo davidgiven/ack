@@ -96,6 +96,10 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 GCSRC =	char.c symbol2str.c next.c
 GOBJ =	char.o symbol2str.o next.o
 
+# Extra object for generating peephole-optimizer-code-expander version.
+# The Sun-3 version is faster when the text-size exceeds 180K! ARRGH
+EXTRA_O =
+
 STRSRC = code.str declar.str decspecs.str def.str expr.str field.str \
 	estack.str util.str \
 	idf.str macro.str stack.str stmt.str struct.str switch.str type.str \
@@ -125,8 +129,7 @@ HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 	print hfiles Cfiles $(GHSRC) $(GSRC) longnames $(LCSRC)
 
-# include files containing ALLOCDEF specifications
-OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
+OBJ =	$(COBJ) $(LOBJ) $(GOBJ) $(EXTRA_O)
 SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 
 LINT = /usr/bin/lint
@@ -151,7 +154,7 @@ Emain:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else mach=$(MACH); export mach; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE "EXTRA_O="$(EXTRA_O) $(CURRDIR)omain ; else mach=$(MACH); export mach; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
 
 CEmain:	Cfiles

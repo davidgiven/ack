@@ -66,7 +66,12 @@ COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	code.o tmpvar.o lookup.o Version.o next.o
 GENC=	$(LSRC) symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
 SRC =	$(CSRC) $(GENC)
-OBJ =	$(COBJ) $(LOBJ) Lpars.o
+
+# Extra object for generating peephole-optimizer-code-expander version.
+# The Sun-3 version is faster when the text-size exceeds 180K! ARRGH
+EXTRA_O =
+
+OBJ =	$(COBJ) $(LOBJ) Lpars.o $(EXTRA_O)
 
 GENH =	errout.h \
 	idfsize.h numsize.h strsize.h target_sizes.h bigparam.h bigresult.h \
@@ -88,7 +93,7 @@ all:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE "EXTRA_O="$(EXTRA_O) $(CURRDIR)omain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
 
 CEmain: Cfiles
