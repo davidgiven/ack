@@ -43,14 +43,14 @@ box ht 0.75 wid 0.75 with .nw at 1st box.nw + (0.5, -0.5) "Process 1"
 box ht 0.75 wid 0.75 with .ne at 1st box.ne + (-0.5, -0.5) "Process 2"
 box ht 0.75 wid 0.75 with .sw at 1st box.sw + (0.5, 0.5) "Process 3"
 box ht 0.75 wid 0.75 with .se at 1st box.se + (-0.5, 0.5) "Process 4"
-line right from 5/12 <2nd box.ne, 2nd box.se> to 3rd box
-line right from 7/12 <2nd box.ne, 2nd box.se> to 3rd box
-line right from 5/12 <4th box.ne, 4th box.se> to 5th box
-line right from 7/12 <4th box.ne, 4th box.se> to 5th box
-line down from 5/12 <2nd box.sw, 2nd box.se> to 4th box
-line down from 7/12 <2nd box.sw, 2nd box.se> to 4th box
-line down from 5/12 <3rd box.sw, 3rd box.se> to 5th box
-line down from 7/12 <3rd box.sw, 3rd box.se> to 5th box
+line right from 5/12 <2nd box.ne, 2nd box.se> to 5/12 <3nd box.nw, 3nd box.sw>
+line right from 7/12 <2nd box.ne, 2nd box.se> to 7/12 <3nd box.nw, 3nd box.sw>
+line right from 5/12 <4th box.ne, 4th box.se> to 5/12 <5nd box.nw, 5nd box.sw>
+line right from 7/12 <4th box.ne, 4th box.se> to 7/12 <5nd box.nw, 5nd box.sw>
+line down from 5/12 <2nd box.sw, 2nd box.se> to 5/12 <4nd box.nw, 4nd box.ne>
+line down from 7/12 <2nd box.sw, 2nd box.se> to 7/12 <4nd box.nw, 4nd box.ne>
+line down from 5/12 <3rd box.sw, 3rd box.se> to 5/12 <5nd box.nw, 5nd box.ne>
+line down from 7/12 <3rd box.sw, 3rd box.se> to 7/12 <5nd box.nw, 5nd box.ne>
 line right 1.0 from 5/12 <5th box.ne, 5th box.se> 
 line right 1.0 from 7/12 <5th box.ne, 5th box.se> 
 line left 1.0 from 5/12 <2nd box.nw, 2nd box.sw> 

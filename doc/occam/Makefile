@@ -6,7 +6,7 @@ EQN=eqn
 TBL=tbl
 TARGET=-Tlp
 ../occam.doc:	p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 channel.h.t channel.c.t
-	cat $(FILES) | $(PIC) $(TARGET) | $(TBL) | $(EQN) $(TARGET) > $@
+	soelim $(FILES) | $(PIC) $(TARGET) | $(TBL) | $(EQN) $(TARGET) > $@
 
 channel.h.t:	$(EMHOME)/h/ocm_chan.h
 	ctot <$(EMHOME)/h/ocm_chan.h >channel.h.t
