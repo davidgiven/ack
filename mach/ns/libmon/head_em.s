@@ -1,6 +1,6 @@
 .define hol0,argv,.reghp,.limhp,envp,begbss
 .define .ignmask, .trpreg
-.define .stop
+.define .stop, BRK
 .define ERANGE,EILLINS,ECASE
 .sect .text
 .sect .rom
@@ -32,6 +32,12 @@ ECASE	= 20
 	movb 0x7f,tos
 	jsr @.putchar
 	bpt
+
+BRK:
+	movd	0,r0
+	ret	0
+
+WRITE:	jump	@__write
 
 .sect .bss
 begbss:
