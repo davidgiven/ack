@@ -17,6 +17,7 @@ struct file_info	finfo;
 #include <alloc.h>
 
 #include        "dbsymtab.h"
+#include	"lint.h"
 #ifndef NOPP
 #ifdef DBSYMTAB
 #include        <stb.h>
@@ -82,6 +83,8 @@ AtEoIF()
 #endif
 #endif /* NOPP */
 	if (WorkingDir[0] != '\0') free(WorkingDir);
+#ifndef LINT
 	if (FileName != source) free(FileName);
+#endif
 	return 0;
 }
