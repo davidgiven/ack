@@ -14,6 +14,8 @@
 #include "../share/map.h"
 #include "../share/alloc.h"
 #include "../share/get.h"
+#include "../../../h/em_pseu.h"
+#include "../../../h/em_mes.h"
 #include "ca_put.h"
 
 
@@ -32,6 +34,76 @@ char **dnames, **pnames;  /* Dynamically allocated arrays of strings.
 			 */
 
 
+STATIC char **newnametab(tablen,namelen)
+	short tablen,namelen;
+{
+	register char **np, **tab;
+
+	tab = (char **) newmap(tablen);
+	for (np = &tab[1]; np <= &tab[tablen]; np++) {
+		*np = (char *) newcore(namelen);
+	}
+	return tab;
+}
+
+
+STATIC line_p get_ca_lines(lf,p_out)
+	FILE *lf;
+	proc_p *p_out;
+{
+	/* Read lines of EM text and link them.
+	 * Register messages are outputted immediately after the PRO.
+	 */
+
+	line_p head, *pp, l;
+	line_p headm, *mp;
+	arg_p a;
+
+	curinp = lf; /* EM input file */
+	pp = &head;
+	mp = &headm;
+	headm = (line_p) 0;
+	while (TRUE) {
+		l = read_line(p_out);
+		if (feof(curinp)) break;
+		assert (l != (line_p) 0);
+		if (INSTR(l) == ps_end && INSTR(head) != ps_pro) {
+			/* Delete end pseudo after data-unit */
+			oldline(l);
+			break;
+		}
+		if (INSTR(l) == ps_mes && l->l_a.la_arg->a_a.a_offset == ms_reg) {
+			/* l is a register message */
+			if (l->l_a.la_arg->a_next == (arg_p) 0) {
+				/* register message without arguments */
+				oldline(l);
+			} else {
+				*mp = l;
+				mp = &l->l_next;
+			}
+		} else {
+			*pp = l;
+			pp = &l->l_next;
+		}
+		if (INSTR(l) == ps_end) {
+			break;
+		}
+	}
+	*pp = (line_p) 0;
+	if (INSTR(head) == ps_pro) {
+		/* append register message without arguments to list */
+		l = newline(OPLIST);
+		l->l_instr = ps_mes;
+		a = ARG(l) = newarg(ARGOFF);
+		a->a_a.a_offset = ms_reg;
+		*mp = l;
+		l->l_next = head->l_next;
+		head->l_next = headm;
+	} else {
+		assert(headm == (line_p) 0);
+	}
+	return head;
+}
 
 STATIC int makedmap(dbl)
 	dblock_p dbl;
