@@ -96,7 +96,13 @@ load_block(sz, al)
 {
 	arith esz = ATW(sz);	/* effective size == actual # pushed bytes */
 
-	if (((sz == al) && (word_align % al == 0)) || (al % word_align == 0))
+	if (
+		((sz == al) && (word_align % al == 0)) ||
+		(
+			(sz % word_size == 0 || word_size % sz == 0) &&
+			(al % word_align == 0)
+		)
+	)	/* Lots of Irritating Stupid Parentheses */
 		C_loi(sz);
 	else {
 #ifndef STB

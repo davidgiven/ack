@@ -13,13 +13,12 @@ EMKLIB = $(EMHOME)/modules/lib/libemk.a
 EMELIB = $(EMHOME)/modules/lib/libeme.a
 STRLIB = $(EMHOME)/modules/lib/libstring.a
 PRTLIB = $(EMHOME)/modules/lib/libprint.a
-EMMESLIB = $(EMHOME)/modules/lib/libem_mesO.a
+EMMESLIB = $(EMHOME)/modules/lib/libem_mes.a
 INPLIB = $(EMHOME)/modules/lib/libinput.a
 ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
 MALLOC = $(EMHOME)/modules/lib/malloc.o
-LIBS = $(EMMESLIB) $(EMHOME)/modules/lib/libemopt.a $(EMHOME)/modules/lib/libread_emk.a \
-	$(INPLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
-	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(EMHOME)/lib/em_data.a
+LIBS = $(INPLIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
+	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 LIB_INCLUDES = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
@@ -36,7 +35,7 @@ ALLOCLLIB = $(EMHOME)/modules/lib/llib-lalloc.ln
 LINTLIBS = $(EMMESLLIB) $(EMKLLIB) $(PRTLLIB) $(STRLLIB) $(ALLOCLLIB) $(SYSLLIB)
 CURRDIR = .
 
-COPTIONS = -DPEEPHOLE
+COPTIONS =
 
 # What parser generator to use and how
 GEN = $(EMHOME)/bin/LLgen
@@ -119,12 +118,12 @@ Emain:	Cfiles
 	@rm -f nmclash.o a.out
 
 install:	Main
-	rm -f $(EMHOME)/lib/em_cemcomO $(EMHOME)/man/em_cemcom.6
-	cp $(CURRDIR)/main $(EMHOME)/lib/em_cemcomO
+	rm -f $(EMHOME)/lib/em_cemcom $(EMHOME)/man/em_cemcom.6
+	cp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
 	cp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 cmp:	Main
-	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_cemcomO
+	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
 	-cmp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 pr:
