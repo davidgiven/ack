@@ -6,7 +6,6 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<alloc.h>
 #include	<system.h>
-#include	"main.h"
 #include	"def.h"
 #include	"type.h"
 #include	"LLlex.h"

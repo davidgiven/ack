@@ -11,6 +11,11 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"LLlex.h"
 #include	"f_info.h"
+#include	"debug.h"
+
+#ifdef DEBUG
+long	sys_filesize();
+#endif
 
 GetFile(name)
 	char *name;
@@ -30,6 +35,7 @@ GetFile(name)
 		fatal("Could'nt find a DEFINITION MODULE for \"%s\"", name);
 	}
 	LineNumber = 1;
+	DO_DEBUG(1, debug("File %s : %ld characters", FileName, sys_filesize(FileName)));
 }
 
 struct def *

@@ -15,8 +15,8 @@ struct variable {
 };
 
 struct constant {
-	arith co_const;		/* result of a constant expression */
-#define con_const	df_value.df_variable.con_const
+	struct node *co_const;	/* result of a constant expression */
+#define con_const	df_value.df_constant.co_const
 };
 
 struct enumval {

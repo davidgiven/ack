@@ -18,7 +18,7 @@ LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
-	cstoper.o
+	cstoper.o chk_expr.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -38,6 +38,9 @@ main:	$(OBJ) Makefile
 
 clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles 
+
+lint:	LLfiles lintlist
+	lint $(INCLUDES) `cat lintlist`
 
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile <tokenname.c >tokenfile.g
@@ -74,23 +77,24 @@ LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h input.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
 error.o: LLlex.h f_info.h input.h main.h node.h
-main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h main.h scope.h standards.h type.h
+main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h scope.h standards.h tokenname.h type.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
 type.o: LLlex.h Lpars.h def.h def_sizes.h idf.h node.h type.h
 def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
-scope.o: LLlex.h debug.h def.h idf.h main.h scope.h type.h
-misc.o: LLlex.h f_info.h idf.h misc.h
+scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
+misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h def.h idf.h node.h scope.h type.h
-defmodule.o: LLlex.h def.h f_info.h idf.h input.h scope.h
+defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h scope.h
 typequiv.o: Lpars.h def.h type.h
-node.o: LLlex.h debug.h def.h main.h node.h type.h
-cstoper.o: Lpars.h def_sizes.h idf.h node.h type.h
+node.o: LLlex.h debug.h def.h node.h type.h
+cstoper.o: LLlex.h Lpars.h def_sizes.h idf.h node.h type.h
+chk_expr.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h
-expression.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h
+expression.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h type.h
 statement.o: LLlex.h Lpars.h node.h
 Lpars.o: Lpars.h

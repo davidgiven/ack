@@ -6,8 +6,8 @@ static  char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include	"idf.h"
 #include	"main.h"
+#include	"idf.h"
 #include	"LLlex.h"
 #include	"scope.h"
 #include	"def.h"
@@ -148,13 +148,12 @@ DefinitionModule
 definition
 {
 	struct def *df;
-	struct type *tp;
 } :
 	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE
 	[ IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
-	  [ '=' type(&tp)
+	  [ '=' type(&(df->df_type))
 	  | /* empty */
 	    /*
 	       Here, the exported type has a hidden implementation.

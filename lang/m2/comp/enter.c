@@ -74,7 +74,7 @@ EnterIdList(idlist, kind, flags, type, scope)
 
 struct def *
 lookfor(id, scope, give_error)
-	struct idf *id;
+	struct node *id;
 	struct scope *scope;
 {
 	/*	Look for an identifier in the visibility range started by
@@ -86,10 +86,10 @@ lookfor(id, scope, give_error)
 	register struct scope *sc = scope;
 
 	while (sc) {
-		df = lookup(id, sc->sc_scope);
+		df = lookup(id->nd_IDF, sc->sc_scope);
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
 	if (give_error) id_not_declared(id);
-	return define(id, scope, D_ERROR);
+	return define(id->nd_IDF, scope, D_ERROR);
 }

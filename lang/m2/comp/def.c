@@ -6,11 +6,11 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+#include	"main.h"
 #include	"Lpars.h"
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"main.h"
 #include	"scope.h"
 #include	"LLlex.h"
 #include	"node.h"
@@ -26,13 +26,12 @@ struct def *ill_df = &illegal_def;
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
-	struct scope *scope;
+	register struct scope *scope;
 {
 	/*	Declare an identifier in a scope, but first check if it
 		already has been defined. If so, error message.
 	*/
 	register struct def *df;
-	register struct scope *sc;
 
 	DO_DEBUG(5, debug("Defining identifier \"%s\" in scope %d", id->id_text, scope->sc_scope));
 	df = lookup(id, scope->sc_scope);
@@ -157,7 +156,6 @@ Import(ids, idn, local)
 		identifiers defined in this module.
 	*/
 	register struct def *df;
-	register struct idf *id = 0;
 	int scope;
 	int kind;
 	int imp_kind;
@@ -165,19 +163,18 @@ Import(ids, idn, local)
 #define FROM_ENCLOSING	1
 	struct def *lookfor(), *GetDefinitionModule();
 
-	if (idn) id = idn->nd_IDF;
 	kind = D_IMPORT;
 	scope = enclosing(CurrentScope)->sc_scope;
-	if (!id) imp_kind = FROM_ENCLOSING;
+	if (!idn) imp_kind = FROM_ENCLOSING;
 	else {
 		imp_kind = FROM_MODULE;
-		if (local) df = lookfor(id, enclosing(CurrentScope), 1);
-		else df = GetDefinitionModule(id);
+		if (local) df = lookfor(idn, enclosing(CurrentScope), 1);
+		else df = GetDefinitionModule(idn->nd_IDF);
 		if (df->df_kind != D_MODULE) {
 			/* enter all "ids" with type D_ERROR */
 			kind = D_ERROR;
 			if (df->df_kind != D_ERROR) {
-node_error(idn, "identifier \"%s\" does not represent a module", id->id_text);
+node_error(idn, "identifier \"%s\" does not represent a module", idn->nd_IDF->id_text);
 			}
 		}
 		else	scope = df->mod_scope;
@@ -197,14 +194,14 @@ ids->nd_IDF->id_text);
 		}
 		else {
 			if (local) {
-				df = lookfor(ids->nd_IDF,
-					     enclosing(CurrentScope), 0);
+				df = lookfor(ids, enclosing(CurrentScope), 0);
 			} else df = GetDefinitionModule(ids->nd_IDF);
 			if (df->df_kind == D_ERROR) {
 node_error(ids, "identifier \"%s\" not visible in enclosing scope",
 ids->nd_IDF->id_text);
 			}
 		}
+		DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text, df->df_kind));
 		define(ids->nd_IDF, CurrentScope, kind)->imp_def = df;
 		if (df->df_kind == D_TYPE &&
 		    df->df_type->tp_fund == ENUMERATION) {
@@ -218,12 +215,14 @@ ids->nd_IDF->id_text);
 
 exprt_literals(df, toscope)
 	register struct def *df;
-	register struct scope *toscope;
+	struct scope *toscope;
 {
 	/*	A list of enumeration literals is exported. This is implemented
 		as an import from the scope "toscope".
 	*/
+	DO_DEBUG(2, debug("enumeration import:"));
 	while (df) {
+		DO_DEBUG(2, debug(df->df_idf->id_text));
 		define(df->df_idf, toscope, D_IMPORT)->imp_def = df;
 		df = df->enm_next;
 	}

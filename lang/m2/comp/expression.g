@@ -6,7 +6,6 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include	"main.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
@@ -34,52 +33,29 @@ number(struct node **p;)
 
 qualident(int types; struct def **pdf; char *str; struct node **p;)
 {
-	int scope;
-	int  module;
 	register struct def *df;
-	struct def *lookfor();
 	register struct node **pnd;
 	struct node *nd;
+	struct def *findname();
 } :
-	IDENT		{ if (types) {
-				df = lookfor(dot.TOK_IDF, CurrentScope, 1);
-				*pdf = df;
-				if (df->df_kind == D_ERROR) types = 0;
-			  }
-			  nd = MkNode(Value, NULLNODE, NULLNODE, &dot);
+	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot);
 			  pnd = &nd;
 			}
 	[
-			{ if (types &&!(scope = has_selectors(df))) {
-				types = 0;
-				*pdf = ill_df;
-			  }
-			}
 		/* selector */
 		'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot);
 			  pnd = &(*pnd)->nd_right;
 			}
 		IDENT
-			{ *pnd = MkNode(Value,NULLNODE,NULLNODE,&dot);
-			  if (types) {
-				module = (df->df_kind == D_MODULE);
-				df = lookup(dot.TOK_IDF, scope);
-				if (!df) {
-					types = 0;
-					df = ill_df;
-					id_not_declared(dot.TOK_IDF);
-				}
-				else
-				if (module &&
-				    !(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
-					error("identifier \"%s\" not exported from qualifying module", dot.TOK_IDF->id_text);
-				}
-			  }
-			}
+			{ *pnd = MkNode(Name,NULLNODE,NULLNODE,&dot); }
 	]*
-			{ if (types && !(types & df->df_kind)) {
-				error("identifier \"%s\" is not a %s",
+			{ if (types) {
+				*pdf = df = findname(nd);
+			  	if (df->df_kind != D_ERROR &&
+				    !(types & df->df_kind)) {
+					error("identifier \"%s\" is not a %s",
 					df->df_idf->id_text, str);
+				}
 			  }
 			  if (!p) FreeNode(nd);
 			  else *p = nd;
@@ -114,6 +90,7 @@ ConstExpression(struct node **pnd;):
 		{ DO_DEBUG(3,
 		     ( debug("Constant expression:"),
 		       PrNode(*pnd)));
+		  (void) chk_expr(*pnd, 1);
 		}
 ;
 
@@ -209,7 +186,7 @@ factor(struct node **p;)
 	'(' expression(p) ')'
 |
 	NOT		{ *p = MkNode(Uoper, NULLNODE, NULLNODE, &dot); }
-	factor(&((*p)->nd_left))
+	factor(&((*p)->nd_right))
 ;
 
 bare_set(struct node **pnd;)
@@ -218,7 +195,7 @@ bare_set(struct node **pnd;)
 } :
 	'{'		{
 			  dot.tk_symb = SET;
-			  *pnd = nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
+			  *pnd = nd = MkNode(Xset, NULLNODE, NULLNODE, &dot);
 			  nd->nd_type = bitset_type;
 			}
 	[
@@ -261,9 +238,9 @@ designator_tail(struct node **pnd;):
 	visible_designator_tail(pnd)
 	[
 		/* selector */
-		'.'	{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+		'.'	{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
 		IDENT	{ (*pnd)->nd_right =
-				MkNode(Value, NULLNODE, NULLNODE, &dot);
+				MkNode(Name, NULLNODE, NULLNODE, &dot);
 			}
 	|
 		visible_designator_tail(pnd)

@@ -5,6 +5,7 @@ static char *RcsId = "$Header$";
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<alloc.h>
 #include	<assert.h>
 #include	"idf.h"
 #include	"LLlex.h"
@@ -122,7 +123,7 @@ FPSection(int doparams; struct paramlist **ppr;)
 		  if (doparams) {
 			EnterIdList(FPList, D_VARIABLE, VARp, tp, CurrentScope);
 		  }
-		  *ppr = ParamList(FPList, tp);
+		  *ppr = ParamList(FPList, tp, VARp);
 		  FreeNode(FPList);
 		}
 ;
@@ -160,7 +161,7 @@ TypeDeclaration
 			      tp->tp_fund != POINTER) {
 error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 			  }
-				
+
 			}
 ;
 
@@ -181,18 +182,18 @@ type(struct type **ptp;):
 SimpleType(struct type **ptp;)
 {
 	struct def *df;
-	struct type *tp;
 } :
 	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
 	[
 		/* nothing */
+			{ *ptp = df->df_type; }
 	|
 		SubrangeType(ptp)
 		/* The subrange type is given a base type by the
 		   qualident (this is new modula-2).
 		*/
 			{
-			  chk_basesubrange(*ptp, tp);
+			  chk_basesubrange(*ptp, df->df_type);
 			}
 	]
 |
@@ -250,7 +251,7 @@ SubrangeType(struct type **ptp;)
 			{
 			  /* For the time being: */
 			  tp = int_type;
-			  tp = construct_type(SUBRANGE, tp, (arith) 0);
+			  tp = construct_type(SUBRANGE, tp);
 			  *ptp = tp;
 			}
 ;
@@ -352,7 +353,7 @@ SetType(struct type **ptp;)
 } :
 	SET OF SimpleType(&tp)
 			{
-			  *ptp = construct_type(SET, tp, (arith) 0 /* ???? */);
+			  *ptp = construct_type(SET, tp);
 			}
 ;
 
@@ -365,6 +366,7 @@ PointerType(struct type **ptp;)
 	struct type *tp;
 	struct def *df;
 	struct def *lookfor();
+	struct node *nd;
 } :
 	POINTER TO
 	[ %if ( (df = lookup(dot.TOK_IDF, CurrentScope->sc_scope)))
@@ -380,8 +382,9 @@ PointerType(struct type **ptp;)
 				  }
 				  else	tp = df->df_type;
 				}
-	| %if (df = lookfor(dot.TOK_IDF, CurrentScope, 0),
-	       df->df_kind == D_MODULE)
+	| %if ( nd = new_node(), nd->nd_token = dot,
+		df = lookfor(nd, CurrentScope, 0), free_node(nd),
+	        df->df_kind == D_MODULE)
 		type(&tp)
 	|
 		IDENT
@@ -449,7 +452,7 @@ ConstantDeclaration
 }:
 	IDENT			{ id = dot.TOK_IDF; }
 	'=' ConstExpression(&nd){ df = define(id, CurrentScope, D_CONST);
-				  /* ???? */
+				  df->con_const = nd;
 				}
 ;
 

@@ -7,18 +7,28 @@ struct node {
 #define nd_left	next
 	struct node *nd_right;
 	int nd_class;		/* kind of node */
-#define Value	1		/* idf or constant */
+#define Value	1		/* constant */
 #define Oper	2		/* binary operator */
 #define Uoper	3		/* unary operator */
 #define Call	4		/* cast or procedure - or function call */
-#define Link	5
+#define Name	5		/* a qualident */
+#define Set	6		/* a set constant */
+#define Xset	7		/* a set */
+#define Def	8		/* an identified name */
+#define Link	11
 	struct type *nd_type;	/* type of this node */
 	union {
-		struct token ndu_token;
-		char *ndu_set;	/* Pointer to a set constant */
+		struct token ndu_token;	/* (Value, Oper, Uoper, Call, Name,
+					    Link)
+					*/
+		arith *ndu_set;		/* pointer to a set constant (Set) */
+		struct def *ndu_def;	/* pointer to definition structure for
+					   identified name (Def)
+					*/
 	} nd_val;
 #define nd_token	nd_val.ndu_token
 #define nd_set		nd_val.ndu_set
+#define nd_def		nd_val.ndu_def
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
 #define nd_filename	nd_token.tk_filename

@@ -223,6 +223,7 @@ again:
 		register char *np = &buf[1];
 					/* allow a '-' to be added	*/
 
+		buf[0] = '-';
 		*np++ = ch;
 		
 		LoadChar(ch);

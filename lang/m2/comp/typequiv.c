@@ -79,5 +79,6 @@ TstCompat(tp1, tp2)
 		  || tp1 == intorcard_type
 		  || tp1->tp_fund == POINTER
 		  )
-		);
+		)
+	;
 }

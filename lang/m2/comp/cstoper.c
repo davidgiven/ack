@@ -19,17 +19,17 @@ arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
 
-cstunary(expp, oper)
+cstunary(expp)
 	register struct node *expp;
 {
-	/*	The unary operation oper is performed on the constant
-		expression expp, and the result restored in expp.
+	/*	The unary operation in "expp" is performed on the constant
+		expression below it, and the result restored in expp.
 	*/
-	arith o1 = expp->nd_INT;
+	arith o1 = expp->nd_right->nd_INT;
 
-	switch(oper) {
+	switch(expp->nd_symb) {
 	case '+':
-		return;
+		break;
 	case '-':
 		o1 = -o1;
 		break;
@@ -39,40 +39,37 @@ cstunary(expp, oper)
 	default:
 		assert(0);
 	}
+	expp->nd_class = Value;
+	expp->nd_token = expp->nd_right->nd_token;
 	expp->nd_INT = o1;
 	cut_size(expp);
+	FreeNode(expp->nd_right);
+	expp->nd_right = 0;
 }
 
-cstbin(expp, oper, expr)
-	register struct node *expp, *expr;
+cstbin(expp)
+	register struct node *expp;
 {
-	/*	The binary operation oper is performed on the constant
-		expressions expp and expr, and the result restored in
+	/*	The binary operation in "expp" is performed on the constant
+		expressions below it, and the result restored in
 		expp.
 	*/
-	arith o1 = expp->nd_INT;
-	arith o2 = expr->nd_INT;
+	arith o1 = expp->nd_left->nd_INT;
+	arith o2 = expp->nd_right->nd_INT;
 	int uns = expp->nd_type != int_type;
 
-	assert(expp->nd_class == Value && expr->nd_class == Value);
-	switch (oper)	{
-	case IN:
-		/* ??? */
+	assert(expp->nd_class == Oper);
+	if (expp->nd_right->nd_type->tp_fund == SET) {
+		cstset(expp);
 		return;
+	}
+	switch (expp->nd_symb)	{
 	case '*':
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		o1 *= o2;
 		break;
-	case '/':
-		assert(expp->nd_type->tp_fund == SET);
-		/* ??? */
-		return;
 	case DIV:
 		if (o2 == 0)	{
-			node_error(expr, "division by 0");
+			node_error(expp, "division by 0");
 			return;
 		}
 		if (uns)	{
@@ -109,7 +106,7 @@ cstbin(expp, oper, expr)
 		break;
 	case MOD:
 		if (o2 == 0)	{
-			node_error(expr, "modulo by 0");
+			node_error(expp, "modulo by 0");
 			return;
 		}
 		if (uns)	{
@@ -137,17 +134,9 @@ cstbin(expp, oper, expr)
 			o1 %= o2;
 		break;
 	case '+':
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		o1 += o2;
 		break;
 	case '-':
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		o1 -= o2;
 		break;
 	case '<':
@@ -171,10 +160,6 @@ cstbin(expp, oper, expr)
 			o1 = o1 > o2;
 		break;
 	case LESSEQUAL:
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
 				(o2 & mach_long_sign ? o1 <= o2 : 0) :
@@ -185,10 +170,6 @@ cstbin(expp, oper, expr)
 			o1 = o1 <= o2;
 		break;
 	case GREATEREQUAL:
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
 				(o2 & mach_long_sign ? o1 >= o2 : 1) :
@@ -199,17 +180,9 @@ cstbin(expp, oper, expr)
 			o1 = o1 >= o2;
 		break;
 	case '=':
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		o1 = o1 == o2;
 		break;
 	case '#':
-		if (expp->nd_type->tp_fund == SET) {
-			/* ??? */
-			return;
-		}
 		o1 = o1 != o2;
 		break;
 	case AND:
@@ -221,8 +194,33 @@ cstbin(expp, oper, expr)
 	default:
 		assert(0);
 	}
+	expp->nd_class = Value;
+	expp->nd_token = expp->nd_right->nd_token;
 	expp->nd_INT = o1;
 	cut_size(expp);
+	FreeNode(expp->nd_left);
+	FreeNode(expp->nd_right);
+	expp->nd_left = expp->nd_right = 0;
+}
+
+cstset(expp)
+	register struct node *expp;
+{
+	switch(expp->nd_symb) {
+	case IN:
+	case '+':
+	case '-':
+	case '*':
+	case '/':
+	case GREATEREQUAL:
+	case LESSEQUAL:
+	case '=':
+	case '#':
+		/* ??? */
+		break;
+	default:
+		assert(0);
+	}
 }
 
 cut_size(expr)

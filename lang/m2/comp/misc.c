@@ -8,6 +8,7 @@ static char *RcsId = "$Header$";
 #include	"misc.h"
 #include	"LLlex.h"
 #include	"idf.h"
+#include	"node.h"
 
 match_id(id1, id2)
 	struct idf *id1, *id2;
@@ -40,12 +41,13 @@ gen_anon_idf()
 }
 
 id_not_declared(id)
-	struct idf *id;
+	struct node *id;
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message
 	*/
-	if (!is_anon_idf(id)) {
-		error("identifier \"%s\" not declared", id->id_text);
+	if (!is_anon_idf(id->nd_IDF)) {
+		node_error(id,
+			"identifier \"%s\" not declared", id->nd_IDF->id_text);
 	}
 }

@@ -11,7 +11,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"type.h"
 #include	"def.h"
-#include	"main.h"
+#include	"node.h"
 #include	"debug.h"
 
 static int maxscope;		/* maximum assigned scope number */
@@ -34,7 +34,8 @@ open_scope(scopetype, scope)
 	register struct scope *sc1;
 
 	sc->sc_scope = scope == 0 ? ++maxscope : scope;
-	sc->sc_forw = 0; sc->sc_def = 0;
+	sc->sc_forw = 0;
+	sc->sc_def = 0;
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 	DO_DEBUG(1, debug("Opening a %s scope",
 			scopetype == OPENSCOPE ? "open" : "closed"));
@@ -42,30 +43,12 @@ open_scope(scopetype, scope)
 	if (scopetype == CLOSEDSCOPE) {
 		sc1 = new_scope();
 		sc1->sc_scope = 0;		/* Pervasive scope nr */
-		sc1->sc_forw = 0; sc1->sc_def = 0;
+		sc1->sc_forw = 0;
+		sc1->sc_def = 0;
 		sc1->next = CurrentScope;
 	}
 	sc->next = sc1;
 	CurrentScope = sc;
-}
-
-static rem_forwards();
-
-close_scope()
-{
-	register struct scope *sc = CurrentScope;
-
-	assert(sc != 0);
-	DO_DEBUG(1, debug("Closing a scope"));
-	if (sc->sc_forw) rem_forwards(sc->sc_forw);
-	if (sc->next && (sc->next->sc_scope == 0)) {
-		struct scope *sc1 = sc;
-
-		sc = sc->next;
-		free_scope(sc1);
-	}
-	CurrentScope = sc->next;
-	free_scope(sc);
 }
 
 init_scope()
@@ -86,7 +69,7 @@ uniq_scope()
 
 struct forwards {
 	struct forwards *next;
-	struct token fo_tok;
+	struct node fo_tok;
 	struct type **fo_ptyp;
 };
 
@@ -103,10 +86,27 @@ Forward(tk, ptp)
 	*/
 	register struct forwards *f = new_forwards();
 
-	f->fo_tok = *tk;
+	f->fo_tok.nd_token = *tk;
 	f->fo_ptyp = ptp;
 	f->next = CurrentScope->sc_forw;
 	CurrentScope->sc_forw = f;
+}
+
+close_scope()
+{
+	register struct scope *sc = CurrentScope;
+
+	assert(sc != 0);
+	DO_DEBUG(1, debug("Closing a scope"));
+	if (sc->sc_forw) rem_forwards(sc->sc_forw);
+	if (sc->next && (sc->next->sc_scope == 0)) {
+		struct scope *sc1 = sc;
+
+		sc = sc->next;
+		free_scope(sc1);
+	}
+	CurrentScope = sc->next;
+	free_scope(sc);
 }
 
 static
@@ -116,21 +116,17 @@ rem_forwards(fo)
 	/*	When closing a scope, all forward references must be resolved
 	*/
 	register struct forwards *f;
-	struct token savetok;
 	register struct def *df;
 	struct def *lookfor();
 
-	savetok = dot;
 	while (f = fo) {
-		dot = f->fo_tok;
-		df = lookfor(dot.TOK_IDF, CurrentScope, 1);
+		df = lookfor(&(f->fo_tok), CurrentScope, 1);
 		if (!(df->df_kind & (D_TYPE | D_HTYPE | D_ERROR))) {
-			error("identifier \"%s\" not a type",
+			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
 			      df->df_idf->id_text);
 		}
 		*(f->fo_ptyp) = df->df_type;
 		fo = f->next;
 		free_forwards(f);
 	}
-	dot = savetok;
 }

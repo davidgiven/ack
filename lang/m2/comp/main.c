@@ -10,12 +10,12 @@ static char *RcsId = "$Header$";
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
-#include	"main.h"
 #include	"debug.h"
 #include	"type.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"standards.h"
+#include	"tokenname.h"
 
 char	options[128];
 int	DefinitionModule; 
@@ -126,7 +126,6 @@ Option(str)
 add_standards()
 {
 	register struct def *df;
-	register struct type *tp;
 	struct def *Enter();
 
 	(void) Enter("ABS", D_STDFUNC, NULLTYPE, S_ABS);
@@ -161,11 +160,11 @@ add_standards()
 		     0);
 	df = Enter("BITSET", D_TYPE, bitset_type, 0);
 	df = Enter("FALSE", D_ENUM, bool_type, 0);
-	df->df_value.df_enum.en_val = 0;
-	df->df_value.df_enum.en_next = Enter("TRUE", D_ENUM, bool_type, 0);
-	df = df->df_value.df_enum.en_next;
-	df->df_value.df_enum.en_val = 1;
-	df->df_value.df_enum.en_next = 0;
+	df->enm_val = 0;
+	df->enm_next = Enter("TRUE", D_ENUM, bool_type, 0);
+	df = df->enm_next;
+	df->enm_val = 1;
+	df->enm_next = 0;
 }
 
 init_DEFPATH()
