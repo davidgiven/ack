@@ -16,6 +16,7 @@ extern	_trp();
 #include <pc_math.h>
 #define M_MIN_D	DBL_MIN
 #define M_MAX_D	DBL_MAX
+#define M_DMINEXP DBL_MIN_EXP
 #endif
 #undef HUGE
 #define HUGE	1e1000
@@ -82,7 +83,7 @@ _exp(x)
 
 		if (g != 0.0) {
 			/* unnormalized numbers apparently exist */
-			if (x < (M_LN2 * (DBL_MIN_EXP - 53))) return 0.0;
+			if (x < (M_LN2 * (M_DMINEXP - 53))) return 0.0;
 		}
 		else {
 			if (x < M_LN_MIN_D) return 0.0;
