@@ -120,7 +120,7 @@ check_for_tc()
 	while (*q && *q != ':') q++;
 	*q = 0;
 	if (tgetent(buf, terminalname) != 1) {
-		---count;
+		--count;
 		return(0);
 	}
 	--count;
