@@ -8,7 +8,7 @@ register char *name;
 	q = name;
 	while (*q && *q++ == *p++) /* nothing */ ;
 	if (*q || *p != '=') continue;
-	return(p);
+	return(p+1);
   }
   return(0);
 }
