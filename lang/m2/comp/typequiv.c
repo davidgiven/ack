@@ -6,16 +6,17 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	"type.h"
 #include	"def.h"
-#include	"Lpars.h"
 
 int
 TstTypeEquiv(tp1, tp2)
 	register struct type *tp1, *tp2;
 {
-	/*	test if two types are equivalent. The only complication comes
+	/*	test if two types are equivalent. A complication comes
 		from the fact that for some procedures two declarations may
 		be given: one in the specification module and one in the
 		definition module.
+		A related problem is that two dynamic arrays with the
+		same base type are also equivalent.
 	*/
 
 	return     tp1 == tp2
@@ -23,6 +24,18 @@ TstTypeEquiv(tp1, tp2)
 		   tp1 == error_type
 		||
 		   tp2 == error_type
+		||
+		   (
+		     tp1->tp_fund == T_ARRAY
+		   &&
+		     tp1->next == 0
+		   &&
+		     tp2->tp_fund == T_ARRAY
+		   &&
+		     tp2->next == 0
+		   &&
+		     TstTypeEquiv(tp1->arr_elem, tp2->arr_elem)
+		   )
 		||
 		   ( 
 		     tp1 && tp1->tp_fund == T_PROCEDURE

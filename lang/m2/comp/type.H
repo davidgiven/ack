@@ -68,6 +68,9 @@ struct type	{
 #define T_PROCEDURE	0x1000
 #define T_ARRAY		0x2000
 #define T_STRING	0x4000
+#define T_INTORCARD	(T_INTEGER|T_CARDINAL)
+#define T_DISCRETE	(T_ENUMERATION|T_INTORCARD|T_CHAR)
+#define T_NUMERIC	(T_INTORCARD|T_REAL)
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {

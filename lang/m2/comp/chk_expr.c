@@ -17,6 +17,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"const.h"
 #include	"standards.h"
+#include	"debug.h"
 
 int
 chk_expr(expp)
@@ -199,7 +200,7 @@ getarg(argp, bases)
 	struct type *tp;
 
 	if (!argp->nd_right) {
-		node_error(argp, "Too few arguments supplied");
+		node_error(argp, "too few arguments supplied");
 		return 0;
 	}
 	argp = argp->nd_right;
@@ -218,7 +219,7 @@ getname(argp, kinds)
 	struct node *argp;
 {
 	if (!argp->nd_right) {
-		node_error(argp, "Too few arguments supplied");
+		node_error(argp, "too few arguments supplied");
 		return 0;
 	}
 	argp = argp->nd_right;
@@ -235,67 +236,84 @@ int
 chk_call(expp)
 	register struct node *expp;
 {
-	register struct type *tp;
+	/*	Check something that looks like a procedure or function call.
+		Of course this does not have to be a call at all.
+		it may also be a cast or a standard procedure call.
+	*/
 	register struct node *left;
 	register struct node *arg;
 
 	expp->nd_type = error_type;
-	(void) findname(expp->nd_left);
+	(void) findname(expp->nd_left);	/* parser made sure it is a name */
 	left = expp->nd_left;
-	tp = left->nd_type;
 
-	if (tp == error_type) return 0;
+	if (left->nd_type == error_type) return 0;
 	if (left->nd_class == Def &&
 	    (left->nd_def->df_kind & (D_HTYPE|D_TYPE|D_HIDDEN))) {
 		/* A type cast. This is of course not portable.
 		   No runtime action. Remove it.
 		*/
 		arg = expp->nd_right;
-		if (!arg || arg->nd_right) {
+		if ((! arg) || arg->nd_right) {
 node_error(expp, "Only one parameter expected in type cast");
 			return 0;
 		}
-		if (! chk_expr(arg->nd_left)) return 0;
-		if (arg->nd_left->nd_type->tp_size !=
-		    	left->nd_type->tp_size) {
+		arg = arg->nd_left;
+		if (! chk_expr(arg)) return 0;
+		if (arg->nd_type->tp_size != left->nd_type->tp_size) {
 node_error(expp, "Size of type in type cast does not match size of operand");
 			return 0;
 		}
-		arg->nd_left->nd_type = left->nd_type;
+		arg->nd_type = left->nd_type;
 		FreeNode(expp->nd_left);
 		*expp = *(arg->nd_left);
-		arg->nd_left->nd_left = 0;
-		arg->nd_left->nd_right = 0;
+		arg->nd_left = 0;
+		arg->nd_right = 0;
 		FreeNode(arg);
 		return 1;
 	}
 
 	if ((left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) ||
-	    tp->tp_fund == T_PROCEDURE) {
+	    left->nd_type->tp_fund == T_PROCEDURE) {
 		/* A procedure call. it may also be a call to a
 		   standard procedure
 		*/
 		arg = expp;
-		if (tp == std_type) {
+		if (left->nd_type == std_type) {
+			/* A standard procedure
+			*/
 			assert(left->nd_class == Def);
+DO_DEBUG(3, debug("Standard name \"%s\", %d", 
+left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 			switch(left->nd_def->df_value.df_stdname) {
 			case S_ABS:
-				arg = getarg(arg, T_INTEGER|T_CARDINAL|T_REAL);
+				arg = getarg(arg, T_NUMERIC);
 				if (! arg) return 0;
-				expp->nd_type = arg->nd_left->nd_type;
+				left = arg->nd_left;
+				expp->nd_type = left->nd_type;
+				if (left->nd_class == Value) {
+					cstcall(expp, S_ABS);
+				}
 				break;
 			case S_CAP:
 				arg = getarg(arg, T_CHAR);
 				expp->nd_type = char_type;
 				if (!arg) return 0;
+				left = arg->nd_left;
+				if (left->nd_class == Value) {
+					cstcall(expp, S_CAP);
+				}
 				break;
 			case S_CHR:
-				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				arg = getarg(arg, T_INTORCARD);
 				expp->nd_type = char_type;
 				if (!arg) return 0;
+				if (arg->nd_left->nd_class == Value) {
+					cstcall(expp, S_CHR);
+				}
 				break;
 			case S_FLOAT:
-				arg = getarg(arg, T_CARDINAL|T_INTEGER);
+				arg = getarg(arg, T_INTORCARD);
 				expp->nd_type = real_type;
 				if (!arg) return 0;
 				break;
@@ -303,50 +321,71 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 				arg = getarg(arg, T_ARRAY);
 				if (!arg) return 0;
 				expp->nd_type = arg->nd_left->nd_type->next;
-				if (!expp->nd_type) expp->nd_type = int_type;
+				if (!expp->nd_type) {
+					/* A dynamic array has no explicit
+					   index type
+					*/
+					expp->nd_type = int_type;
+				}
+				else	cstcall(expp, S_MAX);
 				break;
 			case S_MAX:
 			case S_MIN:
-				arg = getarg(arg, T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL);
+				arg = getarg(arg, T_DISCRETE);
 				if (!arg) return 0;
 				expp->nd_type = arg->nd_left->nd_type;
+				cstcall(expp,left->nd_def->df_value.df_stdname);
 				break;
 			case S_ODD:
-				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				arg = getarg(arg, T_INTORCARD);
 				if (!arg) return 0;
 				expp->nd_type = bool_type;
+				if (arg->nd_left->nd_class == Value) {
+					cstcall(expp, S_ODD);
+				}
 				break;
 			case S_ORD:
-				arg = getarg(arg, T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL);
+				arg = getarg(arg, T_DISCRETE);
 				if (!arg) return 0;
 				expp->nd_type = card_type;
+				if (arg->nd_left->nd_class == Value) {
+					cstcall(expp, S_ORD);
+				}
 				break;
 			case S_TSIZE:	/* ??? */
 			case S_SIZE:
 				arg = getname(arg, D_FIELD|D_VARIABLE|D_TYPE|D_HIDDEN|D_HTYPE);
 				expp->nd_type = intorcard_type;
 				if (!arg) return 0;
+				cstcall(expp, S_SIZE);
 				break;
 			case S_TRUNC:
 				arg = getarg(arg, T_REAL);
 				if (!arg) return 0;
 				expp->nd_type = card_type;
 				break;
-			case S_VAL:
+			case S_VAL: {
+				struct type *tp;
+
 				arg = getname(arg, D_HIDDEN|D_HTYPE|D_TYPE);
 				if (!arg) return 0;
 				tp = arg->nd_left->nd_def->df_type;
 				if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
-				if (!(tp->tp_fund & (T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL))) {
+				if (!(tp->tp_fund & T_DISCRETE)) {
 					node_error(arg, "unexpected type");
 					return 0;
 				}
 				expp->nd_type = arg->nd_left->nd_def->df_type;
-				FreeNode(arg->nd_left);
-				arg->nd_left = 0;
-				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				expp->nd_right = arg->nd_right;
+				arg->nd_right = 0;
+				FreeNode(arg);
+				arg = getarg(expp, T_INTORCARD);
 				if (!arg) return 0;
+				if (arg->nd_left->nd_class == Value) {
+					cstcall(expp, S_VAL);
+				}
 				break;
+				}
 			case S_ADR:
 				arg = getname(arg, D_VARIABLE|D_FIELD|D_PROCEDURE);
 				expp->nd_type = address_type;
@@ -358,7 +397,7 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 				arg = getname(arg, D_VARIABLE|D_FIELD);
 				if (!arg) return 0;
 				if (arg->nd_right) {
-					arg = getarg(arg, T_INTEGER|T_CARDINAL);
+					arg = getarg(arg, T_INTORCARD);
 					if (!arg) return 0;
 				}
 				break;
@@ -366,7 +405,9 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 				expp->nd_type = 0;
 				break;
 			case S_EXCL:
-			case S_INCL:
+			case S_INCL: {
+				struct type *tp;
+
 				expp->nd_type = 0;
 				arg = getname(arg, D_VARIABLE|D_FIELD);
 				if (!arg) return 0;
@@ -375,25 +416,26 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 node_error(arg, "EXCL and INCL expect a SET parameter");
 					return 0;
 				}
-				arg = getarg(arg, T_INTEGER|T_CARDINAL|T_CHAR|T_ENUMERATION);
+				arg = getarg(arg, T_DISCRETE);
 				if (!arg) return 0;
 				if (!TstCompat(tp->next, arg->nd_left->nd_type)) {
 					node_error(arg, "Unexpected type");
 					return 0;
 				}
 				break;
+				}
 			default:
 				assert(0);
 			}
 			if (arg->nd_right) {
 				node_error(arg->nd_right,
-					"Too many parameters supplied");
+					"too many parameters supplied");
 				return 0;
 			}
-			FreeNode(expp->nd_left);
-			expp->nd_left = 0;
 			return 1;
 		}
+		/* Here, we have found a real procedure call
+		*/
 		return 1;
 	}
 	node_error(expp->nd_left, "procedure, type, or function expected");
@@ -527,17 +569,22 @@ node_error(expp, "RHS of IN operator not a SET type");
 node_error(expp, "IN operator: type of LHS not compatible with element type of RHS");
 			return 0;
 		}
+		if (expp->nd_left->nd_class == Value &&
+		    expp->nd_right->nd_class == Set) {
+			cstset(expp);
+		}
 		return 1;
 	}
 
 	if (expp->nd_symb == '[') {
 		/* Handle ARRAY selection specially too! */
 		if (tpl->tp_fund != T_ARRAY) {
-node_error(expp, "array index not belonging to an ARRAY");
+			node_error(expp,
+				   "array index not belonging to an ARRAY");
 			return 0;
 		}
 		if (!TstCompat(tpl->next, tpr)) {
-node_error(expp, "incompatible index type");
+			node_error(expp, "incompatible index type");
 			return 0;
 		}
 		expp->nd_type = tpl->arr_elem;
@@ -548,7 +595,9 @@ node_error(expp, "incompatible index type");
 	expp->nd_type = tpl;
 
 	if (!TstCompat(tpl, tpr)) {
-node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_symb));
+		node_error(expp,
+			   "Incompatible types for operator \"%s\"",
+			   symbol2str(expp->nd_symb));
 		return 0;
 	}
 	
@@ -559,12 +608,18 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 		switch(tpl->tp_fund) {
 		case T_INTEGER:
 		case T_CARDINAL:
-		case T_SET:
+		case T_INTORCARD:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
 			}
 			return 1;
+		case T_SET:
+			if (expp->nd_left->nd_class == Set &&
+			    expp->nd_right->nd_class == Set) {
+				cstset(expp);
+			}
+			/* Fall through */
 		case T_REAL:
 			return 1;
 		}
@@ -572,20 +627,18 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 	case '/':
 		switch(tpl->tp_fund) {
 		case T_SET:
-			if (expp->nd_left->nd_class == Value &&
-			    expp->nd_right->nd_class == Value) {
-				cstbin(expp);
+			if (expp->nd_left->nd_class == Set &&
+			    expp->nd_right->nd_class == Set) {
+				cstset(expp);
 			}
-			return 1;
+			/* Fall through */
 		case T_REAL:
 			return 1;
 		}
 		break;
 	case DIV:
 	case MOD:
-		switch(tpl->tp_fund) {
-		case T_INTEGER:
-		case T_CARDINAL:
+		if (tpl->tp_fund & T_INTORCARD) {
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
@@ -617,13 +670,14 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 			}
 			if (expp->nd_left->nd_class == Set &&
 			    expp->nd_right->nd_class == Set) {
-				cstbin(expp);
+				cstset(expp);
 			}
 			return 1;
 		case T_INTEGER:
 		case T_CARDINAL:
 		case T_ENUMERATION:	/* includes boolean */
 		case T_CHAR:
+		case T_INTORCARD:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
@@ -666,10 +720,7 @@ chk_uoper(expp)
 
 	switch(expp->nd_symb) {
 	case '+':
-		switch(tpr->tp_fund) {
-		case T_INTEGER:
-		case T_REAL:
-		case T_CARDINAL:
+		if (tpr->tp_fund & T_NUMERIC) {
 			expp->nd_token = expp->nd_right->nd_token;
 			FreeNode(expp->nd_right);
 			expp->nd_right = 0;
@@ -677,13 +728,13 @@ chk_uoper(expp)
 		}
 		break;
 	case '-':
-		switch(tpr->tp_fund) {
-		case T_INTEGER:
+		if (tpr->tp_fund & T_INTORCARD) {
 			if (expp->nd_right->nd_class == Value) {
 				cstunary(expp);
 			}
 			return 1;
-		case T_REAL:
+		}
+		else if (tpr->tp_fund == T_REAL) {
 			if (expp->nd_right->nd_class == Value) {
 				expp->nd_token = expp->nd_right->nd_token;
 				if (*(expp->nd_REL) == '-') {
@@ -711,7 +762,7 @@ chk_uoper(expp)
 	default:
 		assert(0);
 	}
-	node_error(expp, "Illegal operand for unary operator \"%s\"",
+	node_error(expp, "illegal operand for unary operator \"%s\"",
 			symbol2str(expp->nd_symb));
 	return 0;
 }

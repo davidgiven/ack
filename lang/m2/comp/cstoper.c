@@ -11,6 +11,7 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
+#include	"standards.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
@@ -60,10 +61,7 @@ cstbin(expp)
 	int uns = expp->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
-	if (expp->nd_right->nd_type->tp_fund == T_SET) {
-		cstset(expp);
-		return;
-	}
+	assert(expp->nd_left->nd_class == Value && expp->nd_right->nd_class == Value);
 	switch (expp->nd_symb)	{
 	case '*':
 		o1 *= o2;
@@ -288,6 +286,108 @@ cstset(expp)
 	expp->nd_left = expp->nd_right = 0;
 }
 
+cstcall(expp, call)
+	register struct node *expp;
+{
+	/*	a standard procedure call is found that can be evaluated
+		compile time, so do so.
+	*/
+	register struct node *expr = 0;
+
+	assert(expp->nd_class == Call);
+	if (expp->nd_right) {
+		expr = expp->nd_right->nd_left;
+		expp->nd_right->nd_left = 0;
+		FreeNode(expp->nd_right);
+	}
+	expp->nd_class = Value;
+	switch(call) {
+	case S_ABS:
+		if (expr->nd_type->tp_fund == T_REAL) {
+			expp->nd_symb = REAL;
+			expp->nd_REL = expr->nd_REL;
+			if (*(expr->nd_REL) == '-') (expp->nd_REL)++;
+			break;
+		}
+		if (expr->nd_INT < 0) expp->nd_INT = - expr->nd_INT;
+		else expp->nd_INT = expr->nd_INT;
+		cut_size(expp);
+		break;
+	case S_CAP:
+		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
+			expp->nd_INT = expr->nd_INT + ('A' - 'a');
+		}
+		else	expp->nd_INT = expr->nd_INT;
+		cut_size(expp);
+		break;
+	case S_CHR:
+		expp->nd_INT = expr->nd_INT;
+		cut_size(expp);
+		break;
+	case S_MAX:
+		if (expp->nd_type == int_type) {
+			expp->nd_INT = max_int;
+		}
+		else if (expp->nd_type == longint_type) {
+			expp->nd_INT = max_longint;
+		}
+		else if (expp->nd_type == card_type) {
+			expp->nd_INT = max_unsigned;
+		}
+		else if (expp->nd_type->tp_fund == T_SUBRANGE) {
+			expp->nd_INT = expp->nd_type->sub_ub;
+		}
+		else	expp->nd_INT = expp->nd_type->enm_ncst - 1;
+		break;
+	case S_MIN:
+		if (expp->nd_type == int_type) {
+			expp->nd_INT = (-max_int) - 1;
+		}
+		else if (expp->nd_type == longint_type) {
+			expp->nd_INT = (-max_longint) - 1;
+		}
+		else if (expp->nd_type->tp_fund == T_SUBRANGE) {
+			expp->nd_INT = expp->nd_type->sub_lb;
+		}
+		else	expp->nd_INT = 0;
+		break;
+	case S_ODD:
+		expp->nd_INT = (expr->nd_INT & 1);
+		break;
+	case S_ORD:
+		expp->nd_INT = expr->nd_INT;
+		cut_size(expp);
+		break;
+	case S_SIZE:
+		expp->nd_INT = align(expr->nd_type->tp_size, wrd_size)/wrd_size;
+		break;
+	case S_VAL:
+		expp->nd_INT = expr->nd_INT;
+		if ( /* Check overflow of subranges or enumerations */
+		    ( expp->nd_type->tp_fund == T_SUBRANGE
+		    &&
+		      (  expp->nd_INT < expp->nd_type->sub_lb
+		      || expp->nd_INT > expp->nd_type->sub_ub
+		      )
+		    )
+		   ||
+		    ( expp->nd_type->tp_fund == T_ENUMERATION
+		    &&
+		      (  expp->nd_INT < 0
+		      || expp->nd_INT >= expp->nd_type->enm_ncst
+		      )
+		    )
+		   )	node_warning(expp,"overflow in constant expression");
+		else cut_size(expp);
+		break;
+	default:
+		assert(0);
+	}
+	FreeNode(expr);
+	FreeNode(expp->nd_left);
+	expp->nd_right = expp->nd_left = 0;
+}
+
 cut_size(expr)
 	register struct node *expr;
 {
@@ -295,10 +395,13 @@ cut_size(expr)
 		conform to the size of the type of the expression.
 	*/
 	arith o1 = expr->nd_INT;
-	int uns = expr->nd_type == card_type || expr->nd_type == intorcard_type;
-	int size = expr->nd_type->tp_size;
+	struct type *tp = expr->nd_type;
+	int uns;
+	int size = tp->tp_size;
 
 	assert(expr->nd_class == Value);
+	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+	uns = (tp->tp_fund & (T_CARDINAL|T_CHAR));
 	if (uns) {
 		if (o1 & ~full_mask[size]) {
 			node_warning(expr,
@@ -332,11 +435,12 @@ init_cst()
 	}
 	mach_long_size = i;
 	mach_long_sign = 1 << (mach_long_size * 8 - 1);
-	if (int_size > mach_long_size) {
+	if (lint_size > mach_long_size) {
 		fatal("sizeof (long) insufficient on this machine");
 	}
 
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
+	max_longint = full_mask[lint_size] & ~(1 << (lint_size * 8 - 1));
 	wrd_bits = 8 * wrd_size;
 }

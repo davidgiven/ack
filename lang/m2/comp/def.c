@@ -7,7 +7,6 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<assert.h>
 #include	"main.h"
-#include	"Lpars.h"
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
@@ -33,7 +32,8 @@ define(id, scope, kind)
 	*/
 	register struct def *df;
 
-	DO_DEBUG(5, debug("Defining identifier \"%s\" in scope %d", id->id_text, scope->sc_scope));
+	DO_DEBUG(5, debug("Defining identifier \"%s\" in scope %d, kind = %d",
+			  id->id_text, scope->sc_scope, kind));
 	df = lookup(id, scope->sc_scope);
 	if (	/* Already in this scope */
 		df
@@ -47,7 +47,10 @@ define(id, scope, kind)
 		switch(df->df_kind) {
 		case D_PROCHEAD:
 			if (kind == D_PROCEDURE) {
-				df->df_kind = D_PROCEDURE;
+				/* Definition of which the heading was
+				   already seen in a definition module
+				*/
+				df->df_kind = kind;
 				return df;
 			}
 			break;	
@@ -57,8 +60,14 @@ define(id, scope, kind)
 				return df;
 			}
 			break;
+		case D_FORWMODULE:
+			if (kind & (D_FORWMODULE|D_MODULE)) {
+				df->df_kind = kind;
+				return df;
+			}
+			break;
 		case D_ERROR:
-		case D_ISEXPORTED:
+		case D_FORWARD:
 			df->df_kind = kind;
 			return df;
 		}
@@ -72,6 +81,7 @@ error("identifier \"%s\" already declared", id->id_text);
 	df->df_scope = scope->sc_scope;
 	df->df_kind = kind;
 	df->next = id->id_def;
+	df->df_flags = 0;
 	id->id_def = df;
 
 	/* enter the definition in the list of definitions in this scope */
@@ -101,6 +111,21 @@ lookup(id, scope)
 				assert(df != 0);
 				return df;
 			}
+
+			if (df->df_kind == D_UNDEF_IMPORT) {	
+				df1 = df->imp_def;
+				assert(df1 != 0);
+				if (df1->df_kind == D_MODULE) {
+					df1 = lookup(id, df1->mod_scope);
+					if (df1) {
+						df->df_kind = D_IMPORT;
+						df->imp_def = df1;
+					}
+					return df1;
+				}
+				return df;
+			}
+
 			if (df1) {
 				df1->next = df->next;
 				df->next = id->id_def;
@@ -122,17 +147,31 @@ Export(ids, qualified)
 		all the "ids" visible in the enclosing scope by defining them
 		in this scope as "imported".
 	*/
-	register struct def *df;
+	register struct def *df, *df1;
 
 	while (ids) {
-		df = define(ids->nd_IDF, CurrentScope, D_ISEXPORTED);
+		df = define(ids->nd_IDF, CurrentScope, D_FORWARD);
 		if (qualified) {
 			df->df_flags |= D_QEXPORTED;
 		}
 		else {
 			df->df_flags |= D_EXPORTED;
-			df = define(ids->nd_IDF, enclosing(CurrentScope),
-					D_IMPORT);
+			df1 = lookup(ids->nd_IDF,
+				     enclosing(CurrentScope)->sc_scope);
+			if (! df1 || !(df1->df_kind & (D_PROCHEAD|D_HIDDEN))) {
+				df1 = define(ids->nd_IDF,
+						enclosing(CurrentScope),
+						D_IMPORT);
+			}
+			else {
+				/* A hidden type or a procedure of which only
+				   the head is seen. Apparently, they are
+				   exported from a local module!
+				*/
+				df->df_kind = df1->df_kind;
+				df1->df_kind = D_IMPORT;
+			}
+			df1->imp_def = df;
 		}
 		ids = ids->next;
 	}
@@ -168,9 +207,24 @@ Import(ids, idn, local)
 	if (!idn) imp_kind = FROM_ENCLOSING;
 	else {
 		imp_kind = FROM_MODULE;
-		if (local) df = lookfor(idn, enclosing(CurrentScope), 1);
-		else df = GetDefinitionModule(idn->nd_IDF);
-		if (df->df_kind != D_MODULE) {
+		if (local) {
+			df = lookfor(idn, enclosing(CurrentScope), 0);
+			if (df->df_kind == D_ERROR) {
+				/* The module from which the import was done
+				   is not yet declared. I'm not sure if I must
+				   accept this, but for the time being I will.
+				   ???
+				*/
+				df->df_scope = scope;
+				df->df_kind = D_FORWMODULE;
+				df->mod_scope = -1;
+				kind = D_UNDEF_IMPORT;
+			}
+		}
+		else {
+			df = GetDefinitionModule(idn->nd_IDF);
+		}
+		if (!(df->df_kind & (D_MODULE|D_FORWMODULE))) {
 			/* enter all "ids" with type D_ERROR */
 			kind = D_ERROR;
 			if (df->df_kind != D_ERROR) {
@@ -181,13 +235,14 @@ node_error(idn, "identifier \"%s\" does not represent a module", idn->nd_IDF->id
 	}
 	while (ids) {
 		if (imp_kind == FROM_MODULE) {
-			if (!(df = lookup(ids->nd_IDF, scope))) {
+			if (scope == -1) {
+			}
+			else if (!(df = lookup(ids->nd_IDF, scope))) {
 node_error(ids, "identifier \"%s\" not declared in qualifying module",
 ids->nd_IDF->id_text);
 				df = ill_df;
 			}
-			else 
-			if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
+			else if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
 node_error(ids,"identifier \"%s\" not exported from qualifying module",
 ids->nd_IDF->id_text);
 			}

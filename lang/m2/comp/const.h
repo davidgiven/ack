@@ -9,4 +9,5 @@ extern int
 extern arith
 	max_int,	/* maximum integer on target machine	*/
 	max_unsigned, 	/* maximum unsigned on target machine	*/
+	max_longint,	/* maximum longint on target machine	*/
 	wrd_bits;	/* Number of bits in a word */

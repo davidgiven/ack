@@ -30,7 +30,7 @@ ProcedureDeclaration
 
 ProcedureHeading(struct def **pdf; int type;)
 {
-	struct type *tp;
+	struct type *tp = 0;
 	struct type *tp1 = 0;
 	struct paramlist *params = 0;
 	register struct def *df;
@@ -97,7 +97,7 @@ FormalParameters(int doparams; struct paramlist **pr; struct type **tp;)
 	]?
 	')'
 			{ *tp = 0; }
-	[	':' qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
+	[	':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
 			{ *tp = df->df_type; }
 	]?
 ;
@@ -135,7 +135,7 @@ FormalType(struct type **tp;)
 } :
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
-	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
+	qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
 			{ if (ARRAYflag) {
 				*tp = construct_type(T_ARRAY, NULLTYPE);
 				(*tp)->arr_elem = df->df_type;
@@ -183,7 +183,7 @@ SimpleType(struct type **ptp;)
 {
 	struct def *df;
 } :
-	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
+	qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
 	[
 		/* nothing */
 			{ *ptp = df->df_type; }
@@ -293,6 +293,7 @@ FieldList(struct scope *scope;)
 	struct idf *id;
 	struct def *df, *df1;
 	struct type *tp;
+	struct node *nd;
 } :
 [
 	IdentList(&FldList) ':' type(&tp)
@@ -301,13 +302,51 @@ FieldList(struct scope *scope;)
 			}
 |
 	CASE
-	[
-		IDENT		{ id = dot.TOK_IDF; }
+	/* Also accept old fashioned Modula-2 syntax, but give a warning
+	*/
+	[	qualident(0, &df, (char *) 0, &nd)
+		[	/* This is good, in both kinds of Modula-2, if
+			   the first qualident is a single identifier.
+			*/
+			{
+			  if (nd->nd_class != Name) {
+				error("illegal variant tag");
+				id = gen_anon_idf();
+			  }
+			  else	id = nd->nd_IDF;
+			}
+		':' qualident(D_TYPE|D_HTYPE|D_HIDDEN,
+			      &df, "type", (struct node **) 0)
+		|
+			/* Old fashioned! the first qualident now represents
+			   the type
+			*/
+				{
+				  warning("Old fashioned Modula-2 syntax!");
+				  id = gen_anon_idf();
+				  findname(nd);
+				  assert(nd->nd_class == Def);
+				  df = nd->nd_def;
+				  if (!(df->df_kind &
+					(D_ERROR|D_TYPE|D_HTYPE|D_HIDDEN))) {
+					error("identifier \"%s\" is not a type",
+						df->df_idf->id_text);
+				  }
+				  FreeNode(nd);
+				}
+		]
 	|
-				{ id = gen_anon_idf(); }
-	]			/* Changed rule in new modula-2 */
-	':' qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
-				{ df1 = define(id, scope, D_FIELD);
+		/* Aha, third edition? */
+		':' qualident(D_TYPE|D_HTYPE|D_HIDDEN,
+			      &df,
+			      "type",
+			      (struct node **) 0)
+				{
+				  id = gen_anon_idf();
+				}
+	]
+				{
+				  df1 = define(id, scope, D_FIELD);
 				  df1->df_type = df->df_type;
 				}
 	OF variant(scope)
@@ -362,7 +401,7 @@ PointerType(struct type **ptp;)
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-		qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
+		qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
 				{
 				  if (!df->df_type) {
 					error("type \"%s\" not declared",
@@ -428,7 +467,7 @@ FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 				{ p->next = 0; }
 	]?
 	')'
-	[ ':' qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
+	[ ':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
 				{ *ptp = df->df_type; }
 	]?
 ;

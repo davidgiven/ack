@@ -7,7 +7,6 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	"def_sizes.h"
-#include	"Lpars.h"
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
@@ -141,7 +140,7 @@ init_types()
 	real_type = standard_type(T_REAL, real_align, real_size);
 	longreal_type = standard_type(T_REAL, lreal_align, lreal_size);
 	word_type = standard_type(T_WORD, wrd_align, wrd_size);
-	intorcard_type = standard_type(T_INTEGER, int_align, int_size);
+	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
 	string_type = standard_type(T_STRING, 1, (arith) -1);
 	address_type = construct_type(T_POINTER, word_type);
 	tp = construct_type(T_SUBRANGE, int_type);

@@ -82,16 +82,16 @@ symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
-type.o: LLlex.h Lpars.h const.h debug.h def.h def_sizes.h idf.h node.h type.h
-def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
+type.o: LLlex.h const.h debug.h def.h def_sizes.h idf.h node.h type.h
+def.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h def.h idf.h node.h scope.h type.h
 defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h scope.h
-typequiv.o: Lpars.h def.h type.h
+typequiv.o: def.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
-cstoper.o: LLlex.h Lpars.h def_sizes.h idf.h node.h type.h
-chk_expr.o: LLlex.h Lpars.h const.h def.h idf.h node.h scope.h standards.h type.h
+cstoper.o: LLlex.h Lpars.h def_sizes.h idf.h node.h standards.h type.h
+chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h

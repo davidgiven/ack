@@ -29,7 +29,7 @@ Enter(name, kind, type, pnam)
 	if (!id) fatal("Out of core");
 	df = define(id, CurrentScope, kind);
 	df->df_type = type;
-	if (kind == D_STDPROC || kind == D_STDFUNC) {
+	if (type = std_type) {
 		df->df_value.df_stdname = pnam;
 	}
 	return df;
@@ -54,7 +54,7 @@ EnterIdList(idlist, kind, flags, type, scope)
 	while (idlist) {
 		df = define(idlist->nd_IDF, scope, kind);
 		df->df_type = type;
-		df->df_flags = flags;
+		df->df_flags |= flags;
 		if (kind == D_ENUM) {
 			if (!first) first = df;
 			df->enm_val = assval++;

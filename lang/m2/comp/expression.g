@@ -48,8 +48,7 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 				findname(nd);
 				assert(nd->nd_class == Def);
 				*pdf = df = nd->nd_def;
-			  	if (df->df_kind != D_ERROR &&
-				    !(types & df->df_kind)) {
+			  	if ( !((types|D_ERROR) & df->df_kind)) {
 					error("identifier \"%s\" is not a %s",
 					df->df_idf->id_text, str);
 				}
@@ -183,7 +182,11 @@ factor(struct node **p;)
 	number(p)
 |
 	STRING		{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
-			  (*p)->nd_type = string_type;
+			  if (dot.TOK_SLE == 1) {
+				dot.TOK_INT = *(dot.TOK_STR);
+				(*p)->nd_type = char_type;
+			  }
+			  else	(*p)->nd_type = string_type;
 			}
 |
 	'(' expression(p) ')'

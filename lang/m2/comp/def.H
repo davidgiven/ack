@@ -43,8 +43,12 @@ struct dfproc {
 };
 
 struct import {
-	struct def *im_def;	/* imported definition */
-#define imp_def		df_value.df_import.im_def
+	union {
+		struct def *im_def; /* imported definition */
+		struct node *im_nodef; /* imported from undefined name */
+	} im_u;
+#define imp_def		df_value.df_import.im_u.im_def
+#define imp_nodef	df_value.df_import.im_u.im_nodef
 };
 
 struct def	{		/* list of definitions for a name */
@@ -65,12 +69,12 @@ struct def	{		/* list of definitions for a name */
 #define D_PROCHEAD	0x0100	/* a procedure heading in a definition module */
 #define D_HIDDEN	0x0200	/* a hidden type */
 #define D_HTYPE		0x0400	/* definition of a hidden type seen */
-#define D_STDPROC	0x0800	/* a standard procedure */
-#define D_STDFUNC	0x1000	/* a standard function */
-#define D_ERROR		0x2000	/* a compiler generated definition for an
+#define D_FORWARD	0x0800	/* not yet defined */
+#define D_UNDEF_IMPORT	0x1000	/* imported from an undefined name */
+#define D_FORWMODULE	0x2000	/* module must be declared later */
+#define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
-#define D_ISEXPORTED	0x4000	/* not yet defined */
 	char df_flags;
 #define D_ADDRESS	0x01	/* set if address was taken */
 #define D_USED		0x02	/* set if used */
