@@ -32,20 +32,20 @@ char *name;
 	if ((unsigned) siz == siz &&
 	    (dirp->dd_buf = malloc((unsigned) siz))) {
 		dirp->dd_bsize = siz;
-#ifdef sun
+#ifdef __BSD4_2
 		dirp->dd_size = getdirentries(fd,
 					      (char *) dirp->dd_buf,
 					      (int) siz,
 					      &siz);
-#else
-		dirp->dd_size = read(fd, dirp->dd_buf, dirp->dd_bsize);
+		if (dirp->dd_size < 0 )
 #endif
+		dirp->dd_size = read(fd, dirp->dd_buf, dirp->dd_bsize);
 		close(fd);
 		dirp->dd_fd = -2;
 		dirp->dd_loc = 0;
 		return dirp;
 	}
-#ifndef sun
+#ifndef __BSD4_2
 	else if (dirp->dd_buf = malloc(8*DIRBLKSIZ)) {
 		dirp->dd_bsize = 8 * DIRBLKSIZ;
 	}
