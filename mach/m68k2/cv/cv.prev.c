@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include "out.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #define ASSERT(x) switch (2) { case 0: case (x): ; }
 
 /*
@@ -11,6 +15,8 @@ struct outsect	outsect[S_MAX];
 
 char	*output_file;
 int	output_file_created;
+
+char *program ;
 
 main(argc, argv)
 	int	argc;
@@ -25,6 +31,7 @@ main(argc, argv)
 	ASSERT(sizeof(struct outsect) == SZ_SECT);
 
 	input = stdin; output = stdout;
+	program= argv[0] ;
 	switch (argc) {
 	case 1:	break;
 	case 3:	if ((output = fopen(argv[2], "w")) == (FILE *)0)
@@ -37,15 +44,16 @@ main(argc, argv)
 		break;
 	default:fatal("Usage: %s <as object> <dl object>.\n", argv[0]);
 	}
-	if (fread((char *)&outhead, SZ_HEAD, 1, input) != 1)
+	if ( !rhead(input,&outhead) )
 		fatal("Reading header failed.\n");
 	if (BADMAGIC(outhead))
 		fatal("Not an ack object file.\n");
 	if (outhead.oh_nrelo > 0)
 		fprintf(stderr, "Warning: relocation information present.\n");
+	for ( nsect=0 ; nsect<outhead.oh_nsect ; nsect++ )
+		if ( !rsect(input,&outsect[nsect]) )
+			fatal("Reading section table failed.\n");
 	nsect = outhead.oh_nsect;
-	if (fread((char *)outsect, SZ_SECT, nsect, input) != nsect)
-		fatal("Reading section table failed.\n");
 	sectp = outsect;
 	while (nsect--) {
 		register long	flen;
@@ -93,10 +101,64 @@ main(argc, argv)
 	exit(0);
 }
 
+rhead(f,head) struct outhead *head ; FILE *f ; {
+	char buf[SZ_HEAD] ;
+	if ( fread(buf,SZ_HEAD,1,f)!=1 ) return 0 ;
+	iconvert(buf,(char *)head,SF_HEAD) ;
+	return 1 ;
+}
+
+rsect(f,sect) struct outsect *sect ; FILE *f ; {
+	char buf[SZ_SECT] ;
+	if ( fread(buf,SZ_SECT,1,f)!=1 ) return 0 ;
+	iconvert(buf,(char *)sect,SF_SECT) ;
+	return 1 ;
+}
+
+rrelo(f,relo) struct outrelo *relo ; FILE *f ; {
+	char buf[SZ_RELO] ;
+	if ( fread(buf,SZ_RELO,1,f)!=1 ) return 0 ;
+	iconvert(buf,(char *)relo,SF_RELO) ;
+	return 1 ;
+}
+
+rname(f,name) struct outname *name ; FILE *f ; {
+	char buf[SZ_NAME] ;
+	if ( fread(buf,SZ_NAME,1,f)!=1 ) return 0 ;
+	iconvert(buf,(char *)name,SF_NAME) ;
+	return 1 ;
+}
+
+iconvert(buf,str,fmt) char *buf, *str, *fmt ; {
+	register char *nf, *ni, *no ;
+	int last, i ;
+	long value ;
+	ni=buf ; no=str ; nf=fmt ;
+	while ( last = *nf++ ) {
+		last -= '0' ;
+		if ( last<1 || last >9 ) fatal("illegal out.h format string\n");
+		value=0 ;
+		i=last ;
+		while ( i-- ) {
+			value = (value<<8) + (ni[i]&0xFF) ;
+		}
+		switch ( last ) {
+		case 0 : break ;
+		case 1 : *no= value ; break ;
+		case 2 : *(unsigned short *)no = value ; break ;
+		case 4 : *(long *)no = value ; break ;
+		default :
+			 fatal("illegal out.h format string\n");
+		}
+		ni += last ; no += last ;
+	}
+}
+
 /* VARARGS1 */
 fatal(s, a1, a2)
 	char	*s;
 {
+	fprintf(stderr,"%s: ",program) ;
 	fprintf(stderr, s, a1, a2);
 	if (output_file_created)
 		unlink(output_file);
