@@ -86,7 +86,7 @@ int seg;
 	  case SEGBSS  : out( "switchseg( SEGBSS);\n");
 			 out( "dump_label();\n");
 			 break;
-	  case SEGHOL  : out( "switchseg( SEGHOL); DOESN'T EXIST!!\n");
+	  case SEGHOL  : out( "switchseg( SEGHOL);\n");
 			 break;
 	  case SEGCON  : out( "switchseg( SEGCON);\n");
 			 out( "dump_label();\n");
