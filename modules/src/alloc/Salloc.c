@@ -9,11 +9,8 @@
 
 	char *Salloc(str, n)	: allocate n bytes, initialized with the string
 					str
-
-	This file imports routines from "system".
 */
 
-#include	<system.h>
 #include	"in_all.h"
 #include	"alloc.h"
 

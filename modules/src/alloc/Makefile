@@ -3,6 +3,7 @@ HDIR = $(EMHOME)/modules/h
 INSTALL=$(EMHOME)/modules/install
 COMPARE=$(EMHOME)/modules/compare
 INCLUDES = -I. -I$(HDIR)
+AR = ar
 
 CFLAGS = -O $(INCLUDES)
 
@@ -24,7 +25,7 @@ OBJECTS =	botch.o clear.o st_alloc.o Malloc.o Salloc.o \
 all:		liballoc.a
 
 liballoc.a:	$(OBJECTS)
-		ar cr liballoc.a $(OBJECTS)
+		$(AR) cr liballoc.a $(OBJECTS)
 		-sh -c 'ranlib liballoc.a'
 
 install:	all

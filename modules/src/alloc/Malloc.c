@@ -8,11 +8,8 @@
 /*	The memory allocation routines offered in this file are:
 
 	char *Malloc(n)		: allocate n bytes
-
-	This file imports routines from "system".
 */
 
-#include	<system.h>
 #include	"in_all.h"
 #include	"alloc.h"
 
