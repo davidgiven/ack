@@ -503,7 +503,7 @@ pat lil lil $1==$2				leaving lil $1 dup 2
 
 pat lil lil stl $1==$2				leaving lil $1 stl $3 lol $3
 
-pat sil lil $1==$2				leaving dup 2 lil $1
+pat sil lil $1==$2				leaving dup 2 sil $1
 
 pat lof	
   with exact reg_off		yields {ind_regoff2,%1.reg,%1.off+$1}
@@ -1616,6 +1616,8 @@ proc loecxxste example loe loc sbi ste
 
 pat loe loc sbi ste $1==$4 && $3==2		call loecxxste("sub")
 pat loe loc sbu ste $1==$4 && $3==2		call loecxxste("sub")
+pat loe loc adu ste $1==$4 && $3==2		call loecxxste("add")
+pat loe loc adi ste $1==$4 && $3==2		call loecxxste("add")
 pat loe loc sli ste $1==$4 && $3==2 && $2==1	call loecxxste("sal")
 pat loe loc slu ste $1==$4 && $3==2 && $2==1	call loecxxste("sal")
 pat loe loc sri ste $1==$4 && $3==2 && $2==1	call loecxxste("sar")
@@ -1660,6 +1662,7 @@ pat lol lol adp stl loi $1==$2 && $2==$4 && $5==2 && inreg($1) > 0
 uses REG = {ind_reg2, regvar($1)}
 				yields %a
 					leaving lol $2 adp $3 stl $4
+pat adp stl inreg($2) > 0		leaving stl $2 lol $2 adp $1 stl $2
 #endif
 
 pat lol lol adp stl $1==$2 && $2==$4
