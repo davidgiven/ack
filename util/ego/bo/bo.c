@@ -192,7 +192,9 @@ STATIC mv_code(b1,b2)
 	l = last_code(b2->b_start,TRUE);
 	DLINK(l,b1->b_start);
 	x = l->l_next;
-	if (INSTR(l) == op_bra) {
+	if (TYPE(l) == OPINSTRLAB) {
+		assert(INSTR(x) == op_lab);
+		assert(INSTRLAB(l) == INSTRLAB(x));
 		rm_line(l,b2);
 	}
 	if (INSTR(x) == op_lab) {
