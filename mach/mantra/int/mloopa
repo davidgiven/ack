@@ -322,7 +322,7 @@ lhalt:
 		bsr	_Xwrite
 		testen	(sp)+
 		bne	halt
-		add.l	4,sp
+		add.l	#4,sp
 		move.l	(sp)+,a1
 4:		move.l	(a1),d1		!next print line numbers
 		lea	mess3,a0
