@@ -43,6 +43,7 @@ DoOption(text)
 	case 'p':	/* call procentry/procexit */
 	case 'n':	/* no register messages */
 	case 'x':	/* every name global */
+	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
 		options[text[-1]]++;
 		break;
 

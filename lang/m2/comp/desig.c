@@ -100,9 +100,9 @@ properly(ds, size, al)
 		(! wordmodsz && ds->dsg_offset % size == 0));
 }
 
-CodeValue(ds, size, al)
+CodeValue(ds, tp)
 	register struct desig *ds;
-	arith size;
+	register struct type *tp;
 {
 	/*	Generate code to load the value of the designator described
 		in "ds"
@@ -113,17 +113,17 @@ CodeValue(ds, size, al)
 		break;
 
 	case DSG_FIXED:
-		if (DoLoadOrStore(ds, size, LD)) break;
+		if (DoLoadOrStore(ds, tp->tp_size, LD)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
-		if (properly(ds, size, al)) {
+		if (properly(ds, tp->tp_size, tp->tp_align)) {
 			CodeAddress(ds);
-			C_loi(size);
+			C_loi(tp->tp_size);
 			break;
 		}
 		if (ds->dsg_kind == DSG_PLOADED) {
-			arith sz = WA(size) - pointer_size;
+			arith sz = WA(tp->tp_size) - pointer_size;
 
 			C_asp(-sz);
 			C_lor((arith) 1);
@@ -131,10 +131,10 @@ CodeValue(ds, size, al)
 			C_loi(pointer_size);
 		}
 		else  {
-			C_asp(-WA(size));
+			C_asp(-WA(tp->tp_size));
 			CodeAddress(ds);
 		}
-		C_loc(size);
+		C_loc(tp->tp_size);
 		C_cal("_load");
 		C_asp(2 * word_size);
 		break;
@@ -148,11 +148,14 @@ CodeValue(ds, size, al)
 	}
 
 	ds->dsg_kind = DSG_LOADED;
+	if (tp->tp_fund == T_SUBRANGE) {
+		CodeCoercion(tp, BaseType(tp));
+	}
 }
 
-CodeStore(ds, size, al)
+CodeStore(ds, tp)
 	register struct desig *ds;
-	arith size;
+	register struct type *tp;
 {
 	/*	Generate code to store the value on the stack in the designator
 		described in "ds"
@@ -162,18 +165,18 @@ CodeStore(ds, size, al)
 	save = *ds;
 	switch(ds->dsg_kind) {
 	case DSG_FIXED:
-		if (DoLoadOrStore(ds, size, STR)) break;
+		if (DoLoadOrStore(ds, tp->tp_size, STR)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(&save);
-		if (properly(ds, size, al)) {
-			C_sti(size);
+		if (properly(ds, tp->tp_size, tp->tp_align)) {
+			C_sti(tp->tp_size);
 			break;
 		}
-		C_loc(size);
+		C_loc(tp->tp_size);
 		C_cal("_store");
-		C_asp(2 * word_size + WA(size));
+		C_asp(2 * word_size + WA(tp->tp_size));
 		break;
 
 	case DSG_INDEXED:
@@ -232,7 +235,7 @@ CodeMove(rhs, left, rtp)
 			C_asp(word_size << 2);
 			return;
 		}
-		CodeStore(lhs, tp->tp_size, tp->tp_align);
+		CodeStore(lhs, tp);
 		return;
 	case DSG_PLOADED:
 	case DSG_PFIXED:
@@ -243,7 +246,7 @@ CodeMove(rhs, left, rtp)
 			C_blm(tp->tp_size);
 			return;
 		}
-		CodeValue(rhs, tp->tp_size, tp->tp_align);
+		CodeValue(rhs, tp);
 		CodeDStore(left);
 		return;
 	case DSG_FIXED:
@@ -319,8 +322,8 @@ CodeMove(rhs, left, rtp)
 				lhs->dsg_def = 0;
 				C_stl(tmp);		/* address of lhs */
 			}
-			CodeValue(rhs, tp->tp_size, tp->tp_align);
-			CodeStore(lhs, tp->tp_size, tp->tp_align);
+			CodeValue(rhs, tp);
+			CodeStore(lhs, tp);
 			if (loadedflag) FreePtr(tmp);
 			return;
 		}
@@ -570,7 +573,7 @@ CodeDesig(nd, ds)
 		case DSG_INDEXED:
 		case DSG_PLOADED:
 		case DSG_PFIXED:
-			CodeValue(ds, pointer_size, pointer_align);
+			CodeValue(ds, nd->nd_right->nd_type);
 			ds->dsg_kind = DSG_PLOADED;
 			ds->dsg_offset = 0;
 			break;

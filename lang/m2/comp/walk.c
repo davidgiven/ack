@@ -231,8 +231,6 @@ WalkProcedure(procedure)
 				   the stack adjusted, the return value pushed
 				   again, and then RET
 				*/
-				arith tmpvar = NewInt();
-
 				if (! StackAdjustment) {
 					/* First time we get here
 					*/
@@ -244,49 +242,22 @@ WalkProcedure(procedure)
 						sc->sc_off -= func_res_size;
 						retsav = sc->sc_off;
 					}
-					StackAdjustment = NewInt();
-					C_loc((arith) 0);
+					StackAdjustment = NewPtr();
+					C_lor((arith) 1);
 					C_stl(StackAdjustment);
 				}
-				/* First compute the size of the array */
-				C_lol(param->par_def->var_off +
-				      pointer_size + word_size);
-						/* upper - lower */
-				C_inc();	/* gives number of elements */
-				C_loc(tp->arr_elem->tp_size);
-				C_mli(word_size);
-				C_loc(word_size - 1);
-				C_adi(word_size);
-				C_loc(word_size);
-				C_dvi(word_size);
-						/* size in words */
-				C_loc(word_size);
-				C_mli(word_size);
-						/* size in bytes */
-				C_stl(tmpvar);
-				C_lol(tmpvar);
-				C_lol(tmpvar);
-				C_lol(StackAdjustment);
-				C_adi(word_size);
-				C_stl(StackAdjustment);
-						/* remember stack adjustments */
-				C_ngi(word_size);
-						/* Assumption: stack grows
-						   downwards!! ???
-						*/
-				C_ass(word_size);
+				/* First compute new stackpointer */
+				C_lal(param->par_def->var_off);
+				C_cal("_new_stackptr");
+				C_asp(pointer_size);
+				C_lfr(pointer_size);
+				C_str((arith) 1);
 						/* adjusted stack pointer */
 				C_lol(param->par_def->var_off);
 						/* push source address */
-				C_lol(tmpvar);	/* push size */
-				C_cal("_load");	/* copy */
-				C_asp(2 * word_size);
-				C_lor((arith) 1);	
-						/* push new address of array
-						   ... downwards ... ???
-						*/
-				C_stl(param->par_def->var_off);
-				FreeInt(tmpvar);
+				C_cal("_copy_array");
+						/* copy */
+				C_asp(word_size);
 			}
 		}
 	}
@@ -307,37 +278,31 @@ WalkProcedure(procedure)
 			/* Remove copies of conformant arrays
 			*/
 			C_lol(StackAdjustment);
-			C_ass(word_size);
+			C_str((arith) 1);
 		}
 		C_lae_dlb(func_res_label, (arith) 0);
 		EndPriority();
 		C_ret(pointer_size);
 	}
-	else if (tp) {
-		if (StackAdjustment) {
-			/* First save the function result in a safe place.
-			   Then remove copies of conformant arrays,
-			   and put function result back on the stack
-			*/
+	else if (StackAdjustment) {
+		/* First save the function result in a safe place.
+		   Then remove copies of conformant arrays,
+		   and put function result back on the stack
+		*/
+		if (tp) {
 			C_lal(retsav);
 			C_sti(func_res_size);
-			C_lol(StackAdjustment);
-			C_ass(word_size);
+		}
+		C_lol(StackAdjustment);
+		C_str((arith) 1);
+		if (tp) {
 			C_lal(retsav);
 			C_loi(func_res_size);
 		}
-		EndPriority();
-		C_ret(func_res_size);
+		FreePtr(StackAdjustment);
 	}
-	else	{
-		if (StackAdjustment) {
-			C_lol(StackAdjustment);
-			C_ass(word_size);
-		}
-		EndPriority();
-		C_ret((arith) 0);
-	}
-	if (StackAdjustment) FreeInt(StackAdjustment);
+	EndPriority();
+	C_ret(func_res_size);
 	if (! options['n']) RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
@@ -506,6 +471,10 @@ WalkStat(nd, exit_label)
 			label l2 = ++text_label;
 
 			good_forvar = DoForInit(nd, left);
+#ifdef DEBUG
+			nd->nd_left = left;
+			nd->nd_right = right;
+#endif
 			fnd = left->nd_right;
 			if (fnd->nd_class != Value) {
 				/* Upperbound not constant.
@@ -561,7 +530,7 @@ WalkStat(nd, exit_label)
 			*/
 			ds.dsg_offset = NewPtr();
 			ds.dsg_name = 0;
-			CodeStore(&ds, pointer_size, pointer_align);
+			CodeStore(&ds, address_type);
 			ds.dsg_kind = DSG_PFIXED;
 			/* the record is indirectly available */
 			wds.w_desig = ds;
@@ -759,7 +728,7 @@ DoAssign(nd, left, right)
 		if (StackNeededFor(&dsr)) CodeAddress(&dsr);
 	}
 	else {
-		CodeValue(&dsr, rtp->tp_size, rtp->tp_align);
+		CodeValue(&dsr, rtp);
 		CodeCheckExpr(rtp, ltp);
 	}
 	CodeMove(&dsr, left, rtp);

@@ -100,8 +100,8 @@ PrNode(nd, lvl)
 		indnt(lvl); print("<nilnode>\n");
 		return;
 	}
-	PrNode(nd->nd_left, lvl + 1);
 	printnode(nd, lvl);
+	PrNode(nd->nd_left, lvl + 1);
 	PrNode(nd->nd_right, lvl + 1);
 }
 #endif DEBUG

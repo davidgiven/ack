@@ -152,7 +152,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	if (true_label != NO_LABEL) {
 		/* Only for boolean expressions
 		*/
-		CodeValue(ds, tp->tp_size, tp->tp_align);
+		CodeValue(ds, tp);
 		C_zne(true_label);
 		C_bra(false_label);
 	}
@@ -162,14 +162,40 @@ CodeCoercion(t1, t2)
 	register struct type *t1, *t2;
 {
 	register int fund1, fund2;
+	arith sz1 = t1->tp_size;
 
 	t1 = BaseType(t1);
 	t2 = BaseType(t2);
-	if (t1 == t2) return;
-	if ((fund1 = t1->tp_fund) == T_WORD) fund1 = T_INTEGER;
-	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
+	switch(fund1 = t1->tp_fund) {
+	case T_WORD:
+		fund1 = T_INTEGER;
+		break;
+	case T_CHAR:
+	case T_EQUAL:
+	case T_ENUMERATION:
+	case T_POINTER:
+		fund1 = T_CARDINAL;
+		break;
+	}
+	switch(fund2 = t1->tp_fund) {
+	case T_WORD:
+		fund2 = T_INTEGER;
+		break;
+	case T_CHAR:
+	case T_EQUAL:
+	case T_ENUMERATION:
+	case T_POINTER:
+		fund2 = T_CARDINAL;
+		break;
+	}
+
 	switch(fund1) {
 	case T_INTEGER:
+		if (sz1 < word_size) {
+			C_loc(sz1);
+			C_loc(word_size);
+			C_cii();
+		}
 		switch(fund2) {
 		case T_INTEGER:
 			if (t2->tp_size != t1->tp_size) {
@@ -178,8 +204,6 @@ CodeCoercion(t1, t2)
 				C_cii();
 			}
 			break;
-		case T_ENUMERATION:
-		case T_CHAR:
 		case T_CARDINAL:
 			if (t1->tp_size != word_size) {
 				C_loc(t1->tp_size);
@@ -197,16 +221,10 @@ CodeCoercion(t1, t2)
 		}
 		break;
 
-	case T_CHAR:
-	case T_ENUMERATION:
 	case T_CARDINAL:
 	case T_INTORCARD:
 		switch(fund2) {
-		case T_ENUMERATION:
-		case T_CHAR:
 		case T_CARDINAL:
-		case T_POINTER:
-		case T_EQUAL:
 		case T_INTORCARD:
 			if (t2->tp_size > word_size) {
 				C_loc(word_size);
@@ -215,9 +233,11 @@ CodeCoercion(t1, t2)
 			}
 			break;
 		case T_INTEGER:
-			C_loc(word_size);
-			C_loc(t2->tp_size);
-			C_cui();
+			if (fund1 == T_CARDINAL || t2->tp_size != word_size) {
+				C_loc(word_size);
+				C_loc(t2->tp_size);
+				C_cui();
+			}
 			break;
 		case T_REAL:
 			C_loc(word_size);
@@ -520,8 +540,14 @@ CodeStd(nd)
 
 		if (size < word_size) size = word_size;
 		CodePExpr(left);
-		if (arg) CodePExpr(arg->nd_left);
-		else	C_loc((arith) 1);
+		if (arg) {
+			CodePExpr(arg->nd_left);
+			CodeCoercion(arg->nd_left->nd_type, tp);
+		}
+		else	{
+			C_loc((arith) 1);
+			CodeCoercion(intorcard_type, tp);
+		}
 		if (std == S_DEC) {
 			if (tp->tp_fund == T_INTEGER) C_sbi(size);
 			else	C_sbu(size);
@@ -975,7 +1001,7 @@ CodePExpr(nd)
 
 	designator = InitDesig;
 	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
-	CodeValue(&designator, nd->nd_type->tp_size, nd->nd_type->tp_align);
+	CodeValue(&designator, nd->nd_type);
 }
 
 CodeDAddress(nd)
@@ -1003,7 +1029,7 @@ CodeDStore(nd)
 
 	designator = InitDesig;
 	CodeDesig(nd, &designator);
-	CodeStore(&designator, nd->nd_type->tp_size, nd->nd_type->tp_align);
+	CodeStore(&designator, nd->nd_type);
 }
 
 DoHIGH(df)

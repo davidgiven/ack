@@ -32,6 +32,8 @@ arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
 arith wrd_bits;		/* number of bits in a word */
 
+extern char options[];
+
 static char ovflow[] = "overflow in constant expression";
 
 cstunary(expp)
@@ -423,10 +425,12 @@ cstcall(expp, call)
 
 	case S_MIN:
 		if (expp->nd_type == int_type) {
-			expp->nd_INT = (-max_int) - 1;
+			expp->nd_INT = -max_int;
+			if (! options['s']) expp->nd_INT--;
 		}
 		else if (expp->nd_type == longint_type) {
-			expp->nd_INT = (-max_longint) - 1;
+			expp->nd_INT = - max_longint;
+			if (! options['s']) expp->nd_INT--;
 		}
 		else if (expp->nd_type->tp_fund == T_SUBRANGE) {
 			expp->nd_INT = expp->nd_type->sub_lb;
