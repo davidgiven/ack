@@ -1,7 +1,11 @@
 .define .cmu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : # bytes of 1 block
-	.text
+	.sect .text
 .cmu:
 	move.l	(sp)+,d2	! reta
 	move.l	sp,a0		! top block

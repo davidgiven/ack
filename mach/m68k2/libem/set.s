@@ -1,8 +1,12 @@
 .define .set
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : setsize in bytes
 	! d1 : bitnumber
-	.text
+	.sect .text
 .set:
 	move.l	(sp)+,a0
 	move.w	(sp)+,d1

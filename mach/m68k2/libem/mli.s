@@ -1,7 +1,11 @@
 .define .mli
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 
-	.text
+	.sect .text
 .mli:
 	move.l	(sp)+,a0
 	move.l	(sp)+,d1

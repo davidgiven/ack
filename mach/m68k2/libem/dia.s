@@ -1,12 +1,16 @@
 .define	.diagnos
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 space	= 040
 del	= 0177
 
-	.text
+	.sect .text
 .diagnos:
 	move.w	hol0,-(sp)
-	move.l	hol0+FILN_AD,d2
+	move.l	hol0+4,d2
 	beq	1f
 	move.l	d2,a0
 	move.l	#40,d0
@@ -31,7 +35,7 @@ del	= 0177
 	move.l	#unknwn,d2
 	bra	2b
 
-	.data
+	.sect .data
 fmt:	.asciz "%s, line %d: "
 unknwn:	.asciz "unknown file"
 .align 2

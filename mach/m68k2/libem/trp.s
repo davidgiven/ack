@@ -1,6 +1,10 @@
 .define	.trp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .trp:
 	move.l	(sp)+,a1	! return address
 	move.w	(sp)+,d0	! error number
@@ -30,7 +34,7 @@
 	jsr	.diagnos
 	jmp	EXIT
 
-	.data
-.rettrp: .long 0
+	.sect .data
+.rettrp: .data4 0
 fmt:	.asciz "trap %d called\n"
 .align 2

@@ -1,4 +1,8 @@
 .define .gto
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern .gto
 
 .gto:
@@ -69,7 +73,7 @@ etabd:
 etaba:
 	move.l	d2,a1
 	jmp	(a1)		! return
-.data
-savd0:	.long 0
-savd1:	.long 0
-.text
+.sect .data
+savd0:	.data4 0
+savd1:	.data4 0
+.sect .text

@@ -1,6 +1,10 @@
 .define .rck
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .rck:
 	move.l	(sp)+,a1
 	move.l	(sp)+,a0	! descriptor address

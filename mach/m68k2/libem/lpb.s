@@ -1,4 +1,8 @@
 .define .lpb
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern .lpb
 .lpb:
 	! convert local to argument base

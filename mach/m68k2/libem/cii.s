@@ -1,6 +1,10 @@
 .define	.cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .cii:
 	move.l	(sp)+,a0	! return address
 	move	(sp)+,d0	! destination size

@@ -1,8 +1,12 @@
 .define	.ciu
 .define	.cui
 .define	.cuu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .ciu:
 .cui:
 .cuu:

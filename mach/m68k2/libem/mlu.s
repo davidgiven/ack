@@ -1,11 +1,15 @@
 .define .mlu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! entry : d0 multiplicand
  !         d1 multiplier
  ! exit  : d0 high order result
  !         d1 low order result
 
-	.text
+	.sect .text
 .mlu:
 	move.l	(sp)+,a1
 	move.l	(sp)+,d1

@@ -1,12 +1,16 @@
 .define .sar
 .define .lar
 .define .aar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	!register usage:
 	! a0 : descriptor address
 	! d0 : index
 	! a1 : base address
-	.text
+	.sect .text
 .aar:
 	move.l	(sp)+,d2	! return address
 	move.l	(sp)+,a0

@@ -1,6 +1,10 @@
 .define	.sig
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .sig:
 	move.l	(sp)+,a0
 	move.l	(sp)+,a1	! trap pc

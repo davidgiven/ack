@@ -1,8 +1,12 @@
 .define .sts
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : # bytes
 	! a0 : destination address
-	.text
+	.sect .text
 .sts:
 	move.l	(sp)+,a1
 	move.w	(sp)+,d0

@@ -1,6 +1,10 @@
 .define	.strhp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .strhp:
 	move.l	(sp)+,a0
 	move.l	(sp)+,d0	! heap pointer

@@ -1,21 +1,16 @@
-.define	CERASE,CKILL,CSTOP,CSTART
 .define .lino,.filn
-
-.define F_DUM,EXIT
-
+.define EXIT
 .define	begtext,begdata,begbss
 .define	EARRAY,ERANGE,ESET,EIDIVZ,EHEAP,EILLINS,ECASE,EBADGTO
 .define	hol0,.reghp,.limhp,.trpim,.trppc
-.define	LINO_AD,FILN_AD
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+
+
 
 ! EM runtime start-off for the Bleasdale 68000 system
-
-
-CERASE	= 010
-CKILL	= 030
-CSTART	= 021
-CSTOP	= 023
-F_DUM	= 0
 
 
 LINO_AD	= 0
@@ -30,8 +25,7 @@ EILLINS	= 18
 ECASE	= 20
 EBADGTO = 27
 
-.base 0x20000
-	.text
+	.sect .text
 begtext:
 	! Bleasdale puts the argument and environment vectors
 	! themselves on top of the stack, instead of POINTERS
@@ -57,30 +51,27 @@ begtext:
 	! envp pointer.
 
 	add.l	#2,sp !convert argc from 4-byte to 2-byte
-	pea	endbss
-	jsr	_brk
-	add.l	#4,sp
 	jsr	_m_a_i_n
 	add	#010,sp
 EXIT:
 	jsr	__exit
 
-	.data
+	.sect .data
 begdata:
 hol0:
 .lino:
-	.short	0,0	! lino
+	.data2	0,0	! lino
 .filn:
-	.long	0	! filn
+	.data4	0	! filn
 .reghp:
-	.long	endbss
+	.data4	endbss
 .limhp:
-	.long	endbss
+	.data4	endbss
 .trppc:
-	.long	0
+	.data4	0
 .trpim:
-	.short	0
+	.data2	0
 
 
-	.bss
-begbss:
+	.sect .bss
+begbss: !initialization is not needed because ALL entries are in zero space!

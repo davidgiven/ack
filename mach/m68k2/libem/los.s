@@ -1,8 +1,12 @@
 .define .los
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : # bytes
 	! a0 : source address
-	.text
+	.sect .text
 .los:
 	move.l	(sp)+,a1
 	move.w	(sp)+,d0

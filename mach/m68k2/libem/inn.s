@@ -1,9 +1,13 @@
 .define .inn
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 ! d0 : set size in bytes
 ! d1 : bitnumber
 
-	.text
+	.sect .text
 .inn:
 	move.l	(sp)+,d2	! return address
 	move.w	(sp)+,d1

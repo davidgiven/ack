@@ -1,4 +1,8 @@
 .define .lxa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 .extern .lxa
 .lxa:
 	! #levels (>= 0) on stack

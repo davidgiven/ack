@@ -1,8 +1,12 @@
 .define	.cmi, .cmi_
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! NUM == 4
 	! result in d1
-	.text
+	.sect .text
 .cmi:
 .cmi_:
 	move.l	(sp)+,a0

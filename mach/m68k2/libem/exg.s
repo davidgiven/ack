@@ -1,7 +1,11 @@
 .define .exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
 	! d0 : exchange size in bytes
-	.text
+	.sect .text
 .exg:
 	move.l	(sp)+,d2	! return address
 	move.l	sp,a1

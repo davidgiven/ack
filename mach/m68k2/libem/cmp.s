@@ -1,6 +1,10 @@
 .define	.cmp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .cmp:
 	move.l	(sp)+,a0	! return address
 	move.l	#1,d1

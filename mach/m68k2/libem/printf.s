@@ -1,6 +1,10 @@
 .define _printn
 .define _printf
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _putchar:
 	move.w	#1,-(sp)
 	pea	7(sp)
@@ -10,14 +14,14 @@ _putchar:
 	rts
 _printf:
 	link	a6,#-12
-.data
+.sect .data
 _12:
-	.short	28786
-	.short	26990
-	.short	29798
-	.short	11875
-	.short	0
-.text
+	.data2	28786
+	.data2	26990
+	.data2	29798
+	.data2	11875
+	.data2	0
+.sect .text
 	pea	8+4(a6)
 	move.l	(sp)+,-6(a6)
 I004:
@@ -138,15 +142,15 @@ I002:
 	rts
 _printn:
 	link	a6,#-2
-.data
+.sect .data
 _15:
-	.short	12337
-	.short	12851
-	.short	13365
-	.short	13879
-	.short	14393
-	.short	0
-.text
+	.data2	12337
+	.data2	12851
+	.data2	13365
+	.data2	13879
+	.data2	14393
+	.data2	0
+.sect .text
 	move.w	8+0(a6),-(sp)
 	move.w	#10,-(sp)
 	move.w	(sp)+,d0

@@ -1,6 +1,10 @@
 .define .csb
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
-	.text
+	.sect .text
 .csb:
 	move.l	(sp)+,a0	! case descriptor
 	move	(sp)+,d0	! index

@@ -1,7 +1,11 @@
 .define .dvi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! signed long divide
-	.text
+	.sect .text
 .dvi:
 	move.l	(sp)+,a0	! return address
 	move.l	(sp)+,d0

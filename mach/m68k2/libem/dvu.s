@@ -1,4 +1,8 @@
 .define .dvu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
 
  ! unsigned long divide
  ! register usage:
@@ -6,7 +10,7 @@
  !         d1 dividend
  ! exit  : d1 quotient
  !         d2 remainder
-	.text
+	.sect .text
 .dvu:
 	move.l	(sp)+,a1	! return address
 	move.l	(sp)+,d0
