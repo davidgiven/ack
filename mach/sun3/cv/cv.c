@@ -132,7 +132,7 @@ main(argc, argv)
 		if (! rd_open(argv[1]))
 			fatal("Can't read %s.\n", argv[1]);
 		break;
-	default:fatal("Usage: %s <ACK object> <Sun object>.\n", argv[0]);
+	default:fatal("Usage: %s [-u]  <ACK object> <Sun object>.\n", argv[0]);
 	}
 	rd_ohead(&outhead);
 	if (BADMAGIC(outhead))
@@ -481,6 +481,18 @@ cvshort(s)
 	*p = x;
 }
 
+int
+is_rest_local(A, i)
+	register int i;
+	register struct outname *A;
+{
+	while (i--) {
+		if (A->on_type & S_EXT) return 0;
+		A++;
+	}
+	return 1;
+}
+
 emit_symtab()
 {
 	register unsigned short i = outhead.oh_nname;
@@ -503,8 +515,16 @@ emit_symtab()
 	}
 	MACHnames = M;
 	ACKnames = A;
-	for (; i; i--, A++, M++) {
+	for (; i; i--, A++) {
 		M->value = A->on_valu;
+		if (A->on_type & S_SCT ||
+		    (A->on_type & S_ETC) == S_FIL) {
+			static int rest_local;
+			if (! unresolved || rest_local || (rest_local = is_rest_local(A, i))) {
+				outhead.oh_nname--;
+				continue;
+			}
+		}
 		if (A->on_type & S_COM) {
 			M->type = N_UNDF | N_EXT;
 		}
@@ -515,7 +535,6 @@ emit_symtab()
 					M->type = N_UNDF;
 					break;
 				case S_MOD:
-				case S_FIL:
 					M->type = N_FN;
 					break;
 				case S_LIN:
@@ -530,12 +549,24 @@ emit_symtab()
 				M->type = N_TEXT; 
 				break;
 			case S_MIN + ROMSG:
+				if (unresolved) {
+					M->value += outsect[TEXTSG].os_size;
+				}
 				M->type = (rom_in_data ? N_DATA : N_TEXT);
 				break;
 			case S_MIN + DATASG:
+				if (unresolved) {
+					M->value += outsect[TEXTSG].os_size +
+						    outsect[ROMSG].os_size;
+				}
 				M->type = N_DATA;
 				break;
 			case S_MIN + BSSSG:
+				if (unresolved) {
+					M->value += outsect[TEXTSG].os_size +
+						    outsect[ROMSG].os_size +
+						    outsect[DATASG].os_size;
+				}
 				M->type = N_BSS;
 				break;
 			case S_MIN + LSECT:
@@ -546,7 +577,12 @@ emit_symtab()
 					A->on_type & S_TYP);
 		}
 		if (A->on_type & S_EXT) M->type |= N_EXT;
-		if (M->name = A->on_foff) {
+		M->name = A->on_foff;
+		M++;
+	}
+	M = MACHnames;
+	for (i = outhead.oh_nname; i; i--, M++) {
+		if (M->name) {
 			M->name -= offX;
 		}
 		else M->name = outhead.oh_nchar + 3;	/* pointer to nullbyte */
