@@ -65,6 +65,8 @@ oper	:	NOOP_1
 			}
 	|	LEAOP R16 ',' mem
 			{	emit1($1); ea_2($2<<3);}
+	|	ARPLOP mem ',' R16
+			{	emit1($1); ea_2($4<<3);}
 	|	EXTOP	R16 ',' ea_2
 			{	emit1(0xF); emit1($1);
 				ea_2($2<<3);

@@ -313,6 +313,7 @@
 0,	NOOP_1,		0157,			"outs",
 0,	NOOP_1,		0157,			"outsw",
 
+0,	ARPLOP,		0143,			"arpl",
 0,	ENTER,		0310,			"enter",
 0,	NOOP_1,		0311,			"leave",
 0,	LEAOP,		0142,			"bound",
