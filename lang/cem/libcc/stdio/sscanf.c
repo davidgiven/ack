@@ -18,7 +18,7 @@ int sscanf(va_alist)
 		_tempfile._flags  = IO_READMODE + IO_UNBUFF;
 		_tempfile._buf    = (unsigned char *) string;
 		_tempfile._ptr    = (unsigned char *) string;
-		_tempfile._count  = 32767;
+		_tempfile._count  = strlen(string);
 
 		retval = _doscanf (&_tempfile, format, ap);
 	}
