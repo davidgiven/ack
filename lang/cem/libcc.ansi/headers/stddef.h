@@ -13,9 +13,9 @@
 
 #define	offsetof(type, ident)		((size_t) &(((type *)0)->ident))
 
-#if	_EM_PSIZE == 2
+#if	_EM_PSIZE == _EM_WSIZE
 typedef int	ptrdiff_t;	/* result of substracting two pointers */
-#elif	_EM_PSIZE == 4
+#elif	_EM_PSIZE == _EM_LSIZE
 typedef long	ptrdiff_t;	/* result of substracting two pointers */
 #else
 #error garbage pointer size
