@@ -16,8 +16,7 @@ head_em.o:      head_em.s
 		vax4 -I../../../h -c head_em.s
 
 libmon_o.a:	libmon_s.a
-		ASAR=ar ; export ASAR ;\
-		RANLIB=ranlib ; export RANLIB ;\
+		ASAR=aal ; export ASAR ;\
 		march . libmon_o.a
 
 clean:

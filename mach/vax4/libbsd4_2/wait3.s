@@ -4,11 +4,11 @@ DEFINE(_wait3)
 	movl	12(ap),r1
 	bispsw	$0xf
 	chmk	$SYS_wait
-	bcs 	err
+	bcs 	Ierr
 	tstl	4(ap)
-	beql	out
+	beql	Iout
 	movl	r1,*4(ap)
-out:
+Iout:
 	ret
-err:
+Ierr:
 	jmp	cerror

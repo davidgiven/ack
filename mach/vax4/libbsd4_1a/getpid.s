@@ -1,16 +1,18 @@
-.globl	_getpid
-.globl	_getppid
-.set	getpid,20
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_getpid
+.define	_getppid
+getpid = 20
 
 .align	1
 _getpid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$getpid
 	ret
 
 .align	1
 _getppid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$getpid
 	movl	r1,r0
 	ret

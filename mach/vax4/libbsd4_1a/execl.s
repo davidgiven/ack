@@ -1,9 +1,11 @@
-.globl	_execl
-.globl	_environ
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_execl
+.define	_environ
 
 .align	1
 _execl:
-	.word	0x0000
+	.data2	0x0000
 	pushl	_environ
 	pushab	8(ap)
 	pushl	4(ap)

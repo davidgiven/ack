@@ -3,7 +3,7 @@ DEFINE(_syscall)
 	movl	4(ap),r0
 	subl3	$1,(ap)+,(ap)
 	chmk	r0
-	bcs	err
+	bcs	Ierr
 	ret
-err:
+Ierr:
 	jmp	cerror

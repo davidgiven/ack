@@ -1,9 +1,11 @@
-.globl	_close
-.set	close,6
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_close
+close = 6
 
 .align	1
 _close:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$close
 	bcc 	1f
 	jmp 	errmon

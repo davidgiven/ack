@@ -1,29 +1,29 @@
 #include "syscall.h"
-.globl	_end
+.extern	_end
 DEFINE(_brk)
-	cmpl	4(ap),min
-	bgeq	ok
-	movl	min,4(ap)
-ok:
+	cmpl	4(ap),Imin
+	bgeq	Iok
+	movl	Imin,4(ap)
+Iok:
 	chmk	$17
-	bcs	err
-	movl	4(ap),cur
+	bcs	Ierr
+	movl	4(ap),Icur
 	clrl	r0
 	ret
-err:
+Ierr:
 	jmp	cerror
 
 DEFINE(_sbrk)
 	addl3	cur,4(ap),-(sp)
-	bcs	err
+	bcs	Ierr
 	pushl	$1
 	movl	ap,r3
 	movl	sp,ap
 	chmk	$17
-	bcs	err
-	movl	cur,r0
-	addl2	4(r3),cur
+	bcs	Ierr
+	movl	Icur,r0
+	addl2	4(r3),Icur
 	ret
-.data
-min: .long	_end
-cur: .long	_end
+.sect .data
+Imin: .data4	_end
+Icur: .data4	_end

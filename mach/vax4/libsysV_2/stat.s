@@ -1,12 +1,13 @@
-.set	stat,18
-.globl	_stat
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+stat = 18
+.define	_stat
 
 _stat:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$stat
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

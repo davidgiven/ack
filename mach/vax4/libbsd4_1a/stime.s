@@ -1,9 +1,11 @@
-.globl	_stime
-.set	stime,25
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_stime
+stime = 25
 
 .align	1
 _stime:
-	.word	0x0000
+	.data2	0x0000
 	movl	*4(ap),4(ap)
 	chmk	$stime
 	bcc 	1f

@@ -1,11 +1,13 @@
-.set	acct,51
-.globl	_acct
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+acct = 51
+.define	_acct
+.define  cerror
 
 _acct:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$acct
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

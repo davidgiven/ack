@@ -1,11 +1,12 @@
-.set	fcntl,62
-.globl	_fcntl
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+fcntl = 62
+.define	_fcntl
 
 _fcntl:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$fcntl
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	ret

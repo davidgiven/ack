@@ -1,61 +1,62 @@
-.set	msg,49
-.globl	_msgrcv
-.globl	_msgctl
-.globl	_msgsnd
-.globl	_msgget
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+msg = 49
+.define	_msgrcv
+.define	_msgctl
+.define	_msgsnd
+.define	_msgget
 
 _msgsnd:
-	.word 0x0000
+	.data2 0x0000
 	pushl	16(ap)
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$3
-	calls	$5,sys
+	calls	$5,Isys
 	ret
 
 _msgrcv:
-	.word 0x0000
+	.data2 0x0000
 	pushl	20(sp)
 	pushl	16(ap)
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$2
-	calls	$6,sys1
+	calls	$6,Isys1
 	ret
 
 _msgctl:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$1
-	calls	$4,sys
+	calls	$4,Isys
 	ret
 
 _msgget:
-	.word 0x0000
+	.data2 0x0000
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$0
-	calls	$3,sys1
+	calls	$3,Isys1
 	ret
 
-sys:
-	.word 0x0000
+Isys:
+	.data2 0x0000
 	chmk	$msg
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	clrl	r0
 	ret
 
-sys1:
-	.word 0x0000
+Isys1:
+	.data2 0x0000
 	chmk	$msg
-	bcc	ok1
+	bcc	1f
 	jmp	cerror
-ok1:
+1:
 	ret

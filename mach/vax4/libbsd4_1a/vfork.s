@@ -1,12 +1,14 @@
-.globl	_vfork
-.set	vfork,66
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_vfork
+vfork = 66
 
 .align	1
 _vfork:
-	.word	0x0000
+	.data2	0x0000
 	movl	16(fp),r2
-	movab	1f,16(fp)	# dirty. Only one process can do return,
-				# so do it before forking
+	movab	1f,16(fp)	! dirty. Only one process can do return,
+				! so do it before forking
 	ret
 1:
 	chmk	$vfork

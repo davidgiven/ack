@@ -1,11 +1,12 @@
-.set	dup,41
-.globl	_dup
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+dup = 41
+.define	_dup
 
 _dup:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$dup
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

@@ -1,9 +1,11 @@
-.set	mpxcall,56
-.globl	_mpxcall
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+mpxcall = 56
+.define	_mpxcall
 
 .align	1
 _mpxcall:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$mpxcall
 	bcc 	1f
 	jmp 	errmon

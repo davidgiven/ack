@@ -1,12 +1,13 @@
-.set	setgid,46
-.globl	_setgid
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+setgid = 46
+.define	_setgid
 
 _setgid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$setgid
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

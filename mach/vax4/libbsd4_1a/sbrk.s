@@ -1,16 +1,18 @@
-.set	break,17
-.globl	_sbrk
-.globl	_brk
-.globl	_end
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+break = 17
+.define	_sbrk
+.define	_brk
+.define	_end
 
 .align	1
 _sbrk:
-	.word	0x0000
-	addl3	brk,4(ap),-(sp)
+	.data2	0x0000
+	addl3	Ibrk,4(ap),-(sp)
 	bcc	1f
-	movl	$0xFFFFFFFF,(sp)	# will cause an error (I hope)
+	movl	$0xFFFFFFFF,(sp)	! will cause an error (I hope)
 1:
-	movl	brk,r3
+	movl	Ibrk,r3
 	calls	$1,_brk
 	tstl	r0
 	blss	1f
@@ -20,14 +22,14 @@ _sbrk:
 
 .align	1
 _brk:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$break
 	bcc 	1f
 	jmp 	errmon
 1:
-	movl	4(ap),brk
+	movl	4(ap),Ibrk
 	clrl	r0
 	ret
 
-.data
-brk:	.long	_end
+.sect .data
+Ibrk:	.data4	_end

@@ -1,9 +1,9 @@
-.globl	_execv
-.globl	_execve
-.globl	_environ
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_execv
 
 _execv:
-	.word	0x0000
+	.data2	0x0000
 	pushl	_environ
 	pushl	8(ap)
 	pushl	4(ap)

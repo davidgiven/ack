@@ -1,9 +1,11 @@
-.globl	_lseek
-.set	lseek,19
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_lseek
+lseek = 19
 
 .align	1
 _lseek:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$lseek
 	bcc 	1f
 	jmp 	errmon

@@ -1,9 +1,11 @@
-.globl	_write
-.set	write,4
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_write
+write = 4
 
 .align	1
 _write:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$write
 	bcc	1f
 	jmp	errmon

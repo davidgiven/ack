@@ -1,7 +1,9 @@
-.set	alarm,27
-.globl	_alarm
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+alarm = 27
+.define	_alarm
 
 _alarm:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$alarm
 	ret

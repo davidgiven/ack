@@ -1,17 +1,17 @@
 #include "syscall.h"
 DEFINE(_vfork)
 	movl	16(fp),r2
-	movab	newret,16(fp)
-	ret			# cleans stack
-newret:
+	movab	Inewret,16(fp)
+	ret			! cleans stack
+Inewret:
 	chmk	$SYS_vfork
-	bcs	err
+	bcs	Ierr
 	tstl	r1
-	beql	parent
+	beql	Iparent
 	clrl	r0
-parent:
+Iparent:
 	jmp	(r2)
-err:
+Ierr:
 	movl	r0,_errno
 	mnegl	$1,r0
 	jmp	(r2)

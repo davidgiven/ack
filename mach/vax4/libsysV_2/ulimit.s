@@ -1,11 +1,12 @@
-.set	ulimit,63
-.globl	_ulimit
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+ulimit = 63
+.define	_ulimit
 
 _ulimit:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$ulimit
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	ret

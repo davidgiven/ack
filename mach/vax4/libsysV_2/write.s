@@ -1,11 +1,12 @@
-.set	write,4
-.globl	_write
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+write = 4
+.define	_write
 
 _write:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$write
-	bcc 	out
+	bcc 	1f
 	jmp 	cerror
-out:
+1:
 	ret

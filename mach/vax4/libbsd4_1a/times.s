@@ -1,8 +1,10 @@
-.globl	_times
-.set	times,43
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_times
+times = 43
 
 .align	1
 _times:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$times
 	ret

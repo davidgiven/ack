@@ -1,11 +1,12 @@
-.set	creat,8
-.globl	_creat
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+creat = 8
+.define	_creat
 
 _creat:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$creat
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

@@ -1,9 +1,11 @@
-.globl	_umask
-.set	umask,60
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_umask
+umask = 60
 
 .align	1
 _umask:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$umask
 	bcc	1f
 	jmp	errmon

@@ -1,9 +1,11 @@
-.globl	_fstat
-.set	fstat,28
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_fstat
+fstat = 28
 
 .align	1
 _fstat:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$fstat
 	bcc 	1f
 	jmp 	errmon

@@ -1,57 +1,58 @@
-.set	shm,52
-.globl	_shmat
-.globl	_shmctl
-.globl	_shmdt
-.globl	_shmget
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+shm = 52
+.define	_shmat
+.define	_shmctl
+.define	_shmdt
+.define	_shmget
 
 _shmat:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$0
-	calls	$4,sys1
+	calls	$4,Isys1
 	ret
 
 _shmdt:
-	.word 0x0000
+	.data2 0x0000
 	pushl	4(ap)
 	pushl	$2
-	calls	$2,sys
+	calls	$2,Isys
 	ret
 
 _shmctl:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$1
-	calls	$4,sys
+	calls	$4,Isys
 	ret
 
 _shmget:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$3
-	calls	$4,sys1
+	calls	$4,Isys1
 	ret
 
-sys:
-	.word 0x0000
+Isys:
+	.data2 0x0000
 	chmk	$shm
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	clrl	r0
 	ret
 
-sys1:
-	.word 0x0000
+Isys1:
+	.data2 0x0000
 	chmk	$shm
-	bcc	ok1
+	bcc	1f
 	jmp	cerror
-ok1:
+1:
 	ret

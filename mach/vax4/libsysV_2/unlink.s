@@ -1,12 +1,13 @@
-.set	unlink,10
-.globl	_unlink
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+unlink = 10
+.define	_unlink
 
 _unlink:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$unlink
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

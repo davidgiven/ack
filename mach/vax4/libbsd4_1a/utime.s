@@ -1,9 +1,11 @@
-.globl	_utime
-.set	utime,30
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_utime
+utime = 30
  
 .align	1
 _utime:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$utime
 	bcc	1f
 	jmp	errmon

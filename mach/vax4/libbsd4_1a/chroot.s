@@ -1,9 +1,11 @@
-.globl	_chroot
-.set	chroot,61
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_chroot
+chroot = 61
  
-.globl	errmon
+.define	errmon
 _chroot:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$chroot
 	bcc	1f
 	jmp	errmon

@@ -1,13 +1,14 @@
-.set	stime,25
-.globl	_stime
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+stime = 25
+.define	_stime
 
 _stime:
-	.word	0x0000
+	.data2	0x0000
 	movl	*4(ap),4(ap)
 	chmk	$stime
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

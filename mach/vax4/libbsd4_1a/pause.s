@@ -1,8 +1,10 @@
-.globl	_pause
-.set	pause,29
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_pause
+pause = 29
 
 .align	1
 _pause:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$pause
 	ret

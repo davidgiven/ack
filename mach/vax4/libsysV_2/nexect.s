@@ -1,9 +1,10 @@
-.set	execve,59
-.globl	_exect
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+execve = 59
+.define	_exect
 
 _exect:
-	.word	0x0000
+	.data2	0x0000
 	bispsw	$0x10
 	chmk	$execve
 	jmp 	cerror

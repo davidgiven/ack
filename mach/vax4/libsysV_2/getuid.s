@@ -1,7 +1,9 @@
-.set	getuid,24
-.globl	_getuid
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+getuid = 24
+.define	_getuid
 
 _getuid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$getuid
 	ret

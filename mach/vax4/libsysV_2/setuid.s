@@ -1,12 +1,13 @@
-.set	setuid,23
-.globl	_setuid
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+setuid = 23
+.define	_setuid
 
 _setuid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$setuid
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

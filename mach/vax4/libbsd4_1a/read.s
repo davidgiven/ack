@@ -1,9 +1,11 @@
-.globl	_read
-.set	read,3
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_read
+read = 3
 
 .align	1
 _read:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$read
 	bcc 	1f
 	jmp 	errmon

@@ -17,8 +17,7 @@ head_em:        head_em.s
 		vax4 -I../../../h -c head_em.s ; mv head_em.o head_em
 
 tail_mon:
-		ASAR=ar ; export ASAR ;\
-		RANLIB=ranlib ; export RANLIB ;\
+		ASAR=aal ; export ASAR ;\
 		march . tail_mon
 
 clean:

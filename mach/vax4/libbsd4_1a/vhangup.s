@@ -1,8 +1,10 @@
-.globl	_vhangup
-.set	vhangup,76
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_vhangup
+vhangup = 76
 
 .align	1
 _vhangup:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$vhangup
 	ret

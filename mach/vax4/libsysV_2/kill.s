@@ -1,12 +1,13 @@
-.set	kill,37
-.globl	_kill
-.globl cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+kill = 37
+.define	_kill
 
 _kill:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$kill
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

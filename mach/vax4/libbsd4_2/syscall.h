@@ -3,9 +3,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#define DEFINE(sysn)	.globl sysn; .align 1; sysn: .word 0
-#define SYSTEM(sys)	chmk $sys; bcs err; ret; err: jmp cerror
-#define SYSNORET(sys)	chmk $sys; bcc ok; jmp cerror; ok:
+#define DEFINE(sysn)	.define sysn; .align 1; sysn: .data2 0
+#define SYSTEM(sys)	chmk $sys; bcs Ierr; ret; Ierr: jmp cerror
+#define SYSNORET(sys)	chmk $sys; bcc Iok; jmp cerror; Iok:
 #define SYS_exit 1
 #define SYS_fork 2
 #define SYS_read 3
@@ -122,3 +122,6 @@
 #define SYS_quota 149
 #define SYS_getsockname 150
 #define SYS_getdirentries 156
+
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text

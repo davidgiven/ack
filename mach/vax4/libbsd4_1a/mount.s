@@ -1,9 +1,11 @@
-.globl	_mount
-.set	mount,21
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_mount
+mount = 21
 
 .align	1
 _mount:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$mount
 	bcc 	1f
 	jmp 	errmon

@@ -1,13 +1,13 @@
-.set	ptrace,26
-.globl	_ptrace
-.globl  _errno
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+ptrace = 26
+.define	_ptrace
 
 _ptrace:
-	.word	0x0000
+	.data2	0x0000
 	clrl	_errno
 	chmk	$ptrace
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

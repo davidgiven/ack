@@ -1,8 +1,10 @@
-.globl	_execve
-.set	exec,59
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_execve
+exec = 59
 
 .align	1
 _execve:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$exec
 	jmp 	errmon

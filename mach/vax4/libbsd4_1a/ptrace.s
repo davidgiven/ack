@@ -1,9 +1,11 @@
-.globl	_ptrace
-.set	ptrace,26
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_ptrace
+ptrace = 26
 
 .align	1
 _ptrace:
-	.word	0x0000
+	.data2	0x0000
 	clrl	_errno
 	chmk	$ptrace
 	bcc 	1f

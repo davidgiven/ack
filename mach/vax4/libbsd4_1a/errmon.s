@@ -1,4 +1,6 @@
-.globl	errmon
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	errmon
 .comm	_errno,4
 
 .align	1

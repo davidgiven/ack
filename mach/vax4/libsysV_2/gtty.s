@@ -1,11 +1,12 @@
-.set	gtty,32
-.globl	_gtty
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+gtty = 32
+.define	_gtty
 
 _gtty:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$gtty
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	ret

@@ -1,41 +1,42 @@
-.set	sem,53
-.globl	_semctl
-.globl	_semget
-.globl	_semop
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+sem = 53
+.define	_semctl
+.define	_semget
+.define	_semop
 
 _semop:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$2
-	calls	$4,sys1
+	calls	$4,Isys1
 	ret
 
 _semctl:
-	.word 0x0000
+	.data2 0x0000
 	pushl	16(ap)
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$1
-	calls	$5,sys1
+	calls	$5,Isys1
 	ret
 
 _semget:
-	.word 0x0000
+	.data2 0x0000
 	pushl	12(ap)
 	pushl	8(ap)
 	pushl	4(ap)
 	pushl	$0
-	calls	$4,sys1
+	calls	$4,Isys1
 	ret
 
-sys1:
-	.word 0x0000
+Isys1:
+	.data2 0x0000
 	chmk	$sem
-	bcc	ok1
+	bcc	1f
 	jmp	cerror
-ok1:
+1:
 	ret

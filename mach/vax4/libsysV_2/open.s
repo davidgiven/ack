@@ -1,11 +1,12 @@
-.set	open,5
-.globl	_open
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+open = 5
+.define	_open
 
 _open:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$open
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

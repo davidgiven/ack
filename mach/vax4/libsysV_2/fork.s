@@ -1,14 +1,15 @@
-.set	fork,2
-.globl	_fork
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+fork = 2
+.define	_fork
 
 _fork:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$fork
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
-	blbc	r1,out
+1:
+	blbc	r1,1f
 	clrl	r0
-out:
+1:
 	ret

@@ -1,12 +1,13 @@
-.set	chmod,15
-.globl	_chmod
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+chmod = 15
+.define	_chmod
 
 _chmod:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$chmod
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

@@ -1,11 +1,13 @@
-.set	time,13
-.globl	_time
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+time = 13
+.define	_time
 
 _time:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$time
 	movl	4(ap),r1
-	beql	out
+	beql	1f
 	movl	r0,(r1)
-out:
+1:
 	ret

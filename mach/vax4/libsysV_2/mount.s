@@ -1,12 +1,13 @@
-.set	mount,21
-.globl	_mount
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+mount = 21
+.define	_mount
 
 _mount:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$mount
-	bcc	ok
+	bcc	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

@@ -1,5 +1,5 @@
 #include "syscall.h"
-.globl	_environ
+.extern	_environ
 DEFINE(_execl)
 	pushl	_environ
 	pushab	8(ap)

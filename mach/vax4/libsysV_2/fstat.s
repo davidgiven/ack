@@ -1,12 +1,13 @@
-.set	fstat,28
-.globl	_fstat
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+fstat = 28
+.define	_fstat
 
 _fstat:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$fstat
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

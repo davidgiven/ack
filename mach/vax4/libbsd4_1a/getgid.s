@@ -1,16 +1,18 @@
-.globl	_getgid
-.globl	_getegid
-.set	getgid,47
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_getgid
+.define	_getegid
+getgid = 47
 
 .align	1
 _getgid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$getgid
 	ret
 
 .align	1
 _getegid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$getgid
 	movl	r1,r0
 	ret

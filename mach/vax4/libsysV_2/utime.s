@@ -1,11 +1,12 @@
-.set	utime,30
-.globl	_utime
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+utime = 30
+.define	_utime
  
 _utime:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$utime
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	ret

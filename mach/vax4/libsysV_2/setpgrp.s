@@ -1,20 +1,22 @@
-.set	setpgrp,39
-.globl	_setpgrp
-.globl	_getpgrp
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+setpgrp = 39
+.define	_setpgrp
+.define	_getpgrp
 
 _setpgrp:
-	.word	0x0000
+	.data2	0x0000
 	pushl	$1
-	calls	$1,pgrp
+	calls	$1,Ipgrp
 	ret
 
 _getpgrp:
-	.word	0x0000
+	.data2	0x0000
 	pushl	$0
-	calls	$1,pgrp
+	calls	$1,Ipgrp
 	ret
 
-pgrp:
-	.word	0x0000
+Ipgrp:
+	.data2	0x0000
 	chmk	$setpgrp
 	ret

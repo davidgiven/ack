@@ -1,12 +1,13 @@
-.set	close,6
-.globl	_close
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+close = 6
+.define	_close
 
 _close:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$close
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

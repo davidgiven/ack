@@ -1,9 +1,11 @@
-.set	vadvise,72
-.globl	_vadvise
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+vadvise = 72
+.define	_vadvise
 
 .align	1
 _vadvise:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$vadvise
 	bcc 	1f
 	jmp 	errmon

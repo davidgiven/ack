@@ -1,9 +1,11 @@
-.globl	_access
-.set	access,33
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_access
+access = 33
 
 .align	1
 _access:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$access
 	bcc 	1f
 	jmp 	errmon

@@ -1,21 +1,22 @@
-.set	utssys,57
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+utssys = 57
 
-.globl	_uname
-.globl	cerror
+.define	_uname
 
 _uname:
-	.word	0x0000
+	.data2	0x0000
 	pushl	$0
 	pushl	$0
 	pushl	4(ap)
-	calls	$3,sys
+	calls	$3,Isys
 	ret
 
-sys:
-	.word	0x0000
+Isys:
+	.data2	0x0000
 	chmk	$utssys
-	bcc	ok
+	bcc	1f
 	jmp	cerror
-ok:
+1:
 	clrl	r0
 	ret

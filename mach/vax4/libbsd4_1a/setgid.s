@@ -1,9 +1,11 @@
-.globl	_setgid
-.set	setgid,46
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_setgid
+setgid = 46
 
 .align	1
 _setgid:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$setgid
 	bcc 	1f
 	jmp 	errmon

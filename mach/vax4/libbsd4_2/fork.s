@@ -1,10 +1,10 @@
 #include "syscall.h"
 DEFINE(_fork)
 	chmk	$SYS_fork
-	bcs	err
-	jlbc	r1,parent
+	bcs	Ierr
+	blbc	r1,Iparent
 	clrl	r0
-parent:
+Iparent:
 	ret
-err:
+Ierr:
 	jmp	cerror

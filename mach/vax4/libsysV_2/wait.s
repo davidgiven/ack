@@ -1,15 +1,16 @@
-.set	wait,7
-.globl	_wait
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+wait = 7
+.define	_wait
 
 _wait:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$wait
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	tstl	4(ap)
-	beql	out
+	beql	1f
 	movl	r1,*4(ap)
-out:
+1:
 	ret

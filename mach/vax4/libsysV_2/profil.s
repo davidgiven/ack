@@ -1,7 +1,9 @@
-.set	prof,44
-.globl	_profil
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+prof = 44
+.define	_profil
 
 _profil:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$prof
 	ret

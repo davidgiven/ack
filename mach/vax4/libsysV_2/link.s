@@ -1,12 +1,13 @@
-.set	link,9
-.globl	_link
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+link = 9
+.define	_link
 
 _link:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$link
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	clrl	r0
 	ret

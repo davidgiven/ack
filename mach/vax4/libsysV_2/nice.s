@@ -1,11 +1,12 @@
-.set	nice,34
-.globl	_nice
-.globl  cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+nice = 34
+.define	_nice
 
 _nice:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$nice
-	bcc 	ok
+	bcc 	1f
 	jmp 	cerror
-ok:
+1:
 	ret

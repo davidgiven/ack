@@ -1,9 +1,11 @@
-.globl	_chown
-.set	chown,16
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_chown
+chown = 16
 
 .align	1
 _chown:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$chown
 	bcc 	1f
 	jmp 	errmon

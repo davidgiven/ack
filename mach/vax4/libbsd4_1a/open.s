@@ -1,9 +1,11 @@
-.globl	_open
-.set	open,5
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_open
+open = 5
 
 .align	1
 _open:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$open
 	bcc 	1f
 	jmp 	errmon

@@ -1,9 +1,11 @@
-.globl	_ioctl
-.set	ioctl,54
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_ioctl
+ioctl = 54
  
 .align	1
 _ioctl:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$ioctl
 	bcc	1f
 	jmp	errmon

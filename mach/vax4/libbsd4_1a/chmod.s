@@ -1,9 +1,11 @@
-.globl	_chmod
-.set	chmod,15
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_chmod
+chmod = 15
 
 .align	1
 _chmod:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$chmod
 	bcc 	1f
 	jmp 	errmon

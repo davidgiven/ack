@@ -1,40 +1,40 @@
-.set	break,17
-.globl	_sbrk
-.globl	_brk
-.globl	_end
-.globl	cerror
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+break = 17
+.define	_sbrk
+.define	_brk
 
 _sbrk:
-	.word	0x0000
-	movl	nd,r0
+	.data2	0x0000
+	movl	Ind,r0
 	tstl	4(ap)
-	jeql	out
+	jeql	3f
 	addl3	r0,4(ap),-(sp)
-	bcs	ovfl
+	bcs	1f
 	pushl	$1
 	movl	ap,r3
 	movl	sp,ap
 	chmk	$break
-	bcc 	ok
-ovfl:
+	bcc 	2f
+1:
 	jmp 	cerror
-ok:
-	movl	nd,r0
-	addl2	4(r3),nd
-out:
+2:
+	movl	Ind,r0
+	addl2	4(r3),Ind
+3:
 	ret
 
-.globl	_brk
+.define	_brk
 
 _brk:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$break
-	bcc 	ok2
+	bcc 	1f
 	jmp 	cerror
-ok2:
-	movl	4(ap),nd
+1:
+	movl	4(ap),Ind
 	clrl	r0
 	ret
 
-	.data
-nd:	.long	_end
+	.sect .data
+Ind:	.data4	_end

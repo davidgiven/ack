@@ -1,7 +1,9 @@
-.set	sync,36
-.globl	_sync
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+sync = 36
+.define	_sync
 
 _sync:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$sync
 	ret

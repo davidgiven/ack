@@ -1,9 +1,11 @@
-.set	wait,7
-.globl	_wait
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+wait = 7
+.define	_wait
 
 .align	1
 _wait:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$wait
 	bcc 	1f
 	jmp	errmon

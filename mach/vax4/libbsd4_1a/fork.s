@@ -1,9 +1,11 @@
-.globl	_fork
-.set	fork,2
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_fork
+fork = 2
 
 .align	1
 _fork:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$fork
 	bcc	1f
 	jmp	errmon

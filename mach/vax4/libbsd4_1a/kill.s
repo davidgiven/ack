@@ -1,9 +1,11 @@
-.globl	_kill
-.set	kill,37
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_kill
+kill = 37
 
 .align	1
 _kill:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$kill
 	bcc 	1f
 	jmp 	errmon

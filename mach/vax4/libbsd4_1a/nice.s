@@ -1,9 +1,11 @@
-.globl	_nice
-.set	nice,34
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_nice
+nice = 34
 
 .align	1
 _nice:
-	.word	0x0000
+	.data2	0x0000
 	chmk	$nice
 	bcc 	1f
 	jmp 	errmon

@@ -1,10 +1,12 @@
-.globl	cerror
-.globl	_errno
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	cerror
+.define	_errno
 
-.data
-_errno:	.long	0
+.sect .bss
+.comm _errno, 4
 
-.text
+.sect .text
 cerror:
 	movl	r0,_errno
 	mnegl	$1,r0

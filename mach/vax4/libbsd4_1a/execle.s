@@ -1,8 +1,10 @@
-.globl	_execle
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
+.define	_execle
 
 .align	1
 _execle:
-	.word	0x0000
+	.data2	0x0000
 	movl	(ap),r0
 	pushl	(ap)[r0]
 	pushab	8(ap)
