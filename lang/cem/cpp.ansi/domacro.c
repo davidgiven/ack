@@ -347,7 +347,8 @@ do_define()
 	/* read the replacement text if there is any			*/
 	ch = skipspaces(ch,0);	/* find first character of the text	*/
 	assert(ch != EOI);
-	UnGetChar();
+       /* UngetChar() is not right when replacement starts with a '/' */
+	ChPushBack(ch);
 	repl_text = get_text((nformals > 0) ? formals : 0, &length);
 	macro_def(str2idf(str, 0), repl_text, nformals, length, NOFLAG);
 	LineNumber++;
