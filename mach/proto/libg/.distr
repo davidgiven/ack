@@ -5,6 +5,7 @@ proto.libpc
 proto.libcc
 proto.libm2
 proto.libsys
+proto.sysmon
 proto.libcc.ansi
 proto.libmon
 proto.libem
