@@ -26,6 +26,12 @@ compare:	all
 		$(COMPARE) lib/libobject.a
 		$(COMPARE) man/object.3
 
+pr:
+		@pr Makefile byte_order.c object.h $(CFILES)
+
+opr:
+		make pr | opr
+
 clean:
 		rm -f *.[oa] nohup.out Out byte_order byte_order.h
 
