@@ -35,7 +35,7 @@ tailcp: tail
 	rm -f $(OLIB)
 
 lib:
-	MACH=$(MACH) MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) \
+	MACH=$(MACH) MACHFL="$(MACHFL) -LIB" ASAR=$(ASAR) SUF=$(SUF) \
 		OLIB=$(OLIB) MakeArch -o
 
 ar aal arch:
