@@ -169,7 +169,7 @@ initializer(struct idf *idf; int sc;)
 	{
 		struct expr *expr = (struct expr *) 0;
 		int globalflag = level == L_GLOBAL ||
-				 (level == L_LOCAL && sc == STATIC);
+				 (level >= L_LOCAL && sc == STATIC);
 	}
 :
 	{	if (idf->id_def->df_type->tp_fund == FUNCTION)	{
