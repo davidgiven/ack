@@ -38,7 +38,7 @@ long	src;	/* largest possible integer to convert */
 	fprintf(stderr,"CUF8(ds(%d),ss(%d),src(%D))\n\n",8,ss,i_src);
 #endif
 	if (i_src == 0)	{
-		zrf8(&src);
+		zrf8(&ss);
 		return;
 	}
 			/* ESTABLISHED THAT src != 0	*/
