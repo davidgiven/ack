@@ -10,6 +10,11 @@
  */
 
 #include <whichone.h>
+
+#if TBL68020
+#define SYNTAX_68020    1
+#endif
+
 #include <stb.h>
 
 con_part(sz,w) register sz; word w; {
@@ -100,7 +105,7 @@ regreturn()
 	register struct regsav_t *p;
 
 	if (regnr > 1)  {
-#ifdef TBL68020
+#ifdef SYNTAX_68020
 		fprintf(codefile,"movem.l (-%ld,a6),", nlocals);
 #else
 		fprintf(codefile,"movem.l -%ld(a6),", nlocals);
@@ -113,7 +118,7 @@ regreturn()
 		putc('\n',codefile);
 	} else if (regnr == 1) {
 		p = regsav;
-#ifdef TBL68020
+#ifdef SYNTAX_68020
 		fprintf(codefile,"move.l (-%ld,a6),%s\n",nlocals, p->rs_reg);
 #else
 		fprintf(codefile,"move.l -%ld(a6),%s\n",nlocals, p->rs_reg);
@@ -131,9 +136,18 @@ f_regsave()
 	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
 #else
 	if (nlocals > 32768) {
-		fprintf(codefile, "move.l a6,-(sp)\nmove.l sp,a6\nsub #%ld,sp\ntst.b -40(sp)\n", nlocals);
+		fprintf(codefile, "move.l a6,-(sp)\nmove.l sp,a6\nsub #%ld,sp\n", nlocals);
 	}
-	else	fprintf(codefile,"link\ta6,#-%ld\ntst.b -40(sp)\n",nlocals);
+	else	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
+#endif
+#ifndef NOSTACKTEST
+	fprintf(codefile, "tst.b %s\n",
+#ifdef SYNTAX_68020
+		"(-40, sp)"
+#else
+		"-40(sp)"
+#endif
+	);
 #endif
 	if (regnr > 1) {
 		fputs("movem.l ", codefile);
@@ -150,7 +164,7 @@ f_regsave()
 	/* initialise register-parameters */
 	for (p = regsav; p < &regsav[regnr]; p++) {
 		if (p->rs_off >= 0) {
-#ifdef TBL68020
+#ifdef SYNTAX_68020
 			fprintf(codefile,"move.%c (%ld,a6),%s\n",
 #else
 			fprintf(codefile,"move.%c %ld(a6),%s\n",
@@ -247,7 +261,7 @@ mes(type) word type ; {
 		    && ! gdb_flag
 #endif
 		) {
-#ifdef TBL68020
+#ifdef SYNTAX_68020
 			fputs("jsr (___u_LiB)\n", codefile);
 #else
 			fputs("jsr ___u_LiB\n", codefile);

@@ -21,6 +21,10 @@ Something very wrong here!
 Something very wrong here!
 #endif
 
+#if TBL68020
+#define SYNTAX_68020	1
+#endif
+
 /* #define	FANCY_MODES	1
 /*	On the M68020, there are some real fancy addressing modes.
 	Their use makes the code a bit shorter, but also much slower.
@@ -170,8 +174,8 @@ extend1_4	= {D_REG4 reg;} 4 cost(0,0) reg .
 #endif
 extend2		= {D_REG4 reg;} 4 cost(0,0) reg .
 
-#ifndef TBL68020
-	/* Part (ii) */
+#ifndef SYNTAX_68020
+	/* Part (ii) in m68k2/4 syntax */
 absolute4	= {ADDR bd;} 4 cost(4,8) bd .
 offsetted4	= {A_REG reg; INT bd;} 4 cost(2,6) bd "(" reg ")" .
 index_off4	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,7)
@@ -196,16 +200,35 @@ regAcon		= {A_REG reg; INT bd;} 4 cost(2,6) bd "(" reg ")" .
 regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,8)
 				bd "(" reg "," xreg ".l)" .
 			/* note: in the m68k[24] version %sc always equals 1 */
+#endif
 
-t_regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,8) .
-t_regAcon	= {A_REG reg; INT bd;} 4 cost(2,6) .
-
-#else /* TBL68020 */
-	/* Part (iii) */
+#ifdef SYNTAX_68020
+	/* Part (ii) in m68020 syntax */
 absolute4	= {ADDR bd;} 4 cost(4,7) "(" bd ")" .
 offsetted4	= {A_REG reg; INT bd;} 4 cost(2,6) "(" bd "," reg ")" .
 index_off4	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(4,9)
 			    "(" bd "," reg "," xreg ".l*" sc ")" .
+absolute2	= {ADDR bd;} WORD_SIZE cost(4,7) "(" bd ")" .
+offsetted2	= {A_REG reg; INT bd;} WORD_SIZE cost(2,6) "(" bd "," reg ")" .
+index_off2	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} WORD_SIZE cost(4,9)
+			    "(" bd "," reg "," xreg ".l*" sc ")" .
+absolute1	= {ADDR bd;} WORD_SIZE cost(4,7) "(" bd ")" .
+offsetted1	= {A_REG reg; INT bd;} WORD_SIZE cost(2,6) "(" bd "," reg ")" .
+index_off1	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} WORD_SIZE cost(4,9)
+			    "(" bd "," reg "," xreg ".l*" sc ")" .
+
+LOCAL		= {INT bd;} WORD_SIZE cost(2,6) "(" bd ",a6)" .
+#if WORD_SIZE==2
+/* pointers may go into DLOCAL's */
+DLOCAL		= {INT bd;} 4 cost(2,6) "(" bd ",a6)" .
+#endif
+local_addr	= {INT bd;} 4 cost(2,3) "(" bd ",a6)" .
+regAcon		= {A_REG reg; INT bd;} 4 cost(2,3) "(" bd "," reg ")" .
+regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,7)
+				"(" bd "," reg "," xreg ".l*" sc ")" .
+#endif
+#ifdef TBL68020
+	/* Part (iii) */
 abs_index4	= {INT sc; D_REG4 xreg; ADDR bd;} 4 cost(6,9)
 			    "(" bd "," xreg ".l*" sc ")" .
 OFF_off4	= {A_REG reg; INT bd; ADDR od;} 4 cost(6,19)
@@ -220,10 +243,6 @@ ABS_indoff4	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} 4 cost(8,22)
 ABSIND_off4	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} 4 cost(8,22)
 			    "([" bd "," xreg ".l*" sc "]," od ")" .
 
-absolute2	= {ADDR bd;} WORD_SIZE cost(4,7) "(" bd ")" .
-offsetted2	= {A_REG reg; INT bd;} WORD_SIZE cost(2,6) "(" bd "," reg ")" .
-index_off2	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} WORD_SIZE cost(4,9)
-			    "(" bd "," reg "," xreg ".l*" sc ")" .
 abs_index2	= {INT sc; D_REG4 xreg; ADDR bd;} WORD_SIZE cost(6,9)
 			    "(" bd "," xreg ".l*" sc ")" .
 OFF_off2	= {A_REG reg; INT bd; ADDR od;} WORD_SIZE cost(6,19)
@@ -238,10 +257,6 @@ ABS_indoff2	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} WORD_SIZE cost(8,22)
 ABSIND_off2	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} WORD_SIZE cost(8,22)
 			    "([" bd "," xreg ".l*" sc "]," od ")" .
 
-absolute1	= {ADDR bd;} WORD_SIZE cost(4,7) "(" bd ")" .
-offsetted1	= {A_REG reg; INT bd;} WORD_SIZE cost(2,6) "(" bd "," reg ")" .
-index_off1	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} WORD_SIZE cost(4,9)
-			    "(" bd "," reg "," xreg ".l*" sc ")" .
 abs_index1	= {INT sc; D_REG4 xreg; ADDR bd;} WORD_SIZE cost(6,9)
 			    "(" bd "," xreg ".l*" sc ")" .
 OFF_off1	= {A_REG reg; INT bd; ADDR od;} WORD_SIZE cost(6,19)
@@ -256,18 +271,8 @@ ABS_indoff1	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} WORD_SIZE cost(8,22)
 ABSIND_off1	= {INT sc; D_REG4 xreg; ADDR bd; ADDR od;} WORD_SIZE cost(8,22)
 			    "([" bd "," xreg ".l*" sc "]," od ")" .
 
-LOCAL		= {INT bd;} WORD_SIZE cost(2,6) "(" bd ",a6)" .
-#if WORD_SIZE==2
-/* pointers may go into DLOCAL's */
-DLOCAL		= {INT bd;} 4 cost(2,6) "(" bd ",a6)" .
-#endif
 ILOCAL		= {INT bd;} WORD_SIZE cost(4,16) "([" bd ",a6])" .
 
-/* check this out !!! ??? */
-local_addr	= {INT bd;} 4 cost(2,3) "(" bd ",a6)" .
-regAcon		= {A_REG reg; INT bd;} 4 cost(2,3) "(" bd "," reg ")" .
-regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,7)
-				"(" bd "," reg "," xreg ".l*" sc ")" .
 off_con		= {A_REG reg; INT bd; ADDR od;} 4 cost(6,18)
 				"([" bd "," reg "]," od ")".
 off_regXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd; ADDR od;} 4 cost(6,18)
@@ -288,7 +293,10 @@ DREG_pair	= {D_REG4 reg1; D_REG4 reg2;} 8 cost(2,0) reg1 ":" reg2 .
 #define	t_regAregXcon	regAregXcon
 #define t_regAcon	regAcon
 
-#endif /* TBL68020 */
+#else /* TBL68020 */
+t_regAregXcon	= {A_REG reg; D_REG4 xreg; INT sc; INT bd;} 4 cost(2,8) .
+t_regAcon	= {A_REG reg; INT bd;} 4 cost(2,6) .
+#endif
 
 #if WORD_SIZE!=2
 #define DLOCAL LOCAL
