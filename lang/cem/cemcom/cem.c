@@ -586,10 +586,13 @@ basename(str, dst)
 		if (*p1++ == '/')
 			p2 = p1;
 	p1--;
-	if (*--p1 == '.')
+	if (*--p1 == '.') {
 		*p1 = '\0';
-	while (*dst++ = *p2++) {}
-	*p1 = '.';
+		while (*dst++ = *p2++) {}
+		*p1 = '.';
+	}
+	else
+		while (*dst++ = *p2++) {}
 }
 
 int
