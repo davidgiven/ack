@@ -13,6 +13,10 @@ end
 name "EM definition library"
 dir util/data
 end
+name "Modules"
+dir modules
+indir
+end
 name "Encode/Decode"
 dir util/misc
 end
