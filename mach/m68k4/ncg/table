@@ -6324,10 +6324,6 @@ proc loc1locciibxx example loc loc cii bne
 with any1 extend1 STACK
     gen cmp_b %1,%2
 	bxx[1] {llabel, $4}
-with any1 any1 STACK
-    uses reusing %1, DD_REG = %1
-    gen cmp_b %2,{dreg1, %a}
-	bxx[2] {llabel, $4}
 with any1 any_int STACK
     uses reusing %1, DD_REG = %1
 #if TBL68020 && WORD_SIZE==4
@@ -6353,18 +6349,9 @@ proc loc2locciibxx example loc loc cii bne
 with any2 extend2 STACK
     gen cmp_w %1,%2
 	bxx[1] {llabel, $4}
-with any2 any2 STACK
-    uses reusing %1, DD_REG = %1
-    gen cmp_w %2,{dreg2, %a}
-	bxx[2] {llabel, $4}
 with any2 any4 STACK
     uses reusing %1, DD_REG = %1
-#if TBL68020
-    gen extb_l %a
-#else
-    gen ext_w %a
-	ext_l %a
-#endif
+    gen ext_l %a
 	cmp_l %2,%a
 	bxx[2] {llabel, $4}
 
