@@ -2,22 +2,37 @@ rcsid = "$Header$"
 
 /*****************************************************************
  *								 *
- *       N S  1 6 0 3 2    B A C K - E N D  T A B L E		 *
+ *	 N S  1 6 0 3 2	   B A C K - E N D  T A B L E		 *
  *								 *
  *								 *
  *	Author: Annita Wilschut.				 *
  *								 *
+ *	Corrections: Nigel Hall					 *
+ *								 *
  *****************************************************************/
+
+/* The handling of arrays was not complete.  Tables extended
+ * in order to handle access to other lexical levels between
+ * local and global.  Corrections to ordering of tokens made.
+ *
+ * The token length was added to cope with the length field
+ * of MOVMi instructions.  The lengths adjusted by division by 4.
+ *
+ * The compare procedures did not return a result.  Caused
+ * an extra word to be popped off the stack. The "cmi txx ior" &
+ * "txx and" sequences needed their branch criterion inverting.
+ *
+ */
 
 /*
  * Deze tabel implementeert, naast gewone, ook floating point
  * instructies. Bij gebrek aan een floating point processor
- * is het betreffende onderdeel van de tabel echter niet 
+ * is het betreffende onderdeel van de tabel echter niet
  * getest. Wanneer NOFLOAT "aan" is worden er zeker geen
  * floating point instructies gegenereerd. Na verwijdering van
  * alle ifdef's worden er bij de vertaling van een programma dat
- * geen floating point gebruikt, hoogst waarschhijnlijk ook
- * geen floating point instructies gegenereerd. Dit is echter niet 
+ * geen floating point gebruikt, hoogst waarschijnlijk ook
+ * geen floating point instructies gegenereerd. Dit is echter niet
  * uitgebreid getest.
  */
 
@@ -38,6 +53,7 @@ PROGRAMCOUNTER
 STACKPOINTER
 STATICBASE
 LOCALBASE
+PROCREG			/* processor register - used by LPRi & SPRi */
 
 
 REGISTERS
@@ -50,10 +66,10 @@ f23("f2")=f2+f3,
 f45("f4")=f4+f5,
 f67("f6")=f6+f7			: DFREG.
 r01("r0")=r0+r1,r23("r2")=r2+r3 : REGPAIR.
-sp				: STACKPOINTER, MEMREG.
+sp				: STACKPOINTER, MEMREG, PROCREG.
 pc				: PROGRAMCOUNTER.
-fp				: LOCALBASE, MEMREG.
-sb				: STATICBASE, MEMREG.
+fp				: LOCALBASE, MEMREG, PROCREG.
+sb				: STATICBASE, MEMREG, PROCREG.
 
 
 TOKENS
@@ -94,7 +110,9 @@ memregrelcon4	= { MEMREG reg; ADDR disp1; ADDR disp2;} 4 .
 
 label		= {ADDR disp; } 4 disp .
 
-memregrelsid	= {INT ind; MEMREG reg1; REG reg2; } 4 ind "(" reg1 
+regrelsid	= {INT ind; REG reg1; REG reg2; } 4 ind "(" reg1
+			")[" reg2 ":d]" .
+memregrelsid	= {INT ind; MEMREG reg1; REG reg2; } 4 ind "(" reg1
 			")[" reg2 ":d]" .
 abssid		= {ADDR disp; REG reg; } 4 "@" disp "[" reg ":d]" .
 fprelsid	= {ADDR disp1; ADDR disp2; REG reg; } 4
@@ -106,34 +124,34 @@ SETS
 
 src1		= regrel1 + memregrel1 + memrel1 + absolute1 .
 src2		= regrel2 + memregrel2 + memrel2 + absolute2 .
-src4		= REG + const4 + LOCAL + regrel4 + memrel4 + 
-	       	  memregrel4 + memregrelsid + abssid + absolute4 + 
+src4		= REG + const4 + LOCAL + regrel4 + memrel4 +
+		  memregrel4 + regrelsid + memregrelsid + abssid + absolute4 +
 		  addr_external.
 con4		= regcon4 + memregcon4 + memregrelcon4 .
 tossrc4		= TOS + src4 .
 consrc4		= con4 + src4 .
-fsrc4		= FREG + LOCAL + regrel4 + memrel4 + 
-	       	  memregrel4 + memregrelsid + abssid + absolute4 . 
+fsrc4		= FREG + LOCAL + regrel4 + memrel4 +
+		  memregrel4 + memregrelsid + abssid + absolute4 .
 tosfsrc4	= TOS + fsrc4 .
-fsrc8		= DFREG + DLOCAL + regrel8 + memrel8 + 
-	       	  memregrel8 + absolute8 . 
+fsrc8		= DFREG + DLOCAL + regrel8 + memrel8 +
+		  memregrel8 + absolute8 .
 tosfsrc8	= TOS + fsrc8 .
 dst1		= src1 .
 tosdst1		= TOS + dst1 .
 dst2		= src2 .
 tosdst2		= TOS + dst2 .
-dst4		= REG + LOCAL + regrel4 + memregrel4 + memrel4 + 
-		  absolute4 + memregrelsid + abssid .
+dst4		= REG + LOCAL + regrel4 + memregrel4 + memrel4 +
+		  absolute4 + regrelsid + memregrelsid + abssid .
 tosdst4		= TOS + dst4 .
-fdst4		= FREG + LOCAL + regrel4 + memregrel4 + memrel4 + 
-		  absolute4 + memregrelsid + abssid .
+fdst4		= FREG + LOCAL + regrel4 + memregrel4 + memrel4 +
+		  absolute4 + regrelsid + memregrelsid + abssid .
 tosfdst4	= TOS + fdst4 .
 fdst8		= fsrc8 .
 tosfdst8	= tosfsrc8 .
 regrel		= regrel1 + regrel2 + regrel4 +regrel8 .
 memregrel	= memregrel1 + memregrel2 + memregrel4 +memregrel8 .
 memrel		= memrel1 + memrel2 + memrel4 +memrel8 .
-rel		= regrel + memregrel + memrel + memregrelsid 
+rel		= regrel + memregrel + memrel + regrelsid + memregrelsid
 		   + fprelsid + sprelsid .
 absolute	= absolute1 + absolute2 + absolute4 + absolute8 + abssid .
 regs		= REG + FREG + DFREG + MEMREG + REGPAIR .
@@ -213,7 +231,7 @@ sfsd tosdst4:wo .
 tbitd tossrc4:ro, tosdst4:ro .
 cbitd tossrc4:ro, tosdst4:rw .
 sbitd tossrc4:ro, tosdst4:rw .
-movmd tosdst4:ro, tosdst4:rw, const4 .
+movmd tossrc4:ro, tosdst4:rw, const4 .
 indexd REG, tossrc4:ro, tossrc4:ro .
 brxx label .
 beq label .
@@ -234,7 +252,8 @@ jsr tosdst4+label .
 ret const4:ro .
 adjspd tossrc4:ro .
 exit label .
-sprd MEMREG:rw, tossrc4:ro .
+lprd PROCREG:rw, tossrc4:ro .
+sprd PROCREG:ro, tossrc4:rw .
 
 
 
@@ -299,7 +318,7 @@ gen addr {memregrel4, %1, 0}, {TOS}
 
 from addr_local to STACK
 gen addr {memregrel4, fp, %1.ind}, {TOS}
- 
+
 from regcon4 to STACK
 gen addr {regrel4, %1.reg, %1.disp}, {TOS}
 
@@ -367,7 +386,7 @@ uses REG
 gen addr {memregrel4, %1.reg, %1.disp}, %a
 					yields %a
 
-from LOCAL 				yields {memregrel4, fp, %1.ind}
+from LOCAL				yields {memregrel4, fp, %1.ind}
 
 from addr_local
 uses REG
@@ -385,7 +404,7 @@ gen addr {memrel4, %1.reg, %1.disp1, %1.disp2}, %a
 					yields %a
 
 from memregrel4				yields {memregrelcon4, %1.reg,
-                                                    %1.disp, 0}
+						    %1.disp, 0}
 
 from src1
 uses REG
@@ -401,13 +420,13 @@ from DLOCAL				yields {LOCAL, %1.ind+4}
 from absolute8				yields {absolute4, %1.disp+4}
 					       {absolute4, %1.disp}
 
-from memrel8				yields {memrel4, %1.reg, 
+from memrel8				yields {memrel4, %1.reg,
 					%1.disp1, %1.disp1+4}
 					       {memrel4, %1.reg,
 					%1.disp1, %1.disp1}
 
 from regrel8				yields {regrel4, %1.reg, %1.disp+4}
-             				       {regrel4, %1.reg, %1.disp}
+					       {regrel4, %1.reg, %1.disp}
 
 from memregrel8				yields {memregrel4, %1.reg, %1.disp+4}
 					       {memregrel4, %1.reg, %1.disp}
@@ -415,7 +434,7 @@ from memregrel8				yields {memregrel4, %1.reg, %1.disp+4}
 PATTERNS
 
 /**********************************************************************
- * Group1 : load instructions                                         *
+ * Group1 : load instructions					      *
  **********************************************************************/
 
 pat loc					yields {const4, $1}
@@ -493,7 +512,7 @@ pat lal					yields {addr_local, $1}
 
 pat lae					yields {addr_external, $1}
 
-pat loi	$1==1
+pat loi $1==1
 with exact MEMREG			yields {memregrel1, %1, 0}
 with REG				yields {regrel1, %1, 0}
 with exact memregcon4			yields {memregrel1, %1.reg, %1.disp}
@@ -539,10 +558,10 @@ pat loi defined($1)
 with REG STACK
     uses REG = {const4, $1}
     gen addd %a, %1
-        1:
-        subd {const4, 4}, %1
-        movd {regrel4, %1, 0}, {TOS}
-        acbd {const4, 0-4}, %a, {label, "1b"}
+	1:
+	subd {const4, 4}, %1
+	movd {regrel4, %1, 0}, {TOS}
+	acbd {const4, 0-4}, %a, {label, "1b"}
 
 pat los $1==4
 kills ALL
@@ -555,12 +574,12 @@ pat lde					yields {absolute8, $1}
 pat ldf
 with exact addr_local			yields {DLOCAL, %1.ind+$1}
 with exact addr_external		yields {absolute8, %1.disp+$1}
-with regcon4				yields {regrel8, %1.reg, 
+with regcon4				yields {regrel8, %1.reg,
 						%1.disp+$1}
 
 pat lpi					yields {addr_external, $1}
 
-			
+
 /*****************************************************************
  * Group2 : store instructions					 *
  *****************************************************************/
@@ -795,7 +814,7 @@ with exact addr_external consrc4 consrc4
 with  regcon4 consrc4 consrc4
     kills allmincon
     gen move %2, {regrel4, %1.reg, %1.disp+$1}
-        move %3, {regrel4, %1.reg, %1.disp+$1+4}
+	move %3, {regrel4, %1.reg, %1.disp+$1+4}
 #ifndef NOFLOAT
 with exact addr_local DFREG
     kills allmincon
@@ -841,7 +860,7 @@ gen addd %1, {absolute4, $1}
 pat adi $1 == 4
 with exact MEMREG const4		yields {memregcon4, %1, %2.num}
 with exact REG const4		yields {regcon4, %1, %2.num}
-with exact const4 REG 		yields {regcon4, %2, %1.num}
+with exact const4 REG		yields {regcon4, %2, %1.num}
 with exact memregrel4 const4		yields {memregrelcon4, %1.reg,
 					%1.disp, %2.num}
 with exact memregcon4 const4		yields {memregcon4, %1.reg,
@@ -853,7 +872,7 @@ with exact memregrelcon4 const4		yields {memregrelcon4, %1.reg,
 with exact addr_local const4		yields {addr_local, %1.ind+%2.num}
 with exact LOCAL const4			yields {memregrelcon4, fp,
 					%1.ind, %2.num}
-with exact const4 LOCAL 		yields {memregrelcon4, fp,
+with exact const4 LOCAL			yields {memregrelcon4, fp,
 					%2.ind, %1.num}
 with exact const4 addr_local		yields {addr_local, %2.ind+%1.num}
 with exact MEMREG addr_external		yields {memregcon4, %1, %2.disp}
@@ -1004,8 +1023,8 @@ pat mlu $1 == 4
 with src4 src4
     uses reusing %1, REGPAIR
     gen move %1, %a.1
-        meid %2, %a			yields %a.1
- 
+	meid %2, %a			yields %a.1
+
 pat dvu $1 == 4
 kills ALL
     gen jsr {absolute4, ".dvu"}		yields r0
@@ -1023,7 +1042,7 @@ with REG
 pat sru $1 == 4
 with REG REG
     gen negd %1, %1
-        lshd %1, %2			yields %2
+	lshd %1, %2			yields %2
 
 
 /*****************************************************************
@@ -1165,7 +1184,7 @@ with exact memregrelcon4		yields {memregrelcon4, %1.reg,
 					%1.disp1, %1.disp2 + $1}
 with exact addr_external		yields {addr_external, $1+%1.disp}
 with exact addr_local			yields {addr_local, %1.ind + $1}
-with exact LOCAL			yields {memregrelcon4, fp, 
+with exact LOCAL			yields {memregrelcon4, fp,
 					%1.ind, $1}
 
 pat loe loc ads ste $3==4 && $1==$4
@@ -1191,7 +1210,7 @@ pat ads $1==4					leaving adi 4
 pat sbs $1==4					leaving sbi 4
 
 /*****************************************************************
- * Group7 : increment/decrement/zero 				 *
+ * Group7 : increment/decrement/zero				 *
  *****************************************************************/
 
 pat inc
@@ -1269,7 +1288,7 @@ pat zer $1==8				yields {const4, 0}
 					       {const4, 0}
 
 pat zer $1==12				yields {const4, 0}
-			                       {const4, 0}
+					       {const4, 0}
 					       {const4, 0}
 
 pat zer $1>12
@@ -1280,7 +1299,7 @@ with STACK
 	acbd {const4, 0-1}, %a, {label, "1b"}
 
 /*****************************************************************
- * Group8 : convert 						 *
+ * Group8 : convert						 *
  *****************************************************************/
 
 pat loc loc cii $1==4 && $2==4
@@ -1351,7 +1370,7 @@ uses FREG
 pat cff
 kills ALL
     gen jsr {absolute4, ".cff"}
- 
+
 #else
 
 pat cif					leaving loc 18 trp
@@ -1371,7 +1390,7 @@ pat cfu
 					leaving loc 18 trp
 
 /*****************************************************************
- * Group9 : logical 						 *
+ * Group9 : logical						 *
  *****************************************************************/
 
 pat loe loc and ste $3==4 && $1==$4
@@ -1410,7 +1429,7 @@ with REG src4
 pat and $1>4
 with STACK
     gen move {const4, $1}, r0
-        addr {memregrel4, sp, $1}, r1
+	addr {memregrel4, sp, $1}, r1
 	1:
 	andd {TOS}, {regrel4, r1, 0}
 	addr {regrel4, r1, 4}, r1
@@ -1481,7 +1500,7 @@ with REG src4
 pat ior $1>4
 with STACK
     gen move {const4, $1}, r0
-        addr {memregrel4, sp, $1}, r1
+	addr {memregrel4, sp, $1}, r1
 	1:
 	ord {TOS}, {regrel4, r1, 0}
 	addr {regrel4, r1, 4}, r1
@@ -1506,7 +1525,7 @@ with REG src4
 pat xor $1>4
 with STACK
     gen move {const4, $1}, r0
-        addr {memregrel4, sp, $1}, r1
+	addr {memregrel4, sp, $1}, r1
 	1:
 	xord {TOS}, {regrel4, r1, 0}
 	addr {regrel4, r1, 4}, r1
@@ -1558,7 +1577,7 @@ with REG REG
 	rotd %1, %2			yields %2
 
 /*****************************************************************
- * Group10 : sets 						 *
+ * Group10 : sets						 *
  *****************************************************************/
 
 pat inn zeq $1==4
@@ -1579,11 +1598,11 @@ with src4 REG
 pat inn $1==4
 with src4 REG
     uses REG
-    gen	tbitd %1, %2
-	sfsd %a				
-        cmpd {const4,0}, %1
+    gen tbitd %1, %2
+	sfsd %a
+	cmpd {const4,0}, %1
 	ble {label, "1f"}
-	xord %a, %a	
+	xord %a, %a
 	1:					yields %a
 
 pat inn $1>4
@@ -1591,10 +1610,10 @@ with src4 STACK
     uses REG
     gen tbitd %1, {TOS}
 	adjspd {const4, 0-4}
-        sfsd %a
-        cmpd {const4,0}, %1
+	sfsd %a
+	cmpd {const4,0}, %1
 	ble {label, "1f"}
-	xord %a, %a	
+	xord %a, %a
 	1:					yields %a
 
 pat inn !defined($1)
@@ -1602,11 +1621,11 @@ with src4 src4 STACK
     uses REG
     gen tbitd %2, {TOS}
 	adjspd {const4, 0-4}
-        sfsd %a
-        cmpd {const4,0}, %2
+	sfsd %a
+	cmpd {const4,0}, %2
 	ble {label, "1f"}
-	xord %a, %a	
-	1:					yields %a
+	xord %a, %a
+	1:				yields %a
 
 pat set $1==4
 with src4
@@ -1631,102 +1650,121 @@ with src4 src4 STACK
 	sbitd %2, {TOS}
 
 /*****************************************************************
- * Group11 : array 						 *
+ * Group11 : array						 *
  *****************************************************************/
 
-pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0 
+pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0
 					leaving adi 2
 
-pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0 
+pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0
 					leaving adi 2
 						adp 0-rom($1,1)
 
-pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0 
+pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0
 with REG
     gen ashd {const4, 1}, %1		yields %1
 					leaving adi 2
 
-pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0 
+pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0
 with REG
     gen ashd {const4, 1}, %1		yields {regcon4, %1,(0-2)*rom($1,1)}
 					leaving adi 2
 
 pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)==0
+with REG REG
+uses REG
+    gen addr {regrelsid, 0, %2, %1}, %a
+					yields %a
 with REG addr_local
 uses REG
-    gen addr {memregrelsid, %2.ind, fp, %1}, %a	
+    gen addr {memregrelsid, %2.ind, fp, %1}, %a
 					yields %a
 with REG addr_external
 uses REG
-    gen addr {abssid, %2.disp, %1}, %a	
+    gen addr {abssid, %2.disp, %1}, %a
 					yields %a
 with					leaving lae $1 aar $2
 
 pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)!=0
+with REG REG
+uses REG
+    gen subd {const4, rom($1,1)}, %1
+	addr {regrelsid, 0, %2, %1}, %a
+					yields %a
 with REG addr_local
 uses REG
     gen subd {const4, rom($1,1)}, %1
-        addr {memregrelsid, %2.ind, fp, %1}, %a	
+	addr {memregrelsid, %2.ind, fp, %1}, %a
 					yields %a
 with REG addr_external
 uses REG
     gen subd {const4, rom($1,1)}, %1
-        addr {abssid, %2.disp, %1}, %a	
+	addr {abssid, %2.disp, %1}, %a
 					yields %a
-with 					leaving lae $1 aar $2
+with					leaving lae $1 aar $2
 
 pat lae lar $2==4 && rom($1,3)==4 && rom($1,1)==0
-with REG addr_local		yields {memregrelsid, %2.ind, fp, %1}
-with REG addr_external		yields {abssid, %2.disp, %1}
-with 					leaving lae $1 lar $2
+with REG REG				yields {regrelsid, 0, %2, %1}
+with REG addr_local			yields {memregrelsid, %2.ind, fp, %1}
+with REG addr_external			yields {abssid, %2.disp, %1}
+with					leaving lae $1 lar $2
 
 pat lae lar $2==4 && rom($1,3)==4 && rom($1,1)!=0
+with REG REG
+    gen subd {const4, rom($1,1)}, %1	yields {regrelsid, 0, %2, %1}
 with REG addr_local
-    gen subd {const4, rom($1,1)}, %1
-				yields {memregrelsid, %2.ind, fp, %1}
+    gen subd {const4, rom($1,1)}, %1	yields {memregrelsid, %2.ind, fp, %1}
 with REG addr_external
-    gen subd {const4, rom($1,1)}, %1
-				yields {abssid, %2.disp, %1}
-with 					leaving lae $1 lar $2
+    gen subd {const4, rom($1,1)}, %1	yields {abssid, %2.disp, %1}
+with					leaving lae $1 lar $2
 
 pat lae sar $2==4 && rom($1,3)==4 && rom($1,1)==0
-with src4 REG addr_local
+with REG REG src4
 kills allmincon
-    gen move %1, {memregrelsid, %3.ind, fp, %2}
-with src4 REG addr_external
+    gen movd %3, {regrelsid, 0, %2, %1}
+with REG addr_local src4
 kills allmincon
-    gen move %1, {abssid, %3.disp, %2}
+    gen move %3, {memregrelsid, %2.ind, fp, %1}
+with REG addr_external src4
+kills allmincon
+    gen move %3, {abssid, %2.disp, %1}
 with					leaving lae $1 sar $2
 
-pat lae lar $2==4 && rom($1,3)==4 && rom($1,1)!=0
-with src4 REG addr_local
+pat lae sar $2==4 && rom($1,3)==4 && rom($1,1)!=0
+with REG REG src4
 kills allmincon
-    gen subd {const4, rom($1,1)}, %2
-	move %1, {memregrelsid, %3.ind, fp, %2}
-with src4 REG addr_external
+    gen subd {const4, rom($1,1)}, %1
+	movd %3, {regrelsid, 0, %2, %1}
+with REG addr_local src4
 kills allmincon
-    gen subd {const4, rom($1,1)}, %2
-	move %1, {abssid, %3.disp, %2}
+    gen subd {const4, rom($1,1)}, %1
+	move %3, {memregrelsid, %2.ind, fp, %1}
+with REG addr_external src4
+kills allmincon
+    gen subd {const4, rom($1,1)}, %1
+	move %3, {abssid, %2.disp, %1}
 with					leaving lae $1 sar $2
 
 pat lae aar $2==4 && rom($1,1)==0
-with src4 REG
-    gen indexd %2, {const4, rom($1,3)-1}, %1	yields %2
+with REG src4
+    gen indexd %1, {const4, rom($1,3)-1}, %2
+					yields %1
 
 pat lae aar $2==4 && rom($1,1)!=0
-with REG REG
-    gen subd {const4,rom($1,1)}, %1
-	indexd %2, {const4, rom($1,3)-1}, %1	yields %2
+with REG src4
+    gen subd {const4, rom($1,1)}, %1
+	indexd %1, {const4, rom($1,3)-1}, %2
+					yields %1
 
 pat lae sar defined(rom($1,3))
-				leaving	lae $1
-					aar $2
-					sti rom($1,3)
+					leaving lae $1
+						aar $2
+						sti rom($1,3)
 
 pat lae lar defined(rom($1,3))
-				leaving lae $1
-					aar $2
-					loi rom($1,3)
+					leaving lae $1
+						aar $2
+						loi rom($1,3)
 
 pat aar defined($1)
 kills ALL
@@ -1756,50 +1794,50 @@ kills ALL
 gen jsr {absolute4, ".sar"}
 
 /*****************************************************************
- * Group12 : compare 						 *
+ * Group12 : compare						 *
  *****************************************************************/
 
 proc cmitxxand
 with src4 src4 REG
-gen cmpd %2, %1
+gen cmpd %1, %2
     brxx* {label, "1f"}
-    xord %3, %3
-    1:
+    movqd {const4, 0}, %3
+    1:					yields %3
 
 proc cmitxxior
 with src4 src4 REG
-gen cmpd %2, %1
+gen cmpd %1, %2
     brxx* {label, "1f"}
     sbitd {const4, 0}, %3
-    1:
+    1:					yields %3
 
 proc txxand
 with src4 REG
-gen cmpd {const4, 0}, %1
+gen cmpqd {const4, 0}, %1
     brxx* {label, "1f"}
-    xord %2, %2
-    1:
+    movqd {const4, 0}, %2
+    1:					yields %2
 
 proc txxior
 with src4 REG
-gen cmpd {const4, 0}, %1
+gen cmpqd {const4, 0}, %1
     brxx* {label, "1f"}
     sbitd {const4, 0}, %2
-    1:
+    1:					yields %2
 
-pat cmi tlt and $1==4 && $3==4	call cmitxxand("blt")
-pat cmi tle and $1==4 && $3==4	call cmitxxand("ble")
+pat cmi tlt and $1==4 && $3==4	call cmitxxand("bgt")
+pat cmi tle and $1==4 && $3==4	call cmitxxand("bge")
 pat cmi teq and $1==4 && $3==4	call cmitxxand("beq")
 pat cmi tne and $1==4 && $3==4	call cmitxxand("bne")
-pat cmi tge and $1==4 && $3==4	call cmitxxand("bge")
-pat cmi tgt and $1==4 && $3==4	call cmitxxand("bgt")
+pat cmi tge and $1==4 && $3==4	call cmitxxand("ble")
+pat cmi tgt and $1==4 && $3==4	call cmitxxand("blt")
 
-pat cmi tlt ior $1==4 && $3==4	call cmitxxior("blt")
-pat cmi tle ior $1==4 && $3==4	call cmitxxior("ble")
-pat cmi teq ior $1==4 && $3==4	call cmitxxior("beq")
-pat cmi tne ior $1==4 && $3==4	call cmitxxior("bne")
-pat cmi tge ior $1==4 && $3==4	call cmitxxior("bge")
-pat cmi tgt ior $1==4 && $3==4	call cmitxxior("bgt")
+pat cmi tlt ior $1==4 && $3==4	call cmitxxior("ble")
+pat cmi tle ior $1==4 && $3==4	call cmitxxior("blt")
+pat cmi teq ior $1==4 && $3==4	call cmitxxior("bne")
+pat cmi tne ior $1==4 && $3==4	call cmitxxior("beq")
+pat cmi tge ior $1==4 && $3==4	call cmitxxior("bgt")
+pat cmi tgt ior $1==4 && $3==4	call cmitxxior("bge")
 
 pat tlt and $2==4		call txxand("bgt")
 pat tle and $2==4		call txxand("bge")
@@ -1808,12 +1846,12 @@ pat tne and $2==4		call txxand("bne")
 pat tge and $2==4		call txxand("ble")
 pat tgt and $2==4		call txxand("blt")
 
-pat tlt ior $2==4		call txxior("bgt")
-pat tle ior $2==4		call txxior("bge")
-pat teq ior $2==4		call txxior("beq")
-pat tne ior $2==4		call txxior("bne")
-pat tge ior $2==4		call txxior("ble")
-pat tgt ior $2==4		call txxior("blt")
+pat tlt ior $2==4		call txxior("ble")
+pat tle ior $2==4		call txxior("blt")
+pat teq ior $2==4		call txxior("bne")
+pat tne ior $2==4		call txxior("beq")
+pat tge ior $2==4		call txxior("bgt")
+pat tgt ior $2==4		call txxior("bge")
 
 pat cmi $1==4
 with src4 REG
@@ -1826,10 +1864,10 @@ uses REG = {const4, 0}
     gen cmpf %1, %2
 	beq {label, "1f"}
 	bgt {label, "2f"}
-	movd {const4, 1}, %a
+	movqd {const4, 1}, %a
 	br {label, "1f"}
 	2:
-	movd {const4, 0-1}, %a
+	movqd {const4, 0-1}, %a
 	1:				yields %a
 
 pat cmf $1==8
@@ -1838,10 +1876,10 @@ uses REG = {const4, 0}
     gen cmpl %1, %2
 	beq {label, "1f"}
 	bgt {label, "2f"}
-	movd {const4, 1}, %a
+	movqd {const4, 1}, %a
 	br {label, "1f"}
 	2:
-	movd {const4, 0-1}, %a
+	movqd {const4, 0-1}, %a
 	1:				yields %a
 
 #else
@@ -1888,15 +1926,15 @@ with src4
     gen cmpqd {const4, 0}, %1
 	sxx* %a					yields %a
 
-pat tlt	       			call txx("sgtd")
-pat tle	       			call txx("sged")
-pat teq	       			call txx("seqd")
-pat tne	       			call txx("sned")
-pat tge	       			call txx("sled")
-pat tgt	       			call txx("sltd")
+pat tlt				call txx("sgtd")
+pat tle				call txx("sged")
+pat teq				call txx("seqd")
+pat tne				call txx("sned")
+pat tge				call txx("sled")
+pat tgt				call txx("sltd")
 
 /*****************************************************************
- * Group13 : branch 						 *
+ * Group13 : branch						 *
  *****************************************************************/
 
 proc bxx example beq
@@ -2001,7 +2039,7 @@ pat zge				call zxx("ble")
 pat zgt				call zxx("blt")
 
 /*****************************************************************
- * Group14 : procedure call 					 *
+ * Group14 : procedure call					 *
  *****************************************************************/
 
 pat cal
@@ -2036,7 +2074,7 @@ pat lfr $1==4				yields r0
 pat lfr $1==8				yields r1 r0
 
 /*****************************************************************
- * Group15 : miscellaneous 					 *
+ * Group15 : miscellaneous					 *
  *****************************************************************/
 
 pat asp
@@ -2053,26 +2091,26 @@ with const4 STACK
 pat blm $1==0
 
 pat blm $1==4
-with REG REG
+with tosdst4 tossrc4
 kills allmincon
-    gen move {regrel4, %2, 0}, {regrel4, %1, 0}
+    gen movd %2, %1
 
 pat blm $1>4 && $1<=16
 with REG REG
 kills allmincon
-    gen movmd %2, %1, {const4, $1}
+    gen movmd {regrel4, %2, 0}, {regrel4, %1, 0}, {const4, $1/4}
 with exact addr_external addr_external
 kills allmincon
-    gen movmd {absolute4, %2.disp}, {absolute4, %1.disp}, {const4, $1}
+    gen movmd {absolute4, %2.disp}, {absolute4, %1.disp}, {const4, $1/4}
 with exact addr_external addr_local
 kills allmincon
-    gen movmd {LOCAL, %2.ind}, {absolute4, %1.disp}, {const4, $1}
+    gen movmd {LOCAL, %2.ind}, {absolute4, %1.disp}, {const4, $1/4}
 with exact addr_local addr_external
 kills allmincon
-    gen movmd {absolute4, %2.disp}, {LOCAL, %1.ind}, {const4, $1}
+    gen movmd {absolute4, %2.disp}, {LOCAL, %1.ind}, {const4, $1/4}
 with exact addr_local addr_local
 kills allmincon
-    gen movmd {LOCAL, %2.ind}, {LOCAL, %1.ind}, {const4, $1}
+    gen movmd {LOCAL, %2.ind}, {LOCAL, %1.ind}, {const4, $1/4}
 
 pat blm $1>16
 with REG REG
@@ -2201,21 +2239,23 @@ uses REG
 
 pat sim
 with src24
+kills ALL
     gen movw %1, {absolute2, ".ignmask"}
 
 pat str $1==0
-with src4
-kills ALL
-gen sprd fp, %1
+with  src4 STACK
+    gen lprd fp, %1
 
 pat str $1==1
-with src4
-kills ALL
-gen sprd sp, %1
+with src4 STACK
+    gen lprd sp, %1
 
 pat str $1==2
 with src4
-gen move %1, {absolute4, ".reghp"}
+kills ALL
+    gen movd %1, {TOS}
+	jsr  {absolute4, ".strhp"}
+	adjspd {const4, 0-4}
 
 pat trp
 kills ALL
