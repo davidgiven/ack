@@ -1,7 +1,7 @@
 EM=../../..
 EMH=$(EM)/h
 EML=$(EM)/lib
-CFLAGS=-DVERBOSE -DNOTCOMPACT -O
+CFLAGS=-DVERBOSE -DNOTCOMPACT
 SRC=types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c map.h map.c aux.h aux.c get.h get.c put.h put.c alloc.h alloc.c lset.h lset.c cset.h cset.c parser.h parser.c stack_chg.h stack_chg.c locals.h locals.c init_glob.h init_glob.c
 
 .SUFFIXES: .m
