@@ -62,13 +62,17 @@ LLerror(t) {
 		return;
 	}
 #endif
+#ifdef LL_USERHOOK
+	LL_USERHOOK(t);
+	LLread();
+#endif LL_USERHOOK
 	if ((LLcsymb = LLindex[LLsymb]) < 0) {
 		LLmessage(0);
 		LLread();
 	}
 	i = LLindex[t];
 	LLtcnt[i]++;
-	if (LLskip()) /* nothing */;
+	if (LLdoskip()) /* nothing */;
 	LLtcnt[i]--;
 	if (LLsymb != t) LLmessage(t);
 }
@@ -90,6 +94,15 @@ LLnext(n) {
 }
 
 LLskip() {
+#ifdef LL_USERHOOK
+	LL_USERHOOK(0);
+	LLread();
+#endif LL_USERHOOK
+	return LLdoskip();
+}
+
+LLdoskip()
+{
 	register int i;
 	int retval;
 	int LLi, LLb;

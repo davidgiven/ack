@@ -9,7 +9,7 @@ extern int LLsymb;
 extern char LLsets[];
 
 #define LL_SAFE(x)	/* Nothing */
-#define LL_SSCANDONE(x)	if (LLsymb != x) LLmessage(x); else
+#define LL_SSCANDONE(x)	if (LLsymb != x) LLerror(x); else
 #define LL_SCANDONE(x)	if (LLsymb != x) LLerror(x); else
 #define LL_T_NOSCANDONE(x)	LLscan(x)
 
