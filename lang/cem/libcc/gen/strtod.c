@@ -16,7 +16,7 @@ strtod(p, pp)
 	double fl;
 	long lowl = 0, highl = 0, pos = 1;
 	int dotseen = 0;
-	int digitseen = 0;
+	int digit_seen = 0;
 
 	if (pp) *pp = p;
 	while (isspace(*p)) p++;
