@@ -55,7 +55,7 @@ _format(buf, fmt, argp)
 			}
 			else
 			if (*pf == 'c') {
-				cbuf[0] = * (char *) pa;
+				cbuf[0] = * (int *) pa;
 				cbuf[1] = '\0';
 				pa += sizeof(int);
 				arg = &cbuf[0];
