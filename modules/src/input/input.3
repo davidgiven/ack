@@ -106,8 +106,9 @@ The next input characters will be obtained from the specified file
 \fIfilename\fR.
 This file will be looked for in the directories, mentioned in the
 null-terminated list \fItable\fR.
-When \fItable\fR is 0, only the current directory is searched. When it is not,
-perhaps it is wise to include "." in the table ...
+When \fItable\fR is 0, only the current directory is searched.
+A null string  (different from null-pointer!) in the table means:
+current directory.
 When \fIfilename\fR starts with a "/", \fItable\fR is not used.
 If \fIfilename\fR is a null pointer, standard input is used. In this case,
 the package may not have been instantiated with INP_READ_IN_ONE defined.
