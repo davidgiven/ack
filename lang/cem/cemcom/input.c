@@ -13,6 +13,7 @@ struct file_info	finfo;
 extern int		nestlevel;
 #include "nopp.h"
 #include <inp_pkg.body>
+#include <alloc.h>
 
 #include	"dbsymtab.h"
 #ifndef NOPP

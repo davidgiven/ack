@@ -182,6 +182,8 @@ check_selector(idf, stp)
 	}
 }
 
+char *symbol2str();
+
 declare_struct(fund, idf, tpp)
 	register struct idf *idf;
 	struct type **tpp;
@@ -192,7 +194,6 @@ declare_struct(fund, idf, tpp)
 		The idf may be missing (i.e. idf == 0), in which case an
 		anonymous struct etc. is defined.
 	*/
-	extern char *symbol2str();
 	register struct tag **tgp;
 	register struct tag *tg;
 
