@@ -17,8 +17,7 @@ OBJ =	C_ms_err.$(SUF) C_ms_opt.$(SUF) C_ms_emx.$(SUF) C_ms_reg.$(SUF) C_ms_src.$
 .c.$(SUF):
 	$(CC) -c $(CFLAGS) $*.c
 
-all:		libem_mes.$(LIBSUF) # libem_mesCE.$(LIBSUF) libem_mesO.$(LIBSUF) 
-
+all:		libem_mes.$(LIBSUF) libem_mesCE.$(LIBSUF) libem_mesO.$(LIBSUF) 
 libem_mes.$(LIBSUF):	$(OBJ)
 		rm -f libem_mes.$(LIBSUF)
 		$(AR) cr libem_mes.$(LIBSUF) $(OBJ)
@@ -40,12 +39,14 @@ libem_mesCE.$(LIBSUF):
 
 install:	all
 		$(INSTALL) lib/libem_mes.$(LIBSUF)
-#		$(INSTALL) lib/libem_mesO.$(LIBSUF)
+		$(INSTALL) lib/libem_mesO.$(LIBSUF)
+		$(INSTALL) lib/libem_mesCE.$(LIBSUF)
 		$(INSTALL) man/em_mes.3
 
 cmp:		all
 		-$(COMPARE) lib/libem_mes.$(LIBSUF)
-#		-$(COMPARE) lib/libem_mesO.$(LIBSUF)
+		-$(COMPARE) lib/libem_mesO.$(LIBSUF)
+		-$(COMPARE) lib/libem_mesCE.$(LIBSUF)
 		-$(COMPARE) man/em_mes.3
 
 pr:
