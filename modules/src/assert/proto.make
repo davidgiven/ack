@@ -14,9 +14,10 @@ libassert.$(LIBSUF):	BadAssert.$(SUF)
 		$(RANLIB) libassert.$(LIBSUF)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp libassert.$(LIBSUF) $(MOD_DIR)/lib/libassert.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libassert.$(LIBSUF)
-		cp $(SRC_DIR)/assert.3 $(MOD_DIR)/man/assert.3
 		cp $(SRC_DIR)/assert.h $(MOD_DIR)/h/assert.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/assert.3 $(TARGET_HOME) ; \
@@ -25,7 +26,6 @@ install:	all
 cmp:		all
 		-cmp libassert.$(LIBSUF) $(MOD_DIR)/lib/libassert.$(LIBSUF)
 		-cmp $(SRC_DIR)/assert.h $(MOD_DIR)/h/assert.h
-		-cmp $(SRC_DIR)/assert.3 $(MOD_DIR)/man/assert.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC_DIR)/assert.h $(SRC_DIR)/BadAssert.c

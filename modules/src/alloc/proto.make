@@ -34,9 +34,10 @@ $(LIBALLOC):	$(OBJECTS)
 		$(RANLIB) $(LIBALLOC)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBALLOC) $(MOD_DIR)/lib/$(LIBALLOC)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBALLOC)
-		cp $(SRC_DIR)/alloc.3 $(MOD_DIR)/man/alloc.3
 		cp $(SRC_DIR)/alloc.h $(MOD_DIR)/h/alloc.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/alloc.3 $(TARGET_HOME) ; \
@@ -45,7 +46,6 @@ install:	all
 cmp:		all
 		-cmp $(LIBALLOC) $(MOD_DIR)/lib/$(LIBALLOC)
 		-cmp $(SRC_DIR)/alloc.h $(MOD_DIR)/h/alloc.h
-		-cmp $(SRC_DIR)/alloc.3 $(MOD_DIR)/man/alloc.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SOURCES)
