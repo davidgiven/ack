@@ -54,8 +54,8 @@ all:	ra
 ra:	$(OFILES)
 	$(CC) -o ra $(LDFLAGS) $(OFILES) $(EMLIB)/ego/share.$(LIBSUF) $(EMLIB)/em_data.$(LIBSUF)
 
-itemtab.h:	$(SRC_DIR)/itemtab.src $(EMH)/em_mnem.h makeitems
-		makeitems $(EMH)/em_mnem.h $(SRC_DIR)/itemtab.src > itemtab.h
+./itemtab.h:	$(SRC_DIR)/itemtab.src $(EMH)/em_mnem.h makeitems
+		makeitems $(EMH)/em_mnem.h $(SRC_DIR)/itemtab.src > ./itemtab.h
 
 makeitems:	$(SRC_DIR)/makeitems.c
 		$(UCC) $(UCFLAGS) $(ULDFLAGS) -o makeitems $(SRC_DIR)/makeitems.c
@@ -67,7 +67,7 @@ cmp:	all
 	-cmp ra $(EMLIB)/ego/ra
 
 clean:
-	rm -f *.$(SUF) ra Out out nohup.out makeitems itemtab.h
+	rm -f *.$(SUF) ra Out out nohup.out makeitems ./itemtab.h
 
 lint:
 	$(LINT) $(LINTFLAGS) $(CFILES) $(EMLIB)/ego/$(LINTPREF)share.$(LINTSUF) $(EMLIB)/$(LINTPREF)em_data.$(LINTSUF)
@@ -78,7 +78,7 @@ pr:
 opr:
 	make pr | opr
 
-depend:	itemtab.h
+depend:	./itemtab.h
 	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
 	echo '#DEPENDENCIES' >>Makefile.new
 	for i in $(CFILES) ; do \
