@@ -15,7 +15,7 @@ var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -23,7 +23,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/{M}/top
+	program {EM}/lib.bin/{M}/top
 	args
 	optimizer
 	stdin
@@ -33,7 +33,7 @@ name asld
 	from .s.so.a
 	to .out
 	outfile a.out
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args (.e:{HEAD}={EM}/{RT}em) \
@@ -51,6 +51,6 @@ name asld
 		(.c:{TAIL}={C_LIB}) \
 		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}mon) \
 		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}fp) \
-		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}ros {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon2 {EM}/lib/{M}/end_em)
 	linker
 end
