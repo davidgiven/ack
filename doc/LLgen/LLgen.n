@@ -699,6 +699,7 @@ the "#\ define" mechanism of C is used to give them a value and
 to allow the lexical analyzer to return their token numbers symbolically.
 These "#\ define"s are collected in the file \fILpars.h\fR which
 can be "#\ include"d in any file that needs the token-names.
+The maximum token number chosen is defined in the macro \fILL_MAXTOKNO\fP.
 .PP
 The lexical analyzer must signal the end
 of input to \fILLparse\fR
@@ -718,8 +719,9 @@ variables, etc, by giving a different prefix, like this:
 .sp 1
 The effect of this is that all global names start with XX instead of LL, for
 the parser that has this prefix. This holds for the variables \fILLsymb\fP,
-which now is called \fIXXsymb\fP, and also for the routine \fILLmessage\fP,
-which must now be called \fIXXmessage\fP.
+which now is called \fIXXsymb\fP, for the routine \fILLmessage\fP,
+which must now be called \fIXXmessage\fP, and for the macro \fILL_MAXTOKNO\fP,
+which is now called \fIXX_MAXTOKNO\fP.
 \fILL.output\fP is now \fIXX.output\fP, and \fILpars.c\fP and \fILpars.h\fP
 are now called \fIXXpars.c\fP and \fIXXpars.h\fP.
 .bp
