@@ -9,6 +9,8 @@
 double __huge_val(void);	/* may be infinity */
 #define	HUGE_VAL	(__huge_val())
 
+int	__IsNan(double d);	/* test for Not A Number */
+
 double	acos(double _x);
 double	asin(double _x);
 double	atan(double _x);
