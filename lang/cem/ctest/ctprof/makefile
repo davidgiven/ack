@@ -29,7 +29,7 @@ pr:
 opr:
 	make pr | opr
 
-cleanup:
+clean:
 	-rm -f *.[kosme] *.old
 
 transI transM cmpI cmpM:
