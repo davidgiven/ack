@@ -5,6 +5,7 @@ LLgen.g
 Lpars.c.dist
 Lpars.h.dist
 Makefile
+proto.make
 alloc.c
 check.c
 compute.c

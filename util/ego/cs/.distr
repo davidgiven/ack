@@ -1,4 +1,4 @@
-Makefile
+proto.make
 cs.c
 cs.h
 cs_alloc.c

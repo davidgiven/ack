@@ -1,4 +1,4 @@
-Makefile
+proto.make
 anm.c
 asize.c
 astrip.c

@@ -1,4 +1,4 @@
-Makefile
+proto.make
 itemtab.src
 makeitems.c
 ra.c

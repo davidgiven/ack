@@ -2,4 +2,5 @@ READ_ME
 lib
 src
 Makefile
+proto.make
 LLgen.1

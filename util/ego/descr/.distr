@@ -1,4 +1,4 @@
-Makefile
+proto.make
 descr.sed
 i86.descr
 m68020.descr

@@ -1,4 +1,4 @@
-Makefile
+proto.make
 ack.h
 data.c
 data.h
