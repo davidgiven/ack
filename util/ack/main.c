@@ -198,7 +198,7 @@ vieuwargs(argc,argv) char **argv ; {
 			break ;
 	   case 't':    t_flag++ ;
 			break ;
-	   case 'R':    do_Rflag(argp); eaten=1;
+	   case 'R':    eaten=1;
 			break ;
 	   case 'r':    if ( argp[2]!=SUFCHAR ) {
 				error("-r must be followed by %c",SUFCHAR) ;
@@ -234,7 +234,11 @@ vieuwargs(argc,argv) char **argv ; {
 		if ( !hide ) {
 			register char *tokeep ;
 			tokeep=keeps(argp) ;
-			*tokeep |= NO_SCAN ;
+			if ( argp[1]=='R' ) {
+				do_Rflag(tokeep); 
+			} else {
+				*tokeep |= NO_SCAN ;
+			}
 			l_add(&flags,tokeep) ;
 		}
 		if ( argp[2] && !eaten ) {

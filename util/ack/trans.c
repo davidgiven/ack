@@ -163,21 +163,20 @@ transini() {
 	register list_elem *elem ;
 	register trf *phase ;
 
-	scanlist(l_first(R_list), elem) {
-		set_Rflag(l_content(*elem)) ;
-	}
-	l_clear(&R_list) ;
 	scanlist(l_first(tr_list), elem) {
 		phase = t_cont(*elem) ;
 		if ( !phase->t_linker ) getmapflags(phase);
 	}
+	scanlist(l_first(R_list), elem) {
+		set_Rflag(l_content(*elem)) ;
+	}
+	l_clear(&R_list) ;
 	setpvar(keeps(NEEDS),needvar) ;
 	setpvar(keeps(HEAD),headvar) ;
 	setpvar(keeps(TAIL),tailvar) ;
 }
 
 set_Rflag(argp) register char *argp ; {
-	int     seen ;
 	register char *eos ;
 	register list_elem *prog ;
 	register int length ;
@@ -192,23 +191,30 @@ set_Rflag(argp) register char *argp ; {
 		if ( eq && eq<eos ) eos= eq ;
 	}
 	if ( colon && ( !eos || eos>colon ) ) eos= colon ;
-	if ( !eos ) fuerror("Incorrect use of -R flag") ;
+	if ( !eos ) {
+		if ( !(argp[0]&NO_SCAN) ) werror("Incorrect use of -R flag") ;
+		return ;
+	}
 	length= eos - &argp[2] ;
-	seen=NO ;
 	scanlist(l_first(tr_list), prog) {
-		if ( strncmp(t_cont(*prog)->t_name, &argp[2], length )==0 ) {
+		if ( strncmp(t_cont(*prog)->t_name, &argp[2], length )==0 &&
+		     t_cont(*prog)->t_name[length]==0  /* Same name length */) {
 			if ( *eos=='-' ) {
-				l_add(&(t_cont(*prog)->t_flags),eos) ;
+				if ( !(argp[0]&NO_SCAN) ) {
+					/* If not already taken by a mapflag */
+					l_add(&(t_cont(*prog)->t_flags),eos) ;
+				}
 			} else
 			if ( *eos=='=' ) {
 				t_cont(*prog)->t_prog= eos+1 ;
 			} else {
 				t_cont(*prog)->t_priority= atoi(eos+1) ;
 			}
-			seen=YES ; 
+			argp[0] |= NO_SCAN ;
+			return ;
 		}
 	}
-	if ( !seen ) error("Cannot find program for %s",argp) ;
+	if ( !(argp[0]&NO_SCAN) ) werror("Cannot find program for %s",argp) ;
 	return ;
 }
 
