@@ -1839,12 +1839,10 @@ uses ADDREG={EXTERN2,$1}	yields %a
 					leaving loe $1 adp $3 ste $1
 
 pat loe ine $1==$2
-uses ADDREG={EXTERN2,$1}	yields %a
-					leaving ine $1
+uses REG={EXTERN2,$1}	yields %a	leaving ine $1
 
 pat loe dee $1==$2
-uses ADDREG={EXTERN2,$1}	yields %a
-					leaving dee $1
+uses REG={EXTERN2,$1}	yields %a	leaving dee $1
 
 pat loe adp ste $1==$3 && $2==1		leaving ine $1
 
