@@ -10,10 +10,11 @@ INCLUDES=-I$(EMH)
 CFLAGS=-O $(INCLUDES)
 YFLAGS=-v -d
 LDFLAGS=-i
+LEXLIB=-ll
 
 
 cgg:	cgg.o $(OFILES) output.o
-	cc $(LDFLAGS) $(OFILES) output.o $(EMHOME)/lib/em_data.a -ll -o cgg
+	cc $(LDFLAGS) $(OFILES) output.o $(EMHOME)/lib/em_data.a $(LEXLIB) -o cgg
 
 install:	cgg
 	rm -f $(EMHOME)/lib/ncgg

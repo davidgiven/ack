@@ -6,9 +6,10 @@ PRIMARY=	occam.o Lpars.o keytab.o lex.yy.o code.o em.o
 SECUNDARY=	symtab.o expr.o builtin.o
 TERTIARY=	report.o
 LLOPT=
+LEXLIB=-ll
 LIBRARY=	$(MODLIB)/libem_mes.a $(MODLIB)/libemk.a \
 		$(MODLIB)/libprint.a $(MODLIB)/libstring.a \
-		$(MODLIB)/libsystem.a -lln
+		$(MODLIB)/libsystem.a $(LEXLIB)
 CFLAGS =	-Dvoid=int -O $(INCL)
 # void = int, because some compilers don't understand void
 HSRC =		code.h em.h expr.h sizes.h symtab.h token.h
