@@ -35,6 +35,7 @@ ch7bin(expp, oper, expr)
 	/*	apply binary operator oper between *expp and expr.
 		NB: don't swap operands if op is one of the op= operators!!!
 	*/
+
 	any2opnd(expp, oper);
 	any2opnd(&expr, oper);
 	switch (oper)	{

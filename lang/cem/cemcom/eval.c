@@ -904,16 +904,17 @@ load_val(expr, rlval)
 	}
 	else {
 		register struct idf *id = expr->VL_IDF;
-		register struct def *df;
+		register struct def *df = id->id_def;
 
 		ASSERT(expr->VL_CLASS == Name);
-		if ((df = id->id_def)->df_type->tp_fund == FUNCTION)
+		if (df->df_type->tp_fund == FUNCTION) {
 			/*	the previous statement tried to catch a function
 				identifier, which may be cast to a pointer to a
 				function.
 				ASSERT(!(rvalue)); ???
 			*/
 			C_lpi(id->id_text);
+		}
 		else
 		if (df->df_level == L_GLOBAL) {
 			if (rvalue) {

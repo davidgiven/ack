@@ -11,7 +11,6 @@
 	semantics of C is a mess.
 */
 
-#include	"botch_free.h"
 #include	<alloc.h>
 #include	"nofloat.h"
 #include	"nobitfield.h"

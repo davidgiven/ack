@@ -234,8 +234,8 @@ firstline:
 				LoadChar(ch);
 				if (ch != nch) {
 					PushBack();
-					lexerror("illegal combination '=%c'",
-						nch);
+					lexerror("illegal operator '=%c%c'",
+						nch, ch);
 				}
 				return ptok->tk_symb = 
 					nch == '<' ? LEFTAB : RIGHTAB;

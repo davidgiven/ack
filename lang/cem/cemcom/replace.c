@@ -137,6 +137,7 @@ macro_func(idef)
 		break;
 	default :
 		crash("(macro_func)");
+		/*NOTREACHED*/
 	}
 }
 

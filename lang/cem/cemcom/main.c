@@ -118,7 +118,8 @@ main(argc, argv)
 	hash_stat();
 #endif	DEBUG
 
-	exit(err_occurred);
+	sys_stop(err_occurred ? S_EXIT : S_END);
+	/*NOTREACHED*/
 }
 
 char *source = 0;
@@ -130,7 +131,6 @@ compile(argc, argv)
 {
 	char *result;
 	register char *destination = 0;
-
 #ifdef DEBUG
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'] || options['C'];
@@ -146,6 +146,7 @@ compile(argc, argv)
 #endif
 			fatal("%s: destination file not specified", prog_name);
 		break;
+
 	case 2:
 		destination = argv[1];
 		break;
@@ -157,6 +158,7 @@ compile(argc, argv)
 		fatal("use: %s source destination [namelist]", prog_name);
 		break;
 	}
+
 	if (strcmp(argv[0], "-"))
 		FileName = source = argv[0];
 	else {
@@ -164,8 +166,6 @@ compile(argc, argv)
 		FileName = "standard input";
 	}
 
-	if (destination && strcmp(destination, "-") == 0)
-		destination = 0;
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, FileName);
 	File_Inserted = 1;
@@ -185,9 +185,8 @@ compile(argc, argv)
 #endif NOPP
 #endif DEBUG
 	{
-
-		init_code(destination);
-
+		init_code(destination && strcmp(destination, "-") != 0 ?
+					destination : 0);
 		/* compile the source text			*/
 		C_program();
 

@@ -97,12 +97,12 @@ check_array_subscript(expr)
 	arith size = expr->VL_VALUE;
 
 	if (size < 0)	{
-		error("negative number of array elements");
+		error("array size is negative");
 		expr->VL_VALUE = (arith)1;
 	}
 	else
 	if (size == 0) {
-		warning("empty array declaration");
+		warning("array size is 0");
 	}
 	else
 	if (size & ~max_unsigned) {	/* absolutely ridiculous */

@@ -56,7 +56,6 @@
 #include	"code.h"
 #include	"expr.h"
 #include	"def.h"
-
 #ifndef NOPP
 extern arith ifval;
 #endif NOPP

@@ -31,21 +31,26 @@ extern int inc_total;
 char options[128];			/* one for every char	*/
 extern int idfsize;
 
-int txt2int();
+static int txt2int();
 
 do_option(text)
 	char *text;
 {
 	register char opt;
 
+next_option:			/* to allow combined one-char options */
 	switch (opt = *text++)	{
+
+	case 0:			/* to end the goto next_option loop */
+		break;
 
 	default:
 		fatal("illegal option: %c", opt);
 		break;
+
 	case '-':
-		options[*text] = 1;	/* flags, debug options etc.	*/
-		break;
+		options[*text++] = 1;	/* flags, debug options etc.	*/
+		goto next_option;
 
 #ifdef	DATAFLOW
 	case 'd':
@@ -58,12 +63,11 @@ do_option(text)
 	case 'R':			/* strict version */
 #endif
 		options[opt] = 1;
-		break;
-
+		goto next_option;
 #ifdef	NOROPTION
 	case 'R':
 		warning("-R option not implemented");
-		break;
+		goto next_option;
 #endif
 
 #ifdef	___XXX___
@@ -293,7 +297,7 @@ deleted, is now a debug-flag
 	}
 }
 
-int
+static int
 txt2int(tp)
 	register char **tp;
 {

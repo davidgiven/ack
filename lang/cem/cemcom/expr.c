@@ -149,7 +149,7 @@ dot2expr(expp)
 #endif NOFLOAT
 	default:
 		crash("bad conversion to expression");
-		break;
+		/*NOTREACHED*/
 	}
 }
 
@@ -304,6 +304,7 @@ fill_int_expr(ex, ivalue, fund)
 		break;
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
+		/*NOTREACHED*/
 	}
 	ex->ex_class = Value;
 	ex->VL_CLASS = Const;

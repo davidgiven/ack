@@ -34,8 +34,8 @@ struct idf	{
 	int id_resmac;		/* if nonzero: keyword of macroproc. 	*/
 #endif NOPP
 	int id_reserved;	/* non-zero for reserved words		*/
-	char *id_file;		/* used for warnings */
-	long id_line;
+	char *id_file;		/* file containing the occurrence */
+	unsigned int id_line;	/* line number of the occurrence */
 	struct def *id_def;	/* variables, typedefs, enum-constants	*/
 	struct sdef *id_sdef;	/* selector tags			*/
 	struct tag *id_struct;	/* struct and union tags		*/

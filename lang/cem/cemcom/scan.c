@@ -181,7 +181,7 @@ copyact(ch1, ch2, lvl)
 				copy(EOS);
 
 				if (++nr_of_params >= NPARAMS) {
-					fatal("(getact) too many actuals");
+					fatal("too many actual parameters");
 				}
 
 				actparams[nr_of_params] = aptr;

@@ -7,6 +7,7 @@ LLlex.h
 LLmessage.c
 SmallPars
 BigPars
+LintPars
 align.h
 arith.c
 arith.h
@@ -87,3 +88,14 @@ type.c
 type.str
 util.str
 util.c
+acklint
+l_class.h
+l_comment.c
+l_ev_ord.c
+l_lint.c
+l_lint.h
+l_misc.c
+l_outdef.c
+l_outdef.str
+l_state.str
+l_states.c

@@ -246,7 +246,7 @@ declare_idf(ds, dc, lvl)
 			sc = GLOBAL;
 		else
 		if (sc == REGISTER) {
-			error("function has illegal storage class");
+			error("function storage class cannot be register");
 			ds->ds_sc = sc = GLOBAL;
 		}
 	}
@@ -444,7 +444,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			break;
+			/*NOTREACHED*/
 		}
 		break;
 	case GLOBAL:
@@ -469,7 +469,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			break;
+			/*NOTREACHED*/
 		}
 		break;
 	case STATIC:
@@ -492,7 +492,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			break;
+			/*NOTREACHED*/
 		}
 		break;
 	case IMPLICIT:
@@ -511,7 +511,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			break;
+			/*NOTREACHED*/
 		}
 		break;
 	case ENUM:
@@ -520,7 +520,7 @@ global_redecl(idf, new_sc, tp)
 		break;
 	default:
 		crash("bad storage class");
-		break;
+		/*NOTREACHED*/
 	}
 }
 

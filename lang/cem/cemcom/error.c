@@ -26,18 +26,14 @@
 */
 
 /* error classes */
-#define	ERROR		1
-#define	WARNING		2
-#define	LEXERROR	3
-#define	LEXWARNING	4
-#define	CRASH		5
-#define	FATAL		6
+#define	WARNING		1
+#define	ERROR		2
+#define	CRASH		3
+#define	FATAL		4
 
 int err_occurred = 0;
 
-extern char *symbol2str();
 extern char options[];
-
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
 		error()		syntactic and semantic error messages
@@ -49,6 +45,8 @@ extern char options[];
 	expression, whereas other errors use the information in the token.
 */
 
+static _error();
+
 /*VARARGS*/
 error(va_alist)				/* fmt, args */
 	va_dcl
@@ -57,7 +55,7 @@ error(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(ERROR, NILEXPR, ap);
+		_error(ERROR, dot.tk_file, dot.tk_line, ap);
 	}
 	va_end(ap);
 }
@@ -74,7 +72,7 @@ expr_error(va_alist)			/* expr, fmt, args */
 
 		if (!(expr->ex_flags & EX_ERROR)) {
 			/* to prevent proliferation */
-			_error(ERROR, expr, ap);
+			_error(ERROR, expr->ex_file, expr->ex_line, ap);
 			expr->ex_flags |= EX_ERROR;
 		}
 	}
@@ -89,7 +87,7 @@ warning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(WARNING, NILEXPR, ap);
+		_error(WARNING, dot.tk_file, dot.tk_line, ap);
 	}
 	va_end(ap);
 }
@@ -106,7 +104,7 @@ expr_warning(va_alist)			/* expr, fmt, args */
 
 		if (!(expr->ex_flags & EX_ERROR)) {
 			/* to prevent proliferation */
-			_error(WARNING, expr, ap);
+			_error(WARNING, expr->ex_file, expr->ex_line, ap);
 		}
 	}
 	va_end(ap);
@@ -120,7 +118,7 @@ lexerror(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(LEXERROR, NILEXPR, ap);
+		_error(ERROR, FileName, LineNumber, ap);
 	}
 	va_end(ap);
 }
@@ -134,7 +132,7 @@ lexwarning(va_alist)			/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(LEXWARNING, NILEXPR, ap);
+		_error(WARNING, FileName, LineNumber, ap);
 	}
 	va_end(ap);
 }
@@ -148,7 +146,7 @@ crash(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(CRASH, NILEXPR, ap);
+		_error(CRASH, FileName, LineNumber, ap);
 	}
 	va_end(ap);
 
@@ -169,17 +167,20 @@ fatal(va_alist)				/* fmt, args */
 
 	va_start(ap);
 	{
-		_error(FATAL, NILEXPR, ap);
+		_error(FATAL, FileName, LineNumber, ap);
 	}
 	va_end(ap);
 
 	if (C_busy()) C_close();
 	sys_stop(S_EXIT);
+	/*NOTREACHED*/
 }
 
-_error(class, expr, ap)
+static
+_error(class, fn, ln, ap)
 	int class;
-	struct expr *expr;
+	char *fn;
+	unsigned int ln;
 	va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
@@ -188,9 +189,7 @@ _error(class, expr, ap)
 	static char *last_fn = 0;
 	static unsigned int last_ln = 0;
 	static int e_seen = 0;
-	char *fn = 0;
-	unsigned int ln = 0;
-	char *remark = 0;
+	char *remark;
 	char *fmt = va_arg(ap, char *);
 	
 	/*	Since name and number are gathered from different places
@@ -199,50 +198,39 @@ _error(class, expr, ap)
 	*/
 	/* preliminaries */
 	switch (class)	{
+	case WARNING:
+		if (options['w'])
+			return;
+		break;
+
 	case ERROR:
-	case LEXERROR:
 	case CRASH:
 	case FATAL:
 		if (C_busy())
 			C_ms_err();
 		err_occurred = 1;
 		break;
-	
-	case WARNING:
-	case LEXWARNING:
-		if (options['w'])
-			return;
-		break;
 	}
 
 	/* the remark */
 	switch (class)	{	
 	case WARNING:
-	case LEXWARNING:
 		remark = "(warning)";
 		break;
+
+	case ERROR:
+		remark = 0;
+		break;
+
 	case CRASH:
 		remark = "CRASH\007";
 		break;
+
 	case FATAL:
 		remark = "fatal error --";
 		break;
-	}
-	
-	/* the place */
-	switch (class)	{	
-	case WARNING:
-	case ERROR:
-		fn = expr ? expr->ex_file : dot.tk_file;
-		ln = expr ? expr->ex_line : dot.tk_line;
-		break;
-	case LEXWARNING:
-	case LEXERROR:
-	case CRASH:
-	case FATAL:
-		fn = FileName;
-		ln = LineNumber;
-		break;
+	default:
+		/*NOTREACHED*/;
 	}
 	
 	if (ln == last_ln && fn && last_fn && strcmp(fn, last_fn) == 0)	{

@@ -24,7 +24,6 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"level.h"
-
 extern char options[];
 }
 

@@ -20,7 +20,6 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
-
 extern int level;
 }
 
@@ -76,6 +75,7 @@ statement
 	asm_statement
 ;
 
+
 expression_statement
 	{	struct expr *expr;
 	}
@@ -84,7 +84,7 @@ expression_statement
 	';'
 		{
 #ifdef	DEBUG
-			print_expr("Full expression", expr);
+			print_expr("expression_statement", expr);
 #endif	DEBUG
 			code_expr(expr, RVAL, FALSE, NO_LABEL, NO_LABEL);
 			free_expression(expr);
@@ -267,8 +267,8 @@ for_statement
 	';'
 	expression(&e_incr)?
 	')'
-	{
-	}
+		{
+		}
 	statement
 		{
 			C_df_ilb(l_continue);

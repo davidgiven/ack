@@ -207,8 +207,10 @@ ch7cast(expp, oper, tp)
 		else		/* !oldi && !i */
 			float2float(expp, tp);
 #else NOFLOAT
-		else
+		else {
 			crash("(ch7cast) floats not implemented\n");
+			/*NOTREACHED*/
+		}
 #endif NOFLOAT
 	}
 	else

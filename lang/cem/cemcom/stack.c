@@ -95,6 +95,7 @@ unstack_level()
 	if (options['t'])
 		dumpidftab("before unstackidfs", 0);
 #endif	DEBUG
+
 	/*	The implementation below is more careful than strictly
 		necessary. Optimists may optimize it afterwards.
 	*/

@@ -213,11 +213,14 @@ code_default()
 {
 	register struct switch_hdr *sh = switch_stack;
 
-	if (sh == 0)
-		error("default not in switch");
-	else
-	if (sh->sh_default != 0)
+	if (sh == 0) {
+		error("default statement not in switch");
+		return;
+	}
+	if (sh->sh_default != 0) {
 		error("multiple entry for default in switch");
-	else
-		C_df_ilb(sh->sh_default = text_label());
+		return;
+	}
+
+	C_df_ilb(sh->sh_default = text_label());
 }

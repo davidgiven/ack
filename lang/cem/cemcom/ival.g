@@ -27,7 +27,6 @@
 #include	"noRoption.h"
 #include	"estack.h"
 #include	"code.h"
-
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
 
@@ -530,6 +529,7 @@ check_ival(expp, tp)
 		break;
 	default:
 		crash("check_ival");
+		/*NOTREACHED*/
 	}
 }
 

@@ -404,7 +404,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 
 	default:
 		/* wrong type altogether */
-		error("illegal field type (%s)",
+		error("field type cannot be %s",
 				symbol2str((*fdtpp)->tp_fund));
 		*fdtpp = error_type;
 		return field_offset;

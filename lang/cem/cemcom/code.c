@@ -29,7 +29,6 @@
 #include	"assert.h"
 #include	"noRoption.h"
 #include	"file_info.h"
-
 label lab_count = 1;
 label datlab_count = 1;
 
@@ -48,7 +47,7 @@ static int	pro_id;
 #endif USE_TMP
 
 extern char options[];
-char *symbol2str();
+extern char *symbol2str();
 
 init_code(dst_file)
 	char *dst_file;
@@ -65,7 +64,6 @@ init_code(dst_file)
 	C_insertpart(tmp_id = C_getid());
 #endif	USE_TMP
 }
-
 static struct string_cst *str_list = 0;
 
 code_string(val, len, dlb)
@@ -425,7 +423,7 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		default:
 			crash("bad local storage class");
-			break;
+			/*NOTREACHED*/
 		}
 	}
 }
@@ -446,7 +444,8 @@ loc_init(expr, id)
 	case ARRAY:
 	case STRUCT:
 	case UNION:
-		error("no automatic aggregate initialisation");
+		error("automatic %s cannot be initialized in declaration",
+			symbol2str(tp->tp_fund));
 		free_expression(e);
 		return;
 	}

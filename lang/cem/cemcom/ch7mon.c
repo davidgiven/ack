@@ -53,12 +53,12 @@ ch7mon(oper, expp)
 		break;
 	case '&':
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
-			warning("& before array: ignored");
+			warning("& before array ignored");
 			array2pointer(*expp);
 		}
 		else
 		if ((*expp)->ex_type->tp_fund == FUNCTION) {
-			warning("& before function: ignored");
+			warning("& before function ignored");
 			function2pointer(*expp);
 		}
 		else
