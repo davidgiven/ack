@@ -38,10 +38,13 @@ char **argv;
 	exit(status);
 }
 
+extern long lseek();
+
 strip(name)
 char *name;
 {
 	long size;
+	int fw;
 
 	if (! rd_open(name)) {
 		fprintf(stderr, "astrip: cannot open %s\n", name);
@@ -68,51 +71,56 @@ char *name;
 		return(2);
 	}
 	wr_ohead(&buf);
+	wr_close();
 	if (writeerror) {
 		fprintf(stderr, "astrip: write error on temp file %s\n", tname);
 		rd_close();
-		wr_close();
 		return(1);
 	}
-	if(copy(name, tname, size)) {
+	fw = open(tname, 2);
+	if (fw < 0 || lseek(fw, (long)SZ_HEAD, 0) < 0) {
+		fprintf(stderr, "astrip: cannot create temp file %s\n", tname);
 		rd_close();
-		wr_close();
+		close(fw);
+		return(2);
+	}
+	if(copy(name, tname, size, rd_fd(), fw)) {
+		rd_close();
+		close(fw);
 		return(1);
 	}
 	rd_close();
-	wr_close();
+	close(fw);
 	size += SZ_HEAD;
-	if (! wr_open(name)) {
+	fw = open(name, 1);
+	if (fw < 0) {
 		fprintf(stderr, "astrip: cannot write %s\n", name);
 		return(1);
 	}
 	if (! rd_open(tname)) {
 		fprintf(stderr, "astrip: cannot read temp file %s\n", tname);
-		wr_close();
+		close(fw);
 		return(2);
 	}
-	if(copy(tname, name, size)) {
-		wr_close();
+	if(copy(tname, name, size, rd_fd(), fw)) {
+		close(fw);
 		rd_close();
 		return(2);
 	}
 
-	wr_close();
+	close(fw);
 	rd_close();
 	return(0);
 }
 
-copy(fnam, tnam, size)
+copy(fnam, tnam, size, fr, fw)
 char *fnam;
 char *tnam;
 long size;
 {
 	register s, n;
 	char lbuf[512];
-	int fr, fw;
 
-	fr = rd_fd();
-	fw = wr_fd();
 	while(size != (long)0) {
 		s = 512;
 		if(size < 512)
