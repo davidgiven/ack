@@ -19,6 +19,8 @@
 #define SL 4
 #define SSL "4"
 
+#define REGVARS
+
 /********************************************************
  * Back end tables for Intel 8086			*
  * Author : Ed Keizer					*
@@ -84,8 +86,13 @@ ax	= ("ax", 2, al, ah), REG, GENREG, ACC.
 bx	= ("bx", 2, bl, bh), REG, GENREG, BREG, BXREG, ADDREG.
 cx	= ("cx", 2, cl, ch), REG, GENREG, CXREG, SHIFT_CREG.
 dx	= ("dx", 2, dl, dh), REG, GENREG, DXREG.
+#ifdef REGVARS
+si	= ("si", 2) regvar, RREG, RADDREG.
+di	= ("di", 2) regvar, RREG, RADDREG.
+#else
 si	= ("si", 2), REG, IREG, SIREG, ADDREG.
 di	= ("di", 2), REG, IREG, DIREG, ADDREG.
+#endif
 bp	= ("bp", 2), BREG.
 
 TOKENS:
@@ -141,9 +148,15 @@ X_REG		= REG*SCRATCH
 X_BXREG 	= BXREG*SCRATCH
 X_DXREG 	= DXREG*SCRATCH
 X_CXREG 	= CXREG*SCRATCH
+#ifndef REGVARS
 X_SIREG 	= SIREG*SCRATCH
 X_DIREG 	= DIREG*SCRATCH
+#endif
 X_ADDREG	= ADDREG*SCRATCH
+
+#ifdef REGVARS
+IREG		= RREG
+#endif
 
 /* Mode refering to a word in memory */
 memory2 	= EXTERN2 + ind_reg2 + ind_regoff2 + ind_bpregoff2 + LOCAL2
@@ -153,11 +166,28 @@ memory1 	= EXTERN1 + ind_reg1 + ind_regoff1 + ind_bpregoff1 + LOCAL1
 
 /* Modes allowed in instructions */
 const		= ANYCON + ADDR_EXTERN
-anyreg		= REG + BREG
+register	= REG
+#ifdef REGVARS
+		  + RREG
+#endif
+anyreg		= register + BREG
+addreg		= ADDREG 
+#ifdef REGVARS
+		  + RADDREG
+#endif
 rm		= anyreg + memory2
+rmnoacc		= RREG + BREG + CXREG + DXREG + memory2
 rmorconst	= const + rm
 regorconst	= const + anyreg
-dest		= REG + memory2
+#ifdef REGVARS
+/* Needed because there is a shortage of ADDREG-registers.
+   This is the main penalty for having register variables.
+*/
+regorconstnoaddr = const + RREG + ACC + CXREG + DXREG
+#else
+regorconstnoaddr = regorconst
+#endif
+dest		= register + memory2
 
 rm1		= REG1 + memory1
 rmorconst1	= const + rm1
@@ -176,7 +206,8 @@ referals	= indirects + locals
 
 /* Miscellaneous */
 halfindir	= reg_off + bpreg_off + ADDR_LOCAL
-some_off	= halfindir + ADDR_EXTERN + ADDREG
+some_off	= halfindir + ADDR_EXTERN + addreg
+x_word		= rmorconst + halfindir
 a_word		= rmorconst + rm1 + halfindir
 no_reg_off	= rmorconst + rm1 + ADDR_LOCAL
 
@@ -191,16 +222,27 @@ CODE:
 
 loc 		| |		| {ANYCON, $1}				| |
 ldc		| |		| {ANYCON, highw(1)} {ANYCON, loww(1)}	| |
-lol		| |		| {LOCAL2, $1, 2}			| |
+#ifdef REGVARS
+lol inreg($1)==2 | |		| regvar($1)				| |
+#endif
+lol 		| |		| {LOCAL2, $1, 2}			| |
 loe		| |		| {EXTERN2, $1} 			| |
-loe loe $1==$2	| | 	allocate(ADDREG={EXTERN2, $1})	| %[a] %[a]	| |
-lol lol $1==$2	| |	allocate(ADDREG={LOCAL2, $1, 2})| %[a] %[a]	| |
+loe loe $1==$2	| | 	allocate(REG={EXTERN2, $1})	| %[a] %[a]	| |
+#ifdef REGVARS
+lol lol $1==$2 && inreg($1)!=2
+		| |	allocate(REG={LOCAL2, $1, 2})| %[a] %[a]	| |
+#else
+lol lol $1==$2	| |	allocate(REG={LOCAL2, $1, 2})| %[a] %[a]	| |
+#endif
+#ifdef REGVARS
+lil inreg($1)==2 | |		| {ind_reg2, regvar($1)}		| |
+#endif
 lil		| |	allocate(ADDREG={ind_regoff2, bp, tostring($1)})
 				| {ind_reg2, %[a]}			| |
 lof		| nocoercions : reg_off |
 				| {ind_regoff2, %[1.reg],
 					%[1.off]+"+"+tostring($1)}	| |
-...		| ADDREG |	| {ind_regoff2,%[1],tostring($1)} | |
+...		| addreg |	| {ind_regoff2,%[1],tostring($1)} 	| |
 ...		| nocoercions : bpreg_off  |
 			  | {ind_bpregoff2,%[1.reg], %[1.ind]+$1} | |
 ...		| nocoercions : ADDR_EXTERN|
@@ -233,7 +275,7 @@ lxa $1 > 2	| |	allocate(ADDREG={ind_regoff2,bp,SSL},
 			samecc erase(%[a]) erase(%[b])
 				| {reg_off, %[a], SSL } 		| |
 dch		| |		|			       | loi 2	  |
-loi $1==2	| ADDREG     |	| {ind_reg2, %[1]}			| |
+loi $1==2	| addreg     |	| {ind_reg2, %[1]}			| |
 ...		| nocoercions : reg_off    |
 			    | {ind_regoff2, %[1.reg], %[1.off]} | |
 ...		| nocoercions : bpreg_off  |
@@ -242,7 +284,7 @@ loi $1==2	| ADDREG     |	| {ind_reg2, %[1]}			| |
 			| {EXTERN2, %[1.off]}			| |
 ...		| nocoercions : ADDR_LOCAL |
 			| {LOCAL2, %[1.ind],2}			| |
-loi $1==1	| ADDREG     |	| {ind_reg1, %[1]}			| |
+loi $1==1	| addreg     |	| {ind_reg1, %[1]}			| |
 ...		| nocoercions : reg_off    |
 				| {ind_regoff1, %[1.reg], %[1.off]}	| |
 ...		| nocoercions : bpreg_off  |
@@ -251,7 +293,7 @@ loi $1==1	| ADDREG     |	| {ind_reg1, %[1]}			| |
 			| {EXTERN1, %[1.off]}			| |
 ...		| nocoercions : ADDR_LOCAL |
 			| {LOCAL1, %[1.ind],1}			| |
-loi $1==4	| ADDREG     |	| {ind_regoff2,%[1],"2"} {ind_reg2,%[1]}| |
+loi $1==4	| addreg     |	| {ind_regoff2,%[1],"2"} {ind_reg2,%[1]}| |
 ...		| nocoercions : reg_off    |
 				| {ind_regoff2,%[1.reg], %[1.off]+"+2"}
 				  {ind_regoff2,%[1.reg], %[1.off]}	| |
@@ -262,24 +304,27 @@ loi $1==4	| ADDREG     |	| {ind_regoff2,%[1],"2"} {ind_reg2,%[1]}| |
 			      {LOCAL2,%[1.ind]+2,2} {LOCAL2,%[1.ind],2} | |
 ...		| nocoercions : ADDR_EXTERN|	| {EXTERN2, %[1.off]+"+2"}
 				  {EXTERN2, %[1.off]}			| |
-loi $1>4	| X_SIREG |
+loi $1>4	| |
 			remove(ALL)
-			allocate(CXREG={ANYCON,$1})
-			"sub sp,cx"
-			"sar cx,1"
+			allocate(CXREG={ANYCON,$1/2})
+			"mov ax,si"
+			"mov bx,di"
+			"sub sp,%($1%)"
 			"mov di,sp"
 			"rep movs"
-			erase(%[a]) erase(%[1]) | | | (8,8+$1*9)
-...		| X_SIREG |
+			"mov si,ax"
+			"mov di,bx"
+			erase(%[a])  | | | (16,16+$1*9)
+...		| X_BXREG |
 			remove(ALL)
 			allocate(CXREG={ANYCON,$1})
 			"call .loi"
-			erase(%[a]) erase(%[1]) | | | (3,32+$1*9)
-los $1==2	| X_CXREG X_SIREG |
+			erase(%[a]) erase(%[1]) | | | (3,40+$1*9)
+los $1==2	| X_CXREG X_BXREG |
 			remove(ALL)
 			"call .loi"
 			erase(%[1]) erase(%[2]) 		|	| |
-los !defined($1)| rm X_CXREG X_SIREG |
+los !defined($1)| rm X_CXREG X_BXREG |
 			remove(ALL)
 			"cmp %[1],2"
 			"jne .unknown"
@@ -292,7 +337,7 @@ ldf		| nocoercions : reg_off |
 					%[1.off]+"+2+"+tostring($1)}
 				  {ind_regoff2, %[1.reg],
 					%[1.off]+"+"+tostring($1)}	| |
-...		| ADDREG |
+...		| addreg |
 				| {ind_regoff2, %[1], tostring($1+2)}
 				  {ind_regoff2, %[1], tostring($1)}	| |
 ...		| nocoercions : bpreg_off |
@@ -317,6 +362,13 @@ lol lal sti $1==$2 && $3<=2 | | |					| |
  * because we seem to have evaluated an expression just now.	*
  ****************************************************************/
 
+#ifdef REGVARS
+stl inreg($1)==2
+		| rmorconst |
+			move(%[1], regvar($1))			|	| |
+...		| nocoercions : STACK |
+			"pop %(regvar($1)%)" samecc		|  | |(1,8)
+#endif
 stl		| regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -327,14 +379,25 @@ ste		| regorconst |
 			remove(indirects)
 			move(%[1], {EXTERN2, $1 })		|	| |
 ...		| nocoercions : STACK | "pop ($1)" samecc	| | |
-sil		| regorconst |
+#ifdef REGVARS
+sil inreg($1)==2| regorconst |
+			remove(referals)
+			move(%[1],regvar($1))			|	| |
+...		| nocoercions : STACK |
+			"pop (%(regvar($1)%)"	samecc		|  | |(2,26)
+#endif
+sil		| regorconstnoaddr |
 			allocate(ADDREG={ind_regoff2, bp, tostring($1)})
 			remove(referals)
 			move(%[1], {ind_reg2, %[a]})		|	| |
-stf		| ADDREG regorconst |
+...		| STACK |
+			allocate(ADDREG={ind_regoff2, bp, tostring($1)})
+			remove(referals)
+			"pop (%[a])"	samecc			| | | (2,26)
+stf		| addreg regorconst |
 			remove(referals)
 			move(%[2],{ind_regoff2,%[1],tostring($1)})|	| |
-...		| nocoercions : ADDREG STACK |
+...		| nocoercions : addreg STACK |
 			remove(referals)
 			"pop $1(%[1])" samecc			      | | |
 ...		| reg_off regorconst |
@@ -344,7 +407,7 @@ stf		| ADDREG regorconst |
 ...		| nocoercions : halfindir STACK |
 			remove(referals)
 			"pop $1+%[1]" samecc			      | | |
-...		| ADDR_LOCAL | | 			| stl %[1.ind]+$1 |
+...		| nocoercions : ADDR_LOCAL | | 			| stl %[1.ind]+$1 |
 ...		| bpreg_off regorconst |
 			remove(all_locals)
 			remove(indexed)
@@ -355,10 +418,10 @@ stf		| ADDREG regorconst |
 			remove(indirects)
 			move(%[2],{EXTERN2,%[1.off]+"+"+tostring($1)})| | |
 */
-sti $1==2	| ADDREG regorconst |
+sti $1==2	| addreg regorconst |
 			remove(referals)
 			move(%[2],{ind_reg2,%[1]})		|	| |
-...		| nocoercions : ADDREG STACK |
+...		| nocoercions : addreg STACK |
 			remove(referals)
 			"pop (%[1])" samecc			      | | |
 ...		| reg_off regorconst |
@@ -382,7 +445,7 @@ sti $1==2	| ADDREG regorconst |
 ...		| nocoercions : ADDR_EXTERN STACK |
 			remove(indirects)
 			"pop (%[1])" samecc			      | | |
-sti $1==1	| ADDREG regorconst12 |
+sti $1==1	| addreg regorconst12 |
 			remove(referals)
 			move(%[2],{ind_reg1,%[1]})		|	| |
 ...		| reg_off regorconst12 |
@@ -401,7 +464,7 @@ sti $1==1	| ADDREG regorconst12 |
 				%[ind]<=%[1.ind] && %[ind]+%[size]>%[1.ind] )
 			move(%[2],{ind_regoff1, bp, tostring(%[1.ind])})
 								|	| |
-sti $1==4	| ADDREG regorconst regorconst |
+sti $1==4	| addreg regorconst regorconst |
 			remove(referals)
 			move(%[2],{ind_reg2,%[1]})
 			move(%[3],{ind_regoff2,%[1],"2"})	|	| |
@@ -424,13 +487,23 @@ sti $1==4	| ADDREG regorconst regorconst |
 			move(%[2],{ind_regoff2, bp, tostring(%[1.ind])})
 			move(%[3],{ind_regoff2, bp,
 						tostring(%[1.ind]+2)})| | |
-sti $1>4	| X_DIREG |
+sti $1>4	| |
 			remove(ALL)
 			allocate(CXREG={ANYCON,$1/2})
+			"mov ax,si"
+			"mov bx,di"
 			"mov si,sp"
+			"pop di"
 			"rep movs"
 			"mov sp,si"
-			erase(%[1]) erase(%[a]) |	| | (5,4+$1*8)
+			"mov si,ax"
+			"mov di,bx"
+			erase(%[a]) |	| | (14,12+$1*8)
+...		| X_BXREG |
+			remove(ALL)
+			allocate(CXREG={ANYCON,$1})
+			"call .sti"
+			erase(%[a]) erase(%[1]) | | | (3,40+$1*9)
 /* This sort of construction gives problems in the codegenerator
    because of the potential verly large lookahead
 ...		| X_ADDREG |
@@ -439,17 +512,17 @@ sti $1>4	| X_DIREG |
 			"add %[1],2"
 			erase(%[1])		| %[1]	| sti $1-2 | (5,30)
 */
-sts $1==2	| X_CXREG X_DIREG |
+sts $1==2	| X_CXREG X_BXREG |
 			remove(ALL)
 			"call .sti"
 			erase(%[1]) erase(%[2]) 		|	| |
 sdl		|	  |			  |	| stl $1 stl $1+2 |
 sde		|	  |			  |  | ste $1 ste $1+"+2" |
-sdf		| ADDREG regorconst regorconst |
+sdf		| addreg regorconst regorconst |
 			remove(referals)
 			move(%[2],{ind_regoff2,%[1],tostring($1)})
 			move(%[3],{ind_regoff2,%[1],tostring($1+2)})|   | |
-...		| nocoercions : ADDREG STACK |
+...		| nocoercions : addreg STACK |
 			remove(referals)
 			"pop $1(%[1])"
 			"pop %($1+2%)(%[1])" samecc		      | | |
@@ -555,26 +628,26 @@ mli $1==2	| X_ACC rm |
 			   but mul is faster
 			*/
 			nocc erase(%[1])	    | %[1]  | |(2,118)+%[2]
-...		| rm-ACC X_ACC |
-			allocate(%[1],DXREG)
+...		| rmnoacc rmorconst |
+			allocate(%[1],%[2],ACC=%[2],DXREG)
 			"mul %[1]"
-			nocc erase(%[2])	    | %[2]  | |(2,118)+%[1]
-mli $1==4	| SIREG DIREG BXREG X_ACC |
+			nocc erase(%[a])	    | ax  | |(2,118)+%[1]
+mli $1==4	| X_ACC X_DXREG |
 			remove(ALL)
 			"call .mli4"
-			erase(ax) setcc(dx)	    | dx ax | |
+			erase(ax) erase(dx) setcc(dx)    | dx ax | |
 /* Not now,
 mli !defined($1)| X_ACC |
 			remove(ALL)
 			"call .mli"		    |	    | |
 */
-dvi $1==2	| rm-ACC X_ACC |
-			allocate(DXREG)
+dvi $1==2	| rmnoacc rmorconst |
+			allocate(%[1], %[2], ACC=%[2], DXREG)
 			"cwd"
 			"idiv %[1]"
-			erase(%[2])		       | ax | |(3,176)+%[1]
+			erase(%[a])		       | ax | |(3,176)+%[1]
 dvi $1==4	| |	remove(ALL)
-			"call .dvi4"		    | cx ax | |
+			"call .dvi4"		    | dx ax | |
 /*
 dvi !defined($1)| X_ACC |
 			remove(ALL)
@@ -586,13 +659,13 @@ loc loc cii dvi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
 			"idiv %[1]"
 			erase(%[2]) erase(%[3])        | ax | |(2,171)+%[1]
 #endif
-rmi $1==2	| rm-ACC X_ACC |
-			allocate(DXREG)
+rmi $1==2	| rmnoacc rmorconst |
+			allocate(%[1], %[2], ACC=%[2], DXREG)
 			"cwd"
 			"idiv %[1]"
-			erase(%[2])		       | dx | |(3,176)+%[1]
+			erase(%[a])		       | dx | |(3,176)+%[1]
 rmi $1==4	| |	remove(ALL)
-			"call .rmi4"		    | bx dx | |
+			"call .rmi4"		    | dx ax | |
 /*
 rmi !defined($1)| X_ACC |
 			remove(ALL)
@@ -613,12 +686,6 @@ ngi $1==4	| X_REG X_REG |
 			"sbb %[2],0"
 			setcc(%[2]) erase(%[1]) erase(%[2])
 						| %[2] %[1] | | (8,10)
-...		| X_REG-ACC X_ACC |
-			"neg %[2]"
-			"neg %[1]"
-			"sbb %[2],0"
-			setcc(%[2]) erase(%[1]) erase(%[2])
-						| %[2] %[1] | | (7,10)
 /*
 ngi !defined($1)| X_ACC |
 			remove(ALL)
@@ -676,23 +743,23 @@ sri !defined($1)| X_ACC |
 adu		| |	|				    | adi $1 |
 sbu		| |	|				    | sbi $1 |
 mlu		| |	|				    | mli $1 |
-dvu $1==2	| rm-ACC X_ACC |
-			allocate(%[1],DXREG={ANYCON,0})
+dvu $1==2	| rmnoacc rmorconst |
+			allocate(%[2],ACC=%[2],DXREG={ANYCON,0})
 			"div %[1]"
-			erase(%[2]) erase(%[a])      | %[2] | |(2,149)+%[1]
+			erase(%[b]) erase(%[a])      | ax | |(2,149)+%[1]
 dvu $1==4	| |	remove(ALL)
-			"call .dvu4"		    | cx ax | |
+			"call .dvu4"		    | dx ax | |
 /*
 dvu !defined($1)| X_ACC |
 			remove(ALL)
 			"call .dvu" erase(%[1])     |	    | |
 */
-rmu $1==2	| rm-ACC X_ACC |
-			allocate(%[1],DXREG={ANYCON,0})
+rmu $1==2	| rmnoacc rmorconst |
+			allocate(%[2],ACC=%[2],DXREG={ANYCON,0})
 			"div %[1]"
-			erase(%[2]) erase(%[a])        | dx | |(3,149)+%[1]
+			erase(%[b]) erase(%[a])        | dx | |(3,149)+%[1]
 rmu $1==4	| |	remove(ALL)
-			"call .rmu4"		    | bx dx | |
+			"call .rmu4"		    | dx ax | |
 /*
 rmu !defined($1)| X_ACC |
 			remove(ALL)
@@ -862,6 +929,7 @@ ads $1==2	| nocoercions : ANYCON reg_off |  |
 			"add %[1.reg],%[2.reg]"
 			erase(%[1.reg]) setcc(%[1.reg]) |
 	       {reg_off,%[1.reg],%[1.off]+"+"+%[2.off]} | | (2,3)
+#ifndef REGVARS
 ...		| IREG ADDR_LOCAL |	  | {bpreg_off,%[1],%[2.ind]} | |
 /*
 ...		| (REG-IREG) ADDR_LOCAL |
@@ -869,6 +937,10 @@ ads $1==2	| nocoercions : ANYCON reg_off |  |
 			"add %[a],bp"
 		  | {reg_off, %[a], tostring(%[2.ind])} | | (2,3)
 */
+#else
+...		| nocoercions: RREG ADDR_LOCAL |	  |
+			{bpreg_off,%[1],%[2.ind]} | |
+#endif
 #ifdef DEEPER
 ...		| X_REG rmorconst |
 			"add %[1],%[2]"
@@ -922,6 +994,11 @@ sbs $1==2	| nocoercions : ANYCON reg_off |   |
 inc		| X_REG |
 			"inc %[1]"
 			setcc(%[1]) erase(%[1])      | %[1] | |(1,2)
+#ifdef REGVARS
+inl inreg($1)==2| |
+			"inc %(regvar($1)%)"
+			setcc(regvar($1))	     |	    | |(1,2)
+#endif
 inl		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"inc $1(bp)"
@@ -932,6 +1009,11 @@ ine		| |	remove(indirects)
 dec		| X_REG |
 			"dec %[1]"
 			setcc(%[1]) erase(%[1])      | %[1] | |(1,2)
+#ifdef REGVARS
+del inreg($1)==2| |
+			"dec %(regvar($1)%)"
+			setcc(regvar($1))	     |	    | |(1,2)
+#endif
 del		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"dec $1(bp)"
@@ -939,6 +1021,10 @@ del		| |	remove(indexed)
 dee		| |	remove(indirects)
 			"dec ($1)"
 			setcc({EXTERN2,$1})	     |	    | |(4,21)
+#ifdef REGVARS
+zrl inreg($1)==2| |
+			move({ANYCON,0},regvar($1))	|	| |
+#endif
 zrl		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			move({ANYCON,0},{LOCAL2,$1,2})
@@ -974,6 +1060,11 @@ zer !defined($1)| X_CXREG |
 			"loop 1b"
 			samecc erase(%[1])		  | | |
 
+#ifdef REGVARS
+lol adi stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
+			"add %(regvar($1)%),%[1]"
+			setcc(regvar($1))		  | | |
+#endif
 lol adi stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -984,6 +1075,11 @@ ldl adi sdl $1==$3 && $2==4 | regorconst regorconst |
 			remove(locals, %[ind]>=$1 && %[ind]<$1+4 )
 			"add $1(bp),%[1]"
 			"adc %($1+2%)(bp),%[2]"		   | | |
+#ifdef REGVARS
+lol ngi stl $1==$3 && $2==2 && inreg($1)==2 | |
+			"neg %(regvar($1)%)"
+			setcc(regvar($1))		  | | |
+#endif
 lol ngi stl $1==$3 && $2==2 | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -995,83 +1091,145 @@ ldl ngi sdl $1==$3 && $2==4 | |
 			"neg $1(bp)"
 			"neg %($1+2%)(bp)"
 			"sbb %($1+2%)(bp),0"		  | | |
-lol ads stl $1==$3 && $2==2 | regorconst |
-			remove(indexed)
-			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
-			"add $1(bp),%[1]"
-			setcc({LOCAL2, $1, 2})		  | | |
+lol ads stl $1==$3 && $2==2 | | | | lol $1 adi 2 stl $1 |
+#ifdef REGVARS
+lol lol adp stl $1==$2 && $1==$4 && inreg($1)==2 | |
+			allocate(ADDREG=regvar($1))	| %[a] | lol $2 adp $3 stl $2 |
+lol inl $1==$2 && inreg($1)==2 | |
+			allocate(REG=regvar($1))	  | %[a] | inl $1 |
+lol del $1==$2 && inreg($1)==2 | |
+			allocate(REG=regvar($1))	  | %[a] | del $1 |
+#endif
 lol lol adp stl $1==$2 && $1==$4 | |
 			allocate(ADDREG={LOCAL2,$1,2})	  | %[a] | lol $2 adp $3 stl $2 |
-lol adp stl $1==$3 && $2==1 | |
-			remove(indexed)
-			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
-			"inc $1(bp)"
-			setcc({LOCAL2, $1, 2})		  | | |
-lol adp stl $1==$3 && $2==0-1 | |
-			remove(indexed)
-			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
-			"dec $1(bp)"
-			setcc({LOCAL2, $1, 2})		  | | |
+lol inl $1==$2 | |	allocate(REG={LOCAL2,$1,2})	  | %[a] | inl $1 |
+lol del $1==$2 | |	allocate(REG={LOCAL2,$1,2})	  | %[a] | del $1 |
+lol adp stl $1==$3 && $2==1 | | | | inl $1 |
+lol adp stl $1==$3 && $2==0-1 | | | | del $1 |
+#ifdef REGVARS
+lol adp stl $1==$3 && inreg($1)==2    | |
+			"add %(regvar($1)%),$2"
+			setcc(regvar($1))		  | | |
+#endif
 lol adp stl $1==$3	    | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"add $1(bp),$2"
 			setcc({LOCAL2, $1, 2})		  | | |
+#ifdef REGVARS
+lol and stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
+			"and %(regvar($1)%),%[1]"
+			setcc(regvar($1))		  | | |
+#endif
 lol and stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"and $1(bp),%[1]"
 			setcc({LOCAL2, $1, 2})		  | | |
+#ifdef REGVARS
+lol ior stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
+			"or %(regvar($1)%),%[1]"
+			setcc(regvar($1))		  | | |
+#endif
 lol ior stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"or $1(bp),%[1]"
 			setcc({LOCAL2, $1, 2})		  | | |
+#ifdef REGVARS
+lol com stl $1==$3 && $2==2 && inreg($1)==2 | |
+			"not %(regvar($1)%)"
+			samecc				  | | |
+#endif
 lol com stl $1==$3 && $2==2 | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"not $1(bp)"
 			samecc				  | | |
-lil adi sil $1==$3 && $2==2 | regorconst |
+#ifdef REGVARS
+lil adi sil $1==$3 && $2==2 && inreg($1)==2 | regorconst |
+			remove(referals)
+			"add (%(regvar($1)%)),%[1]"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
+lil adi sil $1==$3 && $2==2 | regorconstnoaddr |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"add (%[a]),%[1]"
 			setcc({ind_reg2, %[a]})		  | | |
+#ifdef REGVARS
+lil ngi sil $1==$3 && $2==2 && inreg($1)==2 | |
+			remove(referals)
+			"neg (%(regvar($1)%))"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
 lil ngi sil $1==$3 && $2==2 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"neg (%[a])"
 			setcc({ind_reg2, %[a]})		  | | |
-lil ads sil $1==$3 && $2==2 | regorconst |
-			allocate(ADDREG={LOCAL2, $1, 2})
+lil ads sil $1==$3 && $2==2 | | | | lil $1 adi 2 sil $1 |
+#ifdef REGVARS
+lil adp sil $1==$3 && $2==1 && inreg($1)==2 | |
 			remove(referals)
-			"add (%[a]),%[1]"
-			setcc({ind_reg2, %[a]})		  | | |
+			"inc (%(regvar($1)%))"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
 lil adp sil $1==$3 && $2==1 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"inc (%[a])"
 			setcc({ind_reg2, %[a]})		  | | |
+#ifdef REGVARS
+lil adp sil $1==$3 && $2==0-1 && inreg($1)==2 | |
+			remove(referals)
+			"dec (%(regvar($1)%))"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
 lil adp sil $1==$3 && $2==0-1 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"dec (%[a])"
 			setcc({ind_reg2, %[a]})		  | | |
+#ifdef REGVARS
+lil adp sil $1==$3 && inreg($1)==2 | |
+			remove(referals)
+			"add (%(regvar($1)%)),$2"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
 lil adp sil $1==$3	    | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"add (%[a]),$2"
 			setcc({ind_reg2, %[a]})		  | | |
-lil and sil $1==$3 && $2==2 | regorconst |
+#ifdef REGVARS
+lil and sil $1==$3 && $2==2 && inreg($1)==2 | regorconst |
+			remove(referals)
+			"and (%(regvar($1)%)),%[1]"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
+lil and sil $1==$3 && $2==2 | regorconstnoaddr |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"and (%[a]),%[1]"
 			setcc({ind_reg2, %[a]})		  | | |
-lil ior sil $1==$3 && $2==2 | regorconst |
+#ifdef REGVARS
+lil ior sil $1==$3 && $2==2 && inreg($1)==2 | regorconst |
+			remove(referals)
+			"or (%(regvar($1)%)),%[1]"
+			setcc({ind_reg2, regvar($1)})		  | | |
+#endif
+lil ior sil $1==$3 && $2==2 | regorconstnoaddr |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"or (%[a]),%[1]"
 			setcc({ind_reg2, %[a]})		  | | |
+#ifdef REGVARS
+lil com sil $1==$3 && $2==2 && inreg($1)==2 | |
+			remove(referals)
+			"not (%(regvar($1)%))"
+			samecc				  | | |
+#endif
 lil com sil $1==$3 && $2==2 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
@@ -1100,6 +1258,8 @@ loe ads ste $1==$3 && $2==2 | regorconst |
 			setcc({EXTERN2, $1})		  | | |
 loe loe adp ste $1==$4 && $1==$4 | |
 			allocate(ADDREG={EXTERN2,$1})	| %[a] | loe $1 adp $3 ste $1 |
+loe ine $1==$2 | |	allocate(REG={EXTERN2,$1})	| %[a] | ine $1 |
+loe dee $1==$2 | |	allocate(REG={EXTERN2,$1})	| %[a] | dee $1 |
 loe adp ste $1==$3 && $2==1 | |
 			remove(indirects)
 			"inc ($1)"
@@ -1135,7 +1295,7 @@ cii		| CXREG DXREG X_ACC |
 			erase(%[3])		     | %[3] | |
 ciu		| |		|			| cuu	|
 cui		| |		|			| cuu	|
-cuu		| CXREG BXREG X_ACC |
+cuu		| CXREG DXREG X_ACC |
 			remove(ALL)
 			"call .cuu"
 			erase(%[3])		     | %[3] | |
@@ -1461,18 +1621,18 @@ aar $1==2	 | halfindir X_ACC X_ADDREG |
 lae sar defined(rom(1,3)) | |	|	| lae $1 aar $2 sti rom(1,3) |
 lae lar defined(rom(1,3)) | |	|	| lae $1 aar $2 loi rom(1,3) |
 aar !defined($1) | |	remove(ALL)
-			"call .iaar"	    | di | |
-sar $1==2	| X_SIREG X_ACC X_DIREG |
+			"call .iaar"	    | bx | |
+sar $1==2	| X_BXREG X_ACC |
 			remove(ALL)
 			"call .sar2"
-			erase(%[1]) erase(%[2]) erase(%[3])
+			erase(%[1]) erase(%[2])
 						 | | |
 sar !defined($1) | |	remove(ALL)
 			"call .isar"	       | | |
-lar $1==2	| X_DIREG X_ACC X_SIREG |
+lar $1==2	| X_BXREG X_ACC |
 			remove(ALL)
 			"call .lar2"
-			erase(%[1]) erase(%[2]) erase(%[3])
+			erase(%[1]) erase(%[2])
 						 | | |
 lar !defined($1) | |	remove(ALL)
 			"call .ilar"	       | | |
@@ -1539,7 +1699,7 @@ cmf !defined($1)	| X_CXREG |
 			"call .cmf" erase(%[1])	    |	    | |
 
 /* The costs with cmp are the cost of the 8086 cmp instruction */
-cmp		| NO REG rmorconst |
+cmp		| NO register rmorconst |
 			allocate(REG = {ANYCON,0})
 			"cmp %[1],%[2]"
 			"je 2f"
@@ -1549,7 +1709,7 @@ cmp		| NO REG rmorconst |
 			"1:\tdec %[a]\n2:"
 			setcc(%[a])
 			erase(%[a])		     | %[a] | |(4,4)
-...	       | rmorconst REG |
+...	       | rmorconst register |
 			allocate(REG = {ANYCON,0})
 			"cmp %[1],%[2]"
 			"je 2f"
@@ -2080,28 +2240,59 @@ cai		| rm |	remove(ALL)
 			"call %[1]"			  | | |
 lfr $1==2	| |				       | ax | |
 lfr $1==4	| |				    | dx ax | |
-lfr $1==6	| |				 | bx dx ax | |
-lfr $1==8	| |			      | cx bx dx ax | |
+lfr $1==6	| | 	remove(ALL)
+			"call .lfr6"			  | | |
+lfr $1==8	| |	remove(ALL)
+			"call .lfr8"			  | | |
 ret $1==0	| |	remove(ALL)
+#ifdef REGVARS
+			return
+#else
 			"mov sp,bp"
 			"pop bp"
-			"ret"				  | | |
+			"ret"				 
+#endif
+							| | |
 ret $1==2	| ACC |
+			remove(ALL)
+#ifdef REGVARS
+			return
+#else
 			"mov sp,bp"
 			"pop bp"
-			"ret"				  | | |
+			"ret"
+#endif
+							| | |
 ret $1==4	| ACC DXREG |
+			remove(ALL)
+#ifdef REGVARS
+			return
+#else
 			"mov sp,bp"
 			"pop bp"
-			"ret"				  | | |
-ret $1==6	| ACC DXREG BXREG |
+			"ret"
+#endif
+							| | |
+ret $1==6	| STACK |
+			"call .ret6"
+#ifdef REGVARS
+			return
+#else
 			"mov sp,bp"
 			"pop bp"
-			"ret"				  | | |
-ret $1==8	| ACC DXREG BXREG CXREG |
+			"ret"
+#endif
+							| | |
+ret $1==8	| STACK |
+			"call .ret8"
+#ifdef REGVARS
+			return
+#else
 			"mov sp,bp"
 			"pop bp"
-			"ret"				  | | |
+			"ret"
+#endif
+							| | |
 
 /************************************************
  * Group 15 : Miscellaneous instructions	*
@@ -2109,11 +2300,11 @@ ret $1==8	| ACC DXREG BXREG CXREG |
 
 asp $1==2	| nocoercions : a_word |		  | | |
 ...		| STACK |
-			allocate(IREG) /* GENREG may contain lfr area */
+			allocate(BXREG)
 			"pop %[a]" erase(%[a]) samecc	  | | | (1,8)
 asp $1==4	| nocoercions : a_word a_word | 	  | | |
 ...		| STACK |
-			allocate(IREG) /* GENREG may contain lfr area */
+			allocate(BXREG)
 			"pop %[a]" "pop %[a]"
 			erase(%[a]) samecc		  | | | (2,16)
 asp $1==0-2	| |	/* Anything will do */	       | bp | |
@@ -2130,49 +2321,49 @@ ass !defined($1)| rm rmorconst |
 			"jne .unknown"
 			"add sp,%[2]"			  | | |
 blm $1==0	| |					  | | asp 4 |
-blm $1>0	| X_DIREG X_SIREG |
+blm $1>0	| |
 			remove(ALL)
 			allocate(CXREG={ANYCON,$1/2})
-			"rep movs"
-			erase(%[1]) erase(%[2]) erase(%[a])
+			"call .blm"
+			erase(%[a])
 							  | | |
-bls $1==2	| X_CXREG X_DIREG X_SIREG |
+bls $1==2	| X_CXREG |
 			remove(ALL)
 			"sar cx,1"
-			"rep movs"
-			erase(%[1]) erase(%[2]) erase(%[3])
+			"call .blm"
+			erase(%[1])
 							  | | |
-bls !defined($1)| rm-CXREG-DIREG-SIREG X_CXREG X_DIREG X_SIREG |
+bls !defined($1)| rm-CXREG X_CXREG |
 			remove(ALL)
 			"cmp %[1],2"
 			"jne .unknown"
 			"sar cx,1"
-			"rep movs"
-			erase(%[2]) erase(%[3]) erase(%[4])
+			"call .blm"
+			erase(%[2])
 							  | | |
-csa $1==2	| X_SIREG X_BXREG |
+csa $1==2	| X_BXREG X_ACC |
 			remove(ALL)
 			"jmp .csa2"
 			erase(%[1]) erase(%[2]) 	  | | |
-csa !defined($1)| rm-SIREG-BXREG X_SIREG X_BXREG |
+csa !defined($1)| rm-BXREG-ACC X_BXREG X_ACC |
 			remove(ALL)
 			"cmp %[1],2"
 			"jne .unknown"
 			"jmp .csa2"
 			erase(%[2]) erase(%[3]) 	  | | |
-csb $1==2	| X_SIREG X_DXREG |
+csb $1==2	| X_BXREG X_ACC |
 			remove(ALL)
 			"jmp .csb2"
 			erase(%[1]) erase(%[2]) 	  | | |
-csb !defined($1)| rm-SIREG-DIREG X_SIREG X_DXREG |
+csb !defined($1)| rm-BXREG-ACC X_BXREG X_ACC |
 			remove(ALL)
 			"cmp %[1],2"
 			"jne .unknown"
 			"jmp .csb2"
 			erase(%[2]) erase(%[3]) 	  | | |
-dup $1==2	| REG |				| %[1] %[1] | |
+dup $1==2	| regorconst |				| %[1] %[1] | |
 ...		| ACC1 |			| %[1] %[1] | |
-dup $1==4	| REG REG |	      | %[2] %[1] %[2] %[1] | |
+dup $1==4	| regorconst regorconst |	      | %[2] %[1] %[2] %[1] | |
 dup		| |	remove(ALL)
 			move({ANYCON, $1}, cx)
 			"call .dup"
@@ -2218,9 +2409,9 @@ mon		| X_ACC |
 			"call .mon"			  | | |
 nop		| |	remove(ALL)
 			"call .nop"			  | | |
-rck $1==2	| SIREG ACC |
+rck $1==2	| BXREG ACC |
 			"call .rck"		       | ax | |
-rck !defined($1)| rm-SIREG-ACC SIREG ACC |
+rck !defined($1)| rm-BXREG-ACC BXREG ACC |
 			"cmp %[1],2"
 			"jne .unknown"
 			"call .rck"		       | ax | |
@@ -2299,15 +2490,15 @@ MOVES:
 (ACC,		   EXTERN1,   "movb %[2],%[1.1]" samecc,   (3,16))
 (EXTERN2,	   ACC,       "mov %[2],%[1]" samecc,	   (3,14))
 (EXTERN1,	   ACC1,      "movb %[2],%[1]" samecc,	   (3,14))
-(rm,		   REG,       "mov %[2],%[1]" samecc,	   (2,2) + %[1] )
+(rm,		   register,  "mov %[2],%[1]" samecc,	   (2,2) + %[1] )
 (anyreg,	   dest,      "mov %[2],%[1]" samecc,	   (2,3) + %[2] )
-(halfindir,	   REG,	      "lea %[2],%[1]" samecc,	   (2,3) + %[1] )
+(halfindir,	   register,  "lea %[2],%[1]" samecc,	   (2,3) + %[1] )
 (rm1,		   REG1,      "movb %[2],%[1]" samecc,	   (2,2) + %[1] )
 (REG1,		   rm1,       "movb %[2],%[1]" samecc,	   (2,3) + %[2] )
 (GENREG,	   rm1,       "movb %[2],%[1.1]" samecc,   (2,3) + %[2] )
-(ANYCON %[val]==0, REG,       "xor %[2],%[2]" setcc(%[2]), (2,3))
+(ANYCON %[val]==0, register,  "xor %[2],%[2]" setcc(%[2]), (2,3))
 (ANYCON %[val]==0, REG1,      "xorb %[2],%[2]" setcc(%[2]),(2,3))
-(const, 	   REG,       "mov %[2],%[1]" samecc,	   (3,4))
+(const, 	   register,  "mov %[2],%[1]" samecc,	   (3,4))
 (const, 	   REG1,      "movb %[2],%[1]" samecc,	   (2,4))
 (const, 	   dest,      "mov %[2],%[1]" samecc,	   (4,4) + %[2] )
 (const, 	   rm1,       "movb %[2],%[1]" samecc,	   (3,4) + %[2] )
@@ -2326,7 +2517,7 @@ STACKS:
 (const, REG,	move(%[1],%[a])
 		"push %[a]"
 		samecc			      ,  (4,11) )
-(const, ,	".data\n1: .word %[1]\n.text"
+(const, ,	".sect .data\n1: .data2 %[1]\n.sect text"
 		"push (1b)"
 		samecc			      ,  (6,24) )
 (rm1, GENREG,	move({ANYCON,0},%[a])
@@ -2346,9 +2537,6 @@ STACKS:
 (bpreg_off, ,	move(%[1],%[1.reg])
 		"push %[1.reg]"
 		samecc			      ,  ( 6,17) + %[1] )
-(ADDR_LOCAL %[ind]==0, ,
-		"push bp"
-		samecc			      ,  ( 1,10) )
 (halfindir, REG,move(%[1],%[a])
 		"push %[a]"
 		samecc			      ,  ( 6,17) + %[1] )

@@ -77,8 +77,69 @@ prolog(nlocals) full nlocals; {
 	default:
 		printf("\tsub\tsp,%d\n",nlocals); break;
 	}
-
 }
+
+#ifdef REGVARS
+long si_off;
+long di_off;
+int firstreg;
+
+regscore(off, size, typ, score, totyp)
+	long off;
+{
+	if (size != 2) return -1;
+	if (typ == reg_pointer || typ == reg_loop) score *= 3;
+	else score *= 2;
+	score -= 2;	/* cost of saving */
+	if (off >= 0) score -= 3;
+	return score;
+}
+
+i_regsave()
+{
+	si_off = -1;
+	di_off = -1;
+	firstreg = 0;
+}
+
+f_regsave()
+{
+}
+
+regsave(regstr, off, size)
+	char *regstr;
+	long off;
+{
+	if (strcmp(regstr, "si") == 0) {
+		if (! firstreg) firstreg = -1;
+		si_off = off;
+		fputs("push si\n", codefile);
+		if (off >= 0)
+			fprintf(codefile, "mov si,%ld(bp)\n", off);
+	}
+	else {
+		assert( ! strcmp(regstr, "di"));
+		if (! firstreg) firstreg = 1;
+		di_off = off;
+		fputs("push di\n", codefile);
+		if (off >= 0)
+			fprintf(codefile, "mov di,%ld(bp)\n", off);
+	}
+}
+
+regreturn()
+{
+	if (firstreg == 1) {
+		if (si_off != -1) fputs("pop si\n", codefile);
+		fputs("pop di\n", codefile);
+	}
+	else if (firstreg == -1) {
+		if (di_off != -1) fputs("pop di\n", codefile);
+		fputs("pop si\n", codefile);
+	}
+	fputs("mov sp,bp\npop bp\nret\n", codefile);
+}
+#endif REGVARS
 
 mes(type) word type ; {
 	int argt ;
