@@ -1,4 +1,6 @@
+#define CODE_EXPANDER
 #include <system.h>
+#include "back.h"
 #include "mach.h"
 
 arg_error( s, arg)
