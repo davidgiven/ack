@@ -189,9 +189,10 @@ emfile:	<e.out\0>
 	mul	$3,r3		/ or 12	bytes
 .endif
 	add	r3,r0		/ reserve space
-	mov	r0,eb		/ top of pd space
+	mov	r0,hp		/ top of pd space, temporarily in hp
 	mov	r0,r3		/ base for data	fill
 
+	mov	$retsize,eb	/ address of value containing 0, temporarily
 	add	szdata,r0	/ size of external data
 	jcs	toolarge	/ too much text and data
 	mov	r0,globmax	/ maximum global
@@ -200,6 +201,7 @@ emfile:	<e.out\0>
 	sys	indir;sybreak	/ ask for the core
 	jes	toolarge	/ too much, sorry
 
+	mov	hp,eb		/ top of pd space
 	mov	txtsiz,leescal+4     / set up for text read
 	mov	pb,leescal+2	     / start address text read
 	mov	r5,r0		/ file descriptor input
@@ -1659,7 +1661,7 @@ cfu.z:
 .endif
 	mov	$4,-(sp)
 	mov	r1,-(sp)
-	jbr	cuu_z
+	jbr	cuu.z
 /-------
 cfi.z:
 	mov	(sp)+,r0
