@@ -4,6 +4,27 @@
 #include "header.h"
 #include "back.h"
 
+/* Findsym() manages the symbol table. It can be called in three ways. 
+ * 1) findsym( "string", DEFINITION) : look if string is present in the
+ * 	symol table. If not create a new entry: set index into the
+ *	string_area. Return the index to the entry. Symbol_def() will
+ *      the fields.
+ * 2) findsym( "string", REFERENCE) : If string is present but never used
+ *    (see 3)) make this name extern visible and set on_valu on -1.
+ *    We use the on_valu field to distinguish between external visible 
+ *    names that are defined here and those that are defined in another file.
+ *    If the string is not present create a new entry and make the name extern
+ *    visible and set on_valu on -1.
+ *    If the name is present do nothing special.
+ * 3) findsym( "string", STORE_STRING) : this call is made to save a
+ *    copy action. The first time a name is encountered we store it
+ *    immediately in the symbol table. If the name is not present we
+ *    create a new entry and set the on_valu field on -2. In this
+ *    way we can tell later that the name is not used yet. The index 
+ *    is stored in the global varaible 'index_symbol_table' because it is
+ *    very likely that the same string is in the next call to findsym.
+ *    (After introducing a new name one does something with this name)
+ */
 
 int		string_lengte = 0,
 		index_symbol_table = -1;
