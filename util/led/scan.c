@@ -89,7 +89,7 @@ getfile(filename)
 #ifdef SYMDBUG
 		if (passnumber == FIRST || !incore) {
 			if (fstat(infile, &statbuf) < 0)
-				fatal("cannot stat");
+				fatal("cannot stat %s", filename);
 			objectsize = statbuf.st_size;
 		}
 #endif /* SYMDBUG */
@@ -102,14 +102,14 @@ getfile(filename)
 		if (passnumber == FIRST) {
 			rd_arhdr(infile, &archive_header);
 			if (strcmp(archive_header.ar_name, SYMDEF))
-				fatal("no table of contents");
+				fatal("%s: no table of contents", filename);
 		} else if (incore) {
 			modulbase += sizeof(int);
 			core_position += sizeof(int);
 		}
 		return ARCHIVE;
 	default:
-		fatal("wrong magic number");
+		fatal("%s: wrong magic number", filename);
 	}
 	/* NOTREACHED */
 }
