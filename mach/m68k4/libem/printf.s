@@ -7,6 +7,7 @@ _getal:
 	.space	12
 _char:
 	.space	1
+	.align  2
 .data
 sav:
 	.long	0
