@@ -17,7 +17,7 @@ p_type	int_type, char_type, short_type, long_type, bool_type;
 p_type	uint_type, uchar_type, ushort_type, ulong_type;
 p_type	void_type, incomplete_type;
 p_type	float_type, double_type;
-p_type	string_type;
+p_type	string_type, address_type;
 
 long	int_size = SZ_INT,
 	char_size = 1,
@@ -255,6 +255,7 @@ init_types()
   ushort_type = basic_type(T_UNSIGNED, short_size);
   uchar_type = basic_type(T_UNSIGNED, char_size);
   string_type = basic_type(T_STRING, 0L);
+  address_type = basic_type(T_POINTER, pointer_size);
   void_type = basic_type(T_VOID, 0L);
   incomplete_type = basic_type(T_INCOMPLETE, 0L);
   float_type = basic_type(T_REAL, float_size);

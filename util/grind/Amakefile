@@ -61,6 +61,7 @@ CSRC = {
 	value.c,
 	type.c,
 	rd.c,
+	help.c,
 	modula-2.c,
 	c.c
 } ;
@@ -101,7 +102,7 @@ LIBRARIES = {
 	$EMHOME/modules/lib/libsystem.a
 } ;
 
-DBFLAGS = { -g, -DDEBUG } ;
+DBFLAGS = { -O, -DDEBUG } ;
 PROFFLAGS = { } ;
 
 LDFLAGS = {

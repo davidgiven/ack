@@ -13,6 +13,7 @@ extern char	*dirs[];
 extern FILE	*fopen();
 extern FILE	*db_out;
 extern t_lineno	currline;
+extern int	interrupted;
 
 static int
 mk_filnm(dir, file, newname)
@@ -81,16 +82,14 @@ lines(file, l1, l2)
   else f = last_f;
 
   if (l1 < 1) l1 = 1;
-  if (l2 > file->f_nlines) l2 = file->f_nlines;
-  if (l1 > l2) {
-	error("%s has only %d lines", file->f_sym->sy_idf->id_text, file->f_nlines);
-	return;
-  }
+  if (l1 > file->f_nlines) l1 = file->f_nlines;
+  if (l1+l2-1 > file->f_nlines) l2 = file->f_nlines - l1 + 1;
 
   fseek(f, *(file->f_linepos+(l1-1)), 0);
-  for (n = l1; n <= l2; n++) {
+  for (n = l1; n < l1 + l2; n++) {
 	register int	c;
 
+	if (interrupted) return;
 	fprintf(db_out, "%c%5d\t", currfile && file == currfile->sy_file && n == currline ? '>' : ' ', n);
 	do {
 		c = getc(f);

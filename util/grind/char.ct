@@ -8,11 +8,11 @@
 %iSTGARB
 STSKIP: \t\013\014\015
 STNL:;\012
-STIDF:a-zA-Z_$
+STIDF:a-zA-Z_
 STSTR:"'
 STDOT:.
 STNUM:0-9
-STSIMP:,<>{}:`
+STSIMP:-,<>{}:`?\\
 %T#include "class.h"
 %Tchar tkclass[] = {
 %p

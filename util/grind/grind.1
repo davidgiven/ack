@@ -1,5 +1,5 @@
 .\" $Header$
-.TH GRIND 1ACK
+.TH GRIND 1
 .SH NAME
 grind \- source-level debugger for ACK
 .SH SYNOPSIS
@@ -21,15 +21,15 @@ available on many Unix systems. However, some
 .B grind
 commands are not available in
 .IR dbx ,
-some more
+some
 .I dbx
 commands are not available in
 .BR grind ,
-and some things are just plain different.
+and some things are just different.
 .LP
 .I <object file>
 is an object file, produced by
-.IR ack (1ACK)
+.IR ack (1)
 with the
 .B \-g
 option to include a symbol table.
@@ -40,7 +40,7 @@ is specified, "a.out" is used.
 .LP
 For some machines, the debugger does not recognize the object file
 format. For these machines, the result of the
-.IR led (6ACK)
+.IR led (6)
 program must be saved and offered to
 .BR grind .
 .SH USAGE
@@ -164,10 +164,10 @@ when the
 is reached, and then when
 .I condition
 becomes true.
-If no position is given, stop when
+If no position is given, do this when
 .I condition
 becomes true.
-If no condition is given, stop when
+If no condition is given, do this when
 .I position
 is reached.
 Either a position or a condition (or both) must be given.
@@ -273,6 +273,9 @@ If the types do not match,
 tries to apply conversions.
 .TP
 \fBwhere\fP [ \fIn\fP ]
+.ti -0.5i
+\fBw\fP [ \fIn\fP ]
+.br
 List all, or the top
 .IR n ,
 active functions on the stack.
@@ -302,13 +305,11 @@ the first statement of
 Exit
 .BR grind .
 .LP
-Some commands can be repeated by entering an empty command line: step,
-next, print, list, status, cont.
-.SH ENVIRONMENT
-P.M.
+Some commands can be repeated without arguments by entering an empty command line:
+step, next, list, cont.
 .SH SEE ALSO
-.IR ack (1ACK).
-.IR led (6ACK).
+.IR ack (1).
+.IR led (6).
 .SH REMARKS
 .LP
 .B Grind

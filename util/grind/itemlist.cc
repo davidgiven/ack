@@ -7,13 +7,16 @@
 #include "position.h"
 #include "tree.h"
 #include "operator.h"
+#include "message.h"
 
 extern FILE	*db_out;
 extern int	db_ss;
 
 typedef struct item {
-  struct item		*i_next;
-  struct tree		*i_node;
+  struct item	*i_next;
+  struct tree	*i_node;
+  int		i_disabled;
+  int		i_itemno;
 } t_item, *p_item;
 
 /* STATICALLOCDEF "item" 10 */
@@ -25,7 +28,7 @@ struct itemlist {
 
 static struct itemlist	item_list;
 
-int
+static int
 in_item_list(p)
   p_tree	p;
 {
@@ -38,8 +41,17 @@ in_item_list(p)
   return 0;
 }
 
+static
+pr_item(i)
+  p_item	i;
+{
+  fprintf(db_out, "(%d)\t", i->i_itemno);
+  print_node(i->i_node, 0);
+  fputs(i->i_disabled ? " (disabled)\n": "\n", db_out);
+}
+
 int
-item_addr_actions(a)
+item_addr_actions(a, mess_type)
   t_addr	a;
 {
   /* Perform actions associated with position 'a', and return 1 if we must stop
@@ -51,16 +63,14 @@ item_addr_actions(a)
   while (i) {
 	register p_tree	p = i->i_node;
 
-	if (p->t_address == a || p->t_address == NO_ADDR) {
+	if (! i->i_disabled && (p->t_address == a || p->t_address == NO_ADDR)) {
 		switch(p->t_oper) {
 		case OP_TRACE:
 		case OP_WHEN:
-			if (! p->t_args[1] ||
-			    eval_cond(p->t_args[1])) {
-				perform(p, a);
-			}
+			perform(p, a);
 			break;
 		case OP_STOP:
+			if (mess_type != DB_SS && mess_type != OK) break;
 			if (! p->t_args[1] ||
 			    eval_cond(p->t_args[1])) stopping = 1;
 			break;
@@ -83,7 +93,7 @@ handle_displays()
   while (i) {
 	register p_tree p = i->i_node;
 
-	if (p->t_oper == OP_DISPLAY) do_print(p);
+	if (! i->i_disabled && p->t_oper == OP_DISPLAY) do_print(p);
 	i = i->i_next;
   }
 }
@@ -105,9 +115,9 @@ add_to_item_list(p)
   else {
 	item_list.il_last->i_next = i;
   }
-  p->t_itemno = ++item_list.il_count;
+  i->i_itemno = ++item_list.il_count;
   item_list.il_last = i;
-  pr_item(p);
+  pr_item(i);
   return 1;
 }
 
@@ -119,7 +129,7 @@ remove_from_item_list(n)
   p_tree	p = 0;
 
   while (i) {
-	if (i->i_node->t_itemno == n) break;
+	if (i->i_itemno == n) break;
 	prev = i;
 	i = i->i_next;
   }
@@ -144,10 +154,45 @@ get_from_item_list(n)
   register p_item i = item_list.il_first;
 
   while (i) {
-	if (i->i_node->t_itemno == n) return i->i_node;
+	if (i->i_itemno == n) return i->i_node;
 	i = i->i_next;
   }
   return 0;
+}
+
+able_item(n, kind)
+  int	n;
+{
+  register p_item i = item_list.il_first;
+  register p_tree p;
+
+  while (i) {
+	if (i->i_itemno == n) break;
+	i = i->i_next;
+  }
+  if (! i) {
+	error("no item %d in current status", n);
+	return;
+  }
+  p = i->i_node;
+  if (i->i_disabled == kind) {
+	warning("item %d already %sabled", n, kind ? "dis" : "en");
+	return;
+  }
+  if (p->t_address == NO_ADDR &&
+      (p->t_oper != OP_TRACE || ! p->t_args[0])) {
+	db_ss += kind == 1 ? (-1) : 1;
+  }
+  i->i_disabled = kind;
+  switch(p->t_oper) {
+  case OP_STOP:
+  case OP_WHEN:
+	setstop(p, kind ? CLRBP : SETBP);
+	break;
+  case OP_TRACE:
+	settrace(p, kind ? CLRTRACE : SETTRACE);
+	break;
+  }
 }
 
 print_items()
@@ -155,15 +200,8 @@ print_items()
   register p_item i = item_list.il_first;
 
   for (; i; i = i->i_next) {
-	pr_item(i->i_node);
+	pr_item(i);
   }
-}
-
-pr_item(p)
-  p_tree	p;
-{
-  fprintf(db_out, "(%d)\t", p->t_itemno);
-  print_node(p, 1);
 }
 
 do_items()
@@ -171,6 +209,6 @@ do_items()
   register p_item i = item_list.il_first;
 
   for (; i; i = i->i_next) {
-	if (i->i_node->t_oper != OP_DUMP) eval(i->i_node);
+	if (! i->i_disabled && i->i_node->t_oper != OP_DUMP) eval(i->i_node);
   }
 }

@@ -110,8 +110,6 @@ unop_prio(op)
   case E_MIN:
   case E_PLUS:
 	return 3;
-  case E_SELECT:
-	return 9;
   }
   return 1;
 }
@@ -121,6 +119,10 @@ binop_prio(op)
   int	op;
 {
   switch(op) {
+  case E_SELECT:
+	return 9;
+  case E_ARRAY:
+	return 5;
   case E_AND:
   case E_MUL:
   case E_DIV:
@@ -357,15 +359,18 @@ get_token(c)
   register int	c;
 {
   switch(c) {
+  case '[':
+	tok.ival = E_ARRAY;
+	/* fall through */
   case '(':
   case ')':
-  case '[':
   case ']':
   case '`':
   case '{':
   case '}':
   case ':':
   case ',':
+  case '\\':
 	return c;
 
   case '.':
@@ -424,7 +429,7 @@ get_token(c)
 	tok.ival = E_NOT;
 	return PREF_OP;
   default:
-	error("illegal character 0%o", c);
+	error((c >= 040 && c < 0177) ? "%s'%c'" : "%s'\\0%o'", "illegal character ", c);
 	return LLlex();
   }
 }
@@ -440,6 +445,7 @@ get_string(c)
   while (ch = getc(db_in), ch != c) {
 	if (ch == '\n') {
 		error("newline in string");
+		ungetc(ch, db_in);
 		break;
 	}
 	buf[len++] = ch;

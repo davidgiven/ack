@@ -38,11 +38,11 @@ DbxRead(f)
 
   /* Open file, read header, and check magic word */
   if (! rd_open(f)) {
-  	fatal("%s: not an ACK object file", f);
+  	fatal("%s: could not open", f);
   }
   rd_ohead(&h);
   if (BADMAGIC(h) && h.oh_magic != O_CONVERTED) {
-  	fatal("%s: not an ACK object file", f);
+  	fatal("%s: not an object file", f);
   }
 
   /* Allocate space for name table and read it */

@@ -27,20 +27,25 @@ extern char	*AObj;
 extern FILE	*db_out;
 extern int	debug;
 extern long	pointer_size;
+extern char	*progname;
+extern int	child_interrupted;
+extern int	interrupted;
 
 static int	child_pid;		/* process id of child */
 static int	to_child, from_child;	/* file descriptors for communication */
 static int	child_status;
 static int	restoring;
 static int	fild1[2], fild2[2];	/* pipe file descriptors */
+int		disable_intr = 1;
 
 int		db_ss;
-t_lineno	currline, listline;
+t_lineno	currline;
 
 static int	catch_sigpipe();
 static int	stopped();
 static int	uputm(), ugetm();
 static t_addr	curr_stop;
+p_tree		run_command;
 
 int
 init_run()
@@ -57,8 +62,12 @@ init_run()
   }
   to_child = fild1[1];
   from_child = fild2[0];
+  child_pid = 0;
+  if (currfile) CurrentScope = currfile->sy_file->f_scope;
   return 1;
 }
+
+extern int errno;
 
 int
 start_child(p)
@@ -76,6 +85,10 @@ start_child(p)
 			    allowed one child
 			 */
 
+  if (p != run_command) {
+	freenode(run_command);
+	run_command = p;
+  }
   /* first check arguments and redirections and build argument list */
   while (pt) {
   	switch(pt->t_oper) {
@@ -133,7 +146,7 @@ start_child(p)
 		close(0);
 		if ((fd = open(in_redirect, 0)) < 0 ||
 		    (fd != 0 && dup2(fd, 0) < 0)) {
-			error("could not open input file");
+			perror(progname);
 			exit(1);
 		}
 		if (fd != 0) {
@@ -142,10 +155,11 @@ start_child(p)
 	}
 	if (out_redirect) {
 		int fd;
+
 		close(1);
-		if ((fd = creat(in_redirect, 0666)) < 0 ||
+		if ((fd = creat(out_redirect, 0666)) < 0 ||
 		    (fd != 1 && dup2(fd, 1) < 0)) {
-			error("could not open output file");
+			perror(progname);
 			exit(1);
 		}
 		if (fd != 1) {
@@ -165,32 +179,23 @@ start_child(p)
 
   pipe(fild1);		/* to occupy file descriptors */
   signal(SIGPIPE, catch_sigpipe);
-  if (! wait_for_child((char *) 0)) {
-	error("child not responding");
-	return 0;
+  {
+	struct message_hdr m;
+
+  	if (! ugetm(&m)) {
+		error("child not responding");
+		init_run();
+		return 0;
+	}
+	curr_stop = m.m_size;
+	CurrentScope = get_scope_from_addr(curr_stop);
   }
   do_items();
-  if (! restoring && ! item_addr_actions(curr_stop)) {
+  if (! restoring && ! item_addr_actions(curr_stop, OK)) {
 	send_cont(1);
   }
   else if (! restoring) {
 	stopped("stopped", curr_stop);
-	handle_displays();
-  }
-  return 1;
-}
-
-int
-wait_for_child(s)
-  char	*s;		/* to pass on to 'stopped' */
-{
-  struct message_hdr m;
-
-  if (child_pid) {
-  	if (ugetm(&m)) {
-		return stopped(s, (t_addr) m.m_size);
-  	}
-  	return 0;
   }
   return 1;
 }
@@ -211,7 +216,6 @@ catch_sigpipe()
 {
   child_pid = 0;
 }
-
 
 static int
 ureceive(p, c)
@@ -252,6 +256,7 @@ usend(p, c)
 {
   int	i;
 
+  if (! child_pid) return 0;
   while (c >= 0x1000) {
 	i = write(to_child, p, 0x1000);
 	if (i < 0) return 0;
@@ -299,11 +304,12 @@ stopped(s, a)
 {
   p_position pos;
 
-  if (s) {
+  if (s && a) {
 	fprintf(db_out, "%s ", s);
 	pos = print_position(a, 1);
 	fputs("\n", db_out);
 	list_position(pos);
+	handle_displays();
   }
   curr_stop = a;
   return 1;
@@ -315,16 +321,37 @@ could_send(m, stop_message)
 {
   int	type;
   t_addr a;
+  static int level = 0;
+
+  level++;
   for (;;) {
   	if (child_pid) {
-		if (! uputm(m) ||
-		    ! ugetm(&answer)) {
-			if (child_pid) {
-				error("something wrong!");
+		int child_dead = 0;
+		if (m->m_type & DB_RUN) disable_intr = 0;
+		if (!child_interrupted && (! uputm(m) || ! ugetm(&answer))) {
+			child_dead = 1;
+		}
+		disable_intr = 1;
+		if ((interrupted || child_interrupted) && ! child_dead) {
+			while (child_interrupted && answer.m_type != INTR) {
+				if (! ugetm(&answer)) {
+					child_dead = 1;
+					break;
+				}
+			}
+			if (interrupted && ! child_dead) {
+				level--;
+				if (! level) {
+					child_interrupted = 0;
+					CurrentScope = get_scope_from_addr((t_addr) answer.m_size);
+					interrupted = 0;
+					stopped("interrupted", (t_addr) answer.m_size);
+				}
 				return 1;
 			}
+		}
+		if (child_dead) {
 			wait(&child_status);
-			init_run();
 			if (child_status & 0177) {
 				fprintf(db_out,
 					"child died with signal %d\n",
@@ -335,6 +362,8 @@ could_send(m, stop_message)
 					"child terminated, exit status %d\n",
 					child_status >> 8);
 			}
+			init_run();
+			level--;
 			return 1;
 		}
 		a = answer.m_size;
@@ -342,7 +371,7 @@ could_send(m, stop_message)
 		if (m->m_type & DB_RUN) {
 			/* run command */
 			CurrentScope = get_scope_from_addr((t_addr) a);
-		    	if (! item_addr_actions(a) &&
+		    	if (! item_addr_actions(a, type) &&
 		            ( type == DB_SS || type == OK)) {
 				/* no explicit breakpoints at this position.
 				   Also, child did not stop because of
@@ -363,13 +392,40 @@ could_send(m, stop_message)
 		}
 		if (stop_message) {
 			stopped("stopped", a);
-			handle_displays();
 		}
-		return 1;
+		level--;
+		return type;
 	}
+	level--;
 	return 0;
   }
   /*NOTREACHED*/
+}
+
+static int
+getbytes(size, from, to, kind)
+  long	size;
+  t_addr from;
+  char	*to;
+{
+  struct message_hdr	m;
+
+  m.m_type = kind;
+  m.m_size = size;
+  put_int(m.m_buf, pointer_size, (long)from);
+
+  if (! could_send(&m, 0)) {
+	error("no process");
+	return 0;
+  }
+
+  if (answer.m_type == FAIL || answer.m_type == INTR) {
+	return 0;
+  }
+
+  assert(answer.m_type == DATA);
+
+  return ureceive(to, answer.m_size);
 }
 
 int
@@ -378,23 +434,19 @@ get_bytes(size, from, to)
   t_addr from;
   char	*to;
 {
-  struct message_hdr	m;
+  return getbytes(size, from, to, GETBYTES);
+}
 
-  m.m_type = GETBYTES;
-  m.m_size = size;
-  put_int(m.m_buf, pointer_size, (long)from);
+int
+get_string(size, from, to)
+  long	size;
+  t_addr from;
+  char	*to;
+{
+  int retval = getbytes(size, from, to, GETSTR);
 
-  if (! could_send(&m, 0)) {
-	return 0;
-  }
-
-  if (answer.m_type == FAIL) {
-	return 0;
-  }
-
-  assert(answer.m_type == DATA && answer.m_size == m.m_size);
-
-  return ureceive(to, answer.m_size);
+  to[(int)answer.m_size] = 0;
+  return retval;
 }
 
 int
@@ -409,8 +461,7 @@ set_bytes(size, from, to)
   m.m_size = size;
   put_int(m.m_buf, pointer_size, (long) to);
 
-  return uputm(&m)
-	 && usend(from, size)
+  return uputm(&m) && usend(from, size)
 	 && ugetm(&m)
 	 && m.m_type != FAIL;
 }
@@ -424,16 +475,16 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 
   m.m_type = DUMP;
   if (! could_send(&m, 0)) {
-	error("no debuggee");
+	error("no process");
 	return 0;
   }
-  if (answer.m_type == FAIL) return 0;
+  if (answer.m_type == FAIL || answer.m_type == INTR) return 0;
   assert(answer.m_type == DGLOB);
   *globmessage = answer;
   *globbuf = malloc((unsigned) answer.m_size);
   if (! ureceive(*globbuf, answer.m_size) || ! ugetm(stackmessage)) {
 	if (*globbuf) free(*globbuf);
-	error("no debuggee");
+	error("no process");
 	return 0;
   }
   assert(stackmessage->m_type == DSTACK);
@@ -441,7 +492,7 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
   if (! ureceive(*stackbuf, stackmessage->m_size)) {
 	if (*globbuf) free(*globbuf);
 	if (*stackbuf) free(*stackbuf);
-	error("no debuggee");
+	error("no process");
 	return 0;
   }
   put_int(globmessage->m_buf+SP_OFF*pointer_size, pointer_size,
@@ -461,17 +512,17 @@ put_dump(globmessage, globbuf, stackmessage, stackbuf)
   char *globbuf, *stackbuf;
 {
   struct message_hdr m;
+  int retval;
 
   if (! child_pid) {
 	restoring = 1;
 	start_child(run_command);
 	restoring = 0;
   }
-  return	uputm(globmessage) &&
-		usend(globbuf, globmessage->m_size) &&
-		uputm(stackmessage) &&
-		usend(stackbuf, stackmessage->m_size) &&
+  retval =	uputm(globmessage) && usend(globbuf, globmessage->m_size) &&
+		uputm(stackmessage) && usend(stackbuf, stackmessage->m_size) &&
 		ugetm(&m) && stopped("restored", m.m_size);
+  return retval;
 }
 
 t_addr *
@@ -486,9 +537,10 @@ get_EM_regs(level)
   m.m_size = level;
 
   if (! could_send(&m, 0)) {
+	error("no process");
 	return 0;
   }
-  if (answer.m_type == FAIL) return 0;
+  if (answer.m_type == FAIL || answer.m_type == INTR) return 0;
   *to++ = (t_addr) get_int(answer.m_buf, pointer_size, T_UNSIGNED);
   *to++ = (t_addr) get_int(answer.m_buf+pointer_size, pointer_size, T_UNSIGNED);
   *to++ = (t_addr) get_int(answer.m_buf+2*pointer_size, pointer_size, T_UNSIGNED);
@@ -506,7 +558,7 @@ set_pc(PC)
   m.m_type = SETEMREGS;
   m.m_size = 0;
   put_int(m.m_buf+PC_OFF*pointer_size, pointer_size, (long)PC);
-  return could_send(&m, 0) && answer.m_type != FAIL;
+  return could_send(&m, 0) && answer.m_type != FAIL && answer.m_type != INTR;
 }
 
 int
@@ -530,7 +582,7 @@ do_single_step(type, count)
   m.m_type = type | (db_ss ? DB_SS : 0);
   m.m_size = count;
   single_stepping = 1;
-  if (could_send(&m, 1) && answer.m_type != FAIL) {
+  if (could_send(&m, 1) && answer.m_type != FAIL && answer.m_type != INTR) {
 	return 1;
   }
   single_stepping = 0;
@@ -549,7 +601,8 @@ set_or_clear_breakpoint(a, type)
   m.m_type = type;
   m.m_size = a;
   if (debug) printf("%s breakpoint at 0x%lx\n", type == SETBP ? "setting" : "clearing", (long) a);
-  if (! could_send(&m, 0)) { }
+  if (! could_send(&m, 0)) {
+  }
 
   return 1;
 }
@@ -565,7 +618,8 @@ set_or_clear_trace(start, end, type)
   put_int(m.m_buf, pointer_size, (long)start);
   put_int(m.m_buf+pointer_size, pointer_size, (long)end);
   if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == SETTRACE ? "setting" : "clearing", (long) start, (long) end);
-  if (! could_send(&m, 0)) { }
+  if (! could_send(&m, 0)) {
+  }
 
   return 1;
 }

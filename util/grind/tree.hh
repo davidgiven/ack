@@ -6,7 +6,6 @@ typedef struct tree {
   short	t_oper;		/* tree operator */
   short t_whichoper;	/* expression operator */
   t_addr t_address;	/* some operators use an address */
-  int	t_itemno;	/* item number in status list */
   union {
 	long tt_ival;
 	char *tt_sval;
@@ -34,4 +33,3 @@ typedef struct tree {
 /* ALLOCDEF "tree" 100 */
 
 extern p_tree	mknode();
-extern p_tree	run_command;

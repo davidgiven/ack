@@ -15,46 +15,99 @@
 
 extern FILE *db_out;
 extern long float_size, pointer_size, int_size;
+extern char *strindex();
 
 static
-print_literal(tp, v)
+print_unsigned(tp, v, format)
   p_type	tp;
   long		v;
+  register char	*format;
+{
+  while (format && *format) {
+	if (strindex("cdohx", *format)) break;
+	format++;
+  }
+  switch(format == 0 ? 0 : *format) {
+  default:
+	if (tp != uchar_type) {
+  		fprintf(db_out, currlang->uns_fmt, v);
+		break;
+	}
+	/* fall through */
+  case 'c':
+	(*currlang->printchar)((int) v);
+	break;
+  case 'd':
+  	fprintf(db_out, currlang->decint_fmt, v);
+	break;
+  case 'o':
+  	fprintf(db_out, currlang->octint_fmt, v);
+	break;
+  case 'x':
+  case 'h':
+  	fprintf(db_out, currlang->hexint_fmt, v);
+	break;
+  }
+}
+
+static
+print_literal(tp, v, compressed, format)
+  p_type	tp;
+  long		v;
+  int		compressed;
+  char		*format;
 {
   register struct literal *lit = tp->ty_literals;
   register int i;
 
+  if (format) {
+	print_unsigned(tp, v, format);
+	return;
+  }
   for (i = tp->ty_nenums; i; i--, lit++) {
 	if (lit->lit_val == v) {
-		fprintf(db_out, lit->lit_name);
+		fputs(lit->lit_name, db_out);
 		break;
 	}
   }
   if (! i) {
-	fprintf(db_out, "unknown enumeration value %d", v);
+	fprintf(db_out,
+		compressed ? "?%ld?" : "unknown enumeration value %ld",
+		v);
   }
 }
 
 static
-print_unsigned(tp, v)
+print_integer(tp, v, format)
   p_type	tp;
   long		v;
+  register char	*format;
 {
-  if (tp == uchar_type) {
-	(*currlang->printchar)((int) v);
+  while (format && *format) {
+	if (strindex("cdohx", *format)) break;
+	format++;
   }
-  else	fprintf(db_out, currlang->uns_fmt, v);
-}
-
-static
-print_integer(tp, v)
-  p_type	tp;
-  long		v;
-{
-  if (tp == char_type) {
+  switch(format == 0 ? 0 : *format) {
+  default:
+	if (tp != char_type) {
+  		fprintf(db_out, currlang->decint_fmt, v);
+		break;
+	}
+	/* fall through */
+  case 'c':
 	(*currlang->printchar)((int) v);
+	break;
+  case 'd':
+  	fprintf(db_out, currlang->decint_fmt, v);
+	break;
+  case 'o':
+  	fprintf(db_out, currlang->octint_fmt, v);
+	break;
+  case 'x':
+  case 'h':
+  	fprintf(db_out, currlang->hexint_fmt, v);
+	break;
   }
-  else	fprintf(db_out, currlang->decint_fmt, v);
 }
 
 print_params(tp, AB, static_link)
@@ -83,7 +136,6 @@ print_params(tp, AB, static_link)
   }
   if (static_link) p += pointer_size;
   if (! get_bytes(size, AB, param_bytes)) {
-	error("no debuggee");
 	free(param_bytes);
 	return;
   }
@@ -110,11 +162,11 @@ print_params(tp, AB, static_link)
 			fprintf(db_out, currlang->addr_fmt, (long) addr);
 		}
 		else {
-			print_val(par->par_type, size, q, 1, 0);
+			print_val(par->par_type, size, q, 1, 0, (char *)0);
 		}
 		free(q);
 	}
-	else print_val(par->par_type, par->par_type->ty_size, p, 1, 0);
+	else print_val(par->par_type, par->par_type->ty_size, p, 1, 0, (char *)0);
 	if (i) fputs(", ", db_out);
 	p += param_size(par->par_type, par->par_kind);
 	par++;
@@ -122,12 +174,13 @@ print_params(tp, AB, static_link)
   free(param_bytes);
 }
 
-print_val(tp, tp_sz, addr, compressed, indent)
+print_val(tp, tp_sz, addr, compressed, indent, format)
   p_type	tp;		/* type of value to be printed */
   long		tp_sz;		/* size of object to be printed */
   char		*addr;		/* address to get value from */
   int		compressed;	/* for parameter lists */
   int		indent;		/* indentation */
+  register char	*format;	/* format given or 0 */
 {
   register int i;
   long elsize;
@@ -135,12 +188,13 @@ print_val(tp, tp_sz, addr, compressed, indent)
   if (indent == 0) indent = 4;
   switch(tp->ty_class) {
   case T_SUBRANGE:
-	print_val(tp->ty_base, tp_sz, addr, compressed, indent);
+	print_val(tp->ty_base, tp_sz, addr, compressed, indent, format);
 	break;
   case T_ARRAY:
-	if (tp->ty_elements == char_type ||
-	    tp->ty_elements == uchar_type) {
-		print_val(string_type, tp_sz, addr, compressed, indent);
+	if ((!format || strindex(format, 'a') == 0) &&
+	    (tp->ty_elements == char_type ||
+	     tp->ty_elements == uchar_type)) {
+		print_val(string_type, tp_sz, addr, compressed, indent, format);
 		break;
 	}
 	if (compressed) {
@@ -156,7 +210,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	indent += 4;
 	elsize = (*currlang->arrayelsize)(tp->ty_elements->ty_size);
 	for (i = tp_sz/elsize; i; i--) {
-		print_val(tp->ty_elements, tp->ty_elements->ty_size, addr, compressed, indent);
+		print_val(tp->ty_elements, tp->ty_elements->ty_size, addr, compressed, indent, format);
 		addr += elsize;
 		if (compressed && i > 1) {
 			fprintf(db_out, ", ...");
@@ -192,7 +246,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 			/* ??? */
 			fprintf(db_out, "<bitfield, %d, %ld>", fld->fld_bitsize, sz);
 		}
-		else print_val(fld->fld_type, sz, addr+(fld->fld_pos>>3), compressed, indent);
+		else print_val(fld->fld_type, sz, addr+(fld->fld_pos>>3), compressed, indent, format);
 		if (compressed && i > 1) {
 			fprintf(db_out, ", ...");
 			break;
@@ -210,7 +264,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	fprintf(db_out, "<union>");
 	break;
   case T_ENUM:
-	print_literal(tp, get_int(addr, tp_sz, T_ENUM));
+	print_literal(tp, get_int(addr, tp_sz, T_ENUM), compressed, format);
 	break;
   case T_PROCEDURE: {
 	register p_scope sc = get_scope_from_addr((t_addr) get_int(addr, pointer_size, T_UNSIGNED));
@@ -220,8 +274,21 @@ print_val(tp, tp_sz, addr, compressed, indent)
 		break;
 	}
 	}
-	/* Fall through */
+	fprintf(db_out, currlang->addr_fmt, get_int(addr, pointer_size, T_UNSIGNED));
+	break;
   case T_POINTER:
+	if (format && strindex(format,'s') &&
+	    (tp->ty_ptrto == char_type || tp->ty_ptrto == uchar_type)) {
+		t_addr a = get_int(addr, tp_sz, T_UNSIGNED);
+		char *naddr = malloc(512);
+
+		if (naddr && get_string(511L, a, naddr)) {
+			print_val(string_type, 512L, naddr, 0, indent, format);
+			free(naddr);
+			break;
+		}
+		if (naddr) free(naddr);
+	}
 	fprintf(db_out, currlang->addr_fmt, get_int(addr, pointer_size, T_UNSIGNED));
 	break;
   case T_FILE:
@@ -259,13 +326,13 @@ print_val(tp, tp_sz, addr, compressed, indent)
 			}
 			switch(base->ty_class) {
 			case T_INTEGER:
-				print_integer(base, val+i);
+				print_integer(base, val+i, format);
 				break;
 			case T_UNSIGNED:
-				print_unsigned(base, val+i);
+				print_unsigned(base, val+i, format);
 				break;
 			case T_ENUM:
-				print_literal(base, val+i);
+				print_literal(base, val+i, compressed, format);
 				break;
 			default:
 				assert(0);
@@ -283,10 +350,10 @@ print_val(tp, tp_sz, addr, compressed, indent)
 	fprintf(db_out, currlang->real_fmt, get_real(addr, tp->ty_size));
 	break;
   case T_UNSIGNED:
-	print_unsigned(tp, get_int(addr, tp_sz, T_UNSIGNED));
+	print_unsigned(tp, get_int(addr, tp_sz, T_UNSIGNED), format);
 	break;
   case T_INTEGER:
-	print_integer(tp, get_int(addr, tp_sz, T_INTEGER));
+	print_integer(tp, get_int(addr, tp_sz, T_INTEGER), format);
 	break;
   case T_STRING:
 	(*currlang->printstring)(addr, (int) tp_sz);

@@ -117,11 +117,12 @@ add_file(s)
 	p_symbol sym1;
 
 	*p = 0;
-	sym1 = NewSymbol(Salloc(s, (unsigned) strlen(s)+1),
+	s = Salloc(s, (unsigned) strlen(s)+1);
+	*p = c;
+	sym1 = NewSymbol(s,
 		  	 PervasiveScope,
 		 	 FILELINK,
 			 (struct outname *) 0);
-	*p = c;
 	sym1->sy_filelink = sym;
 	sym->sy_file->f_base = sym1;
   }
@@ -171,11 +172,14 @@ consistent(p, sc)
 #define CLASS	(FILELINK|FILESYM|PROC|FUNCTION|MODULE|TYPE|VAR|REGVAR|LOCVAR|VARPAR)
 	sym = Lookfromscope(p->t_idf, CLASS, sc->sc_static_encl);
 	if (sym) {
+		int precise = 1;
+
 		target_sc = def_scope(sym);
 		while (sc && sc != target_sc) {
+			precise = 0;
 			sc = sc->sc_static_encl;
 		}
-		return sc != 0;
+		return sc == 0 ? 0 : precise + 1 ;
 	}
 	return 0;
 
@@ -183,11 +187,16 @@ consistent(p, sc)
 	arg = p->t_args[1];
 	sym = Lookfromscope(arg->t_idf, CLASS, sc->sc_static_encl);
 	if (sym) {
+		int precise = 1;
+
 		target_sc = def_scope(sym);
 		while (sc && sc != target_sc) {
+			precise = 0;
 			sc = sc->sc_static_encl;
 		}
-		return sc != 0 && consistent(p, sym->sy_scope);
+		if (sc == 0) return 0;
+		if (precise) return consistent(p, sym->sy_scope);
+		return consistent(p, sym->sy_scope) != 0;
 	}
 	return 0;
 
@@ -205,9 +214,10 @@ identify(p, class_set)
   p_tree	p;
   int		class_set;
 {
-  p_symbol	sym = 0;
+  p_symbol	sym = 0, sym1 = 0;
   register p_symbol s;
   p_tree	arg;
+  int precise = 0;
 
   switch(p->t_oper) {
   case OP_NAME:
@@ -243,19 +253,26 @@ identify(p, class_set)
 	arg = p->t_args[1];
 	assert(arg->t_oper == OP_NAME);
 	s = arg->t_idf->id_def;
-	sym = 0;
 	while (s) {
-		if ((s->sy_class & class_set) && consistent(p, s->sy_scope)) {
-			if (sym) {
-				error("could not identify \"%s\"", arg->t_str);
-				sym = 0;
+		int temp;
+		if ((s->sy_class & class_set) &&
+		    (temp = consistent(p, s->sy_scope))) {
+			if (temp > precise) {
+				sym = s;
+				precise = temp;
+				sym1 = 0;
 			}
-			sym = s;
+			else if (sym && temp == precise) sym1 = s;
 		}
 		s = s->sy_next;
 	}
+	if (sym && sym1) {
+		error("could not identify \"%s\"", arg->t_str);
+		return 0;
+	}
 	if (!sym && !s) {
 		error("could not find \"%s\"", arg->t_str);
+		return 0;
 	}
 	break;
 

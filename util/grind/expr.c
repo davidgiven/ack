@@ -229,10 +229,10 @@ eval_cond(p)
   if (eval_expr(p, &buf, &size, &tp)) {
 	if (convert(&buf, &size, &tp, target_tp, target_tp->ty_size)) {
 		val = get_int(buf, size, T_UNSIGNED);
-		if (buf) free(buf);
+		free(buf);
 		return (int) (val != 0);
 	}
-	if (buf) free(buf);
+	free(buf);
   }
   return 0;
 }
@@ -298,6 +298,7 @@ ptr_addr(p, paddr, psize, ptp)
 		return 1;
   	default:
 		error("illegal operand of DEREF");
+		free(buf);
 		break;
 	}
   }
@@ -318,6 +319,9 @@ do_deref(p, pbuf, psize, ptp)
 	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, addr, *pbuf)) {
 		error("could not get value");
+		free(*pbuf);
+		*pbuf = 0;
+		return 0;
 	}
 	return 1;
   }
@@ -337,6 +341,8 @@ do_addr(p, pbuf, psize, ptp)
 	*pbuf = malloc((unsigned) pointer_size);
 	malloc_succeeded(*pbuf);
 	put_int(*pbuf, pointer_size, (long) addr);
+	address_type->ty_ptrto = *ptp;
+	*ptp = address_type;
 	return 1;
   }
   return 0;
@@ -505,7 +511,7 @@ do_andor(p, pbuf, psize, ptp)
   p_type	*ptp;
 {
   long		l1, l2;
-  char		*buf;
+  char		*buf = 0;
   long		size;
   p_type	tp;
   p_type	target_tp = currlang->has_bool_type ? bool_type : int_type;
@@ -524,7 +530,7 @@ do_andor(p, pbuf, psize, ptp)
 	free(buf);
 	return 1;
   }
-  free(buf);
+  if (buf) free(buf);
   return 0;
 }
 
@@ -541,9 +547,44 @@ do_arith(p, pbuf, psize, ptp)
   long		size;
   p_type	tp, balance_tp;
 
-  if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
-      eval_expr(p->t_args[1], &buf, &size, &tp) &&
-      (balance_tp = balance(*ptp, tp)) &&
+  if (!(eval_expr(p->t_args[0], pbuf, psize, ptp) &&
+        eval_expr(p->t_args[1], &buf, &size, &tp))) {
+	return 0;
+  }
+  if ((*ptp)->ty_class == T_POINTER) {
+	if (currlang != c_dep ||
+	    (p->t_whichoper != E_PLUS && p->t_whichoper != E_MIN)) {
+		error("illegal operand type(s)");
+		free(buf);
+		return 0;
+	}
+	l1 = get_int(*pbuf, *psize, T_UNSIGNED);
+	if (tp->ty_class == T_POINTER) {
+		if (p->t_whichoper != E_MIN) {
+			error("illegal operand type(s)");
+			free(buf);
+			return 0;
+		}
+		l2 = get_int(buf, size, T_UNSIGNED);
+		free(buf);
+		*pbuf = Realloc(*pbuf, (unsigned) long_size);
+		put_int(*pbuf, long_size, (l1 - l2)/(*ptp)->ty_ptrto->ty_size);
+		*ptp = long_type;
+		return 1;
+	}
+	if (! convert(&buf, &size, &tp, long_type, long_size)) {
+		free(buf);
+		return 0;
+	}
+	l2 = get_int(buf, size, T_INTEGER) * (*ptp)->ty_ptrto->ty_size;
+	free(buf);
+	buf = 0;
+	if (p->t_whichoper == E_PLUS) l1 += l2;
+	else l1 -= l2;
+	put_int(*pbuf, *psize, l1);
+	return 1;
+  }
+  if ((balance_tp = balance(*ptp, tp)) &&
       convert(pbuf, psize, ptp, balance_tp, balance_tp->ty_size) &&
       convert(&buf, &size, &tp, balance_tp, balance_tp->ty_size)) {
 	switch(balance_tp->ty_class) {
@@ -795,6 +836,10 @@ do_cmp(p, pbuf, psize, ptp)
 			break;
 		}
 		break;
+	default:
+		error("illegal operand type(s)");
+		free(buf);
+		return 0;
 	}
 	if (*psize < int_size) {
 		*psize = int_size;
@@ -976,11 +1021,35 @@ do_select(p, pbuf, psize, ptp)
 	*pbuf = malloc((unsigned int) *psize);
 	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, a, *pbuf)) {
+		error("could not get value");
+		free(*pbuf);
+		*pbuf = 0;
 		return 0;
 	}
 	return 1;
   }
   return 0;
+}
+
+static int
+do_derselect(p, pbuf, psize, ptp)
+  p_tree	p;
+  char		**pbuf;
+  long		*psize;
+  p_type	*ptp;
+{
+  int	retval;
+  t_tree	t;
+
+  t.t_oper = OP_UNOP;
+  t.t_whichoper = E_DEREF;
+  t.t_args[0] = p->t_args[0];
+  p->t_args[0] = &t;
+  p->t_whichoper = E_SELECT;
+  retval = eval_expr(p, pbuf, psize, ptp);
+  p->t_args[0] = t.t_args[0];
+  p->t_whichoper = E_DERSELECT;
+  return retval;
 }
 
 static int (*bin_op[])() = {
@@ -1009,7 +1078,7 @@ static int (*bin_op[])() = {
   do_arith,
   do_arith,
   0,
-  0,
+  do_derselect,
   do_sft,
   do_sft,
   0
@@ -1023,9 +1092,14 @@ eval_expr(p, pbuf, psize, ptp)
   p_type	*ptp;
 {
   register p_symbol	sym;
-  int	retval = 0;
+  int		retval = 0;
+
+  *pbuf = 0;
 
   switch(p->t_oper) {
+  case OP_FORMAT:
+	if (eval_expr(p->t_args[0], pbuf, psize, ptp)) retval = 1;
+	break;
   case OP_NAME:
   case OP_SELECT:
 	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST);
@@ -1148,7 +1222,7 @@ eval_desig(p, paddr, psize, ptp)
 	}
 	break;
   default:
-	assert(0);
+	error("illegal designator");
 	break;
   }
   if (! retval) {

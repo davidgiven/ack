@@ -36,6 +36,7 @@ struct message_hdr {
 #define FAIL	51	/* answer of child when something goes wrong */
 #define DATA	52	/* answer of child when data requested */
 #define END_SS	53	/* when stopped because of user single stepping */
+#define INTR	54	/* sent on interrupt */
   long	m_size;		/* size */
   char	m_buf[BUFLEN];	/* some of the data required included in message */
 };

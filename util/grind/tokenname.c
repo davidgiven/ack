@@ -27,6 +27,7 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{NAME, "name"},
 	{STRING, "string"},
 	{INTEGER, "number"},
+	{EXPRESSION, "<expression>"},
 	{REAL, "real"},
 	{CHAR, "char"},
 	{BIN_OP, "<operator>"},
@@ -65,6 +66,9 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{FIND, "find"},
 	{DISPLAY, "display"},
 	{WHICH, "which"},
+	{HELP, "help"},
+	{DISABLE,"disable"},
+	{ENABLE,"enable"},
 	{-1, "quit"},
 	{0, ""}
 };

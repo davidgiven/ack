@@ -127,9 +127,11 @@ add_position_addr(filename, n)
 	map->f_start = n;
   }
   else map = lastmap;
-  map->f_end = n;
-  setnext_outname(n, map->f_line_addr[HASH(n->on_desc)]);
-  map->f_line_addr[HASH(n->on_desc)] = n;
+  if (map) {
+  	map->f_end = n;
+  	setnext_outname(n, map->f_line_addr[HASH(n->on_desc)]);
+  	map->f_line_addr[HASH(n->on_desc)] = n;
+  }
 }
 
 /* extern p_position print_position(t_addr a, int print_function);

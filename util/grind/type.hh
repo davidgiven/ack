@@ -38,9 +38,8 @@ typedef struct type {
 #define T_VOID		12
 #define T_UNSIGNED	13
 #define T_STRING	14	/* only for string constants ... */
+#define T_CROSS		15	/* cross reference to type */
 #define T_INCOMPLETE   100
-  short		ty_flags;
-#define T_CROSS		0x0001
   long		ty_size;
   struct symbol	*ty_sym;
   union {
@@ -117,7 +116,7 @@ extern long
 	compute_size();
 
 extern p_type	char_type, uchar_type, bool_type, int_type,
-		long_type, double_type, string_type;
+		long_type, double_type, string_type, address_type;
 extern p_type	void_type, incomplete_type;
 extern long	int_size, pointer_size, long_size, double_size;
 

@@ -56,8 +56,13 @@ debugger_string
   | /* type name */
 			{ s = NewSymbol(str, CurrentScope, TYPE, currnam); }
 	't' type_name(&(s->sy_type), s)
-			{ if (! s->sy_type->ty_sym) s->sy_type->ty_sym = s; }
-
+			{ if (! s->sy_type->ty_sym) s->sy_type->ty_sym = s; 
+			  if ((s->sy_type->ty_class == T_ENUM ||
+			       s->sy_type->ty_class == T_SUBRANGE) &&
+			      currnam->on_desc != 0) {
+				s->sy_type->ty_size = currnam->on_desc;
+			  }
+			}
   | /* tag name (only C?) */
 			{ s = NewSymbol(str, CurrentScope, TAG, currnam); }
 	'T' tag_name(s)
@@ -225,7 +230,7 @@ type_name(p_type *t; p_symbol sy;)
 	type(t, type_index, sy)
 				{ p = tp_lookup(type_index);
 				  if (*p && *p != incomplete_type) {
-					if (!((*p)->ty_flags & T_CROSS))
+					if ((*p)->ty_class != T_CROSS)
 						error("Redefining (%d,%d) %d",
 						  type_index[0],
 						  type_index[1],
@@ -264,7 +269,7 @@ tag_name(p_symbol t;)
   type(&(t->sy_type), type_index, t)
 				{ p = tp_lookup(type_index);
 				  if (*p && *p != incomplete_type) {
-					if (!((*p)->ty_flags & T_CROSS))
+					if ((*p)->ty_class != T_CROSS)
 						error("Redefining (%d,%d) %d",
 						  type_index[0],
 						  type_index[1],
@@ -275,6 +280,11 @@ tag_name(p_symbol t;)
 				  }
 				  if (t->sy_type) *p = t->sy_type; 
 				  if (*p == 0) *p = incomplete_type;
+			  	  if (t->sy_type &&
+				      t->sy_type->ty_class == T_ENUM &&
+			              currnam->on_desc != 0) {
+					t->sy_type->ty_size = currnam->on_desc;
+			  	  }
 				}
 ;
 
@@ -348,14 +358,15 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
   	]
 			{ AllowName = 1; }
   	name(&str)
-			{ sy = Lookfromscope(str2idf(str,0),CurrentScope,TAG);
-			  if (sy && sy->sy_type->ty_class == tclass) {
+			{ sy = Lookfromscope(str2idf(str,0),TAG,CurrentScope);
+			  if (sy && 
+			      (sy->sy_type->ty_class == tclass ||
+			       sy->sy_type->ty_class == T_CROSS)) {
 				tp = sy->sy_type;
 			  }
 			  else {
 				tp = new_type();
-				tp->ty_flags = T_CROSS;
-				tp->ty_class = tclass;
+				tp->ty_class = T_CROSS;
 				tp->ty_tag = str;
 				sy = NewSymbol(str, CurrentScope, TAG, (struct outname *) 0);
 			  }

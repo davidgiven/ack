@@ -4,7 +4,6 @@
 {
 #include	<stdio.h>
 #include	<alloc.h>
-#include	<setjmp.h>
 #include	<signal.h>
 
 #include	"ops.h"
@@ -19,15 +18,17 @@
 #include	"expr.h"
 
 extern char	*Salloc();
+extern char	*strindex();
 extern FILE	*db_in;
+extern int	disable_intr;
+extern p_tree	run_command, print_command;
 
-int		errorgiven;
+int		errorgiven = 0;
+int		child_interrupted = 0;
+int		interrupted = 0;
+int		eof_seen = 0;
 static int	extended_charset = 0;
 static int	in_expression = 0;
-jmp_buf		jmpbuf;
-
-static int	init_del();
-static int	skip_to_eol();
 
 struct token	tok, aside;
 
@@ -40,50 +41,51 @@ struct token	tok, aside;
 
 commands
   { p_tree com, lastcom = 0;
+    int give_prompt;
   }
 :
-			{ if (! setjmp(jmpbuf)) {
-				init_del();
-			  }
-			  else {
-				skip_to_eol();
-				goto prmpt;
-			  }
-			}
   [ %persistent command_line(&com)
+    [	'\n'		{ give_prompt = 1; }
+    |	%default ';'	{ give_prompt = 0; }
+    ]
 			{ if (com) {
 				if (errorgiven) {
 					freenode(com);
 					com = 0;
 				}
-				if (lastcom && !in_status(lastcom) &&
-				    lastcom != run_command) {
+				if (lastcom) {
 					freenode(lastcom);
 					lastcom = 0;
 				}
 
 				if (com) {
+					eval(com);
 			  		if (repeatable(com)) {
 						lastcom = com;
 					}
-					eval(com);
-					if (! repeatable(com) &&
-					    ! in_status(com) &&
-					    com != run_command) {
+					else if (! in_status(com) &&
+					        com != run_command &&
+						com != print_command) {
 						freenode(com);
 					}
 				}
-			  } else if (lastcom && ! errorgiven) eval(lastcom);
+			  } else if (lastcom && ! errorgiven) {
+				eval(lastcom);
+			  }
+			  if (give_prompt) {
+			  	errorgiven = 0;
+				interrupted = 0;
+				prompt();
+			  }
 			}
-    [	'\n' 		{ prmpt: prompt(); }
-    |	';'
-    ]			{ errorgiven = 0; }
   ]*
 			{ signal_child(SIGKILL); }
 ;
 
 command_line(p_tree *p;)
 :
+			{ *p = 0; }
+[
   list_command(p)
 | file_command(p)
 | run_command(p)
@@ -102,9 +104,12 @@ command_line(p_tree *p;)
 | display_command(p)
 | trace_command(p)
 | set_command(p)
+| help_command(p)
 | FIND qualified_name(p){ *p = mknode(OP_FIND, *p); }
 | WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
-|			{ *p = 0; }
+| able_command(p)
+|
+]
 ;
 
 where_command(p_tree *p;)
@@ -112,6 +117,7 @@ where_command(p_tree *p;)
 :
   WHERE
   [ INTEGER		{ l = tok.ival; }
+  | '-' INTEGER		{ l = - tok.ival; }
   |			{ l = 0x7fffffff; }
   ]			{ *p = mknode(OP_WHERE, l); }
 ;
@@ -121,12 +127,17 @@ list_command(p_tree *p;)
 :
   LIST
   [
-  | lin_num(&t1)
-    [ ',' lin_num(&t2)
-    |			{ t2 = mknode(OP_INTEGER, t1->t_ival); }
-    ]
+  | count(&t1)
   | qualified_name(&t1)
-  ]			{ *p = mknode(OP_LIST, t1, t2); }
+  ]
+  [ ',' count(&t2)
+  | '-' 
+    [	count(&t2)	{ t2->t_ival = - t2->t_ival; }
+    |			{ t2 = mknode(OP_INTEGER, -100000000L); }
+    ]
+  |
+  ]
+			{ *p = mknode(OP_LIST, t1, t2); }
 ;
 
 file_command(p_tree *p;)
@@ -139,13 +150,20 @@ file_command(p_tree *p;)
 			}
 ;
 
+help_command(p_tree *p;)
+:
+  [ HELP | '?' ]
+  [			{ *p = mknode(OP_HELP, (struct idf *) 0, (char *) 0); }
+  | name(p)		{ (*p)->t_oper = OP_HELP; }
+  | '?'			{ *p = mknode(OP_HELP, str2idf("help",0), (char *) 0); }
+  ]
+;
+
 run_command(p_tree *p;)
 :
-  RUN			{ extended_charset = 1; *p = 0; }
+  RUN			{ extended_charset = 1; }
   args(p)		{ *p = mknode(OP_RUN, *p);
 			  extended_charset = 0;
-			  freenode(run_command);
-			  run_command = *p;
 			}
 | RERUN			{ if (! run_command) {
 				error("no run command given yet");
@@ -171,7 +189,7 @@ trace_command(p_tree *p;)
   { p_tree whr = 0, cond = 0, exp = 0; }
 :
   TRACE
-  [ ON expression(&exp, 1) ]?
+  [ ON expression(&exp, 0) ]?
   where(&whr)?
   condition(&cond)?	{ *p = mknode(OP_TRACE, whr, cond, exp); }
 ;
@@ -195,8 +213,10 @@ when_command(p_tree *p;)
   condition(&cond)?
   '{' 
   command_line(p)
-  [ ';'			{ *p = mknode(OP_LINK, *p, (p_tree) 0);
-			  p = &((*p)->t_args[1]);
+  [ ';'			{ if (*p) {
+				*p = mknode(OP_LINK, *p, (p_tree) 0);
+			  	p = &((*p)->t_args[1]);
+			  }
 			}
     command_line(p)
   ]*
@@ -205,6 +225,9 @@ when_command(p_tree *p;)
 				error("no position or condition");
 				freenode(*p);
 				*p = 0;
+			  }
+			  else if (! *p) {
+				error("no commands given");
 			  }
 			  else *p = mknode(OP_WHEN, whr, cond, *p);
 			}
@@ -239,41 +262,81 @@ regs_command(p_tree *p;)
 
 delete_command(p_tree *p;)
 :
-  DELETE
-  INTEGER		{ *p = mknode(OP_DELETE, tok.ival); }
+  DELETE count_list(p)	{ *p = mknode(OP_DELETE, *p); }
 ;
 
 print_command(p_tree *p;)
 :
-  PRINT expression_list(p)
+  PRINT 
+  [ format_expression_list(p)
 			{ *p = mknode(OP_PRINT, *p); }
+  |
+			{ *p = mknode(OP_PRINT, (p_tree) 0); }
+  ]
 ;
 
 display_command(p_tree *p;)
 :
-  DISPLAY expression_list(p)
+  DISPLAY format_expression_list(p)
 			{ *p = mknode(OP_DISPLAY, *p); }
 ;
 
-expression_list(p_tree *p;)
+format_expression_list(p_tree *p;)
 :
-  expression(p, 1)
+  format_expression(p)
   [ ','			{ *p = mknode(OP_LINK, *p, (p_tree) 0);
 			  p = &((*p)->t_args[1]);
 			}
-    expression(p, 1)
+    format_expression(p)
   ]*
+;
+
+format_expression(p_tree *p;)
+  { p_tree	p1; }
+:
+  expression(p, 0)
+  [ '\\' 
+	[ name(&p1)	{ register char *c = p1->t_str;
+			  while (*c) {
+				if (! strindex("doshcax", *c)) {
+					error("illegal format: %c", *c);
+					break;
+				}
+				c++;
+			  }
+			  *p = mknode(OP_FORMAT, *p, p1);
+			}
+	|
+	]
+  |
+  ]
 ;
 
 set_command(p_tree *p;)
 :
-  SET expression(p, 1)	{ *p = mknode(OP_SET, *p, (p_tree) 0); }
-  TO expression(&((*p)->t_args[1]), 1)
+  SET expression(p, 0)	{ *p = mknode(OP_SET, *p, (p_tree) 0); }
+  TO expression(&((*p)->t_args[1]), 0)
+;
+
+able_command(p_tree *p;)
+:
+  [ ENABLE 		{ *p = mknode(OP_ENABLE, (p_tree) 0); }
+  | DISABLE 		{ *p = mknode(OP_DISABLE, (p_tree) 0); }
+  ]
+  count_list(&(*p)->t_args[0])
+;
+
+count_list(p_tree *p;)
+:
+  count(p)
+  [ ','			{ *p = mknode(OP_LIST, *p, (p_tree) 0); }
+    count(&(*p)->t_args[1])
+  ]*
 ;
 
 condition(p_tree *p;)
 :
-  IF expression(p, 1)
+  IF expression(p, 0)
 ;
 
 where(p_tree *p;)
@@ -293,36 +356,7 @@ expression(p_tree *p; int level;)
 			  (*p)->t_whichoper = currop;
 			}
 	expression(&((*p)->t_args[1]), currprio)
-			{ adjust_oper(p); }
-  ]*
-			{ in_expression--; }
-;
-
-factor(p_tree *p;)
-:
-  '(' expression(p, 1) ')'
-|
-  INTEGER		{ *p = mknode(OP_INTEGER, tok.ival); }
-|
-  REAL			{ *p = mknode(OP_REAL, tok.fval); }
-|
-  STRING		{ *p = mknode(OP_STRING, tok.str); }
-|
-  designator(p)
-|
-  			{ *p = mknode(OP_UNOP, (p_tree) 0);
-			  (*p)->t_whichoper = (int) tok.ival;
-			}
-  [ PREF_OP 
-  | PREF_OR_BIN_OP 	{ (*currlang->fix_bin_to_pref)(*p); }
-  ]
-  expression(&(*p)->t_args[0], unprio((*p)->t_whichoper))
-;
-
-designator(p_tree *p;)
-:
-  qualified_name(p)
-  [
+  |
 	SEL_OP		{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
 			  (*p)->t_whichoper = (int) tok.ival;
 			}
@@ -331,9 +365,43 @@ designator(p_tree *p;)
 	'['		{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
 			  (*p)->t_whichoper = E_ARRAY;
 			}
-	expression(&(*p)->t_args[1], 1)
+	expression(&(*p)->t_args[1], 0)
+	[	','	{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
+			  (*p)->t_whichoper = E_ARRAY;
+			}
+		expression(&(*p)->t_args[1], 0)
+	]*
 	']'
+  ]*
+			{ in_expression--; }
+;
+
+factor(p_tree *p;)
+:
+  [
+  	%default EXPRESSION	/* lexical analyzer will never return this token */
+			{ *p = mknode(OP_INTEGER, 0L); }
   |
+  	'(' expression(p, 0) ')'
+  |
+  	INTEGER		{ *p = mknode(OP_INTEGER, tok.ival); }
+  |
+  	REAL		{ *p = mknode(OP_REAL, tok.fval); }
+  |
+  	STRING		{ *p = mknode(OP_STRING, tok.str); }
+  |
+  	qualified_name(p)
+  |
+  			{ *p = mknode(OP_UNOP, (p_tree) 0);
+			  (*p)->t_whichoper = (int) tok.ival;
+			}
+  	[ PREF_OP 
+  	| PREF_OR_BIN_OP
+			{ (*currlang->fix_bin_to_pref)(*p); }
+  	]
+  	expression(&(*p)->t_args[0], unprio((*p)->t_whichoper))
+  ]
+  [ %while(1)
 	POST_OP		{ *p = mknode(OP_UNOP, *p);
 			  (*p)->t_whichoper = (int) tok.ival;
 			}
@@ -352,7 +420,7 @@ position(p_tree *p;)
 			  else str = listfile->sy_idf->id_text;
 			}
   ]
-  lin_num(&lin)		{ *p = mknode(OP_AT, lin->t_ival, str);
+  count(&lin)		{ *p = mknode(OP_AT, lin->t_ival, str);
 			  freenode(lin);
 			}
 ;
@@ -379,7 +447,7 @@ arg(p_tree *p;)
   '<' name(p)		{ (*p)->t_oper = OP_INPUT; }
 ;
 
-lin_num(p_tree *p;)
+count(p_tree *p;)
 :
   INTEGER		{ *p = mknode(OP_INTEGER, tok.ival); }
 ;
@@ -403,7 +471,7 @@ name(p_tree *p;)
   | AT
   | IN
   | IF
-  | NAME
+  | %default NAME
   | CONT
   | STEP
   | NEXT
@@ -421,6 +489,9 @@ name(p_tree *p;)
   | FIND
   | DISPLAY
   | WHICH
+  | HELP
+  | DISABLE
+  | ENABLE
   ]			{ *p = mknode(OP_NAME, tok.idf, tok.str); }
 ;
 
@@ -438,7 +509,10 @@ LLlex()
   do {
 	c = getc(db_in);
   } while (c != EOF && class(c) == STSKIP);
-  if (c == EOF) return c;
+  if (c == EOF) {
+	eof_seen = 1;
+	return c;
+  }
   if (extended_charset && in_ext(c)) {
 	TOK = get_name(c);
 	return TOK;
@@ -483,7 +557,7 @@ get_name(c)
 	c = getc(db_in);
   } while ((extended_charset && in_ext(c)) || in_idf(c));
   ungetc(c, db_in);
-  *p = 0;
+  *p++ = 0;
   if (extended_charset) {
 	tok.idf = 0;
 	tok.str = Salloc(buf, (unsigned) (p - buf));
@@ -520,20 +594,16 @@ static int
 catch_del()
 {
   signal(SIGINT, catch_del);
-  signal_child(SIGEMT);
-  longjmp(jmpbuf, 1);
+  if (! disable_intr) {
+  	signal_child(SIGEMT);
+  	child_interrupted = 1;
+  }
+  interrupted = 1;
 }
 
-static int
+int
 init_del()
 {
   signal(SIGINT, catch_del);
-}
-
-static int
-skip_to_eol()
-{
-  while (TOK != '\n' && TOK > 0) LLlex();
-  wait_for_child("interrupted");
 }
 }

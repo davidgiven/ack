@@ -57,8 +57,8 @@ static struct langdep c = {
 	print_string,
 	print_char,
 	array_elsize,
-	unop_prio,
 	binop_prio,
+	unop_prio,
 	get_string,
 	get_name,
 	get_number,
@@ -70,10 +70,45 @@ static struct langdep c = {
 struct langdep *c_dep = &c;
 
 static int
+printchar(c, esc)
+  int	c;
+{
+  switch(c) {
+  case '\n':
+	fputs("\\n", db_out);
+	break;
+  case '\t':
+	fputs("\\t", db_out);
+	break;
+  case '\b':
+	fputs("\\b", db_out);
+	break;
+  case '\r':
+	fputs("\\r", db_out);
+	break;
+  case '\f':
+	fputs("\\f", db_out);
+	break;
+  case '\\':
+	fputs("\\\\", db_out);
+	break;
+  case '\'':
+  case '"':
+	fprintf(db_out, c == esc ? "\\%c" : "%c", c);
+	break;
+  default:
+  	fprintf(db_out, (c >= 040 && c < 0177) ? "%c" : "\\%03o", c);
+	break;
+  }
+}
+
+static int
 print_char(c)
   int	c;
 {
-  fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "'\\0%o'", c);
+  fputc('\'', db_out);
+  printchar(c, '\'');
+  fputc('\'', db_out);
 }
 
 static int
@@ -82,12 +117,10 @@ print_string(s, len)
   int	len;
 {
   register char	*str = s;
-  int delim = '\'';
 
-  while (*str) {
-	if (*str++ == '\'') delim = '"';
-  }
-  fprintf(db_out, "%c%.*s%c", delim, len, s, delim);
+  fputc('"', db_out);
+  while (*str && len-- > 0) printchar(*str++, '"');
+  fputc('"', db_out);
 }
 
 extern long	int_size;
@@ -110,7 +143,6 @@ unop_prio(op)
   case E_BNOT:
   case E_MIN:
   case E_DEREF:
-  case E_SELECT:
   case E_PLUS:
   case E_ADDR:
 	return 12;
@@ -153,6 +185,11 @@ binop_prio(op)
   case E_MOD:
   case E_ZMOD:
 	return 11;
+  case E_ARRAY:
+  case E_SELECT:
+	return 12;
+  case E_DERSELECT:
+	return 13;
   }
   return 1;
 }
@@ -236,15 +273,19 @@ get_token(c)
   register int	c;
 {
   switch(c) {
+  case '[':
+	tok.ival = E_ARRAY;
+	/* fall through */
   case '(':
   case ')':
-  case '[':
   case ']':
   case '`':
   case ':':
   case ',':
+  case '}':
+  case '{':
+  case '\\':
 	return c;
-
   case '.':
 	tok.ival = E_SELECT;
 	return SEL_OP;
@@ -340,7 +381,7 @@ get_token(c)
 	tok.ival = E_BNOT;
 	return PREF_OP;
   default:
-	error("illegal character 0%o", c);
+	error((c >= 040 && c < 0177) ? "%s'%c'" : "%s'\\0%o'", "illegal character ", c);
 	return LLlex();
   }
 }
@@ -397,6 +438,7 @@ get_string(c)
   while (ch = getc(db_in), ch != c) {
 	if (ch == '\n') {
 		error("newline in string");
+		ungetc(ch, db_in);
 		break;
 	}
 	if (ch == '\\') {
@@ -406,6 +448,15 @@ get_string(c)
 	buf[len++] = ch;
   }
   buf[len++] = 0;
+  if (c == '\'') {
+	long val = 0;
+	ch = 0;
+	while (buf[ch] != 0) {
+		val = (val << 8) + (buf[ch++] & 0377);
+	}
+	tok.ival = val;
+	return INTEGER;
+  }
   tok.str = Salloc(buf, (unsigned) len);
   return STRING;
 }
@@ -418,28 +469,34 @@ print_op(p)
   case OP_UNOP:
   	switch(p->t_whichoper) {
 	case E_MIN:
-		fputs("-", db_out);
+		fputs("-(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	case E_PLUS:
-		fputs("+", db_out);
+		fputs("+(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	case E_NOT:
-		fputs("!", db_out);
+		fputs("!(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	case E_DEREF:
-		fputs("*", db_out);
+		fputs("*(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	case E_BNOT:
-		fputs("~", db_out);
+		fputs("~(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	case E_ADDR:
-		fputs("&", db_out);
+		fputs("&(", db_out);
 		print_node(p->t_args[0], 0);
+		fputc(')', db_out);
 		break;
 	}
 	break;

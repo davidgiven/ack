@@ -9,7 +9,7 @@
 #include "Lpars.h"
 
 static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
-static char	*progname;
+char		*progname;
 char		*AckObj;
 char		*AObj;
 char		*dirs[] = { "", 0 };
@@ -18,6 +18,7 @@ FILE		*db_in;
 int		debug;
 extern struct tokenname tkidf[];
 extern char	*strindex();
+extern int	eof_seen;
 
 static struct tokenname shorts[] = {
 	{LIST, "l"},
@@ -28,6 +29,7 @@ static struct tokenname shorts[] = {
 	{PRINT, "p"},
 	{RESTORE, "r"},
 	{TRACE, "t"},
+	{WHERE, "w"},
 	{ 0, 0}
 };
 
@@ -39,6 +41,7 @@ main(argc, argv)
   db_out = stdout;
   db_in = stdin;
   progname = argv[0];
+  init_del();
   while (p = strindex(progname, '/')) {
 	progname = p + 1;
   }
@@ -66,20 +69,19 @@ main(argc, argv)
   else if (AObj == 0) AObj = "a.out";
   reserve(tkidf);
   reserve(shorts);
-  if (currfile) CurrentScope = currfile->sy_file->f_scope;
   if (! init_run()) {
 	fatal("something wrong with file descriptors");
   }
   prompt();
   Commands();
-  fputc( '\n', db_out);
+  if (eof_seen) fputc('\n', db_out);
   exit(0);
 }
 
 prompt()
 {
   if (isatty(fileno(db_in))) {
-	fprintf(db_out, "%s -> ", progname);
+	fprintf(db_out, "-> ");
 	fflush(db_out);
   }
 }
@@ -94,12 +96,11 @@ fatal(va_alist)
   va_start(ap);
   {
 	fmt = va_arg(ap, char *);
-	fprintf(stderr, "%s: ", progname);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
+	fprintf(db_out, "%s: ", progname);
+	vfprintf(db_out, fmt, ap);
+	fprintf(db_out, "\n");
   }
   va_end(ap);
-  abort();
   exit(1);
 }
 
@@ -115,9 +116,9 @@ error(va_alist)
   va_start(ap);
   {
 	fmt = va_arg(ap, char *);
-	fprintf(stderr, "%s: ", progname);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
+	fprintf(db_out, "%s: ", progname);
+	vfprintf(db_out, fmt, ap);
+	fprintf(db_out, "\n");
   }
   va_end(ap);
   errorgiven = 1;
@@ -133,9 +134,9 @@ warning(va_alist)
   va_start(ap);
   {
 	fmt = va_arg(ap, char *);
-	fprintf(stderr, "%s: ", progname);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
+	fprintf(db_out, "%s: ", progname);
+	vfprintf(db_out, fmt, ap);
+	fprintf(db_out, "\n");
   }
   va_end(ap);
 }
