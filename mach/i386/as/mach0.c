@@ -10,7 +10,7 @@
 #define	THREE_PASS	/* branch and offset optimization */
 #define	LISTING		/* enable listing facilities */
 #define RELOCATION	/* generate relocation info */
-#define DEBUG 2
+#define DEBUG 1
 
 #undef valu_t
 #define valu_t long
