@@ -2319,7 +2319,7 @@ cmp tlt	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bcs 1f"
 				"clr.w %[a]"
@@ -2331,7 +2331,7 @@ cmp tle	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bls 1f"
 				"clr.w %[a]"
@@ -2343,7 +2343,7 @@ cmp teq	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"beq 1f"
 				"clr.w %[a]"
@@ -2355,7 +2355,7 @@ cmp bne	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bne 1f"
 				"clr.w %[a]"
@@ -2367,7 +2367,7 @@ cmp tge	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bcc 1f"
 				"clr.w %[a]"
@@ -2379,7 +2379,7 @@ cmp tgt	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 				"clr.w %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	allocate(DATAREG={IMMEDIATE,1})
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bhi 1f"
 				"clr.w %[a]"
@@ -2389,37 +2389,37 @@ cmp tgt	| ANY4 ADDREG |		allocate(DATAREG={IMMEDIATE,1})
 cmp zlt | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bcs $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bcs $2"	| | |
 cmp zle | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bls $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bls $2"	| | |
 cmp zeq | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"beq $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"beq $2"	| | |
 cmp zne | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bne $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bne $2"	| | |
 cmp zge | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bcc $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bcc $2"	| | |
 cmp zgt | ANY4 ADDREG |		remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bhi $2"	| | |
-...	| nocoercions: EXTERNAL_ADDR ANY4 |	remove(ALL)
+...	| nocoercions: EXTERNAL_ADDR DATA_ALT4 |	remove(ALL)
 				"cmp.l %[1],%[2]"
 				"bhi $2"	| | |
 tlt and $2==2 | DATA_ALT DATASCR |
