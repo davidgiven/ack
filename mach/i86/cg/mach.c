@@ -48,7 +48,7 @@ con_mult(sz) word sz; {
 	if (sz != 4)
 		fatal("bad icon/ucon size");
 	l = atol(str);
-	fprintf(codefile,"\t.word %d,%d\n",
+	fprintf(codefile,"\t.data2 %d,%d\n",
 			(int)l&0xFFFF,(int)(l>>16)&0xFFFF);
 }
 
@@ -59,7 +59,7 @@ con_float() {
 	if (i!= 4 && i!= 8)
 		fatal("bad fcon size");
 	while ( i ) {
-		fprintf(codefile," .word 0,0\n") ;
+		fprintf(codefile," .data2 0,0\n") ;
 		i -=4 ;
 	}
 }
@@ -109,8 +109,8 @@ mes(type) word type ; {
 }
 
 char    *segname[] = {
-	".text",        /* SEGTXT */
-	".data",        /* SEGCON */
-	".data",        /* SEGROM */
-	".bss"          /* SEGBSS */
+	".sect .text",        /* SEGTXT */
+	".sect .data",        /* SEGCON */
+	".sect .rom",        /* SEGROM */
+	".sect .bss"          /* SEGBSS */
 };

@@ -20,11 +20,12 @@
 #define arg_off         "4+%d(bp)"
 #define hol_off         "%d+hol%d"
 
-#define con_cst(x)      fprintf(codefile,".word\t%d\n",x)
-#define con_ilb(x)      fprintf(codefile,".word\t%s\n",x)
-#define con_dlb(x)      fprintf(codefile,".word\t%s\n",x)
+#define con_cst(x)      fprintf(codefile,".data2\t%d\n",x)
+#define con_ilb(x)      fprintf(codefile,".data2\t%s\n",x)
+#define con_dlb(x)      fprintf(codefile,".data2\t%s\n",x)
 
-#define modhead         ""
+#define modhead         ".sect .text; .sect .rom; .sect .data; .sect .bss\n"
 
-#define id_first        '_'
+#define fmt_id(fr,to)	sprintf(to, "_%s", fr)
+
 #define BSS_INIT        0
