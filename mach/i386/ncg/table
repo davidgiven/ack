@@ -227,7 +227,6 @@ jcxz label cost(1,4).
 je label cost(1,4).
 jg label cost(1,4).
 jge label cost(1,4).
-jgt label cost(1,4).
 jl label cost(1,4).
 jle label cost(1,4).
 jne label cost(1,4).
@@ -2698,7 +2697,7 @@ with rm STACK
   gen
       killcc.
       test %1
-      jgt {label, $1}
+      jg {label, $1}
 
 pat zne
 with rm+rm1 STACK
