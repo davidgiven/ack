@@ -413,7 +413,11 @@ LLmessage(d) {
 		s = cpy(LLsymb,s,0);
 		*s = '\0';
 	}
-	error(linecount,buf);
+	error(linecount, "%s", buf);
+			/* Don't change this line to 
+			 * error(linecount, buf).
+			 * The string in "buf" might contain '%' ...
+			 */
 	if (d) {	/*
 			 * Save the current token and make up some
 			 * attributes for the inserted token
