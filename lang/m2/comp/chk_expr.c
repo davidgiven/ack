@@ -448,7 +448,7 @@ chk_designator(expp, flag)
 		assert(expp->nd_right->nd_class == Name);
 
 		if (! chk_designator(expp->nd_left,
-				     (flag|HASSELECTORS)&DESIGNATOR)) return 0;
+				     (flag|HASSELECTORS))) return 0;
 
 		tp = expp->nd_left->nd_type;
 
@@ -633,7 +633,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 	case '*':
 		switch(tpl->tp_fund) {
 		case T_POINTER:
-			if (tpl != address_type) break;
+			if (! chk_address(tpl, tpr)) break;
 			/* Fall through */
 		case T_INTEGER:
 		case T_CARDINAL:
@@ -669,7 +669,13 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	case DIV:
 	case MOD:
-		if ((tpl->tp_fund & T_INTORCARD) || tpl == address_type) {
+		switch(tpl->tp_fund) {
+		case T_POINTER:
+			if (! chk_address(tpl, tpr)) break;
+			/* Fall through */
+		case T_INTEGER:
+		case T_CARDINAL:
+		case T_INTORCARD:
 			if (left->nd_class==Value && right->nd_class==Value) {
 				cstbin(expp);
 			}
@@ -718,7 +724,8 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 			return 1;
 
 		case T_POINTER:
-			if (expp->nd_symb == '=' ||
+			if (chk_address(tpl, tpr) ||
+			    expp->nd_symb == '=' ||
 			    expp->nd_symb == UNEQUAL ||
 			    expp->nd_symb == '#') return 1;
 			break;
@@ -746,6 +753,22 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 }
 
 int
+chk_address(tpl, tpr)
+	register struct type *tpl, *tpr;
+{
+	
+	if (tpl == address_type) {
+		return tpr == address_type || tpr->tp_fund != T_POINTER;
+	}
+
+	if (tpr == address_type) {
+		return tpl->tp_fund != T_POINTER;
+	}
+
+	return 0;
+}
+
+int
 chk_uoper(expp)
 	register struct node *expp;
 {
@@ -769,6 +792,9 @@ chk_uoper(expp)
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
+			if (tpr == intorcard_type) {
+				expp->nd_type = int_type;
+			}
 			if (right->nd_class == Value) {
 				cstunary(expp);
 			}

@@ -44,8 +44,8 @@ main:	$(OBJ) Makefile
 clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles 
 
-lint:	LLfiles lintlist
-	lint $(INCLUDES) `cat lintlist`
+lint:	LLfiles hfiles
+	lint $(INCLUDES) -DNORCSID `sources $(OBJ)`
 
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile <tokenname.c >tokenfile.g
@@ -79,11 +79,11 @@ depend:
 	make.allocd < $< > $@
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-LLlex.o: LLlex.h Lpars.h class.h const.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
+LLlex.o: LLlex.h Lpars.h class.h const.h debug.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
 error.o: LLlex.h debug.h errout.h f_info.h input.h inputtype.h main.h node.h
-main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h ndirs.h node.h scope.h standards.h tokenname.h type.h
+main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h ndir.h node.h scope.h standards.h tokenname.h type.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
@@ -92,17 +92,18 @@ type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h target_sizes.h type.
 def.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
-enter.o: LLlex.h def.h idf.h main.h node.h scope.h type.h
+enter.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
 defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h scope.h
 typequiv.o: def.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
-cstoper.o: LLlex.h Lpars.h idf.h node.h standards.h target_sizes.h type.h
+cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
 walk.o: LLlex.h Lpars.h debug.h def.h main.h node.h scope.h type.h
+casestat.o: LLlex.h Lpars.h debug.h density.h node.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
-declar.o: LLlex.h Lpars.h def.h idf.h main.h misc.h node.h scope.h type.h
-expression.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h type.h
+declar.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h
+expression.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h type.h
 statement.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h
 Lpars.o: Lpars.h

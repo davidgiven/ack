@@ -18,8 +18,6 @@ static char *RcsId = "$Header$";
 
 #include	"density.h"
 
-/* STATICALLOCDEF "caselist" */
-
 struct switch_hdr	{
 	struct switch_hdr *next;
 	label sh_break;
@@ -102,7 +100,7 @@ CaseCode(nd, exitlabel)
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
 	if (sh->sh_default) C_rom_ilb(sh->sh_default);
-	else C_rom_ucon((arith) 0, pointer_size);
+	else C_rom_ucon("0", pointer_size);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 
@@ -253,8 +251,7 @@ AddOneCase(sh, node, lbl)
 		*/
 		if (c1)	{
 			if (c1->ce_value == ce->ce_value)	{
-				node_error("multiple case entry for value %ld",
-					ce->ce_value);
+node_error(node, "multiple case entry for value %ld", ce->ce_value);
 				free_case_entry(ce);
 				return 0;
 			}

@@ -56,6 +56,12 @@ ProcedureHeading(struct def **pdf; int type;)
 	PROCEDURE IDENT
 		{
 		  df = DeclProc(type);
+		  if (proclevel) {
+			/* Room for static link
+			*/
+			df->prc_nbpar = pointer_size;
+		  }
+		  else	df->prc_nbpar = 0;
 		}
 	FormalParameters(type == D_PROCEDURE, &params, &tp, &(df->prc_nbpar))?
 		{

@@ -477,7 +477,6 @@ DeclProc(type)
 			strcpy(CurrentScope->sc_name, buf);
 			C_inp(buf);
 		}
-		df->prc_nbpar = 0;
 	}
 
 	return df;

@@ -25,8 +25,6 @@ static char *RcsId = "$Header$";
 extern arith	align();
 static int	prclev = 0;
 static label	instructionlabel;
-static label	datalabel = 1;
-static label	return_label;
 static char	return_expr_occurred;
 static struct type *func_type;
 
@@ -39,7 +37,9 @@ text_label()
 label
 data_label()
 {
-	return datalabel++;
+	static label	datalabel = 0;
+
+	return ++datalabel;
 }
 
 WalkModule(module)
@@ -89,14 +89,13 @@ WalkModule(module)
 	   this module.
 	*/
 	CurrentScope->sc_off = 0;
-	instructionlabel = 1;
-	return_label = instructionlabel++;
+	instructionlabel = 2;
 	func_type = 0;
 	C_pro_narg(CurrentScope->sc_name);
 	MkCalls(CurrentScope->sc_def);
 	WalkNode(module->mod_body, (label) 0);
-	C_df_ilb(return_label);
-	C_ret((label) 0);
+	C_df_ilb((label) 1);
+	C_ret(0);
 	C_end(align(-CurrentScope->sc_off, word_align));
 
 	CurrVis = vis;
@@ -121,15 +120,20 @@ WalkProcedure(procedure)
 	/* generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
-	return_label = 1;
+	MkCalls(CurrentScope->sc_def);
+	return_expr_occurred = 0;
 	instructionlabel = 2;
 	func_type = procedure->df_type->next;
-	MkCalls(CurrentScope->sc_def);
 	WalkNode(procedure->prc_body, (label) 0);
-	C_df_ilb(return_label);
-	if (func_type) C_ret((arith) align(func_type->tp_size, word_align));
-	else C_ret((arith) 0);
-	C_end(align(-CurrentScope->sc_off, word_size));
+	C_df_ilb((label) 1);
+	if (func_type) {
+		if (! return_expr_occurred) {
+node_error(procedure->prc_body,"function procedure does not return a value");
+		}
+		C_ret((int) align(func_type->tp_size, word_align));
+	}
+	else	C_ret(0);
+	C_end((int) align(-CurrentScope->sc_off, word_align));
 	CurrVis = vis;
 	prclev--;
 }
@@ -195,6 +199,12 @@ WalkStat(nd, lab)
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
 
+	if (!nd) {
+		/* Empty statement
+		*/
+		return;
+	}
+
 	if (nd->nd_class == Call) {
 		if (chk_call(nd)) CodeCall(nd);
 		return;
@@ -204,8 +214,8 @@ WalkStat(nd, lab)
 
 	switch(nd->nd_symb) {
 	case BECOMES:
-		WalkDesignator(left);
 		WalkExpr(right);
+		WalkDesignator(left);	/* May we do it in this order??? */
 
 		if (! TstAssCompat(left->nd_type, right->nd_type)) {
 			node_error(nd, "type incompatibility in assignment");
@@ -318,7 +328,7 @@ node_error(right, "type incompatibility in RETURN statement");
 			}
 			return_expr_occurred = 1;
 		}
-		C_bra(return_label);
+		C_bra((label) 1);
 		break;
 
 	default:
