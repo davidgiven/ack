@@ -70,7 +70,7 @@ sigtrp(trapno, signo)
 
 	oldtrap = __traps[signo];
 
-	if (signal(signo, ctch) == -1)		/* errno set by signal */
+	if (signal(signo, ctch) == (int (*)())-1)  /* errno set by signal */
 		return -1;
 	
 	__traps[signo] = trapno;

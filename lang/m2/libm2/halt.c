@@ -17,7 +17,6 @@ _cleanup()
 {
 	while (--callindex >= 0)
 		(*proclist[callindex])();
-	}
 	callindex = 0;
 }
 
