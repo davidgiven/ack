@@ -73,7 +73,6 @@ Forward(nd, tp)
 	fw_type->f_type = tp;
 }
 
-STATIC
 chk_prog_params()
 {
 	/* the program parameters must be global variables of some file type */
@@ -97,7 +96,6 @@ chk_prog_params()
 	}
 }
 
-STATIC
 chk_directives()
 {
 	/* check if all forward declarations are defined */

@@ -78,7 +78,7 @@ MarkUsed(nd)
 	}
 }
 
-STATIC int
+int
 ChkConstant(expp)
 	register struct node *expp;
 {
@@ -175,7 +175,7 @@ ChkValue(expp)
 }
 #endif
 
-STATIC int
+int
 ChkLinkOrName(expp)
 	register struct node *expp;
 {

@@ -54,7 +54,7 @@ INCLUDES =	-I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 OPTIM=		-O
 CFLAGS =	$(PROFILE) $(INCLUDES) $(OPTIM) $(COPTIONS) -DSTATIC=
 LINTFLAGS =	-DSTATIC= -DNORCSID
-LDFLAGS =	-i $(PROFILE)
+LDFLAGS =	$(PROFILE)
 
 LSRC =	declar.c expression.c program.c statement.c tokenfile.c
 LOBJ =	declar.o expression.o program.o statement.o tokenfile.o

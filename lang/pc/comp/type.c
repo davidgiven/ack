@@ -499,7 +499,6 @@ FreeForward(for_type)
 	free_forwtype(for_type);
 }
 
-STATIC
 chk_forw_types()
 {
 	/* check all forward references (in pointer types) */
@@ -566,7 +565,6 @@ chk_forw_types()
 	}
 }
 
-STATIC
 TstCaseConstants(nd, sel, sel1)
 	register struct node *nd;
 	register struct selector *sel, *sel1;
