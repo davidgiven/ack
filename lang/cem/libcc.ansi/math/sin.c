@@ -30,7 +30,6 @@ sinus(double x, int cos_flag)
 		 0.27204790957888846175e-14
 	};
 
-	double  xsqr;
 	double  y;
 	int     neg = 1;
 

@@ -12,7 +12,6 @@
 double
 fmod(double x, double y)
 {
-	long	i;
 	double val;
 	double frac;
 
@@ -27,7 +26,7 @@ fmod(double x, double y)
 /*
 	val = x / y;
 	if (val > LONG_MIN && val < LONG_MAX) {
-		i = val;
+		long i = val;
 		return x - i * y;
 	}
 */
