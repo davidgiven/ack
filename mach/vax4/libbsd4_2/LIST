@@ -4,6 +4,7 @@ _ftime.c
 _gtty.c
 _pause.c
 _gettimday.s
+_creat.s
 _open.s
 _sigpause.s
 _brk.s
@@ -14,6 +15,7 @@ _fstat.s
 _ioctl.s
 _pipe.s
 _wait.s
+_dup.s
 _dup2.s
 _kill.s
 _read.s

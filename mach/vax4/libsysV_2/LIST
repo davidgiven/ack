@@ -8,7 +8,9 @@ chmod.s
 chown.s
 chroot.s
 creat.s
+_creat.s
 dup.s
+_dup.s
 dup2.c
 _dup2.c
 close.s

@@ -16,6 +16,7 @@ chroot.s
 close.s
 _close.s
 creat.s
+_creat.s
 dup.s
 _dup.s
 errmon.s

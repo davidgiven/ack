@@ -3,6 +3,8 @@ _alarm.s
 _sbrk.s
 _brk.s
 _close.s
+_creat.s
+_dup.s
 _execl.s
 _execve.s
 _fork.s
