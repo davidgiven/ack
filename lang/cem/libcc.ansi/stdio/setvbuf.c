@@ -23,8 +23,13 @@ setvbuf(register FILE *stream, char *buf, int mode, size_t size)
 
 	stream->_flags &= ~(_IOMYBUF | _IONBF | _IOLBF);
 
-	if (!buf && (mode != _IONBF))
-		if ((buf = (char *) malloc(size)) == NULL) retval = EOF;
+	if (!buf && (mode != _IONBF)) {
+		if ((buf = (char *) malloc(size)) == NULL) {
+			retval = EOF;
+		} else {
+			stream->_flags |= _IOMYBUF;
+		}
+	}
 
 	if (io_testflag(stream, _IOREADING) || io_testflag(stream, _IOWRITING))
 		retval = EOF;
