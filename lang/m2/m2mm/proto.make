@@ -58,7 +58,7 @@ pr:
 lint:		make.main
 		make -f make.main lint
 
-Cfiles:		LLfiles $(GEN_C) $(GEN_H)
+Cfiles:		LLfiles $(GEN_C) $(GEN_H) Makefile
 		echo $(CFILES) | tr ' ' '\012' > Cfiles
 		echo $(HFILES) | tr ' ' '\012' >> Cfiles
 
