@@ -57,12 +57,21 @@ statement(register struct node **pnd;)
 |
 	CaseStatement(pnd)
 |
-	WhileStatement(pnd)
+	WHILE		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	expression(&(nd->nd_left))
+	DO
+	StatementSequence(&(nd->nd_right))
+	END
 |
-	RepeatStatement(pnd)
+	REPEAT		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	StatementSequence(&(nd->nd_left))
+	UNTIL
+	expression(&(nd->nd_right))
 |
 			{ loopcount++; }
-	LoopStatement(pnd)
+	LOOP		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	StatementSequence(&((*pnd)->nd_right))
+	END
 			{ loopcount--; }
 |
 	ForStatement(pnd)
@@ -176,6 +185,7 @@ case(struct node **pnd; struct type **ptp;) :
 			}
 ;
 
+/* inline in statement; lack of space 
 WhileStatement(struct node **pnd;)
 {
 	register struct node *nd;
@@ -196,6 +206,7 @@ RepeatStatement(struct node **pnd;)
 	UNTIL
 	expression(&(nd->nd_right))
 ;
+*/
 
 ForStatement(struct node **pnd;)
 {
@@ -225,11 +236,13 @@ ForStatement(struct node **pnd;)
 	END
 ;
 
+/* inline in Statement; lack of space
 LoopStatement(struct node **pnd;):
 	LOOP		{ *pnd = MkLeaf(Stat, &dot); }
 	StatementSequence(&((*pnd)->nd_right))
 	END
 ;
+*/
 
 WithStatement(struct node **pnd;)
 {

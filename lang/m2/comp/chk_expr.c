@@ -425,11 +425,12 @@ ChkSet(expp)
 	register struct def *df;
 	unsigned size;
 	int retval = 1;
+	int SetIsConstant = 1;
 
 	assert(expp->nd_symb == SET);
 
-	expp->nd_class = Set;
 	expp->nd_type = error_type;
+	expp->nd_class = Set;
 
 	/* First determine the type of the set
 	*/
@@ -472,10 +473,11 @@ ChkSet(expp)
 						expp->nd_set)) {
 			retval = 0;
 		}
+		if (nd->nd_left) SetIsConstant = 0;
 		nd = nd->nd_right;
 	}
 
-	if (expp->nd_class == Set) {
+	if (SetIsConstant) {
 		FreeNode(expp->nd_right);
 		expp->nd_right = 0;
 	}
