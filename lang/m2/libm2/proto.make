@@ -25,5 +25,7 @@ opr:
 		make pr | opr
 
 install:
-		-mkdir $(DEF_DIR)
-		for i in $(SOURCES) ; do cp $(SRC_DIR)/$$i $(DEF_DIR)/$$i ; done
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then if [ -d $(DEF_DIR) ] ; then : ; else mkdir $(DEF_DIR) ; fi ; \
+		for i in $(SOURCES) ; do cp $(SRC_DIR)/$$i $(DEF_DIR)/$$i ; done ; \
+		fi

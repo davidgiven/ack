@@ -40,7 +40,9 @@ install:	all
 		-mkdir $b
 		cp em_???? $b
 		cp em eminform $(TARGET_HOME)/bin
-		cp $(SRC_DIR)/em.1 $(SRC_DIR)/eminform.1 $(TARGET_HOME)/man
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/em.1 $(SRC_DIR)/eminform.1 $(TARGET_HOME)/man ; \
+		fi
 
 cmp: 		all
 		-cmp em_t--- $b/em_t---

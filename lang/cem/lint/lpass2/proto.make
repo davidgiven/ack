@@ -33,11 +33,12 @@ OBJ =	lpass2.$(SUF) checkargs.$(SUF) read.$(SUF) report.$(SUF) class.$(SUF)
 all:	lpass2 lint.exec
 
 install:	all
-	-mkdir $(TARGET_HOME)/lib.bin
 	-mkdir $(TARGET_HOME)/lib.bin/lint
 	cp lpass2 $(TARGET_HOME)/lib.bin/lint/lpass2
 	cp lint.exec $(TARGET_HOME)/bin/lint
-	cp $(SRC_DIR)/lint.1 $(TARGET_HOME)/man/lint.1
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then cp $(SRC_DIR)/lint.1 $(TARGET_HOME)/man/lint.1 ; \
+	fi
 
 cmp:	all
 	-cmp lpass2 $(TARGET_HOME)/lib.bin/lint/lpass2

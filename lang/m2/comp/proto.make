@@ -51,12 +51,11 @@ all:		make.main
 		make -f make.main main
 
 install:	all
-		@-mkdir $(TARGET_HOME)
-		@-mkdir $(TARGET_HOME)/lib.bin
 		cp main $(TARGET_HOME)/lib.bin/em_m2
 		@-mkdir $(TARGET_HOME)/man
-		rm -f $(TARGET_HOME)/man/em_m2.6 $(TARGET_HOME)/man/modula-2.1
-		cp $(SRC_DIR)/em_m2.6 $(SRC_DIR)/modula-2.1 $(TARGET_HOME)/man
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/em_m2.6 $(SRC_DIR)/modula-2.1 $(TARGET_HOME)/man ; \
+		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_m2

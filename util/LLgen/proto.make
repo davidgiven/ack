@@ -14,20 +14,22 @@ clean:
 
 install:
 	cd src; make
-	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
 	cp src/LLgen $(INSTALLDIR)/LLgen
-	cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec
-	cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl
-	cp $(SRC_HOME)/util/LLgen/LLgen.1 $(MANDIR)/LLgen.1
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec ; \
+		cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl ; \
+		cp $(SRC_HOME)/util/LLgen/LLgen.1 $(MANDIR)/LLgen.1 ; \
+	fi
 
 firstinstall:
 	cd src; make first
-	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
 	cp src/LLgen $(INSTALLDIR)/LLgen
-	-mkdir $(LIBDIR)
-	cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec
-	cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl
-	cp $(SRC_HOME)/util/LLgen/LLgen.1 $(MANDIR)/LLgen.1
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	if [ -d $(LIBDIR) ] ; then : ; else mkdir $(LIBDIR) ; fi ; \
+		cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec ; \
+		cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl ; \
+		cp $(SRC_HOME)/util/LLgen/LLgen.1 $(MANDIR)/LLgen.1 ; \
+	fi
 
 cmp:
 	cd src; make

@@ -67,7 +67,9 @@ install:	all
 		ls em2_???? | sed 's:em2_\(.*\):cp & $b24/em_\1:' | sh
 		ls em4_???? | sed 's:em4_\(.*\):cp & $b44/em_\1:' | sh
 		cp em $(TARGET_HOME)/bin/em
-		cp em.1 $(TARGET_HOME)/man/em.1
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp em.1 $(TARGET_HOME)/man/em.1 ; \
+		fi
 
 cmp: 		all
 		-ls em2_???? | sed 's:em2_\(.*\):cmp & $b24/em_\1:' | sh

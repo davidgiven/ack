@@ -47,8 +47,6 @@ all:		make.main
 		make -f make.main main
 
 install:	all
-		@-mkdir $(TARGET_HOME)
-		@-mkdir $(TARGET_HOME)/lib.bin
 		cp main $(TARGET_HOME)/lib.bin/em_occam
 
 cmp:		all

@@ -38,11 +38,10 @@ all:		make.main
 		make -f make.main main
 
 install:	all
-		@-mkdir $(TARGET_HOME)
-		@-mkdir $(TARGET_HOME)/bin
 		cp main $(TARGET_HOME)/bin/m2mm
-		@-mkdir $(TARGET_HOME)/man
-		cp $(SRC_DIR)/m2mm.1 $(TARGET_HOME)/man/m2mm.1
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/m2mm.1 $(TARGET_HOME)/man/m2mm.1 ; \
+		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_m2
