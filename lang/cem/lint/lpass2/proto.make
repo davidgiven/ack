@@ -63,7 +63,7 @@ tags:	$(SRC)
 	ctags $(SRC)
 
 clean:
-	rm -f a.out core next.c inpdef.h *.$(SUF) lint.exec
+	rm -f a.out core next.c inpdef.h *.$(SUF) lint.exec lpass2
 
 lint:	inpdef.h next.c
 	$(LINT) $(LINTFLAGS) $(SRC) next.c
