@@ -68,8 +68,15 @@ stop(filled) {
 }
 
 FILE *do_open(file) char *file ; {
+	FILE *fd;
+
 	strcpy(tail,file) ;
-	return fopen(dname,"r") ;
+	strcat(tail,"/");
+	strcat(tail,"descr");
+	if ((fd = fopen(dname,"r")) != NULL) return fd;
+	strcpy(tail,"descr/");
+	strcat(tail,file);
+	return fopen(dname,"r");
 }
 
 readm() {
