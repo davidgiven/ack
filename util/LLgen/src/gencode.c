@@ -1164,7 +1164,6 @@ correct_prefix()
 		fprintf(f, "#define LLfirst %sfirst\n", s);
 		fprintf(f, "#define LLnewlevel %snewlevel\n", s);
 		fprintf(f, "#define LLoldlevel %soldlevel\n", s);
-		fprintf(f, "#define LLlex %slex\n", s);
 		fprintf(f, "#define LLmessage %smessage\n", s);
 	}
 	fprintf(f, "#include \"%s\"\n", f_include);
