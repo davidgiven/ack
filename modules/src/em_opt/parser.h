@@ -75,6 +75,7 @@ struct state {
 extern struct state	*states[MAXSTATES];
 extern struct action	*actions[MAXSTATES];
 extern struct mnems	patterns[MAXSTATES];
+extern int		numpatterns;	/* Number of patterns */
 extern int		higheststate;	/* Highest state yet allocated */
 extern struct idf	*ops;		/* Chained list of all ops */
 extern int		maxpattern;

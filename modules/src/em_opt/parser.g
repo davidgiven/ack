@@ -23,6 +23,7 @@ static char rcsidp1[] = "$Header$";
 struct state	*states[MAXSTATES];
 struct action	*actions[MAXSTATES];
 struct mnems	patterns[MAXSTATES];
+int		numpatterns = 0;	/* Number of patterns */
 int		higheststate = 0;	/* Highest state yet allocated */
 struct idf	*ops;			/* Chained list of all ops */
 int		maxpattern = 0;
@@ -59,6 +60,7 @@ optimization
 	':'
 	action(&repllist)
 			{
+			numpatterns++;
 			addaction(startline,currentstate,restrictions,
 				finaltest,repllist);
 			}

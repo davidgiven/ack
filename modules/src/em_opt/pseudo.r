@@ -1,22 +1,17 @@
 df_dlb	| label:l	|
-	register p_instr p = GETNXTPATT();
-	FLUSHDFA(p);
+	FLUSHDFA();
 	C_df_dlb(l);
 df_dnam	| char *:s	|
-	register p_instr p = GETNXTPATT();
-	FLUSHDFA(p);
+	FLUSHDFA();
 	C_df_dnam(s);
 pro	| char *:s arith:l	|
-	register p_instr p = GETNXTPATT();
-	FLUSHDFA(p);
+	FLUSHDFA();
 	C_pro(s,l);
 pro_narg	| char *:s	|
-	register p_instr p = GETNXTPATT();
-	FLUSHDFA(p);
+	FLUSHDFA();
 	C_pro_narg(s);
 end	| arith:l	|
-	register p_instr p = GETNXTPATT();
-	FLUSHDFA(p);
+	FLUSHDFA();
 	C_end(l);
 end_narg	|	|
 	FLUSHDFA();

@@ -110,7 +110,7 @@ increase_next(size)
 	do {
 		newsize *= 2;
 	} while (newsize<size);
-	printf("Extending next/check arrays from %d to %d\n",currsize,newsize);
+	printf("Note: Extending next/check arrays from %d to %d\n",currsize,newsize);
 	next = (int *)Realloc(next,newsize);
 	check = (int *)Realloc(check,newsize);
 	/* clear ends of new arrays */
@@ -191,9 +191,13 @@ outdfa()
 		else
 			base[s] = EMPTY;
 	}
-
+	/* give some statistics on size of dfa */
+	printf("Number of patterns: %d\n", numpatterns);
+	printf("Longest pattern: %d\n", maxpattern);
+	printf("Longest replacement: %d\n", maxreplacement);
+	printf("Dfa contains %d distinct state/opcode pairs\n", numentries);
+	printf("Compacted using row displacement into %d entries\n",maxpos);
 	/* output the arrays */
-	printf("Compacted %d entries into %d positions\n",numentries,maxpos);
 	fprintf(ofile,"struct dfa OO_checknext[] = {\n");
 	for(i=0;i<=maxpos;i++) {
 		fprintf(ofile,"\t/* %4d */\t",i);
