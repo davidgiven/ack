@@ -218,6 +218,7 @@ union ptr_union *argp;		/* our argument list */
 		case 'f': {
 			register char *c = buffer;
 
+			if (!widflag) width = 127;
 			if (width >= 128) width = 127;
 			if (width && (ic == '+' || ic == '-')) {
 				*c++ = ic;
