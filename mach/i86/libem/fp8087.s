@@ -14,7 +14,7 @@ one:
 two:
 	.data2	2
 bigmin:
-	.data4 	-2147483648
+	.data2	0, -32768
 
 	.sect .text
 .adf4:
