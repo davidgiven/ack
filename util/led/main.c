@@ -407,7 +407,7 @@ norm_commons()
 		}
 		name++;
 	}
-	if (flagword & RFLAG) return;
+	if ((flagword & RFLAG) && !(flagword & CFLAG)) return;
 
 	/*
 	 * RFLAG is off, so we need not produce relocatable output.
