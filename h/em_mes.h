@@ -19,6 +19,8 @@
 #define ms_par	 9	/* Number of bytes of parameters accessed            */
 #define ms_ego	10	/* Hint from EM Global Optimizer                     */
 #define ms_gto	11	/* Dangerous procedure, uses nonlocal goto	     */
+#define ms_stb	12	/* symbol table entry (for debugger)		     */
+#define ms_lin	13	/* line number indication (for debugger symbol table)*/
 
 /*
  * for details about ms_reg, see em_reg.h
