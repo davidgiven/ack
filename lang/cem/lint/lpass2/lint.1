@@ -161,12 +161,16 @@ The \fIn\fR must follow the word VARARGS immediately.
 The \fIn\fP-th argument (counting from 0) of the  next function declaration
 corresponds to a
 .IR printf -like
-format string.  Details about the format are given between the $$. A missing
-$$ repeats the latest format.
+format string.  Details about the format are given between the $$; see below.
+A missing $$ repeats the latest format.
 The \fIn\fR must follow the word FORMAT immediately.
 /* FORMAT\fIn\fR $ ... $ */ implies /* VARARGS\fIn+1\fP */; if the format
 is followed by more required arguments, a separate /* VARARGS\fIm\fP */
 must be given after the FORMAT pseudo-comment.
+.IP
+If the printf-like heading also has to conform to some varargs.h convention,
+error messages may result; these can be suppressed by appending the letter v
+to the word FORMAT\fIn\fR without intervening space.
 .PP
 .I Formats
 .PP
@@ -195,6 +199,16 @@ is:
 	%c = int		%s = char *
 .br
 $ */
+.PP
+.I Output
+.PP
+Some users feel it is a good idea to pipe the output of
+.I lint
+through the command
+.br
+	sort \-t' ' +0d \-1 +2n \-3
+.br
+where the character between the apostrophes is a space.
 .SH "ENVIRONMENT VARIABLES"
 LINTFLAGS	additional flag arguments (e.g. LINTFLAGS=\-h)
 .br
