@@ -40,7 +40,8 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4 %s\n",str);
 }
 
-#define IEEEFLOAT 1
+#define IEEEFLOAT
+#define CODE_GENERATOR
 #include <con_float>
 
 regscore(off,size,typ,score,totyp)
