@@ -31,7 +31,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f $(NOFILES) $(POFILES) $(GENFILES) parser core makerror
+		rm -f $(NOFILES) $(POFILES) $(GENFILES) parser libopt.a
 
 # set HOWMUCH to head -20 to limit number of patterns used
 #HOWMUCH = head -20
