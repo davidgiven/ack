@@ -159,7 +159,7 @@ copyact(ch1, ch2, level)
 			}
 
 			PushBack();
-			copy('\n');
+			copy(' ');
 			break;
 
 		case '/':
