@@ -100,7 +100,6 @@ preprocess(fn)
 							++LineNumber;
 							++lineno;
 							echo(c);
-							break;
 						}
 						else if (c == EOI) {
 							flush(op - _obuf);
