@@ -2411,7 +2411,7 @@ with AA_REG STACK
 	move_l {pre_dec4, %1},{pre_dec4, sp}
 	move_l {pre_dec4, %1},{pre_dec4, sp}
 
-pat loi $1>16
+pat loi $1>16 && $1/4 <= 65536
 with AA_REG STACK
     kills ALL
     uses DD_REG = {const, $1/4 -1}
@@ -2419,6 +2419,12 @@ with AA_REG STACK
 	1:
 	move_l {pre_dec4, %1}, {pre_dec4, sp}
 	dbf %a, {slabel, 1b}
+
+pat loi
+with STACK
+    kills ALL
+    gen move_l {const,$1},{pre_dec4, sp}
+	jsr {absolute4, ".los"}
 
 pat los $1==4
 with STACK
@@ -2827,13 +2833,19 @@ pat sti $1==16
     	move_l {post_inc4, sp},{post_inc4,%1}
     	move_l {post_inc4, sp},{post_inc4,%1}
 
-pat sti $1>16
+pat sti $1>16 && $1/4 <= 65536
 with AA_REG STACK
     kills ALL
     uses DD_REG = {const, $1/4 -1}
     gen 1:
 	move_l {post_inc4, sp}, {post_inc4, %1}
 	dbf %a, {slabel, 1b}
+
+pat sti
+with STACK
+    kills ALL
+    gen	move_l {const, $1}, {pre_dec4, sp}
+	jsr {absolute4, ".sts"}
 
 pat sts $1==4
 with STACK
@@ -3538,14 +3550,20 @@ pat zer $1==4		yields	{zero_const, 0}
 pat zer $1==8		yields	{zero_const, 0} {zero_const, 0}
 pat zer $1==12		yields	{zero_const, 0} {zero_const, 0} {zero_const, 0}
 
-pat zer
+pat zer $1/4 <= 65536
 with STACK
     uses DD_REG = {const, $1/4 -1}
     gen 1:
 	clr_l {pre_dec4, sp}
 	dbf %a, {slabel, 1b}
 
-
+pat zer
+with STACK
+    uses DD_REG = {const, $1/4}
+    gen 1:
+	clr_l {pre_dec4, sp}
+	sub_l {const,1}, %a
+	bne {slabel, 1b}
 
 /************************************************
  * Group 8: convert instructions		*
@@ -3675,26 +3693,41 @@ with DD_REG STACK
     gen
 	lea {regAregXcon, sp, %1, 1, 0},%a
 	asr_l {small_const, 2}, %1
-	sub_l {const, 1}, %1
 	1:
 	move_l {post_inc4, sp}, %b
 	xxx* %b, {post_inc4, %a}
-	dbf %1, {slabel, 1b}
+	sub_l {const,1}, %1
+	bne {slabel, 1b}
+
+proc logbdef example and
+with STACK
+    uses AA_REG,
+	 DD_REG,
+	 DD_REG
+    gen
+	move_l {const,$1/4}, %c
+	lea {regAregXcon, sp, %c, 1, 0},%a
+	1:
+	move_l {post_inc4, sp}, %b
+	xxx* %b, {post_inc4, %a}
+	sub_l {const,1}, %c
+	bne {slabel, 1b}
 
 pat and $1==4				call log4("and.l")
-pat and $1>4				call logdef("and.l")
+pat and $1>4 && $1/4<=65536		call logdef("and.l")
+pat and defined($1)			call logbdef("and.l")
 pat and !defined($1)			call logndef("and.l")
 pat ior $1==4				call log4("or.l")
-pat ior $1>4				call logdef("or.l")
+pat ior $1>4 && $1/4<=65536		call logdef("or.l")
+pat ior defined($1)			call logbdef("or.l")
 pat ior !defined($1)			call logndef("or.l")
 
 pat xor $1==4
-with conreg4-bconst DD_REG
-    gen eor_l %1, %2	yields	%2
 with DD_REG conreg4-bconst 
     gen eor_l %2, %1	yields	%1
 
-pat xor $1>4				call logdef("eor.l")
+pat xor $1>4 && $1/4<=65536		call logdef("eor.l")
+pat xor defined($1)			call logbdef("eor.l")
 pat xor !defined($1)			call logndef("eor.l")
 
 pat com $1==4
@@ -3706,7 +3739,7 @@ with DD_REG DD_REG
     gen not_l %1
 	not_l %2	yields	%2 %1
 
-pat com $1>4
+pat com $1>8 && $1/4<=65536
 with STACK
     uses AA_REG,
 	 DD_REG = {const, $1/4 -1}
@@ -3715,15 +3748,25 @@ with STACK
 	not_l {post_inc4, %a}
 	dbf %b, {slabel, 1b}
 
+pat com defined($1)
+with STACK
+    uses AA_REG,
+	 DD_REG = {const, $1/4}
+    gen	move_l sp, %a
+	1:
+	not_l {post_inc4, %a}
+	sub_l {const, 1}, %b
+	bne {slabel, 1b}
+
 pat com !defined($1)
 with DD_REG STACK
     uses AA_REG
     gen move_l sp, %a
 	asr_l {small_const, 2}, %1
-	sub_l {const, 1}, %1
 	1:
 	not_l {post_inc4, %a}
-	dbf %1, {slabel, 1b}
+	sub_l {const, 1}, %1
+	bne {slabel, 1b}
 
 pat rol $1==4
 with shconreg DD_REG
@@ -4198,7 +4241,7 @@ with A_REG A_REG
     gen	move_l {indirect4, %2}, {indirect4, %1}
 	move_l {offsetted4, %2, 4}, {offsetted4, %1, 4}
 
-pat blm $1>8
+pat blm $1>8 && $1/4 <= 65536
 with AA_REG AA_REG
     kills ALL
     uses DD_REG={const, $1/4 -1}
@@ -4206,15 +4249,24 @@ with AA_REG AA_REG
 	move_l {post_inc4, %2}, {post_inc4, %1}
 	dbf %a, {slabel, 1b}
 
+pat blm
+with AA_REG AA_REG
+    kills ALL
+    uses DD_REG={const,$1/4}
+    gen	1:
+	move_l {post_inc4, %2}, {post_inc4, %1}
+	sub_l {const, 1}, %a
+	bne {slabel, 1b}
+
 pat bls $1==4
 with DD_REG AA_REG AA_REG
     kills ALL
     gen asr_l {small_const, 2}, %1
 	beq {slabel, 2f}
-	sub_l {const, 1}, %1
 	1:
 	move_l {post_inc4, %3}, {post_inc4, %2}
-	dbf %1, {slabel, 1b}
+	sub_l {const, 1}, %1
+	bne {slabel, 1b}
 	2:
 
 pat csa $1==4
@@ -4237,12 +4289,20 @@ with dups4				yields	%1 %1
 pat dup $1==8
 with dups4 dups4			yields	%2 %1 %2 %1
 
-pat dup $1>8
+pat dup $1>8 && $1/4<=65536
 with STACK
     uses DD_REG = {const, $1/4 -1}
     gen 1:
 	move_l {offsetted4, sp, $1 -4}, {pre_dec4, sp}
 	dbf %a, {slabel, 1b}
+
+pat dup
+with STACK
+    uses DD_REG = {const, $1/4}
+    gen 1:
+	move_l {offsetted4, sp, $1 -4}, {pre_dec4, sp}
+	sub_l {const, 1}, %a
+	bne {slabel, 1b}
 
 pat dus $1==4
 with DD_REG STACK
@@ -4251,10 +4311,10 @@ with DD_REG STACK
     	lea {regAregXcon, sp, %1, 1, 0}, %a
 	asr_l {small_const, 2}, %1
 	beq {slabel, 2f}
-	sub_l {const, 1}, %1
 	1:
 	move_l {pre_dec4, %a}, {pre_dec4, sp}
-	dbf %1, {slabel, 1b}
+	sub_l {const, 1}, %1
+	bne {slabel, 1b}
 	2:
 
 pat exg $1==4
