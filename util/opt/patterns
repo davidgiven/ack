@@ -495,6 +495,8 @@ loi loc loc cii loc cmi zne $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:
 loi loc loc cii loc loc ciu loc and $1==1 && $2==1 && $3==w && $5==w && $6==w && $8==255 && $9==w:	loi 1
 loc loc cii LLP sti $2>$1 && $1==$5:	LLP $4 sti $5
 loc loc cii LEP sti $2>$1 && $1==$5:	LEP $4 sti $5
+loc loc cii lal sti $2>$1 && $1==$5:	lal $4 sti $5
+loc loc cii lae sti $2>$1 && $1==$5:	lae $4 sti $5
 loc and LEP sti $1==255 && $2==w && $4==1:	LEP $3 sti $4
 loc and LEP adp sti $1==255 && $2==w && $5==1:	LEP $3 adp $4 sti $5
 loc and lae sti $1==255 && $2==w && $4==1:	lae $3 sti $4
