@@ -5,7 +5,7 @@ COMPARE =	$(EMHOME)/modules/compare
 LINT	=	lint
 BINDIR	=	$(EMHOME)/lib
 LIBOPT =	libemopt.a
-LIBCEOPT =	libemoptCE.a
+LIBCEOPT =	libCEopt.a
 
 # set HOWMUCH to head -20 to limit number of patterns used
 #HOWMUCH =	head -20
@@ -78,6 +78,8 @@ NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.a\
 		$(EMHOME)/modules/lib/libemk.a\
 		$(EMHOME)/modules/lib/liballoc.a\
 		$(EMHOME)/modules/lib/malloc.o\
+		$(EMHOME)/modules/lib/libprint.a\
+		$(EMHOME)/modules/lib/libstring.a\
 		$(EMHOME)/modules/lib/libsystem.a\
 		$(EMHOME)/lib/em_data.a
 
@@ -89,7 +91,9 @@ OLINT =		main.c mkstrct.c nopt.c aux.c dfa.c trans.c
 OLINTLIB = 	$(EMHOME)/modules/lib/llib-lread_emkV.ln\
 		$(EMHOME)/modules/lib/llib-lemk.ln\
 		$(EMHOME)/modules/lib/llib-lsystem.ln\
-		$(EMHOME)/modules/lib/llib-lalloc.ln
+		$(EMHOME)/modules/lib/llib-lalloc.ln\
+		$(EMHOME)/modules/lib/llib-lprint.ln\
+		$(EMHOME)/modules/lib/llib-lstring.ln
 
 lintnopt:	dfadummy $(OLINT)
 		$(LINT) $(LINTFLAGS) $(OLINT) $(OLINTLIB)
@@ -101,14 +105,14 @@ $(LIBOPT):	dfadummy $(NOFILES) mkstrct.o pseudo.d incalls.d
 		ar rc $(LIBOPT) O_*.o $(NOFILES) mkstrct.o
 		-sh -c 'ranlib $(LIBOPT)'
 
-libCEopt.a:
+$(LIBCEOPT):
 		make clean
 		make PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
-		mv $(LIBOPT) libCEopt.a
+		mv $(LIBOPT) $(LIBCEOPT)
 		make clean
 
 dfadummy:	patterns parser
-		-/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
+		-$(EMHOME)/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
 		parser </tmp/patts
 		-rm /tmp/patts
 		touch dfadummy

@@ -14,7 +14,7 @@ outputincalls()
 		case NOARG:
 			fprintf(ofile,"%s\t|\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkop(GETNXTPATT(),op_%s);\n",s);
+				fprintf(ofile,"\tEM_Nop(op_%s);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -25,7 +25,7 @@ outputincalls()
 		case CSTOPT:
 			fprintf(ofile,"%s_narg\t|\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mknarg(GETNXTPATT(),op_%s);\n",s);
+				fprintf(ofile,"\tEM_Nnarg(op_%s);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -36,7 +36,7 @@ outputincalls()
 		case CST:
 			fprintf(ofile,"%s\t| arith:n\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkcst(GETNXTPATT(),op_%s,n);\n",s);
+				fprintf(ofile,"\tEM_Ncst(op_%s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -47,7 +47,7 @@ outputincalls()
 		case DEFILB:
 			fprintf(ofile,"df_ilb\t| label:l\t|\n");
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkdefilb(GETNXTPATT(),op_%s,l);\n",s);
+				fprintf(ofile,"\tEM_Ndefilb(op_%s,l);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -58,7 +58,7 @@ outputincalls()
 		case PNAM:
 			fprintf(ofile,"%s\t| char *:s\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkpro(GETNXTPATT(),op_%s,s);\n",s);
+				fprintf(ofile,"\tEM_Npro(op_%s,s);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -69,7 +69,7 @@ outputincalls()
 		case LAB:
 			fprintf(ofile,"%s\t| label:l\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkilb(GETNXTPATT(),op_%s,l);\n",s);
+				fprintf(ofile,"\tEM_Nilb(op_%s,l);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -80,7 +80,7 @@ outputincalls()
 		case EXT:
 			fprintf(ofile,"%s\t| arith:n\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mkcst(GETNXTPATT(),op_%s,n);\n",s);
+				fprintf(ofile,"\tEM_Ncst(op_%s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -89,7 +89,7 @@ outputincalls()
 			}
 			fprintf(ofile,"%s_dnam\t| char *:s arith:n\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mksof(GETNXTPATT(),op_%s,s,n);\n",s);
+				fprintf(ofile,"\tEM_Nsof(op_%s,s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {
@@ -98,7 +98,7 @@ outputincalls()
 			}
 			fprintf(ofile,"%s_dlb\t| label:l arith:n\t|\n",s);
 			if(op->id_used) {
-				fprintf(ofile,"\tEM_mknof(GETNXTPATT(),op_%s,l,n);\n",s);
+				fprintf(ofile,"\tEM_Nnof(op_%s,l,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
 			}
 			else {

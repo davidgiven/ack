@@ -4,7 +4,7 @@
 		op1 op2 ... : action
    and build a program to recognize then */
 
-%token	SFIT, UFIT, ROTATE, PSIZE, WSIZE, DEFINED, UNDEFINED, SAMESIGN;
+%token	SFIT, UFIT, ROTATE, PSIZE, WSIZE, DWSIZE,  DEFINED, UNDEFINED, SAMESIGN;
 %token	SAMEEXT, SAMENAM, OFFSET, LOGAND, LOGOR, BITAND, BITOR, XOR;
 %token	MINUS, PLUS, TIMES, DIV, MOD, EQ, NE, LT, LE, GT, GE, NOT, COMP;
 %token	LSHIFT, RSHIFT, COMMA, OPCODE, INT, UPLUS, UMINUS, PATARG;
@@ -265,6 +265,10 @@ exp(int level; struct exp_node **result;)
 		| WSIZE
 			{
 			*result = mkleaf(WSIZE,0);
+			}
+		| DWSIZE
+			{
+			*result = mkleaf(DWSIZE,0);
 			}
 		| INT
 			{

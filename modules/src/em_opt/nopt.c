@@ -29,6 +29,7 @@ static char	*nextstr;
 static char	*laststr;
 
 arith		OO_WSIZE;	/* wordlength */
+arith		OO_DWSIZE;	/* 2*wordlength */
 arith		OO_PSIZE;	/* pointer length */
 
 #ifdef STATS
@@ -51,6 +52,7 @@ O_init(wsize,psize)
 	allocmem();
 	C_init(wsize,psize);
 	OO_WSIZE = wsize;
+	OO_DWSIZE = 2*wsize;
 	OO_PSIZE = psize;
 }
 

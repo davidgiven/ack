@@ -46,6 +46,7 @@ p_instr OO_halfflush();
 
 extern int	OO_state;
 extern arith	OO_WSIZE;	/* wordlength */
+extern arith	OO_DWSIZE;	/* 2*wordlength */
 extern arith	OO_PSIZE;	/* pointer length */
 #ifdef STATS
 extern int	OO_wrstats;			/* statistics output */

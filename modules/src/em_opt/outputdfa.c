@@ -241,7 +241,7 @@ sametest(s1,s2,e1,e2)
 	int s1,s2;
 	struct exp_node *e1,*e2;
 {
-	/* retrun 1 if tests are identical */
+	/* return 1 if tests are identical */
 	if(e1) {
 		if(!e2) return 0;
 		if(e1->node_type!=e2->node_type) return 0;
@@ -287,13 +287,15 @@ sametest(s1,s2,e1,e2)
 			if (e1->leaf_val != e2->leaf_val) return 0;
 			return (patterns[s1].m_elems[e1->leaf_val-1]->
 				   op_code->id_argfmt
-			     == patterns[s1].m_elems[e2->leaf_val-1]->
+			     == patterns[s2].m_elems[e2->leaf_val-1]->
 				   op_code->id_argfmt);
 		case PSIZE:
 		case WSIZE:
+		case DWSIZE:
 			return 1;
 
 		}
+		/*NOTREACHED*/
 	}
 	else return (e2==0);
 }
@@ -431,42 +433,42 @@ outrepl(state,repl)
 		char *mnem = ri->op_code->id_text;
 		switch(ri->op_code->id_argfmt) {
 		case NOARG:
-			fprintf(ofile,"\t\tEM_mkop(GETNXTREPL(),op_%s);\n",mnem);
+			fprintf(ofile,"\t\tEM_Rop(op_%s);\n",mnem);
 			break;
 		case CST:
-			fprintf(ofile,"\t\tEM_mkcst(GETNXTREPL(),op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_Rcst(op_%s,",mnem);
 			fprintf(ofile,"(arith)");
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case CSTOPT:
 			if(ri->arg) {
-				fprintf(ofile,"\t\tEM_mkcst(GETNXTREPL(),op_%s,",mnem);
+				fprintf(ofile,"\t\tEM_Rcst(op_%s,",mnem);
 				fprintf(ofile,"(arith)");
 				outexp(ri->arg,state);
 			}
 			else {
-				fprintf(ofile,"\t\tEM_mknarg(GETNXTREPL(),op_%s);\n",mnem);
+				fprintf(ofile,"\t\tEM_Rnarg(op_%s);\n",mnem);
 			}
 			fprintf(ofile,");\n");
 			break;
 		case LAB:
-			fprintf(ofile,"\t\tEM_mkilb(GETNXTREPL(),op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_Rilb(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case DEFILB:
-			fprintf(ofile,"\t\tEM_mkdefilb(GETNXTREPL(),op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_Rdefilb(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case PNAM:
-			fprintf(ofile,"\t\tEM_mkpro(GETNXTREPL(),op_%s,",mnem);
+			fprintf(ofile,"\t\tEM_Rpro(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case EXT:
-			fprintf(ofile,"\t\tOO_mkext(GETNXTREPL(),op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_mkext(GETNXTREPL(), op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
@@ -573,6 +575,8 @@ outexp(e,state)
 		fprintf(ofile,"OO_PSIZE"); break;
 	case WSIZE:
 		fprintf(ofile,"OO_WSIZE"); break;
+	case DWSIZE:
+		fprintf(ofile,"OO_DWSIZE"); break;
 	case INT:
 		fprintf(ofile,"%d",e->leaf_val); break;
 	}

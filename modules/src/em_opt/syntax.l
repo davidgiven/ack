@@ -12,6 +12,7 @@ sfit		return(SFIT);
 ufit		return(UFIT);
 rotate		return(ROTATE);
 p		return(PSIZE);
+w2		return(DWSIZE);
 w		return(WSIZE);
 defined		return(DEFINED);
 undefined	return(UNDEFINED);
