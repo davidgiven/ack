@@ -108,7 +108,7 @@ option(str)
 		break;
 	case 'S':
 	{
-		register i = atoi(++str);
+		int i = atoi(++str);
 
 		if (i <= 0 || i > MAXTAB) {
 			fprintf(stderr, "%s: size would exceed maximum\n",
@@ -127,7 +127,7 @@ option(str)
 InitTable(ival)
 	char *ival;
 {
-	register i;
+	int i;
 
 	for (i = 0; i < TabSize; i++) {
 		Table[i] = 0;
@@ -140,7 +140,7 @@ InitTable(ival)
 
 PrintTable()
 {
-	register i;
+	int i;
 
 	for (i = 0; i < TabSize; i++) {
 		if (Table[i]) {
@@ -232,7 +232,7 @@ int
 setval(ch, nm)
 	char *nm;
 {
-	register char **p = &Table[ch];
+	char **p = &Table[ch];
 
 	if (ch < 0 || ch >= TabSize) {
 		fprintf(stderr, "Illegal index: %d\n", ch);
@@ -249,9 +249,9 @@ int
 quoted(pstr)
 	char **pstr;
 {
-	register int ch;
-	register int i;
-	register char *str = *pstr;
+	int ch;
+	int i;
+	char *str = *pstr;
 
 	if ((*++str >= '0') && (*str <= '9'))	{
 		ch = 0;
@@ -295,7 +295,7 @@ getline(s, n, fp)
 	char *s;
 	FILE *fp;
 {
-	register c = getc(fp);
+	int c = getc(fp);
 	char *str = s;
 
 	while (n--) {
