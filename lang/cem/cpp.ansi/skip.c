@@ -60,9 +60,20 @@ SkipToNewLine()
 {
 	register int ch;
 	register int garbage = 0;
+	register int delim = 0;
 
 	while ((ch = GetChar()) != '\n') {
-		if (ch == '/') {
+		if (delim) {
+			if (ch == '\\') {
+				if (GetChar() == '\n') break;
+			} else if (ch == delim) {
+				delim = 0;
+			}
+			continue;
+		} else if (ch == '\'' || ch == '\"') {
+			delim = ch;
+			garbage = 1;
+		} else if (ch == '/') {
 			if ((ch = GetChar()) == '*' && !InputLevel) {
 				skipcomment();
 				continue;
@@ -71,6 +82,7 @@ SkipToNewLine()
 		if (!is_wsp(ch))
 			garbage = 1;
 	}
+	if (delim) strict("unclosed opening %c", delim);
 	++LineNumber;
 	return garbage;
 }
