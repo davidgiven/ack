@@ -17,13 +17,12 @@ tmpfile(void) {
 
 	if (!name) {
 		name = name_buffer + strlen(name_buffer);
-		i_compute(getpid(), 10, name, 5);
-		name += strlen(name);
-		*name++ = '\0';
+		name = _i_compute(getpid(), 10, name, 5);
+		*name = '\0';
 	}
 
 	file = fopen(name_buffer,"wb+");
 	if (!file) return (FILE *)NULL;
-	if (remove(name_buffer)) return (FILE *)NULL;
+	(void) remove(name_buffer);
 	return file;
 }

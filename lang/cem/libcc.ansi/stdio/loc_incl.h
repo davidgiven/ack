@@ -11,28 +11,17 @@
 #include	<stdarg.h>
 int _doprnt(const char *format, va_list ap, FILE *stream);
 int _doscan(FILE * stream, const char *format, va_list ap);
-char *i_compute(unsigned long val, int base, char *s, int nrdigits);
+char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
+
+FILE *popen(const char *command, const char *type);
+FILE *fdopen(int fd, const char *mode);
 
 #ifndef	NOFLOAT
-char *_pfloat(double r, register char *s, int n, int flags);
-char *_pscien(double r, register char *s, int n, int flags);
-char *ecvt(double value, int ndigit, int *decpt, int *sign);
-char *fcvt(double value, int ndigit, int *decpt, int *sign);
-char *gcvt(double value, int ndigit, char *buf, int flags);
-
-/*
- * When the sizes of doubles and long doubles are equal, the formats must
- * be equal (since a backend only knows the size of a floating-point
- * number). This means that the special routines for long doubles are not
- * necessary.
- */
-#if	EM_DSIZE != EM_LDSIZE
-char *_pfloat_ldbl(long double r, register char *s, int n, int flags);
-char *_pscien_ldbl(long double r, register char *s, int n, int flags);
-char *ecvt_ldbl(long double value, int ndigit, int *decpt, int *sign);
-char *fcvt_ldbl(long double value, int ndigit, int *decpt, int *sign);
-char *gcvt_ldbl(long double value, int ndigit, char *s, int flags);
-#endif	/* EM_DSIZE != EM_LDSIZE */
+char *_pfloat(long double r, register char *s, int n, int flags);
+char *_pscien(long double r, register char *s, int n, int flags);
+char *ecvt(long double value, int ndigit, int *decpt, int *sign);
+char *fcvt(long double value, int ndigit, int *decpt, int *sign);
+char *gcvt(long double value, int ndigit, char *s, int flags);
 #endif	/* NOFLOAT */
 
 #define	FL_LJUST	0x0001		/* left-justify field */

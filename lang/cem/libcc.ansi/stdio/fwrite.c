@@ -18,11 +18,11 @@ fwrite(register const void *ptr, size_t size, size_t nmemb,
 			do {
 				if (putc((int)*(unsigned char *)ptr, stream)
 					== EOF)
-					return(ndone);
+					return ndone;
 				ptr++;
 			} 
 			while (--s);
 			ndone++;
 		}
-	return(ndone);
+	return ndone;
 }

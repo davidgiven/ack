@@ -14,6 +14,11 @@ int
 _flushbuf(int c, FILE * stream)
 {
 	if (fileno(stream) < 0) return EOF;
+	if (!io_testflag(stream, _IOWRITE)) return EOF;
+	if (io_testflag(stream, _IOREADING) && !feof(stream)) return EOF;
+
+	stream->_flags &= ~_IOREADING;
+	stream->_flags |= _IOWRITING;
 	if (!io_testflag(stream, _IONBF)) {
 		if (!stream->_buf) {
 			if (stream == stdout && isatty(fileno(stdout))) {

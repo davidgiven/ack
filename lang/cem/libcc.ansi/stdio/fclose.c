@@ -20,12 +20,12 @@ fclose(FILE *fp)
 			break;
 		}
 	if (i >= FOPEN_MAX)
-		return(EOF);
-	if (fflush(fp)) retval = EOF;				/* ??? */
-	if (close(fileno(fp))) retval = EOF;			/* ??? */
+		return EOF;
+	if (fflush(fp)) retval = EOF;
+	if (close(fileno(fp))) retval = EOF;
 	if ( io_testflag(fp,_IOMYBUF) && fp->_buf )
 		free((void *)fp->_buf);
-	if (fp != &_stdin && fp != &_stdout && fp != &_stderr)
+	if (fp != stdin && fp != stdout && fp != stderr)
 		free((void *)fp);
-	return(retval);
+	return retval;
 }

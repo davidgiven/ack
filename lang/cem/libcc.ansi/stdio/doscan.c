@@ -9,7 +9,7 @@
 #include	<stdarg.h>
 #include	"loc_incl.h"
 
-#define	NUMLEN	128
+#define	NUMLEN	512
 
 static char	Xtable[128];
 static char	inp_buf[NUMLEN];
@@ -157,6 +157,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 {
 	int		done = 0;	/* number of items done */
 	int		nrchars = 0;	/* number of characters read */
+	int		conv = 0;	/* # of conversions */
 	int		base;		/* conversion base */
 	unsigned long	val;		/* an integer value */
 	char		*str, *tmp_string;	/* temporary pointers */
@@ -166,7 +167,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 	int		kind;
 	register int	ic;
 #ifndef	NOFLOAT
-	double		d_val;
+	long double	ld_val;
 #endif
 
 	ic = getc(stream);
@@ -192,7 +193,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		if (!*format)
 			break;		/* end of format */
 		if (ic == EOF)
-			return done;	/* seen an error */
+			return conv ? done : EOF;
 		if (*format != '%') {
 			if (ic != *format)
 				break;		/* matching error */
@@ -229,7 +230,9 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				ic = getc(stream);
 				nrchars++;
 			}
+			if (ic == EOF) return conv ? done : EOF;
 		}
+		conv++;
 		switch (kind) {
 		default:
 			if (kind == ic) continue;
@@ -384,16 +387,14 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 			if (str < inp_buf) return done;
 			nrchars += str - inp_buf + 1;
 			if (!(flags & FL_NOASSIGN)) {
-				d_val = strtod(inp_buf, &tmp_string);
-#if	EM_DSIZE != EM_LDSIZE
+				ld_val = strtod(inp_buf, &tmp_string);
 				if (flags & FL_LONGDOUBLE)
-					*va_arg(ap, long double *) = (long double) d_val;
+					*va_arg(ap, long double *) = (long double) ld_val;
 				else
-#endif	/* EM_DSIZE != EM_LDSIZE */
 				    if (flags & FL_LONG)
-					*va_arg(ap, double *) = (double) d_val;
+					*va_arg(ap, double *) = (double) ld_val;
 				else
-					*va_arg(ap, float *) = (float) d_val;
+					*va_arg(ap, float *) = (float) ld_val;
 				done++;
 			}
 			break;
@@ -401,10 +402,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}		/* end switch */
 		++format;
 	}
-all_done:
 	if (ic != EOF)
 		ungetc(ic, stream);
-	/* nrchars--;			just to keep it clean */
-quit:
-	return done;
+	return conv ? done : EOF;
 }

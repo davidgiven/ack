@@ -13,8 +13,8 @@ vprintf(const char *format, va_list arg)
 	int retval;
 
 	retval = _doprnt(format, arg, stdout);
-	if (io_testflag(stdout, _IOLBF))
-		fflush(stdout);
+	if (retval >= 0 && io_testflag(stdout, _IOLBF))
+		if (fflush(stdout)) return EOF;
 
 	return retval;
 }

@@ -5,24 +5,24 @@
 
 #ifndef NOFLOAT
 
-static char *cvt(double value, int ndigit, int *decpt, int *sign, int ecvtflag);
+static char *cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag);
 #define	NDIGITS		128
 
 char *
-ecvt(double value, int ndigit, int *decpt, int *sign)
+ecvt(long double value, int ndigit, int *decpt, int *sign)
 {
 	return cvt(value, ndigit, decpt, sign, 1);
 }
 
 char *
-fcvt(double value, int ndigit, int *decpt, int *sign)
+fcvt(long double value, int ndigit, int *decpt, int *sign)
 {
 	return cvt(value, ndigit, decpt, sign, 0);
 }
 
 static struct powers_of_10 {
-	double pval;
-	double rpval;
+	long double pval;
+	long double rpval;
 	int exp;
 } p10[] = {
 	1.0e32, 1.0e-32, 32,
@@ -35,7 +35,7 @@ static struct powers_of_10 {
 };
 
 static char *
-cvt(double value, int ndigit, int *decpt, int *sign, int ecvtflag)
+cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
 {
 	static char buf[NDIGITS+1];
 	register char *p = buf;
@@ -104,93 +104,4 @@ cvt(double value, int ndigit, int *decpt, int *sign, int ecvtflag)
 	}
 	return buf;
 }
-
-#if	EM_DSIZE != EM_LDSIZE
-
-static char *cvt_ldbl(long double value, int ndigit, int *decpt,
-						int *sign, int ecvtflag);
-
-char *
-ecvt_ldbl(long double value, int ndigit, int *decpt, int *sign)
-{
-	return cvt_ldbl(value, ndigit, decpt, sign, 1);
-}
-
-char *
-fcvt_ldbl(long double value, int ndigit, int *decpt, int *sign)
-{
-	return cvt_ldbl(value, ndigit, decpt, sign, 0);
-}
-
-static char *
-cvt_ldbl(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
-{
-	static char buf[NDIGITS+1];
-	register char *p = buf;
-	register char *pe;
-
-	if (ndigit < 0) ndigit = 0;
-	if (ndigit > NDIGITS) ndigit = NDIGITS;
-	pe = &buf[ndigit];
-	buf[0] = '\0';
-
-	*sign = 0;
-	if (value < 0) {
-		*sign = 1;
-		value = -value;
-	}
-
-	*decpt = 0;
-	if (value != 0.0) {
-		register struct powers_of_10 *pp = &p10[0];
-
-		if (value >= 10.0) do {
-			while (value >= pp->pval) {
-				value *= pp->rpval;
-				*decpt += pp->exp;
-			}
-		} while ((++pp)->exp > 0);
-
-		pp = &p10[0];
-		if (value < 1.0) do {
-			while (value * pp->pval < 10.0) {
-				value *= pp->pval;
-				*decpt -= pp->exp;
-			}
-		} while ((++pp)->exp > 0);
-
-		(*decpt)++;	/* because now value in [1.0, 10.0) */
-	}
-	if (!ecvtflag) {
-		/* for fcvt() we need ndigit digits behind the dot */
-		pe += *decpt;
-		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
-	}
-	while (p <= pe) {
-		*p++ = (int)value + '0';
-		value = 10.0 * (value - (int)value);
-	}
-	if (pe >= buf) {
-		p = pe;
-		*p += 5;	/* round of at the end */
-		while (*p > '9') {
-			*p = '0';
-			if (p > buf) ++*--p;
-			else {
-				*p = '1';
-				++*decpt;
-				if (!ecvtflag) {
-					/* maybe add another digit at the end,
-					   because the point was shifted right
-					*/
-					if (pe > buf) *pe = '0';
-					pe++;
-				}
-			}
-		}
-		*pe = '\0';
-	}
-	return buf;
-}
-#endif	/* EM_DSIZE != EM_LDSIZE */
 #endif	/* NOFLOAT */

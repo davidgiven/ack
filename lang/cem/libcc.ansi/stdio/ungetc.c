@@ -1,5 +1,5 @@
 /*
- * ungetc.c - push a character back onto an imput stream
+ * ungetc.c - push a character back onto an input stream
  */
 /* $Header$ */
 
@@ -11,14 +11,14 @@ ungetc(int ch, FILE *stream)
 {
 	unsigned char *p;
 
-	if (ch == EOF  || !io_testflag(stream,_IOREAD))
+	if (ch == EOF  || !io_testflag(stream,_IOREADING))
 		return EOF;
 	if (stream->_ptr == stream->_buf) {
 		if (stream->_count != 0) return EOF;
 		stream->_ptr++;
 	}
 	stream->_count++;
-	p = --(stream->_ptr);	/* ??? Bloody vax assembler !!! */
+	p = --(stream->_ptr);		/* ??? Bloody vax assembler !!! */
 	*p = (unsigned char) ch;
 	return ch;
 }

@@ -9,10 +9,5 @@
 void
 setbuf(register FILE *stream, char *buf)
 {
-	int mode;
-
-	if (buf) mode = _IOFBF;
-	else mode = _IONBF;
-
-	(void) setvbuf(stream, buf, mode, (size_t) BUFSIZ);
+	(void) setvbuf(stream, buf, (buf ? _IOFBF : _IONBF), (size_t) BUFSIZ);
 }

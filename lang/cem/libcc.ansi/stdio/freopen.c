@@ -84,5 +84,5 @@ freopen(const char *name, const char *mode, FILE *stream)
 
 	stream->_fd = fd;
 	stream->_flags = flags;
-	return(stream);
+	return stream;
 }

@@ -26,42 +26,34 @@ fopen(const char *name, const char *mode)
 			return (FILE *)NULL;
 
 	switch(*mode++) {
-
 	case 'r':
-		flags |= _IOREAD;	
+		flags |= _IOREAD | _IOREADING;	
 		rwmode = O_RDONLY;
 		break;
-
 	case 'w':
-		flags |= _IOWRITE;
+		flags |= _IOWRITE | _IOWRITING;
 		rwmode = O_WRONLY;
 		rwflags = O_CREAT | O_TRUNC;
 		break;
-
 	case 'a': 
-		flags |= _IOWRITE;
+		flags |= _IOWRITE | _IOWRITING;
 		rwmode = O_WRONLY;
 		rwflags |= O_APPEND | O_CREAT;
 		break;         
-
 	default:
 		return (FILE *)NULL;
 	}
 
 	while (*mode) {
 		switch(*mode++) {
-
 		case 'b':
 			break;
-
 		case '+':
 			rwmode = O_RDWR;
 			flags |= _IOREAD | _IOWRITE;
 			break;
-
 		default:
 			return (FILE *)NULL;
-
 		}
 	}
 
@@ -74,10 +66,13 @@ fopen(const char *name, const char *mode)
 		return (FILE *)NULL;
 	}
 
+	if ((flags & _IOREAD) && (flags  & _IOWRITE))
+		flags &= ~(_IOREADING | _IOWRITING);
+
 	stream->_count = 0;
 	stream->_fd = fd;
 	stream->_flags = flags;
-	stream->_buf = 0;
+	stream->_buf = NULL;
 	_iotable[i] = stream;
 	return stream;
 }

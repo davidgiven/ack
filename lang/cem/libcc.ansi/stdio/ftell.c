@@ -9,19 +9,18 @@
 
 int lseek(int d, int offset, int whence);
 
-long ftell(FILE * stream)
+long ftell(FILE *stream)
 {
 	long result;
-	int adjust;
+	int adjust = 0;
 
-	if ( io_testflag(stream,_IOREAD) )
+	if (io_testflag(stream,_IOREADING))
 		adjust = -stream->_count;
-	else if (io_testflag(stream,_IOWRITE)
+	else if (io_testflag(stream,_IOWRITING)
 		    && stream->_buf
 		    && !io_testflag(stream,_IONBF))
 		adjust = stream->_ptr - stream->_buf;
-	else
-		return -1L;
+	else adjust = 0;
 	
 	result = lseek(fileno(stream), 0, L_INCR);
 

@@ -12,7 +12,7 @@ int lseek(int d, int offset, int whence);
 int
 fseek(FILE *stream, long int offset, int whence)
 {
-	int count;
+	int count, adjust = 0;
 	long pos;
 
 #if	(SEEK_CUR != L_INCR) || (SEEK_SET != L_SET) || (SEEK_END != L_XTND)
@@ -31,30 +31,24 @@ fseek(FILE *stream, long int offset, int whence)
 	stream->_flags &= ~(_IOEOF | _IOERR);
 	/* Clear both the end of file and error flags */
 
-	if ( io_testflag(stream,_IOREAD) ) {
-		if ( whence < 2 && stream->_buf
-		    && !io_testflag(stream,_IONBF) ) {
-			count = stream->_count;
-			pos = offset;
-
-			if ( whence == SEEK_SET )
-				pos +=
-				    count - lseek(fileno(stream), 0L, swhence);
-			else
-				offset -= count;
-
-			if ( count > 0 && pos <= count 
-			     && pos >= stream->_buf - stream->_ptr ) {
-		        	stream->_ptr += (int) pos;
-				stream->_count -= (int) pos;
-				return(0);
-			}
-		}
-		pos = lseek(fileno(stream), offset, swhence);
+	if (io_testflag(stream, _IOREADING)) {
+		if (whence == SEEK_CUR
+		    && stream->_buf
+		    && !io_testflag(stream,_IONBF))
+			adjust = stream->_count;
+		pos = lseek(fileno(stream), offset - adjust, swhence);
 		stream->_count = 0;
-	} else if ( io_testflag(stream,_IOWRITE) ) {
+	}
+	else if (io_testflag(stream,_IOWRITING)) {
 		fflush(stream);
 		pos = lseek(fileno(stream), offset, swhence);
 	}
-	return((pos == -1) ? -1 : 0 );
+	else	/* neither reading nor writing. The buffer must be empty */
+		pos = lseek(fileno(stream), offset, swhence);
+
+	if (io_testflag(stream, _IOREAD) && io_testflag(stream, _IOWRITE))
+		stream->_flags &= ~(_IOREADING | _IOWRITING);
+
+	stream->_ptr = stream->_buf;
+	return ((pos == -1) ? -1 : 0);
 }

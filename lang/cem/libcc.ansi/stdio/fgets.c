@@ -17,8 +17,8 @@ fgets(char *s, int n, FILE *stream)
 		if ( ch == '\n')
 			break;
 	}
-	if (ch == EOF && ptr==s)
-		return(NULL);
+	if (ch == EOF && ptr == s)
+		return (char *)NULL;
 	*ptr = '\0';
-	return(s);
+	return s;
 }

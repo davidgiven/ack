@@ -25,7 +25,7 @@ gnum(register const char *f, int *ip, va_list *app)
 		}
 		*ip = i;
 	}
-	return(f);
+	return f;
 }
 
 #if	EM_WSIZE == EM_PSIZE
@@ -38,16 +38,16 @@ gnum(register const char *f, int *ip, va_list *app)
 #endif
 
 char *
-i_compute(unsigned long val, int base, char *s, int nrdigits)
+_i_compute(unsigned long val, int base, char *s, int nrdigits)
 {
 	int c;
 
 	c= val % base ;
 	val /= base ;
 	if (val || nrdigits > 0)
-		s = i_compute(val, base, s, nrdigits - 1);
+		s = _i_compute(val, base, s, nrdigits - 1);
 	*s++ = (c>9 ? c-10+'a' : c+'0');
-	return(s);
+	return s;
 }
 
 /* print an ordinal number */
@@ -114,7 +114,7 @@ o_print(va_list *ap, int flags, char *s, char c, int precision, int is_signed)
 	case 'p':	base = 16;	break;
 	}
 
-	s = i_compute(unsigned_val, base, s, precision - 1);
+	s = _i_compute(unsigned_val, base, s, precision - 1);
 
 	if (c == 'X')
 		while (old_s != s) {
@@ -130,42 +130,23 @@ static char *
 f_print(va_list *ap, int flags, char *s, char c, int precision)
 {
 	register char *old_s = s;
-	double d_val;
-
-#if	EM_DSIZE != EM_LDSIZE
 	long double ld_val;
 
 	if (flags & FL_LONGDOUBLE) ld_val = va_arg(*ap, long double);
 	else
-#endif
-	    d_val = va_arg(*ap, double);
+	    ld_val = (long double) va_arg(*ap, double);
 
 	switch(c) {
 	case 'f':
-#if	EM_DSIZE != EM_LDSIZE
-		if (flags & FL_LONGDOUBLE)
-			s = _pfloat_ldbl(ld_val, s, precision, flags);
-		else
-#endif
-		    s = _pfloat(d_val, s, precision, flags);
+		s = _pfloat(ld_val, s, precision, flags);
 		break;
 	case 'e':
 	case 'E':
-#if	EM_DSIZE != EM_LDSIZE
-		if (flags & FL_LONGDOUBLE)
-			s = _pscien_ldbl(ld_val, s, precision, flags);
-		else
-#endif
-		    s = _pscien(d_val, s, precision, flags);
+		s = _pscien(ld_val, s, precision, flags);
 		break;
 	case 'g':
 	case 'G':
-#if	EM_DSIZE != EM_LDSIZE
-		if (flags & FL_LONGDOUBLE)
-			s = gcvt_ldbl(ld_val, precision, s, flags) + strlen(s);
-		else
-#endif
-		    s = gcvt(d_val, precision, s, flags) + strlen(s);
+		s = gcvt(ld_val, precision, s, flags) + strlen(s);
 		break;
 	}
 	if ( c == 'E' || c == 'G') {
@@ -190,11 +171,13 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		if (c != '%') {
 #ifdef  CPM
 			if (c == '\n') {
-				putc('\r', stream);
+				if (putc('\r', stream) == EOF)
+					return nrchars ? -nrchars : -1;
 				nrchars++;
 			}
 #endif
-			putc(c, stream);
+			if (putc(c, stream) == EOF)
+				return nrchars ? -nrchars : -1;
 			nrchars++;
 			continue;
 		}
@@ -225,7 +208,7 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 			width = -width;
 			flags |= FL_LJUST;
 		}
-		if (!(flags & FL_WIDTHSPEC)) width = 1;
+		if (!(flags & FL_WIDTHSPEC)) width = 0;
 
 		if (flags & FL_SIGN)
 			flags &= ~FL_SPACE;
@@ -249,11 +232,13 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		default:
 #ifdef  CPM
 			if (c == '\n') {
-				putc('\r', stream);
+				if (putc('\r', stream) == EOF)
+					return nrchars ? -nrchars : -1;
 				nrchars++;
 			}
 #endif
-			putc(c, stream);
+			if (putc(c, stream) == EOF)
+				return nrchars ? -nrchars : -1;
 			nrchars++;
 			continue;
 		case 'n':
@@ -269,11 +254,12 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 			if (s1 == NULL)
 				s1 = "(null)";
 			s = s1;
-			do {
+			while (precision || !(flags & FL_PRECSPEC)) {
 				if (*s ==  '\0')
 					break;
 				s++;
-			} while (!(flags & FL_PRECSPEC) || --precision);
+				precision--;
+			}
 			break;
 		case 'p':
 			set_pointer(flags);
@@ -343,26 +329,33 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 			if (!(flags & FL_LJUST)) {	/* right justify */
 				nrchars += i;
 				if (between_fill) {
-					if (flags & FL_SIGNEDCONV) {
-						j--; nrchars++;
-						putc(*s1++, stream);
-					} else {
-						j -= 2; nrchars += 2;
-						putc(*s1++, stream);
-						putc(*s1++, stream);
-					}
+				    if (flags & FL_SIGNEDCONV) {
+					j--; nrchars++;
+					if (putc(*s1++, stream) == EOF)
+						return nrchars ? -nrchars : -1;
+				    } else {
+					j -= 2; nrchars += 2;
+					if ((putc(*s1++, stream) == EOF)
+					    || (putc(*s1++, stream) == EOF))
+						return nrchars ? -nrchars : -1;
+				    }
 				}
-				do putc(zfill, stream);
-				while (--i);
+				do {
+					if (putc(zfill, stream) == EOF)
+						return nrchars ? -nrchars : -1;
+				} while (--i);
 			}
 
 		nrchars += j;
-		while (--j >= 0)
-			putc(*s1++, stream);
+		while (--j >= 0) {
+			if (putc(*s1++, stream) == EOF)
+				return nrchars ? -nrchars : -1;
+		}
 
 		if (i > 0) nrchars += i;
 		while (--i >= 0)
-			putc(zfill, stream);
+			if (putc(zfill, stream) == EOF)
+				return nrchars ? -nrchars : -1;
 	}
 	return nrchars;
 }

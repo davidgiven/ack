@@ -16,12 +16,13 @@ _fillbuf(register FILE *stream)
 
 	stream->_count = 0;
 	if (fileno(stream) < 0) return EOF;
-	if (io_testflag(stream, (_IOEOF | _IOERR )))
-		return (EOF); 
+	if (io_testflag(stream, (_IOEOF | _IOERR ))) return EOF; 
+	if (!io_testflag(stream, _IOREAD)) return EOF;
+	if (io_testflag(stream, _IOWRITING)) return EOF;
 
-	if (!io_testflag(stream, _IOREAD) ) 
-		return (EOF);
-
+	if (!io_testflag(stream, _IOREADING))
+		stream->_flags |= _IOREADING;
+	
 	if (!io_testflag(stream, _IONBF) && !stream->_buf) {
 		stream->_buf = (unsigned char *) malloc(BUFSIZ);
 		if (!stream->_buf) {
@@ -38,6 +39,10 @@ _fillbuf(register FILE *stream)
 	}
 	stream->_ptr = stream->_buf;
 	stream->_count = read(stream->_fd, (char *)stream->_buf, stream->_bufsiz);
+	/*
+	fprintf(stderr,"read %d bytes, \"%.*s\"\n"
+		, stream->_count, stream->_count, stream->_buf);
+	*/
 
 	if (stream->_count <= 0){
 		if (stream->_count == 0) {
@@ -46,7 +51,7 @@ _fillbuf(register FILE *stream)
 		else 
 			stream->_flags |= _IOERR;
 
-		return (EOF);
+		return EOF;
 	}
 	stream->_count--;
 
