@@ -10,4 +10,6 @@ extern int f_VARARGSn;			/* function with variable # of args */
 extern int f_ARGSUSED;			/* function does not use all args */
 extern int f_FORMATn;			/* argument f_FORMATn is f_FORMAT */
 extern char *f_FORMAT;
+extern int f_FORMATvar;			/* but the formal argument may be
+					   absent because of varargs.h */
 

@@ -125,7 +125,7 @@ SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 LINT = /usr/bin/lint
 LINTFLAGS =
 
-MYLINT = ../lint
+MYLINT = ../lpass2/lint
 MYLINTFLAGS = #-xh
 
 #EXCLEXCLEXCLEXCL

@@ -14,6 +14,9 @@
 #include	<alloc.h>
 #include	"arith.h"
 #include	"l_state.h"
+#include	"l_comment.h"
+
+extern char loptions[];
 
 /*	Since the lexical analyser does a one-token look-ahead, pseudo-
 	comments are read too soon.  This is remedied by first storing them
@@ -25,6 +28,7 @@ static int notreached;
 static int varargsN = -1;
 static int argsused;
 static int formatN;
+static int formatVAR;
 static char *format;
 static char *prev_format;
 
@@ -34,6 +38,13 @@ int f_VARARGSn;				/* function with variable # of args */
 int f_ARGSUSED;				/* function does not use all args */
 int f_FORMATn;				/* argument f_FORMATn is f_FORMAT */
 char *f_FORMAT;
+int f_FORMATvar;			/* but the formal argument may be
+					   absent because of varargs.h */
+
+lint_init_comment()
+{
+	LINTLIB = loptions['L'];
+}
 
 lint_comment_ahead()
 {
@@ -43,7 +54,7 @@ lint_comment_ahead()
 
 lint_comment_function()
 {
-	f_ARGSUSED = argsused;
+	f_ARGSUSED = argsused | loptions['v'];
 	argsused = 0;
 
 	f_VARARGSn = varargsN;
@@ -55,6 +66,9 @@ lint_comment_function()
 	if (format)
 		prev_format = format;
 	format = 0;
+
+	f_FORMATvar = formatVAR;
+	formatVAR = 0;
 }
 
 static char buf[1000];
@@ -97,14 +111,22 @@ lint_end_comment()
 	}
 	else
 	if (strncmp(bufpos, "VARARGS", 7) == 0) {
-		varargsN = isdigit(bufpos[7]) ? atoi(&bufpos[7]) : 0;
+		bufpos += 7;
+		varargsN = isdigit(*bufpos) ? atoi(bufpos) : 0;
 	}
 	else
 	if (strncmp(bufpos, "FORMAT", 6) == 0 && isdigit(bufpos[6])) {
-		int argn = bufpos[6] - '0';
+		register int argn;
 
+		bufpos += 6;
+		argn = *bufpos++ - '0';
 		varargsN = argn + 1;
-		make_format(argn, &bufpos[7]);
+		if (*bufpos == 'v') {
+			/* something like FORMAT3v */
+			formatVAR = 1;
+			bufpos++;
+		}
+		make_format(argn, bufpos);
 		
 	}
 }

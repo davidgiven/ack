@@ -48,6 +48,13 @@ struct brace *top_br = &brace_bottom;
 
 static print_autos();
 
+lint_init_stack()
+{
+/* Allocate some memory for the global stack_bottom
+ */
+	stack_bottom.ls_current = new_state();
+}
+
 lint_start_local()
 {
 	register struct brace *br = new_brace();
@@ -332,7 +339,6 @@ check_args_used()
 		register struct def *def = se->se_idf->id_def;
 
 		if (	(def && !def->df_used)
-		&&	!loptions['v']
 		&&	!(f_ARGSUSED || LINTLIB)
 		) {
 			def_warning(def, "argument %s not used in function %s",

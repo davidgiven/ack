@@ -80,6 +80,7 @@ next_option:			/* to allow combined one-char options */
 	case 'b':	/* don't report unreachable break-statements */
 	case 'x':	/* complain about unused extern declared variables */
 	case 'u':	/* no "used but not defined"; for pass 2 */
+	case 'L':	/* lintlibrary */
 		loptions[opt] = 1;
 		goto next_option;
 #endif	LINT

@@ -96,9 +96,6 @@ main(argc, argv)
 	inc_max = 10;
 
 	init_pp();	/* initialise the preprocessor macros	*/
-#ifdef	LINT
-	lint_init();
-#endif	LINT
 #endif NOPP
 
 	/*	Note: source file "-" indicates that the source is supplied
@@ -116,6 +113,9 @@ main(argc, argv)
 		do_option(par);
 		argc--, argv++;
 	}
+#ifdef	LINT
+	lint_init();
+#endif	LINT
 	compile(argc - 1, &argv[1]);
 
 #ifdef	DEBUG

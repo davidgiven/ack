@@ -22,6 +22,7 @@
 #include	"idf.h"
 #include	"level.h"
 #include	"label.h"
+#include	"code.h"
 #include	"expr.h"
 #include	"l_lint.h"
 #include	"l_comment.h"
@@ -157,8 +158,10 @@ lint_formals()
 		}
 
 		if (f_FORMAT && nrargs == f_FORMATn) {
-			if (	type->tp_fund != POINTER
-			||	type->tp_up->tp_fund != CHAR
+			if (	!f_FORMATvar
+			&&	(	type->tp_fund != POINTER
+				||	type->tp_up->tp_fund != CHAR
+				)
 			) {
 				warning("format parameter %d is not pointer to char",
 					nrargs);
@@ -180,19 +183,47 @@ lint_formals()
 		se = se->next;
 	}
 
+	if (f_FORMAT) {
+		/*	f_FORMAT has not been consumed, perhaps due to
+			a varargs-like construction; add erroneous ArgFormals
+			until f_FORMATn, then an ArgString, if necessary.
+		*/
+		if (!f_FORMATvar) {
+			warning("FORMAT%d function has only %d argument%s",
+				f_FORMATn, nrargs, nrargs == 1 ? "" : "s"
+			);
+		}
+
+		while (nrargs < f_FORMATn) {
+			register struct argument *arg = new_argument();
+			
+			arg->ar_type = error_type;
+			arg->ar_class = ArgFormal;
+			*hook = arg;
+			hook = &arg->next;
+			nrargs++;
+		}
+		if (nrargs == f_FORMATn) {
+			register struct argument *arg = new_argument();
+			
+			arg->ar_type = string_type;
+			arg->ar_class = ArgString;
+			arg->CAS_VALUE = f_FORMAT;
+			arg->CAS_LEN = strlen(f_FORMAT);
+			f_FORMAT = 0;
+			*hook = arg;
+			hook = &arg->next;
+			nrargs++;
+		}
+		/* life is full of duplicated code; this is no good */
+	}
+
 	if (f_VARARGSn > nrargs) {
 		warning("VARARGS%d function has only %d argument%s",
 			f_VARARGSn, nrargs, nrargs == 1 ? "" : "s"
 		);
 		f_VARARGSn = nrargs;
 	}
-	if (f_FORMAT) {
-		warning("FORMAT%d function has only %d argument%s",
-			f_FORMATn, nrargs, nrargs == 1 ? "" : "s"
-		);
-		f_FORMAT = 0;
-	}
-
 	OutDef.od_nrargs = nrargs;
 }
 
@@ -465,10 +496,24 @@ fill_arg(e)
 		arg->ar_class = ArgConst;
 		arg->CAA_VALUE = e->VL_VALUE;
 	}
-	else if (e->ex_class == String) {
-		arg->ar_class = ArgString;
-		arg->CAS_VALUE = e->SG_VALUE;
-		arg->CAS_LEN = e->SG_LEN - 1;	/* SG_LEN includes the \0 */
+	else if (e->ex_class == Value && e->VL_CLASS == Label) {
+		/* it may be a string; let's look it up */
+		register struct string_cst *sc = str_list;
+
+		while (sc) {
+			if (sc->sc_dlb == e->VL_LBL)
+				break;
+			sc = sc->next;
+		}
+		if (sc) {
+			/* it was a string */
+			arg->ar_class = ArgString;
+			arg->CAS_VALUE = sc->sc_value;
+			arg->CAS_LEN = sc->sc_len - 1;	/* included the \0 */
+		}
+		else {
+			arg->ar_class = ArgExpr;
+		}
 	}
 	else {
 		arg->ar_class = ArgExpr;

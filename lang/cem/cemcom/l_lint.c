@@ -36,13 +36,8 @@ static struct expr_state *lint_oper();
 
 lint_init()
 {
-/* Allocate some memory for the global stack_bottom
- * and some other initializations
- */
-
-	extern struct lint_stack_entry stack_bottom;
-
-	stack_bottom.ls_current = new_state();
+	lint_init_comment();
+	lint_init_stack();
 }
 
 pre_lint_expr(expr, val, used)
@@ -357,7 +352,7 @@ expr_ignored(expr)
 		break;
 
 	case Value:
-		hwarning("identifier as statement");
+		hwarning("value as statement");
 		break;
 
 	default:			/* String Float */

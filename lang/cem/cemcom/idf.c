@@ -274,9 +274,13 @@ declare_idf(ds, dc, lvl)
 
 #ifdef	LINT
 	if (	def && def->df_level < lvl
-	&&	!(lvl == L_FORMAL2 || def->df_level == L_UNIVERSAL)
+	&&	!(	lvl == L_FORMAL2
+		||	def->df_level == L_UNIVERSAL
+		||	sc == GLOBAL
+		||	sc == EXTERN
+		)
 	) {
-		/*	there is already a definition for this name
+		/*	there is already a definition for this non-extern name
 			on a more global level
 		*/
 		warning("%s is already defined as a %s",
