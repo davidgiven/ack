@@ -28,15 +28,18 @@ install:	all
 		-mkdir $b
 		cp em_???? $b
 		cp em eminform ../../../bin
+		cp em.1 eminform.1 ../../../man
 
 cmp: 		all
-		cmp em_t--- $b/em_t---
-		cmp em_---- $b/em_----
-		cmp em_tf-- $b/em_tf--
-		cmp em_t-c- $b/em_t-c-
-		cmp em_t--p $b/em_t--p
-		cmp em ../../../bin/em
-		cmp eminform ../../../bin/eminform
+		-cmp em_t--- $b/em_t---
+		-cmp em_---- $b/em_----
+		-cmp em_tf-- $b/em_tf--
+		-cmp em_t-c- $b/em_t-c-
+		-cmp em_t--p $b/em_t--p
+		-cmp em ../../../bin/em
+		-cmp eminform ../../../bin/eminform
+		-cmp em.1 ../../../man/em.1
+		-cmp eminform.1 ../../../man/eminform.1
 
 clean:
 		-rm -f *.o *.old a.out em eminform $(INTS)
