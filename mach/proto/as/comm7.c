@@ -180,8 +180,11 @@ small(fitsmall, gain)
 	if (bflag)
 		return(0);
 	if (nbits == BITMAX) {
-		else if (pass == PASS_1)
+		static int w_given;
+		if (pass == PASS_1 && ! w_given) {
+			w_given = 1;
 			warning("bit table overflow");
+		}
 		return(0);
 	}
 	p = &bittab[(int) (nbits>>3)];
