@@ -89,10 +89,11 @@ main(argc, argv)
 		not defined!
 	*/
 #ifdef READ_IN_ONE
-	while (argc > 1 && *argv[1] == '-') {
+	while (argc > 1 && *argv[1] == '-')
 #else READ_IN_ONE
-	while (argc > 1 && *argv[1] == '-' && argv[1][1] != '\0')	{
+	while (argc > 1 && *argv[1] == '-' && argv[1][1] != '\0')
 #endif READ_IN_ONE
+	{
 		char *par = &argv[1][1];
 
 		if (*par == '-')

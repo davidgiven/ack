@@ -194,7 +194,7 @@ unstack_world()
 		have already been encoded while the uninitialised ones
 		are not and have to be encoded at this moment.
 	*/
-	struct stack_entry *se = local_level->sl_entry;
+	register struct stack_entry *se = local_level->sl_entry;
 
 	open_name_list();
 
@@ -223,11 +223,12 @@ unstack_world()
 				def->df_used ? "used" : "not used");
 		}
 #endif DEBUG
-		/* find final storage class */
-		if (def->df_sc == GLOBAL || def->df_sc == IMPLICIT)	{
-			/* even now we still don't know */
+		/*
+		/_* find final storage class *_/
+		if (def->df_sc == GLOBAL || def->df_sc == IMPLICIT)
+			/_* even now we still don't know *_/
 			def->df_sc = EXTERN;
-		}
+		*/
 		
 		if (	def->df_sc == STATIC
 			&& def->df_type->tp_fund == FUNCTION
@@ -242,28 +243,27 @@ unstack_world()
 			def->df_sc = EXTERN;
 		}
 		
-		if (	def->df_alloc == ALLOC_SEEN &&
+		if (
+			def->df_alloc == ALLOC_SEEN &&
 			!def->df_initialized
 		)	{
 			/* space must be allocated */
 			bss(idf);
 			namelist(idf->id_text);		/* may be common */
-			def->df_alloc = ALLOC_DONE;
-			/*	df_alloc must be set to ALLOC_DONE because
-				the idf entry may occur several times in
-				the list.
-				The reason is that the same name may be used
-				for different purposes on the same level, e.g
-					struct s {int s;} s;
-				is a legal definition and contains 3 defining
-				occurrences of s.  Each definition has been
-				entered into the idfstack.  Although only
-				one of them concerns a variable, we meet the
-				s 3 times when scanning the idfstack.
-			*/
+			def->df_alloc = ALLOC_DONE;	/* *)	*/
 		}
 		se = se->next;
 	}
+	/*   *)	df_alloc must be set to ALLOC_DONE because the idf entry
+		may occur several times in the list.
+		The reason for this is that the same name may be used
+		for different purposes on the same level, e.g
+			struct s {int s;} s;
+		is a legal definition and contains 3 defining occurrences of s.
+		Each definition has been entered into the idfstack.
+		Although only one of them concerns a variable, we meet the
+		s 3 times when scanning the idfstack.
+	*/
 }
 
 /*	A list of potential common names is kept, to be fed to

@@ -28,7 +28,7 @@
 #define	CRASH		5
 #define	FATAL		6
 
-int err_occurred;
+int err_occurred = 0;
 
 extern char *symbol2str();
 extern char options[];
