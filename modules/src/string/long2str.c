@@ -26,8 +26,10 @@ long2str(val, base)
 	if (val) {
 		if (base > 0) {
 			if (val < 0L) {
-				if ((val = -val) < 0L)
+				long v1 = -val;
+				if (v1 == val)
 					goto overflow;
+				val = v1;
 			}
 			else
 				sign = 0;
