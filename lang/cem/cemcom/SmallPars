@@ -37,7 +37,7 @@
 
 
 !File: strsize.h
-#define ISTRSIZE	32	/* minimum number of bytes allocated for
+#define ISTRSIZE	16	/* minimum number of bytes allocated for
 					storing a string		*/
 #define RSTRSIZE	8	/* step size in enlarging the memory for
 					the storage of a string		*/
@@ -109,7 +109,7 @@
 
 
 !File: nobitfield.h
-#undef NOBITFIELD	1	/* implement bitfields	*/
+#define NOBITFIELD	1	/* implement bitfields	*/
 
 
 !File: spec_arith.h
