@@ -1,13 +1,14 @@
-EMHOME=../../../..
-CEG=$(EMHOME)/lib/ceg
+# $Header$
+
+# requires a definition for TARGET_HOME, SRC_DIR, CFLAGS, CC
+
+CEG=$(TARGET_HOME)/lib.bin/ceg
 SOURCE=$(CEG)/ce_back/obj_back
-CFLAGS=-O #-pg
-CC=cc
 
 IDIRS=-I.\
-      -I..\
-      -I$(EMHOME)/h\
-      -I$(EMHOME)/modules/h
+      -I$(SRC_DIR)\
+      -I$(TARGET_HOME)/h\
+      -I$(TARGET_HOME)/modules/h
 
 all : data.o con2.o con4.o relocation.o end_back.o gen1.o gen2.o\
       gen4.o init_back.o output.o reloc1.o reloc2.o reloc4.o\
@@ -27,14 +28,14 @@ con2.o : data.h back.h header.h $(SOURCE)/con2.c
 con4.o : data.h back.h header.h $(SOURCE)/con4.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/con4.c
 
-relocation.o : data.h back.h ../mach.h ../relocation.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. ../relocation.c
+relocation.o : data.h back.h $(SRC_DIR)/mach.h $(SRC_DIR)/relocation.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SRC_DIR)/relocation.c
 
-do_open.o : data.h back.h ../mach.h ../do_open.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. ../do_open.c
+do_open.o : data.h back.h $(SRC_DIR)/mach.h $(SRC_DIR)/do_open.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SRC_DIR)/do_open.c
 
-do_close.o : data.h back.h ../mach.h ../do_close.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. ../do_close.c
+do_close.o : data.h back.h $(SRC_DIR)/mach.h $(SRC_DIR)/do_close.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SRC_DIR)/do_close.c
 
 gen1.o : data.h back.h header.h $(SOURCE)/gen1.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/gen1.c
@@ -45,14 +46,14 @@ gen2.o : data.h back.h header.h $(SOURCE)/gen2.c
 gen4.o : data.h back.h header.h $(SOURCE)/gen4.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/gen4.c
 
-init_back.o : data.h back.h ../mach.h $(SOURCE)/init_back.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/init_back.c
+init_back.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/init_back.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/init_back.c
 
-end_back.o : data.h back.h ../mach.h ../end_back.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. ../end_back.c
+end_back.o : data.h back.h $(SRC_DIR)/mach.h $(SRC_DIR)/end_back.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SRC_DIR)/end_back.c
 
-output.o : data.h back.h ../mach.h ../output.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. ../output.c
+output.o : data.h back.h $(SRC_DIR)/mach.h $(SRC_DIR)/output.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SRC_DIR)/output.c
 
 reloc1.o : data.h back.h header.h $(SOURCE)/reloc1.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/reloc1.c
@@ -69,35 +70,35 @@ rom2.o : data.h back.h header.h $(SOURCE)/rom2.c
 rom4.o : data.h back.h header.h $(SOURCE)/rom4.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/rom4.c
 
-set_global.o : data.h back.h ../mach.h $(SOURCE)/set_global.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/set_global.c
+set_global.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/set_global.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/set_global.c
 
-set_local.o : data.h back.h ../mach.h $(SOURCE)/set_local.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/set_local.c
+set_local.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/set_local.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/set_local.c
 
-switchseg.o : data.h back.h ../mach.h $(SOURCE)/switchseg.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/switchseg.c
+switchseg.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/switchseg.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/switchseg.c
 
-symboldef.o : data.h back.h ../mach.h $(SOURCE)/symboldef.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/symboldef.c
+symboldef.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/symboldef.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/symboldef.c
 
-text2.o : data.h back.h ../mach.h $(SOURCE)/text2.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/text2.c
+text2.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/text2.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/text2.c
 
-text4.o : data.h back.h ../mach.h $(SOURCE)/text4.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/text4.c
+text4.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/text4.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/text4.c
 
-symtable.o : data.h back.h ../mach.h $(SOURCE)/symtable.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/symtable.c
+symtable.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/symtable.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/symtable.c
 
-extnd.o : data.h back.h ../mach.h $(SOURCE)/extnd.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/extnd.c
+extnd.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/extnd.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/extnd.c
 
-misc.o : data.h back.h ../mach.h $(SOURCE)/misc.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/misc.c
+misc.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/misc.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/misc.c
 
-label.o : data.h back.h ../mach.h $(SOURCE)/label.c
-	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/label.c
+label.o : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/label.c
+	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/label.c
 
 common.o : data.h back.h header.h $(SOURCE)/common.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/common.c
