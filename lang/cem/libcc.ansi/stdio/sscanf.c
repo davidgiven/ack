@@ -8,7 +8,7 @@
 #include	<string.h>
 #include	"loc_incl.h"
 
-int sscanf(char *s, const char *format, ...)
+int sscanf(const char *s, const char *format, ...)
 {
 	va_list ap;
 	int retval;

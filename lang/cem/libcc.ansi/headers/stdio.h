@@ -83,7 +83,7 @@ int	fscanf(FILE *_stream, const char *_format, ...);
 int	printf(const char *_format, ...);
 int	scanf(const char *_format, ...);
 int	sprintf(char *_s, const char *_format, ...);
-int	sscanf(char *_s, const char *_format, ...);
+int	sscanf(const char *_s, const char *_format, ...);
 int	vfprintf(FILE *_stream, const char *_format, char *_arg);
 int	vprintf(const char *_format, char *_arg);
 int	vsprintf(char *_s, const char *_format, char *_arg);
