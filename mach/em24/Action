@@ -7,3 +7,6 @@ end
 name "2-4 Interpreter Basic library"
 dir libbc
 end
+name "2-4 Interpreter Occam library"
+dir liboc
+end
