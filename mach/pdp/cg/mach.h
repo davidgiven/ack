@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define ex_ap(y)	fprintf(codefile,"\t.globl %s\n",y)
 #define in_ap(y)	/* nothing */
 
