@@ -68,7 +68,9 @@ debug(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(VDEBUG, NULLNODE, ap);
+	{
+		_error(VDEBUG, NULLNODE, ap);
+	}
 	va_end(ap);
 }
 #endif DEBUG
@@ -80,7 +82,9 @@ error(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(ERROR, NULLNODE, ap);
+	{
+		_error(ERROR, NULLNODE, ap);
+	}
 	va_end(ap);
 }
 
@@ -88,12 +92,14 @@ error(va_alist)
 node_error(va_alist)
 	va_dcl
 {
-	t_node *node;
 	va_list ap;
 
 	va_start(ap);
-	node = va_arg(ap, t_node *);
-	_error(ERROR, node, ap);
+	{
+		t_node *node = va_arg(ap, t_node *);
+
+		_error(ERROR, node, ap);
+	}
 	va_end(ap);
 }
 
@@ -104,8 +110,10 @@ warning(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	warn_class = va_arg(ap, int);
-	_error(WARNING, NULLNODE, ap);
+	{
+		warn_class = va_arg(ap, int);
+		_error(WARNING, NULLNODE, ap);
+	}
 	va_end(ap);
 }
 
@@ -113,13 +121,14 @@ warning(va_alist)
 node_warning(va_alist)
 	va_dcl
 {
-	t_node *nd;
 	va_list ap;
 
 	va_start(ap);
-	nd = va_arg(ap, t_node *);
-	warn_class = va_arg(ap, int);
-	_error(WARNING, nd, ap);
+	{
+		t_node *nd = va_arg(ap, t_node *);
+		warn_class = va_arg(ap, int);
+		_error(WARNING, nd, ap);
+	}
 	va_end(ap);
 }
 
@@ -130,7 +139,9 @@ lexerror(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(LEXERROR, NULLNODE, ap);
+	{
+		_error(LEXERROR, NULLNODE, ap);
+	}
 	va_end(ap);
 }
 
@@ -141,8 +152,10 @@ lexwarning(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	warn_class = va_arg(ap, int);
-	_error(LEXWARNING, NULLNODE, ap);
+	{
+		warn_class = va_arg(ap, int);
+		_error(LEXWARNING, NULLNODE, ap);
+	}
 	va_end(ap);
 }
 
@@ -153,7 +166,9 @@ fatal(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(FATAL, NULLNODE, ap);
+	{
+		_error(FATAL, NULLNODE, ap);
+	}
 	va_end(ap);
 	sys_stop(S_EXIT);
 }
@@ -165,7 +180,9 @@ crash(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(CRASH, NULLNODE, ap);
+	{
+		_error(CRASH, NULLNODE, ap);
+	}
 	va_end(ap);
 #ifdef DEBUG
 	sys_stop(S_ABORT);

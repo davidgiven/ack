@@ -55,7 +55,9 @@ error(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(ERROR, NILEXPR, ap);
+	{
+		_error(ERROR, NILEXPR, ap);
+	}
 	va_end(ap);
 }
 
@@ -63,15 +65,17 @@ error(va_alist)
 expr_error(va_alist)
 	va_dcl
 {
-	struct expr *expr;
 	va_list ap;
 
 	va_start(ap);
-	expr = va_arg(ap, struct expr *);
-	if (!(expr->ex_flags & EX_ERROR)) {
-		/* to prevent proliferation */
-		_error(ERROR, expr, ap);
-		expr->ex_flags |= EX_ERROR;
+	{
+		register struct expr *expr = va_arg(ap, struct expr *);
+
+		if (!(expr->ex_flags & EX_ERROR)) {
+			/* to prevent proliferation */
+			_error(ERROR, expr, ap);
+			expr->ex_flags |= EX_ERROR;
+		}
 	}
 	va_end(ap);
 }
@@ -83,7 +87,9 @@ warning(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(WARNING, NILEXPR, ap);
+	{
+		_error(WARNING, NILEXPR, ap);
+	}
 	va_end(ap);
 }
 
@@ -91,14 +97,16 @@ warning(va_alist)
 expr_warning(va_alist)
 	va_dcl
 {
-	struct expr *expr;
 	va_list ap;
 
 	va_start(ap);
-	expr = va_arg(ap, struct expr *);
-	if (!(expr->ex_flags & EX_ERROR)) {
-		/* to prevent proliferation */
-		_error(WARNING, expr, ap);
+	{
+		struct expr *expr = va_arg(ap, struct expr *);
+
+		if (!(expr->ex_flags & EX_ERROR)) {
+			/* to prevent proliferation */
+			_error(WARNING, expr, ap);
+		}
 	}
 	va_end(ap);
 }
@@ -110,7 +118,9 @@ lexerror(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(LEXERROR, NILEXPR, ap);
+	{
+		_error(LEXERROR, NILEXPR, ap);
+	}
 	va_end(ap);
 }
 
@@ -122,7 +132,9 @@ lexwarning(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(LEXWARNING, NILEXPR, ap);
+	{
+		_error(LEXWARNING, NILEXPR, ap);
+	}
 	va_end(ap);
 }
 #endif	NOPP
@@ -134,8 +146,11 @@ crash(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	_error(CRASH, NILEXPR, ap);
+	{
+		_error(CRASH, NILEXPR, ap);
+	}
 	va_end(ap);
+
 	C_close();
 #ifdef	DEBUG
 	sys_stop(S_ABORT);
@@ -151,9 +166,12 @@ fatal(va_alist)
 	va_list ap;
 
 	va_start(ap);
-	if (C_busy()) C_close();
-	_error(FATAL, NILEXPR, ap);
+	{
+		_error(FATAL, NILEXPR, ap);
+	}
 	va_end(ap);
+
+	if (C_busy()) C_close();
 	sys_stop(S_EXIT);
 }
 
