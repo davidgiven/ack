@@ -1471,7 +1471,7 @@ pat lol lof xor lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
 
 proc lofruxxsof example lol lof inc lol stf
 kills referals
-gen uxx* {ind_regoff2, regvar($1), 2}
+gen uxx* {ind_regoff2, regvar($1), $2}
 
 pat lol lof inc lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
 					call lofruxxsof("inc")
@@ -2024,22 +2024,14 @@ pat inn $1==2
 with SHIFT_CREG REG
 gen shr %2,cl
     and %2,{ANYCON, 1}			yields %2
-with SHIFT_CREG ACC
-gen shr %2,cl
-    and %2,{ANYCON, 1}			yields %2
 
 pat loc inn $1==1 && $2==2
 with REG
 gen shr %1,{ANYCON, 1}
     and %1,{ANYCON, 1}			yields %1
-with ACC
-gen shr %1,{ANYCON, 1}
-    and %1,{ANYCON, 1}			yields %1
 
 pat loc inn $1==0 && $2==2
 with REG
-gen and %1,{ANYCON, 1}			yields %1
-with ACC
 gen and %1,{ANYCON, 1}			yields %1
 
 pat inn defined($1)
