@@ -43,7 +43,7 @@ begtext:
 	move.l	a0,(8,sp)	! env
 !	move.l	a0, environ	! indir is 0 if no env; not 0 if env
 !	jsr	(initfpu)	! call to dummy floating point init routine
-	jsr	(_m_a_i_n)
+	jsr	(__m_a_i_n)
 	move.l	d0,(sp)		! no stack cleanup needed
 EXIT:
 	jsr	(__exit)

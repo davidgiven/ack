@@ -182,8 +182,8 @@ combine() {
 	if (nhol)
 		printf(" hol %d,0,0\n", nhol);
 	copy(name1);
-	printf(" exp $m_a_i_n\n");
-	printf(" pro $m_a_i_n,%d\n", nlocals);
+	printf(" exp $_m_a_i_n\n");
+	printf(" pro $_m_a_i_n,%d\n", nlocals);
 	printf(" loc 123\n");
 	printf(" loc -98\n");
 	copy(name2);

@@ -99,7 +99,7 @@ UNSIGN : .space 1	! is it signed or unsigned arithmetic
 TRAPVAL: .space 1	! intermediate storage of the error number
 
 STACK: .space 1		! contains the hardware stackpointer on
-			! entering m_a_i_n for a neat return
+			! entering _m_a_i_n for a neat return
 
 RESERVED: .space 112    ! used by the operating system
 
@@ -174,7 +174,7 @@ start:
 	lda #0
 	ldx #1
 	jsr Push	! push argc 
-    	jsr _m_a_i_n	! start the real program
+    	jsr __m_a_i_n	! start the real program
 
 	lda #0x0FF
 	jsr WRCH	! send end of program to R423

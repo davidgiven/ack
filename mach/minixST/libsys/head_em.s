@@ -37,11 +37,11 @@ begtext:
         move.l  a1,-(sp)        ! push environ
         move.l  a0,-(sp)        ! push argv
         move.w  d0,-(sp)        ! push argc
-	jsr	_m_a_i_n
+	jsr	__m_a_i_n
 	add	#010,sp
 EXIT:
 	move.w	d0,-(sp)
-	jsr	_exit
+	jsr	__exit
 L0:	bra	L0
 
 	.sect .data

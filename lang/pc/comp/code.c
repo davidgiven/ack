@@ -118,8 +118,8 @@ CodeBeginBlock(df)
 
 	if ( df->df_kind == D_MODULE) /* nothing */ ;
 	else if (df->df_kind == D_PROGRAM ) {
-		C_exp("m_a_i_n");
-		C_pro_narg("m_a_i_n");
+		C_exp("_m_a_i_n");
+		C_pro_narg("_m_a_i_n");
 		C_ms_par((arith) 0);
 		offset = CodeGtoDescr(df->prc_vis->sc_scope);
 		CodeFil();

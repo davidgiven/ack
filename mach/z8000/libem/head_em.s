@@ -39,7 +39,7 @@ EBADMON = 25
 	push	*RR14, envp
 	push	*RR14, argv
 	push	*RR14, $1
-	calr	_m_a_i_n
+	calr	__m_a_i_n
 	ldl	RR14, $0xC00017FC
 	sc	$0
 

@@ -27,7 +27,7 @@ ECASE	= 20
 	movd envp,tos
 	movd argv,tos
 	movd 1,tos
-	jsr @_m_a_i_n
+	jsr @__m_a_i_n
 .stop:
 	movb 0x7f,tos
 	jsr @.putchar

@@ -44,7 +44,7 @@
 	push bc
 	ld bc,1
 	push bc
-	call _m_a_i_n
+	call __m_a_i_n
 
 	jp 0x20
 

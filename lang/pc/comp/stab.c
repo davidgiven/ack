@@ -241,7 +241,7 @@ stb_string(df, kind)
 	addc_db_str(':');
 	if (kind == D_MODULE) {
 		adds_db_str(sprint(buf, "M%d;", df->prc_vis->sc_count));
-		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, "m_a_i_n");
+		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, "_m_a_i_n");
 		return;
 	}
 	switch((int)kind) {

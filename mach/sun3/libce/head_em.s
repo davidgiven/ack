@@ -40,10 +40,10 @@ begtext:
 	move.l	d2,-(sp)
 	move.l	#0,a6
 	jsr	(fsoft_used)
-	jsr	(_m_a_i_n)
+	jsr	(__m_a_i_n)
 	move.l	d0,(sp)		! no stack cleanup needed
 EXIT:
-	jsr	(_exit)
+	jsr	(__exit)
 
 fsoft_used:
 start_float:

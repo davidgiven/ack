@@ -219,7 +219,7 @@ struct  rel {                   /* for relocation tables */
 #define DATA_BYTES      9
 
 /* name of procedure to be called first */
-#define MAIN            "m_a_i_n"
+#define MAIN            "_m_a_i_n"
 
 /* headers of datablocks written */
 #define HEADREP         0

@@ -34,7 +34,7 @@ ECASE	= 20
 
 	.sect .text
 begtext:
-	jsr	_m_a_i_n
+	jsr	__m_a_i_n
 	add	#012,sp
 EXIT:
 

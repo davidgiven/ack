@@ -50,7 +50,7 @@ begtext:
 	! Now the stack contains an argc (4 bytes), argv-pointer and
 	! envp pointer.
 
-	jsr	_m_a_i_n
+	jsr	__m_a_i_n
 	add	#012,sp
 EXIT:
 	move.l	d0,-(sp)

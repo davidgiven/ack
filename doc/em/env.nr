@@ -8,7 +8,7 @@ The remaining way to interact, interrupts, will be treated
 together with traps in chapter 9.
 .S2 "Program starting and stopping"
 EM user programs start with a call to a procedure called
-m_a_i_n.
+_m_a_i_n.
 The assembler and backends look for the definition of a procedure
 with this name in their input.
 The call passes three parameters to the procedure.
@@ -45,7 +45,7 @@ The
 is terminated by a zero pointer.
 .P
 An EM user program stops if the program returns from the first
-invocation of m_a_i_n.
+invocation of _m_a_i_n.
 The contents of the function return area are used to procure a
 wordsized program return code.
 EM programs also stop when traps and interrupts occur that are

@@ -140,7 +140,7 @@ next3:
  ADR R11, argc
  LDR R11,[R11]
  STMFD R12<,{R11}
- BAL.L _m_a_i_n
+ BAL.L __m_a_i_n
  MOV R11,#0
  STMFD R12<,{R11}
  MOV R11,#1

@@ -29,7 +29,7 @@ extern int      _gtty();
 
 struct file     **_extfl;
 int		_extflc;	/* number of external files */
-char            *_m_lb;         /* LB of m_a_i_n */
+char            *_m_lb;         /* LB of _m_a_i_n */
 struct file     *_curfil;       /* points to file struct in case of errors */
 int             _pargc;
 char            **_pargv;

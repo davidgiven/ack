@@ -25,7 +25,7 @@ begtext:
 	push bx
 	push cx
 	xor bp,bp
-	call    _m_a_i_n
+	call    __m_a_i_n
 	add sp,6
 	call	__exit
 .sect	.data

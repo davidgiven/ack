@@ -38,10 +38,10 @@ begtext:
 	pea	(a0)
 	move.l	d2,-(sp)
 	move.l	#0,a6
-	jsr	_m_a_i_n
+	jsr	__m_a_i_n
 	move.l	d0,(sp)		! no stack cleanup needed
 EXIT:
-	jsr	_exit
+	jsr	__exit
 
 	.sect .data
 begdata:

@@ -51,7 +51,7 @@ begtext:
 	! envp pointer.
 
 	add.l	#2,sp !convert argc from 4-byte to 2-byte
-	jsr	_m_a_i_n
+	jsr	__m_a_i_n
 	add	#010,sp
 EXIT:
 	move.w	d0,-(sp)

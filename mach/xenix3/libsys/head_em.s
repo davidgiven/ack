@@ -3,7 +3,7 @@
 .define begtext,begdata,begbss,syscal
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
-.extern _end
+.extern endbss
 
 ERANGE          = 1
 ESET            = 2
@@ -42,7 +42,7 @@ begtext:
 	push bx
 	push cx
 	xor bp,bp
-	mov bx,_end
+	mov bx,endbss
 	mov cx,9
 	add bx,1024
 	shr bx,cl
@@ -50,11 +50,11 @@ begtext:
 	call grow
 	xor	cx,cx
 	push	cx
-	call	_sbrk
+	call	__sbrk
 	mov	(.limhp),ax
 	mov	(.reghp),ax	! on Xenix, heap begins above stack!
 	pop	ax
-	call    _m_a_i_n
+	call    __m_a_i_n
 	push	ax
 	call	__exit
 .sect	.data

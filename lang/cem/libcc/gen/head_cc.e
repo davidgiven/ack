@@ -28,8 +28,8 @@ environ
 _penvp
  bss EM_PSIZE,0,0
 
- exp $m_a_i_n
- pro $m_a_i_n,0
+ exp $_m_a_i_n
+ pro $_m_a_i_n,0
 #if EM_WSIZE==1
  ldc 1336	; EIOVFL | EIUND | ECONV | EFOVFL | EFUNFL
 #else

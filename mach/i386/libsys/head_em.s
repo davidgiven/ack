@@ -1,9 +1,8 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 
-.define begtext,begdata,begbss,syscal
+.define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
-.extern _end
 
 ERANGE          = 1
 ESET            = 2
@@ -35,7 +34,7 @@ begtext:
 	push ax
 	push bx
 	push cx
-	call    _m_a_i_n
+	call    __m_a_i_n
 	push	ax
 	call	__exit
 .sect	.data

@@ -44,7 +44,7 @@ ECASE   = 024
 	tst     -(r0)
 1:
 	mov     r0,4(sp)
-	jsr     pc,_m_a_i_n
+	jsr     pc,__m_a_i_n
 ! next two lines for as long as tail needs printf
 !	mov     r0,-(sp)
 !	jsr     pc,*$_exit

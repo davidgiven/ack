@@ -1,9 +1,6 @@
 The m68k2 back end is an EM code generator for the
 Motorola MC68000. It defines an integer to be 16 bits
 and a pointer to be 32 bits.
-At present it does not support floating point operations.
-(All EM floating point instructions are translated to the
-68000 "trap" instruction.)
 The m68k2 back end generates code for the ACK 68000 assembler.
 (The mnemonics recognized by this assembler can be found in
 "as/mach3.c").
@@ -32,17 +29,16 @@ on the kind of target 68000 system.
 	ACK a.out format to your a.out format (as defined in
 	"/usr/include/a.out.h"). The program "cv/cv.c" does
 	the job for UniSoft Unix. It probably need only be slightly
-	modified for your system. Note that the program
-	generates no text or bss segments, but only a data segment.
+	modified for your system.
 	If your target 68000 does not run Unix, but is e.g. a stand alone
 	68000, you will need a program to download the ACK a.out file.
 	The program "dl/dl.c" produces Intel Hex format on standard output
 	from an a.out file.
    -	The EM runtime start-off ("libsys/head_em.s") may have to be modified.
-	It should call the procedure _m_a_i_n with parameters (argc,argv,envp).
+	It should call the procedure __m_a_i_n with parameters (argc,argv,envp).
 	Usually, Unix will put these on top of the stack before starting
 	the program. Note, however, that for 4-byte systems Unix will provide
-	a 4-byte argc, while _m_a_i_n expects a 2-byte argc; so the value
+	a 4-byte argc, while __m_a_i_n expects a 2-byte argc; so the value
 	must be shortened to 2 bytes.
 
 

@@ -35,7 +35,7 @@
 	push h
 	lxi h,0
 	push h
-	call _m_a_i_n
+	call __m_a_i_n
 .stop:	jmp 0xfb52
 	
 .sect .bss

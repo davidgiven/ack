@@ -36,7 +36,7 @@ stackpointer are set to 0x1000 and 0x7ffe respectivally.
 The latter because it could run on a 32K machine as well.
 Other systems require other values.
 .IP 2)
-In \fIhead_em\fP: before calling "_m_a_i_n", the environment
+In \fIhead_em\fP: before calling "__m_a_i_n", the environment
 pointer, argument vector and argument count will have to be pushed
 onto the stack.
 Since this back-end is tested on a system without any knowledge

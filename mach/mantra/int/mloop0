@@ -1,5 +1,5 @@
 	.define	filb
-	.define _m_a_i_n
+	.define __m_a_i_n
 	.define curproc
 	.define	pd
 	.define	nproc
@@ -25,7 +25,7 @@
 !		START OF THE PROGRAM
 !---------------------------------------------------------------------------
 
-_m_a_i_n:
+__m_a_i_n:
 #ifdef __BSD4_2
 		jsr	getmask
 #endif

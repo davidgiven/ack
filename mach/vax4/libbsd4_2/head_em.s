@@ -28,7 +28,7 @@
 	pushl	r0
 	pushl	r2
 	pushl	r1
-	calls	$3,_m_a_i_n
+	calls	$3,__m_a_i_n
 	movl	$Im2,ap
 	movl	r0,6(ap)
 	chmk	(ap)+

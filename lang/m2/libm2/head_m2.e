@@ -24,8 +24,8 @@
 bkillbss
  bss EM_PSIZE,0,0
 
- exp $m_a_i_n
- pro $m_a_i_n, 0
+ exp $_m_a_i_n
+ pro $_m_a_i_n, 0
 
  lor 0
  lae MainLB

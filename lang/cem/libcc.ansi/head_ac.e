@@ -17,8 +17,6 @@
  *
  */
 
-/* Author: E.G. Keizer */
-
  mes 2,_EM_WSIZE,_EM_PSIZE
 
  exa environ
@@ -27,8 +25,8 @@
 _penvp
  bss _EM_PSIZE,0,0
 
- exp $m_a_i_n
- pro $m_a_i_n,0
+ exp $_m_a_i_n
+ pro $_m_a_i_n,0
  loc 1336	; EIOVFL | EIUND | ECONV | EFOVFL | EFUNFL
  sim            ; ignored
  lal _EM_WSIZE+_EM_PSIZE
