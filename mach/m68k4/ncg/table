@@ -417,9 +417,6 @@ pre_post	= pre_dec4 + pre_dec2 + pre_dec1 +
 regind_addr	= regAcon + regAregXcon + t_regAcon + t_regAregXcon .
 address		= ext_addr + local_addr + regAcon + regAregXcon .
 all_regind	= indirect + offsetted + pre_post + index_off +
-#if WORD_SIZE==2
-		indirect4 + pre_dec4 + post_inc4 + offsetted4 + index_off4
-#endif
 		      regind_addr + areg .
 all_indir	= all_regind .
 allexceptcon	= ALL - ( D_REG + A_REG + consts + dreg2 + dreg1 +
