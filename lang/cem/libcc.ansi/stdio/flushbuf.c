@@ -9,15 +9,15 @@
 
 #include	<sys/types.h>
 
-off_t lseek(int fildes, off_t offset, int whence);
-int write(int d, const char *buf, int nbytes);
-int isatty(int d);
-extern int (*_fflush)(FILE *stream);
+off_t _lseek(int fildes, off_t offset, int whence);
+int _write(int d, const char *buf, int nbytes);
+int _isatty(int d);
+extern void (*_clean)(void);
 
 int
 __flushbuf(int c, FILE * stream)
 {
-	_fflush = fflush;
+	_clean = __cleanup;
 	if (fileno(stream) < 0) return EOF;
 	if (!io_testflag(stream, _IOWRITE)) return EOF;
 	if (io_testflag(stream, _IOREADING) && !feof(stream)) return EOF;
@@ -26,7 +26,7 @@ __flushbuf(int c, FILE * stream)
 	stream->_flags |= _IOWRITING;
 	if (!io_testflag(stream, _IONBF)) {
 		if (!stream->_buf) {
-			if (stream == stdout && isatty(fileno(stdout))) {
+			if (stream == stdout && _isatty(fileno(stdout))) {
 				if (!(stream->_buf =
 					    (unsigned char *) malloc(BUFSIZ))) {
 					stream->_flags |= _IONBF;
@@ -55,12 +55,12 @@ __flushbuf(int c, FILE * stream)
 
 		stream->_count = 0;
 		if (io_testflag(stream, _IOAPPEND)) {
-			if (lseek(fileno(stream), 0L, 2) == -1) {
+			if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
 				stream->_flags |= _IOERR;
 				return EOF;
 			}
 		}
-		if (write(fileno(stream), &c1, 1) != 1) {
+		if (_write(fileno(stream), &c1, 1) != 1) {
 			stream->_flags |= _IOERR;
 			return EOF;
 		}
@@ -69,12 +69,12 @@ __flushbuf(int c, FILE * stream)
 		*stream->_ptr++ = c;
 		if (c == '\n' || stream->_count == -stream->_bufsiz) {
 			if (io_testflag(stream, _IOAPPEND)) {
-				if (lseek(fileno(stream), 0L, 2) == -1) {
+				if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
 					stream->_flags |= _IOERR;
 					return EOF;
 				}
 			}
-			if (write(fileno(stream), (char *)stream->_buf,
+			if (_write(fileno(stream), (char *)stream->_buf,
 					-stream->_count) != -stream->_count) {
 				stream->_flags |= _IOERR;
 				return EOF;
@@ -91,12 +91,12 @@ __flushbuf(int c, FILE * stream)
 
 		if (count > 0) {
 			if (io_testflag(stream, _IOAPPEND)) {
-				if (lseek(fileno(stream), 0L, 2) == -1) {
+				if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
 					stream->_flags |= _IOERR;
 					return EOF;
 				}
 			}
-			if (write(fileno(stream), (char *)stream->_buf, count)
+			if (_write(fileno(stream), (char *)stream->_buf, count)
 			    != count) {
 				*(stream->_buf) = c;
 				stream->_flags |= _IOERR;

@@ -12,6 +12,7 @@
 int _doprnt(const char *format, va_list ap, FILE *stream);
 int _doscan(FILE * stream, const char *format, va_list ap);
 char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
+void __cleanup(void);
 
 FILE *popen(const char *command, const char *type);
 FILE *fdopen(int fd, const char *mode);

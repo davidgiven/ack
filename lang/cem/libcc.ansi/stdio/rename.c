@@ -5,11 +5,11 @@
 
 #include	<stdio.h>
 
-int link(const char *name1, const char *name2);
+int _link(const char *name1, const char *name2);
 
 int
 rename(const char *old, const char *new) {
-	if (!link(old, new))
+	if (!_link(old, new))
 		return remove(old);
 	else return -1;
 }

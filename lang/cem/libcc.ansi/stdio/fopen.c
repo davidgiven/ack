@@ -35,10 +35,10 @@
 #define	O_TRUNC		0x020
 #define	O_APPEND	0x040
 
-int open(const char *path, int flags);
-int creat(const char *path, int mode);
+int _open(const char *path, int flags);
+int _creat(const char *path, int mode);
 
-int close(int d);
+int _close(int d);
 
 FILE *
 fopen(const char *name, const char *mode)
@@ -88,14 +88,14 @@ fopen(const char *name, const char *mode)
 	 * the file is opened for writing and the open() failed.
 	 */
 	if ((rwflags & O_TRUNC)
-	    || (((fd = open(name, rwmode)) < 0)
+	    || (((fd = _open(name, rwmode)) < 0)
 		    && (flags & _IOWRITE)))
-		fd = creat(name, PMODE);
+		fd = _creat(name, PMODE);
 
 	if (fd < 0) return (FILE *)NULL;
 
 	if (( stream = (FILE *) malloc(sizeof(FILE))) == NULL ) {
-		close(fd);
+		_close(fd);
 		return (FILE *)NULL;
 	}
 

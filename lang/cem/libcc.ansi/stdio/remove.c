@@ -5,9 +5,9 @@
 
 #include	<stdio.h>
 
-int unlink(const char *path);
+int _unlink(const char *path);
 
 int
 remove(const char *filename) {
-	return unlink(filename);
+	return _unlink(filename);
 }

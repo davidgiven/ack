@@ -6,7 +6,7 @@
 #include	<stdio.h>
 #include	"loc_incl.h"
 
-int write(int d, const char *buf, int nbytes);
+int _write(int d, const char *buf, int nbytes);
 
 int
 fflush(FILE *stream)
@@ -21,38 +21,46 @@ fflush(FILE *stream)
 	}
 
 	if (!stream->_buf
-	    || io_testflag(stream, _IONBF)
-	    || !io_testflag(stream, _IOWRITE)
-	    || !io_testflag(stream, _IOWRITING)) 
+	    || (!io_testflag(_IOREADING)
+		&& !io_testflag(_IOWRITING)))
 		return 0;
+	if (io_testflag(stream, _IOREADING)) {
+		(void) fseek(stream, 0L, SEEK_CUR);
+		return 0;
+	} else if (io_testflag(stream, _IONBF)) return 0;
 
 	if (io_testflag(stream, _IOREAD))		/* "a" or "+" mode */
 		stream->_flags &= ~_IOWRITING;
 
-	/*
-	if (io_testflag(stream, _IOLBF))
-		count = -stream->_count;
-	else	count = stream->_bufsiz - stream->_count;
-	*/
 	count = stream->_ptr - stream->_buf;
 	stream->_ptr = stream->_buf;
 
 	if ( count <= 0 )
 		return 0;
 
-	c1 = write(stream->_fd, (char *)stream->_buf, count);
+	if (io_testflag(stream, _IOAPPEND)) {
+		if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
+			stream->_flags |= _IOERR;
+			return EOF;
+		}
+	}
+	c1 = _write(stream->_fd, (char *)stream->_buf, count);
 
 	stream->_count = 0;
-
-	/*
-	if(stream != stderr)
-		fprintf(stderr,"written %d bytes :\"%.*s\"\n"
-				, c1, c1, stream->_buf);
-	*/
 
 	if ( count == c1 )
 		return 0;
 
 	stream->_flags |= _IOERR;
 	return EOF; 
+}
+
+void
+__cleanup(void)
+{
+	register int i;
+
+	for(i= 0; i < FOPEN_MAX; i++)
+		if (__iotab[i] && io_testflag(__iotab[i], _IOWRITING))
+			(void) fflush(__iotab[i]);
 }

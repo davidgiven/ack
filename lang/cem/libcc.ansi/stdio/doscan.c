@@ -240,12 +240,14 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		case 'n':
 			if (ic != EOF) ungetc(ic, stream);
 			nrchars--;
-			if (flags & FL_SHORT)
-				*va_arg(ap, short *) = (short) nrchars;
-			else if (flags & FL_LONG)
-				*va_arg(ap, long *) = (long) nrchars;
-			else
-				*va_arg(ap, int *) = (int) nrchars;
+			if (!(flags & FL_NOASSIGN)) {
+				if (flags & FL_SHORT)
+					*va_arg(ap, short *) = (short) nrchars;
+				else if (flags & FL_LONG)
+					*va_arg(ap, long *) = (long) nrchars;
+				else
+					*va_arg(ap, int *) = (int) nrchars;
+			}
 			break;
 		case 'b':		/* binary */
 		case 'd':		/* decimal */

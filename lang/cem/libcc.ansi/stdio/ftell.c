@@ -13,7 +13,7 @@
 
 #include	<sys/types.h>
 
-off_t lseek(int fildes, off_t offset, int whence);
+off_t _lseek(int fildes, off_t offset, int whence);
 
 long ftell(FILE *stream)
 {
@@ -28,7 +28,7 @@ long ftell(FILE *stream)
 		adjust = stream->_ptr - stream->_buf;
 	else adjust = 0;
 
-	result = lseek(fileno(stream), 0, SEEK_CUR);
+	result = _lseek(fileno(stream), 0, SEEK_CUR);
 
 	if ( result == -1 )
 		return result;

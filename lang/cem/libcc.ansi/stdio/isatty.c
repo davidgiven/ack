@@ -1,11 +1,11 @@
 /*
- * isatty - check if a file descriptor is associated with a terminal
+ * _isatty - check if a file descriptor is associated with a terminal
  */
 /* $Header$ */
 
-int gtty(int d, char *buf);
+int _gtty(int d, char *buf);
 
-int isatty(int d)
+int _isatty(int d)
 {
 	char buf[128]; 
 	/* not a sgttyb struct; it might not be large enough;
@@ -13,5 +13,5 @@ int isatty(int d)
 	   where gtty is an ioctl(..., TCGETA, ...)
 	*/
 
-	return gtty(d, buf) >= 0;
+	return _gtty(d, buf) >= 0;
 }
