@@ -3,9 +3,9 @@
 switchseg( seg)
 int seg;
 
-/* De EM definitie eist dat pseudoinstructies gealigned worden op
- * woordgrens.
- */
+ /* The EM definition demands that pseudo instructions are aligned
+  * at word boundaries.
+  */
 {	
 	if ( seg == cur_seg)
 		return;
