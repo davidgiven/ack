@@ -4,13 +4,13 @@ OBJLIB=$(EMHOME)/modules/lib/libobject.a
 head:	cv
 
 cv:	cv.c
-	$(CC) -I$(EMHOME)/h -o cv cv.c $(OBJLIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(EMHOME)/h -o cv cv.c $(OBJLIB)
 
 install:	head
-	@echo Nothing is installed
+	../../install cv
 
 cmp:	head
-	@echo Nothing is compared
+	../../compare cv
 
 clean:
 	rm -f *.o
