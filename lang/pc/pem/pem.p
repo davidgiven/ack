@@ -25,6 +25,9 @@
 {if next line is included the compiler itself is written in standard pascal}
 {#define        STANDARD        1}
 
+{if next line is included, the compiler won't generate static exchanges}
+#define	NO_EXC	1
+
 {Author:        Johan Stevenson                 Version:        32}
 {$l- : no source line numbers}
 {$r- : no subrange checking}
@@ -33,7 +36,7 @@
 {$s+ : test conformancy to standard}
 #endif
 
-program pem(input,em,errors);
+program pem(input,output,em,errors);
 {/*
    This Pascal compiler produces EM code as described in
    - A.S.Tanenbaum, J.W.Stevenson & H. van Staveren,
@@ -165,6 +168,10 @@ type
   lp=   ^labl;
   bp=   ^blockinfo;
   np=   ^nameinfo;
+#ifdef NO_EXC
+  mp=	^mmark;
+  op=	^outrec;
+#endif NO_EXC
 
 {set types}
   sos=          set of symbol;
@@ -293,6 +300,18 @@ type
 			  otherwise dlbno of label information}
   end;
 
+#ifdef NO_EXC
+  outrec=record
+    next:op;		{chain of records}
+    bytes:array[1..16] of byte;
+    cnt:0..16;
+  end;
+
+  mmark=record
+    next:mp;		{chain of marks}
+    count,where:integer;
+  end;
+#endif NO_EXC
 {-------------------------------------------------------------------}
 var  {the most frequent used externals are declared first}
   sy:symbol;            {last symbol}
@@ -369,6 +388,16 @@ var  {the most frequent used externals are declared first}
   em:file of byte;      {the EM code}
   errors:text;          {the compilation errors}
   source:fnarr;
+#ifdef NO_EXC
+  ohead: op;	{head of outrec list}
+  mhead: mp;	{head of marks list}
+  bcnt: integer;
+#define newmark setmark
+#define relmark(xx) freemark(xx)
+#else not NO_EXC
+#define newmark lino
+#define relmark(xx)
+#endif NO_EXC
 
 {===================================================================}
 
@@ -443,8 +472,29 @@ begin if fsp=nil then formof:=false else formof:=fsp^.form in forms end;
 
 {===================================================================}
 
+#ifdef NO_EXC
+procedure newoutrec;
+var p:op;
+begin
+  new(p);
+  bcnt := bcnt+1;
+  with p^ do begin cnt := 0; next := ohead end;
+  ohead := p
+end;
+
+procedure put1(b:byte);
+begin
+  if mhead = nil then write(em,b)
+  else begin
+    if ohead^.cnt = 16 then newoutrec;
+    with ohead^ do
+      begin cnt := cnt + 1; bytes[cnt] := b end
+  end
+end;
+#else not NO_EXC
 procedure put1(b:byte);
 begin write(em,b) end;
+#endif NO_EXC
 
 procedure put2(i:integer);
 var i1,i2:byte;
@@ -534,12 +584,81 @@ end;
 procedure laedlb(d:integer);
 begin genop(op_lae); argdlb(d) end;
 
+#ifdef NO_EXC
+procedure reloutrec;
+var i,j,k:integer;
+  q, r, p:op;
+  m : mp;
+begin p := ohead; q := p;
+  if mhead <> nil then
+    begin
+      m := mhead; while m^.next <> nil do m := m^.next;
+      k := (bcnt - m^.where) + 1
+    end
+  else begin k := 0; ohead := nil; bcnt := 0 end;
+  for i := 1 to k do begin q := p; p := p^.next end;
+  if q <> p then q^.next := nil;
+  if p <> nil then
+    begin r := nil;
+      while p <> nil do
+	begin q := p^.next; p^.next := r; r := p; p := q end;
+      while r <> nil do with r^ do
+        begin
+	  for j := 1 to cnt do write(em, bytes[j]);
+	  r := next
+        end
+    end
+end;
+
+function setmark:integer;
+var p:mp; nm:boolean;
+begin nm := false;
+  if mhead <> nil then with mhead^ do
+    if (where = bcnt) and (ohead^.cnt = 0) then
+      begin count := count + 1; nm := true end;
+  if not nm then
+    begin new(p); newoutrec;
+      with p^ do
+        begin where := bcnt; count := 1; next := mhead end;
+      mhead := p;
+    end;
+  setmark := bcnt
+end;
+
+procedure freemark(m : integer);
+var p, q : mp;
+begin assert(mhead <> nil); p := mhead; q := p;
+  while p^.where <> m do
+    begin q := p; p := p^.next; assert(p <> nil) end;
+  with p^ do
+    begin assert(count > 0); count := count - 1; if count = 0 then
+      begin
+	if p = mhead then begin mhead := next; reloutrec end
+	else q^.next := next
+      end
+end end;
+
+procedure exchange(n,m:integer);
+var i:integer;
+    p,q,r:op;
+begin assert(m >= n);
+  if n <> m then
+    begin
+      p := ohead;
+      for i := bcnt downto m+1 do p := p^.next;
+      q := p;
+      for i := m downto n+1 do q := q^.next;
+      r := ohead; ohead := p^.next; p^.next := q^.next; q^.next := r
+    end
+end;
+#else not NO_EXC
 procedure exchange(l1,l2:integer);
 var d1,d2:integer;
 begin d1:=l2-l1; d2:=lino-l2;
   if (d1<>0) and (d2<>0) then
     begin gencst(ps_exc,d1); argcst(d2) end
 end;
+#endif NO_EXC
 
 procedure newilb(i:integer);
 begin lino:=lino+1;
@@ -1881,7 +2000,7 @@ end;
 procedure callnonstandard(fsys:sos; moreargs:boolean; fip:ip);
 var nxt,lip:ip; l0,l1,l2,l3,sz:integer; lsp,savasp:sp;
 begin with a do begin
-  l0:=lino; l1:=l0; sz:=0; nxt:=fip^.parhead;
+  l0:=newmark; l1:=newmark; sz:=0; nxt:=fip^.parhead;
   while moreargs do
     begin
       if nxt=nil then
@@ -1914,22 +2033,27 @@ begin with a do begin
 	  else  {call by reference}
 	    begin variable(fsys); loadaddr; sz:=sz+sz_addr;
 	      if samesect in nxt^.iflag then lsp:=savasp else
-		begin savasp:=asp; l2:=lino;
+		begin savasp:=asp; l2:=newmark;
 		  while formof(lsp,[carray])
 			and formof(asp,[arrays,carray]) do
 		    if (compat(lsp^.inxtype,asp^.inxtype) > subeq) or
 			  (lsp^.sflag<>asp^.sflag) then errasp(+0142) else
-		      begin l3:=lino; descraddr(asp^.arpos); exchange(l2,l3);
+		      begin l3:=newmark; descraddr(asp^.arpos); exchange(l2,l3);
+			relmark(l3);
 			sz:=sz+sz_addr; asp:=asp^.aeltype; lsp:=lsp^.aeltype
-		      end
+		      end;
+		  relmark(l2)
 		end;
 	      if not eqstruct(asp,lsp) then errasp(+0143);
 	      if packbit then errasp(+0144);
 	    end;
 	  nxt:=nxt^.next
 	end;
-      exchange(l0,l1); l1:=lino; moreargs:=find3(comma,fsys,+0145)
+      exchange(l0,l1);
+      relmark(l1);
+      l1:=newmark; moreargs:=find3(comma,fsys,+0145)
     end;
+  relmark(l0); relmark(l1);
   if nxt<>nil then error(+0146);
   inita(procptr,0); pos:=fip^.pfpos;
   if fip^.pfkind=formal then
@@ -2004,12 +2128,12 @@ begin with a do begin
 end end;
 
 procedure callrw(fsys:sos; lpar,w,ln:boolean);
-var l1,l2,errno:integer; ftype,lsp,fsp:sp; savlb:integer; m:libmnem;
-begin with b do begin savlb:=reglb; ftype:=textptr;
+var l1,l2,errno:integer; ftype,lsp,fsp:sp; (* savlb:integer;*) m:libmnem;
+begin with b do begin (* savlb:=reglb; *) ftype:=textptr;
   inita(textptr,argv[ord(w)].ad); a.pos.lv:=0; fa:=a;
   if lpar then
-    begin l1:=lino; if w then expression(fsys+[colon1]) else variable(fsys);
-      l2:=lino;
+    begin l1:=newmark; if w then expression(fsys+[colon1]) else variable(fsys);
+      l2:=newmark;
       if formof(a.asp,[files]) then
 	begin ftype:=a.asp;
 	  if (a.ak<>fixed) and (a.ak<>pfixed) then
@@ -2023,22 +2147,24 @@ begin with b do begin savlb:=reglb; ftype:=textptr;
 	begin if iop[w]=nil then error(+0155);
 	  if w then callw(fsys,l1,l2) else callr(l1,l2)
 	end;
+      relmark(l1); relmark(l2);
       while find3(comma,fsys,+0156) do with a do
-	begin l1:=lino;
+	begin l1:=newmark;
 	  if w then expression(fsys+[colon1]) else variable(fsys);
-	  l2:=lino;
+	  l2:=newmark;
 	  if ftype=textptr then
 	    if w then callw(fsys,l1,l2) else callr(l1,l2)
 	  else
 	    begin errno:=+0157; fsp:=ftype^.filtype;
 	      if w then force(fsp,errno) else
-		begin store; lsp:=asp; l2:=lino end;
+		begin store; lsp:=asp; relmark(l2); l2 := newmark end;
 	      fileaddr; gensp(WDW,sz_addr); gencst(op_lfr,sz_addr);
 	      ak:=ploaded; packbit:=true; asp:=fsp;
 	      if w then store else
 		begin force(lsp,errno); exchange(l1,l2) end;
 	      fileaddr; if w then m:=PUTX else m:=GETX; gensp(m,sz_addr)
-	    end
+	    end;
+	  relmark(l1); relmark(l2);
 	end;
     end
   else
@@ -2048,7 +2174,7 @@ begin with b do begin savlb:=reglb; ftype:=textptr;
     begin if ftype<>textptr then error(+0160);
       fileaddr; if w then m:=WLN else m:=RLN; gensp(m,sz_addr)
     end;
-  reglb:=savlb
+  (* reglb:=savlb *)
 end end;
 
 procedure callnd(fsys:sos);
@@ -2221,8 +2347,8 @@ begin with a do begin asp:=desub(asp);
     es:
       expandnullset(fsp);
     li,ri,rl,se:
-      begin l2:=lino; lsp:=asp; asp:=fsp;
-	convert(lsp,l1); exchange(l1,l2); asp:=lsp
+      begin l2:=newmark; lsp:=asp; asp:=fsp;
+	convert(lsp,l1); exchange(l1,l2); relmark(l2); asp:=lsp
       end;
     noteq:
       errasp(+0184);
@@ -2279,7 +2405,7 @@ begin with a do begin  {buildset}
   varpart:=false; ncst:=0; asp:=nullset;
   for i:=1 to ncsw do cstpart[i]:=[];
   if find2([notsy..lparent],fsys,+0189) then
-    repeat l1:=lino;
+    repeat l1:=newmark;
       setexpr(fsys+[colon2,comma],cst1,val1); cst12:=cst1;
       if find3(colon2,fsys+[comma,notsy..lparent],+0190) then
 	begin setexpr(fsys+[comma,notsy..lparent],cst2,val2);
@@ -2288,8 +2414,11 @@ begin with a do begin  {buildset}
 	    begin
 	      if cst2 then gencst(op_loc,val2);
 	      if cst1 then
-		begin l2:=lino; gencst(op_loc,val1); exchange(l1,l2) end;
-	      l2:=lino; genasp(op_zer); exchange(l1,l2);
+		begin l2:=newmark; gencst(op_loc,val1); exchange(l1,l2);
+		  relmark(l2);
+		end;
+	      l2:=newmark; genasp(op_zer); exchange(l1,l2);
+	      relmark(l2);
 	      genasp(op_loc); gensp(BTS,3*sz_word)
 	    end;
 	end
@@ -2302,6 +2431,7 @@ begin with a do begin  {buildset}
 	  end
       else
 	if varpart then genasp(op_ior) else varpart:=true;
+      relmark(l1);
     until endofloop(fsys,[notsy..lparent],comma,+0191);  {+0192}
   ak:=loaded;
   if ncst>0 then
@@ -2375,11 +2505,11 @@ end end;
 
 procedure term(fsys:sos);
 var lsy:symbol; lsp:sp; l1:integer; first:boolean;
-begin with a,b do begin first:=true; l1:=lino;
+begin with a,b do begin first:=true;
   factor(fsys+[starsy..andsy]);
   while find2([starsy..andsy],fsys,+0197) do
     begin if first then begin load; first:=false end;
-      lsy:=sy; insym; l1:=lino; lsp:=asp;
+      lsy:=sy; insym; l1:=newmark; lsp:=asp;
       factor(fsys+[starsy..andsy]); load; convert(lsp,l1);
       if asp<>nil then
 	case lsy of
@@ -2407,13 +2537,14 @@ begin with a,b do begin first:=true; l1:=lino;
 	    end;
 	  andsy:
 	    if asp=boolptr then genasp(op_and) else errasp(+0202);
-	end {case}
+	end; {case}
+	relmark(l1)
     end {while}
 end end;
 
 procedure simpleexpression(fsys:sos);
 var lsy:symbol; lsp:sp; l1:integer; signed,min,first:boolean;
-begin with a do begin l1:=lino; first:=true;
+begin with a do begin first:=true;
   signed:=(sy=plussy) or (sy=minsy);
   if signed then begin min:=sy=minsy; insym end else min:=false;
   term(fsys + [minsy,plussy,orsy]); lsp:=desub(asp);
@@ -2424,7 +2555,7 @@ begin with a do begin l1:=lino; first:=true;
       begin load; first:=false; asp:=lsp; negate end;
   while find2([plussy,minsy,orsy],fsys,+0204) do
     begin if first then begin load; first:=false end;
-      lsy:=sy; insym; l1:=lino; lsp:=asp;
+      lsy:=sy; insym; l1:=newmark; lsp:=asp;
       term(fsys+[minsy,plussy,orsy]); load; convert(lsp,l1);
       if asp<>nil then
 	case lsy of
@@ -2439,16 +2570,17 @@ begin with a do begin l1:=lino; first:=true;
 	    else errasp(+0206);
 	  orsy:
 	    if asp=boolptr then genasp(op_ior) else errasp(+0207);
-	end {case}
+	end; {case}
+	relmark(l1)
     end {while}
 end end;
 
 procedure expression; { fsys:sos }
 var lsy:symbol; lsp:sp; l1,l2:integer;
-begin with a do begin l1:=lino;
+begin with a do begin l1:=newmark;
   simpleexpression(fsys+[eqsy..insy]);
   if find2([eqsy..insy],fsys,+0208) then
-    begin lsy:=sy; insym; lsp:=asp; loadcheap; l2:=lino;
+    begin lsy:=sy; insym; lsp:=asp; loadcheap; l2:=newmark;
       simpleexpression(fsys); loadcheap;
       if lsy=insy then
 	begin
@@ -2501,8 +2633,10 @@ begin with a do begin l1:=lino;
 	    eqsy: genop(op_teq)
 	  end
 	end;
+      relmark(l2);
       asp:=boolptr; ak:=loaded
     end;
+    relmark(l1)
 end end;
 
 {===================================================================}
@@ -2513,10 +2647,11 @@ procedure statement(fsys:sos); forward;
 procedure assignment(fsys:sos; fip:ip);
 var la:attr; l1,l2:integer;
 begin
-  l1:=lino; selector(fsys+[becomes],fip,[assigned]); l2:=lino;
+  l1:=newmark; selector(fsys+[becomes],fip,[assigned]); l2:=newmark;
   la:=a; nextif(becomes,+0216);
   expression(fsys); loadcheap; checkasp(la.asp,+0217);
   exchange(l1,l2); a:=la;
+  relmark(l1); relmark(l2);
   if not formof(la.asp,[arrays..records]) then store else
     begin loadaddr;
       if la.asp^.form<>carray then genasp(op_blm) else
@@ -2588,7 +2723,7 @@ var lsp:sp; head,p,q,r:cip; l0,l1:integer;
 begin with b do begin
   expression(fsys+[ofsy,semicolon,ident..plussy]); lsp:=a.asp; load;
   if not nicescalar(desub(lsp)) then begin error(+0223); lsp:=nil end;
-  l0:=lino; ilbno:=ilbno+1; ilb1:=ilbno;
+  l0:=newmark; ilbno:=ilbno+1; ilb1:=ilbno;
   nextif(ofsy,+0224); head:=nil; max:=-MI2; min:=MI2; n:=0;
   repeat ilbno:=ilbno+1; ilb2:=ilbno;   {label of current case}
     repeat i:=cstinteger(fsys+[comma,colon1,semicolon],lsp,+0225);
@@ -2607,7 +2742,7 @@ begin with b do begin
     nextif(colon1,+0229); newilb(ilb2); statement(fsys+[semicolon]);
     gencst(op_bra,ilb1);
   until lastsemicolon(fsys,[ident..plussy],+0230);  {+0231 +0232}
-  assert n<>0; newilb(ilb1); l1:=lino;
+  assert n<>0; newilb(ilb1); l1:=newmark;
   dlb:=newdlb; genop(ps_rom); argnil;
   if (max div 3) - (min div 3) < n then
     begin argcst(min); argcst(max-min);
@@ -2624,7 +2759,8 @@ begin with b do begin
       while head<>nil do
 	begin argcst(head^.cslab);argilb(head^.csstart);head:=head^.next end;
     end;
-  argend; laedlb(dlb); gencst(m,sz_word); exchange(l0,l1)
+  argend; laedlb(dlb); gencst(m,sz_word); exchange(l0,l1);
+  relmark(l0); relmark(l1)
 end end;
 
 procedure repeatstatement(fsys:sos);
@@ -2648,7 +2784,7 @@ begin with b do begin
 end end;
 
 procedure forstatement(fsys:sos);
-var lip:ip; tosym:boolean; endlab,looplab,savlb:integer;
+var lip:ip; tosym:boolean; endlab,looplab(* ,savlb *):integer;
     av,at1,at2:attr; lsp:sp;
 
 procedure forbound(fsys:sos; var fa:attr; fsp:sp);
@@ -2660,7 +2796,7 @@ begin
     end
 end;
 
-begin with b do begin savlb:=reglb; tosym:=false;
+begin with b do begin (* savlb:=reglb; *) tosym:=false;
   ilbno:=ilbno+1; looplab:=ilbno; ilbno:=ilbno+1; endlab:=ilbno;
   inita(nil,0);
   if sy<>ident then error(+0240) else
@@ -2685,13 +2821,13 @@ begin with b do begin savlb:=reglb; tosym:=false;
   a:=av; load; if tosym then genop(op_inc) else genop(op_dec);
   a.asp:=lsp; checkbnds(av.asp); a:=av; store;
   gencst(op_bra,looplab); newilb(endlab);
-  reglb:=savlb
+  (* reglb:=savlb *)
 end end;
 
 procedure withstatement(fsys:sos);
-var lnp,savtop:np; savlb:integer; pbit:boolean;
+var lnp,savtop:np; (* savlb:integer; *) pbit:boolean;
 begin with b do begin
-  savlb:=reglb; savtop:=top;
+  (* savlb:=reglb;*) savtop:=top;
   repeat variable(fsys+[comma,dosy]);
     if not formof(a.asp,[records]) then errasp(+0247) else
       begin pbit:=spack in a.asp^.sflag;
@@ -2704,7 +2840,7 @@ begin with b do begin
       end;
   until endofloop(fsys+[dosy],[ident],comma,+0248);  {+0249}
   nextif(dosy,+0250); statement(fsys);
-  top:=savtop; reglb:=savlb;
+  top:=savtop; (* reglb:=savlb; *)
 end end;
 
 procedure assertion(fsys:sos);
@@ -2773,7 +2909,7 @@ begin with b do begin
 {produce PRO}
   genpnam(ps_pro,fip); argend;
   gencst(ps_mes,ms_par);argcst(fip^.maxlb); argend;
-  l0:=lino; dlb:=0; trace('procentr',fip,dlb);
+  l0:=newmark; dlb:=0; trace('procentr',fip,dlb);
 {global labels}
   llp:=lchain; spset:=false;
   while llp<>nil do
@@ -2804,7 +2940,7 @@ begin with b do begin
 {finish and close files}
   treewalk(top^.fname);
   if level=1 then
-    begin l1:=lino;
+    begin l1:=newmark;
       genop(op_fil); argdlb(fildlb);  {temporarily}
       dlb:=newdlb; gencst(ps_con,argc+1);
       for i:=0 to argc do with argv[i] do
@@ -2813,18 +2949,19 @@ begin with b do begin
 	end;
       argend; gencst(op_lxl,0); laedlb(dlb); gencst(op_lae,0);
       gencst(op_lxa,0); gensp(INI,4*sz_addr);
-      exchange(l0,l1); gencst(op_loc,0); gensp(HLT,0)
+      exchange(l0,l1); relmark(l1); gencst(op_loc,0); gensp(HLT,0)
     end
   else
     begin inita(fip^.idtype,fip^.pfpos.ad);
       if fip^.klass=func then
 	begin load;
 	  if not (assigned in fip^.iflag) then
-	    errid(-(+0265),fip^.name);
+	    errid(-(+0265),fip^.name)
 	end;
-      genasp(op_ret);
+      genasp(op_ret)
     end;
-  gencst(ps_end,-minlb);
+  relmark(l0);
+  gencst(ps_end,-minlb)
 end end;
 
 {===================================================================}
@@ -3014,6 +3151,11 @@ begin
   iop[true]:=nil;
   argv[0].ad:=-1;
   argv[1].ad:=-1;
+#ifdef NO_EXC
+  ohead := nil;
+  bcnt := 0;
+  mhead := nil;
+#endif NO_EXC
 end;
 
 procedure init2;
