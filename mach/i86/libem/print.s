@@ -2,10 +2,6 @@
 .sect .text
 .define	printc,printd,prints
 
-SIO_D		= 0xD8
-SIO_S		= 0xDA
-TXRDY		= 0x01
-
 	! argument in ax
 	! uses bx
 prints:
@@ -38,10 +34,14 @@ printd:
 	! argument in ax
 printc:
 	push	ax
-1:
-	inb	SIO_S
-	andb	al,TXRDY
-	jz	1b
-	pop	ax
-	outb	SIO_D
+	mov	bx,sp
+	mov	ax,1
+	push	ax
+	push	bx
+	push	ax
+	call	_write
+	pop	bx
+	pop	bx
+	pop	bx
+	pop	bx
 	ret
