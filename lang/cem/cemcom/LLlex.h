@@ -12,6 +12,7 @@
 
 #include "nofloat.h"
 #include "file_info.h"
+#include "nopp.h"
 
 /* the structure of a token:	*/
 struct token	{
@@ -48,14 +49,16 @@ struct token	{
 
 extern struct token dot, ahead, aside;
 
+#ifndef NOPP
 extern int ReplaceMacros;	/* "LLlex.c"	*/
-extern int EoiForNewline;	/* "LLlex.c"	*/
 extern int PreProcKeys;		/* "LLlex.c"	*/
-extern int AccFileSpecifier;	/* "LLlex.c"	*/
 extern int AccDefined;		/* "LLlex.c"	*/
-extern int UnknownIdIsZero;	/* "LLlex.c"	*/
-extern int SkipEscNewline;	/* "LLlex.c"	*/
 extern int Unstacked;		/* "LLlex.c"	*/
+extern int UnknownIdIsZero;	/* "LLlex.c"	*/
+#endif NOPP
+extern int EoiForNewline;	/* "LLlex.c"	*/
+extern int AccFileSpecifier;	/* "LLlex.c"	*/
+extern int SkipEscNewline;	/* "LLlex.c"	*/
 extern int File_Inserted;	/* "LLlex.c"	*/
 
 extern int NoUnstack;		/* buffer.c	*/
