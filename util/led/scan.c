@@ -494,9 +494,11 @@ modulsize(head)
  */
 
 static struct outrelo	*walkrelo;
+static unsigned short cnt_relos;
+static unsigned short index;
 
 startrelo(head)
-	struct outhead	*head;
+	register struct outhead	*head;
 {
 	ind_t		reloindex;
 
@@ -504,18 +506,29 @@ startrelo(head)
 		reloindex = *(ind_t *)(modulbase + IND_RELO(*head));
 		walkrelo = (struct outrelo *)address(ALLORELO, reloindex);
 	}
+	else {
+		index = 20;
+		rd_rew_relos(head);
+		cnt_relos = head->oh_nrelos;
+	}
 }
 
 struct outrelo *
 nextrelo()
 {
-	static struct outrelo	relobuf;
+	static struct outrelo	relobuf[20];
 
 	if (incore)
 		return walkrelo++;
 
-	rd_relo(&relobuf, 1);
-	return &relobuf;
+	if (index == 20) {
+		int i = cnt_relos >= 20 ? 20 : cnt_relos;
+
+		cnt_relos -= i;
+		rd_relo(relobuf, i);
+		index = 0;
+	}
+	return &relobuf[index++];
 }
 
 /* ------------------------------------------------------------------------- */
