@@ -47,7 +47,7 @@ name pc
 	program {EM}/lib/em_pc
 	mapflag -L PC_F={PC_F?} -L
 #	mapflag -s PC_F={PC_F?} -s
-#	mapflag -u PC_F={PC_F?} -u
+	mapflag -_ PC_F={PC_F?} -U
 	mapflag -w PC_F={PC_F?} -w
 	mapflag -V* PC_F={PC_F?} -V*
 	mapflag -M* PC_F={PC_F?} -M*
@@ -72,10 +72,12 @@ name m2
 	mapflag -L M2_F={M2_F?} -L
 	mapflag -w* M2_F={M2_F?} -w*
 	mapflag -W* M2_F={M2_F?} -W*
+	mapflag -_ M2_F={M2_F?} -U
 	mapflag -M* M2_F={M2_F?} -M*
 	mapflag -x M2_F={M2_F?} -x
 	mapflag -Xs M2_F={M2_F?} -s
 	mapflag -V* M2_F={M2_F?} -V*
+	mapflag --* M2_F={M2_F?} -*
 	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
 	-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
 	{M2_ALIGN?} {M2_F?} < >
