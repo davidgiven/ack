@@ -6,6 +6,6 @@ isatty(f)
 	   where gtty is an ioctl(..., TCGETA, ...)
 	*/
 
-	if (gtty(f, &buf) < 0) return 0;
+	if (gtty(f, buf) < 0) return 0;
 	return 1;
 }
