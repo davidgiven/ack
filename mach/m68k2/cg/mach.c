@@ -14,17 +14,6 @@ static char rcsid[] = "$Header$";
 
 #include "fppsim.h"
 
-#ifdef IEEEFLOAT
-#include "FP.h"
-#include "trp.c"
-#include "fcompact.c"
-#include "dbl_extract.c"
-#ifdef	PRT_EXP_DEBUG
-#include "prt_extend.c"
-#endif
-#endif IEEEFLOAT
-
-
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -50,70 +39,124 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4 %s\n",str);
 }
 
-#ifdef IEEEFLOAT
-dbl_adjust(fl)
-my_dbl	*fl;
-{
-	EXTEND	buf;
+#ifdef NOFLOAT
+con_float() {
 
-		/* special routine to strip SGL_BIAS */
-	dbl_extract(fl,&buf);
-		/* standard routine to add DBL_BIAS */
-	fcompact(&buf,fl,sizeof(double));
+static int been_here;
+	if (argval != 4 && argval != 8)
+		fatal("bad fcon size");
+	fputs(".data4\t", codefile);
+	if (argval == 8)
+		fputs("0,", codefile);
+	fputs("0 !dummy float\n", codefile);
+	if ( !been_here++)
+	{
+	fputs("Warning : dummy float-constant(s)\n", stderr);
+	}
 }
-#endif IEEEFLOAT
+#else
+#define IEEEFLOAT
 
-con_float()
-{
-	register word	sz;
-	register long	*l;
-#ifdef FPPSIM
+con_float() {
+	double f;
+	double atof();
+	float fl;
+	int i;
+#ifndef OWNFLOAT
+	double f1;
+	double frexp(), modf();
+	int j;
+	int sign = 0;
+	int fraction[4] ;
+#else OWNFLOAT
+	char *p;
+#endif OWNFLOAT
+
+	if (argval!= 4 && argval!= 8)	{
+		fprintf(stderr,"float constant size = %d\n",argval);
+		fatal("bad fcon size");
+	}
+	fprintf(codefile,"!float %s sz %d\n", str, argval);
+	f = atof(str);
+#ifdef OWNFLOAT
+	if (argval == 4) {
+		fl = f;
+		p = (char *) &fl;
+	}
+	else {
+		p = (char *) &f;
+	}
+	fprintf(codefile, ".data1 0%o", *p++ & 0377);
+	for (i = argval-1; i; i--) {
+		fprintf(codefile,",0%o", *p++ & 0377);
+	}
+#else OWNFLOAT
+	f = frexp(f, &i);
+	if (f < 0) {
+		f = -f;
+		sign = 1;
+	}
+	if (f == 0) {
+		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
+		fprintf(codefile, ".data2 0, 0\n");
+		return;
+	}
+	while (f < 0.5) {
+		f += f;
+		i --;
+	}
+	f = modf(2 * f, &f1); /* hidden bit */
 #ifdef IEEEFLOAT
-	register my_dbl	*md;
+	if (argval == 4) {
 #endif IEEEFLOAT
-		 double	d, atof();
-#else not FPPSIM
-	static int been_here;
-#endif
-
-	sz = argval;
-	if (sz!= 4 && sz!= 8) {
-		char	mesg[128];
-		sprintf(mesg,"con_float(): bad fcon size %d %ld\nstr: %s\n\0",
-				sz,sz,str);
-		fatal(mesg);
-	}
-
-#ifdef FPPSIM
-	d = atof(str);
-	l = (long *) &d;
-
+		i = (i + 128) & 0377;
+		fraction[0] = (sign << 15) | (i << 7);
+		for (j = 6; j>= 0; j--) {
+			if (f >= 0.5) fraction[0] |= (1 << j);
+			f = modf(2*f, &f1);
+		}
 #ifdef IEEEFLOAT
-	if (sz == 8)	{
-		/* ATOF() RETURNS THE PROPER FORMAT FOR A FLOAT */
-		/* BUT NOT FOR A DOUBLE. CORRECT THE FORMAT.	*/
-		md = (my_dbl *) &d;
-		dbl_adjust(md);
+	}
+	else {
+		i = (i + 1024) & 03777;
+		fraction[0] = (sign << 15) | (i << 4);
+		for (j = 3; j>= 0; j--) {
+			if (f >= 0.5) fraction[0] |= (1 << j);
+			f = modf(2*f, &f1);
+		}
 	}
 #endif IEEEFLOAT
-
-	while ( sz ) {
-		fprintf(codefile,"\t.data2 0x%x,0x%x !float test %s\n",
-			(int)(*l)&0xFFFF,(int)(*l>>16)&0xFFFF,str);
-		sz -=4 ;
-		l++;
+	for (i = 1; i < argval / 2; i++) {
+		fraction[i] = 0;
+		for (j = 15; j>= 0; j--) {
+			if (f >= 0.5) fraction[i] |= (1 << j);
+			f = modf(2*f, &f1);
+		}
 	}
-#else not FPPSIM
-	if (! been_here) {
-		been_here = 1;
-		fprintf(stderr,"warning: dummy floating constant(s)\n");
+	if (f >= 0.5) {
+		for (i = argval/2 - 1; i >= 0; i--) {
+			for (j = 0; j < 16; j++) {
+				if (fraction[i] & (1 << j)) {
+					fraction[i] &= ~(1 << j);
+				}
+				else {
+					fraction[i] |= (1 << j);
+					break;
+				}
+			}
+			if (j != 16) break;
+		}
 	}
-	while (sz) {
-		fprintf(codefile,"\t.data4 0 !dummy float\n");
-		sz -= 4;
+	for (i = 0; i < argval/2; i++) {
+		fprintf(codefile,
+			i != 0 ? ", 0%o, 0%o" : ".data1 0%o, 0%o", 
+			(fraction[i]>>8)&0377,
+			fraction[i]&0377);
 	}
-#endif
+#endif OWNFLOAT
+	putc('\n', codefile);
 }
+#endif
 
 #ifdef REGVARS
 
