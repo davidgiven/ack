@@ -121,6 +121,11 @@ cleaninstrs() {
 			if (instr == op_lab) {
 				lp->l_a.la_np->n_line = 0;
 			}
+			else if (instr > sp_lmnem) {
+				/* leave pseudo's */
+				lpp = &lp->l_next;
+				continue;
+			}
 			lp = lp->l_next;
 			oldline(*lpp);
 			OPTIM(O_UNREACH);
