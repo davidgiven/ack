@@ -24,11 +24,7 @@ main(argc, argv)
 	 *   The d flag can be repeated several times, resulting in more
 	 *        debugging information.
 	 */
-#ifdef EM_WSIZE
-	char workspace[2000] ;
-#else
 	char workspace[6000] ;
-#endif
 	register char *cp ;
 	register int argno ;
 
