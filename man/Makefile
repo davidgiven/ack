@@ -13,6 +13,7 @@ all:
 	-nroff macro.v7 z80_as.1 > z80_as.opr
 	-tbl macro.v7 ack.1 | nroff >ack.opr
 	-nroff macro.v7 arch.1 >arch.1.opr
+	-nroff macro.v7 LLgen.1 > LLgen.1.opr
 	-nroff macro.v7 arch.5 >arch.5.opr
 	-nroff macro.v7 libmon.7 > libmon.opr
 	-nroff macro.v7 libpc.7 > libpc.opr
@@ -37,6 +38,7 @@ install:
 	-cp z8000_as.1 > /usr/man/man1/z8000_as.1
 	-tbl ack.1 >/usr/man/man1/ack.1
 	-cp arch.1 /usr/man/man1/arch.1
+	-cp LLgen.1 /usr/man/man1/LLgen.1
 	-cp arch.5 /usr/man/man5/arch.5
 	-cp libmon.7 /usr/man/man7/em_libmon.7
 	-cp libpc.7 /usr/man/man7/em_libpc.7
