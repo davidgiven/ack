@@ -36,8 +36,6 @@ do ... while (0) ?
 function %s has return(e); and return;
 statement not reached
 function %s declared %s but no value returned
-
-declare the VARARGS args you want checked!
 .ft P
 .DE
 .SH
