@@ -1558,7 +1558,10 @@ cii 	| R16 |
 					| | |
 cui 	| | | | cii |
 ciu	| | | | cii |
-cuu 	| | | | asp 4 |
+cuu 	| | | | cii |
+loc loc cui $1==$2	| | | | |
+loc loc ciu $1==$2	| | | | |
+loc loc cuu $1==2 && $2==4 | | | | loc 0 |
 
 
 /* GROUP 9 - LOGICAL */
