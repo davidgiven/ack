@@ -1,6 +1,5 @@
 .define _access
 .extern _access
-rts
 _access:		trap #0
 .short	0x21
 			bcc	1f
