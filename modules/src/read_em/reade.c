@@ -13,7 +13,7 @@
 /* #define XXX_YYY	/* only for early debugging */
 
 #ifdef XXX_YYY
-#define out(str)	((void) sys_write(STDOUT, str, strlen(str)))
+#define out(str)	(sys_write(STDOUT, str, strlen(str)))
 #else
 #define out(s)
 #endif
@@ -123,7 +123,7 @@ checkeol()
 
 	if (nospace() != '\n') {
 		syntax("end of line expected");
-		(void) nospace();
+		nospace();
 	}
 }
 
