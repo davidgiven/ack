@@ -28,8 +28,8 @@ name cem
 	mapflag -L CEM_F={CEM_F?} -L
 	mapflag -KR CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
-	mapflag -p CEM_F={DEM_F?} -p
-	mapflag -V CEM_F={DEM_F?} -V*
+	mapflag -p CEM_F={CEM_F?} -p
+	mapflag -V* CEM_F={CEM_F?} -V*
 	args \
 {CPP_F?} {INCLUDES?}  \
 -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
@@ -99,7 +99,7 @@ name ocm
 end
 name abc
 	from .b
-	to .e
+	to .k
 	program {EM}/lib/em_bem
 	mapflag -h ABC_F={ABC_F?} -h
 	mapflag -w ABC_F={ABC_F?} -w
@@ -107,7 +107,7 @@ name abc
 	mapflag -E ABC_F={ABC_F?} -E
 #	mapflag -d ABC_F={ABC_F?} -d
 	args {ABC_F?} < > {SOURCE}
-	prep always
+	prep cond
 	rts .b
 	need .b
 	callname abc
@@ -147,7 +147,8 @@ name ego
 	mapflag -S* EGO_F={EGO_F?} -S*
 	mapflag -s* EGO_F={EGO_F?} -s*
 	mapflag -a* EGO_F={EGO_F?} -a*
-	args {EM}/lib/em_ego {EGO_F?} -P {EM}/lib/ego \
+	mapflag -EV EGO_F={EGO_F?} -V
+	args {EM}/lib/em_ego {EM} {EGO_F?} -P {EM}/lib/ego \
 -M{EM}/lib/ego/{M}descr <
 	optimizer
 	stdout
