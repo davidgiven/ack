@@ -31,7 +31,7 @@ begtext:
 	set	-0x100000, %g4		! should be a few M
 	clr	%l1
 	mov	%sp, %l0
-	sub	%sp, %g4, %sp
+	add	%sp, %g4, %sp
 	dec	12, %l0
 					! enable divide by 0 trap and improper
 					! trap
