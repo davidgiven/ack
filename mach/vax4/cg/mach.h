@@ -4,14 +4,17 @@
 
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
+#define newplb(x)	fprintf(codefile,".align 1\n%s:\n",x)
 #define	dlbdlb(s1,s2)	fprintf(codefile,"%s = %s\n",s1,s2)
-#define newlbss(x,f)	fprintf(codefile,"%s:.space\t%ld\n",x,f)
+#define newlbss(x,f)	fprintf(codefile,"%s:.lcomm\t%ld\n",x,f)
 
 #define cst_fmt		"$%ld"
 #define	off_fmt		"%ld"
-#define ilb_fmt		"I%03x%04x"
+#define ilb_fmt		"L%xL%x"
 #define dlb_fmt		"_%d"
 #define	hol_fmt		"hol%d"
+
+#define fmt_id(fr,to)	sprintf(to,"_%s",fr)
 
 #define hol_off		"%ld+hol%d"
 
