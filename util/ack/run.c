@@ -47,8 +47,8 @@ int runphase(phase) register trf *phase ; {
 				vprint(" %s%s\n",p_basename,
 					rindex(in.p_path,SUFCHAR) ) ;
 			} else {
-				scanlist(l_first(c_arguments), elem) {
-					vprint(" %s",l_content(*elem)) ;
+				scanlist(l_first(phase->t_inputs), elem) {
+					vprint(" %s",p_cont(*elem)->p_path);
 				}
 				vprint("\n") ;
 			}
@@ -91,7 +91,7 @@ int run_exec(phase) trf *phase ; {
 		} while ( waitchild!=child) ;
 		if ( status ) {
 			if ( status&0200 && (status&0177)!=SIGQUIT &&
-				!t_flag ) unlink("core") ;
+				t_flag<=1 ) unlink("core") ;
 			switch ( status&0177 ) {
 			case 0 :
 				break ;
@@ -131,7 +131,7 @@ int run_exec(phase) trf *phase ; {
 		close(1) ;
 		if ( creat(out.p_path,0666)!=1 ) {
 			close(1); dup(2);
-			error("cannot open %s",out.p_path) ;
+			error("cannot create %s",out.p_path) ;
 			exit(1) ;
 		}
 	}
