@@ -8,7 +8,7 @@
 #define	ASSERT(b)	/* empty */
 #endif
 
-#ifdef EM_WSIZE == EM_PSIZE
+#if EM_WSIZE == EM_PSIZE
 #define	ptrint		int
 #else
 #define	ptrint		long
