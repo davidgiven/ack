@@ -22,6 +22,7 @@ extern holno, procno;
 #define 	SEGROM		1
 #define 	SEGCON		2
 #define 	SEGBSS		3
+#define 	SEGHOL		-1	/* does not exist */
 
 #define swtxt()		switchseg( SEGTXT)
 
