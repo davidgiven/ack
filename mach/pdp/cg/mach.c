@@ -24,7 +24,7 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the PDP-11
  */
 
-#define REGPATCH
+/* #define REGPATCH		/* save all registers in markblock */
 
 con_part(sz,w) register sz; word w; {
 

@@ -34,7 +34,7 @@
  *
  */
 
-#define REGPATCH		/* save all registers in link block */
+/* #define REGPATCH		/* save all registers in link block */
 
 #ifdef REGPATCH
 #define SL 8
