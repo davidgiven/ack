@@ -41,12 +41,14 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define PASS    "name"
 #define IN      "from"
 #define OUT     "to"
+#define RES	"outfile"
 #define PROG    "program"
 #define MAPF    "mapflag"
 #define ARGS    "args"
 #define PROP    "prop"
 #define RUNT    "rts"
 #define NEEDT	"need"
+#define CALL	"callname"
 #define END     "end"
 
 extern growstring scanb();
@@ -72,6 +74,16 @@ setlist(name) char *name ; {
 		if ( strcmp(VAR,ty_name)==0 ) {
 			doassign(bol,(char *)0,0) ;
 		} else
+		if ( strcmp(CALL,ty_name)==0 ) {
+			if ( callname && strcmp(bol,callname)==0 ) {
+				callname= (char *)0 ;
+#ifdef DEBUG
+				if ( debug>=3 ) {
+					vprint("found call name\n");
+				}
+#endif
+			}
+		} else
 		if ( strcmp(PASS,ty_name)==0 ) {
 			intrf() ;
 		} else
@@ -88,6 +100,7 @@ intrf() {
 	register char *ptr ;
 	growstring bline, vline ;
 	int twice ;
+	int name_seen=0 ;
 
 	new= (trf *)getcore(sizeof *new) ;
 	new->t_name= keeps(bol) ;
@@ -133,6 +146,7 @@ intrf() {
 				case 'p': new->t_prep= YES ; break ;
 				case 'm': new->t_prep= MAYBE ; break ;
 				case 'O': new->t_optim= YES ; break ;
+				case 'L': new->t_linker=YES ;
 				case 'C': new->t_combine= YES ; break ;
 				default :
 				  error("Unkown option %c in %s for %s",
@@ -149,6 +163,22 @@ intrf() {
 			if ( new->t_needed ) twice=YES ;
 			new->t_needed= keeps(bol) ;
 		} else
+		if ( strcmp(ty_name,RES)==0 ) {
+			if ( new->t_outfile ) twice=YES ;
+			new->t_outfile= keeps(bol) ;
+		} else
+		if ( strcmp(ty_name,CALL)==0 ) {
+			if ( callname && strcmp(bol,callname)==0 ) {
+				name_seen=1 ;
+				callname= (char *)0 ;
+#ifdef DEBUG
+				if ( debug>=3 ) {
+					vprint("found call name in %s\n",
+						new->t_name) ;
+				}
+#endif
+			}
+		} else
 		if ( strcmp(ty_name,END)==0 ) {
 			break ;
 		} else {
@@ -164,6 +194,15 @@ intrf() {
 			new->t_name,inname) ;
 	}
 	if ( ! new->t_argd ) new->t_argd="" ;
+	/* Warning, side effect */
+	if ( name_seen && new->t_rts ) {
+		if ( rts && strcmp(rts,new->t_rts)!=0 ) {
+			error("Attempt to use two run-time systems, %s and %s",
+				rts, new->t_rts) ;
+		}
+		rts= new->t_rts ;
+		keephead(rts) ; keeptail(rts) ;
+	}
 #ifdef DEBUG
 	if ( debug>=3 ) {
 		register list_elem *elem ;
@@ -200,15 +239,10 @@ open_in(name) register char *name ; {
 	}
 	/* Not in core */
 	incore= NO ;
-#ifdef NEW
-	gr_cat(&rline,EM_DIR) ;
-	gr_cat(&rline,"/lib/n_ack/") ;
-#else
-	gr_cat(&rline,ACK_DIR); gr_cat(&rline,"/") ;
-#endif
+	gr_cat(&rline,EM_DIR) ; gr_cat(&rline,"/") ;
+	gr_cat(&rline,ACK_PATH); gr_cat(&rline,"/") ;
 	gr_cat(&rline,name) ;
 	infile= fopen(gr_start(rline),"r") ;
-#ifdef NEW
 	if ( !infile ) {
 		/* Try to read EM_DIR/lib/MACH/plan */
 		gr_throw(&rline) ;
@@ -217,7 +251,6 @@ open_in(name) register char *name ; {
 		gr_cat(&rline,"/plan") ;
 		infile= fopen(gr_start(rline),"r") ;
 	}
-#endif
 	if ( !infile ) {
 		infile= fopen(name,"r") ;
 	}
