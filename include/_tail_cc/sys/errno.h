@@ -54,7 +54,7 @@
 #define	EDEADLK		45	/* DeadLock */
 #endif	/* __USG */
 
-#if	defined(__BDS4_2)
+#if	defined(__BSD4_2)
 /* non-blocking and interrupt i/o */
 #define	EWOULDBLOCK	35	/* Operation would block */
 #define	EINPROGRESS	36	/* Operation now in progress */
