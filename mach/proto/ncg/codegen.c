@@ -569,7 +569,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		do {
 			npos=exactmatch=0;
 			for(rpp=reglist[propno];rp= *rpp; rpp++)
-				if (getrefcount(rp-machregs)==0) {
+				if (getrefcount(rp-machregs, FALSE)==0) {
 					pos[npos++] = rp-machregs;
 					if (eqtoken(&rp->r_contents,&token))
 						exactmatch++;
@@ -651,7 +651,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		}
 	} else {
 		decision = forced;
-		if (getrefcount(decision)!=0)
+		if (getrefcount(decision, FALSE)!=0)
 			BROKE();
 		token2.t_token = -1;
 	}

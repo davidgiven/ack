@@ -38,7 +38,7 @@ tuples(regls,nregneeded) rl_p *regls; {
 
 	for (i=0;i<NREGS;i++) {
 		regclass[i] = class++;
-		if (getrefcount(i) == 0) {
+		if (getrefcount(i, FALSE) == 0) {
 			for (j=0;j<i;j++) {
 				if (eqregclass(i,j) &&
 				    eqtoken(&machregs[i].r_contents,
