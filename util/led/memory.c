@@ -7,6 +7,14 @@ static char rcsid[] = "$Header$";
  * for each piece telling where it is, how many bytes are used, and how may
  * are left. If a request for core doesn't fit in the left bytes, an sbrk()
  * is done and pieces after the one that requested the growth are moved up.
+ *
+ * Unfortunately, we cannot use sbrk to request more memory, because its
+ * result cannot be trusted. More specifically, it does not work properly
+ * on 2.9 BSD, and probably does not work properly on 2.8 BSD and V7 either.
+ * The problem is that "sbrk" adds the increment to the current "break"
+ * WITHOUT testing the carry bit. So, if your break is at 40000, and
+ * you "sbrk(30000)", it will succeed, but your break will be at 4464
+ * (70000 - 65536).
  */
 
 #include <out.h>
@@ -26,7 +34,32 @@ struct memory	mems[NMEMS];
 bool	incore = TRUE;	/* TRUE while everything can be kept in core. */
 ind_t	core_position = (ind_t)0;	/* Index of current module. */
 
-#define AT_LEAST	2	/* See comment about string areas. */
+#define AT_LEAST	(ind_t)2	/* See comment about string areas. */
+#define GRANULE		64	/* power of 2 */
+
+static char *BASE;
+static ind_t refused;
+
+sbreak(incr)
+	ind_t incr;
+{
+	extern char	*sbrk();
+	extern char	*brk();
+	unsigned int	inc;
+
+	incr = (incr + (GRANULE - 1)) & ~(GRANULE - 1);
+
+	inc = incr;
+	if ((refused && refused < incr) ||
+	    inc != incr ||
+	    BASE + inc < BASE ||
+	    (int) brk(BASE + inc) == -1) {
+		refused = refused && refused > incr ? incr : refused;
+		return -1;
+	}
+	BASE = sbrk(0);
+	return 0;
+}
 
 /*
  * Initialize some pieces of core. We hope that this will be our last
@@ -37,9 +70,8 @@ init_core()
 	register char		*base;
 	register ind_t		total_size;
 	register struct memory	*mem;
-	extern char		*sbrk();
 	extern char		*brk();
-char *BASE;
+	extern char		*sbrk();
 
 #include "mach.c"
 
@@ -64,14 +96,22 @@ char *BASE;
 		total_size += 1;
 	else
 		mems[ALLOGCHR].mem_left -= 1;
+
+	if (sbreak(total_size) == -1) {
+		incore = FALSE;	/* In core strategy failed. */
+		if (sbreak(AT_LEAST) == -1)
+			fatal("no core at all");
+		
+		base = BASE;
+		for (mem = mems; mem < &mems[NMEMS]; mem++) {
+			mem->mem_base = base;
+			mem->mem_full = (ind_t)0;
+			mem->mem_left = 0;
+		}
+	}
+
 	mems[ALLOLCHR].mem_full = 1;
 	mems[ALLOGCHR].mem_full = 1;
-
-	if (brk(BASE + total_size) == (char *) -1) {
-		incore = FALSE;	/* In core strategy failed. */
-		if ((int)sbrk(AT_LEAST) == -1)
-			fatal("no core at all");
-	}
 }
 
 /*
@@ -85,10 +125,9 @@ move_up(piece, incr)
 	register ind_t		incr;
 {
 	register struct memory	*mem;
-	extern char		*sbrk();
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
-	if (incr != (int)incr || sbrk((int)incr) == (char *) -1)
+	if (sbreak(incr) == -1)
 		return FALSE;
 
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
@@ -114,16 +153,17 @@ compact(piece, incr)
 {
 	register ind_t		gain;
 	register struct memory	*mem;
+#define ALIGN 8
 
 	debug("compact(%d, %d)\n", piece, (int)incr, 0, 0);
-	gain = mems[0].mem_left;
-	mems[0].mem_left = (ind_t)0;
+	gain = mems[0].mem_left & ~(ALIGN - 1);
+	mems[0].mem_left &= (ALIGN - 1);
 	for (mem = &mems[1]; mem <= &mems[piece]; mem++) {
 		/* Here memory is inserted before a piece. */
 		assert(passnumber == FIRST || gain == (ind_t)0);
 		copy_down(mem, gain);
-		gain += mem->mem_left;
-		mem->mem_left = (ind_t)0;
+		gain += mem->mem_left & ~(ALIGN - 1);
+		mem->mem_left &= (ALIGN - 1);
 	}
 	/*
 	 * Note that we already added the left bytes of the piece we want to
@@ -134,13 +174,13 @@ compact(piece, incr)
 
 		for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--) {
 			/* Here memory is appended after a piece. */
-			up += mem->mem_left;
+			up += mem->mem_left & ~(ALIGN - 1);
 			copy_up(mem, up);
-			mem->mem_left = (ind_t)0;
+			mem->mem_left &= (ALIGN - 1);
 		}
 		gain += up;
 	}
-	mems[piece].mem_left = gain;
+	mems[piece].mem_left += gain;
 	return gain >= incr;
 }
 
@@ -159,6 +199,7 @@ copy_down(mem, dist)
 	register char		*new;
 	register ind_t		size;
 
+	if (!dist) return;
 	size = mem->mem_full;
 	old = mem->mem_base;
 	new = old - dist;
@@ -182,6 +223,7 @@ copy_up(mem, dist)
 	register char		*new;
 	register ind_t		size;
 
+	if (!dist) return;
 	size = mem->mem_full;
 	old = mem->mem_base + size;
 	new = old + dist;
@@ -215,7 +257,7 @@ alloc(piece, size)
 	while (left + incr < size)
 		incr += INCRSIZE;
 
-	if (incr == 0 || move_up(piece, incr) || compact(piece, incr)) {
+	if (incr == 0 || move_up(piece, incr) || compact(piece, size)) {
 		mems[piece].mem_full += size;
 		mems[piece].mem_left -= size;
 		return full;
