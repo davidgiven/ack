@@ -220,6 +220,12 @@ gen_tphead(tpp, nest)
 	}
 	if (gen_error) return tpp;
 	if (tp->tp_fund == UNION) {
+		sd = tp->tp_sdef;
+		if (AHEAD == '{' &&
+		    (aggregate_type(sd->sd_type) || 
+		     sd->sd_type->tp_fund == UNION)) {
+			return &(sd->sd_type);
+		}
 		return gen_tphead(&(tp->tp_sdef->sd_type), nest);
 	}
 	p = new_e_stack();
