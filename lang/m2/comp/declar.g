@@ -404,7 +404,8 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 				ChkCompat(pnd, *ptp, "case label");
 			  }
 			  nd = *pnd;
-			  if (! (nd->nd_type->tp_fund & T_DISCRETE)) {
+			  if (! (nd->nd_type->tp_fund & T_DISCRETE) ||
+			      nd->nd_type->tp_size > word_size) {
 				node_error(nd, "illegal type in case label");
 			  }
 			}

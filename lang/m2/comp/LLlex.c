@@ -461,7 +461,9 @@ again:
 				base = 8;
 				/* Fall through */
 				
-			case End:
+			case End: {
+				int sgnswtch = 0;
+
 				*np = '\0';
 				if (np >= &buf[NUMSIZE]) {
 					tk->TOK_INT = 1;
@@ -470,27 +472,38 @@ again:
 				else {
 					np = &buf[1];
 					while (*np == '0') np++;
-					tk->TOK_INT = str2long(np, base);
-					if (strlen(np) > 14 /* ??? */ ||
-				    	    tk->TOK_INT < 0) {
-lexwarning(W_ORDINARY, "overflow in constant");
+					tk->TOK_INT = 0;
+					while (*np) {
+						arith old = tk->TOK_INT;
+
+						tk->TOK_INT = tk->TOK_INT*base
+							+ (*np++ - '0');
+						sgnswtch += (old < 0) ^
+							    (tk->TOK_INT < 0);
 					}
 				}
-				if (ch == 'C' && base == 8) {
+				toktype = card_type;
+				if (sgnswtch >= 2) {
+lexwarning(W_ORDINARY, "overflow in constant");
+				}
+				else if (ch == 'C' && base == 8) {
 					toktype = char_type;
-					if (tk->TOK_INT<0 || tk->TOK_INT>255) {
+					if (sgnswtch != 0 || tk->TOK_INT>255) {
 lexwarning(W_ORDINARY, "character constant out of range");
 					}
 				}
 				else if (ch == 'D' && base == 10) {
+					if (sgnswtch != 0) {
+lexwarning(W_ORDINARY, "overflow in constant");
+					}
 					toktype = longint_type;
 				}
-				else if (tk->TOK_INT>=0 &&
-					 tk->TOK_INT<=max_int) {
+				else if (sgnswtch == 0 &&
+					 tk->TOK_INT<=max_int[(int)word_size]) {
 					toktype = intorcard_type;
 				}
-				else	toktype = card_type;
 				return tk->tk_symb = INTEGER;
+				}
 
 			case OptReal:
 				/*	The '.' could be the first of the '..'

@@ -474,6 +474,28 @@ CodePString(nd, tp)
 	C_loi(szarg);
 }
 
+static
+subu(sz)
+	arith sz;
+{
+	if (options['R']) C_sbu(sz);
+	else {
+		C_cal(sz == word_size ? "subu" : "subul");
+		C_asp(sz);
+	}
+}
+
+static
+addu(sz)
+	arith sz;
+{
+	if (options['R']) C_adu(sz);
+	else {
+		C_cal(sz == word_size ? "addu" : "addul");
+		C_asp(sz);
+	}
+}
+
 CodeStd(nd)
 	t_node *nd;
 {
@@ -559,11 +581,11 @@ CodeStd(nd)
 		}
 		if (std == S_DEC) {
 			if (tp->tp_fund == T_INTEGER) C_sbi(size);
-			else	C_sbu(size);
+			else	subu(size);
 		}
 		else {
 			if (tp->tp_fund == T_INTEGER) C_adi(size);
-			else	C_adu(size);
+			else	addu(size);
 		}
 		if (size == word_size) {
 			RangeCheck(left->nd_type, tp->tp_fund == T_INTEGER ?
@@ -673,7 +695,7 @@ CodeOper(expr, true_label, false_label)
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_adu(tp->tp_size);
+			addu(tp->tp_size);
 			break;
 		case T_SET:
 			C_ior(tp->tp_size);
@@ -695,7 +717,7 @@ CodeOper(expr, true_label, false_label)
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_sbu(tp->tp_size);
+			subu(tp->tp_size);
 			break;
 		case T_SET:
 			C_com(tp->tp_size);
@@ -715,7 +737,15 @@ CodeOper(expr, true_label, false_label)
 		case T_EQUAL:
 		case T_CARDINAL:
 		case T_INTORCARD:
-			C_mlu(tp->tp_size);
+			if (options['R']) {
+				C_mlu(tp->tp_size);
+			}
+			else {
+				C_cal(tp->tp_size <= word_size ?
+					"mulu" :
+					"mulul");
+				C_asp(tp->tp_size);
+			}
 			break;
 		case T_REAL:
 			C_mlf(tp->tp_size);

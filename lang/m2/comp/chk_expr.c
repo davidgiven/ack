@@ -103,7 +103,7 @@ MkCoercion(pnd, tp)
 			}
 			break;
 		case T_INTEGER:  {
-			long i = ~int_mask[(int)(tp->tp_size)];
+			long i = ~max_int[(int)(tp->tp_size)];
 			long j = nd->nd_INT & i;
 
 			if ((nd_tp->tp_fund == T_INTEGER &&
@@ -896,7 +896,10 @@ ChkBinOper(expp)
 	}
 	else if ( tpl->tp_fund != T_REAL &&
 		  left->nd_class == Value && right->nd_class == Value) {
-		cstbin(expp);
+		if (expp->nd_left->nd_type->tp_fund == T_INTEGER) {
+			cstibin(expp);
+		}
+		else	cstubin(expp);
 	}
 
 	return 1;

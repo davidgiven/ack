@@ -212,7 +212,8 @@ extern t_type
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
 
 extern long full_mask[];
-extern long int_mask[];
+extern long max_int[];
+extern long min_int[];
 
 #define fit(n, i)	(((n) + ((arith)0x80<<(((i)-1)*8)) & ~full_mask[(i)]) == 0)
 #define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)
