@@ -532,32 +532,34 @@ WalkStat(nd, exit_label)
 				C_stl(tmp);
 				nd->nd_def->df_flags |= D_FORLOOP;
 				C_df_ilb(l1);
-			}
-			if (! options['R']) {
-				tmp2 = NewInt();
-				ForLoopVarExpr(nd);
-				C_stl(tmp2);
+				if (! options['R']) {
+					tmp2 = NewInt();
+					ForLoopVarExpr(nd);
+					C_stl(tmp2);
+				}
 			}
 			WalkNode(right, exit_label);
-			if (! options['R']) {
-				C_lol(tmp2);
-				ForLoopVarExpr(nd);
-				C_cal("_forloopchk");
-				FreeInt(tmp2);
-			}
 			nd->nd_def->df_flags &= ~D_FORLOOP;
-			if (good_forvar && stepsize) {	
-				C_lol(tmp);
-				C_zeq(l2);
-				C_lol(tmp);
-				C_loc((arith) 1);
-				C_sbu(int_size);
-				C_stl(tmp);
-				C_loc(left->nd_INT);
-				ForLoopVarExpr(nd);
-				C_adu(int_size);
-				RangeCheck(nd->nd_type, bstp);
-				CodeDStore(nd);
+			if (good_forvar) {
+				if (! options['R']) {
+					C_lol(tmp2);
+					ForLoopVarExpr(nd);
+					C_cal("_forloopchk");
+					FreeInt(tmp2);
+				}
+				if (stepsize) {
+					C_lol(tmp);
+					C_zeq(l2);
+					C_lol(tmp);
+					C_loc((arith) 1);
+					C_sbu(int_size);
+					C_stl(tmp);
+					C_loc(left->nd_INT);
+					ForLoopVarExpr(nd);
+					C_adu(int_size);
+					RangeCheck(nd->nd_type, bstp);
+					CodeDStore(nd);
+				}
 			}
 			C_bra(l1);
 			C_df_ilb(l2);
