@@ -196,7 +196,7 @@ getdents(int fildes, char *buf, unsigned nbyte)	/* returns # bytes read;
 			}
 		/* else fall through into emulation */
 
-/*	case no:	/* fall through into emulation */
+/*	case no:*/	/* fall through into emulation */
 		}
 #endif
 

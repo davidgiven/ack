@@ -45,7 +45,7 @@ setgrent(void)
         return _gfd;
 }
 
-int
+void
 endgrent(void) 
 {
         if (_gfd >= 0)
@@ -79,7 +79,7 @@ getline(void)
         return 1;
 }
 
-static int
+static void
 skip_period(void) 
 {
         while (*_buf && *_buf != ':')
