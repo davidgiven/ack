@@ -22,7 +22,7 @@ name be
 	need .e
 end
 name as
-	from .s
+	from .s.so
 	to .o
 	program {EM}/lib/{M}/as
 	args - -o > <
