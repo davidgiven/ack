@@ -1,7 +1,7 @@
 SUF=o
 EMHOME=../../..
 MAKEFILE=$(EMHOME)/mach/proto/libg/Makefile
-MACHDEF="MACH=mantra" "SUF=$(SUF)"
+MACHDEF="MACH=mantra" "SUF=$(SUF)" "ASAR=aal"
 M2LIB = lang/m2/libm2
 MOD="PREF=m2" "SUB=" "SRC=$(M2LIB)"
 
