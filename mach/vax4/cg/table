@@ -4454,7 +4454,11 @@ lpb		| bigsource4 |
 mon		| STACK |
 			"jsb\t.mon"		|	| |
 nop		| STACK |
-			"jsb\t.nop"		|	| |
+#ifdef TESTING
+			"jsb\t.nop"
+#endif
+						|	| |
+
 #ifdef DORCK
 rck $1==4	| STACK |
 			"jsb\t.rck4"		|	| |
