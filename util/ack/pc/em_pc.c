@@ -428,7 +428,7 @@ listshort() {
 	while (nexterror()) {
 		while (listlino < curr.lino)
 			nextline(0);
-		printf("%s, %d: ",listfnam,listrela);
+		printf("%s, line %d: ",listfnam,listrela);
 		string(&curr);
 	}
 }
