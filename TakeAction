@@ -67,7 +67,7 @@ do
 				     X=
 				     case $ATYPE in
 				     indir)	
-					     if sh $THISFILE $PAR $ACTION
+					     if sh $THISFILE "$PAR" $ACTION
 					     then eval echo $SUCC
 					     else RETC=2 ; eval echo $FAIL
 					     fi ;;
