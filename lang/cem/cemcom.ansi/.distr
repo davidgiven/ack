@@ -6,7 +6,6 @@ LLlex.h
 LLmessage.c
 SmallPars
 BigPars
-LintPars
 align.h
 arith.c
 arith.h
