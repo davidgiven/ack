@@ -14,8 +14,7 @@ extern char *lstrip();
 extern instr_p newinstr();
 extern instr_p read_instr();
 extern instr_p gen_instr();
-extern char *eval_templ();
-extern instr_p malloc();
+extern char * malloc();
 
 struct variable var[NRVARS+1];
 struct variable ANY;  /* ANY symbol matching any instruction */
@@ -64,7 +63,6 @@ optimize()
 	struct queue_t windowq, backupq;
 	queue window, backup;
 	instr_p ip;
-	bool change;
 
 	window = &windowq;
 	backup = &backupq;
@@ -344,10 +342,15 @@ bool operand(ip,n)
 {
 	register char *p;
 	int oplen;
+	int nesting = 0;
 
 	skip_white(ip);
 	p = ip->rest_line;
-	while( *p != OP_SEPARATOR && *p != '\n') p++;
+	while((*p != OP_SEPARATOR || nesting) && *p != '\n') {
+		if (*p == '(') nesting++;
+		else if (*p == ')') nesting--;
+		p++;
+	}
 	oplen = p - ip->rest_line;
 	if (oplen == 0 || oplen > MAXOPLEN) return FALSE;
 	strncpy(ip->op[n],ip->rest_line,oplen);
@@ -571,7 +574,8 @@ instr_p newinstr()
 	int i;
 
 	if (instr_pool == NIL) {
-		instr_pool = malloc(sizeof(struct instruction));
+		instr_pool = (instr_p) malloc(sizeof(struct instruction));
+		instr_pool->fw = 0;
 		nr_mallocs++;
 	}
 	assert(instr_pool != NIL);
