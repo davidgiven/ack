@@ -89,7 +89,6 @@ const
   imax = 10;
   max2bytes   = '0000032767';
   max4bytes   = '2147483647';
-  wordsize    = EM_WSIZE;
 
 #if EM_WSIZE == 4
   {this can only be compiled with a compiler that has integer size 4}
@@ -1516,7 +1515,7 @@ begin lsp:=nil;
 	until endofloop(fsys+[rparent],[ident],comma,+027);  {+028}
 	if max<=MU1 then lsp^.size:=sz_byte
 #if EM_WSIZE == 4
-	else if max <= MU2 then lsp^.size = 2*sz_byte
+	else if max <= MU2 then lsp^.size := 2*sz_byte
 #endif
 	;
 	lsp^.fconst:=hip; top:=lnp; nextif(rparent,+029);
@@ -3295,7 +3294,9 @@ end;
 
 procedure init3;
 var n:np; p,q:ip; i:integer; c:char;
+#if EM_WSIZE == 2
     is:packed array[1..imax] of char;
+#endif
 begin
   for i:=0 to sz_last do readln(errors,sizes[i]);
   if sz_int  = 2 then maxintstring  := max2bytes
@@ -3336,12 +3337,16 @@ begin
 {maxint of the target machine}
   p:=newip(konst,'maxint  ',intptr,nil);
   if sz_int = 2 then p^.value:=MI2
-  else if wordsize = 4 then p^.value := MI
-  else {wordsize = 2, sz_int = 4}
+  else 
+#if EM_WSIZE == 4
+	p^.value := MI;
+#else
+  {EM_WSIZE = 2, sz_int = 4}
     begin p^.idtype:=longptr; ix:=imax; is:=max4bytes;
       for i:=1 to ix do strbuf[i]:=is[i];
       p^.value:=romstr(sp_icon,sz_int);
     end;
+#endif
   enterid(p);
   p:=newip(konst,spaces,charptr,nil); p^.value:=maxcharord;
   charptr^.fconst:=p;
@@ -3360,7 +3365,7 @@ end;
 procedure init4;
 begin
   copt:=opt['c'];
-  dopt:=opt['d']; if wordsize < sz_int then dopt:=on;
+  dopt:=opt['d']; if EM_WSIZE < sz_int then dopt:=on;
   iopt:=opt['i'];
   sopt:=opt['s'];
   if sopt<>off then begin copt:=off; dopt:=off end
