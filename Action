@@ -129,10 +129,6 @@ name "PMDS 4/4 support"
 dir mach/pmds4
 indir
 end
-name "Mantra M68000 System V.0 support"
-dir mach/mantra
-indir
-end
 name "Signetics 2650 support"
 dir mach/s2650
 indir
@@ -151,6 +147,10 @@ indir
 end
 name "Sun 2 M68000 support"
 dir mach/sun2
+indir
+end
+name "Mantra M68000 System V.0 support"
+dir mach/mantra
 indir
 end
 name "Z80 support"
