@@ -38,17 +38,15 @@ pow(double x, double y)
 		x = -x;
 	}
 	x = log(x);
+
 	if (x < 0) {
 		x = -x;
 		y = -y;
 	}
-	if (y > M_LN_MAX_D/x) {
+	/* Beware of overflow in the multiplication */
+	if (x > 1.0 && y > DBL_MAX/x) {
 		errno = ERANGE;
-		return 0;
-	}
-	if (y < M_LN_MIN_D/x) {
-		errno = ERANGE;
-		return 0;
+		return result_neg ? -HUGE_VAL : HUGE_VAL;
 	}
 
 	x = exp(x * y);
