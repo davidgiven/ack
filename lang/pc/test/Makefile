@@ -21,7 +21,7 @@ testC:
 		apc t5.p; a.out
 		apc tstenc.p; a.out
 		apc tstgto.p; a.out
-		apc -.p callc.p cmod.c ; em
+		apc -.p callc.p cmod.c ; a.out
 		rm -f a.out f? *.[os]
 
 install cmp:
@@ -33,4 +33,4 @@ opr:
 		make pr | opr
 
 pr:
-		@pr t[12345].p tstenc.p
+		@pr t[12345].p tstenc.p tstgto.p callc.p cmod.c
