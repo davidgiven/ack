@@ -147,6 +147,7 @@ set.o:	extern.h
 set.o:	lookup.h
 set.o:	param.h
 set.o:	property.h
+set.o:	reg.h
 set.o:	set.h
 set.o:	token.h
 strlookup.o:	param.h
