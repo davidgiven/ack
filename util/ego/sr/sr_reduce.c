@@ -487,6 +487,7 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 			c = newcinfo();
 			c->c_o.co_loadlc = PREV(l2);
 			c->co_endexpr = l2;
+			c->co_lfirst = PREV(lbegin);
 	} else {
 		if (is_const(l2) &&
 			(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign))) {
@@ -494,6 +495,7 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 				c = newcinfo();
 				c->c_o.co_loadlc = l2;
 				c->co_endexpr = PREV(l2);
+				c->co_lfirst = lbegin;
 		} else {
 			OUTTRACE("failed",0);
 			return;
@@ -503,7 +505,6 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 	c->co_iv = iv;
 	c->co_loop = lp;
 	c->co_block = b;
-	c->co_lfirst = PREV(l2);
 	c->co_llast = mul;
 	c->co_ivexpr = lbegin;
 	c->co_sign = sign;
