@@ -16,8 +16,8 @@ gmtime(register const time_t *timer)
 	register unsigned long dayclock, dayno;
 	int year = EPOCH_YR;
 
-	dayclock = time % SECS_DAY;
-	dayno = time / SECS_DAY;
+	dayclock = (unsigned long)time % SECS_DAY;
+	dayno = (unsigned long)time / SECS_DAY;
 
 	timep->tm_sec = dayclock % 60;
 	timep->tm_min = (dayclock % 3600) / 60;
