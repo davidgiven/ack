@@ -564,7 +564,7 @@ unsigned stackupto(limit,ply,toplevel) token_p limit; {
 				if (cp->c1_prop>=0) {
 					for (rpp=reglist[cp->c1_prop];
 					       (rp = *rpp)!=0 &&
-					       getrefcount(rp-machregs, TRUE)!=0;
+					       getrefcount((int)(rp-machregs), TRUE)!=0;
 						  rpp++)
 						;
 					if (rp==0)
