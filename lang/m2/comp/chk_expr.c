@@ -102,8 +102,8 @@ MkCoercion(pnd, tp)
 				wmess = "conversion";
 			}
 			if (!wmess || pass_1) {
-				if (nd->nd_REAL) free(nd->nd_REAL);
-				free_real(nd->nd_token.tk_data.tk_real);
+				if (nd->nd_RSTR) free(nd->nd_RSTR);
+				free_real(nd->nd_REAL);
 				nd->nd_INT = op;
 				nd->nd_symb = INTEGER;
 			}
@@ -122,7 +122,7 @@ MkCoercion(pnd, tp)
 			default:
 				crash("MkCoercion");
 			}
-			nd->nd_token.tk_data.tk_real = p;
+			nd->nd_REAL = p;
 			nd->nd_symb = REAL;
 			}
 			break;
@@ -371,10 +371,10 @@ ChkExLinkOrName(expp)
 		}
 		else	expp->nd_class = Value;
 		if (df->df_type->tp_fund == T_REAL) {
-			struct real *p = expp->nd_token.tk_data.tk_real;
+			struct real *p = expp->nd_REAL;
 
-			expp->nd_token.tk_data.tk_real = new_real();
-			*(expp->nd_token.tk_data.tk_real) = *p;
+			expp->nd_REAL = new_real();
+			*(expp->nd_REAL) = *p;
 			if (p->r_real) {
 				p->r_real = Salloc(p->r_real,
 					   (unsigned)(strlen(p->r_real)+1));
@@ -1021,9 +1021,9 @@ ChkUnOper(expp)
 			if (right->nd_class == Value) {
 				*expp = *right;
 				flt_umin(&(expp->nd_RVAL));
-				if (expp->nd_REAL) {
-					free(expp->nd_REAL);
-					expp->nd_REAL = 0;
+				if (expp->nd_RSTR) {
+					free(expp->nd_RSTR);
+					expp->nd_RSTR = 0;
 				}
 				FreeNode(right);
 			}
@@ -1447,7 +1447,7 @@ TryToString(nd, tp)
 	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
 		buf[0] = nd->nd_INT;
 		nd->nd_type = standard_type(T_STRING, 1, (arith) 2);
-		nd->nd_token.tk_data.tk_str = 
+		nd->nd_SSTR = 
 			(struct string *) Malloc(sizeof(struct string));
 		nd->nd_STR = Salloc(buf, 2);
 		nd->nd_SLE = 1;

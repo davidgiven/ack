@@ -76,6 +76,7 @@ compact(nr, low, up)
 	return (nr != 0 && diff >= 0 && fit(diff, (int) word_size) &&
 		diff / nr <= (DENSITY - 1));
 }
+#define nd_lab	nd_symb
 
 int
 CaseCode(nd, exitlabel, end_reached)
@@ -110,11 +111,11 @@ CaseCode(nd, exitlabel, end_reached)
 			if (pnode->nd_left) {
 				/* non-empty case
 				*/
-				pnode->nd_lab = ++text_label;
+				pnode->nd_left->nd_lab = ++text_label;
 				AddCases(sh, /* to descriptor */
 					 pnode->nd_left->nd_left,
 					     /* of case labels */
-					 pnode->nd_lab
+					 (label) pnode->nd_left->nd_lab
 					     /* and code label */
 					      );
 			}
@@ -194,7 +195,7 @@ CaseCode(nd, exitlabel, end_reached)
 	while (pnode = pnode->nd_right) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
-				rval |= LblWalkNode(pnode->nd_lab,
+				rval |= LblWalkNode((label) pnode->nd_left->nd_lab,
 					    pnode->nd_left->nd_right,
 					    exitlabel, end_reached);
 				C_bra(sh->sh_break);

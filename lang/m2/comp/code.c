@@ -127,13 +127,13 @@ CodeExpr(nd, ds, true_label, false_label)
 		switch(nd->nd_symb) {
 		case REAL:
 			C_df_dlb(++data_label);
-			if (! nd->nd_REAL) {
+			if (! nd->nd_RSTR) {
 				static char buf[FLT_STRLEN];
 
 				flt_flt2str(&nd->nd_RVAL, buf, FLT_STRLEN);
 				C_rom_fcon(buf, tp->tp_size);
 			}
-			else C_rom_fcon(nd->nd_REAL, tp->tp_size);
+			else C_rom_fcon(nd->nd_RSTR, tp->tp_size);
 			c_lae_dlb(data_label);
 			C_loi(tp->tp_size);
 			break;
@@ -481,7 +481,7 @@ subu(sz)
 	arith sz;
 {
 	if (! options['R']) {
-		CAL((int) sz == (int) word_size ? "subuchk" : "subulchk", (int) sz);
+		C_cal((int) sz == (int) word_size ? "subuchk" : "subulchk");
 	}
 	C_sbu(sz);
 }
@@ -491,7 +491,7 @@ addu(sz)
 	arith sz;
 {
 	if (! options['R']) {
-		CAL((int) sz == (int) word_size ? "adduchk" : "addulchk", (int) sz);
+		C_cal((int) sz == (int) word_size ? "adduchk" : "addulchk");
 	}
 	C_adu(sz);
 }
@@ -748,8 +748,9 @@ CodeOper(expr, true_label, false_label)
 		case T_CARDINAL:
 		case T_INTORCARD:
 			if (! options['R']) {
-				CAL((int)(tp->tp_size) <= (int)word_size ? "muluchk" : "mululchk",
-				    (int)(tp->tp_size));
+				C_cal((int)(tp->tp_size) <= (int)word_size ?
+					"muluchk" :
+					"mululchk");
 			}
 			C_mlu(tp->tp_size);
 			break;

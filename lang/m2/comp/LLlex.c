@@ -617,12 +617,12 @@ lexwarning(W_ORDINARY, "overflow in constant");
 
 		tk->tk_data.tk_real = new_real();
 		if (np >= &buf[NUMSIZE]) {
-			tk->TOK_REAL = Salloc("0.0", 4);
+			tk->TOK_RSTR = Salloc("0.0", 4);
 			lexerror("real constant too long");
 		}
-		else	tk->TOK_REAL = Salloc(buf, (unsigned) (np - buf));
+		else	tk->TOK_RSTR = Salloc(buf, (unsigned) (np - buf));
 		CheckForLet();
-		flt_str2flt(tk->TOK_REAL, &(tk->TOK_RVAL));
+		flt_str2flt(tk->TOK_RSTR, &(tk->TOK_RVAL));
 		if (flt_status == FLT_OVFL) {
 lexwarning(W_ORDINARY, "overflow in floating point constant");
 		}

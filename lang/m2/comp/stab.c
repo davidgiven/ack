@@ -347,13 +347,13 @@ stb_string(df, kind)
 			break;
 		case T_REAL:
 			addc_db_str('r');
-			if (! df->con_const.TOK_REAL) {
+			if (! df->con_const.TOK_RSTR) {
 				char buf2[FLT_STRLEN];
 
 				flt_flt2str(&df->con_const.TOK_RVAL, buf2, FLT_STRLEN);
 				adds_db_str(buf2);
 			}
-			else adds_db_str(df->con_const.TOK_REAL);
+			else adds_db_str(df->con_const.TOK_RSTR);
 			addc_db_str(';');
 			break;
 		case T_STRING: {

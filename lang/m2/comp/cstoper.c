@@ -269,7 +269,7 @@ cstfbin(expp)
 		expressions below it, and the result restored in expp.
 		This version is for REAL expressions.
 	*/
-	register struct real *p = expp->nd_left->nd_token.tk_data.tk_real;
+	register struct real *p = expp->nd_left->nd_REAL;
 	register flt_arith *o1 = &p->r_val;
 	register flt_arith *o2 = &expp->nd_right->nd_RVAL;
 	int compar = 0;
@@ -312,8 +312,8 @@ cstfbin(expp)
 		case '=':		cmpval = (cmpval == 0); break;
 		case '#':		cmpval = (cmpval != 0); break;
 		}
-		if (expp->nd_right->nd_REAL) free(expp->nd_right->nd_REAL);
-		free_real(expp->nd_right->nd_token.tk_data.tk_real);
+		if (expp->nd_right->nd_RSTR) free(expp->nd_right->nd_RSTR);
+		free_real(expp->nd_right->nd_REAL);
 		break;
 
 	default:
@@ -343,7 +343,7 @@ cstfbin(expp)
 		expp->nd_INT = cmpval;
 	}
 	else {
-		expp->nd_token.tk_data.tk_real = p;
+		expp->nd_REAL = p;
 	}
 }
 

@@ -56,8 +56,8 @@ LLmessage(tk)
 			break;
 		case REAL:
 			dotp->tk_data.tk_real = new_real();
-			dotp->TOK_REAL = Salloc("0.0", 4);
-			flt_str2flt(dotp->TOK_REAL, &dotp->TOK_RVAL);
+			dotp->TOK_RSTR = Salloc("0.0", 4);
+			flt_str2flt(dotp->TOK_RSTR, &dotp->TOK_RVAL);
 			break;
 		}
 	}

@@ -33,14 +33,15 @@ struct node {
 	struct token nd_token;
 #define nd_set		nd_token.tk_data.tk_set
 #define nd_def		nd_token.tk_data.tk_def
-#define nd_lab		nd_token.tk_data.tk_lab
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
 #define nd_IDF		nd_token.TOK_IDF
+#define nd_SSTR		nd_token.TOK_SSTR
 #define nd_STR		nd_token.TOK_STR
 #define nd_SLE		nd_token.TOK_SLE
 #define nd_INT		nd_token.TOK_INT
 #define nd_REAL		nd_token.TOK_REAL
+#define nd_RSTR		nd_token.TOK_RSTR
 #define nd_RVAL		nd_token.TOK_RVAL
 };
 
