@@ -2651,6 +2651,7 @@ asp $1 >= 1 && $1 <= 8	    | STACK   | "add.l #$1,sp"  | | |
 asp			    | STACK   | "lea $1(sp),sp" | | |
 
 ass $1 == 2 |	DATAREG STACK |	"add.l %[1],sp" | | |
+ass $1 == 4 |	DATAREG4 STACK |	"add.l %[1],sp" | | |
 blm $1 == 2 | ADDREG ADDREG |	remove(MEM_ALL)
 				move({IADDREG,%[2]}, {IADDREG,%[1]}) | | |
 blm $1 == 4 | ADDREG ADDREG |	remove(MEM_ALL)
