@@ -118,7 +118,7 @@
 #define SYS_getdirentries 156
 #define SYS_statfs 157
 #define SYS_fstatfs 158
-#define SYS_unmount 159
+#define SYS_umount 159
 #define SYS_async_daemon 160
 #define SYS_getfh 161
 #define SYS_getdomainname 162
