@@ -69,7 +69,7 @@ opnfile(f,s) FILE **f; char *s; {
 
 unlfile(f,s) FILE *f; char *s; {
 
-	fclose(f);
+	if (f) fclose(f);
 	if (unlink(s)<0)
 		error("%s incorrect, must be removed!!",s);
 }
