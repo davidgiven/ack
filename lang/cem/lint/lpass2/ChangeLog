@@ -1,3 +1,21 @@
+ 7-Aug-88  Dick Grune (dick) at dick
+	About the class of an inpdef, often set-like questions are asked.
+	To speed up answering these questions, a mapping has been created
+	of the values of `class' onto answers to these questions.  See
+	class.[ch].
+
+ 5-Aug-88  Dick Grune (dick) at dick
+	Streamlined the program by rearranging the input sequence:
+		- library
+		- external defs
+		- external decls
+		- external usage
+		- static defs
+		- static usage
+	This change to a much more natural order has been possible by the
+	introduction of the static file number.  Many pieces of code could
+	now be taken together and the program is much cleaner now.
+
  8-Jul-88  Dick Grune (dick) at dick
 	Added a special meta-type (also in lpaas1) for non-negative
 	constant actual arguments, because these may match both the signed

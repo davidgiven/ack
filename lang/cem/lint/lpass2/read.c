@@ -1,12 +1,13 @@
-#include "../lpass1/l_class.h"
-#include "inpdef.h"
+#include	"../lpass1/l_class.h"
+#include	"class.h"
+#include	"inpdef.h"
 
-#include <ctype.h>
+#include	<ctype.h>
 
 #define	INP_NPUSHBACK 2
 
-#include <inp_pkg.spec>
-#include <inp_pkg.body>
+#include	<inp_pkg.spec>
+#include	<inp_pkg.body>
 
 PRIVATE int LineNr = 1;
 
@@ -25,37 +26,49 @@ int
 get_id(id)
 	struct inpdef *id;
 {
-/* A low-level function which just reads a definition */
+	/* A low-level function which just reads a definition */
 
 	if (!ReadString(id->id_name, ':', NAMESIZE))
 		return 0;
 	if (!ReadInt(&id->id_statnr))
 		return 0;
 	SkipChar(':');
+
 	loadchar(id->id_class);
 	if (id->id_class == EOI)
 		return 0;
 	SkipChar(':');
-	switch (id->id_class) {
-	case EFDF:
-	case SFDF:
-	case LFDF:
-	case FC:
+
+	if (is_class(id, CL_FUNC|CL_DEF) || is_class(id, CL_FUNC|CL_USAGE)) {
+		/* read the argument information */
+		id->id_args = 1;
 		if (!ReadInt(&id->id_nrargs))
 			return 0;
 		SkipChar(':');
 		if (!ReadArgs(id->id_nrargs, id->id_argtps))
 			return 0;
-		if (!ReadInt(&id->id_returns))
-			return 0;
+		if (id->id_class == FC) {
+			/* function call */
+			if (!ReadInt(&id->id_valused))
+				return 0;
+		}
+		else {
+			/* function definition */
+			if (!ReadInt(&id->id_valreturned))
+				return 0;
+		}
 		SkipChar(':');
-		break;
 	}
+	else {
+		id->id_args = 0;
+	}
+
 	if (!ReadString(id->id_type, ':', TYPESIZE))
 		return 0;
 	if (!ReadInt(&id->id_line))
 		return 0;
 	SkipChar(':');
+
 	if (!ReadString(id->id_file, '\n', FNAMESIZE))
 		return 0;
 	{	extern char options[];
@@ -69,14 +82,16 @@ PRIVATE int
 ReadString(buf, delim, maxsize)
 	char *buf;
 {
-/* Reads a string until 'delim' is encountered.
- * Delim is discarded.
- * If 'maxsize-1' is exceeded, "string too long" is written by panic().
- * A '\0' is appended to the string.
- * At EOI 0 is returned, else the length of the string (including
- * the appended '\0') is returned.
- */
-	int ch;
+	/*	Reads a string until 'delim' is encountered.
+		Delim is discarded.
+		If 'maxsize-1' is exceeded, "string too long" is written
+		by panic().
+		A '\0' is appended to the string.
+		At EOI 0 is returned, else the length of the string (including
+		the appended '\0') is returned.
+	*/
+
+	int ch = 0;
 	int nread = 0;
 
 	while (nread < maxsize - 1) {
@@ -87,11 +102,11 @@ ReadString(buf, delim, maxsize)
 			break;
 		buf[nread++] = (char)ch;
 	}
+	buf[nread++] = '\0';
 	if (ch != delim) {
 		panic("line %d: string too long: %s", LineNr, buf);
 		/*NOTREACHED*/
 	}
-	buf[nread++] = '\0';
 	return (nread);
 }
 

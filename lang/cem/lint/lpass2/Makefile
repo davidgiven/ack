@@ -1,26 +1,26 @@
 #	M A K E F I L E   F O R   L P A S S 2
 
 # Machine and environ dependent definitions
-EMHOME = /usr/em
-LPASS1 = ../lpass1
+EMHOME =	/usr/em
+LPASS1 =	../lpass1
 
 # Libraries and EM interface definitions
-SYSLIB = $(EMHOME)/modules/lib/libsystem.a
-STRLIB = $(EMHOME)/modules/lib/libstring.a
-PRTLIB = $(EMHOME)/modules/lib/libprint.a
-INPLIB = $(EMHOME)/modules/lib/libinput.a
-ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
-MALLOC = $(EMHOME)/modules/lib/malloc.o
-LLIBS = $(INPLIB) $(PRTLIB) $(STRLIB) $(ALLOCLIB) $(MALLOC) $(SYSLIB)
+SYSLIB =	$(EMHOME)/modules/lib/libsystem.a
+STRLIB =	$(EMHOME)/modules/lib/libstring.a
+PRTLIB =	$(EMHOME)/modules/lib/libprint.a
+INPLIB =	$(EMHOME)/modules/lib/libinput.a
+ALLOCLIB =	$(EMHOME)/modules/lib/liballoc.a
+MALLOC =	$(EMHOME)/modules/lib/malloc.o
+LLIBS =		$(INPLIB) $(PRTLIB) $(STRLIB) $(ALLOCLIB) $(MALLOC) $(SYSLIB)
 
-CFLAGS = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg -I/usr/include
+CFLAGS =	-I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg -I/usr/include
 
 .SUFFIXES: .str .h
 .str.h:
 	$(LPASS1)/make.allocd <$*.str >$*.h
 
-SRC =	lpass2.c read.c
-OBJ =	lpass2.o read.o
+SRC =	lpass2.c read.c report.c class.c
+OBJ =	lpass2.o read.o report.o class.o
 
 test:	lpass2
 	make lint
@@ -32,7 +32,7 @@ lpass2:	$(OBJ) Makefile next.o
 lint:
 	../lint $(CFLAGS) $(SRC) next.c #???
 
-next.c:	inpdef.str
+next.c:	$(LPASS1)/make.next inpdef.str
 	$(LPASS1)/make.next inpdef.str > next.c
 
 tags:	$(SRC)
@@ -42,4 +42,7 @@ clean:
 	rm -f a.out core next.c inpdef.h $(OBJ) next.o
 
 #----------------------------------------------------------------
-lpass2.o: ../lpass1/errout.h ../lpass1/lint.h ../lpass1/l_class.h inpdef.h
+class.o: class.h
+lpass2.o: ../lpass1/l_class.h ../lpass1/l_lint.h class.h inpdef.h
+read.o: ../lpass1/l_class.h class.h inpdef.h
+report.o: inpdef.h
