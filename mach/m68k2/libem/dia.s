@@ -40,7 +40,7 @@ putchar:
 	move.w	#1,-(sp)
 	pea	7(sp)
 	move.w	#1,-(sp)
-	jsr	_write
+	jsr	__write
 	add.l	#8,sp
 	rts
 printf:
