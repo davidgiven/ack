@@ -1152,7 +1152,7 @@ enter("pop_nop");
 			"inc	$V1, %l0";
 		} else {
 			"set	$V1, $reg_tmp";
-			"inc	%l0, $reg_tmp, %l0";
+			"add	%l0, $reg_tmp, %l0";
 		}
 	}
 if (debug) { indent(); fprint(codefile, "\t\t! %dw cache:",j); dump_cache(codefile); }
