@@ -25,6 +25,7 @@
 	ld h,d
 	ld l,e
 	ld bc,begbss
+	xor a			! to clear carry
 	sbc hl,bc
 	ld a,h
 	or l
