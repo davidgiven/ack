@@ -17,7 +17,6 @@ ffs.c
 gcvt.c
 ecvt.c
 getlogin.c
-getopt.c
 index.c
 l3.c
 ldexp.c

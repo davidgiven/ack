@@ -1,5 +1,6 @@
 tail_cc.1s.a
 termcap.c
+getopt.c
 clearerr.c
 fgetc.c
 fgets.c
