@@ -42,6 +42,9 @@ int	InputLevel;
 AtEoIT()
 {
 	/* if (NoUnstack) warning("unexpected EOF"); ??? */
+	/* This is wrong; in an #elif, NoUnstack can be set, but you
+	   can still get calls to AtEoIT().
+	*/
 	InputLevel--;
 	DoUnstack();
 	return 0;
