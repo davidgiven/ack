@@ -98,6 +98,9 @@ iocc_t iops[20];
 
 %left OR2
 %left AND2
+%left '|'
+%left '^'
+%left '&'
 %left CMPEQ,CMPNE
 %left CMPLT,CMPLE,CMPGT,CMPGE
 %left RSHIFT,LSHIFT
@@ -958,6 +961,12 @@ expr
 		{ $$ = make_expr(TYPBOOL,EX_OR2,b_expr($1),b_expr($3)); }
 	| expr AND2 expr
 		{ $$ = make_expr(TYPBOOL,EX_AND2,b_expr($1),b_expr($3)); }
+	| expr '|' expr
+		{ $$ = make_expr(TYPINT,EX_OR,i_expr($1),i_expr($3)); }
+	| expr '^' expr
+		{ $$ = make_expr(TYPINT,EX_XOR,i_expr($1),i_expr($3)); }
+	| expr '&' expr
+		{ $$ = make_expr(TYPINT,EX_AND,i_expr($1),i_expr($3)); }
 	| expr '+' expr
 		{ $$ = sum_expr($1,$3); }
 	| expr '-' expr
