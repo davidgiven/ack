@@ -2,7 +2,7 @@
 
 case $# in
 3) makecmd=$3 ;;
-2) makecmd=comparchentry ;;
+2) makecmd=compmodule ;;
 *) echo "Usage: $0 srcdir archname [ makecmd ]"; exit 1 ;;
 esac
 
