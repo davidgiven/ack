@@ -186,8 +186,13 @@ adc anyreg:rw:cc, rmorconst:ro.
 #ifdef REGVARS
 add LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
-add anyreg:rw:cc, a_word:ro.
-add memory2:rw:cc, regorconst:ro.
+add anyreg:rw:cc, rmorconst:ro.
+add rm:rw:cc, regorconst:ro.
+#ifdef REGVARS
+axx "syntax error" LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
+#endif
+axx "syntax error" anyreg:rw:cc, rmorconst:ro.
+axx "syntax error" rm:rw:cc, regorconst:ro.
 #ifdef REGVARS
 and LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
@@ -259,6 +264,7 @@ check "test" anyreg:ro, rmorconst:ro kills :cc.
 testb "testb" rm12:ro, regorconst:ro kills :cc.
 testb "testb" REG1:ro, rmorconst:ro kills :cc.
 testb "testb" ACC1:ro, const:ro kills :cc.
+uxx "syntax error"  rm:rw:cc cost(1,2).
 xchg rm:rw, anyreg:rw.
 xchg anyreg:rw, rm:rw.
 xor rm:rw:cc, regorconst:ro.
@@ -1018,7 +1024,27 @@ with ACC
  *******************************************************************/
 
 pat adu					leaving adi $1
+pat loc lol adu stl $1==1 && $3==2 && $2==$4	leaving inl $2
+pat loc loe adu ste $1==1 && $3==2 && $2==$4	leaving ine $2
+pat loc lol adu $1==1 && $3==2		leaving lol $2 inc
+pat loc loe adu $1==1 && $3==2		leaving loe $2 inc
+pat loc lil adu $1==1 && $3==2		leaving lil $2 inc
+pat loc lol adu stl $1==0-1 && $3==2 && $2==$4	leaving del $2
+pat loc loe adu ste $1==0-1 && $3==2 && $2==$4	leaving dee $2
+pat loc lol adu $1==0-1 && $3==2		leaving lol $2 dec
+pat loc loe adu $1==0-1 && $3==2		leaving loe $2 dec
+pat loc lil adu $1==0-1 && $3==2		leaving lil $2 dec
 pat sbu					leaving sbi $1
+pat lol loc sbu stl $1==$4 && $2==1 && $3==2	leaving del $1
+pat loe loc sbu ste $1==$4 && $2==1 && $3==2	leaving dee $1
+pat lol loc sbu $2==1 && $3==2		leaving lol $1 dec
+pat loe loc sbu $2==1 && $3==2		leaving loe $1 dec
+pat lil loc sbu $2==1 && $3==2		leaving lil $1 dec
+pat lol loc sbu stl $1==$4 && $2==0-1 && $3==2	leaving inl $1
+pat loe loc sbu ste $1==$4 && $2==0-1 && $3==2	leaving ine $1
+pat lol loc sbu $2==0-1 && $3==2		leaving lol $1 inc
+pat loe loc sbu $2==0-1 && $3==2		leaving loe $1 inc
+pat lil loc sbu $2==0-1 && $3==2		leaving lil $1 inc
 pat mlu					leaving mli $1
 
 pat dvu $1==2
@@ -1314,37 +1340,229 @@ gen move {ANYCON, $1/2}, bx
     loop {label,1b}
 
 #ifdef REGVARS
-pat lol adi stl $1==$3 && $2==2 && inreg($1)==reg_any
+proc lolrxxxstl example lol adi stl
 with rmorconst
   kills regvar($1)
-  gen add {LOCAL,$1,2}, %1
+  gen axx* {LOCAL, $1, 2}, %1
+
+proc lilrxxxsil example lil adi sil
+with regorconst
+kills referals
+gen axx* {ind_reg2, regvar($1)}, %1
+
+pat lol adi stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("add")
+pat lol adu stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("add")
+pat lol ads stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("add")
+pat lol and stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("and")
+pat lol ior stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("or")
+pat lol xor stl $1==$3 && $2==2 && inreg($1)==reg_any	call lolrxxxstl("xor")
+
+pat lil adi sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("add")
+pat lil adu sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("add")
+pat lil ads sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("add")
+pat lil and sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("and")
+pat lil ior sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("or")
+pat lil xor sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("xor")
 #endif
 
-pat lol adi stl $1==$3 && $2==2
+proc lolxxxstl example lol adi stl
 with regorconst
 kills indexed, locals %ind>=$1 && %ind<$1+2
-gen add {LOCAL, $1, 2}, %1
+gen axx* {LOCAL, $1, 2}, %1
 
-pat ldl adi sdl $1==$3 && $2==4
-with regorconst regorconst
-  kills indexed, locals %ind>=$1 && %ind<$1+4
-  gen add {LOCAL,$1,2},%1
-      adc {LOCAL,$1+2,2},%2
+pat lol adi stl $1==$3 && $2==2		call lolxxxstl("add")
+pat lol adu stl $1==$3 && $2==2		call lolxxxstl("add")
+pat lol ads stl $1==$3 && $2==2		call lolxxxstl("add")
+pat lol and stl $1==$3 && $2==2		call lolxxxstl("and")
+pat lol ior stl $1==$3 && $2==2		call lolxxxstl("or")
+pat lol xor stl $1==$3 && $2==2		call lolxxxstl("xor")
+
+proc lilxxxsil example lil adi sil
+with regorconst
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen axx* {ind_reg2, %a}, %1
+    killreg %a
+
+pat lil adi sil $1==$3 && $2==2		call lilxxxsil("add")
+pat lil adu sil $1==$3 && $2==2		call lilxxxsil("add")
+pat lil ads sil $1==$3 && $2==2		call lilxxxsil("add")
+pat lil and sil $1==$3 && $2==2		call lilxxxsil("and")
+pat lil ior sil $1==$3 && $2==2		call lilxxxsil("or")
+pat lil xor sil $1==$3 && $2==2		call lilxxxsil("xor")
 
 #ifdef REGVARS
-pat lol loc sbi stl $1==$4 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  gen sub {LOCAL,$1,2},{ANYCON,$2}
+proc lilruxxsil example lil ngi sil
+kills referals
+gen uxx* {ind_reg2, regvar($1)}
+
+pat lil ngi sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilruxxsil("neg")
+pat lil com sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilruxxsil("not")
+pat lil dec sil $1==$3 && inreg($1)==reg_any		call lilruxxsil("dec")
+pat lil inc sil $1==$3 && inreg($1)==reg_any		call lilruxxsil("inc")
 #endif
 
-pat lol loc sbi stl $1==$4 && $3==2
-  kills indexed, locals %ind>=$1 && %ind<$1+2
-  gen sub {LOCAL,$1,2},{ANYCON,$2}
+proc liluxxsil example lil ngi sil
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen uxx* {ind_reg2, %a}
+    killreg %a
+
+pat lil ngi sil $1==$3 && $2==2		call liluxxsil("neg")
+pat lil com sil $1==$3 && $2==2		call liluxxsil("not")
+pat lil dec sil $1==$3 			call liluxxsil("dec")
+pat lil inc sil $1==$3 			call liluxxsil("inc")
+
+proc loexxxste example loe adi ste
+with regorconst
+kills indirects
+gen axx* {EXTERN2, $1}, %1
+
+pat loe adi ste $1==$3 && $2==2		call loexxxste("add")
+pat loe adu ste $1==$3 && $2==2		call loexxxste("add")
+pat loe ads ste $1==$3 && $2==2		call loexxxste("add")
+pat loe and ste $1==$3 && $2==2		call loexxxste("and")
+pat loe ior ste $1==$3 && $2==2		call loexxxste("or")
+pat loe xor ste $1==$3 && $2==2		call loexxxste("xor")
+
+proc ldlxxxsdl example ldl adi sdl
+with regorconst regorconst
+  kills indexed, locals %ind>=$1 && %ind<$1+4
+  gen axx[1] {LOCAL,$1,2},%1
+      axx[2] {LOCAL,$1+2,2},%2
+
+pat ldl adi sdl $1==$3 && $2==4		call ldlxxxsdl("add", "adc")
+pat ldl adu sdl $1==$3 && $2==4		call ldlxxxsdl("add", "adc")
+pat ldl and sdl $1==$3 && $2==4		call ldlxxxsdl("and", "and")
+pat ldl ior sdl $1==$3 && $2==4		call ldlxxxsdl("or", "or")
+pat ldl xor sdl $1==$3 && $2==4		call ldlxxxsdl("xor", "xor")
+
+proc ldexxxsde example lde adi sde
+with regorconst regorconst
+  kills indirects
+  gen axx[1] {EXTERN2,$1},%1
+      axx[2] {EXTERN2,$1+2},%2
+
+pat lde adi sde $1==$3 && $2==4		call ldexxxsde("add", "adc")
+pat lde adu sde $1==$3 && $2==4		call ldexxxsde("add", "adc")
+pat lde and sde $1==$3 && $2==4		call ldexxxsde("and", "and")
+pat lde ior sde $1==$3 && $2==4		call ldexxxsde("or", "or")
+pat lde xor sde $1==$3 && $2==4		call ldexxxsde("xor", "xor")
 
 #ifdef REGVARS
-pat lol loc sli stl $1==$4 && $2==1 && $3==2 && inreg($1)==reg_any
+proc lofrxxxsof example lol lof adi lol stf
+with regorconst
+kills referals
+gen axx* {ind_regoff2, regvar($1), $2}, %1
+
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("add")
+pat lol lof adu lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("add")
+pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("add")
+pat lol lof and lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("and")
+pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("or")
+pat lol lof xor lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofrxxxsof("xor")
+
+proc lofruxxsof example lol lof inc lol stf
+kills referals
+gen uxx* {ind_regoff2, regvar($1), 2}
+
+pat lol lof inc lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
+					call lofruxxsof("inc")
+pat lol lof dec lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
+					call lofruxxsof("dec")
+pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofruxxsof("neg")
+pat lol lof com lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call lofruxxsof("not")
+#endif
+
+proc lofuxxsof example lol lof inc lol stf
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen uxx* {ind_regoff2, %a, $2}
+    killreg %a
+
+pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2	call lofuxxsof("neg")
+pat lol lof com lol stf $1==$4 && $2==$5 && $3==2	call lofuxxsof("not")
+pat lol lof dec lol stf $1==$4 && $2==$5 		call lofuxxsof("dec")
+pat lol lof inc lol stf $1==$4 && $2==$5 		call lofuxxsof("inc")
+
+proc lofxxxsof example lol lof adi lol stf
+with regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen axx* {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("add")
+pat lol lof adu lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("add")
+pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("add")
+pat lol lof and lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("and")
+pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("or")
+pat lol lof xor lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("xor")
+
+proc lefuxxsef example loe lof inc loe stf
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen uxx* {ind_regoff2, %a, $2}
+    killreg %a
+
+pat loe lof ngi loe stf $1==$4 && $2==$5 && $3==2	call lefuxxsef("neg")
+pat loe lof com loe stf $1==$4 && $2==$5 && $3==2	call lefuxxsef("not")
+pat loe lof dec loe stf $1==$4 && $2==$5 		call lefuxxsef("dec")
+pat loe lof inc loe stf $1==$4 && $2==$5 		call lefuxxsef("inc")
+
+proc lefxxxsef example loe lof adi loe stf
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen axx* {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat loe lof adi loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("add")
+pat loe lof adu loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("add")
+pat loe lof ads loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("add")
+pat loe lof and loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("and")
+pat loe lof ior loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("or")
+pat loe lof xor loe stf $1==$4 && $2==$5 && $3==2	call lefxxxsef("xor")
+
+#ifdef REGVARS
+proc lolcrxxstl example lol loc sbi stl
   kills regvar($1)
-  gen sal {LOCAL,$1,2},{ANYCON,1}
+  gen axx* {LOCAL,$1,2},{ANYCON,$2}
+
+pat lol loc sbi stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolcrxxstl("sub")
+pat lol loc sbu stl $1==$4 && $3==2 && inreg($1)==reg_any
+						call lolcrxxstl("sub")
+pat lol loc sli stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
+						call lolcrxxstl("sal")
+pat lol loc slu stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
+						call lolcrxxstl("sal")
+pat lol loc sri stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
+						call lolcrxxstl("sar")
+pat lol loc sru stl $1==$4 && $3==2 && $2==1 && inreg($1)==reg_any
+						call lolcrxxstl("shr")
+#endif
+
+proc lolcxxstl example lol loc sbi stl
+  kills indexed, locals %ind>=$1 && %ind<$1+2
+  gen axx* {LOCAL,$1,2},{ANYCON,$2}
+
+pat lol loc sbi stl $1==$4 && $3==2		call lolcxxstl("sub")
+pat lol loc sbu stl $1==$4 && $3==2		call lolcxxstl("sub")
+pat lol loc sli stl $1==$4 && $3==2		call lolcxxstl("sal")
+pat lol loc slu stl $1==$4 && $3==2		call lolcxxstl("sal")
+pat lol loc sri stl $1==$4 && $3==2		call lolcxxstl("sar")
+pat lol loc sru stl $1==$4 && $3==2		call lolcxxstl("shr")
+
+#ifdef REGVARS
 pat lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
   gen sal {LOCAL,$1,2},{ANYCON,1}
@@ -1353,9 +1571,6 @@ pat lol loc sli stl $1==$4 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
   uses CXREG={ANYCON,$2}
   gen sal {LOCAL,$1,2},cl
-pat lol loc sri stl $1==$4 && $2==1 && $3==2 && inreg($1)==reg_any
-  kills regvar($1)
-  gen sar {LOCAL,$1,2},{ANYCON,1}
 pat lol loc sri stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
   gen sar {LOCAL,$1,2},{ANYCON,1}
@@ -1364,8 +1579,7 @@ pat lol loc sri stl $1==$4 && $3==2 && inreg($1)==reg_any
   kills regvar($1)
   uses CXREG={ANYCON,$2}
   gen sar {LOCAL,$1,2},cl
-#endif
-#ifdef REGVARS
+
 pat lol ngi stl $1==$3 && $2==2 && inreg($1)==reg_any
 kills regvar($1)
 gen neg {LOCAL, $1, 2}
@@ -1381,8 +1595,6 @@ gen neg {LOCAL, $1, 2}
     neg {LOCAL, $1+2, 2}
     sbb {LOCAL, $1+2, 2}, {ANYCON, 0}
  
-pat lol ads stl $1==$3 && $2==2		leaving lol $1 adi $2 stl $1
-
 pat lol lol adp stl loi stl $1==$2 && $2==$4 && $5<=2
 					leaving lol $1 loi $5 stl $6 lol $2 adp $3 stl $4
 
@@ -1412,40 +1624,7 @@ uses REG={LOCAL,$1,2}		yields %a
 
 pat lol adp stl $1==$3 && $2==1		leaving inl $1
 pat lol adp stl $1==$3 && $2==0-1	leaving del $1
-
-#ifdef REGVARS
-pat lol adp stl $1==$3 && inreg($1)==reg_any
-kills regvar($1)
-gen add {LOCAL,$1,2}, {ANYCON,$2}
-#endif
-
-pat lol adp stl $1==$3 
-kills indexed, locals %ind>=$1 && %ind<$1+2
-gen add {LOCAL,$1,2}, {ANYCON,$2}
-
-#ifdef REGVARS
-pat lol and stl $1==$3 && $2==2 && inreg($1)==reg_any
-with rmorconst
-kills regvar($1)
-gen and {LOCAL,$1,2}, %1
-#endif
-
-pat lol and stl $1==$3 && $2==2
-with regorconst
-kills indexed, locals %ind>=$1 && %ind<$1+2
-gen and {LOCAL, $1, 2}, %1
-
-#ifdef REGVARS
-pat lol ior stl $1==$3 && $2==2 && inreg($1)==reg_any
-with rmorconst
-kills regvar($1)
-gen or {LOCAL,$1,2}, %1
-#endif
-
-pat lol ior stl $1==$3 && $2==2
-with regorconst
-kills indexed, locals %ind>=$1 && %ind<$1+2
-gen or {LOCAL, $1, 2}, %1
+pat lol adp stl $1==$3			leaving loc $2 lol $1 adi 2 stl $3
 
 #ifdef REGVARS
 pat lol com stl $1==$3 && $2==2 && inreg($1)==reg_any
@@ -1456,34 +1635,6 @@ gen not {LOCAL,$1,2}
 pat lol com stl $1==$3 && $2==2
 kills indexed, locals %ind>=$1 && %ind<$1+2
 gen not {LOCAL, $1, 2}
-
-#ifdef REGVARS
-pat lil adi sil $1==$3 && $2==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen add {ind_reg2, regvar($1)}, %1
-#endif
-
-pat lil adi sil $1==$3 && $2==2
-with regorconst
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen add {ind_reg2, %a}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lil ngi sil $1==$3 && $2==2 && inreg($1)==reg_any
-kills referals
-gen neg {ind_reg2, regvar($1)}
-#endif
-
-pat lil ngi sil $1==$3 && $2==2
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen neg {ind_reg2, %a}
-    killreg %a
-
-pat lil ads sil $1==$3 && $2==2		leaving lil $1 adi $2 sil $3
 
 #ifdef REGVARS
 pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_any
@@ -1500,118 +1651,19 @@ pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_any
 uses REG={ind_reg2, regvar($1)}
 				yields %a
 					leaving lil $1 dec sil $4
-
-pat lil inc sil $1==$3 && inreg($1)==reg_any
-kills referals
-gen inc {ind_reg2, regvar($1)}
-
-pat lil dec sil $1==$3 && inreg($1)==reg_any
-kills referals
-gen dec {ind_reg2, regvar($1)}
-
-pat lil adp sil $1==$3 && $2==1 && inreg($1)==reg_any
-kills referals
-gen inc {ind_reg2, regvar($1)}
-
-pat lil adp sil $1==$3 && $2==0-1 && inreg($1)==reg_any
-kills referals
-gen dec {ind_reg2, regvar($1)}
-
-pat lil adp sil $1==$3 && inreg($1)==reg_any
-kills referals
-gen add {ind_reg2, regvar($1)}, {ANYCON,$2}
 #endif
 
-pat lil adp sil $1==$3 
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen add {ind_reg2, %a}, {ANYCON,$2}
-    killreg %a
+pat lil adp sil $1==$3 && $2==1		leaving lil $1 inc sil $1
 
-pat lil adp sil $1==$3 && $2==1
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen inc {ind_reg2, %a}
-    killreg %a
+pat lil adp sil $1==$3 && $2==0-1	leaving lil $1 dec sil $1
 
-pat lil adp sil $1==$3 && $2==0-1
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen dec {ind_reg2, %a}
-    killreg %a
+pat lil adp sil $1==$3	 		leaving loc $2 lil $1 adi 2 sil $3
 
-#ifdef REGVARS
-pat lil and sil $1==$3 && $2==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen and {ind_reg2, regvar($1)}, %1
-#endif
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
+	leaving lol $1 lof $2 inc lol $4 stf $5
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==(0-1)
+	leaving lol $1 lof $2 dec lol $4 stf $5
 
-pat lil and sil $1==$3 && $2==2
-with regorconst
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen and {ind_reg2, %a}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lil ior sil $1==$3 && $2==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen or {ind_reg2, regvar($1)}, %1
-#endif
-
-pat lil ior sil $1==$3 && $2==2
-with regorconst
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen or {ind_reg2, %a}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lil com sil $1==$3 && $2==2 && inreg($1)==reg_any
-kills referals
-gen not {ind_reg2, regvar($1)}
-#endif
-
-pat lil com sil $1==$3 && $2==2
-kills referals
-uses ADDREG={LOCAL, $1, 2}
-gen not {ind_reg2, %a}
-    killreg %a
-
-pat lol lof inc lol stf $1==$4 && $2==$5 
-	leaving lol $1 lof $2 adp 1 lol $4 stf $5
-pat lol lof dec lol stf $1==$4 && $2==$5 
-	leaving lol $1 lof $2 adp (0-1) lol $4 stf $5
-#ifdef REGVARS
-pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen add {ind_regoff2, regvar($1), $2}, %1
-#endif
-
-pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen add {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
-kills referals
-gen neg {ind_regoff2, regvar($1), $2}
-#endif
-
-pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen neg {ind_regoff2, %a, $2}
-    killreg %a
-
-pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2
-			leaving lol $1 lof $2 adi $3 lol $4 stf $5
 
 #ifdef REGVARS
 pat lol lof lol lof adp lol stf 
@@ -1624,99 +1676,17 @@ pat lol lof lol lof inc lol stf
 	$1==$3 && $1==$6 && $2==$4 && $2==$7 && inreg($1)==reg_any
 uses REG={ind_regoff2, regvar($1), $2}
 				yields %a
-					leaving lol $1 lof $2 adp 1 lol $6 stf $7
+					leaving lol $1 lof $2 inc lol $6 stf $7
 
 pat lol lof lol lof dec lol stf
 	$1==$3 && $1==$6 && $2==$4 && $2==$7 && inreg($1)==reg_any
 uses REG={ind_regoff2, regvar($1), $2}
 				yields %a
-					leaving lol $1 lof $2 adp (0-1) lol $6 stf $7
-
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1 && inreg($1)==reg_any
-kills referals
-gen inc {ind_regoff2, regvar($1), $2}
+					leaving lol $1 lof $2 dec lol $6 stf $7
 #endif
 
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen inc {ind_regoff2, %a, $2}
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==0-1 && inreg($1)==reg_any
-kills referals
-gen dec {ind_regoff2, regvar($1), $2}
-#endif
-
-pat lol lof adp lol stf $1==$4 && $2==$5 && $3==0-1
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen dec {ind_regoff2, %a, $2}
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
-kills referals
-gen add {ind_regoff2, regvar($1), $2},{ANYCON,$3}
-#endif
-
-pat lol lof adp lol stf $1==$4 && $2==$5
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen add {ind_regoff2, %a, $2},{ANYCON,$3}
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof and lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen and {ind_regoff2, regvar($1), $2}, %1
-#endif
-
-pat lol lof and lol stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen and {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
-with regorconst
-kills referals
-gen or {ind_regoff2, regvar($1), $2}, %1
-#endif
-
-pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen or {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-#ifdef REGVARS
-pat lol lof com lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
-kills referals
-gen not {ind_regoff2, regvar($1), $2}
-#endif
-
-pat lol lof com lol stf $1==$4 && $2==$5 && $3==2
-kills referals
-uses ADDREG={LOCAL,$1,2}
-gen not {ind_regoff2, %a, $2}
-    killreg %a
-
-pat loe adi ste $1==$3 && $2==2
-with regorconst
-kills indirects
-gen add {EXTERN2, $1}, %1
-
-pat lde adi sde $1==$3 && $2==4
-with regorconst regorconst
-kills indirects
-gen add {EXTERN2, $1}, %1
-    adc {EXTERN2, $1+2}, %2
+pat lol lof adp lol stf $1==$4 && $2==$5	
+			leaving loc $3 lol $1 lof $2 adi 2 lol $4 stf $5
 
 pat loe ngi ste $1==$3 && $2==2
 kills indirects
@@ -1727,11 +1697,6 @@ kills indirects
 gen neg {EXTERN2, $1}
     neg {EXTERN2, $1+2}
     sbb {EXTERN2, $1+2}, {ANYCON, 0}
-
-pat loe ads ste $1==$3 && $2==2
-with regorconst
-kills indirects
-gen add {EXTERN2, $1}, %1
 
 pat loe loe adp ste $1==$2 && $1==$4
 uses ADDREG={EXTERN2,$1}	yields %a
@@ -1745,90 +1710,25 @@ pat loe dee $1==$2
 uses ADDREG={EXTERN2,$1}	yields %a
 					leaving dee $1
 
-pat loe adp ste $1==$3 && $2==1
-kills indirects
-gen inc {EXTERN2, $1}
+pat loe adp ste $1==$3 && $2==1		leaving ine $1
 
-pat loe adp ste $1==$3 && $2==0-1
-kills indirects
-gen dec {EXTERN2, $1}
+pat loe adp ste $1==$3 && $2==0-1	leaving dee $1
 
-pat loe adp ste $1==$3
-kills indirects
-gen add {EXTERN2, $1}, {ANYCON,$2}
-
-pat loe and ste $1==$3 && $2==2
-with regorconst
-kills indirects
-gen and {EXTERN2, $1}, %1
-
-pat loe ior ste $1==$3 && $2==2
-with regorconst
-kills indirects
-gen or {EXTERN2, $1}, %1
+pat loe adp ste $1==$3			leaving loc $2 loe $1 adi 2 ste $3
 
 pat loe com ste $1==$3 && $2==2
 kills indirects
 gen not {EXTERN2, $1}
 
-pat loe lof adi loe stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen add {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-pat loe lof ngi loe stf $1==$4 && $2==$5 && $3==2
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen neg {ind_regoff2, %a, $2}
-    killreg %a
-
 pat loe lof adp loe stf $1==$4 && $2==$5 && $3==1
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen inc {ind_regoff2, %a, $2}
-    killreg %a
+					leaving loe $1 lof $2 inc loe $1 stf $2
 
 pat loe lof adp loe stf $1==$4 && $2==$5 && $3==0-1
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen dec {ind_regoff2, %a, $2}
-    killreg %a
+					leaving loe $1 lof $2 dec loe $1 stf $2
 
 pat loe lof adp loe stf $1==$4 && $2==$5
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen add {ind_regoff2, %a, $2}, {ANYCON, $3}
-    killreg %a
-
-pat loe lof ads loe stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen add {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-pat loe lof and loe stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen and {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-pat loe lof ior loe stf $1==$4 && $2==$5 && $3==2
-with regorconstnoaddr
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen or {ind_regoff2, %a, $2}, %1
-    killreg %a
-
-pat loe lof com loe stf $1==$4 && $2==$5 && $3==2
-kills referals
-uses ADDREG={EXTERN2,$1}
-gen not {ind_regoff2, %a, $2}
-    killreg %a
-
+				leaving loc $3 loe $1 lof $2 adi 2 loe $1 stf $2
+				
 /*******************************************************************
  *  Group 8: Convert Instructions                                  *
  *******************************************************************/
@@ -2460,7 +2360,7 @@ with regorconst regorconst rm rm STACK
       jne {label,$2}
       cmp %4,%2
       jne {label,$2}
-with EXACT rm rm regorconst regorconst
+with rm rm regorconst regorconst STACK
 kills ALL
   gen cmp %1,%3
       jne {label,$2}
@@ -2474,7 +2374,7 @@ with regorconst regorconst rm rm STACK
       cmp %4,%2
       je {label,$2}
       1:
-with EXACT rm rm regorconst regorconst
+with rm rm regorconst regorconst STACK
 kills ALL
   gen cmp %1,%3
       jne {label,1f}
