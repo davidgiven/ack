@@ -251,16 +251,25 @@ dopseudo() {
 		nromwords=0;
 		rommask=0;
 		rombit=1;
-		t=getarg(val_ptyp);
-		while (t!=sp_cend) {
-			if (t==sp_cstx && nromwords<MAXROM) {
-				romcont[nromwords] = (word) argval;
-				rommask |= rombit;
+		for (;;) {
+			t=getarg(val_ptyp);
+			while (t!=sp_cend) {
+				if (t==sp_cstx && nromwords<MAXROM) {
+					romcont[nromwords] = (word) argval;
+					rommask |= rombit;
+				}
+				nromwords++;
+				rombit <<= 1;
+				con(t);
+				t=getarg(any_ptyp);
 			}
-			nromwords++;
-			rombit <<= 1;
-			con(t);
-			t=getarg(any_ptyp);
+			{
+				int c = get8();
+
+				if (c == ps_rom) continue;
+				if (c !=EOF) ungetc(c, emfile);
+			}
+			break;
 		}
 		if (rommask != 0) {
 			romcont[MAXROM]=rommask;
