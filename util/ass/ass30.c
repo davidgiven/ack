@@ -317,7 +317,7 @@ cons_t parval(lnp,defined)
 }
 int valid(lnp) register line_t *lnp ; {
 	cons_t val ;
-	char type ;
+	int type ;
 
 	type = lnp->type1 ;
 	if ( type>=VALLOW && type<=VALHIGH ) {

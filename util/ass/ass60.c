@@ -19,7 +19,7 @@ static  char    *labstr[]  = {"EMPTY","no","yes","seen","notpresent"};
 static  char    formstr[] = { 'm','s','-','1','2','4','8' };
 static  char    *r_data[] = { "null","glob","head","loc","adr" };
 
-cons_t nicepr(typ,ap) addr_u *ap; char typ; {
+cons_t nicepr(typ,ap) addr_u *ap; {
 	register proc_t *pl;
 
 	switch (typ) {
