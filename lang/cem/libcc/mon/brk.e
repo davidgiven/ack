@@ -5,6 +5,6 @@
  lal 0
  loi EM_PSIZE
  str 2          ; The - possibly - occurring traps should be caught
- loc 0
- ret EM_WSIZE
+ zer EM_PSIZE
+ ret EM_PSIZE
  end
