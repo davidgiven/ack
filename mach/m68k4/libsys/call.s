@@ -2,7 +2,6 @@
 .define callc
 .define calle
 .define cerror
-.define _errno
 .extern call
 .extern callc
 .extern calle
@@ -23,6 +22,3 @@ cerror:
 		move.l d0,_errno
 		move.l #-1,d0
 		rts
-.bss
-_errno:		.space 4
-.text
