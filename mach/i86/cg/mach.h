@@ -1,3 +1,7 @@
+#ifndef NORCSID
+#define ID_MH		"$Header$"
+#endif
+
 #define ex_ap(y)        fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)        /* nothing */
 
