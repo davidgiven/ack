@@ -137,7 +137,7 @@ DefinitionModule
 			  df->df_flags |= ForeignFlag;
 			  if (!Defined) Defined = df;
 		  	  CurrentScope->sc_definedby = df;
-			  if (df->df_idf != DefId) {
+			  if (DefId && df->df_idf != DefId) {
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
 					df->df_idf->id_text, DefId->id_text);
 			  }
@@ -239,8 +239,12 @@ ProgramModule
 ;
 
 Module:
-	DEFINITION
-				{ fatal("Compiling a definition module"); }
+				{ error("Compiling a definition module");
+				  open_scope(CLOSEDSCOPE);
+				  state = DEFINITION;
+				}
+	DefinitionModule
+				{ close_scope(SC_CHKFORW); }
 |	%default
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }

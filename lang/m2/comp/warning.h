@@ -20,10 +20,11 @@
 #define	W_ORDINARY	1
 #define W_STRICT	2
 #define W_OLDFASHIONED	4
+#define W_ALWAYS	010	/* always given */
 
-#define W_ALL		(W_ORDINARY|W_STRICT|W_OLDFASHIONED)
+#define W_ALL		(W_ORDINARY|W_STRICT|W_OLDFASHIONED|W_ALWAYS)
 
-#define W_INITIAL	(W_ORDINARY | W_OLDFASHIONED)
+#define W_INITIAL	(W_ORDINARY | W_OLDFASHIONED | W_ALWAYS)
 
 /* The bit mask itself: */
 extern int	warning_classes;

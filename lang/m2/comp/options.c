@@ -71,7 +71,7 @@ DoOption(text)
 				}
 			}
 		}
-		else warning_classes = 0;
+		else warning_classes = W_ALWAYS;
 		break;
 
 	case 'W':
@@ -94,7 +94,7 @@ DoOption(text)
 				}
 			}
 		}
-		else warning_classes = W_OLDFASHIONED|W_STRICT|W_ORDINARY;
+		else warning_classes = W_ALL;
 		break;
 
 	case 'M': {	/* maximum identifier length */
