@@ -93,6 +93,7 @@ initial_value_pack(struct type **tpp; struct expr **expp;)
 initial_value_list(register struct type **tpp; struct expr **expp;)
 	{ struct expr *e1;
 	  register struct type **tpp2 = 0;
+	  int err_flag = gen_error;
 	}
 :
 			{ if (tpp) tpp2 = gen_tphead(tpp, 0); }
@@ -104,7 +105,7 @@ initial_value_list(register struct type **tpp; struct expr **expp;)
 		initial_value(tpp2, &e1)
 			{ if (!tpp) init_expression(&expp, e1); }
 	]*
-			{ if (tpp) gen_tpend(); }
+			{ if (tpp && ! err_flag) gen_tpend(); }
 	','?				/* optional trailing comma */
 ;
 
