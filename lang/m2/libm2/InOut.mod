@@ -308,6 +308,10 @@ IMPLEMENTATION MODULE InOut ;
 
   BEGIN
     	i := 0;
+	REPEAT
+		Read(ch);
+	UNTIL (ch # ' ') AND (ch # TAB);
+	UnRead(ch);
     	LOOP
 		Read(ch);
 		termCH := ch;
