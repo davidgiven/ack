@@ -6,8 +6,8 @@ static char rcsid[] = "$Header$";
  * If everything is kept in core, we must save some things for the second pass.
  */
 
-#include "arch.h"
-#include "out.h"
+#include "../../h/arch.h"
+#include "../../h/out.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"

@@ -6,9 +6,9 @@ static char rcsid[] = "$Header$";
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif SYMDBUG
-#include "arch.h"
-#include "out.h"
-#include "ranlib.h"
+#include "../../h/arch.h"
+#include "../../h/out.h"
+#include "../../h/ranlib.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"

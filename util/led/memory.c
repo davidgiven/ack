@@ -9,7 +9,7 @@ static char rcsid[] = "$Header$";
  * is done and pieces after the one that requested the growth are moved up.
  */
 
-#include "out.h"
+#include "../../h/out.h"
 #include "const.h"
 #include "assert.h"
 #include "debug.h"

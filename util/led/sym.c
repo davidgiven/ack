@@ -6,7 +6,7 @@ static char rcsid[] = "$Header$";
  * Symbol table management.
  */
 
-#include "out.h"
+#include "../../h/out.h"
 #include "const.h"
 #include "memory.h"
 

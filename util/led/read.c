@@ -6,9 +6,9 @@ static char rcsid[] = "$Header$";
  * Routines to read in the various parts of the object file.
  */
 
-#include "arch.h"
-#include "out.h"
-#include "ranlib.h"
+#include "../../h/arch.h"
+#include "../../h/out.h"
+#include "../../h/ranlib.h"
 #include "const.h"
 #include "assert.h"
 
@@ -52,19 +52,43 @@ read_head(head)
 		fatal("bad magic number");
 }
 
-/*
- * Someone inadvertently misaligned a long, thereby creating a hole.
- * Therefore we can't read the header in one chunk.
- */
+read1(fd, val)
+char *val ; {
+	if ( read(fd, val, 1)!=1 ) return 0 ;
+	return 1 ;
+}
+read2(fd, val)
+int *val ; {
+	char rch[2] ;
+	if ( read(fd, rch, 2)!=2 ) return 0 ;
+	*val= (rch[0]&0377) + ((rch[1]&0377)<<8) ;
+	return 1 ;
+}
+read4(fd, val)
+long *val ; {
+	int v1,v2 ;
+	if ( !read2(fd, &v1) ) return 0 ;
+	if ( !read2(fd, &v2) ) return 0 ;
+	*val = ((long)v1<<16) + (unsigned)v2 ;
+	return 1 ;
+}
+
+
 read_arhdr(arhdr)
 	register struct ar_hdr	*arhdr;
 {
-	if (read(infile, (char *)arhdr, 14) != 14)
-		fatal("premature EOF");
-	if (read(infile, (char *)&arhdr->ar_date, SZ_ARCH - 14) != SZ_ARCH - 14)
-		fatal("premature EOF");
-	if (bytes_reversed || words_reversed)
-		swap((char *)&arhdr->ar_date, SF_ARCH);
+	if ( read(infile,arhdr->ar_name,sizeof arhdr->ar_name)!=
+	     sizeof arhdr->ar_name) {
+		goto peof ;
+	}
+	if ( !read4(infile,&arhdr->ar_date) ) goto peof ;
+	if ( !read1(infile,&arhdr->ar_uid) ) goto peof ;
+	if ( !read1(infile,&arhdr->ar_gid) ) goto peof ;
+	if ( !read2(infile,&arhdr->ar_mode) ) goto peof ;
+	if ( !read4(infile,&arhdr->ar_size) ) goto peof ;
+	return ;
+peof:
+	fatal("Prematute EOF") ;
 }
 
 read_table(ran, cnt)

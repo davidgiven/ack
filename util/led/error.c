@@ -4,7 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include <stdio.h>
 #include <signal.h>
-#include "out.h"
+#include "../../h/out.h"
 #include "const.h"
 
 static short	nerrors = 0;

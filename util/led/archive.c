@@ -2,9 +2,9 @@
 static char rcsid[] = "$Header$";
 #endif
 
-#include "arch.h"
-#include "out.h"
-#include "ranlib.h"
+#include "../../h/arch.h"
+#include "../../h/out.h"
+#include "../../h/ranlib.h"
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
@@ -107,7 +107,7 @@ arch()
 			get_archive_header(&arhdr);
 			modulname = arhdr.ar_name;
 			debug("%s defines %s\n", modulname, string, 0, 0);
-			position = ran->ran_pos + SZ_ARCH;
+			position = ran->ran_pos + AR_SIZE;
 			resolved = TRUE;
 			/*
 			 * This archive member is going to be linked,
@@ -170,7 +170,7 @@ arch2()
 		get_archive_header(&arhdr);
 		modulname = arhdr.ar_name;
 		debug("%s: archive member\n", modulname, 0, 0, 0);
-		position = *pos + SZ_ARCH;
+		position = *pos + AR_SIZE;
 		finish();
 	}
 	localpos += sizeof(long);	/* Skip ENDLIB. */

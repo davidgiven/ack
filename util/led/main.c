@@ -7,7 +7,7 @@ static char rcsid[] = "$Header$";
  */
 
 #include <stdio.h>
-#include "out.h"
+#include "../../h/out.h"
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
