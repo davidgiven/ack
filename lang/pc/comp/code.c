@@ -257,7 +257,7 @@ CodeEndBlock(df, StackAdjustment)
 			}
 			if( tp->tp_size == word_size )
 				C_lol(-tp->tp_size);
-			if( tp->tp_size == 2 * word_size )
+			else if( tp->tp_size == 2 * word_size )
 				C_ldl(-tp->tp_size);
 			else {
 				C_lal(-tp->tp_size);

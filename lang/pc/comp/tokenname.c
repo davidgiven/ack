@@ -11,6 +11,7 @@
 	Also, the "symbol2str.c" file is produced from this file.
 */
 
+#ifdef ____
 struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{IDENT, "identifier"},
 	{STRING, "string"},
@@ -27,6 +28,7 @@ struct tokenname tkcomp[] =	{	/* names of the composite tokens */
 	{BECOMES, ":="},
 	{0, ""}
 };
+#endif /* ____ */
 
 struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{AND, "and"},
