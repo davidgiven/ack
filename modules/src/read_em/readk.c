@@ -246,7 +246,8 @@ getstring(isident)
 #ifdef CHECKING
 		if (strleft < 0) {
 			xerror("Negative length in string");
-			return 0;
+			s->length = 0;
+			return s;
 		}
 #endif CHECKING
 	}
