@@ -459,7 +459,7 @@ obj_p object(ident,off,size)
 	 * within the datablock of the given name.
 	 */
 
-	dbl = (ident == (char *) 0 ? curhol : symlookup(ident, OCCURRING));
+	dbl = (ident == (char *) 0 ? hol0_db : symlookup(ident, OCCURRING));
 	VD(dbl);
 	return(make_object(dbl,off,size));
 }

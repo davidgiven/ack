@@ -33,7 +33,8 @@
 
 
 dblock_p	db;
-dblock_p	curhol = (dblock_p) 0;	/* hol block in current scope */
+dblock_p	hol0_db;	/* dblock for ABS block */
+char		*curhol;	/* name of hol block in current scope */
 dblock_p	ldblock;	/* last dblock  */
 proc_p		lproc;		/* last proc    */
 short		tabval;		/* used by table1, table2 and table3 */
@@ -80,10 +81,12 @@ main(argc,argv)
 	lfile = openfile(lname2,"w");
 	pdump = openfile(argv[1],"w");
 	ddump = openfile(argv[2],"w");
+	hol0_db = block_of_lab((char *) 0);
 	while (next_file(argc,argv) != NULL) {
 		/* Read all EM input files, process the code
 		 * and concatenate all output.
 		 */
+		curhol = (char *) 0;
 		process_lines(lfile);
 		dump_procnames(prochash,NPROCHASH,pdump);
 		dump_dblocknames(symhash,NSYMHASH,ddump);
@@ -276,6 +279,7 @@ int readline(instr_out, lnp_out)
 		case PSEU:
 			n = tabval;
 			lnp = inpseudo(n); /* read a pseudo */
+			if (n == ps_hol) n = ps_bss;
 			if (lnp == (line_p) 0)  return DELETED_INSTR;
 			*lnp_out = lnp;
 			lnp->l_instr = n;
@@ -326,7 +330,7 @@ line_p readoperand(instr)
 			   case PAR_G:
 				lnp = newline(OPOBJECT);
 				OBJ(lnp) =
-				  object((char *) 0,(offset) tabval,
+				  object(curhol,(offset) tabval,
 					 opr_size(instr));
 				break;
 			   case PAR_B:
@@ -345,7 +349,7 @@ line_p readoperand(instr)
 			if (flag == PAR_G) {
 				lnp = newline(OPOBJECT);
 				OBJ(lnp) =
-				  object((char *) 0, tabval2,
+				  object(curhol, tabval2,
 					 opr_size(instr));
 				break;
 			}
@@ -388,6 +392,32 @@ line_p readoperand(instr)
 }
 
 
+static char *hol_label()
+{
+	static int holno;
+	line_p lnp;
+	extern char *lastname;
+
+	/* Create a label for a hol pseudo, so that it can be converted
+	 * into a bss. The label is appended to the list of instructions.
+	 */
+
+	sprintf(string, "_HH%d", ++holno);
+	symlookup(string, OCCURRING);		/* to make it exa */
+	db = block_of_lab(string);
+	lnp = newline(OPSHORT);
+	SHORT(lnp) = (short) db->d_id;
+	lnp->l_instr = ps_sym;
+	if (firstline == (line_p) 0) {
+		firstline = lnp;
+	}
+	if (lastline != (line_p) 0) {
+		lastline->l_next = lnp;
+	}
+	lastline = lnp;
+	return lastname;
+}
+
 
 line_p inpseudo(n)
 	short n;
@@ -408,19 +438,27 @@ line_p inpseudo(n)
 
 	switch(n) {
 		case ps_hol:
+			/* hol pseudos are carefully converted into bss
+			 * pseudos, so that the IL phase will not be
+			 * bothered by this. Also, references to the ABS
+			 * block will still work when passed through EGO.
+			 */
+			
+			if (lastline != (line_p) 0 && is_datalabel(lastline)) {
+				curhol = string;
+			}
+			else {
+				curhol = hol_label();
+			}
+			n = ps_bss;
+			/* fall through */			
 		case ps_bss:
 		case ps_rom:
 		case ps_con:
 			if (lastline == (line_p) 0 || !is_datalabel(lastline)) {
-				if (n == ps_hol) {
-				   /* A HOL need not be preceded
-				   * by a label.
-				   */
-				   curhol = db = block_of_lab((char *) 0);
-				} else {
-				   assert(lastline != (line_p) 0);
-				   nlast = INSTR(lastline);
-				   if (n == nlast &&
+				assert(lastline != (line_p) 0);
+				nlast = INSTR(lastline);
+				if (n == nlast &&
 					(n == ps_rom || n == ps_con)) {
 					/* Two successive roms/cons are
 					 * combined into one data block
@@ -432,13 +470,12 @@ line_p inpseudo(n)
 					combine(db,lastline,lnp,pseu);
 					oldline(lnp);
 					return (line_p) 0;
-				   } else {
+				} else {
 				   	error("datablock without label");
-				   }
 				}
 			}
 			VD(db);
-			m = (n == ps_hol || n == ps_bss ? 3 : 0);
+			m = (n == ps_bss ? 3 : 0);
 			lnp = arglist(m);
 			/* Read the arguments, 3 for hol or bss and a list
 			 * of undetermined length for rom and con.

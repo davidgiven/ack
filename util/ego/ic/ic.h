@@ -58,7 +58,7 @@ struct num {
 /* Global variables */
 
 extern dblock_p	db;
-extern dblock_p	curhol;		/* hol block in current scope */
+extern dblock_p	hol0_db;		/* ABS block */
 extern dblock_p		ldblock;	/* last dblock processed so  far   */
 extern proc_p		lproc;		/* last proc processed so far  */
 extern short		tabval;		/* used by table1, table2 and table3 */

@@ -22,6 +22,7 @@
 sym_p symhash[NSYMHASH];
 prc_p prochash[NPROCHASH];
 num_p numhash[NNUMHASH];
+char *lastname;
 
 
 
@@ -131,6 +132,9 @@ dblock_p symlookup(name, status)
 		*spp = sp = newsym();
 		sp->sy_name = (char *) newcore(strlen(name)+1);
 		strcpy(sp->sy_name, name);
+		lastname = sp->sy_name;		/* quick hack to get at
+						   the name
+						*/
 		dp = sp->sy_dblock = newdblock();
 	}
 	if (fdblock == (dblock_p) 0) {

@@ -200,7 +200,7 @@ arch_init(arch)
 
 	infile = arch;
 	n = readshort();
-	if (n != ARMAG) {
+	if (n != (short)ARMAG) {
 		error("wrong archive magic number: %d",n);
 	}
 }
