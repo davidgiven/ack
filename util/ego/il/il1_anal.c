@@ -143,6 +143,9 @@ STATIC anal_instr(p,b,cf)
 		case ps_hol:
 			check_labels(p,ARG(l));
 			break;
+		case op_nop:	/* volatile */
+			UNSUITABLE(p);
+			break;
 	   }
 	}
 }

@@ -122,7 +122,7 @@ STATIC struct {
 /* mon */	HOPELESS,	XXX,	XXX,	XXX,	XXX,
 /* ngf */	UNAIR_OP,	ARGW,	XXX,	ARGW,	FLT,
 /* ngi */	UNAIR_OP,	ARGW,	XXX,	ARGW,	ANY,
-/* nop */	IGNORE,		XXX,	XXX,	XXX,	XXX,
+/* nop */	HOPELESS,	XXX,	XXX,	XXX,	XXX,
 /* rck */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
 /* ret */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
 /* rmi */	BINAIR_OP,	ARGW,	ARGW,	ARGW,	ANY,

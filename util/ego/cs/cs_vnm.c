@@ -267,6 +267,7 @@ hopeless(instr)
 			break;
 		case op_mon:
 		case op_str:
+		case op_nop:	/* for volatiles */
 			/* We can't even trust "static" entities. */
 			kill_all();
 			clr_stack();

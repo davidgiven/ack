@@ -118,6 +118,10 @@ STATIC check_local_use(l,locs)
 		default:
 			return;
 	}
+	if (l->l_next && INSTR(l->l_next) == op_nop) {
+		/* volatile */
+		return;
+	}
 	localvar(off_set(l),sz,locs,FALSE,(offset) 0);
 }
 
