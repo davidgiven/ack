@@ -35,10 +35,12 @@ extern		comfatal();
 extern		copyfile();
 extern		install();
 extern char	*mktemp();
+extern char	*sbrk();
 
 main(argc,argv) register string	argv[]; {
 	register string arg;
 	string libpath();
+	char	*beg_sbrk;
 
 	/* Initialize */
 
@@ -110,6 +112,9 @@ main(argc,argv) register string	argv[]; {
 		argv++;
 		argc--;
 	}
+
+	if (verbose) beg_sbrk = sbrk(0);
+
 	/*
 	 * Now check wether the sets should include nonterminals
 	 */
@@ -164,13 +169,11 @@ main(argc,argv) register string	argv[]; {
 	UNLINK(f_temp);
 	UNLINK(f_pars);
 	if (verbose) {
-		extern char *sbrk(), *end;
-
 		fprintf(stderr, "number of nonterminals: %d\n", nnonterms);
 		fprintf(stderr, "number of tokens: %d\n", ntokens);
 		fprintf(stderr, "number of term structures: %d\n", nterms);
 		fprintf(stderr, "number of alternation structures: %d\n", nalts);
-		fprintf(stderr, "total memory used: %ld\n", (long)(sbrk(0) - (char *) &end));
+		fprintf(stderr, "total memory used: %ld\n", (long)(sbrk(0) - beg_sbrk));
 	}
 	exit(0);
 }
