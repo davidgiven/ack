@@ -2105,11 +2105,8 @@ loc loc cii $1==2 && $2==4	| source2or4 |
 			allocate(%[1],REG)
 			"cvtwl\t%[1],%[a]"
 			setcc(%[a])		| %[a]	| |
-loc loc cii $1==2 && $2==1  | | |				    | |
-loc loc cii $1==4 && $2==1  | | |				    | |
-loc loc cii $1==4 && $2==2  | | |				    | |
 loc loc cui $1==$2	|	|	|	|	|
-loc loc ciu	|	|	|	| loc $1 loc $2 cuu	|
+loc loc ciu $1==$2	|	|	|	|	|
 #ifdef FLOAT4
 #ifdef REGVARS
 loc loc cfi stl $1==4 && $2==4 && inreg($4)==2
@@ -2291,34 +2288,6 @@ loc loc cff ste $1==8 && $2==4	| source8 |
 loc loc cff $1==8 && $2==4	| source8 |
 			allocate(%[1],REG)
 			"cvtdf\t%[1],%[a]"	| %[a]	| |
-#ifdef REGVARS
-loc loc cuu stl $1==2 && $2==4 && inreg($4)==2
-		| source2or4 |
-			remove(regvar($4))
-			"movzwl\t%[1],%(regvar($4)%)"
-			erase(regvar($4))
-			setcc(regvar($4))	|	| |
-#endif REGVARS
-loc loc cuu stl $1==2 && $2==4 && $4<0
-		| source2or4 |
-			remove(displaced)
-			remove(LOCALS,(%[num] <= $4+3 && %[num]+%[size] > $4))
-			"movzwl\t%[1],$4(fp)"
-			setcc({LOCAL4,LB,$4,4})	|	| |
-loc loc cuu stl $1==2 && $2==4 && $4>=0
-		| source2or4 |
-			remove(displaced)
-			remove(LOCALS,(%[num] <= $4+3 && %[num]+%[size] > $4))
-			"movzwl\t%[1],$4(ap)"
-			setcc({LOCAL4,AP,$4,4})	|	| |
-loc loc cuu ste $1==2 && $2==4	| source2or4 |
-			remove(externals)
-			"movzwl\t%[1],$4"
-			setcc({EXTERNAL4,$4})	|	| |
-loc loc cuu $1==2 && $2==4	| source2or4 |
-			allocate(%[1],REG)
-			"movzwl\t%[1],%[a]"
-			setcc(%[a])		| %[a]	| |
 
 /****************************************
  * Group 9 : Logical instructions	*
