@@ -225,6 +225,7 @@ input() {
 		nonline = 1;
 	}
 	if (c == '\n') nonline = 0;
+	if (strip_grammar) putchar(c);
 	return c;
 }
 

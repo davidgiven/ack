@@ -573,8 +573,10 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	register	ch;		/* Current char */
 	register	match;		/* used to read strings */
 	int		saved;		/* save linecount */
+	int		sav_strip = strip_grammar;
 
 	f = fact;
+	if (ch1 == '{' || flag != 1) strip_grammar = 0;
 	if (!level) {
 		saved = linecount;
 		text_seen = 0;
@@ -591,6 +593,10 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 				if (text_seen) nparams++;
 			}
 			if (level || (flag & 1)) putc(ch,f);
+			if (strip_grammar != sav_strip) {
+				if (ch1 == '{' || flag != 1) putchar(ch);
+			}
+			strip_grammar = sav_strip;
 			return;
 		}
 		switch(ch) {
@@ -657,6 +663,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			/* Fall through */
 		    case EOF :
 			if (!level) error(saved,"Action does not terminate");
+			strip_grammar = sav_strip;
 			return;
 		    default:
 			if (c_class[ch] != ISSPA) text_seen = 1;
