@@ -12,8 +12,14 @@
 .sect .text
 	lxi h,0x1000		! stack will grow from 0x1000 downwards
 	sphl
+	lxi d,endbss
 	lxi h,begbss		! clear bss
-	lxi d,endbss-begbss
+	mov a,e
+	sub l
+	mov e,a
+	mov a,d
+	sbb h
+	mov d,a			! de now contains endbss - begbss
 	mvi c,0
 
 2:	mov m,c
