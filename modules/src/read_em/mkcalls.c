@@ -123,47 +123,47 @@ EM_dopseudo(opcode, args)
 			    case cst_ptyp:
 				C_hol_cst(args->em_cst,
 					  arg->em_cst,
-					  args2->em_cst);
+					  (int) (args2->em_cst));
 				break;
 			    case ico_ptyp:
 				C_hol_icon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case uco_ptyp:
 				C_hol_ucon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size,
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case fco_ptyp:
 				C_hol_fcon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case sof_ptyp:
 				C_hol_dnam(args->em_cst,
 					   arg->em_dnam,
 					   arg->em_soff, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case nof_ptyp:
 				C_hol_dlb(args->em_cst,
 					  arg->em_dlb,
 					  arg->em_noff, 
-					  args2->em_cst);
+					  (int)(args2->em_cst));
 				break;
 			    case ilb_ptyp:
 				C_hol_ilb(args->em_cst,
 					  arg->em_ilb, 
-					  args2->em_cst);
+					  (int)(args2->em_cst));
 				break;
 			    case pro_ptyp:
 				C_hol_pnam(args->em_cst, 
 					   arg->em_pnam, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    default:
 				EM_error = "Illegal parameter type";
@@ -182,47 +182,47 @@ EM_dopseudo(opcode, args)
 			    case cst_ptyp:
 				C_bss_cst(args->em_cst,
 					  arg->em_cst,
-					  args2->em_cst);
+					  (int)(args2->em_cst));
 				break;
 			    case ico_ptyp:
 				C_bss_icon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case uco_ptyp:
 				C_bss_ucon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size,
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case fco_ptyp:
 				C_bss_fcon(args->em_cst,
 					   arg->em_str,
 					   arg->em_size, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case sof_ptyp:
 				C_bss_dnam(args->em_cst,
 					   arg->em_dnam,
 					   arg->em_soff, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    case nof_ptyp:
 				C_bss_dlb(args->em_cst,
 					  arg->em_dlb,
 					  arg->em_noff, 
-					  args2->em_cst);
+					  (int)(args2->em_cst));
 				break;
 			    case ilb_ptyp:
 				C_bss_ilb(args->em_cst,
 					  arg->em_ilb, 
-					  args2->em_cst);
+					  (int)(args2->em_cst));
 				break;
 			    case pro_ptyp:
 				C_bss_pnam(args->em_cst, 
 					   arg->em_pnam, 
-					   args2->em_cst);
+					   (int)(args2->em_cst));
 				break;
 			    default:
 				EM_error = "Illegal parameter type";
@@ -407,7 +407,7 @@ EM_dostartmes(args)
 	}
 	arg = c_getarg(args, cst_ptyp);
 	arg = c_getarg(arg, 0);
-	C_mes_begin(args->em_cst);
+	C_mes_begin((int) (args->em_cst));
 	listtype = ps_mes;
 }
 
