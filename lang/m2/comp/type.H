@@ -20,7 +20,7 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 
 struct enume {
 	struct def *en_enums;	/* Definitions of enumeration literals */
-	unsigned int en_ncst;	/* Number of constants */
+	arith en_ncst;		/* Number of constants */
 	label en_rck;		/* Label of range check descriptor */
 #define enm_enums	tp_value.tp_enum.en_enums
 #define enm_ncst	tp_value.tp_enum.en_ncst

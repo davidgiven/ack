@@ -231,6 +231,9 @@ enum_type(EnumList)
 		standard_type(T_ENUMERATION, int_align, int_size);
 
 	EnterEnumList(EnumList, tp);
+	if (! fit(tp->enm_ncst, (int) int_size)) {
+		node_error(EnumList, "too many enumeration literals");
+	}
 	u_small(tp, (arith) (tp->enm_ncst-1));
 	return tp;
 }

@@ -24,6 +24,7 @@
 #include	"Lpars.h"
 #include	"class.h"
 #include	"idf.h"
+#include	"def.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"const.h"
@@ -62,7 +63,7 @@ SkipComment()
 			   of the names. Also, don't generate call to
 			   initialization routine.
 			*/
-			ForeignFlag = 1;
+			ForeignFlag = D_FOREIGN;
 			break;
 		}
 	}
@@ -231,8 +232,6 @@ LLlex()
 		return tk->tk_symb;
 	}
 
-	tk->tk_lineno = LineNumber;
-
 again1:
 	if (eofseen) {
 		eofseen = 0;
@@ -247,6 +246,8 @@ again:
 		}
 	}
 
+	tk->tk_lineno = LineNumber;
+
 	switch (class(ch))	{
 
 	case STNL:
@@ -254,7 +255,6 @@ again:
 #ifdef DEBUG
 		cntlines++;
 #endif
-		tk->tk_lineno++;
 		CheckForLineDirective();
 		goto again1;
 

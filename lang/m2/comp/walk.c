@@ -760,8 +760,7 @@ DoAssign(nd, left, right)
 	}
 	else {
 		CodeValue(&dsr, rtp->tp_size, rtp->tp_align);
-		CodeCoercion(rtp, ltp);
-		RangeCheck(ltp, rtp);
+		CodeCheckExpr(rtp, ltp);
 	}
 	CodeMove(&dsr, left, rtp);
 }

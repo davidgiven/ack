@@ -29,6 +29,7 @@
 extern char	options[];
 }
 
+/* inline, we need room for pdp/11
 number(struct node **p;) :
 [
 	%default
@@ -39,6 +40,7 @@ number(struct node **p;) :
 			  (*p)->nd_type = toktype;
 			}
 ;
+*/
 
 qualident(struct node **p;)
 {
@@ -112,21 +114,28 @@ relation:
 
 SimpleExpression(struct node **pnd;)
 {
+	register struct node *nd = 0;
 } :
 	[
 		[ '+' | '-' ]
-			{ *pnd = MkLeaf(Uoper, &dot);
-			  pnd = &((*pnd)->nd_right);
+			{ nd = MkLeaf(Uoper, &dot);
 			  /* priority of unary operator ??? */
 			}
 	]?
 	term(pnd)
+			{ if (nd) {
+				nd->nd_right = *pnd;
+				*pnd = nd;
+			  }
+			  nd = *pnd;
+			}
 	[
 		/* AddOperator */
 		[ '+' | '-' | OR ]
-			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
-		term(&((*pnd)->nd_right))
+			{ nd = MkNode(Oper, nd, NULLNODE, &dot); }
+		term(&(nd->nd_right))
 	]*
+			{ *pnd = nd; }
 ;
 
 /* Inline in "SimpleExpression"
@@ -171,13 +180,35 @@ factor(register struct node **p;)
 |
 	bare_set(p)
 | %default
-	number(p)
+	[
+		%default
+		INTEGER
+	|
+		REAL
+	|
+		STRING
+	]		{ *p = MkLeaf(Value, &dot);
+			  (*p)->nd_type = toktype;
+			}
 |
-	STRING	{ *p = MkLeaf(Value, &dot);
-		  (*p)->nd_type = toktype;
+	'(' 	{ nd = MkLeaf(Uoper, &dot); }
+	expression(p)
+		{ /*	In some cases we must leave the '(' as an unary
+			operator, because otherwise we cannot see that the
+			factor was not a designator
+		  */
+		  register int class = (*p)->nd_class;
+
+		  if (class == Arrsel ||
+		      class == Arrow ||
+		      class == Name ||
+		      class == Link) {
+			nd->nd_right = *p;
+			*p = nd;
+		  }
+		  else free_node(nd);
 		}
-|
-	'(' expression(p) ')'
+	')'
 |
 	NOT		{ *p = MkLeaf(Uoper, &dot); }
 	factor(&((*p)->nd_right))
@@ -204,7 +235,7 @@ ActualParameters(struct node **pnd;):
 	'(' ExpList(pnd)? ')'
 ;
 
-element(struct node *nd;)
+element(register struct node *nd;)
 {
 	struct node *nd1;
 } :
@@ -235,17 +266,23 @@ designator_tail(struct node **pnd;):
 	]*
 ;
 
-visible_designator_tail(register struct node **pnd;):
-	'['		{ *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot); }
-		expression(&((*pnd)->nd_right))
+visible_designator_tail(struct node **pnd;)
+{
+	register struct node *nd = *pnd;
+}:
+[
+	'['		{ nd = MkNode(Arrsel, nd, NULLNODE, &dot); }
+		expression(&(nd->nd_right))
 		[
 			','
-			{ *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot);
-			  (*pnd)->nd_symb = '[';
+			{ nd = MkNode(Arrsel, nd, NULLNODE, &dot);
+			  nd->nd_symb = '[';
 			}
-			expression(&((*pnd)->nd_right))
+			expression(&(nd->nd_right))
 		]*
 	']'
 |
-	'^'		{ *pnd = MkNode(Arrow, NULLNODE, *pnd, &dot); }
+	'^'		{ nd = MkNode(Arrow, NULLNODE, nd, &dot); }
+]
+			{ *pnd = nd; }
 ;

@@ -169,7 +169,7 @@ SimpleType(register struct type **ptp;)
 		/* The subrange type is given a base type by the
 		   qualident (this is new modula-2).
 		*/
-			{ chk_basesubrange(tp, *ptp); }
+			{ chk_basesubrange(tp, *ptp); *ptp = tp; }
 	]
 |
 	enumeration(ptp)

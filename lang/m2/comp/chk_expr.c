@@ -758,6 +758,10 @@ ChkBinOper(expp)
 	   - The IN-operator has as right-hand-size operand a set.
 	*/
 	if (expp->nd_symb == IN) {
+		if (tpr->tp_fund != T_SET) {
+			node_error(expp, "\"IN\": right operand must be a set");
+			return 0;
+		}
 		if (!TstAssCompat(tpl, ElementType(tpr))) {
 			/* Assignment compatible ???
 			   I don't know! Should we be allowed to check
@@ -831,12 +835,13 @@ ChkUnOper(expp)
 
 	switch(expp->nd_symb) {
 	case '+':
-		if (tpr->tp_fund & T_NUMERIC) {
-			*expp = *right;
-			free_node(right);
-			return 1;
-		}
-		break;
+		if (!(tpr->tp_fund & T_NUMERIC)) break;
+		/* fall through */
+
+	case '(':
+		*expp = *right;
+		free_node(right);
+		return 1;
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {

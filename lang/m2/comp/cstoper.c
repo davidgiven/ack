@@ -262,6 +262,7 @@ cstset(expp)
 		expp->nd_INT = (i >= 0 && i < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
 		free((char *) set2);
+		expp->nd_symb = INTEGER;
 	}
 	else {
 		set1 = expp->nd_left->nd_set;

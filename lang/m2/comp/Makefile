@@ -158,6 +158,7 @@ LLlex.o: class.h
 LLlex.o: const.h
 LLlex.o: debug.h
 LLlex.o: debugcst.h
+LLlex.o: def.h
 LLlex.o: f_info.h
 LLlex.o: idf.h
 LLlex.o: idfsize.h

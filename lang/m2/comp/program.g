@@ -129,7 +129,7 @@ DefinitionModule
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  df->df_flags |= D_BUSY;
-			  if (ForeignFlag) df->df_flags |= D_FOREIGN;
+			  df->df_flags |= ForeignFlag;
 			  if (!Defined) Defined = df;
 		  	  CurrentScope->sc_definedby = df;
 			  if (df->df_idf != DefId) {

@@ -33,7 +33,7 @@ struct constant {
 };
 
 struct enumval {
-	unsigned int en_val;	/* value of this enumeration literal */
+	arith en_val;	/* value of this enumeration literal */
 	struct def *en_next;	/* next enumeration literal */
 #define enm_val		df_value.df_enum.en_val
 #define enm_next	df_value.df_enum.en_next

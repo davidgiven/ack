@@ -396,8 +396,14 @@ CodeParameters(param, arg)
 		return;
 	}
 	CodePExpr(left);
-	RangeCheck(tp, left_type);
-	CodeCoercion(left_type, tp);
+	CodeCheckExpr(left, tp);
+}
+
+CodeCheckExpr(tp1, tp2)
+	struct type *tp1, *tp2;
+{
+	CodeCoercion(tp1, tp2);
+	RangeCheck(tp2, tp1);
 }
 
 CodePString(nd, tp)
@@ -749,6 +755,7 @@ CodeOper(expr, true_label, false_label)
 				C_dup(2*tp->tp_size);
 				C_asp(tp->tp_size);
 				C_ior(tp->tp_size);
+				expr->nd_symb = '=';
 			}
 			else if (expr->nd_symb == LESSEQUAL) {
 				/* A <= B is the same as A - B = {}
@@ -756,6 +763,7 @@ CodeOper(expr, true_label, false_label)
 				C_com(tp->tp_size);
 				C_and(tp->tp_size);
 				C_zer(tp->tp_size);
+				expr->nd_symb = '=';
 			}
 			C_cms(tp->tp_size);
 			break;

@@ -92,6 +92,8 @@ GetDefinitionModule(id, incr)
 	register struct def *df;
 	static int level;
 	struct scopelist *vis;
+	char *fn = FileName;
+	int ln = LineNumber;
 
 	level += incr;
 	df = lookup(id, GlobalScope, 1);
@@ -109,6 +111,7 @@ GetDefinitionModule(id, incr)
 			ForeignFlag = 0;
 			open_scope(CLOSEDSCOPE);
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
+
 				DefModule();
 				df = lookup(id, GlobalScope, 1);
 				if (level == 1 &&
@@ -152,6 +155,8 @@ GetDefinitionModule(id, incr)
 		error("cannot import from currently defined module");
 		df->df_kind = D_ERROR;
 	}
+	FileName = fn;
+	LineNumber = ln;
 	assert(df);
 	level -= incr;
 	return df;
