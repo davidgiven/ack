@@ -8,7 +8,7 @@
 
 operation
 	:
-		prefix oper		
+		prefix oper
 			{	address_long = 1; operand_long = 1; }
 	|	prefix1		/* to allow for only prefixes on a line */
 	;
@@ -121,32 +121,63 @@ oper	:	NOOP_1
 			but this gives a bad yacc conflict
 		*/
 		MOV ea_1 ',' RSYSCR
-			{	
+			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
 				emit1(0xF); emit1(042); emit1(0200|($4<<3)|(reg_1&07));}
 	|	MOV ea_1 ',' RSYSDR
-			{	
+			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
 				emit1(0xF); emit1(043); emit1(0200|($4<<3)|(reg_1&07));}
 	|	MOV ea_1 ',' RSYSTR
-			{	
+			{
 				if ($1 != 1 || !(reg_1 & IS_R32))
 					serror("syntax error");
 				emit1(0xF); emit1(046); emit1(0200|($4<<3)|(reg_1&07));}
 	|	MOV RSYSCR ',' R32
-			{	
+			{
 				if ($1 != 1) serror("syntax error");
 				emit1(0xF); emit1(040); emit1(0200|($4<<3)|$2);}
 	|	MOV RSYSDR ',' R32
-			{	
+			{
 				if ($1 != 1) serror("syntax error");
 				emit1(0xF); emit1(041); emit1(0200|($4<<3)|$2);}
 	|	MOV RSYSTR ',' R32
-			{	
+			{
 				if ($1 != 1) serror("syntax error");
 				emit1(0xF); emit1(044); emit1(0200|($4<<3)|$2);}
+/* Intel 80[23]87 coprocessor instructions */
+	|	FNOOP
+			{	emit1($1); emit1($1>>8);}
+	|	FMEM mem
+			{	emit1($1); ea_2(($1>>8)&070);}
+	|	FMEM_AX R32
+			{	if ($2 != 0) {
+					serror("illegal register");
+				}
+				emit1(FESC|7); emit1(7<<5);
+			}
+	|	FST_I st_i
+			{	emit1($1); emit1(($1>>8)|$2); }
+	|	FST_I ST
+			{	emit1($1); emit1($1>>8); }
+	|	FST_ST ST ',' st_i
+			{	emit1($1); emit1(($1>>8)|$4); }
+	|	FST_ST st_i ',' ST
+			{	emit1($1|4); emit1((($1>>8)|$2)); }
+	|	FST_ST2 st_i ',' ST
+			{	emit1($1|4); emit1((($1>>8)|$2)^010); }
+	;
+
+st_i	:	ST '(' absexp ')'
+			{	if (!fit3($3)) {
+					serror("illegal index in FP stack");
+				}
+				$$ = $3;
+			}
+	;
+
 	;
 mem	:	'(' expr ')'
 			{	rm_2 = 05; exp_2 = $2; reg_2 = 05; mod_2 = 0;

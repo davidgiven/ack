@@ -13,7 +13,7 @@ dvi.s
 dvu.s
 error.s
 exg.s
-fakfp.s
+fp8087.s
 fat.s
 gto.s
 iaar.s

@@ -17,8 +17,8 @@
 %token <y_word> RSYSTR
 %token <y_word> PREFIX
 %token <y_word> ADDOP
-%token <y_word>	BITTEST
-%token <y_word>	BOUND
+%token <y_word> BITTEST
+%token <y_word> BOUND
 %token <y_word> CALFOP
 %token <y_word> CALLOP
 %token <y_word> ENTER
@@ -45,3 +45,14 @@
 %token <y_word> SETCC
 %token <y_word> TEST
 %token <y_word> XCHG
+
+/* Intel 80[23]87 coprocessor tokens */
+%token <y_word> FNOOP
+%token <y_word> FMEM
+%token <y_word> FMEM_AX
+%token <y_word> FST_I
+%token <y_word> FST_ST
+%token <y_word> FST_ST2
+%token <y_word> ST
+
+%type <y_valu> st_i

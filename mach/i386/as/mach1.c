@@ -8,12 +8,16 @@
  * INTEL 80386 C declarations
  */
 
-#define	low6(z)		(z & 077)
-#define	fit6(z)		(low6(z) == z)
+#define low6(z)		(z & 077)
+#define fit6(z)		(low6(z) == z)
+#define low3(z)		(z & 07)
+#define fit3(z)		(low3(z) == z)
+
+#define FESC	0xD8		/* escape for 80[23]87 processor */
 
 #define ufitb(z)	((unsigned)(z) <= 255)
 
-#define	IS_R8		0x100
+#define IS_R8		0x100
 #define IS_R32		0x200
 #define IS_EXPR		0x400
 #define IS_RSEG		0x800
@@ -33,15 +37,15 @@ struct operand {
 
 extern struct operand	op_1, op_2;
 
-#define	mod_1	op_1.mod
-#define	mod_2	op_2.mod
-#define	rm_1	op_1.rm
-#define	rm_2	op_2.rm
-#define	reg_1	op_1.reg
-#define	reg_2	op_2.reg
-#define	sib_1	op_1.sib
-#define	sib_2	op_2.sib
-#define	exp_1	op_1.exp
+#define mod_1	op_1.mod
+#define mod_2	op_2.mod
+#define rm_1	op_1.rm
+#define rm_2	op_2.rm
+#define reg_1	op_1.reg
+#define reg_2	op_2.reg
+#define sib_1	op_1.sib
+#define sib_2	op_2.sib
+#define exp_1	op_1.exp
 #define exp_2	op_2.exp
 
 #ifdef RELOCATION
