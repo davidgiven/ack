@@ -59,4 +59,8 @@
 %token <y_word> FST_ST2
 %token <y_word> ST
 
+/* Intel 80486 tokens */
+%token <y_word> EXTOPBW
+%token <y_word> BSWAP
 %type <y_valu> st_i
+%type <y_valu> reg

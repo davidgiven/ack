@@ -524,7 +524,7 @@ bittestop(opc)
 		emit1((int)(exp_2.val));
 	}
 	else if (is_reg(reg_2)) {
-		emit1(0203 | opc);
+		emit1(0203 | (opc<<3));
 		ea_1((reg_2&7)<<3);
 	}
 	else	badsyntax();

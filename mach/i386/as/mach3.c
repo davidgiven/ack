@@ -51,6 +51,9 @@
 0,	RSYSDR,		3,		"dr3",
 0,	RSYSDR,		6,		"dr6",
 0,	RSYSDR,		7,		"dr7",
+0,	RSYSTR,		3,		"tr3",	/* i486 */
+0,	RSYSTR,		4,		"tr4",	/* i486 */
+0,	RSYSTR,		5,		"tr5",	/* i486 */
 0,	RSYSTR,		6,		"tr6",
 0,	RSYSTR,		7,		"tr7",
 0,	ADDOP,		000,		"addb",
@@ -202,9 +205,9 @@
 0,	NOOP_1,		057,		"das",
 0,	NOOP_1,		067,		"aaa",
 0,	NOOP_1,		077,		"aas",
-0,	NOOP_2,		017+06<<8,	"clts",
-0,	NOOP_2,		0324+012<<8,	"aam",
-0,	NOOP_2,		0325+012<<8,	"aad",
+0,	NOOP_2,		017+(06<<8),	"clts",
+0,	NOOP_2,		0324+(012<<8),	"aam",
+0,	NOOP_2,		0325+(012<<8),	"aad",
 0,	NOTOP,		020,		"notb",
 0,	NOTOP,		021,		"not",
 0,	NOTOP,		030,		"negb",
@@ -294,6 +297,7 @@
 0,	FNOOP,		FESC+1+(0xE0<<8),	"fchs",
 0,	FNOOP,		FESC+3+(0xE2<<8),	"fclex",
 0,	FNOOP,		FESC+6+(0xD9<<8),	"fcompp",
+0,	FNOOP,		FESC+2+(0xE9<<8),	"fucompp",
 0,	FNOOP,		FESC+1+(0xF6<<8),	"fdecstp",
 0,	FNOOP,		FESC+3+(0xE1<<8),	"fdisi",
 0,	FNOOP,		FESC+3+(0xE0<<8),	"feni",
@@ -312,6 +316,7 @@
 0,	FNOOP,		FESC+1+(0xFE<<8),	"fsin",
 0,	FNOOP,		FESC+1+(0xFB<<8),	"fsincos",
 0,	FNOOP,		FESC+1+(0xF8<<8),	"fprem",
+0,	FNOOP,		FESC+1+(0xF5<<8),	"fprem1",
 0,	FNOOP,		FESC+1+(0xF2<<8),	"fptan",
 0,	FNOOP,		FESC+1+(0xFC<<8),	"frndint",
 0,	FNOOP,		FESC+1+(0xFD<<8),	"fscale",
@@ -320,7 +325,7 @@
 0,	FNOOP,		FESC+1+(0xE5<<8),	"fxam",
 0,	FNOOP,		FESC+1+(0xF4<<8),	"fxtract",
 0,	FNOOP,		FESC+1+(0xF1<<8),	"fyl2x",
-0,	FNOOP,		FESC+1+(0xF9<<8),	"fyl2pi",
+0,	FNOOP,		FESC+1+(0xF9<<8),	"fyl2xp1",
 
 0,	FMEM,		FESC+6+(0<<11),		"fiadds",
 0,	FMEM,		FESC+2+(0<<11),		"fiaddl",
@@ -382,10 +387,12 @@
 
 0,	FST_I,		FESC+1+(0xC0<<8),	"fld",
 0,	FST_I,		FESC+5+(0xD0<<8),	"fst",
-0,	FST_I,		FESC+5+(0xC8<<8),	"fstp",
+0,	FST_I,		FESC+5+(0xD8<<8),	"fstp",
 0,	FST_I,		FESC+1+(0xC8<<8),	"fxch",
 0,	FST_I,		FESC+0+(0xD0<<8),	"fcom",
+0,	FST_I,		FESC+5+(0xE0<<8),	"fucom",
 0,	FST_I,		FESC+0+(0xD8<<8),	"fcomp",
+0,	FST_I,		FESC+5+(0xE8<<8),	"fucomp",
 0,	FST_I,		FESC+5+(0xC0<<8),	"ffree",
 
 0,	FST_ST,		FESC+0+(0xC0<<8),	"fadd",
@@ -400,3 +407,14 @@
 0,	FST_ST2,	FESC+2+(0xE0<<8),	"fsubp",
 0,	FST_ST2,	FESC+0+(0xE8<<8),	"fsubr",
 0,	FST_ST2,	FESC+2+(0xE8<<8),	"fsubrp",
+
+/* Intel 486 instructions */
+0,	EXTOPBW,	0xC0,		"xaddb",
+0,	EXTOPBW,	0xC1,		"xadd",
+0,	EXTOPBW,	0xA6,		"cmpxchgb",
+0,	EXTOPBW,	0xA7,		"cmpxchg",
+0,	BSWAP,		0xC8,		"bswap",
+0,	NOOP_2,		017+(010<<8),	"invd",
+0,	EXTOP1,		071,		"invlpg",
+0,	NOOP_2,		017+(011<<8),	"wbinvd",
+

@@ -129,7 +129,7 @@ oper	:	NOOP_1
 				emit2((int)($2.val));
 			}
 	|	SETCC ea_2
-			{	emit1(0xF); emit1($1); ea_2(0);}
+			{	emit1(0xF); emit1($1|0x90); ea_2(0);}
 	|	XCHG ea_ea
 			{	xchg($1);}
 	|	TEST ea_ea
@@ -172,6 +172,8 @@ oper	:	NOOP_1
 			{	emit1($1); emit1($1>>8);}
 	|	FMEM mem
 			{	emit1($1); ea_2(($1>>8)&070);}
+	|	FMEM_AX mem
+			{	emit1($1); ea_2(($1>>8)&070);}
 	|	FMEM_AX R32
 			{	if ($2 != 0) {
 					serror("illegal register");
@@ -190,6 +192,13 @@ oper	:	NOOP_1
 			{	emit1($1|4); emit1((($1>>8)|$2)); }
 	|	FST_ST2 st_i ',' ST
 			{	emit1($1|4); emit1((($1>>8)|$2)^010); }
+	/* 486 instructions */
+	|	BSWAP R32
+			{	emit1(0xF); emit1($1|$2); }
+	|	EXTOPBW reg ',' ea_2
+			{	regsize($1);
+				emit1(0xF); emit1($1); ea_2($2<<3);
+			}
 	;
 
 st_i	:	ST '(' absexp ')'
@@ -261,6 +270,16 @@ ea_2	:	mem
 			{	reg_2 = IS_EXPR | (address_long ? 0 : 040);
 				exp_2 = $1; rm_2 = 0;
 				RELOMOVE(rel_2, relonami);
+			}
+	;
+reg	:	R8	{	reg_1 = ($1 | IS_R8) | (address_long ? 0 : 0300);
+				rm_1 = 0;
+				$$ = $1;
+			}
+	|	R32
+			{	reg_1 = ($1 | IS_R32) | (address_long ? 0 : 0310);
+				rm_1 = 0;
+				$$ = $1;
 			}
 	;
 ea_1	:	ea_2
