@@ -559,8 +559,15 @@ unsigned stackupto(limit,ply,toplevel) token_p limit; {
 					nallreg=0;
 				totalcost+= codegen(&coderules[cp->c1_codep],ply,toplevel,MAXINT,0);
 				tokpatlen = tpl;
-				for (i=0;i<diff;i++)
-					fakestack[stackheight++] = savestack[i];
+				for (i=0;i<diff;i++) {
+					fakestack[stackheight] = savestack[i];
+					stackheight++;
+					/* not cobmined in one statement;
+					   this poor Xenix C compiler sometimes
+					   gets failed assertions when you do
+					   that!
+					*/
+				}
 				nallreg=nareg;
 				for (i=0;i<nareg;i++)
 					allreg[i] = areg[i];
