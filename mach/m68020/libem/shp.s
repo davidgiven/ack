@@ -14,7 +14,7 @@ EHEAP=17
 	add.l	#0x400, d1
 	and.l	#~0x3ff, d1
 	move.l	d1, -(sp)
-	jsr	(_brk)		! allocate 1K bytes of extra storage
+	jsr	(__brk)		! allocate 1K bytes of extra storage
 	bcs	2f
 	move.l	(sp)+,(.limhp)
 1:
