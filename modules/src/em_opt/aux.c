@@ -16,12 +16,14 @@ OO_rotate(w,amount)
 	return(((w<<amount)&highmask) | ((w >> (8*OO_WSIZE-amount))&lowmask));
 }
 
+int
 OO_signsame(a,b)
 	arith a, b;
 {
 	return( (a ^ b) >= 0);
 }
 
+int
 OO_sfit(val,nbits)
 	arith val, nbits;
 {
@@ -29,12 +31,14 @@ OO_sfit(val,nbits)
 	return(((val&mask) == 0) | (val&mask)==mask);
 }
 
+int
 OO_ufit(val, nbits)
 	arith val, nbits;
 {
 	return((val&(~((1L << (nbits - 1)) - 1))) == 0);
 }
 
+int
 OO_extsame(a1,a2)
 	register p_instr a1, a2;
 {
@@ -57,6 +61,7 @@ OO_extsame(a1,a2)
 	}
 }
 
+int
 OO_namsame(a1,a2)
 	register p_instr a1, a2;
 {

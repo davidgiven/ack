@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-#include	"flt_misc.h"
+#include "flt_misc.h"
 
 int
 flt_cmp(e1, e2)

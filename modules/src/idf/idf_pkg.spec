@@ -1,6 +1,8 @@
 /* $Header$ */
 /* IDENTIFIER DESCRIPTOR */
 
+#include <ansi.h>
+
 /* This a generic package for maintaining a name list */
 
 /* Instantiation parameters, supplied by #define, are :
@@ -23,9 +25,9 @@ struct idf	{
 
 /*	init_idf()
 
-	Initializes the namelist. Empty for now.
+	Initializes the namelist.
 */
-#define			init_idf()
+_PROTOTYPE(void init_idf, (void));
 
 /*	struct idf * str2idf(tg, cp)
 		char *tg;
@@ -38,10 +40,6 @@ struct idf	{
 	If cp < 0, the string is not entered, but only looked for.
 */
 
-#if __STDC__ > 0
-struct idf *str2idf(char *, int);
-#else
-extern struct idf *	str2idf();
-#endif
+_PROTOTYPE(struct idf *str2idf, (char *, int));
 
 #define	findidf(tg)	str2idf(tg, -1)

@@ -7,6 +7,8 @@
 #ifndef __FLT_INCLUDED__
 #define __FLT_INCLUDED__
 
+#include "ansi.h"
+
 #ifndef arith
 #define arith long
 #endif
@@ -31,20 +33,17 @@ extern int	flt_status;
 
 #define FLT_STRLEN	32	/* max length of result of flt_flt2str() */
 
-#if __STDC__ > 0
-void flt_add(flt_arith *, flt_arith *, flt_arith *);
-void flt_sub(flt_arith *, flt_arith *, flt_arith *);
-void flt_mul(flt_arith *, flt_arith *, flt_arith *);
-void flt_div(flt_arith *, flt_arith *, flt_arith *);
-void flt_modf(flt_arith *, flt_arith *, flt_arith *);
-int flt_cmp(flt_arith *, flt_arith *);
-void flt_str2flt(char *, flt_arith *);
-void flt_flt2str(flt_arith *, char *, int);
-void flt_arith2flt(arith, flt_arith *, int);
-arith flt_flt2arith(flt_arith *, int);
-void flt_b64_sft(struct flt_mantissa *, int);
-void flt_umin(flt_arith *);
-#else
-arith flt_flt2arith();
-#endif
+_PROTOTYPE(void flt_add, (flt_arith *, flt_arith *, flt_arith *));
+_PROTOTYPE(void flt_sub, (flt_arith *, flt_arith *, flt_arith *));
+_PROTOTYPE(void flt_mul, (flt_arith *, flt_arith *, flt_arith *));
+_PROTOTYPE(void flt_div, (flt_arith *, flt_arith *, flt_arith *));
+_PROTOTYPE(void flt_modf, (flt_arith *, flt_arith *, flt_arith *));
+_PROTOTYPE(int flt_cmp, (flt_arith *, flt_arith *));
+_PROTOTYPE(void flt_str2flt, (char *, flt_arith *));
+_PROTOTYPE(void flt_flt2str, (flt_arith *, char *, int));
+_PROTOTYPE(void flt_arith2flt, (arith, flt_arith *, int));
+_PROTOTYPE(arith flt_flt2arith, (flt_arith *, int));
+_PROTOTYPE(void flt_b64_sft, (struct flt_mantissa *, int));
+_PROTOTYPE(void flt_umin, (flt_arith *));
+
 #endif /* __FLT_INCLUDED__ */

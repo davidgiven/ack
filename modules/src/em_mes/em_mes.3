@@ -6,65 +6,67 @@ em_mes \- EM-message generating routines
 .nf
 .B #include <em.h>
 .PP
-.B C_ms_err()
+.B void C_ms_err()
 .PP
-.B C_ms_opt()
+.B void C_ms_opt()
 .PP
-.B C_ms_emx(wsiz, psiz)
+.B void C_ms_emx(wsiz, psiz)
 .B arith wsiz, psiz;
 .PP
 .B #include <em_reg.h>
-.B C_ms_reg(offs, siz, class, prior)
+.B void C_ms_reg(offs, siz, class, prior)
 .B arith offs, siz;
 .B int class, prior;
 .PP
-.B C_ms_src(nlines, filnam)
+.B void C_ms_src(nlines, filnam)
 .B int nlines;
 .B char *filnam;
 .PP
-.B C_ms_flt()
+.B void C_ms_flt()
 .PP
-.B C_ms_com(str)
+.B void C_ms_com(str)
 .B char *str;
 .PP
-.B C_ms_par(nparams)
+.B void C_ms_par(nparams)
 .B arith nparams;
 .PP
 .B #include <em_ego.h>
-.B C_ms_ego(hint, offs, siz, regno)
+.B void C_ms_ego(hint, offs, siz, regno)
 .B int hint, regno;
 .B arith offs, siz;
 .PP
-.B C_ms_gto()
+.B void C_ms_gto()
 .PP
-.B C_ms_stb_cst(s, e1, e2, e3)
+.B void C_ms_stb_cst(s, e1, e2, e3)
 .B char *s;
 .B int e1, e2;
 .B arith e3;
 .PP
-.B C_ms_stb_dlb(s, e1, e2, l, off)
+.B void C_ms_stb_dlb(s, e1, e2, l, off)
 .B char *s;
 .B int e1, e2;
 .B label l;
 .B arith off;
 .PP
-.B C_ms_stb_dnam(s, e1, e2, l, off)
+.B void C_ms_stb_dnam(s, e1, e2, l, off)
 .B char *s;
 .B int e1, e2;
 .B char *l;
 .B arith off;
 .PP
-.B C_ms_stb_ilb(s, e1, e2, l)
+.B void C_ms_stb_ilb(s, e1, e2, l)
 .B char *s;
 .B int e1, e2;
 .B label l;
 .PP
-.B C_ms_stb_pnam(s, e1, e2, p)
+.B void C_ms_stb_pnam(s, e1, e2, p)
 .B char *s;
 .B int e1, e2;
 .B char *p;
 .PP
-.B C_ms_lin(l)
+.B void C_ms_std(s, e1, l)
+.B char *s;
+.B int e1;
 .B int l;
 .fi
 .SH DESCRIPTION
@@ -157,7 +159,7 @@ can be invoked to indicate that a procedure uses a non-local goto.
 The
 .B C_ms_stb
 and
-.B C_ms_lin
+.B C_ms_std
 routines produce a message that a back-end can use for (debugger) symbol table
 entries.
 .SH FILES
@@ -173,8 +175,7 @@ em_code(3)
 em_code(3), read_em(3)
 .SH DIAGNOSTICS
 None of the functions return a value.
-.SH BUGS
-The
+.SH REMARKS
+There is no
 .BR C_ms_ext ()
-routine has not yet been implemented, since this message uses
-a variable number of arguments.
+routine, since this message uses a variable number of arguments.

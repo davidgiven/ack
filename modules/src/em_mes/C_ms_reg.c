@@ -6,6 +6,7 @@
 #include <em.h>
 #include <em_mes.h>
 
+void
 C_ms_reg(offs, siz, class, prior)
 	arith offs, siz;
 	int class, prior;

@@ -11,6 +11,7 @@
 #include <em_comp.h>
 #include <system.h>
 #include <emO_code.h>
+#include <ansi.h>
 
 #define MAXBUFFER	200
 #define MAXSTRING	1000
@@ -52,13 +53,53 @@ extern arith	OO_PSIZE;	/* pointer length */
 extern int	OO_wrstats;			/* statistics output */
 #endif
 
-extern char	*OO_freestr();
-extern arith	OO_rotate();
-extern arith	OO_offset();
-
 #define CST(p)		(p.em_cst)
 #define PNAM(p)		(p.em_pnam)
 #define LAB(p)		(p.em_ilb)
 #define DEFILB(p)	(p.em_ilb)
 #define DEFINED(p)	(p.em_argtype)
 
+_PROTOTYPE(void EM_mkop, (p_instr, int));
+_PROTOTYPE(void EM_mknarg, (p_instr, int));
+_PROTOTYPE(void EM_mkilb, (p_instr, int, label));
+_PROTOTYPE(void EM_mknof, (p_instr, int, label, arith));
+_PROTOTYPE(void EM_mksof, (p_instr, int, char *, arith));
+_PROTOTYPE(void EM_mkcst, (p_instr, int, arith));
+_PROTOTYPE(void EM_mkpro, (p_instr, int, char *));
+_PROTOTYPE(void EM_mkdefilb, (p_instr, int, label));
+_PROTOTYPE(void EM_Nop, (int));
+_PROTOTYPE(void EM_Nnarg, (int));
+_PROTOTYPE(void EM_Nilb, (int, label));
+_PROTOTYPE(void EM_Nnof, (int, label, arith));
+_PROTOTYPE(void EM_Nsof, (int, char *, arith));
+_PROTOTYPE(void EM_Ncst, (int, arith));
+_PROTOTYPE(void EM_Npro, (int, char *));
+_PROTOTYPE(void EM_Ndefilb, (int, label));
+_PROTOTYPE(void EM_Rop, (int));
+_PROTOTYPE(void EM_Rnarg, (int));
+_PROTOTYPE(void EM_Rilb, (int, label));
+_PROTOTYPE(void EM_Rnof, (int, label, arith));
+_PROTOTYPE(void EM_Rsof, (int, char *, arith));
+_PROTOTYPE(void EM_Rcst, (int, arith));
+_PROTOTYPE(void EM_Rpro, (int, char *));
+_PROTOTYPE(void EM_Rdefilb, (int, label));
+
+_PROTOTYPE(arith OO_rotate, (arith, arith));
+_PROTOTYPE(int OO_signsame, (arith, arith));
+_PROTOTYPE(int OO_sfit, (arith, arith));
+_PROTOTYPE(int OO_ufit, (arith, arith));
+_PROTOTYPE(int OO_extsame, (p_instr, p_instr));
+_PROTOTYPE(int OO_namsame, (p_instr, p_instr));
+_PROTOTYPE(arith OO_offset, (p_instr));
+
+_PROTOTYPE(char	*OO_freestr, (char *));
+_PROTOTYPE(void OO_dfa, (int));
+_PROTOTYPE(void OO_flush, (void));
+_PROTOTYPE(p_instr OO_halfflush, (void));
+_PROTOTYPE(void OO_mkext, (p_instr, int, p_instr, arith));
+_PROTOTYPE(void OO_mkrepl, (int, int, int));
+
+#ifdef DEBUG
+_PROTOTYPE(void dumpstate, (char *));
+_PROTOTYPE(void prtinst, (p_instr));
+#endif

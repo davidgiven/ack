@@ -13,6 +13,8 @@ static char rcsidp2[] = "$Header$";
 extern char em_flag[];
 extern char em_mnem[][4];
 
+PRIVATE idinit();
+
 initlex()
 {
 	register int i,j;

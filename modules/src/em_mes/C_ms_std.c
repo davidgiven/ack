@@ -6,6 +6,7 @@
 #include <em.h>
 #include <em_mes.h>
 
+void
 C_ms_std(s, e1, l)
 	char *s;
 	int e1;

@@ -6,9 +6,8 @@
 /* $Header$ */
 
 #include "flt_misc.h"
-#if __STDC__ > 0
+
 void
-#endif
 flt_mul(e1,e2,e3)
 	register flt_arith *e1,*e2,*e3;
 {

@@ -43,10 +43,11 @@ $(LIBFLT):	$(OBJ)
 		$(RANLIB) $(LIBFLT)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBFLT) $(MOD_DIR)/lib/$(LIBFLT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBFLT)
 		cp $(SRC_DIR)/flt_arith.h $(MOD_DIR)/h/flt_arith.h
-		cp $(SRC_DIR)/flt_arith.3 $(MOD_DIR)/man/flt_arith.3
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/flt_arith.3 $(TARGET_HOME) ; \
 		fi
@@ -54,7 +55,6 @@ install:	all
 cmp:		all
 		-cmp $(LIBFLT) $(MOD_DIR)/lib/$(LIBFLT)
 		-cmp $(SRC_DIR)/flt_arith.h $(MOD_DIR)/h/flt_arith.h
-		-cmp $(SRC_DIR)/flt_arith.3 $(MOD_DIR)/man/flt_arith.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC)

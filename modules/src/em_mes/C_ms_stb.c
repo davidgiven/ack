@@ -6,6 +6,7 @@
 #include <em.h>
 #include <em_mes.h>
 
+void
 C_ms_stb_cst(s, e1, e2, e3)
 	char	*s;
 	int	e1, e2;
@@ -19,6 +20,7 @@ C_ms_stb_cst(s, e1, e2, e3)
 	C_mes_end();
 }
 
+void
 C_ms_stb_dlb(s, e1, e2, l, off)
 	char	*s;
 	int	e1, e2;
@@ -33,6 +35,7 @@ C_ms_stb_dlb(s, e1, e2, l, off)
 	C_mes_end();
 }
 
+void
 C_ms_stb_dnam(s, e1, e2, l, off)
 	char	*s;
 	int	e1, e2;
@@ -47,6 +50,7 @@ C_ms_stb_dnam(s, e1, e2, l, off)
 	C_mes_end();
 }
 
+void
 C_ms_stb_ilb(s, e1, e2, l)
 	char	*s;
 	int	e1, e2;
@@ -60,6 +64,7 @@ C_ms_stb_ilb(s, e1, e2, l)
 	C_mes_end();
 }
 
+void
 C_ms_stb_pnam(s, e1, e2, p)
 	char	*s;
 	int	e1, e2;

@@ -7,6 +7,19 @@ static char rcsidp5[] = "$Header$";
 
 FILE *ofile;
 
+PRIVATE openofile();
+PRIVATE installofile();
+PRIVATE UNLINK();
+PRIVATE RENAME();
+PRIVATE outdfa();
+PRIVATE outmnems();
+PRIVATE outdotrans();
+PRIVATE outoneaction();
+PRIVATE outrepl();
+PRIVATE outexp();
+PRIVATE outext();
+PRIVATE outop();
+
 outputnopt()
 {
 	openofile("dfa.c");

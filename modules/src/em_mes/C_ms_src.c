@@ -6,6 +6,7 @@
 #include <em.h>
 #include <em_mes.h>
 
+void
 C_ms_src(nlines, filnam)
 	int nlines;
 	char *filnam;

@@ -45,13 +45,13 @@ libem_mesCE.$(LIBSUF):
 		rm -f *.$(SUF)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
 		cp libem_mes.$(LIBSUF) $(MOD_DIR)/lib/libem_mes.$(LIBSUF)
 		cp libem_mesCE.$(LIBSUF) $(MOD_DIR)/lib/libem_mesCE.$(LIBSUF)
 		cp libem_mesO.$(LIBSUF) $(MOD_DIR)/lib/libem_mesO.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libem_mes.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libem_mesCE.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libem_mesO.$(LIBSUF)
-		cp $(SRC_DIR)/em_mes.3 $(MOD_DIR)/man/em_mes.3
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/em_mes.3 $(TARGET_HOME) ; \
 		fi
@@ -60,7 +60,6 @@ cmp:		all
 		-cmp libem_mes.$(LIBSUF) $(MOD_DIR)/lib/libem_mes.$(LIBSUF)
 		-cmp libem_mesCE.$(LIBSUF) $(MOD_DIR)/lib/libem_mesCE.$(LIBSUF)
 		-cmp libem_mesO.$(LIBSUF) $(MOD_DIR)/lib/libem_mesO.$(LIBSUF)
-		-cmp $(SRC_DIR)/em_mes.3 $(MOD_DIR)/man/em_mes.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC)

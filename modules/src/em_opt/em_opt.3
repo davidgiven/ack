@@ -7,61 +7,61 @@ emopt \- EM code peephole optimizer interface for compilers
 .B #define PEEPHOLE
 .B #include <em.h>
 .PP
-.B O_init(wsize, psize)
+.B void O_init(wsize, psize)
 .B arith wsize, psize;
 .PP
 .B int O_open(filename)
-.B O_close()
+.B void O_close()
 .B int O_busy()
 .B char *filename;
 .PP
-.B O_magic()
+.B void O_magic()
 .PP
-.B O_df_dlb(l)
-.B O_df_dnam(s)
-.B O_df_ilb(l)
+.B void O_df_dlb(l)
+.B void O_df_dnam(s)
+.B void O_df_ilb(l)
 .B label l; char *s;
 .PP
-.B O_pro(s, l)
-.B O_pro_narg(s)
-.B O_end(l)
-.B O_end_narg()
+.B void O_pro(s, l)
+.B void O_pro_narg(s)
+.B void O_end(l)
+.B void O_end_narg()
 .B char *s; arith l;
 .PP
-.B O_exa_dlb(l)
-.B O_exa_dnam(s)
-.B O_exp(s)
-.B O_ina_dlb(l)
-.B O_ina_dnam(s)
-.B O_inp(s)
+.B void O_exa_dlb(l)
+.B void O_exa_dnam(s)
+.B void O_exp(s)
+.B void O_ina_dlb(l)
+.B void O_ina_dnam(s)
+.B void O_inp(s)
 .B char *s; label l;
 .PP
-.BI O_bss_ cstp ()
-.BI O_hol_ cstp ()
-.BI O_con_ cstp ()
-.BI O_rom_ cstp ()
+.BI "void O_bss_" cstp ()
+.BI "void O_hol_" cstp ()
+.BI "void O_con_" cstp ()
+.BI "void O_rom_" cstp ()
 .PP
 .B #include <em_mes.h>
-.B O_mes_begin(ms)
-.BI O_ cstp ()
-.B O_mes_end()
+.B void O_mes_begin(ms)
+.BI "void O_" cstp ()
+.B void O_mes_end()
 .B int ms;
 .PP
-.B O_exc(c1, c2)
+.B void O_exc(c1, c2)
 .B arith c1, c2;
 .PP
-.BI O_ mnem ()
-.BI O_ mnem _dlb()
-.BI O_ mnem _dnam()
-.BI O_ mnem _narg()
+.BI "void O_" mnem ()
+.BI "void O_" mnem _dlb()
+.BI "void O_" mnem _dnam()
+.BI "void O_" mnem _narg()
 .PP
-.B O_insertpart(id)
+.B void O_insertpart(id)
 .B int id;
 .PP
-.B O_beginpart(id)
+.B void O_beginpart(id)
 .B int id;
 .PP
-.B O_endpart(id)
+.B void O_endpart(id)
 .B int id;
 .fi
 .SH DESCRIPTION

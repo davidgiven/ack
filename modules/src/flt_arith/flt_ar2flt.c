@@ -8,9 +8,7 @@
 #include "flt_misc.h"
 #include <em_arith.h>
 
-#if __STDC__ > 0
 void
-#endif
 flt_arith2flt(n, e, uns)
 	register arith n;
 	register flt_arith *e;

@@ -6,6 +6,9 @@ static char rcsidp3[] = "$Header$";
 
 #define UPDATEWORST(backups) if(backups>mostbackups) mostbackups = backups;
 
+PRIVATE int leftmatch();
+PRIVATE int rightmatch();
+
 findworst(patt,repl)
 	struct mnems patt,repl;
 {

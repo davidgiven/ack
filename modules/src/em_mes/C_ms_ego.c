@@ -6,6 +6,7 @@
 #include <em.h>
 #include <em_mes.h>
 
+void
 C_ms_ego(hint, offs, siz, regno)
 	int hint, regno;
 	arith offs, siz;

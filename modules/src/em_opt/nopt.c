@@ -46,6 +46,9 @@ int		OO_wrstats = 1;	/* pattern statistics output */
  **************************/
 #define BTSCPY(pp,qq,i,p,q,n) for(pp=(p),qq=(q),i=(n);i--;*pp++ = *qq++)
 
+PRIVATE void allocmem();
+
+void
 O_init(wsize,psize)
 	arith wsize, psize;
 {
@@ -56,6 +59,7 @@ O_init(wsize,psize)
 	OO_PSIZE = psize;
 }
 
+int
 O_open(fname)
 	char *fname;
 {
@@ -63,16 +67,19 @@ O_open(fname)
 	return(C_open(fname));
 }
 
+void
 O_magic()
 {
 	C_magic();
 }
 
+void
 O_close()
 {
 	C_close();
 }
 
+void
 OO_dfa(last)
 	register int last;
 {
@@ -100,7 +107,7 @@ OO_dfa(last)
 	}
 }
 
-PRIVATE
+PRIVATE void
 fatal(s,a)
 	char *s;
 	int a;
@@ -111,7 +118,7 @@ fatal(s,a)
 	sys_stop(S_EXIT);
 }
 
-PRIVATE
+PRIVATE void
 allocmem()
 {
 	/* Allocate memory for queues on heap */
@@ -151,6 +158,7 @@ OO_freestr(str)
 	return(res);
 }
 
+void
 OO_flush()
 {
 	/*
@@ -197,6 +205,7 @@ OO_halfflush()
 	return (OO_nxtpatt++);
 }
 
+void
 OO_mkext(p,opcode,arg,off)
 	register p_instr p;
 	int opcode;
@@ -218,6 +227,7 @@ OO_mkext(p,opcode,arg,off)
 	}
 }
 
+void
 OO_mkrepl(lrepl,diff,numbkup)
 	int lrepl,diff,numbkup;
 {
@@ -264,6 +274,7 @@ OO_mkrepl(lrepl,diff,numbkup)
 }
 
 #ifdef DEBUG
+void
 dumpstate(mess)
 	char *mess;
 {
@@ -283,6 +294,7 @@ dumpstate(mess)
 	fprintf(stderr,"\n");
 }
 
+void
 prtinst(p)
 	p_instr	p;
 {

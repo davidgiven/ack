@@ -33,7 +33,7 @@ LIBCEOPT =	libCEopt.$(LIBSUF)
 
 .SUFFIXES:	.d .r
 
-.r.d:		; CMD=$(CMD); export CMD; awk -f $(SRC_DIR)/makefuns.awk $*.r | sh -x
+.r.d:		; CMD=$(CMD); export CMD; awk -f $(SRC_DIR)/makefuns.awk prototypes=/dev/null $*.r | sh -x
 		touch $@
 
 .SUFFIXES: .$(SUF)
@@ -57,15 +57,17 @@ GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c \
 		dfa.c dfa.c.new trans.c trans.c.new\
 		incalls.d incalls.r incalls.r.new pseudo.d pseudo.r
 
-all:		em_nopt $(LIBOPT) $(LIBCEOPT)
+all:		em_nopt $(LIBOPT) $(LIBCEOPT) prototypes
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBOPT) $(MOD_DIR)/lib/$(LIBOPT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBOPT)
 		cp $(LIBCEOPT) $(MOD_DIR)/lib/$(LIBCEOPT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBCEOPT)
-		cp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
 		cp em_nopt $(TARGET_HOME)/lib.bin/em_nopt
+		cp prototypes $(MOD_DIR)/h/em_codeO.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/em_opt.3 $(TARGET_HOME) ; \
 			mk_manpage $(SRC_DIR)/em_nopt.6 $(TARGET_HOME) ; \
@@ -75,7 +77,8 @@ cmp:		all
 		-cmp $(LIBOPT) $(MOD_DIR)/lib/$(LIBOPT)
 		-cmp $(LIBCEOPT) $(MOD_DIR)/lib/$(LIBCEOPT)
 		-cmp em_nopt $(TARGET_HOME)/lib.bin/em_nopt
-		-cmp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
+		-cmp prototypes $(MOD_DIR)/h/em_codeO.h
+
 
 pr:
 		@pr $(SRCS)
@@ -88,7 +91,7 @@ lint:		lintparser lintnopt
 clean:
 		rm -f O_*.$(SUF)
 		rm -f O_*.c
-		rm -f $(NOFILES) main.$(SUF) $(POFILES)
+		rm -f $(NOFILES) main.$(SUF) $(POFILES) prototypes
 		rm -f $(GENFILES) parser em_nopt $(LIBOPT) $(LIBCEOPT)
 
 # How to build stand alone version of the optimizer
@@ -131,6 +134,11 @@ $(LIBCEOPT):	incalls.r
 		mv $(LIBOPT) $(LIBCEOPT)
 		-mv $(LIBOPT).saved $(LIBOPT)
 		rm -f O_*.$(SUF) $(NOFILES)
+
+prototypes:	pseudo.r incalls.r
+		cp $(SRC_DIR)/em_codeO.h prototypes
+		echo >> prototypes
+		awk -f $(SRC_DIR)/makefuns.awk pseudo.r incalls.r > /dev/null
 
 incalls.r:	$(SRC_DIR)/patterns parser
 		-$(UTIL_HOME)/lib.bin/cpp $(SRC_DIR)/patterns | $(HOWMUCH) >/tmp/patts

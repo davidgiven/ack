@@ -4,6 +4,7 @@ static char rcsid3[] = "$Header$";
 
 #include "nopt.h"
 
+void
 EM_mkop(p,opcode)
 	register p_instr p;
 	int opcode;
@@ -13,6 +14,7 @@ EM_mkop(p,opcode)
 	p->em_argtype = 0;
 }
 
+void
 EM_mknarg(p,opcode)
 	register p_instr p;
 	int opcode;
@@ -23,6 +25,7 @@ EM_mknarg(p,opcode)
 	p->em_cst = 0;
 }
 
+void
 EM_mkilb(p,opcode,lab)
 	register p_instr p;
 	int opcode;
@@ -34,6 +37,7 @@ EM_mkilb(p,opcode,lab)
 	p->em_ilb = lab;
 }
 
+void
 EM_mknof(p,opcode,lab,off)
 	register p_instr p;
 	int opcode;
@@ -47,6 +51,7 @@ EM_mknof(p,opcode,lab,off)
 	p->em_off = off;
 }
 
+void
 EM_mksof(p,opcode,name,off)
 	register p_instr p;
 	int opcode;
@@ -60,6 +65,7 @@ EM_mksof(p,opcode,name,off)
 	p->em_off = off;
 }
 
+void
 EM_mkcst(p,opcode,cst)
 	register p_instr p;
 	int opcode;
@@ -71,6 +77,7 @@ EM_mkcst(p,opcode,cst)
 	p->em_cst = cst;
 }
 
+void
 EM_mkpro(p,opcode,pnam)
 	register p_instr p;
 	int opcode;
@@ -82,6 +89,7 @@ EM_mkpro(p,opcode,pnam)
 	p->em_pnam = OO_freestr(pnam);
 }
 
+void
 EM_mkdefilb(p,opcode,deflb)
 	register p_instr p;
 	int opcode;
@@ -93,6 +101,7 @@ EM_mkdefilb(p,opcode,deflb)
 	p->em_ilb = deflb;
 }
 
+void
 EM_Nop(opcode)
 	int opcode;
 {
@@ -102,6 +111,7 @@ EM_Nop(opcode)
 	p->em_argtype = 0;
 }
 
+void
 EM_Nnarg(opcode)
 	int opcode;
 {
@@ -112,6 +122,7 @@ EM_Nnarg(opcode)
 	p->em_cst = 0;
 }
 
+void
 EM_Nilb(opcode,lab)
 	int opcode;
 	label lab;
@@ -123,6 +134,7 @@ EM_Nilb(opcode,lab)
 	p->em_ilb = lab;
 }
 
+void
 EM_Nnof(opcode,lab,off)
 	int opcode;
 	label lab;
@@ -136,6 +148,7 @@ EM_Nnof(opcode,lab,off)
 	p->em_off = off;
 }
 
+void
 EM_Nsof(opcode,name,off)
 	int opcode;
 	char *name;
@@ -149,6 +162,7 @@ EM_Nsof(opcode,name,off)
 	p->em_off = off;
 }
 
+void
 EM_Ncst(opcode,cst)
 	int opcode;
 	arith cst;
@@ -160,6 +174,7 @@ EM_Ncst(opcode,cst)
 	p->em_cst = cst;
 }
 
+void
 EM_Npro(opcode,pnam)
 	int opcode;
 	char *pnam;
@@ -171,6 +186,7 @@ EM_Npro(opcode,pnam)
 	p->em_pnam = OO_freestr(pnam);
 }
 
+void
 EM_Ndefilb(opcode,deflb)
 	int opcode;
 	label deflb;
@@ -182,6 +198,7 @@ EM_Ndefilb(opcode,deflb)
 	p->em_ilb = deflb;
 }
 
+void
 EM_Rop(opcode)
 	int opcode;
 {
@@ -191,6 +208,7 @@ EM_Rop(opcode)
 	p->em_argtype = 0;
 }
 
+void
 EM_Rnarg(opcode)
 	int opcode;
 {
@@ -201,6 +219,7 @@ EM_Rnarg(opcode)
 	p->em_cst = 0;
 }
 
+void
 EM_Rilb(opcode,lab)
 	int opcode;
 	label lab;
@@ -212,6 +231,7 @@ EM_Rilb(opcode,lab)
 	p->em_ilb = lab;
 }
 
+void
 EM_Rnof(opcode,lab,off)
 	int opcode;
 	label lab;
@@ -225,6 +245,7 @@ EM_Rnof(opcode,lab,off)
 	p->em_off = off;
 }
 
+void
 EM_Rsof(opcode,name,off)
 	int opcode;
 	char *name;
@@ -238,6 +259,7 @@ EM_Rsof(opcode,name,off)
 	p->em_off = off;
 }
 
+void
 EM_Rcst(opcode,cst)
 	int opcode;
 	arith cst;
@@ -249,6 +271,7 @@ EM_Rcst(opcode,cst)
 	p->em_cst = cst;
 }
 
+void
 EM_Rpro(opcode,pnam)
 	int opcode;
 	char *pnam;
@@ -260,6 +283,7 @@ EM_Rpro(opcode,pnam)
 	p->em_pnam = OO_freestr(pnam);
 }
 
+void
 EM_Rdefilb(opcode,deflb)
 	int opcode;
 	label deflb;
