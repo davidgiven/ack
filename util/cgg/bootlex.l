@@ -1,4 +1,8 @@
 %{
+
+#ifndef NORCSID
+static char rcsid2[]="$Header$";
+#endif
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *

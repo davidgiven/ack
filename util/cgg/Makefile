@@ -1,3 +1,5 @@
+# $Header$
+
 PREFLAGS=-I../../h
 CFLAGS=$(PREFLAGS)
 LDFLAGS=-i
