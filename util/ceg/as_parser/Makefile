@@ -17,7 +17,8 @@ LEXLIB = -ll
 
 all:	as_parser eval/eval
 
-as_parser:	dummy $(OFILES)
+as_parser:	dummy
+	make $(OFILES)
 	$(CC) -o as_parser $(OFILES) $(LIBS) $(LEXLIB)
 
 eval/eval:
