@@ -38,10 +38,10 @@ confarray.c
 load.c
 blockmove.c
 stackprio.c
-ChkCards.e
+ucheck.c
+rcka.c
+rcku.c
+rcki.c
+rckul.c
+rckil.c
 EM.e
-rcka.e
-rcku.e
-rcki.e
-rckul.e
-rckil.e
