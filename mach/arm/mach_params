@@ -1,5 +1,5 @@
 MACH=arm
-SUF=s
+SUF=so
 ASAR=arch
 RANLIB=:
 MACHFL=-O -DUFS
