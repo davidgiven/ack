@@ -26,3 +26,6 @@
 #define E_LT	18
 #define E_GT	19
 #define E_SELECT 20
+#define E_BAND	21		/* bitwise and */
+#define E_BOR	22		/* bitwise or */
+#define E_BXOR	23

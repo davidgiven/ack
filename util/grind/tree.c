@@ -214,7 +214,7 @@ print_node(p, top_level)
 	fprintf(db_out, currlang->decint_fmt, p->t_ival);
 	break;
   case OP_STRING:
-	(*currlang->printstring)(p->t_sval);
+	(*currlang->printstring)(p->t_sval, strlen(p->t_sval));
 	break;
   case OP_REAL:
 	fprintf(db_out, currlang->real_fmt, p->t_fval);

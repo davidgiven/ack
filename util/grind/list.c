@@ -84,7 +84,6 @@ lines(file, l1, l2)
 		error("could not open %s", file->f_sym->sy_idf->id_text);
 		return;
 	}
-	printf("filedesc = %d\n", fileno(f));
 	last_file = file;
 	last_f = f;
 	if (! file->f_linepos) {

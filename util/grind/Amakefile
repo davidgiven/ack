@@ -62,7 +62,8 @@ CSRC = {
 	type.c,
 	rd.c,
 	default.c,
-	modula-2.c
+	modula-2.c,
+	c.c
 } ;
 
 HSRC = {

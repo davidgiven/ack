@@ -1,6 +1,6 @@
 /* $Header$ */
 
-/* Language dependant support; this one is default */
+/* Language dependant support; this one is for C */
 
 #include <stdio.h>
 #include <alloc.h>
@@ -34,7 +34,7 @@ static int
 static long
 	array_elsize();
 
-static struct langdep def = {
+static struct langdep c = {
 	0,
 
 	"%ld",
@@ -45,10 +45,10 @@ static struct langdep def = {
 	"%g",
 	"'\\%o'",
 
-	"[",
-	"]",
-	"(",
-	")",
+	"{",
+	"}",
+	"{",
+	"}",
 	"{",
 	"}",
 
@@ -62,7 +62,7 @@ static struct langdep def = {
 	print_op
 };
 
-struct langdep *def_dep = &def;
+struct langdep *c_dep = &c;
 
 static int
 print_string(s, len)
@@ -94,6 +94,8 @@ static int
 op_prio(op)
   int	op;
 {
+  switch(op) {
+  }
   return 1;
 }
 
@@ -176,12 +178,93 @@ get_token(c)
   register int	c;
 {
   switch(c) {
+  case '(':
+  case ')':
+  case '[':
+  case ']':
   case '`':
   case ':':
   case ',':
 	return c;
+
   case '.':
-	return get_number(c);
+	tok.ival = E_SELECT;
+	return SEL_OP;
+  case '+':
+	tok.ival = E_PLUS;
+	return PREF_OR_BIN_OP;
+  case '-':
+	tok.ival = E_MIN;
+	return PREF_OR_BIN_OP;
+  case '*':
+	tok.ival = E_MUL;
+	return PREF_OR_BIN_OP;
+  case '/':
+	tok.ival = E_ZDIV;
+	return BIN_OP;
+  case '%':
+	tok.ival = E_ZMOD;
+	return BIN_OP;
+  case '&':
+	c = getc(db_in);
+	if (c == '&') {
+		tok.ival = E_AND;
+	}
+	else {
+		ungetc(c, db_in);
+		tok.ival = E_BAND;
+	}
+	return BIN_OP;
+  case '^':
+	tok.ival = E_BXOR;
+	return BIN_OP;
+  case '|':
+	c = getc(db_in);
+	if (c == '|') {
+		tok.ival = E_OR;
+	}
+	else {
+		ungetc(c, db_in);
+		tok.ival = E_BOR;
+	}
+	return BIN_OP;
+  case '=':
+	c = getc(db_in);
+	if (c == '=') {
+	}
+	else {
+		ungetc(c, db_in);
+		warning("== assumed");
+	}
+	tok.ival = E_EQUAL;
+	return BIN_OP;
+  case '<':
+	c = getc(db_in);
+	if (c == '=') {
+		tok.ival = E_LTEQUAL;
+		return BIN_OP;
+	}
+	ungetc(c, db_in);
+	tok.ival = E_LT;
+	return BIN_OP;
+  case '>':
+	c = getc(db_in);
+	if (c == '=') {
+		tok.ival = E_GTEQUAL;
+		return BIN_OP;
+	}
+	ungetc(c, db_in);
+	tok.ival = E_GT;
+	return BIN_OP;
+  case '!':
+	c = getc(db_in);
+	if (c == '=') {
+		tok.ival = E_NOTEQUAL;
+		return BIN_OP;
+	}
+	ungetc(c, db_in);
+	tok.ival = E_NOT;
+	return PREF_OP;
   default:
 	error("illegal character 0%o", c);
 	return LLlex();
@@ -269,10 +352,11 @@ print_op(p)
 		print_node(p->t_args[0], 0);
 		break;
 	case E_NOT:
-		fputs("~", db_out);
+		fputs("!", db_out);
 		print_node(p->t_args[0], 0);
 		break;
 	case E_DEREF:
+	case E_MUL:
 		fputs("*", db_out);
 		print_node(p->t_args[0], 0);
 		break;
@@ -285,23 +369,23 @@ print_op(p)
 	case E_AND:
 		fputs("&&", db_out);
 		break;
+	case E_BAND:
+		fputs("&", db_out);
+		break;
 	case E_OR:
 		fputs("||", db_out);
+		break;
+	case E_BOR:
+		fputs("|", db_out);
+		break;
+	case E_BXOR:
+		fputs("^", db_out);
 		break;
 	case E_ZDIV:
 		fputs("/", db_out);
 		break;
 	case E_ZMOD:
 		fputs("%", db_out);
-		break;
-	case E_DIV:
-		fputs(" div ", db_out);
-		break;
-	case E_MOD:
-		fputs(" mod ", db_out);
-		break;
-	case E_IN:
-		fputs(" in ", db_out);
 		break;
 	case E_PLUS:
 		fputs("+", db_out);

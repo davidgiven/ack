@@ -294,7 +294,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
 			  	    : BUFTOL(addr));
 	break;
   case T_STRING:
-	(*currlang->printstring)(addr);
+	(*currlang->printstring)(addr, (int) tp_sz);
 	break;
   default:
 	assert(0);

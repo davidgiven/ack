@@ -64,8 +64,9 @@ static struct langdep m2 = {
 struct langdep *m2_dep = &m2;
 
 static int
-print_string(s)
+print_string(s, len)
   char	*s;
+  int	len;
 {
   register char	*str = s;
   int delim = '\'';
@@ -73,7 +74,7 @@ print_string(s)
   while (*str) {
 	if (*str++ == '\'') delim = '"';
   }
-  fprintf(db_out, "%c%s%c", delim, s, delim);
+  fprintf(db_out, "%c%.*s%c", delim, len, s, delim);
 }
 
 extern long	int_size;

@@ -31,6 +31,7 @@ int
 init_languages()
 {
   add_language(".mod", m2_dep);
+  add_language(".c", c_dep);
 }
 
 int

@@ -110,6 +110,23 @@ error(va_alist)
   errorgiven = 1;
 }
 
+/*VARARGS1*/
+warning(va_alist)
+  va_dcl
+{
+  va_list ap;
+  char *fmt;
+
+  va_start(ap);
+  {
+	fmt = va_arg(ap, char *);
+	fprintf(stderr, "%s: ", progname);
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+  }
+  va_end(ap);
+}
+
 rd_fatal()
 {
   fatal("read error in %s", AckObj);

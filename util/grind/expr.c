@@ -15,19 +15,27 @@
 extern FILE	*db_out;
 
 static long
-get_int(buf, size)
+get_int(buf, size, class)
   char	*buf;
   long	size;
 {
+  long l;
+
   switch((int)size) {
   case 1:
-	return *buf & 0xFF;
+	l = *buf;
+	if (class == T_INTEGER && l >= 0x7F) l -= 256;
+	else if (class != T_INTEGER && l < 0) l += 256;
+	break;
   case 2:
-	return *((short *) buf) & 0xFFFF;
+	l = *((short *) buf);
+	if (class == T_INTEGER && l >= 0x7FFF) l -= 65536;
+	else if (class != T_INTEGER && l < 0) l += 65536;
+	break;
   default:
-	return *((long *) buf);
+	l = *((long *) buf);
   }
-  /* NOTREACHED */
+  return l;
 }
 
 static double
@@ -101,7 +109,7 @@ convert(pbuf, psize, ptp, tp)
   case T_UNSIGNED:
   case T_POINTER:
   case T_ENUM:
-	l = get_int(*pbuf, *psize);
+	l = get_int(*pbuf, *psize, (*ptp)->ty_class);
 	if (tp == bool_type) l = l != 0;
 	switch(tp->ty_class) {
   	case T_SUBRANGE:
@@ -166,9 +174,9 @@ eval_cond(p)
 
   if (eval_expr(p, &buf, &size, &tp)) {
 	if (convert(&buf, &size, &tp, currlang->has_bool_type ? bool_type : int_type)) {
-		val = get_int(buf, size);
+		val = get_int(buf, size, T_UNSIGNED);
 		if (buf) free(buf);
-		return (int) val;
+		return (int) (val != 0);
 	}
 	if (buf) free(buf);
   }
@@ -184,7 +192,7 @@ do_not(p, pbuf, psize, ptp)
 {
   if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
       convert(pbuf, psize, ptp, currlang->has_bool_type ? bool_type : int_type)) {
-	put_int(*pbuf, *psize, (long) !get_int(*pbuf, *psize));
+	put_int(*pbuf, *psize, (long) !get_int(*pbuf, *psize, T_UNSIGNED));
 	return 1;
   }
   return 0;
@@ -233,7 +241,7 @@ do_unmin(p, pbuf, psize, ptp)
   	case T_INTEGER:
   	case T_ENUM:
   	case T_UNSIGNED:
-		put_int(*pbuf, *psize, -get_int(*pbuf, *psize));
+		put_int(*pbuf, *psize, -get_int(*pbuf, *psize, (*ptp)->ty_class));
 		return 1;
   	case T_REAL:
 		put_real(*pbuf, *psize, -get_real(*pbuf, *psize));
@@ -283,6 +291,9 @@ static int (*un_op[])() = {
   0,
   do_unplus,
   do_unmin,
+  do_deref,
+  0,
+  0,
   0,
   0,
   0,
@@ -383,8 +394,8 @@ do_andor(p, pbuf, psize, ptp)
       convert(pbuf, psize, ptp, currlang->has_bool_type ? bool_type : int_type) &&
       eval_expr(p->t_args[1], &buf, &size, &tp) &&
       convert(&buf, &size, &tp, currlang->has_bool_type ? bool_type : int_type)) {
-	l1 = get_int(*pbuf, *psize);
-	l2 = get_int(buf, size);
+	l1 = get_int(*pbuf, *psize, T_UNSIGNED);
+	l2 = get_int(buf, size, T_UNSIGNED);
 	put_int(*pbuf,
 		*psize,
 		p->t_whichoper == E_AND 
@@ -419,11 +430,20 @@ do_arith(p, pbuf, psize, ptp)
 	case T_INTEGER:
 	case T_ENUM:
 	case T_UNSIGNED:
-		l1 = get_int(*pbuf, *psize);
-		l2 = get_int(buf, size);
+		l1 = get_int(*pbuf, *psize, balance_tp->ty_class);
+		l2 = get_int(buf, size, balance_tp->ty_class);
 		free(buf);
 		buf = 0;
 		switch(p->t_whichoper) {
+		case E_BAND:
+			l1 &= l2;
+			break;
+		case E_BOR:
+			l1 |= l2;
+			break;
+		case E_BXOR:
+			l1 ^= l2;
+			break;
 		case E_PLUS:
 			l1 += l2;
 			break;
@@ -540,8 +560,8 @@ do_cmp(p, pbuf, psize, ptp)
 	case T_ENUM:
 	case T_UNSIGNED:
 	case T_POINTER:
-		l1 = get_int(*pbuf, *psize);
-		l2 = get_int(buf, size);
+		l1 = get_int(*pbuf, *psize, balance_tp->ty_class);
+		l2 = get_int(buf, size, balance_tp->ty_class);
 		free(buf);
 		buf = 0;
 		switch(p->t_whichoper) {
@@ -636,8 +656,30 @@ do_in(p, pbuf, psize, ptp)
   char		*buf = 0;
   long		size;
   p_type	tp;
+  int		sft = int_size == 2 ? 4 : 5;
 
-  error("IN not implemented"); 	/* ??? */
+  if (eval_expr(p->t_args[0], pbuf, psize, ptp) &&
+      eval_expr(p->t_args[1], &buf, &size, &tp)) {
+	if (tp->ty_class != T_SET) {
+		error("right-hand side of IN not a set");
+		free(buf);
+		return 0;
+	}
+	if (! convert(pbuf, psize, ptp, tp->ty_setbase)) {
+		free(buf);
+		return 0;
+	}
+	l = get_int(*pbuf, *psize, (*ptp)->ty_class) - tp->ty_setlow;
+	l = l >= 0 
+	    && l <= (size << 3) 
+	    && (((int *) buf)[(int)(l>>sft)] & (1 << (l & ((1 << sft)-1))));
+	free(buf);
+	*pbuf = Realloc(*pbuf, (unsigned) int_size);
+	*psize = int_size;
+	*ptp = currlang->has_bool_type ? bool_type : int_type;
+	put_int(*pbuf, *psize, l);
+	return 1;
+  }
   return 0;
 }
 
@@ -694,7 +736,10 @@ static int (*bin_op[])() = {
   do_cmp,
   do_cmp,
   do_cmp,
-  do_select
+  do_select,
+  do_arith,
+  do_arith,
+  do_arith
 };
 
 int

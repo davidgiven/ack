@@ -34,7 +34,7 @@ struct langdep {
   int	(*printop)();
 };
 
-extern struct langdep	*m2_dep, *def_dep, *currlang;
+extern struct langdep	*m2_dep, *def_dep, *c_dep, *currlang;
 
 extern int find_language();
 
