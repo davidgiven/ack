@@ -69,10 +69,16 @@ new_mem(p) register p_info p; {
 	if (p->i_max >= p->i_top) {	/* No more free elements */
 		sz = p->i_size;
 #if BIGMACHINE
+		/*
+		   Do not worry about size. Just double it.
+		 */
 		p->i_size += p->i_size;
 		if (! p->i_size)
 			p->i_size += p->i_incr * p->i_esize;
 #else
+		/*
+		   Worry about size, so only increment in chunks of i_incr.
+		 */
 		p->i_size += p->i_incr * p->i_esize;
 #endif
 		p->i_ptr = !p->i_ptr ? 
