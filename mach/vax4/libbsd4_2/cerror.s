@@ -1,4 +1,5 @@
-	.globl	_errno, cerror
+	.globl	_errno
+	.globl	cerror
 .comm _errno, 4
 cerror:
 	movl	r0,_errno

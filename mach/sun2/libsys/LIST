@@ -126,6 +126,7 @@ times.c
 truncate.s
 umask.s
 unlink.s
+umount.s
 unmount.s
 utime.c
 utimes.s

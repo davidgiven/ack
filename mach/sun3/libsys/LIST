@@ -129,6 +129,7 @@ times.c
 truncate.s
 umask.s
 unlink.s
+umount.s
 unmount.s
 ustat.s
 utime.c

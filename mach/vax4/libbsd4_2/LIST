@@ -119,6 +119,7 @@ getrusage.s
 truncate.s
 umask.s
 umount.s
+unmount.s
 unlink.s
 utime.c
 utimes.s
