@@ -390,8 +390,8 @@ check_integral_type(expp, oper)
 	if (!is_integral_type(expr->ex_type))	{
 		expr_error(expr, "%s on non-integral type (%s)",
 			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
+		erroneous2int(expp);
 	}
-	erroneous2int(expp);
 }
 
 int
@@ -424,6 +424,6 @@ check_arith_type(expp, oper)
 	if (!is_arith_type(expr->ex_type))	{
 		expr_error(expr, "%s on non-arithmetical type (%s)",
 			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
+		erroneous2int(expp);
 	}
-	erroneous2int(expp);
 }
