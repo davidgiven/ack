@@ -2,4 +2,5 @@
 line130
 line140
 line150
-LINE 120:ERROR 1: RETURN without GOSUB
+ 4 end
+Break in 121

@@ -4,5 +4,4 @@
 160 true
 170 true
 yes or no
-? 0 
- 0 
+?LINE 190:ERROR 2: Out of data

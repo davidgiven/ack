@@ -9,7 +9,7 @@ end the enemy will destroy you!
 
 maximum range of your gun is 46500 yards.
 
-	distance to the target is 43000 yards....
+	distance to the target is 42956 yards....
 
 
 elevation?LINE 410:ERROR 2: Out of data
