@@ -3,17 +3,17 @@ For a distribution you need ".distr" files and RCS files.
 The EM home directory contains a file called ".distr". It contains
 the names of all the files and directories you want to have in the distribution.
 The directories should contain .distr files, the other files should
-be placed under RCS.
-The current RCS revision name is "distr4".
-The are files that derive from other files and yet should be placed
+be placed under CVS.
+There are files that derive from other files and yet should be placed
 in the distribution.
-These files should not be placed under RCS.
+These files should not be placed under RCS or CVS.
 The file "Exceptions" in this directory contains the current list of
 these files.
 
 When all this is correct, use the shell script mktree the extract
 the distribution from the EM tree.
-	cd ~em/Repositories ; sh ../Work/distr/mktree destination_tree Distr4 >../Work/distr/f.attf 2>&1
+	cd ~em/Repositories
+	sh ../Work/distr/mktree destination_tree > destination_tree/Version 2>../Work/distr/f.attf
 Make sure that the destination tree exists and is empty!
 Failing to do that will almost certainly result in a welter of
 error messages.
@@ -33,28 +33,28 @@ For each file mentioned there it performes certain actions:
                     In this manner libraries can be distributed whose members
                     have their own RCS file! 
               else
-   b-
-              give message that says "Missing entry" (or some such). 
+   b-		    Try to run 'make distr'
+	      else
+   c-		    Try to run 'make <filename>'
+	      else
+   d-               give message that says "not present" (or some such). 
 
 Now you have the tree but not everything is kosher yet.
 Some files derive from other files in the tree, those derivations should
 be done with the use of an already installed distribution.
-The files Action and Action1 in this directory contain the actions
-we now take. (Confession: most of the time we use /usr/em)
+The file Action in this directory contains the actions
+we now take.
 
 After running these re-derivation programs the distrubtion tree starts
 to look like the tree you need.
 There are too many files there though, especially the files created by
 the derivation process.
 That is why we now give the command:
-	dtar cdf distr4 .
-The file distr4 is the one you should put on tape!
+	dtar cdf distr5 .
+The file distr5 is the one you should put on tape!
 But,.... before doing that: Try it out!
 Repeat the process described in the installation manual.
-Only if that succeeds you are sure that you included the files needed,
-and gave all other files the correct "distr4" RCS id.
-After you sent the tape away, forbid ANYBODY to touch the distr4 id
-in your RCS files.
+Only if that succeeds you are sure that you included the files needed.
 					Good Luck,
 						Ed Keizer, 85/4/15.
 
@@ -63,5 +63,8 @@ And again,
 					Good Luck!
 
 Updated for 4rd distribution by Ceriel Jacobs, 88/4/08.
+And again,
+					Good Luck!
+Updated for 4th distribution by Ceriel Jacobs, 91-16/10.
 And again,
 					Good Luck!

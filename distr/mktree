@@ -1,6 +1,6 @@
 case $# in
 1|2)	;;
-*)	echo $0 directory [ SVrecord ] ; exit 1 ;;
+*)	echo $0 directory [ SVrecord ] 1>&2 ; exit 1 ;;
 esac
 DDIR=/usr/proj/em/Work/distr
 case $1 in

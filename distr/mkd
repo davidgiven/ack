@@ -11,8 +11,8 @@ then
 else
 	if `CV $p > /dev/null 2>&1`
 	then
-		:
+		echo "$1 `RC -i`"
 	else
-		echo "-- $1 CV failed for some reason"
+		echo "-- $1 CV failed for some reason" 1>&2
 	fi
 fi

@@ -8,7 +8,7 @@ fi
 ${DF-:} $CDIR .distr
 if test ! -r $DESTDIR/$CDIR/.distr
 then
-	echo ++ no .distr in $CDIR
+	echo ++ no .distr in $CDIR 1>&2
         exit 0
 fi
 for i in `cat $DESTDIR/$CDIR/.distr`
@@ -21,7 +21,7 @@ do
 			export CDIR
 			exec $DDIR/dwalk $*
 		  else
-			echo ++ Could not access $CDIR/$i
+			echo ++ Could not access $CDIR/$i 1>&2
 		  fi
 		)
 	else

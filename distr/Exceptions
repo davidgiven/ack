@@ -1,25 +1,10 @@
--- ./doc/install.pr no RCS file
--- ./h/em_mnem.h no RCS file
--- ./h/em_pseu.h no RCS file
--- ./h/em_spec.h no RCS file
--- ./lang/cem/cemcom/makefile no RCS file
--- ./lang/pc/pem/pem22.m no RCS file
--- ./lang/pc/pem/pem24.m no RCS file
--- ./lang/pc/pem/pem44.m no RCS file
--- ./lib/LLgen/incl no RCS file
--- ./lib/LLgen/rec no RCS file
--- ./mach/m68k2/cg/tables1.c no RCS file
--- ./mach/m68k2/cg/tables1.h no RCS file
--- ./mach/m68020/ncg/tables1.c no RCS file
--- ./mach/m68020/ncg/tables1.h no RCS file
--- ./mach/vax4/cg/tables1.c no RCS file
--- ./mach/vax4/cg/tables1.h no RCS file
--- ./util/LLgen/src/parser no RCS file
--- ./util/LLgen/src/LLgen.c no RCS file
--- ./util/LLgen/src/Lpars.c no RCS file
--- ./util/LLgen/src/Lpars.h no RCS file
--- ./util/LLgen/src/tokens.c no RCS file
--- ./util/data/em_flag.c no RCS file
--- ./util/data/em_mnem.c no RCS file
--- ./util/data/em_pseu.c no RCS file
--- ./util/ego/share/pop_push.h no RCS file
+++ ./doc/install.pr made
+++ ./doc/int/.distr made
+++ ./h/em_mnem.h not present
+++ ./h/em_pseu.h not present
+++ ./h/em_spec.h not present
+++ ./util/LLgen/src/LLgen.c.dist made
+++ ./util/data/em_flag.c not present
+++ ./util/data/em_mnem.c not present
+++ ./util/data/em_pseu.c not present
+++ ./util/ego/share/pop_push.h made
