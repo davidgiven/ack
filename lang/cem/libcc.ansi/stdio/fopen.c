@@ -73,14 +73,16 @@ fopen(const char *name, const char *mode)
 	while (*mode) {
 		switch(*mode++) {
 		case 'b':
-			break;
+			continue;
 		case '+':
 			rwmode = O_RDWR;
 			flags |= _IOREAD | _IOWRITE;
-			break;
+			continue;
+		/* The sequence may be followed by additional characters */
 		default:
-			return (FILE *)NULL;
+			break;
 		}
+		break;
 	}
 
 	/* Perform a creat() when the file should be truncated or when
