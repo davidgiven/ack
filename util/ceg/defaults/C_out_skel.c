@@ -39,23 +39,12 @@ C_out(p)
 			break;
 		case EM_MNEM:
 			/* normal instruction */
-{
-	register int parametertype;	/* parametertype of the instruction */
-
-	parametertype = em_flag[p->em_opcode-sp_fmnem] & EM_PAR;
-	switch(parametertype) {
-		default:
-			break;
-		case PAR_W:
-			if (p->em_argtype != 0) {
-			}
-			else {
+			if ((em_flag[p->em_opcode-sp_fmnem] & EM_PAR) == PAR_W &&
+			    p->em_argtype == 0) {
 #include "C_mnem_narg"
-			}
-			break;
-	}
+			} else {
 #include "C_mnem"
-}
+			}
 
 			break;
 		case EM_DEFILB:
