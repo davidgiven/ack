@@ -18,9 +18,10 @@ bts2str(b, n, s)
 	register char *f = b, *t = s;
 
 	while (n-- > 0) {
-		if (is_print(*f))
+		if (is_print(*f)) {
+			if (*f == '\\') *t++ = *f;
 			*t++ = *f++;
-		else {
+		} else {
 			*t++ = '\\';
 			*t++ = ((*f >> 6) & 03) + '0';
 			*t++ = ((*f >> 3) & 07) + '0';
