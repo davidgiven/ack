@@ -39,9 +39,9 @@ typedef union _inf mallink;
 */
 #ifndef	NON_STANDARD
 #define	OFF_SET	0
-#else	def NON_STANDARD
+#else	/* def NON_STANDARD */
 #define	OFF_SET	2
-#endif	NON_STANDARD
+#endif	/* NON_STANDARD */
 
 #define	_log_prev_of(ml)	((ml)[-1+OFF_SET]).ptr
 #define	_log_next_of(ml)	((ml)[-2+OFF_SET]).ptr
@@ -54,7 +54,7 @@ typedef union _inf mallink;
 #define	_print_of(ml)		((ml)[-6+OFF_SET]).ui
 #define	_mark_of(ml)		((ml)[-7+OFF_SET]).ui
 #define	N_WORDS			7
-#endif	CHECK
+#endif	/* CHECK */
 
 #define	mallink_size()		(unsigned int) \
 	align((N_WORDS - OFF_SET) * sizeof (mallink))
@@ -65,7 +65,7 @@ typedef union _inf mallink;
 
 #define	set_checksum(ml,e)	(_checksum_of(ml) = (e))
 #define	checksum_of(ml)		(_checksum_of(ml))
-#endif	CHECK
+#endif	/* CHECK */
 
 #define new_mallink(ml)		( _log_prev_of(ml) = 0, \
 				  _log_next_of(ml) = 0, \
@@ -80,14 +80,14 @@ typedef union _inf mallink;
 #ifndef	EXTERN
 #define	private	static
 #define	privatedata	static
-#else	def	EXTERN
+#else	/* def	EXTERN */
 #define	private	extern
 #define	privatedata
-#endif	EXTERN
+#endif	/* EXTERN */
 
 #ifdef	ASSERT
 public m_assert();
 #define	assert(b)		(!(b) ? m_assert(__FILE__, __LINE__) : 0)
-#else	ndef	ASSERT
+#else	/* ndef	ASSERT */
 #define	assert(b)		0
-#endif	ASSERT
+#endif	/* ASSERT */

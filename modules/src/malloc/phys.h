@@ -33,9 +33,9 @@ public Error();
 		(char *)Error("phys_prev_of first_mallink %lx", "somewhere", (long)ml) : \
 		(char *)__phys_prev_of(ml) \
 	)
-#else	ndef	CHECK
+#else	/* ndef	CHECK */
 #define	phys_prev_of(ml)	__phys_prev_of(ml)
-#endif	CHECK
+#endif	/* CHECK */
 
 #define	first_mallink(ml)	(int) (__phys_prev_of(ml) == 0)
 #define	last_mallink(ml)	(int) ((ml) == ml_last)
@@ -69,7 +69,7 @@ public Error();
 #ifdef	CHECK
 #define	set_print(ml,e)		(_print_of(ml) = (e))
 #define	print_of(ml)		(_print_of(ml))
-#endif	CHECK
+#endif	/* CHECK */
 
 public truncate(), combine_chunks();
 public mallink *create_chunk();

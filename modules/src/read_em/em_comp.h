@@ -72,4 +72,4 @@ extern unsigned int
 	EM_lineno;
 extern int
 	EM_wordsize, EM_pointersize;
-#endif __EMCOMP_INCLUDED__
+#endif /* __EMCOMP_INCLUDED__ */
