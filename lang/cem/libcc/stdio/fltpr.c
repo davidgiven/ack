@@ -8,7 +8,9 @@ _pfloat(r,s,n,b)
 	double r;
 	register char *s;
 {
-	int sign,dp,i; char *s1;
+	register char *s1;
+	int sign,dp;
+	register int i;
 
 	if (b == 0)
 		n = 6;
@@ -31,8 +33,9 @@ _pfloat(r,s,n,b)
 	return(s);
 }
 
-char *_pscien(r,s,n,b) float r; char *s; {
-	int sign,dp; char *s1;
+char *_pscien(r,s,n,b) float r; register char *s; {
+	int sign,dp; 
+	register char *s1;
 
 	if (b == 0)
 		n = 7;
