@@ -342,13 +342,19 @@ bool operand(ip,n)
 {
 	register char *p;
 	int oplen;
+#ifdef PAREN_OPEN
 	int nesting = 0;
+#else
+#define nesting 0
+#endif
 
 	skip_white(ip);
 	p = ip->rest_line;
 	while((*p != OP_SEPARATOR || nesting) && *p != '\n') {
-		if (*p == '(') nesting++;
-		else if (*p == ')') nesting--;
+#ifdef PAREN_OPEN
+		if (strindex(PAREN_OPEN, *p) != 0) nesting++;
+		else if (strindex(PAREN_CLOSE, *p) != 0) nesting--;
+#endif
 		p++;
 	}
 	oplen = p - ip->rest_line;
@@ -357,6 +363,9 @@ bool operand(ip,n)
 	ip->op[n][oplen] = '\0';
 	ip->rest_line = p;
 	return TRUE;
+#ifdef nesting
+#undef nesting
+#endif
 }
 
 

@@ -1,10 +1,11 @@
-EM=../../..
+EMHOME=../../..
+LIBS=$(EMHOME)/modules/lib/libstring.a
 PREFLAGS=-I.
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) -O -DNDEBUG
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
-CDIR=$(EM)/mach/proto/top
+CDIR=$(EMHOME)/mach/proto/top
 CFILES=$(CDIR)/top.c $(CDIR)/queue.c
 OFILES=top.o queue.o
 
@@ -21,13 +22,13 @@ queue.o: $(CDIR)/queue.c
 	$(CC) -c $(CFLAGS) $(CDIR)/queue.c
 
 install: all
-	$(EM)/mach/install top
+	$(EMHOME)/mach/install top
 
 cmp:	 all
-	-$(EM)/mach/compare top
+	-$(EMHOME)/mach/compare top
 
 gen.c: table
-	$(EM)/lib/topgen table
+	$(EMHOME)/lib/topgen table
 
 lint: $(CFILES)
 	lint $(LINTOPTS) $(PREFLAGS) $(CFILES)
