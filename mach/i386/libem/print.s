@@ -39,7 +39,7 @@ printc:
 	push	eax
 	push	ebx
 	push	eax
-	call	_write
+	call	__write
 	pop	ebx
 	pop	ebx
 	pop	ebx

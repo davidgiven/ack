@@ -2,11 +2,8 @@ Action
 as
 ce
 cv
-libbc
-libcc
+libend
 libem
 libfp
-libm2
-liboc
-libpc
+libsys
 ncg

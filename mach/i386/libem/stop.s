@@ -2,4 +2,4 @@
 .sect .text
 .define .stop
 .stop:
-	jmp	_exit
+	jmp	__exit
