@@ -20,6 +20,7 @@
 	Also, the "token2str.c" file is produced from this file.
 */
 
+#ifdef ___XXX___
 struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{IDENT, "identifier"},
 	{STRING, "string"},
@@ -35,6 +36,7 @@ struct tokenname tkcomp[] =	{	/* names of the composite tokens */
 	{BECOMES, ":="},
 	{0, ""}
 };
+#endif
 
 struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{AND, "AND"},
@@ -80,6 +82,7 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{0, ""}
 };
 
+#ifdef ___XXX___
 struct tokenname tkinternal[] = {	/* internal keywords	*/
 	{PROGRAM, ""},
 	{0, "0"}
@@ -88,6 +91,7 @@ struct tokenname tkinternal[] = {	/* internal keywords	*/
 struct tokenname tkstandard[] =	{	/* standard identifiers */
 	{0, ""}
 };
+#endif
 
 /* Some routines to handle tokennames */
 

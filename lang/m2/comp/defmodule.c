@@ -36,7 +36,7 @@ struct idf *DefId;
 
 STATIC char *
 getwdir(fn)
-	char *fn;
+	register char *fn;
 {
 	register char *p;
 	char *strrindex();
@@ -49,7 +49,7 @@ getwdir(fn)
 
 	if (p) {
 		*p = '\0';
-		fn = Salloc(fn, p - &fn[0] + 1);
+		fn = Salloc(fn, (unsigned) (p - &fn[0] + 1));
 		*p = '/';
 		return fn;
 	}
@@ -64,7 +64,7 @@ GetFile(name)
 		in the directories mentioned in "DEFPATH".
 	*/
 	char buf[15];
-	char *strcpy(), *strcat();
+	char *strncpy(), *strcat();
 	static char *WorkingDir = ".";
 
 	strncpy(buf, name, 10);

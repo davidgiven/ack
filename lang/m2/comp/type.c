@@ -217,7 +217,7 @@ u_small(tp, n)
 		tp->tp_size = 1;
 		tp->tp_align = 1;
 	}
-	else if (ufit(n, short_size)) {
+	else if (ufit(n, (int)short_size)) {
 		tp->tp_size = short_size;
 		tp->tp_align = short_align;
 	}
@@ -302,16 +302,18 @@ chk_basesubrange(tp, base)
 
 struct type *
 subr_type(lb, ub)
-	struct node *lb, *ub;
+	register struct node *lb;
+	struct node *ub;
 {
 	/*	Construct a subrange type from the constant expressions
 		indicated by "lb" and "ub", but first perform some
 		checks
 	*/
-	register struct type *tp = BaseType(lb->nd_type), *res;
+	register struct type *tp = BaseType(lb->nd_type);
+	register struct type *res;
 
 	if (!TstCompat(lb->nd_type, ub->nd_type)) {
-		node_error(ub, "types of subrange bounds not equal");
+		node_error(lb, "types of subrange bounds not equal");
 		return error_type;
 	}
 
@@ -326,14 +328,14 @@ subr_type(lb, ub)
 	/* Check base type
 	*/
 	if (! (tp->tp_fund & T_DISCRETE)) {
-		node_error(ub, "illegal base type for subrange");
+		node_error(lb, "illegal base type for subrange");
 		return error_type;
 	}
 
 	/* Check bounds
 	*/
 	if (lb->nd_INT > ub->nd_INT) {
-		node_error(ub, "lower bound exceeds upper bound");
+		node_error(lb, "lower bound exceeds upper bound");
 	}
 
 	/* Now construct resulting type
@@ -351,8 +353,8 @@ subr_type(lb, ub)
 			res->tp_size = 1;
 			res->tp_align = 1;
 		}
-		else if (fit(res->sub_lb, short_size) &&
-			 fit(res->sub_ub, short_size)) {
+		else if (fit(res->sub_lb, (int)short_size) &&
+			 fit(res->sub_ub, (int)short_size)) {
 			res->tp_size = short_size;
 			res->tp_align = short_align;
 		}
@@ -381,22 +383,19 @@ genrck(tp)
 	*/
 	arith lb, ub;
 	register label ol;
-	int newlabel = 0;
 
 	getbounds(tp, &lb, &ub);
 
 	if (tp->tp_fund == T_SUBRANGE) {
 		if (!(ol = tp->sub_rck)) {
-			tp->sub_rck = ol = ++data_label;
-			newlabel = 1;
+			tp->sub_rck = ++data_label;
 		}
 	}
 	else if (!(ol = tp->enm_rck)) {
-		tp->enm_rck = ol = ++data_label;
-		newlabel = 1;
+		tp->enm_rck = ++data_label;
 	}
-	if (newlabel) {
-		C_df_dlb(ol);
+	if (!ol) {
+		C_df_dlb(ol = data_label);
 		C_rom_cst(lb);
 		C_rom_cst(ub);
 	}
@@ -571,18 +570,21 @@ int
 type_or_forward(ptp)
 	struct type **ptp;
 {
-	struct node *nd = 0;
+	/*	POINTER TO IDENTIFIER construction. The IDENTIFIER resides
+		in "dot". This routine handles the different cases.
+	*/
+	register struct node *nd;
 
 	*ptp = construct_type(T_POINTER, NULLTYPE);
-	if (lookup(dot.TOK_IDF, CurrentScope, 1)
+	if (lookup(dot.TOK_IDF, CurrentScope, 1)) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-	    ||
-	    ( nd = new_node(),
-	      nd->nd_token = dot,
-	      lookfor(nd, CurrVis, 0)->df_kind == D_MODULE
-	    )
+		return 1;
+	}
+	nd = new_node();
+	nd->nd_token = dot;
+	if (lookfor(nd, CurrVis, 0)->df_kind == D_MODULE) {
 		/* A Modulename in one of the enclosing scopes.
 		   It is not clear from the language definition that
 		   it is correct to handle these like this, but
@@ -591,8 +593,7 @@ type_or_forward(ptp)
 		   one token.
 		   ???
 		*/
-	   ) {
-		if (nd) free_node(nd);
+		free_node(nd);
 		return 1;
 	}
 	/*	Enter a forward reference into a list belonging to the
@@ -652,7 +653,7 @@ DumpType(tp)
 	switch(tp->tp_fund) {
 	case T_RECORD:
 		print("RECORD\n");
-		DumpScope(tp->rec_scope);
+		DumpScope(tp->rec_scope->sc_def);
 		break;
 	case T_ENUMERATION:
 		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;

@@ -33,6 +33,7 @@
 #include	"warning.h"
 
 extern char *symbol2str();
+extern char *sprint();
 
 STATIC
 Xerror(nd, mess, edf)
@@ -293,7 +294,7 @@ ChkElement(expp, tp, set, level)
 	register struct node *expr = *expp;
 	register struct node *left = expr->nd_left;
 	register struct node *right = expr->nd_right;
-	register int i;
+	register arith i;
 
 	if (expr->nd_class == Link && expr->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
@@ -310,7 +311,7 @@ ChkElement(expp, tp, set, level)
 			*/
 
 		    	if (left->nd_INT > right->nd_INT) {
-node_error(expp, "lower bound exceeds upper bound in range");
+node_error(expr, "lower bound exceeds upper bound in range");
 				return 0;
 			}
 
@@ -385,7 +386,7 @@ ChkSet(expp)
 		if (!is_type(df) ||
 	   	    (df->df_type->tp_fund != T_SET)) {
 			if (df->df_kind != D_ERROR) {
-				Xerror(expp, "not a set type", df);
+				Xerror(nd, "not a set type", df);
 			}
 			return 0;
 		}
@@ -568,6 +569,23 @@ ChkProcCall(expp)
 		return 0;
 	}
 
+	return retval;
+}
+
+int
+ChkFunCall(expp)
+	register struct node *expp;
+{
+	/*	Check a call that must have a result
+	*/
+	int retval = 1;
+
+	if (!ChkCall(expp)) retval = 0;
+	if (expp->nd_type == 0) {
+		node_error(expp, "function call expected");
+		expp->nd_type = error_type;
+		retval = 0;
+	}
 	return retval;
 }
 
@@ -1007,7 +1025,7 @@ ChkStandard(expp, left)
 			tk->TOK_INT = PointedtoType(left->nd_type)->tp_size;
 			tk->tk_symb = INTEGER;
 			tk->tk_lineno = left->nd_lineno;
-			nd = MkLeaf(Value, &dt);
+			nd = MkLeaf(Value, tk);
 			nd->nd_type = card_type;
 			tk->tk_symb = ',';
 			arg->nd_right = MkNode(Link, nd, NULLNODE, tk);
@@ -1199,7 +1217,7 @@ int (*ExprChkTable[])() = {
 	ChkBinOper,
 	ChkUnOper,
 	ChkArrow,
-	ChkCall,
+	ChkFunCall,
 	ChkExLinkOrName,
 	NodeCrash,
 	ChkSet,

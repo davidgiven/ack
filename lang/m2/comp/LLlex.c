@@ -156,13 +156,6 @@ getch()
 	return ch;
 }
 
-STATIC
-linedirective() {
-	/*	Read a line directive
-	*/
-	register int	ch;
-}
-
 CheckForLineDirective()
 {
 	register int ch = getch();
@@ -529,7 +522,7 @@ lexwarning(W_ORDINARY, "character constant out of range");
 			tk->TOK_REL = Salloc("0.0", 5);
 			lexerror("floating constant too long");
 		}
-		else	tk->TOK_REL = Salloc(buf, np - buf) + 1;
+		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;
 		toktype = real_type;
 		return tk->tk_symb = REAL;
 

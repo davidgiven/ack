@@ -20,7 +20,7 @@ PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -O -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
-LFLAGS = $(PROFILE)
+LDFLAGS = -i $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 CSRC =	LLlex.c LLmessage.c error.c main.c \
@@ -34,7 +34,7 @@ COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
 	code.o tmpvar.o lookup.o Version.o next.o
 GENC=	$(LSRC) symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
-SRC =	$(CSRC) $(GENC) Lpars.c
+SRC =	$(CSRC) $(GENC)
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 GENH=	errout.h\
@@ -137,10 +137,18 @@ depend:
 #INCLINCLINCLINCL
 
 Xlint:
-	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
+	lint $(INCLUDES) $(LINTFLAGS) $(SRC) \
+		$(LIBDIR)/llib-lem_mes.ln \
+		$(LIBDIR)/llib-lemk.ln \
+		$(LIBDIR)/llib-linput.ln \
+		$(LIBDIR)/llib-lassert.ln \
+		$(LIBDIR)/llib-lalloc.ln \
+		$(LIBDIR)/llib-lprint.ln \
+		$(LIBDIR)/llib-lstring.ln \
+		$(LIBDIR)/llib-lsystem.ln
 
 $(CURRDIR)/main:	$(OBJ)
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
+	$(CC) $(LDFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
 	size $(CURRDIR)/main
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
@@ -162,7 +170,6 @@ LLlex.o: warning.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
 LLmessage.o: idf.h
-char.o: class.h
 error.o: LLlex.h
 error.o: debug.h
 error.o: debugcst.h
@@ -189,7 +196,6 @@ main.o: standards.h
 main.o: tokenname.h
 main.o: type.h
 main.o: warning.h
-symbol2str.o: Lpars.h
 tokenname.o: Lpars.h
 tokenname.o: idf.h
 tokenname.o: tokenname.h
@@ -223,14 +229,6 @@ def.o: main.h
 def.o: node.h
 def.o: scope.h
 def.o: type.h
-scope.o: LLlex.h
-scope.o: debug.h
-scope.o: debugcst.h
-scope.o: def.h
-scope.o: idf.h
-scope.o: node.h
-scope.o: scope.h
-scope.o: type.h
 misc.o: LLlex.h
 misc.o: f_info.h
 misc.o: idf.h
@@ -316,15 +314,6 @@ walk.o: scope.h
 walk.o: type.h
 walk.o: walk.h
 walk.o: warning.h
-casestat.o: LLlex.h
-casestat.o: Lpars.h
-casestat.o: debug.h
-casestat.o: debugcst.h
-casestat.o: density.h
-casestat.o: desig.h
-casestat.o: node.h
-casestat.o: type.h
-casestat.o: walk.h
 desig.o: LLlex.h
 desig.o: debug.h
 desig.o: debugcst.h
@@ -344,12 +333,6 @@ code.o: scope.h
 code.o: standards.h
 code.o: type.h
 code.o: walk.h
-tmpvar.o: debug.h
-tmpvar.o: debugcst.h
-tmpvar.o: def.h
-tmpvar.o: main.h
-tmpvar.o: scope.h
-tmpvar.o: type.h
 lookup.o: LLlex.h
 lookup.o: debug.h
 lookup.o: debugcst.h
@@ -359,8 +342,6 @@ lookup.o: misc.h
 lookup.o: node.h
 lookup.o: scope.h
 lookup.o: type.h
-next.o: debug.h
-next.o: debugcst.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h
 program.o: Lpars.h
@@ -405,4 +386,31 @@ statement.o: idf.h
 statement.o: node.h
 statement.o: scope.h
 statement.o: type.h
+symbol2str.o: Lpars.h
+char.o: class.h
 Lpars.o: Lpars.h
+casestat.o: LLlex.h
+casestat.o: Lpars.h
+casestat.o: debug.h
+casestat.o: debugcst.h
+casestat.o: density.h
+casestat.o: desig.h
+casestat.o: node.h
+casestat.o: type.h
+casestat.o: walk.h
+tmpvar.o: debug.h
+tmpvar.o: debugcst.h
+tmpvar.o: def.h
+tmpvar.o: main.h
+tmpvar.o: scope.h
+tmpvar.o: type.h
+scope.o: LLlex.h
+scope.o: debug.h
+scope.o: debugcst.h
+scope.o: def.h
+scope.o: idf.h
+scope.o: node.h
+scope.o: scope.h
+scope.o: type.h
+next.o: debug.h
+next.o: debugcst.h

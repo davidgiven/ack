@@ -14,6 +14,7 @@
 #include	<system.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<alloc.h>
 
 #include	"input.h"
 #include	"f_info.h"
@@ -101,7 +102,7 @@ Compile(src, dst)
 	C_ms_emx(word_size, pointer_size);
 	CheckForLineDirective();
 	CompUnit();
-	C_ms_src((arith) (LineNumber - 1), FileName);
+	C_ms_src((int)LineNumber - 1, FileName);
 	if (!err_occurred) {
 		C_exp(Defined->mod_vis->sc_scope->sc_name);
 		WalkModule(Defined);

@@ -66,10 +66,7 @@ ModuleDeclaration
 			}
 ;
 
-priority(register struct def *df;)
-{
-	register struct node *nd;
-} :
+priority(register struct def *df;):
 	[
 		'[' ConstExpression(&(df->mod_priority)) ']'
 			{ if (!(df->mod_priority->nd_type->tp_fund &

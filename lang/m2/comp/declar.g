@@ -132,7 +132,7 @@ TypeDeclaration
 {
 	struct def *df;
 	struct type *tp;
-	struct node *nd;
+	register struct node *nd;
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
 			  nd = MkLeaf(Name, &dot);
@@ -143,7 +143,7 @@ TypeDeclaration
 			}
 ;
 
-type(struct type **ptp;):
+type(register struct type **ptp;):
 	%default SimpleType(ptp)
 |
 	ArrayType(ptp)
@@ -157,7 +157,7 @@ type(struct type **ptp;):
 	ProcedureType(ptp)
 ;
 
-SimpleType(struct type **ptp;)
+SimpleType(register struct type **ptp;)
 {
 	struct type *tp;
 } :
@@ -264,9 +264,9 @@ FieldListSequence(struct scope *scope; arith *cnt; int *palign;):
 FieldList(struct scope *scope; arith *cnt; int *palign;)
 {
 	struct node *FldList;
-	register struct idf *id = 0;
 	struct type *tp;
 	struct node *nd;
+	register struct def *df;
 	arith tcnt, max;
 } :
 [
@@ -288,7 +288,17 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			{ if (nd->nd_class != Name) {
 				error("illegal variant tag");
 		  	  }
-		  	  else	id = nd->nd_IDF;
+			  else {
+			  	df = define(nd->nd_IDF, scope, D_FIELD);
+			  	*palign = lcm(*palign, tp->tp_align);
+			  	if (!(tp->tp_fund & T_DISCRETE)) {
+					error("illegal type in variant");
+			  	}
+			  	df->df_type = tp;
+			  	df->fld_off = align(*cnt, tp->tp_align);
+			  	*cnt = df->fld_off + tp->tp_size;
+			  	df->df_flags |= D_QEXPORTED;
+			  }
 			  FreeNode(nd);
 			}
 	  |		/* Old fashioned! the first qualident now represents
@@ -302,22 +312,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	| ':' qualtype(&tp)
 	  /* Aha, third edition. Well done! */
 	]
-			{
-			  *palign = lcm(*palign, tp->tp_align);
-			  if (id) {
-			  	register struct def *df = 
-					define(id, scope, D_FIELD);
-
-			  	if (!(tp->tp_fund & T_DISCRETE)) {
-					error("illegal type in variant");
-			  	}
-			  	df->df_type = tp;
-			  	df->fld_off = align(*cnt, tp->tp_align);
-			  	*cnt = df->fld_off + tp->tp_size;
-			  	df->df_flags |= D_QEXPORTED;
-			  }
-			  tcnt = *cnt;
-			}
+			{ tcnt = *cnt; }
 	OF variant(scope, &tcnt, tp, palign)
 			{ max = tcnt; tcnt = *cnt; }
 	[
@@ -360,26 +355,26 @@ CaseLabelList(struct type **ptp; struct node **pnd;):
 
 CaseLabels(struct type **ptp; register struct node **pnd;)
 {
-	register struct node *nd1;
+	register struct node *nd;
 }:
 	ConstExpression(pnd)
-			{ nd1 = *pnd; }
+			{ nd = *pnd; }
 	[
-		UPTO	{ *pnd = MkNode(Link,nd1,NULLNODE,&dot); }
+		UPTO	{ *pnd = MkNode(Link,nd,NULLNODE,&dot); }
 		ConstExpression(&(*pnd)->nd_right)
-			{ if (!TstCompat(nd1->nd_type,
+			{ if (!TstCompat(nd->nd_type,
 					 (*pnd)->nd_right->nd_type)) {
 				node_error((*pnd)->nd_right,
 					  "type incompatibility in case label");
-			  	nd1->nd_type = error_type;
+			  	nd->nd_type = error_type;
 			  }
 			}
 	]?
-			{ if (*ptp != 0 && !TstCompat(*ptp, nd1->nd_type)) {
-				node_error(nd1,
+			{ if (*ptp != 0 && !TstCompat(*ptp, nd->nd_type)) {
+				node_error(nd,
 					  "type incompatibility in case label");
 			  }
-			  *ptp = nd1->nd_type;
+			  *ptp = nd->nd_type;
 			}
 ;
 
@@ -392,7 +387,7 @@ SetType(struct type **ptp;) :
 	have to be declared yet, so be careful about identifying
 	type-identifiers
 */
-PointerType(struct type **ptp;) :
+PointerType(register struct type **ptp;) :
 	POINTER TO
 	[ %if	(type_or_forward(ptp))
 	  type(&((*ptp)->next)) 
@@ -409,7 +404,7 @@ qualtype(struct type **ptp;)
 		{ *ptp = qualified_type(nd); }
 ;
 
-ProcedureType(struct type **ptp;)
+ProcedureType(register struct type **ptp;)
 {
 	struct paramlist *pr = 0;
 	arith parmaddr = 0;
@@ -423,18 +418,12 @@ ProcedureType(struct type **ptp;)
 			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 
-FormalTypeList(struct paramlist **ppr; arith *parmaddr; struct type **ptp;)
-{
-	struct type *tp;
-	int VARp;
-} :
+FormalTypeList(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
 	'('
 	[
-		var(&VARp) FormalType(&tp)
-			{ EnterParamList(ppr,NULLNODE,tp,VARp,parmaddr); }
+		VarFormalType(ppr, parmaddr)
 		[
-			',' var(&VARp) FormalType(&tp)
-			{ EnterParamList(ppr,NULLNODE,tp,VARp,parmaddr); }
+			',' VarFormalType(ppr, parmaddr)
 		]*
 	]?
 	')'
@@ -442,10 +431,22 @@ FormalTypeList(struct paramlist **ppr; arith *parmaddr; struct type **ptp;)
 	]?
 ;
 
-var(int *VARp;):
-	VAR		{ *VARp = D_VARPAR; }
-|
-	/* empty */	{ *VARp = D_VALPAR; }
+VarFormalType(struct paramlist **ppr; arith *parmaddr;)
+{
+	struct type *tp;
+	int isvar;
+} :
+	var(&isvar)
+	FormalType(&tp)
+			{ EnterParamList(ppr,NULLNODE,tp,isvar,parmaddr); }
+;
+
+var(int *VARp;) :
+	[
+		VAR		{ *VARp = D_VARPAR; }
+	|
+		/* empty */	{ *VARp = D_VALPAR; }
+	]
 ;
 
 ConstantDeclaration

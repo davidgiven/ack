@@ -75,15 +75,14 @@ DoProfil()
 	static label	filename_label = 0;
 
 	if (! options['L']) {
-		register label fn_label = filename_label;
 
-		if (!fn_label) {
-			filename_label = fn_label = ++data_label;
-			C_df_dlb(fn_label);
+		if (!filename_label) {
+			filename_label = ++data_label;
+			C_df_dlb(filename_label);
 			C_rom_scon(FileName, (arith) (strlen(FileName) + 1));
 		}
 
-		C_fil_dlb(fn_label, (arith) 0);
+		C_fil_dlb(filename_label, (arith) 0);
 	}
 }
 
@@ -126,16 +125,14 @@ WalkModule(module)
 			/* We don't actually prevent recursive calls,
 			   but do nothing if called recursively
 			*/
-			label l1 = ++data_label;
-
-			C_df_dlb(l1);
-			C_bss_cst(word_size, (arith) 0, 1);
+			C_df_dlb(++data_label);
+			C_con_cst((arith) 0);
 			/* if this one is set to non-zero, the initialization
 			   was already done.
 			*/
-			C_loe_dlb(l1, (arith) 0);
+			C_loe_dlb(data_label, (arith) 0);
 			C_zne(RETURN_LABEL);
-			C_ine_dlb(l1, (arith) 0);
+			C_ine_dlb(data_label, (arith) 0);
 		}
 
 		for (; nd; nd = nd->next) {

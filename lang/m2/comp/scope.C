@@ -60,7 +60,7 @@ open_and_close_scope(scopetype)
 
 	open_scope(scopetype);
 	sc = CurrentScope;
-	close_scope();
+	close_scope(0);
 	return sc;
 }
 
@@ -106,7 +106,7 @@ chk_proc(df)
 
 STATIC
 chk_forw(pdf)
-	register struct def **pdf;
+	struct def **pdf;
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
@@ -197,6 +197,7 @@ Reverse(pdf)
 }
 
 close_scope(flag)
+	register int flag;
 {
 	/*	Close a scope. If "flag" is set, check for forward declarations,
 		either POINTER declarations, or EXPORTs, or forward references

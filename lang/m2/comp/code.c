@@ -49,11 +49,9 @@ CodeConst(cst, size)
 	else {
 		crash("(CodeConst)");
 /*
-		label dlab = ++data_label;
-
-		C_df_dlb(dlab);
+		C_df_dlb(++data_label);
 		C_rom_icon(long2str((long) cst), size);
-		C_lae_dlb(dlab, (arith) 0);
+		C_lae_dlb(data_label, (arith) 0);
 		C_loi(size);
 */
 	}
@@ -63,14 +61,13 @@ CodeString(nd)
 	register struct node *nd;
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
+		/* Character constant */
 		C_loc(nd->nd_INT);
 	}
 	else {
-		label lab = ++data_label;
-
-		C_df_dlb(lab);
+		C_df_dlb(++data_label);
 		C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
-		C_lae_dlb(lab, (arith) 0);
+		C_lae_dlb(data_label, (arith) 0);
 	}
 }
 
@@ -100,11 +97,8 @@ CodeExpr(nd, ds, true_label, false_label)
 
 	case Oper:
 		CodeOper(nd, true_label, false_label);
-		if (true_label == 0) ds->dsg_kind = DSG_LOADED;
-		else {
-			ds->dsg_kind = DSG_INIT;
-			true_label = 0;
-		}
+		ds->dsg_kind = DSG_LOADED;
+		true_label = NO_LABEL;
 		break;
 
 	case Uoper:
@@ -114,14 +108,11 @@ CodeExpr(nd, ds, true_label, false_label)
 
 	case Value:
 		switch(nd->nd_symb) {
-		case REAL: {
-			label lab = ++data_label;
-
-			C_df_dlb(lab);
+		case REAL:
+			C_df_dlb(++data_label);
 			C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
-			C_lae_dlb(lab, (arith) 0);
+			C_lae_dlb(data_label, (arith) 0);
 			C_loi(nd->nd_type->tp_size);
-			}
 			break;
 		case STRING:
 			CodeString(nd);
@@ -142,16 +133,11 @@ CodeExpr(nd, ds, true_label, false_label)
 
 	case Xset:
 	case Set: {
-		register arith *st = nd->nd_set;
-		register int i;
+		register int i = tp->tp_size / word_size;
+		register arith *st = nd->nd_set + i;
 
-		st = nd->nd_set;
 		ds->dsg_kind = DSG_LOADED;
-		if (!st) {
-			C_zer(tp->tp_size);
-			break;
-		}
-		for (i = tp->tp_size / word_size, st += i; i > 0; i--) { 
+		for (; i > 0; i--) { 
 			C_loc(*--st);
 		}
 		CodeSet(nd);
@@ -162,11 +148,10 @@ CodeExpr(nd, ds, true_label, false_label)
 		crash("(CodeExpr) bad node type");
 	}
 
-	if (true_label != 0) {
+	if (true_label != NO_LABEL) {
 		/* Only for boolean expressions
 		*/
 		CodeValue(ds, tp->tp_size, tp->tp_align);
-		*ds = InitDesig;
 		C_zne(true_label);
 		C_bra(false_label);
 	}
@@ -304,10 +289,10 @@ CodeCall(nd)
 		register struct def *df = left->nd_def;
 
 		if (df->df_kind == D_PROCEDURE) {
-			arith level = df->df_scope->sc_level;
+			int level = df->df_scope->sc_level;
 
 			if (level > 0) {
-				C_lxl((arith) proclevel - level);
+				C_lxl((arith) (proclevel - level));
 			}
 			C_cal(NameOfProc(df));
 			break;
@@ -321,7 +306,7 @@ CodeCall(nd)
 		CodePExpr(left);
 		C_cai();
 	}
-	if (left->nd_type->prc_nbpar) C_asp(left->nd_type->prc_nbpar);
+	C_asp(left->nd_type->prc_nbpar);
 	if (result_tp = ResultType(left->nd_type)) {
 		if (IsConstructed(result_tp)) {
 			C_lfr(pointer_size);
@@ -353,7 +338,7 @@ CodeParameters(param, arg)
 
 		C_loc(tp->arr_elsize);
 		if (IsConformantArray(left_type)) {
-			DoHIGH(left);
+			DoHIGH(left->nd_def);
 			if (elem->tp_size != left_type->arr_elem->tp_size) {
 				/* This can only happen if the formal type is
 				   ARRAY OF (WORD|BYTE)
@@ -478,13 +463,13 @@ CodeStd(nd)
 
 	case S_HIGH:
 		assert(IsConformantArray(tp));
-		DoHIGH(left);
+		DoHIGH(left->nd_def);
 		break;
 
 	case S_SIZE:
 	case S_TSIZE:
 		assert(IsConformantArray(tp));
-		DoHIGH(left);
+		DoHIGH(left->nd_def);
 		C_inc();
 		C_loc(tp->arr_elem->tp_size);
 		C_mlu(word_size);
@@ -777,7 +762,7 @@ CodeOper(expr, true_label, false_label)
 		default:
 			crash("bad type COMPARE");
 		}
-		if (true_label != 0)	{
+		if (true_label != NO_LABEL)	{
 			compare(expr->nd_symb, true_label);
 			C_bra(false_label);
 		}
@@ -794,7 +779,7 @@ CodeOper(expr, true_label, false_label)
 		CodePExpr(leftop);
 		CodeCoercion(leftop->nd_type, word_type);
 		C_inn(rightop->nd_type->tp_size);
-		if (true_label != 0) {
+		if (true_label != NO_LABEL) {
 			C_zne(true_label);
 			C_bra(false_label);
 		}
@@ -806,7 +791,7 @@ CodeOper(expr, true_label, false_label)
 		struct desig Des;
 		int genlabels = 0;
 
-		if (true_label == 0)	{
+		if (true_label == NO_LABEL)	{
 			genlabels = 1;
 			true_label = ++text_label;
 			false_label = ++text_label;
@@ -1000,17 +985,15 @@ CodeDStore(nd)
 	CodeStore(&designator, nd->nd_type->tp_size, nd->nd_type->tp_align);
 }
 
-DoHIGH(nd)
-	struct node *nd;
+DoHIGH(df)
+	register struct def *df;
 {
 	/*	Get the high index of a conformant array, indicated by "nd".
 		The high index is the second field in the descriptor of
 		the array, so it is easily found.
 	*/
-	register struct def *df = nd->nd_def;
 	register arith highoff;
 
-	assert(nd->nd_class == Def);
 	assert(df->df_kind == D_VARIABLE);
 	assert(IsConformantArray(df->df_type));
 

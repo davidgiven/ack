@@ -13,6 +13,7 @@
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<alloc.h>
 
 #include	"type.h"
 #include	"main.h"
@@ -117,7 +118,7 @@ DoOption(text)
 
 			if (++nDEF > mDEF) {
 				char **n = (char **)
-					Malloc((10+mDEF)*sizeof(char *));
+				   Malloc((unsigned)((10+mDEF)*sizeof(char *)));
 
 				for (i = 0; i < mDEF; i++) {
 					n[i] = DEFPATH[i];

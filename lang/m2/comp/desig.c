@@ -67,7 +67,6 @@ CodeValue(ds, size, al)
 	/*	Generate code to load the value of the designator described
 		in "ds"
 	*/
-	arith tmp = 0;
 
 	switch(ds->dsg_kind) {
 	case DSG_LOADED:
@@ -100,14 +99,16 @@ CodeValue(ds, size, al)
 			break;
 		}
 		if (ds->dsg_kind == DSG_PLOADED) {
-			tmp = NewPtr();
-			C_stl(tmp);
+			arith sz = WA(size) - pointer_size;
+
+			C_asp(-sz);
+			C_lor((arith) 1);
+			C_adp(sz);
+			C_loi(pointer_size);
 		}
-		C_asp(-WA(size));
-		if (!tmp) CodeAddress(ds);
-		else {
-			C_lol(tmp);
-			FreePtr(tmp);
+		else  {
+			C_asp(-WA(size));
+			CodeAddress(ds);
 		}
 		C_loc(size);
 		C_cal("_load");
@@ -300,6 +301,7 @@ CodeMove(rhs, left, rtp)
 		}
 		{
 			arith tmp;
+			extern arith NewPtr();
 
 			if (loadedflag) {	
 				tmp = NewPtr();
