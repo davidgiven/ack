@@ -15,13 +15,11 @@
 	move.l	sp,a0
 	add.l	#4,a0
 	move.l	d1,d2
-	asr.l	#4,d2
-	!bchg.l	#0,d2
+	asr.l	#3,d2
 	cmp.l	d0,d2
 	bcc	1f
 	add.l	d2,a0
-	move.l	(a0),d2
-	btst	d1,d2	!eigenlijk .l
+	btst	d1,(a0)
 	beq	1f
 	move.l	#1,d0
 	bra	2f
@@ -30,5 +28,4 @@
 2:
 	move.l	(sp)+,d1
 	add.l	d1,sp
-	move.l	a1,-(sp)
-	rts
+	jmp	(a1)

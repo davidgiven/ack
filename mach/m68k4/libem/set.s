@@ -18,15 +18,12 @@
 	bgt	1b
 	move.l	sp,a1		! set base
 	move.l	d1,d2
-	asr.l	#4,d2
-	!bchg	#0,d2
+	asr.l	#3,d2
 	cmp.l	d0,d2
 	bcs	1f
 	move.w	#ESET,-(sp)
 	jsr	.trp
 1:
 	add.l	d2,a1
-	move.l	(a1),d2
-	bset	d1,d2
-	move.l	d2,(a1)
+	bset	d1,(a1)
 	jmp	(a0)
