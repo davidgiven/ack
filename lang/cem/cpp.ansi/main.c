@@ -5,6 +5,8 @@
 /* $Header$ */
 /* MAIN PROGRAM */
 
+#include	"debug.h"
+
 #include	<alloc.h>
 #include	<assert.h>
 #include	<system.h>

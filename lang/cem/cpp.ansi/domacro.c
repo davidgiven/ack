@@ -17,6 +17,7 @@
 #include	"parbufsize.h"	
 #include	"textsize.h"	
 #include	"idfsize.h"	
+#include	"debug.h"
 #include	<assert.h>
 #include	<alloc.h>
 #include	"class.h"

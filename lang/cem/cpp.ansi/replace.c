@@ -17,6 +17,7 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
+#include	"debug.h"
 #include	<assert.h>
 #include	"macbuf.h"
 #include	"replace.h"
@@ -194,7 +195,6 @@ expand_defined(repl)
 		id = findidf(str);
 		free(str);
 	} else	id = 0;
-	assert(id || class(ch) == STELL);
 	ch = GetChar();
 	ch = skipspaces(ch, 0);
 	if (parens && ch != ')') error(") missing");
