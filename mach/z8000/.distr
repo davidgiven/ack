@@ -2,4 +2,6 @@ Action
 as
 cg
 libem
+libend
+libmon
 mach_params

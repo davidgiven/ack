@@ -7,3 +7,9 @@ end
 name "Zilog Z8000 EM library"
 dir libem
 end
+name "Zilog Z8000 system call library"
+dir libmon
+end
+name "Zilog Z8000 end,etext,edata library"
+dir libend
+end
