@@ -9,9 +9,9 @@
 #define	NULL		((void *)0)
 
 #if	defined(__BSD4_2)
-#define	CLK_TCK		1000000		/* ticks per second */
+#define	CLOCKS_PER_SEC	1000000		/* ticks per second */
 #else
-#define	CLK_TCK		60
+#define	CLOCKS_PER_SEC	60
 #endif	/* __BSD4_2 */
 
 #if	!defined(_SIZE_T)
