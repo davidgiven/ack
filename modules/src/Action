@@ -13,10 +13,7 @@ end
 name "memory allocation module"
 dir alloc
 end
-name "fast, wasting malloc"
-dir Xmalloc
-end
-name "fast, memory efficient malloc"
+name "fast, linear time malloc"
 dir malloc
 end
 name "EM messages generation module"
