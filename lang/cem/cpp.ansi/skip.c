@@ -79,6 +79,9 @@ SkipToNewLine()
 				continue;
 			}
 		}
+		else if (ch == TOKSEP && InputLevel) {
+			continue;
+		}
 		if (!is_wsp(ch))
 			garbage = 1;
 	}
