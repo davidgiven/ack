@@ -1,17 +1,17 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHARE=../share
+CPP=$(EMLIB)/cpp
 
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-phbac
 
-SOURCES = i86.descr m68k2.descr pdp.descr vax2.descr vax4.descr
+SOURCES = i86.descr m68k2.descr pdp.descr vax4.descr m68k4.descr m68020.descr
 
-TARGETS = i86descr m68k2descr vax2descr vax4descr pdpdescr
+TARGETS = i86descr m68k2descr vax4descr pdpdescr m68k4descr m68020descr
 
 PRFILES = Makefile descr.sed $(SOURCES)
 
@@ -20,14 +20,12 @@ all:	$(TARGETS)
 install:	all
 	../install i86descr
 	../install m68k2descr
-	../install vax2descr
 	../install vax4descr
 	../install pdpdescr
 
 cmp:	all
 	-../compare i86descr
 	-../compare m68k2descr
-	-../compare vax2descr
 	-../compare vax4descr
 	-../compare pdpdescr
 
@@ -49,8 +47,11 @@ pdpdescr:	pdp.descr descr.sed
 m68k2descr:	m68k2.descr descr.sed
 		$(CPP) -P -I$(EMH) m68k2.descr | sed -f descr.sed > m68k2descr
 
-vax2descr:	vax2.descr descr.sed
-		$(CPP) -P -I$(EMH) vax2.descr | sed -f descr.sed > vax2descr
+m68k4descr:	m68k4.descr descr.sed
+		$(CPP) -P -I$(EMH) m68k4.descr | sed -f descr.sed > m68k4descr
+
+m68020descr:	m68020.descr descr.sed
+		$(CPP) -P -I$(EMH) m68020.descr | sed -f descr.sed > m68020descr
 
 vax4descr:	vax4.descr descr.sed
 		$(CPP) -P -I$(EMH) vax4.descr | sed -f descr.sed > vax4descr
