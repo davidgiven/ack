@@ -61,6 +61,12 @@ main(argc,argv) char **argv ; {
 #endif
 	}
 	setlist(machine);
+	/* Find the linker, needed for argument building */
+	scanlist(l_first(tr_list),elem) {
+		if ( t_cont(*elem)->t_linker ) {
+			linker= t_cont(*elem) ;
+		}
+	}
 	transini();
 	scanneeds();
 	sprintf(template,TMPNAME,getpid()) ;
@@ -72,14 +78,6 @@ main(argc,argv) char **argv ; {
 		}
 	}
 
-	if ( !stopsuffix ) {
-		/* Find the linker, needed for argument building */
-		scanlist(l_first(tr_list),elem) {
-			if ( t_cont(*elem)->t_linker ) {
-				linker= t_cont(*elem) ;
-			}
-		}
-	}
 
 	scanlist ( l_first(arguments), elem ) {
 		if ( !process(l_content(*elem)) && !k_flag ) return 1 ;
@@ -87,6 +85,7 @@ main(argc,argv) char **argv ; {
 	orig.p_path= (char *)0 ;
 	if ( !rts ) rts="" ;
 	setsvar(keeps(RTS),rts) ;
+	if ( linker ) getmapflags(linker) ;
 
 	scanlist(l_first(tr_list),elem) {
 		phase=t_cont(*elem) ;
@@ -145,6 +144,7 @@ vieuwargs(argc,argv) char **argv ; {
 	register char *argp;
 	register int nextarg ;
 	register int eaten ;
+	int hide ;
 
 	firstarg(argv[0]) ;
 
@@ -160,6 +160,7 @@ vieuwargs(argc,argv) char **argv ; {
 		}
 
 		/* Flags */
+		hide=NO ; /* Do not hide this flags to the phases */
 		eaten=0 ; /* Did not 'eat' tail of flag yet */
 		switch ( argp[1] ) {
 	   case 'm':    if ( machine ) fuerror("Two machines?") ;
@@ -171,6 +172,7 @@ vieuwargs(argc,argv) char **argv ; {
 			}
 			if ( outfile ) fuerror("Two results?") ;
 			outfile= argv[nextarg++] ;
+			hide=YES ;
 			break ;
 	   case 'O':    Optflag++ ;
 			break ;
@@ -213,13 +215,9 @@ vieuwargs(argc,argv) char **argv ; {
 			eaten=1 ;
 			break ;
 	   case  0 :    nill_flag++ ; eaten++ ;
+	   		hide=YES ;
 			break;
-	   case 'w':    { register char *tokeep ;
-			  w_flag++;
-			  tokeep=keeps(argp) ;
-			  *tokeep |= NO_SCAN ;
-			  l_add(&flags,tokeep) ;
-			}
+	   case 'w':    w_flag++;
 			break ;
 	   default:     /* The flag is not recognized,
 			   put it on the list for the sub-processes
@@ -231,6 +229,13 @@ vieuwargs(argc,argv) char **argv ; {
 #endif
 			l_add(&flags,keeps(argp)) ;
 			eaten=1 ;
+			hide=YES ;
+		}
+		if ( !hide ) {
+			register char *tokeep ;
+			tokeep=keeps(argp) ;
+			*tokeep |= NO_SCAN ;
+			l_add(&flags,tokeep) ;
 		}
 		if ( argp[2] && !eaten ) {
 			werror("Unexpected characters at end of %s",argp) ;
@@ -256,6 +261,7 @@ firstarg(argp) register char *argp ; {
 process(arg) char *arg ; {
 	/* Process files & library arguments */
 	trf *phase ;
+	register trf *tmp ;
 
 #ifdef DEBUG
 	if ( debug ) vprint("Processing %s\n",arg) ;
@@ -284,6 +290,23 @@ process(arg) char *arg ; {
 		break ;
 	}
 	if ( !phase ) return 1 ;
+	for ( tmp=phase ; tmp ; tmp=tmp->t_next )
+	if ( !tmp->t_visited ) {
+		/* The flags are set up once.
+		   At the first time each phase is in a list.
+		   The program name and flags may already be touched
+		   by vieuwargs.
+		*/
+		tmp->t_visited=YES ;
+		if ( tmp->t_priority<0 )
+			werror("Using phase %s (negative priority)",
+				tmp->t_name) ;
+		if ( !rts && tmp->t_rts ) rts= tmp->t_rts ;
+		if ( tmp->t_needed ) {
+			add_head(tmp->t_needed) ;
+			add_tail(tmp->t_needed) ;
+		}
+	}
 	if ( phase->t_combine ) {
 		add_input(&orig,phase) ;
 		return 1 ;
