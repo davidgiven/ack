@@ -10,7 +10,7 @@ register score parameters:
 		(2 cases)
 		pointer,pointer
 			(1 size)
-			default ->	(6,3)
+			default ->	(6,4)
 		general,general
 			(1 size)
 			default ->	(4,2)
