@@ -1,116 +1,185 @@
-/* $Header$ */
+/* replace undef by define */
+#undef	 DEBUG		/* check assertions */
+#undef	 SLOWDEBUG	/* some extra test loops (requires DEBUG) */
 
-#define CLICK_SIZE	4096
-#if EM_WSIZE == EM_PSIZE
-typedef unsigned int vir_bytes;
+#ifdef DEBUG
+#define	ASSERT(b)	if (!(b)) assert_failed();
 #else
-typedef long vir_bytes;
+#define	ASSERT(b)	/* empty */
 #endif
-extern bcopy();
 
-#define ALIGN(x, a)	(((x) + (a - 1)) & ~(a - 1))
-#define BUSY		1
-#define NEXT(p)		(* (char **) (p))
-
-#ifdef pdp
-#define BUGFIX	64	/* cannot set break in top 64 bytes */
+#ifdef EM_WSIZE == EM_PSIZE
+#define	ptrint		int
 #else
-#define BUGFIX	0
+#define	ptrint		long
 #endif
+
+#define BRKSIZE		4096
+#define	PTRSIZE		sizeof(char *)
+#define Align(x,a)	(((x) + (a - 1)) & ~(a - 1))
+#define NextSlot(p)	(* (char **) ((p) - PTRSIZE))
+#define NextFree(p)	(* (char **) (p))
+
+/*
+ * A short explanation of the data structure and algorithms.
+ * An area returned by malloc() is called a slot. Each slot
+ * contains the number of bytes requested, but preceeded by
+ * an extra pointer to the next the slot in memory.
+ * '_bottom' and '_top' point to the first/last slot.
+ * More memory is asked for using brk() and appended to top.
+ * The list of free slots is maintained to keep malloc() fast.
+ * '_empty' points the the first free slot. Free slots are
+ * linked together by a pointer at the start of the
+ * user visable part, so just after the next-slot pointer.
+ * Free slots are merged together by free().
+ */
 
 extern char *sbrk(), *brk();
-static char *bottom, *top;
+static char *_bottom, *_top, *_empty;
 
 static grow(len)
 unsigned len;
 {
   register char *p;
-  register int click = CLICK_SIZE;
 
-  p = sbrk(0);
-  len += (char *) ALIGN((vir_bytes) p, sizeof(char *)) - p;
-  while (click >= 4) {
-  	unsigned len1 = ALIGN((vir_bytes) p + len + sizeof(char *), click) - (vir_bytes) p;
-	char *p1 = p;
-  	if (p + len1 + BUGFIX < p || (p1 = sbrk(len1)) == (char *) -1) {
-		click >>= 1;
-		continue;
-	}
-	p = p1;
-  	if (top + sizeof(char *) != p) {
-		/* someone else has done an sbrk */
-		NEXT(top) = (char *) ((vir_bytes) p | BUSY);
-  	} else {
-		for (p = bottom; NEXT(p) != 0; p = (char *) (* (vir_bytes *) p & ~BUSY))
-			;
-	}
-	top = p + len1 - sizeof(char *);
-	NEXT(p) = top;
-	NEXT(top) = 0;
-	return 1;
-  }
-  return 0;
+  ASSERT(NextSlot(_top) == 0);
+  p = (char *) Align((ptrint)_top + len, BRKSIZE);
+  if (p < _top || brk(p) != 0)
+	return(0);
+  NextSlot(_top) = p;
+  NextSlot(p) = 0;
+  free(_top);
+  _top = p;
+  return(1);
 }
 
 char *malloc(size)
 unsigned size;
 {
-  register char *p, *next, *new;
-  register unsigned len = ALIGN(size, sizeof(char *)) + sizeof(char *);
+  register char *prev, *p, *next, *new;
+  register unsigned len, ntries;
 
-  if ((p = bottom) == 0) {
-	p = sbrk(sizeof(char *));
-	sbrk((char *) ALIGN((vir_bytes) p, sizeof(char *)) - p);
-	p = (char *) ALIGN((vir_bytes) p, sizeof(char *));
-	top = bottom = p;
-	NEXT(p) = 0;
-  }
-  while ((next = NEXT(p)) != 0)
-	if ((vir_bytes) next & BUSY)			/* already in use */
-		p = (char *) ((vir_bytes) next & ~BUSY);
-	else {
-		while ((new = NEXT(next)) != 0 && !((vir_bytes) new & BUSY))
-			next = new;
-		if (next - p >= len) {			/* fits */
-			if ((new = p + len) < next)	/* too big */
-				NEXT(new) = next;
-			NEXT(p) = (char *) ((vir_bytes) new | BUSY);
-			return(p + sizeof(char *));
-		}
-		p = next;
+  if (size == 0)
+	size = PTRSIZE;		/* avoid slots less that 2*PTRSIZE */
+  for (ntries = 0; ntries < 2; ntries++) {
+	len = Align(size, PTRSIZE) + PTRSIZE;
+	if (_bottom == 0) {
+		p = sbrk(2 * PTRSIZE);
+		p = (char *) Align((ptrint)p, PTRSIZE);
+		p += PTRSIZE;
+		_top = _bottom = p;
+		NextSlot(p) = 0;
 	}
-  return grow(len) ? malloc(size) : 0;
+#ifdef SLOWDEBUG
+	for (p = _bottom; (next = NextSlot(p)) != 0; p = next)
+		ASSERT(next > p);
+	ASSERT(p == _top);
+#endif
+	for (prev = 0, p = _empty; p != 0; prev = p, p = NextFree(p)) {
+		next = NextSlot(p);
+		new = p + len;
+		if (new > next)
+			continue;		/* too small */
+		if (new + PTRSIZE < next) {	/* too big, so split */
+			/* + PTRSIZE avoids tiny slots on free list */
+			NextSlot(new) = next;
+			NextSlot(p) = new;
+			NextFree(new) = NextFree(p);
+			NextFree(p) = new;
+		}
+		if (prev)
+			NextFree(prev) = NextFree(p);
+		else
+			_empty = NextFree(p);
+		return(p);
+	}
+	if (grow(len) == 0)
+		break;
+  }
+  ASSERT(ntries != 2);
+  return(0);
 }
 
 char *realloc(old, size)
 char *old;
 unsigned size;
 {
-  register char *p = old - sizeof(char *), *next, *new;
-  register unsigned len = ALIGN(size, sizeof(char *)) + sizeof(char *), n;
+  register char *prev, *p, *next, *new;
+  register unsigned len, n;
 
-  next = (char *) (* (vir_bytes *) p & ~BUSY);
-  n = next - old;					/* old size */
-  while ((new = NEXT(next)) != 0 && !((vir_bytes) new & BUSY))
-	next = new;
-  if (next - p >= len) {				/* does it still fit */
-	if ((new = p + len) < next) {			/* even too big */
-		NEXT(new) = next;
-		NEXT(p) = (char *) ((vir_bytes) new | BUSY);
+  len = Align(size, PTRSIZE) + PTRSIZE;
+  next = NextSlot(old);
+  n = (int)(next - old);			/* old length */
+  /*
+   * extend old if there is any free space just behind it
+   */
+  for (prev = 0, p = _empty; p != 0; prev = p, p = NextFree(p)) {
+	if (p > next)
+		break;
+	if (p == next) {	/* 'next' is a free slot: merge */
+		NextSlot(old) = NextSlot(p);
+		if (prev)
+			NextFree(prev) = NextFree(p);
+		else
+			_empty = NextFree(p);
+		next = NextSlot(old);
+		break;
 	}
-	else
-		NEXT(p) = (char *) ((vir_bytes) next | BUSY);
+  }
+  new = old + len;
+  /*
+   * Can we use the old, possibly extended slot?
+   */
+  if (new <= next) {				/* it does fit */
+	if (new + PTRSIZE < next) {		/* too big, so split */
+		/* + PTRSIZE avoids tiny slots on free list */
+		NextSlot(new) = next;
+		NextSlot(old) = new;
+		free(new);
+	}
 	return(old);
   }
-  if ((new = malloc(size)) == 0)			/* it didn't fit */
+  if ((new = malloc(size)) == 0)		/* it didn't fit */
 	return(0);
-  bcopy(old, new, n);					/* n < size */
-  * (vir_bytes *) p &= ~BUSY;
+  bcopy(old, new, n);				/* n < size */
+  free(old);
   return(new);
 }
 
 free(p)
 char *p;
 {
-  * (vir_bytes *) (p - sizeof(char *)) &= ~BUSY;
+  register char *prev, *next;
+
+  ASSERT(NextSlot(p) > p);
+  for (prev = 0, next = _empty; next != 0; prev = next, next = NextFree(next))
+	if (p < next)
+		break;
+  NextFree(p) = next;
+  if (prev)
+	NextFree(prev) = p;
+  else
+	_empty = p;
+  if (next) {
+	ASSERT(NextSlot(p) <= next);
+	if (NextSlot(p) == next) {		/* merge p and next */
+		NextSlot(p) = NextSlot(next);
+		NextFree(p) = NextFree(next);
+	}
+  }
+  if (prev) {
+	ASSERT(NextSlot(prev) <= p);
+	if (NextSlot(prev) == p) {		/* merge prev and p */
+		NextSlot(prev) = NextSlot(p);
+		NextFree(prev) = NextFree(p);
+	}
+  }
 }
+
+#ifdef DEBUG
+static assert_failed()
+{
+	write(2, "assert failed in lib/malloc.c\n", 30);
+	abort();
+}
+#endif
