@@ -695,9 +695,10 @@ do_line(l)
 	unsigned int l;
 {
 	struct token tk;
+	int t = GetToken(&tk);
 
-	LineNumber = l - 1;	/* the number of the next input line */
-	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
-		FileName = tk.tk_bts;
 	SkipRestOfLine();
+	LineNumber = l - 1;	/* the number of the next input line */
+	if (t == STRING)	/* is there a filespecifier? */
+		FileName = tk.tk_bts;
 }
