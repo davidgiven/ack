@@ -1,9 +1,12 @@
-#ifndef m68k4
-#define m68020
+#include "whichone.h"
+
+#ifndef TBL68020
+#ifndef TBL68000
+Something is very wrong here. You must specify the machine: either
+TBL68000 or TBL68020, in the file whichone.h, then REMOVE tables.c
+and then run "make" again
 #endif
-			/* m68020 should be used for a m68020 cg, and it should
-			 * not be used for a m68k4 cg
-			 */
+#endif
 
 #define ex_ap(y)	fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)	/* nothing */
@@ -20,7 +23,7 @@
 #define dlb_fmt		"_%d"
 #define	hol_fmt		"hol%d"
 
-#ifdef m68020
+#ifdef TBL68020
 #define loc_off		"(%d,a6)"
 #define arg_off		"(8+%d,a6)"
 #else
@@ -35,5 +38,6 @@
 
 #define modhead		".sect .text\n.sect .rom\n.sect .data\n.sect .bss\n"
 
-#define id_first	'_'
+#define fmt_id(sf,st)	sprintf(st,"_%s",sf)
+
 #define BSS_INIT	0

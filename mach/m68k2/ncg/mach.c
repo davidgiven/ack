@@ -19,13 +19,7 @@
  * machine dependent back end routines for the Motorola 68000, 68010 or 68020
  */
 
-#ifndef m68k4
-#define m68020
-#endif
-		/* use m68020 when you want a m68020 cg, don't if you want a
-		 * m68k4 cg. The m68k4 cg can be used for both the MC68000
-		 * and the MC68010.
-		 */
+#include "whichone.h"
 
 con_part(sz,w) register sz; word w; {
 
@@ -138,7 +132,7 @@ save()
 	/* initialise register-parameters */
 	for (p = regsav; p < &regsav[regnr]; p++) {
 		if (p->rs_off >= 0) {
-#ifdef m68020
+#ifdef TBL68020
 			fprintf(codefile,"move.%c (%ld,a6),%s\n",
 #else
 			fprintf(codefile,"move.%c %ld(a6),%s\n",
@@ -196,7 +190,7 @@ regreturn()
 
 prolog(nlocals) full nlocals; {
 
-#ifdef m68020
+#ifdef TBL68020
 	fprintf(codefile,"tst.b (-%ld,sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
 #else
 	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
