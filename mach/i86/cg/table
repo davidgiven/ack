@@ -1139,15 +1139,12 @@ loc loc cii $1==2 && $2==4	| ACC |
 			"cwd"
 			samecc			    | dx ax | |(1,5)
 loc loc cii $1==4 && $2==2	| a_word a_word |    | %[1] | |
+loc loc ciu	| |		|			| loc $1 loc $2 cuu |
+loc loc cui	| |		|			| loc $1 loc $2 cuu |
+loc loc cuu $1==$2		| |		|	|	|
 loc loc cuu $1==2 && $2==4	| a_word |
 			allocate(REG={ANYCON,0})| %[a] %[1] | |
 loc loc cuu $1==4 && $2==2	| a_word a_word |    | %[1] | |
-loc loc ciu $1==2 && $2==4	| a_word |
-			allocate(REG={ANYCON,0})| %[a] %[1] | |
-loc loc ciu $1==4 && $2==2	| a_word a_word |    | %[1] | |
-loc loc cui $1==2 && $2==4	| a_word |
-			allocate(REG={ANYCON,0})| %[a] %[1] | |
-loc loc cui $1==4 && $2==2	| a_word a_word |    | %[1] | |
 
 /****************************************
  * Group 9 : Logical instructions	*
