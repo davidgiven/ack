@@ -1,17 +1,16 @@
 # $Header$
-EMHOME=../..
-INSTALLDIR=$(EMHOME)/bin
-LIBDIR=$(EMHOME)/lib/LLgen
-MANDIR=$(EMHOME)/man
+INSTALLDIR=/usr/local/bin
+LIBDIR=/usr/local/lib/LLgen
+MANDIR=/usr/local/man/man1
 
 all:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 
 clean:
 	-cd src; make clean
 
 install:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
 	cp src/LLgen $(INSTALLDIR)/LLgen
 	cp lib/rec $(LIBDIR)/rec
@@ -19,7 +18,7 @@ install:
 	cp LLgen.1 $(MANDIR)/LLgen.1
 
 firstinstall:
-	cd src; make first
+	cd src; make LIBDIR=$(LIBDIR) first
 	rm -f $(INSTALLDIR)/LLgen $(LIBDIR)/rec $(LIBDIR)/incl $(MANDIR)/LLgen.1
 	cp src/LLgen $(INSTALLDIR)/LLgen
 	-mkdir $(LIBDIR)
@@ -28,7 +27,7 @@ firstinstall:
 	cp LLgen.1 $(MANDIR)/LLgen.1
 
 cmp:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 	-cmp src/LLgen $(INSTALLDIR)/LLgen
 	-cmp lib/rec $(LIBDIR)/rec
 	-cmp lib/incl $(LIBDIR)/incl

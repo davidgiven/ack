@@ -6,13 +6,13 @@ INSTALLDIR=$(TARGET_HOME)/bin
 LIBDIR=$(TARGET_HOME)/lib/LLgen
 
 all:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 
 clean:
 	-cd src; make clean
 
 install:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 	cp src/LLgen $(INSTALLDIR)/LLgen
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
 	then	cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec ; \
@@ -21,7 +21,7 @@ install:
 	fi
 
 firstinstall:
-	cd src; make first
+	cd src; make LIBDIR=$(LIBDIR) first
 	cp src/LLgen $(INSTALLDIR)/LLgen
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
 	then	if [ -d $(LIBDIR) ] ; then : ; else mkdir $(LIBDIR) ; fi ; \
@@ -31,7 +31,7 @@ firstinstall:
 	fi
 
 cmp:
-	cd src; make
+	cd src; make LIBDIR=$(LIBDIR)
 	-cmp src/LLgen $(INSTALLDIR)/LLgen
 	-cmp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec
 	-cmp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl

@@ -1,7 +1,5 @@
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
+/* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
+ * All rights reserved.
  */
 
 /*
@@ -19,7 +17,6 @@
 
 # include "types.h"
 # include "extern.h"
-# include <local.h>
 
 # ifndef NORCSID
 static string rcsid = "$Header$";
@@ -68,19 +65,20 @@ new_mem(p) register p_info p; {
 
 	if (p->i_max >= p->i_top) {	/* No more free elements */
 		sz = p->i_size;
-#if BIGMACHINE
-		/*
-		   Do not worry about size. Just double it.
-		 */
-		p->i_size += p->i_size;
-		if (! p->i_size)
+		if (sizeof(char *) > 2) {
+			/*
+			   Do not worry about size. Just double it.
+			 */
+			p->i_size += p->i_size;
+			if (! p->i_size)
+				p->i_size += p->i_incr * p->i_esize;
+			}
+		else {
+			/*
+			   Worry about size, so only increment in chunks of i_incr.
+			 */
 			p->i_size += p->i_incr * p->i_esize;
-#else
-		/*
-		   Worry about size, so only increment in chunks of i_incr.
-		 */
-		p->i_size += p->i_incr * p->i_esize;
-#endif
+		}
 		p->i_ptr = !p->i_ptr ? 
 			alloc(p->i_size) :
 			ralloc(p->i_ptr, p->i_size);

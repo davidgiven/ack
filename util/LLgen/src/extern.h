@@ -1,7 +1,5 @@
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
+/* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
+ * All rights reserved.
  */
 
 /*
@@ -13,12 +11,12 @@
  */
 
 /*
- * extern.h $Header$
+ * $Header$
  * Miscellanious constants and
  * some variables that are visible in more than one file
  */
 
-# define LTEXTSZ	51	/* Size of longest token */
+# define LTEXTSZ	256	/* Size of longest token */
 
 /*
  * options for the identifier search routine

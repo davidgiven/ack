@@ -82,9 +82,9 @@ so that the compiler can generate a jump table for it. This will only be
 done for switches that have density between
 \fIlow_percentage\fP and \fIhigh_percentage\fP, as explained below.
 Usually, compilers generate a jumptable when the density of the switch
-is above a certain threshold. If you want jump tables in more cases,
-set \fIhigh_percentage\fP to this threshold, and \fIlow_percentage\fP to
-a minimum threshold. There is a time-space trade-off here.
+is above a certain threshold. When jump tables are to be used more often,
+\fIhigh_percentage\fP must be set to this threshold, and \fIlow_percentage\fP
+must be set to a minimum threshold. There is a time-space trade-off here.
 .I num
 is the minimum number of cases in a switch for the \fB\-j\fP option to be
 effective. The default value (if

@@ -1,7 +1,5 @@
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
+/* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
+ * All rights reserved.
  */
 
 /*

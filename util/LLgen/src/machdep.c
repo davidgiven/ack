@@ -1,7 +1,5 @@
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
+/* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
+ * All rights reserved.
  */
 
 /*
@@ -17,8 +15,6 @@
  * Machine dependant things
  */
 
-
-# include <em_path.h>
 # include "types.h"
 
 # ifndef NORCSID
@@ -33,17 +29,27 @@ extern string	libpath();
 UNLINK(x) string x; {
 	/* Must remove the file "x" */
 
+#ifdef USE_SYS
 	sys_remove(x);	/* systemcall to remove file */
+#else
+	unlink(x);
+#endif
 }
 
 RENAME(x,y) string x,y; {
 	/* Must move the file "x" to the file "y" */
 
+#ifdef USE_SYS
 	if(! sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
+#else
+	unlink(y);
+	if (link(x,y) != 0) fatal(1,"Cannot rename to %s",y);
+	unlink(x);
+#endif
 }
 
 /* to make it easier to patch ... */
-char emdir[64] = EM_DIR;
+char libdir[256] = LIBDIR;
 
 string
 libpath(s) string s; {
@@ -53,12 +59,11 @@ libpath(s) string s; {
 	register length;
 	p_mem alloc();
 	string strcpy(), strcat();
-	static string subdir = "/lib/LLgen/";
 
-	length = strlen(emdir) + strlen(subdir) + strlen(s) + 1;
+	length = strlen(libdir) + strlen(s) + 2;
 	p = (string) alloc((unsigned) length);
-	strcpy(p,emdir);
-	strcat(p,subdir);
+	strcpy(p,libdir);
+	strcat(p,"/");
 	strcat(p,s);
 	return p;
 }

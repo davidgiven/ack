@@ -3,8 +3,11 @@
 #PARAMS		do not remove this line
 
 SRC_DIR = $(SRC_HOME)/util/LLgen/src
-INCLUDES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(SRC_DIR) -I.
-CFLAGS = -DNDEBUG $(INCLUDES) $(COPTIONS)
+LIBDIR = $(TARGET_HOME)/lib/LLgen
+INCLUDES = -I$(SRC_DIR) -I.
+LIBDIRSTR = \"$(LIBDIR)\"
+DEFINES = -DNDEBUG
+CFLAGS = $(DEFINES) $(INCLUDES) $(COPTIONS)
 LDFLAGS=$(LDOPTIONS)
 
 LLOPT= # -vvv -x
@@ -18,19 +21,19 @@ CSRC = $(SRC_DIR)/main.c $(SRC_DIR)/gencode.c $(SRC_DIR)/compute.c \
 	$(SRC_DIR)/machdep.c $(SRC_DIR)/cclass.c
 CFILES = LLgen.c tokens.c Lpars.c $(CSRC)
 GFILES = $(SRC_DIR)/tokens.g $(SRC_DIR)/LLgen.g
-FILES = $(SRC_DIR)/types.h $(SRC_DIR)/tunable.h $(SRC_DIR)/extern.h \
+FILES = $(SRC_DIR)/types.h $(SRC_DIR)/extern.h \
 	$(SRC_DIR)/io.h $(SRC_DIR)/sets.h \
 	$(GFILES) $(CSRC) $(SRC_DIR)/proto.make
 
 all:		parser
-		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)" "LIBDIR=$(LIBDIR)"
 
 parser:		$(GFILES)
 		LLgen $(LLOPT) $(GFILES)
 		@touch parser
 
 first:		firstparser
-		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)" "LIBDIR=$(LIBDIR)"
 
 firstparser:
 		cp $(SRC_DIR)/LLgen.c.dist LLgen.c
@@ -109,7 +112,7 @@ global.$(SUF):	$(SRC_DIR)/io.h
 global.$(SUF):	$(SRC_DIR)/types.h
 
 machdep.$(SUF):	$(SRC_DIR)/machdep.c
-		$(CC) -c $(CFLAGS) $(SRC_DIR)/machdep.c
+		$(CC) -c $(CFLAGS) -DUSE_SYS -DLIBDIR=$(LIBDIRSTR) $(SRC_DIR)/machdep.c
 machdep.$(SUF):	$(SRC_DIR)/types.h
 
 main.$(SUF):	$(SRC_DIR)/main.c
