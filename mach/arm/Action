@@ -19,6 +19,9 @@ end
 name "ARM RiscOs library"
 dir libmon
 end
+name "ARM system call library"
+dir libsys
+end
 name "ARM floating point library"
 dir libfp
 end

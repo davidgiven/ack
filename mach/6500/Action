@@ -13,6 +13,9 @@ end
 name "MSC6500 etext,edata,end library"
 dir libend
 end
-name "MSC6500 system call library"
+name "MSC6500 MON library"
 dir libmon
+end
+name "MSC6500 system call library"
+dir libsys
 end
