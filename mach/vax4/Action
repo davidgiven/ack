@@ -1,38 +1,37 @@
+name "Vax 4-4 assembler"
+dir as
+end
 name "Vax 4-4 backend"
 dir cg
 end
 name "Vax target optimizer"
 dir top
 end
+name "ACK a.out to VAX a.out conversion program"
+dir cv
+end
 name "Vax code expander library"
 system vax*
 dir ce
 end
 name "Vax 4-4 C libraries"
-system vax*
 dir libcc
 end
 name "Vax 4-4 EM library"
-system vax*
 dir libem
 end
 name "Vax 4-4 Pascal library"
-system vax*
 dir libpc
 end
 name "Vax 4-4 Occam library"
-system vax*
 dir liboc
 end
 name "Vax 4-4 Modula-2 library"
-system vax*
 dir libm2
 end
 name "Vax 4-4 Basic library"
-system vax*
 dir libbc
 end
 name "Vax 4-4 systemcall interface"
-system vax*
 dir libsys
 end
