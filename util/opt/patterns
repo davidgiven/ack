@@ -470,10 +470,10 @@ zer loc defined($1) && $2==0:   zer $1+w
 loc loc loc cui $2==w && $3==w && $1>=0 && $1<=(1<<(8*w-2)):	loc $1
 loi loc loc cui $1 < w && $2==$3 && $2==w: loi $1
 loi loc and $1==1 && $3==w && ($2&255)==255:    loi 1
-loc loc cii zne $1<=w && $2==w:	zne $4
-loc loc cii zeq $1<=w && $2==w:	zeq $4
-loc loc cii tne $1<=w && $2==w:	tne
-loc loc cii teq $1<=w && $2==w:	teq
+loi loc loc cii zeq $1==$2 && $2<=w && $3==w:	loi $1 zeq $5
+loi loc loc cii zne $1==$2 && $2<=w && $3==w:	loi $1 zne $5
+loi loc loc cii teq $1==$2 && $2<=w && $3==w:	loi $1 teq
+loi loc loc cii tne $1==$2 && $2<=w && $3==w:	loi $1 tne
 loi loc and loc loc cii $1==1 && $4==w && $3==w && $2==255: loi $1 loc $4 loc $5 cii
 loi loc loc cii loc and $1==1 && $2==1 && $3==w && $5==255 && $6==w:	loi 1
 loi loc loc cii loc cmi zeq $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:	loi 1 loc $5 cmi w zeq $7
