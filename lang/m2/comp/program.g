@@ -144,7 +144,9 @@ DefinitionModule
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  df->df_flags |= D_BUSY | ForeignFlag;
 		  	  currscope->sc_definedby = df;
-			  if (DefId && df->df_idf != DefId) {
+			  if (DefId &&
+			      df->df_idf != DefId &&
+			      !is_anon_idf(df->df_idf)) {
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
 					df->df_idf->id_text, DefId->id_text);
 			  }

@@ -30,7 +30,8 @@
 #include	"const.h"
 #include	"warning.h"
 
-long str2long();
+extern long str2long();
+extern char *getwdir();
 
 t_token		dot,
 		aside;
@@ -225,6 +226,7 @@ CheckForLineDirective()
 		 */
 		if (class(ch) == STNL && strcmp(FileName,buf)) {
 			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+			WorkingDir = getwdir(FileName);
 		}
 	}
 	if (class(ch) == STEOI) {
