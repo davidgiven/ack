@@ -6,9 +6,9 @@
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
 #define newplb(x)	fprintf(codefile,".align 1\n%s:\n",x)
 #define	dlbdlb(s1,s2)	fprintf(codefile,"%s = %s\n",s1,s2)
-#define newlbss(x,f)	fprintf(codefile,"%s:.lcomm\t%ld\n",x,f)
+#define	newlbss(l,x)	fprintf(codefile,".lcomm\t%s,%d\n",l,x);
 
-#define cst_fmt		"$%ld"
+#define cst_fmt		"%ld"
 #define	off_fmt		"%ld"
 #define ilb_fmt		"L%xL%x"
 #define dlb_fmt		"_%d"
