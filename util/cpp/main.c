@@ -110,6 +110,13 @@ list_dependencies(source)
 			s++;
 			*s++ = 'o';
 			*s = '\0';
+                        /* the source may be in another directory than the
+                         * object generated, so don't include the pathname
+                         * leading to it.
+                         */
+                        if (s = strrindex(source, '/')) {
+                                source = s + 1;
+                        }
 		}
 		else source = 0; 
 	}
