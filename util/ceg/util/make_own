@@ -43,7 +43,7 @@ ce/*.o : mach.h
 
 EM_instr : ceg/ceg EM_table mach.h
 	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
-	$(CEG)/util/create_ofiles
+	( cd ce; $(CEG)/util/create_ofiles)
 	@make ce.a
 
 
