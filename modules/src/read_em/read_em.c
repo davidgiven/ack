@@ -41,13 +41,18 @@ _fill()
 	static int sz;
 
 	if (_ich && _ich < &text[sz]) return _ich++, '\0';
+	_ich = text;
 	if (sys_read(fd, text, BUFSIZ, &sz) &&
 	    sz > 0
 	   ) {
 		text[sz] = '\0';
-		return _ich = text, (*_ich++&0377);
+		return (*_ich++&0377);
 	}
-	else	return EOF;
+	else {
+		sz = 0;
+		text[0] = 0;
+		return EOF;
+	}
 }
 
 #define NARGS	3		/* Maximum number of arguments */
