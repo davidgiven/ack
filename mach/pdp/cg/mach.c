@@ -24,6 +24,8 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the PDP-11
  */
 
+static char procnam[40] ;
+
 /* #define REGPATCH		/* save all registers in markblock */
 
 con_part(sz,w) register sz; word w; {
@@ -147,10 +149,14 @@ f_regsave() {
 			fprintf(codefile,"jsr r5,PR%d%s\n",lbytes,Rstring);
 		}
 	}
-	for (i=0;i<n_regvars;i++)
+	for (i=0;i<n_regvars;i++) {
 		if (regadm[i].ra_off>=0)
 			fprintf(codefile,"mov 0%lo(r5),%s\n",regadm[i].ra_off,
 						regadm[i].ra_str);
+		/* generate equates for access to registers */
+		fprintf(codefile,"~%s%s=%ld.\n",regadm[i].ra_str+1, procnam,
+				 regadm[i].ra_off) ;
+	}
 }
 
 regsave(regstr,off,size) char *regstr; long off; {
@@ -181,6 +187,13 @@ regreturn() {
 }
 
 #endif
+
+doplb(name) char *name ; {
+	register char *p, *q ;
+	p=procnam, q=name ;
+	while ( *p++ = *q++ ) ;
+	fprintf(codefile,"%s:\n",name) ;
+}
 
 prolog(nlocals) full nlocals; {
 
