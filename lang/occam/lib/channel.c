@@ -117,6 +117,8 @@ static int timeout();
 int chan_any(c) register chan *c;
 {
 #ifdef __BSD4_2
+/* Sigh ... since SunOs 4.1, fcntl.h requires sys/types.h. */
+#include <sys/types.h>
 #include <fcntl.h>
 #ifndef O_NDELAY
 #define O_NDELAY FNDELAY
