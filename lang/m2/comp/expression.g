@@ -1,10 +1,6 @@
 /* E X P R E S S I O N S */
 
 {
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -38,22 +34,19 @@ qualident(int types;
 	  struct node **p;
 	 )
 {
-	register struct def *df;
 	struct node *nd;
 } :
 	IDENT	{ nd = MkLeaf(Name, &dot); }
 	[
 		selector(&nd)
 	]*
-		{ if (types) {
-			df = ill_df;
-
-			if (ChkDesignator(nd)) {
-			    if (nd->nd_class != Def) {
+		{ if (types && ChkDesignator(nd)) {
+			if (nd->nd_class != Def) {
 				node_error(nd, "%s expected", str);
-			    }
-			    else {
-				df = nd->nd_def;
+			}
+			else {
+				register struct def *df = nd->nd_def;
+
 		  		if ( !((types|D_ERROR) & df->df_kind)) {
 				    if (df->df_kind == D_FORWARD) {
 node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
@@ -62,9 +55,8 @@ node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
 node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
 				    }
 				}
-			    }
+				if (pdf) *pdf = df;
 			}
-			*pdf = df;
 		  }
 		  if (!p) FreeNode(nd);
 		  else *p = nd;
@@ -170,10 +162,9 @@ MulOperator:
 
 factor(register struct node **p;)
 {
-	struct def *df;
 	struct node *nd;
 } :
-	qualident(0, &df, (char *) 0, p)
+	qualident(0, (struct def **) 0, (char *) 0, p)
 	[
 		designator_tail(p)?
 		[
@@ -236,10 +227,8 @@ element(struct node *nd;)
 ;
 
 designator(struct node **pnd;)
-{
-	struct def *df;
-} :
-	qualident(0, &df, (char *) 0, pnd)
+:
+	qualident(0, (struct def **) 0, (char *) 0, pnd)
 	designator_tail(pnd)?
 ;
 

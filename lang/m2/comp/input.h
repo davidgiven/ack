@@ -1,7 +1,5 @@
 /* I N S T A N T I A T I O N   O F   I N P U T   M O D U L E */
 
-/* $Header$ */
-
 #include	"inputtype.h"
 
 #define INP_NPUSHBACK 2

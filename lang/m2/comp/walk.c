@@ -1,9 +1,5 @@
 /* P A R S E   T R E E   W A L K E R */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Routines to walk through parts of the parse tree, and generate
 	code for these parts.
 */
@@ -103,11 +99,6 @@ WalkModule(module)
 			C_loe_dlb(l1, (arith) 0);
 			C_zne(RETURN_LABEL);
 			C_ine_dlb(l1, (arith) 0);
-			/* Prevent this module from calling its own
-			   initialization routine
-			*/
-			assert(nd->nd_IDF == module->df_idf);
-			nd = nd->next;
 		}
 
 		for (; nd; nd = nd->next) {
@@ -415,17 +406,16 @@ WalkStat(nd, exit_label)
 		break;
 
 	case IF:
-		{	label l1, l2, l3;
+		{	label l1 = ++text_label, l3 = ++text_label;
 
-			l1 = ++text_label;
-			l2 = ++text_label;
-			l3 = ++text_label;
 			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
 			C_df_ilb(l3);
 			WalkNode(right->nd_left, exit_label);
 
 			if (right->nd_right) {	/* ELSE part */
+				label l2 = ++text_label;
+
 				C_bra(l2);
 				C_df_ilb(l1);
 				WalkNode(right->nd_right, exit_label);
@@ -440,73 +430,72 @@ WalkStat(nd, exit_label)
 		break;
 
 	case WHILE:
-		{	label l1, l2, l3;
+		{	label	loop = ++text_label,
+				exit = ++text_label,
+				dummy = ++text_label;
 
-			l1 = ++text_label;
-			l2 = ++text_label;
-			l3 = ++text_label;
-			C_df_ilb(l1);
-			ExpectBool(left, l3, l2);
-			C_df_ilb(l3);
+			C_df_ilb(loop);
+			ExpectBool(left, dummy, exit);
+			C_df_ilb(dummy);
 			WalkNode(right, exit_label);
-			C_bra(l1);
-			C_df_ilb(l2);
+			C_bra(loop);
+			C_df_ilb(exit);
 			break;
 		}
 
 	case REPEAT:
-		{	label l1, l2;
+		{	label loop = ++text_label, exit = ++text_label;
 
-			l1 = ++text_label;
-			l2 = ++text_label;
-			C_df_ilb(l1);
+			C_df_ilb(loop);
 			WalkNode(left, exit_label);
-			ExpectBool(right, l2, l1);
-			C_df_ilb(l2);
+			ExpectBool(right, exit, loop);
+			C_df_ilb(exit);
 			break;
 		}
 
 	case LOOP:
-		{	label l1, l2;
+		{	label loop = ++text_label, exit = ++text_label;
 
-			l1 = ++text_label;
-			l2 = ++text_label;
-			C_df_ilb(l1);
-			WalkNode(right, l2);
-			C_bra(l1);
-			C_df_ilb(l2);
+			C_df_ilb(loop);
+			WalkNode(right, exit);
+			C_bra(loop);
+			C_df_ilb(exit);
 			break;
 		}
 
 	case FOR:
 		{
 			arith tmp = 0;
-			struct node *fnd;
+			register struct node *fnd;
 			label l1 = ++text_label;
 			label l2 = ++text_label;
 
 			if (! DoForInit(nd, left)) break;
 			fnd = left->nd_right;
 			if (fnd->nd_class != Value) {
+				/* Upperbound not constant.
+				   The expression may only be evaluated once,
+				   so generate a temporary for it
+				*/
 				CodePExpr(fnd);
 				tmp = NewInt();
 				C_stl(tmp);
 			}
-			C_bra(l1);
-			C_df_ilb(l2);
+			C_df_ilb(l1);
+			C_dup(int_size);
+			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
+			if (left->nd_INT > 0) {
+				C_bgt(l2);
+			}
+			else	C_blt(l2);
 			RangeCheck(nd->nd_type, int_type);
 			CodeDStore(nd);
 			WalkNode(right, exit_label);
 			CodePExpr(nd);
 			C_loc(left->nd_INT);
 			C_adi(int_size);
-			C_df_ilb(l1);
-			C_dup(int_size);
-			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
-			if (left->nd_INT > 0) {
-				C_ble(l2);
-			}
-			else	C_bge(l2);
+			C_bra(l1);
+			C_df_ilb(l2);
 			C_asp(int_size);
 			if (tmp) FreeInt(tmp);
 		}
@@ -517,7 +506,6 @@ WalkStat(nd, exit_label)
 			struct scopelist link;
 			struct withdesig wds;
 			struct desig ds;
-			arith tmp = 0;
 
 			if (! WalkDesignator(left, &ds)) break;
 			if (left->nd_type->tp_fund != T_RECORD) {
@@ -532,7 +520,7 @@ WalkStat(nd, exit_label)
 			ds.dsg_kind = DSG_FIXED;
 			/* Create a designator structure for the temporary.
 			*/
-			ds.dsg_offset = tmp = NewPtr();
+			ds.dsg_offset = NewPtr();
 			ds.dsg_name = 0;
 			CodeStore(&ds, pointer_size);
 			ds.dsg_kind = DSG_PFIXED;
@@ -544,7 +532,7 @@ WalkStat(nd, exit_label)
 			WalkNode(right, exit_label);
 			CurrVis = link.next;
 			WithDesigs = wds.w_next;
-			FreePtr(tmp);
+			FreePtr(ds.dsg_offset);
 			break;
 		}
 
@@ -648,12 +636,13 @@ DoForInit(nd, left)
 	nd->nd_symb = IDENT;
 
 	if (! ChkVariable(nd) ||
-	    ! ChkExpression(left->nd_left) ||
+	    ! WalkExpr(left->nd_left) ||
 	    ! ChkExpression(left->nd_right)) return 0;
 
 	df = nd->nd_def;
 	if (df->df_kind == D_FIELD) {
-		node_error(nd, "FOR-loop variable may not be a field of a record");
+		node_error(nd,
+			   "FOR-loop variable may not be a field of a record");
 		return 0;
 	}
 
@@ -665,13 +654,14 @@ DoForInit(nd, left)
 	if (df->df_scope != CurrentScope) {
 		register struct scopelist *sc = CurrVis;
 
-		while (sc && sc->sc_scope != df->df_scope) {
+		for (;;) {
+			if (!sc) {
+				node_error(nd,
+				      "FOR-loop variable may not be imported");
+				return 0;
+			}
+			if (sc->sc_scope == df->df_scope) break;
 			sc = nextvisible(sc);
-		}
-
-		if (!sc) {
-			node_error(nd, "FOR-loop variable may not be imported");
-			return 0;
 		}
 	}
 
@@ -691,8 +681,6 @@ DoForInit(nd, left)
 node_warning(nd, "old-fashioned! compatibility required in FOR statement");
 	}
 
-	CodePExpr(left->nd_left);
-
 	return 1;
 }
 
@@ -703,11 +691,12 @@ DoAssign(nd, left, right)
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
 	   it sais that the left hand side is evaluated first.
+	   DAMN THE BOOK!
 	*/
 	struct desig dsl, dsr;
 
-	if (! ChkExpression(right)) return;
-	if (! ChkVariable(left)) return;
+	if (! ChkExpression(right) || ! ChkVariable(left)) return;
+
 	if (right->nd_symb == STRING) TryToString(right, left->nd_type);
 	dsr = InitDesig;
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);

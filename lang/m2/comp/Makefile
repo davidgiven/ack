@@ -1,5 +1,4 @@
 # make modula-2 "compiler"
-# $Header$
 EMDIR =		/usr/ceriel/em
 MHDIR =		$(EMDIR)/modules/h
 PKGDIR =	$(EMDIR)/modules/pkg
@@ -8,19 +7,26 @@ LLGEN =		$(EMDIR)/bin/LLgen
 
 INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
 
-LSRC =	tokenfile.g program.g declar.g expression.g statement.g
+GFILES =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
 LLGENOPTIONS =
 PROFILE =
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 LFLAGS = $(PROFILE)
+LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
+CSRC =	LLlex.c LLmessage.c char.c error.c main.c \
+	symbol2str.c tokenname.c idf.c input.c type.c def.c \
+	scope.c misc.c enter.c defmodule.c typequiv.c node.c \
+	cstoper.c chk_expr.c options.c walk.c casestat.c desig.c \
+	code.c tmpvar.c lookup.c Version.c
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
-	code.o tmpvar.o lookup.o
+	code.o tmpvar.o lookup.o Version.o
+SRC =	$(CSRC) $(LSRC) Lpars.c
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 # Keep the next entries up to date!
@@ -44,11 +50,11 @@ all:	Cfiles
 	@rm -f nmclash.o a.out
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab cclash.o cid.o cclash cid
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab cclash.o cid.o cclash cid clashes
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
-	sh -c `if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
 mkdep:	mkdep.o
@@ -57,20 +63,22 @@ mkdep:	mkdep.o
 cclash:	cclash.o
 	$(CC) $(LFLAGS) -o cclash cclash.o
 
+clashes:	$(SRC) $(HFILES)
+	sh -c 'if test -f clashes ; then ./cclash -l7 clashes $? > Xclashes ; mv Xclashes clashes ; else ./cclash -l7 $? > clashes ; fi'
+
 cid:	cid.o
 	$(CC) $(LFLAGS) -o cid cid.o
 
 # entry points not to be used directly
 
 Xlint:
-	lint $(INCLUDES) $(LINTFLAGS) `./sources $(OBJ)`
+	lint $(INCLUDES) $(LINTFLAGS) $(SRC)
 
-Cfiles:	hfiles LLfiles $(GENHFILES) $(GENCFILES)
-	./sources $(OBJ) > Cfiles
-	sh -c 'for i in $(HFILES) ; do echo $$i ; done >> Cfiles'
+Cfiles:	hfiles LLfiles $(GENCFILES) $(GENHFILES)
+	echo $(SRC) $(HFILES) > Cfiles
 
-LLfiles:	$(LSRC)
-	$(LLGEN) $(LLGENOPTIONS) $(LSRC)
+LLfiles:	$(GFILES)
+	$(LLGEN) $(LLGENOPTIONS) $(GFILES)
 	@touch LLfiles
 
 hfiles:	Parameters make.hfiles
@@ -78,7 +86,7 @@ hfiles:	Parameters make.hfiles
 	touch hfiles
 
 main:	$(OBJ) ../src/Makefile
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../src/main
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/dickmalloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../src/main
 	size ../src/main
 
 tokenfile.g:	tokenname.c make.tokfile
@@ -114,7 +122,7 @@ char.c: ../src/char.tab ../src/tab
 depend:	mkdep
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
-	./mkdep `./sources $(OBJ)` |\
+	./mkdep $(SRC) |\
 		sed 's/\.c:/\.o:/' >> Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
@@ -128,13 +136,13 @@ main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h ndir.h 
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
-input.o: f_info.h input.h inputtype.h
+input.o: def.h f_info.h idf.h input.h inputtype.h scope.h
 type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h scope.h target_sizes.h type.h walk.h
 def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
-defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h scope.h
+defmodule.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h node.h scope.h
 typequiv.o: LLlex.h debug.h def.h node.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
@@ -145,7 +153,7 @@ casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h walk.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h walk.h
 tmpvar.o: debug.h def.h main.h scope.h type.h
-lookup.o: LLlex.h debug.h def.h idf.h node.h scope.h
+lookup.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h chk_expr.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h

@@ -1,9 +1,5 @@
 /* S C O P E   M E C H A N I S M */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<assert.h>
@@ -23,9 +19,9 @@ struct scopelist *CurrVis;
 extern int proclevel;
 static struct scopelist *PervVis;
 
-/* STATICALLOCDEF "scope" */
+/* STATICALLOCDEF "scope" 10 */
 
-/* STATICALLOCDEF "scopelist" */
+/* STATICALLOCDEF "scopelist" 10 */
 
 open_scope(scopetype)
 {
@@ -36,15 +32,14 @@ open_scope(scopetype)
 	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 
-	clear((char *) sc, sizeof (struct scope));
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
 	sc->sc_level = proclevel;
-	if (scopetype == OPENSCOPE) {
-		ls->next = CurrVis;
-	}
-	else	ls->next = PervVis;
 	ls->sc_scope = sc;
 	ls->sc_encl = CurrVis;
+	if (scopetype == OPENSCOPE) {
+		ls->next = ls->sc_encl;
+	}
+	else	ls->next = PervVis;
 	CurrVis = ls;
 }
 
@@ -71,7 +66,7 @@ struct forwards {
 	struct type *fo_ptyp;
 };
 
-/* STATICALLOCDEF "forwards" */
+/* STATICALLOCDEF "forwards" 5 */
 
 Forward(tk, ptp)
 	struct node *tk;
@@ -83,11 +78,12 @@ Forward(tk, ptp)
 		same scope.
 	*/
 	register struct forwards *f = new_forwards();
+	register struct scope *sc = CurrentScope;
 
 	f->fo_tok = tk;
 	f->fo_ptyp = ptp;
-	f->next = CurrentScope->sc_forw;
-	CurrentScope->sc_forw = f;
+	f->next = sc->sc_forw;
+	sc->sc_forw = f;
 }
 
 STATIC
@@ -95,13 +91,14 @@ chk_proc(df)
 	register struct def *df;
 {
 	/*	Called at scope closing. Check all definitions, and if one
-		is a D_PROCHEAD, the procedure was not defined
+		is a D_PROCHEAD, the procedure was not defined.
 	*/
 	while (df) {
 		if (df->df_kind == D_PROCHEAD) {
 			/* A not defined procedure
 			*/
-error("procedure \"%s\" not defined", df->df_idf->id_text);
+			error("procedure \"%s\" not defined",
+				df->df_idf->id_text);
 			FreeNode(df->for_node);
 		}
 		df = df->df_nextinscope;
@@ -110,46 +107,48 @@ error("procedure \"%s\" not defined", df->df_idf->id_text);
 
 STATIC
 chk_forw(pdf)
-	register struct def **pdf;
+	struct def **pdf;
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
 		them, and otherwise move them to the enclosing scope.
 	*/
-	while (*pdf) {
-		if ((*pdf)->df_kind & (D_FORWARD|D_FORWMODULE)) {
+	register struct def *df;
+
+	while (df = *pdf) {
+		if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
 			/* These definitions must be found in
 			   the enclosing closed scope, which of course
 			   may be the scope that is now closed!
 			*/
-			struct def *df1 = (*pdf)->df_nextinscope;
-
 			if (scopeclosed(CurrentScope)) {
 				/* Indeed, the scope was a closed
 				   scope, so give error message
 				*/
-node_error((*pdf)->for_node, "identifier \"%s\" has not been declared",
-(*pdf)->df_idf->id_text);
-				FreeNode((*pdf)->for_node);
-				pdf = &(*pdf)->df_nextinscope;
+node_error(df->for_node, "identifier \"%s\" has not been declared",
+df->df_idf->id_text);
+				FreeNode(df->for_node);
 			}
-			else {	/* This scope was an open scope.
+			else {
+				/* This scope was an open scope.
 				   Maybe the definitions are in the
 				   enclosing scope?
 				*/
-				struct scopelist *ls;
-
-				ls = nextvisible(CurrVis);
-				if ((*pdf)->df_kind == D_FORWMODULE) {
-					(*pdf)->for_vis->next = ls;
+				register struct scopelist *ls =
+						nextvisible(CurrVis);
+				struct def *df1 = df->df_nextinscope;
+	
+				if (df->df_kind == D_FORWMODULE) {
+					df->for_vis->next = ls;
 				}
-				(*pdf)->df_nextinscope = ls->sc_scope->sc_def;
-				ls->sc_scope->sc_def = *pdf;
-				(*pdf)->df_scope = ls->sc_scope;
+				df->df_nextinscope = ls->sc_scope->sc_def;
+				ls->sc_scope->sc_def = df;
+				df->df_scope = ls->sc_scope;
 				*pdf = df1;
+				continue;
 			}
 		}
-		else	pdf = &(*pdf)->df_nextinscope;
+		pdf = &df->df_nextinscope;
 	}
 }
 
@@ -163,20 +162,17 @@ rem_forwards(fo)
 
 	if (fo->next) rem_forwards(fo->next);
 	df = lookfor(fo->fo_tok, CurrVis, 0);
-	if (df->df_kind == D_ERROR) {
-		node_error(fo->fo_tok, "identifier \"%s\" not declared",
-			df->df_idf->id_text);
-	}
-	else if (df->df_kind != D_TYPE) {
-		node_error(fo->fo_tok, "identifier \"%s\" not a type",
-			     df->df_idf->id_text);
+	if (! is_type(df)) {
+		node_error(fo->fo_tok,
+			   "identifier \"%s\" does not represent a type",
+			   df->df_idf->id_text);
 	}
 	fo->fo_ptyp->next = df->df_type;
 	free_forwards(fo);
 }
 
 Reverse(pdf)
-	register struct def **pdf;
+	struct def **pdf;
 {
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
@@ -188,23 +184,18 @@ Reverse(pdf)
 
 	df = 0;
 	df1 = *pdf;
-	while (df1) {
-		if (df1->df_kind & INTERESTING) break;
-		df1 = df1->df_nextinscope;
-	}
-
-	if (!(*pdf = df1)) return;
 
 	while (df1) {
-		*pdf = df1;
-		df1 = df1->df_nextinscope;
-		while (df1) {
-			if (df1->df_kind & INTERESTING) break;
+		if (df1->df_kind & INTERESTING) {
+			struct def *prev = df;
+
+			df = df1;
 			df1 = df1->df_nextinscope;
+			df->df_nextinscope = prev;
 		}
-		(*pdf)->df_nextinscope = df;
-		df = *pdf;
+		else	df1 = df1->df_nextinscope;
 	}
+	*pdf = df;
 }
 
 close_scope(flag)

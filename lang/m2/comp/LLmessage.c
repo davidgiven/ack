@@ -1,9 +1,5 @@
 /* S Y N T A X   E R R O R   R E P O R T I N G */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Defines the LLmessage routine. LLgen-generated parsers require the
 	existence of a routine of that name.
 	The routine must do syntax-error reporting and must be able to
@@ -39,24 +35,28 @@ LLmessage(tk)
 insert_token(tk)
 	int tk;
 {
-	aside = dot;
+	register struct token *dotp = &dot;
 
-	dot.tk_symb = tk;
+	aside = *dotp;
+
+	dotp->tk_symb = tk;
 
 	switch (tk)	{
 	/* The operands need some body */
 	case IDENT:
-		dot.TOK_IDF = gen_anon_idf();
+		dotp->TOK_IDF = gen_anon_idf();
 		break;
 	case STRING:
-		dot.TOK_SLE = 1;
-		dot.TOK_STR = Salloc("", 1);
+		dotp->tk_data.tk_str = (struct string *)
+					Malloc(sizeof (struct string));
+		dotp->TOK_SLE = 1;
+		dotp->TOK_STR = Salloc("", 1);
 		break;
 	case INTEGER:
-		dot.TOK_INT = 1;
+		dotp->TOK_INT = 1;
 		break;
 	case REAL:
-		dot.TOK_REL = Salloc("0.0", 4);
+		dotp->TOK_REL = Salloc("0.0", 4);
 		break;
 	}
 }

@@ -1,7 +1,5 @@
 /* E X P R E S S I O N   C H E C K I N G */
 
-/* $Header$ */
-
 extern int	(*ExprChkTable[])();	/* table of expression checking
 					   functions, indexed by node class
 					*/

@@ -1,7 +1,5 @@
 /* C O N S T A N T S   F O R   E X P R E S S I O N   H A N D L I N G */
 
-/* $Header$ */
-
 extern long
 	mach_long_sign;	/* sign bit of the machine long */
 extern int

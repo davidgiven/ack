@@ -1,7 +1,5 @@
 /* S C O P E   M E C H A N I S M */
 
-/* $Header$ */
-
 #define OPENSCOPE	0	/* Indicating an open scope */
 #define CLOSEDSCOPE	1	/* Indicating a closed scope (module) */
 

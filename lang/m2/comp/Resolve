@@ -19,10 +19,10 @@ then
 	:
 else	mkdir ../Xsrc
 fi
-make cclash
-make cid
-./cclash -c -l7 `cat Cfiles` > clashes
-sed '/^C_/d' < clashes > ../Xsrc/Xclashes
+make cclash clashes cid
+sed '/^C_/d' < clashes > tmp$$
+./cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
+rm -f tmp$$
 cd ../Xsrc
 if cmp -s Xclashes clashes
 then

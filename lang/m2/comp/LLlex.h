@@ -1,7 +1,5 @@
 /* T O K E N   D E S C R I P T O R   D E F I N I T I O N */
 
-/* $Header$ */
-
 /* Structure to store a string constant
 */
 struct string {

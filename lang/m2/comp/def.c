@@ -1,9 +1,5 @@
 /* D E F I N I T I O N   M E C H A N I S M */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -25,11 +21,42 @@ struct def *h_def;		/* pointer to free list of def structures */
 int	cnt_def;		/* count number of allocated ones */
 #endif
 
-struct def *ill_df;
+STATIC
+DefInFront(df)
+	register struct def *df;
+{
+	/*	Put definition "df" in front of the list of definitions
+		in its scope.
+		This is neccessary because in some cases the order in this
+		list is important.
+	*/
+	register struct def *df1 = df->df_scope->sc_def;
+
+	if (df1 != df) {
+		/* Definition "df" is not in front of the list
+		*/
+		while (df1) {
+			/* Find definition "df"
+			*/
+			if (df1->df_nextinscope == df) {
+				/* It already was in the list. Remove it
+				*/
+				df1->df_nextinscope = df->df_nextinscope;
+				break;
+			}
+			df1 = df1->df_nextinscope;
+		}
+
+		/* Now put it in front
+		*/
+		df->df_nextinscope = df->df_scope->sc_def;
+		df->df_scope->sc_def = df;
+	}
+}
 
 struct def *
 MkDef(id, scope, kind)
-	struct idf *id;
+	register struct idf *id;
 	register struct scope *scope;
 {
 	/*	Create a new definition structure in scope "scope", with
@@ -38,7 +65,6 @@ MkDef(id, scope, kind)
 	register struct def *df;
 
 	df = new_def();
-	clear((char *) df, sizeof (*df));
 	df->df_idf = id;
 	df->df_scope = scope;
 	df->df_kind = kind;
@@ -52,24 +78,16 @@ MkDef(id, scope, kind)
 	return df;
 }
 
-InitDef()
-{
-	/*	Initialize this module. Easy, the only thing to be initialized
-		is "ill_df".
-	*/
-	struct idf *gen_anon_idf();
-
-	ill_df = MkDef(gen_anon_idf(), CurrentScope, D_ERROR);
-	ill_df->df_type = error_type;
-}
-
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
 	register struct scope *scope;
+	int kind;
 {
 	/*	Declare an identifier in a scope, but first check if it
-		already has been defined. If so, error message.
+		already has been defined.
+		If so, then check for the cases in which this is legal,
+		and otherwise give an error message.
 	*/
 	register struct def *df;
 
@@ -133,7 +151,8 @@ define(id, scope, kind)
 		if (kind != D_ERROR) {
 			/* Avoid spurious error messages
 			*/
-error("identifier \"%s\" already declared", id->id_text);
+			error("identifier \"%s\" already declared",
+			      id->id_text);
 		}
 
 		return df;
@@ -143,7 +162,7 @@ error("identifier \"%s\" already declared", id->id_text);
 }
 
 RemoveImports(pdf)
-	struct def **pdf;
+	register struct def **pdf;
 {
 	/*	Remove all imports from a definition module. This is
 		neccesary because the implementation module might import
@@ -165,16 +184,15 @@ RemoveImports(pdf)
 }
 
 RemoveFromIdList(df)
-	struct def *df;
+	register struct def *df;
 {
 	/*	Remove definition "df" from the definition list
 	*/
 	register struct idf *id = df->df_idf;
 	register struct def *df1;
 
-	if (id->id_def == df) id->id_def = df->next;
+	if ((df1 = id->id_def) == df) id->id_def = df->next;
 	else {
-		df1 = id->id_def;
 		while (df1->next != df) {
 			assert(df1->next != 0);
 			df1 = df1->next;
@@ -184,13 +202,15 @@ RemoveFromIdList(df)
 }
 
 struct def *
-DeclProc(type)
+DeclProc(type, id)
+	register struct idf *id;
 {
 	/*	A procedure is declared, either in a definition or a program
 		module. Create a def structure for it (if neccessary).
 		Also create a name for it.
 	*/
 	register struct def *df;
+	register struct scope *scope;
 	extern char *sprint();
 	static int nmcount;
 	char buf[256];
@@ -200,85 +220,61 @@ DeclProc(type)
 	if (type == D_PROCHEAD) {
 		/* In a definition module
 		*/
-		df = define(dot.TOK_IDF, CurrentScope, type);
+		df = define(id, CurrentScope, type);
 		df->for_node = MkLeaf(Name, &dot);
-		sprint(buf,"%s_%s",CurrentScope->sc_name,df->df_idf->id_text);
+		sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
 		df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
-		if (CurrVis == Defined->mod_vis) C_exp(df->for_name);
+		if (CurrVis == Defined->mod_vis) {
+			/* The current module will define this routine.
+			   make sure the name is exported.
+			*/
+			C_exp(df->for_name);
+		}
 	}
 	else {
-		df = lookup(dot.TOK_IDF, CurrentScope);
+		char *name;
+
+		df = lookup(id, CurrentScope);
 		if (df && df->df_kind == D_PROCHEAD) {
 			/* C_exp already generated when we saw the definition
 			   in the definition module
 			*/
 			df->df_kind = D_PROCEDURE;
-			open_scope(OPENSCOPE);
-			CurrentScope->sc_name = df->for_name;
-			df->prc_vis = CurrVis;
+			name = df->for_name;
 			DefInFront(df);
 		}
 		else {
-			df = define(dot.TOK_IDF, CurrentScope, type);
-			open_scope(OPENSCOPE);
-			df->prc_vis = CurrVis;
-			sprint(buf,"_%d_%s",++nmcount,df->df_idf->id_text);
-			CurrentScope->sc_name = 
-				Salloc(buf, (unsigned)(strlen(buf)+1));
+			df = define(id, CurrentScope, type);
+			sprint(buf,"_%d_%s",++nmcount,id->id_text);
+			name = Salloc(buf, (unsigned)(strlen(buf)+1));
 			C_inp(buf);
 		}
+		open_scope(OPENSCOPE);
+		scope = CurrentScope;
+		scope->sc_name = name;
+		scope->sc_definedby = df;
+		df->prc_vis = CurrVis;
 	}
 
 	return df;
 }
 
-AddModule(id)
+EndProc(df, id)
+	register struct def *df;
 	struct idf *id;
 {
-	/*	Add the name of a module to the Module list. This list is
-		maintained to create the initialization routine of the
-		program/implementation module currently defined.
+	/*	The end of a procedure declaration.
+		Check that the closing identifier matches the name of the
+		procedure, close the scope, and check that a function
+		procedure has at least one RETURN statement.
 	*/
-	static struct node *nd_end;	/* to remember end of list */
-	register struct node *n;
-	extern struct node *Modules;
+	extern int return_occurred;
 
-	n = MkLeaf(Name, &dot);
-	n->nd_IDF = id;
-	n->nd_symb = IDENT;
-	if (nd_end) nd_end->next = n;
-	else Modules = n;
-	nd_end = n;
-}
-
-DefInFront(df)
-	register struct def *df;
-{
-	/*	Put definition "df" in front of the list of definitions
-		in its scope.
-		This is neccessary because in some cases the order in this
-		list is important.
-	*/
-	register struct def *df1 = df->df_scope->sc_def;
-
-	if (df1 != df) {
-		/* Definition "df" is not in front of the list
-		*/
-		while (df1 && df1->df_nextinscope != df) {
-			/* Find definition "df"
-			*/
-			df1 = df1->df_nextinscope;
-		}
-		if (df1) {
-			/* It already was in the list. Remove it
-			*/
-			df1->df_nextinscope = df->df_nextinscope;
-		}
-
-		/* Now put it in front
-		*/
-		df->df_nextinscope = df->df_scope->sc_def;
-		df->df_scope->sc_def = df;
+	match_id(id, df->df_idf);
+	close_scope(SC_CHKFORW|SC_REVERSE);
+	if (! return_occurred && ResultType(df->df_type)) {
+		error("function procedure %s does not return a value",
+		      df->df_idf->id_text);
 	}
 }
 
@@ -324,6 +320,27 @@ DefineLocalModule(id)
 	C_inp(buf);
 
 	return df;
+}
+
+CheckWithDef(df, tp)
+	register struct def *df;
+	struct type *tp;
+{
+	/*	Check the header of a procedure declaration against a
+		possible earlier definition in the definition module.
+	*/
+
+	if (df->df_type) {
+		/* We already saw a definition of this type
+		   in the definition module.
+		*/
+	  	if (!TstProcEquiv(tp, df->df_type)) {
+			error("inconsistent procedure declaration for \"%s\"",
+			      df->df_idf->id_text); 
+		}
+		FreeType(df->df_type);
+	}
+	df->df_type = tp;
 }
 
 #ifdef DEBUG

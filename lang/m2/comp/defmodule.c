@@ -1,9 +1,5 @@
 /* D E F I N I T I O N   M O D U L E S */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<assert.h>
@@ -15,12 +11,16 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"def.h"
 #include	"LLlex.h"
+#include	"Lpars.h"
 #include	"f_info.h"
 #include	"main.h"
+#include	"node.h"
 
 #ifdef DEBUG
 long	sys_filesize();
 #endif
+
+struct idf *	CurrentId;
 
 GetFile(name)
 	char *name;
@@ -28,10 +28,10 @@ GetFile(name)
 	/*	Try to find a file with basename "name" and extension ".def",
 		in the directories mentioned in "DEFPATH".
 	*/
-	char buf[256];
+	char buf[15];
 	char *strcpy(), *strcat();
 
-	strcpy(buf, name);
+	strncpy(buf, name, 10);
 	buf[10] = '\0';			/* maximum length */
 	strcat(buf, ".def");
 	if (! InsertFile(buf, DEFPATH, &(FileName))) {
@@ -42,17 +42,18 @@ GetFile(name)
 }
 
 struct def *
-GetDefinitionModule(id)
-	struct idf *id;
+GetDefinitionModule(id, incr)
+	register struct idf *id;
 {
 	/*	Return a pointer to the "def" structure of the definition
 		module indicated by "id".
 		We may have to read the definition module itself.
+		Also increment level by "incr".
 	*/
 	struct def *df;
 	static int level;
 
-	level++;
+	level += incr;
 	df = lookup(id, GlobalScope);
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
@@ -62,6 +63,8 @@ GetDefinitionModule(id)
 		}
 		else {
 			GetFile(id->id_text);
+			CurrentId = id;
+			open_scope(CLOSEDSCOPE);
 			DefModule();
 			if (level == 1) {
 				/* The module is directly imported by the
@@ -69,12 +72,23 @@ GetDefinitionModule(id)
 				   remember its name because we have to call
 				   its initialization routine
 				*/
-				AddModule(id);
+				static struct node *nd_end; /* end of list */
+				register struct node *n;
+				extern struct node *Modules;
+
+				n = MkLeaf(Name, &dot);
+				n->nd_IDF = id;
+				n->nd_symb = IDENT;
+				if (nd_end) nd_end->next = n;
+				else Modules = n;
+				nd_end = n;
 			}
+			close_scope(SC_CHKFORW);
 		}
 		df = lookup(id, GlobalScope);
 	}
+	CurrentId = 0;
 	assert(df && df->df_kind == D_MODULE);
-	level--;
+	level -= incr;
 	return df;
 }

@@ -1,7 +1,5 @@
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Header$ */
-
 struct module {
 	arith mo_priority;	/* priority of a module */
 	struct scopelist *mo_vis;/* scope of this module */
@@ -82,12 +80,12 @@ struct def	{		/* list of definitions for a name */
 #define D_IMPORT	0x0080	/* an imported definition */
 #define D_PROCHEAD	0x0100	/* a procedure heading in a definition module */
 #define D_HIDDEN	0x0200	/* a hidden type */
-#define D_FORWARD	0x0800	/* not yet defined */
-#define D_UNDEF_IMPORT	0x1000	/* imported from an undefined name */
-#define D_FORWMODULE	0x2000	/* module must be declared later */
-#define D_ERROR		0x4000	/* a compiler generated definition for an
+#define D_FORWARD	0x0400	/* not yet defined */
+#define D_FORWMODULE	0x0800	/* module must be declared later */
+#define D_ERROR		0x1000	/* a compiler generated definition for an
 				   undefined variable
 				*/
+#define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	char df_flags;
@@ -115,14 +113,13 @@ struct def	{		/* list of definitions for a name */
 
 #define SetUsed(df)	((df)->df_flags |= D_USED)
 
-/* ALLOCDEF "def" */
+/* ALLOCDEF "def" 50 */
 
 extern struct def
 	*define(),
 	*DefineLocalModule(),
 	*MkDef(),
-	*DeclProc(),
-	*ill_df;
+	*DeclProc();
 
 extern struct def
 	*lookup(),

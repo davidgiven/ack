@@ -1,7 +1,5 @@
 /* F I L E   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Header$ */
-
 struct f_info {
 	unsigned short f_lineno;
 	char *f_filename;

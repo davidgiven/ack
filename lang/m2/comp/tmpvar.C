@@ -1,9 +1,5 @@
 /* T E M P O R A R Y   V A R I A B L E S */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Code for the allocation and de-allocation of temporary variables,
 	allowing re-use.
 	The routines use "ProcScope" instead of "CurrentScope", because
@@ -29,7 +25,7 @@ struct tmpvar {
 	arith		t_offset;	/* offset from LocalBase */
 };
 
-/* STATICALLOCDEF "tmpvar" */
+/* STATICALLOCDEF "tmpvar" 10 */
 
 static struct tmpvar	*TmpInts,	/* for integer temporaries */
 			*TmpPtrs;	/* for pointer temporaries */
@@ -47,7 +43,7 @@ TmpOpen(sc) struct scope *sc;
 arith
 NewInt()
 {
-	arith offset;
+	register arith offset;
 	register struct tmpvar *tmp;
 
 	if (!TmpInts) {
@@ -67,7 +63,7 @@ NewInt()
 arith
 NewPtr()
 {
-	arith offset;
+	register arith offset;
 	register struct tmpvar *tmp;
 
 	if (!TmpPtrs) {

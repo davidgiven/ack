@@ -1,9 +1,5 @@
 /* L O O K U P   R O U T I N E S */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<em_arith.h>

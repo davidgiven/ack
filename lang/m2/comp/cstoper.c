@@ -1,9 +1,5 @@
 /* C O N S T A N T   E X P R E S S I O N   H A N D L I N G */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 #include	"target_sizes.h"
 
@@ -35,8 +31,10 @@ cstunary(expp)
 	register arith o1 = expp->nd_right->nd_INT;
 
 	switch(expp->nd_symb) {
+	/* Should not get here
 	case '+':
 		break;
+	*/
 
 	case '-':
 		o1 = -o1;
@@ -71,7 +69,7 @@ cstbin(expp)
 	*/
 	register arith o1 = expp->nd_left->nd_INT;
 	register arith o2 = expp->nd_right->nd_INT;
-	int uns = expp->nd_type != int_type;
+	register int uns = expp->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
 	assert(expp->nd_left->nd_class == Value);

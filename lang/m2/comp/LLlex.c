@@ -1,9 +1,5 @@
 /* L E X I C A L   A N A L Y S E R   F O R   M O D U L A - 2 */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 #include	"idfsize.h"
 #include	"numsize.h"
@@ -40,9 +36,10 @@ SkipComment()
 		Note that comments may be nested (par. 3.5).
 	*/
 	register int ch;
+	register int CommentLevel = 0;
 
+	LoadChar(ch);
 	for (;;) {
-		LoadChar(ch);
 		if (class(ch) == STNL) {
 			LineNumber++;
 #ifdef DEBUG
@@ -51,12 +48,22 @@ SkipComment()
 		}
 		else if (ch == '(') {
 			LoadChar(ch);
-			if (ch == '*') SkipComment();
+			if (ch == '*') CommentLevel++;
+			else continue;
 		}
 		else if (ch == '*') {
 			LoadChar(ch);
-			if (ch == ')') break;
+			if (ch == ')') {
+				CommentLevel--;
+				if (CommentLevel < 0) break;
+			}
+			else continue;
 		}
+		else if (ch == EOI) {
+			lexerror("unterminated comment");
+			break;
+		}
+		LoadChar(ch);
 	}
 }
 
@@ -69,7 +76,8 @@ GetString(upto)
 	register struct string *str = (struct string *) Malloc(sizeof(struct string));
 	register char *p;
 	
-	str->s_str = p = Malloc((unsigned int) (str->s_length = ISTRSIZE));
+	str->s_length = ISTRSIZE;
+	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	while (LoadChar(ch), ch != upto)	{
 		if (class(ch) == STNL)	{
 			lexerror("newline in string");
@@ -394,6 +402,7 @@ lexwarning("Character constant out of range");
 	case STCHAR:
 	default:
 		crash("(LLlex) Impossible character class");
+		/*NOTREACHED*/
 	}
 	/*NOTREACHED*/
 }

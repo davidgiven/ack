@@ -1,9 +1,5 @@
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"target_sizes.h"
 #include	"debug.h"
 #include	"maxset.h"
@@ -67,21 +63,6 @@ int	cnt_type;
 #endif
 
 struct type *
-create_type(fund)
-	int fund;
-{
-	/*	A brand new struct type is created, and its tp_fund set
-		to fund.
-	*/
-	register struct type *ntp = new_type();
-
-	clear((char *)ntp, sizeof(struct type));
-	ntp->tp_fund = fund;
-
-	return ntp;
-}
-
-struct type *
 construct_type(fund, tp)
 	int fund;
 	register struct type *tp;
@@ -89,9 +70,9 @@ construct_type(fund, tp)
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
 	*/
-	register struct type *dtp = create_type(fund);
+	register struct type *dtp = new_type();
 
-	switch (fund)	{
+	switch (dtp->tp_fund = fund)	{
 	case T_PROCEDURE:
 	case T_POINTER:
 	case T_HIDDEN:
@@ -135,8 +116,9 @@ standard_type(fund, align, size)
 	int align;
 	arith size;
 {
-	register struct type *tp = create_type(fund);
+	register struct type *tp = new_type();
 
+	tp->tp_fund = fund;
 	tp->tp_align = align;
 	tp->tp_size = size;
 
@@ -165,10 +147,6 @@ InitTypes()
 
 	if (double_size < float_size) {
 		fatal("long real size smaller than real size");
-	}
-
-	if (!pointer_size || pointer_size % word_size != 0) {
-		fatal("illegal pointer size");
 	}
 
 	/* character type
@@ -303,6 +281,19 @@ subr_type(lb, ub)
 	return res;
 }
 
+struct type *
+proc_type(result_type, parameters, n_bytes_params)
+	struct type *result_type;
+	struct paramlist *parameters;
+	arith n_bytes_params;
+{
+	register struct type *tp = construct_type(T_PROCEDURE, result_type);
+
+	tp->prc_params = parameters;
+	tp->prc_nbpar = n_bytes_params;
+	return tp;
+}
+
 genrck(tp)
 	register struct type *tp;
 {
@@ -310,20 +301,22 @@ genrck(tp)
 		neccessary. Return its label.
 	*/
 	arith lb, ub;
-	label ol, l;
+	register label ol;
+	int newlabel = 0;
 
 	getbounds(tp, &lb, &ub);
 
 	if (tp->tp_fund == T_SUBRANGE) {
 		if (!(ol = tp->sub_rck)) {
-			tp->sub_rck = l = ++data_label;
+			tp->sub_rck = ol = ++data_label;
+			newlabel = 1;
 		}
 	}
 	else if (!(ol = tp->enm_rck)) {
-		tp->enm_rck = l = ++data_label;
+		tp->enm_rck = ol = ++data_label;
+		newlabel = 1;
 	}
-	if (!ol) {
-		ol = l;
+	if (newlabel) {
 		C_df_dlb(ol);
 		C_rom_cst(lb);
 		C_rom_cst(ub);
@@ -385,7 +378,7 @@ ArrayElSize(tp)
 	   Also make sure that its size is either a dividor of the word_size,
 	   or a multiple of it.
 	*/
-	arith algn;
+	register arith algn;
 
 	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
 	algn = align(tp->tp_size, tp->tp_align);
@@ -446,6 +439,7 @@ FreeType(tp)
 	while (pr) {
 		pr1 = pr;
 		pr = pr->next;
+		free_def(pr1->par_def);
 		free_paramlist(pr1);
 	}
 
@@ -520,21 +514,14 @@ DumpType(tp)
 {
 	if (!tp) return;
 
-	print(" a:%d; s:%ld;", tp->tp_align, (long) tp->tp_size);
-	if (tp->next && tp->tp_fund != T_POINTER) {
-		/* Avoid printing recursive types!
-		*/
-		print(" n:(");
-		DumpType(tp->next);
-		print(")");
-	}
+	print("align:%d; size:%ld;", tp->tp_align, (long) tp->tp_size);
 
-	print(" f:");
+	print(" fund:");
 	switch(tp->tp_fund) {
 	case T_RECORD:
 		print("RECORD"); break;
 	case T_ENUMERATION:
-		print("ENUMERATION; n:%d", tp->enm_ncst); break;
+		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;
 	case T_INTEGER:
 		print("INTEGER"); break;
 	case T_CARDINAL:
@@ -562,7 +549,7 @@ DumpType(tp)
 
 		print("PROCEDURE");
 		if (par) {
-			print("; p:");
+			print("(");
 			while(par) {
 				if (IsVarParam(par)) print("VAR ");
 				DumpType(TypeOfParam(par));
@@ -573,17 +560,25 @@ DumpType(tp)
 		}
 	case T_ARRAY:
 		print("ARRAY");
-		print("; el:");
+		print("; element:");
 		DumpType(tp->arr_elem);
 		print("; index:");
 		DumpType(tp->next);
-		break;
+		print(";");
+		return;
 	case T_STRING:
 		print("STRING"); break;
 	case T_INTORCARD:
 		print("INTORCARD"); break;
 	default:
 		crash("DumpType");
+	}
+	if (tp->next && tp->tp_fund != T_POINTER) {
+		/* Avoid printing recursive types!
+		*/
+		print(" next:(");
+		DumpType(tp->next);
+		print(")");
 	}
 	print(";");
 }

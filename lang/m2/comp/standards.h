@@ -1,7 +1,5 @@
 /* S T A N D A R D   P R O C E D U R E S   A N D   F U N C T I O N S */
 
-/* $Header$ */
-
 #define S_ABS	1
 #define S_CAP	2
 #define S_CHR	3

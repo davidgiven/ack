@@ -1,9 +1,5 @@
 /* T O K E N   D E F I N I T I O N S */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"tokenname.h"
 #include	"Lpars.h"
 #include	"idf.h"

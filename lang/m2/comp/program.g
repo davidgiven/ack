@@ -1,10 +1,6 @@
 /* O V E R A L L   S T R U C T U R E */
 
 {
-#ifndef NORCSID
-static  char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -42,14 +38,11 @@ static  char *RcsId = "$Header$";
 
 ModuleDeclaration
 {
-	struct idf *id;			/* save module identifier */
 	register struct def *df;
 	struct node *exportlist = 0;
 	int qualified;
 } :
-	MODULE IDENT	{ id = dot.TOK_IDF;
-			  df = DefineLocalModule(id);
-			}
+	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
 	priority(&(df->mod_priority))?
 	';'
 	import(1)*
@@ -59,7 +52,7 @@ ModuleDeclaration
 				EnterExportList(exportlist, qualified);
 			  }
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
-			  match_id(id, dot.TOK_IDF);
+			  match_id(df->df_idf, dot.TOK_IDF);
 			}
 ;
 
@@ -104,7 +97,7 @@ import(int local;)
 				df = lookfor(nd,enclosing(CurrVis),0);
 				FreeNode(nd);
 			  }
-			  else	df = GetDefinitionModule(dot.TOK_IDF);
+			  else	df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
 	|
 			{ fromid = 0; }
@@ -124,16 +117,13 @@ import(int local;)
 DefinitionModule
 {
 	register struct def *df;
-	struct idf *id;			/* save module identifier */
 	struct node *exportlist;
 	int dummy;
 } :
 	DEFINITION
-	MODULE IDENT	{ id = dot.TOK_IDF;
-			  df = define(id, GlobalScope, D_MODULE);
+	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  if (!Defined) Defined = df;
-			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
-			  CurrentScope->sc_name = id->id_text;
+			  CurrentScope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
@@ -154,15 +144,14 @@ node_warning(exportlist, "export list in definition module ignored");
 		/* empty */
 	]
 	definition* END IDENT
-			{ df = CurrentScope->sc_def;
-			  while (df) {
+			{ register struct def *df1 = CurrentScope->sc_def;
+			  while (df1) {
 				/* Make all definitions "QUALIFIED EXPORT" */
-				df->df_flags |= D_QEXPORTED;
-				df = df->df_nextinscope;
+				df1->df_flags |= D_QEXPORTED;
+				df1 = df1->df_nextinscope;
 			  }
-			  close_scope(SC_CHKFORW);
 			  DefinitionModule--;
-			  match_id(id, dot.TOK_IDF);
+			  match_id(df->df_idf, dot.TOK_IDF);
 			}
 	'.'
 ;
@@ -206,19 +195,17 @@ Semicolon:
 
 ProgramModule
 {
-	struct idf *id;
 	struct def *GetDefinitionModule();
 	register struct def *df;
 } :
 	MODULE
-	IDENT	{ id = dot.TOK_IDF;
-		  if (state == IMPLEMENTATION) {
-			df = GetDefinitionModule(id);
+	IDENT	{ if (state == IMPLEMENTATION) {
+			df = GetDefinitionModule(dot.TOK_IDF, 0);
 			CurrVis = df->mod_vis;
 			RemoveImports(&(CurrentScope->sc_def));
 		  }
 		  else {
-			Defined = df = define(id, CurrentScope, D_MODULE);
+			Defined = df = define(dot.TOK_IDF, CurrentScope, D_MODULE);
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "_M2M";
@@ -229,13 +216,15 @@ ProgramModule
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
 		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
-		  match_id(id, dot.TOK_IDF);
+		  match_id(df->df_idf, dot.TOK_IDF);
 		}
 	'.'
 ;
 
 Module:
+				{ open_scope(CLOSEDSCOPE); }
 	DefinitionModule
+				{ close_scope(SC_CHKFORW); }
 |
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }

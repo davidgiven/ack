@@ -1,7 +1,5 @@
 /* P A R S E   T R E E   W A L K E R */
 
-/* $Header$ */
-
 /*	Definition of WalkNode macro
 */
 

@@ -1,9 +1,5 @@
 /* U S E R   O P T I O N - H A N D L I N G */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"idfsize.h"
 #include	"ndir.h"
 
@@ -17,7 +13,7 @@ extern int	idfsize;
 static int	ndirs;
 
 DoOption(text)
-	char *text;
+	register char *text;
 {
 	switch(*text++)	{
 
@@ -33,12 +29,15 @@ DoOption(text)
 					*/
 
 
-	case 'M':	/* maximum identifier length */
-		idfsize = txt2int(&text);
-		if (*text || idfsize <= 0)
+	case 'M': {	/* maximum identifier length */
+		char *t = text;		/* because &text is illegal */
+
+		idfsize = txt2int(&t);
+		if (*t || idfsize <= 0)
 			fatal("malformed -M option");
 		if (idfsize > IDFSIZE)
 			fatal("maximum identifier length is %d", IDFSIZE);
+		}
 		break;
 
 	case 'I' :
@@ -53,13 +52,16 @@ DoOption(text)
 		arith size;
 		int align;
 		char c;
+		char *t;
 
 		while (c = *text++)	{
-			size = txt2int(&text);
+			t = text;
+			size = txt2int(&t);
 			align = 0;
-			if (*text == '.')	{
-				text++;
-				align = txt2int(&text);
+			if (*(text = t) == '.')	{
+				t = text + 1;
+				align = txt2int(&t);
+				text = t;
 			}
 			switch (c)	{
 
@@ -104,7 +106,7 @@ DoOption(text)
 
 int
 txt2int(tp)
-	char **tp;
+	register char **tp;
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.

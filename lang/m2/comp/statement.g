@@ -1,10 +1,6 @@
 /* S T A T E M E N T S */
 
 {
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -22,6 +18,7 @@ static int	loopcount = 0;	/* Count nested loops */
 statement(register struct node **pnd;)
 {
 	register struct node *nd;
+	extern int return_occurred;
 } :
 	/*
 	 * This part is not in the reference grammar. The reference grammar
@@ -64,6 +61,7 @@ statement(register struct node **pnd;)
 			}
 |
 	ReturnStatement(pnd)
+			{ return_occurred = 1; }
 |
 	/* empty */	{ *pnd = 0; }
 ;
@@ -88,9 +86,12 @@ StatementSequence(register struct node **pnd;)
 	[ %persistent
 		';' statement(&nd)
 			{ if (nd) {
-				*pnd = MkNode(Link, *pnd, nd, &dot);
-				(*pnd)->nd_symb = ';';
-			  	pnd = &((*pnd)->nd_right);
+				register struct node *nd1 = 
+						MkNode(Link, *pnd, nd, &dot);
+
+				*pnd = nd1;
+				nd1->nd_symb = ';';
+			  	pnd = &(nd1->nd_right);
 			  }
 			}
 	]*
@@ -178,31 +179,29 @@ RepeatStatement(struct node **pnd;)
 
 ForStatement(struct node **pnd;)
 {
-	register struct node *nd;
+	register struct node *nd, *nd1;
 	struct node *dummy;
 }:
 	FOR		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	IDENT		{ nd->nd_IDF = dot.TOK_IDF; }
-	BECOMES		{ nd->nd_left = MkLeaf(Stat, &dot);
-			  nd = nd->nd_left;
-			}
-	expression(&(nd->nd_left))
+	BECOMES		{ nd->nd_left = nd1 = MkLeaf(Stat, &dot); }
+	expression(&(nd1->nd_left))
 	TO
-	expression(&(nd->nd_right))
+	expression(&(nd1->nd_right))
 	[
 		BY
 		ConstExpression(&dummy)
 			{ if (!(dummy->nd_type->tp_fund & T_INTORCARD)) {
 				error("illegal type in BY clause");
 			  }
-			  nd->nd_INT = dummy->nd_INT;
+			  nd1->nd_INT = dummy->nd_INT;
 			  FreeNode(dummy);
 			}
 	|
-			{ nd->nd_INT = 1; }
+			{ nd1->nd_INT = 1; }
 	]
 	DO
-	StatementSequence(&((*pnd)->nd_right))
+	StatementSequence(&(nd->nd_right))
 	END
 ;
 
@@ -227,12 +226,9 @@ ReturnStatement(struct node **pnd;)
 {
 	register struct def *df = CurrentScope->sc_definedby;
 	register struct node *nd;
-	extern int return_occurred;
 } :
 
-	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot);
-			  return_occurred = 1;
-			}
+	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot); }
 	[
 		expression(&(nd->nd_right))
 			{ if (scopeclosed(CurrentScope)) {

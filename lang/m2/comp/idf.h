@@ -1,7 +1,5 @@
 /* U S E R   D E C L A R E D   P A R T   O F   I D F */
 
-/* $Header$ */
-
 struct id_u {
 	int id_res;
 	struct def *id_df;

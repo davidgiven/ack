@@ -1,9 +1,5 @@
 /* M I S C E L L A N E O U S    R O U T I N E S */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>

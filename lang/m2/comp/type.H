@@ -1,7 +1,5 @@
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Header$ */
-
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
 	struct def *par_def;	/* "df" of parameter */
@@ -9,7 +7,7 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 #define TypeOfParam(xpar)	((xpar)->par_def->df_type)
 };
 
-/* ALLOCDEF "paramlist" */
+/* ALLOCDEF "paramlist" 20 */
 
 struct enume {
 	struct def *en_enums;	/* Definitions of enumeration literals */
@@ -86,7 +84,7 @@ struct type	{
 	} tp_value;
 };
 
-/* ALLOCDEF "type" */
+/* ALLOCDEF "type" 50 */
 
 extern struct type
 	*bool_type,
@@ -125,11 +123,11 @@ extern arith
 	align();		/* type.c */
 
 struct type
-	*create_type(),
 	*construct_type(),
 	*standard_type(),
 	*set_type(),
 	*subr_type(),
+	*proc_type(),
 	*RemoveEqual();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)

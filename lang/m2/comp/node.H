@@ -1,7 +1,5 @@
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
 
-/* $Header$ */
-
 struct node {
 	struct node *next;
 #define nd_left	next
@@ -35,7 +33,7 @@ struct node {
 #define nd_REL		nd_token.TOK_REL
 };
 
-/* ALLOCDEF "node" */
+/* ALLOCDEF "node" 50 */
 
 extern struct node *MkNode(), *MkLeaf();
 

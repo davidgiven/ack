@@ -1,7 +1,5 @@
 /* T O K E N N A M E   S T R U C T U R E */
 
-/* $Header$ */
-
 struct tokenname	{	/*	Used for defining the name of a
 					token as identified by its symbol
 				*/

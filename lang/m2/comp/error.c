@@ -5,10 +5,6 @@
 	number of arguments!
 */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"errout.h"
 #include	"debug.h"
 

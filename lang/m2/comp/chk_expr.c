@@ -1,9 +1,5 @@
 /* E X P R E S S I O N   C H E C K I N G */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Check expressions, and try to evaluate them as far as possible.
 */
 
@@ -31,6 +27,9 @@ int
 ChkVariable(expp)
 	register struct node *expp;
 {
+	/*	Check that "expp" indicates an item that can be
+		assigned to.
+	*/
 
 	if (! ChkDesignator(expp)) return 0;
 
@@ -47,6 +46,9 @@ STATIC int
 ChkArrow(expp)
 	register struct node *expp;
 {
+	/*	Check an application of the '^' operator.
+		The operand must be a variable of a pointer type.
+	*/
 	register struct type *tp;
 
 	assert(expp->nd_class == Arrow);
@@ -59,8 +61,7 @@ ChkArrow(expp)
 	tp = expp->nd_right->nd_type;
 
 	if (tp->tp_fund != T_POINTER) {
-		node_error(expp, "illegal operand for unary operator \"%s\"",
-			symbol2str(expp->nd_symb));
+		node_error(expp, "illegal operand for unary operator \"^\"");
 		return 0;
 	}
 
@@ -72,6 +73,12 @@ STATIC int
 ChkArr(expp)
 	register struct node *expp;
 {
+	/*	Check an array selection.
+		The left hand side must be a variable of an array type,
+		and the right hand side must be an expression that is
+		assignment compatible with the array-index.
+	*/
+
 	register struct type *tpl, *tpr;
 
 	assert(expp->nd_class == Arrsel);
@@ -91,7 +98,7 @@ ChkArr(expp)
 	tpr = expp->nd_right->nd_type;
 
 	if (tpl->tp_fund != T_ARRAY) {
-		node_error(expp, "array index not belonging to an ARRAY");
+		node_error(expp, "not indexing an ARRAY type");
 		return 0;
 	}
 
@@ -110,6 +117,7 @@ ChkArr(expp)
 	return 1;
 }
 
+#ifdef DEBUG
 STATIC int
 ChkValue(expp)
 	struct node *expp;
@@ -125,11 +133,15 @@ ChkValue(expp)
 	}
 	/*NOTREACHED*/
 }
+#endif
 
 STATIC int
 ChkLinkOrName(expp)
 	register struct node *expp;
 {
+	/*	Check either an ID or a construction of the form
+		ID.ID [ .ID ]*
+	*/
 	register struct def *df;
 
 	expp->nd_type = error_type;
@@ -140,6 +152,9 @@ ChkLinkOrName(expp)
 		expp->nd_type = RemoveEqual(expp->nd_def->df_type);
 	}
 	else if (expp->nd_class == Link) {
+		/*	A selection from a record or a module.
+			Modules also have a record type.
+		*/
 		register struct node *left = expp->nd_left;
 
 		assert(expp->nd_symb == '.');
@@ -188,16 +203,17 @@ df->df_idf->id_text);
 	if (df->df_kind == D_ERROR) return 0;
 
 	if (df->df_kind & (D_ENUM | D_CONST)) {
+		/* Replace an enum-literal or a CONST identifier by its value.
+		*/
 		if (df->df_kind == D_ENUM) {
 			expp->nd_class = Value;
 			expp->nd_INT = df->enm_val;
 			expp->nd_symb = INTEGER;
 		}
 		else  {
-			unsigned int ln;
+			unsigned int ln = expp->nd_lineno;
 
 			assert(df->df_kind == D_CONST);
-			ln = expp->nd_lineno;
 			*expp = *(df->con_const);
 			expp->nd_lineno = ln;
 		}
@@ -210,44 +226,33 @@ STATIC int
 ChkExLinkOrName(expp)
 	register struct node *expp;
 {
+	/*	Check either an ID or an ID.ID [.ID]* occurring in an
+		expression.
+	*/
 	register struct def *df;
 
 	if (! ChkLinkOrName(expp)) return 0;
 	if (expp->nd_class != Def) return 1;
 	df = expp->nd_def;
 
-	if (!(df->df_kind & (D_ENUM|D_CONST|D_PROCEDURE|D_FIELD|D_VARIABLE|D_PROCHEAD))) {
+	if (!(df->df_kind & D_VALUE)) {
 		node_error(expp, "value expected");
 	}
 
 	if (df->df_kind == D_PROCEDURE) {
-		/* Check that this procedure is one that we
-		   may take the address from.
+		/* Check that this procedure is one that we may take the
+		   address from.
 		*/
 		if (df->df_type == std_type || df->df_scope->sc_level > 0) {
 			/* Address of standard or nested procedure
 			   taken.
 			*/
-node_error(expp, "it is illegal to take the address of a standard or local procedure");
+node_error(expp, "standard or local procedures may not be assigned");
 			return 0;
 		}
 	}
 
 	return 1;
-}
-
-STATIC int
-RemoveSet(set)
-	arith **set;
-{
-	/*	This routine is only used for error exits of ChkElement.
-		It frees the set indicated by "set", and returns 0.
-	*/
-	if (*set) {
-		free((char *) *set);
-		*set = 0;
-	}
-	return 0;
 }
 
 STATIC int
@@ -279,7 +284,7 @@ ChkElement(expp, tp, set)
 
 		    	if (left->nd_INT > right->nd_INT) {
 node_error(expp, "lower bound exceeds upper bound in range");
-				return RemoveSet(set);
+				return 0;
 			}
 
 			if (*set) {
@@ -298,28 +303,24 @@ node_error(expp, "lower bound exceeds upper bound in range");
 
 	/* Here, a single element is checked
 	*/
-	if (!ChkExpression(expp)) {
-		return RemoveSet(set);
-	}
+	if (!ChkExpression(expp)) return 0;
 
 	if (!TstCompat(tp, expp->nd_type)) {
 		node_error(expp, "set element has incompatible type");
-		return RemoveSet(set);
+		return 0;
 	}
 
 	if (expp->nd_class == Value) {
 		/* a constant element
 		*/
-		i = expp->nd_INT;
+		arith low, high;
 
-	    	if ((tp->tp_fund != T_ENUMERATION &&
-		     (i < tp->sub_lb || i > tp->sub_ub))
-		   ||
-		    (tp->tp_fund == T_ENUMERATION &&
-		     (i < 0 || i > tp->enm_ncst))
-		   ) {
+		i = expp->nd_INT;
+		getbounds(tp, &low, &high);
+
+	    	if (i < low || i > high) {
 			node_error(expp, "set element out of range");
-			return RemoveSet(set);
+			return 0;
 		}
 
 		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
@@ -353,9 +354,11 @@ ChkSet(expp)
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
 
-		if (!(df->df_kind & (D_TYPE|D_ERROR)) ||
+		if (!is_type(df) ||
 		    (df->df_type->tp_fund != T_SET)) {
-node_error(expp, "specifier does not represent a set type");
+			if (df->df_kind != D_ERROR) {
+node_error(expp, "type specifier does not represent a set type");
+			}
 			return 0;
 		}
 		tp = df->df_type;
@@ -394,7 +397,8 @@ node_error(expp, "specifier does not represent a set type");
 		/* Yes, it was a constant set, and we managed to compute it!
 		   Notice that at the moment there is no such thing as
 		   partial evaluation. Either we evaluate the set, or we
-		   don't (at all). Improvement not neccesary. (???)
+		   don't (at all). Improvement not neccesary (???)
+		   ??? sets have a contant part and a variable part ???
 		*/
 		expp->nd_class = Set;
 		expp->nd_set = set;
@@ -417,7 +421,6 @@ getarg(argp, bases, designator)
 		that it must be a designator and may not be a register
 		variable.
 	*/
-	struct type *tp;
 	register struct node *arg = (*argp)->nd_right;
 	register struct node *left;
 
@@ -437,8 +440,7 @@ getarg(argp, bases, designator)
 	}
 
 	if (bases) {
-		tp = BaseType(left->nd_type);
-		if (!(tp->tp_fund & bases)) {
+		if (!(BaseType(left->nd_type)->tp_fund & bases)) {
 			node_error(arg, "unexpected type");
 			return 0;
 		}
@@ -452,7 +454,12 @@ STATIC struct node *
 getname(argp, kinds)
 	struct node **argp;
 {
+	/*	Get the next argument from argument list "argp".
+		The argument must indicate a definition, and the
+		definition kind must be one of "kinds".
+	*/
 	register struct node *arg = *argp;
+	register struct node *left;
 
 	if (!arg->nd_right) {
 		node_error(arg, "too few arguments supplied");
@@ -460,25 +467,26 @@ getname(argp, kinds)
 	}
 
 	arg = arg->nd_right;
-	if (! ChkDesignator(arg->nd_left)) return 0;
+	left = arg->nd_left;
+	if (! ChkDesignator(left)) return 0;
 
-	if (arg->nd_left->nd_class != Def && arg->nd_left->nd_class != LinkDef) {
+	if (left->nd_class != Def && left->nd_class != LinkDef) {
 		node_error(arg, "identifier expected");
 		return 0;
 	}
 
-	if (!(arg->nd_left->nd_def->df_kind & kinds)) {
+	if (!(left->nd_def->df_kind & kinds)) {
 		node_error(arg, "unexpected type");
 		return 0;
 	}
 
 	*argp = arg;
-	return arg->nd_left;
+	return left;
 }
 
 STATIC int
 ChkProcCall(expp)
-	register struct node *expp;
+	struct node *expp;
 {
 	/*	Check a procedure call
 	*/
@@ -487,11 +495,12 @@ ChkProcCall(expp)
 	register struct paramlist *param;
 
 	left = expp->nd_left;
-	arg = expp;
 	expp->nd_type = RemoveEqual(ResultType(left->nd_type));
 
+	/* Check parameter list
+	*/
 	for (param = ParamList(left->nd_type); param; param = param->next) {
-		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
+		if (!(left = getarg(&expp, 0, IsVarParam(param)))) return 0;
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
@@ -504,8 +513,8 @@ node_error(left, "type incompatibility in parameter");
 		}
 	}
 
-	if (arg->nd_right) {
-		node_error(arg->nd_right, "too many parameters supplied");
+	if (expp->nd_right) {
+		node_error(expp->nd_right, "too many parameters supplied");
 		return 0;
 	}
 
@@ -517,7 +526,7 @@ ChkCall(expp)
 	register struct node *expp;
 {
 	/*	Check something that looks like a procedure or function call.
-		Of course this does not have to be a call at all.
+		Of course this does not have to be a call at all,
 		it may also be a cast or a standard procedure call.
 	*/
 	register struct node *left;
@@ -531,14 +540,14 @@ ChkCall(expp)
 	if (! ChkDesignator(left)) return 0;
 
 	if (IsCast(left)) {
-		/* It was a type cast. This is of course not portable.
+		/* It was a type cast.
 		*/
 		return ChkCast(expp, left);
 	}
 
 	if (IsProcCall(left)) {
-		/* A procedure call. it may also be a call to a
-		   standard procedure
+		/* A procedure call.
+		   It may also be a call to a standard procedure
 		*/
 		if (left->nd_type == std_type) {
 			/* A standard procedure
@@ -559,6 +568,10 @@ STATIC struct type *
 ResultOfOperation(operator, tp)
 	struct type *tp;
 {
+	/*	Return the result type of the binary operation "operator",
+		with operand type "tp".
+	*/
+
 	switch(operator) {
 	case '=':
 	case '#':
@@ -582,6 +595,10 @@ Boolean(operator)
 STATIC int
 AllowedTypes(operator)
 {
+	/*	Return a bit mask indicating the allowed operand types
+		for binary operator "operator".
+	*/
+
 	switch(operator) {
 	case '+':
 	case '-':
@@ -615,13 +632,17 @@ STATIC int
 ChkAddress(tpl, tpr)
 	register struct type *tpl, *tpr;
 {
+	/*	Check that either "tpl" or "tpr" are both of type
+		address_type, or that one of them is, but the other is
+		of type cardinal.
+	*/
 	
 	if (tpl == address_type) {
-		return tpr == address_type || tpr->tp_fund != T_POINTER;
+		return tpr == address_type || (tpr->tp_fund & T_CARDINAL);
 	}
 
 	if (tpr == address_type) {
-		return tpl->tp_fund != T_POINTER;
+		return (tpl->tp_fund & T_CARDINAL);
 	}
 
 	return 0;
@@ -656,21 +677,26 @@ ChkBinOper(expp)
 		}
 	}
 
-	expp->nd_type = ResultOfOperation(expp->nd_symb, tpl);
+	expp->nd_type = ResultOfOperation(expp->nd_symb, tpr);
 
+	/* Check that the application of the operator is allowed on the type
+	   of the operands.
+	   There are three tricky parts:
+	   - Boolean operators are only allowed on boolean operands, but
+	     the "allowed-mask" of "AllowedTypes" can only indicate
+	     an enumeration type.
+	   - All operations that are allowed on CARDINALS are also allowed
+	     on ADDRESS.
+	   - The IN-operator has as right-hand-size operand a set.
+	*/
 	if (expp->nd_symb == IN) {
-		/* Handle this one specially */
-		if (tpr->tp_fund != T_SET) {
-node_error(expp, "RHS of IN operator not a SET type");
-			return 0;
-		}
 		if (!TstAssCompat(tpl, ElementType(tpr))) {
 			/* Assignment compatible ???
 			   I don't know! Should we be allowed to check
 			   if a CARDINAL is a member of a BITSET???
 			*/
 
-node_error(expp, "IN operator: type of LHS not compatible with element type of RHS");
+node_error(expp, "incompatible types for operator \"IN\"");
 			return 0;
 		}
 		if (left->nd_class == Value && right->nd_class == Set) {
@@ -679,38 +705,31 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 		return 1;
 	}
 
+	allowed = AllowedTypes(expp->nd_symb);
+
+	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed)) {
+	    	if (!((T_CARDINAL & allowed) &&
+	             ChkAddress(tpl, tpr))) {
+node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+			return 0;
+		}
+		if (expp->nd_type->tp_fund & T_CARDINAL) {
+			expp->nd_type = address_type;
+		}
+	}
+
+	if (Boolean(expp->nd_symb) && tpl != bool_type) {
+node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+	    
+		return 0;
+	}
+
 	/* Operands must be compatible (distilled from Def 8.2)
 	*/
 	if (!TstCompat(tpl, tpr)) {
 		node_error(expp, "incompatible types for operator \"%s\"",
 					symbol2str(expp->nd_symb));
 		return 0;
-	}
-
-	allowed = AllowedTypes(expp->nd_symb);
-
-	/* Check that the application of the operator is allowed on the type
-	   of the operands.
-	   There are two tricky parts:
-	   - Boolean operators are only allowed on boolean operands, but
-	     the "allowed-mask" of "AllowedTypes" can only indicate
-	     an enumeration type.
-	   - All operations that are allowed on CARDINALS are also allowed
-	     on ADDRESS.
-	*/
-	if (Boolean(expp->nd_symb) && tpl != bool_type) {
-node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
-	    
-		return 0;
-	}
-	if (!(tpl->tp_fund & allowed)) {
-	    	if (!(tpl->tp_fund == T_POINTER &&
-	      	     (T_CARDINAL & allowed) &&
-	             ChkAddress(tpl, tpr))) {
-node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
-			return 0;
-		}
-		if (expp->nd_type == card_type) expp->nd_type = address_type;
 	}
 
 	if (tpl->tp_fund == T_SET) {
@@ -737,9 +756,8 @@ ChkUnOper(expp)
 
 	if (! ChkExpression(right)) return 0;
 
-	tpr = BaseType(right->nd_type);
+	expp->nd_type = tpr = BaseType(right->nd_type);
 	if (tpr == address_type) tpr = card_type;
-	expp->nd_type = tpr;
 
 	switch(expp->nd_symb) {
 	case '+':
@@ -799,6 +817,9 @@ STATIC struct node *
 getvariable(argp)
 	struct node **argp;
 {
+	/*	Get the next argument from argument list "argp".
+		It must obey the rules of "ChkVariable".
+	*/
 	register struct node *arg = *argp;
 
 	arg = arg->nd_right;
@@ -807,10 +828,11 @@ getvariable(argp)
 		return 0;
 	}
 
-	if (! ChkVariable(arg->nd_left)) return 0;
-
 	*argp = arg;
-	return arg->nd_left;
+	arg = arg->nd_left;
+	if (! ChkVariable(arg)) return 0;
+
+	return arg;
 }
 
 STATIC int
@@ -1104,7 +1126,11 @@ done_before(expp)
 extern int	NodeCrash();
 
 int (*ExprChkTable[])() = {
+#ifdef DEBUG
 	ChkValue,
+#else
+	done_before,
+#endif
 	ChkArr,
 	ChkBinOper,
 	ChkUnOper,
@@ -1120,7 +1146,11 @@ int (*ExprChkTable[])() = {
 };
 
 int (*DesigChkTable[])() = {
+#ifdef DEBUG
 	ChkValue,
+#else
+	done_before,
+#endif
 	ChkArr,
 	no_desig,
 	no_desig,

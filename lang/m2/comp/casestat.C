@@ -1,8 +1,11 @@
 /* C A S E   S T A T E M E N T   C O D E   G E N E R A T I O N */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
+/*	Generation of case statements is done by first creating a
+	description structure for the statement, build a list of the
+	case-labels, then generating a case description in the code,
+	and generating either CSA or CSB, and then generating code for the
+	cases themselves.
+*/
 
 #include	"debug.h"
 
@@ -22,30 +25,32 @@ static char *RcsId = "$Header$";
 #include	"density.h"
 
 struct switch_hdr	{
-	struct switch_hdr *next;
-	label sh_break;
-	label sh_default;
-	int sh_nrofentries;
-	struct type *sh_type;
-	arith sh_lowerbd;
-	arith sh_upperbd;
-	struct case_entry *sh_entries;
+	struct switch_hdr *next;	/* in the free list */
+	label sh_break;			/* label of statement after this one */
+	label sh_default;		/* label of ELSE part, or 0 */
+	int sh_nrofentries;		/* number of cases */
+	struct type *sh_type;		/* type of case expression */
+	arith sh_lowerbd;		/* lowest case label */
+	arith sh_upperbd;		/* highest case label */
+	struct case_entry *sh_entries;	/* the cases with their generated
+					   labels
+					*/
 };
 
-/* STATICALLOCDEF "switch_hdr" */
+/* STATICALLOCDEF "switch_hdr" 5 */
 
 struct case_entry	{
-	struct case_entry *next;
-	label ce_label;
-	arith ce_value;
+	struct case_entry *next;	/* next in list */
+	label ce_label;			/* generated label */
+	arith ce_value;			/* value of case label */
 };
 
-/* STATICALLOCDEF "case_entry" */
+/* STATICALLOCDEF "case_entry" 20 */
 
 /* The constant DENSITY determines when CSA and when CSB instructions
    are generated. Reasonable values are: 2, 3, 4.
    On machines that have lots of address space and memory, higher values
-   are also reasonable. On these machines the density of jump tables
+   might also be reasonable. On these machines the density of jump tables
    may be lower.
 */
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
@@ -56,30 +61,36 @@ CaseCode(nd, exitlabel)
 {
 	/*	Check the expression, stack a new case header and
 		fill in the necessary fields.
+		"exitlabel" is the exit-label of the closest enclosing
+		LOOP-statement, or 0.
 	*/
 	register struct switch_hdr *sh = new_switch_hdr();
 	register struct node *pnode = nd;
 	register struct case_entry *ce;
 	register arith val;
-	label tablabel;
+	label CaseDescrLab;
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
-	clear((char *) sh, sizeof(*sh));
-	WalkExpr(pnode->nd_left);
+	WalkExpr(pnode->nd_left);	/* evaluate case expression */
 	sh->sh_type = pnode->nd_left->nd_type;
 	sh->sh_break = ++text_label;
 
 	/* Now, create case label list
 	*/
-	while (pnode && pnode->nd_right) {
+	while (pnode->nd_right) {
 		pnode = pnode->nd_right;
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
+				/* non-empty case
+				*/
 				pnode->nd_lab = ++text_label;
-				if (! AddCases(sh,
+				if (! AddCases(sh, /* to descriptor */
 					       pnode->nd_left->nd_left,
-					       pnode->nd_lab)) {
+						   /* of case labels */
+					       pnode->nd_lab
+						   /* and code label */
+					      )) {
 					FreeSh(sh);
 					return;
 				}
@@ -90,19 +101,20 @@ CaseCode(nd, exitlabel)
 			*/
 
 			sh->sh_default = ++text_label;
-			pnode = 0;
+			break;
 		}
 	}
 
 	/* Now generate code for the switch itself
+	   First the part that CSA and CSB descriptions have in common.
 	*/
-	tablabel = ++data_label;	/* the rom must have a label	*/
-	C_df_dlb(tablabel);
+	CaseDescrLab = ++data_label;	/* the rom must have a label	*/
+	C_df_dlb(CaseDescrLab);
 	if (sh->sh_default) C_rom_ilb(sh->sh_default);
 	else C_rom_ucon("0", pointer_size);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
-		/* CSA */
-
+		/* CSA
+		*/
 		C_rom_cst(sh->sh_lowerbd);
 		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
@@ -115,24 +127,27 @@ CaseCode(nd, exitlabel)
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
 			else C_rom_ucon("0", pointer_size);
 		}
-		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
+		C_lae_dlb(CaseDescrLab, (arith)0);	/* perform the switch */
 		C_csa(word_size);
 	}
-	else	{ /* CSB */
+	else	{ 
+		/* CSB
+		*/
 		C_rom_cst((arith)sh->sh_nrofentries);
 		for (ce = sh->sh_entries; ce; ce = ce->next)	{
-			/* generate the entries: value + prog.label	*/
+			/* generate the entries: value + prog.label
+			*/
 			C_rom_cst(ce->ce_value);
 			C_rom_ilb(ce->ce_label);
 		}
-		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
+		C_lae_dlb(CaseDescrLab, (arith)0);	/* perform the switch */
 		C_csb(word_size);
 	}
 
 	/* Now generate code for the cases
 	*/
 	pnode = nd;
-	while (pnode && pnode->nd_right) {
+	while (pnode->nd_right) {
 		pnode = pnode->nd_right;
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
@@ -148,7 +163,7 @@ CaseCode(nd, exitlabel)
 
 			C_df_ilb(sh->sh_default);
 			WalkNode(pnode, exitlabel);
-			pnode = 0;
+			break;
 		}
 	}
 
@@ -157,7 +172,7 @@ CaseCode(nd, exitlabel)
 }
 
 FreeSh(sh)
-	struct switch_hdr *sh;
+	register struct switch_hdr *sh;
 {
 	/*	 free the allocated switch structure	
 	*/
@@ -176,7 +191,7 @@ FreeSh(sh)
 
 AddCases(sh, node, lbl)
 	struct switch_hdr *sh;
-	struct node *node;
+	register struct node *node;
 	label lbl;
 {
 	/*	Add case labels to the case label list
@@ -208,7 +223,7 @@ AddCases(sh, node, lbl)
 
 AddOneCase(sh, node, lbl)
 	register struct switch_hdr *sh;
-	struct node *node;
+	register struct node *node;
 	label lbl;
 {
 	register struct case_entry *ce = new_case_entry();
@@ -222,15 +237,17 @@ AddOneCase(sh, node, lbl)
 		return 0;
 	}
 	if (sh->sh_entries == 0)	{
-		/* first case entry	*/
+		/* first case entry
+		*/
 		ce->next = (struct case_entry *) 0;
 		sh->sh_entries = ce;
 		sh->sh_lowerbd = sh->sh_upperbd = ce->ce_value;
 		sh->sh_nrofentries = 1;
 	}
 	else	{
-		/* second etc. case entry		*/
-		/* find the proper place to put ce into the list	*/
+		/* second etc. case entry
+		   find the proper place to put ce into the list
+		*/
 		
 		if (ce->ce_value < sh->sh_lowerbd) {
 			sh->sh_lowerbd = ce->ce_value;

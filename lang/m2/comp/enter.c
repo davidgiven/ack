@@ -1,9 +1,5 @@
 /* H I G H   L E V E L   S Y M B O L   E N T R Y */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -119,7 +115,8 @@ EnterVarList(Idlist, type, local)
 			df->var_addrgiven = 1;
 			df->df_flags |= D_NOREG;
 			if (idlist->nd_left->nd_type != card_type) {
-node_error(idlist->nd_left,"Illegal type for address");
+				node_error(idlist->nd_left,
+					   "Illegal type for address");
 			}
 			df->var_off = idlist->nd_left->nd_INT;
 		}
@@ -155,8 +152,8 @@ node_error(idlist->nd_left,"Illegal type for address");
 }
 
 EnterParamList(ppr, Idlist, type, VARp, off)
-	struct node *Idlist;
 	struct paramlist **ppr;
+	struct node *Idlist;
 	struct type *type;
 	int VARp;
 	arith *off;
@@ -178,18 +175,14 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	for ( ; idlist; idlist = idlist->next) {
 		pr = new_paramlist();
 		pr->next = 0;
-		if (!*ppr) {
-			*ppr = pr;
-		}
+		if (!*ppr) *ppr = pr;
 		else	last->next = pr;
 		last = pr;
 		if (!DefinitionModule && idlist != dummy) {
 			df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 			df->var_off = *off;
 		}
-		else {
-			df = new_def();
-		}
+		else	df = new_def();
 		pr->par_def = df;
 		df->df_type = type;
 		df->df_flags = VARp;
@@ -259,11 +252,11 @@ ForwModule(df, idn)
 				   enclosing scope, but this must be done AFTER
 				   closing this one
 				*/
-	df->for_vis = vis;
-	df->for_node = MkLeaf(Name, &(idn->nd_token));
 	close_scope(0);	
 	vis->sc_encl = enclosing(CurrVis);
 				/* Here ! */
+	df->for_vis = vis;
+	df->for_node = MkLeaf(Name, &(idn->nd_token));
 	return vis;
 }
 
@@ -294,7 +287,6 @@ EnterExportList(Idlist, qualified)
 	*/
 	register struct node *idlist = Idlist;
 	register struct def *df, *df1;
-	register struct def *impmod;
 
 	for (;idlist; idlist = idlist->next) {
 		df = lookup(idlist->nd_IDF, CurrentScope);
@@ -302,13 +294,16 @@ EnterExportList(Idlist, qualified)
 		if (!df) {
 			/* undefined item in export list
 			*/
-node_error(idlist, "identifier \"%s\" not defined", idlist->nd_IDF->id_text);
+			node_error(idlist,
+				   "identifier \"%s\" not defined",
+				   idlist->nd_IDF->id_text);
 			continue;
 		}
 
 		if (df->df_flags & (D_EXPORTED|D_QEXPORTED)) {
-node_error(idlist, "identifier \"%s\" occurs more than once in export list",
-idlist->nd_IDF->id_text);
+			node_error(idlist,
+				"multiple occurrences of \"%s\" in export list",
+				idlist->nd_IDF->id_text);
 		}
 
 		df->df_flags |= qualified;
@@ -317,13 +312,13 @@ idlist->nd_IDF->id_text);
 			   Find all imports of the module in which this export
 			   occurs, and export the current definition to it
 			*/
-			impmod = CurrentScope->sc_definedby->df_idf->id_def;
-			while (impmod) {
-				if (impmod->df_kind == D_IMPORT &&
-				    impmod->imp_def == CurrentScope->sc_definedby) {
-					DoImport(df, impmod->df_scope);
+			df1 = CurrentScope->sc_definedby->df_idf->id_def;
+			while (df1) {
+				if (df1->df_kind == D_IMPORT &&
+				    df1->imp_def == CurrentScope->sc_definedby) {
+					DoImport(df, df1->df_scope);
 				}
-				impmod = impmod->next;
+				df1 = df1->next;
 			}
 
 			/* Also handle the definition as if the enclosing
@@ -345,7 +340,9 @@ idlist->nd_IDF->id_text);
 				if (df1->df_kind == D_HIDDEN &&
 				    df->df_kind == D_TYPE) {
 					if (df->df_type->tp_fund != T_POINTER) {
-node_error(idlist, "opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+						node_error(idlist,
+"opaque type \"%s\" is not a pointer type",
+							df->df_idf->id_text);
 					}
 					assert(df1->df_type->next == NULLTYPE);
 					df1->df_kind = D_TYPE;
@@ -388,23 +385,23 @@ EnterFromImportList(Idlist, FromDef)
 		vis = FromDef->mod_vis;
 		break;
 	default:
-error("identifier \"%s\" does not represent a module",
-FromDef->df_idf->id_text);
+		error("identifier \"%s\" does not represent a module",
+		       FromDef->df_idf->id_text);
 		break;
 	}
 
 	for (; idlist; idlist = idlist->next) {
-		if (forwflag) {
-			df = ForwDef(idlist, vis->sc_scope);
-		}
-		else if (!(df = lookup(idlist->nd_IDF, vis->sc_scope))) {
-node_error(idlist, "identifier \"%s\" not declared in qualifying module",
-idlist->nd_IDF->id_text);
+		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
+		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope))) {
+			node_error(idlist, 
+			  "identifier \"%s\" not declared in qualifying module",
+			  idlist->nd_IDF->id_text);
 			df = define(idlist->nd_IDF,vis->sc_scope,D_ERROR);
 		}
-		else if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
-node_error(idlist,"identifier \"%s\" not exported from qualifying module",
-idlist->nd_IDF->id_text);
+		else if (! (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+			node_error(idlist,
+			"identifier \"%s\" not exported from qualifying module",
+			idlist->nd_IDF->id_text);
 			df->df_flags |= D_QEXPORTED;
 		}
 		DoImport(df, CurrentScope);
@@ -422,14 +419,14 @@ EnterImportList(Idlist, local)
 		This case is indicated by the value 0 of the "local" flag.
 	*/
 	register struct node *idlist = Idlist;
-	register struct def *df;
-	struct scopelist *vis = enclosing(CurrVis);
+	struct scope *sc = enclosing(CurrVis)->sc_scope;
 	extern struct def *GetDefinitionModule();
 
 	for (; idlist; idlist = idlist->next) {
-		if (local) df = ForwDef(idlist, vis->sc_scope);
-		else	df = GetDefinitionModule(idlist->nd_IDF);
-		DoImport(df, CurrentScope);
+		DoImport(local ?
+				ForwDef(idlist, sc) :
+				GetDefinitionModule(idlist->nd_IDF) ,
+			 CurrentScope);
 	}
 	FreeNode(Idlist);
 }

@@ -1,9 +1,5 @@
 /* D E S I G N A T O R   E V A L U A T I O N */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Code generation for designators.
    	This file contains some routines that generate code common to address
 	as well as value computations, and leave a description in a "desig"
@@ -165,7 +161,6 @@ CodeFieldDesig(df, ds)
 	   resulting information on where to find the designator is placed
 	   in "ds". "df" indicates the definition of the field.
 	*/
-
 
 	if (ds->dsg_kind == DSG_INIT) {
 		/* In a WITH statement. We must find the designator in the

@@ -1,10 +1,6 @@
 /* D E C L A R A T I O N S */
 
 {
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -23,69 +19,38 @@ static char *RcsId = "$Header$";
 #include	"chk_expr.h"
 
 int		proclevel = 0;		/* nesting level of procedures */
-int		return_occurred;	/* set if a return occurred in a
-					   procedure or function
-					*/
+int		return_occurred;	/* set if a return occurs in a block */
 }
 
 ProcedureDeclaration
 {
-	register struct def *df;
-	struct def *df1;		/* only exists because &df is illegal */
+	struct def *df;
 } :
-			{ ++proclevel;
-			  return_occurred = 0;
-			}
-	ProcedureHeading(&df1, D_PROCEDURE)
-			{ CurrentScope->sc_definedby = df = df1;
-			  df->prc_vis = CurrVis;
-			}
-	';' block(&(df->prc_body)) IDENT
-			{ match_id(dot.TOK_IDF, df->df_idf);
-			  close_scope(SC_CHKFORW|SC_REVERSE);
-			  if (! return_occurred && ResultType(df->df_type)) {
-error("function procedure %s does not return a value", df->df_idf->id_text);
-			  }
+			{ ++proclevel; }
+	ProcedureHeading(&df, D_PROCEDURE)
+	';' block(&(df->prc_body))
+	IDENT
+			{ EndProc(df, dot.TOK_IDF);
 			  --proclevel;
 			}
 ;
 
 ProcedureHeading(struct def **pdf; int type;)
 {
-	struct paramlist *params = 0;
-	register struct type *tp;
-	struct type *tp1 = 0;
-	register struct def *df;
-	arith NBytesParams;		/* parameter offset counter */
+	struct type *tp = 0;
+#define needs_static_link()	(proclevel > 1)
+	arith parmaddr = needs_static_link() ? pointer_size : 0;
+	struct paramlist *pr = 0;
 } :
 	PROCEDURE IDENT
-		{ df = DeclProc(type);
-		  if (proclevel > 1) {	/* need room for static link */
-			NBytesParams = pointer_size;
-		  }
-		  else	NBytesParams = 0;
-		}
-	FormalParameters(&params, &tp1, &NBytesParams)?
-		{ tp = construct_type(T_PROCEDURE, tp1);
-		  tp->prc_params = params;
-		  tp->prc_nbpar = NBytesParams;
-		  if (df->df_type) {
-			/* We already saw a definition of this type
-			   in the definition module.
-			*/
-		  	if (!TstProcEquiv(tp, df->df_type)) {
-error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
-			}
-			FreeType(df->df_type);
-		  }
-		  df->df_type = tp;
-		  *pdf = df;
-		}
+			{ *pdf = DeclProc(type, dot.TOK_IDF); }
+	FormalParameters(&pr, &parmaddr, &tp)?
+			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr)); }
 ;
 
 block(struct node **pnd;) :
 	declaration*
-	[
+	[		{ return_occurred = 0; }
 		BEGIN
 		StatementSequence(pnd)
 	|
@@ -106,15 +71,12 @@ declaration:
 	ModuleDeclaration ';'
 ;
 
-FormalParameters(struct paramlist **pr;
-		 struct type **ptp;
-		 arith *parmaddr;)
-:	
+FormalParameters(struct paramlist *ppr; arith *parmaddr; struct type **ptp;):
 	'('
 	[
-		FPSection(pr, parmaddr)
+		FPSection(ppr, parmaddr)
 		[
-			';' FPSection(pr, parmaddr)
+			';' FPSection(ppr, parmaddr)
 		]*
 	]?
 	')'
@@ -134,12 +96,12 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 
 FormalType(struct type **ptp;)
 {
-	register struct type *tp;
 	extern arith ArrayElSize();
 } :
 	ARRAY OF qualtype(ptp)
-		{ tp = construct_type(T_ARRAY, NULLTYPE);
-		  tp->arr_elem = *ptp; *ptp = tp;
+		{ register struct type *tp = construct_type(T_ARRAY, NULLTYPE);
+		  tp->arr_elem = *ptp;
+		  *ptp = tp;
 		  tp->arr_elsize = ArrayElSize(tp->arr_elem);
 		  tp->tp_align = lcm(word_align, pointer_align);
 		}
@@ -194,12 +156,12 @@ SimpleType(struct type **ptp;)
 enumeration(struct type **ptp;)
 {
 	struct node *EnumList;
-	register struct type *tp;
 } :
 	'(' IdentList(&EnumList) ')'
-		{ *ptp = tp = standard_type(T_ENUMERATION, 1, (arith) 1);
-		  EnterEnumList(EnumList, tp);
-		  if (tp->enm_ncst > 256) { /* ??? is this reasonable ??? */
+		{
+		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
+		  EnterEnumList(EnumList, *ptp);
+		  if ((*ptp)->enm_ncst > 256) { /* ??? is this reasonable ??? */
 			error("Too many enumeration literals");
 		  }
 		}
@@ -230,7 +192,10 @@ SubrangeType(struct type **ptp;)
 	'[' ConstExpression(&nd1)
 	UPTO ConstExpression(&nd2)
 	']'
-			{ *ptp = subr_type(nd1, nd2); }
+			{ *ptp = subr_type(nd1, nd2);
+			  free_node(nd1);
+			  free_node(nd2);
+			}
 ;
 
 ArrayType(struct type **ptp;)
@@ -254,18 +219,18 @@ ArrayType(struct type **ptp;)
 RecordType(struct type **ptp;)
 {
 	register struct scope *scope;
-	arith count;
+	arith size;
 	int xalign = struct_align;
 }
 :
 	RECORD
-		{ open_scope(OPENSCOPE);
+		{ open_scope(OPENSCOPE);	/* scope for fields of record */
 		  scope = CurrentScope;
 		  close_scope(0);
-		  count = 0;
+		  size = 0;
 		}
-	FieldListSequence(scope, &count, &xalign)
-		{ *ptp = standard_type(T_RECORD, xalign, WA(count));
+	FieldListSequence(scope, &size, &xalign)
+		{ *ptp = standard_type(T_RECORD, xalign, WA(size));
 		  (*ptp)->rec_scope = scope;
 		}
 	END
@@ -281,10 +246,10 @@ FieldListSequence(struct scope *scope; arith *cnt; int *palign;):
 FieldList(struct scope *scope; arith *cnt; int *palign;)
 {
 	struct node *FldList;
-	register struct idf *id = gen_anon_idf();
-	register struct def *df;
+	register struct idf *id = 0;
 	struct type *tp;
-	struct node *nd;
+	struct node *nd1;
+	register struct node *nd;
 	arith tcnt, max;
 } :
 [
@@ -294,77 +259,81 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			}
 |
 	CASE
-	/* Also accept old fashioned Modula-2 syntax, but give a warning
+	/* Also accept old fashioned Modula-2 syntax, but give a warning.
+	   Sorry for the complicated code.
 	*/
-	[	qualident(0, (struct def **) 0, (char *) 0, &nd)
-		[	':' qualtype(&tp)
+	[ qualident(0, (struct def **) 0, (char *) 0, &nd1)
+			{ nd = nd1; }
+	  [ ':' qualtype(&tp)
 			/* This is correct, in both kinds of Modula-2, if
-			   the first qualident is a single identifier.
+		   	   the first qualident is a single identifier.
 			*/
-				{ if (nd->nd_class != Name) {
-					error("illegal variant tag");
-			  	  }
-			  	  else	id = nd->nd_IDF;
-				}
-		|
-			/* Old fashioned! the first qualident now represents
+			{ if (nd->nd_class != Name) {
+				error("illegal variant tag");
+		  	  }
+		  	  else	id = nd->nd_IDF;
+			  FreeNode(nd);
+			}
+	  |		/* Old fashioned! the first qualident now represents
 			   the type
 			*/
-				{ warning("Old fashioned Modula-2 syntax!");
-				  if (ChkDesignator(nd) &&
-				      (nd->nd_class != Def ||
-				       !(nd->nd_def->df_kind&(D_ERROR|D_ISTYPE)) ||
-				       !nd->nd_def->df_type)) {
-					node_error(nd, "type expected");
-					tp = error_type;
-				  }
-				  else tp = nd->nd_def->df_type;
-				  FreeNode(nd);
-				}
-		]
-	|
-		/* Aha, third edition. Well done! */
-		':' qualtype(&tp)
+			{ warning("Old fashioned Modula-2 syntax; ':' missing");
+			  if (ChkDesignator(nd) &&
+			      (nd->nd_class != Def ||
+			       !(nd->nd_def->df_kind&(D_ERROR|D_ISTYPE)) ||
+			       !nd->nd_def->df_type)) {
+				node_error(nd, "type expected");
+				tp = error_type;
+			  }
+			  else tp = nd->nd_def->df_type;
+			  FreeNode(nd);
+			}
+	  ]
+	| ':' qualtype(&tp)
+	  /* Aha, third edition. Well done! */
 	]
-				{ if (!(tp->tp_fund & T_DISCRETE)) {
+			{ if (id) {
+			  	register struct def *df = define(id,
+								 scope,
+								 D_FIELD);
+			  	if (!(tp->tp_fund & T_DISCRETE)) {
 					error("Illegal type in variant");
-				  }
-				  df = define(id, scope, D_FIELD);
-				  df->df_type = tp;
-				  df->fld_off = align(*cnt, tp->tp_align);
-				  *cnt = tcnt = df->fld_off + tp->tp_size;
-				  df->df_flags |= D_QEXPORTED;
-				}
+			  	}
+			  	df->df_type = tp;
+			  	df->fld_off = align(*cnt, tp->tp_align);
+			  	*cnt = tcnt = df->fld_off + tp->tp_size;
+			  	df->df_flags |= D_QEXPORTED;
+			  }
+			}
 	OF variant(scope, &tcnt, tp, palign)
-				{ max = tcnt; tcnt = *cnt; }
+			{ max = tcnt; tcnt = *cnt; }
 	[
-		'|' variant(scope, &tcnt, tp, palign)
-				{ if (tcnt > max) max = tcnt; tcnt = *cnt; }
+	  '|' variant(scope, &tcnt, tp, palign)
+			{ if (tcnt > max) max = tcnt; tcnt = *cnt; }
 	]*
 	[ ELSE FieldListSequence(scope, &tcnt, palign)
-				{ if (tcnt > max) max = tcnt; }
+			{ if (tcnt > max) max = tcnt; }
 	]?
 	END
-				{ *cnt = max; }
+			{ *cnt = max; }
 ]?
 ;
 
 variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
 {
-	struct type *tp1 = tp;
 	struct node *nd;
 } :
 	[
-		CaseLabelList(&tp1, &nd)
-				{ /* Ignore the cases for the time being.
-				     Maybe a checking version will be supplied
-				     later ???
-				  */
-				  FreeNode(nd);
-				}
+		CaseLabelList(&tp, &nd)
+			{ /* Ignore the cases for the time being.
+			     Maybe a checking version will be supplied
+			     later ??? (Improbable)
+			  */
+			  FreeNode(nd);
+			}
 		':' FieldListSequence(scope, cnt, palign)
 	]?
-					/* Changed rule in new modula-2 */
+			/* Changed rule in new modula-2 */
 ;
 
 CaseLabelList(struct type **ptp; struct node **pnd;):
@@ -376,27 +345,29 @@ CaseLabelList(struct type **ptp; struct node **pnd;):
 	]*
 ;
 
-CaseLabels(struct type **ptp; struct node **pnd;)
+CaseLabels(struct type **ptp; register struct node **pnd;)
 {
-	struct node *nd1, *nd2 = 0;
+	register struct node *nd1;
 }:
-	ConstExpression(&nd1)	{ *pnd = nd1; }
+	ConstExpression(pnd)
+			{ nd1 = *pnd; }
 	[
-		UPTO		{ *pnd = MkNode(Link,nd1,NULLNODE,&dot); }
-		ConstExpression(&nd2)
-				{ if (!TstCompat(nd1->nd_type, nd2->nd_type)) {
-node_error(nd2,"type incompatibility in case label");
-				  	nd1->nd_type = error_type;
-				  }
-				  (*pnd)->nd_right = nd2;
-				}
+		UPTO	{ *pnd = MkNode(Link,nd1,NULLNODE,&dot); }
+		ConstExpression(&(*pnd)->nd_right)
+			{ if (!TstCompat(nd1->nd_type,
+					 (*pnd)->nd_right->nd_type)) {
+				node_error((*pnd)->nd_right,
+					  "type incompatibility in case label");
+			  	nd1->nd_type = error_type;
+			  }
+			}
 	]?
-				{ if (*ptp != 0 &&
-				       !TstCompat(*ptp, nd1->nd_type)) {
-node_error(nd1,"type incompatibility in case label");
-				  }
-				  *ptp = nd1->nd_type;
-				}
+			{ if (*ptp != 0 && !TstCompat(*ptp, nd1->nd_type)) {
+				node_error(nd1,
+					  "type incompatibility in case label");
+			  }
+			  *ptp = nd1->nd_type;
+			}
 ;
 
 SetType(struct type **ptp;) :
@@ -410,7 +381,7 @@ SetType(struct type **ptp;) :
 */
 PointerType(struct type **ptp;)
 {
-	register struct node *nd;
+	register struct node *nd = 0;
 } :
 	POINTER TO
 			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
@@ -418,49 +389,51 @@ PointerType(struct type **ptp;)
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-		qualtype(&((*ptp)->next))
-	| %if ( nd = new_node(), nd->nd_token = dot,
+	  qualtype(&((*ptp)->next))
+	| %if ( nd = new_node(),
+		nd->nd_token = dot,
 		lookfor(nd, CurrVis, 0)->df_kind == D_MODULE)
-			{ if (dot.tk_symb == IDENT) free_node(nd); }
-		type(&((*ptp)->next)) 
+	  type(&((*ptp)->next)) 
+			{ if (nd) free_node(nd); }
 	|
-		IDENT	{ Forward(nd, (*ptp)); }
+	  IDENT		{ Forward(nd, (*ptp)); }
 	]
 ;
 
 qualtype(struct type **ptp;)
 {
-	struct def *df;
+	struct def *df = 0;
 } :
 	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
-		{ if (!(*ptp = df->df_type)) {
-			error("type \"%s\" not declared", df->df_idf->id_text);
-			*ptp = error_type;
-		  }
-		}
+			{ if (df && !(*ptp = df->df_type)) {
+				error("type \"%s\" not declared",
+				       df->df_idf->id_text);
+				*ptp = error_type;
+		  	  }
+			}
 ;
 
 
 ProcedureType(struct type **ptp;)
 {
 	struct paramlist *pr = 0;
-	register struct type *tp;
-	arith nbytes = 0;
-} :
+	arith parmaddr = 0;
+}
+:
 			{ *ptp = 0; }
-	PROCEDURE FormalTypeList(&pr, ptp, &nbytes)?
-			{ *ptp = tp = construct_type(T_PROCEDURE, *ptp);
-			  tp->prc_params = pr;
-			  tp->prc_nbpar = nbytes;
-			}
+	PROCEDURE 
+	[
+	  	FormalTypeList(&pr, &parmaddr, ptp)
+	]?
+			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 
-FormalTypeList(struct paramlist **ppr; struct type **ptp; arith *parmaddr;)
+FormalTypeList(struct paramlist **ppr; arith *parmaddr; struct type **ptp;)
 {
-	int VARp;
 	struct type *tp;
+	int VARp;
 } :
-	'('		{ *ppr = 0; }
+	'('
 	[
 		var(&VARp) FormalType(&tp)
 			{ EnterParamList(ppr,NULLNODE,tp,VARp,parmaddr); }

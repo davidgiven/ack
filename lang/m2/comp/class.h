@@ -1,7 +1,5 @@
 /* U S E   O F   C H A R A C T E R   C L A S S E S */
 
-/* $Header$ */
-
 /*	As a starter, chars are divided into classes, according to which
 	token they can be the start of.
 	At present such a class number is supposed to fit in 4 bits.

@@ -1,9 +1,5 @@
 /* T Y P E   E Q U I V A L E N C E */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 /*	Routines for testing type equivalence, type compatibility, and
 	assignment compatibility
 */

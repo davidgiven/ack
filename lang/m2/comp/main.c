@@ -1,9 +1,5 @@
 /* M A I N   P R O G R A M */
 
-#ifndef NORCSID
-static char *RcsId = "$Header$";
-#endif
-
 #include	"debug.h"
 #include	"ndir.h"
 
@@ -26,7 +22,6 @@ static char *RcsId = "$Header$";
 int		state;			/* either IMPLEMENTATION or PROGRAM */
 char		options[128];
 int		DefinitionModule; 
-int		SYSTEMModule;
 char		*ProgName;
 char		*DEFPATH[NDIRS+1];
 struct def 	*Defined;
@@ -73,7 +68,6 @@ Compile(src, dst)
 	reserve(tkidf);
 	InitScope();
 	InitTypes();
-	InitDef();
 	AddStandards();
 #ifdef DEBUG
 	if (options['l']) {
@@ -186,27 +180,29 @@ AddStandards()
 	df->enm_next = 0;
 }
 
-do_SYSTEM()
-{
-	/*	Simulate the reading of the SYSTEM definition module
-	*/
-	char *SYSTEM = "\
+/* How do you like that! Modula-2 in a C-program.
+*/
+char SYSTEM[] = "\
 DEFINITION MODULE SYSTEM;\n\
+TYPE	PROCESS = ADDRESS;\n\
 PROCEDURE NEWPROCESS(P:PROC; A:ADDRESS; n:CARDINAL; VAR p1:ADDRESS);\n\
 PROCEDURE TRANSFER(VAR p1,p2:ADDRESS);\n\
 END SYSTEM.\n";
 
+do_SYSTEM()
+{
+	/*	Simulate the reading of the SYSTEM definition module
+	*/
 	open_scope(CLOSEDSCOPE);
 	(void) Enter("WORD", D_TYPE, word_type, 0);
 	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
 	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
 	(void) Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
-	if (!InsertText(SYSTEM, strlen(SYSTEM))) {
+	if (!InsertText(SYSTEM, sizeof(SYSTEM) - 1)) {
 		fatal("Could not insert text");
 	}
-	SYSTEMModule = 1;
 	DefModule();
-	SYSTEMModule = 0;
+	close_scope(SC_CHKFORW);
 }
 
 #ifdef DEBUG
