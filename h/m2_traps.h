@@ -7,3 +7,4 @@
 #define M2_FORCH	68	/* FOR-loop control variable changed */
 #define M2_UUVFL	69	/* cardinal underflow */
 #define M2_INTERNAL	70	/* internal error, should not happen */
+#define M2_UNIXSIG	71	/* unix signal */
