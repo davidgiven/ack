@@ -448,14 +448,17 @@ do_ifdef(how)
 		id = findidf(str);
 		free(str);
 	}
+	if (SkipToNewLine()) {
+		if (str && !options['o'])
+			strict("garbage following #%s <identifier>",
+				how ? "ifdef" : "ifndef");
+	}
 
 	/* The next test is a shorthand for:
 		(how && !id->id_macro) || (!how && id->id_macro)
 	*/
 	if (how ^ (id && id->id_macro != 0))
 		skip_block(0);
-	else
-		SkipToNewLine();
 }
 
 /* argstr != NULL when the undef came from a -U option */

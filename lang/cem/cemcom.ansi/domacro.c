@@ -441,14 +441,16 @@ do_ifdef(how)
 	push_if();
 	if (!(id = GetIdentifier(1)))
 		lexerror("illegal #ifdef construction");
+	else if (SkipToNewLine())
+		if (!options['o'])
+			lexstrict("garbage following #%s <identifier>",
+				  how ? "ifdef" : "ifndef");
 
 	/* The next test is a shorthand for:
 		(how && !id->id_macro) || (!how && id->id_macro)
 	*/
 	if (how ^ (id && id->id_macro != 0))
 		skip_block(0);
-	else if (id)
-		SkipToNewLine();
 }
 
 /* argidf != NULL when the undef came from a -U option */
