@@ -7,6 +7,8 @@
 /* $Header$ */
 
 #include	<math.h>
+#include	<float.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 double
@@ -34,11 +36,17 @@ tan(double x)
 		 0.49819433993786512270e-6
 	};
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (negative) x = -x;
  
 	/* ??? avoid loss of significance, error if x is too large ??? */
 
 	y = x * M_2_PI + 0.5;
+
+	if (y >= DBL_MAX/M_PI_2) return 0.0;
 
 	/*      Use extended precision to calculate reduced argument.
 		Here we used 12 bits of the mantissa for a1.

@@ -21,3 +21,4 @@ sinh.c
 sqrt.c
 tan.c
 tanh.c
+isnan.c

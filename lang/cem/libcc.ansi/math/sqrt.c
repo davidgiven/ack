@@ -7,6 +7,7 @@
 /* $Header$ */
 
 #include	<math.h>
+#include	<float.h>
 #include	<errno.h>
 
 #define NITER	5
@@ -17,10 +18,16 @@ sqrt(double x)
 	int exponent;
 	double val;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (x <= 0) {
 		if (x < 0) errno = EDOM;
 		return 0;
 	}
+
+	if (x > DBL_MAX) return x;	/* for infinity */
 
 	val = frexp(x, &exponent);
 	if (exponent & 1) {

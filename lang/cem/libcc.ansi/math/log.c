@@ -7,6 +7,7 @@
 /* $Header$ */
 
 #include	<math.h>
+#include	<float.h>
 #include	<errno.h>
 #include	"localmath.h"
 
@@ -32,6 +33,10 @@ log(double x)
 	double	znum, zden, z, w;
 	int	exponent;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (x < 0) {
 		errno = EDOM;
 		return -HUGE_VAL;
@@ -41,6 +46,9 @@ log(double x)
 		return -HUGE_VAL;
 	}
 
+	if (x <= DBL_MAX) {
+	}
+	else return x;	/* for infinity and Nan */
 	x = frexp(x, &exponent);
 	if (x > M_1_SQRT2) {
 		znum = (x - 0.5) - 0.5;

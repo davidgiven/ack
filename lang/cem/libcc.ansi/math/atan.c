@@ -8,6 +8,7 @@
 
 #include	<float.h>
 #include	<math.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 double
@@ -42,6 +43,10 @@ atan(double x)
 	int     n;
 	double  g;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (neg) {
 		x = -x;
 	}

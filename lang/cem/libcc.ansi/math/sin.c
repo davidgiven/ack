@@ -7,6 +7,8 @@
 /* $Header$ */
 
 #include	<math.h>
+#include	<float.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 static double
@@ -30,14 +32,18 @@ sinus(double x, int cos_flag)
 
 	double  xsqr;
 	double  y;
-	int     neg = 0;
+	int     neg = 1;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (x < 0) {
 		x = -x;
-		neg = 1;
+		neg = -1;
 	}
 	if (cos_flag) {
-		neg = 0;
+		neg = 1;
 		y = M_PI_2 + x;
 	}
 	else    y = x;
@@ -45,6 +51,8 @@ sinus(double x, int cos_flag)
 	/* ??? avoid loss of significance, if y is too large, error ??? */
 
 	y = y * M_1_PI + 0.5;
+
+	if (y >= DBL_MAX/M_PI) return 0.0;
 
 	/*      Use extended precision to calculate reduced argument.
 		Here we used 12 bits of the mantissa for a1.
@@ -56,7 +64,7 @@ sinus(double x, int cos_flag)
 		double x1, x2;
 
 		modf(y, &y);
-		if (modf(0.5*y, &x1)) neg = !neg;
+		if (modf(0.5*y, &x1)) neg = -neg;
 		if (cos_flag) y -= 0.5;
 		x2 = modf(x, &x1);
 		x = x1 - y * A1;
@@ -67,7 +75,7 @@ sinus(double x, int cos_flag)
 	}
  
 	if (x < 0) {
-		neg = !neg;
+		neg = -neg;
 		x = -x;
 	}
 
@@ -75,7 +83,7 @@ sinus(double x, int cos_flag)
 
 	y = x * x;
 	x += x * y * POLYNOM7(y, r);
-	return neg ? -x : x;
+	return neg==-1 ? -x : x;
 }
 
 double

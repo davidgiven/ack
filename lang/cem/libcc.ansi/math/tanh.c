@@ -8,6 +8,7 @@
 
 #include	<float.h>
 #include	<math.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 double
@@ -31,6 +32,10 @@ tanh(double x)
 	};
 	int 	negative = x < 0;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (negative) x = -x;
 
 	if (x >= 0.5*M_LN_MAX_D) {

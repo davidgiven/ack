@@ -13,6 +13,10 @@
 double
 log10(double x)
 {
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (x < 0) {
 		errno = EDOM;
 		return -HUGE_VAL;

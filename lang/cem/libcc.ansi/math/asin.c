@@ -32,6 +32,11 @@ asin_acos(double x, int cosfl)
 		 1.0
 	};
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
+
 	if (negative) {
 		x = -x;
 	}

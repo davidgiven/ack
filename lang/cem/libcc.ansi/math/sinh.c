@@ -34,6 +34,10 @@ sinh_cosh(double x, int cosh_flag)
 	int	negative = x < 0;
 	double	y = negative ? -x : x;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (! cosh_flag && y <= 1.0) {
 		/* ??? check for underflow ??? */
 		y = y * y;

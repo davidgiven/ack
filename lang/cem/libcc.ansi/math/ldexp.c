@@ -14,10 +14,18 @@ ldexp(double fl, int exp)
 	int sign = 1;
 	int currexp;
 
+	if (__IsNan(fl)) {
+		errno = EDOM;
+		return fl;
+	}
 	if (fl == 0.0) return 0.0;
 	if (fl<0) {
 		fl = -fl;
 		sign = -1;
+	}
+	if (fl > DBL_MAX) {		/* for infinity */
+		errno = ERANGE;
+		return sign * fl;
 	}
 	fl = frexp(fl,&currexp);
 	exp += currexp;

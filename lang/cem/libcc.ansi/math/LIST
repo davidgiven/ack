@@ -19,3 +19,4 @@ floor.c
 hugeval.c
 frexp.e
 modf.e
+isnan.c

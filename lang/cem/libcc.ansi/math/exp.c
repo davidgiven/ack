@@ -36,6 +36,10 @@ exp(double x)
 	int	n;
 	int	negative = x < 0;
 
+	if (__IsNan(x)) {
+		errno = EDOM;
+		return x;
+	}
 	if (x < M_LN_MIN_D) {
 		errno = ERANGE;
 		return 0.0;
