@@ -30,7 +30,7 @@ scopy(src, dst, max)
 {
 	register unsigned int i = 0;
 
-	while (*src && i < max) {
+	while (*src && i <= max) {
 		i++;
 		*dst++ = *src++;
 	}
