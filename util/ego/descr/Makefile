@@ -9,9 +9,11 @@ CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbac
 
-SOURCES = i86.descr m68k2.descr pdp.descr vax4.descr m68k4.descr m68020.descr
+SOURCES = i86.descr m68k2.descr pdp.descr vax4.descr m68k4.descr m68020.descr \
+	  em22.descr em24.descr em44.descr
 
-TARGETS = i86descr m68k2descr vax4descr pdpdescr m68k4descr m68020descr
+TARGETS = i86descr m68k2descr vax4descr pdpdescr m68k4descr m68020descr \
+	  em22descr em24descr em44descr
 
 PRFILES = Makefile descr.sed $(SOURCES)
 
@@ -49,4 +51,13 @@ m68020descr:	m68020.descr descr.sed
 
 vax4descr:	vax4.descr descr.sed
 		$(CPP) -P -I$(EMH) vax4.descr | sed -f descr.sed > vax4descr
+
+em22descr:	em22.descr descr.sed
+		$(CPP) -P -I$(EMH) em22.descr | sed -f descr.sed > em22descr
+
+em24descr:	em24.descr descr.sed
+		$(CPP) -P -I$(EMH) em24.descr | sed -f descr.sed > em24descr
+
+em44descr:	em44.descr descr.sed
+		$(CPP) -P -I$(EMH) em44.descr | sed -f descr.sed > em44descr
 
