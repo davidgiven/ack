@@ -170,7 +170,7 @@ nextc()
 	case '\t':
 	case '\f':
 	case '\r':
-	case '\v':
+	case '\013': /* ACK_MOD, '\v' is not K&R C */
 	case ',':
 	case ';':
 	    ++s;
@@ -654,7 +654,7 @@ get_literal()
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
-	    case 'v': c = '\v'; break;
+	    case 'v': c = '\013'; break; /* ACK_MOD, '\v' is not K&R C */
 	    }
 	}
 	cachec(c);
@@ -695,7 +695,7 @@ get_literal()
 	    case '\n': cachec('n'); break;
 	    case '\r': cachec('r'); break;
 	    case '\t': cachec('t'); break;
-	    case '\v': cachec('v'); break;
+	    case '\013': cachec('v'); break; /* ACK_MOD, '\v' is not K&R C */
 	    default:
 		cachec(((c >> 6) & 7) + '0');
 		cachec(((c >> 3) & 7) + '0');
