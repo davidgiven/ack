@@ -10,6 +10,10 @@ module for compilers
 .PP
 .B PushBack()
 .PP
+.B ChPushBack(ch)
+.br
+.B int ch;
+.PP
 .B int InsertFile(filename, table, result)
 .br
 .B char *filename;
@@ -92,6 +96,9 @@ If there are no suspended input streams left, the constant EOI,
 which is defined in \fIinp_pkg.spec\fR, is returned.
 .PP
 The macro \fIPushBack\fR pushes the last character read back onto the
+input stream.
+.PP
+The macro \fIChPushBack\fR inserts the character \fIch\fP into the
 input stream.
 .PP
 The routine \fIInsertFile\fR suspends input from the current input stream.

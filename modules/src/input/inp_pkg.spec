@@ -20,6 +20,7 @@
 
 #define	LoadChar(dest)	((dest = *_ipp++) || (dest = loadbuf()))
 #define	PushBack()	(--_ipp)
+#define ChPushBack(ch)	(*--_ipp = (ch))
 
 /*	EOF may be defined as -1 in most programs but the character -1 may
 	be expanded to the int -1 which causes troubles at the indexing in
