@@ -749,7 +749,7 @@ C_dvi
 				a= b;
 			}
 			b= alloc_reg();
-			"srl	$a, $n_exp_str, $b";
+			"sra	$a, $n_exp_str, $b";
 			free_reg(a);
 			push_reg(b);
 		}
@@ -1307,23 +1307,9 @@ C_fef_narg	==>
 			}
 			else if (n==8)
 			{
-				a= pop_reg();
-				b= alloc_reg();
-				c= alloc_reg();
-				d= alloc_reg();
-				e= alloc_reg();
-				"srl	$a, 20, $b";
-				"and	$b, 0x7ff, $c";
-				"dec	0x3fe, $c";
-				"set	0x7ff00000, $b";
-				"andn	$a, $b, $d";
-				"set	0x3fe00000, $b";
-				"or	$d, $b, $e";
-				push_reg(e);
-				push_reg(c);
-				free_reg(a);
-				free_reg(b);
-				free_reg(d);
+				flush_cache();
+				"call	fef8";
+				"nop";
 			}
 			else
 				arg_error ("fef", n);
@@ -1352,17 +1338,8 @@ C_fef_narg	==>
 			"nop";
 			"b	1f";
 		"8:";
-			"ld	[$reg_sp], $a";
-			"srl	$a, 20, $b";
-			"and	$b, 0x7ff, $c";
-			"dec	0x3fe, $c";
-			"dec	STACK_CLICK, $reg_sp";
-			"st	$c, [$reg_sp]";
-			"set	0x7ff00000, $c";
-			"andn	$a, $c, $a";
-			"set	0x3fe00000, $c";
-			"or	$a, $c, $a";
-			"st	$a, [$reg_sp+STACK_CLICK]";
+			"call	fef8";
+			"nop";
 		"1:";
 			free_reg(a);
 			free_reg(b);
@@ -3334,7 +3311,8 @@ C_cms_narg	==>
 			{
 				b= NULL;
 				c= alloc_reg();
-				if (type_of_tos() == T_cst)
+				if (type_of_tos() == T_cst &&
+				    const13(top_const()))
 				{
 					pop_const(b_str);
 					a= pop_reg();
@@ -4529,6 +4507,8 @@ C_str
 	$1 == 0		==>
 				Comment( str , $1 );
 				"ld	[$reg_sp], $reg_lb";
+				"add	$reg_lb, 4, %fp";
+				"and	%fp, -8, %fp";
 				"inc	STACK_CLICK, $reg_sp"
 				.
 	$1 == 1		==>

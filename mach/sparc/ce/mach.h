@@ -5,6 +5,10 @@ mach.h
 #ifndef MACH_H
 #define MACH_H
 
+#define con_str B_constr
+#define rom_str B_romstr
+#define gen_str B_genstr
+
 #include "ctype.h"
 #include "mach_em.h"
 #include "push_pop.h"
