@@ -113,9 +113,9 @@ align(pos, al)
 	arith pos;
 	int al;
 {
-	arith i = pos % al;
+	int i = pos % al;
 
-	if (i) return pos + al - i;
+	if (i) return pos + (al - i);
 	return pos;
 }
 
@@ -142,19 +142,20 @@ InitTypes()
 
 	/* first, do some checking
 	*/
-	if (int_size != word_size) {
+	if ((int) int_size != (int) word_size) {
 		fatal("integer size not equal to word size");
 	}
 
-	if (int_size != pointer_size) {
+	if ((int) int_size != (int) pointer_size) {
 		fatal("cardinal size not equal to pointer size");
 	}
 
-	if (long_size < int_size || long_size % word_size != 0) {
+	if ((int) long_size < (int) int_size ||
+	    (int) long_size % (int) word_size != 0) {
 		fatal("illegal long integer size");
 	}
 
-	if (double_size < float_size) {
+	if ((int) double_size < (int) float_size) {
 		fatal("long real size smaller than real size");
 	}
 
@@ -194,7 +195,7 @@ InitTypes()
 	*/
 	tp = construct_type(T_SUBRANGE, card_type);
 	tp->sub_lb = 0;
-	tp->sub_ub = word_size * 8 - 1;
+	tp->sub_ub = (int) word_size * 8 - 1;
 	bitset_type = set_type(tp);
 
 	/* a unique type for standard procedures and functions
@@ -238,33 +239,35 @@ enum_type(EnumList)
 
 struct type *
 qualified_type(nd)
-	struct node *nd;
+	register struct node *nd;
 {
 	struct type *tp = error_type;
+	register struct def *df;
 
 	if (ChkDesignator(nd)) {
-		if (nd->nd_class != Def) node_error(nd, "type expected");
-		else {
-			register struct def *df = nd->nd_def;
-
-			if (df->df_kind&(D_ISTYPE|D_FORWARD|D_FORWTYPE|D_ERROR)) {
-			    if (! df->df_type) {
-node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
-			    }
-			    else {
-				if (df->df_kind == D_FORWTYPE) {
-					df->df_kind = D_FTYPE;
-				}
-			   	tp = df->df_type;
-			    }
-			}
-			else {
-node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
-			}
+		if (nd->nd_class != Def) {
+			node_error(nd, "type expected");
+			FreeNode(nd);
+			return error_type;
 		}
+
+		df = nd->nd_def;
+		if (df->df_kind&(D_ISTYPE|D_FORWARD|D_FORWTYPE|D_ERROR)) {
+			if (! df->df_type) {
+node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
+				FreeNode(nd);
+				return error_type;
+		    	}
+			FreeNode(nd);
+			if (df->df_kind == D_FORWTYPE) {
+				df->df_kind = D_FTYPE;
+			}
+		   	return df->df_type;
+		}
+node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
 	}
 	FreeNode(nd);
-	return tp;
+	return error_type;
 }
 
 chk_basesubrange(tp, base)
