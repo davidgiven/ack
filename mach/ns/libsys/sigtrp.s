@@ -1,6 +1,11 @@
 .define _sigtrp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _sigtrp
-.text
+.sect .text
 _sigtrp:
 enter[], 0
 movd 12(fp),tos

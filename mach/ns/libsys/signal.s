@@ -1,34 +1,39 @@
 .define _signal
-.data
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+.sect .data
 _vector:
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
-.long	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
+.data4	0
 _mapvec:
-.long	0
-.long	134219784
-.long	2048
-.long	0
-.long	2827
-.long	658176
-.long	3072
+.data4	0
+.data4	134219784
+.data4	2048
+.data4	0
+.data4	2827
+.data4	658176
+.data4	3072
 firsttim:
 .extern _signal
-.long	1
-.text
+.data4	1
+.sect .text
 _signal:
 enter[], 16
 movd 8(fp),r7
