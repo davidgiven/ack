@@ -23,7 +23,7 @@
 # include "io.h"
 
 # ifndef NORCSID
-static string rcsid = "$Header$";
+static string rcsid = "$Id$";
 # endif
 
 p_set		get_set();

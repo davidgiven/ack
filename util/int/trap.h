@@ -2,7 +2,7 @@
 	Trap handling
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #define	wtrap(wn,tr)	(warning(wn), trap(tr))
 #define	trap(tr)	do_trap(tr, __LINE__, __FILE__)

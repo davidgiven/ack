@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-#define RCS_TRANS "$Header$"
+#define RCS_TRANS "$Id$"
 #endif
 
 /* This structure is the center of all actions */

@@ -4,7 +4,7 @@
  */
 
 #ifndef NORCSID
-# define RCS_GRAPH	"$Header$"
+# define RCS_GRAPH	"$Id$"
 #endif
 
 /* 

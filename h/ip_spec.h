@@ -4,7 +4,7 @@
  */
 /* Contents of flags used when describing interpreter opcodes */
 
-#define	RCS_IP		"$Header$"
+#define	RCS_IP		"$Id$"
 
 #define OPTYPE  07      /* type field in flag */
 

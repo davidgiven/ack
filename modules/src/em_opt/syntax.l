@@ -1,5 +1,5 @@
 %{
-/* $Header$ */
+/* $Id$ */
 #include "Lpars.h"
 #include "parser.h"
 

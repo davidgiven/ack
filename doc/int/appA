@@ -1,6 +1,6 @@
 .\"	List of all warnings; source of warn_msg and warn.h
 .\"
-.\"	$Header$
+.\"	$Id$
 .\"
 .\"	This file contains the warnings issued by the interpreter, together
 .\"	with their names and values in the code of the interpreter. Some of

@@ -8,7 +8,7 @@
 #include        "assex.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 #endif
 
 /*

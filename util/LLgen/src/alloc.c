@@ -19,7 +19,7 @@
 # include "extern.h"
 
 # ifndef NORCSID
-static string rcsid = "$Header$";
+static string rcsid = "$Id$";
 # endif
 
 static string e_nomem = "Out of memory";

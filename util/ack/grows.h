@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-#define RCS_GROWS "$Header$"
+#define RCS_GROWS "$Id$"
 #endif
 
 /* struct used to identify and do bookkeeping for growing strings */

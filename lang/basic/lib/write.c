@@ -1,7 +1,7 @@
 #include "bc_string.h"
 #include "bc_io.h"
 
-/* $Header$ */
+/* $Id$ */
 
 /* assume that the channel has been set */
 

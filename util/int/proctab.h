@@ -2,7 +2,7 @@
 	Handling the proctable
 */
 
-/* $Header$ */
+/* $Id$ */
 
 struct proc {
 	size pr_nloc;

@@ -9,7 +9,7 @@
 /***************************************************************/
 
 #ifndef NORCSID
-#define RCS_DMACH "$Header$"
+#define RCS_DMACH "$Id$"
 #endif
 
 

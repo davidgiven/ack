@@ -2,7 +2,7 @@
 	Manipulating the Program Counter
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"global.h"

@@ -2,7 +2,7 @@
 	Various debug flags
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #undef	DB_MALLOC			/* sally malloc area */
 

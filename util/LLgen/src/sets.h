@@ -11,7 +11,7 @@
  */
 
 /*
- * $Header$
+ * $Id$
  * Some macros that deal with bitsets and their size
  */
 

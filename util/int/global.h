@@ -2,7 +2,7 @@
 	Defines and externs of general interest
 */
 
-/* $Header$ */
+/* $Id$ */
 
 
 /********* PRIVATE/static *********/

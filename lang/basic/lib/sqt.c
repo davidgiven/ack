@@ -5,7 +5,7 @@
  * Author: Ceriel J.H. Jacobs
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #define __NO_DEFS
 #include <math.h>

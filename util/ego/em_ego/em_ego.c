@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Driver program for the global optimizer. It might even become the global
    optimizer itself one day ...

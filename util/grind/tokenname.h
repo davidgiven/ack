@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 struct tokenname	{	/*	Used for defining the name of a
 					token as identified by its symbol

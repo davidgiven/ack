@@ -1,6 +1,6 @@
 .\"	Macros for simple constant width drawings (uses font CW)
 .\"
-.\"	$Header$
+.\"	$Id$
 .de Dr		\" Drawing $1 (size)
 .sp 1
 .ne \\$1

@@ -2,7 +2,7 @@
 	For dumping the stack, GDA, heap and text segment.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<ctype.h>
 

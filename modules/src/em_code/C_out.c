@@ -6,7 +6,7 @@
 #include <em_ptyp.h>
 #include <em_private.h>
 
-/* $Header$ */
+/* $Id$ */
 
 static arg();
 static pseudo();

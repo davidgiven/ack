@@ -2,7 +2,7 @@
 	Dedicated treatment of the sigtrp system call, MON 48.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<signal.h>
 

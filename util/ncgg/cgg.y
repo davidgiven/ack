@@ -4,7 +4,7 @@
  */
 %{
 #ifndef NORCSID
-static char rcsid[]= "$Header$";
+static char rcsid[]= "$Id$";
 #endif
 
 #include "param.h"

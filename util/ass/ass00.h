@@ -9,7 +9,7 @@
 #include <arch.h>
 #include <local.h>
 
-#define	RCS_ASS	"$Header$"
+#define	RCS_ASS	"$Id$"
 
 /*
  * compile time options

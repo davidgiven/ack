@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 EQN=eqn
 REFER=refer

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*	Get a unique id for C_insertpart, etc.
 */

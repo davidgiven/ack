@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* AVL-trees: trees in which the difference in depth
    of the left branch and the right branch is at most one.

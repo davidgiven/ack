@@ -1,6 +1,6 @@
 #include "bc_string.h"
 
-/* $Header$ */
+/* $Id$ */
 
 int _asc(str)
 String *str;

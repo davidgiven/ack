@@ -2,7 +2,7 @@
 #include "bc_io.h"
 #include <ctype.h>
 
-/* $Header$ */
+/* $Id$ */
 
 _readln()
 {

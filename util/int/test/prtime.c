@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*
 	Test access to fields in struct stat

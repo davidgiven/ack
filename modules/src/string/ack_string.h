@@ -2,7 +2,7 @@
  * (c) copyright 1993 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* RCS: $Header: */
+/* RCS: $Id: */
 
 #ifndef __ACK_STRING_INCLUDED__
 #define __ACK_STRING_INCLUDED__

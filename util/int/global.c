@@ -3,7 +3,7 @@
 	Could be generated.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"global.h"
 

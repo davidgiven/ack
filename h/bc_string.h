@@ -4,7 +4,7 @@
  */
 #
 
-/* $Header$ */
+/* $Id$ */
 
 /* Strings are allocated in a fixed string descriptor table 
 ** This mechanism is used to avoid string copying as much as possible

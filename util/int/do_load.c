@@ -2,7 +2,7 @@
  * Sources of the "LOAD" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"global.h"

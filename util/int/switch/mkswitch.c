@@ -9,7 +9,7 @@
 	stabilized, combine.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <stdio.h>
 

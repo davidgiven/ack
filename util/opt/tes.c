@@ -1,5 +1,5 @@
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #endif
 /*
  * This file contains the main part of the top element size computation phase. 

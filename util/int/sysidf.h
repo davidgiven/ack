@@ -3,7 +3,7 @@
 	the program is being translated.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <local.h>
 

@@ -2,7 +2,7 @@
  * Sources of the "INCREMENT/DECREMENT/ZERO" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"global.h"

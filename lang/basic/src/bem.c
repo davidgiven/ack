@@ -6,7 +6,7 @@
 #include "bem.h"
 
 #ifndef NORSCID
-static char rcs_id[]	= "$Header$" ;
+static char rcs_id[]	= "$Id$" ;
 static char rcs_bem[]	= RCS_BEM ;
 static char rcs_symb[]	= RCS_SYMB ;
 static char rcs_graph[]	= RCS_GRAPH ;

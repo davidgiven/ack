@@ -1,6 +1,6 @@
 # make file for "flex" tool
 
-# @(#) $Header$ (LBL)
+# @(#) $Id$ (LBL)
 
 # Porting considerations:
 #

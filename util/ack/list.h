@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-#define RCS_LIST "$Header$"
+#define RCS_LIST "$Id$"
 #endif
 
 struct ca_elem {

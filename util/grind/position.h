@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* maps from address to filename-lineno pair and reverse,
    maps from filename-lineno pair or address to scope.

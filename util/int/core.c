@@ -2,7 +2,7 @@
 	Core dumping routines
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 #include	"global.h"

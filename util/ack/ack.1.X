@@ -1,4 +1,4 @@
-.\" $Header$
+.\" $Id$
 .de SB
 .\" SuBheader
 .sp 1

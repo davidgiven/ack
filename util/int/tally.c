@@ -2,7 +2,7 @@
 	Gathering run-time statistics
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -6,7 +6,7 @@
  * global data
  */
 
-#define	RCS_EX	"$Header$"
+#define	RCS_EX	"$Id$"
 
 extern  int     wordsize;
 extern  int     ptrsize;

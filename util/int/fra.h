@@ -2,7 +2,7 @@
 	Concerning the Function Return Area
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 

@@ -2,7 +2,7 @@
 	Defines and externs for the logging machine
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 

@@ -2,7 +2,7 @@
 	Trap handling
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<setjmp.h>
 

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*
 	computes a^b.

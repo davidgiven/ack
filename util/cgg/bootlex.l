@@ -1,7 +1,7 @@
 %{
 
 #ifndef NORCSID
-static char rcsid2[]="$Header$";
+static char rcsid2[]="$Id$";
 #endif
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.

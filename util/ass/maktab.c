@@ -10,7 +10,7 @@
 #include <em_flag.h>
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 #endif
 
 /* This program reads the human readable interpreter specification

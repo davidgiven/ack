@@ -6,7 +6,7 @@
 
 /* T O   A N S I   O R   N O T   T O   A N S I ? */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Define the * _PROTOTYPE macro to either expand both of its arguments
    (ANSI prototypes), or only the function name (K&R prototypes).

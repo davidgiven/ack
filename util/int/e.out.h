@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #define	FB_TEST		001
 #define	FB_PROFILE	002

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*	As a starter, chars are divided into classes, according to which
 	token they can be the start of.

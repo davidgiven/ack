@@ -2,7 +2,7 @@
  * Sources of the "INTEGER ARITHMETIC" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"logging.h"

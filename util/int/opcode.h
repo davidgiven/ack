@@ -2,7 +2,7 @@
 	Secondary and tertiary opcode defines
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #define	PRIM_BASE	0
 #define	SEC_BASE	256

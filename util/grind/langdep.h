@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* language-dependent routines and formats, together in one structure: */
 

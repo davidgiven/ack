@@ -11,7 +11,7 @@
  */
 
 /*
- * $Header$
+ * $Id$
  * Some important file names and variables
  */
 

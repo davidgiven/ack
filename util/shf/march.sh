@@ -1,4 +1,4 @@
-: '$Header$'
+: '$Id$'
 
 case $# in
 3) makecmd=$3 ;;

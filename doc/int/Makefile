@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 DOC =		draw.mac cover txt1 txt2 txt3 appA appB bib
 

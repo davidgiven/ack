@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Header$
+# $Id$
 
 (
 	echo '/* This file is generated from '$1'; do not edit */'

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Includes special segment checking when defined */
 #define	SEGCHECK

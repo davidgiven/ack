@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 # This Makefile is not supposed to be used in the doc source directory.
 # Instead, it is supposed to be copied to the target doc directory.

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #define MAXNESTING	1000
 

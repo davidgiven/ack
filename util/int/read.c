@@ -2,7 +2,7 @@
 	Reading the EM object file
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<local.h>		/* for VERSION */

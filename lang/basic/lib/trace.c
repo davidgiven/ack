@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 _trace(i)
 int i;

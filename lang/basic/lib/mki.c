@@ -1,6 +1,6 @@
 #include "bc_string.h"
 
-/* $Header$ */
+/* $Id$ */
 
 String *_mki(i)
 long i;

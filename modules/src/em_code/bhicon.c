@@ -1,6 +1,6 @@
 #include "em_private.h"
 
-/* $Header$ */
+/* $Id$ */
 
 void
 CC_bhicon(op, n, s, sz, i)

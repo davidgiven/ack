@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Language dependant support; this one is for Modula-2 */
 

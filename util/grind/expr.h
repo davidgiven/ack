@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* expression operators. Do not change values, as they are used as
    indices into arrays.

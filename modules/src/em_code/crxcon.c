@@ -1,6 +1,6 @@
 #include "em_private.h"
 
-/* $Header$ */
+/* $Id$ */
 
 void
 CC_crxcon(op, spec, v, s)

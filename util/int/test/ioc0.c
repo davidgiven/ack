@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Testing ioctl monitor call */
 #include	<sgtty.h>

@@ -2,7 +2,7 @@
  * Sources of the "CONVERT" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"nofloat.h"

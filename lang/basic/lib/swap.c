@@ -1,6 +1,6 @@
 #include "bc_string.h"
 
-/* $Header$ */
+/* $Id$ */
 
 _intswap(i1,i2)
 int *i1,*i2;

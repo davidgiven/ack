@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-#define RCS_DATA "$Header$"
+#define RCS_DATA "$Id$"
 #endif
 
 EXTERN  char            *stopsuffix;    /* Suffix to stop at */

@@ -4,7 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-static char rcsid2[]= "$Header$";
+static char rcsid2[]= "$Id$";
 #endif
 
 char *mystrcpy();

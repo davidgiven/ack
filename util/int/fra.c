@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 #include	"global.h"

@@ -4,7 +4,7 @@
  */
 
 #ifndef NORSCID
-static char rcs_lex[] = "$Header$" ;
+static char rcs_lex[] = "$Id$" ;
 #endif
 
 /* This file contains the new lexical analizer */

@@ -2,7 +2,7 @@
  * Sources of the "PROCEDURE CALL" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"logging.h"

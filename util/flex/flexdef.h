@@ -26,7 +26,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* @(#) $Header$ (LBL) */
+/* @(#) $Id$ (LBL) */
 
 #ifndef FILE
 #include <stdio.h>

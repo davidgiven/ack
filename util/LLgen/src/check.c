@@ -22,7 +22,7 @@
 # include "assert.h"
 
 # ifndef NORCSID
-static string rcsid1 = "$Header$";
+static string rcsid1 = "$Id$";
 # endif
 
 

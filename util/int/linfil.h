@@ -6,7 +6,7 @@
 	file name and the line number.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /* these should be EM machine registers */
 extern long LIN;

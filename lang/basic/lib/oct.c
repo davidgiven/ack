@@ -1,6 +1,6 @@
 #include "bc_string.h"
 
-/* $Header$ */
+/* $Id$ */
 
 String *_oct(i)
 int i;

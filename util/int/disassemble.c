@@ -2,7 +2,7 @@
 	For disassembling the text segment.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"global.h"
 #include	"opcode.h"

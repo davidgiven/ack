@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 #include	"global.h"

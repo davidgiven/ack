@@ -10,7 +10,7 @@
 #include "data.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 #endif
 
 enum f_path getpath(first) register trf **first ; {

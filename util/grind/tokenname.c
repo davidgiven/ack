@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #include	"tokenname.h"
 #include	"Lpars.h"

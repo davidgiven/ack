@@ -2,7 +2,7 @@
 	In and output, error messages, etc.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<varargs.h>

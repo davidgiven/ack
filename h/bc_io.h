@@ -4,7 +4,7 @@
  */
 #include <stdio.h>
 
-/* $Header$ */
+/* $Id$ */
 
 /* BASIC file io definitions */
 

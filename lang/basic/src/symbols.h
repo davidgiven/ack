@@ -4,7 +4,7 @@
  */
 
 #ifndef NORCSID
-# define RCS_SYMB	"$Header$"
+# define RCS_SYMB	"$Id$"
 #endif
 
 #define NIL	0

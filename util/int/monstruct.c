@@ -2,7 +2,7 @@
 	Moving system structs between UNIX and EM
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"sysidf.h"
 #include	"v7ioctl.h"

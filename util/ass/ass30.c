@@ -9,7 +9,7 @@
 #include        "ip_spec.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 static char rcs_ip[] = RCS_IP ;
 #endif
 

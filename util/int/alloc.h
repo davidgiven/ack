@@ -4,7 +4,7 @@
 	fatal().
 */
 
-/* $Header$ */
+/* $Id$ */
 
 extern char *Realloc(), *Malloc();
 

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Routines to create type structures */
 

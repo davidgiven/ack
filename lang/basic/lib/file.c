@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "bc_io.h"
 
-/* $Header$ */
+/* $Id$ */
 
 Filedesc	_fdtable[16];
 /* BASIC file descriptor table */

@@ -7,7 +7,7 @@
 
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <stdio.h>
 

@@ -17,7 +17,7 @@ char	*h_file=	"tables.H";
 char	*cd_file=	"code";
 
 #ifndef NORCSID
-static char rcsid[]= "$Header$";
+static char rcsid[]= "$Id$";
 #endif
 
 #include <stdio.h>

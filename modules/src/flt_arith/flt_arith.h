@@ -2,7 +2,7 @@
  * (c) copyright 1989 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 
 #ifndef __FLT_INCLUDED__
 #define __FLT_INCLUDED__

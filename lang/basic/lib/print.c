@@ -1,7 +1,7 @@
 #include "bc_string.h"
 #include "bc_io.h"
 
-/* $Header$ */
+/* $Id$ */
 
 /* Here all routine to generate terminal oriented output is located */
 

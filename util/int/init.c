@@ -2,7 +2,7 @@
 	Startup routines
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

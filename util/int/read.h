@@ -2,7 +2,7 @@
 	Load-time variables, for reading the EM object file
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /* EM header Part 1 varaibles */
 

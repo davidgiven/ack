@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 # make Modula-2 compiler
 

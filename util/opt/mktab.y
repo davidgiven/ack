@@ -1,6 +1,6 @@
 %{
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #endif
 
 #include <stdio.h>

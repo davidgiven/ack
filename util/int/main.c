@@ -2,7 +2,7 @@
 	Main loop
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<setjmp.h>

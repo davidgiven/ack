@@ -24,7 +24,7 @@
 # include "cclass.h"
 
 # ifndef NORCSID
-static string	rcsidc = "$Header$";
+static string	rcsidc = "$Id$";
 # endif
 
 /* Here are defined : */

@@ -2,7 +2,7 @@
  * Sources of the "COMPARE" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"logging.h"

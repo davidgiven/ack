@@ -1,4 +1,4 @@
-"$Header$"
+"$Id$"
 inc dec:
 inc loc adi $3==w:	loc $2+1 adi w
 inc loc sbi $3==w:	loc $2-1 sbi w

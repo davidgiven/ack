@@ -1,7 +1,7 @@
 #
  mes 2,EM_WSIZE,EM_PSIZE
 
-; $Header$
+; $Id$
 
 #define FARG    0
 #define ERES    EM_DSIZE

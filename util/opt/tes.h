@@ -1,7 +1,7 @@
 /*
  * Author: Hans van Eck. 
  */
-/* $Header$ */
+/* $Id$ */
 
 extern int state;
 #define	KNOWN		1

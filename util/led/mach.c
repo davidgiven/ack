@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*
- * $Header$
+ * $Id$
  */
 /*
  * Values depend on the machine on which this program should run.

@@ -2,7 +2,7 @@
 	Dedicated to the ioctl system call, MON 54.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"sysidf.h"
 #include	"v7ioctl.h"

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #define BUFLEN	32	/* size of buffer in message header */
 

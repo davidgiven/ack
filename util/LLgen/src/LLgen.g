@@ -24,7 +24,7 @@
 # include "cclass.h"
 
 # ifndef NORCSID
-static string	rcsid = "$Header$";
+static string	rcsid = "$Id$";
 # endif
 p_mem		alloc(), ralloc();
 string		store();

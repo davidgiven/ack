@@ -2,7 +2,7 @@
 	The logging machine
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<varargs.h>

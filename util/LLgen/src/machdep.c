@@ -18,7 +18,7 @@
 # include "types.h"
 
 # ifndef NORCSID
-static string rcsid5 = "$Header$";
+static string rcsid5 = "$Id$";
 # endif
 
 /* In this file the following routines are defined: */

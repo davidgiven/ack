@@ -2,7 +2,7 @@
 	Accessing the program text
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #define	text_loc(a)	(*(text + (p2i(a))))
 

@@ -13,7 +13,7 @@
 
 {
 #ifndef NORCSID
-static char rcsidp1[] = "$Header$";
+static char rcsidp1[] = "$Id$";
 #endif
 
 #include "parser.h"

@@ -1,4 +1,4 @@
-.\"	$Header$
+.\"	$Id$
 .\"	Run this paper off with
 .\"	refer [options] -p LLgen.refs LLgen.doc | [n]eqn | tbl | (nt)roff -ms
 .if '\*(>.'' \{\

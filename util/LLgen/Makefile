@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 INSTALLDIR=/usr/local/bin
 LIBDIR=/usr/local/lib/LLgen
 MANDIR=/usr/local/man/man1

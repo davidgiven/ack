@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*	The Return Status Block contains, in push order:
 	FIL, LIN, LB, PC, PI, rsbcode

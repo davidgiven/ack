@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 _hlt(nr)
 int nr;

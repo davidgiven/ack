@@ -2,7 +2,7 @@
  * Sources of the "POINTER ARITHMETIC" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"segcheck.h"

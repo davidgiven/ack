@@ -1,7 +1,7 @@
 #
  mes 2,EM_WSIZE,EM_PSIZE
 
-; $Header$
+; $Id$
 
 #define ARG1    0
 #define ARG2    EM_DSIZE

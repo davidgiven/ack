@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef lint
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #endif
 
 int	infile;	/* The current input file. */

@@ -2,7 +2,7 @@
 	Shadowbyte macros
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 

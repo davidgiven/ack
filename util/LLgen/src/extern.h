@@ -11,7 +11,7 @@
  */
 
 /*
- * $Header$
+ * $Id$
  * Miscellanious constants and
  * some variables that are visible in more than one file
  */

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Implementation of C_insertpart, C_beginpart, and C_endpart.
    Basic methodology: place the parts either in memory or on a temporary

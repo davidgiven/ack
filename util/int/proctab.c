@@ -2,7 +2,7 @@
 	Handling the proctable
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"logging.h"
 #include	"global.h"

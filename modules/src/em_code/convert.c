@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #endif
 
 /*	This program converts either human-readable or compact EM

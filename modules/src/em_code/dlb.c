@@ -1,6 +1,6 @@
 #include "em_private.h"
 
-/* $Header$ */
+/* $Id$ */
 
 void
 CC_dlb(l, val)

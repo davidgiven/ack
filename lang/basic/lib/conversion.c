@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 int _cint(f) double f;
 {

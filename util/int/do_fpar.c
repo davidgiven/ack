@@ -2,7 +2,7 @@
  * Sources of the "FLOATING POINT ARITHMETIC" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"nofloat.h"

@@ -2,7 +2,7 @@
 	Warnings.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

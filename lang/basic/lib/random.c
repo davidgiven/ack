@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #if !defined(EM_WSIZE)
 #define EM_WSIZE _EM_WSIZE

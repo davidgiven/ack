@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 extern char *malloc() ;
 

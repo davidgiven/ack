@@ -6,7 +6,7 @@
   C_magic	|	| <hand-written>
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #define C_df_dlb(l)	CC_dfdlb(l)
 #define C_df_dnam(s)	CC_dfdnam(s)

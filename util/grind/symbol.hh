@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Symbol table data structure.
    Each identifier structure refers to a list of possible meanings of this

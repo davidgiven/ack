@@ -22,7 +22,7 @@
 # include "io.h"
 
 # ifndef NORCSID
-static string rcsid7 = "$Header$";
+static string rcsid7 = "$Id$";
 # endif
 
 # define HASHSIZE 128

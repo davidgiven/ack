@@ -2,7 +2,7 @@
 	Direct unchecked memory access
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	The set of macros is neither systematic nor exhaustive; its contents
 	were suggested by expediency rather than by completeness.

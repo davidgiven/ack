@@ -787,6 +787,6 @@ exprlist(int *ip; int *typetable;) { int exp; }
 
 {
 #ifndef NORCSID
-static char rcs_id[]	= "$Header$" ;
+static char rcs_id[]	= "$Id$" ;
 #endif
 }

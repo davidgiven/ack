@@ -1,7 +1,7 @@
 #include "bc_io.h"
 #include <sgtty.h>
 
-/* $Header$ */
+/* $Id$ */
 
 struct sgttyb _ttydef;
 

@@ -2,7 +2,7 @@
  * Sources of the "STORE" group instructions
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"global.h"

@@ -1,4 +1,4 @@
-{ $Header$ }
+{ $Id$ }
 
 program ArrayWithoutArray(input, output);
 {	We simulate a (read-only) array by constructing a mapping

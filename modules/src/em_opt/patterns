@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 loc adi w loc sbi w : loc $1-$3 adi w
 inc dec:
 inc loc adi w :	loc $2+1 adi w

@@ -1,6 +1,6 @@
 /* libmain - flex run-time support library "main" function */
 
-/* $Header$ */
+/* $Id$ */
 
 extern int yylex();
 

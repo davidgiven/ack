@@ -21,7 +21,7 @@
 # include "assert.h"
 
 # ifndef NORCSID
-static string rcsid9 = "$Header$";
+static string rcsid9 = "$Id$";
 # endif
 
 /* In this file the following routines are defined: */

@@ -11,7 +11,7 @@
  */
 
 /*
- * $Header$
+ * $Id$
  * Type and structure definitions
  */
 

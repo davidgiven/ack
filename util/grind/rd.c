@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* a.out file reading ... */
 

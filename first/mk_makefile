@@ -1,4 +1,4 @@
-: '$Header$'
+: '$Id$'
 
 : This shell script inserts make macros after a line
 : starting with #PARAMS in "make_proto", and produces the result on

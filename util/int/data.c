@@ -2,7 +2,7 @@
 	Data access
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"logging.h"

@@ -5,7 +5,7 @@
 #define NSIG _NSIG
 #endif
 
-/* $Header$ */
+/* $Id$ */
 
 /* Trap handling */
 int	_trpline;	/* BASIC return label */

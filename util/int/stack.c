@@ -2,7 +2,7 @@
 	Stack manipulation
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

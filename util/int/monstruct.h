@@ -10,7 +10,7 @@
 	expects two parameters, the offset and the length, both ints.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /* struct stat */
 #define	V7st_dev	0L, 2L			/* short */

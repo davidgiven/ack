@@ -20,7 +20,7 @@
 # include "io.h"
 
 # ifndef NORCSID
-static string rcsid4 = "$Header$";
+static string rcsid4 = "$Id$";
 # endif
 
 char	ltext[LTEXTSZ];

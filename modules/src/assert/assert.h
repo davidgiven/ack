@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*	 A S S E R T I O N    M A C R O   D E F I N I T I O N		*/
 
 /* This 'assert' definition can be used in a ,-expression. */

@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-static char rcsid1[] = "$Header$";
+static char rcsid1[] = "$Id$";
 #endif
 
 /*	This is the main program for the stand-alone version of the

@@ -2,7 +2,7 @@
 	The big switch on all the opcodes
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<em_abs.h>
 #include	"global.h"

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* User-declared part of idf structure */
 

@@ -2,7 +2,7 @@
  * All rights reserved.
  */
 
-/* $Header$ */
+/* $Id$ */
 
 extern char c_class[];
 

@@ -1,4 +1,4 @@
-: '$Header$'
+: '$Id$'
 while true
 do
   (echo ' mes 2,2,2

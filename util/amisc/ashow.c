@@ -1,4 +1,4 @@
-static char	rcsid[] = "$Header$";
+static char	rcsid[] = "$Id$";
 /*
  * show - make the contents of an ACK object file human readable.
  */

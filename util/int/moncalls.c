@@ -2,7 +2,7 @@
 	The MON instruction
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"sysidf.h"
 #include	"log.h"

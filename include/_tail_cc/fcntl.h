@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Copied from Minix, with some changes */
 /* The <fcntl.h> header is needed by the open() and fcntl() system calls,

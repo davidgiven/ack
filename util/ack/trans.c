@@ -11,7 +11,7 @@
 #include "data.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 static char rcs_trans[] = RCS_TRANS ;
 #endif
 

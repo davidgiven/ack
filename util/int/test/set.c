@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*
 	Test combination of signal and setjmp/longjmp

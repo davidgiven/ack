@@ -1,5 +1,5 @@
 #ifndef NORCSID
-static char rcsid3[] = "$Header$";
+static char rcsid3[] = "$Id$";
 #endif
 
 #include "nopt.h"

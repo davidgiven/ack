@@ -18,7 +18,7 @@
 #include "Lpars.h"
 
 #ifndef NORCSID
-# define RCS_BEM	"$Header$"
+# define RCS_BEM	"$Id$"
 #endif
 
 #define MAXINT		32768

@@ -6,7 +6,7 @@
 /* Made into arch/aal by Ceriel Jacobs
  */
 
-static char RcsId[] = "$Header$";
+static char RcsId[] = "$Id$";
 
 /*
  * Usage: [arch|aal] [qdprtx][vlcu] archive [file] ...

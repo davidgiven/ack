@@ -2,7 +2,7 @@
  * All rights reserved.
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include "cclass.h"
 char c_class[] = {

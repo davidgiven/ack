@@ -8,7 +8,7 @@
 	Note that  AB_list[s] increases for decreasing s.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"segcheck.h"
 #include	"global.h"

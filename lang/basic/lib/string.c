@@ -1,6 +1,6 @@
 #include "bc_string.h"
 
-/* $Header$ */
+/* $Id$ */
 
 #define ok(X)	if( X ==0) return;
 #define okr(X)	if( X ==0) return(0);

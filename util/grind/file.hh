@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* Structure for information about files. This information consists of three
    parts:

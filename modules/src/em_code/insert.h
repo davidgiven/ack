@@ -4,7 +4,7 @@
    end-pointer.
 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <system.h>
 #include <local.h>
