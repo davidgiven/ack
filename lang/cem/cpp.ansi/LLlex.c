@@ -351,15 +351,15 @@ char_constant(nm)
 		if (ch == '\\')
 			ch = quoted(GetChar());
 		if (ch >= 128) ch -= 256;
-		if (size < (int)size)
-			val |= ch << 8 * size;
+		if (size < sizeof(arith))
+			val |= ch << (8 * size);
 		size++;
 		ch = GetChar();
 	}
-	if (size > 1)
-		strict("%s constant includes more than one character", nm);
 	if (size > sizeof(arith))
 		error("%s constant too long", nm);
+	else if (size > 1)
+		strict("%s constant includes more than one character", nm);
 	return val;
 }
 
@@ -441,8 +441,7 @@ quoted(ch)
 			ch = hex;
 		}
 		}
-	}
-	else {				/* a quoted octal */
+	} else {				/* a quoted octal */
 		register int oct = 0, cnt = 0;
 
 		do {
