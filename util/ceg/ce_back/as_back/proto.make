@@ -10,11 +10,6 @@ IDIRS=-I.\
       -I$(TARGET_HOME)/h\
       -I$(TARGET_HOME)/modules/h
 
-LIBS=$(TARGET_HOME)/modules/lib/object.$(LIBSUF)\
-     $(TARGET_HOME)/modules/lib/libstring.$(LIBSUF)\
-     $(TARGET_HOME)/modules/lib/libprint.$(LIBSUF)\
-     $(TARGET_HOME)/modules/lib/libsystem.$(LIBSUF)
-
 CFLAGS = $(COPTIONS) $(IDIRS)
 
 all:	bottom.$(SUF) con1.$(SUF) con2.$(SUF) con4.$(SUF) end_back.$(SUF) \
