@@ -5,9 +5,7 @@
 
 /* $Header$ */
 
-#undef		BSD4_1		/* Berkeley Software Distr. 4.1 */
-#define		BSD4_2		/* Berkeley Software Distr. 4.2 */
-#undef		SYS_V0		/* System V0 */
+#include <local.h>
 
 #ifdef	BSD4_1
 #define	BSD_X
@@ -17,7 +15,7 @@
 #define	BSD_X
 #endif	BSD4_2
 
-#ifdef	SYS_V0
+#ifdef	SYS_5
 #define	SYS_V
-#endif	SYS_V0
+#endif	SYS_5
 
