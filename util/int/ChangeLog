@@ -1,4 +1,7 @@
 26-Jan-90  Ceriel Jacobs (ceriel) at ceriel
+	Fixed check in COM instruction.
+
+26-Jan-90  Ceriel Jacobs (ceriel) at ceriel
 	Fixed so that two consecutive SIG's have no effect.
 
  8-Dec-89  Ceriel Jacobs (ceriel) at ceriel

@@ -201,7 +201,7 @@ DoCOMz()
 	spoilFRA();
 	l = arg_w(l);
 	for (p = SP; p < (SP + l); p++) {
-		check_def(p, l);
+		check_def(p, 0);
 		stack_loc(p) = ~stack_loc(p);
 	}
 }
