@@ -80,9 +80,10 @@ csb_z:		mov	(sp)+,d0 ;	bra	0f
 csb_l:		adroff		;	move.w	(a5),d0
 0:		comp	wrd,d0 ;	bne	e_illins
 csb_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
-		mov	4(a0),d1 ;	sub.l	#1,d1
 		move.l	a0,a3
 !Use a3 as a general register
+		mov	4(a0),d1 ;	sub.l	#1,d1
+		blt	2f
 		move.l	wrd,d2 ;	add.l	#4,d2
 1:		add.l	d2,a0	;	comp	(a0),d0
 		dbeq	d1,1b	;	bne	2f

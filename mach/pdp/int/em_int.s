@@ -2921,11 +2921,12 @@ csb.z:	mov	(sp)+,r0;	br	1f;
 csb.l:	jsr	pc,wrdoff;
 1:	sub	$2,r0;		jne	e.illins;
 csb.1W:	mov	(sp)+,r0;	mov	(sp)+,r1;
-	mov	2(r0),r5;	mov	r0,pcx;
+	mov 	r0,pcx;		mov	2(r0),r5
 					/use pcx as ordinary register
+	ble	3f
 2:	add	$4,r0;		cmp	(r0),r1;
 	beq	4f;		sob	r5,2b;
-	mov	(pcx),pcx;	jeq	e.case;		next
+3:	mov	(pcx),pcx;	jeq	e.case;		next
 4:	mov	2(r0),pcx;	jeq	e.case;		next
 
 rck.l:	jsr	pc,wrdoff;	br	1f;
