@@ -13,7 +13,6 @@
 	cmp	#16,d0
 	bcc	1f
 	btst	d0,.trpim
-5:
 	bne	3f
 1:
 	move.l	.trppc,a0
