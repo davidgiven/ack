@@ -229,9 +229,9 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(procscope->sc_name);
+	TmpOpen(procscope);
 	DoPriority();
 	DoFilename();		/* ??? only when this procedure is exported? */
-	TmpOpen(procscope);
 
 	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
 
