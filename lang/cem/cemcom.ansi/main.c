@@ -348,6 +348,7 @@ init()
 	lngdbl_type = standard_type(LNGDBL, 0, lngdbl_align, lngdbl_size);
 	void_type = standard_type(VOID, 0, 1, (arith)-1);
 	error_type = standard_type(ERRONEOUS, 0, 1, (arith)1);
+	error_type->tp_up = error_type;
 
 	/*	Pointer Arithmetic type: all arithmetics concerning
 		pointers is supposed to be performed in the

@@ -263,11 +263,9 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	func_name = name;
 	if (def->df_type->tp_fund != FUNCTION) {
 		error("making function body for non-function");
-		func_type = error_type;
+		def->df_type = error_type;
 	}
-	else {
-		func_type = def->df_type->tp_up;
-	}
+	func_type = def->df_type->tp_up;
 #ifdef LINT
 	func_notypegiven = ds->ds_notypegiven;
 #endif
