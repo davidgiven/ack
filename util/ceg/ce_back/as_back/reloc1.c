@@ -1,0 +1,9 @@
+#include "header.h"
+
+reloc1( s, o, r)
+char *s;
+arith o;
+int r;
+{
+	fprint( codefile, RELOC1_FMT, s, (arith) o);
+}

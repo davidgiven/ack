@@ -1,0 +1,77 @@
+EM = /proj/em/Work
+CEG = /usr/star/kaashoek/em/ceg.1
+
+Em   = $(CEG)/EM_parser/obj_EM_pars
+AS   = $(CEG)/as_parser
+ASMAIN = $(CEG)/assemble/obj_assemble
+EVAL = $(CEG)/as_parser/eval
+BACK = $(CEG)/ce_back
+DEF = $(CEG)/defaults
+
+CC = cc
+
+IFILES  = -I. -I.. -I$(AS) -I$(Em) -I$(EM)/h -I$(EM)/modules/h -I../back
+
+CEG_LIBS = $(EM)/modules/lib/liballoc.a\
+	   $(EM)/modules/lib/libprint.a\
+	   $(EM)/modules/lib/libstring.a\
+	   $(EM)/modules/lib/libsystem.a
+
+.c.o : mach.h back/*h ; ( cd ce; $(CC) -c -O $(IFILES) ../$*.c)
+
+
+install : back ceg ce
+	make ce.a
+
+ce : ceg/ceg
+	mkdir ce
+	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
+	cp $(DEF)/*.c ce
+	cp $(DEF)/*/*.c ce
+	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
+	ln mach.c ce/mach.c
+
+ceg : 
+	mkdir ceg
+	cp $(ASMAIN)/* ceg
+	(cd ceg;$(CC) -c $(IFILES) *.c; ar r as_lib.a *.o; ranlib as_lib.a)
+
+
+back :
+	mkdir back
+	cp $(BACK)/obj_back/*h $(BACK)/obj_back/Makefile back
+	( cd back; make)
+	ar r back.a back/*o;
+	ranlib back.a
+
+
+
+ce.a : ce/*.o
+	ar r ce.a ce/*.o
+	ranlib ce.a
+
+ce/*.o : mach.h back/*.h
+	(cd ce;$(CC) -c -O $(IFILES) *.c)
+
+EM_instr : ceg/ceg mach.h back/*.h EM_table
+	( cd ce; $(CEG)/util/preproc ../EM_table| ../ceg/ceg -l)
+	$(CEG)/util/create_ofiles
+	@make ce.a
+
+
+
+ceg/ceg	: $(Em)/em_parser ceg/as_lib.a ceg/as_instr.o ceg/eval_as.o
+	$(CC) -o ceg/ceg $(Em)/*.o ceg/as_instr.o ceg/eval_as.o ceg/as_lib.a\
+       			 $(CEG_LIBS) -ll
+
+ceg/as_instr.o : as.h ceg/*h ceg/as_instr.c
+	(cd ceg;$(CC) -c $(IFILES) as_instr.c)
+
+ceg/as_instr.c : as_table $(AS)/as_parser
+	$(CEG)/util/preproc  as_table| $(AS)/as_parser > ceg/as_instr.c
+
+ceg/eval_as.o : ceg/eval_as.c as.h $(AS)/as_parser.h $(Em)/arg_type.h
+	(cd ceg;$(CC) -c $(IFILES) eval_as.c)
+
+ceg/eval_as.c : as.c $(EVAL)/eval
+	$(EVAL)/eval < as.c > ceg/eval_as.c
