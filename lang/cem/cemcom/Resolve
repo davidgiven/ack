@@ -1,0 +1,56 @@
+: create a directory Xsrc with name clashes resolved
+: and run make in that directory
+: '$Header$'
+
+case $# in
+1)	
+	;;
+*)	echo "$0: one argument expected" 1>&2
+	exit 1
+	;;
+esac
+PW=`pwd`
+case $1 in
+main|emain)
+	target=$PW/$1
+	;;
+Xlint)
+	target=$1
+	;;
+*)	echo "$0: $1: Illegal argument" 1>&2
+	exit 1
+	;;
+esac
+if test -d ../Xsrc
+then
+	:
+else	mkdir ../Xsrc
+fi
+make longnames
+: remove code generating routines from the clashes list as they are defines.
+: code generating routine names start with C_
+sed '/^C_/d' < longnames > tmp$$
+cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
+rm -f tmp$$
+cd ../Xsrc
+if cmp -s Xclashes clashes
+then
+	:
+else
+	mv Xclashes clashes
+fi
+rm -f makefile
+ed - $PW/makefile <<'EOF'
+/^#EXCLEXCL/,/^#INCLINCL/d
+w makefile
+q
+EOF
+for i in `cat $PW/Cfiles`
+do
+	cat >> makefile <<EOF
+
+$i:	clashes $PW/$i
+	cid -Fclashes < $PW/$i > $i
+EOF
+done
+make CURRDIR=$PW $target
