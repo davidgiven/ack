@@ -10,6 +10,10 @@ name "Sparc EM library"
 system "sparc"
 dir libem
 end
+name "Sparc end library"
+system "sparc"
+dir libend
+end
 !name "M68020 debugger support library"
 !system "sparc"
 !dir libdb
