@@ -40,6 +40,9 @@ distr:
 		apc -mpdp -c.m -I$h pem22.p ; rm -f pem22.p
 		rm -f pem24.p ; ln pem.p pem24.p
 		apc -mvax2 -c.m -I$h pem24.p ; rm -f pem24.p
+		rm -f pem44.p ; ln pem.p pem44.p
+		apc -mvax4 -c.m -I$h pem44.p ; rm -f pem44.p
+
 clean:
 		-rm -f pem pem.out *.[os] *.old
 
