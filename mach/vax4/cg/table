@@ -170,30 +170,34 @@ adispldefind8 =	{REGISTER ireg,reg; STRING ind;} 4 cost=(3,13)
 
 TOKENEXPRESSIONS:
 CONST =		CONST1 + CONST2 + CONST4
-source1 =	regdef1 + displ1 + displdef1 +
+Xsource1 =	regdef1 + displ1 + displdef1 +
 		EXTERNAL1 + reldef1 + CONST1 + LOCAL1
 		+ displind1 + extdefind1 + displdefind1
+source1 =	Xsource1
 #ifdef REGVARS
 		+ reginc1 + regdec1
 #endif REGVARS
-source2 =	regdef2 + displ2 + displdef2 +
+Xsource2 =	regdef2 + displ2 + displdef2 +
 		EXTERNAL2 + reldef2 + CONST2 + LOCAL2
 		+ extind2 + displind2 + extdefind2 + displdefind2
+source2 =	Xsource2
 #ifdef REGVARS
 		+ reginc2 + regdec2
 #endif REGVARS
-source4 =	REG + regdef4 + displ4 + displdef4 + LocaLBase +
+Xsource4 =	REG + regdef4 + displ4 + displdef4 + LocaLBase +
 		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4 + FCONST4
 		+ extind4 + displind4 + extdefind4 + displdefind4
+source4 =	Xsource4
 #ifdef REGVARS
 		+ RREG + reginc4 + regdec4
 #endif REGVARS
 dups4 =		CONST + regdef1 + displ1 + LOCAL1 +
 		REG +	regdef2 + displ2 + LOCAL2 +
 		RREG +	regdef4 + displ4 + LOCAL4 + DOUBLE
-source8 =	QREG + regdef8 + displ8 + displdef8 +
+Xsource8 =	QREG + regdef8 + displ8 + displdef8 +
 		EXTERNAL8 + reldef8 + CONST8 + LOCAL8 + FCONST8
 		+ extind8 + displind8 + extdefind8 + displdefind8
+source8 =	Xsource8
 #ifdef REGVARS
 		+ reginc8 + regdec8
 #endif REGVARS
@@ -854,7 +858,7 @@ dvi !defined($1) | source4 |
 			remove(ALL)
 			move(%[1],R0)
 			"jsb\t.dvi"			     |	     | |
-rmi $1==4	| source4 source4 |
+rmi $1==4	| Xsource4 Xsource4 |
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
 			"mull2\t%[1],%[a]"
@@ -862,7 +866,7 @@ rmi $1==4	| source4 source4 |
 			setcc(%[a])				| %[a]	 | |
 #ifdef REGVARS
 rmi stl $1==4 && inreg($2)==2
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			remove(regvar($2))
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
@@ -872,7 +876,7 @@ rmi stl $1==4 && inreg($2)==2
 			setcc(regvar($2))		|	| |
 #endif REGVARS
 rmi stl $1==4 && $2<0
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			remove(displaced)
 			remove(LOCALS,(%[num]<=$2+3 && %[num]+%[size]>$2))
 			allocate(REG)
@@ -881,7 +885,7 @@ rmi stl $1==4 && $2<0
 			"subl3\t%[a],%[2],$2(fp)"
 			setcc({LOCAL4,LB,$2,4})		|	| |
 rmi stl $1==4 && $2>=0
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			remove(displaced)
 			remove(LOCALS,(%[num]<=$2+3 && %[num]+%[size]>$2))
 			allocate(REG)
@@ -891,7 +895,7 @@ rmi stl $1==4 && $2>=0
 			setcc({LOCAL4,AP,$2,4})		|	| |
 #ifdef REGVARS
 rmi sil $1==4 && inreg($2)==2
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			REMEXTANDLOC
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
@@ -900,7 +904,7 @@ rmi sil $1==4 && inreg($2)==2
 			setcc({regdef4,regvar($2)})	|	| |
 #endif REGVARS
 rmi sil $1==4 && $2<0
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			REMEXTANDLOC
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
@@ -908,14 +912,14 @@ rmi sil $1==4 && $2<0
 			"subl3\t%[a],%[2],*$2(fp)"
 			setcc({displdef4,LB,tostring($2)})	|	| |
 rmi sil $1==4 && $2>=0
-		| source4 source4 |
+		| Xsource4 Xsource4 |
 			REMEXTANDLOC
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
 			"mull2\t%[1],%[a]"
 			"subl3\t%[a],%[2],*$2(ap)"
 			setcc({displdef4,AP,tostring($2)})	|	| |
-rmi ste $1==4	| source4 source4 |
+rmi ste $1==4	| Xsource4 Xsource4 |
 			remove(externals)
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
@@ -4379,8 +4383,8 @@ dus !defined($1) | source4 |
 			move(%[1],R0)
 			"jsb\t.dus"
 			erase(R0)		|	| |
-exg $1==4	| bigsource4 bigsource4 |	| %[1] %[2] | |
-exg $1==8	| bigsource8 bigsource8 |	| %[1] %[2] | |
+exg $1==4	| bigsource4-source4+Xsource4 bigsource4-source4+Xsource4 |	| %[1] %[2] | |
+exg $1==8	| bigsource8-source8+Xsource8 bigsource8-source8+Xsource8 |	| %[1] %[2] | |
 exg defined($1) | STACK |
 			move({CONST4,$1},R0)
 			"jsb\t.exg"
