@@ -514,6 +514,7 @@ loc cms $1==0 && $2==w: tne
 zer $1==w: loc 0
 loc loc adi $3==w && sfit($1+$2,8*w) : loc $1+$2
 loc loc sbi $3==w && sfit($1-$2,8*w) : loc $1-$2
+loc loc sbs $3==w && w==p && sfit($1-$2,8*w) : loc $1-$2
 loc loc mli $3==w && sfit($1*$2,8*w) : loc $1*$2
 loc loc dvi $3==w && $2!=0 : loc $1/$2
 loc loc and $3==w :	loc $1&$2
