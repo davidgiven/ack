@@ -39,10 +39,12 @@ fmt:	.asciz "%s\n"
 	add.l	#4, sp
 	rts
 9:
-	jsr	(.trpstr)
 	move.l	d0,-(sp)
+	jsr	(.trpstr)
+	move.l	d0,(sp)
 	pea	(fmt)
 	jsr	(.diagnos)
 	lea	(4, sp), sp
+	illegal
 	jsr	(_exit)
 .align 2
