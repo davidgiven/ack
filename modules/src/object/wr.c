@@ -33,14 +33,18 @@ static int		offcnt;
 __wr_flush(ptr)
 	register struct fil *ptr;
 {
-	if (ptr->pnow > ptr->pbegin) {
 #ifdef OUTSEEK
-		if (currpos != ptr->currpos) {
-			lseek(ptr->fd, ptr->currpos, 0);
-		}
+	/* seek to correct position even if we aren't going to write now */
+	if (currpos != ptr->currpos) {
+		currpos = lseek(ptr->fd, ptr->currpos, 0);
+	}
 #endif
+	if (ptr->pnow > ptr->pbegin) {
 		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
 		ptr->currpos += ptr->pnow - ptr->pbegin;
+#ifdef OUTSEEK
+		currpos = ptr->currpos;
+#endif
 		if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 			offset[sectionnr] = ptr->currpos;
 		}
@@ -48,9 +52,6 @@ __wr_flush(ptr)
 	ptr->cnt = WBUFSIZ;
 	ptr->pnow = ptr->pbuf;
 	ptr->pbegin = ptr->pbuf;
-#ifdef OUTSEEK
-	currpos = ptr->currpos;
-#endif
 }
 
 static OUTWRITE(p, b, n)
@@ -71,6 +72,9 @@ static OUTWRITE(p, b, n)
 			n -= i;
 			b += i;
 			ptr->currpos += i;
+#ifdef OUTSEEK
+			currpos = ptr->currpos;
+#endif
 			if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 				offset[sectionnr] = ptr->currpos;
 			}
@@ -94,6 +98,9 @@ static OUTWRITE(p, b, n)
 			b += m;
 			n &= WBUFSIZ - 1;
 			ptr->currpos += m;
+#ifdef OUTSEEK
+			currpos = ptr->currpos;
+#endif
 			if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 				offset[sectionnr] = ptr->currpos;
 			}
@@ -109,9 +116,6 @@ static OUTWRITE(p, b, n)
 			}
 			ptr->pnow = pn;
 		}
-#ifdef OUTSEEK
-		currpos = ptr->currpos;
-#endif
 	}
 }
 
@@ -267,13 +271,16 @@ wr_outsect(s)
 			currpos = lseek(ptr->fd, ptr->currpos, 0);
 #endif
 		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
-#ifdef OUTSEEK
-		currpos += ptr->pnow - ptr->pbegin;
-#endif
 		ptr->currpos += ptr->pnow - ptr->pbegin;
+#ifdef OUTSEEK
+		currpos = ptr->currpos;
+#endif
 		offset[sectionnr] = ptr->currpos;
 		if (offset[s] != ptr->currpos) {
 			ptr->currpos = lseek(ptr->fd, offset[s], 0);
+#ifdef OUTSEEK
+			currpos = ptr->currpos;
+#endif
 		}
 		ptr->cnt = WBUFSIZ - ((int)offset[s] & (WBUFSIZ-1));
 		ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
