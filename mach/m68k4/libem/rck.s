@@ -11,7 +11,7 @@
 	move.l	(sp),d0
 	cmp.l	(a0),d0
 	blt	1f
-	cmp.l	2(a0),d0
+	cmp.l	4(a0),d0
 	ble	2f
 1:
 	move.l	#ERANGE,-(sp)

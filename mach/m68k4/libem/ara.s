@@ -38,11 +38,11 @@
 	move.l	12(sp),a1
 	move.l	4(sp),a0
 	add.l	d1,a1		! address of element
-	add.l	8(a0),a1	! a1++ because of predecrement
+	move.l	8(a0),d0
+	add.l	d0,a1		! a1++ because of predecrement
 	move.l	(sp)+,a0	! return address
 	add.l	#12,sp		! pop parameters
 	clr.l	d1		!?nodig?
-	move.l	8(a0),d0
 	asr	#1,d0
 	bne	3f
 	move.b	-(a1),d1	! 1 byte element
