@@ -68,10 +68,10 @@ main(argc,argv) char **argv; {
 			error("Unknown flag %c",argv[0][1]);
 		}
 	}
-	if (argc < 1 || argc > 2)
-		error("Usage: %s EMfile [ asfile ]",progname);
-	in_init(argv[0]);
-	out_init(argv[1]);
+	if (argc > 2)
+		error("Usage: %s [ EMfile ] [ asfile ]",progname);
+	in_init(argc >= 1 ? argv[0] : (char *) 0);
+	out_init(argc >= 2 ? argv[1] : (char *) 0);
 	readcodebytes();
 	itokcost();
 	in_start();

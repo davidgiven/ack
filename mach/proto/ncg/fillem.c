@@ -95,10 +95,11 @@ long get32();
 
 in_init(filename) char *filename; {
 
-	if ((emfile=freopen(filename,"r",stdin))==NULL)
+	emfile = stdin;
+	if (filename && (emfile=freopen(filename,"r",stdin))==NULL)
 		error("Can't open %s",filename);
 	if (get16()!=sp_magic)
-		error("Bad format %s",filename);
+		error("Bad format %s",filename ? filename : "standard-input");
 }
 
 in_start() {
