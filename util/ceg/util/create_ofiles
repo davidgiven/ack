@@ -1,7 +1,7 @@
 for i in *.c
 do
   b=`basename $i .c`
-  if test !( -f $b.o) 
+  if test ! -f $b.o 
   then
 	>$b.o
 	touch $i
