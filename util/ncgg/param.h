@@ -15,7 +15,7 @@
 #define EMPATMAX 20
 #define MAXPATTERNS 40
 #define MAXALLREG 5
-#define MAXINSTANCES 300
+#define MAXINSTANCES 500
 #define MAXMOVES 40
 #define MAXTESTS 10
 #define MAXSTACKS 30
