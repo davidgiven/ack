@@ -501,6 +501,15 @@ cpy(s,p,inserted) register string p; {
 		}
 		t = "literal";
 		break;
+	  case C_ACTION:
+		t = "C action";
+		break;
+	  case C_PARAMS:
+		t = "C parameter section";
+		break;
+	  case C_EXPR:
+		t = "C expression";
+		break;
 	  case EOFILE :
 		t = "end-of-file";
 		break;
