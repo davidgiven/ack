@@ -159,6 +159,8 @@ main(argc, argv)
 		datasize= outsect[BSSSG].os_base - outsect[ROMSG].os_base ;
 		if (! follows(&outsect[DATASG], &outsect[ROMSG]))
 			fatal("data segment must follow rom\n") ;
+		outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
+		outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
 	} else
 	if ( outsect[DATASG].os_lign == 0x20000 ) {
 		/* 410/413 file with ROMSG in instruction space */
@@ -166,21 +168,26 @@ main(argc, argv)
 		magic= NMAGIC ;
 		textsize= (outsect[ROMSG].os_base - outsect[TEXTSG].os_base) +
 				outsect[ROMSG].os_size ;
-		datasize= outsect[DATASG].os_size ;
 		if (! follows(&outsect[ROMSG],&outsect[TEXTSG].os_base))
 			fatal("rom segment must follow text\n") ;
+		outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
+		outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
+		datasize= outsect[DATASG].os_size ;
 	} else {
 		/* Plain 407 file */
 		rom_in_data = 0;
 		magic= OMAGIC ;
 		textsize= (outsect[DATASG].os_base - outsect[TEXTSG].os_base);
-		datasize= outsect[DATASG].os_size ;
 		if (!unresolved) {
 			if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
 				fatal("rom segment must follow text\n") ;
 			if (! follows(&outsect[DATASG],&outsect[ROMSG]))
 				fatal("data segment must follow rom\n") ;
 		}
+		outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
+		outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
+		outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
+		datasize= outsect[DATASG].os_size ;
 	}
 	if (outsect[TEXTSG].os_base == TOT_HDRSIZE+ENTRY) {
 		if (magic != NMAGIC) {
