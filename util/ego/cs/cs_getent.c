@@ -51,6 +51,7 @@ STATIC struct inf_entity {
 	op_sdf,	ENOFFSETTED,	WS2,
 	op_sdl,	ENLOCAL,	WS2,
 	op_sil,	ENINDIR,	WS1,
+	op_sim,	ENIGNMASK,	WS1,
 	op_ste,	ENEXTERNAL, 	WS1,
 	op_stf,	ENOFFSETTED,	WS1,
 	op_sti,	ENINDIR,	ARGW,
