@@ -65,7 +65,6 @@ static int been_here;
 
 #ifdef REGVARS
 
-
 regscore(off,size,typ,score,totyp)
 	long off;
 {
@@ -93,8 +92,6 @@ regscore(off,size,typ,score,totyp)
 	score -= 1; /* take save/restore into account */
 	return score;
 }
-
-
 struct regsav_t {
 	char	*rs_reg;	/* e.g. "a3" or "d5" */
 	long	rs_off;		/* offset of variable */
@@ -103,20 +100,10 @@ struct regsav_t {
 
 
 int regnr;
-int nr_a_regs,nr_d_regs;
-int EM_BSIZE;
-static long nlocals;
-
-prolog(n)
-{	nlocals = n; }
-
 
 i_regsave()
 {
 	regnr = 0;
-	nr_a_regs = 0;
-	nr_d_regs = 0;
-	EM_BSIZE = 0;
 }
 
 #define MOVEM_LIMIT	2
@@ -125,11 +112,9 @@ i_regsave()
 * we simply use several move.l's.
 */
 
-
 save()
 {
 	register struct regsav_t *p;
-	int i;
 
 	if (regnr > MOVEM_LIMIT) {
 		fprintf(codefile,"movem.l ");
@@ -140,37 +125,16 @@ save()
 		}
 		fprintf(codefile,",-(sp)\n");
 	} else {
-		/* Note that the order in which the registers are saved
-		 * is important; it is used by gto.s.
-		 */
-		for (i = 0; i < nr_a_regs; i++) {
-			fprintf(codefile,"move.l a%d,-(sp)\n",5-i);
-		}
-		for (i = 0; i < nr_d_regs; i++) {
-			fprintf(codefile,"move.l d%d,-(sp)\n",7-i);
+		for (p = regsav; p < &regsav[regnr]; p++) {
+			fprintf(codefile,"move.l %s,-(sp)\n",p->rs_reg);
 		}
 	}
-	/* Push a mask that indicates which registers were saved */
-	assert(nr_d_regs < 8 && nr_a_regs < 8);
-	if (nr_d_regs == 0 && nr_a_regs == 0) {
-		fprintf(codefile,"clr.w -(sp)\n");
-	} else {
-		fprintf(codefile,"move.w #%d,-(sp)\n",
-			nr_d_regs + (nr_a_regs<<3));
-	}
-
-	/* Compute AB - LB */
-	EM_BSIZE = 4 * (nr_d_regs + nr_a_regs) + 10;
-
-	/* allocate space for local variables */
-	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
-
 	/* initialise register-parameters */
 	for (p = regsav; p < &regsav[regnr]; p++) {
 		if (p->rs_off >= 0) {
 			fprintf(codefile,"move.%c %ld(a6),%s\n",
 				(p->rs_size == 4 ? 'l' : 'w'),
-				p->rs_off + EM_BSIZE,
+				p->rs_off,
 				p->rs_reg);
 		}
 	}
@@ -179,10 +143,7 @@ save()
 restr()
 {
 	register struct regsav_t *p;
-	int i;
 
-	fprintf(codefile,"unlk a6\n");
-	fprintf(codefile,"add.l #2,sp\n"); /* pop mask */
 	if (regnr > MOVEM_LIMIT)  {
 		fprintf(codefile,"movem.l (sp)+,");
 		for (p = regsav; ;) {
@@ -192,14 +153,10 @@ restr()
 		}
 		putc('\n',codefile);
 	} else {
-		for (i = nr_d_regs - 1; i >= 0; i--) {
-			fprintf(codefile,"move.l (sp)+,d%d\n",7-i);
-		}
-		for (i = nr_a_regs - 1; i >= 0; i--) {
-			fprintf(codefile,"move.l (sp)+,a%d\n",5-i);
+		for (p = &regsav[regnr-1]; p >= regsav; p--) {
+			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
 		}
 	}
-	fprintf(codefile,"rts\n");
 }
 
 
@@ -214,12 +171,6 @@ regsave(str,off,size)
 {
 	assert (regnr < 9);
 	regsav[regnr].rs_reg = str;
-	if (str[0] == 'a') {
-		nr_a_regs++;
-	} else {
-		assert(str[0] == 'd');
-		nr_d_regs++;
-	}
 	regsav[regnr].rs_off = off;
 	regsav[regnr++].rs_size = size;
 	fprintf(codefile, "!Local %ld into %s\n",off,str);
@@ -232,14 +183,10 @@ regreturn()
 
 #endif
 
-#ifndef REGVARS
-
 prolog(nlocals) full nlocals; {
 
 	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
 }
-
-#endif
 
 
 
