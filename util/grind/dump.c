@@ -23,10 +23,13 @@ struct dump {
 do_dump(p)
   p_tree	p;
 {
-  struct dump *d = (struct dump *) Malloc(sizeof(struct dump));
+  struct dump *d = (struct dump *) malloc(sizeof(struct dump));
 
+  if (! d) {
+	error("could not allocate enough memory");
+	return;
+  }
   if (! get_dump(&d->mglobal, &d->globals, &d->mstack, &d->stack)) {
-	error("no debuggee");
 	free((char *) d);
 	return;
   }

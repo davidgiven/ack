@@ -212,16 +212,18 @@ ureceive(p, c)
   long	c;
 {
   int	i;
+  char buf[0x1000];
 
   if (! child_pid) return 0;
 
+  if (! p) p = buf;
   while (c >= 0x1000) {
 	i = read(from_child, p, 0x1000);
 	if (i <= 0) {
 		if (i == 0) child_pid = 0;
 		return 0;
 	}
-	p += i;
+	if (p != buf) p += i;
 	c -= i;
   }
   while (c > 0) {
@@ -317,12 +319,12 @@ could_send(m, stop_message)
 			init_run();
 			if (child_status & 0177) {
 				fprintf(db_out,
-					"Child died with signal %d\n",
+					"child died with signal %d\n",
 					child_status & 0177);
 			}
 			else {
 				fprintf(db_out,
-					"Child terminated, exit status %d\n",
+					"child terminated, exit status %d\n",
 					child_status >> 8);
 			}
 			return 1;
@@ -414,25 +416,34 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 
   m.m_type = DUMP;
   if (! could_send(&m, 0)) {
+	error("no debuggee");
 	return 0;
   }
   if (answer.m_type == FAIL) return 0;
   assert(answer.m_type == DGLOB);
   *globmessage = answer;
-  *globbuf = Malloc((unsigned) answer.m_size);
+  *globbuf = malloc((unsigned) answer.m_size);
   if (! ureceive(*globbuf, answer.m_size) || ! ugetm(stackmessage)) {
-	free(*globbuf);
+	if (*globbuf) free(*globbuf);
+	error("no debuggee");
 	return 0;
   }
   assert(stackmessage->m_type == DSTACK);
-  *stackbuf = Malloc((unsigned) stackmessage->m_size);
+  *stackbuf = malloc((unsigned) stackmessage->m_size);
   if (! ureceive(*stackbuf, stackmessage->m_size)) {
-	free(*globbuf);
-	free(*stackbuf);
+	if (*globbuf) free(*globbuf);
+	if (*stackbuf) free(*stackbuf);
+	error("no debuggee");
 	return 0;
   }
   put_int(globmessage->m_buf+SP_OFF*pointer_size, pointer_size,
 	 get_int(stackmessage->m_buf+SP_OFF*pointer_size, pointer_size, T_UNSIGNED));
+  if (! *globbuf || ! *stackbuf) {
+	error("could not allocate enough memory");
+	if (*globbuf) free(*globbuf);
+	if (*stackbuf) free(*stackbuf);
+	return 0;
+  }
   return 1;
 }
 
