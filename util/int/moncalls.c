@@ -33,7 +33,6 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 
 #ifdef	BSD4_2				/* from system.h */
 #include	<sys/time.h>
-#include	<sys/wait.h>
 #endif	BSD4_2
 
 #ifdef	SYS_V
@@ -55,11 +54,7 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 
 #define	DUPMASK		0x40
 
-#ifdef	BSD4_2				/* from system.h */
-extern int times();
-#else
 extern long times();
-#endif	BSD4_2
 extern long lseek();
 #ifdef	SYS_V
 extern unsigned int alarm();
@@ -133,11 +128,7 @@ PRIVATE int vec();
 moncall()
 {
 	int n;				/* number actually read/written */
-#ifndef	BSD4_2				/* from system.h */
 	int status;			/* status for wait-call */
-#else	BSD4_2
-	union wait status;		/* status for wait-call */
-#endif	BSD4_2
 	int flag;			/* various flag parameters */
 	int mode;			/* various mode parameters */
 	int oldmask;			/* for umask call */
@@ -394,11 +385,7 @@ moncall()
 		}
 		else {
 			push_i2(pid);
-#ifndef	BSD4_2				/* from system.h */
 			push_i2(status);
-#else	BSD4_2
-			push_i2(status.w_status);
-#endif	BSD4_2
 			push_int(0);
 			LOG(("@m9 Wait: succeeded, status = %d, pid = %d",
 					status, pid));
