@@ -184,13 +184,6 @@ con_float() {
 }
 #endif
 
-#define MOVEM_LIMIT	2
-/* If #registers to be saved exceeds MOVEM_LIMIT, we
-* use the movem instruction to save registers; else
-* we simply use several move.l's.
-*/
-
-
 regscore(off,size,typ,score,totyp)
 	long off;
 {
@@ -238,18 +231,16 @@ regreturn()
 {
 	register struct regsav_t *p;
 
-	if (regnr > MOVEM_LIMIT)  {
-		fputs("movem.l (sp)+,", codefile);
+	if (regnr > 1)  {
+		fprintf(codefile,"movem.l -%ld(a6),", nlocals);
 		for (p = regsav; ;) {
 			fputs(p->rs_reg, codefile);
 			if (++p == &regsav[regnr]) break;
 			putc('/',codefile);
 		}
 		putc('\n',codefile);
-	} else {
-		for (p = &regsav[regnr-1]; p >= regsav; p--) {
-			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
-		}
+	} else if (regnr == 1) {
+		fprintf(codefile,"move.l -%ld(a6),%s\n",nlocals);
 	}
 	fputs("unlk a6\nrts\n", codefile);
 }
@@ -258,18 +249,22 @@ f_regsave()
 {
 	register struct regsav_t *p;
 
-	if (regnr > MOVEM_LIMIT) {
+	nlocals += regnr*4;
+#ifdef TBL68020
+	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
+#else
+	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
+#endif
+	if (regnr > 1) {
 		fputs("movem.l ", codefile);
 		for (p = regsav; ;) {
 			fputs(p->rs_reg, codefile);
 			if (++p == &regsav[regnr]) break;
 			putc('/',codefile);
 		}
-		fputs(",-(sp)\n", codefile);
-	} else {
-		for (p = regsav; p < &regsav[regnr]; p++) {
-			fprintf(codefile,"move.l %s,-(sp)\n",p->rs_reg);
-		}
+		fputs(",(sp)\n", codefile);
+	} else if (regnr == 1) {
+		fprintf(codefile,"move.l %s,(sp)\n",p->rs_reg);
 	}
 	/* initialise register-parameters */
 	for (p = regsav; p < &regsav[regnr]; p++) {
@@ -300,11 +295,6 @@ regsave(s,off,size)
 prolog(n) full n; {
 
 	nlocals = n;
-#ifdef TBL68020
-	fprintf(codefile,"link\ta6,#-%ld\n",n);
-#else
-	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",n+40,n);
-#endif
 }
 
 
