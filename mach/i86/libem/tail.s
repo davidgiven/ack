@@ -3,14 +3,14 @@
 
         ! $Header$
 	.text
+	.align 2
 endtext:
 _etext:
-	.align 2
 	.data
+	.align 2
 enddata:
 _edata:
-	.align 2
 	.bss
+	.align 2
 _end:
 endbss:
-	.align 2
