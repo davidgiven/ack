@@ -53,7 +53,6 @@ GetToken(ptok)
 
 again:	/* rescan the input after an error or replacement	*/
 	LoadChar(c);
-go_on:
 	if ((c & 0200) && c != EOI)
 		fatal("non-ascii '\\%03o' read", c & 0377);
 	switch (class(c)) {	/* detect character class	*/
@@ -118,13 +117,11 @@ go_on:
 			PushBack();
 			return ptok->tk_symb = c;
 		case '=':
-			if (nch == '=')
-				return ptok->tk_symb = EQUAL;
-			/*	The following piece of code tries to recognise
-				old-fashioned assignment operators `=op'
-			*/
-			error("illegal character");
-			goto go_on;
+			if (nch != '=') {
+				PushBack();
+				error("missing =");
+			}
+			return ptok->tk_symb = EQUAL;
 		case '>':
 			if (nch == '=')
 				return ptok->tk_symb = GREATEREQ;
