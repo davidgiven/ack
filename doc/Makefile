@@ -14,7 +14,7 @@ RESFILES= \
 	peep.$(SUF) cg.$(SUF) ncg.$(SUF) regadd.$(SUF) LLgen.$(SUF) \
 	basic.$(SUF) crefman.$(SUF) pcref.$(SUF) val.$(SUF) \
 	6500.$(SUF) i80.$(SUF) z80.$(SUF) top.$(SUF) ego.$(SUF) \
-	m68020.$(SUF) occam.$(SUF)
+	m68020.$(SUF) occam.$(SUF) nopt.$(SUF)
 
 .SUFFIXES: .doc .$(SUF)
 
