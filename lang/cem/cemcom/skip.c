@@ -20,12 +20,17 @@ skipspaces(ch, skipnl)
 	/*	skipspaces() skips any white space and returns the first
 		non-space character.
 	*/
+	register int nlseen = 0;
+
 	for (;;) {
-		while (class(ch) == STSKIP)
+		while (class(ch) == STSKIP) {
+			nlseen = 0;
 			LoadChar(ch);
+		}
 		if (skipnl && class(ch) == STNL) {
 			LoadChar(ch);
-			++LineNumber;
+			LineNumber++;
+			nlseen++;
 			continue;
 		}
 		/* How about "\\\n"?????????	*/
@@ -41,7 +46,13 @@ skipspaces(ch, skipnl)
 				return '/';
 			}
 		}
-		else
+		else if (nlseen && ch == '#') {
+			domacro();
+			LoadChar(ch);
+			/* ch is the first character of a line. This means
+			 * that nlseen will still be true.
+			 */
+		} else
 			return ch;
 	}
 }
