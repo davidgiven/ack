@@ -21,6 +21,9 @@ The expected output in all directories is generated using
 discrepancies to occur with the expected output in the ...cem.g
 files.
 
+The output of a run with a compiler using 2-bytes int can be found
+in the file out.std.
+
 If any other differences with the expected output occur, the error
 causing the diffence has to be rooted out by a person with some
 experience with the kit. Most errors will be caused by the
