@@ -1,3 +1,4 @@
+.\" $Header$
 .TL
 Internal documentation on the peephole optimizer
 .br

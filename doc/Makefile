@@ -1,3 +1,5 @@
+# $Header$
+
 SUF=pr
 PRINT=cat
 RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\

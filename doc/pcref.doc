@@ -1,3 +1,4 @@
+.\" $Header$
 .ds OF \\fBtest~off:~\\fR
 .ds ON \\fBtest~on:~~\\fR
 .ds AL \\fBtest~all:~\\fR
