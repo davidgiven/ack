@@ -104,8 +104,15 @@ w
 q
 EOF
 	case $i in
-	m68k2|m68k4)
+	m68k2)
 		DISABLE_INT=1
+		;;
+	m68k4)
+		case $SYSNAME in
+		m68_sysV_0|sun2)
+			DISABLE_INT=1
+			;;
+		esac
 		;;
 	mantra)
 		if test $SYSNAME = m68_sysV_0
@@ -114,15 +121,27 @@ EOF
 		fi
 		;;
 	sun2)
-		case $SYSNAME in
-		sun2|sun3)
+		if test $SYSNAME = sun2
+		then
 			DISABLE_INT=1
-			;;
-		esac
+		fi
+		;;
+	sun3)
+		if test $SYSNAME = sun3
+		then
+			DISABLE_INT=1
+		fi
 		;;
 	pmds4)
 		case $SYSNAME in
 		pmds*)
+			DISABLE_INT=1
+			;;
+		esac
+		;;
+	m68020)
+		case $SYSNAME in
+		m68020|sun3)
 			DISABLE_INT=1
 			;;
 		esac
