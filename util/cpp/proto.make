@@ -129,8 +129,7 @@ tags:	cfiles
 	ctags $(SRC)
 
 depend:	cfiles
-	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
-	echo '#DEPENDENCIES' >>Makefile.new
+	rm_deps Makefile >Makefile.new
 	for i in $(SRC) ; do \
 		echo "`basename $$i .c`.$$(SUF):	$$i" >> Makefile.new ; \
 		echo '	$$(CC) -c $$(CFLAGS)' $$i >> Makefile.new ; \

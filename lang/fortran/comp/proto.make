@@ -99,8 +99,7 @@ pr:
 	make pr | opr
 
 depend:	$(CFILES) tokdefs.h
-	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
-	echo '#DEPENDENCIES' >>Makefile.new
+	rm_deps Makefile >Makefile.new
 	for i in $(CFILES) ; do \
 		echo "`basename $$i .c`.$$(SUF):	$$i" >> Makefile.new ; \
 		echo '	$$(CC) -c $$(CFLAGS)' $$i >> Makefile.new ; \
@@ -113,16 +112,15 @@ f2c:	$(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) $(TARGET_HOME)/modules/lib/libstring.$(LIBSUF) -o f2c
 
 gram.c:	$(GSRC) $(SRC_DIR)/defs.h tokdefs.h
-	( sed <tokdefs.h "s/#define/%token/" ;\
+	( sed <tokdefs.h "s/^.define/%token/" ;\
 		cat $(GSRC) ) >gram.in
 	yacc gram.in
 	echo "(expect 4 shift/reduce)"
-	sed 's/^# line.*/\/* & *\//' y.tab.c >gram.c
-	rm -f gram.in y.tab.c
+	mv y.tab.c gram.c
+	rm -f gram.in
 
-tokdefs.h: $(SRC_DIR)/tokens
-	grep -n . <$(SRC_DIR)/tokens | \
-	   sed "s/\([^:]*\):\(.*\)/#define \2 \1/" >tokdefs.h
+tokdefs.h: $(SRC_DIR)/tokens $(SRC_DIR)/mk_tokdefs
+	$(SRC_DIR)/mk_tokdefs < $(SRC_DIR)/tokens > tokdefs.h
 
 clean:
 	rm -f gram.c *.$(SUF) f2c tokdefs.h Out

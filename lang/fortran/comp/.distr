@@ -58,3 +58,4 @@ vax.c
 version.c
 xsum.c
 xsum0.out
+mk_tokdefs
