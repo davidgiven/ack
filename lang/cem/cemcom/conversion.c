@@ -36,8 +36,8 @@ conversion(from_type, to_type)
 	int from_fund = fundamental(from_type);
 	int to_fund = fundamental(to_type);
 
-	if (to_size < word_size) to_size = word_size;
-	if (from_size == to_size && from_fund == to_fund)
+	if ((int)to_size < (int)word_size) to_size = word_size;
+	if ((int)from_size == (int)to_size && from_fund == to_fund)
 		return;
 	switch (from_fund)	{
 	case T_SIGNED:
@@ -51,7 +51,7 @@ conversion(from_type, to_type)
 #ifndef NOFLOAT
 		case T_FLOATING:
 #endif NOOFLOAT
-			if (from_size < word_size) {
+			if ((int)from_size < (int)word_size) {
 				C_loc(from_size);
 				C_loc(word_size);
 				C_cii();
@@ -65,7 +65,7 @@ conversion(from_type, to_type)
 		}
 		break;
 	case T_UNSIGNED:
-		if (from_size < word_size) from_size = word_size;
+		if ((int)from_size < (int)word_size) from_size = word_size;
 		C_loc(from_size);
 		C_loc(to_size);
 		switch (to_fund)	{
@@ -102,7 +102,7 @@ conversion(from_type, to_type)
 	default:
 		crash("(conversion) illegal type conversion");
 	}
-	if (to_type->tp_size < word_size
+	if ((int)(to_type->tp_size) < (int)word_size
 #ifndef NOFLOAT
 	    && to_fund != T_FLOATING
 #endif NOFLOAT

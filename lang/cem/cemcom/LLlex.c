@@ -304,7 +304,8 @@ firstline:
 	}
 	case STCHAR:				/* character constant	*/
 	{
-		register arith val = 0, size = 0;
+		register arith val = 0;
+		int size = 0;
 
 		LoadChar(ch);
 		if (ch == '\'')
@@ -327,7 +328,7 @@ firstline:
 			size++;
 			LoadChar(ch);
 		}
-		if (size > int_size)
+		if (size > (int)int_size)
 			lexerror("character constant too long");
 		ptok->tk_ival = val;
 		ptok->tk_fund = INT;

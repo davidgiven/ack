@@ -29,7 +29,6 @@
 #include	"specials.h"
 
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
-#define	toword(n)	((n) < word_size ? word_size : (n))
 
 char *symbol2str();
 char *long2str();
@@ -324,7 +323,7 @@ EVAL(expr, val, code, true_label, false_label)
 			if (gencode) {
 				arith size = tp->tp_size;
 
-				if (size < word_size)
+				if ((int)size < (int)word_size)
 					size = word_size;
 				switch (oper) {
 				case '&':
@@ -679,7 +678,7 @@ assop(type, oper)
 	register arith size;
 	register uns = type->tp_unsigned;
 
-	if ((size = type->tp_size) < word_size)
+	if ((int)(size = type->tp_size) < (int)word_size)
 		size = word_size;
 	switch (type->tp_fund) {
 	case CHAR:

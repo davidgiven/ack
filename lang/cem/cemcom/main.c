@@ -250,23 +250,23 @@ init()
 		pointer arithmetic type which is equal to either
 		int_type or long_type, depending on the pointer_size
 	*/
-	if (pointer_size == word_size)
+	if ((int)pointer_size == (int)word_size)
 		pa_type = word_type;
 	else
-	if (pointer_size == short_size)
+	if ((int)pointer_size == (int)short_size)
 		pa_type = short_type;
 	else
-	if (pointer_size == int_size)
+	if ((int)pointer_size == (int)int_size)
 		pa_type = int_type;
 	else
-	if (pointer_size == long_size)
+	if ((int)pointer_size == (int)long_size)
 		pa_type = long_type;
 	else
 		fatal("pointer size incompatible with any integral size");
 
-	if (int_size != word_size)
+	if ((int)int_size != (int)word_size)
 		fatal("int_size and word_size are not equal");
-	if (short_size > int_size || int_size > long_size)
+	if ((int)short_size > (int)int_size || (int)int_size > (int)long_size)
 		fatal("sizes of short/int/long decreasing");
 
 	/* Build a type for function returning int, RM 13 */
