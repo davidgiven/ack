@@ -97,7 +97,7 @@ HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
 # generated files, for 'make clean' only
 GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
-	print Xref lxref hfiles Cfiles $(GHSRC) $(GSRC) longnames $(LCSRC)
+	print hfiles Cfiles $(GHSRC) $(GSRC) longnames $(LCSRC)
 
 # include files containing ALLOCDEF specifications
 OBJ =	$(COBJ) $(LOBJ) $(GOBJ)

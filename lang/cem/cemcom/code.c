@@ -161,8 +161,8 @@ code_scope(text, def)
 	}
 }
 
-static label return_label;
-/* static char return_expr_occurred; */
+static label return_label, return2_label;
+static char return_expr_occurred;
 static struct type *func_tp;
 static arith func_size;
 static label func_res_label;
@@ -217,7 +217,8 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	*/
 	lab_count = (label) 1;
 	return_label = text_label();
-	/* return_expr_occurred = 0; */
+	return2_label = text_label();
+	return_expr_occurred = 0;
 	LocalInit();
 	prc_entry(name);
 	if (! options['L'])	{	/* profiling */
@@ -255,18 +256,21 @@ end_proc(fbytes)
 	if (options['d'])
 		DfaEndFunction();
 #endif	DATAFLOW
-	prc_exit();
-	C_asp(-func_size);		/* arbitrary return value */
+	C_df_ilb(return2_label);
+	if (return_expr_occurred) C_asp(-func_size);
 	C_df_ilb(return_label);
 	prc_exit();
-	if (func_res_label != 0)	{
-		C_lae_dlb(func_res_label, (arith)0);
-		store_block(func_size, func_tp->tp_align);
-		C_lae_dlb(func_res_label, (arith)0);
-		C_ret(pointer_size);
+	if (return_expr_occurred) {
+		if (func_res_label != 0)	{
+			C_lae_dlb(func_res_label, (arith)0);
+			store_block(func_size, func_tp->tp_align);
+			C_lae_dlb(func_res_label, (arith)0);
+			C_ret(pointer_size);
+		}
+		else
+			C_ret(func_size);
 	}
-	else
-		C_ret(func_size);
+	else	C_ret((arith) 0);
 
 	/* getting the number of "local" bytes is posponed until here,
 	   because copying the function result in "func_res_label" may
@@ -300,8 +304,7 @@ do_return()
 		probably smarter than generating a direct return.
 		Return sequences may be expensive.
 	*/
-	C_asp(-func_size);	/* arbitrary return value */
-	C_bra(return_label);
+	C_bra(return2_label);
 }
 
 do_return_expr(expr)
@@ -313,7 +316,7 @@ do_return_expr(expr)
 	ch7cast(&expr, RETURN, func_tp);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	C_bra(return_label);
-	/* return_expr_occurred = 1; */
+	return_expr_occurred = 1;
 }
 
 code_declaration(idf, expr, lvl, sc)
