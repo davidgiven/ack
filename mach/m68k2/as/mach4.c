@@ -21,11 +21,7 @@ operation
 				fit(fitw($4.val));
 				emit2($1 | $2);
 #ifdef RELOCATION
-#ifdef DUK
 				newrelo($4.typ, RELPC|RELO2|RELBR|RELWR);
-#else DUK
-				newrelo($4.typ, RELPC|RELO2);
-#endif DUK
 #endif
 				emit2(loww($4.val));
 			}

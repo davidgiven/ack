@@ -1,4 +1,3 @@
-#define DUK
 /* @(#)mach0.c	1.5 */
 /*
  * Motorola 68000/68010 options
@@ -24,5 +23,3 @@
 
 #undef	VALWIDTH
 #define	VALWIDTH	8
-
-#define NOLD	/* Added by Duk Bekema. */

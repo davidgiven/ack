@@ -37,11 +37,7 @@ ea_1(sz, bits)
 #ifdef RELOCATION
 	RELOMOVE(relonami, rel_1);
 	if (flag & ~0xFF)
-#ifdef DUK
 		newrelo(exp_1.typ, (flag>>8) | RELBR | RELWR);
-#else DUK
-		newrelo(exp_1.typ, flag>>8);
-#endif DUK
 #endif
 	if (flag & PUTL)
 		emit4(exp_1.val);
@@ -361,11 +357,7 @@ expr_t exp;
 		fit(fitw(exp.val));
 		emit2(opc);
 #ifdef RELOCATION
-#ifdef DUK
 		newrelo(exp.typ, RELPC|RELO2|RELBR|RELWR);
-#else DUK
-		newrelo(exp.typ, RELPC|RELO2);
-#endif DUK
 #endif
 		emit2(loww(exp.val));
 	}
