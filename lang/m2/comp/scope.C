@@ -147,7 +147,6 @@ node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 				*/
 node_error(df->for_node, "identifier \"%s\" not declared",
 df->df_idf->id_text);
-				FreeNode(df->for_node);
 			}
 			else {
 				/* This scope was an open scope.
@@ -156,17 +155,22 @@ df->df_idf->id_text);
 				*/
 				register t_scopelist *ls =
 						nextvisible(CurrVis);
-				t_def *df1 = df->df_nextinscope;
+				register t_def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
+
+				*pdf = df->df_nextinscope;
 	
-				if (df->df_kind == D_FORWMODULE) {
-					df->for_vis->sc_next = ls;
+				if (! df1) {
+					if (df->df_kind == D_FORWMODULE) {
+						df->for_vis->sc_next = ls;
+					}
+					df->df_nextinscope = ls->sc_scope->sc_def;
+					ls->sc_scope->sc_def = df;
+					df->df_scope = ls->sc_scope;
+					continue;
 				}
-				df->df_nextinscope = ls->sc_scope->sc_def;
-				ls->sc_scope->sc_def = df;
-				df->df_scope = ls->sc_scope;
-				*pdf = df1;
-				continue;
+				/* leave it like this ??? */
 			}
+			FreeNode(df->for_node);
 		}
 		pdf = &df->df_nextinscope;
 	}
