@@ -1835,7 +1835,7 @@ finishio() {
 	if (bsize>=0)
 		fprintf(hfile,"#define TEM_BSIZE %d\n",bsize);
 	else
-		yyerror("EM_BSIZE undefined");
+ 		fprintf(hfile,"extern int TEM_BSIZE;\n");
 	if (fmt!=0)
 		fprintf(hfile,"#define WRD_FMT \"%s\"\n",fmt);
 	fprintf(hfile,"#define MAXALLREG %d\n",maxallreg);
