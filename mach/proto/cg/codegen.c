@@ -58,7 +58,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 	byte *bp;
 	int n;
 	unsigned mindistance,dist;
-	register i;
+	register int i;
 	int cindex;
 	int npos,npos2,pos[MAXPOS],pos2[MAXPOS];
 #ifdef STONSTACK
@@ -401,6 +401,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 			rp->r_contents.t_token=0;
 	break;
     case DO_RREMOVE:	/* register remove */
+	DEBUG("RREMOVE");
 	getint(nodeno,codep);
 	result=compute(&enodes[nodeno]);
 	assert(result.e_typ==EV_REG);
