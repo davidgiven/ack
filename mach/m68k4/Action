@@ -2,12 +2,15 @@ name "M68000 4-4 backend"
 dir cg
 end
 lib
-name "M68000 4-4 C libraries"
-dir libcc
-end
 name "M68000 4-4 EM library"
 dir libem
 end
-name "M68000 4-4 Pascal library"
-dir libpc
+name "M68000 4-4 system call library"
+dir libsys
+end
+name "M68000 4-4 C libraries"
+dir libcc
+end
+name "M68000 4-4 Basic libraries"
+dir libbc
 end
