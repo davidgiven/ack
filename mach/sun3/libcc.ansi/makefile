@@ -15,15 +15,15 @@ cplibc:
 	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tailcp
 
 cmp:	cmplibc
+	-../../compare $(OLIB)
 
 cmplibc:
 	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
 	tar xf libsrc
 	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tail
-	-../../compare $(OLIB)
 
 clean:
-	rm -rf `cat LIST` LIST MakeArch Makefile make.proto libsrc
+	rm -rf `cat LIST` LIST OLIST MakeArch Makefile make.proto libsrc
 
 opr:
 	make pr | opr
