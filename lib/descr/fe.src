@@ -64,7 +64,7 @@ name pc
 	callname pc
 end
 name m2
-	from .mod
+	from .mod.def
 	to .k
 	program {EM}/lib/em_m2
 	mapflag -I* M2_INCL={M2_INCL?} -I*
@@ -74,7 +74,6 @@ name m2
 	mapflag -M* M2_F={M2_F?} -M*
 	mapflag -x M2_F={M2_F?} -x
 	mapflag -Xs M2_F={M2_F?} -s
-	mapflag -Xi* M2_F={M2_F?} -i*
 	mapflag -V* M2_F={M2_F?} -V*
 	args {M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
 	-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
