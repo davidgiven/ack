@@ -20,7 +20,7 @@
 
  mes 2,EM_WSIZE,EM_PSIZE
 
-#define STACKSIZE	1024	/* maximum stack size for a coroutine */
+#define STACKSIZE	2048	/* maximum stack size for a coroutine */
 
  exa _environ
  exa _argv

@@ -1,3 +1,5 @@
+#include <m2_traps.h>
+
 struct descr {
 	char *addr;
 	int low;
@@ -17,7 +19,7 @@ _new_stackptr(pdescr, a)
 
 	if (ppdescr >= &descrs[10]) {
 		/* to many nested traps + handlers ! */
-		TRP(65);
+		TRP(M2_TOOMANY);
 	}
 	*ppdescr++ = pdescr;
 	if ((char *) &a - (char *) &size > 0) {

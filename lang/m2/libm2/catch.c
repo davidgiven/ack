@@ -1,4 +1,5 @@
 #include <em_abs.h>
+#include <m2_traps.h>
 
 static struct errm {
 	int errno;
@@ -29,8 +30,9 @@ static struct errm {
 	{ EBADLIN,	"argument if LIN too high"},
 	{ EBADGTO,	"GTO descriptor error"},
 
-	{ 64,		"stack size of process too large"},
-	{ 65,		"too many nested traps + handlers"},
+	{ M2_TOOLARGE,	"stack size of process too large"},
+	{ M2_TOOMANY,	"too many nested traps + handlers"},
+	{ M2_NORESULT,	"no RETURN from procedure function"},
 	{ -1,		0}
 };
 

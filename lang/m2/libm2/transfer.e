@@ -1,5 +1,6 @@
 #
 #include <em_mes.h>
+#include <m2_traps.h>
 
  mes 2, EM_WSIZE, EM_PSIZE
 
@@ -230,7 +231,7 @@ _target
  loe _StackSize
  cmu EM_WSIZE
  zle *1
- loc 64		; trap number for "stack size too large"
+ loc M2_TOOLARGE	; trap number for "stack size too large"
  trp
 1
  lol 0
