@@ -1,7 +1,9 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define	.strhp
+.extern .reghp, .limhp, EHEAP, .fat
 
 .strhp:
-        ! $Header$
 	pop	bx
 	pop	ax
 	mov	(.reghp),ax

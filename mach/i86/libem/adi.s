@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .adi
 
-        ! $Header$
 	! #bytes in cx , top of stack in ax
+	.sect .text
 .adi:
 	pop     bx              ! return address
 	cmp     cx,2
@@ -20,6 +21,8 @@
 	push    dx
 	jmp     bx
 9:
+.extern	EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

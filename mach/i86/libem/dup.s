@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define	.dup
 
-        ! $Header$
 	! #bytes in cx
+	.sect .text
 .dup:
 	pop	bx		! return address
 	mov	si,sp

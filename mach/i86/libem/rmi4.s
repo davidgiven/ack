@@ -1,3 +1,5 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .rmi4
 
 yl=2
@@ -6,7 +8,6 @@ xl=6
 xh=8
 
 .rmi4:
-        ! $Header$
 	mov     si,sp           ! copy of sp
 	mov     bx,yl(si)
 	mov     ax,yh(si)

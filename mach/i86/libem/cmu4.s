@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .cmu4
 
+.sect .text
 .cmu4:
-        ! $Header$
 	pop     bx              ! return address
 	xor     ax,ax
 	pop     cx

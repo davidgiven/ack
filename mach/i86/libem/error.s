@@ -1,10 +1,11 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .error
 
-        ! $Header$
 	! ax is trap number
 	! all registers must be saved
 	! because return is possible
 	! May only be called with error no's <16
+.sect .text
 .error:
 	push bp
 	push si
@@ -16,6 +17,8 @@
 	mov  cx,ax
 	mov  bx,1
 	sal  bx,cl
+.extern .ignmask
+.extern .trp
 	test bx,(.ignmask)
 	jne  2f
 	call    .trp

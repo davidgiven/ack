@@ -1,7 +1,9 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define	printf
+.extern printc, printd, prints
 
 printf:
-        ! $Header$
 	pop	bx		! return address
 	xchg	ax,di
 	mov	si,sp

@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .lar2
 
 .lar2:
-        ! $Header$
 	pop     bx              ! return address
 				! di, descriptor address
 				! ax, index

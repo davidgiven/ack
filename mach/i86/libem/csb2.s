@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .csb2
 
+.sect .text
 .csb2:
-        ! $Header$
 				!si, descriptor address
 				!dx,  index
 	lods
@@ -19,6 +20,8 @@
 2:
 	test    bx,bx
 	jnz     3f
+.extern ECASE
+.extern .fat
 	mov     ax,ECASE
 	push    ax
 	jmp     .fat

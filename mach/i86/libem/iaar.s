@@ -1,10 +1,12 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .iaar
 
 .iaar:
-        ! $Header$
 	pop     bx
 	pop     dx
 	cmp     dx,2
+.extern .unknown
 	jne     .unknown
 	pop     si      ! descriptor address
 	pop     ax      ! index

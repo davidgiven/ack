@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .sli
 
-        ! $Header$
 	! #bytes in ax
 .sli:
 	pop     dx              ! return address
@@ -27,6 +28,8 @@
 2:
 	jmp     dx
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

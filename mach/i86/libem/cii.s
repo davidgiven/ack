@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .cii
 
+.sect .text
 .cii:
-        ! $Header$
 	pop     di              ! return address
 				! pop     cx, dest. size
 				! pop     bx, src. size
@@ -31,6 +32,8 @@
 	jmp     di
 9:
 	push    ax              ! push low source
+.extern EILLINS
+.extern .fat
 	mov     ax,EILLINS
 	push    ax
 	jmp     .fat

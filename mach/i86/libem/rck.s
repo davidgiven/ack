@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .rck
 
-        ! $Header$
 	! descriptor address in si
 	! value in ax, must be left there
 .rck:
@@ -11,6 +12,8 @@
 	ret
 2:
 	push    ax
+.extern ERANGE
+.extern .error
 	mov     ax,ERANGE
 	call    .error
 	pop     ax

@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .mli
 
-        ! $Header$
 	! #bytes in ax
 .mli:
 	pop     bx              ! return address
@@ -22,6 +23,8 @@
 	push    dx
 	jmp    .mli4
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

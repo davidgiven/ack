@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .ror
 
-        ! $Header$
 	! #bytes in ax
 .ror:
 	pop     dx              ! return address
@@ -29,6 +30,8 @@
 2:
 	jmp     dx
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .csa2
 
+.sect .text
 .csa2:
-        ! $Header$
 				! si, descriptor address
 				! bx, index
 	mov     dx,(si)         ! default
@@ -16,6 +17,8 @@
 	mov     bx,dx
 	test    bx,bx
 	jnz     2f
+.extern ECASE
+.extern .fat
 	mov     ax,ECASE
 	push    ax
 	jmp     .fat

@@ -1,5 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .mon
 
 .mon:
-        ! $Header$
+.extern .stop
 	call    .stop

@@ -1,10 +1,11 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define	printc,printd,prints
 
 SIO_D		= 0xD8
 SIO_S		= 0xDA
 TXRDY		= 0x01
 
-        ! $Header$
 	! argument in ax
 	! uses bx
 prints:
@@ -33,7 +34,6 @@ printd:
 1:
 	xchg	ax,dx
 	addb	al,'0'
-	.errnz	printc - .
 
 	! argument in ax
 printc:

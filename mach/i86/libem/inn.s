@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .inn
 
-        ! $Header$
 	! #bytes in cx
 	! bit # in ax
 .inn:
@@ -24,6 +25,6 @@
 	! ax is result
 	jmp     bx
 
-	.data
+	.sect .data
 bits:
-	.byte 1,2,4,8,16,32,64,128
+	.data1 1,2,4,8,16,32,64,128

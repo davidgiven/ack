@@ -1,6 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .trp
+.extern .trppc, .stop
 
-        ! $Header$
 		! ax is trap number
 .trp:
 	xor     bx,bx

@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .rmi
 
-        ! $Header$
 	! #bytes in ax
 .rmi:
 	pop     bx              ! return address
@@ -24,12 +25,15 @@
 	push    si
 	push    dx
 	push    ax
+.extern .rmi4
 	call   .rmi4
 	pop     ax
 	push    bx
 	push    dx
 	jmp     ax
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

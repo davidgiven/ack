@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .mli4
 
-        ! $Header$
 	! x * y with
 	! x.low = si x.high = di
 	! y.low = bx y.high = ax

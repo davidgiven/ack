@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .set
 
-        ! $Header$
 	! #bytes in cx
 	! bit # in ax
 .set:
@@ -25,11 +26,13 @@
 	orb     (di),dl
 	jmp     bx
 2:
+.extern ESET
+.extern .trp
 	push    bx
 	mov     ax,ESET
 	push    ax
 	jmp     .trp
 
-	.data
+	.sect .data
 bits:
-	.byte   1,2,4,8,16,32,64,128
+	.data1   1,2,4,8,16,32,64,128

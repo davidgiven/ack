@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define	.ior
 
-        ! $Header$
 	! #bytes in cx
 .ior:
 	pop	bx		! return address

@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .loi
 
-        ! $Header$
 	! #bytes in cx
 	! source address in si
 .loi:

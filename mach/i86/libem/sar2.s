@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .sar2
 
 .sar2:
-        ! $Header$
 	pop     bx              ! return address
 				! si, descriptor address
 				! ax, index

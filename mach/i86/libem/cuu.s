@@ -1,11 +1,12 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .ciu
 .define .cui
 .define .cuu
 
+.sect .text
 .ciu:
 .cui:
 .cuu:
-        ! $Header$
 	pop     di              ! return address
 				! pop     cx, dest. size
 				! pop     bx, source size
@@ -29,6 +30,8 @@
 	jmp     di
 9:
 	push    ax              ! to help debugging ?
+.extern EILLINS
+.extern .fat
 	mov     ax,EILLINS
 	push    ax
 	jmp     .fat

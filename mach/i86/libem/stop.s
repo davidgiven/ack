@@ -1,4 +1,5 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .stop
 .stop:
-        ! $Header$
 	int     3

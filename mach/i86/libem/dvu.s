@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .dvu
 
-        ! $Header$
 	! #bytes in ax
+	.sect .text
 .dvu:
 	pop     bx              ! return address
 	cmp     ax,2
@@ -24,12 +25,15 @@
 	push    si
 	push    dx
 	push    ax
+.extern .dvu4
 	call   .dvu4
 	pop     bx
 	push    cx
 	push    ax
 	jmp     bx
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp

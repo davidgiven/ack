@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .sti
 
-        ! $Header$
 	! #bytes in cx
 	! destination address in di
 .sti:

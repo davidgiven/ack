@@ -1,7 +1,8 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define	.and
 
-        ! $Header$
 	! #bytes in cx
+	.sect .text
 .and:
 	pop	bx		! return address
 	mov	di,sp

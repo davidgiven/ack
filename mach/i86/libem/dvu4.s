@@ -1,3 +1,4 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
 .define .dvu4
 
 yl=2
@@ -5,8 +6,8 @@ yh=4
 xl=6
 xh=8
 
+.sect .text
 .dvu4:
-        ! $Header$
 	mov     si,sp           ! copy of sp
 	mov     bx,yl(si)
 	mov     ax,yh(si)

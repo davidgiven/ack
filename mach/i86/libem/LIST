@@ -1,4 +1,4 @@
-tail_em.a
+libem_s.a
 adi.s
 and.s
 cii.s
@@ -50,4 +50,3 @@ trp.s
 stop.s
 printf.s
 print.s
-tail.s

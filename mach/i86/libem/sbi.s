@@ -1,6 +1,7 @@
+.sect .text; .sect .rom; .sect .data; .sect .bss
+.sect .text
 .define .sbi
 
-        ! $Header$
 	! #bytes in cx , top of stack in ax
 .sbi:
 	pop     bx              ! return subress
@@ -18,10 +19,12 @@
 	sub     cx,ax
 	mov     ax,cx
 	pop     cx
-	sbc     cx,dx
+	sbb     cx,dx
 	push    cx
 	jmp     bx
 9:
+.extern EODDZ
+.extern .trp
 	mov     ax,EODDZ
 	push    ax
 	jmp     .trp
