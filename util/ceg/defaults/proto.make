@@ -38,6 +38,8 @@ install:	all
 	for i in $(PseudoList) ; do cp $(SRC_DIR)/pseudo/$$i $(DEF)/pseudo/$$i ; done
 	for i in $(StorageList) ; do cp $(SRC_DIR)/storage/$$i $(DEF)/storage/$$i ; done
 	cp C_out.c $(DEF)/C_out.c
+	chmod +w $(DEF)/*
+	chmod +w $(DEF)/*/*
 
 cmp:	all
 	-cmp $(SRC_DIR)/pseudo_vars.c $(DEF)/pseudo_vars.c
