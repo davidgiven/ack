@@ -1,6 +1,6 @@
 .TH AFCC 1
 .SH NAME
-afcc \- fast ACK compatible ANSI C compiler
+afcc \- fast ACK compatible C compiler
 .SH SYNOPSIS
 .B afcc
 [
@@ -8,6 +8,12 @@ afcc \- fast ACK compatible ANSI C compiler
 ]
 [
 .B \-v
+]
+[
+.B \-ansi
+]
+[
+.B \-R
 ]
 [
 .B \-vn
@@ -77,6 +83,14 @@ You can specify a name for the executable by using the
 option.
 .SH OPTIONS
 .LP
+.IP \fB\-ansi\fP
+Use the ANSI C compiler instead of the K&R one. This flag must be first,
+and must also be used when linking through 
+.I afcc
+or
+.I ack.
+.IP \fB\-R\fP
+test for more compatibility with Kernighan & Ritchie C [1].
 .IP \fB\-c\fP
 .br
 Suppress the loading phase of the compilation, and force an object module to

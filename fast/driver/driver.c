@@ -225,6 +225,12 @@ lang_opt(str)
 	char *str;
 {
 	switch(str[1]) {
+	case 'R':
+		if (! ansi_c) {
+			append(&COMP_FLAGS, str);
+			return 1;
+		}
+		break;
 	case '-':	/* debug options */
 		append(&COMP_FLAGS, str);
 		return 1;
@@ -236,6 +242,10 @@ lang_opt(str)
 		}
 		break;
 	case 'w':	/* disable warnings */
+		if (! ansi_c) {
+			append(&COMP_FLAGS, str);
+			return 1;
+		}
 		if (str[2]) {
 			str[1] = '-';
 			append(&COMP_FLAGS, &str[1]);
