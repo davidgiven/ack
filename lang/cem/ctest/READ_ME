@@ -15,14 +15,14 @@ Part of the output in the subdirectory ctmargt is a printout
 of the current environment variables. These will differ per
 user.
 The expected output in the directory ctconv is for a compiler
-that considers char's as unsigned quantaties.
+that considers char's as signed quantities.
 The expected output in all directories is generated using
-16-bit arithmetic, using 32-bit arithmetic will cause several
+32-bit arithmetic. Using 16-bit arithmetic will cause several
 discrepancies to occur with the expected output in the ...cem.g
 files.
 
 The output of a run with a compiler using 2-bytes int can be found
-in the file out.std.
+in the file Out2.std.
 
 If any other differences with the expected output occur, the error
 causing the diffence has to be rooted out by a person with some
@@ -36,7 +36,7 @@ differently. This directory contains a file 'OPS' with a
 prototype program. This prototype program performs all C
 arithmetic operations on a few operands. The operands are
 X, Y, S, Z1, Z2. X, Y and S can be arbitrary expressions,
-but S is used as a shift count and must be less then 16 (32).
+but S is used as a shift count and must be less then 32 (16).
 Z1 and Z2 must be lvalue's.
 The name ISTART indicates global declarations and LSTART
 indicates local declarations.
@@ -51,4 +51,4 @@ Most programs use compile time #ifdef's to hide the use of
 floating point they make.
 For an example, look at makefile.i86.
 Differences are to be expected in the output of such a run.
-Look at the file Out2.nf.std to see what can be expected.
+Look at the file Out2.nf.std or Out4.nf.std to see what can be expected.
