@@ -280,7 +280,7 @@ bool opmatch(t,s)
 	templ_p t;
 	char *s;
 {
-	char *l, buf[MAXOPLEN];
+	char *l, buf[MAXOPLEN+1];
 	bool was_instantiated;
 	int vno;
 
