@@ -27,7 +27,7 @@ cp:     headcp tailcp
 
 head_$(PREF):  $(HEADSRC)
 	cp $(HEADSRC) head_$(PREF).e
-	$(MACH) $(MACHFL) head_$(PREF).e
+	$(MACH) $(MACHFL) -I$(HOME)/h head_$(PREF).e
 	mv head_$(PREF).$(SUF) head_$(PREF)
 	-rm -f head_$(PREF).[ekm$(SUF)]
 
