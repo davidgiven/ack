@@ -12,7 +12,7 @@ _vfork:
 	chmk	$vfork
 	bcs	3f
 	tstl	r1
-	bneq	1f
+	beql	1f
 	clrl	r0
 1:
 	jmp	(r2)
