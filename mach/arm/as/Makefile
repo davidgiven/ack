@@ -2,7 +2,7 @@
 EM	= ../../..
 h	= $(EM)/h
 LIBOBJ	= $(EM)/modules/lib/libobject.a
-CDIR	= $(EM)/mach/proto/nas
+CDIR	= $(EM)/mach/proto/as
 CPP	= $(EM)/lib/cpp
 DEF	=
 
