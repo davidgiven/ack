@@ -71,6 +71,12 @@ getrefcount(regno) {
 
 erasereg(regno) {
 	register struct reginfo *rp;
+	register int i;
+
+	rp = &machregs[regno];
+	rp->r_contents.t_token = 0;
+	for (i=0;i<TOKENSIZE;i++)
+		rp->r_contents.t_att[i].aw = 0;
 
 #if MAXMEMBERS==0
 	awayreg(regno);
@@ -85,11 +91,6 @@ awayreg(regno) {
 	register struct reginfo *rp;
 	register tkdef_p tdp;
 	register i;
-
-	rp = &machregs[regno];
-	rp->r_contents.t_token = 0;
-	for (i=0;i<TOKENSIZE;i++)
-		rp->r_contents.t_att[i].aw = 0;
 
 	/* Now erase recursively all registers containing
 	 * something using this one
