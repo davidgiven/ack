@@ -356,7 +356,7 @@ formal(struct formal **fmp;)
 		new->fm_idf = idf;
 		new->next = *fmp;
 		*fmp = new;
-		if (idef->id_def && idef->id_def->df_sc == TYPEDEF) {
+		if (idf->id_def && idf->id_def->df_sc == TYPEDEF) {
 			error("typedef name %s may not be redeclared as a parameter", idf->id_text);
 		}
 	}
