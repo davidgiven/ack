@@ -38,6 +38,7 @@ name cem
 	mapflag -NL LFLAG=
 	mapflag -KR CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
+	mapflag -g CEM_F={CEM_F?} -g
 	mapflag -p CEM_F={CEM_F?} -p
 	mapflag -V* CEM_F={CEM_F?} -V*
 	args \
