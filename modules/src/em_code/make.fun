@@ -33,14 +33,14 @@ g/^BODY/s/^BODY \(.*\)$/{\
 --EOF--/
 1,/^END/-1p
 1,/^END/d
-g:^NAME:s:^NAME \(.*\)$:cc -c -O -I$1 -I../../h -I../../../h \1.c:
+g:^NAME:s:^NAME \(.*\)$:cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h \1.c:
 1i
 cat >make.sh <<'--EOF--'
 : script for making lib
 rm -f *.o
 .
 $a
-cc -c -O -I$1 -I../../h -I../../../h $1/em.c
+cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
 mv em.o em$1.o
 rm -f libem$1.a
 ar rc libem$1.a *.o

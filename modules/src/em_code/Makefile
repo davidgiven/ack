@@ -18,18 +18,18 @@ em_code.3:	em_code.3X
 		tbl < em_code.3X > em_code.3
 
 libeme.a:	make.sh e/em_private.h e/em.c
-		sh make.sh e
+		EMHOME=$(EMHOME); export EMHOME; sh make.sh e
 		-sh -c 'ranlib libeme.a'
 
 libemk.a:	make.sh k/em_private.h k/em.c
-		sh make.sh k
+		EMHOME=$(EMHOME); export EMHOME; sh make.sh k
 		-sh -c 'ranlib libemk.a'
 
 make.sh:	em.gen em.nogen
 		make.fun em.gen em.nogen | sh
 
 em.gen:		make.em.gen $(EMHOME)/etc/em_table
-		make.em.gen > em.gen
+		make.em.gen $(EMHOME)/etc/em_table > em.gen
 
 pr:
 		@pr Makefile make.em.gen make.fun em.nogen e/em_private.h e/em.c k/em_private.h k/em.c
