@@ -202,7 +202,7 @@
 .	Er F "top margin size + bottom margin size >= paper size
 .rm Mc
 .nr MS 0
-.if (\\(nl>=(\\n(.pu-\\n(Bmu))&(\\n(Mi=0) .Bm \}
+.if (\\n(nl>=(\\n(.pu-\\n(Bmu))&(\\n(Mi=0) .Bm \}
 ..
 .de PN			\" SET FIRST PAGE NUMBER
 .\"	.PN [ $1 [$2] ]
