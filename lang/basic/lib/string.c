@@ -36,6 +36,8 @@ _decstr(str)
 String *str;
 {
 	ok(str);
+	/* Strings in ROM are initialized with this count */
+	if ( str->strcount==9999 ) return ;
 	str->strcount--;
 	if(str->strcount<=0) _delstr(str);
 }
