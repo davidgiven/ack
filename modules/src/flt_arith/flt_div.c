@@ -31,7 +31,7 @@ flt_div(e1,e2,e3)
 		e3->flt_sign = 0;
 		return;
 	}
-	e3->flt_exp = e1->flt_exp - e2->flt_exp + 2;
+	e3->flt_exp = e1->flt_exp - e2->flt_exp;
 
 	u[4] = (e1->m2 & 1) << 15;
 	flt_b64_rsft(&(e1->flt_mantissa));
