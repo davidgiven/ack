@@ -32,7 +32,9 @@
 # include "../../../h/em_path.h"
 # include "types.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsid5 = "$Header$";
+# endif
 
 /* In this file the following routines are defined: */
 extern	UNLINK();

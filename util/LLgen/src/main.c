@@ -34,7 +34,9 @@
 # include "sets.h"
 # include "assert.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsid6 = "$Header$";
+# endif
 
 static string	rec_file;
 static string	incl_file;

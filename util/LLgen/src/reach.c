@@ -35,7 +35,9 @@
 # include "io.h"
 # include "assert.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsid8 = "$Header$";
+# endif
 
 /* In this file the following routines are defined: */
 extern co_reach();

@@ -34,7 +34,9 @@
 # include "assert.h"
 # include "io.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsid7 = "$Header$";
+# endif
 
 # define HASHSIZE 128
 

@@ -32,7 +32,9 @@
 # include "io.h"
 # include "tunable.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsid4 = "$Header$";
+# endif
 
 char	ltext[LTEXTSZ];
 t_entry	h_entry[NTERMINALS+NNONTERMS+1];

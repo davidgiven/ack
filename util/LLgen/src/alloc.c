@@ -31,7 +31,9 @@
 # include "types.h"
 # include "extern.h"
 
-static string rcsid = "$Header$";
+# ifndef NORCSID
+static string rcsida = "$Header$";
+# endif
 
 static string e_nomem = "Out of memory";
 

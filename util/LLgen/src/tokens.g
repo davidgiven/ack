@@ -36,7 +36,9 @@
 # include "extern.h"
 # include "assert.h"
 
-static string	rcsid = "$Header$";
+# ifndef NORCSID
+static string	rcsidc = "$Header$";
+# endif
 
 /* Here are defined : */
 extern int	scanner();
