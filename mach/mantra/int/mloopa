@@ -16,7 +16,7 @@ e_iund:		mov	#0x8,-(sp) ;	bra	error
 e_fund:		mov	#0x9,-(sp) ;	bra	error
 e_conv:		mov	#0xA,-(sp) ;	bra	error
 e_stack:	mov	#0x10,-(sp) ;	bra	fatal
-e_heap:		mov	#0x11,-(sp) ;	bra	fatal
+e_heap:		mov	#0x11,-(sp) ;	bra	error
 e_illins:	mov	#0x12,-(sp) ;	bra	fatal
 e_oddz:		mov	#0x13,-(sp) ;	bra	fatal
 e_case:		mov	#0x14,-(sp) ;	bra	fatal

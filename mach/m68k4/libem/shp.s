@@ -23,5 +23,8 @@
 	rts
 2:
 	move.l	#EHEAP, -(sp)
-	jmp	.fatal
+	jsr	.trp
+	move.l	(sp)+,a0
+	move.l	a0,(sp)
+	rts
 .align 2

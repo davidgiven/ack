@@ -25,4 +25,5 @@
 	jmp	(a0)
 2:
 	move.w	#EHEAP,-(sp)
-	jmp	.fat
+	jsr	.trp
+	jmp	(a0)
