@@ -9,6 +9,7 @@ BEGIN	{ print "#define CONDBRA        '\001'" > "pop_push.h"
 }
 /aar/	{ switch = NR }
 	{ if (switch) {
+	      if ($1 == "cal" || $1 == "cai") $3 = "?"
 	      printf("/* %s */ \"%s\",\n",$1,$3) 
 	      col_2[NR-switch] = $2
 	      comment[NR-switch] = $1
