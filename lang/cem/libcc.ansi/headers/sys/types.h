@@ -10,6 +10,22 @@
 #if	!defined(_SYS_TYPES_H)
 #define	_SYS_TYPES_H
 
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
+typedef unsigned int	size_t;		/* type returned by sizeof */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
+
+#if	!defined(_TIME_T)
+#define	_TIME_T
+typedef	unsigned long	time_t;
+#endif	/* TIME_T */
+
+#if	!defined(_POSIX_SOURCE)
+
 /* major part of a device */
 #define	major(x)	((int)(((unsigned)(x)>>8)&0377))
 
@@ -34,20 +50,6 @@ typedef	u_short ino_t;
 #endif
 typedef	long	swblk_t;
 
-#if	!defined(_SIZE_T)
-#define	_SIZE_T
-#if	_EM_WSIZE  == _EM_PSIZE
-typedef unsigned int	size_t;		/* type returned by sizeof */
-#else
-typedef unsigned long	size_t;		/* type returned by sizeof */
-#endif
-#endif	/* _SIZE_T */
-
-#if	!defined(_TIME_T)
-#define	_TIME_T
-typedef	unsigned long	time_t;
-#endif	/* TIME_T */
-
 typedef	long	label_t[14];
 typedef	short	dev_t;
 #if	defined(__BSD4_2)
@@ -63,5 +65,17 @@ typedef unsigned char	uchar_t;
 typedef short		cnt_t;
 typedef long		paddr_t;
 typedef long		key_t;
+#else	/* _POSIX_SOURCE */
+#if	defined(_MINIX)
+typedef unsigned short	dev_t;	/* hold (major|minor) device pair */
+typedef unsigned char	gid_t;	/* group id */
+typedef unsigned short	ino_t;	/* i-node number */
+typedef unsigned short	mode_t;	/* mode number within an i-node */
+typedef unsigned char	nlink_t; /* number-of-links field within an i-node */
+typedef long		off_t;	/* offsets within a file */
+typedef int		pid_t;	/* type for pids (must be signed) */
+typedef unsigned short	uid_t;	/* user id */
+#endif	/* _MINIX */
+#endif	/* _POSIX_SOURCE */
 
 #endif	/* _SYS_TYPES_H */

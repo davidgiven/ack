@@ -126,6 +126,19 @@
 
 #endif	/* __BSD4_2 */
 
-extern int errno;	/* error number */
+#if	defined(_POSIX_SOURCE)
+#if	defined(_MINIX)
+#define	EDEADLK		35	/* resource deadlock avoided */
+#define	ENAMETOOLONG	36	/* file name too long */
+#define	ENOLCK		37	/* no locks available */
+#define	ENOSYS		38	/* function not implemented */
+#define	ENOTEMPTY	39	/* directory not empty */
+
+#define	ELOCKED		101	/* can't send message */
+#define	EBADCALL	102	/* error on send/recieve */
+#define	ELONGSTRING	103	/* string too long */
+#endif
+/* Room for other POSIX implementations */
+#endif
 
 #endif	/* _SYS_ERRNO_H */
