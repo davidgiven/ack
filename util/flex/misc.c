@@ -622,7 +622,7 @@ Char array[];
     switch ( array[1] )
 	{
 #ifdef ACK_MOD
-#if__STDC__
+#if __STDC__
 	case 'a': return ( '\a' );
 	case 'v': return ( '\v' );
 #else
