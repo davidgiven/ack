@@ -1,6 +1,4 @@
 LIST
-Makefile
-compmodule
 head_em.s
 libmon_s.a
 syscall.h
