@@ -120,7 +120,7 @@ domacro()
 	case INTEGER:		/* # <integer> [<filespecifier>]?	*/
 		do_line((unsigned int)tk.tk_val);
 		break;
-	case EOI:	/* only `#' on this line: do nothing, ignore	*/
+	case EOF:	/* only `#' on this line: do nothing, ignore	*/
 		break;
 	default:	/* invalid token following '#'		*/
 		error("illegal # line");
