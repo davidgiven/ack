@@ -3,6 +3,6 @@ struct Hashitem {
 	int hs_nami;
 };
 
-#define Hashitems _HashItems
+#define Hashitems B_HashItems
 
 extern struct Hashitem *Hashitems;
