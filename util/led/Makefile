@@ -29,6 +29,8 @@ led:	$(OFILES)
 
 install:led
 	cp led $(LIBDIR)/em_led
+	cp led.6 $(EM)/man/led.6
+	cp ack.out.5 $(EM)/man/ack.out.5
 
 cmp:	led
 	cmp led $(LIBDIR)/em_led

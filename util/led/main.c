@@ -131,6 +131,13 @@ first_pass(argv)
 				fatal("usage: -b<section number>:<base>");
 			setbase(sectno, number(++argp));
 			break;
+		case 'c':
+			/*
+			 * Might be used in combination with 'r', to produce
+			 * relocatable output, but handle commons now.
+			 */
+			flagword |= CFLAG;
+			break;
 #ifndef NDEBUG
 		case 'd':
 			DEB = 1;
@@ -413,10 +420,11 @@ complete_sections()
 		outsect[sectindex].os_foff = foff;
 		foff += outsect[sectindex].os_flen;
 
-		if (flagword & RFLAG)
+		if ((flagword & RFLAG) && !(flagword & CFLAG))
 			continue;
 
 		outsect[sectindex].os_size += sect_comm[sectindex];
+		if (flagword & RFLAG)
 		outsect[sectindex].os_lign =
 			tstbit(sectindex, lignmap) ? sect_lign[sectindex] : 1;
 		if (tstbit(sectindex, basemap)) {
