@@ -6,25 +6,25 @@
 
 #define MAXREGS 40
 #define MAXPROPS 30
-#define MAXTOKENS 60
-#define MAXATT 3
-#define MAXSETS 100
-#define MAXINSTR 100
+#define MAXTOKENS 100
+#define MAXATT 6
+#define MAXSETS 150
+#define MAXINSTR 200
 #define MAXSTRINGS 250
-#define MAXNODES 300
+#define MAXNODES 500
 #define EMPATMAX 20
-#define MAXPATTERNS 20
+#define MAXPATTERNS 40
 #define MAXALLREG 5
 #define MAXINSTANCES 300
-#define MAXMOVES 20
+#define MAXMOVES 40
 #define MAXTESTS 10
 #define MAXSTACKS 30
-#define MAXCOERCS 25
+#define MAXCOERCS 50
 #define MAXSPLCOERC 20
-#define MAXSPLIT 2
+#define MAXSPLIT 3
 #define MAXPATBYTES 7000
-#define MAXREGVAR 8
-#define MAXSOURCELINES 4000
+#define MAXREGVAR 10
+#define MAXSOURCELINES 6000
 
 /* end of tunable constants */
 
