@@ -63,9 +63,10 @@ char *lowerupper(str) register char *str;
 	register char *key=keyword;
 
 	if (islower(*str)) {
-		do
-			*key++ = toupper(*str++);
-		while (key<keyword+MAXKEYLEN && islower(*str));
+		do {
+			*key++ = toupper(*str);
+			str++;
+		} while (key<keyword+MAXKEYLEN && islower(*str));
 	} else {
 		do
 			*key++ = *str++;

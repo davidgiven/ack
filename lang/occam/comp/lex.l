@@ -15,7 +15,7 @@
 # define TABSTOP(ind)	(((ind)+TAB)&(~(TAB-1)))
 # endif
 
-char *malloc(), *strcpy();
+char *Malloc(), *strcpy();
 
 struct token token;
 int ind=0;		/* Indentation level of current line */
@@ -72,7 +72,7 @@ int included=0;		/* Is current file included? */
 	register key;
 
 	if ((key=keyword(yytext))==IDENTIFIER)
-		token.t_sval=strcpy(malloc(yyleng+1), yytext);
+		token.t_sval=strcpy(Malloc(yyleng+1), yytext);
 	
 	return key;
 }
@@ -289,7 +289,7 @@ char *tokenname(tk, inst) register tk, inst;
 		case IDENTIFIER:
 			if (inst) {
 				sprint(fake_id, "_%d", ++fake_cnt);
-				token.t_sval=strcpy(malloc(strlen(fake_id)+1),
+				token.t_sval=strcpy(Malloc(strlen(fake_id)+1),
 					fake_id);
 				return "IDENTIFIER";
 			} else
@@ -300,7 +300,7 @@ char *tokenname(tk, inst) register tk, inst;
 			return "NUMBER";
 		case STRING:
 			if (inst) {
-				token.t_sval=malloc(1);
+				token.t_sval=Malloc(1);
 				token.t_sval[0]=0;
 			} else
 				free(token.t_sval);

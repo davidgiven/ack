@@ -18,7 +18,7 @@
 int wz = 4, pz = 4, vz = 4;
 int Lflag;
 static Lab=0;
-char *malloc();
+char *Malloc();
 
 void init()
 {
@@ -40,7 +40,7 @@ void meswp()
 void maxdes()
 {
 	C_df_dnam("maxcdes");
-	rom(wz, 0L); rom(wz, -1L); rom(wz, (long) (wz+pz));
+	rom(wz, 0L); rom(wz, -1L); rom(wz, (long) (wz+vz));
 	C_df_dnam("maxwdes");
 	rom(wz, 0L); rom(wz, -1L); rom(wz, (long) vz);
 	C_df_dnam("maxbdes");
@@ -82,7 +82,7 @@ char *proc_label(L, name) register L; register char *name;
 
 	if (lab!=nil) free(lab);
 
-	lab=malloc(strlen(name)+(1+sizeof(int)*3+1));
+	lab=Malloc(strlen(name)+(1+sizeof(int)*3+1));
 		/* That is: P<L><name>\0 */
 
 	sprint(lab, "P%d", L);
@@ -412,8 +412,8 @@ int set_file(f) char *f;
 		apf= cmp<0 ? &pf->left : &pf->right;
 
 	if (pf==nil) {
-		*apf= pf= (struct ftree *) malloc(sizeof *pf);
-		pf->file=strcpy(malloc(strlen(f)+1), f);
+		*apf= pf= (struct ftree *) Malloc(sizeof *pf);
+		pf->file=strcpy(Malloc(strlen(f)+1), f);
 		pf->lab=0;
 		pf->left=pf->right=nil;
 	}
@@ -438,7 +438,7 @@ void par_fork(NONZERO) int *NONZERO;
 {
 	C_zer((arith) pz);
 	C_cal("pc_fork");
-	C_asp(pz);
+	C_asp((arith) pz);
 	C_lfr((arith) wz);
 	C_zne((label) new_label(NONZERO));
 }

@@ -13,7 +13,7 @@ int min_offset=0;	/* Minimum of all offsets within current level */
 
 static struct symtab *sym_table=nil;
 
-char *malloc();
+char *Malloc();
 
 static struct symbol **search_sym(tree, name)
 	struct symbol **tree;
@@ -46,7 +46,7 @@ struct symbol *insert(name, type, arr_siz, info)
 		return nil;
 	}
 
-	ps= (struct symbol *) malloc(sizeof *ps);
+	ps= (struct symbol *) Malloc(sizeof *ps);
 
 	ps->s_name=name;
 
@@ -89,7 +89,7 @@ void sym_down()
 {
 	register struct symtab *ps;
 
-	ps= (struct symtab *) malloc(sizeof *ps);
+	ps= (struct symtab *) Malloc(sizeof *ps);
 
 	ps->local=nil;
 	ps->global=sym_table;
@@ -117,13 +117,13 @@ static void sym_destroy(ps) register struct symbol *ps;
 			while (par!=nil) {
 				junk=par;
 				par=par->pr_next;
-				free(junk);
+				free((char *)junk);
 			}
 		} else
 		if ((ps->s_type&T_TYPE)==T_CONST)
 			destroy(ps->s_info.t_const);
-		free(ps->s_name);
-		free(ps);
+		free((char *)(ps->s_name));
+		free((char *)ps);
 	}
 }
 
@@ -172,7 +172,7 @@ void pars_add(aapars, type, var)
 {
 	register struct par_list *pl;
 
-	pl= (struct par_list *) malloc(sizeof *pl);
+	pl= (struct par_list *) Malloc(sizeof *pl);
 
 	pl->pr_type=type;
 	pl->pr_var=var;
@@ -204,4 +204,5 @@ int form_offsets(pars) register struct par_list *pars;
 			return offset+ ((var->s_type&T_ARR) ? pz : vz);
 		}
 	}
+	return pz;
 }

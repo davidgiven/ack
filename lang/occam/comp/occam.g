@@ -17,6 +17,7 @@
 
 static void nonconst(), nonpositive(), rep_cleanup(), check_assoc();
 void init_builtins();
+char *strcpy();
 
 extern int yylineno, LLsymb;
 union type_info info, none;
@@ -282,7 +283,7 @@ subscript(register *byte; register struct expr **e; )
 					} else
 					if (e1->u.const<=0)
 						nonpositive(siz);
-					*e=new_node(FOR, *e, e1);
+					*e=new_node(FOR, *e, e1, *byte);
 					slice=1;
 				}
 	  ]?
@@ -499,7 +500,7 @@ item(register struct expr **e;)
 				{	if (!subs_call && var_proc(var)) {
 						if (pars!=nil)
 							report("no actual parameters");
-						*e=new_call(*e, nil);
+						*e=new_call(*e, (char *)nil);
 					}
 				}
 	| vector_constant(e)
@@ -515,7 +516,7 @@ statement(register struct expr **e;)
 				}:
 	  item(e)
 	  [	  AS expression(&e1)
-				{	*e=new_node(AS, *e, e1); }
+				{	*e=new_node(AS, *e, e1, 0); }
 		| [
 			  '?'	{	out=0; }
 			| '!'	{	out=1; }
@@ -608,10 +609,10 @@ expression(register struct expr **e;)
 					op=LLsymb;
 				}
 		  operator element(&e1)
-				{	*e=new_node(op, *e, e1); }
+				{	*e=new_node(op, *e, e1, 0); }
 	  ]*
 	| monadic_op(&op) element(&e1)
-				{	*e=new_node(op, e1, nil); }
+				{	*e=new_node(op, e1, (char *)nil, 0); }
 	;
 
 val_expr(register struct expr **e;) :
@@ -746,5 +747,10 @@ static void check_assoc(prev_op, op) register prev_op, op;
 			prev, tokenname(op, 0)
 		);
 	}
+}
+
+No_Mem()
+{
+	fatal("out of memory");
 }
 }

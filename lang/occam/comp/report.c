@@ -8,6 +8,7 @@
 extern int err, yylineno;
 extern char *curr_file;
 
+/*VARARGS1*/
 report(fmt, arg1, arg2, arg3) char *fmt;
 {
 	fprint(STDERR, "%s (%d) F: ", curr_file, yylineno);
@@ -16,6 +17,7 @@ report(fmt, arg1, arg2, arg3) char *fmt;
 	err=1;
 }
 
+/*VARARGS1*/
 warning(fmt, arg1, arg2, arg3) char *fmt, *arg1;
 {
 	fprint(STDERR, "%s (%d) E: ", curr_file, yylineno);
@@ -23,6 +25,7 @@ warning(fmt, arg1, arg2, arg3) char *fmt, *arg1;
 	fprint(STDERR,"\n");
 }
 
+/*VARARGS1*/
 fatal(fmt, arg1, arg2, arg3) char *fmt, *arg1;
 {
 	fprint(STDERR, "%s (%d) X: ", curr_file, yylineno);

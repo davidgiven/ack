@@ -43,11 +43,11 @@ void init_builtins()
 	insert("input", T_CHAN|T_BUILTIN, 1, &info);
 
 	info.vc.st.builtin=file;
-	info.vc.offset=wz+pz;
+	info.vc.offset=wz+vz;
 	insert("output", T_CHAN|T_BUILTIN, 1, &info);
 
 	info.vc.st.builtin=file;
-	info.vc.offset=2*(wz+pz);
+	info.vc.offset=2*(wz+vz);
 	insert("error", T_CHAN|T_BUILTIN, 1, &info);
 
 	/* DEF EOF= -1, TEXT= -2, RAW= -3: */
