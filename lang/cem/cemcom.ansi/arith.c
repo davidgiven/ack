@@ -72,11 +72,18 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	*/
 	/* ??? t1 == LNGDBL, t2 == DOUBLE */
 	if (t1 == LNGDBL) {
-		if (t2 != LNGDBL)
+		if (t2 != LNGDBL) {
+		    if (t2 == DOUBLE || t2 == FLOAT)
+			float2float(e2p, lngdbl_type);
+		    else
 			int2float(e2p, lngdbl_type);
+		}
 		return;
 	} else if (t2 == LNGDBL) {
 		if (t1 != LNGDBL)
+		    if (t1 == DOUBLE || t1 == FLOAT)
+			float2float(e1p, lngdbl_type);
+		    else
 			int2float(e1p, lngdbl_type);
 		return;
 	}
@@ -85,11 +92,15 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 		is converted to double.
 	*/
 	if (t1 == DOUBLE) {
-		if (t2 != DOUBLE)
+		if (t2 == FLOAT)
+			float2float(e2p, double_type);
+		else if (t2 != DOUBLE)
 			int2float(e2p, double_type);
 		return;
 	} else if (t2 == DOUBLE) {
-		if (t1 != DOUBLE)
+		if (t1 == FLOAT)
+			float2float(e1p, double_type);
+		else if (t1 != DOUBLE)
 			int2float(e1p, double_type);
 		return;
 	}
