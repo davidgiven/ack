@@ -38,7 +38,7 @@ ea_1(sz, bits)
 		checksize(sz, 2|4);
 	bits &= ~flag;
 	if (bits)
-		serror("bad addressing categorie");
+		serror("bad addressing category");
 	if (flag & FITW)
 		Xfit (fitw(exp_1.val) ||
 		      (mrg_1 == 074 && fit16(exp_1.val))
