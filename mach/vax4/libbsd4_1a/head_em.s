@@ -9,6 +9,7 @@
 .define	.limhp
 .define	.trppc
 .define	.trpim
+.define EXIT, BRK, WRITE
 
 	! run time startoff
 	.data2	0
@@ -29,10 +30,35 @@
 	pushl	r2
 	pushl	r1
 	calls	$3,__m_a_i_n
+EXIT:
 	movl	$Im2,ap
 	movl	r0,6(ap)
 	chmk	(ap)+
 	halt
+
+break = 17
+
+.align	1
+BRK:
+	.data2	0x0000
+	chmk	$break
+	bcc 	1f
+	jmp 	errmon
+1:
+	movl	4(ap),.limhp
+	clrl	r0
+	ret
+
+write = 4
+
+.align	1
+WRITE:
+	.data2	0x0000
+	chmk	$write
+	bcc	1f
+	jmp	errmon
+1:
+	ret
 
 	.sect .data
 Im2:
