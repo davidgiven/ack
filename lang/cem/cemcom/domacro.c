@@ -337,8 +337,10 @@ PRIVATE
 do_endif()
 {
 	SkipRestOfLine();
-	if (nestlevel-- < 0)
+	if (nestlevel < 0)	{
 		lexerror("#endif without corresponding #if");
+	}
+	else	nestlevel--;
 }
 
 PRIVATE

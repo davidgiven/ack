@@ -94,6 +94,7 @@ struct expr	{
 #define	EX_LOGICAL	0004		/* contains logical operator */
 #define	EX_COMMA	0010		/* contains expression comma */
 #define	EX_PARENS	0020		/* the top level is parenthesized */
+#define EX_SIDEEFFECTS	0040		/* expression has side effects */
 #define	EX_ERROR	0200		/* the expression is wrong */
 
 #define	NILEXPR		((struct expr *)0)

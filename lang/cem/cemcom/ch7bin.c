@@ -77,6 +77,7 @@ ch7bin(expp, oper, expr)
 		else
 			*expp = new_oper((*expp)->ex_type->tp_up,
 					*expp, '(', expr);
+		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
 	case PARCOMMA:				/* RM 7.1 */
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
@@ -149,8 +150,8 @@ ch7bin(expp, oper, expr)
 		}
 		break;
 	case LEFT:
-	case LEFTAB:
 	case RIGHT:
+	case LEFTAB:
 	case RIGHTAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);

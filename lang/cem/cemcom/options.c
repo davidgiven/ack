@@ -115,7 +115,7 @@ do_option(text)
 		break;
 
 	case 'L' :
-		warning("-L: default no EM profiling; use -p for EM profiling");
+		options['L'] = 1;	/* no fil/lin */
 		break;
 
 	case 'M':	/* maximum identifier length */
@@ -124,10 +124,6 @@ do_option(text)
 			fatal("malformed -M option");
 		if (idfsize > IDFSIZE)
 			fatal("maximum identifier length is %d", IDFSIZE);
-		break;
-
-	case 'p' :	/* generate profiling code (fil/lin) */
-		options['p'] = 1;
 		break;
 
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/

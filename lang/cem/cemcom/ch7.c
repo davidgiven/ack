@@ -333,6 +333,7 @@ ch7asgn(expp, oper, expr)
 	*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 #endif NOBITFIELD
 	(*expp)->OP_TYPE = tp;	/* for EVAL() */
+	(*expp)->ex_flags |= EX_SIDEEFFECTS;
 }
 
 /*	Some interesting (?) questions answered.

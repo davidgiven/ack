@@ -201,7 +201,7 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	lab_count = (label) 1;
 	return_label = text_label();
 	return_expr_occurred = 0;
-	if (options['p'])	{	/* profiling */
+	if (! options['L'])	{	/* profiling */
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
 			C_df_dlb(file_name_label = data_label());
@@ -479,7 +479,7 @@ code_expr(expr, val, code, tlbl, flbl)
 		generator.  If line number trace is wanted, it generates a
 		lin instruction.  EVAL() is called directly.
 	*/
-	if (options['p'])	/* profiling	*/
+	if (! options['L'])	/* profiling	*/
 		C_lin((arith)LineNumber);
 	EVAL(expr, val, code, tlbl, flbl);
 }

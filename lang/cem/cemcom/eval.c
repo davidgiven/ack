@@ -94,8 +94,10 @@ EVAL(expr, val, code, true_label, false_label)
 		register struct expr *right = expr->OP_RIGHT;
 		register struct type *tp = expr->OP_TYPE;
 
-		if (tp->tp_fund == ERRONEOUS)	/* stop immediately */
+		if (tp->tp_fund == ERRONEOUS || (expr->ex_flags & EX_ERROR)) {
+			/* stop immediately */
 			break;
+		}
 		if (tp->tp_fund == VOID)
 			gencode = 0;
 		switch (oper) {
@@ -298,15 +300,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_bra(false_label);
 				}
 				else {
-					label l_true = text_label();
-					label l_end = text_label();
-
-					compare(oper, l_true);
-					C_loc((arith)0);
-					C_bra(l_end);
-					C_df_ilb(l_true);
-					C_loc((arith)1);
-					C_df_ilb(l_end);
+					truthvalue(oper);
 				}
 			}
 			break;
@@ -384,9 +378,9 @@ EVAL(expr, val, code, true_label, false_label)
 				load_val(left, RVAL);
 			}
 			else
-			if (left->ex_depth == 1 && left->OP_OPER == ARROW) {
-				compl = 1; /* Value->sel */
-				ASSERT(left->OP_LEFT->ex_class == Value);
+			if (left->ex_depth == 1 &&
+			    !(left->ex_flags & EX_SIDEEFFECTS))	{
+				compl = 1;
 				EVAL(left, RVAL, newcode, NO_LABEL, NO_LABEL);
 			}
 			else {
@@ -661,6 +655,35 @@ compare(relop, lbl)
 		CRASH();
 	}
 }
+
+/*	truthvalue() serves as an auxiliary function of EVAL	*/
+truthvalue(relop)
+	int relop;
+{
+	switch (relop)	{
+	case '<':
+		C_tlt();
+		break;
+	case LESSEQ:
+		C_tle();
+		break;
+	case '>':
+		C_tgt();
+		break;
+	case GREATEREQ:
+		C_tge();
+		break;
+	case EQUAL:
+		C_teq();
+		break;
+	case NOTEQUAL:
+		C_tne();
+		break;
+	default:
+		CRASH();
+	}
+}
+
 
 /*	assop() generates the opcode of an assignment operators op=	*/
 assop(type, oper)
