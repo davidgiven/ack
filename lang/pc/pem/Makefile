@@ -4,6 +4,8 @@ h=$d/h
 
 # Use apc -m.... for cross-compilation.
 APC=apc
+# The call to acc has to produce an executable file
+# Add an -m parameter if needed.
 ACC=acc
 
 PEM=$d/lib/pc_pem
