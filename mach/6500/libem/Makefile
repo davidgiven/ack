@@ -1,23 +1,21 @@
-install:	tail_em.s.a tail_em.ve.s.a
+all:
+
+install:
 		../../install head_em.s head_em
-		../../install tail_em.s.a tail_em
-		../../install tail_em.ve.s.a tail_em.vend
+		../../install libem_s.a tail_em
+		../../install end.s end_em
 
-cmp:		tail_em.s.a tail_em.ve.s.a
+cmp:
 		-../../compare head_em.s head_em
-		-../../compare tail_em.s.a tail_em
-		-../../compare tail_em.ve.s.a tail_em.vend
-
-distr:		tail_em.ve.s.a
-
-tail_em.s.a:
-		arch cr `cat LIST`
-
-tail_em.ve.s.a:
-		arch cr tail_em.ve.s.a end.s
+		-../../compare libem_s.a tail_em
+		-../../compare end.s end_em
 
 opr:
 		make pr | opr
+
 pr:
-		@pr `pwd`/Makefile `pwd`/head_em.s
-		@pr -l33 `tail +1 LIST|sort` `pwd`/end.s
+		@pr `pwd`/head_em.s
+		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
+		@pr `pwd`/end.s
+
+clean:
