@@ -85,10 +85,10 @@ if cc -o str_change str_change.c
 then
 	case $m in
 	vax)
-		./str_change /usr/em `pwd` < bin.vax/m2mm > fm2mm
+		./str_change CHANGE_ME `pwd` < bin.vax/m2mm > fm2mm
 		;;
 	sun)
-		./str_change /proj/em/Work `pwd` < bin.sun/m2mm > fm2mm
+		./str_change CHANGE_ME `pwd` < bin.sun/m2mm > fm2mm
 		;;
 	esac
 	rm -f str_change.o str_change
