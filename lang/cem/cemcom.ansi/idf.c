@@ -49,6 +49,32 @@ struct idf *idf_hashtable[HASHSIZE];
 		(variable, selector, structure tag, etc.).
 	*/
 
+static struct idf *
+idf_new(tg, size)
+	register char *tg;
+	register int size;
+{
+#define IBUFSIZ	2048
+	static unsigned int icnt;
+	static char *ip;
+	register char *p;
+	register struct idf *id = new_idf();
+
+	if (size > icnt) {
+		icnt = size > IBUFSIZ ? size : IBUFSIZ;
+		p = malloc(icnt);	/* yes, malloc, not Malloc */
+		if (! p) p = Malloc(size);
+	}
+	else p = ip;
+	icnt -= size;
+	id->id_text = p;
+	while (size--) {
+		*p++ = *tg++;
+	}
+	ip = p;
+	return id;
+}
+
 struct idf *
 idf_hashed(tg, size, hc)
 	char *tg;
@@ -86,10 +112,9 @@ idf_hashed(tg, size, hc)
 		hook = &notch->next;
 	}
 	/* a new struct idf must be inserted at the hook */
-	notch = new_idf();
+	notch = idf_new(tg, size);
 	notch->next = *hook;
 	*hook = notch;		/* hooked in */
-	notch->id_text = Salloc(tg, (unsigned) size);
 #ifndef NOPP
 	/* notch->id_resmac = 0; */
 #endif NOPP
