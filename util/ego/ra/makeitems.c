@@ -74,4 +74,5 @@ main(argc,argv)
 		error("cannot open item file");
 	}
 	convert(f1,f2);
+	exit(0);
 }

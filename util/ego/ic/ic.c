@@ -104,6 +104,7 @@ main(argc,argv)
 	putdtable(fdblock, dfile);
 	pfile = openfile(pname2,"w");
 	putptable(fproc, pfile,FALSE);
+	exit(0);
 }
 
 
