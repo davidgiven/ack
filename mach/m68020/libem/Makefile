@@ -26,3 +26,6 @@ opr :
 pr:
 		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
 		@pr `pwd`/end.s
+
+trpstr.s:	trpstr.c strscript
+		sh strscript

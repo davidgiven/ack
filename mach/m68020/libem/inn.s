@@ -5,6 +5,8 @@
 .sect .bss
 .sect .text
 
+ESET=2
+
 .inn:	! d0 bitnumber
 	! d1 setsize in bytes
 	! on exit: 0 or 1 in d0

@@ -29,12 +29,9 @@
 	add.l	#4, sp
 	rts
 9:
-	pea	(fmt)
+	jsr	(.trpstr)
+	move.l	d0,-(sp)
 	jsr	(.diagnos)
 	lea	(4, sp), sp
-	jsr	(__cleanup)
-	jmp	(EXIT)
-
-.sect .data
-fmt:	.asciz "trap %d called\n"
+	jsr	(_exit)
 .align 2

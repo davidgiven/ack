@@ -4,9 +4,12 @@
 .sect .data
 .sect .bss
 .sect	.text
+ESET=2
 
 .set:	! d0 bitnumber
 	! d1 setsize in bytes
+	! a1 saved d2
+	! a0 return address
 
 	move.l	(sp)+, a0
 	move.l	d2, a1

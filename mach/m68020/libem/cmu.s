@@ -8,9 +8,10 @@
 	! on entry d0: # bytes in 1 block
 	! on exit d0: result
 .cmu:
-	move.l	(sp)+, d2	! return address
+	move.l	(sp)+, d1	! return address
 	move.l	sp, a0		! address of top block
 	lea	(sp,d0.l), a1	! address of lower block
+	move.l	d1,-(sp)
 	move.l	d0, d1
 	asr.l	#2, d0
 1:
@@ -22,7 +23,7 @@
 	bcc	3f
 	neg.l	d0		! less
 3:
+	move.l	(sp)+,a0
 	lea	(sp,d1.l*2), sp	! new sp; two blocks popped
-	move.l	d2, a0
 	jmp	(a0)
 .align 2

@@ -10,10 +10,10 @@ set.s
 inn.s
 fat.s
 trp.s
+trpstr.s
 mon.s
 nop.s
 dia.s
-printf.s
 cii.s
 cuu.s
 cmi.s

@@ -3,6 +3,7 @@
 .sect .rom
 .sect .data
 .sect .bss
+ECASE=20
 
 .sect .text
 

@@ -3,6 +3,7 @@
 .sect .rom
 .sect .data
 .sect .bss
+EHEAP=17
 
 	.sect .text
 .strhp:

@@ -1,0 +1,3 @@
+acc -c.s -L -LIB -I../../../h trpstr.c
+sed s/_trpstr/.trpstr/g < trpstr.s > trpstr.ss
+mv trpstr.ss trpstr.s

@@ -4,6 +4,7 @@
 .sect .data
 .sect .bss
 .sect .text
+EILLINS = 18
 
 .aar:	! (on entry d0 contains the integer size in the descriptor)
 
