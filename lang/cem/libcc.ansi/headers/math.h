@@ -6,7 +6,8 @@
 #if	!defined(_MATH_H)
 #define	_MATH_H
 
-#define	HUGE_VAL	9.9e+999	/* though it will generate a warning */
+double __huge_val(void);	/* may be infinity */
+#define	HUGE_VAL	(__huge_val())
 
 double	acos(double _x);
 double	asin(double _x);

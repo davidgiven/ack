@@ -16,5 +16,6 @@ exp.c
 ldexp.c
 fmod.c
 floor.c
+hugeval.c
 frexp.e
 modf.e

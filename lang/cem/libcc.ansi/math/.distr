@@ -9,6 +9,7 @@ fabs.c
 floor.c
 fmod.c
 frexp.e
+hugeval.c
 ldexp.c
 localmath.h
 log.c
