@@ -91,11 +91,15 @@ construct_type(fund, tp)
 		break;
 
 	case T_ARRAY:
+		dtp->tp_value.tp_arr = 
+			(struct array *) Malloc(sizeof(struct array));
 		if (tp) dtp->tp_align = tp->tp_align;
 		break;
 
 	case T_SUBRANGE:
 		assert(tp != 0);
+		dtp->tp_value.tp_subrange = 
+			(struct subrange *) Malloc(sizeof(struct subrange));
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
 		break;
@@ -130,6 +134,10 @@ standard_type(fund, align, size)
 	tp->tp_fund = fund;
 	tp->tp_align = align;
 	tp->tp_size = size;
+	if (fund == T_ENUMERATION || fund == T_CHAR) {
+		tp->tp_value.tp_enum =
+			(struct enume *) Malloc(sizeof(struct enume));
+	}
 
 	return tp;
 }
@@ -204,7 +212,8 @@ InitTypes()
 
 	/* a unique type indicating an error
 	*/
-	error_type = standard_type(T_CHAR, 1, (arith) 1);
+	error_type = new_type();
+	*error_type = *char_type;
 }
 
 STATIC
@@ -241,7 +250,6 @@ struct type *
 qualified_type(nd)
 	register struct node *nd;
 {
-	struct type *tp = error_type;
 	register struct def *df;
 
 	if (ChkDesignator(nd)) {

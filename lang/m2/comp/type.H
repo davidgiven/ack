@@ -22,26 +22,26 @@ struct enume {
 	struct def *en_enums;	/* Definitions of enumeration literals */
 	arith en_ncst;		/* Number of constants */
 	label en_rck;		/* Label of range check descriptor */
-#define enm_enums	tp_value.tp_enum.en_enums
-#define enm_ncst	tp_value.tp_enum.en_ncst
-#define enm_rck		tp_value.tp_enum.en_rck
+#define enm_enums	tp_value.tp_enum->en_enums
+#define enm_ncst	tp_value.tp_enum->en_ncst
+#define enm_rck		tp_value.tp_enum->en_rck
 };
 
 struct subrange {
 	arith su_lb, su_ub;	/* lower bound and upper bound */
 	label su_rck;		/* label of range check descriptor */
-#define sub_lb	tp_value.tp_subrange.su_lb
-#define sub_ub	tp_value.tp_subrange.su_ub
-#define sub_rck	tp_value.tp_subrange.su_rck
+#define sub_lb	tp_value.tp_subrange->su_lb
+#define sub_ub	tp_value.tp_subrange->su_ub
+#define sub_rck	tp_value.tp_subrange->su_rck
 };
 
 struct array {
 	struct type *ar_elem;	/* type of elements */
 	label ar_descr;		/* label of array descriptor */
 	arith ar_elsize;	/* size of elements */
-#define arr_elem	tp_value.tp_arr.ar_elem
-#define arr_descr	tp_value.tp_arr.ar_descr
-#define arr_elsize	tp_value.tp_arr.ar_elsize
+#define arr_elem	tp_value.tp_arr->ar_elem
+#define arr_descr	tp_value.tp_arr->ar_descr
+#define arr_elsize	tp_value.tp_arr->ar_elsize
 };
 
 struct record {
@@ -85,9 +85,9 @@ struct type	{
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {
-	    struct enume tp_enum;
-	    struct subrange tp_subrange;
-	    struct array tp_arr;
+	    struct enume *tp_enum;
+	    struct subrange *tp_subrange;
+	    struct array *tp_arr;
 	    struct record tp_record;
 	    struct proc tp_proc;
 	} tp_value;
@@ -174,5 +174,5 @@ struct type
 
 extern long full_mask[];
 
-#define fit(n, i)	(((n) + (0x80<<(((i)-1)*8)) & ~full_mask[(i)]) == 0)
+#define fit(n, i)	(((n) + ((arith)0x80<<(((i)-1)*8)) & ~full_mask[(i)]) == 0)
 #define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)
