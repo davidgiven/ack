@@ -28,3 +28,26 @@ extern rem_graph();		/* (proc_p p)
 extern remcc();			/* (calcnt_p head)
 				 * Remove call-count info from core.
 				 */
+extern call_p getcall();	/* (FILE *cf)
+				 * Read a call from the call-file
+				 */
+extern line_p get_text();	/* (FILE *lf; proc_p *p_out)
+				 * Read the EM text of one procedure.
+				 * The procedure read is returned via
+				 * p_out.
+				 */
+extern calcnt_p getcc();	/* (FILE *ccf; proc_p p)
+				 * Read the call-count information
+				 * of procedure p.
+				 */
+extern putcall();		/* (call_p call; FILE *cfile; short level)
+				 * Write the call 
+				 * with the given id to the given file.
+				 * The level is the nesting level, used by
+				 * putcall when it calls itself recurively.
+				 * It should be 0 on outer levels.
+				 */
+extern long putcc();		/* (calcnt_p head; FILE *ccf)
+				 * Write call-count information to
+				 * file ccf.
+				 */
