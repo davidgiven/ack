@@ -2,7 +2,8 @@ LLlex.c
 LLlex.h
 LLmessage.c
 Makefile
-Parameters
+BigPars
+SmallPars
 Resolve
 SYSTEM.h
 Version.c
