@@ -268,6 +268,7 @@ xor anyreg:rw:cc, rmorconst:ro.
 xorb rm1:rw:cc, regorconst12:ro.
 xorb anyreg:rw:cc, rm1:ro.
 killreg "! kill" anyreg:wo cost(0,0).
+killcc "! kill cc" kills:cc cost(0,0).
 
 data ".sect .data".
 word ".data2" const:ro.
@@ -2644,12 +2645,32 @@ uses REG = {ANYCON,0}
       inc %a
       1:                            yields %a
 
-pat tlt call txx("jge")
-pat tle call txx("jg")
+pat tlt call txx("jns")
 pat teq call txx("jne")
 pat tne call txx("je")
-pat tge call txx("jl")
-pat tgt call txx("jle")
+pat tge call txx("js")
+
+/* For the next two patterns there is no I8086 test instruction (one that
+   ignores the OF flag. Therefore, condition codes are killed and the test
+   is done again.
+*/
+pat tgt
+with rm
+uses REG = {ANYCON, 0}
+  gen killcc.
+      test %1
+      jle {label, 1f}
+      inc %a
+      1:			    yields %a
+
+pat tle
+with rm
+uses REG = {ANYCON, 0}
+  gen killcc.
+      test %1
+      jg {label, 1f}
+      inc %a
+      1:			    yields %a
 
 proc txxior
 with rm REG
@@ -2658,12 +2679,30 @@ with rm REG
       or  %2,{ANYCON,1}
       1:                            yields %2
 
-pat tlt ior $2==2 call txxior("jge")
-pat tle ior $2==2 call txxior("jg")
+pat tlt ior $2==2 call txxior("jns")
+pat tge ior $2==2 call txxior("js")
 pat teq ior $2==2 call txxior("jne")
 pat tne ior $2==2 call txxior("je")
-pat tge ior $2==2 call txxior("jl")
-pat tgt ior $2==2 call txxior("jle")
+
+/* For the next two patterns there is no I8086 test instruction (one that
+   ignores the OF flag. Therefore, condition codes are killed and the test
+   is done again.
+*/
+pat tle ior $2==2
+with rm REG
+  gen killcc.
+      test %1
+      jg {label,1f}
+      or  %2,{ANYCON,1}
+      1:                            yields %2
+
+pat tgt ior $2==2
+with rm REG
+  gen killcc.
+      test %1
+      jle {label,1f}
+      or  %2,{ANYCON,1}
+      1:                            yields %2
 
 proc cmixxior
 with regorconst rm REG
@@ -3013,10 +3052,24 @@ with rm STACK
   gen test %1
       jxx* {label,$1}
 
-pat zlt		call zxx("jl")
-pat zle		call zxx("jle")
-pat zge		call zxx("jge")
-pat zgt		call zxx("jg")
+pat zlt		call zxx("js")
+pat zge		call zxx("jns")
+
+/* For the next two patterns there is no I8086 test instruction (one that
+   ignores the OF flag. Therefore, condition codes are killed and the test
+   is done again.
+*/
+pat zle
+with rm STACK
+  gen killcc.
+      test %1
+      jle {label,$1}
+
+pat zgt
+with rm STACK
+  gen killcc.
+      test %1
+      jg {label,$1}
 
 pat zne
 with rm+rm1 STACK

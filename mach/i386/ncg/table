@@ -227,6 +227,7 @@ jcxz label cost(1,4).
 je label cost(1,4).
 jg label cost(1,4).
 jge label cost(1,4).
+jgt label cost(1,4).
 jl label cost(1,4).
 jle label cost(1,4).
 jne label cost(1,4).
@@ -234,6 +235,8 @@ jmp label cost(1,4).
 proccall "call" label+rm cost(1,8).
 jxx "syntax error" label cost(1,4).
 setxx "syntax error" REG:rw cost(2,4).
+setle REG:rw cost(2,4).
+setgt REG:rw cost(2,4).
 lea anyreg:rw, halfindir:ro.
 lea LOCAL:rw, halfindir:ro.	/* only for register variables, UNSAFE!!! */
 leave cost(1,4).
@@ -299,6 +302,7 @@ xorw "o16 xor" rm2:rw:cc, regorconst124:ro.
 xorw "o16 xor" anyreg:rw:cc, rmorconst2:ro.
 
 killreg "! kill" anyreg:wo cost(0,0).
+killcc "! kill cc" kills:cc cost(0,0).
 
 
 /*****************************************************************/
@@ -2452,12 +2456,31 @@ uses REG = {ANYCON,0}
   gen test %1
       setxx* %a			    yields %a
 
-pat tlt call txx("setl")
-pat tle call txx("setle")
+pat tlt call txx("sets")
 pat teq call txx("sete")
 pat tne call txx("setne")
-pat tge call txx("setge")
-pat tgt call txx("setg")
+pat tge call txx("setns")
+
+/* Explicit test for TLE and TGT. We must make sure that the OC
+   flag is cleared.
+*/
+pat tle
+with rm
+uses REG = {ANYCON,0}
+  gen
+      killcc.
+      test %1
+      setle %a
+				   yields %a
+
+pat tgt
+with rm
+uses REG = {ANYCON,0}
+  gen
+      killcc.
+      test %1
+      setgt %a
+				   yields %a
 
 proc txxior
 with rm REG
@@ -2657,10 +2680,25 @@ with rm STACK
   gen test %1
       jxx* {label,$1}
 
-pat zlt		call zxx("jl")
-pat zle		call zxx("jle")
-pat zge		call zxx("jge")
-pat zgt		call zxx("jg")
+pat zlt		call zxx("js")
+pat zge		call zxx("jns")
+
+/* Explicit test for ZLE and ZGT. We must make sure that the OC
+   flag is cleared.
+*/
+pat zle
+with rm STACK
+  gen 
+      killcc.
+      test %1
+      jle {label,$1}
+
+pat zgt
+with rm STACK
+  gen
+      killcc.
+      test %1
+      jgt {label, $1}
 
 pat zne
 with rm+rm1 STACK
