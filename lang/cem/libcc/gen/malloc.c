@@ -11,7 +11,7 @@ extern bcopy();
 #define BUSY		1
 #define NEXT(p)		(* (char **) (p))
 
-#ifdef pdp11
+#ifdef pdp
 #define BUGFIX	64
 #else
 #define BUGFIX	0
