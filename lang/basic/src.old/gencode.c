@@ -543,10 +543,18 @@ prolog2()
 		fprintf(emfile," loc 0\n");
 		fprintf(emfile," cal $_setchan\n");
 		fprintf(emfile," asp EM_WSIZE\n");
-		fprintf(emfile,"datfname\n rom \"%s\"\n", datfname);
-		fprintf(emfile," lae datfname\n");
+		fprintf(emfile,"datfname\n rom \"%s\\0\"\n", datfname);
+		fprintf(emfile,"dattyp\n rom \"i\\0\"\n");
+		fprintf(emfile,"datfdes\n rom datfname,1,%d\n",
+			strlen(datfname));
+		fprintf(emfile,"dattdes\n rom dattyp,1,1\n");
+		fprintf(emfile," lae dattdes\n");
+		fprintf(emfile," lae datfdes\n");
+		fprintf(emfile," loc 0\n");
 		fprintf(emfile," cal $_opnchn\n");
 		fprintf(emfile," asp EM_PSIZE\n");
+		fprintf(emfile," asp EM_PSIZE\n");
+		fprintf(emfile," asp EM_WSIZE\n");
 	}
 	datatable();
 }
