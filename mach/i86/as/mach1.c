@@ -1,0 +1,37 @@
+#define RCSID1 "$Header$"
+
+/*
+ * INTEL 8086 C declarations
+ */
+
+#define	low6(z)		(z & 077)
+#define	fit6(z)		(low6(z) == z)
+
+extern int	mrg_1,mrg_2;
+extern expr_t	exp_1,exp_2;
+#ifndef ASLD
+extern int	rel_1, rel_2;
+#endif
+
+#ifndef extern
+extern char	sr_m[8];
+#else
+char	sr_m[8] = {
+	-1,	-1,	-1,	7,	-1,	6,	4,	5
+};
+#endif
+
+#ifndef extern
+extern char	dr_m[8][8];
+#else
+char	dr_m[8][8] = {
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+	-1,	-1,	-1,	-1,	-1,	-1,	0,	1,
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+	-1,	-1,	-1,	-1,	-1,	-1,	2,	3,
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1
+};
+#endif
