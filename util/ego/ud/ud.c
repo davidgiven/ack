@@ -42,7 +42,7 @@ STATIC cond_p getcondtab(f)
 	fscanf(f,"%d",&l);
 	tab = newcondtab(l);
 	for (i = 0; i < l; i++) {
-		fscanf(f,"%d %d %d",&tab[i].mc_cond,&tab[i].mc_tval,
+		fscanf(f,"%hd %hd %hd",&tab[i].mc_cond,&tab[i].mc_tval,
 			 &tab[i].mc_sval);
 	}
 	assert(tab[l-1].mc_cond == DEFAULT);
