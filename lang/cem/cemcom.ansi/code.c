@@ -46,7 +46,6 @@
 
 label lab_count = 1;
 label datlab_count = 1;
-arith fbytes;
 
 int fp_used;
 extern arith NewLocal();	/* util.c	*/
@@ -318,7 +317,8 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 #endif
 }
 
-end_proc()
+end_proc(fbytes)
+	arith fbytes;
 {
 	/*	end_proc() deals with the code to be generated at the end of
 		a function, as there is:
@@ -347,7 +347,7 @@ end_proc()
 	prc_exit();
 	if (return_expr_occurred) {
 		if (struct_return != 0)	{
-			LoadLocal(fbytes, pointer_size);
+			LoadLocal((arith) 0, pointer_size);
 			C_ret(pointer_size);
 		}
 		else
@@ -366,7 +366,6 @@ end_proc()
 	C_beginpart(pro_id);
 	C_pro(func_name, nbytes);
 #endif
-	if (struct_return) fbytes += pointer_size;
 	if (fbytes > max_int) {
 		error("%s has more than %ld parameter bytes",
 			func_name, (long) max_int);
@@ -411,7 +410,7 @@ do_return_expr(expr)
 	ch3cast(&expr, RETURN, func_type);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	if (struct_return != 0) {
-		LoadLocal(fbytes, pointer_size);
+		LoadLocal((arith) 0, pointer_size);
 		store_block(func_size, func_type->tp_align);
 	}
 	C_bra(return_label);

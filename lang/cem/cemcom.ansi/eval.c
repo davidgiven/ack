@@ -489,12 +489,6 @@ EVAL(expr, val, code, true_label, false_label)
 					ParSize += pointer_size;
 				}
 			}
-			if (is_struct_or_union(tp->tp_fund)) {
-				retspace = NewLocal(tp->tp_size, tp->tp_align,
-						    -1, 0);
-				C_lal(retspace);
-				ParSize += pointer_size;
-			}
 			if ((ex = right) != NILEXPR) {
 				/* function call with parameters*/
 				while (	ex->ex_class == Oper &&
@@ -507,6 +501,12 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 				EVAL(ex, RVAL, TRUE, NO_LABEL, NO_LABEL);
 				ParSize += ATW(ex->ex_type->tp_size);
+			}
+			if (is_struct_or_union(tp->tp_fund)) {
+				retspace = NewLocal(tp->tp_size, tp->tp_align,
+						    -1, 0);
+				C_lal(retspace);
+				ParSize += pointer_size;
 			}
 			if (ISNAME(left)) {
 				/* e.g., main() { (*((int (*)())0))(); } */

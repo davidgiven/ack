@@ -67,7 +67,6 @@
 extern arith ifval;
 #endif /* NOPP */
 
-extern arith fbytes;
 extern error();
 }
 
@@ -198,6 +197,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 /* 3.7.1 */
 function(struct decspecs *ds; struct declarator *dc;)
 	{
+		arith fbytes;
 		register struct idf *idf = dc->dc_idf;
 	}
 :
@@ -222,7 +222,7 @@ function(struct decspecs *ds; struct declarator *dc;)
 	}
 	compound_statement
 	{
-		end_proc();
+		end_proc(fbytes);
 #ifdef	LINT
 		lint_implicit_return();
 #endif	/* LINT */

@@ -522,6 +522,10 @@ declare_formals(idf, fp)
 	if (options['t'])
 		dumpidftab("start declare_formals", 0);
 #endif	/* DEBUG */
+	if (is_struct_or_union(idf->id_def->df_type->tp_up->tp_fund)) {
+		/* create space for address of return value */
+		f_offset = pointer_size;
+	}
 	while (se)	{
 		register struct def *def = se->se_idf->id_def;
 		
