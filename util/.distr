@@ -16,3 +16,5 @@ shf
 topgen
 int
 ceg
+byacc
+flex
