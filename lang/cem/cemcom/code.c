@@ -283,6 +283,10 @@ end_proc(fbytes)
 	C_beginpart(pro_id);
 	C_pro(pro_name, nbytes);
 #endif
+	if (fbytes > max_int) {
+		error("%s has more than %ld parameter bytes",
+			pro_name, (long) max_int);
+	}
 	C_ms_par(fbytes);		/* # bytes for formals		*/
 	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
 		options['n'] = 1;
@@ -294,6 +298,10 @@ end_proc(fbytes)
 #endif
 	LocalFinish();
 	C_end(nbytes);
+	if (nbytes > max_int) {
+		error("%s has more than %ld bytes of local variables",
+			pro_name, (long) max_int);
+	}
 	options['n'] = optionsn;
 }
 
