@@ -470,9 +470,11 @@ getansiparams(mkdef) {
 
 	ltext[0] = '\0';
 	while ((l = gettok()) != ENDDECL) {
-		if (delayed) {
-			fputc(',', fpars);
-			delayed = 0;
+		if (l > 0177 || c_class[l] != ISSPA) {
+			if (delayed) {
+				fputc(',', fpars);
+				delayed = 0;
+			}
 		}
 		if ((l == ';' || l == ',') && ltext[0] != '\0') {
 			/*
