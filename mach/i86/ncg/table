@@ -1,0 +1,2929 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+
+rscid = "$Header$"
+
+/*
+ * Back end tables for Intel 8086, 80286
+ *
+ * Author : Ed Keizer
+ *
+ * Adapted to ncg format by BMT Mosseveld, EM v Mulligen, M de Rooy, E tulp,
+ * and R Vendelmans (practical work course compiler construction).
+ *
+ * Added register variables: Ceriel Jacobs
+ * Adapted to use floating point library: Ceriel Jacobs
+ *
+ * wordsize = 2 bytes, pointersize = 2 bytes.
+ *
+ * Register bp is used as LB, sp is used for SP.
+ * Some global variables are used:
+ * - .reghp     : the heap pointer
+ * - .ignmask   : trap ignore mask
+ * - .trppc     : address of user defined trap handler
+ *
+ */
+
+#ifdef LARGE
+#define PSIZE 4
+SL = 6
+SSL = "6"
+#else
+#define PSIZE 2
+SL = 4
+SSL = "4"
+#endif
+
+EM_WSIZE = 2
+#ifdef LARGE
+EM_PSIZE = 4
+EM_BSIZE = 6
+#else
+EM_PSIZE = 2
+EM_BSIZE = 4
+#endif
+
+SIZEFACTOR = 5/1
+
+#define EXACT exact
+#define LONGEMPAT
+#define REGVARS
+
+/*****************************************************************/
+PROPERTIES
+/*****************************************************************/
+
+REG1
+ACC1
+AREG
+SHIFT_CREG
+REG
+GENREG
+ACC
+BREG
+BXREG
+ADDREG
+CXREG
+DXREG
+#ifndef REGVARS
+IREG
+SIREG
+DIREG
+#else
+RREG
+RADDREG
+#endif
+
+/*****************************************************************/
+REGISTERS
+/*****************************************************************/
+
+al                                  : REG1 , ACC1 .
+ah,bl,bh,ch,dl,dh                   : REG1 .
+cl                                  : REG1 , SHIFT_CREG .
+ax = al + ah                        : REG , GENREG , ACC .
+bx = bl + bh                        : REG , GENREG , BREG , BXREG ,
+                                      ADDREG , AREG .
+cx = cl + ch                        : REG , GENREG , CXREG , SHIFT_CREG.
+dx = dl + dh                        : REG , GENREG , DXREG .
+#ifndef REGVARS
+si                                  : REG , IREG , AREG , SIREG , ADDREG .
+di                                  : REG , IREG , AREG , DIREG , ADDREG .
+#else
+si				    : AREG , RADDREG , RREG regvar(reg_any) .
+di				    : AREG , RADDREG , RREG regvar(reg_any) .
+#endif
+bp                                  : AREG , BREG .
+sp				    : BREG .
+
+/*****************************************************************/
+TOKENS
+/*****************************************************************/
+
+ANYCON          = { INT val; }      2 cost(2,2) val .
+ADDR_EXTERN     = { ADDR off; }     PSIZE cost(2,2) off .
+EXTERN1         = { ADDR off; }     2 cost(2,12) "(" off ")" .
+EXTERN2         = { ADDR off; }     2 cost(2,12) "(" off ")" .
+ADDR_LOCAL      = { INT ind; }      PSIZE cost(1,9) ind "(bp)" .
+LOCAL          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
+LOCAL1          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
+
+Rreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg 
+                  ")" .
+Rbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "("
+                  reg ")" .
+Xreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg 
+                  ")" .
+Xbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "("
+                  reg ")" .
+
+ind_reg2        = { AREG reg;} 2 cost(0,11) "(" reg ")" .
+ind_regoff2     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg
+                  ")" .
+ind_bpregoff2   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "("
+                  reg ")" .
+
+ind_reg1        = { AREG reg;} 2 cost(0,11) "(" reg ")" .
+ind_regoff1     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg
+                  ")" .
+ind_bpregoff1   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "("
+                  reg ")" .
+label           = { ADDR off;} 2 off .
+
+/*****************************************************************/
+SETS
+/*****************************************************************/
+
+/* Mode refering to a word in memory */
+memory2 	= EXTERN2 + ind_reg2 + ind_regoff2 + ind_bpregoff2 +
+                  LOCAL .
+
+
+memory1 	= EXTERN1 + ind_reg1 + ind_regoff1 + ind_bpregoff1 +
+                  LOCAL1 .
+
+const		= ANYCON + ADDR_EXTERN .
+register	= REG
+#ifdef REGVARS
+		  + RREG
+#endif
+			.
+addreg		= ADDREG
+#ifdef REGVARS
+		  + RADDREG
+#endif
+			.
+anyreg		= register + BREG .
+rm		= anyreg + memory2 .
+rmnoacc		= RREG + BREG + CXREG + memory2 .
+rmorconst	= const + rm .
+regorconst	= const + anyreg .
+#ifdef REGVARS
+/* Needed because there is a shortage of ADDREG-registers.
+   This is the main penalty for having register variables.
+*/
+regorconstnoaddr = const + RREG + ACC + CXREG + DXREG .
+#else
+regorconstnoaddr = regorconst .
+#endif
+dest		= register + memory2 .
+
+rm1		= REG1 + memory1 .
+rmorconst1	= const + rm1 .
+regorconst12	= REG1 + GENREG + const .
+dest1		= REG1 + memory1 .
+rm12		= rm1 + rm .
+
+/* Modes used to indicate tokens to be removed from the fakestack */
+reg_indexed	= ind_reg2 + ind_regoff2 + ind_reg1 + ind_regoff1 .
+lb_indexed	= ind_bpregoff2 + ind_bpregoff1 .
+indexed 	= reg_indexed + lb_indexed .
+externals	= EXTERN2 + EXTERN1 .
+locals		= LOCAL + LOCAL1 .
+all_locals	= locals + lb_indexed .
+indirects	= externals + reg_indexed .
+referals	= indirects + locals .
+
+/* Miscellaneous */
+reg_off		= Xreg_off + Rreg_off .
+bpreg_off	= Xbpreg_off + Rbpreg_off .
+halfindir	= reg_off + bpreg_off + ADDR_LOCAL .
+some_off	= halfindir + ADDR_EXTERN + addreg .
+a_word		= rmorconst + rm1 + halfindir .
+no_reg_off	= rmorconst + rm1 + ADDR_LOCAL .
+#ifdef REGVARS
+IREG		= RREG .
+uses_bx		= BXREG + Xreg_off + Xbpreg_off .
+#endif
+ 
+/*****************************************************************/
+INSTRUCTIONS
+/*****************************************************************/
+
+cost(1,3)
+adc rm:rw:cc, regorconst:ro.
+adc anyreg:rw:cc, rmorconst:ro.
+#ifdef REGVARS
+add LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
+#endif
+add anyreg:rw:cc, a_word:ro.
+add memory2:rw:cc, regorconst:ro.
+#ifdef REGVARS
+and LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
+#endif
+and rm:rw:cc, regorconst:ro.
+and anyreg:rw:cc, rmorconst:ro.
+cbw kills ah cost(1,2).
+cmp rm:ro, regorconst:ro kills :cc.
+cmp regorconst:ro, rm:ro kills :cc.
+cmp anyreg:ro, rmorconst:ro kills :cc.
+cmp rmorconst:ro, anyreg:ro kills :cc.
+cmpb rm1:rw, const:ro kills :cc.
+cwd kills dx cost(1,5).
+dec rm:rw:cc cost(1,2).
+div rm:ro kills:cc ax dx cost(1,150).
+idiv rm:ro kills:cc ax dx cost(1,170).
+inc rm:rw:cc cost(1,2).
+ja label cost(1,4).
+jae label cost(1,4).
+jb label cost(1,4).
+jbe label cost(1,4).
+jcxz label cost(1,5).
+je label cost(1,4).
+jg label cost(1,4).
+jge label cost(1,4).
+jl label cost(1,4).
+jle label cost(1,4).
+jne label cost(1,4).
+jmp label cost(1,7).
+joehoe "call" label+rm cost(1,8).
+jxx "syntax error" label.
+lea anyreg:wo, halfindir:ro cost(1,2).
+loop label cost(1,5).
+#ifdef REGVARS
+mov LOCAL:wo, memory2:ro cost(1,2).	/* only for register variables, UNSAFE!!! */
+#endif
+mov a_word:wo, regorconst:ro cost(1,2).
+mov anyreg:wo, rmorconst:ro cost(1,2).
+movb rm1:wo, regorconst12:ro cost(1,2).
+movb REG1:wo, rm1:ro cost(1,2).
+mul rmorconst:ro kills :cc ax dx cost(1,124).
+neg rmorconst:rw:cc.
+nop .
+not rmorconst:rw:cc.
+ORB "orb" REG1:ro, REG1:ro:cc.		/* use ORB for tests */
+OR "or" anyreg:ro, anyreg:ro:cc.	/* Use OR for tests */
+#ifdef REGVARS
+or LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
+#endif
+or rm:rw:cc, regorconst:ro.
+or anyreg:rw:cc, rmorconst:ro.
+pop rmorconst+rm1:wo cost(1,8).
+push rmorconst+rm1:ro cost(1,10).
+rcl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+rcr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+ret cost(1,8).
+rol rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+ror rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+sal rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+sar rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+sbb rm:rw:cc, regorconst:ro.
+sbb anyreg:rw:cc, rmorconst:ro.
+shl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+shr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+#ifdef REGVARS
+sub LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
+#endif
+sub rm:rw:cc, regorconst:ro.
+sub anyreg:rw:cc, rmorconst+halfindir:ro.
+check "test" rm:ro, regorconst:ro kills :cc.
+check "test" anyreg:ro, rmorconst:ro kills :cc.
+testb "testb" rm12:ro, regorconst:ro kills :cc.
+testb "testb" REG+REG1:ro, rmorconst:ro kills :cc.
+testb "testb" ACC+ACC1:ro, const:ro kills :cc.
+xchg rm:rw, anyreg:rw.
+xchg anyreg:rw, rm:rw.
+xor rm:rw:cc, regorconst:ro.
+xor anyreg:rw:cc, rmorconst:ro.
+xorb rm1:rw:cc, regorconst12:ro.
+xorb anyreg:rw:cc, rm1:ro.
+killreg "! kill" anyreg:wo cost(0,0).
+
+data ".sect .data".
+word ".data2" const:ro.
+text ".sect .text".
+
+
+/*****************************************************************/
+MOVES
+/*****************************************************************/
+
+#ifdef REGVARS
+from memory2 to LOCAL		/* unsafe !!! */
+gen mov %2,%1
+#endif
+
+from rm to register
+gen mov %2,%1
+
+from anyreg to dest
+gen mov %2,%1
+
+from halfindir to register+AREG
+gen lea %2,%1
+
+from rm1 to REG1
+gen movb %2,%1
+
+from GENREG to rm1
+gen movb %2,%1.1
+
+from ANYCON %val==0 to register
+gen xor %2,%2
+
+from ANYCON %val==0 to REG1
+gen xorb %2,%2
+
+from const to dest
+gen mov %2,%1
+
+from const+REG1 to rm1
+gen movb %2,%1
+
+
+/*****************************************************************/
+TESTS
+/*****************************************************************/
+
+to test anyreg
+gen OR %1,%1
+
+to test memory2
+gen cmp %1, {ANYCON,0}
+
+to test REG1
+gen ORB %1,%1
+
+to test memory1
+gen cmpb %1, {ANYCON,0}
+
+
+/*****************************************************************/
+STACKINGRULES
+/*****************************************************************/
+
+from anyreg to STACK
+  gen push %1
+
+from memory2 to STACK
+  gen push %1
+
+from const to STACK
+  uses REG
+  gen move %1,%a
+      push %a
+
+from const to STACK
+  gen data.
+      1:
+      word %1
+      text.
+      push {EXTERN2,"1b"}
+
+from rm1 to STACK
+  uses GENREG
+  gen move {ANYCON,0},%a
+      move %1,%a.1
+      push %a
+
+from rm1 to STACK
+  gen push %1
+      push bx
+      mov bx,sp
+      movb {ind_regoff1,bx,3},{ANYCON,0}
+      pop bx
+
+from Xreg_off to STACK
+  gen add %1.reg,{ADDR_EXTERN,%1.off}
+      push %1.reg
+
+from Xbpreg_off to STACK
+  gen move %1,%1.reg
+      push %1.reg
+
+from ADDR_LOCAL %ind==0 to STACK
+  gen push bp
+
+from halfindir to STACK
+  uses REG
+  gen move %1,%a
+      push %a
+
+from halfindir to STACK
+  gen push ax
+      push bx
+      lea ax,%1
+      mov bx,sp
+      xchg {ind_regoff2,bx,2},ax
+      pop bx
+
+
+/*****************************************************************/
+COERCIONS
+/*****************************************************************/
+
+/***************************
+ * From source to register *
+ ***************************/
+
+from rmorconst
+  uses reusing %1,REG=%1		yields %a
+
+from Xreg_off
+  gen add %1.reg,{ADDR_EXTERN,%1.off}			yields %1.reg
+
+from halfindir
+  uses reusing %1,ADDREG
+  gen move %1,%a			yields %a
+
+/************************
+ * From source to token *
+ ************************/
+
+from ANYCON				yields {ADDR_EXTERN,%1.val}
+
+/****************
+ * From source1 *
+ ****************/
+
+from rm1
+  uses reusing %1,REG1=%1		yields %a
+
+from rm1
+  uses reusing %1,GENREG
+  gen move %1,%a.1
+      xorb %a.2,%a.2			yields %a
+
+from ACC1
+  uses reusing %1,ACC
+  gen xorb %a.2,%a.2			yields %a
+
+/************************
+ * From STACK coercions *
+ ************************/
+
+from STACK
+  uses REG
+  gen pop %a				yields %a
+
+
+/*****************************************************************/
+PATTERNS
+/*****************************************************************/
+
+/******************************************************************
+ *  Group 1 : Load Instructions                                   *
+ ******************************************************************/
+
+pat loc					yields {ANYCON,$1}
+
+pat ldc					yields {ANYCON,highw($1)}
+				       	       {ANYCON,loww($1)}
+
+pat lol					yields {LOCAL,$1,2}
+
+pat lol lol $1==$2
+#ifdef REGVARS
+	    && inreg($1) <= 0
+#endif
+  uses GENREG = {LOCAL, $1, 2}		yields %a %a
+
+pat loe					yields {EXTERN2,$1}
+
+pat loe loe $1==$2
+  uses GENREG = {EXTERN2, $1}		yields %a %a
+
+#ifndef LARGE
+#ifdef REGVARS
+pat lil inreg($1) > 0			yields {ind_reg2, regvar($1)}
+#endif
+#endif
+pat lil	
+  uses ADDREG={ind_regoff2,bp,$1}    	yields {ind_reg2,%a}
+
+pat lof	
+  with exact reg_off		yields {ind_regoff2,%1.reg,%1.off+$1}
+  with addreg			yields {ind_regoff2,%1,$1}
+  with exact bpreg_off		yields {ind_bpregoff2,%1.reg,%1.ind+$1}
+  with exact ADDR_EXTERN	yields {EXTERN2,%1.off+$1}
+  with exact ADDR_LOCAL		yields {LOCAL,%1.ind + $1,2}
+
+pat lal					yields {ADDR_LOCAL,$1}
+
+pat lae					yields {ADDR_EXTERN,$1}
+
+pat lpb 					leaving adp SL
+
+pat lxl $1==0				yields {ADDR_LOCAL,0}
+
+pat lxl $1==1				yields {LOCAL,SL,2}
+
+pat lxl $1==2				
+  uses ADDREG={ind_regoff2,bp,SSL}	yields {ind_regoff2,%a,SSL}
+
+pat lxl $1>2				
+  uses ADDREG={ind_regoff2,bp,SSL},
+       CXREG={ANYCON,$1-1}
+  gen 1:
+      mov %a,{ind_regoff2,%a,4}
+      loop {label,1b}			yields %a
+
+pat lxa $1==0				yields {ADDR_LOCAL,SL}
+
+pat lxa $1==1 				
+  uses ADDREG={ind_regoff2,bp,SSL}	yields {Xreg_off,%a,SSL}
+
+pat lxa $1==2
+  uses ADDREG={ind_regoff2,bp,SSL}
+  gen move {ind_regoff2,%a,SSL},%a	yields {Xreg_off,%a,SSL}
+
+pat lxa $1>2	
+  uses ADDREG={ind_regoff2,bp,SSL},
+       CXREG={ANYCON,$1-1}
+  gen 1:
+      mov %a,{ind_regoff2,%a,4}
+      loop {label,1b}			yields {Xreg_off,%a,SSL}
+
+pat dch						leaving loi 2
+
+pat loi $1==2			
+  with addreg			yields {ind_reg2,%1}
+  with exact reg_off		yields {ind_regoff2,%1.reg,%1.off}
+  with exact bpreg_off		yields {ind_bpregoff2,%1.reg,%1.ind}
+  with exact ADDR_EXTERN	yields {EXTERN2,%1.off}
+  with exact ADDR_LOCAL		yields {LOCAL,%1.ind,2}
+
+pat loi $1==1
+  with addreg			yields {ind_reg1,%1}
+  with exact reg_off		yields {ind_regoff1,%1.reg,%1.off}
+  with exact bpreg_off		yields {ind_bpregoff1,%1.reg,%1.ind}
+  with exact ADDR_EXTERN	yields {EXTERN1,%1.off}
+  with exact ADDR_LOCAL		yields {LOCAL1,%1.ind,1}
+
+pat loi $1==4
+  with addreg			yields {ind_regoff2,%1,2}
+				       {ind_reg2,%1}
+  with exact reg_off		yields {ind_regoff2,%1.reg,%1.off+2}
+  				       {ind_regoff2,%1.reg,%1.off}
+  with exact bpreg_off		yields {ind_bpregoff2,%1.reg,%1.ind+2}
+				       {ind_bpregoff2,%1.reg,%1.ind}
+  with exact ADDR_LOCAL         yields {LOCAL,%1.ind+2,2}
+				       {LOCAL,%1.ind,2}
+  with exact ADDR_EXTERN	yields {EXTERN2,%1.off + 2}
+ 				       {EXTERN2,%1.off}
+
+pat loi $1>4
+  with BXREG
+  kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label,".loi"}
+
+pat los $1==2
+  with CXREG BXREG
+  kills ALL
+  gen joehoe {label,".loi"}
+
+pat los !defined($1)
+  with rm CXREG BXREG
+  kills ALL
+  gen cmp %1,{ANYCON,2}
+      jne {label,".unknown"}
+      joehoe {label,".loi"}
+
+pat ldl					yields {LOCAL,$1+2,2}
+					       {LOCAL,$1,2}
+
+pat lde 				yields {EXTERN2,$1 + 2}
+					       {EXTERN2,$1}
+
+pat ldf	
+  with exact reg_off			yields {ind_regoff2,%1.reg,
+					        %1.off + 2 + $1}
+ 					       {ind_regoff2,%1.reg,
+ 						%1.off + $1}
+  with addreg				yields {ind_regoff2,%1,$1+2}
+                                               {ind_regoff2,%1,$1}
+  with exact bpreg_off	yields {ind_bpregoff2,%1.reg,%1.ind+2+$1}
+			       {ind_bpregoff2,%1.reg,%1.ind+$1}
+  with exact ADDR_EXTERN	yields {EXTERN2,%1.off+2+$1}
+				       {EXTERN2,%1.off+$1}
+  with exact ADDR_LOCAL		yields {LOCAL,%1.ind + $1 + 2,2}
+				       {LOCAL,%1.ind + $1,2}
+
+pat lpi				yields {ADDR_EXTERN,$1}
+
+/* this code sequence is generated by the C-compiler to tackle
+   char parameters, on the 8086 it reduces to nil */
+
+pat lol lal sti $1==$2 && $3<=2
+
+/*******************************************************************
+ *  Group 2 : Store Instructions                                   *
+ *******************************************************************/
+
+#ifdef REGVARS
+pat stl inreg($1)==reg_any
+  with rmorconst
+  kills regvar($1)
+  gen move %1, {LOCAL,$1,2}
+  with exact STACK
+  kills regvar($1)
+  gen pop {LOCAL, $1, 2}
+#endif
+pat stl
+  with regorconst
+  kills indexed,locals %ind>=$1 && %ind<$1+2
+  gen move %1,{ind_regoff2,bp,$1}
+  with exact STACK
+  kills ALL
+  gen pop {ind_regoff2,bp,$1}
+
+pat ste
+  with regorconst
+  kills indirects
+  gen move %1,{EXTERN2,$1}
+  with exact STACK
+  kills ALL
+  gen pop {EXTERN2,$1}
+
+#ifdef REGVARS
+pat sil inreg($1)==reg_any
+  with regorconst
+  kills referals
+  gen move %1,{ind_reg2,regvar($1)}
+  with exact STACK
+  kills ALL
+  gen pop {ind_reg2,regvar($1)}
+#endif
+pat sil
+  with regorconstnoaddr
+  kills referals
+  uses ADDREG={ind_regoff2,bp,$1}
+  gen move %1,{ind_reg2,%a}
+      killreg %a
+  with exact STACK
+  kills ALL
+  uses ADDREG={ind_regoff2,bp,$1}
+  gen pop {ind_reg2,%a}
+      killreg %a
+
+pat stf
+  with addreg regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1,$1}
+  with exact addreg STACK
+  kills ALL
+  gen pop {ind_regoff2, %1,$1}
+  with reg_off regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
+  with exact reg_off STACK
+  gen pop {ADDR_EXTERN,$1+%1.off}
+  with exact bpreg_off STACK
+  gen pop {ADDR_EXTERN,$1+%1.ind}
+  with exact ADDR_LOCAL STACK
+  gen pop {ADDR_EXTERN,$1+%1.ind}
+  with exact ADDR_LOCAL				leaving stl %1.ind+$1
+  with bpreg_off regorconst
+  kills all_locals,indexed
+  gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
+
+/* ??? why commented out ???
+  with ADDR_EXTERN regorconst
+  kills indirects
+  gen move %2,{EXTERN2,%1.off+$1}
+*/
+
+pat sti $1==2
+  with addreg regorconst
+  kills referals
+  gen move %2,{ind_reg2,%1}
+  with exact addreg STACK
+  kills ALL
+  gen pop {ind_reg2,%1}
+  with reg_off regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1.reg,%1.off}
+  with exact reg_off STACK
+  kills ALL
+  gen pop {ind_regoff2,%1.reg,%1.off}
+  with exact ADDR_LOCAL				leaving stl %1.ind
+  with bpreg_off regorconst
+  kills all_locals,indexed
+  gen move %2,{ind_bpregoff2,%1.reg,%1.ind}
+  with exact bpreg_off STACK
+  gen pop {ind_bpregoff2,%1.reg,%1.ind}
+  with ADDR_EXTERN regorconst
+  kills indirects
+  gen move %2,{EXTERN2,%1.off}
+  with exact ADDR_EXTERN STACK
+  kills ALL
+  gen pop {EXTERN1,%1.off}
+
+pat sti $1==1
+  with addreg regorconst12
+  kills referals
+  gen move %2,{ind_reg1,%1}
+  with reg_off regorconst12
+  kills referals
+  gen move %2,{ind_regoff1,%1.reg,%1.off}
+  with bpreg_off regorconst12
+  kills all_locals,indexed
+  gen move %2,{ind_bpregoff1,%1.reg,%1.ind}
+  with ADDR_EXTERN regorconst12
+  kills indirects
+  gen move %2,{EXTERN1,%1.off}
+  with ADDR_LOCAL regorconst12
+  kills indexed,locals %ind<=%1.ind && %ind+%size>%1.ind
+  gen move %2,{ind_regoff1,bp,%1.ind}
+
+pat sti $1==4
+  with addreg regorconst regorconst
+  kills referals
+  gen move %2,{ind_reg2,%1}
+      move %3,{ind_regoff2,%1,2}
+  with exact addreg STACK
+  kills referals
+  gen pop {ind_reg2,%1}
+      pop {ind_regoff2,%1,2}
+  with reg_off regorconst regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1.reg,%1.off}
+      move %3,{ind_regoff2,%1.reg,%1.off+2}
+  with exact reg_off STACK
+  kills referals
+  gen pop {ind_regoff2,%1.reg,%1.off}
+      pop {ind_regoff2,%1.reg,%1.off+2}
+  with bpreg_off regorconst regorconst
+  kills all_locals,indexed
+  gen move %2,{ind_bpregoff2,%1.reg,%1.ind}
+      move %3,{ind_bpregoff2,%1.reg,%1.ind+2}
+  with exact bpreg_off STACK
+  kills all_locals,indexed
+  gen pop {ind_bpregoff2,%1.reg,%1.ind}
+      pop {ind_bpregoff2,%1.reg,%1.ind+2}
+  with ADDR_EXTERN regorconst regorconst
+  kills indirects
+  gen move %2,{EXTERN2,%1.off}
+      move %3,{EXTERN2,%1.off+2}
+  with exact ADDR_EXTERN STACK
+  kills indirects
+  gen pop {EXTERN2,%1.off}
+      pop {EXTERN2,%1.off+2}
+  with ADDR_LOCAL regorconst regorconst
+  kills indexed,locals %ind>=%1.ind && %ind<%1.ind+4
+  gen move %2,{ind_regoff2,bp,%1.ind}
+      move %3,{ind_regoff2,bp,%1.ind+2}
+  with exact ADDR_LOCAL STACK
+  kills indexed,locals %ind>=%1.ind && %ind<%1.ind+4
+  gen pop {ind_regoff2,bp,%1.ind}
+      pop {ind_regoff2,bp,%1.ind+2}
+
+pat sti $1>4
+  with BXREG
+  kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".sti"}
+
+/* this sort of construction gives problems in the codegenerator
+   because of the potential very large lookahead                 
+
+  with addreg 
+  kills ALL
+  gen pop (%1)
+      add %1,{ANYCON,2} 		yields %1	leaving sti $1-2
+
+*/
+
+pat sts $1==2
+  with CXREG BXREG
+  kills ALL
+  gen joehoe {label,".sti"}
+
+pat sdl
+  with regorconst regorconst	yields %2 %1
+					leaving stl $1 stl $1+2
+  with exact STACK			leaving stl $1 stl $1+2
+
+pat sde
+  with regorconst regorconst	yields %2 %1
+					leaving ste $1 ste $1+2
+  with exact STACK			leaving ste $1 ste $1+2
+
+pat sdf		
+  with addreg regorconst regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1,$1}
+      move %3,{ind_regoff2,%1,$1+2}
+  with exact addreg STACK
+  kills ALL
+  gen pop {ind_regoff2,%1,$1}
+      pop {ind_regoff2,%1,$1+2}
+  with reg_off regorconst regorconst
+  kills referals
+  gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
+      move %3,{ind_regoff2,%1.reg,%1.off+$1+2}
+  with exact reg_off STACK
+  kills ALL
+  gen pop {ADDR_EXTERN,$1+%1.off}
+      pop {ADDR_EXTERN,$1+2+%1.off}
+  with exact bpreg_off STACK
+  kills ALL
+  gen pop {ADDR_EXTERN,$1+%1.ind}
+      pop {ADDR_EXTERN,$1+2+%1.ind}
+  with exact ADDR_LOCAL STACK
+  kills ALL
+  gen pop {ADDR_EXTERN,$1+%1.ind}
+      pop {ADDR_EXTERN,$1+2+%1.ind}
+
+/* Funny things happen when the sign changes in the stl parameters */
+
+  with exact ADDR_LOCAL				leaving stl %1.ind+$1
+							stl %1.ind+$1+2
+  with bpreg_off regorconst regorconst
+  kills all_locals,indexed
+  gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
+      move %3,{ind_bpregoff2,%1.reg,%1.ind+$1+2}
+  with halfindir regorconst
+  kills referals
+  gen mov %1,%2			yields %1	leaving stf $1+2
+
+
+/****************************************************************
+ *  Group 3 : Integer Arithmetic.				*
+ *								*
+ *  Implemented (sometimes with the use of subroutines) :	*
+ *  all 2 and 4 byte arithmetic. 				*
+ ****************************************************************/
+
+pat adi $1==2
+with EXACT REG rmorconst
+  gen add %1,%2			yields %1
+with rmorconst REG
+  gen add %2,%1			yields %2
+with ACC const
+  gen add %1,%2			yields %1
+with const ACC
+  gen add %2,%1			yields %2
+
+pat adi $1==4
+with EXACT REG REG rmorconst rmorconst
+  gen add %1,%3
+      adc %2,%4			yields %2 %1
+with exact ACC REG const rmorconst
+  gen add %1,%3
+      adc %2,%4			yields %2 %1
+with rmorconst rmorconst REG REG
+  gen add %3,%1
+      adc %4,%2			yields %4 %3
+with exact const rmorconst ACC REG
+  gen add %3,%1
+      adc %4,%2			yields %4 %3
+
+pat adi !defined($1)
+with CXREG ACC
+  kills ALL
+  gen joehoe {label,".adi"}	yields ax
+
+pat sbi $1==2
+
+with rmorconst REG
+  gen sub %2,%1			yields %2
+with const ACC
+  gen sub %2,%1			yields %2
+with EXACT REG rmorconst
+  gen sub %1,%2
+      neg %1			yields %1
+with EXACT ACC const
+  gen sub %1,%2
+      neg %1			yields %1
+
+pat sbi $1==4
+with rmorconst rmorconst REG REG
+  gen sub %3,%1
+      sbb %4,%2			yields %4 %3
+with exact const rmorconst-ACC ACC REG
+  gen sub %3,%1
+      sbb %4,%2			yields %4 %3
+
+pat sbi !defined($1)
+with CXREG ACC
+  kills ALL
+  gen joehoe {label,".sbi"}	yields ax
+
+pat mli $1==2
+with ACC rm
+  uses reusing %2,DXREG
+  gen mul %2			yields %1
+			/* mul and imul have same low order result
+			   but mul is faster
+			*/
+
+with rmnoacc rmorconst
+  uses reusing %2,DXREG,ACC=%2
+  gen mul %1			yields %b
+
+pat mli $1==4
+with ACC DXREG
+  kills ALL
+  gen joehoe {label,".mli4"}	yields dx ax
+
+/* 
+pat mli !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".mli"}
+*/
+
+pat dvi $1==2
+with rmnoacc rmorconst
+  uses reusing %2,DXREG,ACC=%2
+  gen cwd.
+      idiv %1			yields ax
+
+pat dvi $1==4
+kills ALL
+  gen joehoe {label,".dvi4"}	yields cx ax
+
+/*
+pat dvi !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".dvi"}
+*/
+
+#ifdef LONGEMPAT
+pat loc loc cii dvi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
+  with rmnoacc ACC DXREG
+  gen idiv %1			yields ax
+#endif
+
+pat rmi $1==2
+with rmnoacc rmorconst
+  uses reusing %2, ACC=%2, DXREG
+  gen cwd.
+      idiv %1			yields dx
+
+pat rmi $1==4
+kills ALL
+  gen joehoe {label,".rmi4"}	yields bx dx
+
+/*
+pat rmi !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".rmi"}
+*/
+
+#ifdef LONGEMPAT
+pat loc loc cii rmi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
+with rmnoacc ACC DXREG
+  gen idiv %1			yields dx
+#endif
+
+pat ngi $1==2
+with REG
+  gen neg %1			yields %1
+
+pat ngi $1==4
+with REG REG
+  gen neg %2
+      neg %1
+      sbb %2,{ANYCON,0}		yields %2 %1
+
+/*
+pat ngi !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".ngi"}
+*/
+
+pat loc sli $1==1 && $2==2
+with REG
+  gen sal %1,{ANYCON,1}		yields %1
+
+pat loc sli $1==1 && $2==4
+with REG REG
+  gen sal %1,{ANYCON,1}
+      rcl %2,{ANYCON,1}		yields %2 %1
+
+pat loc sli $1==16 && $2==4
+with rmorconst rmorconst	yields %1 {ANYCON,0}
+
+pat sli $1==2
+with SHIFT_CREG REG
+  gen sal %2,cl			yields %2
+
+pat sli $1==4
+with CXREG REG REG
+  gen jcxz {label,1f}
+      2:
+      sal %2,{ANYCON,1}
+      rcl %3,{ANYCON,1}
+      loop {label,2b}
+      1:
+				yields %3 %2
+
+/*
+pat sli !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".sli"}
+*/
+
+pat loc sri $1==1 && $2==2
+with REG
+  gen sar %1,{ANYCON,1}		yields %1
+
+pat loc sri $1==1 && $2==4
+with REG REG
+  gen sar %2,{ANYCON,1}
+      rcr %1,{ANYCON,1}		yields %2 %1
+
+pat sri $1==2
+with SHIFT_CREG REG
+  gen sar %2,cl			yields %2
+
+pat sri $1==4
+with CXREG REG REG
+  gen jcxz {label,1f}
+      2:
+      sar %3,{ANYCON,1}
+      rcr %2,{ANYCON,1}
+      loop {label,2b}
+      1:
+				yields %3 %2
+
+/*
+pat sri !defined($1)
+with ACC
+  kills ALL
+  gen joehoe {label,".sri"}
+*/
+
+/*******************************************************************
+ *  Group 4: Unsigned Arithmetic                                   *
+ *******************************************************************/
+
+pat adu					leaving adi $1
+pat sbu					leaving sbi $1
+pat mlu					leaving mli $1
+
+pat dvu $1==2
+with rmnoacc rmorconst
+uses reusing %2, ACC=%2,  DXREG={ANYCON,0}
+gen div %1			yields ax
+
+pat dvu $1==4
+kills ALL
+gen joehoe {label,".dvu4"}	yields dx ax
+
+/*
+pat dvu !defined($1)
+with ACC STACK
+gen joehoe {label,".dvu"}
+*/
+
+pat rmu $1==2
+with rmnoacc rmorconst
+uses reusing %2, ACC=%2, DXREG={ANYCON,0}
+gen div %1			yields dx
+
+pat rmu $1==4
+kills ALL
+gen joehoe {label,".rmu4"}	yields dx ax
+
+/*
+pat rmu !defined($1)
+with ACC STACK
+gen joehoe {label,".rmu"}
+*/
+
+pat slu					leaving sli $1
+pat loc slu				leaving loc $1 sli $2
+pat lol loc slu				leaving lol $1 loc $2 sli $3
+
+pat loc sru $1==1 && $2==2
+with REG
+gen shr %1,{ANYCON, 1}			yields %1
+
+pat loc sru $1==16 && $2==4
+with rmorconst rmorconst		yields {ANYCON,0} %2
+
+pat sru $1==2
+with SHIFT_CREG REG
+gen shr %2,cl			yields %2
+
+pat sru $1==4
+with CXREG REG REG
+gen jcxz {label,1f}
+    2:
+    shr %3,{ANYCON, 1}
+    rcr %2,{ANYCON, 1}
+    loop {label,2b}
+    1:				yields %3 %2
+
+/*
+pat sru !defined($1)
+with ACC STACK
+gen joehoe {label,".sru"}
+*/
+
+/*******************************************************************
+ *  Group 5: Floating Point Instructions                           *
+ *******************************************************************/
+
+pat adf $1==4		leaving cal ".adf4" asp 4
+pat adf $1==8		leaving cal ".adf8" asp 8
+pat sbf $1==4		leaving cal ".sbf4" asp 4
+pat sbf $1==8		leaving cal ".sbf8" asp 8
+pat mlf $1==4		leaving cal ".mlf4" asp 4
+pat mlf $1==8		leaving cal ".mlf8" asp 8
+pat dvf $1==4		leaving cal ".dvf4" asp 4
+pat dvf $1==8		leaving cal ".dvf8" asp 8
+pat ngf $1==4		leaving cal ".ngf4"
+pat ngf $1==8		leaving cal ".ngf8"
+pat fif $1==4		leaving cal ".fif4"
+pat fif $1==8		leaving cal ".fif8"
+pat fef $1==4
+with REG REG
+  kills ALL
+  gen push %2
+      push %2
+      push %1		leaving cal ".fef4"
+pat fef $1==8
+with REG REG REG REG
+  kills ALL
+  gen push %4
+      push %4
+      push %3
+      push %2
+      push %1		leaving cal ".fef8"
+
+/******************************************************************
+ *  Group 6: Pointer Arithmetic                                   *
+ ******************************************************************/
+
+pat adp $1==1
+with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
+with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
+with exact ADDR_EXTERN	yields {ADDR_EXTERN,%1.off+$1}
+with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
+with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
+with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
+with REG
+  gen inc %1		yields %1
+with ADDREG		yields {Xreg_off, %1, $1}
+with exact RADDREG	yields {Rreg_off, %1, $1}
+
+pat adp $1==0-1
+with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
+with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
+with exact ADDR_EXTERN  yields {ADDR_EXTERN,%1.off+$1}
+with exact ADDR_LOCAL   yields {ADDR_LOCAL,%1.ind+$1}
+with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
+with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
+with REG
+  gen dec %1		yields %1
+with ADDREG		yields {Xreg_off, %1, $1}
+with exact RADDREG	yields {Rreg_off, %1, $1}
+
+pat adp
+with exact Xreg_off	yields {Xreg_off,%1.reg,%1.off+$1}
+with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
+with exact ADDR_EXTERN	yields {ADDR_EXTERN,%1.off+$1}
+with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
+with exact Xbpreg_off	yields {Xbpreg_off,%1.reg,%1.ind+$1}
+with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
+with ADDREG		yields {Xreg_off,%1,$1}
+with exact RADDREG	yields {Rreg_off, %1, $1}
+with REG
+  gen add %1,{ANYCON,$1}	yields %1
+
+pat ads $1==2
+with exact ANYCON Rreg_off
+			yields {Rreg_off,%2.reg,%2.off+%1.val}
+with exact ANYCON Xreg_off
+			yields {Xreg_off,%2.reg,%2.off+%1.val}
+with exact ADDR_EXTERN Rreg_off
+			yields {Rreg_off,%2.reg,%2.off+%1.off}
+with exact ADDR_EXTERN Xreg_off
+			yields {Xreg_off,%2.reg,%2.off+%1.off}
+with rm Xreg_off
+  gen add %2.reg,%1	yields {Xreg_off,%2.reg,%2.off}
+with exact ANYCON Xbpreg_off
+			yields {Xbpreg_off,%2.reg,%2.ind+%1.val}
+with exact ANYCON Rbpreg_off
+			yields {Xbpreg_off,%2.reg,%2.ind+%1.val}
+with rm Xbpreg_off
+  gen add %2.reg,%1	yields {Xbpreg_off,%2.reg,%2.ind}
+with Xreg_off rmorconst
+  gen add %1.reg,%2	yields {Xreg_off,%1.reg,%1.off}
+with Xbpreg_off rmorconst
+  gen add %1.reg,%2	yields {Xbpreg_off,%1.reg,%1.ind}
+with exact Xreg_off ANYCON
+			yields {Xreg_off,%1.reg,%1.off+%2.val}
+with exact Rreg_off ANYCON
+			yields {Rreg_off,%1.reg,%1.off+%2.val}
+with exact Xreg_off ADDR_EXTERN
+			yields {Xreg_off,%1.reg,%1.off+%2.off}
+with exact Rreg_off ADDR_EXTERN
+			yields {Rreg_off,%1.reg,%1.off+%2.off}
+with exact Xreg_off reg_off
+  gen add %1.reg,%2.reg
+			yields {Xreg_off,%1.reg,%1.off+%2.off}
+#ifndef REGVARS
+with IREG ADDR_LOCAL
+			yields {Xbpreg_off,%1,%2.ind}
+
+/*
+with (REG-IREG) ADDR_LOCAL
+  uses reusing %1,ADDREG=%1
+  gen add %a,bp		yields {reg_off,%a,%2.ind}
+*/
+#else
+with exact RREG ADDR_LOCAL
+			yields {Rbpreg_off, %1, %2.ind}
+with exact RREG ADDR_EXTERN
+			yields {Rreg_off, %1, %2.off}
+with exact ADDR_EXTERN RREG
+			yields {Rreg_off,%2,%1.off}
+with exact ADDR_LOCAL RREG
+			yields {Rbpreg_off,%2,%1.ind}
+#endif
+
+with exact ADDREG ADDR_EXTERN
+			yields {Xreg_off,%1,%2.off}
+with exact ADDREG ADDR_LOCAL
+			yields {Xbpreg_off,%1,%2.ind}
+with ADDREG rm
+  gen add %1,%2		yields %1
+with exact ADDR_EXTERN ADDREG
+			yields {Xreg_off,%2,%1.off}
+with exact ADDR_LOCAL ADDREG
+			yields {Xbpreg_off,%2,%1.ind}
+with rm ADDREG
+  gen add %2,%1		yields %2
+
+pat sbs $1==2
+with exact ANYCON Xreg_off
+			yields {Xreg_off,%2.reg,%2.off+"-"+%1.val}
+with exact ANYCON Rreg_off
+			yields {Rreg_off,%2.reg,%2.off+"-"+%1.val}
+with exact ANYCON ADDR_LOCAL
+			yields {ADDR_LOCAL,%2.ind-%1.val}
+with rm Xreg_off
+  gen sub %2.reg,%1	yields {Xreg_off,%2.reg,%2.off}
+
+/* Should not occur
+with exact reg_off ANYCON
+			yields {reg_off,%1.reg,%1.off-%2.val}
+with ANYCON ADDR_EXTERN
+			yields {ADDR_EXTERN,%2.off+%1.val}
+with exact ANYCON ADDR_LOCAL
+			yields {ADDR_LOCAL,%1.val+%2.ind}
+*/
+
+with rm REG
+  gen sub %2,%1		yields %2
+with const ACC
+  gen sub %2,%1		yields %2
+
+/*******************************************************************
+ *  Group 7 : Increment/Decrement Zero                             *
+ *******************************************************************/
+
+pat inc
+with REG
+gen inc %1			yields %1
+
+#ifdef REGVARS
+pat inl inreg($1)==reg_any
+  kills regvar($1)
+  gen inc {LOCAL,$1,2}
+#endif
+
+pat inl 
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen inc {LOCAL, $1, 2}
+
+pat ine
+kills indirects
+gen inc {EXTERN2, $1}
+
+pat dec
+with REG
+gen dec %1			yields %1
+
+#ifdef REGVARS
+pat del inreg($1)==reg_any
+  kills regvar($1)
+  gen dec {LOCAL,$1,2}
+#endif
+
+pat del 
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen dec {LOCAL, $1, 2}
+
+pat dee
+kills indirects
+gen dec {EXTERN2, $1}
+
+#ifdef REGVARS
+pat zrl inreg($1)==reg_any
+  kills regvar($1)
+  gen move {ANYCON, 0}, {LOCAL,$1,2}
+#endif
+
+pat zrl 
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen move {ANYCON, 0}, {LOCAL,$1,2}
+
+pat zre
+kills indirects
+gen move {ANYCON, 0},  {EXTERN2, $1}
+
+pat zrf			leaving zer $1
+
+pat zer $1==2			yields {ANYCON, 0}	
+pat zer $1==4			yields {ANYCON, 0} {ANYCON, 0}	
+pat zer $1==6			yields {ANYCON, 0} {ANYCON, 0} 
+				       {ANYCON, 0}	
+pat zer $1==8			yields {ANYCON, 0} {ANYCON, 0} 
+				       {ANYCON, 0} {ANYCON, 0}	
+
+pat zer defined($1)
+with STACK
+gen move {ANYCON, $1/2}, cx
+    move {ANYCON, 0}, bx
+    1:
+    push bx
+    loop {label,1b}
+
+pat zer !defined($1)
+with CXREG STACK
+gen move {ANYCON, $1/2}, bx
+    sar cx,{ANYCON, 1}
+    1:
+    push bx
+    loop {label,1b}
+
+#ifdef REGVARS
+pat lol adi stl $1==$3 && $2==2 && inreg($1)==reg_any
+with rmorconst
+  kills regvar($1)
+  gen add {LOCAL,$1,2}, %1
+#endif
+
+pat lol adi stl $1==$3 && $2==2
+with regorconst
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen add {LOCAL, $1, 2}, %1
+
+pat ldl adi sdl $1==$3 && $2==4
+with regorconst regorconst
+  kills indexed, locals %ind>=$1 && %ind<$1+4
+  gen add {LOCAL,$1,2},%1
+      adc {LOCAL,$1+2,2},%2
+
+#ifdef REGVARS
+pat lol loc sbi stl $1==$4 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  gen sub {LOCAL,$1,2},{ANYCON,$2}
+#endif
+
+pat lol loc sbi stl $1==$4 && $3==2
+  kills indexed, locals %ind>=$1 && %ind<$1+2
+  gen sub {LOCAL,$1,2},{ANYCON,$2}
+
+#ifdef REGVARS
+pat lol loc sli stl $1==$4 && $2==1 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  gen sal {LOCAL,$1,2},{ANYCON,1}
+pat lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  gen sal {LOCAL,$1,2},{ANYCON,1}
+      sal {LOCAL,$1,2},{ANYCON,1}
+pat lol loc sli stl $1==$4 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  uses CXREG={ANYCON,2}
+  gen sal {LOCAL,$1,2},cl
+pat lol loc sri stl $1==$4 && $2==1 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  gen sar {LOCAL,$1,2},{ANYCON,1}
+pat lol loc sri stl $1==$4 && $2==2 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  gen sar {LOCAL,$1,2},{ANYCON,1}
+      sar {LOCAL,$1,2},{ANYCON,1}
+pat lol loc sri stl $1==$4 && $3==2 && inreg($1)==reg_any
+  kills regvar($1)
+  uses CXREG={ANYCON,2}
+  gen sar {LOCAL,$1,2},cl
+#endif
+#ifdef REGVARS
+pat lol ngi stl $1==$3 && $2==2 && inreg($1)==reg_any
+kills regvar($1)
+gen neg {LOCAL, $1, 2}
+#endif
+
+pat lol ngi stl $1==$3 && $2==2
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen neg {LOCAL, $1, 2}
+
+pat ldl ngi stl $1==$3 && $2==4
+kills indexed, locals %ind>=$1 && %ind<$1+4
+gen neg {LOCAL, $1, 2}
+    neg {LOCAL, $1+2, 2}
+    sbb {LOCAL, $1+2, 2}, {ANYCON, 0}
+ 
+pat lol ads stl $1==$3 && $2==2		leaving lol $1 adi $2 stl $1
+
+pat lol lol adp stl $1==$2 && $2==$4
+uses ADDREG={LOCAL,$1,2}	yields %a
+					leaving lol $2 adp $3 stl $2
+
+pat lol inl $1==$2
+uses REG={LOCAL,$1,2}		yields %a
+					leaving inl $1
+
+pat lol del $1==$2
+uses REG={LOCAL,$1,2}		yields %a
+					leaving del $1
+
+pat lol adp stl $1==$3 && $2==1		leaving inl $1
+pat lol adp stl $1==$3 && $2==0-1	leaving del $1
+
+#ifdef REGVARS
+pat lol adp stl $1==$3 && inreg($1)==reg_any
+kills regvar($1)
+gen add {LOCAL,$1,2}, {ANYCON,$2}
+#endif
+
+pat lol adp stl $1==$3 
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen add {LOCAL,$1,2}, {ANYCON,$2}
+
+#ifdef REGVARS
+pat lol and stl $1==$3 && $2==2 && inreg($1)==reg_any
+with rmorconst
+kills regvar($1)
+gen and {LOCAL,$1,2}, %1
+#endif
+
+pat lol and stl $1==$3 && $2==2
+with regorconst
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen and {LOCAL, $1, 2}, %1
+
+#ifdef REGVARS
+pat lol ior stl $1==$3 && $2==2 && inreg($1)==reg_any
+with rmorconst
+kills regvar($1)
+gen or {LOCAL,$1,2}, %1
+#endif
+
+pat lol ior stl $1==$3 && $2==2
+with regorconst
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen or {LOCAL, $1, 2}, %1
+
+#ifdef REGVARS
+pat lol com stl $1==$3 && $2==2 && inreg($1)==reg_any
+kills regvar($1)
+gen not {LOCAL,$1,2}
+#endif
+
+pat lol com stl $1==$3 && $2==2
+kills indexed, locals %ind>=$1 && %ind<$1+2
+gen not {LOCAL, $1, 2}
+
+#ifdef REGVARS
+pat lil adi sil $1==$3 && $2==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen add {ind_reg2, regvar($1)}, %1
+#endif
+
+pat lil adi sil $1==$3 && $2==2
+with regorconst
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen add {ind_reg2, %a}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lil ngi sil $1==$3 && $2==2 && inreg($1)==reg_any
+kills referals
+gen neg {ind_reg2, regvar($1)}
+#endif
+
+pat lil ngi sil $1==$3 && $2==2
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen neg {ind_reg2, %a}
+    killreg %a
+
+pat lil ads sil $1==$3 && $2==2		leaving lil $1 adi $2 sil $3
+
+#ifdef REGVARS
+pat lil adp sil $1==$3 && $2==1 && inreg($1)==reg_any
+kills referals
+gen inc {ind_reg2, regvar($1)}
+
+pat lil adp sil $1==$3 && $2==0-1 && inreg($1)==reg_any
+kills referals
+gen dec {ind_reg2, regvar($1)}
+
+pat lil adp sil $1==$3 && inreg($1)==reg_any
+kills referals
+gen add {ind_reg2, regvar($1)}, {ANYCON,$2}
+#endif
+
+pat lil adp sil $1==$3 
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen add {ind_reg2, %a}, {ANYCON,$2}
+    killreg %a
+
+pat lil adp sil $1==$3 && $2==1
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen inc {ind_reg2, %a}
+    killreg %a
+
+pat lil adp sil $1==$3 && $2==0-1
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen dec {ind_reg2, %a}
+    killreg %a
+
+#ifdef REGVARS
+pat lil and sil $1==$3 && $2==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen and {ind_reg2, regvar($1)}, %1
+#endif
+
+pat lil and sil $1==$3 && $2==2
+with regorconst
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen and {ind_reg2, %a}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lil ior sil $1==$3 && $2==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen or {ind_reg2, regvar($1)}, %1
+#endif
+
+pat lil ior sil $1==$3 && $2==2
+with regorconst
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen or {ind_reg2, %a}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lil com sil $1==$3 && $2==2 && inreg($1)==reg_any
+kills referals
+gen not {ind_reg2, regvar($1)}
+#endif
+
+pat lil com sil $1==$3 && $2==2
+kills referals
+uses ADDREG={LOCAL, $1, 2}
+gen not {ind_reg2, %a}
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen add {ind_regoff2, regvar($1), $2}, %1
+#endif
+
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen add {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+kills referals
+gen neg {ind_regoff2, regvar($1), $2}
+#endif
+
+pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==2
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen neg {ind_regoff2, %a, $2}
+    killreg %a
+
+pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2
+			leaving lol $1 lof $2 ads $3 lol $4 stf $5
+
+#ifdef REGVARS
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1 && inreg($1)==reg_any
+kills referals
+gen inc {ind_regoff2, regvar($1), $2}
+#endif
+
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen inc {ind_regoff2, %a, $2}
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==0-1 && inreg($1)==reg_any
+kills referals
+gen dec {ind_regoff2, regvar($1), $2}
+#endif
+
+pat lol lof adp lol stf $1==$4 && $2==$5 && $3==0-1
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen dec {ind_regoff2, %a, $2}
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_any
+kills referals
+gen add {ind_regoff2, regvar($1), $2},{ANYCON,$3}
+#endif
+
+pat lol lof adp lol stf $1==$4 && $2==$5
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen add {ind_regoff2, %a, $2},{ANYCON,$3}
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof and lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen and {ind_regoff2, regvar($1), $2}, %1
+#endif
+
+pat lol lof and lol stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen and {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+with regorconst
+kills referals
+gen or {ind_regoff2, regvar($1), $2}, %1
+#endif
+
+pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen or {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+#ifdef REGVARS
+pat lol lof com lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+kills referals
+gen not {ind_regoff2, regvar($1), $2}
+#endif
+
+pat lol lof com lol stf $1==$4 && $2==$5 && $3==2
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen not {ind_regoff2, %a, $2}
+    killreg %a
+
+pat loe adi ste $1==$3 && $2==2
+with regorconst
+kills indirects
+gen add {EXTERN2, $1}, %1
+
+pat lde adi sde $1==$3 && $2==4
+with regorconst regorconst
+kills indirects
+gen add {EXTERN2, $1}, %1
+    adc {EXTERN2, $1+2}, %2
+
+pat loe ngi ste $1==$3 && $2==2
+kills indirects
+gen neg {EXTERN2, $1}
+
+pat lde ngi sde $1==$3 && $2==4
+kills indirects
+gen neg {EXTERN2, $1}
+    neg {EXTERN2, $1+2}
+    sbb {EXTERN2, $1+2}, {ANYCON, 0}
+
+pat loe ads ste $1==$3 && $2==2
+with regorconst
+kills indirects
+gen add {EXTERN2, $1}, %1
+
+pat loe loe adp ste $1==$2 && $1==$4
+uses ADDREG={EXTERN2,$1}	yields %a
+					leaving loe $1 adp $3 ste $1
+
+pat loe ine $1==$2
+uses ADDREG={EXTERN2,$1}	yields %a
+					leaving ine $1
+
+pat loe dee $1==$2
+uses ADDREG={EXTERN2,$1}	yields %a
+					leaving dee $1
+
+pat loe adp ste $1==$3
+kills indirects
+gen add {EXTERN2, $1}, {ANYCON,$2}
+
+pat loe adp ste $1==$3 && $2==1
+kills indirects
+gen inc {EXTERN2, $1}
+
+pat loe adp ste $1==$3 && $2==0-1
+kills indirects
+gen dec {EXTERN2, $1}
+
+pat loe and ste $1==$3 && $2==2
+with regorconst
+kills indirects
+gen and {EXTERN2, $1}, %1
+
+pat loe ior ste $1==$3 && $2==2
+with regorconst
+kills indirects
+gen or {EXTERN2, $1}, %1
+
+pat loe com ste $1==$3 && $2==2
+kills indirects
+gen not {EXTERN2, $1}
+
+pat loe lof adi loe stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen add {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat loe lof ngi loe stf $1==$4 && $2==$5 && $3==2
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen neg {ind_regoff2, %a, $2}
+    killreg %a
+
+pat loe lof adp loe stf $1==$4 && $2==$5 && $3==1
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen inc {ind_regoff2, %a, $2}
+    killreg %a
+
+pat loe lof adp loe stf $1==$4 && $2==$5 && $3==0-1
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen dec {ind_regoff2, %a, $2}
+    killreg %a
+
+pat loe lof adp loe stf $1==$4 && $2==$5
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen add {ind_regoff2, %a, $2}, {ANYCON, $3}
+    killreg %a
+
+pat loe lof ads loe stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen add {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat loe lof and loe stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen and {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat loe lof ior loe stf $1==$4 && $2==$5 && $3==2
+with regorconstnoaddr
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen or {ind_regoff2, %a, $2}, %1
+    killreg %a
+
+pat loe lof com loe stf $1==$4 && $2==$5 && $3==2
+kills referals
+uses ADDREG={EXTERN2,$1}
+gen not {ind_regoff2, %a, $2}
+    killreg %a
+
+/*******************************************************************
+ *  Group 8: Convert Instructions                                  *
+ *******************************************************************/
+
+pat cii
+with CXREG DXREG ACC
+kills ALL
+gen joehoe {label,".cii"}		yields %3
+
+pat ciu					leaving cuu
+pat cui					leaving cuu
+
+pat cuu
+with CXREG DXREG ACC
+kills ALL
+gen joehoe {label,".cuu"}		yields %3
+
+pat loc loc cii $1==1 && $2==2
+with ACC
+gen cbw.			yields ax
+with exact rmorconst1
+uses reusing %1, ACC1=%1
+gen cbw.			yields ax
+
+pat loc loc cii $1==1 && $2==4
+with ACC
+uses DXREG
+gen cbw.	
+    cwd.			yields dx ax
+with exact rmorconst1
+uses reusing %1, ACC1=%1, DXREG
+gen cbw.	
+    cwd.			yields dx ax
+
+pat loc loc cii $1==2 && $2==4
+with ACC
+uses DXREG
+gen  cwd.			yields dx ax
+
+pat loc loc cii $1==4 && $2==2
+with a_word a_word		yields %1
+
+pat loc loc ciu				leaving loc $1 loc $2 cuu
+pat loc loc cui				leaving loc $1 loc $2 cuu
+
+pat loc loc cuu $1==$2
+
+pat loc loc cuu $1==2 && $2==4
+with a_word			yields {ANYCON,0} %1
+
+pat loc loc cuu $1==4 && $2==2
+with a_word a_word		yields %1
+
+pat loc loc cif $1==2 && $2==4		leaving loc $1 cal ".cif4"
+pat loc loc cif $1==4 && $2==4		leaving loc $1 cal ".cif4" asp 2
+
+pat loc loc cif $1==2 && $2==8
+with REG
+kills ALL
+  gen push %1
+      push %1
+      push %1				leaving loc $1 cal ".cif8"
+
+pat loc loc cif $1==4 && $2==8
+with REG REG
+kills ALL
+  gen push %1
+      push %2
+      push %1				leaving loc $1 cal ".cif8"
+
+pat loc loc cuf $1==2 && $2==4		leaving loc $1 cal ".cuf4"
+pat loc loc cuf $1==4 && $2==4		leaving loc $1 cal ".cuf4" asp 2
+
+pat loc loc cuf $1==2 && $2==8
+with REG
+kills ALL
+  gen push %1
+      push %1
+      push %1				leaving loc $1 cal ".cuf8"
+
+pat loc loc cuf $1==4 && $2==8
+with REG REG
+kills ALL
+  gen push %1
+      push %2
+      push %1				leaving loc $1 cal ".cuf8"
+
+pat loc loc cfi $1==4 && $2==2	leaving loc $1 loc $2 cal ".cfi" asp 8 lfr 2
+pat loc loc cfi $2==4		leaving loc $1 loc $2 cal ".cfi" asp $1
+pat loc loc cfi $1==8 && $2==2	leaving loc $1 loc $2 cal ".cfi" asp 12 lfr 2
+pat loc loc cfu $1==4 && $2==2	leaving loc $1 loc $2 cal ".cfu" asp 8 lfr 2
+pat loc loc cfu $2==4		leaving loc $1 loc $2 cal ".cfu" asp $1
+pat loc loc cfu $1==8 && $2==2	leaving loc $1 loc $2 cal ".cfu" asp 12 lfr 2
+pat loc loc cff $1==8 && $2==4	leaving cal ".cff4" asp 4
+pat loc loc cff $1==4 && $2==8
+with REG REG
+kills ALL
+uses REG={ANYCON,0}
+  gen push %a
+      push %a
+      push %2
+      push %1			leaving cal ".cff8"
+
+/********************************************************************
+ *  Group 9 : Logical Instructions                                  *
+ ********************************************************************/
+
+pat and $1==2
+with EXACT REG rmorconst
+  gen and %1,%2				yields %1
+with rmorconst REG
+  gen and %2,%1				yields %2
+with ACC const
+  gen and %1,%2				yields %1
+with const ACC
+  gen and %2,%1				yields %2
+
+pat and $1==4
+with EXACT REG REG rmorconst rmorconst
+  gen and %1,%3
+      and %2,%4				yields %2 %1
+with exact ACC REG const rmorconst
+  gen and %1,%3
+      and %2,%4				yields %2 %1
+with rmorconst rmorconst REG REG
+  gen and %3,%1
+      and %4,%2				yields %4 %3
+with exact const rmorconst-ACC ACC REG
+  gen and %3,%1
+      and %4,%2				yields %4 %3
+
+pat and defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".and"}
+
+pat and !defined($1)
+with CXREG
+kills ALL
+  gen joehoe {label, ".and"}
+
+pat ior $1==2
+with REG rmorconst
+  gen or %1,%2				yields %1
+with EXACT rmorconst REG
+  gen or %2,%1				yields %2
+with ACC const
+  gen or %1,%2				yields %1
+with const ACC
+  gen or %2,%1				yields %2
+
+pat ior $1==4
+with EXACT REG REG rmorconst rmorconst
+  gen or %1,%3
+      or %2,%4				yields %2 %1
+with exact ACC REG const rmorconst
+  gen or %1,%3
+      or %2,%4				yields %2 %1
+with rmorconst rmorconst REG REG
+  gen or %3,%1
+      or %4,%2				yields %4 %3
+with exact const rmorconst-ACC ACC REG
+  gen or %3,%1
+      or %4,%2				yields %4 %3
+
+pat ior defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".ior"}
+
+pat ior !defined($1)
+with CXREG
+kills ALL
+  gen joehoe {label, ".ior"}
+
+pat xor $1==2
+with EXACT REG rmorconst
+  gen xor %1,%2				yields %1
+with rmorconst REG
+  gen xor %2,%1				yields %2
+with ACC const
+  gen xor %1,%2				yields %1
+with const ACC
+  gen xor %2,%1				yields %2
+
+pat xor $1==4
+with EXACT REG REG rmorconst rmorconst
+  gen xor %1,%3
+      xor %2,%4				yields %2 %1
+with exact ACC REG const rmorconst
+  gen xor %1,%3
+      xor %2,%4				yields %2 %1
+with rmorconst rmorconst REG REG
+  gen xor %3,%1
+      xor %4,%2				yields %4 %3
+with exact const rmorconst-ACC ACC REG
+  gen xor %3,%1
+      xor %4,%2				yields %4 %3
+
+pat xor defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".xor"}
+
+pat xor !defined($1)
+with CXREG
+kills ALL
+  gen joehoe {label, ".xor"}
+
+pat com $1==2
+with REG
+  gen not %1				yields %1
+
+pat com $1==4
+with REG REG
+  gen not %2
+      not %1				yields %2 %1
+
+pat com defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".com"}
+
+pat com !defined($1)
+with CXREG
+kills ALL
+  gen joehoe {label, ".com"}
+
+pat loc rol $1==1 && $2==2
+with REG
+  gen rol %1,{ANYCON,1}			yields %1
+
+pat rol $1==2
+with SHIFT_CREG REG
+  gen rol %2,cl				yields %2
+
+pat rol $1==4
+with CXREG REG REG
+  gen jcxz {label, 1f}
+      2: sal %2,{ANYCON,1}
+      rcl %3,{ANYCON,1}
+      adc %2,{ANYCON,0}
+      loop {label, 2b}
+      1:
+
+pat loc ror $1==1 && $2==2
+with REG
+  gen ror %1,{ANYCON,1}			yields %1
+
+pat ror $1==2
+with SHIFT_CREG REG
+  gen ror %2,cl				yields %2
+
+pat ror $1==4
+with CXREG REG REG
+  gen jcxz {label, 1f}
+      neg cx
+      add cx,{ANYCON,32}
+      2: sal %2,{ANYCON,1}
+      rcl %3,{ANYCON,1}
+      adc %2,{ANYCON,0}
+      loop {label, 2b}
+      1:
+
+/*******************************************************************
+ *  Group 10 : Set Instructions                                    *
+ *******************************************************************/
+
+pat inn $1==2
+with SHIFT_CREG REG
+gen shr %2,cl
+    and %2,{ANYCON, 1}			yields %2
+with SHIFT_CREG ACC
+gen shr %2,cl
+    and %2,{ANYCON, 1}			yields %2
+
+pat loc inn $1==1 && $2==2
+with REG
+gen shr %1,{ANYCON, 1}
+    and %1,{ANYCON, 1}			yields %1
+with ACC
+gen shr %1,{ANYCON, 1}
+    and %1,{ANYCON, 1}			yields %1
+
+pat loc inn $1==0 && $2==2
+with REG
+gen and %1,{ANYCON, 1}			yields %1
+with ACC
+gen and %1,{ANYCON, 1}			yields %1
+
+pat inn defined($1)
+with ACC 
+kills ALL
+gen mov cx,{ANYCON, $1}
+    joehoe {label,".inn"}		yields ax
+
+pat inn !defined($1)
+with CXREG ACC
+kills ALL
+gen joehoe {label,".inn"}		yields ax
+
+pat loc inn zeq $2==2
+with rm STACK
+gen check %1,{ANYCON,1<<$1}
+    je {label,$3}
+
+pat loc inn zne $2==2
+with rm STACK
+gen check %1,{ANYCON,1<<$1}
+    jne {label,$3}
+
+pat set $1==2
+with SHIFT_CREG
+uses REG={ANYCON, 1}
+gen shl %a,cl			yields %a
+
+pat set defined($1)
+with ACC
+kills ALL
+gen mov cx,{ANYCON, $1}
+    joehoe {label,".set"}
+
+pat set !defined($1)
+with CXREG ACC
+kills ALL
+gen joehoe {label,".set"}
+
+/********************************************************************
+ *  Group 11 : Array Instructions                                   *
+ ********************************************************************/
+
+pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)==0
+						leaving ads 2
+
+pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0
+					leaving adp 0-rom($1,1) ads 2
+
+pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0
+  with ADDREG
+  gen sal %1,{ANYCON,1}			yields %1	leaving ads 2
+
+pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0
+  with ADDREG
+  gen sal %1,{ANYCON,1}     yields %1   leaving adp 0-2*rom($1,1) ads 2
+
+pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)==0
+  with ADDREG
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}			yields %1	leaving ads 2
+
+pat lae aar $2==2 && rom($1,3)==4 && rom($1,1)!=0
+  with ADDREG
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}  yields %1	leaving adp 0-4*rom($1,1) ads 2
+
+pat lae aar $2==2 && rom($1,1)==0
+  with ACC
+  uses DXREG,REG={ANYCON,rom($1,3)}
+  gen mul %b			yields %1	leaving ads 2
+
+pat lae aar $2==2 && defined(rom($1,1))
+  with ACC
+  uses DXREG,REG={ANYCON,rom($1,3)}
+  gen mul %b 		yields %1
+   				leaving adp 0-rom($1,1)*rom($1,3) ads 2
+ 
+pat loc sli ads $1==1 && $2==2 && $3==2
+with ADDREG
+  gen sal %1,{ANYCON,1}		yields %1	leaving ads 2
+#ifdef REGVARS
+with exact rmorconst-ADDREG uses_bx
+  uses reusing %2, REG=%2,ADDREG=%1
+  gen sal %b,{ANYCON,1}		yields %b %a	leaving ads 2
+#endif
+
+pat loc sli ads $1==2 && $2==2 && $3==2
+with ADDREG
+  gen sal %1,{ANYCON,1}
+      sal %1,{ANYCON,1}		yields %1	leaving ads 2
+#ifdef REGVARS
+with exact rmorconst-ADDREG uses_bx
+  uses reusing %2, REG=%2,ADDREG=%1
+  gen sal %b,{ANYCON,1}
+      sal %b,{ANYCON,1}		yields %b %a	leaving ads 2
+#endif
+
+pat loc sli ads $2==2 && $3==2
+with ADDREG
+uses CXREG={ANYCON,$1}
+  gen sal %1,cl 		yields %1	leaving ads 2
+#ifdef REGVARS
+with exact rmorconst-(ADDREG+CXREG) uses_bx
+  uses reusing %2, REG=%2,ADDREG=%1,CXREG={ANYCON,$1}
+  gen sal %b,cl			yields %b %a	leaving ads 2
+#endif
+
+pat aar $1==2
+  with AREG ACC ADDREG
+  uses DXREG
+  gen sub %2,{ind_reg2,%1}
+      mul {ind_regoff2,%1,4}
+      add %3,%2			yields %3
+  with AREG ACC REG
+  uses DXREG
+  gen sub %2,{ind_reg2,%1}
+      mul {ind_regoff2,%1,4}
+      add %3,%2			yields %3
+  with reg_off ACC ADDREG
+  uses DXREG
+  gen sub %2,%1
+      mul {ADDR_EXTERN, 4+%1.off}
+      add %3,%2			yields %3
+  with bpreg_off ACC ADDREG
+  uses DXREG
+  gen sub %2,%1
+      mul {ADDR_EXTERN, 4+%1.ind}
+      add %3,%2			yields %3
+  with ADDR_LOCAL ACC ADDREG
+  uses DXREG
+  gen sub %2,%1
+      mul {ADDR_EXTERN, 4+%1.ind}
+      add %3,%2			yields %3
+  with ADDR_EXTERN ACC ADDREG
+  uses DXREG
+  gen sub %2,{EXTERN2,%1.off}
+      mul {EXTERN2,4+%1.off}
+      add %3,%2			yields %3
+
+pat lae lar defined(rom($1,3))	leaving lae $1 aar $2 sti rom($1,3)
+
+pat lae sar defined(rom($1,3))  leaving lae $1 aar $2 loi rom($1,3)
+
+pat aar !defined($1)
+  kills ALL
+  gen joehoe {label,".iaar"}  	yields bx
+
+pat sar $1==2
+  with BXREG ACC
+  kills ALL
+  gen joehoe {label,".sar2"}
+
+pat sar !defined($1)
+  kills ALL
+  gen joehoe {label,".isar"}
+
+pat lar $1==2 
+  with BXREG ACC
+  kills ALL
+  gen joehoe {label,".lar2"}
+
+pat lar !defined($1)
+  kills ALL
+  gen joehoe {label,".ilar"}
+
+/*******************************************************************
+ *  Group 12 : Compare Instructions                                *
+ *******************************************************************/
+
+pat cmi $1==2
+with EXACT register rmorconst
+  uses REG={ANYCON,0}
+  gen cmp %1,%2
+      je {label,2f}
+      jl {label,1f}
+      inc %a
+      jmp {label,2f}
+      1:
+      dec %a
+      2:			yields %a
+with rmorconst register
+  uses REG={ANYCON,0}
+  gen cmp %1,%2
+      je {label,2f}
+      jl {label,1f}
+      inc %a
+      jmp {label,2f}
+      1:
+      dec %a
+      2:			yields %a
+with ACC const
+  uses REG={ANYCON,0}
+  gen cmp %1,%2
+      je {label,2f}
+      jl {label,1f}
+      inc %a
+      jmp {label,2f}
+      1:
+      dec %a
+      2:			yields %a
+with const ACC
+  uses REG={ANYCON,0}
+  gen cmp %1,%2
+      je {label,2f}
+      jl {label,1f}
+      inc %a
+      jmp {label,2f}
+      1:
+      dec %a
+      2:			yields %a
+
+pat cmi $1==4
+kills ALL
+  gen joehoe {label,".cmi4"}	yields ax
+
+pat cmu $1==2                            leaving cmp
+
+pat cmu $1==4
+kills ALL
+  gen joehoe {label,".cmu4"}  	yields ax
+
+pat cms $1==2
+with EXACT REG rmorconst
+  gen sub %1,%2                	yields %1
+with rmorconst REG
+  gen sub %2,%1                	yields %2
+with ACC const
+  gen sub %1,%2                	yields %1
+with const ACC
+  gen sub %2,%1                	yields %2
+
+pat cms $1==4
+with rmorconst rmorconst REG REG
+  gen sub %3,%1
+      sbb %4,%2
+      or %4,%3			yields %4
+with EXACT REG REG rmorconst rmorconst
+  gen sub %1,%3
+      sbb %2,%4
+      or %2,%1			yields %2
+
+pat cms defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label,".cms"}     yields cx
+
+pat cms !defined($1)
+kills ALL
+  gen joehoe {label,".cms"}	yields cx
+pat cmf $1==4
+kills ALL
+  gen joehoe {label,".cmf4"}	leaving asp 8 lfr 2
+
+pat cmf $1==8
+kills ALL
+  gen joehoe {label,".cmf8"}	leaving asp 16 lfr 2
+
+pat cmp
+with EXACT register rmorconst
+uses REG = {ANYCON,0}
+  gen cmp %1,%2
+      je  {label,2f}
+      jb  {label,1f}
+      inc %a
+      jmp {label,2f}
+      1: dec %a
+      2:                            yields %a
+with rmorconst register
+uses REG = {ANYCON,0}
+  gen cmp %1,%2
+      je  {label,2f}
+      jb  {label,1f}
+      inc %a
+      jmp {label,2f}
+      1: dec %a
+      2:                            yields %a
+with ACC const
+uses REG = {ANYCON,0}
+  gen cmp %1,%2
+      je  {label,2f}
+      jb  {label,1f}
+      inc %a
+      jmp {label,2f}
+      1: dec %a
+      2:                            yields %a
+with const ACC
+uses REG = {ANYCON,0}
+  gen cmp %1,%2
+      je  {label,2f}
+      jb  {label,1f}
+      inc %a
+      jmp {label,2f}
+      1: dec %a
+      2:                            yields %a
+
+proc txx
+with rm
+uses REG = {ANYCON,0}
+  gen test %1
+      jxx* {label,1f}
+      inc %a
+      1:                            yields %a
+
+pat tlt call txx("jge")
+pat tle call txx("jg")
+pat teq call txx("jne")
+pat tne call txx("je")
+pat tge call txx("jl")
+pat tgt call txx("jle")
+
+proc txxior
+with rm REG
+  gen test %1
+      jxx* {label,1f}
+      or  %2,{ANYCON,1}
+      1:                            yields %2
+
+pat tlt ior $2==2 call txxior("jge")
+pat tle ior $2==2 call txxior("jg")
+pat teq ior $2==2 call txxior("jne")
+pat tne ior $2==2 call txxior("je")
+pat tge ior $2==2 call txxior("jl")
+pat tgt ior $2==2 call txxior("jle")
+
+proc cmixxior
+with regorconst rm REG
+  gen cmp %2,%1
+      jxx* {label,1f}
+      or  %3,{ANYCON,1}
+      1:                            yields %3
+
+pat cmi tlt ior $1==2 && $3==2 call cmixxior("jge")
+pat cmi tle ior $1==2 && $3==2 call cmixxior("jg")
+pat cmi teq ior $1==2 && $3==2 call cmixxior("jne")
+pat cmi tne ior $1==2 && $3==2 call cmixxior("je")
+pat cmi tge ior $1==2 && $3==2 call cmixxior("jl")
+pat cmi tgt ior $1==2 && $3==2 call cmixxior("jle")
+
+proc cmxtxx
+with regorconst rm
+uses REG = {ANYCON,0}
+  gen cmp %2,%1
+      jxx[1] {label,1f}
+      inc %a
+      1:                            yields %a
+with EXACT rm regorconst
+uses REG = {ANYCON,0}
+  gen cmp %1,%2
+      jxx[2] {label,1f}
+      inc %a
+      1:                            yields %a
+
+pat cmi tlt $1==2     call cmxtxx("jge","jle")
+pat cmi tle $1==2     call cmxtxx("jg","jl")
+pat cmi teq $1==2     call cmxtxx("jne","jne")
+pat cmi tne $1==2     call cmxtxx("je","je")
+pat cmi tge $1==2     call cmxtxx("jl","jg")
+pat cmi tgt $1==2     call cmxtxx("jle","jge")
+pat cmp tlt           call cmxtxx("jae","jbe")
+pat cmp tle           call cmxtxx("ja","jb")
+pat cmp teq           call cmxtxx("jne","jne")
+pat cmp tne           call cmxtxx("je","je")
+pat cmp tge           call cmxtxx("jb","ja")
+pat cmp tgt           call cmxtxx("jbe","jae")
+pat cms teq $1==2     call cmxtxx("jne","jne")
+pat cms tne $1==2     call cmxtxx("je","je")
+
+proc cmxzxx example cmp zlt
+with regorconst rm STACK
+  gen cmp %2,%1
+      jxx[1] {label,$2}
+with EXACT rm regorconst
+  kills ALL
+  gen cmp %1,%2
+      jxx[2] {label,$2}
+
+pat cmp zlt         call cmxzxx("jb","ja")
+pat cmp zle         call cmxzxx("jbe","jae")
+pat cmp zeq         call cmxzxx("je","je")
+pat cmp zne         call cmxzxx("jne","jne")
+pat cmp zge         call cmxzxx("jae","jbe")
+pat cmp zgt         call cmxzxx("ja","jb")
+pat cms zeq $1==2   call cmxzxx("je","je")
+pat cms zne $1==2   call cmxzxx("jne","jne")
+
+pat ldc cmi zlt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst	yields %2	leaving zlt $3
+
+pat ldc cmi zge highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst	yields %2	leaving zge $3
+
+pat ldc cms zeq $2==4 && loww($1)==0 && highw($1)==0
+with rmorconst REG STACK
+  gen or %2,%1
+      je {label,$3}
+with REG rmorconst STACK
+  gen or %1,%2
+      je {label,$3}
+
+pat ldc cms zne $2==4 && loww($1)==0 && highw($1)==0
+with rmorconst REG STACK
+  gen or %2,%1
+      jne {label,$3}
+with REG rmorconst STACK
+  gen or %1,%2
+      jne {label,$3}
+
+pat ldc cms zeq $2==4
+with rm rm STACK
+  gen cmp %1, {ANYCON, loww($1)}
+      jne {label,1f}
+      cmp %2, {ANYCON, highw($1)}
+      je {label,$3}
+      1:
+
+pat ldc cms zne $2==4
+with rm rm STACK
+  gen cmp %1, {ANYCON, loww($1)}
+      jne {label,$3}
+      cmp %2, {ANYCON, highw($1)}
+      jne {label,$3}
+
+pat cms zne
+with regorconst regorconst rm rm STACK
+  gen cmp %3,%1
+      jne {label,$2}
+      cmp %4,%2
+      jne {label,$2}
+with EXACT rm rm regorconst regorconst
+kills ALL
+  gen cmp %1,%3
+      jne {label,$2}
+      cmp %2,%4
+      jne {label,$2}
+
+pat cms zeq
+with regorconst regorconst rm rm STACK
+  gen cmp %3,%1
+      jne {label, 1f}
+      cmp %4,%2
+      je {label,$2}
+      1:
+with EXACT rm rm regorconst regorconst
+kills ALL
+  gen cmp %1,%3
+      jne {label,1f}
+      cmp %2,%4
+      je {label,$2}
+      1:
+
+proc andzxx example and zeq
+with regorconst rm STACK
+  gen check %2,%1
+      jxx* {label,$2}
+with exact rm regorconst
+  kills ALL
+  gen check %1,%2
+      jxx* {label,$2}
+
+pat and zeq $1==2 call andzxx("je")
+pat and zne $1==2 call andzxx("jne")
+
+proc locandzxx example loc and zeq
+with exact rm1+memory2
+  kills ALL
+  gen testb %1,{ANYCON,$1}
+      jxx* {label,$3}
+with GENREG STACK
+  gen testb %1.1,{ANYCON,$1}
+      jxx* {label,$3}
+with exact IREG
+  kills ALL
+  gen check %1,{ANYCON,$1}
+      jxx* {label,$3}
+
+pat loc and zeq $1<256 && $1>=0 && $2==2 call locandzxx("je")
+pat loc and zne $1<256 && $1>=0 && $2==2 call locandzxx("jne")
+
+proc locbxx example loc beq
+with exact rm1
+kills ALL
+  gen cmpb %1,{ANYCON,$1}
+      jxx* {label,$2}
+with rm STACK
+  gen cmp %1,{ANYCON,$1}
+      jxx* {label,$2}
+
+pat loc beq $1<256 && $1>=0 call locbxx("je")
+pat loc bne $1<256 && $1>=0 call locbxx("jne")
+
+proc loccmuzxx example loc cmu zeq
+with exact rm1
+kills ALL
+  gen cmpb %1,{ANYCON,$1}
+      jxx* {label,$3}
+with rm STACK
+  gen cmp %1,{ANYCON,$1}
+      jxx* {label,$3}
+
+pat loc cmu zeq $1<256 && $1>=0 && $2==2 call loccmuzxx("je")
+pat loc cmu zne $1<256 && $1>=0 && $2==2 call loccmuzxx("jne")
+
+/*******************************************************************
+ *  Group 13 : Branch Instructions                                 *
+ *******************************************************************/
+
+pat bra
+  with STACK
+  gen jmp {label,$1}
+
+proc bxx example blt
+with regorconst rm STACK
+  kills ALL
+  gen cmp %2,%1
+      jxx[1] {label,$1}
+with EXACT rm regorconst
+  kills ALL
+  gen cmp %1,%2
+      jxx[2] {label,$1}
+
+pat blt		call bxx("jl","jg")
+pat ble		call bxx("jle","jge")
+pat beq		call bxx("je","je")
+pat bne		call bxx("jne","jne")
+pat bge		call bxx("jge","jle")
+pat bgt		call bxx("jg","jl")
+
+proc zxx example zlt
+with rm STACK
+  gen test %1
+      jxx* {label,$1}
+
+pat zlt		call zxx("jl")
+pat zle		call zxx("jle")
+pat zge		call zxx("jge")
+pat zgt		call zxx("jg")
+
+pat zne
+with rm+rm1 STACK
+  gen test %1
+      jne {label,$1}
+
+pat zeq
+with rm+rm1 STACK
+  gen test %1
+      je {label,$1}
+
+
+/*******************************************************************
+ *  Group 14 : Procedure-call Instructions                         *
+ *******************************************************************/
+
+pat cal
+  kills ALL
+  gen joehoe {label,$1}
+
+pat cai
+  with rm
+  kills ALL
+  gen joehoe %1
+
+pat lfr $1==2			yields ax
+
+pat lfr $1==4			yields dx ax
+
+pat lfr $1==6
+kills ALL
+  gen joehoe {label, ".lfr6"}
+
+pat lfr $1==8
+kills ALL
+  gen joehoe {label, ".lfr8"}
+
+pat ret $1==0
+  kills ALL
+  gen
+#ifdef REGVARS
+	return
+#else
+      mov sp,bp
+      pop bp
+      ret.
+#endif
+
+pat ret $1==2
+  with ACC
+  kills ALL
+  gen
+#ifdef REGVARS
+	return
+#else
+      mov sp,bp
+      pop bp
+      ret.
+#endif
+
+pat ret $1==4
+  with ACC DXREG
+  kills ALL
+  gen
+#ifdef REGVARS
+	return
+#else
+      mov sp,bp
+      pop bp
+      ret.
+#endif
+
+pat ret $1==6
+  with STACK
+  gen joehoe {label, ".ret6"}
+#ifdef REGVARS
+	return
+#else
+      mov sp,bp
+      pop bp
+      ret.
+#endif
+
+pat ret $1==8
+  with STACK
+  gen joehoe {label, ".ret8"}
+#ifdef REGVARS
+	return
+#else
+      mov sp,bp
+      pop bp
+      ret.
+#endif
+
+/********************************************************************
+ *  Group 15 : Miscellaneous Instructions                           *
+ ********************************************************************/
+
+pat asp $1==2
+with exact a_word
+with STACK
+  uses BXREG /* GENREG may contain lfr area */
+  gen pop %a
+
+pat asp $1==4
+with exact a_word a_word
+with STACK
+  uses BXREG /* GENREG may contain lfr area */
+  gen pop %a
+      pop %a
+
+pat asp $1==0-2
+with STACK                                      yields bp
+
+pat asp
+with STACK
+  gen add sp,{ANYCON,$1}
+
+pat ass $1==2
+with rmorconst STACK
+  gen add sp,%1
+
+pat ass !defined($1)
+with rm rmorconst STACK
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      add sp,%2
+
+pat blm $1==0					leaving asp 4
+
+pat blm $1>0
+kills ALL
+  gen mov cx,{ANYCON,$1/2}
+      joehoe {label, ".blm"}
+
+pat bls $1==2
+with CXREG
+kills ALL
+  gen sar cx,{ANYCON,1}
+      joehoe {label, ".blm"}
+
+pat bls !defined($1)
+with rm-CXREG CXREG
+kills ALL
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      sar cx,{ANYCON,1}
+      joehoe {label, ".blm"}
+
+pat csa $1==2
+with BXREG ACC
+kills ALL
+  gen jmp {label, ".csa2"}
+
+pat csa !defined($1)
+with rm-BXREG-ACC ACC
+kills ALL
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      jmp {label, ".csa2"}
+
+pat csb $1==2
+with BXREG ACC
+kills ALL
+  gen jmp {label, ".csb2"}
+
+pat csb !defined($1)
+with rm-BXREG-ACC BXREG ACC
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      jmp {label, ".csb2"}
+
+pat dup $1==2
+with regorconst				yields %1 %1
+with ACC1				yields %1 %1
+
+pat dup $1==4
+with regorconst regorconst		yields %2 %1 %2 %1
+
+pat dup
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".dup"}
+
+pat dus $1==2
+with CXREG
+kills ALL
+  gen joehoe {label, ".dup"}
+
+pat dus !defined($1)
+with rm-CXREG CXREG
+kills ALL
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      joehoe {label, ".dup"}
+
+pat exg $1==2
+with a_word a_word			yields %1 %2
+
+pat exg $1==4
+with a_word a_word a_word a_word	yields %2 %1 %4 %3
+
+pat exg defined($1)
+kills ALL
+  gen mov cx,{ANYCON,$1}
+      joehoe {label, ".exg"}
+
+pat exg
+with CXREG
+  kills ALL
+  gen joehoe {label, ".exg"}
+
+pat gto
+kills ALL
+  gen mov bx,{ADDR_EXTERN,$1}
+      jmp {label, ".gto"}
+
+pat fil
+  gen mov {EXTERN2,"hol0+4"},{ADDR_EXTERN,$1}
+
+pat lim
+  uses REG
+  gen mov %a,{EXTERN2,".ignmask"}			yields %a
+
+pat lin
+  gen mov {EXTERN2,"hol0"},{ANYCON,$1}
+
+pat lni
+  gen inc {EXTERN2,"hol0"}
+
+pat lor $1==0				yields bp
+
+pat lor $1==1
+with STACK
+  uses REG
+  gen mov %a,sp				yields %a
+
+pat lor $1==2
+  uses REG
+  gen mov %a,{EXTERN2,".reghp"}		yields %a
+
+pat mon
+with ACC
+kills ALL
+  gen joehoe {label, ".mon"}
+
+pat nop
+kills ALL
+  gen joehoe {label, ".nop"}
+
+pat rck $1==2
+with BXREG ACC
+  gen joehoe {label, ".rck"}				yields ax
+
+pat rck !defined($1)
+with rm-BXREG-ACC BXREG ACC
+  gen cmp %1,{ANYCON,2}
+      jne {label, ".unknown"}
+      joehoe {label, ".rck"}				yields ax
+
+pat rtt						leaving ret 0
+
+pat sig
+with REG
+  gen xchg {EXTERN2,".trppc"},%1			yields %1
+
+pat sim
+with regorconst
+  gen mov {EXTERN2,".ignmask"},%1
+
+pat str $1==0
+with rmorconst
+  gen mov bp,%1
+
+pat str $1==1
+with rmorconst STACK
+  gen mov sp,%1
+
+pat str $1==2
+kills ALL
+  gen joehoe {label, ".strhp"}
+
+pat trp
+with ACC
+kills ALL
+  gen joehoe {label, ".trp"}
