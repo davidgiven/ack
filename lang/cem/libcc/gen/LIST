@@ -33,6 +33,7 @@ monitor.c
 perror.c
 procentry.c
 qsort.c
+bsearch.c
 rand.c
 seekdir.c
 sleep.c
