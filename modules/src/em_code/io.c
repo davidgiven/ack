@@ -6,7 +6,6 @@
 #include <alloc.h>
 #include <em_path.h>
 #include <em_arith.h>
-#include <local.h>
 #include "insert.h"
 
 int		C_ontmpfile = 0;
@@ -14,7 +13,7 @@ int		C_sequential = 1;
 Part		*C_curr_part;
 Part		*C_stable[TABSIZ];
 char		*C_tmpdir = TMP_DIR;
-int		(*C_outpart)(), (*C_switchtoout)(), (*C_switchtotmp)();
+int		(*C_outpart)(), (*C_swtout)(), (*C_swttmp)();
 
 #ifdef INCORE
 char		*C_BASE;
@@ -26,7 +25,7 @@ File		*C_ofp;
 File		*C_tfr, *C_old_ofp;
 char		*C_tmpfile;
 char		*strcpy(), *strcat(), *mktemp();
-static char	*ibuf = 0;
+char		*C_ibuf = 0;
 long		C_current_out;
 #endif
 
@@ -42,6 +41,8 @@ char		*C_old_top;
 char		*C_old_opp;
 #ifdef INCORE
 char		*C_current_out = obuf;
+#else
+char		*C_opp = obuf;
 #endif
 
 C_flush() {
@@ -109,8 +110,8 @@ C_close()
 
 #ifndef INCORE
 	C_flush();
-	if (tmpfile) {
-		(*C_switchtotmp)();
+	if (C_tmpfile) {
+		(*C_swttmp)();
 		sys_close(C_ofp);
 #else
 	if (C_BASE) {
@@ -118,14 +119,14 @@ C_close()
 		if (C_curr_part) {
 			C_curr_part->p_parts->pp_end = C_current_out - C_BASE;
 		}
-		(*C_switchtoout)();
+		(*C_swtout)();
 		if (! C_sequential) {
 			(*C_outpart)(0);
 		}
 #ifndef INCORE
 		sys_close(C_tfr);
-		sys_remove(tmpfile);
-		if (ibuf) free(ibuf);
+		sys_remove(C_tmpfile);
+		if (C_ibuf) free(C_ibuf);
 #else
 		free(C_BASE);
 #endif

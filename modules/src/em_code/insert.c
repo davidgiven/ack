@@ -29,21 +29,21 @@ getbyte(b)
 
 		C_flush();
 		if (nb != curr_pos) {
-			if (sys_seek(tfr, nb, 0, &curr_pos) == 0) {
+			if (sys_seek(C_tfr, nb, 0, &curr_pos) == 0) {
 				C_failed();
 			}
 		}
-		if (! ibuf) {
-			ibuf = Malloc(BUFSIZ);
+		if (! C_ibuf) {
+			C_ibuf = Malloc(BUFSIZ);
 		}
-		if (sys_read(tfr, ibuf, BUFSIZ, &n) == 0) {
+		if (sys_read(C_tfr, C_ibuf, BUFSIZ, &n) == 0) {
 			C_failed();
 		}
 		curr_pos += n;
 		start_core = nb;
 	}
 
-	return ibuf[(int) (b - start_core)];
+	return C_ibuf[(int) (b - start_core)];
 }
 #endif
 
@@ -80,7 +80,7 @@ C_out_parts(pp)
 
 	while (pp) {
 		if (pp->pp_type == INSERT) {
-			C_outpart(pp->pp_id);
+			(*C_outpart)(pp->pp_id);
 		}
 		else {
 			/* copy the chunk to output */
@@ -119,7 +119,7 @@ C_findpart(part)
 }
 
 static
-switchtotmp()
+swttmp()
 {
 #ifndef INCORE
 	if (C_tmpfile == 0) {
@@ -128,7 +128,7 @@ switchtotmp()
 
 		strcpy(p, C_tmpdir);
 		strcat(p, "/CodeXXXXXX");
-		tmpfile = mktemp(p);
+		C_tmpfile = mktemp(p);
 		if (! sys_open(p, OP_WRITE, &C_old_ofp)) {
 			C_failed();
 		}
@@ -161,7 +161,7 @@ switchtotmp()
 }
 
 static
-switchtoout()
+swtout()
 {
 #ifndef INCORE
 	if (C_ontmpfile) {
@@ -277,7 +277,7 @@ resume(p)
 	*/
 	register PartOfPart *pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
 
-	switchtotmp();
+	swttmp();
 	C_curr_part = p;
 	pp->pp_next = p->p_parts;
 	p->p_parts = pp;
@@ -296,8 +296,8 @@ C_insertpart(part)
 	register PartOfPart *pp;
 
 	C_outpart = outpart;
-	C_switchtotmp = switchtotmp;
-	C_switchtoout = switchtoout;
+	C_swttmp = swttmp;
+	C_swtout = swtout;
 	if (C_sequential && available(part)) {
 		outpart(part);
 		return;
@@ -333,8 +333,8 @@ C_beginpart(part)
 	register Part *p = mkpart(part);
 
 	C_outpart = outpart;
-	C_switchtotmp = switchtotmp;
-	C_switchtoout = switchtoout;
+	C_swttmp = swttmp;
+	C_swtout = swtout;
 
 	end_partofpart(C_curr_part);
 
@@ -359,6 +359,6 @@ C_endpart(part)
 	if (p->p_prevpart) resume(p->p_prevpart);
 	else {
 		C_curr_part = 0;
-		switchtoout();
+		swtout();
 	}
 }

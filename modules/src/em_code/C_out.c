@@ -10,6 +10,8 @@ static pseudo();
 
 extern char em_flag[];
 
+#define flags(pp)	(em_flag[(pp)->em_opcode - sp_fmnem] & EM_PAR)
+
 struct e_instr *
 C_alloc()
 {
@@ -30,12 +32,11 @@ C_out(p)
 	switch(p->em_type) {
 	case EM_MNEM:
 		OP(p->em_opcode);
-		if (em_flag[p->em_opcode - sp_fmnem] == PAR_B &&
-		    p->em_argtype == cst_ptyp) {
+		if (flags(p) == PAR_B && p->em_argtype == cst_ptyp) {
 			p->em_ilb = p->em_cst;
 			p->em_argtype = ilb_ptyp;
 		}
-		if (em_flag[p->em_opcode - sp_fmnem] != PAR_NO) arg(p, 0);
+		if (flags(p) != PAR_NO) arg(p, 0);
 		NL();
 		break;
 
@@ -86,7 +87,7 @@ arg(p, comma)
 
 	switch(p->em_argtype) {
 	case 0:
-		if (p->em_type == EM_MNEM && em_flag[p->em_opcode - sp_fmnem] != PAR_W) {
+		if (p->em_type == EM_MNEM && flags(p) != PAR_W) {
 			abort();
 		}
 		CCEND();

@@ -33,11 +33,11 @@ em_code.3:	em_code.3X
 		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
 libeme.a:	e/em_private.h e/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ie $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh make.sh e
+		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ie $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh -x make.sh e
 		-sh -c 'ranlib libeme.a'
 
 libemk.a:	k/em_private.h k/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ik $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh make.sh k
+		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ik $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh -x make.sh k
 		-sh -c 'ranlib libemk.a'
 
 em_codeEK.h:	make.em.gen $(ETC)/em_table em.nogen
