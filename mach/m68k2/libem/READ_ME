@@ -1,0 +1,5 @@
+The original EM library routines saved all registers
+(including scratch registers) in global data; hence they
+were not reentrant.
+The new routines do not save registers d0,d1,d2,a0 and a1.
+They are reentrant.
