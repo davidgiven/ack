@@ -54,7 +54,7 @@ ready:
 	mov	r4,-(sp)
 	mov	$buff,-(sp)
 	mov	$01,-(sp)
-	jsr	__write
+	jsr	pc,__write
 	add	$06,sp
 	mov	(sp)+,r4
 	mov	(sp)+,r3

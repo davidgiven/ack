@@ -6,7 +6,7 @@
 
 fat~:
 	jsr     pc,trp~
-	jsr	__exit
+	jsr	pc,__exit
 
 trp~:
 	mov     r0,-(sp)
@@ -88,9 +88,9 @@ trp~:
 	mov	$013,-(sp)
 	mov	$buf,-(sp)
 	mov	$2,-(sp)
-	jsr	__write
+	jsr	pc,__write
 	add	$6,sp
-	jsr	__exit
+	jsr	pc,__exit
 .sect .data
 retar:	.space 16
 retend:
