@@ -5,6 +5,13 @@
 #define OPENSCOPE	0	/* Indicating an open scope */
 #define CLOSEDSCOPE	1	/* Indicating a closed scope (module) */
 
+#define SC_CHKFORW	1	/* Check for forward definitions when closing
+				   a scope
+				*/
+#define SC_CHKPROC	2	/* Check for forward procedure definitions
+				   when closing a scope
+				*/
+
 struct scope {
 	struct scope *next;
 	struct forwards *sc_forw;

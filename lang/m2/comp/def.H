@@ -43,12 +43,15 @@ struct dfproc {
 };
 
 struct import {
-	union {
-		struct def *im_def; /* imported definition */
-		struct node *im_nodef; /* imported from undefined name */
-	} im_u;
-#define imp_def		df_value.df_import.im_u.im_def
-#define imp_nodef	df_value.df_import.im_u.im_nodef
+	struct def *im_def;	/* imported definition */
+#define imp_def		df_value.df_import.im_def
+};
+
+struct dforward {
+	int fo_scope;
+	struct node *fo_node;
+#define for_node	df_value.df_forward.fo_node
+#define for_scope	df_value.df_forward.fo_scope
 };
 
 struct def	{		/* list of definitions for a name */
@@ -92,6 +95,7 @@ struct def	{		/* list of definitions for a name */
 		struct field df_field;
 		struct import df_import;
 		struct dfproc df_proc;
+		struct dforward df_forward;
 		int df_stdname;	/* define for standard name */
 	} df_value;
 };

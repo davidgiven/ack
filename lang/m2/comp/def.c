@@ -61,13 +61,23 @@ define(id, scope, kind)
 			}
 			break;
 		case D_FORWMODULE:
-			if (kind & (D_FORWMODULE|D_MODULE)) {
+			if (kind == D_FORWMODULE) {
+				df->df_kind = kind;
+				return df;
+			}
+			if (kind == D_MODULE) {
+				FreeNode(df->for_node);
+				df->mod_scope = df->for_scope;
 				df->df_kind = kind;
 				return df;
 			}
 			break;
-		case D_ERROR:
 		case D_FORWARD:
+			if (kind != D_FORWARD) {
+				FreeNode(df->for_node);
+			}
+			/* Fall Through */
+		case D_ERROR:
 			df->df_kind = kind;
 			return df;
 		}
@@ -77,11 +87,11 @@ error("identifier \"%s\" already declared", id->id_text);
 		return df;
 	}
 	df = new_def();
+	df->df_flags = 0;
 	df->df_idf = id;
 	df->df_scope = scope->sc_scope;
 	df->df_kind = kind;
 	df->next = id->id_def;
-	df->df_flags = 0;
 	id->id_def = df;
 
 	/* enter the definition in the list of definitions in this scope */
@@ -100,30 +110,17 @@ lookup(id, scope)
 		otherwise return 0.
 	*/
 	register struct def *df, *df1;
+	struct def *retval;
 
 	df1 = 0;
 	df = id->id_def;
 	DO_DEBUG(5, debug("Looking for identifier \"%s\" in scope %d", id->id_text, scope));
 	while (df) {
 		if (df->df_scope == scope) {
+			retval = df;
 			if (df->df_kind == D_IMPORT) {
-				df = df->imp_def;
-				assert(df != 0);
-				return df;
-			}
-
-			if (df->df_kind == D_UNDEF_IMPORT) {	
-				df1 = df->imp_def;
-				assert(df1 != 0);
-				if (df1->df_kind == D_MODULE) {
-					df1 = lookup(id, df1->mod_scope);
-					if (df1) {
-						df->df_kind = D_IMPORT;
-						df->imp_def = df1;
-					}
-					return df1;
-				}
-				return df;
+				retval = df->imp_def;
+				assert(retval != 0);
 			}
 
 			if (df1) {
@@ -131,7 +128,7 @@ lookup(id, scope)
 				df->next = id->id_def;
 				id->id_def = df;
 			}
-			return df;
+			return retval;
 		}
 		df1 = df;
 		df = df->next;
@@ -148,9 +145,19 @@ Export(ids, qualified)
 		in this scope as "imported".
 	*/
 	register struct def *df, *df1;
+	struct node *nd = ids;
 
 	while (ids) {
-		df = define(ids->nd_IDF, CurrentScope, D_FORWARD);
+		df = lookup(ids->nd_IDF, CurrentScope->sc_scope);
+		if (df && (df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+node_error(ids, "Identifier \"%s\" occurs more than once in export list",
+df->df_idf->id_text);
+		}
+		else if (!df) {
+			df = define(ids->nd_IDF, CurrentScope, D_FORWARD);
+			df->for_node = MkNode(Name,NULLNODE,NULLNODE,
+					&(ids->nd_token));
+		}
 		if (qualified) {
 			df->df_flags |= D_QEXPORTED;
 		}
@@ -175,6 +182,7 @@ Export(ids, qualified)
 		}
 		ids = ids->next;
 	}
+	FreeNode(nd);
 }
 
 Import(ids, idn, local)
@@ -195,6 +203,7 @@ Import(ids, idn, local)
 		identifiers defined in this module.
 	*/
 	register struct def *df;
+	struct def *df1 = 0;
 	int scope;
 	int kind;
 	int imp_kind;
@@ -204,7 +213,8 @@ Import(ids, idn, local)
 
 	kind = D_IMPORT;
 	scope = enclosing(CurrentScope)->sc_scope;
-	if (!idn) imp_kind = FROM_ENCLOSING;
+
+	if (! idn) imp_kind = FROM_ENCLOSING;
 	else {
 		imp_kind = FROM_MODULE;
 		if (local) {
@@ -217,25 +227,39 @@ Import(ids, idn, local)
 				*/
 				df->df_scope = scope;
 				df->df_kind = D_FORWMODULE;
-				df->mod_scope = -1;
-				kind = D_UNDEF_IMPORT;
+				open_scope(CLOSEDSCOPE, 0);
+				df->for_scope = CurrentScope->sc_scope;
+				df->for_node = MkNode(Name, NULLNODE,
+						NULLNODE, &(idn->nd_token));
+				close_scope();
+				df1 = df;
 			}
 		}
-		else {
-			df = GetDefinitionModule(idn->nd_IDF);
-		}
+		else	df = GetDefinitionModule(idn->nd_IDF);
+
 		if (!(df->df_kind & (D_MODULE|D_FORWMODULE))) {
 			/* enter all "ids" with type D_ERROR */
 			kind = D_ERROR;
 			if (df->df_kind != D_ERROR) {
-node_error(idn, "identifier \"%s\" does not represent a module", idn->nd_IDF->id_text);
+node_error(idn, "identifier \"%s\" does not represent a module",
+idn->nd_IDF->id_text);
 			}
 		}
 		else	scope = df->mod_scope;
+		FreeNode(idn);
 	}
+
+	idn = ids;
 	while (ids) {
 		if (imp_kind == FROM_MODULE) {
-			if (scope == -1) {
+			if (df1 != 0) {
+				open_scope(CLOSEDSCOPE, df1->mod_scope);
+				df = define(ids->nd_IDF,
+					    CurrentScope,
+					    D_FORWARD);
+				df->for_node = MkNode(Name, NULLNODE,
+						NULLNODE, &(ids->nd_token));
+				close_scope(0);
 			}
 			else if (!(df = lookup(ids->nd_IDF, scope))) {
 node_error(ids, "identifier \"%s\" not declared in qualifying module",
@@ -250,13 +274,18 @@ ids->nd_IDF->id_text);
 		else {
 			if (local) {
 				df = lookfor(ids, enclosing(CurrentScope), 0);
-			} else df = GetDefinitionModule(ids->nd_IDF);
+			} else	df = GetDefinitionModule(ids->nd_IDF);
 			if (df->df_kind == D_ERROR) {
-node_error(ids, "identifier \"%s\" not visible in enclosing scope",
-ids->nd_IDF->id_text);
+				/* It was not yet defined in the enclosing
+				   scope.
+				*/
+				df->df_kind = D_FORWARD;
+				df->for_node = MkNode(Name, NULLNODE, NULLNODE,
+							&(ids->nd_token));
 			}
 		}
-		DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text, df->df_kind));
+DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text,
+df->df_kind));
 		define(ids->nd_IDF, CurrentScope, kind)->imp_def = df;
 		if (df->df_kind == D_TYPE &&
 		    df->df_type->tp_fund == T_ENUMERATION) {
@@ -266,6 +295,7 @@ ids->nd_IDF->id_text);
 		}
 		ids = ids->next;
 	}
+	FreeNode(idn);
 }
 
 exprt_literals(df, toscope)
@@ -290,26 +320,18 @@ RemImports(pdf)
 		neccesary because the implementation module might import
 		them again.
 	*/
-	register struct def *df = *pdf, *df1 = 0;
+	register struct def *df = *pdf;
 
 	while (df) {
 		if (df->df_kind == D_IMPORT) {
 			RemFromId(df);
-			if (df1) {
-				df1->df_nextinscope = df->df_nextinscope;
-				free_def(df);
-				df = df1->df_nextinscope;
-			}
-			else {
-				*pdf = df->df_nextinscope;
-				free_def(df);
-				df = *pdf;
-			}
+			*pdf = df->df_nextinscope;
+			free_def(df);
 		}
 		else {
-			df1 = df;
-			df = df->df_nextinscope;
+			pdf = &(df->df_nextinscope);
 		}
+		df = *pdf;
 	}
 }
 

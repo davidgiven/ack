@@ -49,8 +49,12 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 				assert(nd->nd_class == Def);
 				*pdf = df = nd->nd_def;
 			  	if ( !((types|D_ERROR) & df->df_kind)) {
-					error("identifier \"%s\" is not a %s",
-					df->df_idf->id_text, str);
+					if (df->df_kind == D_FORWARD) {
+node_error(*pnd,"%s \"%s\" not declared", str, df->df_idf->id_text);
+					}
+					else {
+node_error(*pnd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
+					}
 				}
 			  }
 			  if (!p) FreeNode(nd);

@@ -24,7 +24,7 @@ ProcedureDeclaration
 	';' block IDENT
 			{ match_id(dot.TOK_IDF, df->df_idf);
 			  df->prc_scope = CurrentScope->sc_scope;
-			  close_scope();
+			  close_scope(SC_CHKFORW);
 			}
 ;
 
@@ -39,6 +39,7 @@ ProcedureHeading(struct def **pdf; int type;)
 			{ assert(type & (D_PROCEDURE | D_PROCHEAD));
 			  if (type == D_PROCHEAD) {
 				df = define(dot.TOK_IDF, CurrentScope, type);
+				df->for_node = MkNode(Name, NULLNODE, NULLNODE, &dot);
 			  }
 			  else {
 				df = lookup(dot.TOK_IDF,

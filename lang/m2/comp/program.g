@@ -15,7 +15,11 @@ static  char *RcsId = "$Header$";
 #include	"node.h"
 #include	"debug.h"
 
-static struct idf *impl_name = 0;
+static int DEFofIMPL = 0;	/* Flag indicating that we are currently
+				   parsing the definition module of the
+				   implementation module currently being
+				   compiled
+				*/
 static struct def *impl_df;
 }
 /*
@@ -45,8 +49,11 @@ ModuleDeclaration
 	MODULE IDENT		{
 				  id = dot.TOK_IDF;
 				  df = define(id, CurrentScope, D_MODULE);
-				  open_scope(CLOSEDSCOPE, 0);
-				  df->mod_scope = CurrentScope->sc_scope;
+				  if (!df->mod_scope) {	
+				  	open_scope(CLOSEDSCOPE, 0);
+				  	df->mod_scope = CurrentScope->sc_scope;
+				  }
+				  else	open_scope(CLOSEDSCOPE, df->mod_scope);
 				  df->df_type = 
 					standard_type(T_RECORD, 0, (arith) 0);
 				  df->df_type->rec_scope = df->mod_scope;
@@ -55,7 +62,7 @@ ModuleDeclaration
 	import(1)*
 	export(0)?
 	block
-	IDENT			{ close_scope();
+	IDENT			{ close_scope(SC_CHKFORW|SC_CHKPROC);
 				  match_id(id, dot.TOK_IDF);
 				}
 ;
@@ -78,9 +85,13 @@ export(int def;)
 	]?
 	IdentList(&ExportList) ';'
 			{
-			  if (!def) Export(ExportList, QUALflag);
-			  else warning("export list in definition module ignored");
-			  FreeNode(ExportList);
+			  if (!def) {
+				Export(ExportList, QUALflag);
+			  }
+			  else {
+			  warning("export list in definition module ignored");
+				FreeNode(ExportList);
+			  }
 			}
 ;
 
@@ -101,8 +112,6 @@ import(int local;)
 	*/
 			{
 			  Import(ImportList, id, local);
-			  FreeNode(ImportList);
-			  if (id) FreeNode(id);
 			}
 ;
 
@@ -130,7 +139,7 @@ DefinitionModule
 	*/
 	definition* END IDENT
 			{
-			  if (id == impl_name) {
+			  if (DEFofIMPL) {
 				/* Just read the definition module of the
 				   implementation module being compiled
 				*/
@@ -143,7 +152,7 @@ DefinitionModule
 				df->df_flags |= D_QEXPORTED;
 				df = df->df_nextinscope;
 			  }
-			  if (!SYSTEMModule) close_scope();
+			  if (!SYSTEMModule) close_scope(SC_CHKFORW);
 			  DefinitionModule = 0;
 			  match_id(id, dot.TOK_IDF);
 			}
@@ -185,9 +194,10 @@ ProgramModule(int state;)
 	IDENT		{ 
 			  id = dot.TOK_IDF;
 			  if (state == IMPLEMENTATION) {
-				   impl_name = id;
+				   DEFofIMPL = 1;
 				   df = GetDefinitionModule(id);
 				   scope = df->mod_scope;
+				   DEFofIMPL = 0;
 			  }
 			  DefinitionModule = 0;
 			  open_scope(CLOSEDSCOPE, scope);
@@ -196,7 +206,7 @@ ProgramModule(int state;)
 	priority?
 	';' import(0)*
 	block IDENT
-			{ close_scope();
+			{ close_scope(SC_CHKFORW|SC_CHKPROC);
 			  match_id(id, dot.TOK_IDF);
 			}
 	'.'

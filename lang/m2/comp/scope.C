@@ -92,21 +92,73 @@ Forward(tk, ptp)
 	CurrentScope->sc_forw = f;
 }
 
-close_scope()
+close_scope(flag)
 {
+	/*	Close a scope. If "flag" is set, check for forward declarations,
+		either POINTER declarations, or EXPORTs, or forward references
+		to MODULES
+	*/
 	register struct scope *sc = CurrentScope;
+	register struct def *df, *dfback = 0;
 
 	assert(sc != 0);
 	DO_DEBUG(1, debug("Closing a scope"));
-	if (sc->sc_forw) rem_forwards(sc->sc_forw);
-	if (sc->next && (sc->next->sc_scope == 0)) {
-		struct scope *sc1 = sc;
 
+	if (flag) {
+		if (sc->sc_forw) rem_forwards(sc->sc_forw);
+		df = sc->sc_def;
+		while(df) {
+			if (flag & SC_CHKPROC) {
+				if (df->df_kind == D_PROCHEAD) {
+					/* A not defined procedure
+					*/
+node_error(df->for_node, "procedure \"%s\" not defined", df->df_idf->id_text);
+					FreeNode(df->for_node);
+				}
+			}
+			if ((flag & SC_CHKFORW) && 
+			    df->df_kind & (D_FORWARD|D_FORWMODULE)) {
+				/* These definitions must be found in
+				   the enclosing closed scope, which of course
+				   may be the scope that is now closed!
+				*/
+				struct def *df1 = df->df_nextinscope;
+
+				if (scopeclosed(CurrentScope)) {
+					/* Indeed, the scope was a closed
+					   scope, so give error message
+					*/
+node_error(df->for_node, "identifier \"%s\" not declared", df->df_idf->id_text);
+					FreeNode(df->for_node);
+					dfback = df;
+				}
+				else {
+					/* This scope was an open scope.
+					   Maybe the definitions are in the
+					   enclosing scope?
+					*/
+					struct scope *sc;
+
+					sc = enclosing(CurrentScope);
+					df->df_nextinscope = sc->sc_def;
+					sc->sc_def = df;
+					df->df_scope = sc->sc_scope;
+					if (dfback) dfback->df_nextinscope = df1;
+					else sc->sc_def = df1;
+				}
+				df = df1;
+			}
+			else {
+				dfback = df;
+				df = df->df_nextinscope;
+			}
+		}
+	}
+
+	if (sc->next && (sc->next->sc_scope == 0)) {
 		sc = sc->next;
-		free_scope(sc1);
 	}
 	CurrentScope = sc->next;
-	free_scope(sc);
 }
 
 static
@@ -121,7 +173,7 @@ rem_forwards(fo)
 
 	while (f = fo) {
 		df = lookfor(&(f->fo_tok), CurrentScope, 1);
-		if (!(df->df_kind & (D_TYPE | D_HTYPE | D_ERROR))) {
+		if (!(df->df_kind & (D_TYPE|D_HTYPE|D_ERROR))) {
 			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
 			      df->df_idf->id_text);
 		}
