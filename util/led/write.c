@@ -2,105 +2,23 @@
 static char rcsid[] = "$Header$";
 #endif
 
-/*
- * You can choose between two strategies:
- *	- Open the output file several times, once for each logical part, and
- *	write to it in multiple places.
- *	- Open the output file once and seek back and forth to each logical
- *	part. In this case #define OUTSEEK.
- */
-
+#include <out.h>
 #include <stdio.h>
-#include "../../h/out.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"
-#include "orig.h"
-
-static			openoutput();
-static			wrt_head();
-static			wrt_sect();
-extern long		lseek();
-
-#define WRITE		1	/* Argument to open(). */
-
-/*
- * Parts of the output file.
- */
-#define	PARTEMIT	0
-#define	PARTRELO	1
-#define	PARTNAME	2
-#define	PARTCHAR	3
-#ifdef SYMDBUG
-#define PARTDBUG	4
-#else SYMDBUG
-#define PARTDBUG	PARTCHAR
-#endif SYMDBUG
-#define	NPARTS		(PARTDBUG + 1)
-
-/*
- * Call OUTPART() with the part you want to write on as argument, before
- * you call OUTWRITE().
- */
-static int		outpart = NPARTS;
-
-#ifdef OUTSEEK
-
-static int		outfile;
-static long		outseek[NPARTS];
-
-#define	OUTPART(p) \
-	{	if (outpart != (p)) {\
-			outpart = (p);\
-			lseek(outfile, outseek[(p)], 0);\
-		}\
-	}
-#define OUTSECT(i) \
-	{	outpart = NPARTS;\
-		outseek[PARTEMIT] =\
-			outsect[(i)].os_foff + relorig[(i)].org_flen;\
-	}
-#define OUTWRITE(b, n) \
-	{	if (write(outfile, (b), (n)) != (n))\
-			fatal("write error");\
-		outseek[outpart] += (n);\
-	}
-#define BEGINSEEK(p, o) \
-	{	outseek[(p)] = (o);\
-	}
-
-#else OUTSEEK
-
-static int	outfile[NPARTS];
-
-#define	OUTPART(p) \
-	{	outpart = (p);\
-	}
-#define OUTSECT(i) \
-	{	lseek(	outfile[PARTEMIT],\
-			outsect[(i)].os_foff + relorig[(i)].org_flen,\
-			0\
-		);\
-	}
-#define OUTWRITE(b, n) \
-	{	if (write(outfile[outpart], (b), (n)) != (n))\
-			fatal("write error");\
-	}
-#define	BEGINSEEK(p, o) \
-	{	lseek(outfile[(p)], (o), 0);\
-	}
-
-#endif OUTSEEK
 
 extern struct outhead	outhead;
 extern struct outsect	outsect[];
 extern int		flagword;
-extern struct orig	relorig[];
-extern bool		bytes_reversed, words_reversed;
 extern bool		incore;
 
+wr_fatal()
+{
+	fatal("write error");
+}
 
-static long		offchar;
+static long		off_char;
 
 /*
  * Open the output file according to the chosen strategy.
@@ -108,52 +26,16 @@ static long		offchar;
  */
 begin_write()
 {
-	register long	off;
+	extern char *outputname;
+	register struct outhead *hd = &outhead;
 
-	openoutput();
-	BEGINSEEK(PARTEMIT, (long)0);
-	wrt_head(&outhead);
-	wrt_sect(outsect, outhead.oh_nsect);
-
-	off = SZ_HEAD + (long)outhead.oh_nsect * SZ_SECT + outhead.oh_nemit;
-	
-	if (flagword & RFLAG) {
-		/* A relocation table will be produced. */
-		BEGINSEEK(PARTRELO, off);
-		off += (long)outhead.oh_nrelo * SZ_RELO;
+	assert(! incore);
+	if (! wr_open(outputname)) {
+		fatal("cannot write %s", outputname);
 	}
-
-	if (flagword & SFLAG)
-		return;
-
-	/* A name table will be produced. */
-	BEGINSEEK(PARTNAME, off);
-	off += (long)outhead.oh_nname * SZ_NAME;
-	BEGINSEEK(PARTCHAR, off);
-	offchar = off; /* See wrt_name(). */
-#ifdef SYMDBUG
-	off += outhead.oh_nchar;
-	BEGINSEEK(PARTDBUG, off);
-#endif SYMDBUG
-}
-
-static
-openoutput()
-{
-#ifndef OUTSEEK
-	register int	*fdp;
-#endif OUTSEEK
-	extern char	*outputname;
-
-	close(creat(outputname, 0666));
-#ifdef OUTSEEK
-	if ((outfile = open(outputname, WRITE)) < 0)
-		fatal("can't write %s", outputname);
-#else OUTSEEK
-	for (fdp = &outfile[PARTEMIT]; fdp < &outfile[NPARTS]; fdp++)
-		if ((*fdp = open(outputname, WRITE)) < 0)
-			fatal("can't write %s", outputname);
-#endif OUTSEEK
+	wr_ohead(hd);
+	wr_sect(outsect, hd->oh_nsect);
+	off_char = OFF_CHAR(*hd);
 }
 
 static struct outname *
@@ -198,73 +80,28 @@ end_write()
 		wrt_name(sectname(sectindex));
 }
 	
-static
-wrt_head(head)
-	register struct outhead	*head;
-{
-	assert(!incore);
-	OUTPART(PARTEMIT);
-	if (bytes_reversed || words_reversed)
-		swap((char *)head, SF_HEAD);
-	OUTWRITE((char *)head, SZ_HEAD);
-	/*
-	 * Swap back because we will need it again.
-	 */
-	if (bytes_reversed || words_reversed)
-		swap((char *)head, SF_HEAD);
-}
-
-static
-wrt_sect(sect, cnt)
-	register struct outsect	*sect;
-	register ushort		cnt;
-{
-	assert(!incore);
-	OUTPART(PARTEMIT);
-	while (cnt--) {
-		if (bytes_reversed || words_reversed)
-			swap((char *)sect, SF_SECT);
-		OUTWRITE((char *)sect, SZ_SECT);
-		/*
-		 * Swap back because we will need it again.
-		 */
-		if (bytes_reversed || words_reversed)
-			swap((char *)sect, SF_SECT);
-		sect++;
-	}
-}
-
-/*
- * We don't have to worry about byte order here.
- */
 wrt_emit(emit, sectindex, cnt)
-	register char		*emit;
-	int			sectindex;
-	register long		cnt;
+	char		*emit;
+	int		sectindex;
+	long		cnt;
 {
-	register int		n;
 
-	assert(!incore);
-	OUTPART(PARTEMIT);
-	OUTSECT(sectindex);
+	wr_outsect(sectindex);
+	wr_emit(emit, cnt);
+}
+
+wrt_nulls(sectindex, cnt)
+	register long cnt;
+{
+	static char nullbuf[BUFSIZ];
+
+	wr_outsect(sectindex);
 	while (cnt) {
-		n = cnt >= BUFSIZ ? BUFSIZ : cnt;
-		OUTWRITE(emit, n);
-		emit += n;
+		register int n = cnt >= BUFSIZ ? BUFSIZ : cnt;
+		wr_emit(nullbuf, (long)n);
 		cnt -= n;
 	}
 }
-
-wrt_relo(relo)
-	register struct outrelo	*relo;
-{
-	assert(!incore);
-	assert(flagword & RFLAG);
-	OUTPART(PARTRELO);
-	if (bytes_reversed || words_reversed)
-		swap((char *)relo, SF_RELO);
-	OUTWRITE((char *)relo, SZ_RELO);
-}		
 
 wrt_name(name)
 	register struct outname	*name;
@@ -272,29 +109,13 @@ wrt_name(name)
 	assert(!incore);
 	assert(!(flagword & SFLAG));
 	if (name->on_mptr != (char *)0) {
-		register int	len = strlen(name->on_mptr) + 1;
+		register long	len = strlen(name->on_mptr) + 1;
 
-		OUTPART(PARTCHAR);
-		OUTWRITE(name->on_mptr, len);
-		name->on_foff = offchar;
-		offchar += len;
+		wr_string(name->on_mptr, len);
+		name->on_foff = off_char;
+		off_char += len;
 	} else {
 		name->on_foff = (long)0;
 	}
-	OUTPART(PARTNAME);
-	if (bytes_reversed || words_reversed)
-		swap((char *)name, SF_NAME);
-	OUTWRITE((char *)name, SZ_NAME);
+	wr_name(name, 1);
 }
-#ifdef SYMDBUG
-
-wrt_dbug(buf, size)
-	char		*buf;
-	int		size;
-{
-	assert(!incore);
-	assert(!(flagword & SFLAG));
-	OUTPART(PARTDBUG);
-	OUTWRITE((char *)buf, size);
-}
-#endif SYMDBUG

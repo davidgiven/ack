@@ -2,7 +2,7 @@
 static char rcsid[] = "$Header$";
 #endif
 
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
@@ -47,23 +47,20 @@ get_names(head)
 	register struct outhead	*head;
 {
 	register int	nnames;
-	register ind_t	sectindex, nameindex, charindex;
+	register ind_t	nameindex, charindex;
 	register ind_t	charoff;
 	extern int	flagword;
 
 	nnames = head->oh_nname;
-	sectindex = IND_SECT(*head);
 	nameindex = IND_NAME(*head);
 	charindex = IND_CHAR(*head);
 	charoff = OFF_CHAR(*head);
 	while (nnames--) {
-		register struct outsect	*sects;
 		struct outname		name;	/* A local copy. */
 		/*
 		 * Because savelocal/getexternal might relocate the modules
 		 * we have to compute the core addresses again.
 		 */
-		sects = (struct outsect *)modulptr(sectindex);
 		name = *(struct outname *)modulptr(nameindex);
 		/*
 		 * Change the offset in file into an offset in the memory area.
@@ -73,7 +70,7 @@ get_names(head)
 		 */
 		if (name.on_foff)
 			name.on_foff += charindex - charoff;
-		namerelocate(&name, sects);
+		namerelocate(&name);
 		if (name.on_type & S_EXT) {
 			getexternal(&name);
 		} else {
@@ -111,14 +108,19 @@ process(head)
 	nsect = head->oh_nsect;
 	outsp = outsect;
 	while (nsect--) {
+		if (sects->os_flen) {
+			/* contains non-zero stuff */
+			outsp->os_flen = outsp->os_size + sects->os_flen;
+		}
+		else {
+			outsp->os_flen += sects->os_flen;
+		}
 		outsp->os_size += sects->os_size;
-		outsp->os_flen += sects->os_flen;
 		/*
 		 * Add all flen's and all (size - flen == zero)'s of
 		 * preceding sections with the same number.
 		 */
-		orig->org_flen += sects->os_flen;
-		orig->org_zero += sects->os_size - sects->os_flen;
+		orig->org_size = outsp->os_size;
 		orig++; outsp++; sects++;
 	}
 }
@@ -127,21 +129,13 @@ process(head)
  * Add relocation constant for names in user defined sections.
  * The value of a common name indicates a size instead of an offset,
  * and hence shouldn't be relocated.
- * The value of a name in the zero part of a section is relative from the
- * beginning of the section, not from the beginning of the zero part; but
- * all zero parts will be put after the normal section contents, so we
- * must subtract the flen of its section from the value (and later on add
- * the total flen of its section) and add the accumulated size of all
- * zero parts in preceding sections with the same number.
  * Otherwise we just add the accumulated size of all normal parts in preceding
  * sections with the same size.
  */
-namerelocate(name, sects)
+namerelocate(name)
 	register struct outname	*name;
-	struct outsect		*sects;
 {
 	register int	type = name->on_type;
-	register int	sectindex;
 
 	if ((type & S_TYP) == S_UND || (type & S_TYP) == S_ABS)
 		return;
@@ -150,14 +144,7 @@ namerelocate(name, sects)
 		return;
 	}
 
-	sectindex = (type & S_TYP) - S_MIN;
-	if (name->on_valu >= sects[sectindex].os_flen) {
-		name->on_type |= S_ZER;
-		name->on_valu -= sects[sectindex].os_flen;
-		name->on_valu += relorig[sectindex].org_zero;
-	} else {
-		name->on_valu += relorig[sectindex].org_flen;
-	}
+	name->on_valu += relorig[(type & S_TYP) - S_MIN].org_size;
 }
 
 /*

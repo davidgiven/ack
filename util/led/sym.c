@@ -6,9 +6,10 @@ static char rcsid[] = "$Header$";
  * Symbol table management.
  */
 
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "memory.h"
+#include "debug.h"
 
 /*
  * Symbol table types. Each hash table entry contains the offset of a symbol
@@ -55,17 +56,23 @@ searchname(string, hashval)
 	register struct symbol	*sym;
 
 	symindex = hashtable[hashval];
+	debug("looking for %s %d %ld:", string, hashval, hashtable[hashval], 0);
 	while (symindex != BADOFF) {
 		sym = (struct symbol *)address(ALLOSYMB, symindex);
 		name = (struct outname *)address(ALLOGLOB, sym->sy_name);
 		namestring = address(ALLOGCHR, (ind_t)name->on_foff);
 		rcp = string;
+		debug("comp %s;", namestring, 0, 0, 0);
 		while (*rcp == *namestring++)
-			if (*rcp++ == '\0')
+			if (*rcp++ == '\0') {
+				debug("found %x, %x, %lx\n",
+					name->on_type, name->on_desc, name->on_valu, 0);
 				return name;
+			}	
 		symindex = sym->sy_next;
 	}
 	/* Not found. */
+	debug("not found\n", 0, 0, 0, 0);
 	return (struct outname *)0;
 }
 
@@ -82,13 +89,15 @@ entername(name, hashval)
 	ind_t		savindex;
 	ind_t		symindex;
 	ind_t		namindex;
-	struct symbol	*sym;
+	register struct symbol	*sym;
 	struct outname	*newname;
 	extern ind_t	savechar();
 	extern ind_t	hard_alloc();
 
+	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
 	symindex = hard_alloc(ALLOSYMB, (long)sizeof(struct symbol));
+	debug("; %ld\n", symindex, 0, 0, 0);
 	namindex = hard_alloc(ALLOGLOB, (long)sizeof(struct outname));
 	if (savindex == BADOFF || symindex == BADOFF || namindex == BADOFF)
 		fatal("symbol table overflow");

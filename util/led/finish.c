@@ -2,7 +2,7 @@
 static char rcsid[] = "$Header$";
 #endif
 
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "defs.h"
 #include "memory.h"
@@ -38,7 +38,7 @@ finish()
 	adjust_names(names, head, chars);
 	handle_relos(head, sects, names);
 	if (!incore && !(flagword & SFLAG)) {
-		put_locals(names, head->oh_nname, sects);
+		put_locals(names, head->oh_nname);
 #ifdef SYMDBUG
 		put_dbug(OFF_DBUG(*head));
 #endif SYMDBUG
@@ -86,6 +86,7 @@ handle_relos(head, sects, names)
 	register char		*emit;
 	extern char		*getemit();
 	extern struct outrelo	*nextrelo();
+	static long zeros[MAXSECT];
 
 	if (incore) {
 		nrelo = head->oh_nrelo; sectindex = -1;
@@ -95,7 +96,7 @@ handle_relos(head, sects, names)
 				sectindex = relo->or_sect - S_MIN;
 				emit = getemit(head, sects, sectindex);
 			}
-			relocate(head, emit, names, relo, sects);
+			relocate(head, emit, names, relo);
 			relo++;
 		}
 	} else {
@@ -105,16 +106,22 @@ handle_relos(head, sects, names)
 			while (nrelo--) {
 				relo = nextrelo();
 				if (relo->or_sect - S_MIN == sectindex) {
-					relocate(head,emit,names,relo,sects);
+					relocate(head,emit,names,relo);
 					/*
 					 * Write out the (probably changed)
 					 * relocation information.
 					 */
 					if (flagword & RFLAG)
-						wrt_relo(relo);
+						wr_relo(relo, 1);
 				}
 			}
-			wrt_emit(emit, sectindex, sects[sectindex].os_flen);
+			if (sects[sectindex].os_flen) {
+				wrt_nulls(sectindex, zeros[sectindex]);
+				zeros[sectindex] = 0;
+				wrt_emit(emit, sectindex, sects[sectindex].os_flen);
+			}
+			zeros[sectindex] += sects[sectindex].os_size -
+					    sects[sectindex].os_flen;
 			/*
 			 * XXX We should be able to free the emitted bytes.
 			 */
@@ -126,14 +133,13 @@ handle_relos(head, sects, names)
  * Write out the local names that must be saved.
  */
 static
-put_locals(name, nnames, sects)
+put_locals(name, nnames)
 	register struct outname	*name;
 	register ushort		nnames;
-	register struct outsect	*sects;
 {
 	while (nnames--) {
 		if ((name->on_type & S_EXT) == 0 && mustsavelocal(name)) {
-			namerelocate(name, sects);
+			namerelocate(name);
 			addbase(name);
 			wrt_name(name);
 		}
@@ -154,8 +160,8 @@ compute_origins(sect, nsect)
 	register struct orig	*orig = relorig;
 
 	while (nsect--) {
-		orig->org_flen += sect->os_flen;
-		orig->org_zero += sect->os_size - sect->os_flen;
+
+		orig->org_size += sect->os_size;
 		orig++; sect++;
 	}
 }
@@ -173,14 +179,12 @@ put_dbug(offdbug)
 	register int	nbytes;
 	register long	dbugsize;
 	extern long	objectsize;
-	extern long	position;
 
 	dbugsize = objectsize - offdbug;
-	seek(position + offdbug);
 	while (dbugsize) {
 		nbytes = dbugsize > 512 ? 512 : dbugsize;
-		read_char(buf, (long)nbytes);
-		wrt_dbug(buf, nbytes);
+		rd_dbug(buf, (long)nbytes);
+		wr_dbug(buf, (long) nbytes);
 		dbugsize -= nbytes;
 	}
 }

@@ -2,7 +2,7 @@
 static char rcsid[] = "$Header$";
 #endif
 
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
@@ -98,39 +98,6 @@ putvalu(valu, addr, type)
 	}
 }
 
-/*
- * Returns whether `valu' refers to the zero part of its section.
- * The address of its zero part (relative to the beginning of the section)
- * is in `zero_addr'. If `valu' is used in a pc-relative address computation,
- * we have to do that computation ourselves. A pc-relative address is the
- * difference between the address of the byte after the value and the "real"
- * address:
- * referencing address + its size + pc-relative address == "real" address.
- */
-static bool
-refers_zero(valu, relo, zero_addr)
-	register long	valu;
-	struct outrelo	*relo;
-	long		zero_addr;
-{
-	if (relo->or_type & RELPC) {
-		valu += relo->or_addr;
-		/*
-		 * Below is a dirty switch-statement. But an even dirtier
-		 * statement would be: valu += (relo->or_type & RELSZ),
-		 * because in that case you would have to know the values
-		 * of the RELO[124] symbols.
-		 */
-		switch (relo->or_type & RELSZ) {
-		case RELO4:	valu += 1;
-				valu += 1;
-		case RELO2:	valu += 1;
-		case RELO1:	valu += 1;
-		}
-	}
-	return valu >= zero_addr;
-}
-
 extern ushort		NLocals, NGlobals;
 extern struct outsect	outsect[];
 extern struct orig	relorig[];
@@ -148,10 +115,9 @@ extern struct orig	relorig[];
  * in position of the section of local.
  */
 static ushort
-addrelo(relo, names, sects, valu_out)
+addrelo(relo, names, valu_out)
 	struct outrelo		*relo;
 	struct outname		*names;
-	struct outsect		*sects;
 	long			*valu_out;	/* Out variable. */
 {
 	register struct outname	*local = &names[relo->or_nami];
@@ -161,13 +127,7 @@ addrelo(relo, names, sects, valu_out)
 	if ((local->on_type & S_SCT)) {
 		register int	sectindex = (local->on_type & S_TYP) - S_MIN;
 
-		if (refers_zero(valu, relo, sects[sectindex].os_flen)) {
-			valu -= sects[sectindex].os_flen;
-			valu += outsect[sectindex].os_flen;
-			valu += relorig[sectindex].org_zero;
-		} else {
-			valu += relorig[sectindex].org_flen;
-		}
+		valu += relorig[sectindex].org_size;
 		valu += outsect[sectindex].os_base;
 		index += NGlobals + sectindex;
 	} else {
@@ -196,12 +156,11 @@ addrelo(relo, names, sects, valu_out)
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-relocate(head, emit, names, relo, sects)
+relocate(head, emit, names, relo)
 	struct outhead	*head;
 	char		*emit;
 	struct outname	names[];
 	struct outrelo	*relo;
-	struct outsect	*sects;
 {
 	long		valu;
 	int		sectindex = relo->or_sect - S_MIN;
@@ -220,7 +179,7 @@ relocate(head, emit, names, relo, sects)
 	 */
 	if (relo->or_nami < head->oh_nname) {
 		/* First two cases. */
-		relo->or_nami = addrelo(relo, names, sects, &valu);
+		relo->or_nami = addrelo(relo, names, &valu);
 	} else {
 		/*
 		 * Third case: it is absolute. The relocation of absolute
@@ -234,11 +193,9 @@ relocate(head, emit, names, relo, sects)
 	 * the change in distance between the referencING and referencED
 	 * section. We already added the origin of the referencED section;
 	 * now we subtract the origin of the referencING section.
-	 * Note that the the value to be relocated cannot lie within the
-	 * zero part.
 	 */
 	if (relo->or_type & RELPC)
-		valu -=	relorig[sectindex].org_flen+outsect[sectindex].os_base;
+		valu -=	relorig[sectindex].org_size+outsect[sectindex].os_base;
 
 	/*
 	 * Now put the value back.
@@ -250,5 +207,5 @@ relocate(head, emit, names, relo, sects)
 	 * relocated to its offset in the new section. `Or_addr' must again be
 	 * in the normal part, of course.
 	 */
-	relo->or_addr += relorig[sectindex].org_flen;
+	relo->or_addr += relorig[sectindex].org_size;
 }

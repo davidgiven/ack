@@ -9,7 +9,7 @@ static char rcsid[] = "$Header$";
  * is done and pieces after the one that requested the growth are moved up.
  */
 
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "assert.h"
 #include "debug.h"
@@ -19,8 +19,6 @@ static		copy_down();
 static		copy_up();
 static		free_saved_moduls();
 static		writelong();
-static		sectswap();
-static		reloswap();
 static		namecpy();
 
 struct memory	mems[NMEMS];
@@ -201,11 +199,11 @@ copy_up(mem, dist)
  */
 ind_t
 alloc(piece, size)
-	register int		piece;
+	int			piece;
 	register long		size;
 {
 	register ind_t		incr = 0;
-	register ind_t		left = mems[piece].mem_left;
+	ind_t			left = mems[piece].mem_left;
 	register ind_t		full = mems[piece].mem_full;
 
 	assert(passnumber == FIRST || (!incore && piece == ALLOMODL));
@@ -347,18 +345,14 @@ freeze_core()
 
 /* ------------------------------------------------------------------------- */
 
-extern bool	bytes_reversed;
-extern bool	words_reversed;
-
 /*
  * To transform the various pieces of the output in core to the file format,
  * we must order the bytes in the ushorts and longs as ACK prescribes.
  */
 write_bytes()
 {
-	ushort			nsect, nrelo;
+	ushort			nsect;
 	long			offchar;
-	int			fd;
 	register struct memory	*mem;
 	extern ushort		NLocals, NGlobals;
 	extern long		NLChars, NGChars;
@@ -366,16 +360,11 @@ write_bytes()
 	extern struct outhead	outhead;
 	extern struct outsect	outsect[];
 	extern char		*outputname;
+	int			sectionno = 0;
 
 	nsect = outhead.oh_nsect;
-	nrelo = outhead.oh_nrelo;
 	offchar = OFF_CHAR(outhead);
 
-	if (bytes_reversed || words_reversed) {
-		swap((char *)&outhead, SF_HEAD);
-		sectswap(outsect, nsect);
-		reloswap(nrelo);
-	}
 	/*
 	 * We allocated two areas: one for local and one for global names.
 	 * Also, we used another kind of on_foff than on file.
@@ -391,66 +380,34 @@ write_bytes()
 			offchar + NLChars
 		);
 	}
-	if ((fd = creat(outputname, 0666)) < 0)
+	if (! wr_open(outputname)) {
 		fatal("can't create %s", outputname);
+	}
 	/*
 	 * These pieces must always be written.
 	 */
-	writelong(fd, (char *)&outhead, (ind_t)SZ_HEAD);
-	writelong(fd, (char *)outsect, (ind_t)nsect * SZ_SECT);
+	wr_ohead(&outhead);
+	wr_sect(outsect, nsect);
 	for (mem = &mems[ALLOEMIT]; mem < &mems[ALLORELO]; mem++)
-		writelong(fd, mem->mem_base, mem->mem_full);
+		wrt_emit(mem->mem_base, sectionno++, mem->mem_full);
 	/*
 	 * The rest depends on the flags.
 	 */
 	if (flagword & RFLAG)
-		writelong(fd, mems[ALLORELO].mem_base, mems[ALLORELO].mem_full);
+		wr_relo((struct outrelo *) mems[ALLORELO].mem_base,
+			outhead.oh_nrelo);
 	if (!(flagword & SFLAG)) {
-		writelong(fd, mems[ALLOLOCL].mem_base, mems[ALLOLOCL].mem_full);
-		writelong(fd, mems[ALLOGLOB].mem_base, mems[ALLOGLOB].mem_full);
-		writelong(fd, mems[ALLOLCHR].mem_base + 1, (ind_t)NLChars);
-		writelong(fd, mems[ALLOGCHR].mem_base + 1, (ind_t)NGChars);
+		wr_name((struct outname *) mems[ALLOLOCL].mem_base,
+			NLocals);
+		wr_name((struct outname *) mems[ALLOGLOB].mem_base,
+			NGlobals+nsect);
+		wr_string(mems[ALLOLCHR].mem_base + 1, (long)NLChars);
+		wr_string(mems[ALLOGCHR].mem_base + 1, (long)NGChars);
 #ifdef SYMDBUG
-		writelong(fd, mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_full);
+		wr_dbug(mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_full);
 #endif SYMDBUG
 	}
-	close(fd);
-}
-
-static
-writelong(fd, base, size)
-	register int	fd;
-	register char	*base;
-	register ind_t	size;
-{
-	register int	chunk;
-
-	while (size) {
-		chunk = size > (ind_t)MAXCHUNK ? MAXCHUNK : size;
-		write(fd, base, chunk);
-		size -= chunk;
-		base += chunk;
-	}
-}
-
-static
-sectswap(sect, nsect)
-	register struct outsect	*sect;
-	register ushort		nsect;
-{
-	while (nsect--)
-		swap((char *)sect++, SF_SECT);
-}
-
-static
-reloswap(nrelo)
-	register ushort		nrelo;
-{
-	register struct outrelo	*relo;
-
-	relo = (struct outrelo *)mems[ALLORELO].mem_base;
-	while (nrelo--)
-		swap((char *)relo++, SF_RELO);
+	wr_close();
 }
 
 static
@@ -462,8 +419,6 @@ namecpy(name, nname, offchar)
 	while (nname--) {
 		if (name->on_foff)
 			name->on_foff += offchar - 1;
-		if (bytes_reversed || words_reversed)
-			swap((char *)name, SF_NAME);
 		name++;
 	}
 }

@@ -4,7 +4,7 @@ static char rcsid[] = "$Header$";
 
 #include <stdio.h>
 #include <signal.h>
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 
 static short	nerrors = 0;
@@ -13,11 +13,14 @@ static		diag();
 stop()
 {
 	extern char	*outputname;
+	extern int	exitstatus;
 
-	if (nerrors)
+	if (nerrors) {
 		unlink(outputname);
+		exit(nerrors);
+	}
 
-	exit(nerrors);
+	exit(exitstatus);
 }
 
 trap_signals()

@@ -2,9 +2,9 @@
 static char rcsid[] = "$Header$";
 #endif
 
-#include "../../h/arch.h"
-#include "../../h/out.h"
-#include "../../h/ranlib.h"
+#include <arch.h>
+#include <out.h>
+#include <ranlib.h>
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
@@ -30,20 +30,21 @@ getsymdeftable()
 	register struct ranlib	*ran;
 	register long		count;
 	register long		nran, nchar;
-	extern long		getlong();
+	extern long		rd_long();
+	extern int		infile;
 
-	count = nran = getlong();
+	count = nran = rd_long(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
 	off = hard_alloc(ALLORANL, nran * sizeof(struct ranlib));
 	if (off == BADOFF)
 		fatal("no space for ranlib structs");
 	ran = (struct ranlib *)address(ALLORANL, off);
-	read_table(ran, count);
-	nchar = getlong();
+	rd_ranlib(infile, ran, count);
+	nchar = rd_long(infile);
 	debug("%ld ranlib chars\n", nchar, 0, 0, 0);
 	if ((off = hard_alloc(ALLORANL, nchar)) == BADOFF)
 		fatal("no space for ranlib strings");
-	read_char(address(ALLORANL, off), nchar);
+	rd_bytes(infile, address(ALLORANL, off), nchar);
 	ran = (struct ranlib *)address(ALLORANL, (ind_t)0);
 	while (count--) {
 		/*
@@ -60,7 +61,6 @@ getsymdeftable()
 }
 
 extern char	*modulname;
-extern long	position;
 
 /*
  * Process archive with table of contents. The table of contents tells
@@ -107,7 +107,6 @@ arch()
 			get_archive_header(&arhdr);
 			modulname = arhdr.ar_name;
 			debug("%s defines %s\n", modulname, string, 0, 0);
-			position = ran->ran_pos + AR_SIZE;
 			resolved = TRUE;
 			/*
 			 * This archive member is going to be linked,
@@ -170,7 +169,6 @@ arch2()
 		get_archive_header(&arhdr);
 		modulname = arhdr.ar_name;
 		debug("%s: archive member\n", modulname, 0, 0, 0);
-		position = *pos + AR_SIZE;
 		finish();
 	}
 	localpos += sizeof(long);	/* Skip ENDLIB. */

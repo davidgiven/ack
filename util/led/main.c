@@ -7,7 +7,7 @@ static char rcsid[] = "$Header$";
  */
 
 #include <stdio.h>
-#include "../../h/out.h"
+#include <out.h>
 #include "const.h"
 #include "debug.h"
 #include "defs.h"
@@ -15,6 +15,9 @@ static char rcsid[] = "$Header$";
 #include "orig.h"
 
 extern bool	incore;
+#ifndef NDEBUG
+int			DEB = 0;
+#endif
 
 static			initializations();
 static			first_pass();
@@ -65,7 +68,6 @@ initializations(argc, argv)
 
 	progname = argv[0];
 	passnumber = FIRST;
-	determine_ordering();
 	init_core();
 	init_symboltable();
 	outhead.oh_magic = O_MAGIC;
@@ -76,6 +78,7 @@ initializations(argc, argv)
 
 int	flagword = 0;		/* To store command-line options. */
 char	*outputname = "a.out";	/* Name of the resulting object file. */
+int	exitstatus = 0;
 
 /*
  * Scan the arguments.
@@ -90,7 +93,7 @@ first_pass(argv)
 	int			sectno;
 	int			h;
 	extern int		atoi();
-	extern char		*index();
+	extern char		*strindex();
 	extern int		hash();
 	extern struct outname	*searchname();
 
@@ -111,7 +114,7 @@ first_pass(argv)
 			 * section <section number>.
 			 */
 			sectno = atoi(++argp);
-			if ((argp = index(argp, ':')) == (char *)0)
+			if ((argp = strindex(argp, ':')) == (char *)0)
 				fatal("usage: -a<section number>:<alignment>");
 			setlign(sectno, number(++argp));
 			break;
@@ -124,10 +127,15 @@ first_pass(argv)
 			 * <section number>.
 			 */
 			sectno = atoi(++argp);
-			if ((argp = index(argp, ':')) == (char *)0)
+			if ((argp = strindex(argp, ':')) == (char *)0)
 				fatal("usage: -b<section number>:<base>");
 			setbase(sectno, number(++argp));
 			break;
+#ifndef NDEBUG
+		case 'd':
+			DEB = 1;
+			break;
+#endif
 		case 'o':
 			/*
 			 * The `name' argument after -o is used as name
@@ -311,8 +319,7 @@ pass1(file)
 static
 evaluate()
 {
-	if (!(flagword & RFLAG))
-		norm_commons();
+	norm_commons();
 	complete_sections();
 	if (!(flagword & RFLAG))
 		change_names();
@@ -324,7 +331,7 @@ extern ushort	NGlobals, NLocals;
  * Sect_comm[N] is the number of common bytes in section N.
  * It is computed after pass 1.
  */
-static long	sect_comm[MAXSECT];
+long	sect_comm[MAXSECT];
 
 /*
  * If there are undefined names, we print them and we set a flag so that
@@ -347,9 +354,13 @@ norm_commons()
 		if (ISUNDEFINED(name)) {
 			if (!und) {
 				und = TRUE;
+				if (!(flagword & RFLAG)) {
+					exitstatus = 1;
+					fprintf(stderr, "Undefined:\n");
+				}
 				outhead.oh_flags |= HF_LINK;
+				if (flagword & RFLAG) break;
 				flagword = (flagword & ~SFLAG) | RFLAG;
-				fprintf(stderr, "Undefined:\n");
 			}
 			fprintf(stderr, "\t%s\n",
 				address(ALLOGCHR, (ind_t)name->on_foff)
@@ -398,8 +409,7 @@ complete_sections()
 
 	foff = SZ_HEAD + outhead.oh_nsect * SZ_SECT;
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++) {
-		relorig[sectindex].org_flen = (long)0;
-		relorig[sectindex].org_zero = (long)0;
+		relorig[sectindex].org_size = (long)0;
 		outsect[sectindex].os_foff = foff;
 		foff += outsect[sectindex].os_flen;
 
@@ -497,8 +507,7 @@ tstbit(indx, string)
 }
 
 /*
- * Add the base of the section of a name to its value. For a name in the zero
- * part, the size of the normal part is also a "base".
+ * Add the base of the section of a name to its value.
  */
 addbase(name)
 	struct outname	*name;
@@ -511,10 +520,6 @@ addbase(name)
 	if (name->on_type & S_COM)
 		return;
 
-	if (name->on_type & S_ZER) {
-		name->on_valu += outsect[sectindex].os_flen;
-		name->on_type &= ~S_ZER;
-	}
 	name->on_valu += outsect[sectindex].os_base;
 	debug(	"%s: type 0x%x, value %ld\n",
 		address((name->on_type & S_EXT) ? ALLOGCHR : ALLOLCHR,
@@ -564,9 +569,3 @@ pass2(file)
 	}
 	closefile(file);
 }
-
-#ifdef NDEBUG
-
-dummy() { ; }
-
-#endif

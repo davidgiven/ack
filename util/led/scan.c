@@ -6,13 +6,14 @@ static char rcsid[] = "$Header$";
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif SYMDBUG
-#include "../../h/arch.h"
-#include "../../h/out.h"
-#include "../../h/ranlib.h"
+#include <arch.h>
+#include <out.h>
+#include <ranlib.h>
 #include "const.h"
 #include "assert.h"
 #include "memory.h"
 #include "scan.h"
+#include "debug.h"
 
 #define READ	0
 
@@ -29,7 +30,6 @@ extern int	passnumber;
 
 char		*archname;	/* Name of archive, if reading from archive. */
 char		*modulname;	/* Name of object module. */
-long		position;	/* Byte offset within cuurent input file. */
 #ifdef SYMDBUG
 long		objectsize;
 #endif SYMDBUG
@@ -65,7 +65,6 @@ getfile(filename)
 	struct stat	statbuf;
 	extern int	fstat();
 #endif SYMDBUG
-	extern ushort	getushort();
 
 	archname = (char *)0;
 	modulname = (char *)0;
@@ -73,7 +72,7 @@ getfile(filename)
 	if (passnumber == FIRST || !incore) {
 		if ((infile = open(filename, READ)) < 0)
 			fatal("can't read %s", filename);
-		magic_number = getushort();
+		magic_number = rd_unsigned2(infile);
 	} else {
 		modulbase = modulptr((ind_t)0);
 		magic_number = *(ushort *)modulbase;
@@ -88,7 +87,6 @@ getfile(filename)
 			objectsize = statbuf.st_size;
 		}
 #endif SYMDBUG
-		position = (long)0;
 		seek((long)0);
 		modulname = filename;
 		return PLAIN;
@@ -97,7 +95,7 @@ getfile(filename)
 	case AALMAG:
 		archname = filename;
 		if (passnumber == FIRST) {
-			read_arhdr(&archive_header);
+			rd_arhdr(infile, &archive_header);
 			if (strcmp(archive_header.ar_name, SYMDEF))
 				fatal("no table of contents");
 		} else if (incore) {
@@ -123,7 +121,7 @@ get_archive_header(archive_header)
 	register struct ar_hdr	*archive_header;
 {
 	if (passnumber == FIRST || !incore) {
-		read_arhdr(archive_header);
+		rd_arhdr(infile, archive_header);
 	} else {
 		/* Copy structs. */
 		*archive_header = *(struct ar_hdr *)modulbase;
@@ -138,8 +136,10 @@ get_archive_header(archive_header)
 get_modul()
 {
 	if (passnumber == FIRST) {
+		rd_fdopen(infile);
 		scan_modul();
 	} else if (!incore) {
+		rd_fdopen(infile);
 		read_modul();
 	}
 }
@@ -161,11 +161,9 @@ scan_modul()
 	if (space) {
 		sect = (struct outsect *)modulptr(IND_SECT(*head));
 		get_indirect(head, sect);
-	} else {
-		lseek(infile, OFF_NAME(*head) - OFF_EMIT(*head), 1);
 	}
-	read_name((struct outname *)modulptr(IND_NAME(*head)), head->oh_nname);
-	read_char((char *)modulptr(IND_CHAR(*head)), head->oh_nchar);
+	rd_name((struct outname *)modulptr(IND_NAME(*head)), head->oh_nname);
+	rd_string((char *)modulptr(IND_CHAR(*head)), head->oh_nchar);
 #ifdef SYMDBUG
 	if (space) {
 		get_dbug(*(ind_t *)modulptr(IND_DBUG(*head)),
@@ -191,7 +189,7 @@ all_alloc()
 
 	if (hard_alloc(ALLOMODL, (long)sizeof(struct outhead)) == BADOFF)
 		fatal("no space for module header");
-	read_head((struct outhead *)modulptr(IND_HEAD));
+	rd_ohead((struct outhead *)modulptr(IND_HEAD));
 	/*
 	 * Copy the header because we need it so often.
 	 */
@@ -226,7 +224,7 @@ direct_alloc(head)
 	size = modulsize(head) - sizeof(struct outhead) - rest;
 	if (hard_alloc(ALLOMODL, size) == BADOFF)
 		fatal("no space for module");
-	read_sect((struct outsect *)modulptr(sectindex), nsect);
+	rd_sect((struct outsect *)modulptr(sectindex), nsect);
 
 	return incore && alloc(ALLOMODL, rest) != BADOFF;
 }
@@ -281,8 +279,28 @@ putemitindex(sectindex, emitoff, allopiece)
 	long		flen;
 	ind_t		emitindex;
 	extern ind_t	alloc();
+	static long	zeros[MAXSECT];
+	register long	 zero  = zeros[allopiece - ALLOEMIT];
+
+	/*
+	 * Notice that "sectindex" is not a section number!
+	 * It contains the offset of the section from the beginning
+	 * of the module. Thus, it cannot be used to index "zeros".
+	 * AIAIAIAIA
+	 */
 
 	flen = ((struct outsect *)modulptr(sectindex))->os_flen;
+	if (flen && zero) {
+		if ((emitindex = alloc(allopiece, zero)) != BADOFF){
+			register char *p = address(allopiece, emitindex);
+
+			debug("Zeros %ld\n", zero, 0,0,0);
+			while (zero--) *p++ = 0;
+		}
+		else	 return FALSE;
+	}
+	zeros[allopiece - ALLOEMIT] =
+		((struct outsect *) modulptr(sectindex))->os_size - flen;
 	if ((emitindex = alloc(allopiece, flen)) != BADOFF) {
 		*(ind_t *)modulptr(emitoff) = emitindex;
 		return TRUE;
@@ -343,13 +361,14 @@ get_indirect(head, sect)
 	ind_t			*reloindex;
 
 	emitindex = (ind_t *)modulptr(IND_EMIT(*head));
-	nsect = head->oh_nsect; piece = ALLOEMIT;
-	while (nsect--) {
-		read_emit(address(piece, *emitindex), sect->os_flen);
+	piece = ALLOEMIT;
+	for (nsect = 0; nsect < head->oh_nsect; nsect++) {
+		rd_outsect(nsect);
+		rd_emit(address(piece, *emitindex), sect->os_flen);
 		piece++; emitindex++; sect++;
 	}
 	reloindex = (ind_t *)modulptr(IND_RELO(*head));
-	read_relo((struct outrelo *)address(ALLORELO, *reloindex),
+	rd_relo((struct outrelo *)address(ALLORELO, *reloindex),
 		head->oh_nrelo
 	);
 }
@@ -398,7 +417,6 @@ read_modul()
 	ushort		nsect, nname;
 	long		size;
 	long		nchar;
-	long		skip;
 	extern ind_t	hard_alloc();
 
 	assert(passnumber == SECOND);
@@ -406,11 +424,10 @@ read_modul()
 	if (hard_alloc(ALLOMODL, (long)sizeof(struct outhead)) == BADOFF)
 		fatal("no space for module header");
 	head = (struct outhead *)modulptr(IND_HEAD);
-	read_head(head);
+	rd_ohead(head);
 	nsect = head->oh_nsect; sectindex = IND_SECT(*head);
 	nname = head->oh_nname; nameindex = IND_NAME(*head);
 	nchar = head->oh_nchar; charindex = IND_CHAR(*head);
-	skip = OFF_NAME(*head) - OFF_EMIT(*head);
 #ifdef SYMDBUG
 	size = modulsize(head) - (nsect * sizeof(ind_t) + 2 * sizeof(ind_t));
 #else SYMDBUG
@@ -423,10 +440,9 @@ read_modul()
 	names = (struct outname *)modulptr(nameindex);
 	chars = modulptr(charindex);
 
-	read_sect(sects, nsect);
-	lseek(infile, skip, 1);
-	read_name(names, nname);
-	read_char(chars, nchar);
+	rd_sect(sects, nsect);
+	rd_name(names, nname);
+	rd_string(chars, nchar);
 }
 
 /*
@@ -437,8 +453,7 @@ static long
 align(size)
 	register long	size;
 {
-	size += sizeof(double) - 1;
-	return size - (size & (sizeof(double) - 1));
+	return (size + (sizeof(double) - 1)) & ~(sizeof(double) - 1);
 }
 
 /*
@@ -488,8 +503,7 @@ startrelo(head)
 	if (incore) {
 		reloindex = *(ind_t *)(modulbase + IND_RELO(*head));
 		walkrelo = (struct outrelo *)address(ALLORELO, reloindex);
-	} else
-		lseek(infile, position + OFF_RELO(*head), 0);
+	}
 }
 
 struct outrelo *
@@ -500,7 +514,7 @@ nextrelo()
 	if (incore)
 		return walkrelo++;
 
-	read_relo(&relobuf, (ushort)1);
+	rd_relo(&relobuf, 1);
 	return &relobuf;
 }
 
@@ -524,8 +538,8 @@ getemit(head, sects, sectindex)
 		ret = core_alloc(ALLOMODL, sects[sectindex].os_flen);
 		if (ret == (char *)0)
 			fatal("no space for section contents");
-		lseek(infile, position + sects[sectindex].os_foff, 0);
-		read_emit(ret, sects[sectindex].os_flen);
+		rd_outsect(sectindex);
+		rd_emit(ret, sects[sectindex].os_flen);
 		return ret;
 	}
 	/*
