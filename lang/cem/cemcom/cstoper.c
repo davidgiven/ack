@@ -120,15 +120,13 @@ cstbin(expp, oper, expr)
 			o1 >>= o2;
 		break;
 	case '<':
-		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 < o2 : 0) :
-				(o2 & mach_long_sign ? 1 : o1 < o2)
-			);
+		{
+			arith tmp = o1;
+
+			o1 = o2;
+			o2 = tmp;
 		}
-		else
-			o1 = o1 < o2;
-		break;
+		/* Fall through */
 	case '>':
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
@@ -140,15 +138,13 @@ cstbin(expp, oper, expr)
 			o1 = o1 > o2;
 		break;
 	case LESSEQ:
-		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 <= o2 : 0) :
-				(o2 & mach_long_sign ? 1 : o1 <= o2)
-			);
+		{
+			arith tmp = o1;
+
+			o1 = o2;
+			o2 = tmp;
 		}
-		else
-			o1 = o1 <= o2;
-		break;
+		/* Fall through */
 	case GREATEREQ:
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?

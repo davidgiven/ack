@@ -464,7 +464,7 @@ any2opnd(expp, oper)
 
 #ifndef NOBITFIELD
 field2arith(expp)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	/*	The expression to extract the bitfield value from the
 		memory word is put in the tree.
@@ -500,7 +500,7 @@ field2arith(expp)
 	take care of the first byte the fl_value pointer points to.
 */
 switch_sign_fp(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	if (*(expr->FL_VALUE) == '-')
 		++(expr->FL_VALUE);

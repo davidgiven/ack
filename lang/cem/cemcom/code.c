@@ -437,8 +437,13 @@ bss(idf)
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:
 	*/
+	/*	but we already gave a warning at the declaration of the
+		array. Besides, the message given here does not apply to
+		voids
+	
 	if (options['R'] && size == 0)
 		warning("actual array of size 0");
+	*/
 	C_df_dnam(idf->id_text);
 	C_bss_cst(align(size, word_align), (arith)0, 1);
 }
@@ -455,7 +460,9 @@ formal_cvt(df)
 		(tp->tp_fund == CHAR || tp->tp_fund == SHORT)
 	) {
 		C_lol(df->df_address);
-		/* conversion(int_type, df->df_type); ??? */
+		/* conversion(int_type, df->df_type); ???
+		   No, you can't do this on the stack! (CJ)
+		*/
 		C_lal(df->df_address);
 		C_sti(tp->tp_size);
 		df->df_register = REG_NONE;

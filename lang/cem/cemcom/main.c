@@ -170,7 +170,7 @@ compile(argc, argv)
 	tmpfile = mktemp(tmpf);
 #endif USE_TMP
 
-	if (strcmp(destination, "-") == 0)
+	if (destination && strcmp(destination, "-") == 0)
 		destination = 0;
 	if (!InsertFile(source, (char **) 0)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, 
@@ -246,7 +246,7 @@ init()
 	float_type = standard_type(FLOAT, 0, float_align, float_size);
 	double_type = standard_type(DOUBLE, 0, double_align, double_size);
 #endif NOFLOAT
-	void_type = standard_type(VOID, 0, 0, (arith)0);
+	void_type = standard_type(VOID, 0, 1, (arith)0);
 	label_type = standard_type(LABEL, 0, 0, (arith)0);
 	error_type = standard_type(ERRONEOUS, 0, 1, (arith)1);
 

@@ -88,6 +88,8 @@ construct_type(fund, tp, count)
 			error("cannot construct array of unknown type");
 			count = (arith)-1;
 		}
+		else if (tp->tp_size == 0)	/* CJ */
+			warning("array elements have size 0");
 		if (count >= (arith)0)
 			count *= tp->tp_size;
 		dtp = array_of(tp, count);

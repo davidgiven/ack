@@ -101,7 +101,6 @@ check_array_subscript(expr)
 	else
 	if (size == 0) {
 		warning("empty array declaration");
-		expr->VL_VALUE = (arith)-1;
 	}
 	else
 	if (size & ~max_unsigned) {	/* absolutely ridiculous */

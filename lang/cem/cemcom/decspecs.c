@@ -39,8 +39,8 @@ do_decspecs(ds)
 		    ds->ds_sc != REGISTER){
 			extern char *symbol2str();
 			error("%s formal illegal", symbol2str(ds->ds_sc));
+			ds->ds_sc = FORMAL;
 		}
-		ds->ds_sc = FORMAL;
 	}
 	/*	The tests concerning types require a full knowledge of the
 		type and will have to be postponed to declare_idf.

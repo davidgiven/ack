@@ -20,6 +20,9 @@ extern char *symbol2str();
 	depending on the constancy of the operands.
 */
 
+#define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
+#define non_commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 0)
+
 ch7bin(expp, oper, expr)
 	register struct expr **expp;
 	struct expr *expr;
@@ -82,23 +85,27 @@ ch7bin(expp, oper, expr)
 		break;
 	case '%':
 	case MODAB:
+	case ANDAB:
+	case XORAB:
+	case ORAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		fund = arithbalance(expp, oper, &expr);
-		non_commutative_binop(expp, oper, expr);
-		break;
+		/* Fall through */
 	case '/':
 	case DIVAB:
-		fund = arithbalance(expp, oper, &expr);
-		non_commutative_binop(expp, oper, expr);
-		break;
-	case '*':
-		fund = arithbalance(expp, oper, &expr);
-		commutative_binop(expp, oper, expr);
-		break;
 	case TIMESAB:
 		fund = arithbalance(expp, oper, &expr);
 		non_commutative_binop(expp, oper, expr);
+		break;
+	case '&':
+	case '^':
+	case '|':
+		opnd2integral(expp, oper);
+		opnd2integral(&expr, oper);
+		/* Fall through */
+	case '*':
+		fund = arithbalance(expp, oper, &expr);
+		commutative_binop(expp, oper, expr);
 		break;
 	case '+':
 		if (expr->ex_type->tp_fund == POINTER)	{ /* swap operands */
@@ -161,41 +168,27 @@ ch7bin(expp, oper, expr)
 		non_commutative_binop(expp, oper, expr);
 		(*expp)->ex_type = int_type;
 		break;
-	case '&':
-	case '^':
-	case '|':
-		opnd2integral(expp, oper);
-		opnd2integral(&expr, oper);
-		fund = arithbalance(expp, oper, &expr);
-		commutative_binop(expp, oper, expr);
-		break;
-	case ANDAB:
-	case XORAB:
-	case ORAB:
-		opnd2integral(expp, oper);
-		opnd2integral(&expr, oper);
-		fund = arithbalance(expp, oper, &expr);
-		non_commutative_binop(expp, oper, expr);
-		break;
 	case AND:
 	case OR:
 		opnd2test(expp, oper);
 		opnd2test(&expr, oper);
 		if (is_cp_cst(*expp))	{
-			struct expr *ex = *expp;
+			register struct expr *ex = *expp;
 
 			/* the following condition is a short-hand for
 				((oper == AND) && o1) || ((oper == OR) && !o1)
 				where o1 == (*expp)->VL_VALUE;
 				and ((oper == AND) || (oper == OR))
 			*/
-			if ((oper == AND) == ((*expp)->VL_VALUE != (arith)0))
+			if ((oper == AND) == (ex->VL_VALUE != (arith)0))
 				*expp = expr;
 			else {
+				ex->ex_flags |= expr->ex_flags;
 				free_expression(expr);
 				*expp = intexpr((arith)((oper == AND) ? 0 : 1),
 						INT);
 			}
+			(*expp)->ex_flags |= ex->ex_flags;
 			free_expression(ex);
 		}
 		else
@@ -205,8 +198,10 @@ ch7bin(expp, oper, expr)
 				where o2 == expr->VL_VALUE
 				and ((oper == AND) || (oper == OR))
 			*/
-			if ((oper == AND) == (expr->VL_VALUE != (arith)0))
+			if ((oper == AND) == (expr->VL_VALUE != (arith)0)) {
+				(*expp)->ex_flags |= expr->ex_flags;
 				free_expression(expr);
+			}
 			else {
 				if (oper == OR)
 					expr->VL_VALUE = (arith)1;
@@ -270,31 +265,22 @@ pntminuspnt(expp, oper, expr)
 	ch7cast(expp, CAST, int_type);	/* result will be an integer expr */
 }
 
-non_commutative_binop(expp, oper, expr)
+mk_binop(expp, oper, expr, commutative)
 	register struct expr **expp, *expr;
 {
 	/*	Constructs in *expp the operation indicated by the operands.
-		"oper" is a non-commutative operator
+		"commutative" indicates wether "oper" is a commutative
+		operator.
 	*/
-	if (is_cp_cst(expr) && is_cp_cst(*expp))
-		cstbin(expp, oper, expr);
-	else
-		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
-}
+	register struct expr *ex = *expp;
 
-commutative_binop(expp, oper, expr)
-	register struct expr **expp, *expr;
-{
-	/*	Constructs in *expp the operation indicated by the operands.
-		"oper" is a commutative operator
-	*/
-	if (is_cp_cst(expr) && is_cp_cst(*expp))
+	if (is_cp_cst(expr) && is_cp_cst(ex))
 		cstbin(expp, oper, expr);
-	else
-	if ((*expp)->ex_depth > expr->ex_depth)
-		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
-	else
-		*expp = new_oper((*expp)->ex_type, expr, oper, *expp);
+	else	{
+		*expp = (commutative && expr->ex_depth >= ex->ex_depth) ?
+				new_oper(ex->ex_type, expr, oper, ex) :
+				new_oper(ex->ex_type, ex, oper, expr);
+	}
 }
 
 pointer_arithmetic(expp1, oper, expp2)

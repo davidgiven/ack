@@ -96,14 +96,16 @@ EVAL(expr, val, code, true_label, false_label)
 
 		if (tp->tp_fund == ERRONEOUS)	/* stop immediately */
 			break;
+		if (tp->tp_fund == VOID)
+			gencode = 0;
 		switch (oper) {
 		case '+':
 			/*	We have the following possibilities :
 				int + int, pointer + int, pointer + long,
 				long + long, double + double
 			*/
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode) {
 				switch (tp->tp_fund) {
 				case INT:
@@ -128,7 +130,7 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case '-':
 			if (left == 0) {	/* unary	*/
-				EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 				if (gencode) {
 					switch (tp->tp_fund) {
 					case INT:
@@ -151,8 +153,8 @@ EVAL(expr, val, code, true_label, false_label)
 				int - int, pointer - int, pointer - long,
 				pointer - pointer, long - long, double - double
 			*/
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (!gencode)
 				break;
 			switch (tp->tp_fund) {
@@ -182,10 +184,10 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case '*':
 			if (left == 0) /* unary */
-				EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			else { /* binary */
-				EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-				EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+				EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 				if (gencode)
 					switch (tp->tp_fund) {
 					case INT:
@@ -207,8 +209,8 @@ EVAL(expr, val, code, true_label, false_label)
 			}
 			break;
 		case '/':
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				switch (tp->tp_fund) {
 				case INT:
@@ -229,8 +231,8 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 			break;
 		case '%':
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			ASSERT(tp->tp_fund==INT || tp->tp_fund==LONG);
 			if (gencode)
 				if (tp->tp_unsigned)
@@ -239,8 +241,8 @@ EVAL(expr, val, code, true_label, false_label)
 					C_rmi(tp->tp_size);
 			break;
 		case LEFT:
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_slu(tp->tp_size);
@@ -248,8 +250,8 @@ EVAL(expr, val, code, true_label, false_label)
 					C_sli(tp->tp_size);
 			break;
 		case RIGHT:
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_sru(tp->tp_size);
@@ -262,8 +264,8 @@ EVAL(expr, val, code, true_label, false_label)
 		case GREATEREQ:
 		case EQUAL:
 		case NOTEQUAL:
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode) {
 				/* The operands have the same type */
 				arith size = left->ex_type->tp_size;
@@ -312,8 +314,8 @@ EVAL(expr, val, code, true_label, false_label)
 		case '|':
 		case '^':
 			/* both operands should have type int	*/
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode) {
 				arith size = tp->tp_size;
 
@@ -332,23 +334,26 @@ EVAL(expr, val, code, true_label, false_label)
 				}
 			}
 			break;
-		case '=':
+		case '=': {
+			int newcode = tp->tp_size > 0;	/* CJ */
 #ifndef NOBITFIELD
 			if (left->ex_type->tp_fund == FIELD) {
-				eval_field(expr, code);
+				eval_field(expr, gencode);
 				break;
 			}
 #endif NOBITFIELD
-			EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				C_dup(ATW(tp->tp_size));
 			if (left->ex_class != Value) {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
-				store_block(tp->tp_size, tp->tp_align);
+				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
+				if (newcode)
+					store_block(tp->tp_size, tp->tp_align);
 			}
-			else
+			else if (newcode)
 				store_val(&(left->ex_object.ex_value),
 					left->ex_type);
+			}
 			break;
 		case PLUSAB:
 		case MINAB:
@@ -367,13 +372,14 @@ EVAL(expr, val, code, true_label, false_label)
 		{
 			arith old_offset, tmp;
 			int compl;	/* Complexity of left operand */
+			int newcode = left->ex_type->tp_size > 0; /* CJ */
 #ifndef NOBITFIELD
 			if (left->ex_type->tp_fund == FIELD) {
-				eval_field(expr, code);
+				eval_field(expr, gencode);
 				break;
 			}
 #endif NOBITFIELD
-			if (left->ex_class == Value) {
+			if (newcode && left->ex_class == Value) {
 				compl = 0; /* Value */
 				load_val(left, RVAL);
 			}
@@ -381,34 +387,42 @@ EVAL(expr, val, code, true_label, false_label)
 			if (left->ex_depth == 1 && left->OP_OPER == ARROW) {
 				compl = 1; /* Value->sel */
 				ASSERT(left->OP_LEFT->ex_class == Value);
-				EVAL(left, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, RVAL, newcode, NO_LABEL, NO_LABEL);
 			}
 			else {
 				compl = 2; /* otherwise */
-				tmp = tmp_pointer_var(&old_offset);
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
-				C_dup(pointer_size);
-				C_lal(tmp);
-				C_sti(pointer_size);
-				C_loi(left->ex_type->tp_size);
+				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
+				if (newcode) {
+					tmp = tmp_pointer_var(&old_offset);
+					C_dup(pointer_size);
+					C_lal(tmp);
+					C_sti(pointer_size);
+					C_loi(left->ex_type->tp_size);
+				}
 			}
-			conversion(left->ex_type, tp);
-			if (gencode && (oper == POSTINCR || oper == POSTDECR))
-				C_dup(tp->tp_size);
-			EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
-			assop(tp, oper);
-			if (gencode && oper != POSTINCR && oper != POSTDECR)
-				C_dup(tp->tp_size);
-			conversion(tp, left->ex_type);
-			if (compl == 0)
+			if (newcode) {
+				conversion(left->ex_type, tp);
+				if (gencode && (oper == POSTINCR ||
+						oper == POSTDECR))
+					C_dup(tp->tp_size);
+			}
+			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
+			if (newcode) {
+				assop(tp, oper);
+				if (gencode && oper != POSTINCR && 
+						oper != POSTDECR)
+					C_dup(tp->tp_size);
+				conversion(tp, left->ex_type);
+			}
+			if (newcode && compl == 0)
 				store_val(&(left->ex_object.ex_value),
 					left->ex_type);
 			else
 			if (compl == 1) {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
-				C_sti(left->ex_type->tp_size);
+				EVAL(left, LVAL, newcode, NO_LABEL, NO_LABEL);
+				if (newcode) C_sti(left->ex_type->tp_size);
 			}
-			else {
+			else if (newcode) {
 				C_lal(tmp);	/* always init'd */
 				C_loi(pointer_size);
 				C_sti(left->ex_type->tp_size);
@@ -426,12 +440,14 @@ EVAL(expr, val, code, true_label, false_label)
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					EVAL(ex->OP_RIGHT, RVAL, TRUE,
+					EVAL(ex->OP_RIGHT, RVAL,
+					     ex->ex_type->tp_size > 0,
 							NO_LABEL, NO_LABEL);
 					ParSize += ATW(ex->ex_type->tp_size);
 					ex = ex->OP_LEFT;
 				}
-				EVAL(ex, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(ex, RVAL, ex->ex_type->tp_size > 0,
+						NO_LABEL, NO_LABEL);
 				ParSize += ATW(ex->ex_type->tp_size);
 			}
 			if (left->ex_class == Value && left->VL_CLASS == Name) {
@@ -463,23 +479,23 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		}
 		case '.':
-			EVAL(left, LVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, LVAL, gencode, NO_LABEL, NO_LABEL);
 			ASSERT(is_cp_cst(right));
 			if (gencode)
 				C_adp(right->VL_VALUE);
 			break;
 		case ARROW:
-			EVAL(left, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, gencode, NO_LABEL, NO_LABEL);
 			ASSERT(is_cp_cst(right));
 			if (gencode)
 				C_adp(right->VL_VALUE);
 			break;
 		case ',':
 			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			break;
 		case '~':
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				C_com(tp->tp_size);
 			break;
@@ -491,10 +507,10 @@ EVAL(expr, val, code, true_label, false_label)
 
 			EVAL(left, RVAL, TRUE, l_true, l_false);
 			C_df_ilb(l_true);
-			EVAL(right->OP_LEFT, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(right->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
 			C_df_ilb(l_false);
-			EVAL(right->OP_RIGHT, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(right->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);
 			C_df_ilb(l_end);
 			break;
 		}
@@ -528,7 +544,7 @@ EVAL(expr, val, code, true_label, false_label)
 
 				EVAL(left, RVAL, TRUE, l_maybe, false_label);
 				C_df_ilb(l_maybe);
-				EVAL(right, RVAL, code, true_label,
+				EVAL(right, RVAL, gencode, true_label,
 					false_label);
 			}
 			break;
@@ -562,7 +578,7 @@ EVAL(expr, val, code, true_label, false_label)
 
 				EVAL(left, RVAL, TRUE, true_label, l_maybe);
 				C_df_ilb(l_maybe);
-				EVAL(right, RVAL, code, true_label,
+				EVAL(right, RVAL, gencode, true_label,
 					false_label);
 			}
 			break;
@@ -587,7 +603,7 @@ EVAL(expr, val, code, true_label, false_label)
 						NO_LABEL);
 			}
 			else
-				EVAL(right, RVAL, code, false_label,
+				EVAL(right, RVAL, gencode, false_label,
 								true_label);
 			break;
 		case INT2INT:
@@ -596,7 +612,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case FLOAT2INT:
 		case FLOAT2FLOAT:
 #endif NOFLOAT
-			EVAL(right, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				conversion(right->ex_type, left->ex_type);
 			break;

@@ -41,6 +41,15 @@ replace(idef)
 	int size;
 
 	if (idef->id_macro->mc_nps != -1) {	/* with parameter list	*/
+		if (flags & FUNC) {
+					/* must be "defined".
+					   Unfortunately, the next assertion
+					   will not compile ...
+			ASSERT( ! strcmp("defined", idef->id_text));
+					*/
+			if (! AccDefined)
+				return 0;
+		}
 		LoadChar(c);
 		c = skipspaces(c);
 		if (c != '(') {		/* no replacement if no ()	*/
@@ -50,10 +59,20 @@ replace(idef)
 			return 0;
 		}
 		actpars = getactuals(idef);	/* get act.param. list	*/
+		if (flags & FUNC) {
+			struct idf *param = str2idf(*actpars);
+
+			if (param->id_macro) 
+				reptext = "\0001";
+			else
+				reptext = "\0000";
+			InsertText(reptext, 2);
+			return 1;
+		}
 	}
 	if ((flags & PREDEF) && (UnknownIdIsZero == 0)) /* don't replace */
 		return 0;
-	if (flags & FUNC)	/* this macro leads to special action	*/
+	if (flags & FUNC) 	/* this macro leads to special action	*/
 		macro_func(idef);
 	reptext = macro2buffer(idef, actpars, &size); /* create input buffer */
 	InsertText(reptext, size);

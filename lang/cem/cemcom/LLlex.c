@@ -267,7 +267,7 @@ go_on:	/* rescan, the following character has been read	*/
 		if (idef->id_macro && ReplaceMacros && replace(idef))
 			/* macro replacement should be performed	*/
 			goto again;
-		if (UnknownIdIsZero) {
+		if (UnknownIdIsZero && idef->id_reserved != SIZEOF) {
 			ptok->tk_ival = (arith)0;
 			ptok->tk_fund = INT;
 			return ptok->tk_symb = INTEGER;

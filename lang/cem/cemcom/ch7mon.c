@@ -151,9 +151,9 @@ ch7mon(oper, expp)
 			warning("sizeof formal array %s is sizeof pointer!",
 				(*expp)->VL_IDF->id_text);
 		expr = intexpr(size_of_type((*expp)->ex_type, "object"), INT);
+		expr->ex_flags |= EX_SIZEOF;
 		free_expression(*expp);
 		*expp = expr;
-		(*expp)->ex_flags |= EX_SIZEOF;
 		break;
 	}
 }

@@ -128,7 +128,7 @@ ch7sel(expp, oper, idf)
 }
 
 ch7incr(expp, oper)
-	register struct expr **expp;
+	struct expr **expp;
 {
 	/*	The monadic prefix/postfix incr/decr operator oper is
 		applied to *expp.

@@ -118,6 +118,7 @@ unstack_level()
 			if (level == L_LOCAL || level == L_FORMAL1)	{
 				if (	def->df_register != REG_NONE &&
 					def->df_sc != STATIC &&
+					def->df_type->tp_size > 0 &&
 					options['n'] == 0
 				)	{
 					int reg;

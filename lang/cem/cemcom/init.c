@@ -75,6 +75,9 @@ init_pp()
 	/* __FILE__	*/
 	macro_def(str2idf("__FILE__"), "", -1, 1, FUNC);
 
+	/* defined(??) */
+	macro_def(str2idf("defined"), "", 1, 1, FUNC);
+
 #ifdef	PREDEFINE
 	{
 		/*	PREDEFINE is a compile-time defined string

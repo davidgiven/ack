@@ -187,17 +187,23 @@ declare_idf(ds, dc, lvl)
 	else	{
 		/* combine the decspecs and the declarator into one type */
 		type = declare_type(ds->ds_type, dc);
-		if (type->tp_size == (arith)-1)	{
-			/* the type is not yet known */
-			if (actual_declaration(sc, type))	{
-				/* but it has to be: */
+		if (type->tp_size <= (arith)0 &&
+		    actual_declaration(sc, type))	{
+			if (type->tp_size == (arith) -1) {
+				/* the type is not yet known,
+				   but it has to be:
+				*/
 				extern char *symbol2str();
 				error("unknown %s-type",
 					symbol2str(type->tp_fund));
 			}
+			else {
+				/* CJ */
+				warning("%s has size 0", idf->id_text);
+			}
 		}
 	}
-	
+
 	/* some additional work for formal definitions */
 	if (lvl == L_FORMAL2)	{
 		switch (type->tp_fund)	{
@@ -276,9 +282,8 @@ declare_idf(ds, dc, lvl)
 		def->df_type = type;
 		def->df_formal_array = formal_array;
 		def->df_sc = sc;
-		if (def->df_sc != FORMAL)
-			crash("non-formal formal");
-		def->df_register = (sc == REGISTER) ? REG_BONUS : REG_DEFAULT;
+		def->df_level = L_FORMAL2;	/* CJ */
+		if (sc == REGISTER) def->df_register = REG_BONUS;
 	}
 	else
 	if (	lvl >= L_LOCAL &&
@@ -303,6 +308,8 @@ declare_idf(ds, dc, lvl)
 		newdef->df_level = lvl;
 		newdef->df_type = type;
 		newdef->df_sc = sc;
+		if (lvl == L_FORMAL1)	/* CJ */
+			newdef->df_register = REG_DEFAULT;
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);
@@ -323,17 +330,17 @@ declare_idf(ds, dc, lvl)
 						idf->id_text);
 				/** type = idf->id_def->df_type = int_type; **/
 				}
-				idf->id_def->df_register =
+				newdef->df_register =
 					(sc == REGISTER) ? REG_BONUS
 					: REG_DEFAULT;
-				idf->id_def->df_address =
+				newdef->df_address =
 				stl->sl_max_block =
 				stl->sl_local_offset =
 					-align(-stl->sl_local_offset +
 						type->tp_size, type->tp_align);
 				break;
 			case STATIC:
-				idf->id_def->df_address = (arith) data_label();
+				newdef->df_address = (arith) data_label();
 				break;
 			}
 		}
@@ -504,7 +511,7 @@ global_redecl(idf, new_sc, tp)
 int
 good_formal(def, idf)
 	register struct def *def;
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	Succeeds if def is a proper L_FORMAL1 definition and
 		gives an error message otherwise.
@@ -514,6 +521,7 @@ good_formal(def, idf)
 			error("%s not in parameter list", idf->id_text);
 		return 0;
 	}
+	ASSERT(def->df_sc == FORMAL);	/* CJ */
 	return 1;
 }
 
@@ -533,7 +541,7 @@ declare_params(dc)
 }
 
 init_idf(idf)
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	The topmost definition of idf is set to initialized.
 	*/
@@ -593,6 +601,7 @@ declare_formals(fp)
 		f_offset = align(f_offset + def->df_type->tp_size, word_align);
 		formal_cvt(def); /* cvt int to char or short, if necessary */
 		se = se->next;
+		def->df_level = L_FORMAL2;	/* CJ */
 	}
 	*fp = f_offset;
 }
@@ -637,7 +646,8 @@ free_formals(fm)
 	register struct formal *fm;
 {
 	while (fm)	{
-		register struct formal *tmp = fm->next;
+		struct formal *tmp = fm->next;
+
 		free_formal(fm);
 		fm = tmp;
 	}
