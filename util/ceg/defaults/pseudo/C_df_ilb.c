@@ -5,6 +5,7 @@
 C_df_ilb( l)
 label l;
 {
+	swtxt();
 	symbol_definition( extnd_ilb( l));
 	set_local_visible( extnd_ilb( l));
 }
