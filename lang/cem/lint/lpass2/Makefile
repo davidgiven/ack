@@ -7,7 +7,7 @@
 
 # Machine and environ dependent definitions
 EMHOME =	/usr/em
-LPASS1 =	../lpass1
+LPASS1 =	$(EMHOME)/lang/cem/cemcom
 
 # Libraries and EM interface definitions
 SYSLIB =	$(EMHOME)/modules/lib/libsystem.a
@@ -24,12 +24,13 @@ CFLAGS =	-I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg -I/usr/include
 .str.h:
 	$(LPASS1)/make.allocd <$*.str >$*.h
 
-SRC =	lpass2.c read.c report.c class.c
-OBJ =	lpass2.o read.o report.o class.o
+SRC =	lpass2.c checkargs.c read.c report.c class.c l_print3ack.c
+OBJ =	lpass2.o checkargs.o read.o report.o class.o l_print3ack.o
 
 test:	lpass2
-	make lint
-#	lpass2 -xh <.i
+	lpass2 -xh <.i
+#	make lint
+
 
 lpass2:	$(OBJ) Makefile next.o
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) next.o $(LLIBS) -o lpass2

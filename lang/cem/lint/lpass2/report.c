@@ -14,6 +14,8 @@
 #define	MSGOUT		STDERR	/* filedes on which to write the messages */
 #define	ERROUT		STDERR	/* filedes on which to write the panics */
 
+extern int LineNr;
+
 PRIVATE rep_loc();
 
 /* VARARGS */
@@ -90,6 +92,11 @@ PRIVATE
 rep_loc(id)
 	struct inpdef *id;
 {
+	/* a definition can come from a number of places */
+	if (!id) {
+		fprint(MSGOUT, "format");
+	}
+	else
 	if (is_class(id, CL_LIB)) {
 		fprint(MSGOUT, "library file %s", id->id_file);
 	}
@@ -103,7 +110,7 @@ rep_loc(id)
 panic(fmt, args)
 	char *fmt;
 {
-	fprint(ERROUT, "PANIC, lint, pass2: ");
+	fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
 	doprnt(ERROUT, fmt, &args);
 	fprint(ERROUT, "\n");
 	exit(1);

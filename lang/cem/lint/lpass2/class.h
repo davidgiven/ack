@@ -9,7 +9,7 @@
 	class[] contains a bit pattern for each letter, with those bits set
 	that correspond to the lint class meaning of the letter.
 
-	This facility is used through the macro  is_class(inpdef_var, CL_???)
+	This facility is used through the macro  is_class(inpdef_var, CL_XXX)
 */
 
 #define	CL_DEF		(1<<0)

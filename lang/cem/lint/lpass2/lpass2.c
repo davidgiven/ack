@@ -15,13 +15,11 @@
 extern char *strcpy();
 
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
-#define	min(a,b)	((a) <= (b) ? (a) : (b))
 
 PRIVATE char cur_name[NAMESIZE];
 PRIVATE struct inpdef *dot, *lib, *ext, *sta;
 
-PRIVATE check_args();
-PRIVATE check_def();
+PRIVATE chk_def();
 PRIVATE ext_decls();
 PRIVATE ext_def();
 PRIVATE get_dot();
@@ -32,8 +30,6 @@ PRIVATE one_func_call();
 PRIVATE one_var_usage();
 PRIVATE stat_def();
 PRIVATE statics();
-PRIVATE int type_equal();
-PRIVATE int type_match();
 PRIVATE usage();
 
 #define	same_name()	(dot && streq(cur_name, dot->id_name))
@@ -67,7 +63,7 @@ main(argc, argv)
 		ext_decls();
 		usage(0);
 		if (ext)
-			check_def(ext);
+			chk_def(ext);
 		statics();
 		if (same_name()) {
 			/*	there are more lines for this name that have
@@ -199,6 +195,7 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 		report("%L: %s %s %s as %s at %L",
 			dot, kind, dot->id_name, defdec(def), other_kind, def);
 		/* no further testing possible */
+		get_dot();
 		return;
 	}
 
@@ -264,7 +261,7 @@ PRIVATE one_func_call(def)
 	def->id_called = 1;
 
 	if (def->id_args) {
-		check_args(dot, def);
+		chk_args(dot, def);
 		if (	dot->id_valused == USED
 		&&	def->id_valreturned == NOVALRETURNED
 		) {
@@ -284,7 +281,7 @@ PRIVATE one_func_call(def)
 		def->id_voided = 1;
 		break;
 	default:
-		panic("invalid dot->id_valused in check");
+		panic("invalid dot->id_valused in one_func_call()");
 		break;
 	}
 
@@ -326,7 +323,7 @@ PRIVATE statics()
 		stat_def(stnr);
 		usage(stnr);
 		if (sta)
-			check_def(sta);
+			chk_def(sta);
 
 		if (same_obj(stnr))
 			panic("sequence error in input");
@@ -360,7 +357,7 @@ PRIVATE stat_def(stnr)
 	}
 }
 
-PRIVATE check_def(def)
+PRIVATE chk_def(def)
 	struct inpdef *def;
 {
 	if (!def)
@@ -393,104 +390,6 @@ PRIVATE check_def(def)
 						"sometimes" : "always");
 		}
 	}
-}
-
-
-/******** T Y P E   C H E C K I N G ********/
-
-PRIVATE check_args(id, def)
-	struct inpdef *id, *def;
-{
-	register char *act_tp = id->id_argtps;
-	register char *def_tp = def->id_argtps;
-	register int i;
-	register int nrargs;		/* # of args to be type-checked */
-	register int varargs;
-
-	/* determine nrargs */
-	if (def->id_nrargs < 0) {
-		varargs = 1;
-		nrargs = -def->id_nrargs - 1;
-	}
-	else {
-		varargs = 0;
-		nrargs = def->id_nrargs;
-	}
-
-	/* adjust nrargs, if necessary */
-	if (varargs) {
-		if (nrargs > id->id_nrargs) {
-			report("%L: number of args to %s differs from %L",
-				id, id->id_name, def);
-			nrargs = id->id_nrargs;
-		}
-	}
-	else {
-		if (nrargs != id->id_nrargs) {
-			report("%L: number of args to %s differs from %L",
-				id, id->id_name, def);
-			nrargs = min(nrargs, id->id_nrargs);
-		}
-	}
-
-	for (i = 1; i <= nrargs; i++) {
-		register char *act_par = act_tp;
-		register char *def_par = def_tp;
-
-		/* isolate actual argument type */
-		while (*act_tp) {
-			if (*act_tp == ':') {
-				*act_tp = '\0';
-				break;
-			}
-			act_tp++;
-		}
-		/* isolate formal argument type */
-		while (*def_tp) {
-			if (*def_tp == ':') {
-				*def_tp = '\0';
-				break;
-			}
-			def_tp++;
-		}
-
-		if (!type_match(act_par, def_par)) {
-			report("%L: arg %d of %s differs from that at %L",
-				id, i, id->id_name, def);
-		}
-		*act_tp++ = ':';
-		*def_tp++ = ':';
-	}
-}
-
-int
-PRIVATE type_equal(act, def)
-	char *act, *def;
-{
-	return	streq(act, def)
-	||	streq(act, "erroneous")
-	||	streq(def, "erroneous");
-}
-
-int
-PRIVATE type_match(act, def)
-	char *act, *def;
-{
-	if (type_equal(act, def))
-		return 1;
-
-	if (act[0] == '+') {
-		/* a non-negative constant */
-		/* might be signed or unsigned */
-		if (type_equal(&act[1], def))
-			return 1;
-		if (	strncmp(def, "unsigned ", strlen("unsigned ")) == 0
-		&&	type_equal(&act[1], &def[strlen("unsigned ")])
-		) {
-			return 1;
-		}
-	}
-	return 0;
 }
 
 

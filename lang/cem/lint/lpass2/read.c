@@ -17,7 +17,7 @@
 
 #include	"private.h"
 
-PRIVATE int LineNr = 1;
+int LineNr = 1;
 
 /* Two dangerous macro's. They replace a single statement by
  * two statements
@@ -25,10 +25,13 @@ PRIVATE int LineNr = 1;
 #define	loadchar(ch) LoadChar(ch); if (ch=='\n') LineNr++
 #define	pushback(ch) PushBack(); if (ch=='\n') LineNr--
 
+/* all the ReadX() functions return 0 upon EOI */
 PRIVATE int ReadString();
 PRIVATE int ReadInt();
-PRIVATE SkipChar();
 PRIVATE int ReadArgs();
+PRIVATE int ReadArg();
+
+PRIVATE SkipChar();
 
 int
 get_id(id)
@@ -79,20 +82,18 @@ get_id(id)
 
 	if (!ReadString(id->id_file, '\n', FNAMESIZE))
 		return 0;
-	return (1);
+	return 1;
 }
 
 PRIVATE int
 ReadString(buf, delim, maxsize)
 	char *buf;
 {
-	/*	Reads a string until 'delim' is encountered.
-		Delim is discarded.
-		If 'maxsize-1' is exceeded, "string too long" is written
-		by panic().
+	/*	Reads a string until 'delim' is encountered; delim is
+		discarded.
+		If 'maxsize-1' is exceeded or the string contains a newline
+		(which is not delim), panic() is called.
 		A '\0' is appended to the string.
-		At EOI 0 is returned, else the length of the string (including
-		the appended '\0') is returned.
 	*/
 
 	int ch = 0;
@@ -104,14 +105,18 @@ ReadString(buf, delim, maxsize)
 			return 0;
 		if (ch == delim)
 			break;
+		if (ch == '\n') {
+			panic("newline in string");
+			/*NOTREACHED*/
+		}
 		buf[nread++] = (char)ch;
 	}
 	buf[nread++] = '\0';
 	if (ch != delim) {
-		panic("line %d: string too long: %s", LineNr, buf);
+		panic("string too long");
 		/*NOTREACHED*/
 	}
-	return (nread);
+	return 1;
 }
 
 PRIVATE int
@@ -123,7 +128,6 @@ ReadInt(ip)
  * Non-digits except minus-sign in front of the number are discarded.
  * Doesn't check on overflow.
  * Just a minus-sign is interpreted as 0. (To prevent a look-ahead.)
- * At EOI 0 is returned, else 1.
  */
 	int ch;
 	int negative = 0;
@@ -148,24 +152,12 @@ ReadInt(ip)
 	return 1;
 }
 
-PRIVATE SkipChar(ch)
-{
-	int c;
-
-	loadchar(c);
-	if (c != ch) {
-		panic("line %d: bad format, '%c' expected; '%c' read",
-				LineNr, ch, c);
-		/*NOTREACHED*/
-	}
-}
-
 PRIVATE int
 ReadArgs(nrargs, buf)
 	char *buf;
 {
 	/*	Reads a string into buf with format
-			<type1>:<type2>: ... :<typeN>:
+			<type1>:<type2>: ... :<typeN>:\0
 		Note: format must include the final colon.
 	*/
 	int i;
@@ -179,7 +171,7 @@ ReadArgs(nrargs, buf)
 	for (i = 0; i < nrargs; i++) {
 		int n;
 
-		if (!ReadString(buf, ':', ARGTPSSIZE-charcount-1))
+		if (!ReadArg(buf, ARGTPSSIZE-charcount-1))
 			return 0;
 		n = strlen(buf) + 1;
 		charcount += n;
@@ -188,5 +180,42 @@ ReadArgs(nrargs, buf)
 	}
 	*buf = '\0';
 	return 1;
+}
+
+PRIVATE int
+ReadArg(buf, size)
+	char *buf;
+	int size;
+{
+	int ch;
+
+	loadchar(ch);
+	switch (ch) {
+	case '"':	/* formal format or actual string */
+		*buf++ = ch;
+		if (!ReadString(buf, ch, size-1))
+			return 0;
+		buf += strlen(buf);
+		*buf++ = ch;
+		*buf++ = '\0';
+		SkipChar(':');
+		return 1;
+	default:	/* normal type */
+		pushback(ch);
+		return ReadString(buf, ':', size);
+	case EOI:
+		return 0;
+	}
+}
+
+PRIVATE SkipChar(ch)
+{
+	int c;
+
+	loadchar(c);
+	if (c != ch) {
+		panic("bad format, '%c' expected; '%c' read", ch, c);
+		/*NOTREACHED*/
+	}
 }
 
