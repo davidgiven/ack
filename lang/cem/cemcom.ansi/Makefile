@@ -3,8 +3,8 @@
 
 # Machine and environ dependent definitions
 EMHOME = ../../..
-CC = /proj/em/Work/bin/fcc.cc
 CC = cc
+CC = /proj/em/Work/bin/fcc.cc
 CFLOW = cflow
 MKDEP = $(EMHOME)/bin/mkdep
 PRID = $(EMHOME)/bin/prid

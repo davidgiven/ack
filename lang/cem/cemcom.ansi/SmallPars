@@ -22,6 +22,7 @@
 
 !File: nparams.h
 #define	NPARAMS 32	/* maximum number of parameters of macros	*/
+#define	STDC_NPARAMS 31	/* ANSI limit on number of parameters		*/
 
 
 !File: ifdepth.h
@@ -33,7 +34,11 @@
 
 
 !File: lapbuf.h
-#define	LAPBUF	4096	/* size of macro actual parameter buffer	*/
+#define	LAPBUF	4096	/* size of macro replacement buffer		*/
+
+
+!File: argbuf.h
+#define ARGBUF	2048	/* sizeof of macro actual parameter buffer	*/
 
 
 !File: strsize.h
@@ -55,6 +60,7 @@
 #ifndef NOFLOAT
 #define	SZ_FLOAT	(arith)4
 #define	SZ_DOUBLE	(arith)8
+#define	SZ_LNGDBL	(arith)8	/* for now */
 #endif NOFLOAT
 #define	SZ_POINTER	(arith)4
 
@@ -67,6 +73,7 @@
 #ifndef NOFLOAT
 #define	AL_FLOAT	SZ_WORD
 #define	AL_DOUBLE	SZ_WORD
+#define	AL_LNGDBL	SZ_WORD
 #endif NOFLOAT
 #define	AL_POINTER	SZ_WORD
 #define AL_STRUCT	1
