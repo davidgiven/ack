@@ -9,3 +9,6 @@ malloc/malloc.c:
 
 malloc.c: malloc/malloc.c
 	-cp malloc/malloc.c malloc.c
+
+distr:	malloc.c
+
