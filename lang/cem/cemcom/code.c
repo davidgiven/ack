@@ -494,7 +494,7 @@ code_expr(expr, val, code, tlbl, flbl)
 		lin instruction.  EVAL() is called directly.
 	*/
 	if (! options['L'])	/* profiling	*/
-		C_lin((arith)LineNumber);
+		C_lin((arith)(expr->ex_line));
 	EVAL(expr, val, code, tlbl, flbl);
 }
 
