@@ -36,6 +36,36 @@ em_mes \- EM-message generating routines
 .B arith offs, siz;
 .PP
 .B C_ms_gto()
+.PP
+.B C_ms_stb_cst(s, e1, e2, e3)
+.B char *s;
+.B int e1, e2;
+.B arith e3;
+.PP
+.B C_ms_stb_dlb(s, e1, e2, l, off)
+.B char *s;
+.B int e1, e2;
+.B label l;
+.B arith off;
+.PP
+.B C_ms_stb_dnam(s, e1, e2, l, off)
+.B char *s;
+.B int e1, e2;
+.B char *l;
+.B arith off;
+.PP
+.B C_ms_stb_ilb(s, e1, e2, l)
+.B char *s;
+.B int e1, e2;
+.B label l;
+.PP
+.B C_ms_stb_pnam(s, e1, e2, p)
+.B char *s;
+.B int e1, e2;
+.B char *p;
+.PP
+.B C_ms_lin(l)
+.B int l;
 .fi
 .SH DESCRIPTION
 This set of routines forms a front end for the
@@ -123,6 +153,13 @@ The parameters needed are conform to the format of the message.
 .PP
 .BR C_ms_gto ()
 can be invoked to indicate that a procedure uses a non-local goto.
+.PP
+The
+.B C_ms_stb
+and
+.B C_ms_lin
+routines produce a message that a back-end can use for (debugger) symbol table
+entries.
 .SH FILES
 .nf
 ~em/modules/h/em.h
@@ -141,7 +178,3 @@ The
 .BR C_ms_ext ()
 routine has not yet been implemented, since this message uses
 a variable number of arguments.
-.PP
-Please report other bugs to the author.
-.SH AUTHOR
-Erik Baalbergen <erikb@vu44.UUCP>
