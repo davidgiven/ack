@@ -9,21 +9,21 @@ int	type;
 {	oprtype[ operand ] = type;	}
 
 
-short	twolog( s )
-short	s;
-{	short	twopower = 0;
+int	twolog( s )
+int	s;
+{	int	twopower = 0;
 	while ( (s>>=1) != 0 )  twopower++;
 	return( twopower );
 }
 
 
 setmode( opr )
-short	opr;
+int	opr;
 {	mode = modetbl[ twolog( oprtype[opr] ) ] << 12;	}
 
 
 chtype( opr, typerange )
-short	opr,
+int	opr,
 	typerange;
 /* Check type of 'opr' with given 'typerange' and
 ** set the global var 'mode'.
@@ -34,7 +34,7 @@ short	opr,
 
 
 chreg( opc, reg )
-short	opc, reg;
+int	opc, reg;
 {	switch( opc ) {
 	case 0xB10A: case 0x1B00: case 0x1900:
 		/* R32 expected	*/  if (reg & 1) regerr();  break;
@@ -62,8 +62,7 @@ expr_t	ad_inf;
 /* When the type of an operand is 'da' or 'x' this function
 ** emits the address.
 */
-{	short	sm;
-	ATYPE	addr;
+{	ATYPE	addr;
 
 	addr = checkaddr( ad_inf.val );
 		/* Always the long format is emitted, because the binary
@@ -95,14 +94,14 @@ valu_t	absval;
 
 
 branch( opc, exp )
-short	opc;
+int	opc;
 expr_t	exp;
 /* This routine determines for the F3 format instructions whether the
 ** relative address is small enough to fit in normal code; If this is
 ** so normal code is emitted otherwise 'long' code is emitted contai-
 ** ning the direct address.
 */
-{	short	longopc = 0, reladdr = 0, sm2, sm4;
+{	int	longopc = 0, reladdr = 0, sm2, sm4;
 	valu_t	val;
 	ATYPE	addr;
 
@@ -122,7 +121,7 @@ expr_t	exp;
 			    longopc = 0x5F00;
 			    break;
 	    }
-	    sm4 = sm2 || fit8( (short)exp.val );
+	    sm4 = sm2 || fit8( (int)exp.val );
 	}
 	switch ( opc & 0xF000 )
 	{   case DJNZ_: fit( sm2 );  /* djnz must be short */
@@ -147,7 +146,7 @@ expr_t	exp;
 
 
 ldrel( opc, exp )
-short	opc;
+int	opc;
 expr_t	exp;
 /* This routine determines for the F4 format instructions whether the
 ** address is within the same segment  (meaning a relative address of
@@ -157,7 +156,7 @@ expr_t	exp;
 {	if ( pass >= PASS_2 && (exp.typ & ~S_DOT) != DOTTYP )
 				serror( "relative too far" );
 	emit2( opc );
-	emit2( (short)adjust(exp.val) );
+	emit2( (int)adjust(exp.val) );
 }
 
 
