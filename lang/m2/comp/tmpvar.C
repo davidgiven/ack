@@ -33,9 +33,16 @@ struct tmpvar {
 
 static struct tmpvar	*TmpInts,	/* for integer temporaries */
 			*TmpPtrs;	/* for pointer temporaries */
-extern struct scope	*ProcScope;	/* scope of procedure in which the
+static struct scope	*ProcScope;	/* scope of procedure in which the
 					   temporaries are allocated
 					*/
+
+TmpOpen(sc) struct scope *sc;
+{
+	/*	Initialize for temporaries in scope "sc".
+	*/
+	ProcScope = sc;
+}
 
 arith
 NewInt()

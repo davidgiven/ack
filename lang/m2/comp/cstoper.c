@@ -32,24 +32,28 @@ cstunary(expp)
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result restored in expp.
 	*/
-	arith o1 = expp->nd_right->nd_INT;
+	register arith o1 = expp->nd_right->nd_INT;
 
 	switch(expp->nd_symb) {
 	case '+':
 		break;
+
 	case '-':
 		o1 = -o1;
 		if (expp->nd_type->tp_fund == T_INTORCARD) {
 			expp->nd_type = int_type;
 		}
 		break;
+
 	case NOT:
 	case '~':
 		o1 = !o1;
 		break;
+
 	default:
 		crash("(cstunary)");
 	}
+
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
 	expp->nd_INT = o1;
@@ -65,8 +69,8 @@ cstbin(expp)
 		expressions below it, and the result restored in
 		expp.
 	*/
-	arith o1 = expp->nd_left->nd_INT;
-	arith o2 = expp->nd_right->nd_INT;
+	register arith o1 = expp->nd_left->nd_INT;
+	register arith o2 = expp->nd_right->nd_INT;
 	int uns = expp->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
@@ -158,15 +162,12 @@ cstbin(expp)
 		break;
 
 	case '<':
-		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 < o2 : 0) :
-				(o2 & mach_long_sign ? 1 : o1 < o2)
-			);
+		{	arith tmp = o1;
+			
+			o1 = o2;
+			o2 = tmp;
 		}
-		else
-			o1 = (o1 < o2);
-		break;
+		/* Fall through */
 
 	case '>':
 		if (uns)	{
@@ -178,16 +179,15 @@ cstbin(expp)
 		else
 			o1 = (o1 > o2);
 		break;
+
 	case LESSEQUAL:
-		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 <= o2 : 0) :
-				(o2 & mach_long_sign ? 1 : o1 <= o2)
-			);
+		{	arith tmp = o1;
+			
+			o1 = o2;
+			o2 = tmp;
 		}
-		else
-			o1 = (o1 <= o2);
-		break;
+		/* Fall through */
+
 	case GREATEREQUAL:
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
@@ -198,22 +198,28 @@ cstbin(expp)
 		else
 			o1 = (o1 >= o2);
 		break;
+
 	case '=':
 		o1 = (o1 == o2);
 		break;
+
 	case '#':
 		o1 = (o1 != o2);
 		break;
+
 	case AND:
 	case '&':
 		o1 = (o1 && o2);
 		break;
+
 	case OR:
 		o1 = (o1 || o2);
 		break;
+
 	default:
 		crash("(cstbin)");
 	}
+
 	expp->nd_class = Value;
 	expp->nd_token = expp->nd_right->nd_token;
 	if (expp->nd_type == bool_type) expp->nd_symb = INTEGER;
@@ -227,7 +233,7 @@ cstbin(expp)
 cstset(expp)
 	register struct node *expp;
 {
-	register arith *set1 = 0, *set2;
+	register arith *set1, *set2;
 	arith *resultset = 0;
 	register int setsize, j;
 
@@ -253,6 +259,8 @@ cstset(expp)
 		expp->nd_left->nd_set = 0;
 		switch(expp->nd_symb) {
 		case '+':
+			/* Set union
+			*/
 			if (!set1) {
 				resultset = set2;
 				expp->nd_right->nd_set = 0;
@@ -262,11 +270,15 @@ cstset(expp)
 				*set1++ |= *set2++;
 			}
 			break;
+
 		case '-':
+			/* Set difference
+			*/
 			if (!set1 || !set2) {
 				/* The set from which something is substracted
 				   is already empty, or the set that is
-				   substracted is empty
+				   substracted is empty. In either case, the
+				   result set is set1.
 				*/
 				break;
 			}
@@ -274,34 +286,50 @@ cstset(expp)
 				*set1++ &= ~*set2++;
 			}
 			break;
+
 		case '*':
-			if (!set1) break;
+			/* Set intersection
+			*/
+			if (!set1) {
+				/* set1 is empty, and so is the result set
+				*/
+				break;
+			}
 			if (!set2) {
+				/* set 2 is empty, so the result set must be
+				   empty too.
+				*/
 				resultset = set2;
 				expp->nd_right->nd_set = 0;
 				break;
 			}
-
 			for (j = 0; j < setsize; j++) {
 				*set1++ &= *set2++;
 			}
 			break;
+
 		case '/':
+			/* Symmetric set difference
+			*/
 			if (!set1) {
 				resultset = set2;
 				expp->nd_right->nd_set = 0;
 				break;
 			}
-			if (set2) for (j = 0; j < setsize; j++) {
-				*set1++ ^= *set2++;
+			if (set2) {
+				for (j = 0; j < setsize; j++) {
+					*set1++ ^= *set2++;
+				}
 			}
 			break;
+
 		case GREATEREQUAL:
 		case LESSEQUAL:
 		case '=':
 		case '#':
-			/* Clumsy, but who cares? Nobody writes these things! */
-			expp->nd_left->nd_set = set1;
+			/* Constant set comparisons
+			*/
+			expp->nd_left->nd_set = set1;	/* may be disposed of */
 			for (j = 0; j < setsize; j++) {
 				switch(expp->nd_symb) {
 				case GREATEREQUAL:
@@ -371,11 +399,13 @@ cstcall(expp, call)
 	register struct node *expr = 0;
 
 	assert(expp->nd_class == Call);
+
 	if (expp->nd_right) {
 		expr = expp->nd_right->nd_left;
 		expp->nd_right->nd_left = 0;
 		FreeNode(expp->nd_right);
 	}
+
 	expp->nd_class = Value;
 	expp->nd_symb = INTEGER;
 	switch(call) {
@@ -384,6 +414,7 @@ cstcall(expp, call)
 		else expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
+
 	case S_CAP:
 		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
 			expp->nd_INT = expr->nd_INT + ('A' - 'a');
@@ -391,10 +422,12 @@ cstcall(expp, call)
 		else	expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
+
 	case S_CHR:
 		expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
+
 	case S_MAX:
 		if (expp->nd_type == int_type) {
 			expp->nd_INT = max_int;
@@ -410,6 +443,7 @@ cstcall(expp, call)
 		}
 		else	expp->nd_INT = expp->nd_type->enm_ncst - 1;
 		break;
+
 	case S_MIN:
 		if (expp->nd_type == int_type) {
 			expp->nd_INT = (-max_int) - 1;
@@ -422,16 +456,20 @@ cstcall(expp, call)
 		}
 		else	expp->nd_INT = 0;
 		break;
+
 	case S_ODD:
 		expp->nd_INT = (expr->nd_INT & 1);
 		break;
+
 	case S_ORD:
 		expp->nd_INT = expr->nd_INT;
 		CutSize(expp);
 		break;
+
 	case S_SIZE:
 		expp->nd_INT = WA(expr->nd_type->tp_size) / word_size;
 		break;
+
 	case S_VAL:
 		expp->nd_INT = expr->nd_INT;
 		if ( /* Check overflow of subranges or enumerations */
@@ -451,6 +489,7 @@ cstcall(expp, call)
 		   )	node_warning(expp,"overflow in constant expression");
 		else CutSize(expp);
 		break;
+
 	default:
 		crash("(cstcall)");
 	}
@@ -465,8 +504,8 @@ CutSize(expr)
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	arith o1 = expr->nd_INT;
-	struct type *tp = BaseType(expr->nd_type);
+	register arith o1 = expr->nd_INT;
+	register struct type *tp = BaseType(expr->nd_type);
 	int uns;
 	int size = tp->tp_size;
 
@@ -476,8 +515,8 @@ CutSize(expr)
 		if (o1 & ~full_mask[size]) {
 			node_warning(expr,
 				"overflow in constant expression");
+			o1 &= full_mask[size];
 		}
-		o1 &= full_mask[size];
 	}
 	else {
 		int nbits = (int) (mach_long_size - size) * 8;
@@ -485,17 +524,17 @@ CutSize(expr)
 
 		if (remainder != 0 && remainder != ~full_mask[size]) {
 			node_warning(expr, "overflow in constant expression");
+			o1 <<= nbits;
+			o1 >>= nbits;
 		}
-		o1 <<= nbits;
-		o1 >>= nbits;
 	}
 	expr->nd_INT = o1;
 }
 
 InitCst()
 {
-	int i = 0;
-	arith bt = (arith)0;
+	register int i = 0;
+	register arith bt = (arith)0;
 
 	while (!(bt < 0))	{
 		bt = (bt << 8) + 0377, i++;

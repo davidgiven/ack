@@ -78,17 +78,16 @@ selector(struct node **pnd;):
 
 ExpList(struct node **pnd;)
 {
-	struct node **nd;
+	register struct node *nd;
 } :
-	expression(pnd)		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+	expression(pnd)		{ *pnd = nd = MkNode(Link,*pnd,NULLNODE,&dot);
 				  (*pnd)->nd_symb = ',';
-				  nd = &((*pnd)->nd_right);
 				}
 	[
-		','		{ *nd = MkLeaf(Link, &dot);
+		','		{ nd->nd_right = MkLeaf(Link, &dot);
+				  nd = nd->nd_right;
 				}
-		expression(&(*nd)->nd_left)
-				{ nd = &((*nd)->nd_right); }
+		expression(&(nd->nd_left))
 	]*
 ;
 
@@ -169,7 +168,7 @@ MulOperator:
 ;
 */
 
-factor(struct node **p;)
+factor(register struct node **p;)
 {
 	struct def *df;
 	struct node *nd;
@@ -190,8 +189,7 @@ factor(struct node **p;)
 | %default
 	number(p)
 |
-	STRING	{
-		  *p = MkLeaf(Value, &dot);
+	STRING	{ *p = MkLeaf(Value, &dot);
 		  (*p)->nd_type = toktype;
 		}
 |
@@ -205,8 +203,7 @@ bare_set(struct node **pnd;)
 {
 	register struct node *nd;
 } :
-	'{'		{
-			  dot.tk_symb = SET;
+	'{'		{ dot.tk_symb = SET;
 			  *pnd = nd = MkLeaf(Xset, &dot);
 			  nd->nd_type = bitset_type;
 			}
@@ -255,7 +252,7 @@ designator_tail(struct node **pnd;):
 	]*
 ;
 
-visible_designator_tail(struct node **pnd;):
+visible_designator_tail(register struct node **pnd;):
 	'['		{ *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot); }
 		expression(&((*pnd)->nd_right))
 		[

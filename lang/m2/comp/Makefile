@@ -1,16 +1,16 @@
 # make modula-2 "compiler"
 # $Header$
+EMDIR =		/usr/em
+MHDIR =		$(EMDIR)/modules/h
+PKGDIR =	$(EMDIR)/modules/pkg
+LIBDIR =	$(EMDIR)/modules/lib
+LLGEN =		$(EMDIR)/util/LLgen/src/LLgen
 
-HDIR =	../../em/h
-PKGDIR =	../../em/pkg
-LIBDIR =	../../em/lib
-
-INCLUDES = -I$(HDIR) -I/usr/em/h -I$(PKGDIR) -I/user1/erikb/em/h
+INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
 
 LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
-GEN =	/usr/em/util/LLgen/src/LLgen
-GENOPTIONS = -d
+LLGENOPTIONS = -d
 PROFILE = 
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
@@ -30,7 +30,8 @@ GENCFILES=	tokenfile.c \
 GENGFILES=	tokenfile.g
 GENHFILES=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h debug.h\
-	inputtype.h maxset.h ndir.h density.h
+	inputtype.h maxset.h ndir.h density.h\
+	def.h type.h Lpars.h node.h
 #
 GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
 all:
@@ -39,7 +40,7 @@ all:
 	make main
 
 LLfiles:	$(LSRC)
-	$(GEN) $(GENOPTIONS) $(LSRC)
+	$(LLGEN) $(LLGENOPTIONS) $(LSRC)
 	@touch LLfiles
 
 hfiles:	Parameters make.hfiles
@@ -47,7 +48,7 @@ hfiles:	Parameters make.hfiles
 	touch hfiles
 
 main:	$(OBJ) Makefile
-	$(CC) $(LFLAGS) $(OBJ) /user1/erikb/em/lib/libem_mes.a /user1/erikb/em/lib/libeme.a $(LIBDIR)/libcomp.a $(LIBDIR)/malloc.o /user1/erikb/em/lib/libprint.a /user1/erikb/em/lib/libstr.a /user1/erikb/em/lib/libsystem.a -o main
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libeme.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o main
 	size main
 
 clean:

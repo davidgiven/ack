@@ -23,7 +23,6 @@ statement(register struct node **pnd;)
 {
 	register struct node *nd;
 } :
-[
 	/*
 	 * This part is not in the reference grammar. The reference grammar
 	 * states : assignment | ProcedureCall | ...
@@ -67,7 +66,6 @@ statement(register struct node **pnd;)
 	ReturnStatement(pnd)
 |
 	/* empty */	{ *pnd = 0; }
-]
 ;
 
 /*
@@ -194,8 +192,7 @@ ForStatement(struct node **pnd;)
 	[
 		BY
 		ConstExpression(&dummy)
-			{
-			  if (!(dummy->nd_type->tp_fund & T_INTORCARD)) {
+			{ if (!(dummy->nd_type->tp_fund & T_INTORCARD)) {
 				error("illegal type in BY clause");
 			  }
 			  nd->nd_INT = dummy->nd_INT;

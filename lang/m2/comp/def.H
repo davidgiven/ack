@@ -119,6 +119,7 @@ extern struct def
 	*define(),
 	*DefineLocalModule(),
 	*MkDef(),
+	*DeclProc(),
 	*ill_df;
 
 extern struct def

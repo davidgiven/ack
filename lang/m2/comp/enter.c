@@ -9,6 +9,7 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<em_code.h>
 #include	<assert.h>
 
 #include	"idf.h"

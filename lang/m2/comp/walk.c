@@ -13,6 +13,7 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<em_reg.h>
+#include	<em_code.h>
 #include	<assert.h>
 
 #include	"def.h"
@@ -36,7 +37,6 @@ label		data_label;
 static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
-struct scope	*ProcScope;
 
 STATIC
 DoProfil()
@@ -74,9 +74,9 @@ WalkModule(module)
 	   First call initialization routines for modules defined within
 	   this module.
 	*/
-	sc->sc_off = 0;
+	sc->sc_off = 0;		/* no locals (yet) */
 	text_label = 1;
-	ProcScope = sc;	
+	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
 	DoProfil();
 	if (module == Defined) {
@@ -130,7 +130,7 @@ WalkProcedure(procedure)
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
-	ProcScope = sc = CurrentScope;
+	sc = CurrentScope;
 
 	/* Generate code for all local modules and procedures
 	*/
@@ -140,6 +140,7 @@ WalkProcedure(procedure)
 	*/
 	C_pro_narg(sc->sc_name);
 	DoProfil();
+	TmpOpen(sc);
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -397,20 +398,16 @@ WalkStat(nd, lab)
 			wds.w_next = WithDesigs;
 			WithDesigs = &wds;
 			wds.w_scope = left->nd_type->rec_scope;
-			if (ds.dsg_kind != DSG_PFIXED) {
-				/* In this case, we use a temporary variable
-				*/
-				CodeAddress(&ds);
-				ds.dsg_kind = DSG_FIXED;
-				/* Create a designator structure for the
-				   temporary.
-				*/
-				ds.dsg_offset = tmp = NewPtr();
-				ds.dsg_name = 0;
-				CodeStore(&ds, pointer_size);
-				ds.dsg_kind = DSG_PFIXED;
-				/* the record is indirectly available */
-			}
+			CodeAddress(&ds);
+			ds.dsg_kind = DSG_FIXED;
+			/* Create a designator structure for the
+			   temporary.
+			*/
+			ds.dsg_offset = tmp = NewPtr();
+			ds.dsg_name = 0;
+			CodeStore(&ds, pointer_size);
+			ds.dsg_kind = DSG_PFIXED;
+			/* the record is indirectly available */
 			wds.w_desig = ds;
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
@@ -418,7 +415,7 @@ WalkStat(nd, lab)
 			WalkNode(right, lab);
 			CurrVis = link.next;
 			WithDesigs = wds.w_next;
-			if (tmp) FreePtr(tmp);
+			FreePtr(tmp);
 			break;
 		}
 

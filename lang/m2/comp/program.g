@@ -41,9 +41,8 @@ static  char *RcsId = "$Header$";
 
 ModuleDeclaration
 {
-	struct idf *id;
-	struct def *df;
-	struct node *nd;
+	struct idf *id;			/* save module identifier */
+	register struct def *df;
 	struct node *exportlist = 0;
 	int qualified;
 } :
@@ -54,9 +53,8 @@ ModuleDeclaration
 	';'
 	import(1)*
 	export(&qualified, &exportlist)?
-	block(&nd)
-	IDENT		{ InitProc(nd, df);
-			  if (exportlist) {
+	block(&(df->mod_body))
+	IDENT		{ if (exportlist) {
 				EnterExportList(exportlist, qualified);
 			  }
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
@@ -93,11 +91,13 @@ export(int *QUALflag; struct node **ExportList;)
 import(int local;)
 {
 	struct node *ImportList;
-	struct node *id = 0;
+	register struct node *id;
 } :
 	[ FROM
 	  IDENT		{ id = MkLeaf(Value, &dot); }
-	]?
+	|
+			{ id = 0; }
+	]
 	IMPORT IdentList(&ImportList) ';'
 	/*
 	   When parsing a global module, this is the place where we must
@@ -113,8 +113,8 @@ import(int local;)
 DefinitionModule
 {
 	register struct def *df;
-	struct idf *id;
-	struct node *exportlist = 0;
+	struct idf *id;			/* save module identifier */
+	struct node *exportlist;
 	int dummy;
 } :
 	DEFINITION
@@ -130,19 +130,20 @@ DefinitionModule
 			}
 	';'
 	import(0)* 
-	export(&dummy, &exportlist)?
-	/*	New Modula-2 does not have export lists in definition modules.
-		For the time being, we ignore export lists here, and a
-		warning is issued.
-	*/
-			{ if (exportlist) {
+	[
+		export(&dummy, &exportlist)
+		/*	New Modula-2 does not have export lists in definition
+			modules. Issue a warning.
+		*/
+			{ 
 node_warning(exportlist, "export list in definition module ignored");
 				FreeNode(exportlist);
-			  }
 			}
+	|
+		/* empty */
+	]
 	definition* END IDENT
-			{
-			  df = CurrentScope->sc_def;
+			{ df = CurrentScope->sc_def;
 			  while (df) {
 				/* Make all definitions "QUALIFIED EXPORT" */
 				df->df_flags |= D_QEXPORTED;
@@ -157,7 +158,8 @@ node_warning(exportlist, "export list in definition module ignored");
 
 definition
 {
-	struct def *df;
+	register struct def *df;
+	struct def *dummy;
 } :
 	CONST [ ConstantDeclaration Semicolon ]*
 |
@@ -179,13 +181,17 @@ definition
 |
 	VAR [ VariableDeclaration Semicolon ]*
 |
-	ProcedureHeading(&df, D_PROCHEAD) Semicolon
+	ProcedureHeading(&dummy, D_PROCHEAD)
+			{ close_scope(0); }
+	Semicolon
 ;
 
+/*	The next nonterminal is used to relax the grammar a little.
+*/
 Semicolon:
 	';'
 |
-			{ warning("; expected"); }
+	/* empty */	{ warning("; expected"); }
 ;
 
 ProgramModule
@@ -193,30 +199,26 @@ ProgramModule
 	struct idf *id;
 	struct def *GetDefinitionModule();
 	register struct def *df;
-	struct node *nd;
 } :
 	MODULE
 	IDENT	{ id = dot.TOK_IDF;
 		  if (state == IMPLEMENTATION) {
 			df = GetDefinitionModule(id);
 			CurrVis = df->mod_vis;
-			CurrentScope = CurrVis->sc_scope;
 			RemoveImports(&(CurrentScope->sc_def));
 		  }
 		  else {
-			df = define(id, CurrentScope, D_MODULE);
+			Defined = df = define(id, CurrentScope, D_MODULE);
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "_M2M";
 		  }
-		  Defined = df;
 		  CurrentScope->sc_definedby = df;
 		}
 	priority(&(df->mod_priority))?
 	';' import(0)*
-	block(&nd) IDENT
-		{ InitProc(nd, df);
-		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
+	block(&(df->mod_body)) IDENT
+		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(id, dot.TOK_IDF);
 		}
 	'.'
@@ -228,7 +230,7 @@ Module:
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }
 	|
-				{ state = PROGRAM; }
+		/* empty */	{ state = PROGRAM; }
 	]
 	ProgramModule
 ;

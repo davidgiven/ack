@@ -26,7 +26,7 @@ static char *RcsId = "$Header$";
 int		state;			/* either IMPLEMENTATION or PROGRAM */
 char		options[128];
 int		DefinitionModule; 
-int		SYSTEMModule = 0;
+int		SYSTEMModule;
 char		*ProgName;
 char		*DEFPATH[NDIRS+1];
 struct def 	*Defined;
@@ -34,7 +34,7 @@ extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
 
 main(argc, argv)
-	char *argv[];
+	register char **argv;
 {
 	register int Nargc = 1;
 	register char **Nargv = &argv[0];
@@ -84,9 +84,7 @@ Compile(src, dst)
 	open_scope(CLOSEDSCOPE);
 	GlobalScope = CurrentScope;
 	C_init(word_size, pointer_size);
-	if (! C_open(dst)) {
-		fatal("Could not open output file");
-	}
+	if (! C_open(dst)) fatal("Could not open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CompUnit();
@@ -95,9 +93,7 @@ Compile(src, dst)
 	if (!err_occurred) {
 		C_exp(Defined->mod_vis->sc_scope->sc_name);
 		WalkModule(Defined);
-		if (fp_used) {
-			C_ms_flt();
-		}
+		if (fp_used) C_ms_flt();
 	}
 	C_close();
 #ifdef DEBUG
