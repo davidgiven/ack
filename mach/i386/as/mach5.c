@@ -21,18 +21,10 @@ ea_1(param) {
 		/* sib field use here */
 		emit1(mod_1 << 6 | param | 04);
 		emit1(sib_1 | reg_1);
-		if ((mod_1 == 0 && reg_1 == 5) || mod_1 == 2) {
-#ifdef RELOCATION
-			RELOMOVE(relonami, rel_1);
-			newrelo(exp_1.typ, RELO4);
-#endif
-			emit4((long)(exp_1.val));
-		}
-		else if (mod_1 == 1) emit1((int)(exp_1.val));
-		return;
 	}
-	emit1(mod_1<<6 | param | (reg_1&07));
+	else emit1(mod_1<<6 | param | (reg_1&07));
 	if ((mod_1 == 0 && reg_1 == 5) || mod_1 == 2) {
+		/* ??? should this be protected by a call to "small" ??? */
 #ifdef RELOCATION
 		RELOMOVE(relonami, rel_1);
 		newrelo(exp_1.typ, RELO4);
@@ -201,7 +193,8 @@ pushop(opc)
 		emit1(0120 | opc<<3 | (reg_1&7));
 	} else if (opc == 0) {
 		if (is_expr(reg_1)) {
-			if (exp_1.typ == S_ABS && fitb(exp_1.val)) {
+			if (small(exp_1.typ == S_ABS && fitb(exp_1.val),
+				  operand_long ? 3 : 1)) {
 				emit1(0152);
 				emit1((int)(exp_1.val));
 			}
@@ -279,7 +272,8 @@ addop(opc)
 		/*	Add immediate to register or memory */
 		if ((opc&1) == 0) {
 			emit1(0200);
-		} else if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0) {
+		} else if (! small(exp_2.typ == S_ABS && fitb(exp_2.val),
+			   	   operand_long ? 3 : 1)) {
 			emit1(0201);
 		} else {
 			emit1(0203); opc &= ~1;
@@ -504,7 +498,8 @@ imul(reg)
 	}
 	if (is_expr(reg_2)) {
 		/* The immediate form; two cases: */
-		if (exp_2.typ == S_ABS && fitb(exp_2.val)) {
+		if (small(exp_2.typ == S_ABS && fitb(exp_2.val),
+			  operand_long ? 3 : 1)) {
 			/* case 1: 1 byte encoding of immediate */
 			emit1(0153);
 			ea_1((reg & 07) << 3);
