@@ -5,6 +5,9 @@
 
 /* $Header$ */
 
+#ifndef _MATH_H
+#define _MATH_H
+
 /* some constants (Hart & Cheney) */
 
 #define M_PI		 3.14159265358979323846264338327950288
@@ -74,3 +77,5 @@ extern double sinh(), tanh(), cosh();
 
 #define HUGE		M_MAX_D
 #define MAXDOUBLE	M_MAX_D
+
+#endif /* _MATH_H */

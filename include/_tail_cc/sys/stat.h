@@ -3,6 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+#ifndef _STAT_H
+#define _STAT_H
+
 struct	stat {
 	dev_t	st_dev;
 	ino_t	st_ino;
@@ -51,3 +55,5 @@ struct	stat {
 #define	S_IREAD		0000400
 #define	S_IWRITE	0000200
 #define	S_IEXEC		0000100
+
+#endif /* _STAT_H */

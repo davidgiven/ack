@@ -5,6 +5,9 @@
  */
 /* Data structures for ioctl/stty/gtty, sufficient for ACK libraries */
 
+#ifndef _SGTTY_H
+#define _SGTTY_H
+
 struct sgttyb {
   char sg_ispeed;		/* input speed (not used) */
   char sg_ospeed;		/* output speed (not used) */
@@ -104,3 +107,5 @@ struct tchars {
 #define B9600   13
 #define EXTA    14
 #define EXTB    15
+
+#endif /* _SGTTY_H */

@@ -3,6 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+#ifndef _CTYPE_H
+#define _CTYPE_H
+
 /*  File   : ctypes.h
     Author : Richard A. O'Keefe.
     Updated: 26 April 1984
@@ -48,3 +52,4 @@ extern	char	_c2type[];
 #define tocntrl(c)	(((((c)+1)&~96)-1)&127)
 #define	toascii(c)	((c)&127)
 
+#endif /* _CTYPE_H */

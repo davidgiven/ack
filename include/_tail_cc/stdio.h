@@ -3,6 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+#ifndef _STDIO_H
+#define _STDIO_H
+
 #define BUFSIZ  1024
 #ifdef __vax
 #define _NBF	8
@@ -75,3 +79,5 @@ extern FILE *fopen(), *fdopen(), *freopen(), *popen();
 extern long ftell();
 extern setbuf(), rewind();
 extern char *fgets(), *gets();
+
+#endif /* _STDIO_H */

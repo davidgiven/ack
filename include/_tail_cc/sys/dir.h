@@ -3,6 +3,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef _DIR_H
+#define _DIR_H
+
 #ifdef __BSD4_2
 #define MAXNAMLEN 255
 #else
@@ -38,3 +41,5 @@ extern long telldir();
 extern seekdir();
 #define rewinddir(dirp) seekdir((dirp), 0L)
 extern closedir();
+
+#endif /* _DIR_H */
