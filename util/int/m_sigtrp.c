@@ -23,6 +23,9 @@
 
 #define	UNIX_trap(sn)	(SIGILL <= sn && sn <= SIGSYS)
 
+#ifndef NSIG
+#define NSIG _NSIG
+#endif
 PRIVATE int sig_map[NSIG+1];		/* maps signals onto trap numbers */
 
 PRIVATE int HndlIntSig();		/* handle signal to interpreter */
