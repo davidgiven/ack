@@ -7,7 +7,6 @@
 #define	_CTYPE_H
 
 extern char	__ctype[];	/* located in chartab.c */
-extern int	__x; 		/* scratch variable */
 
 #define _U		0x01	/* this bit is for upper-case letters [A-Z] */
 #define _L		0x02	/* this bit is for lower-case letters [a-z] */
@@ -44,8 +43,5 @@ int toupper(int _c);		/* convert to upper case character */
 #define isupper(c)	((unsigned) ((c)-'A') < 26)
 #define	isprint(c)	((unsigned) ((c)-' ') < 95)
 #define	isascii(c)	((unsigned) (c) < 128)
-
-#define toupper(c)	(__x = (c), islower( __x) ? __x - 'a' + 'A' : __x)
-#define tolower(c)	(__x = (c), isupper( __x) ? __x - 'A' + 'a' : __x)
 
 #endif	/* _CTYPE_H */
