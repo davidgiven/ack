@@ -69,9 +69,9 @@ struct instr_t {
 #endif
 };
 typedef struct instr_t instr_t;
-instr_t instr[30];	/* temporary area for instructions */
-instr_t *instrp;	/* index into instr[] */
-int dot_offset;
+extern instr_t instr[30];	/* temporary area for instructions */
+extern instr_t *instrp;	/* index into instr[] */
+extern int dot_offset;
 
 /* flags used when reading effective addresses */
 #define INDEX		0300

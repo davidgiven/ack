@@ -51,7 +51,8 @@ short word;
 		instrp->i_relotype = relotype;
 	}
 #endif
-	instrp++->i_word = word;
+	instrp->i_word = word;
+	instrp++;
 	dot_offset += 2;
 }
 
