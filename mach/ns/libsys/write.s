@@ -1,6 +1,11 @@
 .define _write
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _write
-.text
+.sect .text
 _write:
 enter[], 0
 save [r0,r1,r2,r3]

@@ -1,6 +1,11 @@
 .define _tell
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _tell
-.text
+.sect .text
 _tell:
 enter[], 0
 movd 1,tos

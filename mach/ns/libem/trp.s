@@ -1,6 +1,11 @@
 .define .trp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .trp:	
 	save [r0, r1]

@@ -1,6 +1,11 @@
 .define .aar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .aar:
 	movd 8(sp), r7

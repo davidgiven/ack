@@ -1,6 +1,11 @@
 .define	.lar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .lar:
 	movd tos, r2

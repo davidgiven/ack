@@ -1,6 +1,11 @@
 .define	.gto
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 !r0 contains descriptor addres
 .gto:	

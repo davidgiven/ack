@@ -1,6 +1,11 @@
 .define _umount
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _umount
-.text
+.sect .text
 _umount:
 enter[], 0
 movd 8(fp),tos

@@ -1,6 +1,11 @@
 .define .cfi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .cfi:	cmpd 4, 8(sp)
 	beq 4f

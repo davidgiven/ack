@@ -1,6 +1,11 @@
 .define .rmu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .rmu:
 	enter[r2],0

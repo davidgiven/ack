@@ -1,6 +1,11 @@
 .define _wait
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _wait
-.text
+.sect .text
 _wait:
 enter[], 0
 movd 7,tos

@@ -1,6 +1,11 @@
 .define _utime
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _utime
-.text
+.sect .text
 _utime:
 enter[], 0
 movd 12(fp),tos

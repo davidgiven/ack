@@ -1,6 +1,11 @@
 .define	.dup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 !r2 will save return addres
 .dup:

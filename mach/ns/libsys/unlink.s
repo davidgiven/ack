@@ -1,6 +1,11 @@
 .define _unlink
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _unlink
-.text
+.sect .text
 _unlink:
 enter[], 0
 movd 8(fp),tos

@@ -1,6 +1,11 @@
 .define	.csa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 !r0 contains index
 !r1 contains pointer to csa descriptor

@@ -1,6 +1,11 @@
 .define _times
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _times
-.text
+.sect .text
 _times:
 enter[], 0
 movd 8(fp),tos

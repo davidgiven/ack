@@ -1,6 +1,11 @@
 .define	.sts
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .sts:
 	movd tos, r7

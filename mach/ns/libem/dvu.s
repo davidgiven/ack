@@ -1,6 +1,11 @@
 .define	.dvu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .dvu:	
 	enter[r1,r2],0

@@ -1,6 +1,11 @@
 .define	.cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 !r7 will save return addres
 .cii:	

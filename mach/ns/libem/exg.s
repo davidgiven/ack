@@ -1,6 +1,11 @@
 .define	.exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .exg:
 	save [r2,r3]

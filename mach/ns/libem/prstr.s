@@ -1,6 +1,11 @@
 .define	.prstr
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 !het adres van de af te drukken string staat op de stack.
 .prstr:

@@ -1,6 +1,11 @@
 .define _time
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _time
-.text
+.sect .text
 _time:
 enter[], 12
 addr -12(fp),tos

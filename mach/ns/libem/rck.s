@@ -1,6 +1,11 @@
 .define	.rck
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .rck:	
 	cmpd 0(4(sp)), 8(sp)

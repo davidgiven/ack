@@ -1,6 +1,11 @@
 .define _stty
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _stty
-.text
+.sect .text
 _stty:
 enter[], 0
 movd 12(fp),tos

@@ -1,6 +1,11 @@
 .define .cff
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .cff :	cmpd 4(sp), 8(sp)
 	beq 1f

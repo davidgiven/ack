@@ -1,6 +1,11 @@
 .define .cif
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .cif :	cmpd 4, 4(sp)
 	beq 4f

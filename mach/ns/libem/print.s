@@ -1,6 +1,11 @@
 .define	.print
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .print:
 	save[r0,r1,r2]

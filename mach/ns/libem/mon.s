@@ -1,6 +1,11 @@
 .define .mon
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .mon:	
 	cmpd 1,4(sp)
@@ -47,7 +52,7 @@
 5:	movd 0, 16(sp)
 	ret 12
 
-.data
+.sect .data
 .add1:	.asciz "monitor call "
 .add2:	.asciz " not implemented\n"
 .align

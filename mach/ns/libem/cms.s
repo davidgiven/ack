@@ -1,6 +1,11 @@
 .define	.cms
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .cms:	movd tos, r7		!return addres
 	addr 4(sp), r1

@@ -1,6 +1,11 @@
 .define	.putchar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .putchar:
 	save [r0, r1, r2, r3]

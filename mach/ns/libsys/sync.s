@@ -1,6 +1,11 @@
 .define _sync
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _sync
-.text
+.sect .text
 _sync:
 enter[], 0
 movd 36,tos

@@ -1,6 +1,11 @@
 .define	.los
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-	.text
+	.sect .text
 
 .los:
 	movd tos, r7
