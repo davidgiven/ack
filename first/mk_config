@@ -77,7 +77,7 @@ do
 		mk_makefile $SRC_HOME/mach/proto/ncg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
 		if [ -f $SRC_HOME/mach/$i/ncg/table_dir ]
 		then
-			ed - Makefile <<EOF
+			ed -s Makefile <<EOF
 /^#TABLE_DEFINE/+1r $SRC_HOME/mach/$i/ncg/table_dir
 w
 q

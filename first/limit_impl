@@ -1,13 +1,13 @@
 for i in $DISABLE_LANG
 do
-	ed - $CONFIG/Action <<EOF
+	ed -s $CONFIG/Action <<EOF
 /^name "$i/;/^end/s/^/!/
 w
 q
 EOF
 	case $i in
 	Modula-2)
-		ed - $CONFIG/Action <<EOF
+		ed -s $CONFIG/Action <<EOF
 /^name "$i definition/;/^end/s/^/!/
 /^name "$i makefile/;/^end/s/^/!/
 w
@@ -15,14 +15,14 @@ q
 EOF
 		;;
 	ANSI-C)	: install compiler anyway
-		ed - $CONFIG/Action <<EOF
+		ed -s $CONFIG/Action <<EOF
 /^!name "$i frontend/;/^!end/s/^!//
 w
 q
 EOF
 		;;
 	C)	: install compiler anyway
-		ed - $CONFIG/Action <<EOF
+		ed -s $CONFIG/Action <<EOF
 /^!name "$i frontend/;/^!end/s/^!//
 w
 q
@@ -112,7 +112,7 @@ done
 DISABLE_INT=0
 for i in $DISABLE_SUP
 do
-	ed - $CONFIG/Action <<EOF
+	ed -s $CONFIG/Action <<EOF
 /^dir .*$i\$/;?^name?;/^end/s/^/!/
 w
 q
@@ -170,7 +170,7 @@ m68*|sun2|sun3|pmds*)
 esac
 if test $DISABLE_INT = 1
 then
-	ed - $CONFIG/Action <<EOF
+	ed -s $CONFIG/Action <<EOF
 /68000 interpreters/;/^end/s/^/!/
 w
 q
@@ -185,7 +185,7 @@ then
 		do
 			if fgrep -s $j $i
 			then
-				ed - $i <<EOF
+				ed -s $i <<EOF
 /$j/;?^name?,/^end/s/^/!/
 w
 q
@@ -197,7 +197,7 @@ fi
 
 if [ $DO_FAST = n ]
 then
-	ed - $CONFIG/Action <<'EOF'
+	ed -s $CONFIG/Action <<'EOF'
 /^name "Peephole optimizer lib/;/^end/s/^/!/
 /^name "Fast/;$s/^/!/
 w

@@ -21,7 +21,7 @@ $SRC_HOME/first/limit_impl
 
 case $SYSNAME in
 i386)
-	ed - $TARGET_HOME/lib/descr/fe << 'ABC'
+	ed -s $TARGET_HOME/lib/descr/fe << 'ABC'
 1,$s/-D{NAME}/-D{NAME} -DNO_PROTOTYPE/
 w
 q
@@ -41,12 +41,12 @@ fi
 
 case X$SYSVAX in
 Xvax_sysV_2)
-	ed - $TARGET_HOME/lib/vax4/descr << 'ABC'
+	ed -s $TARGET_HOME/lib/vax4/descr << 'ABC'
 /CPP_F/s/$/ -D__USG/
 w
 q
 ABC
-	ed - $CONFIG/mach/vax4/Action << 'ABC'
+	ed -s $CONFIG/mach/vax4/Action << 'ABC'
 /libbsd4_2/s/libbsd4_2/libsysV_2/
 w
 q
@@ -54,7 +54,7 @@ ABC
 	( cd $CONFIG/mach/vax4
 	  for i in libcc libcc.ansi
 	  do
-	  	ed - $i/Makefile << 'ABC'
+	  	ed -s $i/Makefile << 'ABC'
 /BFS/s/BFS/UFS/
 w
 q
@@ -63,14 +63,14 @@ ABC
 	)
 	;;
 Xvax_bsd4_2)
-	ed - $TARGET_HOME/lib/vax4/descr << 'ABC'
+	ed -s $TARGET_HOME/lib/vax4/descr << 'ABC'
 /CPP_F/s/$/ -D__BSD4_2/
 w
 q
 ABC
 	;;
 Xvax_bsd4_1a)
-	ed - $CONFIG/mach/vax4/Action << 'ABC'
+	ed -s $CONFIG/mach/vax4/Action << 'ABC'
 /libbsd4_2/s/libbsd4_2/libbsd4_1a/
 w
 q

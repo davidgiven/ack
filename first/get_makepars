@@ -69,7 +69,7 @@ then
 	fi
 	case $ACM in
 	sun3|sparc)
-		ed - make_macros <<'EOF'
+		ed -s make_macros <<'EOF'
 /cc-and-mkdep.sun/s/^..//
 w
 q

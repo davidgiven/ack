@@ -14,7 +14,7 @@ esac
 
 cp $1 /tmp/mk_mak$$
 
-ed - /tmp/mk_mak$$ << 'EOF'
+ed -s /tmp/mk_mak$$ << 'EOF'
 /^#PARAMS/c
 #PARAMS		do not remove this line!
 .
@@ -23,7 +23,7 @@ q
 EOF
 case `ack_sys` in
 sparc_solaris)
-	ed - /tmp/mk_mak$$ << 'EOF'
+	ed -s /tmp/mk_mak$$ << 'EOF'
 g/^EXTRALIB/s/=/= -lelf/
 w
 q
