@@ -4747,22 +4747,35 @@ with STACK
 	xxx* %c, {post_inc_int, %b}
 	dbf %a, {slabel, 1b}
 
+#if WORD_SIZE==4
 proc logndef
 with DD_REG4 STACK
     uses AA_REG,
 	 DD_REG
     gen
 	lea {regAregXcon, sp, %1, 1, 0},%a
-#if WORD_SIZE==2
-	asr_l {small_const, 1}, %1
-#else
 	asr_l {small_const, 2}, %1
-#endif
 	1:
 	move_i {post_inc_int, sp}, %b
 	xxx* %b, {post_inc_int, %a}
 	sub_l {const4,1}, %1
 	bne {slabel, 1b}
+#else
+proc logndef
+with any_int STACK
+    uses AA_REG,
+	 DD_REG,
+	 DD_REG4
+    gen
+	move %1, %c.1
+	lea {regAregXcon, sp, %c, 1, 0},%a
+	asr_l {small_const, 1}, %c
+	sub_l {const4,1}, %c
+	1:
+	move_i {post_inc_int, sp}, %b
+	xxx* %b, {post_inc_int, %a}
+	dbf %c, {slabel, 1b}
+#endif
 
 proc logbdef example and
 with STACK
@@ -4842,19 +4855,29 @@ with STACK
 	sub_l {const4, 1}, %b
 	bne {slabel, 1b}
 
+#if WORD_SIZE==4
 pat com !defined($1)
-with DD_REG4 STACK
+with DD_REG STACK
     uses AA_REG
     gen move_l sp, %a
-#if WORD_SIZE==2
-	asr_l {small_const, 1}, %1
-#else
 	asr_l {small_const, 2}, %1
-#endif
 	1:
 	not_i {post_inc_int, %a}
 	sub_l {const4, 1}, %1
 	bne {slabel, 1b}
+#else
+pat com !defined($1)
+with any_int STACK
+    uses AA_REG,
+	 DD_REG4
+    gen move %1, %b.1
+	move_l sp, %a
+	asr_l {small_const, 1}, %b
+	sub_l {const4, 1}, %b
+	1:
+	not_i {post_inc_int, %a}
+	dbf %b, {slabel, 1b}
+#endif
 
 #if WORD_SIZE==2
 pat rol $1==2
