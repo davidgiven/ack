@@ -14,7 +14,7 @@
 
 extern int (*WalkTable[])();
 
-#define	WalkNode(xnd, xlab)	((xnd) && (*WalkTable[(xnd)->nd_class])((xnd), (xlab)))
+#define	WalkNode(xnd, xlab)	if (! xnd) ; else (*WalkTable[(xnd)->nd_class])((xnd), (xlab))
 
 extern label	text_label;
 extern label	data_label;

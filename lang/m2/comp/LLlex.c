@@ -19,6 +19,7 @@
 #include	<em_label.h>
 #include	<assert.h>
 
+#include	"LLlex.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"Lpars.h"
@@ -26,7 +27,6 @@
 #include	"idf.h"
 #include	"def.h"
 #include	"type.h"
-#include	"LLlex.h"
 #include	"const.h"
 #include	"warning.h"
 
@@ -278,6 +278,8 @@ again:
 			else if (nch == EOI) eofseen = 1;
 			else PushBack();
 		}
+		if (ch == '&') return tk->tk_symb = AND;
+		if (ch == '~') return tk->tk_symb = NOT;
 		return tk->tk_symb = ch;
 
 	case STCOMP:
@@ -301,7 +303,6 @@ again:
 				return tk->tk_symb = LESSEQUAL;
 			}
 			if (nch == '>') {
-				lexwarning(W_STRICT, "'<>' is old-fashioned; use '#'");
 				return tk->tk_symb = '#';
 			}
 			break;

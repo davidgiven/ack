@@ -15,10 +15,10 @@
 #include	<em_label.h>
 #include	<assert.h>
 
+#include	"LLlex.h"
 #include	"def.h"
 #include	"idf.h"
 #include	"scope.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"type.h"
 #include	"misc.h"
@@ -52,9 +52,11 @@ lookup(id, scope, import)
 			df->df_next = id->id_def;
 			id->id_def = df;
 		}
-		if (import && df->df_kind == D_IMPORT) {
-			assert(df->imp_def != 0);
-			return df->imp_def;
+		if (import) {
+			while (df->df_kind == D_IMPORT) {
+				assert(df->imp_def != 0);
+				df = df->imp_def;
+			}
 		}
 	}
 	return df;

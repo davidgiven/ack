@@ -27,6 +27,7 @@
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
 long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
+long int_mask[MAXSIZE];	/* int_mask[1] == 0x7F, int_mask[2] == 0x7FFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
@@ -200,14 +201,7 @@ cstbin(expp)
 		/* Fall through */
 
 	case GREATEREQUAL:
-		if (uns)	{
-			o1 = (o1 & mach_long_sign ?
-				(o2 & mach_long_sign ? o1 >= o2 : 1) :
-				(o2 & mach_long_sign ? 0 : o1 >= o2)
-			);
-		}
-		else
-			o1 = (o1 >= o2);
+		o1 = chk_bounds(o2, o1, uns ? T_CARDINAL : T_INTEGER);
 		break;
 
 	case '=':
@@ -251,6 +245,7 @@ cstset(expp)
 
 	assert(expp->nd_right->nd_class == Set);
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
+
 	set2 = expp->nd_right->nd_set;
 	setsize = (unsigned) expp->nd_right->nd_type->tp_size / (unsigned) word_size;
 
@@ -390,22 +385,11 @@ cstcall(expp, call)
 		CutSize(expp);
 		break;
 
-	case S_LONG:
-	case S_SHORT: {
-		struct type *tp = expp->nd_type;
-
-		*expp = *expr;
-		expp->nd_type = tp;
-		break;
-		}
 	case S_CAP:
 		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
 			expr->nd_INT = expr->nd_INT + ('A' - 'a');
 		}
-		/* fall through */
-	case S_CHR:
 		expp->nd_INT = expr->nd_INT;
-		CutSize(expp);
 		break;
 
 	case S_MAX:
@@ -443,33 +427,8 @@ cstcall(expp, call)
 		expp->nd_INT = (expr->nd_INT & 1);
 		break;
 
-	case S_ORD:
-		expp->nd_INT = expr->nd_INT;
-		CutSize(expp);
-		break;
-
 	case S_SIZE:
 		expp->nd_INT = expr->nd_type->tp_size;
-		break;
-
-	case S_VAL:
-		expp->nd_INT = expr->nd_INT;
-		if ( /* Check overflow of subranges or enumerations */
-		    ( expp->nd_type->tp_fund == T_SUBRANGE
-		    &&
-		      (  expp->nd_INT < expp->nd_type->sub_lb
-		      || expp->nd_INT > expp->nd_type->sub_ub
-		      )
-		    )
-		   ||
-		    ( expp->nd_type->tp_fund == T_ENUMERATION
-		    &&
-		      (  expp->nd_INT < 0
-		      || expp->nd_INT >= expp->nd_type->enm_ncst
-		      )
-		    )
-		   )	node_warning(expp, W_ORDINARY, ovflow);
-		else CutSize(expp);
 		break;
 
 	default:
@@ -501,9 +460,9 @@ CutSize(expr)
 	}
 	else {
 		int nbits = (int) (mach_long_size - size) * 8;
-		long remainder = o1 & ~full_mask[size];
+		long remainder = o1 & ~int_mask[size];
 
-		if (remainder != 0 && remainder != ~full_mask[size]) {
+		if (remainder != 0 && remainder != ~int_mask[size]) {
 			node_warning(expr, W_ORDINARY, ovflow);
 			o1 <<= nbits;
 			o1 >>= nbits;
@@ -522,6 +481,7 @@ InitCst()
 		if (i == MAXSIZE)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
+		int_mask[i] = bt & ~(1L << ((i << 3) - 1));
 	}
 	mach_long_size = i;
 	mach_long_sign = 1L << (mach_long_size * 8 - 1);
@@ -529,8 +489,8 @@ InitCst()
 		fatal("sizeof (long) insufficient on this machine");
 	}
 
-	max_int = full_mask[int_size] & ~(1L << (int_size * 8 - 1));
+	max_int = int_mask[int_size];
 	max_unsigned = full_mask[int_size];
-	max_longint = full_mask[long_size] & ~(1L << (long_size * 8 - 1));
+	max_longint = int_mask[long_size];
 	wrd_bits = 8 * (unsigned) word_size;
 }

@@ -19,8 +19,9 @@
 #include	<assert.h>
 
 #include	"type.h"
-#include	"def.h"
 #include	"LLlex.h"
+#include	"idf.h"
+#include	"def.h"
 #include	"node.h"
 #include	"warning.h"
 
@@ -175,9 +176,10 @@ TstAssCompat(tp1, tp2)
 }
 
 int
-TstParCompat(formaltype, actualtype, VARflag, nd)
-	register struct type *formaltype, *actualtype;
-	struct node *nd;
+TstParCompat(parno, formaltype, VARflag, nd, edf)
+	register struct type *formaltype;
+	struct node **nd;
+	struct def *edf;
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
@@ -186,11 +188,19 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		may do too.
 		Or: a WORD may do.
 	*/
+	register struct type *actualtype = (*nd)->nd_type;
+	char ebuf[256];
+	char ebuf1[256];
 
-	return
+	if (edf) {
+		sprintf(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
+	}
+	else sprint(ebuf, "parameter %d: %%s", parno);
+
+	if (
 		TstTypeEquiv(formaltype, actualtype)
 	    ||
-		( !VARflag && TstAssCompat(formaltype, actualtype))
+		( !VARflag && ChkAssCompat(nd, formaltype, (char *) 0))
 	    ||
 		(  formaltype == address_type 
 		&& actualtype->tp_fund == T_POINTER
@@ -225,13 +235,62 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		      )
 		   )
 		)
-	    ||
-		(  VARflag
-		&& (  TstCompat(formaltype, actualtype)
-		   &&
-(node_warning(nd, W_OLDFASHIONED, "types of formal and actual must be identical"),
-		      1)
-		   )
-		)
-	;
+	)
+		return 1;
+	if (VARflag && TstCompat(formaltype, actualtype)) {
+		if (formaltype->tp_size == actualtype->tp_size) {
+			sprint(ebuf1, ebuf, "identical types required");
+			node_warning(*nd,
+				     W_OLDFASHIONED,
+				     ebuf1);
+			return 1;
+		}
+		sprint(ebuf1, ebuf, "equal sized types required");
+		node_error(*nd, ebuf1);
+		return 0;
+	}
+				
+	sprint(ebuf1, ebuf, "type incompatibility");
+	node_error(*nd, ebuf1);
+	return 0;
+}
+
+CompatCheck(nd, tp, message, fc)
+	struct node **nd;
+	struct type *tp;
+	char *message;
+	int (*fc)();
+{
+	if (! (*fc)(tp, (*nd)->nd_type)) {
+		if (message) {
+			node_error(*nd, "type incompatibility in %s", message);
+		}
+		return 0;
+	}
+	MkCoercion(nd, tp);
+	return 1;
+}
+
+ChkAssCompat(nd, tp, message)
+	struct node **nd;
+	struct type *tp;
+	char *message;
+{
+	/*	Check assignment compatibility of node "nd" with type "tp".
+		Give an error message when it fails
+	*/
+
+	return CompatCheck(nd, tp, message, TstAssCompat);
+}
+
+ChkCompat(nd, tp, message)
+	struct node **nd;
+	struct type *tp;
+	char *message;
+{
+	/*	Check compatibility of node "nd" with type "tp".
+		Give an error message when it fails
+	*/
+
+	return CompatCheck(nd, tp, message, TstCompat);
 }

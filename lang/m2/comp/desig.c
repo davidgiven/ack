@@ -22,16 +22,16 @@
 #include	<em_label.h>
 #include	<em_code.h>
 #include	<assert.h>
+#include	<alloc.h>
 
 #include	"type.h"
+#include	"LLlex.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"desig.h"
-#include	"LLlex.h"
 #include	"node.h"
 
 extern int	proclevel;
-struct desig	InitDesig = {DSG_INIT, 0, 0, 0};
 
 int
 WordOrDouble(ds, size)
@@ -86,9 +86,9 @@ DoStore(ds, size)
 }
 
 STATIC int
-properly(ds, size, al)
+properly(ds, tp)
 	register struct desig *ds;
-	arith size;
+	register struct type *tp;
 {
 	/*	Check if it is allowed to load or store the value indicated
 		by "ds" with LOI/STI.
@@ -100,16 +100,17 @@ properly(ds, size, al)
 		  with DSG_FIXED.
 	*/
 
-	int szmodword = (int) size % (int) word_size;	/* 0 if multiple of wordsize */
-	int wordmodsz = word_size % size;	/* 0 if dividor of wordsize */
+	int szmodword = (int) (tp->tp_size) % (int) word_size;
+						/* 0 if multiple of wordsize */
+	int wordmodsz = word_size % tp->tp_size;/* 0 if dividor of wordsize */
 
 	if (szmodword && wordmodsz) return 0;
-	if (al >= word_align) return 1;
-	if (szmodword && al >= szmodword) return 1;
+	if (tp->tp_align >= word_align) return 1;
+	if (szmodword && tp->tp_align >= szmodword) return 1;
 
 	return ds->dsg_kind == DSG_FIXED &&
 	       ((! szmodword && (int) (ds->dsg_offset) % word_align == 0) ||
-		(! wordmodsz && ds->dsg_offset % size == 0));
+		(! wordmodsz && ds->dsg_offset % tp->tp_size == 0));
 }
 
 CodeValue(ds, tp)
@@ -131,7 +132,7 @@ CodeValue(ds, tp)
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		sz = WA(tp->tp_size);
-		if (properly(ds, tp->tp_size, tp->tp_align)) {
+		if (properly(ds, tp)) {
 			CodeAddress(ds);
 			C_loi(tp->tp_size);
 			break;
@@ -162,9 +163,6 @@ CodeValue(ds, tp)
 	}
 
 	ds->dsg_kind = DSG_LOADED;
-	if (tp->tp_fund == T_SUBRANGE) {
-		CodeCoercion(tp, BaseType(tp));
-	}
 }
 
 CodeStore(ds, tp)
@@ -184,7 +182,7 @@ CodeStore(ds, tp)
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(&save);
-		if (properly(ds, tp->tp_size, tp->tp_align)) {
+		if (properly(ds, tp)) {
 			C_sti(tp->tp_size);
 			break;
 		}
@@ -225,12 +223,9 @@ CodeMove(rhs, left, rtp)
 	register struct node *left;
 	struct type *rtp;
 {
-	struct desig dsl;
-	register struct desig *lhs = &dsl;
+	register struct desig *lhs = new_desig();
 	register struct type *tp = left->nd_type;
 	int	loadedflag = 0;
-
-	dsl = InitDesig;
 
 	/*	Generate code for an assignment. Testing of type
 		compatibility and the like is already done.
@@ -247,10 +242,10 @@ CodeMove(rhs, left, rtp)
 			C_loc(tp->tp_size);
 			C_cal("_StringAssign");
 			C_asp(word_size << 2);
-			return;
+			break;
 		}
 		CodeStore(lhs, tp);
-		return;
+		break;
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(rhs);
@@ -259,11 +254,11 @@ CodeMove(rhs, left, rtp)
 			CodeDesig(left, lhs);
 			CodeAddress(lhs);
 			C_blm(tp->tp_size);
-			return;
+			break;
 		}
 		CodeValue(rhs, tp);
 		CodeDStore(left);
-		return;
+		break;
 	case DSG_FIXED:
 		CodeDesig(left, lhs);
 		if (lhs->dsg_kind == DSG_FIXED &&
@@ -313,7 +308,7 @@ CodeMove(rhs, left, rtp)
 					CodeCopy(lhs, rhs, (arith) sz, &size);
 				}
 			}
-			return;
+			break;
 		}
 		if (lhs->dsg_kind == DSG_PLOADED ||
 		    lhs->dsg_kind == DSG_INDEXED) {
@@ -326,7 +321,7 @@ CodeMove(rhs, left, rtp)
 			if (loadedflag) C_exg(pointer_size);
 			else CodeAddress(lhs);
 			C_blm(tp->tp_size);
-			return;
+			break;
 		}
 		{
 			arith tmp;
@@ -343,11 +338,12 @@ CodeMove(rhs, left, rtp)
 			CodeValue(rhs, tp);
 			CodeStore(lhs, tp);
 			if (loadedflag) FreePtr(tmp);
-			return;
+			break;
 		}
 	default:
 		crash("CodeMove");
 	}
+	free_desig(lhs);
 }
 
 CodeAddress(ds)
@@ -529,6 +525,7 @@ CodeDesig(nd, ds)
 	switch(nd->nd_class) {	/* Divide */
 	case Def:
 		df = nd->nd_def;
+		if (nd->nd_left) CodeDesig(nd->nd_left, ds);
 
 		switch(df->df_kind) {
 		case D_FIELD:
@@ -544,22 +541,12 @@ CodeDesig(nd, ds)
 		}
 		break;
 
-	case LinkDef:
-		assert(nd->nd_symb == '.');
-
-		CodeDesig(nd->nd_left, ds);
-		CodeFieldDesig(nd->nd_def, ds);
-		break;
-
 	case Arrsel:
 		assert(nd->nd_symb == '[');
 
 		CodeDesig(nd->nd_left, ds);
 		CodeAddress(ds);
 		CodePExpr(nd->nd_right);
-		if (nd->nd_right->nd_type->tp_size > word_size) {
-			CodeCoercion(nd->nd_right->nd_type, int_type);
-		}
 
 		/* Now load address of descriptor
 		*/

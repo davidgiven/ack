@@ -387,22 +387,22 @@ CaseLabels(struct type **ptp; register struct node **pnd;)
 	register struct node *nd;
 }:
 	ConstExpression(pnd)
-			{ nd = *pnd; }
+			{ 
+			  if (*ptp != 0) {
+				ChkCompat(pnd, *ptp, "case label");
+			  }
+			  nd = *pnd;
+			}
 	[
 		UPTO	{ *pnd = MkNode(Link,nd,NULLNODE,&dot); }
 		ConstExpression(&(*pnd)->nd_right)
-			{ if (!TstCompat(nd->nd_type,
-					 (*pnd)->nd_right->nd_type)) {
-				node_error((*pnd)->nd_right,
-					  "type incompatibility in case label");
+			{ if (!ChkCompat(&((*pnd)->nd_right), nd->nd_type,
+					 "case label")) {
 			  	nd->nd_type = error_type;
 			  }
 			}
 	]?
-			{ if (*ptp != 0 && !TstCompat(*ptp, nd->nd_type)) {
-				node_error(nd,
-					  "type incompatibility in case label");
-			  }
+			{
 			  *ptp = nd->nd_type;
 			}
 ;
@@ -486,10 +486,15 @@ ConstantDeclaration
 {
 	struct idf *id;
 	struct node *nd;
+	register struct def *df;
 }:
 	IDENT		{ id = dot.TOK_IDF; }
 	'=' ConstExpression(&nd)
-			{ define(id,CurrentScope,D_CONST)->con_const = nd; }
+			{ df = define(id,CurrentScope,D_CONST);
+			  df->con_const = nd->nd_token;
+			  df->df_type = nd->nd_type;
+			  FreeNode(nd);
+			}
 ;
 
 VariableDeclaration
@@ -508,10 +513,14 @@ VariableDeclaration
 			{ EnterVarList(VarList, tp, proclevel > 0); }
 ;
 
-IdentAddr(register struct node **pnd;) :
-	IDENT		{ *pnd = MkLeaf(Name, &dot); }
+IdentAddr(struct node **pnd;) 
+{
+	register struct node *nd;
+} :
+	IDENT		{ nd = MkLeaf(Name, &dot); }
 	[	'['
-		ConstExpression(&((*pnd)->nd_left))
+		ConstExpression(&(nd->nd_left))
 		']'
 	]?
+			{ *pnd = nd; }
 ;

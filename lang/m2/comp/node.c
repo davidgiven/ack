@@ -16,9 +16,9 @@
 #include	<alloc.h>
 #include	<system.h>
 
+#include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
-#include	"LLlex.h"
 #include	"node.h"
 
 struct node *

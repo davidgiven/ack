@@ -12,11 +12,6 @@
 #include	"f_info.h"
 struct f_info	file_info;
 #include	"input.h"
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	"def.h"
-#include	"idf.h"
-#include	"scope.h"
 #include	<inp_pkg.body>
 
 

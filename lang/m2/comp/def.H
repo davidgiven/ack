@@ -26,7 +26,7 @@ struct variable {
 };
 
 struct constant {
-	struct node *co_const;	/* result of a constant expression */
+	struct token co_const;	/* result of a constant expression */
 #define con_const	df_value.df_constant.co_const
 };
 

@@ -22,8 +22,8 @@
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"type.h"
-#include	"def.h"
 #include	"LLlex.h"
+#include	"def.h"
 #include	"node.h"
 #include	"scope.h"
 #include	"const.h"
@@ -35,7 +35,7 @@
 extern char *symbol2str();
 extern char *sprint();
 
-STATIC
+STATIC int
 Xerror(nd, mess, edf)
 	struct node *nd;
 	char *mess;
@@ -45,9 +45,86 @@ Xerror(nd, mess, edf)
 		if (edf->df_kind != D_ERROR)  {
 			node_error(nd,"\"%s\": %s", edf->df_idf->id_text, mess);
 		}
-		return;
 	}
-	node_error(nd, "%s", mess);
+	else node_error(nd, "%s", mess);
+	return 0;
+}
+
+MkCoercion(pnd, tp)
+	struct node **pnd;
+	register struct type *tp;
+{
+	register struct node *nd = *pnd;
+	register struct type *nd_tp = nd->nd_type;
+	extern int pass_1;
+	int w = 0;
+
+	if (nd_tp == tp) return;
+	if (nd_tp->tp_fund == T_STRING) return;
+	nd_tp = BaseType(nd_tp);
+	if (nd->nd_class == Value) {
+		switch(tp->tp_fund) {
+		case T_REAL:
+			if (nd_tp->tp_fund == T_REAL) {
+				break;
+			}
+			goto Out;
+		case T_SUBRANGE:
+			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
+				BaseType(tp)->tp_fund) ||
+			    ! chk_bounds(nd->nd_INT, tp->sub_ub,
+				BaseType(tp)->tp_fund)) {
+				node_warning(nd,
+					     W_ORDINARY,
+					     "might cause range bound error");
+				w = 1;
+			}
+			break;
+		case T_ENUMERATION:
+		case T_CHAR:
+			if (nd->nd_INT < 0 || nd->nd_INT >= tp->enm_ncst) {
+				node_warning(nd,
+					     W_ORDINARY,
+					     "might cause range bound error");
+				w = 1;
+			}
+			break;
+		case T_INTORCARD:
+		case T_CARDINAL:
+		case T_POINTER:
+			if ((nd_tp->tp_fund == T_INTEGER &&
+			     nd->nd_INT < 0) ||
+			    (nd->nd_INT & ~full_mask[(int)(tp->tp_size)])) {
+				node_warning(nd,
+					     W_ORDINARY,
+					     "might cause conversion error");
+				w = 1;
+			}
+			break;
+		case T_INTEGER:  {
+			long i = ~int_mask[(int)(tp->tp_size)];
+			long j = nd->nd_INT & i;
+
+			if ((nd_tp->tp_fund == T_INTEGER &&
+			     j != i && j != 0) ||
+			    (nd_tp->tp_fund != T_INTEGER && j)) {
+				node_warning(nd,
+					     W_ORDINARY,
+					     "might cause conversion error");
+				w = 1;
+			}
+			}
+			break;
+		}
+		if (!w || pass_1) {
+			nd->nd_type = tp;
+			return;
+		}
+	}
+Out:
+	*pnd = nd = MkNode(Uoper, NULLNODE, nd, &(nd->nd_token));
+	nd->nd_symb = COERCION;
+	nd->nd_type = tp;
 }
 
 int
@@ -58,15 +135,10 @@ ChkVariable(expp)
 		assigned to.
 	*/
 
-	if (! ChkDesignator(expp)) return 0;
-
-	if ((expp->nd_class == Def || expp->nd_class == LinkDef) &&
-	     !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
-		Xerror(expp, "variable expected", expp->nd_def);
-		return 0;
-	}
-
-	return 1;
+	return ChkDesignator(expp) &&
+		( expp->nd_class != Def ||
+	    	  ( expp->nd_def->df_kind & (D_FIELD|D_VARIABLE)) ||
+		  Xerror(expp, "variable expected", expp->nd_def));
 }
 
 STATIC int
@@ -106,37 +178,33 @@ ChkArr(expp)
 		assignment compatible with the array-index.
 	*/
 
-	register struct type *tpl, *tpr;
-	int retval;
+	register struct type *tpl;
 
 	assert(expp->nd_class == Arrsel);
 	assert(expp->nd_symb == '[');
 
 	expp->nd_type = error_type;
 
-	retval = ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right);
+	if (! (ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right))) {
+		return 0;
+	}
 
 	tpl = expp->nd_left->nd_type;
-	tpr = expp->nd_right->nd_type;
-	if (tpl == error_type || tpr == error_type) return 0;
 
 	if (tpl->tp_fund != T_ARRAY) {
 		node_error(expp, "not indexing an ARRAY type");
 		return 0;
 	}
+	expp->nd_type = RemoveEqual(tpl->arr_elem);
 
 	/* Type of the index must be assignment compatible with
 	   the index type of the array (Def 8.1).
 	   However, the index type of a conformant array is not specified.
 	   In our implementation it is CARDINAL.
 	*/
-	if (!TstAssCompat(IndexType(tpl), tpr)) {
-		node_error(expp, "incompatible index type");
-		return 0;
-	}
-
-	expp->nd_type = RemoveEqual(tpl->arr_elem);
-	return retval;
+	return ChkAssCompat(&(expp->nd_right),
+			    BaseType(IndexType(tpl)),
+			    "index type");
 }
 
 #ifdef DEBUG
@@ -183,13 +251,12 @@ ChkLinkOrName(expp)
 
 		if (! ChkDesignator(left)) return 0;
 
-		if ((left->nd_class==Def || left->nd_class==LinkDef) &&
+		if (left->nd_class==Def &&
 		    (left->nd_type->tp_fund != T_RECORD ||
 		    !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
 		    )
 		   ) {
-			Xerror(left, "illegal selection", left->nd_def);
-			return 0;
+			return Xerror(left, "illegal selection", left->nd_def);
 		}
 		if (left->nd_type->tp_fund != T_RECORD) {
 			node_error(left, "illegal selection");
@@ -200,25 +267,22 @@ ChkLinkOrName(expp)
 			id_not_declared(expp);
 			return 0;
 		}
-		else {
-			expp->nd_def = df;
-			expp->nd_type = RemoveEqual(df->df_type);
-			expp->nd_class = LinkDef;
-			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
-				/* Fields of a record are always D_QEXPORTED,
-				   so ...
-				*/
+		expp->nd_def = df;
+		expp->nd_type = RemoveEqual(df->df_type);
+		expp->nd_class = Def;
+		if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+			/* Fields of a record are always D_QEXPORTED,
+			   so ...
+			*/
 Xerror(expp, "not exported from qualifying module", df);
-			}
 		}
 
-		if ((left->nd_class == Def || left->nd_class == LinkDef) &&
-		     left->nd_def->df_kind == D_MODULE) {
-			expp->nd_class = Def;
-			FreeNode(left);
-			expp->nd_left = 0;
+		if (!(left->nd_class == Def &&
+		      left->nd_def->df_kind == D_MODULE)) {
+			return 1;
 		}
-		else	return 1;
+		FreeNode(left);
+		expp->nd_left = 0;
 	}
 
 	assert(expp->nd_class == Def);
@@ -242,8 +306,11 @@ ChkExLinkOrName(expp)
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		/* Replace an enum-literal or a CONST identifier by its value.
 		*/
+		if (df->df_type->tp_fund == T_SET) {
+			expp->nd_class = Set;
+		}
+		else	expp->nd_class = Value;
 		if (df->df_kind == D_ENUM) {
-			expp->nd_class = Value;
 			expp->nd_INT = df->enm_val;
 			expp->nd_symb = INTEGER;
 		}
@@ -251,7 +318,7 @@ ChkExLinkOrName(expp)
 			unsigned int ln = expp->nd_lineno;
 
 			assert(df->df_kind == D_CONST);
-			*expp = *(df->con_const);
+			expp->nd_token = df->con_const;
 			expp->nd_lineno = ln;
 		}
 	}
@@ -278,32 +345,24 @@ node_error(expp, "standard or local procedures may not be assigned");
 
 STATIC int
 ChkEl(expr, tp)
-	register struct node *expr;
+	register struct node **expr;
 	struct type *tp;
 {
-	if (!ChkExpression(expr)) return 0;
 
-	if (!TstCompat(tp, expr->nd_type)) {
-		node_error(expr, "set element has incompatible type");
-		return 0;
-	}
-
-	return 1;
+	return ChkExpression(*expr) && ChkCompat(expr, tp, "set element");
 }
 
 STATIC int
 ChkElement(expp, tp, set)
 	struct node **expp;
 	struct type *tp;
-	arith **set;
+	arith *set;
 {
 	/*	Check elements of a set. This routine may call itself
 		recursively.
 		Also try to compute the set!
 	*/
 	register struct node *expr = *expp;
-	register struct node *left = expr->nd_left;
-	register struct node *right = expr->nd_right;
 	register unsigned int i;
 	arith lo, hi, low, high;
 
@@ -311,22 +370,25 @@ ChkElement(expp, tp, set)
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (! (ChkEl(left, tp) & ChkEl(right, tp))) {
+		if (! (ChkEl(&(expr->nd_left), tp) & 
+		       ChkEl(&(expr->nd_right), tp))) {
 			return 0;
 		}
 
-		if (!(left->nd_class == Value && right->nd_class == Value)) {
+		if (!(expr->nd_left->nd_class == Value &&
+		      expr->nd_right->nd_class == Value)) {
 			return 1;
 		}
 		/* We have a constant range. Put all elements in the
 		  set
 		*/
 
-		low = left->nd_INT;
-		high = right->nd_INT;
+		low = expr->nd_left->nd_INT;
+		high = expr->nd_right->nd_INT;
 	}
 	else {
-		if (! ChkEl(expr, tp)) return 0;
+		if (! ChkEl(expp, tp)) return 0;
+		expr = *expp;
 		if (expr->nd_class != Value) {
 			return 1;
 		}
@@ -344,7 +406,7 @@ ChkElement(expp, tp, set)
 	}
 
 	for (i=(unsigned)low; i<= (unsigned)high; i++) {
-		(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
+		set[i/wrd_bits] |= (1<<(i%wrd_bits));
 	}
 	FreeNode(expr);
 	*expp = 0;
@@ -374,7 +436,7 @@ ChkSet(expp)
 		/* A type was given. Check it out
 		*/
 		if (! ChkDesignator(nd)) return 0;
-		assert(nd->nd_class == Def || nd->nd_class == LinkDef);
+		assert(nd->nd_class == Def);
 		df = nd->nd_def;
 
 		if (!is_type(df) ||
@@ -406,7 +468,7 @@ ChkSet(expp)
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
 		if (!ChkElement(&(nd->nd_left), ElementType(tp),
-						&(expp->nd_set))) {
+						expp->nd_set)) {
 			retval = 0;
 		}
 		if (nd->nd_left) expp->nd_class = Xset;
@@ -418,6 +480,21 @@ ChkSet(expp)
 		expp->nd_right = 0;
 	}
 	return retval;
+}
+
+STATIC struct node *
+nextarg(argp, edf)
+	struct node **argp;
+	struct def *edf;
+{
+	register struct node *arg = (*argp)->nd_right;
+
+	if (! arg) {
+		return (struct node *)Xerror(*argp, "too few arguments supplied", edf);
+	}
+
+	*argp = arg;
+	return arg->nd_left;
 }
 
 STATIC struct node *
@@ -433,29 +510,23 @@ getarg(argp, bases, designator, edf)
 		that it must be a designator and may not be a register
 		variable.
 	*/
-	register struct node *arg = (*argp)->nd_right;
-	register struct node *left;
+	register struct node *left = nextarg(argp, edf);
 
-	if (! arg) {
-		Xerror(*argp, "too few arguments supplied", edf);
+	if (!left || (designator ? !ChkVariable(left) : !ChkExpression(left))) {
 		return 0;
 	}
 
-	left = arg->nd_left;
-	*argp = arg;
-
-	if (designator ? !ChkVariable(left) : !ChkExpression(left)) {
-		return 0;
-	}
-
-	if (designator && (left->nd_class==Def || left->nd_class==LinkDef)) {
+	if (designator && left->nd_class==Def) {
 		left->nd_def->df_flags |= D_NOREG;
 	}
 
 	if (bases) {
-		if (!(BaseType(left->nd_type)->tp_fund & bases)) {
-			Xerror(arg, "unexpected parameter type", edf);
-			return 0;
+		struct type *tp = BaseType(left->nd_type);
+
+		MkCoercion(&((*argp)->nd_left), tp);
+		left = (*argp)->nd_left;
+		if (!(tp->tp_fund & bases)) {
+			return (struct node *)Xerror(left, "unexpected parameter type", edf);
 		}
 	}
 
@@ -471,35 +542,17 @@ getname(argp, kinds, bases, edf)
 		The argument must indicate a definition, and the
 		definition kind must be one of "kinds".
 	*/
-	register struct node *arg = *argp;
-	register struct node *left;
+	register struct node *left = nextarg(argp, edf);
 
-	*argp = arg->nd_right;
+	if (!left || ! ChkDesignator(left)) return 0;
 
-	if (!arg->nd_right) {
-		Xerror(arg, "too few arguments supplied", edf);
-		return 0;
+	if (left->nd_class != Def) {
+		return (struct node *)Xerror(left, "identifier expected", edf);
 	}
 
-	arg = arg->nd_right;
-	left = arg->nd_left;
-	if (! ChkDesignator(left)) return 0;
-
-	if (left->nd_class != Def && left->nd_class != LinkDef) {
-		Xerror(arg, "identifier expected", edf);
-		return 0;
-	}
-
-	if (!(left->nd_def->df_kind & kinds)) {
-		Xerror(arg, "unexpected parameter type", edf);
-		return 0;
-	}
-
-	if (bases) {
-		if (!(left->nd_type->tp_fund & bases)) {
-			Xerror(arg, "unexpected parameter type", edf);
-			return 0;
-		}
+	if (!(left->nd_def->df_kind & kinds) ||
+	    (bases && !(left->nd_type->tp_fund & bases))) {
+		return (struct node *)Xerror(left, "unexpected parameter type", edf);
 	}
 
 	return left;
@@ -514,12 +567,11 @@ ChkProcCall(expp)
 	register struct node *left;
 	struct def *edf = 0;
 	register struct paramlist *param;
-	char ebuf[256];
 	int retval = 1;
 	int cnt = 0;
 
 	left = expp->nd_left;
-	if (left->nd_class == Def || left->nd_class == LinkDef) {
+	if (left->nd_class == Def) {
 		edf = left->nd_def;
 	}
 	if (left->nd_type == error_type) {
@@ -544,13 +596,11 @@ ChkProcCall(expp)
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
 		}
-		if (! TstParCompat(RemoveEqual(TypeOfParam(param)),
-				   left->nd_type,
+		if (! TstParCompat(cnt,
+				   RemoveEqual(TypeOfParam(param)),
 				   IsVarParam(param),
-				   left)) {
-			sprint(ebuf, "type incompatibility in parameter %d",
-					cnt);
-			Xerror(left, ebuf, edf);
+				   &(expp->nd_left),
+				   edf)) {
 			retval = 0;
 		}
 	}
@@ -591,19 +641,18 @@ ChkCall(expp)
 		Of course this does not have to be a call at all,
 		it may also be a cast or a standard procedure call.
 	*/
-	register struct node *left;
+	register struct node *left = expp->nd_left;
 	STATIC int ChkStandard();
 	STATIC int ChkCast();
 
 	/* First, get the name of the function or procedure
 	*/
 	expp->nd_type = error_type;
-	left = expp->nd_left;
 	if (ChkDesignator(left)) {
 		if (IsCast(left)) {
 			/* It was a type cast.
 			*/
-			return ChkCast(expp, left);
+			return ChkCast(expp);
 		}
 
 		if (IsProcCall(left) || left->nd_type == error_type) {
@@ -613,7 +662,7 @@ ChkCall(expp)
 			if (left->nd_type == std_type) {
 				/* A standard procedure
 				*/
-				return ChkStandard(expp, left);
+				return ChkStandard(expp);
 			}
 			/* Here, we have found a real procedure call. 
 			   The left hand side may also represent a procedure
@@ -650,7 +699,7 @@ ResultOfOperation(operator, tp)
 STATIC int
 Boolean(operator)
 {
-	return operator == OR || operator == AND || operator == '&';
+	return operator == OR || operator == AND;
 }
 
 STATIC int
@@ -672,7 +721,6 @@ AllowedTypes(operator)
 		return T_INTORCARD;
 	case OR:
 	case AND:
-	case '&':
 		return T_ENUMERATION;
 	case '=':
 	case '#':
@@ -756,15 +804,16 @@ ChkBinOper(expp)
 			node_error(expp, "\"IN\": right operand must be a set");
 			return 0;
 		}
-		if (!TstAssCompat(tpl, ElementType(tpr))) {
+		if (!TstAssCompat(ElementType(tpr), tpl)) {
 			/* Assignment compatible ???
 			   I don't know! Should we be allowed to check
 			   if a INTEGER is a member of a BITSET???
 			*/
-
-			node_error(expp, "\"IN\": incompatible types");
+			node_error(left, "type incompatibility in IN");
 			return 0;
 		}
+		MkCoercion(&(expp->nd_left), word_type);
+		left = expp->nd_left;
 		if (left->nd_class == Value && right->nd_class == Set) {
 			cstset(expp);
 		}
@@ -795,10 +844,14 @@ ChkBinOper(expp)
 
 	/* Operands must be compatible (distilled from Def 8.2)
 	*/
-	if (!TstCompat(tpl, tpr)) {
-		node_error(expp, "\"%s\": incompatible types", symbol2str(expp->nd_symb));
+	if (!TstCompat(tpr, tpl)) {
+		node_error(expp,"\"%s\": incompatible types",
+			   symbol2str(expp->nd_symb));
 		return 0;
 	}
+
+	MkCoercion(&(expp->nd_left), tpl);
+	MkCoercion(&(expp->nd_right), tpr);
 
 	if (tpl->tp_fund == T_SET) {
 	    	if (left->nd_class == Set && right->nd_class == Set) {
@@ -823,8 +876,10 @@ ChkUnOper(expp)
 	register struct type *tpr;
 
 	if (! ChkExpression(right)) return 0;
-
 	expp->nd_type = tpr = BaseType(right->nd_type);
+	MkCoercion(&(expp->nd_right), tpr);
+	right = expp->nd_right;
+
 	if (tpr == address_type) tpr = card_type;
 
 	switch(expp->nd_symb) {
@@ -862,7 +917,6 @@ ChkUnOper(expp)
 		break;
 
 	case NOT:
-	case '~':
 		if (tpr == bool_type) {
 			if (right->nd_class == Value) {
 				cstunary(expp);
@@ -886,38 +940,31 @@ getvariable(argp, edf)
 	/*	Get the next argument from argument list "argp".
 		It must obey the rules of "ChkVariable".
 	*/
-	register struct node *arg = *argp;
+	register struct node *left = nextarg(argp, edf);
 
-	arg = arg->nd_right;
-	if (!arg) {
-		Xerror(arg, "too few parameters supplied", edf);
-		return 0;
-	}
+	if (!left || !ChkVariable(left)) return 0;
 
-	*argp = arg;
-	arg = arg->nd_left;
-	if (! ChkVariable(arg)) return 0;
-
-	return arg;
+	return left;
 }
 
 STATIC int
-ChkStandard(expp, left)
-	register struct node *expp, *left;
+ChkStandard(expp)
+	register struct node *expp;
 {
 	/*	Check a call of a standard procedure or function
 	*/
 	struct node *arg = expp;
-	register struct def *edf;
-	int std;
+	register struct node *left = expp->nd_left;
+	register struct def *edf = left->nd_def;
+	int free_it = 0;
 
-	assert(left->nd_class == Def || left->nd_class == LinkDef);
-	edf = left->nd_def;
-	std = edf->df_value.df_stdname;
+	assert(left->nd_class == Def);
 
-	switch(std) {
+	switch(edf->df_value.df_stdname) {
 	case S_ABS:
 		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
+		MkCoercion(&(arg->nd_left), BaseType(left->nd_type));
+		left = arg->nd_left;
 		expp->nd_type = left->nd_type;
 		if (left->nd_class == Value &&
 		    expp->nd_type->tp_fund != T_REAL) {
@@ -934,47 +981,57 @@ ChkStandard(expp, left)
 	case S_CHR:
 		expp->nd_type = char_type;
 		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
-		if (left->nd_class == Value) cstcall(expp, S_CHR);
+		MkCoercion(&(arg->nd_left), char_type);
+		free_it = 1;
 		break;
 
 	case S_FLOATD:
 	case S_FLOAT:
-		expp->nd_type = real_type;
-		if (std == S_FLOATD) expp->nd_type = longreal_type;
-		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
+		if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
+		if (edf->df_value.df_stdname == S_FLOAT) {
+			MkCoercion(&(arg->nd_left), card_type);
+		}
+		MkCoercion(&(arg->nd_left),
+			   edf->df_value.df_stdname == S_FLOATD ?
+				longreal_type :
+				real_type);
+		free_it = 1;
 		break;
 
+	case S_SHORT:
 	case S_LONG: {
 		struct type *tp;
+		struct type *s1, *s2, *d1, *d2;
+
+		if (edf->df_value.df_stdname == S_SHORT) {
+			s1 = longint_type;
+			d1 = int_type;
+			s2 = longreal_type;
+			d2 = real_type;
+		}
+		else {
+			d1 = longint_type;
+			s1 = int_type;
+			d2 = longreal_type;
+			s2 = real_type;
+		}
 
 		if (!(left = getarg(&arg, 0, 0, edf))) {
 			return 0;
 		}
 		tp = BaseType(left->nd_type);
-		if (tp == int_type) expp->nd_type = longint_type;
-		else if (tp == real_type) expp->nd_type = longreal_type;
+		if (tp == s1) {
+			MkCoercion(&(arg->nd_left), d1);
+		}
+		else if (tp == s2) {
+			MkCoercion(&(arg->nd_left), d2);
+		}
 		else {
 			expp->nd_type = error_type;
 			Xerror(left, "unexpected parameter type", edf);
+			break;
 		}
-		if (left->nd_class == Value) cstcall(expp, S_LONG);
-		break;
-		}
-
-	case S_SHORT: {
-		struct type *tp;
-
-		if (!(left = getarg(&arg, 0, 0, edf))) {
-			return 0;
-		}
-		tp = BaseType(left->nd_type);
-		if (tp == longint_type) expp->nd_type = int_type;
-		else if (tp == longreal_type) expp->nd_type = real_type;
-		else {
-			expp->nd_type = error_type;
-			Xerror(left, "unexpected parameter type", edf);
-		}
-		if (left->nd_class == Value) cstcall(expp, S_SHORT);
+		free_it = 1;
 		break;
 		}
 
@@ -990,8 +1047,7 @@ ChkStandard(expp, left)
 			break;
 		}
 		if (left->nd_symb != STRING) {
-			Xerror(left,"array parameter expected", edf);
-			return 0;
+			return Xerror(left,"array parameter expected", edf);
 		}
 		expp->nd_type = card_type;
 		expp->nd_class = Value;
@@ -1011,19 +1067,20 @@ ChkStandard(expp, left)
 			return 0;
 		}
 		expp->nd_type = left->nd_type;
-		cstcall(expp,std);
+		cstcall(expp,edf->df_value.df_stdname);
 		break;
 
 	case S_ODD:
-		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
+		if (! (left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
+		MkCoercion(&(arg->nd_left), BaseType(left->nd_type));
 		expp->nd_type = bool_type;
-		if (left->nd_class == Value) cstcall(expp, S_ODD);
+		if (arg->nd_left->nd_class == Value) cstcall(expp, S_ODD);
 		break;
 
 	case S_ORD:
-		if (!(left = getarg(&arg, T_DISCRETE, 0, edf))) return 0;
-		expp->nd_type = card_type;
-		if (left->nd_class == Value) cstcall(expp, S_ORD);
+		if (! getarg(&arg, T_DISCRETE, 0, edf)) return 0;
+		MkCoercion(&(arg->nd_left), card_type);
+		free_it = 1;
 		break;
 
 	case S_NEW:
@@ -1038,8 +1095,7 @@ ChkStandard(expp, left)
 		}
 		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
-			Xerror(left, "pointer variable expected", edf);
-			return 0;
+			return Xerror(left, "pointer variable expected", edf);
 		}
 		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
 		{
@@ -1058,7 +1114,7 @@ ChkStandard(expp, left)
 			FreeNode(expp->nd_left);
 			dt.tk_symb = IDENT;
 			dt.tk_lineno = expp->nd_left->nd_lineno;
-			dt.TOK_IDF = str2idf(std == S_NEW ?
+			dt.TOK_IDF = str2idf(edf->df_value.df_stdname==S_NEW ?
 						"ALLOCATE" : "DEALLOCATE", 0);
 			expp->nd_left = MkLeaf(Name, &dt);
 		}
@@ -1080,8 +1136,12 @@ ChkStandard(expp, left)
 	case S_TRUNCD:
 	case S_TRUNC:
 		expp->nd_type = card_type;
-		if (std == S_TRUNCD) expp->nd_type = longint_type;
-		if (!(left = getarg(&arg, T_REAL, 0, edf))) return 0;
+		if (edf->df_value.df_stdname == S_TRUNCD) {
+			expp->nd_type = longint_type;
+		}
+		if (! getarg(&arg, T_REAL, 0, edf)) return 0;
+		MkCoercion(&(arg->nd_left), expp->nd_type);
+		free_it = 1;
 		break;
 
 	case S_VAL:
@@ -1094,12 +1154,13 @@ ChkStandard(expp, left)
 		FreeNode(arg);
 		arg = expp;
 		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
-		if (left->nd_class == Value) cstcall(expp, S_VAL);
+		MkCoercion(&(arg->nd_left), expp->nd_type);
+		free_it = 1;
 		break;
 
 	case S_ADR:
 		expp->nd_type = address_type;
-		if (!(left = getarg(&arg, 0, 1, edf))) return 0;
+		if (! getarg(&arg, 0, 1, edf)) return 0;
 		break;
 
 	case S_DEC:
@@ -1107,8 +1168,7 @@ ChkStandard(expp, left)
 		expp->nd_type = 0;
 		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
-			Xerror(left,"illegal parameter type", edf);
-			return 0;
+			return Xerror(left,"illegal parameter type", edf);
 		}
 		if (arg->nd_right) {
 			if (! getarg(&arg, T_INTORCARD, 0, edf)) return 0;
@@ -1122,23 +1182,26 @@ ChkStandard(expp, left)
 	case S_EXCL:
 	case S_INCL:
 		{
-		struct type *tp;
+		register struct type *tp;
+		struct node *dummy;
 
 		expp->nd_type = 0;
 		if (!(left = getvariable(&arg, edf))) return 0;
 		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
-			Xerror(arg, "SET parameter expected", edf);
-			return 0;
+			return Xerror(arg, "SET parameter expected", edf);
 		}
-		if (!(left = getarg(&arg, T_DISCRETE, 0, edf))) return 0;
-		if (!TstAssCompat(ElementType(tp), left->nd_type)) {
+		if (!(dummy = getarg(&arg, 0, 0, edf))) return 0;
+		if (!ChkAssCompat(&dummy, ElementType(tp), "EXCL/INCL")) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???
+			   But we don't want the coercion in the tree, because
+			   we don't want a range check here. We want a SET
+			   error.
 			*/
-			Xerror(arg, "unexpected parameter type", edf);
 			return 0;
 		}
+		MkCoercion(&(arg->nd_left), word_type);
 		break;
 		}
 
@@ -1147,16 +1210,22 @@ ChkStandard(expp, left)
 	}
 
 	if (arg->nd_right) {
-		Xerror(arg->nd_right, "too many parameters supplied", edf);
-		return 0;
+		return Xerror(arg->nd_right, "too many parameters supplied", edf);
+	}
+
+	if (free_it) {
+		FreeNode(expp->nd_left);
+		*expp = *(arg->nd_left);
+		arg->nd_left = 0;
+		FreeNode(arg);
 	}
 
 	return 1;
 }
 
 STATIC int
-ChkCast(expp, left)
-	register struct node *expp, *left;
+ChkCast(expp)
+	register struct node *expp;
 {
 	/*	Check a cast and perform it if the argument is constant.
 		If the sizes don't match, only complain if at least one of them
@@ -1165,17 +1234,19 @@ ChkCast(expp, left)
 		is no problem as such values take a word on the EM stack
 		anyway.
 	*/
-	register struct type *lefttype = left->nd_type;
+	register struct node *left = expp->nd_left;
 	register struct node *arg = expp->nd_right;
+	register struct type *lefttype = left->nd_type;
 
 	if ((! arg) || arg->nd_right) {
-		Xerror(expp, "too many parameters in type cast", left->nd_def);
-		return 0;
+		return Xerror(expp, "type cast must have 1 parameter", left->nd_def);
 	}
 
-	arg = arg->nd_left;
-	if (! ChkExpression(arg)) return 0;
+	if (! ChkExpression(arg->nd_left)) return 0;
 
+	MkCoercion(&(arg->nd_left), BaseType(arg->nd_left->nd_type));
+
+	arg = arg->nd_left;
 	if (arg->nd_type->tp_size != lefttype->tp_size &&
 	    (arg->nd_type->tp_size > word_size ||
 	     lefttype->tp_size > word_size)) {
@@ -1186,11 +1257,9 @@ ChkCast(expp, left)
 		FreeNode(left);
 		expp->nd_right->nd_left = 0;
 		FreeNode(expp->nd_right);
-		expp->nd_left = expp->nd_right = 0;
 		*expp = *arg;
-		expp->nd_type = lefttype;
 	}
-	else expp->nd_type = lefttype;
+	expp->nd_type = lefttype;
 
 	return 1;
 }
@@ -1201,17 +1270,16 @@ TryToString(nd, tp)
 {
 	/*	Try a coercion from character constant to string.
 	*/
+	static char buf[2];
 
 	assert(nd->nd_symb == STRING);
 
 	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
-		int ch = nd->nd_INT;
-
+		buf[0] = nd->nd_INT;
 		nd->nd_type = standard_type(T_STRING, 1, (arith) 2);
 		nd->nd_token.tk_data.tk_str = 
 			(struct string *) Malloc(sizeof(struct string));
-		nd->nd_STR = Salloc("X", 2);
-		*(nd->nd_STR) = ch;
+		nd->nd_STR = Salloc(buf, 2);
 		nd->nd_SLE = 1;
 	}
 }

@@ -16,16 +16,14 @@
 #include	<em_label.h>
 #include	<assert.h>
 
+#include	"LLlex.h"
 #include	"main.h"
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
 #include	"scope.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
-
-extern int	(*c_inp)();
 
 STATIC
 DefInFront(df)
@@ -272,7 +270,10 @@ DeclProc(type, id)
 			df = define(id, CurrentScope, type);
 			sprint(buf,"_%d_%s",++nmcount,id->id_text);
 			name = Salloc(buf, (unsigned)(strlen(buf)+1));
-			(*c_inp)(buf);
+			if (options['x']) {
+				C_exp(buf);
+			}
+			else	C_inp(buf);
 		}
 		open_scope(OPENSCOPE);
 		scope = CurrentScope;
@@ -342,7 +343,10 @@ DefineLocalModule(id)
 	/* Generate code that indicates that the initialization procedure
 	   for this module is local.
 	*/
-	(*c_inp)(buf);
+	if (options['x']) {
+		C_exp(buf);
+	}
+	else	C_inp(buf);
 
 	return df;
 }

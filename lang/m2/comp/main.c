@@ -36,12 +36,10 @@ int		DefinitionModule;
 char		*ProgName;
 char		**DEFPATH;
 int		nDEF, mDEF;
+int		pass_1;
 struct def 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
-
-extern		C_inp(), C_exp();
-int		(*c_inp)() = C_inp;
 
 main(argc, argv)
 	register char **argv;
@@ -66,7 +64,6 @@ main(argc, argv)
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
 		exit(1);
 	}
-	if (options['x']) c_inp = C_exp;
 	exit(!Compile(Nargv[1], Nargv[2]));
 }
 
@@ -103,9 +100,11 @@ Compile(src, dst)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 	CheckForLineDirective();
+	pass_1 = 1;
 	CompUnit();
 	C_ms_src((int)LineNumber - 1, FileName);
 	if (!err_occurred) {
+		pass_1 = 0;
 		C_exp(Defined->mod_vis->sc_scope->sc_name);
 		WalkModule(Defined);
 		if (fp_used) C_ms_flt();
@@ -186,7 +185,7 @@ AddStandards()
 {
 	register struct def *df;
 	register struct stdproc *p;
-	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0}};
+	static struct token nilconst = { INTEGER, 0};
 
 	for (p = stdproc; p->st_nam != 0; p++) {
 		Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con);
@@ -200,9 +199,7 @@ AddStandards()
 	EnterType("BOOLEAN", bool_type);
 	EnterType("CARDINAL", card_type);
 	df = Enter("NIL", D_CONST, address_type, 0);
-	df->con_const = &nilnode;
-	nilnode.nd_INT = 0;
-	nilnode.nd_type = address_type;
+	df->con_const = nilconst;
 
 	EnterType("PROC", construct_type(T_PROCEDURE, NULLTYPE));
 	EnterType("BITSET", bitset_type);

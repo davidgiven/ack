@@ -21,12 +21,13 @@
 #include	<em_code.h>
 #include	<m2_traps.h>
 #include	<assert.h>
+#include	<alloc.h>
 
+#include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"
 #include	"main.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
 #include	"desig.h"
@@ -40,7 +41,7 @@ extern arith	NewPtr();
 extern arith	NewInt();
 extern int	proclevel;
 label		text_label;
-label		data_label;
+label		data_label = 1;
 static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
@@ -55,8 +56,11 @@ DoPriority()
 	/*	For the time being (???), handle priorities by calls to
 		the runtime system
 	*/
-	if (priority) {
-		C_loc(priority->nd_INT);
+
+	register struct node *p;
+
+	if (p = priority) {
+		C_loc(p->nd_INT);
 		C_cal("_stackprio");
 		C_asp(word_size);
 	}
@@ -77,13 +81,13 @@ DoProfil()
 
 	if (! options['L']) {
 
-		if (!filename_label) {
-			filename_label = ++data_label;
-			C_df_dlb(filename_label);
+		if (! filename_label) {
+			filename_label = 1;
+			C_df_dlb((label) 1);
 			C_rom_scon(FileName, (arith) (strlen(FileName) + 1));
 		}
 
-		C_fil_dlb(filename_label, (arith) 0);
+		C_fil_dlb((label) 1, (arith) 0);
 	}
 }
 
@@ -215,14 +219,14 @@ WalkProcedure(procedure)
 	     param;
 	     param = param->par_next) {
 		if (! IsVarParam(param)) {
-			register struct type *TpParam = TypeOfParam(param);
+			tp = TypeOfParam(param);
 
-			if (! IsConformantArray(TpParam)) {
-				if (TpParam->tp_size < word_size &&
-				    (int) word_size % (int) TpParam->tp_size == 0) {
+			if (! IsConformantArray(tp)) {
+				if (tp->tp_size < word_size &&
+				    (int) word_size % (int) tp->tp_size == 0) {
 					C_lol(param->par_def->var_off);
 					C_lal(param->par_def->var_off);
-					C_sti(TpParam->tp_size);
+					C_sti(tp->tp_size);
 				}
 			}
 			else {
@@ -239,7 +243,7 @@ WalkProcedure(procedure)
 				if (! StackAdjustment) {
 					/* First time we get here
 					*/
-					if (tp && !func_res_label) {
+					if (func_type && !func_res_label) {
 						/* Some local space, only
 						   needed if the value itself
 						   is returned
@@ -290,21 +294,20 @@ WalkProcedure(procedure)
 			C_str((arith) 1);
 		}
 		C_lae_dlb(func_res_label, (arith) 0);
-		EndPriority();
-		C_ret(pointer_size);
+		func_res_size = pointer_size;
 	}
 	else if (StackAdjustment) {
 		/* First save the function result in a safe place.
 		   Then remove copies of conformant arrays,
 		   and put function result back on the stack
 		*/
-		if (tp) {
+		if (func_type) {
 			C_lal(retsav);
 			C_sti(func_res_size);
 		}
 		C_lol(StackAdjustment);
 		C_str((arith) 1);
-		if (tp) {
+		if (func_type) {
 			C_lal(retsav);
 			C_loi(func_res_size);
 		}
@@ -410,7 +413,7 @@ WalkStat(nd, exit_label)
 		break;
 
 	case BECOMES:
-		DoAssign(nd, left, right);
+		DoAssign(left, right);
 		break;
 
 	case IF:
@@ -478,43 +481,47 @@ WalkStat(nd, exit_label)
 			int good_forvar;
 			label l1 = ++text_label;
 			label l2 = ++text_label;
+			int uns = 0;
 
 			good_forvar = DoForInit(nd, left);
-#ifdef DEBUG
-			nd->nd_left = left;
-			nd->nd_right = right;
-#endif
 			fnd = left->nd_right;
-			if (fnd->nd_class != Value) {
-				/* Upperbound not constant.
-				   The expression may only be evaluated once,
-				   so generate a temporary for it
-				*/
-				CodePExpr(fnd);
-				tmp = NewInt();
-				C_stl(tmp);
-			}
-			C_df_ilb(l1);
-			C_dup(int_size);
-			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
-			if (left->nd_INT > 0) {
-				C_bgt(l2);
-			}
-			else	C_blt(l2);
 			if (good_forvar) {
-				RangeCheck(nd->nd_type, int_type);
+				uns = BaseType(nd->nd_type)->tp_fund != T_INTEGER;
+				if (fnd->nd_class != Value) {
+					/* Upperbound not constant.
+					   The expression may only be evaluated
+					   once, so generate a temporary for it
+					*/
+					CodePExpr(fnd);
+					tmp = NewInt();
+					C_stl(tmp);
+				}
+				C_df_ilb(l1);
+				C_dup(int_size);
+				if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
+				if (uns) C_cmu(int_size);
+				else C_cmi(int_size);
+				if (left->nd_INT > 0) {
+					C_zgt(l2);
+				}
+				else	C_zlt(l2);
 				CodeDStore(nd);
 			}
 			WalkNode(right, exit_label);
 			if (good_forvar) {	
 				CodePExpr(nd);
 				C_loc(left->nd_INT);
-				C_adi(int_size);
+				if (uns) C_adu(int_size);
+				else C_adi(int_size);
 				C_bra(l1);
 				C_df_ilb(l2);
 				C_asp(int_size);
 			}
 			if (tmp) FreeInt(tmp);
+#ifdef DEBUG
+			nd->nd_left = left;
+			nd->nd_right = right;
+#endif
 		}
 		break;
 
@@ -566,15 +573,14 @@ WalkStat(nd, exit_label)
 			   assignment compatible with the result type of the
 			   function procedure (See Rep. 9.11).
 			*/
-			if (!TstAssCompat(func_type, right->nd_type)) {
-node_error(right, "type incompatibility in RETURN statement");
+			if (!ChkAssCompat(&(nd->nd_right), func_type, "RETURN")) {
 				break;
 			}
+			right = nd->nd_right;
 			if (right->nd_type->tp_fund == T_STRING) {
 				CodePString(right, func_type);
 			}
 			else	CodePExpr(right);
-			RangeCheck(func_type, right->nd_type);
 		}
 		C_bra(RETURN_LABEL);
 		break;
@@ -609,29 +615,16 @@ ExpectBool(nd, true_label, false_label)
 	/*	"nd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
-	struct desig ds;
+	register struct desig *ds = new_desig();
 
-	if (!ChkExpression(nd)) return;
+	if (ChkExpression(nd)) {
+		if (nd->nd_type != bool_type && nd->nd_type != error_type) {
+			node_error(nd, "boolean expression expected");
+		}
 
-	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
-		node_error(nd, "boolean expression expected");
+		CodeExpr(nd, ds,  true_label, false_label);
 	}
-
-	ds = InitDesig;
-	CodeExpr(nd, &ds,  true_label, false_label);
-}
-
-int
-WalkExpr(nd)
-	register struct node *nd;
-{
-	/*	Check an expression and generate code for it
-	*/
-
-	if (! ChkExpression(nd)) return 0;
-
-	CodePExpr(nd);
-	return 1;
+	free_desig(ds);
 }
 
 int
@@ -644,7 +637,7 @@ WalkDesignator(nd, ds)
 
 	if (! ChkVariable(nd)) return 0;
 
-	*ds = InitDesig;
+	clear((char *) ds, sizeof(struct desig));
 	CodeDesig(nd, ds);
 	return 1;
 }
@@ -653,13 +646,14 @@ DoForInit(nd, left)
 	register struct node *nd, *left;
 {
 	register struct def *df;
+	struct type *tpl, *tpr;
 
 	nd->nd_left = nd->nd_right = 0;
 	nd->nd_class = Name;
 	nd->nd_symb = IDENT;
 
 	if (!( ChkVariable(nd) &
-	       WalkExpr(left->nd_left) &
+	       ChkExpression(left->nd_left) &
 	       ChkExpression(left->nd_right))) return 0;
 
 	df = nd->nd_def;
@@ -694,21 +688,22 @@ DoForInit(nd, left)
 		return 1;
 	}
 
-	if (!TstCompat(df->df_type, left->nd_left->nd_type) ||
-	    !TstCompat(df->df_type, left->nd_right->nd_type)) {
-		if (!TstAssCompat(df->df_type, left->nd_left->nd_type) ||
-		    !TstAssCompat(df->df_type, left->nd_right->nd_type)) {
-			node_error(nd, "type incompatibility in FOR statement");
-			return 1;
-		}
+	tpl = left->nd_left->nd_type;
+	tpr = left->nd_right->nd_type;
+	if (!ChkAssCompat(&(left->nd_left), df->df_type, "FOR statement") ||
+	    !ChkAssCompat(&(left->nd_right), df->df_type,"FOR statement")) {
+		return 1;
+	}
+	if (!TstCompat(df->df_type, tpl) ||
+	    !TstCompat(df->df_type, tpr)) {
 node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	}
 
+	CodePExpr(left->nd_left);
 	return 1;
 }
 
-DoAssign(nd, left, right)
-	struct node *nd;
+DoAssign(left, right)
 	register struct node *left, *right;
 {
 	/* May we do it in this order (expression first) ???
@@ -716,32 +711,32 @@ DoAssign(nd, left, right)
 	   it sais that the left hand side is evaluated first.
 	   DAMN THE BOOK!
 	*/
-	struct desig dsr;
+	register struct desig *dsr;
 	register struct type *rtp, *ltp;
+	struct node *rht = right;
 
 	if (! (ChkExpression(right) & ChkVariable(left))) return;
 	rtp = right->nd_type;
 	ltp = left->nd_type;
 
 	if (right->nd_symb == STRING) TryToString(right, ltp);
-	dsr = InitDesig;
 
-	if (! TstAssCompat(ltp, rtp)) {
-		node_error(nd, "type incompatibility in assignment");
+	if (! ChkAssCompat(&rht, ltp, "assignment")) {
 		return;
 	}
+	dsr = new_desig();
 
 #define StackNeededFor(ds)	((ds)->dsg_kind == DSG_PLOADED \
 				  || (ds)->dsg_kind == DSG_INDEXED)
-	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
+	CodeExpr(rht, dsr, NO_LABEL, NO_LABEL);
 	if (complex(rtp)) {
-		if (StackNeededFor(&dsr)) CodeAddress(&dsr);
+		if (StackNeededFor(dsr)) CodeAddress(dsr);
 	}
 	else {
-		CodeValue(&dsr, rtp);
-		CodeCheckExpr(rtp, ltp);
+		CodeValue(dsr, rtp);
 	}
-	CodeMove(&dsr, left, rtp);
+	CodeMove(dsr, left, rtp);
+	free_desig(dsr);
 }
 
 RegisterMessages(df)

@@ -18,10 +18,10 @@
 #include	<assert.h>
 
 #include	"idf.h"
+#include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"main.h"
 #include	"misc.h"

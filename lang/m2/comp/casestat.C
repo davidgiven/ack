@@ -30,6 +30,7 @@
 #include	"node.h"
 #include	"desig.h"
 #include	"walk.h"
+#include	"chk_expr.h"
 
 #include	"density.h"
 
@@ -81,14 +82,16 @@ CaseCode(nd, exitlabel)
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
-	WalkExpr(pnode->nd_left);	/* evaluate case expression */
+	if (ChkExpression(pnode->nd_left)) {
+		MkCoercion(&(pnode->nd_left),BaseType(pnode->nd_left->nd_type));
+		CodePExpr(pnode->nd_left);
+	}
 	sh->sh_type = pnode->nd_left->nd_type;
 	sh->sh_break = ++text_label;
 
 	/* Now, create case label list
 	*/
-	while (pnode->nd_right) {
-		pnode = pnode->nd_right;
+	while (pnode = pnode->nd_right) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
 				/* non-empty case
@@ -168,8 +171,7 @@ CaseCode(nd, exitlabel)
 	/* Now generate code for the cases
 	*/
 	pnode = nd;
-	while (pnode->nd_right) {
-		pnode = pnode->nd_right;
+	while (pnode = pnode->nd_right) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
 				C_df_ilb(pnode->nd_lab);
@@ -252,8 +254,7 @@ AddOneCase(sh, node, lbl)
 
 	ce->ce_label = lbl;
 	ce->ce_value = node->nd_INT;
-	if (! TstCompat(sh->sh_type, node->nd_type)) {
-		node_error(node, "type incompatibility in case");
+	if (! ChkCompat(&node, sh->sh_type, "case")) {
 		free_case_entry(ce);
 		return 0;
 	}

@@ -19,10 +19,10 @@
 #include	<em_label.h>
 #include	<em_code.h>
 
+#include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"const.h"
 #include	"scope.h"
@@ -287,7 +287,10 @@ chk_basesubrange(tp, base)
 		/* Check that the bounds of "tp" fall within the range
 		   of "base".
 		*/
-		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
+		int fund = base->tp_next->tp_fund;
+
+		if (! chk_bounds(base->sub_lb, tp->sub_lb, fund) || 
+		    ! chk_bounds(base->sub_ub, tp->sub_ub, fund)) {
 			error("base type has insufficient range");
 		}
 		base = base->tp_next;
@@ -314,6 +317,21 @@ chk_basesubrange(tp, base)
 	tp->tp_align = base->tp_align;
 }
 
+int
+chk_bounds(l1, l2, fund)
+	arith l1, l2;
+{
+	/*	compare to arith's, but be careful. They might be unsigned
+	*/
+	if (fund == T_INTEGER) {
+		return l2 >= l1;
+	}
+	return (l2 & mach_long_sign ?
+		(l1 & mach_long_sign ? l2 >= l1 : 1) :
+		(l1 & mach_long_sign ? 0 : l2 >= l1)
+	       );
+}
+
 struct type *
 subr_type(lb, ub)
 	register struct node *lb;
@@ -326,17 +344,16 @@ subr_type(lb, ub)
 	register struct type *tp = BaseType(lb->nd_type);
 	register struct type *res;
 
-	if (!TstCompat(lb->nd_type, ub->nd_type)) {
-		node_error(lb, "types of subrange bounds not equal");
-		return error_type;
-	}
-
 	if (tp == intorcard_type) {
 		/* Lower bound >= 0; in this case, the base type is CARDINAL,
 		   according to the language definition, par. 6.3
 		*/
 		assert(lb->nd_INT >= 0);
 		tp = card_type;
+	}
+
+	if (!ChkCompat(&ub, tp, "subrange bounds")) {
+		return error_type;
 	}
 
 	/* Check base type
@@ -348,7 +365,7 @@ subr_type(lb, ub)
 
 	/* Check bounds
 	*/
-	if (lb->nd_INT > ub->nd_INT) {
+	if (! chk_bounds(lb->nd_INT, ub->nd_INT, tp->tp_fund)) {
 		node_error(lb, "lower bound exceeds upper bound");
 	}
 
@@ -490,7 +507,7 @@ ArraySizes(tp)
 	*/
 	register struct type *index_type = IndexType(tp);
 	register struct type *elem_type = tp->arr_elem;
-	arith lo, hi;
+	arith lo, hi, diff;
 
 	tp->arr_elsize = ArrayElSize(elem_type);
 	tp->tp_align = elem_type->tp_align;
@@ -504,20 +521,21 @@ ArraySizes(tp)
 	}
 
 	getbounds(index_type, &lo, &hi);
+	diff = hi - lo;
 
-	tp->tp_size = (hi - lo + 1) * tp->arr_elsize;
+	tp->tp_size = (diff + 1) * tp->arr_elsize;
 
 	/* generate descriptor and remember label.
 	*/
 	tp->arr_descr = ++data_label;
 	C_df_dlb(tp->arr_descr);
 	C_rom_cst(lo);
-	C_rom_cst(hi - lo);
+	C_rom_cst(diff);
 	C_rom_cst(tp->arr_elsize);
 }
 
 FreeType(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	/*	Release type structures indicated by "tp".
 		This procedure is only called for types, constructed with
@@ -549,19 +567,20 @@ DeclareType(nd, df, tp)
 		"df" is already bound. In that case, it is either an opaque
 		type, or an error message was given when "df" was created.
 	*/
+	register struct type *df_tp = df->df_type;
 
-	if (df->df_type && df->df_type->tp_fund == T_HIDDEN) {
+	if (df_tp && df_tp->tp_fund == T_HIDDEN) {
 	  	if (! (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
 			node_error(nd,
 				   "opaque type \"%s\" is not a pointer type",
 				   df->df_idf->id_text);
 		}
-		df->df_type->tp_next = tp;
-		df->df_type->tp_fund = T_EQUAL;
-		while (tp != df->df_type && tp->tp_fund == T_EQUAL) {
+		df_tp->tp_next = tp;
+		df_tp->tp_fund = T_EQUAL;
+		while (tp != df_tp && tp->tp_fund == T_EQUAL) {
 			tp = tp->tp_next;
 		}
-		if (tp == df->df_type) {
+		if (tp == df_tp) {
 			/* Circular definition! */
 			node_error(nd,
 				 "opaque type \"%s\" has a circular definition",
@@ -588,7 +607,7 @@ type_or_forward(ptp)
 		in "dot". This routine handles the different cases.
 	*/
 	register struct node *nd;
-	register struct def *df1;
+	register struct def *df, *df1;
 
 	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1))) {
 		/* Either a Module or a Type, but in both cases defined
@@ -622,21 +641,17 @@ type_or_forward(ptp)
 		may have forward references that must howewer be declared in the
 		same scope.
 	*/
-	{
-		register struct def *df =
-			define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
+	df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
 
-		if (df->df_kind == D_TYPE) {
-			(*ptp)->tp_next = df->df_type;
-			free_node(nd);
-		}
-		else {
-			nd->nd_type = *ptp;
-			df->df_forw_node = nd;
-			if (df1->df_kind == D_TYPE) {
-				df->df_type = df1->df_type;
-			}
-		}
+	if (df->df_kind == D_TYPE) {
+		(*ptp)->tp_next = df->df_type;
+		free_node(nd);
+		return 0;
+	}
+	nd->nd_type = *ptp;
+	df->df_forw_node = nd;
+	if (df1->df_kind == D_TYPE) {
+		df->df_type = df1->df_type;
 	}
 	return 0;
 }

@@ -24,6 +24,7 @@
 #include	<alloc.h>
 #include	<assert.h>
 
+#include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"

@@ -19,12 +19,13 @@
 #include	<em_code.h>
 #include	<em_abs.h>
 #include	<assert.h>
+#include	<alloc.h>
 
 #include	"type.h"
+#include	"LLlex.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"desig.h"
-#include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
 #include	"standards.h"
@@ -90,7 +91,6 @@ CodeExpr(nd, ds, true_label, false_label)
 		/* Fall through */
 
 	case Link:
-	case LinkDef:
 	case Arrsel:
 	case Arrow:
 		CodeDesig(nd, ds);
@@ -263,10 +263,21 @@ CodeCoercion(t1, t2)
 			C_cfi();
 			break;
 		case T_CARDINAL:
+		{
+			label lb = ++text_label;
+
+			C_dup(t1->tp_size);
+			C_zrf(t1->tp_size);
+			C_cmf(t1->tp_size);
+			C_zge(lb);
+			C_loc((arith) ECONV);
+			C_trp();
+			C_df_ilb(lb);
 			C_loc(t1->tp_size);
 			C_loc(t2->tp_size);
 			C_cfu();
 			break;
+		}
 		default:
 			crash("Funny REAL conversion");
 		}
@@ -400,7 +411,6 @@ CodeParameters(param, arg)
 		case Arrsel:
 		case Arrow:
 		case Def:
-		case LinkDef:
 			CodeDAddress(left);
 			break;
 		default:{
@@ -425,14 +435,6 @@ CodeParameters(param, arg)
 		return;
 	}
 	CodePExpr(left);
-	CodeCheckExpr(left_type, tp);
-}
-
-CodeCheckExpr(tp1, tp2)
-	struct type *tp1, *tp2;
-{
-	CodeCoercion(tp1, tp2);
-	RangeCheck(tp2, tp1);
 }
 
 CodePString(nd, tp)
@@ -486,11 +488,6 @@ CodeStd(nd)
 		C_and(word_size);
 		break;
 
-	case S_CHR:
-		CodePExpr(left);
-		RangeCheck(char_type, tp);
-		break;
-
 	case S_HIGH:
 		assert(IsConformantArray(tp));
 		DoHIGH(left->nd_def);
@@ -519,52 +516,15 @@ CodeStd(nd)
 		}
 		break;
 
-	case S_ORD:
-		CodePExpr(left);
-		break;
-
-	case S_FLOAT:
-		CodePExpr(left);
-		RangeCheck(card_type, left->nd_type);
-		CodeCoercion(tp, nd->nd_type);
-		break;
-
-	case S_TRUNC: {
-		label lb = ++text_label;
-
-		CodePExpr(left);
-		C_dup(tp->tp_size);
-		C_zrf(tp->tp_size);
-		C_cmf(tp->tp_size);
-		C_zge(lb);
-		C_loc((arith) ECONV);
-		C_trp();
-		C_df_ilb(lb);
-		CodeCoercion(tp, nd->nd_type);
-		}
-		break;
-
-	case S_TRUNCD:
-	case S_FLOATD:
-	case S_LONG:
-	case S_SHORT:
-		CodePExpr(left);
-		CodeCoercion(tp, nd->nd_type);
-		break;
-
-	case S_VAL:
-		CodePExpr(left);
-		RangeCheck(nd->nd_type, tp);
-		break;
-
 	case S_ADR:
 		CodeDAddress(left);
 		break;
 
 	case S_DEC:
 	case S_INC: {
-		register arith size = tp->tp_size;
+		register arith size;
 
+		size = left->nd_type->tp_size;
 		if (size < word_size) size = word_size;
 		CodePExpr(left);
 		if (arg) {
@@ -584,7 +544,7 @@ CodeStd(nd)
 			else	C_adu(size);
 		}
 		if (size == word_size) {
-			RangeCheck(tp, tp->tp_fund == T_INTEGER ?
+			RangeCheck(left->nd_type, tp->tp_fund == T_INTEGER ?
 						int_type : card_type);
 		}
 		CodeDStore(left);
@@ -628,24 +588,24 @@ RangeCheck(tpl, tpr)
 		if (!bounded(tpr)) {
 			/* yes, we need one */
 			genrck(tpl);
+			return;
 		}
-		else {
-			/* both types are restricted. check the bounds
-			   to see wether we need a range check.
-			   We don't need one if the range of values of the
-			   right hand side is a subset of the range of values
-			   of the left hand side.
-			*/
-			getbounds(tpl, &llo, &lhi);
-			getbounds(tpr, &rlo, &rhi);
-			if (llo > rlo || lhi < rhi) {
-				genrck(tpl);
-			}
+		/* both types are restricted. check the bounds
+		   to see wether we need a range check.
+		   We don't need one if the range of values of the
+		   right hand side is a subset of the range of values
+		   of the left hand side.
+		*/
+		getbounds(tpl, &llo, &lhi);
+		getbounds(tpr, &rlo, &rhi);
+		if (llo > rlo || lhi < rhi) {
+			genrck(tpl);
 		}
+		return;
 	}
-	else if (tpl->tp_size <= tpr->tp_size &&
-		 ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
-		  (tpr->tp_fund == T_INTEGER && tpl == card_type))) {
+	if (tpl->tp_size <= tpr->tp_size &&
+	    ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
+	     (tpr->tp_fund == T_INTEGER && tpl == card_type))) {
 		label lb = ++text_label;
 
 		C_dup(word_size);
@@ -654,18 +614,14 @@ RangeCheck(tpl, tpr)
 		C_trp();
 		C_df_ilb(lb);
 	}
-
 }
 
-Operands(leftop, rightop, tp)
+Operands(leftop, rightop)
 	register struct node *leftop, *rightop;
-	struct type *tp;
 {
 
 	CodePExpr(leftop);
-	CodeCoercion(leftop->nd_type, tp);
 	CodePExpr(rightop);
-	CodeCoercion(rightop->nd_type, tp);
 }
 
 CodeOper(expr, true_label, false_label)
@@ -679,7 +635,7 @@ CodeOper(expr, true_label, false_label)
 
 	switch (expr->nd_symb)	{
 	case '+':
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_adi(tp->tp_size);
@@ -701,7 +657,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '-':
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_sbi(tp->tp_size);
@@ -724,7 +680,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '*':
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_mli(tp->tp_size);
@@ -746,7 +702,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '/':
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch (tp->tp_fund)	{
 		case T_REAL:
 			C_dvf(tp->tp_size);
@@ -759,7 +715,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case DIV:
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_dvi(tp->tp_size);
@@ -775,7 +731,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case MOD:
-		Operands(leftop, rightop, tp);
+		Operands(leftop, rightop);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_rmi(tp->tp_size);
@@ -796,9 +752,9 @@ CodeOper(expr, true_label, false_label)
 	case GREATEREQUAL:
 	case '=':
 	case '#':
+		Operands(leftop, rightop);
 		tp = BaseType(leftop->nd_type);
 		if (tp == intorcard_type) tp = BaseType(rightop->nd_type);
-		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_cmi(tp->tp_size);
@@ -854,7 +810,6 @@ CodeOper(expr, true_label, false_label)
 		*/
 		CodePExpr(rightop);
 		CodePExpr(leftop);
-		CodeCoercion(leftop->nd_type, word_type);
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != NO_LABEL) {
 			C_zne(true_label);
@@ -862,10 +817,9 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case OR:
-	case AND:
-	case '&': {
+	case AND: {
 		label  l_maybe = ++text_label, l_end;
-		struct desig Des;
+		struct desig *Des = new_desig();
 		int genlabels = 0;
 
 		if (true_label == NO_LABEL)	{
@@ -875,14 +829,14 @@ CodeOper(expr, true_label, false_label)
 			l_end = ++text_label;
 		}
 
-		Des = InitDesig;
 		if (expr->nd_symb == OR) {
-			CodeExpr(leftop, &Des, true_label, l_maybe);
+			CodeExpr(leftop, Des, true_label, l_maybe);
 		}
-		else	CodeExpr(leftop, &Des, l_maybe, false_label);
+		else	CodeExpr(leftop, Des, l_maybe, false_label);
 		C_df_ilb(l_maybe);
-		Des = InitDesig;
-		CodeExpr(rightop, &Des, true_label, false_label);
+		free_desig(Des);
+		Des = new_desig();
+		CodeExpr(rightop, Des, true_label, false_label);
 		if (genlabels) {
 			C_df_ilb(true_label);
 			C_loc((arith)1);
@@ -891,6 +845,7 @@ CodeOper(expr, true_label, false_label)
 			C_loc((arith)0);
 			C_df_ilb(l_end);
 		}
+		free_desig(Des);
 		break;
 		}
 	default:
@@ -962,7 +917,6 @@ CodeUoper(nd)
 
 	CodePExpr(nd->nd_right);
 	switch(nd->nd_symb) {
-	case '~':
 	case NOT:
 		C_teq();
 		break;
@@ -978,6 +932,10 @@ CodeUoper(nd)
 		default:
 			crash("Bad operand to unary -");
 		}
+		break;
+	case COERCION:
+		CodeCoercion(nd->nd_right->nd_type, tp);
+		RangeCheck(tp, nd->nd_right->nd_type);
 		break;
 	default:
 		crash("Bad unary operator");
@@ -1010,7 +968,7 @@ CodeEl(nd, tp)
 			C_loc(eltype->sub_ub);
 		}
 		else	C_loc((arith) (eltype->enm_ncst - 1));
-		Operands(nd->nd_left, nd->nd_right, word_type);
+		Operands(nd->nd_left, nd->nd_right);
 		C_cal("_LtoUset");	/* library routine to fill set */
 		C_asp(4 * word_size);
 	}
@@ -1027,11 +985,11 @@ CodePExpr(nd)
 	/*	Generate code to push the value of the expression "nd"
 		on the stack.
 	*/
-	struct desig designator;
+	register struct desig *designator = new_desig();
 
-	designator = InitDesig;
-	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
-	CodeValue(&designator, nd->nd_type);
+	CodeExpr(nd, designator, NO_LABEL, NO_LABEL);
+	CodeValue(designator, nd->nd_type);
+	free_desig(designator);
 }
 
 CodeDAddress(nd)
@@ -1041,11 +999,11 @@ CodeDAddress(nd)
 		on the stack.
 	*/
 
-	struct desig designator;
+	register struct desig *designator = new_desig();
 
-	designator = InitDesig;
-	CodeDesig(nd, &designator);
-	CodeAddress(&designator);
+	CodeDesig(nd, designator);
+	CodeAddress(designator);
+	free_desig(designator);
 }
 
 CodeDStore(nd)
@@ -1055,11 +1013,11 @@ CodeDStore(nd)
 		designator "nd".
 	*/
 
-	struct desig designator;
+	register struct desig *designator = new_desig();
 
-	designator = InitDesig;
-	CodeDesig(nd, &designator);
-	CodeStore(&designator, nd->nd_type);
+	CodeDesig(nd, designator);
+	CodeStore(designator, nd->nd_type);
+	free_desig(designator);
 }
 
 DoHIGH(df)

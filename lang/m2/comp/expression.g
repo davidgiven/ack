@@ -146,19 +146,21 @@ AddOperator:
 
 term(struct node **pnd;)
 {
+	register struct node *nd;
 }:
-	factor(pnd)
+	factor(pnd)	{ nd = *pnd; }
 	[
 		/* MulOperator */
-		[ '*' | '/' | DIV | MOD | AND | '&' ]
-			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
-		factor(&((*pnd)->nd_right))
+		[ '*' | '/' | DIV | MOD | AND ]
+			{ nd = MkNode(Oper, nd, NULLNODE, &dot); }
+		factor(&(nd->nd_right))
 	]*
+			{ *pnd = nd; }
 ;
 
 /* inline in "term"
 MulOperator:
-	'*' | '/' | DIV | MOD | AND | '&'
+	'*' | '/' | DIV | MOD | AND
 ;
 */
 

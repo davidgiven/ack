@@ -40,14 +40,14 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENH=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
 	inputtype.h maxset.h density.h\
-	def.h debugcst.h type.h Lpars.h node.h
+	def.h debugcst.h type.h Lpars.h node.h desig.h
 HFILES=		LLlex.h\
-	chk_expr.h class.h const.h debug.h desig.h f_info.h idf.h\
+	chk_expr.h class.h const.h debug.h f_info.h idf.h\
 	input.h main.h misc.h scope.h standards.h tokenname.h\
 	walk.h warning.h SYSTEM.h $(GENH)
 #
 GENFILES = $(GENGFILES) $(GENC) $(GENH)
-NEXTFILES = def.H type.H node.H scope.C tmpvar.C casestat.C
+NEXTFILES = def.H type.H node.H desig.H scope.C tmpvar.C casestat.C
 
 #EXCLEXCLEXCLEXCL
 
@@ -113,6 +113,7 @@ symbol2str.c:	tokenname.c make.tokcase
 def.h:		make.allocd
 type.h:		make.allocd
 node.h:		make.allocd
+desig.h:	make.allocd
 scope.c:	make.allocd
 tmpvar.c:	make.allocd
 casestat.c:	make.allocd
