@@ -3,6 +3,7 @@ alloc
 assert
 em_code
 em_mes
+em_opt
 flt_arith
 idf
 input
