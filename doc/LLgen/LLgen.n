@@ -151,7 +151,7 @@ used for grouping.
 .PP
 We can describe the syntax of an ECF syntax with an ECF syntax :
 .DS
-.ft 5
+.ft CW
 grammar         : rule +
                 ;
 .ft R
@@ -159,7 +159,7 @@ grammar         : rule +
 This grammar rule states that a grammar consists of one or more
 rules.
 .DS
-.ft 5
+.ft CW
 rule            : nonterminal ':' productionrule ';'
                 ;
 .ft R
@@ -169,7 +169,7 @@ followed by ":",
 the \fBproduce symbol\fR, followed by a production rule, followed by a
 ";", in\%di\%ca\%ting the end of the rule.
 .DS
-.ft 5
+.ft CW
 productionrule  : production [ '|' production ]*
                 ;
 .ft R
@@ -178,7 +178,7 @@ A production rule consists of one or
 more alternative productions separated by "|". This symbol is called the
 \fBalternation symbol\fR.
 .DS
-.ft 5
+.ft CW
 production      : term *
                 ;
 .ft R
@@ -186,14 +186,14 @@ production      : term *
 A production consists of a possibly empty list of terms.
 So, empty productions are allowed.
 .DS
-.ft 5
+.ft CW
 term            : element repeats
                 ;
 .ft R
 .DE
 A term is an element, possibly with a repeat specification.
 .DS
-.ft 5
+.ft CW
 element         : LITERAL
                 | IDENTIFIER
                 | '[' productionrule ']'
@@ -205,7 +205,7 @@ between apostrophes, it can be an IDENTIFIER, which is either a
 nonterminal or a token, and it can be a production rule
 between square parentheses.
 .DS
-.ft 5
+.ft CW
 repeats         : '?'
                 | [ '*' | '+' ] NUMBER ?
                 | NUMBER ?
@@ -287,7 +287,7 @@ Names representing tokens must be declared before they are used.
 This can be done using the "\fB%token\fR" keyword,
 by writing
 .nf
-.ft 5
+.ft CW
 .sp 1
 %token  name1, name2, . . . ;
 .ft R
@@ -301,7 +301,7 @@ The start symbols must be declared explicitly using the
 "\fB%start\fR" keyword. It can be used whenever a declaration is
 legal, f.i.:
 .nf
-.ft 5
+.ft CW
 .sp 1
 %start LLparse, specification ;
 .ft R
@@ -340,7 +340,7 @@ In order to facilitate communication between the actions and
 \fILLparse\fR,
 the parsing routines can be given C-like parameters. So, for example
 .nf
-.ft 5
+.ft CW
 .sp 1
 expr(int *pval;) { int fact; } :
                 /*
@@ -464,7 +464,7 @@ By default, for terms with a repetition count containing "*" or
 "?" the default choice is to continue with the rest of the rule
 in which the term appears, and
 .sp 1
-.ft 5
+.ft CW
 .nf
                 term+
 .fi
@@ -473,7 +473,7 @@ in which the term appears, and
 is treated as
 .sp 1
 .nf
-.ft 5
+.ft CW
                 term term* .
 .ft R
 .fi
@@ -488,7 +488,7 @@ the skipping of such a term can be prevented by
 using the keyword "\fB%persistent\fR".
 For instance, the rule
 .sp 1
-.ft 5
+.ft CW
 .nf
 commandlist : command* ;
 .fi
@@ -496,7 +496,7 @@ commandlist : command* ;
 .sp 1
 could be changed to
 .sp 1
-.ft 5
+.ft CW
 .nf
 commandlist : [ %persistent command ]* ;
 .fi
@@ -592,7 +592,7 @@ returning 1 if the parameter supplied can start a specified
 nonterminal, f.i.:
 .sp 1
 .nf
-.ft 5
+.ft CW
 %first fmac, nonterm ;
 .ft R
 .sp 1
@@ -675,7 +675,7 @@ This keyword can be used wherever a declaration is legal and may appear
 only once in the grammar specification, f.i.:
 .sp 1
 .nf
-.ft 5
+.ft CW
 %lexical scanner ;
 .ft R
 .fi
@@ -717,7 +717,7 @@ This appendix has a description of the \fILLgen\fR input syntax,
 as a \fILLgen\fR specification. As a matter of fact, the current
 version of \fILLgen\fR is written with \fILLgen\fR.
 .nf
-.ft 5
+.ft CW
 .sp 2
 /*
  * First the declarations of the terminals
@@ -846,7 +846,7 @@ priority. The example shows how we can do it all with one
 nonterminal, no matter how many priority levels there are.
 .sp 1
 .nf
-.ft 5
+.ft CW
 {
 #include <stdio.h>
 #include <ctype.h>
@@ -1007,7 +1007,7 @@ one file.
 As usual, there is a way around this problem.
 A sample makefile follows:
 .sp 1
-.ft 5
+.ft CW
 .nf
 # The grammar exists of the files decl.g, stat.g and expr.g.
 # The ".o"-files are the result of a C-compilation.
