@@ -1,15 +1,17 @@
+#define CODE_EXPANDER
 #include <system.h>
-#include <em.h>
 #include <out.h>
 #include "mach.h"
 #include "back.h"
 
+#ifdef DEBUG
 arg_error( s, arg)
 char *s;
 int arg;
 {
 	fprint( STDERR, "arg_error %s %d\n", s, arg);
 }
+#endif
 
 #define OWNFLOAT	/* compile on VAX, generate code for VAX FP ... */
 

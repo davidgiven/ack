@@ -39,3 +39,6 @@
 #define fit_byte(val)		((unsigned long)((val)+128) < 256)
 #define fit_word(val)		((unsigned long)((val)+32768L) < 65536L)
  
+#ifndef DEBUG
+#define arg_error(s, i)
+#endif
