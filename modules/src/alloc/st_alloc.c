@@ -20,7 +20,6 @@ st_alloc(phead, size, count)
 	char *retval;
 
 	if (*phead == 0)	{
-
 		p = Malloc(size * count);
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
@@ -32,15 +31,12 @@ st_alloc(phead, size, count)
 	else	p = *phead;
 	*phead = (char *) (((_PALLOC_)p)->_A_next);
 	retval = p;
-	if (size >= sizeof(long)) {
-		q = (long *) p;
-		do {
-			*q++ = 0;
-			size -= sizeof(long);
-		} while (size >= sizeof(long));
-
-		p = (char *) q;
+	q = (long *) p;
+	while (size >= sizeof(long)) {
+		*q++ = 0;
+		size -= sizeof(long);
 	}
+	p = (char *) q;
 
 	while (size--) *p++ = 0;
 	return retval;
