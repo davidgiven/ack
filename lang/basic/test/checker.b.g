@@ -6,30 +6,5 @@ disappear (same for triple!)
 	Wait for the computer to move!!!!!!
 
 retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-
-retry
-LINE 11300:ERROR 1: RETURN without GOSUB
+ I move from ( 2  6 ) to( 1  5 )
+board?LINE 13500:ERROR 2: Out of data
