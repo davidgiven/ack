@@ -774,49 +774,49 @@
 .de RP
 .ds $0 RP
 .rn RP ]R
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de SN
 .ds $0 SN
 .rn SN ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de SM
 .ds $0 SM
 .rn SM ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de S1
 .ds $0 S1
 .rn S1 ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de S2
 .ds $0 S2
 .rn S2 ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de S3
 .ds $0 S3
 .rn S3 ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de S4
 .ds $0 S4
 .rn S4 ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .de AP
 .ds $0 AP
 .rn AP ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q1
+.so MACDIR/tmac.q1
 ..
 .\"	CATCH MACROES FOR POINTS file tmac.q2
 .\"
@@ -824,13 +824,13 @@
 .ds $0 PM
 .rn PM ]R
 .At "\\$1"
-.so LIBDIR/tmac/tmac.q2
+.so MACDIR/tmac.q2
 ..
 .de PS
 .ds $0 PS
 .rn PS ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4"
-.so LIBDIR/tmac/tmac.q2
+.so MACDIR/tmac.q2
 ..
 .nr PS 0
 .\"	CATCH MACROES FOR DISPLAYS file tmac.q3
@@ -839,13 +839,13 @@
 .ds $0 DB
 .rn DB ]R
 .At "\\$1"
-.so LIBDIR/tmac/tmac.q3
+.so MACDIR/tmac.q3
 ..
 .de DS
 .ds $0 DS
 .rn DS ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8"
-.so LIBDIR/tmac/tmac.q3
+.so MACDIR/tmac.q3
 ..
 .nr DS 0
 .\"	CATCH MACROES FOR FOOTNOTES file tmac.q4
@@ -854,13 +854,13 @@
 .ds $0 FN
 .rn FN ]R
 .At "\\$1" "\\$2"
-.so LIBDIR/tmac/tmac.q4
+.so MACDIR/tmac.q4
 ..
 .de FS
 .ds $0 FS
 .rn FS ]R
 .At "\\$1" "\\$2" "\\$3"
-.so LIBDIR/tmac/tmac.q4
+.so MACDIR/tmac.q4
 ..
 .nr FS 0
 .nr Fl 0
@@ -870,7 +870,7 @@
 .ds $0 EQ
 .rn EQ ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4"
-.so LIBDIR/tmac/tmac.q5
+.so MACDIR/tmac.q5
 ..
 .\"	CATCH MACROES FOR TABLES file tmac.q6
 .\"
@@ -878,7 +878,7 @@
 .ds $0 TS
 .rn TS ]R
 .At "\\$1" "\\$2"
-.so LIBDIR/tmac/tmac.q6
+.so MACDIR/tmac.q6
 ..
 .\"nr TS 0
 .\"	CATCH MACROES FOR BIBLIGRAPHIC REFERENCES file tmac.q7
@@ -887,13 +887,13 @@
 .ds $0 RS
 .rn RS ]R
 .At "\\$1" "\\$2" "\\$3"
-.so LIBDIR/tmac/tmac.q7
+.so MACDIR/tmac.q7
 ..
 .de RF
 .ds $0 RF
 .rn RF ]R
 .At "\\$1"
-.so LIBDIR/tmac/tmac.q7
+.so MACDIR/tmac.q7
 ..
 .nr RS 0
 .\"	CATCH MACROES FOR INDEX REFERENCES file tmac.q8
@@ -902,31 +902,31 @@
 .ds $0 IX
 .rn IX ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q8
+.so MACDIR/tmac.q8
 ..
 .de IW
 .ds $0 IW
 .rn IW ]R
 .At "\\$1" "\\$2" "\\$3"
-.so LIBDIR/tmac/tmac.q8
+.so MACDIR/tmac.q8
 ..
 .de IR
 .ds $0 IR
 .rn IR ]R
 .At "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
-.so LIBDIR/tmac/tmac.q8
+.so MACDIR/tmac.q8
 ..
 .\"	CATCH MACROES FOR INDEX REFERENCES file tmac.q9
 .\"
 .de ]-
 .ds $0 ]-
 .rn ]- ]R
-.so LIBDIR/tmac/tmac.q9
+.so MACDIR/tmac.q9
 ..
 .de ]<
 .ds $0 ]<
 .rn ]< ]R
-.so LIBDIR/tmac/tmac.q9
+.so MACDIR/tmac.q9
 ..
 .de [
 .tm Error, page \\n%: did you forget refer?

@@ -3,7 +3,7 @@ LIB=/usr/lib
 MIDDLE=tmac
 # the script replaces references to pathnames and
 # deletes all comment
-RUNSCRIPT=sed -e s-LIBDIR-$(LIB)-g -e '/Header/!s/[ 	]*\\".*//' -e '/^\.$$/d' -e 's/^\.[ 	][ 	]*/./'
+RUNSCRIPT=sed -e s-MACDIR-$(LIB)/$(MIDDLE)-g -e '/Header/!s/[ 	]*\\".*//' -e '/^\.$$/d' -e 's/^\.[ 	][ 	]*/./'
 FILES=tmac.kun tmac.q?
 
 TBL=tbl
