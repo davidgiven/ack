@@ -80,7 +80,7 @@ extern item_t	*fb_ptr[4*FB_SIZE];
 #ifdef THREE_PASS
 extern char	bittab[BITMAX>>3];
 				/* one bit per small-large decision */
-extern short	nbits;		/* number of decisions so far */
+extern long	nbits;		/* number of decisions so far */
 #endif
 
 #ifdef LISTING

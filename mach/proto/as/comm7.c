@@ -179,15 +179,14 @@ small(fitsmall, gain)
 		nosect();
 	if (bflag)
 		return(0);
-	if ((bit = nbits++) >= BITMAX) {
-		if (bit != BITMAX)
-			nbits--;	/* prevent wraparound */
+	if (nbits == BITMAX) {
 		else if (pass == PASS_1)
 			warning("bit table overflow");
 		return(0);
 	}
-	p = &bittab[bit>>3];
-	bit = 1 << (bit&7);
+	p = &bittab[(int) (nbits>>3)];
+	bit = 1 << ((int)nbits&7);
+	nbits++;
 	switch (pass) {
 	case PASS_1:
 		return(0);
