@@ -366,6 +366,7 @@ enum_specifier(register struct type **tpp;)
 		arith l = (arith)0;
 	}
 :
+	{if (*tpp) error("multiple types in declaration");}
 	ENUM
 	[
 		{declare_struct(ENUM, (struct idf *) 0, tpp);}
@@ -432,6 +433,7 @@ struct_or_union_specifier(register struct type **tpp;)
 		register struct idf *idf;
 	}
 :
+	{if (*tpp) error("multiple types in declaration");}
 	[ STRUCT | UNION ]
 	{fund = DOT;}
 	[
