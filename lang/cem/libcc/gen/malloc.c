@@ -46,7 +46,7 @@ unsigned size;
 
   if ((p = bottom) == 0) {
 	top = bottom = p = sbrk(sizeof(char *));
-	NEXT(top) = 0;
+	NEXT(p) = 0;
   }
   while ((next = NEXT(p)) != 0)
 	if ((vir_bytes) next & BUSY)			/* already in use */
