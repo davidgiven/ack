@@ -105,15 +105,15 @@ getgrent(void)
 struct group *
 getgrnam(const char *name)
 {
-        struct group *grp;
+        struct group *g;
 
         setgrent();
-        while ((grp = getgrent()) != 0)
-	        if (!strcmp(grp -> gr_name, name))
+        while ((g = getgrent()) != 0)
+	        if (!strcmp(g -> gr_name, name))
 	                break;
         endgrent();
-        if (grp != 0)
-	        return grp;
+        if (g != 0)
+	        return g;
         else
 	        return 0;
 }
@@ -121,15 +121,15 @@ getgrnam(const char *name)
 struct group *
 getgrgid(int gid)
 {
-        struct group   *grp;
+        struct group   *g;
 
         setgrent();
-        while ((grp = getgrent()) != 0)
-	        if (grp -> gr_gid == gid)
+        while ((g = getgrent()) != 0)
+	        if (g -> gr_gid == gid)
 	                break;
         endgrent();
-        if (grp != 0)
-	        return grp;
+        if (g != 0)
+	        return g;
         else
 	        return 0;
 }

@@ -286,14 +286,14 @@ parseDate(register char *buf, register const char *p, struct dsttype *dstinfo)
 static const char *
 parseRule(register char *buf, register const char *p)
 {
-	long time;
+	long tim;
 	register const char *q;
 
 	if (!(p = parseDate(buf, p, &dststart))) return NULL;
 	buf += strlen(buf);
 	if (*p == '/') {
 		q = ++p;
-		if (!(p = parseTime(&time, p, &dststart))) return NULL;
+		if (!(p = parseTime(&tim, p, &dststart))) return NULL;
 		while( p != q) *buf++ = *q++;
 	}
 	if (*p != ',') return NULL;
@@ -302,7 +302,7 @@ parseRule(register char *buf, register const char *p)
 	buf += strlen(buf);
 	if (*p == '/') {
 		q = ++p;
-		if (!(p = parseTime(&time, p, &dstend))) return NULL;
+		if (!(p = parseTime(&tim, p, &dstend))) return NULL;
 		while(*buf++ = *q++);
 	}
 	if (*p) return NULL;
@@ -316,7 +316,6 @@ parseRule(register char *buf, register const char *p)
 static void
 parseTZ(const char *p)
 {
-	register int n;
 	long tz, dst = 60 * 60, sign = 1;
 	static char lastTZ[2 * RULE_LEN];
 	static char buffer[RULE_LEN];
@@ -392,11 +391,11 @@ _tzset(void)
 #elif	!defined(_POSIX_SOURCE) && !defined(__USG)
 
 #if	!defined(_MINIX)		/* MINIX has no ftime() */
-	struct timeb time;
+	struct timeb tim;
 
-	_ftime(&time);
-	_timezone = time.timezone * 60L;
-	_daylight = time.dstflag;
+	_ftime(&tim);
+	_timezone = tim.timezone * 60L;
+	_daylight = tim.dstflag;
 #endif
 
 #endif	/* !_POSIX_SOURCE && !__USG */

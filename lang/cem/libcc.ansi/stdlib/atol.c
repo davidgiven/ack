@@ -13,7 +13,6 @@ long
 atol(register const char *nptr)
 {
 	long total = 0;
-	register unsigned int digit;
 	int minus = 0;
 
 	while (isspace(*nptr)) nptr++;

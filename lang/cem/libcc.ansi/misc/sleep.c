@@ -21,8 +21,8 @@ void
 sleep(int n)
 {
 /* sleep(n) pauses for 'n' seconds by scheduling an alarm interrupt. */
-	unsigned oldalarm;
-	void (*oldsig)(int);
+	unsigned oldalarm = 0;
+	void (*oldsig)(int) = 0;
 
 	if (n <= 0) return;
 	if (setjmp(setjmpbuf)) {

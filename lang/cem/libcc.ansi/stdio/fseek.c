@@ -18,7 +18,7 @@ off_t _lseek(int fildes, off_t offset, int whence);
 int
 fseek(FILE *stream, long int offset, int whence)
 {
-	int count, adjust = 0;
+	int adjust = 0;
 	long pos;
 
 	stream->_flags &= ~(_IOEOF | _IOERR);

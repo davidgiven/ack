@@ -12,12 +12,12 @@ gmtime(register const time_t *timer)
 {
 	static struct tm br_time;
 	register struct tm *timep = &br_time;
-	time_t time = *timer;
+	time_t tim = *timer;
 	register unsigned long dayclock, dayno;
 	int year = EPOCH_YR;
 
-	dayclock = (unsigned long)time % SECS_DAY;
-	dayno = (unsigned long)time / SECS_DAY;
+	dayclock = (unsigned long)tim % SECS_DAY;
+	dayno = (unsigned long)tim / SECS_DAY;
 
 	timep->tm_sec = dayclock % 60;
 	timep->tm_min = (dayclock % 3600) / 60;

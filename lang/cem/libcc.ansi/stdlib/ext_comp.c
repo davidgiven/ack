@@ -697,7 +697,6 @@ _dbl_ext_cvt(double value, struct EXTEND *e)
 	/*	Convert double to extended
 	*/
 	int exponent;
-	register int i;
 
 	value = frexp(value, &exponent);
 	e->sign = value < 0.0;

@@ -44,7 +44,6 @@ tgetent(char *bp, const char *name)
 	FILE	*fp;
 	char	*file;
 	char	*cp;
-	short	len = strlen(name);
 	char	buf[1024];
 
 	capab = bp;

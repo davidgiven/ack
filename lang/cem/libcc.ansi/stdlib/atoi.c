@@ -13,7 +13,6 @@ int
 atoi(register const char *nptr)
 {
 	int total = 0;
-	register unsigned int digit;
 	int minus = 0;
 
 	while (isspace(*nptr)) nptr++;
