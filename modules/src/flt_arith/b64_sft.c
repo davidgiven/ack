@@ -7,8 +7,8 @@
 
 #include "misc.h"
 
-b64_sft(e,n)
-	register struct _mantissa *e;
+flt_b64_sft(e,n)
+	register struct flt_mantissa *e;
 	register int n;
 {
 	if (n > 0) {
@@ -56,8 +56,8 @@ b64_sft(e,n)
 	}
 }
 
-b64_lsft(e)
-	register struct _mantissa *e;
+flt_b64_lsft(e)
+	register struct flt_mantissa *e;
 {
 	/*	shift left 1 bit */
 	e->flt_h_32 = (e->flt_h_32 << 1) & 0xFFFFFFFF;
@@ -65,8 +65,8 @@ b64_lsft(e)
 	e->flt_l_32 = (e->flt_l_32 << 1) & 0xFFFFFFFF;
 }
 
-b64_rsft(e)
-	register struct _mantissa *e;
+flt_b64_rsft(e)
+	register struct flt_mantissa *e;
 {
 	/*	shift right 1 bit */
 	e->flt_l_32 = (e->flt_l_32 >> 1) & 0x7FFFFFFF;

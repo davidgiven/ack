@@ -7,18 +7,16 @@
 #ifndef __FLT_INCLUDED__
 #define __FLT_INCLUDED__
 
-struct _mantissa {
-	long	flt_h_32;
-	long	flt_l_32;
+struct flt_mantissa {
+	long	flt_h_32;	/* high order 32 bits of mantissa */
+	long	flt_l_32;	/* low order 32 bits of mantissa */
 };
 
-struct _EXTEND {
-	short	flt_sign;
-	short	flt_exp;
-	struct _mantissa flt_mantissa;
-};
-
-typedef struct _EXTEND flt_arith;
+typedef struct {
+	short	flt_sign;	/* 0 for positive, 1 for negative */
+	short	flt_exp;	/* between -16384 and 16384 */
+	struct flt_mantissa flt_mantissa;	/* normalized, in [1,2). */
+} flt_arith;
 
 extern int	flt_status;
 #define FLT_OVFL	001

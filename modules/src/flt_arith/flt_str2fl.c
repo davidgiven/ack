@@ -5,6 +5,7 @@
 
 /* $Header$ */
 
+#include <ctype.h>
 #include "misc.h"
 
 /* The following tables can be computed with the following bc(1)
@@ -189,6 +190,9 @@ static flt_arith r_big_10pow[] = { /* representation of 10 ** -(28*i) */
 	{ 0,	-1768,	0xD4EEC394,	0xD6258BF8 }
 };
 
+#define BIGSZ	(sizeof(big_10pow)/sizeof(big_10pow[0]))
+#define SMALLSZ	(sizeof(s10pow)/sizeof(s10pow[0]))
+
 static
 add_exponent(e, exp)
 	register flt_arith *e;
@@ -198,13 +202,13 @@ add_exponent(e, exp)
 	flt_arith x;
 
 	if (neg) exp = -exp;
-	divsz = exp / (sizeof(s10pow)/sizeof(s10pow[0]));
-	modsz = exp % (sizeof(s10pow)/sizeof(s10pow[0]));
+	divsz = exp / SMALLSZ;
+	modsz = exp % SMALLSZ;
 	if (neg) {
 		flt_mul(e, &r_10pow[modsz], &x);
-		while (divsz >= sizeof(r_big_10pow)/sizeof(r_big_10pow[0])) {
-			flt_mul(&x, &r_big_10pow[sizeof(r_big_10pow)/sizeof(r_big_10pow[0])-1],&x);
-			divsz -= sizeof(r_big_10pow)/sizeof(r_big_10pow[0])-1;
+		while (divsz >= BIGSZ) {
+			flt_mul(&x, &r_big_10pow[BIGSZ-1],&x);
+			divsz -= BIGSZ-1;
 			flt_chk(e);
 			if (flt_status != 0) return;
 		}
@@ -212,9 +216,9 @@ add_exponent(e, exp)
 	}
 	else {
 		flt_mul(e, &s10pow[modsz], &x);
-		while (divsz >= sizeof(big_10pow)/sizeof(big_10pow[0])) {
-			flt_mul(&x, &big_10pow[sizeof(big_10pow)/sizeof(big_10pow[0])-1],&x);
-			divsz -= sizeof(big_10pow)/sizeof(big_10pow[0])-1;
+		while (divsz >= BIGSZ) {
+			flt_mul(&x, &big_10pow[BIGSZ-1],&x);
+			divsz -= BIGSZ-1;
 			flt_chk(e);
 			if (flt_status != 0) return;
 		}
@@ -250,15 +254,15 @@ flt_str2flt(s, e)
 		if (c == '.') continue;
 		digitseen = 1;
 		if (e->m1 <= 0x7FFFFFFF/5) {
-			struct _mantissa	a1;
+			struct flt_mantissa	a1;
 
 			a1 = e->flt_mantissa;
-			b64_sft(&(e->flt_mantissa), -3);
-			b64_sft(&a1, -1);
-			b64_add(&(e->flt_mantissa), &a1);
+			flt_b64_sft(&(e->flt_mantissa), -3);
+			flt_b64_lsft(&a1);
+			flt_b64_add(&(e->flt_mantissa), &a1);
 			a1.flt_h_32 = 0;
 			a1.flt_l_32 = c - '0';
-			b64_add(&(e->flt_mantissa), &a1);
+			flt_b64_add(&(e->flt_mantissa), &a1);
 		}
 		else exp++;
 		if (dotseen) exp--;
@@ -318,8 +322,6 @@ flt_ecvt(e, ndigit, decpt, sign)
 
 	*decpt = 0;
 	if (e->m1 != 0) {
-#define BIGSZ	(sizeof(big_10pow)/sizeof(big_10pow[0]))
-#define SMALLSZ	(sizeof(s10pow)/sizeof(s10pow[0]))
 		register flt_arith *pp = &big_10pow[1];
 
 		while (flt_cmp(e, &big_10pow[BIGSZ-1]) >= 0) {
@@ -333,18 +335,18 @@ flt_ecvt(e, ndigit, decpt, sign)
 		flt_mul(e,&r_big_10pow[pp-big_10pow],e);
 		*decpt += (pp - big_10pow)*SMALLSZ;
 		pp = &s10pow[1];
-		while (pp < &s10pow[SMALLSZ] && cmp_ext(e, pp) >= 0) pp++;
+		while (pp < &s10pow[SMALLSZ] && flt_cmp(e, pp) >= 0) pp++;
 		pp--;
 		flt_mul(e, &r_10pow[pp-s10pow], e);
 		*decpt += pp - s10pow;
 
-		if (cmp_ext(e, &s10pow[0]) < 0) {
+		if (flt_cmp(e, &s10pow[0]) < 0) {
                 	while (flt_cmp(e, &r_big_10pow[BIGSZ-1]) < 0) { 
                         	flt_mul(e,&big_10pow[BIGSZ-1],e);
                         	*decpt -= (BIGSZ-1)*SMALLSZ;
                 	}
 			pp = &r_big_10pow[1];
-			while(cmp_ext(e,pp) < 0) pp++;
+			while(flt_cmp(e,pp) < 0) pp++;
 			pp--;
 			flt_mul(e,&big_10pow[pp-r_big_10pow],e);
 			*decpt -= (pp - r_big_10pow)*SMALLSZ;
@@ -352,7 +354,7 @@ flt_ecvt(e, ndigit, decpt, sign)
 			flt_mul(e, &s10pow[1], e);
 			(*decpt)--;
 			pp = &r_10pow[0];
-			while(cmp_ext(e, pp) < 0) pp++;
+			while(flt_cmp(e, pp) < 0) pp++;
 			flt_mul(e, &s10pow[pp-r_10pow], e);
 			*decpt -= pp - r_10pow;
 		}
@@ -364,10 +366,11 @@ flt_ecvt(e, ndigit, decpt, sign)
 
 			x.m2 = 0; x.flt_exp = e->flt_exp;
 			x.flt_sign = 1;
-			x.m1 = e->m1>>(31-e->flt_exp);
+			x.m1 = (e->m1 >> 1) & 0x7FFFFFFF;
+			x.m1 = x.m1>>(30-e->flt_exp);
 			*p++ = (x.m1) + '0';
 			x.m1 = x.m1 << (31-e->flt_exp);
-			add_ext(e, &x, e);
+			flt_add(e, &x, e);
 		}
 		else *p++ = '0';
 		flt_mul(e, &s10pow[1], e);
@@ -393,7 +396,7 @@ flt_flt2str(e, buf, bufsize)
 	char *buf;
 {
 
-#define NDIG	25
+#define NDIG	20
 	int sign, dp;
 	register int i;
 	register char *s1;
@@ -413,23 +416,21 @@ flt_flt2str(e, buf, bufsize)
         if ((e->m1 | e->m2) || e->flt_exp == EXT_MIN || e->flt_exp == EXT_MAX) {
 		--dp ;
 	}
-	if (dp == 0) {
-		*s = 0;
-		return;
+	if (dp != 0) {
+        	*s++ = 'e';
+        	if ( dp<0 ) {
+                	*s++ = '-' ; dp= -dp ;
+        	} else {
+                	*s++ = '+' ;
+        	}
+		s1 = &Xbuf[NDIG+12];
+		*--s1 = '\0';
+		do {
+			*--s1 = dp % 10 + '0';
+			dp /= 10;
+		} while (dp != 0);
+		while (*s1) *s++ = *s1++;
 	}
-        *s++ = 'e';
-        if ( dp<0 ) {
-                *s++ = '-' ; dp= -dp ;
-        } else {
-                *s++ = '+' ;
-        }
-	s1 = &Xbuf[NDIG+12];
-	*--s1 = '\0';
-	do {
-		*--s1 = dp % 10 + '0';
-		dp /= 10;
-	} while (dp != 0);
-	while (*s1) *s++ = *s1++;
 	*s++ = '\0';
 	if (s - Xbuf > bufsize) {
 		flt_status = FLT_BTSM;

@@ -72,8 +72,9 @@ flt_mul(e1,e2,e3)
 	e3->m1 = ((long)result[0] << 16) + result[1];
 	e3->m2 = ((long)result[2] << 16) + result[3];
 	if (result[4] & 0x8000) {
-		if (++e3->m2 == 0) {
-			if (++e3->m1 == 0) {
+		if (++e3->m2 == 0 || (e3->m2 & ~ 0xFFFFFFFF)) {
+			e3->m2 = 0;
+			if (++e3->m1 == 0 || (e3->m1 & ~ 0xFFFFFFFF)) {
 				e3->m1 = 0x80000000;
 				e3->flt_exp++;
 			}

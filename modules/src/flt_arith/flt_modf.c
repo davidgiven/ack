@@ -26,7 +26,7 @@ flt_modf(e, ipart, fpart)
 	}
 	*ipart = *e;
 	/* "loose" low order bits */
-	b64_sft(&(ipart->flt_mantissa), 63 - e->flt_exp);
-	b64_sft(&(ipart->flt_mantissa), e->flt_exp - 63);
+	flt_b64_sft(&(ipart->flt_mantissa), 63 - e->flt_exp);
+	flt_b64_sft(&(ipart->flt_mantissa), e->flt_exp - 63);
 	flt_sub(e, ipart, fpart);
 }

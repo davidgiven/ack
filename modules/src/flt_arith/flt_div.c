@@ -10,7 +10,6 @@
 flt_div(e1,e2,e3)
 	register flt_arith *e1,*e2,*e3;
 {
-	short	error = 0;
 	long	result[2];
 	register long	*lp;
 	unsigned short u[9], v[5];
@@ -35,7 +34,7 @@ flt_div(e1,e2,e3)
 	e3->flt_exp = e1->flt_exp - e2->flt_exp + 2;
 
 	u[4] = (e1->m2 & 1) << 15;
-	b64_rsft(&(e1->flt_mantissa));
+	flt_b64_rsft(&(e1->flt_mantissa));
 	u[0] = (e1->m1 >> 16) & 0xFFFF;
 	u[1] = e1->m1 & 0xFFFF;
 	u[2] = (e1->m2 >> 16) & 0xFFFF;
@@ -80,7 +79,8 @@ flt_div(e1,e2,e3)
 			}
 		}
 		temp -= q_est * v[1];
-		while (!(temp&0xFFFF0000) && ucmp(v[2]*q_est,((temp<<16)+u_p[2])) > 0) {
+		while (!(temp&0xFFFF0000) &&
+		       ucmp((long)(v[2]*q_est),(long)((temp<<16)+u_p[2])) > 0) {
 			q_est--;
 			temp += v[1];
 		}

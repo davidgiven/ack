@@ -18,7 +18,4 @@
 #define ucmp		flt__ucmp
 #define flt_nrm		flt__nrm
 #define flt_chk		flt__chk
-#define b64_add		flt__64add
-#define b64_sft		flt__64sft
-#define b64_rsft	flt__64rsft
-#define b64_lsft	flt__64lsft
+#define flt_b64_add	flt__64add

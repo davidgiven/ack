@@ -13,7 +13,7 @@ flt_add(e1,e2,e3)
 	/*	Add two extended numbers e1 and e2, and put the result
 		in e3
 	*/
-	flt_arith ce2;
+	flt_arith ce1, ce2;
 	int diff;
 
 	flt_status = 0;
@@ -26,43 +26,46 @@ flt_add(e1,e2,e3)
 		return;
 	}
 	ce2 = *e2;
-	*e3 = *e1;
-	e1 = &ce2;
+	ce1 = *e1;
+	e1 = &ce1;
+	e2 = &ce2;
 
 	/* adjust mantissas to equal power */
-	diff = e3->flt_exp - e1->flt_exp;
+	diff = e2->flt_exp - e1->flt_exp;
 	if (diff < 0) {
 		diff = -diff;
-		e3->flt_exp += diff;
-		b64_sft(&(e3->flt_mantissa), diff);
+		e2->flt_exp += diff;
+		flt_b64_sft(&(e2->flt_mantissa), diff);
 	}
 	else if (diff > 0) {
 		e1->flt_exp += diff;
-		b64_sft(&(e1->flt_mantissa), diff);
+		flt_b64_sft(&(e1->flt_mantissa), diff);
 	}
-	if (e1->flt_sign != e3->flt_sign) {
-		/* e3 + e1 = e3 - (-e1) */
-		int tmp = ucmp(e1->m1, e3->m1);
-		int tmp2 = ucmp(e1->m2, e3->m2);
+	if (e1->flt_sign != e2->flt_sign) {
+		/* e2 + e1 = e2 - (-e1) */
+		int tmp = ucmp(e1->m1, e2->m1);
+		int tmp2 = ucmp(e1->m2, e2->m2);
 		if (tmp > 0 || (tmp == 0 && tmp2 > 0)) {
-                	/*      abs(e1) > abs(e3) */
+                	/*      abs(e1) > abs(e2) */
                 	if (tmp2 < 0) {
                         	e1->m1 -= 1;    /* carry in */
                 	}
-                	e1->m1 -= e3->m1;
-                	e1->m2 -= e3->m2;
+                	e1->m1 -= e2->m1;
+                	e1->m2 -= e2->m2;
                 	*e3 = *e1;
         	}
         	else {
                 	if (tmp2 > 0)
-                        	e3->m1 -= 1;    /* carry in */
-                	e3->m1 -= e1->m1;
-                	e3->m2 -= e1->m2;
+                        	e2->m1 -= 1;    /* carry in */
+                	e2->m1 -= e1->m1;
+                	e2->m2 -= e1->m2;
+			*e3 = *e2;
         	}
 	}
 	else {
-		if (b64_add(&e3->flt_mantissa,&e1->flt_mantissa)) {/* addition carry */
-			b64_sft(&e3->flt_mantissa,1);/* shift mantissa one bit RIGHT */
+		*e3 = *e2;
+		if (flt_b64_add(&e3->flt_mantissa,&e1->flt_mantissa)) {/* addition carry */
+			flt_b64_rsft(&e3->flt_mantissa);
 			e3->m1 |= 0x80000000L;	/* set max bit	*/
 			e3->flt_exp++;		/* increase the exponent */
 		}
@@ -74,9 +77,7 @@ flt_add(e1,e2,e3)
 flt_sub(e1,e2,e3)
 	flt_arith *e1,*e2,*e3;
 {
-	flt_arith ce2;
-
-	ce2 = *e2;
-	ce2.flt_sign = ! ce2.flt_sign;
-	flt_add(e1,&ce2,e3);
+	e2->flt_sign = ! e2->flt_sign;
+	flt_add(e1,e2,e3);
+	e2->flt_sign = ! e2->flt_sign;
 }

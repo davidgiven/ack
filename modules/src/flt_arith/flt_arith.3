@@ -6,6 +6,25 @@ flt_arith \- high precision floating point arithmetic
 .nf
 .B #include <flt_arith.h>
 .PP
+.ta 5m 30m
+struct flt_mantissa {
+	long	flt_h_32;	/* high order 32 bits of mantissa */
+	long	flt_l_32;	/* low order 32 bits of mantissa */
+};
+
+typedef struct {
+	short	flt_sign;	/* 0 for positive, 1 for negative */
+	short	flt_exp;	/* between -16384 and 16384 */
+	struct flt_mantissa flt_mantissa;	/* normalized, in [1,2). */
+} flt_arith;
+
+extern int	flt_status;
+#define FLT_OVFL	001
+#define FLT_UNFL	002
+#define FLT_DIV0	004
+#define	FLT_NOFLT	010
+#define FLT_BTSM	020
+.PP
 .B flt_add(e1, e2, e3)
 .B flt_arith *e1, *e2, *e3;
 .PP
@@ -42,6 +61,16 @@ flt_arith \- high precision floating point arithmetic
 .PP
 .B arith flt_flt2arith(e)
 .B flt_arith *e;
+.PP
+.B flt_b64_sft(m, n)
+.B struct flt_mantissa *m;
+.B int n;
+.PP
+.B flt_b64_rsft(m)
+.B struct flt_mantissa *m;
+.PP
+.B flt_b64_lsft(m)
+.B struct flt_mantissa *m;
 .SH DESCRIPTION
 This set of routines emulates floating point arithmetic, in a high
 precision. It is intended primarily for compilers that need to evaluate
@@ -198,6 +227,31 @@ This can only occur with the routine
 indicates that the buffer is too small. The contents of the buffer is
 undefined. This can only occur with the routine
 .IR flt_flt2str .
+.PP
+The routine
+.I flt_b64_sft
+shifts the mantissa
+.I m
+.I |n|
+bits left or right, depending on the sign of
+.IR n .
+If
+.I n
+is negative, it is a left-shift; If
+.I n
+is positive, it is a right shift.
+.PP
+The routine
+.I flt_b64_rsft
+shifts the mantissa
+.I m
+1 bit right.
+.PP
+The routine
+.I flt_b64_lsft
+shifts the mantissa
+.I m
+1 bit left.
 .SH FILES
 ~em/modules/h/flt_arith.h
 .br

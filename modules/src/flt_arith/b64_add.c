@@ -8,8 +8,8 @@
 # include "misc.h"
 
 int
-b64_add(e1,e2)
-	register struct _mantissa *e1,*e2;
+flt_b64_add(e1,e2)
+	register struct flt_mantissa *e1,*e2;
 {
 	int	overflow;
 	int	carry;

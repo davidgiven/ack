@@ -15,7 +15,7 @@ flt_flt2arith(e)
 	/*	Convert the flt_arith "n" to an arith.
 	*/
 	arith	n;
-	struct _mantissa a;
+	struct flt_mantissa a;
 
 	flt_status = 0;
 	if (e->flt_exp < 0) {
@@ -48,7 +48,7 @@ flt_flt2arith(e)
 	}
 	
 	a = e->flt_mantissa;
-	b64_sft(&a, 63-e->flt_exp);
+	flt_b64_sft(&a, 63-e->flt_exp);
 	n = a.flt_l_32 | ((a.flt_h_32 << 16) << 16);
 	/* not << 32; this could be an undefined operation */
 	return n;

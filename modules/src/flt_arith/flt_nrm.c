@@ -29,6 +29,6 @@ flt_nrm(e)
 			cnt--;
 		}
 		e->flt_exp += cnt;
-		b64_sft(&(e->flt_mantissa), cnt);
+		flt_b64_sft(&(e->flt_mantissa), cnt);
 	}
 }

@@ -35,13 +35,13 @@ flt_arith2flt(n, e)
 		e->flt_exp++;
 	}
 	for (i = 64; i > 0 && n != 0; i--) {
-		b64_rsft(&(e->flt_mantissa));
+		flt_b64_rsft(&(e->flt_mantissa));
 		e->m1 |= (n & 1) << 31;
 		n >>= 1;
 	}
 
 	if (i > 0) {
-		b64_sft(&(e->flt_mantissa), i);
+		flt_b64_sft(&(e->flt_mantissa), i);
 	}
 	flt_status = 0;
 	flt_nrm(e);
