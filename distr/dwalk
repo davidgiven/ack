@@ -14,7 +14,7 @@ do
 			${DD-:} $CDIR $i
 			CDIR=$CDIR/$i
 			export CDIR
-			exec /usr/em/distr/dwalk
+			exec /proj/em/distr/dwalk
 		  else
 			echo ++ Could not access $CDIR/$i
 		  fi

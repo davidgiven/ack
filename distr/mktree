@@ -2,7 +2,7 @@ case $# in
 1)	;;
 *)	echo $0 directory ; exit 1 ;;
 esac
-DDIR=/usr/em/distr
+DDIR=/proj/em/distr
 case $1 in
 /*)	DESTDIR=$1 ;;
 *)	DESTDIR=`pwd`/$1 ;;
