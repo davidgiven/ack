@@ -86,6 +86,9 @@ end
 name "ANSI-C header files"
 dir lang/cem/libcc.ansi
 end
+name "LINT C program checker"
+dir lang/cem/lint
+end
 name "Pascal frontend"
 dir lang/pc/comp
 end
@@ -194,6 +197,11 @@ name "Sun 3 M68020 support"
 dir mach/sun3
 indir
 end
+name Sun 4 SPARC support"
+dir mach/sparc
+system "sparc"
+indir
+end
 name "Sun 2 M68000 support"
 dir mach/sun2
 indir
@@ -216,6 +224,10 @@ indir
 end
 name "Zilog Z8000 support"
 dir mach/z8000
+indir
+end
+name "Acorn Archimedes support"
+dir mach/arm
 indir
 end
 name "Motorola 68000 interpreters"

@@ -4,7 +4,10 @@ Many problems with the previous distribution have been fixed.
 The major additions are:
 
 	- an ANSI C compiler
+	- a LINT C program checker, both non-ansi and ansi
 	- an Intel 80386 back-end
+	- a SPARC code expander
+	- a source level debugger for Pascal, Modula-2, and ANSI C
 	- an Acorn Archimedes back-end
 	- code-expanders for VAX, Intel 80386 and Motorola M68020 processors,
 	  allowing the creation of very fast compilers.
