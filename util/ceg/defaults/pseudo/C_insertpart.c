@@ -9,7 +9,7 @@ int d;
 	char *s;
 	swtxt();
 
-	jump(extnd_part( d));
+	C_jump(extnd_part( d));
 	symbol_definition( s = extnd_cont( d));
 	set_local_visible( s);
 }
@@ -33,7 +33,7 @@ int d;
 {
 	swtxt();
 
-	jump(extnd_cont( d));
+	C_jump(extnd_cont( d));
 }
 
 

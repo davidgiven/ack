@@ -18,9 +18,9 @@ char*s;
 
 	symbol_definition( extnd_name( s));
 	B_procno++;
-	prolog();
+	C_prolog();
 	B_locals_created = 0;
-	jump( extnd_pro( B_procno));
+	C_jump( extnd_pro( B_procno));
 	symbol_definition( ss = extnd_start( B_procno));
 	set_local_visible( ss);
 }

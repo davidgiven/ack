@@ -353,9 +353,9 @@ C_cii		==> 	"   move.l (sp)+, d0";
 
 C_cuu		==> 	"lea	(8,sp),sp".
 
-C_ciu		==>	C_cuu().
+C_ciu		==>	"lea	(8,sp),sp".
 
-C_cui		==>	C_cuu().
+C_cui		==>	"lea	(8,sp),sp".
 
 C_cfi		==>	"jsr (.cfi)";
 			"move.l (4, sp), d0";
@@ -856,8 +856,8 @@ C_trp		==> 	"jsr (.trp)".
 
 /*****************************************************************************/
 
-prolog		==>	.
+C_prolog		==>	.
 
-jump 		==>	"bra $1".
+C_jump	 		==>	"bra $1".
 
-locals		==>	"link a6, #-$1".
+C_locals		==>	"link a6, #-$1".

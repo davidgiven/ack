@@ -13,7 +13,7 @@ arith l;
 
 	symbol_definition( extnd_name( s));
 	B_procno++;
-	prolog();
-	locals(l);
+	C_prolog();
+	C_locals(l);
 	B_locals_created = 1;
 }

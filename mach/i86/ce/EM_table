@@ -1249,17 +1249,17 @@ C_df_ilb	==>	clean_push_buf();
 			set_local_visible( $1).
 #endif
 
-jump		==>	"jmp $1".
+C_jump		==>		"jmp $1".
 
-prolog		==>	"push bp";
-			"mov bp, sp".
+C_prolog		==>	"push bp";
+				"mov bp, sp".
 
-locals
-  $1 == 0	==>	.
+C_locals
+  $1 == 0		==>	.
 
-  $1 == 2	==>	"push ax".
+  $1 == 2		==>	"push ax".
 
-  $1 == 4	==>	"push ax";
-			"push ax".
+  $1 == 4		==>	"push ax";
+				"push ax".
 
-  default	==>	"sub sp, $1".
+  default		==>	"sub sp, $1".

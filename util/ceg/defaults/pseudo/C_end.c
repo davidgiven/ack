@@ -17,7 +17,7 @@ arith l;
 
 		symbol_definition( p);
 		set_local_visible( p);
-		locals( l);
-		jump( extnd_start( B_procno));
+		C_locals( l);
+		C_jump( extnd_start( B_procno));
 	}
 }
