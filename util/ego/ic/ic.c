@@ -445,7 +445,9 @@ line_p inpseudo(n)
 			 */
 			
 			if (lastline != (line_p) 0 && is_datalabel(lastline)) {
-				curhol = string;
+				extern char *lastname;
+
+				curhol = lastname;
 			}
 			else {
 				curhol = hol_label();

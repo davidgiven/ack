@@ -119,6 +119,7 @@ dblock_p symlookup(name, status)
 			 */
 			if (strcmp((*spp)->sy_name, name) == 0) {
 				/* found */
+				lastname = (*spp)->sy_name;
 				return ((*spp)->sy_dblock);
 			} else {
 				spp = &(*spp)->sy_next;
