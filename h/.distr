@@ -10,12 +10,10 @@ em_ego.h
 em_flag.h
 em_mes.h
 em_mnem.h
-em_path.h
 em_pseu.h
 em_ptyp.h
 em_reg.h
 em_spec.h
-local.h
 out.h
 pc_err.h
 pc_file.h
