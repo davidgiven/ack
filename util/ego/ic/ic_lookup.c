@@ -116,7 +116,7 @@ dblock_p symlookup(name, status)
 			 * hash values). Try to find 'name' in its
 			 * list.
 			 */
-			if (strncmp((*spp)->sy_name, name, IDL) == 0) {
+			if (strcmp((*spp)->sy_name, name) == 0) {
 				/* found */
 				return ((*spp)->sy_dblock);
 			} else {
@@ -129,7 +129,8 @@ dblock_p symlookup(name, status)
 		 */
 		if (status == IMPORTING) return (dblock_p) 0;
 		*spp = sp = newsym();
-		strncpy(sp->sy_name, name, IDL);
+		sp->sy_name = (char *) newcore(strlen(name)+1);
+		strcpy(sp->sy_name, name);
 		dp = sp->sy_dblock = newdblock();
 	}
 	if (fdblock == (dblock_p) 0) {
@@ -202,7 +203,7 @@ proc_p proclookup(name, status)
 		 * hash values). Try to find 'name' in its
 		 * list.
 		 */
-		if (strncmp((*ppp)->pr_name, name, IDL) == 0) {
+		if (strcmp((*ppp)->pr_name, name) == 0) {
 			/* found */
 			return ((*ppp)->pr_proc);
 		} else {
@@ -215,7 +216,8 @@ proc_p proclookup(name, status)
 	 */
 	if (status == IMPORTING) return (proc_p) 0;
 	*ppp = pp = newprc();
-	strncpy(pp->pr_name, name, IDL);
+	pp->pr_name = (char *) newcore(strlen(name)+1);
+	strcpy(pp->pr_name, name);
 	dp = pp->pr_proc = newproc();
 	if (fproc == (proc_p) 0) {
 		fproc = dp;  /* first proc */
@@ -279,7 +281,6 @@ dump_procnames(hash,n,f)
 
 	register prc_p *pp, ph;
 	proc_p p;
-	char str[IDL+1];
 	register int i;
 
 #define PF_WRITTEN 01
@@ -292,11 +293,7 @@ dump_procnames(hash,n,f)
 			p = ph->pr_proc;
 			if ((p->p_flags2 & PF_WRITTEN) == 0) {
 				/* not been written yet */
-				for(i = 0; i < IDL; i++) {
-					str[i] = ph->pr_name[i];
-				}
-				str[IDL] = '\0';
-				fprintf(f,"%d	%s\n",p->p_id, str);
+				fprintf(f,"%d	%s\n",p->p_id, ph->pr_name);
 				p->p_flags2 |= PF_WRITTEN;
 			}
 		}
@@ -362,7 +359,6 @@ dump_dblocknames(hash,n,f)
 
 	register sym_p *sp, sh;
 	dblock_p d;
-	char str[IDL+1];
 	register int i;
 
 #define DF_WRITTEN 01
@@ -375,11 +371,7 @@ dump_dblocknames(hash,n,f)
 			d = sh->sy_dblock;
 			if ((d->d_flags2 & DF_WRITTEN) == 0) {
 				/* not been written yet */
-				for (i = 0; i < IDL; i++) {
-					str[i] = sh->sy_name[i];
-					str[IDL] = '\0';
-				}
-				fprintf(f,"%d	%s\n",d->d_id, str);
+				fprintf(f,"%d	%s\n",d->d_id, sh->sy_name);
 				d->d_flags2 |= DF_WRITTEN;
 			}
 		}

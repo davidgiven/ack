@@ -39,18 +39,6 @@ char **dnames, **pnames;  /* Dynamically allocated arrays of strings.
 			 */
 
 
-STATIC char **newnametab(tablen,namelen)
-	short tablen,namelen;
-{
-	register char **np, **tab;
-
-	tab = (char **) newmap(tablen);
-	for (np = &tab[1]; np <= &tab[tablen]; np++) {
-		*np = (char *) newcore(namelen);
-	}
-	return tab;
-}
-
 
 STATIC line_p get_ca_lines(lf,p_out)
 	FILE *lf;
@@ -140,18 +128,14 @@ STATIC getdnames(dumpd)
 	 */
 
 	char str[IDL+1];
-	char *s;
 	int id;
-	register int i;
 
-	dnames = (char **) newnametab(dlength,IDL);
+	dnames = (char **) newmap(dlength);
 	for (;;) {
 		if (fscanf(dumpd,"%d	%s",&id,str) == EOF) return;
 		assert(id <= dlength);
-		s = dnames[id];
-		for (i = 0; i < IDL; i++) {
-			*s++ = str[i];
-		}
+		dnames[id] = (char *) newcore(strlen(str)+1);
+		strcpy(dnames[id], str);
 	}
 }
 
@@ -163,18 +147,14 @@ STATIC getpnames(dumpp)
 	 */
 
 	char str[IDL+1];
-	char *s;
 	int id;
-	register int i;
 
-	pnames = (char **) newnametab(plength,IDL);
+	pnames = (char **) newmap(plength);
 	for (;;) {
 		if (fscanf(dumpp,"%d	%s",&id,str) == EOF) return;
 		assert(id <= plength);
-		s = pnames[id];
-		for (i = 0; i < IDL; i++) {
-			*s++ = str[i];
-		}
+		pnames[id] = (char *) newcore(strlen(str)+1);
+		strcpy(pnames[id], str);
 	}
 }
 
@@ -193,10 +173,10 @@ STATIC bool name_exists(name,endp,endd)
 	dblock_p d;
 
 	for (p = fproc; p != endp; p = p->p_next) {
-		if (strncmp(name,pnames[p->p_id],IDL) == 0) return TRUE;
+		if (strcmp(name,pnames[p->p_id]) == 0) return TRUE;
 	}
 	for (d = fdblock; d != endd; d = d->d_next) {
-		if (strncmp(name,dnames[d->d_id],IDL) == 0) return TRUE;
+		if (strcmp(name,dnames[d->d_id]) == 0) return TRUE;
 	}
 	return FALSE;
 }

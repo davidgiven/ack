@@ -18,12 +18,12 @@ typedef struct num *num_p;
 
 struct sym {
 	sym_p	 sy_next;	/* link					*/
-	char	 sy_name[IDL];	/* name of the symbol			*/
+	char	 *sy_name;	/* name of the symbol			*/
 	dblock_p sy_dblock;	/* pointer to dblock struct		*/
 };
 struct prc {
 	prc_p	 pr_next;	/* link					*/
-	char	 pr_name[IDL];	/* name of the procedure		*/
+	char	 *pr_name;	/* name of the procedure		*/
 	proc_p	 pr_proc;	/* pointer tto proc struct		*/
 };
 
