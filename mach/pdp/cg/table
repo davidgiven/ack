@@ -1,3 +1,4 @@
+"$Header$"
 /********************************************************
  * Back end tables for pdp 11                           *
  * Authors : Ceriel J.H. Jacobs,Hans van Staveren       *
@@ -223,7 +224,8 @@ lxl $1==3	| |	allocate(REG={LOCAL2, SL, 2})
 			move({regind2,%[a], SSL},%[a])
 				| {regind2,%[a], SSL}                   | |
 lxl $1>3        | |     allocate(REG={LOCAL2, SL, 2}, REG={CONST2,$1-1})
-			"1:\tmov 4(%[a]),%[a]" /* SL */
+			"1:"
+			move({regind2,%[a], SSL},%[a])
 			"sob %[b],1b"
 			setcc(%[a]) erase(%[a]) erase(%[b])
 				| %[a]                                  | |
@@ -238,7 +240,8 @@ lxa $1==3       | |     allocate(REG={LOCAL2, SL, 2 })
 			move({regind2, %[a], SSL }, %[a])
 				| {regconst2, %[a], SSL }               | |
 lxa $1 > 3      | |     allocate(REG={LOCAL2, SL, 2}, REG={CONST2,$1-1})
-			"1:\tmov 4(%[a]),%[a]" /* SL */
+			"1:"
+			move({regind2,%[a], SSL},%[a])
 			"sob %[b],1b"
 			setcc(%[a]) erase(%[a]) erase(%[b])
 				| {regconst2, %[a], SSL }               | |
