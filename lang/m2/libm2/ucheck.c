@@ -53,13 +53,13 @@ mululchk(a,b)
 subuchk(a,b)
   unsigned	a,b;
 {
-  if (b < a) TRP(M2_UOVFL);
+  if (b < a) TRP(M2_UUVFL);
 }
 
 #if EM_WSIZE < EM_LSIZE
 subulchk(a,b)
   unsigned long	a,b;
 {
-  if (b < a) TRP(M2_UOVFL);
+  if (b < a) TRP(M2_UUVFL);
 }
 #endif
