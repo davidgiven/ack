@@ -24,7 +24,7 @@ putenv(char *name)
 	 */
 
 	if (!name) return 0;
-	if (r = strrchr(name, '=')) {
+	if (r = strchr(name, '=')) {
 		register const char *p, *q;
 
 		*r = '\0';
