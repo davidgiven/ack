@@ -88,7 +88,7 @@ con_float() {
 		p = (char *) &f;
 	}
 	fprintf(codefile, ".data1 0%o", *p++ & 0377);
-	for (i = argval-2; i; i--) {
+	for (i = argval-1; i; i--) {
 		fprintf(codefile,",0%o", *p++ & 0377);
 	}
 #else OWNFLOAT
