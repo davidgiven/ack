@@ -20,6 +20,7 @@ AtEoIF()
 	/*	Make the unstacking of input streams noticable to the
 	   	lexical analyzer
 	*/
+	if (WorkingDir[0] != '\0') free(WorkingDir);
 	return 1;
 }
 

@@ -138,7 +138,7 @@ DoOption(text)
 			register int i;
 			register char *new = text;
 
-			if (++nDEF > mDEF) {
+			if (nDEF > mDEF) {
 				DEFPATH = (char **)
 				  Realloc((char *)DEFPATH,(unsigned)(mDEF+=10)*sizeof(char *));
 			}
@@ -149,6 +149,7 @@ DoOption(text)
 				DEFPATH[i] = new;
 				new = tmp;
 			}
+			++nDEF;
 		}
 		else	DEFPATH[ndirs] = 0;
 		break;

@@ -193,6 +193,7 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 			  DefinitionModule--;
 			  match_id(dot.TOK_IDF, df->df_idf);
 			  df->df_flags &= ~D_BUSY;
+			  free(FileName);
 			}
 	'.'
 ;
