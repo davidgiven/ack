@@ -61,7 +61,7 @@ and write ACK-object files and libraries
 .PP
 .B wr_arhdr(fd, arhdr)
 .br
-.B struct arhdr *arhdr;
+.B struct ar_hdr *arhdr;
 .PP
 .B wr_ranlib(fd, ran, cnt)
 .br
@@ -125,9 +125,9 @@ and write ACK-object files and libraries
 .br
 .B long cnt;
 .PP
-.B rd_arhdr(fd, arhdr)
+.B int rd_arhdr(fd, arhdr)
 .br
-.B struct arhdr *arhdr;
+.B struct ar_hdr *arhdr;
 .PP
 .B rd_ranlib(fd, ran, cnt)
 .br
@@ -260,6 +260,8 @@ rewinds the relocation part, so that it can be read again.
 reads two bytes from file descriptor
 .I fd
 and interpretes them as an unsigned integer.
+.PP
+.I Rd_arhdr returns 1 if a header was read, and 0 on end-of-file.
 .PP
 When using any of the reading routines, you must define a routine
 named
