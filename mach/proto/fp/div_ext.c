@@ -31,6 +31,15 @@ EXTEND	*e1,*e2;
 			unsigned long	result[2];
 	register	unsigned long	*lp;
 
+	if ((e2->m1 | e2->m2) == 0) {
+                /*
+                 * Exception 8.2 - Divide by zero
+                 */
+		trap(EFDIVZ);
+		e1->m1 = e1->m2 = 0L;
+		e1->exp = EXT_MAX;
+		return;
+	}
 	if ((e1->m1 | e1->m2) == 0) {	/* 0 / anything == 0 */
 		e1->exp = 0;	/* make sure */
 		return;
@@ -55,15 +64,6 @@ EXTEND	*e1,*e2;
 		trap(EFUNFL);	/* underflow */
 		e1->exp = EXT_MIN;
 		e1->m1 = e1->m2 = 0L;
-		return;
-	}
-	if ((e2->m1 | e2->m2) == 0) {
-                /*
-                 * Exception 8.2 - Divide by zero
-                 */
-		trap(EFDIVZ);
-		e1->m1 = e1->m2 = 0L;
-		e1->exp = EXT_MAX;
 		return;
 	}
 	if (e1->exp >= EXT_MAX) {
