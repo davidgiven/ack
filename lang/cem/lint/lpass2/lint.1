@@ -8,7 +8,7 @@ lint \- a C program checker
 .SH SYNOPSIS
 .B lint
 [
-.B \-abhuvx \-KR
+.B \-abhuvx \-KR -ansi
 ]
 [file | libname
 .BR \-l xxx
@@ -97,6 +97,9 @@ option tells
 to check strictly according to Kernighan & Ritchie; since
 .I lint
 is trying to be helpful rather than obnoxious, this is not the default.
+The
+.B \-ansi
+option tells lint to check according to ANSI C.
 .PP
 .I Lint
 understands the following additional options:
