@@ -79,6 +79,8 @@ DEFINITION MODULE Unix;
   PROCEDURE getgid() : INTEGER;
   PROCEDURE getegid() : INTEGER;
   PROCEDURE ioctl(fildes, request: INTEGER; arg: ADDRESS) : INTEGER;
+  PROCEDURE stty(fildes: INTEGER; buf: ADDRESS) : INTEGER;
+  PROCEDURE gtty(fildes: INTEGER; buf: ADDRESS) : INTEGER;
   PROCEDURE kill(pid, sig: INTEGER) : INTEGER;
   PROCEDURE link(path1, path2: ADDRESS) : INTEGER;
   PROCEDURE lseek(fildes: INTEGER; offset: LONGINT; whence: INTEGER) : LONGINT;
