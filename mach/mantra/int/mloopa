@@ -275,12 +275,14 @@ lhalt:
 		pea	emlast
 		bsr	_Xunlink
 		testen	(sp)+
-		blt	halt
+		beq	1f
+		testen	(sp)+		! ignore result
+1:
 		mov	#0x1B6,-(sp)
 		pea	emlast
 		bsr	_Xcreat
 		testen	(sp)+
-		blt	halt
+		bne	halt
 		mov	(sp)+,d6	!d6 contains file descriptor
 		cmp.l	#-1,linused-4	!test if buffer is fully used
 		beq	0f
@@ -294,7 +296,7 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		testen	(sp)+
-		blt	halt
+		bne	halt
 		add.l	#4,sp
 		bra	9f
 2:		move.l	a1,-(sp)
@@ -303,7 +305,7 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		testen	(sp)+
-		blt	halt
+		bne	halt
 		add.l	#4,sp
 		move.l	(sp)+,a1
 		move.l	(a1),d7
@@ -318,7 +320,9 @@ lhalt:
 		move.l	d7,-(sp)
 		mov	d6,-(sp)
 		bsr	_Xwrite
-		add.l	wrd+4,sp
+		testen	(sp)+
+		bne	halt
+		add.l	4,sp
 		move.l	(sp)+,a1
 4:		move.l	(a1),d1		!next print line numbers
 		lea	mess3,a0
@@ -329,7 +333,7 @@ lhalt:
 		mov	d6,-(sp)
 		bsr	_Xwrite
 		testen	(sp)+
-		blt	halt
+		bne	halt
 		add.l	#4,sp
 		move.l	(sp)+,a1
 		bsr	nexttab
@@ -340,6 +344,7 @@ lhalt:
 		clr.l	(a1)+		!skip file name
 		bra	4b		!only new line
 9:
+		clr.l	-(sp)
 	.sect .data
 emlast:	.asciz	"em_last"
 mess1:	.asciz	"no line processed yet\n"
