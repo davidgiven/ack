@@ -19,7 +19,7 @@
 #define C_STE	36
 #define C_ZRE	39
 
-struct { char *name; int segment, generated}
+struct { char *name; int segment, generated; }
 		def_info[] = {
 		/* _ICON */	{ "C_con_icon", SEGCON, 0},
 				{ "C_rom_icon", SEGROM, 0},
