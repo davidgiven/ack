@@ -302,6 +302,7 @@ stb_string(df, kind)
 
 				if (d && d->df_kind == D_PROCEDURE) {
 					adds_db_str(sprint(buf, ",%s", d->df_idf->id_text));
+					break;
 				}
 				sc = enclosing(sc);
 			}
