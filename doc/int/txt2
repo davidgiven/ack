@@ -529,7 +529,7 @@ types are described in [1].  Each opcode in the text segment identifies an
 instruction with a particular operand type; these relations are described in
 computer-readable format in a file in the EM tree, \fIip_spec.t\fP.
 .PP
-The interpreter uses a variant of the second method.  Several other approaches
+The interpreter uses the third method.  Several other approaches
 can be designed, with increasing efficiency and equally increasing complexity.
 They are briefly treated below.
 .NH 3
@@ -557,20 +557,14 @@ decoding is immediate, and no dispatch table is needed.  Generation of the
 of routine names or a generated switch statement is used to map the opcode onto
 the correct routine.  The switch approach has the advantage that parameters can
 be passed to the routines.
-.LP
-The interpreter uses a variant of the switch statement scheme.  Numerical
-information that can be deduced from the opcode is passed as parameters to the
-routine; this includes the argument of minis, the high order byte of shorties,
-and the fact that the result is to be multiplied by the word size.  This
-reduces the number of required routines to 338.
 .NH 3
-Intelligent Calls.
+Intelligent Calls, Method 3.
 .PP
 The call in the switch statement does full operand construction, and the
 resulting operand is passed to the routine.  This reduces the number of
 routines to 133, the number of EM instructions.  Generation of the switch
-statement from ip_spec.t will be complicated, but the routine space will be
-much cleaner.  This will not give any speed-up since the same actions are still
+statement from ip_spec.t is more complicated, but the routine space is
+much cleaner.  This does not give any speed-up since the same actions are still
 required; they are just performed in a different place.
 .NH 3
 Static Evaluation.
