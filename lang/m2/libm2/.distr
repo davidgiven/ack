@@ -24,3 +24,4 @@ CSP.def
 Epilogue.def
 Streams.def
 ArraySort.def
+StripUnix.def
