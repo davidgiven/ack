@@ -1,5 +1,5 @@
 EM=/proj/em/Work
-CEG=/usr/star/kaashoek/em/ceg.1
+CEG=/usr/star/kaashoek/em/ceg
 SOURCE=$(CEG)/ce_back/as_back
 
 IDIRS=-I.\
