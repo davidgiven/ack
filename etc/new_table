@@ -59,7 +59,7 @@ echo '};'
 (
 echo '#include	<em_flag.h>
 char em_flag[] = {'
-ed - Z <<'A' | tr a-z A-Z
+ed - Z <<'A' | tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
 g/^... /s///
 g/ .*/s///
 g/\(.\)\(.\)/s//PAR_\1 | FLO_\2/
