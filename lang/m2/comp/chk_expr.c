@@ -914,6 +914,7 @@ ChkUnOper(expp)
 	register t_node *right = expp->nd_right;
 	register t_type *tpr;
 
+	if (expp->nd_symb == COERCION) return 1;
 	if (expp->nd_symb == '(') {
 		*expp = *right;
 		free_node(right);
