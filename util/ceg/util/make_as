@@ -28,6 +28,7 @@ ce : ceg/ceg
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
 	(cd ce; co $(DEF)/RCS/*.c,v) 
 	(cd ce; co $(DEF)/*/RCS/*.c,v) 
+	(cd ce; chmod +w *.c)
 	ln mach.c ce/mach.c
 	@make EM_instr
 
