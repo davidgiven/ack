@@ -6,9 +6,7 @@
 
 #include <system.h>
 
-#if __STDC__ > 0
 void
-#endif
 sys_close(fp)
 	register File *fp;
 {

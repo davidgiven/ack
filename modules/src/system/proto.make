@@ -18,7 +18,7 @@ CSRC	= $(SRC_DIR)/access.c $(SRC_DIR)/break.c $(SRC_DIR)/chmode.c \
 	  $(SRC_DIR)/write.c $(SRC_DIR)/seek.c $(SRC_DIR)/rename.c
 SRC	= $(SRC_DIR)/proto.make $(SRC_DIR)/system.h $(CSRC)
 
-INCLUDES = -I$(SRC_DIR)
+INCLUDES = -I$(SRC_DIR) -I$(MOD_DIR)/h
 CFLAGS = $(COPTIONS) $(INCLUDES)
 
 all:		$(LIBSYS)
@@ -29,9 +29,10 @@ $(LIBSYS):	$(OBJ)
 		$(RANLIB) $(LIBSYS)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
+		-mkdir $(MOD_DIR)/h
 		cp $(LIBSYS) $(MOD_DIR)/lib/$(LIBSYS)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSYS)
-		cp $(SRC_DIR)/system.3 $(MOD_DIR)/man/system.3
 		cp $(SRC_DIR)/system.h $(MOD_DIR)/h/system.h
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
 		then	mk_manpage $(SRC_DIR)/system.3 $(TARGET_HOME) ; \
@@ -39,7 +40,6 @@ install:	all
 
 cmp:		all
 		-cmp $(LIBSYS) $(MOD_DIR)/lib/$(LIBSYS)
-		-cmp $(SRC_DIR)/system.3 $(MOD_DIR)/man/system.3
 		-cmp $(SRC_DIR)/system.h $(MOD_DIR)/h/system.h
 
 clean:

@@ -16,7 +16,7 @@ sys_break, sys_stop, sys_time \- system call interface
 .B int flag;
 .B File **filep;
 .PP
-.B sys_close(filep)
+.B void sys_close(filep)
 .B File *filep;
 .PP
 .B int sys_read(filep, bufptr, bufsiz, pnbytes)
@@ -64,7 +64,7 @@ sys_break, sys_stop, sys_time \- system call interface
 .B char *sys_break(incr)
 .B int incr;
 .PP
-.B sys_stop(how)
+.B void sys_stop(how)
 .B int how;
 .PP
 .B long sys_time();
