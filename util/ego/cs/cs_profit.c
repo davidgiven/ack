@@ -156,6 +156,7 @@ STATIC bool okay_lines(avp, ocp)
 	occur_p ocp;
 {
 	register line_p lnp, next;
+	offset sz;
 
 	for (lnp = ocp->oc_lfirst; lnp != (line_p) 0; lnp = next) {
 		next = lnp != ocp->oc_llast ? lnp->l_next : (line_p) 0;
@@ -175,7 +176,8 @@ STATIC bool okay_lines(avp, ocp)
 	 */
 	if (INSTR(ocp->oc_llast) == op_lar || INSTR(ocp->oc_llast) == op_sar) {
 		if (avp->av_instr == (byte) op_aar && time_space_ratio < 50) {
-			return array_elemsize(avp->av_othird) <= AR_limit;
+			return (sz = array_elemsize(avp->av_othird)) <= AR_limit &&
+				sz != UNKNOWN_SIZE;
 		}
 	}
 	return TRUE;
