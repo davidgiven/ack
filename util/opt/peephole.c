@@ -405,7 +405,7 @@ eval_t compute(pexp) register expr_p pexp; {
 			    leaf2.e_v.e_con < 0 ||
 			    leaf2.e_v.e_con >= MAXROM)
 				return(undefres);
-			res.e_v.e_con = sp->s_rom[leaf2.e_v.e_con];
+			res.e_v.e_con = sp->s_rom[(int)(leaf2.e_v.e_con)];
 			break;
 		} else
 			return(undefres);
