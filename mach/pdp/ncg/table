@@ -1632,11 +1632,16 @@ gen jsr pc,{label, "ilar~"}
  ****************************************/
 
 pat cmi $1==2
-with src2 REG
-  gen sub %1,%2				yields %2
-with REG src2
-  gen sub %2,%1
-      neg %1				yields %1
+with src2 src2
+uses REG = {const2,0}
+gen cmp %1,%2
+    beq {label,2f}
+    bgt {label,1f}
+    inc %a
+    br {label,2f}
+    1:
+    dec %a
+    2:					yields %a
 
 pat cmi $1==4
 kills ALL

@@ -1804,15 +1804,16 @@ lar !defined($1) | |    remove(all)
  * group 12 : Compare instructions      *
  ****************************************/
 
-cmi $1==2       | source2 SCR_REG |
-			"sub %[1],%[2]"
-			setcc(%[2])
-			erase(%[2])                             | %[2]  | |
-...             | SCR_REG source2 |
-			"sub %[2],%[1]"
-			"neg %[1]"
-			setcc(%[1])
-			erase(%[1])                             | %[1]  | |
+cmi $1==2       | source2 source2 |
+			allocate(REG = {CONST2,0})
+			"cmp %[1],%[2]"
+			"beq 2f"
+			"bgt 1f"
+			"inc %[a]"
+			"br 2f"
+			"1:\tdec %[a]\n2:"
+			setcc(%[a])
+			erase(%[a])                             | %[a]  | |
 ldc cmi zlt highw(1)==0 && loww(1)==0 && $2==4 | source2 source2 |
 					| %[1] | zlt $3 |
 ldc cmi zge highw(1)==0 && loww(1)==0 && $2==4 | source2 source2 |

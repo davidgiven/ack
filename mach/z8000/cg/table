@@ -1157,7 +1157,22 @@ lae lar defined(rom(1,3))	| | | | lae $1 aar $2 loi rom(1,3)     |
 ********	GROUP 12	********
 ***************************************/
 
-cmi $1==2	| | | | sbi $1	|
+cmi $1==2 | src2  REG	| allocate( REG = {im2, 0} )
+			  "cp %[2], %[1]"
+			  "jr EQ, 2f"
+			  "jr LT, 1f"
+			  "inc %[a]"
+			  "jr 2f"
+			  "1:\tdec %[a]\n2:"
+			  erase(%[a])  nocc	| %[a]	| |
+...	| NC im2  src2a	| allocate( REG = {im2, 0} )
+			  "cp %[2], %[1]"
+			  "jr EQ, 2f"
+			  "jr LT, 1f"
+			  "inc %[a]"
+			  "jr 2f"
+			  "1:\tdec %[a]\n2:"
+			  erase(%[a])  nocc	| %[a]	| |
 cmi $1==4	| STACK	| "calr cmi4"	| R0	| |
 cmi !defined($1)| src2  STACK	| move( %[1], R0 )
 				  "calr cmi"

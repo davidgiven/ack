@@ -1854,8 +1854,15 @@ pat tge ior $2==4		call txxior("bgt")
 pat tgt ior $2==4		call txxior("bge")
 
 pat cmi $1==4
-with src4 REG
-    gen subd %1, %2			yields %2
+with src4 src4
+    uses REG={const4, 0}
+    gen cmpd %2, %1
+	blt {label, "1f"}
+	shid %a
+	br {label, "2f"}
+	1:
+	addd {const4, 0-1}, %a
+	2:				yields %a
 
 #ifndef NOFLOAT
 pat cmf $1==4
