@@ -66,6 +66,7 @@ gencode.o:	types.h
 global.o:	io.h
 global.o:	tunable.h
 global.o:	types.h
+machdep.o:	../../../h/em_path.h
 machdep.o:	types.h
 main.o:	assert.h
 main.o:	extern.h
