@@ -25,7 +25,7 @@ char *name;
 	if ((unsigned) stbuf.st_size == stbuf.st_size &&
 	    (dirp->dd_buf = malloc((unsigned) stbuf.st_size))) {
 		dirp->dd_bsize = stbuf.st_size;
-		read(fd, dirp->dd_buf, dirp->dd_bsize);
+		dirp->dd_size = read(fd, dirp->dd_buf, dirp->dd_bsize);
 		close(fd);
 		dirp->dd_fd = -2;
 		dirp->dd_loc = 0;
