@@ -15,6 +15,9 @@ cmp:		all
 cv:	cv.o
 		$(CC) $(LDFLAGS) -o cv cv.o $(LIBOBJ)
 
+Xcv:	Xcv.o
+		$(CC) $(LDFLAGS) -o Xcv Xcv.o $(LIBOBJ)
+
 clean:
 		rm -f $(TARGETS) *.o nohup.out Out
 
