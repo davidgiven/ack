@@ -49,6 +49,16 @@ short getshort()
 	return n;
 }
 
+offset getoff()
+{
+	register offset n;
+
+	n = (unsigned) getshort();
+	n |= ((offset) getshort() ) << 16;
+	return n;
+}
+
+
 int getint()
 {
 	/* Read an integer from the input file. This routine is
@@ -61,16 +71,6 @@ int getint()
 	} else {
 		return getoff();
 	}
-}
-
-
-offset getoff()
-{
-	register offset n;
-
-	n = (unsigned) getshort();
-	n |= ((offset) getshort() ) << 16;
-	return n;
 }
 
 
@@ -184,7 +184,7 @@ showp()
 }
 
 
-char *pseudo[] = {"hol", "bss", "rom", "con", "unknown" };
+char *pseudo[5] = {"hol", "bss", "rom", "con", "unknown" };
 
 showd()
 {
