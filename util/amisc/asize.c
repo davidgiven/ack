@@ -54,6 +54,7 @@ char **argv;
 		printf(" = %ld = 0x%lx\n", sum, sum);
 		rd_close();
 	}
+	exit(0);
 }
 
 rd_fatal()
