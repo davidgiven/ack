@@ -440,6 +440,8 @@ cmp teq :       cms p   teq
 cmp tne :       cms p   tne
 cmp zeq :	cms p	zeq $2
 cmp zne :	cms p	zne $2
+cmi teq defined($1):    cms $1  teq
+cmi tne defined($1):    cms $1  tne
 cmu teq defined($1):    cms $1  teq
 cmu tne defined($1):    cms $1  tne
 cms zeq $1==w:  beq $2
