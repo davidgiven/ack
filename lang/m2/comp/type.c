@@ -125,7 +125,7 @@ align(pos, al)
 	int i = pos % al;
 
 	if (i) return pos + (al - i);
-	return pos;
+	return pos == 0 ? 1 : pos;
 }
 
 t_type *
@@ -384,6 +384,8 @@ subr_type(lb, ub, base)
 	*/
 	if (! chk_bounds(lb->nd_INT, ub->nd_INT, tp->tp_fund)) {
 		node_error(lb, "lower bound exceeds upper bound");
+		ub->nd_INT = lb->nd_INT;
+		res->sub_ub = res->sub_lb;
 	}
 
 	if (tp == card_type) {
