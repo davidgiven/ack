@@ -1,0 +1,69 @@
+FL=succes
+TRIES='-ll and -lln'
+case X$# in
+X0)
+	myecho "trying to find your lex library ..."
+	cat > x.l <<'EOF'
+%%
+[A-Z]	putchar(yytext[0]+'a'-'A');
+EOF
+	if lex x.l > /dev/null 2>&1
+	then :
+	else myecho "Sorry, your lex does not seem to work"
+	     exit 2
+	fi
+	cat > trylib <<'EOF'
+if cc $1 lex.yy.c > /dev/null 2>&1
+then
+	rm -f lex.yy.* a.out
+	exit 0
+else
+	exit 1
+fi
+EOF
+	if sh trylib -ll
+	then
+		LEX=-ll
+	elif sh trylib -ln
+	then
+		LEX=-lln
+	else
+		FL=fail
+	fi
+	;;
+*)	if sh trylib $1
+	then
+		LEX=$1
+	else
+		TRIES="$2 and $1"
+		FL=fail
+	fi
+	;;
+esac
+case X$FL in
+Xfail)	myecho 'What option do I have to give to cc to get the LEX library?'
+	myecho "I tried " $TRIES "but these don't seem to work."
+	myecho -n 'LEX library option: '
+	if read ANSWER
+	then :
+	else myecho "Sorry, got EOF while reading your answer"
+	     exit 9
+	fi
+	exec $0 $ANSWER "$TRIES"
+	;;
+Xsucces)
+	for i in ../util/opt ../util/cgg ../util/ncgg ../lang/occam/comp
+	do
+	    (	cd $i
+		ed - Makefile << EOF
+/^LEXLIB/c
+LEXLIB = $LEX
+.
+w
+q
+EOF
+	    )
+	done
+	;;
+esac
+rm -f x.l trylib
