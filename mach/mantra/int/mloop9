@@ -58,12 +58,13 @@ csa_z:		mov	(sp)+,d0 ;	bra	0f
 csa_l:		adroff		;	move.w	(a1),d0
 0:		sub.l	wrd,d0	;	bne	e_illins
 csa_1W:		move.l	(sp)+,a0 ;	mov	(sp)+,d0
-		ext.l	d0
 		add.l	#4,a0	;	subt	(a0),d0
 		blt	6f
 		comp	word(a0),d0 ;	bhi	6f
+		extend	d0
 		asl.l	#2,d0	;	add.l	wrd,d0
-		move.l	word(a0,d0),d1 ;	bne	5f
+		move.l	a0,a5	;	add.l	d0,a5
+		move.l	word(a5),d1 ;	bne	5f
 6:		sub.l	#4,a0	;	move.l	(a0),d1
 		beq	e_case
 5:		move.l	d1,a3	;	jmp	(a4)
@@ -88,7 +89,7 @@ dch_z:		move.l	(sp)+,a0 ;	move.l	(a0),-(sp)
 		move.l	ml,a0	;	cmp.l	(sp),a0
 		bls	e_badptr ;	jmp	(a4)
 
-lpb_z:		add.l	#16,(sp) ;	jmp	(a4)
+lpb_z:		add.l	#0+l0,(sp) ;	jmp	(a4)
 
 !----------------------------------------------------------------------------
 
@@ -105,8 +106,7 @@ dus_l:		adroff		;	move.w	(a1),d0
 		asr.l	wmu,d0	;	sub.l	#1,d0
 3:		mov	-(a0),-(sp) ;	dbra	d0,3b
 		jmp	(a4)
-!We do not test if d0 is indeed a word multiple . This can eventually be done
-!in the usual way.
+!We do not test if d0 is a word multiple indeed .
 
 !-----------------------------------------------------------------------------
 exg_z:		mov	(sp)+,d0 ;	bra	0f
@@ -125,7 +125,24 @@ gto_q:		move.l	(sp)+,a0 ;	bra	3f
 gto_l:		move.l	d6,a0	;	move.b	(a3)+,-(sp)
 		move.b	(a3)+,1(sp) ;	move.w	(sp)+,a0
 3:		add.l	a6,a0	;	move.l	(a0)+,a3
-		move.l	(a0)+,sp ;	move.l	(a0),a2
+		move.l	(a0)+,sp 
+#if count+prof+flow
+!To find the procedure descriptor of the procedure we go to ,we cannot use
+!the memory place curproc . We need to find the last time this procedure
+!called. In the frame of that procedure we find the pointer to the procedure
+!descriptor we need.
+2:		move.l	(a2),d0
+		cmp.l	(a0),d0
+		beq	1f
+		move.l	d0,a2
+		bra	2b
+1:		move.l	8(a2),a2	!a2 ponts at procedure descriptor.
+		move.l	8(a2),d0	!countptr in d0.
+		move.l	d0,countptr	!initially assume first line
+		sub.l	12(a2),d0
+		move.l	d0,countfld
+#endif
+		move.l	(a0),a2
 		jmp	(a4)
 
 lim_z:		move.w	ignmask,-(sp) ;	jmp	(a4)
@@ -254,16 +271,16 @@ lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
 		move.l	countptr,d1	!LINE NUMBER IN d1
 		asl.l	#2,d1		!MULTIPLY BY 4
 		move.l	lcount,a0
-		add.l	#1,0(a0,d1)	!ADD 1 TO THE CORRESPONDING COUNT
+		add.l	d1,a0
+		add.l	#1,(a0)		!ADD 1 TO THE CORRESPONDING COUNT
 #endif
 #if	flow
 		move.l	countptr,d1	!LINE NUMBER IN d1
 		move.l	#8,d0
-		bsr	dvu4
-!QUOTIENT IN d1 REST IN d3
+		bsr	dvu4 		!QUOTIENT IN d1 REST IN d3
 		move.l	lflow,a0
-		bset	d3,0(a0,d1)
-!ATTENTION BIT 0 CORR TO LINE 0
+		add.l	d1,a0
+		bset	d3,(a0) 	!ATTENTION BIT 0 CORR TO LINE 0
 #endif
 !9:		bra	nop_z
 9:		jmp	(a4)
