@@ -3,6 +3,7 @@ INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
 
 all:		libeme.a libemk.a em_code.3
+		rm -f *.c
 
 install:	all
 		$(INSTALL) lib/libeme.a
