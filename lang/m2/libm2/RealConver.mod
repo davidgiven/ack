@@ -57,7 +57,7 @@ IMPLEMENTATION MODULE RealConversions;
 	sign := r < 0.0D;
 	IF sign THEN r := -r END;
 	ok := TRUE;
-	IF NOT (r / 10.0D < r) THEN
+	IF (r <> 0.0D) AND NOT (r / 10.0D < r) THEN
 		(* assume Nan or Infinity *)
 		r := 0.0D;
 		ok := FALSE;
