@@ -8,5 +8,7 @@ C_mes_end.c
 C_pnam.c
 C_rom_scon.c
 C_scon.c
+C_exp.c
+C_exa_dnam.c
 misc.c
 ms_reg.c

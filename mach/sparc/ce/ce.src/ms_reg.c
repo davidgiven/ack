@@ -170,28 +170,17 @@ static params_to_regs()		/* copy required parameters to registers */
 {
   int i, j;
 
-  for (i = 0; i < nr_reg_vars; i++)
-	if (reg_dat[i].offset >= 4096) {
-		fprint(codefile, "set	%d, %s\n",
-			reg_dat[i].offset, reg_dat[i].reg);
-		fprint(codefile, "ld	[%%l1+%s], %s\n",
-			reg_dat[i].reg, reg_dat[i].reg);
-	}
-	else if (reg_dat[i].offset > 0)
-		fprint(codefile, "ld	[%%l1+%d], %s\n",
-			reg_dat[i].offset, reg_dat[i].reg);
-
   for (i = 0; i < nr_flt_vars; i++)
 	if (flt_dat[i].offset >= 4092) {
-		fprint(codefile, "set	%d, %s\n",
-			reg_dat[i].offset, reg_dat[i].reg);
-		fprint(codefile, "ld	[%%l1+%s], %s\n",
-			reg_dat[i].reg, reg_dat[i].reg);
+		fprint(codefile, "set	%d, %%l2\n",
+			flt_dat[i].offset);
+		fprint(codefile, "ld	[%%l1+%%l2], %s\n",
+			flt_dat[i].reg);
 		if (flt_dat[i].size == EM_DSIZE) {
-			fprint(codefile, "set	%d, %s\n",
-				reg_dat[i].offset+4, reg_dat[i].reg2);
-			fprint(codefile, "ld	[%%l1+%s], %s\n",
-				reg_dat[i].reg2, reg_dat[i].reg2);
+			fprint(codefile, "set	%d, %%l2\n",
+				flt_dat[i].offset+4);
+			fprint(codefile, "ld	[%%l1+%%l2], %s\n",
+				flt_dat[i].reg2);
 		}
 	}
 	else if (flt_dat[i].offset > 0)
@@ -202,6 +191,17 @@ static params_to_regs()		/* copy required parameters to registers */
 			fprint(codefile, "ld	[%%l1+%d], %s\n",
 			  flt_dat[i].offset + 4, flt_dat[i].reg2);
 	}
+
+  for (i = 0; i < nr_reg_vars; i++)
+	if (reg_dat[i].offset >= 4096) {
+		fprint(codefile, "set	%d, %s\n",
+			reg_dat[i].offset, reg_dat[i].reg);
+		fprint(codefile, "ld	[%%l1+%s], %s\n",
+			reg_dat[i].reg, reg_dat[i].reg);
+	}
+	else if (reg_dat[i].offset > 0)
+		fprint(codefile, "ld	[%%l1+%d], %s\n",
+			reg_dat[i].offset, reg_dat[i].reg);
 }
 
 static cmp_flt_dat(e1, e2)
@@ -336,7 +336,7 @@ arith l;
 			switchseg( SEGTXT);
 			if (l == N_SLINE && ! __gdb_flag) {
 				flush_cache();
-				fprintf(codefile, "call ___uX_LiB\nnop\n");
+				fprint(codefile, "call ___uX_LiB\nnop\n");
 			}
 			if (db_mes == ms_std) {
 				fprint(codefile, ".stabd 0x%lx,0", (long) l);
