@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
@@ -468,9 +472,11 @@ int inpseudo(n) short n; {
 				error("This optimizer cannot handle wordsize>2");
 #endif
 			break;
+		case ms_gto:
+			curpro.gtoproc=1;
+			/* Treat as empty mes ms_reg */
 		case ms_reg:
-			if (prodepth==0)
-				error("MES REG outside procedure");
+			tstinpro();
 			regvar(lnp->l_a.la_arg->a_next);
 			oldline(lnp);
 			lnp=newline(OPNO);
@@ -497,6 +503,7 @@ int inpseudo(n) short n; {
 			error("bad second arg of PRO");
 		}
 		prodepth++;
+		curpro.gtoproc=0;
 		if (prodepth>1) {
 			register i;
 
@@ -545,5 +552,5 @@ int inpseudo(n) short n; {
 tstinpro() {
 
 	if (prodepth==0)
-		error("Instruction or label not allowed outside procedure");
+		error("This is not allowed outside a procedure");
 }
