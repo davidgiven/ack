@@ -27,15 +27,7 @@ struct idstack_item	{	/* stack of identifiers */
 	struct idf *is_idf;
 };
 
-
-/* allocation definitions of struct idstack_item */
 /* ALLOCDEF "idstack_item" */
-extern char *st_alloc();
-extern struct idstack_item *h_idstack_item;
-#define	new_idstack_item() ((struct idstack_item *) \
-		st_alloc((char **)&h_idstack_item, sizeof(struct idstack_item)))
-#define	free_idstack_item(p) st_free(p, h_idstack_item, sizeof(struct idstack_item))
-
 
 struct idf	{
 	struct idf *next;
@@ -52,15 +44,7 @@ struct idf	{
 	int id_special;		/* special action needed at occurrence	*/
 };
 
-
-/* allocation definitions of struct idf */
 /* ALLOCDEF "idf" */
-extern char *st_alloc();
-extern struct idf *h_idf;
-#define	new_idf() ((struct idf *) \
-		st_alloc((char **)&h_idf, sizeof(struct idf)))
-#define	free_idf(p) st_free(p, h_idf, sizeof(struct idf))
-
 
 extern struct idf *str2idf(), *idf_hashed();
 

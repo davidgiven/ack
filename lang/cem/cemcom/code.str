@@ -7,15 +7,7 @@ struct stat_block	{
 	label st_continue;
 };
 
-
-/* allocation definitions of struct stat_block */
 /* ALLOCDEF "stat_block" */
-extern char *st_alloc();
-extern struct stat_block *h_stat_block;
-#define	new_stat_block() ((struct stat_block *) \
-		st_alloc((char **)&h_stat_block, sizeof(struct stat_block)))
-#define	free_stat_block(p) st_free(p, h_stat_block, sizeof(struct stat_block))
-
 
 #define	LVAL	0
 #define	RVAL	1

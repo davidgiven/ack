@@ -13,15 +13,7 @@ struct switch_hdr	{
 	struct case_entry *sh_entries;
 };
 
-
-/* allocation definitions of struct switch_hdr */
 /* ALLOCDEF "switch_hdr" */
-extern char *st_alloc();
-extern struct switch_hdr *h_switch_hdr;
-#define	new_switch_hdr() ((struct switch_hdr *) \
-		st_alloc((char **)&h_switch_hdr, sizeof(struct switch_hdr)))
-#define	free_switch_hdr(p) st_free(p, h_switch_hdr, sizeof(struct switch_hdr))
-
 
 struct case_entry	{
 	struct case_entry *next;
@@ -29,12 +21,4 @@ struct case_entry	{
 	arith ce_value;
 };
 
-
-/* allocation definitions of struct case_entry */
 /* ALLOCDEF "case_entry" */
-extern char *st_alloc();
-extern struct case_entry *h_case_entry;
-#define	new_case_entry() ((struct case_entry *) \
-		st_alloc((char **)&h_case_entry, sizeof(struct case_entry)))
-#define	free_case_entry(p) st_free(p, h_case_entry, sizeof(struct case_entry))
-

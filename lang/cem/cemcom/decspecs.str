@@ -10,14 +10,6 @@ struct decspecs	{
 	int ds_unsigned;	/* 0 or 1 */
 };
 
-
-/* allocation definitions of struct decspecs */
 /* ALLOCDEF "decspecs" */
-extern char *st_alloc();
-extern struct decspecs *h_decspecs;
-#define	new_decspecs() ((struct decspecs *) \
-		st_alloc((char **)&h_decspecs, sizeof(struct decspecs)))
-#define	free_decspecs(p) st_free(p, h_decspecs, sizeof(struct decspecs))
-
 
 extern struct decspecs null_decspecs;

@@ -41,12 +41,4 @@ extern struct type *pa_type;	/* type.c	*/
 
 extern arith size_of_type(), align();
 
-
-/* allocation definitions of struct type */
 /* ALLOCDEF "type" */
-extern char *st_alloc();
-extern struct type *h_type;
-#define	new_type() ((struct type *) \
-		st_alloc((char **)&h_type, sizeof(struct type)))
-#define	free_type(p) st_free(p, h_type, sizeof(struct type))
-

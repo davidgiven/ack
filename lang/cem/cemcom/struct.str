@@ -13,15 +13,7 @@ struct sdef	{		/* for selectors */
 
 extern char *st_alloc();
 
-
-/* allocation definitions of struct sdef */
 /* ALLOCDEF "sdef" */
-extern char *st_alloc();
-extern struct sdef *h_sdef;
-#define	new_sdef() ((struct sdef *) \
-		st_alloc((char **)&h_sdef, sizeof(struct sdef)))
-#define	free_sdef(p) st_free(p, h_sdef, sizeof(struct sdef))
-
 
 struct tag	{		/* for struct-, union- and enum tags */
 	struct tag *next;
@@ -31,14 +23,6 @@ struct tag	{		/* for struct-, union- and enum tags */
 };
 
 
-
-/* allocation definitions of struct tag */
 /* ALLOCDEF "tag" */
-extern char *st_alloc();
-extern struct tag *h_tag;
-#define	new_tag() ((struct tag *) \
-		st_alloc((char **)&h_tag, sizeof(struct tag)))
-#define	free_tag(p) st_free(p, h_tag, sizeof(struct tag))
-
 
 struct sdef *idf2sdef();

@@ -89,14 +89,6 @@ struct expr	{
 
 extern struct expr *intexpr(), *new_oper();
 
-
-/* allocation definitions of struct expr */
 /* ALLOCDEF "expr" */
-extern char *st_alloc();
-extern struct expr *h_expr;
-#define	new_expr() ((struct expr *) \
-		st_alloc((char **)&h_expr, sizeof(struct expr)))
-#define	free_expr(p) st_free(p, h_expr, sizeof(struct expr))
-
 
 #define	ISCOMMA(e) ((e)->ex_class == Oper && (e)->OP_OPER == INITCOMMA)

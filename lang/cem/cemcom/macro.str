@@ -26,15 +26,7 @@ struct macro	{
 	char	mc_flag;	/* marking this macro		*/
 };
 
-
-/* allocation definitions of struct macro */
 /* ALLOCDEF "macro" */
-extern char *st_alloc();
-extern struct macro *h_macro;
-#define	new_macro() ((struct macro *) \
-		st_alloc((char **)&h_macro, sizeof(struct macro)))
-#define	free_macro(p) st_free(p, h_macro, sizeof(struct macro))
-
 
 /* `token' numbers of keywords of command-line processor
 */
