@@ -73,7 +73,8 @@ compact(nr, low, up)
 	*/
 	arith diff = up - low;
 
-	return (nr == 0 || (diff >= 0 && diff / nr <= (DENSITY - 1)));
+	return (nr != 0 && diff >= 0 && fit(diff, (int) word_size) &&
+		diff / nr <= (DENSITY - 1));
 }
 
 CaseCode(nd, exitlabel)
@@ -149,11 +150,10 @@ CaseCode(nd, exitlabel)
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA
 		*/
-		C_rom_cst(sh->sh_lowerbd);
-		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		ce = sh->sh_entries;
-		if (sh->sh_nrofentries)
-		    for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
+		C_rom_cst((arith) 0);
+		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
+		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
 			assert(ce);
 			if (val == ce->ce_value)	{
 				C_rom_ilb(ce->ce_label);
@@ -162,6 +162,8 @@ CaseCode(nd, exitlabel)
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
 			else C_rom_ucon("0", pointer_size);
 		}
+		C_loc(sh->sh_lowerbd);
+		C_sbu(word_size);
 		c_lae_dlb(CaseDescrLab);	/* perform the switch */
 		C_csa(word_size);
 	}

@@ -50,7 +50,7 @@ SkipComment()
 	/*	Skip Modula-2 comments (* ... *).
 		Note that comments may be nested (par. 3.5).
 	*/
-	register int ch;
+	register int ch, c;
 	register int CommentLevel = 0;
 
 	LoadChar(ch);
@@ -66,17 +66,23 @@ SkipComment()
 			*/
 			ForeignFlag = D_FOREIGN;
 			break;
-		case 'R':
-			/* Range checks, on or off */
-			LoadChar(ch);
-			if (ch == '-') {
-				options['R'] = 1;
+		case 'U':
+			inidf['_'] = 1;
+			break;
+		case 'A': /* Extra array bound checks, on or off */
+		case 'R': /* Range checks, on or off */
+		{
+			int on_on_minus = ch == 'R';
+			LoadChar(c);
+			if (c == '-') {
+				options[ch] = on_on_minus;
 				break;
 			}
-			if (ch == '+') {
-				options['R'] = 0;
+			if (c == '+') {
+				options[ch] = !on_on_minus;
 				break;
 			}
+		}
 			/* fall through */
 		default:
 			PushBack();
@@ -365,6 +371,9 @@ again:
 		}
 		else {
 			tk->tk_data.tk_str = str;
+			if (! fit(str->s_length, (int) word_size)) {
+				lexerror("string too long");
+			}
 			toktype = standard_type(T_STRING, 1, str->s_length);
 		}
 		return tk->tk_symb = STRING;
@@ -504,11 +513,11 @@ lexwarning(W_ORDINARY, "overflow in constant");
 					toktype = longint_type;
 				}
 				else if (sgnswtch == 0 &&
-					 tk->TOK_INT<=max_int[(int)word_size]) {
+					 tk->TOK_INT<=max_int[(int)int_size]) {
 					toktype = intorcard_type;
 				}
 				else if (! chk_bounds(tk->TOK_INT,
-						      full_mask[(int)word_size],
+						      full_mask[(int)int_size],
 						      T_CARDINAL)) {
 lexwarning(W_ORDINARY, "overflow in constant");
 				}

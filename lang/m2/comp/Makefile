@@ -1,8 +1,9 @@
 # make modula-2 "compiler"
-EMHOME =		../../..
-MHDIR =		$(EMHOME)/modules/h
-PKGDIR =	$(EMHOME)/modules/pkg
-LIBDIR =	$(EMHOME)/modules/lib
+EMHOME =	../../..
+MDIR =		$(EMHOME)/modules
+MHDIR =		$(MDIR)/h
+PKGDIR =	$(MDIR)/pkg
+LIBDIR =	$(MDIR)/lib
 OBJECTCODE =	$(LIBDIR)/libemk.a
 LLGEN =		$(EMHOME)/bin/LLgen
 MKDEP =		$(EMHOME)/bin/mkdep
@@ -325,10 +326,12 @@ chk_expr.o: strict3rd.h
 chk_expr.o: target_sizes.h
 chk_expr.o: type.h
 chk_expr.o: warning.h
+options.o: class.h
 options.o: idfsize.h
 options.o: main.h
 options.o: nocross.h
 options.o: nostrict.h
+options.o: squeeze.h
 options.o: strict3rd.h
 options.o: target_sizes.h
 options.o: type.h

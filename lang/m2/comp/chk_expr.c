@@ -282,9 +282,9 @@ ChkLinkOrName(expp, flags)
 			/* Fields of a record are always D_QEXPORTED,
 			   so ...
 			*/
-			df_error(expp,
+			if (df_error(expp,
 			       "not exported from qualifying module",
-			       df);
+			       df)) assert(0);
 		}
 
 		if (!(left->nd_class == Def &&
@@ -617,7 +617,7 @@ ChkProcCall(expp)
 		/* Just check parameters as if they were value parameters
 		*/
 		while (expp->nd_right) {
-			getarg(&expp, 0, 0, edf);
+			if (getarg(&expp, 0, 0, edf)) { }
 		}
 		return 0;
 	}
@@ -646,9 +646,11 @@ ChkProcCall(expp)
 	}
 
 	if (expp->nd_right) {
-		df_error(expp->nd_right, "too many parameters supplied", edf);
+		if (df_error(expp->nd_right,"too many parameters supplied",edf)){
+			assert(0);
+		}
 		while (expp->nd_right) {
-			getarg(&expp, 0, 0, edf);
+			if (getarg(&expp, 0, 0, edf)) { }
 		}
 		return 0;
 	}
@@ -779,20 +781,47 @@ AllowedTypes(operator)
 }
 
 STATIC int
-ChkAddress(tpl, tpr)
+ChkAddressOper(tpl, tpr, expp)
 	register t_type *tpl, *tpr;
+	register t_node *expp;
 {
 	/*	Check that either "tpl" or "tpr" are both of type
 		address_type, or that one of them is, but the other is
-		of type cardinal.
+		of a cardinal type.
+		Also insert proper coercions, making sure that the EM pointer
+		arithmetic instructions can be generated whenever possible
 	*/
+
+	if (tpr == address_type && expp->nd_symb == '+') {
+		/* use the fact that '+' is a commutative operator */
+		t_type *tmptype = tpr;
+		t_node *tmpnode = expp->nd_right;
+
+		tpr = tpl;
+		expp->nd_right = expp->nd_left;
+		tpl = tmptype;
+		expp->nd_left = tmpnode;
+	}
 	
 	if (tpl == address_type) {
-		return tpr == address_type || (tpr->tp_fund & T_CARDINAL);
+		expp->nd_type = address_type;
+		if (tpr == address_type) {
+			return 1;
+		}
+		if (tpr->tp_fund & T_CARDINAL) {
+			MkCoercion(&(expp->nd_right),
+				   expp->nd_symb=='+' || expp->nd_symb=='-' ?
+					tpr :
+				  	address_type);
+			return 1;
+		}
+		return 0;
 	}
 
-	if (tpr == address_type) {
-		return (tpl->tp_fund & T_CARDINAL);
+	if (tpr == address_type && tpl->tp_fund & T_CARDINAL) {
+		expp->nd_type = address_type;
+		MkCoercion(&(expp->nd_left), address_type);
+		return 1;
 	}
 
 	return 0;
@@ -804,13 +833,13 @@ ChkBinOper(expp)
 {
 	/*	Check a binary operation.
 	*/
-	register t_node *left, *right;
+	register t_node *left = expp->nd_left, *right = expp->nd_right;
 	register t_type *tpl, *tpr;
+	t_type *result_type;
 	int allowed;
 	int retval;
 
-	left = expp->nd_left;
-	right = expp->nd_right;
+	/* First, check BOTH operands */
 
 	retval = ChkExpression(left) & ChkExpression(right);
 
@@ -828,7 +857,7 @@ ChkBinOper(expp)
 		}
 	}
 
-	expp->nd_type = ResultOfOperation(expp->nd_symb, tpr);
+	expp->nd_type = result_type = ResultOfOperation(expp->nd_symb, tpr);
 
 	/* Check that the application of the operator is allowed on the type
 	   of the operands.
@@ -866,26 +895,25 @@ ChkBinOper(expp)
 
 	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed)) {
 	    	if (!((T_CARDINAL & allowed) &&
-	             ChkAddress(tpl, tpr))) {
+	             ChkAddressOper(tpl, tpr, expp))) {
 			return ex_error(expp, "illegal operand type(s)");
 		}
-		if (expp->nd_type->tp_fund & T_CARDINAL) {
-			expp->nd_type = address_type;
+		if (result_type == bool_type) expp->nd_type = bool_type;
+	}
+	else {
+		if (Boolean(expp->nd_symb) && tpl != bool_type) {
+			return ex_error(expp, "illegal operand type(s)");
 		}
-	}
 
-	if (Boolean(expp->nd_symb) && tpl != bool_type) {
-		return ex_error(expp, "illegal operand type(s)");
-	}
+		/* Operands must be compatible (distilled from Def 8.2)
+		*/
+		if (!TstCompat(tpr, tpl)) {
+			return ex_error(expp, "incompatible operand types");
+		}
 
-	/* Operands must be compatible (distilled from Def 8.2)
-	*/
-	if (!TstCompat(tpr, tpl)) {
-		return ex_error(expp, "incompatible operand types");
+		MkCoercion(&(expp->nd_left), tpl);
+		MkCoercion(&(expp->nd_right), tpr);
 	}
-
-	MkCoercion(&(expp->nd_left), tpl);
-	MkCoercion(&(expp->nd_right), tpr);
 
 	if (tpl->tp_fund == T_SET) {
 	    	if (left->nd_class == Set && right->nd_class == Set) {
@@ -1071,7 +1099,9 @@ ChkStandard(expp)
 			MkCoercion(&(arg->nd_left), d2);
 		}
 		else {
-			df_error(left, "unexpected parameter type", edf);
+			if (df_error(left, "unexpected parameter type", edf)) {
+				assert(0);
+			}
 			break;
 		}
 		free_it = 1;
