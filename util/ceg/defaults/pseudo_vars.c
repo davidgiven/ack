@@ -1,2 +1,2 @@
-int	locals_created = 0, busy = 0;
-int	holno = 0, procno = 0;
+int	B_locals_created = 0, B_busy = 0;
+int	B_holno = 0, B_procno = 0;

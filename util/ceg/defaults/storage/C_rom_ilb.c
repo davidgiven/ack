@@ -29,7 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
-extern int procno;
+extern int B_procno;
 
 C_rom_ilb( l)
 label l;
@@ -37,5 +37,5 @@ label l;
 	switchseg( SEGROM);
 	dump_label();	
 
-	relocEM_PSIZE( extnd_ilb( l, procno), 0, ABSOLUTE);
+	relocEM_PSIZE( extnd_ilb( l, B_procno), 0, ABSOLUTE);
 }

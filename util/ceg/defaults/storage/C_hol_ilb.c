@@ -29,7 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
-extern int holno, procno;
+extern int B_holno, B_procno;
 
 C_hol_ilb( n, l, i)
 arith n;
@@ -39,16 +39,16 @@ int i;
 	if ( i == 0) {
 		switchseg( SEGBSS);
 		align_word();
-		symbol_definition( extnd_hol( ++holno));
+		symbol_definition( extnd_hol( ++B_holno));
 
 		bss( n);
 	}
 	else {  
 		switchseg( SEGCON);
 		align_word();
-		symbol_definition( extnd_hol( ++holno));
+		symbol_definition( extnd_hol( ++B_holno));
 
 		for ( i = 0; i < n/EM_PSIZE; i++)
-			relocEM_PSIZE( extnd_ilb( l, procno), 0, ABSOLUTE);
+			relocEM_PSIZE( extnd_ilb( l, B_procno), 0, ABSOLUTE);
 	 }
 }

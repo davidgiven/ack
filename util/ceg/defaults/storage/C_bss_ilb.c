@@ -29,7 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
-extern int procno;
+extern int B_procno;
 
 C_bss_ilb( n, l, i)
 arith n;
@@ -44,6 +44,6 @@ int i;
 		dump_label();
 
 		for ( i = 0; i < n/EM_PSIZE; i++)
-			relocEM_PSIZE( extnd_ilb( l, procno), 0, ABSOLUTE);
+			relocEM_PSIZE( extnd_ilb( l, B_procno), 0, ABSOLUTE);
 	}
 }
