@@ -14,6 +14,21 @@
 Something wrong here! Only one of FM2, FPC, or FCC must be defined
 #endif
 
+#ifdef sun3
+#define MACHNAME	"m68020"
+#define SYSNAME		"sun3"
+#endif
+
+#ifdef vax4
+#define MACHNAME	"vax4"
+#define SYSNAME		"vax4"
+#endif
+
+#ifdef i386
+#define MACHNAME	"i386"
+#define SYSNAME		"i386"
+#endif
+
 #include <errno.h>
 #include <signal.h>
 #include <varargs.h>
@@ -22,7 +37,6 @@ Something wrong here! Only one of FM2, FPC, or FCC must be defined
 #define M2DEF	"/lib/m2"
 #define FASTDIR EM_DIR
 
-#define BINDIR	"/lib.bin/"
 #define CCINCL	"/include/tail_ac"
 char *ROOT_DIR = FASTDIR;
 
@@ -34,16 +48,18 @@ char *ROOT_DIR = FASTDIR;
 
 typedef char USTRING[USTR_SIZE];
 
-USTRING INCLUDE = "-I";
-
 struct arglist {
 	int al_argc;
 	char *al_argv[MAXARGC];
 };
 
-#define CPP	"*cpp"
-#define LD	"*../bin/ack"
+#define CPP_NAME	"$H/lib.bin/cpp"
+#define LD_NAME		"$H/lib.bin/em_led"
+#define CV_NAME		"$H/lib.bin/$S/cv"
 #define SHELL	"/bin/sh"
+
+char	*CPP;
+char	*COMP;
 
 int kids =  -1;
 int ecount = 0;
@@ -73,6 +89,73 @@ struct arglist CPP_FLAGS = {
 	}
 };
 
+struct arglist LD_HEAD = {
+	2,
+	{
+		"$H/lib/$S/head_em",
+#ifdef FCC
+		"$H/lib/$S/head_$A"
+#endif
+#ifdef FM2
+		"$H/lib/$S/head_m2"
+#endif
+#ifdef FPC
+		"$H/lib/$S/head_pc"
+#endif
+	}
+};
+
+struct arglist LD_TAIL = {
+#if defined(sun3) || defined(i386)
+	5,
+#else
+	4,
+#endif
+	{
+#ifdef FCC
+		"$H/lib/$S/tail_$A",
+#endif
+#ifdef FM2
+		"$H/lib/$S/tail_m2",
+#endif
+#ifdef FPC
+		"$H/lib/$S/tail_pc",
+#endif
+#if defined(sun3) || defined(i386)
+		"$H/lib/$M/tail_fp",
+#endif
+		"$H/lib/$M/tail_em",
+		"$H/lib/$S/tail_mon",
+		"$H/lib/$M/end_em"
+	}
+};
+
+struct arglist align = {
+	5, {
+#ifdef sun3
+		"-a0:4",
+		"-a1:4",
+		"-a2:0x20000",
+		"-a3:4",
+		"-b0:0x2020"
+#endif
+#ifdef vax4
+		"-a0:4",
+		"-a1:4",
+		"-a2:0x400",
+		"-a3:4",
+		"-b0:0"
+#endif
+#ifdef i386
+		"-a0:4",
+		"-a1:4",
+		"-a2:4",
+		"-a3:4",
+		"-b1:0x1880000"
+#endif
+	}
+};
+
 struct arglist COMP_FLAGS;
 
 char *o_FILE = "a.out"; /* default name for executable file */
@@ -85,7 +168,6 @@ char ProgCall[128];
 
 struct arglist SRCFILES;
 struct arglist LDFILES;
-struct arglist GEN_LDFILES;
 
 int RET_CODE = 0;
 
@@ -98,11 +180,13 @@ int c_flag = 0;
 int g_flag = 0;
 int v_flag = 0;
 int O_flag = 0;
+int ansi_c = 0;
 
 char *mkstr();
 char *malloc();
 char *alloc();
 char *extension();
+char *expand_string();
 
 USTRING ofile;
 USTRING BASE;
@@ -124,17 +208,18 @@ trapcc(sig)
 
 #ifdef FCC
 #define lang_suffix()	"c"
-#define comp_name()	"*c_ce"
+#define comp_name()	"$H/lib.bin/c_ce"
+#define ansi_c_name()	"$H/lib.bin/c_ce.ansi"
 #endif FCC
 
 #ifdef FM2
 #define lang_suffix()	"mod"
-#define comp_name()	"*m2_ce"
+#define comp_name()	"$H/lib.bin/m2_ce"
 #endif FM2
 
 #ifdef FPC
 #define lang_suffix()	"p"
-#define comp_name()	"*pc_ce"
+#define comp_name()	"$H/lib.bin/pc_ce"
 #endif FPC
 
 
@@ -147,8 +232,10 @@ lang_opt(str)
 	case '-':	/* debug options */
 		append(&COMP_FLAGS, str);
 		return 1;
-	case 'a':	/* ignore -ansi flag */
+	case 'a':	/* -ansi flag */
 		if (! strcmp(str, "-ansi")) {
+			ansi_c = 1;
+			COMP = expand_string(ansi_c_name());
 			return 1;
 		}
 		break;
@@ -243,24 +330,15 @@ main(argc, argv)
 	char *ext;
 	register struct arglist *call = &CALL_VEC;
 	char *file;
-	char *ldfile = 0;
-	USTRING COMP;
+	char *ldfile;
+	char *INCLUDE = 0;
 	int compile_cnt = 0;
 
 	setbuf(stdout, (char *) 0);
 	basename(*argv++,ProgCall);
-	strcat(INCLUDE, ROOT_DIR);
-#ifdef FM2
-	strcat(INCLUDE, M2DEF);
-#endif FM2
-#ifdef FCC
-	strcat(INCLUDE, CCINCL);
-	append(&COMP_FLAGS, "-L");
-#endif FCC
-#ifdef FPC
-	INCLUDE[0] = '\0';
-#endif FPC
-	strcpy(COMP,comp_name());
+
+	COMP = expand_string(comp_name());
+	CPP = expand_string(CPP_NAME);
 
 #ifdef vax4
 	append(&CPP_FLAGS, "-D__vax");
@@ -303,6 +381,12 @@ main(argc, argv)
 			append(&COMP_FLAGS, str);
 			g_flag = 1;
 			break;
+		case 'a':	/* -ansi flag */
+			if (! strcmp(str, "-ansi")) {
+				ansi_c = 1;
+				return 1;
+			}
+			break;
 		case 'o':	/* target file */
 			if (argc-- >= 0) {
 				o_flag = 1;
@@ -312,9 +396,12 @@ main(argc, argv)
 				) {
 					error("-o would overwrite %s", o_FILE);
 				}
-				append(&LD_FLAGS, "-o");
-				append(&LD_FLAGS, o_FILE);
 			}
+			break;
+		case 'u':	/* mark identifier as undefined */
+			append(&LD_FLAGS, str);
+			if (argc-- >= 0)
+				append(&LD_FLAGS, *argv++);
 			break;
 		case 'O':	/* use built in peephole optimizer */
 			O_flag = 1;
@@ -330,8 +417,14 @@ main(argc, argv)
 		case 'M':	/* use other compiler (for testing) */
 			strcpy(COMP, str+2);
 			break;
+		case 's':	/* strip */
+			if (str[2] == '\0') {
+				append(&LD_FLAGS, str);
+				break;
+			}
+			/* fall through */
 		default:
-			append(&LD_FLAGS, str);
+			warning("%s flag ignored", str);
 			break;
 		}
 	}
@@ -354,6 +447,13 @@ main(argc, argv)
 		o_flag = 0;
 	}
 
+#ifdef FM2
+	INCLUDE = expand_string("-I$H/lib/m2");
+#endif FM2
+#ifdef FCC
+	INCLUDE = expand_string("-I$H/include/tail_ac");
+	append(&COMP_FLAGS, "-L");
+#endif FCC
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
 	while (count-- > 0) {
@@ -425,31 +525,37 @@ main(argc, argv)
 			continue;
 
 		append(&LDFILES, file);
-		if (ldfile) {
-			append(&GEN_LDFILES, ldfile);
-			ldfile = 0;
-		}
 	}
 
 	/* *.s to a.out */
 	if (RET_CODE == 0 && LDFILES.al_argc > 0) {
 		init(call);
-		append(call, LD);
-#ifdef FCC
-		append(call, "-.c");
-		append(call, "-ansi");
-#endif
-#ifdef FM2
-		append(call, "-.mod");
-#endif
-#ifdef FPC
-		append(call, "-.p");
-#endif
-		if (g_flag) append(call, "-g");
+		expand(&LD_HEAD);
+		expand(&LD_TAIL);
+		append(call, expand_string(LD_NAME));
+		concat(call, &align);
+		append(call, "-o");
+		strcpy(tmp_file, TMP_DIR);
+		strcat(tmp_file, "/F_XXXXXX");
+		mktemp(tmp_file);
+		append(call, tmp_file);
+		concat(call, &LD_HEAD);
 		concat(call, &LD_FLAGS);
 		concat(call, &LDFILES);
-		if (runvec(call, (char *) 0) && GEN_LDFILES.al_argc == 1)
-			;
+		if (g_flag) append(call, expand_string("$H/lib/$M/tail_db"));
+#ifdef FCC
+		if (! ansi_c) append(call, expand_string("$H/lib/$S/tail_cc.1s"));
+#endif
+		concat(call, &LD_TAIL);
+		if (! runvec(call, (char *) 0)) {
+			cleanup(tmp_file);
+			exit(RET_CODE);
+		}
+		init(call);
+		append(call, expand_string(CV_NAME));
+		append(call, tmp_file);
+		append(call, o_FILE);
+		runvec(call, (char *) 0);
 		cleanup(tmp_file);
 	}
 	exit(RET_CODE);
@@ -479,22 +585,68 @@ alloc(u)
 	return p;
 }
 
+char *
+expand_string(s)
+	char	*s;
+{
+	char	buf[1024];
+	register char	*p = s;
+	register char	*q = &buf[0];
+	int expanded = 0;
+
+	if (!p) return p;
+	while (*p) {
+		if (*p == '$') {
+			p++;
+			expanded = 1;
+			switch(*p++) {
+			case 'A':
+				if (ansi_c) strcpy(q, "ac");
+				else strcpy(q, "cc.2g");
+				break;
+			case 'H':
+				strcpy(q, ROOT_DIR);
+				break;
+			case 'M':
+				strcpy(q, MACHNAME);
+				break;
+			case 'S':
+				strcpy(q, SYSNAME);
+				break;
+			default:
+				panic("internal error");
+				break;
+			}
+			while (*q) q++;
+		}
+		else *q++ = *p++;
+	}
+	if (! expanded) return s;
+	*q++ = '\0';
+	p = alloc((unsigned int) (q - buf));
+	return strcpy(p, buf);
+}
+
 append(al, arg)
-	struct arglist *al;
+	register struct arglist *al;
 	char *arg;
 {
 	if (!arg || !*arg) return;
 	if (al->al_argc >= MAXARGC)
 		panic("argument list overflow");
-	if (*arg == '*') {
-		char *p;
-		p = alloc((unsigned)strlen(ROOT_DIR)+strlen(BINDIR)+strlen(arg+1)+1);
-		strcpy(p, ROOT_DIR);
-		strcat(p, BINDIR);
-		strcat(p, arg+1);
-		arg = p;
-	}
 	al->al_argv[(al->al_argc)++] = arg;
+}
+
+expand(al)
+	register struct arglist *al;
+{
+	register int i = al->al_argc;
+	register char **p = &(al->al_argv[0]);
+
+	while (i-- > 0) {
+		*p = expand_string(*p);
+		p++;
+	}
 }
 
 concat(al1, al2)
@@ -507,14 +659,7 @@ concat(al1, al2)
 	if ((al1->al_argc += i) >= MAXARGC)
 		panic("argument list overflow");
 	while (i-- > 0) {
-		if (**q == '*') {
-			*p = alloc((unsigned)strlen(ROOT_DIR)+strlen(BINDIR)+strlen(*q+1)+2);
-			strcpy(*p, ROOT_DIR);
-			strcat(*p, BINDIR);
-			strcat(*p++, *q+1);
-			q++;
-		}
-		else	*p++ = *q++;
+		*p++ = *q++;
 	}
 }
 
@@ -646,10 +791,9 @@ pr_vec(vec)
 	register char **ap = &vec->al_argv[1];
 
 	vec->al_argv[vec->al_argc] = 0;
-	fputs(*ap, stderr);
+	fprintf(stderr, "%s", *ap);
 	while (*++ap) {
-		putc(' ', stderr);
-		fputs(*ap, stderr);
+		fprintf(stderr, " %s", *ap);
 	}
 }
 

@@ -30,10 +30,10 @@ opr:
 	make pr | opr
 
 clean:
-	rm -f *,$(SUF) afcc afm2 afpc Out
+	rm -f *.$(SUF) afcc afm2 afpc Out
 
 lint:
-	$(LINT) $(LINTFLAGS) -DFCC $(SRC_DIR)/driver.c
+	$(LINT) $(LINTFLAGS) -DFCC -D`ack_sys` $(SRC_DIR)/driver.c
 
 afcc.$(SUF):	$(SRC_DIR)/driver.c $(TARGET_HOME)/config/em_path.h
 	$(CC) $(CFLAGS) -c -DFCC -D$(MACH) -D`ack_sys` $(SRC_DIR)/driver.c
