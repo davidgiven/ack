@@ -1,0 +1,15 @@
+isalnum.c
+isalpha.c
+iscntrl.c
+isdigit.c
+isgraph.c
+islower.c
+isprint.c
+ispunct.c
+isspace.c
+isupper.c
+isxdigit.c
+isascii.c
+toupper.c
+tolower.c
+chartab.c
