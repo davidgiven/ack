@@ -1,6 +1,6 @@
 /* $Header$ */
 #ifndef NOFLOAT
-extern double modf();
+
 static char *cvt();
 #define NDIGITS	128
 
@@ -20,21 +20,32 @@ fcvt(value, ndigit, decpt, sign)
 	return cvt(value, ndigit, decpt, sign, 0);
 }
 
+static struct powers_of_10 {
+	double pval;
+	double rpval;
+	int exp;
+} p10[] = {
+	1.0e32, 1.0e-32, 32,
+	1.0e16, 1.0e-16, 16,
+	1.0e8, 1.0e-8, 8,
+	1.0e4, 1.0e-4, 4,
+	1.0e2, 1.0e-2, 2,
+	1.0e1, 1.0e-1, 1,
+	1.0e0, 1.0e0, 0
+};
+
 static char *
 cvt(value, ndigit, decpt, sign, ecvtflag)
 	double value;
 	int ndigit, *decpt, *sign;
 {
-	double intpart, fractpart;
 	static char buf[NDIGITS+1];
-	char buf1[NDIGITS+1];
-	register char *pe = buf1;
-	register  char *pb;
-	int pointpos = 0;
-
+	register char *p = buf;
+	register char *pe;
 
 	if (ndigit < 0) ndigit = 0;
-	if (ndigit >= NDIGITS - 10) ndigit = NDIGITS - 11;
+	if (ndigit > NDIGITS) ndigit = NDIGITS;
+	pe = &buf[ndigit];
 
 	*sign = 0;
 	if (value < 0) {
@@ -42,60 +53,44 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		value = -value;
 	}
 
-	fractpart = modf(value, &intpart);
-	if (intpart != 0) {
-		do {	/* get digits of integer part, low order digit
-			   first
-			*/
-			value = modf(intpart/10.0, &intpart);
-			/* compensate for rounding errors, because
-			   the conversion to "int" truncates
-			*/
-			if (pe >= &buf1[NDIGITS]) {
-				pb = &buf1[10];
-				pe = &buf1[0];
-				while (pb < &buf1[NDIGITS]) *pe++ = *pb++;
+	*decpt = 0;
+	if (value != 0.0) {
+		register struct powers_of_10 *pp = &p10[0];
+
+		if (value >= 10.0) do {
+			while (value >= pp->pval) {
+				value *= pp->rpval;
+				*decpt += pp->exp;
 			}
-			*pe++ = (int)((value+.05) * 10.0) + '0';
-			pointpos++;
-		} while (intpart != 0);
-		pb = buf;
-		while (pe > buf1) *pb++ = *--pe;
-	}
-	else {
-		pb = &buf[0];
-		if (value > 0) {
-			fractpart = value;
-			while ((value = value*10.0) < 1) {
-				fractpart = value;
-				pointpos--;
+		} while ((++pp)->exp > 0);
+
+		pp = &p10[0];
+		if (value < 1.0) do {
+			while (value * pp->pval < 10.0) {
+				value *= pp->pval;
+				*decpt -= pp->exp;
 			}
-		}
+		} while ((++pp)->exp > 0);
+
+		(*decpt)++;	/* because now value in [1.0, 10.0) */
 	}
-	pe = &buf[ndigit];
 	if (! ecvtflag) {
 		/* for fcvt() we need ndigit digits behind the dot */
-		pe += pointpos;
-		if (pe < buf) {
-			/* pointpos was too far left of the beginning */
-			buf[0] = 0;
-			*decpt = pointpos;
-			return buf;
-		}
+		pe += *decpt;
 		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
-	while (pb <= pe) {
-		fractpart = modf(fractpart * 10.0, &value);
-		*pb++ = (int)value + '0';
+	while (p <= pe) {
+		*p++ = (int)value + '0';
+		value = 10.0 * (value - (int)value);
 	}
-	pb = pe;
-	*pb += 5;	/* round of at the end */
-	while (*pb > '9') {
-		*pb = '0';
-		if (pb > buf) ++*--pb;
+	p = pe;
+	*p += 5;	/* round of at the end */
+	while (*p > '9') {
+		*p = '0';
+		if (p > buf) ++*--p;
 		else {
-			*pb = '1';
-			pointpos++;
+			*p = '1';
+			++*decpt;
 			if (! ecvtflag) {
 				/* maybe add another digit at the end,
 				   because the point was shifted right
@@ -105,7 +100,6 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 			}
 		}
 	}
-	*decpt = pointpos;
 	*pe = '\0';
 	return buf;
 }
