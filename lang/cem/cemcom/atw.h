@@ -5,6 +5,6 @@
 /* $Header$ */
 /* Align To Word boundary Definition	*/
 
-extern int word_align;	/* align of a word	*/
+extern arith word_size;
 
-#define	ATW(arg)	((((arg) + word_align - 1) / word_align) * word_align)
+#define	ATW(arg)	((((arg) + word_size - 1) / word_size) * word_size)

@@ -435,10 +435,10 @@ firstline:
 		buf[0] = '-';	/* good heavens...	*/
 		if (np == &buf[NUMSIZE+1]) {
 			lexerror("floating constant too long");
-			ptok->tk_fval = Salloc("0.0", 5) + 1;
+			ptok->tk_fval = Salloc("0.0",(unsigned) 5) + 1;
 		}
 		else
-			ptok->tk_fval = Salloc(buf, np - buf) + 1;
+			ptok->tk_fval = Salloc(buf,(unsigned) (np - buf)) + 1;
 		return ptok->tk_symb = FLOATING;
 #endif NOFLOAT
 	}
@@ -489,7 +489,7 @@ string_token(nm, stop_char, plen)
 {
 	register int ch;
 	register int str_size;
-	register char *str = Malloc(str_size = ISTRSIZE);
+	register char *str = Malloc((unsigned) (str_size = ISTRSIZE));
 	register int pos = 0;
 	
 	LoadChar(ch);
@@ -514,7 +514,7 @@ string_token(nm, stop_char, plen)
 		}
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Srealloc(str, str_size += RSTRSIZE);
+			str = Srealloc(str, (unsigned) (str_size += RSTRSIZE));
 		LoadChar(ch);
 	}
 	str[pos++] = '\0'; /* for filenames etc. */

@@ -30,6 +30,7 @@
 #include	"specials.h"
 #include	"atw.h"
 #include	"assert.h"
+#include	"align.h"
 
 label lab_count = 1;
 label datlab_count = 1;
@@ -368,7 +369,7 @@ code_declaration(idf, expr, lvl, sc)
 					error("size of %s unknown", text);
 					size = (arith)0;
 				}
-				C_bss_cst(align(size, word_align), (arith)0, 1);
+				C_bss_cst(ATW(size), (arith)0, 1);
 			}
 			break;
 		case EXTERN:
@@ -460,7 +461,7 @@ bss(idf)
 		warning("actual array of size 0");
 	*/
 	C_df_dnam(idf->id_text);
-	C_bss_cst(align(size, word_align), (arith)0, 1);
+	C_bss_cst(ATW(size), (arith)0, 1);
 }
 
 formal_cvt(df)

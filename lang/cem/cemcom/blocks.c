@@ -9,9 +9,11 @@
 #include "arith.h"
 #include "sizes.h"
 #include "atw.h"
+#include "align.h"
 #ifndef STB
 #include "label.h"
 #include "stack.h"
+extern arith tmp_pointer_var();
 #endif STB
 
 /*	Because EM does not support the loading and storing of

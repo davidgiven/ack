@@ -656,7 +656,7 @@ domacro()
 		SkipRestOfLine();
 		return;
 	}
-	do_line(tk.tk_ival);
+	do_line((unsigned int) tk.tk_ival);
 	EoiForNewline = 0;
 	SkipEscNewline = 0;
 }

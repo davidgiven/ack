@@ -78,7 +78,7 @@ idf_hashed(tg, size, hc)
 	notch = new_idf();
 	notch->next = *hook;
 	*hook = notch;		/* hooked in */
-	notch->id_text = Salloc(tg, size);
+	notch->id_text = Salloc(tg, (unsigned) size);
 #ifndef NOPP
 	notch->id_resmac = 0;
 #endif NOPP
@@ -551,7 +551,7 @@ init_idf(idf)
 		error("multiple initialization of %s", idf->id_text);
 	if (def->df_sc == TYPEDEF)	{
 		warning("typedef cannot be initialized");
-		def->df_sc == EXTERN;		/* ??? *//* What else ? */
+		def->df_sc = EXTERN;		/* ??? *//* What else ? */
 	}
 	def->df_initialized = 1;
 }

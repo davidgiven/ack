@@ -193,6 +193,12 @@ cut_size(expr)
 	int size = (int) expr->ex_type->tp_size;
 
 	ASSERT(expr->ex_class == Value);
+	if (expr->ex_type->tp_fund == POINTER) {
+		/* why warn on "ptr-3" ?
+		   This quick hack fixes it
+		*/
+		uns = 0;
+	}
 	if (uns) {
 		if (o1 & ~full_mask[size])
 			expr_warning(expr,

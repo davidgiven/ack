@@ -117,6 +117,7 @@ char *source = 0;
 char *nmlist = 0;
 
 #ifdef USE_TMP
+extern char *strcpy(), *strcat();
 extern char *mktemp();		/* library routine	*/
 char *tmpfdir = "/tmp";		/* where to keep the temporary file */
 static char *tmpfname = "/Cem.XXXXXX";
@@ -158,7 +159,12 @@ compile(argc, argv)
 		fatal("use: %s source destination [namelist]", prog_name);
 		break;
 	}
-	source = strcmp(argv[0], "-") ? argv[0] : 0;
+	if (strcmp(argv[0], "-"))
+		FileName = source = argv[0];
+	else {
+		source = 0;
+		FileName = "standard input";
+	}
 
 #ifdef USE_TMP
 	if (! options['N']) {
@@ -171,11 +177,9 @@ compile(argc, argv)
 	if (destination && strcmp(destination, "-") == 0)
 		destination = 0;
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
-		fatal("%s: no source file %s\n", prog_name, 
-			source ? source : "stdin");
+		fatal("%s: no source file %s\n", prog_name, FileName);
 	File_Inserted = 1;
 	init();
-	FileName = source;
 	LineNumber = 0;
 #ifndef NOPP
 	WorkingDir = getwdir(source);
@@ -410,3 +414,13 @@ AppendFile(src, dst)
 		sys_close(fp_dst);
 }
 #endif USE_TMP
+
+No_Mem()
+{
+	fatal("out of memory");
+}
+
+C_failed()
+{
+	fatal("write failed");
+}
