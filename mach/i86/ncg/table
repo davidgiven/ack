@@ -156,7 +156,7 @@ rm1		= REG1 + memory1 .
 rmorconst1	= const + rm1 .
 regorconst12	= REG1 + GENREG + const .
 dest1		= REG1 + memory1 .
-rm12		= rm1 + memory2 + REG .
+rm12		= rm1 + memory2 .
 
 /* Modes used to indicate tokens to be removed from the fakestack */
 reg_indexed	= ind_reg2 + ind_regoff2 + ind_reg1 + ind_regoff1 .
@@ -257,8 +257,8 @@ sub anyreg:rw:cc, rmorconst+halfindir:ro.
 check "test" rm:ro, regorconst:ro kills :cc.
 check "test" anyreg:ro, rmorconst:ro kills :cc.
 testb "testb" rm12:ro, regorconst:ro kills :cc.
-testb "testb" REG+REG1:ro, rmorconst:ro kills :cc.
-testb "testb" ACC+ACC1:ro, const:ro kills :cc.
+testb "testb" REG1:ro, rmorconst:ro kills :cc.
+testb "testb" ACC1:ro, const:ro kills :cc.
 xchg rm:rw, anyreg:rw.
 xchg anyreg:rw, rm:rw.
 xor rm:rw:cc, regorconst:ro.
