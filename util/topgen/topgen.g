@@ -34,7 +34,13 @@ optim_description
 			}
 	separator SPACE* mode_definitions
 	separator SPACE* patterns		
-	separator user_routines
+	separator 
+			{   register int c;
+			    fprintf(genc, linedir, lineno, inpfile);
+			    while ((c = getc(input)) != EOF) {
+				putc(c,genc);
+			    }
+			}
 ;
 
 parameter_line
@@ -282,14 +288,6 @@ replacement (int *n;)
 	]
 ;
 
-user_routines
-	{register c;} :
-			{   fprintf(genc, linedir, lineno, inpfile);
-			    while ((c = getc(input)) != EOF) {
-				putc(c,genc);
-			    }
-			}
-;
 
 identifier
 	{ char *p = idbuf; } :
