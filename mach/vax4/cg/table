@@ -2947,7 +2947,7 @@ loc inn zne $2==4	| source4 |
 			remove(ALL)
 			"bitl\t%[1],$$%(1<<$1%)"
 			"jneq\t$3"		|	| |
-inn zeq $1==4	| source4 source4 |
+inn zeq $1==4	| source1or2or4 source4 |
 			remove(ALL)
 			allocate(REG)
 			"cmpl\t%[1],$$31"
@@ -2956,7 +2956,7 @@ inn zeq $1==4	| source4 source4 |
 			"bitl\t%[2],%[a]"
 			"jeql\t$2"		|	| |
 #ifdef LOCLABS
-inn zne $1==4	| source4 source4 |
+inn zne $1==4	| source1or2or4 source4 |
 			remove(ALL)
 			allocate(REG)
 			"cmpl\t%[1],$$31"
