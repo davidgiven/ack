@@ -264,6 +264,14 @@ q
 ABC
 	  done
 	)
+	( cd ..
+	  cp Action Action.orig
+	  ed - Action <<ABC
+/EM interpreter in C/,/^end/s/^/!/
+w
+q
+ABC
+	)
 	;;
 *)	( cd ../lang/cem/cemcom
 	  cp BigPars Parameters
