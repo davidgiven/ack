@@ -13,7 +13,7 @@ INT =		int
 
 IP_SPEC =	$(SRC_HOME)/etc/ip_spec.t
 TRAPS =		$(SRC_HOME)/etc/traps
-APP_A =		$(SRC_HOME)/doc/int/appA	# to be moved later
+APP_A =		$(SRC_HOME)/doc/int/appA#	# to be moved later
 
 CFILES =	$(SRC_DIR)/alloc.c \
 	$(SRC_DIR)/core.c \

@@ -35,7 +35,7 @@ lint:
 	$(LINT) $(LINTOPTIONS) $(SRC_DIR)/mkiswitch.c $(UTIL_HOME)/lib.bin/em_data.$(LINTSUF)
 	$(LINT) $(LINTOPTIONS) $(SRC_DIR)/mkswitch.c
 
-clean:						# NOT the cases files !
+clean:#						# NOT the cases files !
 	rm -f a.out core $(OBJ) mkswitch mkiswitch
 
 bare:		clean
