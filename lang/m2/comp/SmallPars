@@ -46,10 +46,10 @@
 
 
 !File: debugcst.h
-#undef DEBUG		1	/* perform various self-tests		*/
+/*#define DEBUG		1	/* perform various self-tests		*/
 
 !File: inputtype.h
-#undef INP_READ_IN_ONE	1	/* read input file in one	*/
+/*#define INP_READ_IN_ONE	1	/* read input file in one	*/
 
 
 !File: density.h
@@ -86,14 +86,14 @@
 				*/
 
 !File: dbsymtab.h
-#undef DBSYMTAB	1	/* ability to produce symbol table for debugger */
+/*#define DBSYMTAB	1	/* ability to produce symbol table for debugger */
 
 
 !File: use_insert.h
-#undef USE_INSERT	1	/* use C_insertpart mechanism */
+/*#define USE_INSERT	1	/* use C_insertpart mechanism */
 
 
 !File: uns_arith.h
-#undef UNSIGNED_ARITH	unsigned arith
+/*#define UNSIGNED_ARITH	unsigned arith	/* when it is supported */
 
 

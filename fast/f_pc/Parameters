@@ -1,5 +1,5 @@
 !File: debugcst.h
-#undef DEBUG		1	/* perform various self-tests	*/
+/* #define DEBUG		1	/* perform various self-tests	*/
 
 
 !File: density.h

@@ -45,7 +45,7 @@
 
 
 !File: debugcst.h
-#undef DEBUG		1	/* perform various self-tests		*/
+/*#define DEBUG		1	/* perform various self-tests		*/
 
 !File: inputtype.h
 #define INP_READ_IN_ONE	1	/* read input file in one	*/
@@ -56,22 +56,22 @@
 
 
 !File: squeeze.h
-#undef SQUEEZE		1	/* define on "small" machines */
+/*#define SQUEEZE		1	/* define on "small" machines */
 
 
 !File: strict3rd.h
-#undef STRICT_3RD_ED	1	/* define on "small" machines, and if you want
+/*#define STRICT_3RD_ED	1	/* define on "small" machines, and if you want
 				   a compiler that only implements "3rd edition"
 				   Modula-2
 				*/
 
 
 !File: nocross.h
-#undef NOCROSS		1	/* define when cross-compiler not needed */
+/*#define NOCROSS		1	/* define when cross-compiler not needed */
 
 
 !File: nostrict.h
-#undef NOSTRICT		1	/* define when STRICT warnings disabled
+/*#define NOSTRICT		1	/* define when STRICT warnings disabled
 				   (yet another squeezing method)
 				*/
 
@@ -94,6 +94,6 @@
 
 
 !File: uns_arith.h
-#undef UNSIGNED_ARITH	unsigned arith
+/*#define UNSIGNED_ARITH	unsigned arith	/* when it is supported */
 
 

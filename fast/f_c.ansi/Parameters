@@ -1,5 +1,5 @@
 !File: lint.h
-#undef	LINT		1	/* if defined, 'lint' is produced	*/
+/*#define	LINT		1	/* if defined, 'lint' is produced	*/
 
 
 !File: pathlength.h
@@ -75,15 +75,15 @@
 
 
 !File: botch_free.h
-#undef BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
+/*#define BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
 
 
 !File: dataflow.h
-#undef DATAFLOW	1	/* produce some compile-time xref	*/
+/*#define DATAFLOW	1	/* produce some compile-time xref	*/
 
 
 !File: debug.h
-#undef DEBUG		1	/* perform various self-tests		*/
+/*#define DEBUG		1	/* perform various self-tests		*/
 
 
 !File: use_tmp.h
@@ -91,7 +91,7 @@
 					and if USE_TMP is defined let them
 					precede the rest of the generated
 					compact code	*/
-#undef USE_TMP		1	/* use C_insertpart, C_endpart mechanism
+/*#define USE_TMP		1	/* use C_insertpart, C_endpart mechanism
 					to generate EM-code in the order needed
 					for the code-generators. If not defined,
 					the old-style peephole optimizer is
@@ -111,17 +111,17 @@
 
 
 !File: nopp.h
-#undef NOPP		1	/* if NOT defined, use built-int preprocessor */
+/*#define NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h
-#undef NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
+/*#define NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
 
 
 !File: spec_arith.h
 /* describes internal compiler arithmetics */
-#undef	SPECIAL_ARITHMETICS	/* something different from native long */
-#undef UNSIGNED_ARITH	unsigned arith
+/*#define	SPECIAL_ARITHMETICS	/* something different from native long */
+#define UNSIGNED_ARITH	unsigned arith	/* when it is supported */
 
 
 !File: static.h
@@ -133,7 +133,7 @@
 
 
 !File: regcount.h
-#undef REGCOUNT		1	/* count occurrences for register messages */
+/*#define REGCOUNT		1	/* count occurrences for register messages */
 
 
 !File: dbsymtab.h

@@ -1,4 +1,4 @@
-#undef DEBUG 1
+/*#define DEBUG 1	/* define when debugging */
 #include <sun4/asm_linkage.h>
 
 #define BYTES_REVERSED
@@ -52,7 +52,7 @@
 #define FLTSAV_OFFSET	(WINDOWSIZE + FLOATTRANS)
 #define REGSAV		(WINDOWSIZE + FLOATTRANS + ALIGN_GAP + FLTSAV)
 
-#undef MATH_DIVIDE	1
+/*#define MATH_DIVIDE	1	/* define when using mathematical def of / */
 
 #ifndef DEBUG
 #undef arg_error

@@ -46,7 +46,7 @@
 
 
 !File: debugcst.h
-#undef DEBUG		1	/* perform various self-tests		*/
+/*#define DEBUG		1	/* perform various self-tests		*/
 
 !File: inputtype.h
 #define INP_READ_IN_ONE	1	/* read input file in one	*/
@@ -57,11 +57,11 @@
 
 
 !File: squeeze.h
-#undef SQUEEZE		1	/* define on "small" machines */
+/*#define SQUEEZE		1	/* define on "small" machines */
 
 
 !File: strict3rd.h
-#undef STRICT_3RD_ED	1	/* define on "small" machines, and if you want
+/*#define STRICT_3RD_ED	1	/* define on "small" machines, and if you want
 				   a compiler that only implements "3rd edition"
 				   Modula-2
 				*/
@@ -72,7 +72,7 @@
 
 
 !File: nostrict.h
-#undef NOSTRICT		1	/* define when STRICT warnings disabled
+/*#define NOSTRICT		1	/* define when STRICT warnings disabled
 				   (yet another squeezing method)
 				*/
 
@@ -91,7 +91,7 @@
 
 
 !File: use_insert.h
-#undef USE_INSERT	1	/* use C_insertpart mechanism */
+/*#define USE_INSERT	1	/* use C_insertpart mechanism */
 
 
 !File: uns_arith.h
