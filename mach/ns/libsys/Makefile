@@ -18,7 +18,7 @@ head_em.o:	head_em.s
 		$(MACH) -I../../../h -c head_em.s
 
 clean:
-		rm -f *.o
+		rm -f *.o libmon_o.a nohup.out Out
 
 opr :
 		make pr | opr
