@@ -10,6 +10,7 @@ var LIB=mach/i86/lib/tail_
 var LIBIBM=mach/ibm/lib/tail_
 var RT=mach/i86/lib/head_
 var RTIBM=mach/ibm/lib/head_
+var CCP_F=-Dunix
 var INCLUDES=-I{EM}/include -I{EM}/mach/ibm/include
 name be
 	from .m

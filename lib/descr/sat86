@@ -10,6 +10,7 @@ var LIB=mach/i86/lib/tail_
 var ALIB=mach/i86/lib/sat_tail_
 var RT=mach/i86/lib/head_
 var ART=mach/i86/lib/sat_head_
+var CCP_F=-Dunix
 var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m
