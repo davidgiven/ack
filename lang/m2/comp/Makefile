@@ -89,7 +89,7 @@ pr:
 	@pr Makefile Resolve Parameters $(GF) *.H $(HFILES) *.C $(CSRC)
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes \
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles clashes \
 		$(CURRDIR)/main LL.output
 	(cd .. ; rm -rf Xsrc)
 
@@ -138,11 +138,8 @@ casestat.c:	make.allocd
 next.c:		$(NEXTFILES) ./make.next
 		./make.next $(NEXTFILES) > next.c
 
-char.c: char.tab tab
-	tab -fchar.tab >char.c
-
-tab:
-	$(CC) tab.c -o tab
+char.c: char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab >char.c
 
 depend: Cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new

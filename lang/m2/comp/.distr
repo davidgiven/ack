@@ -51,7 +51,6 @@ scope.C
 scope.h
 standards.h
 statement.g
-tab.c
 tmpvar.C
 tokenname.c
 tokenname.h
