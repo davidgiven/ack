@@ -309,7 +309,9 @@ preprocess()
 					lastlineno = dot.tk_line;
 					if (!options['P'])
 						printf("\n#line %ld \"%s\"\n",
-							lastlineno, lastfilenm);
+							lastlineno,
+							lastfilenm
+						);
 				}
 			}
 			else	{

@@ -78,7 +78,7 @@ ch7mon(oper, expp)
 				*/
 				if (def->df_sc == REGISTER) {
 					expr_error(*expp,
-						"& on register variable not allowed");
+					"& on register variable not allowed");
 					(*expp)->ex_type = error_type;
 					break;	/* break case '&' */
 				}
@@ -113,7 +113,8 @@ ch7mon(oper, expp)
 		if (is_fp_cst(*expp))
 			switch_sign_fp(*expp);
 		else
-			*expp = new_oper((*expp)->ex_type, NILEXPR, oper, *expp);
+			*expp = new_oper((*expp)->ex_type,
+						NILEXPR, oper, *expp);
 		break;
 	case '!':
 		if ((*expp)->ex_type->tp_fund == FUNCTION)

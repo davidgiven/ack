@@ -46,7 +46,8 @@ stack_level()	{
 	local_level->sl_next = stl;
 	stl->sl_previous = local_level;
 	stl->sl_level = ++level;
-	stl->sl_local_offset = stl->sl_max_block = local_level->sl_local_offset;
+	stl->sl_local_offset =
+	stl->sl_max_block = local_level->sl_local_offset;
 	local_level = stl;
 }
 
@@ -143,12 +144,16 @@ unstack_level()
 			free_def(def);
 			update_ahead(idf);
 		}
-		while ((sdef = idf->id_sdef) && sdef->sd_level >= level)	{
+		while (	(sdef = idf->id_sdef)
+		&&	sdef->sd_level >= level
+		)	{
 			/* unlink it from the sdef list under the idf block */
 			idf->id_sdef = sdef->next;
 			free_sdef(sdef);
 		}
-		while ((tag = idf->id_struct) && tag->tg_level >= level)	{
+		while (	(tag = idf->id_struct)
+		&&	tag->tg_level >= level
+		)	{
 			/* unlink it from the struct list under the idf block */
 			idf->id_struct = tag->next;
 			free_tag(tag);
@@ -163,8 +168,11 @@ unstack_level()
 	*/
 	lastlvl = local_level;
 	local_level = local_level->sl_previous;
-	if (level > L_LOCAL && lastlvl->sl_max_block < local_level->sl_max_block)
-			local_level->sl_max_block = lastlvl->sl_max_block;
+	if (	level > L_LOCAL
+	&&	lastlvl->sl_max_block < local_level->sl_max_block
+	)	{
+		local_level->sl_max_block = lastlvl->sl_max_block;
+	}
 	free_stack_level(lastlvl);
 	local_level->sl_next = (struct stack_level *) 0;
 	level = local_level->sl_level;

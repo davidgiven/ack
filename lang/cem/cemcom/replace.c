@@ -138,7 +138,8 @@ macro2buffer(idef, actpars, siztext)
 				text[pos++] = *p;
 
 				if (pos == size) {
-					text = Srealloc(text, size += RSTRSIZE);
+					text = Srealloc(text,
+							size += RSTRSIZE);
 				}
 			}
 		}

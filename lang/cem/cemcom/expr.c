@@ -225,11 +225,14 @@ intexpr(ivalue, fund)
 		expr->ex_type = long_type;
 		break;
 	case UNSIGNED:
-		/*	We cannot make a test like "ivalue <= max_unsigned"
-			because, if sizeof(long) == int_size holds, max_unsigned
-			may be a negative long in which case the comparison
-			results in an unexpected answer.  We assume that
-			the type "unsigned long" is not part of portable C !
+		/*	We cannot make a test like
+				ivalue <= max_unsigned
+			because, if
+				sizeof(long) == int_size
+			holds, max_unsigned may be a negative long in
+			which case the comparison results in an unexpected
+			answer.  We assume that the type "unsigned long"
+			is not part of portable C !
 		*/
 		expr->ex_type = 
 			(ivalue & ~max_unsigned) ? long_type : uint_type;

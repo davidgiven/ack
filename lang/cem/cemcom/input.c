@@ -95,8 +95,10 @@ readfile(filename, size)
 	char *cbuf;		/* pointer to buffer to be returned	*/
 	register tmp;
 
-	if ((fd = sys_open(filename, OP_RDONLY)) < 0) /* can't open this file */
+	if ((fd = sys_open(filename, OP_RDONLY)) < 0)	{
+		/* can't open this file */
 		return (char *) 0;
+	}
 
 	if ((*size = sys_fsize(fd)) < 0)
 		fatal("(readfile) cannot get size of file");
@@ -374,8 +376,11 @@ loadbuf()
 
 #ifndef READ_IN_ONE
 #ifndef NOPP
-	if (FilDes >= 0 && (head->bh_size = readblock(FilDes, head->bh_text)) > 0)
+	if (	FilDes >= 0
+	&&	(head->bh_size = readblock(FilDes, head->bh_text)) > 0
+	)	{
 		return ipp = &(head->bh_text[1]), *ipp++;
+	}
 #else NOPP
 	if (FilDes >= 0 && (isize = readblock(FilDes, &ibuf[0])) > 0)
 		return ipp = &ibuf[1], *ipp++;

@@ -105,8 +105,11 @@ ch7bin(expp, oper, expr)
 		}
 		if ((*expp)->ex_type->tp_fund == POINTER)	{
 			pointer_arithmetic(expp, oper, &expr);
-			if (expr->ex_type->tp_size != (*expp)->ex_type->tp_size)
+			if (	expr->ex_type->tp_size !=
+				(*expp)->ex_type->tp_size
+			)	{
 				ch7cast(&expr, CAST, (*expp)->ex_type);
+			}
 			pointer_binary(expp, oper, expr);
 		}
 		else	{

@@ -529,8 +529,9 @@ get_text(formals, length)
 		if (c == '\\') {	/* check for "\\\n"	*/
 			LoadChar(c);
 			if (c == '\n') {
-				/*	more than one line is used for the
-					replacement text. Replace "\\\n" by " ".
+				/*	More than one line is used for the
+					replacement text.
+					Replace "\\\n" by " ".
 				*/
 				text[pos++] = ' ';
 				++LineNumber;

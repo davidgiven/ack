@@ -165,7 +165,8 @@ copyact(ch1, ch2, level)
 			break;
 
 		case ',':
-			if (!level)	{	/* next parameter encountered */
+			if (!level)	{
+				/* next parameter encountered */
 				copy(EOS);
 
 				if (++nr_of_params >= NPARAMS) {

@@ -497,7 +497,8 @@ string_token(nm, stop_char)
 			else {
 				str[pos++] = '\\';
 				if (pos == str_size)
-					str = Srealloc(str, str_size += RSTRSIZE);
+					str = Srealloc(str,
+						str_size += RSTRSIZE);
 				ch = nch;
 			}
 		}

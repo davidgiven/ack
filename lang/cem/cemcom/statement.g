@@ -258,7 +258,8 @@ for_statement
 		{
 			C_df_ilb(l_continue);
 			if (e_incr)
-				code_expr(e_incr, RVAL, FALSE, NO_LABEL, NO_LABEL);
+				code_expr(e_incr, RVAL, FALSE,
+							NO_LABEL, NO_LABEL);
 			C_bra(l_test);
 			C_df_ilb(l_break);
 			stat_unstack();

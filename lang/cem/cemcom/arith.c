@@ -450,7 +450,8 @@ field2arith(expp)
 		register arith bits_in_type = atype->tp_size * 8;
 
 		ch7bin(expp, LEFT,
-			intexpr(bits_in_type - fd->fd_width - fd->fd_shift, INT)
+			intexpr(bits_in_type - fd->fd_width - fd->fd_shift,
+						INT)
 		);
 		ch7bin(expp, RIGHT, intexpr(bits_in_type - fd->fd_width, INT));
 	}

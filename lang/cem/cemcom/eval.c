@@ -57,14 +57,16 @@ arith tmp_pointer_var();
 	int code:		indicates whether the expression tree must be
 				turned into EM code or not. E.g. the expression
 				statement "12;" delivers the expression "12" to
-				EVAL while this should not result in any EM code
+				EVAL while this should not result in any EM
+				code
 	
 	label false_label:
 	label true_label:	if the expression is a logical or relational
 				expression and if the loop of the program
 				depends on the resulting value then EVAL
-				generates jumps to the specified program labels,
-				in case they are specified (i.e. are non-zero)
+				generates jumps to the specified program
+				labels, in case they are specified
+				(i.e. are non-zero)
 */
 
 EVAL(expr, val, code, true_label, false_label)
@@ -242,7 +244,9 @@ EVAL(expr, val, code, true_label, false_label)
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
 			EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
 			if (gencode)
-				if (tp->tp_fund == INT || tp->tp_fund == LONG) {
+				if (	tp->tp_fund == INT
+				||	tp->tp_fund == LONG
+				)	{
 					if (tp->tp_unsigned)
 						C_rmu(tp->tp_size);
 					else
@@ -279,23 +283,25 @@ EVAL(expr, val, code, true_label, false_label)
 			EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
 			if (gencode) {
 				/* The operands have the same type */
+				arith size = leftop->ex_type->tp_size;
+				
 				switch (tp->tp_fund)	{
 				case INT:
 				case LONG:
 					if (leftop->ex_type->tp_unsigned)
-						C_cmu(leftop->ex_type->tp_size);
+						C_cmu(size);
 					else
-						C_cmi(leftop->ex_type->tp_size);
+						C_cmi(size);
 					break;
 				case FLOAT:
 				case DOUBLE:
-					C_cmf(leftop->ex_type->tp_size);
+					C_cmf(size);
 					break;
 				case POINTER:
 					C_cmp();
 					break;
 				case ENUM:
-					C_cmi(leftop->ex_type->tp_size);
+					C_cmi(size);
 					break;
 				default:
 					CRASH();
@@ -537,10 +543,12 @@ EVAL(expr, val, code, true_label, false_label)
 
 			EVAL(leftop, RVAL, TRUE, l_true, l_false);
 			C_df_ilb(l_true);
-			EVAL(rightop->OP_LEFT, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(rightop->OP_LEFT, RVAL, code,
+						NO_LABEL, NO_LABEL);
 			C_bra(l_end);
 			C_df_ilb(l_false);
-			EVAL(rightop->OP_RIGHT, RVAL, code, NO_LABEL, NO_LABEL);
+			EVAL(rightop->OP_RIGHT, RVAL, code,
+						NO_LABEL, NO_LABEL);
 			C_df_ilb(l_end);
 			break;
 		}
