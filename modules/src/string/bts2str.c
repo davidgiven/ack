@@ -21,16 +21,17 @@ bts2str(b, n, s)
 		if (is_print(*f))
 			*t++ = *f++;
 		else {
-			register int n = (*f++ & 0377);
-			register int i;
 			register char *p;
+			register int n = (*f++ & 0377);
 
 			*t = '\\';
 			p = (t += 4);
-			for (i = 0; i < 3; i++) {
-				*--p = (n & 07) + '0';
-				n >>= 3;
-			}
+			*--p = (n & 07) + '0';
+			n >>= 3;
+			*--p = (n & 07) + '0';
+			n >>= 3;
+			*--p = (n & 07) + '0';
+			n >>= 3;
 		}
 	}
 	*t = '\000';
