@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-#include "misc.h"
+#include "flt_misc.h"
 
 flt_b64_sft(e,n)
 	register struct flt_mantissa *e;

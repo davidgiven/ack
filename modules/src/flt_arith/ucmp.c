@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-#include "misc.h"
+#include "flt_misc.h"
 
 int
 ucmp(l1,l2)

@@ -58,18 +58,18 @@ lintlib:
 		lint $(INCLUDES) -Cflt $(SRC)
 		mv llib-lflt.ln $(MODDIR)/lib
 
-b64_add.$(SUF):	misc.h flt_arith.h
-flt_ar2flt.$(SUF):	misc.h flt_arith.h
-flt_div.$(SUF):	misc.h flt_arith.h
-flt_nrm.$(SUF):	misc.h flt_arith.h
-b64_sft.$(SUF):	misc.h flt_arith.h
-flt_chk.$(SUF):	misc.h flt_arith.h
-flt_flt2ar.$(SUF):	misc.h flt_arith.h
-flt_str2fl.$(SUF):	misc.h flt_arith.h
-flt_add.$(SUF):	misc.h flt_arith.h
-flt_cmp.$(SUF):	misc.h flt_arith.h
-flt_mul.$(SUF):	misc.h flt_arith.h
-flt_modf.$(SUF):	misc.h flt_arith.h
-flt_umin.$(SUF):	misc.h
-ucmp.$(SUF):	misc.h flt_arith.h
-split.$(SUF):	misc.h flt_arith.h
+b64_add.$(SUF):	flt_misc.h flt_arith.h
+flt_ar2flt.$(SUF):	flt_misc.h flt_arith.h
+flt_div.$(SUF):	flt_misc.h flt_arith.h
+flt_nrm.$(SUF):	flt_misc.h flt_arith.h
+b64_sft.$(SUF):	flt_misc.h flt_arith.h
+flt_chk.$(SUF):	flt_misc.h flt_arith.h
+flt_flt2ar.$(SUF):	flt_misc.h flt_arith.h
+flt_str2fl.$(SUF):	flt_misc.h flt_arith.h
+flt_add.$(SUF):	flt_misc.h flt_arith.h
+flt_cmp.$(SUF):	flt_misc.h flt_arith.h
+flt_mul.$(SUF):	flt_misc.h flt_arith.h
+flt_modf.$(SUF):	flt_misc.h flt_arith.h
+flt_umin.$(SUF):	flt_misc.h
+ucmp.$(SUF):	flt_misc.h flt_arith.h
+split.$(SUF):	flt_misc.h flt_arith.h

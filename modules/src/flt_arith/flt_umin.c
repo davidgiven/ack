@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-#include "misc.h"
+#include "flt_misc.h"
 
 flt_umin(e)
 	flt_arith *e;

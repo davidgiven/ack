@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-# include "misc.h"
+# include "flt_misc.h"
 
 int
 flt_b64_add(e1,e2)

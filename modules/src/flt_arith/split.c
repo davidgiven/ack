@@ -1,6 +1,6 @@
 /* $Header$ */
 
-#include "misc.h"
+#include "flt_misc.h"
 
 flt_split(e, p)
 	register flt_arith *e;

@@ -5,7 +5,7 @@
 
 /* $Header$ */
 
-#include "misc.h"
+#include "flt_misc.h"
 
 flt_modf(e, ipart, fpart)
 	register flt_arith *e, *ipart, *fpart;

@@ -6,7 +6,7 @@
 /* $Header$ */
 
 #include <ctype.h>
-#include "misc.h"
+#include "flt_misc.h"
 
 /* The following tables can be computed with the following bc(1)
    program:
