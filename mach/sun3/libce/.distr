@@ -19,4 +19,5 @@ mlf8.s
 sbf4.s
 sbf8.s
 vars.s
+sys.s
 head_em.s

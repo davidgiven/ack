@@ -8,7 +8,8 @@ EMOBJ =	aar.o cii.o cmi.o cms.o cmu.o csa.o csb.o cuu.o dia.o exg.o fat.o \
 	inn.o lar.o los.o mon.o nop.o sar.o set.o shp.o sts.o trp.o trpstr.o
 
 FOBJ =	adf4.o adf8.o cff.o cfi.o cfu.o cif.o cmf4.o cmf8.o cuf.o dvf4.o \
-	dvf8.o fef4.o fef8.o fif4.o fif8.o mlf4.o mlf8.o sbf4.o sbf8.o vars.o
+	dvf8.o fef4.o fef8.o fif4.o fif8.o mlf4.o mlf8.o sbf4.o sbf8.o vars.o \
+	sys.o
 
 OBJ =	$(EMOBJ) $(FOBJ)
 
