@@ -322,7 +322,7 @@ int table3(i) {
 	case sp_ilb2:
 		argval = get16();
 		if ( argval<0 ) {
-			error("illegal instruction label %D",argval);
+			error("illegal instruction label %ld",argval);
 			argval=0 ;
 		}
 		break;
@@ -421,12 +421,12 @@ puttyp(t) {
 		break;
 	case sp_cst2:
 	case sp_cst4:
-		printf("%D",argval);
+		printf("%ld",argval);
 		break;
 	case sp_doff:
 		puttyp(offtyp);
 		if (argval >= 0) putchar('+');
-		printf("%D",argval);
+		printf("%ld",argval);
 		break;
 	case sp_pnam:
 		putstr('$',0);
@@ -436,15 +436,15 @@ puttyp(t) {
 		break;
 	case sp_icon:
 		putstr(0,'I');
-		printf("%D",argval);
+		printf("%ld",argval);
 		break;
 	case sp_ucon:
 		putstr(0,'U');
-		printf("%D",argval);
+		printf("%ld",argval);
 		break;
 	case sp_fcon:
 		putstr(0,'F');
-		printf("%D",argval);
+		printf("%ld",argval);
 		break;
 	case sp_cend:
 		putchar('?');
