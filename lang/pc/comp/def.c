@@ -142,8 +142,9 @@ DoDirective(directive, nd, tp, scl, function)
 			break;
 
 		default:
-			crash("(DoDirective)");
-			/* NOTREACHED */
+			node_error(nd, "\"%s\" unknown directive",
+							directive->id_text);
+			return;
 	}
 
 	if( df = define(nd->nd_IDF, CurrentScope, kind) )	{
