@@ -9,9 +9,9 @@ mh=$d/modules/h
 DEC_PATH=decode
 ENC_PATH=encode
 DATA_PATH=$l/em_data.a
-DECLIBS=$(ml)/libread_emk.a $(ml)/libeme.a $(ml)/libprint.a $(ml)/libstring.a \
+DECLIBS=$(ml)/libread_emkV.a $(ml)/libeme.a $(ml)/liballoc.a $(ml)/libprint.a $(ml)/libstring.a \
 	$(ml)/libsystem.a
-ENCLIBS=$(ml)/libread_emeV.a $(ml)/libemk.a $(ml)/libprint.a $(ml)/libstring.a \
+ENCLIBS=$(ml)/libread_emeV.a $(ml)/libemk.a $(ml)/liballoc.a $(ml)/libprint.a $(ml)/libstring.a \
 	$(ml)/libsystem.a
 HFILES=$h/em_mnem.h $h/em_spec.h $h/em_pseu.h $h/em_flag.h $h/em_ptyp.h  \
 	$h/em_mes.h $(mh)/em.h $(mh)/em_comp.h

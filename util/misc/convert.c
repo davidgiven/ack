@@ -31,9 +31,8 @@ int errors;			/* Number of errors */
 main(argc,argv)
 	char **argv;
 {
-	struct e_instr *EM_getinstr();
-	register struct e_instr *p;
-	register struct e_args *ap;
+	struct e_instr buf;
+	register struct e_instr *p = &buf;
 
 	if (argc >= 2) {
 		filename = argv[1];
@@ -42,7 +41,7 @@ main(argc,argv)
 	if (!EM_open(filename)) {
 		fatal(EM_error);
 	}
-	p = EM_getinstr();
+	EM_getinstr(p);
 	C_init((arith) EM_wordsize, (arith) EM_pointersize);
 	if (argc >= 3) {
 		if (!C_open(argv[2])) {
@@ -51,7 +50,7 @@ main(argc,argv)
 	}
 	else	if (!C_open( (char *) 0)) fatal("C_open failed");
 	C_magic();
-	while (p) {
+	while (p->em_type != EM_EOF) {
 		if (p->em_type == EM_FATAL) {
 			fatal("%s", EM_error);
 		}
@@ -61,7 +60,7 @@ main(argc,argv)
 		if (p->em_type != EM_ERROR && !EM_mkcalls(p)) {
 			error("%s", EM_error);
 		}
-		p = EM_getinstr();
+		EM_getinstr(p);
 	}
 	C_close();
 	EM_close();
