@@ -490,6 +490,7 @@ lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
 lsr_l  "lsr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsr   "lsr #1,"	memalt2:rw:cc				cost(2,4).
+move_l "move.l" any4:ro,	A_REG:wo		cost(2,2).
 move_l "move.l" any4:ro,	alterable4:wo:cc	cost(2,2).
 move_w "move.w" any2:ro,	alterable2:wo:cc	cost(2,2).
 move_b "move.b" any1:ro,	alterable1:wo:cc	cost(2,2).
