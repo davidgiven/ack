@@ -25,7 +25,6 @@
 extern char em_flag[];	/* One per EM instruction: indicates parameter kind */
 extern short em_ptyp[];	/* One per parameter kind: indicates parameter type */
 static char *C_error;
-char *C_tmpdir;
 
 EXPORT int
 C_out(p)
