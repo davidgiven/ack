@@ -8,8 +8,8 @@ w1
 	st2.w1_i -577
 	st1.w1_i 577
 w2
-	s2t2: .w2_i 18000 .w2_d 3.141500
-	s2t3->w2_d 3.141500
+	s2t2: .w2_i 18000 .w2_l 31415
+	s2t3->w2_l 31415
 w3
 s3t2.w3_a[ 0] a
 s3t2.w3_a[ 1] b
@@ -37,7 +37,7 @@ s3t2.w3_a[22] w
 s3t2.w3_a[23] x
 s3t2.w3_a[24] y
 s3t2.w3_a[25] z
-s3t2.w3_x 1.000000
+s3t2.w3_u 8000
 s3t1.w3_a[ 0] A
 s3t1.w3_a[ 1] B
 s3t1.w3_a[ 2] C
@@ -64,7 +64,7 @@ s3t1.w3_a[22] W
 s3t1.w3_a[23] X
 s3t1.w3_a[24] Y
 s3t1.w3_a[25] Z
-s3t1.w3_x 0.318319
+s3t1.w3_u 587
 structure parameters
 before -1
 str.w3_a[ 0]	1
@@ -93,7 +93,7 @@ str.w3_a[22]	23
 str.w3_a[23]	24
 str.w3_a[24]	25
 str.w3_a[25]	26
-str.w3_x 2.810000
+str.w3_u 119
 after 1000
 
 Stucture valued functions
