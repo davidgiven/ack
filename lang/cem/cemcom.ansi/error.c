@@ -211,7 +211,6 @@ lexerror(va_alist)			/* fmt, args */
 	va_end(ap);
 }
 
-#ifndef	NOPP
 /*VARARGS*/
 lexwarning(va_alist)			/* fmt, args */
 	va_dcl
@@ -224,7 +223,6 @@ lexwarning(va_alist)			/* fmt, args */
 	}
 	va_end(ap);
 }
-#endif	NOPP
 
 /*VARARGS*/
 crash(va_alist)				/* fmt, args */

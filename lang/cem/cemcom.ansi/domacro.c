@@ -691,6 +691,28 @@ macroeq(s, t)
 	}
 }
 #else NOPP
+
+struct idf *
+GetIdentifier(skiponerr)
+	int skiponerr;		/* skip the rest of the line on error */
+{
+	/*	returns a pointer to the descriptor of the identifier that is
+		read from the input stream. When the input doe not contain
+		an identifier, the rest of the line is skipped when
+		skiponerr is on, and a null-pointer is returned.
+		The substitution of macros is disabled.
+	*/
+	int tok;
+	struct token tk;
+
+	tok = GetToken(&tk);
+	if (tok != IDENTIFIER) {
+		if (skiponerr && tok != EOI) SkipToNewLine(0);
+		return (struct idf *)0;
+	}
+	return tk.tk_idf;
+}
+
 domacro()
 {
 	int tok;
