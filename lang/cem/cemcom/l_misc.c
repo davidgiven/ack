@@ -11,6 +11,9 @@
 
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
+#ifdef ANSI
+#include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -22,7 +25,6 @@
 #include	"stack.h"
 #include	"type.h"
 #include	"level.h"
-#include	"nofloat.h"
 #include	"l_state.h"
 
 extern char *symbol2str();
@@ -31,6 +33,32 @@ extern struct type *func_type;
 PRIVATE lint_enum_arith();
 PRIVATE lint_conversion();
 PRIVATE int numsize();
+
+check_hiding(idf, lvl, sc)
+	struct idf *idf;
+	int lvl;
+	int sc;
+{
+	/*	Checks if there is already a definition for this non-extern
+		name on a more global level.
+	*/
+	struct def *def = idf->id_def;
+	
+	if (	def && def->df_level < lvl
+	&&	! (	lvl == L_FORMAL2
+		||	def->df_level == L_UNIVERSAL
+		||	sc == GLOBAL
+		||	sc == EXTERN
+		)
+	) {
+		warning("%s is already defined as a %s",
+			idf->id_text,
+			def->df_level == L_GLOBAL ? "global" :
+			def->df_level == L_FORMAL2 ? "formal" :
+				"more global local"
+		);
+	}
+}
 
 lint_new_oper(expr)
 	struct expr *expr;

@@ -11,9 +11,14 @@
 
 #include	<alloc.h>
 #include	"interface.h"
+#ifdef ANSI
+#include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
+#include	"declar.h"
+#include	"decspecs.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"stack.h"
@@ -45,7 +50,6 @@ PRIVATE outargs();
 PRIVATE outarg();
 PRIVATE outargstring();
 PRIVATE outargtype();
-PRIVATE implicit_func_decl();
 PRIVATE fill_arg();
 
 lint_declare_idf(idf, sc)
@@ -66,6 +70,19 @@ lint_declare_idf(idf, sc)
 	if (level >= L_LOCAL && sc != STATIC && is_function) {
 		local_EFDC(idf);
 	}
+}
+
+lint_non_function_decl(ds, dc)
+	struct decspecs *ds;
+	struct declarator *dc;
+{
+	register struct def *def = dc->dc_idf->id_def;
+	register int is_function = def->df_type->tp_fund == FUNCTION;
+
+	if (is_function)
+		def2decl(ds->ds_sc);
+	if (def->df_sc != TYPEDEF)
+		outdef();
 }
 
 lint_ext_def(idf, sc)
@@ -466,6 +483,7 @@ outargtype(tp)
 	}
 }
 
+#ifdef	IMPLICIT
 PRIVATE
 implicit_func_decl(idf, file, line)
 	struct idf *idf;
@@ -483,6 +501,7 @@ implicit_func_decl(idf, file, line)
 	output_def(&od);
 	/* The other fields are not used for this class. */
 }
+#endif	IMPLICIT
 
 fill_outcall(ex, used)
 	struct expr *ex;
@@ -491,10 +510,12 @@ fill_outcall(ex, used)
 	register struct idf *idf = ex->OP_LEFT->VL_IDF;
 	register struct def *def = idf->id_def;
 
+#ifdef	IMPLICIT
 	if (def->df_sc == IMPLICIT && !idf->id_def->df_used) {
 		/* IFDC, first time */
 		implicit_func_decl(idf, ex->ex_file, ex->ex_line);
 	}
+#endif	IMPLICIT
 
 	OutCall.od_type = def->df_type->tp_up;
 	OutCall.od_statnr = (def->df_sc == STATIC ? stat_number : 0);

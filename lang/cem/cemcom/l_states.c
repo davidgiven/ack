@@ -13,6 +13,9 @@
 #include	"interface.h"
 #include	"assert.h"
 #include	"debug.h"
+#ifdef ANSI
+#include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
@@ -24,7 +27,6 @@
 #include	"stack.h"
 #include	"type.h"
 #include	"level.h"
-#include	"nofloat.h"
 #include	"l_lint.h"
 #include	"l_brace.h"
 #include	"l_state.h"
@@ -201,7 +203,9 @@ lint_1_global(idf, def)
 	case STATIC:
 	case EXTERN:
 	case GLOBAL:
+#ifdef	IMPLICIT
 	case IMPLICIT:
+#endif	IMPLICIT
 		if (fund == ERRONEOUS)
 			break;
 

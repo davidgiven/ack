@@ -11,7 +11,7 @@
 #ifndef	LINT
 #include	<em.h>
 #else
-#include	"em_lint.h"
+#include	"l_em.h"
 #endif	LINT
 
 #include	"nopp.h"

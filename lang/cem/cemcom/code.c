@@ -9,7 +9,7 @@
 #ifndef	LINT
 #include	<em.h>
 #else
-#include	"em_lint.h"
+#include	"l_em.h"
 #include	"l_lint.h"
 #endif	LINT
 #include	"botch_free.h"

@@ -121,7 +121,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
-	 file_info.h tokenname.h em_lint.h l_lint.h
+	 file_info.h tokenname.h l_em.h l_lint.h
 
 HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
@@ -466,7 +466,7 @@ code.o: debug.h
 code.o: declar.h
 code.o: decspecs.h
 code.o: def.h
-code.o: em_lint.h
+code.o: l_em.h
 code.o: expr.h
 code.o: file_info.h
 code.o: idf.h
@@ -508,7 +508,7 @@ error.o: LLlex.h
 error.o: arith.h
 error.o: debug.h
 error.o: def.h
-error.o: em_lint.h
+error.o: l_em.h
 error.o: errout.h
 error.o: expr.h
 error.o: file_info.h
@@ -660,7 +660,7 @@ stack.o: arith.h
 stack.o: botch_free.h
 stack.o: debug.h
 stack.o: def.h
-stack.o: em_lint.h
+stack.o: l_em.h
 stack.o: idf.h
 stack.o: level.h
 stack.o: lint.h
@@ -746,7 +746,7 @@ switch.o: botch_free.h
 switch.o: code.h
 switch.o: debug.h
 switch.o: density.h
-switch.o: em_lint.h
+switch.o: l_em.h
 switch.o: expr.h
 switch.o: idf.h
 switch.o: label.h
@@ -771,7 +771,7 @@ conversion.o: type.h
 util.o: Lpars.h
 util.o: align.h
 util.o: def.h
-util.o: em_lint.h
+util.o: l_em.h
 util.o: lint.h
 util.o: nocross.h
 util.o: nofloat.h
@@ -948,7 +948,7 @@ statement.o: botch_free.h
 statement.o: code.h
 statement.o: debug.h
 statement.o: def.h
-statement.o: em_lint.h
+statement.o: l_em.h
 statement.o: expr.h
 statement.o: file_info.h
 statement.o: idf.h
@@ -1000,7 +1000,7 @@ ival.o: arith.h
 ival.o: assert.h
 ival.o: debug.h
 ival.o: def.h
-ival.o: em_lint.h
+ival.o: l_em.h
 ival.o: estack.h
 ival.o: expr.h
 ival.o: field.h

@@ -273,23 +273,7 @@ declare_idf(ds, dc, lvl)
 #endif
 
 #ifdef	LINT
-	if (	def && def->df_level < lvl
-	&&	!(	lvl == L_FORMAL2
-		||	def->df_level == L_UNIVERSAL
-		||	sc == GLOBAL
-		||	sc == EXTERN
-		)
-	) {
-		/*	there is already a definition for this non-extern name
-			on a more global level
-		*/
-		warning("%s is already defined as a %s",
-			idf->id_text,
-			def->df_level == L_GLOBAL ? "global" :
-			def->df_level == L_FORMAL2 ? "formal" :
-				"more global local"
-		);
-	}
+	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
 #endif	LINT
 
 	if (def && 
@@ -490,7 +474,8 @@ global_redecl(idf, new_sc, tp)
 				error("cannot redeclare %s to static",
 					idf->id_text);
 			else	{
-#ifdef	LINT			/* warn unconditionally */
+#ifdef	LINT
+				/* warn unconditionally */
 				warning("%s redeclared to static",
 						idf->id_text);
 #else	LINT
