@@ -14,8 +14,8 @@ _flushbuf(c, iop)
 				else {
 					extern unsigned char _sobuf[];
 
-					iop->_buf = iop->_ptr = _sobuf;
-					iop->_count = BUFSIZ;
+					iop->_buf = _sobuf;
+					iop->_count = BUFSIZ-1;
 				}
 			}
 			else {
@@ -25,11 +25,11 @@ _flushbuf(c, iop)
 					iop->_flags |= IO_UNBUFF;
 				}
 				else {
-					iop->_ptr = iop->_buf;
 					iop->_flags |= IO_MYBUF;
-					iop->_count = BUFSIZ;
+					iop->_count = BUFSIZ-1;
 				}
 			}
+			iop->_ptr = iop->_buf;
 		}
 	}
 
@@ -44,7 +44,7 @@ _flushbuf(c, iop)
 		return c;
 	}
 	else {
-		int count = BUFSIZ - iop->_count;
+		int count = iop->_ptr - iop->_buf;
 
 		iop->_count = BUFSIZ - 1;
 		iop->_ptr = iop->_buf + 1;
