@@ -1,4 +1,4 @@
-tail_mon.a
+libmon_s.a
 exit.s
 _exit.s
 abort.s
