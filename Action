@@ -17,6 +17,9 @@ name "Modules"
 dir modules
 indir
 end
+name "C utilities"
+dir util/cmisc
+end
 name "Encode/Decode"
 dir util/misc
 end
