@@ -56,6 +56,12 @@ IMPLEMENTATION MODULE RealConversions;
 	pointpos := 0;
 	sign := r < 0.0D;
 	IF sign THEN r := -r END;
+	ok := TRUE;
+	IF NOT (r / 10.0D < r) THEN
+		(* assume Nan or Infinity *)
+		r := 0.0D;
+		ok := FALSE;
+	END;
 	IF r # 0.0D THEN
 		IF r >= 10.0D THEN
 			FOR i := 1 TO 6 DO
@@ -81,7 +87,6 @@ IMPLEMENTATION MODULE RealConversions;
 		INC(pointpos);
 	END;
 	ind1 := 0;
-	ok := TRUE;
 	ind2 := ndigits+1;
 
 	IF NOT ecvtflag THEN 
