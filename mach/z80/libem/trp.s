@@ -43,14 +43,14 @@
 	push iy
 	ld iy,2
 	push iy
-	call __write
+	call WRITE
 	pop iy
 	pop iy
 	pop iy
 	pop de
 	pop iy
 	push de
-	call __exit
+	jp EXIT
 2:
 	pop hl
 	push bc

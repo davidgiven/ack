@@ -26,7 +26,7 @@
 	push de
 	ld de,1
 	push de
-	call __write
+	call WRITE
 	pop de
 	pop de
 	pop de
