@@ -24,7 +24,7 @@ dfdnam.c
 dfilb.c
 dlb.c
 dnam.c
-e
+em.c
 em.nogen
 end.c
 endarg.c
@@ -37,8 +37,6 @@ ilb.c
 insert.c
 insert.h
 internerr.c
-io.c
-k
 make.em.gen
 make.sh
 msend.c

@@ -1,50 +1,22 @@
-if $cc $cflags bhcst.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhdlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhdnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhfcon.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhicon.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhilb.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhpnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags bhucon.c ; then : ; else exit 1 ; fi
-if $cc $cflags crcst.c ; then : ; else exit 1 ; fi
-if $cc $cflags crdlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags crdnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags crfcon.c ; then : ; else exit 1 ; fi
-if $cc $cflags cricon.c ; then : ; else exit 1 ; fi
-if $cc $cflags crilb.c ; then : ; else exit 1 ; fi
-if $cc $cflags crpnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags crscon.c ; then : ; else exit 1 ; fi
-if $cc $cflags crucon.c ; then : ; else exit 1 ; fi
-if $cc $cflags cst.c ; then : ; else exit 1 ; fi
-if $cc $cflags dfdlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags dfdnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags dfilb.c ; then : ; else exit 1 ; fi
-if $cc $cflags dlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags dnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags end.c ; then : ; else exit 1 ; fi
-if $cc $cflags endarg.c ; then : ; else exit 1 ; fi
-if $cc $cflags exc.c ; then : ; else exit 1 ; fi
-if $cc $cflags fcon.c ; then : ; else exit 1 ; fi
-if $cc $cflags icon.c ; then : ; else exit 1 ; fi
-if $cc $cflags ilb.c ; then : ; else exit 1 ; fi
-if $cc $cflags msend.c ; then : ; else exit 1 ; fi
-if $cc $cflags op.c ; then : ; else exit 1 ; fi
-if $cc $cflags opcst.c ; then : ; else exit 1 ; fi
-if $cc $cflags opdlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags opdnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags opilb.c ; then : ; else exit 1 ; fi
-if $cc $cflags opnarg.c ; then : ; else exit 1 ; fi
-if $cc $cflags oppnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags pnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags pro.c ; then : ; else exit 1 ; fi
-if $cc $cflags pronarg.c ; then : ; else exit 1 ; fi
-if $cc $cflags msstart.c ; then : ; else exit 1 ; fi
-if $cc $cflags psdlb.c ; then : ; else exit 1 ; fi
-if $cc $cflags psdnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags pspnam.c ; then : ; else exit 1 ; fi
-if $cc $cflags scon.c ; then : ; else exit 1 ; fi
-if $cc $cflags ucon.c ; then : ; else exit 1 ; fi
+list=
+target=$1
+shift
+for i
+do
+	echo "+$cc $cflags $i"
+	if $cc $cflags $i
+	then
+		list="$list `basename $i .c`.o"
+	else
+		exit 1
+	fi
+done
+echo "+$cc $cflags -I../read_em C_out.c"
 if $cc $cflags -I../read_em C_out.c ; then : ; else exit 1 ; fi
-if $cc $cflags $1/em.c ; then : ; else exit 1 ; fi
-if mv em.$suf em$1.$suf ; then : ; else exit 1 ; fi
-if $ar rc libem$1.$libsuf bhcst.$suf bhdlb.$suf bhdnam.$suf bhfcon.$suf bhicon.$suf bhilb.$suf bhpnam.$suf bhucon.$suf crcst.$suf crdlb.$suf crdnam.$suf crfcon.$suf cricon.$suf crilb.$suf crpnam.$suf crscon.$suf crucon.$suf cst.$suf dfdlb.$suf dfdnam.$suf dfilb.$suf dlb.$suf dnam.$suf end.$suf endarg.$suf exc.$suf fcon.$suf getid.$suf icon.$suf ilb.$suf insert.$suf internerr.$suf msend.$suf op.$suf opcst.$suf opdlb.$suf opdnam.$suf opilb.$suf opnarg.$suf oppnam.$suf pnam.$suf pro.$suf pronarg.$suf msstart.$suf psdlb.$suf psdnam.$suf pspnam.$suf scon.$suf ucon.$suf C_out.$suf em$1.$suf failed.$suf ; then : ; else exit 1 ; fi
+echo "+$ar rc libem$target.$libsuf $list"
+if $ar rc libem$target.$libsuf $list
+then
+	:
+else
+	exit 1
+fi

@@ -9,10 +9,10 @@ LIBSUF = a
 SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
 	crcst.c crdlb.c crdnam.c crfcon.c cricon.c crilb.c crpnam.c crscon.c \
 	crucon.c cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
-	exc.c fcon.c getid.c icon.c ilb.c insert.c internerr.c io.c \
+	exc.c fcon.c getid.c icon.c ilb.c insert.c internerr.c \
 	msend.c op.c opcst.c opdlb.c opdnam.c opilb.c opnarg.c oppnam.c pnam.c \
 	pro.c pronarg.c msstart.c psdlb.c psdnam.c pspnam.c scon.c ucon.c \
-	C_out.c failed.c
+	C_out.c failed.c em.c
 
 OBS = failed.$(SUF) insert.$(SUF) internerr.$(SUF) getid.$(SUF)
 
@@ -38,12 +38,12 @@ em_code.3:	em_code.3X
 		-sh -c 'tbl < em_code.3X > em_code.3'
 		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
-libeme.$(LIBSUF):	e/em_private.h e/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c -Ie $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh -x make.sh e
+libeme.$(LIBSUF):	em_private.h $(SRC) $(OBS)
+		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c -DREADABLE_EM $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh make.sh e $(SRC)
 		-sh -c 'ranlib libeme.$(LIBSUF)'
 
-libemk.$(LIBSUF):	k/em_private.h k/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c -Ik $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh -x make.sh k
+libemk.$(LIBSUF):	em_private.h $(SRC) $(OBS)
+		EMHOME=$(EMHOME); cc="$(CC)"; suf="$(SUF)"; libsuf="$(LIBSUF)"; cflags="-c $(CFLAGS)"; ar="$(AR)"; export EMHOME cc ar suf libsuf cflags; sh make.sh k $(SRC)
 		-sh -c 'ranlib libemk.$(LIBSUF)'
 
 em_codeEK.h:	make.em.gen $(ETC)/em_table em.nogen
@@ -51,7 +51,7 @@ em_codeEK.h:	make.em.gen $(ETC)/em_table em.nogen
 		cat em.nogen >> em_codeEK.h
 
 pr:
-		@pr Makefile em.nogen make.em.gen make.sh insert.h $(SRC) e/em_private.h e/em.c k/em_private.h k/em.c
+		@pr Makefile em.nogen make.em.gen make.sh insert.h $(SRC) em_private.h
 
 opr:
 		make pr | opr
@@ -60,8 +60,8 @@ clean:
 		rm -f *.$(SUF) *.$(LIBSUF) em_code.3
 
 lintlib:	make.sh
-		lint -I. -I../../h -I../../../h -Ie -Ceme $(SRC) e/*.c
-		lint -I. -I../../h -I../../../h -Ik -Cemk $(SRC) k/*.c
+		lint -I. -I../../h -I../../../h -Ceme -DREADABLE_EM $(SRC)
+		lint -I. -I../../h -I../../../h -Cemk $(SRC)
 		mv llib-leme.ln llib-lemk.ln $(EMHOME)/modules/lib
 
 insert.$(SUF):	insert.c insert.h
