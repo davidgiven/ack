@@ -17,3 +17,4 @@ system.h
 time.c
 unlock.c
 write.c
+seek.c

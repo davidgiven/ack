@@ -29,6 +29,12 @@ sys_break, sys_stop, sys_time \- system call interface
 .B char *bufptr;
 .B int nbytes;
 .PP
+.B int sys_seek(filep, offset, whence, poffset)
+.B File *filep;
+.B long offset;
+.B int whence;
+.B long *poffset;
+.PP
 .B int sys_reset(filep)
 .B File *filep
 .PP
@@ -141,6 +147,31 @@ onto the open file known by
 A non-zero return value indicates that
 .I nbytes
 are actually written.
+.PP
+.I Sys_seek
+sets the file pointer of
+.I filep
+as follows:
+.IP " "
+If
+.I whence
+is 0, the pointer is set to
+.I offset
+bytes.
+.IP " "
+If
+.I whence
+is 1, the pointer is set to its current location plus
+.IR offset .
+.IP " "
+If
+.I whence
+is 2, the pointer is set to the size of the file plus
+.IR offset .
+.PP
+Upon succesful completion, the resulting pointer location is returned in
+.IR poffset ,
+and 1 is returned. Otherwise, 0 is returned.
 .PP
 .I Sys_reset
 causes the open file known by

@@ -7,10 +7,10 @@ INCLUDES = -I.
 CFLAGS	= $(INCLUDES) -O
 OBJ	= access.o break.o chmode.o close.o create.o filesize.o \
 	modtime.o lock.o open.o read.o remove.o stop.o \
-	system.o time.o unlock.o write.o
+	system.o time.o unlock.o write.o seek.o
 CSRC	= access.c break.c chmode.c close.c create.c filesize.c \
 	modtime.c lock.c open.c read.c remove.c stop.c \
-	system.c time.c unlock.c write.c
+	system.c time.c unlock.c write.c seek.c
 SRC	= Makefile system.h $(CSRC)
 
 all:		$(LIBSYS)
