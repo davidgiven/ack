@@ -585,14 +585,7 @@ pat loi $1>4
 pat los $1==2
   with CXREG BXREG
   kills ALL
-  gen joehoe {label,".loi"}
-
-pat los !defined($1)
-  with rm CXREG BXREG
-  kills ALL
-  gen cmp %1,{ANYCON,2}
-      jne {label,".unknown"}
-      joehoe {label,".loi"}
+  gen joehoe {label,".los"}
 
 pat ldl					yields {LOCAL,$1+2,2}
 					       {LOCAL,$1,2}
@@ -781,7 +774,7 @@ pat sti $1>4
 pat sts $1==2
   with CXREG BXREG
   kills ALL
-  gen joehoe {label,".sti"}
+  gen joehoe {label,".sts"}
 
 pat sdl
   with regorconst regorconst	yields %2 %1
@@ -2698,7 +2691,7 @@ with rm-BXREG-ACC BXREG ACC
       jmp {label, ".csb2"}
 
 pat dup $1==2
-with regorconst				yields %1 %1
+with anyreg				yields %1 %1
 with ACC1				yields %1 %1
 
 pat dup $1==4

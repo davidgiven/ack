@@ -332,13 +332,13 @@ loi $1>4	| X_BXREG |
 			erase(%[a]) erase(%[1]) | | | (3,40+$1*9)
 los $1==2	| X_CXREG X_BXREG |
 			remove(ALL)
-			"call .loi"
+			"call .los"
 			erase(%[1]) erase(%[2]) 		|	| |
 los !defined($1)| rm X_CXREG X_BXREG |
 			remove(ALL)
 			"cmp %[1],2"
 			"jne .unknown"
-			"call .loi"
+			"call .los"
 			erase(%[2]) erase(%[3]) 		|	| |
 ldl		| |		| {LOCAL2, $1+2,2} {LOCAL2, $1,2}	| |
 lde		| |		| {EXTERN2, $1+"+2"} {EXTERN2, $1}	| |
