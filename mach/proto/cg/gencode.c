@@ -35,7 +35,7 @@ FILE *codefile;
 out_init(filename) char *filename; {
 
 #ifndef NDEBUG
-	static char stderrbuff[512];
+	static char stderrbuff[BUFSIZ];
 
     if (Debug) {
 	codefile = stderr;
