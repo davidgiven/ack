@@ -48,7 +48,7 @@ static int sqr(par) int par ; {
 }
 
 int sqrt(par) int par ; {
-	float x1,x2 ;
+	int x1,x2 ;
 	int i ;
 
 	if ( par<0 ) return -1 ;
@@ -58,7 +58,7 @@ int sqrt(par) int par ; {
 		x2 = x1 ;
 		x1 = ( x2*x2 + par ) / (2*x2) ;
 		if ( i++>=100 ) return -2 ;
-	} while ( ( x2<x1 ? x1-x2 : x2-x1 ) > 1e-5 ) ;
+	} while ( ( x2<x1 ? x1-x2 : x2-x1 ) > 0 ) ;
 	return (x1+x2)/2 ;
 }
 
