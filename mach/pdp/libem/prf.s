@@ -23,9 +23,9 @@ prf~:
 	mov	r1,-(sp)
 	mov	r0,-(sp)
 	mov	$fmt,-(sp)
-	jsr	pc,_printf
+	jsr	pc,printf~
 	add	$010,sp
-	jsr	pc,_printf
+	jsr	pc,printf~
 	jmp	retu~
 1:	mov	$name,r0
 	br	2b

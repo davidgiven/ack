@@ -28,7 +28,6 @@ exg.s
 fef.s
 fif.s
 gto.s
-hlt.s
 iaar.s
 aar.s
 ilar.s
@@ -61,7 +60,6 @@ sbf.s
 sbi.s
 set.s
 setfl.s
-sigtrp.s
 sim.s
 sli.s
 sri.s

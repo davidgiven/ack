@@ -5,7 +5,7 @@
 
 write	= 4
 
-_printf:
+printf~:
 	mov	r2,-(sp)
 	mov	r3,-(sp)
 	mov	r4,-(sp)
@@ -51,11 +51,11 @@ printn:
 ready:
 	movb	r0,(r4)+
 	sub	$buff,r4
-	mov	$01,r0
-	mov	$buff,9f
-	mov	r4,9f+2
-	sys	write
-9:	.data2 0, 0
+	mov	r4,-(sp)
+	mov	$buff,-(sp)
+	mov	$01,-(sp)
+	jsr	__write
+	add	$06,sp
 	mov	(sp)+,r4
 	mov	(sp)+,r3
 	mov	(sp)+,r2

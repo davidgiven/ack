@@ -3,11 +3,10 @@
 .define trp~,fat~
 .extern trppc~,trpim~,savearea,retar
 ! $Header$
-	write=4
 
 fat~:
 	jsr     pc,trp~
-	.data2 4
+	jsr	__exit
 
 trp~:
 	mov     r0,-(sp)
@@ -86,10 +85,12 @@ trp~:
 	bisb	r3,-(r1)
 	ash	$-3,r0
 	sob	r2,1b
-	mov	$2,r0
-	sys	write;.data2 buf, 013
-	.data2 4
-
+	mov	$013,-(sp)
+	mov	$buf,-(sp)
+	mov	$2,-(sp)
+	jsr	__write
+	add	$6,sp
+	jsr	__exit
 .sect .data
 retar:	.space 16
 retend:
