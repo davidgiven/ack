@@ -521,7 +521,7 @@ comparing lu
 > yes if ( z ^= x  ) yes() ; else no() 40224
 *** Error code 1 (ignored)
 ***** ctill
------ All program(s) in this directory should fail to compile.
+All program(s) in this directory should fail to compile.
 em24 noarg.c
 noarg.c
 "noarg.c", line 14: name not in parameter list
