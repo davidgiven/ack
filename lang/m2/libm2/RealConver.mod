@@ -1,6 +1,6 @@
 IMPLEMENTATION MODULE RealConversions;
 
-  FROM FIFFEF IMPORT FIF, FEF;
+  FROM EM IMPORT FIF, FEF;
 
   PROCEDURE RealToString(arg: REAL;
 		width, digits: INTEGER;
@@ -225,11 +225,6 @@ IMPLEMENTATION MODULE RealConversions;
 		signed: BOOLEAN;
 		signedexp: BOOLEAN;
 		iB: CARDINAL;
-
-    PROCEDURE dig(ch: CARDINAL);
-    BEGIN
-	IF r>BIG THEN INC(pow10) ELSE r:= 10.0D*r + FLOATD(ch) END;
-    END dig;
 
   BEGIN
 	r := 0.0D;

@@ -2,6 +2,7 @@ IMPLEMENTATION MODULE RealInOut;
 
   IMPORT InOut;
   IMPORT RealConversions;
+  IMPORT EM;
   FROM SYSTEM IMPORT WORD;
 
   CONST	MAXNDIG = 32;
@@ -26,7 +27,10 @@ IMPLEMENTATION MODULE RealInOut;
   BEGIN
 	InOut.ReadString(Buf);
 	RealConversions.StringToReal(Buf, x, ok);
-	Done := ok;
+	IF NOT ok THEN
+		EM.TRP(68);
+	END;
+	Done := TRUE;
   END ReadReal;
 
   PROCEDURE wroct(x: ARRAY OF WORD);

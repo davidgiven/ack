@@ -28,7 +28,12 @@ static struct errm {
 	{ EBADMON,	"bad monitor call"},
 	{ EBADLIN,	"argument if LIN too high"},
 	{ EBADGTO,	"GTO descriptor error"},
+
 	{ 64,		"stack size of process too large"},
+	{ 65,		"too many nested traps + handlers"},
+	{ 66,		"illegal integer"},
+	{ 67,		"illegal cardinal"},
+	{ 68,		"illegal real"},
 	{ -1,		0}
 };
 

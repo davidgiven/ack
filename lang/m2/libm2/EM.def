@@ -1,0 +1,17 @@
+(*$Foreign *)
+DEFINITION MODULE EM;
+(* An interface to EM instructions *)
+
+	PROCEDURE FIF(arg1, arg2: LONGREAL; VAR intres: LONGREAL) : LONGREAL;
+	(* multiplies arg1 and arg2, and returns the integer part of the
+	   result in "intres" and the fraction part as the function result.
+	*)
+
+	PROCEDURE FEF(arg: LONGREAL; VAR exp: INTEGER) : LONGREAL;
+	(* splits "arg" in mantissa and a base-2 exponent.
+	   The mantissa is returned, and the exponent is left in "exp".
+	*)
+
+	PROCEDURE TRP(trapno: INTEGER);
+	(* Generate EM trap number "trapno" *)
+END EM.

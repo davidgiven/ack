@@ -1,7 +1,9 @@
+#include <em_abs.h>
 IMPLEMENTATION MODULE InOut ;
 
   IMPORT Unix;
   IMPORT Conversions;
+  IMPORT EM;
   FROM TTY IMPORT isatty;
   FROM SYSTEM IMPORT ADR;
 
@@ -89,6 +91,7 @@ IMPLEMENTATION MODULE InOut ;
 		CloseInput;
 	END;
 	MakeFileName("Name of input file: ", defext, namebuf);
+	IF NOT Done THEN RETURN; END;
 	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
 	ELSE
 		WITH ibuf DO
@@ -135,6 +138,7 @@ IMPLEMENTATION MODULE InOut ;
 		CloseOutput;
 	END;
 	MakeFileName("Name of output file: ", defext, namebuf);
+	IF NOT Done THEN RETURN; END;
 	IF (namebuf[1] = '-') AND (namebuf[2] = 0C) THEN
 	ELSE	
 		WITH obuf DO
@@ -177,63 +181,57 @@ IMPLEMENTATION MODULE InOut ;
 
   PROCEDURE MakeFileName(prompt, defext : ARRAY OF CHAR;
 		       VAR buf : ARRAY OF CHAR);
-  VAR	i, k : INTEGER;
+  VAR	i : INTEGER;
 	j : CARDINAL;
 	ch: CHAR;
   BEGIN
-	FOR k := 1 TO 3 DO
-		IF isatty(0) THEN
-			XWriteString(prompt);
-		END;
-		XReadString(buf);
-		i := 0;
-		WHILE buf[i] # 0C DO i := i + 1 END;
-		IF i # 0 THEN
-			i := i - 1;
-			IF buf[i] = '.' THEN
-	    			FOR j := 0 TO HIGH(defext) DO
-					i := i + 1;
-					buf[i] := defext[j];
-	    			END;
-	    			buf[i+1] := 0C;
-			END;
-			RETURN;
-		END;
+	Done := TRUE;
+	IF isatty(0) THEN
+		XWriteString(prompt);
 	END;
-	Error("no proper file name in three attempts. Giving up.");
+	XReadString(buf);
+	i := 0;
+	WHILE buf[i] # 0C DO i := i + 1 END;
+	IF i # 0 THEN
+		i := i - 1;
+		IF buf[i] = '.' THEN
+	    		FOR j := 0 TO HIGH(defext) DO
+				i := i + 1;
+				buf[i] := defext[j];
+	    		END;
+	    		buf[i+1] := 0C;
+		END;
+		RETURN;
+	END;
+	Done := FALSE;
   END MakeFileName;
-
-  PROCEDURE Error(s: ARRAY OF CHAR);
-  VAR Xch: ARRAY[1..1] OF CHAR;
-  BEGIN
-	XWriteString("Error: ");
-	XWriteString(s);
-	Xch[1] := 12C;
-	XWriteString(Xch);
-	Unix.exit(1);
-  END Error;
 
   PROCEDURE ReadInt(VAR integ : INTEGER);
   CONST
     	SAFELIMITDIV10 = MAX(INTEGER) DIV 10;
     	SAFELIMITREM10 = MAX(INTEGER) MOD 10;
+  TYPE
+	itype = [0..31];
+	ibuf =  ARRAY itype OF CHAR;
   VAR
     	int : INTEGER;
-    	ch  : CHAR;
     	neg : BOOLEAN;
     	safedigit: [0 .. 9];
     	chvalue: CARDINAL;
+	buf : ibuf;
+	index : itype;
   BEGIN
-    	Read(ch);
-    	WHILE (ch = ' ') OR (ch = TAB) OR (ch = 12C) DO
-		Read(ch)
-    	END;
-    	IF ch = '-' THEN
+    	ReadString(buf);
+	IF NOT Done THEN
+		RETURN
+	END;
+	index := 0;
+    	IF buf[index] = '-' THEN
 		neg := TRUE;
-		Read(ch)
-    	ELSIF ch = '+' THEN
+		INC(index);
+    	ELSIF buf[index] = '+' THEN
 		neg := FALSE;
-		Read(ch)
+		INC(index);
     	ELSE
 		neg := FALSE
     	END;
@@ -241,69 +239,69 @@ IMPLEMENTATION MODULE InOut ;
     	safedigit := SAFELIMITREM10;
     	IF neg THEN safedigit := safedigit + 1 END;
     	int := 0;
-    	IF (ch >= '0') & (ch <= '9') THEN
-		WHILE (ch >= '0') & (ch <= '9') DO
-  	    		chvalue := ORD(ch) - ORD('0');
-	    		IF (int > SAFELIMITDIV10) OR 
-			   ( (int = SAFELIMITDIV10) AND
-			     (chvalue > safedigit)) THEN
-				Error("integer overflow");
-	    		ELSE
-				int := 10*int + VAL(INTEGER, chvalue);
-				Read(ch)
-	    		END;
-		END;
-		IF neg THEN
-   	    		integ := -int
-		ELSE
-	    		integ := int
-		END;
-		Done := TRUE;
-    	ELSE
-		Done := FALSE
-    	END;
-    	UnRead(ch)
+	WHILE (buf[index] >= '0') & (buf[index] <= '9') DO
+  		chvalue := ORD(buf[index]) - ORD('0');
+	   	IF (int > SAFELIMITDIV10) OR 
+		   ( (int = SAFELIMITDIV10) AND
+		     (chvalue > safedigit)) THEN
+			EM.TRP(EIOVFL);
+	    	ELSE
+			int := 10*int + VAL(INTEGER, chvalue);
+			INC(index)
+	    	END;
+	END;
+	IF neg THEN
+   		integ := -int
+	ELSE
+		integ := int
+	END;
+	IF buf[index] > " " THEN
+		EM.TRP(66);
+	END;
+	Done := TRUE;
   END ReadInt;
 
   PROCEDURE ReadCard(VAR card : CARDINAL);
   CONST
     	SAFELIMITDIV10 = MAX(CARDINAL) DIV 10;
     	SAFELIMITREM10 = MAX(CARDINAL) MOD 10;
+
+  TYPE
+	itype = [0..31];
+	ibuf =  ARRAY itype OF CHAR;
     
   VAR
     	int : CARDINAL;
-    	ch  : CHAR;
+    	index  : itype;
+	buf : ibuf;
     	safedigit: [0 .. 9];
     	chvalue: CARDINAL;
   BEGIN
-    	Read(ch);
-    	WHILE (ch = ' ') OR (ch = TAB) OR (ch = 12C) DO
-		Read(ch)
-    	END;
-
+    	ReadString(buf);
+	IF NOT Done THEN RETURN; END;
+	index := 0;
     	safedigit := SAFELIMITREM10;
     	int := 0;
-    	IF (ch >= '0') & (ch <= '9') THEN
-		WHILE (ch >= '0') & (ch <= '9') DO
-  	    		chvalue := ORD(ch) - ORD('0');
-	    		IF (int > SAFELIMITDIV10) OR 
-			   ( (int = SAFELIMITDIV10) AND
-			     (chvalue > safedigit)) THEN
-				Error("cardinal overflow");
-	    		ELSE
-				int := 10*int + chvalue;
-				Read(ch)
-	    		END;
-		END;
-		card := int;
-		Done := TRUE;
-    	ELSE
-		Done := FALSE
-    	END;
-    	UnRead(ch)
+	WHILE (buf[index] >= '0') & (buf[index] <= '9') DO
+  		chvalue := ORD(buf[index]) - ORD('0');
+	    	IF (int > SAFELIMITDIV10) OR 
+		   ( (int = SAFELIMITDIV10) AND
+		     (chvalue > safedigit)) THEN
+			EM.TRP(EIOVFL);
+	    	ELSE
+			int := 10*int + chvalue;
+			INC(index);
+	    	END;
+	END;
+	IF buf[index] > " " THEN
+		EM.TRP(67);
+	END;
+	card := int;
+	Done := TRUE;
   END ReadCard;
 
   PROCEDURE ReadString(VAR s : ARRAY OF CHAR);
+  TYPE charset = SET OF CHAR;
   VAR	i : CARDINAL;
     	ch : CHAR;
 
@@ -311,7 +309,7 @@ IMPLEMENTATION MODULE InOut ;
     	i := 0;
 	REPEAT
 		Read(ch);
-	UNTIL (ch # ' ') AND (ch # TAB);
+	UNTIL NOT (ch IN charset{' ', TAB, 12C, 15C});
 	UnRead(ch);
     	REPEAT
 		Read(ch);
@@ -324,6 +322,7 @@ IMPLEMENTATION MODULE InOut ;
 		END;
 		INC(i);
     	UNTIL (NOT Done) OR (ch <= " ");
+	UnRead(ch);
   END ReadString;
 
   PROCEDURE XReadString(VAR s : ARRAY OF CHAR);
@@ -336,7 +335,7 @@ IMPLEMENTATION MODULE InOut ;
 	LOOP
 		i := Unix.read(0, ADR(ch), 1);
 		IF i < 0 THEN
-			Error("failed read");
+			EXIT;
 		END;
 		IF ch <= " " THEN
 			s[j] := 0C;

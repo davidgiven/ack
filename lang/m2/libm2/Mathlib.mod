@@ -1,6 +1,6 @@
 IMPLEMENTATION MODULE Mathlib;
 
-  FROM FIFFEF IMPORT FIF, FEF;
+  FROM EM IMPORT FIF, FEF;
 
 	(* From:	Handbook of Mathematical Functions
 			Edited by M. Abramowitz and I.A. Stegun

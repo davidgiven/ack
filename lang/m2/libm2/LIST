@@ -13,7 +13,6 @@ Conversion.mod
 Semaphores.mod
 random.mod
 Strings.mod
-FIFFEF.e
 Arguments.c
 catch.c
 hol0.e
@@ -26,5 +25,7 @@ absl.c
 halt.c
 transfer.e
 store.c
+confarray.c
 load.c
 stackprio.c
+EM.e
