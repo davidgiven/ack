@@ -50,8 +50,6 @@ pr:
 opr:
 		make pr | opr
 
-# don't put the next "rm"s all on one line. the argument list then
-# becomes too long for some systems
 clean:
 		rm -f *.o *.a em_code.3
 
