@@ -295,10 +295,10 @@ cstubin(expp)
 			if (expp->nd_type->tp_fund == T_INTORCARD) {
 				expp->nd_type = int_type;
 				if (! chk_bounds(min_int[sz], o1 - o2, T_CARDINAL)) {
-					overflow();
+					overflow(expp);
 				}
 			}
-			else	overflow();
+			else	overflow(expp);
 		}
 		o1 -= o2;
 		break;

@@ -230,7 +230,7 @@ WalkProcedure(procedure)
 	DoFilename(procedure->prc_body);
 	TmpOpen(procscope);
 
-	func_type = tp = RemoveEqual(RresultType(procedure->df_type));
+	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
 
 	if (tp) {
 		func_res_size = WA(tp->tp_size);
