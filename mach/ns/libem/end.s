@@ -1,20 +1,16 @@
-.define	endtext,enddata,endbss
-.define _end, _etext, _edata
+.define	endtext,enddata,endbss,_etext,_edata,_end
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
-.sect .text
+.sect .end ! only for declaration of _end and endbss.
 
 	.sect .text
 endtext:
 _etext:
-	.align	4
 	.sect .data
 enddata:
 _edata:
-	.align	4
-	.sect .bss
-	.align	4
-endbss:
+	.sect .end
 _end:
+endbss:
