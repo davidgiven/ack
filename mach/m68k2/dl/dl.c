@@ -1,3 +1,4 @@
+static char rcsid[] = "$Header$";
 #define MAXBYTE	24
 #include <stdio.h>
 char hex[] =  "0123456789ABCDEF";
