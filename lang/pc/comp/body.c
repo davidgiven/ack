@@ -284,6 +284,7 @@ CodeEndFor(nd, stepsize, l1, l2, tmp2)
 
 	/* Exit label */
 	C_df_ilb(l2);
+	C_asp(int_size);
 }
 
 WithStat(nd)
