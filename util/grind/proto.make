@@ -87,7 +87,7 @@ pr:
 lint:		make.main
 		make -f make.main lint
 
-Cfiles:		hfiles LLfiles $(GEN_C) $(GEN_H) Makefile
+Cfiles:		LLfiles $(GEN_C) $(GEN_H) Makefile
 		echo $(CFILES) | tr ' ' '\012' > Cfiles
 		echo $(HFILES) | tr ' ' '\012' >> Cfiles
 
@@ -129,7 +129,7 @@ lists:		Cfiles
 clean:
 		-make -f make.main clean
 		rm -f $(GEN_C) $(GEN_G) $(GEN_H) \
-			hfiles LL1files LL2files Cfiles LL.output DBS.output
+			LL1files LL2files Cfiles LL.output DBS.output
 		rm -f resolved *.dep lists make.main make_macros
 
 LLfiles:	LL1files LL2files
@@ -141,10 +141,6 @@ LL1files:	$(GFILES1)
 LL2files:	$(GFILES2)
 		$(LLGEN) $(LLGENOPTIONS) $(GFILES2)
 		@touch LL2files
-
-hfiles:		Parameters $(SRC_DIR)/make.hfiles
-		$(SRC_DIR)/make.hfiles Parameters
-		touch hfiles
 
 tokenfile.g:	$(SRC_DIR)/tokenname.c $(SRC_DIR)/make.tokfile
 		$(SRC_DIR)/make.tokfile <$(SRC_DIR)/tokenname.c >tokenfile.g

@@ -16,6 +16,7 @@ MALLOC =	$(LIBDIR)/malloc.$(SUF)
 MODLIB = \
 		$(LIBDIR)/libassert.$(LIBSUF) \
 		$(LIBDIR)/liballoc.$(LIBSUF) \
+		$(LIBDIR)/libobject.$(LIBSUF) \
 		$(MALLOC) \
 		$(LIBDIR)/libprint.$(LIBSUF) \
 		$(LIBDIR)/libstring.$(LIBSUF) \
@@ -39,16 +40,16 @@ LDFLAGS =	$(PROFILE) $(LDOPTIONS)
 # C_SRC and OBJ should be set here.
 #LISTS		do not remove this line!
 
-all:		main
+all:		grind
 
 clean:
-		rm -f *.$(SUF) main
+		rm -f *.$(SUF) grind
 
 lint:
 		$(LINT) $(LINTFLAGS) $(C_SRC) $(LINTLIBS)
 
-main:		$(OBJ)
-		$(CC) $(LDFLAGS) $(OBJ) $(LIBS) -o main
+grind:		$(OBJ)
+		$(CC) $(LDFLAGS) $(OBJ) $(LIBS) -o grind
 
 # do not remove the next line; it is used for generating dependencies
 #DEPENDENCIES
