@@ -9,7 +9,7 @@ esac
 errors=no
 if test -r $1/LIST
 then
-  <$1/LIST (
+  (
     read archname
     if test -r $1/$archname
     then 
@@ -47,7 +47,7 @@ then
       echo $2 not made, due to compilation errors
       exit 1
     fi
-  )
+  ) < $1/LIST
 else
   echo no LIST file in directory $1
   exit 1
