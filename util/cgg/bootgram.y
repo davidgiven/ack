@@ -53,6 +53,10 @@ static char rcsid[]="$Header$";
 #define MAXSPLIT 4              /* Maximum degree of split */
 #define MAXNSTR 40		/* Maximum consecutive strings in coderule */
 
+char *hname="tables.h";
+char *cname="tables.c";
+char *iname=0;			/* stdin */
+
 /* Derived constants */
 
 #define SETSIZE ((MAXREGS+1+MAXTOKENS+15)>>4)
@@ -1555,9 +1559,23 @@ tabovf(tablename) string tablename; {
 
 main(argc,argv) char *argv[]; {
 
-	if (argc!=1) {
-		fprintf(stderr,"%s is a filter, don't use arguments\n",argv[0]);
-		exit(-1);
+	while (--argc) {
+		++argv;
+		if (argv[0][0]=='-') {
+			switch (argv[0][1]) {
+			case 'h':
+				hname= &argv[0][2];
+				break;
+			case 'c':
+				cname= &argv[0][2];
+				break;
+			default:
+				fprintf(stderr,"Bad flag %s\n",argv[0]);
+				break;
+			}
+		} else {
+			iname= argv[0];
+		}
 	}
 	inithash();
 	initio();
@@ -1665,12 +1683,16 @@ ident_p ilookup(name,enterf) string name; int enterf; {
 
 initio() {
 
-	if ((cfile=fopen("tables.c","w"))==NULL) {
-		fprintf(stderr,"Can't create tables.c\n");
+	if (iname!=0 && freopen(iname,"r",stdin)==NULL) {
+		fprintf(stderr,"Can't open %s\n",iname);
 		exit(-1);
 	}
-	if ((hfile=fopen("tables.h","w"))==NULL) {
-		fprintf(stderr,"Can't create tables.h\n");
+	if ((cfile=fopen(cname,"w"))==NULL) {
+		fprintf(stderr,"Can't create %s\n",cname);
+		exit(-1);
+	}
+	if ((hfile=fopen(hname,"w"))==NULL) {
+		fprintf(stderr,"Can't create %s\n",hname);
 		exit(-1);
 	}
 	fprintf(cfile,"#include \"param.h\"\n");
@@ -1803,17 +1825,17 @@ finishio() {
 
 	fprintf(cfile,"};\n\n");
 	if (wsize>0)
-		fprintf(hfile,"#define EM_WSIZE %d\n",wsize);
+		fprintf(hfile,"#define TEM_WSIZE %d\n",wsize);
 	else
 		yyerror("Wordsize undefined");
 	if (psize>0)
-		fprintf(hfile,"#define EM_PSIZE %d\n",psize);
+		fprintf(hfile,"#define TEM_PSIZE %d\n",psize);
 	else
 		yyerror("Pointersize undefined");
 	if (bsize>=0)
-		fprintf(hfile,"#define EM_BSIZE %d\n",bsize);
+		fprintf(hfile,"#define TEM_BSIZE %d\n",bsize);
 	else
-		fprintf(hfile,"extern int EM_BSIZE;\n");
+		yyerror("EM_BSIZE undefined");
 	if (fmt!=0)
 		fprintf(hfile,"#define WRD_FMT \"%s\"\n",fmt);
 	fprintf(hfile,"#define MAXALLREG %d\n",maxallreg);
