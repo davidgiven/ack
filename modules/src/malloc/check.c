@@ -287,6 +287,7 @@ check_work_empty(s) char *s;	{
 
 public int
 Error(fmt, s, ml) char *fmt, *s; mallink *ml;	{
+	setbuf(stdout, (char *) 0);
 	printf("%s: ", s);
 	printf(fmt, (long)ml);
 	printf("\n");
