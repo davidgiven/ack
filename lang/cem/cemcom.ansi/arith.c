@@ -592,19 +592,17 @@ field2arith(expp)
 	*/
 	register struct type *tp = (*expp)->ex_type->tp_up;
 	register struct field *fd = (*expp)->ex_type->tp_field;
-	register struct type *atype = (tp->tp_unsigned
-					&& fd->fd_width >= 8 * word_size)
-					    ? uword_type
-					    : word_type;
 
-	(*expp)->ex_type = atype;
+	(*expp)->ex_type = word_type;
 
 	if (tp->tp_unsigned)	{	/* don't worry about the sign bit */
+		if (fd->fd_width >= 8 * word_size)
+			(*expp)->ex_type = uword_type;
 		ch3bin(expp, RIGHT, intexpr((arith)fd->fd_shift, INT));
 		ch3bin(expp, '&', intexpr(fd->fd_mask, INT));
 	}
 	else	{	/* take care of the sign bit: sign extend if needed */
-		arith bits_in_type = atype->tp_size * 8;
+		arith bits_in_type = word_size * 8;
 
 		ch3bin(expp, LEFT,
 			intexpr(bits_in_type - fd->fd_width - fd->fd_shift,

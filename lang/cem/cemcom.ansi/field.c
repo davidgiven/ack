@@ -82,7 +82,7 @@ eval_field(expr, code)
 			StoreLocal(tmpvar, pointer_size);
 			C_loi(word_size);
 		}
-		if (atype->tp_unsigned) {
+		if (tp->tp_unsigned) {
 			C_loc((arith)fd->fd_shift);
 			C_sru(word_size);
 			C_loc(fd->fd_mask);
@@ -117,7 +117,7 @@ eval_field(expr, code)
 			the bit field (i.e. the value that is got on
 			retrieval) is on top of stack.
 		*/
-		if (atype->tp_unsigned == 0) {	/* sign extension */
+		if (tp->tp_unsigned == 0) {	/* sign extension */
 			register arith shift = word_size * 8 - fd->fd_width;
 
 			C_loc(shift);
