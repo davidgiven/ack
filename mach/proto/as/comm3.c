@@ -38,6 +38,7 @@ item_t	keytab[] = {
 	0,	SECTION,	0,		".sect",
 	0,	BASE,		0,		".base",
 	0,	SYMB,		0,		".symb",
+	0,	SYMD,		0,		".symd",
 	0,	LINE,		0,		".line",
 	0,	FILe,		0,		".file",
 #ifdef LISTING

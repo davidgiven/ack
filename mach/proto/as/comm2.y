@@ -13,6 +13,8 @@
 %{
 #include	"comm0.h"
 #include	"comm1.h"
+
+static item_t	*last_it, *o_it;
 %}
 
 /* ========== Machine independent Yacc definitions ========== */
@@ -49,6 +51,7 @@
 %token COMMON
 %token BASE
 %token SYMB
+%token SYMD
 %token ALIGN
 %token ASSERT
 %token SPACE
@@ -164,7 +167,8 @@ operation
 			{	if ($2.val == 0 && pass == PASS_3)
 					warning("assertion failed");
 			}
-	|	SYMB STRING ',' expr optabs2 optabs2
+	|	SYMB STRING ',' expr	{ o_it = last_it; }
+		optabs2 optabs2
 			{	if ((sflag & SYM_SMB) && PASS_SYMB) {
 #ifndef ASLD
 					if (
@@ -175,16 +179,45 @@ operation
 						serror("expression undefined");
 						relonami = -1;
 					}
+					if (
+						PASS_SYMB
+						&&
+						($4.typ & S_COM)
+					   ) {
+						/* No value is known at
+						   assembler time.
+						   Generate reference to other
+						   entry in name table
+						*/
+						$4.typ = S_CRS;
+						$4.val = new_string(o_it->i_name);
+						relonami = 0;
+					}
 #endif
+					    
 					newsymb(
-						stringbuf+1,
+						*(stringbuf+1) ? stringbuf+1 : (char *) 0,
 						(short)(
 							($4.typ & (S_EXT|S_TYP))
 							|
-							((ushort)$5<<8)
+							((ushort)$6<<8)
+						),
+						(short)$7,
+						$4.val
+					);
+				}
+			}
+	|	SYMD STRING ','  absexp ',' absexp
+			{	if ((sflag & SYM_SMB) && PASS_SYMB) {
+					newsymb(
+						*(stringbuf+1) ? stringbuf+1 : (char *) 0,
+						(short)(
+							(DOTTYP & (S_EXT|S_TYP))
+							|
+							((ushort)$4<<8)
 						),
 						(short)$6,
-						$4.val
+						(valu_t)DOTVAL
 					);
 				}
 			}
@@ -258,6 +291,7 @@ expr	:	error
 			{	$$.val = $1; $$.typ = S_ABS;}
 	|	id_fb
 			{	$$.val = load($1); 
+				last_it = $1;
 				$$.typ = $1->i_type & ~S_EXT;
 			}
 	|	STRING

@@ -310,6 +310,22 @@ short s;
 }
 #endif
 
+long
+new_string(s)
+	char	*s;
+{
+	long	r = 0;
+
+	if (s) {
+		long len = strlen(s) + 1;
+
+		r = outhead.oh_nchar;
+		if (pass == PASS_3) wr_string(s, len);
+		outhead.oh_nchar += len;
+	}
+	return r;
+}
+
 newsymb(name, type, desc, valu)
 register char *name;
 short type;
@@ -322,20 +338,12 @@ valu_t valu;
 		name = 0;
 	assert(PASS_SYMB);
 	if (pass != PASS_3) {
-		if (name)
-			outhead.oh_nchar += strlen(name)+1;
+		new_string(name);
 		outhead.oh_nname++;
 		return;
 	}
 	nname++;
-	if (name) {
-		long len = strlen(name) + 1;
-
-		wr_string(name, len);
-		outname.on_foff = outhead.oh_nchar;
-		outhead.oh_nchar += len;
-	} else
-		outname.on_foff = 0;
+	outname.on_foff = new_string(name);
 	outname.on_type = type;
 	outname.on_desc = desc;
 	outname.on_valu = valu & ~(((0xFFFFFFFF)<<(4*sizeof(valu_t)))<<(4*sizeof(valu_t)));
