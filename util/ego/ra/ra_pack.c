@@ -22,7 +22,7 @@ short regs_occupied[NRREGTYPES];	/* #occupied registers for reg_pointer,
 					 */
 #define reg_available(t)	(regs_available[t] > regs_occupied[t])
 
-STATIC init_regcount()
+STATIC initregcount()
 {
 	int t;
 
@@ -58,7 +58,7 @@ STATIC bool fits_in(a,b,cont_item)
 		while (b != (alloc_p) 0) {
 			if (Cis_elem(a->al_id,b->al_rivals)) break;
 			b = b->al_mates;
-			if (a->al_item == b->al_item) {
+			if (b != (alloc_p) 0 && a->al_item == b->al_item) {
 				*cont_item = TRUE;
 			}
 		}
@@ -142,7 +142,7 @@ STATIC alloc_p choose_location(alloc,packed,p)
 	if (fit == (alloc_p) 0) {
 		/* Take a brand new register; allocate a dummy local for it */
 		alloc->al_regnr = regs_occupied[alloc->al_regtype]++;
-		dum = tmplocal(p,alloc->al_item->it_size);
+		dum = tmplocal(p,(offset) alloc->al_item->it_size);
 		alloc->al_dummy = dum;
 	} else {
 		alloc->al_regnr = fit->al_regnr;
@@ -255,7 +255,7 @@ STATIC account_regsave(packed,unpacked)
 	short time,space;
 	short tot_cost = 0,diff;
 
-	init_regcount();
+	initregcount();
 	checked = make_dummy();
 	while (TRUE) {
 		best_cumprofits(packed,&x,&prev);
@@ -387,7 +387,7 @@ pack(alloclist,time_opt,packed_out,not_packed_out,p)
 	register alloc_p x;
 	alloc_p packed,unpacked,fit;
 
-	init_regcount();
+	initregcount();
 	packed = make_dummy();
 	unpacked = make_dummy();
 	unpacked->al_next = alloclist;
