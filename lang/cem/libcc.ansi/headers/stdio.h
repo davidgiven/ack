@@ -17,7 +17,6 @@ typedef struct __iobuf {
 	int		_fd;
 	int		_flags;
 	int		_bufsiz;
-	char		*_tname;
 	unsigned char	*_buf;
 	unsigned char	*_ptr;
 } FILE;
