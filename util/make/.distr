@@ -1,0 +1,10 @@
+Makefile
+README
+check.c
+h.h
+input.c
+macro.c
+main.c
+make.c
+reader.c
+rules.c
