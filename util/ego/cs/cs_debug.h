@@ -29,10 +29,10 @@ extern SHOWAVAIL();	/* (avail_p avp)
 			 * Shows an available expression.
 			 */
 
-#else TRACE
+#else /* TRACE */
 
 #define OUTAVAILS()
 #define OUTENTITIES()
 #define SHOWAVAIL(x)
 
-#endif TRACE
+#endif /* TRACE */

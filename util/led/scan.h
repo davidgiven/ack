@@ -14,4 +14,4 @@
 #define IND_CHAR(x)	(IND_NAME(x) + (x).oh_nname * sizeof(struct outname))
 #ifdef SYMDBUG
 #define OFF_DBUG(x)	(OFF_CHAR(x) + (x).oh_nchar)
-#endif SYMDBUG
+#endif /* SYMDBUG */

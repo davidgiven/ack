@@ -15,4 +15,4 @@ extern char *FRA_sh;		/* shadowbytes of Function Return Area */
 
 #define	spoilFRA()
 
-#endif	LOGGING
+#endif	/* LOGGING */
