@@ -40,15 +40,10 @@ SRC_DIR = $(SRC_HOME)/util/flex
 # Installation targeting.  Files will be installed under the tree rooted
 # at DESTDIR.  User commands will be installed in BINDIR, library files
 # in LIBDIR (which will be created if necessary), auxiliary files in
-# AUXDIR, manual pages will be installed in MANDIR with extension MANEXT.
-# Raw, unformatted troff source will be installed if INSTALLMAN=man, nroff
-# preformatted versions will be installed if INSTALLMAN=cat.
+# AUXDIR;
 DESTDIR =
 BINDIR = $(TARGET_HOME)/bin
 AUXDIR = $(TARGET_HOME)/lib/flex
-MANDIR = $(TARGET_HOME)/man
-MANEXT = 1
-INSTALLMAN = man
 
 # MAKE = make
 
@@ -142,14 +137,27 @@ LINTFLAGS = $(LINTOPTIONS) $(INCLUDES)
 lint : $(FLEX_C_SOURCES)
 	$(LINT) $(LINTFLAGS) $(FLEX_C_SOURCES)
 
-install: first_flex $(SRC_DIR)/flex.skel
+firstinstall: first_flex $(SRC_DIR)/flex.skel
 	rm -f $(BINDIR)/flex
 	cp flex $(BINDIR)/flex
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
 	then	cp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel ; \
-		cp $(SRC_DIR)/flex.1 $(MANDIR)/flex.1 ; \
-		cp $(SRC_DIR)/flexdoc.1 $(MANDIR)/flexdoc.1 ; \
+		mk_manpage $(SRC_DIR)/flex.1 $(TARGET_HOME) ; \
+		mk_manpage $(SRC_DIR)/flexdoc.1 $(TARGET_HOME) ; \
 	fi
+
+install: flex $(SRC_DIR)/flex.skel
+	rm -f $(BINDIR)/flex
+	cp flex $(BINDIR)/flex
+	if [ $(DO_MACHINE_INDEP) = y ] ; \
+	then	cp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel ; \
+		mk_manpage $(SRC_DIR)/flex.1 $(TARGET_HOME) ; \
+		mk_manpage $(SRC_DIR)/flexdoc.1 $(TARGET_HOME) ; \
+	fi
+
+cmp: flex $(SRC_DIR)/flex.skel
+	-cmp flex $(BINDIR)/flex
+	-cmp $(SRC_DIR)/flex.skel $(AUXDIR)/flex.skel 
 
 clean :
 	rm -f core errs flex *.$(SUF) parse.c *.lint parse.h tags

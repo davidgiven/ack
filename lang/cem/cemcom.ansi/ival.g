@@ -72,7 +72,7 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 					free_expression(*expp);
 					*expp = 0;
 				} else {
-					expr_error(*expp,"illegal initialisation");
+					expr_error(*expp,"illegal initialization");
 					free_expression(*expp);
 					*expp = 0;
 				}
@@ -602,7 +602,7 @@ ch_array(tpp, ex)
 		} else
 #endif
 		if (length > dim + 1) {
-			expr_strict(ex, "too many initialisers");
+			expr_strict(ex, "too many initializers");
 		}
 		length = dim;
 	}
@@ -725,13 +725,13 @@ con_int(ex)
 illegal_init_cst(ex)
 	struct expr *ex;
 {
-	expr_error(ex, "illegal initialisation constant");
+	expr_error(ex, "illegal initialization constant");
 	gen_error = pack_level;
 }
 
 too_many_initialisers()
 {
-	error("too many initialisers");
+	error("too many initializers");
 	gen_error = pack_level;
 }
 }

@@ -128,7 +128,7 @@ gen_tpcheck(tpp, union_allowed)
 		break;
 	case UNION:
 		if (! union_allowed) {
-			error("union initialisation not allowed");
+			error("union initialization not allowed");
 			gen_error = pack_level;
 			break;
 		}
@@ -432,7 +432,7 @@ pad(tpx)
 	case UNION:
 #ifndef NOROPTION
 		if (options['R']) {
-			warning("initialisation of unions not allowed");
+			warning("initialization of unions not allowed");
 		}
 #endif
 		break;
@@ -583,7 +583,7 @@ ch_array(tpp, ex)
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
 
 		if (length > dim) {
-			expr_warning(ex, "too many initialisers");
+			expr_warning(ex, "too many initializers");
 		}
 		length = dim;
 	}
@@ -700,13 +700,13 @@ con_int(ex)
 illegal_init_cst(ex)
 	struct expr *ex;
 {
-	expr_error(ex, "illegal initialisation constant");
+	expr_error(ex, "illegal initialization constant");
 	gen_error = pack_level;
 }
 
 too_many_initialisers()
 {
-	error("too many initialisers");
+	error("too many initializers");
 	gen_error = pack_level;
 }
 }

@@ -4,7 +4,6 @@
 
 SRC_DIR = $(SRC_HOME)/util/cmisc
 TARGET_BIN = $(TARGET_HOME)/bin
-TARGET_MAN = $(TARGET_HOME)/man
 CFLAGS = $(COPTIONS)
 LDFLAGS = $(LDOPTIONS)
 LINTFLAGS = $(LINTOPTIONS)
@@ -14,7 +13,10 @@ all:		cid cclash prid tabgen
 install:	all
 		cp cid cclash prid tabgen $(TARGET_BIN)
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/cid.1 $(SRC_DIR)/cclash.1 $(SRC_DIR)/prid.1 $(SRC_DIR)/tabgen.1 $(TARGET_MAN) ; \
+		then	mk_manpage $(SRC_DIR)/cid.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/cclash.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/prid.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/tabgen.1 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
@@ -22,10 +24,6 @@ cmp:		all
 		-cmp cclash $(TARGET_BIN)/cclash
 		-cmp prid $(TARGET_BIN)/prid
 		-cmp tabgen $(TARGET_BIN)/tabgen
-		-cmp $(SRC_DIR)/cid.1 $(TARGET_MAN)/cid.1
-		-cmp $(SRC_DIR)/cclash.1 $(TARGET_MAN)/cclash.1
-		-cmp $(SRC_DIR)/prid.1 $(TARGET_MAN)/prid.1
-		-cmp $(SRC_DIR)/tabgen.1 $(TARGET_MAN)/tabgen.1
 
 clean:
 		rm -f *.$(SUF) cid cclash prid tabgen

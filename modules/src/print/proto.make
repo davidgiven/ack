@@ -24,6 +24,9 @@ install:	all
 		cp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBPRINT)
 		cp $(SRC_DIR)/print.3 $(MOD_DIR)/man/print.3
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/print.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp $(LIBPRINT) $(MOD_DIR)/lib/$(LIBPRINT)

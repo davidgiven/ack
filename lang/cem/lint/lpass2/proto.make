@@ -37,13 +37,12 @@ install:	all
 	cp lpass2 $(TARGET_HOME)/lib.bin/lint/lpass2
 	cp lint.exec $(TARGET_HOME)/bin/lint
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then cp $(SRC_DIR)/lint.1 $(TARGET_HOME)/man/lint.1 ; \
+	then	mk_manpage $(SRC_DIR)/lint.1 $(TARGET_HOME) ; \
 	fi
 
 cmp:	all
 	-cmp lpass2 $(TARGET_HOME)/lib.bin/lint/lpass2
 	-cmp lint.exec $(TARGET_HOME)/bin/lint
-	-cmp $(SRC_DIR)/lint.1 $(TARGET_HOME)/man/lint.1
 
 pr:
 	@pr $(SRC_DIR)/proto.make $(SRC_DIR)/inpdef.str $(SRC_DIR)/class.h \

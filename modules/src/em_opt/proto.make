@@ -67,15 +67,15 @@ install:	all
 		cp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
 		cp em_nopt $(TARGET_HOME)/lib.bin/em_nopt
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/em_nopt.6 $(TARGET_HOME)/man/em_nopt.6 ; \
+		then	mk_manpage $(SRC_DIR)/em_opt.3 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/em_nopt.6 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
 		-cmp $(LIBOPT) $(MOD_DIR)/lib/$(LIBOPT)
 		-cmp $(LIBCEOPT) $(MOD_DIR)/lib/$(LIBCEOPT)
-		-cmp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
-		-cmp $(SRC_DIR)/em_nopt.6 $(TARGET_HOME)/man/em_nopt.6
 		-cmp em_nopt $(TARGET_HOME)/lib.bin/em_nopt
+		-cmp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
 
 pr:
 		@pr $(SRCS)

@@ -52,14 +52,12 @@ led:	$(OFILES)
 install:led
 	cp led $(LIBDIR)/em_led
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then	cp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6 ; \
-		cp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5 ; \
+	then	mk_manpage $(SRC_DIR)/led.6 $(TARGET_HOME) ; \
+		mk_manpage $(SRC_DIR)/ack.out.5 $(TARGET_HOME) ; \
 	fi
 
 cmp:	led
 	-cmp led $(LIBDIR)/em_led
-	-cmp $(SRC_DIR)/led.6 $(TARGET_HOME)/man/led.6
-	-cmp $(SRC_DIR)/ack.out.5 $(TARGET_HOME)/man/ack.out.5
 
 lint:
 	lint $(LINTFLAGS) $(CFILES) $(LINTLIBS)

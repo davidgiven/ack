@@ -65,12 +65,13 @@ all:		make.main
 install:	all
 		cp main $(TARGET_HOME)/lib.bin/cpp.ansi
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/ncpp.6 $(TARGET_HOME)/man/cpp.ansi.6 ; \
+		then	cp $(SRC_DIR)/ncpp.6 cpp.ansi.6 ; \
+			mk_manpage cpp.ansi.6 $(TARGET_HOME) ; \
+			rm -f cpp.ansi.6 ; \
 		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/cpp.ansi
-		-cmp $(SRC_DIR)/ncpp.6 $(TARGET_HOME)/man/cpp.ansi.6
 
 opr:
 		make pr | opr

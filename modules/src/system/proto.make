@@ -33,6 +33,9 @@ install:	all
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSYS)
 		cp $(SRC_DIR)/system.3 $(MOD_DIR)/man/system.3
 		cp $(SRC_DIR)/system.h $(MOD_DIR)/h/system.h
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/system.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp $(LIBSYS) $(MOD_DIR)/lib/$(LIBSYS)

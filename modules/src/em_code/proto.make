@@ -70,12 +70,15 @@ install:	all
 		$(RANLIB) $(MOD_DIR)/lib/libemk.$(LIBSUF)
 		cp em_code.3 $(MOD_DIR)/man/em_code.3
 		cp em_codeEK.h $(MOD_DIR)/h/em_codeEK.h
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage em_code.3 $(TARGET_HOME) ; \
+		fi
 
-compare:	all
+cmp:	all
 		-cmp libeme.$(LIBSUF) $(MOD_DIR)/lib/libeme.$(LIBSUF)
 		-cmp libemk.$(LIBSUF) $(MOD_DIR)/lib/libemk.$(LIBSUF)
-		-cmp em_code.3 $(MOD_DIR)/man/em_code.3
 		-cmp em_codeEK.h $(MOD_DIR)/h/em_codeEK.h
+		-cmp em_code.3 $(MOD_DIR)/man/em_code.3
 
 em_code.3:	$(SRC_DIR)/em_code.3X
 		-sh -c 'tbl < $(SRC_DIR)/em_code.3X > em_code.3'

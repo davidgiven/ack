@@ -69,12 +69,11 @@ all:		make.main
 install:	all
 		cp grind $(TARGET_HOME)/bin/grind
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/grind.1 $(TARGET_HOME)/man/grind.1 ; \
+		then	mk_manpage $(SRC_DIR)/grind.1 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
 		-cmp grind $(TARGET_HOME)/bin/grind
-		-cmp $(SRC_DIR)/grind.1 $(TARGET_HOME)/man/grind.1
 
 opr:
 		make pr | opr

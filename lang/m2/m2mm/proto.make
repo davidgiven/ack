@@ -40,12 +40,11 @@ all:		make.main
 install:	all
 		cp main $(TARGET_HOME)/bin/m2mm
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/m2mm.1 $(TARGET_HOME)/man/m2mm.1 ; \
+		then	mk_manpage $(SRC_DIR)/m2mm.1 $(TARGET_HOME) ; \
 		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_m2
-		-cmp $(SRC_DIR)/m2mm.1 $(TARGET_HOME)/man/m2mm.1
 
 opr:
 		make pr | opr

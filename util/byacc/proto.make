@@ -4,7 +4,6 @@
 
 SRC_DIR		= $(SRC_HOME)/util/byacc
 DEST		= $(TARGET_HOME)/bin
-MAN		= $(TARGET_HOME)/man
 
 HDRS		= $(SRC_DIR)/defs.h
 
@@ -52,12 +51,13 @@ clean:
 install:	$(PROGRAM)
 		cp $(PROGRAM) $(DEST)/$(PROGRAM)
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/manpage $(MAN)/yacc.1 ; \
+		then	cp $(SRC_DIR)/manpage yacc.1 ; \
+			mk_manpage yacc.1 $(TARGET_HOME) ; \
+			rm -f yacc.1 ; \
 		fi
 
 cmp:		$(PROGRAM)
 		-cmp $(PROGRAM) $(DEST)/$(PROGRAM)
-		-cmp $(SRC_DIR)/manpage $(MAN)/yacc.1
 
 pr:
 		@pr proto.make $(HDRS) $(SRCS)

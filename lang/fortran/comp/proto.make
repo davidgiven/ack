@@ -81,13 +81,12 @@ all:	f2c
 install:	all
 	cp f2c $(TARGET_HOME)/lib.bin/f2c
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then cp $(SRC_DIR)/f2c.6 $(TARGET_HOME)/man/f2c.6 ; \
-	     cp $(SRC_DIR)/f2c.h $(TARGET_HOME)/include/_tail_cc/f2c.h ; \
+	then	mk_manpage $(SRC_DIR)/f2c.6 $(TARGET_HOME) ; \
+	     	cp $(SRC_DIR)/f2c.h $(TARGET_HOME)/include/_tail_cc/f2c.h ; \
 	fi
 
 cmp:	all
 	-cmp f2c $(TARGET_HOME)/lib.bin/f2c
-	-cmp $(SRC_DIR)/f2c.6 $(TARGET_HOME)/man/f2c.6
 	-cmp $(SRC_DIR)/f2c.h $(TARGET_HOME)/include/_tail_cc/f2c.h
 
 lint:	$(CFILES) tokdefs.h

@@ -60,7 +60,6 @@ LDFLAGS= $(LDOPTIONS)
 ULDFLAGS= $(ULDOPTIONS)
 BINDIR=$(TARGET_HOME)/bin
 HDIR=$(TARGET_HOME)/h
-MANDIR=$(TARGET_HOME)/man
 MODDIR=$(TARGET_HOME)/modules/lib
 
 all:		ack ack.1
@@ -70,12 +69,11 @@ install:	ack ack.1
 		-cd $(BINDIR) ; \
 		for i in $(INTABLES) $(LNTABLES) ; do rm -f $$i ; ln ack $$i ; done
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp ack.1 $(MANDIR)/ack.1 ; \
+		then	mk_manpage ack.1 $(TARGET_HOME) ; \
 		fi
 
-cmp:		ack ack.1
+cmp:		ack
 		-cmp ack $(BINDIR)/ack
-		-cmp ack.1 $(MANDIR)/ack.1
 
 ack.1:		$(SRC_DIR)/ack.1.X
 		-sh -c 'tbl < $(SRC_DIR)/ack.1.X > ack.1'

@@ -52,6 +52,9 @@ install:	all
 		$(RANLIB) $(MOD_DIR)/lib/libem_mesCE.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libem_mesO.$(LIBSUF)
 		cp $(SRC_DIR)/em_mes.3 $(MOD_DIR)/man/em_mes.3
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/em_mes.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp libem_mes.$(LIBSUF) $(MOD_DIR)/lib/libem_mes.$(LIBSUF)

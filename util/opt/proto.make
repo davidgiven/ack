@@ -40,13 +40,12 @@ test:	opt testopt
 cmp:	all
 	-cmp opt $(TARGET_HOMTARGET_HOME)/lib.bin/em_opt
 	-cmp opt2 $(TARGET_HOME)/lib.bin/em_opt2
-	-cmp $(SRC_DIR)/em_opt.6 $(TARGET_HOME)/man/em_opt.6
 
 install:all
 	cp opt $(TARGET_HOME)/lib.bin/em_opt
 	cp opt2 $(TARGET_HOME)/lib.bin/em_opt2
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then cp $(SRC_DIR)/em_opt.6 $(TARGET_HOME)/man/em_opt.6 ; \
+	then	mk_manpage $(SRC_DIR)/em_opt.6 $(TARGET_HOME) ; \
 	fi
 
 pattern.c:	$(SRC_DIR)/patterns mktab

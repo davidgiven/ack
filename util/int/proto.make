@@ -92,12 +92,11 @@ all:	test
 install:	$(INT)
 	cp $(INT) $(TARGET_HOME)/bin/int
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then	cp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1 ; \
+	then	mk_manpage $(SRC_DIR)/int.1 $(TARGET_HOME) ; \
 	fi
 
 cmp:	$(INT)
 	-cmp $(INT) $(TARGET_HOME)/bin/int
-	-cmp $(SRC_DIR)/int.1 $(TARGET_HOME)/man/int.1
 
 test:	$(INT) test/awa.em22 test/awa.em24 test/awa.em44
 	@rm -f int.mess

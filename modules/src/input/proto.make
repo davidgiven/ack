@@ -23,12 +23,15 @@ install:	all
 		cp $(SRC_DIR)/input.3 $(MOD_DIR)/man/input.3
 		cp $(SRC_DIR)/inp_pkg.body $(MOD_DIR)/pkg/inp_pkg.body
 		cp $(SRC_DIR)/inp_pkg.spec $(MOD_DIR)/pkg/inp_pkg.spec
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/input.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp libinput.$(LIBSUF) $(MOD_DIR)/lib/libinput.$(LIBSUF)
-		-cmp $(SRC_DIR)/input.3 $(MOD_DIR)/man/input.3
 		-cmp $(SRC_DIR)/inp_pkg.body $(MOD_DIR)/pkg/inp_pkg.body
 		-cmp $(SRC_DIR)/inp_pkg.spec $(MOD_DIR)/pkg/inp_pkg.spec
+		-cmp $(SRC_DIR)/input.3 $(MOD_DIR)/man/input.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC_DIR)/inp_pkg.spec $(SRC_DIR)/inp_pkg.body $(SRC_DIR)/AtEoIF.c $(SRC_DIR)/AtEoIT.c

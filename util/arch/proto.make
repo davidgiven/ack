@@ -5,7 +5,6 @@
 SRC_DIR = $(SRC_HOME)/util/arch
 EMH = $(TARGET_HOME)/h
 EMBIN = $(TARGET_HOME)/bin
-EMMAN = $(TARGET_HOME)/man
 LIB = $(TARGET_HOME)/modules/lib
 ULIB = $(UTIL_HOME)/modules/lib
 
@@ -48,15 +47,14 @@ install :       all
 		cp aal $(EMBIN)/aal
 		cp arch $(EMBIN)/arch
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/aal.1 $(SRC_DIR)/arch.1 $(SRC_DIR)/arch.5 $(EMMAN) ; \
+		then	mk_manpage $(SRC_DIR)/aal.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/arch.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/arch.5 $(TARGET_HOME) ; \
 		fi
 
 cmp :           all
 		-cmp aal $(EMBIN)/aal
 		-cmp arch $(EMBIN)/arch
-		-cmp $(SRC_DIR)/aal.1 $(EMMAN)/aal.1
-		-cmp $(SRC_DIR)/arch.1 $(EMMAN)/arch.1
-		-cmp $(SRC_DIR)/arch.5 $(EMMAN)/arch.5
 
 opr:
 		make pr ^ opr

@@ -9,7 +9,6 @@ UMODULES=$(UTIL_HOME)/modules
 MODULESLIB=$(MODULES)/lib
 UMODULESLIB=$(UMODULES)/lib
 BIN=$(TARGET_HOME)/lib.bin
-MANDIR=$(TARGET_HOME)/man
 
 # Libraries
 SYSLIB = $(MODULESLIB)/libsystem.$(LIBSUF)
@@ -114,12 +113,11 @@ cfiles: hfiles LLfiles $(GSRC)
 install: all
 	cp cpp $(CEMPP)
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then cp $(SRC_DIR)/cpp.6 $(MANDIR)/cpp.6 ; \
+	then	mk_manpage $(SRC_DIR)/cpp.6 $(TARGET_HOME) ; \
 	fi
 
 cmp:	all
 	-cmp cpp $(CEMPP)
-	-cmp $(SRC_DIR)/cpp.6 $(MANDIR)/cpp.6
 
 pr: 
 	@pr $(PRFILES)

@@ -68,14 +68,13 @@ install:	all
 		ls em4_???? | sed 's:em4_\(.*\):cp & $b44/em_\1:' | sh
 		cp em $(TARGET_HOME)/bin/em
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp em.1 $(TARGET_HOME)/man/em.1 ; \
+		then	mk_manpage $(SRC_DIR)/em.1 $(TARGET_HOME) ; \
 		fi
 
 cmp: 		all
 		-ls em2_???? | sed 's:em2_\(.*\):cmp & $b24/em_\1:' | sh
 		-ls em4_???? | sed 's:em4_\(.*\):cmp & $b44/em_\1:' | sh
 		-cmp em $(TARGET_HOME)/bin/em
-		-cmp em.1 $(TARGET_HOME)/man/em.1
 
 clean:
 		-rm -f *.o *.old a.out em tmp.s $(INTS) compile

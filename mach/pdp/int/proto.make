@@ -41,7 +41,8 @@ install:	all
 		cp em_???? $b
 		cp em eminform $(TARGET_HOME)/bin
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/em.1 $(SRC_DIR)/eminform.1 $(TARGET_HOME)/man ; \
+		then	mk_manpage $(SRC_DIR)/em.1 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/eminform.1 $(TARGET_HOME) ; \
 		fi
 
 cmp: 		all
@@ -52,8 +53,6 @@ cmp: 		all
 		-cmp em_t--p $b/em_t--p
 		-cmp em $(TARGET_HOME)/bin/em
 		-cmp eminform $(TARGET_HOME)/bin/eminform
-		-cmp $(SRC_DIR)/em.1 $(TARGET_HOME)/man/em.1
-		-cmp $(SRC_DIR)/eminform.1 $(TARGET_HOME)/man/eminform.1
 
 clean:
 		-rm -f *.o *.old a.out em eminform $(INTS)

@@ -43,13 +43,16 @@ install:	all
 		$(RANLIB) $(MOD_DIR)/lib/libread_emkV.$(LIBSUF)
 		cp libread_emeV.$(LIBSUF) $(MOD_DIR)/lib/libread_emeV.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libread_emeV.$(LIBSUF)
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/read_em.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp $(SRC_DIR)/em_comp.h $(MOD_DIR)/h/em_comp.h
-		-cmp $(SRC_DIR)/read_em.3 $(MOD_DIR)/man/read_em.3
 		-cmp libread_emk.$(LIBSUF) $(MOD_DIR)/lib/libread_emk.$(LIBSUF)
 		-cmp libread_emkV.$(LIBSUF) $(MOD_DIR)/lib/libread_emkV.$(LIBSUF)
 		-cmp libread_emeV.$(LIBSUF) $(MOD_DIR)/lib/libread_emeV.$(LIBSUF)
+		-cmp $(SRC_DIR)/read_em.3 $(MOD_DIR)/man/read_em.3
 
 pr:
 		@pr $(SRC_DIR)/proto.make $(SRC_DIR)/m_C_mnem $(SRC_DIR)/m_C_mnem_na $(SRC_DIR)/argtype $(SRCFILES)

@@ -65,16 +65,14 @@ install :       all
 		cp $(ENC_PATH) $l/em_$(ENC_PATH)
 		cp esize $(TARGET_HOME)/bin/esize
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then	cp $(SRC_DIR)/em_decode.6 $(TARGET_HOME)/man/em_decode.6 ; \
-			cp $(SRC_DIR)/esize.1 $(TARGET_HOME)/man/esize.1 ; \
+		then	mk_manpage $(SRC_DIR)/em_decode.6 $(TARGET_HOME) ; \
+			mk_manpage $(SRC_DIR)/esize.1 $(TARGET_HOME) ; \
 		fi
 
 cmp :           all
 		-cmp $(DEC_PATH) $l/em_$(DEC_PATH)
 		-cmp $(ENC_PATH) $l/em_$(ENC_PATH)
 		-cmp esize $(TARGET_HOME)/bin/esize
-		-cmp $(SRC_DIR)/em_decode.6 $(TARGET_HOME)/man/em_decode.6
-		-cmp $(SRC_DIR)/esize.1 $(TARGET_HOME)/man/esize.1
 
 opr:
 		make pr ^ opr

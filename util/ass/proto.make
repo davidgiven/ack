@@ -26,12 +26,11 @@ clean:
 install :       all
 		cp ass $(TARGET_HOME)/lib.bin/em_ass
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/em_ass.6 $(TARGET_HOME)/man/em_ass.6 ; \
+		then	mk_manpage $(SRC_DIR)/em_ass.6 $(TARGET_HOME) ; \
 		fi
 
 cmp :           all
 		-cmp ass $(TARGET_HOME)/lib.bin/em_ass
-		-cmp $(SRC_DIR)/em_ass.6 $(TARGET_HOME)/man/em_ass.6
 
 lint:		asstb.c
 		$(LINT) $(LINTFLAGS) $(CFILES)

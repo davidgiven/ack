@@ -33,6 +33,9 @@ install:	all
 		cp $(LIBSTRING) $(MOD_DIR)/lib/$(LIBSTRING)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBSTRING)
 		cp $(SRC_DIR)/string.3 $(MOD_DIR)/man/string.3
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/string.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp $(LIBSTRING) $(MOD_DIR)/lib/$(LIBSTRING)

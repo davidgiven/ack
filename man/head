@@ -1,11 +1,10 @@
-.de TH
 .rn TH yy
+.de TH
 .di zz
-.so /usr/lib/tmac/tmac.an
-.TH "\\$1" "\\$2" "\\$3" "\\$4"
+.yy "\\$1" "\\$2" "\\$3" "\\$4"
 .ds ]W 5th ACK distribution
 .ds ]D Amsterdam Compiler Kit
+.ds ]L "\\$3
 .di
-.rm yy
 .rm zz
 ..

@@ -25,6 +25,9 @@ install:	all
 		cp libobject.$(LIBSUF) $(MOD_DIR)/lib/libobject.$(LIBSUF)
 		$(RANLIB) $(MOD_DIR)/lib/libobject.$(LIBSUF)
 		cp $(SRC_DIR)/object.3 $(MOD_DIR)/man/object.3
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/object.3 $(TARGET_HOME) ; \
+		fi
 
 compare:	all
 		-cmp libobject.$(LIBSUF) $(MOD_DIR)/lib/libobject.$(LIBSUF)

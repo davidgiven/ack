@@ -13,16 +13,15 @@ all:	afcc afm2 afpc
 install:	all
 	cp afcc afm2 afpc $(TARGET_HOME)/bin
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then	cp $(SRC_DIR)/afcc.1 $(SRC_DIR)/afm2.1 $(SRC_DIR)/afpc.1 $(TARGET_HOME)/man ; \
+	then	mk_manpage $(SRC_DIR)/afcc.1 $(TARGET_HOME) ; \
+		mk_manpage $(SRC_DIR)/afpc.1 $(TARGET_HOME) ; \
+		mk_manpage $(SRC_DIR)/afm2.1 $(TARGET_HOME) ; \
 	fi
 
 cmp:	all
 	-cmp afcc $(TARGET_HOME)/bin/afcc
 	-cmp afm2 $(TARGET_HOME)/bin/afm2
 	-cmp afpc $(TARGET_HOME)/bin/afpc
-	-cmp afcc.1 $(TARGET_HOME)/man/afcc.1
-	-cmp afm2.1 $(TARGET_HOME)/man/afm2.1
-	-cmp afpc.1 $(TARGET_HOME)/man/afpc.1
 
 pr:
 	@pr $(SRC_DIR)/proto.make $(SRC_DIR)/driver.c

@@ -20,7 +20,6 @@ SOURCES=$(SRC_DIR)/*.h $(SRC_DIR)/cgg.y $(SRC_DIR)/scan.l \
 
 SRC_DIR=$(SRC_HOME)/util/ncgg
 EMH=$(TARGET_HOME)/h
-MANDIR=$(TARGET_HOME)/man
 INCLUDES=-I$(EMH) -I$(TARGET_HOME)/config -I$(SRC_DIR) -I.
 CFLAGS=$(INCLUDES) $(COPTIONS)
 YFLAGS=-d
@@ -34,12 +33,11 @@ cgg:	cgg.$(SUF) $(OFILES) output.$(SUF)
 install:	cgg
 	cp cgg $(TARGET_HOME)/lib.bin/ncgg
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
-	then cp $(SRC_DIR)/ncgg.6 $(MANDIR)/ncgg.6 ; \
+	then	mk_manpage $(SRC_DIR)/ncgg.6 $(TARGET_HOME) ; \
 	fi
 
 cmp:	cgg
 	-cmp cgg $(TARGET_HOME)/lib.bin/ncgg
-	-cmp $(SRC_DIR)/ncgg.6 $(MANDIR)/ncgg.6
 
 debugcgg:	cgg.$(SUF) $(OFILES) debugoutput.$(SUF)
 	$(CC) $(LDFLAGS) $(OFILES) debugoutput.$(SUF) $(TARGET_HOME)/lib.bin/em_data.$(LIBSUF) -o cgg

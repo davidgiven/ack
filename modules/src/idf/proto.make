@@ -11,6 +11,9 @@ install:	all
 		cp $(SRC_DIR)/idf_pkg.body $(MOD_DIR)/pkg/idf_pkg.body
 		cp $(SRC_DIR)/idf_pkg.spec $(MOD_DIR)/pkg/idf_pkg.spec
 		cp $(SRC_DIR)/idf.3 $(MOD_DIR)/man/idf.3
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then	mk_manpage $(SRC_DIR)/idf.3 $(TARGET_HOME) ; \
+		fi
 
 cmp:		all
 		-cmp $(SRC_DIR)/idf_pkg.body $(MOD_DIR)/pkg/idf_pkg.body

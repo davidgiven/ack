@@ -126,12 +126,13 @@ all:		make.main
 install:	all
 		cp main $(TARGET_HOME)/lib.bin/em_cemcom
 		if [ $(DO_MACHINE_INDEP) = y ] ; \
-		then cp $(SRC_DIR)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6 ; \
+		then	cp $(SRC_DIR)/cemcom.1 em_cemcom.6 ; \
+			mk_manpage em_cemcom.6 $(TARGET_HOME) ; \
+			rm -f em_cemcom.6 ; \
 		fi
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_cemcom
-		-cmp $(SRC_DIR)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6
 
 opr:
 		make pr | opr
