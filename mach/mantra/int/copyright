@@ -1,27 +1,5 @@
 ! (c) copyright 1984 by the Vrije Universiteit, Amsterdam, The Netherlands.
-! Explicit permission is hereby granted to universities to use or duplicate
-! this program for educational or research purposes.  All other use or dup-
-! lication  by universities,  and all use or duplication by other organiza-
-! tions is expressly prohibited unless written permission has been obtained
-! from the Vrije Universiteit. Requests for such permissions may be sent to
-
-!      Dr. Andrew S. Tanenbaum
-!      Wiskundig Seminarium
-!      Vrije Universiteit
-!      Postbox 7161
-!      1007 MC Amsterdam
-!      The Netherlands
-
-! Organizations wishing to modify part of this software for subsequent sale
-! must  explicitly  apply  for  permission.  The exact arrangements will be
-! worked out on a case by case basis, but at a minimum will require the or-
-! ganization to include the following notice in all software and documenta-
-! tion based on our work:
-
-!	    This product is based on the Pascal  system  developed  by
-!      Andrew  S.  Tanenbaum, Johan W. Stevenson and Hans van Staveren
-!      of the Vrije Universiteit, Amsterdam, The Netherlands.
-!
+! See the copyright notice in the ACK home directory, in the file "Copyright".
 !=========================================================================
 
 ! This is an interpreter for EM programs with no virtual memory for the
