@@ -1,5 +1,6 @@
 .define _stime
 .extern _stime
+.sect .text
 .sect .rom
 .sect .data
 .sect .bss

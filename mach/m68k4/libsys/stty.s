@@ -1,5 +1,6 @@
 .define _stty
 .extern _stty
+.sect .text
 .sect .rom
 .sect .data
 .sect .bss

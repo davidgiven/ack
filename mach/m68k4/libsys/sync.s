@@ -1,5 +1,6 @@
 .define _sync
 .extern _sync
+.sect .text
 .sect .rom
 .sect .data
 .sect .bss
