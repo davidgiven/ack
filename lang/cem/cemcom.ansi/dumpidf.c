@@ -480,12 +480,13 @@ p1_expr(lvl, expr)
 		break;
 	}
 	case Float:
-		if (!expr->FL_VALUE) {
-			expr->FL_VALUE = Malloc(FLT_STRLEN);
-			flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
-		}
-		print("%s\n", expr->FL_VALUE);
+	{
+		char buf[FLT_STRLEN];
+
+		flt_flt2str(&(expr->FL_ARITH), buf, FLT_STRLEN);
+		print("%s\n", buf);
 		break;
+	}
 	case Oper:
 		o = &expr->ex_object.ex_oper;
 		print("\n");

@@ -223,7 +223,6 @@ string2expr(expp, str, len)
 	ex->ex_class = String;
 	ex->SG_VALUE = str;
 	ex->SG_LEN = len;
-	/* ex->SG_DATLAB = 0; */
 }
 
 int2expr(expr)
@@ -258,12 +257,11 @@ float2expr(expr)
 		crash("(float2expr) bad fund %s\n", symbol2str(fund));
 	}
 	expr->ex_class = Float;
-	expr->FL_VALUE = dot.tk_fval;
-	flt_str2flt(expr->FL_VALUE, &(expr->FL_ARITH));
+	flt_str2flt(dot.tk_fval, &(expr->FL_ARITH));
+	free(dot.tk_fval);
 	ASSERT(flt_status != FLT_NOFLT);
 	if (flt_status == FLT_OVFL)
 		expr_warning(expr,"internal floating point overflow");
-	expr->FL_DATLAB = 0;
 }
 
 struct expr*
@@ -501,8 +499,6 @@ free_expression(expr)
 	/*	The expression expr is freed recursively.
 	*/
 	if (expr) {
-		if (expr->ex_class == Float && expr->FL_VALUE)
-			free(expr->FL_VALUE);
 		if (expr->ex_class == Oper)	{
 			free_expression(expr->OP_LEFT);
 			free_expression(expr->OP_RIGHT);

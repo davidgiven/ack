@@ -514,11 +514,10 @@ check_ival(expp, tp)
 		print_expr("init-expr after cast", expr);
 #endif DEBUG
 		if (expr->ex_class == Float) {
-			if (!expr->FL_VALUE) {
-				expr->FL_VALUE = Malloc(FLT_STRLEN);
-				flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
-			}
-			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+			char buf[FLT_STRLEN];
+
+			flt_flt2str(&(expr->FL_ARITH), buf, FLT_STRLEN);
+			C_con_fcon(buf, expr->ex_type->tp_size);
 		}
 #ifdef NOTDEF
 

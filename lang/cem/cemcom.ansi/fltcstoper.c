@@ -91,8 +91,6 @@ fltcstbin(expp, oper, expr)
 		default:	/* there can't be another status */
 			crash("(fltcstoper) bad status");
 	}
-	if ((*expp)->FL_VALUE) free((*expp)->FL_VALUE);
-	(*expp)->FL_VALUE = 0;
 	if (compar) {
 		fill_int_expr(*expp, (arith)cmpval, INT);
 	} else {

@@ -379,9 +379,7 @@ int2float(expp, tp)
 		
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		exp->FL_VALUE = 0;
 		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);
-		exp->FL_DATLAB = 0;
 	}
 	else	{
 		fp_used = 1;
@@ -623,6 +621,4 @@ switch_sign_fp(expr)
 	register struct expr *expr;
 {
 	flt_umin(&(expr->FL_ARITH));
-	if (expr->FL_VALUE) free(expr->FL_VALUE);
-	expr->FL_VALUE = 0;
 }

@@ -101,14 +101,12 @@ EVAL(expr, val, code, true_label, false_label)
 	case Float:	/* a floating constant	*/
 		if (gencode) {
 			label datlab = data_label();
+			char buf[FLT_STRLEN];
 			
 			fp_used = 1;
-			if (!expr->FL_VALUE) {
-				expr->FL_VALUE = Malloc(FLT_STRLEN);
-				flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
-			}
+			flt_flt2str(&(expr->FL_ARITH), buf, FLT_STRLEN);
 			C_df_dlb(datlab);
-			C_rom_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+			C_rom_fcon(buf, expr->ex_type->tp_size);
 			C_lae_dlb(datlab, (arith)0);
 			C_loi(expr->ex_type->tp_size);
 		}

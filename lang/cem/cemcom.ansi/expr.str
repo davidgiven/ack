@@ -26,13 +26,6 @@ struct value	{
 struct string	{
 	char *sg_value;		/* row of bytes repr. the constant */
 	int sg_len;		/* length of the row */
-	label sg_datlab;	/* global data-label			*/
-};
-
-struct floating	{
-	char *fl_value;		/* pointer to string repr. the fp const. */
-	flt_arith fl_arith;	/* the value in high precision */
-	label fl_datlab;	/* global data_label	*/
 };
 
 struct oper	{
@@ -60,7 +53,7 @@ struct expr	{
 	union	{
 		struct value ex_value;
 		struct string ex_string;
-		struct floating ex_float;
+		flt_arith ex_fl_arith;
 		struct oper ex_oper;
 	} ex_object;
 };
@@ -73,10 +66,7 @@ struct expr	{
 #define	VL_LBL		EX_VALUE.vl_data.vl_lbl
 #define	SG_VALUE	ex_object.ex_string.sg_value
 #define SG_LEN		ex_object.ex_string.sg_len
-#define	SG_DATLAB	ex_object.ex_string.sg_datlab
-#define	FL_VALUE	ex_object.ex_float.fl_value
-#define	FL_ARITH	ex_object.ex_float.fl_arith
-#define	FL_DATLAB	ex_object.ex_float.fl_datlab
+#define	FL_ARITH	ex_object.ex_fl_arith
 #define	OP_TYPE		ex_object.ex_oper.op_type
 #define	OP_LEFT		ex_object.ex_oper.op_left
 #define	OP_OPER		ex_object.ex_oper.op_oper
