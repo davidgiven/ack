@@ -14,4 +14,10 @@ cmp:		all
 		$(COMPARE) pkg/idf_pkg.spec
 		$(COMPARE) man/idf.3
 
+pr:
+		@pr Makefile idf_pkg.spec idf_pkg.body
+
+opr:
+		make pr | opr
+
 clean:
