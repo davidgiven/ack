@@ -341,7 +341,7 @@ ch3cast(expp, oper, tp)
 	if (oldtp->tp_fund == POINTER && is_integral_type(tp))	{
 		/* from pointer to integral */
 		if (oper != CAST)
-			expr_warning(exp,
+			expr_strict(exp,
 				"illegal conversion of pointer to %s",
 				symbol2str(tp->tp_fund));
 		if (oldtp->tp_size > tp->tp_size)
@@ -367,7 +367,7 @@ ch3cast(expp, oper, tp)
 			if (is_cp_cst(exp) && exp->VL_VALUE == (arith)0)
 				break;
 		default:
-			expr_warning(exp,
+			expr_strict(exp,
 				"illegal conversion of %s to pointer",
 				symbol2str(oldtp->tp_fund));
 			break;
@@ -388,7 +388,7 @@ ch3cast(expp, oper, tp)
 	}
 	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
-		expr_warning(exp, "dubious conversion based on equal size");
+		expr_strict(exp, "dubious conversion based on equal size");
 		exp->ex_type = tp;		/* brute force */
 	}
 	else	{

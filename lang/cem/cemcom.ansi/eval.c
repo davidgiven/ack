@@ -868,8 +868,7 @@ store_val(vl, tp)
 		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
 		if (df->df_sc == GLOBAL
 		    || df->df_sc == EXTERN
-		    || df->df_sc == STATIC
-		    || df->df_sc == IMPLICIT) {
+		    || df->df_sc == STATIC) {
 			if (inword)
 				C_ste_dnam(id->id_text, val);
 			else
@@ -980,8 +979,7 @@ load_val(expr, rlval)
 		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
 		if ( df->df_sc == GLOBAL
 		    || df->df_sc == STATIC
-		    || df->df_sc == EXTERN
-		    || df->df_sc == IMPLICIT) {
+		    || df->df_sc == EXTERN) {
 			if (rvalue) {
 				if (inword)
 					C_loe_dnam(id->id_text, val);

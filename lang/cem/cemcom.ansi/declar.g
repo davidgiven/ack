@@ -234,7 +234,7 @@ initializer(struct idf *idf; int sc;)
 			idf->id_def->df_type->tp_fund = ERRONEOUS;
 		}
 		if (level == L_FORMAL2)
-			warning("illegal initialization of formal parameter (ignored)");
+			error("illegal initialization of formal parameter");
 	}
 	'='
 	{

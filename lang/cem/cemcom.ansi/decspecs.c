@@ -38,7 +38,7 @@ do_decspecs(ds)
 	if (	level == L_GLOBAL &&
 		(ds->ds_sc == AUTO || ds->ds_sc == REGISTER)
 	)	{
-		warning("no global %s variable allowed",
+		error("no global %s variable allowed",
 			symbol2str(ds->ds_sc));
 		ds->ds_sc = GLOBAL;
 	}

@@ -186,7 +186,6 @@ code_scope(text, def)
 	switch (def->df_sc)	{
 	case EXTERN:
 	case GLOBAL:
-	case IMPLICIT:
 		if (fund == FUNCTION)
 			C_exp(text);
 		else
@@ -455,8 +454,7 @@ code_declaration(idf, expr, lvl, sc)
 		)
 			def->df_alloc = ALLOC_SEEN;
 		if (expr && def_sc == STATIC && sc == EXTERN) {
-			warning("%s redeclared extern", idf->id_text);
-			def->df_sc = EXTERN;
+			warning("%s has internal linkage", idf->id_text);
 		}
 		if (expr) {	/* code only if initialized */
 #ifndef PREPEND_SCOPES
@@ -468,7 +466,7 @@ code_declaration(idf, expr, lvl, sc)
 	}
 	else
 	if (lvl >= L_LOCAL)	{	/* local variable	*/
-		/* STATIC, EXTERN, GLOBAL, IMPLICIT, AUTO or REGISTER */
+		/* STATIC, EXTERN, GLOBAL, AUTO or REGISTER */
 		switch (def_sc)	{
 		case STATIC:
 			if (fund == FUNCTION) {
@@ -499,7 +497,6 @@ code_declaration(idf, expr, lvl, sc)
 				error("cannot initialize extern in block"
 						, idf->id_text);
 		case GLOBAL:
-		case IMPLICIT:
 			/* we are sure there is no expression */
 			break;
 		case AUTO:

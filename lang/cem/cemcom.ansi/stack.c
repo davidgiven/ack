@@ -217,13 +217,6 @@ unstack_world()
 				def->df_used ? "used" : "not used");
 		}
 #endif DEBUG
-		/*
-		/_* find final storage class *_/
-		if (def->df_sc == GLOBAL || def->df_sc == IMPLICIT)
-			/_* even now we still don't know *_/
-			def->df_sc = EXTERN;
-		*/
-		
 		if (def->df_sc == STATIC
 		    && def->df_type->tp_fund == FUNCTION
 		    && !def->df_initialized) {

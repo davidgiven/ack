@@ -34,6 +34,7 @@
 int idfsize = IDFSIZE;
 extern char options[];
 extern arith NewLocal();
+extern char *symbol2str();
 
 char sp_occurred[SP_TOTAL+1];	/* indicate occurrence of special id	*/
 
@@ -204,7 +205,6 @@ declare_idf(ds, dc, lvl)
 				/* the type is not yet known,
 				   but it has to be:
 				*/
-				extern char *symbol2str();
 				if (type->tp_fund != VOID) {
 				    if (level != L_GLOBAL)
 					error("unknown %s-type",
@@ -250,10 +250,10 @@ declare_idf(ds, dc, lvl)
 		if (lvl != L_GLOBAL)  {		/* 3.5.1 */
 			if (sc == 0)
 				sc = GLOBAL;
-			else if (sc != EXTERN && sc != IMPLICIT) {
+			else if (sc != EXTERN) {
 				error("illegal storage class %s for function with block-scope"
 					, symbol2str(sc));
-				ds->ds_sc = sc = GLOBAL;
+				ds->ds_sc = sc = EXTERN;
 			}
 		}
 		else if (sc == 0)
@@ -264,10 +264,6 @@ declare_idf(ds, dc, lvl)
 			sc =	lvl == L_GLOBAL ? GLOBAL
 				: lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL
 				: AUTO;
-
-	/* is it a universal typedef? */
-	if (def && def->df_level == L_UNIVERSAL)
-		warning("redeclaring reserved word %s", idf->id_text);
 
 #ifdef	LINT
 	if (	def && def->df_level < lvl
@@ -326,21 +322,6 @@ declare_idf(ds, dc, lvl)
 		def->df_file = idf->id_file;
 		def->df_line = idf->id_line;
 	}
-#if	0	/* be more strict in scope (at least for now) */
-	else
-	if (	lvl >= L_LOCAL &&
-		(type->tp_fund == FUNCTION || sc == EXTERN)
-	)	{
-		/*	extern declaration inside function is treated the
-			same way as global extern declaration
-		*/
-		if (sc == STATIC && type->tp_fund == FUNCTION)
-			if (!is_anon_idf(idf))
-				warning("non-global static function %s",
-					idf->id_text);
-		declare_idf(ds, dc, L_GLOBAL);
-	}
-#endif
 	else	{ /* fill in the def block */
 		register struct def *newdef = new_def();
 
@@ -431,6 +412,9 @@ global_redecl(idf, new_sc, tp)
 		if (def->df_type->tp_size < 0)	{	/* old decl has [] */
 			def->df_type = tp;
 		}
+	} if (tp->tp_fund == FUNCTION && new_sc == GLOBAL) {
+		/* see 3.1.2.2 */
+		new_sc = EXTERN;
 	}
 
 	/*	Now we may be able to update the storage class.
@@ -442,21 +426,18 @@ global_redecl(idf, new_sc, tp)
 					level, without either "extern" or
 					"static".
 			STATIC:		we have seen the word "static"
-			IMPLICIT:	function declaration inferred from
-					call
 	*/
-	if (new_sc == IMPLICIT)
-		return;			/* no new information */
 
 	switch (def->df_sc)	{	/* the old storage class */
 	case EXTERN:
 		switch (new_sc)	{	/* the new storage class */
-		case EXTERN:
-		case GLOBAL:
-			break;
 		case STATIC:
-			warning("redeclaration of %s to static ignored"
-						, idf->id_text);
+			warning("%s redeclared static", idf->id_text);
+			/* fallthrough */
+		case GLOBAL:
+			def->df_sc = new_sc;
+			/* fallthrough */
+		case EXTERN:
 			break;
 		default:
 			crash("bad storage class");
@@ -465,14 +446,12 @@ global_redecl(idf, new_sc, tp)
 		break;
 	case GLOBAL:
 		switch (new_sc)	{	/* the new storage class */
-		case EXTERN:
-			def->df_sc = EXTERN;
-			break;
+		case STATIC:		/* linkage disagreement */
+			warning("%s redeclared static", idf->id_text);
+			def->df_sc = new_sc;
+			/* fallthrough */
 		case GLOBAL:
-			break;
-		case STATIC:
-			warning("redeclaration of %s to static ignored"
-						, idf->id_text);
+		case EXTERN:
 			break;
 		default:
 			crash("bad storage class");
@@ -481,27 +460,11 @@ global_redecl(idf, new_sc, tp)
 		break;
 	case STATIC:
 		switch (new_sc)	{	/* the new storage class */
-		case GLOBAL:
-			warning("%s redeclared extern", idf->id_text);
-			def->df_sc = new_sc;
-			break;
-		case EXTERN:			/* complain at definition */
-			break;
-		case STATIC:
-			break;
-		default:
-			crash("bad storage class");
-			/*NOTREACHED*/
-		}
-		break;
-	case IMPLICIT:
-		switch (new_sc)	{	/* the new storage class */
+		case GLOBAL:		/* linkage disagreement */
 		case EXTERN:
-		case GLOBAL:
-			def->df_sc = new_sc;
-			break;
+			warning("%s is already declared static", idf->id_text);
+			/* fallthrough */
 		case STATIC:
-			def->df_sc = new_sc;
 			break;
 		default:
 			crash("bad storage class");
@@ -559,8 +522,8 @@ init_idf(idf)
 	if (def->df_initialized)
 		error("multiple initialization of %s", idf->id_text);
 	if (def->df_sc == TYPEDEF)	{
-		warning("typedef cannot be initialized");
-		def->df_sc = EXTERN;		/* ??? *//* What else ? */
+		error("typedef cannot be initialized");
+		return;
 	}
 	def->df_initialized = 1;
 }

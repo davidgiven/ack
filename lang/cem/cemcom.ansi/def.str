@@ -12,7 +12,7 @@ struct def	{		/* for ordinary tags */
 	int df_level;
 	struct type *df_type;
 	int df_sc;		/*	may be:
-					GLOBAL, STATIC, EXTERN, IMPLICIT,
+					GLOBAL, STATIC, EXTERN
 					TYPEDEF,
 					FORMAL, AUTO,
 					ENUM, LABEL

@@ -530,7 +530,7 @@ getparams(buf, parbuf)
 		*/
 		for (pbuf2 = pbuf - 1; pbuf2 >= &buf[0]; pbuf2--) {
 			if (!strcmp(*pbuf2, *pbuf)) {
-				warning("formal parameter \"%s\" already used",
+				error("formal parameter \"%s\" already used",
 					*pbuf);
 			}
 		}

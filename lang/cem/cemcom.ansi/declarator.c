@@ -107,6 +107,11 @@ reject_params(dc)
 		error("non_empty formal parameter pack");
 		free_formals(dc->dc_formal);
 		dc->dc_formal = 0;
+	} else {
+		if (du && du->du_fund == FUNCTION
+		    && !du->du_proto && !options['o']) {
+			warning("old-fashioned function declaration");
+		}
 	}
 	while (du) {
 		if (du->du_fund == FUNCTION)

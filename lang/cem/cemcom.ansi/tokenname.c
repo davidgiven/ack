@@ -111,7 +111,6 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{FIELD, "field"},
 
 	{GLOBAL, "global"},
-	{IMPLICIT, "implicit"},
 	{FORMAL, "formal"},
 	{LABEL, "label"},
 	{ERRONEOUS, "erroneous"},

@@ -140,11 +140,11 @@ idf2expr(expr)
 	
 	if (def == 0)	{
 		if (AHEAD == '(') {
-			/* function call, declare name IMPLICITly (3.3.2.2) */
+			/* function call, declare name implicitly (3.3.2.2) */
 			if (!options['o'])
 				warning("implicit declaration of function %s"
 					, idf->id_text);
-			add_def(idf, IMPLICIT, funint_type, level);
+			add_def(idf, EXTERN, funint_type, level);
 		} else	{
 			if (!is_anon_idf(idf))
 				error("%s undefined", idf->id_text);
