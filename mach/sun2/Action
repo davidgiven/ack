@@ -1,0 +1,9 @@
+name "Ack.out --> SUN2 a.out format conversion program"
+dir cv
+end
+name "SUN2 systemcall library"
+dir libsys
+end
+name "SUN2 C libraries"
+dir libcc
+end
