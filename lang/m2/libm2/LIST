@@ -1,4 +1,5 @@
 tail_m2.a
+Termcap.mod
 CSP.mod
 PascalIO.mod
 RealInOut.mod
@@ -17,6 +18,7 @@ Strings.mod
 ArraySort.mod
 catch.c
 Traps.mod
+XXTermcap.c
 Arguments.c
 LtoUset.e
 StrAss.c

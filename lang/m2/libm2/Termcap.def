@@ -1,0 +1,45 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+ 
+(* 
+  Module:       Interface to termcap database
+  From:         Unix manual chapter 3 
+  Version:      $Header$ 
+*)
+
+(*
+  Use this like the C-version. In this Modula-2 version, some of the buffers,
+  that are explicit in the C-version, are hidden. These buffers are initialized
+  by a call to Tgetent. The "ARRAY OF CHAR" parameters must be null-terminated.
+  You can call them with a constant string argument, as these are always
+  null-terminated in our Modula-2 implementation. Also, the strings returned
+  by these routines are null-terminated.
+*)
+
+DEFINITION MODULE Termcap;
+
+  TYPE	STR = ARRAY[1..32] OF CHAR;
+	PTSTR = POINTER TO STR;
+	PUTPROC = PROCEDURE(CHAR);
+
+  VAR	UP, BC: PTSTR;		(* must be null-terminated *)
+	ospeed: INTEGER;	(* see termcap(3), tty(4) *)
+	PC: CHAR;		(* is initially 0C *)
+
+  PROCEDURE Tgetent(name: ARRAY OF CHAR) : INTEGER;
+
+  PROCEDURE Tgetnum(id: ARRAY OF CHAR): INTEGER;
+
+  PROCEDURE Tgetflag(id: ARRAY OF CHAR): BOOLEAN;
+
+  PROCEDURE Tgoto(cm: PTSTR; col, line: INTEGER): PTSTR;
+  (* Result exists until next call to Tgoto *)
+
+  PROCEDURE Tgetstr(id: ARRAY OF CHAR): PTSTR;
+  (* Result exists until next call to Tgetent *)
+
+  PROCEDURE Tputs(cp: PTSTR; affcnt: INTEGER; p: PUTPROC);
+
+END Termcap.

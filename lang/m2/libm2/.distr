@@ -25,3 +25,5 @@ Epilogue.def
 Streams.def
 ArraySort.def
 StripUnix.def
+Termcap.def
+XXTermcap.def
