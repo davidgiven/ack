@@ -584,11 +584,12 @@ ArraySizes(tp)
 	getbounds(index_type, &(tp->arr_low), &(tp->arr_high));
 	diff = tp->arr_high - tp->arr_low;
 
-	if (! fit(diff, (int) int_size)) {
+	if (diff < 0 || ! fit(diff, (int) int_size)) {
 		error("too many elements in array");
 	}
 
 	tp->tp_size = align((diff + 1) * tp->arr_elsize, tp->tp_align);
+	/* ??? check overflow ??? */
 	if (! ufit(tp->tp_size, (int) pointer_size)) {
 		error("array too large");
 	}

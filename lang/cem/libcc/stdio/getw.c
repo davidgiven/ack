@@ -11,6 +11,6 @@ int getw(iop)
 	while (cnt--) {
 		*p++ = getc(iop);
 	}
-	if (foef(iop) || ferror(iop)) return EOF;
+	if (feof(iop) || ferror(iop)) return EOF;
 	return w;
 }

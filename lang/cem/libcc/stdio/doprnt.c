@@ -225,9 +225,8 @@ _doprnt(fmt,ap,stream)
 			break;
 #endif
 		case 'r':
-			ap = va_arg(ap, char *);
+			ap = va_arg(ap, va_list);
 			fmt = va_arg(ap, char *);
-			fmt=oldfmt;
 			continue;
 		}
 #ifndef NOFLOAT

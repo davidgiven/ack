@@ -5,4 +5,4 @@ sed "s/\.$VERSION/.$NEWVERSION/" < Version.c > tmp$$
 mv tmp$$ Version.c
 CM "$*"
 V=`cat Version.c`
-SV > ../versions/V`expr "$V" ':' '.*\([0-9][0-9]*\.[0-9][0-9]*\).*'`
+SV > Versions/V`expr "$V" ':' '.*\([0-9][0-9]*\.[0-9][0-9]*\).*'`
