@@ -161,6 +161,15 @@ do
 	Xn*)	. $FDIR/get_sysvax
 		LIMIT=n
 		DO_MACHINE_INDEP=y
+		DO_FAST=n
+		if [ $TARGET_HOME = $UTIL_HOME ]
+		then
+			case $ACM in
+			sun3|m68020|i386|vax*)
+				DO_FAST=y
+				;;
+			esac
+		fi
 		break
 		;;
 	*)	echo "I do not understand your answer ($ANS). Try again."
