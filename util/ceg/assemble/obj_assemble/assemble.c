@@ -170,7 +170,7 @@ char *match_ch( c, str, instr)
 char *skip_string( ptr)
 	char *ptr;
 {
-	while  ( isalnum( *ptr) && !isspace( *ptr) && *ptr != ':')
+	while  ( isalnum( *ptr) || ( !isspace( *ptr) && *ptr != ':'))
 		ptr++;
 	return( ptr);
 }
