@@ -39,7 +39,7 @@ lint:
 		$(LINT) $(INCLUDES) $(CFILES)
 
 clean:
-		-rm -f *.o LL.temp LL.xxx LL.output LLgen LLgen.c tokens.c Lpars.[ch]
+		-rm -f *.o LL.temp LL.xxx LL.output LLgen LLgen.c tokens.c Lpars.[ch] parser
 
 distr:
 		-rm -f parser
