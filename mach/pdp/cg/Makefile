@@ -1,12 +1,13 @@
 # $Header$
 
-PREFLAGS=-I../../../h -I. -DNDEBUG
+EMHOME=../../..
+PREFLAGS=-I$(EMHOME)/h -I. -DNDEBUG
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) -O
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
-LIBS=../../../lib/em_data.a
-CDIR=../../proto/cg
+LIBS=$(EMHOME)/lib/em_data.a
+CDIR=$(EMHOME)/mach/proto/cg
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
        $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/main.c $(CDIR)/move.c \
        $(CDIR)/nextem.c $(CDIR)/reg.c $(CDIR)/regvar.c $(CDIR)/salloc.c \
@@ -71,7 +72,7 @@ distr:
 
 tables.c: table
 	-mv tables.h tables.h.save
-	../../../lib/cpp -P table | ../../../lib/cgg > debug.out
+	$(EMHOME)/lib/cpp -P table | $(EMHOME)/lib/cgg > debug.out
 	-if cmp -s tables.h.save tables.h; then mv tables.h.save tables.h; else exit 0; fi
 	-if cmp -s /dev/null tables.h; then mv tables.h.save tables.h; else exit 0; fi
 
