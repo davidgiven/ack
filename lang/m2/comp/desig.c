@@ -329,6 +329,7 @@ CodeDesig(nd, ds)
 
 	case Oper:
 		assert(nd->nd_symb == '[');
+
 		CodeDesig(nd->nd_left, ds);
 		CodeAddress(ds);
 		*ds = InitDesig;
@@ -348,6 +349,7 @@ CodeDesig(nd, ds)
 
 	case Uoper:
 		assert(nd->nd_symb == '^');
+
 		CodeDesig(nd->nd_right, ds);
 		switch(ds->dsg_kind) {
 		case DSG_LOADED:

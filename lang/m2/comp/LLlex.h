@@ -8,9 +8,8 @@ struct string {
 };
 
 struct token	{
-	int tk_symb;		/* token itself	*/
-	char *tk_filename;	/* filename in which it occurred */
-	int tk_lineno;		/* linenumber on which it occurred */
+	short tk_symb;		/* token itself	*/
+	unsigned short tk_lineno;	/* linenumber on which it occurred */
 	union {
 		struct idf *tk_idf;	/* IDENT	*/
 		struct string *tk_str;	/* STRING	*/

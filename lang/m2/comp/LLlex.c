@@ -121,7 +121,6 @@ LLlex()
 		return tk->tk_symb;
 	}
 	tk->tk_lineno = LineNumber;
-	tk->tk_filename = FileName;
 
 again:
 	LoadChar(ch);

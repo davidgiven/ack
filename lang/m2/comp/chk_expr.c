@@ -503,15 +503,12 @@ df->df_idf->id_text);
 				expp->nd_symb = INTEGER;
 			}
 			else  {
-				char *fn;
-				int ln;
+				unsigned int ln;
 
 				assert(df->df_kind == D_CONST);
 				ln = expp->nd_lineno;
-				fn = expp->nd_filename;
 				*expp = *(df->con_const);
 				expp->nd_lineno = ln;
-				expp->nd_filename = fn;
 			}
 		}
 

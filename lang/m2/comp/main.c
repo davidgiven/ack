@@ -140,7 +140,7 @@ AddStandards()
 {
 	register struct def *df;
 	struct def *Enter();
-	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0, 0}};
+	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0}};
 
 	(void) Enter("ABS", D_PROCEDURE, std_type, S_ABS);
 	(void) Enter("CAP", D_PROCEDURE, std_type, S_CAP);

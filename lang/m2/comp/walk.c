@@ -69,10 +69,12 @@ WalkModule(module)
 		Also generate code for its body.
 	*/
 	register struct def *df = module->mod_vis->sc_scope->sc_def;
+	register struct scope *sc;
 	struct scopelist *vis;
 
 	vis = CurrVis;
 	CurrVis = module->mod_vis;
+	sc = CurrentScope;
 
 	if (!proclevel && module != Defined) {
 		/* This module is a local module, but not within a
@@ -80,12 +82,12 @@ WalkModule(module)
 		   variables. This is done by generating a "bss",
 		   with label "_<modulenumber><modulename>".
 		*/
-		arith size = align(CurrentScope->sc_off, word_align);
+		arith size = align(sc->sc_off, word_align);
 
 		if (size == 0) size = word_size;
 		/* WHY ??? because we generated an INA for it ??? */
 
-		C_df_dnam(&(CurrentScope->sc_name[1]));
+		C_df_dnam(&(sc->sc_name[1]));
 		C_bss_cst(size, (arith) 0, 0);
 	}
 	else if (CurrVis == Defined->mod_vis) {
@@ -104,22 +106,22 @@ WalkModule(module)
 
 	/* Now, walk through it's local definitions
 	*/
-	WalkDef(CurrentScope->sc_def);
+	WalkDef(sc->sc_def);
 
 	/* Now, generate initialization code for this module.
 	   First call initialization routines for modules defined within
 	   this module.
 	*/
-	CurrentScope->sc_off = 0;
+	sc->sc_off = 0;
 	instructionlabel = 2;
 	func_type = 0;
-	C_pro_narg(CurrentScope->sc_name);
+	C_pro_narg(sc->sc_name);
 	DoProfil();
-	MkCalls(CurrentScope->sc_def);
+	MkCalls(sc->sc_def);
 	WalkNode(module->mod_body, (label) 0);
 	C_df_ilb((label) 1);
 	C_ret(0);
-	C_end(-CurrentScope->sc_off);
+	C_end(-sc->sc_off);
 	TmpClose();
 
 	CurrVis = vis;
@@ -132,20 +134,22 @@ WalkProcedure(procedure)
 		local definitions
 	*/
 	struct scopelist *vis = CurrVis;
+	register struct scope *sc;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
+	sc = CurrentScope;
 	
-	WalkDef(CurrentScope->sc_def);
+	WalkDef(sc->sc_def);
 
 	/* Generate code for this procedure
 	*/
-	C_pro_narg(CurrentScope->sc_name);
+	C_pro_narg(sc->sc_name);
 	DoProfil();
 	/* generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
-	MkCalls(CurrentScope->sc_def);
+	MkCalls(sc->sc_def);
 	return_expr_occurred = 0;
 	instructionlabel = 2;
 	func_type = procedure->df_type->next;
@@ -158,7 +162,7 @@ node_error(procedure->prc_body,"function procedure does not return a value");
 		C_ret((int) align(func_type->tp_size, word_align));
 	}
 	else	C_ret(0);
-	C_end(-CurrentScope->sc_off);
+	C_end(-sc->sc_off);
 	TmpClose();
 	CurrVis = vis;
 	proclevel--;
@@ -215,7 +219,7 @@ WalkNode(nd, lab)
 }
 
 WalkStat(nd, lab)
-	register struct node *nd;
+	struct node *nd;
 	label lab;
 {
 	/*	Walk through a statement, generating code for it.
@@ -224,14 +228,15 @@ WalkStat(nd, lab)
 	*/
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
-
-	if (options['p']) C_lin((arith) nd->nd_lineno);
+	register struct desig *pds = &Desig;
 
 	if (!nd) {
 		/* Empty statement
 		*/
 		return;
 	}
+
+	if (options['p']) C_lin((arith) nd->nd_lineno);
 
 	if (nd->nd_class == Call) {
 		if (chk_call(nd)) CodeCall(nd);
@@ -253,7 +258,7 @@ WalkStat(nd, lab)
 			break;
 		}
 
-		CodeAssign(nd, &ds, &Desig);
+		CodeAssign(nd, &ds, pds);
 		}
 		break;
 
@@ -341,16 +346,16 @@ WalkStat(nd, lab)
 			wds.w_next = WithDesigs;
 			WithDesigs = &wds;
 			wds.w_scope = left->nd_type->rec_scope;
-			if (Desig.dsg_kind != DSG_PFIXED) {
+			if (pds->dsg_kind != DSG_PFIXED) {
 				/* In this case, we use a temporary variable
 				*/
-				CodeAddress(&Desig);
-				Desig.dsg_kind = DSG_FIXED;
+				CodeAddress(pds);
+				pds->dsg_kind = DSG_FIXED;
 				/* Only for the store ... */
-				Desig.dsg_offset = tmp = NewPtr();
-				Desig.dsg_name = 0;
-				CodeStore(&Desig, pointer_size);
-				Desig.dsg_kind = DSG_PFIXED;
+				pds->dsg_offset = tmp = NewPtr();
+				pds->dsg_name = 0;
+				CodeStore(pds, pointer_size);
+				pds->dsg_kind = DSG_PFIXED;
 				/* the record is indirectly available */
 			}
 			wds.w_desig = Desig;
@@ -390,7 +395,7 @@ node_error(right, "type incompatibility in RETURN statement");
 }
 
 ExpectBool(nd, true_label, false_label)
-	struct node *nd;
+	register struct node *nd;
 	label true_label, false_label;
 {
 	/*	"nd" must indicate a boolean expression. Check this and

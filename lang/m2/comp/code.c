@@ -51,7 +51,6 @@ CodeConst(cst, size)
 CodeString(nd)
 	struct node *nd;
 {
-	
 	label lab;
 	
 	if (nd->nd_type == charc_type) {
@@ -75,8 +74,8 @@ CodeReal(nd)
 }
 
 CodeExpr(nd, ds, true_label, false_label)
-	struct node *nd;
-	struct desig *ds;
+	register struct node *nd;
+	register struct desig *ds;
 	label true_label, false_label;
 {
 
@@ -135,9 +134,22 @@ CodeExpr(nd, ds, true_label, false_label)
 		ds->dsg_kind = DSG_LOADED;
 		break;
 
+	case Set: {
+		arith *st;
+		int i;
+
+		st = nd->nd_set;
+		for (i = nd->nd_type->tp_size / word_size, st = nd->nd_set + i;
+		     i > 0;
+		     i--) { 
+			C_loc(*--st);
+		}
+		ds->dsg_kind = DSG_LOADED;
+		}
+		break;
+
 	case Xset:
-	case Set:
-		/* ??? */
+		CodeSet(nd);
 		ds->dsg_kind = DSG_LOADED;
 		break;
 		
@@ -160,7 +172,7 @@ CodeCoercion(t1, t2)
 }
 
 CodeCall(nd)
-	struct node *nd;
+	register struct node *nd;
 {
 	/*	Generate code for a procedure call. Checking of parameters
 		and result is already done.
@@ -250,7 +262,7 @@ CodeAssign(nd, dst, dss)
 }
 
 Operands(leftop, rightop)
-	struct node *leftop, *rightop;
+	register struct node *leftop, *rightop;
 {
 	struct desig Des;
 
@@ -514,7 +526,7 @@ CodeOper(expr, true_label, false_label)
 /*	compare() serves as an auxiliary function of CodeOper	*/
 compare(relop, lbl)
 	int relop;
-	label lbl;
+	register label lbl;
 {
 	switch (relop)	{
 	case '<':
@@ -594,5 +606,44 @@ CodeUoper(nd)
 		break;
 	default:
 		crash("Bad unary operator");
+	}
+}
+
+CodeSet(nd)
+	register struct node *nd;
+{
+	struct type *tp = nd->nd_type;
+
+	nd = nd->nd_right;
+	while (nd) {
+		assert(nd->nd_class == Link && nd->nd_symb == ',');
+
+		CodeEl(nd->nd_left, tp);
+		nd = nd->nd_right;
+		if (nd) {
+			C_ior(tp->tp_size);
+		}
+	}
+}
+
+CodeEl(nd, tp)
+	register struct node *nd;
+	struct type *tp;
+{
+
+	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
+		C_zer(tp->tp_size);	/* empty set */
+		C_lor((arith) 1);	/* SP: address of set */
+		Operands(nd->nd_left, nd->nd_right);
+		C_cal("_LtoUset");	/* library routine to fill set */
+		C_asp(2 * word_size + pointer_size);
+	}
+	else {
+		struct desig Des;
+
+		Des = InitDesig;
+		CodeExpr(nd, &Des, NO_LABEL, NO_LABEL);
+		CodeValue(nd, word_size);
+		C_set(tp->tp_size);
 	}
 }

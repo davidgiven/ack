@@ -137,9 +137,8 @@ _error(class, node, fmt, argv)
 	static unsigned int last_ln = 0;
 	unsigned int ln = 0;
 	static char * last_fn = 0;
-	char *fn = 0;
 	static int e_seen = 0;
-	char *remark = 0;
+	register char *remark = 0;
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
@@ -185,7 +184,6 @@ _error(class, node, fmt, argv)
 	switch (class)	{	
 	case WARNING:
 	case ERROR:
-		fn = node ? node->nd_filename : dot.tk_filename;
 		ln = node ? node->nd_lineno : dot.tk_lineno;
 		break;
 	case LEXWARNING:
@@ -196,14 +194,13 @@ _error(class, node, fmt, argv)
 	case VDEBUG:
 #endif DEBUG
 		ln = LineNumber;
-		fn = FileName;
 		break;
 	}
 	
 #ifdef DEBUG
 	if (class != VDEBUG) {
 #endif
-	if (fn == last_fn && ln == last_ln)	{
+	if (FileName == last_fn && ln == last_ln)	{
 		/* we've seen this place before */
 		e_seen++;
 		if (e_seen == MAXERR_LINE) fmt = "etc ...";
@@ -215,14 +212,14 @@ _error(class, node, fmt, argv)
 	else	{
 		/* brand new place */
 		last_ln = ln;
-		last_fn = fn;
+		last_fn = FileName;
 		e_seen = 0;
 	}
 #ifdef DEBUG
 	}
 #endif DEBUG
 	
-	if (fn) fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
+	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
 
 	if (remark) fprint(ERROUT, "%s ", remark);
 

@@ -3,7 +3,7 @@
 /* $Header$ */
 
 struct f_info {
-	unsigned int f_lineno;
+	unsigned short f_lineno;
 	char *f_filename;
 	char *f_workingdir;
 };

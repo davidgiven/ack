@@ -43,8 +43,8 @@ FreeNode(nd)
 		list
 	*/
 	if (!nd) return;
-	if (nd->nd_left) FreeNode(nd->nd_left);
-	if (nd->nd_right) FreeNode(nd->nd_right);
+	FreeNode(nd->nd_left);
+	FreeNode(nd->nd_right);
 	free_node(nd);
 }
 

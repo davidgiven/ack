@@ -29,11 +29,8 @@ struct subrange {
 
 struct array {
 	struct type *ar_elem;	/* Type of elements */
-	arith ar_lb, ar_ub;	/* Lower bound and upper bound */
 	label ar_descr;		/* Label of array descriptor */
 #define arr_elem	tp_value.tp_arr.ar_elem
-#define arr_lb		tp_value.tp_arr.ar_lb
-#define arr_ub		tp_value.tp_arr.ar_ub
 #define arr_descr	tp_value.tp_arr.ar_descr
 };
 

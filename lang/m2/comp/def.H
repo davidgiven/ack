@@ -61,7 +61,6 @@ struct dforward {
 	char *fo_name;
 #define for_node	df_value.df_forward.fo_node
 #define for_vis		df_value.df_forward.fo_vis
-#define for_scopes	df_value.df_forward.fo_scopes
 #define for_name	df_value.df_forward.fo_name
 };
 

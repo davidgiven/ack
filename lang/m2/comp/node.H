@@ -24,7 +24,6 @@ struct node {
 #define nd_lab		nd_token.tk_data.tk_lab
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
-#define nd_filename	nd_token.tk_filename
 #define nd_IDF		nd_token.TOK_IDF
 #define nd_STR		nd_token.TOK_STR
 #define nd_SLE		nd_token.TOK_SLE

@@ -387,15 +387,11 @@ ArraySizes(tp)
 	*/
 	switch(index_type->tp_fund) {
 	case T_SUBRANGE:
-		tp->arr_lb = index_type->sub_lb;
-		tp->arr_ub = index_type->sub_ub;
 		tp->tp_size = elem_size *
 			(index_type->sub_ub - index_type->sub_lb + 1);
 		break;
 	case T_CHAR:
 	case T_ENUMERATION:
-		tp->arr_lb = 0;
-		tp->arr_ub = index_type->enm_ncst - 1;
 		tp->tp_size = elem_size * index_type->enm_ncst;
 		break;
 	default:
@@ -453,6 +449,8 @@ lcm(m, n)
 DumpType(tp)
 	register struct type *tp;
 {
+	if (!tp) return;
+
 	print(" a:%d; s:%ld;", tp->tp_align, (long) tp->tp_size);
 	if (tp->next && tp->tp_fund != T_POINTER) {
 		/* Avoid printing recursive types!
@@ -501,9 +499,11 @@ DumpType(tp)
 		break;
 		}
 	case T_ARRAY:
-		print("ARRAY %ld-%ld", (long) tp->arr_lb, (long) tp->arr_ub);
+		print("ARRAY");
 		print("; el:");
 		DumpType(tp->arr_elem);
+		print("; index:");
+		DumpType(tp->next);
 		break;
 	case T_STRING:
 		print("STRING"); break;

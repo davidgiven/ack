@@ -128,11 +128,12 @@ TstCompat(tp1, tp2)
 
 int
 TstAssCompat(tp1, tp2)
-	struct type *tp1, *tp2;
+	register struct type *tp1, *tp2;
 {
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
 	*/
+	register struct type *tp;
 
 	if (TstCompat(tp1, tp2)) return 1;
 
@@ -145,11 +146,16 @@ TstAssCompat(tp1, tp2)
 	if (tp1 == char_type && tp2 == charc_type) return 1;
 
 	if (tp1->tp_fund == T_ARRAY) {
+		/* check for string
+		*/
 		arith size;
 
-		if (! tp1->next) return 0;
+		if (!(tp = tp1->next)) return 0;
 
-		size = tp1->arr_ub - tp1->arr_lb + 1;
+		if (tp->tp_fund == T_SUBRANGE) {
+			size = tp->sub_ub - tp->sub_lb + 1;
+		}
+		else	size = tp->enm_ncst;
 	    	tp1 = tp1->arr_elem;
 		if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
 	    	return
