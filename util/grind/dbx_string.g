@@ -314,6 +314,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
     long ic1, ic2;
     int A_used = 0;
     int tclass;
+    int tp_index[2];
     char *str;
   }
 :
@@ -355,7 +356,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
    	 * integer_const.
    	 * Upperbound -1 means unsigned int or unsigned long.
    	 */
-  	'r' type_name(&t1, (p_symbol) 0) ';'
+  	'r' type_index(tp_index) ';'
 	[ 'A' integer_const(&ic1)	{ A_used = 1; }
 	| integer_const(&ic1)
 	]
@@ -365,7 +366,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 	]
 			{ if (tp != *ptp) free_type(tp);
 			  tp = subrange_type(A_used,
-					       last_index,
+					       tp_index,
 					       ic1,
 					       ic2,
 					       type_index);
