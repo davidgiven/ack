@@ -1,7 +1,7 @@
 long _xpipe();
 
 int
-pipe(f)
+_pipe(f)
 	int f[2];
 {
 	long x;

@@ -1,6 +1,6 @@
 long _xwait();
 
-wait(p)
+_wait(p)
 	int *p;
 {
 	long l = _xwait();

@@ -1,5 +1,5 @@
 stime(p)
 	long *p;
 {
-	return _stime(*p);
+	return _xstime(*p);
 }

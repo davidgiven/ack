@@ -1,10 +1,10 @@
-long _time();
+long _xtime();
 
 long
 time(p)
 	long *p;
 {
-	long l = _time();
+	long l = _xtime();
 	if (p) *p = l;
 
 	return l;
