@@ -15,6 +15,8 @@
  *
  */
 
+char rcs_id[] = "$Header$" ;
+
 /*
  * The assumption is that this program is run on the same machine the
  * assembler has run. So the assembler's idea of long fits cv's idea.
