@@ -1,5 +1,5 @@
 .define .lino,.filn
-.define EXIT
+.define EXIT,BRK,WRITE
 .define	begtext,begdata,begbss
 .define	EARRAY,ERANGE,ESET,EIDIVZ,EHEAP,EILLINS,ECASE,EBADGTO
 .define	hol0,.reghp,.limhp,.trpim,.trppc
@@ -47,6 +47,11 @@ begtext:
 	move.l	d0,(sp)		! no stack cleanup needed
 EXIT:
 	jsr	(__exit)
+
+WRITE:
+	jmp	(__write)
+BRK:
+	jmp	(__brk)
 
 	.sect .data
 begdata:
