@@ -1,4 +1,5 @@
 .define	.csa4
+.define .csa
 .sect .text
 .sect .rom
 .sect .data
@@ -8,6 +9,7 @@ ECASE=20
 .sect .text
 
 .csa4:
+.csa:
 		! jump table address in a0
 		! index in d0
 
