@@ -174,6 +174,8 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 	long double	ld_val;
 #endif
 
+	if (!*format) return 0;
+
 	while (1) {
 		if (isspace(*format)) {
 			while (isspace(*format))

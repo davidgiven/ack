@@ -19,6 +19,8 @@ ungetc(int ch, FILE *stream)
 	}
 	stream->_count++;
 	p = --(stream->_ptr);		/* ??? Bloody vax assembler !!! */
-	*p = (unsigned char) ch;
+	/* ungetc() in sscanf() shouldn't write in rom */
+	if (*p != (unsigned char) ch)
+		*p = (unsigned char) ch;
 	return ch;
 }
