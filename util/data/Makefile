@@ -11,14 +11,14 @@ CFLAGS=-O -I$h
 
 $(DATA_PATH):   $(OBJ)
 		ar rv $(DATA_PATH) $(OBJ)
-		-ranlib $(DATA_PATH)
+		-sh -c 'ranlib $(DATA_PATH)'
 
 em_flag.o:      $h/em_flag.h
 
 em_ptyp.o:      $h/em_flag.h $h/em_ptyp.h
 
 install :       $(DATA_PATH)
-		-cmp -s $(DATA_PATH) $l/$(DATA_PATH) || cp $(DATA_PATH) $l/$(DATA_PATH)
+		-cmp -s $(DATA_PATH) $l/$(DATA_PATH) || { cp $(DATA_PATH) $l/$(DATA_PATH) ; sh -c 'ranlib $l/$(DATA_PATH)' ; }
 
 cmp :           $(DATA_PATH)
 		cmp $(DATA_PATH) $l/$(DATA_PATH)
