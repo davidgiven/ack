@@ -67,7 +67,7 @@ opr:
 	make pr | opr
 
 clean:
-	rm -f makeclassdef classdefs.h makewordlen wordlen.h pop_push.h *.o Out out nohup.out *.m
+	rm -f makeclassdef classdefs.h makewordlen wordlen.h *.o Out out nohup.out *.m
 
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
