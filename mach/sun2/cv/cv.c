@@ -29,8 +29,6 @@ long	lseek();
 #define	NMAGIC	0410	/* text write protexted */
 #define ZMAGIC	0413	/* demand paging */
 
-#define MACH	2
-
 struct bhdr {
 	short	machtype;
 	short	magic;

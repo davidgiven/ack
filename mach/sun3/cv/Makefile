@@ -1,7 +1,7 @@
 EMHOME =	../../..
 LIBOBJ =	$(EMHOME)/modules/lib/libobject.a
 INCLUDE =	$(EMHOME)/h
-CFLAGS =	-I. -I$(INCLUDE) -O
+CFLAGS =	-I. -I$(INCLUDE) -O -DMACH=2
 TARGETS =	cv
 
 all:		$(TARGETS)
