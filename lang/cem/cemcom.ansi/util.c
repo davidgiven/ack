@@ -205,6 +205,7 @@ LoadLocal(off, sz)
 	if (p) p->t_count++;
 #endif
 #endif
+	if (p && p->t_size != sz) p->t_regtype = -1;
 	if (sz == word_size) C_lol(off);
 	else if (sz == dword_size) C_ldl(off);
 	else {
@@ -224,6 +225,7 @@ StoreLocal(off, sz)
 	if (p) p->t_count++;
 #endif
 #endif
+	if (p && p->t_size != sz) p->t_regtype = -1;
 	if (sz == word_size) C_stl(off);
 	else if (sz == dword_size) C_sdl(off);
 	else {

@@ -536,14 +536,14 @@ declare_formals(idf, fp)
 			parameter starts on a new word boundary.
 		*/
 		f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
+		RegisterAccount(def->df_address, def->df_type->tp_size,
+				regtype(def->df_type),
+				def->df_sc);
 		/* cvt int to char or short and double to float, if necessary
 		 */
 		formal_cvt(hasproto, def);
 
 		def->df_level = L_FORMAL2;	/* CJ */
-		RegisterAccount(def->df_address, def->df_type->tp_size,
-				regtype(def->df_type),
-				def->df_sc);
 		if (nparams++ >= STDC_NPARAMS)
 			strict("number of formal parameters exceeds ANSI limit");
 #ifdef DBSYMTAB
