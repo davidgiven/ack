@@ -1,7 +1,7 @@
 /* $Header$ */
 #include <signal.h>
 
-typedef int (*callvec)() ;
+typedef void (*callvec)() ;
 
 static callvec vector[16] = {
       SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL,

@@ -4,7 +4,7 @@
 
 static jmp_buf	setjmpbuf;
 
-static
+static void
 alfun(){
 	longjmp(setjmpbuf, 1);
 }		/* used with sleep() below */
@@ -14,7 +14,7 @@ sleep(n)
 {
 /* sleep(n) pauses for 'n' seconds by scheduling an alarm interrupt. */
 	unsigned oldalarm;
-	int (*oldsig)();
+	void (*oldsig)();
 
   if (n <= 0) return;
   if (setjmp(setjmpbuf)) {
