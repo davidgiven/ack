@@ -7,7 +7,8 @@
 
 #include	"lint.h"
 #include	"debug.h"
-#include	<em.h>
+#include	"dbsymtab.h"
+#include	<em_code.h>
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"dataflow.h"
@@ -34,6 +35,9 @@
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	LINT
+#ifdef DBSYMTAB
+#include	<stb.h>
+#endif /* DBSYMTAB */
 
 label lab_count = 1;
 label datlab_count = 1;
@@ -53,6 +57,7 @@ static int	pro_id;
 
 extern char options[];
 extern char *symbol2str();
+extern char *source;
 
 #ifndef	LINT
 init_code(dst_file)
@@ -66,6 +71,23 @@ init_code(dst_file)
 		fatal("cannot write to %s\n", dst_file);
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+#ifdef DBSYMTAB
+	if (options['g']) {
+		C_ms_std(source, N_SO, 0);
+		stb_typedef(int_type, "int");
+		stb_typedef(schar_type, "char");
+		stb_typedef(long_type, "long");
+		stb_typedef(short_type, "short");
+		stb_typedef(uchar_type, "unsigned char");
+		stb_typedef(ushort_type, "unsigned short");
+		stb_typedef(ulong_type, "unsigned long");
+		stb_typedef(uint_type, "unsigned int");
+		stb_typedef(float_type, "float");
+		stb_typedef(double_type, "double");
+		stb_typedef(lngdbl_type, "long double");
+		stb_typedef(void_type, "void");
+	}
+#endif /* DBSYMTAB */
 #ifdef USE_TMP
 #ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
@@ -139,11 +161,10 @@ prepend_scopes()
 	C_beginpart(tmp_id);
 #endif USE_TMP
 	while (se != 0)	{
-		register struct idf *id = se->se_idf;
-		register struct def *df = id->id_def;
+		register struct def *df = se->se_idf->id_def;
 		
 		if (df && (df->df_initialized || df->df_used || df->df_alloc)) {
-			code_scope(id->id_text, df);
+			code_scope(se->se_idf->id_text, df);
 		}
 		se = se->next;
 	}
@@ -272,6 +293,14 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 		C_fil_dlb(file_name_label, (arith)0);
 		C_lin((arith)LineNumber);
 	}
+#ifdef DBSYMTAB
+	if (options['g']) {
+		stb_string(def, FUNCTION, name);
+		if (! strcmp(name, "main")) {
+			C_ms_stb_cst(name, N_MAIN, 0, (arith) 0);
+		}
+	}
+#endif
 }
 
 end_proc(fbytes)
@@ -403,8 +432,14 @@ code_declaration(idf, expr, lvl, sc)
 	int fund = def->df_type->tp_fund;
 	int def_sc = def->df_sc;
 	
-	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
+	if (def_sc == TYPEDEF)	{	/* no code for typedefs		*/
+#ifdef DBSYMTAB
+		if (options['g']) {
+			stb_typedef(def->df_type, idf->id_text);
+		}
+#endif /* DBSYMTAB */
 		return;
+	}
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
@@ -421,6 +456,11 @@ code_declaration(idf, expr, lvl, sc)
 			code_scope(idf->id_text, def);
 #endif PREPEND_SCOPES
 			def->df_alloc = ALLOC_DONE;
+#ifdef DBSYMTAB
+			if (options['g']) {
+				stb_string(def, sc, idf->id_text);
+			}
+#endif /* DBSYMTAB */
 			C_df_dnam(idf->id_text);
 		}
 	}
@@ -436,6 +476,11 @@ code_declaration(idf, expr, lvl, sc)
 			/*	they are handled on the spot and get an
 				integer label in EM.
 			*/
+#ifdef DBSYMTAB
+			if (options['g']) {
+				stb_string(def, sc, idf->id_text);
+			}
+#endif /* DBSYMTAB */
 			C_df_dlb((label)def->df_address);
 			if (expr) { /* there is an initialisation */
 			}
@@ -457,6 +502,11 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		case AUTO:
 		case REGISTER:
+#ifdef DBSYMTAB
+			if (options['g']) {
+				stb_string(def, sc, idf->id_text);
+			}
+#endif /* DBSYMTAB */
 			if (expr)
 				loc_init(expr, idf);
 			else if ((fund == ARRAY)
@@ -474,32 +524,33 @@ code_declaration(idf, expr, lvl, sc)
 
 loc_init(expr, id)
 	struct expr *expr;
-	register struct idf *id;
+	struct idf *id;
 {
 	/*	loc_init() generates code for the assignment of
 		expression expr to the local variable described by id.
 		It frees the expression afterwards.
 	*/
 	register struct expr *e = expr;
-	register struct type *tp = id->id_def->df_type;
+	register struct def *df = id->id_def;
+	register struct type *tp = df->df_type;
 	static arith tmpoffset = 0;
 	static arith unknownsize = 0;
 	
-	ASSERT(id->id_def->df_sc != STATIC);
+	ASSERT(df->df_sc != STATIC);
 	switch (tp->tp_fund)	{
 	case ARRAY:
-		if (id->id_def->df_type->tp_size == (arith) -1)
+		if (tp->tp_size == (arith) -1)
 			unknownsize = 1;
 	case STRUCT:
 	case UNION:
-		if (expr != (struct expr *) 0) {
+		if (e != (struct expr *) 0) {
 			break;		/* switch */
 		} else if (!tmpoffset) {/* first time for this variable */
-			tmpoffset = id->id_def->df_address;
-			id->id_def->df_address = data_label();
-			C_df_dlb((label)id->id_def->df_address);
+			tmpoffset = df->df_address;
+			df->df_address = data_label();
+			C_df_dlb((label)df->df_address);
 		} else {
-			C_lae_dlb((label)id->id_def->df_address, (arith)0);
+			C_lae_dlb((label)df->df_address, (arith)0);
 			load_block(tp->tp_size, 1);
 			if (unknownsize) {
 				/* tmpoffset += tp->tp_size; */
@@ -508,13 +559,19 @@ loc_init(expr, id)
 				tmpoffset = NewLocal(tp->tp_size
 						    , tp->tp_align
 						    , regtype(tp)
-						    , id->id_def->df_sc);
+						    , df->df_sc);
 			}
 			C_lal(tmpoffset);
 			store_block(tp->tp_size, 1);
-			id->id_def->df_address = tmpoffset;
+			df->df_address = tmpoffset;
 			tmpoffset = 0;
 		}
+#ifdef DBSYMTAB
+		if (options['g']) {
+			stb_string(df, AUTO, id->id_text);
+
+		}
+#endif /* DBSYMTAB */
 		return;
 	}
 	if (ISCOMMA(e))	{	/* embraced: int i = {12};	*/
@@ -536,7 +593,7 @@ loc_init(expr, id)
 			store_val(&vl, tp);
 		}
 #else	LINT
-		id->id_def->df_set = 1;
+		df->df_set = 1;
 #endif	LINT
 		free_expression(expr);
 	}
@@ -547,12 +604,18 @@ bss(idf)
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
+	register struct def *df = idf->id_def;
 	
 #ifndef	PREPEND_SCOPES
-	code_scope(idf->id_text, idf->id_def);
+	code_scope(idf->id_text, df);
 #endif	PREPEND_SCOPES
+#ifdef DBSYMTAB
+	if (options['g']) {
+		stb_string(df, df->df_sc, idf->id_text);
+	}
+#endif /* DBSYMTAB */
 	C_df_dnam(idf->id_text);
-	C_bss_cst(ATW(idf->id_def->df_type->tp_size), (arith)0, 1);
+	C_bss_cst(ATW(df->df_type->tp_size), (arith)0, 1);
 }
 
 formal_cvt(hasproto,df)
@@ -596,6 +659,9 @@ code_expr(expr, val, code, tlbl, flbl)
 #ifndef	LINT
 	if (! options['L'])	/* profiling	*/
 		C_lin((arith)(expr->ex_line));
+#ifdef DBSYMTAB
+	if (options['g']) db_line(expr->ex_file, (int)expr->ex_line);
+#endif
 
 	EVAL(expr, val, code, tlbl, flbl);
 #else	LINT
@@ -690,3 +756,19 @@ prc_exit()
 		C_asp(pointer_size);
 	}
 }
+
+#ifdef DBSYMTAB
+db_line(file, line)
+	char	*file;
+	int	line;
+{
+	static int	oldline;
+	static char	*oldfile;
+
+	if (file != oldfile || line != oldline) {
+		C_ms_std((char *) 0, N_SLINE, line);
+		oldline = line;
+		oldfile = file;
+	}
+}
+#endif

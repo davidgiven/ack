@@ -6,6 +6,7 @@
 /* TYPE DESCRIPTOR */
 
 #include	"nobitfield.h"
+#include	"dbsymtab.h"
 
 struct type	{
 	struct type *next;	/* used for ARRAY and for qualifiers */
@@ -16,6 +17,9 @@ struct type	{
 	arith tp_size;		/* -1 if declared but not defined */
 	struct type *tp_pointer;	/* to POINTER */
 	struct type *tp_array;		/* to ARRAY */
+#ifdef DBSYMTAB
+	int tp_dbindex;
+#endif
 #if 0
 /* This field is not needed now; see comment in function_of() routine. */
 	struct type *tp_function;	/* to FUNCTION */

@@ -22,7 +22,9 @@ extern struct idf *GetIdentifier();
 
 do_pragma()
 {
+#if	NR_PRAGMAS
 	register struct pkey *pkp = &pragmas[0];
+#endif
 	register struct idf *id = GetIdentifier(1);
 
 	if (id != (struct idf *)0) {

@@ -176,7 +176,7 @@ char *source;
 add_dependency(s)
 char *s;
 {
-    register struct idf *p = str2idf(s, 0);
+    register struct idf *p = str2idf(s);
     
     if (! p->id_resmac) {
 	p->id_resmac = K_FILE;
@@ -260,7 +260,7 @@ compile(argc, argv)
 		FileName = source = argv[0];
 	else {
 		source = 0;
-		FileName = Salloc("standard input", 16);
+		FileName = Salloc("standard input", (unsigned) 16);
 	}
 
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/

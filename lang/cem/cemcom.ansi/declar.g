@@ -7,6 +7,7 @@
 
 {
 #include	"lint.h"
+#include	"dbsymtab.h"
 #include	<alloc.h>
 #include	"nobitfield.h"
 #include	"debug.h"
@@ -31,6 +32,8 @@
 #include	"l_lint.h"
 #include	"l_state.h"
 #endif	LINT
+
+extern char	options[];
 }
 
 /* 3.5 */
@@ -363,6 +366,13 @@ enum_specifier(register struct type **tpp;)
 		[
 			{declare_struct(ENUM, idf, tpp);}
 			enumerator_pack(*tpp, &l)
+			{
+#ifdef DBSYMTAB
+				if (options['g']) {
+					stb_tag(idf->id_enum, idf->id_text);
+				}
+#endif /*DBSYMTAB */
+			}
 		|
 			{apply_struct(ENUM, idf, tpp);}
 			/* empty */
@@ -430,6 +440,11 @@ struct_or_union_specifier(register struct type **tpp;)
 			struct_declaration_pack(*tpp)
 			{
 				(idf->id_struct->tg_busy)--;
+#ifdef DBSYMTAB
+				if (options['g']) {
+					stb_tag(idf->id_struct, idf->id_text);
+				}
+#endif /*DBSYMTAB */
 			}
 		|
 			{

@@ -89,6 +89,7 @@ scan.c
 sizes.h
 skip.c
 specials.h
+stab.c
 stack.c
 stack.str
 statement.g

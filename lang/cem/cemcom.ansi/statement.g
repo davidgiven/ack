@@ -6,11 +6,12 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
-#include	<em.h>
+#include	<em_code.h>
 
 #include	"lint.h"
 #include	"debug.h"
 #include	"botch_free.h"
+#include	"dbsymtab.h"
 
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -26,8 +27,12 @@
 #include	"l_lint.h"
 #include	"l_state.h"
 #endif	LINT
+#ifdef DBSYMTAB
+#include	<stb.h>
+#endif /* DBSYMTAB */
 
 extern int level;
+extern char options[];
 }
 
 /* Each statement construction is stacked in order to trace a
@@ -463,7 +468,14 @@ jump
 ;
 
 /* 3.6.2 */
-compound_statement:
+compound_statement
+	{
+#ifdef DBSYMTAB
+	static int	brc_level = 1;
+	int		ndecl = 0;
+#endif /* DBSYMTAB */
+	}
+:
 	'{'
 		{
 			stack_level();
@@ -472,12 +484,31 @@ compound_statement:
 		 (DOT == IDENTIFIER && AHEAD == IDENTIFIER))
 			/* >>> conflict on TYPE_IDENTIFIER, IDENTIFIER */
 		declaration
+		{
+#ifdef DBSYMTAB
+			ndecl++;
+#endif /* DBSYMTAB */
+		}
 	]*
+		{
+#ifdef DBSYMTAB
+			++brc_level;
+			if (options['g'] && ndecl) {
+				C_ms_std((char *) 0, N_LBRAC, brc_level);
+			}
+#endif /* DBSYMTAB */
+		}
 	[%persistent
 		statement
 	]*
 	'}'
 		{
 			unstack_level();
+#ifdef DBSYMTAB
+			if (options['g'] && ndecl) {
+				C_ms_std((char *) 0, N_RBRAC, brc_level);
+			}
+			brc_level--;
+#endif /* DBSYMTAB */
 		}
 ;

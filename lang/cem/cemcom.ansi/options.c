@@ -19,6 +19,7 @@
 #include	"align.h"
 #include	"use_tmp.h"
 #include	"dataflow.h"
+#include	"dbsymtab.h"
 
 #ifndef NOPP
 extern char **inctable;
@@ -76,6 +77,12 @@ next_option:			/* to allow combined one-char options */
             	break;
 #endif NOPP
 #endif LINT
+#ifdef DBSYMTAB
+	case 'g':	/* symbol table for debugger */
+		options['g'] = 1;
+		options['n'] = 1;
+		break;
+#endif /* DBSYMTAB */
 
 #ifndef	LINT
 #ifdef	DATAFLOW
@@ -150,7 +157,7 @@ deleted, is now a debug-flag
 			break;
 		}
 
-		macro_def(str2idf(name), mactext, -1, maclen, NOFLAG);
+		macro_def(str2idf(name), mactext, -1, (int)maclen, NOFLAG);
 #else NOPP
 		warning("-D option ignored");
 #endif NOPP
@@ -176,7 +183,8 @@ deleted, is now a debug-flag
 			
 			if (++inc_total > inc_max) {
 				inctable = (char **)
-				   Realloc(inctable,(inc_max+=10)*sizeof(char *));
+				   Realloc((char *)inctable,
+					   (unsigned)((inc_max+=10)*sizeof(char *)));
 			}
 				
 			for (i = inc_pos++; i < inc_total ; i++) {

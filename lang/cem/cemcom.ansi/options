@@ -5,6 +5,7 @@ C	while running preprocessor, copy comment
 d	perform a small dataflow analysis
 D	see identifier following as a macro
 E	run preprocessor only
+g	produce symbol table for debugger
 i	suppress /usr/include include files in dependency list
 I	expand include table with directory name following
 m	generate file.o: file1.h format dependency lines

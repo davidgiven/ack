@@ -83,7 +83,7 @@ CSRC =	main.c idf.c declarator.c decspecs.c struct.c \
 	input.c domacro.c replace.c init.c options.c \
 	skip.c stack.c type.c ch3mon.c label.c eval.c \
 	switch.c conversion.c util.c proto.c \
-	pragma.c blocks.c dataflow.c Version.c \
+	pragma.c blocks.c dataflow.c Version.c stab.c\
 	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c l_dummy.c
 COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	expr.o ch3.o ch3bin.o cstoper.o fltcstoper.o arith.o \
@@ -92,7 +92,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	input.o domacro.o replace.o init.o options.o \
 	skip.o stack.o type.o ch3mon.o label.o eval.o \
 	switch.o conversion.o util.o proto.o \
-	pragma.o blocks.o dataflow.o Version.o \
+	pragma.o blocks.o dataflow.o Version.o stab.o \
 	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o l_dummy.o
 
 # Objects of other generated C files
@@ -281,6 +281,8 @@ main.o: LLlex.h
 main.o: Lpars.h
 main.o: align.h
 main.o: arith.h
+main.o: assert.h
+main.o: dbsymtab.h
 main.o: debug.h
 main.o: declar.h
 main.o: file_info.h
@@ -307,6 +309,7 @@ idf.o: align.h
 idf.o: arith.h
 idf.o: assert.h
 idf.o: botch_free.h
+idf.o: dbsymtab.h
 idf.o: debug.h
 idf.o: declar.h
 idf.o: decspecs.h
@@ -332,6 +335,7 @@ idf.o: type.h
 declarator.o: Lpars.h
 declarator.o: arith.h
 declarator.o: botch_free.h
+declarator.o: dbsymtab.h
 declarator.o: debug.h
 declarator.o: declar.h
 declarator.o: def.h
@@ -351,6 +355,7 @@ declarator.o: type.h
 decspecs.o: Lpars.h
 decspecs.o: arith.h
 decspecs.o: assert.h
+decspecs.o: dbsymtab.h
 decspecs.o: debug.h
 decspecs.o: decspecs.h
 decspecs.o: def.h
@@ -365,6 +370,7 @@ struct.o: align.h
 struct.o: arith.h
 struct.o: assert.h
 struct.o: botch_free.h
+struct.o: dbsymtab.h
 struct.o: debug.h
 struct.o: def.h
 struct.o: field.h
@@ -387,6 +393,7 @@ expr.o: Lpars.h
 expr.o: arith.h
 expr.o: assert.h
 expr.o: botch_free.h
+expr.o: dbsymtab.h
 expr.o: debug.h
 expr.o: declar.h
 expr.o: decspecs.h
@@ -408,6 +415,7 @@ expr.o: use_tmp.h
 ch3.o: Lpars.h
 ch3.o: arith.h
 ch3.o: assert.h
+ch3.o: dbsymtab.h
 ch3.o: debug.h
 ch3.o: def.h
 ch3.o: expr.h
@@ -424,6 +432,7 @@ ch3.o: type.h
 ch3bin.o: Lpars.h
 ch3bin.o: arith.h
 ch3bin.o: botch_free.h
+ch3bin.o: dbsymtab.h
 ch3bin.o: debug.h
 ch3bin.o: expr.h
 ch3bin.o: idf.h
@@ -440,6 +449,7 @@ ch3bin.o: type.h
 cstoper.o: Lpars.h
 cstoper.o: arith.h
 cstoper.o: assert.h
+cstoper.o: dbsymtab.h
 cstoper.o: debug.h
 cstoper.o: expr.h
 cstoper.o: idf.h
@@ -454,6 +464,7 @@ cstoper.o: type.h
 fltcstoper.o: Lpars.h
 fltcstoper.o: arith.h
 fltcstoper.o: assert.h
+fltcstoper.o: dbsymtab.h
 fltcstoper.o: debug.h
 fltcstoper.o: expr.h
 fltcstoper.o: idf.h
@@ -468,6 +479,7 @@ fltcstoper.o: type.h
 arith.o: Lpars.h
 arith.o: arith.h
 arith.o: assert.h
+arith.o: dbsymtab.h
 arith.o: debug.h
 arith.o: expr.h
 arith.o: field.h
@@ -490,6 +502,7 @@ code.o: atw.h
 code.o: botch_free.h
 code.o: code.h
 code.o: dataflow.h
+code.o: dbsymtab.h
 code.o: debug.h
 code.o: declar.h
 code.o: decspecs.h
@@ -514,6 +527,7 @@ code.o: type.h
 code.o: use_tmp.h
 dumpidf.o: Lpars.h
 dumpidf.o: arith.h
+dumpidf.o: dbsymtab.h
 dumpidf.o: debug.h
 dumpidf.o: declar.h
 dumpidf.o: def.h
@@ -547,6 +561,7 @@ field.o: align.h
 field.o: arith.h
 field.o: assert.h
 field.o: code.h
+field.o: dbsymtab.h
 field.o: debug.h
 field.o: expr.h
 field.o: field.h
@@ -647,6 +662,7 @@ options.o: arith.h
 options.o: botch_free.h
 options.o: class.h
 options.o: dataflow.h
+options.o: dbsymtab.h
 options.o: idf.h
 options.o: idfsize.h
 options.o: lint.h
@@ -668,6 +684,7 @@ skip.o: spec_arith.h
 stack.o: Lpars.h
 stack.o: arith.h
 stack.o: botch_free.h
+stack.o: dbsymtab.h
 stack.o: debug.h
 stack.o: def.h
 stack.o: idf.h
@@ -684,6 +701,7 @@ type.o: Lpars.h
 type.o: align.h
 type.o: arith.h
 type.o: botch_free.h
+type.o: dbsymtab.h
 type.o: debug.h
 type.o: decspecs.h
 type.o: def.h
@@ -700,6 +718,7 @@ type.o: type.h
 ch3mon.o: Lpars.h
 ch3mon.o: arith.h
 ch3mon.o: botch_free.h
+ch3mon.o: dbsymtab.h
 ch3mon.o: debug.h
 ch3mon.o: def.h
 ch3mon.o: expr.h
@@ -715,6 +734,7 @@ ch3mon.o: trgt_sizes.h
 ch3mon.o: type.h
 label.o: Lpars.h
 label.o: arith.h
+label.o: dbsymtab.h
 label.o: def.h
 label.o: idf.h
 label.o: label.h
@@ -731,6 +751,7 @@ eval.o: assert.h
 eval.o: atw.h
 eval.o: code.h
 eval.o: dataflow.h
+eval.o: dbsymtab.h
 eval.o: debug.h
 eval.o: def.h
 eval.o: expr.h
@@ -753,6 +774,7 @@ switch.o: arith.h
 switch.o: assert.h
 switch.o: botch_free.h
 switch.o: code.h
+switch.o: dbsymtab.h
 switch.o: debug.h
 switch.o: density.h
 switch.o: expr.h
@@ -768,6 +790,7 @@ switch.o: trgt_sizes.h
 switch.o: type.h
 conversion.o: Lpars.h
 conversion.o: arith.h
+conversion.o: dbsymtab.h
 conversion.o: lint.h
 conversion.o: nobitfield.h
 conversion.o: nocross.h
@@ -792,6 +815,7 @@ proto.o: align.h
 proto.o: arith.h
 proto.o: assert.h
 proto.o: botch_free.h
+proto.o: dbsymtab.h
 proto.o: debug.h
 proto.o: declar.h
 proto.o: decspecs.h
@@ -827,11 +851,26 @@ blocks.o: spec_arith.h
 blocks.o: stack.h
 blocks.o: trgt_sizes.h
 dataflow.o: dataflow.h
+stab.o: LLlex.h
+stab.o: Lpars.h
+stab.o: dbsymtab.h
+stab.o: def.h
+stab.o: field.h
+stab.o: file_info.h
+stab.o: idf.h
+stab.o: level.h
+stab.o: lint.h
+stab.o: nobitfield.h
+stab.o: nopp.h
+stab.o: stack.h
+stab.o: struct.h
+stab.o: type.h
 l_lint.o: LLlex.h
 l_lint.o: Lpars.h
 l_lint.o: arith.h
 l_lint.o: assert.h
 l_lint.o: code.h
+l_lint.o: dbsymtab.h
 l_lint.o: debug.h
 l_lint.o: def.h
 l_lint.o: expr.h
@@ -854,6 +893,7 @@ l_states.o: Lpars.h
 l_states.o: arith.h
 l_states.o: assert.h
 l_states.o: code.h
+l_states.o: dbsymtab.h
 l_states.o: debug.h
 l_states.o: def.h
 l_states.o: expr.h
@@ -877,6 +917,7 @@ l_misc.o: LLlex.h
 l_misc.o: Lpars.h
 l_misc.o: arith.h
 l_misc.o: code.h
+l_misc.o: dbsymtab.h
 l_misc.o: debug.h
 l_misc.o: def.h
 l_misc.o: expr.h
@@ -897,6 +938,7 @@ l_ev_ord.o: Lpars.h
 l_ev_ord.o: arith.h
 l_ev_ord.o: assert.h
 l_ev_ord.o: code.h
+l_ev_ord.o: dbsymtab.h
 l_ev_ord.o: debug.h
 l_ev_ord.o: def.h
 l_ev_ord.o: expr.h
@@ -918,6 +960,7 @@ l_outdef.o: Lpars.h
 l_outdef.o: arith.h
 l_outdef.o: assert.h
 l_outdef.o: code.h
+l_outdef.o: dbsymtab.h
 l_outdef.o: debug.h
 l_outdef.o: def.h
 l_outdef.o: expr.h
@@ -953,6 +996,7 @@ declar.o: LLlex.h
 declar.o: Lpars.h
 declar.o: arith.h
 declar.o: code.h
+declar.o: dbsymtab.h
 declar.o: debug.h
 declar.o: declar.h
 declar.o: decspecs.h
@@ -980,6 +1024,7 @@ statement.o: Lpars.h
 statement.o: arith.h
 statement.o: botch_free.h
 statement.o: code.h
+statement.o: dbsymtab.h
 statement.o: debug.h
 statement.o: def.h
 statement.o: expr.h
@@ -998,6 +1043,7 @@ expression.o: LLlex.h
 expression.o: Lpars.h
 expression.o: arith.h
 expression.o: code.h
+expression.o: dbsymtab.h
 expression.o: debug.h
 expression.o: expr.h
 expression.o: file_info.h
@@ -1015,6 +1061,7 @@ program.o: LLlex.h
 program.o: Lpars.h
 program.o: arith.h
 program.o: code.h
+program.o: dbsymtab.h
 program.o: debug.h
 program.o: declar.h
 program.o: decspecs.h
@@ -1034,6 +1081,7 @@ ival.o: LLlex.h
 ival.o: Lpars.h
 ival.o: arith.h
 ival.o: assert.h
+ival.o: dbsymtab.h
 ival.o: debug.h
 ival.o: def.h
 ival.o: estack.h

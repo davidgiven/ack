@@ -695,13 +695,18 @@ declare_formals(idf, fp)
 		 */
 		formal_cvt(hasproto, def);
 
-		se = se->next;
 		def->df_level = L_FORMAL2;	/* CJ */
 		RegisterAccount(def->df_address, def->df_type->tp_size,
 				regtype(def->df_type),
 				def->df_sc);
 		if (nparams++ >= STDC_NPARAMS)
 			strict("number of formal parameters exceeds ANSI limit");
+#ifdef DBSYMTAB
+		if (options['g']) {
+			stb_string(def, FORMAL, se->se_idf->id_text);
+		}
+#endif /* DBSYMTAB */
+		se = se->next;
 	}
 	*fp = f_offset;
 }
