@@ -85,7 +85,7 @@ string ad2str(ad) addr_t ad; {
 	if (ad.ea_str==0)
 		ad.ea_str="";
 	if ((long)ad.ea_off==(long)0) {
-		if strcmp(ad.ea_str,"")
+		if(ad.ea_str[0]==0)
 			return(mystrcpy("0")); /* don't return empty string */
 		else
 			return(mystrcpy(ad.ea_str));
