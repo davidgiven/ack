@@ -160,7 +160,7 @@ IMPLEMENTATION MODULE CSP;
   BEGIN
 	Pop(free, newprocess);
 	IF newprocess = NIL THEN
-		NEW(newprocess);
+		ALLOCATE(newprocess,SIZE(ProcessDescriptor));
 		ALLOCATE(newprocess^.wsp, WorkSpaceSize)
 	END;
 	WITH newprocess^ DO
@@ -195,7 +195,7 @@ IMPLEMENTATION MODULE CSP;
   PROCEDURE InitChannel(VAR ch: Channel);
   (* Initialize the channel ch *)
   BEGIN
-	NEW(ch);
+	ALLOCATE(ch, SIZE(ChannelDescriptor));
 	WITH ch^ DO
 		InitQueue(senders);
 		owner := NIL;
@@ -335,7 +335,7 @@ IMPLEMENTATION MODULE CSP;
 BEGIN
 	InitQueue(free);
 	InitQueue(ready);
-	NEW(cp);
+	ALLOCATE(cp,SIZE(ProcessDescriptor));
 	WITH cp^ DO
 		sons := 0;
 		father := NIL

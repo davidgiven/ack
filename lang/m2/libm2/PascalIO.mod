@@ -110,7 +110,7 @@ IMPLEMENTATION MODULE PascalIO;
 		text := text^.next;
 	END;
 	IF text = NIL THEN
-		NEW(text);
+		ALLOCATE(text,SIZE(IOBuf));
 		text^.next := head;
 		head := text;
 	END;
