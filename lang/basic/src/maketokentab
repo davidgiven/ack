@@ -1,17 +1,16 @@
-cp Lpars.h tokentab.h
-ex tokentab.h 2>&1 > /dev/null <<+
+ed - Lpars.h <<'+'
 1d
-1,\$s/# define //
-1,\$s/ ...$//
-1,\$s/^/	"/
-1,\$-1s/\$/",/
-\$s/\$/"/
+1,$s/# define //
+1,$s/ ...$//
+1,$s/^/	"/
+1,$-1s/$/",/
+$s/$/"/
 0a
 char *tokentab[] = {
 .
-\$a
+$a
 };
 .
-w
+w tokentab.h
 q
 +
