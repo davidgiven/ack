@@ -10,11 +10,12 @@ trp:
 	retl
 	nop
 2:
-	set	trppc, %o1
-	ld	[%o1], %o1
+	set	trppc, %o2
+	ld	[%o2], %o1
 	tst	%o1
 	bz	1f
 	nop
+	st	%g0,[%o2]
 	dec	4, %l0
 	st	%o0, [%l0]
 	jmp	%o1
