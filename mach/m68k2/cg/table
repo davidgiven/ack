@@ -1023,20 +1023,10 @@ dvf $1==4       | | | | cal ".dvf4" asp 4 |
 dvf $1==8       | | | | cal ".dvf8" asp 8 |
 ngf $1==4       | | | | cal ".ngf4" |
 ngf $1==8       | | | | cal ".ngf8" |
-fif $1==4       | | | | cal ".fif4" |
-fif $1==8       | | | | cal ".fif8" |
-fef $1==4	| |
-			remove(ALL)
-			"move.l (sp)+,d0"
-			"clr.w -(sp)"
-			"move.l d0,-(sp)"	| | cal ".fef4" |
-fef $1==8	| |
-			remove(ALL)
-			"move.l (sp)+,d0"
-			"move.l (sp)+,d1"
-			"clr.w -(sp)"
-			"move.l d1,-(sp)"
-			"move.l d0,-(sp)"	| | cal ".fef8" |
+fif $1==4       | | | | lor 1 cal ".fif4" asp 4 |
+fif $1==8       | | | | lor 1 cal ".fif8" asp 4 |
+fef $1==4	| | | | lor 1 adp 0-2 cal ".fef4" asp 2 |
+fef $1==8	| | | | lor 1 adp 0-2 cal ".fef8" asp 2 |
 
 
 /* G R O U P  VI :   P O I N T E R  A R I T H M E T I C  */

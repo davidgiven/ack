@@ -265,18 +265,20 @@ C_ngf
 	default		==>	arg_error( "ngf", $1).
 
 C_fif	
-	$1 == 4		==>	"jsr (.fif4)".
-	$1 == 8		==>	"jsr (.fif8)".
+	$1 == 4		==>	C_lor((arith)1);
+				"jsr (.fif4)";
+				"tst.l (sp)+".
+	$1 == 8		==>	C_lor((arith)1);
+				"jsr (.fif8)";
+				"tst.l (sp)+".
 	default		==>	arg_error( "fif", $1).
 
 C_fef	
-	$1 == 4		==>	C_dup( (arith) 4);
+	$1 == 4		==>	C_lor( (arith) 1);
+				"sub.l #4, (sp)";
 				"jsr (.fef4)".
-	$1 == 8		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
-				"move.l d0, -(sp)";
-				"move.l d1, -(sp)";
-				"move.l d0, -(sp)";
+	$1 == 8		==>	C_lor((arith)1);
+				"sub.l #4, (sp)";
 				"jsr (.fef8)".
 	default		==>	arg_error( "fef", $1).
 

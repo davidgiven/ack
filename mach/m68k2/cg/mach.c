@@ -12,8 +12,6 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the Motorola 68000
  */
 
-#include "fppsim.h"
-
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -39,7 +37,8 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4 %s\n",str);
 }
 
-#define ACKFLOAT 1
+#define IEEEFLOAT
+#define CODE_GENERATOR
 #include <con_float>
 
 #ifdef REGVARS

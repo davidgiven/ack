@@ -2,6 +2,5 @@ Makefile
 mach.c
 mach.h
 table
-fppsim.h
 tables1.c
 tables1.h
