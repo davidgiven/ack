@@ -1,12 +1,2 @@
-ansi.h
-fcntl.h
-limits.h
-lib.h
-errno.h
+a.out.h
 minix
-sgtty.h
-signal.h
-string.h
-time.h
-utime.h
-sys

@@ -1,16 +1,17 @@
 /* The <a.out> header file describes the format of executable files. */
+/* This version is intended for the Atari ST */
 
 #ifndef _AOUT_H
 #define _AOUT_H
 
 struct	exec {			/* a.out header */
-	unsigned char	a_magic[2];	/* magic number */
-	unsigned char	a_flags;	/* flags, see below */
 	unsigned char	a_cpu;		/* cpu id */
-	unsigned char	a_hdrlen;	/* length of header */
-	unsigned char	a_unused;	/* reserved for future use */
+	unsigned char	a_flags;	/* flags, see below */
+	unsigned char	a_magic[2];	/* magic number */
 	unsigned short	a_version;	/* version stamp */	
 				/* not used */
+	unsigned char	a_unused;	/* reserved for future use */
+	unsigned char	a_hdrlen;	/* length of header */
 	long		a_text;		/* size of text segement in bytes */
 	long		a_data;		/* size of data segment in bytes */
 	long		a_bss;		/* size of bss segment in bytes */
@@ -24,8 +25,8 @@ struct	exec {			/* a.out header */
 	long		a_dbase;	/* data relocation base */
 };
 
-#define A_MAGIC0	(unsigned char) 0x01
-#define A_MAGIC1	(unsigned char) 0x03
+#define A_MAGIC0	(unsigned char) 0x03
+#define A_MAGIC1	(unsigned char) 0x01
 #define BADMAG(X)	((X).a_magic[0] != A_MAGIC0 ||\
 			 (X).a_magic[1] != A_MAGIC1)
 
