@@ -4,23 +4,23 @@
 .sect .data
 .sect .bss
 
+.sect .text
 	! d0 contains set size
-
-	.sect .text
+	! on exit d0 is zero for equal, non-zero for not equal
 .cms:
-	move.l	(sp)+,a2	! return address
-	move.l	sp,a0
-	move.l	sp,a1
-	add	d0,a1
-	move.w	d0,d1
-	asr	#1,d0
+	move.l	(sp)+, d2	! return address
+	move.l	sp, a0		! address of top block
+	lea	0(sp, d0.l), a1	! address of lower block
+	move.l	d0, d1
+	asr.l	#2, d0
 1:
-	cmp	(a0)+,(a1)+
+	cmp.l	(a0)+, (a1)+
 	bne	2f
-	sub.l	#1,d0
+	sub.l	#1, d0
 	bne	1b
 2:
-	asl	#1,d1
-	add	d1,sp
-	move.l	d0,-(sp)
-	jmp	(a2)
+	asl.l	#1, d1
+	add.l	d1, sp		! two blocks popped
+	move.l	d2, -(sp)
+	rts
+.align 2

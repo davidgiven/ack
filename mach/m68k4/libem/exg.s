@@ -1,28 +1,20 @@
-.define .exg
+.define	.exg
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
+.sect .text
 	! d0 : exchange size in bytes
-	.sect .text
 .exg:
-	move.l	(sp)+,d2
-	move.l	sp,a1
-	sub.l	d0,sp
-	move.l	sp,a2
-	asr	#1,d0
-	move.l	d0,d1
+	lea	4(sp, d0), a0	! address of bottom block
+	lea	4(sp), a1	! address of top block
+	asr.l	#2, d0
+	sub.l	#1, d0
 1:
-	move.l	(a1)+,(a2)+
-	sub	#1,d0
-	bgt	1b
-	move.l	sp,a1
-	asr	#1,d1
-1:
-	move.l	(a1)+,(a2)+
-	sub	#1,d1
-	bgt	1b
-	move.l	a1,sp
-	move.l	d2,-(sp)
+	move.l	(a1), d1
+	move.l	(a0), (a1)+
+	move.l	d1, (a0)+
+	dbf	d0, 1b
 	rts
+.align 2

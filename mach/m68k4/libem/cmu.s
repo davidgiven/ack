@@ -1,32 +1,29 @@
-.define .cmu
+.define	.cmu
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
-	! d0 : # bytes of 1 block
-	.sect .text
+.sect .text
+	! on entry d0: # bytes of 1 block
+	! on exit d0: result
 .cmu:
-	move.l	sp,a0		! top block
-	add.l	#4,a0
-	move.l	a0,a1
-	add.l	d0,a1		! lower block
-	move.l	d0,d2
-	asr.l	#2,d0
-	sub.l	#1,d0
-	move.l	#1,d1		! greater
+	move.l	(sp)+, d2	! return address
+	move.l	sp, a0		! address of top block
+	lea	0(sp, d0.l), a1	! address of lower block
+	move.l	d0, d1
+	asr.l	#2, d0
 1:
-	cmp.l	(a0)+,(a1)+
+	cmp.l	(a0)+, (a1)+
 	bne	2f
-	dbf	d0,1b
-	clr.l	d1		! equal
+	sub.l	#1, d0
+	bne	1b		! note: on equal carry is set
 2:
 	bcc	3f
-	neg.l	d1		! less
+	neg.l	d0		! less
 3:
-	asl.l	#1,d2
-	move.l	(sp)+,a0
-	add.l	d2,sp		! new sp
-	jmp	(a0)
-
+	asl.l	#1, d1
+	add.l	d1, sp		! new sp; two blocks popped
+	move.l	d2, -(sp)
+	rts
 .align 2
