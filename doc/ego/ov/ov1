@@ -139,7 +139,7 @@ We will give two methods to do this.
 .PP
 In "C" the notorious library routines "setjmp" and "longjmp"
 .[
-unix programmer's manual
+unix programmer's manual McIlroy
 .]
 may be used to jump out of a procedure,
 but can also be used for a number of other stuffy purposes,
@@ -298,9 +298,9 @@ optimizations; the report also contains a lengthy (over 60 pages)
 bibliography.
 .PP
 The number of articles on optimization is quite impressive.
-The Lowrey and Medlock paper on the Fortran H compiler
+The Lowry and Medlock paper on the Fortran H compiler
 .[
-object code optimization
+object code optimization Lowry Medlock
 .]
 is a classical one.
 Other papers on global optimization are.
