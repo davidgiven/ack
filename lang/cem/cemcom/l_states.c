@@ -964,7 +964,6 @@ lint_label()
 */
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
-	hwarning("all auto variables assumed initialized at label");
 	while (a) {
 		a->ad_maybe_set = 0;
 		a->ad_set = 1;

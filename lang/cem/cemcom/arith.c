@@ -12,6 +12,7 @@
 */
 
 #include	<alloc.h>
+#include	"lint.h"
 #include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"idf.h"
@@ -163,7 +164,9 @@ any2arith(expp, oper)
 		else
 			expr_warning(*expp, "%s on enum", symbol2str(oper));
 #endif NOROPTION
+#ifndef	LINT
 		int2int(expp, int_type);
+#endif	LINT
 		break;
 #ifndef	NOFLOAT
 	case FLOAT:
@@ -419,53 +422,6 @@ is_test_op(oper)
 	}
 	/*NOTREACHED*/
 }
-
-#ifdef ____
-int
-is_arith_op(oper)
-{
-	switch (oper) {
-	case '*':
-	case '/':
-	case '%':
-	case '+':
-	case '-':
-	case LEFT:
-	case RIGHT:
-	case '&':
-	case '^':
-	case '|':
-		return 1;
-	default:
-		return 0;
-	}
-}
-
-int
-is_asgn_op(oper)
-{
-	switch (oper) {
-	case '=':
-	case PLUSAB:
-	case MINAB:
-	case TIMESAB:
-	case DIVAB:
-	case MODAB:
-	case LEFTAB:
-	case RIGHTAB:
-	case ANDAB:
-	case ORAB:
-	case XORAB:
-	case PLUSPLUS:
-	case POSTINCR:
-	case MINMIN:
-	case POSTDECR:
-		return 1;
-	default:
-		return 0;
-	}
-}
-#endif
 
 any2opnd(expp, oper)
 	register struct expr **expp;

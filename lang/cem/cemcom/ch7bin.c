@@ -303,7 +303,7 @@ mk_binop(expp, oper, expr, commutative)
 	register struct expr *expr;
 {
 	/*	Constructs in *expp the operation indicated by the operands.
-		"commutative" indicates wether "oper" is a commutative
+		"commutative" indicates whether "oper" is a commutative
 		operator.
 	*/
 	register struct expr *ex = *expp;

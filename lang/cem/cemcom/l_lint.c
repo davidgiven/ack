@@ -166,7 +166,6 @@ lint_oper(expr, val, used)
 	case ANDAB:
 	case XORAB:
 	case ORAB:
-		lint_conversion(oper, right->ex_type, left->ex_type);
 		/* for cases like i += l; */
 		esp1 = lint_expr(right, RVAL, USED);
 		if (oper != '=') {
@@ -269,7 +268,6 @@ lint_oper(expr, val, used)
 	case INT2FLOAT:
 	case FLOAT2INT:
 	case FLOAT2FLOAT:
-		lint_conversion(oper, right->ex_type, left->ex_type);
 		return lint_expr(right, RVAL, USED);
 
 	case '<':

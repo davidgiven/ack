@@ -254,8 +254,8 @@ type2str(tp)
 		sprint(buf, "<NILTYPE>");
 		return buf;
 	}
-	sprint(buf, "(@%lx, #%ld, &%d) ",
-			tp, (long)tp->tp_size, tp->tp_align);
+
+	sprint(buf, "%s(#%ld, &%d) ", buf, (long)tp->tp_size, tp->tp_align);
 	while (ops)	{
 		switch (tp->tp_fund)	{
 		case POINTER:

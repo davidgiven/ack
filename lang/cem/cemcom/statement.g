@@ -417,7 +417,7 @@ return_statement
 		expression(&expr)
 		{
 #ifdef	LINT
-			lint_ret_conv(expr->ex_type);
+			lint_ret_conv(expr);
 #endif	LINT
 
 			do_return_expr(expr);

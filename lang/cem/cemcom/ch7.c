@@ -163,21 +163,26 @@ ch7cast(expp, oper, tp)
 	if ((*expp)->ex_class == String)
 		string2pointer(*expp);
 	oldtp = (*expp)->ex_type;
+
 #ifndef NOBITFIELD
 	if (oldtp->tp_fund == FIELD)	{
 		field2arith(expp);
 		ch7cast(expp, oper, tp);
 	}
 	else
-	if (tp->tp_fund == FIELD)
+	if (tp->tp_fund == FIELD) {
 		ch7cast(expp, oper, tp->tp_up);
+	}
 	else
 #endif NOBITFIELD
-	if (oldtp == tp)
-		{}			/* life is easy */
+	if (oldtp == tp) {
+		/* life is easy */
+	}
 	else
-	if (tp->tp_fund == VOID)	/* Easy again */
+	if (tp->tp_fund == VOID) {
+		/* Easy again */
 		(*expp)->ex_type = void_type;
+	}
 	else
 	if (is_arith_type(oldtp) && is_arith_type(tp))	{
 		int oldi = is_integral_type(oldtp);
@@ -191,7 +196,14 @@ ch7cast(expp, oper, tp)
 				expr_warning(*expp,
 					"%s on enums of different types",
 					symbol2str(oper));
+#ifdef	LINT
+			if (oper == CAST)
+				(*expp)->ex_type = tp;
+			else
+				int2int(expp, tp);
+#else	LINT
 			int2int(expp, tp);
+#endif	LINT
 		}
 #ifndef NOFLOAT
 		else
@@ -200,13 +212,37 @@ ch7cast(expp, oper, tp)
 				expr_warning(*expp,
 					"conversion of enum to %s\n",
 					symbol2str(tp->tp_fund));
+#ifdef	LINT
+			if (oper == CAST)
+				(*expp)->ex_type = tp;
+			else
+				int2float(expp, tp);
+#else	LINT
 			int2float(expp, tp);
+#endif	LINT
 		}
 		else
-		if (!oldi && i)
+		if (!oldi && i) {
+#ifdef	LINT
+			if (oper == CAST)
+				(*expp)->ex_type = tp;
+			else
+				float2int(expp, tp);
+#else	LINT
 			float2int(expp, tp);
-		else		/* !oldi && !i */
+#endif	LINT
+		}
+		else {
+			/* !oldi && !i */
+#ifdef	LINT
+			if (oper == CAST)
+				(*expp)->ex_type = tp;
+			else
+				float2float(expp, tp);
+#else	LINT
 			float2float(expp, tp);
+#endif	LINT
+		}
 #else NOFLOAT
 		else {
 			crash("(ch7cast) floats not implemented\n");
@@ -269,8 +305,10 @@ ch7cast(expp, oper, tp)
 			(*expp)->ex_type = tp;
 	}
 	else
-	if (oldtp->tp_fund == ERRONEOUS) /* we just won't look */
+	if (oldtp->tp_fund == ERRONEOUS) {
+		/* we just won't look */
 		(*expp)->ex_type = tp;	/* brute force */
+	}
 	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
 		expr_warning(*expp, "dubious conversion based on equal size");
@@ -321,6 +359,7 @@ ch7asgn(expp, oper, expr)
 		struct expr *extmp = intexpr((arith)0, INT);
 
 		/* this is really $#@&*%$# ! */
+		/* if you correct this, please correct lint_new_oper() too */
 		extmp->ex_lvalue = 1;
 		extmp->ex_type = exp->ex_type;
 		ch7bin(&extmp, oper, expr);

@@ -352,6 +352,7 @@ new_oper(tp, e1, oper, e2)
 		expr->ex_file = dot.tk_file;
 		expr->ex_line = dot.tk_line;
 	}
+
 	expr->ex_type = tp;
 	expr->ex_class = Oper;
 	/* combine depths and flags of both expressions */
@@ -368,6 +369,9 @@ new_oper(tp, e1, oper, e2)
 	op->op_oper = oper;
 	op->op_left = e1;
 	op->op_right = e2;
+#ifdef	LINT
+	lint_new_oper(expr);
+#endif	LINT
 	return expr;
 }
 

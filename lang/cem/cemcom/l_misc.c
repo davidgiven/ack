@@ -27,16 +27,36 @@
 extern char *symbol2str();
 extern struct type *func_type;
 
-lint_conversion(oper, from_type, to_type)
-	struct type *from_type, *to_type;
+lint_new_oper(expr)
+	struct expr *expr;
 {
-	register int from = from_type->tp_fund;
-	register int to = to_type->tp_fund;
+	/*	Does additional checking on a newly constructed expr node
+		of class Oper.
 
+		Some code in this routine could be contracted, but since
+		I am not sure we have covered the entire ground, we'll
+		leave the contracting for some rainy day.
+	*/
+	register struct expr *left = expr->OP_LEFT;
+	register struct expr *right = expr->OP_RIGHT;
+	register int oper = expr->OP_OPER;
+	register int l_fund =
+		left == 0 ? 0 :			/* for monadics */
+		left->ex_type->tp_fund;
+	register int r_fund =
+		right == 0 ? 0 :		/* for ( without parameters */
+		right->ex_type->tp_fund;
+
+	/*	In ch7.c, in ch7asgn(), a combined operator/assignment
+		is hammered into correctness by repeated application of
+		ch7bin(), which calls new_oper(), which calls lint_new_oper().
+		These spurious calls understandably cause spurious error
+		messages, which we don't like.  So we try to suppress these
+		wierd calls here.  This refers to the code marked
+			this is really $#@&*%$# !
+		in ch7asgn().
+	*/
 	switch (oper) {
-	case RETURN:	/* not really an oper, but it works */
-	case INT2INT:
-	case '=':
 	case PLUSAB:
 	case MINAB:
 	case TIMESAB:
@@ -47,19 +67,225 @@ lint_conversion(oper, from_type, to_type)
 	case ANDAB:
 	case XORAB:
 	case ORAB:
-		if (	(from == LONG && to != LONG)
-		||	(from == DOUBLE && to != DOUBLE)
+		/* is the left operand wierd? */
+		if (	left->ex_class == Value
+		&&	left->VL_CLASS == Const
+		&&	left->VL_VALUE == 0
 		) {
-			awarning("conversion from %s to %s may lose accuracy",
-				symbol2str(from), symbol2str(to));
+			return;
 		}
+	}
+
+	switch (oper) {
+	case '=':
+		lint_conversion(right, l_fund);
+		break;
+
+	case PLUSAB:
+		lint_conversion(right, l_fund);
+	case '+':
+		lint_enum_arith(l_fund, oper, r_fund);
+		break;
+
+	case MINAB:
+		lint_conversion(right, l_fund);
+	case '-':
+		if (left == 0) {
+			/* unary */
+			if (r_fund == ENUM)
+				warning("negating an enum");
+		}
+		else {
+			/* binary */
+			if (l_fund == ENUM && r_fund == ENUM) {
+				if (left->ex_type != right->ex_type)
+					warning("subtracting enums of different type");
+				/* update the type, cem does not do it */
+				expr->ex_type = int_type;
+			}
+			lint_enum_arith(l_fund, oper, r_fund);
+		}
+		break;
+
+	case TIMESAB:
+		lint_conversion(right, l_fund);
+	case '*':
+		if (left == 0) {
+			/* unary */
+		}
+		else {
+			/* binary */
+			if (l_fund == ENUM || r_fund == ENUM)
+				warning("multiplying enum");
+		}
+		break;
+
+	case DIVAB:
+		lint_conversion(right, l_fund);
+	case '/':
+		if (l_fund == ENUM || r_fund == ENUM)
+			warning("division on enum");
+		break;
+
+	case MODAB:
+		lint_conversion(right, l_fund);
+	case '%':
+		if (l_fund == ENUM || r_fund == ENUM)
+			warning("modulo on enum");
+		break;
+
+	case '~':
+		if (r_fund == ENUM || r_fund == FLOAT || r_fund == DOUBLE)
+			warning("~ on %s", symbol2str(r_fund));
+		break;
+
+	case '!':
+		if (r_fund == ENUM)
+			warning("! on enum");
+		break;
+
+	case INT2INT:
+	case INT2FLOAT:
+	case FLOAT2INT:
+	case FLOAT2FLOAT:
+		lint_conversion(right, l_fund);
+		break;
+
+	case '<':
+	case '>':
+	case LESSEQ:
+	case GREATEREQ:
+	case EQUAL:
+	case NOTEQUAL:
+		if (	(l_fund == ENUM || r_fund == ENUM)
+		&&	left->ex_type != right->ex_type
+		) {
+			warning("comparing enum with non-enum");
+		}
+		lint_relop(left, right, oper);
+		lint_relop(right, left, 
+			oper == '<' ? '>' :
+			oper == '>' ? '<' :
+			oper == LESSEQ ? GREATEREQ :
+			oper == GREATEREQ ? LESSEQ :
+			oper
+		);
+		break;
+
+	case LEFTAB:
+	case RIGHTAB:
+		lint_conversion(right, l_fund);
+	case LEFT:
+	case RIGHT:
+		if (l_fund == ENUM || r_fund == ENUM)
+			warning("shift on enum");
+		break;
+
+	case ANDAB:
+	case ORAB:
+	case XORAB:
+		lint_conversion(right, l_fund);
+	case '&':
+	case '|':
+	case '^':
+		if (l_fund == ENUM || r_fund == ENUM)
+			warning("bit operations on enum");
+		break;
+
+	case ',':
+	case '?':
+	case ':':
+	case AND:
+	case OR:
+	case POSTINCR:
+	case POSTDECR:
+	case PLUSPLUS:
+	case MINMIN:
+	case '(':
+	case '.':
+	case ARROW:
+	default:
+		/* OK with lint */
+		break;
 	}
 }
 
-lint_ret_conv(from_type)
-	struct type *from_type;
+lint_enum_arith(l_fund, oper, r_fund)
+	int l_fund, oper, r_fund;
 {
-	lint_conversion(RETURN, from_type, func_type);
+	if (	l_fund == ENUM
+	&&	r_fund != CHAR
+	&&	r_fund != SHORT
+	&&	r_fund != INT
+	) {
+		warning("%s on enum and %s",
+			symbol2str(oper), symbol2str(r_fund));
+	}
+	else
+	if (	r_fund == ENUM
+	&&	l_fund != CHAR
+	&&	l_fund != SHORT
+	&&	l_fund != INT
+	) {
+		warning("%s on %s and enum",
+			symbol2str(oper), symbol2str(r_fund));
+	}
+}
+
+lint_conversion(from_expr, to_fund)
+	struct expr *from_expr;
+	int to_fund;
+{
+	register int from_fund = from_expr->ex_type->tp_fund;
+
+	/*	was there an attempt to reduce the type of the from_expr
+		of the form
+			expr & 0377
+		or something like this?
+	*/
+	if (from_expr->ex_class == Oper && from_expr->OP_OPER == INT2INT) {
+		from_expr = from_expr->OP_LEFT;
+	}
+	if (from_expr->ex_class == Oper && from_expr->OP_OPER == '&') {
+		struct expr *bits =
+			is_cp_cst(from_expr->OP_LEFT) ? from_expr->OP_LEFT :
+			is_cp_cst(from_expr->OP_RIGHT) ? from_expr->OP_RIGHT :
+			0;
+
+		if (bits) {
+			arith val = bits->VL_VALUE;
+
+			if (val < 256)
+				from_fund = CHAR;
+			else if (val < 256)
+				from_fund = SHORT;
+		}
+	}
+	if (numsize(from_fund) > numsize(to_fund)) {
+		awarning("conversion from %s to %s may lose accuracy",
+			symbol2str(from_fund), symbol2str(to_fund));
+	}
+}
+
+int
+numsize(fund)
+{
+	switch (fund) {
+	case CHAR:	return 1;
+	case SHORT:	return 2;
+	case INT:	return 3;
+	case ENUM:	return 3;
+	case LONG:	return 4;
+	case FLOAT:	return 5;
+	case DOUBLE:	return 6;
+	default:	return 0;
+	}
+}
+
+lint_ret_conv(from_expr)
+	struct expr *from_expr;
+{
+	lint_conversion(from_expr, func_type->tp_fund);
 }
 
 lint_ptr_conv(from, to)
@@ -117,6 +343,13 @@ lint_relop(left, right, oper)
 	struct expr *left, *right;
 	int oper;	/* '<', '>', LESSEQ, GREATEREQ, EQUAL, NOTEQUAL */
 {
+	/* left operand may be converted */
+	if (	left->ex_class == Oper
+	&&	left->OP_OPER == INT2INT
+	) {
+		left = left->OP_RIGHT;
+	}
+
 	/* <unsigned> <relop> <neg-const|0> is doubtful */
 	if (	left->ex_type->tp_unsigned
 	&&	right->ex_class == Value
