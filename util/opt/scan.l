@@ -1,6 +1,6 @@
 %{
 #ifndef NORCSID
-static char rcsid[] = "$Header$";
+static char rcsid2[] = "$Header$";
 #endif
 
 /*
