@@ -96,7 +96,7 @@ opr:
 clean:
 	rm -f makeclassdef classdefs.h *.$(SUF) Out out nohup.out *.$(LIBSUF) 
 
-lintlib:
+lintlib:	classdefs.h
 	-mkdir $(TARGET_HOME)/lib.bin/ego
 	$(MK_LINT_LIB) share $(TARGET_HOME)/lib.bin/ego $(CPPFLAGS) $(CFILES)
 

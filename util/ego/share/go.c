@@ -24,7 +24,9 @@
 
 
 STATIC bool report_flag = FALSE;  /* report #optimizations found? */
+#ifdef DEBUG
 STATIC bool core_flag = FALSE;    /* report core usage? */
+#endif
 
 
 STATIC mach_init(machfile,phase_machinit)
@@ -79,7 +81,9 @@ go(argc,argv,initialize,optimize,phase_machinit,proc_flag)
 				mach_init(p,phase_machinit);
 				break;
 			case 'C':
+#ifdef DEBUG
 				core_flag = TRUE;
+#endif
 				break;
 			case 'Q':
 				report_flag = TRUE;
