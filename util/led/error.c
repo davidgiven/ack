@@ -66,11 +66,11 @@ diag(tail, format, a1, a2, a3, a4)
 
 	fprintf(stderr, "%s: ", progname);
 	if (archname && modulname)
-		fprintf(stderr, "%s(%s): ", archname, modulname);
+		fprintf(stderr, "%s(%.14s): ", archname, modulname);
 	else if (archname)
 		fprintf(stderr, "%s: ", archname);
 	else if (modulname)
-		fprintf(stderr, "%s: ", modulname);
+		fprintf(stderr, "%.14s: ", modulname);
 	fprintf(stderr, format, a1, a2, a3, a4);
 	if (tail) fprintf(stderr, " (%s)\n", tail);
 	else putc('\n', stderr);

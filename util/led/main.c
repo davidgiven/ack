@@ -563,7 +563,7 @@ addbase(name)
 	register int	type = name->on_type & S_TYP;
 	register int	sectindex = type - S_MIN;
 
-	if (type == S_UND || type == S_ABS)
+	if (type == S_UND || type == S_ABS || type == S_CRS)
 		return;
 	if (name->on_type & S_COM)
 		return;

@@ -14,7 +14,9 @@ static char rcsid[] = "$Header$";
 #include "scan.h"
 
 extern bool	incore;
+extern ushort	NLocals;
 extern int	flagword;
+extern struct outname	*searchname();
 
 static		adjust_names();
 static		handle_relos();
@@ -62,12 +64,45 @@ adjust_names(name, head, chars)
 {
 	register int		cnt;
 	register long		charoff;
+	struct outname		*base = name;
 
 	cnt = head->oh_nname;
 	charoff = OFF_CHAR(*head);
 	while (cnt--) {
 		if (name->on_foff != (long)0)
 			name->on_mptr = chars + (ind_t)(name->on_foff - charoff);
+		name++;
+	}
+	if (! incore) {
+		do_crs(base, head->oh_nname);
+	}
+}
+
+do_crs(base, count)
+	struct outname	*base;
+	unsigned short	count;
+{
+	register struct outname	*name = base;
+
+	while (count--) {
+		if ((name->on_type & S_TYP) == S_CRS) {
+			char *s;
+			struct outname *p;
+
+			s = address(ALLOGCHR, (ind_t) name->on_valu);
+			p = searchname(s, hash(s));
+
+			if (flagword & RFLAG) {
+				name->on_valu = NLocals + (p -
+					(struct outname *)
+					  address(ALLOGLOB, (ind_t) 0));
+			}
+			else {
+				name->on_valu = p->on_valu;
+				name->on_type &= ~S_TYP;
+				name->on_type |= (p->on_type & S_TYP);
+			}
+		}
 		name++;
 	}
 }

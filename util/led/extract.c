@@ -80,6 +80,10 @@ get_names(head)
 			name.on_foff += charindex - charoff;
 		}
 		namerelocate(&name);
+		if ((name.on_type & S_TYP) == S_CRS) {
+			name.on_valu += charindex - charoff;
+			name.on_valu = savechar(ALLOGCHR, (ind_t)name.on_valu);
+		}
 		if (name.on_type & S_EXT) {
 			getexternal(&name);
 		} else {
@@ -146,8 +150,9 @@ namerelocate(name)
 	register struct outname	*name;
 {
 	register int	type = name->on_type;
+	register int	sct = type & S_TYP;
 
-	if ((type & S_TYP) == S_UND || (type & S_TYP) == S_ABS)
+	if (sct == S_UND || sct == S_ABS || sct == S_CRS)
 		return;
 	if (type & S_COM) {
 		if ( ! (type&S_EXT) ) fatal("local commons should be handled by the assembler") ;
@@ -178,6 +183,9 @@ getexternal(name)
 	if (old == (struct outname *)0) {
 		NGlobals++;
 		entername(name, h);
+		if (ISUNDEFINED(name)) {
+			verbose("requires %s", string, 0, 0, 0);
+		}
 	} else if (!ISUNDEFINED(name)) {
 		if (ISUNDEFINED(old)) {
 			name->on_mptr = string;	/* Just for convenience. */

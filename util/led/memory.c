@@ -572,6 +572,7 @@ write_bytes()
 	 * At the end of the global area we have put the section names.
 	 */
 	if (!(flagword & SFLAG)) {
+		do_crs((struct outname *)mems[ALLOLOCL].mem_base, NLocals);
 		namecpy((struct outname *)mems[ALLOLOCL].mem_base,
 			NLocals,
 			offchar

@@ -185,7 +185,8 @@ struct outrelo {
 #define S_UND	0x0000		/* undefined item */
 #define S_ABS	0x0001		/* absolute item */
 #define S_MIN	0x0002		/* first user section */
-#define S_MAX	S_TYP		/* last user section */
+#define S_MAX	(S_TYP-1)	/* last user section */
+#define S_CRS	S_TYP		/* reference to other namelist item */
 .fi
 .PP
 The fields of this structure have the following purpose:
