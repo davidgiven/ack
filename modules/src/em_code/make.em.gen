@@ -1,0 +1,17 @@
+echo '% this part is generated from ../../../etc/em_table at: ' `date`
+ed - ../../../etc/em_table <<'EOI' 
+1,/^$/d
+1,/^$/d
+1,$s/^\(...\)	\(.\).*/\1:\2/
+g/:d/s/^\(...\):\(.\).*/C_\1	| arith:\2	| OP(op_\1); DCST(\2); NL()/
+g/:[cslnfzor]/s/^\(...\):\(.\).*/C_\1	| arith:\2	| OP(op_\1); CST(\2); NL()/
+g/:w/s/^\(...\).*/C_\1	| arith:w	| OP(op_\1); CST(w); NL()\
+C_\1_narg	| 	| OP(op_\1); CCEND(); NL()/
+g/:g/s/^\(...\).*/C_\1	| arith:g	| OP(op_\1); CST(g); NL()\
+C_\1_dnam	| char *:g arith:o	| OP(op_\1); NOFF(g,o); NL()\
+C_\1_dlb	| label:g arith:o	| OP(op_\1); DOFF(g,o); NL()/
+g/:p/s/^\(...\).*/C_\1	| char *:p	| OP(op_\1); PNAM(p); NL()/
+g/:b/s/^\(...\).*/C_\1	| label:b	| OP(op_\1); CILB(b); NL()/
+g/:-/s/^\(...\).*/C_\1	| 	| OP(op_\1); NL()/
+1,$p
+EOI
