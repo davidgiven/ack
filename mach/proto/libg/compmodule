@@ -1,0 +1,6 @@
+if ${MACH?} ${MACHFL?} -c $1 1>&2
+then
+	echo `basename $1 $2`.${SUF?}
+else
+	exit 1
+fi
