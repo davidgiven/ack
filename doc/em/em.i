@@ -1504,10 +1504,9 @@ begin
 	 end;
     CSA: begin k:=argw(k); if k<>wsize then trap(EILLINS);
 	   a:=popa;
-	   st:= popsw - signwd(memw(a+asize)); b:=0;
+	   st:= popsw - signwd(memw(a+asize));
 	   if (st>=0) and (st<=memw(a+wsize+asize)) then
-	      b:=mema(a+2*wsize+asize+asize*st);
-	   if b=0 then b:=mema(a);
+	      b:=mema(a+2*wsize+asize+asize*st) else b:=mema(a);
 	   if b=0 then trap(ECASE) else newpc(b)
 	 end;
     CSB: begin k:=argw(k); if k<>wsize then trap(EILLINS); a:=popa;
