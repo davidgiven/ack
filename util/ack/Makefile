@@ -9,11 +9,12 @@ OBJ=list.o data.o main.o scan.o svars.o trans.o util.o rmach.o run.o \
 ACKDIR=$(EMHOME)/lib/descr
 FE=fe
 INTABLES=pdp int
-LNTABLES=acc apc abc vax4 i86 m68k2 m68k4 pmds pmds4 mantra mantra4 \
+LNTABLES=acc apc abc ocm vax4 i86 m68k2 m68k4 pmds pmds4 mantra mantra4 \
 	m68020 z8000 int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 \
 	sun3
 INCLUDES=-I$(EMHOME)/h
-CFLAGS=-O -n $(INCLUDES)
+CFLAGS=-O $(INCLUDES)
+LDFLAGS=-i
 BINDIR=$(EMHOME)/bin
 MANDIR=$(EMHOME)/man
 MODDIR=$(EMHOME)/modules/lib
@@ -26,8 +27,8 @@ install:	ack ack.1
 		-cd $(BINDIR) ; \
 		for i in $(INTABLES) $(LNTABLES) ; do rm -f $$i ; ln ack $$i ; done
 		(cd pc ; make install )
-		rm -f $(MANDIR)/man/ack.1
-		cp ack.1 $(MANDIR)/man/ack.1
+		rm -f $(MANDIR)/ack.1
+		cp ack.1 $(MANDIR)/ack.1
 
 cmp:		ack ack.1
 		-cmp ack $(BINDIR)/ack
@@ -42,7 +43,7 @@ clean:
 		(cd pc ; make clean )
 
 ack:    $(OBJ)
-	$(CC) -o ack $(CFLAGS) $(OBJ) $(MODDIR)/libstring.a
+	$(CC) $(LDFLAGS) -o ack $(OBJ) $(MODDIR)/libstring.a
 
 grows.o files.o list.o run.o \
 data.o main.o scan.o trans.o rmach.o util.o : ack.h list.h
