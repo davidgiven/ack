@@ -7,3 +7,6 @@ end
 name "Sun 3 M68020 C libraries"
 dir libcc
 end
+name "Sun 3 M68020 Occam libraries"
+dir liboc
+end
