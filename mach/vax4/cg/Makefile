@@ -71,7 +71,7 @@ distr:
 
 tables.c: table
 	-mv tables.h tables.h.save
-	/lib/cpp -P table | ../../../lib/cgg > debug.out
+	../../../lib/cpp -P table | ../../../lib/cgg > debug.out
 	-if cmp -s tables.h.save tables.h; then mv tables.h.save tables.h; else exit 0; fi
 	-if cmp -s /dev/null tables.h; then mv tables.h.save tables.h; else exit 0; fi
 
