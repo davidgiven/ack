@@ -221,7 +221,7 @@ _doprnt(fmt,ap,stream)
 		case 'g':
 			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
 			dbl = va_arg(ap, double);
-			s = gcvt(dbl, ndigit+1, s) + strlen(s);
+			s = gcvt(dbl, ndigit ? ndigit+1 : 6, s) + strlen(s);
 			break;
 #endif
 		case 'r':
