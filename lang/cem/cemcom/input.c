@@ -58,7 +58,9 @@ AtEoIF()
 	if (nestlevel != nestlow) lexwarning("missing #endif");
 	else
 #endif NOPP
-	if (NoUnstack) lexwarning("unexpected EOF");
+	if (NoUnstack) lexerror("unexpected EOF");
+#ifndef NOPP
 	nestlevel = nestlow;
+#endif
 	return 0;
 }
