@@ -35,7 +35,7 @@ harddvu4:
 	mov	06(sp),r2
 	mov	04(sp),r1
 	mov	(sp),r3
-	mov	$17.,r4
+	mov	$17,r4
 	br	3f
 6:	rol	r2
 	rol	r1
