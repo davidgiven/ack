@@ -40,6 +40,8 @@ add.l #2,sp : move.w X,-(sp)		->	move.w X,(sp) ;
 add.l #4,sp : move.l X,-(sp)		->	move.l X,(sp) ;
 add.l #4,sp : pea (NUM)			->	move.l #NUM,(sp) ;
 add.l #NUM,sp : unlk AREG		->	unlk AREG ;
+add.l #NUM,sp : movem.l X,Y : unlk AREG
+  {no_part("sp",X) && no_part("sp",Y)}	->	movem.l X,Y : unlk AREG ;
 move.w A,X : tst.w A			->	move.w A,X ;
 move.w X,A : tst.w A			->	move.w X,A ;
 move.l A,D : tst.l A {no_part(D,A)}	->	move.l A,D ;
