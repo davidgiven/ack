@@ -10,7 +10,7 @@ INCLUDES = -I$(TARGET_HOME)/h
 CFLAGS	= $(INCLUDES) $(COPTIONS)
 LINTFLAGS = $(INCLUDES) $(LINTOPTIONS)
 
-ALL	= anm asize astrip
+ALL	= anm asize astrip ashow
 LIBS	= $(TARGET_HOME)/modules/lib/libobject.$(LIBSUF)
 LINTLIBS = $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)
 
@@ -22,7 +22,6 @@ asize:	$(SRC_DIR)/asize.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o asize $(SRC_DIR)/asize.c $(LIBS)
 astrip: $(SRC_DIR)/astrip.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o astrip $(SRC_DIR)/astrip.c $(LIBS)
-#not installed:
 ashow:	$(SRC_DIR)/ashow.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o ashow $(SRC_DIR)/ashow.c $(LIBS)
 

@@ -165,12 +165,18 @@ showname(namep)
 	case S_ABS:
 		printf("\tabsolute\n");
 		break;
+	case S_CRS:
+		printf("\tcross reference\n");
 	default:
 		printf("\tin section %d\n", (namep->on_type & S_TYP) - S_MIN);
 		break;
 	}
 	if (namep->on_type & S_EXT) printf("\texternal\n");
-	switch (namep->on_type & S_ETC) {
+	if (namep->on_type & S_STB) {
+		printf("\tstab 0x%x\n", namep->on_type >> 8);
+		printf("\tdesc 0x%x\n", namep->on_desc);
+	}
+	else switch (namep->on_type & S_ETC) {
 	case S_SCT:
 		printf("\tsection name\n"); break;
 	case S_LIN:
