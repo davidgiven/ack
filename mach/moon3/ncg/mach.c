@@ -208,6 +208,11 @@ mes(type) word type ; {
 		argt = getarg(cst_ptyp);
 		a2 = argval;
 		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+#ifdef DBX
+		if (a1 == N_PSYM) {
+			argval += 8;
+		}
+#endif
 		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
 		argt = getarg(end_ptyp);
 		break;
@@ -219,6 +224,7 @@ mes(type) word type ; {
 			argt = getarg(cst_ptyp);
 		}
 		swtxt();
+#ifndef DBX
 		if (argval == N_SLINE) {
 #ifdef TBL68020
 			fputs("jsr (___u_LiB)\n", codefile);
@@ -227,6 +233,7 @@ mes(type) word type ; {
 #endif
 			cleanregs();	/* debugger might change variables */
 		}
+#endif
 		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
 		argt = getarg(cst_ptyp);
 		fprintf(codefile, "%d\n", (int) argval);
