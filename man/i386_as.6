@@ -63,6 +63,7 @@ expr (reg1) (reg2 * scale)
 		contents of \fIreg2\fP multiplied by \fIscale\fP,
 		is the address of the operand.
 		\fIscale\fP can be either 1, 2, 4, or 8.
+		This mode is only allowed for 32-bit addressing.
 
 The next addressing mode is only allowed with the instructions
 "callf" or "jmpf".
@@ -102,6 +103,12 @@ for the next instruction, and also generate code to set the processor
 temporarily in 16-bit operand mode.
 .IP ""
 Prefixes only affect the next instruction.
+.IP ""
+There are also the .use32 and .use16 assembler directives, which do not
+generate code, but change the default for operand and address sizes.
+Obviously, .use16 gives 16-bit modes, .use32 gives 32-bit modes.
+This is useful for assembling real mode 80386 code, or pure 16-bit
+modules (that do not have the D-bit set in the segment descriptor).
 .SH "SEE ALSO"
 uni_ass(6),
 ack(1),
