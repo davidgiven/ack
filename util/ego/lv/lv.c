@@ -451,11 +451,12 @@ STATIC rem_code(l1,l2,b)
 	line_p l1,l2;
 	bblock_p b;
 {
-	line_p l,x,y;
+	line_p l,x,y,next;
 
 	x = PREV(l1);
 	y = l2->l_next;
-	for (l = l1; l != l2; l = l->l_next) {
+	for (l = l1; l != l2; l = next) {
+		next = l->l_next;
 		oldline(l);
 	}
 	if (x == (line_p) 0) {
