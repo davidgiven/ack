@@ -232,7 +232,11 @@ regreturn()
 	register struct regsav_t *p;
 
 	if (regnr > 1)  {
+#ifdef TBL68020
+		fprintf(codefile,"movem.l (-%ld,a6),", nlocals);
+#else
 		fprintf(codefile,"movem.l -%ld(a6),", nlocals);
+#endif
 		for (p = regsav; ;) {
 			fputs(p->rs_reg, codefile);
 			if (++p == &regsav[regnr]) break;
@@ -240,7 +244,12 @@ regreturn()
 		}
 		putc('\n',codefile);
 	} else if (regnr == 1) {
-		fprintf(codefile,"move.l -%ld(a6),%s\n",nlocals);
+		p = regsav;
+#ifdef TBL68020
+		fprintf(codefile,"move.l (-%ld,a6),%s\n",nlocals, p->rs_reg);
+#else
+		fprintf(codefile,"move.l -%ld(a6),%s\n",nlocals, p->rs_reg);
+#endif
 	}
 	fputs("unlk a6\nrts\n", codefile);
 }
@@ -264,6 +273,7 @@ f_regsave()
 		}
 		fputs(",(sp)\n", codefile);
 	} else if (regnr == 1) {
+		p = regsav;
 		fprintf(codefile,"move.l %s,(sp)\n",p->rs_reg);
 	}
 	/* initialise register-parameters */
