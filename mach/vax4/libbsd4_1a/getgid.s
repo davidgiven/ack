@@ -1,4 +1,5 @@
-.globl	_getgid, _getegid
+.globl	_getgid
+.globl	_getegid
 .set	getgid,47
 
 .align	1

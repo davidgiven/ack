@@ -1,4 +1,5 @@
-.globl	_getuid, _geteuid
+.globl	_getuid
+.globl	_geteuid
 .set	getuid,24
 
 .align	1

@@ -1,4 +1,5 @@
-.globl	_getpid, _getppid
+.globl	_getpid
+.globl	_getppid
 .set	getpid,20
 
 .align	1
