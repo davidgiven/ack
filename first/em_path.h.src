@@ -1,5 +1,7 @@
-#define TMP_DIR         "/usr/tmp"      /* Intended as a common dir. for */
-					/* ALL temporary files */
+/* The trailing " is intentionally missing ! */
+#define TMP_HOME        "/usr/tmp
+#define TMP_DIR		TMP_HOME"
+/* Intended as a common directory for ALL temporary files */
 
 /* The trailing " is intentionally missing ! */
 #define EM_HOME		"/usr/em
