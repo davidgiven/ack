@@ -24,7 +24,17 @@
 
 extern char options[];
 
-#define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= (DENSITY - 1))
+compact(nr, low, up)
+	arith low, up;
+{
+	/*	Careful! up - low might not fit in an arith. And then,
+		the test "up-low < 0" might also not work to detect this
+		situation! Or is this just a bug in the M68020/M68000?
+	*/
+	arith diff = up - low;
+
+	return (nr != 0 && diff >= 0 && diff / nr <= (DENSITY - 1));
+}
 
 static struct switch_hdr *switch_stack = 0;
 

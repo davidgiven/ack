@@ -120,14 +120,17 @@ type_specifier(struct type **tpp;)
 ;
 
 single_type_specifier(register struct decspecs *ds;):
-	TYPE_IDENTIFIER		/* this includes INT, CHAR, etc. */
+	%default TYPE_IDENTIFIER	/* this includes INT, CHAR, etc. */
 	{idf2type(dot.tk_idf, &ds->ds_type);}
 |
 	IDENTIFIER
-	{error("%s is not a type identifier", dot.tk_idf->id_text);
-	 dot.tk_idf->id_def->df_type = error_type;
-	 dot.tk_idf->id_def->df_sc = TYPEDEF;
-	 ds->ds_type = error_type;
+	{
+		error("%s is not a type identifier", dot.tk_idf->id_text);
+	 	ds->ds_type = error_type;
+		if (dot.tk_idf->id_def) {
+	 		dot.tk_idf->id_def->df_type = error_type;
+	 		dot.tk_idf->id_def->df_sc = TYPEDEF;
+		}
 	}
 |
 	struct_or_union_specifier(&ds->ds_type)

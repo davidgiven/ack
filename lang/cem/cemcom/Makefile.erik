@@ -13,7 +13,7 @@ LINT =		/usr/new/lint
 # Libraries and EM interface definitions
 SYSLIB =	$(EMHOME)/modules/lib/libsystem.a
 EMKLIB =	$(EMHOME)/modules/lib/libemk.a
-EMELIB =	$(EMHOME)/modules/lib/libeme.a
+EMELIB =	$(EMHOME)/modules/lib/libeme.a $(EMHOME)/lib/em_data.a
 STRLIB =	$(EMHOME)/modules/lib/libstring.a
 PRTLIB =	$(EMHOME)/modules/lib/libprint.a
 EMMESLIB =	$(EMHOME)/modules/lib/libem_mes.a
