@@ -10,7 +10,7 @@
 struct	group { 
   char *gr_name;		/* the name of the group */
   char *gr_passwd;		/* the group passwd */
-  gid_t gr_gid;			/* the numerical group ID */
+  int gr_gid;			/* the numerical group ID */
   char **gr_mem;		/* a vector of pointers to the members */
 };
 
