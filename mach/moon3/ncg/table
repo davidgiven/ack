@@ -532,7 +532,7 @@ lsr   "lsr #1,"	memalt2:rw:cc				cost(2,4).
    address register!
 */
 move_l "move.l" any4:ro,	A_REG+areg:wo		cost(2,2).
-move_l "move.l" any4:ro,	alterable4+dreg4:wo:cc	cost(2,2).
+move_l "move.l" any4:ro,	alterable4+dreg4-(areg+A_REG):wo:cc	cost(2,2).
 move_w "move.w" any2:ro,	alterable2+dreg4:wo:cc	cost(2,2).
 move_b "move.b" any1:ro,	alterable1+dreg4:wo:cc	cost(2,2).
 neg_b  "neg.b"	D_REG:rw:cc				cost(2,3).
@@ -666,10 +666,10 @@ from t_regAcon to A_REG+areg
 from address - ext_addr to A_REG+areg
     gen lea %1, %2
 
-from any4 to alterable4
+from any4 to areg+A_REG
     gen move_l %1, %2
 
-from any4 to areg
+from any4 to alterable4-(areg+A_REG)
     gen move_l %1, %2
 
 from any2 to alterable2
