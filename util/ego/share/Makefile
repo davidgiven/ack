@@ -1,6 +1,13 @@
-EM=../../..
-EMH=$(EM)/h
-EML=$(EM)/lib
+
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
+SHARE=../share
+
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
 
 SRC=\
 types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c\
@@ -19,6 +26,9 @@ classdefs.h pop_push.h wordlen.h alloc.o cset.o debug.o files.o go.o\
 global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o\
 init_glob.o
 
+install:	all
+
+cmp:		all
 
 em_files:\
 classdefs.h pop_push.h wordlen.h alloc.m cset.m debug.m\
@@ -29,6 +39,7 @@ classdefs.h: \
 	makeclassdef \
 	cldefs.src
 	 makeclassdef $(EMH)/em_mnem.h cldefs.src > classdefs.h
+
 makeclassdef: \
 	makecldef.c
 	 $(CC) -o makeclassdef makecldef.c
@@ -40,17 +51,29 @@ pop_push.h: \
 wordlen.h: makewordlen 
 	makewordlen > wordlen.h
 	rm makewordlen 
+
 makewordlen: makewlen.c
 	$(CC) -o makewordlen makewlen.c
+
 show: \
 	show.c
-	 $(CC) -o show show.c $(EML)/em_data.a
+	 $(CC) -o show show.c $(EMLIB)/em_data.a
+
+pr:
+	@pr $(PRFILES)
+
+opr:
+	make pr | opr
+
+clean:
+	rm -f makeclassdef classdefs.h makewordlen wordlen.h pop_push.h *.o Out out nohup.out *.m
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
-pr:	$(PRFILES)
+print:	$(PRFILES)
 	@pr $?
-	@touch pr
+	@touch print
 
 depend:
 	$(SHR)/makedepend
