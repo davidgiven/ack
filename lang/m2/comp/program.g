@@ -167,12 +167,7 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 		/* empty */
 	]
 	definition* END IDENT
-			{ register t_def *df1 = CurrentScope->sc_def;
-			  while (df1) {
-				/* Make all definitions "QUALIFIED EXPORT" */
-				df1->df_flags |= D_QEXPORTED;
-				df1 = df1->df_nextinscope;
-			  }
+			{ end_definition_list(&(CurrentScope->sc_def));
 			  DefinitionModule--;
 			  match_id(df->df_idf, dot.TOK_IDF);
 			  df->df_flags &= ~D_BUSY;
@@ -219,7 +214,6 @@ ProgramModule
 	IDENT	{ if (state == IMPLEMENTATION) {
 			df = GetDefinitionModule(dot.TOK_IDF, 0);
 			CurrVis = df->mod_vis;
-			RemoveImports(&(CurrentScope->sc_def));
 		  }
 		  else {
 			Defined = df = define(dot.TOK_IDF, GlobalScope, D_MODULE);

@@ -25,6 +25,7 @@
 #include	"scope.h"
 #include	"node.h"
 #include	"Lpars.h"
+#include	"warning.h"
 
 STATIC
 DefInFront(df)
@@ -185,22 +186,27 @@ define(id, scope, kind)
 	return MkDef(id, scope, kind);
 }
 
-RemoveImports(pdf)
+end_definition_list(pdf)
 	register t_def **pdf;
 {
 	/*	Remove all imports from a definition module. This is
 		neccesary because the implementation module might import
 		them again.
+		Also, mark all other definitions "QUALIFIED EXPORT".
 	*/
 	register t_def *df = *pdf;
 
 	while (df) {
 		if (df->df_kind & D_IMPORTED) {
+			if (! (df->df_flags & D_USED)) {
+				warning(W_ORDINARY, "identifier \"%s\" imported but not used", df->df_idf->id_text);
+			}
 			RemoveFromIdList(df);
 			*pdf = df->df_nextinscope;
 			free_def(df);
 		}
 		else {
+			df->df_flags |= D_QEXPORTED;
 			pdf = &(df->df_nextinscope);
 		}
 		df = *pdf;

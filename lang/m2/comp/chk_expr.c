@@ -53,6 +53,15 @@ df_error(nd, mess, edf)
 	return 0;
 }
 
+STATIC int
+ex_error(nd, mess)
+	t_node	*nd;
+	char	*mess;
+{
+	node_error(nd, "\"%s\": %s", symbol2str(nd->nd_symb), mess);
+	return 0;
+}
+
 MkCoercion(pnd, tp)
 	t_node		**pnd;
 	register t_type	*tp;
@@ -160,8 +169,7 @@ ChkArrow(expp)
 	tp = expp->nd_right->nd_type;
 
 	if (tp->tp_fund != T_POINTER) {
-		node_error(expp, "\"^\": illegal operand");
-		return 0;
+		return ex_error(expp, "illegal operand type");
 	}
 
 	expp->nd_type = RemoveEqual(PointedtoType(tp));
@@ -837,8 +845,7 @@ ChkBinOper(expp)
 	*/
 	if (expp->nd_symb == IN) {
 		if (tpr->tp_fund != T_SET) {
-			node_error(expp, "\"IN\": right operand must be a set");
-			return 0;
+			return ex_error(expp, "right operand must be a set");
 		}
 		if (!TstAssCompat(ElementType(tpr), tpl)) {
 			/* Assignment compatible ???
@@ -863,9 +870,7 @@ ChkBinOper(expp)
 	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed)) {
 	    	if (!((T_CARDINAL & allowed) &&
 	             ChkAddress(tpl, tpr))) {
-			node_error(expp, "\"%s\": illegal operand type(s)", 
-				     symbol2str(expp->nd_symb));
-			return 0;
+			return ex_error(expp, "illegal operand type(s)");
 		}
 		if (expp->nd_type->tp_fund & T_CARDINAL) {
 			expp->nd_type = address_type;
@@ -873,17 +878,13 @@ ChkBinOper(expp)
 	}
 
 	if (Boolean(expp->nd_symb) && tpl != bool_type) {
-		node_error(expp, "\"%s\": illegal operand type(s)",
-			     symbol2str(expp->nd_symb));
-		return 0;
+		return ex_error(expp, "illegal operand type(s)");
 	}
 
 	/* Operands must be compatible (distilled from Def 8.2)
 	*/
 	if (!TstCompat(tpr, tpl)) {
-		node_error(expp,"\"%s\": incompatible types",
-			   symbol2str(expp->nd_symb));
-		return 0;
+		return ex_error(expp, "incompatible operand types");
 	}
 
 	MkCoercion(&(expp->nd_left), tpl);
@@ -968,8 +969,7 @@ ChkUnOper(expp)
 	default:
 		crash("ChkUnOper");
 	}
-	node_error(expp, "\"%s\": illegal operand", symbol2str(expp->nd_symb));
-	return 0;
+	return ex_error(expp, "illegal operand type");
 }
 
 STATIC t_node *
