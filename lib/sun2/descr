@@ -70,7 +70,7 @@ name led
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
-		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{MLIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
 name cv
