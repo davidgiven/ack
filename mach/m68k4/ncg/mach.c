@@ -63,8 +63,8 @@ static int been_here;
 		fatal("bad fcon size");
 	fprintf(codefile,".data4\t");
 	if (argval == 8)
-		fprintf(codefile,"F_DUM,");
-	fprintf(codefile,"F_DUM\n");
+		fprintf(codefile,"0,");
+	fprintf(codefile,"0 !dummy float\n");
 	if ( !been_here++)
 	{
 	fprintf(stderr,"Warning : dummy float-constant(s)\n");
