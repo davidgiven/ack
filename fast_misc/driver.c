@@ -66,7 +66,7 @@ char *ROOT_DIR = FASTDIR;
 	Version producing ACK .o files in one pass.
 #endif ACK_BIN
 */
-#define MAXARGC	128	/* maximum number of arguments allowed in a list */
+#define MAXARGC	256	/* maximum number of arguments allowed in a list */
 #define USTR_SIZE	128	/* maximum length of string variable */
 
 typedef char USTRING[USTR_SIZE];
