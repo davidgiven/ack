@@ -67,7 +67,7 @@ ceg.X:
 install cmp:
 
 distr:		install.doc
-		tbl install.doc | nroff -Tlp $(MS) >install.pr
+		tbl install.doc | nroff -Tlpr $(MS) >install.pr
 
 pr:
 		@make "SUF="$(SUF) "NROFF="$(NROFF) "EQN="$(EQN) "TBL="$(TBL) \
