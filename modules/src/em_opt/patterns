@@ -175,16 +175,20 @@ loc 1  mlu w  :
 ldc 1  mlu 2*w  :
 loc 1  sbi w  : dec
 loc loe mli w :      loe $2  loc $1  mli w
+loc loe mlu w :      loe $2  loc $1  mlu w
 loc loe adi w loc :	loe $2 	loc $1 	adi w loc $4
 loc loe adi w inc :	loe $2 	loc $1 	adi w inc
 loc loe adi w dec :	loe $2 	loc $1 	adi w dec
 loc lol mli w :      lol $2  loc $1  mli w
+loc lol mlu w :      lol $2  loc $1  mlu w
 loc lol adi w loc :	lol $2	loc $1	adi w loc $4
 loc lol adi w inc :	lol $2	loc $1	adi w dec
 loc lol adi w dec :	lol $2	loc $1	adi w dec
 ldc lde mli 2*w :    lde $2  ldc $1  mli 2*w
+ldc lde mlu 2*w :    lde $2  ldc $1  mlu 2*w
 ldc lde adi 2*w :    lde $2  ldc $1  adi 2*w
 ldc ldl mli 2*w :    ldl $2  ldc $1  mli 2*w
+ldc ldl mlu 2*w :    ldl $2  ldc $1  mlu 2*w
 ldc ldl adi 2*w :    ldl $2  ldc $1  adi 2*w
 loc 2  mli w  : 	loc 1   sli w
 loc 4  mli w  : 	loc 2   sli w
@@ -407,6 +411,8 @@ loi 1  loc 1  loc w  cii loc cmi w zne ? $5>=0&&$5<128 :	loi 1 loc $5 cmi w zne 
 loi 1  loc 1  loc w  cii loc w  loc w  ciu loc 255 and w:	loi 1
 cmp teq :       cms p   teq
 cmp tne :       cms p   tne
+cmp zeq :	cms p	zeq $2
+cmp zne :	cms p	zne $2
 cmu defined teq :    cms $1  teq
 cmu defined tne :    cms $1  tne
 cms w zeq :  beq $2
@@ -427,6 +433,7 @@ adp dup p sdl adp -$1 ? p==2*w :       dup p   adp $1   sdl $3
 inc dup w ste dec :  dup w   inc     ste $3
 inc dup w stl dec :  dup w   inc     stl $3
 #endif
+bra lab $1 :	lab $2
 zeq bra lab $1 :     zne $2  lab $1
 zge bra lab $1:     zlt $2  lab $1
 zgt bra lab $1 :     zle $2  lab $1
@@ -542,8 +549,8 @@ lal loi 4*w loc loc loc loc ior 4*w ? ($3==0)+($4==0)+($5==0)+($6==0)>2 :
 	lol $1+3*w loc $3 ior w lol $1+2*w loc $4 ior w lol $1+w loc $5 ior w lol $1 loc $6 ior w
 loc dup 2  stl loc dup 2 stl  :
 	loc $1 stl $3 loc $4 stl $6 loc $1 loc $4
-/*LLP LLP adp SLP $2 sti ? (!notreg($2) || $5!=p):	*/
-/*	LLP $1 sti $5 LLP $2 adp $3 SLP $4		*/
+lol lol adp stl $2 sti != p ? p==w : lol $1 sti $5 lol $2 adp $3 stl $4
+ldl ldl adp sdl $2 sti != p ? p==2*w : ldl $1 sti $5 ldl $2 adp $3 sdl $4
 loe loe adp ste $2 sti !=p ? p==w : loe $1 sti $5 loe $2 adp $3 ste $4
 lde lde adp sde $2 sti !=p ? p==2*w : lde $1 sti $5 lde $2 adp $3 sde $4
 #ifndef INT

@@ -70,20 +70,24 @@ used in compilers and other EM code producing programs. The interface
 routines are identical to the EM_CODE(3) procedure interface except that all
 names have been replaced by
 .I O_xxx
-. It is possible to convert
-a program that is currently using the EM_CODE interface by defining PEEPHOLE
-before including em.h which enables a series of macros to map all the
+It is possible to convert
+a program that is currently using the EM_CODE interface
+to use this module instead by defining
+.I PEEPHOLE
+before including
+.I em.h.
+This defines a series of macros to map all the
 .I C_xxx
 names to the corresponding
 .I O_xxx
 names. The module in turn calls
 .I C_xxx
 routines to output the optimized code. Hence it is possible to add peephole
-optimization to any program that outputs EM code usng the EM_CODE module.
+optimization to any program that outputs EM code using the EM_CODE module.
 .PP
 Details of the
 .I O_xxx
-routines may be obtained by refering to the description
+routines may be obtained by referring to the description
 of the corresponding 
 .I C_xxx
 routine in EM_CODE(3).
@@ -94,7 +98,7 @@ routine in EM_CODE(3).
 .fi
 .SH MODULES
 .nf
-alloc(3), system(3), string(3)
+alloc(3), system(3), string(3), em_code(3)
 .fi
 .SH SEE ALSO
 em_nopt(1) em_code(3), read_em(3), em_mes(3)

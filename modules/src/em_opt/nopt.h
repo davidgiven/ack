@@ -10,21 +10,19 @@
 #include <em.h>
 #include <em_comp.h>
 #include <system.h>
-#include <idf_pkg.spec>
 #include <emO_code.h>
 
-#define OTHER 255
+#define OTHER	0
+#define op_lab	sp_fpseu
+
+typedef struct e_instr *p_instr;
 
 #define FLUSHDFA()	if(OO_state) {\
 				*OO_nxtpatt++ = OO_OTHER; OO_dfa(OTHER);\
 			} else if(OO_noutput) OO_flush();
 
 #define GETINSTR() (OO_nxtifree>OO_freeiqueue)?*(--OO_nxtifree):\
-	((p_instr)Malloc(sizeof(struct e_instr)))
-
-#define op_lab sp_ilb1
-
-typedef struct e_instr *p_instr;
+			((p_instr)Malloc(sizeof(struct e_instr)))
 
 extern p_instr	*OO_freeiqueue;
 extern p_instr	*OO_nxtifree;
