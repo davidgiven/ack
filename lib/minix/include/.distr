@@ -1,0 +1,4 @@
+errno.h
+minix
+sgtty.h
+signal.h
