@@ -109,6 +109,22 @@ extern long lseek();
 
 long	emit_symtab();
 
+long align(a,b)
+        long a,b;
+{
+        a += b - 1;
+        return a - a % b;
+}
+
+int
+follows(pa, pb)
+        register struct outsect *pa, *pb;
+{
+        /* return 1 if pa follows pb */
+
+        return pa->os_base == align(pb->os_base+pb->os_size, pa->os_lign);
+}
+
 main(argc, argv)
 	int	argc;
 	char	*argv[];
@@ -162,25 +178,21 @@ main(argc, argv)
 		fatal("Input file must have %d sections, not %ld\n",
 			NSECT,outhead.oh_nsect) ;
 	rd_sect(outsect, outhead.oh_nsect);
-	while (outsect[TEXTSG].os_size % outsect[TEXTSG].os_lign) 
-		outsect[TEXTSG].os_size++;
-	while (outsect[ROMSG].os_size % outsect[ROMSG].os_lign) 
-		outsect[ROMSG].os_size++;
-	while (outsect[DATASG].os_size % outsect[DATASG].os_lign) 
-		outsect[DATASG].os_size++;
 	/* A few checks */
 	if ( outsect[TEXTSG].os_base != ENTRY)
 		fatal("text must start at 0x%lx not at 0x%lx\n", ENTRY,
 			outsect[TEXTSG].os_base) ;
 	if ( outsect[BSSSG].os_flen != 0 )
 		fatal("bss space contains initialized data\n") ;
-	if ( outsect[BSSSG].os_base != outsect[DATASG].os_base+
-					outsect[DATASG].os_size )
+	if (! follows(&outsect[BSSSG], &outsect[DATASG]))
+		fatal("bss segment must follow data segment\n") ;
+	if (! follows(&outsect[DATASG], &outsect[ROMSG]))
 		fatal("bss segment must follow data segment\n") ;
 
+	outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
+	outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
 	exec.x_magic = XMAGIC;
 	exec.x_ext = 054;
-	exec.x_text = outsect[TEXTSG].os_size;
 	exec.x_data = outsect[ROMSG].os_size + outsect[DATASG].os_size;
 	exec.x_bss = outsect[BSSSG].os_size;
 	exec.x_entry = outsect[TEXTSG].os_base;
@@ -189,23 +201,18 @@ main(argc, argv)
 	exec.x_renv = XV3 | XSEG | XFS | XEXEC;
 	if ( outsect[ROMSG].os_base == 0x0 ) {
 		/* Separate I/D */
+		outsect[TEXTSG].os_size = align(outsect[TEXTSG].os_size, 2L);
 		sep_id = 1;
 		exec.x_renv |= XPURE | XSEP;
-		if ( outsect[DATASG].os_base != outsect[ROMSG].os_base+
-						outsect[ROMSG].os_size )
-			fatal("data segment must follow rom\n") ;
 	} else {
-		if ( outsect[ROMSG].os_base != outsect[TEXTSG].os_base+
-						outsect[TEXTSG].os_size )
-			fatal("rom segment must follow text\n") ;
-		if ( outsect[DATASG].os_base != outsect[ROMSG].os_base+
-						outsect[ROMSG].os_size )
-			fatal("data segment must follow rom\n") ;
+		if (! follows(&outsect[ROMSG], &outsect[TEXTSG]))
+			fatal("bss segment must follow data segment\n") ;
+		outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
 	}
+	exec.x_text = outsect[TEXTSG].os_size;
 	if ( outhead.oh_nsect==NSECT ) {
-		if ( outsect[LSECT].os_base != outsect[BSSSG].os_base+
-						outsect[BSSSG].os_size )
-			fatal("end segment must follow bss\n") ;
+		if (! follows(&outsect[LSECT], &outsect[BSSSG]))
+			fatal("bss segment must follow data segment\n") ;
 		if ( outsect[LSECT].os_size != 0 )
 			fatal("end segment must be empty\n") ;
 	}
