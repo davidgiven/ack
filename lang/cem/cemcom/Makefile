@@ -97,7 +97,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h static.h \
 	regcount.h
 
-HSRC = LLlex.h align.h arith.h assert.h atw.h class.h faulty.h \
+HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
 	 file_info.h tokenname.h
 
