@@ -29,7 +29,6 @@ ngi.s
 nop.s
 print.s
 rck.s
-return.s
 rmi.s
 rmu.s
 rol.s
