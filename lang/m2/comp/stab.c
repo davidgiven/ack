@@ -10,7 +10,9 @@
 /* $Header$ */
 
 #include	<alloc.h>
-#include	<em.h>
+#include	<em_arith.h>
+#include	<em_label.h>
+#include	<em_code.h>
 #include	<flt_arith.h>
 #include	<stb.h>
 

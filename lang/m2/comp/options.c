@@ -140,10 +140,10 @@ DoOption(text)
 				  Realloc(DEFPATH,(mDEF+=10)*sizeof(char *));
 			}
 
-			for (i = ndirs++; i <= nDEF; i++) {
+			for (i = ndirs++; i < nDEF; i++) {
 				char *tmp = DEFPATH[i];
 	
-				DEFPATH[i++] = new;
+				DEFPATH[i] = new;
 				new = tmp;
 			}
 		}

@@ -354,7 +354,10 @@ WalkProcedure(procedure)
 				}
 				continue;
 			}
-			if (param->par_def->df_flags & D_DEFINED) {
+#ifdef PASS_BIG_VAL_AS_VAR
+			if (param->par_def->df_flags & D_DEFINED)
+#endif
+			{
 				/* Here, we have to make a copy of the
 				   array. We must also remember how much
 				   room is reserved for copies, because

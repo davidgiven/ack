@@ -13,7 +13,9 @@
 #include	"debug.h"
 
 #include	<alloc.h>
-#include	<em.h>
+#include	<em_arith.h>
+#include	<em_label.h>
+#include	<em_code.h>
 #include	<stb.h>
 
 #include	"strict3rd.h"
