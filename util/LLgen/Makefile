@@ -27,4 +27,4 @@ opr:
 
 pr:
 	@cd src; make pr
-	@cd lib; make pr
+	@pr lib/incl lib/rec
