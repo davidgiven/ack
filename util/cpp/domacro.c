@@ -30,7 +30,6 @@ IMPORT char *getwdir();
 PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
-int nestlevel = -1;		/* initially no nesting level.		*/
 
 PRIVATE char *
 GetIdentifier()
@@ -263,6 +262,7 @@ do_include()
 		}
 		else {
 			WorkingDir = getwdir(result);
+			nestlevel = -1;
 			FileName = result;
 			LineNumber = 1;
 		}

@@ -47,7 +47,6 @@ AtEoIT()
 
 AtEoIF()
 {
-	extern int nestlevel;
 
 	if (nestlevel != -1) warning("missing #endif");
 	else if (NoUnstack) warning("unexpected EOF");
