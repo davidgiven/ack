@@ -1,7 +1,7 @@
 # $Header$
 PROF=
 LLOPT= # -vvv -x
-CFLAGS=$(PROF) -O -DNDEBUG
+CFLAGS=-O -DNDEBUG $(PROF)
 LDFLAGS=-i
 OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o name.o sets.o Lpars.o alloc.o machdep.o cclass.o
 CFILES = main.c gencode.c compute.c LLgen.c tokens.c check.c reach.c global.c name.c sets.c Lpars.c alloc.c machdep.c cclass.c
@@ -9,9 +9,8 @@ FILES =types.h tunable.h extern.h io.h sets.h assert.h tokens.g LLgen.g main.c n
 GFILES = tokens.g LLgen.g
 LINT = lint -b -DNDEBUG -DNORCSID
 
-all:
-		@make parser "LLOPT=$(LLOPT)"
-		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "PROF=$(PROF)" "CFLAGS=$(CFLAGS)"
+all:		parser
+		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "CFLAGS=$(CFLAGS)" "PROF=$(PROF)"
 
 parser:		$(GFILES)
 		-LLgen $(LLOPT) $(GFILES)
