@@ -1500,18 +1500,6 @@ loc loc cii $1==1 && $2==2	| X_ACC |
 			allocate(%[1], ACC1 = %[1])
 			 "cbw"
 			 samecc			    | ax  | |(1,2)
-...				| nocoercions: rmorconst1 ACC+ACC1 |
-			allocate(%[2],ACC1,REG)
-			move(%[2],%[b])
-			move(%[1],%[a])
-			 "cbw"
-			 samecc			    | ax %[b]  | |(1,2)
-...				| nocoercions: rmorconst ACC+ACC1 |
-			allocate(%[2],ACC,REG)
-			move(%[2],%[b])
-			move(%[1],%[a])
-			 "cbw"
-			 samecc			    | ax %[b]  | |(1,2)
 loc loc cii $1==1 && $2==4	| X_ACC |
 			allocate(DXREG)
 			"cbw"
@@ -1798,7 +1786,7 @@ loc sli ads $1==1 && $2==2 && $3==2 | X_ADDREG |
 			"sal %[1],1"
 			erase(%[1])     | %[1] | ads 2 |
 #ifdef REGVARS
-...	| nocoercions: rmorconst uses_bx |
+...	| nocoercions: rmorconst-ADDREG uses_bx |
 			allocate(%[2],REG=%[2],ADDREG=%[1])
 			"sal %[b],1"
 			erase(%[b])     | %[b] %[a] | ads 2 |
@@ -1808,7 +1796,7 @@ loc sli ads $1==2 && $2==2 && $3==2 | X_ADDREG |
 			"sal %[1],1"
 			erase(%[1])     | %[1] | ads 2 |
 #ifdef REGVARS
-...	| nocoercions: rmorconst uses_bx |
+...	| nocoercions: rmorconst-ADDREG uses_bx |
 			allocate(%[2],REG=%[2],ADDREG=%[1])
 			"sal %[b],1"
 			"sal %[b],1"
@@ -1819,7 +1807,7 @@ loc sli ads $2==2 && $3==2 | X_ADDREG |
 			"sal %[1],cl"
 			erase(%[1])     | %[1] | ads 2 |
 #ifdef REGVARS
-...	| nocoercions: rmorconst uses_bx |
+...	| nocoercions: rmorconst-(ADDREG+CXREG) uses_bx |
 			allocate(%[2],REG=%[2],ADDREG=%[1],CXREG={ANYCON,$1})
 			"sal %[b],cl"
 			erase(%[b])     | %[b] %[a] | ads 2 |
