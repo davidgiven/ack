@@ -1,6 +1,11 @@
 .define _close
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _close
-.text
+.sect .text
 _close:
 tst.b -40(sp)
 link	a6,#-0
@@ -12,7 +17,7 @@ add.l #4,sp
 unlk a6
 rts
 __Sclose:		trap #0
-.short	0x6
+.data2	0x6
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,6 +1,11 @@
 .define _nice
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _nice
-.text
+.sect .text
 _nice:
 tst.b -40(sp)
 link	a6,#-0
@@ -12,7 +17,7 @@ add.l #4,sp
 unlk a6
 rts
 __Snice:		trap #0
-.short	0x22
+.data2	0x22
 			bcc	1f
 			jmp	cerror
 1:

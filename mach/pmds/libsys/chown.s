@@ -1,6 +1,11 @@
 .define _chown
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chown
-.text
+.sect .text
 _chown:
 tst.b -40(sp)
 link	a6,#-0
@@ -16,7 +21,7 @@ lea 12(sp),sp
 unlk a6
 rts
 __Schown:		trap #0
-.short	0x10
+.data2	0x10
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,4 +1,4 @@
-tail_mon
+libmon_s.a
 gtty.s
 stty.s
 chmod.s

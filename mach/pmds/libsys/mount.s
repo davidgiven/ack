@@ -1,6 +1,11 @@
 .define _mount
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mount
-.text
+.sect .text
 _mount:
 tst.b -40(sp)
 link	a6,#-0
@@ -14,7 +19,7 @@ lea 12(sp),sp
 unlk a6
 rts
 __Smount:		trap #0
-.short	0x15
+.data2	0x15
 			bcc	1f
 			jmp	cerror
 1:

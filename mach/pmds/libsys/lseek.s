@@ -1,6 +1,11 @@
 .define _lseek
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _lseek
-.text
+.sect .text
 _lseek:
 tst.b -40(sp)
 link	a6,#-0
@@ -16,7 +21,7 @@ lea 12(sp),sp
 unlk a6
 rts
 __Slseek:		trap #0
-.short	0x13
+.data2	0x13
 			bcc	1f
 			jmp	cerror
 1:

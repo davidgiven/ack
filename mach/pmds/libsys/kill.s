@@ -1,6 +1,11 @@
 .define _kill
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _kill
-.text
+.sect .text
 _kill:
 tst.b -40(sp)
 link	a6,#-0
@@ -15,7 +20,7 @@ add.l #8,sp
 unlk a6
 rts
 __Skill:		trap #0
-.short	0x25
+.data2	0x25
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,6 +1,11 @@
 .define _creat
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _creat
-.text
+.sect .text
 _creat:
 tst.b -40(sp)
 link	a6,#-0
@@ -13,7 +18,7 @@ add.l #8,sp
 unlk a6
 rts
 __Screat:		trap #0
-.short	0x8
+.data2	0x8
 			bcc	1f
 			jmp	cerror
 1:

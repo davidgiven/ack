@@ -1,6 +1,11 @@
 .define _alarm
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _alarm
-.text
+.sect .text
 _alarm:
 tst.b -40(sp)
 link	a6,#-0
@@ -11,5 +16,5 @@ add.l #4,sp
 unlk a6
 rts
 __Salarm:		trap #0
-.short	0x1B
+.data2	0x1B
 			rts

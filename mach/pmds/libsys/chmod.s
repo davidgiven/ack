@@ -1,6 +1,11 @@
 .define _chmod
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chmod
-.text
+.sect .text
 _chmod:
 tst.b -40(sp)
 link	a6,#-0
@@ -13,7 +18,7 @@ add.l #8,sp
 unlk a6
 rts
 __Schmod:		trap #0
-.short	0xF
+.data2	0xF
 			bcc	1f
 			jmp	cerror
 1:

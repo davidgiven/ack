@@ -1,6 +1,11 @@
 .define _execl
 .define _execve
 .define _execv
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _execl
 .extern _execve
 .extern _execv
@@ -14,7 +19,7 @@ _execl:		tst.b -48(sp)
 		unlk a6
 		rts
 _execve:	trap #0
-.short 59
+.data2 59
 		jmp cerror
 _execv:		tst.b -48(sp)
 		link a6,#0

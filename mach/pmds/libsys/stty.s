@@ -1,6 +1,11 @@
 .define _stty
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _stty
-.text
+.sect .text
 _stty:
 tst.b -40(sp)
 link	a6,#-0

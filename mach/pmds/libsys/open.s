@@ -1,6 +1,11 @@
 .define _open
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _open
-.text
+.sect .text
 _open:
 tst.b -40(sp)
 link	a6,#-0
@@ -13,7 +18,7 @@ add.l #8,sp
 unlk a6
 rts
 __Sopen:		trap #0
-.short	0x5
+.data2	0x5
 			bcc	1f
 			jmp	cerror
 1:

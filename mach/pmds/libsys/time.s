@@ -1,9 +1,14 @@
 .define _time
 .define _ftime
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _time
 _time:
 	trap #0
-.short	0xD
+.data2	0xD
 	tst.l 4(sp)
 	beq 1f
 	move.l 4(sp),a0
@@ -13,7 +18,7 @@ _time:
 .extern _ftime
 _ftime:
 	trap #0
-.short 0x23
+.data2 0x23
 	bcc 1f
 	jmp cerror
 1:

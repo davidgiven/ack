@@ -1,6 +1,11 @@
 .define _profil
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _profil
-.text
+.sect .text
 _profil:
 tst.b -40(sp)
 link	a6,#-0
@@ -19,5 +24,5 @@ lea 16(sp),sp
 unlk a6
 rts
 __Sprofil:		trap #0
-.short	0x2C
+.data2	0x2C
 			rts

@@ -1,6 +1,11 @@
 .define _fstat
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _fstat
-.text
+.sect .text
 _fstat:
 tst.b -40(sp)
 link	a6,#-0
@@ -13,7 +18,7 @@ add.l #8,sp
 unlk a6
 rts
 __Sfstat:		trap #0
-.short	0x1C
+.data2	0x1C
 			bcc	1f
 			jmp	cerror
 1:

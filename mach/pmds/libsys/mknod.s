@@ -1,6 +1,11 @@
 .define _mknod
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mknod
-.text
+.sect .text
 _mknod:
 tst.b -40(sp)
 link	a6,#-0
@@ -16,7 +21,7 @@ lea 12(sp),sp
 unlk a6
 rts
 __Smknod:		trap #0
-.short	0xE
+.data2	0xE
 			bcc	1f
 			jmp	cerror
 1:

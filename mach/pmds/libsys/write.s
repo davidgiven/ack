@@ -1,6 +1,11 @@
 .define _write
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _write
-.text
+.sect .text
 _write:
 tst.b -40(sp)
 link	a6,#-0
@@ -16,7 +21,7 @@ lea 12(sp),sp
 unlk a6
 rts
 __Swrite:		trap #0
-.short	0x4
+.data2	0x4
 			bcc	1f
 			jmp	cerror
 1:

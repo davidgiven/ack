@@ -1,6 +1,11 @@
 .define __exit
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern __exit
-.text
+.sect .text
 __exit:
 tst.b -40(sp)
 link	a6,#-0
@@ -12,4 +17,4 @@ add.l #4,sp
 unlk a6
 rts
 __Sexit:		trap #0
-.short			0x1
+.data2			0x1
