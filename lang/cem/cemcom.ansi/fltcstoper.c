@@ -31,7 +31,7 @@ fltcstbin(expp, oper, expr)
 	*/
 	flt_arith o1, o2;
 	int compar = 0;
-	arith cmpval;
+	int cmpval;
 
 	o1 = (*expp)->FL_ARITH;
 	o2 = expr->FL_ARITH;
@@ -103,7 +103,7 @@ fltcstbin(expp, oper, expr)
 	if ((*expp)->FL_VALUE) free((*expp)->FL_VALUE);
 	(*expp)->FL_VALUE = 0;
 	if (compar) {
-		fill_int_expr(*expp, cmpval, INT);
+		fill_int_expr(*expp, (arith)cmpval, INT);
 	} else {
 		(*expp)->FL_ARITH = o1;
 	}

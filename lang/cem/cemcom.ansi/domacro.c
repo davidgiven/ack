@@ -592,7 +592,7 @@ get_text(formals, length)
 			do {
 			    /* being careful, as ever */
 			    if (pos+3 >= text_size)
-				text = Srealloc(text,
+				text = Realloc(text,
 					(unsigned) (text_size += RTEXTSIZE));
 			    text[pos++] = c;
 			    if (c == '\\')
@@ -606,7 +606,7 @@ get_text(formals, length)
 		if (c == '/') {
 			c = GetChar();
 			if (pos+1 >= text_size)
-				text = Srealloc(text,
+				text = Realloc(text,
 					(unsigned) (text_size += RTEXTSIZE));
 			if (c == '*') {
 				skipcomment();
@@ -633,7 +633,7 @@ get_text(formals, length)
 			if (n = find_name(id_buf, formals)) {
 			    /* construct the formal parameter mark	*/
 			    if (pos+1 >= text_size)
-				text = Srealloc(text,
+				text = Realloc(text,
 					(unsigned) (text_size += RTEXTSIZE));
 			    text[pos++] = FORMALP | (char) n;
 			}
@@ -641,7 +641,7 @@ get_text(formals, length)
 			    register char *ptr = &id_buf[0];
 
 			    while (pos + id_size >= text_size)
-				text = Srealloc(text,
+				text = Realloc(text,
 					(unsigned) (text_size += RTEXTSIZE));
 			    while (text[pos++] = *ptr++)
 				/* EMPTY */ ;
@@ -650,7 +650,7 @@ get_text(formals, length)
 		}
 		else {
 			if (pos+1 >= text_size)
-				text = Srealloc(text,
+				text = Realloc(text,
 					(unsigned) (text_size += RTEXTSIZE));
 			text[pos++] = c;
 			c = GetChar();
@@ -697,7 +697,7 @@ GetIdentifier(skiponerr)
 	int skiponerr;		/* skip the rest of the line on error */
 {
 	/*	returns a pointer to the descriptor of the identifier that is
-		read from the input stream. When the input doe not contain
+		read from the input stream. When the input does not contain
 		an identifier, the rest of the line is skipped when
 		skiponerr is on, and a null-pointer is returned.
 		The substitution of macros is disabled.
@@ -720,26 +720,23 @@ domacro()
 
 	EoiForNewline = 1;
 	if ((tok = GetToken(&tk)) == IDENTIFIER) {
-		if (strcmp(tk.tk_idf->id_text, "line")
-		    && strcmp(tk.tk_idf->id_text, "pragma")) {
-			error("illegal # line");
-			SkipToNewLine();
-			return;
+		if (! strcmp(tk.tk_idf->id_text, "line")) {
+			tok = GetToken(&tk);
+			if (tok == INTEGER) {
+				do_line((unsigned int) tk.tk_ival);
+				EoiForNewline = 0;
+				return;
+			}
 		}
-		else if ( !strcmp(tk.tk_idf->id_text, "pragma")) {
+		else if (! strcmp(tk.tk_idf->id_text, "pragma")) {
 			do_pragma();
 			EoiForNewline = 0;
 			return;
 		}
-		tok = GetToken(&tk);
 	}
-	if (tok != INTEGER) {
-		error("illegal # line");
-		SkipToNewLine();
-		return;
-	}
-	do_line((unsigned int) tk.tk_ival);
+	error("illegal # line");
 	EoiForNewline = 0;
+	SkipToNewLine();
 }
 #endif NOPP
 

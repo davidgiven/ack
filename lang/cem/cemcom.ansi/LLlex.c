@@ -535,7 +535,7 @@ string_token(nm, stop_char, plen)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Srealloc(str, (unsigned) (str_size += RSTRSIZE));
+			str = Realloc(str, (unsigned) (str_size += RSTRSIZE));
 		ch = GetChar();
 	}
 	str[pos++] = '\0'; /* for filenames etc. */

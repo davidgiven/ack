@@ -62,8 +62,8 @@ add_proto(pl, ds, dc, level)
 		later on it's decided whether they were prototypes
 		or actual declarations.
 	*/
-	register struct idf *idf;
-	register struct def *def = (struct def *)0;
+	register struct idf *idf = dc->dc_idf;
+	register struct def *def = idf ? idf->id_def : (struct def *)0;
 	register int sc = ds->ds_sc;
 	register struct type *type;
 	char formal_array = 0;
@@ -71,8 +71,6 @@ add_proto(pl, ds, dc, level)
 	ASSERT(ds->ds_type != (struct type *)0);
 
 	pl->pl_flag = PL_FORMAL;
-	if ((idf = dc->dc_idf) != (struct idf *)0)
-		def = idf->id_def;
 	type = declare_type(ds->ds_type, dc);
 	if (type->tp_size < (arith)0 && actual_declaration(sc, type)) {
 		extern char *symbol2str();
@@ -159,7 +157,7 @@ gettag(tp, idpp)
 struct type *tp;
 struct idf **idpp;
 {
-	struct tag *tg;
+	struct tag *tg = (struct tag *)0;
 
 	while (tp->tp_up) tp = tp->tp_up;
 	*idpp = tp->tp_idf;
@@ -167,7 +165,6 @@ struct idf **idpp;
 	case ENUM: tg = tp->tp_idf->id_enum; break;
 	case UNION:
 	case STRUCT: tg = tp->tp_idf->id_struct; break;
-	default: return (struct tag *)0;
 	}
 	return tg;
 }

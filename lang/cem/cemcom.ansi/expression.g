@@ -67,7 +67,7 @@ string(register struct expr **expp;)
 			 */
 			if (dot.tk_fund != fund)
 				warning("illegal pasting of string literals");
-			str = Srealloc(str, (unsigned) (--len + dot.tk_len));
+			str = Realloc(str, (unsigned) (--len + dot.tk_len));
 			for (i = 0; i < dot.tk_len; i++)
 				str[len++] = dot.tk_bts[i];
 		}

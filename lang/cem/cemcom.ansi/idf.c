@@ -412,12 +412,10 @@ global_redecl(idf, new_sc, tp)
 		in storage class.
 	*/
 	register struct def *def = idf->id_def;
-	int retval;
 
-	if (!(retval = equal_type(tp, def->df_type, 0)))
+	if (!equal_type(tp, def->df_type, 0))
 		error("redeclaration of %s with different type", idf->id_text);
-	else if (retval == 1)
-		update_proto(tp, def->df_type);
+	else	update_proto(tp, def->df_type);
 	if (tp->tp_fund == ARRAY) {
 		/* Multiple array declaration; this may be interesting */
 		if (tp->tp_size < 0)	{		/* new decl has [] */

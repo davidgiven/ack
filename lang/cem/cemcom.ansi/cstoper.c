@@ -46,6 +46,9 @@ cstbin(expp, oper, expr)
 			break;
 		}
 		if (uns)	{
+#ifdef UNSIGNED_ARITH
+			o1 /= (UNSIGNED_ARITH) o2;
+#else
 			/*	this is more of a problem than you might
 				think on C compilers which do not have
 				unsigned arith (== long (probably)).
@@ -73,6 +76,7 @@ cstbin(expp, oper, expr)
 					rem >= o2 for o2 <= max_arith
 				*/
 			}
+#endif
 		}
 		else
 			o1 /= o2;
@@ -86,6 +90,9 @@ cstbin(expp, oper, expr)
 			break;
 		}
 		if (uns)	{
+#ifdef UNSIGNED_ARITH
+			o1 %= (UNSIGNED_ARITH) o2;
+#else
 			if (o2 & arith_sign)	{/* o2 > max_arith */
 				o1 = (o1 >= 0 || o1 < o2) ? o1 : o1 - o2;
 				/*	this is the unsigned test
@@ -105,6 +112,7 @@ cstbin(expp, oper, expr)
 				rem = 2 * hrem + bit;
 				o1 = (rem < 0 || rem >= o2) ? rem - o2 : rem;
 			}
+#endif
 		}
 		else
 			o1 %= o2;
@@ -122,12 +130,10 @@ cstbin(expp, oper, expr)
 		if (o2 == 0)
 			break;
 		if (uns)	{
-			o1 >>= 1;
-			o1 &= ~arith_sign;
-			o1 >>= (o2-1);
+			o1 = (o1 >> 1) & ~arith_sign;
+			o1 >>= (o2 - 1);
 		}
-		else
-			o1 >>= o2;
+		else	o1 >>= o2;
 		break;
 	case '<':
 		{
@@ -139,10 +145,14 @@ cstbin(expp, oper, expr)
 		/* Fall through */
 	case '>':
 		if (uns)	{
+#ifdef UNSIGNED_ARITH
+			o1 = (UNSIGNED_ARITH) o1 > (UNSIGNED_ARITH) o2;
+#else
 			o1 = (o1 & arith_sign ?
 				(o2 & arith_sign ? o1 > o2 : 1) :
 				(o2 & arith_sign ? 0 : o1 > o2)
 			);
+#endif
 		}
 		else
 			o1 = o1 > o2;
@@ -157,10 +167,14 @@ cstbin(expp, oper, expr)
 		/* Fall through */
 	case GREATEREQ:
 		if (uns)	{
+#ifdef UNSIGNED_ARITH
+			o1 = (UNSIGNED_ARITH) o1 >= (UNSIGNED_ARITH) o2;
+#else
 			o1 = (o1 & arith_sign ?
 				(o2 & arith_sign ? o1 >= o2 : 1) :
 				(o2 & arith_sign ? 0 : o1 >= o2)
 			);
+#endif
 		}
 		else
 			o1 = o1 >= o2;
@@ -219,8 +233,7 @@ cut_size(expr)
 		if (remainder != 0 && remainder != ~full_mask[size])
 		    if (!ResultKnown)
 			expr_warning(expr,"overflow in constant expression");
-		o1 <<= nbits;		/* ??? */
-		o1 >>= nbits;
+		o1 = (o1 << nbits) >> nbits;		/* ??? */
 	}
 	expr->VL_VALUE = o1;
 }

@@ -416,14 +416,14 @@ check_pseudoproto(pl, opl)
 
 	if (pl->pl_flag & PL_ELLIPSIS) {
 		error("illegal ellipsis terminator");
-		return 2;
+		return 0;
 	}
 	if (opl->pl_flag & PL_VOID) {
 		if (!(pl->pl_flag & PL_VOID))
 			error("function is defined without parameters");
 		pl->pl_flag |= PL_ERRGIVEN;
 		opl->pl_flag |= PL_ERRGIVEN;
-		return 2;
+		return 0;
 	}
 	while (pl && opl) {
 	    if (!equal_type(pl->pl_type, opl->pl_type, 0)) {
@@ -433,14 +433,14 @@ check_pseudoproto(pl, opl)
 				opl->pl_idf->id_text);
 		pl->pl_flag |= PL_ERRGIVEN;
 		opl->pl_flag |= PL_ERRGIVEN;
-		retval = 2;
+		retval = 0;
 	    }
 	    pl = pl->next;
 	    opl = opl->next;
 	}
 	if (pl || opl) {
 		error("incorrect number of parameters");
-		retval = 2;
+		retval = 0;
 	}
 	return retval;
 }
@@ -468,10 +468,9 @@ legal_mixture(tp, otp)
 			if (pl)
 				error("illegal ellipsis terminator");
 			else	error("ellipsis terminator in previous (prototype) declaration");
+			prot->pl_flag |= PL_ERRGIVEN;
 		}
-		prot->pl_flag |= PL_ERRGIVEN;
-		prot = prot->next;
-		return 2;
+		return 0;
 	}
 	while (prot) {
 				/* if (!(prot->pl_flag & PL_ELLIPSIS)) {} */
@@ -481,7 +480,7 @@ legal_mixture(tp, otp)
 			    error("illegal %s parameter in %sdeclaration",
 				symbol2str(fund), (opl ? "previous (prototype) " : "" ));
 			prot->pl_flag |= PL_ERRGIVEN;
-			retval = 2;
+			retval = 0;
 		}
 		prot = prot->next;
 	}
@@ -500,10 +499,8 @@ equal_proto(pl, opl)
 	*/
 	while ( pl && opl) {
 
-	    if ((pl->pl_flag & ~PL_ERRGIVEN) != (opl->pl_flag & ~PL_ERRGIVEN))
-		return 0;
-
-	    if (!equal_type(pl->pl_type, opl->pl_type, 0))
+	    if ((pl->pl_flag & ~PL_ERRGIVEN) != (opl->pl_flag & ~PL_ERRGIVEN) ||
+	        !equal_type(pl->pl_type, opl->pl_type, 0))
 		return 0;
 
 	    pl = pl->next;
@@ -519,7 +516,6 @@ struct type *tp;
 	register struct sdef *sdf;
 
 	ASSERT(tp);
-	if (!tp) return 0;
 	if (tp->tp_typequal & TQ_CONST) return 1;
 	sdf = tp->tp_sdef;
 	while (sdf) {

@@ -35,13 +35,15 @@ ch3bin(expp, oper, expr)
 	/*	apply binary operator oper between *expp and expr.
 		NB: don't swap operands if op is one of the op= operators!!!
 	*/
+	register struct type *expp_tp;
 
 	any2opnd(expp, oper);
+	expp_tp = (*expp)->ex_type;
 	any2opnd(&expr, oper);
 	switch (oper)	{
 	case '[':				/* 3.3.2.1 */
 		/* indexing follows the commutative laws */
-		switch ((*expp)->ex_type->tp_fund)	{
+		switch (expp_tp->tp_fund)	{
 		case POINTER:
 		case ARRAY:
 			break;
@@ -57,7 +59,7 @@ ch3bin(expp, oper, expr)
 			default:
 				expr_error(*expp,
 					"indexing an object of type %s",
-					symbol2str((*expp)->ex_type->tp_fund));
+					symbol2str(expp_tp->tp_fund));
 				return;
 			}
 			break;
@@ -67,27 +69,28 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case '(':				/* 3.3.2.2 */
-		if (	(*expp)->ex_type->tp_fund == POINTER &&
-			(*expp)->ex_type->tp_up->tp_fund == FUNCTION
+		if (	expp_tp->tp_fund == POINTER &&
+			expp_tp->tp_up->tp_fund == FUNCTION
 		)	{
 			ch3mon('*', expp);
+			expp_tp = (*expp)->ex_type;
 		}
-		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
+		if (expp_tp->tp_fund != FUNCTION)	{
 			expr_error(*expp, "call of non-function (%s)",
-				symbol2str((*expp)->ex_type->tp_fund));
+				symbol2str(expp_tp->tp_fund));
 			/* leave the expression; it may still serve */
 			free_expression(expr);	/* there go the parameters */
 			*expp = new_oper(error_type,
 					*expp, '(', (struct expr *)0);
 		}
 		else
-			*expp = new_oper((*expp)->ex_type->tp_up,
+			*expp = new_oper(expp_tp->tp_up,
 					*expp, '(', expr);
 		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
 
 	case PARCOMMA:				/* 3.3.2.2 */
-		if ((*expp)->ex_type->tp_fund == FUNCTION)
+		if (expp_tp->tp_fund == FUNCTION)
 			function2pointer(*expp);
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
 		break;
@@ -128,7 +131,7 @@ ch3bin(expp, oper, expr)
 	case PLUSAB:
 	case POSTINCR:
 	case PLUSPLUS:
-		if ((*expp)->ex_type->tp_fund == POINTER)	{
+		if (expp_tp->tp_fund == POINTER)	{
 			pointer_arithmetic(expp, oper, &expr);
 			if (expr->ex_type->tp_size != (*expp)->ex_type->tp_size)
 				ch3cast(&expr, CAST, (*expp)->ex_type);
@@ -147,7 +150,7 @@ ch3bin(expp, oper, expr)
 	case MINAB:
 	case POSTDECR:
 	case MINMIN:
-		if ((*expp)->ex_type->tp_fund == POINTER)	{
+		if (expp_tp->tp_fund == POINTER)	{
 			if (expr->ex_type->tp_fund == POINTER)
 				pntminuspnt(expp, oper, expr);
 			else {
@@ -230,10 +233,10 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case ':':
-		if (	is_struct_or_union((*expp)->ex_type->tp_fund)
+		if (	is_struct_or_union(expp_tp->tp_fund)
 		||	is_struct_or_union(expr->ex_type->tp_fund)
 		)	{
-			if (!equal_type((*expp)->ex_type, expr->ex_type, 0))
+			if (!equal_type(expp_tp, expr->ex_type, 0))
 				expr_error(*expp, "illegal balance");
 		}
 		else

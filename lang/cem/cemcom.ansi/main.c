@@ -265,12 +265,6 @@ init()
 		pointer arithmetic type which is equal to either
 		int_type or long_type, depending on the pointer_size
 	*/
-	if ((int)pointer_size == (int)word_size)
-		pa_type = word_type;
-	else
-	if ((int)pointer_size == (int)short_size)
-		pa_type = short_type;
-	else
 	if ((int)pointer_size == (int)int_size)
 		pa_type = int_type;
 	else
@@ -283,6 +277,8 @@ init()
 		fatal("int_size and word_size are not equal");
 	if ((int)short_size > (int)int_size || (int)int_size > (int)long_size)
 		fatal("sizes of short/int/long decreasing");
+	if ((int)float_size > (int)double_size || (int)double_size > (int)lngdbl_size)
+		fatal("sizes of float/double/long double decreasing");
 
 	/* Build a type for function returning int (3.3.2.2) */
 	funint_type = construct_type(FUNCTION, int_type, 0, (arith)0, NO_PROTO);
