@@ -2,19 +2,17 @@
 install:	cp
 
 cp:             all
-		../../install head_em
+		../../install head_em head_em.o
 		../../install tail_mon
-		rm -f head_em tail_mon
 
 cmp:            all
 		-../../compare head_em
 		-../../compare tail_mon
-		rm -f head_em tail_mon
 
 all:            head_em tail_mon
 
 head_em:        head_em.s
-		vax4 -I../../../h -c head_em.s ; mv head_em.o head_em
+		vax4 -I../../../h -c head_em.s
 
 tail_mon:
 		ASAR=aal ; export ASAR ;\
