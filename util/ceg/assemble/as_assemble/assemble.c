@@ -3,9 +3,18 @@
 #include "em_decl.h"
 #include "as.h"
 
+/* This file contains the assemble routine that generates assembly code.
+ * As 'str' is in assembly format this is a easy job. Only operands 
+ * with "$n" in it need some special treatment. 
+ * Note : a '$' is qouted by prefixing it with a '$'.
+ */
 
 assemble( str)
 char *str;
+
+/* Output assembly instruction. Substitute for '$n' the name of the
+ * the n-th argument of the current EM-instruction.
+ */
 {
 	char buf[512] , *b_ptr, *arg_format();
 	int nr;
@@ -20,7 +29,7 @@ char *str;
 				        *b_ptr++ = '$';
 					str = str + 2;
 			       	}
-			      	else {
+			      	else {  
 					nr = atoi( str+1) - 1;
 					*b_ptr = '\0';
 					out( "%s%s\", %s);", buf,
