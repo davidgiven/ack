@@ -1,4 +1,4 @@
-.define hol0,argv,.reghp,envp,begbss
+.define hol0,argv,.reghp,.limhp,envp,begbss
 .define .ignmask, .trpreg
 .define .stop
 .define ERANGE,EILLINS,ECASE
@@ -46,6 +46,8 @@ envp:
 3:
 	.asciz 'PROGRAM'
 .reghp:
+	.data4 endbss
+.limhp:
 	.data4 endbss
 .ignmask:
 	.data2 0
