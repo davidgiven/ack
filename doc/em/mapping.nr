@@ -50,8 +50,8 @@ The most straightforward layout is shown in figure 2.
                 |///////////////////////////////|
            0 \-> |-------------------------------|
 .Df
-           Figure 2.  Memory layout showing typical register
-           positions during execution of an EM program.
+Figure 2.  Memory layout showing typical register
+positions during execution of an EM program.
 .De
 .N 1
 The base registers for the various memory pieces can be stored
@@ -140,11 +140,11 @@ lower physical address than the second element.
 
                 Type A                                 Type B
 .Df
-              Figure 3. Two possible memory implementations.
-                 Numbers within the boxes are EM addresses.
-                 The other numbers are physical addresses.
+Figure 3. Two possible memory implementations.
+Numbers within the boxes are EM addresses.
+The other numbers are physical addresses.
 .De
-.A 0 0
+.A 1 0
 So, we have two different EM memory implementations:
 .IS
 .PS - 4
