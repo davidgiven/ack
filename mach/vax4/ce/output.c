@@ -11,24 +11,27 @@
 Read above comment ...
 #endif
 
-extern File *out_file;
+extern File *_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
 
 static struct exec u_header;
 
-long ntext, ndata, nrelo, nchar;
+static long ntext, ndata, nrelo, nchar;
 
-long base_address[SEGBSS+1];
+long _base_address[SEGBSS+1];
 
 static int trsize=0, drsize=0;
 
 static struct relocation_info *u_reloc;
 
 static reduce_name_table();
+static putbuf(), put_stringtablesize();
+static init_unixheader();
+static convert_reloc(), convert_name()
 
-output()
+output_back()
 {
 	register int i;
 	register struct nlist *u_name;
@@ -250,7 +253,7 @@ register struct nlist *u_name;
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)
 		u_name->n_value = a_name->on_valu + 
-			base_address[( a_name->on_type & S_TYP) - S_MIN];
+			_base_address[( a_name->on_type & S_TYP) - S_MIN];
 	else 
 		 u_name->n_value = 0;
 }
@@ -266,5 +269,5 @@ putbuf(buf,n)
 char *buf;
 long n;
 {
-	sys_write( out_file, buf, n);
+	sys_write( _out_file, buf, n);
 }
