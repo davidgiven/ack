@@ -132,7 +132,7 @@ _error(class, expr, fmt, argv)
 	case LEXERROR:
 	case CRASH:
 	case FATAL:
-		/*
+		/* ????
 		if (C_busy())
 			C_ms_err();
 		*/
@@ -164,7 +164,7 @@ _error(class, expr, fmt, argv)
 	switch (class)	{	
 	case WARNING:
 	case ERROR:
-		ln = /* expr ? expr->ex_line : */ dot.tk_lineno;
+		ln = /* ???? expr ? expr->ex_line : */ dot.tk_lineno;
 		break;
 	case LEXWARNING:
 	case LEXERROR:

@@ -12,3 +12,6 @@ struct id_list {
 /* ALLOCDEF "id_list" */
 
 #define is_anon_idf(x)	((x)->id_text[0] == '#')
+
+extern struct idf
+	*gen_anon_idf();

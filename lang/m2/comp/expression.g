@@ -1,5 +1,15 @@
+/* E X P R E S S I O N S */
+
 {
 static char *RcsId = "$Header$";
+
+#include	<alloc.h>
+#include	<em_arith.h>
+#include	<em_label.h>
+#include	"LLlex.h"
+#include	"idf.h"
+#include	"def.h"
+#include	"scope.h"
 }
 
 number:
@@ -8,8 +18,44 @@ number:
 	REAL
 ;
 
-qualident:
-	IDENT selector*
+qualident(int types; struct def **pdf; char *str;)
+{
+	int scope;
+	register struct def *df;
+	struct def *lookfor();
+} :
+	IDENT		{ if (types) {
+				df = lookfor(dot.TOK_IDF, 1);
+				if (df->df_kind == D_ERROR) {
+					*pdf = df;
+					types = 0;
+				}
+			  }
+			}
+	[
+			{ if (types &&!(scope = has_selectors(df))) {
+				types = 0;
+				*pdf = ill_df;
+			  }
+			}
+		/* selector */
+		'.' IDENT
+			{ if (types) {
+				df = lookup(dot.TOK_IDF, scope);
+				if (!df) {
+					error("identifier \"%s\" not declared",
+					      dot.TOK_IDF->id_text);
+					types = 0;
+					df = ill_df;
+				}
+			  }
+			}
+	]*
+			{ if (types && !(types & df->df_kind)) {
+				error("identifier \"%s\" is not a %s",
+					dot.TOK_IDF, str);
+			  }
+			}
 ;
 
 selector:
@@ -52,8 +98,11 @@ MulOperator:
 	'*' | '/' | DIV | MOD | AND | '&'
 ;
 
-factor:
-	qualident
+factor
+{
+	struct def *df;
+} :
+	qualident(0, &df, (char *) 0)
 	[
 		designator_tail? ActualParameters?
 	|
@@ -83,15 +132,25 @@ element:
 	expression [ UPTO expression ]?
 ;
 
-designator:
-	qualident designator_tail?
+designator
+{
+	struct def *df;
+} :
+	qualident(0, &df, (char *) 0)
+	designator_tail?
 ;
 
 designator_tail:
 	visible_designator_tail
-	[ selector | visible_designator_tail ]*
+	[
+		selector
+	|
+		visible_designator_tail
+	]*
 ;
 
 visible_designator_tail:
-	'[' ExpList ']' | '^'
+	'[' ExpList ']'
+|
+	'^'
 ;

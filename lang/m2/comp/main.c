@@ -121,8 +121,6 @@ Option(str)
 	options[str[1]]++;	/* switch option on	*/
 }
 
-#define NULLTYPE	((struct type *) 0)
-
 add_standards()
 {
 	register struct def *df;
@@ -157,15 +155,13 @@ add_standards()
 	(void) Enter("NIL", D_CONST, nil_type, 0);
 	(void) Enter("PROC",
 		     D_TYPE,
-		     construct_type(PROCEDURE, NULLTYPE, (arith) 0),
+		     construct_type(PROCEDURE, NULLTYPE),
 		     0);
-	tp = construct_type(SUBRANGE, int_type, (arith) 0);
+	tp = construct_type(SUBRANGE, int_type);
 	tp->tp_value.tp_subrange.su_lb = 0;
 	tp->tp_value.tp_subrange.su_ub = wrd_size * 8 - 1;
-	(void) Enter("BITSET",
-		     D_TYPE,
-		     construct_type(SET, tp, wrd_size),
-		     0);
+	df = Enter("BITSET", D_TYPE, construct_type(SET, tp), 0);
+	df->df_type->tp_size = wrd_size;
 	df = Enter("FALSE", D_ENUM, bool_type, 0);
 	df->df_value.df_enum.en_val = 0;
 	df->df_value.df_enum.en_next = Enter("TRUE", D_ENUM, bool_type, 0);

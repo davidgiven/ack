@@ -76,12 +76,12 @@ idf.o: idf.h
 input.o: f_info.h input.h
 type.o: Lpars.h def.h def_sizes.h idf.h type.h
 def.o: Lpars.h debug.h def.h idf.h main.h scope.h
-scope.o: debug.h scope.h
+scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
 enter.o: def.h idf.h misc.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h def.h idf.h main.h misc.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h scope.h type.h
-expression.o: Lpars.h
+expression.o: LLlex.h Lpars.h def.h idf.h scope.h
 statement.o: Lpars.h
 Lpars.o: Lpars.h

@@ -83,7 +83,7 @@ DefinitionModule
 	MODULE IDENT	{ 
 			  df = define(dot.TOK_IDF, CurrentScope, D_MODULE);
 			  open_scope(CLOSEDSCOPE, 0);
-			  df->df_value.df_module.mo_scope = CurrentScope->sc_scope;
+			  df->df_value.df_module.mo_scope = CurrentScope;
 			}
 	';'
 	import(0)* 
@@ -98,12 +98,13 @@ DefinitionModule
 definition
 {
 	struct def *df;
+	struct type *tp;
 } :
 	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE
 	[ IDENT 
-	  [ '=' type 
+	  [ '=' type(&tp)
 	  | /* empty */
 	    /*
 	       Here, the exported type has a hidden implementation.

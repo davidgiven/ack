@@ -14,21 +14,30 @@ static char *RcsId = "$Header$";
 
 struct def *h_def;		/* Pointer to free list of def structures */
 
+static struct def illegal_def =
+	{0, 0, -20 /* Illegal scope */, D_ERROR};
+
+struct def *ill_df = &illegal_def;
+
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
-	register struct scope *scope;
 {
 	/*	Declare an identifier in a scope, but first check if it
 		already has been defined. If so, error message.
 	*/
-	register struct def *df = lookup(id, scope->sc_scope);
+	register struct def *df;
 
-	DO_DEBUG(debug(3,"Defining identifier %s in scope %d", id->id_text, scope->sc_scope));
+	DO_DEBUG(debug(4,"Defining identifier %s in scope %d", id->id_text, scope));
+	df = lookup(id, scope);
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
-		(scopeclosed(scope) && (df = lookup(id, 0)))
+		( CurrentScope == scope 
+		&&
+		  scopeclosed(currscope)
+		&&
+		  (df = lookup(id, 0)))
 	   ) {
 		switch(df->df_kind) {
 		case D_PROCHEAD:
@@ -43,17 +52,17 @@ define(id, scope, kind)
 				return df;
 			}
 			break;
+		case D_ERROR:
 		case D_ISEXPORTED:
 			df->df_kind = kind;
 			return df;
-			break;
 		}
-		error("Identifier \"%s\" already declared", id->id_text);
+		error("identifier \"%s\" already declared", id->id_text);
 		return df;
 	}
 	df = new_def();
 	df->df_idf = id;
-	df->df_scope = scope->sc_scope;
+	df->df_scope = scope;
 	df->df_kind = kind;
 	df->next = id->id_def;
 	id->id_def = df;
@@ -73,7 +82,7 @@ lookup(id, scope)
 
 	df1 = 0;
 	df = id->id_def;
-	DO_DEBUG(debug(3,"Looking for identifier %s in scope %d", id->id_text, scope));
+	DO_DEBUG(debug(4,"Looking for identifier %s in scope %d", id->id_text, scope));
 	while (df) {
 		if (df->df_scope == scope) {
 			if (df1) {

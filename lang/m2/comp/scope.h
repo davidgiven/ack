@@ -7,6 +7,7 @@
 
 struct scope {
 	struct scope *next;
+	struct forwards *sc_forw;
 	int sc_scope;		/* The scope number. Scope number 0 indicates
 				   both the pervasive scope and the end of a
 				   visibility range
@@ -14,7 +15,9 @@ struct scope {
 };
 
 extern struct scope
-	*CurrentScope;
+	*currscope;
 
 #define nextvisible(x)	((x)->sc_scope ? (x)->next : (struct scope *) 0)
 #define scopeclosed(x)	((x)->next->sc_scope == 0)
+#define enclosing(x)	((x)->next->scope != 0 ? (struct scope *) 0 : (x)->next->next)
+#define CurrentScope	(currscope->sc_scope)

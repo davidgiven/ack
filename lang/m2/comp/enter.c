@@ -32,24 +32,50 @@ Enter(name, kind, type, pnam)
 	return df;
 }
 
-EnterIdList(idlist, kind, flags, type)
+EnterIdList(idlist, kind, flags, type, scope)
 	register struct id_list *idlist;
 	struct type *type;
 {
 	register struct def *df;
-	struct def *last = 0;
+	struct def *first = 0, *last = 0;
 	int assval = 0;
 
 	while (idlist) {
-		df = define(idlist->id_ptr, CurrentScope, kind);
+		df = define(idlist->id_ptr, scope, kind);
 		df->df_type = type;
 		df->df_flags = flags;
 		if (kind == D_ENUM) {
+			if (!first) first = df;
 			df->df_value.df_enum.en_val = assval++;
 			if (last) last->df_value.df_enum.en_next = df;
 			last = df;
 		}
 		idlist = idlist->next;
 	}
-	if (last) last->df_value.df_enum.en_next = 0;
+	if (last) {
+		/* Also meaning : enumeration */
+		last->df_value.df_enum.en_next = 0;
+		type->tp_value.tp_enum.en_enums = first;
+		type->tp_value.tp_enum.en_ncst = assval;
+	}
+}
+
+/*	Look for an identifier in the current visibility range.
+	If it is not defined, give an error message, and
+	create a dummy definition.
+*/
+struct def *
+lookfor(id, give_error)
+	struct idf *id;
+{
+	register struct scope *sc = currscope;
+	struct def *df;
+
+	while (sc) {
+		df = lookup(id, sc->sc_scope);
+		if (df) return df;
+		sc = nextvisible(sc);
+	}
+	if (give_error) error("Identifier \"%s\" not declared", id->id_text);
+	return define(id, CurrentScope, D_ERROR);
 }

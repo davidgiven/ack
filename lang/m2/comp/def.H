@@ -38,21 +38,24 @@ struct def	{		/* list of definitions for a name */
 	struct def *next;
 	struct idf *df_idf;	/* link back to the name */
 	int df_scope;		/* Scope in which this definition resides */
-	char df_kind;		/* The kind of this definition: */
-#define D_MODULE	0x00
-#define D_PROCEDURE	0x01
-#define D_VARIABLE	0x02
-#define D_FIELD		0x03
-#define D_TYPE		0x04
-#define D_ENUM		0x05
-#define D_CONST		0x06
-#define D_IMPORT	0x07
-#define D_PROCHEAD	0x08	/* A procedure heading in a definition module */
-#define D_HIDDEN	0x09	/* A hidden type */
-#define D_HTYPE		0x0A	/* Definition of a hidden type seen */
-#define D_STDPROC	0x0B	/* A standard procedure */
-#define D_STDFUNC	0x0C	/* A standard function */
-#define D_ISEXPORTED	0xFF	/* Not yet defined */
+	short df_kind;		/* The kind of this definition: */
+#define D_MODULE	0x0001
+#define D_PROCEDURE	0x0002
+#define D_VARIABLE	0x0004
+#define D_FIELD		0x0008
+#define D_TYPE		0x0010
+#define D_ENUM		0x0020
+#define D_CONST		0x0040
+#define D_IMPORT	0x0080
+#define D_PROCHEAD	0x0100	/* A procedure heading in a definition module */
+#define D_HIDDEN	0x0200	/* A hidden type */
+#define D_HTYPE		0x0400	/* Definition of a hidden type seen */
+#define D_STDPROC	0x0800	/* A standard procedure */
+#define D_STDFUNC	0x1000	/* A standard function */
+#define D_ERROR		0x2000	/* A compiler generated definition for an
+				   undefined variable
+				*/
+#define D_ISEXPORTED	0x4000	/* Not yet defined */
 	char df_flags;
 #define D_ADDRESS	0x01	/* Set if address was taken */
 #define D_USED		0x02	/* Set if used */
@@ -74,6 +77,9 @@ struct def	{		/* list of definitions for a name */
 
 /* ALLOCDEF "def" */
 
-struct def
+extern struct def
 	*define(),
-	*lookup();
+	*lookup(),
+	*ill_df;
+
+#define NULLDEF ((struct def *) 0)

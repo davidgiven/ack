@@ -64,9 +64,8 @@ create_type(fund)
 }
 
 struct type *
-construct_type(fund, tp, count)
+construct_type(fund, tp)
 	struct type *tp;
-	arith count;
 {
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
@@ -82,13 +81,10 @@ construct_type(fund, tp, count)
 		break;
 	case SET:
 		dtp->tp_align = wrd_align;
-		dtp->tp_size = align((count + 7) / 8, wrd_align);
 		dtp->next = tp;
 		break;
 	case ARRAY:
 		dtp->tp_align = tp->tp_align;
-		if (tp->tp_size < 0) dtp->tp_size = -1;
-		else dtp->tp_size = count * tp->tp_size;
 		dtp->next = tp;
 		break;
 	case SUBRANGE:
@@ -133,4 +129,25 @@ init_types()
 	longreal_type = standard_type(LONGREAL, lreal_align, lreal_size);
 	nil_type = standard_type(POINTER, ptr_align, ptr_size);
 	error_type = standard_type(ERRONEOUS, 1, (arith) 1);
+}
+
+int
+has_selectors(df)
+	register struct def *df;
+{
+
+	switch(df->df_kind) {
+	case D_MODULE:
+		return df->df_value.df_module.mo_scope;
+	case D_VARIABLE: {	
+		register struct type *tp = df->df_type;
+
+		if (tp->tp_fund == RECORD) {
+			return tp->tp_value.tp_record.rc_scopenr;
+		}
+		break;
+		}
+	}
+	error("no selectors for \"%s\"", df->df_idf->id_text);
+	return 0;
 }

@@ -22,7 +22,7 @@ struct subrange {
 };
 
 struct array {
-	struct type *ar_index;	/* Type of index */
+	struct type *ar_elem;	/* Type of elements */
 	arith ar_lb, ar_ub;	/* Lower bound and upper bound */
 	label ar_descr;		/* Label of array descriptor */
 };
@@ -90,3 +90,5 @@ struct type
 	*create_type(),
 	*construct_type(),
 	*standard_type();
+
+#define NULLTYPE ((struct type *) 0)
