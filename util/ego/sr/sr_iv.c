@@ -21,7 +21,7 @@
 
 
 
-STATIC lset ivars;	/* set of induction variables */
+STATIC lset ivvars;	/* set of induction variables */
 
 STATIC short nature(lnp)
 	line_p lnp;
@@ -86,7 +86,7 @@ STATIC ivar(lnp,step)
 	i->iv_off = (TYPE(lnp) == OPSHORT ? (offset) SHORT(lnp) : OFFSET(lnp));
 	i->iv_incr = lnp;	/* last instruction of increment code */
 	i->iv_step = step;	/* step value */
-	Ladd(i,&ivars);
+	Ladd(i,&ivvars);
 }
 
 
@@ -160,7 +160,7 @@ induc_vars(loop,ivar_out, vars_out)
 	line_p lnp;
 	lset cand_iv, vars;
 
-	ivars = Lempty_set();
+	ivvars = Lempty_set();
 	candidates(loop, &cand_iv, &vars);
 	/* Find the set of all variables that are assigned precisely
 	 * once within the loop, within a firm block.
@@ -178,6 +178,6 @@ induc_vars(loop,ivar_out, vars_out)
 		}
 	}
 	Ljoin(cand_iv, &vars);
-	*ivar_out = ivars;
+	*ivar_out = ivvars;
 	*vars_out = vars;
 }
