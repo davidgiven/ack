@@ -1,7 +1,7 @@
-.define _begsig
+.define __begsig
 .sect .text; .sect .rom; .sect .data
-.extern _begsig
-.extern _vectab, _M
+.extern __begsig
+.extern __vectab, __M
 mtype = 2			! M+mtype = &M.m_type
 .sect .text
 _begsig:
@@ -19,13 +19,13 @@ _begsig:
 	mov ax,bx		! ax = signal number
 	dec bx			! vectab[0] is for sig 1
 	add bx,bx		! pointers are two bytes on 8088
-	mov bx,_vectab(bx)	! bx = address of routine to call
-	push (_M+mtype)		! push status of last system call
+	mov bx,__vectab(bx)	! bx = address of routine to call
+	push (__M+mtype)	! push status of last system call
 	push ax			! func called with signal number as arg
 	call (bx)
 back:
 	pop ax			! get signal number off stack
-	pop (_M+mtype)		! restore status of previous system call
+	pop (__M+mtype)		! restore status of previous system call
 	pop es			! signal handling finished
 	pop ds
 	pop bp

@@ -120,5 +120,6 @@ _wait.c
 _write.c
 _sendrec.s
 brksize.s
+catchsig.s
 vectab.c
 errno.c
