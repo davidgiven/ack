@@ -1,2 +1,7 @@
-eval : eval.c states.h
-	cc -o eval eval.c
+CC = cc
+CFLAGS = -O
+
+eval:	eval.o
+	$(CC) $(CFLAGS) -o eval eval.o
+
+eval.o : states.h
