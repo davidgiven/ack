@@ -3,6 +3,5 @@ setjmp.h
 stdio.h
 assert.h
 termio.h
-sgtty.h
 varargs.h
 sys
