@@ -415,6 +415,7 @@ vax_bsd4_2	VAX11 with BSD4.2	vax4
 vax_sysV_2	VAX11 with System V.2	vax4
 pc_ix	IBM PC with PC/IX	i86
 xenix3	IBM AT with Microsoft Xenix V3.2	xenix3
+i386	Intel 80386 system running Xenix System V	i386
 m68_unisoft	Motorola 68000 with Unisoft UNIX	m68k2
 m68_pmds	Philips PMDS	pmds
 m68_sysV_0	68000 with Uniplus UNIX System V.0	mantra
@@ -852,6 +853,12 @@ i86	IBM PC/IX	2/2	C	+	i86	IBM PC with PC/IX
 
 xenix3	Microsoft Xenix V3	2/2	C	+	xenix3	IBM AT with Xenix
 			Pascal		i86
+			Basic
+			Occam
+			Modula-2
+
+i386	SCO Xenix System V	4/4	C	+	i386	Intel 80386 system with Xenix System V
+			Pascal
 			Basic
 			Occam
 			Modula-2

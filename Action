@@ -86,6 +86,10 @@ name "Intel 80286 support for Xenix"
 dir mach/xenix3
 indir
 end
+name "Intel 80386 support for Xenix 386 System V"
+dir mach/i386
+indir
+end
 name "MSC6500 support"
 dir mach/6500
 indir
