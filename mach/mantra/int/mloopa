@@ -241,7 +241,7 @@ countsiz: .space 4
 emopf:	.asciz	"em_opfreq\0"
 	.align
 	.sect .bss
-counttab:  .space	1884
+counttab:  .space	1892
 	.sect .text
 		pea	emopf
 		bsr	_Xunlink

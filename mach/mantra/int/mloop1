@@ -185,7 +185,7 @@ escape2:
 	move.b	(a3)+,3(sp)
 	add.w	d0,d0
 	add.w	d0,d0
-	cmp.w	#220,d0
+	cmp.w	#228,d0
 	bhi	e_illins
 #if prof
 	lea	timeinf2,a1
@@ -217,9 +217,10 @@ bra	sde_q	; bra	sdf_q	; bra	sdl_qpw	; bra	sdl_qnw
 bra	sil_qpw	; bra	sil_qnw	; bra	ste_qw	; bra	stf_q
 bra	stl_qpw	; bra	stl_qnw	; bra	zeq_q	; bra	zge_q
 bra	zgt_q	; bra	zle_q	; bra	zlt_q	; bra	zne_q
-bra	zre_qw	; bra	zrl_qpw	; bra	zrl_qnw
+bra	zre_qw	; bra	zrl_qpw	; bra	zrl_qnw ; bra	loi_q
+bra	sti_q
 
-.assert .-dispae2-220 == 0
+.assert .-dispae2-228 == 0
 
 !------------------------------------------------------------------------------
 !	timeinf	tables,	first the unescaped opcodes these tables are parallel
@@ -364,7 +365,8 @@ timeinf2:
 .data4 29 ; .data4 29 ; .data4 29 ; .data4 29 
 .data4 29 ; .data4 29 ; .data4 29 ; .data4 29
 .data4 29 ; .data4 29 ; .data4 29 ; .data4 29 
-.data4 29 ; .data4 29 ; .data4 29  
+.data4 29 ; .data4 29 ; .data4 29 ; .data4 29
+.data4 29
 #else
 timeinf:
 .data4 30 ; .data4 35 ; .data4 35 ; .data4 35 
@@ -488,7 +490,8 @@ timeinf2:
 .data4 25 ; .data4 25 ; .data4 25 ; .data4 25 
 .data4 25 ; .data4 25 ; .data4 25 ; .data4 25
 .data4 25 ; .data4 25 ; .data4 25 ; .data4 25 
-.data4 25 ; .data4 25 ; .data4 25  
+.data4 25 ; .data4 25 ; .data4 25 ; .data4 25
+.data4 25
 #endif
 #endif
 	.sect .text

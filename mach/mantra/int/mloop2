@@ -427,19 +427,20 @@ lxa_l:		adroff
 
 !-----------------------------------------------------------------------
 
+loi_q:		move.l	(sp)+,d1;	bra	8f
 loi_l:		adroff
 		clr.l	d1
 		move.w	(a5),d1
 		bra	8f
 loi_s0:		move.l	#0,d1
 		move.b	(a3)+,d1
-8:		cmp.w	#1,d1
+8:		cmp.l	#1,d1
 		beq	loi_1
-		cmp.w	#2,d1
+		cmp.l	#2,d1
 		beq	2f
-		move.w	d1,d0
+		move.l	d1,d0
 		move.w	d7,d2
-3:		asr.w	#1,d0	;	dbcs	d2,3b
+3:		asr.l	#1,d0	;	dbcs	d2,3b
 		bcs	e_oddz
 		bra	5f
 loi_1W:		loi_2W:		loi_3W:		loi_4W:
@@ -456,7 +457,7 @@ loi_1W:		loi_2W:		loi_3W:		loi_4W:
 7:		bra	e_badptr
 6:
 #endif
-		sub.w	#1,d0
+		sub.l	#1,d0
 1:		mov	-(a0),-(sp)
 		dbra	d0,1b
 		jmp	(a4)
