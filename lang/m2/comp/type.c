@@ -27,6 +27,7 @@
 #include	"walk.h"
 #include	"chk_expr.h"
 #include	"warning.h"
+#include	"uns_arith.h"
 
 #ifndef NOCROSS
 #include	"target_sizes.h"
@@ -302,10 +303,14 @@ chk_bounds(l1, l2, fund)
 	if (fund == T_INTEGER) {
 		return l2 >= l1;
 	}
+#ifdef UNSIGNED_ARITH
+	return (UNSIGNED_ARITH) l2 >= (UNSIGNED_ARITH) l1;
+#else
 	return (l2 & arith_sign ?
 		(l1 & arith_sign ? l2 >= l1 : 1) :
 		(l1 & arith_sign ? 0 : l2 >= l1)
 	       );
+#endif
 }
 
 int

@@ -30,13 +30,17 @@ extern char	*symbol2str();
 
 #define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
 
+#ifndef NOCROSS
 arith full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
 arith min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
 			   ...
 			*/
-#ifndef NOCROSS
 unsigned int wrd_bits;	/* number of bits in a word */
+#else
+arith full_mask[4] = { 0L, 0xFFL, 0xFFFFL, 0L, 0xFFFFFFFFL };
+arith max_int[4] =   { 0L, 0x7FL, 0x7FFFL, 0L, 0x7FFFFFFFL };
+arith min_int[4] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 #endif
 
 extern char options[];
@@ -46,14 +50,6 @@ overflow(expp)
 {
 	if (expp->nd_type != address_type) {
 	    node_warning(expp, W_ORDINARY, "overflow in constant expression");
-	}
-}
-
-underflow(expp)
-	t_node *expp;
-{
-	if (expp->nd_type != address_type) {
-	    node_warning(expp, W_ORDINARY, "underflow in constant expression");
 	}
 }
 
@@ -182,18 +178,20 @@ cstibin(expp)
 
 	switch (exp->nd_symb)	{
 	case '*':
-		if (o1 > 0 && o2 > 0) {
-			if (max_int[sz] / o1 < o2) overflow(exp);
+		if (o1 > 0) {
+			if (o2 > 0) {
+				if (max_int[sz] / o1 < o2) overflow(exp);
+			}
+			else if (min_int[sz] / o1 > o2) overflow(exp);
 		}
-		else if (o1 < 0 && o2 < 0) {
-			if (o1 == min_int[sz] || o2 == min_int[sz] ||
-			    max_int[sz] / (-o1) < (-o2)) overflow(exp);
-		}
-		else if (o1 > 0) {
-			if (min_int[sz] / o1 > o2) overflow(exp);
-		}
-		else if (o2 > 0) {
-			if (min_int[sz] / o2 > o1) overflow(exp);
+		else if (o1 < 0) {
+			if (o2 < 0) {
+				if (o1 == min_int[sz] || o2 == min_int[sz] ||
+			 	   max_int[sz] / (-o1) < (-o2)) overflow(exp);
+			}
+			else if (o2 > 0) {
+				if (min_int[sz] / o2 > o1) overflow(exp);
+			}
 		}
 		o1 *= o2;
 		break;
@@ -219,22 +217,16 @@ cstibin(expp)
 		break;
 
 	case '+':
-		if (o1 > 0 && o2 > 0) {
-			if (max_int[sz] - o1 < o2) overflow(exp);
-		}
-		else if (o1 < 0 && o2 < 0) {
-			if (min_int[sz] - o1 > o2) overflow(exp);
-		}
+		if (  (o1 > 0 && o2 > 0 && max_int[sz] - o1 < o2)
+		   || (o1 < 0 && o2 < 0 && min_int[sz] - o1 > o2)
+		   ) overflow(exp);
 		o1 += o2;
 		break;
 
 	case '-':
-		if (o1 >= 0 && o2 < 0) {
-			if (max_int[sz] + o2 < o1) overflow(exp);
-		}
-		else if (o1 < 0 && o2 >= 0) {
-			if (min_int[sz] + o2 > o1) overflow(exp);
-		}
+		if (  (o1 >= 0 && o2 < 0 && max_int[sz] + o2 < o1)
+		   || (o1 < 0 && o2 >= 0 && min_int[sz] + o2 > o1)
+		   ) overflow(exp);
 		o1 -= o2;
 		break;
 
@@ -390,20 +382,15 @@ cstubin(expp)
 		break;
 
 	case DIV:
-		if (o2 == 0)	{
-			node_error(exp, "division by 0");
-			return;
-		}
-		divide(&o1, &o2);
-		break;
-
 	case MOD:
 		if (o2 == 0)	{
-			node_error(exp, "modulo by 0");
+			node_error(exp, exp->nd_symb == DIV ? 
+					"division by 0" :
+					"modulo by 0");
 			return;
 		}
 		divide(&o1, &o2);
-		o1 = o2;
+		if (exp->nd_symb == MOD) o1 = o2;
 		break;
 
 	case '+':
@@ -414,14 +401,14 @@ cstubin(expp)
 		break;
 
 	case '-':
-		if (! chk_bounds(o2, o1, T_CARDINAL)) {
-			if (exp->nd_type->tp_fund == T_INTORCARD) {
-				exp->nd_type = int_type;
-				if (! chk_bounds(min_int[sz], o1 - o2, T_CARDINAL)) {
-					underflow(exp);
-				}
-			}
-			else	underflow(exp);
+		if (  exp->nd_type != address_type
+		   && !chk_bounds(o2, o1, T_CARDINAL)
+		   && (  exp->nd_type->tp_fund != T_INTORCARD
+	 	      || ( exp->nd_type = int_type
+			 , !chk_bounds(min_int[sz], o1 - o2, T_CARDINAL) ) )
+		   ) {
+			node_warning(exp, W_ORDINARY,
+				"underflow in constant expression");
 		}
 		o1 -= o2;
 		break;
@@ -683,6 +670,7 @@ CutSize(expr)
 InitCst()
 {
 	register int i = 0;
+#ifndef NOCROSS
 	register arith bt = (arith)0;
 
 	while (!(bt < 0))	{
@@ -699,7 +687,10 @@ InitCst()
 		fatal("sizeof (arith) insufficient on this machine");
 	}
 
-#ifndef NOCROSS
 	wrd_bits = 8 * (int) word_size;
+#else
+	if (options['s']) {
+		for (i = 0; i < sizeof(long); i++) min_int[i] = - max_int[i];
+	}
 #endif
 }

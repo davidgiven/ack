@@ -185,7 +185,7 @@ CodeCoercion(t1, t2)
 	case T_ENUMERATION:
 	case T_CARDINAL:
 	case T_INTORCARD:
-		if (sz1 < word_size) sz1 = word_size;
+		if ((int) sz1 < (int) word_size) sz1 = word_size;
 		/* fall through */
 	case T_EQUAL:
 	case T_POINTER:
@@ -208,7 +208,7 @@ CodeCoercion(t1, t2)
 
 	switch(fund1) {
 	case T_INTEGER:
-		if (sz1 < word_size) {
+		if ((int) sz1 < (int) word_size) {
 			c_loc((int)sz1);
 			c_loc((int) word_size);
 			C_cii();
@@ -220,7 +220,7 @@ CodeCoercion(t1, t2)
 			C_cif();
 			break;
 		}
-		if (sz2 != sz1) {
+		if ((int) sz2 != (int) sz1) {
 			c_loc((int)sz1);
 			c_loc((int)sz2);
 			switch(fund2) {
@@ -244,7 +244,7 @@ CodeCoercion(t1, t2)
 			C_cuf();
 			break;
 		}
-		if (sz1 != sz2) {
+		if ((int) sz1 != (int) sz2) {
 			c_loc((int)sz1);
 			c_loc((int)sz2);
 			switch(fund2) {
@@ -264,7 +264,7 @@ CodeCoercion(t1, t2)
 	case T_REAL:
 		switch(fund2) {
 		case T_REAL:
-			if (sz1 != sz2) {
+			if ((int) sz1 != (int) sz2) {
 				c_loc((int)sz1);
 				c_loc((int)sz2);
 				C_cff();
@@ -404,7 +404,7 @@ CodeParameters(param, arg)
 			}
 		}
 		else if (arg->nd_symb == STRING) {
-			C_loc((arith)(arg->nd_SLE - 1));
+			c_loc((int) arg->nd_SLE - 1);
 		}
 		else if (elem == word_type) {
 			C_loc((arg_type->tp_size+word_size-1) / word_size - 1);
@@ -464,22 +464,22 @@ CodePString(nd, tp)
 
 static
 subu(sz)
-	arith sz;
+	int sz;
 {
 	if (! options['R']) {
-		C_cal((int) sz == (int) word_size ? "subuchk" : "subulchk");
+		C_cal(sz == (int) word_size ? "subuchk" : "subulchk");
 	}
-	C_sbu(sz);
+	C_sbu((arith) sz);
 }
 
 static
 addu(sz)
-	arith sz;
+	int sz;
 {
 	if (! options['R']) {
-		C_cal((int) sz == (int) word_size ? "adduchk" : "addulchk");
+		C_cal(sz == (int) word_size ? "adduchk" : "addulchk");
 	}
-	C_adu(sz);
+	C_adu((arith)sz);
 }
 
 CodeStd(nd)
@@ -555,7 +555,7 @@ CodeStd(nd)
 		register arith size;
 
 		size = left->nd_type->tp_size;
-		if (size < word_size) size = word_size;
+		if ((int) size < (int) word_size) size = word_size;
 		CodePExpr(left);
 		CodeCoercion(left->nd_type, tp);
 		if (arg) {
@@ -568,13 +568,13 @@ CodeStd(nd)
 		}
 		if (std == S_DEC) {
 			if (tp->tp_fund == T_INTEGER) C_sbi(size);
-			else	subu(size);
+			else	subu((int) size);
 		}
 		else {
 			if (tp->tp_fund == T_INTEGER) C_adi(size);
-			else	addu(size);
+			else	addu((int) size);
 		}
-		if (size == word_size) {
+		if ((int) size == (int) word_size) {
 			RangeCheck(left->nd_type, tp->tp_fund == T_INTEGER ?
 						int_type : card_type);
 		}
@@ -684,7 +684,7 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_CARDINAL:
 		case T_INTORCARD:
-			addu(tp->tp_size);
+			addu((int) tp->tp_size);
 			break;
 		case T_SET:
 			C_ior(tp->tp_size);
@@ -713,7 +713,7 @@ CodeOper(expr, true_label, false_label)
 			break;
 		case T_INTORCARD:
 		case T_CARDINAL:
-			subu(tp->tp_size);
+			subu((int) tp->tp_size);
 			break;
 		case T_SET:
 			C_com(tp->tp_size);
@@ -767,11 +767,9 @@ CodeOper(expr, true_label, false_label)
 		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
-			if ((int)(tp->tp_size) == word_size) {
 			C_cal((int)(tp->tp_size) == (int)word_size 
 				? "dvi"
 				: "dvil");
-			}
 			C_asp(2*tp->tp_size);
 			C_lfr(tp->tp_size);
 			break;
@@ -789,11 +787,9 @@ CodeOper(expr, true_label, false_label)
 		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
-			if ((int)(tp->tp_size) == word_size) {
 			C_cal((int)(tp->tp_size) == (int)word_size 
 				? "rmi"
 				: "rmil");
-			}
 			C_asp(2*tp->tp_size);
 			C_lfr(tp->tp_size);
 			break;

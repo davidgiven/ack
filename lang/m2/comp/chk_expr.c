@@ -52,15 +52,6 @@ df_error(nd, mess, edf)
 	else node_error(nd, mess);
 }
 
-STATIC int
-ex_error(nd, mess)
-	register t_node	*nd;
-	char	*mess;
-{
-	node_error(nd, "\"%s\": %s", symbol2str(nd->nd_symb), mess);
-	return 0;
-}
-
 MkCoercion(pnd, tp)
 	t_node		**pnd;
 	register t_type	*tp;
@@ -203,7 +194,8 @@ ChkArrow(expp)
 	tp = exp->nd_RIGHT->nd_type;
 
 	if (tp->tp_fund != T_POINTER) {
-		return ex_error(exp, "illegal operand type");
+		node_error(exp, "\"^\": illegal operand type");
+		return 0;
 	}
 
 	if ((tp = RemoveEqual(PointedtoType(tp))) == 0) tp = error_type;
@@ -910,6 +902,7 @@ ChkBinOper(expp)
 	t_type *result_type;
 	int allowed;
 	int retval;
+	char *symb;
 
 	/* First, check BOTH operands */
 
@@ -941,7 +934,8 @@ ChkBinOper(expp)
 	*/
 	if (exp->nd_symb == IN) {
 		if (tpr->tp_fund != T_SET) {
-			return ex_error(exp, "right operand must be a set");
+			node_error(exp, "\"IN\": right operand must be a set");
+			return 0;
 		}
 		if (!TstAssCompat(ElementType(tpr), tpl)) {
 			/* Assignment compatible ???
@@ -964,26 +958,27 @@ ChkBinOper(expp)
 
 	allowed = AllowedTypes(exp->nd_symb);
 
+	symb = symbol2str(exp->nd_symb);
 	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed)) {
 	    	if (!((T_CARDINAL & allowed) &&
 	             ChkAddressOper(tpl, tpr, exp))) {
-			return ex_error(exp, "illegal operand type(s)");
+			node_error(exp, "\"%s\": illegal operand type(s)", symb);
+			return 0;
 		}
 		if (result_type == bool_type) exp->nd_type = bool_type;
 	}
 	else {
 		if (Boolean(exp->nd_symb) && tpl != bool_type) {
-			return ex_error(exp, "illegal operand type(s)");
+			node_error(exp, "\"%s\": illegal operand type(s)", symb);
+			return 0;
 		}
 
 		/* Operands must be compatible (distilled from Def 8.2)
 		*/
 		if (!TstCompat(tpr, tpl)) {
 			extern char *incompat();
-			char buf[128];
-
-			sprint(buf, "%s in operand(s)", incompat(tpl, tpr));
-			return ex_error(exp, buf);
+			node_error(exp, "\"%s\": %s in operands", symb, incompat(tpl, tpr));
+			return 0;
 		}
 
 		MkCoercion(&(exp->nd_LEFT), tpl);
@@ -1080,7 +1075,8 @@ ChkUnOper(expp)
 	default:
 		crash("ChkUnOper");
 	}
-	return ex_error(exp, "illegal operand type");
+	node_error(exp, "\"%s\": illegal operand type", symbol2str(exp->nd_symb));
+	return 0;
 }
 
 STATIC t_node *
