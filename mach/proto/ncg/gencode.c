@@ -52,7 +52,7 @@ out_finish() {
 		fflush(stderr);
 	else
 #endif
-		fclose(codefile);
+		if (codefile) fclose(codefile);
 #ifdef TABLEDEBUG
 	termlset();
 #endif
