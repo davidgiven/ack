@@ -283,21 +283,37 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	}
 	fprintf(db_out, currlang->addr_fmt, get_int(addr, pointer_size, T_UNSIGNED));
 	break;
-  case T_POINTER:
-	if (format && strindex(format,'s') &&
+  case T_POINTER: {
+	t_addr a = get_int(addr, tp_sz, T_UNSIGNED);
+
+	fprintf(db_out, currlang->addr_fmt, a);
+	if (format && strindex(format, 's') &&
 	    (tp->ty_ptrto == char_type || tp->ty_ptrto == uchar_type)) {
-		t_addr a = get_int(addr, tp_sz, T_UNSIGNED);
 		char *naddr = malloc(512);
 
-		if (naddr && get_string(511L, a, naddr)) {
-			print_val(string_type, 512L, naddr, 0, indent, format);
+		if (! naddr) {
+			fputs(" (could not allocate memory)", db_out);
+			break;
+		}
+		if (! get_string(511L, a, naddr)) {
+			fputs(" (not a valid pointer)", db_out);
 			free(naddr);
 			break;
 		}
-		if (naddr) free(naddr);
+		fputs(" (", db_out);
+		print_val(string_type, 512L, naddr, 0, indent, format);
+		fputs(")", db_out);
+		free(naddr);
+		break;
 	}
-	fprintf(db_out, currlang->addr_fmt, get_int(addr, pointer_size, T_UNSIGNED));
+	if (tp->ty_ptrto->ty_class == T_PROCEDURE) {
+		p_scope sc = get_scope_from_addr(a);
+		if (sc && sc->sc_definedby && a == sc->sc_start) {
+			fprintf(db_out, " (%s)", sc->sc_definedby->sy_idf->id_text);
+		}
+	}
 	break;
+	}
   case T_FILE:
 	fprintf(db_out, "<file>");
 	break;
@@ -363,7 +379,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	print_integer(tp, get_int(addr, tp_sz, T_INTEGER), format);
 	break;
   case T_STRING:
-	(*currlang->printstring)(addr, (int) tp_sz);
+	(*currlang->printstring)(db_out, addr, (int) tp_sz);
 	break;
   default:
 	assert(0);

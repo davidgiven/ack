@@ -7,7 +7,7 @@
 typedef unsigned int	t_lineno;
 typedef long		t_addr;
 #define ILL_ADDR	((t_addr) -1)
-#define NO_ADDR		((t_addr) -3)
+#define NO_ADDR		((t_addr) 0)
 
 typedef struct pos {
   t_lineno	lineno;

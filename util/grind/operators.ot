@@ -34,3 +34,10 @@ OP_BINOP	2	0
 OP_FORMAT	2	0
 OP_DISABLE	1	do_disable
 OP_ENABLE	1	do_enable
+OP_SHELL	0	do_noop
+OP_SOURCE	1	do_source
+OP_PRCOMM	1	do_prcomm
+OP_UP		1	do_up
+OP_DOWN		1	do_down
+OP_FRAME	1	do_frame
+OP_LOG		1	do_log

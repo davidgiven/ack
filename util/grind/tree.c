@@ -151,200 +151,239 @@ get_addr_from_node(p)
   return a;
 }
 
-print_node(p, top_level)
+static int	ommit_commas = 0;
+
+print_node(f, p, top_level)
   register p_tree	p;
+  register FILE		*f;
 {
   if (!p) return;
   switch(p->t_oper) {
+  case OP_LOG:
+	fputs("log ", f);
+	print_node(f, p->t_args[0], 0);
+	break;
+  case OP_PRCOMM:
+	fputs("rerun ?", f);
+	break;
+  case OP_RUN:
+	fputs("run ", f);
+	ommit_commas = 1;
+	print_node(f, p->t_args[0], 0);
+	ommit_commas = 0;
+	break;
   case OP_LIST:
-	fputs("list ", db_out);
+	fputs("list ", f);
 	if (p->t_args[0]) {
-		print_node(p->t_args[0], 0);
+		print_node(f, p->t_args[0], 0);
 		if (p->t_args[1]) {
 			if (p->t_args[1]->t_ival >= 0) {
-				fputs(", ", db_out);
-				print_node(p->t_args[1], 0);
+				fputs(", ", f);
+				print_node(f, p->t_args[1], 0);
 			}
 			else  {
 				if (p->t_args[1]->t_ival < -100000000) {
-					fputs("-", db_out);
+					fputs("-", f);
 				}
-				else print_node(p->t_args[1], 0);
+				else print_node(f, p->t_args[1], 0);
 			}
 		}
 	}
 	break;
   case OP_PRINT:
-	fputs("print ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("print ", f);
+	print_node(f, p->t_args[0], 0);
+	break;
+  case OP_SOURCE:
+	fputs("source ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_ENABLE:
-	fputs("enable ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("enable ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_DISABLE:
-	fputs("disable ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("disable ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_DISPLAY:
-	fputs("display ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("display ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_LINK:
-	print_node(p->t_args[0], 0);
-	fputs(", ", db_out);
-	print_node(p->t_args[1], 0);
+	print_node(f, p->t_args[0], 0);
+	if (! ommit_commas) fputs(", ", f);
+	else putc(' ', f);
+	print_node(f, p->t_args[1], 0);
 	break;
   case OP_FILE:
-	fputs("file ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("file ", f);
+	print_node(f, p->t_args[0], 0);
+	break;
+  case OP_FRAME:
+	fputs("frame ", f);
+	print_node(f, p->t_args[0], 0);
+	break;
+  case OP_UP:
+	fputs("frame +", f);
+	print_node(f, p->t_args[0], 0);
+	break;
+  case OP_DOWN:
+	fputs("frame -", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_SET:
-	fputs("set ", db_out);
-	print_node(p->t_args[0], 0);
-	fputs(" to ", db_out);
-	print_node(p->t_args[1], 0);
+	fputs("set ", f);
+	print_node(f, p->t_args[0], 0);
+	fputs(" to ", f);
+	print_node(f, p->t_args[1], 0);
 	break;
   case OP_FIND:
-	fputs("find ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("find ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_WHICH:
-	fputs("which ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("which ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_DELETE:
-	fputs("delete ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("delete ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_REGS:
-	fputs("regs ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("regs ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_NEXT:
-	fputs("next ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("next ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_STEP:
-	fputs("step ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("step ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_STATUS:
-	fputs("status", db_out);
+	fputs("status", f);
 	break;
   case OP_DUMP:
-	fputs("dump ", db_out);
+	fputs("dump ", f);
 	print_position(p->t_address, 1);
 	break;
   case OP_RESTORE:
-	fputs("restore ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("restore ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_WHERE:
-	fputs("where ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("where ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_HELP:
-	fputs("help ", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("help ", f);
+	print_node(f, p->t_args[0], 0);
 	break;
   case OP_CONT:
-	fputs("cont", db_out);
+	fputs("cont", f);
 	if (p->t_args[0]) {
-		fprintf(db_out, " %ld", p->t_args[0]->t_ival);
+		fprintf(f, " %ld", p->t_args[0]->t_ival);
 	}
 	if (p->t_args[1]) {
-		fputs(" ", db_out);
-		print_node(p->t_args[1], 0);
+		fputs(" ", f);
+		print_node(f, p->t_args[1], 0);
 	}
 	break;
 
   case OP_WHEN:
-	fputs("when ", db_out);
+	fputs("when ", f);
 	if (p->t_address != NO_ADDR) {
 		print_position(p->t_address, 1);
 	}
-	else print_node(p->t_args[0], 0);
+	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
-		fputs(" if ", db_out);
-		print_node(p->t_args[1], 0);
+		fputs(" if ", f);
+		print_node(f, p->t_args[1], 0);
 	}
 	p = p->t_args[2];
-	fputs(" { ", db_out);
+	fputs(" { ", f);
 	while (p && p->t_oper == OP_LINK) {
-		print_node(p->t_args[0], 0);
-		fputs("; ", db_out);
+		print_node(f, p->t_args[0], 0);
+		fputs("; ", f);
 		p = p->t_args[1];
 	}
-	print_node(p, 0);
-	fputs(" }", db_out);
+	print_node(f, p, 0);
+	fputs(" }", f);
 	break;
   case OP_STOP:
-	fputs("stop ", db_out);
+	fputs("stop ", f);
 	if (p->t_address != NO_ADDR) {
 		print_position(p->t_address, 1);
 	}
-	else print_node(p->t_args[0], 0);
+	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
-		fputs(" if ", db_out);
-		print_node(p->t_args[1], 0);
+		fputs(" if ", f);
+		print_node(f, p->t_args[1], 0);
 	}
 	break;
   case OP_TRACE:
-	fputs("trace ", db_out);
+	fputs("trace ", f);
 	if (p->t_args[2]) {
-		fputs("on ", db_out);
-		print_node(p->t_args[2], 0);
-		fputs(" ", db_out);
+		fputs("on ", f);
+		print_node(f, p->t_args[2], 0);
+		fputs(" ", f);
 	}
 	if (p->t_address != NO_ADDR) {
 		print_position(p->t_address, 1);
 	}
-	else print_node(p->t_args[0], 0);
+	else print_node(f, p->t_args[0], 0);
 	if (p->t_args[1]) {
-		fputs(" if ", db_out);
-		print_node(p->t_args[1], 0);
+		fputs(" if ", f);
+		print_node(f, p->t_args[1], 0);
 	}
 	break;
   case OP_AT:
-	fprintf(db_out, "at \"%s\":%ld", p->t_filename, p->t_lino);
+	fprintf(f, "at \"%s\":%ld", p->t_filename, p->t_lino);
 	break;
   case OP_IN:
-	fputs("in ", db_out);
-	print_node(p->t_args[0], 0);
-	fputs(" ", db_out);
-	print_node(p->t_args[1], 0);
+	fputs("in ", f);
+	print_node(f, p->t_args[0], 0);
+	fputs(" ", f);
+	print_node(f, p->t_args[1], 0);
 	break;
   case OP_SELECT:
-	print_node(p->t_args[0], 0);
-	fputs("`", db_out);
-	print_node(p->t_args[1], 0);
+	print_node(f, p->t_args[0], 0);
+	fputs("`", f);
+	print_node(f, p->t_args[1], 0);
+	break;
+  case OP_OUTPUT:
+	fprintf(f, "> %s ", p->t_str);
+	break;
+  case OP_INPUT:
+	fprintf(f, "< %s ", p->t_str);
 	break;
   case OP_NAME:
-	fputs(p->t_str, db_out);
+	fputs(p->t_str, f);
 	break;
   case OP_INTEGER:
-	fprintf(db_out, currlang->decint_fmt, p->t_ival);
+	fprintf(f, currlang->decint_fmt, p->t_ival);
 	break;
   case OP_STRING:
-	(*currlang->printstring)(p->t_sval, strlen(p->t_sval));
+	(*currlang->printstring)(f, p->t_sval, strlen(p->t_sval));
 	break;
   case OP_REAL:
-	fprintf(db_out, currlang->real_fmt, p->t_fval);
+	fprintf(f, currlang->real_fmt, p->t_fval);
 	break;
   case OP_FORMAT:
-	print_node(p->t_args[0], 0);
-	fputs("\\", db_out);
-	print_node(p->t_args[1], 0);
+	print_node(f, p->t_args[0], 0);
+	fputs("\\", f);
+	print_node(f, p->t_args[1], 0);
 	break;
   case OP_UNOP:
   case OP_BINOP:
-	(*currlang->printop)(p);
+	(*currlang->printop)(f, p);
 	break;
   default:
 	assert(0);
   }
-  if (top_level) fputs("\n", db_out);
+  if (top_level) fputs("\n", f);
 }
 
 int
@@ -377,6 +416,8 @@ in_status(com)
   p_tree	com;
 {
   switch(com->t_oper) {
+  case OP_PRCOMM:
+	/* not really in status but may not be removed */
   case OP_STOP:
   case OP_WHEN:
   case OP_TRACE:
@@ -408,6 +449,8 @@ newfile(id)
   find_language(strrindex(id->id_text, '.'));
 }
 
+int	in_wheninvoked;
+
 perform(p, a)
   register p_tree	p;
   t_addr		a;
@@ -416,6 +459,7 @@ perform(p, a)
   case OP_WHEN:
 	if (p->t_args[1] && ! eval_cond(p->t_args[1])) break;
 	p = p->t_args[2];
+	in_wheninvoked++;
 	while (p && p->t_oper == OP_LINK) {
 		if (interrupted) return;
 		if (p->t_args[0]) eval(p->t_args[0]);
@@ -423,6 +467,7 @@ perform(p, a)
 	}
 	if (interrupted) return;
 	if (p) eval(p);
+	in_wheninvoked--;
 	break;
   case OP_TRACE:
 	if (p->t_args[0] && p->t_args[0]->t_oper == OP_IN) {

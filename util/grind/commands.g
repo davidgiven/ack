@@ -56,10 +56,11 @@ commands
 					lastcom = 0;
 				}
 				if (errorgiven) {
-					freenode(com);
+					if (com != run_command) freenode(com);
 					com = 0;
 				}
 				else {
+					log(com);
 					eval(com);
 			  		if (repeatable(com)) {
 						lastcom = com;
@@ -72,6 +73,7 @@ commands
 					}
 				}
 			  } else if (lastcom && ! errorgiven) {
+				log(lastcom);
 				eval(lastcom);
 			  }
 			  if (give_prompt) {
@@ -81,7 +83,6 @@ commands
 			  }
 			}
   ]*
-			{ signal_child(SIGKILL); }
 ;
 
 command_line(p_tree *p;)
@@ -111,20 +112,48 @@ command_line(p_tree *p;)
 | WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
 | able_command(p)
 | '!'			{ shellescape();
-			  errorgiven = 1; /* to prevent execution of lastcomm */
+			  *p = mknode(OP_SHELL);
 			}
+| source_command(p)
+| log_command(p)
+| frame_command(p)
 |
 ]
 ;
 
+frame_command(p_tree	*p;)
+:
+  FRAME 
+  [			{ *p = mknode(OP_FRAME, (p_tree) 0); }
+  | count(p)		{ *p = mknode(OP_FRAME, *p); }
+  | '-' count(p)	{ *p = mknode(OP_DOWN, *p); }
+  | '+' count(p)	{ *p = mknode(OP_UP, *p); }
+  ]
+;
+
+source_command(p_tree *p;)
+:
+  SOURCE		{ extended_charset = 1; }
+  name(p)		{ (*p)->t_idf = str2idf((*p)->t_str, 0); }
+  			{ *p = mknode(OP_SOURCE, *p);
+			  extended_charset = 0;
+			}
+;
+
+log_command(p_tree *p;)
+:
+  LOG			{ extended_charset = 1; }
+  [ name(p)		{ (*p)->t_idf = str2idf((*p)->t_str, 0); }
+  |			{ *p = 0; }
+  ]
+  			{ *p = mknode(OP_LOG, *p);
+			  extended_charset = 0;
+			}
+;
 
 where_command(p_tree *p;)
 :
-  WHERE			{ *p = mknode(OP_WHERE, (p_tree) 0); }
-  [ count(&(*p)->t_args[0])?
-  | '-' count(&(*p)->t_args[0])
-			{ (*p)->t_args[0]->t_ival = - (*p)->t_args[0]->t_ival; }
-  ]
+  WHERE opt_num(p)	{ *p = mknode(OP_WHERE, *p); }
 ;
 
 list_command(p_tree *p;)
@@ -161,6 +190,7 @@ help_command(p_tree *p;)
   			{ *p = mknode(OP_HELP, (p_tree) 0); }
   [ name(&(*p)->t_args[0])?
   | '?'			{ (*p)->t_args[0] = mknode(OP_NAME, str2idf("help",0), (char *) 0); }
+  | '!'			{ (*p)->t_args[0] = mknode(OP_NAME, (struct idf *) 0, "!"); }
   ]
 ;
 
@@ -175,6 +205,9 @@ run_command(p_tree *p;)
 			  }
 			  else *p = run_command;
 			}
+  [ '?'			{ *p = mknode(OP_PRCOMM, *p); }
+  |
+  ]
 ;
 
 stop_command(p_tree *p;)
@@ -447,6 +480,15 @@ count(p_tree *p;)
   INTEGER		{ *p = mknode(OP_INTEGER, tok.ival); }
 ;
 
+opt_num(p_tree *p;)
+:
+  count(p)
+|
+  '-' count(p)		{ (*p)->t_ival = - (*p)->t_ival; }
+|
+			{ *p = 0; }
+;
+
 qualified_name(p_tree *p;)
 :
   name(p)
@@ -487,6 +529,9 @@ name(p_tree *p;)
   | HELP
   | DISABLE
   | ENABLE
+  | SOURCE
+  | FRAME
+  | LOG
   ]			{ *p = mknode(OP_NAME, tok.idf, tok.str); }
 ;
 

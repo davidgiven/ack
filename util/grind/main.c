@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <varargs.h>
+#include <signal.h>
 
 #include "tokenname.h"
 #include "position.h"
@@ -77,6 +78,7 @@ main(argc, argv)
   }
   prompt();
   Commands();
+  signal_child(SIGKILL);
   if (eof_seen) putc('\n', db_out);
   exit(0);
 }

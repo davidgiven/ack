@@ -70,35 +70,36 @@ static struct langdep c = {
 struct langdep *c_dep = &c;
 
 static int
-printchar(c, esc)
+printchar(f, c, esc)
+  FILE	*f;
   int	c;
 {
   c &= 0377;
   switch(c) {
   case '\n':
-	fputs("\\n", db_out);
+	fputs("\\n", f);
 	break;
   case '\t':
-	fputs("\\t", db_out);
+	fputs("\\t", f);
 	break;
   case '\b':
-	fputs("\\b", db_out);
+	fputs("\\b", f);
 	break;
   case '\r':
-	fputs("\\r", db_out);
+	fputs("\\r", f);
 	break;
   case '\f':
-	fputs("\\f", db_out);
+	fputs("\\f", f);
 	break;
   case '\\':
-	fputs("\\\\", db_out);
+	fputs("\\\\", f);
 	break;
   case '\'':
   case '"':
-	fprintf(db_out, c == esc ? "\\%c" : "%c", c);
+	fprintf(f, c == esc ? "\\%c" : "%c", c);
 	break;
   default:
-  	fprintf(db_out, (c >= 040 && c < 0177) ? "%c" : "\\%03o", c);
+  	fprintf(f, (c >= 040 && c < 0177) ? "%c" : "\\%03o", c);
 	break;
   }
 }
@@ -108,20 +109,21 @@ print_char(c)
   int	c;
 {
   putc('\'', db_out);
-  printchar(c, '\'');
+  printchar(db_out, c, '\'');
   putc('\'', db_out);
 }
 
 static int
-print_string(s, len)
+print_string(f, s, len)
+  FILE	*f;
   char	*s;
   int	len;
 {
   register char	*str = s;
 
-  putc('"', db_out);
-  while (*str && len-- > 0) printchar(*str++, '"');
-  putc('"', db_out);
+  putc('"', f);
+  while (*str && len-- > 0) printchar(f, *str++, '"');
+  putc('"', f);
 }
 
 extern long	int_size;
@@ -463,124 +465,125 @@ get_string(c)
 }
 
 static int
-print_op(p)
+print_op(f, p)
+  FILE		*f;
   p_tree	p;
 {
   switch(p->t_oper) {
   case OP_UNOP:
   	switch(p->t_whichoper) {
 	case E_MIN:
-		fputs("-(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("-(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	case E_PLUS:
-		fputs("+(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("+(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	case E_NOT:
-		fputs("!(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("!(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	case E_DEREF:
-		fputs("*(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("*(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	case E_BNOT:
-		fputs("~(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("~(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	case E_ADDR:
-		fputs("&(", db_out);
-		print_node(p->t_args[0], 0);
-		putc(')', db_out);
+		fputs("&(", f);
+		print_node(f, p->t_args[0], 0);
+		putc(')', f);
 		break;
 	}
 	break;
   case OP_BINOP:
 	if (p->t_whichoper == E_ARRAY) {
-		print_node(p->t_args[0], 0);
-		fputs("[", db_out);
-		print_node(p->t_args[1], 0);
-		fputs("]", db_out);
+		print_node(f, p->t_args[0], 0);
+		fputs("[", f);
+		print_node(f, p->t_args[1], 0);
+		fputs("]", f);
 		break;
 	}
 	if (p->t_whichoper == E_DERSELECT) {
-		print_node(p->t_args[0], 0);
-		fputs("->", db_out);
-		print_node(p->t_args[1], 0);
+		print_node(f, p->t_args[0], 0);
+		fputs("->", f);
+		print_node(f, p->t_args[1], 0);
 		break;
 	}
 	if (p->t_whichoper == E_SELECT) {
-		print_node(p->t_args[0], 0);
-		fputs(".", db_out);
-		print_node(p->t_args[1], 0);
+		print_node(f, p->t_args[0], 0);
+		fputs(".", f);
+		print_node(f, p->t_args[1], 0);
 		break;
 	}
-	fputs("(", db_out);
-	print_node(p->t_args[0], 0);
+	fputs("(", f);
+	print_node(f, p->t_args[0], 0);
 	switch(p->t_whichoper) {
 	case E_LSFT:
-		fputs("<<", db_out);
+		fputs("<<", f);
 		break;
 	case E_RSFT:
-		fputs(">>", db_out);
+		fputs(">>", f);
 		break;
 	case E_AND:
-		fputs("&&", db_out);
+		fputs("&&", f);
 		break;
 	case E_BAND:
-		fputs("&", db_out);
+		fputs("&", f);
 		break;
 	case E_OR:
-		fputs("||", db_out);
+		fputs("||", f);
 		break;
 	case E_BOR:
-		fputs("|", db_out);
+		fputs("|", f);
 		break;
 	case E_BXOR:
-		fputs("^", db_out);
+		fputs("^", f);
 		break;
 	case E_ZDIV:
-		fputs("/", db_out);
+		fputs("/", f);
 		break;
 	case E_ZMOD:
-		fputs("%", db_out);
+		fputs("%", f);
 		break;
 	case E_PLUS:
-		fputs("+", db_out);
+		fputs("+", f);
 		break;
 	case E_MIN:
-		fputs("-", db_out);
+		fputs("-", f);
 		break;
 	case E_MUL:
-		fputs("*", db_out);
+		fputs("*", f);
 		break;
 	case E_EQUAL:
-		fputs("==", db_out);
+		fputs("==", f);
 		break;
 	case E_NOTEQUAL:
-		fputs("!=", db_out);
+		fputs("!=", f);
 		break;
 	case E_LTEQUAL:
-		fputs("<=", db_out);
+		fputs("<=", f);
 		break;
 	case E_GTEQUAL:
-		fputs(">=", db_out);
+		fputs(">=", f);
 		break;
 	case E_LT:
-		fputs("<", db_out);
+		fputs("<", f);
 		break;
 	case E_GT:
-		fputs(">", db_out);
+		fputs(">", f);
 		break;
 	}
-	print_node(p->t_args[1], 0);
-	fputs(")", db_out);
+	print_node(f, p->t_args[1], 0);
+	fputs(")", f);
 	break;
   }
 }

@@ -31,6 +31,7 @@ extern char	*progname;
 extern int	child_interrupted;
 extern int	interrupted;
 extern int	stop_reason;
+extern int	stack_offset;
 extern t_lineno	currline;
 
 static int	child_pid;		/* process id of child */
@@ -386,6 +387,7 @@ could_send(m, stop_message)
 	if (m->m_type & M_DB_RUN) {
 		disable_intr = 0;
 		stop_reason = 0;
+		stack_offset = 0;
 	}
 	if (!child_interrupted && (! uputm(m) || ! ugetm(&answer))) {
 		child_dead = 1;
@@ -458,10 +460,12 @@ could_send(m, stop_message)
 }
 
 static int
-getbytes(size, from, to, kind)
+getbytes(size, from, to, kind, errmess)
   long	size;
   t_addr from;
   char	*to;
+  int kind;
+  int errmess;
 {
   struct message_hdr	m;
 
@@ -475,10 +479,10 @@ getbytes(size, from, to, kind)
 
   switch(answer.m_type) {
   case M_FAIL:
-	error("could not get value");
+	if (errmess) error("could not get value");
 	return 0;
   case M_INTR:
-	error("interrupted");
+	if (errmess) error("interrupted");
 	return 0;
   case M_DATA:
   	return ureceive(to, BUFTOI(answer.m_buf+1, (int)LS));
@@ -494,7 +498,7 @@ get_bytes(size, from, to)
   t_addr from;
   char	*to;
 {
-  return getbytes(size, from, to, M_GETBYTES);
+  return getbytes(size, from, to, M_GETBYTES, 1);
 }
 
 int
@@ -503,7 +507,7 @@ get_string(size, from, to)
   t_addr from;
   char	*to;
 {
-  int retval = getbytes(size, from, to, M_GETSTR);
+  int retval = getbytes(size, from, to, M_GETSTR, 0);
 
   to[(int)BUFTOI(answer.m_buf+1, (int)LS)] = 0;
   return retval;

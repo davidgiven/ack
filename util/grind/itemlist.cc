@@ -24,10 +24,10 @@ typedef struct item {
 
 struct itemlist {
   p_item	il_first, il_last;
-  int		il_count;
 };
 
 static struct itemlist	item_list;
+int		item_count;
 
 static int
 in_item_list(p)
@@ -47,7 +47,7 @@ pr_item(i)
   p_item	i;
 {
   fprintf(db_out, "(%d)\t", i->i_itemno);
-  print_node(i->i_node, 0);
+  print_node(db_out, i->i_node, 0);
   fputs(i->i_disabled ? " (disabled)\n": "\n", db_out);
 }
 
@@ -143,7 +143,7 @@ add_to_item_list(p)
   else {
 	item_list.il_last->i_next = i;
   }
-  i->i_itemno = ++item_list.il_count;
+  i->i_itemno = ++item_count;
   item_list.il_last = i;
   pr_item(i);
   return 1;
@@ -156,6 +156,7 @@ remove_from_item_list(n)
   register p_item i = item_list.il_first, prev = 0;
   p_tree	p;
 
+  if (n <= 0) n = item_count - n;
   while (i) {
 	if (i->i_itemno == n) break;
 	prev = i;
@@ -184,6 +185,7 @@ get_from_item_list(n)
 {
   register p_item i = item_list.il_first;
 
+  if (n <= 0) n = item_count - n;
   while (i) {
 	if (i->i_itemno == n) return i->i_node;
 	i = i->i_next;
@@ -197,6 +199,7 @@ able_item(n, kind)
   register p_item i = item_list.il_first;
   register p_tree p;
 
+  if (n <= 0) n = item_count - n;
   while (i) {
 	if (i->i_itemno == n) break;
 	i = i->i_next;

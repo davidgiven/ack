@@ -25,6 +25,12 @@ extern int	interrupted;
 
 p_tree		print_command;
 
+/*ARGSUSED*/
+do_noop(p)
+  p_tree	p;
+{
+}
+
 /* ------------------------------------------------------------- */
 
 /* implementation of the help command */
@@ -49,9 +55,27 @@ do_help(p)
 	fputs("  <wsize> is the last <cnt> given, or 10.\n", db_out);
 	return;
   case XFILE:
-	fputs("file [ <name> ]\n", db_out);
+	fputs("file [ <name> | ? ]\n", db_out);
 	fputs("  Print the name of the current source file, or change the\n", db_out);
-	fputs("  current source file to <name>.\n", db_out);
+	fputs("  current source file to <name>, or print the files that\n", db_out);
+	fputs("  the debugger knows about.\n", db_out);
+	return;
+  case SOURCE:
+	fputs("source <filename>\n", db_out);
+	fputs("  Read commands from the file <filename>\n", db_out);
+	return;
+  case FRAME:
+	fputs("frame [ [ + | - ] <num> ]\n", db_out);
+	fputs("  Sets the 'current' frame to frame <num>. The currently active\n", db_out);
+	fputs("  procedure has frame 0. If <num> is not given, print the 'current' frame.\n", db_out);
+	fputs("  If <num> is given with a + or -, go up or down <num> frames relative\n", db_out);
+	fputs("  to the current one.\n", db_out);
+	return;
+  case LOG:
+	fputs("log [ <name> | off ]\n", db_out);
+	fputs("  Creates a logfile <name> of the commands given.\n", db_out);
+	fputs("  When no argument is given, the current logfile is printed.\n", db_out);
+	fputs("  If the argument is 'off', logging is turned off.\n", db_out);
 	return;
   case RUN:
 	fputs("run [ <args> ] [ < <infile> ] [ > <outfile> ]\n", db_out);
@@ -59,8 +83,9 @@ do_help(p)
 	fputs("  possible redirection of standard input and/or standard output.\n", db_out);
 	return;
   case RERUN:
-	fputs("rerun\n", db_out);
-	fputs("  repeats the last run command.\n", db_out);
+	fputs("rerun [ ? ]\n", db_out);
+	fputs("  If the ? is given, prints the last run command;\n", db_out);
+	fputs("  otherwise repeats the last run command.\n", db_out);
 	return;
   case STOP:
 	fputs("stop [ <pos> ] [ if <cond> ]\n", db_out);
@@ -112,9 +137,9 @@ do_help(p)
 	fputs("  Assign the value of <exp> to <desig>.\n", db_out);
 	return;
   case PRINT:
-	fputs("print <exp> [ , <exp> ] ...\n", db_out);
-	fputs("p <exp> [ , <exp> ] ...\n", db_out);
-	fputs("  Print the value of each <exp>.\n", db_out);
+	fputs("print [ <exp> [ , <exp> ] ...]\n", db_out);
+	fputs("p [ <exp> [ , <exp> ] ...]\n", db_out);
+	fputs("  Print the value of each <exp>, or repeat the last print command\n", db_out);
 	return;
   case DISPLAY:
 	fputs("display <exp> [ , <exp> ] ...\n", db_out);
@@ -160,22 +185,32 @@ do_help(p)
 	fputs("  If no <num> is given, enable the current stopping point (not effective).\n", db_out);
 	return;
   }
+  else if (p && p->t_str) {
+	if (! strcmp(p->t_str, "!")) {
+		fputs("! <shell command>\n", db_out);
+		fputs("  Execute the given shell command.\n", db_out);
+		return;
+	}
+  }
   fputs("cont [ <cnt> ] [ at <line> ]\n", db_out);
   fputs("delete [ <num> [ , <num> ] ... ]\n", db_out);
   fputs("disable [ <num> [ , <num> ] ... ]\n", db_out);
   fputs("display <exp> [ , <exp> ] ...\n", db_out);
   fputs("dump\n", db_out);
   fputs("enable [ <num> [ , <num> ] ... ]\n", db_out);
-  fputs("file [ <name> ]\n", db_out);
+  fputs("file [ <name> | ? ]\n", db_out);
   fputs("find <name>\n", db_out);
+  fputs("frame [ [ + | - ] <num> ]\n", db_out);
   fputs("help [ <commandname> ]\n", db_out);
   fputs("list [ <start> | <func> ] [ , <cnt> | - [ <end> ] ]\n", db_out);
+  fputs("log [ <name> | off ]\n", db_out);
   fputs("next [ <cnt> ]\n", db_out);
-  fputs("print <exp> [ , <exp> ] ...\n", db_out);
-  fputs("rerun\n", db_out);
-  fputs("restore <num>\n", db_out);
+  fputs("print [ <exp> [ , <exp> ] ... ]\n", db_out);
+  fputs("rerun [ ? ]\n", db_out);
+  fputs("restore [ <num> ]\n", db_out);
   fputs("run [ <args> ] [ < <infile> ] [ > <outfile> ]\n", db_out);
   fputs("set <desig> to <exp>\n", db_out);
+  fputs("source <filename>\n", db_out);
   fputs("status\n", db_out);
   fputs("step [ <cnt> ]\n", db_out);
   fputs("stop [ <pos> ] [ if <cond> ]\n", db_out);
@@ -183,6 +218,7 @@ do_help(p)
   fputs("when [ <pos> ] [ if <cond> ] { <command> [ ; <command> ] ... } \n", db_out);
   fputs("where [ <cnt> ]\n", db_out);
   fputs("which <name>\n", db_out);
+  fputs("! <shell command>\n", db_out);
 }
 
 /* ------------------------------------------------------------- */
@@ -608,6 +644,30 @@ do_regs(p)
 
 /* implementation of the where command */
 
+static t_addr	where_PC;
+
+static int
+where_entry(num)
+  int	num;
+{
+  t_addr *buf;
+  t_addr AB;
+  p_scope sc;
+
+  if (! (buf = get_EM_regs(num))) return 0;
+  AB = buf[1];
+  where_PC = buf[2];
+  if (! AB) return 0;
+  sc = base_scope(get_scope_from_addr(where_PC));
+  if (! sc || sc->sc_start > where_PC) return 0;
+  fprintf(db_out, "%s(", sc->sc_definedby->sy_idf->id_text);
+  print_params(sc->sc_definedby->sy_type, AB, has_static_link(sc));
+  fputs(") ", db_out);
+  print_position(where_PC, 0);
+  fputs("\n", db_out);
+  return 1;
+}
+
 /*ARGSUSED*/
 do_where(p)
   p_tree	p;
@@ -636,20 +696,8 @@ do_where(p)
   }
   else if (p) maxcnt = p->t_ival;
   for (cnt = maxcnt; cnt != 0; cnt--) {
-	t_addr AB;
-
 	if (interrupted) return;
-	if (! (buf = get_EM_regs(i++))) break;
-	AB = buf[1];
-	PC = buf[2];
-	if (! AB) break;
-	sc = base_scope(get_scope_from_addr(PC));
-	if (! sc || sc->sc_start > PC) break;
-	fprintf(db_out, "%s(", sc->sc_definedby->sy_idf->id_text);
-	print_params(sc->sc_definedby->sy_type, AB, has_static_link(sc));
-	fputs(") ", db_out);
-	print_position(PC, 0);
-	fputs("\n", db_out);
+	if (! where_entry(i++)) return;
   }
 }
 
@@ -735,7 +783,7 @@ do_print(p)
 	break;
   default:
 	if (interrupted || ! eval_expr(p, &buf, &size, &tp)) return;
-	print_node(p, 0);
+	print_node(db_out, p, 0);
 	fputs(" = ", db_out);
 	if (p->t_oper == OP_FORMAT) {
 		format = p->t_args[1]->t_str;
@@ -774,3 +822,155 @@ do_set(p)
   free(buf);
 }
 
+/* ------------------------------------------------------------- */
+
+/* implementation of the source command */
+
+extern FILE	*db_in;
+
+do_source(p)
+  p_tree	p;
+{
+  FILE		*old_db_in = db_in;
+
+  p = p->t_args[0];
+  if ((db_in = fopen(p->t_str, "r")) == NULL) {
+	db_in = old_db_in;
+	error("could not open %s", p->t_str);
+	return;
+  }
+  Commands();
+  fclose(db_in);
+  db_in = old_db_in;
+}
+
+/* ------------------------------------------------------------- */
+
+do_prcomm(p)
+  p_tree	p;
+{
+  print_node(db_out, p->t_args[0], 1);
+}
+
+/* ------------------------------------------------------------- */
+
+/* stack frame commands: frame, down, up */
+
+extern int	stack_offset;
+
+static
+frame_pos(diff)
+  int	diff;
+{
+  if (stack_offset+diff < 0) diff = - stack_offset;
+  if (! where_entry(stack_offset+diff)) {
+	error("no frame %d", stack_offset+diff);
+	return;
+  }
+  stack_offset += diff;
+  list_position(get_position_from_addr(where_PC));
+  CurrentScope = get_scope_from_addr(where_PC);
+}
+
+do_frame(p)
+  p_tree	p;
+{
+  if (p->t_args[0]) {
+	frame_pos((int) p->t_args[0]->t_ival - stack_offset);
+  }
+  else frame_pos(0);
+}
+
+do_up(p)
+  p_tree	p;
+{
+  if (p->t_args[0]) {
+	frame_pos((int) p->t_args[0]->t_ival);
+  }
+  else frame_pos(1);
+}
+
+do_down(p)
+  p_tree	p;
+{
+  if (p->t_args[0]) {
+	frame_pos(-(int) p->t_args[0]->t_ival);
+  }
+  else frame_pos(-1);
+}
+
+/* ------------------------------------------------------------- */
+
+/* log command */
+
+static char	*logfile;
+static FILE	*logfd;
+
+do_log(p)
+  p_tree	p;
+{
+  p = p->t_args[0];
+  if (p) {
+	if (logfd && ! strcmp(p->t_str, "off")) {
+		fprintf(db_out, "stopped logging on %s\n", logfile);
+		fclose(logfd);
+		logfd = NULL;
+		return;
+	}
+	if (logfd) {
+		error("already logging on %s", logfile);
+		return;
+	}
+	logfile = p->t_str;
+	if ((logfd = fopen(logfile, "w")) == NULL) {
+		error("could not open %s", logfile);
+		return;
+	}
+	fprintf(db_out, "started logging on %s\n", logfile);
+  }
+  else if (logfd) {
+	fprintf(db_out, "the current logfile is %s\n", logfile);
+  }
+  else {
+	error("no current logfile");
+  }
+}
+
+extern int	item_count;
+extern int	in_wheninvoked;
+
+log(p)
+  p_tree	p;
+{
+  register p_tree	p1;
+
+  if (logfd && ! in_wheninvoked) {
+	switch(p->t_oper) {
+	case OP_SOURCE:
+	case OP_LOG:
+		break;
+	case OP_DELETE:
+	case OP_ENABLE:
+	case OP_DISABLE:
+		/* Change absolute item numbers into relative ones
+		   for safer replay
+		*/
+		p1 = p->t_args[0];
+		while (p1 && p1->t_oper == OP_LINK) {
+			register p_tree	p2 = p1->t_args[0];
+			if (p2->t_ival > 0) {
+				p2->t_ival = item_count - p2->t_ival;
+			}
+			p1 = p1->t_args[1];
+		}
+		if (p1 && p1->t_ival > 0) {
+			p1->t_ival = item_count - p1->t_ival;
+		}
+		/* Fall through */
+	default:
+		print_node(logfd, p, 1);
+		fflush(logfd);
+		break;
+	}
+  }
+}

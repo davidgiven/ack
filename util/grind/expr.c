@@ -1197,7 +1197,7 @@ eval_desig(p, paddr, psize, ptp)
 		}
 		break;
 	default:
-		print_node(p, 0);
+		print_node(db_out, p, 0);
 		fputs(" not a designator\n", db_out);
 		break;
 	}
@@ -1216,7 +1216,7 @@ eval_desig(p, paddr, psize, ptp)
 		}
 		break;
 	default:
-		print_node(p, 0);
+		print_node(db_out, p, 0);
 		fputs(" not a designator\n", db_out);
 		break;
 	}
@@ -1233,7 +1233,7 @@ eval_desig(p, paddr, psize, ptp)
 		*ptp = (*ptp)->ty_cross;
 		if (! *ptp) {
 			*ptp = void_type;
-			print_node(p, 0);
+			print_node(db_out, p, 0);
 			fputs(" designator has unknown type\n", db_out);
 			retval = 0;
 			*psize = 0;
