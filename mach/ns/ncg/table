@@ -58,8 +58,8 @@ PROCREG			/* processor register - used by LPRi & SPRi */
 
 REGISTERS
 
-r0,r1,r2,r7		: REG.
-r3,r4,r5,r6		: REG regvar .
+r0,r1,r2,r3		: REG.
+r7,r4,r5,r6		: REG regvar .
 f0,f1,f2,f3,f4,f5,f6,f7		: FREG.
 f01("f0")=f0+f1,
 f23("f2")=f2+f3,
