@@ -689,12 +689,12 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 			code53(DO_REMOVE,1);
 			codeint(vp->vi_int[0]);
 			codeint(vp->vi_int[1]);
-		} else if (vp->vi_int[1] >= 0) {
+		} else if (vp->vi_int[0] >= 0) {
 			code53(DO_REMOVE,0);
 			codeint(vp->vi_int[0]);
 		} else {
 			code8(DO_RREMOVE);
-			codeint(vp->vi_int[0]);
+			codeint(-vp->vi_int[0] - 1);
 		}
 		codenl();
 	}
