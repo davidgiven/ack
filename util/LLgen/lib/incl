@@ -6,7 +6,6 @@
 #endif
 
 extern int LLsymb;
-extern char LLsets[];
 
 #define LL_SAFE(x)	/* Nothing */
 #define LL_SSCANDONE(x)	if (LLsymb != x) LLerror(x); else
