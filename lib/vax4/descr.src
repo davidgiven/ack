@@ -23,7 +23,7 @@ name asopt
 	from .s
 	to .so
 	program /bin/sed
-	args -f {EM}/mach/vax4/cg/sedf
+	args -f {EM}/lib/{M}/sedf
 	optimizer
 	stdin
 	stdout
