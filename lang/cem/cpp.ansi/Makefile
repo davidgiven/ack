@@ -24,8 +24,8 @@ CEMPP = $(BIN)/ncpp
 TABGEN	= $(EMHOME)/bin/tabgen
 
 # What C compiler to use and how
-CC = fcc
-COPTIONS =
+CC = cc
+COPTIONS = -O
 LDFLAGS = -i
 
 # What parser generator to use and how
