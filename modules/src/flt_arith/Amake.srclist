@@ -1,0 +1,24 @@
+# Copyright 1994 Vrije Universiteit, The Netherlands.
+# For full copyright and restrictions on use see the file COPYRIGHT in the
+# top level of the Amoeba distribution.
+
+L_ACK_MODULES_FLT_ARITH = {
+	$PWD/b64_add.c,
+	$PWD/b64_sft.c,
+	$PWD/flt_add.c,
+	$PWD/flt_ar2flt.c,
+	$PWD/flt_chk.c,
+	$PWD/flt_cmp.c,
+	$PWD/flt_div.c,
+	$PWD/flt_flt2ar.c,
+	$PWD/flt_modf.c,
+	$PWD/flt_mul.c,
+	$PWD/flt_nrm.c,
+	$PWD/flt_str2fl.c,
+	$PWD/flt_umin.c,
+	$PWD/split.c,
+	$PWD/ucmp.c,
+
+	$PWD/flt_arith.h,
+	$PWD/misc.h,
+};

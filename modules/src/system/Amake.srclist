@@ -1,0 +1,25 @@
+# Copyright 1994 Vrije Universiteit, The Netherlands.
+# For full copyright and restrictions on use see the file COPYRIGHT in the
+# top level of the Amoeba distribution.
+
+L_ACK_MODULES_SYSTEM = {
+	$PWD/access.c,
+	$PWD/break.c,
+	$PWD/chmode.c,
+	$PWD/close.c,
+	$PWD/create.c,
+	$PWD/filesize.c,
+	$PWD/lock.c,
+	$PWD/modtime.c,
+	$PWD/open.c,
+	$PWD/read.c,
+	$PWD/remove.c,
+	$PWD/rename.c,
+	$PWD/seek.c,
+	$PWD/stop.c,
+	$PWD/system.c,
+	$PWD/time.c,
+	$PWD/unlock.c,
+	$PWD/write.c,
+	$PWD/system.h
+};

@@ -1,0 +1,17 @@
+# Copyright 1994 Vrije Universiteit, The Netherlands.
+# For full copyright and restrictions on use see the file COPYRIGHT in the
+# top level of the Amoeba distribution.
+
+L_ACK_MODULES_ALLOC = {
+	$PWD/Malloc.c,
+	$PWD/Salloc.c,
+	$PWD/Srealloc.c,
+	$PWD/Realloc.c,
+	$PWD/botch.c,
+	$PWD/clear.c,
+	$PWD/st_alloc.c,
+	$PWD/std_alloc.c,
+	$PWD/No_Mem.c,
+	$PWD/alloc.h
+};
+
