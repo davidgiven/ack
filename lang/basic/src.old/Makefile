@@ -5,11 +5,15 @@ h=$d/h
 l=$d/lib
 INSTALL=$l/em_bem
 
-CFLAGS = -c -I$h
+CFLAGS = -I$h
 
 FILES= bem.o y.tab.o symbols.o initialize.o compile.o \
 	parsepar.o yywrap.o gencode.o util.o graph.o \
 	eval.o func.o split.o
+
+CFILES= bem.c y.tab.c symbols.c initialize.c compile.c \
+	parsepar.c yywrap.c gencode.c util.c graph.c \
+	eval.c func.c split.c
 
 SRC=    bem.h symbols.h graph.h y.tab.h \
 	bem.c basic.yacc symbols.c initialize.c compile.c \
@@ -33,12 +37,15 @@ pr:
 		@pr $(SRC)
 
 bem:		$(FILES)
-		cc -o bem $(FILES)
+		$(CC) -o bem $(FILES)
 
-y.tab.o : 	y.tab.c lex.c
-		cc $(CFLAGS) y.tab.c
+y.tab.o : 	y.tab.c basic.lex
+		$(CC) $(CFLAGS) -c y.tab.c
 
 y.tab.h y.tab.c : basic.yacc 
 		yacc -d basic.yacc
 
 $(FILES)	: bem.h symbols.h graph.h y.tab.h
+
+lint:		$(CFILES)
+		lint -phac -I$h $(CFILES)
