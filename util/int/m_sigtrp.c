@@ -28,8 +28,8 @@
 #endif
 PRIVATE int sig_map[NSIG+1];		/* maps signals onto trap numbers */
 
-PRIVATE int HndlIntSig();		/* handle signal to interpreter */
-PRIVATE int HndlEmSig();		/* handle signal to user program */
+PRIVATE void HndlIntSig();		/* handle signal to interpreter */
+PRIVATE void HndlEmSig();		/* handle signal to user program */
 
 init_signals() {
 	int sn;
@@ -110,7 +110,7 @@ trap_signal()
 
 /* The handling functions for the UNIX signals */
 
-PRIVATE HndlIntSig(sn)
+PRIVATE void HndlIntSig(sn)
 	int sn;
 {
 	/* The interpreter got the signal */
@@ -121,7 +121,7 @@ PRIVATE HndlIntSig(sn)
 	close_down(1);
 }
 
-PRIVATE HndlEmSig(sn)
+PRIVATE void HndlEmSig(sn)
 	int sn;
 {
 	/* The EM machine got the signal */
