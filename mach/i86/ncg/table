@@ -1324,19 +1324,9 @@ pat dee
 kills indirects
 gen dec {EXTERN2, $1}
 
-#ifdef REGVARS
-pat zrl inreg($1)==reg_any
-  kills regvar($1)
-  gen move {ANYCON, 0}, {LOCAL,$1,2}
-#endif
+pat zrl				yields {ANYCON, 0}	leaving stl $1
 
-pat zrl 
-kills indexed,locals %ind+%size > $1 && %ind < $1+2
-gen move {ANYCON, 0}, {LOCAL,$1,2}
-
-pat zre
-kills indirects
-gen move {ANYCON, 0},  {EXTERN2, $1}
+pat zre				yields {ANYCON, 0}	leaving ste $1
 
 pat zrf			leaving zer $1
 
@@ -1357,7 +1347,7 @@ gen move {ANYCON, $1/2}, cx
 
 pat zer !defined($1)
 with CXREG STACK
-gen move {ANYCON, $1/2}, bx
+gen move {ANYCON, 0}, bx
     sar cx,{ANYCON, 1}
     1:
     push bx
