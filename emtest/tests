@@ -1871,6 +1871,16 @@ OK
 TEST 084: test bls WS
 HOL 40
 MAIN 32
+ loc 20
+ stl -8
+ lal -8
+ lae 20
+ loc WS
+ bls WS
+ loe 20
+ loc 20
+ bne *1
+OK
  loc 55
  stl -8+WS
  loc 56
