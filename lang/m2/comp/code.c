@@ -34,6 +34,7 @@
 extern char	*long2str();
 extern char	*symbol2str();
 extern int	proclevel;
+extern char	options[];
 int		fp_used;
 
 CodeConst(cst, size)
@@ -263,21 +264,21 @@ CodeCoercion(t1, t2)
 			C_cfi();
 			break;
 		case T_CARDINAL:
-		{
-			label lb = ++text_label;
+			if (! options['R']) {
+				label lb = ++text_label;
 
-			C_dup(t1->tp_size);
-			C_zrf(t1->tp_size);
-			C_cmf(t1->tp_size);
-			C_zge(lb);
-			C_loc((arith) ECONV);
-			C_trp();
-			C_df_ilb(lb);
+				C_dup(t1->tp_size);
+				C_zrf(t1->tp_size);
+				C_cmf(t1->tp_size);
+				C_zge(lb);
+				C_loc((arith) ECONV);
+				C_trp();
+				C_df_ilb(lb);
+			}
 			C_loc(t1->tp_size);
 			C_loc(t2->tp_size);
 			C_cfu();
 			break;
-		}
 		default:
 			crash("Funny REAL conversion");
 		}
@@ -582,6 +583,8 @@ RangeCheck(tpl, tpr)
 	*/
 
 	arith llo, lhi, rlo, rhi;
+
+	if (options['R']) return;
 
 	if (bounded(tpl)) {
 		/* in this case we might need a range check */

@@ -1330,5 +1330,5 @@ int (*DesigChkTable[])() = {
 	done_before,
 	NodeCrash,
 	ChkLinkOrName,
-	done_before
+	NodeCrash
 };

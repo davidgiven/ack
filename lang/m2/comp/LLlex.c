@@ -42,6 +42,7 @@ extern int	cntlines;
 #endif
 
 static int	eofseen;
+extern char	options[];
 
 STATIC
 SkipComment()
@@ -64,6 +65,21 @@ SkipComment()
 			   initialization routine.
 			*/
 			ForeignFlag = D_FOREIGN;
+			break;
+		case 'R':
+			/* Range checks, on or off */
+			LoadChar(ch);
+			if (ch == '-') {
+				options['R'] = 1;
+				break;
+			}
+			if (ch == '+') {
+				options['R'] = 0;
+				break;
+			}
+			/* fall through */
+		default:
+			PushBack();
 			break;
 		}
 	}

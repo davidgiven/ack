@@ -39,6 +39,7 @@ int		nDEF, mDEF;
 int		pass_1;
 struct def 	*Defined;
 extern int 	err_occurred;
+extern int 	Roption;
 extern int	fp_used;		/* set if floating point used */
 struct node	*EmptyStatement;
 
@@ -89,6 +90,7 @@ Compile(src, dst)
 	AddStandards();
 	EmptyStatement = dot2leaf(Stat);
 	EmptyStatement->nd_symb = ';';
+	Roption = options['R'];
 #ifdef DEBUG
 	if (options['l']) {
 		LexScan();

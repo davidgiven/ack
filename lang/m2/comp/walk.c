@@ -417,7 +417,7 @@ WalkStat(nd, exit_label)
 
 	assert(nd->nd_class == Stat);
 
-	if (! options['L']) C_lin((arith) nd->nd_lineno);
+	if (! options['L'] && nd->nd_lineno) C_lin((arith) nd->nd_lineno);
 	switch(nd->nd_symb) {
 	case ';':
 		break;
@@ -630,6 +630,16 @@ WalkStat(nd, exit_label)
 
 extern int	NodeCrash();
 
+STATIC
+WalkOption(nd)
+	struct node *nd;
+{
+	/* Toggle option indicated by node "nd"
+	*/
+
+	options[nd->nd_symb] = ! options[nd->nd_symb];
+}
+
 int (*WalkTable[])() = {
 	NodeCrash,
 	NodeCrash,
@@ -643,7 +653,7 @@ int (*WalkTable[])() = {
 	NodeCrash,
 	WalkStat,
 	WalkLink,
-	NodeCrash
+	WalkOption
 };
 
 ExpectBool(nd, true_label, false_label)
