@@ -1286,6 +1286,7 @@ BEGIN
 	margin := initmargin;
 	lnpending := FALSE;
 	symbol := othersym;
+	inheader := FALSE;
 END Initialize;
 
 BEGIN
