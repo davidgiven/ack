@@ -17,11 +17,14 @@
 #include "../share/init_glob.h"
 #include "../share/locals.h"
 #include "../share/go.h"
-#include "../../../h/em_pseu.h"
 #include "../../../h/em_spec.h"
 #include "ud_defs.h"
 #include "ud_const.h"
 #include "ud_copy.h"
+
+/* core allocation macros */
+#define newudbx()	(bext_p) newstruct(bext_ud)
+#define oldudbx(x)	oldstruct(bext_ud,x)
 
 short nrglobals;
 short nrvars;
