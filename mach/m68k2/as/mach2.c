@@ -42,6 +42,24 @@
 %token <y_word> OP_EXT
 %token <y_word> RTD
 %token <y_word> MODEL
+%token <y_word> FPCR
+%token <y_word> FPREG
+%token <y_word> FMOVE
+%token <y_word> FMOVECR
+%token <y_word> FMOVEM
+%token <y_word> FDYADIC
+%token <y_word> FMONADIC
+%token <y_word> FSINCOS
+%token <y_word> FBCC
+%token <y_word> FDBCC
+%token <y_word> FNOP
+%token <y_word> FSCC
+%token <y_word> FTST
+%token <y_word> FSAVRES
+%token <y_word> FTRAPCC
+%token <y_word> FSIZE
+%token <y_word> CP
 
 %type <y_word> bcdx op_ea regs rrange 
 %type <y_word> reg sizedef sizenon creg
+%type <y_word> fsize fregs fcregs frlist frrange

@@ -286,19 +286,27 @@ move_special(sz)
 	badoperand();
 }
 
+int
+reverse(regs, max)
+	register int regs;
+{
+	register int r, i;
+
+	r = regs; regs = 0;
+	for (i = max; i > 0; i--) {
+		regs <<= 1;
+		if (r & 1) regs++;
+		r >>= 1;
+	}
+	return regs;
+}
+
 movem(dr, sz, regs)
 {
 	register i;
-	register r;
 
 	if ((mrg_2>>3) == 04) {
-		r = regs; regs = 0;
-		for (i = 0; i < 16; i++) {
-			regs <<= 1;
-			if (r & 1)
-				regs++;
-			r >>= 1;
-		}
+		regs = reverse(regs, 16);
 	}
 	checksize(sz, 2|4);
 	if ((mrg_2>>3)-3 == dr)
@@ -453,4 +461,44 @@ ea73(ri, sz)
 Xnofit()
 {
 	if (pass == PASS_3) serror("too big");
+}
+
+fbranch(opc, exp)
+expr_t exp;
+{
+	register sm;
+
+	exp.val -= (DOTVAL + 2);
+	if ((pass == PASS_2) 
+	    &&
+	    (exp.val > 0)
+	    &&
+	    ((exp.typ & S_DOT) == 0)
+	   )
+		exp.val -= DOTGAIN;
+	sm = fitw(exp.val);
+	if ((exp.typ & ~S_DOT) != DOTTYP)
+		sm = 0;
+	if (small(sm,2)) {
+		emit2(0170200|co_id|opc);
+		emit2(loww(exp.val));
+		return;
+	}
+	emit2(0170300|co_id|opc); /* 4 byte offset */
+#ifdef RELOCATION
+	newrelo(exp.typ, RELPC|RELO4|RELBR|RELWR);
+#endif
+	emit4(exp.val);
+}
+
+ch_sz_dreg(size, mode)
+{
+	if (mode == 0 &&
+	    (size == FSIZE_X || size == FSIZE_P || size == FSIZE_D))
+		serror("illegal size for data register");
+}
+
+check_fsize(sz, size)
+{
+	if (sz != size) serror("bad size");
 }

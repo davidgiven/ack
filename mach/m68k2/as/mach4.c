@@ -113,6 +113,7 @@ operation
 			}
 	|	MODEL
 			{	model = $1;}
+	|	fp_op
 	;
 bcdx	:	ABCD
 	|	ADDX sizedef
@@ -197,4 +198,223 @@ ea_ea	:	ea ','
 				RELOMOVE(rel_1, rel_2);
 			}
 		ea
+	;
+fp_op	:	CP
+			{	co_id = $1; }
+		fp_op1
+	|		{	co_id = DEF_FP; }
+		fp_op1
+	;
+fp_op1	:	FMOVE fsize ea ',' FPCR
+			{	check_fsize($2, FSIZE_L);
+				if ((mrg_2&070) == 010 && $5 != 001)
+					badoperand();
+				emit2((0170000|co_id|mrg_2));
+				emit2((0100000|($5<<10)));
+				ea_2(SIZE_L, 0);
+			}
+	|	FMOVE fsize FPCR ',' ea
+			{	check_fsize($2, FSIZE_L);
+				if ((mrg_2&070) == 010 && $3 == 001)
+					badoperand();
+				emit2((0170000|co_id|mrg_2));
+				emit2((0120000|($3<<10)));
+				ea_2(SIZE_L, ALT);
+			}
+	|	FMOVE fsize FPREG ',' FPREG
+			{	emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7));
+			}
+	|	FMOVE fsize ea ',' FPREG
+			{	ch_sz_dreg($2, mrg_2&070);
+				emit2((0170000|co_id|mrg_2));
+				emit2((0040000|($2<<10)|($5<<7)));
+				ea_2(SIZE_L, DTA);
+			}
+	|	FMOVE fsize FPREG ',' ea
+			{	ch_sz_dreg($2, mrg_2&070);
+				if ($2 == FSIZE_P)
+					serror("packed decimal needs k-factor");
+				emit2((0170000|co_id|mrg_2));
+				emit2((0060000|($2<<10)|($3<<7)));
+				ea_2(SIZE_L, DTA|ALT);
+			}
+	|	FMOVE fsize FPREG ',' ea '{' '#' absexp '}'
+			{	check_fsize($2, FSIZE_P);
+				fit(sfit7($8));
+				emit2((0170000|co_id|mrg_2));
+				emit2((0066000|($3<<7)|low7($8)));
+				ea_2(SIZE_L, MEM|DTA|ALT);
+			}
+	|	FMOVE fsize FPREG ',' ea '{' DREG '}'
+			{	check_fsize($2, FSIZE_P);
+				emit2((0170000|co_id|mrg_2));
+				emit2((0076000|($3<<7)|($7<<4)));
+				ea_2(SIZE_L, MEM|DTA|ALT);
+			}
+	|	FMOVECR fsize '#' absexp ',' FPREG
+			{	fit(fit7($4));
+				check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(056000|($6<<7)|low7($4));
+			} 
+	|	FMOVEM FSIZE fregs ',' notimmreg
+			{	check_fsize($2, FSIZE_X);
+				if ((mrg_2&070) == 030)
+					serror("bad addressing category");
+				emit2((0170000|co_id|mrg_2));
+				emit2(0160000 |
+					(((mrg_2&070)==040 || ($3&04000)) ?
+						$3 :
+						(010000|reverse($3,8))));
+				ea_2(SIZE_L, MEM|ALT);
+			}
+	|	FMOVEM FSIZE notimmreg ',' fregs
+			{	check_fsize($2, FSIZE_X);
+				if ((mrg_2&070) == 040)
+					serror("bad addressing category");
+				emit2((0170000|co_id|mrg_2));
+				emit2((0150000|(($5&04000)?$5:reverse($5,8))));
+				ea_2(SIZE_L, MEM);
+			}
+	|	FMOVEM SIZE fcregs ',' ea
+			{	checksize($2, 4);
+				if ((mrg_2&070) == 1 && $3!= 02000)
+					serror("bad addressing category");
+				if ((mrg_2 & 070) == 0 &&
+				    $3 != 02000 && $3 != 04000 && $3 != 010000)
+					serror("bad addressing category");
+				emit2((0170000|co_id|mrg_2));
+				emit2((0120000|$3));
+				ea_2(SIZE_L, ALT);
+			}
+	|	FMOVEM SIZE ea ',' fcregs
+			{	checksize($2, 4);
+				if ((mrg_2&070) == 1 && $5!= 02000)
+					serror("bad addressing category");
+				if ((mrg_2 & 070) == 0 &&
+				    $5 != 02000 && $5 != 04000 && $5 != 010000)
+					serror("bad addressing category");
+				emit2((0170000|co_id|mrg_2));
+				emit2((0100000|$5));
+				ea_2(SIZE_L, 0);
+			}
+	|	FDYADIC fsize ea ',' FPREG
+			{	emit2((0170000|co_id|mrg_2));
+				emit2((0040000|($2<<10)|($5<<7)|$1));
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FDYADIC fsize FPREG ',' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7)|$1);
+			}
+	|	FMONADIC fsize ea ',' FPREG
+			{	emit2((0170000|co_id|mrg_2));
+				emit2((0040000|($2<<10)|($5<<7)|$1));
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FMONADIC fsize FPREG ',' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($5<<7)|$1);
+			}
+	|	FMONADIC fsize FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($3<<7)|$1);
+			}
+	|	FSINCOS fsize ea ',' FPREG ':' FPREG
+			{	emit2(0170000|co_id|mrg_2);
+				emit2(0040000|($2<<10)|($7<<7)|$1|$5);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FSINCOS fsize FPREG ',' FPREG ':' FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|($7<<7)|$1|$5);
+			}
+	|	FBCC expr
+			{	fbranch($1, $2);}
+	|	FDBCC DREG ',' expr
+			{	emit2(0170110|co_id|$2);
+				emit2($1);
+				$4.val -= DOTVAL;
+				fit(fitw($4.val));
+#ifdef RELOCATION
+				newrelo($4.typ, RELPC|RELO2|RELBR|RELWR);
+#endif
+				emit2(loww($4.val));
+			}
+	|	FNOP
+			{	emit2(0170200|co_id);
+				emit2(0);
+			}
+	|	FSCC ea
+			{	emit2(0170100|co_id|mrg_2);
+				emit2($1);
+				ea_2(SIZE_B, DTA|ALT);
+			}
+	|	FTST fsize ea
+			{	emit2((0170000|co_id|mrg_2));
+				emit2((0040072|($2<<10)));
+				ch_sz_dreg($2, mrg_2&070);
+				ea_2(SIZE_L, DTA);
+			}
+	|	FTST fsize FPREG
+			{	check_fsize($2, FSIZE_X);
+				emit2(0170000|co_id);
+				emit2(($3<<10)|072);
+			}
+	|	FSAVRES ea
+			{	if ((mrg_2&070) == ($1&070))
+					badoperand();
+				emit2((0170000|co_id|($1&0700)|mrg_2));
+				ea_2(0, $1&07);
+			}
+	|	FTRAPCC
+			{	emit2(0170174|co_id);
+				emit2($1);
+			}
+	|	FTRAPCC SIZE imm
+			{	checksize($2, 2|4);
+				emit2((0170170|co_id|($2==SIZE_L?03:02)));
+				emit2($1);
+				ea_2($2,0);
+			}
+	;
+fregs	:	DREG
+			{	$$ = 04000 | $1 << 4; }
+	|	frlist
+	;
+frlist	:	frrange
+	|	frlist '/' frrange
+			{	$$ = $1 | $3;}
+	;
+frrange	:	FPREG
+			{	$$ = 1 << $1; }
+	|	FPREG '-' FPREG
+			{	if ($1 > $3)
+					badoperand();
+				for ($$ = 0; $1 <= $3; $1++)
+					$$ |= (1 << $1);
+			}
+	;
+fcregs	:	FPCR
+			{	$$ = $1 << 10; }
+	|	fcregs '/' FPCR
+			{	$$ = $1 | ($3 << 10); }
+	;
+fsize	:	/*	empty */
+			{	$$ = FSIZE_X; }
+	|	SIZE
+			{	if ($1 == SIZE_L)
+					$$ = FSIZE_L;
+				else if ($1 == SIZE_W)
+					$$ = FSIZE_W;
+				else	$$ = FSIZE_B;
+			}
+	|	FSIZE
 	;
