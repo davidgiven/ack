@@ -1027,7 +1027,12 @@ C_adf_narg	==>
 			if (n == EM_WSIZE)
 			{
 				f1= pop_float();
-				inc_tos_reg(f1);
+				f2= pop_float();
+				f3= alloc_float();
+				"fadds	$f2, $f1, $f3";
+				free_reg(f1);
+				free_reg(f2);
+				push_reg(f3);
 			}
 			else if (n == EM_DSIZE)
 			{
