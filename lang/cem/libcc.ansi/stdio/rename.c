@@ -1,7 +1,7 @@
 /*
  * rename.c - rename a file
  */
-/* $Header$ */
+/* $Id$ */
 
 #if !defined(_POSIX_SOURCE)
 #include	<stdio.h>

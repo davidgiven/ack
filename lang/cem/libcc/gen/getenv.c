@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *getenv(name)
 register char *name;
 {

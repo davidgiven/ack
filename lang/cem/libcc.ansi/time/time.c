@@ -1,7 +1,7 @@
 /*
  * time - return the current calendar time (seconds since jan 1, 1970)
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	defined(__BSD4_2)
 #include	<time.h>

@@ -9,7 +9,7 @@
 
 /* stripped down version of the one in the Modula-2 compiler */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Token structure. Keep it small, as it is part of a parse-tree node
 */

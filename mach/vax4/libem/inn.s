@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.inn
 
-        ! $Header$
+        ! $Id$
 
 	! bytes in r0
 .inn:

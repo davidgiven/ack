@@ -1,7 +1,7 @@
 /*
  * ftell.c - obtain the value of the file-position indicator of a stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

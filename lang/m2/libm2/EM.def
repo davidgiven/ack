@@ -3,7 +3,7 @@ DEFINITION MODULE EM;
 (*
   Module:	Interface to some EM instructions and data
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
 	FROM SYSTEM IMPORT ADDRESS;

@@ -7,7 +7,7 @@
 
 /* L O O K U P   R O U T I N E S */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 

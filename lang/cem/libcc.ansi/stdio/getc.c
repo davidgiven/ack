@@ -1,7 +1,7 @@
 /*
  * getc.c - read an unsigned character
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

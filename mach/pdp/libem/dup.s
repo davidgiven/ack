@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define dup~
-! $Header$
+! $Id$
 
 dup~:
 	mov	(sp)+,r3

@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define unknown~
-! $Header$
+! $Id$
 .extern fat~
 
 EILLSIZ	= 023

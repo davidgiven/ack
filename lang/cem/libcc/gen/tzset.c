@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #ifdef __BSD4_2
 struct timeval {
 	long tv_sec, tv_usec;

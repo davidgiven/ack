@@ -3,7 +3,7 @@ IMPLEMENTATION MODULE Processes [1];
 (*
   Module:       Processes
   From:         "Programming in Modula-2", 3rd, corrected edition, by N. Wirth
-  Version:      $Header$
+  Version:      $Id$
 *)
 
   FROM	SYSTEM IMPORT	ADDRESS, TSIZE, NEWPROCESS, TRANSFER;

@@ -2,7 +2,7 @@ DEFINITION MODULE Arguments;
 (*
   Module:	Access to program arguments and environment
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
 VAR	Argc: CARDINAL;	(* Number of program arguments, including the program

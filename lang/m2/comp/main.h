@@ -7,7 +7,7 @@
 
 /* S O M E   G L O B A L   V A R I A B L E S */
 
-/* $Header$ */
+/* $Id$ */
 
 extern char options[];	/* indicating which options were given */
 

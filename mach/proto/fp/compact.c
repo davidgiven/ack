@@ -3,7 +3,7 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*
 	COMPACT EXTEND FORMAT INTO FLOAT OF PROPER SIZE

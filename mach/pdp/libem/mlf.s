@@ -2,7 +2,7 @@
 .sect .text
 .define mlf~
 .extern setfloat~
-! $Header$
+! $Id$
 
 mlf~:
 	mov	(sp)+,r1

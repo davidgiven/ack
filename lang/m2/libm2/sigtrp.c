@@ -7,7 +7,7 @@
   Module:	Mapping of Unix signals to EM traps
 		(only when not using the MON instruction)
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 #if !defined(__em22) && !defined(__em24) && !defined(__em44)

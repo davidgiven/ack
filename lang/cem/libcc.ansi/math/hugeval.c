@@ -4,7 +4,7 @@
  *
  * Author: Hans van Eck
  */
-/* $Header$ */
+/* $Id$ */
 #include	<math.h>
 
 double

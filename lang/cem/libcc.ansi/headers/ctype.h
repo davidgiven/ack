@@ -1,7 +1,7 @@
 /*
  * ctype.h - character handling
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_CTYPE_H)
 #define	_CTYPE_H

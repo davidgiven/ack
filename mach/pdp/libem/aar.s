@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define aar~
-! $Header$
+! $Id$
 
 !r0 : descriptor address
 !r1 : element number

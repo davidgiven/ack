@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Traps;
 (*
   Module:       Facility for handling traps
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 *)
 
   FROM	EM IMPORT	SIG, LINO, FILN, TRP;

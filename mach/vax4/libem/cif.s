@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define  .cif
 
-        ! $Header$
+        ! $Id$
 
 
 .cif:

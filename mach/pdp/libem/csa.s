@@ -2,7 +2,7 @@
 .sect .text
 .define csa~
 .extern fat~
-! $Header$
+! $Id$
 
 ECASE	= 024
 

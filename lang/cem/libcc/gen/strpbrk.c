@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *
 strpbrk(string, brk)
 	register char *string, *brk;

@@ -9,7 +9,7 @@
 
 /* stripped version from the one in the Modula-2 compiler */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"f_info.h"
 #include	"idf.h"

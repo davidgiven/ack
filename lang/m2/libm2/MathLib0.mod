@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE MathLib0;
 (*
   Module:	Some mathematical functions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   IMPORT	Mathlib;

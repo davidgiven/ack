@@ -1,6 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define exg~
-! $Header$
+! $Id$
 
 exg~:	jsr pc,save~
 	mov sp,r4

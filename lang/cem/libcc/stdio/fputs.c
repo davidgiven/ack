@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <stdio.h>
 
 fputs(s,file)

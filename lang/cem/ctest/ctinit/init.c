@@ -6,7 +6,7 @@
 
 /* Author: E.G. Keizer */
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 /* Test initialisation of a V7 C-compiler */
 /* 1 sept 1980 */

@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define  .sar4
 
-        ! $Header$
+        ! $Id$
 
 .sar4:
 	movl    (sp)+,r2

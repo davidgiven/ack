@@ -3,7 +3,7 @@ DEFINITION MODULE ASCII;
 (*
   Module:	Mnemonics for ASCII control characters
   From:		???
-  Version:	$Header$
+  Version:	$Id$
 *)
 
 CONST

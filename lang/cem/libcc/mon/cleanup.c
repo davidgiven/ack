@@ -1,2 +1,2 @@
-/* $Header$ */
+/* $Id$ */
 _cleanup(){}

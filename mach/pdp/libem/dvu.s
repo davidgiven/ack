@@ -2,7 +2,7 @@
 .sect .text
 .define dvu~
 .extern unknown~,dvu4~,dvu2~
-! $Header$
+! $Id$
 
 dvu~:
 	mov	(sp)+,r3

@@ -4,7 +4,7 @@
 .define  ERANGE,ESET,EHEAP,EILLINS,ECASE
 .define  hol0,trppc~,trpim~,reghp~,.limhp
 .define EXIT,WRITE,BRK
-! $Header$
+! $Id$
 
 #define float 1
 #define hardfp 1

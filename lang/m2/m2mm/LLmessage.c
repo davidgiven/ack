@@ -9,7 +9,7 @@
 
 /* stripped down version from the one in the Modula-2 compiler */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Defines the LLmessage routine. LLgen-generated parsers require the
 	existence of a routine of that name.

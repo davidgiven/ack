@@ -2,7 +2,7 @@ DEFINITION MODULE ArraySort;
 (* 
   Module:	Array sorting module
   Author:	Ceriel J.H. Jacobs
-  Date:		$Header$
+  Date:		$Id$
 
   Interface is like the qsort() interface in C, so that an array of values
   can be sorted. This does not mean that it has to be an ARRAY, but it does

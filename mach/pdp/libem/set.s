@@ -2,7 +2,7 @@
 .sect .text
 .define set~
 .extern save~,retu~,trp~
-! $Header$
+! $Id$
 
 ESET	= 2
 

@@ -1,7 +1,7 @@
 /*
  * sleep - suspend current process for a number of seconds
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<signal.h>
 #include	<setjmp.h>

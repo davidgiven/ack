@@ -2,7 +2,7 @@
 .sect .text
 .define ngi~
 .extern unknown~
-! $Header$
+! $Id$
 
 ngi~:
 	mov	(sp)+,r1

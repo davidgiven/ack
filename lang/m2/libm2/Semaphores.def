@@ -2,7 +2,7 @@ DEFINITION MODULE Semaphores;
 (*
   Module:	Processes with semaphores
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 
   On systems using quasi-concurrency, the only opportunities for process-
   switches are calls to Down and Up.

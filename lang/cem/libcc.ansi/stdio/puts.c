@@ -1,7 +1,7 @@
 /*
  * puts.c - print a string onto the standard output stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -5,7 +5,7 @@
  */
 
 #ifndef NORCSID
-static char rcs_m[]= "$Header$" ;
+static char rcs_m[]= "$Id$" ;
 static char rcs_mh[]= ID_MH ;
 #endif
 

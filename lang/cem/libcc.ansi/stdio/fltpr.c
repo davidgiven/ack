@@ -1,7 +1,7 @@
 /*
  * fltpr.c - print floating point numbers
  */
-/* $Header$ */
+/* $Id$ */
 
 #ifndef	NOFLOAT
 #include	<string.h>

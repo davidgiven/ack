@@ -6,7 +6,7 @@
 /*
   Module:	block moves
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 #if _EM_WSIZE==_EM_PSIZE

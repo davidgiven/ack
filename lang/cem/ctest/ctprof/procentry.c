@@ -4,7 +4,7 @@
  *
  */
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 static int level = 0 ;
 int procentry(name) char *name ; {

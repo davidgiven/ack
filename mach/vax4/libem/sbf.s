@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.sbf
 
-        ! $Header$
+        ! $Id$
 
 
 .sbf:

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_GRP_H)
 #define	_GRP_H

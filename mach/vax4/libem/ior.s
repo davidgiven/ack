@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.ior
 
-        ! $Header$
+        ! $Id$
 
 	! bytes in r0
 .ior:

@@ -1,4 +1,4 @@
---------- $Header$ --------
+--------- $Id$ --------
 The file "table" is too large. The "cgg" program cannot generate
 "tables.h" and "tables.c" on a PDP 11/44.
 Therefore the distribution includes two files "tables1.c" and "tables1.h",

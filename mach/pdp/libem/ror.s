@@ -2,7 +2,7 @@
 .sect .text
 .define ror~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 ror~:
 	asr	r0

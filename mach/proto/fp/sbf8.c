@@ -3,7 +3,7 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*
 	SUBTRACT TWO FLOATS - DOUBLE Precision (SBF 8)

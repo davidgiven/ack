@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 #define ex_ap(x)	fprintf(codefile,".extern\t%s\n",x)
 #define in_ap(x)	/* nothing */
 

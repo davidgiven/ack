@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *
 memccpy(dst, src, c, n)
 	register char *dst, *src;

@@ -2,7 +2,7 @@
 .sect .text
 .define prf~
 .extern save~,retu~,hol0,printf~
-! $Header$
+! $Id$
 
 prf~:
 	jsr	pc,save~

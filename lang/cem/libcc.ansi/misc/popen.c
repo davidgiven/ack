@@ -1,7 +1,7 @@
 /*
  * popen - open a pipe
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<errno.h>
 #include	<stdio.h>

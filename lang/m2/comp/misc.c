@@ -7,7 +7,7 @@
 
 /* M I S C E L L A N E O U S    R O U T I N E S */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	<alloc.h>
 #include	<em_arith.h>

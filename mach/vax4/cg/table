@@ -1,4 +1,4 @@
-"$Header$"
+"$Id$"
 #define LOCLABS		/* define if target assembler recognizes local labels */
 #define REGVARS		/* define for register variables */
 #define DORCK		/* define if you want RCK */

@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define cmi4~
-! $Header$
+! $Id$
 
 cmi4~:
 	mov	(sp)+,r1

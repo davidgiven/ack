@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define xor~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 xor~:
 	jsr	pc,save~

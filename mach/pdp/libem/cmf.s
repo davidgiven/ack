@@ -2,7 +2,7 @@
 .sect .text
 .define cmf~
 .extern setfloat~
-! $Header$
+! $Id$
 
 cmf~:
 	jsr	pc,setfloat~

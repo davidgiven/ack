@@ -1,7 +1,7 @@
 /*
  * fillbuf.c - fill a buffer
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

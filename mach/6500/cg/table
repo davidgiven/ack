@@ -1,4 +1,4 @@
-"$Header$"
+"$Id$"
 #define em_bsize	2	/* must be equal to EM_BSIZE */
 #define	ND	!defined($1)
 #define	D	defined($1)

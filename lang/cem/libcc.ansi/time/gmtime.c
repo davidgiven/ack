@@ -1,7 +1,7 @@
 /*
  * gmtime - convert the calendar time into broken down time
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 #include	<limits.h>

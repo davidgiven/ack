@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *strrchr(s, c)
 register char *s, c;
 {

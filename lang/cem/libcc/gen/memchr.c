@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *
 memchr(s, c, n)
 char *s;

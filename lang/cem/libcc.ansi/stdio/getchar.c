@@ -1,7 +1,7 @@
 /*
  * getchar.c - read a character from the standard input stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

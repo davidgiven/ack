@@ -4,7 +4,7 @@
  *
  */
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 /* This program can be used to test C-compilers */
 

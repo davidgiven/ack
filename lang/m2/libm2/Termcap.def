@@ -6,7 +6,7 @@
 (* 
   Module:       Interface to termcap database
   From:         Unix manual chapter 3 
-  Version:      $Header$ 
+  Version:      $Id$ 
 *)
 
 (*

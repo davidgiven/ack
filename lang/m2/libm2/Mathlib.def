@@ -2,7 +2,7 @@ DEFINITION MODULE Mathlib;
 (*
   Module:	Mathematical functions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   (* Some mathematical constants: *)

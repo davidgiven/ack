@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 int
 strncmp(s, t, n)
 	register char *s, *t;

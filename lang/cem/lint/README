@@ -1,7 +1,7 @@
 # (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
 # See the copyright notice in the ACK home directory, in the file "Copyright".
 #
-# $Header$
+# $Id$
 
 This directory contains part of the sources of the program lint, which is
 based on the cem compiler of ACK, and some more programs which will be

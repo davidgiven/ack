@@ -1,7 +1,7 @@
 /* 
  * putw - write an word on a stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

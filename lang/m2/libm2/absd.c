@@ -6,7 +6,7 @@
 /*
   Module:	double abs function
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 #ifndef NOFLOAT
 double

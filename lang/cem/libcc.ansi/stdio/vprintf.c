@@ -1,7 +1,7 @@
 /*
  * vprintf - formatted output without ellipsis to the standard output stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

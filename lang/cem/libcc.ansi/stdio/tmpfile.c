@@ -1,7 +1,7 @@
 /*
  * tmpfile.c - create and open a temporary file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<string.h>

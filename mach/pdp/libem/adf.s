@@ -2,7 +2,7 @@
 .sect .text
 .define adf~
 .extern setfloat~
-! $Header$
+! $Id$
 
 !size in r0
 adf~:

@@ -1,7 +1,7 @@
 /*
  * fdopen - convert a (UNIX) file descriptor into a FILE pointer
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

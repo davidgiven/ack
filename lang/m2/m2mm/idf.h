@@ -7,7 +7,7 @@
 
 /* U S E R   D E C L A R E D   P A R T   O F   I D F */
 
-/* $Header$ */
+/* $Id$ */
 
 #include "file_list.h"
 

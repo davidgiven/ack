@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <signal.h>
 #include <setjmp.h>
 

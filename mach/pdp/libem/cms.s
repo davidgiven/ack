@@ -2,7 +2,7 @@
 .sect .text
 .define cms~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 cms~:
 	jsr	pc,save~

@@ -3,7 +3,7 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*
 	DIVIDE TWO FLOATS - DOUBLE Precision (DVF 8)

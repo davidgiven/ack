@@ -1,4 +1,4 @@
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #define MAXBYTE	24
 #include <stdio.h>
 #include <out.h>

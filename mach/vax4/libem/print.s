@@ -2,7 +2,7 @@
 .define  printd
 .define  printc
 
-        ! $Header$
+        ! $Id$
 
 printd:
 	clrl    r1

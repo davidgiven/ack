@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*  LEVEL DEFINITIONS */
 
 /*	The level of the top-most stack_level is kept in a global variable

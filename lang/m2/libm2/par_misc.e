@@ -7,7 +7,7 @@
 ;
 ; Module:	coroutine primitives
 ; Author:	Kees Bot, Edwin Scheffer, Ceriel Jacobs
-; Version:	$Header$
+; Version:	$Id$
 ;
 
  mes 2,EM_WSIZE,EM_PSIZE

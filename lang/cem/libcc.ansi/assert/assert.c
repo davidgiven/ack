@@ -1,7 +1,7 @@
 /*
  * assert.c - diagnostics
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<assert.h>
 #include	<stdio.h>

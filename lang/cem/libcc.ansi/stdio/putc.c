@@ -1,7 +1,7 @@
 /*
  * putc.c - print (or buffer) one character
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

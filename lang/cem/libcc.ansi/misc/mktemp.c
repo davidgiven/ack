@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /* mktemp - make a name for a temporary file; only here for backwards compat */
 /* no _-protected system-calls? */
 

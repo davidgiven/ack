@@ -2,7 +2,7 @@ DEFINITION MODULE MathLib0;
 (*
   Module:	Some mathematical functions
   From:		"Programming in Modula-2", 3rd, corrected edition, by N. Wirth
-  Version:	$Header$
+  Version:	$Id$
 
 	Exists for compatibility.
 	A more elaborate math lib can be found in Mathlib.def

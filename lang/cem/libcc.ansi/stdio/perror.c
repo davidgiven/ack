@@ -1,7 +1,7 @@
 /*
  * perror.c - print an error message on the standard error output
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<errno.h>
 #include	<stdio.h>

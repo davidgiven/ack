@@ -1,7 +1,7 @@
 /*
  * locale.h - localization
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_LOCALE_H)
 #define	_LOCALE_H

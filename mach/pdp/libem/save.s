@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define save~,retu~,savearea
-! $Header$
+! $Id$
 
 save~:
 	mov	r5,savearea

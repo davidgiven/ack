@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define inn~
-! $Header$
+! $Id$
 
 inn~:
 	mov	r0,-(sp)

@@ -7,7 +7,7 @@
 
 /* D E F I N I T I O N   M O D U L E S */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 

@@ -1,4 +1,4 @@
-"$Header$"
+"$Id$"
 #define	SL	6
 #define	SSL	"6"
     /* savsize is 6 because size of LB is 2 and size of z8000-PC is 4 */

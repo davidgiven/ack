@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  7 RM	*/
 
 #include	"lint.h"

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #define UTMPFILE "/etc/utmp"
 
 #ifdef __USG

@@ -7,7 +7,7 @@
 
 /* R E A L   C O N S T A N T   D E S C R I P T O R   D E F I N I T I O N */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <flt_arith.h>
 

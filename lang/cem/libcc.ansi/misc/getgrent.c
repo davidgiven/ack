@@ -3,7 +3,7 @@
  *
  * Author: Patrick van Kleef
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdlib.h>
 #include	<string.h>

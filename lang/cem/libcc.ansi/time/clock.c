@@ -1,7 +1,7 @@
 /*
  * clock - determine the processor time used
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 

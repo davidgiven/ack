@@ -2,7 +2,7 @@
 .sect .text
 .define sru~
 .extern unknown~
-! $Header$
+! $Id$
 
 sru~:
 	neg	2(sp)

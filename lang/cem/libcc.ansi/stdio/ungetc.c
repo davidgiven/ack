@@ -1,7 +1,7 @@
 /*
  * ungetc.c - push a character back onto an input stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	"loc_incl.h"

@@ -1,7 +1,7 @@
 /*
  * fileno .c - map a stream to a file descriptor
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

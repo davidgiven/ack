@@ -1,7 +1,7 @@
 /*
  * fgets.c - get a string from a file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

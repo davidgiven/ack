@@ -1,6 +1,6 @@
 .globl ___Get_PC, ___Set_PC
 
-! $Header$
+! $Id$
 
 ! This is the machine-dependant part of the ACK debugger support.
 ! ___Get_PC takes a frame pointer (local base) argument and returns the

@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Conversions;
 (*
   Module:	numeric-to-string conversions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   PROCEDURE ConvertNum(num, len, base: CARDINAL;

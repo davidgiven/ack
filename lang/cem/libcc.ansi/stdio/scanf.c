@@ -1,7 +1,7 @@
 /*
  * scanf.c - read formatted input from the standard input stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

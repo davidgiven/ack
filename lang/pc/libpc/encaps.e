@@ -1,7 +1,7 @@
 #
 
 
-; $Header$
+; $Id$
 ;  (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
 ; 
 ;           This product is part of the Amsterdam Compiler Kit.

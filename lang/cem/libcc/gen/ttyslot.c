@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #ifdef __USG
 /*	system V, so no /etc/ttys file. In this case, scan the
 	/etc/utmp file

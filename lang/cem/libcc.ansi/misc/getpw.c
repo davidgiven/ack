@@ -1,7 +1,7 @@
 /*
  * getpw - get a password from the password file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

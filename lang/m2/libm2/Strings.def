@@ -2,7 +2,7 @@ DEFINITION MODULE Strings;
 (*
   Module:	String manipulations
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 (* Note: truncation of strings may occur if the user does not provide
    large enough variables to contain the result of the operation.

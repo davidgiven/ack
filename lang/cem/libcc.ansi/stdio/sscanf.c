@@ -1,7 +1,7 @@
 /*
  * sscanf - read formatted output from a string
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

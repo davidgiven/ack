@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*
  * return offset in file.
  */

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdlib.h>
 #include	"ext_fmt.h"

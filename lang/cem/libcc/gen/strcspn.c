@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 int
 strcspn(string, notin)
 	char *string;

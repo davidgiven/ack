@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE ArraySort;
 (* 
   Module:	Array sorting module.
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
   FROM	SYSTEM IMPORT	ADDRESS, BYTE;	(* no generics in Modula-2, sorry *)
 

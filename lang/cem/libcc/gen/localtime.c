@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <time.h>
 
 #define LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))

@@ -5,7 +5,7 @@
 
 	Prerequisite:	<sys/types.h>
 */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_DIRENT_H)
 #define	_DIRENT_H

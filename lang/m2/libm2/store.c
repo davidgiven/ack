@@ -6,7 +6,7 @@
 /*
   Module:	store values from stack, byte by byte
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 #include <m2_traps.h>

@@ -1,7 +1,7 @@
 #include <stb.h>
 
 #ifndef lint
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 #endif /* lint */
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.

@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE random;
 (*
   Module:       random numbers
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 *)
 
   FROM	Unix IMPORT	getpid, time;

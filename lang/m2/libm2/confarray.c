@@ -6,7 +6,7 @@
 /*
   Module:	runtime support for conformant arrays
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 #include <m2_traps.h>
 

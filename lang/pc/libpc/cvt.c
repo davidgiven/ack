@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #ifndef NOFLOAT
 
 #if __STDC__

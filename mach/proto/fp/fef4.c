@@ -3,7 +3,7 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*
 	SEPERATE INTO EXPONENT AND FRACTION (FEF 4)

@@ -7,7 +7,7 @@
 .sect .data
 .sect .bss
 
-!	$Header$
+!	$Id$
 
 !	Implement interface to floating point package for M68881
 

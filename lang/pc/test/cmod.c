@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <stdio.h>
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 typedef struct {
 	int	(*p_func)() ;

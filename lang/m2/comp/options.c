@@ -7,7 +7,7 @@
 
 /* U S E R   O P T I O N - H A N D L I N G */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"idfsize.h"
 

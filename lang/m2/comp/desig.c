@@ -7,7 +7,7 @@
 
 /* D E S I G N A T O R   E V A L U A T I O N */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Code generation for designators.
    	This file contains some routines that generate code common to address

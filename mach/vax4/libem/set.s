@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.setx
 
-        ! $Header$
+        ! $Id$
 
 
 	! bytes in r0

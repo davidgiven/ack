@@ -1,7 +1,7 @@
 /*
  * fopen.c - open a stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

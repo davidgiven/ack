@@ -7,7 +7,7 @@
 
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Header$ */
+/* $Id$ */
 
 #include "dbsymtab.h"
 

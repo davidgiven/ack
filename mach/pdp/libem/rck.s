@@ -2,7 +2,7 @@
 .sect .text
 .define rck~
 .extern trp~
-! $Header$
+! $Id$
 
 ERANGE	= 1
 

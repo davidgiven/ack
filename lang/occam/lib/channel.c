@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*	channel.c - basic channel handling routines */
 #include <errno.h>
 #ifndef __BSD4_2

@@ -1,7 +1,7 @@
 /*
  * tzset - set timezone information
  */
-/* $Header$ */
+/* $Id$ */
 
 /* This function is present for System V && POSIX */
 

@@ -2,7 +2,7 @@
 .sect .text
 .define rmu4~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 rmu4~:
 	jsr	pc,save~

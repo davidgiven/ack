@@ -2,7 +2,7 @@
 .sect .text
 .define rmi4~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 rmi4~:
 	jsr	pc,save~

@@ -1,7 +1,7 @@
 /*
  * tmpnam.c - create a unique filename
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<string.h>

@@ -1,7 +1,7 @@
 /*
  * gets.c - read a line from a stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 long now()
 {
 	extern int deadlock;

@@ -1,7 +1,7 @@
 /*
  * setlocale - set the programs locale
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<locale.h>
 #include	<string.h>

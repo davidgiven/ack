@@ -2,7 +2,7 @@
 .sect .text
 .define sbf~
 .extern setfloat~
-! $Header$
+! $Id$
 
 sbf~:
 	mov	(sp)+,r1

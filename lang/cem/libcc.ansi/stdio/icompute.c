@@ -1,7 +1,7 @@
 /*
  * icompute.c - compute an integer
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	"loc_incl.h"
 

@@ -2,7 +2,7 @@
 .sect .text
 .define nop~
 .extern hol0,prf~
-! $Header$
+! $Id$
 
 nop~:
 	mov	hol0,-(sp)

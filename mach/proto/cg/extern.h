@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 
 extern int maxply;                      /* amount of lookahead allowed */
 extern int stackheight;                 /* # of tokens on fakestack */

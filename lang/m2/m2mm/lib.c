@@ -7,7 +7,7 @@
 
 /* L I B R A R Y */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <em_path.h>
 #include <alloc.h>

@@ -1,7 +1,7 @@
 /*
  * loc_incl.h - local include file for stdio library
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

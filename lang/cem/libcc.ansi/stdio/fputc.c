@@ -1,7 +1,7 @@
 /*
  * fputc.c - print an unsigned character
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

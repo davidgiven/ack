@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 
 typedef char *va_list;
 # define __va_sz(mode)	(((sizeof(mode) + sizeof(int) - 1) / sizeof(int)) * sizeof(int))

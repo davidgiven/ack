@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Strings;
 (*
   Module:       String manipulations
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 *)
 
   PROCEDURE Assign(source: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);

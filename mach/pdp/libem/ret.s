@@ -2,7 +2,7 @@
 .sect .text
 .define ret~,lfr~
 .extern unknown~, retar
-! $Header$
+! $Id$
 
 ! Size in r0
 ret~:

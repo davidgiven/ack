@@ -7,7 +7,7 @@
 
 /* U S E   O F   C H A R A C T E R   C L A S S E S */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	As a starter, chars are divided into classes, according to which
 	token they can be the start of.

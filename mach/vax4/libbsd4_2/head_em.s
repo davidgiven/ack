@@ -1,7 +1,7 @@
 #include "em_abs.h"
 #include "syscall.h"
 
-	! $Header$
+	! $Id$
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define	hol0

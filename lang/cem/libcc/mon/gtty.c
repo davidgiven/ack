@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <sgtty.h>
 int
 gtty(fildes,argp) int fildes ; struct sgttyb *argp ; {

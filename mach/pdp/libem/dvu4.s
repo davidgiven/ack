@@ -2,7 +2,7 @@
 .sect .text
 .define dvu4~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 dvu4~:
 	jsr	pc,save~

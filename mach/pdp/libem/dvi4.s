@@ -2,7 +2,7 @@
 .sect .text
 .define dvi4~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 dvi4~:
 	jsr	pc,save~

@@ -2,7 +2,7 @@
 .sect .text
 .define setfloat~,setint~
 .extern unknown~
-! $Header$
+! $Id$
 
 setfloat~:
 	cmp	r0,$8

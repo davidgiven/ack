@@ -1,7 +1,7 @@
 /*
  * environ.c - define the variable environ
  */
-/* $Header$ */
+/* $Id$ */
 /*
  * This file defines the variable environ and initializes it with a magic
  * value.  The C run-time start-off routine tests whether the variable

@@ -1,7 +1,7 @@
 /* fmod function */
 /* Author Robert R. Hall (hall@crach.cts.com) */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <math.h>
 #include <errno.h>

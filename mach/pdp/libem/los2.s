@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define los2~
-! $Header$
+! $Id$
 
 los2~:
 	mov	(sp)+,r3

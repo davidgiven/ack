@@ -2,7 +2,7 @@ DEFINITION MODULE Conversions;
 (*
   Module:	Numeric-to-string conversions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   PROCEDURE ConvertOctal(num, len: CARDINAL; VAR str: ARRAY OF CHAR);

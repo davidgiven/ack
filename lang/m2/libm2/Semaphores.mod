@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Semaphores [1];
 (*
   Module:       Processes with semaphores
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 
   Quasi-concurrency implementation
 *)

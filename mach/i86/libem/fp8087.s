@@ -4,7 +4,7 @@
 .define .cmf4, .cmf8
 .sect .text; .sect .rom; .sect .data; .sect .bss
 
-!	$Header$
+!	$Id$
 
 !	Implement interface to floating point package for Intel 8087
 

@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-#define RCS_H		"$Header$"
+#define RCS_H		"$Id$"
 #endif
 
 #define ex_ap(y)        fprintf(codefile,".extern %s\n",y)

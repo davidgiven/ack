@@ -1,7 +1,7 @@
 /*
  * fclose.c - flush a stream and close the file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

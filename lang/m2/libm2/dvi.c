@@ -6,7 +6,7 @@
 /*
   Module:	implementation of DIV and MOD
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
   Reason:	We cannot use DVI and RMI, because DVI rounds towards 0
 		and Modula-2 requires truncation
 */

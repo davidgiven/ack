@@ -2,7 +2,7 @@
 .sect .text
 .define cff~
 .extern setfloat~
-! $Header$
+! $Id$
 
 cff~:
 	mov	(sp)+,r1

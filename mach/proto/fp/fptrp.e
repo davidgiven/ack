@@ -4,7 +4,7 @@
 ; See the copyright notice in the ACK home directory, in the file "Copyright".
 ;
 
-; $Header$
+; $Id$
 
  mes 2,EM_WSIZE,EM_PSIZE
 

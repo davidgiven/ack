@@ -1,7 +1,7 @@
 /*
  * loc_time.h - some local definitions
  */
-/* $Header$ */
+/* $Id$ */
 
 #define	YEAR0		1900			/* the first year */
 #define	EPOCH_YR	1970		/* EPOCH = Jan 1 1970 00:00:00 */

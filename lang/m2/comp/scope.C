@@ -7,7 +7,7 @@
 
 /* S C O P E   M E C H A N I S M */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 

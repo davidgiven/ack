@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define .cmand
 
-        ! $Header$
+        ! $Id$
 
 	! bytes in r0
 

@@ -2,7 +2,7 @@
 .sect .text
 .define trp~,fat~
 .extern trppc~,trpim~,savearea,retar
-! $Header$
+! $Id$
 
 fat~:
 	jsr     pc,trp~

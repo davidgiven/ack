@@ -7,7 +7,7 @@
 ;
 ; Module:	coroutine primitives
 ; Author:	Kees Bot, Edwin Scheffer, Ceriel Jacobs
-; Version:	$Header$
+; Version:	$Id$
 ;
 ; This has been taken from the ACK Modula-2 runtime system and adapted.
 ;

@@ -5,7 +5,7 @@
  */
 
 /* Author: E.G. Keizer */
-static char rcs_id[]=	"$Header$" ;
+static char rcs_id[]=	"$Id$" ;
 
 /* test for structure parameters, assignment and return */
 # define ASIZE 26

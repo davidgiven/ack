@@ -6,7 +6,7 @@
 /*
   Module:	Dummy priority routines
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 static unsigned prio = 0;

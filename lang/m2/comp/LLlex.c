@@ -7,7 +7,7 @@
 
 /* L E X I C A L   A N A L Y S E R   F O R   M O D U L A - 2 */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 #include	"idfsize.h"

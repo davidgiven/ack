@@ -6,7 +6,7 @@
 /*
   Module:	default modula-2 trap handler
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 #include <em_abs.h>
 #include <m2_traps.h>

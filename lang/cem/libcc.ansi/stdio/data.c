@@ -1,7 +1,7 @@
 /*
  * data.c - this is the initialization for the standard streams
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

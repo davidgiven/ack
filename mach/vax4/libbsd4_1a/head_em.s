@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 
-	! $Header$
+	! $Id$
 
 .define	hol0
 .define	.reghp

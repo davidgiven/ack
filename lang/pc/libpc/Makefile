@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 head:
 	echo This Makefile needs arguments

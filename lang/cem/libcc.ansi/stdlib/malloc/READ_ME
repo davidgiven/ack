@@ -6,7 +6,7 @@
 		Modified by Ceriel Jacobs, Free University, Amsterdam,
 		to make it faster
 	VERSION
-		$Header$
+		$Id$
 	DESCRIPTION
 	This is an independent rewrite of the malloc/free package; it is
 	fast and efficient.  Free blocks are kept in doubly linked lists,

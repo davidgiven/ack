@@ -7,7 +7,7 @@
 
 /* S Y N T A X   E R R O R   R E P O R T I N G */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Defines the LLmessage routine. LLgen-generated parsers require the
 	existence of a routine of that name.

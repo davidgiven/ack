@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define  .lxa
 
-        ! $Header$
+        ! $Id$
 
 .lxa:
 	jsb	.lxl	! Find local base

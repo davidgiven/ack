@@ -9,7 +9,7 @@ IMPLEMENTATION MODULE Storage;
   Module:	Dynamic Storage Allocation
   Author:	Ceriel J.H. Jacobs
 		Adapted from a version in C by Hans Tebra
-  Version:	$Header$
+  Version:	$Id$
 *)
 (* This storage manager maintains an array of lists of objects with the
    same size. Commonly used sizes have their own bucket. The larger ones

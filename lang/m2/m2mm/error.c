@@ -8,7 +8,7 @@
 /* E R R O R   A N D   D I A G N O S T I C   R O U T I N E S */
 
 /* stripped down version from the one in the Modula-2 compiler */
-/* $Header$ */
+/* $Id$ */
 
 /*	This file contains the error-message and diagnostic
 	giving functions.  Be aware that they are called with a variable

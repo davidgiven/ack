@@ -7,7 +7,7 @@
 
 /* D E S I G N A T O R   D E S C R I P T I O N S */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Generating code for designators is not particularly easy, especially if
    you don't know wether you want the address or the value.

@@ -3,7 +3,7 @@ DEFINITION MODULE Unix;
 (*
   Module:	interface to some Unix systemcalls
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
   FROM SYSTEM IMPORT WORD, ADDRESS;
 

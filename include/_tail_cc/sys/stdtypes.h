@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /* This include file exists so that <sys/types.h> can still safely be
    included. On a SUN, this would cause problems because sometimes time_t

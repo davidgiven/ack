@@ -6,7 +6,7 @@
 #include "out.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Header$" ;
+static char rcs_id[] = "$Id$" ;
 #endif
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }

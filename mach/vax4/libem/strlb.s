@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define .strlb
 
-	! $Header$
+	! $Id$
 	! revised version by CHL
 	! Store the value that is on the stack in fp.
 	! Compute ap.

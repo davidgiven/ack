@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE RealConversions;
 (*
   Module:       string-to-real and real-to-string conversions
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 *)
 
 

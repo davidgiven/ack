@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 int
 strlen(s)
 	char *s;

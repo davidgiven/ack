@@ -1,7 +1,7 @@
 /*
  * fscanf.c - read formatted input from stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

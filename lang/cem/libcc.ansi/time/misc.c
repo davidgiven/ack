@@ -1,7 +1,7 @@
 /*
  * misc - data and miscellaneous routines
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<ctype.h>
 #include	<time.h>

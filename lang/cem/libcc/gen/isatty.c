@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 isatty(f)
 {
 	char buf[128];

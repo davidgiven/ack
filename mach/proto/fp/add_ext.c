@@ -3,7 +3,7 @@
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
-/* $Header$ */
+/* $Id$ */
 
 /*
 	ADD TWO EXTENDED FORMAT NUMBERS

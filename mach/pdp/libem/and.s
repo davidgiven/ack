@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define and~
-! $Header$
+! $Id$
 
 ! size in r0
 and~:

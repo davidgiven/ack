@@ -1,7 +1,7 @@
 /*
  * sprintf - print formatted output on an array
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

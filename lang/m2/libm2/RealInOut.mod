@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE RealInOut;
 (*
   Module:       InOut for REAL numbers
   Author:	Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 *)
 
   FROM	InOut IMPORT	ReadString, WriteString, WriteOct;

@@ -1,7 +1,7 @@
 /*
  * time.h - date and time
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_TIME_H)
 #define	_TIME_H

@@ -2,7 +2,7 @@ DEFINITION MODULE PascalIO;
 (* 
    Module:	Pascal-like Input/Output
    Author:	Ceriel J.H. Jacobs
-   Version:	$Header$
+   Version:	$Id$
 
    This module provides for I/O that is essentially equivalent to the I/O
    provided by Pascal with "text", or "file of char".

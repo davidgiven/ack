@@ -1,6 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.trp
-        ! $Header$
+        ! $Id$
 
 .trp:
 	pushl	r0

@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE InOut ;
 (*
   Module:	Wirth's Input/Output module
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   IMPORT	Streams;

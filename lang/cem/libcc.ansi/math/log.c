@@ -4,7 +4,7 @@
  *
  * Author: Ceriel J.H. Jacobs
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<math.h>
 #include	<float.h>

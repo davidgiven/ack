@@ -7,7 +7,7 @@
 
 /* D E B U G G I N G   M A C R O */
 
-/* $Header$ */
+/* $Id$ */
 
 #include "debugcst.h"
 

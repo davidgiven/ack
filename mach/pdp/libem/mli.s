@@ -2,7 +2,7 @@
 .sect .text
 .define mli~
 .extern unknown~,mli4~
-! $Header$
+! $Id$
 
 mli~:
 	cmp	r0,$04

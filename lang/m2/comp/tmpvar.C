@@ -7,7 +7,7 @@
 
 /* T E M P O R A R Y   V A R I A B L E S */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Code for the allocation and de-allocation of temporary variables,
 	allowing re-use.

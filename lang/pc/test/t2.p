@@ -20,7 +20,7 @@ program t2(input,output);
 { This program can be used to test out PASCAL compilers }
 
 const
-   rcsversion='$Header$';
+   rcsversion='$Id$';
    kew='q';
 #ifndef NOFLOAT
    eps = 2.0e-7;  { This constant is machine dependent }

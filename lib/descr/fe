@@ -1,5 +1,5 @@
 # (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
-# $Header$
+# $Id$
 #
 # Don't generate line updating code by default (i.e.: -L flag provided to cem).
 # To put it on again: use -NL

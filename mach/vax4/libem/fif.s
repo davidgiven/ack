@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.fif
 
-        ! $Header$
+        ! $Id$
 
 .sect .rom
 Ione: .data1 0200, 077, 00, 00, 00, 00, 00, 00

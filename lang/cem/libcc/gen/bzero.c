@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 bzero(b, l)
 	register char *b;
 {

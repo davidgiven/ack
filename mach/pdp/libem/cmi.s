@@ -2,7 +2,7 @@
 .sect .text
 .define cmi~
 .extern cmi4~,unknown~
-! $Header$
+! $Id$
 
 ! Size in r0
 cmi~:

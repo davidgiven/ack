@@ -7,7 +7,7 @@
 
 /* P A R S E   T R E E   W A L K E R */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Routines to walk through parts of the parse tree, and generate
 	code for these parts.

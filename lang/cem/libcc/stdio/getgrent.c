@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*
  * get entry from group file
  * 

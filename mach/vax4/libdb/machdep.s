@@ -1,7 +1,7 @@
 .define ___Get_PC, ___Set_PC, ___u_LiB
 .sect .text; .sect .rom; .sect .data
 
-! $Header$
+! $Id$
 
 ! This is the machine-dependant part of the ACK debugger support.
 ! ___Get_PC takes a frame pointer (local base) argument and returns the

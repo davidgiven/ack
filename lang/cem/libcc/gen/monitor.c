@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 static int bs;
 static char *bp;
 static char *bufp;

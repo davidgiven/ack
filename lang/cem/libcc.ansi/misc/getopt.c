@@ -1,7 +1,7 @@
 /*
  * getopt - parse command-line options
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<string.h>

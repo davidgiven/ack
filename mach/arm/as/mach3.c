@@ -1,4 +1,4 @@
-/* $Header: mach3.c, v2.0 23-Feb-89 AJM */
+/* $Id: mach3.c, v2.0 23-Feb-89 AJM */
 
 0,		COND,		0x00000000,	".EQ",
 0,		COND,		0x10000000,	".NE",

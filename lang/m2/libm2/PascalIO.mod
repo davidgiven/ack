@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE PascalIO;
 (*
   Module:	Pascal-like Input/Output
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   FROM	Conversions IMPORT

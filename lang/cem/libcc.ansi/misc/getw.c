@@ -1,7 +1,7 @@
 /*
  * getw - read a word from a stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -1,6 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define eret
-! $Header$
+! $Id$
 
 eret:
 	mov r5,sp

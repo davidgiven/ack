@@ -2,7 +2,7 @@
 .sect .text
 .define mlu4~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 mlu4~:
 	jsr	pc,save~

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /* library routine for copying structs */
 
 __stb(n, f, t)

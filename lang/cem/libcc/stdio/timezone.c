@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #ifndef __USG
 static struct zonetable {
 	int	offset;

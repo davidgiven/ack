@@ -6,7 +6,7 @@
 
 /* Author: E.G. Keizer */
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 /* This programs is a collection of derived from small tests develloped
    for specific bugs/features in the C->EM compiler

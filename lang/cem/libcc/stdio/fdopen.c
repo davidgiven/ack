@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <stdio.h>
 
 FILE *fdopen(fd,mode)

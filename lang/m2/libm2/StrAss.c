@@ -7,7 +7,7 @@
   Module:	assign string to character array, with possible 0-byte
 		extension
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 StringAssign(dstsiz, srcsiz, dstaddr, srcaddr)
 	register char *dstaddr, *srcaddr;

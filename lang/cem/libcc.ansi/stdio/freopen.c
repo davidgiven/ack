@@ -1,7 +1,7 @@
 /*
  * freopen.c - open a file and associate a stream with it
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

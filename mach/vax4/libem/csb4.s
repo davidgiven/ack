@@ -2,7 +2,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define  .csb4
 
-        ! $Header$
+        ! $Id$
 
 
 .csb4:

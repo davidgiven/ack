@@ -6,7 +6,7 @@
 /*
   Module:	longint abs function
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 long
 absl(i)

@@ -2,7 +2,7 @@
 .define PRr2,PR2r2,PR4r2,PR6r2
 .define PRr2r4,PR2r2r4,PR4r2r4,PR6r2r4
 .define RT,RTr2,RTr2r4
-! $Header$
+! $Id$
 
 PR6r2:	mov $6,r0;br PRr2
 PR4r2:	mov $4,r0;br PRr2

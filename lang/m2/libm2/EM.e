@@ -6,7 +6,7 @@
 ;
 ; Module:	Interface to some EM instructions and data
 ; Author:	Ceriel J.H. Jacobs
-; Version:	$Header$
+; Version:	$Id$
 ;
  mes 2,EM_WSIZE,EM_PSIZE
 

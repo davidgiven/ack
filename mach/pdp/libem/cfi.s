@@ -2,7 +2,7 @@
 .sect .text
 .define cfi~
 .extern setfloat~,setint~
-! $Header$
+! $Id$
 
 cfi~:
 	mov	(sp)+,r1

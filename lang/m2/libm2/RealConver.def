@@ -2,7 +2,7 @@ DEFINITION MODULE RealConversions;
 (*
   Module:	string-to-real and real-to-string conversions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   PROCEDURE StringToReal(str: ARRAY OF CHAR; VAR r: REAL; VAR ok: BOOLEAN);

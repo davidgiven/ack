@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.rmu4
 
-        ! $Header$
+        ! $Id$
 
 .rmu4:
 	movl    (sp)+,r3

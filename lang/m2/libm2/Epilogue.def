@@ -4,7 +4,7 @@ DEFINITION MODULE Epilogue;
   Module:	install module termination procedures to be called at
 		program termination
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 
    MODULA-2 offers a facility for the initialization of modules, but there
    is no mechanism to have some code executed when the program finishes.

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *strncat(s1, s2, n)
 register char *s1, *s2;
 int n;

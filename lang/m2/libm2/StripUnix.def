@@ -3,7 +3,7 @@ DEFINITION MODULE StripUnix;
 (*
   Module:	interface to some Unix systemcalls
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 
   This is a stripped down version of Unix.def, needed to compile some of
   the modules on small machines

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char
 *strncpy(s1, s2, n)
 register char *s1, *s2;

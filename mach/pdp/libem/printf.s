@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define printf~
-! $Header$
+! $Id$
 
 printf~:
 	mov	r2,-(sp)

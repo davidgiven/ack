@@ -2,7 +2,7 @@
 .sect .text
 .define dvi~
 .extern unknown~,dvi4~
-! $Header$
+! $Id$
 
 dvi~:
 	mov	(sp)+,r3

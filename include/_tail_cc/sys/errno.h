@@ -1,7 +1,7 @@
 /*
  * sys/errno.h - error numbers
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_SYS_ERRNO_H)
 #define	_SYS_ERRNO_H

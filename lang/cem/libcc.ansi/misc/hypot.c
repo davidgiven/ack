@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-/* $Header$ */
+/* $Id$ */
 
 double
 hypot(double x,double y)

@@ -4,7 +4,7 @@
  */
 #include <signal.h>
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 foo()
 {

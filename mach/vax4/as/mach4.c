@@ -2,7 +2,7 @@
  * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#define RCSID4 "$Header$"
+#define RCSID4 "$Id$"
 
 /*
  * VAX-11 machine dependent yacc syntax rules

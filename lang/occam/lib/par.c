@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*	par.c - Routines to simulate parallelism */
 #include "ocm_proc.h"
 

@@ -6,7 +6,7 @@
 /*
   Module:	cap; implementation of CAP
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 cap(u)

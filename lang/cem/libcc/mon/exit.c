@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.

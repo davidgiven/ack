@@ -1,7 +1,7 @@
 /*
  * math.h - mathematics
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_MATH_H)
 #define	_MATH_H

@@ -1,7 +1,7 @@
 /*
  * remove.c - remove a file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.lpb
 
-        ! $Header$
+        ! $Id$
 	! special version to work with A68S, by CHL
         ! compute AB, given LB
 .lpb:

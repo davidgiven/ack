@@ -8,7 +8,7 @@
 #include <em_path.h>
 #include <local.h>
 
-char rcs_id[]	=	"$Header$" ;
+char rcs_id[]	=	"$Id$" ;
 
 #define MAGIC 07255
 

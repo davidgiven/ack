@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #ifndef NOFLOAT
 extern char     *fcvt();
 extern char     *ecvt();

@@ -1,7 +1,7 @@
 /*
  * fflush.c - flush stream(s)
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<sys/types.h>
 #include	<stdio.h>

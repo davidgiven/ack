@@ -6,7 +6,7 @@
 /*
   Module:	initialization and some global vars
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 #include <signal.h>

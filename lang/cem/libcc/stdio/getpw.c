@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include	<stdio.h>
 
 getpw(uid, buf)

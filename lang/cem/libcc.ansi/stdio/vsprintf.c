@@ -1,7 +1,7 @@
 /*
  * vsprintf - print formatted output without ellipsis on an array
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdarg.h>

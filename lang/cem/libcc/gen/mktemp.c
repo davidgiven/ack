@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /* mktemp - make a name for a temporary file */
 
 char *mktemp(template)

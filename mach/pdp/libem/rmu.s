@@ -2,7 +2,7 @@
 .sect .text
 .define rmu~
 .extern rmu2~,rmu4~,unknown~
-! $Header$
+! $Id$
 
 rmu~:
 	mov	(sp)+,r3

@@ -2,7 +2,7 @@
 .sect .text
 .define mlu~
 .extern unknown~,mlu4~
-! $Header$
+! $Id$
 
 mlu~:
 	cmp	r0,$04

@@ -2,7 +2,7 @@
 .sect .text
 .define ilar~
 .extern lar~,trp~
-! $Header$
+! $Id$
 
 EILLINS = 022
 

@@ -2,7 +2,7 @@
 .sect .text
 .define rmi~
 .extern unknown~,rmi4~
-! $Header$
+! $Id$
 
 rmi~:
 	mov	(sp)+,r3

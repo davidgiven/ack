@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 long atol(s)
 register char *s;
 {

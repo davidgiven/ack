@@ -1,7 +1,7 @@
 /*
  * localtime - convert a calendar time into broken down time
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 #include	"loc_time.h"

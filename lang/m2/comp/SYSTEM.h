@@ -7,7 +7,7 @@
 
 /* S Y S T E M   M O D U L E   T E X T */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Text of SYSTEM module, for as far as it can be expressed in Modula-2 */
 

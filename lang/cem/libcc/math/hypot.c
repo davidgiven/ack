@@ -5,7 +5,7 @@
  * Author: Ceriel J.H. Jacobs
  */
 
-/* $Header$ */
+/* $Id$ */
 
 double
 hypot(x,y)

@@ -2,7 +2,7 @@
 .sect .text
 .define strhp~
 .extern trp~,reghp~
-! $Header$
+! $Id$
 
 EHEAP	= 021
 

@@ -7,7 +7,7 @@
 
 /* W A R N I N G   C L A S S E S */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Warning classes, at the moment three of them:
    Strict (R)

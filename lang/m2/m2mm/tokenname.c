@@ -7,7 +7,7 @@
 
 /* T O K E N   D E F I N I T I O N S */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"tokenname.h"
 #include	"Lpars.h"

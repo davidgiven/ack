@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <stdio.h>
 
 fread(ptr, size, count, file)

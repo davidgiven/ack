@@ -1,7 +1,7 @@
 #
 program callc(input,output) ;
 var success: integer ;
-procedure rcsid ; begin writeln('$Header$') end ;
+procedure rcsid ; begin writeln('$Id$') end ;
 function kwad(val:integer) : integer ; extern ;
 procedure cmain ; extern ;
 procedure incs ; begin success:=success+1 end ;

@@ -1,7 +1,7 @@
 /*
  * doprnt.c - print formatted output
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<ctype.h>
 #include	<stdio.h>

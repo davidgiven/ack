@@ -6,7 +6,7 @@
 /*
   Module:	program termination routines
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 #define MAXPROCS 32
 

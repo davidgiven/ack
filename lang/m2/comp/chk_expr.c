@@ -7,7 +7,7 @@
 
 /* E X P R E S S I O N   C H E C K I N G */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Check expressions, and try to evaluate them as far as possible.
 */

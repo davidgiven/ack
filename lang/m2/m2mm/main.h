@@ -7,7 +7,7 @@
 
 /* S O M E   G L O B A L   V A R I A B L E S */
 
-/* $Header$ */
+/* $Id$ */
 
 extern char **DEFPATH;	/* search path for DEFINITION MODULE's */
 extern int mDEF, nDEF;

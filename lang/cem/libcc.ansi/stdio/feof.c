@@ -1,7 +1,7 @@
 /*
  * feof.c - test if eof on a stream occurred
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

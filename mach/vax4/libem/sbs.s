@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define .sbs
 
-        ! $Header$
+        ! $Id$
 
 .sbs:
 	movl    (sp)+,r1

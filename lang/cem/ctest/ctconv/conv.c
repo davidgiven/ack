@@ -6,7 +6,7 @@
 
 /* Author: E.G. Keizer */
 
-char rcs_id[] = "$Header$" ;
+char rcs_id[] = "$Id$" ;
 
 main() {
 	t1() ;

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*  File   : _c2type.c
     Author : Richard A. O'Keefe.
     Updated: 23 April 1984

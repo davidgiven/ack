@@ -1,7 +1,7 @@
 /*
  * fgetc - get an unsigned character and return it as an int
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /* D E F I N I T I O N S   F O R   T H E   L E X I C A L   A N A L Y Z E R */
 
 /*	A token from the input stream is represented by an integer,

@@ -1,4 +1,4 @@
-/* $Header: mach5.c, v3.3 25-Apr-89 AJM */
+/* $Id: mach5.c, v3.3 25-Apr-89 AJM */
 
 branch(brtyp, link, val)
 word_t brtyp;

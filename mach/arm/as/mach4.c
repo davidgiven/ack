@@ -1,4 +1,4 @@
-/* $Header: mach4.c, v1.9 15-Mar-89 AJM */
+/* $Id: mach4.c, v1.9 15-Mar-89 AJM */
 
 operation	: BRANCH optlink expr
 			{branch($1, $2, $3.val);}

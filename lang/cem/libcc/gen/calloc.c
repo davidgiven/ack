@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #define ALIGN(sz)	((((sz) + (sizeof(long) - 1)) / sizeof(long)) * sizeof(long))
 char *
 calloc(nelem, elsize)

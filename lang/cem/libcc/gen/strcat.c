@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *strcat(s1, s2)
 register char *s1, *s2;
 {

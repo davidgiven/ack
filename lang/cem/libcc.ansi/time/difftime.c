@@ -1,7 +1,7 @@
 /*
  * difftime - compute the difference between two calendar times
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include <stdio.h>
 
 struct _io_buf _stdin = {

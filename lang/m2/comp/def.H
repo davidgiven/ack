@@ -7,7 +7,7 @@
 
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Header$ */
+/* $Id$ */
 
 struct module {
 	struct node *mo_priority;/* priority of a module */

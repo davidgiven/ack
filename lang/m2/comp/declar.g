@@ -7,7 +7,7 @@
 
 /* D E C L A R A T I O N S */
 
-/* $Header$ */
+/* $Id$ */
 
 {
 #include	"debug.h"

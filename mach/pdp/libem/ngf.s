@@ -2,7 +2,7 @@
 .sect .text
 .define ngf~
 .extern setfloat~
-! $Header$
+! $Id$
 
 ngf~:
 	jsr	pc,setfloat~

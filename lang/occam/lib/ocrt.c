@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /*	ocrt.c - Occam runtime support */
 #include "ocm_chan.h"
 

@@ -2,7 +2,7 @@ DEFINITION MODULE Traps;
 (*
   Module:	Facility for handling traps
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   IMPORT EM;

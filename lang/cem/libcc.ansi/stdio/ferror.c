@@ -1,7 +1,7 @@
 /*
  * ferror .c - test if an error on a stream occurred
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Mathlib;
 (*
   Module:	Mathematical functions
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 *)
 
   FROM	EM IMPORT	FIF, FEF;

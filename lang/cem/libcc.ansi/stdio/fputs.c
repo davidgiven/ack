@@ -1,7 +1,7 @@
 /*
  * fputs - print a string
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

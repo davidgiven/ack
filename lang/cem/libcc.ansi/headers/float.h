@@ -1,7 +1,7 @@
 /*
  * float.h - implementation limits
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_FLOAT_H)
 #define	_FLOAT_H

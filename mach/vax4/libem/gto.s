@@ -1,6 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define	.gto
-        ! $Header$
+        ! $Id$
 
 .extern	.strlb
 	! Nonlocal goto.

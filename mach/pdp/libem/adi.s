@@ -2,7 +2,7 @@
 .sect .text
 .define adi~
 .extern unknown~
-! $Header$
+! $Id$
 
 !size in r0
 adi~:

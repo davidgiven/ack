@@ -5,7 +5,7 @@
  *
  * Module:	range checks for INTEGER, now for array indexing
  * Author:	Ceriel J.H. Jacobs
- * Version:	$Header$
+ * Version:	$Id$
 */
 
 #include <em_abs.h>

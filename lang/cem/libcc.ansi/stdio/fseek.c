@@ -1,7 +1,7 @@
 /*
  * fseek.c - perform an fseek
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

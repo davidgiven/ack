@@ -9,7 +9,7 @@ IMPLEMENTATION MODULE Streams;
 (*
   Module:       Stream Input/Output
   Author:       Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 
   Implementation for Unix
 *)

@@ -7,7 +7,7 @@
 
 /* S T A T E M E N T S */
 
-/* $Header$ */
+/* $Id$ */
 
 {
 #include	<assert.h>

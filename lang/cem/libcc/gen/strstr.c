@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 /* find first occurrence of wanted in s */
 char *
 strstr(s, wanted)

@@ -9,7 +9,7 @@
 
 /* stripped down version of the one in the Modula-2 compiler */
 
-/* $Header$ */
+/* $Id$ */
 
 ProcedureHeading :
 	PROCEDURE IDENT

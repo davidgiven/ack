@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 # Makefile for f2c, a Fortran 77 to C converter
 

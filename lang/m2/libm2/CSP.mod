@@ -6,7 +6,7 @@ IMPLEMENTATION MODULE CSP;
 		M. Collado, R. Morales, J.J. Moreno,
 		SIGPlan Notices, Volume 22, Number 6, June 1987.
 		Some modifications by Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 
    See this article for an explanation of the use of this module.
 *)

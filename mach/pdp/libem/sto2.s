@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define sto2~
-! $Header$
+! $Id$
 
 sto2~:
 	mov	(sp)+,r3

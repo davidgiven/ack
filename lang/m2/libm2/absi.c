@@ -6,7 +6,7 @@
 /*
   Module:	integer abs function
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 absi(i)

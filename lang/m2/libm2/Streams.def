@@ -2,7 +2,7 @@ DEFINITION MODULE Streams;
 (*
   Module:	Stream Input/Output
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 
  * This module provides sequential IO through streams.
  * A stream is either a text stream or a binary stream, and is either in

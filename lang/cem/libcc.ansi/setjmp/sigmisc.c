@@ -1,7 +1,7 @@
 /*
  * sigmisc.c - used to get a signal mask
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	defined(_POSIX_SOURCE)
 

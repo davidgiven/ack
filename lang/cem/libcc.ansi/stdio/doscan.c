@@ -1,7 +1,7 @@
 /*
  * doscan.c - scan formatted input
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

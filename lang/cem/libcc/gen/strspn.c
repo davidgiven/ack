@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 int
 strspn(string, in)
 	char *string;

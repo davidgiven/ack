@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 # C compilation part. Not to be called directly.
 # Instead, it is to be called by the Makefile.

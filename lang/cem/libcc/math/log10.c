@@ -5,7 +5,7 @@
  * Author: Ceriel J.H. Jacobs
  */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <math.h>
 #include <errno.h>

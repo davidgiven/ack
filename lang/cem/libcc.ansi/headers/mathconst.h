@@ -1,7 +1,7 @@
 /*
  * mathconst.h - mathematic constants
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_MATHCONST_H)
 #define	_MATHCONST_H

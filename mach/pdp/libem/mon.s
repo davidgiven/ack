@@ -1,5 +1,5 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
-! $Header$
+! $Id$
 .sect .text
 .define mon~
 

@@ -4,7 +4,7 @@
  *
  */
 
-char rcs_id2[] = "$Header$" ;
+char rcs_id2[] = "$Id$" ;
 
 /* Author: E.G. Keizer */
 

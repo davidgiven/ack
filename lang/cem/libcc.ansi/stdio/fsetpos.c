@@ -1,7 +1,7 @@
 /*
  * fsetpos.c - set the position in the file
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

@@ -1,7 +1,7 @@
 /*
  * putchar.c - print (or buffer) a character on the standard output stream
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 

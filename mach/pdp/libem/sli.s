@@ -2,7 +2,7 @@
 .sect .text
 .define sli~
 .extern unknown~
-! $Header$
+! $Id$
 
 sli~:
 	mov	(sp)+,r3

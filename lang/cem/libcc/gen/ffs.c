@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 ffs(i)
 	register int i;
 {

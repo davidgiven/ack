@@ -2,7 +2,7 @@
 .sect .text
 .define cif~,cuf~
 .extern setint~,setfloat~
-! $Header$
+! $Id$
 
 cif~:
 	mov	(sp)+,r1

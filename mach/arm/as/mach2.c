@@ -1,4 +1,4 @@
-/* $Header: mach2.c, V1.4 15-Mar-89 AJM */
+/* $Id: mach2.c, V1.4 15-Mar-89 AJM */
 %token <y_word> COND
 %token <y_word> LINK
 %token <y_word> BRANCH

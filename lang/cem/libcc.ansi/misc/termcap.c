@@ -13,7 +13,7 @@
  *	- does not check termcap entry sizes
  *	- not fully tested
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

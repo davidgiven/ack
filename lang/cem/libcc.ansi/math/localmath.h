@@ -1,7 +1,7 @@
 /*
  * localmath.h - This header is used by the mathematical library.
  */
-/* $Header$ */
+/* $Id$ */
 
 /* some constants (Hart & Cheney) */
 #define	M_PI		3.14159265358979323846264338327950288

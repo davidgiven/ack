@@ -1,7 +1,7 @@
 /*
  * flushbuf.c - flush a buffer
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	<stdlib.h>

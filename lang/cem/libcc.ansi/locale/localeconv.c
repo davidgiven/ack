@@ -1,7 +1,7 @@
 /*
  * localeconv - set components of a struct according to current locale
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<limits.h>
 #include	<locale.h>

@@ -6,7 +6,7 @@
 /*
   Module:	Access to program arguments and environment
   Author:	Ceriel J.H. Jacobs
-  Version:	$Header$
+  Version:	$Id$
 */
 
 extern char **argv, **environ;

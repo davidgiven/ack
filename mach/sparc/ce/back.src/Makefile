@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 
 # requires a definition for TARGET_HOME, SRC_DIR, COPTIONS, CC
 

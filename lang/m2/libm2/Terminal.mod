@@ -9,7 +9,7 @@ IMPLEMENTATION MODULE Terminal;
 (*
   Module:       Input/Output to/from terminals
   Author:	Ceriel J.H. Jacobs
-  Version:      $Header$
+  Version:      $Id$
 
   Implementation for Unix.
 *)

@@ -2,7 +2,7 @@
 .sect .text
 .define sbi~
 .extern unknown~
-! $Header$
+! $Id$
 
 sbi~:
 	mov	(sp)+,r1

@@ -1,7 +1,7 @@
 /*
  * rewind.c - set the file position indicator of a stream to the start
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<stdio.h>
 #include	"loc_incl.h"

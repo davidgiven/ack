@@ -1,7 +1,7 @@
 /*
  * mktime - convert local time into calendar time
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 #include	<limits.h>

@@ -7,7 +7,7 @@
 
 /* D E B U G G E R   S Y M B O L   T A B L E */
 
-/* $Header$ */
+/* $Id$ */
 
 #include "dbsymtab.h"
 

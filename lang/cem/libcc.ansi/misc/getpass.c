@@ -1,7 +1,7 @@
 /*
  * getpass - ask for a password
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<signal.h>
 #include	<string.h>

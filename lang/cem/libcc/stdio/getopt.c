@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 #include	<stdio.h>
 #define ERR(s, c)       if(opterr){\
 	fputs(argv[0], stderr);\

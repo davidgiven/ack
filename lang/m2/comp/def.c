@@ -7,7 +7,7 @@
 
 /* D E F I N I T I O N   M E C H A N I S M */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 

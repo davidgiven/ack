@@ -5,7 +5,7 @@
  *
  * Module:	CARDINAL operations with overflow checking
  * Author:	Ceriel J.H. Jacobs
- * Version:	$Header$
+ * Version:	$Id$
 */
 
 #ifndef EM_WSIZE

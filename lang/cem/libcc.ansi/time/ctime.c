@@ -1,7 +1,7 @@
 /*
  * ctime - convers the calendar time to a string
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<time.h>
 

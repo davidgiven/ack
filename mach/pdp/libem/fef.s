@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define fef~
 .extern setfloat~
-! $Header$
+! $Id$
 
 fef~:
 	mov	(sp)+,r1

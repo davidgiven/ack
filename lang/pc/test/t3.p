@@ -20,7 +20,7 @@ program t3(input,output,f1,f2,f3,f4,f5,f6);
 
 { The Berkeley and EM-1 compilers both can handle this program }
 
-const rcsversion='$Header$';
+const rcsversion='$Id$';
 type wavelength = (red,blue,yellow,q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,
                    pink,green,orange);
   spectrum= set of wavelength;

@@ -1,7 +1,7 @@
 /*
  * _isatty - check if a file descriptor is associated with a terminal
  */
-/* $Header$ */
+/* $Id$ */
 
 int _gtty(int d, char *buf);
 

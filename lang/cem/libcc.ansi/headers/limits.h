@@ -1,7 +1,7 @@
 /*
  * limits.h - implementation limits
  */
-/* $Header$ */
+/* $Id$ */
 
 #if	!defined(_LIMITS_H)
 #define	_LIMITS_H

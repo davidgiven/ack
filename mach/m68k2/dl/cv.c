@@ -1,4 +1,4 @@
-static char rcsid[] = "$Header$";
+static char rcsid[] = "$Id$";
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *

@@ -2,7 +2,7 @@
 .sect .text
 .define rol~
 .extern save~,retu~
-! $Header$
+! $Id$
 
 rol~:
 	jsr	pc,save~

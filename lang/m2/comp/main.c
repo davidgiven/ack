@@ -7,7 +7,7 @@
 
 /* M A I N   P R O G R A M */
 
-/* $Header$ */
+/* $Id$ */
 
 #include	"debug.h"
 

@@ -1,4 +1,4 @@
-/* $Header$ */
+/* $Id$ */
 char *rindex(s, c)
 register char *s, c;
 {

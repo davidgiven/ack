@@ -1,7 +1,7 @@
 /*
  * asctime - print a date
  */
-/* $Header$ */
+/* $Id$ */
 
 #include	<string.h>
 #include	<time.h>

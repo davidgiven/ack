@@ -2,7 +2,7 @@
 .sect .text
 .define sri~
 .extern unknown~
-! $Header$
+! $Id$
 
 ! Size in r0
 sri~:
