@@ -92,7 +92,7 @@ main(argc, argv)
 	init_hmask();
 #ifndef NOPP
 	inctable = (char **) Malloc(10 * sizeof(char *));
-	inctable[0] = ".";
+	inctable[0] = "";
 	inctable[1] = "/usr/include";
 	inctable[2] = 0;
 	inc_total = 2;
