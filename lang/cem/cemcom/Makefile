@@ -586,6 +586,7 @@ options.o: spec_arith.h
 options.o: target_sizes.h
 options.o: use_tmp.h
 scan.o: class.h
+scan.o: file_info.h
 scan.o: idf.h
 scan.o: input.h
 scan.o: interface.h

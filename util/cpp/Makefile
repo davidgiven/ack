@@ -223,6 +223,7 @@ replace.o: pathlength.h
 replace.o: textsize.h
 scan.o: charoffset.h
 scan.o: class.h
+scan.o: file_info.h
 scan.o: idf.h
 scan.o: input.h
 scan.o: inputtype.h

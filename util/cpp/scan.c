@@ -18,6 +18,7 @@
 #include	"idf.h"
 #include	"macro.h"
 #include	"interface.h"
+#include	"file_info.h"
 
 #define	EOS		'\0'
 #define	overflow()	(fatal("actual parameter buffer overflow"))
@@ -138,6 +139,7 @@ copyact(ch1, ch2, level)
 #endif __MATCHING_PAR__
 
 		case '\n':
+			LineNumber++;
 			LoadChar(ch);
 			while (ch == '#')	{
 				/*	This piece of code needs some
@@ -207,6 +209,7 @@ copyact(ch1, ch2, level)
 				}
 				else
 				if (ch == '\n')	{
+					LineNumber++;
 					error("newline in string");
 					copy(match);
 					break;
