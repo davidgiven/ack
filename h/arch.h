@@ -15,7 +15,7 @@ struct	ar_hdr {
 	long	ar_date;
 	char	ar_uid;
 	char	ar_gid;
-	int	ar_mode;
+	short	ar_mode;
 	long	ar_size;
 };
 
