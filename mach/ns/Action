@@ -2,7 +2,7 @@ name "NS16032 assembler"
 dir as
 end
 name "NS16032 backend"
-dir cg
+dir ncg
 end
 name "NS16032 EM library"
 dir libem
