@@ -80,6 +80,7 @@ IMPLEMENTATION MODULE Storage;
 				pc := ADR(p^.BSTORE) + size;
 				pc^ := MAGICC;
 			END;
+			p^.BSIZE := size;
 			RETURN ADR(p^.BSTORE);
 		END;
 
@@ -103,6 +104,7 @@ IMPLEMENTATION MODULE Storage;
 					pc := ADR(q^.BSTORE) + size;
 					pc^ := MAGICC;
 				END;
+				q^.BSIZE := size;
 				RETURN ADR(q^.BSTORE);
 			END;
 		END;
@@ -138,6 +140,7 @@ IMPLEMENTATION MODULE Storage;
 					pc := ADR(p^.BSTORE) + size;
 					pc^ := MAGICC;
 				END;
+				p^.BSIZE := size;
 				RETURN ADR(p^.BSTORE);
 			END;
 			(* Give part of tail of original block.
@@ -151,6 +154,7 @@ IMPLEMENTATION MODULE Storage;
 				pc := ADR(q^.BSTORE) + size;
 				pc^ := MAGICC;
 			END;
+			q^.BSIZE := size;
 			RETURN ADR(q^.BSTORE);
 		END;
 	END;
@@ -176,6 +180,7 @@ IMPLEMENTATION MODULE Storage;
 		pc := ADR(p^.BSTORE) + size;
 		pc^ := MAGICC;
 	END;
+	p^.BSIZE := size;
 	RETURN ADR(p^.BSTORE);
   END MyAllocate;
 
@@ -214,22 +219,24 @@ IMPLEMENTATION MODULE Storage;
 	pc: POINTER TO CHAR;
   BEGIN
 	IF (a = NIL) THEN 
-		Message("(Warning) NIL pointer deallocated");
+		Message("(Warning) Deallocate: NIL pointer deallocated");
 		RETURN;
 	END;
 	p := a - UNIT;
 	IF (p^.BNEXT # BucketPtr(USED)) THEN
-		Message("(Warning) area already deallocated or heap corrupted");
+		Message("(Warning) Deallocate: area already deallocated or heap corrupted");
 		a := NIL;
 		RETURN;
 	END;
 	WITH p^ DO
-		IF BSIZE # ((size + (UNIT - 1)) DIV UNIT) THEN
-			Message("(Warning) wrong size in deallocate");
-		ELSIF (BSIZE*UNIT # size) THEN
+		IF BSIZE # size THEN
+			Message("(Warning) Deallocate: wrong size or heap corrupted");
+		END;
+		BSIZE := (size + (UNIT - 1)) DIV UNIT;
+		IF (BSIZE*UNIT # size) THEN
 			pc := a + size;
 			IF pc^ # MAGICC THEN
-				Message("(Warning) heap corrupted or wrong size in deallocate");
+				Message("(Warning) Deallocate: heap corrupted");
 			END;
 		END;	
 		IF BSIZE <= NLISTS THEN
