@@ -116,7 +116,7 @@ This pointer must also be relocated by the back end or the interpreter.
 Although the EM stack grows from high to low EM addresses,
 some machines have hardware PUSH and POP
 instructions that require the stack to grow upwards.
-If reasons of efficiency urge you to use these
+If reasons of efficiency demand the use of these
 instructions, then EM
 can be implemented with the memory layout
 upside down, as shown in figure 3.

@@ -52,8 +52,8 @@ higher level one (see example below).
 The RTT instruction returns from the trap procedure and continues after the
 trap.
 In the list below all traps marked with an asterisk ('*') are
-considered to be fatal and it is explicitly undefined what happens if
-you try to restart after the trap.
+considered to be fatal and it is explicitly undefined what happens when
+restarting after the trap.
 .P
 The way a trap procedure is called is completely compatible
 with normal calling conventions. The only way a trap procedure

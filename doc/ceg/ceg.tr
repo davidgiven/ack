@@ -591,7 +591,7 @@ The default value that the loader puts in the bss segment
 T}
 #
 BYTES_REVERSED#:#T{
-Must be defined if you want the byte order reversed.
+Must be defined if the byte order must be reversed.
 By default the least significant byte is outputted first.\fR\(dg
 .FS 
 \fR\(dg When both byte orders are used, for 
@@ -600,7 +600,7 @@ supply his own set of routines.
 .FE
 T}
 WORDS_REVERSED#:#T{
-Must be defined if you want the word order reversed.
+Must be defined if the word order must be reversed.
 By default the least significant word is outputted first.
 T}
 .TE
@@ -855,8 +855,8 @@ A function call with an ``@''-sign is called during code
 expander execution (e.g.,
 the \fBback\fR-primitives). So the last group will be part of the compiler.
 .PP
-The need for the ``@''-sign construction arises, for example, when you 
-implement push/pop optimization (e.g., ``push x'' followed by ``pop y'' 
+The need for the ``@''-sign construction arises, for example, when
+implementing push/pop optimization (e.g., ``push x'' followed by ``pop y'' 
 can be replaced by ``move x, y'').
 In this case flags need to be set, unset, and tested during the execution of
 the compiler:
@@ -1368,9 +1368,8 @@ object code. If the default back.a is used, the object code is in
 ACK.OUT(5ACK) format.
 In de default back.a, the names defined here are remapped to more hidden names,
 to avoid name conflicts with for instance names used in the front-end. This
-remapping is done in an include-file, "back.h". If you implement your own
-back.a library, you are advised to do the same thing. You need some parts of
-the default "back.h" anyway.
+remapping is done in an include-file, "back.h".
+A user-implemented back.a should do the same thing.
 .nr PS 10
 .nr VS 12
 .PP
@@ -1537,8 +1536,9 @@ Some miscellaneous routines, with char *l;
 tab(#);
 l c lw(10c).
 save_label( l)#:#T{
-Save label \fIl\fP. Unfortunately, in EM when you see a label, you don't
-know yet in which segment it will end up. The save_label/dump_label mechanism
+Save label \fIl\fP. Unfortunately, in EM, when a label is encountered,
+it is not yet
+known in which segment it will end up. The save_label/dump_label mechanism
 is there to solve this problem.
 T}
 dump_label()#:#T{
@@ -1583,5 +1583,5 @@ A better solution is to change the functions output_back(), do_relo(),
 open_back(), and close_back() in such a way
 that they produce the wanted a.out format. This strategy saves a lot of I/O.
 .IP \ \3:
-If you still are not satisfied and have a lot of spare time adapt the
-\fBback\fR-primitives to produce the wanted a.out format.
+If this still is not satisfactory, the
+\fBback\fR-primitives can be adapted to produce the wanted a.out format.
