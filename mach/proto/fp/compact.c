@@ -104,7 +104,7 @@ dbl_over:			trap(EFOVFL);
 		    }
 		}
 		/*	check for overflow			*/
-		if (f->exp >= DBL_MAX)
+		if (f->exp > DBL_MAX)
 		    goto dbl_over;
 
 		/* STORE EXPONENT:			*/
@@ -177,7 +177,7 @@ sgl_over:			trap(EFOVFL);
 				}
 			}
 		}
-		if (f->exp >= SGL_MAX)
+		if (f->exp > SGL_MAX)
 			goto sgl_over;
 
 		/* STORE EXPONENT			*/
