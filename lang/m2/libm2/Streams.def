@@ -119,7 +119,7 @@ DEFINITION MODULE Streams;
   *)
 
   PROCEDURE WriteBytes(stream: Stream;
-		       VAR bytes: ARRAY OF BYTE;
+		       bytes: ARRAY OF BYTE;
 		       VAR result: StreamResult);
   (* writes bytes to the stream. No character translations occur.
      The number of bytes written is equal to the size of the parameter.

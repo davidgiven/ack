@@ -304,7 +304,7 @@ IMPLEMENTATION MODULE Streams;
 	END;
   END WriteByte;
 
-  PROCEDURE WriteBytes(stream: Stream; VAR bytes: ARRAY OF BYTE; VAR result: StreamResult);
+  PROCEDURE WriteBytes(stream: Stream; bytes: ARRAY OF BYTE; VAR result: StreamResult);
   VAR i: CARDINAL;
   BEGIN
 	FOR i := 0 TO HIGH(bytes) DO

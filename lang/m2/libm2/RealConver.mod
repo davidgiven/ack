@@ -139,7 +139,7 @@ IMPLEMENTATION MODULE RealConversions;
 			RETURN;
 		END;
 		str[ind1] := 'E'; INC(ind1);
-		DEC(pointpos);
+		IF r # 0.0D THEN DEC(pointpos); END;
 		IF pointpos < 0 THEN
 			pointpos := -pointpos;
 			str[ind1] := '-';
