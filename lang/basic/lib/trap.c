@@ -17,6 +17,7 @@ int nr;
 	/*debug  printf("trap set to %d\n",nr);*/
 	_trpline=nr;
 }
+void
 _trpfatal(i)
 int i;
 {
@@ -35,7 +36,7 @@ int i;
 _ini_trp()
 {
 	/* initialize trap routines */
-	int i, _trpfatal();
+	int i;
 
 	for(i=0;i<NSIG;i++)
 		signal(i,_trpfatal);

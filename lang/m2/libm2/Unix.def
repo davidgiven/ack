@@ -8,7 +8,7 @@ DEFINITION MODULE Unix;
   FROM SYSTEM IMPORT WORD, ADDRESS;
 
 (* Type needed for Signal *)
-  TYPE SignalPrc = PROCEDURE(INTEGER):INTEGER;
+  TYPE SignalPrc = PROCEDURE(INTEGER);
   CONST
 	SIGDFL = SignalPrc(NIL);
 	SIGIGN = SignalPrc(NIL+1);
@@ -99,8 +99,7 @@ DEFINITION MODULE Unix;
   PROCEDURE setuid(uid: INTEGER) : INTEGER;
   PROCEDURE setgid(gid: INTEGER) : INTEGER;
   PROCEDURE signal(sig: INTEGER;
-		   func: SignalPrc;
-		   VAR oldfunc: SignalPrc) : INTEGER;
+		   func: SignalPrc) : SignalPrc;
   PROCEDURE sigtrp(trapno, signo: INTEGER) : INTEGER;
   (* Let Unix signal signo cause EM trap trapno to occur *)
   PROCEDURE stat(path: ADDRESS; statbuf: ADDRESS) : INTEGER;

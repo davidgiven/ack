@@ -25,7 +25,7 @@ static int __traps[] = {
  -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
 };
 
-static int
+static void
 __ctchsig(signo)
 {
 	signal(signo,__ctchsig);
@@ -47,8 +47,8 @@ sigtrp(trapno, signo)
 		indicates failure, with error number in errno.
 	*/
 	extern int errno;
-	int (*ctch)() = __ctchsig;
-	int (*oldctch)();
+	void (*ctch)() = __ctchsig;
+	void (*oldctch)();
 	int oldtrap;
 
 	if (signo <= 0 || signo >= sizeof(__traps)/sizeof(__traps[0])) {
@@ -69,7 +69,7 @@ sigtrp(trapno, signo)
 
 	oldtrap = __traps[signo];
 
-	if ((oldctch = signal(signo, ctch)) == (int (*)())-1)  /* errno set by signal */
+	if ((oldctch = signal(signo, ctch)) == (void (*)())-1)  /* errno set by signal */
 		return -1;
 	
 	else if (oldctch == SIG_IGN) {
