@@ -14,7 +14,7 @@ FILES = macr.nr title.nr intro.nr mem.nr ispace.nr dspace.nr mapping.nr \
 IOP=$(HOME)/etc/ip_spec.t#			# to construct itables from
 
 ../em.$(SUF):	$(FILES) itables dispatdummy em.i Makefile
-		$(TBL) $(FILES) | $(NROFF) -kun $(TARGET) > ../em.$(SUF)
+		$(TBL) $(FILES) | $(NROFF) -mkun $(TARGET) > ../em.$(SUF)
 
 app.codes.pr: app.codes.nr itables dispatdummy
 
@@ -31,7 +31,7 @@ mkdispatch:	mkdispatch.c
 	$(CC) -I$(HOME)/util/ass -I$(HOME)/h -o mkdispatch mkdispatch.c $(HOME)/lib/em_data.a
 
 .SUFFIXES : .pr .nr
-.nr.pr: ; $(TBL) macr.nr $*.nr | $(NROFF) -kun >$@
+.nr.pr: ; $(TBL) macr.nr $*.nr | $(NROFF) -mkun >$@
 
 clean:
 	rm -f *.pr itables *.out dispatdummy dispat? *.o mkdispatch
