@@ -10,9 +10,11 @@ scans the files in the argument list for C-preprocessor lines of the form
 .DS
 #include "\fIfile1\fp"
 .DE
-and produces for each file \fIarg\fR in the argument list a line of the form
+and produces for each file \fIarg\fR in the argument list lines of the form
 .DS
-\fIarg\fR: \fIfile1\fR \fIfile2\fR ...
+\fIarg\fR: \fIfile1\fR
+\fIarg\fR: \fIfile2\fR
+...
 .DE
 where \fIfile1\fR, \fIfile2\fR, etc. are filenames included by \fIarg\fR, or
 by a file included by \fIarg\fR, etc.

@@ -84,12 +84,10 @@ print_namelist(nm, nlp)
 	struct namelist *nlp;
 {
 	if (nlp) {
-			printf("%s:", nm);
 			while (nlp) {
-				printf(" %s", nlp->name);
+				printf("%s: %s\n", nm, nlp->name);
 				nlp = nlp->next;
 			}
-			printf("\n");
 	}
 }
 
