@@ -548,17 +548,18 @@ lexwarning(W_ORDINARY, "overflow in constant");
 			LoadChar(ch);
 		}
 
-		if (ch == 'E' || ch == 'D') {
-			/*	Scale factor
-			*/
-			if (ch == 'D') {
-				toktype = longreal_type;
-				LoadChar(ch);
-				if (!(ch == '+' || ch == '-' || is_dig(ch)))
-					goto noscale;
+		if (ch == 'D') {
+			toktype = longreal_type;
+			LoadChar(ch);
+			if (ch == '+' || ch == '-' || is_dig(ch)) {
+				ch = 'E';
 				PushBack();
 			}
-			if (np < &buf[NUMSIZE]) *np++ = 'E';
+		}
+		if (ch == 'E') {
+			/*	Scale factor
+			*/
+			if (np < &buf[NUMSIZE]) *np++ = ch;
 			LoadChar(ch);
 			if (ch == '+' || ch == '-') {
 				/*	Signed scalefactor
@@ -577,7 +578,6 @@ lexwarning(W_ORDINARY, "overflow in constant");
 			}
 		}
 
-noscale:
 		*np++ = '\0';
 		PushBack();
 
