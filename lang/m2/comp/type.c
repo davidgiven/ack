@@ -726,8 +726,8 @@ RemoveEqual(tpx)
 }
 
 int
-type_or_forward(ptp)
-	t_type **ptp;
+type_or_forward(tp)
+	t_type *tp;
 {
 	/*	POINTER TO IDENTIFIER construction. The IDENTIFIER resides
 		in "dot". This routine handles the different cases.
@@ -748,7 +748,7 @@ type_or_forward(ptp)
 		case D_FORWTYPE:
 			nd = dot2node(0, NULLNODE, df1->df_forw_node);
 			df1->df_forw_node = nd;
-			nd->nd_type = *ptp;
+			nd->nd_type = tp;
 			return 0;
 		default:
 			return 1;
@@ -777,7 +777,7 @@ type_or_forward(ptp)
 	df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
 	assert(df->df_kind == D_FORWTYPE);
 	df->df_flags |= D_USED | D_DEFINED;
-	nd->nd_type = *ptp;
+	nd->nd_type = tp;
 	df->df_forw_node = nd;
 	if (df != df1 && (df1->df_kind & (D_TYPE | D_FORWTYPE))) {
 		/*	"df1" refers to a possible identification, but

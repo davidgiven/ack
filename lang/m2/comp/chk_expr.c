@@ -37,7 +37,7 @@
 
 extern char *symbol2str();
 extern char *sprint();
-extern arith flt2arith();
+extern arith flt_flt2arith();
 
 STATIC int
 df_error(nd, mess, edf)
