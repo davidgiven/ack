@@ -1,0 +1,1 @@
+make "P=conv" -fsk ../makefile ${1-gen}
