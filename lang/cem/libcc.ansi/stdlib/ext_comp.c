@@ -501,6 +501,7 @@ _str_ext_cvt(char *s, char **ss, struct EXTEND *e)
 	if (c == 'E' || c == 'e') {
 		int	exp1 = 0;
 		int	sign = 1;
+		int	exp_overflow = 0;
 
 		switch(*s) {
 		case '-':
@@ -515,13 +516,16 @@ _str_ext_cvt(char *s, char **ss, struct EXTEND *e)
 				exp1 = 10 * exp1 + (c - '0');
 				if ((tmp = sign * exp1 + exp) > MAX_EXP ||
 				     tmp < -MAX_EXP) {
-					errno = ERANGE;
+					exp_overflow = 1;
 				}
 			} while (c = *++s, isdigit(c));
 			if (ss) *ss = s;
 		}
 		exp += sign * exp1;
-		if (errno == ERANGE) exp = sign * MAX_EXP;
+		if (exp_overflow) {
+			exp = sign * MAX_EXP;
+			if (e->m1 != 0 || e->m2 != 0) errno = ERANGE;
+		}
 	}
 	if (e->m1 == 0 && e->m2 == 0) return;
 	e->exp = 63;

@@ -74,16 +74,15 @@ string2long(register const char *nptr, char ** const endptr,
 		else *endptr = (char *)nptr;
 	}
 
-	/* We can't represent a negative unsigned long, nor a long that
-	 * is smaller than LONG_MIN or larger than LONG_MAX.
-	 */
 	if (!ovfl) {
-		if (!is_signed)
-			if (sign < 0 && val != 0)
-				ovfl++;
-			else if (((sign < 0 && val > -LONG_MIN)
-				    || (sign > 0 && val > LONG_MAX)))
-				ovfl++;
+		/* Overflow is only possible when converting a signed long.
+		 * val is unsigned long, so -LONG_MIN is converted to
+		 * unsigned long.
+		 */
+		if (is_signed
+		    && (   (sign < 0 && val > -LONG_MIN)
+			|| (sign > 0 && val > LONG_MAX)))
+		    ovfl++;
 	}
 
 	if (ovfl) {
@@ -93,6 +92,5 @@ string2long(register const char *nptr, char ** const endptr,
 			else return LONG_MAX;
 		else return ULONG_MAX;
 	}
-	if (is_signed)	return (unsigned long) sign * val;
-	else return val;
+	return (unsigned long) sign * val;
 }

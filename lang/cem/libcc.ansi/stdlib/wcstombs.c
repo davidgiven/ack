@@ -14,8 +14,8 @@ wcstombs(register char *s, register const wchar_t *pwcs, size_t n)
 	register int i = n;
 
 	while (--i >= 0) {
-		if (!(*s++ = *pwcs))
-			return n - i - 1;
+		if (!(*s++ = *pwcs++))
+			break;
 	}
-	return n - i;
+	return n - i - 1;
 }
