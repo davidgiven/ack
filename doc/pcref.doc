@@ -1334,6 +1334,19 @@ Alternate symbol representation.
 .sp
 The comment delimiters '(*' and '*)' are recognized and treated like '{' and '}'.
 The other alternate representations of symbols are not recognized.
+.sp
+.ti -3
+9.~\
+Pre-processing.
+.sp
+If the very first character of a file containing a Pascal
+program is the sharp ('#', ASCII 23(hex)) the file is preprocessed
+in the same way as C programs.
+Lines beginning with a '#' are taken as preprocessor command lines
+and not fed to the Pascal compiler proper.
+C style comments, /*......*/, are removed by the C preprocessor,
+thus C comments inside Pascal programs are also removed when they
+are fed through the preprocessor.
 .CH "Deviations from the standard"
 Ack-Pascal deviates from the (March 1980) standard proposal in the following ways:
 .IS
