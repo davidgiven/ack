@@ -6,8 +6,8 @@
  */
 /* $Header$ */
 
-#if	!defined(__SIGNAL_HEADER__)
-#define	__SIGNAL_HEADER__
+#if	!defined(_SIGNAL_H)
+#define	_SIGNAL_H
 
 typedef	int		sig_atomic_t;
 
@@ -69,4 +69,4 @@ typedef	int		sig_atomic_t;
 void	(*signal(int __sig, void (*__func)(int)))(int);
 int	raise(int __sig);
 
-#endif	/* __SIGNAL_HEADER__ */
+#endif	/* _SIGNAL_H */

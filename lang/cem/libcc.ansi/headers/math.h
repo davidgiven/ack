@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#if	!defined(__MATH_HEADER__)
-#define	__MATH_HEADER__
+#if	!defined(_MATH_H)
+#define	_MATH_H
 
 #define	HUGE_VAL	9.9e+999	/* though it will generate a warning */
 
@@ -37,4 +37,4 @@ double	ldexp(double __x, int __exp);
 double	modf(double __x, double *__iptr);
 double	fmod(double __x, double __y);
 
-#endif	/* __MATH_HEADER__ */
+#endif	/* _MATH_H */

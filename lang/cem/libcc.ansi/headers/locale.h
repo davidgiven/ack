@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#if	!defined(__LOCALE_HEADER__)
-#define	__LOCALE_HEADER__
+#if	!defined(_LOCALE_H)
+#define	_LOCALE_H
 
 struct lconv {
 	char	*decimal_point;		/* "." */
@@ -17,6 +17,7 @@ struct lconv {
 	char	*mon_grouping;		/* "" */
 	char	*positive_sign;		/* "" */
 	char	*negative_sign;		/* "" */
+	char	int_frac_digits;	/* CHAR_MAX */
 	char	frac_digits;		/* CHAR_MAX */
 	char	p_cs_precedes;		/* CHAR_MAX */
 	char	p_sep_by_space;		/* CHAR_MAX */
@@ -26,9 +27,7 @@ struct lconv {
 	char	n_sign_posn;		/* CHAR_MAX */
 };
 
-#if	defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
+#define	NULL		((void *)0)
 
 #define	LC_ALL		1
 #define	LC_COLLATE	2
@@ -41,4 +40,4 @@ struct lconv {
 char		*setlocale(int __category, const char *__locale);
 struct	lconv	*localeconv(void);
 
-#endif	/* __LOCALE_HEADER__ */
+#endif	/* _LOCALE_H */

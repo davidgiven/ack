@@ -6,17 +6,19 @@
  */
 /* $Header$ */
 
-#if	!defined(__STRING_HEADER__)
-#define	__STRING_HEADER__
+#if	!defined(_STRING_H)
+#define	_STRING_H
 
-#if	!defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
+#define	NULL		((void *)0)
 
-#if	!defined(__TYPE_SIZE__)
-#define	__TYPE_SIZE__
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* __TYPE_SIZE__ */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
 
 void	*memcpy(void *__s1, const void *__s2, size_t __n);
 void	*memmove(void *__s1, const void *__s2, size_t __n);
@@ -41,4 +43,4 @@ void	*memset(void *__s, int __c, size_t __n);
 char	*strerror(int __errnum);
 size_t	strlen(const char *__s);
 
-#endif	/* __STRING_HEADER__ */
+#endif	/* _STRING_H */

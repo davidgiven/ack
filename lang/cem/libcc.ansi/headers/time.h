@@ -3,12 +3,10 @@
  */
 /* $Header$ */
 
-#if	!defined(__TIME_HEADER__)
-#define	__TIME_HEADER__
+#if	!defined(_TIME_H)
+#define	_TIME_H
 
-#if	!defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
+#define	NULL		((void *)0)
 
 #if	defined(__BSD4_2)
 #define	CLOCKS_PER_SEC		1000000		/* ticks per second */
@@ -16,12 +14,20 @@
 #define	CLOCKS_PER_SEC		60
 #endif	/* __BSD4_2 */
 
-#if	!defined(__TYPE_SIZE__)
-#define	__TYPE_SIZE__
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* __TYPE_SIZE__ */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
 
+#if	!defined(_TIME_T)
+#define	_TIME_T
 typedef	unsigned long	time_t;		/* type returned by TOD clock */
+#endif	/* _TIME_T */
+
 typedef	unsigned long	clock_t;	/* type returned by real time clock */
 
 struct tm {
@@ -49,7 +55,14 @@ size_t		strftime(char *__s, size_t __maxsize,
 			const struct tm *__timeptr);
 
 #if	defined(__USG) || defined(_POSIX_SOURCE)
+
 void	tzset(void);
+
+#if	defined(__USG)
+extern long timezone;
+extern int daylight;
+extern char *tzname[2];
+#endif
 #endif	/* __USG || _POSIX_SOURCE */
 
-#endif	/* __TIME_HEADER__ */
+#endif	/* _TIME_H */

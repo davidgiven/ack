@@ -6,12 +6,10 @@
  */
 /* $Header$ */
 
-#if	!defined(__STDLIB_HEADER__)
-#define	__STDLIB_HEADER__
+#if	!defined(_STDLIB_H)
+#define	_STDLIB_H
 
-#if	!defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
+#define	NULL		((void *)0)
 
 #define	EXIT_FAILURE	1
 #define	EXIT_SUCCESS	0
@@ -21,15 +19,19 @@
 typedef struct { int quot, rem; } div_t;
 typedef struct { long quot, rem; } ldiv_t;
 
-#if	!defined(__TYPE_SIZE__)
-#define	__TYPE_SIZE__
-typedef unsigned int	size_t;
-#endif	/* __TYPE_SIZE__ */
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
+typedef unsigned int	size_t;		/* type returned by sizeof */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
 
-#if	!defined(__TYPE_WCHAR__)
-#define	__TYPE_WCHAR__
+#if	!defined(_WCHAR_T)
+#define	_WCHAR_T
 typedef char	wchar_t;
-#endif	/* __TYPE_WCHAR__ */
+#endif	/* _WCHAR_T */
 
 double		atof(const char *__nptr);
 int		atoi(const char *__nptr);
@@ -63,4 +65,4 @@ int		wctomb(char *__s, wchar_t __wchar);
 size_t		mbstowcs(wchar_t *__pwcs, const char *__s, size_t __n);
 size_t		wcstombs(char *__s, const wchar_t *__pwcs, size_t __n);
 
-#endif	/* __STDLIB_HEADER__ */
+#endif	/* _STDLIB_H */

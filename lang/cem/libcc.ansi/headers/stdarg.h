@@ -6,15 +6,15 @@
  */
 /* $Header$ */
 
-#if	!defined(__STDARG_HEADER__)
-#define	__STDARG_HEADER__
+#if	!defined(_STDARG_H)
+#define	_STDARG_H
 
-typedef	void	*va_list;
+typedef	char	*va_list;
 
-#define _vasz(x)		((sizeof(x)+sizeof(int)-1) & ~(sizeof(int) -1))
+#define __vasz(x)		((sizeof(x)+sizeof(int)-1) & ~(sizeof(int) -1))
 
-#define va_start(ap, parmN)	(ap = (va_list)&parmN + _vasz(parmN))
-#define va_arg(ap, type)	(*((type *)((ap += _vasz(type)) - _vasz(type))))
+#define va_start(ap, parmN)	(ap = (va_list)&parmN + __vasz(parmN))
+#define va_arg(ap, type)	(*((type *)((ap += __vasz(type)) - __vasz(type))))
 #define va_end(ap)
 
-#endif	/* __STDARG_HEADER__ */
+#endif	/* _STDARG_H */

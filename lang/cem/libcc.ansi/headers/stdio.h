@@ -6,8 +6,8 @@
  */
 /* $Header$ */
 
-#if	!defined(__STDIO_HEADER__)
-#define	__STDIO_HEADER__
+#if	!defined(_STDIO_H)
+#define	_STDIO_H
 
 /*
  * Focus point of all stdio activity.
@@ -32,6 +32,7 @@ typedef struct __iobuf {
 #define	_IOLBF		0x040
 #define	_IOREADING	0x080
 #define _IOWRITING	0x100
+#define	_IOAPPEND	0x200
 
 /* The following definitions are also in <unistd.h>. They should not
  * conflict.
@@ -45,12 +46,8 @@ typedef struct __iobuf {
 #define	stderr		(&__stderr)
 
 #define	BUFSIZ		1024
-#if	!defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
-#if	!defined(EOF)
+#define	NULL		((void *)0)
 #define	EOF		(-1)
-#endif	/* EOF */
 
 #define	FOPEN_MAX	20
 
@@ -62,15 +59,16 @@ typedef struct __iobuf {
 #define	TMP_MAX		999
 #define	L_tmpnam	(sizeof("/tmp/") + 15)
 
-#if	!defined(__TYPE_FPOS__)
-#define	__TYPE_FPOS__
 typedef long int	fpos_t;
-#endif	/* __TYPE_FPOS__ */
 
-#if	!defined(__TYPE_SIZE__)
-#define	__TYPE_SIZE__
-typedef unsigned int	size_t;
-#endif	/* __TYPE_SIZE__ */
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
+typedef unsigned int	size_t;		/* type returned by sizeof */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
 
 extern FILE	*__iotab[FOPEN_MAX];
 extern FILE	__stdin, __stdout, __stderr;
@@ -91,9 +89,9 @@ int	printf(const char *__format, ...);
 int	scanf(const char *__format, ...);
 int	sprintf(char *__s, const char *__format, ...);
 int	sscanf(char *__s, const char *__format, ...);
-int	vfprintf(FILE *__stream, const char *__format, void *__arg);
-int	vprintf(const char *__format, void *__arg);
-int	vsprintf(char *__s, const char *__format, void *__arg);
+int	vfprintf(FILE *__stream, const char *__format, char *__arg);
+int	vprintf(const char *__format, char *__arg);
+int	vsprintf(char *__s, const char *__format, char *__arg);
 int	fgetc(FILE *__stream);
 char	*fgets(char *__s, int __n, FILE *__stream);
 int	fputc(int __c, FILE *__stream);
@@ -132,9 +130,9 @@ int __flushbuf(int __c, FILE *__stream);
 #define	feof(p)		(((p)->_flags & _IOEOF) != 0)
 #define	ferror(p)	(((p)->_flags & _IOERR) != 0)
 
-#if	defined(_POSIX_SOURCE)
+#if	defined(__BSD4_2) || defined(__USG) || defined(_POSIX_SOURCE)
 int fileno(FILE *__stream);
 #define	fileno(stream)		((stream)->_fd)
-#endif	/* _POSIX_SOURCE */
+#endif	/* __BSD4_2 || __USG || _POSIX_SOURCE */
 
-#endif	/* __STDIO_HEADER__ */
+#endif	/* _STDIO_H */

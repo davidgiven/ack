@@ -6,28 +6,33 @@
  */
 /* $Header$ */
 
-#if	!defined(__STDDEF_HEADER__)
-#define	__STDDEF_HEADER__
+#if	!defined(_STDDEF_H)
+#define	_STDDEF_H
 
-#if	!defined(NULL)
-#define	NULL		0
-#endif	/* NULL */
+#define	NULL		((void *)0)
 
-#define	offsetof(type, ident)		(((size_t) &(((type *)0)->ident))
+#define	offsetof(type, ident)		(((size_t) &(((type *)0)->ident)))
 
-#if	!defined(__TYPE_PTRDIFF__)
-#define	__TYPE_PTRDIFF__
+#if	_EM_PSIZE == 2
 typedef int	ptrdiff_t;	/* result of substracting two pointers */
-#endif	/* __TYPE_PTRDIFF__ */
+#elif	_EM_PSIZE == 4
+typedef long	ptrdiff_t;	/* result of substracting two pointers */
+#else
+#error garbage pointer size
+#endif	/* _EM_PSIZE */
 
-#if	!defined(__TYPE_SIZE__)
-#define	__TYPE_SIZE__
+#if	!defined(_SIZE_T)
+#define	_SIZE_T
+#if	_EM_WSIZE  == _EM_PSIZE
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* __TYPE_SIZE__ */
+#else
+typedef unsigned long	size_t;		/* type returned by sizeof */
+#endif
+#endif	/* _SIZE_T */
 
-#if	!defined(__TYPE_WCHAR__)
-#define	__TYPE_WCHAR__
+#if	!defined(_WCHAR_T)
+#define	_WCHAR_T
 typedef char	wchar_t;		/* type expanded character set */
-#endif	/* __TYPE_WCHAR__ */
+#endif	/* _WCHAR_T */
 
-#endif	/* __STDDEF_HEADER__ */
+#endif	/* _STDDEF_H */

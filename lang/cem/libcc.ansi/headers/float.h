@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#if	!defined(__FLOAT_HEADER__)
-#define	__FLOAT_HEADER__
+#if	!defined(_FLOAT_H)
+#define	_FLOAT_H
 
 #if	defined(vax)
 #define	FLT_DIG			6
@@ -113,4 +113,4 @@
 
 #endif	/* vax, pdp or ieee */
 
-#endif	/* __FLOAT_HEADER__ */
+#endif	/* _FLOAT_H */
