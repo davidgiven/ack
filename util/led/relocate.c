@@ -158,7 +158,19 @@ addrelo(relo, names, sects, valu_out)
 	register ushort		index = NLocals;
 	register long		valu = *valu_out;
 
-	if (ISUNDEFINED(local) || ISCOMMON(local)) {
+	if ((local->on_type & S_SCT)) {
+		register int	sectindex = (local->on_type & S_TYP) - S_MIN;
+
+		if (refers_zero(valu, relo, sects[sectindex].os_flen)) {
+			valu -= sects[sectindex].os_flen;
+			valu += outsect[sectindex].os_flen;
+			valu += relorig[sectindex].org_zero;
+		} else {
+			valu += relorig[sectindex].org_flen;
+		}
+		valu += outsect[sectindex].os_base;
+		index += NGlobals + sectindex;
+	} else {
 		register struct outname	*name;
 		extern int		hash();
 		extern struct outname	*searchname();
@@ -174,20 +186,6 @@ addrelo(relo, names, sects, valu_out)
 			valu += name->on_valu;
 			index += NGlobals + (name->on_type & S_TYP) - S_MIN;
 		}
-	} else {
-		register int	sectindex = (local->on_type & S_TYP) - S_MIN;
-
-		if (!(local->on_type & S_SCT))
-			fatal("bad relocation index");
-		if (refers_zero(valu, relo, sects[sectindex].os_flen)) {
-			valu -= sects[sectindex].os_flen;
-			valu += outsect[sectindex].os_flen;
-			valu += relorig[sectindex].org_zero;
-		} else {
-			valu += relorig[sectindex].org_flen;
-		}
-		valu += outsect[sectindex].os_base;
-		index += NGlobals + sectindex;
 	}
 	*valu_out = valu;
 	return index;
