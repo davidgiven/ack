@@ -939,7 +939,7 @@ CodeOper(expr, true_label, false_label)
 				break;
 			}
 			CodePExpr(rightop);
-			C_loc(rightop->nd_type->set_low-leftop->nd_INT);
+			C_loc(leftop->nd_INT - rightop->nd_type->set_low);
 		}
 		else {
 			CodePExpr(rightop);
