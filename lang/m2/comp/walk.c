@@ -544,23 +544,22 @@ WalkStat(nd, exit_label)
 			if (good_forvar) {
 				bstp = BaseType(nd->nd_type);
 				uns = bstp->tp_fund != T_INTEGER;
-				C_dup(int_size);
-				CodeDStore(nd);
 				CodePExpr(fnd);
 				C_stl(tmp);
+				CodePExpr(left->nd_left);
+				C_dup(int_size);
+				CodeDStore(nd);
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
+				C_zgt(l2);
+				C_lol(tmp);
+				ForLoopVarExpr(nd);
 				if (left->nd_INT >= 0) {
-					C_zgt(l2);
-					C_lol(tmp);
-					ForLoopVarExpr(nd);
 				}
 				else {
 					stepsize = -stepsize;
-					C_zlt(l2);
-					ForLoopVarExpr(nd);
-					C_lol(tmp);
+					C_exg(int_size);
 				}
 				C_sbu(int_size);
 				if (stepsize) {
@@ -797,7 +796,6 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 		return 1;
 	}
 
-	CodePExpr(left->nd_left);
 	return 1;
 }
 
