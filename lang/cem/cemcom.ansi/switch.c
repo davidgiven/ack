@@ -42,7 +42,6 @@ static struct switch_hdr *switch_stack = 0;
 	- the expression E in "switch(E)" shall have integral type (3.6.4.2)
 	- the expression E in "case E:" is converted to the promoted type
 					of the controlling expression
-	- the values in the CSA/CSB tables are words (EM 7.4) (??? JvE)
 	For simplicity, we suppose int_size == word_size.
 */
 
@@ -59,18 +58,6 @@ code_startswitch(expp)
 				    /* INT, LONG, FLOAT, DOUBLE or LNGDBL */
 	
 	switch (fund) {
-	case LONG:
-		/* switches on longs should work. Unfortunately, no backend
-		 * has simplemented switches with sizes other than the
-		 * word_size. Furthermore, building the rom should then be
-		 * done using C_rom_icon().
-		 * Just cast the expression to int and give a warning when
-		 * this means truncation.
-		 */
-		if (long_size > int_size)
-			warning("can't switch on longs (cast to int)");
-		int2int(expp, int_type);	/* for now ??? */
-		break;
 	case FLOAT:
 	case DOUBLE:
 	case LNGDBL:
@@ -80,23 +67,25 @@ code_startswitch(expp)
 	}
 	stack_stmt(l_break, NO_LABEL);
 	sh->sh_break = l_break;
-	sh->sh_default = 0;
+	/* sh->sh_default = 0; */
 	sh->sh_table = l_table;
-	sh->sh_nrofentries = 0;
+	/* sh->sh_nrofentries = 0; */
 	sh->sh_type = (*expp)->ex_type;	/* the expression switched	*/
-	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* immaterial ??? */
-	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
+	/* sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->sh_expr = *expp;
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
 
+extern char *long2str();
+
 code_endswitch()
 {
 	register struct switch_hdr *sh = switch_stack;
 	register label tablabel;
 	register struct case_entry *ce;
+	arith size = sh->sh_type->tp_size;
 
 	if (sh->sh_default == 0)	/* no default occurred yet */
 		sh->sh_default = sh->sh_break;
@@ -111,8 +100,9 @@ code_endswitch()
 		/* CSA */
 		register arith val;
 
-		C_rom_cst(sh->sh_lowerbd);
-		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
+		C_rom_icon(long2str((long)sh->sh_lowerbd,10), size);
+		C_rom_icon(long2str((long)(sh->sh_upperbd - sh->sh_lowerbd),10),
+				size);
 		ce = sh->sh_entries;
 		if (sh->sh_nrofentries)
 		    for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
@@ -125,17 +115,17 @@ code_endswitch()
 				C_rom_ilb(sh->sh_default);
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
-		C_csa(sh->sh_type->tp_size);
+		C_csa(size);
 	}
 	else { /* CSB */
-		C_rom_cst((arith)sh->sh_nrofentries);
+		C_rom_icon(long2str((long)sh->sh_nrofentries,10),size);
 		for (ce = sh->sh_entries; ce; ce = ce->next) {
 			/* generate the entries: value + prog.label	*/
-			C_rom_cst(ce->ce_value);
+			C_rom_icon(long2str((long)ce->ce_value,10),size);
 			C_rom_ilb(ce->ce_label);
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
-		C_csb(sh->sh_type->tp_size);
+		C_csb(size);
 	}
 	C_df_ilb(sh->sh_break);
 	switch_stack = sh->next;	/* unstack the switch descriptor */
@@ -168,7 +158,7 @@ code_case(expr)
 	C_df_ilb(ce->ce_label = text_label());
 	ce->ce_value = val = expr->VL_VALUE;
 	if (sh->sh_entries == 0) { /* first case entry	*/
-		ce->next = (struct case_entry *) 0;
+		/* ce->next = (struct case_entry *) 0; */
 		sh->sh_entries = ce;
 		sh->sh_lowerbd = sh->sh_upperbd = val;
 		sh->sh_nrofentries = 1;

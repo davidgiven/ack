@@ -103,7 +103,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	check_selector(idf, stp);
 
 	newsdef = new_sdef();
-	newsdef->sd_sdef = (struct sdef *) 0;
+	/* newsdef->sd_sdef = (struct sdef *) 0; */
 
 	/*	link into selector descriptor list of this id
 	*/

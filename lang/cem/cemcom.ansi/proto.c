@@ -119,7 +119,7 @@ add_proto(pl, ds, dc, level)
 		newdef->df_line = idf->id_line;
 #ifdef LINT
 		newdef->df_set = (type->tp_fund == ARRAY);
-		newdef->df_firstbrace = 0;
+		/* newdef->df_firstbrace = 0; */
 #endif
 		/*	We can't put the idf onto the stack, since these kinds
 			of declaration may occurs at any level, and the idf

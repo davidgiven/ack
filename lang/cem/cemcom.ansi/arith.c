@@ -334,9 +334,9 @@ int2float(expp, tp)
 		
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		exp->FL_VALUE = 0 /* Salloc(buf, (unsigned)strlen(buf)+1) */ ;
+		/* exp->FL_VALUE = 0 /* Salloc(buf, (unsigned)strlen(buf)+1) */ ;
 		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH));
-		exp->FL_DATLAB = 0;
+		/* exp->FL_DATLAB = 0; */
 	}
 	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
 }

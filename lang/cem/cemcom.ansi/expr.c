@@ -209,11 +209,11 @@ string2expr(expp, str, len)
 	ex->ex_type = string_type;
 	/* ex->ex_type = qualifier_type(ex->ex_type, TQ_CONST); */
 	ex->ex_flags |= EX_READONLY;
-	ex->ex_lvalue = 0;
+	/* ex->ex_lvalue = 0; */
 	ex->ex_class = String;
 	ex->SG_VALUE = str;
 	ex->SG_LEN = len;
-	ex->SG_DATLAB = 0;
+	/* ex->SG_DATLAB = 0; */
 }
 
 int2expr(expr)

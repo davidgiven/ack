@@ -90,7 +90,7 @@ idf_hashed(tg, size, hc)
 	*hook = notch;		/* hooked in */
 	notch->id_text = Salloc(tg, (unsigned) size);
 #ifndef NOPP
-	notch->id_resmac = 0;
+	/* notch->id_resmac = 0; */
 #endif NOPP
 	return notch;
 }
@@ -346,7 +346,7 @@ declare_idf(ds, dc, lvl)
 		newdef->df_line = idf->id_line;
 #ifdef	LINT
 		newdef->df_set = (type->tp_fund == ARRAY);
-		newdef->df_firstbrace = 0;
+		/* newdef->df_firstbrace = 0; */
 #endif	LINT
 
 		/* link it into the name list in the proper place */
