@@ -33,6 +33,14 @@ begdata:
 hol0:
 	.data2   0,0
 	.data2   0,0
+.reghp:
+	.data2   endbss
+.limhp:
+	.data2   endbss
+.ignmask:
+	.data2   0
+.trppc:
+	.data2   0
 
 	.sect .bss
 begbss:
