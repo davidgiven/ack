@@ -117,12 +117,12 @@ DoLineno(nd)
 	}
 }
 
-DoFilename()
+DoFilename(needed)
 {
 	static label	filename_label = 0;
 
-	oldlineno = 0;
-	if (! options['L']) {
+	oldlineno = 0;	/* always invalidate remembered line number */
+	if (needed && ! options['L']) {
 
 		if (! filename_label) {
 			filename_label = 1;
@@ -185,7 +185,7 @@ WalkModule(module)
 		for (; nd; nd = nd->nd_left) {
 			C_cal(nd->nd_def->mod_vis->sc_scope->sc_name);
 		}
-		DoFilename();
+		DoFilename(1);
 	}
 	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
@@ -230,7 +230,12 @@ WalkProcedure(procedure)
 	C_ms_par(procedure->df_type->prc_nbpar);
 	TmpOpen(procscope);
 	DoPriority();
-	DoFilename();		/* ??? only when this procedure is exported? */
+	/* generate code for filename only when the procedure can be
+	   exported, either directly or by taking the address.
+	   This cannot be done if the level is not zero (because in
+	   this case it is a nested procedure).
+	*/
+	DoFilename(! procscope->sc_level);
 
 	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
 

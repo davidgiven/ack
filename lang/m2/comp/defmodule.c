@@ -93,7 +93,7 @@ GetDefinitionModule(id, incr)
 	t_scopelist *vis;
 	char *fn = FileName;
 	int ln = LineNumber;
-	t_scope *newsc = CurrentScope;
+	t_scope *newsc;
 
 	level += incr;
 	df = lookup(id, GlobalScope, D_IMPORTED, 0);
@@ -105,13 +105,14 @@ GetDefinitionModule(id, incr)
 		ForeignFlag = 0;
 		DefId = id;
 		open_scope(CLOSEDSCOPE);
+		newsc = CurrentScope;
 		vis = CurrVis;
+		newsc->sc_defmodule = incr;
 		if (!strcmp(id->id_text, "SYSTEM")) {
 			do_SYSTEM();
 			df = lookup(id, GlobalScope, D_IMPORTED, 0);
 		}
 		else {
-			newsc = CurrentScope;
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 
 				DefModule();

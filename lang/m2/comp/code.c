@@ -311,8 +311,8 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register t_node *left = nd->nd_left;
-	register t_node *right = nd->nd_right;
 	register t_type *result_tp;
+	int needs_fn;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -321,8 +321,8 @@ CodeCall(nd)
 
 	assert(IsProcCall(left));
 
-	if (right) {
-		CodeParameters(ParamList(left->nd_type), right);
+	if (nd->nd_right) {
+		CodeParameters(ParamList(left->nd_type), nd->nd_right);
 	}
 
 	switch(left->nd_class) {
@@ -333,11 +333,13 @@ CodeCall(nd)
 			if (level > 0) {
 				C_lxl((arith) (proclevel - level));
 			}
+			needs_fn = left->nd_def->df_scope->sc_defmodule;
 			C_cal(NameOfProc(left->nd_def));
 			break;
 		}}
 		/* Fall through */
 	default:
+		needs_fn = 1;
 		CodePExpr(left);
 		C_cai();
 	}
@@ -350,7 +352,7 @@ CodeCall(nd)
 		}
 		else	C_lfr(sz);
 	}
-	DoFilename();
+	DoFilename(needs_fn);
 	DoLineno(nd);
 }
 

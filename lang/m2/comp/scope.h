@@ -28,6 +28,9 @@ struct scope {
 	struct def *sc_def;	/* list of definitions in this scope */
 	arith sc_off;		/* offsets of variables in this scope */
 	char sc_scopeclosed;	/* flag indicating closed or open scope */
+	char sc_defmodule;	/* flag set is this scope is from a separate
+				   definition module
+				*/
 	int sc_level;		/* level of this scope */
 	struct def *sc_definedby; /* The def structure defining this scope */
 	struct node *sc_end;	/* node to remember line number of end of scope */
