@@ -197,7 +197,7 @@ declare_idf(ds, dc, lvl)
 				error("unknown %s-type",
 					symbol2str(type->tp_fund));
 			}
-			else {
+			else if (type->tp_fund != LABEL) {
 				/* CJ */
 				warning("%s has size 0", idf->id_text);
 			}
