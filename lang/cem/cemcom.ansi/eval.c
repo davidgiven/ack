@@ -547,6 +547,9 @@ EVAL(expr, val, code, true_label, false_label)
 		}
 		case '.':
 		case ARROW:
+			if (tp->tp_fund == FLOAT || tp->tp_fund == DOUBLE
+			    || tp->tp_fund == LNGDBL)
+				fp_used = 1;
 			EVAL(left, oper == '.' ? LVAL : RVAL, gencode,
 				NO_LABEL, NO_LABEL);
 			ASSERT(is_cp_cst(right));
@@ -638,6 +641,10 @@ EVAL(expr, val, code, true_label, false_label)
 			loaded by the following statements:
 		*/
 		if (gencode && val == RVAL && expr->ex_lvalue == 1) {
+			if (expr->ex_type->tp_fund == FLOAT
+			    || expr->ex_type->tp_fund == DOUBLE
+			    || expr->ex_type->tp_fund == LNGDBL)
+				fp_used = 1;
 			load_block(expr->ex_type->tp_size,
 				expr->ex_type->tp_align);
 		}
@@ -906,6 +913,10 @@ load_val(expr, rlval)
 	register int inword = 0, indword = 0;
 	register arith val = expr->VL_VALUE;
 
+	if (expr->ex_type->tp_fund == FLOAT
+	    || expr->ex_type->tp_fund == DOUBLE
+	    || expr->ex_type->tp_fund == LNGDBL)
+		fp_used = 1;
 	if (expr->VL_CLASS == Const) {
 		if (rvalue) { /* absolute addressing */
 			load_cst(val, pointer_size);
@@ -945,8 +956,6 @@ load_val(expr, rlval)
 		int fund = df->df_type->tp_fund;
 
 		ASSERT(ISNAME(expr));
-		if (fund == FLOAT || fund == DOUBLE || fund == LNGDBL)
-			fp_used = 1;
 		if (fund == FUNCTION) {
 			/*	the previous statement tried to catch a function
 				identifier, which may be cast to a pointer to a

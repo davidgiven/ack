@@ -379,7 +379,7 @@ type2str(tp)
 			ops = 0;
 			break;
 		}
-		if (!ops) tp = tp->tp_up;
+		if (ops) tp = tp->tp_up;
 	}
 	return buf;
 }
