@@ -5,8 +5,13 @@
 /* $Header$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	"lint.h"
 #include	"nofloat.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"em_lint.h"
+#endif	LINT
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -21,7 +26,6 @@
 #include	"expr.h"
 #include	"type.h"
 #include	"noRoption.h"
-#include	"lint.h"
 
 extern char options[];
 

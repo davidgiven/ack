@@ -6,7 +6,12 @@
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
 #include	"lint.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"em_lint.h"
+#include	"l_lint.h"
+#endif	LINT
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"dataflow.h"
@@ -30,9 +35,6 @@
 #include	"assert.h"
 #include	"noRoption.h"
 #include	"file_info.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	LINT
 
 label lab_count = 1;
 label datlab_count = 1;
@@ -104,6 +106,7 @@ def_strings(sc)
 	}
 }
 
+#ifndef	LINT
 end_code()
 {
 	/*	end_code() performs the actions to be taken when closing
@@ -120,6 +123,7 @@ end_code()
 	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
+#endif	LINT
 
 #ifdef	PREPEND_SCOPES
 prepend_scopes()

@@ -81,7 +81,7 @@ CSRC =	main.c idf.c declarator.c decspecs.c struct.c \
 	scan.c skip.c stack.c type.c ch7mon.c label.c eval.c \
 	switch.c conversion.c util.c \
 	blocks.c dataflow.c Version.c \
-	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c l_dummy.c
+	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c
 COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	expr.o ch7.o ch7bin.o cstoper.o arith.o \
 	asm.o code.o dumpidf.o error.o field.o\
@@ -90,7 +90,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	scan.o skip.o stack.o type.o ch7mon.o label.o eval.o \
 	switch.o conversion.o util.o \
 	blocks.o dataflow.o Version.o \
-	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o l_dummy.o
+	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o
 
 # Objects of other generated C files
 GCSRC =	char.c symbol2str.c next.c
@@ -121,7 +121,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
-	 file_info.h tokenname.h l_lint.h
+	 file_info.h tokenname.h em_lint.h l_lint.h
 
 HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
@@ -272,6 +272,7 @@ main.o: LLlex.h
 main.o: Lpars.h
 main.o: align.h
 main.o: arith.h
+main.o: assert.h
 main.o: debug.h
 main.o: declar.h
 main.o: file_info.h
@@ -465,6 +466,7 @@ code.o: debug.h
 code.o: declar.h
 code.o: decspecs.h
 code.o: def.h
+code.o: em_lint.h
 code.o: expr.h
 code.o: file_info.h
 code.o: idf.h
@@ -506,6 +508,7 @@ error.o: LLlex.h
 error.o: arith.h
 error.o: debug.h
 error.o: def.h
+error.o: em_lint.h
 error.o: errout.h
 error.o: expr.h
 error.o: file_info.h
@@ -657,6 +660,7 @@ stack.o: arith.h
 stack.o: botch_free.h
 stack.o: debug.h
 stack.o: def.h
+stack.o: em_lint.h
 stack.o: idf.h
 stack.o: level.h
 stack.o: lint.h
@@ -742,6 +746,7 @@ switch.o: botch_free.h
 switch.o: code.h
 switch.o: debug.h
 switch.o: density.h
+switch.o: em_lint.h
 switch.o: expr.h
 switch.o: idf.h
 switch.o: label.h
@@ -766,6 +771,7 @@ conversion.o: type.h
 util.o: Lpars.h
 util.o: align.h
 util.o: def.h
+util.o: em_lint.h
 util.o: lint.h
 util.o: nocross.h
 util.o: nofloat.h
@@ -909,10 +915,6 @@ l_comment.o: l_comment.h
 l_comment.o: l_state.h
 l_comment.o: lint.h
 l_comment.o: spec_arith.h
-l_dummy.o: arith.h
-l_dummy.o: label.h
-l_dummy.o: lint.h
-l_dummy.o: spec_arith.h
 tokenfile.o: Lpars.h
 declar.o: LLlex.h
 declar.o: Lpars.h
@@ -946,6 +948,7 @@ statement.o: botch_free.h
 statement.o: code.h
 statement.o: debug.h
 statement.o: def.h
+statement.o: em_lint.h
 statement.o: expr.h
 statement.o: file_info.h
 statement.o: idf.h
@@ -997,6 +1000,7 @@ ival.o: arith.h
 ival.o: assert.h
 ival.o: debug.h
 ival.o: def.h
+ival.o: em_lint.h
 ival.o: estack.h
 ival.o: expr.h
 ival.o: field.h

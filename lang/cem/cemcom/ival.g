@@ -8,7 +8,12 @@
 {
 #include	"lint.h"
 #include	"nofloat.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"em_lint.h"
+#include	"l_lint.h"
+#endif	LINT
 #include	"debug.h"
 #include	<alloc.h>
 #include	"nobitfield.h"
@@ -27,9 +32,6 @@
 #include	"LLlex.h"
 #include	"noRoption.h"
 #include	"estack.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	LINT
 
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
@@ -564,7 +566,7 @@ ch_array(tpp, ex)
 	ASSERT(ex->ex_class == String);
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
-		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
+		tp = *tpp = construct_type(ARRAY, tp->tp_up, (arith)length);
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;

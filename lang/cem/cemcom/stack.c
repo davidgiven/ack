@@ -8,7 +8,11 @@
 #include	"lint.h"
 #include	"nofloat.h"
 #include	<system.h>
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"em_lint.h"
+#endif	LINT
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -22,8 +26,6 @@
 #include	"level.h"
 #include	"mes.h"
 #include	"noRoption.h"
-
-/* #include	<em_reg.h> */
 
 extern char options[];
 

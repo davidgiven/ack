@@ -180,7 +180,7 @@ char *source;
 add_dependency(s)
 char *s;
 {
-    register struct idf *p = str2idf(s, 0);
+    register struct idf *p = str2idf(s);
     
     if (! p->id_resmac) {
 	p->id_resmac = K_FILE;
@@ -281,15 +281,16 @@ compile(argc, argv)
 #ifndef	LINT
 		init_code(destination && strcmp(destination, "-") != 0 ?
 					destination : 0);
-#endif	LINT
-
 		/* compile the source text			*/
 		C_program();
-
 #ifdef PREPEND_SCOPES
 		prepend_scopes();
 #endif PREPEND_SCOPES
 		end_code();
+#else	LINT
+		/* lint the source text				*/
+		C_program();
+#endif	LINT
 
 #ifdef	DEBUG
 		if (options['u'])	{

@@ -36,6 +36,7 @@ decspecs.str
 def.str
 domacro.c
 dumpidf.c
+em_lint.h
 error.c
 estack.str
 eval.c
@@ -56,7 +57,6 @@ l_brace.str
 l_class.h
 l_comment.h
 l_comment.c
-l_dummy.c
 l_ev_ord.c
 l_lint.c
 l_lint.h

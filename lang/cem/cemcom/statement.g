@@ -6,9 +6,14 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
-#include	<em.h>
-
 #include	"lint.h"
+#ifndef	LINT
+#include	<em.h>
+#else
+#include	"em_lint.h"
+#include	"l_lint.h"
+#endif	LINT
+
 #include	"debug.h"
 #include	"botch_free.h"
 
@@ -21,9 +26,6 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	LINT
 
 extern int level;
 }
