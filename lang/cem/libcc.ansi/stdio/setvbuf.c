@@ -32,9 +32,6 @@ setvbuf(register FILE *stream, char *buf, int mode, size_t size)
 		}
 	}
 
-	if (io_testflag(stream, _IOREADING) || io_testflag(stream, _IOWRITING))
-		retval = EOF;
-
 	stream->_buf = (unsigned char *) buf;
 
 	stream->_count = 0;
