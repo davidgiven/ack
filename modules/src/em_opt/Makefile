@@ -44,16 +44,17 @@ GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
 		dfa.c dfa.c.new trans.h trans.h.new trans.c trans.c.new\
 		incalls.d incalls.r incalls.r.new pseudo.d
 
-all:		em_nopt $(LIBOPT)
+all:		em_nopt $(LIBOPT) em_opt.3
 
 install:	all
 		$(INSTALL) lib/$(LIBOPT)
+		$(INSTALL) man/em_opt.3
+		cp em_nopt.1 $(EMHOME)/man
 		cp em_nopt $(BINDIR)/em_nopt
-
-lint:		lintparser lintnopt
 
 cmp:		all
 		$(COMPARE) lib/$(LIBOPT)
+		$(COMPARE) man/em_opt.3
 		-cmp em_nopt $(BINDIR)/em_nopt
 
 pr:
@@ -61,6 +62,8 @@ pr:
 
 opr:
 		make pr | opr
+
+lint:		lintparser lintnopt
 
 clean:
 		rm -f O_*.o
@@ -102,6 +105,14 @@ dfadummy:	patterns parser
 		parser </tmp/patts
 		-rm /tmp/patts
 		touch dfadummy
+
+# How to build the lint library for the optimizer
+
+LLINT =		nopt.c mkstrct.c aux.c dfa.c trans.c
+
+lintlib:	dfadummy $(LLINT)
+		$(LINT) $(LINTFLAGS) $(LLINT) -Cemopt
+		mv llib-lemopt.ln $(EMHOME)/modules/lib
 
 # How to build program to parse patterns table and build c files.
 
