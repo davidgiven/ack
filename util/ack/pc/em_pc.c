@@ -33,8 +33,11 @@
 
 #define void                    int
 
-char	*pc_path	=	PEM_PATH ;
-char    *err_path       =	ERR_PATH;
+char	def_pc_path[200] ;
+char	def_err_path[200] ;
+
+char	*pc_path	=	def_pc_path ;
+char    *err_path       =	def_err_path ;
 
 int     toterr;
 int     parent;
@@ -340,12 +343,18 @@ donewith(p) char *p; {
 }
 
 init() {
-	register char *p;
+	register char *p,*s ;
 	register i,fd;
 
 	if ((fd = open(tmp_dir,0)) < 0)
 		tmp_dir = ".";
 	close(fd);
+	p= def_pc_path ;
+	s= EM_DIR ; while ( *p++ = *s++ ) ; *p='/' ;
+	s= PEM_PATH ; while ( *p++ = *s++ ) ;
+	p= def_err_path ;
+	s= EM_DIR ; while ( *p++ = *s++ ) ; *p='/' ;
+	s= ERR_PATH ; while ( *p++ = *s++ ) ;
 	p = unique+2;
 	parent = i = getpid();
 	do
