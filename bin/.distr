@@ -3,6 +3,6 @@ cc-and-mkdep.all
 cc-and-mkdep.sun
 do_deps
 do_resolve
-em.pascal
 lint-lib.ack
 lint-lib.unix
+mk_manpage
