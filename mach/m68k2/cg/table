@@ -30,6 +30,7 @@
  */
 
 #define REGVARS
+#include "fppsim.h"
 
 EM_WSIZE = 2
 EM_PSIZE = 4
@@ -1008,6 +1009,7 @@ adu | | | | adi $1 |
 sbu | | | | sbi $1 |
 slu | | | | sli $1 |
 
+#ifdef FPPSIM
 /* Floating point stuff */
 adf $1==4	| |
 			remove(ALL)
@@ -1051,6 +1053,15 @@ fef $1==4	| |
 fef $1==8	| |
 			remove(ALL)
 			"jsr .fef8"		    |  |  asp 8 lfr 4 loi 12 |
+#else not FPPSIM
+fef		| | | | loc 18 trp |
+fif		| | | | loc 18 trp |
+ngf		| | | | loc 18 trp |
+adf		| | | | loc 18 trp |
+sbf		| | | | loc 18 trp |
+mlf		| | | | loc 18 trp |
+dvf		| | | | loc 18 trp |
+#endif FPPSIM
 
 
 
@@ -1344,6 +1355,7 @@ loc loc loc cuu $2 == 1 && $3 == 4 && $1 > 0 && $1 < 128 | | | | ldc $1 |
 
 /* Floating point stuff */
 
+#ifdef FPPSYM
 loc loc cif	$1==2 && $2==4 | |
 			remove(ALL)
 			"move.w #$1,-(sp)"
@@ -1422,6 +1434,13 @@ loc loc cff	$1==8 && $2==4 | |
 loc loc cff	$1==4 && $2==8 | |
 			remove(ALL)
 			"jsr .cff8"		| | asp 4 lfr 4 loi 8 |
+#else not FPPSIM
+cif		| | | | loc 18 trp |
+cfi		| | | | loc 18 trp |
+cuf		| | | | loc 18 trp |
+cfu		| | | | loc 18 trp |
+cff		| | | | loc 18 trp |
+#endif FPPSIM
 
 
 /* G R O U P  IX :   L O G I C A L  */
@@ -1855,13 +1874,16 @@ cmp | |				remove(ALL)
 						| D1 | |
 /* floating point */
 
+#ifdef FPPSIM
 cmf $1==4	| |
 			remove(ALL)
 			"jsr .cmf4"		       | | asp 8 lfr 2 |
 cmf $1==8	| |
 			remove(ALL)
 			"jsr .cmf8"		       | | asp 16 lfr 2 |
-
+#else
+cmf		| | | | loc 18 trp |
+#endif
 
 cmi tlt and $1==2 && $3==2 | ANY DATAREG DATASCR |
 				"cmp %[1],%[2]"
