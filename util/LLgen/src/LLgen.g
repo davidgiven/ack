@@ -144,7 +144,7 @@ rule			{	register p_nont p;}
 	  [ params(2)	{	p->n_flags |= PARAMS;
 				if (nparams > 7) {
 					error(linecount,"Too many parameters");
-				} else	p->n_flags |= (nparams << 3);
+				} else	setntparams(p,nparams);
 			}
 	  ]?
 	  [ action(0)	{	p->n_flags |= LOCALS; }

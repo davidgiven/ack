@@ -695,6 +695,17 @@ co_safes() {
 			}
 		}
 	}
+# ifndef NDEBUG
+	if (debug) {
+		fputs("Safeties:\n", stderr);
+		for (p = nonterms; p < maxnt; p++) {
+			fprintf(stderr, "%s\t%d\t%d\n",
+				(min_nt_ent + (p - nonterms))->h_name,
+				getntsafe(p),
+				getntout(p));
+		}
+	}
+# endif
 }
 
 STATIC int

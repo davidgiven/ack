@@ -411,7 +411,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			register p_entry t;
 
 			t = &h_entry[g_getcont(p)];
-			if (toplevel == 0 && safety != NOSCANDONE) {
+			if (toplevel == 0) {
 				fputs(c_LLptrmin,f);
 			}
 			if (safety == SAFE) {
@@ -421,10 +421,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 				fputs("LL_SCANDONE(",f);
 			}
 			else if (safety == NOSCANDONE) {
-				if (toplevel != 0) {
-					fputs("LL_T_NOSCANDONE(", f);
-				}
-				else	fputs("LL_N_NOSCANDONE(", f);
+				fputs("LL_T_NOSCANDONE(", f);
 			}
 			PTERM(f,t);
 			fputs(");\n", f);
@@ -481,6 +478,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	int		var;
 	int		haddefault = 0;
 	int		unsafe = 1;
+	int		nsafe;
 	p_set		set;
 	p_set		setalloc();
 
@@ -492,13 +490,13 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	var = nvar++;
 	if (!lb) lb = hulp1;
 	if (safety <= SAFESCANDONE) unsafe = 0;
-	if (unsafe && hulp1 == lb) fprintf(f,"L_%d: ", hulp1);
-	else if (mustpop) {
+	if (!unsafe && mustpop) {
 		mustpop = 0;
 		fputs(c_LLptrmin, f);
 	}
 	if (unsafe) {
 		fprintf(f,"{ int LL_%d = 0;\n", var);
+		if (hulp1 == lb) fprintf(f, "L_%d: \n", hulp1);
 	}
 	fputs("switch(LLcsymb) {\n", f);
 	while (g_gettype(p) != EORULE) {
@@ -527,17 +525,15 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 			haddefault = 1;
 		}
 		else	gencases(l->l_symbs);
+		nsafe = SAFE;
 		if (l->l_flag & DEF) {
 			if (unsafe) {
 				fprintf(f,"L_%d: ;\n", hulp2);
 			}
-			if (mustpop) fputs(c_LLptrmin, f);
-			rulecode(l->l_rule, SAFESCANDONE, mustscan, 0);
+			if (safety != SAFE) nsafe = SAFESCANDONE;
 		}
-		else {
-			if (mustpop) fputs(c_LLptrmin, f);
-			rulecode(l->l_rule, SAFE, mustscan, 0);
-		}
+		if (mustpop) fputs(c_LLptrmin, f);
+		rulecode(l->l_rule, nsafe, mustscan, 0);
 		fputs(c_break,f);
 		if (l->l_flag & COND) {
 			if (!haddefault) {
@@ -578,9 +574,16 @@ dopush(p,safety,toplevel) register p_gram p; {
 			return count;
 		  case TERM : {
 			register p_term q;
+			int rep, cnt;
 
 			q = (p_term) pentry[g_getcont(p)];
+			rep = r_getkind(&(q->t_reps));
+			cnt = r_getnum(&(q->t_reps));
 			count += dopush(p+1,SCANDONE,0);
+			if (toplevel > 0 &&
+			    (rep == OPT || (rep == FIXED && cnt == 0))) {
+				if (safety <= SAFESCANDONE) return count;
+			}
 			*ppushlist++ = findindex(&(q->t_contains));
 			return count+1; }
 		  case TERMINAL :
@@ -707,15 +710,25 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	register int	i;
 	register int	rep;
 	int		persistent;
+	int		ispushed;
 
 	f = fpars;
 	i = r_getnum(&(q->t_reps));
 	rep = r_getkind(&(q->t_reps));
+	ispushed = !(toplevel > 0 && safety <= SAFESCANDONE &&
+		     (rep == OPT || (rep == FIXED && i == 0)));
 	persistent = (q->t_flags & PERSISTENT);
 	if (safety == NOSCANDONE && (rep != FIXED || i == 0)) {
 		fputs(c_read, f);
-		if (rep == FIXED && g_gettype(q->t_rule) != ALTERNATION) {
+		safety = SCANDONE;
+	}
+	if (ispushed) {
+		if ((safety <= SAFESCANDONE &&
+		     (rep == OPT || (rep == FIXED && i == 0)))  ||
+		    (rep == FIXED && i == 0 &&
+		     g_gettype(q->t_rule) != ALTERNATION)) {
 			fputs(c_LLptrmin, f);
+			ispushed = 0;
 		}
 	}
 	if (i) {
@@ -726,6 +739,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		if (rep == FIXED) {
 			if (gettout(q) == NOSCANDONE && safety == NOSCANDONE) {
 				fputs(c_read,f);
+				safety = SCANDONE;
 			}
 		}
 	}
@@ -734,22 +748,24 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		fputs("for (;;) {\n",f);
 	}
 	if (rep == STAR || rep == OPT) {
-		genifhead(q,rep);
+		genifhead(q, rep, safety, ispushed);
 	}
 	rulecode(q->t_rule,t_safety(rep,i,persistent,safety),
 		 rep != FIXED || gettout(q) != NOSCANDONE,
-		 rep == FIXED && i == 0 && g_gettype(q->t_rule) == ALTERNATION);
+		 rep == FIXED && i == 0 && ispushed);
 	/* in the case of '+', the if is after the code for the rule */
 	if (rep == PLUS) {
 		if (!persistent) {
 			fprintf(f, "*LLptr = %d;\n", findindex(&(q->t_first)));
+			/* ??? */
 		}
-		genifhead(q,rep);
+		genifhead(q,rep,safety, ispushed);
 	}
 	if (rep != OPT && rep != FIXED) fputs("continue;\n", f);
 	if (rep != FIXED) {
 		fputs(c_close, f); /* Close switch */
 		if (rep != OPT) {
+			if (ispushed) fputs(c_LLptrmin, f);
 			fputs("break;\n", f);
 		}
 	}
@@ -763,19 +779,24 @@ codeforterm(q,safety,toplevel) register p_term q; {
 }
 
 STATIC
-genifhead(q,rep) register p_term q; {
+genifhead(q, rep, safety, ispushed) register p_term q; {
 	/*
 	 * Generate if statement for term q
 	 */
 	register FILE	*f;
 	p_set		p1;
 	p_set		setalloc();
-	int		hulp, hulp1;
+	int		hulp1;
+	int		safeterm;
 
 	f = fpars;
-	hulp = nlabel++;
 	hulp1 = nlabel++;
-	fprintf(f, "L_%d : switch(LLcsymb) {\n", hulp);
+	if (rep == PLUS) safeterm = gettout(q) <= SAFESCANDONE;
+	else if (rep == OPT) safeterm = safety <= SAFESCANDONE;
+	else /* if (rep == STAR) */ {
+		safeterm = safety <= SAFESCANDONE && gettout(q) <= SAFESCANDONE;
+	}
+	fputs("switch(LLcsymb) {\n", f);
 	if (q->t_flags & RESOLVER) {
 		p1 = setalloc(tsetsize);
 		setunion(p1,q->t_first,tsetsize);
@@ -794,15 +815,17 @@ genifhead(q,rep) register p_term q; {
 		fprintf(f, ") goto L_%d;\n", hulp1);
 	}
 	gencases(q->t_follow);
-	fputs("LLptr++; break;\n", f);
-	fprintf(f, "default: if (!LLnext()) goto L_%d;\n", hulp);
-	gencases(q->t_first);
+	if (ispushed && rep == OPT) fputs(c_LLptrmin, f);
+	fputs("break;\n", f);
+	if (!safeterm) {
+		fputs("default: if (!LLnext()) break;\n", f);
+		gencases(q->t_first);
+	}
+	else	fputs("default: ;\n", f);
 	if (q->t_flags & RESOLVER) {
 		fprintf(f, "L_%d : ;\n", hulp1);
 	}
-	if (rep == OPT) {
-		fputs(c_LLptrmin,f);
-	}
+	if (ispushed && rep == OPT) fputs(c_LLptrmin, f);
 }
 
 STATIC

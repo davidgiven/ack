@@ -88,15 +88,9 @@ conflchecks() {
 	 */
 	for (; x->f_end < maxorder; x++) {
 	    f_input = x->f_name;
-# ifndef NDEBUG
-	if (debug) fprintf(stderr, "CHECK: file %s\n", f_input);
-# endif
 	    for (s = x->f_start; s <= x->f_end; s++) {
 		nt = p = &nonterms[*s];
 		ntname = (min_nt_ent + *s)->h_name;
-# ifndef NDEBUG
-		if (debug) fprintf(stderr,"CHECK: nonterminal %s\n", ntname);
-# endif
 		if (p->n_flags & RECURSIVE) {
 			error(p->n_lineno,
 				"Recursion in default for nonterminal %s",
