@@ -2,7 +2,7 @@ wordsize: 2
 pointersize: 4
 %%RA
 general registers: 3
-address registers: 5
+address registers: 4
 floating point registers: 0
 
 register score parameters:
