@@ -67,6 +67,7 @@ main(argc,argv) char **argv; {
 		error("Usage: %s EMfile [ asfile ]",progname);
 	in_init(argv[0]);
 	out_init(argv[1]);
+	in_start();
 	codegen(startupcode,maxply,TRUE,MAXINT,0);
 	in_finish();
 	if (!endofprog)
