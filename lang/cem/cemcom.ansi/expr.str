@@ -95,6 +95,7 @@ struct expr	{
 #define	EX_VOLATILE	0x080		/* volatile variabele */
 #define	EX_ILVALUE	0x100		/* an illegal lvalue e.g. f().x */
 #define	EX_ERROR	0x200		/* the expression is wrong */
+#define	EX_PTRDIFF	0x400		/* subtracting 2 pointers in expr. */
 
 #define	NILEXPR		((struct expr *)0)
 

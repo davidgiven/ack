@@ -51,7 +51,7 @@ replace(idf)
 	if (!expand_macro(repl, idf))
 		return 0;
 	InputLevel++;
-	InsertText(repl->r_text, repl->r_ptr - repl->r_text);
+	InsertText(repl->r_text, (int)(repl->r_ptr - repl->r_text));
 	idf->id_macro->mc_flag |= NOREPLACE;
 	repl->r_level = InputLevel;
 	repl->next = ReplaceList;
@@ -347,7 +347,7 @@ actual(repl)
 			/*	When the identifier has an associated macro
 				replacement list, it's expanded.
 			*/
-			idef = idf_hashed(buf, p - buf, hash);
+			idef = idf_hashed(buf, (int) (p - buf), hash);
 			if (NoExpandMacro || !replace(idef)) {
 				if ((idef->id_macro
 				    && (idef->id_macro->mc_flag & NOREPLACE))

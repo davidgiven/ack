@@ -38,13 +38,33 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 {
 	/*	The expressions *e1p and *e2p are balanced to be operands
 		of the arithmetic operator oper.
+		We check here if the EX_PTRDIFF flag should be retained.
+		They are set to zero in because one of the opreands might
+		have a floating type, in which case the flags shouldn't
+		travel upward in the expression tree.
 	*/
 	register int t1, t2, u1, u2;
 	int shifting = (oper == LEFT || oper == RIGHT
 			|| oper == LEFTAB || oper == RIGHTAB);
+	int ptrdiff = 0;
 
 	t1 = any2arith(e1p, oper);
 	t2 = any2arith(e2p, oper);
+
+	if (int_size != pointer_size) {
+		if (ptrdiff = ((*e1p)->ex_flags & EX_PTRDIFF)
+			    || ((*e2p)->ex_flags & EX_PTRDIFF)) {
+			if (!((*e1p)->ex_flags & EX_PTRDIFF) && t1 == LONG)
+				ptrdiff = 0;
+			if (!((*e2p)->ex_flags & EX_PTRDIFF) && t2 == LONG
+			    && !shifting)
+				ptrdiff = 0;
+		}
+		/* Now turn off ptrdiff flags */
+		(*e1p)->ex_flags &= ~EX_PTRDIFF;
+		(*e2p)->ex_flags &= ~EX_PTRDIFF;
+	}
+
 	/* Now t1 and t2 are either INT, LONG, FLOAT, DOUBLE, or LNGDBL */
 
 	/*	If any operand has the type long double, the other operand
@@ -132,6 +152,13 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	else
 	if (!u1 && u2 && !shifting)
 		t1 = int2int(e1p, (t2 == LONG) ? ulong_type : uint_type);
+
+	if (int_size != pointer_size) {
+		if (ptrdiff) {
+			(*e1p)->ex_flags |= EX_PTRDIFF;
+			(*e2p)->ex_flags |= EX_PTRDIFF;
+		}
+	}
 }
 
 relbalance(e1p, oper, e2p)
@@ -549,6 +576,9 @@ any2parameter(expp)
 	/*	To handle default argument promotions
 	*/
 	any2opnd(expp, '(');
+	if (int_size != pointer_size)
+	    if ((*expp)->ex_flags & EX_PTRDIFF)
+		expr_warning(*expp, "pointer difference caused long expression");
 	if ((*expp)->ex_type->tp_fund == FLOAT)
 		float2float(expp, double_type);
 }

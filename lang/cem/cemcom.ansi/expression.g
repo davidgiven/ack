@@ -127,6 +127,8 @@ unary(register struct expr **expp;)
 	cast(&tp) unary(expp)
 	{	ch3cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
+		if (int_size != pointer_size)
+			(*expp)->ex_flags &= ~EX_PTRDIFF;
 	}
 |
 	postfix_expression(expp)

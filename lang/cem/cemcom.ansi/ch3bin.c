@@ -17,6 +17,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
+#include	"sizes.h"
 
 extern char options[];
 extern char *symbol2str();
@@ -297,6 +298,7 @@ pntminuspnt(expp, oper, expr)
 			    , pa_type->tp_fund));
 	ch3cast(expp, CAST, pa_type);	/* result will be an integral expr */
 					/* cast necessary ??? */
+	if (int_size != pointer_size) (*expp)->ex_flags |= EX_PTRDIFF;
 }
 
 mk_binop(expp, oper, expr, commutative)

@@ -141,7 +141,7 @@ str2idf(tg)
 	}
 	hash = STOPHASH(hash);
 	*ncp++ = '\0';
-	return idf_hashed(ntg, ncp - ntg, hash);
+	return idf_hashed(ntg, (int) (ncp - ntg), hash);
 }
 
 struct idf *
