@@ -2,7 +2,7 @@ EM=../../..
 CEG = $(EM)/lib/ceg
 BACK = $(CEG)/ce_back
 
-ASLIST = Makefile back.h bottom.c bss.c con1.c con2.c con4.c const.h \
+ASLIST = Makefile back.h bottom.c bss.c con1.c con2.c con4.c \
 		do_close.c do_open.c end_back.c gen1.c gen2.c gen4.c header.h \
 		init_back.c reloc1.c reloc2.c reloc4.c rom1.c rom2.c rom4.c \
 		set_global.c set_local.c switchseg.c symboldef.c text1.c \
