@@ -18,14 +18,70 @@
 
 #include	<em_abs.h>
 #include	<em_path.h>
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 #define	MESLEN		30
 #define PATHLEN		100
 
 /* to make it easier to patch ... */
-char 			emdir[64] = EM_DIR;
 extern struct file	*_curfil;
+
+static struct errm {
+	int errno;
+	char *errmes;
+} errors[] = {
+	{ EARRAY,	"array bound error"},
+	{ ERANGE,	"range bound error"},
+	{ ESET,		"set bound error"},
+	{ EIOVFL,	"integer overflow"},
+	{ EFOVFL,	"real overflow"},
+	{ EFUNFL,	"real underflow"},
+	{ EIDIVZ,	"divide by 0"},
+	{ EFDIVZ,	"divide by 0.0"},
+	{ EIUND,	"undefined integer"},
+	{ EFUND,	"undefined real"},
+	{ ECONV,	"conversion error"},
+
+	{ ESTACK,	"stack overflow"},
+	{ EHEAP,	"heap overflow"},
+	{ EILLINS,	"illegal instruction"},
+	{ EODDZ,	"illegal size argument"},
+	{ ECASE,	"case error"},
+	{ EMEMFLT,	"addressing non existent memory"},
+	{ EBADPTR,	"bad pointer used"},
+	{ EBADPC,	"program counter out of range"},
+	{ EBADLAE,	"bad argument of lae"},
+	{ EBADMON,	"bad monitor call"},
+	{ EBADLIN,	"argument if LIN too high"},
+	{ EBADGTO,	"GTO descriptor error"},
+
+	{ EARGC,	"more args expected" },
+	{ EEXP,		"error in exp" },
+	{ ELOG,		"error in ln" },
+	{ ESQT,		"error in sqrt" },
+	{ EASS,		"assertion failed" },
+	{ EPACK,	"array bound error in pack" },
+	{ EUNPACK,	"array bound error in unpack" },
+	{ EMOD,		"only positive j in 'i mod j'" },
+	{ EBADF,	"file not yet open" },
+	{ EFREE,	"dispose error" },
+	{ EFUNASS,	"function not assigned" },
+	{ EWIDTH,	"illegal field width" },
+
+	{ EWRITEF,	"not writable" },
+	{ EREADF,	"not readable" },
+	{ EEOF,		"end of file" },
+	{ EFTRUNC,	"truncated" },
+	{ ERESET,	"reset error" },
+	{ EREWR,	"rewrite error" },
+	{ ECLOSE,	"close error" },
+	{ EREAD,	"read error" },
+	{ EWRITE,	"write error" },
+	{ EDIGIT,	"digit expected" },
+	{ EASCII,	"non-ASCII char read" },
+	{ -1,		0}
+};
 
 extern int		_pargc;
 extern char		**_pargv;
@@ -38,24 +94,22 @@ extern int		open();
 extern int		read();
 extern int		write();
 
-/* Modified not to use a table of indices any more. This circumvents yet 
-   another point where byte order in words would make you lose.
- */
-
 _catch(erno) unsigned erno; {
-	char		*p,*q,**qq;
-	unsigned	i;
-	int		fd;
-	char		*pp[8];
-	char		mes[MESLEN];
-	char		filename[PATHLEN];
-	char		c;
+	register struct errm *ep = &errors[0];
+	char *p,*q,*s,**qq;
+	char buf[20];
+	unsigned i;
+	int j = erno;
+	char *pp[10];
+	char mes[MESLEN];
 
 	qq = pp;
 	if (p = FILN)
 		*qq++ = p;
 	else
 		*qq++ = _pargv[0];
+
+	while (ep->errno != erno && ep->errmes != 0) ep++;
 	p = &("xxxxx: "[5]);
 	if (i = LINO) {
 		*qq++ = ", ";
@@ -70,25 +124,23 @@ _catch(erno) unsigned erno; {
 		*qq++ = _curfil->fname;
 		*qq++ = ": ";
 	}
-	if ( (i=strtobuf(emdir,filename,PATHLEN)) >= PATHLEN-1 ||
-	     (filename[i]='/' ,
-	      strtobuf(RTERR_PATH,filename+i+1,PATHLEN-i-1) >= PATHLEN-i-1
-	     ) )
-		goto error;
-	if ((fd=open(filename,0))<0)
-		goto error;
-	/* skip to correct message */
-	for(i=0;i<erno;i++)
-		do if (read(fd,&c,1)!=1)
-			goto error;
-		while (c!= '\n');
-	if(read(fd,mes,MESLEN-1)<=0)
-		goto error;
-	mes[MESLEN-1]=0;
-	for(i=0;i<MESLEN-1;i++)
-		if(mes[i]=='\n')
-			mes[i+1]=0;
-	*qq++ = mes;
+	if (ep->errmes) *qq++ = ep->errmes;
+	else {
+		q = "error number xxxxxxxxxxxxx";
+		p = &q[13];
+		s = buf;
+		if (j < 0) {
+			j = -j;
+			*p++ = '-';
+		}
+		do
+			*s++ = j % 10 + '0';
+		while (j /= 10);
+		while (s > buf) *p++ = *--s;
+		*p = 0;
+		*qq++ = q;
+	}
+	*qq++ = "\n";
 	*qq = 0;
 	qq = pp;
 	while (q = *qq++) {

@@ -27,15 +27,15 @@ extern          _catch();
 extern int      gtty();
 #endif
 
-char            *_hbase;
-int             *_extfl;
+struct file     **_extfl;
+int		_extflc;	/* number of external files */
 char            *_m_lb;         /* LB of m_a_i_n */
 struct file     *_curfil;       /* points to file struct in case of errors */
 int             _pargc;
 char            **_pargv;
 char            **_penvp;
 
-_ini(args,hb,p,mainlb) char *args,*hb,*mainlb; int *p; {
+_ini(args,c,p,mainlb) char *args,*mainlb; int c; struct file **p; {
 	struct file *f;
 	char buf[128];
 
@@ -44,20 +44,19 @@ _ini(args,hb,p,mainlb) char *args,*hb,*mainlb; int *p; {
 	_penvp= *(char ***)args;
 	_sig(_catch);
 	_extfl = p;
-	_hbase = hb;
+	_extflc = c;
+	if( !c ) return;
 	_m_lb = mainlb;
-	if (_extfl[1] != -1) {
-		f = EXTFL(1);
+	if ( (f = _extfl[0]) != (struct file *) 0) {
 		f->ptr = f->bufadr;
 		f->flags = MAGIC|TXTBIT;
 		f->fname = "INPUT";
 		f->ufd = 0;
 		f->size = 1;
 		f->count = 0;
-		f->buflen = 512;
+		f->buflen = PC_BUFLEN;
 	}
-	if (_extfl[2] != -1) {
-		f = EXTFL(2);
+	if ( (f = _extfl[1]) != (struct file *) 0) {
 		f->ptr = f->bufadr;
 		f->flags = MAGIC|TXTBIT|WRBIT|EOFBIT|ELNBIT;
 		f->fname = "OUTPUT";
@@ -66,7 +65,7 @@ _ini(args,hb,p,mainlb) char *args,*hb,*mainlb; int *p; {
 #ifdef CPM
 		f->count = 1;
 #else
-		f->count = (gtty(1,buf) >= 0 ? 1 : 512);
+		f->count = (gtty(1,buf) >= 0 ? 1 : PC_BUFLEN);
 #endif
 		f->buflen = f->count;
 	}

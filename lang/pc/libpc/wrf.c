@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 extern		_wstrin();
@@ -33,6 +34,7 @@ extern char	*_fcvt();
 _wrf(n,w,r,f) int n,w; double r; struct file *f; {
 	char *p,*b; int s,d; char buf[BUFSIZE];
 
+	if ( n < 0 || w < 0) _trp(EWIDTH);
 	p = buf;
 	if (n > PREC_DIG)
 		n = PREC_DIG;

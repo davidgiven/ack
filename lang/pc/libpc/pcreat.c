@@ -34,8 +34,8 @@ pcreat(f,s) struct file *f; char *s; {
 	f->flags = WRBIT|EOFBIT|ELNBIT|TXTBIT|MAGIC;
 	f->fname = s;
 	f->size = 1;
-	f->count = 512;
-	f->buflen = 512;
+	f->count = PC_BUFLEN;
+	f->buflen = PC_BUFLEN;
 	if ((f->ufd = creat(s,0644)) < 0)
 		_trp(EREWR);
 }

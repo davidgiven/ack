@@ -31,5 +31,5 @@ buff(f) struct file *f; {
 		return;
 	_flush(f);
 	sz = f->size;
-	f->count = f->buflen = (sz>512 ? sz : 512-512%sz);
+	f->count = f->buflen = (sz>PC_BUFLEN ? sz : PC_BUFLEN-PC_BUFLEN%sz);
 }

@@ -16,6 +16,7 @@
  *
  */
 
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 extern		_wstrin();
@@ -43,6 +44,7 @@ Something wrong here!
 _wsi(w,i,f) int w,i; struct file *f; {
 	char *p; int j; char buf[SZ];
 
+	if (w < 0) _trp(EWIDTH);
 	p = &buf[SZ];
 	if ((j=i) < 0) {
 		if (i == MININT) {

@@ -68,4 +68,6 @@ wrz.c
 wrs.c
 outcpt.c
 wf.c
+nfa.c
+rcka.c
 trp.e

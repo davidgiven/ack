@@ -24,6 +24,16 @@ extern		_trp();
 
 int _mdi(j,i) int j,i; {
 
+        if (j <= 0)
+                _trp(EMOD);
+        i = i % j;
+        if (i < 0)
+                i += j;
+        return(i);
+}
+
+long _mdil(j,i) long j,i; {
+
 	if (j <= 0)
 		_trp(EMOD);
 	i = i % j;

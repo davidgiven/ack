@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 extern		_wstrin();
@@ -27,6 +28,7 @@ extern		_wstrin();
 _wsl(w,l,f) int w; long l; struct file *f; {
 	char *p,c; long j; char buf[11];
 
+	if (w < 0) _trp(EWIDTH);
 	p = &buf[11];
 	if ((j=l) < 0) {
 		if (l == MAXNEGLONG) {

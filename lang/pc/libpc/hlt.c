@@ -20,16 +20,16 @@
 
 #include	<pc_file.h>
 
-extern char	*_hbase;
-extern int	*_extfl;
-extern		_cls();
-extern		exit();
+extern struct file	**_extfl;
+extern int		_extflc;
+extern			_cls();
+extern			exit();
 
 _hlt(ecode) int ecode; {
 	int i;
 
-	for (i = 1; i <= _extfl[0]; i++)
-		if (_extfl[i] != -1)
-			_cls(EXTFL(i));
+	for (i = 0; i < _extflc; i++)
+		if (_extfl[i] != (struct file *) 0)
+			_cls(_extfl[i]);
 	exit(ecode);
 }

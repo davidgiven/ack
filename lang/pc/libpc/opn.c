@@ -21,8 +21,8 @@
 #include	<pc_file.h>
 #include	<pc_err.h>
 
-extern char		*_hbase;
-extern int		*_extfl;
+extern struct file	**_extfl;
+extern int		_extflc;
 extern struct file	*_curfil;
 extern int		_pargc;
 extern char		**_pargv;
@@ -69,10 +69,10 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 		sz++;
 		descr |= TXTBIT;
 	}
-	for (i=1; i<=_extfl[0]; i++)
-		if (f == EXTFL(i))
+	for (i=0; i<_extflc; i++)
+		if (f == _extfl[i])
 			break;
-	if (i > _extfl[0]) {		/* local file */
+	if (i >= _extflc) {		/* local file */
 		f->fname = "LOCAL";
 		if ((descr & WRBIT) == 0 && (f->flags & 0377) == MAGIC) {
 			_xcls(f);
@@ -83,7 +83,7 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 			f->ufd = tmpfil();
 		}
 	} else {	/* external file */
-		if ((i -= 2) <= 0)
+		if (--i <= 0)
 			return(0);
 		if (i >= _pargc)
 			_trp(EARGC);
@@ -97,7 +97,7 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 				_trp(EREWR);
 		}
 	}
-	f->buflen = (sz>512 ? sz : 512-512%sz);
+	f->buflen = (sz>PC_BUFLEN ? sz : PC_BUFLEN-PC_BUFLEN%sz);
 	f->size = sz;
 	f->ptr = f->bufadr;
 	f->flags = descr;

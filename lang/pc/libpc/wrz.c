@@ -16,6 +16,7 @@
  *
  */
 
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 extern		_wss();
@@ -24,6 +25,7 @@ extern		_wrs();
 _wsz(w,s,f) int w; char *s; struct file *f; {
 	char *p;
 
+	if (w < 0) _trp(EWIDTH);
 	for (p=s; *p; p++);
 	_wss(w,p-s,s,f);
 }

@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
+#include	<pc_err.h>
 #include	<pc_file.h>
 
 extern		_wstrin();
@@ -26,8 +27,9 @@ extern char	*_ecvt();
 #define	PREC_DIG	80	/* maximum digits produced by _ecvt() */
 
 _wsr(w,r,f) int w; double r; struct file *f; {
-	char *p,*b; int s,d,i; char buf[PREC_DIG+6];
+	char *p,*b; int s,d,i; char buf[PREC_DIG+7];
 
+	if (w < 0) _trp(EWIDTH);
 	p = buf;
 	if ((i = w-6) < 2)
 		i = 2;
@@ -46,8 +48,17 @@ _wsr(w,r,f) int w; double r; struct file *f; {
 		*p++ = '-';
 	} else
 		*p++ = '+';
-	*p++ = '0' + (d/10);
-	*p++ = '0' + (d%10);
+
+	if (d >= 1000) {
+		*p++ = '*';
+		*p++ = '*';
+		*p++ = '*';
+	}
+	else {
+		*p++ = '0' + d/100;
+		*p++ = '0' + (d/10) % 10;
+		*p++ = '0' + d%10;
+	}
 	_wstrin(w,p-buf,buf,f);
 }
 

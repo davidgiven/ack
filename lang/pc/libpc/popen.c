@@ -35,7 +35,7 @@ popen(f,s) struct file *f; char *s; {
 	f->fname = s;
 	f->size = 1;
 	f->count = 0;
-	f->buflen = 512;
+	f->buflen = PC_BUFLEN;
 	if ((f->ufd = open(s,0)) < 0)
 		_trp(ERESET);
 }
