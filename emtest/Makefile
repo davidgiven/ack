@@ -1,3 +1,4 @@
+ACK=ack
 tested:		last
 	set -x ;\
 		for i in `awk '{for(i=\$$1;i<=151;i++)print i}' last ` ;\
@@ -5,7 +6,7 @@ tested:		last
 		  echo $$i; \
 		  echo $$i >last; \
 		  select $$i tests > test.e; \
-		  ack test.e; \
+		  $(ACK) test.e; \
 		  a.out \
 		  : ok; \
 		done
