@@ -42,6 +42,7 @@ gcvt(value, ndigit, buf)
 	if (dp <= 0) {
 		if (*s1 != '0')	{
 			/* otherwise the whole number is 0 */
+			*s2++ = '0';
 			*s2++ = '.';
 		}
 		while (dp < 0) {
