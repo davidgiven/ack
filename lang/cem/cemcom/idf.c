@@ -151,11 +151,14 @@ gen_idf()
 		anonymous name.
 	*/
 	static int name_cnt;
-	char buff[100];
+	struct idf *id;
+	char *s = Malloc(strlen(dot.tk_file)+50);
 
-	sprint(buff, "#%d in %s, line %u",
+	sprint(s, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);
-	return str2idf(buff);
+	id = str2idf(s);
+	free(s);
+	return id;
 }
 
 int
