@@ -4,6 +4,6 @@
 _nostk:
 	sys	local; 0f
 	rts	pc
-.data:
+.data
 0:
 	sys	nostk
