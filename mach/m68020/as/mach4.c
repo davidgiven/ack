@@ -125,10 +125,14 @@ instruction
 			{	move($2);}
 	|	MOVEP sizedef ea_ea
 			{	movep($2);}
-	|	MOVEM sizedef regs ',' notimmreg
+	|	MOVEM sizedef regs ',' 
+			{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
+		notimmreg
 			{	movem(0, $2, $3);}
-	|	MOVEM sizedef notimmreg ',' regs
-			{	movem(1, $2, $5);}
+	|	MOVEM sizedef 
+			{	mrg_2 = 0; ffew_2 = 0400; /* initialization */}
+		notimmreg ',' regs
+			{	movem(1, $2, $6);}
 	| 	MOVES sizedef ea_ea
 			{	if (mrg_1 <= 017) {
 					T_EMIT2(007000 | $2 | mrg_2,0,0,0);
