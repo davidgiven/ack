@@ -1,11 +1,19 @@
 #ifdef USG
-/* some systems require inclusion of sys/types.h before utmp.h */
-#include <sys/types.h>
-#include <utmp.h>
-
 /*	system V, so no /etc/ttys file. In this case, scan the
 	/etc/utmp file
 */
+struct utmp {
+	char ut_name[8];
+	char ut_id[4];
+	char ut_line[12];
+	short ut_pid;
+	short ut_type;
+	struct exit_status {
+		short e_termination;
+		short e_exit;
+	} ut_exit;
+	long ut_time;
+};
 #define FILENAME "/etc/utmp"
 #else
 #define FILENAME "/etc/ttys"
@@ -34,10 +42,12 @@ ttyslot()
 	if ((fd = open(FILENAME, 0)) < 0) return 0;
 #ifdef USG
 	while (read(fd, (char *) &buf, sizeof(buf)) == sizeof(buf)) {
-		if ((buf.ut_type == INIT_PROCESS ||
-		     buf.ut_type == LOGIN_PROCESS ||
-		     buf.ut_type == USER_PROCESS ||
-		     buf.ut_type == DEAD_PROCESS) &&
+		/* processes associated with a terminal ...
+		   unfortunately we cannot use the include file because
+		   some systems have a different one ...
+		   INIT_PROCESS, DEAD_PROCESS, USER_PROCESS, LOGIN_PROCESS
+		*/
+		if ((buf.ut_type >= 5 && buf.ut_type <= 8) &&
 		    ! strncmp(buf.ut_line, p, sizeof(buf.ut_line))) {
 			close(fd);
 			return retval;

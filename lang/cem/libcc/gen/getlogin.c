@@ -1,8 +1,28 @@
 #define UTMPFILE "/etc/utmp"
 
-/* some systems require inclusion of sys/types.h before utmp.h */
-#include <sys/types.h>
-#include <utmp.h>
+#ifdef USG
+struct utmp {
+	char ut_name[8];
+	char ut_id[4];
+	char ut_line[12];
+	short ut_pid;
+	short ut_type;
+	struct exit_status {
+		short e_termination;
+		short e_exit;
+	} ut_exit;
+	long ut_time;
+};
+#else
+struct utmp {
+	char	ut_line[8];
+	char	ut_name[8];
+#ifdef BSD4_2
+	char	ut_host[16];
+#endif
+	long	ut_time;
+};
+#endif
 
 char *
 getlogin()
