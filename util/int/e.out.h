@@ -1,8 +1,12 @@
 /* $Header$ */
 
-#define	MAGIC		07255
+/* get version number from ... */
+#include	<local.h>
 
-#define	VERSION		3
+/* get magic number from ... */
+#include	<em_spec.h>
+#include	<as_spec.h>
+#define	MAGIC		as_magic
 
 #define	FB_TEST		001
 #define	FB_PROFILE	002
