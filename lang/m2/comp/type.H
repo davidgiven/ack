@@ -9,6 +9,8 @@
 
 /* $Header$ */
 
+#include "dbsymtab.h"
+
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *par_next;
 	struct def *par_def;	/* "df" of parameter */
@@ -102,7 +104,9 @@ struct type	{
 #define T_INDEX		(T_ENUMERATION|T_CHAR|T_SUBRANGE)
 #define T_DISCRETE	(T_INDEX|T_INTORCARD)
 #define	T_CONSTRUCTED	(T_ARRAY|T_SET|T_RECORD)
+#ifdef DBSYMTAB
 	short tp_dbindex;	/* index in debugger symbol table */
+#endif
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {

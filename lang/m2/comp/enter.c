@@ -17,6 +17,7 @@
 #include	<em_code.h>
 #include	<assert.h>
 
+#include	"dbsymtab.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -41,7 +42,9 @@ Enter(name, kind, type, pnam)
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
 	if (pnam) df->df_value.df_stdname = pnam;
+#ifdef DBSYMTAB
 	else if (options['g']) stb_string(df, kind);
+#endif /* DBSYMTAB */
 	return df;
 }
 
@@ -180,7 +183,9 @@ EnterVarList(Idlist, type, local)
 				C_ina_dnam(df->var_name);
 			}
 		}
+#ifdef DBSYMTAB
 		if (options['g']) stb_string(df, D_VARIABLE);
+#endif /* DBSYMTAB */
 	}
 	FreeNode(Idlist);
 }

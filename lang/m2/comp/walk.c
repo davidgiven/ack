@@ -25,6 +25,7 @@
 #include	<stb.h>
 
 #include	"strict3rd.h"
+#include	"dbsymtab.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -127,6 +128,7 @@ DoLineno(nd)
 	    nd->nd_lineno != oldlineno) {
 		oldlineno = nd->nd_lineno;
 		if (! options['L']) C_lin((arith) nd->nd_lineno);
+#ifdef DBSYMTAB
 		if ( options['g']) {
 			static int	ms_lineno;
 
@@ -135,6 +137,7 @@ DoLineno(nd)
 				ms_lineno = nd->nd_lineno;
 			}
 		}
+#endif /* DBSYMTAB */
 	}
 }
 
@@ -221,17 +224,21 @@ WalkModule(module)
 	}
 	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
 	}
+#endif /* DBSYMTAB */
 	WalkNode(module->mod_body, NO_EXIT_LABEL, REACH_FLAG);
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	def_ilb(RETURN_LABEL);
 	EndPriority();
 	C_ret((arith) 0);
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_RBRAC, proclevel);
 	}
+#endif /* DBSYMTAB */
 	C_end(-sc->sc_off);
 	proclevel--;
 	TmpClose();
@@ -449,9 +456,11 @@ WalkProcedure(procedure)
 	C_ret(func_res_size);
 	C_beginpart(partno2);
 	C_pro(procscope->sc_name, -procscope->sc_off);
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
 	}
+#endif /* DBSYMTAB */
 	C_ms_par(procedure->df_type->prc_nbpar
 #ifdef BIG_RESULT_ON_STACK
 		+ (too_big ? func_res_size : 0)
@@ -459,9 +468,11 @@ WalkProcedure(procedure)
 		);
 	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
 	C_endpart(partno2);
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_RBRAC, proclevel);
 	}
+#endif /* DBSYMTAB */
 	C_end(-procscope->sc_off);
 	if (! fit(procscope->sc_off, (int) word_size)) {
 		node_error(procedure->prc_body,

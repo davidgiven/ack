@@ -9,6 +9,10 @@
 
 /* $Header$ */
 
+#include "dbsymtab.h"
+
+#ifdef DBSYMTAB
+
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -391,3 +395,4 @@ stb_string(df, kind)
 	}
 }
 
+#endif /* DBSYMTAB */

@@ -20,6 +20,7 @@
 #include	<stb.h>
 
 #include	"strict3rd.h"
+#include	"dbsymtab.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"idf.h"
@@ -87,9 +88,11 @@ Compile(src, dst)
 	if (! C_open(dst)) fatal("could not open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std(FileName, N_SO, 0);
 	}
+#endif /* DBSYMTAB */
 	init_idf();
 	InitCst();
 	reserve(tkidf);

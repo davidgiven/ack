@@ -50,7 +50,7 @@ INCLUDES =	-I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 OPTIM =		-O
 CFLAGS =	$(PROFILE) $(INCLUDES) $(COPTIONS) $(OPTIM)
 LINTFLAGS =
-LDFLAGS =	-i $(PROFILE)
+LDFLAGS =	$(PROFILE)
 
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
@@ -212,6 +212,7 @@ LLlex.o: Lpars.h
 LLlex.o: bigparam.h
 LLlex.o: class.h
 LLlex.o: const.h
+LLlex.o: dbsymtab.h
 LLlex.o: debug.h
 LLlex.o: debugcst.h
 LLlex.o: def.h
@@ -248,6 +249,7 @@ main.o: LLlex.h
 main.o: Lpars.h
 main.o: SYSTEM.h
 main.o: bigparam.h
+main.o: dbsymtab.h
 main.o: debug.h
 main.o: debugcst.h
 main.o: def.h
@@ -276,6 +278,7 @@ type.o: LLlex.h
 type.o: bigparam.h
 type.o: chk_expr.h
 type.o: const.h
+type.o: dbsymtab.h
 type.o: debug.h
 type.o: debugcst.h
 type.o: def.h
@@ -293,6 +296,7 @@ type.o: warning.h
 def.o: LLlex.h
 def.o: Lpars.h
 def.o: bigparam.h
+def.o: dbsymtab.h
 def.o: debug.h
 def.o: debugcst.h
 def.o: def.h
@@ -313,6 +317,7 @@ misc.o: node.h
 misc.o: real.h
 enter.o: LLlex.h
 enter.o: bigparam.h
+enter.o: dbsymtab.h
 enter.o: debug.h
 enter.o: debugcst.h
 enter.o: def.h
@@ -329,6 +334,7 @@ enter.o: type.h
 defmodule.o: LLlex.h
 defmodule.o: Lpars.h
 defmodule.o: bigparam.h
+defmodule.o: dbsymtab.h
 defmodule.o: debug.h
 defmodule.o: debugcst.h
 defmodule.o: def.h
@@ -346,6 +352,7 @@ defmodule.o: target_sizes.h
 defmodule.o: type.h
 typequiv.o: LLlex.h
 typequiv.o: bigparam.h
+typequiv.o: dbsymtab.h
 typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
@@ -360,6 +367,7 @@ typequiv.o: type.h
 typequiv.o: warning.h
 node.o: LLlex.h
 node.o: bigparam.h
+node.o: dbsymtab.h
 node.o: debug.h
 node.o: debugcst.h
 node.o: def.h
@@ -373,6 +381,7 @@ cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: bigparam.h
 cstoper.o: const.h
+cstoper.o: dbsymtab.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
 cstoper.o: idf.h
@@ -388,6 +397,7 @@ chk_expr.o: Lpars.h
 chk_expr.o: bigparam.h
 chk_expr.o: chk_expr.h
 chk_expr.o: const.h
+chk_expr.o: dbsymtab.h
 chk_expr.o: debug.h
 chk_expr.o: debugcst.h
 chk_expr.o: def.h
@@ -406,6 +416,7 @@ chk_expr.o: type.h
 chk_expr.o: warning.h
 options.o: bigparam.h
 options.o: class.h
+options.o: dbsymtab.h
 options.o: idfsize.h
 options.o: main.h
 options.o: nocross.h
@@ -420,6 +431,7 @@ walk.o: Lpars.h
 walk.o: bigparam.h
 walk.o: bigresult.h
 walk.o: chk_expr.h
+walk.o: dbsymtab.h
 walk.o: debug.h
 walk.o: debugcst.h
 walk.o: def.h
@@ -440,6 +452,7 @@ walk.o: walk.h
 walk.o: warning.h
 desig.o: LLlex.h
 desig.o: bigparam.h
+desig.o: dbsymtab.h
 desig.o: debug.h
 desig.o: debugcst.h
 desig.o: def.h
@@ -457,6 +470,7 @@ code.o: LLlex.h
 code.o: Lpars.h
 code.o: bigparam.h
 code.o: bigresult.h
+code.o: dbsymtab.h
 code.o: debug.h
 code.o: debugcst.h
 code.o: def.h
@@ -472,6 +486,7 @@ code.o: type.h
 code.o: walk.h
 lookup.o: LLlex.h
 lookup.o: bigparam.h
+lookup.o: dbsymtab.h
 lookup.o: debug.h
 lookup.o: debugcst.h
 lookup.o: def.h
@@ -486,8 +501,10 @@ lookup.o: type.h
 stab.o: LLlex.h
 stab.o: bigparam.h
 stab.o: const.h
+stab.o: dbsymtab.h
 stab.o: def.h
 stab.o: idf.h
+stab.o: main.h
 stab.o: nocross.h
 stab.o: real.h
 stab.o: scope.h
@@ -497,12 +514,14 @@ tokenfile.o: Lpars.h
 program.o: LLlex.h
 program.o: Lpars.h
 program.o: bigparam.h
+program.o: dbsymtab.h
 program.o: debug.h
 program.o: debugcst.h
 program.o: def.h
 program.o: f_info.h
 program.o: idf.h
 program.o: main.h
+program.o: misc.h
 program.o: nocross.h
 program.o: node.h
 program.o: real.h
@@ -515,6 +534,7 @@ declar.o: LLlex.h
 declar.o: Lpars.h
 declar.o: bigparam.h
 declar.o: chk_expr.h
+declar.o: dbsymtab.h
 declar.o: debug.h
 declar.o: debugcst.h
 declar.o: def.h
@@ -535,6 +555,7 @@ expression.o: Lpars.h
 expression.o: bigparam.h
 expression.o: chk_expr.h
 expression.o: const.h
+expression.o: dbsymtab.h
 expression.o: debug.h
 expression.o: debugcst.h
 expression.o: def.h
@@ -548,6 +569,7 @@ expression.o: warning.h
 statement.o: LLlex.h
 statement.o: Lpars.h
 statement.o: bigparam.h
+statement.o: dbsymtab.h
 statement.o: def.h
 statement.o: idf.h
 statement.o: nocross.h
@@ -563,6 +585,7 @@ casestat.o: LLlex.h
 casestat.o: Lpars.h
 casestat.o: bigparam.h
 casestat.o: chk_expr.h
+casestat.o: dbsymtab.h
 casestat.o: debug.h
 casestat.o: debugcst.h
 casestat.o: def.h
@@ -577,6 +600,7 @@ casestat.o: type.h
 casestat.o: walk.h
 tmpvar.o: LLlex.h
 tmpvar.o: bigparam.h
+tmpvar.o: dbsymtab.h
 tmpvar.o: debug.h
 tmpvar.o: debugcst.h
 tmpvar.o: def.h
@@ -588,6 +612,7 @@ tmpvar.o: target_sizes.h
 tmpvar.o: type.h
 scope.o: LLlex.h
 scope.o: bigparam.h
+scope.o: dbsymtab.h
 scope.o: debug.h
 scope.o: debugcst.h
 scope.o: def.h

@@ -16,6 +16,7 @@
 #include	<alloc.h>
 
 #include	"strict3rd.h"
+#include	"dbsymtab.h"
 #include	"type.h"
 #include	"main.h"
 #include	"warning.h"
@@ -60,10 +61,12 @@ DoOption(text)
 		options[text[-1]]++;
 		break;
 
+#ifdef DBSYMTAB
 	case 'g':	/* generate symbol table for debugger */
 		options['g']++;
 		options['n']++;	/* no register vars ??? */
 		break;
+#endif /* DBSYMTAB */
 
 	case 'w':
 		if (*text) {

@@ -90,4 +90,7 @@
 				   returns a pointer to it
 				*/
 
+!File: dbsymtab.h
+#undef DBSYMTAB	1	/* ability to produce symbol table for debugger */
+
 

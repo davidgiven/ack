@@ -91,3 +91,7 @@
 				*/
 
 
+!File: dbsymtab.h
+#define DBSYMTAB	1	/* ability to produce symbol table for debugger */
+
+
