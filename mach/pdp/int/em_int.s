@@ -1645,17 +1645,21 @@ cuu.z:
 	jbr	6b
 /-------
 cfu.z:
-	mov	(sp)+,r0
+	mov	(sp)+,r1
+	mov	$4,r0
 	jsr	pc,setint
 	mov	(sp)+,r0
 	jsr	pc,setfloat
 	movf	(sp)+,fr0
 	movfi	fr0,-(sp)
+/ unfortunately, this does not work for numbers >= 2^31
 .if .test
 	jcs	9b
 	jlt	9b
 .endif
-	next
+	mov	$4,-(sp)
+	mov	r1,-(sp)
+	jbr	cuu_z
 /-------
 cfi.z:
 	mov	(sp)+,r0
