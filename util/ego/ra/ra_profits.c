@@ -234,6 +234,9 @@ compute_profits(alloclist,time_opt)
 			}
 			t = cnt * time - dyn_inits(alloc->al_inits) * otime;
 			sc = (time_opt ? t : s);
+			/*
+			fprintf(stderr, "cnt: %d time: %d otime: %d t: %d s: %d score: %d\n", cnt, time, otime, t, s, sc);
+			*/
 			if (sc > maxsc) {
 				maxsc = sc;
 				alloc->al_regtype = rtyp;

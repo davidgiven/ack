@@ -241,15 +241,13 @@ STATIC bool useful_item(item)
 	item_p item;
 {
 	/* See if it may be useful to put the item in a register.
-	 * A local variable that is not a parameter may always be put
-	 * in a register (as it need not be initialized).
+	 * A local variable may always be put in a register.
 	 * Other items must be used at least twice.
 	 */
 
 	int nruses = Lnrelems(item->it_usage);	
 	assert (nruses > 0); /* otherwise it would not be an item! */
-	return nruses > 1 || (item->it_type == LOCALVAR &&
-				item->i_t.it_off < 0);
+	return nruses > 1 || item->it_type == LOCALVAR;
 }
 
 
@@ -367,7 +365,7 @@ ra_optimize(p)
 	instrmap = (line_p *) newmap(nrinstrs-1); /* map starts counting at 0 */
 	make_instrmap(p,instrmap);
 	build_lifetimes(items);
-	/*  print_items(items,p); */
+	/* print_items(items,p); */
 	/* statistics(items); */
 	itemlist = cat_items(items); /* make one list */
 	alloclist = build_alloc_list(p,Lnrelems(p->p_loops),
@@ -378,7 +376,7 @@ ra_optimize(p)
 	pack(alloclist,time_opt,&packed,&unpacked,p);
 	stat_regusage(packed);
 	xform_proc(p,packed,nrinstrs,instrmap);
-	/* print_allocs(packed);   */
+	/* print_allocs(packed); */
 	p->p_localbytes = locls;
 	/* don't really allocate dummy local variables! */
 	rem_locals(p,packed); 
