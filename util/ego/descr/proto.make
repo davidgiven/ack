@@ -28,6 +28,7 @@ all:	$(TARGETS)
 
 install:	all
 	for i in $(TARGETS) ; do cp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
+	-ln $(TARGET_HOME)/lib.bin/ego/sparcdescr $(TARGET_HOME)/lib.bin/ego/sparc_solarisdescr
 
 cmp:	all
 	-for i in $(TARGETS) ; do cmp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
