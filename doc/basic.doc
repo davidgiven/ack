@@ -51,11 +51,8 @@ ordered alphabetically.
 Appendix A discusses the differences with
 Microsoft BASIC. Appendix B describes all reserved symbols.
 Appendix C lists the error messages in use.
-.sp
-Additional information about EM and the Amsterdam Compiler Kit
-can be obtained from .... and found in ......
 .SH
-SyNTAX NOTATION
+SYNTAX NOTATION
 .LP
 The conventions for syntax presentation are as follows:
 .IP CAPS 10
@@ -80,8 +77,6 @@ GENERAL INFORMATION
 The BASIC-EM compiler is designed for a UNIX based environment.
 It accepts a text file with your BASIC program (suffix .b) and generates
 an executable file, called a.out.
-.LP
-Should we call the preprocessor first?
 .NH 2
 LINE FORMAT
 .LP
@@ -145,7 +140,7 @@ Defines a double precision variable
 Defines a string variable.
 .LP
 NOTE: Two variables with the same name but different type is
-considered illegal (DONE?).
+considered illegal.
 .LP
 Beside single valued variables, values may be grouped
 into tables or arrays.
@@ -542,7 +537,7 @@ MID$
 MID$(<string expr1>,n[,m])=<string expr2>
 .PU
 To replace a portion of a string with another string value.
-The characters of <string expr> replaces characters in <string expr1>
+The characters of <string expr2> replaces characters in <string expr1>
 starting at position n. If m is present, at most m characters are copied,
 otherwise all characters are copied.
 However, the string obtained never exceeds the length of string expr1.
