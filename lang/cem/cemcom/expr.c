@@ -379,7 +379,6 @@ chk_cst_expr(expp)
 	}
 	
 	if (err) {
-		free_expression(expr);
 		erroneous2int(expp);
 		(*expp)->ex_type = error_type;
 	}
