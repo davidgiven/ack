@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#ifndef	_LOCALE_HEADER_
-#define	_LOCALE_HEADER_
+#if	!defined(__LOCALE_HEADER__)
+#define	__LOCALE_HEADER__
 
 struct lconv {
 	char	*decimal_point;		/* "." */
@@ -26,7 +26,7 @@ struct lconv {
 	char	n_sign_posn;		/* CHAR_MAX */
 };
 
-#ifndef	NULL
+#if	defined(NULL)
 #define	NULL		0
 #endif	/* NULL */
 
@@ -38,7 +38,7 @@ struct lconv {
 #define	LC_TIME		6
 
 
-char		*setlocale(int category, const char *locale);
+char		*setlocale(int __category, const char *__locale);
 struct	lconv	*localeconv(void);
 
-#endif	/* _LOCALE_HEADER_ */
+#endif	/* __LOCALE_HEADER__ */

@@ -3,26 +3,26 @@
  */
 /* $Header$ */
 
-#ifndef	_TIME_HEADER_
-#define	_TIME_HEADER_
+#if	!defined(__TIME_HEADER__)
+#define	__TIME_HEADER__
 
-#ifndef	NULL
+#if	!defined(NULL)
 #define	NULL		0
 #endif	/* NULL */
 
-#ifdef	__BSD4_2
-#define	CLK_TCK		60		/* ticks per second */
+#if	defined(__BSD4_2)
+#define	CLOCKS_PER_SEC		1000000		/* ticks per second */
 #else
-#define	CLK_TCK		1
+#define	CLOCKS_PER_SEC		60
 #endif	/* __BSD4_2 */
 
-#ifndef	_TYPE_SIZE_
-#define	_TYPE_SIZE_
+#if	!defined(__TYPE_SIZE__)
+#define	__TYPE_SIZE__
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* _TYPE_SIZE_ */
+#endif	/* __TYPE_SIZE__ */
 
-typedef	signed	long	time_t;		/* type returned by TOD clock */
-typedef	signed	long	clock_t;	/* type returned by real time clock */
+typedef	unsigned long	time_t;		/* type returned by TOD clock */
+typedef	unsigned long	clock_t;	/* type returned by real time clock */
 
 struct tm {
 	int	tm_sec;			/* seconds after the minute - [0, 59] */
@@ -37,15 +37,19 @@ struct tm {
 };
 
 clock_t		clock(void);
-double		difftime(time_t time1, time_t time0);
-time_t		mktime(struct tm *timeptr);
-time_t		time(time_t *timeptr);
-char		*asctime(const struct tm *timeptr);
-char		*ctime(const time_t *timer);
-struct	tm	*gmtime(const time_t *timer);
-struct	tm	*localtime(const time_t *timer);
-size_t		strftime(char *s, size_t maxsize,
-			const char *format,
-			const struct tm *timeptr);
+double		difftime(time_t __time1, time_t __time0);
+time_t		mktime(struct tm *__timeptr);
+time_t		time(time_t *__timeptr);
+char		*asctime(const struct tm *__timeptr);
+char		*ctime(const time_t *__timer);
+struct	tm	*gmtime(const time_t *__timer);
+struct	tm	*localtime(const time_t *__timer);
+size_t		strftime(char *__s, size_t __maxsize,
+			const char *__format,
+			const struct tm *__timeptr);
 
-#endif	/* _TIME_HEADER_ */
+#if	defined(__USG) || defined(_POSIX_SOURCE)
+void	tzset(void);
+#endif	/* __USG || _POSIX_SOURCE */
+
+#endif	/* __TIME_HEADER__ */

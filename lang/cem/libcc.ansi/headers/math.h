@@ -3,39 +3,38 @@
  */
 /* $Header$ */
 
-#ifndef	_MATH_HEADER_
-#define	_MATH_HEADER_
+#if	!defined(__MATH_HEADER__)
+#define	__MATH_HEADER__
 
-#include	<float.h>
-#define	HUGE_VAL	DBL_MAX
+#define	HUGE_VAL	9.9e+999	/* though it will generate a warning */
 
-double	acos(double x);
-double	asin(double x);
-double	atan(double x);
-double	atan2(double y, double x);
+double	acos(double __x);
+double	asin(double __x);
+double	atan(double __x);
+double	atan2(double __y, double __x);
 
-double	cos(double x);
-double	sin(double x);
-double	tan(double x);
+double	cos(double __x);
+double	sin(double __x);
+double	tan(double __x);
 
-double	cosh(double x);
-double	sinh(double x);
-double	tanh(double x);
+double	cosh(double __x);
+double	sinh(double __x);
+double	tanh(double __x);
 
-double	exp(double x);
-double	log(double x);
-double	log10(double x);
+double	exp(double __x);
+double	log(double __x);
+double	log10(double __x);
 
-double	sqrt(double x);
-double	ceil(double x);
-double	fabs(double x);
-double	floor(double x);
+double	sqrt(double __x);
+double	ceil(double __x);
+double	fabs(double __x);
+double	floor(double __x);
 
-double	pow(double x, double y);
+double	pow(double __x, double __y);
 
-double	frexp(double x, int *exp);
-double	ldexp(double x, int exp);
-double	modf(double x, double *iptr);
-double	fmod(double x, double y);
+double	frexp(double __x, int *__exp);
+double	ldexp(double __x, int __exp);
+double	modf(double __x, double *__iptr);
+double	fmod(double __x, double __y);
 
-#endif	/* _MATH_HEADER_ */
+#endif	/* __MATH_HEADER__ */

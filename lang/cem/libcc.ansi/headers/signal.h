@@ -5,19 +5,20 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-#ifndef	_SIGNAL_HEADER_
-#define	_SIGNAL_HEADER_
+
+#if	!defined(__SIGNAL_HEADER__)
+#define	__SIGNAL_HEADER__
 
 typedef	int		sig_atomic_t;
 
-#define	SIG_ERR		(void (*)())-1
+#define	SIG_ERR		((void (*)(int))-1)
 #if	defined(em22) || defined(em24) || defined(em44)
-#define	SIG_DFL		((void (*)())-2)
-#define	SIG_IGN		((void (*)())-3)
+#define	SIG_DFL		((void (*)(int))-2)
+#define	SIG_IGN		((void (*)(int))-3)
 #else
-#define	SIG_DFL		((void (*)())0)
-#define	SIG_IGN		((void (*)())1)
-#endif	/* SIG_ERR */
+#define	SIG_DFL		((void (*)(int))0)
+#define	SIG_IGN		((void (*)(int))1)
+#endif	/* no interpretation */
 
 #define	SIGHUP	1	/* hangup */
 #define	SIGINT	2	/* interrupt */
@@ -35,7 +36,7 @@ typedef	int		sig_atomic_t;
 #define	SIGPIPE	13	/* write on a pipe with no one to read it */
 #define	SIGALRM	14	/* alarm clock */
 #define	SIGTERM	15	/* software termination signal from kill */
-#ifdef	__USG
+#if	defined(__USG)
 #define	SIGUSR1	16	/* user defined signal 1 */
 #define	SIGUSR2	17	/* user defined signal 2 */
 #define	SIGCLD	18	/* death of a child */
@@ -65,52 +66,7 @@ typedef	int		sig_atomic_t;
 #define	_NSIG	16
 #endif	/* __USG or __BSD4_2 */
 
-#ifdef	__BSD4_2
-struct	sigvec {
-	int	(*sv_handler)();	/* handler */
-	int	sv_mask;		/* mask to apply */
-	int	sv_flags;
-};
-#define	SV_ONSTACK	0x0001		/* take signal on signal stack */
-#define	SV_INTERRUPT	0x0002		/* do not restart system on signal return */
-#define	SV_RESETHAND	0x0004		/* reset signal handler to SIG_DFL when signal taken */
-#define	sv_onstack	sv_flags	/* compat. */
+void	(*signal(int __sig, void (*__func)(int)))(int);
+int	raise(int __sig);
 
-struct	sigstack {
-	char	*ss_sp;			/* signal stack pointer */
-	int	ss_onstack;		/* current status */
-};
-
-struct	sigcontext {
-	int	sc_onstack;		/* sigstack state to restore */
-	int	sc_mask;		/* signal mask to restore */
-	int	sc_sp;			/* sp to restore */
-#ifdef	vax
-	int	sc_fp;			/* fp to restore */
-	int	sc_ap;			/* ap to restore */
-#endif	/* vax */
-	int	sc_pc;			/* pc to retore */
-	int	sc_ps;			/* psl to restore */
-};
-
-#define	BADSIG	SIG_ERR			/* compat. */
-#define	sigmask(m)	(1 << ((m)-1))
-
-/*
- * These are only defined for shutting up the compiler.
- */
-#ifdef	__STDC__
-int	sigvec(int sig, struct sigvec *vec, struct sigvec *ovec);
-int	sigstack(struct sigstack *ss, struct sigstack *oss);
-int	sigblock(int mask);
-int	sigsetmask(int mask);
-int	sigpause(int sigmask);
-#endif	/* __STDC__ */
-#endif	/* __BSD4_2 */
-
-#ifdef	__STDC__
-void	(*signal(int sig, void (*func)(int)))(int);
-int	raise(int sig);
-#endif	/* __STDC__ */
-
-#endif	/* _SIGNAL_HEADER_ */
+#endif	/* __SIGNAL_HEADER__ */

@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#ifndef	_ERRNO_HEADER_
-#define	_ERRNO_HEADER_
+#if	!defined(__ERRNO_HEADER__)
+#define	__ERRNO_HEADER__
 
 #define	EPERM		1	/* Not owner */
 #define	ENOENT		2	/* No such file or directory */
@@ -43,7 +43,7 @@
 #define	EDOM		33	/* math arg out of domain of func */
 #define	ERANGE		34	/* math result not representable */
 
-#ifdef	__USG
+#if	defined(__USG)
 /* Only ENOMSG, EIDRM and EDEADLK are documented */
 #define	ENOMSG		35	/* No message of desired type */
 #define	EIDRM		36	/* Identifier Removed */
@@ -58,7 +58,7 @@
 #define	EDEADLK		45	/* DeadLock */
 #endif	/* __USG */
 
-#ifdef	__BDS4_2
+#if	defined(__BDS4_2)
 /* non-blocking and interrupt i/o */
 #define	EWOULDBLOCK	35	/* Operation would block */
 #define	EINPROGRESS	36	/* Operation now in progress */
@@ -132,4 +132,4 @@
 
 extern int errno;	/* error number */
 
-#endif	/* _ERRNO_HEADER_ */
+#endif	/* __ERRNO_HEADER__ */

@@ -6,12 +6,12 @@
  */
 /* $Header$ */
 
-#ifndef	_SETJMP_HEADER_
-#define	_SETJMP_HEADER_
+#if	!defined(__SETJMP_HEADER__)
+#define	__SETJMP_HEADER__
 
 typedef char jmp_buf[256];
 
-int	setjmp(jmp_buf env);
-void	longjmp(jmp_buf env, int val);
+int	setjmp(jmp_buf __env);
+void	longjmp(jmp_buf __env, int __val);
 
-#endif	/* _SETJMP_HEADER_ */
+#endif	/* __SETJMP_HEADER__ */

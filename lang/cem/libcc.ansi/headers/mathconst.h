@@ -3,8 +3,8 @@
  */
 /* $Header$ */
 
-#ifndef	_MATHCONST_HEADER_
-#define	_MATHCONST_HEADER_
+#if	!defined(__MATHCONST_HEADER__)
+#define	__MATHCONST_HEADER__
 
 /* some constants (Hart & Cheney) */
 #define	M_PI		3.14159265358979323846264338327950288
@@ -26,4 +26,4 @@
 #define	M_1_SQRT2	0.70710678118654752440084436210484904
 #define	M_EULER		0.57721566490153286060651209008240243
 
-#endif	/* _MATHCONST_HEADER_ */
+#endif	/* __MATHCONST_HEADER__ */

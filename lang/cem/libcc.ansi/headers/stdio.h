@@ -6,120 +6,135 @@
  */
 /* $Header$ */
 
-#ifndef	_STDIO_HEADER_
-#define	_STDIO_HEADER_
-
-#include	<stdarg.h>
-
-#define	_NFILES		20
+#if	!defined(__STDIO_HEADER__)
+#define	__STDIO_HEADER__
 
 /*
  * Focus point of all stdio activity.
  */
-typedef struct _iobuf {
-	int		_fd;
+typedef struct __iobuf {
 	int		_count;
+	int		_fd;
 	int		_flags;
+	int		_bufsiz;
 	char		*_tname;
 	unsigned char	*_buf;
 	unsigned char	*_ptr;
 } FILE;
 
-#define	_IOFBF		0000
-#define	_IOREAD		0001
-#define	_IOWRITE	0002
-#define	_IONBF		0004
-#define	_IOMYBUF	0010
-#define	_IOEOF		0020
-#define	_IOERR		0040
-#define	_IOLBF		0100
+#define	_IOFBF		0x000
+#define	_IOREAD		0x001
+#define	_IOWRITE	0x002
+#define	_IONBF		0x004
+#define	_IOMYBUF	0x008
+#define	_IOEOF		0x010
+#define	_IOERR		0x020
+#define	_IOLBF		0x040
+#define	_IOREADING	0x080
+#define _IOWRITING	0x100
 
+/* The following definitions are also in <unistd.h>. They should not
+ * conflict.
+ */
 #define	SEEK_SET	0
 #define	SEEK_CUR	1
 #define	SEEK_END	2
 
-#define	stdin		(&_stdin)
-#define	stdout		(&_stdout)
-#define	stderr		(&_stderr)
+#define	stdin		(&__stdin)
+#define	stdout		(&__stdout)
+#define	stderr		(&__stderr)
 
 #define	BUFSIZ		1024
-#ifndef	NULL
+#if	!defined(NULL)
 #define	NULL		0
 #endif	/* NULL */
-#ifndef	EOF
+#if	!defined(EOF)
 #define	EOF		(-1)
 #endif	/* EOF */
 
-#define	FOPEN_MAX	(_NFILES - 3)
-#ifdef	__BSD4_2
+#define	FOPEN_MAX	20
+
+#if	defined(__BSD4_2)
 #define	FILENAME_MAX	255
 #else
 #define	FILENAME_MAX	14
 #endif	/* __BSD4_2 */
-#define	TMP_MAX		1000
-#define	L_tmpnam	(sizeof("/usr/tmp/") + 15)
+#define	TMP_MAX		999
+#define	L_tmpnam	(sizeof("/tmp/") + 15)
 
-#ifndef	_TYPE_FPOS_
-#define	_TYPE_FPOS_
+#if	!defined(__TYPE_FPOS__)
+#define	__TYPE_FPOS__
 typedef long int	fpos_t;
-#endif	/* _TYPE_FPOS */
+#endif	/* __TYPE_FPOS__ */
 
-#ifndef	_TYPE_SIZE_
-#define	_TYPE_SIZE_
+#if	!defined(__TYPE_SIZE__)
+#define	__TYPE_SIZE__
 typedef unsigned int	size_t;
-#endif	/* _TYPE_SIZE_ */
+#endif	/* __TYPE_SIZE__ */
+
+extern FILE	*__iotab[FOPEN_MAX];
+extern FILE	__stdin, __stdout, __stderr;
+
+int	remove(const char *__filename);
+int	rename(const char *__old, const char *__new);
+FILE	*tmpfile(void);
+char	*tmpnam(char *__s);
+int	fclose(FILE *__stream);
+int	fflush(FILE *__stream);
+FILE	*fopen(const char *__filename, const char *__mode);
+FILE	*freopen(const char *__filename, const char *__mode, FILE *__stream);
+void	setbuf(FILE *__stream, char *__buf);
+int	setvbuf(FILE *__stream, char *__buf, int __mode, size_t __size);
+int	fprintf(FILE *__stream, const char *__format, ...);
+int	fscanf(FILE *__stream, const char *__format, ...);
+int	printf(const char *__format, ...);
+int	scanf(const char *__format, ...);
+int	sprintf(char *__s, const char *__format, ...);
+int	sscanf(char *__s, const char *__format, ...);
+int	vfprintf(FILE *__stream, const char *__format, void *__arg);
+int	vprintf(const char *__format, void *__arg);
+int	vsprintf(char *__s, const char *__format, void *__arg);
+int	fgetc(FILE *__stream);
+char	*fgets(char *__s, int __n, FILE *__stream);
+int	fputc(int __c, FILE *__stream);
+int	fputs(const char *__s, FILE *__stream);
+int	getc(FILE *__stream);
+int	getchar(void);
+char	*gets(char *__s);
+int	putc(int __c, FILE *__stream);
+int	putchar(int __c);
+int	puts(const char *__s);
+int	ungetc(int __c, FILE *__stream);
+size_t	fread(void *__ptr, size_t __size, size_t __nmemb, FILE *__stream);
+size_t	fwrite(const void *__ptr, size_t __size, size_t __nmemb, FILE *__stream);
+int	fgetpos(FILE *__stream, fpos_t *__pos);
+int	fseek(FILE *__stream, long __offset, int __whence);
+int	fsetpos(FILE *__stream, fpos_t *__pos);
+long	ftell(FILE *__stream);
+void	rewind(FILE *__stream);
+void	clearerr(FILE *__stream);
+int	feof(FILE *__stream);
+int	ferror(FILE *__stream);
+void	perror(const char *__s);
+
+int __fillbuf(FILE *__stream);
+int __flushbuf(int __c, FILE *__stream);
+
 
 #define	getchar()	getc(stdin)
 #define	putchar(c)	putc(c,stdout)
 #define	getc(p)		(--(p)->_count >= 0 ? (int) (*(p)->_ptr++) : \
-				_fillbuf(p))
+				__fillbuf(p))
 #define	putc(c, p)	(--(p)->_count >= 0 ? \
 			 (int) (*(p)->_ptr++ = (c)) : \
-			 _flushbuf((c),(p)))
+			 __flushbuf((c),(p)))
 
 #define	feof(p)		(((p)->_flags & _IOEOF) != 0)
 #define	ferror(p)	(((p)->_flags & _IOERR) != 0)
-#define	fileno(p)	((p)->_fd)
 
+#if	defined(_POSIX_SOURCE)
+int fileno(FILE *__stream);
+#define	fileno(stream)		((stream)->_fd)
+#endif	/* _POSIX_SOURCE */
 
-FILE	*_iotable[_NFILES];
-FILE	_stdin, _stdout, _stderr;
-
-#ifdef	__STDC__
-int	remove(const char *filename);
-int	rename(const char *old, const char *new);
-FILE	*tmpfile(void);
-char	*tmpnam(char *s);
-int	fclose(FILE *stream);
-int	fflush(FILE *stream);
-FILE	*fopen(const char *filename, const char *mode);
-FILE	*freopen(const char *filename, const char *mode, FILE *stream);
-void	setbuf(FILE *stream, char *buf);
-int	setvbuf(FILE *stream, char *buf, int mode, size_t size);
-int	fprintf(FILE *stream, const char *format, ...);
-int	fscanf(FILE *stream, const char *format, ...);
-int	printf(const char *format, ...);
-int	scanf(const char *format, ...);
-int	sprintf(char *s, const char *format, ...);
-int	sscanf(char *s, const char *format, ...);
-int	vfprintf(FILE *stream, const char *format, va_list arg);
-int	vprintf(const char *format, va_list arg);
-int	vsprintf(char *s, const char *format, va_list arg);
-int	fgetc(FILE *stream);
-char	*fgets(char *s, int n, FILE *stream);
-int	fputc(int c, FILE *stream);
-int	fputs(const char *s, FILE *stream);
-char	*gets(char *s);
-int	ungetc(int c, FILE *stream);
-size_t	fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
-size_t	fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
-int	fgetpos(FILE *stream, fpos_t *pos);
-int	fseek(FILE *stream, long offset, int whence);
-int	fsetpos(FILE *stream, const fpos_t *pos);
-long	ftell(FILE *stream);
-void	rewind(FILE *stream);
-void	clearerr(FILE *stream);
-int	perror(const char *s);
-#endif	/* __STDC__ */
-
-#endif	/* _STDIO_HEADER_ */
+#endif	/* __STDIO_HEADER__ */

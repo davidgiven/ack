@@ -6,30 +6,28 @@
  */
 /* $Header$ */
 
-#ifndef	_STDDEF_HEADER_
-#define	_STDDEF_HEADER_
+#if	!defined(__STDDEF_HEADER__)
+#define	__STDDEF_HEADER__
 
-#ifndef	NULL
+#if	!defined(NULL)
 #define	NULL		0
 #endif	/* NULL */
 
-/* ??? cast to char pointer necessary? */
-#define	offsetof(type, ident) \
-	(size_t) &(((type *)0)->ident)
+#define	offsetof(type, ident)		(((size_t) &(((type *)0)->ident))
 
-#ifndef	_TYPE_PTRDIFF_
-#define	_TYPE_PTRDIFF_
+#if	!defined(__TYPE_PTRDIFF__)
+#define	__TYPE_PTRDIFF__
 typedef int	ptrdiff_t;	/* result of substracting two pointers */
-#endif	/* _TYPE_PTRDIFF_ */
+#endif	/* __TYPE_PTRDIFF__ */
 
-#ifndef	_TYPE_SIZE_
-#define	_TYPE_SIZE_
+#if	!defined(__TYPE_SIZE__)
+#define	__TYPE_SIZE__
 typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* _TYPE_SIZE_ */
+#endif	/* __TYPE_SIZE__ */
 
-#ifndef	_TYPE_WCHAR_
-#define	_TYPE_WCHAR_
+#if	!defined(__TYPE_WCHAR__)
+#define	__TYPE_WCHAR__
 typedef char	wchar_t;		/* type expanded character set */
-#endif	/* _TYPE_WCHAR_ */
+#endif	/* __TYPE_WCHAR__ */
 
-#endif	/* _STDEF_HEADER_ */
+#endif	/* __STDDEF_HEADER__ */
