@@ -196,11 +196,11 @@ wr_ohead(head)
 		BEGINSEEK(PARTDBUG, off);
 #endif
 	}
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outhead) != SZ_HEAD)
-#endif
+	if (BYTE_ORDER != 0x0123 || sizeof(struct outhead) != SZ_HEAD)
 	{
-		register char *c = (char *) head;
+		char buf[SZ_HEAD];
+
+		register char *c = &buf[0];
 
 		put2(head->oh_magic, c);	c += 2;
 		put2(head->oh_stamp, c);	c += 2;
@@ -210,36 +210,57 @@ wr_ohead(head)
 		put2(head->oh_nname, c);	c += 2;
 		put4(head->oh_nemit, c);	c += 4;
 		put4(head->oh_nchar, c);
+		OUTWRITE(PARTEMIT, buf, (long)SZ_HEAD);
 	}
-	OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
+	else OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
 }
 
-wr_sect(s, cnt1)
-	struct outsect	*s;
-	unsigned int	cnt1;
+wr_sect(sect, cnt)
+	register struct outsect	*sect;
+	register unsigned int	cnt;
 {
-	register unsigned int cnt = cnt1;
-	register struct outsect	*sect = s;
-	register char *c = (char *) sect;
+	{	register unsigned int i = cnt;
 
-	while (cnt--) {
-		if (offcnt >= 1 && offcnt < SECTCNT) {
-			BEGINSEEK(PARTEMIT+offcnt, sect->os_foff);
+		while (i--) {
+			if (offcnt >= 1 && offcnt < SECTCNT) {
+				BEGINSEEK(PARTEMIT+offcnt, sect->os_foff);
+			}
+			offset[offcnt++] = sect->os_foff;
+			sect++;
 		}
-		offset[offcnt++] = sect->os_foff;
+		sect -= cnt;
+	}
 #if BYTE_ORDER == 0x0123
-		if (sizeof(struct outsect) != SZ_SECT)
+	if (sizeof(struct outsect) != SZ_SECT)
 #endif
-		{
+	while (cnt)
+	{
+		register char *c;
+		register unsigned int i;
+
+		i = __parts[PARTEMIT].cnt/SZ_SECT;
+		c = __parts[PARTEMIT].pnow;
+		if (i > cnt) i = cnt;
+		cnt -= i;
+		__parts[PARTEMIT].cnt -= (i*SZ_SECT);
+		while (i--) {
 			put4(sect->os_base, c);	c += 4;
 			put4(sect->os_size, c);	c += 4;
 			put4(sect->os_foff, c);	c += 4;
 			put4(sect->os_flen, c);	c += 4;
 			put4(sect->os_lign, c);	c += 4;
+			sect++;
 		}
-		sect++;
+		__parts[PARTEMIT].pnow = c;
+		if (cnt) {
+			__wr_flush(&__parts[PARTEMIT]);
+		}
 	}
-	OUTWRITE(PARTEMIT, (char *) s, (long) cnt1 * SZ_SECT);
+#if BYTE_ORDER == 0x0123
+	else {
+		OUTWRITE(PARTEMIT, (char *) sect, (long) cnt * SZ_SECT);
+	}
+#endif
 }
 
 wr_outsect(s)

@@ -6,14 +6,15 @@
 #include <ranlib.h>
 #include "object.h"
 
-wr_ranlib(fd, ran, cnt)
+wr_ranlib(fd, ran, cnt1)
 	struct ranlib	*ran;
-	register long	cnt;
+	long	cnt1;
 {
 #if BYTE_ORDER == 0x0123
 	if (sizeof (struct ranlib) != SZ_RAN)
 #endif
 	{
+		register long cnt = cnt1;
 		register struct ranlib *r = ran;
 		register char *c = (char *) r;
 
@@ -23,5 +24,5 @@ wr_ranlib(fd, ran, cnt)
 			r++;
 		}
 	}
-	wr_bytes(fd, (char *) ran, cnt * SZ_RAN);
+	wr_bytes(fd, (char *) ran, cnt1 * SZ_RAN);
 }
