@@ -148,7 +148,7 @@ start:	ldfps	$7400
 	beq	1b
 	4
 .PE
-You have to dig into the kernel to fix it.
+Some digging into the kernel is required to fix it.
 The following patch will do:
 .PS
 /* original /usr/sys/sys/slp.c */
@@ -265,14 +265,14 @@ The same file slp.c should be patched as follows:
 .sp
 Some system calls are changed from version 6 to version 7.
 A library of system call entries, that make a version 6 UNIX look like
-a version 7 system, is provided to enable you to run some
+a version 7 system, is provided to run some
 useful version 7 utilities, like 'tar', on UNIX-6.
 The entry for 'stat' contained two bugs:
 the 24-bit file size was incorrectly converted to 32 bits
 (sign extension of bit 15)
 and the uid/gid fields suffered from sign extension.
 .sp
-Transferring your files from version 6 to version 7 using 'tar'
+Transferring files from version 6 to version 7 using 'tar'
 will fail for all files for which
 .sp
 	( (size & 0100000) != 0 )

@@ -1,6 +1,6 @@
 Some of these documents use a font called CW.
-If you don't have that, you can change references to it with a sed-script
-like
+If this font is not available, reference to it can be changed with
+a sed-script like
 	s/\.ft CW/.ft yourfont/
 	s/\\f(CW/\\fyourfont/g
 	s/^.fp\(.*\)CW$/.fp\1yourfont/

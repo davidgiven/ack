@@ -374,12 +374,12 @@ It is undefined when the instruction has no operand.
 .br
 Although an exhaustive list could be given describing all the types
 the following rule of thumb will suffice.
-If you cannot imagine the operand of the instruction ever to be
+If it is unimaginable for the operand of the instruction ever to be
 something different from a plain integer, the type is integer,
 otherwise it is string.
 .br
 .I Cg
-makes all necessary conversions for you,
+makes all necessary conversions,
 like adding EM_BSIZE to positive arguments of instructions
 dealing with locals,
 prepending underlines to global names,
@@ -776,8 +776,8 @@ Items are pushed in the order of appearance.
 This means that the last item will be on the top of the
 stack after the push.
 So if the stack pattern contained two token expressions
-and you want to push them back unchanged,
-you have to specify as stack replacement
+and they must be pushed back unchanged,
+they have to be specified as stack replacement
 .DS
 %[2] %[1]
 .DE
@@ -878,7 +878,7 @@ and shows how to place erase() and setcc() calls.
 	"sxt %[a.even]" | { PAIRSIGNED, %[a.1], %[a.2] }| | 
 .DE
 This coercion shows how to use the move and test calls.
-At first you might think that the testcall is unnecessary,
+At first one might think that the testcall is unnecessary,
 since the move will have set the condition codes,
 but the move may never have been executed
 if the register already contained the value,
@@ -1155,8 +1155,8 @@ from the string of size w_size and generate code to assemble global
 data for that integer.
 Only the sizes for which arithmetic is implemented need be
 handled,
-so if you didn't implement 200-byte integer division
-you don't have to implement 200-byte integer global data.
+so if 200-byte integer division is not implemented,
+200-byte integer global data do not have to be implemented.
 Here one must take care of word order in long integers.
 .IP con_float()
 This function must generate code to assemble a floating
@@ -1170,7 +1170,8 @@ and room made for local variables for a total of f_nlocals bytes.
 This function is called when a
 .B mes
 pseudo is seen that is not handled by the machine independent part.
-Example below shows all you probably have to know about that.
+The example below probably shows all the table writer ever has to know
+about that.
 .IP segname[]
 This is not a function,
 but an array of four strings.

@@ -88,14 +88,14 @@ All punctuation must be included where shown.
 GENERAL INFORMATION
 .LP
 The BASIC-EM compiler is designed for a UNIX based environment.
-It accepts a text file with your BASIC program (suffix .b) and generates
+It accepts a text file with a BASIC program (suffix .b) and generates
 an executable file, called a.out.
 .NH 2
 LINE FORMAT
 .LP
 A BASIC program consists of a series of lines, starting with a 
 positive line number in the range 0 to 32767.
-A line may consists of more then one physical line on your terminal, but must
+A line may consists of more than one physical line on a terminal, but
 is limited to 1024 characters.
 Multiple BASIC statements may be placed on a single line, provided
 they are separated by a colon (:).
@@ -393,7 +393,7 @@ ERROR
 ERROR <integer expression>
 .PU
 To simulate the occurrence of a BASIC error.
-To define your own error code use a value not already in
+To define a private error code a value must be used that is not already in
 use by the BASIC runtime system.
 The list of error messages currently in use can be found in appendix B.
 .NH 2

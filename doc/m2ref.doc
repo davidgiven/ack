@@ -465,7 +465,7 @@ This error occurs when a function procedure does not return properly
 ("falls" through).
 .IP "illegal instruction"
 .br
-This error might occur when you use floating point operations on an
+This error might occur when floating point operations are used on an
 implementation that does not have floating point.
 .PP
 In addition,

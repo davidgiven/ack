@@ -187,9 +187,9 @@ Not recommended unless the own package does not work on some bizarre
 machine.
 .IP -
 COREDEBUG, prints large amounts of information about core management.
-Better not define it unless you change the code and it stops working.
+Not recommended unless the code is changed and it stops working.
 .IP -
-SEPID, if you define this you will get an extra procedure that will
+SEPID, defining this will add an extra procedure that will
 go through a lot of work to scrape the last bytes together if the
 system won't provide more.
 This is not a good idea if memory is scarce and code and data reside
@@ -440,9 +440,9 @@ These are first replaced everywhere in the table by the correct
 replacement after which the first three instructions of the
 pattern are hashed and the pattern is linked into one of the
 256 linked lists.
-There is a define CHK_HASH in this module that you
-can set if you do not trust the randomness of the hashing
-function.
+There is a define CHK_HASH in this module that
+can be set if the randomness of the hashing
+function is not trusted.
 .PP
 The attention now shifts to optimize().
 This routine calls  basicblock() for every piece of code between two labels.

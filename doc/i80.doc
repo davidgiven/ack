@@ -558,7 +558,7 @@ Maybe some conversions will have to be made.
 .IP 4)
 In 'head_em': an application program returns control to the monitor by 
 jumping to address 0xFB52.
-If this is not the right way on your system, change it.
+This may have to be changed for different systems.
 .IP 5)
 In 'tail_em': the current version of the 8080 back-end has very limited I/O
 capabilities, because it was tested on a system that

@@ -11,8 +11,8 @@ This table was written to make it run, not to make it clever!
 The effect is, that the table written for the intel 8080, 
 which was made very clever runs faster and requiers less space!!
 So, for anyone to run programs on a z80 machine:
-You could try to make the table as clever as the one for the i80,
-or you could run the i80 table, for that can run on every z80 too.
+n attempt could be made to make this table as clever as the one for the i80,
+or the i80 table could be used, for that can run on every z80 too.
 .NH
 IMPLEMENTATION
 .PP
@@ -51,7 +51,7 @@ in the EM-library.
 .IP 4)
 In \fIhead_em\fP: an application program returns control to the monitor by 
 jumping to address 0x20.
-If this is not the right way on your system, change it.
+Thie may have to be changed on different systems.
 For an CPM-machine for example this should be 0x5, to provide a warm boot.
 .IP 5)
 In \fItail_em\fP: the current version of the z80 back-end has very limited I/O

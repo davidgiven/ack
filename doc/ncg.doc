@@ -229,8 +229,8 @@ Register variables
 .PP
 If the machine has more than enough registers to generate code with,
 it is possible to reserve some of them for use as register variables.
-If it has not, you can skip this section and ignore any references
-to register variables in the rest of this document.
+If it has not, this section may be skipped and any references
+to register variables in the rest of this document may be ignored.
 .PP
 The front ends generate messages to the back ends telling them which
 local variables could go into registers.
@@ -253,8 +253,8 @@ A loop control variable.
 A pointer variable.
 Usually they are better candidates to put in registers.
 .PP
-If you use register variables in your table you must supply
-more functions in mach.c.
+If register variables are used,
+more functions must be supplied in mach.c.
 These functions are explained later.
 .NH 1
 Description of the machine table
@@ -803,11 +803,10 @@ The type of the operand is dependent on the instruction,
 sometimes it is integer,
 sometimes it is address.
 It is undefined when the instruction has no operand.
-Watch out for instructions with type-letter w.
-They can occur without an operand.
-Check for this in your code rule with the defined() pseudo function.
+Instructions with type-letter w can occur without an operand.
+This can be checked in the code rule with the defined() pseudo function.
 .br
-If you cannot imagine the operand of the instruction ever to be
+If it is unimaginable for the operand of the instruction ever to be
 something different from a plain integer, the type is integer,
 otherwise it is address.
 .br
@@ -816,7 +815,7 @@ are the instructions marked with the
 type-letters c,f,l,n,o,s,r,w,z in the EM manual.
 .br
 .I Cg
-makes all necessary conversions for you,
+makes all necessary conversions,
 like adding EM_BSIZE to positive arguments of instructions
 dealing with locals,
 prepending underlines to global names,
@@ -851,7 +850,7 @@ This is the second allocated register.
 The second subregister of the first allocated register.
 .PP
 All normal C operators apply to integers,
-the + operator on addresses behaves as you would expect
+the + operator on addresses behaves as one would expect
 and the only operators allowed on register expressions
 are == and != .
 Furthermore there are some special `functions':
@@ -1343,8 +1342,7 @@ generate the same string as is used for this label.
 The code generator system could probably easily be changed
 to make this work for assemblers that do not support this
 type of label by generating unique labels itself.
-Implementation of this is not contemplated at the moment,
-bad luck if your assembler cannot do it.
+Implementation of this is not contemplated at the moment.
 .NH 3
 Stack replacement
 .PP
@@ -1360,8 +1358,8 @@ Items are pushed in the order of appearance.
 This means that the last item will be on the top of the
 stack after the push.
 So if the stack pattern contained two sets
-and you want to push them back unchanged,
-you have to specify as stack replacement
+and they must be pushed back unchanged,
+they have to be specified as stack replacement
 .DS
 yields %2 %1
 .DE
@@ -1549,10 +1547,9 @@ with REG REG
   gen com %1
       bic %1,%2	yields %2
 .DE
-Shows the way you have to twist the table,
-if an
-.I and -instruction
-is not available on your machine.
+Shows the way to handle the absence
+of an
+.I and -instruction.
 .DS
 .ta 7.5c
 pat set $1==2
@@ -1656,7 +1653,7 @@ This rule for
 .B blm
 already uses three registers of the same type.
 .I Cgg
-contains code to check all your rules
+contains code to check all rules
 to see if they can be applied from an empty fakestack.
 It uses the marriage thesis from Hall,
 a thesis from combinatorial mathematics,
@@ -2202,8 +2199,8 @@ from the string of size w_size and generate code to assemble global
 data for that integer.
 Only the sizes for which arithmetic is implemented need be
 handled,
-so if you didn't implement 200-byte integer division
-you don't have to implement 200-byte integer global data.
+so if 200-byte integer division is not implemented,
+200-byte integer global data don't have to be implemented.
 Here one must take care of word order in long integers.
 .IP -
 con_float()
@@ -2223,7 +2220,7 @@ mes(w_mesno)
 This function is called when a
 .B mes
 pseudo is seen that is not handled by the machine independent part.
-The example below shows all you probably have to know about that.
+The example below shows all one probably have to know about that.
 .IP -
 segname[]
 .br
