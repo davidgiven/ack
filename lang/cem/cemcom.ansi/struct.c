@@ -180,6 +180,7 @@ declare_struct(fund, idf, tpp)
 	register struct tag *tg;
 
 
+	if (*tpp) error("multiple types in declaration");
 	if (!idf)
 		idf = gen_idf();
 	tgp = (fund == ENUM ? &idf->id_enum : &idf->id_struct);
