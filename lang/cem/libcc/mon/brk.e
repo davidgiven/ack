@@ -28,14 +28,14 @@
 
  exp $brk
  pro $brk,0
- lal 0
- loi EM_PSIZE
  lpi $ctch
  sig
  lae .1
  sti EM_PSIZE
  loc 0
  ste .2
+ lal 0
+ loi EM_PSIZE
  str 2          ; The - possibly - occurring trap is caught
  lae .1
  loi EM_PSIZE

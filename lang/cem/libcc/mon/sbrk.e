@@ -38,7 +38,7 @@
  ste .2
  lol 0
  ads EM_WSIZE	; this is the new heap pointer, but watch out for overflow!
- dup EM_WSIZE
+ dup EM_PSIZE
  lor 2
  cmp		; compare with old heap pointer
  zlt *1
