@@ -18,6 +18,9 @@ C_alloc()
 	return &b;
 }
 
+arith C_holsize, C_bsssize;
+int C_holinit, C_bssinit;
+
 C_out(p)
 	register struct e_instr *p;
 {
@@ -27,11 +30,12 @@ C_out(p)
 	switch(p->em_type) {
 	case EM_MNEM:
 		OP(p->em_opcode);
-		if (em_flag[p->em_opcode] == PAR_B) {
-			p->em_argtype = ilb_ptyp;
+		if (em_flag[p->em_opcode - sp_fmnem] == PAR_B &&
+		    p->em_argtype == cst_ptyp) {
 			p->em_ilb = p->em_cst;
+			p->em_argtype = ilb_ptyp;
 		}
-		if (em_flag[p->em_opcode] != PAR_NO) arg(p, 0);
+		if (em_flag[p->em_opcode - sp_fmnem] != PAR_NO) arg(p, 0);
 		NL();
 		break;
 
@@ -82,11 +86,19 @@ arg(p, comma)
 
 	switch(p->em_argtype) {
 	case 0:
+		if (p->em_type == EM_MNEM && em_flag[p->em_opcode - sp_fmnem] != PAR_W) {
+			abort();
+		}
 		CCEND();
 		break;
 
 	case ilb_ptyp:
-		ILB(p->em_ilb);
+		if (p->em_type == EM_MNEM) {
+			CILB(p->em_ilb);
+		}
+		else {
+			ILB(p->em_ilb);
+		}
 		break;
 
 	case nof_ptyp:
@@ -121,6 +133,8 @@ arg(p, comma)
 		WCON(sp_fcon, p->em_string, p->em_size);
 		break;
 
+	default:
+		abort();
 	}
 }
 
@@ -145,11 +159,17 @@ pseudo(p)
 		break;
 
 	case ps_bss:
-	case ps_hol:
-		CST(EM_holsize);
+		CST(C_bsssize);
 		arg(p, 1);
 		COMMA();
-		CST((arith) EM_holinit);
+		CST((arith) C_bssinit);
+		break;
+
+	case ps_hol:
+		CST(C_holsize);
+		arg(p, 1);
+		COMMA();
+		CST((arith) C_holinit);
 		break;
 
 	case ps_pro:
