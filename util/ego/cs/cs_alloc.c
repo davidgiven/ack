@@ -23,7 +23,7 @@ occur_p newoccur(l1, l2, b)
 oldoccur(ocp)
 	occur_p ocp;
 {
-	oldcore((short *) ocp, sizeof(struct occur));
+	oldcore((char *) ocp, sizeof(struct occur));
 }
 
 avail_p newavail()
@@ -34,7 +34,7 @@ avail_p newavail()
 oldavail(avp)
 	avail_p avp;
 {
-	oldcore((short *) avp, sizeof(struct avail));
+	oldcore((char *) avp, sizeof(struct avail));
 }
 
 entity_p newentity()
@@ -45,5 +45,5 @@ entity_p newentity()
 oldentity(enp)
 	entity_p enp;
 {
-	oldcore((short *) enp, sizeof(struct entity));
+	oldcore((char *) enp, sizeof(struct entity));
 }

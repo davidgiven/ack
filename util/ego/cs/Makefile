@@ -7,7 +7,7 @@ SHR=../share
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
-LINTFLAGS=-hbac
+LINTFLAGS=-hbu
 
 CFILES=\
 cs.c cs_alloc.c cs_aux.c cs_avail.c cs_debug.c cs_elim.c \
