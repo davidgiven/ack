@@ -32,8 +32,11 @@ operation
 			}
 	|	BITOP ea_ea
 			{	bitop($1);}
-	|	OP_EA_D ea ',' DREG
-			{	emit2($1 | mrg_2 | $4<<9);
+	|	OP_EA_D sizedef ea ',' DREG
+			{	if ($2 != SIZE_W) {
+					serror("illegal size");
+				}
+				emit2($1 | mrg_2 | $5<<9);
 				ea_2(SIZE_W, DTA);
 			}
 	|	LEA ea ',' AREG
