@@ -1,13 +1,14 @@
 # $Header$
 
-PREFLAGS=-I../../../h -I. 
+EMHOME=../../..
+PREFLAGS=-I$(EMHOME)/h -I. 
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS)
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
-LIBS=../../../lib/em_data.a
-CDIR=../../proto/ncg
-CGG=../../../lib/ncgg
+LIBS=$(EMHOME)/lib/em_data.a
+CDIR=$(EMHOME)/mach/proto/ncg
+CGG=$(EMHOME)/lib/ncgg
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
        $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/main.c $(CDIR)/move.c \
        $(CDIR)/nextem.c $(CDIR)/reg.c $(CDIR)/regvar.c $(CDIR)/salloc.c \
@@ -57,14 +58,14 @@ var.o: $(CDIR)/var.c
 	cc -c $(CFLAGS) $(CDIR)/var.c
 
 install: all
-	../../install cg
+	$(EMHOME)/mach/install cg
 
 cmp:	 all
-	-../../compare cg
+	-$(EMHOME)/mach/compare cg
 
 
 tables.c: table $(CGG)
-	$(CGG) table
+	$(EMHOME)/lib/cpp table | $(CGG)
 	-cmp tables.h tables.H || cp tables.H tables.h
 
 lint: $(CFILES)
@@ -72,7 +73,7 @@ lint: $(CFILES)
 clean:
 	rm -f *.o tables.c tables.h debug.out cg tables.H
 
-codegen.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+codegen.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 codegen.o:	$(CDIR)/data.h
 codegen.o:	$(CDIR)/equiv.h
 codegen.o:	$(CDIR)/extern.h
@@ -81,7 +82,7 @@ codegen.o:	$(CDIR)/result.h
 codegen.o:	$(CDIR)/state.h
 codegen.o:	tables.h
 codegen.o:	$(CDIR)/types.h
-compute.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+compute.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 compute.o:	$(CDIR)/data.h
 compute.o:	$(CDIR)/extern.h
 compute.o:	$(CDIR)/glosym.h
@@ -90,14 +91,14 @@ compute.o:	$(CDIR)/result.h
 compute.o:	tables.h
 compute.o:	$(CDIR)/types.h
 equiv.o:	$(CDIR)/assert.h
-equiv.o:	$(CDIR)/data.h ../../../h/cgg_cg.h
+equiv.o:	$(CDIR)/data.h $(EMHOME)/h/cgg_cg.h
 equiv.o:	$(CDIR)/equiv.h
 equiv.o:	$(CDIR)/extern.h
 equiv.o:	$(CDIR)/param.h
 equiv.o:	$(CDIR)/result.h
 equiv.o:	tables.h
 equiv.o:	$(CDIR)/types.h
-fillem.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+fillem.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 fillem.o:	$(CDIR)/data.h
 fillem.o:	$(CDIR)/extern.h
 fillem.o:	mach.c
@@ -107,7 +108,7 @@ fillem.o:	$(CDIR)/regvar.h
 fillem.o:	$(CDIR)/result.h
 fillem.o:	tables.h
 fillem.o:	$(CDIR)/types.h
-gencode.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+gencode.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 gencode.o:	$(CDIR)/data.h
 gencode.o:	$(CDIR)/extern.h
 gencode.o:	$(CDIR)/param.h
@@ -120,28 +121,28 @@ glosym.o:	tables.h
 glosym.o:	$(CDIR)/types.h
 main.o:		$(CDIR)/param.h
 main.o:		tables.h
-move.o:		$(CDIR)/assert.h ../../../h/cgg_cg.h
+move.o:		$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 move.o:		$(CDIR)/data.h
 move.o:		$(CDIR)/extern.h
 move.o:		$(CDIR)/param.h
 move.o:		$(CDIR)/result.h
 move.o:		tables.h
 move.o:		$(CDIR)/types.h
-nextem.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+nextem.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 nextem.o:	$(CDIR)/data.h
 nextem.o:	$(CDIR)/extern.h
 nextem.o:	$(CDIR)/param.h
 nextem.o:	$(CDIR)/result.h
 nextem.o:	tables.h
 nextem.o:	$(CDIR)/types.h
-reg.o:		$(CDIR)/assert.h ../../../h/cgg_cg.h
+reg.o:		$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 reg.o:		$(CDIR)/data.h
 reg.o:		$(CDIR)/extern.h
 reg.o:		$(CDIR)/param.h
 reg.o:		$(CDIR)/result.h
 reg.o:		tables.h
 reg.o:		$(CDIR)/types.h
-regvar.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+regvar.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 regvar.o:	$(CDIR)/data.h
 regvar.o:	$(CDIR)/extern.h
 regvar.o:	$(CDIR)/param.h
@@ -149,14 +150,14 @@ regvar.o:	$(CDIR)/regvar.h
 regvar.o:	$(CDIR)/result.h
 regvar.o:	tables.h
 regvar.o:	$(CDIR)/types.h
-salloc.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+salloc.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 salloc.o:	$(CDIR)/data.h
 salloc.o:	$(CDIR)/extern.h
 salloc.o:	$(CDIR)/param.h
 salloc.o:	$(CDIR)/result.h
 salloc.o:	tables.h
 salloc.o:	$(CDIR)/types.h
-state.o:	$(CDIR)/assert.h ../../../h/cgg_cg.h
+state.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 state.o:	$(CDIR)/data.h
 state.o:	$(CDIR)/extern.h
 state.o:	$(CDIR)/param.h
@@ -164,14 +165,14 @@ state.o:	$(CDIR)/result.h
 state.o:	$(CDIR)/state.h
 state.o:	tables.h
 state.o:	$(CDIR)/types.h
-subr.o:		$(CDIR)/assert.h ../../../h/cgg_cg.h
+subr.o:		$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 subr.o:		$(CDIR)/data.h
 subr.o:		$(CDIR)/extern.h
 subr.o:		$(CDIR)/param.h
 subr.o:		$(CDIR)/result.h
 subr.o:		tables.h
 subr.o:		$(CDIR)/types.h
-var.o:		$(CDIR)/data.h ../../../h/cgg_cg.h
+var.o:		$(CDIR)/data.h $(EMHOME)/h/cgg_cg.h
 var.o:		$(CDIR)/param.h
 var.o:		$(CDIR)/result.h
 var.o:		tables.h
