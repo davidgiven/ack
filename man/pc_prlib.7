@@ -51,7 +51,7 @@ procedure	_rst(var p:^integer);
 procedure	_pac(var ad,zd:arrdescr; var zp:arr2; i:integer;
 		      var ap:arr1);
 procedure	_unp(var ad,zd:arrdescr; i:integer; var ap:arr1;
-		      var zp:arr2;);
+		      var zp:arr2;nosgnext:boolean);
 function	_asz(var dp:arrdescr):integer;
 
 procedure	_ass(line:integer; b:boolean);
@@ -252,7 +252,8 @@ Pack until \fIz\fP is full.
 Unpack \fIz\fP into \fIa\fP.
 \fIap\fP, \fIzp\fP, \fIad\fP and \fIzd\fP are as for _pac. \fIi\fP is
 the index in \fIa\fP where the first element of \fIz\fP is copied into.
-Unpack all elements of \fIz\fP.
+Unpack all elements of \fIz\fP. The boolean flag \fInosgnext\fP indicates
+whether the values should or should not be sign-extended.
 .IP _asz
 Compute array size. Used for copying conformant arrays.
 .PD
