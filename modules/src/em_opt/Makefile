@@ -77,7 +77,6 @@ NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.a\
 		$(EMHOME)/modules/lib/libemk.a\
 		$(EMHOME)/modules/lib/liballoc.a\
 		$(EMHOME)/modules/lib/malloc.o\
-		$(EMHOME)/modules/lib/libstring.a\
 		$(EMHOME)/modules/lib/libsystem.a\
 		$(EMHOME)/lib/em_data.a
 
