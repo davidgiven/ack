@@ -10,6 +10,9 @@ end
 name "NS16032 etext,edata,end library"
 dir libend
 end
-name "NS16032 system call library"
+name "NS16032 MON library"
 dir libmon
+end
+name "NS16032 system call library"
+dir libsys
 end

@@ -13,6 +13,9 @@ end
 name "Intel 8080 etext,edata,end library"
 dir libend
 end
-name "Intel 8080 System library"
+name "Intel 8080 MON library"
+dir libmon
+end
+name "Intel 8080 system call library"
 dir libmon
 end

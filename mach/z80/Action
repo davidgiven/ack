@@ -7,8 +7,11 @@ end
 name "Z80 EM library"
 dir libem
 end
-name "Z80 system call library"
+name "Z80 MON library"
 dir libmon
+end
+name "Z80 system call library"
+dir libsys
 end
 name "Z80 end,etext,edata library"
 dir libend
