@@ -2138,7 +2138,7 @@ pat lil lil adp sil sti $1==$2 && $1==$4 && inreg($1)==reg_pointer && $5<=4
     uses AA_REG = {indirect4, regvar($1, reg_pointer)}
     gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
     killreg %a
-			yields	%1 %a
+			yields	%1 %a		leaving sti $5
 
 pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
