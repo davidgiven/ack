@@ -324,6 +324,7 @@ ch7asgn(expp, oper, expr)
 		EVAL should however take care of evaluating (typeof (f op e))f
 	*/
 	int fund = (*expp)->ex_type->tp_fund;
+	struct type *tp;
 
 	/* We expect an lvalue */
 	if (!(*expp)->ex_lvalue)	{
@@ -333,6 +334,7 @@ ch7asgn(expp, oper, expr)
 	}
 	if (oper == '=') {
 		ch7cast(&expr, oper, (*expp)->ex_type);
+		tp = expr->ex_type;
 	}
 	else {	/* turn e into e' where typeof(e') = typeof (f op e) */
 		struct expr *extmp = intexpr((arith)0, INT);
@@ -341,13 +343,14 @@ ch7asgn(expp, oper, expr)
 		extmp->ex_lvalue = 1;
 		extmp->ex_type = (*expp)->ex_type;
 		ch7bin(&extmp, oper, expr);
-		/* note that ch7bin creates a tree of the expression
+		/* Note that ch7bin creates a tree of the expression
 			((typeof (f op e))f op (typeof (f op e))e),
-		   where f ~ extmp and e ~ expr;
-		   we have to use (typeof (f op e))e
+		   where f ~ extmp and e ~ expr.
+		   We want to use (typeof (f op e))e.
 		   Ch7bin does not create a tree if both operands
 		   were illegal or constants!
 		*/
+		tp = extmp->ex_type;	/* perform the arithmetic in type tp */
 		if (extmp->ex_class == Oper) {
 			expr = extmp->OP_RIGHT;
 			extmp->OP_RIGHT = NILEXPR;
@@ -356,13 +359,17 @@ ch7asgn(expp, oper, expr)
 		else
 			expr = extmp;
 	}
+
 #ifndef NOBITFIELD
 	if (fund == FIELD)
 		*expp = new_oper((*expp)->ex_type->tp_up, *expp, oper, expr);
 	else
-#endif NOBITFIELD
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
-	(*expp)->OP_TYPE = expr->ex_type;	/* for EVAL() */
+#else NOBITFIELD
+	*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
+#endif NOBITFIELD
+
+	(*expp)->OP_TYPE = tp;	/* for EVAL() */
 }
 
 /*	Some interesting (?) questions answered.

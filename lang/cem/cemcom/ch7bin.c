@@ -156,7 +156,8 @@ ch7bin(expp, oper, expr)
 	case RIGHTAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		ch7cast(&expr, oper, int_type); /* leftop should be int	*/
+		fund = arithbalance(expp, oper, &expr); /* ch. 7.5 */
+		ch7cast(&expr, oper, int_type); /* cvt. rightop to int */
 		non_commutative_binop(expp, oper, expr);
 		break;
 	case '<':
