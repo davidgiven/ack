@@ -193,6 +193,8 @@ loc 		| |		| {ANYCON, $1}				| |
 ldc		| |		| {ANYCON, highw(1)} {ANYCON, loww(1)}	| |
 lol		| |		| {LOCAL2, $1, 2}			| |
 loe		| |		| {EXTERN2, $1} 			| |
+loe loe $1==$2	| | 	allocate(ADDREG={EXTERN2, $1})	| %[a] %[a]	| |
+lol lol $1==$2	| |	allocate(ADDREG={LOCAL2, $1, 2})| %[a] %[a]	| |
 lil		| |	allocate(ADDREG={ind_regoff2, bp, tostring($1)})
 				| {ind_reg2, %[a]}			| |
 lof		| nocoercions : reg_off |
@@ -804,6 +806,7 @@ adp $1==1	| nocoercions : reg_off | |
 ...		| X_REG |
 			"inc %[1]"
 			erase(%[1]) setcc(%[1])   | %[1]	| | (1,2)
+...		| X_ADDREG | |		  {reg_off, %[1], tostring($1)} | |
 adp $1 == 0-1	| nocoercions : reg_off | |
 			      {reg_off, %[1.reg],%[1.off]+tostring($1)} | |
 ...		| nocoercions : ADDR_EXTERN | |
@@ -814,6 +817,7 @@ adp $1 == 0-1	| nocoercions : reg_off | |
 ...		| X_REG |
 			"dec %[1]"
 			erase(%[1]) setcc(%[1])   | %[1]	| | (1,2)
+...		| X_ADDREG | |		  {reg_off, %[1], tostring($1)} | |
 adp		| nocoercions : reg_off | |
 			  {reg_off, %[1.reg],%[1.off]+"+"+tostring($1)} | |
 ...		| nocoercions : ADDR_EXTERN | |
@@ -975,21 +979,29 @@ lol adi stl $1==$3 && $2==2 | regorconst |
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"add $1(bp),%[1]"
 			setcc({LOCAL2, $1, 2})		  | | |
+ldl adi sdl $1==$3 && $2==4 | regorconst regorconst |
+			remove(indexed)
+			remove(locals, %[ind]>=$1 && %[ind]<$1+4 )
+			"add $1(bp),%[1]"
+			"adc %($1+2%)(bp),%[2]"		   | | |
 lol ngi stl $1==$3 && $2==2 | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"neg $1(bp)"
 			setcc({LOCAL2, $1, 2})		  | | |
+ldl ngi sdl $1==$3 && $2==4 | |
+			remove(indexed)
+			remove(locals, %[ind]>=$1 && %[ind]<$1+4 )
+			"neg $1(bp)"
+			"neg %($1+2%)(bp)"
+			"sbb %($1+2%)(bp,0"		  | | |
 lol ads stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"add $1(bp),%[1]"
 			setcc({LOCAL2, $1, 2})		  | | |
-lol adp stl $1==$3	    | |
-			remove(indexed)
-			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
-			"add $1(bp),$2"
-			setcc({LOCAL2, $1, 2})		  | | |
+lol lol adp stl $1==$2 && $1==$4 | |
+			allocate(ADDREG={LOCAL2,$1,2})	  | %[a] | lol $2 adp $3 stl $2 |
 lol adp stl $1==$3 && $2==1 | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -999,6 +1011,11 @@ lol adp stl $1==$3 && $2==0-1 | |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
 			"dec $1(bp)"
+			setcc({LOCAL2, $1, 2})		  | | |
+lol adp stl $1==$3	    | |
+			remove(indexed)
+			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
+			"add $1(bp),$2"
 			setcc({LOCAL2, $1, 2})		  | | |
 lol and stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
@@ -1030,11 +1047,6 @@ lil ads sil $1==$3 && $2==2 | regorconst |
 			remove(referals)
 			"add (%[a]),%[1]"
 			setcc({ind_reg2, %[a]})		  | | |
-lil adp sil $1==$3	    | |
-			allocate(ADDREG={LOCAL2, $1, 2})
-			remove(referals)
-			"add (%[a]),$2"
-			setcc({ind_reg2, %[a]})		  | | |
 lil adp sil $1==$3 && $2==1 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
@@ -1044,6 +1056,11 @@ lil adp sil $1==$3 && $2==0-1 | |
 			allocate(ADDREG={LOCAL2, $1, 2})
 			remove(referals)
 			"dec (%[a])"
+			setcc({ind_reg2, %[a]})		  | | |
+lil adp sil $1==$3	    | |
+			allocate(ADDREG={LOCAL2, $1, 2})
+			remove(referals)
+			"add (%[a]),$2"
 			setcc({ind_reg2, %[a]})		  | | |
 lil and sil $1==$3 && $2==2 | regorconst |
 			allocate(ADDREG={LOCAL2, $1, 2})
@@ -1064,18 +1081,25 @@ loe adi ste $1==$3 && $2==2 | regorconst |
 			remove(indirects)
 			"add ($1),%[1]"
 			setcc({EXTERN2, $1})		  | | |
+lde adi sde $1==$3 && $2==4 | regorconst regorconst |
+			remove(indirects)
+			"add ($1),%[1]"
+			"adc ($1+2),%[2]"		  | | |
 loe ngi ste $1==$3 && $2==2 | |
 			remove(indirects)
 			"neg ($1)"
 			setcc({EXTERN2, $1})		  | | |
+lde ngi sde $1==$3 && $2==4 | |
+			remove(indirects)
+			"neg ($1)"
+			"neg ($1+2)"
+			"sbb ($1+2),0"			  | | |
 loe ads ste $1==$3 && $2==2 | regorconst |
 			remove(indirects)
 			"add ($1),%[1]"
 			setcc({EXTERN2, $1})		  | | |
-loe adp ste $1==$3 	    | |
-			remove(indirects)
-			"add ($1),$2"
-			setcc({EXTERN2, $1})		  | | |
+loe loe adp ste $1==$4 && $1==$4 | |
+			allocate(ADDREG={EXTERN2,$1})	| %[a] | loe $1 adp $3 ste $1 |
 loe adp ste $1==$3 && $2==1 | |
 			remove(indirects)
 			"inc ($1)"
@@ -1083,6 +1107,10 @@ loe adp ste $1==$3 && $2==1 | |
 loe adp ste $1==$3 && $2==0-1 | |
 			remove(indirects)
 			"dec ($1)"
+			setcc({EXTERN2, $1})		  | | |
+loe adp ste $1==$3 	    | |
+			remove(indirects)
+			"add ($1),$2"
 			setcc({EXTERN2, $1})		  | | |
 loe and ste $1==$3 && $2==2 | regorconst |
 			remove(indirects)
@@ -1129,7 +1157,15 @@ cff		| CXREG DXREG |
 loc loc cii $1==1 && $2==2	| ACC |
 			 "cbw"
 			 samecc 		    | ax  | |(1,2)
+...				| ACC1 |
+			 "cbw"
+			 samecc			    | ax  | |(1,2)
 loc loc cii $1==1 && $2==4	| ACC |
+			allocate(DXREG)
+			"cbw"
+			"cwd"
+			samecc			    | dx ax | |(2,7)
+...				| ACC1 |
 			allocate(DXREG)
 			"cbw"
 			"cwd"
@@ -2135,6 +2171,7 @@ csb !defined($1)| rm-SIREG-DIREG X_SIREG X_DXREG |
 			"jmp .csb2"
 			erase(%[2]) erase(%[3]) 	  | | |
 dup $1==2	| REG |				| %[1] %[1] | |
+...		| ACC1 |			| %[1] %[1] | |
 dup $1==4	| REG REG |	      | %[2] %[1] %[2] %[1] | |
 dup		| |	remove(ALL)
 			move({ANYCON, $1}, cx)
