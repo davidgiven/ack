@@ -290,7 +290,7 @@ ABC
 	echo "target optimizers do not work on Xenix; disabling their use"
 	for i in ../lib/*/descr
 	do
-		if grep -s "name asopt" $i
+		if grep "name asopt" $i > /dev/null 2>&1
 		then
 			if [ -f $i.top ]
 			then
