@@ -13,7 +13,6 @@ chk_expr.c
 chk_expr.h
 class.h
 code.c
-const.h
 cstoper.c
 debug.h
 declar.g

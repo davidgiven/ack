@@ -161,6 +161,8 @@ extern t_type
 #define	float_size	(SZ_FLOAT)
 #define	double_size	(SZ_DOUBLE)
 #define	pointer_size	(SZ_POINTER)
+
+#define wrd_bits	(8*(int)word_size)
 #else NOCROSS
 
 extern int
@@ -182,6 +184,9 @@ extern arith
 	float_size,
 	double_size,
 	pointer_size;		/* All from type.c */
+
+extern unsigned int
+	wrd_bits;		/* from cstoper.c */
 #endif NOCROSS
 
 extern arith

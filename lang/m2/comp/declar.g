@@ -236,14 +236,13 @@ IdentList(t_node **p;)
 {
 	register t_node *q;
 } :
-	IDENT		{ *p = q = dot2leaf(Value); }
+	IDENT		{ *p = q = dot2leaf(Select); }
 	[ %persistent
 		',' IDENT
-			{ q->nd_left = dot2leaf(Value);
-			  q = q->nd_left;
+			{ q->nd_NEXT = dot2leaf(Select);
+			  q = q->nd_NEXT;
 			}
 	]*
-			{ q->nd_left = 0; }
 ;
 
 SubrangeType(t_type **ptp;)
@@ -360,7 +359,7 @@ FieldList(t_scope *scope; arith *cnt; int *palign;)
 			  else
 #endif
 			  error("':' missing");
-			  tp = qualified_type(nd);
+			  tp = qualified_type(&nd);
 			}
 	  ]
 	| ':' qualtype(&tp)
@@ -405,8 +404,8 @@ CaseLabelList(t_type **ptp; t_node **pnd;):
 	CaseLabels(ptp, pnd)
 	[	
 			{ *pnd = dot2node(Link, *pnd, NULLNODE); }
-		',' CaseLabels(ptp, &((*pnd)->nd_right))
-			{ pnd = &((*pnd)->nd_right); }
+		',' CaseLabels(ptp, &((*pnd)->nd_RIGHT))
+			{ pnd = &((*pnd)->nd_RIGHT); }
 	]*
 ;
 
@@ -431,15 +430,15 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			}
 	[
 		UPTO	{ *pnd = nd = dot2node(Link,nd,NULLNODE);
-			  nd->nd_type = nd->nd_left->nd_type;
+			  nd->nd_type = nd->nd_LEFT->nd_type;
 			}
-		ConstExpression(&(*pnd)->nd_right)
-			{ if (!ChkCompat(&((*pnd)->nd_right), nd->nd_type,
+		ConstExpression(&(*pnd)->nd_RIGHT)
+			{ if (!ChkCompat(&((*pnd)->nd_RIGHT), nd->nd_type,
 					 "case label")) {
 			  	nd->nd_type = error_type;
 			  }
-			  else if (! chk_bounds(nd->nd_left->nd_INT,
-						nd->nd_right->nd_INT,
+			  else if (! chk_bounds(nd->nd_LEFT->nd_INT,
+						nd->nd_RIGHT->nd_INT,
 						nd->nd_type->tp_fund)) {
 			    node_error(nd,
 			   "lower bound exceeds upper bound in case label range");
@@ -482,7 +481,7 @@ qualtype(t_type **ptp;)
 	t_node *nd;
 } :
 	qualident(&nd)
-		{ *ptp = qualified_type(nd); }
+		{ *ptp = qualified_type(&nd); }
 ;
 
 ProcedureType(t_type **ptp;)
@@ -559,8 +558,8 @@ VariableDeclaration
 	IdentAddr(&VarList)
 			{ nd = VarList; }
 	[ %persistent
-		',' IdentAddr(&(nd->nd_right))
-			{ nd = nd->nd_right; }
+		',' IdentAddr(&(nd->nd_RIGHT))
+			{ nd = nd->nd_RIGHT; }
 	]*
 	':' type(&tp)
 			{ EnterVarList(VarList, tp, proclevel > 0); }
@@ -570,11 +569,12 @@ IdentAddr(t_node **pnd;)
 {
 	register t_node *nd;
 } :
-	IDENT		{ nd = dot2leaf(Name); }
+	IDENT		{ nd = dot2leaf(Name);
+			  *pnd = dot2node(Link, nd, NULLNODE);
+			}
 	[	'['
-		ConstExpression(&(nd->nd_left))
+		ConstExpression(&(nd->nd_NEXT))
 		']'
 	|
 	]
-			{ *pnd = nd; }
 ;

@@ -629,7 +629,7 @@ CodeDesig(nd, ds)
 	switch(nd->nd_class) {	/* Divide */
 	case Def:
 		df = nd->nd_def;
-		if (nd->nd_left) CodeDesig(nd->nd_left, ds);
+		if (nd->nd_NEXT) CodeDesig(nd->nd_NEXT, ds);
 
 		switch(df->df_kind) {
 		case D_FIELD:
@@ -648,10 +648,10 @@ CodeDesig(nd, ds)
 	case Arrsel:
 		assert(nd->nd_symb == '[' || nd->nd_symb == ',');
 
-		CodeDesig(nd->nd_left, ds);
+		CodeDesig(nd->nd_LEFT, ds);
 		CodeAddress(ds);
-		CodePExpr(nd->nd_right);
-		nd = nd->nd_left;
+		CodePExpr(nd->nd_RIGHT);
+		nd = nd->nd_LEFT;
 
 		/* Now load address of descriptor
 		*/
@@ -681,7 +681,7 @@ CodeDesig(nd, ds)
 	case Arrow:
 		assert(nd->nd_symb == '^');
 
-		nd = nd->nd_right;
+		nd = nd->nd_RIGHT;
 		CodeDesig(nd, ds);
 		switch(ds->dsg_kind) {
 		case DSG_LOADED:

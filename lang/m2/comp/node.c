@@ -22,6 +22,33 @@
 #include	"node.h"
 #include	"main.h"
 
+static int	nsubnodes[] = {
+	0,
+	2,
+	2,
+	2,
+	2,
+	2,
+	1,
+	1,
+	2,
+	1,
+	2,
+	1,
+	2
+};
+
+t_node *
+getnode(class)
+{
+	register t_node *nd = new_node();
+
+	if (options['R']) nd->nd_flags |= ROPTION;
+	if (options['A']) nd->nd_flags |= AOPTION;
+	nd->nd_class = class;
+	return nd;
+}
+
 t_node *
 MkNode(class, left, right, token)
 	t_node *left, *right;
@@ -29,14 +56,11 @@ MkNode(class, left, right, token)
 {
 	/*	Create a node and initialize it with the given parameters
 	*/
-	register t_node *nd = new_node();
+	register t_node *nd = getnode(class);
 
-	nd->nd_left = left;
-	nd->nd_right = right;
 	nd->nd_token = *token;
-	nd->nd_class = class;
-	if (options['R']) nd->nd_flags |= ROPTION;
-	if (options['A']) nd->nd_flags |= AOPTION;
+	nd->nd_LEFT = left;
+	nd->nd_RIGHT = right;
 	return nd;
 }
 
@@ -51,21 +75,40 @@ t_node *
 MkLeaf(class, token)
 	t_token *token;
 {
-	return MkNode(class, NULLNODE, NULLNODE, token);
+	register t_node *nd = getnode(class);
+	nd->nd_token = *token;
+	switch(nsubnodes[class]) {
+	case 1:
+		nd->nd_NEXT = 0;
+		break;
+	case 2:
+		nd->nd_LEFT = 0;
+		nd->nd_RIGHT = 0;
+		break;
+	}
+	return nd;
 }
 
 t_node *
 dot2leaf(class)
 {
-	return MkNode(class, NULLNODE, NULLNODE, &dot);
+	return MkLeaf(class, &dot);
 }
 
 FreeLR(nd)
 	register t_node *nd;
 {
-	FreeNode(nd->nd_left);
-	FreeNode(nd->nd_right);
-	nd->nd_left = nd->nd_right = 0;
+	switch(nsubnodes[nd->nd_class]) {
+	case 2:
+		FreeNode(nd->nd_LEFT);
+		FreeNode(nd->nd_RIGHT);
+		nd->nd_LEFT = nd->nd_RIGHT = 0;
+		break;
+	case 1:
+		FreeNode(nd->nd_NEXT);
+		nd->nd_NEXT = 0;
+		break;
+	}
 }
 
 FreeNode(nd)
@@ -83,6 +126,12 @@ NodeCrash(expp)
 	t_node *expp;
 {
 	crash("Illegal node %d", expp->nd_class);
+}
+
+PNodeCrash(expp)
+	t_node **expp;
+{
+	crash("Illegal node %d", (*expp)->nd_class);
 }
 
 #ifdef DEBUG
@@ -117,7 +166,14 @@ PrNode(nd, lvl)
 		return;
 	}
 	printnode(nd, lvl);
-	PrNode(nd->nd_left, lvl + 1);
-	PrNode(nd->nd_right, lvl + 1);
+	switch(nsubnodes[nd->nd_class]) {
+	case 1:
+		PrNode(nd->nd_LEFT, lvl + 1);
+		PrNode(nd->nd_RIGHT, lvl + 1);
+		break;
+	case 2:
+		PrNode(nd->nd_NEXT, lvl + 1);
+		break;
+	}
 }
 #endif DEBUG

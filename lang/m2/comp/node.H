@@ -10,8 +10,6 @@
 /* $Header$ */
 
 struct node {
-	struct node *nd_left;
-	struct node *nd_right;
 	char nd_class;		/* kind of node */
 #define Value	0		/* constant */
 #define Arrsel  1		/* array selection */
@@ -24,7 +22,8 @@ struct node {
 #define Xset	8		/* a set */
 #define Def	9		/* an identified name */
 #define Stat	10		/* a statement */
-#define Link	11
+#define Select	11		/* a '.' selection */
+#define Link	12
 				/* do NOT change the order or the numbers!!! */
 	char nd_flags;		/* options */
 #define ROPTION	1
@@ -33,6 +32,9 @@ struct node {
 	struct token nd_token;
 #define nd_set		nd_token.tk_data.tk_set
 #define nd_def		nd_token.tk_data.tk_def
+#define nd_LEFT		nd_token.tk_data.tk_left
+#define nd_RIGHT	nd_token.tk_data.tk_right
+#define nd_NEXT		nd_token.tk_data.tk_next
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
 #define nd_IDF		nd_token.TOK_IDF
@@ -49,7 +51,7 @@ typedef struct node	t_node;
 
 /* ALLOCDEF "node" 50 */
 
-extern t_node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf();
+extern t_node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf(), *getnode();
 
 #define NULLNODE ((t_node *) 0)
 

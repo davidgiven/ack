@@ -23,7 +23,6 @@
 #include	"type.h"
 #include	"idf.h"
 #include	"node.h"
-#include	"const.h"
 #include	"scope.h"
 #include	"walk.h"
 #include	"chk_expr.h"
@@ -51,6 +50,8 @@ arith
 	double_size = SZ_DOUBLE,
 	pointer_size = SZ_POINTER;
 #endif
+
+#define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
 
 arith	ret_area_size;
 
@@ -255,12 +256,13 @@ enum_type(EnumList)
 }
 
 t_type *
-qualified_type(nd)
-	register t_node *nd;
+qualified_type(pnd)
+	t_node **pnd;
 {
 	register t_def *df;
 
-	if (ChkDesig(nd, D_USED)) {
+	if (ChkDesig(pnd, D_USED)) {
+		register t_node *nd = *pnd;
 		if (nd->nd_class != Def) {
 			node_error(nd, "type expected");
 			FreeNode(nd);
@@ -284,9 +286,9 @@ node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
 			}
 		   	return df->df_type;
 		}
-node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
+node_error(nd, "identifier \"%s\" is not a type", df->df_idf->id_text);
 	}
-	FreeNode(nd);
+	FreeNode(*pnd);
 	return error_type;
 }
 
@@ -681,7 +683,7 @@ SolveForwardTypeRefs(df)
 		df->df_kind = D_TYPE;
 		while (nd) {
 			nd->nd_type->tp_next = df->df_type;
-			nd = nd->nd_right;
+			nd = nd->nd_RIGHT;
 		}
 		FreeNode(df->df_forw_node);
 	}
@@ -750,7 +752,7 @@ type_or_forward(tp)
 			df1->df_forw_node = 0;
 			/* Fall through */
 		case D_FORWTYPE:
-			nd = dot2node(0, NULLNODE, df1->df_forw_node);
+			nd = dot2node(Link, NULLNODE, df1->df_forw_node);
 			df1->df_forw_node = nd;
 			nd->nd_type = tp;
 			return 0;
@@ -758,7 +760,7 @@ type_or_forward(tp)
 			return 1;
 		}
 	}
-	nd = dot2leaf(0);
+	nd = dot2leaf(Name);
 	if ((df1 = lookfor(nd, CurrVis, 0, D_USED))->df_kind == D_MODULE) {
 		/* A Modulename in one of the enclosing scopes.
 		   It is not clear from the language definition that

@@ -48,13 +48,6 @@ struct field {
 #define fld_variant	df_value.df_field.fd_variant
 };
 
-struct dfproc {
-	struct scopelist *pr_vis; /* scope of procedure */
-	struct node *pr_body;	/* body of this procedure */
-#define prc_vis		df_value.df_proc.pr_vis
-#define prc_body	df_value.df_proc.pr_body
-};
-
 struct import {
 	struct def *im_def;	/* imported definition */
 #define imp_def		df_value.df_import.im_def
@@ -66,7 +59,9 @@ struct dforward {
 	char *fo_name;
 #define for_node	df_value.df_forward.fo_node
 #define for_vis		df_value.df_forward.fo_vis
-#define for_name	df_value.df_forward.fo_name
+#define prc_vis		df_value.df_forward.fo_vis
+#define prc_body	df_value.df_forward.fo_node
+#define prc_name	df_value.df_forward.fo_name
 };
 
 struct forwtype {
@@ -128,8 +123,7 @@ struct def	{		/* list of definitions for a name */
 		struct enumval df_enum;
 		struct field df_field;
 		struct import df_import;
-		struct dfproc df_proc;
-		struct dforward df_forward;
+		struct dforward df_forward;	/* also used for proc */
 		struct forwtype df_fortype;
 		int df_stdname;	/* define for standard name */
 	} df_value;

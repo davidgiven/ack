@@ -38,19 +38,6 @@ extern int	proclevel;
 extern char	options[];
 int		fp_used;
 
-STATIC char *
-NameOfProc(df)
-	register t_def *df;
-{
-
-	assert(df->df_kind & (D_PROCHEAD|D_PROCEDURE));
-
-	if (df->df_kind == D_PROCEDURE) {
-		return df->prc_vis->sc_scope->sc_name;
-	}
-	return df->for_name;
-}
-
 CodeConst(cst, size)
 	arith cst;
 	int size;
@@ -100,7 +87,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	switch(nd->nd_class) {
 	case Def:
 		if (nd->nd_def->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
-			C_lpi(NameOfProc(nd->nd_def));
+			C_lpi(nd->nd_def->prc_name);
 			ds->dsg_kind = DSG_LOADED;
 			break;
 		}
@@ -317,7 +304,7 @@ CodeCall(nd)
 	/*	Generate code for a procedure call. Checking of parameters
 		and result is already done.
 	*/
-	register t_node *left = nd->nd_left;
+	register t_node *left = nd->nd_LEFT;
 	t_type *result_tp;
 	int needs_fn;
 
@@ -335,8 +322,8 @@ CodeCall(nd)
 	}
 #endif
 
-	if (nd->nd_right) {
-		CodeParameters(ParamList(left->nd_type), nd->nd_right);
+	if (nd->nd_RIGHT) {
+		CodeParameters(ParamList(left->nd_type), nd->nd_RIGHT);
 	}
 
 	switch(left->nd_class) {
@@ -353,7 +340,7 @@ CodeCall(nd)
 				C_lxl((arith) (proclevel - level));
 			}
 			needs_fn = df->df_scope->sc_defmodule;
-			C_cal(NameOfProc(df));
+			C_cal(df->prc_name);
 			break;
 		}}
 		/* Fall through */
@@ -379,32 +366,31 @@ CodeCall(nd)
 
 CodeParameters(param, arg)
 	t_param *param;
-	t_node *arg;
+	register t_node *arg;
 {
 	register t_type *tp;
-	register t_node *left;
-	register t_type *left_type;
+	register t_type *arg_type;
 
 	assert(param != 0 && arg != 0);
 
 	if (param->par_next) {
-		CodeParameters(param->par_next, arg->nd_right);
+		CodeParameters(param->par_next, arg->nd_RIGHT);
 	}
 
 	tp = TypeOfParam(param);
-	left = arg->nd_left;
-	left_type = left->nd_type;
+	arg = arg->nd_LEFT;
+	arg_type = arg->nd_type;
 	if (IsConformantArray(tp)) {
 		register t_type *elem = tp->arr_elem;
 
 		C_loc(tp->arr_elsize);
-		if (IsConformantArray(left_type)) {
-			DoHIGH(left->nd_def);
-			if (elem->tp_size != left_type->arr_elem->tp_size) {
+		if (IsConformantArray(arg_type)) {
+			DoHIGH(arg->nd_def);
+			if (elem->tp_size != arg_type->arr_elem->tp_size) {
 				/* This can only happen if the formal type is
 				   ARRAY OF (WORD|BYTE)
 				*/
-				C_loc(left_type->arr_elem->tp_size);
+				C_loc(arg_type->arr_elem->tp_size);
 				C_mli(word_size);
 				if (elem == word_type) {
 					c_loc((int) word_size - 1);
@@ -417,47 +403,47 @@ CodeParameters(param, arg)
 				}
 			}
 		}
-		else if (left->nd_symb == STRING) {
-			C_loc((arith)(left->nd_SLE - 1));
+		else if (arg->nd_symb == STRING) {
+			C_loc((arith)(arg->nd_SLE - 1));
 		}
 		else if (elem == word_type) {
-			C_loc((left_type->tp_size+word_size-1) / word_size - 1);
+			C_loc((arg_type->tp_size+word_size-1) / word_size - 1);
 		}
 		else if (elem == byte_type) {
-			C_loc(left_type->tp_size - 1);
+			C_loc(arg_type->tp_size - 1);
 		}
 		else {
-			C_loc(left_type->arr_high - left_type->arr_low);
+			C_loc(arg_type->arr_high - arg_type->arr_low);
 		}
 		c_loc(0);
 	}
 	if (IsConformantArray(tp) || IsVarParam(param) || IsBigParamTp(tp)) {
-		if (left->nd_symb == STRING) {
-			CodeString(left);
+		if (arg->nd_symb == STRING) {
+			CodeString(arg);
 		}
-		else switch(left->nd_class) {
+		else switch(arg->nd_class) {
 		case Arrsel:
 		case Arrow:
 		case Def:
-			CodeDAddress(left, IsVarParam(param));
+			CodeDAddress(arg, IsVarParam(param));
 			break;
 		default:{
 			arith tmp, TmpSpace();
 
-			CodePExpr(left);
-			tmp = TmpSpace(left->nd_type->tp_size, left->nd_type->tp_align);
-			STL(tmp, WA(left->nd_type->tp_size));
+			CodePExpr(arg);
+			tmp = TmpSpace(arg->nd_type->tp_size, arg->nd_type->tp_align);
+			STL(tmp, WA(arg->nd_type->tp_size));
 			C_lal(tmp);
 			}
 			break;
 		}
 		return;
 	}
-	if (left_type->tp_fund == T_STRING) {
-		CodePString(left, tp);
+	if (arg_type->tp_fund == T_STRING) {
+		CodePString(arg, tp);
 		return;
 	}
-	CodePExpr(left);
+	CodePExpr(arg);
 }
 
 CodePString(nd, tp)
@@ -499,15 +485,15 @@ addu(sz)
 CodeStd(nd)
 	t_node *nd;
 {
-	register t_node *arg = nd->nd_right;
+	register t_node *arg = nd->nd_RIGHT;
 	register t_node *left = 0;
 	register t_type *tp = 0;
-	int std = nd->nd_left->nd_def->df_value.df_stdname;
+	int std = nd->nd_LEFT->nd_def->df_value.df_stdname;
 
 	if (arg) {
-		left = arg->nd_left;
+		left = arg->nd_LEFT;
 		tp = BaseType(left->nd_type);
-		arg = arg->nd_right;
+		arg = arg->nd_RIGHT;
 	}
 
 	switch(std) {
@@ -573,8 +559,8 @@ CodeStd(nd)
 		CodePExpr(left);
 		CodeCoercion(left->nd_type, tp);
 		if (arg) {
-			CodePExpr(arg->nd_left);
-			CodeCoercion(arg->nd_left->nd_type, tp);
+			CodePExpr(arg->nd_LEFT);
+			CodeCoercion(arg->nd_LEFT->nd_type, tp);
 		}
 		else	{
 			c_loc(1);
@@ -603,7 +589,7 @@ CodeStd(nd)
 	case S_INCL:
 	case S_EXCL:
 		CodePExpr(left);
-		CodePExpr(arg->nd_left);
+		CodePExpr(arg->nd_LEFT);
 		C_loc(tp->set_low);
 		C_sbi(word_size);
 		C_set(tp->tp_size);
@@ -668,8 +654,8 @@ Operands(nd)
 	register t_node *nd;
 {
 
-	CodePExpr(nd->nd_left);
-	CodePExpr(nd->nd_right);
+	CodePExpr(nd->nd_LEFT);
+	CodePExpr(nd->nd_RIGHT);
 	DoLineno(nd);
 }
 
@@ -678,8 +664,8 @@ CodeOper(expr, true_label, false_label)
 	label true_label;
 	label false_label;	/* labels to jump to in logical expr's	*/
 {
-	register t_node *leftop = expr->nd_left;
-	register t_node *rightop = expr->nd_right;
+	register t_node *leftop = expr->nd_LEFT;
+	register t_node *rightop = expr->nd_RIGHT;
 	register t_type *tp = expr->nd_type;
 
 	switch (expr->nd_symb)	{
@@ -991,7 +977,7 @@ CodeUoper(nd)
 {
 	register t_type *tp = nd->nd_type;
 
-	CodePExpr(nd->nd_right);
+	CodePExpr(nd->nd_RIGHT);
 	switch(nd->nd_symb) {
 	case NOT:
 		C_teq();
@@ -1010,8 +996,8 @@ CodeUoper(nd)
 		}
 		break;
 	case COERCION:
-		CodeCoercion(nd->nd_right->nd_type, tp);
-		RangeCheck(tp, nd->nd_right->nd_type);
+		CodeCoercion(nd->nd_RIGHT->nd_type, tp);
+		RangeCheck(tp, nd->nd_RIGHT->nd_type);
 		break;
 	case CAST:
 		break;
@@ -1025,12 +1011,12 @@ CodeSet(nd)
 {
 	register t_type *tp = nd->nd_type;
 
-	nd = nd->nd_right;
+	nd = nd->nd_NEXT;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (nd->nd_left) CodeEl(nd->nd_left, tp);
-		nd = nd->nd_right;
+		if (nd->nd_LEFT) CodeEl(nd->nd_LEFT, tp);
+		nd = nd->nd_RIGHT;
 	}
 }
 

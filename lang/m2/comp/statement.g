@@ -40,7 +40,7 @@ statement(register t_node **pnd;)
 				  nd->nd_symb = '(';
 				  nd->nd_lineno = (*pnd)->nd_lineno;
 				}
-		ActualParameters(&(nd->nd_right))?
+		ActualParameters(&(nd->nd_RIGHT))?
 	|
 		[ BECOMES	
 		| '='		{ error("':=' expected instead of '='");
@@ -48,7 +48,7 @@ statement(register t_node **pnd;)
 				}
 		]
 				{ nd = dot2node(Stat, *pnd, NULLNODE); }
-		expression(&(nd->nd_right))
+		expression(&(nd->nd_RIGHT))
 	]
 				{ *pnd = nd; }
 	/*
@@ -60,19 +60,19 @@ statement(register t_node **pnd;)
 	CaseStatement(pnd)
 |
 	WHILE		{ *pnd = nd = dot2leaf(Stat); }
-	expression(&(nd->nd_left))
+	expression(&(nd->nd_LEFT))
 	DO
-	StatementSequence(&(nd->nd_right))
+	StatementSequence(&(nd->nd_RIGHT))
 	END
 |
 	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
-	StatementSequence(&(nd->nd_left))
+	StatementSequence(&(nd->nd_LEFT))
 	UNTIL
-	expression(&(nd->nd_right))
+	expression(&(nd->nd_RIGHT))
 |
 			{ loopcount++; }
 	LOOP		{ *pnd = nd = dot2leaf(Stat); }
-	StatementSequence(&((*pnd)->nd_right))
+	StatementSequence(&((*pnd)->nd_RIGHT))
 	END
 			{ loopcount--; }
 |
@@ -116,7 +116,7 @@ StatementSequence(register t_node **pnd;)
 			  	nd1 = dot2node(Link, *pnd, nd);
 			  	*pnd = nd1;
 			  	nd1->nd_symb = ';';
-			  	pnd = &(nd1->nd_right);
+			  	pnd = &(nd1->nd_RIGHT);
 			  }
 			}
 	]*
@@ -129,25 +129,25 @@ IfStatement(t_node **pnd;)
 	IF		{ nd = dot2leaf(Stat);
 			  *pnd = nd;
 			}
-	expression(&(nd->nd_left))
-	THEN		{ nd->nd_right = dot2leaf(Link);
-			  nd = nd->nd_right;
+	expression(&(nd->nd_LEFT))
+	THEN		{ nd->nd_RIGHT = dot2leaf(Link);
+			  nd = nd->nd_RIGHT;
 			}
-	StatementSequence(&(nd->nd_left))
+	StatementSequence(&(nd->nd_LEFT))
 	[
-		ELSIF	{ nd->nd_right = dot2leaf(Stat);
-			  nd = nd->nd_right;
+		ELSIF	{ nd->nd_RIGHT = dot2leaf(Stat);
+			  nd = nd->nd_RIGHT;
 			  nd->nd_symb = IF;
 			}
-		expression(&(nd->nd_left))
-		THEN	{ nd->nd_right = dot2leaf(Link);
-			  nd = nd->nd_right;
+		expression(&(nd->nd_LEFT))
+		THEN	{ nd->nd_RIGHT = dot2leaf(Link);
+			  nd = nd->nd_RIGHT;
 			}
-		StatementSequence(&(nd->nd_left))
+		StatementSequence(&(nd->nd_LEFT))
 	]*
 	[
 		ELSE
-		StatementSequence(&(nd->nd_right))
+		StatementSequence(&(nd->nd_RIGHT))
 	|
 	]
 	END
@@ -159,16 +159,16 @@ CaseStatement(t_node **pnd;)
 	t_type *tp = 0;
 } :
 	CASE		{ *pnd = nd = dot2leaf(Stat); }
-	expression(&(nd->nd_left))
+	expression(&(nd->nd_LEFT))
 	OF
-	case(&(nd->nd_right), &tp)
-			{ nd = nd->nd_right; }
+	case(&(nd->nd_RIGHT), &tp)
+			{ nd = nd->nd_RIGHT; }
 	[
 		'|'
-		case(&(nd->nd_right), &tp)
-			{ nd = nd->nd_right; }
+		case(&(nd->nd_RIGHT), &tp)
+			{ nd = nd->nd_RIGHT; }
 	]*
-	[ ELSE StatementSequence(&(nd->nd_right))
+	[ ELSE StatementSequence(&(nd->nd_RIGHT))
 	|
 	]
 	END
@@ -177,7 +177,7 @@ CaseStatement(t_node **pnd;)
 case(t_node **pnd; t_type **ptp;) :
 	[ CaseLabelList(ptp, pnd)
 	  ':'		{ *pnd = dot2node(Link, *pnd, NULLNODE); }
-	  StatementSequence(&((*pnd)->nd_right))
+	  StatementSequence(&((*pnd)->nd_RIGHT))
 	|
 	]
 			{ *pnd = dot2node(Link, *pnd, NULLNODE);
@@ -191,9 +191,9 @@ WhileStatement(t_node **pnd;)
 	register t_node *nd;
 }:
 	WHILE		{ *pnd = nd = dot2leaf(Stat); }
-	expression(&(nd->nd_left))
+	expression(&(nd->nd_LEFT))
 	DO
-	StatementSequence(&(nd->nd_right))
+	StatementSequence(&(nd->nd_RIGHT))
 	END
 ;
 
@@ -202,44 +202,49 @@ RepeatStatement(t_node **pnd;)
 	register t_node *nd;
 }:
 	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
-	StatementSequence(&(nd->nd_left))
+	StatementSequence(&(nd->nd_LEFT))
 	UNTIL
-	expression(&(nd->nd_right))
+	expression(&(nd->nd_RIGHT))
 ;
 */
 
 ForStatement(t_node **pnd;)
 {
 	register t_node *nd, *nd1;
-	t_node *dummy;
 }:
 	FOR		{ *pnd = nd = dot2leaf(Stat); }
-	IDENT		{ nd->nd_IDF = dot.TOK_IDF; }
-	BECOMES		{ nd->nd_left = nd1 = dot2leaf(Stat); }
-	expression(&(nd1->nd_left))
+	IDENT		{ nd1 = dot2leaf(Name); }
+	BECOMES		{ nd->nd_LEFT = dot2node(Stat, nd1, dot2leaf(Link));
+			  nd1 = nd->nd_LEFT->nd_RIGHT;
+			  nd1->nd_symb = TO;
+			}
+	expression(&(nd1->nd_LEFT))
 	TO
-	expression(&(nd1->nd_right))
+	expression(&(nd1->nd_RIGHT))
+			{ nd->nd_RIGHT = nd1 = dot2leaf(Link); 
+			  nd1->nd_symb = BY;
+			}
 	[
 		BY
-		ConstExpression(&dummy)
-			{ if (!(dummy->nd_type->tp_fund & T_INTORCARD)) {
+		ConstExpression(&(nd1->nd_LEFT))
+			{ if (!(nd1->nd_LEFT->nd_type->tp_fund & T_INTORCARD)) {
 				error("illegal type in BY clause");
 			  }
-			  nd1->nd_INT = dummy->nd_INT;
-			  FreeNode(dummy);
 			}
 	|
-			{ nd1->nd_INT = 1; }
+			{ nd1->nd_LEFT = dot2leaf(Value);
+			  nd1->nd_LEFT->nd_INT = 1;
+			}
 	]
 	DO
-	StatementSequence(&(nd->nd_right))
+	StatementSequence(&(nd1->nd_RIGHT))
 	END
 ;
 
 /* inline in Statement; lack of space
 LoopStatement(t_node **pnd;):
 	LOOP		{ *pnd = dot2leaf(Stat); }
-	StatementSequence(&((*pnd)->nd_right))
+	StatementSequence(&((*pnd)->nd_RIGHT))
 	END
 ;
 */
@@ -249,9 +254,9 @@ WithStatement(t_node **pnd;)
 	register t_node *nd;
 }:
 	WITH		{ *pnd = nd = dot2leaf(Stat); }
-	designator(&(nd->nd_left))
+	designator(&(nd->nd_LEFT))
 	DO
-	StatementSequence(&(nd->nd_right))
+	StatementSequence(&(nd->nd_RIGHT))
 	END
 ;
 
@@ -264,7 +269,7 @@ ReturnStatement(t_node **pnd;)
 
 	RETURN		{ *pnd = nd = dot2leaf(Stat); }
 	[
-		expression(&(nd->nd_right))
+		expression(&(nd->nd_RIGHT))
 			{ if (scopeclosed(CurrentScope)) {
 error("a module body cannot return a value");
 			  }

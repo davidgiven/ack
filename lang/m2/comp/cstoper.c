@@ -24,16 +24,19 @@
 #include	"Lpars.h"
 #include	"standards.h"
 #include	"warning.h"
-#include	"const.h"
 
 extern char	*symbol2str();
+
+#define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
 
 arith full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
 arith min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
 			   ...
 			*/
+#ifndef NOCROSS
 unsigned int wrd_bits;	/* number of bits in a word */
+#endif
 
 extern char options[];
 
@@ -55,24 +58,28 @@ underflow(expp)
 
 STATIC
 commonbin(expp)
-	register t_node *expp;
+	register t_node **expp;
 {
-	expp->nd_class = Value;
-	expp->nd_token = expp->nd_right->nd_token;
-	CutSize(expp);
-	FreeLR(expp);
+	register t_type *tp = (*expp)->nd_type;
+	register t_node *right = (*expp)->nd_RIGHT;
+	
+	(*expp)->nd_RIGHT = 0;
+	FreeNode(*expp);
+	*expp = right;
+	right->nd_type = tp;
 }
 
 cstunary(expp)
-	register t_node *expp;
+	t_node **expp;
 {
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result restored in expp.
 	*/
-	register t_node *right = expp->nd_right;
+	register t_node *exp = *expp;
+	register t_node *right = exp->nd_RIGHT;
 	register arith o1 = right->nd_INT;
 
-	switch(expp->nd_symb) {
+	switch(exp->nd_symb) {
 	/* Should not get here
 	case '+':
 		break;
@@ -80,7 +87,7 @@ cstunary(expp)
 
 	case '-':
 		if (o1 == min_int[(int)(right->nd_type->tp_size)]) {
-			overflow(expp);
+			overflow(exp);
 		}
 		o1 = -o1;
 		break;
@@ -95,7 +102,8 @@ cstunary(expp)
 	}
 
 	commonbin(expp);
-	expp->nd_INT = o1;
+	(*expp)->nd_INT = o1;
+	CutSize(*expp);
 }
 
 STATIC
@@ -149,41 +157,42 @@ divide(pdiv, prem)
 }
 
 cstibin(expp)
-	register t_node *expp;
+	t_node **expp;
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
 		This version is for INTEGER expressions.
 	*/
-	register arith o1 = expp->nd_left->nd_INT;
-	register arith o2 = expp->nd_right->nd_INT;
-	register int sz = expp->nd_type->tp_size;
+	register t_node *exp = *expp;
+	register arith o1 = exp->nd_LEFT->nd_INT;
+	register arith o2 = exp->nd_RIGHT->nd_INT;
+	register int sz = exp->nd_type->tp_size;
 
-	assert(expp->nd_class == Oper);
-	assert(expp->nd_left->nd_class == Value);
-	assert(expp->nd_right->nd_class == Value);
+	assert(exp->nd_class == Oper);
+	assert(exp->nd_LEFT->nd_class == Value);
+	assert(exp->nd_RIGHT->nd_class == Value);
 
-	switch (expp->nd_symb)	{
+	switch (exp->nd_symb)	{
 	case '*':
 		if (o1 > 0 && o2 > 0) {
-			if (max_int[sz] / o1 < o2) overflow(expp);
+			if (max_int[sz] / o1 < o2) overflow(exp);
 		}
 		else if (o1 < 0 && o2 < 0) {
 			if (o1 == min_int[sz] || o2 == min_int[sz] ||
-			    max_int[sz] / (-o1) < (-o2)) overflow(expp);
+			    max_int[sz] / (-o1) < (-o2)) overflow(exp);
 		}
 		else if (o1 > 0) {
-			if (min_int[sz] / o1 > o2) overflow(expp);
+			if (min_int[sz] / o1 > o2) overflow(exp);
 		}
 		else if (o2 > 0) {
-			if (min_int[sz] / o2 > o1) overflow(expp);
+			if (min_int[sz] / o2 > o1) overflow(exp);
 		}
 		o1 *= o2;
 		break;
 
 	case DIV:
 		if (o2 == 0)	{
-			node_error(expp, "division by 0");
+			node_error(exp, "division by 0");
 			return;
 		}
 		if ((o1 < 0) != (o2 < 0)) {
@@ -197,7 +206,7 @@ cstibin(expp)
 		break;
 	case MOD:
 		if (o2 == 0)	{
-			node_error(expp, "modulo by 0");
+			node_error(exp, "modulo by 0");
 			return;
 		}
 		if ((o1 < 0) != (o2 < 0)) {
@@ -212,20 +221,20 @@ cstibin(expp)
 
 	case '+':
 		if (o1 > 0 && o2 > 0) {
-			if (max_int[sz] - o1 < o2) overflow(expp);
+			if (max_int[sz] - o1 < o2) overflow(exp);
 		}
 		else if (o1 < 0 && o2 < 0) {
-			if (min_int[sz] - o1 > o2) overflow(expp);
+			if (min_int[sz] - o1 > o2) overflow(exp);
 		}
 		o1 += o2;
 		break;
 
 	case '-':
 		if (o1 >= 0 && o2 < 0) {
-			if (max_int[sz] + o2 < o1) overflow(expp);
+			if (max_int[sz] + o2 < o1) overflow(exp);
 		}
 		else if (o1 < 0 && o2 >= 0) {
-			if (min_int[sz] + o2 > o1) overflow(expp);
+			if (min_int[sz] + o2 > o1) overflow(exp);
 		}
 		o1 -= o2;
 		break;
@@ -259,27 +268,29 @@ cstibin(expp)
 	}
 
 	commonbin(expp);
-	expp->nd_INT = o1;
+	(*expp)->nd_INT = o1;
+	CutSize(*expp);
 }
 
 cstfbin(expp)
-	register t_node *expp;
+	t_node **expp;
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
 		This version is for REAL expressions.
 	*/
-	register struct real *p = expp->nd_left->nd_REAL;
+	register t_node *exp = *expp;
+	register struct real *p = exp->nd_LEFT->nd_REAL;
 	register flt_arith *o1 = &p->r_val;
-	register flt_arith *o2 = &expp->nd_right->nd_RVAL;
+	register flt_arith *o2 = &exp->nd_RIGHT->nd_RVAL;
 	int compar = 0;
 	int cmpval = 0;
 
-	assert(expp->nd_class == Oper);
-	assert(expp->nd_left->nd_class == Value);
-	assert(expp->nd_right->nd_class == Value);
+	assert(exp->nd_class == Oper);
+	assert(exp->nd_LEFT->nd_class == Value);
+	assert(exp->nd_RIGHT->nd_class == Value);
 
-	switch (expp->nd_symb)	{
+	switch (exp->nd_symb)	{
 	case '*':
 		flt_mul(o1, o2, o1);
 		break;
@@ -304,7 +315,7 @@ cstfbin(expp)
 	case '#':
 		compar++;
 		cmpval = flt_cmp(o1, o2);
-		switch(expp->nd_symb) {
+		switch(exp->nd_symb) {
 		case '<':		cmpval = (cmpval < 0); break;
 		case '>':		cmpval = (cmpval > 0); break;
 		case LESSEQUAL:		cmpval = (cmpval <= 0); break;
@@ -312,8 +323,8 @@ cstfbin(expp)
 		case '=':		cmpval = (cmpval == 0); break;
 		case '#':		cmpval = (cmpval != 0); break;
 		}
-		if (expp->nd_right->nd_RSTR) free(expp->nd_right->nd_RSTR);
-		free_real(expp->nd_right->nd_REAL);
+		if (exp->nd_RIGHT->nd_RSTR) free(exp->nd_RIGHT->nd_RSTR);
+		free_real(exp->nd_RIGHT->nd_REAL);
 		break;
 
 	default:
@@ -322,11 +333,11 @@ cstfbin(expp)
 
 	switch(flt_status) {
 	case FLT_OVFL:
-		node_warning(expp, "floating point overflow on %s", 
-				symbol2str(expp->nd_symb));
+		node_warning(exp, "floating point overflow on %s", 
+				symbol2str(exp->nd_symb));
 		break;
 	case FLT_DIV0:
-		node_error(expp, "division by 0.0");
+		node_error(exp, "division by 0.0");
 		break;
 	}
 
@@ -338,32 +349,35 @@ cstfbin(expp)
 		free_real(p);
 	}
 	commonbin(expp);
+	exp = *expp;
 	if (compar) {
-		expp->nd_symb = INTEGER;
-		expp->nd_INT = cmpval;
+		exp->nd_symb = INTEGER;
+		exp->nd_INT = cmpval;
 	}
 	else {
-		expp->nd_REAL = p;
+		exp->nd_REAL = p;
 	}
+	CutSize(exp);
 }
 
 cstubin(expp)
-	register t_node *expp;
+	t_node **expp;
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in
 		expp.
 	*/
-	arith o1 = expp->nd_left->nd_INT;
-	arith o2 = expp->nd_right->nd_INT;
-	register int sz = expp->nd_type->tp_size;
+	register t_node *exp = *expp;
+	arith o1 = exp->nd_LEFT->nd_INT;
+	arith o2 = exp->nd_RIGHT->nd_INT;
+	register int sz = exp->nd_type->tp_size;
 	arith tmp1, tmp2;
 
-	assert(expp->nd_class == Oper);
-	assert(expp->nd_left->nd_class == Value);
-	assert(expp->nd_right->nd_class == Value);
+	assert(exp->nd_class == Oper);
+	assert(exp->nd_LEFT->nd_class == Value);
+	assert(exp->nd_RIGHT->nd_class == Value);
 
-	switch (expp->nd_symb)	{
+	switch (exp->nd_symb)	{
 	case '*':
 		if (o1 == 0 || o2 == 0) {
 			o1 = 0;
@@ -372,13 +386,13 @@ cstubin(expp)
 		tmp1 = full_mask[sz];
 		tmp2 = o2;
 		divide(&tmp1, &tmp2);
-		if (! chk_bounds(o1, tmp1, T_CARDINAL)) overflow(expp);
+		if (! chk_bounds(o1, tmp1, T_CARDINAL)) overflow(exp);
 		o1 *= o2;
 		break;
 
 	case DIV:
 		if (o2 == 0)	{
-			node_error(expp, "division by 0");
+			node_error(exp, "division by 0");
 			return;
 		}
 		divide(&o1, &o2);
@@ -386,7 +400,7 @@ cstubin(expp)
 
 	case MOD:
 		if (o2 == 0)	{
-			node_error(expp, "modulo by 0");
+			node_error(exp, "modulo by 0");
 			return;
 		}
 		divide(&o1, &o2);
@@ -395,20 +409,20 @@ cstubin(expp)
 
 	case '+':
 		if (! chk_bounds(o2, full_mask[sz] - o1, T_CARDINAL)) {
-			overflow(expp);
+			overflow(exp);
 		}
 		o1 += o2;
 		break;
 
 	case '-':
 		if (! chk_bounds(o2, o1, T_CARDINAL)) {
-			if (expp->nd_type->tp_fund == T_INTORCARD) {
-				expp->nd_type = int_type;
+			if (exp->nd_type->tp_fund == T_INTORCARD) {
+				exp->nd_type = int_type;
 				if (! chk_bounds(min_int[sz], o1 - o2, T_CARDINAL)) {
-					underflow(expp);
+					underflow(exp);
 				}
 			}
-			else	underflow(expp);
+			else	underflow(exp);
 		}
 		o1 -= o2;
 		break;
@@ -451,75 +465,81 @@ cstubin(expp)
 	}
 
 	commonbin(expp);
-	expp->nd_INT = o1;
-	if (expp->nd_type == bool_type) expp->nd_symb = INTEGER;
+	exp = *expp;
+	exp->nd_INT = o1;
+	if (exp->nd_type == bool_type) exp->nd_symb = INTEGER;
+	CutSize(exp);
 }
 
 cstset(expp)
-	register t_node *expp;
+	t_node **expp;
 {
 	extern arith *MkSet();
-	register arith *set1, *set2;
-	register arith *resultset;
+	register t_node *exp = *expp;
+	register arith *set1, *set2, *set3;
 	register unsigned int setsize;
 	register int j;
 
-	assert(expp->nd_right->nd_class == Set);
-	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
+	assert(exp->nd_RIGHT->nd_class == Set);
+	assert(exp->nd_symb == IN || exp->nd_LEFT->nd_class == Set);
 
-	set2 = expp->nd_right->nd_set;
-	setsize = (unsigned) (expp->nd_right->nd_type->tp_size) / (unsigned) word_size;
+	set2 = exp->nd_RIGHT->nd_set;
+	setsize = (unsigned) (exp->nd_RIGHT->nd_type->tp_size) / (unsigned) word_size;
 
-	if (expp->nd_symb == IN) {
+	if (exp->nd_symb == IN) {
 		/*	The setsize must fit in an unsigned, as it is
 			allocated with Malloc, so we can do the arithmetic
 			in an unsigned too.
 		*/
 		unsigned i;
 
-		assert(expp->nd_left->nd_class == Value);
+		assert(exp->nd_LEFT->nd_class == Value);
 
-		expp->nd_left->nd_INT -= expp->nd_right->nd_type->set_low;
-		i = expp->nd_left->nd_INT;
-		expp->nd_class = Value;
-		/*	Careful here; use expp->nd_left->nd_INT to see if
+		exp->nd_LEFT->nd_INT -= exp->nd_RIGHT->nd_type->set_low;
+		i = exp->nd_LEFT->nd_INT;
+		/*	Careful here; use exp->nd_LEFT->nd_INT to see if
 			it falls in the range of the set. Do not use i
 			for this, as i may be truncated.
 		*/
-		expp->nd_INT = (expp->nd_left->nd_INT >= 0 &&
-				expp->nd_left->nd_INT < setsize * wrd_bits &&
+		i = (exp->nd_LEFT->nd_INT >= 0 &&
+		     exp->nd_LEFT->nd_INT < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
 		FreeSet(set2);
-		expp->nd_symb = INTEGER;
-		FreeLR(expp);
+		exp = getnode(Value);
+		exp->nd_symb = INTEGER;
+		exp->nd_lineno = (*expp)->nd_lineno;
+		exp->nd_INT = i;
+		exp->nd_type = bool_type;
+		FreeNode(*expp);
+		*expp = exp;
 		return;
 	}
 
-	set1 = expp->nd_left->nd_set;
-	switch(expp->nd_symb) {
+	set1 = exp->nd_LEFT->nd_set;
+	*expp = MkLeaf(Set, &(exp->nd_RIGHT->nd_token));
+	(*expp)->nd_type = exp->nd_type;
+	switch(exp->nd_symb) {
 	case '+': /* Set union */
 	case '-': /* Set difference */
 	case '*': /* Set intersection */
 	case '/': /* Symmetric set difference */
-		expp->nd_set = resultset = MkSet(expp->nd_type->set_sz);
+		(*expp)->nd_set = set3 = MkSet(exp->nd_type->set_sz);
 		for (j = 0; j < setsize; j++) {
-			switch(expp->nd_symb) {
+			switch(exp->nd_symb) {
 			case '+':
-				*resultset = *set1++ | *set2++;
+				*set3++ = *set1++ | *set2++;
 				break;
 			case '-':
-				*resultset = *set1++ & ~*set2++;
+				*set3++ = *set1++ & ~*set2++;
 				break;
 			case '*':
-				*resultset = *set1++ & *set2++;
+				*set3++ = *set1++ & *set2++;
 				break;
 			case '/':
-				*resultset = *set1++ ^ *set2++;
+				*set3++ = *set1++ ^ *set2++;
 				break;
 			}
-			resultset++;
 		}
-		expp->nd_class = Set;
 		break;
 
 	case GREATEREQUAL:
@@ -529,7 +549,7 @@ cstset(expp)
 		/* Constant set comparisons
 		*/
 		for (j = 0; j < setsize; j++) {
-			switch(expp->nd_symb) {
+			switch(exp->nd_symb) {
 			case GREATEREQUAL:
 				if ((*set1 | *set2++) != *set1) break;
 				set1++;
@@ -546,24 +566,27 @@ cstset(expp)
 			break;
 		}
 		if (j < setsize) {
-			expp->nd_INT = expp->nd_symb == '#';
+			j = exp->nd_symb == '#';
 		}
 		else {
-			expp->nd_INT = expp->nd_symb != '#';
+			j = exp->nd_symb != '#';
 		}
-		expp->nd_class = Value;
-		expp->nd_symb = INTEGER;
+		*expp = getnode(Value);
+		(*expp)->nd_symb = INTEGER;
+		(*expp)->nd_INT = j;
+		(*expp)->nd_type = bool_type;
+		(*expp)->nd_lineno = (*expp)->nd_lineno;
 		break;
 	default:
 		crash("(cstset)");
 	}
-	FreeSet(expp->nd_left->nd_set);
-	FreeSet(expp->nd_right->nd_set);
-	FreeLR(expp);
+	FreeSet(exp->nd_LEFT->nd_set);
+	FreeSet(exp->nd_RIGHT->nd_set);
+	FreeNode(exp);
 }
 
 cstcall(expp, call)
-	register t_node *expp;
+	t_node **expp;
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
@@ -571,69 +594,69 @@ cstcall(expp, call)
 	register t_node *expr;
 	register t_type *tp;
 
-	assert(expp->nd_class == Call);
-
-	expr = expp->nd_right->nd_left;
+	assert((*expp)->nd_class == Call);
+	expr = (*expp)->nd_RIGHT->nd_LEFT;
 	tp = expr->nd_type;
+	expr->nd_type = (*expp)->nd_type;
 
-	expp->nd_class = Value;
-	expp->nd_symb = INTEGER;
-	expp->nd_INT = expr->nd_INT;
+	(*expp)->nd_RIGHT->nd_LEFT = 0;
+	FreeNode(*expp);
+	*expp = expr;
+	expr->nd_symb = INTEGER;
+	expr->nd_class = Value;
 	switch(call) {
 	case S_ABS:
-		if (expp->nd_INT < 0) {
-			if (expp->nd_INT <= min_int[(int)(tp->tp_size)]) {
+		if (expr->nd_INT < 0) {
+			if (expr->nd_INT <= min_int[(int)(tp->tp_size)]) {
 				overflow(expr);
 			}
-			expp->nd_INT = - expp->nd_INT;
+			expr->nd_INT = - expr->nd_INT;
 		}
-		CutSize(expp);
+		CutSize(expr);
 		break;
 
 	case S_CAP:
-		if (expp->nd_INT >= 'a' && expp->nd_INT <= 'z') {
-			expp->nd_INT += ('A' - 'a');
+		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
+			expr->nd_INT += ('A' - 'a');
 		}
 		break;
 
+	case S_HIGH:
 	case S_MAX:
 		if (tp->tp_fund == T_INTEGER) {
-			expp->nd_INT = max_int[(int)(tp->tp_size)];
+			expr->nd_INT = max_int[(int)(tp->tp_size)];
 		}
 		else if (tp == card_type) {
-			expp->nd_INT = full_mask[(int)(int_size)];
+			expr->nd_INT = full_mask[(int)(int_size)];
 		}
 		else if (tp->tp_fund == T_SUBRANGE) {
-			expp->nd_INT = tp->sub_ub;
+			expr->nd_INT = tp->sub_ub;
 		}
-		else	expp->nd_INT = tp->enm_ncst - 1;
+		else	expr->nd_INT = tp->enm_ncst - 1;
 		break;
 
 	case S_MIN:
 		if (tp->tp_fund == T_INTEGER) {
-			expp->nd_INT = min_int[(int)(tp->tp_size)];
+			expr->nd_INT = min_int[(int)(tp->tp_size)];
 		}
 		else if (tp->tp_fund == T_SUBRANGE) {
-			expp->nd_INT = tp->sub_lb;
+			expr->nd_INT = tp->sub_lb;
 		}
-		else	expp->nd_INT = 0;
+		else	expr->nd_INT = 0;
 		break;
 
 	case S_ODD:
-		expp->nd_INT &= 1;
+		expr->nd_INT &= 1;
 		break;
 
+	case S_TSIZE:
 	case S_SIZE:
-		expp->nd_INT = tp->tp_size;
+		expr->nd_INT = tp->tp_size;
 		break;
 
 	default:
 		crash("(cstcall)");
 	}
-	expp->nd_right = 0;		/* don't deallocate, for further
-					   argument checking
-					*/
-	FreeLR(expp);
 }
 
 CutSize(expr)
@@ -675,5 +698,7 @@ InitCst()
 		fatal("sizeof (arith) insufficient on this machine");
 	}
 
+#ifndef NOCROSS
 	wrd_bits = 8 * (int) word_size;
+#endif
 }

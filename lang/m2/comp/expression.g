@@ -21,7 +21,6 @@
 #include	"idf.h"
 #include	"def.h"
 #include	"node.h"
-#include	"const.h"
 #include	"type.h"
 #include	"chk_expr.h"
 #include	"warning.h"
@@ -51,8 +50,10 @@ qualident(t_node **p;)
 	]*
 ;
 
-selector(register t_node **pnd;):
-	'.'	{ *pnd = dot2node(Link,*pnd,NULLNODE); }
+selector(register t_node **pnd;)
+{ t_node *nd;
+} :
+	'.'	{ nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
 	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
 ;
 
@@ -64,35 +65,34 @@ ExpList(t_node **pnd;)
 				  nd->nd_symb = ',';
 				}
 	[
-		','		{ nd->nd_right = dot2leaf(Link);
-				  nd = nd->nd_right;
+		','		{ nd->nd_RIGHT = dot2leaf(Link);
+				  nd = nd->nd_RIGHT;
 				}
-		expression(&(nd->nd_left))
+		expression(&(nd->nd_LEFT))
 	]*
 ;
 
-ConstExpression(t_node **pnd;)
+ConstExpression(register t_node **pnd;)
 {
-	register t_node *nd;
 }:
 	expression(pnd)
 	/*
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
-		{ nd = *pnd;
+		{
 		  DO_DEBUG(options['C'], print("CONSTANT EXPRESSION\n"));
-		  DO_DEBUG(options['C'], PrNode(nd, 0));
+		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 
-		  if (ChkExpression(nd) &&
-		      nd->nd_class != Set &&
-		      nd->nd_class != Value &&
-		      ! (options['l'] && nd->nd_class == Def && IsProc(nd))) {
+		  if (ChkExpression(pnd) &&
+		      (*pnd)->nd_class != Set &&
+		      (*pnd)->nd_class != Value &&
+		      ! (options['l'] && (*pnd)->nd_class == Def && IsProc((*pnd)))) {
 			error("constant expression expected");
 		  }
 
 		  DO_DEBUG(options['C'], print("RESULTS IN\n"));
-		  DO_DEBUG(options['C'], PrNode(nd, 0));
+		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 		}
 ;
 
@@ -104,7 +104,7 @@ expression(register t_node **pnd;)
 		/* relation */
 		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
 			{ *pnd = dot2node(Oper, *pnd, NULLNODE); }
-		SimpleExpression(&((*pnd)->nd_right))
+		SimpleExpression(&((*pnd)->nd_RIGHT))
 	|
 	]
 ;
@@ -128,7 +128,7 @@ SimpleExpression(register t_node **pnd;)
 	]
 	term(pnd)
 			{ if (nd) {
-				nd->nd_right = *pnd;
+				nd->nd_RIGHT = *pnd;
 				*pnd = nd;
 			  }
 			  nd = *pnd;
@@ -137,7 +137,7 @@ SimpleExpression(register t_node **pnd;)
 		/* AddOperator */
 		[ '+' | '-' | OR ]
 			{ nd = dot2node(Oper, nd, NULLNODE); }
-		term(&(nd->nd_right))
+		term(&(nd->nd_RIGHT))
 	]*
 			{ *pnd = nd; }
 ;
@@ -157,7 +157,7 @@ term(t_node **pnd;)
 		/* MulOperator */
 		[ '*' | '/' | DIV | MOD | AND ]
 			{ nd = dot2node(Oper, nd, NULLNODE); }
-		factor(&(nd->nd_right))
+		factor(&(nd->nd_RIGHT))
 	]*
 			{ *pnd = nd; }
 ;
@@ -178,12 +178,12 @@ factor(register t_node **p;)
 		designator_tail(p)
 		[
 			{ *p = dot2node(Call, *p, NULLNODE); }
-			ActualParameters(&((*p)->nd_right))
+			ActualParameters(&((*p)->nd_RIGHT))
 		|
 		]
 	|
 		bare_set(&nd1)
-			{ nd = nd1; nd->nd_left = *p; *p = nd; }
+			{ nd = nd1; nd->nd_LEFT = *p; *p = nd; }
 	]
 |
 	bare_set(p)
@@ -210,8 +210,8 @@ factor(register t_node **p;)
 		  if (class == Arrsel ||
 		      class == Arrow ||
 		      class == Name ||
-		      class == Link) {
-			nd->nd_right = *p;
+		      class == Select) {
+			nd->nd_RIGHT = *p;
 			*p = nd;
 		  }
 		  else FreeNode(nd);
@@ -219,20 +219,20 @@ factor(register t_node **p;)
 	')'
 |
 	NOT		{ *p = dot2leaf(Uoper); }
-	factor(&((*p)->nd_right))
+	factor(&((*p)->nd_RIGHT))
 ;
 
 bare_set(t_node **pnd;)
 {
 	register t_node *nd;
 } :
-	'{'		{ dot.tk_symb = SET;
+	'{'		{ DOT = SET;
 			  *pnd = nd = dot2leaf(Xset);
 			  nd->nd_type = bitset_type;
 			}
 	[
 		element(nd)
-		[	{ nd = nd->nd_right; }
+		[	{ nd = nd->nd_RIGHT; }
 			',' element(nd)
 		]*
 	|
@@ -245,15 +245,15 @@ ActualParameters(t_node **pnd;):
 ;
 
 element(register t_node *nd;) :
-	expression(&(nd->nd_right))
+	expression(&(nd->nd_RIGHT))
 	[
 		UPTO
-			{ nd->nd_right = dot2node(Link, nd->nd_right, NULLNODE);}
-		expression(&(nd->nd_right->nd_right))
+			{ nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);}
+		expression(&(nd->nd_RIGHT->nd_RIGHT))
 	|
 	]
-			{ nd->nd_right = dot2node(Link, nd->nd_right, NULLNODE);
-			  nd->nd_right->nd_symb = ',';
+			{ nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);
+			  nd->nd_RIGHT->nd_symb = ',';
 			}
 ;
 
@@ -279,12 +279,12 @@ visible_designator_tail(t_node **pnd;)
 	register t_node *nd = *pnd;
 }:
 	'['		{ nd = dot2node(Arrsel, nd, NULLNODE); }
-		expression(&(nd->nd_right))
+		expression(&(nd->nd_RIGHT))
 		[
 			','
 			{ nd = dot2node(Arrsel, nd, NULLNODE);
 			}
-			expression(&(nd->nd_right))
+			expression(&(nd->nd_RIGHT))
 		]*
 	']'
 			{ *pnd = nd; }

@@ -259,40 +259,37 @@ DeclProc(type, id)
 		df->for_node = dot2leaf(Name);
 		df->df_flags |= D_USED | D_DEFINED;
 		if (CurrentScope->sc_definedby->df_flags & D_FOREIGN) {
-			df->for_name = id->id_text;
+			df->prc_name = id->id_text;
 		}
 		else {
 			sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
-			df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
+			df->prc_name = Salloc(buf, (unsigned) (strlen(buf)+1));
 		}
 		if (CurrVis == Defined->mod_vis) {
 			/* The current module will define this routine.
 			   make sure the name is exported.
 			*/
-			C_exp(df->for_name);
+			C_exp(df->prc_name);
 		}
 	}
 	else {
-		char *name;
-
 		df = lookup(id, CurrentScope, D_IMPORTED, 0);
 		if (df && df->df_kind == D_PROCHEAD) {
 			/* C_exp already generated when we saw the definition
 			   in the definition module
 			*/
-			name = df->for_name;
 			DefInFront(df);
 		}
 		else {
 			df = define(id, CurrentScope, type);
 			sprint(buf,"_%d_%s",++nmcount,id->id_text);
-			name = Salloc(buf, (unsigned)(strlen(buf)+1));
+			df->prc_name = Salloc(buf, (unsigned)(strlen(buf)+1));
 			internal(buf);
 			df->df_flags |= D_DEFINED;
 		}
 		open_scope(OPENSCOPE);
 		scope = CurrentScope;
-		scope->sc_name = name;
+		scope->sc_name = df->prc_name;
 		scope->sc_definedby = df;
 	}
 	df->prc_vis = CurrVis;

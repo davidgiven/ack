@@ -27,7 +27,6 @@
 #include	"idf.h"
 #include	"def.h"
 #include	"type.h"
-#include	"const.h"
 #include	"warning.h"
 
 extern long str2long();

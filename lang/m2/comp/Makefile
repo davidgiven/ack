@@ -79,7 +79,7 @@ GENH =	errout.h \
 	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h real.h \
 	use_insert.h dbsymtab.h
 HFILES =LLlex.h \
-	chk_expr.h class.h const.h debug.h f_info.h idf.h \
+	chk_expr.h class.h debug.h f_info.h idf.h \
 	input.h main.h misc.h scope.h standards.h tokenname.h \
 	walk.h warning.h SYSTEM.h $(GENH)
 #
@@ -212,7 +212,6 @@ LLlex.o: LLlex.h
 LLlex.o: Lpars.h
 LLlex.o: bigparam.h
 LLlex.o: class.h
-LLlex.o: const.h
 LLlex.o: dbsymtab.h
 LLlex.o: debug.h
 LLlex.o: debugcst.h
@@ -278,7 +277,6 @@ input.o: inputtype.h
 type.o: LLlex.h
 type.o: bigparam.h
 type.o: chk_expr.h
-type.o: const.h
 type.o: dbsymtab.h
 type.o: debug.h
 type.o: debugcst.h
@@ -381,7 +379,6 @@ node.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: bigparam.h
-cstoper.o: const.h
 cstoper.o: dbsymtab.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
@@ -397,7 +394,6 @@ chk_expr.o: LLlex.h
 chk_expr.o: Lpars.h
 chk_expr.o: bigparam.h
 chk_expr.o: chk_expr.h
-chk_expr.o: const.h
 chk_expr.o: dbsymtab.h
 chk_expr.o: debug.h
 chk_expr.o: debugcst.h
@@ -502,7 +498,6 @@ lookup.o: target_sizes.h
 lookup.o: type.h
 stab.o: LLlex.h
 stab.o: bigparam.h
-stab.o: const.h
 stab.o: dbsymtab.h
 stab.o: def.h
 stab.o: idf.h
@@ -556,7 +551,6 @@ expression.o: LLlex.h
 expression.o: Lpars.h
 expression.o: bigparam.h
 expression.o: chk_expr.h
-expression.o: const.h
 expression.o: dbsymtab.h
 expression.o: debug.h
 expression.o: debugcst.h

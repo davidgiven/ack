@@ -97,25 +97,25 @@ CaseCode(nd, exitlabel, end_reached)
 
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
-	if (ChkExpression(pnode->nd_left)) {
-		MkCoercion(&(pnode->nd_left),BaseType(pnode->nd_left->nd_type));
-		CodePExpr(pnode->nd_left);
+	if (ChkExpression(&(pnode->nd_LEFT))) {
+		MkCoercion(&(pnode->nd_LEFT),BaseType(pnode->nd_LEFT->nd_type));
+		CodePExpr(pnode->nd_LEFT);
 	}
-	sh->sh_type = pnode->nd_left->nd_type;
+	sh->sh_type = pnode->nd_LEFT->nd_type;
 	sh->sh_break = ++text_label;
 
 	/* Now, create case label list
 	*/
-	while (pnode = pnode->nd_right) {
+	while (pnode = pnode->nd_RIGHT) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
-			if (pnode->nd_left) {
+			if (pnode->nd_LEFT) {
 				/* non-empty case
 				*/
-				pnode->nd_left->nd_lab = ++text_label;
+				pnode->nd_LEFT->nd_lab = ++text_label;
 				AddCases(sh, /* to descriptor */
-					 pnode->nd_left->nd_left,
+					 pnode->nd_LEFT->nd_LEFT,
 					     /* of case labels */
-					 (label) pnode->nd_left->nd_lab
+					 (label) pnode->nd_LEFT->nd_lab
 					     /* and code label */
 					      );
 			}
@@ -192,11 +192,11 @@ CaseCode(nd, exitlabel, end_reached)
 	*/
 	pnode = nd;
 	rval = 0;
-	while (pnode = pnode->nd_right) {
+	while (pnode = pnode->nd_RIGHT) {
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
-			if (pnode->nd_left) {
-				rval |= LblWalkNode((label) pnode->nd_left->nd_lab,
-					    pnode->nd_left->nd_right,
+			if (pnode->nd_LEFT) {
+				rval |= LblWalkNode((label) pnode->nd_LEFT->nd_lab,
+					    pnode->nd_LEFT->nd_RIGHT,
 					    exitlabel, end_reached);
 				C_bra(sh->sh_break);
 			}
@@ -245,16 +245,16 @@ AddCases(sh, node, lbl)
 
 	if (node->nd_class == Link) {
 		if (node->nd_symb == UPTO) {
-			assert(node->nd_left->nd_class == Value);
-			assert(node->nd_right->nd_class == Value);
+			assert(node->nd_LEFT->nd_class == Value);
+			assert(node->nd_RIGHT->nd_class == Value);
 
-			AddOneCase(sh, node->nd_left, node->nd_right, lbl);
+			AddOneCase(sh, node->nd_LEFT, node->nd_RIGHT, lbl);
 			return;
 		}
 
 		assert(node->nd_symb == ',');
-		AddCases(sh, node->nd_left, lbl);
-		AddCases(sh, node->nd_right, lbl);
+		AddCases(sh, node->nd_LEFT, lbl);
+		AddCases(sh, node->nd_RIGHT, lbl);
 		return;
 	}
 

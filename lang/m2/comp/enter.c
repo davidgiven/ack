@@ -75,7 +75,7 @@ EnterEnumList(Idlist, type)
 	register t_node *idlist = Idlist;
 
 	type->enm_ncst = 0;
-	for (; idlist; idlist = idlist->nd_left) {
+	for (; idlist; idlist = idlist->nd_NEXT) {
 		df = define(idlist->nd_IDF, CurrentScope, D_ENUM);
 		df->df_type = type;
 		df->enm_val = (type->enm_ncst)++;
@@ -102,7 +102,7 @@ EnterFieldList(Idlist, type, scope, addr)
 	register t_def *df;
 	register t_node *idlist = Idlist;
 
-	for (; idlist; idlist = idlist->nd_left) {
+	for (; idlist; idlist = idlist->nd_NEXT) {
 		df = define(idlist->nd_IDF, scope, D_FIELD);
 		df->df_type = type;
 		df->df_flags |= D_QEXPORTED;
@@ -134,20 +134,20 @@ EnterVarList(Idlist, type, local)
 		while (sc->sc_scope->sc_scopeclosed) sc = enclosing(sc);
 	}
 
-	for (; idlist; idlist = idlist->nd_right) {
-		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
+	for (; idlist; idlist = idlist->nd_RIGHT) {
+		df = define(idlist->nd_LEFT->nd_IDF, CurrentScope, D_VARIABLE);
 		df->df_type = type;
-		if (idlist->nd_left) {
+		if (idlist->nd_LEFT->nd_NEXT) {
 			/* An address was supplied
 			*/
-			register t_type *tp = idlist->nd_left->nd_type;
+			register t_type *tp = idlist->nd_LEFT->nd_NEXT->nd_type;
 
 			df->df_flags |= D_ADDRGIVEN | D_NOREG;
 			if (tp != error_type && !(tp->tp_fund & T_CARDINAL)){
-				node_error(idlist->nd_left,
+				node_error(idlist->nd_LEFT->nd_NEXT,
 					   "illegal type for address");
 			}
-			df->var_off = idlist->nd_left->nd_INT;
+			df->var_off = idlist->nd_LEFT->nd_NEXT->nd_INT;
 		}
 		else if (local) {
 			/* subtract aligned size of variable to the offset,
@@ -211,7 +211,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		/* Can only happen when a procedure type is defined */
 		dummy = Idlist = idlist = dot2leaf(Name);
 	}
-	for ( ; idlist; idlist = idlist->nd_left) {
+	for ( ; idlist; idlist = idlist->nd_NEXT) {
 		pr = new_paramlist();
 		pr->par_next = 0;
 		if (!*ppr) *ppr = pr;
@@ -378,7 +378,7 @@ EnterExportList(Idlist, qualified)
 	register t_node *idlist = Idlist;
 	register t_def *df, *df1;
 
-	for (;idlist; idlist = idlist->nd_left) {
+	for (;idlist; idlist = idlist->nd_NEXT) {
 		df = lookup(idlist->nd_IDF, CurrentScope, 0, 0);
 
 		if (!df) {
@@ -508,7 +508,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 		return;
 	}
 
-	for (; idlist; idlist = idlist->nd_left) {
+	for (; idlist; idlist = idlist->nd_NEXT) {
 		if (! (df = lookup(idlist->nd_IDF, sc, 0, 0))) {
 			if (! is_anon_idf(idlist->nd_IDF)) {
 				node_error(idlist,
@@ -544,7 +544,7 @@ EnterImportList(idlist, local, sc)
 	
 	f = file_info;
 
-	for (; idlist; idlist = idlist->nd_left) {
+	for (; idlist; idlist = idlist->nd_NEXT) {
 		if (! DoImport(local ?
 			   ForwDef(idlist, sc) :
 			   GetDefinitionModule(idlist->nd_IDF, 1), 

@@ -131,7 +131,7 @@ GetDefinitionModule(id, incr)
 
 					n = dot2leaf(Def);
 					n->nd_def = newsc->sc_definedby;
-					if (nd_end) nd_end->nd_left = n;
+					if (nd_end) nd_end->nd_NEXT = n;
 					else Modules = n;
 					nd_end = n;
 				}

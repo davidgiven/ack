@@ -45,7 +45,7 @@ int		pass_1 = 1;
 t_def	 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
-static t_node	_emptystat = { NULLNODE, NULLNODE, Stat, 0, NULLTYPE, { ';' }};
+static t_node	_emptystat = { Stat, 0, NULLTYPE, { ';' }};
 t_node		*EmptyStatement = &_emptystat;
 
 main(argc, argv)
@@ -66,9 +66,9 @@ main(argc, argv)
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc < 2) {
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
-		exit(1);
+		sys_stop(S_EXIT);
 	}
-	exit(!Compile(Nargv[1], Nargv[2]));
+	sys_stop(Compile(Nargv[1], Nargv[2]) ? S_END : S_EXIT);
 	/*NOTREACHED*/
 }
 

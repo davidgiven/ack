@@ -72,7 +72,7 @@ static int		UseWarnings();
 int
 LblWalkNode(lbl, nd, exit, reach)
 	label lbl, exit;
-	register t_node *nd;
+	t_node *nd;
 {
 	/*	Generate code for node "nd", after generating instruction
 		label "lbl". "exit" is the exit label for the closest
@@ -134,8 +134,8 @@ DoLineno(nd)
 			static int	ms_lineno;
 
 			if (ms_lineno != nd->nd_lineno) {
-				C_ms_std((char *) 0, N_SLINE, nd->nd_lineno);
 				ms_lineno = nd->nd_lineno;
+				C_ms_std((char *) 0, N_SLINE, ms_lineno);
 			}
 		}
 #endif /* DBSYMTAB */
@@ -218,7 +218,7 @@ WalkModule(module)
 			C_cal("killbss");
 		}
 
-		for (; nd; nd = nd->nd_left) {
+		for (; nd; nd = nd->nd_NEXT) {
 			C_cal(nd->nd_def->mod_vis->sc_scope->sc_name);
 		}
 		DoFilename(1);
@@ -578,8 +578,8 @@ WalkLink(nd, exit_label, end_reached)
 	*/
 
 	while (nd && nd->nd_class == Link) {	 /* statement list */
-		end_reached = WalkNode(nd->nd_left, exit_label, end_reached);
-		nd = nd->nd_right;
+		end_reached = WalkNode(nd->nd_LEFT, exit_label, end_reached);
+		nd = nd->nd_RIGHT;
 	}
 
 	return WalkNode(nd, exit_label, end_reached);
@@ -602,8 +602,8 @@ WalkStat(nd, exit_label, end_reached)
 {
 	/*	Walk through a statement, generating code for it.
 	*/
-	register t_node *left = nd->nd_left;
-	register t_node *right = nd->nd_right;
+	register t_node *left = nd->nd_LEFT;
+	register t_node *right = nd->nd_RIGHT;
 
 	assert(nd->nd_class == Stat);
 
@@ -620,33 +620,36 @@ WalkStat(nd, exit_label, end_reached)
 	options['R'] = (nd->nd_flags & ROPTION);
 	options['A'] = (nd->nd_flags & AOPTION);
 	switch(nd->nd_symb) {
-	case '(':
-		if (ChkCall(nd)) {
+	case '(': {
+		t_node *nd1 = nd;
+		if (ChkCall(&nd1)) {
+			assert(nd == nd1);
 			if (nd->nd_type != 0) {
 				node_error(nd, "procedure call expected instead of function call");
 				break;
 			}
 			CodeCall(nd);
 		}
+		}
 		break;
 
 	case BECOMES:
-		DoAssign(left, right);
+		DoAssign(nd);
 		break;
 
 	case IF:
 		{	label l1 = ++text_label, l3 = ++text_label;
 			int end_r;
 
-			ExpectBool(left, l3, l1);
+			ExpectBool(&(nd->nd_LEFT), l3, l1);
 			assert(right->nd_symb == THEN);
-			end_r = LblWalkNode(l3, right->nd_left, exit_label, end_reached);
+			end_r = LblWalkNode(l3, right->nd_LEFT, exit_label, end_reached);
 
-			if (right->nd_right) {	/* ELSE part */
+			if (right->nd_RIGHT) {	/* ELSE part */
 				label l2 = ++text_label;
 
 				C_bra(l2);
-				end_reached = end_r | LblWalkNode(l1, right->nd_right, exit_label, end_reached);
+				end_reached = end_r | LblWalkNode(l1, right->nd_RIGHT, exit_label, end_reached);
 				l1 = l2;
 			}
 			else	end_reached |= end_r;
@@ -666,7 +669,7 @@ WalkStat(nd, exit_label, end_reached)
 			C_bra(dummy);
 			end_reached |= LblWalkNode(loop, right, exit_label, end_reached);
 			def_ilb(dummy);
-			ExpectBool(left, loop, exit);
+			ExpectBool(&(nd->nd_LEFT), loop, exit);
 			def_ilb(exit);
 			break;
 		}
@@ -675,7 +678,7 @@ WalkStat(nd, exit_label, end_reached)
 		{	label loop = ++text_label, exit = ++text_label;
 
 			end_reached = LblWalkNode(loop, left, exit_label, end_reached);
-			ExpectBool(right, exit, loop);
+			ExpectBool(&(nd->nd_RIGHT), exit, loop);
 			def_ilb(exit);
 			break;
 		}
@@ -696,44 +699,45 @@ WalkStat(nd, exit_label, end_reached)
 		{
 			arith tmp = NewInt();
 			arith tmp2 = NewInt();
-			register t_node *fnd;
 			int good_forvar;
 			label l1 = ++text_label;
 			label l2 = ++text_label;
 			int uns = 0;
 			arith stepsize;
 			t_type *bstp;
+			t_node *loopid;
 
-			good_forvar = DoForInit(nd);
-			if ((stepsize = left->nd_INT) == 0) {
-				node_warning(left,
+			good_forvar = DoForInit(left);
+			loopid = left->nd_LEFT;
+			if ((stepsize = right->nd_LEFT->nd_INT) == 0) {
+				node_warning(right->nd_LEFT,
 					     W_ORDINARY,
 					     "zero stepsize in FOR loop");
 			}
-			fnd = left->nd_right;
 			if (good_forvar) {
-				bstp = BaseType(nd->nd_type);
+				bstp = BaseType(loopid->nd_type);
 				uns = bstp->tp_fund != T_INTEGER;
-				CodePExpr(fnd);
+				CodePExpr(left->nd_RIGHT->nd_RIGHT);
 				C_stl(tmp);
-				CodePExpr(left->nd_left);
+				CodePExpr(left->nd_RIGHT->nd_LEFT);
 				C_dup(int_size);
 				C_stl(tmp2);
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
-				if (left->nd_INT >= 0) C_zgt(l2);
+				if (stepsize >= 0) C_zgt(l2);
 				else C_zlt(l2);
 				C_lol(tmp2);
-				RangeCheck(nd->nd_type, left->nd_left->nd_type);
-				CodeDStore(nd);
-				if (left->nd_INT >= 0) {
+				RangeCheck(loopid->nd_type,
+					   left->nd_RIGHT->nd_LEFT->nd_type);
+				CodeDStore(loopid);
+				if (stepsize >= 0) {
 					C_lol(tmp);
-					ForLoopVarExpr(nd);
+					ForLoopVarExpr(loopid);
 				}
 				else {
 					stepsize = -stepsize;
-					ForLoopVarExpr(nd);
+					ForLoopVarExpr(loopid);
 					C_lol(tmp);
 				}
 				C_sbu(int_size);
@@ -742,23 +746,23 @@ WalkStat(nd, exit_label, end_reached)
 					C_dvu(int_size);
 				}
 				C_stl(tmp);
-				nd->nd_def->df_flags |= D_FORLOOP;
+				loopid->nd_def->df_flags |= D_FORLOOP;
 				def_ilb(l1);
 				if (! options['R']) {
 					label x = ++text_label;
 
-					ForLoopVarExpr(nd);
+					ForLoopVarExpr(loopid);
 					C_stl(tmp2);
-					end_reached |= WalkNode(right, exit_label, end_reached);
+					end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
 					C_lol(tmp2);
-					ForLoopVarExpr(nd);
+					ForLoopVarExpr(loopid);
 					C_beq(x);
 					c_loc(M2_FORCH);
 					C_trp();
 					def_ilb(x);
 				}
-				else	end_reached |= WalkNode(right, exit_label, end_reached);
-				nd->nd_def->df_flags &= ~D_FORLOOP;
+				else	end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
+				loopid->nd_def->df_flags &= ~D_FORLOOP;
 				FreeInt(tmp2);
 				if (stepsize) {
 					C_lol(tmp);
@@ -767,24 +771,20 @@ WalkStat(nd, exit_label, end_reached)
 					c_loc(1);
 					C_sbu(int_size);
 					C_stl(tmp);
-					C_loc(left->nd_INT);
-					ForLoopVarExpr(nd);
+					C_loc(right->nd_LEFT->nd_INT);
+					ForLoopVarExpr(loopid);
 					C_adu(int_size);
-					RangeCheck(nd->nd_type, bstp);
-					CodeDStore(nd);
+					RangeCheck(loopid->nd_type, bstp);
+					CodeDStore(loopid);
 				}
 			}
 			else {
-				end_reached |= WalkNode(right, exit_label, end_reached);
-				nd->nd_def->df_flags &= ~D_FORLOOP;
+				end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
+				loopid->nd_def->df_flags &= ~D_FORLOOP;
 			}
 			C_bra(l1);
 			def_ilb(l2);
 			FreeInt(tmp);
-#ifdef DEBUG
-			nd->nd_left = left;
-			nd->nd_right = right;
-#endif
 		}
 		break;
 
@@ -794,7 +794,8 @@ WalkStat(nd, exit_label, end_reached)
 			struct withdesig wds;
 			t_desig ds;
 
-			if (! WalkDesignator(left, &ds, D_USED)) break;
+			if (! WalkDesignator(&(nd->nd_LEFT), &ds, D_USED)) break;
+			left = nd->nd_LEFT;
 			if (left->nd_type->tp_fund != T_RECORD) {
 				node_error(left, "record variable expected");
 				break;
@@ -821,7 +822,7 @@ WalkStat(nd, exit_label, end_reached)
 			CurrVis = link.sc_next;
 			WithDesigs = wds.w_next;
 			FreePtr(ds.dsg_offset);
-			ChkDesig(left, wds.w_flags & (D_USED|D_DEFINED));
+			ChkDesig(&(nd->nd_LEFT), wds.w_flags & (D_USED|D_DEFINED));
 			break;
 		}
 
@@ -835,15 +836,15 @@ WalkStat(nd, exit_label, end_reached)
 	case RETURN:
 		end_reached &= ~REACH_FLAG;
 		if (right) {
-			if (! ChkExpression(right)) break;
+			if (! ChkExpression(&(nd->nd_RIGHT))) break;
 			/* The type of the return-expression must be
 			   assignment compatible with the result type of the
 			   function procedure (See Rep. 9.11).
 			*/
-			if (!ChkAssCompat(&(nd->nd_right), func_type, "RETURN")) {
+			if (!ChkAssCompat(&(nd->nd_RIGHT), func_type, "RETURN")) {
 				break;
 			}
-			right = nd->nd_right;
+			right = nd->nd_RIGHT;
 			if (right->nd_type->tp_fund == T_STRING) {
 				CodePString(right, func_type);
 			}
@@ -872,60 +873,58 @@ int (*WalkTable[])() = {
 	NodeCrash,
 	NodeCrash,
 	WalkStat,
+	NodeCrash,
 	WalkLink,
 };
 
-ExpectBool(nd, true_label, false_label)
-	register t_node *nd;
+ExpectBool(pnd, true_label, false_label)
+	register t_node **pnd;
 	label true_label, false_label;
 {
-	/*	"nd" must indicate a boolean expression. Check this and
+	/*	"pnd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
 	register t_desig *ds = new_desig();
 
-	if (ChkExpression(nd)) {
-		if (nd->nd_type != bool_type && nd->nd_type != error_type) {
-			node_error(nd, "boolean expression expected");
+	if (ChkExpression(pnd)) {
+		if ((*pnd)->nd_type != bool_type &&
+		    (*pnd)->nd_type != error_type) {
+			node_error(*pnd, "boolean expression expected");
 		}
 
-		CodeExpr(nd, ds,  true_label, false_label);
+		CodeExpr(*pnd, ds,  true_label, false_label);
 	}
 	free_desig(ds);
 }
 
 int
-WalkDesignator(nd, ds, flags)
-	t_node *nd;
+WalkDesignator(pnd, ds, flags)
+	t_node **pnd;
 	t_desig *ds;
 {
 	/*	Check designator and generate code for it
 	*/
 
-	if (! ChkVariable(nd, flags)) return 0;
+	if (! ChkVariable(pnd, flags)) return 0;
 
 	clear((char *) ds, sizeof(t_desig));
-	CodeDesig(nd, ds);
+	CodeDesig(*pnd, ds);
 	return 1;
 }
 
 DoForInit(nd)
-	register t_node *nd;
+	t_node *nd;
 {
-	register t_node *left = nd->nd_left;
+	register t_node *right = nd->nd_RIGHT;
 	register t_def *df;
-	register t_type *base_tp;
+	t_type *base_tp;
 	t_type *tpl, *tpr;
 
-	nd->nd_left = nd->nd_right = 0;
-	nd->nd_class = Name;
-	nd->nd_symb = IDENT;
+	if (!( ChkVariable(&(nd->nd_LEFT), D_USED|D_DEFINED) &
+	       ChkExpression(&(right->nd_LEFT)) &
+	       ChkExpression(&(right->nd_RIGHT)))) return 0;
 
-	if (!( ChkVariable(nd, D_USED|D_DEFINED) &
-	       ChkExpression(left->nd_left) &
-	       ChkExpression(left->nd_right))) return 0;
-
-	df = nd->nd_def;
+	df = nd->nd_LEFT->nd_def;
 	if (df->df_kind == D_FIELD) {
 		node_error(nd,
 			   "FOR-loop variable may not be a field of a record");
@@ -958,12 +957,12 @@ DoForInit(nd)
 	}
 
 	base_tp = BaseType(df->df_type);
-	tpl = left->nd_left->nd_type;
-	tpr = left->nd_right->nd_type;
+	tpl = right->nd_LEFT->nd_type;
+	tpr = right->nd_RIGHT->nd_type;
 #ifndef STRICT_3RD_ED
 	if (! options['3']) {
-	  if (!ChkAssCompat(&(left->nd_left), base_tp, "FOR statement") ||
-	      !ChkAssCompat(&(left->nd_right), base_tp, "FOR statement")) {
+	  if (!ChkAssCompat(&(right->nd_LEFT), base_tp, "FOR statement") ||
+	      !ChkAssCompat(&(right->nd_RIGHT), base_tp, "FOR statement")) {
 		return 1;
 	  }
 	  if (!TstCompat(df->df_type, tpl) ||
@@ -972,17 +971,16 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	  }
 	} else
 #endif
-	if (!ChkCompat(&(left->nd_left), base_tp, "FOR statement") ||
-	    !ChkCompat(&(left->nd_right), base_tp, "FOR statement")) {
+	if (!ChkCompat(&(right->nd_LEFT), base_tp, "FOR statement") ||
+	    !ChkCompat(&(right->nd_RIGHT), base_tp, "FOR statement")) {
 		return 1;
 	}
 
 	return 1;
 }
 
-DoAssign(left, right)
-	register t_node *left;
-	t_node *right;
+DoAssign(nd)
+	register t_node *nd;
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
@@ -992,27 +990,28 @@ DoAssign(left, right)
 	register t_desig *dsr;
 	register t_type *tp;
 
-	if (! (ChkExpression(right) & ChkVariable(left, D_DEFINED))) return;
-	tp = left->nd_type;
+	if (! (ChkExpression(&(nd->nd_RIGHT)) &
+	       ChkVariable(&(nd->nd_LEFT), D_DEFINED))) return;
+	tp = nd->nd_LEFT->nd_type;
 
-	if (right->nd_symb == STRING) TryToString(right, tp);
+	if (nd->nd_RIGHT->nd_symb == STRING) TryToString(nd->nd_RIGHT, tp);
 
-	if (! ChkAssCompat(&right, tp, "assignment")) {
+	if (! ChkAssCompat(&(nd->nd_RIGHT), tp, "assignment")) {
 		return;
 	}
 	dsr = new_desig();
 
 #define StackNeededFor(ds)	((ds)->dsg_kind == DSG_PLOADED \
 				  || (ds)->dsg_kind == DSG_INDEXED)
-	CodeExpr(right, dsr, NO_LABEL, NO_LABEL);
-	tp = right->nd_type;
+	CodeExpr(nd->nd_RIGHT, dsr, NO_LABEL, NO_LABEL);
+	tp = nd->nd_RIGHT->nd_type;
 	if (complex(tp)) {
 		if (StackNeededFor(dsr)) CodeAddress(dsr);
 	}
 	else {
 		CodeValue(dsr, tp);
 	}
-	CodeMove(dsr, left, tp);
+	CodeMove(dsr, nd->nd_LEFT, tp);
 	free_desig(dsr);
 }
 

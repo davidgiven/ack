@@ -24,13 +24,13 @@
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"const.h"
 #include	"scope.h"
 #include	"main.h"
 
 #define INCR_SIZE	64
 
 extern int	proclevel;
+extern char	*sprint();
 
 static struct db_str {
 	unsigned	sz;
@@ -276,11 +276,11 @@ stb_string(df, kind)
 		break;
 	case D_END:
 		adds_db_str(sprint(buf, "E%d;", df->mod_vis->sc_count));
-		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, 0);
+		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith) 0);
 		break;
 	case D_PEND:
 		adds_db_str(sprint(buf, "E%d;", df->prc_vis->sc_count));
-		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, 0);
+		C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith) 0);
 		break;
 	case D_VARIABLE:
 		if (DefinitionModule && CurrVis != Defined->mod_vis) break;
