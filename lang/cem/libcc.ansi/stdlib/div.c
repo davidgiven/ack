@@ -14,7 +14,7 @@ div(register int numer, register int denom)
 	div_t r;
 
 	/* The assignment of tmp should not be optimized !! */
-	if (tmp == -1)
+	if (tmp == -1) {
 		tmp = (tmp / 2 == 0);
 	}
 	if (numer == 0) {
@@ -22,7 +22,7 @@ div(register int numer, register int denom)
 		r.rem = numer % denom;
 	} else if ( !tmp && ((numer < 0) != (denom < 0))) {
 		r.quot = (numer / denom) + 1;
-		r.rem = numer - (numer / denom + 1) * denom
+		r.rem = numer - (numer / denom + 1) * denom;
 	} else {
 		r.quot = numer / denom;
 		r.rem = numer % denom;
