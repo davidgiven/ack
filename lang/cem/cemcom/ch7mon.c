@@ -53,12 +53,12 @@ ch7mon(oper, expp)
 		break;
 	case '&':
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
-			warning("& before array ignored");
+			expr_warning(*expp, "& before array ignored");
 			array2pointer(*expp);
 		}
 		else
 		if ((*expp)->ex_type->tp_fund == FUNCTION) {
-			warning("& before function ignored");
+			expr_warning(*expp, "& before function ignored");
 			function2pointer(*expp);
 		}
 		else
@@ -146,7 +146,7 @@ ch7mon(oper, expp)
 		break;
 	case SIZEOF:
 		if (ISNAME(*expp) && (*expp)->VL_IDF->id_def->df_formal_array)
-			warning("sizeof formal array %s is sizeof pointer!",
+			expr_warning(*expp, "sizeof formal array %s is sizeof pointer!",
 				(*expp)->VL_IDF->id_text);
 		expr = intexpr((*expp)->ex_class == String ?
 				   (arith)((*expp)->SG_LEN) :
