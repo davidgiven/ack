@@ -88,7 +88,7 @@ fopen(const char *name, const char *mode)
 	 */
 	if ((rwflags & O_TRUNC)
 	    || (((fd = _open(name, rwmode)) < 0)
-		    && (flags & _IOWRITE))) {
+		    && (rwflags & O_CREAT))) {
 		if (((fd = _creat(name, PMODE)) > 0) && flags  | _IOREAD) {
 			(void) _close(fd);
 			fd = _open(name, rwmode);
