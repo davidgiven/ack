@@ -1,6 +1,6 @@
-.if n .so /usr/lib/tmac/tmac.kun
-.if t .so /usr/lib/ditroff/tmac/tmac.kun
+.so /usr/lib/tmac/tmac.kun
 .SS 10
+.if n .LL 78
 .RP
 .MS T E
 \!.TL '%'''
@@ -19,18 +19,18 @@
 .N 1
 .NE \\$1
 .NA
-.cs 1 18			\" constant spacing
+.ft CW				\" constant spacing
 .lg 0				\" no ligatures
-.ss 18				\" bug in troff
 ..
 .de Df				\" Drawing Footer
-.br
-.cs 1
-.ss 12
+.N 1
+.FT P
+.CS
 .lg 1
 ..
 .de De				\" Drawing End $1 (lines)
 .Df				\" if it hasn't happened yet
+.CE
 .AD
 .N \\$1
 ..
