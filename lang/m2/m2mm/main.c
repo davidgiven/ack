@@ -74,7 +74,7 @@ getwdir(fn)
 static struct file_list *arglist;
 
 char *mflags = "";
-char *compiler = "ack";
+char *compiler = "m2";
 char *suff = "o";
 char *llibs = 0;
 
@@ -417,7 +417,7 @@ pr_prog_dep(id, a)
 	print("\n\n");
 	print("o_files:\t$(OBS_%s)\n\n", id->id_text);
 	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
-	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
+	print("\t$(MOD) -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
 }
 
 programs()
