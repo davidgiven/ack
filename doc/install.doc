@@ -131,6 +131,7 @@ em_reg.h	Definition of names for register types.
 ocm_chan.h	Used by the occam run-time system
 ocm_parco.h	Used by the occam run-time system
 ocm_proc.h	Used by the occam run-time system
+m2_traps.h	Used by the Modula-2 run-time system
 .TE
 .IP "modules"
 .br
@@ -191,6 +192,8 @@ libbc	Used to create Basic run-time system and libraries
 libcc	Used to create C run-time system and libraries
 libpc	Used to create Pascal run-time system and libraries
 liboc	Used to create Occam run-time system and libraries
+libm2	Used to create Modula-2 run-time system and libraries
+libfp	Used to create floating point library
 libsys	Sources for system-dependent EM library
 test	Various tests
 
@@ -206,6 +209,7 @@ mach/proto/cg	Current backend sources.
 mach/proto/ncg	New backend sources.
 mach/proto/as	Assembler sources.
 mach/proto/top	Target optimizer sources.
+mach/proto/fp	FLoating point package sources.
 mach/proto/libg	Makefile for compiling libraries.
 .TE
 .IP "emtest"
@@ -278,6 +282,21 @@ Source of Occam run-time system (in EM or C).
 .IP "lang/occam/test"
 .br
 Some Occam programs.
+.IP "lang/m2"
+.br
+Modual-2 front-end.
+.IP "lang/m2/comp"
+.br
+The compiler proper.
+.IP "lang/m2/libm2"
+.br
+Source of Modula-2 run-time system (in EM, C and Modula-2).
+.IP "lang/m2/m2mm"
+.br
+Modula-2 makefile generator.
+.IP "lang/m2/test"
+.br
+Some Modula-2 example programs.
 .IP "util"
 .br
 Contains directories with sources for various utilities
@@ -377,6 +396,7 @@ vax_bsd4_1a	VAX11 with BSD4.1a	vax4
 vax_bsd4_2	VAX11 with BSD4.2	vax4
 vax_sysV_2	VAX11 with System V.2	vax4
 pc_ix	IBM PC with PC/IX	i86
+xenix3	IBM AT with Microsoft Xenix V3.2	xenix3
 m68_unisoft	Motorola 68000 with Unisoft UNIX	m68k2
 m68_pmds	Philips PMDS	pmds
 m68_sysV_0	68000 with Uniplus UNIX System V.0	mantra
@@ -386,8 +406,11 @@ ANY	Neither of the above	m68k2
 .TE
 .sp 1
 For some of these, the installation procedure has not been tested, as
-we don't have them. However,
-the pdp_v7, vax_bsd4_1a, pc_ix, sun3 and m68 systems are known to behave
+we don't have them.
+For others, the installation procedure has only been tested with earlier
+distributions, as we don't have those systems anymore.
+However,
+the pdp_v7, vax_bsd4_1a, sun3 and m68 systems are known to behave
 reasonably.
 The Sun systems should run Release 3.0 or newer.
 For ANY you can use any name you fancy,
@@ -402,11 +425,10 @@ See also the section 8.2.
 .IP \-
 Automatically editing a few description files that tell
 ACK to use your system's assembler.
-On both the PDP and the VAX the Kit uses the native assembler and linker.
-The description files in lib/pdp/descr and
-lib/vax4/descr have to be altered to prevent
+On the VAX the Kit uses the native assembler and linker.
+The description file lib/vax4/descr has to be altered to prevent
 attempts to assemble programs with unsuitable assemblers.
-The original descr files are copied to descr.orig.
+The original descr file is copied to descr.orig.
 .IP \-
 The VAX backend cannot be booted on systems
 with a 16-bit address space systems.
@@ -655,7 +677,7 @@ Commands
 The following commands are available in the bin directory after compilation
 of the Kit:
 .sp 1
-.IP "\fIack\fP, \fIacc\fP, \fIabc\fP, \fIapc\fP, \fIocm\fP and their links"
+.IP "\fIack\fP, \fIacc\fP, \fIabc\fP, \fIapc\fP, \fIocm\fP, \fIm2\fP and their links"
 .br
 The names mentioned here can be used to compile Pascal, C, etc... programs.
 Most of the links can be used to generate code for a particular
@@ -738,86 +760,115 @@ pdp	PDP/UNIX V7	2/2	C	*	pdp	needs sep. I/D
 			Pascal			No assembler
 			Basic
 			Occam
+			Modula-2
 
 vax4	VAX/BSD 4.?	4/4	C	*	vax4	No assembler
 	System V.2		Pascal
 			Basic
 			Occam
+			Modula-2
 
 m68k2	M68000/Unisoft	2/4	C	+	m68k2
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 m68k4	M68000/Unisoft	4/4	C	+	m68k4
 			Pascal		m68k2
 			Basic
 			Occam
+			Modula-2
 
 pmds	M68000/PMDS	2/4	C	+	pmds	Philips Micro
 			Pascal		m68k2	Devel. System
 			Basic
 			Occam
+			Modula-2
 
 pmds4	M68000/PMDS	4/4	C	+	pmds4	Philips Micro
 			Pascal		m68k2	Devel. System
 			Basic		m68k4
 			Occam
+			Modula-2
 
 mantra	M68000/SysV.0	4/4	C	+	mantra
 			Pascal		m68k2
 			Basic		m68k4
 			Occam
+			Modula-2
 
 m68020	M68020/V/68	4/4	C	+	m68020
 	R2V2.1		Pascal
 			Basic
 			Occam
+			Modula-2
 
 sun3	SUN 3 R3.0	4/4	C	+	sun3
 			Pascal		m68020
 			Basic
 			Occam
+			Modula-2
 
 sun2	SUN 2 R3.0	4/4	C	+	sun2
 			Pascal		m68k4
 			Basic		m68k2
 			Occam
+			Modula-2
 
 i86	IBM PC/IX	2/2	C	+	i86	IBM PC with PC/IX
 			Pascal			Causes kernel crashes
 			Basic
 			Occam
+			Modula-2
 
 xenix3	Microsoft Xenix V3	2/2	C	+	xenix3	IBM AT with Xenix
 			Pascal		i86
 			Basic
 			Occam
+			Modula-2
+
+minix	Minix PC	2/2	C	+	minix	IBM PC running Minix
+			Pascal		i86
+			Basic
+			Occam
+			Modula-2
+
+minixST	ST Minix	2/4	C	+	minixST	Atari ST running Minix
+			Pascal		m68k2
+			Basic
+			Occam
+			Modula-2
 
 z8000	Zilog 8000	2/2	C		z8000	Central Data
 			Pascal			CPU board
 			Basic			Uses assembler/loader
 			Occam
+			Modula-2
 
 int22	EM machine	2/2	C	*	int22	Needs interpreter
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 int24	EM machine	2/4	C	*	int24	Needs interpreter
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 int44	EM machine	4/4	C	*	int44	Needs interpreter
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 6500	6502/BBC	2/2	C		6500	Uses assembler/loader
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 6800	Bare 6800				6800	Assembler only
 
@@ -829,16 +880,19 @@ ns	Bare NS16032	4/4	C		ns
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 i80	Hermac/z80	2/2	C		i80
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 z80	Hermac/z80	2/2	C		z80	\fIi80\fP is faster
 			Pascal
 			Basic
 			Occam
+			Modula-2
 
 s2650	Signetics 2650				s2650	Assembler only
 .TE
@@ -925,7 +979,8 @@ Default machine
 .PP
 There is one important option in h/local.h.
 The utility \fIack\fP uses a default machine name when called
-as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP, \fIocm\fP, or \fIack\fP.
+as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP, \fIocm\fP,
+\fIm2\fP, or \fIack\fP.
 The machine name used for default is determined by the
 definition of ACKM in h/local.h.
 The Kit is distributed with "vax4" as the default machine,

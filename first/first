@@ -60,6 +60,7 @@ vax_bsd4_1a	VAX11 with BSD4.1a
 vax_bsd4_2	VAX11 with BSD4.2
 vax_sysV_2	VAX11 with System V.2
 pc_ix		IBM PC with PC/IX
+xenix3		IBM AT running Microsoft Xenix V3.2
 m68_unisoft	Motorola 68000 with Unisoft UNIX
 sun3		Sun 3 M68020 workstation 
 sun2		Sun 2 M68000 workstation
@@ -73,7 +74,7 @@ system type: "
 		echo echo "$SYSNAME" >../bin/ack_sys
 		chmod +x ../bin/ack_sys
 		case `ack_sys` in
-		pdp_v7|vax_bsd4_1a|vax_bsd4_2|vax_sysV_2|pc_ix|m68_unisoft|sun3|sun2|m68_sysV_0) ;;
+		pdp_v7|vax_bsd4_1a|vax_bsd4_2|vax_sysV_2|pc_ix|m68_unisoft|sun3|sun2|m68_sysV_0|xenix3|m68020) ;;
 		*)	echo None of the software especially intended for the named systems will work ;;
 		esac
 	else
@@ -102,8 +103,6 @@ fi
 : 'Prevent the use of the system assembler on for certain systems'
 : 'prevent the use of ranlib on pdp 11s'
 case `ack_sys` in
-vax_bsd*)	RMD=pdp ;;
-vax_sys*)	RMD=pdp ;;
 pdp_*)		RMD="vax4"
 		echo 'echo "no ranlib on this system"; exit 93' > ../bin/ranlib
 		chmod +x ../bin/ranlib
@@ -115,7 +114,7 @@ pdp_*)		RMD="vax4"
 			exit 13
 		esac
 		;;
-*)		RMD="pdp vax4" ;;
+*)		RMD="vax4" ;;
 esac
 for i in $RMD
 do
@@ -152,44 +151,6 @@ ABC
 		)
 		;;
 esac
-case `ack_sys` in
-m68_sysV_0)	
-		( cd ../lib/int24
-		  cp descr descr.orig
-		  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__USG/
-w
-q
-ABC
-		)
-		( cd ../lib/int44
-		  cp descr descr.orig
-		  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__USG/
-w
-q
-ABC
-		)
-		;;
-sun2|sun3)
-		( cd ../lib/int24
-		  cp descr descr.orig
-		  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__BSD4_2/
-w
-q
-ABC
-		)
-		( cd ../lib/int44
-		  cp descr descr.orig
-		  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__BSD4_2/
-w
-q
-ABC
-		)
-		;;
-esac
 : 'Set the default machine in ../h/local.h'
 BM=1
 case `ack_sys` in
@@ -198,6 +159,7 @@ vax_bsd4_1a)    ACM=vax4 ;;
 vax_bsd4_2)	ACM=vax4 ;;
 vax_sysV_2)	ACM=vax4 ;;
 pc_ix)		ACM=i86 ; BM=0;;
+xenix3)		ACM=xenix3 ; BM=0;;
 sun3)		ACM=sun3 ;;
 sun2)		ACM=sun2 ;;
 m68_unisoft)	ACM=m68k2 ;;
@@ -264,8 +226,8 @@ ABC
 	)
 	done
 	( cd ../modules/src/malloc
-	  ed - param.h <<ABC
 	  cp param.h param.h.orig
+	  ed - param.h <<ABC
 /STORE/s/define/undef/
 w
 q
