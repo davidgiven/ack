@@ -20,7 +20,10 @@ int err_occurred;
 err_hdr(s)
 	char *s;
 {
-	fprint(ERROUT, "\"%s\", line %d: %s", FileName, LineNumber, s);
+	if (FileName) {
+		fprint(ERROUT, "\"%s\", line %d: %s", FileName, LineNumber, s);
+	}
+	else	fprint(ERROUT, s);
 }
 
 /*VARARGS1*/
