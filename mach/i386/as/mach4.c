@@ -7,11 +7,15 @@
  */
 
 operation
-	:		{	address_long = 1; operand_long = 1; }
-		prefix oper
+	:
+		prefix oper		
+			{	address_long = 1; operand_long = 1; }
+	|	prefix1		/* to allow for only prefixes on a line */
 	;
 prefix	:	/* empty */
-	|	prefix PREFIX
+	|	prefix1
+	;
+prefix1:	prefix PREFIX
 			{	if ($2 == 0146) operand_long = ! operand_long;
 				if ($2 == 0147) address_long = ! address_long;
 				emit1($2);
