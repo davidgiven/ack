@@ -54,7 +54,7 @@ conversion(from_type, to_type)
 		case T_UNSIGNED:
 #ifndef NOFLOAT
 		case T_FLOATING:
-#endif NOOFLOAT
+#endif NOFLOAT
 			if ((int)from_size < (int)word_size) {
 				C_loc(from_size);
 				C_loc(word_size);
