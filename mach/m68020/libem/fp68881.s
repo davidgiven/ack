@@ -228,14 +228,32 @@
 	bne	1f
 	fmove.s	(8,sp),fp0
 	fabs	fp0
+	cmp.l	#0x4f000000,(8,sp)
+	bge	2f
 	fintrz	fp0,fp0
 	fmove.l	fp0,(8,sp)
+	jmp	(a0)
+2:
+	fadd.l	#-2147483648,fp0
+	fintrz	fp0,fp0
+	fmove.l	fp0,d0
+	bchg	#31,d0
+	move.l	d0,(8,sp)
 	jmp	(a0)
 1:
 	fmove.d	(8,sp),fp0
 	fabs	fp0
+	cmp.l	#0x41e00000,(8,sp)
+	bge	1f
 	fintrz	fp0,fp0
 	fmove.l	fp0,(12,sp)
+	jmp	(a0)
+1:
+	fadd.l	#-2147483648,fp0
+	fintrz	fp0,fp0
+	fmove.l	fp0,d0
+	bchg	#31,d0
+	move.l	d0,(12,sp)
 	jmp	(a0)
 
 .cff4:
