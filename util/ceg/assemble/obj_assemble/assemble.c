@@ -231,6 +231,7 @@ error(va_alist)
 	char *fmt;
 	va_list args;
 	extern int yylineno;
+	extern int nerrors;
 
 	va_start(args);
 		fmt = va_arg(args, char *);
@@ -238,4 +239,5 @@ error(va_alist)
 		doprnt( STDERR, fmt, args);
 		fprint( STDERR, "\n");
 	va_end(args);
+	nerrors++;
 }
