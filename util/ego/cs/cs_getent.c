@@ -96,9 +96,11 @@ entity_p getentity(lnp, l_out)
 
 	/* Lor is a special case. */
 	if (INSTR(lnp) == op_lor) {
+		offset off = off_set(lnp);
+
 		en.en_static = FALSE;
 		en.en_size = ps;
-		switch (off_set(lnp)) {
+		switch ((int) off == off ? (int) off : 3) {
 			default:
 				assert(FALSE);
 				break;
