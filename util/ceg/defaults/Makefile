@@ -26,10 +26,10 @@ install:
 	-mkdir $(DEF)/pseudo
 	-mkdir $(DEF)/storage
 	cp pseudo_vars.c $(DEF)
-	for i in $(MessageList) ; do cp message/$$i $(DEF)/message ; done
-	for i in $(NotimplList) ; do cp not_impl/$$i $(DEF)/not_impl ; done
-	for i in $(PseudoList) ; do cp pseudo/$$i $(DEF)/pseudo ; done
-	for i in $(StorageList) ; do cp storage/$$i $(DEF)/storage ; done
+	for i in $(MessageList) ; do cp message/$$i $(DEF)/message/$$i ; done
+	for i in $(NotimplList) ; do cp not_impl/$$i $(DEF)/not_impl/$$i ; done
+	for i in $(PseudoList) ; do cp pseudo/$$i $(DEF)/pseudo/$$i ; done
+	for i in $(StorageList) ; do cp storage/$$i $(DEF)/storage/$$i ; done
 
 cmp:
 	-cmp pseudo_vars.c $(DEF)/pseudo_vars.c
