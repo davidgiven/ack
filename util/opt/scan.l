@@ -24,6 +24,7 @@ static char rcsid2[] = "$Header$";
 extern long atol();
 %}
 %%
+\"[^"]*\"	{ strncpy(patid,yytext,sizeof(patid)); return(STRING); }
 notreg		return(NOTREG);
 sfit		return(SFIT);
 ufit		return(UFIT);

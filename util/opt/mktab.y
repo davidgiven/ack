@@ -42,6 +42,7 @@ byte	nparam[N_EX_OPS];
 bool	nonumlab[N_EX_OPS];
 bool	onlyconst[N_EX_OPS];
 int	nerrors=0;
+char	patid[128];
 %}
 
 %union {
@@ -61,7 +62,7 @@ int	nerrors=0;
 %nonassoc NOT,COMP,UMINUS
 %nonassoc '$'
 
-%token SFIT,UFIT,NOTREG,PSIZE,WSIZE,DEFINED,SAMESIGN,ROM,ROTATE
+%token SFIT,UFIT,NOTREG,PSIZE,WSIZE,DEFINED,SAMESIGN,ROM,ROTATE,STRING
 %token <y_int> MNEM
 %token <y_int> NUMBER
 %type <y_int> expr,argno,optexpr
@@ -71,6 +72,7 @@ int	nerrors=0;
 %%
 patternlist
 	:	/* empty */
+	|	STRING '\n'
 	|	patternlist '\n'
 	|	patternlist pattern
 	;
@@ -297,6 +299,8 @@ printnodes() {
 		printf("/* %3d */\t%3d,%6u,%6u,\n",
 			p-nodes,p->ex_operator,p->ex_lnode,p->ex_rnode);
 	printf("};\n\niarg_t iargs[%d];\n",maxpatlen);
+	if (patid[0])
+		printf("static char rcsid[] = %s;\n",patid);
 }
 
 initio() {
