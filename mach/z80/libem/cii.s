@@ -76,6 +76,12 @@
 	ex de,hl	! de := difference (> 0)
 	ld hl,0
 	add hl,sp	! hl := sp
+	dec de		! if difference = 1, don't adjust stack pointer
+	jr nz, 4f
+	inc de
+	jr 5f
+4:
+	inc de
 	push hl
 	or a
 	sbc hl,de
@@ -96,6 +102,7 @@
 	dec hl		! now hl points to
 			! most significant byte
 			! of the source
+5:
 	or a		! see if we're doing
 			! a 'cii' or a 'cuu'
 	jr nz,3f	! cuu, expand with zeroes
