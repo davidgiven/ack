@@ -149,13 +149,13 @@ char **argv;
 		if (nfile != 0)
 			fatal("second source file %s", p);
 		nfile++;
-#endif
+#else
 		if (p[0] == '-' && p[1] == '\0') {
 			input = stdin;
 			parse("STDIN");
 			continue;
 		}
-
+#endif
 		if ((input = fopen(p, "r")) == NULL)
 			fatal("can't open %s", p);
 #ifdef ASLD
@@ -174,6 +174,12 @@ char **argv;
 		parse(p);
 		fclose(input);
 	}
+#ifndef ASLD
+	if (nfile == 0) {
+		input = stdin;
+		parse("STDIN");
+	}
+#endif
 	commfinish();
 	machfinish(PASS_1);
 #ifdef ASLD
@@ -195,8 +201,10 @@ char **argv;
 #else
 	if (unresolved)
 		outhead.oh_flags |= HF_LINK;
+	/*
 	if (nfile == 0)
 		fatal("no source file");
+	*/
 #endif
 }
 
