@@ -280,6 +280,7 @@ getnumber(c, ap)
 	if (! isdigit(c)) {
 		ungetbyte(c);
 		syntax("digit expected");
+		i_strings--;
 		return sp_cst4;
 	}
 
@@ -288,6 +289,7 @@ getnumber(c, ap)
 	for (;;) {
 		if (p >= &(s->str[STRSIZ])) {
 			syntax("number too long");
+			i_strings--;
 			return sp_cst4;
 		}
 
@@ -582,6 +584,7 @@ line_line()
 	ap = gettyp(str_ptyp);
 	btscpy(filebuf, ap->em_str, (int) ap->em_size);
 	i_emargs--;
+	i_strings--;
 	EM_filename = filebuf;
 }
 
