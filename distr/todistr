@@ -9,7 +9,7 @@ do
 	shift
 	case "$ARG" in
 	-r*)	REV=`echo "$ARG"| sed s/-r//` ;;
-	-*)	FLAGS=$FLAGS $ARG ;;
+	-*)	FLAGS="$FLAGS $ARG" ;;
 	*)	case x$FILE in
 		x)	FILE="$ARG" ;;
 		*)	echo todistr can only be done on one file at the time
