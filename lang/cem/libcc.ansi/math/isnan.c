@@ -1,6 +1,6 @@
 __IsNan(double d)
 {
-#if defined(vax) || defined(pdp)
+#if defined(__vax) || defined(__pdp)
 #else
 	float f = d;
 

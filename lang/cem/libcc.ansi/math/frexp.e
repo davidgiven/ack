@@ -6,7 +6,6 @@
 /* $Header$ */
 
  mes 2,_EM_WSIZE,_EM_PSIZE
-#ifndef NOFLOAT
  exp $frexp
  pro $frexp,0
  lal 0
@@ -17,4 +16,3 @@
  sti _EM_WSIZE
  ret _EM_DSIZE
  end
-#endif
