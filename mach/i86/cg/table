@@ -994,7 +994,7 @@ ldl ngi sdl $1==$3 && $2==4 | |
 			remove(locals, %[ind]>=$1 && %[ind]<$1+4 )
 			"neg $1(bp)"
 			"neg %($1+2%)(bp)"
-			"sbb %($1+2%)(bp,0"		  | | |
+			"sbb %($1+2%)(bp),0"		  | | |
 lol ads stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
