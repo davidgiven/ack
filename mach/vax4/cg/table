@@ -4434,8 +4434,7 @@ sig		| STACK |
 			"jsb\t.sig"		|	| |
 sim		| STACK |
 			"jsb\t.sim"		|	| |
-str $1==0	| source4 |
-			remove(ALL)
+str $1==0	| STACK |
 			"jsb\t.strlb"	 	|	| |
 str $1==1	| source4 |
 			remove(ALL)
