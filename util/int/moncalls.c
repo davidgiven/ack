@@ -167,12 +167,11 @@ moncall()
 	struct timeval tv;		/* private timeval buffer */
 #endif	/* BSD4_2			 */
 
-#ifdef	BSD_X				/* from system.h */
-	time_t utimbuf[2];		/* private utime buffer */
-#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 	struct {time_t x, y;} utimbuf;	/* private utime buffer */
-#endif	/* SYS_V */
+#else	/* SYS_V */
+	time_t utimbuf[2];		/* private utime buffer */
+#endif	/* !SYS_V */
 
 	char *cp;
 	int nr;
@@ -692,15 +691,16 @@ moncall()
 		}
 		actime = mem_ldu(dsp2, INT4SIZE);
 		modtime = mem_ldu(dsp2 + INT4SIZE, INT4SIZE);
-#ifdef	BSD_X				/* from system.h */
-		utimbuf[0] = actime;
-		utimbuf[1] = modtime;
-#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 		utimbuf.x = actime;
 		utimbuf.y = modtime;
-#endif	/* SYS_V */
+		if (!savestr(0, dsp1) || utime(buf[0], &utimbuf) == -1) {
+#else	/* SYS_V */
+		utimbuf[0] = actime;
+		utimbuf[1] = modtime;
 		if (!savestr(0, dsp1) || utime(buf[0], utimbuf) == -1) {
+			/* may require modification for POSIX ???!!! */
+#endif	/* !SYS_V */
 			push_err();
 			LOG(("@m4 Utime: failed, dsp1 = %lu, dsp2 = %lu, errno = %d",
 					dsp1, dsp2, errno));
