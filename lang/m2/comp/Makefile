@@ -215,6 +215,7 @@ type.o: idf.h
 type.o: maxset.h
 type.o: node.h
 type.o: scope.h
+type.o: squeeze.h
 type.o: target_sizes.h
 type.o: type.h
 type.o: walk.h
@@ -312,6 +313,7 @@ walk.o: idf.h
 walk.o: main.h
 walk.o: node.h
 walk.o: scope.h
+walk.o: squeeze.h
 walk.o: type.h
 walk.o: walk.h
 walk.o: warning.h
@@ -322,7 +324,10 @@ desig.o: def.h
 desig.o: desig.h
 desig.o: node.h
 desig.o: scope.h
+desig.o: squeeze.h
 desig.o: type.h
+desig.o: walk.h
+desig.o: warning.h
 code.o: LLlex.h
 code.o: Lpars.h
 code.o: debug.h
@@ -331,6 +336,7 @@ code.o: def.h
 code.o: desig.h
 code.o: node.h
 code.o: scope.h
+code.o: squeeze.h
 code.o: standards.h
 code.o: type.h
 code.o: walk.h
@@ -398,6 +404,7 @@ casestat.o: debugcst.h
 casestat.o: density.h
 casestat.o: desig.h
 casestat.o: node.h
+casestat.o: squeeze.h
 casestat.o: type.h
 casestat.o: walk.h
 tmpvar.o: LLlex.h
