@@ -58,6 +58,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 			*pe++ = (int)((value+.05) * 10) + '0';
 			pointpos++;
 		} while (intpart != 0);
+		pb = buf;
 		while (pe > buf1) *pb++ = *--pe;
 	}
 	else if (value > 0) {
@@ -103,6 +104,6 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	}
 	*decpt = pointpos;
 	*pe = '\0';
-	return(buf);
+	return buf;
 }
 #endif
