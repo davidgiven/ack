@@ -11,8 +11,16 @@ static char rcsid[]="$Header$";
  * Author: Hans van Staveren
  */
 
+#include <stdio.h>
+#include <assert.h>
+#include <ctype.h>
+#include <em_spec.h>
+#include <em_flag.h>
+#include <em_reg.h>
+
 #define extern
 #include "booth.h"
+#undef extern
 
 %}
 

@@ -6,7 +6,7 @@ LDFLAGS=-i
 LINTOPTS=-hbxac $(PREFLAGS)
 LIBS=../../lib/em_data.a
 # LEXLIB is system dependent, try -ll or -lln first
-LEXLIB=-lln
+LEXLIB = -lln
 
 cgg:	bootgram.o main.o bootlex.o
 	$(CC) $(LDFLAGS) bootgram.o main.o bootlex.o $(LIBS) $(LEXLIB) -o cgg

@@ -16,6 +16,13 @@ static char rcsid2[]="$Header$";
 
 #define MAXBACKUP 50
 
+#include <stdio.h>
+#include <assert.h>
+#include <ctype.h>
+#include <em_spec.h>
+#include <em_flag.h>
+#include <em_reg.h>
+
 #include "booth.h"
 #include "y.tab.h"
 %}
