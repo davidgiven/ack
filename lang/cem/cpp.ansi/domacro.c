@@ -203,9 +203,20 @@ int to_endif;
 			on the same level.
 		*/
 		id = findidf(tk.tk_str);
+		if (id == (struct idf *)0) {
+			/* invalid word seen after the '#' */
+			error("%s: unknown control", tk.tk_str);
+		}
 		free(tk.tk_str);
+		if (id == (struct idf *)0) continue;
 		switch(id->id_resmac) {
-		default:
+		case K_DEFINE:
+		case K_ERROR:
+		case K_INCLUDE:
+		case K_LINE:
+		case K_PRAGMA:
+		case K_UNDEF:
+		case K_FILE:
 			SkipToNewLine();
 			break;
 		case K_IF:

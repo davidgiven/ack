@@ -215,10 +215,10 @@ preprocess(fn)
 			case STCHAR:
 				{
 				register int stopc = c;
-				int escaped = 0;
+				int escaped;
 
 				do {
-
+					escaped = 0;
 					echo(c);
 					c = GetChar();
 					if (c == '\n') {
@@ -230,14 +230,14 @@ preprocess(fn)
 						flush((int)(op-_obuf));
 						return;
 					}
-					if (!escaped && c == '\\') {
+					if (c == '\\') {
 						echo(c);
 						c = GetChar();
 						if (c == '\n') {
 							++LineNumber;
 							lineno++;
 						} else escaped = 1;
-					} else escaped = 0;
+					}
 				} while (escaped || c != stopc);
 				echo(c);
 				if (c == '\n')
