@@ -563,7 +563,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	int npos,npos2,pos[NREGS],pos2[NREGS];
 	unsigned mincost,t;
 	struct reginfo *rp,**rpp;
-	token_t token,mtoken,token2;
+	token_t token,token2;
 	int propno;
 	int exactmatch;
 	int decision;
@@ -585,7 +585,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 				if (getrefcount(rp-machregs, FALSE)==0) {
 					pos[npos++] = rp-machregs;
 					if (eqtoken(&rp->r_contents,&token))
-						exactmatch++;
+						pos2[exactmatch++] = rp-machregs;
 				}
 			/*
 			 * Now pos[] contains all free registers with desired
@@ -606,6 +606,21 @@ normalfailed:	if (stackpad!=tokpatlen) {
   				CHKCOST();
 			}
 		} while (npos==0);
+
+		if (!exactmatch && tinstno!=0) {
+			/*
+			 * No exact match, but we were looking for a particular
+			 * token. Now try to find registers of which no
+			 * known contents is available (the others might still
+			 * be useful).
+			 */
+			instance(0,&token2);
+			for (i=0;i<npos;i++)
+				if (eqtoken(&machregs[pos[i]].r_contents,&token2)) {
+					pos2[exactmatch++] = pos[i];
+				}
+		}
+
 		if (!exactmatch) {
 			npos2=npos;
 			for(i=0;i<npos;i++)
@@ -616,17 +631,15 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			 * We take only one equally likely register out of every
 			 * equivalence class as given by set of properties.
 			 */
-			mtoken = token;
 			npos2=0;
-			for(i=0;i<npos;i++)
-				if (eqtoken(&machregs[pos[i]].r_contents,&mtoken)) {
-					pos2[npos2++] = pos[i];
-					for(j=0;j<npos2-1;j++)
-						if (eqregclass(pos2[j],pos[i])) {
-							npos2--;
-							break;
-						}
-				}
+			for(i=0;i<exactmatch;i++) {
+				pos2[npos2++] = pos2[i];
+				for(j=0;j<npos2-1;j++)
+					if (eqregclass(pos2[j],pos2[i])) {
+						npos2--;
+						break;
+					}
+			}
 		}
 		/*
 		 * Now pos2[] contains all possibilities to try, if more than
