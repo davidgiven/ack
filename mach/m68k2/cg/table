@@ -405,7 +405,7 @@ sti $1 == 2 | ADDREG ANY |	remove(MEM_ALL)
 				move(%[2],{IADDREG,%[1]}) | | |
 sti $1 == 4  | ADDREG ANY4 |	remove(MEM_ALL)
 				move(%[2],{IADDREG4,%[1]}) | | |
-sti $1 > 4 | ADDREG |		remove(ALL)
+sti $1 > 4 | ADDSCR |		remove(ALL)
 				allocate(DATAREG4={IMMEDIATE4,$1/2-1})
 				"1:"
 				"move.w (sp)+,(%[1])+"
