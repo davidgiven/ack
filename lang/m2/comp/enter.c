@@ -444,6 +444,7 @@ EnterFromImportList(idlist, FromDef, FromId)
 		break;
 	case D_FORWMODULE:
 		vis = FromDef->for_vis;
+		forwflag = 1;
 		break;
 	case D_MODULE:
 		vis = FromDef->mod_vis;
