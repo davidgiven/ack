@@ -335,7 +335,7 @@ ch7asgn(expp, oper, expr)
 		ch7cast(&expr, oper, (*expp)->ex_type);
 	}
 	else {	/* turn e into e' where typeof(e') = typeof (f op e) */
-		struct expr *extmp = intexpr(0, INT);
+		struct expr *extmp = intexpr((arith)0, INT);
 
 		/* this is really $#@&*%$# ! */
 		extmp->ex_lvalue = 1;
