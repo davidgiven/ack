@@ -172,16 +172,16 @@ typedef short t_reps,*p_reps;
 /*
  * Access macros for repitition in term
  */
-# define r_getkind(q)	((q)->t_reps&03)
-# define r_getnum(q)	(((q)->t_reps>>2)&037777)
-# define r_setkind(q,s)	{ assert(((unsigned)(s))<=03);(q)->t_reps=((q)->t_reps&0177774)|(s);}
-# define r_setnum(q,s)	{ assert(((unsigned)(s))<=037777);(q)->t_reps=((q)->t_reps&03)|((s)<<2);}
+# define r_getkind(q)	((q)->t_repeats&03)
+# define r_getnum(q)	(((q)->t_repeats>>2)&037777)
+# define r_setkind(q,s)	{ assert(((unsigned)(s))<=03);(q)->t_repeats=((q)->t_repi&0177774)|(s);}
+# define r_setnum(q,s)	{ assert(((unsigned)(s))<=037777);(q)->t_repeats=((q)->t_repi&03)|((s)<<2);}
 
 /*
  * header structure for	a term
  */
 typedef struct term {
-	t_reps	t_reps;		/* repeats ? */
+	t_reps	t_repeats;
 	short	t_flags;	/* Low order three bits for safety */
 # define gettout(q)	((q)->t_flags&07)
 # define settout(q,i)	{assert(((unsigned)(i))<=NOSAFETY);(q)->t_flags&=~07;(q)->t_flags|=i;}
