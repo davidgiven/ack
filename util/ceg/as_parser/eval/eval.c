@@ -225,33 +225,41 @@ char *quest;
 pr_text_with_conversions( str)
 char *str;
 {
-	char *s, *ptr, *next_conversion(), *pr_conversion();
+	char *ptr, *next_conversion(), *pr_conversion();
 
         while (  ptr = next_conversion( str)) {
 		/* ptr points to '%'-sign */
 	 	*ptr = '\0';
 		printf( "fprint( outfile, \"");
-
-		for ( s = str; *s != '\0'; s++)
-			if ( *s == '\n')
-				printf( "\\n");
-			else
-				putchar( *s);
-
+		pr_string( str);
 		printf( "\");");
 	 	*ptr = '%';
 	        str = pr_conversion( ptr);
 	}
 	printf( "fprint( outfile, \"");
-
-	for ( s = str; *s != '\0'; s++)
-		if ( *s == '\n')
-			printf( "\\n");
-		else
-			putchar( *s);
-
+	pr_string( str);
 	printf( "\");");
 }
+
+
+pr_string( s)
+char *s;
+{
+	for ( ; *s != '\0'; s++)
+		switch ( *s) {
+		  case '"' : printf( "\\\"");
+			     break;
+
+		  case '\\': printf( "\\\\");
+			     break;
+
+		  case '\n': printf( "\\n");
+			     break;
+
+		  default  : printf( "%c", *s);
+		}
+}
+
 
 char *next_conversion( str)
 char *str;
