@@ -60,19 +60,23 @@ string holstr(n) word n; {
 prolog(nlocals) full nlocals; {
 
 	fputs("push ebp\nmov ebp,esp\n", codefile);
+	if (nlocals == 0) return;
+#ifdef NOTDEF
+	probably not better on 386.
 	switch(nlocals) {
 	case 8:
 		fputs("push eax\n", codefile);
 		/* fall through */
 	case 4:
 		fputs("push eax\n", codefile);
-		/* fall through */
-	case 0:
 		break;
 	default:
+#endif
 		fprintf(codefile, "\tsub\tesp,%ld\n",nlocals);
+#ifdef NOTDEF
 		break;
 	}
+#endif
 }
 
 #ifdef REGVARS
