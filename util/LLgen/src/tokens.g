@@ -214,7 +214,10 @@ input() {
 		backupc = 0;
                 return c;
 	}
-	if ((c = getc(finput)) == EOF) return c;
+	if ((c = getc(finput)) == EOF) {
+		nonline = 0;
+		return c;
+	}
 # ifdef LINE_DIRECTIVE
 	nostartline = 1;
 # endif

@@ -635,7 +635,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 				text_seen = 0;
 				nparams++;
 				if (ch == ',' && (flag & 2)) {
-					error(linecount, "Parameters may not be separated with a ','");
+					warning(linecount, "Parameters may not be separated with a ','");
+					ch = ';';
 				}
 			}
 			break;
