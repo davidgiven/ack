@@ -30,9 +30,10 @@ del	= 0177
 	pea	(fmt)
 	jsr	(_printf)
 	lea	(8, sp), sp
-	move.l	(28, sp), (sp)
+	move.l	(28, sp),(sp)
+	move.l	(24, sp),-(sp)
 	jsr	(_printf)
-	lea	(4, sp), sp
+	lea	(8, sp), sp
 	movem.l	(sp)+, d0/d1/d2/a0
 	move.l	(sp), (4, sp)
 	lea	(4, sp), sp
