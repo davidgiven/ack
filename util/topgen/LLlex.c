@@ -54,7 +54,7 @@ LLlex() {
 			else c = getc(input);
                 }
 		else {
-			ungetc(c, stdin);
+			ungetc(c, input);
 			c = '/';
 			break;
 		}
