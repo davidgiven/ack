@@ -1,3 +1,4 @@
+/* $Header: mach2.c, V1.3 2-Nov-88 AJM */
 %token <y_word> COND
 %token <y_word> LINK
 %token <y_word> BRANCH
@@ -8,13 +9,15 @@
 %token <y_word> PEE
 %token <y_word> REG
 %token <y_word> SHIFT
-%token <y_word> RXX
+%token <y_word> RRX
 %token <y_word> SDT
 %token <y_word> BYTE
 %token <y_word> TRANS
 %token <y_word> BDT
 %token <y_word> SWI
 %token <y_word> ADR
+%token <y_word> MUL
+%token <y_word> MLA
 
 %type <y_word> optlink optcond opts optt optp optb optexc reglist rlist
 %type <y_word> optsign optpsr optshift shftcnt address offset

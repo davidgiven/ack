@@ -1,6 +1,11 @@
+/* $Header; mach0.c, v1.1 20-Oct-88 AJM */
+
 #define LISTING
 #define ASLD
 #define THREE_PASS
+
+#define WORDS_REVERSED
+#define BYTES_REVERSED
 
 #undef valu_t
 #define valu_t 	long

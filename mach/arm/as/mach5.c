@@ -1,3 +1,5 @@
+/* $Header: mach5.c, v1.6 3-Nov-88 AJM */
+
 branch(brtyp, link, val)
 word_t brtyp;
 word_t link;
@@ -15,7 +17,7 @@ valu_t val;
 }
 
 data(opc, ins, val, typ)
-word_t opc, ins;
+long opc, ins;
 valu_t val;
 short typ;
 {
@@ -42,7 +44,8 @@ short typ;
 		return;
 	}	
 
-	if (opc == MOV) {
+	if (opc == MOV && typ != S_ABS)
+	{
 		if (small((val & 0xF0000000) == 0xF0000000, 8)){
 			emit4(0xE51F0004 | (ins & 0xF000));
 			emit4(val);
@@ -57,7 +60,8 @@ short typ;
 		DOTVAL += 16;
 		return;
 	}
-	if (opc == ADD) {
+	if (opc == ADD && typ != S_ABS)
+	{
 		if (small((val & 0xF0000000) == 0xF0000000, 4)){
 			emit4(0xE51F0004 | (ins & 0xF000));
 			emit4(val);
@@ -70,10 +74,13 @@ short typ;
 		emit4(0xE2800000 | (ins&0xFF000) | (ins&0xF000)>>12);
 		return;
 	}
-	if (pass == PASS_1)
-		DOTVAL += 16;
-	else
-		serror("immediate value out of range");
+	/* default: */
+		if (pass == PASS_1)
+			DOTVAL += 16;
+		else
+			serror("immediate value out of range");
+		return;
+
 }
 
 calcimm(opc,val,typ)
@@ -85,61 +92,70 @@ short typ;
 
 	if (typ == S_UND) return 0;
 
-	if ((*val & ~0xFF) == 0) return 1;
+	if ((*val & 0xFFFFFF00) == 0) return 1;
 
-	if ((~*val & ~0xFF) == 0){
-		if (*opc == AND) {
+	if ((~*val & 0xFFFFFF00) == 0){
+		if (*opc == AND)
+			{
 			*val = ~*val;
 			*opc = BIC;
 			return 1;
-		}
-		if (*opc == MOV) {
+			}
+		if (*opc == MOV)
+			{
 			*val = ~*val;
 			*opc = MVN;
 			return 1;
-		}
-		if (*opc == ADC) {
+			}
+		if (*opc == ADC)
+			{
 			*val = ~*val;
 			*opc = SBC;
 			return 1;
-		}
+			}
+
 	}	
-	if ((-1**val & ~0xFF) == 0 ){
-		if (*opc == ADD) {
+	if ((-1**val & 0xFFFFFF00) == 0 ){
+		if (*opc == ADD)
+			{
 			*val *= -1;
 			*opc = SUB;
 			return 1;
-		}
-		if (*opc == CMP) {
+			}
+		if (*opc == CMP)
+			{
 			*val *= -1;
 			*opc = CMN;
 			return 1;
-		}
+			}
 	}
 
 	do{
 		rotateleft2(&*val);
 		i++;
-		if((*val & ~0xFF) == 0){
+		if((*val & 0xFFFFFF00) == 0){
 			*val = *val|i<<8;
 			return 1;
 		}
-		if ((~*val & ~0xFF) == 0){
-			if (*opc == AND) {
+		if ((~*val & 0xFFFFFF00) == 0){
+			if (*opc == AND)
+				{
 				*val = ~*val|i<<8;
 				*opc = BIC;
 				return 1;
-			}
-			if (*opc == MOV) {
+				}
+			if (*opc == MOV)
+				{
 				*val = ~*val|i<<8;
 				*opc = MVN;
 				return 1;
-			}
-			if (*opc == ADC) {
+				}
+			if (*opc == ADC)
+				{
 				*val = ~*val|i<<8;
 				*opc = SBC;
 				return 1;
-			}
+				}
 		}	
 	}while(i<15);
 
@@ -150,17 +166,17 @@ word_t
 calcoffset(val)
 valu_t val;
 {
-	if((val & ~0xFFF) == 0)
+	if((val & 0xFFFFF000) == 0)
 		return(val|0x00800000);
 	val *= -1;
-	if((val & ~0xFFF) == 0)
+	if((val & 0xFFFFF000) == 0)
 		return(val);
 	serror("offset out of range");
 	return(0);
 }
 
 word_t
-calcaddress(val,typ,reg)
+calcaddress (val,typ,reg)
 valu_t val;
 short typ;
 word_t reg;
@@ -172,10 +188,10 @@ word_t reg;
 		return 0;
 	}
 	tmpval = val - DOTVAL - 8;
-	if(small((tmpval & ~0xFFF) == 0, 8))
+	if(small((tmpval & 0xFFFFF000) == 0, 8))
 		return(val|0x008F0000);
 	tmpval *= -1;
-	if(small((tmpval & ~0xFFF) == 0, 8))
+	if(small((tmpval & 0xFFFFF000) == 0, 8))
 		return(val|0x000F0000);
 	emit4(0xE51F0004 | reg << 12);
 	emit4(val | 0xF0000000);
@@ -183,36 +199,44 @@ word_t reg;
 }
 
 word_t
-calcadr(reg, val, typ)
-word_t reg;
+calcadr(ins, reg, val, typ)
+word_t ins, reg;
 valu_t val;
 short typ;
 {
 	valu_t tmpval = val;
+	word_t opc;
 	int i = 0;
-
-	if ((val & 0xFC000000) && (typ != S_UND)){
-		serror("address out of range");
-		return 0;
-	}
 
 	if (typ != S_ABS){
 		tmpval = val-DOTVAL-8;
-		if (small((tmpval & ~0xFF) == 0),12){
-			emit4(0xE2000000|ADD|(long)0xF<<16|reg<<12|tmpval);
-			return 0;
+		if (tmpval > 0) {
+			if (small((tmpval & 0xFFFFFF00) == 0),12){
+				emit4(ins|ADD|0x020F0000|reg<<12|tmpval);
+				return 0;
+			}
 		}
 	
 		tmpval *= -1;
-		if (small((tmpval & ~0xFF) == 0), 12){
-			emit4(0xE2000000|SUB|(long)0xF<<16|reg<<12|tmpval);
+		if (small((tmpval & 0xFFFFFF00) == 0), 12){
+			emit4(ins|SUB|0x020F0000|reg<<12|tmpval);
 			return 0;
 		}
 	}
 
-	data(MOV, 0xE2000000||reg<<12, val, typ);
+	tmpval = val;
+	opc = MOV;
+	if (calcimm(&opc, &tmpval, typ)){
+		emit4(ins|opc|0x020F0000|reg<<12|tmpval);
+		return 0;
+	}
 
-	return 0;
+/* Failed */
+	if (pass == PASS_1)
+		DOTVAL += 16;
+	else
+		serror("illegal ADR argument");
+	return ;
 }
 
 
@@ -223,7 +247,7 @@ short typ;
 word_t styp;
 {
 	if (typ=S_UND) return 0;
-	if (val & ~0x1F) serror("shiftcount out of range");
+	if (val & 0xFFFFFFE0) serror("shiftcount out of range");
 	if (styp && !val) warning("shiftcount 0");
 	return((val & 0x1F)<<7);
 }

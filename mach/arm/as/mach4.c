@@ -1,3 +1,5 @@
+/* $Header: mach4.c, v1.5 2-Nov-88 AJM */
+
 operation	: BRANCH optlink expr
 			{branch($1, $2, $3.val);}
 		| DATA1 optcond opts optp REG ',' REG ',' operand
@@ -11,9 +13,13 @@ operation	: BRANCH optlink expr
 		| BDT optcond REG optexc ',' reglist optpsr
 			{emit4($1|$2|$3<<16|$4|$6|$7);}
 		| SWI optcond expr
-			{emit4($1|$2);}
-		| ADR REG ',' expr
-			{calcadr($2, $4.val, $4.typ);}
+			{emit4($1|$2|$3.val);}
+		| ADR optcond REG ',' expr
+			{calcadr($2, $3, $5.val, $5.typ);}
+		| MUL optcond REG ',' REG ',' REG
+			{emit4($1|$2|$3<<16|$5|$7<<8);}
+		| MLA optcond REG ',' REG ',' REG ',' REG
+			{emit4($1|$2|$3<<16|$5|$7<<8|$9<<12);}
 		;
 
 optlink		: 	{$$=0;}
@@ -64,7 +70,7 @@ operand		: REG optshift
 
 optshift	: ',' SHIFT shftcnt
 			{$$ = $2|$3;}
-		| ',' RXX
+		| ',' RRX
 			{$$ = $2;}
 		|
 			{$$ = 0;}

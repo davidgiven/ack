@@ -1,3 +1,5 @@
+/* $Header: mach3.c, v1.5 2-Nov-88 AJM */
+
 0,		COND,		0x00000000,	".EQ",
 0,		COND,		0x10000000,	".NE",
 0,		COND,		0x20000000,	".CS",
@@ -82,7 +84,7 @@
 0,		SHIFT,		0x00000040,	"ASR",
 0,		SHIFT,		0x00000060,	"ROR",
 
-0,		RXX,		0x00000060,	"RXX",
+0,		RRX,		0x00000060,	"RRX",
 
 0,		SDT,		0x04100000,	"LDR",
 0,		SDT,		0x04000000,	"STR",
@@ -108,8 +110,11 @@
 0,		BDT,		0x08000000,	"STMED",
 0,		BDT,		0x08800000,	"STMEA",
 
-0,		SWI,		0,		"SWI",
+0,		SWI,		0x0F000000,	"SWI",
 
 0,		ADR,		0,		"ADR",
+
+0,		MUL,		0x00000090,	"MUL",
+0,		MLA,		0x00200090,	"MLA",
 
 
