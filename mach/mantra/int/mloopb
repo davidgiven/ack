@@ -1,4 +1,5 @@
-_sigtrp:	mov	(sp)+,d1	!trapno in d1
+_sigtrp:	move.l	(sp)+,d2	!save return address
+		mov	(sp)+,d1	!trapno in d1
 		mov	(sp)+,d4	!signo in d4
 		extend	d4
 		extend	d1
@@ -26,7 +27,7 @@ sig_bad:	mov	22,-(sp)	!_signal. If pointer 0 trapping is
 		move.l	d3,-(sp)		!set arguments to signal:
 		mov	d4,-(sp)		!pointer ,signo to be trapped
 		bsr	_signal
-		cl	-(sp)		!set code for no error
+		jmp	(a4)
 	.data
 sig_adr:	.long	sig1 ;	.long	sig2 ;	.long sig3 ;	.long	0
 		.long	0 ;	.long	0 ;	.long 0 ;	.long	0
@@ -39,11 +40,40 @@ sig_trp:	.long	-2  ;	.long	-2  ;	.long	-2  ;	.long	-2
 	.text
 !the next procedures map the catched signal to em errors. The em error
 !procedure will handle this.
-sig1:	sig2:	sig3:	sig8:	sig13:	sig14:	sig15:	sig16:	
-		pea	retutrap
-		mov	d1,-(sp)
+sig1:		pea	retutrap
+		move.l	sig_trp,d0
+		mov	d0,-(sp)
 		bra	error
-retutrap:	rtr
+sig2: 		pea	retutrap
+		move.l	sig_trp+4,d0
+		mov	d0,-(sp)
+		bra	error
+sig3:		pea	retutrap
+		move.l	sig_trp+8,d0
+		mov	d0,-(sp)
+		bra	error
+sig8: 		pea	retutrap
+		move.l	sig_trp+28,d0
+		mov	d0,-(sp)
+		bra	error
+sig13:		pea	retutrap
+		move.l	sig_trp+48,d0
+		mov	d0,-(sp)
+		bra	error
+sig14:		pea	retutrap
+		move.l	sig_trp+52,d0
+		mov	d0,-(sp)
+		bra	error
+sig15:		pea	retutrap
+		move.l	sig_trp+56,d0
+		mov	d0,-(sp)
+		bra	error
+sig16:		pea	retutrap
+		move.l	sig_trp+60,d0
+		mov	d0,-(sp)
+		bra	error
+retutrap:	add.l	#4,sp		!remove signumber
+		rtr
 
 sig12:		pea	sig12
 		mov	#12,-(sp)
