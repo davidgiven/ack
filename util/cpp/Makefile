@@ -4,6 +4,7 @@ EMHOME=../..
 MODULES=$(EMHOME)/modules
 MODULESLIB=$(MODULES)/lib
 BIN=$(EMHOME)/lib
+MANDIR=$(EMHOME)/man
 
 # Some paths
 
@@ -106,9 +107,12 @@ cfiles: hfiles LLfiles $(GSRC)
 install: all
 	rm -f $(CEMPP)
 	cp cpp $(CEMPP)
+	mr -f $(MANDIR)/cpp.6
+	cp cpp.6 $(MANDIR)/cpp.6
 
 cmp:	all
-	cmp cpp $(CEMPP)
+	-cmp cpp $(CEMPP)
+	-cmp cpp.6 $(MANDIR)/cpp.6
 
 pr: 
 	@pr $(PRFILES)
