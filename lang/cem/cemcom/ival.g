@@ -504,6 +504,13 @@ check_ival(expp, tp)
 #endif DEBUG
 		if (expr->ex_class == Float)
 			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+#ifdef NOTDEF
+
+Coercion from int to float is now always done compile time.
+This, to accept declarations like
+double	x = -(double)1;
+and also to prevent runtime coercions for compile-time constants.
+
 		else
 		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			/* float f = 1; */
@@ -514,6 +521,7 @@ check_ival(expp, tp)
 			else 
 				illegal_init_cst(expr);
 		}
+#endif NOTDEF
 		else
 			illegal_init_cst(expr);
 		break;

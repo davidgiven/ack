@@ -270,9 +270,22 @@ int2float(expp, tp)
 	/*	The expression *expp, which is of some integral type, is
 		converted to the floating type tp.
 	*/
+	register struct expr *exp = *expp;
+	char buf[32];
 	
 	fp_used = 1;
-	*expp = arith2arith(tp, INT2FLOAT, *expp);
+	if (is_cp_cst(exp)) {
+		*expp = new_expr();
+		**expp = *exp;
+		sprint(buf+1, "%ld", (long)(exp->VL_VALUE));
+		buf[0] = '-';
+		exp = *expp;
+		exp->ex_type = tp;
+		exp->ex_class = Float;
+		exp->FL_VALUE = Salloc(buf, (unsigned)strlen(buf)+1) + 1;
+		exp->FL_DATLAB = 0;
+	}
+	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
 }
 
 float2int(expp, tp)

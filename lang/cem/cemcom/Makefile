@@ -51,9 +51,10 @@ GEN = $(EMHOME)/bin/LLgen
 GENOPTIONS = -v
 
 # Special #defines during compilation
+PROF = #-pg
 CDEFS =	$(EM_INCLUDES) $(LIB_INCLUDES)
-CFLAGS = $(CDEFS) $(COPTIONS) -O
-LDFLAGS = -i
+CFLAGS = $(CDEFS) $(COPTIONS) -O $(PROF)
+LDFLAGS = -i $(PROF)
 
 # Grammar files and their objects
 LSRC =	tokenfile.g declar.g statement.g expression.g program.g ival.g
