@@ -37,7 +37,11 @@
  loc 0
  ste .2
  lol 0
- ads EM_WSIZE
+ ads EM_WSIZE	; this is the new heap pointer, but watch out for overflow!
+ dup EM_WSIZE
+ lor 2
+ cmp		; compare with old heap pointer
+ zlt *1
  str 2          ; The - possibly - occurring trap is caught
  lae .1
  loi EM_PSIZE
