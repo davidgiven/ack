@@ -1,4 +1,9 @@
 .define Ret
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine stores the returnvalue in the return area.
 ! This area is in zeropage.

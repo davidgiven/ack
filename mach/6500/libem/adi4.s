@@ -1,4 +1,9 @@
 .define Adi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine adds two fourbyte integers, which are on the stack.
 ! The addresses are initiated by the subroutine Addsub.

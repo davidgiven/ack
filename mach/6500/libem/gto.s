@@ -1,4 +1,9 @@
 .define Gto
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the non_local goto.
 ! The address of the descriptor is stored in zeropage locations

@@ -1,4 +1,9 @@
 .define Mread
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine reads characters from the standard input.
 ! It ignores the filedes.

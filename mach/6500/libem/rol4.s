@@ -1,4 +1,9 @@
 .define Rol4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine rotates left a fourbyte integer n times.
 ! N is in register X.

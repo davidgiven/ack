@@ -1,4 +1,9 @@
 .define Rmu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine returns the remainder of an twobyte unsigned
 ! integer division.

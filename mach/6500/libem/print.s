@@ -1,4 +1,9 @@
 .define Mprint
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine prints a zero terminated ascii string.
 ! The registerpair AX contains the start of the string.

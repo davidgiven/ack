@@ -1,4 +1,9 @@
 .define Zrl, Zro
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Zrl makes a local zero which offset is to big.
 ! The offset of the local is in registerpair AX.

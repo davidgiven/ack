@@ -1,4 +1,9 @@
 .define Ror4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine rotates right a fourbyte word.
 ! The number of rotates is in X.

@@ -1,4 +1,9 @@
 .define Sar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the SAR instruction.
 ! For details see rapport IR-81.

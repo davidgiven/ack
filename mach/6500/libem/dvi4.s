@@ -1,4 +1,9 @@
 .define Dvi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs a fourbyte signed division.
 ! For more details see dvi.s

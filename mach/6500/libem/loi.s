@@ -1,4 +1,9 @@
 .define Loi, Lext
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! This subroutine performs an indirect load on a word of two bytes.
 ! Lext is used when the address is already in zeropage.
 

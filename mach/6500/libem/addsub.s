@@ -1,4 +1,9 @@
 .define Addsub
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine is used by the fourbyte addition and subtraction
 ! routines.

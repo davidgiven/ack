@@ -1,4 +1,9 @@
 .define Trap
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the trap instruction.
 

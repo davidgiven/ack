@@ -1,4 +1,9 @@
 .define Dvu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs a twobyte unsigned division
 ! For more details see dvi.s.

@@ -1,4 +1,9 @@
 .define TestFFh
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine tests if the value on top of the stack is <= 256.
 ! It is used if the istruction argument is on top of the stack.

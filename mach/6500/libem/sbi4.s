@@ -1,4 +1,9 @@
 .define Sbi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine subtracts two fourbyte signed integers.
 

@@ -1,4 +1,9 @@
 .define Mon
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs some monitor calls.
 ! The exit call just resets the hardware_stackpointer so

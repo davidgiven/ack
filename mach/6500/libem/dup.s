@@ -1,4 +1,9 @@
 .define Dup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine duplicate's the top n (in register Y) bytes.
 ! N is atmost 256.

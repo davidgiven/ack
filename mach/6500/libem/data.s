@@ -2,12 +2,17 @@
 .define ECONV,ESTACK
 .define EHEAP,EODDZ,ECASE
 .define EBADMON,EBADLIN,EBADGTO
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This file contains the global data used by the trap routine.
 
 
 ! DATA
-.data
+.sect .data
 EARRAY:
 .asciz	"Array bound error\n\r"
 ERANGE:

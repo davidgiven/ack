@@ -1,4 +1,9 @@
 .define Ngi2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine negates the integer in registerpair AX.
 ! The negation is a one's complement plus one.

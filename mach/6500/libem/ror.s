@@ -1,4 +1,9 @@
 .define Ror
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine rotates right a integer twobyte word.
 ! The number of rotates is in X.

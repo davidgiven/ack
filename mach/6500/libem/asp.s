@@ -1,4 +1,9 @@
 .define Asp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine adds an offset to the stackpointer,
 ! e.g. after the return from a procedurecall.

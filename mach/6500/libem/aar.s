@@ -1,4 +1,9 @@
 .define Aar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine gets the address of the array element
 

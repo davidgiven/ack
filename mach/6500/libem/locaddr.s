@@ -1,4 +1,9 @@
 .define Locaddr
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This routine gets the address of a local which offset is to big.
 ! The offset is in registerpair AX.

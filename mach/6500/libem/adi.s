@@ -1,4 +1,9 @@
 .define  Adi2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine adds two twobyte integers.
 ! The first operand is on the top of the stack, the second operand

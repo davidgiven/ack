@@ -1,4 +1,9 @@
 .define Ldi, Ldo
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Ldi pushes a four byte object onto the stack.
 ! The address is in registerpair AX.

@@ -1,4 +1,9 @@
 .define Dvu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs an unsigned division on fourbyte
 ! integers. For more details see dvi.s

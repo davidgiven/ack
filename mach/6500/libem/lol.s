@@ -1,4 +1,9 @@
 .define Lol
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine loads a local in registerpair AX which
 ! offset from the localbase is to big.

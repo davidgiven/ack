@@ -1,4 +1,9 @@
 .define Div4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs a signed divide on two fourbyte integers.
 ! For more detail see dvi.s

@@ -1,4 +1,9 @@
 .define Sri4, Sru4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Sri4 shifts a signed fourbyte integer to the
 ! right n times

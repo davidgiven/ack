@@ -1,4 +1,9 @@
 .define Exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine exchanges two groups of bytes on the top of the
 ! stack. The groups may consist of atmost 255 bytes.

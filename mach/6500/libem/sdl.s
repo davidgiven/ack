@@ -1,4 +1,9 @@
 .define Sdi, Sdo
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Sdi takes a fourbyte word and stores it
 ! at the address in registerpair AX.

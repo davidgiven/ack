@@ -1,4 +1,9 @@
 .define Lar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the LAR instruction.
 ! For details see rapport IR-81.

@@ -1,4 +1,9 @@
 .define Rol
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine rotates left an integer n times
 ! N is in register X.

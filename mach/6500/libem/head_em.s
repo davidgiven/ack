@@ -9,6 +9,12 @@
 .define RETSIZE, TRAPVAL, STACK, BRANCH
 .define start, Push, Pop, STACKTh, STACKTl
 .define F_DUM
+.sect .zero
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! DEFINITIONS
 
@@ -51,7 +57,7 @@ STACKTl = 0D0h
 
 	! Some zeropage declarations
 
-.zero
+.sect .zero
 
 RES: .space 76		! special for the operating system
 
@@ -97,8 +103,8 @@ STACK: .space 1		! contains the hardware stackpointer on
 
 RESERVED: .space 112    ! used by the operating system
 
+.sect .text
 .base 0E02h		! where to start in the BBC micro
-.text
 ! GENERAL PURPOSE ROUTINES
 
 start:
@@ -220,8 +226,8 @@ Pop:
 	rts
 
 
-.data
+.sect .data
 PROGNAME:		! for initialising the programname pointer
 .asciz "program"
-.bss
+.sect .bss
 beginbss:

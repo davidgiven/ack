@@ -1,4 +1,9 @@
 .define Sri2, Sru2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Sri2 shifts a signed integer n times right.
 ! In the case of a negative integer there is signextension.

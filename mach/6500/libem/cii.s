@@ -1,4 +1,9 @@
 .define Cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine converts integers to integers.
 ! Convertions of integers with the same source size as destination

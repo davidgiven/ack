@@ -1,4 +1,9 @@
 .define Cmu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine compares two unsigned fourbyte integers.
 ! If T is first pushed and than S the routine will return:

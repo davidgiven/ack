@@ -1,4 +1,9 @@
 .define And
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the logical and on two groups of
 ! atmost 254 bytes. The number of bytes is in register Y.

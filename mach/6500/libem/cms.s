@@ -1,4 +1,9 @@
 .define Cms
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine compares two groups of bytes, bit for bit.
 ! The groups can consist of 2 or 4 bytes. This number is in

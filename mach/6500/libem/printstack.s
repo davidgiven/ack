@@ -1,4 +1,9 @@
 .define Printstack
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This a special subroutine which prints some things to the
 ! monitorscreen for debugging.

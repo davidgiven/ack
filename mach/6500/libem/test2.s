@@ -1,4 +1,9 @@
 .define Test2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine tests if the value on top of the stack is 2.
 ! It is used if the size is on top of the stack.

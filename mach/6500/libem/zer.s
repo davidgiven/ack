@@ -1,4 +1,9 @@
 .define Zer
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine puts n (n <=256) zero bytes on top of 
 ! the stack.

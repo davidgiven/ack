@@ -1,4 +1,9 @@
 .define Lcs
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine creates space for locals on procedure entry
 ! by lowering the stackpointer.

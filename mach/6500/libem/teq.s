@@ -1,4 +1,9 @@
 .define Teq
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine test if the value in registerpair AX is zero
 ! or nonzero.

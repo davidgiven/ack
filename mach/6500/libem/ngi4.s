@@ -1,4 +1,9 @@
 .define Ngi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine takes a fourbyte interger and negates it.
 ! For more details see ngi2.s

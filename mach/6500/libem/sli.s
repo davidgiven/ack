@@ -1,4 +1,9 @@
 .define Sli2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine shifts a signed or unsigned interger to the
 ! left n times.

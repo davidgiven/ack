@@ -1,4 +1,9 @@
 .define Pro
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This routine is called at the entry of a procedure.
 ! It saves the localbase of the invoking procedure, and sets the

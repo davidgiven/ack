@@ -1,4 +1,9 @@
 .define Rmu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine returns the remainder of a fourbyte unsigned
 ! division.

@@ -1,4 +1,9 @@
 .define Inn
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine checks if a certain bit is set in a set
 ! of n bytes on top of the stack.

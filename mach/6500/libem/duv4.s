@@ -1,4 +1,9 @@
 .define Duv4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs an unsigned division on two fourbyte
 ! unsigned integers.

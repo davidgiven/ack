@@ -1,4 +1,9 @@
 .define Tge
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine test if the value in registerpair AX is
 ! greater than or equal to zero.

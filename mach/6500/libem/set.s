@@ -1,4 +1,9 @@
 .define Set
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine creates a set of n (n <= 256) bytes.
 ! In this set a certain bit, which number is in registerpair AX,

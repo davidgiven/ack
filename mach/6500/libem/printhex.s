@@ -1,4 +1,9 @@
 .define Printhex
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine print the contents of register A to the screen
 ! in hexadecimal form.

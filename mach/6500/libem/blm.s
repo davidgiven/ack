@@ -1,4 +1,9 @@
 .define Blm, Blmnp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine copies bytes from one place in memory to
 ! another. The source address is in registerpair AX and is stored

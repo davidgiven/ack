@@ -1,4 +1,9 @@
 .define Mwrite
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the monitor call write.
 ! Writing is always done to standardoutput.

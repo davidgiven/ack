@@ -1,12 +1,17 @@
 .define endtext, enddata, endbss, end
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-.text
+.sect .text
 endtext:
 .align 2
-.data
+.sect .data
 .align 2
 enddata:
-.bss
+.sect .bss
 .align 2
 endbss:
 end:

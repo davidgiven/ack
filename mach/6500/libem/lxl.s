@@ -1,4 +1,9 @@
 .define Lxl
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine loads LB n (255 => n > 0) static levels back.
 

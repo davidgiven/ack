@@ -1,4 +1,9 @@
 .define Rmi2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine returns the remainder of a twobyte signed division.
 ! The sign of the result is as specified in the emtest.

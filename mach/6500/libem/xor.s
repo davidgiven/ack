@@ -1,4 +1,9 @@
 .define Xor
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the exclusive or on two groups of bytes.
 ! The groups consists of atmost 254 bytes.

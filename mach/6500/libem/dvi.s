@@ -1,4 +1,9 @@
 .define Dvi2, Div, Duv
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Dvi2 performs a signed division.
 ! Its operands are on the stack.

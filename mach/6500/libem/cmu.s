@@ -1,4 +1,9 @@
 .define Cmu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine compares two unsigned twobyte integers.
 ! If T is the first pushed and than S, the routine will return:

@@ -1,4 +1,9 @@
 .define Loi1
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This routine loads a one byte object in registerpair AX.
 

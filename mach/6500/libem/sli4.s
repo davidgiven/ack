@@ -1,4 +1,9 @@
 .define Sli4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine shift a signed or unsigned fourbyte integer
 ! n times left. N is in register X.

@@ -1,4 +1,9 @@
 .define Lxa1
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine loads the address of AB zero static levels back.
 

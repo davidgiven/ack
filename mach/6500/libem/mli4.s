@@ -1,4 +1,9 @@
 .define Mli4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine multiplies two signed fourbyte integers
 ! For more detail see mli.s

@@ -1,4 +1,9 @@
 .define Mlu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine multiplies two unsigned fourbyte intergers.
 ! For more details see mli.s

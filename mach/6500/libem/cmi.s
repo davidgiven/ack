@@ -1,4 +1,9 @@
 .define Cmi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine compares on two integers.
 ! If T is pushed first and than S, the routine will return:

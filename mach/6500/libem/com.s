@@ -1,4 +1,9 @@
 .define Com
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs a one complement on
 ! a group of atmost 254 bytes (number in register Y).

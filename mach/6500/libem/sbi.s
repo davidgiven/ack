@@ -1,4 +1,9 @@
 .define Sbi2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine subtracts two twobyte signed integers
 ! and returnes the result in registerpair AX.

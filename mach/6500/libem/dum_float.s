@@ -23,6 +23,11 @@
 .define Cfu
 .define Lfr8
 .define Ret8
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Dummy floating point package for 6500
 ! every EM floating point instruction results in an

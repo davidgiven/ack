@@ -1,4 +1,9 @@
 .define Loil
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine pushes an object of size greater than four bytes
 ! onto the stack.

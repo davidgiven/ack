@@ -1,4 +1,9 @@
 .define Indir
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs an indirect procedurecall.
 ! This must be done this way since the jump instruction

@@ -1,4 +1,9 @@
 .define Sts
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine stores indirect a number of bytes.
 ! The number of bytes is in the registerpair AX.

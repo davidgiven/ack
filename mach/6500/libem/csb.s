@@ -1,4 +1,9 @@
 .define Csb
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine performs the case jump by searching the table.
 ! The zeropage locations ADDR, ADDR+1 contain the address of the

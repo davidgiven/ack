@@ -1,4 +1,9 @@
 .define Mli2, Mlinp, Mul
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Mli2 multiplies two signed integers. The integers
 ! are popped from the stack.

@@ -1,4 +1,9 @@
 .define Los
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine perfoms the LOS instruction.
 ! For detail see rapport IR-81.

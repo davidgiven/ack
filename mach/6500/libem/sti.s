@@ -1,4 +1,9 @@
 .define Sti, Sext, Stii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! The subroutine Sti stores an twobyte word at the address which
 ! is in registerpair AX.

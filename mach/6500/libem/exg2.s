@@ -1,4 +1,9 @@
 .define Exg2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine exchanges two words on top of the stack.
 ! The top word of the stack is really in the AX registerpair.

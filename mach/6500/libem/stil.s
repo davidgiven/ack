@@ -1,4 +1,9 @@
 .define Stil
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! This subroutine stores indirect a block of bytes if 
 ! the number of bytes is greater than four.
