@@ -96,12 +96,14 @@ string ad2str(ad) addr_t ad; {
 
 praddr(ad) addr_t ad; {
 
-	if (ad.ea_str==0)
+	if (ad.ea_str==0 || *(ad.ea_str) == '\0')
 		fprintf(codefile,WRD_FMT,ad.ea_off);
 	else {
 		fprintf(codefile,"%s",ad.ea_str);
-		if (ad.ea_off<0)
-			fprintf(codefile,WRD_FMT,ad.ea_off);		
+		if (ad.ea_off<0) {
+			fputc('-', codefile);
+			fprintf(codefile,WRD_FMT,-ad.ea_off);		
+		}
 		else if(ad.ea_off>0) {
 			fputc('+',codefile);
 			fprintf(codefile,WRD_FMT,ad.ea_off);

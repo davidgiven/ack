@@ -145,10 +145,10 @@ result_t compute(node) register node_p node; {
 	switch(node->ex_operator) {
 	default:        assert(FALSE);
 	case EX_TOKFIELD:
-		if (node->ex_lnode!=0)
-			tp = &fakestack[stackheight-node->ex_lnode];
-		else
-			tp = curtoken;
+		if (node->ex_lnode==0)
+			if (curtoken) tp = curtoken;
+			else tp = &fakestack[stackheight-1];
+		else	tp = &fakestack[stackheight-node->ex_lnode];
 		switch(result.e_typ = tokens[tp->t_token].t_type[node->ex_rnode-1]) {
 		default:
 			assert(FALSE);
@@ -343,7 +343,10 @@ result_t compute(node) register node_p node; {
 		return(result);
 	case EX_SUBREG:
 		result.e_typ = EV_REG;
-		tp= &fakestack[stackheight-node->ex_lnode];
+		if (node->ex_lnode==0)
+			if (curtoken) tp = curtoken;
+			else tp = &fakestack[stackheight-1];
+		else	tp = &fakestack[stackheight-node->ex_lnode];
 		assert(tp->t_token == -1);
 		tmpreg= tp->t_att[0].ar;
 #if MAXMEMBERS!=0

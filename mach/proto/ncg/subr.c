@@ -78,7 +78,10 @@ instance(instno,token) register token_p token; {
 	default:
 		assert(FALSE);
 	case IN_COPY:
-		tp= &fakestack[stackheight-inp->in_info[0]];
+		if (inp->in_info[0] == 0)
+			if (curtoken) tp = curtoken;
+			else tp = &fakestack[stackheight-1];
+		else	tp= &fakestack[stackheight-inp->in_info[0]];
 		if (inp->in_info[1]==0) {
 			*token = *tp;
 		} else {
@@ -93,7 +96,10 @@ instance(instno,token) register token_p token; {
 		}
 		return;
 	case IN_MEMB:
-		tp= &fakestack[stackheight-inp->in_info[0]];
+		if (inp->in_info[0] == 0)
+			if (curtoken) tp = curtoken;
+			else tp = &fakestack[stackheight-1];
+		else	tp= &fakestack[stackheight-inp->in_info[0]];
 		assert(inp->in_info[1]!=0);
 		assert(tp->t_token>0);
 		token->t_token= -1;
@@ -160,7 +166,7 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 	default:
 		assert(FALSE);
 	case IN_COPY:
-		assert(inp->in_info[0] == 1);
+		assert(inp->in_info[0] <= 1);
 		if (inp->in_info[1]==0) {
 			*token = *tp;
 		} else {
@@ -175,7 +181,7 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 		}
 		return;
 	case IN_MEMB:
-		assert(inp->in_info[0] == 1);
+		assert(inp->in_info[0] <= 1);
 		token->t_token= -1;
 		assert(tp->t_token>0);
 		assert(tokens[tp->t_token].t_type[inp->in_info[1]-1] == EV_REG);
@@ -197,14 +203,19 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 #ifdef REGVARS
 	case IN_S_DESCR:
 	case IN_D_DESCR:
-		result=compute(&enodes[inp->in_info[1]]);
-		assert(result.e_typ==EV_INT);
-		if ((regno=isregvar(result.e_v.e_con)) > 0) {
-			token->t_token = -1;
-			token->t_att[0].ar = regno;
-			for(i=1;i<TOKENSIZE;i++)
-				token->t_att[i].aw = 0;
-			return;
+		{	token_p ct = curtoken;
+
+			curtoken = tp;
+			result=compute(&enodes[inp->in_info[1]]);
+			curtoken = ct;
+			assert(result.e_typ==EV_INT);
+			if ((regno=isregvar(result.e_v.e_con)) > 0) {
+				token->t_token = -1;
+				token->t_att[0].ar = regno;
+				for(i=1;i<TOKENSIZE;i++)
+					token->t_att[i].aw = 0;
+				return;
+			}
 		}
 		/* fall through */
 #endif
@@ -217,7 +228,11 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 				assert(tokens[token->t_token].t_type[i]==0);
 				token->t_att[i].aw=0;
 			} else {
+				token_p ct = curtoken;
+
+				curtoken = tp;
 				result=compute(&enodes[inp->in_info[i+1]]);
+				curtoken = ct;
 				assert(tokens[token->t_token].t_type[i]==result.e_typ);
 				if (result.e_typ==EV_INT)
 					token->t_att[i].aw=result.e_v.e_con;
@@ -605,12 +620,19 @@ itokcost() {
 
 error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
-	fatal(s,a1,a2,a3,a4,a5,a6,a7,a8);
+	fprintf(stderr,"Error: ");
+	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	fprintf(stderr,"\n");
+#ifdef TABLEDEBUG
+	ruletrace();
+#endif
+	out_finish();
+	exit(-1);
 }
 
 fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 
-	fprintf(stderr,"Error: ");
+	fprintf(stderr,"Fatal: ");
 	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
 	fprintf(stderr,"\n");
 #ifdef TABLEDEBUG
