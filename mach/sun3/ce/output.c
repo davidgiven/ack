@@ -21,14 +21,17 @@ struct exec u_header;
 long ntext, ndata, nrelo, nchar, base_address();
 int trsize=0, drsize=0;
 
+struct relocation_info *u_reloc;
+
+static reduce_name_table();
+
 output()
 {
 	register int i;
-	struct relocation_info *u_reloc;
-	struct nlist *u_name;
+	register struct nlist *u_name;
 
 	/*
-	 * first, convert relocation data structures. This also requires
+	 * Convert relocation data structures. This also requires
 	 * some re-ordering, as SUN .o format needs has text relocation
 	 * structures in front of the data relocation structures, whereas in
 	 * ACK they can be in any order.
@@ -56,6 +59,8 @@ output()
 	nrelo = trsize + drsize;
 	u_reloc -= nrelo;
 
+	reduce_name_table();
+
 	init_unixheader();
 
 	putbuf( (char *) &u_header, sizeof(struct exec));
@@ -80,6 +85,69 @@ output()
 	putbuf((char *) string_area, nchar);
 }
 
+static
+reduce_name_table()
+{
+	/*
+	 * Reduce the name table size. This is done by first marking
+	 * the name-table entries that are needed for relocation, then
+	 * removing the entries that are compiler-generated and not
+	 * needed for relocation, while remembering how many entries were
+	 * removed at each point, and then updating the relocation info.
+	 * After that, the string table is reduced.
+	 */
+
+#define S_NEEDED	0x8000
+#define removable(nm)	(!(nm.on_type & S_NEEDED) && *(nm.on_foff+string_area) == GENLAB)
+
+	register int *diff_index =
+		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
+	register int i;
+	char *new_str;
+	register char *p, *q;
+
+	*diff_index++ = 0;
+	for (i = 0; i < nrelo; i++) {
+		if (u_reloc[i].r_extern) {
+			symbol_table[u_reloc[i].r_symbolnum].on_type |= S_NEEDED;
+		}
+	}
+
+	for (i = 0; i < nname; i++) {
+		int old_diff_index = diff_index[i-1];
+
+		if (removable(symbol_table[i])) {
+			diff_index[i] = old_diff_index + 1;
+		}
+		else {
+			diff_index[i] = old_diff_index;
+			if (old_diff_index) {
+				symbol_table[i - old_diff_index] = symbol_table[i];
+			}
+		}
+	}
+	nname -= diff_index[nname - 1];
+
+	for (i = 0; i < nrelo; i++) {
+		register struct relocation_info *rp = &u_reloc[i];
+
+		if (rp->r_extern) {
+			rp->r_symbolnum -= diff_index[rp->r_symbolnum];
+		}
+	}
+
+	free((char *)(diff_index-1));
+
+	new_str = q = Malloc((unsigned)(string - string_area));
+	for (i = 0; i < nname; i++) {
+		p = symbol_table[i].on_foff + string_area;
+		symbol_table[i].on_foff = q - new_str;
+		while (*q++ = *p) p++;
+	}
+	free(string_area);
+	string_area = new_str;
+	string = q;
+}
 
 init_unixheader()
 {

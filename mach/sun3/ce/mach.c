@@ -70,10 +70,9 @@ static int been_here;
 #ifdef OWNFLOAT
 	if (argval == 4) {
 		/* careful: avoid overflow */
-		double ldexp();
-		f = frexp(f, &i);
-		fl = f;
-		fl = frexp(fl,&j);
+		double f1;
+		f1 = frexp(f, &i);
+		fl = frexp(f1,&j);
 		if (i+j > 127) {
 			/* overflow situation */
 			gen1(f<0?0377:0177);
@@ -90,7 +89,7 @@ static int been_here;
 			gen1(0);
 			return;
 		}
-		fl = ldexp(fl, i+j);
+		fl = f;
 		p = (char *) &fl;
 	}
 	else {
