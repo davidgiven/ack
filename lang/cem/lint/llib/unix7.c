@@ -63,7 +63,9 @@ int	ptrace(r, p, a, d) int *a;{ return(0); }
 int	read(f, b, l) char *b; { return(0); }
 int	setuid(u) { return(0); }
 int	setgid(g) { return(0); }
+#ifndef __STDC__
 int	(*signal(c, f))() int (*f)(); { return(f); }
+#endif
 int	stat(s, b) char *s; struct stat *b; { return(0); }
 int	fstat(f, b) struct stat *b; { return(0); }
 int	stime(t) time_t *t; { return(0); }
@@ -85,12 +87,24 @@ int	abort() {/*NOTREACHED*/ }
 	%[feg] = double
 	%c = int		%s = char *
 $ */
+#ifdef __STDC__
+int     printf(const char *_format, ...);
+#else
 printf(fmt) char *fmt; { ; }
+#endif
 
 /* FORMAT1 */
+#ifdef __STDC__
+int     fprintf(FILE *_stream, const char *_format, ...);
+#else
 fprintf(fp, fmt) FILE *fp; char *fmt; { ; }
+#endif
 /* FORMAT1 */
+#ifdef __STDC__
+int     sprintf(char *_s, const char *_format, ...);
+#else
 sprintf(s, fmt) char *s; char *fmt; { ; }
+#endif
 
 /* FORMAT0 $
 	%[dox] = int *		%l[dox] = long *	%[DOX] = long *
@@ -99,14 +113,26 @@ sprintf(s, fmt) char *s; char *fmt; { ; }
 	%[fe] = float *		%l[fe] = double *	%[FE] = double *
 	%c = char *		%s = char *		%[[] = char *
 $ */
+#ifdef __STDC__
+int     scanf(const char *_format, ...);
+#else
 int scanf(fmt) char *fmt; { return(0); }
+#endif
 /* FORMAT1 */
+#ifdef __STDC__
+int     fscanf(FILE *_stream, const char *_format, ...);
+#else
 int fscanf(fp, fmt) FILE *fp; char *fmt; { return(0); }
+#endif
 /* FORMAT1 */
+#ifdef __STDC__
+int     sscanf(const char *_s, const char *_format, ...);
+#else
 int sscanf(s, fmt) char *s; char *fmt; { return(0); }
+#endif
 int _flsbuf(i, fp) unsigned int i; FILE *fp; { return(0); }
 
 /* System variables */
 char **environ;
 int errno;
-char *sys_errlist[];
+char *sys_errlist[1];

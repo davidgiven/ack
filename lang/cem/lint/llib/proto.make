@@ -26,6 +26,7 @@ install:	all
 	-mkdir $(TARGET_HOME)/lib.bin/lint
 	-mkdir $(TARGET_HOME)/lib.bin/lint/llib
 	cp $(SRC_DIR)/*.llb $(TARGET_HOME)/lib.bin/lint/llib
+	chmod +w $(TARGET_HOME)/lib.bin/lint/llib/*
 	cp *.llb $(TARGET_HOME)/lib.bin/lint/llib
 	chmod +w $(TARGET_HOME)/lib.bin/lint/llib/*
 
@@ -49,7 +50,7 @@ c.llb:	$(SRC_DIR)/unix7.c
 ansi_c.llb:	$(SRC_DIR)/unix7.c
 	cp $(SRC_DIR)/ansi_c.llb ansi_c.llb
 	chmod +w ansi_c.llb
-	$(LINT) -ansi -Lansi_c.llb $(SRC_DIR)/unix7.c
+	$(LINT) -ansi -Lansi_c.llb -o $(SRC_DIR)/unix7.c
 
 curses.llb:
 	$(LINT) -Lcurses.llb $(CURSESDIR)/*.c
