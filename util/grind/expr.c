@@ -241,7 +241,7 @@ eval_cond(p)
 /* one routine for each unary operator */
 
 static int
-do_not(p, pbuf, psize, ptp)
+not_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -258,7 +258,7 @@ do_not(p, pbuf, psize, ptp)
 }
 
 static int
-do_bnot(p, pbuf, psize, ptp)
+bnot_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -307,7 +307,7 @@ ptr_addr(p, paddr, psize, ptp)
 }
 
 static int
-do_deref(p, pbuf, psize, ptp)
+deref_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -329,7 +329,7 @@ do_deref(p, pbuf, psize, ptp)
 }
 
 static int
-do_addr(p, pbuf, psize, ptp)
+addr_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -349,7 +349,7 @@ do_addr(p, pbuf, psize, ptp)
 }
 
 static int
-do_unmin(p, pbuf, psize, ptp)
+unmin_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -375,7 +375,7 @@ do_unmin(p, pbuf, psize, ptp)
 }
 
 static int
-do_unplus(p, pbuf, psize, ptp)
+unplus_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -399,8 +399,8 @@ do_unplus(p, pbuf, psize, ptp)
 
 static int (*un_op[])() = {
   0,
-  do_not,
-  do_deref,
+  not_op,
+  deref_op,
   0,
   0,
   0,
@@ -409,8 +409,8 @@ static int (*un_op[])() = {
   0,
   0,
   0,
-  do_unplus,
-  do_unmin,
+  unplus_op,
+  unmin_op,
   0,
   0,
   0,
@@ -422,11 +422,11 @@ static int (*un_op[])() = {
   0,
   0,
   0,
-  do_bnot,
+  bnot_op,
   0,
   0,
   0,
-  do_addr
+  addr_op
 };
 
 static p_type
@@ -504,7 +504,7 @@ balance(tp1, tp2)
 }
 
 static int
-do_andor(p, pbuf, psize, ptp)
+andor_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -535,7 +535,7 @@ do_andor(p, pbuf, psize, ptp)
 }
 
 static int
-do_arith(p, pbuf, psize, ptp)
+arith_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -699,7 +699,7 @@ do_arith(p, pbuf, psize, ptp)
 }
 
 static int
-do_sft(p, pbuf, psize, ptp)
+sft_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -747,7 +747,7 @@ do_sft(p, pbuf, psize, ptp)
 }
 
 static int
-do_cmp(p, pbuf, psize, ptp)
+cmp_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -859,7 +859,7 @@ do_cmp(p, pbuf, psize, ptp)
 }
 
 static int
-do_in(p, pbuf, psize, ptp)
+in_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -951,7 +951,7 @@ array_addr(p, paddr, psize, ptp)
 }
 
 static int
-do_array(p, pbuf, psize, ptp)
+array_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -1009,7 +1009,7 @@ select_addr(p, paddr, psize, ptp)
 }
 
 static int
-do_select(p, pbuf, psize, ptp)
+select_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -1030,7 +1030,7 @@ do_select(p, pbuf, psize, ptp)
 }
 
 static int
-do_derselect(p, pbuf, psize, ptp)
+derselect_op(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
   long		*psize;
@@ -1054,31 +1054,31 @@ static int (*bin_op[])() = {
   0,
   0,
   0,
-  do_andor,
-  do_andor,
-  do_arith,
-  do_arith,
-  do_arith,
-  do_arith,
-  do_in,
-  do_array,
-  do_arith,
-  do_arith,
-  do_arith,
-  do_cmp,
-  do_cmp,
-  do_cmp,
-  do_cmp,
-  do_cmp,
-  do_cmp,
-  do_select,
-  do_arith,
-  do_arith,
-  do_arith,
+  andor_op,
+  andor_op,
+  arith_op,
+  arith_op,
+  arith_op,
+  arith_op,
+  in_op,
+  array_op,
+  arith_op,
+  arith_op,
+  arith_op,
+  cmp_op,
+  cmp_op,
+  cmp_op,
+  cmp_op,
+  cmp_op,
+  cmp_op,
+  select_op,
+  arith_op,
+  arith_op,
+  arith_op,
   0,
-  do_derselect,
-  do_sft,
-  do_sft,
+  derselect_op,
+  sft_op,
+  sft_op,
   0
 };
 

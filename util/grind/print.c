@@ -224,7 +224,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 			break;
 		} 
 		if (i > 1) {
-			fputc(',', db_out);
+			putc(',', db_out);
 		}
 		fprintf(db_out, "\n%*c", i > 1 ? indent : indent - 4, ' ');
 	}
@@ -259,7 +259,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 			break;
 		} 
 		if (i > 1) {
-			fputc(',', db_out);
+			putc(',', db_out);
 		}
 		fprintf(db_out, "\n%*c", i > 1 ? indent : indent - 4, ' ');
 	}

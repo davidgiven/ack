@@ -192,8 +192,8 @@ start_child(p)
 	curr_stop = m.m_size;
 	CurrentScope = get_scope_from_addr(curr_stop);
   }
-  do_items();
-  if (! restoring && ! item_addr_actions(curr_stop, OK, 1)) {
+  perform_items();
+  if (! restoring && ! item_addr_actions(curr_stop, M_OK, 1)) {
 	send_cont(1);
   }
   else if (! restoring) {
@@ -354,7 +354,7 @@ could_send(m, stop_message)
 		error("no process");
 		return 0;
 	}
-	if (m->m_type & DB_RUN) {
+	if (m->m_type & M_DB_RUN) {
 		disable_intr = 0;
 		stop_reason = 0;
 	}
@@ -363,7 +363,7 @@ could_send(m, stop_message)
 	}
 	disable_intr = 1;
 	if ((interrupted || child_interrupted) && ! child_dead) {
-		while (child_interrupted && answer.m_type != INTR) {
+		while (child_interrupted && answer.m_type != M_INTR) {
 			if (! ugetm(&answer)) {
 				child_dead = 1;
 				break;
@@ -397,24 +397,24 @@ could_send(m, stop_message)
 	}
 	a = answer.m_size;
 	type = answer.m_type;
-	if (m->m_type & DB_RUN) {
+	if (m->m_type & M_DB_RUN) {
 		/* run command */
 		CurrentScope = get_scope_from_addr((t_addr) a);
 	    	if (! item_addr_actions(a, type, stop_message) &&
-	            ( type == DB_SS || type == OK)) {
+	            ( type == M_DB_SS || type == M_OK)) {
 			/* no explicit breakpoints at this position.
 			   Also, child did not stop because of
 			   SETSS or SETSSF, otherwise we would
 			   have gotten END_SS.
 			   So, continue.
 			*/
-			if ((m->m_type & ~ DB_SS) != CONT) {
-				m->m_type = CONT | (m->m_type & DB_SS);
+			if ((m->m_type & ~ M_DB_SS) != M_CONT) {
+				m->m_type = M_CONT | (m->m_type & M_DB_SS);
 			}
 			continue;
 		}
-		if (type != END_SS && single_stepping) {
-			m->m_type = CLRSS;
+		if (type != M_END_SS && single_stepping) {
+			m->m_type = M_CLRSS;
 			if (! uputm(m) || ! ugetm(&answer)) return 0;
 		}
 		single_stepping = 0;
@@ -445,13 +445,13 @@ getbytes(size, from, to, kind)
   }
 
   switch(answer.m_type) {
-  case FAIL:
+  case M_FAIL:
 	error("could not get value");
 	return 0;
-  case INTR:
+  case M_INTR:
 	error("interrupted");
 	return 0;
-  case DATA:
+  case M_DATA:
   	return ureceive(to, answer.m_size);
   default:
 	assert(0);
@@ -465,7 +465,7 @@ get_bytes(size, from, to)
   t_addr from;
   char	*to;
 {
-  return getbytes(size, from, to, GETBYTES);
+  return getbytes(size, from, to, M_GETBYTES);
 }
 
 int
@@ -474,7 +474,7 @@ get_string(size, from, to)
   t_addr from;
   char	*to;
 {
-  int retval = getbytes(size, from, to, GETSTR);
+  int retval = getbytes(size, from, to, M_GETSTR);
 
   to[(int)answer.m_size] = 0;
   return retval;
@@ -487,7 +487,7 @@ set_bytes(size, from, to)
 {
   struct message_hdr	m;
 
-  m.m_type = SETBYTES;
+  m.m_type = M_SETBYTES;
   m.m_size = size;
   put_int(m.m_buf, pointer_size, (long) to);
 
@@ -495,13 +495,13 @@ set_bytes(size, from, to)
 	return;
   }
   switch(answer.m_type) {
-  case FAIL:
+  case M_FAIL:
 	error("could not handle this SET request");
 	break;
-  case INTR:
+  case M_INTR:
 	error("interrupted");
 	break;
-  case OK:
+  case M_OK:
 	break;
   default:
 	assert(0);
@@ -515,18 +515,18 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 {
   struct message_hdr	m;
 
-  m.m_type = DUMP;
+  m.m_type = M_DUMP;
   if (! could_send(&m, 0)) {
 	return 0;
   }
   switch(answer.m_type) {
-  case FAIL:
+  case M_FAIL:
 	error("request for DUMP failed");
 	return 0;
-  case INTR:
+  case M_INTR:
 	error("interrupted");
 	return 0;
-  case DGLOB:
+  case M_DGLOB:
 	break;
   default:
 	assert(0);
@@ -538,7 +538,7 @@ get_dump(globmessage, globbuf, stackmessage, stackbuf)
 	if (*globbuf) free(*globbuf);
 	return 0;
   }
-  assert(stackmessage->m_type == DSTACK);
+  assert(stackmessage->m_type == M_DSTACK);
   *stackbuf = malloc((unsigned) stackmessage->m_size);
   if (! ureceive(*stackbuf, stackmessage->m_size)) {
 	if (*globbuf) free(*globbuf);
@@ -583,20 +583,20 @@ get_EM_regs(level)
   static t_addr buf[5];
   register t_addr *to = &buf[0];
 
-  m.m_type = GETEMREGS;
+  m.m_type = M_GETEMREGS;
   m.m_size = level;
 
   if (! could_send(&m, 0)) {
 	return 0;
   }
   switch(answer.m_type) {
-  case FAIL:
+  case M_FAIL:
 	error("request for registers failed");
 	return 0;
-  case INTR:
+  case M_INTR:
 	error("interrupted");
 	return 0;
-  case GETEMREGS:
+  case M_GETEMREGS:
 	break;
   default:
 	assert(0);
@@ -615,18 +615,18 @@ set_pc(PC)
 {
   struct message_hdr	m;
 
-  m.m_type = SETEMREGS;
+  m.m_type = M_SETEMREGS;
   m.m_size = 0;
   put_int(m.m_buf+PC_OFF*pointer_size, pointer_size, (long)PC);
   if (! could_send(&m, 0)) return 0;
   switch(answer.m_type) {
-  case FAIL:
+  case M_FAIL:
 	error("could not set PC to %lx", (long) PC);
 	return 0;
-  case INTR:
+  case M_INTR:
 	error("interrupted");
 	return 0;
-  case OK:
+  case M_OK:
 	return 1;
   default:
 	assert(0);
@@ -640,19 +640,19 @@ send_cont(stop_message)
 {
   struct message_hdr	m;
 
-  m.m_type = (CONT | (db_ss ? DB_SS : 0));
+  m.m_type = (M_CONT | (db_ss ? M_DB_SS : 0));
   m.m_size = 0;
   return could_send(&m, stop_message) && child_pid;
 }
 
 int
-do_single_step(type, count)
+singlestep(type, count)
   int	type;
   long	count;
 {
   struct message_hdr	m;
 
-  m.m_type = type | (db_ss ? DB_SS : 0);
+  m.m_type = type | (db_ss ? M_DB_SS : 0);
   m.m_size = count;
   single_stepping = 1;
   if (could_send(&m, 1) && child_pid) return 1;
@@ -669,7 +669,7 @@ set_or_clear_breakpoint(a, type)
 
   m.m_type = type;
   m.m_size = a;
-  if (debug) printf("%s breakpoint at 0x%lx\n", type == SETBP ? "setting" : "clearing", (long) a);
+  if (debug) printf("%s breakpoint at 0x%lx\n", type == M_SETBP ? "setting" : "clearing", (long) a);
   if (child_pid && ! could_send(&m, 0)) {
   }
 
@@ -686,7 +686,7 @@ set_or_clear_trace(start, end, type)
   m.m_type = type;
   put_int(m.m_buf, pointer_size, (long)start);
   put_int(m.m_buf+pointer_size, pointer_size, (long)end);
-  if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == SETTRACE ? "setting" : "clearing", (long) start, (long) end);
+  if (debug) printf("%s trace at [0x%lx,0x%lx]\n", type == M_SETTRACE ? "setting" : "clearing", (long) start, (long) end);
   if (child_pid && ! could_send(&m, 0)) {
 	return 0;
   }

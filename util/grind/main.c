@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #include <stdio.h>
 #include <varargs.h>
 
@@ -66,7 +68,7 @@ main(argc, argv)
   init_types();
   init_scope();
   init_languages();
-  if (DbxRead(AckObj) && AObj == 0) AObj = AckObj;
+  if (DbRead(AckObj) && AObj == 0) AObj = AckObj;
   else if (AObj == 0) AObj = "a.out";
   reserve(tkidf);
   reserve(shorts);
@@ -75,7 +77,7 @@ main(argc, argv)
   }
   prompt();
   Commands();
-  if (eof_seen) fputc('\n', db_out);
+  if (eof_seen) putc('\n', db_out);
   exit(0);
 }
 
@@ -87,7 +89,7 @@ prompt()
   }
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 fatal(va_alist)
   va_dcl
 {
@@ -107,7 +109,7 @@ fatal(va_alist)
 
 extern int errorgiven;
 
-/*VARARGS1*/
+/*VARARGS*/
 error(va_alist)
   va_dcl
 {
@@ -127,7 +129,7 @@ error(va_alist)
   errorgiven = 1;
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 warning(va_alist)
   va_dcl
 {

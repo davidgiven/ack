@@ -106,9 +106,9 @@ static int
 print_char(c)
   int	c;
 {
-  fputc('\'', db_out);
+  putc('\'', db_out);
   printchar(c, '\'');
-  fputc('\'', db_out);
+  putc('\'', db_out);
 }
 
 static int
@@ -118,9 +118,9 @@ print_string(s, len)
 {
   register char	*str = s;
 
-  fputc('"', db_out);
+  putc('"', db_out);
   while (*str && len-- > 0) printchar(*str++, '"');
-  fputc('"', db_out);
+  putc('"', db_out);
 }
 
 extern long	int_size;
@@ -471,32 +471,32 @@ print_op(p)
 	case E_MIN:
 		fputs("-(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	case E_PLUS:
 		fputs("+(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	case E_NOT:
 		fputs("!(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	case E_DEREF:
 		fputs("*(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	case E_BNOT:
 		fputs("~(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	case E_ADDR:
 		fputs("&(", db_out);
 		print_node(p->t_args[0], 0);
-		fputc(')', db_out);
+		putc(')', db_out);
 		break;
 	}
 	break;

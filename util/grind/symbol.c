@@ -154,7 +154,7 @@ def_scope(s)
 
 /* Determine if the OP_SELECT tree indicated by 'p' could lead to scope 'sc'.
 */
-static int
+int
 consistent(p, sc)
   p_tree	p;
   p_scope	sc;
@@ -298,7 +298,6 @@ pr_scopes(sc)
   }
 }
 
-static
 pr_sym(s)
   p_symbol	s;
 {
@@ -337,49 +336,6 @@ pr_sym(s)
   }
   pr_scopes(s->sy_scope);
   fprintf(db_out, "%s\n", s->sy_idf->id_text);
-}
-
-/* Print all identifications of p->t_args[0].
-*/
-do_find(p)
-  p_tree	p;
-{
-  register p_symbol s;
-  p_tree	arg;
-
-  p = p->t_args[0];
-  switch(p->t_oper) {
-  case OP_NAME:
-	s = p->t_idf->id_def;
-	while (s) {
-		pr_sym(s);
-		s = s->sy_next;
-	}
-	break;
-
-  case OP_SELECT:
-	arg = p->t_args[1];
-	assert(arg->t_oper == OP_NAME);
-	s = arg->t_idf->id_def;
-	while (s) {
-		if (consistent(p, s->sy_scope)) {
-			pr_sym(s);
-		}
-		s = s->sy_next;
-	}
-	break;
-
-  default:
-	assert(0);
-  }
-}
-
-do_which(p)
-  p_tree	p;
-{
-  p_symbol	sym = identify(p->t_args[0], 0xffff);
-
-  if ( sym) pr_sym(sym);
 }
 
 resolve_cross(tp)

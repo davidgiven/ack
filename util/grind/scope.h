@@ -1,6 +1,6 @@
-/* scope structure */
-
 /* $Header$ */
+
+/* scope structure */
 
 typedef struct scope {
   struct scope	*sc_static_encl;	/* linked list of enclosing scopes */

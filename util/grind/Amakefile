@@ -20,13 +20,13 @@ TOKENNAMES = tokenname.c [
 ];
 
 DBS_LLTARGETS = {
-	dbx_string.c[type=C-src],
+	db_symtab.c[type=C-src],
 	DBSpars.c[type=C-src],
 	DBSpars.h[type=C-incl]
 } ;
 
 DBS_LLSRC = {
-	dbx_string.g
+	db_symtab.g
 } ;
 
 CMD_LLTARGETS = {
@@ -47,7 +47,6 @@ GENNEXTSRC = {
 } ;
 
 CSRC = {
-	dbxread.c,
 	main.c,
 	list.c,
 	tree.c,
@@ -55,13 +54,12 @@ CSRC = {
 	position.c,
 	idf.c,
 	run.c,
-	dump.c,
 	symbol.c,
 	print.c,
 	value.c,
 	type.c,
 	rd.c,
-	help.c,
+	do_comm.c,
 	modula-2.c,
 	c.c
 } ;

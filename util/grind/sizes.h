@@ -1,3 +1,5 @@
+/* $Header$ */
+
 /* For the time being ... */
 
 #define SZ_INT		4

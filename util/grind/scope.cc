@@ -1,6 +1,6 @@
-/* Scope mechanism */
-
 /* $Header$ */
+
+/* Scope mechanism */
 
 #include	<assert.h>
 #include	<alloc.h>

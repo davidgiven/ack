@@ -108,6 +108,7 @@ command_line(p_tree *p;)
 | FIND qualified_name(p){ *p = mknode(OP_FIND, *p); }
 | WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
 | able_command(p)
+| '!'			{ shellescape(); }
 |
 ]
 ;
@@ -127,7 +128,7 @@ list_command(p_tree *p;)
 :
   LIST
   [
-  | count(&t1)
+  | position(&t1)
   | qualified_name(&t1)
   ]
   [ ',' count(&t2)
@@ -201,7 +202,7 @@ continue_command(p_tree *p;)
   [ INTEGER		{ l = tok.ival; }
   |			{ l = 1; }
   ]
-  position(&pos)?
+  [ AT position(&pos) ]?
   			{ *p = mknode(OP_CONT, mknode(OP_INTEGER, l), pos); }
 ;
 
@@ -332,9 +333,9 @@ condition(p_tree *p;)
 where(p_tree *p;)
 :
   IN qualified_name(p)	{ *p = mknode(OP_IN, *p, (p_tree) 0); }
-  position(&((*p)->t_args[1]))?
+  [ AT position(&((*p)->t_args[1])) ]?
 |
-  position(p)
+  AT position(p)
 ;
 
 expression(p_tree *p; int level;)
@@ -404,7 +405,6 @@ position(p_tree *p;)
     char *str;
   }
 :
-  AT
   [ STRING		{ str = tok.str; }
     ':'
   |			{ if (! listfile) str = 0;
@@ -596,5 +596,83 @@ int
 init_del()
 {
   signal(SIGINT, catch_del);
+}
+
+static int
+ctch()
+{
+  /* Only for shell escapes ... */
+  signal(SIGINT, ctch);
+}
+
+#define SHBUFSIZ	512
+
+int
+shellescape()
+{
+  register char *p;			/* walks through command */
+  static char previous[SHBUFSIZ];	/* previous command */
+  char comm[SHBUFSIZ];			/* space for command */
+  register int cnt;			/* prevent array bound errors */
+  register int c;			/* current char */
+  register int lastc = 0;		/* will contain the previous char */
+
+  p = comm;
+  cnt = SHBUFSIZ-2;
+  while (c = getc(db_in), c != '\n') {
+	switch(c) {
+	  case '!':
+		/*
+		 * An unescaped ! expands to the previous
+		 * command, but disappears if there is none
+		 */
+		if (lastc != '\\') {
+			if (*previous) {
+				int len = strlen(previous);
+				if ((cnt -= len) <= 0) break;
+				strcpy(p,previous);
+				p += len;
+			}
+		}
+		else {
+			*p++ = c;
+		}
+		continue;
+	  case '%':
+		/*
+		 * An unescaped % will expand to the current
+		 * filename, but disappears is there is none
+		 */
+		if (lastc != '\\') {
+			if (listfile) {
+				int len = strlen(listfile->sy_idf->id_text);
+				if ((cnt -= len) <= 0) break;
+				strcpy(p,listfile->sy_idf->id_text);
+				p += len;
+			}
+		}
+		else {
+			*p++ = c;
+		}
+		continue;
+	  default:
+		lastc = c;
+		if (cnt-- <= 0) break;
+		*p++ = c;
+		continue;
+	}
+	break;
+  }
+  *p = '\0';
+  if (c != '\n') {
+	warning("shell command too long");
+  	while (c != '\n') c = getc(db_in);
+  }
+  ungetc(c, db_in);
+  strcpy(previous, comm);
+  signal(SIGINT, ctch);
+  cnt = system(comm);
+  signal(SIGINT, catch_del);
+  return cnt;
 }
 }

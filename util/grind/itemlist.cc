@@ -71,7 +71,7 @@ item_addr_actions(a, mess_type, may_stop)
 	    && (p->t_address == a || p->t_address == NO_ADDR)) {
 		switch(p->t_oper) {
 		case OP_STOP:
-			if (mess_type != DB_SS && mess_type != OK) break;
+			if (mess_type != M_DB_SS && mess_type != M_OK) break;
 			if (! p->t_args[1] || eval_cond(p->t_args[1])) {
 				if (! stop_reason) stop_reason = i->i_itemno;
 				stopping = 1;
@@ -94,7 +94,7 @@ item_addr_actions(a, mess_type, may_stop)
 	    && (p->t_address == a || p->t_address == NO_ADDR)) {
 		switch(p->t_oper) {
 		case OP_TRACE:
-			if ((! stopping && mess_type != END_SS)
+			if ((! stopping && mess_type != M_END_SS)
 			    || p->t_args[2] || ! may_stop) {
 				perform(p, a);
 			}
@@ -154,24 +154,27 @@ remove_from_item_list(n)
   int	n;
 {
   register p_item i = item_list.il_first, prev = 0;
-  p_tree	p = 0;
+  p_tree	p;
 
   while (i) {
 	if (i->i_itemno == n) break;
 	prev = i;
 	i = i->i_next;
   }
-  if (i) {
-	if (prev) {
-		prev->i_next = i->i_next;
-	}
-	else item_list.il_first = i->i_next;
-	if (i == item_list.il_last) item_list.il_last = prev;
-	p = i->i_node;
-	if (p->t_address == NO_ADDR
-	    && (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss--;
-	free_item(i);
+  if (! i) {
+	error("no item %d in current status", n);
+	return 0;
   }
+  if (i->i_itemno == stop_reason) stop_reason = 0;
+  if (prev) {
+	prev->i_next = i->i_next;
+  }
+  else item_list.il_first = i->i_next;
+  if (i == item_list.il_last) item_list.il_last = prev;
+  p = i->i_node;
+  if (p->t_address == NO_ADDR
+      && (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss--;
+  free_item(i);
   return p;
 }
 
@@ -215,10 +218,10 @@ able_item(n, kind)
   switch(p->t_oper) {
   case OP_STOP:
   case OP_WHEN:
-	setstop(p, kind ? CLRBP : SETBP);
+	setstop(p, kind ? M_CLRBP : M_SETBP);
 	break;
   case OP_TRACE:
-	settrace(p, kind ? CLRTRACE : SETTRACE);
+	settrace(p, kind ? M_CLRTRACE : M_SETTRACE);
 	break;
   }
 }
@@ -232,7 +235,7 @@ print_items()
   }
 }
 
-do_items()
+perform_items()
 {
   register p_item i = item_list.il_first;
 
