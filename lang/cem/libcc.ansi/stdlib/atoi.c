@@ -4,15 +4,27 @@
  */
 /* $Header$ */
 
-#include	<stdlib.h>
-#include	<errno.h>
+#include	<ctype.h>
 
+/* We do not use strtol here for backwards compatibility in behaviour on
+   overflow.
+*/
 int
-atoi(const char *nptr)
+atol(register const char *nptr)
 {
-	int i, e = errno;
+	int total = 0;
+	register unsigned int digit;
+	int minus = 0;
 
-	i = (int)strtol(nptr, (char **)NULL, 10);
-	errno = e;
-	return i;
+	while (isspace(*nptr)) nptr++;
+	if (*nptr == '+') nptr++;
+	else if (*nptr == '-') {
+		minus = 1;
+		nptr++;
+	}
+	while (isdigit(*nptr)) {
+		total *= 10;
+		total += (*nptr++ - '0');
+	}
+	return minus ? -total : total;
 }
