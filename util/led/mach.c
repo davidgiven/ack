@@ -13,7 +13,8 @@
 #define K 1024L
 
 	mems[ALLOEMIT + 0].mem_left = 64 * K;
-	mems[ALLOEMIT + 1].mem_left = 64 * K;
+	mems[ALLOEMIT + 1].mem_left = 8 * K;
+	mems[ALLOEMIT + 2].mem_left = 64 * K;
 	mems[ALLORELO].mem_left = 64 * K;
 	mems[ALLOLOCL].mem_left = 64 * K;
 	mems[ALLOGLOB].mem_left = 64 * K;
