@@ -456,11 +456,6 @@ code_declaration(idf, expr, lvl, sc)
 			code_scope(idf->id_text, def);
 #endif PREPEND_SCOPES
 			def->df_alloc = ALLOC_DONE;
-#ifdef DBSYMTAB
-			if (options['g']) {
-				stb_string(def, sc, idf->id_text);
-			}
-#endif /* DBSYMTAB */
 			C_df_dnam(idf->id_text);
 		}
 	}
@@ -477,7 +472,7 @@ code_declaration(idf, expr, lvl, sc)
 				integer label in EM.
 			*/
 #ifdef DBSYMTAB
-			if (options['g']) {
+			if (options['g'] && ! expr) {
 				stb_string(def, sc, idf->id_text);
 			}
 #endif /* DBSYMTAB */

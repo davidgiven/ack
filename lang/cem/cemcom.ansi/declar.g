@@ -268,6 +268,11 @@ initializer(struct idf *idf; int sc;)
 				loc_init((struct expr *) 0, idf);
 			else	code_declaration(idf, expr, level, sc);
 		}
+#ifdef	DBSYMTAB
+		if (options['g'] && globalflag) {
+			stb_string(idf->id_def, sc, idf->id_text);
+		}
+#endif	/* DBSYMTAB */
 		init_idf(idf);
 	}
 ;
