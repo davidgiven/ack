@@ -181,13 +181,13 @@ lblcal:
 
 ret_l:		adroff		;	move.w	(a1),d0
 		bra	1f
-ret_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
-		bra	1f
-ret_1W:		move.w	d6,d0	;	bra	5f
+ret_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
 1:		blt	e_oddz	;	beq	ret_0
 		comp	#32,d0	;	ble	2f
 		bsr	e_badlfr
 2:		sub.w	#1,d0	;	asr.w	wmu,d0
+		bra	5f
+ret_1W:		move.l	#0,d0
 5:		move.w	d0,retsize			!RETSIZE CONTAINS 
 3:		mov	(sp)+,(a1)+ ;	dbra	d0,3b	! #WORDS-1
 		lea	retarea,a1 ;	bra	4f
@@ -200,8 +200,10 @@ ret_0:		move.w	#-1,retsize
 		move.l	8(a0),d0		!d0 IS COUNT
 		sub.l	12(a0),d0		!d0 IS COUNT-FIRST LINE
 		move.l	d0,countfld		!RESTORE POINTER
+		beq	1f			!NO LINES IN CALLER
 		add.l	(sp),d0			!ADD LINE NUMBER
 		move.l	d0,countptr
+1:
 #if	prof
 		beq	5f
 		asl.l	#2,d0
@@ -231,4 +233,4 @@ lfr_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 lfr_2W:		move.l	wrd,d1	;	add.l	d1,d1
 		move.l	#1,d0	;	bra	0b
 
-e_badlfr:	mov	0xD,-(sp) ;	bra	error
+e_badlfr:	mov	#0x1C,-(sp) ;	bra	error
