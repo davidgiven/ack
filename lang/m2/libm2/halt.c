@@ -32,5 +32,6 @@ CallAtEnd(p)
 
 halt()
 {
-	exit(0);
+	_cleanup();
+	_exit(0);
 }

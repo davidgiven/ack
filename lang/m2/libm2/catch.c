@@ -52,8 +52,6 @@ static struct errm {
 	{ -1,		0}
 };
 
-extern			exit();
-
 catch(trapno)
 	int trapno;
 {
@@ -93,11 +91,14 @@ catch(trapno)
 		signal(__signo, SIG_DFL);
 		_cleanup();
 		kill(getpid(), __signo);
-		exit(trapno);
+		_exit(trapno);
 	}
 #endif
 #endif
 #endif
-	if (trapno != M2_FORCH) exit(trapno);
+	if (trapno != M2_FORCH) {
+		_cleanup();
+		_exit(trapno);
+	}
 	SIG(catch);
 }

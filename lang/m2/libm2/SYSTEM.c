@@ -71,6 +71,7 @@ _SYSTEM__NEWPROCESS(p, a, n, p1)
 		   Just call the coroutine procedure.
 		*/
 		(*(curproc->proc))();
+		_cleanup();
 		_exit(0);
 	}
 }
