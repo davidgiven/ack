@@ -112,6 +112,8 @@ opr:
 	make pr | opr
 
 distr:	.distr
+	(cd switch; make distr)
+	(cd test; make distr)
 
 .distr:		Makefile
 	echo $(DISTR) | tr ' ' '\012' >.distr
