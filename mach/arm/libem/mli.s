@@ -3,6 +3,7 @@
 	.sect .text
 
 .mli:	LDMFD R12<,{R1,R2}
+	STMFD R12<,{R4}
 	MOV R3,#0
 	MOV R0,#0
 	CMP R1,#0
@@ -24,4 +25,5 @@
 	BNE 1B
 	TST R3,#1
 	RSB.NE R0,R0,#0
+	LDMFD R12<,{R4}
 	MOV R15,R14

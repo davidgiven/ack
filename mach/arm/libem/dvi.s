@@ -3,13 +3,16 @@
 	.sect .text
 
 .dvi:	LDMFD R12<,{R1,R2}
-	MOV R3,#0
+	STMFD R12<,{R4}
 	CMP R1,#0
-	ADD.MI R3,R3,#1
-	RSB.MI R1,R1,#0
+	BEQ dbyzero
+	MOV R4,#0
+	CMP R1,#0
+	ADD.LT R4,R4,#1
+	RSB.LT R1,R1,#0
 	CMP R2,#0
-	ADD.MI R3,R3,#2
-	RSB.MI R2,R2,#0
+	ADD.LT R4,R4,#2
+	RSB.LT R2,R2,#0
 	MOV R0,#1
 div1:	CMP R1,#0x80000000
 	CMP.CC R1,R2
@@ -23,9 +26,14 @@ div2:	CMP R2,R1
 	MOV.S R0,R0,LSR #1
 	MOV.NE R1,R1,LSR #1
 	BNE div2
-	TST R4, #2
-	RSB.NE R2,R2,#0
-	TST R4, #1
-	TST.NE R4, #1
-	RSB.NE R3,R3,#0
+	CMP R4, #1
+	RSB.EQ R3,R3,#0
+	CMP R4,#2
+	RSB.EQ R3,R3,#0
+	LDMFD R12<,{R4}
 	MOV R15,R14
+dbyzero:
+	MOV R0,#6
+	STMFD R12<,{R0}
+	BAL _EmTrp
+
