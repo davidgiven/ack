@@ -81,7 +81,7 @@ sizes:  opt
 	-nm opt | sort -n| /usr/plain/bin/map
 
 clean:
-	rm -f *.o opt mktab mktab.c scan.c pattern.c
+	rm -f *.o opt mktab mktab.c scan.c pattern.c opt2 Out
 
 regnoglob.c:	reg.c
 		cp reg.c regnoglob.c
