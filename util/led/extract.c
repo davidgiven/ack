@@ -175,6 +175,7 @@ getexternal(name)
 		entername(name, h);
 	} else if (!ISUNDEFINED(name)) {
 		if (ISUNDEFINED(old)) {
+			name->on_mptr = string;	/* Just for convenience. */
 			transfer(name, old);
 		} else {
 			name->on_mptr = string;	/* Just for convenience. */
