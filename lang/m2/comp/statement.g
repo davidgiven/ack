@@ -38,6 +38,7 @@ statement(register t_node **pnd;)
 	designator(pnd)
 	[			{ nd = dot2node(Stat, *pnd, NULLNODE);
 				  nd->nd_symb = '(';
+				  nd->nd_lineno = (*pnd)->nd_lineno;
 				}
 		ActualParameters(&(nd->nd_right))?
 	|
