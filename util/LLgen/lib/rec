@@ -55,7 +55,7 @@ LLread() {
 LLerror(t) {
 	register int i;
 
-#ifdef LL_NEWMESSAGE
+#ifdef LL_NEWMESS
 	if (t == EOFILE) {
 		LLmessage(-1);
 		return;
