@@ -31,6 +31,7 @@
 extern char *symbol2str();
 extern char options[];
 extern arith flt_flt2arith();
+extern label code_string();
 
 arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	register struct expr **e1p, **e2p;
@@ -464,9 +465,9 @@ string2pointer(ex)
 	/*	The expression, which must be a string constant, is converted
 		to a pointer to the string-containing area.
 	*/
-	label lbl = data_label();
+	label lbl;
 
-	code_string(ex->SG_VALUE, ex->SG_LEN, lbl);
+	lbl = code_string(ex->SG_VALUE, ex->SG_LEN);
 	ex->ex_class = Value;
 	ex->VL_CLASS = Label;
 	ex->VL_LBL = lbl;

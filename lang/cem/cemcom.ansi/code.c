@@ -105,12 +105,13 @@ init_code(dst_file)
 
 struct string_cst *str_list = 0;
 
-code_string(val, len, dlb)
+label
+code_string(val, len)
 	char *val;
 	int len;
-	label dlb;
 {
 	register struct string_cst *sc = new_string_cst();
+	label lbl = data_label();
 
 	C_ina_dlb(dlb);
 	sc->next = str_list;
@@ -118,6 +119,7 @@ code_string(val, len, dlb)
 	sc->sc_value = val;
 	sc->sc_len = len;
 	sc->sc_dlb = dlb;
+	return dlb;
 }
 
 def_strings(sc)

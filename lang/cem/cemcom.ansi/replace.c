@@ -308,14 +308,23 @@ actual(repl)
 	register int ch = 0;
 	register int level = 0, nostashraw = 0;
 	int lastch;
+	static int Unstacked_missed;
 
 	while (1) {
 		lastch = ch;
 		ch = GetChar();
 
+		if (nostashraw 
+		    && nostashraw >= Unstacked_missed) {
+			nostashraw -= Unstacked_missed;
+			Unstacked_missed = 0;
+		}
 		if (Unstacked) {
 			nostashraw -= Unstacked;
-			if (nostashraw < 0) nostashraw = 0;
+			if (nostashraw < 0) {
+				Unstacked_missed = -nostashraw;
+				nostashraw = 0;
+			}
 			EnableMacros();
 		}
 		if (class(ch) == STIDF || class(ch) == STELL) {
