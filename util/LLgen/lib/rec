@@ -3,7 +3,9 @@
  * This file is copied into Lpars.c.
  */
 
+# ifndef NORCSID
 static char *rcsid = "$Header$";
+# endif
 
 #define LLSTSIZ	1024
 static short	LLstack[LLSTSIZ];		/* Recovery stack */
