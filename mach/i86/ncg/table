@@ -194,7 +194,8 @@ and anyreg:rw:cc, rmorconst:ro.
 cbw kills ah cost(1,2).
 cmp rm:ro, regorconst:ro kills :cc.
 cmp anyreg:ro, rmorconst:ro kills :cc.
-cmpb rm1:rw, const:ro kills :cc.
+cmpb rm1:ro, REG1+const:ro kills :cc.
+cmpb REG1:ro, rm1:ro kills :cc.
 cwd kills dx cost(1,5).
 dec rm:rw:cc cost(1,2).
 div rm:ro kills:cc ax dx cost(1,150).
@@ -2732,10 +2733,27 @@ with rm regorconst STACK
 
 pat blt		call bxx("jl","jg")
 pat ble		call bxx("jle","jge")
-pat beq		call bxx("je","je")
-pat bne		call bxx("jne","jne")
 pat bge		call bxx("jge","jle")
 pat bgt		call bxx("jg","jl")
+
+proc bex example beq
+with regorconst rm STACK
+  gen cmp %2,%1
+      jxx[1] {label,$1}
+with rm regorconst STACK
+  gen cmp %1,%2
+      jxx[2] {label,$1}
+with exact rm1 REG1
+  kills ALL
+  gen cmpb %1,%2
+      jxx[2] {label,$1}
+with exact REG1 rm1
+  kills ALL
+  gen cmpb %2,%1
+      jxx[1] {label,$1}
+
+pat beq		call bex("je","je")
+pat bne		call bex("jne","jne")
 
 proc zxx example zlt
 with rm STACK
