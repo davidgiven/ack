@@ -324,6 +324,7 @@ IMPLEMENTATION MODULE PascalIo;
 
   BEGIN
 	index := 0;
+	ok := TRUE;
     	WHILE NextCHAR(inputtext) IN spaces DO
 		Get(inputtext);
 	END;

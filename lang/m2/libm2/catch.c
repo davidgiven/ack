@@ -63,9 +63,8 @@ _catch(trapno)
 		do
 			*s++ = i % 10 + '0';
 		while (i /= 10);
-		*s = 0;
-		s = buf;
-		while (*p++ = *s++) /* nothing */;
+		while (s > buf) *p++ = *--s;
+		*p = 0;
 		Traps_Message(q, 0, (int) (p - q), 1);
 	}
 	exit(trapno);
