@@ -352,9 +352,13 @@ C_fif
   default	==>	arg_error("C_fif", $1).
 
 C_fef
-  $1 == 4	==>	C_lor((arith)1);
+  $1 == 4	==>	"mov eax,esp";
+			"sub eax,4";
+			"push eax";
 			"call .fef4".
-  $1 == 8	==>	C_lor((arith)1);
+  $1 == 8	==>	"mov eax,esp"
+			"sub eax,4";
+			"push eax";
 			"call .fef8".
   default	==>	arg_error("C_fef", $1).
 
