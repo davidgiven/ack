@@ -38,8 +38,8 @@ checkarg(arg, typset)
 	register struct e_arg *arg;
 {
 
-	if (((!typset) && arg->ems_argtype) ||
-	    ((!arg->ems_argtype) && typset)) {
+	if (((!typset) && arg->ema_argtype) ||
+	    ((!arg->ema_argtype) && typset)) {
 		/* End of arguments expected, but there are more, or
 		   an argument expected, but there is none
 		*/
@@ -47,7 +47,7 @@ checkarg(arg, typset)
 		return;
 	}
 
-	if (!(arg->ems_argtype & typset)) {
+	if (!(arg->ema_argtype & typset)) {
 		/* Type error */
 		EM_error = "Illegal parameter type";
 	}

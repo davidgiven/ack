@@ -54,21 +54,21 @@ getarg(typset, ap)
 	default:
 		if (i < sp_fcst0+sp_ncst0 && i >= sp_fcst0) { /* A cst */
 			ap->ema_cst = i - sp_zcst0;
-			ap->ems_argtype = cst_ptyp;
+			ap->ema_argtype = cst_ptyp;
 			i = sp_cst2;
 		}
 		break;
 
 	case sp_dlb1:	/* Numeric data label encoded in one byte */
 		ap->ema_dlb = getbyte();
-		ap->ems_szoroff = 0;
-		ap->ems_argtype = nof_ptyp;
+		ap->ema_szoroff = 0;
+		ap->ema_argtype = nof_ptyp;
 		break;
 
 	case sp_dlb2:	/* Numeric data label encoded in two bytes */
 		ap->ema_dlb = get16();
-		ap->ems_szoroff = 0;
-		ap->ems_argtype = nof_ptyp;
+		ap->ema_szoroff = 0;
+		ap->ema_argtype = nof_ptyp;
 #ifdef CHECKING
 		if (ap->ema_dlb > 32767 && !EM_error) {
 			EM_error = "Illegal data label";
@@ -79,12 +79,12 @@ getarg(typset, ap)
 
 	case sp_ilb1:	/* Instruction label encoded in one byte */
 		ap->ema_ilb = getbyte();
-		ap->ems_argtype = ilb_ptyp;
+		ap->ema_argtype = ilb_ptyp;
 		break;
 
 	case sp_ilb2:	/* Instruction label encoded in two bytes */
 		ap->ema_ilb = get16();
-		ap->ems_argtype = ilb_ptyp;
+		ap->ema_argtype = ilb_ptyp;
 #ifdef CHECKING
 		if (ap->ema_ilb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label";
@@ -95,12 +95,12 @@ getarg(typset, ap)
 
 	case sp_cst2:	/* A cst encoded in two bytes */
 		ap->ema_cst = get16();
-		ap->ems_argtype = cst_ptyp;
+		ap->ema_argtype = cst_ptyp;
 		break;
 
 	case sp_cst4:	/* A cst encoded in four bytes */
 		ap->ema_cst = get32();
-		ap->ems_argtype = cst_ptyp;
+		ap->ema_argtype = cst_ptyp;
 		break;
 
 	case sp_pnam:	/* A procedure name */
@@ -114,7 +114,7 @@ getarg(typset, ap)
 		}
 #endif CHECKING
 		ap->ema_pnam = p->str;
-		ap->ems_argtype = pro_ptyp;
+		ap->ema_argtype = pro_ptyp;
 		break;
 	}
 
@@ -129,8 +129,8 @@ getarg(typset, ap)
 		}
 #endif CHECKING
 		ap->ema_dnam = p->str;
-		ap->ems_szoroff = 0;
-		ap->ems_argtype = sof_ptyp;
+		ap->ema_szoroff = 0;
+		ap->ema_argtype = sof_ptyp;
 		break;
 	}
 
@@ -140,7 +140,7 @@ getarg(typset, ap)
 
 		getarg(lab_ptyp, ap);
 		getarg(cst_ptyp, &dummy);
-		ap->ems_szoroff = dummy.ema_cst;
+		ap->ema_szoroff = dummy.ema_cst;
 		break;
 	}
 
@@ -151,14 +151,14 @@ getarg(typset, ap)
 		register struct string *p;
 
 		getarg(cst_ptyp, ap);
-		ap->ems_szoroff = ap->ema_cst;
+		ap->ema_szoroff = ap->ema_cst;
 		p = getstring(0);
 #ifdef CHECKING
 		if (state & INSTRING) {
 			xerror("Numeric constant too long");
 		}
 #endif CHECKING
-		ap->ems_argtype = ptyp(i);
+		ap->ema_argtype = ptyp(i);
 		ap->ema_string = p->str;
 		break;
 	}
@@ -168,9 +168,9 @@ getarg(typset, ap)
 		register struct string *p;
 
 		p = getstring(0);
-		ap->ems_argtype = str_ptyp;
+		ap->ema_argtype = str_ptyp;
 		ap->ema_string = p->str;
-		ap->ems_szoroff = p->length;
+		ap->ema_szoroff = p->length;
 		break;
 	}
 	}
@@ -192,11 +192,11 @@ getarg(typset, ap)
 		EM_error = "Bad argument type";
 	}
 	if (argtyp == sp_cend) {
-		ap->ems_argtype = 0;
+		ap->ema_argtype = 0;
 	}
 #else not CHECKING
 	if (i == sp_cend) {
-		ap->ems_argtype = 0;
+		ap->ema_argtype = 0;
 	}
 #endif CHECKING
 }

@@ -352,7 +352,7 @@ EM_getinstr(p)
 			case ps_pro:
 				getarg(pro_ptyp, &(p->em_arg));
 				getarg(cst_ptyp|ptyp(sp_cend), &dummy);
-				if (dummy.ems_argtype == 0) {
+				if (dummy.ema_argtype == 0) {
 					p->em_nlocals = -1;
 				}
 				else	p->em_nlocals = dummy.ema_cst;

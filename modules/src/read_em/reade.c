@@ -274,7 +274,7 @@ getnumber(c, ap)
 	int expsign;
 	long str2long();
 
-	ap->ems_argtype = cst_ptyp;
+	ap->ema_argtype = cst_ptyp;
 	expsign = 0;
 
 	if (c == '+' || c == '-') {
@@ -328,17 +328,17 @@ getnumber(c, ap)
 		strcpy(string.str, str);
 		ap->ema_string = string.str;
 		gettyp(cst_ptyp, &dummy);
-		ap->ems_szoroff = dummy.ema_cst;
+		ap->ema_szoroff = dummy.ema_cst;
 
 		switch(c) {
 		case 'I':
-			ap->ems_argtype = ico_ptyp;
+			ap->ema_argtype = ico_ptyp;
 			return sp_icon;
 		case 'U':
-			ap->ems_argtype = uco_ptyp;
+			ap->ema_argtype = uco_ptyp;
 			return sp_ucon;
 		case 'F':
-			ap->ems_argtype = fco_ptyp;
+			ap->ema_argtype = fco_ptyp;
 			return sp_fcon;
 		}
 		assert(0);
@@ -457,25 +457,25 @@ gettyp(typset, ap)
 		out("name\n");
 		ungetbyte(c);
 		ap->ema_dnam = getname()->str;
-		ap->ems_argtype = sof_ptyp;
-		argtyp = offsetted(sp_dnam, &(ap->ems_szoroff));
+		ap->ema_argtype = sof_ptyp;
+		argtyp = offsetted(sp_dnam, &(ap->ema_szoroff));
 	}
 	else if (c == '.') {
 		out(".label\n");
 		ap->ema_dlb = get15u();
-		ap->ems_argtype = nof_ptyp;
-		argtyp = offsetted(sp_dlb2, &(ap->ems_szoroff));
+		ap->ema_argtype = nof_ptyp;
+		argtyp = offsetted(sp_dlb2, &(ap->ema_szoroff));
 	}
 	else if (c == '*') {
 		out("*label\n");
 		ap->ema_ilb = get15u();
-		ap->ems_argtype = ilb_ptyp;
+		ap->ema_argtype = ilb_ptyp;
 		argtyp = sp_ilb2;
 	}
 	else if (c == '$') {
 		out("$name\n");
 		ap->ema_pnam = getname()->str;
-		ap->ems_argtype = pro_ptyp;
+		ap->ema_argtype = pro_ptyp;
 		argtyp = sp_pnam;
 	}
 	else if (c == '"' || c == '\'') {
@@ -485,14 +485,14 @@ gettyp(typset, ap)
 		ungetbyte(c);
 		s = getstring(0);
 		ap->ema_string = s->str;
-		ap->ems_szoroff = s->length;	
-		ap->ems_argtype = str_ptyp;
+		ap->ema_szoroff = s->length;	
+		ap->ema_argtype = str_ptyp;
 		argtyp = sp_scon;
 	}
 	else if (c == '?') {
 		out("?\n");
 		argtyp = sp_cend;
-		ap->ems_argtype = 0;
+		ap->ema_argtype = 0;
 	}
 	else {
 		/* c != '\n', so "ungetbyte" not neccesary */
@@ -508,7 +508,7 @@ gettyp(typset, ap)
 	}
 
 	if (argtyp == sp_cend) {
-		ap->ems_argtype = 0;
+		ap->ema_argtype = 0;
 	}
 	return;
 }
@@ -587,7 +587,7 @@ line_line()
 	gettyp(ptyp(sp_cst2), &dummy);
 	EM_lineno = dummy.ema_cst;
 	gettyp(str_ptyp, &dummy);
-	btscpy(filebuf, dummy.ema_string, (int) dummy.ems_szoroff);
+	btscpy(filebuf, dummy.ema_string, (int) dummy.ema_szoroff);
 	EM_filename = filebuf;
 }
 
