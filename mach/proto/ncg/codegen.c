@@ -622,9 +622,8 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		token2.t_token= -1;
 		for (i=1;i<TOKENSIZE;i++)
 			token2.t_att[i].aw=0;
-		if (npos2==1)
-			decision=pos2[0];
-		else {
+		decision=pos2[0];
+		if (npos2!=1) {
 			SAVEST;
 			mincost=costlimit-totalcost+1;
 			for(j=0;j<npos2;j++) {
