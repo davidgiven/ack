@@ -6,6 +6,7 @@ SOURCES=*.h cgg.y scan.l cvtkeywords keywords coerc.c emlookup.c error.c expr.c 
 EMH=../../h
 CFLAGS=-I$(EMH)
 YFLAGS=-v -d
+LDFLAGS=-i
 
 
 cgg:	cgg.o $(OFILES) output.o
