@@ -34,7 +34,7 @@ LLmessage(tk)
 		*/
 		register t_token *dotp = &dot;
 
-		error("%s missing", symbol2str(tk));
+		error("%s missing before %s", symbol2str(tk), symbol2str(dotp->tk_symb));
 
 		aside = *dotp;
 

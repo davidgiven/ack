@@ -30,18 +30,16 @@ LLmessage(tk)
 	if (tk > 0)	{
 		/* if (tk > 0), it represents the token to be inserted.
 		*/
-		register struct token *dotp = &dot;
+		error("%s missing before %s", symbol2str(tk), symbol2str(dot.tk_symb));
 
-		error("%s missing", symbol2str(tk));
+		aside = dot;
 
-		aside = *dotp;
-
-		dotp->tk_symb = tk;
+		dot.tk_symb = tk;
 
 		switch (tk)	{
 		/* The operands need some body */
 		case IDENT:
-			dotp->TOK_IDF = gen_anon_idf();
+			dot.TOK_IDF = gen_anon_idf();
 			break;
 		}
 	}
