@@ -156,6 +156,7 @@ preprocess(fn)
 							++LineNumber;
 							lineno++;
 						}
+						else if (c == '\'') continue;
 					}
 				}
 				while (c != stopc);
