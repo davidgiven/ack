@@ -17,7 +17,6 @@ IMPLEMENTATION MODULE Mathlib;
   CONST
 	OneRadianInDegrees	= 57.295779513082320876798155D;
 	OneDegreeInRadians	=  0.017453292519943295769237D;
-	Sqrt2			= 1.41421356237309504880168872420969808D;
 	OneOverSqrt2		= 0.70710678118654752440084436210484904D;
 
   (* basic functions *)
@@ -94,56 +93,68 @@ IMPLEMENTATION MODULE Mathlib;
 	RETURN temp;
   END longsqrt;
 
+  PROCEDURE ldexp(x:LONGREAL; n: INTEGER): LONGREAL;
+  BEGIN
+	WHILE n >= 16 DO
+		x := x * 65536.0D;
+		n := n - 16;
+	END;
+	WHILE n > 0 DO
+		x := x * 2.0D;
+		DEC(n);
+	END;
+	WHILE n <= -16 DO
+		x := x / 65536.0D;
+		n := n + 16;
+	END;
+	WHILE n < 0 DO
+		x := x / 2.0D;
+		INC(n);
+	END;
+	RETURN x;
+  END ldexp;
+
   PROCEDURE exp(x: REAL): REAL;
   BEGIN
 	RETURN SHORT(longexp(LONG(x)));
   END exp;
 
   PROCEDURE longexp(x: LONGREAL): LONGREAL;
-  (*      2**x = (Q(x*x)+x*P(x*x))/(Q(x*x)-x*P(x*x)) for x in [0,0.5] *)
-  (*      Hart & Cheney #1069 *)
+  (*	Algorithm and coefficients from:
+		"Software manual for the elementary functions"
+		by W.J. Cody and W. Waite, Prentice-Hall, 1980
+  *)
     CONST
-	p0 = 0.2080384346694663001443843411D+07;
-	p1 = 0.3028697169744036299076048876D+05;
-	p2 = 0.6061485330061080841615584556D+02;
-	q0 = 0.6002720360238832528230907598D+07;
-	q1 = 0.3277251518082914423057964422D+06;
-	q2 = 0.1749287689093076403844945335D+04;
-	q3 = 0.1000000000000000000000000000D+01;
+	p0 = 0.25000000000000000000D+00;
+	p1 = 0.75753180159422776666D-02;
+	p2 = 0.31555192765684646356D-04;
+	q0 = 0.50000000000000000000D+00;
+	q1 = 0.56817302698551221787D-01;
+	q2 = 0.63121894374398503557D-03;
+	q3 = 0.75104028399870046114D-06;
 
     VAR
 	neg: BOOLEAN;
-	xPxx, Qxx: LONGREAL;
-	n: LONGREAL;
-	n1 : INTEGER;
-	xsq : LONGREAL;
-	large: BOOLEAN;
+	n: INTEGER;
+	xn, g, x1, x2: LONGREAL;
   BEGIN
 	neg := x < 0.0D;
 	IF neg THEN
 		x := -x;
 	END;
-	x := FIF(x/longln2, 1.0D, n);
-	large := x > 0.5D;
-	IF large THEN x := x - 0.5D; END;
-	xsq := x*x;
-	xPxx := x*((p2*xsq+p1)*xsq+p0);
-	Qxx := ((q3*xsq+q2)*xsq+q1)*xsq+q0;
-	x := (Qxx + xPxx)/(Qxx - xPxx);
-	IF large THEN
-		x := x * Sqrt2;
+	n := TRUNC(x/longln2 + 0.5D);
+	xn := FLOATD(n);
+	x1 := FLOATD(TRUNCD(x));
+	x2 := x - x1;
+	g := ((x1 - xn * 0.693359375D)+x2) - xn * (-2.1219444005469058277D-4);
+	IF neg THEN
+		g := -g;
+		n := -n;
 	END;
-	n1 := TRUNCD(n + 0.5D);
-	WHILE n1 >= 16 DO
-		x := x * 65536.0D;
-		n1 := n1 - 16;
-	END;
-	WHILE n1 > 0 DO
-		x := x * 2.0D;
-		DEC(n1);
-	END;
-	IF neg THEN RETURN 1.0D/x; END;
-	RETURN x;
+	xn := g*g;
+	x := g*((p2*xn+p1)*xn+p0);
+	INC(n);
+	RETURN ldexp(0.5D + x/((((q3*xn+q2)*xn+q1)*xn+q0) - x), n);
   END longexp;
 
   PROCEDURE ln(x: REAL): REAL;	(* natural log *)
@@ -152,23 +163,21 @@ IMPLEMENTATION MODULE Mathlib;
   END ln;
 
   PROCEDURE longln(x: LONGREAL): LONGREAL;	(* natural log *)
-  (* log(x) = z*P(z*z)/Q(z*z), z = (x-1)/(x+1), x in [1/sqrt(2), sqrt(2)]
-     Hart & Cheney #2707
-  *)
+  (*	Algorithm and coefficients from:
+		"Software manual for the elementary functions"
+		by W.J. Cody and W. Waite, Prentice-Hall, 1980
+   *)
     CONST
-	p0 =  0.7504094990777122217455611007D+02;
-	p1 = -0.1345669115050430235318253537D+03;
-	p2 =  0.7413719213248602512779336470D+02;
-	p3 = -0.1277249755012330819984385000D+02;
-	p4 =  0.3327108381087686938144000000D+00;
-	q0 =  0.3752047495388561108727775374D+02;
-	q1 = -0.7979028073715004879439951583D+02;
-	q2 =  0.5616126132118257292058560360D+02;
-	q3 = -0.1450868091858082685362325000D+02;
-	q4 =  0.1000000000000000000000000000D+01;
+	p0 = -0.64124943423745581147D+02;
+	p1 =  0.16383943563021534222D+02;
+	p2 = -0.78956112887491257267D+00;
+	q0 = -0.76949932108494879777D+03;
+	q1 =  0.31203222091924532844D+03;
+	q2 = -0.35667977739034646171D+02;
+	q3 =  1.0D;
     VAR
 	exp: INTEGER;
-	z, zsq: LONGREAL;
+	z, znum, zden, w: LONGREAL;
 
   BEGIN
 	IF x <= 0.0D THEN
@@ -176,15 +185,20 @@ IMPLEMENTATION MODULE Mathlib;
 		HALT
 	END;
 	x := FEF(x, exp);
-	WHILE x < OneOverSqrt2 DO
-		x := x + x;
+	IF x > OneOverSqrt2 THEN
+		znum := (x - 0.5D) - 0.5D;
+		zden := x * 0.5D + 0.5D;
+	ELSE
+		znum := x - 0.5D;
+		zden := znum * 0.5D + 0.5D;
 		DEC(exp);
 	END;
-	z := (x - 1.0D) / (x + 1.0D);
-	zsq := z*z;
-	RETURN z * ((((p4*zsq+p3)*zsq+p2)*zsq+p1)*zsq+p0) /
-		   ((((q4*zsq+q3)*zsq+q2)*zsq+q1)*zsq+q0) +
-		FLOATD(exp) * longln2;
+	z := znum / zden;
+	w := z * z;
+	x := z + z * w * (((p2*w+p1)*w+p0)/(((q3*w+q2)*w+q1)*w+q0));
+	z := FLOATD(exp);
+	x := x + z * (-2.121944400546905827679D-4);
+	RETURN x + z * 0.693359375D;
   END longln;
 
   PROCEDURE log(x: REAL): REAL;	(* log with base 10 *)
@@ -204,80 +218,60 @@ IMPLEMENTATION MODULE Mathlib;
 	RETURN SHORT(longsin(LONG(x)));
   END sin;
 
-  PROCEDURE sinus(x: LONGREAL; quadrant: INTEGER) : LONGREAL;
-  (* sin(0.5*pi*x) = x * P(x*x)/Q(x*x) for x in [0,1]
-     Hart & Cheney # 3374
+  PROCEDURE sinus(x: LONGREAL; cosflag: BOOLEAN) : LONGREAL;
+  (*	Algorithm and coefficients from:
+		"Software manual for the elementary functions"
+		by W.J. Cody and W. Waite, Prentice-Hall, 1980
   *)
     CONST
-	p0 =  0.4857791909822798473837058825D+10;
-	p1 = -0.1808816670894030772075877725D+10;
-	p2 =  0.1724314784722489597789244188D+09;
-	p3 = -0.6351331748520454245913645971D+07;
-	p4 =  0.1002087631419532326179108883D+06;
-	p5 = -0.5830988897678192576148973679D+03;
-	q0 =  0.3092566379840468199410228418D+10;
-	q1 =  0.1202384907680254190870913060D+09;
-	q2 =  0.2321427631602460953669856368D+07;
-	q3 =  0.2848331644063908832127222835D+05;
-	q4 =  0.2287602116741682420054505174D+03;
-	q5 =  0.1000000000000000000000000000D+01;
-	A1 =  6.2822265625D;
-	A2 =  0.00095874467958647692528676655900576D;
+	r0 = -0.16666666666666665052D+00;
+	r1 =  0.83333333333331650314D-02;
+	r2 = -0.19841269841201840457D-03;
+	r3 =  0.27557319210152756119D-05;
+	r4 = -0.25052106798274584544D-07;
+	r5 =  0.16058936490371589114D-09;
+	r6 = -0.76429178068910467734D-12;
+	r7 =  0.27204790957888846175D-14;
+	A1 =  3.1416015625D;
+	A2 = -8.908910206761537356617D-6;
     VAR
-	xsq, x1, x2, n : LONGREAL;
-	t : INTEGER;
+	x1, x2, y : LONGREAL;
+	neg : BOOLEAN;
   BEGIN
 	IF x < 0.0D THEN
-		INC(quadrant, 2);
-		x := -x;
+		neg := TRUE;
+		x := -x
+	ELSE	neg := FALSE
 	END;
-	IF longhalfpi - x = longhalfpi THEN
-		CASE quadrant OF
-		| 0,2:
-			RETURN 0.0D;
-		| 1:
-			RETURN 1.0D;
-		| 3:
-			RETURN -1.0D;
-		END;
+	IF cosflag THEN
+		neg := FALSE;
+		y := longhalfpi + x
+	ELSE
+		y := x
 	END;
-	IF x >= longtwicepi THEN
-		IF x <= FLOATD(MAX(LONGINT)) THEN
-		(*      Use extended precision to calculate reduced argument.
-                        Split 2pi in 2 parts a1 and a2, of which the first only
-                        uses some bits of the mantissa, so that n * a1 is
-                        exactly representable, where n is the integer part of
-                        x/pi.
-                        Here we used 12 bits of the mantissa for a1.
-	                Also split x in integer part x1 and fraction part x2.
-	                We then compute x-n*2pi as ((x1 - n*a1) + x2) - n*a2.
-		*)
-			n := FLOATD(TRUNCD(x/longtwicepi));
-			x1 := FLOATD(TRUNCD(x));
-			x2 := x - x1;
-			x := ((x1 - n * A1) + x2) - n * A2;
-		ELSE
-			x := FIF(x/longtwicepi, 1.0D, x1) * longtwicepi;
-		END
+	y := y / longpi + 0.5D;
+
+	IF FIF(y, 1.0D, y) < 0.0D THEN ; END;
+	IF FIF(y, 0.5D, x1) # 0.0D THEN neg := NOT neg END;
+	IF cosflag THEN y := y - 0.5D END;
+	x2 := FIF(x, 1.0, x1);
+	x := x1 - y * A1;
+	x := x + x2;
+	x := x - y * A2;
+
+	IF x < 0.0D THEN
+		neg := NOT neg;
+		x := -x
 	END;
-	x := x / longhalfpi;
-	t := TRUNC(x);
-	x := x - FLOATD(t);
-	quadrant := (quadrant + t MOD 4) MOD 4;
-	IF ODD(quadrant) THEN
-		x := 1.0D - x;
-	END;
-	IF quadrant > 1 THEN
-		x := -x;
-	END;
-	xsq := x * x;
-	RETURN x * (((((p5*xsq+p4)*xsq+p3)*xsq+p2)*xsq+p1)*xsq+p0) /
-		   (((((q5*xsq+q4)*xsq+q3)*xsq+q2)*xsq+q1)*xsq+q0);
+	y := x * x;
+	x := x + x * y * (((((((r7*y+r6)*y+r5)*y+r4)*y+r3)*y+r2)*y+r1)*y+r0);
+	IF neg THEN RETURN -x END;
+	RETURN x;
   END sinus;
-		
+
   PROCEDURE longsin(x: LONGREAL): LONGREAL;
   BEGIN
-	RETURN sinus(x, 0);
+	RETURN sinus(x, FALSE);
   END longsin;
 
   PROCEDURE cos(x: REAL): REAL;
@@ -288,7 +282,7 @@ IMPLEMENTATION MODULE Mathlib;
   PROCEDURE longcos(x: LONGREAL): LONGREAL;
   BEGIN
 	IF x < 0.0D THEN x := -x; END;
-	RETURN sinus(x, 1);	
+	RETURN sinus(x, TRUE);	
   END longcos;
 
   PROCEDURE tan(x: REAL): REAL;
@@ -297,14 +291,49 @@ IMPLEMENTATION MODULE Mathlib;
   END tan;
 
   PROCEDURE longtan(x: LONGREAL): LONGREAL;
-    VAR cosinus: LONGREAL;
+  (*	Algorithm and coefficients from:
+		"Software manual for the elementary functions"
+		by W.J. Cody and W. Waite, Prentice-Hall, 1980
+  *)
+
+    CONST
+	p1 = -0.13338350006421960681D+00;
+	p2 =  0.34248878235890589960D-02;
+	p3 = -0.17861707342254426711D-04;
+
+	q0 =  1.0D;
+	q1 = -0.46671683339755294240D+00;
+	q2 =  0.25663832289440112864D-01;
+	q3 = -0.31181531907010027307D-03;
+	q4 =  0.49819433993786512270D-06;
+
+	A1 =  1.57080078125D;
+	A2 = -4.454455103380768678308D-06;
+
+    VAR y, x1, x2: LONGREAL;
+	negative: BOOLEAN;
+	invert: BOOLEAN;
   BEGIN
-	cosinus := longcos(x);
-	IF cosinus = 0.0D THEN
-		Message("tan: result does not exist");
-		HALT
-	END;
-	RETURN longsin(x)/cosinus;
+	negative := x < 0.0D;
+	y := x / longhalfpi + 0.5D;
+
+        (*      Use extended precision to calculate reduced argument.
+                Here we used 12 bits of the mantissa for a1.
+                Also split x in integer part x1 and fraction part x2.
+        *)
+	IF FIF(y, 1.0D, y) < 0.0D THEN ; END;
+	invert := FIF(y, 0.5D, x1) # 0.0D;
+	x2 := FIF(x, 1.0D, x1);
+	x := x1 - y * A1;
+	x := x + x2;
+	x := x - y * A2;
+
+	y := x * x;
+	x := x + x * y * ((p3*y+p2)*y+p1);
+	y := (((q4*y+q3)*y+q2)*y+q1)*y+q0;
+	IF negative THEN x := -x END;
+	IF invert THEN RETURN -y/x END;
+	RETURN x/y;
   END longtan;
 
   PROCEDURE arcsin(x: REAL): REAL;
@@ -313,24 +342,48 @@ IMPLEMENTATION MODULE Mathlib;
   END arcsin;
 
   PROCEDURE arcsincos(x: LONGREAL; cosfl: BOOLEAN): LONGREAL;
-  VAR
+    CONST
+	p0 = -0.27368494524164255994D+02;
+	p1 =  0.57208227877891731407D+02;
+	p2 = -0.39688862997540877339D+02;
+	p3 =  0.10152522233806463645D+02;
+	p4 = -0.69674573447350646411D+00;
+
+	q0 = -0.16421096714498560795D+03;
+	q1 =  0.41714430248260412556D+03;
+	q2 = -0.38186303361750149284D+03;
+	q3 =  0.15095270841030604719D+03;
+	q4 = -0.23823859153670238830D+02;
+	q5 =  1.0D;
+    VAR
 	negative : BOOLEAN;
+	big: BOOLEAN;
+	g: LONGREAL;
   BEGIN
-	negative := x <= 0.0D;
+	negative := x < 0.0D;
 	IF negative THEN x := -x; END;
-	IF x > 1.0D THEN
-		Message("arcsin or arccos: argument > 1");
-		HALT
-	END;
-	IF x = 1.0D THEN
-		x := longhalfpi;
+	IF x > 0.5D THEN
+		big := TRUE;
+		IF x > 1.0D THEN
+			Message("arcsin or arccos: argument > 1");
+			HALT
+		END;
+		g := 0.5D - 0.5D * x;
+		x := -longsqrt(g);
+		x := x + x;
 	ELSE
-		x := longarctan(x/longsqrt(1.0D - x*x));
+		big := FALSE;
+		g := x * x;
 	END;
-	IF negative THEN x := -x; END;
-	IF cosfl THEN
-		RETURN longhalfpi - x;
+	x := x + x * g *
+	  ((((p4*g+p3)*g+p2)*g+p1)*g+p0)/(((((q5*g+q4)*g+q3)*g+q2)*g+q1)*g+q0);
+	IF cosfl AND NOT negative THEN x := -x END;
+	IF cosfl = NOT big THEN
+		x := (x + longquartpi) + longquartpi;
+	ELSIF cosfl AND negative AND big THEN
+		x := (x + longhalfpi) + longhalfpi;
 	END;
+	IF negative AND NOT cosfl THEN x := -x END;
 	RETURN x;
   END arcsincos;	
 
@@ -354,115 +407,65 @@ IMPLEMENTATION MODULE Mathlib;
 	RETURN SHORT(longarctan(LONG(x)));
   END arctan;
 
-  TYPE
-	precomputed = RECORD
-			X:	LONGREAL;	(* partition point *)
-			arctan:	LONGREAL;	(* arctan of evaluation node *)
-			OneOverXn: LONGREAL;	(* 1/xn *)
-			OneOverXnSquarePlusone: LONGREAL;	(* ... *)
-		      END;
-
-  VAR	arctaninit: BOOLEAN;
-	precomp : ARRAY[0..4] OF precomputed;
+  VAR A: ARRAY[0..3] OF LONGREAL;
+      arctaninit: BOOLEAN;
 
   PROCEDURE longarctan(x: LONGREAL): LONGREAL;
-  (*      The interval [0, infinity) is treated as follows:
-	  Define partition points Xi
-	          X0 = 0
-	          X1 = tan(pi/16)
-		  X2 = tan(3pi/16)
-		  X3 = tan(5pi/16)
-		  X4 = tan(7pi/16)
-		  X5 = infinity
-          and evaluation nodes xi
-	          x2 = tan(2pi/16)
-	          x3 = tan(4pi/16)
-		  x4 = tan(6pi/16)
-		  x5 = infinity
-          An argument x in [Xn-1, Xn] is now reduced to an argument
-          t in [-X1, X1] by the following formulas:
-
-                   t = 1/xn - (1/(xn*xn) + 1)/((1/xn) + x)
-
-                   arctan(x) = arctan(xi) + arctan(t)
-
-          For the interval [0, tan(p/16)] an approximation is used:
-                   arctan(x) = x * P(x*x)/Q(x*x)
+  (*	Algorithm and coefficients from:
+		"Software manual for the elementary functions"
+		by W.J. Cody and W. Waite, Prentice-Hall, 1980
   *)
-  (* Hart & Cheney # 5037 *)
     CONST
-	p0 = 0.7698297257888171026986294745D+03;
-	p1 = 0.1557282793158363491416585283D+04;
-	p2 = 0.1033384651675161628243434662D+04;
-	p3 = 0.2485841954911840502660889866D+03;
-	p4 = 0.1566564964979791769948970100D+02;
-	q0 = 0.7698297257888171026986294911D+03;
-	q1 = 0.1813892701754635858982709369D+04;
-	q2 = 0.1484049607102276827437401170D+04;
-	q3 = 0.4904645326203706217748848797D+03;
-	q4 = 0.5593479839280348664778328000D+02;
-	q5 = 0.1000000000000000000000000000D+01;
+	p0 = -0.13688768894191926929D+02;
+	p1 = -0.20505855195861651981D+02;
+	p2 = -0.84946240351320683534D+01;
+	p3 = -0.83758299368150059274D+00;
+	q0 =  0.41066306682575781263D+02;
+	q1 =  0.86157349597130242515D+02;
+	q2 =  0.59578436142597344465D+02;
+	q3 =  0.15024001160028576121D+02;
+	q4 =  1.0D;
     VAR
-	xsqr: LONGREAL;
+	g: LONGREAL;
 	neg: BOOLEAN;
-	i: INTEGER;
+	n: INTEGER;
   BEGIN
 	IF NOT arctaninit THEN
 		arctaninit := TRUE;
-		WITH precomp[0] DO
-			X := 0.19891236737965800691159762264467622D;
-			arctan := 0.0D;
-			OneOverXn := 0.0D;
-			OneOverXnSquarePlusone := 0.0D;
-		END;
-		WITH precomp[1] DO
-			X := 0.66817863791929891999775768652308076D;
-			arctan := 0.39269908169872415480783042290993786D;
-			OneOverXn := 2.41421356237309504880168872420969808D;
-			OneOverXnSquarePlusone := 6.82842712474619009760337744841939616D;
-		END;
-		WITH precomp[2] DO
-			X := 1.49660576266548901760113513494247691D;
-			arctan := longquartpi;
-			OneOverXn := 1.0;
-			OneOverXnSquarePlusone := 2.0;
-		END;
-		WITH precomp[3] DO
-			X := 5.02733949212584810451497507106407238D;
-			arctan := 1.17809724509617246442349126872981358D;
-			OneOverXn := 0.41421356237309504880168872420969808D;
-			OneOverXnSquarePlusone := 1.17157287525380998659662255158060384D;
-		END;
-		WITH precomp[4] DO
-			X := 0.0D;
-			arctan := longhalfpi;
-			OneOverXn := 0.0D;
-			OneOverXnSquarePlusone := 1.0D;
-		END;
+		A[0] := 0.0D;
+		A[1] := 0.52359877559829887307710723554658381D;	(* p1/6 *)
+		A[2] := longhalfpi;
+		A[3] := 1.04719755119659774615421446109316763D; (* pi/3 *)
 	END;
 	neg := FALSE;
 	IF x < 0.0D THEN
 		neg := TRUE;
 		x := -x;
 	END;
-	i := 0;
-	WHILE (i <= 3) AND (x >= precomp[i].X) DO
-		INC(i);
-	END;
-	IF (i # 0) THEN 
-	    WITH precomp[i] DO
-		x := arctan + longarctan(OneOverXn-OneOverXnSquarePlusone/(OneOverXn+x));
-	    END
+	IF x > 1.0D THEN
+		x := 1.0D/x;
+		n := 2
 	ELSE
-		xsqr := x * x;
-		x := x *  ((((p4*xsqr+p3)*xsqr+p2)*xsqr+p1)*xsqr+p0) /
-			(((((q5*xsqr+q4)*xsqr+q3)*xsqr+q2)*xsqr+q1)*xsqr+q0);
+		n := 0
 	END;
+	IF x > 0.26794919243112270647D (* 2-sqrt(3) *) THEN
+		INC(n);
+		x := (((0.73205080756887729353D*x-0.5D)-0.5D)+x)/
+			(1.73205080756887729353D + x);
+	END;
+	g := x*x;
+	x := x + x * g * (((p3*g+p2)*g+p1)*g+p0) / ((((q4*g+q3)*g+q2)*g+q1)*g+q0);
+	IF n > 1 THEN x := -x END;
+	x := x + A[n];
 	IF neg THEN RETURN -x; END;
 	RETURN x;
   END longarctan;
 
   (* hyperbolic functions *)
+  (* The C math library has better implementations for some of these, but
+     they depend on some properties of the floating point implementation,
+     and, for now, we don't want that in the Modula-2 system.
+  *)
 
   PROCEDURE sinh(x: REAL): REAL;
   BEGIN
