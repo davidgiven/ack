@@ -184,6 +184,8 @@ oper	:	NOOP_1
 			{	emit1($1); emit1($1>>8); }
 	|	FST_ST ST ',' st_i
 			{	emit1($1); emit1(($1>>8)|$4); }
+	|	FST_ST2 ST ',' st_i
+			{	emit1($1); emit1(($1>>8)|$4); }
 	|	FST_ST st_i ',' ST
 			{	emit1($1|4); emit1((($1>>8)|$2)); }
 	|	FST_ST2 st_i ',' ST
