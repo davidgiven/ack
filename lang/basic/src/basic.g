@@ -301,7 +301,7 @@ fieldstmt { int intv; }
 		',' fieldlist		{ notyetimpl(); }
         ;
 
-fieldlist { int intv,var; }
+fieldlist { int intv; int var; }
 	:	intvalue(&intv) ASSYM variable(&var)
 		[ ',' intvalue(&intv) ASSYM variable(&var) ]*
 	;
@@ -406,7 +406,7 @@ semi	: ';'
 	| /* empty */
 	;
 
-letstmt { int var,exp; }
+letstmt { int var; int exp; }
 	:	LETSYM		
 		variable(&var)		 { save_address(); }
 		'=' expression(&exp)  	 { assign(var,exp); }
@@ -415,7 +415,7 @@ letstmt { int var,exp; }
 		'=' expression(&exp)	 { assign(var,exp); }
 	;
 
-lineinputstmt { int var,intv; }
+lineinputstmt { int var; int intv; }
 	: 	LINESYM
 		[ INPUTSYM
 	  	  semiprompt		 { setchannel(-1); }
@@ -435,7 +435,7 @@ readelm { int var; }
 	: variable(&var)	{ readelm(var); }
 	;
 
-lsetstmt { int var,exp; }
+lsetstmt { int var; int exp; }
 	:	LSETSYM variable(&var) '=' expression(&exp)
 				{ notyetimpl(); }
 	;
@@ -539,7 +539,7 @@ printlist(int *ip;) { int exp; }
 	  ]+
 	;
 
-pokestmt { int exp1,exp2 ; }
+pokestmt { int exp1; int exp2 ; }
 	: POKESYM
 	  expression(&exp1)
 	  ','
@@ -570,7 +570,7 @@ restorestmt :	RESTORESYM
 		]
 	    ;
 	
-swapstmt { int var1,var2; }
+swapstmt { int var1; int var2; }
 	: SWAPSYM
 	  variable(&var1)
 	  ','
