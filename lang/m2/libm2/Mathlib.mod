@@ -1,6 +1,7 @@
 IMPLEMENTATION MODULE Mathlib;
 
   FROM EM IMPORT FIF, FEF;
+  FROM Traps IMPORT Message;
 
 	(* From:	Handbook of Mathematical Functions
 			Edited by M. Abramowitz and I.A. Stegun
@@ -49,8 +50,8 @@ IMPLEMENTATION MODULE Mathlib;
   BEGIN
 	IF x <= 0.0D THEN
 		IF x < 0.0D THEN
-			(* ??? *)
-			;
+			Message("sqrt: negative argument");
+			HALT
 		END;
 		RETURN 0.0D;
 	END;
@@ -152,8 +153,8 @@ IMPLEMENTATION MODULE Mathlib;
 
   BEGIN
 	IF x <= 0.0D THEN
-		(* ??? *)
-		RETURN 0.0D;
+		Message("ln: argument <= 0");
+		HALT
 	END;
 	x := FEF(x, exp);
 	WHILE x < 1.0D DO
@@ -254,8 +255,8 @@ IMPLEMENTATION MODULE Mathlib;
   BEGIN
 	cosinus := longcos(x);
 	IF cosinus = 0.0D THEN
-		(* ??? *)
-		RETURN 0.0D;
+		Message("tan: result does not exist");
+		HALT
 	END;
 	RETURN longsin(x)/cosinus;
   END longtan;
@@ -278,8 +279,8 @@ IMPLEMENTATION MODULE Mathlib;
   BEGIN
 	IF x < 0.0D THEN x := -x; END;
 	IF x > 1.0D THEN
-		(* ??? *)
-		RETURN 0.0D;
+		Message("arcsin: argument > 1");
+		HALT
 	END;
 	RETURN LONG(halfpi) -
 		longsqrt(1.0D - x)*(a0+x*(a1+x*(a2+x*(a3+x*(a4+x*(a5+x*(a6+x*a7)))))));
@@ -398,8 +399,8 @@ IMPLEMENTATION MODULE Mathlib;
   PROCEDURE longarccosh(x: LONGREAL): LONGREAL;
   BEGIN
 	IF x < 1.0D THEN
-		(* ??? *)
-		RETURN 0.0D;
+		Message("arccosh: argument < 1");
+		HALT
 	END;
 	RETURN longln(x + longsqrt(x*x - 1.0D));
   END longarccosh;
@@ -412,8 +413,8 @@ IMPLEMENTATION MODULE Mathlib;
   PROCEDURE longarctanh(x: LONGREAL): LONGREAL;
   BEGIN
 	IF (x <= -1.0D) OR (x >= 1.0D) THEN
-		(* ??? *)
-		RETURN 0.0D;
+		Message("arctanh: ABS(argument) >= 1");
+		HALT
 	END;
 	RETURN longln((1.0D + x)/(1.0D - x)) / 2.0D;
   END longarctanh;

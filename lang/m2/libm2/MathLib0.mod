@@ -34,12 +34,18 @@ END exp;
 
 PROCEDURE entier(x: REAL): INTEGER;
 BEGIN
-	RETURN TRUNC(x);	(* ??? *)
+	IF x < 0.0 THEN
+		RETURN - TRUNC(-x);
+	END;
+	RETURN TRUNC(x);
 END entier;
 
 PROCEDURE real(x: INTEGER): REAL;
 BEGIN
-	RETURN FLOAT(x);	(* ??? *)
+	IF x < 0 THEN
+		RETURN - FLOAT(-x);
+	END;
+	RETURN FLOAT(x);
 END real;
 
 BEGIN
