@@ -148,6 +148,10 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #ifndef NDEBUG
 		chkregs();
 #endif
+		if (! toplevel) {
+			ply -= emp-saveemp+1;
+			if (ply <= 0) ply = 1;
+		}
 		n = *bp++;
 		if (n==0) {	/* "procedure" */
 			int j, nargs;
@@ -853,8 +857,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 		}
 	}
 	if (!toplevel) {
-		if (ply >= j) ply = emrepllen + ply - j;
-		else ply = emrepllen;
+		ply += emrepllen;
 #ifndef NDEBUG
 		if (Debug > 4) 
 			fprintf(stderr, "ply becomes %d\n", ply);
