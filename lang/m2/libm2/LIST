@@ -3,6 +3,7 @@ CSP.mod
 PascalIO.mod
 RealInOut.mod
 InOut.mod
+Streams.mod
 Terminal.mod
 TTY.mod
 ASCII.mod
