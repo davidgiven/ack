@@ -217,6 +217,10 @@ close_scope(flag)
 
 	assert(sc != 0);
 
+	if (! sc->sc_end) {
+		sc->sc_end = dot2leaf(Link);
+	}
+
 	if (flag) {
 		DO_DEBUG(options['S'],(print("List of definitions in currently ended scope:\n"), DumpScope(sc->sc_def)));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);

@@ -73,6 +73,7 @@ MkDef(id, scope, kind)
 	df->df_scope = scope;
 	df->df_kind = kind;
 	df->df_next = id->id_def;
+	df->df_flags = D_USED | D_DEFINED;
 	id->id_def = df;
 	if (kind == D_ERROR || kind == D_FORWARD) df->df_type = error_type;
 
@@ -241,6 +242,7 @@ DeclProc(type, id)
 		*/
 		df = define(id, CurrentScope, type);
 		df->for_node = dot2leaf(Name);
+		df->df_flags |= D_USED | D_DEFINED;
 		if (CurrentScope->sc_definedby->df_flags & D_FOREIGN) {
 			df->for_name = id->id_text;
 		}
@@ -275,6 +277,7 @@ DeclProc(type, id)
 				C_exp(buf);
 			}
 			else	C_inp(buf);
+			df->df_flags |= D_DEFINED;
 		}
 		open_scope(OPENSCOPE);
 		scope = CurrentScope;
@@ -360,11 +363,12 @@ CheckWithDef(df, tp)
 		possible earlier definition in the definition module.
 	*/
 
-	if (df->df_kind == D_PROCHEAD && df->df_type != error_type) {
+	if (df->df_kind == D_PROCHEAD &&
+	    df->df_type &&
+	    df->df_type != error_type) {
 		/* We already saw a definition of this type
 		   in the definition module.
 		*/
-		assert(df->df_type != 0);
 
 	  	if (!TstProcEquiv(tp, df->df_type)) {
 			error("inconsistent procedure declaration for \"%s\"",

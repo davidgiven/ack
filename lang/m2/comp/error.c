@@ -21,6 +21,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
+#include	"strict3rd.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"LLlex.h"
@@ -170,9 +171,11 @@ _error(class, node, fmt, argv)
 	case WARNING:
 	case LEXWARNING:
 		switch(warn_class) {
+#ifndef STRICT_3RD_ED
 		case W_OLDFASHIONED:
 			remark = "(old-fashioned use)";
 			break;
+#endif
 		case W_STRICT:
 			remark = "(strict)";
 			break;

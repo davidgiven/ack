@@ -23,6 +23,7 @@
 #include	<assert.h>
 #include	<alloc.h>
 
+#include	"strict3rd.h"
 #include	"squeeze.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -40,13 +41,21 @@
 
 extern arith		NewPtr();
 extern arith		NewInt();
+
 extern int		proclevel;
+
 label			text_label;
 label			data_label = 1;
-static t_type		*func_type;
 struct withdesig	*WithDesigs;
-t_node		*Modules;
+t_node			*Modules;
+
+static t_type		*func_type;
 static arith		priority;
+
+static int		RegisterMessage();
+static int		WalkDef();
+static int		MkCalls();
+static int		UseWarnings();
 
 #define	NO_EXIT_LABEL	((label) 0)
 #define RETURN_LABEL	((label) 1)
@@ -119,7 +128,7 @@ WalkModule(module)
 
 	/* Walk through it's local definitions
 	*/
-	WalkDef(sc->sc_def);
+	WalkDefList(sc->sc_def, WalkDef);
 
 	/* Now, generate initialization code for this module.
 	   First call initialization routines for modules defined within
@@ -156,7 +165,7 @@ WalkModule(module)
 			C_cal(nd->nd_IDF->id_text);
 		}
 	}
-	MkCalls(sc->sc_def);
+	WalkDefList(sc->sc_def, MkCalls);
 	proclevel++;
 	WalkNode(module->mod_body, NO_EXIT_LABEL);
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
@@ -168,6 +177,7 @@ WalkModule(module)
 	TmpClose();
 
 	CurrVis = savevis;
+	WalkDefList(sc->sc_def, UseWarnings);
 }
 
 WalkProcedure(procedure)
@@ -190,7 +200,7 @@ WalkProcedure(procedure)
 
 	/* Generate code for all local modules and procedures
 	*/
-	WalkDef(sc->sc_def);
+	WalkDefList(sc->sc_def, WalkDef);
 
 	/* Generate code for this procedure
 	*/
@@ -221,7 +231,7 @@ WalkProcedure(procedure)
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
-	MkCalls(sc->sc_def);
+	WalkDefList(sc->sc_def, MkCalls);
 
 	/* Make sure that arguments of size < word_size are on a
 	   fixed place.
@@ -327,54 +337,53 @@ WalkProcedure(procedure)
 	}
 	EndPriority();
 	C_ret(func_res_size);
-	if (! options['n']) RegisterMessages(sc->sc_def);
+	if (! options['n']) WalkDefList(sc->sc_def, RegisterMessage);
 	C_end(-sc->sc_off);
 	TmpClose();
 	CurrVis = savevis;
 	proclevel--;
+	WalkDefList(sc->sc_def, UseWarnings);
 }
 
+static int
 WalkDef(df)
 	register t_def *df;
 {
 	/*	Walk through a list of definitions
 	*/
 
-	for ( ; df; df = df->df_nextinscope) {
-		switch(df->df_kind) {
-		case D_MODULE:
-			WalkModule(df);
-			break;
-		case D_PROCEDURE:
-			WalkProcedure(df);
-			break;
-		case D_VARIABLE:
-			if (!proclevel  && !(df->df_flags & D_ADDRGIVEN)) {
-				C_df_dnam(df->var_name);
-				C_bss_cst(
-					WA(df->df_type->tp_size),
-					(arith) 0, 0);
-			}
-			break;
-		default:
-			/* nothing */
-			;
+	switch(df->df_kind) {
+	case D_MODULE:
+		WalkModule(df);
+		break;
+	case D_PROCEDURE:
+		WalkProcedure(df);
+		break;
+	case D_VARIABLE:
+		if (!proclevel  && !(df->df_flags & D_ADDRGIVEN)) {
+			C_df_dnam(df->var_name);
+			C_bss_cst(
+				WA(df->df_type->tp_size),
+				(arith) 0, 0);
 		}
+		break;
+	default:
+		/* nothing */
+		;
 	}
 }
 
+static int
 MkCalls(df)
 	register t_def *df;
 {
 	/*	Generate calls to initialization routines of modules
 	*/
 
-	for ( ; df; df = df->df_nextinscope) {
-		if (df->df_kind == D_MODULE) {
-			C_lxl((arith) 0);
-			C_cal(df->mod_vis->sc_scope->sc_name);
-			C_asp(pointer_size);
-		}
+	if (df->df_kind == D_MODULE) {
+		C_lxl((arith) 0);
+		C_cal(df->mod_vis->sc_scope->sc_name);
+		C_asp(pointer_size);
 	}
 }
 
@@ -579,7 +588,7 @@ WalkStat(nd, exit_label)
 			struct withdesig wds;
 			t_desig ds;
 
-			if (! WalkDesignator(left, &ds)) break;
+			if (! WalkDesignator(left, &ds, D_USED|D_DEFINED)) break;
 			if (left->nd_type->tp_fund != T_RECORD) {
 				node_error(left, "record variable expected");
 				break;
@@ -686,14 +695,14 @@ ExpectBool(nd, true_label, false_label)
 }
 
 int
-WalkDesignator(nd, ds)
+WalkDesignator(nd, ds, flags)
 	t_node *nd;
 	t_desig *ds;
 {
 	/*	Check designator and generate code for it
 	*/
 
-	if (! ChkVariable(nd)) return 0;
+	if (! ChkVariable(nd, flags)) return 0;
 
 	clear((char *) ds, sizeof(t_desig));
 	CodeDesig(nd, ds);
@@ -711,7 +720,7 @@ DoForInit(nd)
 	nd->nd_class = Name;
 	nd->nd_symb = IDENT;
 
-	if (!( ChkVariable(nd) &
+	if (!( ChkVariable(nd, D_USED|D_DEFINED) &
 	       ChkExpression(left->nd_left) &
 	       ChkExpression(left->nd_right))) return 0;
 
@@ -749,13 +758,22 @@ DoForInit(nd)
 
 	tpl = left->nd_left->nd_type;
 	tpr = left->nd_right->nd_type;
-	if (!ChkAssCompat(&(left->nd_left), df->df_type, "FOR statement") ||
-	    !ChkAssCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
+#ifndef STRICT_3RD_ED
+	if (! options['3']) {
+	  if (!ChkAssCompat(&(left->nd_left), df->df_type, "FOR statement") ||
+	      !ChkAssCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
 		return 1;
-	}
-	if (!TstCompat(df->df_type, tpl) ||
-	    !TstCompat(df->df_type, tpr)) {
+	  }
+	  if (!TstCompat(df->df_type, tpl) ||
+	      !TstCompat(df->df_type, tpr)) {
 node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
+		node_error(nd, "compatibility required in FOR statement");
+	  }
+	} else
+#endif
+	if (!ChkCompat(&(left->nd_left), df->df_type, "FOR statement") ||
+	    !ChkCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
+		return 1;
 	}
 
 	CodePExpr(left->nd_left);
@@ -774,7 +792,7 @@ DoAssign(left, right)
 	register t_desig *dsr;
 	register t_type *tp;
 
-	if (! (ChkExpression(right) & ChkVariable(left))) return;
+	if (! (ChkExpression(right) & ChkVariable(left, D_DEFINED))) return;
 	tp = left->nd_type;
 
 	if (right->nd_symb == STRING) TryToString(right, tp);
@@ -798,20 +816,22 @@ DoAssign(left, right)
 	free_desig(dsr);
 }
 
-RegisterMessages(df)
+static int
+RegisterMessage(df)
 	register t_def *df;
 {
 	register t_type *tp;
 	arith sz;
-	int regtype = -1;
+	int regtype;
 
-	for (; df; df = df->df_nextinscope) {
-		if (df->df_kind == D_VARIABLE && !(df->df_flags & D_NOREG)) {
+	if (df->df_kind == D_VARIABLE) {
+		if ( !(df->df_flags & D_NOREG)) {
 			/* Examine type and size
 			*/
+			regtype = -1;
 			tp = BaseType(df->df_type);
 			if ((df->df_flags & D_VARPAR) ||
-				 (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
+			    (tp->tp_fund&(T_POINTER|T_HIDDEN|T_EQUAL))) {
 				sz = pointer_size;
 				regtype = reg_pointer;
 			}
@@ -824,5 +844,40 @@ RegisterMessages(df)
 				C_ms_reg(df->var_off, sz, regtype, 0);
 			}
 		}
+	}
+}
+
+static int
+UseWarnings(df)
+	register t_def *df;
+{
+	if (df->df_kind & (D_IMPORT | D_VARIABLE | D_PROCEDURE)) {
+		struct node *nd;
+
+		if (df->df_flags & (D_EXPORTED | D_QEXPORTED)) return;
+		if (df->df_kind == D_IMPORT) df = df->imp_def;
+		if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE))) return;
+		nd = df->df_scope->sc_end;
+		if (! (df->df_flags & D_DEFINED)) {
+			node_warning(nd,
+				     W_ORDINARY,
+				     "identifier \"%s\" never assigned",
+				     df->df_idf->id_text);
+		}
+		if (! (df->df_flags & D_USED)) {
+			node_warning(nd,
+				     W_ORDINARY,
+				     "identifier \"%s\" never used",
+				     df->df_idf->id_text);
+		}
+	}
+}
+
+WalkDefList(df, proc)
+	register t_def *df;
+	int (*proc)();
+{
+	for (; df; df = df->df_nextinscope) {
+		(*proc)(df);
 	}
 }

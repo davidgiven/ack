@@ -611,7 +611,7 @@ type_or_forward(ptp)
 		   in this scope, so this is the correct identification
 		*/
 		if (df1->df_kind == D_FORWTYPE) {
-			nd = dot2node(NULLNODE, df1->df_forw_node, 0);
+			nd = dot2node(0, NULLNODE, df1->df_forw_node);
 			df1->df_forw_node = nd;
 			nd->nd_type = *ptp;
 		}

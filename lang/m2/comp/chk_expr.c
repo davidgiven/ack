@@ -19,6 +19,7 @@
 #include	<assert.h>
 #include	<alloc.h>
 
+#include	"strict3rd.h"
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"type.h"
@@ -31,6 +32,7 @@
 #include	"chk_expr.h"
 #include	"misc.h"
 #include	"warning.h"
+#include	"main.h"
 
 extern char *symbol2str();
 extern char *sprint();
@@ -125,14 +127,14 @@ MkCoercion(pnd, tp)
 }
 
 int
-ChkVariable(expp)
+ChkVariable(expp, flags)
 	register t_node *expp;
 {
 	/*	Check that "expp" indicates an item that can be
 		assigned to.
 	*/
 
-	return ChkDesignator(expp) &&
+	return ChkDesig(expp, flags) &&
 		( expp->nd_class != Def ||
 	    	  ( expp->nd_def->df_kind & (D_FIELD|D_VARIABLE)) ||
 		  df_error(expp, "variable expected", expp->nd_def));
@@ -152,7 +154,7 @@ ChkArrow(expp)
 
 	expp->nd_type = error_type;
 
-	if (! ChkVariable(expp->nd_right)) return 0;
+	if (! ChkVariable(expp->nd_right, D_USED)) return 0;
 
 	tp = expp->nd_right->nd_type;
 
@@ -166,7 +168,7 @@ ChkArrow(expp)
 }
 
 STATIC int
-ChkArr(expp)
+ChkArr(expp, flags)
 	register t_node *expp;
 {
 	/*	Check an array selection.
@@ -182,7 +184,7 @@ ChkArr(expp)
 
 	expp->nd_type = error_type;
 
-	if (! (ChkVariable(expp->nd_left) & ChkExpression(expp->nd_right))) {
+	if (! (ChkVariable(expp->nd_left, flags) & ChkExpression(expp->nd_right))) {
 		/* Bitwise and, because we want them both evaluated.
 		*/
 		return 0;
@@ -225,7 +227,7 @@ ChkValue(expp)
 #endif
 
 STATIC int
-ChkLinkOrName(expp)
+ChkLinkOrName(expp, flags)
 	register t_node *expp;
 {
 	/*	Check either an ID or a construction of the form
@@ -236,9 +238,10 @@ ChkLinkOrName(expp)
 	expp->nd_type = error_type;
 
 	if (expp->nd_class == Name) {
-		expp->nd_def = lookfor(expp, CurrVis, 1);
+		expp->nd_def = df = lookfor(expp, CurrVis, 1);
 		expp->nd_class = Def;
-		expp->nd_type = RemoveEqual(expp->nd_def->df_type);
+		expp->nd_type = RemoveEqual(df->df_type);
+		df->df_flags |= flags;
 	}
 	else if (expp->nd_class == Link) {
 		/*	A selection from a record or a module.
@@ -248,7 +251,7 @@ ChkLinkOrName(expp)
 
 		assert(expp->nd_symb == '.');
 
-		if (! ChkDesignator(left)) return 0;
+		if (! ChkDesig(left, flags)) return 0;
 
 		if (left->nd_class==Def &&
 		    (left->nd_type->tp_fund != T_RECORD ||
@@ -266,6 +269,7 @@ ChkLinkOrName(expp)
 			id_not_declared(expp);
 			return 0;
 		}
+		df->df_flags |= flags;
 		expp->nd_def = df;
 		expp->nd_type = RemoveEqual(df->df_type);
 		expp->nd_class = Def;
@@ -300,7 +304,7 @@ ChkExLinkOrName(expp)
 	*/
 	register t_def *df;
 
-	if (! ChkLinkOrName(expp)) return 0;
+	if (! ChkLinkOrName(expp, D_USED)) return 0;
 
 	df = expp->nd_def;
 
@@ -537,7 +541,7 @@ getarg(argp, bases, designator, edf)
 	register t_node *left = nextarg(argp, edf);
 
 	if (! left ||
-	    ! (designator ? ChkVariable(left) : ChkExpression(left))) {
+	    ! (designator ? ChkVariable(left, D_USED|D_DEFINED) : ChkExpression(left))) {
 		return 0;
 	}
 
@@ -616,7 +620,9 @@ ChkProcCall(expp)
 	*/
 	for (param = ParamList(left->nd_type); param; param = param->par_next) {
 		if (!(left = getarg(&expp, 0, IsVarParam(param), edf))) {
-			return 0;
+			retval = 0;
+			cnt++;
+			continue;
 		}
 		cnt++;
 		if (left->nd_symb == STRING) {
@@ -673,7 +679,7 @@ ChkCall(expp)
 
 	/* First, get the name of the function or procedure
 	*/
-	if (ChkDesignator(left)) {
+	if (ChkDesig(left, D_USED)) {
 		if (IsCast(left)) {
 			/* It was a type cast.
 			*/
@@ -920,8 +926,8 @@ ChkUnOper(expp)
 		return 1;
 
 	case '-':
-		if (tpr->tp_fund & T_INTORCARD) {
-			if (tpr == intorcard_type || tpr == card_type) {
+		if (tpr->tp_fund == T_INTORCARD || tpr->tp_fund == T_INTEGER) {
+			if (tpr == intorcard_type) {
 				expp->nd_type = int_type;
 			}
 			if (right->nd_class == Value) {
@@ -957,7 +963,7 @@ ChkUnOper(expp)
 }
 
 STATIC t_node *
-getvariable(argp, edf)
+getvariable(argp, edf, flags)
 	t_node **argp;
 	t_def *edf;
 {
@@ -966,7 +972,7 @@ getvariable(argp, edf)
 	*/
 	register t_node *left = nextarg(argp, edf);
 
-	if (!left || !ChkVariable(left)) return 0;
+	if (!left || !ChkVariable(left, flags)) return 0;
 
 	return left;
 }
@@ -1072,6 +1078,7 @@ ChkStandard(expp)
 		if (left->nd_type->tp_fund == T_ARRAY) {
 			expp->nd_type = IndexType(left->nd_type);
 			if (! IsConformantArray(left->nd_type)) {
+				left->nd_type = expp->nd_type;
 				cstcall(expp, S_MAX);
 			}
 			break;
@@ -1120,11 +1127,19 @@ ChkStandard(expp)
 
 			if (!warning_given) {
 				warning_given = 1;
+#ifndef STRICT_3RD_ED
+				if (! options['3'])
 	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are obsolete");
+				else
+#endif
+	node_error(expp, "NEW and DISPOSE are obsolete");
 			}
 		}
+#ifdef STRICT_3RD_ED
+		return 0;
+#else
 		expp->nd_type = 0;
-		if (! (left = getvariable(&arg, edf))) return 0;
+		if (! (left = getvariable(&arg, edf,D_DEFINED))) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
 			return df_error(left, "pointer variable expected", edf);
 		}
@@ -1150,6 +1165,7 @@ ChkStandard(expp)
 			expp->nd_left = MkLeaf(Name, &dt);
 		}
 		return ChkCall(expp);
+#endif
 
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
@@ -1197,7 +1213,7 @@ ChkStandard(expp)
 	case S_DEC:
 	case S_INC:
 		expp->nd_type = 0;
-		if (! (left = getvariable(&arg, edf))) return 0;
+		if (! (left = getvariable(&arg, edf, D_USED|D_DEFINED))) return 0;
 		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
 			return df_error(left,"illegal parameter type", edf);
 		}
@@ -1217,7 +1233,7 @@ ChkStandard(expp)
 		t_node *dummy;
 
 		expp->nd_type = 0;
-		if (!(left = getvariable(&arg, edf))) return 0;
+		if (!(left = getvariable(&arg, edf, D_USED|D_DEFINED))) return 0;
 		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
 			return df_error(arg, "SET parameter expected", edf);

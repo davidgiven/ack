@@ -32,6 +32,7 @@
 #include	"desig.h"
 #include	"walk.h"
 #include	"chk_expr.h"
+#include	"def.h"
 
 #include	"density.h"
 

@@ -129,6 +129,7 @@ EnterVarList(Idlist, type, local)
 	for (; idlist; idlist = idlist->nd_right) {
 		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 		df->df_type = type;
+		df->df_flags &= ~(D_USED | D_DEFINED);
 		if (idlist->nd_left) {
 			/* An address was supplied
 			*/
@@ -166,6 +167,7 @@ EnterVarList(Idlist, type, local)
 			df->df_flags |= D_NOREG;
 
  			if (DefinitionModule) {
+				df->df_flags |= D_USED | D_DEFINED;
 				if (sc == Defined->mod_vis) {
 					C_exa_dnam(df->var_name);
 				}
@@ -212,7 +214,8 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		else	df = new_def();
 		pr->par_def = df;
 		df->df_type = type;
-		df->df_flags = VARp;
+		df->df_flags |= (VARp | D_DEFINED);
+		if (df->df_flags & D_VARPAR) df->df_flags |= D_USED;
 
 		if (IsConformantArray(type)) {
 			/* we need room for the base address and a descriptor
@@ -239,6 +242,10 @@ DoImport(df, scope)
 	*/
 
 	define(df->df_idf, scope, D_IMPORT)->imp_def = df;
+
+	while (df->df_kind == D_IMPORT) {
+		df = df->imp_def;
+	}
 
 	if (df->df_kind == D_TYPE && df->df_type->tp_fund == T_ENUMERATION) {
 		/* Also import all enumeration literals
@@ -305,7 +312,7 @@ ForwDef(ids, scope)
 	*/
 	register t_def *df;
 
-	if (!(df = lookup(ids->nd_IDF, scope, 1))) {
+	if (!(df = lookup(ids->nd_IDF, scope, 0))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
 		df->for_node = MkLeaf(Name, &(ids->nd_token));
 	}
@@ -341,8 +348,6 @@ EnterExportList(Idlist, qualified)
 				idlist->nd_IDF->id_text);
 		}
 
-		if (df->df_kind == D_IMPORT) df = df->imp_def;
-
 		df->df_flags |= qualified;
 		if (qualified == D_EXPORTED) {
 			/* Export, but not qualified.
@@ -368,15 +373,20 @@ EnterExportList(Idlist, qualified)
 				   scope. There are two legal possibilities,
 				   which are examined below.
 				*/
+				t_def *df2 = df;
+
+				while (df2->df_kind == D_IMPORT) {
+					df2 = df2->imp_def;
+				}
 				if (df1->df_kind == D_PROCHEAD &&
-				     df->df_kind == D_PROCEDURE) {
+				     df2->df_kind == D_PROCEDURE) {
 					df1->df_kind = D_IMPORT;
 					df1->imp_def = df;
 					continue;
 				}
 				if (df1->df_kind == D_HIDDEN &&
-				    df->df_kind == D_TYPE) {
-					DeclareType(idlist, df1, df->df_type);
+				    df2->df_kind == D_TYPE) {
+					DeclareType(idlist, df1, df2->df_type);
 					df1->df_kind = D_TYPE;
 					continue;
 				}
@@ -388,14 +398,13 @@ EnterExportList(Idlist, qualified)
 	FreeNode(Idlist);
 }
 
-EnterFromImportList(Idlist, FromDef, FromId)
-	t_node *Idlist;
+EnterFromImportList(idlist, FromDef, FromId)
+	register t_node *idlist;
 	register t_def *FromDef;
 	t_node *FromId;
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
-	register t_node *idlist = Idlist;
 	register t_scopelist *vis;
 	register t_def *df;
 	char *module_name = FromDef->df_idf->id_text;
@@ -430,7 +439,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 
 	for (; idlist; idlist = idlist->nd_left) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
-		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 1))) {
+		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 0))) {
 			if (! is_anon_idf(idlist->nd_IDF)) {
 				node_error(idlist,
 			"identifier \"%s\" not declared in module \"%s\"",
@@ -450,30 +459,38 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 	}
 
 	if (!forwflag) FreeNode(FromId);
-	FreeNode(Idlist);
 }
 
-EnterImportList(Idlist, local)
-	t_node *Idlist;
+EnterGlobalImportList(idlist)
+	register t_node *idlist;
 {
-	/*	Import "Idlist" from the enclosing scope.
-		An exception must be made for imports of the compilation unit.
-		In this case, definition modules must be read for "Idlist".
-		This case is indicated by the value 0 of the "local" flag.
+	/*	Import "idlist" from the enclosing scope.
+		Definition modules must be read for "idlist".
 	*/
-	register t_node *idlist = Idlist;
-	t_scope *sc = enclosing(CurrVis)->sc_scope;
 	extern t_def *GetDefinitionModule();
 	struct f_info f;
 	
 	f = file_info;
 
 	for (; idlist; idlist = idlist->nd_left) {
-		DoImport(local ?
-				ForwDef(idlist, sc) :
-				GetDefinitionModule(idlist->nd_IDF, 1) ,
-			 CurrentScope);
+		DoImport(GetDefinitionModule(idlist->nd_IDF, 1), CurrentScope);
 		file_info = f;
 	}
-	FreeNode(Idlist);
+}
+
+EnterImportList(idlist)
+	register t_node *idlist;
+{
+	/*	Import "idlist" from the enclosing scope.
+	*/
+	t_scope *sc = enclosing(CurrVis)->sc_scope;
+	extern t_def *GetDefinitionModule();
+
+	for (; idlist; idlist = idlist->nd_left) {
+		t_def *df;
+
+		DoImport(ForwDef(idlist, sc), CurrentScope);
+		df = lookup(idlist->nd_def, CurrentScope, 0);
+		df->df_flags |= D_EXPORTED;
+	}
 }

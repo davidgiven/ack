@@ -40,7 +40,7 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENH=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
 	inputtype.h maxset.h density.h squeeze.h \
-	def.h debugcst.h type.h Lpars.h node.h desig.h
+	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h f_info.h idf.h\
 	input.h main.h misc.h scope.h standards.h tokenname.h\
@@ -181,6 +181,7 @@ error.o: input.h
 error.o: inputtype.h
 error.o: main.h
 error.o: node.h
+error.o: strict3rd.h
 error.o: warning.h
 main.o: LLlex.h
 main.o: Lpars.h
@@ -195,6 +196,7 @@ main.o: inputtype.h
 main.o: node.h
 main.o: scope.h
 main.o: standards.h
+main.o: strict3rd.h
 main.o: tokenname.h
 main.o: type.h
 main.o: warning.h
@@ -264,7 +266,9 @@ typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
 typequiv.o: idf.h
+typequiv.o: main.h
 typequiv.o: node.h
+typequiv.o: strict3rd.h
 typequiv.o: type.h
 typequiv.o: warning.h
 node.o: LLlex.h
@@ -291,14 +295,17 @@ chk_expr.o: debug.h
 chk_expr.o: debugcst.h
 chk_expr.o: def.h
 chk_expr.o: idf.h
+chk_expr.o: main.h
 chk_expr.o: misc.h
 chk_expr.o: node.h
 chk_expr.o: scope.h
 chk_expr.o: standards.h
+chk_expr.o: strict3rd.h
 chk_expr.o: type.h
 chk_expr.o: warning.h
 options.o: idfsize.h
 options.o: main.h
+options.o: strict3rd.h
 options.o: type.h
 options.o: warning.h
 walk.o: LLlex.h
@@ -314,6 +321,7 @@ walk.o: main.h
 walk.o: node.h
 walk.o: scope.h
 walk.o: squeeze.h
+walk.o: strict3rd.h
 walk.o: type.h
 walk.o: walk.h
 walk.o: warning.h
@@ -360,6 +368,7 @@ program.o: idf.h
 program.o: main.h
 program.o: node.h
 program.o: scope.h
+program.o: strict3rd.h
 program.o: type.h
 program.o: warning.h
 declar.o: LLlex.h
@@ -373,6 +382,7 @@ declar.o: main.h
 declar.o: misc.h
 declar.o: node.h
 declar.o: scope.h
+declar.o: strict3rd.h
 declar.o: type.h
 declar.o: warning.h
 expression.o: LLlex.h
@@ -401,6 +411,7 @@ casestat.o: Lpars.h
 casestat.o: chk_expr.h
 casestat.o: debug.h
 casestat.o: debugcst.h
+casestat.o: def.h
 casestat.o: density.h
 casestat.o: desig.h
 casestat.o: node.h

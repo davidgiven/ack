@@ -15,6 +15,7 @@
 #include	<em_label.h>
 #include	<alloc.h>
 
+#include	"strict3rd.h"
 #include	"type.h"
 #include	"main.h"
 #include	"warning.h"
@@ -44,6 +45,9 @@ DoOption(text)
 	case 'n':	/* no register messages */
 	case 'x':	/* every name global */
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
+#ifndef STRICT_3RD_ED
+	case '3':	/* strict 3rd edition Modula-2 */
+#endif
 		options[text[-1]]++;
 		break;
 
@@ -64,9 +68,11 @@ DoOption(text)
 		if (*text) {
 			while (*text) {
 				switch(*text++) {
+#ifndef STRICT_3RD_ED
 				case 'O':
 					warning_classes &= ~W_OLDFASHIONED;
 					break;
+#endif
 				case 'R':
 					warning_classes &= ~W_STRICT;
 					break;
@@ -83,9 +89,11 @@ DoOption(text)
 		if (*text) {
 			while (*text) {
 				switch(*text++) {
+#ifndef STRICT_3RD_ED
 				case 'O':
 					warning_classes |= W_OLDFASHIONED;
 					break;
+#endif
 				case 'R':
 					warning_classes |= W_STRICT;
 					break;

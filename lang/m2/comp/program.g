@@ -16,6 +16,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
+#include	"strict3rd.h"
 #include	"main.h"
 #include	"idf.h"
 #include	"LLlex.h"
@@ -114,7 +115,9 @@ import(int local;)
 			{ if (FromId) {
 				EnterFromImportList(ImportList, df, FromId);
 			  }
-			  else EnterImportList(ImportList, local);
+			  else if (local) EnterImportList(ImportList);
+			  else EnterGlobalImportList(ImportList);
+			  FreeNode(ImportList);
 			}
 ;
 
@@ -150,8 +153,13 @@ DefinitionModule
 			modules. Issue a warning.
 		*/
 			{ 
+#ifndef STRICT_3RD_ED
+			  if (! options['3'])
 node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignored");
-				FreeNode(exportlist);
+			  else
+#endif
+				error("export list not allowed in definition module");
+			  FreeNode(exportlist);
 			}
 	|
 		/* empty */

@@ -16,6 +16,7 @@
 #include	<em_label.h>
 #include	<alloc.h>
 
+#include	"strict3rd.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"idf.h"

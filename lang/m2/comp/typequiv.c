@@ -18,12 +18,14 @@
 #include	<em_label.h>
 #include	<assert.h>
 
+#include	"strict3rd.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
 #include	"node.h"
 #include	"warning.h"
+#include	"main.h"
 
 extern char *sprint();
 
@@ -239,7 +241,8 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 		)
 	)
 		return 1;
-	if (VARflag && TstCompat(formaltype, actualtype)) {
+#ifndef STRICT_3RD_ED
+	if (! options['3'] && VARflag && TstCompat(formaltype, actualtype)) {
 		if (formaltype->tp_size == actualtype->tp_size) {
 			sprint(ebuf1, ebuf, "identical types required");
 			node_warning(*nd,
@@ -251,7 +254,7 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 		node_error(*nd, ebuf1);
 		return 0;
 	}
-				
+#endif
 	sprint(ebuf1, ebuf, "type incompatibility");
 	node_error(*nd, ebuf1);
 	return 0;

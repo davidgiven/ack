@@ -65,3 +65,10 @@
 #undef SQUEEZE 1		/* define on "small" machines */
 
 
+!File: strict3rd.h
+#undef STRICT_3RD_ED 1		/* define on "small" machines, and if you want
+				   a compiler that only implements "3rd edition"
+				   Modula-2
+				*/
+
+

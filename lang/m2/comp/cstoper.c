@@ -29,8 +29,6 @@ int mach_long_size;	/* size of long on this machine == sizeof(long) */
 long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 long int_mask[MAXSIZE];	/* int_mask[1] == 0x7F, int_mask[2] == 0x7FFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
-arith max_unsigned;	/* maximum unsigned on target machine	*/
-arith max_longint;	/* maximum longint on target machine	*/
 unsigned int wrd_bits;	/* number of bits in a word */
 
 extern char options[];
@@ -52,10 +50,10 @@ cstunary(expp)
 	*/
 
 	case '-':
+		if (right->nd_INT < -int_mask[(int)(right->nd_type->tp_size)])
+			node_warning(expp, W_ORDINARY, ovflow);
+		
 		expp->nd_INT = -right->nd_INT;
-		if (expp->nd_type->tp_fund == T_INTORCARD) {
-			expp->nd_type = int_type;
-		}
 		break;
 
 	case NOT:
@@ -74,6 +72,62 @@ cstunary(expp)
 	expp->nd_right = 0;
 }
 
+STATIC
+divide(pdiv, prem, uns)
+	arith *pdiv, *prem;
+{
+	/*	Divide *pdiv by *prem, and store result in *pdiv,
+		remainder in *prem
+	*/
+	register arith o1 = *pdiv;
+	register arith o2 = *prem;
+
+	if (uns)	{
+		/*	this is more of a problem than you might
+			think on C compilers which do not have
+			unsigned long.
+		*/
+		if (o2 & mach_long_sign)	{/* o2 > max_long */
+			if (! (o1 >= 0 || o1 < o2)) {
+				/*	this is the unsigned test
+					o1 < o2 for o2 > max_long
+				*/
+				*prem = o2 - o1;
+				*pdiv = 1;
+			}
+			else {
+				*pdiv = 0;
+			}
+		}
+		else	{		/* o2 <= max_long */
+			long half, bit, hdiv, hrem, rem;
+
+			half = (o1 >> 1) & ~mach_long_sign;
+			bit = o1 & 01;
+			/*	now o1 == 2 * half + bit
+				and half <= max_long
+				and bit <= max_long
+			*/
+			hdiv = half / o2;
+			hrem = half % o2;
+			rem = 2 * hrem + bit;
+			*pdiv = 2*hdiv;
+			*prem = rem;
+			if (rem < 0 || rem >= o2) {
+				/*	that is the unsigned compare
+					rem >= o2 for o2 <= max_long
+				*/
+				*pdiv += 1;
+				*prem -= o2;
+			}
+		}
+	}
+	else {
+		*pdiv = o1 / o2;		/* ??? */
+		*prem = o1 - *pdiv * o2;
+	}
+}
+
 cstbin(expp)
 	register t_node *expp;
 {
@@ -81,8 +135,8 @@ cstbin(expp)
 		expressions below it, and the result restored in
 		expp.
 	*/
-	register arith o1 = expp->nd_left->nd_INT;
-	register arith o2 = expp->nd_right->nd_INT;
+	arith o1 = expp->nd_left->nd_INT;
+	arith o2 = expp->nd_right->nd_INT;
 	register int uns = expp->nd_left->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
@@ -99,37 +153,7 @@ cstbin(expp)
 			node_error(expp, "division by 0");
 			return;
 		}
-		if (uns)	{
-			/*	this is more of a problem than you might
-				think on C compilers which do not have
-				unsigned long.
-			*/
-			if (o2 & mach_long_sign)	{/* o2 > max_long */
-				o1 = ! (o1 >= 0 || o1 < o2);
-				/*	this is the unsigned test
-					o1 < o2 for o2 > max_long
-				*/
-			}
-			else	{		/* o2 <= max_long */
-				long half, bit, hdiv, hrem, rem;
-
-				half = (o1 >> 1) & ~mach_long_sign;
-				bit = o1 & 01;
-				/*	now o1 == 2 * half + bit
-					and half <= max_long
-					and bit <= max_long
-				*/
-				hdiv = half / o2;
-				hrem = half % o2;
-				rem = 2 * hrem + bit;
-				o1 = 2 * hdiv + (rem < 0 || rem >= o2);
-				/*	that is the unsigned compare
-					rem >= o2 for o2 <= max_long
-				*/
-			}
-		}
-		else
-			o1 /= o2;
+		divide(&o1, &o2, uns);
 		break;
 
 	case MOD:
@@ -137,29 +161,8 @@ cstbin(expp)
 			node_error(expp, "modulo by 0");
 			return;
 		}
-		if (uns)	{
-			if (o2 & mach_long_sign)	{/* o2 > max_long */
-				o1 = (o1 >= 0 || o1 < o2) ? o1 : o1 - o2;
-				/*	this is the unsigned test
-					o1 < o2 for o2 > max_long
-				*/
-			}
-			else	{		/* o2 <= max_long */
-				long half, bit, hrem, rem;
-
-				half = (o1 >> 1) & ~mach_long_sign;
-				bit = o1 & 01;
-				/*	now o1 == 2 * half + bit
-					and half <= max_long
-					and bit <= max_long
-				*/
-				hrem = half % o2;
-				rem = 2 * hrem + bit;
-				o1 = (rem < 0 || rem >= o2) ? rem - o2 : rem;
-			}
-		}
-		else
-			o1 %= o2;
+		divide(&o1, &o2, uns);
+		o1 = o2;
 		break;
 
 	case '+':
@@ -343,15 +346,15 @@ cstcall(expp, call)
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
 	*/
-	register t_node *expr = 0;
+	register t_node *expr;
+	register t_type *tp;
 
 	assert(expp->nd_class == Call);
 
-	if (expp->nd_right) {
-		expr = expp->nd_right->nd_left;
-		expp->nd_right->nd_left = 0;
-		FreeNode(expp->nd_right);
-	}
+	expr = expp->nd_right->nd_left;
+	expp->nd_right->nd_left = 0;
+	FreeNode(expp->nd_right);
+	tp = expr->nd_type;
 
 	expp->nd_class = Value;
 	expp->nd_symb = INTEGER;
@@ -370,32 +373,25 @@ cstcall(expp, call)
 		break;
 
 	case S_MAX:
-		if (expp->nd_type == int_type) {
-			expp->nd_INT = max_int;
+		if (tp->tp_fund == T_INTEGER) {
+			expp->nd_INT = int_mask[(int)(tp->tp_size)];
 		}
-		else if (expp->nd_type == longint_type) {
-			expp->nd_INT = max_longint;
+		else if (tp == card_type) {
+			expp->nd_INT = full_mask[(int)(int_size)];
 		}
-		else if (expp->nd_type == card_type) {
-			expp->nd_INT = max_unsigned;
+		else if (tp->tp_fund == T_SUBRANGE) {
+			expp->nd_INT = tp->sub_ub;
 		}
-		else if (expp->nd_type->tp_fund == T_SUBRANGE) {
-			expp->nd_INT = expp->nd_type->sub_ub;
-		}
-		else	expp->nd_INT = expp->nd_type->enm_ncst - 1;
+		else	expp->nd_INT = tp->enm_ncst - 1;
 		break;
 
 	case S_MIN:
-		if (expp->nd_type == int_type) {
-			expp->nd_INT = -max_int;
+		if (tp->tp_fund == T_INTEGER) {
+			expp->nd_INT = -int_mask[(int)(tp->tp_size)];
 			if (! options['s']) expp->nd_INT--;
 		}
-		else if (expp->nd_type == longint_type) {
-			expp->nd_INT = - max_longint;
-			if (! options['s']) expp->nd_INT--;
-		}
-		else if (expp->nd_type->tp_fund == T_SUBRANGE) {
-			expp->nd_INT = expp->nd_type->sub_lb;
+		else if (tp->tp_fund == T_SUBRANGE) {
+			expp->nd_INT = tp->sub_lb;
 		}
 		else	expp->nd_INT = 0;
 		break;
@@ -405,7 +401,7 @@ cstcall(expp, call)
 		break;
 
 	case S_SIZE:
-		expp->nd_INT = expr->nd_type->tp_size;
+		expp->nd_INT = tp->tp_size;
 		break;
 
 	default:
@@ -466,8 +462,6 @@ InitCst()
 		fatal("sizeof (long) insufficient on this machine");
 	}
 
-	max_int = int_mask[int_size];
-	max_unsigned = full_mask[int_size];
-	max_longint = int_mask[long_size];
+	max_int = int_mask[(int)int_size];
 	wrd_bits = 8 * (unsigned) word_size;
 }

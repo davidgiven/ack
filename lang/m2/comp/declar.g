@@ -17,6 +17,7 @@
 #include	<alloc.h>
 #include	<assert.h>
 
+#include	"strict3rd.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -336,8 +337,13 @@ FieldList(t_scope *scope; arith *cnt; int *palign;)
 	  |		/* Old fashioned! the first qualident now represents
 			   the type
 			*/
-			{ warning(W_OLDFASHIONED,
+			{
+#ifndef STRICT_3RD_ED
+			  if (! options['3']) warning(W_OLDFASHIONED,
 			      "old fashioned Modula-2 syntax; ':' missing");
+			  else
+#endif
+			  error("':' missing");
 			  tp = qualified_type(nd);
 			}
 	  ]
