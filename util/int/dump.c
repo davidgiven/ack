@@ -117,7 +117,7 @@ std_raw(addr, rawfl)
 PRIVATE std_item(addr)
 	ptr addr;
 {
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_stack(addr, psize)
 	&&	std_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
 	) {
@@ -129,7 +129,7 @@ PRIVATE std_item(addr)
 			displ_sh(st_sh(addr), stack_loc(addr))));
 	}
 	else
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_stack(addr, wsize)
 	&&	std_bytes(addr, addr + wsize, SH_INT)
 	) {
@@ -243,7 +243,7 @@ PRIVATE FRA_dump()
 PRIVATE FRA_item(addr)
 	int addr;
 {
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_FRA(addr, psize)
 	&&	FRAd_bytes(addr, (int)(addr + psize), SH_DATAP|SH_INSP)
 	) {
@@ -255,7 +255,7 @@ PRIVATE FRA_item(addr)
 			displ_sh(FRA_sh[addr], FRA[addr])));
 	}
 	else
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_FRA(addr, wsize)
 	&&	FRAd_bytes(addr, (int)(addr + wsize), SH_INT)
 	) {
@@ -321,7 +321,7 @@ gdad_all(low, high)
 PRIVATE gdad_item(addr)
 	ptr addr;
 {
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_data(addr, psize)
 	&&	dtd_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
 	) {
@@ -333,7 +333,7 @@ PRIVATE gdad_item(addr)
 			displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 	else
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_data(addr, wsize)
 	&&	dtd_bytes(addr, addr + wsize, SH_INT)
 	) {
@@ -411,7 +411,7 @@ hpd_all()
 PRIVATE hpd_item(addr)
 	ptr addr;
 {
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_data(addr, psize)
 	&&	dtd_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
 	) {
@@ -423,7 +423,7 @@ PRIVATE hpd_item(addr)
 			displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 	else
-	if (	is_aligned(addr, wsize)
+	if (	is_wordaligned(addr)
 	&&	is_in_data(addr, wsize)
 	&&	dtd_bytes(addr, addr + wsize, SH_INT)
 	) {

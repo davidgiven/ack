@@ -80,16 +80,16 @@
 
 #define	arg_n(u)	((u > i_maxuw) ? (wtrap(WARGL, EILLINS), 0) : u)
 
-#define	arg_s(s)	((s <= 0 || s > max_off || s % wsize) ? \
+#define	arg_s(s)	((s <= 0 || s > max_off || (s & wsizem1)) ? \
 				(trap(EODDZ), s) : s)
 
-#define	arg_z(s)	((s < 0 || s > max_off || s % wsize) ? \
+#define	arg_z(s)	((s < 0 || s > max_off || (s & wsizem1)) ? \
 				(trap(EODDZ), s) : s)
 
-#define	arg_o(s)	((s < 0 || s > max_off || (s%wsize && wsize%s)) ? \
+#define	arg_o(s)	((s < 0 || s > max_off || ((s&wsizem1) && wsize%s)) ? \
 				(trap(EODDZ), s) : s)
 
-#define	arg_w(s)	((s <= 0 || s > max_off || s % wsize) ? \
+#define	arg_w(s)	((s <= 0 || s > max_off || (s & wsizem1)) ? \
 				(trap(EODDZ), s) : s)
 
 #define	arg_p(l)	((l >= NProc) ? (wtrap(WARGP, EILLINS), 0) : l)
@@ -102,7 +102,7 @@
 
 #define	arg_wf(s)	((s != 4 && s != 8) ? (trap(EODDZ), s) : s)
 
-#define	arg_wi(s)	(((s != 2 && s != 4) || (s % wsize)) ? \
+#define	arg_wi(s)	(((s != 2 && s != 4) || (s & wsizem1)) ? \
 				(trap(EODDZ), s) : s)
 
 /* special tests */

@@ -402,7 +402,7 @@ DoLIMz()
 	/* LIM -: Load 16 bit ignore mask */
 	LOG(("@M6 DoLIMz()"));
 	spoilFRA();
-	npush(IgnMask, wsize);
+	wpush(IgnMask);
 }
 
 DoLINl2(arg)

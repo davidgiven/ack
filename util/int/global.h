@@ -91,6 +91,7 @@ extern unsigned long i_maxuw;	/* Max. value for unsigned integer of wsize */
 extern long min_off;		/* Minimum offset */
 extern long max_off;		/* Maximum offset */
 extern ptr max_addr;		/* Maximum address */
+extern size wsizem1;		/* wordsize - 1 */
 
 
 /******** EM program parameters ********/
@@ -139,6 +140,7 @@ extern char *data;		/* global data & heap space */
 extern ptr HL;			/* Heap Limit */
 
 extern char *stack;		/* stack space and local data */
+extern char *stackML;		/* stack + ML, to speed up stack accesses */
 extern ptr SL;			/* Stack Limit */
 
 

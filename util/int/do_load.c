@@ -24,7 +24,7 @@ DoLOCl2(arg)
 
 	LOG(("@L6 DoLOCl2(%ld)", l));
 	spoilFRA();
-	npush(arg_c(l), wsize);
+	wpush(arg_c(l));
 }
 
 DoLOCl4(arg)
@@ -35,7 +35,7 @@ DoLOCl4(arg)
 
 	LOG(("@L6 DoLOCl4(%ld)", l));
 	spoilFRA();
-	npush(arg_c(l), wsize);
+	wpush(arg_c(l));
 }
 
 DoLOCm(arg)
@@ -46,7 +46,7 @@ DoLOCm(arg)
 
 	LOG(("@L6 DoLOCm(%ld)", l));
 	spoilFRA();
-	npush(l, wsize);
+	wpush(l);
 }
 
 DoLOCs(hob, wfac)
@@ -58,7 +58,7 @@ DoLOCs(hob, wfac)
 
 	LOG(("@L6 DoLOCs(%ld)", l));
 	spoilFRA();
-	npush(arg_c(l), wsize);
+	wpush(arg_c(l));
 }
 
 DoLDCl2(arg)

@@ -102,9 +102,9 @@ PRIVATE bit_test(w)
 			trap(ESET);
 		}
 	}
-	test_byte = stack_loc(SP + (bitno / 8));
+	test_byte = stack_loc(SP + (bitno >> 3));
 	st_dec(w);
-	npush((long)((test_byte & BIT(bitno % 8)) ? 1 : 0), wsize);
+	wpush((long)((test_byte & BIT(bitno & 7)) ? 1 : 0));
 }
 
 /********************************************************
@@ -132,6 +132,6 @@ PRIVATE create_set(w)
 			trap(ESET);
 		}
 	}
-	st_stn(SP + (bitno / 8), (long)BIT(bitno % 8), 1L);
+	st_stn(SP + (bitno >> 3), (long)BIT(bitno & 7), 1L);
 }
 

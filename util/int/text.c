@@ -32,7 +32,7 @@ init_text() {
  ************************************************************************/
 
 newPC(p)
-	ptr p;
+	register ptr p;
 {
 	register struct proc *pr = &proctab[PI];
 

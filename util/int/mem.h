@@ -8,7 +8,7 @@
 /******** Memory address & location defines ********/
 
 #define	data_loc(a)	(*(data + (p2i(a))))
-#define	stack_loc(a)	(*(stack + (ML - (a))))
+#define	stack_loc(a)	(*(stackML - (a)))
 #define	mem_loc(a)	(in_stack(a) ? stack_loc(a) : data_loc(a))
 
 #define	loc_addr(o)	(((o) < 0) ? (LB + (o)) : (AB + (o)))
@@ -17,8 +17,11 @@
 /******** Checks on adresses and ranges ********/
 
 #define	is_aligned(a,n)	((p2i(a)) % (n) == 0)
+#define	is_wordaligned(a)	(((p2i(a)) & wsizem1) == 0)
 
 #define	ch_aligned(a,n)	{ if (!is_aligned(a, min(n, wsize))) \
+						{ trap(EBADPTR); } }
+#define	ch_wordaligned(a)	{ if (!is_wordaligned(a)) \
 						{ trap(EBADPTR); } }
 
 #define	in_gda(p)	((p) < HB)

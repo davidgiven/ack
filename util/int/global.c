@@ -19,6 +19,7 @@ unsigned long i_maxuw;
 long min_off;
 long max_off;
 ptr max_addr;
+size wsizem1;
 
 
 /******** EM program parameters ********/
@@ -62,6 +63,7 @@ char *data;
 ptr HL;
 
 char *stack;
+char *stackML;
 ptr SL;
 
 

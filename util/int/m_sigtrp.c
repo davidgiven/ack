@@ -38,6 +38,15 @@ init_signals() {
 	for (sn = 0; sn < NSIG+1; sn++) {
 		/* for all signals that would cause termination */
 		if (!UNIX_trap(sn)) {
+#ifdef SIGCHLD
+			if (sn == SIGCHLD) continue;
+#endif
+#ifdef SIGIO
+			if (sn == SIGIO) continue;
+#endif
+#ifdef SIGWINCH
+			if (sn == SIGWINCH) continue;
+#endif
 			if (signal(sn, SIG_IGN) != SIG_IGN) {
 				/* we take our fate in our own hand */
 				signal(sn, HndlIntSig);

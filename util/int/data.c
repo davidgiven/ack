@@ -60,7 +60,7 @@ newHP(ap)
 	if (in_stack(p)) {
 		wtrap(WHPSTACK, EHEAP);
 	}
-	if (!is_aligned(p, wsize)) {
+	if (!is_wordaligned(p)) {
 		wtrap(WHPODD, EHEAP);
 	}
 	if (maxheap) {
@@ -99,61 +99,61 @@ newHP(ap)
  ************************************************************************/
 
 dt_stdp(addr, ap)
-	ptr addr, ap;
+	register ptr addr;
+	ptr ap;
 {
 	register int i;
 	register long p = (long) ap;
 
 	LOG(("@g6 dt_stdp(%lu, %lu)", addr, p));
 	ch_in_data(addr, psize);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) psize; i++) {
-		ch_dt_prot(addr + i);
-		data_loc(addr + i) = (char) (p);
-		dt_dp(addr + i);
+	ch_wordaligned(addr);
+	for (i = (int) psize; i > 0; i--, addr++) {
+		ch_dt_prot(addr);
+		data_loc(addr) = (char) (p);
+		dt_dp(addr);
 		p = p>>8;
 	}
 }
 
 dt_stip(addr, ap)
-	ptr addr, ap;
+	register ptr addr;
+	ptr ap;
 {
 	register int i;
 	register long p = (long) ap;
 
 	LOG(("@g6 dt_stip(%lu, %lu)", addr, p));
 	ch_in_data(addr, psize);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) psize; i++) {
-		ch_dt_prot(addr + i);
-		data_loc(addr + i) = (char) (p);
-		dt_ip(addr + i);
+	ch_wordaligned(addr);
+	for (i = (int) psize; i > 0; i--, addr++) {
+		ch_dt_prot(addr);
+		data_loc(addr) = (char) (p);
+		dt_ip(addr);
 		p = p>>8;
 	}
 }
 
 dt_stn(addr, al, n)
-	ptr addr;
+	register ptr addr;
 	long al;
 	size n;
 {
 	register int i;
 	register long l = al;
+#ifdef LOGGING
+	/* a psize zero is ambiguous */
+	int sh_flags = (l == 0 && n == psize) ? (SH_INT|SH_DATAP) : SH_INT;
+#endif LOGGING
 
 	LOG(("@g6 dt_stn(%lu, %lu, %lu)", addr, l, n));
 	ch_in_data(addr, n);
 	ch_aligned(addr, n);
-	for (i = 0; i < (int) n; i++) {
-		ch_dt_prot(addr + i);
-		data_loc(addr + i) = (char) l;
-#ifdef	LOGGING
-		if (al == 0 && n == psize) {
-			/* a psize zero, ambiguous */
-			dt_sh(addr + i) = (SH_INT|SH_DATAP);
-		}
-		else {
-			dt_sh(addr + i) = SH_INT;
-		}
+	for (i = (int) n; i > 0; i--, addr++) {
+		ch_dt_prot(addr);
+		data_loc(addr) = (char) l;
+#ifdef LOGGING
+		dt_sh(addr) = sh_flags;
 #endif	LOGGING
 		l = l>>8;
 	}
@@ -161,20 +161,25 @@ dt_stn(addr, al, n)
 
 #ifndef	NOFLOAT
 dt_stf(addr, f, n)
-	ptr addr;
+	register ptr addr;
 	double f;
-	size n;
+	register size n;
 {
 	register char *cp = (char *) &f;
 	register int i;
+	float fl;
 
 	LOG(("@g6 dt_stf(%lu, %g, %lu)", addr, f, n));
 	ch_in_data(addr, n);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) n; i++) {
-		ch_dt_prot(addr + i);
-		data_loc(addr + i) = *cp++;
-		dt_fl(addr + i);
+	ch_wordaligned(addr);
+	if ((int) n == 4) {
+		fl = f;
+		cp = (char *) &fl;
+	}
+	for (i = (int) n; i > 0; i--, addr++) {
+		ch_dt_prot(addr);
+		data_loc(addr) = *cp++;
+		dt_fl(addr);
 	}
 }
 #endif	NOFLOAT
@@ -191,14 +196,14 @@ dt_stf(addr, f, n)
  ************************************************************************/
 
 ptr dt_lddp(addr)
-	ptr addr;
+	register ptr addr;
 {
 	register ptr p;
 
 	LOG(("@g6 dt_lddp(%lu)", addr));
 
 	ch_in_data(addr, psize);
-	ch_aligned(addr, wsize);
+	ch_wordaligned(addr);
 #ifdef	LOGGING
 	if (!is_dt_set(addr, psize, SH_DATAP)) {
 		warning(WGDPEXP);
@@ -212,14 +217,14 @@ ptr dt_lddp(addr)
 }
 
 ptr dt_ldip(addr)
-	ptr addr;
+	register ptr addr;
 {
 	register ptr p;
 
 	LOG(("@g6 dt_ldip(%lu)", addr));
 
 	ch_in_data(addr, psize);
-	ch_aligned(addr, wsize);
+	ch_wordaligned(addr);
 #ifdef	LOGGING
 	if (!is_dt_set(addr, psize, SH_INSP)) {
 		warning(WGIPEXP);
@@ -233,7 +238,7 @@ ptr dt_ldip(addr)
 }
 
 unsigned long dt_ldu(addr, n)
-	ptr addr;
+	register ptr addr;
 	size n;
 {
 	register int i;
@@ -258,7 +263,7 @@ unsigned long dt_ldu(addr, n)
 }
 
 long dt_lds(addr, n)
-	ptr addr;
+	register ptr addr;
 	size n;
 {
 	register int i;
@@ -295,42 +300,42 @@ long dt_lds(addr, n)
  ************************************************************************/
 
 dt_mvd(d2, d1, n)			/* d1 -> d2 */
-	ptr d2, d1;
+	register ptr d2, d1;
 	size n;
 {
 	register int i;
 
 	ch_in_data(d1, n);
-	ch_aligned(d1, wsize);
+	ch_wordaligned(d1);
 	ch_in_data(d2, n);
-	ch_aligned(d2, wsize);
+	ch_wordaligned(d2);
 
-	for (i = 0; i < (int) n; i++) {
-		ch_dt_prot(d2 + i);
-		data_loc(d2 + i) = data_loc(d1 + i);
+	for (i = (int) n; i > 0; i--, d1++, d2++) {
+		ch_dt_prot(d2);
+		data_loc(d2) = data_loc(d1);
 #ifdef	LOGGING
-		dt_sh(d2 + i) = dt_sh(d1 + i) & ~SH_PROT;
+		dt_sh(d2) = dt_sh(d1) & ~SH_PROT;
 #endif	LOGGING
 	}
 }
 
 dt_mvs(d, s, n)				/* s -> d */
-	ptr d, s;
+	register ptr d, s;
 	size n;
 {
 	register int i;
 
 	ch_in_stack(s, n);
-	ch_aligned(s, wsize);
+	ch_wordaligned(s);
 	ch_in_data(d, n);
-	ch_aligned(d, wsize);
+	ch_wordaligned(d);
 
-	for (i = 0; i < (int) n; i++) {
-		ch_dt_prot(d + i);
-		ch_st_prot(s + i);
-		data_loc(d + i) = stack_loc(s + i);
+	for (i = (int) n; i > 0; i--, d++, s++) {
+		ch_dt_prot(d);
+		ch_st_prot(s);
+		data_loc(d) = stack_loc(s);
 #ifdef	LOGGING
-		dt_sh(d + i) = st_sh(s + i) & ~SH_PROT;
+		dt_sh(d) = st_sh(s) & ~SH_PROT;
 #endif	LOGGING
 	}
 }
@@ -338,8 +343,8 @@ dt_mvs(d, s, n)				/* s -> d */
 #ifdef	LOGGING
 
 PRIVATE warn_dtbits(addr, n)
-	ptr addr;
-	size n;
+	register ptr addr;
+	register size n;
 {
 	register int or_bits = 0;
 	register int and_bits = 0xff;

@@ -461,7 +461,7 @@ PRIVATE fef(f, n)
 		f *= 2.0;
 
 	fpush((sign) ? -f : f, n);	/* push mantissa */
-	npush(exponent, wsize);		/* push exponent */
+	wpush(exponent);		/* push exponent */
 }
 
 /* floating point service routines, to avoid having to use -lm */

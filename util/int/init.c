@@ -134,7 +134,7 @@ init(ac, av)
 	}
 	dt_stdp(vecp, i2p(0));		/* terminating zero */
 
-	npush((long) ac, wsize);	/* push argc */
+	wpush((long) ac);	/* push argc */
 }
 
 PRIVATE size alignedstrlen(s)
@@ -177,7 +177,7 @@ PRIVATE ptr storestring(addr, s)
 #ifdef	LOGGING
 dt_clear_area(from, to)
 	ptr from;
-	ptr to;
+	register ptr to;
 {
 	/* includes *from but excludes *to */
 	register ptr a;
@@ -189,7 +189,7 @@ dt_clear_area(from, to)
 
 st_clear_area(from, to)
 	ptr from;
-	ptr to;
+	register ptr to;
 {
 	/* includes both *from and *to (since ML+1 is unexpressible) */
 	register ptr a;

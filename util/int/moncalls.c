@@ -78,7 +78,7 @@ extern void sync();
 #define	pop_unsp()	((unsigned int) upop(psize))
 #define	pop_ptr()	(dppop())
 
-#define	push_int(a)	(npush((long)(a), wsize))
+#define	push_int(a)	(wpush((long)(a)))
 #define	push_i2(a)	(npush((long)(a), INT2SIZE))
 #define	push_i4(a)	(npush((long)(a), INT4SIZE))
 #define	push_unsp(a)	(npush((long)(a), psize))

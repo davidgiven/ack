@@ -32,7 +32,7 @@ DoCMIl2(arg)
 
 	LOG(("@T6 DoCMIl2(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoCMIm(arg)
@@ -45,7 +45,7 @@ DoCMIm(arg)
 
 	LOG(("@T6 DoCMIm(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoCMIz()
@@ -57,7 +57,7 @@ DoCMIz()
 
 	LOG(("@T6 DoCMIz(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoCMFl2(arg)
@@ -71,7 +71,7 @@ DoCMFl2(arg)
 
 	LOG(("@T6 DoCMFl2(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 #else	NOFLOAT
 	arg = arg;
 	nofloat();
@@ -90,7 +90,7 @@ DoCMFs(hob, wfac)
 
 	LOG(("@T6 DoCMFs(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 #else	NOFLOAT
 	hob = hob;
 	wfac = wfac;
@@ -108,7 +108,7 @@ DoCMFz()
 
 	LOG(("@T6 DoCMFz(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 #else	NOFLOAT
 	nofloat();
 #endif	NOFLOAT
@@ -124,7 +124,7 @@ DoCMUl2(arg)
 
 	LOG(("@T6 DoCMUl2(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoCMUz()
@@ -136,7 +136,7 @@ DoCMUz()
 
 	LOG(("@T6 DoCMUz(%ld)", l));
 	spoilFRA();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoCMSl2(arg)
@@ -181,7 +181,7 @@ DoCMPz()
 	spoilFRA();
 	t = dppop();
 	s = dppop();
-	npush((long)(t < s ? 1 : t > s ? -1 : 0), wsize);
+	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
 DoTLTz()
@@ -189,7 +189,7 @@ DoTLTz()
 	/* TLT -: True if less, i.e. iff top of stack < 0 */
 	LOG(("@T6 DoTLTz()"));
 	spoilFRA();
-	npush((long)(wpop() < 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() < 0 ? 1 : 0));
 }
 
 DoTLEz()
@@ -197,7 +197,7 @@ DoTLEz()
 	/* TLE -: True if less or equal, i.e. iff top of stack <= 0 */
 	LOG(("@T6 DoTLEz()"));
 	spoilFRA();
-	npush((long)(wpop() <= 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() <= 0 ? 1 : 0));
 }
 
 DoTEQz()
@@ -205,7 +205,7 @@ DoTEQz()
 	/* TEQ -: True if equal, i.e. iff top of stack = 0 */
 	LOG(("@T6 DoTEQz()"));
 	spoilFRA();
-	npush((long)(wpop() == 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() == 0 ? 1 : 0));
 }
 
 DoTNEz()
@@ -213,7 +213,7 @@ DoTNEz()
 	/* TNE -: True if not equal, i.e. iff top of stack non zero */
 	LOG(("@T6 DoTNEz()"));
 	spoilFRA();
-	npush((long)(wpop() != 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() != 0 ? 1 : 0));
 }
 
 DoTGEz()
@@ -221,7 +221,7 @@ DoTGEz()
 	/* TGE -: True if greater or equal, i.e. iff top of stack >= 0 */
 	LOG(("@T6 DoTGEz()"));
 	spoilFRA();
-	npush((long)(wpop() >= 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() >= 0 ? 1 : 0));
 }
 
 DoTGTz()
@@ -229,7 +229,7 @@ DoTGTz()
 	/* TGT -: True if greater, i.e. iff top of stack > 0 */
 	LOG(("@T6 DoTGTz()"));
 	spoilFRA();
-	npush((long)(wpop() > 0 ? 1 : 0), wsize);
+	wpush((long)(wpop() > 0 ? 1 : 0));
 }
 
 /********************************************************
@@ -267,5 +267,5 @@ PRIVATE compare_obj(obj_size)
 		}
 	}
 	st_dec(2 * obj_size);
-	npush((long) comp_res, wsize);
+	wpush((long) comp_res);
 }

@@ -1,3 +1,10 @@
+13-Nov-89  Ceriel Jacobs (ceriel) at ceriel
+	Many changes for speed-up (resulting speed-up: 20-25%).
+	Also fixed serious problem in floating point handling: the existing
+	code assumed that the low order 4 bytes of a double could be used as
+	a float (4 bytes). This is NOT true for most floating point
+	implementations, notably IEEE ones.
+
  3-Oct-88  Dick Grune (dick) at dick
 	Since the definitions of VERSION and MAGIC are now available from
 	standard include files, e.out.h can be simplified.

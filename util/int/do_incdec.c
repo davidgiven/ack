@@ -21,7 +21,7 @@ DoINCz()
 	/* INC -: Increment word on top of stack by 1 (*) */
 	LOG(("@Z6 DoINCz()"));
 	spoilFRA();
-	npush(inc(spop(wsize)), wsize);
+	wpush(inc(spop(wsize)));
 }
 
 DoINLm(arg)
@@ -150,7 +150,7 @@ DoDECz()
 	/* DEC -: Decrement word on top of stack by 1 (*) */
 	LOG(("@Z6 DoDECz()"));
 	spoilFRA();
-	npush(dec(spop(wsize)), wsize);
+	wpush(dec(spop(wsize)));
 }
 
 DoDELn2(arg)
@@ -406,7 +406,7 @@ DoZERl2(arg)
 	LOG(("@Z6 DoZERl2(%ld)", l));
 	spoilFRA();
 	for (i = arg_w(l); i; i -= wsize)
-		npush(0L, wsize);
+		wpush(0L);
 }
 
 DoZERs(hob, wfac)
@@ -419,7 +419,7 @@ DoZERs(hob, wfac)
 	LOG(("@Z6 DoZERs(%ld)", l));
 	spoilFRA();
 	for (i = arg_w(l); i; i -= wsize)
-		npush(0L, wsize);
+		wpush(0L);
 }
 
 DoZERz()
@@ -430,7 +430,7 @@ DoZERz()
 	LOG(("@Z6 DoZERz(%ld)", l));
 	spoilFRA();
 	for (i = arg_w(l); i; i -= wsize)
-		npush(0L, wsize);
+		wpush(0L);
 }
 
 PRIVATE long inc(l)

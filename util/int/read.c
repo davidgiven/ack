@@ -87,6 +87,7 @@ rd_header()
 		fatal("Bad wordsize in loadfile");
 
 	dwsize = 2 * wsize;		/* set double wordsize */
+	wsizem1 = wsize - 1;		/* wordsize - 1 used often */
 	
 	psize = rd_int(2L);
 	if (!(psize == 2 || psize == 4) || psize < wsize)
@@ -195,9 +196,7 @@ rd_close()
  *									*
  *	A double is 8 bytes, so it can contain 4- and 8-byte (EM)	*
  *	floating point numbers. That's why a 4-byte floating point	*
- *	number is also stored in a double. In this case only the	*
- *	the 4 LSB's are used. These bytes contain the most important	*
- *	information, the MSB's are just for precision.			*
+ *	number is also stored in a double.				*
  ************************************************************************/
 
 PRIVATE ptr rd_repeat(pos, count, prev_pos)

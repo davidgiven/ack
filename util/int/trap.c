@@ -90,11 +90,11 @@ do_trap(nr, L, F)
 
 		/* save the Function Return Area */
 		pushFRA(FRASize);
-		npush((long)FRASize, wsize);
-		npush((long)FRA_def, wsize);
+		wpush((long)FRASize);
+		wpush((long)FRA_def);
 
 		/* set up the trap number as the only parameter */
-		npush((long) nr, wsize);
+		wpush((long) nr);
 
 		tpi = TrapPI;		/* allowed since OnTrap == TR_TRAP */
 		TrapPI = 0;

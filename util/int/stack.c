@@ -25,6 +25,7 @@ extern size maxstack;			/* from main.c */
 
 #ifdef	LOGGING
 char *stack_sh;				/* stadowbytes */
+char *stackML_sh;			/* speed up access of stadowbytes */
 #endif	LOGGING
 
 PRIVATE warn_stbits();
@@ -38,8 +39,10 @@ init_stack() {
 
 	SL = ML + 1 - STACKSIZE;	/* initialize Stack Limit */
 	stack = Malloc(STACKSIZE, "stack space");
+	stackML = stack + ML;
 #ifdef	LOGGING
 	stack_sh = Malloc(STACKSIZE, "shadowspace for stack");
+	stackML_sh = stack_sh + ML;
 	st_clear_area(ML, SL);
 #endif	LOGGING
 }
@@ -63,37 +66,39 @@ newSP(ap)
 	if (LB < p) {
 		wtrap(WSPGTLB, ESTACK);
 	}
-	if (p < HP) {
-		wtrap(WSPINHEAP, ESTACK);
-	}
-	if (!is_aligned(p, wsize)) {
+	if (!is_wordaligned(p)) {
 		wtrap(WSPODD, ESTACK);
 	}
-	if (maxstack) {
-		/* more than allowed on command line */
-		if (ML - p > maxstack) {
-			warning(WESTACK);
-			trap(ESTACK);
+	if (p < SP) {
+		if (p < HP) {
+			wtrap(WSPINHEAP, ESTACK);
 		}
-	}
-	if (p < SL) {
-		/* extend stack space */
-		register size stacksize = ML + 1 - p;
+		if (maxstack) {
+			/* more than allowed on command line */
+			if (ML - p > maxstack) {
+				warning(WESTACK);
+				trap(ESTACK);
+			}
+		}
+		if (p < SL) {
+			/* extend stack space */
+			register size stacksize = ML + 1 - p;
 
-		stacksize = allocfrac(stacksize);
-		SL = ML + 1 - stacksize;
-		stack = Realloc(stack, (size)(stacksize), "stack space");
+			stacksize = allocfrac(stacksize);
+			SL = ML + 1 - stacksize;
+			stack = Realloc(stack, (size)(stacksize), "stack space");
+			stackML = stack + ML;
 #ifdef	LOGGING
-		stack_sh = Realloc(stack_sh, (size)(stacksize),
+			stack_sh = Realloc(stack_sh, (size)(stacksize),
 						"shadowspace for stack");
+			stackML_sh = stack_sh + ML;
 #endif	LOGGING
-	}
+		}
 
 #ifdef	LOGGING
-	if (!in_stack(p)) {
 		st_clear_area(SP - 1, p);
-	}
 #endif	LOGGING
+	}
 	SP = p;
 }
 
@@ -103,7 +108,7 @@ newLB(p)
 	if (!in_stack(p)) {
 		wtrap(WLBOUT, ESTACK);
 	}
-	if (!is_aligned(p, wsize)) {
+	if (!is_wordaligned(p)) {
 		wtrap(WLBODD, ESTACK);
 	}
 	if (!is_LB(p)) {
@@ -126,64 +131,64 @@ newLB(p)
  ************************************************************************/
 
 st_stdp(addr, ap)
-	ptr addr, ap;
+	register ptr addr;
+	ptr ap;
 {
 	register int i;
 	register long p = (long) ap;
 
 	LOG(("@s6 st_stdp(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) psize; i++) {
-		ch_st_prot(addr + i);
-		stack_loc(addr + i) = (char) (p);
-		st_dp(addr + i);
+	ch_wordaligned(addr);
+	for (i = (int) psize; i > 0; i--, addr++) {
+		ch_st_prot(addr);
+		stack_loc(addr) = (char) (p);
+		st_dp(addr);
 		p = p>>8;
 	}
 
 }
 
 st_stip(addr, ap)
-	ptr addr, ap;
+	register ptr addr;
+	ptr ap;
 {
 	register int i;
 	register long p = (long) ap;
 
 	LOG(("@s6 st_stip(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) psize; i++) {
-		ch_st_prot(addr + i);
-		stack_loc(addr + i) = (char) (p);
-		st_ip(addr + i);
+	ch_wordaligned(addr);
+	for (i = (int) psize; i > 0; i--, addr++) {
+		ch_st_prot(addr);
+		stack_loc(addr) = (char) (p);
+		st_ip(addr);
 		p = p>>8;
 	}
 }
 
 st_stn(addr, al, n)
-	ptr addr;
+	register ptr addr;
 	long al;
 	size n;
 {
 	register int i;
 	register long l = al;
+#ifdef LOGGING
+	/* a psize zero is ambiguous */
+	int sh_flags = (l == 0 && n == psize) ? (SH_INT|SH_DATAP) : SH_INT;
+#endif
 
 	LOG(("@s6 st_stn(%lu, %ld, %lu)", addr, l, n));
 	ch_in_stack(addr, n);
 	ch_aligned(addr, n);
 
 	/* store the bytes */
-	for (i = 0; i < (int) n; i++) {
-		ch_st_prot(addr + i);
-		stack_loc(addr + i) = (char) l;
+	for (i = (int) n; i > 0; i--, addr++) {
+		ch_st_prot(addr);
+		stack_loc(addr) = (char) l;
 #ifdef	LOGGING
-		if (al == 0 && n == psize) {
-			/* a psize zero, ambiguous */
-			st_sh(addr + i) = (SH_INT|SH_DATAP);
-		}
-		else {
-			st_sh(addr + i) = SH_INT;
-		}
+		st_sh(addr) = sh_flags;
 #endif	LOGGING
 		l = l>>8;
 	}
@@ -191,20 +196,25 @@ st_stn(addr, al, n)
 
 #ifndef	NOFLOAT
 st_stf(addr, f, n)
-	ptr addr;
+	register ptr addr;
 	double f;
 	size n;
 {
 	register char *cp = (char *) &f;
+	float fl;
 	register int i;
 
 	LOG(("@s6 st_stf(%lu, %g, %lu)", addr, f, n));
 	ch_in_stack(addr, n);
-	ch_aligned(addr, wsize);
-	for (i = 0; i < (int) n; i++) {
-		ch_st_prot(addr + i);
-		stack_loc(addr + i) = *(cp++);
-		st_fl(addr + i);
+	ch_wordaligned(addr);
+	if ((int) n == 4) {
+		fl = f;
+		cp = (char *) &fl;
+	}
+	for (i = (int) n; i > 0; i--, addr++) {
+		ch_st_prot(addr);
+		stack_loc(addr) = *(cp++);
+		st_fl(addr);
 	}
 }
 #endif	NOFLOAT
@@ -222,14 +232,14 @@ st_stf(addr, f, n)
  ************************************************************************/
 
 ptr st_lddp(addr)
-	ptr addr;
+	register ptr addr;
 {
 	register ptr p;
 
 	LOG(("@s6 st_lddp(%lu)", addr));
 
 	ch_in_stack(addr, psize);
-	ch_aligned(addr, wsize);
+	ch_wordaligned(addr);
 #ifdef	LOGGING
 	if (!is_st_set(addr, psize, SH_DATAP)) {
 		warning(WLDPEXP);
@@ -243,14 +253,14 @@ ptr st_lddp(addr)
 }
 
 ptr st_ldip(addr)
-	ptr addr;
+	register ptr addr;
 {
 	register ptr p;
 
 	LOG(("@s6 st_ldip(%lu)", addr));
 
 	ch_in_stack(addr, psize);
-	ch_aligned(addr, wsize);
+	ch_wordaligned(addr);
 #ifdef	LOGGING
 	if (!is_st_set(addr, psize, SH_INSP)) {
 		warning(WLIPEXP);
@@ -264,7 +274,7 @@ ptr st_ldip(addr)
 }
 
 unsigned long st_ldu(addr, n)
-	ptr addr;
+	register ptr addr;
 	size n;
 {
 	register int i;
@@ -289,7 +299,7 @@ unsigned long st_ldu(addr, n)
 }
 
 long st_lds(addr, n)
-	ptr addr;
+	register ptr addr;
 	size n;
 {
 	register int i;
@@ -316,17 +326,24 @@ long st_lds(addr, n)
 
 #ifndef	NOFLOAT
 double st_ldf(addr, n)
-	ptr addr;
+	register ptr addr;
 	size n;
 {
-	double f = 0.0;
-	register char *cp = (char *) &f;
+	double f;
+	float fl;
+	register char *cp;
 	register int i;
 
 	LOG(("@s6 st_ldf(%lu, %lu)", addr, n));
 
+	if ((int)n == 4) {
+		cp = (char *) &fl;
+	}
+	else {
+		cp = (char *) &f;
+	}
 	ch_in_stack(addr, n);
-	ch_aligned(addr, wsize);
+	ch_wordaligned(addr);
 #ifdef	LOGGING
 	if (!is_st_set(addr, n, SH_FLOAT)) {
 		warning(WLFEXP);
@@ -334,8 +351,11 @@ double st_ldf(addr, n)
 	}
 #endif	LOGGING
 
-	for (i = 0; i < (int) n; i++) {
-		*(cp++) = stack_loc(addr + i);
+	for (i = (int) n; i > 0; i--, addr++) {
+		*(cp++) = stack_loc(addr);
+	}
+	if ((int)n == 4) {
+		f = fl;
 	}
 	return (f);
 }
@@ -359,42 +379,42 @@ double st_ldf(addr, n)
  ************************************************************************/
 
 st_mvs(s2, s1, n)			/* s1 -> s2 */
-	ptr s2, s1;
+	register ptr s2, s1;
 	size n;
 {
 	register int i;
 
 	ch_in_stack(s1, n);
-	ch_aligned(s1, wsize);
+	ch_wordaligned(s1);
 	ch_in_stack(s2, n);
-	ch_aligned(s2, wsize);
+	ch_wordaligned(s2);
 
-	for (i = 0; i < (int) n; i++) {
-		ch_st_prot(s2 + i);
-		ch_st_prot(s1 + i);
-		stack_loc(s2 + i) = stack_loc(s1 + i);
+	for (i = (int) n; i > 0; i--, s1++, s2++) {
+		ch_st_prot(s2);
+		ch_st_prot(s1);
+		stack_loc(s2) = stack_loc(s1);
 #ifdef	LOGGING
-		st_sh(s2 + i) = st_sh(s1 + i) & ~SH_PROT;
+		st_sh(s2) = st_sh(s1) & ~SH_PROT;
 #endif	LOGGING
 	}
 }
 
 st_mvd(s, d, n)				/* d -> s */
-	ptr s, d;
+	register ptr s, d;
 	size n;
 {
 	register int i;
 
 	ch_in_data(d, n);
-	ch_aligned(d, wsize);
+	ch_wordaligned(d);
 	ch_in_stack(s, n);
-	ch_aligned(s, wsize);
+	ch_wordaligned(s);
 
-	for (i = 0; i < (int) n; i++) {
-		ch_st_prot(s + i);
-		stack_loc(s + i) = data_loc(d + i);
+	for (i = (int) n; i > 0; i--, s++, d++) {
+		ch_st_prot(s);
+		stack_loc(s) = data_loc(d);
 #ifdef	LOGGING
-		st_sh(s + i) = dt_sh(d + i) & ~SH_PROT;
+		st_sh(s) = dt_sh(d) & ~SH_PROT;
 #endif	LOGGING
 	}
 }
@@ -495,6 +515,7 @@ long wpop()
  ************************************************************************
  *									*
  *	dppush(p)	- push a data ptr, load from p.			*
+ *	wpush(l)	- push a word, load from l.			*
  *	npush(l, n)	- push n bytes, load from l.			*
  *	push_dt(d, n)	- push n bytes, load from address d in data.	*
  *	push_st(s, n)	- push n bytes, load from address s in stack.	*
@@ -509,17 +530,26 @@ dppush(p)
 	st_stdp(SP, p);
 }
 
-npush(l, n)
+wpush(l)
 	long l;
+{
+	st_inc(wsize);
+	st_stn(SP, l, wsize);
+}
+
+npush(l, n)
+	register long l;
 	size n;
 {
-	st_inc(max(n, wsize));
+	size m = max(n, wsize);
+
+	st_inc(m);
 	if (n == 1)
 		l &= MASK1;
 	else
 	if (n == 2)
 		l &= MASK2;
-	st_stn(SP, l, max(n, wsize));
+	st_stn(SP, l, m);
 
 }
 
@@ -562,8 +592,8 @@ fpush(f, n)
 #ifdef	LOGGING
 
 PRIVATE warn_stbits(addr, n)
-	ptr addr;
-	size n;
+	register ptr addr;
+	register size n;
 {
 	register int or_bits = 0;
 	register int and_bits = 0xff;

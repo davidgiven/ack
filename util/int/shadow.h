@@ -10,6 +10,7 @@
 
 extern char *data_sh;		/* shadowbytes of data space */
 extern char *stack_sh;		/* shadowbytes of stack space */
+extern char *stackML_sh;	/* stack_sh + ML (to speed up stack access) */
 
 /* Bit 0, 1, 2 and 3: datatype/pointertype. */
 
@@ -25,7 +26,7 @@ extern char *stack_sh;		/* shadowbytes of stack space */
 /******** Shadowbytes, general ********/
 
 #define	dt_sh(a)	(*(data_sh + (p2i(a))))
-#define	st_sh(a)	(*(stack_sh + (ML - (a))))
+#define	st_sh(a)	(*(stackML_sh - (a)))
 #define	mem_sh(a)	(in_stack(a) ? st_sh(a) : dt_sh(a))
 
 /******** Shadowbytes settings for data ********/
