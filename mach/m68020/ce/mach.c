@@ -26,4 +26,5 @@ char *filename;
 }
 */
 
+#define IEEEFLOAT
 #include <float_cst>
