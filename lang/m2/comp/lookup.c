@@ -26,26 +26,31 @@ lookup(id, scope)
 		Return a pointer to its "def" structure if it exists,
 		otherwise return 0.
 	*/
-	register struct def *df;
-	struct def *df1;
+	register struct def *df, *df1;
 
-	for (df = id->id_def, df1 = 0; df; df1 = df, df = df->next) {
-		if (df->df_scope == scope) {
-			if (df1) {
-				/* Put the definition in front
-				*/
-				df1->next = df->next;
-				df->next = id->id_def;
-				id->id_def = df;
-			}
-			if (df->df_kind == D_IMPORT) {
-				assert(df->imp_def != 0);
-				return df->imp_def;
-			}
-			return df;
+	/* Look in the chain of definitions of this "id" for one with scope
+	   "scope".
+	*/
+	for (df = id->id_def, df1 = 0;
+	     df && df->df_scope != scope;
+	     df1 = df, df = df->next) { /* nothing */ }
+
+	if (df) {
+		/* Found it
+		*/
+		if (df1) {
+			/* Put the definition in front
+			*/
+			df1->next = df->next;
+			df->next = id->id_def;
+			id->id_def = df;
+		}
+		if (df->df_kind == D_IMPORT) {
+			assert(df->imp_def != 0);
+			return df->imp_def;
 		}
 	}
-	return 0;
+	return df;
 }
 
 struct def *
@@ -57,7 +62,7 @@ lookfor(id, vis, give_error)
 		If it is not defined create a dummy definition and,
 		if "give_error" is set, give an error message.
 	*/
-	struct def *df;
+	register struct def *df;
 	register struct scopelist *sc = vis;
 
 	while (sc) {

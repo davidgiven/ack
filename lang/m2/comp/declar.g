@@ -21,23 +21,31 @@ static char *RcsId = "$Header$";
 #include	"misc.h"
 #include	"main.h"
 
-int		proclevel = 0;	/* nesting level of procedures */
+int		proclevel = 0;		/* nesting level of procedures */
+int		return_occurred;	/* set if a return occurred in a
+					   procedure or function
+					*/
 }
 
 ProcedureDeclaration
 {
-	struct def *df;
+	register struct def *df;
+	struct def *df1;
 } :
 			{ proclevel++; }
-	ProcedureHeading(&df, D_PROCEDURE)
+	ProcedureHeading(&df1, D_PROCEDURE)
 			{
-			  CurrentScope->sc_definedby = df;
+			  CurrentScope->sc_definedby = df = df1;
 			  df->prc_vis = CurrVis;
+			  return_occurred = 0;
 			}
 	';' block(&(df->prc_body)) IDENT
 			{
 			  match_id(dot.TOK_IDF, df->df_idf);
 			  close_scope(SC_CHKFORW|SC_REVERSE);
+			  if (! return_occurred && ResultType(df->df_type)) {
+error("function procedure does not return a value", df->df_idf->id_text);
+			  }
 			  proclevel--;
 			}
 ;

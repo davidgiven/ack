@@ -229,9 +229,12 @@ ReturnStatement(struct node **pnd;)
 {
 	register struct def *df = CurrentScope->sc_definedby;
 	register struct node *nd;
+	extern int return_occurred;
 } :
 
-	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot);
+			  return_occurred = 1;
+			}
 	[
 		expression(&(nd->nd_right))
 			{ if (scopeclosed(CurrentScope)) {

@@ -21,9 +21,8 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"Lpars.h"
 #include	"standards.h"
+#include	"walk.h"
 
-extern label	data_label();
-extern label	text_label();
 extern char	*long2str();
 extern char	*symbol2str();
 extern int	proclevel;
@@ -43,7 +42,7 @@ CodeConst(cst, size)
 		C_ldc(cst);
 	}
 	else {
-		C_df_dlb(dlab = data_label());
+		C_df_dlb(dlab = ++data_label);
 		C_rom_icon(long2str((long) cst), size);
 		C_lae_dlb(dlab, (arith) 0);
 		C_loi(size);
@@ -59,7 +58,7 @@ CodeString(nd)
 		C_loc(nd->nd_INT);
 	}
 	else {
-		C_df_dlb(lab = data_label());
+		C_df_dlb(lab = ++data_label);
 		C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
 		C_lae_dlb(lab, (arith) 0);
 	}
@@ -88,7 +87,7 @@ CodePadString(nd, sz)
 CodeReal(nd)
 	register struct node *nd;
 {
-	label lab = data_label();
+	label lab = ++data_label;
 
 	C_df_dlb(lab);
 	C_rom_fcon(nd->nd_REL, nd->nd_type->tp_size);
@@ -114,6 +113,7 @@ CodeExpr(nd, ds, true_label, false_label)
 		/* Fall through */
 
 	case Link:
+	case LinkDef:
 	case Arrsel:
 	case Arrow:
 		CodeDesig(nd, ds);
@@ -290,6 +290,7 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register struct node *left = nd->nd_left;
+	register struct type *result_tp;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -308,7 +309,7 @@ CodeCall(nd)
 	assert(IsProcCall(left));
 
 	if (nd->nd_right) {
-		CodeParameters(left->nd_type->prc_params, nd->nd_right);
+		CodeParameters(ParamList(left->nd_type), nd->nd_right);
 	}
 
 	if (left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) {
@@ -325,8 +326,12 @@ CodeCall(nd)
 		C_cai();
 	}
 	if (left->nd_type->prc_nbpar) C_asp(left->nd_type->prc_nbpar);
-	if (left->nd_type->next) {
-		C_lfr(WA(left->nd_type->next->tp_size));
+	if (result_tp = ResultType(left->nd_type)) {
+		if (IsConstructed(result_tp)) {
+			C_lfr(pointer_size);
+			C_loi(result_tp->tp_size);
+		}
+		else	C_lfr(WA(result_tp->tp_size));
 	}
 }
 
@@ -765,6 +770,7 @@ CodeOper(expr, true_label, false_label)
 				C_com(tp->tp_size);
 				C_and(tp->tp_size);
 				C_ior(tp->tp_size);
+				C_zer(tp->tp_size);
 			}
 			C_cms(tp->tp_size);
 			break;
@@ -795,10 +801,10 @@ CodeOper(expr, true_label, false_label)
 	case AND:
 	case '&':
 		if (true_label == 0)	{
-			label l_true = text_label();
-			label l_false = text_label();
-			label l_maybe = text_label();
-			label l_end = text_label();
+			label l_true = ++text_label;
+			label l_false = ++text_label;
+			label l_maybe = ++text_label;
+			label l_end = ++text_label;
 			struct desig Des;
 
 			Des = InitDesig;
@@ -814,7 +820,7 @@ CodeOper(expr, true_label, false_label)
 			C_df_ilb(l_end);
 		}
 		else	{
-			label l_maybe = text_label();
+			label l_maybe = ++text_label;
 			struct desig Des;
 
 			Des = InitDesig;
@@ -826,10 +832,10 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case OR:
 		if (true_label == 0)	{
-			label l_true = text_label();
-			label l_false = text_label();
-			label l_maybe = text_label();
-			label l_end = text_label();
+			label l_true = ++text_label;
+			label l_false = ++text_label;
+			label l_maybe = ++text_label;
+			label l_end = ++text_label;
 			struct desig Des;
 
 			Des = InitDesig;
@@ -845,7 +851,7 @@ CodeOper(expr, true_label, false_label)
 			C_df_ilb(l_end);
 		}
 		else	{
-			label l_maybe = text_label();
+			label l_maybe = ++text_label;
 			struct desig Des;
 
 			Des = InitDesig;
@@ -1026,13 +1032,10 @@ CodeDStore(nd)
 DoHIGH(nd)
 	struct node *nd;
 {
-	register struct def *df;
-	arith highoff;
+	register struct def *df = nd->nd_def;
+	register arith highoff;
 
 	assert(nd->nd_class == Def);
-
-	df = nd->nd_def;
-
 	assert(df->df_kind == D_VARIABLE);
 
 	highoff = df->var_off + pointer_size + word_size;

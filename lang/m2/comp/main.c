@@ -159,6 +159,8 @@ AddStandards()
 	(void) Enter("DEC", D_PROCEDURE, std_type, S_DEC);
 	(void) Enter("INC", D_PROCEDURE, std_type, S_INC);
 	(void) Enter("VAL", D_PROCEDURE, std_type, S_VAL);
+	(void) Enter("NEW", D_PROCEDURE, std_type, S_NEW);
+	(void) Enter("DISPOSE", D_PROCEDURE, std_type, S_DISPOSE);
 	(void) Enter("TRUNC", D_PROCEDURE, std_type, S_TRUNC);
 	(void) Enter("SIZE", D_PROCEDURE, std_type, S_SIZE);
 	(void) Enter("ORD", D_PROCEDURE, std_type, S_ORD);

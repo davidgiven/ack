@@ -11,7 +11,7 @@ LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
 GEN =	/usr/em/util/LLgen/src/LLgen
 GENOPTIONS = -d
-PROFILE = -p
+PROFILE = 
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 LFLAGS = $(PROFILE)
@@ -22,10 +22,17 @@ COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
 	code.o tmpvar.o lookup.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
-GENFILES=	tokenfile.c \
-	program.c declar.c expression.c statement.c \
-	tokenfile.g symbol2str.c char.c Lpars.c Lpars.h
 
+# Keep the next three entries up to date!
+GENCFILES=	tokenfile.c \
+	program.c declar.c expression.c statement.c \
+	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c
+GENGFILES=	tokenfile.g
+GENHFILES=	errout.h\
+	idfsize.h numsize.h strsize.h target_sizes.h debug.h\
+	inputtype.h maxset.h ndir.h density.h
+#
+GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
 all:
 	make hfiles
 	make LLfiles
@@ -44,7 +51,7 @@ main:	$(OBJ) Makefile
 	size main
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles 
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles
 
 lint:	LLfiles hfiles
 	lint $(INCLUDES) $(LINTFLAGS) `sources $(OBJ)`
@@ -101,7 +108,7 @@ node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
-walk.o: LLlex.h Lpars.h chk_expr.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h
+walk.o: LLlex.h Lpars.h chk_expr.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h walk.h
 casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h

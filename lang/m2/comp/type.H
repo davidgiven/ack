@@ -74,7 +74,7 @@ struct type	{
 #define T_NUMERIC	(T_INTORCARD|T_REAL)
 #define T_INDEX		(T_ENUMERATION|T_CHAR|T_SUBRANGE)
 #define T_DISCRETE	(T_INDEX|T_INTORCARD)
-#define T_PRCRESULT	(T_DISCRETE|T_REAL|T_POINTER|T_WORD)
+#define	T_CONSTRUCTED	(T_ARRAY|T_SET|T_RECORD)
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {
@@ -136,6 +136,8 @@ struct type
 #define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->next==0)
 #define bounded(tpx)	((tpx)->tp_fund & T_INDEX)
 #define complex(tpx)	((tpx)->tp_fund & (T_RECORD|T_ARRAY))
-#define returntype(tpx)	(((tpx)->tp_fund & T_PRCRESULT) ||\
-		((tpx)->tp_fund == T_SET && (tpx)->tp_size <= dword_size))
 #define WA(sz)		(align(sz, (int) word_size))
+#define ResultType(tpx)	(assert((tpx)->tp_fund == T_PROCEDURE), (tpx)->next)
+#define ParamList(tpx)	(assert((tpx)->tp_fund == T_PROCEDURE),\
+					(tpx)->prc_params)
+#define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)

@@ -31,7 +31,7 @@ STATIC int
 chk_arr(expp)
 	struct node *expp;
 {
-	return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
+	return chk_designator(expp, VARIABLE, D_USED);
 }
 
 STATIC int
@@ -54,7 +54,7 @@ STATIC int
 chk_linkorname(expp)
 	register struct node *expp;
 {
-	if (chk_designator(expp, VALUE|DESIGNATOR, D_USED)) {
+	if (chk_designator(expp, VALUE, D_USED)) {
 		if (expp->nd_class == Def &&
 		    expp->nd_def->df_kind == D_PROCEDURE) {
 			/* Check that this procedure is one that we
@@ -269,7 +269,7 @@ getarg(argp, bases, designator)
 
 	if ((!designator && !chk_expr(left)) ||
 	    (designator &&
-	     !chk_designator(left, DESIGNATOR|VARIABLE, D_USED|D_NOREG))) {
+	     !chk_designator(left, VARIABLE, D_USED|D_NOREG))) {
 		return 0;
 	}
 
@@ -299,7 +299,10 @@ getname(argp, kinds)
 	arg = arg->nd_right;
 	if (! chk_designator(arg->nd_left, 0, D_REFERRED)) return 0;
 
-	if (arg->nd_left->nd_class != Def);
+	if (arg->nd_left->nd_class != Def && arg->nd_left->nd_class != LinkDef) {
+		node_error(arg, "identifier expected");
+		return 0;
+	}
 
 	if (!(arg->nd_left->nd_def->df_kind & kinds)) {
 		node_error(arg, "unexpected type");
@@ -324,7 +327,7 @@ chk_proccall(expp)
 	arg = expp;
 	expp->nd_type = left->nd_type->next;
 
-	for (param = left->nd_type->prc_params; param; param = param->next) {
+	for (param = ParamList(left->nd_type); param; param = param->next) {
 		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
 		if (left->nd_symb == STRING) {
 			TryToString(left, TypeOfParam(param));
@@ -430,8 +433,6 @@ chk_designator(expp, flag, dflags)
 		be something that can be assigned to.
 		It may also contain the flag VALUE, indicating that a
 		value is expected. In this case, VARIABLE may not be set.
-		It also contains the flag DESIGNATOR, indicating that '['
-		and '^' are allowed for this designator.
 		Also contained may be the flag HASSELECTORS, indicating that
 		the result must have selectors.
 		"dflags" contains some flags that must be set at the definition
@@ -439,6 +440,11 @@ chk_designator(expp, flag, dflags)
 	*/
 	register struct def *df;
 	register struct type *tp;
+
+	if (expp->nd_class == Def || expp->nd_class == LinkDef) {
+		expp->nd_def->df_flags |= dflags;
+		return 1;
+	}
 
 	expp->nd_type = error_type;
 
@@ -453,7 +459,7 @@ chk_designator(expp, flag, dflags)
 		assert(expp->nd_symb == '.');
 
 		if (! chk_designator(left,
-				     (flag&DESIGNATOR)|HASSELECTORS,
+				     HASSELECTORS,
 				     dflags)) return 0;
 
 		tp = left->nd_type;
@@ -466,6 +472,7 @@ chk_designator(expp, flag, dflags)
 		else {
 			expp->nd_def = df;
 			expp->nd_type = df->df_type;
+			expp->nd_class = LinkDef;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 				/* Fields of a record are always D_QEXPORTED,
 				   so ...
@@ -513,18 +520,13 @@ df->df_idf->id_text);
 		return 1;
 	}
 
-	if (! (flag & DESIGNATOR)) {
-		node_error(expp, "identifier expected");
-		return 0;
-	}
-
 	if (expp->nd_class == Arrsel) {
 		struct type *tpl, *tpr;
 
 		assert(expp->nd_symb == '[');
 
 		if ( 
-		     !chk_designator(expp->nd_left, DESIGNATOR|VARIABLE, dflags)
+		     !chk_designator(expp->nd_left, VARIABLE, dflags)
 		   ||
 		     !chk_expr(expp->nd_right)
 		   ||
@@ -556,7 +558,7 @@ df->df_idf->id_text);
 	if (expp->nd_class == Arrow) {
 		assert(expp->nd_symb == '^');
 
-		if (! chk_designator(expp->nd_right, DESIGNATOR|VARIABLE, dflags)) {
+		if (! chk_designator(expp->nd_right, VARIABLE, dflags)) {
 			return 0;
 		}
 
@@ -795,7 +797,7 @@ chk_uoper(expp)
 		break;
 
 	default:
-		assert(0);
+		crash("chk_uoper");
 	}
 	node_error(expp, "illegal operand for unary operator \"%s\"",
 			symbol2str(expp->nd_symb));
@@ -818,14 +820,14 @@ getvariable(argp)
 
 	left = arg->nd_left;
 
-	if (! chk_designator(left, DESIGNATOR, D_REFERRED)) return 0;
+	if (! chk_designator(left, 0, D_REFERRED)) return 0;
 	if (left->nd_class == Arrsel || left->nd_class == Arrow) {
 		*argp = arg;
 		return left;
 	}
 
 	df = 0;
-	if (left->nd_class == Link || left->nd_class == Def) {
+	if (left->nd_class == LinkDef || left->nd_class == Def) {
 		df = left->nd_def;
 	}
 
@@ -916,6 +918,47 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 		expp->nd_type = card_type;
 		if (left->nd_class == Value) cstcall(expp, S_ORD);
 		break;
+
+	case S_NEW:
+	case S_DISPOSE:
+		{
+			static int warning_given = 0;
+
+			if (!warning_given) {
+				warning_given = 1;
+				node_warning(expp, "NEW and DISPOSE are old-fashioned");
+			}
+		}
+		if (! (left = getvariable(&arg))) return 0;
+		if (! (left->nd_type->tp_fund == T_POINTER)) {
+			node_error(left, "pointer variable expected");
+			return 0;
+		}
+		if (left->nd_class == Def) {
+			left->nd_def->df_flags |= D_NOREG;
+		}
+		/* Now, make it look like a call to ALLOCATE or DEALLOCATE */
+		{
+			struct token dt;
+			struct node *nd;
+
+			dt.TOK_INT = left->nd_type->next->tp_size;
+			dt.tk_symb = INTEGER;
+			dt.tk_lineno = left->nd_lineno;
+			nd = MkLeaf(Value, &dt);
+			nd->nd_type = card_type;
+			dt.tk_symb = ',';
+			arg->nd_right = MkNode(Link, nd, NULLNODE, &dt);
+			/* Ignore other arguments to NEW and/or DISPOSE ??? */
+
+			FreeNode(expp->nd_left);
+			dt.tk_symb = IDENT;
+			dt.tk_lineno = expp->nd_left->nd_lineno;
+			dt.TOK_IDF = str2idf(std == S_NEW ?
+						"ALLOCATE" : "DEALLOCATE", 0);
+			expp->nd_left = MkLeaf(Name, &dt);
+		}
+		return chk_call(expp);
 
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
@@ -1080,5 +1123,6 @@ int (*ChkTable[])() = {
 	chk_set,
 	NodeCrash,
 	NodeCrash,
-	chk_linkorname
+	chk_linkorname,
+	NodeCrash
 };

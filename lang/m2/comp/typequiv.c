@@ -7,8 +7,11 @@ static char *RcsId = "$Header$";
 /*	Routines for testing type equivalence, type compatibility, and
 	assignment compatibility
 */
+#include	"debug.h"
+
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<assert.h>
 
 #include	"type.h"
 #include	"def.h"
@@ -66,8 +69,8 @@ TstProcEquiv(tp1, tp2)
 	*/
 	if (! TstTypeEquiv(tp1->next, tp2->next)) return 0;
 
-	p1 = tp1->prc_params;
-	p2 = tp2->prc_params;
+	p1 = ParamList(tp1);
+	p2 = ParamList(tp2);
 
 	/* Now check the parameters
 	*/
@@ -180,6 +183,10 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		TstTypeEquiv(formaltype, actualtype)
 	    ||
 		( !VARflag && TstAssCompat(formaltype, actualtype))
+	    ||
+		(  formaltype == address_type 
+		&& actualtype->tp_fund == T_POINTER
+		)
 	    ||
 		(  formaltype == word_type
 		&& 

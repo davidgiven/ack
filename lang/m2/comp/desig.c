@@ -311,7 +311,7 @@ CodeDesig(nd, ds)
 		}
 		break;
 
-	case Link:
+	case LinkDef:
 		assert(nd->nd_symb == '.');
 
 		CodeDesig(nd->nd_left, ds);

@@ -20,6 +20,7 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"const.h"
 #include	"scope.h"
+#include	"walk.h"
 
 int
 	word_align = AL_WORD,
@@ -64,8 +65,6 @@ struct type *h_type;
 int	cnt_type;
 #endif
 
-extern label	data_label();
-
 struct type *
 create_type(fund)
 	int fund;
@@ -93,10 +92,6 @@ construct_type(fund, tp)
 
 	switch (fund)	{
 	case T_PROCEDURE:
-		if (tp && !returntype(tp)) {
-			error("illegal procedure result type");
-		}
-		/* Fall through */
 	case T_POINTER:
 	case T_HIDDEN:
 		dtp->tp_align = pointer_align;
@@ -315,11 +310,11 @@ genrck(tp)
 
 	if (tp->tp_fund == T_SUBRANGE) {
 		if (!(ol = tp->sub_rck)) {
-			tp->sub_rck = l = data_label();
+			tp->sub_rck = l = ++data_label;
 		}
 	}
 	else if (!(ol = tp->enm_rck)) {
-		tp->enm_rck = l = data_label();
+		tp->enm_rck = l = ++data_label;
 	}
 	if (!ol) {
 		ol = l;
@@ -423,7 +418,7 @@ ArraySizes(tp)
 
 	/* generate descriptor and remember label.
 	*/
-	tp->arr_descr = data_label();
+	tp->arr_descr = ++data_label;
 	C_df_dlb(tp->arr_descr);
 	C_rom_cst(lo);
 	C_rom_cst(hi - lo);
@@ -441,7 +436,7 @@ FreeType(tp)
 
 	assert(tp->tp_fund == T_PROCEDURE);
 
-	pr = tp->prc_params;
+	pr = ParamList(tp);
 	while (pr) {
 		pr1 = pr;
 		pr = pr->next;
@@ -516,7 +511,7 @@ DumpType(tp)
 		break;
 	case T_PROCEDURE:
 		{
-		register struct paramlist *par = tp->prc_params;
+		register struct paramlist *par = ParamList(tp);
 
 		print("PROCEDURE");
 		if (par) {
@@ -541,7 +536,7 @@ DumpType(tp)
 	case T_INTORCARD:
 		print("INTORCARD"); break;
 	default:
-		assert(0);
+		crash("DumpType");
 	}
 	print(";");
 }

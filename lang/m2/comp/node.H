@@ -19,6 +19,7 @@ struct node {
 #define Def	9		/* an identified name */
 #define Stat	10		/* a statement */
 #define Link	11
+#define LinkDef	12
 				/* do NOT change the order or the numbers!!! */
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;
@@ -40,10 +41,9 @@ extern struct node *MkNode(), *MkLeaf();
 
 #define NULLNODE ((struct node *) 0)
 
-#define DESIGNATOR 1
-#define HASSELECTORS 2
-#define VARIABLE 4
-#define VALUE 8
+#define HASSELECTORS	002
+#define VARIABLE	004
+#define VALUE		010
 
-#define	IsCast(lnd)	((lnd)->nd_class == Def && is_type((lnd)->nd_def))
+#define	IsCast(lnd)	(((lnd)->nd_class == Def || (lnd)->nd_class == LinkDef)  && is_type((lnd)->nd_def))
 #define	IsProcCall(lnd)	((lnd)->nd_type->tp_fund == T_PROCEDURE)

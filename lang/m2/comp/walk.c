@@ -26,30 +26,17 @@ static char *RcsId = "$Header$";
 #include	"f_info.h"
 #include	"idf.h"
 #include	"chk_expr.h"
+#include	"walk.h"
 
 extern arith	NewPtr();
 extern arith	NewInt();
 extern int	proclevel;
-static label	instructionlabel;
-static char	return_expr_occurred;
+label		text_label;
+label		data_label;
 static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
 struct scope	*ProcScope;
-
-label
-text_label()
-{
-	return instructionlabel++;
-}
-
-label
-data_label()
-{
-	static label	datalabel = 0;
-
-	return ++datalabel;
-}
 
 STATIC
 DoProfil()
@@ -58,7 +45,7 @@ DoProfil()
 
 	if (! options['L']) {
 		if (!filename_label) {
-			filename_label = data_label();
+			filename_label = ++data_label;
 			C_df_dlb(filename_label);
 			C_rom_scon(FileName, (arith) (strlen(FileName) + 1));
 		}
@@ -73,7 +60,6 @@ WalkModule(module)
 	/*	Walk through a module, and all its local definitions.
 		Also generate code for its body.
 	*/
-	register struct def *df = module->mod_vis->sc_scope->sc_def;
 	register struct scope *sc;
 	struct scopelist *vis;
 
@@ -81,20 +67,10 @@ WalkModule(module)
 	CurrVis = module->mod_vis;
 	sc = CurrentScope;
 
-	if (!proclevel) {
-		/* This module is a glocal module.
-		   Generate code to allocate storage for its variables.
-		   They all have an explicit name.
+	if (!proclevel && module == Defined) {
+		/* This module is a global module. Export the name of its
+		   initialization routine
 		*/
-		while (df) {
-			if (df->df_kind == D_VARIABLE) {
-				C_df_dnam(df->var_name);
-				C_bss_cst(
-					WA(df->df_type->tp_size),
-					(arith) 0, 0);
-			}
-			df = df->df_nextinscope;
-		}
 		if (state == PROGRAM) C_exp("main");
 		else C_exp(sc->sc_name);
 	}
@@ -108,12 +84,11 @@ WalkModule(module)
 	   this module.
 	*/
 	sc->sc_off = 0;
-	instructionlabel = 2;
-	func_type = 0;
+	text_label = 1;
 	ProcScope = CurrentScope;	
-	C_pro_narg(state == PROGRAM ? "main" : sc->sc_name);
+	C_pro_narg(state==PROGRAM && module==Defined ? "main" : sc->sc_name);
 	DoProfil();
-	if (CurrVis == Defined->mod_vis) {
+	if (module == Defined) {
 		/* Body of implementation or program module.
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
@@ -121,7 +96,7 @@ WalkModule(module)
 		struct node *nd;
 
 		if (state == IMPLEMENTATION) {
-			label l1 = data_label();
+			label l1 = ++data_label;
 			/* we don't actually prevent recursive calls,
 			   but do nothing if called recursively
 			*/
@@ -157,44 +132,73 @@ WalkProcedure(procedure)
 	/*	Walk through the definition of a procedure and all its
 		local definitions
 	*/
-	struct scopelist *vis = CurrVis;
+	struct scopelist *savevis = CurrVis;
 	register struct scope *sc;
 	register struct type *tp;
 	register struct paramlist *param;
+	label func_res_label = 0;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
 	ProcScope = sc = CurrentScope;
 	
+	/* Generate code for all local modules and procedures
+	*/
 	WalkDef(sc->sc_def);
 
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(sc->sc_name);
 	DoProfil();
-	/* generate calls to initialization routines of modules defined within
+
+	/* Generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
 	MkCalls(sc->sc_def);
-	return_expr_occurred = 0;
-	instructionlabel = 2;
-	func_type = tp = procedure->df_type->next;
-	if (! returntype(tp)) {
-		node_error(procedure->prc_body, "illegal result type");
-	}
-	WalkNode(procedure->prc_body, (label) 0);
-	C_df_ilb((label) 1);
-	if (tp) {
-		if (! return_expr_occurred) {
-node_error(procedure->prc_body,"function procedure does not return a value");
+
+	/* Make sure that arguments of size < word_size are on a
+	   fixed place.
+	*/
+	for (param = ParamList(procedure->df_type);
+	     param;
+	     param = param->next) {
+		if (! IsVarParam(param)) {
+			tp = TypeOfParam(param);
+
+			if (!IsConformantArray(tp) && tp->tp_size < word_size) {
+				C_lol(param->par_def->var_off);
+				C_lal(param->par_def->var_off);
+				C_sti(tp->tp_size);
+			}
 		}
-		C_ret(WA(tp->tp_size));
 	}
-	else	C_ret((arith) 0);
+
+	text_label = 1;
+	func_type = tp = ResultType(procedure->df_type);
+
+	if (IsConstructed(tp)) {
+		func_res_label = ++data_label;
+		C_df_dlb(func_res_label);
+		C_bss_cst(tp->tp_size, (arith) 0, 0);
+	}
+
+	WalkNode(procedure->prc_body, (label) 0);
+	C_ret((arith) 0);
+	if (tp) {
+		C_df_ilb((label) 1);
+		if (func_res_label) {
+			C_lae_dlb(func_res_label, (arith) 0);
+			C_sti(tp->tp_size);
+			C_lae_dlb(func_res_label, (arith) 0);
+			C_ret(pointer_size);
+		}
+		else	C_ret(WA(tp->tp_size));
+	}
+
 	RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
-	CurrVis = vis;
+	CurrVis = savevis;
 	proclevel--;
 }
 
@@ -210,6 +214,12 @@ WalkDef(df)
 		}
 		else if (df->df_kind == D_PROCEDURE) {
 			WalkProcedure(df);
+		}
+		else if (!proclevel && df->df_kind == D_VARIABLE) {
+			C_df_dnam(df->var_name);
+			C_bss_cst(
+				WA(df->df_type->tp_size),
+				(arith) 0, 0);
 		}
 		df = df->df_nextinscope;
 	}
@@ -231,22 +241,36 @@ MkCalls(df)
 	}
 }
 
-WalkNode(nd, lab)
+WalkLink(nd, lab)
 	register struct node *nd;
 	label lab;
 {
-	/*	Node "nd" represents either a statement or a statement list.
-		Walk through it.
+	/*	Walk node "nd", which is a link.
 		"lab" represents the label that must be jumped to on
 		encountering an EXIT statement.
 	*/
 
-	while (nd->nd_class == Link) {	 /* statement list */
-		WalkStat(nd->nd_left, lab);
+	while (nd && nd->nd_class == Link) {	 /* statement list */
+		WalkNode(nd->nd_left, lab);
 		nd = nd->nd_right;
 	}
 
-	WalkStat(nd, lab);
+	WalkNode(nd, lab);
+}
+
+WalkCall(nd)
+	register struct node *nd;
+{
+	assert(nd->nd_class == Call);
+
+	if (! options['L']) C_lin((arith) nd->nd_lineno);
+	if (chk_call(nd)) {
+		if (nd->nd_type != 0) {
+			node_error(nd, "procedure call expected");
+			return;
+		}
+		CodeCall(nd);
+	}
 }
 
 WalkStat(nd, lab)
@@ -260,27 +284,9 @@ WalkStat(nd, lab)
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
 
-	if (!nd) {
-		/* Empty statement
-		*/
-		return;
-	}
-
-	if (! options['L']) C_lin((arith) nd->nd_lineno);
-
-	if (nd->nd_class == Call) {
-		if (chk_call(nd)) {
-			if (nd->nd_type != 0) {
-				node_error(nd, "procedure call expected");
-				return;
-			}
-			CodeCall(nd);
-		}
-		return;
-	}
-
 	assert(nd->nd_class == Stat);
 
+	if (! options['L']) C_lin((arith) nd->nd_lineno);
 	switch(nd->nd_symb) {
 	case BECOMES:
 		DoAssign(nd, left, right);
@@ -289,9 +295,9 @@ WalkStat(nd, lab)
 	case IF:
 		{	label l1, l2, l3;
 
-			l1 = instructionlabel++;
-			l2 = instructionlabel++;
-			l3 = instructionlabel++;
+			l1 = ++text_label;
+			l2 = ++text_label;
+			l3 = ++text_label;
 			ExpectBool(left, l3, l1);
 			assert(right->nd_symb == THEN);
 			C_df_ilb(l3);
@@ -314,9 +320,9 @@ WalkStat(nd, lab)
 	case WHILE:
 		{	label l1, l2, l3;
 
-			l1 = instructionlabel++;
-			l2 = instructionlabel++;
-			l3 = instructionlabel++;
+			l1 = ++text_label;
+			l2 = ++text_label;
+			l3 = ++text_label;
 			C_df_ilb(l1);
 			ExpectBool(left, l3, l2);
 			C_df_ilb(l3);
@@ -329,8 +335,8 @@ WalkStat(nd, lab)
 	case REPEAT:
 		{	label l1, l2;
 
-			l1 = instructionlabel++;
-			l2 = instructionlabel++;
+			l1 = ++text_label;
+			l2 = ++text_label;
 			C_df_ilb(l1);
 			WalkNode(left, lab);
 			ExpectBool(right, l2, l1);
@@ -341,8 +347,8 @@ WalkStat(nd, lab)
 	case LOOP:
 		{	label l1, l2;
 
-			l1 = instructionlabel++;
-			l2 = instructionlabel++;
+			l1 = ++text_label;
+			l2 = ++text_label;
 			C_df_ilb(l1);
 			WalkNode(right, l2);
 			C_bra(l1);
@@ -354,8 +360,8 @@ WalkStat(nd, lab)
 		{
 			arith tmp = 0;
 			struct node *fnd;
-			label l1 = instructionlabel++;
-			label l2 = instructionlabel++;
+			label l1 = ++text_label;
+			label l2 = ++text_label;
 
 			if (! DoForInit(nd, left)) break;
 			fnd = left->nd_right;
@@ -432,20 +438,40 @@ WalkStat(nd, lab)
 	case RETURN:
 		if (right) {
 			WalkExpr(right);
-			/* Assignment compatibility? Yes, see Rep. 9.11
+			/* The type of the return-expression must be
+			   assignment compatible with the result type of the
+			   function procedure (See Rep. 9.11).
 			*/
 			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
 			}
-			return_expr_occurred = 1;
+			C_bra((label) 1);
 		}
-		C_bra((label) 1);
+		else	C_ret((arith) 0);
 		break;
 
 	default:
 		crash("(WalkStat)");
 	}
 }
+
+extern int	NodeCrash();
+
+int (*WalkTable[])() = {
+	NodeCrash,
+	NodeCrash,
+	NodeCrash,
+	NodeCrash,
+	NodeCrash,
+	WalkCall,
+	NodeCrash,
+	NodeCrash,
+	NodeCrash,
+	NodeCrash,
+	WalkStat,
+	WalkLink,
+	NodeCrash
+};
 
 ExpectBool(nd, true_label, false_label)
 	register struct node *nd;
@@ -488,7 +514,7 @@ WalkDesignator(nd, ds)
 
 	DO_DEBUG(1, (DumpTree(nd), print("\n")));
 
-	if (! chk_designator(nd, DESIGNATOR|VARIABLE, D_DEFINED)) return;
+	if (! chk_designator(nd, VARIABLE, D_DEFINED)) return;
 
 	*ds = InitDesig;
 	CodeDesig(nd, ds);
@@ -497,6 +523,7 @@ WalkDesignator(nd, ds)
 DoForInit(nd, left)
 	register struct node *nd, *left;
 {
+	register struct def *df;
 
 	nd->nd_left = nd->nd_right = 0;
 	nd->nd_class = Name;
@@ -505,6 +532,30 @@ DoForInit(nd, left)
 	if (! chk_designator(nd, VARIABLE, D_DEFINED) ||
 	    ! chk_expr(left->nd_left) ||
 	    ! chk_expr(left->nd_right)) return 0;
+
+	df = nd->nd_def;
+	if (df->df_kind == D_FIELD) {
+		node_error(nd, "FOR-loop variable may not be a field of a record");
+		return 0;
+	}
+
+	if (!df->var_name && df->var_off >= 0) {
+		node_error(nd, "FOR-loop variable may not be a parameter");
+		return 0;
+	}
+
+	if (df->df_scope != CurrentScope) {
+		register struct scopelist *sc = CurrVis;
+
+		while (sc && sc->sc_scope != df->df_scope) {
+			sc = nextvisible(sc);
+		}
+
+		if (!sc) {
+			node_error(nd, "FOR-loop variable may not be imported");
+			return 0;
+		}
+	}
 
 	if (nd->nd_type->tp_size > word_size ||
 	    !(nd->nd_type->tp_fund & T_DISCRETE)) {
@@ -536,7 +587,7 @@ DoAssign(nd, left, right)
 	struct desig dsl, dsr;
 
 	if (!chk_expr(right)) return;
-	if (! chk_designator(left, DESIGNATOR|VARIABLE, D_DEFINED)) return;
+	if (! chk_designator(left, VARIABLE, D_DEFINED)) return;
 	TryToString(right, left->nd_type);
 	dsr = InitDesig;
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);

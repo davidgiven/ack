@@ -19,6 +19,8 @@
 #define S_SIZE	15
 #define S_TRUNC	16
 #define S_VAL	17
+#define S_NEW	18
+#define S_DISPOSE 19
 
 /* Standard procedures and functions defined in the SYSTEM module ... */
 

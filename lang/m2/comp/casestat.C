@@ -16,6 +16,7 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 #include	"desig.h"
+#include	"walk.h"
 
 #include	"density.h"
 
@@ -48,8 +49,6 @@ struct case_entry	{
 */
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
 
-extern label text_label(), data_label();
-
 CaseCode(nd, exitlabel)
 	struct node *nd;
 	label exitlabel;
@@ -68,7 +67,7 @@ CaseCode(nd, exitlabel)
 	clear((char *) sh, sizeof(*sh));
 	WalkExpr(pnode->nd_left);
 	sh->sh_type = pnode->nd_left->nd_type;
-	sh->sh_break = text_label();
+	sh->sh_break = ++text_label;
 
 	/* Now, create case label list
 	*/
@@ -76,7 +75,7 @@ CaseCode(nd, exitlabel)
 		pnode = pnode->nd_right;
 		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
 			if (pnode->nd_left) {
-				pnode->nd_lab = text_label();
+				pnode->nd_lab = ++text_label;
 				if (! AddCases(sh,
 					       pnode->nd_left->nd_left,
 					       pnode->nd_lab)) {
@@ -89,17 +88,17 @@ CaseCode(nd, exitlabel)
 			/* Else part
 			*/
 
-			sh->sh_default = text_label();
+			sh->sh_default = ++text_label;
 			pnode = 0;
 		}
 	}
 
 	/* Now generate code for the switch itself
 	*/
-	tablabel = data_label();	/* the rom must have a label	*/
+	tablabel = ++data_label;	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
 	if (sh->sh_default) C_rom_ilb(sh->sh_default);
-	else C_rom_ilb(sh->sh_break);
+	else C_rom_ucon("0", pointer_size);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 
@@ -113,7 +112,7 @@ CaseCode(nd, exitlabel)
 				ce = ce->next;
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
-			else C_rom_ilb(sh->sh_break);
+			else C_rom_ucon("0", pointer_size);
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(word_size);
