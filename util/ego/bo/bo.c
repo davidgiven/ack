@@ -190,13 +190,10 @@ STATIC mv_code(b1,b2)
 	line_p l,x;
 
 	l = last_code(b2->b_start,TRUE);
+	assert(INSTR(l) == op_bra);
 	DLINK(l,b1->b_start);
 	x = l->l_next;
-	if (TYPE(l) == OPINSTRLAB) {
-		assert(INSTR(x) == op_lab);
-		assert(INSTRLAB(l) == INSTRLAB(x));
-		rm_line(l,b2);
-	}
+	rm_line(l,b2);
 	if (INSTR(x) == op_lab) {
 		rm_line(x,b2);
 	}
@@ -207,13 +204,15 @@ bo_switch(b)
 {
 	bblock_p s,x;
 	Lindex i;
-	line_p l;
+	line_p l,bra;
 
 	if (Lnrelems(b->b_succ) == 1) {
 		s = (bblock_p) Lelem(Lfirst(b->b_succ));
 		if (b->b_start != (line_p) 0 &&
 		    s->b_start != (line_p) 0 &&
 		    Lnrelems(s->b_pred) == 1 && 
+		    (bra = last_code(b->b_start,TRUE)) != (line_p) 0 &&
+		    INSTR(bra) == op_bra &&
 		    (s->b_next == (bblock_p) 0 ||
 		     !Lis_elem(s->b_next,s->b_succ))) {
 			l = last_code(s->b_start,FALSE);
