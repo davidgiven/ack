@@ -14,6 +14,13 @@ rscid = "$Header$"
 
 #include "whichone.h"
 
+/*#define	FANCY_MODES
+/*	On the M68020, there are some rea fancy addressing modes.
+	Their use makes the code a bit shorter, but also much slower.
+	The FANCY_MODES #define enables the use of these addressing
+	modes.
+*/
+
 #define small(x) ((x)>=1 && (x)<=8)
 #define abs_small(x)	((x)>=0-8 && (x)<=8)
 #define nicesize(x) ((x)==1||(x)==2||(x)==4||(x)==8)
@@ -447,7 +454,7 @@ mulu_l "mulu.l" data4:ro,	LOCAL:rw:cc		cost(0,44).
 #endif TBL68020
 
 add_l  "add.l"	any4:ro,	D_REG+LOCAL:rw:cc	cost(2,3).
-add_l  "add.l"	any4:ro,	A_REG+LOCAL:rw 		cost(2,3).
+add_l  "add.l"	any4:ro,	A_REG+LOCAL+areg:rw	cost(2,3).
 add_l  "add.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
 and_l  "and.l"	data4:ro,	D_REG:rw:cc		cost(2,3).
 and_l  "and.l"	D_REG:ro,	memalt4:rw:cc		cost(2,6).
@@ -582,29 +589,32 @@ from consts to memalt1
 from consts to memalt2
     gen move_w {const, loww(%1.num)}, %2
 
-from regAcon %bd==0 to A_REG
+from regAcon %bd==0 to A_REG+areg
     gen move_l %1.reg, %2
 
 #ifndef TBL68020
-from t_regAregXcon sfit(%bd, 8) to A_REG
+from t_regAregXcon sfit(%bd, 8) to A_REG+areg
     gen lea {regAregXcon, %1.reg, %1.xreg, 1, %1.bd}, %2
 
-from t_regAregXcon to A_REG
+from t_regAregXcon to A_REG+areg
     gen lea {regAregXcon, %1.reg, %1.xreg, 1, 0}, %2
 	add_l {const, %1.bd}, %2
 
-from t_regAcon sfit(%bd, 16) to A_REG
+from t_regAcon sfit(%bd, 16) to A_REG+areg
     gen lea {regAcon, %1.reg, %1.bd}, %2
 
-from t_regAcon to A_REG
+from t_regAcon to A_REG+areg
     gen move_l %1.reg, %2
 	add_l {const, %1.bd}, %2
 #endif TBL68020
 
-from address - ext_addr to A_REG
+from address - ext_addr to A_REG+areg
     gen lea %1, %2
 
 from any4 to alterable4
+    gen move_l %1, %2
+
+from any4 to areg
     gen move_l %1, %2
 
 from any2 to alterable2
@@ -1174,10 +1184,14 @@ pat lol lof ngi lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer && $3==4
 pat lol lof com lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer && $3==4
 					call lofruxxsof("not.l")
 
-#ifdef TBL68020
 proc lofuxxsof example lol lof inc lol stf
     kills allexceptcon
+#if TBL68020 && FANCY_MODES
     gen bit* {OFF_off4, lb, $1, $2}
+#else
+    uses AA_REG={LOCAL,$1}
+    gen bit* {offsetted4,%a,$2}
+#endif
 
 pat lol lof inc lol stf $1==$4 && $2==$5
 					call lofuxxsof("add.l #1,")
@@ -1190,7 +1204,12 @@ pat lol lof com lol stf $1==$4 && $2==$5 && $3==4
 
 proc lefuxxsef example loe lof inc loe stf
     kills allexceptcon
+#if TBL68020 && FANCY_MODES
     gen bit* {ABS_off4, $1, $2}
+#else
+    uses AA_REG={absolute4, $1}
+    gen bit* {offsetted4, %a, $2}
+#endif
 
 pat loe lof inc loe stf $1==$4 && $2==$5
 					call lefuxxsef("add.l #1,")
@@ -1203,7 +1222,12 @@ pat loe lof com loe stf $1==$4 && $2==$5 && $3==4
 
 proc leiuxxsei example loe loi inc loe sti
     kills allexceptcon
+#if TBL68020 && FANCY_MODES
     gen bit* {ABS_off4, $1, 0}
+#else
+    uses AA_REG={absolute4, $1}
+    gen bit* {indirect4, %a}
+#endif
 
 pat loe loi inc loe sti $1==$4 && $2==4 && $5==4
 					call leiuxxsei("add.l #1,")
@@ -1213,7 +1237,6 @@ pat loe loi ngi loe sti $1==$4 && $2==4 && $5==4 && $3==4
 					call leiuxxsei("neg.l")
 pat loe loi com loe sti $1==$4 && $2==4 && $5==4 && $3==4
 					call leiuxxsei("not.l")
-#endif
 
 proc lolcxxstl example lol loc and stl
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
@@ -1452,6 +1475,81 @@ pat and stl $1==4 && inreg($2)==reg_any	call xxxstl("and.l")
 pat ior stl $1==4 && inreg($2)==reg_any	call xxxstl("or.l")
 pat xor stl $1==4 && inreg($2)==reg_any	call xxxstl("eor.l")
 
+pat ads stl $1==4 && inreg($2)==reg_pointer
+with any4 any4+address
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move %2,{areg,regvar($2,reg_pointer)}
+	add_l %1,{areg,regvar($2,reg_pointer)}
+#ifdef TBL68020
+with regX any4+address
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move %2,{areg,regvar($2,reg_pointer)}
+	move {regAregXcon, regvar($2,reg_pointer), %1.xreg, %1.sc, 0},{areg,regvar($2,reg_pointer)}
+with exact regX regAcon	
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen	move {regAregXcon, %2.reg, %1.xreg, %1.sc, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact regX local_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {regAregXcon, lb, %1.xreg, %1.sc, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact regX indirect4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, %2.reg, %1.xreg,%1.sc,0,0},{areg,regvar($2,reg_pointer)}
+with exact regX offsetted4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, %2.reg, %1.xreg, %1.sc, %2.bd, 0},{areg,regvar($2,reg_pointer)}
+with exact regX LOCAL
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, lb, %1.xreg, %1.sc, %2.bd, 0},{areg,regvar($2,reg_pointer)}
+#ifdef FANCY_MODES
+with exact regX off_con
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, %2.reg, %1.xreg,%1.sc,%2.bd,%2.od},{areg,regvar($2,reg_pointer)}
+with exact regX ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move{ext_regX, %1.sc, %1.xreg, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact regX absolute4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {abs_regXcon, %1.sc, %1.xreg, %2.bd, 0},{areg,regvar($2,reg_pointer)}
+with exact regX abs_con
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {abs_regXcon, %1.sc, %1.xreg, %2.bd, %2.od},{areg,regvar($2,reg_pointer)}
+#endif
+with exact indirect4 ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_con, %1.reg, 0, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact offsetted4 ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_con, %1.reg, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact LOCAL ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_con, lb, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact index_off4 ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {indoff_con, %1.reg, %1.xreg, %1.sc,%1.bd,%2.bd},{areg,regvar($2,reg_pointer)}
+#ifdef FANCY_MODES
+with exact absolute4 ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {abs_con, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact abs_index4 ext_addr
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {absind_con, %1.sc, %1.xreg, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact indirect4 ext_regX
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, %1.reg, %2.xreg, %2.sc, 0, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact offsetted4 ext_regX
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, %1.reg, %2.xreg,%2.sc,%1.bd,%2.bd},{areg,regvar($2,reg_pointer)}
+with exact LOCAL ext_regX
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {off_regXcon, lb, %2.xreg, %2.sc, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+with exact absolute4 ext_regX
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move {abs_regXcon, %2.sc, %2.xreg, %1.bd, %2.bd},{areg,regvar($2,reg_pointer)}
+#endif
+#endif
+	
+
+
 proc xxxdupstl example adi dup stl
 with any4 any
     kills regvar($3, reg_any), use_index %xreg==regvar($3, reg_any)
@@ -1613,26 +1711,25 @@ pat lol lof dup adp lol stf $3==4 && $1==$5 && $2==$6 && inreg($1)==reg_pointer
     killreg %a
 			yields	%a
 
-#ifdef TBL68020
 pat loe lof dup adp loe stf sti $3==4 && $1==$5 && $2==$6 && $7 <= 4
     with conreg
     kills allexceptcon
-    uses AA_REG = {abs_con, $1, $2}, AA_REG
-    gen move_l {indirect4, %a}, %b
-	add_l {const, $4}, {indirect4, %a}
+    uses AA_REG = {absolute4, $1}, AA_REG
+    gen move_l {offsetted4, %a, $2}, %b
+	add_l {const, $4}, {offsetted4, %a, $2}
 			yields	%1 %b		leaving sti $7
 
 pat loe lof dup adp loe stf $3==4 && $1==$5 && $2==$6
     kills allexceptcon
-    uses AA_REG = {abs_con, $1, $2}, AA_REG
-    gen move_l {indirect4, %a}, %b
-	add_l {const, $4}, {indirect4, %a}
+    uses AA_REG = {absolute4, $1}, AA_REG
+    gen move_l {offsetted4, %a, $2}, %b
+	add_l {const, $4}, {offsetted4, %a, $2}
 			yields	%b
 
 pat loe loi dup adp loe sti sti $3==4 && $1==$5 && $2==4 && $6==4 && $7 <= 4
     with conreg
     kills allexceptcon
-    uses AA_REG = {absolute, $1}, AA_REG
+    uses AA_REG = {absolute4, $1}, AA_REG
     gen move_l {indirect4, %a}, %b
 	add_l {const, $4}, {indirect4, %a}
 			yields	%1 %b		leaving sti $7
@@ -1643,7 +1740,6 @@ pat loe loi dup adp loe sti $3==4 && $1==$5 && $2==4 && $6==4
     gen move_l {indirect4, %a}, %b
 	add_l {const, $4}, {indirect4, %a}
 			yields	%b
-#endif
 
 pat lol lol adp stl lae cmp $1==$2 && $2==$4 && inreg($1)==reg_pointer && $3 < 0
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
@@ -1913,17 +2009,19 @@ with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, $1}
 with exact indirect	yields	{OFF_off4, %1.reg, 0, $1}
 with exact LOCAL	yields	{OFF_off4, lb, %1.bd, $1}
 with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od+$1}
-with exact off_regXcon	yields	{OFF_indoff4,
-					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
 with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
 with exact indoff_con	yields	{INDOFF_off4,
 					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact off_regXcon	yields	{OFF_indoff4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+#ifdef FANCY_MODES
 with exact absolute4	yields	{ABS_off4, %1.bd, $1}
 with exact abs_con	yields	{ABS_off4, %1.bd, %1.od+$1}
 with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
 with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
 with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
 with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+#endif
 #endif TBL68020
 
 pat lal			yields	{local_addr, $1}
@@ -2000,17 +2098,19 @@ with exact indirect4	yields	{OFF_off1, %1.reg, 0, 0}
 with exact offsetted4	yields	{OFF_off1, %1.reg, %1.bd, 0}
 with exact LOCAL	yields	{OFF_off1, lb, %1.bd, 0}
 with exact off_con	yields	{OFF_off1, %1.reg, %1.bd, %1.od}
-with exact off_regXcon	yields	{OFF_indoff1,
-					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact index_off4	yields	{INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
 with exact indoff_con	yields	{INDOFF_off1,
 					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff1,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4	yields	{ABS_off1, %1.bd, 0}
 with exact abs_con	yields	{ABS_off1, %1.bd, %1.od}
 with exact abs_regXcon	yields	{ABS_indoff1, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact abs_index4	yields	{ABSIND_off1, %1.sc, %1.xreg, %1.bd, 0}
 with exact absind_con	yields	{ABSIND_off1, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact ext_regX	yields	{abs_index1, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
 pat loi $1==2
@@ -2027,17 +2127,19 @@ with exact indirect4	yields	{OFF_off2, %1.reg, 0, 0}
 with exact offsetted4	yields	{OFF_off2, %1.reg, %1.bd, 0}
 with exact LOCAL	yields	{OFF_off2, lb, %1.bd, 0}
 with exact off_con	yields	{OFF_off2, %1.reg, %1.bd, %1.od}
-with exact off_regXcon	yields	{OFF_indoff2,
-					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact index_off4	yields	{INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
 with exact indoff_con	yields	{INDOFF_off2,
 					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff2,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4	yields	{ABS_off2, %1.bd, 0}
 with exact abs_con	yields	{ABS_off2, %1.bd, %1.od}
 with exact abs_regXcon	yields	{ABS_indoff2, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact abs_index4	yields	{ABSIND_off2, %1.sc, %1.xreg, %1.bd, 0}
 with exact absind_con	yields	{ABSIND_off2, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact ext_regX	yields	{abs_index2, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
 pat loi $1==4
@@ -2054,23 +2156,43 @@ with exact LOCAL	yields	{ILOCAL, %1.bd}
 with exact indirect4	yields	{OFF_off4, %1.reg, 0, 0}
 with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, 0}
 with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od}
-with exact off_regXcon	yields	{OFF_indoff4,
-					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
 with exact indoff_con	yields	{INDOFF_off4,
 					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4	yields	{ABS_off4, %1.bd, 0}
 with exact abs_con	yields	{ABS_off4, %1.bd, %1.od}
 with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, 0}
 with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od}
 with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
-pat loi $1==8
-with A_REG		yields	{offsetted4, %1, 4}
-				{indirect4, %1}
-pat loi $1>8
+pat loi $1==8			leaving ldf 0
+
+pat loi $1==12
+with AA_REG STACK
+    kills ALL
+    uses DD_REG={const,$1}
+    gen add_l %a, %1
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+
+pat loi $1==16
+with AA_REG STACK
+    kills ALL
+    uses DD_REG={const,$1}
+    gen add_l %a, %1
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+	move_l {pre_dec4, %1},{pre_dec4, sp}
+
+pat loi $1>16
 with AA_REG STACK
     kills ALL
     uses DD_REG = {const, $1/4 -1}
@@ -2092,47 +2214,8 @@ with A_REG		yields	{offsetted4, %1, $1+4}
 				{offsetted4, %1, $1}
 with exact local_addr	yields	{LOCAL, %1.bd+$1+4}
 				{LOCAL, %1.bd+$1}
-with exact ext_addr	yields	{absolute4, %1.bd+$1+4}
-				{absolute4, %1.bd+$1}
-#ifndef TBL68020
 with regAcon		yields	{offsetted4, %1.reg, %1.bd+$1+4}
 				{offsetted4, %1.reg, %1.bd+$1}
-#else TBL68020
-with exact regAcon	yields	{offsetted4, %1.reg, %1.bd+$1+4}
-				{offsetted4, %1.reg, %1.bd+$1}
-with exact regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1+4}
-				{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
-with exact indirect4	yields	{OFF_off4, %1.reg, 0, $1+4}
-				{OFF_off4, %1.reg, 0, $1}
-with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, $1+4}
-				{OFF_off4, %1.reg, %1.bd, $1}
-with exact LOCAL	yields	{OFF_off4, lb, %1.bd, $1+4}
-				{OFF_off4, lb, %1.bd, $1}
-with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od+$1+4}
-				{OFF_off4, %1.reg, %1.bd, %1.od+$1}
-with exact off_regXcon	yields	{OFF_indoff4,
-				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
-				{OFF_indoff4,
-				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc,%1.bd,$1+4}
-				{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
-with exact indoff_con	yields	{INDOFF_off4,
-				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
-				{INDOFF_off4,
-				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-with exact absolute4	yields	{ABS_off4, %1.bd, $1+4}
-				{ABS_off4, %1.bd, $1}
-with exact abs_con	yields	{ABS_off4, %1.bd, %1.od+$1+4}
-				{ABS_off4, %1.bd, %1.od+$1}
-with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
-				{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1+4}
-				{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
-with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
-				{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd+$1+4}
-				{abs_index4, %1.sc, %1.xreg, %1.bd+$1}
-#endif TBL68020
 
 pat lpi			yields	{ext_addr, $1}
 
@@ -2267,15 +2350,16 @@ with exact LOCAL any4
 with exact off_con any4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od+$1}
-with exact off_regXcon any4
-    kills allexceptcon
-    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
 with exact index_off4 any4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
 with exact indoff_con any4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact off_regXcon any4
+    kills allexceptcon
+    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+#ifdef FANCY_MODES
 with exact absolute4 any4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, $1}
@@ -2294,6 +2378,7 @@ with exact absind_con any4
 with exact ext_regX any4
     kills allexceptcon
     gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+#endif
 #endif TBL68020
 
 pat sti $1==1
@@ -2332,15 +2417,16 @@ with exact LOCAL any1
 with exact off_con any1
     kills allexceptcon
     gen move %2, {OFF_off1, %1.reg, %1.bd, %1.od}
-with exact off_regXcon any1
-    kills allexceptcon
-    gen move %2, {OFF_indoff1, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact index_off4 any1
     kills allexceptcon
     gen move %2, {INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
 with exact indoff_con any1
     kills allexceptcon
     gen move %2, {INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon any1
+    kills allexceptcon
+    gen move %2, {OFF_indoff1, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4 any1
     kills allexceptcon
     gen move %2, {ABS_off1, %1.bd, 0}
@@ -2359,6 +2445,7 @@ with exact absind_con any1
 with exact ext_regX any1
     kills allexceptcon
     gen move %2, {abs_index1, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
 pat sti $1==2
@@ -2400,12 +2487,13 @@ with exact off_con any2
 with exact index_off4 any2
     kills allexceptcon
     gen move %2, {INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
-with exact off_regXcon any2
-    kills allexceptcon
-    gen move %2, {OFF_indoff2, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact indoff_con any2
     kills allexceptcon
     gen move %2, {INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon any2
+    kills allexceptcon
+    gen move %2, {OFF_indoff2, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4 any2
     kills allexceptcon
     gen move %2, {ABS_off2, %1.bd, 0}
@@ -2424,6 +2512,7 @@ with exact absind_con any2
 with exact ext_regX any2
     kills allexceptcon
     gen move %2, {abs_index2, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
 pat sti $1==4
@@ -2471,15 +2560,16 @@ with exact offsetted4 any4
 with exact off_con any4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od}
-with exact off_regXcon any4
-    kills allexceptcon
-    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
 with exact index_off4 any4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
 with exact indoff_con any4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact off_regXcon any4
+    kills allexceptcon
+    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+#ifdef FANCY_MODES
 with exact absolute4 any4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, 0}
@@ -2498,9 +2588,27 @@ with exact absind_con any4
 with exact ext_regX any4
     kills allexceptcon
     gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd}
+#endif
 #endif TBL68020
 
-pat sti $1>4
+pat sti $1==8		leaving sdf 0
+
+pat sti $1==12
+    with AA_REG STACK
+    kills ALL
+    gen	move_l {post_inc4, sp},{post_inc4,%1}
+    	move_l {post_inc4, sp},{post_inc4,%1}
+    	move_l {post_inc4, sp},{post_inc4,%1}
+
+pat sti $1==16
+    with AA_REG STACK
+    kills ALL
+    gen	move_l {post_inc4, sp},{post_inc4,%1}
+    	move_l {post_inc4, sp},{post_inc4,%1}
+    	move_l {post_inc4, sp},{post_inc4,%1}
+    	move_l {post_inc4, sp},{post_inc4,%1}
+
+pat sti $1>16
 with AA_REG STACK
     kills ALL
     uses DD_REG = {const, $1/4 -1}
@@ -2542,77 +2650,10 @@ with exact local_addr any4 any4
     kills allexceptcon
     gen move %2, {LOCAL, %1.bd+$1}
 	move %3, {LOCAL, %1.bd+$1+4}
-with exact ext_addr any4 any4
-    kills allexceptcon
-    gen move %2, {absolute4, %1.bd+$1}
-	move %3, {absolute4, %1.bd+$1+4}
-#ifndef TBL68020
 with regAcon any4-sconsts any4-sconsts
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd+$1}
 	move %3, {offsetted4, %1.reg, %1.bd+$1+4}
-#else TBL68020
-with exact regAcon any4 any4
-    kills allexceptcon
-    gen move %2, {offsetted4, %1.reg, %1.bd+$1}
-	move %3, {offsetted4, %1.reg, %1.bd+$1+4}
-with exact regAregXcon any4 any4
-    kills allexceptcon
-    gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
-	move %3, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1+4}
-with exact indirect4 any4 any4
-    kills allexceptcon
-    gen move %2, {OFF_off4, %1.reg, 0, $1}
-	move %3, {OFF_off4, %1.reg, 0, $1+4}
-with exact offsetted4 any4 any4
-    kills allexceptcon
-    gen move %2, {OFF_off4, %1.reg, %1.bd, $1}
-	move %3, {OFF_off4, %1.reg, %1.bd, $1+4}
-with exact LOCAL any4 any4
-    kills allexceptcon
-    gen move %2, {OFF_off4, lb, %1.bd, $1}
-	move %3, {OFF_off4, lb, %1.bd, $1+4}
-with exact off_con any4 any4
-    kills allexceptcon
-    gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od+$1}
-	move %3, {OFF_off4, %1.reg, %1.bd, %1.od+$1+4}
-with exact off_regXcon any4 any4
-    kills allexceptcon
-    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-	move %3, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
-with exact index_off4 any4 any4
-    kills allexceptcon
-    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
-	move %3, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1+4}
-with exact indoff_con any4 any4
-    kills allexceptcon
-    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-	move %3, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
-with exact absolute4 any4 any4
-    kills allexceptcon
-    gen move %2, {ABS_off4, %1.bd, $1}
-	move %3, {ABS_off4, %1.bd, $1+4}
-with exact abs_con any4 any4
-    kills allexceptcon
-    gen move %2, {ABS_off4, %1.bd, %1.od+$1}
-	move %3, {ABS_off4, %1.bd, %1.od+$1+4}
-with exact abs_regXcon any4 any4
-    kills allexceptcon
-    gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-	move %3, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
-with exact abs_index4 any4 any4
-    kills allexceptcon
-    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
-	move %3, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1+4}
-with exact absind_con any4 any4
-    kills allexceptcon
-    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-	move %3, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
-with exact ext_regX any4 any4
-    kills allexceptcon
-    gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd+$1}
-	move %3, {abs_index4, %1.sc, %1.xreg, %1.bd+$1+4}
-#endif TBL68020
 
 
 
@@ -2799,17 +2840,19 @@ with exact indirect4	yields	{off_con, %1.reg, 0, $1}
 with exact LOCAL	yields	{off_con, lb, %1.bd, $1}
 with exact offsetted4	yields	{off_con, %1.reg, %1.bd, $1}
 with exact off_con	yields	{off_con, %1.reg, %1.bd, %1.od+$1}
-with exact off_regXcon	yields	{off_regXcon,
-					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
 with exact index_off4	yields	{indoff_con, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
 with exact indoff_con	yields	{indoff_con,
 					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact off_regXcon	yields	{off_regXcon,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+#ifdef FANCY_MODES
 with exact absolute4	yields	{abs_con, %1.bd, $1}
 with exact abs_con	yields	{abs_con, %1.bd, %1.od+$1}
 with exact abs_regXcon	yields	{abs_regXcon, %1.sc, %1.xreg, %1.bd, %1.od+$1}
 with exact abs_index4	yields	{absind_con, %1.sc, %1.xreg, %1.bd, $1}
 with exact absind_con	yields	{absind_con, %1.sc, %1.xreg, %1.bd, %1.od+$1}
 with exact ext_regX	yields	{ext_regX, %1.sc, %1.xreg, %1.bd+$1}
+#endif
 #endif TBL68020
 
 pat ads cmp $1==4
@@ -2817,97 +2860,172 @@ with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving cmu 4
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving cmu 4
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving cmu 4
+#endif
 
 pat ads bne $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving bne $2
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving bne $2
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving bne $2
+#endif
 
 pat ads beq $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving beq $2
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving beq $2
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving beq $2
+#endif
 
 pat ads loe bne $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving loe $2 bne $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving loe $2 bne $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving loe $2 bne $3
+#endif
 
 pat ads loe beq $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving loe $2 beq $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving loe $2 beq $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving loe $2 beq $3
+#endif
 
 pat ads loe cmp $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving loe $2 cmu 4
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving loe $2 cmu 4
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving loe $2 cmu 4
+#endif
 
 pat ads lae bne $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lae $2 bne $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lae $2 bne $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lae $2 bne $3
+#endif
 
 pat ads lae beq $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lae $2 beq $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lae $2 beq $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lae $2 beq $3
+#endif
 
 pat ads lae cmp $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lae $2 cmu 4
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lae $2 cmu 4
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lae $2 cmu 4
+#endif
 
 pat ads lal bne $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lal $2 bne $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lal $2 bne $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lal $2 bne $3
+#endif
 
 pat ads lal beq $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lal $2 beq $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lal $2 beq $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lal $2 beq $3
+#endif
 
 pat ads lal cmp $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lal $2 cmu 4
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lal $2 cmu 4
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lal $2 cmu 4
+#endif
 
 pat ads lol bne $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lol $2 bne $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lol $2 bne $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lol $2 bne $3
+#endif
 
 pat ads lol beq $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lol $2 beq $3
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lol $2 beq $3
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lol $2 beq $3
+#endif
 
 pat ads lol cmp $1==4
 with DD_REG any4
      gen add_l %2, %1	yields	%1	leaving lol $2 cmu 4
 with any4 DD_REG
      gen add_l %1, %2	yields	%2	leaving lol $2 cmu 4
+#ifdef TBL68020
+with regX AA_REG
+     gen move {regAregXcon, %2, %1.xreg, %1.sc, 0},%2
+			yields	%2	leaving lol $2 cmu 4
+#endif
 
 pat ads $1==4
 with D_REG A_REG	yields	{regAregXcon, %2, %1, 1, 0}
 with D_REG regAcon + t_regAcon
 			yields	{t_regAregXcon, %2.reg, %1, 1, %2.bd}
 with D_REG local_addr	yields	{t_regAregXcon, lb, %1, 1, %2.bd}
-with any4-D_REG AA_REG
+with any4 AA_REG
     gen add_l %1, %2	yields	%2
 
 #ifdef TBL68020
@@ -2918,17 +3036,19 @@ with regX A_REG		yields	{regAregXcon, %2, %1.xreg, %1.sc, 0}
 with exact regX regAcon	yields	{regAregXcon, %2.reg, %1.xreg, %1.sc, %2.bd}
 with exact regX local_addr
 			yields	{regAregXcon, lb, %1.xreg, %1.sc, %2.bd}
-with exact regX ext_addr
-			yields	{ext_regX, %1.sc, %1.xreg, %2.bd}
 with exact regX indirect4
 			yields	{off_regXcon, %2.reg, %1.xreg,%1.sc,0,0}
 with exact regX offsetted4
 			yields	{off_regXcon, %2.reg, %1.xreg, %1.sc, %2.bd, 0}
 with exact regX LOCAL	yields	{off_regXcon, lb, %1.xreg, %1.sc, %2.bd, 0}
+#ifdef FANCY_MODES
 with exact regX off_con	yields	{off_regXcon, %2.reg, %1.xreg,%1.sc,%2.bd,%2.od}
+with exact regX ext_addr
+			yields	{ext_regX, %1.sc, %1.xreg, %2.bd}
 with exact regX absolute4
 			yields	{abs_regXcon, %1.sc, %1.xreg, %2.bd, 0}
 with exact regX abs_con	yields	{abs_regXcon, %1.sc, %1.xreg, %2.bd, %2.od}
+#endif
 with exact indirect4 ext_addr
 			yields	{off_con, %1.reg, 0, %2.bd}
 with exact offsetted4 ext_addr
@@ -2937,6 +3057,7 @@ with exact LOCAL ext_addr
 			yields	{off_con, lb, %1.bd, %2.bd}
 with exact index_off4 ext_addr
 			yields	{indoff_con, %1.reg, %1.xreg, %1.sc,%1.bd,%2.bd}
+#ifdef FANCY_MODES
 with exact absolute4 ext_addr
 			yields	{abs_con, %1.bd, %2.bd}
 with exact abs_index4 ext_addr
@@ -2949,6 +3070,7 @@ with exact LOCAL ext_regX
 			yields	{off_regXcon, lb, %2.xreg, %2.sc, %1.bd, %2.bd}
 with exact absolute4 ext_regX
 			yields	{abs_regXcon, %2.sc, %2.xreg, %1.bd, %2.bd}
+#endif
 #endif TBL68020
 
 	/* I WOULD ALSO LIKE THIS:
@@ -3529,15 +3651,9 @@ with STACK
     kills ALL
     uses AA_REG = {post_inc4, sp}
     gen jsr {indirect4, %a}
-#ifdef TBL68020
-with exact address
-    kills ALL
-    gen jsr %1
-#else TBL68020
 with address STACK
     kills ALL
     gen jsr %1
-#endif TBL68020
 
 pat cal
 with STACK
@@ -3684,12 +3800,12 @@ with STACK
     uses AA_REG = {ext_addr, $1}
     gen move_l {offsetted4, %a, 8}, lb
 	move_l {offsetted4, %a, 4}, sp
-#ifdef TBL68020
+#if TBL68020 && FANCY_MODES
 	jmp {OFF_off4, %a, 0, 0}
-#else TBL68020
+#else
 	move_l {indirect4, %a}, %a
 	jmp {indirect4, %a}
-#endif TBL68020
+#endif
 
 pat lim			yields	{absolute4, ".trpim"}
 
@@ -3813,12 +3929,11 @@ proc lloe1shste example loe loc sli ste		/* only left */
 	roxl {absolute2, $1}
 
 proc llil1shsil example lil loc sli sil		/* only left */
-#ifdef TBL68020
     kills allexceptcon
+#ifdef TBL68020
     gen shw* {OFF_off2, lb, $1, 2}
 	roxl {OFF_off2, lb, $1, 0}
 #else TBL68020
-    kills allexceptcon
     uses AA_REG = {LOCAL, $1}
     gen shw* {offsetted2, %a, 2}
 	roxl {indirect2, %a}
@@ -3835,12 +3950,11 @@ proc rloe1shste example loe loc sri ste		/* only right */
 	roxr {absolute2, $1+2}
 
 proc rlil1shsil example lil loc sri sil		/* only right */
-#ifdef TBL68020
     kills allexceptcon
+#ifdef TBL68020
     gen shw* {OFF_off2, lb, $1, 0}
 	roxr {OFF_off2, lb, $1, 2}
 #else TBL68020
-    kills allexceptcon
     uses AA_REG = {LOCAL, $1}
     gen shw* {indirect2, %a}
 	roxr {offsetted2, %a, 2}
