@@ -1,0 +1,4 @@
+MACH=arm
+SUF=s
+ASAR=arch
+RANLIB=:

@@ -10,27 +10,12 @@ end
 name "ARM cv program"
 dir cv
 end
-name "ARM C libraries"
-dir libcc
-end
-name "ARM Pascal libraries"
-dir libpc
-end
 name "ARM EM library"
 dir libem
 end
 name "ARM RiscOs library"
-dir libros
+dir libmon
 end
 name "ARM floating point library"
 dir libfp
-end
-name "ARM Modula 2 library"
-dir libm2
-end
-name "ARM Occam libraries"
-dir liboc
-end
-name "ARM Basic libraries"
-dir libbc
 end

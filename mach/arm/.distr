@@ -2,13 +2,9 @@ Action
 READ_ME
 as
 cv
-libbc
-libcc
-libem
-libfp
-libm2
-liboc
-libpc
-libros
 ncg
 top
+libem
+libfp
+libend
+libmon
