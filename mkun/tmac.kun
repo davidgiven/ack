@@ -586,7 +586,7 @@
 .mk #T
 ..
 .de Bm			\" bottom margin trap macro
-.if \\(Im .Er F "Macro package error: recursive trap
+.if \\n(Im .Er F "Macro package error: recursive trap
 .nr Im 1
 .ch Bm \\n(.p+1u	\" The trap gets reset by Tm
 .if \\n(TS>0 \{\
