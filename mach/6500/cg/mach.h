@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define ex_ap(y)        fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)        /* nothing */
 
@@ -8,7 +10,7 @@
 
 #define cst_fmt         "%d"
 #define off_fmt         "%d"
-#define ilb_fmt         "I%02x%x"
+#define ilb_fmt         "I%03x%x"
 #define dlb_fmt         "_%d"
 #define hol_fmt         "hol%d"
 
