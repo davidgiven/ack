@@ -400,35 +400,35 @@ sti $1==1       | REG source1or2 |
 ...             | regind2 source1or2 |
 			INDSTORE
 			move(%[2],{reginddef1,%[1.reg],%[1.ind]}) |     | |
-sti $1==4       | dadres2 FLT_REG |
+sti $1==4       | NC dadres2 FLT_REG |
 			INDSTORE
 			"movfo %[2],*%[1]"
 			samecc                                  |       | |
-...		| dadres2 ftolong |
+...		| NC dadres2 ftolong |
 			INDSTORE
 			"setl\nmovfi %[2.reg],*%[1]\nseti"
 			samecc					|	| |
-...             | regconst2 FLT_REG |
+...             | NC regconst2 FLT_REG |
 			INDSTORE
 			"movfo %[2],%[1.ind](%[1.reg])"
 			samecc                                  |       | |
-...             | regconst2 ftolong |
+...             | NC regconst2 ftolong |
 			INDSTORE
 			"setl\nmovfi %[2.reg],%[1.ind](%[1.reg])\nseti"
 			samecc                                  |       | |
-...             | ADDR_LOCAL FLT_REG |
+...             | NC ADDR_LOCAL FLT_REG |
 			INDSTORE
 			"movfo %[2],%[1.ind](r5)"
 			samecc                                  |       | |
-...             | ADDR_LOCAL ftolong |
+...             | NC ADDR_LOCAL ftolong |
 			INDSTORE
 			"setl\nmovfi %[2.reg],%[1.ind](r5)\nseti"
 			samecc                                  |       | |
-...		| ADDR_EXTERNAL FLT_REG |
+...		| NC ADDR_EXTERNAL FLT_REG |
 			INDSTORE
 			"movfo %[2],%[1.ind]"
 			samecc					|	| |
-...		| ADDR_EXTERNAL ftolong |
+...		| NC ADDR_EXTERNAL ftolong |
 			INDSTORE
 			"setl\nmovfi %[2.reg],%[1.ind]\nseti"
 			samecc					|	| |
@@ -440,19 +440,19 @@ sti $1==4       | dadres2 FLT_REG |
 			"mov (sp)+,(%[1])+"
 			"mov (sp)+,(%[1])"
 			erase(%[1])                             |       | | (4,2040)
-sti $1==8       | dadres2 DBL_REG |
+sti $1==8       | NC dadres2 DBL_REG |
 			INDSTORE
 			"movf %[2],*%[1]"
 			samecc                                  |       | |
-...             | regconst2 DBL_REG |
+...             | NC regconst2 DBL_REG |
 			INDSTORE
 			"movf %[2],%[1.ind](%[1.reg])"
 			samecc                                  |       | |
-...             | ADDR_LOCAL DBL_REG |
+...             | NC ADDR_LOCAL DBL_REG |
 			INDSTORE
 			"movf %[2],%[1.ind](r5)"
 			samecc                                  |       | |
-...		| ADDR_EXTERNAL DBL_REG |
+...		| NC ADDR_EXTERNAL DBL_REG |
 			INDSTORE
 			"movf %[2],%[1.ind]"
 			samecc					|	| |
