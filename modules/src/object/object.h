@@ -48,9 +48,7 @@ struct fil {
 	char	*pnow;
 	char	*pbegin;
 	long	currpos;
-#ifndef OUTSEEK
 	int	fd;
-#endif
 	char	pbuf[WBUFSIZ];
 };
 
