@@ -21,11 +21,11 @@
 	! The next three definitions are special for the
 	! BBC microcomputer
 
-WRCH	= 0FFEEh	! This subroutine writes the character in
+WRCH	= 0x0FFEE	! This subroutine writes the character in
 			! register A to the screen
-RDCH	= 0FFE0h	! This subroutine returns a character in
+RDCH	= 0x0FFE0	! This subroutine returns a character in
 			! register A from the current input stream
-OSBYTE	= 0FFF4h	! This subroutine performs miscelaneous
+OSBYTE	= 0x0FFF4	! This subroutine performs miscelaneous
 			! operating system calls
 
 F_DUM	= 0		! Dummy floating point constant
@@ -47,13 +47,13 @@ Ecase	= 20
 Ebadmon = 25
 Ebadlin = 26
 Ebadgto = 27
-MON = 78D0h
+MON = 0x78D0
 
 BASE	= 240		! This is the offset from the localbase
 			! for the second localbase
 
-STACKTh = 78h		! This is the top of the stack
-STACKTl = 0D0h
+STACKTh = 0x78		! This is the top of the stack
+STACKTl = 0x0D0
 
 	! Some zeropage declarations
 
@@ -104,7 +104,7 @@ STACK: .space 1		! contains the hardware stackpointer on
 RESERVED: .space 112    ! used by the operating system
 
 .sect .text
-.base 0E02h		! where to start in the BBC micro
+.base 0x0E02		! where to start in the BBC micro
 ! GENERAL PURPOSE ROUTINES
 
 start:
@@ -176,7 +176,7 @@ start:
 	jsr Push	! push argc 
     	jsr _m_a_i_n	! start the real program
 
-	lda #0FFh
+	lda #0x0FF
 	jsr WRCH	! send end of program to R423
 	lda #3
 	ldx #0

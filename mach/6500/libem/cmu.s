@@ -21,7 +21,7 @@ Cmu2:
     4:	lda #0		! S > T
 	ldx #1
 	rts
-    1:	lda #0FFh	! S < T
+    1:	lda #0xFF	! S < T
 	tax
 	rts
     2:	cpx EXG

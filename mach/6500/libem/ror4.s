@@ -25,7 +25,7 @@ Ror4:
 	ror ARTH+1
 	ror ARTH
 	bcc 1f		! no carry
-	lda #80h	! put carry in leftmost bit
+	lda #0x80	! put carry in leftmost bit
 	ora ARTH+3
 	sta ARTH+3
     1:	dey

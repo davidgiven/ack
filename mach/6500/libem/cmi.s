@@ -15,7 +15,7 @@
 Cmi:
 	jsr Sbi2	! subtract operands (T - S)
 	bpl 1f		! S >= T
-	lda #0FFh	! S < T
+	lda #0x0FF	! S < T
 	tax		! AX becomes -1
 	rts
     1:	beq 2f

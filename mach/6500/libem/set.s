@@ -15,7 +15,7 @@ Set:
 	sta ARTH+1	! save bitnumber (highbyte)
 	jsr Zer		! create n zerobytes
 	lda ARTH
-	and #07h	! n mod 8 (bitnumber in byte)
+	and #0x07	! n mod 8 (bitnumber in byte)
 	tax
 	lda #1
 	cpx #0

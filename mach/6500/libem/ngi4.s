@@ -14,11 +14,11 @@ Ngi4:
 	stx ADDR
 	ldy #3
     1:	lda (ADDR),y
-	eor #0FFh	! one's complement lowbyte+y
+	eor #0x0FF	! one's complement lowbyte+y
 	sta (ADDR),y
 	dey
 	bpl 1b
-	ldx #0FDh
+	ldx #0x0FD
 	iny
 	clc
     	lda (ADDR),y

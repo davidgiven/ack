@@ -10,10 +10,10 @@
 
 
 Ngi2:
-	eor #0FFh	! one's complement A
+	eor #0x0FF	! one's complement A
 	tay
 	txa
-	eor #0FFh	! one's complement X
+	eor #0x0FF	! one's complement X
 	tax
 	inx		! increment X
 	bne 1f

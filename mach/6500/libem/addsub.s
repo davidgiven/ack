@@ -26,7 +26,7 @@ Addsub:
 	sta ADDR+3	! address of first operand (highbyte)
 	sta SP+1
 	ldy #0
-	ldx #0FCh	! do it 4 times
+	ldx #0x0FC	! do it 4 times
 	rts
 
 

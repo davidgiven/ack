@@ -21,7 +21,7 @@ Ror:
 	ror a		! rotate highbyte
 	ror Ytmp	! rotate lowbyte
 	bcc 1f		! no carry
-	ora #80h	! put carry in leftmost bit
+	ora #0x80	! put carry in leftmost bit
     1:	dey
 	bne 2b
 	ldx Ytmp	! get lowbyte

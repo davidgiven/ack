@@ -19,13 +19,13 @@ Printhex:
 	lsr a		! get four high bits
 	jsr 1f
 	pla		! restore A
-	and #0Fh	! get four low bits
+	and #0x0F	! get four low bits
 	jsr 1f
 	rts
     1:	sed		! print in hex
 	clc
-	adc #90h
-	adc #40h
+	adc #0x90
+	adc #0x40
 	cld
 	jmp WRCH
 

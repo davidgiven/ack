@@ -43,7 +43,7 @@ Cmu4:
     2:	lda #0		! S > T
 	ldx #1
 	rts
-    3:	lda #0FFh	! S < T
+    3:	lda #0x0FF	! S < T
 	tax
 	rts
 

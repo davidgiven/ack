@@ -12,13 +12,13 @@
 Inn:
 	stx ARTH	! save bit number (lowbyte)
 	sta ARTH+1	! save bit number (highbyte)
-	and #80h
+	and #0x80
 	beq 1f
 	lda #0		! bit number is negative
 	sta ARTH+2	! make it zero
 	beq 3f
     1:	txa
-	and #07h	! get bit number mod 8
+	and #0x07	! get bit number mod 8
 	tax
 	lda #1
 	cpx #0		! bit number = 0

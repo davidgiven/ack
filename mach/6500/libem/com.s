@@ -17,7 +17,7 @@ Com:
 	sta ADDR	! address (lowbyte) of first byte
     1:	dey
     	lda (ADDR),y
-	eor #0FFh	! one complement
+	eor #0x0FF	! one complement
 	sta (ADDR),y
 	tya
 	bne 1b		! do it n times

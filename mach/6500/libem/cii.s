@@ -30,7 +30,7 @@ Cii:
 	lda #0		! no sign extension here
 	tax
 	beq 2f
-    1:	lda #0FFh	! sign extension here
+    1:	lda #0x0FF	! sign extension here
 	tax
     2:	jsr Push	! push twobyte integer
 	pla

@@ -21,7 +21,7 @@ Mul4:
 	sta ARTH+14
 	sta ARTH+15	! clear accumulator
     	ldy #32
-    1:	lda #1h
+    1:	lda #0x01
 	bit ARTH
 	beq 2f		! multiplying by zero: no addition
 	clc
@@ -53,11 +53,11 @@ Mul4:
 	beq 3f		! it's unsigned: so no shift in of signbit
 	lda ARTH+7
 	bpl 3f
-	lda #40h
+	lda #0x40
 	bit ARTH+15
 	beq 3f
 	lda ARTH+15
-	ora #80h
+	ora #0x80
 	sta ARTH+15
     3:	dey
 	bne 1b
