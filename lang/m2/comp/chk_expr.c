@@ -1376,7 +1376,7 @@ int (*ExprChkTable[])() = {
 	ChkExLinkOrName,
 	NodeCrash,
 	ChkSet,
-	NodeCrash,
+	done_before,
 	NodeCrash,
 	ChkExLinkOrName,
 	NodeCrash

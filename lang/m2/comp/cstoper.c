@@ -525,7 +525,7 @@ CutSize(expr)
 
 	assert(expr->nd_class == Value);
 	if (tp->tp_fund != T_INTEGER) {
-		expr->nd_INT &= full_mask[tp->tp_size];
+		expr->nd_INT &= full_mask[(int)(tp->tp_size)];
 	}
 	else {
 		int nbits = (int) (mach_long_size - tp->tp_size) * 8;
