@@ -73,15 +73,6 @@ EnterIdList(idlist, kind, flags, type, scope, addr)
 			}
 
 			if (*addr >= 0) {
-				if (scope->sc_level && kind != D_FIELD) {
-					/* alignment of parameters is on
-					   word boundaries. We cannot do any
-					   better, because we don't know the
-					   alignment of the stack pointer when
-					   starting to push parameters
-					*/
-					xalign = word_align;
-				}
 				off = align(*addr, xalign);
 				*addr = off + type->tp_size;
 			}

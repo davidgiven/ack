@@ -23,25 +23,23 @@ static char *RcsId = "$Header$";
 
 int		proclevel = 0;	/* nesting level of procedures */
 extern char	*sprint();
-extern struct def *currentdef;
 }
 
 ProcedureDeclaration
 {
 	struct def *df;
-	struct def *savecurr = currentdef;
 } :
+			{ proclevel++; }
 	ProcedureHeading(&df, D_PROCEDURE)
 			{
-			  currentdef = df;
+			  CurrentScope->sc_definedby = df;
+			  df->prc_vis = CurrVis;
 			}
 	';' block(&(df->prc_body)) IDENT
 			{
 			  match_id(dot.TOK_IDF, df->df_idf);
-			  df->prc_vis = CurrVis;
 			  close_scope(SC_CHKFORW|SC_REVERSE);
 			  proclevel--;
-			  currentdef = savecurr;
 			}
 ;
 
@@ -54,17 +52,16 @@ ProcedureHeading(struct def **pdf; int type;)
 } :
 	PROCEDURE IDENT
 		{
-		  if (type == D_PROCEDURE) proclevel++;
 		  df = DeclProc(type);
 		  tp = construct_type(T_PROCEDURE, tp);
-		  if (proclevel > 1) {
+		  if (proclevel) {
 			/* Room for static link
 			*/
 			tp->prc_nbpar = pointer_size;
 		  }
 		  else	tp->prc_nbpar = 0;
 		}
-	FormalParameters(type == D_PROCEDURE, &params, &(tp->next), &(tp->prc_nbpar))?
+	FormalParameters(&params, &(tp->next), &(tp->prc_nbpar))?
 		{
 		  tp->prc_params = params;
 		  if (df->df_type) {
@@ -78,6 +75,8 @@ error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text);
 		  }
 		  df->df_type = tp;
 		  *pdf = df;
+
+		  if (type == D_PROCHEAD) close_scope(0);
 
 		  DO_DEBUG(1, type == D_PROCEDURE && 
 				(print("proc %s:", df->df_idf->id_text),
@@ -110,20 +109,17 @@ declaration:
 	ModuleDeclaration ';'
 ;
 
-FormalParameters(int doparams;
-		 struct paramlist **pr;
+FormalParameters(struct paramlist **pr;
 		 struct type **tp;
 		 arith *parmaddr;)
 {
 	struct def *df;
-	register struct paramlist *pr1;
 } :
 	'('
 	[
-		FPSection(doparams, pr, parmaddr)	
+		FPSection(pr, parmaddr)
 		[
-			{ for (pr1 = *pr; pr1->next; pr1 = pr1->next) ; }
-			';' FPSection(doparams, &(pr1->next), parmaddr)
+			';' FPSection(pr, parmaddr)
 		]*
 	]?
 	')'
@@ -134,16 +130,9 @@ FormalParameters(int doparams;
 	]?
 ;
 
-/*	In the next nonterminal, "doparams" is a flag indicating whether
-	the identifiers representing the parameters must be added to the
-	symbol table. We must not do so when reading a Definition Module,
-	because in this case we only read the header. The Implementation
-	might contain different identifiers representing the same paramters.
-*/
-FPSection(int doparams; struct paramlist **ppr; arith *addr;)
+FPSection(struct paramlist **ppr; arith *parmaddr;)
 {
 	struct node *FPList;
-	struct paramlist *ParamList();
 	struct type *tp;
 	int VARp = 0;
 } :
@@ -152,11 +141,7 @@ FPSection(int doparams; struct paramlist **ppr; arith *addr;)
 	]?
 	IdentList(&FPList) ':' FormalType(&tp)
 		{
-		  if (doparams) {
-			EnterIdList(FPList, D_VARIABLE, VARp,
-				    tp, CurrentScope, addr);
-		  }
-		  *ppr = ParamList(FPList, tp, VARp);
+		  ParamList(ppr, FPList, tp, VARp, parmaddr);
 		  FreeNode(FPList);
 		}
 ;
@@ -530,27 +515,29 @@ FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 } :
 	'('		{ *ppr = 0; }
 	[
-		[ VAR	{ VARp = 1; }
-		|	{ VARp = 0; }
+		[ VAR	{ VARp = D_VARPAR; }
+		|	{ VARp = D_VALPAR; }
 		]
 		FormalType(&tp)
 			{ *ppr = p = new_paramlist();
-			  p->par_type = tp;
-			  p->par_var = VARp;
+			  p->next = 0;
+			  p->par_def = df = new_def();
+			  df->df_type = tp;
+			  df->df_flags = VARp;
 			}
 		[
 			','
-			[ VAR	{VARp = 1; }
-			|	{VARp = 0; }
+			[ VAR	{VARp = D_VARPAR; }
+			|	{VARp = D_VALPAR; }
 			] 
 			FormalType(&tp)
-				{ p->next = new_paramlist();
-				  p = p->next;
-				  p->par_type = tp;
-				  p->par_var = VARp;
+				{ p = new_paramlist();
+				  p->next = *ppr; *ppr = p;
+			  	  p->par_def = df = new_def();
+			  	  df->df_type = tp;
+			  	  df->df_flags = VARp;
 				}
 		]*
-				{ p->next = 0; }
 	]?
 	')'
 	[ ':' qualident(D_TYPE, &df, "type", (struct node **) 0)

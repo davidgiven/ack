@@ -33,13 +33,12 @@ open_scope(scopetype)
 	*/
 	register struct scope *sc = new_scope();
 	register struct scopelist *ls = new_scopelist();
-
+	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
+
+	clear((char *) sc, sizeof (*sc));
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
 	sc->sc_level = proclevel;
-	sc->sc_forw = 0;
-	sc->sc_def = 0;
-	sc->sc_off = 0;
 	if (scopetype == OPENSCOPE) {
 		ls->next = CurrVis;
 	}

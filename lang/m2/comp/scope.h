@@ -23,6 +23,7 @@ struct scope {
 	arith sc_off;		/* offsets of variables in this scope */
 	char sc_scopeclosed;	/* flag indicating closed or open scope */
 	int sc_level;		/* level of this scope */
+	struct def *sc_definedby; /* The def structure defining this scope */
 };
 
 struct scopelist {

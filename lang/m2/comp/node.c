@@ -17,6 +17,9 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 
 struct node *h_node;		/* header of free list */
+#ifdef DEBUG
+int	cnt_node;		/* count number of allocated ones */
+#endif
 
 struct node *
 MkNode(class, left, right, token)

@@ -16,7 +16,6 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
-extern struct def *currentdef;
 }
 
 statement(struct node **pnd;)
@@ -61,28 +60,11 @@ statement(struct node **pnd;)
 	WithStatement(pnd)
 |
 	EXIT
-			{ if (!loopcount) {
-error("EXIT not in a LOOP");
-			  }
+			{ if (!loopcount) error("EXIT not in a LOOP");
 			  *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
 			}
 |
-	RETURN		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
-	[
-		expression(&(nd->nd_right))
-			{ if (scopeclosed(CurrentScope)) {
-error("a module body has no result value");
-			  }
-			  else if (! currentdef->df_type->next) {
-error("procedure \"%s\" has no result value", currentdef->df_idf->id_text);
-			  }
-			}
-	|
-			{ if (currentdef->df_type->next) {
-error("procedure \"%s\" must return a value", currentdef->df_idf->id_text);
-			  }
-			}
-	]
+	ReturnStatement(pnd)
 ]?
 ;
 
@@ -193,18 +175,28 @@ RepeatStatement(struct node **pnd;)
 ForStatement(struct node **pnd;)
 {
 	register struct node *nd;
+	struct node *dummy;
 }:
 	FOR		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
-	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot); }
-	BECOMES		{ nd = MkNode(BECOMES, nd, NULLNODE, &dot); }
-	expression(&(nd->nd_right))
-	TO		{ (*pnd)->nd_left=nd=MkNode(Link,nd,NULLNODE,&dot); }
+	IDENT		{ (*pnd)->nd_IDF = dot.TOK_IDF; }
+	BECOMES		{ nd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
+			  (*pnd)->nd_left = nd;
+			}
+	expression(&(nd->nd_left))
+	TO
 	expression(&(nd->nd_right))
 	[
-		BY	{ nd->nd_right=MkNode(Link,NULLNODE,nd->nd_right,&dot);
+		BY
+		ConstExpression(&dummy)
+			{
+			  if (!(dummy->nd_type->tp_fund & T_INTORCARD)) {
+				error("illegal type in BY clause");
+			  }
+			  nd->nd_INT = dummy->nd_INT;
+			  FreeNode(dummy);
 			}
-		ConstExpression(&(nd->nd_right->nd_left))
 	|
+			{ nd->nd_INT = 1; }
 	]
 	DO
 	StatementSequence(&((*pnd)->nd_right))
@@ -226,4 +218,28 @@ WithStatement(struct node **pnd;)
 	DO
 	StatementSequence(&(nd->nd_right))
 	END
+;
+
+ReturnStatement(struct node **pnd;)
+{
+	register struct def *df = CurrentScope->sc_definedby;
+	register struct node *nd;
+} :
+
+	RETURN		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	[
+		expression(&(nd->nd_right))
+			{ if (scopeclosed(CurrentScope)) {
+error("a module body has no result value");
+			  }
+			  else if (! df->df_type->next) {
+error("procedure \"%s\" has no result value", df->df_idf->id_text);
+			  }
+			}
+	|
+			{ if (df->df_type->next) {
+error("procedure \"%s\" must return a value", df->df_idf->id_text);
+			  }
+			}
+	]
 ;

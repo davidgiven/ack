@@ -19,6 +19,7 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 #include	"const.h"
+#include	"scope.h"
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
@@ -58,8 +59,14 @@ struct type
 	*error_type;
 
 struct paramlist *h_paramlist;
+#ifdef DEBUG
+int	cnt_paramlist;
+#endif
 
 struct type *h_type;
+#ifdef DEBUG
+int	cnt_type;
+#endif
 
 extern label	data_label();
 
@@ -215,31 +222,33 @@ init_types()
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
 }
 
-/*	Create a parameterlist of a procedure and return a pointer to it.
-	"ids" indicates the list of identifiers, "tp" their type, and
-	"VARp" is set when the parameters are VAR-parameters.
-	Actually, "ids" is only used because it tells us how many parameters
-	there were with this type.
-*/
-struct paramlist *
-ParamList(ids, tp, VARp)
+ParamList(ppr, ids, tp, VARp, off)
 	register struct node *ids;
+	struct paramlist **ppr;
 	struct type *tp;
+	arith *off;
 {
+	/*	Create (part of) a parameterlist of a procedure.
+		"ids" indicates the list of identifiers, "tp" their type, and
+		"VARp" is set when the parameters are VAR-parameters.
+*/
 	register struct paramlist *pr;
+	register struct def *df;
 	struct paramlist *pstart;
 
-	pstart = pr = new_paramlist();
-	pr->par_type = tp;
-	pr->par_var = VARp;
-	for (ids = ids->next; ids; ids = ids->next) {
-		pr->next = new_paramlist();
-		pr = pr->next;
-		pr->par_type = tp;
-		pr->par_var = VARp;
+	while (ids) {
+		pr = new_paramlist();
+		pr->next = *ppr;
+		*ppr = pr;
+		df = define(ids->nd_IDF, CurrentScope, D_VARIABLE);
+		pr->par_def = df;
+		df->df_type = tp;
+		if (VARp) df->df_flags = D_VARPAR;
+		else	df->df_flags = D_VALPAR;
+		df->var_off = align(*off, word_align);
+		*off = df->var_off + tp->tp_size;
+		ids = ids->next;
 	}
-	pr->next = 0;
-	return pstart;
 }
 
 chk_basesubrange(tp, base)
@@ -551,8 +560,8 @@ DumpType(tp)
 		if (par) {
 			print("; p:");
 			while(par) {
-				if (par->par_var) print("VAR ");
-				DumpType(par->par_type);
+				if (IsVarParam(par)) print("VAR ");
+				DumpType(TypeOfParam(par));
 				par = par->next;
 			}
 		}

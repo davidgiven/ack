@@ -24,7 +24,6 @@ static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   implementation module currently being
 				   compiled
 				*/
-struct def *currentdef;		/* current definition of module or procedure */
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -49,7 +48,6 @@ ModuleDeclaration
 {
 	struct idf *id;
 	register struct def *df;
-	struct def *savecurr = currentdef;
 	extern int proclevel;
 	static int modulecount = 0;
 	char buf[256];
@@ -61,7 +59,6 @@ ModuleDeclaration
 	MODULE IDENT	{
 			  id = dot.TOK_IDF;
 			  df = define(id, CurrentScope, D_MODULE);
-			  currentdef = df;
 
 			  if (!df->mod_vis) {	
 			  	open_scope(CLOSEDSCOPE);
@@ -71,6 +68,7 @@ ModuleDeclaration
 				CurrVis = df->mod_vis;
 				CurrentScope->sc_level = proclevel;
 			  }
+			  CurrentScope->sc_definedby = df;
 
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
@@ -93,7 +91,6 @@ ModuleDeclaration
 			  }
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(id, dot.TOK_IDF);
-			  currentdef = savecurr;
 			}
 ;
 
@@ -244,7 +241,6 @@ ProgramModule
 		  if (state == IMPLEMENTATION) {
 			DEFofIMPL = 1;
 			df = GetDefinitionModule(id);
-			currentdef = df;
 			CurrVis = df->mod_vis;
 			CurrentScope = CurrVis->sc_scope;
 			DEFofIMPL = 0;
@@ -256,6 +252,7 @@ ProgramModule
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = id->id_text;
 		  }
+		  CurrentScope->sc_definedby = df;
 		}
 	priority(&(df->mod_priority))?
 	';' import(0)*

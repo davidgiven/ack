@@ -4,8 +4,9 @@
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
-	struct type *par_type;	/* Parameter type */
-	int par_var;		/* flag, set if VAR parameter */
+	struct def *par_def;	/* "df" of parameter */
+#define	IsVarParam(xpar)	((xpar)->par_def->df_flags & D_VARPAR)
+#define TypeOfParam(xpar)	((xpar)->par_def->df_type)
 };
 
 /* ALLOCDEF "paramlist" */

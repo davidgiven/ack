@@ -326,10 +326,9 @@ CodeDesig(nd, ds)
 
 	case Link:
 		assert(nd->nd_symb == '.');
-		assert(nd->nd_right->nd_class == Def);
 
 		CodeDesig(nd->nd_left, ds);
-		CodeFieldDesig(nd->nd_right->nd_def, ds);
+		CodeFieldDesig(nd->nd_def, ds);
 		break;
 
 	case Oper:

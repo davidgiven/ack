@@ -20,6 +20,7 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 #include	"Lpars.h"
+#include	"standards.h"
 
 extern label	data_label();
 extern label	text_label();
@@ -81,6 +82,11 @@ CodeExpr(nd, ds, true_label, false_label)
 
 	switch(nd->nd_class) {
 	case Def:
+		if (nd->nd_def->df_kind == D_PROCEDURE) {
+			C_lpi(nd->nd_def->prc_vis->sc_scope->sc_name);
+			ds->dsg_kind = DSG_LOADED;
+			break;
+		}
 		CodeDesig(nd, ds);
 		break;
 
@@ -102,8 +108,7 @@ CodeExpr(nd, ds, true_label, false_label)
 			CodeDesig(nd, ds);
 			break;
 		}
-		CodeExpr(nd->nd_right, ds, NO_LABEL, NO_LABEL);
-		CodeValue(ds, nd->nd_right->nd_type->tp_size);
+		CodePExpr(nd->nd_right);
 		CodeUoper(nd);
 		ds->dsg_kind = DSG_LOADED;
 		break;
@@ -181,6 +186,7 @@ CodeCoercion(t1, t2)
 	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
 	switch(fund1) {
 	case T_INTEGER:
+	case T_INTORCARD:
 		switch(fund2) {
 		case T_INTEGER:
 			if (t2->tp_size != t1->tp_size) {
@@ -274,7 +280,6 @@ CodeCall(nd)
 	register struct paramlist *param;
 	struct type *tp;
 	arith pushed = 0;
-	struct desig Des;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -282,32 +287,27 @@ CodeCall(nd)
 	}	
 	tp = left->nd_type;
 
-	if (left->nd_class == Def && is_type(left->nd_def)) {
+	if (IsCast(left)) {
 		/* it was just a cast. Simply ignore it
 		*/
-		Des = InitDesig;
-		CodeExpr(nd->nd_right->nd_left, &Des, NO_LABEL, NO_LABEL);
-		CodeValue(&Des, tp->tp_size);
+		CodePExpr(nd->nd_right->nd_left);
 		*nd = *(nd->nd_right->nd_left);
 		nd->nd_type = left->nd_def->df_type;
 		return;
 	}
 
-	assert(tp->tp_fund == T_PROCEDURE);
+	assert(IsProcCall(left));
 
 	for (param = left->nd_type->prc_params; param; param = param->next) {
-		Des = InitDesig;
 		arg = arg->nd_right;
 		assert(arg != 0);
-		if (param->par_var) {
-			CodeDesig(arg->nd_left, &Des);
-			CodeAddress(&Des);
+		if (IsVarParam(param)) {
+			CodeDAddress(arg->nd_left);
 			pushed += pointer_size;
 		}
 		else {
-			CodeExpr(arg->nd_left, &Des, NO_LABEL, NO_LABEL);
-			CodeValue(&Des, arg->nd_left->nd_type->tp_size);
-			CheckAssign(arg->nd_left->nd_type, param->par_type);
+			CodePExpr(arg->nd_left);
+			CheckAssign(arg->nd_left->nd_type, TypeOfParam(param));
 			pushed += align(arg->nd_left->nd_type->tp_size, word_align);
 		}
 		/* ??? Conformant arrays */
@@ -324,9 +324,7 @@ CodeCall(nd)
 		C_cal(left->nd_def->for_name);
 	}
 	else {
-		Des = InitDesig;
-		CodeDesig(left, &Des);
-		CodeAddress(&Des);
+		CodePExpr(left);
 		C_cai();
 	}
 	C_asp(pushed);
@@ -338,7 +336,141 @@ CodeCall(nd)
 CodeStd(nd)
 	struct node *nd;
 {
-	/* ??? */
+	register struct node *arg = nd->nd_right;
+	register struct node *left = 0;
+	register struct type *tp = 0;
+	int std;
+
+	if (arg) {
+		left = arg->nd_left;
+		tp = left->nd_type;
+		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+		arg = arg->nd_right;
+	}
+	Desig = InitDesig;
+
+	switch(std = nd->nd_left->nd_def->df_value.df_stdname) {
+	case S_ABS:
+		CodePExpr(left);
+		if (tp->tp_fund == T_INTEGER) {
+			if (tp->tp_size == int_size) {
+				C_cal("_absi");
+			}
+			else	C_cal("_absl");
+		}
+		else if (tp->tp_fund == T_REAL) {
+			if (tp->tp_size == float_size) {
+				C_cal("_absf");
+			}
+			else	C_cal("_absd");
+		}
+		C_lfr(tp->tp_size);
+		break;
+
+	case S_CAP:
+		CodePExpr(left);
+		C_loc((arith) 0137);
+		C_and(word_size);
+		break;
+
+	case S_CHR:
+		CodePExpr(left);
+		CheckAssign(char_type, tp);
+		break;
+
+	case S_FLOAT:
+		CodePExpr(left);
+		CodeCoercion(tp, real_type);
+		break;
+
+	case S_HIGH:
+		assert(IsConformantArray(tp));
+		/* ??? */
+		break;
+
+	case S_ODD:
+		if (tp->tp_size == word_size) {
+			C_loc((arith) 1);
+			C_and(word_size);
+		}
+		else {
+			assert(tp->tp_size == dword_size);
+			C_ldc((arith) 1);
+			C_and(dword_size);
+			C_ior(word_size);
+		}
+		break;
+
+	case S_ORD:
+		CodePExpr(left);
+		break;
+
+	case S_TRUNC:
+		CodePExpr(left);
+		CodeCoercion(tp, card_type);
+		break;
+
+	case S_VAL:
+		CodePExpr(left);
+		CheckAssign(nd->nd_type, tp);
+		break;
+
+	case S_ADR:
+		CodeDAddress(left);
+		break;
+
+	case S_DEC:
+	case S_INC:
+		CodePExpr(left);
+		if (arg) CodePExpr(arg->nd_left);
+		else	C_loc((arith) 1);
+		if (tp->tp_size <= word_size) {
+			if (std == S_DEC) {
+				if (tp->tp_fund == T_INTEGER) C_sbi(word_size);
+				else	C_sbu(word_size);
+			}
+			else {
+				if (tp->tp_fund == T_INTEGER) C_adi(word_size);
+				else	C_adu(word_size);
+			}
+			CheckAssign(tp, int_type);
+		}
+		else {
+			CodeCoercion(int_type, tp);
+			if (std == S_DEC) {
+				if (tp->tp_fund==T_INTEGER) C_sbi(tp->tp_size);
+				else	C_sbu(tp->tp_size);
+			}
+			else {
+				if (tp->tp_fund==T_INTEGER) C_adi(tp->tp_size);
+				else	C_adu(tp->tp_size);
+			}
+		}
+		CodeDStore(left);
+		break;
+
+	case S_HALT:
+		C_cal("_halt");
+		break;
+
+	case S_INCL:
+	case S_EXCL:
+		CodePExpr(left);
+		CodePExpr(arg->nd_left);
+		C_set(tp->tp_size);
+		if (std == S_INCL) {
+			C_ior(tp->tp_size);
+		}
+		else {
+			C_com(tp->tp_size);
+			C_and(tp->tp_size);
+		}
+		CodeDStore(left);
+		break;
+
+	default:
+		crash("(CodeStd)");
+	}
 }
 
 CodeAssign(nd, dss, dst)
@@ -353,6 +485,7 @@ CodeAssign(nd, dss, dst)
 		CodeStore(dst, nd->nd_left->nd_type->tp_size);
 	}
 	else {
+		CodeAddress(dss);
 		CodeAddress(dst);
 		C_blm(nd->nd_left->nd_type->tp_size);
 	}
@@ -395,12 +528,8 @@ CheckAssign(tpl, tpr)
 Operands(leftop, rightop)
 	register struct node *leftop, *rightop;
 {
-	struct desig Des;
 
-	Des = InitDesig;
-	CodeExpr(leftop, &Des, NO_LABEL, NO_LABEL);
-	CodeValue(&Des, leftop->nd_type->tp_size);
-	Des = InitDesig;
+	CodePExpr(leftop);
 
 	if (rightop->nd_type->tp_fund == T_POINTER && 
 	    leftop->nd_type->tp_size != pointer_size) {
@@ -408,8 +537,7 @@ Operands(leftop, rightop)
 		leftop->nd_type = rightop->nd_type;
 	}
 
-	CodeExpr(rightop, &Des, NO_LABEL, NO_LABEL);
-	CodeValue(&Des, rightop->nd_type->tp_size);
+	CodePExpr(rightop);
 }
 
 CodeOper(expr, true_label, false_label)
@@ -787,11 +915,48 @@ CodeEl(nd, tp)
 		C_asp(2 * word_size + pointer_size);
 	}
 	else {
-		struct desig Des;
-
-		Des = InitDesig;
-		CodeExpr(nd, &Des, NO_LABEL, NO_LABEL);
-		CodeValue(&Des, word_size);
+		CodePExpr(nd);
 		C_set(tp->tp_size);
 	}
+}
+
+CodePExpr(nd)
+	struct node *nd;
+{
+	/*	Generate code to push the value of the expression "nd"
+		on the stack.
+	*/
+	struct desig designator;
+
+	designator = InitDesig;
+	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
+	CodeValue(&designator, nd->nd_type->tp_size);
+}
+
+CodeDAddress(nd)
+	struct node *nd;
+{
+	/*	Generate code to push the address of the designator "nd"
+		on the stack.
+	*/
+
+	struct desig designator;
+
+	designator = InitDesig;
+	CodeDesig(nd, &designator);
+	CodeAddress(&designator);
+}
+
+CodeDStore(nd)
+	register struct node *nd;
+{
+	/*	Generate code to store the expression on the stack into the
+		designator "nd".
+	*/
+
+	struct desig designator;
+
+	designator = InitDesig;
+	CodeDesig(nd, &designator);
+	CodeStore(&designator, nd->nd_type->tp_size);
 }

@@ -72,7 +72,7 @@ node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
 
 selector(struct node **pnd;):
 	'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot); }
-	IDENT	{ (*pnd)->nd_right = MkNode(Name,NULLNODE,NULLNODE,&dot); }
+	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
 ;
 
 ExpList(struct node **pnd;)

@@ -25,8 +25,8 @@ DoOption(text)
 		options[text[-1]] = 1;	/* flags, debug options etc.	*/
 		break;
 
-	case 'L' :
-		warning("-L: default no EM profiling; use -p for EM profiling");
+	case 'L' :	/* don't generate fil/lin */
+		options['L'] = 1;
 		break;
 
 	case 'M':	/* maximum identifier length */
@@ -37,7 +37,7 @@ DoOption(text)
 			fatal("maximum identifier length is %d", IDFSIZE);
 		break;
 
-	case 'p' :	/* generate profiling code (fil/lin) */
+	case 'p' :	/* generate profiling code procentry/procexit ???? */
 		options['p'] = 1;
 		break;
 

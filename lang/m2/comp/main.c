@@ -101,6 +101,9 @@ Compile(src, dst)
 	}
 	WalkModule(Defined);
 	C_close();
+#ifdef DEBUG
+	if (options['m']) MemUse();
+#endif
 	if (err_occurred) return 0;
 	return 1;
 }
@@ -217,3 +220,19 @@ AtEoIT()
 	*/
 	return 1;
 }
+
+#ifdef DEBUG
+MemUse()
+{
+	extern int cnt_def, cnt_node, cnt_paramlist, cnt_type,
+		   cnt_switch_hdr, cnt_case_entry, 
+		   cnt_scope, cnt_scopelist, cnt_forwards, cnt_tmpvar;
+
+	print("\
+%6d def\n%6d node\n%6d paramlist\n%6d type\n%6d switch_hdr\n\
+%6d case_entry\n%6d scope\n%6d scopelist\n%6d forwards\n%6d tmpvar\n",
+cnt_def, cnt_node, cnt_paramlist, cnt_type,
+cnt_switch_hdr, cnt_case_entry, 
+cnt_scope, cnt_scopelist, cnt_forwards, cnt_tmpvar);
+}
+#endif

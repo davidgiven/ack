@@ -41,3 +41,6 @@ extern struct node *MkNode();
 #define HASSELECTORS 2
 #define VARIABLE 4
 #define VALUE 8
+
+#define	IsCast(lnd)	((lnd)->nd_class == Def && is_type((lnd)->nd_def))
+#define	IsProcCall(lnd)	((lnd)->nd_type->tp_fund == T_PROCEDURE)

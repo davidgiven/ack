@@ -54,7 +54,7 @@ DoProfil()
 {
 	static label	filename_label = 0;
 
-	if (options['p']) {
+	if (! options['L']) {
 		if (!filename_label) {
 			filename_label = data_label();
 			C_df_dlb(filename_label);
@@ -278,10 +278,16 @@ WalkStat(nd, lab)
 		return;
 	}
 
-	if (options['p']) C_lin((arith) nd->nd_lineno);
+	if (options['L']) C_lin((arith) nd->nd_lineno);
 
 	if (nd->nd_class == Call) {
-		if (chk_call(nd)) CodeCall(nd);
+		if (chk_call(nd)) {
+			if (nd->nd_type != 0) {
+				node_error(nd, "procedure call expected");
+				return;
+			}
+			CodeCall(nd);
+		}
 		return;
 	}
 
@@ -289,7 +295,7 @@ WalkStat(nd, lab)
 
 	switch(nd->nd_symb) {
 	case BECOMES:
-		DoAssign(nd, left, right, 0);
+		DoAssign(nd, left, right);
 		break;
 
 	case IF:
@@ -362,51 +368,27 @@ WalkStat(nd, lab)
 			struct node *fnd;
 			label l1 = instructionlabel++;
 			label l2 = instructionlabel++;
-			arith incr = 1;
 			arith size;
 
-			assert(left->nd_symb == TO);
-			assert(left->nd_left->nd_symb == BECOMES);
-
-			DoAssign(left->nd_left,
-				 left->nd_left->nd_left,
-				 left->nd_left->nd_right, 1);
+			if (! DoForInit(nd, left)) break;
 			fnd = left->nd_right;
-			if (fnd->nd_symb == BY) {
-				incr = fnd->nd_left->nd_INT;
-				fnd = fnd->nd_right;
-			}
-			if (! chk_expr(fnd)) return;
 			size = fnd->nd_type->tp_size;
 			if (fnd->nd_class != Value) {
-				*pds = InitDesig;
-				CodeExpr(fnd, pds, NO_LABEL, NO_LABEL);
-				CodeValue(pds, size);
+				CodePExpr(fnd);
 				tmp = NewInt();
 				C_stl(tmp);
-			}
-			if (!TstCompat(left->nd_left->nd_left->nd_type,
-				       fnd->nd_type)) {
-node_error(fnd, "type incompatibility in limit of FOR loop");
-				break;
 			}
 			C_bra(l1);
 			C_df_ilb(l2);
 			WalkNode(right, lab);
-			*pds = InitDesig;
-			C_loc(incr);
-			CodeDesig(left->nd_left->nd_left, pds);
-			CodeValue(pds, size);
+			C_loc(left->nd_INT);
+			CodePExpr(nd);
 			C_adi(int_size);
-			*pds = InitDesig;
-			CodeDesig(left->nd_left->nd_left, pds);
-			CodeStore(pds, size);
+			CodeDStore(nd);
 			C_df_ilb(l1);
-			*pds = InitDesig;
-			CodeDesig(left->nd_left->nd_left, pds);
-			CodeValue(pds, size);
+			CodePExpr(nd);
 			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
-			if (incr > 0) {
+			if (left->nd_INT > 0) {
 				C_ble(l2);
 			}
 			else	C_bge(l2);
@@ -461,8 +443,7 @@ node_error(fnd, "type incompatibility in limit of FOR loop");
 	case RETURN:
 		if (right) {
 			WalkExpr(right, NO_LABEL, NO_LABEL);
-			/* What kind of compatibility do we need here ???
-			   assignment compatibility?
+			/* Assignment compatibility? Yes, see Rep. 9.11
 			*/
 			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
@@ -519,27 +500,51 @@ WalkDesignator(nd)
 
 	Desig = InitDesig;
 	CodeDesig(nd, &Desig);
-
 }
 
-DoAssign(nd, left, right, forloopass)
+DoForInit(nd, left)
+	register struct node *nd, *left;
+{
+
+	nd->nd_left = nd->nd_right = 0;
+	nd->nd_class = Name;
+	nd->nd_symb = IDENT;
+
+	if (! chk_designator(nd, VARIABLE, D_DEFINED) ||
+	    ! chk_expr(left->nd_left) ||
+	    ! chk_expr(left->nd_right)) return;
+
+	if (nd->nd_type->tp_size > word_size ||
+	    !(nd->nd_type->tp_fund & T_DISCRETE)) {
+		node_error(nd, "illegal type of FOR loop variable");
+		return 0;
+	}
+
+	if (!TstCompat(nd->nd_type, left->nd_left->nd_type) ||
+	    !TstCompat(nd->nd_type, left->nd_right->nd_type)) {
+		if (!TstAssCompat(nd->nd_type, left->nd_left->nd_type) ||
+		    !TstAssCompat(nd->nd_type, left->nd_right->nd_type)) {
+			node_error(nd, "type incompatibility in FOR statement");
+			return 0;
+		}
+node_warning(nd, "old-fashioned! compatibility required in FOR statement");
+	}
+
+	CodePExpr(left->nd_left);
+	CodeDStore(nd);
+}
+
+DoAssign(nd, left, right)
 	struct node *nd;
 	register struct node *left, *right;
 {
-		/* May we do it in this order (expression first) ??? */
+	/* May we do it in this order (expression first) ??? */
 	struct desig ds;
 
 	WalkExpr(right, NO_LABEL, NO_LABEL);
 	if (! chk_designator(left, DESIGNATOR|VARIABLE, D_DEFINED)) return;
 
-	if (forloopass) {
-		if (! TstCompat(left->nd_type, right->nd_type)) {
-			node_error(nd, "type incompatibility in FOR loop");
-			return;
-		}
-		/* Test if the left hand side may be a for loop variable ??? */
-	}
-	else if (! TstAssCompat(left->nd_type, right->nd_type)) {
+	if (! TstAssCompat(left->nd_type, right->nd_type)) {
 		node_error(nd, "type incompatibility in assignment");
 		return;
 	}

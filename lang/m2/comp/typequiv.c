@@ -12,6 +12,8 @@ static char *RcsId = "$Header$";
 
 #include	"type.h"
 #include	"def.h"
+#include	"LLlex.h"
+#include	"node.h"
 
 int
 TstTypeEquiv(tp1, tp2)
@@ -70,8 +72,8 @@ TstProcEquiv(tp1, tp2)
 	/* Now check the parameters
 	*/
 	while (p1 && p2) {
-		if (p1->par_var != p2->par_var ||
-		    !TstParEquiv(p1->par_type, p2->par_type)) return 0;
+		if (IsVarParam(p1) != IsVarParam(p2) ||
+		    !TstParEquiv(TypeOfParam(p1), TypeOfParam(p2))) return 0;
 		p1 = p1->next;
 		p2 = p2->next;
 	}
@@ -172,11 +174,11 @@ TstAssCompat(tp1, tp2)
 }
 
 int
-TstParCompat(formaltype, actualtype, VARflag)
+TstParCompat(formaltype, actualtype, VARflag, nd)
 	struct type *formaltype, *actualtype;
+	struct node *nd;
 {
-	/*	Check type compatibility for a parameter in a procedure
-		call. Ordinary type compatibility is sufficient in any case.
+	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
 		a value parameter.
 		Otherwise, a conformant array may do, or an ARRAY OF WORD
@@ -185,11 +187,20 @@ TstParCompat(formaltype, actualtype, VARflag)
 	*/
 
 	return
-		TstCompat(formaltype, actualtype)
+		TstTypeEquiv(formaltype, actualtype)
 	    ||
 		( !VARflag && TstAssCompat(formaltype, actualtype))
 	    ||
-		(  formaltype == word_type && actualtype->tp_size == word_size)
+		(  formaltype == word_type
+		&& 
+		   (  actualtype->tp_size == word_size
+		   ||
+		      (  !VARflag
+		      &&
+			 actualtype->tp_size <= word_size
+		      )
+		   )
+		)
 	    ||
 		(  IsConformantArray(formaltype)
 		&&
@@ -203,5 +214,21 @@ TstParCompat(formaltype, actualtype, VARflag)
 		      && TstTypeEquiv(formaltype->arr_elem, char_type)
 		      )
 		   )
-		);
+		)
+	    ||
+		( VARflag && OldCompat(formaltype, actualtype, nd))
+	;
+}
+
+int
+OldCompat(ft, at, nd)
+	struct type *ft, *at;
+	struct node *nd;
+{
+	if (TstCompat(ft, at)) {
+node_warning(nd, "oldfashioned! types of formal and actual must be identical");
+		return 1;
+	}
+
+	return 0;
 }

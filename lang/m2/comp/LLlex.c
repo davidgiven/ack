@@ -182,6 +182,10 @@ again:
 			if (nch == '=')	{
 				return tk->tk_symb = LESSEQUAL;
 			}
+			if (nch == '>') {
+				lexwarning("'<>' is old-fashioned; use '#'");
+				return tk->tk_symb = '#';
+			}
 			PushBack(nch);
 			return tk->tk_symb = ch;
 

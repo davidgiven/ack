@@ -54,7 +54,6 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	make.tokcase <tokenname.c >symbol2str.c
 
-misc.h:		misc.H make.allocd
 def.h:		def.H make.allocd
 type.h:		type.H make.allocd
 node.h:		node.H make.allocd
@@ -90,13 +89,13 @@ symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h inputtype.h
-type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h target_sizes.h type.h
+type.o: LLlex.h const.h debug.h def.h idf.h maxset.h node.h scope.h target_sizes.h type.h
 def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
 defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h scope.h
-typequiv.o: def.h type.h
+typequiv.o: LLlex.h def.h node.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
@@ -104,7 +103,7 @@ options.o: idfsize.h main.h ndir.h type.h
 walk.o: LLlex.h Lpars.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h
 casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
-code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h type.h
+code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h
 tmpvar.o: debug.h def.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h

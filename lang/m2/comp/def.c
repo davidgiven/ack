@@ -20,7 +20,10 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"Lpars.h"
 
-struct def *h_def;		/* Pointer to free list of def structures */
+struct def *h_def;		/* pointer to free list of def structures */
+#ifdef DEBUG
+int	cnt_def;		/* count number of allocated ones */
+#endif
 
 struct def *ill_df;
 
@@ -455,6 +458,7 @@ DeclProc(type)
 		df->for_name = Malloc((unsigned) (strlen(buf)+1));
 		strcpy(df->for_name, buf);
 		C_exp(df->for_name);
+		open_scope(OPENSCOPE);
 	}
 	else {
 		df = lookup(dot.TOK_IDF, CurrentScope);

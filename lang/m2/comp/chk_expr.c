@@ -254,47 +254,53 @@ rem_set(set)
 
 struct node *
 getarg(argp, bases, designator)
-	struct node *argp;
+	struct node **argp;
 {
 	struct type *tp;
+	register struct node *arg = *argp;
 
-	if (!argp->nd_right) {
-		node_error(argp, "too few arguments supplied");
+	if (!arg->nd_right) {
+		node_error(arg, "too few arguments supplied");
 		return 0;
 	}
-	argp = argp->nd_right;
-	if ((!designator && !chk_expr(argp->nd_left)) ||
-	    (designator && !chk_designator(argp->nd_left, DESIGNATOR, D_REFERRED))) {
+	arg = arg->nd_right;
+	if ((!designator && !chk_expr(arg->nd_left)) ||
+	    (designator && !chk_designator(arg->nd_left, DESIGNATOR, D_REFERRED))) {
 		return 0;
 	}
-	tp = argp->nd_left->nd_type;
+	tp = arg->nd_left->nd_type;
 	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 	if (bases && !(tp->tp_fund & bases)) {
-		node_error(argp, "unexpected type");
+		node_error(arg, "unexpected type");
 		return 0;
 	}
-	return argp;
+
+	*argp = arg;
+	return arg->nd_left;
 }
 
 struct node *
 getname(argp, kinds)
-	struct node *argp;
+	struct node **argp;
 {
-	if (!argp->nd_right) {
-		node_error(argp, "too few arguments supplied");
+	register struct node *arg = *argp;
+
+	if (!arg->nd_right) {
+		node_error(arg, "too few arguments supplied");
 		return 0;
 	}
-	argp = argp->nd_right;
-	if (! chk_designator(argp->nd_left, 0, D_REFERRED)) return 0;
+	arg = arg->nd_right;
+	if (! chk_designator(arg->nd_left, 0, D_REFERRED)) return 0;
 
-	assert(argp->nd_left->nd_class == Def);
+	assert(arg->nd_left->nd_class == Def);
 
-	if (!(argp->nd_left->nd_def->df_kind & kinds)) {
-		node_error(argp, "unexpected type");
+	if (!(arg->nd_left->nd_def->df_kind & kinds)) {
+		node_error(arg, "unexpected type");
 		return 0;
 	}
 
-	return argp;
+	*argp = arg;
+	return arg->nd_left;
 }
 
 int
@@ -314,44 +320,20 @@ chk_call(expp)
 	left = expp->nd_left;
 	if (! chk_designator(left, 0, D_USED)) return 0;
 
-	if (left->nd_class == Def && is_type(left->nd_def)) {
+	if (IsCast(left)) {
 		/* It was a type cast. This is of course not portable.
 		*/
-		arg = expp->nd_right;
-		if ((! arg) || arg->nd_right) {
-node_error(expp, "only one parameter expected in type cast");
-			return 0;
-		}
-		arg = arg->nd_left;
-		if (! chk_expr(arg)) return 0;
-		if (arg->nd_type->tp_size != left->nd_type->tp_size) {
-node_error(expp, "unequal sizes in type cast");
-		}
-		if (arg->nd_class == Value) {
-			struct type *tp = left->nd_type;
-
-			FreeNode(expp->nd_left);
-			expp->nd_right->nd_left = 0;
-			FreeNode(expp->nd_right);
-			expp->nd_left = expp->nd_right = 0;
-			*expp = *arg;
-			expp->nd_type = tp;
-		}
-		else expp->nd_type = left->nd_type;
-
-		return 1;
+		return chk_cast(expp, left);
 	}
 
-	if ((left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) ||
-	    left->nd_type->tp_fund == T_PROCEDURE) {
+	if (IsProcCall(left)) {
 		/* A procedure call. it may also be a call to a
 		   standard procedure
 		*/
-		arg = expp;
 		if (left->nd_type == std_type) {
 			/* A standard procedure
 			*/
-			return chk_std(expp, left, arg);
+			return chk_std(expp, left);
 		}
 		/* Here, we have found a real procedure call. The left hand
 		   side may also represent a procedure variable.
@@ -363,12 +345,12 @@ node_error(expp, "unequal sizes in type cast");
 }
 
 chk_proccall(expp)
-	struct node *expp;
+	register struct node *expp;
 {
 	/*	Check a procedure call
 	*/
 	register struct node *left;
-	register struct node *arg;
+	struct node *arg;
 	register struct paramlist *param;
 
 	left = 0;
@@ -383,20 +365,21 @@ chk_proccall(expp)
 
 	left = expp->nd_left;
 	arg = expp;
-	arg->nd_type = left->nd_type->next;
+	expp->nd_type = left->nd_type->next;
 	param = left->nd_type->prc_params;
 
 	while (param) {
-		if (!(arg = getarg(arg, 0, param->par_var))) return 0;
+		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
 
-		if (! TstParCompat(param->par_type,
-				   arg->nd_left->nd_type,
-				   param->par_var)) {
-node_error(arg->nd_left, "type incompatibility in parameter");
+		if (! TstParCompat(TypeOfParam(param),
+				   left->nd_type,
+				   IsVarParam(param),
+				   left)) {
+node_error(left, "type incompatibility in parameter");
 			return 0;
 		}
-		if (param->par_var && arg->nd_left->nd_class == Def) {
-			arg->nd_left->nd_def->df_flags |= D_NOREG;
+		if (IsVarParam(param) && left->nd_class == Def) {
+			left->nd_def->df_flags |= D_NOREG;
 		}
 
 		param = param->next;
@@ -475,7 +458,6 @@ chk_designator(expp, flag, dflags)
 
 	if (expp->nd_class == Link) {
 		assert(expp->nd_symb == '.');
-		assert(expp->nd_right->nd_class == Name);
 
 		if (! chk_designator(expp->nd_left,
 				     flag|HASSELECTORS,
@@ -485,19 +467,17 @@ chk_designator(expp, flag, dflags)
 
 		assert(tp->tp_fund == T_RECORD);
 
-		df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
+		df = lookup(expp->nd_IDF, tp->rec_scope);
 
 		if (!df) {
-			id_not_declared(expp->nd_right);
+			id_not_declared(expp);
 			return 0;
 		}
 		else {
-			expp->nd_right->nd_class = Def;
-			expp->nd_right->nd_def = df;
+			expp->nd_def = df;
 			expp->nd_type = df->df_type;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
-node_error(expp->nd_right,
-"identifier \"%s\" not exported from qualifying module",
+node_error(expp, "identifier \"%s\" not exported from qualifying module",
 df->df_idf->id_text);
 				return 0;
 			}
@@ -508,11 +488,10 @@ df->df_idf->id_text);
 			expp->nd_class = Def;
 			expp->nd_def = df;
 			FreeNode(expp->nd_left);
-			FreeNode(expp->nd_right);
-			expp->nd_left = expp->nd_right = 0;
+			expp->nd_left = 0;
 		}
 		else {
-			return FlagCheck(expp->nd_right, df, flag);
+			return FlagCheck(expp, df, flag);
 		}
 	}
 
@@ -869,10 +848,11 @@ chk_uoper(expp)
 }
 
 struct node *
-getvariable(arg)
-	register struct node *arg;
+getvariable(argp)
+	struct node **argp;
 {
-	struct def *df;
+	register struct node *arg = *argp;
+	register struct def *df;
 	register struct node *left;
 
 	arg = arg->nd_right;
@@ -885,62 +865,65 @@ getvariable(arg)
 
 	if (! chk_designator(left, DESIGNATOR, D_REFERRED)) return 0;
 	if (left->nd_class == Oper || left->nd_class == Uoper) {
-		return arg;
+		*argp = arg;
+		return left;
 	}
 
 	df = 0;
-	if (left->nd_class == Link) df = left->nd_right->nd_def;
-	else if (left->nd_class == Def) df = left->nd_def;
+	if (left->nd_class == Link || left->nd_class == Def) {
+		df = left->nd_def;
+	}
 
 	if (!df || !(df->df_kind & (D_VARIABLE|D_FIELD))) {
 		node_error(arg, "variable expected");
 		return 0;
 	}
 
-	return arg;
+	*argp = arg;
+	return left;
 }
 
 int
-chk_std(expp, left, arg)
-	register struct node *expp, *left, *arg;
+chk_std(expp, left)
+	register struct node *expp, *left;
 {
 	/*	Check a call of a standard procedure or function
 	*/
+	struct node *arg = expp;
+	int std;
 
 	assert(left->nd_class == Def);
-DO_DEBUG(3, debug("standard name \"%s\", %d", 
-left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
+	std = left->nd_def->df_value.df_stdname;
 
-	switch(left->nd_def->df_value.df_stdname) {
+DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
+
+	switch(std) {
 	case S_ABS:
-		if (!(arg = getarg(arg, T_NUMERIC, 0))) return 0;
-		left = arg->nd_left;
+		if (!(left = getarg(&arg, T_NUMERIC, 0))) return 0;
 		expp->nd_type = left->nd_type;
 		if (left->nd_class == Value) cstcall(expp, S_ABS);
 		break;
 
 	case S_CAP:
 		expp->nd_type = char_type;
-		if (!(arg = getarg(arg, T_CHAR, 0))) return 0;
-		left = arg->nd_left;
+		if (!(left = getarg(&arg, T_CHAR, 0))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_CAP);
 		break;
 
 	case S_CHR:
 		expp->nd_type = char_type;
-		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
-		left = arg->nd_left;
+		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
 		if (left->nd_class == Value) cstcall(expp, S_CHR);
 		break;
 
 	case S_FLOAT:
 		expp->nd_type = real_type;
-		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
 		break;
 
 	case S_HIGH:
-		if (!(arg = getarg(arg, T_ARRAY, 0))) return 0;
-		expp->nd_type = arg->nd_left->nd_type->next;
+		if (!(left = getarg(&arg, T_ARRAY, 0))) return 0;
+		expp->nd_type = left->nd_type->next;
 		if (!expp->nd_type) {
 			/* A dynamic array has no explicit index type
 			*/
@@ -951,68 +934,75 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	case S_MAX:
 	case S_MIN:
-		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
-		expp->nd_type = arg->nd_left->nd_type;
-		cstcall(expp,left->nd_def->df_value.df_stdname);
+		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
+		expp->nd_type = left->nd_type;
+		cstcall(expp,std);
 		break;
 
 	case S_ODD:
-		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
+		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
 		expp->nd_type = bool_type;
-		if (arg->nd_left->nd_class == Value) cstcall(expp, S_ODD);
+		if (left->nd_class == Value) cstcall(expp, S_ODD);
 		break;
 
 	case S_ORD:
-		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
+		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
+		if (left->nd_type->tp_size > word_size) {
+			node_error(left, "illegal type in argument of ORD");
+			return 0;
+		}
 		expp->nd_type = card_type;
-		if (arg->nd_left->nd_class == Value) cstcall(expp, S_ORD);
+		if (left->nd_class == Value) cstcall(expp, S_ORD);
 		break;
 
 	case S_TSIZE:	/* ??? */
 	case S_SIZE:
 		expp->nd_type = intorcard_type;
-		arg = getname(arg, D_FIELD|D_VARIABLE|D_ISTYPE);
-		if (!arg) return 0;
+		if (! getname(&arg, D_FIELD|D_VARIABLE|D_ISTYPE)) return 0;
 		cstcall(expp, S_SIZE);
 		break;
 
 	case S_TRUNC:
 		expp->nd_type = card_type;
-		if (!(arg = getarg(arg, T_REAL, 0))) return 0;
+		if (!(left = getarg(&arg, T_REAL, 0))) return 0;
 		break;
 
 	case S_VAL:
 		{
 		struct type *tp;
 
-		if (!(arg = getname(arg, D_ISTYPE))) return 0;
-		tp = arg->nd_left->nd_def->df_type;
+		if (!(left = getname(&arg, D_ISTYPE))) return 0;
+		tp = left->nd_def->df_type;
 		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 		if (!(tp->tp_fund & T_DISCRETE)) {
 			node_error(arg, "unexpected type");
 			return 0;
 		}
-		expp->nd_type = arg->nd_left->nd_def->df_type;
+		expp->nd_type = left->nd_def->df_type;
 		expp->nd_right = arg->nd_right;
 		arg->nd_right = 0;
 		FreeNode(arg);
-		arg = getarg(expp, T_INTORCARD, 0);
-		if (!arg) return 0;
-		if (arg->nd_left->nd_class == Value) cstcall(expp, S_VAL);
+		arg = expp;
+		if (!(left = getarg(&arg, T_INTORCARD, 0))) return 0;
+		if (left->nd_class == Value) cstcall(expp, S_VAL);
 		break;
 		}
 
 	case S_ADR:
 		expp->nd_type = address_type;
-		if (!(arg = getarg(arg, 0, 1))) return 0;
+		if (!(left = getarg(&arg, 0, 1))) return 0;
 		break;
 
 	case S_DEC:
 	case S_INC:
 		expp->nd_type = 0;
-		if (!(arg = getvariable(arg))) return 0;
+		if (! (left = getvariable(&arg))) return 0;
+		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
+node_error(left, "illegal type in argument of INC or DEC");
+			return 0;
+		}
 		if (arg->nd_right) {
-			if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
+			if (! getarg(&arg, T_INTORCARD, 0)) return 0;
 		}
 		break;
 
@@ -1026,14 +1016,14 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 		struct type *tp;
 
 		expp->nd_type = 0;
-		if (!(arg = getvariable(arg))) return 0;
-		tp = arg->nd_left->nd_type;
+		if (!(left = getvariable(&arg))) return 0;
+		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
 node_error(arg, "EXCL and INCL expect a SET parameter");
 			return 0;
 		}
-		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
-		if (!TstAssCompat(tp->next, arg->nd_left->nd_type)) {
+		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
+		if (!TstAssCompat(tp->next, left->nd_type)) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???
 			*/
@@ -1044,13 +1034,54 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 		}
 
 	default:
-		assert(0);
+		crash("(chk_std)");
 	}
 
 	if (arg->nd_right) {
 		node_error(arg->nd_right, "too many parameters supplied");
 		return 0;
 	}
+
+	return 1;
+}
+
+chk_cast(expp, left)
+	register struct node *expp, *left;
+{
+	/*	Check a cast and perform it if the argument is constant.
+		If the sizes don't match, only complain if at least one of them
+		has a size larger than the word size.
+		If both sizes are equal to or smaller than the word size, there
+		is no problem as such values take a word on the EM stack
+		anyway.
+	*/
+	register struct node *arg = expp->nd_right;
+
+	if ((! arg) || arg->nd_right) {
+node_error(expp, "only one parameter expected in type cast");
+		return 0;
+	}
+
+	arg = arg->nd_left;
+	if (! chk_expr(arg)) return 0;
+
+	if (arg->nd_type->tp_size != left->nd_type->tp_size &&
+	    (arg->nd_type->tp_size > word_size ||
+	     left->nd_type->tp_size > word_size)) {
+		node_error(expp, "unequal sizes in type cast");
+	}
+
+	if (arg->nd_class == Value) {
+		struct type *tp = left->nd_type;
+
+		FreeNode(left);
+		expp->nd_right->nd_left = 0;
+		FreeNode(expp->nd_right);
+		expp->nd_left = expp->nd_right = 0;
+		*expp = *arg;
+		expp->nd_type = tp;
+	}
+	else expp->nd_type = left->nd_type;
 
 	return 1;
 }
