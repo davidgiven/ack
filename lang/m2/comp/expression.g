@@ -91,6 +91,7 @@ ConstExpression(struct node **pnd;):
 		     ( debug("Constant expression:"),
 		       PrNode(*pnd)));
 		  (void) chk_expr(*pnd, 1);
+		  DO_DEBUG(3, PrNode(*pnd));
 		}
 ;
 

@@ -13,6 +13,8 @@ static char *RcsId = "$Header$";
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"const.h"
+#include	"debug.h"
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
@@ -129,6 +131,7 @@ init_types()
 	register struct type *tp;
 
 	char_type = standard_type(CHAR, 1, (arith) 1);
+	char_type->enm_ncst = 256;
 	bool_type = standard_type(BOOLEAN, 1, (arith) 1);
 	int_type = standard_type(INTEGER, int_align, int_size);
 	longint_type = standard_type(LONGINT, lint_align, lint_size);
@@ -217,8 +220,87 @@ chk_basesubrange(tp, base)
 	else if (base != card_type && base != int_type) {
 		error("Illegal base for a subrange");
 	}
+	else if (base == int_type && tp->next == card_type &&
+		 (tp->sub_ub > max_int || tp->sub_ub)) {
+		error("Upperbound to large for type INTEGER");
+	}
 	else if (base != tp->next && base != int_type) {
 		error("Specified base does not conform");
 	}
 	tp->next = base;
+}
+
+struct type *
+subr_type(lb, ub)
+	struct node *lb, *ub;
+{
+	/*	Construct a subrange type from the constant expressions
+		indicated by "lb" and "ub", but first perform some
+		checks
+	*/
+	register struct type *tp = lb->nd_type;
+
+	if (!TstCompat(lb->nd_type, ub->nd_type)) {
+		node_error(ub, "Types of subrange bounds not compatible");
+		return error_type;
+	}
+
+	if (tp->tp_fund == SUBRANGE) tp = tp->next;
+	if (tp == intorcard_type) tp = card_type;	/* lower bound > 0 */
+
+	/* Check base type
+	*/
+	if (tp != int_type && tp != card_type && tp != char_type &&
+	    tp->tp_fund != ENUMERATION) {
+		/* BOOLEAN is also an ENUMERATION type
+		*/
+		node_error(ub, "Illegal base type for subrange");
+		return error_type;
+	}
+
+	/* Check bounds
+	*/
+	if (lb->nd_INT > ub->nd_INT) {
+		node_error(ub, "Lower bound exceeds upper bound");
+	}
+
+	/* Now construct resulting type
+	*/
+	tp = construct_type(SUBRANGE, tp);
+	tp->sub_lb = lb->nd_INT;
+	tp->sub_ub = ub->nd_INT;
+	DO_DEBUG(2,debug("Creating subrange type %ld-%ld", (long)lb->nd_INT,(long)ub->nd_INT));
+	return tp;
+}
+#define MAX_SET	1024	/* ??? Maximum number of elements in a set */
+
+struct type *
+set_type(tp)
+	struct type *tp;
+{
+	/*	Construct a set type with base type "tp", but first
+		perform some checks
+	*/
+	int lb, ub;
+
+	if (tp->tp_fund == SUBRANGE) {
+		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAX_SET - 1) {
+			error("Set type limits exceeded");
+			return error_type;
+		}
+	}
+	else if (tp->tp_fund == ENUMERATION || tp == char_type) {
+		lb = 0;
+		if ((ub = tp->enm_ncst - 1) > MAX_SET - 1) {
+			error("Set type limits exceeded");
+			return error_type;
+		}
+	}
+	else {
+		error("illegal base type for set");
+		return error_type;
+	}
+	tp = construct_type(SET, tp);
+	tp->tp_size = align(((ub - lb) + 7)/8, wrd_align);
+	return tp;
 }

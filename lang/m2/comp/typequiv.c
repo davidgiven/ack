@@ -20,6 +20,10 @@ TstTypeEquiv(tp1, tp2)
 
 	return     tp1 == tp2
 		||
+		   tp1 == error_type
+		||
+		   tp2 == error_type
+		||
 		   ( 
 		     tp1 && tp1->tp_fund == PROCEDURE
 		   &&
@@ -61,9 +65,19 @@ TstCompat(tp1, tp2)
 		Modula-2 Report for a definition of "compatible".
 	*/
 	if (TstTypeEquiv(tp1, tp2)) return 1;
-	if (tp2->tp_fund == SUBRANGE) tp1 = tp1->next;
-	if (tp2->tp_fund == SUBRANGE) tp1 = tp1->next;
+	if (tp1->tp_fund == SUBRANGE) tp1 = tp1->next;
+	if (tp2->tp_fund == SUBRANGE) tp2 = tp2->next;
 	return	tp1 == tp2
+	    ||
+		(  tp1 == intorcard_type
+		&&
+		   (tp2 == int_type || tp2 == card_type)
+		)
+	    ||
+		(  tp2 == intorcard_type
+		&&
+		   (tp1 == int_type || tp1 == card_type)
+		)
 	    ||
 		(  tp1 == address_type
 		&& 

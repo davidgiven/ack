@@ -50,6 +50,8 @@ chk_expr(expp, const)
 		return chk_call(expp, const);
 	case Link:
 		return chk_name(expp, const);
+	default:
+		assert(0);
 	}
 	/*NOTREACHED*/
 }
@@ -58,7 +60,85 @@ int
 chk_set(expp, const)
 	register struct node *expp;
 {
-	/* ??? */
+	struct type *tp;
+	struct def *df;
+	register struct node *nd;
+	extern struct def *findname();
+
+	assert(expp->nd_symb == SET);
+
+	/* First determine the type of the set
+	*/
+	if (expp->nd_left) {
+		/* A type was given. Check it out
+		*/
+		df = findname(expp->nd_left);
+		if ((df->df_kind != D_TYPE && df->df_kind != D_ERROR) ||
+		    (df->df_type->tp_fund != SET)) {
+			node_error(expp, "Illegal set type");
+			return 0;
+		}
+		tp = df->df_type;
+	}
+	else	tp = bitset_type;
+
+	/* Now check the elements given
+	*/
+	nd = expp->nd_right;
+	while (nd) {
+		assert(nd->nd_class == Link && nd->nd_symb == ',');
+		if (!chk_el(nd->nd_left, const, tp->next, 0)) return 0;
+		nd = nd->nd_right;
+	}
+	return 1;
+}
+
+int
+chk_el(expp, const, tp, level)
+	struct node *expp;
+	struct type *tp;
+{
+	/*	Check elements of a set. This routine may call itself
+		recursively, but only once.
+	*/
+	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
+		/*  { ... , expr1 .. expr2,  ... } */
+		if (level) {
+			node_error(expp, "Illegal set element");
+			return 0;
+		}
+		if (!chk_el(expp->nd_left, const, tp, 1) ||
+		    !chk_el(expp->nd_right, const, tp, 1)) {
+			return 0;
+		}
+		if (expp->nd_left->nd_class == Value &&
+		    expp->nd_right->nd_class == Value) {
+		    	if (expp->nd_left->nd_INT > expp->nd_right->nd_INT) {
+node_error(expp, "Lower bound exceeds upper bound in range");
+				return 0;
+			}
+		}
+		return 1;
+	}
+	if (!chk_expr(expp, const)) return 0;
+	if (!TstCompat(tp, expp->nd_type)) {
+		node_error(expp, "Set element has incompatible type");
+		return 0;
+	}
+	if (expp->nd_class == Value) {
+	    	if ((tp->tp_fund != ENUMERATION &&
+		     (expp->nd_INT < tp->sub_lb || expp->nd_INT > tp->sub_ub))
+		   ||
+		    (tp->tp_fund == ENUMERATION &&
+		     (expp->nd_INT < 0 || expp->nd_INT > tp->enm_ncst))
+		   ) {
+			node_error(expp, "Set element out of range");
+#ifdef DEBUG
+			debug("%d (%d, %d)", (int) expp->nd_INT, (int) tp->sub_lb, (int) tp->sub_ub);
+#endif
+			return 0;
+		}
+	}
 	return 1;
 }
 

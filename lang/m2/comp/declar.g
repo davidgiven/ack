@@ -233,8 +233,8 @@ IdentList(struct node **p;)
 
 SubrangeType(struct type **ptp;)
 {
-	struct type *tp;
-	struct node *nd1 = 0, *nd2 = 0;
+	struct node *nd1, *nd2;
+	extern struct type *subr_type();
 }:
 	/*
 	   This is not exactly the rule in the new report, but see
@@ -243,17 +243,7 @@ SubrangeType(struct type **ptp;)
 	'[' ConstExpression(&nd1)
 	UPTO ConstExpression(&nd2)
 	']'
-	/*
-	   Evaluate the expressions. Check that they are indeed constant.
-	   ???
-	   Leave the basetype of the subrange in tp;
-	*/
-			{
-			  /* For the time being: */
-			  tp = int_type;
-			  tp = construct_type(SUBRANGE, tp);
-			  *ptp = tp;
-			}
+			{ *ptp = subr_type(nd1, nd2); }
 ;
 
 ArrayType(struct type **ptp;)
@@ -350,10 +340,11 @@ CaseLabels
 SetType(struct type **ptp;)
 {
 	struct type *tp;
+	struct type *set_type();
 } :
 	SET OF SimpleType(&tp)
-			{
-			  *ptp = construct_type(SET, tp);
+			{ 
+			  *ptp = set_type(tp);
 			}
 ;
 

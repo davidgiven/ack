@@ -267,10 +267,10 @@ init_cst()
 	}
 	mach_long_size = i;
 	mach_long_sign = 1 << (mach_long_size * 8 - 1);
-	if (sizeof(long) < mach_long_size)
+	if (int_size > mach_long_size) {
 		fatal("sizeof (long) insufficient on this machine");
+	}
 
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
-	max_longint = full_mask[lint_size] & ~(1 << (lint_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
 }

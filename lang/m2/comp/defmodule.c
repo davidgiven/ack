@@ -25,6 +25,7 @@ GetFile(name)
 	*/
 	extern char *DEFPATH[];
 	char buf[256];
+	char *strcpy(), *strcat();
 
 	(void) strcpy(buf, name);
 	if (strlen(buf) > 10) {
