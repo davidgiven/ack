@@ -25,3 +25,10 @@ init()
 	sigtrp(M2_UNIXSIG, SIGALRM);
 	sigtrp(M2_UNIXSIG, SIGTERM);
 }
+
+extern int catch();
+
+int (*handler)() = catch;
+char **argv, **environ;
+int argc, StackSize;
+char *CurrentProcess, MainProcess, StackBase, MainLB;

@@ -26,24 +26,6 @@
  exp $init
  inp $trap_handler
 
-handler
- con $catch
-environ
- bss EM_PSIZE,0,0
-argv
- bss EM_PSIZE,0,0
-argc
- bss EM_WSIZE,0,0
-CurrentProcess
- bss EM_PSIZE,0,0
-MainProcess
- bss EM_PSIZE,0,0
-StackBase
- bss EM_PSIZE,0,0
-MainLB
- bss EM_PSIZE,0,0
-StackSize
- bss EM_WSIZE,0,0
 mainroutine
  bss 2*EM_PSIZE,0,0
 
