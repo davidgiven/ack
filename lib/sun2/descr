@@ -8,6 +8,8 @@ var d=8
 var NAME=sun
 var M=m68k4
 var P=sun2
+# I am not sure about the next line. It is the sun3 one.
+var CC_ALIGN=-Vw{w}.{s}i{w}.{s}p{p}.{s}s{s}.{s}l{l}.{s}f{f}.{w}d{d}.{w}S{s}U{s}
 var LIB=lib/{P}/tail_
 var RT=lib/{P}/head_
 var PLIB=lib/{M}/tail_
