@@ -73,3 +73,6 @@ extern string	LLgenid;	/* LLgen identification string */
 extern t_token	lextoken;	/* the current token */
 extern int	nerrors;
 extern string	rec_file, incl_file;
+extern int	low_percentage, high_percentage;
+extern int	min_cases_for_jmptable;
+extern int	jmptable_option;

@@ -45,6 +45,7 @@ static string	c_read =	"LLread();\n";
 
 static int nlabel;		/* count for the generation of labels */
 static int firsts;		/* are there any? */
+static int listcount;
 
 /* In this file the following routines are defined: */
 extern		gencode();
@@ -60,6 +61,7 @@ STATIC		getparams();
 STATIC		gettok();
 STATIC		rulecode();
 STATIC int *	dopush();
+STATIC int *	mk_tokenlist();
 STATIC		getaction();
 STATIC		alternation();
 STATIC		codeforterm();
@@ -68,6 +70,9 @@ STATIC		gencases();
 STATIC		genpush();
 STATIC		genpop();
 STATIC		genincrdecr();
+STATIC		add_cases();
+STATIC int	analyze_switch();
+STATIC		out_list();
 
 # define NOPOP		-20000
 
@@ -80,6 +85,17 @@ doclose(f)
 		fatal(0,"Write error on temporary");
 	}
 	fclose(f);
+}
+
+STATIC int *
+mk_tokenlist()
+{
+	register int *p = (int *)alloc(ntokens * sizeof(int)) + ntokens;
+	register int i = ntokens;
+
+	while (i--) *--p = -1;
+
+	return p;
 }
 
 gencode(argc) {
@@ -222,6 +238,7 @@ generate(f) p_file f; {
 	register p_first ff;
 	int mustpop;
 
+	listcount = 0;
 	/* Generate first sets */
 	for (ff = f->f_firsts; ff; ff = ff->ff_next) {
 		macro(ff->ff_name,&nonterms[ff->ff_nont]);
@@ -502,23 +519,28 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 }
 
 STATIC
-alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
-	register FILE *f = fpars;
+alternation(pp, safety, mustscan, mustpop, lb)
+	p_gram pp;
+{
+	register p_gram	p = pp;
+	register FILE	*f = fpars;
 	register p_link	l;
 	int		hulp, hulp1,hulp2;
 	int		haddefault = 0;
-	int		unsafe = 1;
 	int		nsafe;
 	p_set		set;
 	p_set		setalloc();
+	int		*tokenlist = mk_tokenlist();
+	int		casecnt = 0;
+	int		compacted;
+	int		unsafe;
 
 	assert(safety < NOSCANDONE);
-	l = g_getlink(p);
 	hulp = nlabel++;
 	hulp1 = nlabel++;
 	hulp2 = nlabel++;
 	if (!lb) lb = hulp1;
-	if (!onerror && safety <= SAFESCANDONE) unsafe = 0;
+	unsafe = onerror || safety > SAFESCANDONE;
 	if (!unsafe) {
 		genpop(mustpop);
 		mustpop = NOPOP;
@@ -526,33 +548,76 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	if (unsafe && hulp1 == lb) {
 		fprintf(f,"L_%d: \n", hulp1);
 	}
-	fputs("switch(LLcsymb) {\n", f);
+	while (g_gettype(p) != EORULE) {
+		l = g_getlink(p);
+		if (l->l_flag & COND) {
+			if (!(l->l_flag & NOCONF)) {
+				set = setalloc();
+				setunion(set, l->l_others);
+				setintersect(set, l->l_symbs);
+				setminus(l->l_symbs, set);
+				setminus(l->l_others, set);
+				add_cases(set, tokenlist, casecnt++);
+			}
+		}
+		if (!unsafe && (l->l_flag & DEF)) {
+			haddefault = 1;
+		}
+		else	add_cases(l->l_symbs, tokenlist, casecnt++);
+		if (l->l_flag & DEF) {
+			haddefault = 1;
+		}
+		if ((l->l_flag & COND) && !(l->l_flag & NOCONF)) {
+			p++;
+			if (g_gettype(p+1) == EORULE) {
+				setminus(g_getlink(p)->l_symbs, set);
+				free((p_mem) set);
+				continue;
+			}
+			free((p_mem) set);
+			if (!haddefault) {
+			}
+			else {
+				add_cases(l->l_others, tokenlist, casecnt++);
+				unsafe = 0;
+			}
+			break;
+		}
+		p++;
+	}
+
+	unsafe = onerror || safety > SAFESCANDONE;
+	p = pp;
+	haddefault = 0;
+	compacted = analyze_switch(tokenlist);
+	if (compacted) {
+		fputs("{", f);
+		out_list(tokenlist, listcount, casecnt);
+		fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount++);
+	}
+	else	fputs("switch(LLcsymb) {\n", f);
+	casecnt = 0;
+
 	while (g_gettype(p) != EORULE) {
 		l = g_getlink(p);
 		if (l->l_flag & COND) {
 			if (l->l_flag & NOCONF) {
 				fputs("#ifdef ___NOCONFLICT___\n", f);
 			}
-			set = setalloc();
-			setunion(set, l->l_others);
-			setintersect(set, l->l_symbs);
-			setminus(l->l_symbs, set);
-			setminus(l->l_others, set);
-			gencases(set);
+			else gencases(tokenlist, casecnt++, compacted);
 			controlline();
 			fputs("if (!",f);
 			getaction(0);
 			fprintf(f,") goto L_%d;\n", hulp);
 			if (l->l_flag & NOCONF) {
 				fputs("#endif\n", f);
-				free((p_mem) set);
 			}
 		}
 		if (!unsafe && (l->l_flag & DEF)) {
 			haddefault = 1;
 			fputs("default:\n", f);
 		}
-		else	gencases(l->l_symbs);
+		else	gencases(tokenlist, casecnt++, compacted);
 		nsafe = SAFE;
 		if (l->l_flag & DEF) {
 			if (unsafe) {
@@ -572,16 +637,13 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 			p++;
 			fprintf(f,"L_%d : ;\n",hulp);
 			if (g_gettype(p+1) == EORULE) {
-				setminus(g_getlink(p)->l_symbs, set);
-				free((p_mem) set);
 				continue;
 			}
-			free((p_mem) set);
 			if (!haddefault) {
 				fputs("default:\n", f);
 			}
 			else {
-				gencases(l->l_others);
+				gencases(tokenlist, casecnt++, compacted);
 				safety = SAFE;
 				unsafe = 0;
 			}
@@ -594,7 +656,9 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 		}
 		p++;
 	}
+	if (compacted) fputs(c_close, f);
 	fputs(c_close, f);
+	free((p_mem) tokenlist);
 }
 
 STATIC int *
@@ -801,6 +865,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	if (rep_kind != OPT && rep_kind != FIXED) fputs("continue;\n", f);
 	if (rep_kind != FIXED) {
 		fputs(c_close, f); /* Close switch */
+		fputs(c_close, f);
 		if (rep_kind != OPT) {
 			genpop(ispushed);
 			fputs(c_break, f);
@@ -826,30 +891,53 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	int		hulp1, hulp2;
 	int		safeterm;
 	int		termissafe = 0;
+	int		casecnt = 0;
+	int		*tokenlist = mk_tokenlist();
+	int		compacted;
 
 	if (rep_kind == PLUS) safeterm = gettout(q);
 	else if (rep_kind == OPT) safeterm = safety;
 	else /* if (rep_kind == STAR) */ safeterm = max(safety, gettout(q));
 	hulp2 = nlabel++;
 	fprintf(f, "L_%d : ", hulp2);
-	fputs("switch(LLcsymb) {\n", f);
+	if (q->t_flags & RESOLVER) {
+		hulp1 = nlabel++;
+		if (! (q->t_flags & NOCONF)) {
+			p1 = setalloc();
+			setunion(p1,q->t_first);
+			setintersect(p1,q->t_follow);
+			/*
+			 * p1 now points to a set containing the conflicting
+			 * symbols
+			 */
+			setminus(q->t_first, p1);
+			setminus(q->t_follow, p1);
+			setminus(q->t_contains, p1);
+			add_cases(p1, tokenlist, casecnt++);
+			free((p_mem) p1);
+		}
+	}
+	if (safeterm == 0 || (!onerror && safeterm <= SAFESCANDONE)) {
+		termissafe = 1;
+	}
+	else	add_cases(q->t_follow, tokenlist, casecnt++);
+	if (!onerror && (q->t_flags & PERSISTENT) && safeterm != SAFE) {
+		add_cases(q->t_contains, tokenlist, casecnt);
+	}
+	else	add_cases(q->t_first, tokenlist, casecnt);
+	compacted = analyze_switch(tokenlist);
+	fputs("{", f);
+	if (compacted) {
+		out_list(tokenlist, listcount, casecnt);
+		fprintf(f, "switch(LL%d_tklist[LLcsymb]) {\n", listcount++);
+	}
+	else	fputs("switch(LLcsymb) {\n", f);
+	casecnt = 0;
 	if (q->t_flags & RESOLVER) {
 		if (q->t_flags & NOCONF) {
 			fputs("#ifdef ___NOCONFLICT___\n", f);
 		}
-		hulp1 = nlabel++;
-		p1 = setalloc();
-		setunion(p1,q->t_first);
-		setintersect(p1,q->t_follow);
-		/*
-		 * p1 now points to a set containing the conflicting
-		 * symbols
-		 */
-		setminus(q->t_first, p1);
-		setminus(q->t_follow, p1);
-		setminus(q->t_contains, p1);
-		gencases(p1);
-		free((p_mem) p1);
+		else gencases(tokenlist, casecnt++, compacted);
 		controlline();
 		fputs("if (", f);
 		getaction(0);
@@ -860,9 +948,8 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 	}
 	if (safeterm == 0 || (!onerror && safeterm <= SAFESCANDONE)) {
 		fputs("default:\n", f);
-		termissafe = 1;
 	}
-	else	gencases(q->t_follow);
+	else	gencases(tokenlist, casecnt++, compacted);
 	if (rep_kind == OPT) genpop(ispushed);
 	fputs(c_break, f);
 	if (! termissafe) {
@@ -880,10 +967,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 		fputs(c_close, f);
 		fprintf(f,"else if (LL_%d & 1) goto L_%d;}\n",nvar, hulp2);
 	}
-	if (!onerror && (q->t_flags & PERSISTENT) && safeterm != SAFE) {
-		gencases(q->t_contains);
-	}
-	else	gencases(q->t_first);
+	gencases(tokenlist, casecnt, compacted);
 	if (q->t_flags & RESOLVER) {
 		fprintf(f, "L_%d : ;\n", hulp1);
 	}
@@ -893,11 +977,14 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 		fputs(rep_kind == STAR ? "if (!LL_i) " : "if (LL_i == 1) ", f);
 		genpop(ispushed);
 	}
+	free((p_mem) tokenlist);
 	return safeterm;
 }
 
 STATIC
-gencases(setp) register p_set setp; {
+gencases(tokenlist, caseno, compacted)
+	int 	*tokenlist;
+{
 	/*
 	 * setp points to a bitset indicating which cases must
 	 * be generated.
@@ -916,11 +1003,15 @@ gencases(setp) register p_set setp; {
 	register p_token p;
 	register int i;
 
+	if (compacted) fprintf(fpars, "case %d :\n", caseno);
 	for (i = 0, p = tokens; i < ntokens; i++, p++) {
-		if (IN(setp,i)) {
+		if (tokenlist[i] == caseno) {
 			fprintf(fpars,
-				p->t_tokno<0400 ? "case /* '%s' */ %d : ;\n"
-					      : "case /*  %s  */ %d : ;\n",
+				compacted ?
+				   (p->t_tokno < 0400 ? "/* case '%s' */\n" :
+							"/* case %s */\n") :
+				   p->t_tokno<0400 ? "case /* '%s' */ %d : ;\n"
+					        : "case /*  %s  */ %d : ;\n",
 				p->t_string, i);
 		}
 	}
@@ -974,4 +1065,59 @@ genincrdecr(s, d) string s; {
 STATIC
 genpop(d) {
 	genincrdecr("decr", d);
+}
+
+STATIC int
+analyze_switch(tokenlist)
+	int	*tokenlist;
+{
+	register int i;
+	int ncases = 0;
+	int percentage;
+	int maxcase = 0, mincase = 0;
+
+	if (! jmptable_option) return 0;
+	for (i = 0; i < ntokens; i++) {
+		if (tokenlist[i] >= 0) {
+			ncases++;
+			if (! mincase) mincase = i + 1;
+			maxcase = i + 1;
+		}
+	}
+
+	if (ncases < min_cases_for_jmptable) return 0;
+	percentage = ncases * 100 / (maxcase - mincase);
+	fprintf(fpars, "/* percentage is %d */\n", percentage);
+	return percentage >= low_percentage && percentage <= high_percentage;
+}
+
+STATIC
+add_cases(s, tokenlist, caseno)
+	p_set	s;
+	int	*tokenlist;
+{
+	register int i;
+
+	for (i = 0; i < ntokens; i++) {
+		if (IN(s, i)) {
+			tokenlist[i] = caseno;
+		}
+	}
+}
+
+STATIC
+out_list(tokenlist, listno, casecnt)
+	int	*tokenlist;
+{
+	register int i;
+	register FILE *f = fpars;
+
+	fprintf(f, "static %s LL%d_tklist[] = {", 
+		casecnt <= 127 ? "char" : "short",
+		listno);
+	
+	for (i = 0; i < ntokens; i++) {
+		fprintf(f, "%c%d,", i % 10 == 0 ? '\n': ' ', tokenlist[i]);
+	}
+	fputs(c_arrend, f);
 }

@@ -52,6 +52,10 @@ main(argc,argv) register string	argv[]; {
 	while (argc >= 2 && (arg = argv[1], *arg == '-')) {
 		while (*++arg) {
 			switch(*arg) {
+			  case 'j':
+			  case 'J':
+				jmptable_option = 1;
+				continue;
 			  case 'w':
 			  case 'W':
 				wflag = 1;
@@ -60,6 +64,18 @@ main(argc,argv) register string	argv[]; {
 			  case 'V':
 				verbose++;
 				continue;
+			  case 'l':
+			  case 'L':
+				low_percentage = atoi(++arg);
+				break;
+			  case 'h':
+			  case 'H':
+				high_percentage = atoi(++arg);
+				break;
+			  case 'm':
+			  case 'M':
+				min_cases_for_jmptable = atoi(++arg);
+				break;
 # ifndef NDEBUG
 			  case 'd':
 			  case 'D':
@@ -91,9 +107,7 @@ main(argc,argv) register string	argv[]; {
 				fprintf(stderr,"illegal option : %c\n",*arg);
 				exit(1);
 			}
-# ifndef NDEBUG
 			break;
-# endif
 		}
 		argv++;
 		argc--;
