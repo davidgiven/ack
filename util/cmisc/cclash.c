@@ -37,7 +37,7 @@ struct idf {
 	struct idf *id_next;
 	char *id_name;
 	struct idf *id_same;
-	char *id_key;
+	char id_key;
 };
 
 #define ACT_LISTONLY	0
@@ -164,8 +164,7 @@ InsertId(id, key)
 		idp->id_same = p;
 	}
 
-	if (key)
-		p->id_key = id;
+	p->id_key = key;
 }
 
 char *
@@ -205,7 +204,7 @@ EnHash(id)
 	return hash_val % (unsigned) HASHSIZE;
 }
 
-BeginOfProgram() { }
+BeginOfProgram() { DefineKeys(); }
 
 EndOfProgram()
 {
