@@ -66,6 +66,9 @@ end
 name "Basic frontend"
 dir lang/basic/src
 end
+name "Occam frontend"
+dir lang/occam/comp
+end
 name "Intel 8086 support"
 dir mach/i86
 indir
@@ -128,10 +131,6 @@ indir
 end
 name "Mantra 68000 System V.0 support"
 dir mach/mantra
-indir
-end
-name "Mantra 68000 System V.0 4/4 support"
-dir mach/mantra4
 indir
 end
 name "Signetics 2650 support"
