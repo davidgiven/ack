@@ -183,7 +183,7 @@ error.o: input.h
 error.o: inputtype.h
 error.o: main.h
 error.o: node.h
-error.o: squeeze.h
+error.o: nostrict.h
 error.o: strict3rd.h
 error.o: warning.h
 main.o: LLlex.h
@@ -221,6 +221,7 @@ type.o: def.h
 type.o: idf.h
 type.o: nocross.h
 type.o: node.h
+type.o: nostrict.h
 type.o: scope.h
 type.o: squeeze.h
 type.o: target_sizes.h
@@ -316,8 +317,8 @@ chk_expr.o: main.h
 chk_expr.o: misc.h
 chk_expr.o: nocross.h
 chk_expr.o: node.h
+chk_expr.o: nostrict.h
 chk_expr.o: scope.h
-chk_expr.o: squeeze.h
 chk_expr.o: standards.h
 chk_expr.o: strict3rd.h
 chk_expr.o: target_sizes.h
@@ -326,7 +327,7 @@ chk_expr.o: warning.h
 options.o: idfsize.h
 options.o: main.h
 options.o: nocross.h
-options.o: squeeze.h
+options.o: nostrict.h
 options.o: strict3rd.h
 options.o: target_sizes.h
 options.o: type.h
@@ -416,8 +417,8 @@ declar.o: main.h
 declar.o: misc.h
 declar.o: nocross.h
 declar.o: node.h
+declar.o: nostrict.h
 declar.o: scope.h
-declar.o: squeeze.h
 declar.o: strict3rd.h
 declar.o: target_sizes.h
 declar.o: type.h

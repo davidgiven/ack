@@ -266,7 +266,7 @@ ChkLinkOrName(expp, flags)
 			return 0;
 		}
 
-		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, 1, flags))) {
+		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope, D_IMPORTED, flags))) {
 			id_not_declared(expp);
 			return 0;
 		}

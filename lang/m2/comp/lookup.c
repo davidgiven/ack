@@ -44,6 +44,12 @@ lookup(id, scope, import, flags)
 	     df && df->df_scope != scope;
 	     df1 = df, df = df->df_next) { /* nothing */ }
 
+	if (! df && import && scopeclosed(scope)) {
+		for (df = id->id_def, df1 = 0;
+		     df && df->df_scope != PervasiveScope;
+		     df1 = df, df = df->df_next) { /* nothing */ }
+	}
+
 	if (df) {
 		/* Found it
 		*/
@@ -55,12 +61,9 @@ lookup(id, scope, import, flags)
 			id->id_def = df;
 		}
 		df->df_flags |= flags;
-		if (import) {
-			while (df->df_kind & D_IMPORTED) {
-				if (df->df_kind == D_INUSE && import != 1) break;
-				assert(df->imp_def != 0);
-				df = df->imp_def;
-			}
+		while (df->df_kind & import) {
+			assert(df->imp_def != 0);
+			df = df->imp_def;
 		}
 	}
 	return df;
@@ -79,14 +82,16 @@ lookfor(id, vis, message, flags)
 	t_def *df;
 
 	while (sc) {
-		df = lookup(id->nd_IDF, sc->sc_scope, 1, flags);
+		df = lookup(id->nd_IDF, sc->sc_scope, D_IMPORTED, flags);
 		if (df) {
-			if (pass_1 &&
-			    message && 
-			    sc->sc_scope->sc_level < vis->sc_scope->sc_level &&
-			    ! scopeclosed(vis->sc_scope)) {
-				define(id->nd_IDF, vis->sc_scope, D_INUSE)->
-					imp_def = df;
+			if (pass_1 && message) {
+				while (vis->sc_scope->sc_level >
+				       sc->sc_scope->sc_level) {
+					define( id->nd_IDF,
+						vis->sc_scope,
+						D_INUSE)-> imp_def = df;
+					vis = nextvisible(vis);
+				}
 			}
 			return df;
 		}

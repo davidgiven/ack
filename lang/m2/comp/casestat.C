@@ -238,10 +238,13 @@ AddCases(sh, node, lbl)
 			assert(node->nd_right->nd_class == Value);
 
 			node->nd_type = node->nd_left->nd_type;
-			for (node->nd_INT = node->nd_left->nd_INT;
-			     node->nd_INT != node->nd_right->nd_INT;
-			     node->nd_INT++) {
+			node->nd_INT = node->nd_left->nd_INT;
+			for (;;) {
 				if (! AddOneCase(sh, node, lbl)) return 0;
+			        if (node->nd_INT == node->nd_right->nd_INT) {
+					break;
+				}
+			     	node->nd_INT++;
 			}
 			return 1;
 		}

@@ -20,6 +20,7 @@
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<em_code.h>
 #include	<em_reg.h>
 #include	<alloc.h>
 #include	<assert.h>

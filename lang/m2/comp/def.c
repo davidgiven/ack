@@ -14,6 +14,7 @@
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<em_code.h>
 #include	<assert.h>
 
 #include	"LLlex.h"
@@ -96,14 +97,9 @@ define(id, scope, kind)
 	*/
 	register t_def *df;
 
-	df = lookup(id, scope, 2, 0);
+	df = lookup(id, scope, D_IMPORT, 0);
 	if (	/* Already in this scope */
 		df
-	   ||	/* A closed scope, and id defined in the pervasive scope */
-		( 
-		  scopeclosed(scope)
-		&&
-		  (df = lookup(id, PervasiveScope, 2, 0)))
 	   ) {
 		switch(df->df_kind) {
 		case D_INUSE:
@@ -265,7 +261,7 @@ DeclProc(type, id)
 	else {
 		char *name;
 
-		df = lookup(id, CurrentScope, 1, 0);
+		df = lookup(id, CurrentScope, D_IMPORTED, 0);
 		if (df && df->df_kind == D_PROCHEAD) {
 			/* C_exp already generated when we saw the definition
 			   in the definition module

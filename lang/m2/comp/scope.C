@@ -49,7 +49,6 @@ open_scope(scopetype)
 	if (scopetype == OPENSCOPE) {
 		ls->sc_next = ls->sc_encl;
 	}
-	else	ls->sc_next = PervVis;
 	CurrVis = ls;
 }
 

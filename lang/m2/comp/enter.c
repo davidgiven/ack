@@ -129,7 +129,7 @@ EnterVarList(Idlist, type, local)
 	for (; idlist; idlist = idlist->nd_right) {
 		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 		df->df_type = type;
-		df->df_flags &= ~(D_USED | D_DEFINED);
+		/* df->df_flags &= ~(D_USED | D_DEFINED); */
 		if (idlist->nd_left) {
 			/* An address was supplied
 			*/
@@ -382,7 +382,9 @@ EnterExportList(Idlist, qualified)
 			   scope imports it.
 			*/
 			df1 = lookup(idlist->nd_IDF,
-				     enclosing(CurrVis)->sc_scope, 1, 0);
+				     enclosing(CurrVis)->sc_scope,
+				     D_IMPORTED,
+				     0);
 			if (df1) {
 				/* It was already defined in the enclosing
 				   scope. There are two legal possibilities,

@@ -623,7 +623,7 @@ type_or_forward(ptp)
 	register t_node *nd;
 	register t_def *df, *df1;
 
-	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1, D_USED))) {
+	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, D_IMPORTED, D_USED))) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
