@@ -26,7 +26,6 @@
 t_scope *PervasiveScope;
 t_scopelist *CurrVis, *GlobalVis;
 extern int proclevel;
-static t_scopelist *PervVis;
 extern char options[];
 
 /* STATICALLOCDEF "scope" 10 */
@@ -71,7 +70,6 @@ InitScope()
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
 	ls->sc_scope = PervasiveScope;
-	PervVis = ls;
 	CurrVis = ls;
 }
 

@@ -123,15 +123,15 @@ align(pos, al)
 }
 
 t_type *
-standard_type(fund, align, size)
+standard_type(fund, algn, size)
 	int fund;
-	int align;
+	int algn;
 	arith size;
 {
 	register t_type *tp = new_type();
 
 	tp->tp_fund = fund;
-	tp->tp_align = align;
+	tp->tp_align = algn;
 	tp->tp_size = size;
 	if (fund == T_ENUMERATION || fund == T_CHAR) {
 		tp->tp_value.tp_enum = new_enume();

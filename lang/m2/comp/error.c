@@ -60,7 +60,7 @@ extern char *symbol2str();
 */
 
 #ifdef DEBUG
-/*VARARGS1*/
+/*VARARGS*/
 debug(va_alist)
 	va_dcl
 {
@@ -74,7 +74,7 @@ debug(va_alist)
 }
 #endif DEBUG
 
-/*VARARGS1*/
+/*VARARGS*/
 error(va_alist)
 	va_dcl
 {
@@ -87,7 +87,7 @@ error(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS2*/
+/*VARARGS*/
 node_error(va_alist)
 	va_dcl
 {
@@ -102,7 +102,7 @@ node_error(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS2*/
+/*VARARGS*/
 warning(va_alist)
 	va_dcl
 {
@@ -115,7 +115,7 @@ warning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS3*/
+/*VARARGS*/
 node_warning(va_alist)
 	va_dcl
 {
@@ -129,7 +129,7 @@ node_warning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 lexerror(va_alist)
 	va_dcl
 {
@@ -142,7 +142,7 @@ lexerror(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS2*/
+/*VARARGS*/
 lexwarning(va_alist)
 	va_dcl
 {
@@ -155,7 +155,7 @@ lexwarning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 fatal(va_alist)
 	va_dcl
 {
@@ -169,7 +169,7 @@ fatal(va_alist)
 	sys_stop(S_EXIT);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 crash(va_alist)
 	va_dcl
 {

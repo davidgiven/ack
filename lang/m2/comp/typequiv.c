@@ -139,7 +139,6 @@ TstAssCompat(tp1, tp2)
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
 	*/
-	register t_type *tp;
 
 	if (TstCompat(tp1, tp2)) return 1;
 

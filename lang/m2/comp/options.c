@@ -156,7 +156,7 @@ DoOption(text)
 #ifndef NOCROSS
 	{
 		register int size;
-		register int align;
+		register int algn;
 		char c;
 		char *t;
 
@@ -165,10 +165,10 @@ DoOption(text)
 
 			t = text;
 			size = txt2int(&t);
-			align = 0;
+			algn = 0;
 			if (*(text = t) == '.')	{
 				t = text + 1;
-				align = txt2int(&t);
+				algn = txt2int(&t);
 				text = t;
 			}
 			if (! strindex("wislfdpS", c)) {
@@ -199,31 +199,31 @@ DoOption(text)
 				pointer_size = size;
 				break;
 			}
-			if (align != 0) switch (c)	{
+			if (algn != 0) switch (c)	{
 
 			case 'w':	/* word		*/
-				word_align = align;
+				word_align = algn;
 				break;
 			case 'i':	/* int		*/
-				int_align = align;
+				int_align = algn;
 				break;
 			case 's':	/* short (subranges) */
-				short_align = align;
+				short_align = algn;
 				break;
 			case 'l':	/* longint	*/
-				long_align = align;
+				long_align = algn;
 				break;
 			case 'f':	/* real		*/
-				float_align = align;
+				float_align = algn;
 				break;
 			case 'd':	/* longreal	*/
-				double_align = align;
+				double_align = algn;
 				break;
 			case 'p':	/* pointer	*/
-				pointer_align = align;
+				pointer_align = algn;
 				break;
 			case 'S':	/* initial record alignment	*/
-				struct_align = align;
+				struct_align = algn;
 				break;
 			}
 		}
