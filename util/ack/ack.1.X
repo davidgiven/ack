@@ -182,6 +182,12 @@ Cross jumping.
 .IP \-s<num>
 Give an indication to the IL phase, how much bigger the program may get.
 The IL phase will not make the program bigger when given \-s0.
+.IP \-Q
+Give some statistics.
+.IP \-T
+Optimize for time.
+.IP \-S
+Optimize for size.
 .RE
 .IP ""
 The default options are: -CJ -BO -SP.
