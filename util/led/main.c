@@ -25,6 +25,7 @@ int		statistics;
 #ifndef NDEBUG
 int			DEB = 0;
 #endif
+int		Verbose = 0;
 
 static			initializations();
 static			first_pass();
@@ -220,6 +221,9 @@ first_pass(argv)
 			h = hash(*argv);
 			if (searchname(*argv, h) == (struct outname *)0)
 				entername(makename(*argv), h);
+			break;
+		case 'v':
+			Verbose = 1;
 			break;
 		case 'S':
 			statistics = 1;

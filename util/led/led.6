@@ -114,6 +114,13 @@ This is useful for loading wholly from a library,
 since initially the name table is empty
 and an unresolved reference is needed
 to force the loading of the first routine.
+.TP
+.B  \-v
+For each member of a library that is linked, give a message on standard
+error telling why
+.I led
+chose to link it (which unresolved reference it resolves).
+This option is useful if you have 'multiply defined' problems.
 .SH FILES
 ~em/lib/em_led
 a.out	output file

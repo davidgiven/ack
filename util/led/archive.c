@@ -110,7 +110,7 @@ arch()
 			seek(ran->ran_pos);
 			get_archive_header(&arhdr);
 			modulname = arhdr.ar_name;
-			debug("%s defines %s\n", modulname, string, 0, 0);
+			verbose("defines %s", string, 0, 0, 0);
 			resolved = TRUE;
 			/*
 			 * This archive member is going to be linked,

@@ -14,3 +14,6 @@ extern int DEB;
 #define debug(s, a1, a2, a3, a4)	(DEB && printf(s, a1, a2, a3, a4))
 
 #endif
+
+extern int Verbose;
+#define verbose(s, a1, a2, a3, a4)	(Verbose && do_verbose(s, a1, a2, a3, a4))

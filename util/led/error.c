@@ -50,6 +50,13 @@ error(format, a1, a2, a3, a4)
 	diag("error", format, a1, a2, a3, a4);
 }
 
+/* VARARGS1 */
+do_verbose(format, a1, a2, a3, a4)
+	char	*format;
+{
+	diag((char *) 0, format, a1, a2, a3, a4);
+}
+
 static
 diag(tail, format, a1, a2, a3, a4)
 	char	*tail;
@@ -58,10 +65,13 @@ diag(tail, format, a1, a2, a3, a4)
 	extern char	*progname, *archname, *modulname; 
 
 	fprintf(stderr, "%s: ", progname);
-	if (archname)
+	if (archname && modulname)
+		fprintf(stderr, "%s(%s): ", archname, modulname);
+	else if (archname)
 		fprintf(stderr, "%s: ", archname);
-	if (modulname)
+	else if (modulname)
 		fprintf(stderr, "%s: ", modulname);
 	fprintf(stderr, format, a1, a2, a3, a4);
-	fprintf(stderr, " (%s)\n", tail);
+	if (tail) fprintf(stderr, " (%s)\n", tail);
+	else putc('\n', stderr);
 }
