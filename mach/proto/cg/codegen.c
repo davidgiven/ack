@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -649,8 +653,10 @@ if (Debug)
 	break;
 #ifdef REGVARS
     case DO_PRETURN:
-	if (toplevel)
+	if (toplevel) {
+		swtxt();
 		regreturn();	/* in mach.c */
+	}
 	break;
 #endif
     case DO_RETURN:
