@@ -9,5 +9,5 @@ long time();
 long
 sys_time()
 {
-	return time(0);
+	return time((long *) 0);
 }
