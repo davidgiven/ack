@@ -14,7 +14,7 @@ egen:   $P.e
 	echo comparing $P.e
 	-if test -f $P.e.g ; then diff -h $P.e $P.e.g ; else echo creating $P.e.g ; cp $P.e $P.e.g ; fi
 	rm -f $P.e
-$P.e:   $P.c $(CEM)
+$P.e:   $P.c
 	$(CEM) -c.e $P.c
 $P.pcc.r: $P.pcc
 	echo running $P.pcc
@@ -50,4 +50,4 @@ opr:
 	make pr | opr
 
 clean:
-	-rm -f $P.[kmsoe] $P.*.r core a.out *.old
+	-rm -f $P.[kmsoe] $P.*.r core a.out *.old em_last em_runinf e.out

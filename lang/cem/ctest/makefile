@@ -1,5 +1,5 @@
 .SILENT:
-CEM=acc -fp # -Oego -IL -s0 -SP -BO -CJ -CS -SR -UD -LV -SA
+CEM=acc
 head:
 	echo use run
 
@@ -50,4 +50,4 @@ opr:
 	make pr | opr
 
 clean:
-	-rm -f $P.[kmsoe] $P.*.r core a.out *.old
+	-rm -f $P.[kmsoe] $P.*.r core a.out *.old em_last em_runinf e.out

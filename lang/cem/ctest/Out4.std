@@ -1,195 +1,192 @@
-Tue Feb 24 13:49:31 MET 1987
+Tue Apr 26 14:08:56 MET DST 1988
 ***** ctconv
-acc conv.c
+acc -fp conv.c
 conv.c
-"conv.c", line 48: (warning) overflow in constant expression
+"conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 ***** ctdecl
-acc decl.c
+acc -fp decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-acc ops.c
+acc -fp ops.c
 ops.c
 running ops.cem
 comparing ops
 ***** cterr
-acc bugs.c
+acc -fp bugs.c
 bugs.c
-"bugs.c", line 98: (warning) overflow in constant expression
+"bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
-*** Error code -21 (ignored)
 comparing bugs
 ***** ctest1
-acc test.c
+acc -fp test.c
 test.c
 running test.cem
 comparing test
 ***** ctest2
-acc t7.c
+acc -fp t7.c
 t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-acc test2.c
+acc -fp test2.c
 test2.c
 running test2.cem
 comparing test2
 ***** ctest5
-acc test1.c
+acc -fp test1.c
 test1.c
-"test1.c", line 386: (warning) incompatible pointers in =
-"test1.c", line 387: (warning) incompatible pointers in =
-"test1.c", line 388: (warning) incompatible pointers in =
-"test1.c", line 400: (warning) incompatible pointers in =
-"test1.c", line 423: (warning) incompatible pointers in =
-"test1.c", line 424: (warning) incompatible pointers in =
-"test1.c", line 425: (warning) incompatible pointers in =
-"test1.c", line 437: (warning) incompatible pointers in =
+"test1.c", line 375: (warning) incompatible pointers in =
+"test1.c", line 376: (warning) incompatible pointers in =
+"test1.c", line 377: (warning) incompatible pointers in =
+"test1.c", line 389: (warning) incompatible pointers in =
+"test1.c", line 412: (warning) incompatible pointers in =
+"test1.c", line 413: (warning) incompatible pointers in =
+"test1.c", line 414: (warning) incompatible pointers in =
+"test1.c", line 426: (warning) incompatible pointers in =
 running test1.cem
 comparing test1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-acc bf.c
+acc -fp bf.c
 bf.c
 running bf.cem
 comparing bf
 sed -f cel.sed <OPS >cel.c
-acc cel.c
+acc -fp cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-acc clu.c
+acc -fp clu.c
 clu.c
 running clu.cem
 comparing clu
 sed -f ec.sed <OPS >ec.c
-acc ec.c
+acc -fp ec.c
 ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-acc ef.c
+acc -fp ef.c
 ef.c
 running ef.cem
 comparing ef
 sed -f ei.sed <OPS >ei.c
-acc ei.c
+acc -fp ei.c
 ei.c
 running ei.cem
 comparing ei
 sed -f el.sed <OPS >el.c
-acc el.c
+acc -fp el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-acc eu.c
+acc -fp eu.c
 eu.c
 running eu.cem
 comparing eu
 sed -f id.sed <OPS >id.c
-acc id.c
+acc -fp id.c
 id.c
 running id.cem
 comparing id
 sed -f lc.sed <OPS >lc.c
-acc lc.c
+acc -fp lc.c
 lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-acc ld.c
+acc -fp ld.c
 ld.c
 running ld.cem
 comparing ld
 sed -f lf.sed <OPS >lf.c
-acc lf.c
+acc -fp lf.c
 lf.c
 running lf.cem
 comparing lf
 sed -f li.sed <OPS >li.c
-acc li.c
+acc -fp li.c
 li.c
 running li.cem
 comparing li
 sed -f ll.sed <OPS >ll.c
-acc ll.c
+acc -fp ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-acc lu.c
+acc -fp lu.c
 lu.c
 running lu.cem
 comparing lu
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-acc noarg.c
+acc -fp noarg.c
 noarg.c
-"noarg.c", line 10: name not in parameter list
+"noarg.c", line 14: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-acc init.c
+acc -fp init.c
 init.c
 running init.cem
 comparing init
+47,48c47,48
+< fl5	2.93873587705571956974e-39
+< fl6	1.70141173319264450000e+38
+---
+> fl5	2.93873587705571892581e-39
+> fl6	1.70141173319264428000e+38
+70c70
+< dbl5	2.93873600000000188004e-39
+---
+> dbl5	2.93873600000000034793e-39
+*** Error code 1 (ignored)
 ***** ctmargt
-acc margt.c
+acc -fp margt.c
 margt.c
 running margt.cem
 comparing margt
-5,$c5,$
-< 	CDPATH=:~:~em:/usr/spool
-< 	CWD=/usr/em/lang/cem/ctest/ctmargt
-< 	ESHKEYS=dcl=^?:dcl=^H:dcr=^D:dlr=^K:dtm=^W:dwl=^[h:dew=^[d:eof=^[^C:eof=^X^C:eof=^X^F:exp=^u:fcl=^[?:fcr=^[/:gcl=^B:gcr=^F:gll=^A:glr=^E:gwl=^[b:gew=^[f:hlp=^[H:hst=^_:int=^G:lnx=^V:prh=^P:rdr=^L:rtn=^J:rtn=^M:stm=^@:tab=^I:xgm=^X^X:xpl=^[^J:xpl=^[^M:yn< k=^Y:ipl=^N
-< 	HOME=/user0/ceriel
-< 	M2PATH=.:/user0/ceriel/modula-2/lib/m2v
-< 	PAGER=/user0/ceriel/bin/yap
-< 	PATH=/user0/ceriel/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new::/user0/ceriel/modula-2/bin/m2v
-< 	REFS=/user0/ceriel/etc/refer/refs
-< 	SHELL=/usr/local/esh
-< 	TERM=sun
-< 	TERMCAP=Mu|sun:li#34:co#80:cl=^L:cm=\E[%i%d;%dH:nd=\E[C:up=\E[A:am:bs:mi:ms:ce=\E[K:cd=\E[J:so=\E[7m:se=\E[m:kd=\E[B:kl=\E[D:ku=\E[A:kr=\E[C:kh=\E[H:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:al=\E[L:dl=\E[M:im=:ei=:ic=\E[@:dc=\E[P
-< 	USER=ceriel
----
-> 	HOME=/usr/em
-> 	PATH=:/bin:/usr/ucb:/usr/local:/usr/bin:/usr/em/bin
-> 	SHELL=/usr/local/esh
-> 	TERM=dialup
-> 	USER=em
 ***** ctprof
 test profiling
 procentry.c
-acc tp.c procentry.k
+acc -fp tp.c procentry.m
 tp.c
-procentry.k
+procentry.m
 running tp
 comparing tp
+***** ctsetjmp
+acc -fp stjmp.c
+stjmp.c
+running stjmp.cem
+comparing stjmp
 ***** ctstruct
-acc str.c
+acc -fp str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-acc tfork.c
+acc -fp tfork.c
 tfork.c
 running tfork.cem
 comparing tfork
 1,$c1,$
-< childno 1066
-< Child 1066, status 0x800
+< childno 25349
+< Child 25349, status 0x800
 < fork/wait ok
 ---
 > childno 16276
 > Child 16276, status 0x800
 > fork/wait ok
-Tue Feb 24 16:01:13 MET 1987
+*** Error code 1 (ignored)
+Tue Apr 26 14:26:04 MET DST 1988

@@ -18,9 +18,8 @@ ctmargt
 ctprof
 ctstruct
 ctsys
+ctsetjmp
 local.h
 makefile
-makefile.i86
-makefile.int
 makefile.std
 run

@@ -49,6 +49,5 @@ If one has a implementation without floating point one can
 use the -DNOFLOAT flag.
 Most programs use compile time #ifdef's to hide the use of
 floating point they make.
-For an example, look at makefile.i86.
 Differences are to be expected in the output of such a run.
 Look at the file Out2.nf.std or Out4.nf.std to see what can be expected.

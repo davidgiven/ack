@@ -1,8 +1,8 @@
-Thu Mar  5 23:10:57 MET 1987
+Wed Apr 27 13:01:47 MET DST 1988
 ***** ctconv
-vax2 -DNOFLOAT conv.c
+int24 -DNOFLOAT conv.c
 conv.c
-"conv.c", line 48: (warning) overflow in constant expression
+"conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 2a3,4
@@ -15,8 +15,12 @@ comparing conv
 < 	char   -64, int    -64, unsigned 177700, long         -64
 < From long
 < 	char    -3, int     -3, unsigned 177775, long          -3
+< Casts from long
+< 	char    -8, int 9464, unsigned short  22370, long       75000
 < a[l] (l==3) -17
 < a[3l] -17
+< (unsigned short) 0x1f010L = 0xf010
+< (short) 0x1f010L = 0xfffff010
 ---
 > 					float 127.000000
 > 	char    -1, int     -1, unsigned 37777777777, long          -1
@@ -29,6 +33,8 @@ comparing conv
 > From long
 > 	char    -3, int     -3, unsigned 37777777775, long          -3
 > 					float -3.000000
+> Casts from long
+> 	char    -8, int 75000, unsigned short  22370, long       75000
 > From float
 > 	char   121, int    121, unsigned    171, long         121, float 121.500000
 > 	char     0, int      0, unsigned      0, long           0, float 0.000100
@@ -36,17 +42,21 @@ comparing conv
 > 	long  1223432064, float 1223432064.000000
 > a[l] (l==3) -17
 > a[3l] -17
+> (unsigned short) 0x1f010L = 0xf010
+> (short) 0x1f010L = 0xfffff010
+*** Error code 1 (ignored)
 ***** ctdecl
-vax2 -DNOFLOAT decl.c
+int24 -DNOFLOAT decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-vax2 -DNOFLOAT ops.c
+int24 -DNOFLOAT ops.c
 ops.c
 running ops.cem
 comparing ops
-24,39c24,39
+22,37c22,39
+<  u<<0  150715
 <  u<<1  121632
 <  u<<2   43464
 <  u<<3  107150
@@ -62,8 +72,9 @@ comparing ops
 <  u<<13 120000
 <  u<<14  40000
 <  u<<15 100000
-<  u<<16      0
 ---
+>  u>>16      0
+>  u<<0  150715
 >  u<<1  321632
 >  u<<2  643464
 >  u<<3  1507150
@@ -80,14 +91,15 @@ comparing ops
 >  u<<14 6434640000
 >  u<<15 15071500000
 >  u<<16 32163200000
+*** Error code 1 (ignored)
 ***** cterr
-vax2 -DNOFLOAT bugs.c
+int24 -DNOFLOAT bugs.c
 bugs.c
-"bugs.c", line 98: (warning) overflow in constant expression
+"bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-vax2 -DNOFLOAT test.c
+int24 -DNOFLOAT test.c
 test.c
 running test.cem
 comparing test
@@ -95,29 +107,30 @@ comparing test
 < End of test program, 10 tests completed, 0 errors detected
 ---
 > End of test program, 11 tests completed, 0 errors detected
+*** Error code 1 (ignored)
 ***** ctest2
-vax2 -DNOFLOAT t7.c
+int24 -DNOFLOAT t7.c
 t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-vax2 -DNOFLOAT test2.c
+int24 -DNOFLOAT test2.c
 test2.c
-"test2.c", line 459: (warning) conversion of pointer to int loses accuracy
-"test2.c", line 459: (warning) conversion of pointer to int loses accuracy
+"test2.c", line 448: (warning) conversion of pointer to int loses accuracy
+"test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 running test2.cem
 comparing test2
 ***** ctest5
-vax2 -DNOFLOAT test1.c
+int24 -DNOFLOAT test1.c
 test1.c
-"test1.c", line 386: (warning) incompatible pointers in =
-"test1.c", line 387: (warning) incompatible pointers in =
-"test1.c", line 388: (warning) incompatible pointers in =
-"test1.c", line 400: (warning) incompatible pointers in =
-"test1.c", line 423: (warning) incompatible pointers in =
-"test1.c", line 424: (warning) incompatible pointers in =
-"test1.c", line 425: (warning) incompatible pointers in =
-"test1.c", line 437: (warning) incompatible pointers in =
+"test1.c", line 375: (warning) incompatible pointers in =
+"test1.c", line 376: (warning) incompatible pointers in =
+"test1.c", line 377: (warning) incompatible pointers in =
+"test1.c", line 389: (warning) incompatible pointers in =
+"test1.c", line 412: (warning) incompatible pointers in =
+"test1.c", line 413: (warning) incompatible pointers in =
+"test1.c", line 414: (warning) incompatible pointers in =
+"test1.c", line 426: (warning) incompatible pointers in =
 running test1.cem
 comparing test1
 1,$c1,$
@@ -127,19 +140,20 @@ comparing test1
 > error 13 in test 11 
 > program test1
 > 11 tests completed. Number of errors = 1
+*** Error code 1 (ignored)
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-vax2 -DNOFLOAT bf.c
+int24 -DNOFLOAT bf.c
 bf.c
 running bf.cem
 comparing bf
 sed -f cel.sed <OPS >cel.c
-vax2 -DNOFLOAT cel.c
+int24 -DNOFLOAT cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-vax2 -DNOFLOAT clu.c
+int24 -DNOFLOAT clu.c
 clu.c
 "clu.c", line 60: (warning) overflow in unsigned constant expression
 "clu.c", line 66: (warning) overflow in unsigned constant expression
@@ -235,15 +249,16 @@ comparing clu
 > no if ( x &= 40000  ) yes() ; else no() 0
 > yes if ( x |= 40000  ) yes() ; else no() 40010
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
+*** Error code 1 (ignored)
 sed -f ec.sed <OPS >ec.c
-vax2 -DNOFLOAT ec.c
+int24 -DNOFLOAT ec.c
 ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-vax2 -DNOFLOAT ef.c
+int24 -DNOFLOAT ef.c
 ef.c
 running ef.cem
 comparing ef
@@ -322,7 +337,7 @@ comparing ef
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f ei.sed <OPS >ei.c
-vax2 -DNOFLOAT ei.c
+int24 -DNOFLOAT ei.c
 ei.c
 "ei.c", line 22: (warning) overflow in constant expression
 "ei.c", line 65: (warning) overflow in constant expression
@@ -349,13 +364,14 @@ comparing ei
 < yes if ( x <<= 15 ) yes() ; else no() -32768
 ---
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
+*** Error code 1 (ignored)
 sed -f el.sed <OPS >el.c
-vax2 -DNOFLOAT el.c
+int24 -DNOFLOAT el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-vax2 -DNOFLOAT eu.c
+int24 -DNOFLOAT eu.c
 eu.c
 "eu.c", line 58: (warning) overflow in unsigned constant expression
 "eu.c", line 64: (warning) overflow in unsigned constant expression
@@ -451,50 +467,95 @@ comparing eu
 > no if ( x &= 40000  ) yes() ; else no() 0
 > yes if ( x |= 40000  ) yes() ; else no() 40010
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
+*** Error code 1 (ignored)
 sed -f id.sed <OPS >id.c
-vax2 -DNOFLOAT id.c
+int24 -DNOFLOAT id.c
 id.c
 running id.cem
 comparing id
-26,28c26,28
-< y = ( (-40) - 300 ) -15190
-< y = ( (-40) / 300 ) 0
-< y = ( (-40) * 300 ) -14533
----
-> y = ( (-40) - 300 ) 50346
+0a1,$
+> (-40) + 300
+> (-40) - 300
+> (-40) / 300
+> (-40) * 300
+> (-40) || 300
+> (-40) && 300
+> -(-40) 
+> !(-40) 
+> (-40) == 300
+> (-40) != 300
+> (-40) <= 300
+> (-40) >= 300
+> (-40) < 300
+> (-40) > 300
+> (-40) ? (-40) : 300
+> x = (-40)  -4.000000e+01
+> x += (-40)  -3.685850e+01
+> x -= (-40)  4.314150e+01
+> x /= (-40)  -7.853750e-02
+> x *= (-40)  -1.256600e+02
+> x ++ 4.141500e+00
+> x -- 2.141500e+00
+> -- x 2.141500e+00
+> ++ x 4.141500e+00
+> y = ( (-40) + 300 ) 260
+> y = ( (-40) - 300 ) -340
 > y = ( (-40) / 300 ) 0
-> y = ( (-40) * 300 ) -2147432645
-39,48c39,48
-< y = ( (-40) ? (-40) : 300 ) -15584
-< y = ( x = (-40)  ) -4.000000e+01 -15584
-< y = ( x += (-40)  ) -3.685850e+01 -15597
-< y = ( x -= (-40)  ) 4.314150e+01 17196
-< y = ( x /= (-40)  ) -7.853750e-02 -16736
-< y = ( x *= (-40)  ) -1.256600e+02 -15365
-< y = ( x ++ ) 4.141500e+00 16713
-< y = ( x -- ) 2.141500e+00 16713
-< y = ( -- x ) 2.141500e+00 16649
-< y = ( ++ x ) 4.141500e+00 16772
----
-> y = ( (-40) ? (-40) : 300 ) 49952
-> y = ( x = (-40)  ) -4.000000e+01 49952
-> y = ( x += (-40)  ) -3.685850e+01 1864024851
-> y = ( x -= (-40)  ) 4.314150e+01 -1864023252
-> y = ( x /= (-40)  ) -7.853750e-02 -666583392
-> y = ( x *= (-40)  ) -1.256600e+02 1374405627
-> y = ( x ++ ) 4.141500e+00 240533833
-> y = ( x -- ) 2.141500e+00 240533833
-> y = ( -- x ) 2.141500e+00 240533769
-> y = ( ++ x ) 4.141500e+00 -2027208316
+> y = ( (-40) * 300 ) -12000
+> y = ( (-40) || 300 ) 1
+> y = ( (-40) && 300 ) 1
+> y = ( -(-40)  ) 40
+> y = ( !(-40)  ) 0
+> y = ( (-40) == 300 ) 0
+> y = ( (-40) != 300 ) 1
+> y = ( (-40) <= 300 ) 1
+> y = ( (-40) >= 300 ) 0
+> y = ( (-40) < 300 ) 1
+> y = ( (-40) > 300 ) 0
+> y = ( (-40) ? (-40) : 300 ) -40
+> y = ( x = (-40)  ) -4.000000e+01 -40
+> y = ( x += (-40)  ) -3.685850e+01 -36
+> y = ( x -= (-40)  ) 4.314150e+01 43
+> y = ( x /= (-40)  ) -7.853750e-02 0
+> y = ( x *= (-40)  ) -1.256600e+02 -125
+> y = ( x ++ ) 4.141500e+00 3
+> y = ( x -- ) 2.141500e+00 3
+> y = ( -- x ) 2.141500e+00 2
+> y = ( ++ x ) 4.141500e+00 4
+> yes if ( (-40) + 300 ) yes() ; else no()
+> yes if ( (-40) - 300 ) yes() ; else no()
+> no if ( (-40) / 300 ) yes() ; else no()
+> yes if ( (-40) * 300 ) yes() ; else no()
+> yes if ( (-40) || 300 ) yes() ; else no()
+> yes if ( (-40) && 300 ) yes() ; else no()
+> yes if ( -(-40)  ) yes() ; else no()
+> no if ( !(-40)  ) yes() ; else no()
+> no if ( (-40) == 300 ) yes() ; else no()
+> yes if ( (-40) != 300 ) yes() ; else no()
+> yes if ( (-40) <= 300 ) yes() ; else no()
+> no if ( (-40) >= 300 ) yes() ; else no()
+> yes if ( (-40) < 300 ) yes() ; else no()
+> no if ( (-40) > 300 ) yes() ; else no()
+> yes if ( (-40) ? (-40) : 300 ) yes() ; else no()
+> yes if ( x = (-40)  ) yes() ; else no() -4.000000e+01
+> yes if ( x += (-40)  ) yes() ; else no() -3.685850e+01
+> yes if ( x -= (-40)  ) yes() ; else no() 4.314150e+01
+> yes if ( x /= (-40)  ) yes() ; else no() -7.853750e-02
+> yes if ( x *= (-40)  ) yes() ; else no() -1.256600e+02
+> yes if ( x ++ ) yes() ; else no() 4.141500e+00
+> yes if ( x -- ) yes() ; else no() 2.141500e+00
+> yes if ( -- x ) yes() ; else no() 2.141500e+00
+> yes if ( ++ x ) yes() ; else no() 4.141500e+00
+*** Error code 1 (ignored)
 sed -f lc.sed <OPS >lc.c
-vax2 -DNOFLOAT lc.c
+int24 -DNOFLOAT lc.c
 lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-vax2 -DNOFLOAT ld.c
+int24 -DNOFLOAT ld.c
 ld.c
 running ld.cem
 comparing ld
@@ -573,7 +634,7 @@ comparing ld
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f lf.sed <OPS >lf.c
-vax2 -DNOFLOAT lf.c
+int24 -DNOFLOAT lf.c
 lf.c
 running lf.cem
 comparing lf
@@ -652,7 +713,7 @@ comparing lf
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
 *** Error code 1 (ignored)
 sed -f li.sed <OPS >li.c
-vax2 -DNOFLOAT li.c
+int24 -DNOFLOAT li.c
 li.c
 "li.c", line 22: (warning) overflow in constant expression
 "li.c", line 67: (warning) overflow in constant expression
@@ -679,13 +740,14 @@ comparing li
 < yes if ( x <<= 15 ) yes() ; else no() -32768
 ---
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
+*** Error code 1 (ignored)
 sed -f ll.sed <OPS >ll.c
-vax2 -DNOFLOAT ll.c
+int24 -DNOFLOAT ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-vax2 -DNOFLOAT lu.c
+int24 -DNOFLOAT lu.c
 lu.c
 running lu.cem
 comparing lu
@@ -779,17 +841,18 @@ comparing lu
 > yes if ( z &= x  ) yes() ; else no() 10
 > yes if ( z |= x  ) yes() ; else no() 40234
 > yes if ( z ^= x  ) yes() ; else no() 40224
+*** Error code 1 (ignored)
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-vax2 -DNOFLOAT noarg.c
+int24 -DNOFLOAT noarg.c
 noarg.c
-"noarg.c", line 10: name not in parameter list
+"noarg.c", line 14: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-vax2 -DNOFLOAT init.c
+int24 -DNOFLOAT init.c
 init.c
-"init.c", line 183: (warning) overflow in constant expression
+"init.c", line 172: (warning) overflow in constant expression
 running init.cem
 comparing init
 41,$c41,$
@@ -890,35 +953,41 @@ comparing init
 > sizeof stb 8
 > stb	-1 -2 3 4 -1 6 7
 > 
+*** Error code 1 (ignored)
 ***** ctmargt
-vax2 -DNOFLOAT margt.c
+int24 -DNOFLOAT margt.c
 margt.c
 running margt.cem
 comparing margt
 ***** ctprof
 test profiling
 procentry.c
-vax2 -DNOFLOAT tp.c procentry.k
+int24 -DNOFLOAT tp.c procentry.m
 tp.c
-procentry.k
-running tp
+running tp.cem
 comparing tp
+***** ctsetjmp
+int24 -DNOFLOAT stjmp.c
+stjmp.c
+running stjmp.cem
+comparing stjmp
 ***** ctstruct
-vax2 -DNOFLOAT str.c
+int24 -DNOFLOAT str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-vax2 -DNOFLOAT tfork.c
+int24 -DNOFLOAT tfork.c
 tfork.c
 running tfork.cem
 comparing tfork
 1,$c1,$
-< childno 29134
-< Child 29134, status 0x800
+< childno 14497
+< Child 14497, status 0x800
 < fork/wait ok
 ---
 > childno 16276
 > Child 16276, status 0x800
 > fork/wait ok
-Thu Mar  5 23:59:20 MET 1987
+*** Error code 1 (ignored)
+Wed Apr 27 13:39:12 MET DST 1988
