@@ -12,18 +12,19 @@ strtok(register char *string, const char *separators)
 	register char *s1, *s2;
 	static char *savestring;
 
-	if (!string)
+	if (string == NULL) {
 		string = savestring;
+		if (string == NULL) return (char *)NULL;
+	}
 
-	if (!string)
-		return (char *)NULL;
-
-	if (*(s1 = string + strspn(string, separators)) == '\0') {
+	s1 = string + strspn(string, separators);
+	if (*s1 == '\0') {
 		savestring = NULL;
 		return (char *)NULL;
 	}
 
-	if (s2 = strpbrk(s1, separators))
+	s2 = strpbrk(s1, separators);
+	if (s2 != NULL)
 		*s2++ = '\0';
 	savestring = s2;
 	return s1;

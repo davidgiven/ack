@@ -9,7 +9,7 @@
 char *
 strstr(register const char *s, register const char *wanted)
 {
-	int len = strlen(wanted);
+	register const int len = strlen(wanted);
 
 	if (len == 0) return (char *)s;
 	while (*s != *wanted || strncmp(s, wanted, len))

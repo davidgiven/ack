@@ -13,9 +13,11 @@ memcpy(void *s1, const void *s2, register size_t n)
 	register const char *p2 = s2;
 
 
-	while (n > 0) {
-		n--;
-		*p1++ = *p2++;
+	if (n) {
+		n++;
+		while (--n > 0) {
+			*p1++ = *p2++;
+		}
 	}
 	return s1;
 }

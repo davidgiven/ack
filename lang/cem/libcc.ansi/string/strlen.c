@@ -14,5 +14,5 @@ strlen(const char *org)
 	while (*s++)
 		/* EMPTY */ ;
 
-	return (s - 1) - org;
+	return --s - org;
 }

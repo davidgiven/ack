@@ -10,11 +10,10 @@
 int
 strcoll(register const char *s1, register const char *s2)
 {
-	for(;;) {
-		if (*s1 != *s2)
-			return *s1 - *s2;
-		if (*s1++ == '\0')
+	while (*s1 == *s2++) {
+		if (*s1++ == '\0') {
 			return 0;
-		s2++;
+		}
 	}
+	return *s1 - *--s2;
 }

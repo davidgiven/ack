@@ -9,14 +9,14 @@
 char *
 strrchr(register const char *s, int c)
 {
-	register const char *result;
-	register char c1 = (char) c;
+	register const char *result = NULL;
 
-	result = (char *)NULL;
+	c = (char) c;
+
 	do {
-		if (*s == c1)
+		if (c == *s)
 			result = s;
-	} while (*s++);
+	} while (*s++ != '\0');
 
 	return (char *)result;
 }

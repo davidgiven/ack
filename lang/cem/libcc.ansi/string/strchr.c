@@ -7,14 +7,12 @@
 #include	<string.h>
 
 char *
-strchr(register const char *s, int c)
+strchr(register const char *s, register int c)
 {
-	register char c1 = (char) c;
+	c = (char) c;
 
-	do {
-		if (*s == c1)
-			return (char *)s;
-	} while (*s++ != '\0');
-
-	return (char *)NULL;
+	while (c != *s) {
+		if (*s++ == '\0') return NULL;
+	}
+	return (char *)s;
 }

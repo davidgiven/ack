@@ -7,15 +7,17 @@
 #include	<string.h>
 
 void *
-memchr(const void *s, int c, register size_t n)
+memchr(const void *s, register int c, register size_t n)
 {
 	register const unsigned char *s1 = s;
-	unsigned char c1 = (unsigned char) c;
-	
-	while (n > 0) {
-		n--;
-		if (*s1++ == c1)
-			return (void *) (s1 - 1);
+
+	c = (unsigned char) c;
+	if (n) {
+		n++;
+		while (--n > 0) {
+			if (*s1++ != c) continue;
+			return (void *) --s1;
+		}
 	}
 	return NULL;
 }

@@ -7,13 +7,15 @@
 #include	<string.h>
 
 void *
-memset(void *s, int c, register size_t n)
+memset(void *s, register int c, register size_t n)
 {
 	register char *s1 = s;
 
-	while (n > 0) {
-		n--;
-		*s1++ = c;
+	if (n>0) {
+		n++;
+		while (--n > 0) {
+			*s1++ = c;
+		}
 	}
 	return s;
 }

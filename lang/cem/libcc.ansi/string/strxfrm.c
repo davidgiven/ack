@@ -18,7 +18,7 @@ strxfrm(register char *s1, register const char *save, register size_t n)
 		} else
 			s2++;
 	}
-	if (n >= 1)
+	if (n > 0)
 		*s1++ = '\0';
 	return s2 - save;
 }
