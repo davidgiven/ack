@@ -13,7 +13,7 @@ Vrije Universiteit
 Amsterdam, The Netherlands
 .PP
 This document specifies the implementation-defined behaviour of the ANSI-C
-frontend of the Amsterdam Compiler Kit as required by ANS X3.159-1989. Since
+front end of the Amsterdam Compiler Kit as required by ANS X3.159-1989. Since
 the implementation-defined behaviour sometimes depends on the machine
 compiling on or for, some items will be left unspecified in this
 document\(dg.
@@ -48,7 +48,7 @@ Interactive devices are terminals.
 .NS A.6.3.3
 .IP -
 The number of significant characters is an option. By default it is 64.
-There is a distinction between upper- and lowercase.
+There is a distinction between upper and lower case.
 .NS A.6.3.4
 .IP -
 The compiler assumes ASCII-characters in both the source and execution
@@ -58,7 +58,7 @@ There are no multi-byte characters.
 .IP -
 There 8 bits in a character.
 .IP -
-Character constants with values that can't be represented in 8 bits
+Character constants with values that can not be represented in 8 bits
 are truncated.
 .IP -
 Character constants that are more than 1 character wide will have the
@@ -88,7 +88,7 @@ The right-shift of a negative value is negative.
 .NS A.6.3.6
 .IP -
 The representation of floating-point values is machine-dependent.
-When native floating-point isn't present an IEEE-emulation is used.
+When native floating-point is not present an IEEE-emulation is used.
 The compiler uses high-precision floating-point for constant folding.
 .IP -
 Truncation is always to the nearest floating-point number that can
@@ -108,7 +108,7 @@ When a pointer is as large as an integer, the type of a 'ptrdiff_t' will
 be 'int'. Otherwise the type will be 'long'.
 .NS A.6.3.8
 .IP -
-Since the frontend has only limited control over the registers, it can
+Since the front end has only limited control over the registers, it can
 only make it more likely that variables that are declared as
 registers also end up in registers. The only things that can possibly be
 put into registers are : 'int', 'long', 'float', 'double', 'long double'
@@ -120,7 +120,7 @@ different type, the resulting value will usually be garbage. The
 compiler makes no effort to catch these errors.
 .IP -
 The alignment of types is a compile-time option. The alignment of
-a structure-member is the alignment of it's type. Usually, the
+a structure-member is the alignment of its type. Usually, the
 alignment is passed on to the compiler by the 'ack' program. When a
 user wants to do this manually, he/she should be prepared for trouble.
 .IP -
@@ -165,7 +165,7 @@ being compiled resides.
 The characters in a h- or q- char-sequence are taken to be UNIX
 paths.
 .IP -
-Neither the compiler nor the preprocessor know any pragma's.
+Neither the compiler nor the preprocessor know any pragmas.
 .IP -
 Since the compiler runs on UNIX, __DATE__ and __TIME__ will always be
 defined.
@@ -181,7 +181,7 @@ The diagnostic printed by 'assert' is as follows:
 where <expr> is the argument to the assert macro, printed as string.
 (the <file> and <line> should be clear)
 .IP -
-The sets for character test macro's.
+The sets for character test macros.
 .TS
 l l.
 name:	set:
@@ -236,7 +236,7 @@ The buffering intended by the standard is fully supported.
 .IP -
 A zero-length file actually exists.
 .IP -
-A filename can consist of any character, except for the '\e0' and
+A file name can consist of any character, except for the '\e0' and
 the '\e'.
 .IP -
 A file can be open multiple times.
@@ -262,7 +262,7 @@ just be put into the scanlist.
 The value of errno is that of lseek(). This means:
 .RS
 .IP "EBADF \-" 10
-when the stream isn't valid
+when the stream is not valid
 .IP "ESPIPE \-"
 when fildes is associated with a pipe (and on some systems: sockets)
 .IP "EINVAL \-"
@@ -280,18 +280,18 @@ When abort() is called, output buffers will be flushed. Temporary files
 (made with the tmpfile() function) will have disappeared when SIGABRT
 is not caught or ignored.
 .IP -
-The exit() function returns the low-order eight bits of it's argument
+The exit() function returns the low-order eight bits of its argument
 to the environment.
 .IP -
 The predefined environment names are controlled by the user.
 Setting environment variables is done through the putenv() function.
-This function accepts a pointer to char as it's argument.
+This function accepts a pointer to char as its argument.
 To set f.i. the environment variable TERM to a230 one writes
 .ti +4n
 putenv("TERM=a230");
 .br
 The argument to putenv() is stored in an internal table, so malloc'ed
-strings can't be freed until another call to putenv() (wich set's the
+strings can not be freed until another call to putenv() (which sets the
 same environment variable) is made. The function returns 1 if it fails,
 0 otherwise.
 .LP
@@ -341,7 +341,7 @@ ERANGE	"Result too large"
 .TE
 everything else causes strerror() to return "unknown error"
 .IP -
-The local timezone is per default MET (GMT + 1:00:00). This can be
+The local time zone is per default MET (GMT + 1:00:00). This can be
 changed through the TZ environment variable, or by some changes in the
 sources.
 .IP -
