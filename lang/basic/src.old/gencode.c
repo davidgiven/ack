@@ -517,9 +517,9 @@ prologcode()
 	fprintf(emfile,"dummy1\n con 0,0,0,0\n");
 	fprintf(emfile," exa _iomode\n_iomode\n rom \"O\"\n");
 	fprintf(emfile," exa _errsym\n");
-	fprintf(emfile,"_errsym\n bss 2,0,1\n");
+	fprintf(emfile,"_errsym\n bss EM_WSIZE,0,1\n");
 	fprintf(emfile," exa _erlsym\n");
-	fprintf(emfile,"_erlsym\n bss 2,0,1\n");
+	fprintf(emfile,"_erlsym\n bss EM_WSIZE,0,1\n");
 }
 
 prolog2()
