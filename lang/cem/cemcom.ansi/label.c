@@ -12,6 +12,7 @@
 #include	"arith.h"
 #include	"def.h"
 #include	"type.h"
+#include	"stack.h"
 
 extern char options[];
 
