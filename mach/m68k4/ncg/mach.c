@@ -56,7 +56,11 @@ static int been_here;
 	}
 }
 #else
+#if TBL68881
+#define OWNFLOAT
+#else
 #define IEEEFLOAT
+#endif
 
 con_float() {
 	double f;

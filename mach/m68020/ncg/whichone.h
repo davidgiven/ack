@@ -5,3 +5,4 @@
  */
 
 #define TBL68020	1
+/*#define TBL68881	1 	/* use floating point processor */

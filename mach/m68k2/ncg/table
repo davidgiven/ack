@@ -14,6 +14,10 @@ rscid = "$Header$"
 
 #include "whichone.h"
 
+#if TBL68881 && ! TBL68020
+Something very wrong here!
+#endif
+
 /*#define	FANCY_MODES
 /*	On the M68020, there are some real fancy addressing modes.
 	Their use makes the code a bit shorter, but also much slower.
@@ -47,6 +51,10 @@ DD_REG		/* allocatable D_REG, may not be a register variable */
 AA_REG		/* allocatable A_REG, may not be a register variable */
 RD_REG		/* data register, register var */
 RA_REG		/* address register, register var */
+#if TBL68881
+FS_REG		/* floating point register */
+FD_REG(8)	/* double floating point register */
+#endif
 
 
 
@@ -57,7 +65,12 @@ d3, d4, d5, d6, d7		:D_REG, RD_REG regvar.
 a0, a1				:A_REG, AA_REG.
 a2, a3, a4, a5			:A_REG, RA_REG regvar(reg_pointer).
 lb ("a6"), sp			:A_REG.	/* localbase and stack pointer */
-
+#if TBL68881
+F0 ("fp0"), F1 ("fp1"), F2 ("fp2"), F3 ("fp3"), F4 ("fp4"), F5 ("fp5"),
+F6 ("fp6"), F7 ("fp7")		:FS_REG.
+fp0=F0,fp1=F1,fp2=F2,fp3=F3,fp4=F4,fp5=F5,fp6=F6,fp7=F7
+				:FD_REG.
+#endif
 
 
 
@@ -418,6 +431,12 @@ t_address	= address + t_regAregXcon + t_regAcon .
 #define	t_address	address
 #endif TBL68020
 
+#if TBL68881
+freg		= FD_REG + FS_REG .
+store4		= any4 + FS_REG .
+#else
+store4		= any4 .
+#endif
 dups4		= genreg .
 
 INSTRUCTIONS
@@ -444,8 +463,7 @@ INSTRUCTIONS
 add_l  "add.l"	any4:ro,	LOCAL:rw:cc		cost(0,0).
 lea		address:ro,	LOCAL:wo		cost(0,0).
 sub_l  "sub.l"	any4:ro,	LOCAL:rw:cc		cost(0,0).
-sh   "illegal"	shconreg:ro,	LOCAL:rw:cc		cost(0,0).
-sh   "illegal"	LOCAL:ro,	LOCAL:rw:cc		cost(0,0).
+sh   "illegal"	shconreg+LOCAL:ro,	LOCAL:rw:cc		cost(0,0).
 xxx  "illegal"	data4:ro,	LOCAL:rw:cc		cost(0,0).
 xxx  "illegal"	LOCAL:ro,	alterable4:rw:cc	cost(0,0).
 #ifdef TBL68020
@@ -543,7 +561,6 @@ unlk		A_REG					cost(2,6).
 bxx  "illegal"	label					cost(2,5).
 sxx  "illegal"	any4:wo					cost(2,5).
 xxx  "illegal"	any4:ro,	any4:rw:cc		cost(2,3).
-/*xxx  "illegal"	conreg4:ro,	memalt4:rw:cc		cost(2,6).*/
 bit  "illegal"	control4:rw:cc				cost(2,6).
 sh   "illegal"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 shw  "illegal"	control2:rw:cc				cost(2,4).
@@ -568,9 +585,40 @@ pea		address+control4			cost(2,4).
 	 * it is necessary with long divides where remainders are important;
 	 * see also: 'pat rmi' and 'pat rmu'
 	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-killreg "! kill" D_REG:wo				cost(0,0).
-killreg "! kill" A_REG:wo				cost(0,0).
-
+killreg "! kill" D_REG+A_REG:wo				cost(0,0).
+#if TBL68881
+/* These descriptions are not very accurate, because we have no
+   other 8-byte objects in the table.
+ */
+fmove_s "fmove.s" data4:ro, freg:wo			cost(4,100).
+fmove_s "fmove.s" freg:ro, data4:wo			cost(4,100).
+fmove_d "fmove.d" freg:ro, data4:wo			cost(4,100).
+fmove_d "fmove.d" data4:ro, freg:ro			cost(4,100).
+fmove_l "fmove.l" freg:ro, D_REG:wo			cost(4,100).
+fmove_l "fmove.l" data4:ro, freg:wo			cost(4,100).
+fmove freg:ro,freg:wo					cost(4,100).
+fadd_s "fadd.s" data4:ro, freg:rw			cost(4,100).
+fadd_d "fadd.d" data4:ro, freg:rw			cost(4,100).
+fsub_s "fsub.s" data4:ro, freg:rw			cost(4,100).
+fsub_d "fsub.d" data4:ro, freg:rw			cost(4,100).
+fsub freg:ro, freg:rw					cost(4,100).
+fmul freg:ro, freg:rw					cost(4,100).
+fmul_s "fmul.s" data4:ro, freg:rw			cost(4,100).
+fmul_d "fmul.d" data4:ro, freg:rw			cost(4,100).
+fdiv freg:ro, freg:rw					cost(4,100).
+fdiv_s "fdiv.s" data4:ro, freg:rw			cost(4,100).
+fdiv_d "fdiv.d" data4:ro, freg:rw			cost(4,100).
+fcmp freg:ro, freg:ro					cost(4,100).
+fbeq label:ro						cost(4,4).
+fblt label:ro						cost(4,4).
+fmovecr const:ro, freg:rw				cost(4,100).
+fabs freg:rw						cost(4,100).
+fneg freg:rw						cost(4,100).
+fgetman freg:rw						cost(4,100).
+fintrz freg:ro, freg:wo					cost(4,100).
+fgetexp freg:ro, freg:wo				cost(4,100).
+fsub_l "fsub.l" const:ro, freg:rw			cost(4,100).
+#endif
 
 MOVES
 
@@ -637,6 +685,13 @@ from any1 to dreg4
     gen clr_l %2
 	move_b %1, %2
 
+#if TBL68881
+from data4 to FS_REG
+    gen fmove_s %1, %2
+
+from FS_REG to datalt4
+    gen fmove_s %1, %2
+#endif
 
 TESTS
 
@@ -731,7 +786,13 @@ from regX to STACK
 	 * stackingrule for regX, so here it is
 	 */
 
+#if TBL68881
+from FS_REG to STACK
+    gen fmove_s %1,{pre_dec4,sp}
 
+from FD_REG to STACK
+    gen fmove_d %1,{pre_dec4,sp}
+#endif
 COERCIONS
 
 
@@ -744,6 +805,17 @@ from STACK
     uses AA_REG
     gen move_l {post_inc4, sp}, %a
 			yields	%a
+
+#ifdef TBL68881
+from STACK
+    uses FS_REG
+    gen fmove_s {post_inc4, sp}, %a
+			yields	%a
+from STACK
+    uses FD_REG
+    gen fmove_d {post_inc4, sp}, %a
+			yields	%a
+#endif
 
 #ifndef TBL68020
 from t_regAregXcon sfit(%bd, 8)
@@ -774,6 +846,11 @@ from any4
 from any4
     uses reusing %1, AA_REG = %1
 			yields	%a
+#if TBL68881
+from data4
+    uses reusing %1, FS_REG = %1
+			yields	%a
+#endif
 
 from memory2
     uses DD_REG = {const, 0}
@@ -2376,7 +2453,7 @@ with exact memory2-consts
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen	clr_l {LOCAL, $1}
 	move_w %1, {dreg2, regvar($1,reg_any)}
-with any4
+with store4
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen move %1, {LOCAL, $1}
 with exact STACK
@@ -2398,7 +2475,7 @@ with exact STACK
     gen move_l {post_inc4, sp}, {areg, regvar($1, reg_pointer)}
 
 pat stl
-with any4-sconsts
+with store4-sconsts
     kills all_indir, LOCAL %bd==$1
     gen move %1, {LOCAL, $1}
 with exact STACK
@@ -2406,7 +2483,7 @@ with exact STACK
     gen move_l {post_inc4,sp}, {LOCAL, $1}
 
 pat ste
-with any4-sconsts
+with store4-sconsts
     kills posextern
     gen move %1, {absolute4, $1}
 with exact STACK
@@ -2414,7 +2491,7 @@ with exact STACK
     gen move_l {post_inc4, sp}, {absolute4, $1}
 
 pat sil inreg($1)==reg_pointer
-with any4-sconsts
+with store4-sconsts
     kills allexceptcon
     gen move %1, {indirect4, regvar($1, reg_pointer)}
 with exact STACK
@@ -2422,7 +2499,7 @@ with exact STACK
     gen move_l {post_inc4, sp}, {indirect4, regvar($1, reg_pointer)}
 
 pat sil inreg($1)==reg_any
-with any4-sconsts
+with store4-sconsts
     kills allexceptcon
     uses AA_REG = {LOCAL, $1}
     gen move %1, {indirect4, %a}
@@ -2433,14 +2510,14 @@ with exact STACK
 
 pat sil
 #if TBL68020
-with any4-sconsts
+with store4-sconsts
     kills allexceptcon
     gen move %1, {ILOCAL, $1}
 with exact STACK
     kills allexceptcon
     gen move_l {post_inc4, sp}, {ILOCAL, $1}
 #else
-with any4-sconsts
+with store4-sconsts
     kills allexceptcon
     uses AA_REG = {LOCAL, $1}
     gen move %1, {indirect4, %a}
@@ -2451,7 +2528,7 @@ with exact STACK
 #endif
 
 pat stf
-with A_REG any4-sconsts
+with A_REG store4-sconsts
     kills allexceptcon
     gen move %2, {offsetted4, %1, $1}
 with exact any4 STACK
@@ -2463,61 +2540,61 @@ with exact STACK
     uses AA_REG
     gen move_l {post_inc4, sp}, %a
 	move_l {post_inc4, sp}, {offsetted4, %a, $1}
-with exact local_addr any4
+with exact local_addr store4
     kills allexceptcon
     gen move %2, {LOCAL, %1.bd+$1}
-with exact ext_addr any4
+with exact ext_addr store4
     kills allexceptcon
     gen move %2, {absolute4, %1.bd+$1}
 #ifndef TBL68020
-with regAcon any4
+with regAcon store4
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd+$1}
 #else TBL68020
-with exact regAcon any4
+with exact regAcon store4
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd+$1}
-with exact regAregXcon any4
+with exact regAregXcon store4
     kills allexceptcon
     gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
 #ifdef FANCY_MODES
-with exact indirect4 any4
+with exact indirect4 store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, 0, $1}
-with exact offsetted4 any4
+with exact offsetted4 store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, $1}
-with exact LOCAL any4
+with exact LOCAL store4
     kills allexceptcon
     gen move %2, {OFF_off4, lb, %1.bd, $1}
-with exact off_con any4
+with exact off_con store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od+$1}
-with exact index_off4 any4
+with exact index_off4 store4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
-with exact indoff_con any4
+with exact indoff_con store4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-with exact off_regXcon any4
+with exact off_regXcon store4
     kills allexceptcon
     gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
-with exact absolute4 any4
+with exact absolute4 store4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, $1}
-with exact abs_con any4
+with exact abs_con store4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, %1.od+$1}
-with exact abs_regXcon any4
+with exact abs_regXcon store4
     kills allexceptcon
     gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-with exact abs_index4 any4
+with exact abs_index4 store4
     kills allexceptcon
     gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
-with exact absind_con any4
+with exact absind_con store4
     kills allexceptcon
     gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
-with exact ext_regX any4
+with exact ext_regX store4
     kills allexceptcon
     gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd+$1}
 #endif
@@ -2658,7 +2735,7 @@ with exact ext_regX any2
 #endif TBL68020
 
 pat sti $1==4
-with A_REG any4-sconsts
+with A_REG store4-sconsts
     kills allexceptcon
     gen move %2, {indirect4, %1}
 with exact any4 STACK
@@ -2670,64 +2747,64 @@ with exact STACK
     uses AA_REG
     gen move_l {post_inc4, sp}, %a
 	move_l {post_inc4, sp}, {indirect4, %a}
-with exact local_addr any4
+with exact local_addr store4
     kills allexceptcon
     gen move %2, {LOCAL, %1.bd}
-with exact ext_addr any4
+with exact ext_addr store4
     kills allexceptcon
     gen move %2, {absolute4, %1.bd}
 #ifndef TBL68020
-with regAcon any4-sconsts
+with regAcon store4-sconsts
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd}
-with regAregXcon any4-sconsts
+with regAregXcon store4-sconsts
     kills allexceptcon
     gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
 #else TBL68020
-with exact regAcon any4
+with exact regAcon store4
     kills allexceptcon
     gen move %2, {offsetted4, %1.reg, %1.bd}
-with exact regAregXcon any4
+with exact regAregXcon store4
     kills allexceptcon
     gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
-with exact LOCAL any4
+with exact LOCAL store4
     kills allexceptcon
     gen move %2, {ILOCAL, %1.bd}
 #ifdef FANCY_MODES
-with exact indirect4 any4
+with exact indirect4 store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, 0, 0}
-with exact offsetted4 any4
+with exact offsetted4 store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, 0}
-with exact off_con any4
+with exact off_con store4
     kills allexceptcon
     gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od}
-with exact index_off4 any4
+with exact index_off4 store4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
-with exact indoff_con any4
+with exact indoff_con store4
     kills allexceptcon
     gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
-with exact off_regXcon any4
+with exact off_regXcon store4
     kills allexceptcon
     gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
-with exact absolute4 any4
+with exact absolute4 store4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, 0}
-with exact abs_con any4
+with exact abs_con store4
     kills allexceptcon
     gen move %2, {ABS_off4, %1.bd, %1.od}
-with exact abs_regXcon any4
+with exact abs_regXcon store4
     kills allexceptcon
     gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od}
-with exact abs_index4 any4
+with exact abs_index4 store4
     kills allexceptcon
     gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, 0}
-with exact absind_con any4
+with exact absind_con store4
     kills allexceptcon
     gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od}
-with exact ext_regX any4
+with exact ext_regX store4
     kills allexceptcon
     gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd}
 #endif
@@ -2766,8 +2843,8 @@ with STACK
 pat sdl
 with any4-sconsts any4-sconsts
     kills all_indir, LOCAL %bd==$1
-    gen move %1, {LOCAL, $1}
-	move %2, {LOCAL, $1+4}
+    gen move %1, {LOCAL, $1} 
+        move %2, {LOCAL, $1+4}
 with exact STACK
     kills all_indir, LOCAL %bd==$1
     gen move_l {post_inc4, sp}, {LOCAL,$1}
@@ -2940,6 +3017,84 @@ with shconreg DD_REG
  * Arithmetic instructions
  */
  
+#if TBL68881
+pat adf $1==4
+    with FS_REG STACK
+    gen fadd_s {indirect4,sp},%1
+	fmove_s %1,{indirect4,sp}
+pat adf $1==8
+    with FD_REG STACK
+    gen fadd_d {indirect4,sp},%1
+	fmove_d %1,{indirect4,sp}
+pat sbf $1==4
+    with FS_REG FS_REG STACK
+    gen fsub %1,%2
+	fmove_s %2,{pre_dec4,sp}
+pat sbf $1==8
+    with FD_REG FD_REG STACK
+    gen fsub %1,%2
+	fmove_d %2,{pre_dec4,sp}
+pat mlf $1==4
+    with FS_REG STACK
+    gen fmul_s {indirect4,sp},%1
+	fmove_s %1,{indirect4,sp}
+pat mlf $1==8
+    with FD_REG STACK
+    gen fmul_d {indirect4,sp},%1
+	fmove_d %1,{indirect4,sp}
+pat dvf $1==4
+    with FS_REG FS_REG STACK
+    gen fdiv %1,%2
+	fmove_s %2,{pre_dec4,sp}
+pat dvf $1==8
+    with FD_REG FD_REG STACK
+    gen fdiv %1,%2
+	fmove_d %2,{pre_dec4,sp}
+pat ngf $1==4
+    with FS_REG STACK
+    gen fneg %1
+	fmove_s %1,{pre_dec4,sp}
+pat ngf $1==8
+    with FD_REG STACK
+    gen fneg %1
+	fmove_d %1,{pre_dec4,sp}
+pat fif $1==4
+    with FS_REG FS_REG STACK
+    gen fmul %1,%2
+        fintrz %2,%1
+	fsub %1,%2
+	fmove_s %2,{pre_dec4,sp}
+	fmove_s %1,{pre_dec4,sp}
+pat fif $1==8
+    with FD_REG FD_REG STACK
+    gen fmul %1,%2
+        fintrz %2,%1
+	fsub %1,%2
+	fmove_d %2,{pre_dec4,sp}
+	fmove_d %1,{pre_dec4,sp}
+pat fef $1==4
+    with FS_REG STACK
+    uses D_REG, FS_REG
+    gen	fgetexp %1,%b
+	fmove_l %b,%a
+	add_l {const,1},%a
+	fgetman %1
+	fmove_l {const,2},%b
+	fdiv %b,%1
+	fmove_s %1,{pre_dec4,sp}
+				yields %a
+pat fef $1==8
+    with FD_REG STACK
+    uses D_REG, FD_REG
+    gen	fgetexp %1,%b
+	fmove_l %b,%a
+	add_l {const,1},%a
+	fgetman %1
+	fmove_l {const,2},%b
+	fdiv %b,%1
+	fmove_d %1,{pre_dec4,sp}
+				yields %a
+#else
 pat adf $1==4	leaving  cal ".adf4" asp 4
 pat adf $1==8	leaving  cal ".adf8" asp 8
 pat sbf $1==4	leaving  cal ".sbf4" asp 4
@@ -2962,6 +3117,7 @@ pat fef $1==8
 	    move_l d1, {pre_dec4, sp}
 	    move_l d0, {pre_dec4, sp}
 		leaving cal ".fef8"
+#endif
 
 /************************************************
  * Group 6: pointer arithmetic			*
@@ -3339,6 +3495,66 @@ pat ciu				leaving cuu
 
 pat cui				leaving cuu
 
+#if TBL68881
+pat loc loc cif $1==4 && $2==4
+with data4 STACK
+    uses FS_REG
+    gen	fmove_l %1,%a
+	fmove_s %a,{pre_dec4,sp}
+pat loc loc cif $1==4 && $2==8
+with data4 STACK
+    uses FD_REG
+    gen	fmove_l %1,%a
+	fmove_d %a,{pre_dec4,sp}
+pat loc loc cuf $1==4 && $2==4
+with D_REG STACK
+    uses FS_REG
+    gen	fmove_l %1,%a
+	tst_l %1
+	bge {slabel, 1f}
+	fsub_l {const,0-2147483648},%a
+	fsub_l {const,0-2147483648},%a
+	1:
+	fmove_s %a,{pre_dec4,sp}
+pat loc loc cuf $1==4 && $2==8
+with D_REG STACK
+    uses FD_REG
+    gen	fmove_l %1,%a
+	tst_l %1
+	bge {slabel, 1f}
+	fsub_l {const,0-2147483648},%a
+	fsub_l {const,0-2147483648},%a
+	1:
+	fmove_d %a,{pre_dec4,sp}
+pat loc loc cfi $1==4 && $2==4
+with FS_REG
+    uses D_REG
+    gen	fintrz %1,%1
+	fmove_l %1,%a		yields %a
+pat loc loc cfi $1==8 && $2==4
+with FD_REG
+    uses D_REG
+    gen	fintrz %1,%1
+	fmove_l %1,%a		yields %a
+pat loc loc cfu $1==4 && $2==4
+with FS_REG
+    uses D_REG
+    gen fabs %1
+	fintrz %1,%1
+	fmove_l %1,%a		yields %a
+pat loc loc cfu $1==8 && $2==4
+with FD_REG
+    uses D_REG
+    gen fabs %1
+	fintrz %1,%1
+	fmove_l %1,%a		yields %a
+pat loc loc cff $1==4 && $2==8
+with FS_REG STACK
+    gen fmove_d %1,{pre_dec4,sp}
+pat loc loc cff $1==8 && $2==4
+with FD_REG STACK
+    gen fmove_s %1,{pre_dec4,sp}
+#else
 /*
  * Floating point stuff
  * Conversion
@@ -3352,6 +3568,7 @@ pat loc loc cfu	leaving loc $1 loc $2 cal ".cfu" asp 8+($1-4)
 pat loc loc cff	$1==8 && $2==4 leaving cal ".cff4" asp 4
 pat loc loc cff	$1==4 && $2==8
 	leaving loc 0 exg 4 cal ".cff8"
+#endif
 
 /************************************************
  * Group 9: logical instructions		*
@@ -3709,9 +3926,33 @@ pat tgt					call txx("sgt", "shi")
  * Floating point
  * Comparision
  */
-
+#if TBL68881
+pat cmf $1==4
+with FS_REG FS_REG
+    uses D_REG={const,0}
+    gen	fcmp %1,%2
+	fbeq {slabel,2f}
+	fblt {slabel,1f}
+	add_l {const,1},%a
+	bra {slabel,2f}
+	1:
+	sub_l {const,1},%a
+	2:			yields %a
+pat cmf $1==8
+with FD_REG FD_REG
+    uses D_REG={const,0}
+    gen	fcmp %1,%2
+	fbeq {slabel,2f}
+	fblt {slabel,1f}
+	add_l {const,1},%a
+	bra {slabel,2f}
+	1:
+	sub_l {const,1},%a
+	2:			yields %a
+#else
 pat cmf $1==4	leaving cal ".cmf4" asp 8 lfr 4
 pat cmf $1==8	leaving cal ".cmf8" asp 16 lfr 4
+#endif
 /*
  * Floating Point
  * Zero Constants
