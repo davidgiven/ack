@@ -48,7 +48,14 @@ begtext:
 	shr bx,cl
 	shl bx,cl
 	call grow
+	xor	cx,cx
+	push	cx
+	call	_sbrk
+	mov	(.limhp),ax
+	mov	(.reghp),ax	! on Xenix, heap begins above stack!
+	pop	ax
 	call    _m_a_i_n
+	push	ax
 	call	__exit
 .sect	.data
 begdata:
