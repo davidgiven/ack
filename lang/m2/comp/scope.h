@@ -15,9 +15,11 @@
 struct scope {
 	struct scope *next;
 	struct forwards *sc_forw;
+	char *sc_name;		/* name of this scope */
 	struct def *sc_def;	/* list of definitions in this scope */
 	arith sc_off;		/* offsets of variables in this scope */
 	char sc_scopeclosed;	/* flag indicating closed or open scope */
+	int sc_level;		/* level of this scope */
 };
 
 extern struct scope

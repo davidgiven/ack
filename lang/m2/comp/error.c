@@ -11,6 +11,7 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 
 #include	"errout.h"
+#include	"debug.h"
 
 #include	"input.h"
 #include	"f_info.h"

@@ -15,6 +15,7 @@ static char *RcsId = "$Header$";
 #include	"debug.h"
 
 struct scope *CurrentScope, *PervasiveScope, *GlobalScope;
+static int scp_level;
 
 /* STATICALLOCDEF "scope" */
 
@@ -26,6 +27,7 @@ open_scope(scopetype)
 
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
+	sc->sc_level = scp_level++;
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
 	sc->sc_off = 0;
@@ -45,6 +47,7 @@ init_scope()
 	sc->sc_scopeclosed = 0;
 	sc->sc_forw = 0;
 	sc->sc_def = 0;
+	sc->sc_level = scp_level++;
 	sc->next = 0;
 	PervasiveScope = sc;
 	CurrentScope = sc;
@@ -197,6 +200,7 @@ close_scope(flag)
 		Reverse(&(sc->sc_def));
 	}
 	CurrentScope = sc->next;
+	scp_level = CurrentScope->sc_level;
 }
 
 #ifdef DEBUG

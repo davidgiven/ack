@@ -23,6 +23,32 @@ static struct def illegal_def =
 struct def *ill_df = &illegal_def;
 
 struct def *
+MkDef(id, scope, kind)
+	struct idf *id;
+	struct scope *scope;
+{
+	/*	Create a new definition structure in scope "scope", with
+		id "id" and kind "kind".
+	*/
+	register struct def *df;
+
+	df = new_def();
+	df->df_flags = 0;
+	df->df_idf = id;
+	df->df_scope = scope;
+	df->df_kind = kind;
+	df->df_type = 0;
+	df->next = id->id_def;
+	id->id_def = df;
+
+	/* enter the definition in the list of definitions in this scope
+	*/
+	df->df_nextinscope = scope->sc_def;
+	scope->sc_def = df;
+	return df;
+}
+
+struct def *
 define(id, scope, kind)
 	register struct idf *id;
 	register struct scope *scope;
@@ -85,19 +111,7 @@ error("identifier \"%s\" already declared", id->id_text);
 		}
 		return df;
 	}
-	df = new_def();
-	df->df_flags = 0;
-	df->df_idf = id;
-	df->df_scope = scope;
-	df->df_kind = kind;
-	df->df_type = 0;
-	df->next = id->id_def;
-	id->id_def = df;
-
-	/* enter the definition in the list of definitions in this scope */
-	df->df_nextinscope = scope->sc_def;
-	scope->sc_def = df;
-	return df;
+	return MkDef(id, scope, kind);
 }
 
 struct def *

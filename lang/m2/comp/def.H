@@ -14,8 +14,13 @@ struct module {
 struct variable {
 	arith va_off;		/* address or offset of variable */
 	char va_addrgiven;	/* an address was given in the program */
+	char va_noreg;		/* may not be in a register */
+	short va_number;	/* number of this variable in definition module
+				*/
 #define var_off		df_value.df_variable.va_off
 #define var_addrgiven	df_value.df_variable.va_addrgiven
+#define var_noreg	df_value.df_variable.va_noreg
+#define var_number	df_value.df_variable.va_number
 };
 
 struct constant {
@@ -43,13 +48,16 @@ struct field {
 
 struct dfproc {
 	struct scope *pr_scope;	/* scope of procedure */
-	int pr_level;		/* depth level of this procedure */
-	arith pr_nbpar;		/* Number of bytes parameters */
+	short pr_level;		/* depth level of this procedure */
+	short pr_number;	/* number of this procedure in definition module
+				*/
+	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
 #define prc_scope	df_value.df_proc.pr_scope
 #define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
+#define prc_number	df_value.df_proc.pr_number
 };
 
 struct import {

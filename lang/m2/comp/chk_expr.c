@@ -8,6 +8,7 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<assert.h>
 #include	<alloc.h>
+
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"type.h"
@@ -17,6 +18,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"const.h"
 #include	"standards.h"
+
 #include	"debug.h"
 
 int
@@ -25,7 +27,7 @@ chk_expr(expp)
 {
 	/*	Check the expression indicated by expp for semantic errors,
 		identify identifiers used in it, replace constants by
-		their value.
+		their value, and try to evaluate the expression.
 	*/
 
 	switch(expp->nd_class) {
@@ -33,25 +35,32 @@ chk_expr(expp)
 		return	chk_expr(expp->nd_left) &&
 			chk_expr(expp->nd_right) &&
 			chk_oper(expp);
+
 	case Uoper:
 		return	chk_expr(expp->nd_right) &&
 			chk_uoper(expp);
+
 	case Value:
 		switch(expp->nd_symb) {
 		case REAL:
 		case STRING:
 		case INTEGER:
 			return 1;
+
 		default:
 			assert(0);
 		}
 		break;
+
 	case Xset:
 		return chk_set(expp);
+
 	case Name:
 		return chk_name(expp);
+
 	case Call:
 		return chk_call(expp);
+
 	case Link:
 		return chk_name(expp);
 	default:
@@ -82,9 +91,9 @@ chk_set(expp)
 		findname(expp->nd_left);
 		assert(expp->nd_left->nd_class == Def);
 		df = expp->nd_left->nd_def;
-		if ((df->df_kind != D_TYPE && df->df_kind != D_ERROR) ||
+		if (!(df->df_kind & (D_TYPE|D_ERROR)) ||
 		    (df->df_type->tp_fund != T_SET)) {
-			node_error(expp, "Illegal set type");
+			node_error(expp, "illegal set type");
 			return 0;
 		}
 		tp = df->df_type;
@@ -93,7 +102,8 @@ chk_set(expp)
 
 	/* Now check the elements given, and try to compute a constant set.
 	*/
-	set = (arith *) Malloc(tp->tp_size * sizeof(arith) / word_size);
+	set = (arith *)
+		Malloc((unsigned) (tp->tp_size * sizeof(arith) / word_size));
 	nd = expp->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
@@ -102,7 +112,10 @@ chk_set(expp)
 	}
 	expp->nd_type = tp;
 	if (set) {
-		/* Yes, in was a constant set, and we managed to compute it!
+		/* Yes, it was a constant set, and we managed to compute it!
+		   Notice that at the moment there is no such thing as
+		   partial evaluation. Either we evaluate the set, or we
+		   don't (at all). Improvement not neccesary. (???)
 		*/
 		expp->nd_class = Set;
 		expp->nd_set = set;
@@ -123,6 +136,8 @@ chk_el(expp, tp, set)
 		recursively.
 		Also try to compute the set!
 	*/
+	register int i;
+
 	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
@@ -136,10 +151,9 @@ chk_el(expp, tp, set)
 			/* We have a constant range. Put all elements in the
 			   set
 			*/
-			register int i;
 
 		    	if (expp->nd_left->nd_INT > expp->nd_right->nd_INT) {
-node_error(expp, "Lower bound exceeds upper bound in range");
+node_error(expp, "lower bound exceeds upper bound in range");
 				return rem_set(set);
 			}
 			
@@ -161,20 +175,21 @@ node_error(expp, "Lower bound exceeds upper bound in range");
 		return rem_set(set);
 	}
 	if (!TstCompat(tp, expp->nd_type)) {
-		node_error(expp, "Set element has incompatible type");
+		node_error(expp, "set element has incompatible type");
 		return rem_set(set);
 	}
 	if (expp->nd_class == Value) {
+		i = expp->nd_INT;
 	    	if ((tp->tp_fund != T_ENUMERATION &&
-		     (expp->nd_INT < tp->sub_lb || expp->nd_INT > tp->sub_ub))
+		     (i < tp->sub_lb || i > tp->sub_ub))
 		   ||
 		    (tp->tp_fund == T_ENUMERATION &&
-		     (expp->nd_INT < 0 || expp->nd_INT > tp->enm_ncst))
+		     (i < 0 || i > tp->enm_ncst))
 		   ) {
-			node_error(expp, "Set element out of range");
+			node_error(expp, "set element out of range");
 			return rem_set(set);
 		}
-		if (*set) (*set)[expp->nd_INT/wrd_bits] |= (1 << (expp->nd_INT%wrd_bits));
+		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
 	}
 	return 1;
 }
@@ -207,8 +222,8 @@ getarg(argp, bases)
 	if (!chk_expr(argp->nd_left)) return 0;
 	tp = argp->nd_left->nd_type;
 	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
-	if (!(tp->tp_fund & bases)) {
-		node_error(argp, "Unexpected type");
+	if (bases && !(tp->tp_fund & bases)) {
+		node_error(argp, "unexpected type");
 		return 0;
 	}
 	return argp;
@@ -226,7 +241,7 @@ getname(argp, kinds)
 	findname(argp->nd_left);
 	assert(argp->nd_left->nd_class == Def);
 	if (!(argp->nd_left->nd_def->df_kind & kinds)) {
-		node_error(argp, "Unexpected type");
+		node_error(argp, "unexpected type");
 		return 0;
 	}
 	return argp;
@@ -243,6 +258,8 @@ chk_call(expp)
 	register struct node *left;
 	register struct node *arg;
 
+	/* First, get the name of the function or procedure
+	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
 	findname(left);
@@ -250,18 +267,18 @@ chk_call(expp)
 	if (left->nd_type == error_type) return 0;
 	if (left->nd_class == Def &&
 	    (left->nd_def->df_kind & (D_HTYPE|D_TYPE|D_HIDDEN))) {
-		/* A type cast. This is of course not portable.
+		/* It was a type cast. This is of course not portable.
 		   No runtime action. Remove it.
 		*/
 		arg = expp->nd_right;
 		if ((! arg) || arg->nd_right) {
-node_error(expp, "Only one parameter expected in type cast");
+node_error(expp, "only one parameter expected in type cast");
 			return 0;
 		}
 		arg = arg->nd_left;
 		if (! chk_expr(arg)) return 0;
 		if (arg->nd_type->tp_size != left->nd_type->tp_size) {
-node_error(expp, "Size of type in type cast does not match size of operand");
+node_error(expp, "size of type in type cast does not match size of operand");
 			return 0;
 		}
 		arg->nd_type = left->nd_type;
@@ -285,7 +302,7 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 			/* A standard procedure
 			*/
 			assert(left->nd_class == Def);
-DO_DEBUG(3, debug("Standard name \"%s\", %d", 
+DO_DEBUG(3, debug("standard name \"%s\", %d", 
 left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 			switch(left->nd_def->df_value.df_stdname) {
 			case S_ABS:
@@ -297,6 +314,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					cstcall(expp, S_ABS);
 				}
 				break;
+
 			case S_CAP:
 				arg = getarg(arg, T_CHAR);
 				expp->nd_type = char_type;
@@ -306,6 +324,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					cstcall(expp, S_CAP);
 				}
 				break;
+
 			case S_CHR:
 				arg = getarg(arg, T_INTORCARD);
 				expp->nd_type = char_type;
@@ -314,11 +333,13 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					cstcall(expp, S_CHR);
 				}
 				break;
+
 			case S_FLOAT:
 				arg = getarg(arg, T_INTORCARD);
 				expp->nd_type = real_type;
 				if (!arg) return 0;
 				break;
+
 			case S_HIGH:
 				arg = getarg(arg, T_ARRAY);
 				if (!arg) return 0;
@@ -331,6 +352,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 				}
 				else	cstcall(expp, S_MAX);
 				break;
+
 			case S_MAX:
 			case S_MIN:
 				arg = getarg(arg, T_DISCRETE);
@@ -338,6 +360,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 				expp->nd_type = arg->nd_left->nd_type;
 				cstcall(expp,left->nd_def->df_value.df_stdname);
 				break;
+
 			case S_ODD:
 				arg = getarg(arg, T_INTORCARD);
 				if (!arg) return 0;
@@ -346,6 +369,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					cstcall(expp, S_ODD);
 				}
 				break;
+
 			case S_ORD:
 				arg = getarg(arg, T_DISCRETE);
 				if (!arg) return 0;
@@ -354,6 +378,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					cstcall(expp, S_ORD);
 				}
 				break;
+
 			case S_TSIZE:	/* ??? */
 			case S_SIZE:
 				arg = getname(arg, D_FIELD|D_VARIABLE|D_TYPE|D_HIDDEN|D_HTYPE);
@@ -361,11 +386,13 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 				if (!arg) return 0;
 				cstcall(expp, S_SIZE);
 				break;
+
 			case S_TRUNC:
 				arg = getarg(arg, T_REAL);
 				if (!arg) return 0;
 				expp->nd_type = card_type;
 				break;
+
 			case S_VAL: {
 				struct type *tp;
 
@@ -388,11 +415,13 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 				}
 				break;
 				}
+
 			case S_ADR:
 				arg = getname(arg, D_VARIABLE|D_FIELD|D_PROCEDURE);
 				expp->nd_type = address_type;
 				if (!arg) return 0;
 				break;
+
 			case S_DEC:
 			case S_INC:
 				expp->nd_type = 0;
@@ -403,9 +432,11 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					if (!arg) return 0;
 				}
 				break;
+
 			case S_HALT:
 				expp->nd_type = 0;
 				break;
+
 			case S_EXCL:
 			case S_INCL: {
 				struct type *tp;
@@ -421,11 +452,12 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 				arg = getarg(arg, T_DISCRETE);
 				if (!arg) return 0;
 				if (!TstCompat(tp->next, arg->nd_left->nd_type)) {
-					node_error(arg, "Unexpected type");
+					node_error(arg, "unexpected type");
 					return 0;
 				}
 				break;
 				}
+
 			default:
 				assert(0);
 			}
@@ -436,12 +468,49 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 			}
 			return 1;
 		}
-		/* Here, we have found a real procedure call
+		/* Here, we have found a real procedure call. The left hand
+		   side may also represent a procedure variable.
 		*/
-		return 1;
+		return chk_proccall(expp);
 	}
 	node_error(expp->nd_left, "procedure, type, or function expected");
 	return 0;
+}
+
+chk_proccall(expp)
+	struct node *expp;
+{
+	/*	Check a procedure call
+	*/
+	register struct node *left = expp->nd_left;
+	register struct node *arg;
+	register struct paramlist *param;
+
+	expp->nd_type = left->nd_type->next;
+	param = left->nd_type->prc_params;
+	arg = expp;
+
+	while (param) {
+		arg = getarg(arg, 0);
+		if (!arg) return 0;
+		if (param->par_var &&
+		    ! TstCompat(param->par_type, arg->nd_left->nd_type)) {
+node_error(arg->nd_left, "type incompatibility in var parameter");
+			return 0;
+		}
+		else
+		if (!param->par_var &&
+		    !TstAssCompat(param->par_type, arg->nd_left->nd_type)) {
+node_error(arg->nd_left, "type incompatibility in value parameter");
+			return 0;
+		}
+		param = param->next;
+	}
+	if (arg->nd_right) {
+		node_error(arg->nd_right, "too many parameters supplied");
+		return 0;
+	}
+	return 1;
 }
 
 findname(expp)
@@ -471,7 +540,7 @@ findname(expp)
 		}
 		else if (tp->tp_fund != T_RECORD) {
 			/* This is also true for modules */
-			node_error(expp,"Illegal selection");
+			node_error(expp,"illegal selection");
 			df = ill_df;
 		}
 		else df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
@@ -614,16 +683,19 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 				cstbin(expp);
 			}
 			return 1;
+
 		case T_SET:
 			if (expp->nd_left->nd_class == Set &&
 			    expp->nd_right->nd_class == Set) {
 				cstset(expp);
 			}
 			/* Fall through */
+
 		case T_REAL:
 			return 1;
 		}
 		break;
+
 	case '/':
 		switch(tpl->tp_fund) {
 		case T_SET:
@@ -632,10 +704,12 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 				cstset(expp);
 			}
 			/* Fall through */
+
 		case T_REAL:
 			return 1;
 		}
 		break;
+
 	case DIV:
 	case MOD:
 		if (tpl->tp_fund & T_INTORCARD) {
@@ -646,6 +720,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 			return 1;
 		}
 		break;
+
 	case OR:
 	case AND:
 		if (tpl == bool_type) {
@@ -657,6 +732,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 		}
 		errval = 3;
 		break;
+
 	case '=':
 	case '#':
 	case GREATEREQUAL:
@@ -673,6 +749,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 				cstset(expp);
 			}
 			return 1;
+
 		case T_INTEGER:
 		case T_CARDINAL:
 		case T_ENUMERATION:	/* includes boolean */
@@ -683,24 +760,29 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 				cstbin(expp);
 			}
 			return 1;
+
 		case T_POINTER:
 			if (!(expp->nd_symb == '=' || expp->nd_symb == '#')) {
 				break;
 			}
 			/* Fall through */
+
 		case T_REAL:
 			return 1;
 		}
+
 	default:
 		assert(0);
 	}
 	switch(errval) {
 	case 1:
-		node_error(expp,"Operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
+		node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
 		break;
+
 	case 3:
 		node_error(expp, "BOOLEAN type(s) expected");
 		break;
+
 	default:
 		assert(0);
 	}
@@ -727,6 +809,7 @@ chk_uoper(expp)
 			return 1;
 		}
 		break;
+
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
 			if (expp->nd_right->nd_class == Value) {
@@ -747,6 +830,7 @@ chk_uoper(expp)
 			return 1;
 		}
 		break;
+
 	case NOT:
 		if (tpr == bool_type) {
 			if (expp->nd_right->nd_class == Value) {
@@ -755,10 +839,12 @@ chk_uoper(expp)
 			return 1;
 		}
 		break;
+
 	case '^':
 		if (tpr->tp_fund != T_POINTER) break;
 		expp->nd_type = tpr->next;
 		return 1;
+
 	default:
 		assert(0);
 	}

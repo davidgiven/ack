@@ -111,3 +111,27 @@ TstCompat(tp1, tp2)
 		)
 	;
 }
+
+int TstAssCompat(tp1, tp2)
+	struct type *tp1, *tp2;
+{
+	/*	Test if two types are assignment compatible.
+	*/
+	if (TstCompat(tp1, tp2)) return 1;
+
+	if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
+	if (tp2->tp_fund == T_SUBRANGE) tp2 = tp2->next;
+	if ((tp1->tp_fund & (T_INTEGER|T_CARDINAL)) &&
+	    (tp2->tp_fund & (T_INTEGER|T_CARDINAL))) return 1;
+	if (tp1 == char_type && tp2 == charc_type) return 1;
+	if (tp1->tp_fund == T_ARRAY && 
+	    (tp2 == charc_type || tp2 == string_type)) {
+		/* Unfortunately the length of the string is not
+		   available here, so this must be tested somewhere else (???)
+		*/
+	    	tp1 = tp1->arr_elem;
+		if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
+		return tp1 == char_type;
+	}
+	return 0;
+}

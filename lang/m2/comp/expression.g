@@ -183,10 +183,15 @@ factor(struct node **p;)
 | %default
 	number(p)
 |
-	STRING		{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
+	STRING		{
+			  *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
 			  if (dot.TOK_SLE == 1) {
-				dot.TOK_INT = *(dot.TOK_STR);
-				(*p)->nd_type = char_type;
+				int i;
+
+				i = *(dot.TOK_STR) & 0377;
+				(*p)->nd_type = charc_type;
+				free(dot.TOK_STR);
+				dot.TOK_INT = i;
 			  }
 			  else	(*p)->nd_type = string_type;
 			}

@@ -12,6 +12,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"main.h"
 
 struct def *
 Enter(name, kind, type, pnam)
@@ -126,6 +127,13 @@ node_error(IdList->nd_left,"Illegal type for address");
 			df->var_off = off;
 			scope->sc_off = off;
 		}
+		else if (DefinitionModule) {
+			char buf[256];
+			char *sprint();
+
+			C_exa_dnam(sprint(buf,"%s_%s",df->df_scope->sc_name,
+						df->df_idf->id_text));
+		}
 		IdList = IdList->nd_right;
 	}
 }
@@ -137,17 +145,20 @@ lookfor(id, scope, give_error)
 {
 	/*	Look for an identifier in the visibility range started by
 		"scope".
-		If it is not defined, give an error message, and
+		If it is not defined, maybe give an error message, and
 		create a dummy definition.
 	*/
 	struct def *df;
 	register struct scope *sc = scope;
+	struct def *MkDef();
 
 	while (sc) {
 		df = lookup(id->nd_IDF, sc);
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
+
 	if (give_error) id_not_declared(id);
-	return define(id->nd_IDF, scope, D_ERROR);
+
+	return MkDef(id->nd_IDF, scope, D_ERROR);
 }

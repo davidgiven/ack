@@ -23,7 +23,7 @@ STEOI:\200
 %	INIDF
 %
 %C
-1:a-zA-Z_0-9
+1:a-zA-Z0-9
 %Tchar inidf[] = {
 %F	%s,
 %p

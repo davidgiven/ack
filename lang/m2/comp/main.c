@@ -40,23 +40,24 @@ main(argc, argv)
 			Nargv[Nargc++] = *argv++;
 	}
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
-	if (Nargc != 2) {
-		fprint(STDERR, "%s: Use one file argument\n", ProgName);
+	if (Nargc < 2) {
+		fprint(STDERR, "%s: Use a file argument\n", ProgName);
 		return 1;
 	}
 #ifdef DEBUG
-	print("Mod2 compiler -- Debug version\n");
-#endif DEBUG
+	print("MODULA-2 compiler -- Debug version\n");
 	DO_DEBUG(1, debug("Debugging level: %d", options['D']));
-	return !Compile(Nargv[1]);
+#endif DEBUG
+	return !Compile(Nargv[1], Nargv[2]);
 }
 
-Compile(src)
-	char *src;
+Compile(src, dst)
+	char *src, *dst;
 {
 	extern struct tokenname tkidf[];
 
 	DO_DEBUG(1, debug("Filename : %s", src));
+	DO_DEBUG(1, (!dst || debug("Targetfile: %s", dst)));
 	if (! InsertFile(src, (char **) 0, &src)) {
 		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
@@ -77,8 +78,15 @@ Compile(src)
 	{
 		(void) open_scope(CLOSEDSCOPE);
 		GlobalScope = CurrentScope;
+		C_init(word_size, pointer_size);
+		if (! C_open(dst)) {
+			fatal("Could not open output file");
+		}
+		C_magic();
+		C_ms_emx(word_size, pointer_size);
 		CompUnit();
 	}
+	C_close();
 	if (err_occurred) return 0;
 	return 1;
 }
@@ -87,6 +95,7 @@ Compile(src)
 LexScan()
 {
 	register int symb;
+	char *symbol2str();
 
 	while ((symb = LLlex()) > 0) {
 		print(">>> %s ", symbol2str(symb));
@@ -171,6 +180,8 @@ init_DEFPATH()
 			if (*p) *p++ = '\0';
 		}
 	}
+	else DEFPATH[i++] = "";
+
 	DEFPATH[i] = 0;
 }
 

@@ -88,6 +88,7 @@ struct type	{
 extern struct type
 	*bool_type,
 	*char_type,
+	*charc_type,
 	*int_type,
 	*card_type,
 	*longint_type,

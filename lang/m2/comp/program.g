@@ -20,6 +20,9 @@ static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   implementation module currently being
 				   compiled
 				*/
+short nmcount = 0;		/* count names in definition modules in order
+				   to create suitable names in the object code
+				*/
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -95,7 +98,7 @@ export(int def;)
 				Export(ExportList, QUALflag);
 			  }
 			  else {
-			  warning("export list in definition module ignored");
+node_warning(ExportList, "export list in definition module ignored");
 				FreeNode(ExportList);
 			  }
 			}
@@ -125,16 +128,20 @@ DefinitionModule
 {
 	register struct def *df;
 	struct idf *id;
+	int savnmcount = nmcount;
 } :
 	DEFINITION
 	MODULE IDENT	{ id = dot.TOK_IDF;
 			  df = define(id, GlobalScope, D_MODULE);
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
 			  df->mod_scope = CurrentScope;
+			  CurrentScope->sc_name = id->id_text;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_scope;
-			  DefinitionModule = 1;
-			  DO_DEBUG(1, debug("Definition module \"%s\"", id->id_text));
+			  DefinitionModule++;
+			  nmcount = 0;
+			  DO_DEBUG(1, debug("Definition module \"%s\" %d",
+					id->id_text, DefinitionModule));
 			}
 	';'
 	import(0)* 
@@ -158,8 +165,9 @@ DefinitionModule
 				df = df->df_nextinscope;
 			  }
 			  if (!SYSTEMModule) close_scope(SC_CHKFORW);
-			  DefinitionModule = 0;
+			  DefinitionModule--;
 			  match_id(id, dot.TOK_IDF);
+			  nmcount = savnmcount;
 			}
 	'.'
 ;
@@ -210,7 +218,6 @@ ProgramModule(int state;)
 			df = GetDefinitionModule(id);
 			CurrentScope = df->mod_scope;
 			DEFofIMPL = 0;
-		  	DefinitionModule = 0;
 		  }
 		  else {
 			df = define(id, CurrentScope, D_MODULE);

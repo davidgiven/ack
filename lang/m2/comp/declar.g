@@ -14,16 +14,24 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"node.h"
 #include	"misc.h"
+#include	"main.h"
 
 static int	proclevel = 0;	/* nesting level of procedures */
+char *		sprint();
 }
 
 ProcedureDeclaration
 {
 	struct def *df;
+	char buf[256];
 } :
 	ProcedureHeading(&df, D_PROCEDURE)
 			{ df->prc_level = proclevel++;
+			  if (DefinitionModule) {
+				C_exp(sprint(buf, "%s_%s",
+						df->df_scope->sc_name,
+						df->df_idf->id_text));
+			  }
 			}
 	';' block(&(df->prc_body)) IDENT
 			{ match_id(dot.TOK_IDF, df->df_idf);

@@ -40,6 +40,7 @@ arith
 struct type
 	*bool_type,
 	*char_type,
+	*charc_type,
 	*int_type,
 	*card_type,
 	*longint_type,
@@ -134,6 +135,8 @@ init_types()
 
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
+	charc_type = standard_type(T_CHAR, 1, (arith) 1);
+	charc_type->enm_ncst = 256;
 	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);
 	bool_type->enm_ncst = 2;
 	int_type = standard_type(T_INTEGER, int_align, int_size);
