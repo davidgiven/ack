@@ -2,7 +2,7 @@ EMHOME=../../..
 SUF=s
 MACH=m68k4
 ASAR=arch
-CFLAGS=-O
+CFLAGS=
 #	must use -r option of make so that default rules
 #	are not loaded
 #
@@ -24,7 +24,7 @@ CFLAGS=-O
 #
 # DFLAGS=-DPRT_ADD -DPRT_ALL -DPRT_DBL -DPRT_ENTRY -DPRT_EXIT -DPRT_EXT -DPRT_EXT2 -DPRT_LONG -DPRT_RNDMSG -DPRT_STDERR -DPRT_TRAP
 DFLAGS=
-EMFLAGS= -L -LIB -I. $(DFLAGS) $(CFLAGS)
+EMFLAGS= -L -LIB -I. $(DFLAGS) -O $(CFLAGS)
 #	AS=ack -m$(MACH) -c.$(SUF)
 #	CC=ack -m$(MACH) -c.s
 #	CCFLAGS=$(EMFLAGS)
