@@ -111,6 +111,7 @@ scan.c : $(SRC_DIR)/scan.l
 	$(FLEX) $(FLEX_FLAGS) $(COMPRESSION) $(SRC_DIR)/scan.l >scan.c
 
 scan.$(SUF) : scan.c parse.h $(SRC_DIR)/flexdef.h
+	$(CC) $(CFLAGS) -c scan.c
 
 main.$(SUF) : $(SRC_DIR)/main.c $(SRC_DIR)/flexdef.h
 	-mkdir $(AUXDIR)
