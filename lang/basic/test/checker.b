@@ -172,8 +172,8 @@
 17100 if s(x,y)=0 then 17500
 17200 print "that space is already occupied"
 17300 print
-17500 rem
 17400 goto 16700
+17500 rem
 17600 s(a,b)=s(e,h)
 17700 s(e,h)=0
 17800 t=(4.5-(3.5*g))
