@@ -39,6 +39,8 @@ LLgen.$(SUF):	LLgen.doc
 
 install cmp:
 
+distr:		install.doc
+		nroff -Tlp install.doc >install.pr
 pr:
 		@make "SUF="$SUF "NROFF="$NROFF "PRINT="$PRINT $(RESFILES) \
 			>make.pr.out 2>&1
