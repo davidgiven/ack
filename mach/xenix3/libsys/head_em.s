@@ -3,6 +3,7 @@
 .define begtext,begdata,begbss,syscal
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
+.define EXIT,BRK
 .extern endbss
 
 ERANGE          = 1
@@ -55,8 +56,13 @@ begtext:
 	mov	(.reghp),ax	! on Xenix, heap begins above stack!
 	pop	ax
 	call    __m_a_i_n
+EXIT:
 	push	ax
 	call	__exit
+
+BRK:
+	jmp	__brk
+
 .sect	.data
 begdata:
 hol0:
