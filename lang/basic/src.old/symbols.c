@@ -191,8 +191,7 @@ heading( )
 	if( fcn->symtype== DEFAULTTYPE)
 		fcn->symtype= DOUBLETYPE;
 }
-fcnsize(s)
-Symbol *s;
+fcnsize()
 {
 	/* generate portable function size */
 	int	i;
@@ -210,7 +209,7 @@ int type;
 	emcode("ret", typestring(fcn->symtype));
 	/* generate portable EM code */
 	fprintf(tmpfile," end ");
-	fcnsize(fcn);
+	fcnsize();
 	s= firstsym;
 	while(s)
 	{
@@ -226,7 +225,7 @@ int type;
 dclparm(s)
 Symbol	*s;
 {
-	int i,size=0;
+	int size=0;
 	if( s->symtype== DEFAULTTYPE)
 		s->symtype= DOUBLETYPE;
 	s->isparam=1;
@@ -257,9 +256,10 @@ Symbol *s;
 		fcnindex++;
 		fcntable[fcnindex]=s;
 	}
+	return(s->symtype);
 }
-fcnend(fcntype, parmcount)
-int fcntype, parmcount;
+fcnend(parmcount)
+int parmcount;
 {
 	int type;
 	/* check number of arguments */
@@ -270,7 +270,7 @@ int fcntype, parmcount;
 	fprintf(tmpfile," cal $_%s\n",fcn->symname);
 	emlinecount++;
 	fprintf(tmpfile," asp ");
-	fcnsize(fcn);
+	fcnsize();
 	emcode("lfr",typestring(fcn->symtype));
 	type= fcn->symtype;
 	fcnindex--;

@@ -321,7 +321,6 @@ int type;
 {
 	/* load a simple variable  its address is on the stack*/
 	emcode("loi",typestring(type));
-	return(type);
 }
 loadint(value)
 int value;
@@ -343,7 +342,6 @@ loadstr(value)
 int value;
 {
 	emcode("lae",datalabel(value));
-	return(STRINGTYPE);
 }
 loadaddr(s)
 Symbol *s;

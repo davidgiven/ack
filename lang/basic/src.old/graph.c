@@ -11,6 +11,13 @@ Linerecord	*firstline,
 		*currline, 
 		*lastline;
 
+List *newlist()
+{
+	List *l;
+	l= (List *) salloc(sizeof(List));
+	return(l);
+}
+
 /* Line management is handled here */
 
 Linerecord *srchline(nr)
@@ -94,7 +101,7 @@ int nr;
 
 	if(debug) printf("goto label %d\n",nr);
 	/* update currline */
-	ll= (List *) salloc( sizeof(*ll));
+	ll= newlist();
 	ll-> linenr=nr;
 	ll-> nextlist= currline->gotos;
 	currline->gotos= ll;
@@ -108,7 +115,7 @@ int nr;
 	{
 		/* declare forward label */
 		if(debug) printf("declare forward %d\n",nr);
-		ll= (List *) salloc( sizeof(*ll));
+		ll= newlist();
 		ll->emlabel= genlabel();
 		ll-> linenr=nr;
 		ll->nextlist= forwardlabel;
@@ -132,9 +139,8 @@ int	gosubcnt=1;
 List *gosublabel()
 {
 	List *l;
-	int n;
 
-	l= (List *) salloc(sizeof(List));
+	l= newlist();
 	l->nextlist=0;
 	l->emlabel=genlabel();
 	if( gotail){
@@ -192,7 +198,7 @@ int nr;
 {
 	List *l;
 
-	l= (List *) salloc(sizeof(List));
+	l= newlist();
 	l->emlabel= gotolabel(nr);
 	l->nextlist=0;
 	if( jumphead==0) jumphead= jumptail= l;
@@ -247,7 +253,7 @@ int type;
 	}
 	jumphead= jumptail=0; jumpcnt=0;
 
-	l= (List *) salloc(sizeof(List));
+	l= newlist();
 	l->nextlist=0;
 	l->emlabel=firstlabel;
 	if( gotail){
@@ -277,12 +283,12 @@ simpleprogram()
 	/* a small EM programs has been found */
 	prologcode();
 	prolog2();
-	fclose(tmpfile);
+	(void) fclose(tmpfile);
 	tmpfile= fopen(tmpfname,"r");
 	if( tmpfile==NULL)
 		fatal("tmp file disappeared");
 	while( (length=fread(buf,1,512,tmpfile)) != 0)
-		fwrite(buf,1,length,emfile);
+		(void) fwrite(buf,1,length,emfile);
 	epilogcode();
-	unlink(tmpfname);
+	(void) unlink(tmpfname);
 }

@@ -41,8 +41,8 @@ List *l;
 phase1()
 {
 	/* copy all offloaded blocks */
-	Linerecord	*lr, *lf,*lr2;
-	int		blksize;
+	Linerecord	*lr, *lf;
+	long		blksize;
 
 	lf= lr= firstline;
 	blksize= lr->codelines;

@@ -61,3 +61,5 @@ extern char *itoa();
 extern char *datalabel();
 extern char *instrlabel();
 extern char *typesize();
+extern char *typestring();
+extern void sprintf();

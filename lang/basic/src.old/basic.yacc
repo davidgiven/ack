@@ -87,6 +87,7 @@ int	chann;		/* input/output channel */
 char	*formatstring;	/* formatstring used for printing */
 Symbol	*s;		/* Symbol dummy */
 %}
+/* We need to type things properly  to limit complaints of lint*/
 %%
 programline	: INTVALUE {newblock(ival); newemblock(ival);} stmts EOLN
 		| '#' INTVALUE STRVALUE EOLN
@@ -417,8 +418,8 @@ factor  : INTVALUE			{$$=loadint(ival);}
 	| '(' expression ')'		{$$=$2;}
 	| '-' factor  { $$=negate($2);}
 	| FLTVALUE			{$$=loaddbl(dval);}
-	| STRVALUE			{$$=loadstr($1);}
-	| variable			{$$=loadvar($1);}
+	| STRVALUE			{$$= STRINGTYPE; loadstr($1);}
+	| variable			{$$=$1; loadvar($1);}
 	| INKEYSYM '$' 			{ emcode("cal","$_inkey");
 					  emcode("lfr",EMPTRSIZE);
 					  $$= STRINGTYPE;
@@ -426,8 +427,8 @@ factor  : INTVALUE			{$$=loadint(ival);}
 	| VARPTR '(' '#' intvalue ')'	{ warning("Not supported"); $$=INTTYPE;}
 	| FUNCTION			{$$= callfcn($1,0);}
 	| FUNCTION '(' cross exprlist')'	{$$=callfcn($1,$4);}
-	| funcname			{ $$=fcnend($1);}
-	| funcname funccall ')'	{ $$=fcnend($1,$2);}
+	| funcname			{ $$=fcnend(0);}
+	| funcname funccall ')'	{ $$=fcnend($2);}
 	| MIDSYM '$' midparms	
 	{	emcode("cal","$_mid");
 		emcode("asp",itoa($3));
@@ -460,4 +461,4 @@ exprlist: expression	{ typetable[0]= $1; $$=1;}
 #ifndef NORCSID
 static char rcs_id[]	= "$Header$" ;
 #endif
-#include "lex.c"
+#include "basic.lex"

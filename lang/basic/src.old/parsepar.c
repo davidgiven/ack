@@ -15,10 +15,9 @@ parseparams(argc,argv)
 int argc;
 char **argv;
 {
-	int i,j,k;
+	int i;
 	char *ext;
 
-	j=k=0;
 	if(argc< 4)
 	{
 	fprintf(stderr,"usage %s <flags> <file>.i <file>.e <source>\n", argv[0]);
@@ -32,7 +31,7 @@ char **argv;
 		case 't': traceflag++; break;	/* line tracing */
 		case 'h':/* split EM file */
 			hflag=0;
-			threshold= (long) atol(argv[i][2]);
+			threshold= atoi(argv[i][2]);
 			if( threshold==0)
 				threshold= THRESHOLD;	
 			break;

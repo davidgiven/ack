@@ -6,13 +6,15 @@ static char rcs_id[] = "$Header$" ;
 
 
 /* compile the next program in the list */
+/* Here we should open the input file. (for the future) */
 
 FILE *yyin;
 
-compileprogram()
+compileprogram(dummyprog)
+char *dummyprog;
 {
 
 	while( getline())
-		yyparse();
-	fclose(yyin);
+		(void) yyparse();
+	(void) fclose(yyin);
 }
