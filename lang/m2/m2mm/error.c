@@ -10,11 +10,12 @@
 /* stripped down version from the one in the Modula-2 compiler */
 /* $Header$ */
 
-/*	This file contains the (non-portable) error-message and diagnostic
+/*	This file contains the error-message and diagnostic
 	giving functions.  Be aware that they are called with a variable
 	number of arguments!
 */
 
+#include	<varargs.h>
 #include	<system.h>
 #include	"input.h"
 #include	"f_info.h"
@@ -42,47 +43,62 @@ extern char *symbol2str();
 */
 
 /*VARARGS1*/
-error(fmt, args)
-	char *fmt;
+error(va_alist)
+	va_dcl
 {
-	_error(ERROR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(ERROR, ap);
+	va_end(ap);
 }
 
 /*VARARGS1*/
-Gerror(fmt, args)
-	char *fmt;
+Gerror(va_alist)
+	va_dcl
 {
+	va_list ap;
 	char *fn = FileName;
 
 	FileName = 0;
-	_error(ERROR, fmt, &args);
+	va_start(ap);
+	_error(ERROR, ap);
+	va_end(ap);
 	FileName = fn;
 }
 
 /*VARARGS1*/
-lexerror(fmt, args)
-	char *fmt;
+lexerror(va_alist)
+	va_dcl
 {
-	_error(LEXERROR, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(LEXERROR, ap);
+	va_end(ap);
 }
 
 /*VARARGS1*/
-fatal(fmt, args)
-	char *fmt;
-	int args;
+fatal(va_alist)
+	va_dcl
 {
+	va_list ap;
 
-	_error(FATAL, fmt, &args);
+	va_start(ap);
+	_error(FATAL, ap);
+	va_end(ap);
 	sys_stop(S_EXIT);
 }
 
 /*VARARGS1*/
-crash(fmt, args)
-	char *fmt;
-	int args;
+crash(va_alist)
+	va_dcl
 {
+	va_list ap;
 
-	_error(CRASH, fmt, &args);
+	va_start(ap);
+	_error(CRASH, ap);
+	va_end(ap);
 #ifdef DEBUG
 	sys_stop(S_ABORT);
 #else
@@ -90,16 +106,16 @@ crash(fmt, args)
 #endif
 }
 
-_error(class, fmt, argv)
+_error(class, argv)
 	int class;
-	char *fmt;
-	int argv[];
+	va_list argv;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
 	*/
 	unsigned int ln = 0;
 	register char *remark = 0;
+	char *fmt = va_arg(argv, char *);
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant

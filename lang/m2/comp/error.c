@@ -17,6 +17,8 @@
 #include	"errout.h"
 #include	"debug.h"
 
+#include	<varargs.h>
+
 #include	<system.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -60,77 +62,111 @@ extern char *symbol2str();
 
 #ifdef DEBUG
 /*VARARGS1*/
-debug(fmt, args)
-	char *fmt;
+debug(va_alist)
+	va_dcl
 {
-	_error(VDEBUG, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(VDEBUG, NULLNODE, ap);
+	va_end(ap);
 }
 #endif DEBUG
 
 /*VARARGS1*/
-error(fmt, args)
-	char *fmt;
+error(va_alist)
+	va_dcl
 {
-	_error(ERROR, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(ERROR, NULLNODE, ap);
+	va_end(ap);
 }
 
 /*VARARGS2*/
-node_error(node, fmt, args)
+node_error(va_alist)
+	va_dcl
+{
 	t_node *node;
-	char *fmt;
-{
-	_error(ERROR, node, fmt, &args);
-}
+	va_list ap;
 
-/*VARARGS1*/
-warning(class, fmt, args)
-	char *fmt;
-{
-	warn_class = class;
-	if (class & warning_classes) _error(WARNING, NULLNODE, fmt, &args);
+	va_start(ap);
+	node = va_arg(ap, t_node *);
+	_error(ERROR, node, ap);
+	va_end(ap);
 }
 
 /*VARARGS2*/
-node_warning(node, class, fmt, args)
-	t_node *node;
-	char *fmt;
+warning(va_alist)
+	va_dcl
 {
-	warn_class = class;
-	if (class & warning_classes) _error(WARNING, node, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	warn_class = va_arg(ap, int);
+	_error(WARNING, NULLNODE, ap);
+	va_end(ap);
+}
+
+/*VARARGS3*/
+node_warning(va_alist)
+	va_dcl
+{
+	t_node *nd;
+	va_list ap;
+
+	va_start(ap);
+	nd = va_arg(ap, t_node *);
+	warn_class = va_arg(ap, int);
+	_error(WARNING, nd, ap);
+	va_end(ap);
 }
 
 /*VARARGS1*/
-lexerror(fmt, args)
-	char *fmt;
+lexerror(va_alist)
+	va_dcl
 {
-	_error(LEXERROR, NULLNODE, fmt, &args);
+	va_list ap;
+
+	va_start(ap);
+	_error(LEXERROR, NULLNODE, ap);
+	va_end(ap);
+}
+
+/*VARARGS2*/
+lexwarning(va_alist)
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	warn_class = va_arg(ap, int);
+	_error(LEXWARNING, NULLNODE, ap);
+	va_end(ap);
 }
 
 /*VARARGS1*/
-lexwarning(class, fmt, args) 
-	char *fmt;
+fatal(va_alist)
+	va_dcl
 {
-	warn_class = class;
-	if (class & warning_classes) _error(LEXWARNING, NULLNODE, fmt, &args);
-}
+	va_list ap;
 
-/*VARARGS1*/
-fatal(fmt, args)
-	char *fmt;
-	int args;
-{
-
-	_error(FATAL, NULLNODE, fmt, &args);
+	va_start(ap);
+	_error(FATAL, NULLNODE, ap);
+	va_end(ap);
 	sys_stop(S_EXIT);
 }
 
 /*VARARGS1*/
-crash(fmt, args)
-	char *fmt;
-	int args;
+crash(va_alist)
+	va_dcl
 {
+	va_list ap;
 
-	_error(CRASH, NULLNODE, fmt, &args);
+	va_start(ap);
+	_error(CRASH, NULLNODE, ap);
+	va_end(ap);
 #ifdef DEBUG
 	sys_stop(S_ABORT);
 #else
@@ -138,11 +174,10 @@ crash(fmt, args)
 #endif
 }
 
-_error(class, node, fmt, argv)
+_error(class, node, ap)
 	int class;
 	t_node *node;
-	char *fmt;
-	int argv[];
+	va_list ap;
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
@@ -152,6 +187,7 @@ _error(class, node, fmt, argv)
 	static char * last_fn = 0;
 	static int e_seen = 0;
 	register char *remark = 0;
+	char *fmt = va_arg(ap, char *);
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
@@ -172,6 +208,7 @@ _error(class, node, fmt, argv)
 	switch (class)	{	
 	case WARNING:
 	case LEXWARNING:
+		if (! warn_class & warning_classes) return;
 		switch(warn_class) {
 #ifndef STRICT_3RD_ED
 		case W_OLDFASHIONED:
@@ -244,6 +281,6 @@ _error(class, node, fmt, argv)
 
 	if (remark) fprint(ERROUT, "%s ", remark);
 
-	doprnt(ERROUT, fmt, argv);		/* contents of error */
+	doprnt(ERROUT, fmt, ap);		/* contents of error */
 	fprint(ERROUT, "\n");
 }
