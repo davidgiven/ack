@@ -2916,7 +2916,7 @@ C_rol
 			free_reg(a);
 			free_reg(b);
 			free_reg(c);
-			push_ref(d);
+			push_reg(d);
 		}
 	}.
 	default		==>
