@@ -11,7 +11,6 @@
 #define THREE_PASS
 #define LISTING
 #define RELOCATION
-#define DEBUG 2			/* as long as we are testing ... */
 
 #undef valu_t
 #define valu_t long
