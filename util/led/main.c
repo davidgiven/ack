@@ -51,7 +51,7 @@ main(argc, argv)
 	initializations(argc, argv);
 	first_pass(argv);
 #ifndef NOSTATISTICS
-	do_statistics();
+	if (statistics) do_statistics();
 #endif
 	freeze_core();
 	evaluate();
@@ -461,8 +461,6 @@ complete_sections()
 		if (flagword & RFLAG) continue;
 		sc->os_lign =
 			tstbit(sectindex, lignmap) ? sect_lign[sectindex] : 1;
-		sc->os_size += sc->os_lign - 1;
-		sc->os_size -= sc->os_size % sc->os_lign;
 		if (tstbit(sectindex, basemap)) {
 			base = sect_base[sectindex];
 			if (base % sc->os_lign)

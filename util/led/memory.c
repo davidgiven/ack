@@ -21,6 +21,7 @@ static char rcsid[] = "$Header$";
  * (70000 - 65536).
  */
 
+#include <stdio.h>
 #include <out.h>
 #include "const.h"
 #include "assert.h"
@@ -143,6 +144,9 @@ move_up(piece, incr)
 	register ind_t		incr;
 {
 	register struct memory	*mem;
+#ifndef NOSTATISTICS
+	extern int statistics;
+#endif
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
 	while (incr > 0 && sbreak(incr) == -1)
@@ -152,6 +156,9 @@ move_up(piece, incr)
 		incr = 0;
 		return (ind_t) 0;
 	}
+#ifndef NOSTATISTICS
+	if (statistics) fprintf(stderr,"moving up %X\n", (long) incr);
+#endif
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
 		copy_up(mem, incr);
 
