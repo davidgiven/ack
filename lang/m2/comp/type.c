@@ -590,7 +590,6 @@ type_or_forward(ptp)
 	register struct node *nd;
 	register struct def *df1;
 
-	*ptp = construct_type(T_POINTER, NULLTYPE);
 	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, 1))) {
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification

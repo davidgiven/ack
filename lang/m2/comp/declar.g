@@ -414,6 +414,7 @@ SetType(struct type **ptp;) :
 	type-identifiers
 */
 PointerType(register struct type **ptp;) :
+			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
 	POINTER TO
 	[ %if	(type_or_forward(ptp))
 	  type(&((*ptp)->tp_next)) 

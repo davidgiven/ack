@@ -574,6 +574,7 @@ node_error(right, "type incompatibility in RETURN statement");
 				CodePString(right, func_type);
 			}
 			else	CodePExpr(right);
+			RangeCheck(func_type, right->nd_type);
 		}
 		C_bra(RETURN_LABEL);
 		break;

@@ -1,1 +1,1 @@
-static char Version[] = "ACK Modula-2 compiler Version 0.12";
+static char Version[] = "ACK Modula-2 compiler Version 0.13";

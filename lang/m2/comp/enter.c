@@ -25,6 +25,7 @@
 #include	"node.h"
 #include	"main.h"
 #include	"misc.h"
+#include	"f_info.h"
 
 struct def *
 Enter(name, kind, type, pnam)
@@ -463,12 +464,16 @@ EnterImportList(Idlist, local)
 	register struct node *idlist = Idlist;
 	struct scope *sc = enclosing(CurrVis)->sc_scope;
 	extern struct def *GetDefinitionModule();
+	struct f_info f;
+	
+	f = file_info;
 
 	for (; idlist; idlist = idlist->nd_left) {
 		DoImport(local ?
 				ForwDef(idlist, sc) :
 				GetDefinitionModule(idlist->nd_IDF, 1) ,
 			 CurrentScope);
+		file_info = f;
 	}
 	FreeNode(Idlist);
 }

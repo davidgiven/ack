@@ -132,7 +132,6 @@ CodeExpr(nd, ds, true_label, false_label)
 		ds->dsg_kind = DSG_LOADED;
 		break;
 
-	case Xset:
 	case Set: {
 		register unsigned i = (unsigned) (tp->tp_size) / (int) word_size;
 		register arith *st = nd->nd_set + i;
@@ -397,8 +396,14 @@ CodeParameters(param, arg)
 		if (left->nd_symb == STRING) {
 			CodeString(left);
 		}
-		else if (left->nd_class == Call || left->nd_class == Value) {
-			/* ouch! forgot about these ones! */
+		else switch(left->nd_class) {
+		case Arrsel:
+		case Arrow:
+		case Def:
+		case LinkDef:
+			CodeDAddress(left);
+			break;
+		default:{
 			arith tmp, TmpSpace();
 
 			CodePExpr(left);
@@ -406,8 +411,9 @@ CodeParameters(param, arg)
 			C_lal(tmp);
 			C_sti(WA(left->nd_type->tp_size));
 			C_lal(tmp);
+			}
+			break;
 		}
-		else	CodeDAddress(left);
 		return;
 	}
 	if (IsVarParam(param)) {

@@ -239,6 +239,7 @@ enter.o: LLlex.h
 enter.o: debug.h
 enter.o: debugcst.h
 enter.o: def.h
+enter.o: f_info.h
 enter.o: idf.h
 enter.o: main.h
 enter.o: misc.h
