@@ -90,23 +90,34 @@ construct_type(fund, tp)
 		dtp->tp_align = pointer_align;
 		dtp->tp_size = pointer_size;
 		dtp->next = tp;
+		if (fund == T_PROCEDURE && tp) {
+			if (tp != bitset_type &&
+			    !(tp->tp_fund&(T_NUMERIC|T_INDEX|T_WORD|T_POINTER))) {
+				error("illegal procedure result type");
+			}
+		}
 		break;
+
 	case T_SET:
 		dtp->tp_align = word_align;
 		dtp->next = tp;
 		break;
+
 	case T_ARRAY:
 		dtp->tp_align = tp->tp_align;
 		dtp->next = tp;
 		break;
+
 	case T_SUBRANGE:
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
 		dtp->next = tp;
 		break;
+
 	default:
 		assert(0);
 	}
+
 	return dtp;
 }
 

@@ -134,10 +134,7 @@ _error(class, node, fmt, argv)
 	case LEXERROR:
 	case CRASH:
 	case FATAL:
-		/* ????
-		if (C_busy())
-			C_ms_err();
-		*/
+		if (C_busy()) C_ms_err();
 		err_occurred = 1;
 		break;
 	

@@ -51,6 +51,7 @@ ModuleDeclaration
 	extern int proclevel;
 	static int modulecount = 0;
 	char buf[256];
+	struct node *nd;
 	extern char *sprint(), *Malloc(), *strcpy();
 } :
 	MODULE IDENT	{
@@ -78,8 +79,9 @@ ModuleDeclaration
 	';'
 	import(1)*
 	export(0)?
-	block(&(df->mod_body))
-	IDENT		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
+	block(&nd)
+	IDENT		{ InitProc(nd, df);
+			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(id, dot.TOK_IDF);
 			  currentdef = savecurr;
 			}
@@ -226,6 +228,7 @@ ProgramModule(int state;)
 	struct idf *id;
 	struct def *GetDefinitionModule();
 	register struct def *df;
+	struct node *nd;
 } :
 	MODULE
 	IDENT	{ 
@@ -243,12 +246,14 @@ ProgramModule(int state;)
 			open_scope(CLOSEDSCOPE);
 			df->mod_scope = CurrentScope;
 			df->mod_number = 0;
+			CurrentScope->sc_name = id->id_text;
 		  }
 		}
 	priority(&(df->mod_priority))?
 	';' import(0)*
-	block(&(df->mod_body)) IDENT
-		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
+	block(&nd) IDENT
+		{ InitProc(nd, df);
+		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(id, dot.TOK_IDF);
 		}
 	'.'

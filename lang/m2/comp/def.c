@@ -439,6 +439,16 @@ DeclProc(type)
 	return df;
 }
 
+InitProc(nd, df)
+	struct node *nd;
+	struct def *df;
+{
+	/*	Create an initialization procedure for a module.
+	*/
+	df->mod_body = nd;
+	/* Keep it this way, or really create a procedure out of it??? */
+}
+
 #ifdef DEBUG
 PrDef(df)
 	register struct def *df;

@@ -33,27 +33,33 @@ number(struct node **p;)
 qualident(int types; struct def **pdf; char *str; struct node **p;)
 {
 	register struct def *df;
-	register struct node **pnd;
 	struct node *nd;
 } :
 	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot);
-			  pnd = &nd;
 			}
 	[
-		selector(pnd)
+		selector(&nd)
 	]*
 			{ if (types) {
-				findname(nd);
-				assert(nd->nd_class == Def);
-				*pdf = df = nd->nd_def;
-			  	if ( !((types|D_ERROR) & df->df_kind)) {
-					if (df->df_kind == D_FORWARD) {
-node_error(*pnd,"%s \"%s\" not declared", str, df->df_idf->id_text);
+				df = ill_df;
+
+				if (chk_designator(nd, QUALONLY)) {
+				    if (nd->nd_class != Def) {
+					node_error(nd, "%s expected", str);
+				    }
+				    else {
+					df = nd->nd_def;
+			  		if ( !((types|D_ERROR) & df->df_kind)) {
+					    if (df->df_kind == D_FORWARD) {
+node_error(nd,"%s \"%s\" not declared", str, df->df_idf->id_text);
+					    }
+					    else {
+node_error(nd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
+					    }
 					}
-					else {
-node_error(*pnd,"identifier \"%s\" is not a %s", df->df_idf->id_text, str);
-					}
+				    }
 				}
+				*pdf = df;
 			  }
 			  if (!p) FreeNode(nd);
 			  else *p = nd;

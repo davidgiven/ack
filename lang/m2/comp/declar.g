@@ -117,7 +117,8 @@ FormalParameters(int doparams;
 			{ *tp = 0; }
 	[	':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type",
 							(struct node **) 0)
-			{ *tp = df->df_type; }
+			{ *tp = df->df_type;
+			}
 	]?
 ;
 
@@ -364,14 +365,14 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			*/
 				{ warning("Old fashioned Modula-2 syntax!");
 				  id = gen_anon_idf();
-				  findname(nd);
-				  assert(nd->nd_class == Def);
-				  df = nd->nd_def;
-				  if (!(df->df_kind &
-					(D_ERROR|D_TYPE|D_HTYPE|D_HIDDEN))) {
-					error("identifier \"%s\" is not a type",
-						df->df_idf->id_text);
+				  df = ill_df;
+				  if (chk_designator(nd, QUALONLY) &&
+				      (nd->nd_class != Def ||
+				       !(nd->nd_def->df_kind &
+					 (D_ERROR|D_TYPE|D_HTYPE|D_HIDDEN)))) {
+					node_error(nd, "type expected");
 				  }
+				  else df = nd->nd_def;
 				  FreeNode(nd);
 				}
 		]

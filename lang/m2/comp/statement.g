@@ -74,7 +74,12 @@ error("a module body has no result value");
 error("procedure \"%s\" has no result value", currentdef->df_idf->id_text);
 			  }
 			}
-	]?
+	|
+			{ if (currentdef->df_type->next) {
+error("procedure \"%s\" must return a value", currentdef->df_idf->id_text);
+			  }
+			}
+	]
 ]?
 ;
 

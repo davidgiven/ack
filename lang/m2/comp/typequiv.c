@@ -96,14 +96,14 @@ TstCompat(tp1, tp2)
 		   (tp2 == int_type || tp2 == card_type)
 		)
 	    ||
-		(tp1 == char_type && tp2 == charc_type)
-	    ||
-		(tp2 == char_type && tp1 == charc_type)
-	    ||
 		(  tp2 == intorcard_type
 		&&
 		   (tp1 == int_type || tp1 == card_type)
 		)
+	    ||
+		(tp1 == char_type && tp2 == charc_type)
+	    ||
+		(tp2 == char_type && tp1 == charc_type)
 	    ||
 		(  tp1 == address_type
 		&& 

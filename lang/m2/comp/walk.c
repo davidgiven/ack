@@ -24,6 +24,9 @@ extern arith	align();
 static int	prclev = 0;
 static label	instructionlabel = 0;
 static label	datalabel = 0;
+static label	return_label;
+static char	return_expr_occurred;
+static struct type *func_type;
 
 WalkModule(module)
 	register struct def *module;
@@ -72,9 +75,14 @@ WalkModule(module)
 	   this module.
 	*/
 	CurrentScope->sc_off = 0;
+	instructionlabel = 1;
+	return_label = instructionlabel++;
+	func_type = 0;
 	C_pro_narg(CurrentScope->sc_name);
 	MkCalls(CurrentScope->sc_def);
 	WalkNode(module->mod_body, (label) 0);
+	C_df_ilb(return_label);
+	C_ret((label) 0);
 	C_end(align(-CurrentScope->sc_off, word_size));
 
 	CurrentScope = scope;
@@ -100,9 +108,14 @@ WalkProcedure(procedure)
 	/* generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
-	instructionlabel = 1;
+	return_label = 1;
+	instructionlabel = 2;
+	func_type = procedure->df_type->next;
 	MkCalls(CurrentScope->sc_def);
 	WalkNode(procedure->prc_body, (label) 0);
+	C_df_ilb(return_label);
+	if (func_type) C_ret((arith) align(func_type->tp_size, word_align));
+	else C_ret((arith) 0);
 	C_end(align(-CurrentScope->sc_off, word_size));
 	CurrentScope = scope;
 	prclev--;
@@ -255,7 +268,13 @@ WalkStat(nd, lab)
 		break;
 
 	case RETURN:
-		/* ??? */
+		if (right) {
+			WalkExpr(right);
+			if (!TstCompat(right->nd_type, func_type)) {
+node_error(right, "type incompatibility in RETURN statement");
+			}
+		}
+		C_bra(return_label);
 		break;
 
 	default:
@@ -270,13 +289,55 @@ ExpectBool(nd)
 		generate code to evaluate the expression.
 	*/
 
-	chk_expr(nd);
+	WalkExpr(nd);
 
 	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
 		node_error(nd, "boolean expression expected");
 	}
-
-	/* generate code
-	*/
-	/* ??? */
 }
+
+WalkExpr(nd)
+	struct node *nd;
+{
+	/*	Check an expression and generate code for it
+	*/
+
+	DO_DEBUG(1, (DumpTree(nd), print("\n")));
+
+	if (chk_expr(nd)) {
+		/* ??? */
+	}
+}
+
+#ifdef DEBUG
+DumpTree(nd)
+	struct node *nd;
+{
+	char *s;
+	extern char *symbol2str();
+	
+	if (!nd) {
+		print("()");
+		return;
+	}
+
+	print("(");
+	DumpTree(nd->nd_left);
+	switch(nd->nd_class) {
+	case Def:	s = "Def"; break;
+	case Oper:	s = "Oper"; break;
+	case Uoper:	s = "Uoper"; break;
+	case Name:	s = "Name"; break;
+	case Set:	s = "Set"; break;
+	case Value:	s = "Value"; break;
+	case Call:	s = "Call"; break;
+	case Xset:	s = "Xset"; break;
+	case Stat:	s = "Stat"; break;
+	case Link:	s = "Link"; break;
+	default:	s = "ERROR"; break;
+	}
+	print("%s %s", s, symbol2str(nd->nd_symb));
+	DumpTree(nd->nd_right);
+	print(")");
+}
+#endif
