@@ -106,6 +106,9 @@ C_sti
 				"move.w d0, (a0)".
   	$1 == 4		==>	"move.l (sp)+, a0";
 				"move.l (sp)+, (a0)".
+  	$1 == 8		==>	"move.l (sp)+, a0";
+				"move.l (sp)+, (a0)+";
+				"move.l (sp)+, (a0)".
   	$1 % 4 == 0  	==>	"move.l (sp)+, a0";
 				"move.l #$1/4, d0";
 				"1:move.l (sp)+, (a0)+";
