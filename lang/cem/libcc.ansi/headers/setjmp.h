@@ -20,7 +20,7 @@
 typedef struct {
 	long __mask;
 	int __flag;
-	void (*__pc)();
+	void (*__pc)(void);
 	void *__sp;
 	void *__lb;
 } jmp_buf[1];
