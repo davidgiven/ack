@@ -530,7 +530,7 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case ',':
 			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, gencode, true_label, false_label);
 			break;
 		case '~':
 			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);

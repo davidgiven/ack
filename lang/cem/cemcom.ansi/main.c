@@ -187,8 +187,10 @@ compile(argc, argv)
 	nestlow = -1;
 #ifndef NOPP
 	WorkingDir = getwdir(source);
-#endif NOPP
 	PushLex();			/* initialize lex machine */
+#else NOPP
+	GetToken(&ahead);
+#endif NOPP
 
 #ifdef DEBUG
 #ifndef NOPP
@@ -219,7 +221,9 @@ compile(argc, argv)
 			dumpidftab("end of main", options['f'] ? 7 : 0);
 #endif	DEBUG
 	}
+#ifndef	NOPP
 	PopLex();
+#endif	/* NOPP */
 }
 
 init()

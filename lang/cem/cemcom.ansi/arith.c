@@ -464,30 +464,26 @@ opnd2test(expp, oper)
 	register struct expr **expp;
 {
 	opnd2logical(expp, oper);
-	if ((*expp)->ex_class == Oper && is_test_op((*expp)->OP_OPER))
-		{ /* It is already a test */ }
-	else
-		ch3bin(expp, NOTEQUAL, intexpr((arith)0, INT));
-}
-
-int
-is_test_op(oper)
-{
-	switch (oper)	{
-	case '<':
-	case '>':
-	case LESSEQ:
-	case GREATEREQ:
-	case EQUAL:
-	case NOTEQUAL:
-	case '!':
-	case AND:
-	case OR:	/* && and || also impose a test	*/
-		return 1;
-	default:
-		return 0;
+	if ((*expp)->ex_class == Oper) {
+		switch((*expp)->OP_OPER) {
+		case '<':
+		case '>':
+		case LESSEQ:
+		case GREATEREQ:
+		case EQUAL:
+		case NOTEQUAL:
+		case '!':
+		case AND:
+		case OR:	/* && and || also impose a test	*/
+			/* It is already a test */
+			return;
+		}
+		case ',':
+			opnd2test(&((*expp)->OP_RIGHT), oper);
+			return;
+		}
 	}
-	/*NOTREACHED*/
+	ch3bin(expp, NOTEQUAL, intexpr((arith)0, INT));
 }
 
 any2opnd(expp, oper)

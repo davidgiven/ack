@@ -44,6 +44,7 @@ int LexSave = 0;		/* last character read by GetChar	*/
 extern arith full_mask[];
 extern arith max_int;
 
+#ifndef	NOPP
 static struct token LexStack[MAX_LL_DEPTH];
 static LexSP = 0;
 
@@ -65,6 +66,7 @@ PopLex()
 	ASSERT(LexSP > 0);
 	dot = LexStack[--LexSP];
 }
+#endif	/* NOPP */
 
 int
 LLlex()
@@ -144,10 +146,12 @@ firstline:
 			if (ch == '#') {
 				/* a control line follows */
 				domacro();
+#ifndef	NOPP
 				if (File_Inserted) {
 					File_Inserted = 0;
 					goto firstline;
 				}
+#endif	/* NOPP */
 			}
 		}
 			/*	We have to loop here, because in

@@ -50,17 +50,24 @@ extern arith NewLocal();
 	we only push an object of the size accepted by EM onto the stack,
 	while we need a loop to store the stack block into a memory object.
 */
+
+suitable_sz(sz, al)
+	arith sz;
+	int al;
+{
+	return	((int)sz % (int)word_size == 0 && al % word_align == 0) ||
+		(
+			word_size % sz == 0 &&
+			(al >= (int)sz || al >= word_align)
+		/* Lots of Irritating Stupid Parentheses */
+		);
+}
+
 store_block(sz, al)
 	arith sz;
 	int al;
 {
-	if (
-		((sz == al) && (word_align % al == 0)) ||
-		(
-			(sz % word_size == 0 || word_size % sz == 0) &&
-			(al % word_align == 0)
-		)
-	)	/* Lots of Irritating Stupid Parentheses */
+	if (suitable_sz(sz, al))
 		C_sti(sz);
 	else {
 #ifndef STB
@@ -98,15 +105,8 @@ load_block(sz, al)
 	arith sz;
 	int al;
 {
-	arith esz = ATW(sz);	/* effective size == actual # pushed bytes */
 
-	if (
-		((sz == al) && (word_align % al == 0)) ||
-		(
-			(sz % word_size == 0 || word_size % sz == 0) &&
-			(al % word_align == 0)
-		)
-	)	/* Lots of Irritating Stupid Parentheses */
+	if (suitable_sz(sz, al))
 		C_loi(sz);
 	else {
 #ifndef STB
@@ -117,17 +117,18 @@ load_block(sz, al)
 		dst = LocalPtrVar();
 
 		StoreLocal(src, pointer_size);
-		C_asp(-esz);		/* allocate stack block */
+		C_asp(-ATW(sz));	/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
 		StoreLocal(dst, pointer_size);
 		copy_loop(sz, src, dst);
 		FreeLocal(dst);
 		FreeLocal(src);
 #else STB
-		C_asp(-(esz - pointer_size));	/* allocate stack block */
+		arith esz = ATW(sz) - pointer_size;
+		C_asp(-esz);		/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
 		C_dup(pointer_size);		/* fetch source address	*/
-		C_adp(esz - pointer_size);
+		C_adp(esz);
 		C_loi(pointer_size);
 		C_loc(sz);			/* # bytes to copy	*/
 		C_cal("__stb");			/* library copy routine	*/
