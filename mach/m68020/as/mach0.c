@@ -1,0 +1,33 @@
+/* @(#)mach0.c	1.5 */
+/*
+ * Motorola 68020 options
+ */
+#undef	BITMAX
+#define	BITMAX	20000
+
+#define	THREE_PASS		/* branch and offset optimization */
+#define	BYTES_REVERSED		/* high order byte has lowest address */
+#define	WORDS_REVERSED		/* high order word has lowest address */
+#define	LISTING			/* enable listing facilities */
+#define RELOCATION		/* generate relocatable code */
+#define DEBUG 1
+
+#undef	valu_t
+#define	valu_t		long
+#undef	addr_t
+#define	addr_t		long
+
+#undef	ASC_LPAR
+#define	ASC_LPAR	'{'
+#undef	ASC_RPAR
+#define	ASC_RPAR	'}'
+
+#undef	ALIGNWORD
+#define	ALIGNWORD	2
+#undef	ALIGNSECT
+#define	ALIGNSECT	2
+
+#undef	VALWIDTH
+#define	VALWIDTH	8
+
+#define ASLD
