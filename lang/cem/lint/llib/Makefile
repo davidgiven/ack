@@ -12,7 +12,7 @@ TERMLIBDIR =	/usr/src/lib/libtermlib#	# for a local -ltermlib
 
 ALLDIR =	$(EMHOME)/lang/cem/libcc#	# to create c.llb
 INCLUDE =	$(EMHOME)/include/_tail_cc
-ALLFLAGS =	-D__BSD4_2 -I$(INCLUDE)		# to compile $(ALLDIR)
+ALLFLAGS =	-D__BSD4_2 -I$(INCLUDE)#	# to compile $(ALLDIR)
 
 c.llb:	unix7.c
 	$(LINT) -Lc.llb unix7.c
