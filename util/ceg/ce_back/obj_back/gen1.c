@@ -12,7 +12,7 @@ ONE_BYTE c;
 			       return;
 		case SEGROM  : rom1( c);
 			       return;
-		case SEGBSS  : bss( 1);
+		case SEGBSS  : bss( (arith) 1);
 			       return;
 		default      : fprint( STDERR, "gen1() : bad seg number\n");
 			       return;

@@ -10,7 +10,7 @@ arith w;
 			break;
 	  case SEGROM : fprint( codefile, LONG_FMT, (arith) w);
 			break;
-	  case SEGBSS : bss( 4);
+	  case SEGBSS : bss( (arith) 4);
 			break;
 	  default : fprint( STDERR, "gen4 unkown seg %d\n", cur_seg);
 	}

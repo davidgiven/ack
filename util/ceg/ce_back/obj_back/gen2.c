@@ -27,7 +27,7 @@ TWO_BYTES w;
 				*data++ = w>>8;
 #endif
 			       return;
-		case SEGBSS  : bss( 2);
+		case SEGBSS  : bss( (arith) 2);
 			       return;
 		default      : fprint( STDERR, "gen2() : bad seg number\n");
 			       return;

@@ -34,7 +34,7 @@ FOUR_BYTES l;
 			con2( (int) (l>>16));
 #endif
 			return;
-		case SEGBSS  : bss( 4);
+		case SEGBSS  : bss( (arith) 4);
 			       return;
 		default      : fprint( STDERR, "gen4() : bad seg number\n");
 			       return;
