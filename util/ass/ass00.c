@@ -340,11 +340,13 @@ endproc() {
 	if ( prevstate!= pst_cast 0 ) {
 		for ( lbhead= *pstate.s_locl;
 			lbhead<&(*pstate.s_locl)[LOCLABSIZE] ; lbhead++ ) {
-			for ( lbp=lbhead; lbp!= lbp_cast 0; lbp= lbp_next ) {
+			for ( lbp=lbhead->l_chain; lbp!= lbp_cast 0; lbp= lbp_next ) {
 				lbp_next= lbp->l_chain;
 				freearea((area_t)lbp,(unsigned)sizeof *lbp) ;
 			}
 		}
+		freearea((area_t)(*pstate.s_locl),
+			LOCLABSIZE * (sizeof((*pstate.s_locl)[0])));
 		pstate= *prevstate ;
 		freearea((area_t)prevstate,(unsigned)sizeof *prevstate) ;
 	}
