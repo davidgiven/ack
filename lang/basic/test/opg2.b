@@ -7,7 +7,7 @@
 160 rem determine absolute value of x1-x
 170 let n= x1-x
 180 if n>= 0 then 200
-19 let n= 0-n
+190 let n= 0-n
 200 if n<e then 230
 210 let x=x1
 220 goto 150
