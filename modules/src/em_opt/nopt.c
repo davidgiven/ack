@@ -3,6 +3,7 @@ static char rcsid2[] = "$Header$";
 #endif
 
 #include "nopt.h"
+#include <system.h>
 
 extern struct dfa OO_checknext[];	/* Initialized in dfa.c */
 extern struct dfa *OO_base[];		/* Initialized in dfa.c */
@@ -80,7 +81,7 @@ OO_dfa(last)
 	for(;;) {
 		printstate("OO_dfa");
 		if((b=OO_base[OO_state]) && ((b += last)->check==OO_state)) {
-			if(f=OO_ftrans[OO_state = b->next]) f();
+			if(f=OO_ftrans[OO_state = b->next]) (*f)();
 		}
 		else if (OO_state) {
 			/* consult default entry */
@@ -88,7 +89,7 @@ OO_dfa(last)
 			if(!OO_endbackup) OO_endbackup = OO_nxtpatt;
 			OO_nxtpatt--;
 			OO_patternqueue += d->numout;
-			if(f=OO_ftrans[OO_state = d->next]) f();
+			if(f=OO_ftrans[OO_state = d->next]) (*f)();
 		}
 		else OO_flush();
 		if (!OO_endbackup) return;
@@ -103,9 +104,9 @@ fatal(s,a)
 	char *s;
 	int a;
 {
-	fprintf(stderr, "%s: ", filename ? filename : "standard input");
-	fprintf(stderr,s,a);
-	fprintf(stderr,"\n");
+	fprint(STDERR, "%s: ", filename ? filename : "standard input");
+	fprint(STDERR,s,a);
+	fprint(STDERR,"\n");
 	sys_stop(S_EXIT);
 }
 

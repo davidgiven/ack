@@ -25,21 +25,14 @@ OO_signsame(a,b)
 OO_sfit(val,nbits)
 	arith val, nbits;
 {
-	register long mask = 0;
-	register int i;
-	for(i=nbits-1;i<8*sizeof(mask);i++)
-		mask |= (1<<i);
+	register long mask = ~((1L << (nbits - 1)) - 1);
 	return(((val&mask) == 0) | (val&mask)==mask);
 }
 
 OO_ufit(val, nbits)
 	arith val, nbits;
 {
-	register long mask = 0;
-	register int i;
-	for(i=nbits;i<8*sizeof(mask);i++)
-		mask |= (1<<i);
-	return((val&mask) == 0);
+	return((val&(~((1L << (nbits - 1)) - 1))) == 0);
 }
 
 OO_extsame(a1,a2)
