@@ -85,7 +85,9 @@ ConstExpression(t_node **pnd;)
 		  DO_DEBUG(options['C'], PrNode(nd, 0));
 
 		  if (ChkExpression(nd) &&
-		      ((nd)->nd_class != Set && (nd)->nd_class != Value)) {
+		      nd->nd_class != Set &&
+		      nd->nd_class != Value &&
+		      ! (options['l'] && nd->nd_class == Def && IsProc(nd))) {
 			error("constant expression expected");
 		  }
 

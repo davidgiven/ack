@@ -56,6 +56,7 @@ DoOption(text)
 	case 'x':	/* every name global */
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
 	case '3':	/* strict 3rd edition Modula-2 */
+	case 'l':	/* local additions enabled */
 		options[text[-1]]++;
 		break;
 

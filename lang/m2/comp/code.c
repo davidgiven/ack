@@ -311,7 +311,7 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register t_node *left = nd->nd_left;
-	register t_type *result_tp;
+	t_type *result_tp;
 	int needs_fn;
 
 	if (left->nd_type == std_type) {
@@ -319,7 +319,7 @@ CodeCall(nd)
 		return;
 	}	
 
-	assert(IsProcCall(left));
+	assert(IsProc(left));
 
 	if (nd->nd_right) {
 		CodeParameters(ParamList(left->nd_type), nd->nd_right);
@@ -327,14 +327,19 @@ CodeCall(nd)
 
 	switch(left->nd_class) {
 	case Def: {
-		if (left->nd_def->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
-			int level = left->nd_def->df_scope->sc_level;
+		register t_def *df = left->nd_def;
+
+		if (df->df_kind == D_CONST) {
+			df = df->con_const.tk_data.tk_def;
+		}
+		if (df->df_kind & (D_PROCEDURE|D_PROCHEAD)) {
+			int level = df->df_scope->sc_level;
 
 			if (level > 0) {
 				C_lxl((arith) (proclevel - level));
 			}
-			needs_fn = left->nd_def->df_scope->sc_defmodule;
-			C_cal(NameOfProc(left->nd_def));
+			needs_fn = df->df_scope->sc_defmodule;
+			C_cal(NameOfProc(df));
 			break;
 		}}
 		/* Fall through */

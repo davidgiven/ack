@@ -324,6 +324,10 @@ ChkExLinkOrName(expp)
 			expp->nd_class = Set;
 			inc_refcount(expp->nd_set);
 		}
+		else if (df->df_type->tp_fund == T_PROCEDURE) {
+			/* for procedure constants */
+			expp->nd_class = Def;
+		}
 		else	expp->nd_class = Value;
 	}
 
@@ -686,7 +690,7 @@ ChkCall(expp)
 			return ChkCast(expp);
 		}
 
-		if (IsProcCall(left) || left->nd_type == error_type) {
+		if (IsProc(left) || left->nd_type == error_type) {
 			/* A procedure call.
 		   	   It may also be a call to a standard procedure
 			*/

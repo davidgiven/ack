@@ -56,4 +56,4 @@ extern t_node *MkNode(), *MkLeaf(), *dot2node(), *dot2leaf();
 #define VALUE		010
 
 #define	IsCast(lnd)	((lnd)->nd_class == Def && is_type((lnd)->nd_def))
-#define	IsProcCall(lnd)	((lnd)->nd_type->tp_fund == T_PROCEDURE)
+#define	IsProc(lnd)	((lnd)->nd_type->tp_fund == T_PROCEDURE)

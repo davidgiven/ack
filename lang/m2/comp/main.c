@@ -89,7 +89,7 @@ Compile(src, dst)
 	InitTypes();
 	AddStandards();
 #ifdef DEBUG
-	if (options['l']) {
+	if (options['t']) {
 		LexScan();
 		return 1;
 	}
