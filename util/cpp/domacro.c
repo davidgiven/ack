@@ -142,7 +142,7 @@ domacro()
 }
 
 PRIVATE
-skip_block()
+skip_block(to_endif)
 {
 	/*	skip_block() skips the input from
 		1)	a false #if, #ifdef, #ifndef or #elif until the
@@ -188,7 +188,7 @@ skip_block()
 			push_if();
 			continue;
 		case K_ELIF:
-			if (nestlevel == skiplevel) {
+			if (! to_endif && nestlevel == skiplevel) {
 				nestlevel--;
 				push_if();
 				if (ifexpr()) {
@@ -198,12 +198,14 @@ skip_block()
 			}
 			break;
 		case K_ELSE:
-			++(ifstack[nestlevel]);
-			if (nestlevel == skiplevel) {
-				PushBack();
-				skipline();
-				NoUnstack--;
-				return;
+			if (! to_endif) {
+				++(ifstack[nestlevel]);
+				if (nestlevel == skiplevel) {
+					PushBack();
+					skipline();
+					NoUnstack--;
+					return;
+				}
 			}
 			break;
 		case K_ENDIF:
@@ -349,7 +351,7 @@ do_elif()
 	else { /* restart at this level as if a #if is detected.  */
 		nestlevel--;
 		push_if();
-		skip_block();
+		skip_block(1);
 	}
 }
 
@@ -362,7 +364,7 @@ do_else()
 		error("#else without corresponding #if");
 	else {	/* mark this level as else-d		*/
 		++(ifstack[nestlevel]);
-		skip_block();
+		skip_block(1);
 	}
 }
 
@@ -381,7 +383,7 @@ do_if()
 {
 	push_if();
 	if (!ifexpr())	/* a false #if/#elif expression */
-		skip_block();
+		skip_block(0);
 }
 
 PRIVATE
@@ -407,7 +409,7 @@ do_ifdef(how)
 		(how && !id->id_macro) || (!how && id->id_macro)
 	*/
 	if (how ^ (id && id->id_macro != 0))
-		skip_block();
+		skip_block(0);
 	else {
 		PushBack();
 		skipline();
