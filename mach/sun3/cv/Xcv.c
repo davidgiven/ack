@@ -6,7 +6,7 @@
  */
 
 /*
- * Convert SUN-3 object format to ACK object format
+ * Convert SUN-3 object format to ACK object format. Only on Sun-3
  */
 #include <stdio.h>
 #include <out.h>
