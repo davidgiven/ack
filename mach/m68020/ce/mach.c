@@ -1,13 +1,13 @@
 #include "mach.h"
 #include <back.h>
-#include <stdio.h>
+#include <system.h>
 
 
 arg_error( s, arg)
 char *s;
 int arg;
 {
-	fprintf( stderr, "arg_error %s %d\n", s, arg);
+	fprint( STDERR, "arg_error %s %d\n", s, arg);
 }
 
 
@@ -37,7 +37,7 @@ static int been_here;
 	gen4((FOUR_BYTES) 0);
 	if ( !been_here++)
 	{
-	fputs("Warning : dummy float-constant(s)\n", stderr);
+	fprint(STDERR, "Warning : dummy float-constant(s)\n");
 	}
 #else
 #define IEEEFLOAT
