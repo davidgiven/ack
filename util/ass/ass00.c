@@ -125,7 +125,7 @@ argument(arg) char *arg; {
 		return;
 	}
 	inpoff = 2;
-	if ((w = (unsigned)get16()) == sp_magic )
+	if ((w = get16()) == sp_magic )
 		read_compact();
 	else if (w == ARMAG) {
 		archmode = TRUE;
@@ -323,9 +323,9 @@ initproc() {
 	pstate.s_fline= lnp_cast 0 ;
 	pstate.s_fdata= l_data ;
 	pstate.s_locl = (locl_t (*)[])
-		getarea(LOCLABSIZE * sizeof (*(pstate.s_locl))[0]);
+		getarea(LOCLABSIZE * sizeof (*pstate.s_locl)[0]);
 	zero(chp_cast pstate.s_locl,
-		LOCLABSIZE * (unsigned) sizeof (*(pstate.s_locl))[0]);
+		LOCLABSIZE * (unsigned) sizeof (*pstate.s_locl)[0]);
 	if ( memflg>2 ) memuse() ;
 }
 
