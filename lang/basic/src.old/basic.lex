@@ -224,7 +224,7 @@ char name[SIGNIFICANT+1];
 lookup()
 {
 	Key *k;
-	Symbol *s;
+	Symbol *Sym;
 	char *c;
 	int i, typech;
 
@@ -239,7 +239,7 @@ lookup()
 		if( isalnum( *(cptr+k->length) ) &&
 		    k->token==FUNCTION) continue;
 		cptr += k->length;
-		yylval= k->classvalue;
+		yylval.integer= k->classvalue;
 		if(debug) printf("lookup:%d %d\n",
 				 k->classvalue,k->token);
 		if( k->token == FUNCTION)
@@ -261,17 +261,17 @@ lookup()
 		if( i<SIGNIFICANT) name[i++]= *c++;
 	name[i]=0;
 	cptr=c;
-	s= (Symbol *) srchsymbol(name);
-	yylval = (YYSTYPE) s;
+	Sym= srchsymbol(name);
+	yylval.Sptr = Sym;
 	typech= typechar();
-	if(s->symtype!=DEFAULTTYPE) 
+	if(Sym->symtype!=DEFAULTTYPE) 
 	{
-		if(typech && typech!=s->symtype && wflag)
+		if(typech && typech!=Sym->symtype && wflag)
 			warning("type re-declared,ignored");
 	}
 	if( typech)
-		s->symtype=typech;
-	if(debug) printf("lookup:%d Identifier\n",s);
+		Sym->symtype=typech;
+	if(debug) printf("lookup:%d Identifier\n",Sym);
 	if( (name[0]=='f' || name[0]=='F') &&
 	    (name[1]=='n' || name[1]=='N') )
 		return(FUNCTID);
@@ -322,16 +322,17 @@ number()
 	cptr=c;
 	if( *c != '.'){
 		if( i1> MAXINT || i1<MININT) {
-			dval= i1;
+			/*NOSTRICT*/ dval= i1;
 			return(FLTVALUE);
 		}
-		ival= i1;
+		/*NOSTRICT*/ ival= i1;
 #ifdef YYDEBUG
 		if(yydebug) printf("number:INTVALUE %d",i1);
 #endif
 		return(INTVALUE);
 	}
 	/* handle floats */
+	/*NOSTRICT*/
 	f= i1; dec=0.1;
 	c++;
 	while( isdigit(*c)){
@@ -365,7 +366,7 @@ scanstring()
 	   the EM file as well, because it is not used internally
 	*/
 	/* generate label here */
-	yylval= genrom();
+	yylval.integer= genrom();
 	length=0;
 	if( fputc('"',emfile) == EOF) fatal("scanstring");
 	sval= cptr;
@@ -392,8 +393,8 @@ scanstring()
 	*cptr=0;
 	cptr++;
 	fprintf(emfile,"\\000\"\n");
-	i=yylval;
-	yylval= genrom();
+	i=yylval.integer;
+	yylval.integer= genrom();
 	fprintf(emfile,"l%d,1,%d\n",i,length);
 #ifdef YYDEBUG
 	if(yydebug) printf("STRVALUE found\n");
@@ -447,20 +448,19 @@ yylex()
 	case '?': return(PRINTSYM);
 	case '>':
 		if( *(c+1)=='='){
-			c++;c++;cptr=c; yylval= GESYM;return(RELOP);
+			c++;c++;cptr=c; yylval.integer= GESYM;return(RELOP);
 		}
-		yylval= '>';
+		yylval.integer= '>';
 		cptr++;
 		return(RELOP);
-		break;
 	case '<':
 		if( *(c+1)=='='){
-			c++; c++; cptr=c; yylval=LESYM; return(RELOP);
+			c++; c++; cptr=c; yylval.integer=LESYM; return(RELOP);
 		} else
 		if( *(c+1)=='>'){
-			c++; c++; cptr=c; yylval=NESYM; return(RELOP);
+			c++; c++; cptr=c; yylval.integer=NESYM; return(RELOP);
 		} 
-		yylval= '<';
+		yylval.integer= '<';
 		cptr++;
 		return(RELOP);
 	}
