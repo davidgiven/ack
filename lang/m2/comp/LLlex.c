@@ -123,7 +123,7 @@ GetString(upto)
 		}
 		*p++ = ch;
 		if (p - str->s_str == len)	{
-			str->s_str = Srealloc(str->s_str,
+			str->s_str = Realloc(str->s_str,
 				(unsigned int) len + RSTRSIZE);
 			p = str->s_str + len;
 			len += RSTRSIZE;

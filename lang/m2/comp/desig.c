@@ -30,6 +30,7 @@
 #include	"scope.h"
 #include	"desig.h"
 #include	"node.h"
+#include	"warning.h"
 
 extern int	proclevel;
 
@@ -165,6 +166,21 @@ CodeValue(ds, tp)
 	ds->dsg_kind = DSG_LOADED;
 }
 
+ChkForFOR(nd)
+	struct node *nd;
+{
+	if (nd->nd_class == Def) {
+		register struct def *df = nd->nd_def;
+
+		if (df->df_flags & D_FORLOOP) {
+			node_warning(nd,
+				     W_ORDINARY,
+				     "assignment to FOR-loop control variable");
+			df->df_flags &= ~D_FORLOOP;
+		}
+	}
+}
+
 CodeStore(ds, tp)
 	register struct desig *ds;
 	register struct type *tp;
@@ -175,6 +191,7 @@ CodeStore(ds, tp)
 	struct desig save;
 
 	save = *ds;
+
 	switch(ds->dsg_kind) {
 	case DSG_FIXED:
 		if (DoStore(ds, tp->tp_size)) break;
@@ -233,6 +250,7 @@ CodeMove(rhs, left, rtp)
 		generated.
 	*/
 
+	ChkForFOR(left);
 	switch(rhs->dsg_kind) {
 	case DSG_LOADED:
 		CodeDesig(left, lhs);

@@ -1001,6 +1001,7 @@ CodeDAddress(nd)
 
 	register struct desig *designator = new_desig();
 
+	ChkForFOR(nd);
 	CodeDesig(nd, designator);
 	CodeAddress(designator);
 	free_desig(designator);
@@ -1015,6 +1016,7 @@ CodeDStore(nd)
 
 	register struct desig *designator = new_desig();
 
+	ChkForFOR(nd);
 	CodeDesig(nd, designator);
 	CodeStore(designator, nd->nd_type);
 	free_desig(designator);

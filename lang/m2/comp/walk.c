@@ -482,42 +482,66 @@ WalkStat(nd, exit_label)
 			label l1 = ++text_label;
 			label l2 = ++text_label;
 			int uns = 0;
+			arith stepsize;
 
-			good_forvar = DoForInit(nd, left);
+			good_forvar = DoForInit(nd);
+			if ((stepsize = left->nd_INT) == 0) {
+			    node_warning(left,
+					 W_ORDINARY,
+					 "zero stepsize in FOR loop");
+			}
+			if (stepsize < 0) {
+				stepsize = -stepsize;
+			}
 			fnd = left->nd_right;
 			if (good_forvar) {
-				uns = BaseType(nd->nd_type)->tp_fund != T_INTEGER;
-				if (fnd->nd_class != Value) {
-					/* Upperbound not constant.
-					   The expression may only be evaluated
-					   once, so generate a temporary for it
-					*/
-					CodePExpr(fnd);
-					tmp = NewInt();
-					C_stl(tmp);
-				}
-				C_df_ilb(l1);
+				uns = BaseType(nd->nd_type)->tp_fund !=
+						T_INTEGER;
 				C_dup(int_size);
-				if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
+				CodePExpr(fnd);
+				tmp = NewInt();
+				C_stl(tmp);
+				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
-				if (left->nd_INT > 0) {
+				if (left->nd_INT >= 0) {
 					C_zgt(l2);
+					CodeDStore(nd);
+					C_lol(tmp);
+					CodePExpr(nd);
 				}
-				else	C_zlt(l2);
-				CodeDStore(nd);
+				else {
+					C_zlt(l2);
+					CodeDStore(nd);
+					CodePExpr(nd);
+					C_lol(tmp);
+				}
+				C_sbu(int_size);
+				if (stepsize) {
+					C_loc(stepsize);
+					C_dvu(int_size);
+					C_loc((arith) 1);
+					C_adu(int_size);
+				}
+				nd->nd_def->df_flags |= D_FORLOOP;
+				C_df_ilb(l1);
 			}
 			WalkNode(right, exit_label);
-			if (good_forvar) {	
-				CodePExpr(nd);
+			nd->nd_def->df_flags &= ~D_FORLOOP;
+			if (stepsize && good_forvar) {	
+				C_loc((arith) 1);
+				C_sbu(int_size);
+				C_dup(int_size);
+				C_zeq(l2);
 				C_loc(left->nd_INT);
-				if (uns) C_adu(int_size);
-				else C_adi(int_size);
-				C_bra(l1);
-				C_df_ilb(l2);
-				C_asp(int_size);
+				CodePExpr(nd);
+				C_adu(int_size);
+				CodeDStore(nd);
 			}
-			if (tmp) FreeInt(tmp);
+			C_bra(l1);
+			C_df_ilb(l2);
+			C_asp(int_size);
+			FreeInt(tmp);
 #ifdef DEBUG
 			nd->nd_left = left;
 			nd->nd_right = right;
@@ -642,9 +666,10 @@ WalkDesignator(nd, ds)
 	return 1;
 }
 
-DoForInit(nd, left)
-	register struct node *nd, *left;
+DoForInit(nd)
+	register struct node *nd;
 {
+	register struct node *left = nd->nd_left;
 	register struct def *df;
 	struct type *tpl, *tpr;
 

@@ -113,6 +113,7 @@ struct def	{		/* list of definitions for a name */
 #define D_BUSY		0x80	/* set if busy reading this definition module */
 #define D_FOREIGN	0x100	/* set for foreign language modules */
 #define D_ADDRGIVEN	0x200	/* set if address given for variable */
+#define D_FORLOOP	0x400	/* set if busy in for-loop */
 	struct type *df_type;
 	union {
 		struct module df_module;
