@@ -16,7 +16,7 @@
 	move.l	a0,-(sp)
 	move.l	d0,-(sp)
 	move.l	d0,.limhp
-	jsr	__brk
+	jsr	BRK
 	tst.l	(sp)+
 	move.l	(sp)+,a0
 	tst.w	d0
