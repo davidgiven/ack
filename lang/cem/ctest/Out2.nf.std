@@ -1,33 +1,33 @@
-Fri Feb 15 14:24:12 MET 1985
+Wed Feb 25 13:13:37 MET 1987
 ***** ctconv
-acc -DNOFLOAT conv.c
+vax2 -DNOFLOAT conv.c
 conv.c
-"conv.c", line 48: warning: Overflow in constant expression
+"conv.c", line 48: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 2a3,4
 > (float) 12 = 12.000000
 > (int) 3.14 = 3
 11,$c13,$
-< 	char   255, int    255, unsigned    377, long         255
-< 	char   255, int    255, unsigned    377, long         255
+< 	char    -1, int     -1, unsigned 177777, long          -1
+< 	char    -1, int     -1, unsigned 177777, long          -1
 < From integer
-< 	char   192, int    -64, unsigned 177700, long         -64
+< 	char   -64, int    -64, unsigned 177700, long         -64
 < From long
-< 	char   253, int     -3, unsigned 177775, long          -3
+< 	char    -3, int     -3, unsigned 177775, long          -3
 < a[l] (l==3) -17
 < a[3l] -17
 ---
 > 					float 127.000000
-> 	char   255, int    255, unsigned    377, long         255
-> 					float 255.000000
-> 	char   255, int    255, unsigned    377, long         255
-> 					float 255.000000
+> 	char    -1, int     -1, unsigned 37777777777, long          -1
+> 					float -1.000000
+> 	char    -1, int     -1, unsigned 37777777777, long          -1
+> 					float -1.000000
 > From integer
-> 	char   192, int    -64, unsigned 177700, long         -64
+> 	char   -64, int    -64, unsigned 37777777700, long         -64
 > 					float -64.000000
 > From long
-> 	char   253, int     -3, unsigned 177775, long          -3
+> 	char    -3, int     -3, unsigned 37777777775, long          -3
 > 					float -3.000000
 > From float
 > 	char   121, int    121, unsigned    171, long         121, float 121.500000
@@ -37,23 +37,57 @@ comparing conv
 > a[l] (l==3) -17
 > a[3l] -17
 ***** ctdecl
-acc -DNOFLOAT decl.c
+vax2 -DNOFLOAT decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-acc -DNOFLOAT ops.c
+vax2 -DNOFLOAT ops.c
 ops.c
 running ops.cem
 comparing ops
+24,39c24,39
+<  u<<1  121632
+<  u<<2   43464
+<  u<<3  107150
+<  u<<4   16320
+<  u<<5   34640
+<  u<<6   71500
+<  u<<7  163200
+<  u<<8  146400
+<  u<<9  115000
+<  u<<10  32000
+<  u<<11  64000
+<  u<<12 150000
+<  u<<13 120000
+<  u<<14  40000
+<  u<<15 100000
+<  u<<16      0
+---
+>  u<<1  321632
+>  u<<2  643464
+>  u<<3  1507150
+>  u<<4  3216320
+>  u<<5  6434640
+>  u<<6  15071500
+>  u<<7  32163200
+>  u<<8  64346400
+>  u<<9  150715000
+>  u<<10 321632000
+>  u<<11 643464000
+>  u<<12 1507150000
+>  u<<13 3216320000
+>  u<<14 6434640000
+>  u<<15 15071500000
+>  u<<16 32163200000
 ***** cterr
-acc -DNOFLOAT bugs.c
+vax2 -DNOFLOAT bugs.c
 bugs.c
-"bugs.c", line 98: warning: Overflow in constant expression
+"bugs.c", line 98: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-acc -DNOFLOAT test.c
+vax2 -DNOFLOAT test.c
 test.c
 running test.cem
 comparing test
@@ -62,49 +96,28 @@ comparing test
 ---
 > End of test program, 11 tests completed, 0 errors detected
 ***** ctest2
-acc -DNOFLOAT t7.c
+vax2 -DNOFLOAT t7.c
 t7.c
-"t7.c", line 163: warning: statement not reached
-"t7.c", line 180: warning: statement not reached
-"t7.c", line 184: warning: statement not reached
-"t7.c", line 188: warning: statement not reached
-"t7.c", line 192: warning: statement not reached
-"t7.c", line 196: warning: statement not reached
-"t7.c", line 200: warning: statement not reached
-"t7.c", line 207: warning: statement not reached
-"t7.c", line 209: warning: statement not reached
-"t7.c", line 213: warning: statement not reached
-"t7.c", line 215: warning: statement not reached
-"t7.c", line 289: warning: statement not reached
-"t7.c", line 296: warning: statement not reached
-"t7.c", line 302: warning: statement not reached
-"t7.c", line 309: warning: statement not reached
-"t7.c", line 345: warning: statement not reached
-"t7.c", line 346: warning: statement not reached
-"t7.c", line 347: warning: statement not reached
-"t7.c", line 348: warning: statement not reached
-"t7.c", line 350: warning: statement not reached
-"t7.c", line 454: warning: statement not reached
-"t7.c", line 563: warning: statement not reached
-"t7.c", line 591: warning: statement not reached
 running t7.cem
 comparing t7
 ***** ctest3
-acc -DNOFLOAT test2.c
+vax2 -DNOFLOAT test2.c
 test2.c
+"test2.c", line 459: (warning) conversion of pointer to int loses accuracy
+"test2.c", line 459: (warning) conversion of pointer to int loses accuracy
 running test2.cem
 comparing test2
 ***** ctest5
-acc -DNOFLOAT test1.c
+vax2 -DNOFLOAT test1.c
 test1.c
-"test1.c", line 386: warning: illegal pointer combination
-"test1.c", line 387: warning: illegal pointer combination
-"test1.c", line 388: warning: illegal pointer combination
-"test1.c", line 400: warning: illegal pointer combination
-"test1.c", line 423: warning: illegal pointer combination
-"test1.c", line 424: warning: illegal pointer combination
-"test1.c", line 425: warning: illegal pointer combination
-"test1.c", line 437: warning: illegal pointer combination
+"test1.c", line 386: (warning) incompatible pointers in =
+"test1.c", line 387: (warning) incompatible pointers in =
+"test1.c", line 388: (warning) incompatible pointers in =
+"test1.c", line 400: (warning) incompatible pointers in =
+"test1.c", line 423: (warning) incompatible pointers in =
+"test1.c", line 424: (warning) incompatible pointers in =
+"test1.c", line 425: (warning) incompatible pointers in =
+"test1.c", line 437: (warning) incompatible pointers in =
 running test1.cem
 comparing test1
 1,$c1,$
@@ -116,105 +129,445 @@ comparing test1
 > 11 tests completed. Number of errors = 1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-acc -DNOFLOAT bf.c
+vax2 -DNOFLOAT bf.c
 bf.c
 running bf.cem
 comparing bf
 sed -f cel.sed <OPS >cel.c
-acc -DNOFLOAT cel.c
+vax2 -DNOFLOAT cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-acc -DNOFLOAT clu.c
+vax2 -DNOFLOAT clu.c
 clu.c
-"clu.c", line 60: warning: Overflow in constant expression
-"clu.c", line 66: warning: Overflow in constant expression
+"clu.c", line 60: (warning) overflow in unsigned constant expression
+"clu.c", line 66: (warning) overflow in unsigned constant expression
 running clu.cem
 comparing clu
+23,31c23,31
+< x = 40000  -25536
+< x += 40000  -25526
+< x -= 40000  25546
+< x /= 40000  0
+< x %= 40000  10
+< x *= 40000  6784
+< x &= 40000  0
+< x |= 40000  -25526
+< x ^= 40000  -25526
+---
+> x = 40000  40000
+> x += 40000  40010
+> x -= 40000  -39990
+> x /= 40000  0
+> x %= 40000  10
+> x *= 40000  400000
+> x &= 40000  0
+> x |= 40000  40010
+> x ^= 40000  40010
+38c38
+< y = ( 40000 + 8012 ) -17524
+---
+> y = ( 40000 + 8012 ) 48012
+42,52c42,52
+< y = ( 40000 * 8012 ) 8960
+< y = ( 40000 & 8012 ) 7232
+< y = ( 40000 | 8012 ) -24756
+< y = ( 40000 ^ 8012 ) -31988
+< y = ( 40000 || 8012 ) 1
+< y = ( 40000 && 8012 ) 1
+< y = ( 40000 << 9 ) -32768
+< y = ( 40000 >> 9 ) 78
+< y = ( -40000  ) 25536
+< y = ( !40000  ) 0
+< y = ( ~40000  ) 25535
+---
+> y = ( 40000 * 8012 ) 320480000
+> y = ( 40000 & 8012 ) 7232
+> y = ( 40000 | 8012 ) 40780
+> y = ( 40000 ^ 8012 ) 33548
+> y = ( 40000 || 8012 ) 1
+> y = ( 40000 && 8012 ) 1
+> y = ( 40000 << 9 ) 20480000
+> y = ( 40000 >> 9 ) 78
+> y = ( -40000  ) -40000
+> y = ( !40000  ) 0
+> y = ( ~40000  ) -40001
+59,68c59,68
+< y = ( 40000 ? 40000 : 8012 ) -25536
+< y = ( x = 40000  ) -25536 -25536
+< y = ( x += 40000  ) -25526 -25526
+< y = ( x -= 40000  ) 25546 25546
+< y = ( x /= 40000  ) 0 0
+< y = ( x %= 40000  ) 10 10
+< y = ( x *= 40000  ) 6784 6784
+< y = ( x &= 40000  ) 0 0
+< y = ( x |= 40000  ) -25526 -25526
+< y = ( x ^= 40000  ) -25526 -25526
+---
+> y = ( 40000 ? 40000 : 8012 ) 40000
+> y = ( x = 40000  ) 40000 40000
+> y = ( x += 40000  ) 40010 40010
+> y = ( x -= 40000  ) -39990 -39990
+> y = ( x /= 40000  ) 0 0
+> y = ( x %= 40000  ) 10 10
+> y = ( x *= 40000  ) 400000 400000
+> y = ( x &= 40000  ) 0 0
+> y = ( x |= 40000  ) 40010 40010
+> y = ( x ^= 40000  ) 40010 40010
+97,105c97,105
+< yes if ( x = 40000  ) yes() ; else no() -25536
+< yes if ( x += 40000  ) yes() ; else no() -25526
+< yes if ( x -= 40000  ) yes() ; else no() 25546
+< no if ( x /= 40000  ) yes() ; else no() 0
+< yes if ( x %= 40000  ) yes() ; else no() 10
+< yes if ( x *= 40000  ) yes() ; else no() 6784
+< no if ( x &= 40000  ) yes() ; else no() 0
+< yes if ( x |= 40000  ) yes() ; else no() -25526
+< yes if ( x ^= 40000  ) yes() ; else no() -25526
+---
+> yes if ( x = 40000  ) yes() ; else no() 40000
+> yes if ( x += 40000  ) yes() ; else no() 40010
+> yes if ( x -= 40000  ) yes() ; else no() -39990
+> no if ( x /= 40000  ) yes() ; else no() 0
+> yes if ( x %= 40000  ) yes() ; else no() 10
+> yes if ( x *= 40000  ) yes() ; else no() 400000
+> no if ( x &= 40000  ) yes() ; else no() 0
+> yes if ( x |= 40000  ) yes() ; else no() 40010
+> yes if ( x ^= 40000  ) yes() ; else no() 40010
 sed -f ec.sed <OPS >ec.c
-acc -DNOFLOAT ec.c
+vax2 -DNOFLOAT ec.c
 ec.c
-"ec.c", line 58: warning: Overflow in constant expression
-"ec.c", line 64: warning: Overflow in constant expression
+"ec.c", line 58: (warning) overflow in constant expression
+"ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-acc -DNOFLOAT ef.c
+vax2 -DNOFLOAT ef.c
 ef.c
 running ef.cem
 comparing ef
 sed -f ei.sed <OPS >ei.c
-acc -DNOFLOAT ei.c
+vax2 -DNOFLOAT ei.c
 ei.c
-"ei.c", line 22: warning: Overflow in constant expression
-"ei.c", line 65: warning: Overflow in constant expression
-"ei.c", line 108: warning: Overflow in constant expression
+"ei.c", line 22: (warning) overflow in constant expression
+"ei.c", line 65: (warning) overflow in constant expression
+"ei.c", line 108: (warning) overflow in constant expression
 running ei.cem
 comparing ei
+32c32
+< x <<= 15 -32768
+---
+> x <<= 15 8355840
+48c48
+< y = ( 4 << 15 ) 0
+---
+> y = ( 4 << 15 ) 131072
+69c69
+< y = ( x <<= 15 ) -32768 -32768
+---
+> y = ( x <<= 15 ) 8355840 8355840
+85c85
+< no if ( 4 << 15 ) yes() ; else no()
+---
+> yes if ( 4 << 15 ) yes() ; else no()
+106c106
+< yes if ( x <<= 15 ) yes() ; else no() -32768
+---
+> yes if ( x <<= 15 ) yes() ; else no() 8355840
 sed -f el.sed <OPS >el.c
-acc -DNOFLOAT el.c
+vax2 -DNOFLOAT el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-acc -DNOFLOAT eu.c
+vax2 -DNOFLOAT eu.c
 eu.c
-"eu.c", line 58: warning: Overflow in constant expression
-"eu.c", line 64: warning: Overflow in constant expression
+"eu.c", line 58: (warning) overflow in unsigned constant expression
+"eu.c", line 64: (warning) overflow in unsigned constant expression
 running eu.cem
 comparing eu
+23,31c23,31
+< x = 40000  -25536
+< x += 40000  -25526
+< x -= 40000  25546
+< x /= 40000  0
+< x %= 40000  10
+< x *= 40000  6784
+< x &= 40000  0
+< x |= 40000  -25526
+< x ^= 40000  -25526
+---
+> x = 40000  40000
+> x += 40000  40010
+> x -= 40000  -39990
+> x /= 40000  0
+> x %= 40000  10
+> x *= 40000  400000
+> x &= 40000  0
+> x |= 40000  40010
+> x ^= 40000  40010
+38c38
+< y = ( 40000 + 8012 ) -17524
+---
+> y = ( 40000 + 8012 ) 48012
+42,52c42,52
+< y = ( 40000 * 8012 ) 8960
+< y = ( 40000 & 8012 ) 7232
+< y = ( 40000 | 8012 ) -24756
+< y = ( 40000 ^ 8012 ) -31988
+< y = ( 40000 || 8012 ) 1
+< y = ( 40000 && 8012 ) 1
+< y = ( 40000 << 9 ) -32768
+< y = ( 40000 >> 9 ) 78
+< y = ( -40000  ) 25536
+< y = ( !40000  ) 0
+< y = ( ~40000  ) 25535
+---
+> y = ( 40000 * 8012 ) 320480000
+> y = ( 40000 & 8012 ) 7232
+> y = ( 40000 | 8012 ) 40780
+> y = ( 40000 ^ 8012 ) 33548
+> y = ( 40000 || 8012 ) 1
+> y = ( 40000 && 8012 ) 1
+> y = ( 40000 << 9 ) 20480000
+> y = ( 40000 >> 9 ) 78
+> y = ( -40000  ) -40000
+> y = ( !40000  ) 0
+> y = ( ~40000  ) -40001
+59,68c59,68
+< y = ( 40000 ? 40000 : 8012 ) -25536
+< y = ( x = 40000  ) -25536 -25536
+< y = ( x += 40000  ) -25526 -25526
+< y = ( x -= 40000  ) 25546 25546
+< y = ( x /= 40000  ) 0 0
+< y = ( x %= 40000  ) 10 10
+< y = ( x *= 40000  ) 6784 6784
+< y = ( x &= 40000  ) 0 0
+< y = ( x |= 40000  ) -25526 -25526
+< y = ( x ^= 40000  ) -25526 -25526
+---
+> y = ( 40000 ? 40000 : 8012 ) 40000
+> y = ( x = 40000  ) 40000 40000
+> y = ( x += 40000  ) 40010 40010
+> y = ( x -= 40000  ) -39990 -39990
+> y = ( x /= 40000  ) 0 0
+> y = ( x %= 40000  ) 10 10
+> y = ( x *= 40000  ) 400000 400000
+> y = ( x &= 40000  ) 0 0
+> y = ( x |= 40000  ) 40010 40010
+> y = ( x ^= 40000  ) 40010 40010
+97,105c97,105
+< yes if ( x = 40000  ) yes() ; else no() -25536
+< yes if ( x += 40000  ) yes() ; else no() -25526
+< yes if ( x -= 40000  ) yes() ; else no() 25546
+< no if ( x /= 40000  ) yes() ; else no() 0
+< yes if ( x %= 40000  ) yes() ; else no() 10
+< yes if ( x *= 40000  ) yes() ; else no() 6784
+< no if ( x &= 40000  ) yes() ; else no() 0
+< yes if ( x |= 40000  ) yes() ; else no() -25526
+< yes if ( x ^= 40000  ) yes() ; else no() -25526
+---
+> yes if ( x = 40000  ) yes() ; else no() 40000
+> yes if ( x += 40000  ) yes() ; else no() 40010
+> yes if ( x -= 40000  ) yes() ; else no() -39990
+> no if ( x /= 40000  ) yes() ; else no() 0
+> yes if ( x %= 40000  ) yes() ; else no() 10
+> yes if ( x *= 40000  ) yes() ; else no() 400000
+> no if ( x &= 40000  ) yes() ; else no() 0
+> yes if ( x |= 40000  ) yes() ; else no() 40010
+> yes if ( x ^= 40000  ) yes() ; else no() 40010
 sed -f id.sed <OPS >id.c
-acc -DNOFLOAT id.c
+vax2 -DNOFLOAT id.c
 id.c
 running id.cem
 comparing id
+26,28c26,28
+< y = ( (-40) - 300 ) -15190
+< y = ( (-40) / 300 ) 0
+< y = ( (-40) * 300 ) -14533
+---
+> y = ( (-40) - 300 ) 50346
+> y = ( (-40) / 300 ) 0
+> y = ( (-40) * 300 ) -2147432645
+39,48c39,48
+< y = ( (-40) ? (-40) : 300 ) -15584
+< y = ( x = (-40)  ) -4.000000e+01 -15584
+< y = ( x += (-40)  ) -3.685850e+01 -15597
+< y = ( x -= (-40)  ) 4.314150e+01 17196
+< y = ( x /= (-40)  ) -7.853750e-02 -16736
+< y = ( x *= (-40)  ) -1.256600e+02 -15365
+< y = ( x ++ ) 4.141500e+00 16713
+< y = ( x -- ) 2.141500e+00 16713
+< y = ( -- x ) 2.141500e+00 16649
+< y = ( ++ x ) 4.141500e+00 16772
+---
+> y = ( (-40) ? (-40) : 300 ) 49952
+> y = ( x = (-40)  ) -4.000000e+01 49952
+> y = ( x += (-40)  ) -3.685850e+01 1864024851
+> y = ( x -= (-40)  ) 4.314150e+01 -1864023252
+> y = ( x /= (-40)  ) -7.853750e-02 -666583392
+> y = ( x *= (-40)  ) -1.256600e+02 1374405627
+> y = ( x ++ ) 4.141500e+00 240533833
+> y = ( x -- ) 2.141500e+00 240533833
+> y = ( -- x ) 2.141500e+00 240533769
+> y = ( ++ x ) 4.141500e+00 -2027208316
 sed -f lc.sed <OPS >lc.c
-acc -DNOFLOAT lc.c
+vax2 -DNOFLOAT lc.c
 lc.c
-"lc.c", line 60: warning: Overflow in constant expression
-"lc.c", line 66: warning: Overflow in constant expression
+"lc.c", line 60: (warning) overflow in constant expression
+"lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-acc -DNOFLOAT ld.c
+vax2 -DNOFLOAT ld.c
 ld.c
 running ld.cem
 comparing ld
 sed -f lf.sed <OPS >lf.c
-acc -DNOFLOAT lf.c
+vax2 -DNOFLOAT lf.c
 lf.c
 running lf.cem
 comparing lf
 sed -f li.sed <OPS >li.c
-acc -DNOFLOAT li.c
+vax2 -DNOFLOAT li.c
 li.c
-"li.c", line 22: warning: Overflow in constant expression
-"li.c", line 67: warning: Overflow in constant expression
-"li.c", line 112: warning: Overflow in constant expression
+"li.c", line 22: (warning) overflow in constant expression
+"li.c", line 67: (warning) overflow in constant expression
+"li.c", line 112: (warning) overflow in constant expression
 running li.cem
 comparing li
+32c32
+< x <<= 15 -32768
+---
+> x <<= 15 8355840
+48c48
+< y = ( 4 << 15 ) 0
+---
+> y = ( 4 << 15 ) 131072
+69c69
+< y = ( x <<= 15 ) -32768 -32768
+---
+> y = ( x <<= 15 ) 8355840 8355840
+85c85
+< no if ( 4 << 15 ) yes() ; else no()
+---
+> yes if ( 4 << 15 ) yes() ; else no()
+106c106
+< yes if ( x <<= 15 ) yes() ; else no() -32768
+---
+> yes if ( x <<= 15 ) yes() ; else no() 8355840
 sed -f ll.sed <OPS >ll.c
-acc -DNOFLOAT ll.c
+vax2 -DNOFLOAT ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-acc -DNOFLOAT lu.c
+vax2 -DNOFLOAT lu.c
 lu.c
 running lu.cem
 comparing lu
+23,31c23,31
+< z = x  -25302
+< z += x  -25292
+< z -= x  25312
+< z /= x  0
+< z %= x  10
+< z *= x  9124
+< z &= x  10
+< z |= x  -25302
+< z ^= x  -25312
+---
+> z = x  40234
+> z += x  40244
+> z -= x  -40224
+> z /= x  0
+> z %= x  10
+> z *= x  402340
+> z &= x  10
+> z |= x  40234
+> z ^= x  40224
+38c38
+< y = ( x + 8012 ) -17290
+---
+> y = ( x + 8012 ) 48246
+42,52c42,52
+< y = ( x * 8012 ) -16776
+< y = ( x & 8012 ) 7432
+< y = ( x | 8012 ) -24722
+< y = ( x ^ 8012 ) -32154
+< y = ( x || 8012 ) 1
+< y = ( x && 8012 ) 1
+< y = ( x << 9 ) 21504
+< y = ( x >> 9 ) 78
+< y = ( -x  ) 25302
+< y = ( !x  ) 0
+< y = ( ~x  ) 25301
+---
+> y = ( x * 8012 ) 322354808
+> y = ( x & 8012 ) 7432
+> y = ( x | 8012 ) 40814
+> y = ( x ^ 8012 ) 33382
+> y = ( x || 8012 ) 1
+> y = ( x && 8012 ) 1
+> y = ( x << 9 ) 20599808
+> y = ( x >> 9 ) 78
+> y = ( -x  ) -40234
+> y = ( !x  ) 0
+> y = ( ~x  ) -40235
+59,68c59,68
+< y = ( x ? x : 8012 ) -25302
+< y = ( z = x  ) -25302 -25302
+< y = ( z += x  ) -25292 -25292
+< y = ( z -= x  ) 25312 25312
+< y = ( z /= x  ) 0 0
+< y = ( z %= x  ) 10 10
+< y = ( z *= x  ) 9124 9124
+< y = ( z &= x  ) 10 10
+< y = ( z |= x  ) -25302 -25302
+< y = ( z ^= x  ) -25312 -25312
+---
+> y = ( x ? x : 8012 ) 40234
+> y = ( z = x  ) 40234 40234
+> y = ( z += x  ) 40244 40244
+> y = ( z -= x  ) -40224 -40224
+> y = ( z /= x  ) 0 0
+> y = ( z %= x  ) 10 10
+> y = ( z *= x  ) 402340 402340
+> y = ( z &= x  ) 10 10
+> y = ( z |= x  ) 40234 40234
+> y = ( z ^= x  ) 40224 40224
+97,105c97,105
+< yes if ( z = x  ) yes() ; else no() -25302
+< yes if ( z += x  ) yes() ; else no() -25292
+< yes if ( z -= x  ) yes() ; else no() 25312
+< no if ( z /= x  ) yes() ; else no() 0
+< yes if ( z %= x  ) yes() ; else no() 10
+< yes if ( z *= x  ) yes() ; else no() 9124
+< yes if ( z &= x  ) yes() ; else no() 10
+< yes if ( z |= x  ) yes() ; else no() -25302
+< yes if ( z ^= x  ) yes() ; else no() -25312
+---
+> yes if ( z = x  ) yes() ; else no() 40234
+> yes if ( z += x  ) yes() ; else no() 40244
+> yes if ( z -= x  ) yes() ; else no() -40224
+> no if ( z /= x  ) yes() ; else no() 0
+> yes if ( z %= x  ) yes() ; else no() 10
+> yes if ( z *= x  ) yes() ; else no() 402340
+> yes if ( z &= x  ) yes() ; else no() 10
+> yes if ( z |= x  ) yes() ; else no() 40234
+> yes if ( z ^= x  ) yes() ; else no() 40224
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-acc -DNOFLOAT noarg.c
+vax2 -DNOFLOAT noarg.c
 noarg.c
-"noarg.c", line 10: declared argument name is missing
+"noarg.c", line 10: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-acc -DNOFLOAT init.c
+vax2 -DNOFLOAT init.c
 init.c
-"init.c", line 183: warning: Overflow in constant expression (U-)
+"init.c", line 183: (warning) overflow in constant expression
 running init.cem
 comparing init
 41,$c41,$
@@ -223,7 +576,7 @@ comparing init
 < lo1	14
 < lo2	-17
 < lo3	2147483647
-< lo4	-2147483648
+< lo4	0
 < lo5	0
 < lo6	1
 < 
@@ -240,7 +593,7 @@ comparing init
 < bit fields:
 < 
 < sizeof stb 6
-< stb	1 2 3 4 3 6 7
+< stb	-1 -2 3 4 -1 6 7
 < 
 ---
 > Floats:
@@ -250,7 +603,7 @@ comparing init
 > fl2	2.00000000000000000000e+00
 > fl4	4.00000000000000000000e+00
 > fl5	2.93873587705571892581e-39
-> fl6	1.70141173319264427000e+38
+> fl6	1.70141173319264428000e+38
 > fl7	0.00000000000000000000e+00
 >     fla1                    fla2                    fla3
 >             1.000000e+00           -1.000000e+00            1.100000e+01
@@ -312,63 +665,57 @@ comparing init
 > 
 > bit fields:
 > 
-> sizeof stb 6
-> stb	1 2 3 4 3 6 7
+> sizeof stb 8
+> stb	-1 -2 3 4 -1 6 7
 > 
 ***** ctmargt
-acc -DNOFLOAT margt.c
+vax2 -DNOFLOAT margt.c
 margt.c
 running margt.cem
 comparing margt
 5,$c5,$
-< 	BELL=
-< 	BIN=/user0/keie/bin
-< 	CDPATH=:/usr/em/util:/usr/em/mach:/usr/em/lang
-< 	DIT=/user0/keie/ditroff/troff/a.out
-< 	HOME=/usr/em
-< 	MAILHEADER=To: botter!vu44!mcvax!%t
-< Subject: Re: %S
-< Newsgroups: %n
-< In-Reply-To: %i
-< %(%[references]!=^$?References\: %[references]
-< )Organization: %o
-< Cc:
-< Bcc: 
-< 
-< 
-< 	PATH=:/user0/keie/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new
-< 	SHELL=/usr/local/dsh
-< 	TERM=d80
-< 	TERMCAP=ME|ampex|d80|dialogue|dialogue80:am:bs:pt:if=/usr/lib/tabset/stdcrt:cl=\E;:cm=\E=%+\040%+\040:al=10\EE:ic=3\EQ:im=:ei=:dl=10\ER:dc=\EW:is=\EA:ho=^^:ce=\ET:cd=\EY:so=\Ej:se=\Ek:us=\El:ue=\Em:ul:li#24:co#80:nd=^L:up=^K:we=\Eo:ws=\En
-< 	USER=keie
+< 	CDPATH=:~:~em:/usr/spool
+< 	CWD=/usr/em/lang/cem/ctest/ctmargt
+< 	ESHKEYS=dcl=^?:dcl=^H:dcr=^D:dlr=^K:dtm=^W:dwl=^[h:dew=^[d:eof=^[^C:eof=^X^C:eof=^X^F:exp=^u:fcl=^[?:fcr=^[/:gcl=^B:gcr=^F:gll=^A:glr=^E:gwl=^[b:gew=^[f:hlp=^[H:hst=^_:int=^G:lnx=^V:prh=^P:rdr=^L:rtn=^J:rtn=^M:stm=^@:tab=^I:xgm=^X^X:xpl=^[^J:xpl=^[^M:yn< k=^Y:ipl=^N
+< 	HOME=/user0/ceriel
+< 	M2PATH=.:/user0/ceriel/modula-2/lib/m2v
+< 	PAGER=/user0/ceriel/bin/yap
+< 	PATH=/user0/ceriel/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new::/user0/ceriel/modula-2/bin/m2v
+< 	REFS=/user0/ceriel/etc/refer/refs
+< 	SHELL=/usr/local/esh
+< 	TERM=sun
+< 	TERMCAP=Mu|sun:li#34:co#80:cl=^L:cm=\E[%i%d;%dH:nd=\E[C:up=\E[A:am:bs:mi:ms:ce=\E[K:cd=\E[J:so=\E[7m:se=\E[m:kd=\E[B:kl=\E[D:ku=\E[A:kr=\E[C:kh=\E[H:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:al=\E[L:dl=\E[M:im=:ei=:ic=\E[@:dc=\E[P
+< 	USER=ceriel
 ---
-> 	HOME=/other/keie
-> 	PATH=:/other/keie/bin:/bin:/usr/bin
-> 	TERM=MiniBee
+> 	HOME=/usr/em
+> 	PATH=:/bin:/usr/ucb:/usr/local:/usr/bin:/usr/em/bin
+> 	SHELL=/usr/local/esh
+> 	TERM=dialup
+> 	USER=em
 ***** ctprof
 test profiling
 procentry.c
-acc -DNOFLOAT tp.c procentry.k
+vax2 -DNOFLOAT tp.c procentry.k
 tp.c
 procentry.k
 running tp
 comparing tp
 ***** ctstruct
-acc -DNOFLOAT str.c
+vax2 -DNOFLOAT str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-acc -DNOFLOAT tfork.c
+vax2 -DNOFLOAT tfork.c
 tfork.c
 running tfork.cem
 comparing tfork
 1,$c1,$
-< childno 5207
-< Child 5207, status 0x800
+< childno 15195
+< Child 15195, status 0x800
 < fork/wait ok
 ---
-> childno N
-> Child N, status 0x800
+> childno 16276
+> Child 16276, status 0x800
 > fork/wait ok
-Fri Feb 15 15:55:48 MET 1985
+Wed Feb 25 14:53:48 MET 1987

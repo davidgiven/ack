@@ -1,33 +1,33 @@
-Fri Mar 15 14:44:59 GMT 1985
+Wed Feb 25 11:07:00 MET 1987
 ***** ctconv
-acc -mm68k4 -DNOFLOAT conv.c
+vax4 -DNOFLOAT conv.c
 conv.c
-"conv.c", line 48: warning: Overflow in constant expression
+"conv.c", line 48: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 2a3,4
 > (float) 12 = 12.000000
 > (int) 3.14 = 3
 11,$c13,$
-< 	char   255, int    255, unsigned    377, long         255
-< 	char   255, int    255, unsigned    377, long         255
+< 	char    -1, int     -1, unsigned 37777777777, long          -1
+< 	char    -1, int     -1, unsigned 37777777777, long          -1
 < From integer
-< 	char   192, int    -64, unsigned 37777777700, long         -64
+< 	char   -64, int    -64, unsigned 37777777700, long         -64
 < From long
-< 	char   253, int     -3, unsigned 37777777775, long          -3
+< 	char    -3, int     -3, unsigned 37777777775, long          -3
 < a[l] (l==3) -17
 < a[3l] -17
 ---
 > 					float 127.000000
-> 	char   255, int    255, unsigned    377, long         255
-> 					float 255.000000
-> 	char   255, int    255, unsigned    377, long         255
-> 					float 255.000000
+> 	char    -1, int     -1, unsigned 37777777777, long          -1
+> 					float -1.000000
+> 	char    -1, int     -1, unsigned 37777777777, long          -1
+> 					float -1.000000
 > From integer
-> 	char   192, int    -64, unsigned 177700, long         -64
+> 	char   -64, int    -64, unsigned 37777777700, long         -64
 > 					float -64.000000
 > From long
-> 	char   253, int     -3, unsigned 177775, long          -3
+> 	char    -3, int     -3, unsigned 37777777775, long          -3
 > 					float -3.000000
 > From float
 > 	char   121, int    121, unsigned    171, long         121, float 121.500000
@@ -37,57 +37,24 @@ comparing conv
 > a[l] (l==3) -17
 > a[3l] -17
 ***** ctdecl
-acc -mm68k4 -DNOFLOAT decl.c
+vax4 -DNOFLOAT decl.c
 decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-acc -mm68k4 -DNOFLOAT ops.c
+vax4 -DNOFLOAT ops.c
 ops.c
 running ops.cem
 comparing ops
-24,39c24,39
-<  u<<1  321632
-<  u<<2  643464
-<  u<<3  1507150
-<  u<<4  3216320
-<  u<<5  6434640
-<  u<<6  15071500
-<  u<<7  32163200
-<  u<<8  64346400
-<  u<<9  150715000
-<  u<<10 321632000
-<  u<<11 643464000
-<  u<<12 1507150000
-<  u<<13 3216320000
-<  u<<14 6434640000
-<  u<<15 15071500000
-<  u<<16 32163200000
----
->  u<<1  121632
->  u<<2  043464
->  u<<3  107150
->  u<<4  016320
->  u<<5  034640
->  u<<6  071500
->  u<<7  163200
->  u<<8  146400
->  u<<9  115000
->  u<<10 032000
->  u<<11 064000
->  u<<12 150000
->  u<<13 120000
->  u<<14 040000
->  u<<15 100000
->  u<<16 000000
 ***** cterr
-acc -mm68k4 -DNOFLOAT bugs.c
+vax4 -DNOFLOAT bugs.c
 bugs.c
-"bugs.c", line 98: warning: Overflow in constant expression
+"bugs.c", line 98: (warning) overflow in constant expression
 running bugs.cem
+*** Error code -37 (ignored)
 comparing bugs
 ***** ctest1
-acc -mm68k4 -DNOFLOAT test.c
+vax4 -DNOFLOAT test.c
 test.c
 running test.cem
 comparing test
@@ -96,49 +63,26 @@ comparing test
 ---
 > End of test program, 11 tests completed, 0 errors detected
 ***** ctest2
-acc -mm68k4 -DNOFLOAT t7.c
+vax4 -DNOFLOAT t7.c
 t7.c
-"t7.c", line 163: warning: statement not reached
-"t7.c", line 180: warning: statement not reached
-"t7.c", line 184: warning: statement not reached
-"t7.c", line 188: warning: statement not reached
-"t7.c", line 192: warning: statement not reached
-"t7.c", line 196: warning: statement not reached
-"t7.c", line 200: warning: statement not reached
-"t7.c", line 207: warning: statement not reached
-"t7.c", line 209: warning: statement not reached
-"t7.c", line 213: warning: statement not reached
-"t7.c", line 215: warning: statement not reached
-"t7.c", line 289: warning: statement not reached
-"t7.c", line 296: warning: statement not reached
-"t7.c", line 302: warning: statement not reached
-"t7.c", line 309: warning: statement not reached
-"t7.c", line 345: warning: statement not reached
-"t7.c", line 346: warning: statement not reached
-"t7.c", line 347: warning: statement not reached
-"t7.c", line 348: warning: statement not reached
-"t7.c", line 350: warning: statement not reached
-"t7.c", line 454: warning: statement not reached
-"t7.c", line 563: warning: statement not reached
-"t7.c", line 591: warning: statement not reached
 running t7.cem
 comparing t7
 ***** ctest3
-acc -mm68k4 -DNOFLOAT test2.c
+vax4 -DNOFLOAT test2.c
 test2.c
 running test2.cem
 comparing test2
 ***** ctest5
-acc -mm68k4 -DNOFLOAT test1.c
+vax4 -DNOFLOAT test1.c
 test1.c
-"test1.c", line 386: warning: illegal pointer combination
-"test1.c", line 387: warning: illegal pointer combination
-"test1.c", line 388: warning: illegal pointer combination
-"test1.c", line 400: warning: illegal pointer combination
-"test1.c", line 423: warning: illegal pointer combination
-"test1.c", line 424: warning: illegal pointer combination
-"test1.c", line 425: warning: illegal pointer combination
-"test1.c", line 437: warning: illegal pointer combination
+"test1.c", line 386: (warning) incompatible pointers in =
+"test1.c", line 387: (warning) incompatible pointers in =
+"test1.c", line 388: (warning) incompatible pointers in =
+"test1.c", line 400: (warning) incompatible pointers in =
+"test1.c", line 423: (warning) incompatible pointers in =
+"test1.c", line 424: (warning) incompatible pointers in =
+"test1.c", line 425: (warning) incompatible pointers in =
+"test1.c", line 437: (warning) incompatible pointers in =
 running test1.cem
 comparing test1
 1,$c1,$
@@ -150,679 +94,242 @@ comparing test1
 > 11 tests completed. Number of errors = 1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-acc -mm68k4 -DNOFLOAT bf.c
+vax4 -DNOFLOAT bf.c
 bf.c
 running bf.cem
 comparing bf
-39c39
-< bfs.bf4 = ( bfs.bf1 - bfs.bf2 ) 65529
----
-> bfs.bf4 = ( bfs.bf1 - bfs.bf2 ) -7
-50,52c50,52
-< bfs.bf4 = ( -bfs.bf1  ) 65535
-< bfs.bf4 = ( !bfs.bf1  ) 0
-< bfs.bf4 = ( ~bfs.bf1  ) 65534
----
-> bfs.bf4 = ( -bfs.bf1  ) -1
-> bfs.bf4 = ( !bfs.bf1  ) 0
-> bfs.bf4 = ( ~bfs.bf1  ) -2
 sed -f cel.sed <OPS >cel.c
-acc -mm68k4 -DNOFLOAT cel.c
+vax4 -DNOFLOAT cel.c
 cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-acc -mm68k4 -DNOFLOAT clu.c
+vax4 -DNOFLOAT clu.c
 clu.c
 running clu.cem
 comparing clu
-23,31c23,31
-< x = 40000  40000
-< x += 40000  40010
-< x -= 40000  -39990
-< x /= 40000  0
-< x %= 40000  10
-< x *= 40000  400000
-< x &= 40000  0
-< x |= 40000  40010
-< x ^= 40000  40010
----
-> x = 40000  -25536
-> x += 40000  -25526
-> x -= 40000  25546
-> x /= 40000  0
-> x %= 40000  10
-> x *= 40000  6784
-> x &= 40000  0
-> x |= 40000  -25526
-> x ^= 40000  -25526
-38c38
-< y = ( 40000 + 8012 ) 48012
----
-> y = ( 40000 + 8012 ) -17524
-42,52c42,52
-< y = ( 40000 * 8012 ) 320480000
-< y = ( 40000 & 8012 ) 7232
-< y = ( 40000 | 8012 ) 40780
-< y = ( 40000 ^ 8012 ) 33548
-< y = ( 40000 || 8012 ) 1
-< y = ( 40000 && 8012 ) 1
-< y = ( 40000 << 9 ) 20480000
-< y = ( 40000 >> 9 ) 78
-< y = ( -40000  ) -40000
-< y = ( !40000  ) 0
-< y = ( ~40000  ) -40001
----
-> y = ( 40000 * 8012 ) 8960
-> y = ( 40000 & 8012 ) 7232
-> y = ( 40000 | 8012 ) -24756
-> y = ( 40000 ^ 8012 ) -31988
-> y = ( 40000 || 8012 ) 1
-> y = ( 40000 && 8012 ) 1
-> y = ( 40000 << 9 ) -32768
-> y = ( 40000 >> 9 ) 78
-> y = ( -40000  ) 25536
-> y = ( !40000  ) 0
-> y = ( ~40000  ) 25535
-59,68c59,68
-< y = ( 40000 ? 40000 : 8012 ) 40000
-< y = ( x = 40000  ) 40000 40000
-< y = ( x += 40000  ) 40010 40010
-< y = ( x -= 40000  ) -39990 -39990
-< y = ( x /= 40000  ) 0 0
-< y = ( x %= 40000  ) 10 10
-< y = ( x *= 40000  ) 400000 400000
-< y = ( x &= 40000  ) 0 0
-< y = ( x |= 40000  ) 40010 40010
-< y = ( x ^= 40000  ) 40010 40010
----
-> y = ( 40000 ? 40000 : 8012 ) -25536
-> y = ( x = 40000  ) -25536 -25536
-> y = ( x += 40000  ) -25526 -25526
-> y = ( x -= 40000  ) 25546 25546
-> y = ( x /= 40000  ) 0 0
-> y = ( x %= 40000  ) 10 10
-> y = ( x *= 40000  ) 6784 6784
-> y = ( x &= 40000  ) 0 0
-> y = ( x |= 40000  ) -25526 -25526
-> y = ( x ^= 40000  ) -25526 -25526
-97,105c97,105
-< yes if ( x = 40000  ) yes() ; else no() 40000
-< yes if ( x += 40000  ) yes() ; else no() 40010
-< yes if ( x -= 40000  ) yes() ; else no() -39990
-< no if ( x /= 40000  ) yes() ; else no() 0
-< yes if ( x %= 40000  ) yes() ; else no() 10
-< yes if ( x *= 40000  ) yes() ; else no() 400000
-< no if ( x &= 40000  ) yes() ; else no() 0
-< yes if ( x |= 40000  ) yes() ; else no() 40010
-< yes if ( x ^= 40000  ) yes() ; else no() 40010
----
-> yes if ( x = 40000  ) yes() ; else no() -25536
-> yes if ( x += 40000  ) yes() ; else no() -25526
-> yes if ( x -= 40000  ) yes() ; else no() 25546
-> no if ( x /= 40000  ) yes() ; else no() 0
-> yes if ( x %= 40000  ) yes() ; else no() 10
-> yes if ( x *= 40000  ) yes() ; else no() 6784
-> no if ( x &= 40000  ) yes() ; else no() 0
-> yes if ( x |= 40000  ) yes() ; else no() -25526
-> yes if ( x ^= 40000  ) yes() ; else no() -25526
 sed -f ec.sed <OPS >ec.c
-acc -mm68k4 -DNOFLOAT ec.c
+vax4 -DNOFLOAT ec.c
 ec.c
-"ec.c", line 58: warning: Overflow in constant expression
-"ec.c", line 64: warning: Overflow in constant expression
+"ec.c", line 58: (warning) overflow in constant expression
+"ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-acc -mm68k4 -DNOFLOAT ef.c
+vax4 -DNOFLOAT ef.c
 ef.c
-Warning : dummy float-constant(s)
 running ef.cem
-*** Error code 18 (ignored)
 comparing ef
-5,$c5,$
-< ef.c, line 13: trap 18 called
----
-> .4e-5 || .3e-5
-> .4e-5 && .3e-5
-> -.4e-5 
-> !.4e-5 
-> .4e-5 == .3e-5
-> .4e-5 != .3e-5
-> .4e-5 <= .3e-5
-> .4e-5 >= .3e-5
-> .4e-5 < .3e-5
-> .4e-5 > .3e-5
-> .4e-5 ? .4e-5 : .3e-5
-> x = .4e-5  4.000000e-06
-> x += .4e-5  3.141504e+00
-> x -= .4e-5  3.141496e+00
-> x /= .4e-5  7.853750e+05
-> x *= .4e-5  1.256600e-05
-> x ++ 4.141500e+00
-> x -- 2.141500e+00
-> -- x 2.141500e+00
-> ++ x 4.141500e+00
-> y = ( .4e-5 + .3e-5 ) 7.000000e-06
-> y = ( .4e-5 - .3e-5 ) 1.000000e-06
-> y = ( .4e-5 / .3e-5 ) 1.333333e+00
-> y = ( .4e-5 * .3e-5 ) 1.200000e-11
-> y = ( .4e-5 || .3e-5 ) 1.000000e+00
-> y = ( .4e-5 && .3e-5 ) 1.000000e+00
-> y = ( -.4e-5  ) -4.000000e-06
-> y = ( !.4e-5  ) 0.000000e+00
-> y = ( .4e-5 == .3e-5 ) 0.000000e+00
-> y = ( .4e-5 != .3e-5 ) 1.000000e+00
-> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
-> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
-> y = ( .4e-5 < .3e-5 ) 0.000000e+00
-> y = ( .4e-5 > .3e-5 ) 1.000000e+00
-> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
-> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
-> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
-> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
-> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
-> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
-> y = ( x ++ ) 4.141500e+00 3.141500e+00
-> y = ( x -- ) 2.141500e+00 3.141500e+00
-> y = ( -- x ) 2.141500e+00 2.141500e+00
-> y = ( ++ x ) 4.141500e+00 4.141500e+00
-> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
-> yes if ( -.4e-5  ) yes() ; else no()
-> no if ( !.4e-5  ) yes() ; else no()
-> no if ( .4e-5 == .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
-> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
-> no if ( .4e-5 < .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
-> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
-> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
-> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
-> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
-> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
-> yes if ( x ++ ) yes() ; else no() 4.141500e+00
-> yes if ( x -- ) yes() ; else no() 2.141500e+00
-> yes if ( -- x ) yes() ; else no() 2.141500e+00
-> yes if ( ++ x ) yes() ; else no() 4.141500e+00
 sed -f ei.sed <OPS >ei.c
-acc -mm68k4 -DNOFLOAT ei.c
+vax4 -DNOFLOAT ei.c
 ei.c
 running ei.cem
 comparing ei
-32c32
-< x <<= 15 8355840
----
-> x <<= 15 -32768
-48c48
-< y = ( 4 << 15 ) 131072
----
-> y = ( 4 << 15 ) 0
-69c69
-< y = ( x <<= 15 ) 8355840 8355840
----
-> y = ( x <<= 15 ) -32768 -32768
-85c85
-< yes if ( 4 << 15 ) yes() ; else no()
----
-> no if ( 4 << 15 ) yes() ; else no()
-106c106
-< yes if ( x <<= 15 ) yes() ; else no() 8355840
----
-> yes if ( x <<= 15 ) yes() ; else no() -32768
 sed -f el.sed <OPS >el.c
-acc -mm68k4 -DNOFLOAT el.c
+vax4 -DNOFLOAT el.c
 el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-acc -mm68k4 -DNOFLOAT eu.c
+vax4 -DNOFLOAT eu.c
 eu.c
 running eu.cem
 comparing eu
-23,31c23,31
-< x = 40000  40000
-< x += 40000  40010
-< x -= 40000  -39990
-< x /= 40000  0
-< x %= 40000  10
-< x *= 40000  400000
-< x &= 40000  0
-< x |= 40000  40010
-< x ^= 40000  40010
----
-> x = 40000  -25536
-> x += 40000  -25526
-> x -= 40000  25546
-> x /= 40000  0
-> x %= 40000  10
-> x *= 40000  6784
-> x &= 40000  0
-> x |= 40000  -25526
-> x ^= 40000  -25526
-38c38
-< y = ( 40000 + 8012 ) 48012
----
-> y = ( 40000 + 8012 ) -17524
-42,52c42,52
-< y = ( 40000 * 8012 ) 320480000
-< y = ( 40000 & 8012 ) 7232
-< y = ( 40000 | 8012 ) 40780
-< y = ( 40000 ^ 8012 ) 33548
-< y = ( 40000 || 8012 ) 1
-< y = ( 40000 && 8012 ) 1
-< y = ( 40000 << 9 ) 20480000
-< y = ( 40000 >> 9 ) 78
-< y = ( -40000  ) -40000
-< y = ( !40000  ) 0
-< y = ( ~40000  ) -40001
----
-> y = ( 40000 * 8012 ) 8960
-> y = ( 40000 & 8012 ) 7232
-> y = ( 40000 | 8012 ) -24756
-> y = ( 40000 ^ 8012 ) -31988
-> y = ( 40000 || 8012 ) 1
-> y = ( 40000 && 8012 ) 1
-> y = ( 40000 << 9 ) -32768
-> y = ( 40000 >> 9 ) 78
-> y = ( -40000  ) 25536
-> y = ( !40000  ) 0
-> y = ( ~40000  ) 25535
-59,68c59,68
-< y = ( 40000 ? 40000 : 8012 ) 40000
-< y = ( x = 40000  ) 40000 40000
-< y = ( x += 40000  ) 40010 40010
-< y = ( x -= 40000  ) -39990 -39990
-< y = ( x /= 40000  ) 0 0
-< y = ( x %= 40000  ) 10 10
-< y = ( x *= 40000  ) 400000 400000
-< y = ( x &= 40000  ) 0 0
-< y = ( x |= 40000  ) 40010 40010
-< y = ( x ^= 40000  ) 40010 40010
----
-> y = ( 40000 ? 40000 : 8012 ) -25536
-> y = ( x = 40000  ) -25536 -25536
-> y = ( x += 40000  ) -25526 -25526
-> y = ( x -= 40000  ) 25546 25546
-> y = ( x /= 40000  ) 0 0
-> y = ( x %= 40000  ) 10 10
-> y = ( x *= 40000  ) 6784 6784
-> y = ( x &= 40000  ) 0 0
-> y = ( x |= 40000  ) -25526 -25526
-> y = ( x ^= 40000  ) -25526 -25526
-97,105c97,105
-< yes if ( x = 40000  ) yes() ; else no() 40000
-< yes if ( x += 40000  ) yes() ; else no() 40010
-< yes if ( x -= 40000  ) yes() ; else no() -39990
-< no if ( x /= 40000  ) yes() ; else no() 0
-< yes if ( x %= 40000  ) yes() ; else no() 10
-< yes if ( x *= 40000  ) yes() ; else no() 400000
-< no if ( x &= 40000  ) yes() ; else no() 0
-< yes if ( x |= 40000  ) yes() ; else no() 40010
-< yes if ( x ^= 40000  ) yes() ; else no() 40010
----
-> yes if ( x = 40000  ) yes() ; else no() -25536
-> yes if ( x += 40000  ) yes() ; else no() -25526
-> yes if ( x -= 40000  ) yes() ; else no() 25546
-> no if ( x /= 40000  ) yes() ; else no() 0
-> yes if ( x %= 40000  ) yes() ; else no() 10
-> yes if ( x *= 40000  ) yes() ; else no() 6784
-> no if ( x &= 40000  ) yes() ; else no() 0
-> yes if ( x |= 40000  ) yes() ; else no() -25526
-> yes if ( x ^= 40000  ) yes() ; else no() -25526
+sed -f id.sed <OPS >id.c
+vax4 -DNOFLOAT id.c
+id.c
+running id.cem
+comparing id
 sed -f lc.sed <OPS >lc.c
-acc -mm68k4 -DNOFLOAT lc.c
+vax4 -DNOFLOAT lc.c
 lc.c
-"lc.c", line 60: warning: Overflow in constant expression
-"lc.c", line 66: warning: Overflow in constant expression
+"lc.c", line 60: (warning) overflow in constant expression
+"lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-acc -mm68k4 -DNOFLOAT ld.c
+vax4 -DNOFLOAT ld.c
 ld.c
-Warning : dummy float-constant(s)
 running ld.cem
-*** Error code 18 (ignored)
 comparing ld
-5,$c5,$
-< ld.c, line 13: trap 18 called
----
-> .4e-5 || .3e-5
-> .4e-5 && .3e-5
-> -.4e-5 
-> !.4e-5 
-> .4e-5 == .3e-5
-> .4e-5 != .3e-5
-> .4e-5 <= .3e-5
-> .4e-5 >= .3e-5
-> .4e-5 < .3e-5
-> .4e-5 > .3e-5
-> .4e-5 ? .4e-5 : .3e-5
-> x = .4e-5  4.000000e-06
-> x += .4e-5  3.141504e+00
-> x -= .4e-5  3.141496e+00
-> x /= .4e-5  7.853750e+05
-> x *= .4e-5  1.256600e-05
-> x ++ 4.141500e+00
-> x -- 2.141500e+00
-> -- x 2.141500e+00
-> ++ x 4.141500e+00
-> y = ( .4e-5 + .3e-5 ) 7.000000e-06
-> y = ( .4e-5 - .3e-5 ) 1.000000e-06
-> y = ( .4e-5 / .3e-5 ) 1.333333e+00
-> y = ( .4e-5 * .3e-5 ) 1.200000e-11
-> y = ( .4e-5 || .3e-5 ) 1.000000e+00
-> y = ( .4e-5 && .3e-5 ) 1.000000e+00
-> y = ( -.4e-5  ) -4.000000e-06
-> y = ( !.4e-5  ) 0.000000e+00
-> y = ( .4e-5 == .3e-5 ) 0.000000e+00
-> y = ( .4e-5 != .3e-5 ) 1.000000e+00
-> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
-> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
-> y = ( .4e-5 < .3e-5 ) 0.000000e+00
-> y = ( .4e-5 > .3e-5 ) 1.000000e+00
-> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
-> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
-> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
-> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
-> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
-> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
-> y = ( x ++ ) 4.141500e+00 3.141500e+00
-> y = ( x -- ) 2.141500e+00 3.141500e+00
-> y = ( -- x ) 2.141500e+00 2.141500e+00
-> y = ( ++ x ) 4.141500e+00 4.141500e+00
-> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
-> yes if ( -.4e-5  ) yes() ; else no()
-> no if ( !.4e-5  ) yes() ; else no()
-> no if ( .4e-5 == .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
-> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
-> no if ( .4e-5 < .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
-> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
-> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
-> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
-> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
-> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
-> yes if ( x ++ ) yes() ; else no() 4.141500e+00
-> yes if ( x -- ) yes() ; else no() 2.141500e+00
-> yes if ( -- x ) yes() ; else no() 2.141500e+00
-> yes if ( ++ x ) yes() ; else no() 4.141500e+00
 sed -f lf.sed <OPS >lf.c
-acc -mm68k4 -DNOFLOAT lf.c
+vax4 -DNOFLOAT lf.c
 lf.c
-Warning : dummy float-constant(s)
 running lf.cem
-*** Error code 18 (ignored)
 comparing lf
-1,$c1,$
-< lf.c, line 8: trap 18 called
----
-> .4e-5 + .3e-5
-> .4e-5 - .3e-5
-> .4e-5 / .3e-5
-> .4e-5 * .3e-5
-> .4e-5 || .3e-5
-> .4e-5 && .3e-5
-> -.4e-5 
-> !.4e-5 
-> .4e-5 == .3e-5
-> .4e-5 != .3e-5
-> .4e-5 <= .3e-5
-> .4e-5 >= .3e-5
-> .4e-5 < .3e-5
-> .4e-5 > .3e-5
-> .4e-5 ? .4e-5 : .3e-5
-> x = .4e-5  4.000000e-06
-> x += .4e-5  3.141504e+00
-> x -= .4e-5  3.141496e+00
-> x /= .4e-5  7.853750e+05
-> x *= .4e-5  1.256600e-05
-> x ++ 4.141500e+00
-> x -- 2.141500e+00
-> -- x 2.141500e+00
-> ++ x 4.141500e+00
-> y = ( .4e-5 + .3e-5 ) 7.000000e-06
-> y = ( .4e-5 - .3e-5 ) 1.000000e-06
-> y = ( .4e-5 / .3e-5 ) 1.333333e+00
-> y = ( .4e-5 * .3e-5 ) 1.200000e-11
-> y = ( .4e-5 || .3e-5 ) 1.000000e+00
-> y = ( .4e-5 && .3e-5 ) 1.000000e+00
-> y = ( -.4e-5  ) -4.000000e-06
-> y = ( !.4e-5  ) 0.000000e+00
-> y = ( .4e-5 == .3e-5 ) 0.000000e+00
-> y = ( .4e-5 != .3e-5 ) 1.000000e+00
-> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
-> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
-> y = ( .4e-5 < .3e-5 ) 0.000000e+00
-> y = ( .4e-5 > .3e-5 ) 1.000000e+00
-> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
-> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
-> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
-> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
-> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
-> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
-> y = ( x ++ ) 4.141500e+00 3.141500e+00
-> y = ( x -- ) 2.141500e+00 3.141500e+00
-> y = ( -- x ) 2.141500e+00 2.141500e+00
-> y = ( ++ x ) 4.141500e+00 4.141500e+00
-> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
-> yes if ( -.4e-5  ) yes() ; else no()
-> no if ( !.4e-5  ) yes() ; else no()
-> no if ( .4e-5 == .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
-> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
-> no if ( .4e-5 < .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
-> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
-> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
-> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
-> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
-> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
-> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
-> yes if ( x ++ ) yes() ; else no() 4.141500e+00
-> yes if ( x -- ) yes() ; else no() 2.141500e+00
-> yes if ( -- x ) yes() ; else no() 2.141500e+00
-> yes if ( ++ x ) yes() ; else no() 4.141500e+00
 sed -f li.sed <OPS >li.c
-acc -mm68k4 -DNOFLOAT li.c
+vax4 -DNOFLOAT li.c
 li.c
 running li.cem
 comparing li
-32c32
-< x <<= 15 8355840
----
-> x <<= 15 -32768
-48c48
-< y = ( 4 << 15 ) 131072
----
-> y = ( 4 << 15 ) 0
-69c69
-< y = ( x <<= 15 ) 8355840 8355840
----
-> y = ( x <<= 15 ) -32768 -32768
-85c85
-< yes if ( 4 << 15 ) yes() ; else no()
----
-> no if ( 4 << 15 ) yes() ; else no()
-106c106
-< yes if ( x <<= 15 ) yes() ; else no() 8355840
----
-> yes if ( x <<= 15 ) yes() ; else no() -32768
 sed -f ll.sed <OPS >ll.c
-acc -mm68k4 -DNOFLOAT ll.c
+vax4 -DNOFLOAT ll.c
 ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-acc -mm68k4 -DNOFLOAT lu.c
+vax4 -DNOFLOAT lu.c
 lu.c
 running lu.cem
 comparing lu
-23,31c23,31
-< z = x  40234
-< z += x  40244
-< z -= x  -40224
-< z /= x  0
-< z %= x  10
-< z *= x  402340
-< z &= x  10
-< z |= x  40234
-< z ^= x  40224
----
-> z = x  -25302
-> z += x  -25292
-> z -= x  25312
-> z /= x  0
-> z %= x  10
-> z *= x  9124
-> z &= x  10
-> z |= x  -25302
-> z ^= x  -25312
-38c38
-< y = ( x + 8012 ) 48246
----
-> y = ( x + 8012 ) -17290
-42,52c42,52
-< y = ( x * 8012 ) 322354808
-< y = ( x & 8012 ) 7432
-< y = ( x | 8012 ) 40814
-< y = ( x ^ 8012 ) 33382
-< y = ( x || 8012 ) 1
-< y = ( x && 8012 ) 1
-< y = ( x << 9 ) 20599808
-< y = ( x >> 9 ) 78
-< y = ( -x  ) -40234
-< y = ( !x  ) 0
-< y = ( ~x  ) -40235
----
-> y = ( x * 8012 ) -16776
-> y = ( x & 8012 ) 7432
-> y = ( x | 8012 ) -24722
-> y = ( x ^ 8012 ) -32154
-> y = ( x || 8012 ) 1
-> y = ( x && 8012 ) 1
-> y = ( x << 9 ) 21504
-> y = ( x >> 9 ) 78
-> y = ( -x  ) 25302
-> y = ( !x  ) 0
-> y = ( ~x  ) 25301
-59,68c59,68
-< y = ( x ? x : 8012 ) 40234
-< y = ( z = x  ) 40234 40234
-< y = ( z += x  ) 40244 40244
-< y = ( z -= x  ) -40224 -40224
-< y = ( z /= x  ) 0 0
-< y = ( z %= x  ) 10 10
-< y = ( z *= x  ) 402340 402340
-< y = ( z &= x  ) 10 10
-< y = ( z |= x  ) 40234 40234
-< y = ( z ^= x  ) 40224 40224
----
-> y = ( x ? x : 8012 ) -25302
-> y = ( z = x  ) -25302 -25302
-> y = ( z += x  ) -25292 -25292
-> y = ( z -= x  ) 25312 25312
-> y = ( z /= x  ) 0 0
-> y = ( z %= x  ) 10 10
-> y = ( z *= x  ) 9124 9124
-> y = ( z &= x  ) 10 10
-> y = ( z |= x  ) -25302 -25302
-> y = ( z ^= x  ) -25312 -25312
-97,105c97,105
-< yes if ( z = x  ) yes() ; else no() 40234
-< yes if ( z += x  ) yes() ; else no() 40244
-< yes if ( z -= x  ) yes() ; else no() -40224
-< no if ( z /= x  ) yes() ; else no() 0
-< yes if ( z %= x  ) yes() ; else no() 10
-< yes if ( z *= x  ) yes() ; else no() 402340
-< yes if ( z &= x  ) yes() ; else no() 10
-< yes if ( z |= x  ) yes() ; else no() 40234
-< yes if ( z ^= x  ) yes() ; else no() 40224
----
-> yes if ( z = x  ) yes() ; else no() -25302
-> yes if ( z += x  ) yes() ; else no() -25292
-> yes if ( z -= x  ) yes() ; else no() 25312
-> no if ( z /= x  ) yes() ; else no() 0
-> yes if ( z %= x  ) yes() ; else no() 10
-> yes if ( z *= x  ) yes() ; else no() 9124
-> yes if ( z &= x  ) yes() ; else no() 10
-> yes if ( z |= x  ) yes() ; else no() -25302
-> yes if ( z ^= x  ) yes() ; else no() -25312
 ***** ctill
 ----- All program(s) in this directory should fail to compile.
-acc -mm68k4 -DNOFLOAT noarg.c
+vax4 -DNOFLOAT noarg.c
 noarg.c
-"noarg.c", line 10: declared argument name is missing
+"noarg.c", line 10: name not in parameter list
 *** Error code 1
 `gen' not remade because of errors
 ***** ctinit
-acc -mm68k4 -DNOFLOAT init.c
+vax4 -DNOFLOAT init.c
 init.c
-"init.c", line 183: warning: Overflow in constant expression (U-)
-"init.c", line 224: compiler problem: initialization alignment error
-*** Error code 1
-`gen' not remade because of errors
+running init.cem
+comparing init
+41,$c41,$
+< long
+< 
+< lo1	14
+< lo2	-17
+< lo3	2147483647
+< lo4	-2147483648
+< lo5	0
+< lo6	1
+< 
+< structures
+< 
+< 	 st1          sta[0..2]
+< s_i	              0              1              2              3
+< s_ca[0]	              0             97              0              0
+< s_ca[1]	              0             98              0              0
+< s_ca[2]	              0             99              0              0
+< s_l	              0             10              0              0
+< (sta[0].s_s1)->s_i = 1
+< 
+< bit fields:
+< 
+< sizeof stb 8
+< stb	-1 -2 3 4 -1 6 7
+< 
+---
+> Floats:
+> 
+> fl1	0.00000000000000000000e+00
+> fl2	2.00000000000000000000e+00
+> fl2	2.00000000000000000000e+00
+> fl4	4.00000000000000000000e+00
+> fl5	2.93873587705571892581e-39
+> fl6	1.70141173319264428000e+38
+> fl7	0.00000000000000000000e+00
+>     fla1                    fla2                    fla3
+>             1.000000e+00           -1.000000e+00            1.100000e+01
+>             3.000000e+00           -3.000000e+00            0.000000e+00
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             2.000000e+00           -2.000000e+00            1.200000e+01
+>             4.000000e+00           -4.000000e+00            0.000000e+00
+>             6.000000e+00           -6.000000e+00            0.000000e+00
+>             3.000000e+00           -3.000000e+00            1.300000e+01
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             7.000000e+00           -7.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            1.400000e+01
+>             0.000000e+00            0.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            0.000000e+00
+> 
+> Doubles:
+> 
+> dbl1	0.00000000000000000000e+00
+> dbl2	2.00000000000000000000e+00
+> dbl2	2.00000000000000000000e+00
+> dbl4	4.00000000000000000000e+00
+> dbl5	2.93873600000000034793e-39
+> dbl6	1.70141170000000000000e+38
+> dbl7	0.00000000000000000000e+00
+>     dbla1                    dbla2                    dbla3
+>             1.000000e+00           -1.000000e+00            1.100000e+01
+>             3.000000e+00           -3.000000e+00            0.000000e+00
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             2.000000e+00           -2.000000e+00            1.200000e+01
+>             4.000000e+00           -4.000000e+00            0.000000e+00
+>             6.000000e+00           -6.000000e+00            0.000000e+00
+>             3.000000e+00           -3.000000e+00            1.300000e+01
+>             5.000000e+00           -5.000000e+00            0.000000e+00
+>             7.000000e+00           -7.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            1.400000e+01
+>             0.000000e+00            0.000000e+00            0.000000e+00
+>             0.000000e+00            0.000000e+00            0.000000e+00
+> 
+> long
+> 
+> lo1	14
+> lo2	-17
+> lo3	2147483647
+> lo4	-2147483648
+> lo5	0
+> lo6	1
+> 
+> structures
+> 
+> 	 st1          sta[0..2]
+> s_i	              0              1              2              3
+> s_ca[0]	              0             97              0              0
+> s_ca[1]	              0             98              0              0
+> s_ca[2]	              0             99              0              0
+> s_l	              0             10              0              0
+> s_f	   0.000000e+00  -1.000000e+01   0.000000e+00   0.000000e+00
+> 
+> (sta[0].s_s1)->s_i = 1
+> 
+> bit fields:
+> 
+> sizeof stb 8
+> stb	-1 -2 3 4 -1 6 7
+> 
 ***** ctmargt
-acc -mm68k4 -DNOFLOAT margt.c
+vax4 -DNOFLOAT margt.c
 margt.c
 running margt.cem
 comparing margt
 5,$c5,$
-< 	HOME=/usr/em
-< 	NAME=em
-< 	PATH=:/bin/:/usr/bin:/usr/em/bin
-< 	SHELL=/bin/sh
-< 	TERM=d80
+< 	CDPATH=:~:~em:/usr/spool
+< 	CWD=/usr/em/lang/cem/ctest/ctmargt
+< 	ESHKEYS=dcl=^?:dcl=^H:dcr=^D:dlr=^K:dtm=^W:dwl=^[h:dew=^[d:eof=^[^C:eof=^X^C:eof=^X^F:exp=^u:fcl=^[?:fcr=^[/:gcl=^B:gcr=^F:gll=^A:glr=^E:gwl=^[b:gew=^[f:hlp=^[H:hst=^_:int=^G:lnx=^V:prh=^P:rdr=^L:rtn=^J:rtn=^M:stm=^@:tab=^I:xgm=^X^X:xpl=^[^J:xpl=^[^M:yn< k=^Y:ipl=^N
+< 	HOME=/user0/ceriel
+< 	M2PATH=.:/user0/ceriel/modula-2/lib/m2v
+< 	PAGER=/user0/ceriel/bin/yap
+< 	PATH=/user0/ceriel/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new::/user0/ceriel/modula-2/bin/m2v
+< 	REFS=/user0/ceriel/etc/refer/refs
+< 	SHELL=/usr/local/esh
+< 	TERM=sun
+< 	TERMCAP=Mu|sun:li#34:co#80:cl=^L:cm=\E[%i%d;%dH:nd=\E[C:up=\E[A:am:bs:mi:ms:ce=\E[K:cd=\E[J:so=\E[7m:se=\E[m:kd=\E[B:kl=\E[D:ku=\E[A:kr=\E[C:kh=\E[H:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:al=\E[L:dl=\E[M:im=:ei=:ic=\E[@:dc=\E[P
+< 	USER=ceriel
 ---
-> 	HOME=/other/keie
-> 	PATH=:/other/keie/bin:/bin:/usr/bin
-> 	TERM=MiniBee
+> 	HOME=/usr/em
+> 	PATH=:/bin:/usr/ucb:/usr/local:/usr/bin:/usr/em/bin
+> 	SHELL=/usr/local/esh
+> 	TERM=dialup
+> 	USER=em
 ***** ctprof
 test profiling
 procentry.c
-acc -mm68k4 -DNOFLOAT tp.c procentry.k
+vax4 -DNOFLOAT tp.c procentry.k
 tp.c
 procentry.k
 running tp
 comparing tp
-sh: 3905 Memory fault - core dumped
-*** Error code -117 (ignored)
 ***** ctstruct
-acc -mm68k4 -DNOFLOAT str.c
+vax4 -DNOFLOAT str.c
 str.c
 running str.cem
 comparing str
 ***** ctsys
-acc -mm68k4 -DNOFLOAT tfork.c
+vax4 -DNOFLOAT tfork.c
 tfork.c
 running tfork.cem
 comparing tfork
 1,$c1,$
-< childno 3944
-< Child 3944, status 0x800
+< childno 11517
+< Child 11517, status 0x800
 < fork/wait ok
 ---
-> childno N
-> Child N, status 0x800
+> childno 16276
+> Child 16276, status 0x800
 > fork/wait ok
-Fri Mar 15 16:15:13 GMT 1985
+Wed Feb 25 13:05:57 MET 1987
