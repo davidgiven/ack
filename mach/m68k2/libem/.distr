@@ -1,5 +1,9 @@
 LIST
 Makefile
 compmodule
+em_end.s
+etext.s
+edata.s
 end.s
 libem_s.a
+READ_ME
