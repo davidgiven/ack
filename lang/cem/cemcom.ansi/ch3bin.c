@@ -340,7 +340,9 @@ mk_binop(expp, oper, expr, commutative)
 	else {
 		*expp = (commutative
 			&& !(ex->ex_flags & EX_VOLATILE)
-			&& ( expr->ex_depth > ex->ex_depth
+			&& (expr->ex_depth > ex->ex_depth
+			    || ((expr->ex_flags & EX_SIDEEFFECTS)
+				&& !(ex->ex_flags & EX_SIDEEFFECTS))
 			    || is_cp_cst(ex)))
 			? new_oper(ex->ex_type, expr, arg_switched(oper), ex)
 			: new_oper(ex->ex_type, ex, oper, expr);
