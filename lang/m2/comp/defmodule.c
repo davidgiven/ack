@@ -52,7 +52,7 @@ getwdir(fn)
 		*p = '/';
 		return fn;
 	}
-	return ".";
+	return "";
 }
 
 STATIC
