@@ -220,7 +220,7 @@ int type;
 	descr= genlabel();
 	firstlabel=genlabel();
 	fprintf(tmpfile,"l%d\n",descr); emlinecount++;
-	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt); emlinecount++;
+	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
 	l= jumphead;
 	while( l)
 	{
@@ -244,7 +244,7 @@ int type;
 	descr= genlabel();
 	firstlabel=genlabel();
 	fprintf(tmpfile,"l%d\n",descr); emlinecount++;
-	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt); emlinecount++;
+	fprintf(tmpfile," rom *%d,1,%d\n",firstlabel,jumpcnt-1); emlinecount++;
 	l= jumphead;
 	while( l)
 	{
