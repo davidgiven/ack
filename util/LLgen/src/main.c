@@ -184,7 +184,6 @@ main(argc,argv) register string	argv[]; {
 	setinit(ntneeded);
 	maxnt = &nonterms[nnonterms];
 	maxt = &tokens[ntokens];
-	fclose(fact);
 	/*
 	 * Now, the grammar is read. Do some computations
 	 */
@@ -198,6 +197,7 @@ main(argc,argv) register string	argv[]; {
 		      stderr);
 	}
 	else	gencode(argc);
+	fclose(fact);
 	UNLINK(f_temp);
 	UNLINK(f_pars);
 	if (verbose) {
