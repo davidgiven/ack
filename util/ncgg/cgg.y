@@ -525,7 +525,7 @@ stackdeflist_el
 	;
 optuses
 	: /* empty */
-		{ $$ = 0; nallreg=0;}
+		{ $$ = -1; nallreg=0;}
 	| USES propno
 		{ $$ = $2; nallreg = 1; allreg[0] = $2; }
 	;
