@@ -22,3 +22,7 @@ name "Sparc system call library"
 system "sparc"
 dir libsys
 end
+name "Sparc debugger support library"
+system "sparc"
+dir libdb
+end
