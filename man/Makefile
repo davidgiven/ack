@@ -8,6 +8,7 @@ all:
 	-nroff macro.v7 i86_as.1 > i86_as.opr
 	-nroff macro.v7 m68k2_as.1 > m68k2_as.opr
 	-nroff macro.v7 pdp_as.1 > pdp_as.opr
+	-nroff macro.v7 z8000_as.1 > z8000_as.opr
 	-nroff macro.v7 z80_as.1 > z80_as.opr
 	-tbl macro.v7 ack.1 | nroff >ack.opr
 	-nroff macro.v7 arch.1 >arch.1.opr
@@ -31,6 +32,7 @@ install:
 	-cp m68k2_as.1 > /usr/man/man1/m68k2_as.1
 	-cp pdp_as.1 > /usr/man/man1/pdp_as.1
 	-cp z80_as.1 > /usr/man/man1/z80_as.1
+	-cp z8000_as.1 > /usr/man/man1/z8000_as.1
 	-tbl ack.1 >/usr/man/man1/ack.1
 	-cp arch.1 /usr/man/man1/arch.1
 	-cp arch.5 /usr/man/man5/arch.5
