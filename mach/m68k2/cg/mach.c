@@ -157,6 +157,7 @@ restr()
 			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
 		}
 	}
+	fprintf(codefile,"unlk a6\n");
 	fprintf(codefile,"rts\n");
 }
 
