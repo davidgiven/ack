@@ -285,7 +285,6 @@ il_flags(p)
 		while (*p != '\0') {
 			space = 10*space +*p++ -'0';
 		}
-		space = total_size * space / 100 ;
 		break;
 	case 'a':
 		complete_program = 1;
@@ -306,6 +305,7 @@ main(argc,argv)
 	mktemp(sname);
 	mktemp(cname2);
 	pass1(lname,bname,cname); /* grep calls, analyse procedures */
+	space = total_size * space / 100 ;
 	pass2(cname,space);  /* select calls to be expanded */
 	pass3(lname,lname2); /* do substitutions */
 	f = openfile(dname2,"w");
