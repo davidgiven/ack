@@ -147,7 +147,7 @@ fgets(buf, count, fd)
 		}
 		*c = *pbf++;
 		if (*c++ == '\n') {
-			*--c = 0;
+			*c = 0;
 			return buf;
 		}
 	}
