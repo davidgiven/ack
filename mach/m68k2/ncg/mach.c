@@ -45,13 +45,13 @@ con_float() {
 static int been_here;
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
-	fprintf(codefile,".data4\t");
+	fputs(".data4\t", codefile);
 	if (argval == 8)
-		fprintf(codefile,"0,");
-	fprintf(codefile,"0 !dummy float\n");
+		fputs("0,", codefile);
+	fputs("0 !dummy float\n", codefile);
 	if ( !been_here++)
 	{
-	fprintf(stderr,"Warning : dummy float-constant(s)\n");
+	fputs("Warning : dummy float-constant(s)\n", stderr);
 	}
 }
 
@@ -108,13 +108,13 @@ save()
 	register struct regsav_t *p;
 
 	if (regnr > MOVEM_LIMIT) {
-		fprintf(codefile,"movem.l ");
+		fputs("movem.l ", codefile);
 		for (p = regsav; ;) {
-			fprintf(codefile,"%s",p->rs_reg);
+			fputs(p->rs_reg, codefile);
 			if (++p == &regsav[regnr]) break;
 			putc('/',codefile);
 		}
-		fprintf(codefile,",-(sp)\n");
+		fputs(",-(sp)\n", codefile);
 	} else {
 		for (p = regsav; p < &regsav[regnr]; p++) {
 			fprintf(codefile,"move.l %s,-(sp)\n",p->rs_reg);
@@ -140,9 +140,9 @@ restr()
 	register struct regsav_t *p;
 
 	if (regnr > MOVEM_LIMIT)  {
-		fprintf(codefile,"movem.l (sp)+,");
+		fputs("movem.l (sp)+,", codefile);
 		for (p = regsav; ;) {
-			fprintf(codefile,"%s",p->rs_reg);
+			fputs(p->rs_reg, codefile);
 			if (++p == &regsav[regnr]) break;
 			putc('/',codefile);
 		}
@@ -152,8 +152,7 @@ restr()
 			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
 		}
 	}
-	fprintf(codefile,"unlk a6\n");
-	fprintf(codefile,"rts\n");
+	fputs("unlk a6\nrts\n", codefile);
 }
 
 
