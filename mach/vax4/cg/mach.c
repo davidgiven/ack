@@ -1,3 +1,5 @@
+#include <stb.h>
+
 #ifndef lint
 static char rcsid[] = "$Header$";
 #endif lint
@@ -48,7 +50,64 @@ con_mult(sz)
 mes(mesno)
 	word	mesno;
 {
-	while (getarg(any_ptyp) != sp_cend );
+	int argt, a1, a2 ;
+
+	switch ( (int)mesno ) {
+	case ms_ext :
+		for (;;) {
+			switch ( argt=getarg(
+			    ptyp(sp_cend)|ptyp(sp_pnam)|sym_ptyp) ) {
+			case sp_cend :
+				return ;
+			default:
+				strarg(argt) ;
+				fprintf(codefile,".define %s\n",argstr) ;
+				break ;
+			}
+		}
+	case ms_stb:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			fputs(".symb \"\", ", codefile);
+		else {
+			fprintf(codefile, ".symb \"%s\", ", str);
+			argt = getarg(cst_ptyp);
+		}
+		a1 = argval;
+		argt = getarg(cst_ptyp);
+		a2 = argval;
+		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+#ifdef DBX
+		if (a1 == N_PSYM) {
+			argval += 4;
+		}
+#endif
+		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
+		argt = getarg(end_ptyp);
+		break;
+	case ms_std:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			str[0] = '\0';
+		else {
+			argt = getarg(cst_ptyp);
+		}
+		swtxt();
+#ifndef DBX
+		if (argval == N_SLINE) {
+			fputs("calls $0,___u_LiB\n", codefile);
+			cleanregs();	/* debugger might change variables */
+		}
+#endif
+		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
+		argt = getarg(cst_ptyp);
+		fprintf(codefile, "%d\n", (int) argval);
+		argt = getarg(end_ptyp);
+		break;
+	default :
+		while ( getarg(any_ptyp) != sp_cend ) ;
+		break ;
+	}
 }
 
 #define PDPFLOAT
