@@ -220,7 +220,10 @@ int decflag(str) char *str ; {
 	if ( escape!=ILLGL ) type|=OPESC ;
 	if ( wordm!=ILLGL ) type|=OPWORD ;
 	switch ( range) {
-	case ILLGL : type|=OP_BOTH ; break ;
+	case ILLGL : type|=OP_BOTH ;
+		     if ( type==OPMINI || type==OPSHORT )
+			     error("Minies and shorties must have P or N") ;
+		     break ;
 	case 1     : type|=OP_POS  ; break ;
 	case 2     : type|=OP_NEG  ; break ;
 	}
