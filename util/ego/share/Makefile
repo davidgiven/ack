@@ -1,10 +1,29 @@
 EM=../../..
 EMH=$(EM)/h
 EML=$(EM)/lib
-CFLAGS=-DVERBOSE -DNOTCOMPACT
-SRC=types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c map.h map.c aux.h aux.c get.h get.c put.h put.c alloc.h alloc.c lset.h lset.c cset.h cset.c parser.h parser.c stack_chg.h stack_chg.c locals.h locals.c init_glob.h init_glob.c
 
-all:	classdefs.h pop_push.h wordlen.h alloc.o cset.o debug.o files.o go.o global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o init_glob.o
+SRC=\
+types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c\
+map.h map.c aux.h aux.c get.h get.c put.h put.c alloc.h alloc.c lset.h lset.c\
+cset.h cset.c parser.h parser.c stack_chg.h stack_chg.c locals.h locals.c\
+init_glob.h init_glob.c
+
+PRFILES=$(SRC)
+
+.SUFFIXES: .m
+.c.m:
+	$(CC) -c.m $(CFLAGS) $<
+
+all:\
+classdefs.h pop_push.h wordlen.h alloc.o cset.o debug.o files.o go.o\
+global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o\
+init_glob.o
+
+
+em_files:\
+classdefs.h pop_push.h wordlen.h alloc.m cset.m debug.m\
+files.m go.m global.m lset.m map.m parser.m get.m put.m aux.m stack_chg.m\
+locals.m init_glob.m
 
 classdefs.h: \
 	makeclassdef \
@@ -20,18 +39,22 @@ pop_push.h: \
 
 wordlen.h: makewordlen 
 	makewordlen > wordlen.h
-	rm makewordlen makewlen.o
+	rm makewordlen 
 makewordlen: makewlen.c
 	$(CC) -o makewordlen makewlen.c
-lpr:
-	pr $(SRC) | lpr
-opr:
-	pr $(SRC) | opr
-dumpflop:
-	tar -uf ../../../ego/share/share.tarf $(SRC) Makefile show.c
 show: \
 	show.c
 	 $(CC) -o show show.c $(EML)/em_data.a
+lint:
+	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
+
+pr:	$(PRFILES)
+	@pr $?
+	@touch pr
+
+depend:
+	$(SHR)/makedepend
+
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 alloc.o:	alloc.h
