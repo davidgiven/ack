@@ -19,11 +19,8 @@ struct outhead {
 
 #define O_MAGIC	0x0201		/* magic number of output file */
 #define	O_STAMP	0		/* version stamp */
+#define MAXSECT	64		/* Maximum number of sections */
 
-#ifdef JOHAN
-#define	HF_BREV	0x0001		/* high order byte lowest address */
-#define	HF_WREV	0x0002		/* high order word lowest address */
-#endif JOHAN
 #define	HF_LINK	0x0004		/* unresolved references left */
 #define	HF_8086	0x0008		/* os_base specially encoded */
 
@@ -62,10 +59,8 @@ struct outname {
 #define RELO2	   2		/* 2 bytes */
 #define RELO4	   4		/* 4 bytes */
 #define RELPC	0x08		/* pc relative */
-#ifndef JOHAN
 #define RELBR	0x10		/* High order byte lowest address. */
 #define RELWR	0x20		/* High order word lowest address. */
-#endif JOHAN
 
 /*
  * section type bits and fields
@@ -89,9 +84,7 @@ struct outname {
 #define S_LIN	0x0200		/* hll source line item */
 #define S_FIL	0x0300		/* hll source file item */
 #define S_MOD	0x0400		/* ass source file item */
-#ifndef JOHAN
 #define S_COM	0x1000		/* Common name. */
-#endif JOHAN
 
 /*
  * structure format strings
