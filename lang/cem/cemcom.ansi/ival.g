@@ -188,7 +188,7 @@ arr_elem(tpp, p)
 		p->nelem = 1;
 		return tpp;
 	}
-	if (AHEAD == '{' || ! aggregate_type(tp->tp_up))
+	if (AHEAD == '{' || (! aggregate_type(tp->tp_up) && tp->tp_up->tp_fund != UNION))
 		return &(tp->tp_up);
 	return gen_tphead(&(tp->tp_up), 1);
 }
@@ -219,6 +219,9 @@ gen_tphead(tpp, nest)
 		return 0;
 	}
 	if (gen_error) return tpp;
+	if (tp->tp_fund == UNION) {
+		return gen_tphead(&(tp->tp_sdef->sd_type), nest);
+	}
 	p = new_e_stack();
 	p->next = p_stack;
 	p_stack = p;
