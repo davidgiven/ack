@@ -159,8 +159,7 @@ dependencies:	resolved
 		do_deps `grep '.c$$' Cfiles`
 
 make.main:	dependencies make_macros lists $(FSRC_DIR)/proto.main
-		sed -e '/^#DEPENDENCIES/,$$d' -e '/^#PARAMS/r make_macros' -e '/^#LISTS/r lists' $(FSRC_DIR)/proto.main > make.main
-		echo '#DEPENDENCIES' >> make.main
+		rm_deps $(FSRC_DIR)/proto.main | sed -e '/^.PARAMS/r make_macros' -e '/^.LISTS/r lists' > make.main
 		cat *.dep >> make.main
 
 make_macros:	Makefile
@@ -183,7 +182,7 @@ lists:		Cfiles
 		echo "C_SRC = \\" > lists
 		echo $(CFILES) >> lists
 		echo "OBJ = \\" >> lists
-		echo $(CFILES) | sed -e 's#[^ ]*/##g' -e 's/\.c/.$$(SUF)/g' >> lists
+		echo $(CFILES) | sed -e 's|[^ ]*/||g' -e 's/\.c/.$$(SUF)/g' >> lists
 
 clean:
 		-make -f make.main clean

@@ -49,7 +49,7 @@ pr:
 		$(SRC) lint
 
 lint.exec:	$(SRC_DIR)/lint
-	sed -e 's|^EMDIR=.*|EMDIR=$(TARGET_HOME)|' -e 's/#.*//' < $(SRC_DIR)/lint > lint.exec
+	sed -e 's|^EMDIR=.*|EMDIR=$(TARGET_HOME)|' < $(SRC_DIR)/lint > lint.exec
 	chmod +x lint.exec
 
 lpass2:	$(OBJ) next.$(SUF)
