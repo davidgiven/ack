@@ -64,6 +64,8 @@ C module.
 Basic program.
 .IP .ocm
 Occam program.
+.IP .mod
+Modula-2 module.
 .IP .e
 EM assembly module in human readable form.
 .IP .k
@@ -230,7 +232,7 @@ routines for systems calls needed by both C and Pascal.
 When linking multiple \fI.o\fP or \fI.m\fP files created by
 separate calls of \fIack\fP together, \fIack\fP cannot deduce
 the run-time system needed,
-unless called as \fIapc\fP, \fIabc\fP, \fIocm\fP or \fIacc\fP.
+unless called as \fIapc\fP, \fIabc\fP, \fIocm\fP, \fIm2\fP, or \fIacc\fP.
 This flag serves to tell \fIack\fP which runtime system is
 needed in such a case.
 For example: "ack \-c x.c ; ack \-.c x.o".
