@@ -5,7 +5,7 @@ system(str)
 	char *str;
 {
 	int pid, exitstatus, waitval;
-	int (*sigint)(), (*sigquit)();
+	void (*sigint)(), (*sigquit)();
 	int i;
 
 	if ((pid = fork()) < 0) return -1;	/* How do we distinguish this

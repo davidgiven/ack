@@ -9,7 +9,7 @@ char *prompt;
 	struct sgttyb tty, ttysave;
 	static char pwdbuf[9];
 	int fd;
-	int (*savesig)();
+	void (*savesig)();
 
 	if ((fd = open("/dev/tty", 0)) < 0) fd = 0;
 	savesig = signal(SIGINT, SIG_IGN);

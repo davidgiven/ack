@@ -1,6 +1,6 @@
 #include "f2c.h"
 
-typedef int (*sig_type)();
+typedef void (*sig_type)();
 extern sig_type signal();
 
 integer signal_(sigp, procp)

@@ -40,8 +40,8 @@ pclose(iop)
 {
 	int fd = fileno(iop);
 	int status, wret;
-	int (*intsave)() = signal(SIGINT, SIG_IGN);
-	int (*quitsave)() = signal(SIGQUIT, SIG_IGN);
+	void (*intsave)() = signal(SIGINT, SIG_IGN);
+	void (*quitsave)() = signal(SIGQUIT, SIG_IGN);
 
 	fclose(iop);
 	while ((wret = wait(&status)) != -1) {

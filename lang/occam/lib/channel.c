@@ -86,7 +86,7 @@ void chan_out(v, c) long v; register chan *c;
 }
 
 #ifndef __BSD4_2
-static int timeout();
+static void timeout();
 #endif
 
 int chan_any(c) register chan *c;
@@ -170,7 +170,7 @@ int chan_any(c) register chan *c;
  * timeout() to prevent it from getting lost.
  */
 
-static int timeout(sig)
+static void timeout(sig)
 {
 	signal(SIGALRM, timeout);
 	alarm(1);

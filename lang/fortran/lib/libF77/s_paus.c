@@ -2,7 +2,7 @@
 #include "f2c.h"
 #define PAUSESIG 15
 
-static waitpause()
+static void waitpause()
 {
 return;
 }
