@@ -26,7 +26,11 @@ beginoutput()
 {
 	extern ushort	NLocals, NGlobals;
 	extern long	NLChars, NGChars;
+	extern char	*outputname;
 
+	if (! wr_open(outputname)) {
+		fatal("can't create %s", outputname);
+	}
 	if (incore)
 		generate_section_names();
 
@@ -82,4 +86,5 @@ endoutput()
 	} else {
 		write_bytes();
 	}
+	wr_close();
 }

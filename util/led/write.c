@@ -30,13 +30,9 @@ static long		off_char;
  */
 begin_write()
 {
-	extern char *outputname;
 	register struct outhead *hd = &outhead;
 
 	assert(! incore);
-	if (! wr_open(outputname)) {
-		fatal("cannot write %s", outputname);
-	}
 	wr_ohead(hd);
 	wr_sect(outsect, hd->oh_nsect);
 	off_char = OFF_CHAR(*hd);

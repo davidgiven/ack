@@ -581,9 +581,6 @@ write_bytes()
 			offchar + NLChars
 		);
 	}
-	if (! wr_open(outputname)) {
-		fatal("can't create %s", outputname);
-	}
 	/*
 	 * These pieces must always be written.
 	 */
@@ -608,7 +605,6 @@ write_bytes()
 		wr_dbug(mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_full);
 #endif SYMDBUG
 	}
-	wr_close();
 }
 
 namecpy(name, nname, offchar)
