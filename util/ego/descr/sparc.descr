@@ -38,8 +38,11 @@ register score parameters:
 
 opening cost parameters:
         local variable:
-                (1 case)
+                (2 cases)
                 general
+                        (1 size)
+                        default ->      (2,1)
+		pointer
                         (1 size)
                         default ->      (2,1)
         address of local variable:
