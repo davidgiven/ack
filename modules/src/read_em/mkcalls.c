@@ -21,8 +21,6 @@
 extern char em_flag[];	/* One per EM instruction: indicates parameter kind */
 extern short em_ptyp[];	/* One per parameter kind: indicates parameter type */
 
-#include "C_funcs"
-
 static int listtype = 0;	/* indicates pseudo when generating code for
 				   variable length argument lists
 				   (only for MES)

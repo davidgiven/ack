@@ -48,13 +48,13 @@ cmp:		all
 		$(COMPARE) man/read_em.3
 
 pr:
-		@pr Makefile m_C_funcs m_C_mnem m_C_mnem_na argtype $(SRCFILES)
+		@pr Makefile m_C_mnem m_C_mnem_na argtype $(SRCFILES)
 
 opr:
 		make pr | opr
 
 clean:
-		rm -f *.o *.a C_funcs C_mnem C_mnem_narg
+		rm -f *.o *.a C_mnem C_mnem_narg
 
 libread_emk.a:	$(K_OFILES)
 		ar r libread_emk.a $(K_OFILES)
@@ -80,11 +80,11 @@ read_emeV.o:	read_em.c em_comp.h reade.c
 		$(CC) -c $(CFLAGS) -DCHECKING read_em.c
 		mv read_em.o read_emeV.o
 
-makecalls.o:	C_funcs C_mnem C_mnem_narg em_comp.h mkcalls.c
+makecalls.o:	C_mnem C_mnem_narg em_comp.h mkcalls.c
 		$(CC) -c $(CFLAGS) mkcalls.c
 		mv mkcalls.o makecalls.o
 
-makecallsV.o:	C_funcs C_mnem C_mnem_narg em_comp.h mkcalls.c
+makecallsV.o:	C_mnem C_mnem_narg em_comp.h mkcalls.c
 		$(CC) -c $(CFLAGS) -DCHECKING mkcalls.c
 		mv mkcalls.o makecallsV.o
 
@@ -94,10 +94,7 @@ C_mnem:		m_C_mnem argtype
 C_mnem_narg:	m_C_mnem_na argtype
 		sh m_C_mnem_na > C_mnem_narg
 
-C_funcs:	m_C_funcs argtype
-		sh m_C_funcs > C_funcs
-
-lintlib:	C_mnem C_mnem_narg C_funcs
+lintlib:	C_mnem C_mnem_narg
 		lint $(INCLUDES) $(DEFINES) -DCOMPACT -DCHECKING -Cread_emkV $(KSRCFILES)
 		lint $(INCLUDES) $(DEFINES) -DCHECKING -Cread_emeV $(ESRCFILES)
 		mv llib-lread_emeV.ln llib-lread_emkV.ln $(MODULES)/lib

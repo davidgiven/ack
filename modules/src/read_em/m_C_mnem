@@ -1,6 +1,5 @@
 EM_TABLE=../../../etc/em_table
 echo "switch(p->em_opcode) {"
-echo '	default: EM_error = "Illegal mnemonic"; break;'
 for i in - cdflnorswz p b
 do
 	list=`./argtype $i $EM_TABLE`
@@ -26,19 +25,22 @@ do
 	esac
 	for i in $list
 	do
-		echo "	case op_$i:"
+		cat << EOF
+	case op_$i:
+		C_$i$args;
+		break;
+EOF
 	done
-	echo "		(*C_funcs[p->em_opcode])$args; break;"
 done
 list=`./argtype g $EM_TABLE`
-for i in $list
-do
-	echo "	case op_$i:"
-done
 cat << 'EOF'
-	/* a "g" argument */
+	default:
+/* a "g" argument */
 		if (p->em_argtype == nof_ptyp) {
 			switch(p->em_opcode) {
+				default:
+					EM_error = "Illegal mnemonic";
+					break;
 EOF
 for i in $list
 do
@@ -53,6 +55,9 @@ cat << 'EOF'
 		}
 		else if (p->em_argtype == sof_ptyp) {
 			switch(p->em_opcode) {
+				default:
+					EM_error = "Illegal mnemonic";
+					break;
 EOF
 for i in $list
 do
@@ -66,8 +71,21 @@ cat << 'EOF'
 			}
 		}
 		else /*argtype == cst_ptyp */ {
-			(*C_funcs[p->em_opcode])(p->em_cst);
-			break;
+			switch(p->em_opcode) {
+				default:
+					EM_error = "Illegal mnemonic";
+					break;
+EOF
+for i in $list
+do
+	cat << EOF
+				case op_$i:
+					C_$i(p->em_cst);
+					break;
+EOF
+done
+cat << 'EOF'
+			}
 		}
 }
 EOF
