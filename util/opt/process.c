@@ -30,10 +30,16 @@ process() {
 		symvalue();		/* give symbols value */
 	if (prodepth != 0) {
 		if (!nflag) {
-			checklocs();	/* check definition of locals */
-			peephole();	/* local optimization */
+		    int npasses = 0;
+		    bool madeopt;
+
+		    checklocs();	/* check definition of locals */
+		    do {
+			madeopt = peephole();	/* local optimization */
 			relabel();	/* relabel local labels */
 			flow();		/* throw away unreachable code */
+		    } while (madeopt && ++npasses < 5000);
+		    assert(!madeopt);
 		}
 		outpro();		/* generate PRO pseudo */
 		outregs();		/* generate MES ms_reg pseudos */
@@ -62,6 +68,7 @@ relabel() {
 
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
 		for (np = *npp; np != (num_p) 0; np = np->n_next) {
+			if (! np->n_line) continue;
 			assert((np->n_line->l_instr&BMASK) == op_lab
 			    && np->n_line->l_a.la_np == np);
 			for(tp=np; (tp->n_flags&(NUMKNOWN|NUMMARK))==0;
@@ -74,6 +81,11 @@ relabel() {
 				tp->n_flags &= ~ NUMMARK;
 				tp->n_flags |=   NUMKNOWN;
 			}
+		}
+	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
+		for (np = *npp; np != (num_p) 0; np = np->n_next) {
+			np->n_flags &= ~(NUMKNOWN|NUMSCAN|NUMREACH);
+			np->n_jumps = 0;
 		}
 }
 

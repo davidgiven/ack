@@ -127,24 +127,28 @@ peephole() {
 		hashpatterns();
 		phashed=TRUE;
 	}
-	optimize();
+	return optimize();
 }
 
 optimize() {
 	register num_p *npp,np;
 	register instr;
+	bool madeopt;
 
-	basicblock(&instrs);
+	madeopt = basicblock(&instrs);
 	for (npp=curpro.numhash;npp< &curpro.numhash[NNUMHASH]; npp++)
 		for (np = *npp; np != (num_p) 0; np=np->n_next) {
+			if (! np->n_line) continue;
 			if(np->n_line->l_next == (line_p) 0)
 				continue;
 			instr = np->n_line->l_next->l_instr&BMASK;
 			if (instr == op_lab || instr == op_bra)
 				np->n_repl = np->n_line->l_next->l_a.la_np;
 			else
-				basicblock(&np->n_line->l_next);
+				if (basicblock(&np->n_line->l_next))
+					madeopt = TRUE;
 		}
+	return madeopt;
 }
 
 offset oabs(off) offset off; {
@@ -590,20 +594,18 @@ int len;
 	return(tryrepl(lpp,bp,patlen));
 }
 
+int
 basicblock(alpp) line_p *alpp; {
 	register line_p *lpp,lp;
-	bool madeopt;
 	unsigned short hash[3];
 	line_p *next;
 	register byte *bp;
 	int i;
 	short index;
-	int npasses;
+	bool madeopt;
 
-	npasses = 0;
-	do {	/* make pass over basicblock */
-	    lpp = alpp; madeopt = FALSE;
-	    while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
+	lpp = alpp; madeopt = FALSE;
+	while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
 		lp = *lpp; next = &lp->l_next;
 		hash[0] = lp->l_instr&BMASK;
 		lp=lp->l_next;
@@ -638,7 +640,6 @@ basicblock(alpp) line_p *alpp; {
 		    }
 		}
 		lpp = next;
-	    }
-	} while(madeopt && ++npasses<5000);	/* as long as there is progress */
-	assert(!madeopt);
+	}
+	return madeopt;
 }

@@ -37,7 +37,15 @@ findreach() {
 				np->n_repl->n_jumps++;
 				if (!(np->n_flags&NUMSCAN)) {
 					np->n_flags |= NUMSCAN;
-					reach(np->n_line->l_next);
+					if (np->n_line) {
+						reach(np->n_line->l_next);
+						continue;
+					}
+					if (!(np->n_repl->n_flags&NUMSCAN)) {
+						np->n_repl->n_flags |= NUMSCAN;
+						if (np->n_repl->n_line)
+						    reach(np->n_repl->n_line->l_next);
+					}
 				}
 			}
 }
@@ -52,11 +60,21 @@ reach(lnp) register line_p lnp; {
 			 */
 			np = lnp->l_a.la_np;
 			if ((lnp->l_instr&BMASK) != op_lab)
-				np = np->n_repl;
+				lnp->l_a.la_np = np = np->n_repl;
 			np->n_flags |= NUMREACH;
 			if (!(np->n_flags&NUMSCAN)) {
 				np->n_flags |= NUMSCAN;
-				reach(np->n_line->l_next);
+				if (np->n_line)
+					reach(np->n_line->l_next);
+				else {
+					np = np->n_repl;
+					np->n_flags |= NUMREACH;
+					if (!(np->n_flags & NUMSCAN)) {
+						np->n_flags |= NUMSCAN;
+						if (np->n_line)
+							reach(np->n_line->l_next);
+					}
+				}
 			}
 			if ((lnp->l_instr&BMASK) == op_lab)
 				return;
@@ -99,6 +117,9 @@ cleaninstrs() {
 		} else
 			superfluous = FALSE;
 		if ( (!reachable) || superfluous) {
+			if (instr == op_lab) {
+				lp->l_a.la_np->n_line = 0;
+			}
 			lp = lp->l_next;
 			oldline(*lpp);
 			OPTIM(O_UNREACH);

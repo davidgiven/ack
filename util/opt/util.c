@@ -44,7 +44,7 @@ badassertion(file,line) char *file; unsigned line; {
 optim(n) {
 
 	fprintf(stderr,"Made optimization %d",n);
-	if (inpro)
+	if (prodepth)
 		fprintf(stderr," (%.*s)",IDL,curpro.symbol->s_name);
 	fprintf(stderr,"\n");
 }
