@@ -15,4 +15,5 @@
 Lerr:
 	pushl	r1
 	pushl	$ERANGE
-	jmp	.trp
+	jsb	.trp
+	rsb
