@@ -43,6 +43,9 @@ afm2 \- fast ACK compatible Modula-2 compiler
 .B \-_
 ]
 [
+.B \-g
+]
+[
 .BI \-U name
 ]
 [
@@ -162,6 +165,9 @@ Verbose, no execute. Only print the commands, do not execute them.
 .IP \fB\-L\fR
 do not generate code to keep track of
 the current location in the source code.
+.IP \fB\-g\fP
+.br
+Produce symbolic debugging information for grind(1).
 .IP \fB\-w\fR\fIclasses\fR
 suppress warning messages whose class is a member of \fIclasses\fR.
 Currently, there are three classes: \fBO\fR, indicating old-flashioned use,
@@ -197,5 +203,7 @@ N. Wirth, \fIProgramming in Modula-2\fP, 3rd edition, Springer Verlag.
 C.J.H. Jacobs, \fIThe ACK Modula-2 Compiler\fP.
 .IP [3]
 ack(1) unix manual page.
+.IP [4]
+grind(1) unix manual page.
 .SH DIAGNOSTICS
 Diagnostics are intended to be self-explanatory.

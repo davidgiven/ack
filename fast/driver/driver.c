@@ -49,7 +49,11 @@ int kids =  -1;
 int ecount = 0;
 
 struct arglist CPP_FLAGS = {
+#ifdef FCC
 	7,
+#else
+	13,
+#endif
 	{
 		"-D__unix",
 		"-D_EM_WSIZE=4",
@@ -58,6 +62,14 @@ struct arglist CPP_FLAGS = {
 		"-D_EM_LSIZE=4",
 		"-D_EM_FSIZE=4",
 		"-D_EM_DSIZE=8",
+#ifndef FCC
+		"-DEM_WSIZE=4",
+		"-DEM_PSIZE=4",
+		"-DEM_SSIZE=2",
+		"-DEM_LSIZE=4",
+		"-DEM_FSIZE=4",
+		"-DEM_DSIZE=8",
+#endif
 	}
 };
 
@@ -83,6 +95,7 @@ struct arglist CALL_VEC;
 
 int o_flag = 0;
 int c_flag = 0;
+int g_flag = 0;
 int v_flag = 0;
 int O_flag = 0;
 
@@ -132,6 +145,13 @@ lang_opt(str)
 {
 	switch(str[1]) {
 	case '-':	/* debug options */
+		append(&COMP_FLAGS, str);
+		return 1;
+	case 'a':	/* ignore -ansi flag */
+		if (! strcmp(str, "-ansi")) {
+			return 1;
+		}
+		break;
 	case 'w':	/* disable warnings */
 		if (str[2]) {
 			str[1] = '-';
@@ -235,7 +255,7 @@ main(argc, argv)
 #endif FM2
 #ifdef FCC
 	strcat(INCLUDE, CCINCL);
-	append(&COMPFLAGS, "-L");
+	append(&COMP_FLAGS, "-L");
 #endif FCC
 #ifdef FPC
 	INCLUDE[0] = '\0';
@@ -278,6 +298,10 @@ main(argc, argv)
 			break;
 		case 'I':	/* include directory */
 			append(&CPP_FLAGS, str);
+			break;
+		case 'g':	/* debugger support */
+			append(&COMP_FLAGS, str);
+			g_flag = 1;
 			break;
 		case 'o':	/* target file */
 			if (argc-- >= 0) {
@@ -370,7 +394,7 @@ main(argc, argv)
 			if (o_flag && c_flag) {
 				f = o_FILE;
 			}
-			else	f = mkstr(ldfile, BASE, ".o", (char *)0);
+			else	f = mkstr(ldfile, BASE, ".", "o", (char *)0);
 				append(call, COMP);
 #ifdef FCC
 				concat(call, &CPP_FLAGS);
@@ -421,6 +445,7 @@ main(argc, argv)
 #ifdef FPC
 		append(call, "-.p");
 #endif
+		if (g_flag) append(call, "-g");
 		concat(call, &LD_FLAGS);
 		concat(call, &LDFILES);
 		if (runvec(call, (char *) 0) && GEN_LDFILES.al_argc == 1)

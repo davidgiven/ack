@@ -21,6 +21,9 @@ afcc \- fast ACK compatible ANSI C compiler
 .B \-w
 ]
 [
+.B \-g
+]
+[
 .B \-o 
 .I outfile
 ]
@@ -112,6 +115,9 @@ Name the final output file
 .br
 Remove any initial definition of
 .I name.
+.IP \fB\-g\fP
+.br
+Produce symbolic debugging information for grind(1).
 .IP \fB\-v\fP
 .br
 Verbose. Print the commands as they are executed.
@@ -132,5 +138,7 @@ can be freely mixed.
 B.W. Kernighan, D. Ritchie, "\fIThe C programming Language\fP", Prentice-Hall Inc., 1978
 .IP [2]
 ack(1) manual page.
+.IP [3]
+grind(1) manual page.
 .SH DIAGNOSTICS
 Diagnostics are intended to be self-explanatory.

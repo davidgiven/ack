@@ -21,6 +21,9 @@ afpc \- fast ACK compatible Pascal compiler
 .B \-w
 ]
 [
+.B \-g
+]
+[
 .B \-L
 ]
 [
@@ -165,6 +168,9 @@ Verbose, no execute. Only print the commands, do not execute them.
 .br
 do not generate code to keep track of
 the current location in the source code.
+.IP \fB\-g\fP
+.br
+Produce symbolic debugging information for grind(1).
 .IP \fB\-w\fP
 .br
 suppress warning messages.
@@ -215,5 +221,7 @@ use \fIcompiler\fR as Modula-2 compiler instead of the default.
 J.W. Stevenson, H. v. Eck, \fIAmsterdam Compiler Kit-Pascal reference manual\fP.
 .IP [2]
 ack(1) unix manual page.
+.IP [3]
+grind(1) unix manual page.
 .SH DIAGNOSTICS
 Diagnostics are intended to be self-explanatory.
