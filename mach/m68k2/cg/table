@@ -1048,12 +1048,18 @@ adp $1 >= 1 && $1 <= 8
 ...	| ADDSCR |	"add.l #$1,%[1]"
 			erase(%[1])
 			setcc(%[1])			| %[1] | |
-adp	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+"
+adp $1 >= 0-32767 && $1 <= 32767
+	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+"
 						+ tostring($1)} | |
 ...	| nocoercions: LOCAL_ADDR | | {LOCAL_ADDR,%[1.off]+$1} | |
 ...	| nocoercions: REGOFF_ADDR | | {REGOFF_ADDR,%[1.reg],%[1.off]+$1}  | |
 ...	| nocoercions: ADDREG | | {REGOFF_ADDR,%[1],$1} | |
 ...	| ADDSCR |	"lea $1(%[1]),%[1]"
+			erase(%[1])
+			setcc(%[1])			| %[1] | |
+adp	| nocoercions: EXTERNAL_ADDR | | {EXTERNAL_ADDR,%[1.off] + "+"
+						+ tostring($1)} | |
+...	| ADDSCR |	"add.l #$1,%[1]"
 			erase(%[1])
 			setcc(%[1])			| %[1] | |
 			
