@@ -7,18 +7,15 @@
 
 #include	<alloc.h>
 #include	"idfsize.h"
-#include	"maxincl.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
 
 char options[128];			/* one for every char	*/
 int inc_pos = 1;			/* place where next -I goes */
-char *inctable[MAXINCL] = {		/* list for includes	*/
-	".",
-	"/usr/include",
-	0
-};
+int inc_max;
+int inc_total;
+char **inctable;
 
 extern int idfsize;
 int txt2int();
@@ -63,15 +60,26 @@ do_option(text)
 	}
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 		if (*text)	{
-			register int i = inc_pos++;
+			register int i;
 			register char *new = text;
+
+			if (++inc_total > inc_max) {
+				char **n = (char **)
+				   Malloc((10 + inc_max) * sizeof(char *));
+
+				for (i = 0; i < inc_max; i++) {
+					n[i] = inctable[i];
+				}
+				free((char *) inctable);
+				inctable = n;
+				inc_max += 10;
+			}
 			
+			i = inc_pos++;
 			while (new)	{
 				register char *tmp = inctable[i];
 				
 				inctable[i++] = new;
-				if (i == MAXINCL)
-					fatal("too many -I options");
 				new = tmp;
 			}
 		}

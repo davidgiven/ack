@@ -7,7 +7,6 @@
 
 #include <system.h>
 #include "input.h"
-#include "maxincl.h"
 #include "obufsize.h"
 #include "LLlex.h"
 #include "class.h"

@@ -25,7 +25,7 @@
 #include	"macro.h"
 #include	"bits.h"
 
-IMPORT char *inctable[];	/* list of include directories		*/
+IMPORT char **inctable;		/* list of include directories		*/
 IMPORT char *getwdir();
 PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/

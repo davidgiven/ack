@@ -5,18 +5,21 @@
  */
 /* MAIN PROGRAM */
 
+#include <alloc.h>
 #include "file_info.h"
 #include "idfsize.h"
 
 extern char *symbol2str();
 extern char *getwdir();
-extern char *inctable[];
 extern int err_occurred;
 int idfsize = IDFSIZE;
 
 int ifval;
 
 char *prog_name;
+
+extern char **inctable;
+extern int inc_max, inc_total;
 
 main(argc, argv)
 	char *argv[];
@@ -25,6 +28,12 @@ main(argc, argv)
 	prog_name = argv[0];
 
 	init_idf();
+
+	inctable = (char **) Malloc(10 * sizeof(char *));
+	inc_max = 10;
+	inc_total = 2;
+	inctable[0] = ".";
+	inctable[1] = "/usr/include";
 	init_pp();	/* initialise the preprocessor macros	*/
 
 	/*	Note: source file "-" indicates that the source is supplied
