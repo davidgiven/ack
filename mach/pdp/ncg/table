@@ -1982,12 +1982,14 @@ pat lfr ret $1==$2				leaving ret 0
 pat ret $1==0
 with STACK
 gen mov lb,sp
+    mov {autoinc, sp},lb
     rts pc
 
 pat ret $1==2
 with src2 STACK
 gen move %1,r0
     mov lb,sp
+    mov {autoinc, sp},lb
     rts pc
 
 pat ret $1==4
@@ -1995,6 +1997,7 @@ with STACK
 gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     mov lb,sp
+    mov {autoinc, sp},lb
     rts pc
 
 pat ret $1==8				yields {addr_external, "retar"}
