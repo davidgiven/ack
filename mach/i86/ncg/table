@@ -2604,12 +2604,12 @@ pat ldc cms tne $2==4 && loww($1)==0 && highw($1)==0
 with rmorconst REG STACK
   gen or %2,%1
       je {label,1f}
-      inc %2
+      mov %2,{ANYCON,1}
       1:			yields %2
 with REG rmorconst STACK
   gen or %1,%2
       je {label,1f}
-      inc %1
+      mov %2,{ANYCON,1}
       1:			yields %1
 
 pat ldc cms zeq $2==4 && loww($1)==65535 && highw($1)==(0-1)
