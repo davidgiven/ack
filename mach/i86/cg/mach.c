@@ -49,11 +49,11 @@ con_float() {
 	if (i!= 4 && i!= 8)
 		fatal("bad fcon size");
 	if (! warning_given) {
-		fprintf(stderr, "Warning: dummy floating point constant(s)\n");
+		fputs("Warning: dummy floating point constant(s)\n", stderr);
 		warning_given = 1;
 	}
 	while ( i ) {
-		fprintf(codefile," .data2 0,0\n") ;
+		fputs(" .data2 0,0\n", codefile) ;
 		i -=4 ;
 	}
 }
@@ -69,13 +69,13 @@ string holstr(n) word n; {
 
 prolog(nlocals) full nlocals; {
 
-	fprintf(codefile,"\tpush\tbp\n\tmov\tbp,sp\n");
+	fputs("\tpush\tbp\n\tmov\tbp,sp\n", codefile);
 	switch (nlocals) {
-	case 4: printf("\tpush\tax\n");
-	case 2: printf("\tpush\tax\n");
+	case 4: fputs("\tpush\tax\n", codefile);
+	case 2: fputs("\tpush\tax\n", codefile);
 	case 0: break;
 	default:
-		printf("\tsub\tsp,%d\n",nlocals); break;
+		fprintf(codefile, "\tsub\tsp,%d\n",nlocals); break;
 	}
 }
 
@@ -130,14 +130,14 @@ regsave(regstr, off, size)
 regreturn()
 {
 	if (firstreg == 1) {
-		if (si_off != -1) fputs("pop si\n", codefile);
-		fputs("pop di\n", codefile);
+		if (si_off != -1) fputs("jmp .sdret\n", codefile);
+		else fputs("jmp .dret\n", codefile);
 	}
 	else if (firstreg == -1) {
-		if (di_off != -1) fputs("pop di\n", codefile);
-		fputs("pop si\n", codefile);
+		if (di_off != -1) fputs("jmp .dsret\n", codefile);
+		else fputs("jmp .sret\n", codefile);
 	}
-	fputs("mov sp,bp\npop bp\nret\n", codefile);
+	else fputs("jmp .cret\n", codefile);
 }
 #endif REGVARS
 
@@ -153,7 +153,7 @@ mes(type) word type ; {
 				return ;
 			default:
 				strarg(argt) ;
-				printf(".define %s\n",argstr) ;
+				fprintf(codefile, ".define %s\n",argstr) ;
 				break ;
 			}
 		}
