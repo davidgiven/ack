@@ -14,7 +14,7 @@ gen.c
 initscan.c
 libmain.c
 main.c
-makefile
+proto.make
 misc.c
 nfa.c
 parse.y

@@ -25,18 +25,14 @@ char OutputForm[MAXBUF] = "%s,\n";
 			/* format for spitting out a string */
 char *Table[MAXTAB];
 char *ProgCall;		/* callname of this program */
-int signedch = 0;	/* set if characters are signed */
 int TabSize = 128;	/* default size of generated table */
 char *InitialValue;	/* initial value of all table entries */
-#define CHROFFSETFILE	"charoffset.h"
-char *chroffsetfile = 0;
 
 extern char *malloc(), *strcpy();
 
 main(argc, argv)
 	char *argv[];
 {
-	if (((char) -1) < 0) signedch = 1;
 
 	ProgCall = *argv++;
 	argc--;
@@ -50,24 +46,8 @@ main(argc, argv)
 			}
 		}
 	}
-	if (chroffsetfile) MkCharIndex();
 	exit(0);
-}
-
-MkCharIndex()
-{
-	/*	Assumption: 8 bit bytes, ASCII character set */
-	FILE *fp;
-
-	if ((fp = fopen(chroffsetfile, "w")) == NULL) {
-		fprintf(stderr, "%s: cannot write file %s\n", ProgCall, chroffsetfile);
-		exit(1);
-	}
-	if (signedch) {
-		fputs("#define CharOffset	128\n", fp);
-	}
-	else	fputs("#define CharOffset	0\n", fp);
-	fclose(fp);
+	/*NOTREACHED*/
 }
 
 char *
@@ -125,16 +105,6 @@ option(str)
 			InitTable((char *)0);
 		}
 		else	InitTable(str);
-		break;
-	case 'H':	/* create include file for character offset,
-			   and create tables which can be indexed by the
-			   full range of characters, rather than 0..127,
-			   by adding "CharOffset" to the base.
-			*/
-		if (*++str == '\0') {
-			chroffsetfile = CHROFFSETFILE;
-		}
-		else	chroffsetfile = ++str;
 		break;
 	case 'S':
 	{
@@ -232,14 +202,14 @@ c_proc(str, Name)
 			ch = quoted(&str);
 		}
 		else	{
-			ch = *str++;
+			ch = *str++ & 0377;
 		}
 		if (*str == '-')	{
 			if (*++str == '\\')	{
 				ch2 = quoted(&str);
 			}
 			else	{
-				if (ch2 = *str++);
+				if (ch2 = (*str++ & 0377));
 				else str--;
 			}
 			if (ch > ch2) {
@@ -255,23 +225,20 @@ c_proc(str, Name)
 			if (! setval(ch, name)) return 0;
 		}
 	}
-	if (chroffsetfile) Table[256] = Table[0];
 	return 1;
 }
-
-#define ind(X)	(chroffsetfile && signedch?(X>=128?X-128:X+128):X)
 
 int
 setval(ch, nm)
 	char *nm;
 {
-	register char **p = &Table[ind(ch)];
+	register char **p = &Table[ch];
 
 	if (ch < 0 || ch >= TabSize) {
 		fprintf(stderr, "Illegal index: %d\n", ch);
 		return 0;
 	}
-	if (*(p = &Table[ind(ch)])) {
+	if (*(p = &Table[ch])) {
 		fprintf(stderr, "Warning: redefinition of index %d\n", ch);
 	}
 	*p = nm;

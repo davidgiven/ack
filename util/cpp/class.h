@@ -10,9 +10,7 @@
 	At present such a class number is supposed to fit in 4 bits.
 */
 
-#include "charoffset.h"
-
-#define	class(ch)	((tkclass+CharOffset)[ch])
+#define	class(ch)	(tkclass[(unsigned char) ch])
 
 /*	Being the start of a token is, fortunately, a mutual exclusive
 	property, so, as there are less than 16 classes they can be
@@ -38,9 +36,9 @@
 #define _D_	04
 #define _H_	010
 
-#define	in_idf(ch)	((tk2class+CharOffset)[ch] & _I_)
-#define	is_oct(ch)	((tk2class+CharOffset)[ch] & _O_)
-#define	is_dig(ch)	((tk2class+CharOffset)[ch] & _D_)
-#define	is_hex(ch)	((tk2class+CharOffset)[ch] & _H_)
+#define	in_idf(ch)	(tk2class[(unsigned char)ch] & _I_)
+#define	is_oct(ch)	(tk2class[(unsigned char)ch] & _O_)
+#define	is_dig(ch)	(tk2class[(unsigned char)ch] & _D_)
+#define	is_hex(ch)	(tk2class[(unsigned char)ch] & _H_)
 
 extern char tkclass[], tk2class[];

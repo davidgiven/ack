@@ -1,4 +1,4 @@
 READ_ME
-Makefile
+proto.make
 mkiswitch.c
 mkswitch.c

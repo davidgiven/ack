@@ -1,7 +1,7 @@
 LLlex.c
 LLlex.h
 LLmessage.c
-Makefile
+proto.make
 Parameters
 bits.h
 ch7bin.c

@@ -5,5 +5,5 @@ ioc0.c
 prtime.c
 set.c
 sig.c
-Makefile
+proto.make
 READ_ME

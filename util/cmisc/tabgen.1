@@ -60,13 +60,6 @@ Initialize all internal table values to \fIstr\fP. if \fIstr\fP is not
 given, this command is equivalent to the C command.
 .IP S\fInum\fP
 Set the table size to \fInum\fP entries. The default size is 128.
-.IP H\fIfilename\fP
-Create tables which can be indexed by the full range of characters,
-rather than 0..127. As this depends on the implementation of 'char'
-in C (signed or unsigned), this also generates a file \fIfilename\fP,
-with a #define for the constant "CharOffset". The generated tables can
-be indexed by first adding "CharOffset" to the base of the table.
-If \fIfilename\fP is not given, "charoffset.h" is used.
 .SH "AN EXAMPLE"
 .PP
 The next example is a part of the \fItabgen\fP description of the

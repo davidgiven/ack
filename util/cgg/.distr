@@ -1,4 +1,4 @@
-Makefile
+proto.make
 bootgram.y
 bootlex.l
 main.c

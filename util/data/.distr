@@ -1,4 +1,4 @@
-Makefile
+proto.make
 em_flag.c
 em_mnem.c
 em_pseu.c
