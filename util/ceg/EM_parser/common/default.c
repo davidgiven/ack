@@ -1,20 +1,9 @@
 #include "decl.h"
 #include <system.h>
 
-File	*save_file;
-extern File *outfile;
-extern char yytext[];
-int	def_start, def_end, save_lineno;
-extern int yylineno;
-
-init_defaults( instr)
-char *instr;
-{
-	save_file = outfile;
-	save_lineno = yylineno;
-	sys_open( ".default", OP_WRITE, &outfile);
-	set_def_params( instr);
-}
+/* This file contains a number of funtions which will be called to handle
+ * the 'DEF_C_INSTR' (e.g., C_loe).
+ */
 
 #define _ICON	0
 #define _UCON	4
@@ -86,7 +75,39 @@ struct { char *name; int segment, generated}
 		/* C_ZRE */	{ "C_zre", SEGTXT, 0},
 				{ "C_zre_dnam", SEGTXT, 0},
 				{ "C_zre_dlb", SEGTXT, 0}
-		};
+		};	/* This big array contains information about the 
+			 * functions that will be generated from the descrip-
+			 * tion of 1 DEF_C_INSTR. It contains the name, the
+			 * segment and a flag of these instructions. The flag
+			 * is used to determine if the instruction is explicitly
+			 * given in the EM_table or not.
+			 */
+
+
+File	*save_file;	/* Save original output-file in this variable */
+int	def_start,	/* Index in def_info[], start of the expanded C_INSTR */
+	def_end,	/* last expanded C_INSTR index. */
+	save_lineno;
+
+extern File *outfile;
+extern char yytext[];
+extern int yylineno;
+
+
+
+
+init_defaults( instr)
+char *instr;
+
+/* Save current output-file and write on a file called ".default" */
+
+{
+	save_file = outfile;
+	save_lineno = yylineno;
+	sys_open( ".default", OP_WRITE, &outfile);
+	set_def_params( instr);
+}
+
 
 int bss_or_hol_instr( index)
 int index;
@@ -96,10 +117,11 @@ int index;
 	     	 index == _FCON + 2 || index == _FCON + 3);
 }
 
+
 set_def_params( instr)
 char *instr;
 
-/* geef def_start en def_end een waarde */
+/* Give 'def_start' and 'def_end' their correct values. */
 
 {
 	int low, high, mid, rel;
@@ -130,7 +152,7 @@ char *instr;
 			else if ( rel < 0)
 				high = mid;
 			else
-				/* pas op, mid is naar beneden afgerond !! */
+				/* be careful : 'mid' is truncated */
 				low = ( mid == low ? low + 3: mid);
 		}
 		def_start = mid;
@@ -143,8 +165,9 @@ char *instr;
 
 handle_defaults()
 
-/* Zorgen dat de lexical-analyzer nu van de .default-file leest. */
-
+/* Switch back to original output-file and start generating the functions 
+ * from the file ".default".
+ */
 {
 	FILE *old, *tmp, *switch_input();
 	int i, old_yylineno;
@@ -165,11 +188,14 @@ handle_defaults()
 
 			set_outfile( def_info[i].name);
 			header( def_info[i].name);
-			CD_pos = TRUE;	/* zet mylex() in juiste positie! */
+			CD_pos = TRUE;	/* Set mylex() in correct state */
 
 			if ( bss_or_hol_instr( i)) {
 				extnd_header();
-				/* Zorg voor de juiste $args */
+				/* Rest of body is just the same as the corres-
+				 * ponding C_con_xxx C_rom_xxx instruction
+				 * so set correct info.
+				 */
 				set_C_instr_info( def_info[i-2].name);
 				def_row();
 				out( "}\n\n");
@@ -186,9 +212,10 @@ handle_defaults()
 
 def_admn( instr)
 char *instr;
+
+/* Mark this 'instr' as being generated */
+
 {
-	/* Noteer dat deze instructie gegenereerd is */
-	
 	int low, high, mid, rel;
 
 	low = _ICON;
@@ -205,13 +232,16 @@ char *instr;
 		else if ( rel < 0)
 			high = mid;
 		else
-			/* pas op, mid is naar beneden afgerond !! */
 			low = ( mid == low ? low + 1: mid);
 	}
 	def_info[mid].generated = 1;
 }
 
 extnd_header()
+
+/* Generates code for loooking at the parameters 'nbytes' and 'i' of the
+ * bss an hol pseudo-instructions.
+ */
 {
 	out( "if ( %s == 0 ) {\n", C_instr_info->arg_id[3]);
 	set_segment( SEGBSS);
