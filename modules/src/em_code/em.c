@@ -89,7 +89,7 @@ C_putbyte(c)
 	Xputbyte(c);
 }
 
-#ifdef BIGMACHINE
+#if BIGMACHINE
 #define C_putbyte Xputbyte
 #endif
 
