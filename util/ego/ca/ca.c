@@ -186,13 +186,19 @@ STATIC bool name_exists(name,endp,endd)
 static int nn = 0;
 
 STATIC new_name(s)
-	char *s;
+	char **s;
 {
-	s[0] = '_';
-	s[1] = 'I';
-	s[2] = 'I';
-	sprintf(&s[3],"%d",nn);
+	char buf[20];
+	int len = strlen(*s);
+
+	oldcore(*s, len+1);
+	buf[0] = '_';
+	buf[1] = 'I';
+	buf[2] = 'I';
+	sprintf(&buf[3],"%d",nn);
 	nn++;
+	*s = (char *) newcore(strlen(buf)+1);
+	strcpy(*s, buf);
 }
 
 
@@ -212,13 +218,13 @@ STATIC uniq_names()
 	for (p = fproc; p != (proc_p) 0; p = p->p_next) {
 		if (!(p->p_flags1 & PF_EXTERNAL) &&
 		    name_exists(pnames[p->p_id],p,fdblock)) {
-			new_name(pnames[p->p_id]);
+			new_name(&(pnames[p->p_id]));
 		}
 	}
 	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
 		if (!(d->d_flags1 & DF_EXTERNAL) &&
 		    name_exists(dnames[d->d_id],(proc_p) 0,d) ) {
-			new_name(dnames[d->d_id]);
+			new_name(&(dnames[d->d_id]));
 		}
 	}
 }
