@@ -98,7 +98,7 @@ idfappfun(fun, opt)
 		}
 	}
 }
-#endif	IDF_DEBUG
+#endif	/* IDF_DEBUG */
 
 struct idf *
 str2idf(tg, cpy)

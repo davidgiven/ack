@@ -69,6 +69,6 @@ end_init_proctab()
 		LOG((" r5: proctab[%ld]: nloc = %d, ep = %lu, ff = %lu",
 				p, pr->pr_nloc, pr->pr_ep, pr->pr_ff));
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 }
 

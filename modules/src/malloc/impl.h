@@ -49,7 +49,7 @@ typedef union _inf mallink;
 #define	_this_size_of(ml)	((ml)[-4+OFF_SET]).ui
 #ifndef	CHECK
 #define	N_WORDS			4
-#else	ifdef	CHECK
+#else	/* ifdef	CHECK */
 #define	_checksum_of(ml)	((ml)[-5+OFF_SET]).ui
 #define	_print_of(ml)		((ml)[-6+OFF_SET]).ui
 #define	_mark_of(ml)		((ml)[-7+OFF_SET]).ui

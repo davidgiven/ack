@@ -25,7 +25,7 @@
 
 #ifdef	LOGGING
 extern int must_test;
-#endif	LOGGING
+#endif	/* LOGGING */
 
 #define	adu(w1,w2)	(unsigned long)(w1 + w2)
 #define	sbu(w1,w2)	(unsigned long)(w1 - w2)
@@ -149,7 +149,7 @@ PRIVATE unsigned long slu(w1, w2, nbytes)	/* w1 << w2 */
 			w2 = nbytes*8 - 1;
 		}
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	/* calculate result */
 	return (w1 << w2);
@@ -168,7 +168,7 @@ PRIVATE unsigned long sru(w1, w2, nbytes)	/* w1 >> w2 */
 			w2 = nbytes*8 - 1;
 		}
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	/* calculate result */
 	return (w1 >> w2);

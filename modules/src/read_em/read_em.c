@@ -92,9 +92,9 @@ static int wsize, psize;	/* word size and pointer size */
 #ifdef CHECKING
 static char *argrange = "Argument range error";
 #define check(expr) (expr || EM_error || (EM_error = argrange))
-#else not CHECKING
+#else /* not CHECKING */
 #define check(x)	/* nothing */
-#endif CHECKING
+#endif /* CHECKING */
 
 /* Error handling
 */
@@ -117,9 +117,9 @@ xfatal(s)
 }
 
 #include "readk.c"
-#else not COMPACT
+#else /* not COMPACT */
 #include "reade.c"
-#endif COMPACT
+#endif /* COMPACT */
 
 /* EM_open: Open input file, get magic word if COMPACT.
 */
@@ -147,9 +147,9 @@ EM_open(filename)
 		EM_error = "Illegal magic word";
 		return 0;
 	}
-#else not COMPACT
+#else /* not COMPACT */
 	inithash();	/* initialize hashtable */
-#endif COMPACT
+#endif /* COMPACT */
 
 	EM_initialized = 1;
 	return 1;
@@ -228,7 +228,7 @@ EM_getinstr(p)
 		p->em_type = EM_FATAL;
 		return 0;
 	}
-#endif CHECKING
+#endif /* CHECKING */
 
 	if (!state) {		/* All clear, get a new line */
 		gethead(p);
@@ -247,14 +247,14 @@ EM_getinstr(p)
 			}
 #ifndef COMPACT
 			if (j == PAR_B) i = ptyp(sp_ilb2);
-#endif COMPACT
+#endif /* COMPACT */
 			if (j != PAR_NO) getarg(i, &(p->em_arg));
 #ifndef COMPACT
 			if (j == PAR_B) {
 				p->em_cst = p->em_ilb;
 				p->em_argtype = cst_ptyp;
 			}
-#endif COMPACT
+#endif /* COMPACT */
 			/* range checking
 			*/
 #ifdef CHECKING
@@ -304,10 +304,10 @@ EM_getinstr(p)
 				check(p->em_cst >= 0 && p->em_cst <= 2);
 				break;
 			}
-#endif CHECKING
+#endif /* CHECKING */
 #ifndef COMPACT
 			checkeol();
-#endif COMPACT
+#endif /* COMPACT */
 			}
 			break;
 		case EM_PSEU:
@@ -334,7 +334,7 @@ EM_getinstr(p)
 				  if (! EM_error)
 				   EM_error="Third argument of hol/bss not 0/1";
 				}
-#endif CHECKING
+#endif /* CHECKING */
 				break;
 			case ps_exa:
 			case ps_ina:
@@ -378,7 +378,7 @@ EM_getinstr(p)
 			if (p->em_opcode != ps_con && p->em_opcode != ps_rom) {
 				checkeol();
 			}
-#endif COMPACT
+#endif /* COMPACT */
 			break;
 		case EM_STARTMES:
 			startmes(p);

@@ -14,7 +14,7 @@ static char rcsid[] = "$Header$";
 #include "scan.h"
 
 extern bool	incore;
-extern ushort	NLocals;
+extern unsigned short	NLocals;
 extern int	flagword;
 extern struct outname	*searchname();
 
@@ -47,7 +47,7 @@ finish()
 		put_locals(names, head->oh_nname);
 #ifdef SYMDBUG
 		put_dbug(OFF_DBUG(*head));
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	}
 	compute_origins(sects, head->oh_nsect);
 	skip_modul(head);
@@ -80,7 +80,7 @@ adjust_names(name, head, chars)
 
 do_crs(base, count)
 	struct outname	*base;
-	unsigned short	count;
+	unsigned	count;
 {
 	register struct outname	*name = base;
 
@@ -209,7 +209,7 @@ handle_relos(head, sects, names)
 static
 put_locals(name, nnames)
 	struct outname		*name;
-	register ushort		nnames;
+	register unsigned	nnames;
 {
 	register struct outname *oname = name;
 	register struct outname *iname = oname;
@@ -233,7 +233,7 @@ put_locals(name, nnames)
 static
 compute_origins(sect, nsect)
 	register struct outsect	*sect;
-	register ushort		nsect;
+	register unsigned	nsect;
 {
 	extern struct orig	relorig[];
 	register struct orig	*orig = relorig;
@@ -267,4 +267,4 @@ put_dbug(offdbug)
 		dbugsize -= nbytes;
 	}
 }
-#endif SYMDBUG
+#endif /* SYMDBUG */

@@ -9,13 +9,13 @@
 
 #ifdef	BSD4_1
 #define	BSD_X
-#endif	BSD4_1
+#endif	/* BSD4_1 */
 
 #ifdef	BSD4_2
 #define	BSD_X
-#endif	BSD4_2
+#endif	/* BSD4_2 */
 
 #ifdef	SYS_5
 #define	SYS_V
-#endif	SYS_5
+#endif	/* SYS_5 */
 

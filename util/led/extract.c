@@ -39,8 +39,8 @@ extract()
 	skip_modul(&head);
 }
 
-ushort	NLocals = 0;	/* Number of local names to be saved. */
-ushort	NGlobals = 0;	/* Number of global names. */
+unsigned short	NLocals = 0;	/* Number of local names to be saved. */
+unsigned short	NGlobals = 0;	/* Number of global names. */
 
 /*
  * Walk through the nametable of this module, counting the locals that must

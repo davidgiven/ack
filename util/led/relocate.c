@@ -23,7 +23,7 @@ getvalu(addr, type)
 	char	addr[];
 	char	type;
 {
-	ushort	word0, word1;
+	unsigned short	word0, word1;
 
 	switch (type & RELSZ) {
 	case RELO1:
@@ -62,7 +62,7 @@ putvalu(valu, addr, type)
 	char	addr[];
 	char	type;
 {
-	ushort	word0, word1;
+	unsigned short	word0, word1;
 
 	switch (type & RELSZ) {
 	case RELO1:
@@ -102,7 +102,7 @@ putvalu(valu, addr, type)
 	}
 }
 
-extern ushort		NLocals, NGlobals;
+extern unsigned short	NLocals, NGlobals;
 extern struct outsect	outsect[];
 extern struct orig	relorig[];
 
@@ -118,14 +118,14 @@ extern struct orig	relorig[];
  * Second case: we must update the value by the change
  * in position of the section of local.
  */
-static ushort
+static unsigned
 addrelo(relo, names, valu_out)
 	struct outrelo		*relo;
 	struct outname		*names;
 	long			*valu_out;	/* Out variable. */
 {
 	register struct outname	*local = &names[relo->or_nami];
-	register ushort		index = NLocals;
+	register unsigned short		index = NLocals;
 	register long		valu = *valu_out;
 
 	if ((local->on_type & S_SCT)) {
@@ -138,7 +138,7 @@ addrelo(relo, names, valu_out)
 		register struct outname	*name;
 		extern int		hash();
 		extern struct outname	*searchname();
-		extern ushort		indexof();
+		extern unsigned 	indexof();
 		extern struct outhead	outhead; 
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));

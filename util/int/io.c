@@ -31,7 +31,7 @@ incr_mess_id()
 
 #ifdef	LOGGING
 extern long inr;			/* from log.c */
-#endif	LOGGING
+#endif	/* LOGGING */
 
 /********  General file handling  ********/
 
@@ -102,7 +102,7 @@ init_ofiles(firsttime)
 
 #ifdef	LOGGING
 	open_log(firsttime);
-#endif	LOGGING
+#endif	/* LOGGING */
 }
 
 /*VARARGS0*/
@@ -146,7 +146,7 @@ close_down(rc)
 
 #ifdef	LOGGING
 	close_log();
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	exit(rc);
 }
@@ -188,9 +188,9 @@ char *position()			/* transient */
 	
 #ifdef	LOGGING
 	sprintf(buff, "\"%s\", line %ld, INR = %ld", fn, getLIN(), inr);
-#else	LOGGING
+#else	/* LOGGING */
 	sprintf(buff, "\"%s\", line %ld", fn, getLIN());
-#endif	LOGGING
+#endif	/* LOGGING */
 	return buff;
 }
 

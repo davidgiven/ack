@@ -21,7 +21,7 @@
 
 #ifndef	NOFLOAT
 extern double str2double();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 /************************************************************************
  *	Read object file contents.					*
@@ -214,7 +214,7 @@ PRIVATE ptr rd_repeat(pos, count, prev_pos)
 #ifdef	LOGGING
 			/* copy shadow byte, including protection bit */
 			dt_sh(pos) = dt_sh(pos - diff);
-#endif	LOGGING
+#endif	/* LOGGING */
 			pos++;
 		}
 	}
@@ -284,10 +284,10 @@ PRIVATE ptr rd_descr(type, count, pos)
 #ifndef	NOFLOAT
 		/* store the float */
 		dt_stf(pos, str2double(fl_rep), j);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 		/* we cannot store the float */
 		warning(WFLINIT);
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 		pos += j;
 		break;
 	default:

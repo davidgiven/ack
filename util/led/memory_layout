@@ -24,7 +24,7 @@
 #ifdef SYMDEBUG
 			Symbolic debugging information
 		-----------------------------------------------
-#endif SYMDEBUG
+#endif /* SYMDEBUG */
 			Symbol table *
 		-----------------------------------------------
 			Archive positions *

@@ -77,7 +77,7 @@ int poprsb(rtt)
 		if (SP > properSP)
 			warning(rtt ? WRTTSTS : WRETSTS);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	/* discard stack up to RSB */
 	newSP(LB);

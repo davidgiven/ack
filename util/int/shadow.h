@@ -98,5 +98,5 @@ extern char *stackML_sh;	/* stack_sh + ML (to speed up stack access) */
 #define	ch_dt_prot(a)
 #define	ch_st_prot(a)
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

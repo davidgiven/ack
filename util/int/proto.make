@@ -119,7 +119,7 @@ trap_msg:	$(SRC_DIR)/M.trap_msg $(TRAPS)
 warn_msg:	$(SRC_DIR)/M.warn_msg $(APP_A)
 	$(SRC_DIR)/M.warn_msg $(APP_A)
 
-warn.h:		$(SRC_DIR)/M.warn_h $(APP_A)
+./warn.h:		$(SRC_DIR)/M.warn_h $(APP_A)
 	$(SRC_DIR)/M.warn_h $(APP_A)
 
 switch/DoCases:
@@ -142,7 +142,7 @@ test/awa.em44:
 
 
 # Auxiliary entries
-lint:	$(CFILES) trap_msg warn_msg warn.h switch/DoCases switch/PrCases
+lint:	$(CFILES) trap_msg warn_msg ./warn.h switch/DoCases switch/PrCases
 	$(LINT) $(LINTFLAGS) $(CFILES)
 
 tags:	$(HDR) $(CFILES)
@@ -170,7 +170,7 @@ clean:
 bare:	clean
 	(cd switch; make bare)
 
-depend:	warn.h trap_msg warn_msg
+depend:	./warn.h trap_msg warn_msg
 	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
 	echo '#DEPENDENCIES' >>Makefile.new
 	for i in $(CFILES) ; do \

@@ -765,4 +765,4 @@ enter_name(namep)
 	}
 	tnum++;
 }
-#endif AAL
+#endif /* AAL */

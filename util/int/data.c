@@ -22,7 +22,7 @@ extern size maxheap;			/* from main.c */
 
 #ifdef	LOGGING
 char *data_sh;				/* shadowbytes */
-#endif	LOGGING
+#endif	/* LOGGING */
 
 PRIVATE warn_dtbits();
 
@@ -37,7 +37,7 @@ init_data(hb)
 #ifdef	LOGGING
 	data_sh = Malloc((size)p2i(HL), "shadowspace for data");
 	dt_clear_area(i2p(0), HL);
-#endif	LOGGING
+#endif	/* LOGGING */
 }
 
 
@@ -77,14 +77,14 @@ newHP(ap)
 #ifdef	LOGGING
 		data_sh = Realloc(data_sh, (size)(p2i(HL) + 1),
 						"shadowspace for heap");
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 
 #ifdef	LOGGING
 	if (p > HP) {
 		dt_clear_area(HP, p);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 	HP = p;
 }
 
@@ -145,7 +145,7 @@ dt_stn(addr, al, n)
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && n == psize) ? (SH_INT|SH_DATAP) : SH_INT;
-#endif LOGGING
+#endif /* LOGGING */
 
 	LOG(("@g6 dt_stn(%lu, %lu, %lu)", addr, l, n));
 	ch_in_data(addr, n);
@@ -155,7 +155,7 @@ dt_stn(addr, al, n)
 		data_loc(addr) = (char) l;
 #ifdef LOGGING
 		dt_sh(addr) = sh_flags;
-#endif	LOGGING
+#endif	/* LOGGING */
 		l = l>>8;
 	}
 }
@@ -169,7 +169,7 @@ dt_stw(addr, al)
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && wsize == psize) ? (SH_INT|SH_DATAP) : SH_INT;
-#endif LOGGING
+#endif /* LOGGING */
 
 	LOG(("@g6 dt_stw(%lu, %lu)", addr, l));
 	ch_in_data(addr, wsize);
@@ -179,7 +179,7 @@ dt_stw(addr, al)
 		data_loc(addr) = (char) l;
 #ifdef LOGGING
 		dt_sh(addr) = sh_flags;
-#endif	LOGGING
+#endif	/* LOGGING */
 		l = l>>8;
 	}
 }
@@ -207,7 +207,7 @@ dt_stf(addr, f, n)
 		dt_fl(addr);
 	}
 }
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 /************************************************************************
  *	Data load division.						*
@@ -236,7 +236,7 @@ ptr dt_lddp(addr)
 		warning(WGDPEXP);
 		warn_dtbits(addr, psize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	p = p_in_data(addr);
 	LOG(("@g6 dt_lddp() returns %lu", p));
@@ -257,7 +257,7 @@ ptr dt_ldip(addr)
 		warning(WGIPEXP);
 		warn_dtbits(addr, psize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	p = p_in_data(addr);
 	LOG(("@g6 dt_ldip() returns %lu", p));
@@ -280,7 +280,7 @@ unsigned long dt_ldu(addr, n)
 		warning(n == 1 ? WGCEXP : WGIEXP);
 		warn_dtbits(addr, n);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += n-1;
 	for (i = (int) n-1; i >= 0; i--, addr--) {
@@ -305,7 +305,7 @@ unsigned long dt_lduw(addr)
 		warning(WGIEXP);
 		warn_dtbits(addr, wsize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += wsize-1;
 	for (i = (int) wsize-1; i >= 0; i--, addr--) {
@@ -331,7 +331,7 @@ long dt_lds(addr, n)
 		warning(n == 1 ? WGCEXP : WGIEXP);
 		warn_dtbits(addr, n);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += n-2;
 	l = btos(data_loc(addr + 1));
@@ -357,7 +357,7 @@ long dt_ldsw(addr)
 		warning(WGIEXP);
 		warn_dtbits(addr, wsize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += wsize-2;
 	l = btos(data_loc(addr + 1));
@@ -395,7 +395,7 @@ dt_mvd(d2, d1, n)			/* d1 -> d2 */
 		data_loc(d2) = data_loc(d1);
 #ifdef	LOGGING
 		dt_sh(d2) = dt_sh(d1) & ~SH_PROT;
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 }
 
@@ -416,7 +416,7 @@ dt_mvs(d, s, n)				/* s -> d */
 		data_loc(d) = stack_loc(s);
 #ifdef	LOGGING
 		dt_sh(d) = st_sh(s) & ~SH_PROT;
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 }
 
@@ -452,5 +452,5 @@ PRIVATE warn_dtbits(addr, n)
 		warningcont(WWASINSP);
 }
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

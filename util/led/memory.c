@@ -547,14 +547,14 @@ freeze_core()
 
 /*
  * To transform the various pieces of the output in core to the file format,
- * we must order the bytes in the ushorts and longs as ACK prescribes.
+ * we must order the bytes in the unsigned shorts and longs as ACK prescribes.
  */
 write_bytes()
 {
-	ushort			nsect;
+	unsigned short		nsect;
 	long			offchar;
 	register struct memory	*mem;
-	extern ushort		NLocals, NGlobals;
+	extern unsigned short	NLocals, NGlobals;
 	extern long		NLChars, NGChars;
 	extern int		flagword;
 	extern struct outhead	outhead;
@@ -603,13 +603,13 @@ write_bytes()
 		wr_string(mems[ALLOGCHR].mem_base + 1, (long)NGChars);
 #ifdef SYMDBUG
 		wr_dbug(mems[ALLODBUG].mem_base, mems[ALLODBUG].mem_full);
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	}
 }
 
 namecpy(name, nname, offchar)
 	register struct outname	*name;
-	register ushort		nname;
+	register unsigned	nname;
 	register long		offchar;
 {
 	while (nname--) {

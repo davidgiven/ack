@@ -26,7 +26,7 @@
 	mems[ALLOGCHR].mem_left = 16 * K;
 #ifdef SYMDBUG
 	mems[ALLODBUG].mem_left = 32 * K;
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	mems[ALLOSYMB].mem_left = 8 * K;
 	mems[ALLOARCH].mem_left = 4 * K;
 	mems[ALLOMODL].mem_left = 64 * K;
@@ -43,7 +43,7 @@
 	mems[ALLOGCHR].mem_left = 2 * K;
 #ifdef SYMDBUG
 	mems[ALLODBUG].mem_left = 2 * K;
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	mems[ALLOSYMB].mem_left = 2 * K;
 	mems[ALLOARCH].mem_left = 1 * K;
 	mems[ALLOMODL].mem_left = 12 * K;

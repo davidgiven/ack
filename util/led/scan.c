@@ -9,7 +9,7 @@ static char rcsid[] = "$Header$";
 #ifdef SYMDBUG
 #include <sys/types.h>
 #include <sys/stat.h>
-#endif SYMDBUG
+#endif /* SYMDBUG */
 #include <arch.h>
 #include <out.h>
 #include <ranlib.h>
@@ -25,7 +25,7 @@ static char rcsid[] = "$Header$";
 #define IND_RELO(x)	(IND_EMIT(x) + (x).oh_nsect * sizeof(ind_t))
 #ifdef SYMDBUG
 #define IND_DBUG(x)	(IND_RELO(x) + sizeof(ind_t))
-#endif SYMDBUG
+#endif /* SYMDBUG */
 
 extern long	lseek();
 extern char 	*core_alloc();
@@ -37,7 +37,7 @@ char		*archname;	/* Name of archive, if reading from archive. */
 char		*modulname;	/* Name of object module. */
 #ifdef SYMDBUG
 long		objectsize;
-#endif SYMDBUG
+#endif /* SYMDBUG */
 
 static long	align();
 static char	*modulbase;
@@ -50,7 +50,7 @@ static bool	putemitindex();
 static bool	putreloindex();
 #ifdef SYMDBUG
 static bool	putdbugindex();
-#endif SYMDBUG
+#endif /* SYMDBUG */
 static		get_indirect();
 static		read_modul();
 
@@ -66,11 +66,11 @@ getfile(filename)
 {
 	unsigned int	rd_unsigned2();
 	struct ar_hdr	archive_header;
-	ushort		magic_number;
+	unsigned short	magic_number;
 #ifdef SYMDBUG
 	struct stat	statbuf;
 	extern int	fstat();
-#endif SYMDBUG
+#endif /* SYMDBUG */
 
 	archname = (char *)0;
 	modulname = (char *)0;
@@ -81,7 +81,7 @@ getfile(filename)
 		magic_number = rd_unsigned2(infile);
 	} else {
 		modulbase = modulptr((ind_t)0);
-		magic_number = *(ushort *)modulbase;
+		magic_number = *(unsigned short *)modulbase;
 	}
 
 	switch (magic_number) {
@@ -92,7 +92,7 @@ getfile(filename)
 				fatal("cannot stat");
 			objectsize = statbuf.st_size;
 		}
-#endif SYMDBUG
+#endif /* SYMDBUG */
 		seek((long)0);
 		modulname = filename;
 		return PLAIN;
@@ -135,7 +135,7 @@ get_archive_header(archive_header)
 	}
 #ifdef SYMDBUG
 	objectsize = archive_header.ar_size;
-#endif SYMDBUG
+#endif /* SYMDBUG */
 }
 
 get_modul()
@@ -175,7 +175,7 @@ scan_modul()
 			 ojectsize - OFF_DBUG(*head)
 		);
 	}
-#endif SYMDBUG
+#endif /* SYMDBUG */
 }
 
 /*
@@ -213,16 +213,16 @@ direct_alloc(head)
 {
 	ind_t		sectindex = IND_SECT(*head);
 	register struct outsect *sects;
-	ushort		nsect = head->oh_nsect;
+	unsigned short	nsect = head->oh_nsect;
 	long		size, rest;
 	extern ind_t	hard_alloc();
 	extern ind_t	alloc();
 
 #ifdef SYMDBUG
 	rest = nsect * sizeof(ind_t) + sizeof(ind_t) + sizeof(ind_t);
-#else SYMDBUG
+#else /* SYMDBUG */
 	rest = nsect * sizeof(ind_t) + sizeof(ind_t);
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	/*
 	 * We already allocated space for the header, we now need
 	 * the section, name an string table.
@@ -251,8 +251,8 @@ indirect_alloc(head)
 	struct outhead	*head;
 {
 	register int	allopiece;
-	ushort		nsect = head->oh_nsect;
-	ushort		nrelo = head->oh_nrelo;
+	unsigned short	nsect = head->oh_nsect;
+	unsigned short	nrelo = head->oh_nrelo;
 	ind_t		sectindex = IND_SECT(*head);
 	ind_t		emitoff = IND_EMIT(*head);
 	ind_t		relooff = IND_RELO(*head);
@@ -260,7 +260,7 @@ indirect_alloc(head)
 	ind_t		dbugoff = IND_DBUG(*head);
 	extern long	objectsize;
 	long		dbugsize = objectsize - OFF_DBUG(*head);
-#endif SYMDBUG
+#endif /* SYMDBUG */
 
 	assert(incore);
 	for (allopiece = ALLOEMIT; allopiece < ALLOEMIT + nsect; allopiece++) {
@@ -273,9 +273,9 @@ indirect_alloc(head)
 	return	putreloindex(relooff, (long)nrelo * sizeof(struct outrelo))
 		&&
 		putdbugindex(dbugoff, dbugsize);
-#else SYMDBUG
+#else /* SYMDBUG */
 	return putreloindex(relooff, (long)nrelo * sizeof(struct outrelo));
-#endif SYMDBUG
+#endif /* SYMDBUG */
 }
 
 /*
@@ -358,7 +358,7 @@ putdbugindex(dbugoff, ndbugbytes)
 	}
 	return FALSE;
 }
-#endif SYMDBUG
+#endif /* SYMDBUG */
 
 /*
  * Compute addresses and read in. Remember that the contents of the sections
@@ -430,7 +430,7 @@ read_modul()
 	struct outname	*names;
 	char		*chars;
 	ind_t		sectindex, nameindex, charindex;
-	ushort		nsect, nname;
+	unsigned short	nsect, nname;
 	long		size;
 	long		nchar;
 	extern ind_t	hard_alloc();
@@ -446,9 +446,9 @@ read_modul()
 	nchar = head->oh_nchar; charindex = IND_CHAR(*head);
 #ifdef SYMDBUG
 	size = modulsize(head) - (nsect * sizeof(ind_t) + 2 * sizeof(ind_t));
-#else SYMDBUG
+#else /* SYMDBUG */
 	size = modulsize(head) - (nsect * sizeof(ind_t) + sizeof(ind_t));
-#endif SYMDBUG
+#endif /* SYMDBUG */
 	if (hard_alloc(ALLOMODL, size) == BADOFF)
 		fatal("no space for module");
 
@@ -490,7 +490,7 @@ align(size)
  *	5. the offset of the relocation table.
 #ifdef SYMDBUG
  *	6. the offset of the debugging information.
-#endif SYMDBUG
+#endif /* SYMDBUG */
  */
 static long
 modulsize(head)
@@ -504,9 +504,9 @@ modulsize(head)
 #ifdef SYMDBUG
 		sizeof(ind_t) +					/* 5 */
 		sizeof(ind_t);					/* 6 */
-#else SYMDBUG
+#else /* SYMDBUG */
 		sizeof(ind_t);					/* 5 */
-#endif SYMDBUG
+#endif /* SYMDBUG */
 }
 
 /* ------------------------------------------------------------------------- */

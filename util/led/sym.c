@@ -118,7 +118,7 @@ entername(name, hashval)
  * Return the index of `name' in the symbol table in the order in which
  * it was entered. We need a REAL index, not a byte offset.
  */
-ushort
+unsigned
 indexof(name)
 	struct outname	*name;
 {

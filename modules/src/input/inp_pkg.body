@@ -58,7 +58,7 @@ Now this is really ridiculous! You deserve what you get!!
 
 #ifdef INP_TYPE
 extern INP_TYPE INP_VAR;
-#endif INP_TYPE
+#endif /* INP_TYPE */
 
 #ifdef DEBUG
 #define INP_PRIVATE
@@ -73,7 +73,7 @@ struct INP_buffer_header	{
 	char *bh_ipp;	/* current read pointer (= stacked ipp)	*/
 #ifdef INP_TYPE
 	INP_TYPE bh_i;	/* user defined */
-#endif INP_TYPE
+#endif /* INP_TYPE */
 	File *bh_fd;	/* A file descriptor in case of a file */
 	char bh_eofreturned;	/* set if we returned eof for this buffer */
 };
@@ -84,7 +84,7 @@ struct INP_i_buf {
 	char ib_text[INP_BUFSIZE+INP_NPUSHBACK];
 };
 
-# endif not INP_READ_IN_ONE
+#endif /* not INP_READ_IN_ONE */
 
 char *_ipp;
 INP_PRIVATE struct INP_buffer_header *INP_head, *INP_free;
@@ -124,7 +124,7 @@ INP_rdfile(fd, fn, size, pbuf)
 	(*pbuf)[rsize] = '\0';	/* invoke loadbuf() at end */
 	return 1;
 }
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 
 #ifndef INP_READ_IN_ONE
 /*	Input buffer supplying routines: INP_pbuf()
@@ -147,7 +147,7 @@ INP_pbuf()
 	*/
 	return &(ib->ib_text[INP_NPUSHBACK-1]);
 }
-#endif not INP_READ_IN_ONE
+#endif /* not INP_READ_IN_ONE */
 
 /*	Input buffer administration: INP_push_bh() and INP_pop_bh()
 */
@@ -160,7 +160,7 @@ INP_push_bh()
 		bh->bh_ipp = _ipp;
 #ifdef INP_TYPE
 		bh->bh_i = INP_VAR;
-#endif INP_TYPE
+#endif /* INP_TYPE */
 	}
 	bh = INP_free;
 	if (bh) INP_free = bh->bh_next;
@@ -194,7 +194,7 @@ INP_pop_bh()
 	_ipp = bh->bh_ipp;	/* restore previous input pointer */
 #ifdef INP_TYPE
 	INP_VAR = bh->bh_i;
-#endif INP_TYPE
+#endif /* INP_TYPE */
 
 	return 1;
 }
@@ -217,7 +217,7 @@ INP_rdblock(fd, buf, n)
 	buf[*n] = '\0';
 	return 1;
 }
-#endif not INP_READ_IN_ONE
+#endif /* not INP_READ_IN_ONE */
 
 /*	Miscellaneous routines :
 	INP_mk_filename()
@@ -258,7 +258,7 @@ InsertFile(filnam, table, result)
 #ifdef INP_READ_IN_ONE
 	char *text;
 	long size;
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 	File *fd = 0;
 
 	if (!filnam) fd = STDIN;
@@ -301,7 +301,7 @@ InsertFile(filnam, table, result)
 		}
 		bh->bh_size = size;
 		_ipp = bh->bh_text = text;
-#else not INP_READ_IN_ONE
+#else /* not INP_READ_IN_ONE */
 		if (
 		     !(_ipp = bh->bh_text = INP_pbuf())
 		   ||
@@ -309,7 +309,7 @@ InsertFile(filnam, table, result)
 			if (fd != STDIN) sys_close(fd);
 			return 0;
 		}
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 		bh->bh_fd = fd;	/* this is a file */
 		if (result) *result = filnam;
 		return 1;
@@ -376,7 +376,7 @@ loadbuf()
 			}
 		}
 
-#endif not INP_READ_IN_ONE
+#endif /* not INP_READ_IN_ONE */
 		if (FromFile && bh->bh_fd != STDIN) sys_close(bh->bh_fd);
 
 #if INP_NPUSHBACK > 1
@@ -401,9 +401,9 @@ loadbuf()
 			ib = i_ptr->ib_next;
 			free((char *) i_ptr);
 			i_ptr = ib;
-#else INP_READ_IN_ONE
+#else /* INP_READ_IN_ONE */
 			free(bh->bh_text);
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 		}
 		bh->bh_text = buf;
 		bh->bh_size = INP_NPUSHBACK - 1;

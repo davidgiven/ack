@@ -26,7 +26,7 @@
 
 # ifndef NORCSID
 static string rcsid3 = "$Header$";
-# endif NORCSID
+#endif /* NORCSID */
 
 /*
  * Some codestrings used more than once
@@ -448,11 +448,12 @@ genprototypes(f)
 	for (i = 0; i < nnonterms; i++)	{
 		if (! IN(f->f_used, i)) continue;
 		p = &nonterms[i];
+		if (!(p->n_flags & GENSTATIC)) continue;
 		if (g_gettype(p->n_rule) == EORULE &&
 		    getntparams(p) == 0) {
 			continue;
 		}
-		if (p->n_flags & GENSTATIC) fputs("static ", fpars);
+		fputs("static ", fpars);
 		genextname(i, p->n_name, fpars);
 		fputs("();\n", fpars);
 	}
@@ -1047,7 +1048,7 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 		getaction(0);
 		fprintf(f, ") goto L_%d;\n", hulp1);
 		if (q->t_flags & NOCONF) {
-			fputs("#endif ___NOCONFLICT___\n", f);
+			fputs("#endif /* ___NOCONFLICT___ */\n", f);
 		}
 	}
 	if (safeterm == 0 || (!onerror && safeterm <= SAFESCANDONE)) {

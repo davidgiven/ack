@@ -55,7 +55,7 @@ int	ntneeded;
 int	ntprint;
 # ifndef NDEBUG
 int	debug;
-# endif not NDEBUG
+#endif /* not NDEBUG */
 p_file	files;
 p_file	maxfiles;
 p_file	pfile;

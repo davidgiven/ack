@@ -29,7 +29,7 @@ char *Malloc(sz, descr)
 			}
 		}
 	}
-#endif	DB_MALLOC
+#endif	/* DB_MALLOC */
 
 	return new;
 }

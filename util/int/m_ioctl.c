@@ -25,7 +25,7 @@
 #define	V7IOSETC	(('t'<<8)|17)
 #define	V7IOGETC	(('t'<<8)|18)
 
-#endif	V7IOCTL
+#endif	/* V7IOCTL */
 
 
 /************************************************************************
@@ -54,13 +54,13 @@ int do_ioctl(fd, req, addr)
 	long count;	/* might get ALIGNMENT problems with this one */
 	int ldisc;	/* might get ALIGNMENT problems with this one */
 	int pgrp;	/* might get ALIGNMENT problems with this one */
-#endif	V7IOCTL
+#endif	/* V7IOCTL */
 
 	struct tchars tc_buf;
 #ifndef	V7IOCTL
 	struct ltchars ltc_buf;
-#endif	V7IOCTL
-#endif	BSD_X
+#endif	/* V7IOCTL */
+#endif	/* BSD_X */
 
 
 #ifdef	V7IOCTL
@@ -92,14 +92,14 @@ int do_ioctl(fd, req, addr)
 	case V7IOGETC:
 		req = TIOCGETC;
 		break;
-#endif	BSD_X
+#endif	/* BSD_X */
 
 	default:
 		einval(WBADIOCTL);
 		return (-1);			/* Fake return value */
 	}
 
-#endif	V7IOCTL
+#endif	/* V7IOCTL */
 
 
 	switch (req) {
@@ -120,7 +120,7 @@ int do_ioctl(fd, req, addr)
 	case TIOCSETP:
 #ifdef	BSD4_1				/* from system.h */
 	case TIOCSETN:
-#endif	BSD4_1
+#endif	/* BSD4_1 */
 		/* set fd's parameters according to sgtty buffer	*/
 		/* pointed to (addr), so first fill sg_buf properly.	*/
 		if (	!mem2sgtty(addr, &sg_buf)
@@ -289,8 +289,8 @@ int do_ioctl(fd, req, addr)
 		}
 		break;
 
-#endif	V7IOCTL
-#endif	BSD_X
+#endif	/* V7IOCTL */
+#endif	/* BSD_X */
 
 	default:
 		einval(WBADIOCTL);

@@ -20,14 +20,14 @@
 
 #ifdef	BSD_X				/* from system.h */
 #include	<sys/timeb.h>
-#endif	BSD_X
+#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 struct timeb {	/* non-existing; we use an ad-hoc definition */
 	long time;
 	unsigned short millitm;
 	short timezone, dstflag;
 }
-#endif	SYS_V
+#endif	/* SYS_V */
 
 /******** System to EM memory ********/
 
@@ -130,8 +130,8 @@ int ltchars2mem(addr, ltcharsb)
 	mem_stfld(addr, V7t_lnextc, (long) ltcharsb->t_lnextc);
 	return 1;
 }
-#endif	V7IOCTL
-#endif	BSD_X
+#endif	/* V7IOCTL */
+#endif	/* BSD_X */
 
 
 /******** EM memory to system ********/
@@ -188,6 +188,6 @@ int mem2ltchars(addr, ltcharsb)
 	ltcharsb->t_lnextc = (char) mem_ldfld(addr, V7t_lnextc);
 	return 1;
 }
-#endif	V7IOCTL
-#endif	BSD_X
+#endif	/* V7IOCTL */
+#endif	/* BSD_X */
 

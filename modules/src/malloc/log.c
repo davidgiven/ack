@@ -130,4 +130,4 @@ free_list_entry(i)	{
 	*/
 	return free_list[i];
 }
-#endif	CHECK
+#endif	/* CHECK */

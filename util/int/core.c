@@ -67,7 +67,7 @@ core_dump()
 	fwrite(FRA_sh, 1, (int)(FRALimit), core_file);
 	fwrite(data_sh, 1, (int)(HL), core_file);
 	fwrite(stack_sh, 1, (int)(ML+1-SL), core_file);
-#endif	LOGGING
+#endif	/* LOGGING */
 	
 	fclose(core_file);
 	core_file = 0;

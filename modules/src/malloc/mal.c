@@ -31,7 +31,7 @@ extern char *SBRK();
 #define MAX_SZ_IN_STORE	(MAX_STORE*ALIGNMENT)
 private do_free(), sell_out();
 privatedata mallink *store[MAX_STORE];
-#endif STORE
+#endif /* STORE */
 
 char *
 malloc(n)
@@ -57,7 +57,7 @@ malloc(n)
 			return block_of_mallink(ml);
 		}
 	}
-#endif STORE
+#endif /* STORE */
 
 	check_work_empty("malloc, entry");
 
@@ -116,7 +116,7 @@ malloc(n)
 			sell_out();
 			ml = first_present(min_class);
 			if (ml == MAL_NULL)	{
-#endif STORE
+#endif /* STORE */
 				/* In this emergency we try to locate a suitable
 				   chunk in the free_list just below the safe
 				   one; some of these chunks may fit the job.
@@ -130,7 +130,7 @@ malloc(n)
 #ifdef STORE
 			}
 			else started_working_on(ml);
-#endif STORE
+#endif /* STORE */
 		}
 		else {
 			assert((size_type)p == align((size_type)p));
@@ -196,7 +196,7 @@ do_free(ml)
 
 #ifndef STORE
 	if (free_of(ml))	return;
-#endif STORE
+#endif /* STORE */
 	started_working_on(ml);
 	set_free(ml, 1);
 	calc_checksum(ml);
@@ -340,7 +340,7 @@ sell_out()	{
 	}
 
 }
-#endif STORE
+#endif /* STORE */
 
 #ifdef	ASSERT
 public
@@ -358,4 +358,4 @@ m_assert(fn, ln)
 	write(2, "\n", 1);
 	maldump(1);
 }
-#endif	ASSERT
+#endif	/* ASSERT */

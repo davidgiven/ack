@@ -16,7 +16,7 @@
 
 #ifndef	NOFLOAT
 extern double fpop();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 DoCII()
 {
@@ -163,9 +163,9 @@ DoCFI()
 	default:
 		wtrap(WILLCONV, EILLINS);
 	}
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoCIF()
@@ -198,9 +198,9 @@ DoCIF()
 	default:
 		wtrap(WILLCONV, EILLINS);
 	}
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoCUF()
@@ -244,9 +244,9 @@ DoCUF()
 	default:
 		wtrap(WILLCONV, EILLINS);
 	}
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoCFF()
@@ -271,9 +271,9 @@ DoCFF()
 	default:
 		wtrap(WILLCONV, EILLINS);
 	}
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoCIU()
@@ -377,7 +377,7 @@ DoCFU()
 	default:
 		wtrap(WILLCONV, EILLINS);
 	}
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }

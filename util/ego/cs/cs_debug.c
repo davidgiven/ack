@@ -149,4 +149,4 @@ OUTENTITIES()
 	}
 }
 
-#endif TRACE
+#endif /* TRACE */

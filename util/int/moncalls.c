@@ -25,25 +25,25 @@ extern int fd_limit;			/* from io.c */
 
 #ifdef	BSD_X				/* from system.h */
 #include	<sys/timeb.h>
-#endif	BSD_X
+#endif	/* BSD_X */
 #ifdef	SYS_V
 struct timeb {			/* non-existing; we use an ad-hoc definition */
 	long time;
 	unsigned short millitm;
 	short timezone, dstflag;
 };
-#endif	SYS_V
+#endif	/* SYS_V */
 
 #ifdef	BSD4_2				/* from system.h */
 #include	<sys/time.h>
-#endif	BSD4_2
+#endif	/* BSD4_2 */
 
 #ifdef	SYS_V
 #include	<sys/errno.h>
 #undef		ERANGE			/* collision with trap.h */
 #include	<fcntl.h>
 #include	<time.h>
-#endif	SYS_V
+#endif	/* SYS_V */
 
 #include	<em_abs.h>
 #include	"logging.h"
@@ -62,7 +62,7 @@ extern long lseek();
 extern unsigned int alarm();
 extern long time();
 extern void sync();
-#endif	SYS_V
+#endif	/* SYS_V */
 
 #define	INT2SIZE	max(wsize, 2L)
 #define	INT4SIZE	max(wsize, 4L)
@@ -165,14 +165,14 @@ moncall()
 
 #ifdef	BSD4_2				/* from system.h */
 	struct timeval tv;		/* private timeval buffer */
-#endif	BSD4_2			
+#endif	/* BSD4_2			 */
 
 #ifdef	BSD_X				/* from system.h */
 	time_t utimbuf[2];		/* private utime buffer */
-#endif	BSD_X
+#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 	struct {time_t x, y;} utimbuf;	/* private utime buffer */
-#endif	SYS_V
+#endif	/* SYS_V */
 
 	char *cp;
 	int nr;
@@ -190,7 +190,7 @@ moncall()
 			UNDEFINED : DEFINED;
 #else
 		ES_def = DEFINED;
-#endif	LOGGING
+#endif	/* LOGGING */
 		ES = pop_int();
 		running = 0;		/* stop the machine */
 		LOG(("@m9 Exit: ES = %ld", ES));
@@ -247,7 +247,7 @@ moncall()
 				LOG(("@m6 Read: char = '%c'", *(buf[0] + i)));
 			}
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 		if (in_gda(dsp1) && !in_gda(dsp1 + (n-1))) {
 			efault(WRGDAH);
@@ -313,7 +313,7 @@ moncall()
 				warning(in_stack(addr) ? WWLUNDEF : WWGUNDEF);
 			}
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 		check_buf(0, (size)nbytes);
 		for (	nr = nbytes, addr = dsp1, cp = buf[0];
@@ -331,7 +331,7 @@ moncall()
 				LOG(("@m6 write: char = '%c'", *(buf[0] + i)));
 			}
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 		if ((n = write(fd, buf[0], nbytes)) == -1)
 			goto write_error;
@@ -575,9 +575,9 @@ moncall()
 		if (	!savestr(0, dsp1)
 #ifndef	BSD4_2				/* from system.h */
 		||	umount(buf[0]) == -1
-#else	BSD4_2
+#else	/* BSD4_2 */
 		||	unmount(buf[0]) == -1
-#endif	BSD4_2
+#endif	/* BSD4_2 */
 		) {
 			push_err();
 			LOG(("@m4 Umount: failed, dsp1 = %lu, errno = %d",
@@ -618,11 +618,11 @@ moncall()
 		tm = pop_int4();
 #ifndef	BSD4_2				/* from system.h */
 		rc = stime(&tm);
-#else	BSD4_2
+#else	/* BSD4_2 */
 		tv.tv_sec = tm;
 		tv.tv_usec = 0;		/* zero microseconds */
 		rc = settimeofday(&tv, (struct timezone *)0);
-#endif	BSD4_2
+#endif	/* BSD4_2 */
 		if (rc == -1) {
 			push_err();
 			LOG(("@m4 Stime: failed, tm = %ld, errno = %d",
@@ -695,11 +695,11 @@ moncall()
 #ifdef	BSD_X				/* from system.h */
 		utimbuf[0] = actime;
 		utimbuf[1] = modtime;
-#endif	BSD_X
+#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 		utimbuf.x = actime;
 		utimbuf.y = modtime;
-#endif	SYS_V
+#endif	/* SYS_V */
 		if (!savestr(0, dsp1) || utime(buf[0], utimbuf) == -1) {
 			push_err();
 			LOG(("@m4 Utime: failed, dsp1 = %lu, dsp2 = %lu, errno = %d",
@@ -740,13 +740,13 @@ moncall()
 		dsp2 = pop_ptr();
 #ifdef	BSD_X				/* from system.h */
 		ftime(&tb_buf);
-#endif	BSD_X
+#endif	/* BSD_X */
 #ifdef	SYS_V				/* from system.h */
 		tb_buf.time = time((time_t*)0);
 		tb_buf.millitm = 0;
 		tb_buf.timezone = timezone / 60;
 		tb_buf.dstflag = daylight;
-#endif	SYS_V
+#endif	/* SYS_V */
 		if (!timeb2mem(dsp2, &tb_buf)) {
 			push_err();
 			LOG(("@m4 Ftime: failed, dsp2 = %lu, errno = %d",
@@ -794,7 +794,7 @@ moncall()
 			}
 #ifdef	BSD_X				/* from system.h */
 			fdnew = dup2(fd1, fdnew);
-#endif	BSD_X
+#endif	/* BSD_X */
 
 #ifdef	SYS_V				/* from system.h */
 			{
@@ -814,7 +814,7 @@ moncall()
 					fdnew = fcntl(fd1, F_DUPFD, fdnew);
 				}
 			}
-#endif	SYS_V
+#endif	/* SYS_V */
 		dup2_error:;
 		}
 		else {

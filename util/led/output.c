@@ -24,7 +24,7 @@ extern int		flagword;
  */
 beginoutput()
 {
-	extern ushort	NLocals, NGlobals;
+	extern unsigned short	NLocals, NGlobals;
 	extern long	NLChars, NGChars;
 	extern char	*outputname;
 
@@ -35,9 +35,9 @@ beginoutput()
 		generate_section_names();
 
 	if (!(flagword & (CFLAG|RFLAG)))
-		outhead.oh_nrelo = (ushort)0;
+		outhead.oh_nrelo = (unsigned short)0;
 	if (flagword & SFLAG) {
-		outhead.oh_nname = (ushort)0;
+		outhead.oh_nname = (unsigned short)0;
 		outhead.oh_nchar = (long)0;
 	} else {
 		outhead.oh_nname = NLocals + NGlobals + outhead.oh_nsect;
@@ -68,7 +68,7 @@ generate_section_names()
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++, name++) {
 		name->on_foff = (long)0;	/* No string name. */
 		name->on_type = (S_MIN + sectindex) | S_SCT;
-		name->on_desc = (ushort)0;
+		name->on_desc = (unsigned short)0;
 		name->on_valu = outsect[sectindex].os_base;
 	}
 }

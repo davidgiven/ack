@@ -20,13 +20,13 @@ typedef unsigned long ptr;		/* pointer to EM address */
 #define	p2i(p)		(p)		/* convert pointer to index */
 #define	i2p(p)		(ptr)(p)	/* convert index to pointer */
 
-#else	UNSIGNED
+#else	/* UNSIGNED */
 
 typedef char *ptr;			/* pointer to EM address */
 #define	p2i(p)		(long)(p)	/* convert pointer to index */
 #define	i2p(p)		(ptr)(p)	/* convert index to pointer */
 
-#endif UNSIGNED
+#endif /* UNSIGNED */
 
 /* The EM size is an integer type; a cast suffices */
 typedef long size;

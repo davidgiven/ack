@@ -25,7 +25,7 @@
 
 #define	check_seg(s1,s2,w)
 
-#endif	SEGCHECK
+#endif	/* SEGCHECK */
 
 DoADP(l)
 	register long l;

@@ -18,7 +18,7 @@
 
 #ifndef	NOFLOAT
 extern double fpop();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 PRIVATE compare_obj();
 
@@ -45,9 +45,9 @@ DoCMF(l)
 	LOG(("@T6 DoCMF(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoCMU(l)
@@ -160,7 +160,7 @@ PRIVATE compare_obj(obj_size)
 			comp_res = 1;
 			break;
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 		if (stack_loc(addr1) != stack_loc(addr2)) {
 			comp_res = 1;
 			break;

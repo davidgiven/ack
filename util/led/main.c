@@ -371,7 +371,7 @@ evaluate()
 		change_names();
 }
 
-extern ushort	NGlobals, NLocals;
+extern unsigned short	NGlobals, NLocals;
 
 /*
  * Sect_comm[N] is the number of common bytes in section N.

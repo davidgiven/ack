@@ -52,9 +52,9 @@ checkarg(arg, typset)
 	}
 	return 1;
 }
-#else not CHECKING
+#else /* not CHECKING */
 #define checkarg(arg, x) 1
-#endif CHECKING
+#endif /* CHECKING */
 
 /*	EM_doinstr: An EM instruction
 */
@@ -72,7 +72,7 @@ EM_doinstr(p)
 			return;
 		}
 	}
-#endif CHECKING
+#endif /* CHECKING */
 	switch(parametertype) {
 		case PAR_NO:
 			break;
@@ -389,7 +389,7 @@ EM_mkcalls(line)
 		EM_error = "Message not ended";
 		return 0;
 	}
-#endif CHECKING
+#endif /* CHECKING */
 	EM_error = 0;
 	switch(line->em_type) {
 		default:

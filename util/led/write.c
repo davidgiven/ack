@@ -59,7 +59,7 @@ end_write()
 {
 	register struct outname	*name;
 	register int		sectindex;
-	extern ushort		NGlobals;
+	extern unsigned short	NGlobals;
 	extern long		NGChars;
 
 	assert(!incore);

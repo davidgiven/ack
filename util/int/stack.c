@@ -26,7 +26,7 @@ extern size maxstack;			/* from main.c */
 #ifdef	LOGGING
 char *stack_sh;				/* stadowbytes */
 char *stackML_sh;			/* speed up access of stadowbytes */
-#endif	LOGGING
+#endif	/* LOGGING */
 
 PRIVATE warn_stbits();
 
@@ -44,7 +44,7 @@ init_stack() {
 	stack_sh = Malloc(STACKSIZE, "shadowspace for stack");
 	stackML_sh = stack_sh + ML;
 	st_clear_area(ML, SL);
-#endif	LOGGING
+#endif	/* LOGGING */
 }
 
 
@@ -94,12 +94,12 @@ newSP(ap)
 			stack_sh = Realloc(stack_sh, (size)(stacksize),
 						"shadowspace for stack");
 			stackML_sh = stack_sh + ML;
-#endif	LOGGING
+#endif	/* LOGGING */
 		}
 
 #ifdef	LOGGING
 		st_clear_area(SP - 1, p);
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 	SP = p;
 }
@@ -229,7 +229,7 @@ st_stn(addr, al, n)
 		stack_loc(addr) = (char) l;
 #ifdef	LOGGING
 		st_sh(addr) = sh_flags;
-#endif	LOGGING
+#endif	/* LOGGING */
 		l = l>>8;
 	}
 }
@@ -255,7 +255,7 @@ st_stw(addr, al)
 		stack_loc(addr) = (char) l;
 #ifdef	LOGGING
 		st_sh(addr) = sh_flags;
-#endif	LOGGING
+#endif	/* LOGGING */
 		l = l>>8;
 	}
 }
@@ -283,7 +283,7 @@ st_stf(addr, f, n)
 		st_fl(addr);
 	}
 }
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 /************************************************************************
  *	Stack load division.						*
@@ -313,7 +313,7 @@ ptr st_lddp(addr)
 		warning(WLDPEXP);
 		warn_stbits(addr, psize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	p = p_in_stack(addr);
 	LOG(("@s6 st_lddp() returns %lu", p));
@@ -334,7 +334,7 @@ ptr st_ldip(addr)
 		warning(WLIPEXP);
 		warn_stbits(addr, psize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	p = p_in_stack(addr);
 	LOG(("@s6 st_ldip() returns %lu", p));
@@ -357,7 +357,7 @@ unsigned long st_ldu(addr, n)
 		warning(n == 1 ? WLCEXP : WLIEXP);
 		warn_stbits(addr, n);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += n-1;
 	for (i = (int) n-1; i >= 0; i--, addr--) {
@@ -382,7 +382,7 @@ unsigned long st_lduw(addr)
 		warning(WLIEXP);
 		warn_stbits(addr, wsize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += wsize - 1;
 	for (i = (int) wsize-1; i >= 0; i--, addr--) {
@@ -408,7 +408,7 @@ long st_lds(addr, n)
 		warning(n == 1 ? WLCEXP : WLIEXP);
 		warn_stbits(addr, n);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += n - 2;
 	l = btos(stack_loc(addr + 1));
@@ -434,7 +434,7 @@ long st_ldsw(addr)
 		warning(WLIEXP);
 		warn_stbits(addr, wsize);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	addr += wsize - 2;
 	l = btos(stack_loc(addr+1));
@@ -470,7 +470,7 @@ double st_ldf(addr, n)
 		warning(WLFEXP);
 		warn_stbits(addr, n);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	for (i = (int) n; i > 0; i--, addr++) {
 		*(cp++) = stack_loc(addr);
@@ -480,7 +480,7 @@ double st_ldf(addr, n)
 	}
 	return (f);
 }
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 /************************************************************************
  *	Stack move division						*
@@ -516,7 +516,7 @@ st_mvs(s2, s1, n)			/* s1 -> s2 */
 		stack_loc(s2) = stack_loc(s1);
 #ifdef	LOGGING
 		st_sh(s2) = st_sh(s1) & ~SH_PROT;
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 }
 
@@ -536,7 +536,7 @@ st_mvd(s, d, n)				/* d -> s */
 		stack_loc(s) = data_loc(d);
 #ifdef	LOGGING
 		st_sh(s) = dt_sh(d) & ~SH_PROT;
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 }
 
@@ -658,7 +658,7 @@ double fpop(n)
 	decSP(n);
 	return (d);
 }
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 long wpop()
 {
@@ -762,7 +762,7 @@ fpush(f, n)
 	incSP(n);
 	st_stf(SP, f, n);
 }
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 #ifdef	LOGGING
 
@@ -796,5 +796,5 @@ PRIVATE warn_stbits(addr, n)
 		warningcont(WWASINSP);
 }
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

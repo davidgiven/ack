@@ -48,7 +48,7 @@ getarg(typset, ap)
 	register int i = getbyte();
 #ifdef CHECKING
 	int argtyp;
-#endif CHECKING
+#endif /* CHECKING */
 
 	ap->ema_argtype = 0;
 	switch(i) {
@@ -75,7 +75,7 @@ getarg(typset, ap)
 			EM_error = "Illegal data label";
 			break;
 		}
-#endif CHECKING
+#endif /* CHECKING */
 		break;
 
 	case sp_ilb1:	/* Instruction label encoded in one byte */
@@ -91,7 +91,7 @@ getarg(typset, ap)
 			EM_error = "Illegal instruction label";
 			break;
 		}
-#endif CHECKING
+#endif /* CHECKING */
 		break;
 
 	case sp_cst2:	/* A cst encoded in two bytes */
@@ -180,11 +180,11 @@ getarg(typset, ap)
 	if (argtyp == sp_cend) {
 		ap->ema_argtype = 0;
 	}
-#else not CHECKING
+#else /* not CHECKING */
 	if (i == sp_cend) {
 		ap->ema_argtype = 0;
 	}
-#endif CHECKING
+#endif /* CHECKING */
 }
 
 #ifdef CHECKING
@@ -209,7 +209,7 @@ checkident(s)
 	}
 	return 1;
 }
-#endif CHECKING
+#endif /* CHECKING */
 
 /* getstring: read a string from the input
 */
@@ -231,7 +231,7 @@ getstring(isident)
 		s->length = 0;
 		return s;
 	}
-#endif CHECKING
+#endif /* CHECKING */
 
 	if (n > s->maxlen) {
 		if (! s->maxlen) {
@@ -253,7 +253,7 @@ getstring(isident)
 			EM_error = "Illegal identifier";
 		}
 	}
-#endif CHECKING
+#endif /* CHECKING */
 	return s;
 }
 
@@ -305,7 +305,7 @@ gethead(p)
 		if (p->em_ilb > 32767 && !EM_error) {
 			EM_error = "Illegal instruction label definition";
 		}
-#endif CHECKING
+#endif /* CHECKING */
 		break;
 
 	case sp_dlb1:	/* Numeric data label */
@@ -322,7 +322,7 @@ gethead(p)
 		if (p->em_dlb > 32767 && !EM_error) {
 			EM_error = "Illegal data label definition";
 		}
-#endif CHECKING
+#endif /* CHECKING */
 		break;
 
 	case sp_dnam:	/* Non-numeric data label */

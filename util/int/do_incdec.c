@@ -111,10 +111,10 @@ DoZRF(l)
 	LOG(("@Z6 DoZRF(%ld)", l));
 	spoilFRA();
 	fpush(0.0, arg_wf(l));
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	arg = arg;
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoZER(l)

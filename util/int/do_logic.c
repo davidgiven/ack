@@ -17,13 +17,13 @@
 
 #ifdef	LOGGING
 extern int must_test;
-#endif	LOGGING
+#endif	/* LOGGING */
 
 #ifdef	LOGGING
 #define	check_def(p,l)	if (!st_sh(p) || !st_sh(p+l)) {warning(WUNLOG);}
 #else
 #define	check_def(p,l)
-#endif	LOGGING
+#endif	/* LOGGING */
 
 DoAND(l)
 	register size l;
@@ -113,7 +113,7 @@ DoROL(l)
 			t = l*8 - 1;
 		}
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 	
 	/* calculate result */
 	while (t--) {
@@ -146,7 +146,7 @@ DoROR(l)
 			t = l*8 - 1;
 		}
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 	
 	/* calculate result */
 	while (t--) {

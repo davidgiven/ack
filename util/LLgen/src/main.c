@@ -91,7 +91,7 @@ main(argc,argv) register string	argv[]; {
 				}
 			  	incl_file = ++arg;
 				break;
-# endif not NDEBUG
+#endif /* not NDEBUG */
 			  case 'x':
 			  case 'X':
 				ntneeded = 1;

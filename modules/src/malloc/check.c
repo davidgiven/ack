@@ -303,4 +303,4 @@ Error(fmt, s, ml) char *fmt, *s; mallink *ml;	{
 	return 0;			/* to satisfy lint */
 }
 
-#endif	CHECK
+#endif	/* CHECK */

@@ -391,4 +391,4 @@ wr_dbug(buf, size)
 	OUTWRITE(PARTDBUG, buf, size);
 }
 
-#endif SYMDBUG
+#endif /* SYMDBUG */

@@ -118,7 +118,7 @@ copyact(ch1, ch2, level)
 		case ']':
 			error("unbalanced parenthesis");
 			break;
-#endif __MATCHING_PAR__
+#endif /* __MATCHING_PAR__ */
 
 		case '(':
 			copyact('(', ')', level+1);
@@ -136,7 +136,7 @@ copyact(ch1, ch2, level)
 		case '[':
 			copyact('[', ']', level+1);
 			break;
-#endif __MATCHING_PAR__
+#endif /* __MATCHING_PAR__ */
 
 		case '\n':
 			LineNumber++;

@@ -42,16 +42,14 @@ In general, an object file consists of the following parts:
 .br
 The header of an object file has the following structure:
 .PP
-#define ushort	unsigned\ short
-.PP
 .nf
 struct outhead {
-	ushort 	oh_magic;	/* magic number */
-	ushort 	oh_stamp;	/* version stamp */
-	ushort	oh_flags;	/* several format flags */
-	ushort	oh_nsect;	/* number of outsect structures */
-	ushort	oh_nrelo;	/* number of outrelo structures */
-	ushort	oh_nname;	/* number of outname structures */
+	unsigned short 	oh_magic;	/* magic number */
+	unsigned short 	oh_stamp;	/* version stamp */
+	unsigned short	oh_flags;	/* several format flags */
+	unsigned short	oh_nsect;	/* number of outsect structures */
+	unsigned short	oh_nrelo;	/* number of outrelo structures */
+	unsigned short	oh_nname;	/* number of outname structures */
 	long	oh_nemit;	/* length of sections */
 	long	oh_nchar;	/* size of string area */
 };
@@ -151,7 +149,7 @@ relocatable datum. The information has the following structure:
 struct outrelo {
 	char	or_type;	/* type of reference */
 	char	or_sect;	/* referencing section */
-	ushort	or_nami;	/* referenced symbol index */
+	unsigned short	or_nami;	/* referenced symbol index */
 	long	or_addr;	/* referencing address */
 };
 .fi
@@ -231,8 +229,8 @@ struct outname {
 	}	on_u;
 #define on_mptr	on_u.on_ptr
 #define on_foff	on_u.on_off
-	ushort	on_type;	/* symbol type */
-	ushort	on_desc;	/* debug info */
+	unsigned short	on_type;	/* symbol type */
+	unsigned short	on_desc;	/* debug info */
 	long	on_valu;	/* symbol value */
 };
 .fi

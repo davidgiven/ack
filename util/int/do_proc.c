@@ -103,7 +103,7 @@ PRIVATE lfr(sz)
 	if (sz != FRASize) {
 		warning(FRASize < sz ? WRFUNSML : WRFUNLAR);
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	pushFRA(sz);
 	spoilFRA();

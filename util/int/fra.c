@@ -9,13 +9,13 @@
 
 #ifdef	LOGGING
 char *FRA_sh;				/* shadowbytes */
-#endif	LOGGING
+#endif	/* LOGGING */
 
 init_FRA() {
 	FRA = Malloc(FRALimit, "Function Return Area");
 #ifdef	LOGGING
 	FRA_sh = Malloc(FRALimit, "shadowspace for Function Return Area");
-#endif	LOGGING
+#endif	/* LOGGING */
 	FRA_def = UNDEFINED;		/* set FRA illegal */
 }
 
@@ -32,7 +32,7 @@ pushFRA(sz)
 		stack_loc(SP + i) = FRA[i];
 #ifdef	LOGGING
 		st_sh(SP + i) = (i < FRASize ? FRA_sh[i] : UNDEFINED);
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 }
 
@@ -48,7 +48,7 @@ popFRA(sz)
 		FRA[i] = stack_loc(SP + i);
 #ifdef	LOGGING
 		FRA_sh[i] = st_sh(SP + i);
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 	st_dec(max(sz, wsize));
 }

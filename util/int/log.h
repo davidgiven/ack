@@ -20,5 +20,5 @@ extern int logging;			/* set if logging in progress */
 
 #define	LOG(a)
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

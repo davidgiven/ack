@@ -198,5 +198,5 @@ st_clear_area(from, to)
 		st_undef(a);
 	}
 }
-#endif	LOGGING
+#endif	/* LOGGING */
 

@@ -5,7 +5,7 @@
 
 #ifndef	MAGIC
 #define	MAGIC		07255
-#endif	MAGIC
+#endif	/* MAGIC */
 
 FILE *load_fp;
 int eof;

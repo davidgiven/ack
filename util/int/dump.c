@@ -639,5 +639,5 @@ displ_sh(shadow, byte)				/* transient */
 	return (buf);
 }
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

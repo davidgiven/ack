@@ -314,5 +314,5 @@ PRIVATE long longpar(var, def)
 	return (res ? atol(res) : def);
 }
 
-#endif	LOGGING
+#endif	/* LOGGING */
 

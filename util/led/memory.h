@@ -12,9 +12,9 @@
 #define ALLOGCHR	(ALLOLCHR + 1)		/* Strings of global names. */
 #ifdef SYMDEBUG
 #define ALLODBUG	(ALLOGCHR + 1)		/* Symbolic debugging info. */
-#else SYMDEBUG
+#else /* SYMDEBUG */
 #define ALLODBUG	ALLOGCHR
-#endif SYMDEBUG
+#endif /* SYMDEBUG */
 #define ALLOSYMB	(ALLODBUG + 1)		/* Symbol table. */
 #define ALLOARCH	(ALLOSYMB + 1)		/* Archive positions. */
 #define ALLOMODL	(ALLOARCH + 1)		/* Modules. */

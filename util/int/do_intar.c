@@ -223,7 +223,7 @@ PRIVATE long sli(w1, w2, nbytes)	/* w1 << w2 */
 			warning(WSHLARGE);
 			w2 = nbytes*8 - 1;
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 	
 		if (!(IgnMask&BIT(EIOVFL))) {
 			/* check overflow */
@@ -256,7 +256,7 @@ PRIVATE long sri(w1, w2, nbytes)	/* w1 >> w2 */
 			w2 = nbytes*8 - 1;
 		}
 	}
-#endif	LOGGING
+#endif	/* LOGGING */
 	
 	/* calculate result */
 	return (w1 >> w2);

@@ -35,7 +35,7 @@ size maxheap;				/* if set, max heap size */
 
 #ifdef	LOGGING
 extern long inr;			/* from log.c */
-#endif	LOGGING
+#endif	/* LOGGING */
 
 PRIVATE char *dflt_av[] = {"e.out", 0};	/* default arguments */
 
@@ -95,14 +95,14 @@ main(argc, argv)
 		else if (logarg(argv[i])) {
 			/* interesting for the logging machine */
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 		else break;
 	}
 
 #ifdef	LOGGING
 	/* Initialize the logging machine */
 	init_log();
-#endif	LOGGING
+#endif	/* LOGGING */
 
 	if (argc > i)
 		init(argc - i, argv + i);
@@ -127,7 +127,7 @@ main(argc, argv)
 #ifdef	NOFLOAT
 	if (FLAGS&FB_REALS)
 		warning(WFLUSED);
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 	if (FLAGS&FB_EXTRA)
 		warning(WEXTRIGN);
@@ -145,7 +145,7 @@ main(argc, argv)
 			/* log this instruction */
 			logging = 1;
 		}
-#endif	LOGGING
+#endif	/* LOGGING */
 
 		LOG(("@x9 PC = %lu OPCODE = %lu", PC,
 			btol(text_loc(PC)) < SECONDARY ?
@@ -174,7 +174,7 @@ main(argc, argv)
 
 #ifdef	LOGGING
 		log_eoi();
-#endif	LOGGING
+#endif	/* LOGGING */
 	}
 	
 	if (must_tally) {

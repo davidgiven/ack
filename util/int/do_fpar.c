@@ -18,7 +18,16 @@
 
 extern double fpop();
 
-#define	MAXDOUBLE	99.e999		/* IEEE infinity */	/*???*/
+#ifdef __STDC__
+#include <float.h>
+#define MAXDOUBLE DBL_MAX
+#else /* not __STDC__ */
+#if defined(vax) || defined(pdp) || defined(__vax) || defined(__pdp)
+#define	MAXDOUBLE	1.701411834604692293e+38
+#else
+#define MAXDOUBLE	1.7976931348623157e+308
+#endif
+#endif /* not __STDC__ */
 #define	SMALL		(1.0/MAXDOUBLE)
 
 PRIVATE double adf(), sbf(), mlf(), dvf();
@@ -26,7 +35,7 @@ PRIVATE double ttttp();
 PRIVATE double floor(), fabs();
 PRIVATE fef(), fif();
 
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 
 DoADF(l)
 	register size l;
@@ -38,9 +47,9 @@ DoADF(l)
 	LOG(("@F6 DoADF(%ld)", l));
 	spoilFRA();
 	fpush(adf(fpop(l), t), l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoSBF(l)
@@ -53,9 +62,9 @@ DoSBF(l)
 	LOG(("@F6 DoSBF(%ld)", l));
 	spoilFRA();
 	fpush(sbf(fpop(l), t), l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoMLF(l)
@@ -68,9 +77,9 @@ DoMLF(l)
 	LOG(("@F6 DoMLF(%ld)", l));
 	spoilFRA();
 	fpush(mlf(fpop(l), t), l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoDVF(l)
@@ -83,9 +92,9 @@ DoDVF(l)
 	LOG(("@F6 DoDVF(%ld)", l));
 	spoilFRA();
 	fpush(dvf(fpop(l), t), l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoNGF(l)
@@ -98,9 +107,9 @@ DoNGF(l)
 	LOG(("@F6 DoNGF(%ld)", l));
 	spoilFRA();
 	fpush(-t, l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoFIF(l)
@@ -113,9 +122,9 @@ DoFIF(l)
 	LOG(("@F6 DoFIF(%ld)", l));
 	spoilFRA();
 	fif(fpop(l), t, l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 DoFEF(l)
@@ -126,9 +135,9 @@ DoFEF(l)
 	LOG(("@F6 DoFEF(%ld)", l));
 	spoilFRA();
 	fef(fpop(arg_wf(l)), l);
-#else	NOFLOAT
+#else	/* NOFLOAT */
 	nofloat();
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 }
 
 #ifndef	NOFLOAT
@@ -440,11 +449,11 @@ BadFloat:
 	return (0.0);
 }
 
-#else	NOFLOAT
+#else	/* NOFLOAT */
 
 nofloat() {
 	fatal("attempt to execute a floating point instruction on an EM machine without FP");
 }
 
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 

@@ -146,7 +146,7 @@ warningcont(nr)
 	}
 }
 
-#endif	LOGGING
+#endif	/* LOGGING */
 
 set_wmask(i)
 	int i;

@@ -72,7 +72,7 @@ int ptr2seg(p)
 	return s;
 }
 
-#else	SEGCHECK
+#else	/* SEGCHECK */
 
 init_AB_list() {}
 
@@ -80,5 +80,5 @@ push_frame() {}
 
 pop_frames() {}
 
-#endif	SEGCHECK
+#endif	/* SEGCHECK */
 

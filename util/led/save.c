@@ -27,7 +27,7 @@ savemagic()
 		return;
 
 	if ((p = core_alloc(ALLOMODL, (long)sizeof(int))) != (char *)0) {
-		*(ushort *)p = AALMAG;
+		*(unsigned short *)p = AALMAG;
 		core_position += sizeof(int);
 	}
 }

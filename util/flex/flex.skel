@@ -855,4 +855,4 @@ FILE *file;
 		} \
 	while ( 0 )
 
-#endif ACK_MOD
+#endif /* ACK_MOD */
