@@ -299,6 +299,7 @@ completed(tp)
 		while (etp = etp->next) {
 			if (! etp->tp_sdef) etp->tp_sdef = tp->tp_sdef;
 			etp->tp_size = tp->tp_size;
+			etp->tp_align = tp->tp_align;
 		}
 		break;
 	}
