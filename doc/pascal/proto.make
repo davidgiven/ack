@@ -25,4 +25,4 @@ SRC =  \
 	$(SRC_DIR)/example.doc
 
 $(TARGET_HOME)/doc/pascal.doc:	$(SRC)
-	$(PIC) $(SRC) > $$
+	$(PIC) $(SRC) > $@
