@@ -10,7 +10,7 @@
 Read above comment ...
 #endif
 
-extern File *_out_file;
+extern File *B_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
@@ -19,7 +19,7 @@ static struct exec u_header;
 
 static long ntext, ndata, nrelo, nchar;
 
-long _base_address[SEGBSS+1];
+long B_base_address[SEGBSS+1];
 
 static int trsize=0, drsize=0;
 
@@ -272,7 +272,7 @@ register struct nlist *u_name;
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)
 		u_name->n_value = a_name->on_valu + 
-			_base_address[( a_name->on_type & S_TYP) - S_MIN];
+			B_base_address[( a_name->on_type & S_TYP) - S_MIN];
 	else 
 		 u_name->n_value = 0;
 }
@@ -289,5 +289,5 @@ putbuf(buf,n)
 char *buf;
 long n;
 {
-	sys_write( _out_file, buf, n);
+	sys_write( B_out_file, buf, n);
 }

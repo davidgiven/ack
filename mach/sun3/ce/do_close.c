@@ -1,8 +1,9 @@
 #include <system.h>
+#include <back.h>
 
-extern File *_out_file;
+extern File *B_out_file;
 
 close_back()
 {
-	sys_close( _out_file);
+	sys_close( B_out_file);
 }
