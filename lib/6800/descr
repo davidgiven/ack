@@ -9,7 +9,7 @@ var NAME=m6800
 var M=6800
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
+var INCLUDES=-I{EM}/include/_tail_mon
 name as
 	from .s.so
 	to .o
