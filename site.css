@@ -85,7 +85,7 @@ BODY {
 	margin: 0;
 }
 
-.body > A {
+.anchor {
 	position: absolute;
 	top: 0;
 }
@@ -105,5 +105,8 @@ BODY {
 
 /* Revision history
  * $Log$
+ * Revision 1.2  2005/02/14 23:51:25  dtrg
+ * Initial version.
+ *
  *
  * vim: set ts=2 sw=2: */

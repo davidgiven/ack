@@ -10,7 +10,14 @@
 
 document.write("<style type='text/css'>.page { display: none }</style>");
 
-var page = "home";
+var page = function() {
+	var s = document.location.toString();
+	var i = s.indexOf("#");
+	if (i == -1)
+		return "home";
+	return s.substr(i+1);
+}()
+
 function showpage(pagename)
 {
 	/* Hide old page. */
@@ -27,6 +34,9 @@ function showpage(pagename)
 
 /* Revision history
  * $Log$
+ * Revision 1.2  2005/02/14 23:51:25  dtrg
+ * Initial version.
+ *
  * Revision 1.1  2005/02/14 23:39:07  dtrg
  * Initial version.
  */

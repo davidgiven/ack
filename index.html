@@ -13,16 +13,16 @@
   <link type="text/css" href="site.css" rel="stylesheet">
 	<script type="text/javascript" src="pager.js"></script>
 </head>
-<body>
+<body onload="showpage(page)">
 <div class="title">
 <h1>The
 Amsterdam Compiler Kit</h1>
 </div>
 <div class="contents">
-<h3><a href="#home" onclick="showpage('home')">Home</a></h3>
-<h3><a href="#introduction" onclick="showpage('introduction')">Introduction</a></h3>
-<h3><a href="#documentation" onclick="showpage('documentation')">Documentation</a></h3>
-<h3><a href="#installation" onclick="showpage('installation')">Installation</a></h3>
+<h3><a href="#home" onclick="showpage('home'); return false">Home</a></h3>
+<h3><a href="#introduction" onclick="showpage('introduction'); return false">Introduction</a></h3>
+<h3><a href="#documentation" onclick="showpage('documentation'); return false">Documentation</a></h3>
+<h3><a href="#installation" onclick="showpage('installation'); return false">Installation</a></h3>
 <p class="c"><a href="http://sourceforge.net/projects/tack"><img
  src="http://sourceforge.net/sflogo.php?group_id=108104&amp;type=1"
  alt="SourceForge.net Logo" border="0" height="31" width="88"></a></p>
@@ -34,7 +34,7 @@ alt="Valid HTML 4.01!" height="31" width="88"></a>
 </div>
 <div class="body">
 
-<div id="home"><h2><a name="home">Home</a></h2>
+<div class="page" id="home"><h2><a name="home">Home</a></h2>
 <h3>2005-02-14</h3>
 <p>Initial version of this web page set up.</p>
 <h3>2005-02-11</h3>
