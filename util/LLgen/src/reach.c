@@ -102,9 +102,21 @@ reachwalk(p) register p_gram p; {
 		  case TERM :
 			reachwalk(g_getterm(p)->t_rule);
 			break;
-		  case NONTERM :
-			reachable(&nonterms[g_getcont(p)]);
+		  case NONTERM : {
+			register p_nont n = &nonterms[g_getcont(p)];
+
+			reachable(n);
+			if (g_gettype(n->n_rule) == EORULE &&
+			    ! g_getnpar(p) && (getntparams(n) == 0)) {
+				register p_gram np = p;
+				do {
+					*np = *(np + 1);
+					np++;
+				} while (g_gettype(np) != EORULE);
+				continue;
+			}
 			break;
+		  }
 		  case EORULE :
 			return;
 		}

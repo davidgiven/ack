@@ -253,6 +253,10 @@ generate(f) p_file f; {
 		 * of synchronisation with the action file
 		 */
 		while (p->n_count--) getaction(1);
+		if (g_gettype(p->n_rule) == EORULE &&
+		    getntparams(p) == 0) {
+			continue;
+		}
 		fprintf(fpars,"L%d_%s (\n",s->o_index,p->n_name);
 		if (p->n_flags & PARAMS) {
 			controlline();
@@ -486,12 +490,6 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			    (g_gettype(n->n_rule) != ALTERNATION ||
 			     getntsafe(n) <= SAFESCANDONE)) {
 				genpop(findindex(n->n_contains));
-			}
-			if (g_gettype(n->n_rule) == EORULE &&
-			    safety <= getntout(n) &&
-			    ! g_getnpar(p)) {
-				safety = getntout(n);
-				break;
 			}
 			fprintf(f,"L%d_%s(\n",g_getcont(p), n->n_name);
 			if (g_getnpar(p)) {
