@@ -16,14 +16,17 @@ struct	fef4_returns {
 	_float	f;
 };
 
-fef4(s1)
+fef4(r,s1)
 _float	s1;
+struct fef4_returns	*r;
 {
-	struct	fef4_returns	*r = (struct fef4_returns *) &s1;
 	EXTEND	buf;
+	register struct fef4_returns	*p = r;	/* make copy; r might refer
+						   to itself (see table)
+						*/
 
 	extend((_double *) &s1,&buf,sizeof(_float));
-	r->e = buf.exp-1;
-	buf.exp = 1;
-	compact(&buf,(_double *) &r->f,sizeof(_float));
+	p->e = buf.exp+1;
+	buf.exp = -1;
+	compact(&buf,(_double *) &p->f,sizeof(_float));
 }

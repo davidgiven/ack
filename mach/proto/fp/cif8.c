@@ -29,13 +29,13 @@ long	src;	/* largest possible integer to convert */
 	result = (_double *) &ss;	/* always */
 	zrf_ext(&buf);
 	if (ss == sizeof(long))	{
-		buf.exp = 33;
+		buf.exp = 31;
 		i_src = src;
 	}
 	else	{
 		ipt = (short *) &src;
 		i_src = (long) *ipt;
-		buf.exp = 17;
+		buf.exp = 15;
 	}
 	if (i_src == 0)	{
 		zrf8(result);

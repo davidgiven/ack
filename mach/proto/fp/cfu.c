@@ -27,17 +27,16 @@ _double	src;	/* assume worst case */
 	short	newint, max_exp;
 
 	extend(&src,&buf,ss);	/* get extended format	*/
-	buf.exp--;		/* additional bias correction */
-	if (buf.exp < 1) {	/* no conversion needed	*/
+	if (buf.exp < 0) {	/* no conversion needed	*/
 		src.__double[ss == 8] = 0L;
 		return(0L);
 	}
-	max_exp = (ds << 3);
+	max_exp = (ds << 3) - 1;
 	if (buf.exp > max_exp) {
 		trap(EIOVFL);	/* integer overflow	*/
 		buf.exp %= max_exp;
 	}
-	new = buf.m1 >> (32-buf.exp);
+	new = buf.m1 >> (31-buf.exp);
 done:
 	src.__double[ss == 8] = new;
 	return(new);

@@ -11,6 +11,7 @@
 
 #include	"FP_types.h"
 
+_double
 dvf8(s2,s1)
 _double	s1,s2;
 {
@@ -22,4 +23,5 @@ _double	s1,s2;
 		/* do a divide */
 	div_ext(&e1,&e2);
 	compact(&e1,&s1,sizeof(_double));
+	return s1;
 }

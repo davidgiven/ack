@@ -29,5 +29,5 @@ _float	s1,s2;
 	extend((_double *)&s2,&e2,sizeof(SINGLE));
 	add_ext(&e1,&e2);
 	compact(&e1,(_double *)&s1,sizeof(SINGLE));
-	return(s1);
+	return s1;
 }

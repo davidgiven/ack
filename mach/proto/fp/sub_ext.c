@@ -10,6 +10,7 @@
 */
 
 #include "FP_types.h"
+
 sub_ext(e1,e2)
 EXTEND	*e1,*e2;
 {

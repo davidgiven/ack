@@ -13,69 +13,22 @@
 # include "FP_bias.h"
 # include "FP_trap.h"
 # include "FP_types.h"
+# include "FP_shift.h"
 
 mul_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
 	register int	i,j;		/* loop control	*/
-	short unsigned	mp[4];	/* multiplier */
-	short unsigned	mc[4];	/* multipcand */
-	short unsigned	result[8];	/* result */
-	B64		tmp64;
+	unsigned short	mp[4];		/* multiplier */
+	unsigned short	mc[4];		/* multipcand */
+	unsigned short	result[8];	/* result */
 	register unsigned short *pres;
 
 	/* first save the sign (XOR)			*/
-
 	e1->sign ^= e2->sign;
 
-	/********************************************************/
-	/* 	 	INCREASE EXPONENT BY ONE (1)	    	*/
-	/*							*/
-	/* the nature of the multiplication algorithm used	*/
-	/* results in an exponent that is small by an additive	*/
-	/* factor of one (1);					*/
-	/* if the maximum bit is set it will not be subtracted	*/
-	/* during normalization -> this is correct and can be	*/
-	/* expected often with normalized numbers		*/
-	/*	HOWEVER, it is also possible that unnormalized	*/
-	/*	numbers are used. Rather than shifting here	*/
-	/*	always(!) (unless L bit is set) I chose to	*/
-	/*	increase the exponent by one - a simple (FAST)	*/
-	/*	process - and to decrease it later during	*/
-	/*	normalization.					*/
-	/*							*/
-	/********************************************************/
-	/* The effects of bias (as used here)			*/
-	/* and the multiplication algorithm used cancel		*/
-	/* so these statements are commented out		*/
-	/* August 1985 - if changing the Leading Bit (or NORMBIT) */
-	/* this problem with the multiplication algorithm no longer */
-	/* exists - bias must be subtracted now			*/
-	/*							*/
-	/* e1->exp++;						*/
-	/********************************************************/
-
-	/* next add the exponents			*/
-
-	e1->exp += e2->exp;
-	e1->exp -= 1;			/* correction for bias	*/
-
-					/* check for overflow	*/
-	if (e1->exp >= EXT_MAX)	{
-		trap(EFOVFL);
-			/* if caught 			*/
-			/* return signed infinity	*/
-		e1->exp = EXT_MAX;
-infinity:	e1->m1 = e1->m2 =0L;
-		return;
-	}
-				/* check for underflow	*/
-	if (e1->exp < EXT_MIN)	{
-		trap(EFUNFL);
-		e1->exp = EXT_MIN;
-		goto infinity;
-	}
-
+	/* compute new exponent */
+	e1->exp += e2->exp + 1;
 	/* 128 bit multiply of mantissas			*/
 
 		/* assign unknown long formats		*/
@@ -105,7 +58,15 @@ infinity:	e1->m1 = e1->m2 =0L;
 		}
 		pres[-1] = k;
 	}
-	
+        if (! (result[0] & 0x8000)) {
+                e1->exp--;
+                for (i = 0; i <= 3; i++) {
+                        result[i] <<= 1;
+                        if (result[i+1]&0x8000) result[i] |= 1;
+                }
+                result[4] <<= 1;
+        }
+
 	/*
 	 *	combine the registers to a total
 	 */
@@ -113,8 +74,25 @@ infinity:	e1->m1 = e1->m2 =0L;
 	e1->m2 = ((unsigned long)(result[2]) << 16) + result[3];
 	if (result[4] & 0x8000) {
 		if (++e1->m2 == 0)
-			e1->m1++;
+			if (++e1->m1 == 0) {
+				e1->m1 = NORMBIT;
+				e1->exp++;
+			}
 	}
 
-	nrm_ext(e1);
+					/* check for overflow	*/
+	if (e1->exp >= EXT_MAX)	{
+		trap(EFOVFL);
+			/* if caught 			*/
+			/* return signed infinity	*/
+		e1->exp = EXT_MAX;
+infinity:	e1->m1 = e1->m2 =0L;
+		return;
+	}
+				/* check for underflow	*/
+	if (e1->exp < EXT_MIN)	{
+		trap(EFUNFL);
+		e1->exp = EXT_MIN;
+		goto infinity;
+	}
 }

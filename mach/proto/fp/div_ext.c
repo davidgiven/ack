@@ -68,25 +68,6 @@ EXTEND	*e1,*e2;
 	/*	check for underflow, divide by zero, etc	*/
 	e1->sign ^= e2->sign;
 	e1->exp -= e2->exp;
-	e1->exp += 2;		/* bias correction	*/
-	if (e1->exp < EXT_MIN)	{
-		/*
-		 * Exception 8.4 - Underflow
-		 */
-		trap(EFUNFL);	/* underflow */
-		e1->exp = EXT_MIN;
-		e1->m1 = e1->m2 = 0L;
-		return;
-	}
-	if (e1->exp >= EXT_MAX) {
-                /*
-                 * Exception 8.3 - Overflow
-                 */
-                trap(EFOVFL);   /* overflow */
-                e1->exp = EXT_MAX;
-                e1->m1 = e1->m2 = 0L;
-                return;
-        }
 
 #ifndef USE_DIVIDE
 		/* do division of mantissas	*/
@@ -264,4 +245,22 @@ EXTEND	*e1,*e2;
 	e1->m2 = result[1];
 
 	nrm_ext(e1);
+	if (e1->exp < EXT_MIN)	{
+		/*
+		 * Exception 8.4 - Underflow
+		 */
+		trap(EFUNFL);	/* underflow */
+		e1->exp = EXT_MIN;
+		e1->m1 = e1->m2 = 0L;
+		return;
+	}
+	if (e1->exp >= EXT_MAX) {
+                /*
+                 * Exception 8.3 - Overflow
+                 */
+                trap(EFOVFL);   /* overflow */
+                e1->exp = EXT_MAX;
+                e1->m1 = e1->m2 = 0L;
+                return;
+        }
 }

@@ -34,14 +34,13 @@ _double	d1,d2;
 		rv = l1 < l2 ? 1 : -1;
 	}
 	else	{ 		/* decide in 2nd half */
-		l1 = get4(((char *)&d1 + 4));
-		l2 = get4(((char *)&d2 + 4));
-		if (l1 == l2)
+		unsigned long u1, u2;
+		u1 = get4(((char *)&d1 + 4));
+		u2 = get4(((char *)&d2 + 4));
+		if (u1 == u2)
 			return(0);
-		if (l1 >= 0)
-			rv = l1 < l2 || l2 < 0 ? 1 : -1;
-		else if (l2 >= 0) rv = -1;
-		else rv = l1 < l2 ? 1 : -1;
+		if (u1 < u2) rv = 1;
+		else rv = -1;
 	}
 	return sign1 * rv;
 }

@@ -35,18 +35,19 @@ int	size;
 		f->exp += DBL_BIAS;	/* restore proper bias	*/
 		if (f->exp > DBL_MAX)	{
 dbl_over:			trap(EFOVFL);
-			f->exp = DBL_MAX;
-			f->m1 = 0xffffffffL;
-			f->m2 = DBL_ZERO;
+			f->exp = DBL_MAX+1;
+			f->m1 = 0;
+			f->m2 = 0;
 			if (error++)
 				return;
 		}
 		else if (f->exp < DBL_MIN)	{
-			trap(EFUNFL);
-			f->exp = DBL_MIN;
-			f->m1 = f->m2 = 0L;
-			if (error++)
-				return;
+			b64_rsft(&(f->m1));
+			if (f->exp < 0) {
+				b64_sft(&(f->m1), -f->exp);
+				f->exp = 0;
+			}
+			/* underflow ??? */
 		}
 			
 		/* local CAST conversion		*/
@@ -121,18 +122,19 @@ dbl_over:			trap(EFOVFL);
 		f->exp += SGL_BIAS;	/* restore bias	*/
 		if (f->exp > SGL_MAX)	{
 sgl_over:			trap(EFOVFL);
-			f->exp = SGL_MAX;
-			f->m1 = SGL_ZERO;
+			f->exp = SGL_MAX+1;
+			f->m1 = 0L;
 			f->m2 = 0L;
 			if (error++)
 				return;
 		}
 		else if (f->exp < SGL_MIN)	{
-			trap(EFUNFL);
-			f->exp = SGL_MIN;
-			f->m1 = f->m2 = 0L;
-			if (error++)
-				return;
+			b64_rsft(&(f->m1));
+			if (f->exp < 0) {
+				b64_sft(&(f->m1), -f->exp);
+				f->exp = 0;
+			}
+			/* underflow ??? */
 		}
 
 		/* shift mantissa and store	*/

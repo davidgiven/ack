@@ -15,6 +15,7 @@
 
 #include "FP_trap.h"
 #include "FP_types.h"
+#include "FP_shift.h"
 
 long
 cfi(ds,ss,src)
@@ -24,21 +25,25 @@ _double	src;	/* assume worst case */
 {
 	EXTEND	buf;
 	long	new;
-	short	newint,	max_exp;
+	short	max_exp;
 
 	extend(&src,&buf,ss);	/* get extended format */
-	buf.exp--;		/* additional bias correction */
-	if (buf.exp < 1) {	/* no conversion needed */
+	if (buf.exp < 0) {	/* no conversion needed */
 		src.__double[ss == 8] = 0L;
 		return(0L);
 	}
-	max_exp = (ds << 3) - 1;	/* signed numbers */
+	max_exp = (ds << 3) - 2;	/* signed numbers */
 				/* have more limited max_exp */
 	if (buf.exp > max_exp) {
-		trap(EIOVFL);	/* integer overflow	*/
-		buf.exp %= max_exp; /* truncate	*/
+		if (buf.exp == max_exp+1 && buf.sign && buf.m1 == NORMBIT &&
+		    buf.m2 == 0L) {
+		}
+		else {
+			trap(EIOVFL);	/* integer overflow	*/
+			buf.exp %= max_exp; /* truncate	*/
+		}
 	}
-	new = buf.m1 >> (32-buf.exp);
+	new = buf.m1 >> (31-buf.exp);
 	if (buf.sign)
 		new = -new;
 done:

@@ -8,47 +8,43 @@ CFLAGS=
 #
 #	$Header$
 #
-# various flags that can be used during compilation
-# define DEBUG
-# define PRT_ADD
-# define PRT_ALL
-# define PRT_DBL
-# define PRT_ENTRY
-# define PRT_EXIT
-# define PRT_EXT
-# define PRT_EXT2
-# define PRT_LONG
-# define PRT_RNDMSG
-# define PRT_STDERR
-# define PRT_TRAP
-#
-# DFLAGS=-DPRT_ADD -DPRT_ALL -DPRT_DBL -DPRT_ENTRY -DPRT_EXIT -DPRT_EXT -DPRT_EXT2 -DPRT_LONG -DPRT_RNDMSG -DPRT_STDERR -DPRT_TRAP
-DFLAGS=
-EMFLAGS= -L -LIB -I. $(DFLAGS) -O $(CFLAGS)
+EMFLAGS= -L -LIB -I. -O $(CFLAGS)
 #	AS=ack -m$(MACH) -c.$(SUF)
 #	CC=ack -m$(MACH) -c.s
 #	CCFLAGS=$(EMFLAGS)
 CDIR=$(EMHOME)/mach/proto/fp
 
-LIST =		cff4.$(SUF) cff8.$(SUF) cfu.$(SUF) cmf4.$(SUF) cmf8.$(SUF)\
+LIST =		cff4.$(SUF) cff8.$(SUF)\
+		cfu.$(SUF)\
+		cmf4.$(SUF) cmf8.$(SUF)\
 		cuf4.$(SUF) cuf8.$(SUF)\
-		dvf4.$(SUF) dvf8.$(SUF) fef4.$(SUF) fef8.$(SUF)\
+		dvf4.$(SUF) dvf8.$(SUF)\
+		fef4.$(SUF) fef8.$(SUF)\
 		fif4.$(SUF) fif8.$(SUF)\
-		cfi.$(SUF) cif4.$(SUF) cif8.$(SUF) mlf4.$(SUF) mlf8.$(SUF)\
-		ngf4.$(SUF)\
-		ngf8.$(SUF) sbf4.$(SUF) sbf8.$(SUF) adf4.$(SUF) adf8.$(SUF)\
+		cfi.$(SUF)\
+		cif4.$(SUF) cif8.$(SUF)\
+		mlf4.$(SUF) mlf8.$(SUF)\
+		ngf4.$(SUF) ngf8.$(SUF)\
+		sbf4.$(SUF) sbf8.$(SUF)\
+		adf4.$(SUF) adf8.$(SUF)\
 		zrf4.$(SUF) zrf8.$(SUF)\
 		extend.$(SUF) compact.$(SUF)\
 		add_ext.$(SUF) div_ext.$(SUF) mul_ext.$(SUF) nrm_ext.$(SUF)\
 		sft_ext.$(SUF) sub_ext.$(SUF) zrf_ext.$(SUF)\
 		adder.$(SUF) shifter.$(SUF) fptrp.$(SUF)
-SLIST =		cff4.s cff8.s cfu.s cmf4.s cmf8.s\
+SLIST =		cff4.s cff8.s\
+		cfu.s\
+		cmf4.s cmf8.s\
 		cuf4.s cuf8.s\
-		dvf4.s dvf8.s fef4.s fef8.s\
+		dvf4.s dvf8.s\
+		fef4.s fef8.s\
 		fif4.s fif8.s\
-		cfi.s cif4.s cif8.s mlf4.s mlf8.s\
-		ngf4.s\
-		ngf8.s sbf4.s sbf8.s adf4.s adf8.s\
+		cfi.s\
+		cif4.s cif8.s\
+		mlf4.s mlf8.s\
+		ngf4.s ngf8.s\
+		sbf4.s sbf8.s\
+		adf4.s adf8.s\
 		zrf4.s zrf8.s\
 		extend.s compact.s\
 		add_ext.s div_ext.s mul_ext.s nrm_ext.s\
@@ -56,13 +52,19 @@ SLIST =		cff4.s cff8.s cfu.s cmf4.s cmf8.s\
 		adder.s shifter.s fptrp.s
 
 SRC =		FP_bias.h FP_shift.h FP_trap.h FP_types.h adder.h get_put.h\
-		cff4.c cff8.c cfu.c cmf4.c cmf8.c\
+		cff4.c cff8.c\
+		cfu.c\
+		cmf4.c cmf8.c\
 		cuf4.c cuf8.c\
-		dvf4.c dvf8.c fef4.c fef8.c\
+		dvf4.c dvf8.c\
+		fef4.c fef8.c\
 		fif4.c fif8.c\
-		cfi.c cif4.c cif8.c mlf4.c mlf8.c\
-		ngf4.c\
-		ngf8.c sbf4.c sbf8.c adf4.c adf8.c\
+		cfi.c\
+		cif4.c cif8.c\
+		mlf4.c mlf8.c\
+		ngf4.c ngf8.c\
+		sbf4.c sbf8.c\
+		adf4.c adf8.c\
 		zrf4.c zrf8.c\
 		extend.c compact.c\
 		add_ext.c div_ext.c mul_ext.c nrm_ext.c\

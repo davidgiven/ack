@@ -11,6 +11,7 @@
 
 #include	"FP_types.h"
 
+_float
 dvf4(s2,s1)
 _float	s1,s2;
 {
@@ -22,4 +23,5 @@ _float	s1,s2;
 		/* do a divide */
 	div_ext(&e1,&e2);
 	compact(&e1,(_double *)&s1,sizeof(_float));
+	return s1;
 }

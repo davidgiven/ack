@@ -17,11 +17,13 @@
 
 #include "FP_types.h"
 
+_double
 cff8(src)
-_float	src;	/* the space on the stack is for a double - see cg/table */
+_float	src;
 {
 	EXTEND	buf;
 
 	extend((_double *) &src,&buf,4);	/* no matter what */
-	compact(&buf,&src,8);
+	compact(&buf,(_double *) &src,8);
+	return *(_double *) &src;
 }

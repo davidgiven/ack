@@ -14,8 +14,14 @@
 
 _float sbf4();
 
-fif4(x,y)
+struct fif4_returns {
+	_float ipart;
+	_float fpart;
+};
+
+fif4(p,x,y)
 _float	x,y;
+struct fif4_returns *p;
 {
 
 	EXTEND	e1,e2;
@@ -26,19 +32,18 @@ _float	x,y;
 	mul_ext(&e1,&e2);
 	e2 = e1;
 	compact(&e2, (_double *)&y, sizeof(_float));
-	e1.exp--;			/* additional bias correction */
-	if (e1.exp < 1) {
-		x = 0;
+	if (e1.exp < 0) {
+		p->ipart = 0;
+		p->fpart = y;
 		return;
 	}
-	if (e1.exp > 31 - SGL_M1LEFT) {
-		x = y;
-		y = 0;
+	if (e1.exp > 30 - SGL_M1LEFT) {
+		p->ipart = y;
+		p->fpart = 0;
 		return;
 	}
 	b64_sft(&e1.m1, 64 - e1.exp);
 	b64_sft(&e1.m1, e1.exp - 64);	/* "loose" low order bits */
-	e1.exp++;
-	compact(&e1,(_double *) &x, sizeof(SINGLE));
-	y = sbf4(x, y);
+	compact(&e1,(_double *) &(p->ipart), sizeof(SINGLE));
+	p->fpart = sbf4(p->ipart, y);
 }

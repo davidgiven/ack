@@ -29,5 +29,5 @@ _double	s1,s2;
 	extend(&s2,&e2,sizeof(_double));
 	add_ext(&e1,&e2);
 	compact(&e1,&s1,sizeof(_double));
-	return(s1);
+	return s1;
 }

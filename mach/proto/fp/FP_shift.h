@@ -26,32 +26,13 @@
 #define	SGL_MASK	0x007fffffL
 
 				/* parameters for Double Precision */
-#ifndef	IEEEFORMAT
-
-#define DBL_EXPSHIFT	SGL_EXPSHIFT
-#define DBL_M1LEFT	SGL_M1LEFT
-
-#define	DBL_LPACK	DBL_RUNPACK
-#define	DBL_RPACK	DBL_LUNPACK
-
-#define DBL_ZERO	SGL_ZERO
-#define DBL_EXACT	SGL_EXACT
-
-#define DBL_RUNPACK	DBL_M1LEFT
-#define DBL_LUNPACK	32-DBL_M1LEFT
-
-#define DBL_ROUNDUP	SGL_ROUNDUP
-#define	DBL_CARRYOUT	SGL_CARRYOUT
-#define	DBL_MASK	SGL_MASK
-
-#else
 				/* used in extend.c */
 
 #define DBL_EXPSHIFT	4
 
 #define DBL_M1LEFT	11
 
-#define	DBL_RPACK	32-DBL_M1LEFT
+#define	DBL_RPACK	(32-DBL_M1LEFT)
 #define	DBL_LPACK	DBL_M1LEFT
 
 				/* used in compact.c */
@@ -61,10 +42,8 @@
 #define DBL_EXACT	0x7ff
 
 #define DBL_RUNPACK	DBL_M1LEFT
-#define DBL_LUNPACK	32-DBL_RUNPACK
+#define DBL_LUNPACK	(32-DBL_RUNPACK)
 
 #define DBL_ROUNDUP	0x400
 #define	DBL_CARRYOUT	0x00200000L
 #define	DBL_MASK	0x000fffffL
-
-#endif	IEEEFORMAT

@@ -16,6 +16,7 @@
 
 #include "FP_types.h"
 
+_double
 ngf8(f)
 _double	f;
 {
@@ -25,5 +26,5 @@ _double	f;
 		p = (unsigned char *) &f;
 		*p ^= 0x80;
 	}
+	return f;
 }
-

@@ -28,14 +28,14 @@ long	src;	/* largest possible integer to convert */
 
 	zrf_ext(&buf);
 	if (ss == sizeof(long))	{
-		buf.exp = 33;
+		buf.exp = 31;
 		i_src = src;
 		result = (_float *) &src;
 	}
 	else	{
 		ipt = (short *) &src;
 		i_src = (long) *ipt;
-		buf.exp = 17;
+		buf.exp = 15;
 		result = (_float *) &ss;
 	}
 	if (i_src == 0)	{

@@ -16,13 +16,15 @@
 
 #include "FP_types.h"
 
+_float
 ngf4(f)
 _float	f;
 {
-	char unsigned	*p;
+	unsigned char *p;
 
 	if (f != (_float) 0) {
-		p = (char unsigned *) &f;
+		p = (unsigned char *) &f;
 		*p ^= 0x80;
 	}
+	return f;
 }

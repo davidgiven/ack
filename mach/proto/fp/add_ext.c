@@ -27,12 +27,15 @@ register EXTEND	*e1,*e2;
 		if (e2->m1 > e1->m1 ||
                     (e2->m1 == e1->m1 && e2->m2 > e1->m2)) {
                 	/*      abs(e2) > abs(e1) */
-                	if (e1->m2 > e2->m2) {
-                        	e2->m1 -= 1;    /* carry in */
+			EXTEND x;
+
+			x = *e1;
+			*e1 = *e2;
+                	if (x.m2 > e1->m2) {
+                        	e1->m1 -= 1;    /* carry in */
                 	}
-                	e2->m1 -= e1->m1;
-                	e2->m2 -= e1->m2;
-                	*e1 = *e2;
+                	e1->m1 -= x.m1;
+                	e1->m2 -= x.m2;
         	}
         	else {
                 	if (e2->m2 > e1->m2)

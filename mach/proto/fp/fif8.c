@@ -14,8 +14,14 @@
 
 _double sbf8();
 
-fif8(x,y)
+struct fif8_returns {
+	_double	ipart;
+	_double fpart;
+};
+
+fif8(p,x,y)
 _double	x,y;
+struct fif8_returns *p;
 {
 
 	EXTEND	e1,e2;
@@ -26,22 +32,20 @@ _double	x,y;
 	mul_ext(&e1,&e2);
 	e2 = e1;
 	compact(&e2, &y, sizeof(_double));
-	e1.exp--;			/* additional bias correction */
-	if (e1.exp < 1) {
-		x.__double[0] = 0;
-		x.__double[1] = 0;
+	if (e1.exp < 0) {
+		p->ipart.__double[0] = 0;
+		p->ipart.__double[1] = 0;
+		p->fpart = y;
 		return;
 	}
-	if (e1.exp > 63 - DBL_M1LEFT) {
-		x.__double[0] = y.__double[0];
-		x.__double[1] = y.__double[1];
-		y.__double[0] = 0;
-		y.__double[1] = 0;
+	if (e1.exp > 62 - DBL_M1LEFT) {
+		p->ipart = y;
+		p->fpart.__double[0] = 0;
+		p->fpart.__double[1] = 0;
 		return;
 	}
 	b64_sft(&e1.m1, 64 - e1.exp);
 	b64_sft(&e1.m1, e1.exp - 64);	/* "loose" low order bits */
-	e1.exp++;
-	compact(&e1, &x, sizeof(DOUBLE));
-	y = sbf8(x, y);
+	compact(&e1, &(p->ipart), sizeof(DOUBLE));
+	p->fpart = sbf8(p->ipart, y);
 }

@@ -80,6 +80,8 @@ zero:			zrf_ext(to);
 	}
 
 	to->m1 |= NORMBIT;				/* set bit L	*/
-	if (leadbit == 0)		/* set or clear Leading Bit	*/
+	if (leadbit == 0) {		/* set or clear Leading Bit	*/
 		to->m1 &= ~NORMBIT;			/* clear bit L	*/
+		nrm_ext(to);				/* and normalize */
+	}
 }

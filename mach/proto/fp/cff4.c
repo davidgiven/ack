@@ -17,6 +17,7 @@
 
 #include	"FP_types.h"
 
+_float
 cff4(src)
 _double	src;	/* the source itself -	THIS TIME it's DOUBLE */
 {
@@ -24,4 +25,5 @@ _double	src;	/* the source itself -	THIS TIME it's DOUBLE */
 
 	extend(&src,&buf,8);	/* no matter what */
 	compact(&buf,(_double *) &(src.__double[1]),4);
+	return *(_float *)&(src.__double[1]);
 }

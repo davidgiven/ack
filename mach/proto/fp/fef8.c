@@ -16,14 +16,17 @@ struct	fef8_returns	{
 	_double	f;
 };
 
-fef8(s1)
+fef8(r, s1)
 _double	s1;
+struct fef8_returns *r;
 {
 	EXTEND	buf;
-	struct fef8_returns *r = (struct fef8_returns *) &s1;
+	register struct fef8_returns *p = r;	/* make copy, r might refer
+						   to itself (see table)
+						*/
 
 	extend(&s1,&buf,sizeof(_double));
-	r->e = buf.exp - 1;
-	buf.exp = 1;
-	compact(&buf,&r->f,sizeof(_double));
+	p->e = buf.exp + 1;
+	buf.exp = -1;
+	compact(&buf,&p->f,sizeof(_double));
 }

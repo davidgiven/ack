@@ -12,6 +12,7 @@
 #include	"FP_types.h"
 #include	"get_put.h"
 
+int
 cmf4(f1,f2)
 _float	f1,f2;
 {
