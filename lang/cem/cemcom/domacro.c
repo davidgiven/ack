@@ -650,7 +650,7 @@ domacro()
 		SkipRestOfLine();
 		return;
 	}
-	LineNumber = tk.tk_ival;
+	LineNumber = tk.tk_ival - 1; /* number of the next line */
 	if ((tok = GetToken(&tk)) == STRING)
 		FileName = tk.tk_bts;
 	else
