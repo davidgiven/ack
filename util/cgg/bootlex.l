@@ -16,6 +16,8 @@ static char rcsid2[]="$Header$";
 
 #define MAXBACKUP 50
 %}
+
+%p 2000
 %%
 "/*"                    { char c;
                           c = input();
