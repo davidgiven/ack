@@ -643,12 +643,14 @@ RangeCheck(tpl, tpr)
 		genrck(tpl);
 		return;
 	}
-	if (tpl->tp_size <= tpr->tp_size &&
-	    ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
-	     (tpr->tp_fund == T_INTEGER && tpl == card_type))) {
+	tpr = BaseType(tpr);
+	if ((tpl->tp_fund == T_INTEGER && tpr == card_type) ||
+	     (tpr->tp_fund == T_INTEGER && tpl == card_type)) {
 		label lb = ++text_label;
 
-		C_dup(word_size);
+		C_dup(tpr->tp_size);
+		C_zer(tpr->tp_size);
+		C_cmi(tpr->tp_size);
 		C_zge(lb);
 		c_loc(ECONV);
 		C_trp();
