@@ -36,7 +36,7 @@
 {$s+ : test conformancy to standard}
 #endif
 
-program pem(input,output,em,errors);
+program pem(input,em,errors);
 {/*
    This Pascal compiler produces EM code as described in
    - A.S.Tanenbaum, J.W.Stevenson & H. van Staveren,
@@ -79,6 +79,8 @@ const
 {fundamental constants}
   MB1 = 7;
   NB1 = 8;
+  MI1 = 127;
+  NI1 = 128;
   MI2 = 32767;
   MU1 = 255;
   NU1 = 256;
@@ -541,6 +543,7 @@ begin
   put1(i1); put1(i2)
 end;
 
+#if EM_WSIZE == 4
 procedure put4(i:integer);
 var i1,i2:integer;
 begin
@@ -551,6 +554,7 @@ begin
   put1(i1 mod NU1); put1(i1 div NU1);
   put1(i2 mod NU1); put1(i2 div NU1)
 end;
+#endif
 
 procedure argend;
 begin put1(sp_cend) end;
@@ -559,9 +563,14 @@ procedure argcst(i:integer);
 begin
   if (i >= -sp_zcst0) and (i < sp_ncst0-sp_zcst0) then
     	 put1(i + sp_zcst0 + sp_fcst0)
-  else if (i >= -MI2-1) and (i <= MI2) then
+  else
+#if EM_WSIZE == 4
+	if (i >= -MI2-1) and (i <= MI2) then
+#endif
     	 begin put1(sp_cst2); put2(i) end
+#if EM_WSIZE == 4
   else   begin put1(sp_cst4); put4(i) end
+#endif
 end;
 
 procedure argnil;
@@ -864,6 +873,11 @@ begin with a do begin sz:=sizeof(asp,packbit);
 	gencst(op_lar,sz_word);
     end;  {case}
   ak:=loaded;
+  if asp^.form = subrange then
+     if sz < sz_word then
+	if asp^.min < 0 then
+	   { do sign extension }
+	   begin gencst(op_loc, sz); gencst(op_loc, sz_word); genop(op_cii) end
 end end;
 
 procedure store;
@@ -1500,7 +1514,11 @@ begin lsp:=nil;
 	  if lip<>nil then
 	    begin enterid(lip); hip:=lip; lip^.value:=max; max:=max+1 end;
 	until endofloop(fsys+[rparent],[ident],comma,+027);  {+028}
-	if max<=MU1 then lsp^.size:=sz_byte;
+	if max<=MU1 then lsp^.size:=sz_byte
+#if EM_WSIZE == 4
+	else if max <= MU2 then lsp^.size = 2*sz_byte
+#endif
+	;
 	lsp^.fconst:=hip; top:=lnp; nextif(rparent,+029);
       end
     else
@@ -1520,7 +1538,13 @@ begin lsp:=nil;
 	    lsp^.rangetype:=lsp1;
 	    nextif(colon2,+031); max:=cstinteger(fsys,lsp1,+032);
 	    if min>max then begin error(+033); max:=min end;
-	    if (min>=0) and (max<=MU1) then lsp^.size:=sz_byte;
+	    if ((min>=0) and (max<=MU1)) or ((min>=-NI1) and (max<=MI1)) then
+		lsp^.size:=sz_byte
+#if EM_WSIZE == 4
+	    else if ((min>=0) and (max<=MU2)) or ((min>=-MI2-1) and (max<=MI2)) then
+		lsp^.size := 2*sz_byte
+#endif
+		;
 	    lsp^.min:=min; lsp^.max:=max
 	  end
       end;
