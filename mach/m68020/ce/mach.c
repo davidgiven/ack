@@ -4,12 +4,14 @@
 #include <system.h>
 
 
+#ifdef DEBUG
 arg_error( s, arg)
 char *s;
 int arg;
 {
 	fprint( STDERR, "arg_error %s %d\n", s, arg);
 }
+#endif
 
 
 /*

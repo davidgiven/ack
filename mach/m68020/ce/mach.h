@@ -42,3 +42,7 @@
 
 
 #define small( x)	( 1 <= (x) && (x) <= 8)
+
+#ifndef DEBUG
+#define arg_error(s,i)
+#endif
