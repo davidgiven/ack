@@ -1,4 +1,7 @@
 libmon_s.a
+stty.s
+gtty.s
+exit1.s
 access.s
 acct.s
 alarm.s
@@ -45,7 +48,6 @@ unlink.s
 utime.s
 wait.s
 write.s
-exit1.s
 exit2.s
 cleanup.s
 cerror.s
