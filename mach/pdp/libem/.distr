@@ -3,3 +3,4 @@ Makefile
 compmodule
 head_em.s
 libem_s.a
+end.s
