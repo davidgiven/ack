@@ -35,10 +35,7 @@ char *s;
 int i;
 {
 	if ( i == 0) {
-		switchseg( SEGBSS);
-		dump_label();
-
-		bss( n);
+		common( n);
 	}
 	else {  
 		switchseg( SEGCON);

@@ -34,10 +34,7 @@ arith n, w;
 int i;
 {
 	if ( i == 0 || w == BSS_INIT) {
-		switchseg( SEGBSS);
-		dump_label();
-
-		bss( n);
+		common(n);
 	}
 	else {  
 		switchseg( SEGCON);
