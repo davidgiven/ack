@@ -1,6 +1,0 @@
-name "em22 etext,edata,end library"
-dir libend
-end
-name "em22 system call library"
-dir libsys
-end

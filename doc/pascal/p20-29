@@ -1,1 +1,0 @@
-troff -ms -n20 syntax.doc rtl.doc example.doc > p20-29.dit

@@ -1,5 +1,0 @@
-MACH=sparc
-SUF=o
-ASAR=ar
-RANLIB=ranlib
-MACHFL=-O -DNFS

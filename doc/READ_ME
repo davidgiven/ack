@@ -1,8 +1,0 @@
-Some of these documents use a font called CW.
-If this font is not available, reference to it can be changed with
-a sed-script like
-	s/\.ft CW/.ft yourfont/
-	s/\\f(CW/\\fyourfont/g
-	s/^.fp\(.*\)CW$/.fp\1yourfont/
-However, the font must be a constant-width font for the documents to look
-reasonable.

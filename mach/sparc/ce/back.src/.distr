@@ -1,9 +1,0 @@
-Makefile
-back.h
-con_str.c
-const.h
-do_open.c
-gen_str.c
-header.h
-rom_str.c
-symboldef.c

@@ -1,1 +1,0 @@
-LINE 110: FATAL ERROR: trap 8

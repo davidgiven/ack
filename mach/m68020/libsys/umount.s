@@ -1,9 +1,0 @@
-.define _umount
-.extern _umount
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-.sect .text
-_umount:	move.l #0x16,d0
-		jmp (callc)

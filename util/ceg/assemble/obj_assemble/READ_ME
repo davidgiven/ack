@@ -1,5 +1,0 @@
-
-This directory contains the assembly part of the code expander generator.
-
-This version should be used when generating a code epander that produces
-object code.

@@ -1,7 +1,0 @@
-in-line in ../A
-
-2.5 17.28 ack w/o opt
-1.6 2.93 ack with opt
-9.4 2.26 ack -O4
-1.5 7.43 \fIcc\fR
-2.7 2.02 \fIcc -O4\fR
