@@ -26,21 +26,21 @@ install : back ceg ce
 ce : ceg/ceg
 	mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
-	(cd ce; co $(DEF)/*.c) 
-	(cd ce; co $(DEF)/*/*.c) 
+	(cd ce; co $(DEF)/RCS/*.c) 
+	(cd ce; co $(DEF)/*/RCS/*.c) 
 	ln mach.c ce/mach.c
 	@make EM_instr
 
 ceg : 
 	mkdir ceg
-	(cd ceg; co $(ASMAIN)/*) 
+	(cd ceg; co $(ASMAIN)/RCS/*) 
 	(cd ceg;$(CC) -c $(IFILES) *.c; ar r as_lib.a *.o; ranlib as_lib.a)
 
 
 back :
 	mkdir back
-	(cd back;co $(BACK)/as_back/*h )
-	(cd back;co $(BACK)/as_back/Makefile )
+	(cd back;co $(BACK)/as_back/RCS/*h )
+	(cd back;co $(BACK)/as_back/RCS/Makefile )
 	( cd back; make)
 	ar r back.a back/*o;
 	ranlib back.a

@@ -24,8 +24,8 @@ install : ceg ce
 ce : ceg/ceg
 	mkdir ce
 	( cd ce; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table)
-	(cd ce;co $(DEF)/*.c )
-	(cd ce;co $(DEF)/*/*.c)
+	(cd ce;co $(DEF)/RCS/*.c )
+	(cd ce;co $(DEF)/*/RCS/*.c)
 	ln mach.c ce/mach.c
 	@make EM_instr
 
