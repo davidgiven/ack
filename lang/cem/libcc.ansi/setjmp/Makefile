@@ -1,2 +1,2 @@
 clean:
-	rm -f setjmp.o OLIST
+	rm -f setjmp.o sigmisc.o OLIST

@@ -1,11 +1,12 @@
 #
  mes 2,_EM_WSIZE,_EM_PSIZE
-
 ;
 ; layout of a setjmp buffer:
 ;
 ;  -----------------
-; |   signal mask   |		(only for Berkeley 4.[2-])
+; |      flag       |		(!0 when blocked signals saved (POSIX))
+;  -----------------
+; | signal mask/set |		(for Berkeley 4.[2-] / POSIX)
 ;  -----------------
 ; |                 |
 ; |  GTO descriptor |
@@ -24,11 +25,24 @@ gtobuf
  bss 3*_EM_PSIZE,0,0
 
  inp $fill_ret_area
- exp $setjmp
- pro $setjmp,0
-#ifdef __BSD4_2
+ exp $__setjmp
+ pro $__setjmp,0
+#if	defined(_POSIX_SOURCE)
 ; save mask of currently blocked signals. 
 ; longjmp must restore this mask
+ lol _EM_PSIZE			; the flag integer at offset _EM_PSIZE
+ lal 0
+ loi _EM_PSIZE
+ stf 3*_EM_PSIZE+_EM_LSIZE
+ lol _EM_PSIZE			; the flag integer at offset _EM_PSIZE
+ zeq *1
+ lal 0
+ loi _EM_PSIZE
+ adp 3*_EM_PSIZE
+ cal $__newsigset
+ asp _EM_PSIZE
+1
+#elif	defined(__BSD4_2)
  loc 0
  cal $sigblock
  asp _EM_WSIZE
@@ -41,7 +55,7 @@ gtobuf
  lxl 0
  dch		; Local Base of caller
  lxa 0		; Stackpointer of caller
- lal _EM_PSIZE
+ lal _EM_PSIZE+_EM_WSIZE
  loi _EM_PSIZE	; Return address of caller
  lal 0
  loi _EM_PSIZE	; address of jmpbuf
@@ -58,7 +72,19 @@ gtobuf
 
  exp $longjmp
  pro $longjmp,?
-#ifdef __BSD4_2
+#if	defined(_POSIX_SOURCE)
+; restore blocked mask
+ lal 0
+ loi _EM_PSIZE
+ lof 3*_EM_PSIZE+_EM_LSIZE
+ zeq *2
+ lal 0
+ loi _EM_PSIZE
+ adp 3*_EM_PSIZE
+ cal $__oldsigset
+ asp _EM_PSIZE
+2
+#elif	defined(__BSD4_2)
 ; restore signal mask
  lal 0
  loi _EM_PSIZE
@@ -76,8 +102,7 @@ gtobuf
  dup _EM_WSIZE
  zne *3
 ; of course, longjmp may not return 0!
- asp _EM_WSIZE
- loc 1
+ inc
 3
 ; put return value in function result area
  cal $fill_ret_area
