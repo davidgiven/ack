@@ -2746,7 +2746,7 @@ kills ALL
 
 pat nop
 kills ALL
-  gen proccall {label, ".nop"}
+  /* gen proccall {label, ".nop"} */
 
 pat rck $1==4
 with BXREG ACC
