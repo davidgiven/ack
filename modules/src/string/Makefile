@@ -3,29 +3,37 @@ MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 AR	= ar
+SUF	= o
+LIBSUF	= a
 
-CFLAGS = -O
+CFLAGS = -O $(COPT)
 
 SRC =	bts2str.c btscat.c btscmp.c btscpy.c btszero.c long2str.c \
 	str2bts.c str2long.c strcat.c strcmp.c strcpy.c strindex.c \
 	strlen.c strncat.c strncmp.c strncpy.c strrindex.c strzero.c
-OBJ =	bts2str.o btscat.o btscmp.o btscpy.o btszero.o long2str.o \
-	str2bts.o str2long.o strcat.o strcmp.o strcpy.o strindex.o \
-	strlen.o strncat.o strncmp.o strncpy.o strrindex.o strzero.o
+OBJ =	bts2str.$(SUF) btscat.$(SUF) btscmp.$(SUF) btscpy.$(SUF) \
+	btszero.$(SUF) long2str.$(SUF) str2bts.$(SUF) str2long.$(SUF) \
+	strcat.$(SUF) strcmp.$(SUF) strcpy.$(SUF) strindex.$(SUF) \
+	strlen.$(SUF) strncat.$(SUF) strncmp.$(SUF) strncpy.$(SUF) \
+	strrindex.$(SUF) strzero.$(SUF)
 
-all:		libstring.a
+.SUFFIXES: .$(SUF)
+.c.$(SUF):
+	$(CC) -c $(CFLAGS) $*.c
 
-libstring.a:	$(OBJ) Makefile
-		$(AR) r libstring.a $(OBJ)
-		-sh -c 'ranlib libstring.a'
+all:		libstring.$(LIBSUF)
+
+libstring.$(LIBSUF):	$(OBJ) Makefile
+		$(AR) r libstring.$(LIBSUF) $(OBJ)
+		-sh -c 'ranlib libstring.$(LIBSUF)'
 
 install:	all
-		$(INSTALL) lib/libstring.a
+		$(INSTALL) lib/libstring.$(LIBSUF)
 		$(INSTALL) man/string.3
 
 cmp:		all
-		$(COMPARE) lib/libstring.a
-		$(COMPARE) man/string.3
+		-$(COMPARE) lib/libstring.$(LIBSUF)
+		-$(COMPARE) man/string.3
 
 pr:
 		@pr Makefile $(SRC)
@@ -34,7 +42,7 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.[oa]
+		rm -f *.$(SUF) *.$(LIBSUF)
 
 lintlib:
 		lint -Cstring $(SRC)
