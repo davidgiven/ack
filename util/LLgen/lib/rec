@@ -32,8 +32,7 @@ LLscan(t) {
 	/*
 	 * Check if the next symbol is equal to the parameter
 	 */
-	if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
-	if (LLsymb == t) {
+	if ((LLsymb = LL_LEXI()) == t) {
 		return;
 	}
 	/*
@@ -44,8 +43,7 @@ LLscan(t) {
 
 LLread() {
 	for (;;) {
-		if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
-		if ((LLcsymb = LLindex[LLsymb]) >= 0) return;
+		if ((LLcsymb = LLindex[(LLsymb = LL_LEXI())]) >= 0) return;
 		LLmessage(0);
 	}
 	/* NOTREACHED */
@@ -54,15 +52,17 @@ LLread() {
 LLerror(t) {
 	register int i;
 
+	if (t == EOFILE && LLsymb <= 0) return;
 #ifdef LL_NEWMESS
 	if (t == EOFILE) {
 #ifdef LL_USERHOOK
 		static int lst[] = { EOFILE, 0 };
 		LLuserhook(EOFILE, lst);
 #endif LL_USERHOOK
-		if (LLsymb != EOFILE) {
+		if (LLsymb != EOFILE && LLsymb > 0) {
 			LLmessage(-1);
-			while ((LLsymb = LL_LEXI()) > 0) /* nothing */ ;
+			while ((LLsymb = LL_LEXI()) > 0 && LLsymb != EOFILE) 
+				/* nothing */ ;
 		}
 		return;
 	}
@@ -107,7 +107,7 @@ LLnext(n) {
 	if (n <= 0 && LLsets[(LLcsymb >> 3) - n] & (1 << (LLcsymb & 07))) {
 		retval |= 2;
 	}
-	else if (LLsymb == n) retval |= 2;
+	else if (n > 0 && LLcsymb == LLindex[n]) retval |= 2;
 	return retval;
 }
 
@@ -170,7 +170,7 @@ LLdoskip(exp) {
 	for (;;) {
 		if (LLtcnt[LLcsymb] != 0) {
 #ifdef LL_USERHOOK
-			if (!exp || !LLx || LLsymb == exp)
+			if (!exp || !LLx || LLcsymb == LLindex[exp])
 #endif
 			return retval;
 		}
@@ -180,7 +180,7 @@ LLdoskip(exp) {
 			if (LLscnt[i] != 0) {
 				if (LLsets[LL_SSIZE*i+LLi] & LLb) {
 #ifdef LL_USERHOOK
-					if (!exp || !LLx || LLsymb == exp)
+					if (!exp || !LLx || LLcsymb == LLindex[exp])
 #endif
 					return retval;
 				}

@@ -208,8 +208,8 @@ genrecovery() {
 	for (t = tokens; t < maxt; t++) {
 		index[t->t_tokno] = t - tokens;
 	}
-	fputs("static short LLindex[] = {\n",f);
-	for (q = index; q < &index[assval]; q++) {
+	fputs("#define LLindex (LL_index+1)\nstatic short LL_index[] = {0,0,\n",f);
+	for (q = index+1; q < &index[assval]; q++) {
 		fprintf(f, "%d,\n", *q);
 	}
 	fputs(c_arrend, f);

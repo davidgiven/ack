@@ -17,7 +17,6 @@ extern int LLsymb;
 extern unsigned int LLscnt[];
 extern unsigned int LLtcnt[];
 extern int LLcsymb;
-extern int LL_symb;
 
 #define LLsdecr(d)	{LL_assert(LLscnt[d] > 0); LLscnt[d]--;}
 #define LLtdecr(d)	{LL_assert(LLtcnt[d] > 0); LLtcnt[d]--;}
