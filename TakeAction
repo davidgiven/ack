@@ -44,12 +44,18 @@ do
 			FAIL="$2" ;;
 	xsuccess)	SUCC="$2" ;;
 	xdir)		DIR="$2" ;;
-	xsystem)	case `ack_sys` in
-			$2)	;;
-			*)	echo "Sorry, $SYS can only be made on $2 systems"
+	xsystem)	PAT="$2"
+			oIFS=$IFS
+			IFS="|"
+			eval set $2
+			case x`ack_sys` in
+			x$1|x$2|x$3|x$4|x$5|x$6|x$7)	;;
+			*)	echo "Sorry, $SYS can only be made on $PAT systems"
 				DOIT=no
 				;;
-			esac ;;
+			esac
+			IFS=$oIFS
+			;;
 	xend)		case $DOIT in
 			no)	continue ;;
 			esac
