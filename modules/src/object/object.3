@@ -254,14 +254,15 @@ to close the file. You can close the file yourself.
 .PP
 .I Rd_rew_relo
 rewinds the relocation part, so that it can be read again.
-\fILed\fR(1) sometimes needs this.
+\fILed\fR(6) sometimes needs this.
 .PP
 .I Rd_unsigned2
 reads two bytes from file descriptor
 .I fd
 and interpretes them as an unsigned integer.
 .PP
-.I Rd_arhdr returns 1 if a header was read, and 0 on end-of-file.
+.I Rd_arhdr
+returns 1 if a header was read, and 0 on end-of-file.
 .PP
 When using any of the reading routines, you must define a routine
 named
