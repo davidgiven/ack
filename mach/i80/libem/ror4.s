@@ -10,7 +10,7 @@
 ! Expects on stack:	operand
 ! Yields on stack:	result
 
-.ror4	pop h
+.ror4:	pop h
 	shld .retadr
 	mov h,b
 	mov l,c
