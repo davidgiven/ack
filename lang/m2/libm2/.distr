@@ -15,7 +15,6 @@ RealConver.def
 Semaphores.def
 Storage.def
 Strings.def
-TTY.def
 Terminal.def
 Unix.def
 head_m2.e

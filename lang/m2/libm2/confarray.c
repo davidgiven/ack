@@ -1,3 +1,13 @@
+/*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*/
+
+/*
+  Module:	runtime support for conformant arrays
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*/
 #include <m2_traps.h>
 
 struct descr {

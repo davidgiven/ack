@@ -1,4 +1,9 @@
 DEFINITION MODULE Terminal;
+(*
+  Module:	Input/Output to/from terminals
+  From:		"Programming in Modula-2", 3rd, corrected edition, by N. Wirth
+  Version:	$Header$
+*)
 
 	PROCEDURE Read(VAR ch : CHAR);
 	(* Read a character from the terminal and leave it in ch

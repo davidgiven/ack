@@ -1,9 +1,12 @@
 (*$R-*)
 IMPLEMENTATION MODULE CSP;
-(* From 
-	"A Modula-2 Implementation of CSP",
-	M. Collado, R. Morales, J.J. Moreno,
-	SIGPlan Notices, Volume 22, Number 6, June 1987.
+(*
+  Module:	Communicating Sequential Processes
+  From:		"A Modula-2 Implementation of CSP",
+		M. Collado, R. Morales, J.J. Moreno,
+		SIGPlan Notices, Volume 22, Number 6, June 1987.
+		Some modifications by Ceriel J.H. Jacobs
+  Version:	$Header$
 
    See this article for an explanation of the use of this module.
 *)

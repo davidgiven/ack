@@ -1,6 +1,10 @@
 (*$Foreign *)
 DEFINITION MODULE EM;
-(* An interface to EM instructions and data *)
+(*
+  Module:	Interface to some EM instructions and data
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
 
 	FROM SYSTEM IMPORT ADDRESS;
 
@@ -20,8 +24,15 @@ DEFINITION MODULE EM;
 	(* Generate EM trap number "trapno" *)
 
 	PROCEDURE SIG(t: TrapHandler): TrapHandler;
+	(* install traphandler t; return previous handler *)
 
 	PROCEDURE FILN(): ADDRESS;
+	(* return current program file-name. This only works if file-name
+	   and line-number generation is not disabled during compilation
+	*)
 
 	PROCEDURE LINO(): INTEGER;
+	(* return current program line-number. This only works if file-name
+	   and line-number generation is not disabled during compilation
+	*)
 END EM.

@@ -1,3 +1,14 @@
+/*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*/
+
+/*
+  Module:	Access to program arguments and environment
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*/
+
 extern char **_argv, **_environ;
 extern int _argc;
 unsigned int Arguments_Argc;

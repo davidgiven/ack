@@ -1,7 +1,17 @@
 #
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Terminal;
-(* This implementation is Unix-dependant
+(*
+  Module:       Input/Output to/from terminals
+  Author:	Ceriel J.H. Jacobs
+  Version:      $Header$
+
+  Implementation for Unix.
 *)
   IMPORT Unix;
   FROM SYSTEM IMPORT ADR;

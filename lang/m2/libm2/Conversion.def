@@ -1,4 +1,9 @@
 DEFINITION MODULE Conversions;
+(*
+  Module:	Numeric-to-string conversions
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
 
   PROCEDURE ConvertOctal(num, len: CARDINAL; VAR str: ARRAY OF CHAR);
   (* Convert number "num" to right-justified octal representation of

@@ -1,4 +1,16 @@
 #
+;
+; (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+; See the copyright notice in the ACK home directory, in the file "Copyright".
+;
+;
+; Module:	implementation of coroutines
+; Author:	Ceriel J.H. Jacobs
+; Version:	$Header$
+;
+; This version works for EM implementations that have a contiguous downwards
+; growing stack, on which data below the stack-pointer is not destroyed.
+;
 #include <em_mes.h>
 #include <m2_traps.h>
 

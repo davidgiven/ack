@@ -1,4 +1,10 @@
+(*$Foreign*)
 DEFINITION MODULE ASCII;
+(*
+  Module:	Mnemonics for ASCII control characters
+  From:		???
+  Version:	$Header$
+*)
 
 CONST
 	nul = 00C;	soh = 01C;	stx = 02C;	etx = 03C;

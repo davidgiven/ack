@@ -1,6 +1,8 @@
 DEFINITION MODULE Arguments;
-(*	Routines and variables to access the programs arguments and
-	environment
+(*
+  Module:	Access to program arguments and environment
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
 *)
 
 VAR	Argc: CARDINAL;	(* Number of program arguments, including the program

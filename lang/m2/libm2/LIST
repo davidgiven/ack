@@ -5,8 +5,6 @@ RealInOut.mod
 InOut.mod
 Streams.mod
 Terminal.mod
-TTY.mod
-ASCII.mod
 MathLib0.mod
 Mathlib.mod
 Processes.mod

@@ -1,8 +1,9 @@
 (*$R-*)
 IMPLEMENTATION MODULE Processes [1];
-(* This implementation module comes from
-	"Programming in Modula-2", by Niklaus Wirth,
-	3rd edition, Springer-Verlag, New York, 1985
+(*
+  Module:       Processes
+  From:         "Programming in Modula-2", 3rd, corrected edition, by N. Wirth
+  Version:      $Header$
 *)
 
   FROM SYSTEM IMPORT ADDRESS, TSIZE, NEWPROCESS, TRANSFER;

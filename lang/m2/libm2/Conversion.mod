@@ -1,5 +1,15 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Conversions;
+(*
+  Module:	numeric-to-string conversions
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
 
   PROCEDURE ConvertNum(num, len, base: CARDINAL;
 		       neg: BOOLEAN;

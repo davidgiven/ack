@@ -1,5 +1,15 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE RealConversions;
+(*
+  Module:       string-to-real and real-to-string conversions
+  Author:       Ceriel J.H. Jacobs
+  Version:      $Header$
+*)
 
   FROM EM IMPORT FIF;
 

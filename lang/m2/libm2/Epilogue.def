@@ -1,6 +1,12 @@
 (*$Foreign*)
 DEFINITION MODULE Epilogue;
-(* MODULA-2 offers a facility for the initialization of modules, but there
+(*
+  Module:	install module termination procedures to be called at
+		program termination
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+
+   MODULA-2 offers a facility for the initialization of modules, but there
    is no mechanism to have some code executed when the program finishes.
    This module is a feeble attempt at solving this problem.
 *)

@@ -1,5 +1,15 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Strings;
+(*
+  Module:       String manipulations
+  Author:       Ceriel J.H. Jacobs
+  Version:      $Header$
+*)
 
 PROCEDURE Assign(source: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);
 (* Assign string source to dest

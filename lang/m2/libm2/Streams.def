@@ -1,5 +1,9 @@
 DEFINITION MODULE Streams;
 (*
+  Module:	Stream Input/Output
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+
  * This module provides sequential IO through streams.
  * A stream is either a text stream or a binary stream, and is either in
  * reading, writing or appending mode.
@@ -134,10 +138,16 @@ DEFINITION MODULE Streams;
 			position: LONGINT;
 			VAR result: StreamResult);
   (* sets the actual read/write position to "position".
-     "result" is set to illegaloperation if "stream" is not a stream or
-     the stream was opened for appending and the position is in front of
-     the current position, or it failed for some other
-     reason (f.i. when the stream is connected to a terminal).
+     "result" is set to nostream if "stream" is not a stream.
+     It is set to illegaloperation if the stream was opened for appending and
+     the position is in front of the current position, or it failed for some
+     other reason (f.i. when the stream is connected to a terminal).
+  *)
+
+  PROCEDURE isatty(stream: Stream; VAR result: StreamResult): BOOLEAN;
+  (* return TRUE if the stream is connected to a terminal.
+     "result" is set to nostream if "stream" is not a stream, and
+     set to illegaloperation if the operation failed for some other reason.
   *)
 
 END Streams.

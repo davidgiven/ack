@@ -1,5 +1,17 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Semaphores [1];
+(*
+  Module:       Processes with semaphores
+  Author:       Ceriel J.H. Jacobs
+  Version:      $Header$
+
+  Quasi-concurrency implementation
+*)
 
   FROM SYSTEM IMPORT ADDRESS, NEWPROCESS, TRANSFER;
   FROM Storage IMPORT ALLOCATE;

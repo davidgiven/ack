@@ -1,5 +1,16 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Storage;
+(*
+  Module:	Dynamic Storage Allocation
+  Author:	Ceriel J.H. Jacobs
+		Adapted from a version in C by Hans Tebra
+  Version:	$Header$
+*)
 (* This storage manager maintains an array of lists of objects with the
    same size. Commonly used sizes have their own bucket. The larger ones
    are put in a single list.

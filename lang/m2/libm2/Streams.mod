@@ -1,8 +1,21 @@
+#
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Streams;
+(*
+  Module:       Stream Input/Output
+  Author:       Ceriel J.H. Jacobs
+  Version:      $Header$
+
+  Implementation for Unix
+*)
 
   FROM SYSTEM IMPORT BYTE, ADR;
-  IMPORT Unix, TTY, Storage, Epilogue;
+  IMPORT Unix, Storage, Epilogue;
 
   CONST BUFSIZ = 1024;	(* tunable *)
   TYPE	IOB = RECORD
@@ -332,7 +345,7 @@ IMPLEMENTATION MODULE Streams;
   BEGIN
 	currpos := 0D;
 	IF (s = NIL) OR (s^.kind = none) THEN
-		result := illegaloperation;
+		result := nostream;
 		RETURN;
 	END;
 	IF (s^.mode # reading) THEN
@@ -360,6 +373,24 @@ IMPLEMENTATION MODULE Streams;
 	result := succeeded;
   END SetPosition;
 
+  PROCEDURE isatty(stream: Stream): BOOLEAN;
+    VAR buf: ARRAY[1..100] OF CHAR;
+  BEGIN
+	IF (stream = NIL) OR (s^.kind = none) THEN
+		result := nostream;
+		RETURN FALSE;
+	END;
+#ifdef __USG
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('T') * 256 + 1), ADR(buf)) >= 0;
+#else
+#ifdef __BSD4_2
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8 + 6*65536 + 40000000H), ADR(buf)) >= 0;
+#else
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8), ADR(buf)) >= 0;
+#endif
+#endif
+  END isatty;
+
 BEGIN
 	InputStream := ADR(ibuf);
 	OutputStream := ADR(obuf);
@@ -383,7 +414,7 @@ BEGIN
 		maxcnt := 0;
 		cnt := 0;
 		bufferedcnt := BUFSIZ;
-		IF TTY.isatty(1) THEN
+		IF isatty(OutputStream) THEN
 			buffering := linebuffered;
 		ELSE
 			buffering := blockbuffered;
@@ -398,7 +429,7 @@ BEGIN
 		maxcnt := 0;
 		cnt := 0;
 		bufferedcnt := BUFSIZ;
-		IF TTY.isatty(2) THEN
+		IF isatty(ErrorStream) THEN
 			buffering := linebuffered;
 		ELSE
 			buffering := blockbuffered;

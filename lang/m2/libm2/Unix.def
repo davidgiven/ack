@@ -1,6 +1,10 @@
 (*$Foreign language module *)
 DEFINITION MODULE Unix;
-(*	An interface to some Unix system-calls *)
+(*
+  Module:	interface to some Unix systemcalls
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
   FROM SYSTEM IMPORT WORD, ADDRESS;
 
 (* Type needed for Signal *)

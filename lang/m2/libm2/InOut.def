@@ -1,4 +1,9 @@
 DEFINITION MODULE InOut;
+(*
+  Module:	Wirth's Input/Output module
+  From:		"Programming in Modula-2", 3rd, corrected edition, by N. Wirth
+  Version:	$Header$
+*)
 
 	CONST	EOL = 12C;
 
@@ -23,11 +28,13 @@ DEFINITION MODULE InOut;
 	*)
 
 	PROCEDURE OpenInputFile(filename: ARRAY OF CHAR);
-	(* Like OpenInput, but filename given as parameter
+	(* Like OpenInput, but filename given as parameter.
+	   This procedure is not in Wirth's InOut.
 	*)
 
 	PROCEDURE OpenOutputFile(filename: ARRAY OF CHAR);
-	(* Like OpenOutput, but filename given as parameter
+	(* Like OpenOutput, but filename given as parameter.
+	   This procedure is not in Wirth's InOut.
 	*)
 
 	PROCEDURE CloseInput;

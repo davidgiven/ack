@@ -1,5 +1,16 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE Traps;
+(*
+  Module:       Facility for handling traps
+  Author:       Ceriel J.H. Jacobs
+  Version:      $Header$
+*)
+
   IMPORT EM;
   IMPORT Unix;
   FROM SYSTEM IMPORT ADDRESS, ADR;

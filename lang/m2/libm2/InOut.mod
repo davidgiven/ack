@@ -1,10 +1,19 @@
+(*
+  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+  See the copyright notice in the ACK home directory, in the file "Copyright".
+*)
+
 (*$R-*)
 IMPLEMENTATION MODULE InOut ;
+(*
+  Module:	Wirth's Input/Output module
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
 
   IMPORT Streams;
   IMPORT Conversions;
   IMPORT Traps;
-  FROM TTY IMPORT isatty;
 
   CONST	TAB = 11C;
 
@@ -123,7 +132,7 @@ IMPLEMENTATION MODULE InOut ;
 	j : CARDINAL;
   BEGIN
 	Done := TRUE;
-	IF isatty(0) THEN
+	IF isatty(Streams.InputStream) THEN
 		XWriteString(prompt);
 	END;
 	XReadString(buf);

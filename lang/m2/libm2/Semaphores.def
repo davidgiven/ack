@@ -1,4 +1,12 @@
 DEFINITION MODULE Semaphores;
+(*
+  Module:	Processes with semaphores
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+
+  On systems using quasi-concurrency, the only opportunities for process-
+  switches are calls to Down and Up.
+*)
 
   TYPE Sema;
 
@@ -12,12 +20,10 @@ DEFINITION MODULE Semaphores;
   (* If the value of "s" is > 0, then just decrement "s".
      Else, suspend the current process until the semaphore becomes
      positive again.
-     May result in a process switch.
   *)
 
   PROCEDURE Up(VAR s: Sema);
   (* Increment the semaphore "s".
-     This call may result in a process switch
   *)
 
   PROCEDURE StartProcess(P: PROC; n: CARDINAL);
