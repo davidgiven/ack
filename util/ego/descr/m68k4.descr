@@ -26,7 +26,7 @@ register score parameters:
 	constant:
 		(2 sizes)
 		in_0_8 ->	(0,0)
-		default ->	(2,2)
+		default ->	(4,4)
 	double constant:
 		(1 size)
 		default ->	(-1,-1)
@@ -35,7 +35,7 @@ register score parameters:
 		default ->	(4,4)
 	address of procedure:
 		(1 size)
-		default ->	(2,4)
+		default ->	(4,4)
 
 opening cost parameters:
 	local variable:
@@ -45,18 +45,18 @@ opening cost parameters:
 			default ->	(6,4)
 		general
 			(1 size)
-			default ->	(8,4)
+			default ->	(6,4)
 	address of local variable:
 		(2 cases)
 		pointer
 			(1 size)
-			default ->	(4,2)
+			default ->	(4,4)
 		general
 			(1 size)
-			general ->	(4,2)
+			general ->	(4,4)
 	constant:
 		(1 size)
-		default ->	(4,4)
+		default ->	(6,6)
 	double constant:
 		(1 size)
 		default ->	(1000,1000)
@@ -70,15 +70,15 @@ opening cost parameters:
 register save costs:
 	(11 cases)
 	0 -> (0,0)
-	1 -> (12,4)
-	2 -> (24,8)
-	3 -> (34,8)
-	4 -> (42,8)
-	5 -> (50,8)
-	6 -> (58,8)
-	7 -> (66,8)
-	8 -> (84,8)
-	9 -> (92,8)
+	1 -> (12,6)
+	2 -> (24,10)
+	3 -> (34,10)
+	4 -> (42,10)
+	5 -> (50,10)
+	6 -> (58,10)
+	7 -> (66,10)
+	8 -> (84,10)
+	9 -> (92,10)
 	0 -> (0,0)
 %%UD
 access costs of global variables:
@@ -95,11 +95,12 @@ array bound harmful?:  no
 first time then space:
 addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
 		  op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: -1 -1
+cheap operations: op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
+		  op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
 lexical tresholds: 1 1
 indirection limit: 8
 do not eliminate sli if index on shiftcounts:	-1
 						-1
 forbidden operators: -1 -1
 %%SP
-global stack pollution allowed?: no
+global stack pollution allowed?: yes
