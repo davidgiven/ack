@@ -12,7 +12,7 @@ char **as_instructions;	    /* The buffer(?) where the instructions are saved */
 int quantum = 0,	    /* Max. nr. of instructions in as_instructions[] */
     nr_instr,		    /* Number of saved instructions */
     first_action,	    /* Is this block of assembler-instr. the first after
-			     * a '==>' or '::=' ?
+			     * a '==>'?
 			     */
     last_action;	    /* Is this block followed by a '.' ? */
 

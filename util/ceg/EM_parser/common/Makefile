@@ -9,9 +9,7 @@ OFILES = pars.o Lpars.o scan.o mylex.o default.o C_instr2.o help.o eval.o\
 	 action.o
 IFILES = -I$(EM)/h -I$(EM)/modules/h
 CC = cc
-
-.c.o :
-	$(CC) $(IFILES) -c $<
+CFLAGS = $(IFILES)
 
 all : dummy $(OFILES)
 

@@ -9,7 +9,6 @@
  *	DEF_C_INSTR 	- 'C_loe..', 'C_ste..', '..icon, '..fcon', etc
  *	CONDITION 	- C-expression, for example: '$1 == 481'
  *	ARROW 		- '==>'
- *	EQUIV 		- '::='
  *	CALL 		- C-style functioncall, for example: 'error( 17)'
  *	ASSEM_INSTR 	- C-style string, for example: '"mov r0, (r1)"'
  *	DEFAULT 	- 'default'
@@ -79,13 +78,6 @@ int mylex()
 			CD_pos = FALSE;
 			CALL_pos = TRUE;
 			return( ARROW);
-		     }
-		     break;
-
-	  case ':' : if ( equiv()) {
-			CD_pos = FALSE;
-			CALL_pos = TRUE;
-			return( EQUIV);
 		     }
 		     break;
 
@@ -194,18 +186,6 @@ int arrow() /* '==>' */
 	return( FALSE);
 }
 
-int equiv() /* '::=' */
-{
-	if ( ( *next++ = scanc()) == ':')
-		if ( ( *next++ = scanc()) == '=')
-			return( TRUE);
-		else
-			backc( *--next);
-	else
-		backc( *--next);
-	return( FALSE);
-}
-
 int _default() /* 'default' */
 {
 	char c, skip_space();
@@ -266,7 +246,7 @@ read_call()
 
 read_condition()
 
-/* A CONDITION is followed by either '==>' or '::='.
+/* A CONDITION is followed by '==>'
  */
 {
 	while ( TRUE) {
@@ -281,15 +261,6 @@ read_condition()
 				return;
 			     }
 			     break;
-
-		  case ':' : if ( equiv()) {
-				backc( '=');
-				backc( ':');
-				backc( ':');
-				next -= 3;
-				return;
-			     }
-			     break;
 		}
 	}
 }
@@ -298,12 +269,6 @@ is_C_INSTR( str)
 char *str;
 {
 	if ( *str == 'C' && *(str+1) == '_')	/* C_xxx */
-		return( TRUE);
-	else if ( strncmp( "locals", str, 6) == 0)
-		return( TRUE);
-	else if ( strncmp( "jump", str, 4) == 0)
-		return( TRUE);
-	else if ( strncmp( "prolog", str, 6) == 0)
 		return( TRUE);
 	else
 		return( FALSE);

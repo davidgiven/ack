@@ -44,7 +44,7 @@ char *to_change;
 
 }
 
-%token 	C_INSTR, DEF_C_INSTR, CONDITION, ARROW, EQUIV,
+%token 	C_INSTR, DEF_C_INSTR, CONDITION, ARROW,
 	CALL, ASSEM_INSTR, DEFAULT, ERROR;
 %start	table, table;
 %start	def_row, def_row;
@@ -78,13 +78,6 @@ special :
 simple	: ARROW 		{ save_output();}
 	  actionlist		{ back_patch();}
         ;
-
-/*
-	| EQUIV			{ no_conversions = TRUE; save_output();}
-	  actionlist		{ no_conversions = FALSE; back_patch();}
-
-	;
-*/
 
 
 actionlist :			{ first_action = TRUE;}
@@ -130,9 +123,6 @@ Dspecial: CONDITION 		{ out( " %s ", yytext);}
 
 Dsimple	: ARROW 		{ out( "%s", yytext);}
 	  Dactionlist
-
-	| EQUIV			{ out( "%s", yytext);}
-	  Dactionlist		
 
 	;
 
@@ -196,8 +186,6 @@ c_special : CONDITION
 c_simple: ARROW
 	  c_actionlist
 
-	| EQUIV
-	  c_actionlist
 	;
 
 c_actionlist : 
@@ -253,8 +241,6 @@ int token;
 	  case CALL	: fprint( STDERR,  "CALL  %s", yytext);
 			  break;
 	  case ARROW	: fprint( STDERR,  "==> ");
-			  break;
-	  case EQUIV	: fprint( STDERR,  "::= ");
 			  break;
 	  case CONDITION: fprint( STDERR,  "CONDITION  %s", yytext);
 			  break;
