@@ -16,7 +16,7 @@ lint:
 		lint -hpxc -I$h em_pc.c
 
 clean:
-		rm -f *.o *.old
+		rm -f *.o *.old em_pc
 
 opr:
 		make pr ^ opr
