@@ -981,7 +981,8 @@ main() {
         ptab['-'] = 3;
         ptab['&'] = 2;
         ptab['|'] = 1;
-        return parse();
+        parse();
+	exit(nerrors);
 }   }
 .fi
 .ft R
