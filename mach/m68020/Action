@@ -1,0 +1,24 @@
+name "M68020 assembler"
+dir as
+end
+name "M68020 backend"
+dir ncg
+end
+name "M68020 EM library"
+dir libem
+end
+name "M68020 system call library"
+dir libsys
+end
+name "M68020 C libraries"
+dir libcc
+end
+name "M68020 PC library"
+dir libpc
+end
+name "M68020 Basic library"
+dir libbc
+end
+name "M68020 Occam library"
+dir liboc
+end
