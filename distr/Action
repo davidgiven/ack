@@ -7,9 +7,6 @@ end
 name "Pascal bootstrap files"
 dir lang/pc/pem
 end
-name "Basic yacc files"
-dir lang/basic/src
-end
 name "C compiler makefile"
 dir lang/cem/cemcom
 action "cp AckMake makefile"

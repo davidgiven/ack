@@ -1,5 +1,5 @@
-.\" $Header$
-.TL
+.\" $Header$ 
+.TL 
 .de Sy
 .LP
 .IP \fBsyntax\fR 10
@@ -13,10 +13,17 @@
 The ABC compiler
 .AU
 Martin L. Kersten
+Gert-Jan Akkerman
+Marcel Worring
+Edo Westerhuis
+Frans Kunst
+Ronnie Lachniet
 .AI
 Department of Mathematics and Computer Science.
 .br
-Vrije Universiteit
+Free University
+.br
+Amsterdam
 .AB
 This manual describes the 
 programming language BASIC and its compiler
@@ -28,35 +35,40 @@ INTRODUCTION.
 The BASIC-EM compiler is an extensive implementation of the
 programming language BASIC.
 The language structure and semantics are modelled after the 
-BASIC interpreter/compiler of Microsoft (tr), a detailed comparison
+BASIC interpreter/compiler of Microsoft (tr), a short comparison
 is provided in appendix A.
 .LP
 The compiler generates code for a virtual machine, the EM machine
-[[ACM, etc]]
+[[ACM, etc]].
 Using EM as an intermediate machine results in a highly portable
 compiler and BASIC code.
+.br
 The drawback of EM is that it does not directly reflect one particular
-hardware design, which means that many of 
-the low level operations available within 
-BASIC are ill-defined or even inapplicable.
+hardware design, which means that many of the low level operations available 
+within BASIC are ill-defined or even inapplicable.
 To mention a few, the peek and poke instructions are likely
 to be behave errorneous, while line printer and tapedeck 
 primitives are unknown.
 .LP
 This manual is divided into three chapters.
-The first chapter discusses the general language syntax and semantics.
-Chapter two describes the statements available in BASIC-EM.
-Chapter 3 describes the predefined functions,
-ordered alphabetically.
-Appendix A discusses the differences with
-Microsoft BASIC. Appendix B describes all reserved symbols.
-Appendix C lists the error messages in use.
+.br
+Chapter 1 discusses the general language syntax and semantics.
+.br
+Chapter 2 describes the statements available in BASIC-EM.
+.br
+Chapter 3 describes the predefined functions, ordered alphabetically.
+.LP
+Appendix A discusses the differences with Microsoft BASIC. 
+.br
+Appendix B describes all reserved symbols.
+.LP
+.LP
 .SH
 SYNTAX NOTATION
 .LP
 The conventions for syntax presentation are as follows:
 .IP CAPS 10
-Items are reserved words, must be input as shown
+Items are reserved words, must be input as shown.
 .IP <> 10
 Items in lowercase letters enclosed in angular brackets
 are to be supplied by the user.
@@ -71,6 +83,7 @@ must be chosen.
 Vertical bars separate the choices within braces.
 .LP
 All punctuation must be included where shown.
+.bp
 .NH 1
 GENERAL INFORMATION
 .LP
@@ -81,7 +94,7 @@ an executable file, called a.out.
 LINE FORMAT
 .LP
 A BASIC program consists of a series of lines, starting with a 
-positive line number in the range 0 to 65529.
+positive line number in the range 0 to 32767.
 A line may consists of more then one physical line on your terminal, but must
 is limited to 1024 characters.
 Multiple BASIC statements may be placed on a single line, provided
@@ -105,19 +118,24 @@ character set enclosed by double quotation marks.
 Numeric constants are positive or negative numbers, grouped into
 five different classes.
 .IP "a) integer constants" 25
+.br
 Whole numbers in the range of -32768 and 32767. Integer constants do
 not contain decimal points.
 .IP "b) fixed point constants" 25
+.br
 Positive or negative real numbers, i.e. numbers with a decimal point.
 .IP "c) floating point constants" 25
+.br
 Real numbers in scientific notation. A floating point constant
 consists of an optional signed integer or fixed point number
 followed by the letter E (or D) and an optional signed integer
 (the exponent).
 The allowable range of floating point constants is 10^-38 to 10^+38.
 .IP "d) Hex constants" 25
+.br
 Hexadecimal numbers, denoted by the prefix &H.
-.IP "d) Octal constants" 25
+.IP "e) Octal constants" 25
+.br
 Octal numbers, denoted by the prefix &O.
 .NH 2
 VARIABLES
@@ -128,7 +146,7 @@ Before a variable is assigned its value is assumed to be zero.
 .br
 Variable names are composed of letters, digits or the decimal point,
 starting with a letter. Up to 40 characters are significant.
-A variable name be be followed by any of the following  type 
+A variable name can be followed by any of the following  type 
 declaration characters:
 .IP % 5
 Defines an integer variable
@@ -139,11 +157,7 @@ Defines a double precision variable
 .IP $ 5
 Defines a string variable.
 .LP
-NOTE: Two variables with the same name but different type is
-considered illegal.
-.LP
-Beside single valued variables, values may be grouped
-into tables or arrays.
+Beside single valued variables, values may be grouped into tables or arrays.
 Each element in an array is referenced by the array name and an index,
 such a variable is called a subscripted variable.
 An array has as many subscripts as there are dimensions in the array,
@@ -154,13 +168,24 @@ function.
 .br
 A variable name may not be a reserved word nor the name 
 of a predefined function.
-A list of all reserved identifiers is included as Appendix ?.
+A list of all reserved identifiers is included as Appendix B.
+.LP
+NOTES: 
+.br
+Two variables with the same name but different type is
+considered illegal.
+.br
+The type of a variable without typedeclaration-character is set,
+at it's first occurence in the program, 
+to the defaulttype which is (in this implementation) double precision.
+.br
+Multi-dimensional array's must be declared before use (see 
+DIM-statement ).
+.br
+BASIC-EM differs from Microsoft BASIC in supporting floats in one precision
+only (due to EM), eg doubles and floats have the same precision.
 .NH 2
 EXPRESSIONS
-.LP
-BASIC-EM differs from Microsoft BASIC in supporting floats in one precision
-only (due to EM).
-All floating point constants have the same precision, i.e. 16 digits.
 .LP
 When necessary the compiler will convert a numeric value from
 one type to another.
@@ -179,9 +204,9 @@ Arithmetic
 .LP
 The arithmetic operators in order of precedence,a re:
 .DS L
-\^		Exponentiation
+^		Exponentiation
 -		Negation
-*,/,\\,MOD	Multiplication, Division, Remainder
+*,/,\\\\\\\\,MOD	 Multiplication, Division, Remainder
 +,-		Addition, Substraction
 .DE
 The operator \\\\ denotes integer division, its operands are rounded to
@@ -189,7 +214,7 @@ integers before the operator is applied.
 Modulus arithmetic is denoted by the operator MOD, which yields the
 integer value that is the remainder of an integer division.
 .br
-The order in which operators are performed can be changec with parentheses.
+The order in which operators are performed can be changed with parentheses.
 .SH
 Relational
 .LP
@@ -210,7 +235,7 @@ then the arithmetic operators.
 Logical
 .LP
 The logical operators performs tests on multiple relations, bit manipulations,
-or Boolean operations.
+or boolean operations.
 The logical operators returns a bitwise result ("true" or "false").
 In an expression, logical operators are performed after the relational and
 arithmetic operators.
@@ -241,6 +266,7 @@ ERROR MESSAGES
 .LP
 The occurence of an error results in termination of the program
 unless an ON....ERROR statement has been encountered.
+.bp
 .NH 1
 B-EM STATEMENTS
 .LP
@@ -266,7 +292,7 @@ The argument list consist of (subscripted) variables.
 The BASIC compiler pushes the address of the arguments on the stack in order
 of encounter.
 .RM
-Not yet available
+Not yet available.
 .NH 2
 CLOSE
 .Sy
@@ -274,7 +300,7 @@ CLOSE [[#]<file number>[,[#]<file number...>]]
 .PU
 To terminate I/O on a disk file.
 <file number> is the number associated with the file 
-when it was OPENed (See OPEN). Ommission of parameters results in closing
+when it was OPENed (See OPEN-statement). Ommission of parameters results in closing
 all files.
 .sp
 The END statement and STOP statement always issue a CLOSE of
@@ -334,14 +360,15 @@ DIM <list of subscripted variable>
 .PU
 The DIM statement allocates storage for subscripted variables.
 If an undefined subscripted variable is used 
-the maximum value of the array subscript(s) is assumed to be 10.
-A subscript out of range is signalled by the program (when RCK works)
+the maximum value of the array subscript is assumed to be 10.
+A subscript out of range is signalled by the program (when ACK works)
 The minimum subscript value is 0, unless the OPTION BASE statement has been
 encountered.
 .sp
 All variables in a subscripted variable are initially zero.
 .sp
-BUG. Multi-dimensional arrays MUST be defined.
+BUGS. Multi-dimensional arrays MUST be defined. Subscript out of range is
+left unnotified.
 .NH 2
 END
 .Sy
@@ -351,6 +378,10 @@ END terminates a BASIC program and returns to the UNIX shell.
 An END statement at the end of the BASIC program is optional.
 .NH 2
 ERR and ERL
+.Sy
+<identifier name>= ERR
+.br
+<identifier name>= ERL
 .PU
 Whenever an error occurs the variable ERR contains the
 error number and ERL the BASIC line where the error occurred.
@@ -364,8 +395,7 @@ ERROR <integer expression>
 To simulate the occurrence of a BASIC error.
 To define your own error code use a value not already in
 use by the BASIC runtime system.
-The list of error messages currently in use 
-can be found in appendix B.
+The list of error messages currently in use can be found in appendix B.
 .NH 2
 FIELD
 .PU
@@ -383,17 +413,14 @@ The FOR statements allows a series of statements to be performed
 repeatedly. <variable> is used as a counter. During the first
 execution pass it is assigned the value <low>,
 an arithmetic expression. After each pass the counter
-is incremented with the step size <size>, an expression.
+is incremented (decremented) with the step size <size>, an expression.
 Ommission of the step size is intepreted as an increment of 1.
+.br
 Execution of the program lines specified between the FOR and the NEXT
-statement is terminated as soon as <low> is greater than <high>
+statement is terminated as soon as <low> is greater (less) than <high>
 .sp
 The NEXT statement is labeled with the name(s) of the counter to be
 incremented.
-.sp
-The body of the FOR statement is skipped when the initial value of the
-loop times the sign of the step exceeds the value of the highest value
-times the sign of the step.
 .sp
 The variables mentioned in the NEXT statement may be ommitted, in which case
 the variable of increment the counter of the most recent FOR statement.
@@ -408,7 +435,7 @@ To be implemented.
 .NH 2
 GOSUB...RETURN
 .Sy
-GOSUB <line number
+GOSUB <line number>
   ...
 .br
 RETURN
@@ -512,7 +539,7 @@ LET
 [LET]<variable>=<expression>
 .PU
 To assign  the value of an expression to a (subscribted) variable.
-The type convertions as dictated in section 1.X apply.
+The type convertions as dictated in chapter 1 apply.
 .NH 2
 LINE INPUT
 .Sy
@@ -558,18 +585,30 @@ Subsequent errors result in an error message and program termination.
 ON...GOSUB and ON ...GOTO
 .Sy
 ON <expression> GOSUB <list of line numbers>
+.br
 ON <expression> GOTO <list of line numbers>
 .PU
 To branch to one of several specified line numbers or subroutines, based
 on the result of the <expression>. The list of line numbers are considered
 the first, second, etc alternative. Branching to the first occurs when
 the expression evaluates to one, to the second alternative on two, etc.
-If the value of the expression in zero or greater than the number of alternatives, processing continues at the first statement following the ON..GOTO 
+If the value of the expression is zero or greater than the number of alternatives, processing continues at the first statement following the ON..GOTO 
 (ON GOSUB) statement.
+.sp
 When the expression results in a negative number the 
 an "Illegal function call" error occurs.
+.sp
+BUG If the value of the expression is zero or greater than the number of 
+alternatives, processing does NOT continue at the first statement 
+following the ON..GOTO (ON GOSUB) statement.
 .NH 2
 OPEN
+.Sy
+OPEN {"i" | "o" | "r" } , [#]<file number> , <file-name>
+.PU
+To open <file-name> (filename should be quoted) for input/reading or output.
+If file is not opened for output it has to be existent, otherwise an 
+"file not found" error will occur.
 .NH 2
 OPTION BASE
 .Sy
@@ -587,7 +626,21 @@ because it requires full understanding of both
 the implementation of the Amsterdam
 Compiler Kit and the hardware characteristics.
 .NH 2
-PRINT [USING]
+PRINT 
+.Sy
+PRINT <list of variables and/or constants>
+.PU
+To print constants or the contents of variables on the terminal-device. 
+If the variables or constants are seperated by comma's the values will 
+be printed seperated by tabs. 
+If the variables or constants are seperated by semi-colon's the values 
+will be printed without spaces in between. 
+The new-line generated at the end of the print-statement can be suppressed by 
+a semi-colon at the end of list of variables or constants.
+.NH 2
+PRINT USING
+.PU
+To be implemented
 .NH 2
 PUT
 .PU
@@ -608,7 +661,8 @@ READ <list of variables>
 .PU
 To read values from the DATA statements and assign them to variables.
 The type of the variables should match to the type of the items being read,
-otherwise a "Syntax error" occurs.
+otherwise a "Syntax error" occurs. If all data is read the message "Out of
+data" will be displayed.
 .NH 2
 REM
 .Sy
@@ -651,6 +705,8 @@ SWAP
 SWAP <variable>,<variable>
 .PU
 To exchange the values of two variables.
+.sp
+BUG. Strings cannot be swapped !
 .NH 2
 TRON/TROFF
 .Sy
@@ -684,118 +740,121 @@ WRITE #<file number> ,<list of expressions>
 .PU
 To write a sequential data file, being opened with the "O" mode.
 The values are being writting using the DATA statements layout conventions.
+.bp
 .NH
 FUNCTIONS
 .LP
-.IP ABS(X) 12
+.IP ABS(X) 25
 Returns the absolute value of expression X
-.IP ASC(X$) 12
+.IP ASC(X$) 25
 Returns the numeric value of the first character of the string.
 If X$ is not initialized an "Illegal function call" error
 is returned.
-.IP ATN(X) 12
+.IP ATN(X) 25
 Returns the arctangent of X in radians. Result is in the range
 of -pi/2 to pi/2.
-.IP CDBL(X) 12
+.IP CDBL(X) 25
 Converts X to a double precision number.
-.IP CHR$(X) 12
+.IP CHR$(X) 25
 Converts the integer value X to its ASCII character. 
-X must be in the range of 0 to 127.
+X must be in the range of 0 to 257.
 It is used for cursor addressing and generating bel signals.
-.IP CINT(X) 12
+.IP CINT(X) 25
 Converts X to an integer by rounding the fractional portion.
 If X is not in the range -32768 to 32767 an "Overflow"
 error occurs.
-.IP COS(X) 12
+.IP COS(X) 25
 Returns the cosine of X in radians.
-.IP CSNG(X) 12
-Converts X to a double precision number.
-.IP CVI(<2-bytes>) 12
+.IP CSNG(X) 25
+Converts X to a single precision number.
+.IP CVI(<2-bytes>) 25
 Convert two byte string value to integer number.
-.IP CVS(<4-bytes>) 12
+.IP CVS(<4-bytes>) 25
 Convert four byte string value to single precision number.
-.IP CVD(<8-bytes>) 12
+.IP CVD(<8-bytes>) 25
 Convert eight byte string value to double precision number.
-.IP EOF[(<file-number>)] 12
+.IP EOF[(<file-number>)] 25
 Returns -1 (true) if the end of a sequential file has been reached.
-.IP EXP(X) 12
+.IP EXP(X) 25
 Returns e(base of natural logarithm) to the power of X.
 X should be less then 10000.0.
-.IP FIX(X) 12
+.IP FIX(X) 25
 Returns the truncated integer part of X. FIX(X) is
 equivalent to SGN(X)*INT(ABS(X)).
 The major difference between FIX and INT is that FIX does not
 return the next lower number for negative X.
-.IP HEX$(X) 12
+.IP HEX$(X) 25
 Returns the string which represents the hexadecimal value of
 the decimal argument. X is rounded to an integer using CINT
 before HEX$ is evaluated.
-.IP INT(X) 12
+.IP INT(X) 25
 Returns the largest integer <= X.
-.IP INPUT$(X[,[#]Y]) 12
+.IP INP$(X[,[#]Y]) 25
 Returns the string of X characters read from the terminal or
 the designated file.
-.IP LEX(X$) 12
+.IP LEN(X$) 25
 Returns the number of characters in the string X$.
 Non printable and blancs are counted too.
-.IP LOC(<file\ number>) 12
+.IP LOC(<file\ number>) 25
 For sequential files LOC returns 
 position of the read/write head, counted in number of bytes.
 For random files the function returns the record number just
 read or written from a GET or PUT statement.
 If nothing was read or written 0 is returned.
-.IP LOG(X) 12
+.IP LOG(X) 25
 Returns the natural logarithm of X. X must be greater than zero.
-.IP MID$(X,I,[J]) 12
-To be implemented.
-.IP MKI$(X) 12
+.IP MID$(X,I,[J]) 25
+Returns first J characters from string X starting at position I in X.
+If J is omitted all characters starting of from position I in X are returned.
+.IP MKI$(X) 25
 Converts an integer expression to a two-byte string.
-.IP MKS$(X) 12
+.IP MKS$(X) 25
 Converts a single precision expression to a four-byte string.
-.IP MKD$(X) 12
+.IP MKD$(X) 25
 Converts a double precision expression to a eight-byte string.
-.IP OCT$(X) 12
+.IP OCT$(X) 25
 Returns the string which represents the octal value of the decimal
 argument. X is rounded to an integer using CINT before OCTS is evaluated.
-.IP PEEK(I) 12
+.IP PEEK(I) 25
 Returns the byte read from the indicated memory. (Of limited use
 in the context of ACK)
-.IP POS(I) 12
+.IP POS(I) 25
 Returns the current cursor position. To be implemented.
 .IP RIGHT$(X$,I)
 Returns the right most I characters of string X$.
 If I=0 then the empty string is returned.
-.IP RND(X) 12
+.IP RND(X) 25
 Returns a random number between 0 and 1. X is a dummy argument.
-.IP SGN(X) 12
+.IP SGN(X) 25
 If X>0 , SGN(X) returns 1.
 .br
 if X=0, SGN(X) returns 0.
 .br
 if X<0, SGN(X) returns -1.
-.IP SIN(X) 12
+.IP SIN(X) 25
 Returns the sine of X in radians.
-.IP SPACE$(X) 12
+.IP SPACE$(X) 25
 Returns  a string of spaces length X. The expression
 X is rounded to an integer using CINT.
 .IP STR$(X)
 Returns the string representation value of X.
-.IP STRING$(I,J) 12
+.IP STRING$(I,J) 25
 Returns thes string of length Iwhose characters all
 have ASCII code J. (or first character when J is a string)
-.IP TAB(I) 12
+.IP TAB(I) 25
 Spaces to position I on the terminal. If the current
 print position is already beyond space I,TAB
 goes to that position on the next line.
 Space 1 is leftmost position, and the rightmost position
 is width minus 1. To be used within PRINT statements only.
-.IP TAN(X) 12
+.IP TAN(X) 25
 Returns the tangent of X in radians. If TAN overflows
 the "Overflow" message is displayed.
-.IP VAL(X$) 12
+.IP VAL(X$) 25
 Returns the numerical value of string X$.
 The VAL function strips leading blanks and tabs from the
 argument string.
+.bp
 .SH
 APPENDIX A DIFFERENCES WITH MICROSOFT BASIC
 .LP
@@ -846,4 +905,45 @@ LEFT$
 LSET
 RSET
 PUT
+.DE
+.bp
+.SH
+APPENDIX B RESERVED WORDS IN BASIC-EM
+.LP
+The following list of words/symbols/names/identifiers are reserved, which
+means that they can not be used for variable-names.
+.DS
+ABS		AND		ASC		AS
+ATN		AUTO		BASE		CALL
+CDBL		CHAIN		CHR		CINT
+CLEAR		CLOAD	CLOSE		COMMON
+CONT		COS		CSNG		CSAVE
+CVI		CVS		CVD		DATA
+DEFINT	DEFSNG	DEFDBL	DEFSTR
+DEF		DELETE	DIM		EDIT
+ELSE		END		EOF		ERASE
+ERROR		ERR		ERL		ELSE
+EQV		EXP		FIELD		FIX
+FOR		FRE		GET		GOSUB
+GOTO		HEX		IF		IMP
+INKEY		INPUT		INP		INSTR
+INT		KILL		LEFT		LEN		
+LET		LINE		LIST		LLIST
+LOAD		LOC		LOG		LPOS
+LPRINT	LSET		MERGE	MID
+MKI		MKS		MKD		MOD
+NAME		NEW		NEXT		NOT		
+NULL		ON		OCT		OPEN
+OPTION	OR		OUT		PEEK
+POKE		PRINT		POS		PUT
+RANDOMIZE	READ		REM		RENUM
+REN		RESTORE	RESUME	RETURN
+RIGHT		RND		RUN		SAVE
+STEP		SGN		SIN		SPACE
+SPC		SQR		STOP		STRING
+STR		SWAP		TAB		TAN
+THEN		TO		TRON		TROFF
+USING		USR		VAL		VARPTR
+WAIT		WHILE		WEND		WIDTH
+WRITE		XOR
 .DE
