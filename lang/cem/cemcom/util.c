@@ -136,9 +136,11 @@ LocalFinish()
 		}
 		regs[i] = 0;
 	}
+	if (! options['n']) {
+		C_mes_begin(ms_reg);
+		C_mes_end();
+	}
 #ifdef USE_TMP
-	C_mes_begin(ms_reg);
-	C_mes_end();
 	C_endpart(loc_id);
 #endif
 }

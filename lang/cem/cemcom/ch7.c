@@ -41,7 +41,9 @@ ch7sel(expp, oper, idf)
 	exp = *expp;
 	tp = exp->ex_type;
 	if (oper == ARROW)	{
-		if (tp->tp_fund == POINTER)	/* normal case */
+		if (tp->tp_fund == POINTER &&
+		    ( tp->tp_up->tp_fund == STRUCT ||
+		      tp->tp_up->tp_fund == UNION))	/* normal case */
 			tp = tp->tp_up;
 		else {	/* constructions like "12->selector" and
 				"char c; c->selector"
@@ -54,6 +56,8 @@ ch7sel(expp, oper, idf)
 				sd = idf2sdef(idf, tp);
 				tp = sd->sd_stype;
 				break;
+			case POINTER:
+				break;
 			default:
 				expr_error(exp, "-> applied to %s",
 					symbol2str(tp->tp_fund));
@@ -61,7 +65,7 @@ ch7sel(expp, oper, idf)
 				exp->ex_type = error_type;
 				return;
 			}
-		} /* tp->tp_fund != POINTER */
+		}
 	} /* oper == ARROW */
 	else { /* oper == '.' */
 		/* filter out illegal expressions "non_lvalue.sel" */

@@ -34,7 +34,7 @@ int idfsize = IDFSIZE;
 extern char options[];
 extern arith NewLocal();
 
-char sp_occurred[SP_TOTAL];	/* indicate occurrence of special id	*/
+char sp_occurred[SP_TOTAL+1];	/* indicate occurrence of special id	*/
 
 struct idf *idf_hashtable[HASHSIZE];
 	/*	All identifiers can in principle be reached through
