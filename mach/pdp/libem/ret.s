@@ -25,7 +25,3 @@ lfr~:
 5:	mov	(r1)+,-(sp)
 	sob	r0,5b
 4:	jmp	(r3)
-
-.data
-retar:	.=.+16.
-retend:

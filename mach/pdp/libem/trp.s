@@ -90,4 +90,6 @@ trp~:
 	4
 
 .data
+retar:	.=.+16.
+retend:
 buf:	<err 00000\n>
