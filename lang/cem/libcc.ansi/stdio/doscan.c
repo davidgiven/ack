@@ -9,6 +9,15 @@
 #include	<stdarg.h>
 #include	"loc_incl.h"
 
+#if	_EM_WSIZE == _EM_PSIZE
+#define set_pointer(flags)				/* nothing */
+#elif	_EM_LSIZE == _EM_PSIZE
+#define set_pointer(flags)	(flags |= FL_LONG)
+#else
+#error garbage pointer size
+#define set_pointer(flags)		/* compilation might continue */
+#endif
+
 #define	NUMLEN	512
 #define	NR_CHARS	256
 
@@ -251,11 +260,13 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					*va_arg(ap, int *) = (int) nrchars;
 			}
 			break;
+		case 'p':		/* pointer */
+			set_pointer(flags);
+			/* fallthrough */
 		case 'b':		/* binary */
 		case 'd':		/* decimal */
 		case 'i':		/* general integer */
 		case 'o':		/* octal */
-		case 'p':		/* pointer */
 		case 'u':		/* unsigned */
 		case 'x':		/* hexadecimal */
 		case 'X':		/* ditto */
