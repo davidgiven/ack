@@ -154,15 +154,19 @@ opentemp(str) string str; {
 STATIC
 geninclude() {
 	register p_token p;
+	int maxno = 0;
 
 	opentemp((string) 0);
 	for (p = tokens; p < maxt; p++) {
+		if (p->t_tokno > maxno) maxno = p->t_tokno;
 		if (p->t_tokno >= 0400) {
-			fprintf(fpars,"# define %s %d\n",
+			fprintf(fpars,"#define %s %d\n",
 				  p->t_string,
 				  p->t_tokno);
 		}
 	}
+	fprintf(fpars, "#define %s_MAXTOKNO %d\n", prefix ? prefix : "LL",
+		maxno);
 	doclose(fpars);
 	install(f_include, ".");
 }
