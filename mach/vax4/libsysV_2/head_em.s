@@ -28,50 +28,18 @@
 	pushl	r0
 	pushl	r2
 	pushl	r1
-	movl	$Im1,ap
-	chmk	(ap)+		! catch floating point exception
 	calls	$3,_m_a_i_n
 	movl	$Im2,ap
 	movl	r0,6(ap)
 	chmk	(ap)+
 	halt
 
-	.align	1
-Isig8:
-	.data2	0x0000
-	pushl	8(ap)
-	movl	(sp)+,ap
-	pushl	Itab [ap]
-	jsb	.trp
-	movl	$Im1,ap
-	chmk	(ap)+
-	ret
-
-	.sect .rom
-Im1:
-	.data2	48
-	.data4	2
-	.data4	8
-	.data4	Isig8
-
-Itab:
-	.data4	0
-	.data4	EIOVFL
-	.data4	EIDIVZ
-	.data4	EFOVFL
-	.data4	EFDIVZ
-	.data4	EFUNFL
-	.data4	EILLINS
-	.data4	EARRAY
-	.data4	EFOVFL
-	.data4	EFDIVZ
-	.data4	EFUNFL
-
 	.sect .data
 Im2:
 	.data2	1
 	.data4	1
 	.data4	0
+	.data2	0
 .reghp:
 	.data4	__end
 .limhp:
