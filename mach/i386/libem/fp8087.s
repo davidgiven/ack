@@ -329,7 +329,8 @@ bigmin:
 	fstcw	4(bx)
 	wait
 	mov	dx,4(bx)
-	or	4(bx),0xc00	! truncating mode
+	and	4(bx),0xf3ff
+	or	4(bx),0x400	! to -infinity
 	wait
 	fldcw	4(bx)
 	cmp	8(bx),4
@@ -337,8 +338,12 @@ bigmin:
 				! loc 4 loc ? cfu
 	flds	12(bx)
 	fabs			! ???
+	fiaddl	(bigmin)
 	fistpl	12(bx)
 	wait
+	mov	ax,12(bx)
+	sub	ax,(bigmin)
+	mov	12(bx),ax
 1:
 	mov	4(bx),dx
 	wait
@@ -348,7 +353,12 @@ bigmin:
 				! loc 8 loc ? cfu
 	fldd	12(bx)
 	fabs			! ???
+	fiaddl	(bigmin)
 	fistpl	16(bx)
+	wait
+	mov	ax,16(bx)
+	sub	ax,(bigmin)
+	mov	16(bx),ax
 	jmp	1b
 
 .cff4:

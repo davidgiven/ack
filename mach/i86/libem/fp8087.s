@@ -487,7 +487,8 @@ bigmin:
 	fstcw	-2(bx)
 	wait
 	mov	dx,-2(bx)
-	or	-2(bx),0xc00	! truncating mode
+	and	-2(bx),0xf3ff
+	or	-2(bx),0x400	! to -infinity
 	wait
 	fldcw	-2(bx)
 	wait
@@ -499,8 +500,12 @@ bigmin:
 	wait
 	fabs			! ???
 	wait
+	fiaddl	(bigmin)
 	fistpl	6(bx)
 	wait
+	mov	ax,8(bx)
+	sub	ax,(bigmin+2)
+	mov	8(bx),ax
 	cmp	2(bx),2
 	jne	1f
 	mov	ax,6(bx)
@@ -517,8 +522,12 @@ bigmin:
 	wait
 	fabs			! ???
 	wait
+	fiaddl	(bigmin)
 	fistpl	10(bx)
 	wait
+	mov	ax,12(bx)
+	sub	ax,(bigmin+2)
+	mov	12(bx),ax
 	cmp	2(bx),2
 	jne	1b
 	mov	ax,10(bx)
