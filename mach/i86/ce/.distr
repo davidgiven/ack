@@ -4,4 +4,4 @@ as.h
 as_table
 mach.c
 mach.h
-Makefile
+proto.make
