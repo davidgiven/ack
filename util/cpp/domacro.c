@@ -365,8 +365,9 @@ do_endif()
 {
 	PushBack();
 	skipline();
-	if (nestlevel-- <= svnestlevel[nestcount])
+	if (nestlevel <= svnestlevel[nestcount])
 		error("#endif without corresponding #if");
+	else nestlevel--;
 }
 
 PRIVATE
