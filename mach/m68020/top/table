@@ -79,11 +79,16 @@ move.w DREG,DREG2 : NO32 A,DREG2 : move.w DREG2,DREG
 move.l DREG,DREG2 : ANY A,DREG2 : move.l DREG2,DREG
 		{no_part(DREG2,A)}	->	ANY A,DREG : move.l DREG,DREG2 ;
 
-/* change some compares to tests */
-cmp.w A,A				->	tst.w A ;
-cmp.l A,A				->	tst.l A ;
-cmp.b A,A				->	tst.b A ;
+cmp.b A,A : beq LAB			->	bra LAB ;
+cmp.w A,A : beq LAB			->	bra LAB ;
+cmp.l A,A : beq LAB			->	bra LAB ;
 
+/* cannot delete cmp's because they affect condition codes (obvious, but ... )*/
+cmp.b A,A : bne LAB			->	cmp.b A,A ;
+cmp.w A,A : bne LAB			->	cmp.w A,A ;
+cmp.l A,A : bne LAB			->	cmp.l A,A ;
+
+/* change some compares to tests */
 cmp.w #0,D : beq LAB			->	tst.w D : beq LAB ;
 cmp.w #0,D : bne LAB			->	tst.w D : bne LAB ;
 cmp.w #0,D : blt LAB			->	tst.w D : blt LAB ;
