@@ -1,5 +1,6 @@
 : create a directory Xsrc with name clashes resolved
 : and run make in that directory
+: '$Header$'
 
 case $# in
 1)	
@@ -8,14 +9,14 @@ case $# in
 	exit 1
 	;;
 esac
-currdir=`pwd`
+PW=`pwd`
 case $1 in
-main)	target=$currdir/$1
+main)	target=$PW/$1
 	;;
-omain)	target=$currdir/$1
+omain)	target=$PW/$1
 	options=-DPEEPHOLE
 	;;
-cemain)	target=$currdir/$1
+cemain)	target=$PW/$1
 	options=-DCODE_EXPANDER
 	;;
 Xlint)	target=$1
@@ -35,7 +36,6 @@ make EMHOME=$EMHOME longnames
 sed '/^C_/d' < longnames > tmp$$
 cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
 rm -f tmp$$
-PW=`pwd`
 cd ../Xsrc
 if cmp -s Xclashes clashes
 then
@@ -57,4 +57,4 @@ $i:	clashes $PW/$i
 	\$(CID) -Fclashes < $PW/$i > $i
 EOF
 done
-make EMHOME=$EMHOME CURRDIR=$currdir/ COPTIONS=$options $target
+make EMHOME=$EMHOME COPTIONS=$options MACH=$MACH CURRDIR=$PW/ $target

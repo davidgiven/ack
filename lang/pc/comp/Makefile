@@ -4,30 +4,57 @@ MDIR =		$(EMHOME)/modules
 MHDIR =		$(MDIR)/h
 PKGDIR =	$(MDIR)/pkg
 LIBDIR =	$(MDIR)/lib
-OBJECTCODE =	$(LIBDIR)/libemk.a
 LLGEN =		$(EMHOME)/bin/LLgen
 MKDEP =		$(EMHOME)/bin/mkdep
 PRID =		$(EMHOME)/bin/prid
 CID =		$(EMHOME)/bin/cid
+OPR =		opr
 CURRDIR =
 CC =		fcc
 CC =		cc
-PRINTER =	vu45
 LINT =		lint
+MACH =		sun3
 
-INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
+MALLOC =	$(LIBDIR)/malloc.o
+EMELIB =	$(LIBDIR)/libem_mes.a \
+		$(LIBDIR)/libeme.a \
+		$(EMHOME)/lib/em_data.a
+EMKLIB =	$(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a
+MODLIB =	$(LIBDIR)/libinput.a \
+		$(LIBDIR)/libassert.a \
+		$(LIBDIR)/liballoc.a \
+		$(MALLOC) \
+		$(LIBDIR)/libprint.a \
+		$(LIBDIR)/libstring.a \
+		$(LIBDIR)/libsystem.a
+EMCELIB =	$(LIBDIR)/libem_mesCE.a \
+		$(EMHOME)/lib/$(MACH)/ce.a \
+		$(EMHOME)/lib/$(MACH)/back.a \
+		$(LIBDIR)/libflt.a \
+		$(LIBDIR)/libobject.a \
+		$(EMHOME)/lib/em_data.a
+EMOCELIB =	$(LIBDIR)/libem_mesO.a \
+		$(LIBDIR)/libCEopt.a \
+		$(EMHOME)/lib/$(MACH)/ce.a \
+		$(EMHOME)/lib/$(MACH)/back.a \
+		$(LIBDIR)/libflt.a \
+		$(LIBDIR)/libobject.a \
+		$(EMHOME)/lib/em_data.a
 
-OLIBS = $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a
+LIBS =		$(EMKLIB) $(MODLIB)
+CELIBS =	$(EMCELIB) $(MODLIB)
+OLIBS =		$(EMOCELIB) $(MODLIB)
 
 GFILES =	tokenfile.g declar.g expression.g program.g statement.g
 LLGENOPTIONS =
 PROFILE =
 COPTIONS =
-OPTIM=	-O
-CFLAGS = $(PROFILE) $(INCLUDES) $(OPTIM) $(COPTIONS) -DSTATIC=
-LINTFLAGS = -DSTATIC= -DNORCSID
-MALLOC = $(LIBDIR)/malloc.o
-LDFLAGS = -i $(PROFILE)
+INCLUDES =	-I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
+OPTIM=		-O
+CFLAGS =	$(PROFILE) $(INCLUDES) $(OPTIM) $(COPTIONS) -DSTATIC=
+LINTFLAGS =	-DSTATIC= -DNORCSID
+LDFLAGS =	-i $(PROFILE)
+
 LSRC =	declar.c expression.c program.c statement.c tokenfile.c
 LOBJ =	declar.o expression.o program.o statement.o tokenfile.o
 CSRC =	LLlex.c LLmessage.c body.c chk_expr.c code.c\
@@ -62,15 +89,13 @@ all:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o PEEPHOLE
 
 CEmain: Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else MACH=$(MACH); export MACH; EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o CODE_EXPANDER
 
 install:	all
 	cp $(CURRDIR)main $(EMHOME)/lib/em_pc
@@ -79,7 +104,7 @@ cmp:	all
 	-cmp $(CURRDIR)main $(EMHOME)/lib/em_pc
 
 opr:
-	make pr | opr
+	make pr | $(OPR)
 
 pr:
 	@pr Makefile Resolve Parameters $(GFILES) *.H $(HFILES) *.C $(CSRC)
@@ -146,7 +171,7 @@ depend: Cfiles
 	mv Makefile.new Makefile
 
 print:	$(CSRC) $(GFILES) $(HFILES)	# print recently changed files
-	pr -t $? | rpr $(PRINTER)
+	pr -t $? | $(OPR)
 	@touch print
 
 xref:
@@ -167,17 +192,17 @@ Xlint:
 
 $(CURRDIR)main: $(OBJ) $(CURRDIR)Makefile
 	-mv $(CURRDIR)main $(CURRDIR)main.old
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)main
+	$(CC) $(LDFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)main
 	-size $(CURRDIR)main.old
 	size $(CURRDIR)main
 
 $(CURRDIR)omain:	$(OBJ) #$(CURRDIR)Makefile
-#	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
-#	#size $(CURRDIR)omain
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
+	-size $(CURRDIR)omain
 
 $(CURRDIR)cemain:      $(OBJ) #$(CURRDIR)Makefile
-#	#$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)cemain
-#	# #size $(CURRDIR)cemain
+	$(CC) $(LDFLAGS) $(OBJ) $(CELIBS) -o $(CURRDIR)cemain
+	-size $(CURRDIR)cemain
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h
