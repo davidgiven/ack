@@ -52,6 +52,7 @@ compile(argc, argv)
 		break;
 	case 0:
 		FileName = "";
+		WorkingDir = 0;
 		break;
 	default:
 		fatal("use: %s [options] [source]", prog_name);
@@ -61,6 +62,6 @@ compile(argc, argv)
 	if (!InsertFile(source, (char **) 0, &dummy)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, 
 			source ? source : "stdin");
-	WorkingDir = getwdir(dummy);
+	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
 }
