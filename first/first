@@ -163,6 +163,8 @@ do
 		LIMIT=n
 		DO_MACHINE_INDEP=y
 		DO_FAST=n
+		DISABLE_LANG=
+		DISABLE_SUP=
 		if [ $TARGET_HOME = $UTIL_HOME ]
 		then
 			case $ACM in
