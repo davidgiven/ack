@@ -5,6 +5,7 @@
 
 extern struct tokenname tkidf[], tkkey[];
 extern char *symbol2str();
+extern char *getwdir();
 extern char *inctable[];
 extern int err_occurred;
 int idfsize = IDFSIZE;
@@ -56,10 +57,10 @@ compile(argc, argv)
 		fatal("use: %s [options] [source]", prog_name);
 		break;
 	}
-	WorkingDir = inctable[0];
 
 	if (!InsertFile(source, (char **) 0, &dummy)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, 
 			source ? source : "stdin");
+	WorkingDir = getwdir(dummy);
 	preprocess(source);
 }
