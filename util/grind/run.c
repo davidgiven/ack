@@ -203,9 +203,13 @@ start_child(p)
 	exit(1);
   }
 
-  /* debugger; don't close fild1[0] and fild2[1]; we want those file
-     descriptors occupied!
+  /* close fild1[0] and fild2[1]; but we want those file descriptors occupied,
+     so we re-occupy them.
   */
+
+  close(fild1[0]);
+  close(fild2[1]);
+  pipe(fild1);		/* to occupy file descriptors */
 
   signal(SIGPIPE, catch_sigpipe);
   {

@@ -139,13 +139,13 @@ print_params(tp, AB, static_link)
 	error("could not allocate enough memory");
 	return;
   }
-  if (static_link) p += pointer_size;
-  if (! get_bytes(size, AB, param_bytes)) {
-	free(param_bytes);
+  if (! get_bytes(size, AB, p)) {
+	free(p);
 	return;
   }
 
   while (i--) {
+	p = param_bytes + par->par_off;
 	if (par->par_kind == 'v' || par->par_kind == 'i') {
 		/* call by reference parameter, or
 		   call by value parameter, but address is passed;
@@ -173,7 +173,6 @@ print_params(tp, AB, static_link)
 	}
 	else print_val(par->par_type, par->par_type->ty_size, p, 1, 0, (char *)0);
 	if (i) fputs(", ", db_out);
-	p += param_size(par->par_type, par->par_kind);
 	par++;
   }
   free(param_bytes);

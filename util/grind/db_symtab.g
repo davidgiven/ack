@@ -50,6 +50,7 @@ debugger_string
   { register p_symbol s;
     char *str;
     p_type tmp = 0;
+    int upb = 0;
   }
 :
   name(&str)
@@ -149,6 +150,22 @@ debugger_string
   | /* local variable */
 			{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam); }
 	type_name(&(s->sy_type), s)
+
+  | /* lower or upper bound of array descriptor */
+	[ 'A' 		{ upb = LBOUND; }
+	| 'Z'		{ upb = UBOUND; }
+	]
+	[ ['p' | ]	{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam);
+			  if (upb == UBOUND) add_param_type('Z', s);
+			}
+	| [ 'V' | 'S' ]	{ s = NewSymbol(str, CurrentScope, VAR, currnam); }
+	]
+	type_name(&(s->sy_type), s)
+			{ p_symbol s1 = new_symbol();
+			  *s1 = *s;
+			  s->sy_class = upb;
+			  s->sy_descr = s1;
+			}
 
   | /* function result in Pascal; ignore ??? */
 			{ s = NewSymbol(str, CurrentScope, LOCVAR, currnam); }
@@ -367,6 +384,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 	';'
 	[ 'A' integer_const(&ic2)	{ A_used |= 2; }
 	| integer_const(&ic2)
+	| 'Z' integer_const(&ic2)	{ A_used |= 0200; }
 	]
 			{ if (tp != *ptp) free_type(tp);
 			  tp = subrange_type(A_used,
@@ -516,7 +534,8 @@ param_list(p_type t;)
   	|	'i' 	{ p->par_kind = 'i'; }
   	]
   	type(&(p->par_type), (int *) 0, (p_symbol) 0) ';'
-			{ t->ty_nbparams += 
+			{ p->par_off = t->ty_nbparams;
+			  t->ty_nbparams += 
 				param_size(p->par_type, p->par_kind);
 			  p++;
 			}

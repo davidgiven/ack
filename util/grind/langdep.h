@@ -36,7 +36,7 @@ struct langdep {
   int	(*fix_bin_to_pref)();
 };
 
-extern struct langdep	*m2_dep, *c_dep, *currlang;
+extern struct langdep	*m2_dep, *c_dep, *pascal_dep, *currlang;
 
 extern int find_language();
 

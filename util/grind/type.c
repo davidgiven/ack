@@ -369,7 +369,8 @@ param_size(t, v)
 	/* addresss; only exception is a conformant array, which also
 	   takes a descriptor.
 	*/
-	if (t->ty_class == T_ARRAY &&
+	if (currlang == m2_dep &&
+	    t->ty_class == T_ARRAY &&
 	    t->ty_index->ty_class == T_SUBRANGE &&
 	    t->ty_index->ty_A) {
 		return pointer_size + 3 * int_size;
@@ -390,11 +391,16 @@ add_param_type(v, s)
   prc_type = sc->sc_definedby->sy_type;
   assert(prc_type->ty_class == T_PROCEDURE);
 
+  if (v == 'Z') {
+  	prc_type->ty_nbparams += 3 * int_size;
+	return;
+  }
   prc_type->ty_nparams++;
   prc_type->ty_params = (struct param *) Realloc((char *) prc_type->ty_params, 
 				(unsigned)prc_type->ty_nparams * sizeof(struct param));
   prc_type->ty_params[prc_type->ty_nparams - 1].par_type = s->sy_type;
   prc_type->ty_params[prc_type->ty_nparams - 1].par_kind = v;
+  prc_type->ty_params[prc_type->ty_nparams - 1].par_off = s->sy_name.nm_value;
   prc_type->ty_nbparams += param_size(s->sy_type, v);
 }
 
@@ -418,6 +424,9 @@ compute_size(tp, AB)
   tp->ty_lb = low;
   if (tp->ty_index->ty_A & 2) {
 	high = get_int(AB+tp->ty_index->ty_up, int_size, T_INTEGER);
+  } else if (tp->ty_index->ty_A & 0200) {
+	high = get_int(AB+tp->ty_index->ty_up, int_size, T_INTEGER);
+	high += get_int(AB+tp->ty_index->ty_up+int_size, int_size, T_INTEGER);
   } else high = tp->ty_index->ty_up;
   tp->ty_hb = high;
   return (high - low + 1) * tp->ty_elements->ty_size;

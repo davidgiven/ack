@@ -152,6 +152,23 @@ get_addr(sym, psize)
   return 0;
 }
 
+static int
+get_v(a, pbuf, size)
+  t_addr	a;
+  char		**pbuf;
+  long		size;
+{
+  if (a) {
+	*pbuf = malloc((unsigned) size);
+	if (! *pbuf) {
+		error("could not allocate enough memory");
+		return 0;
+	}
+	if (! get_bytes(size, a, *pbuf)) return 0;
+  }
+  return 1;
+}
+
 /* static int	get_value(p_symbol sym; char **pbuf; long *psize);
    Get the value of the symbol indicated by sym.  Return 0 on failure,
    1 on success. On success, 'pbuf' contains the value, and 'psize' contains
@@ -205,17 +222,23 @@ get_value(sym, pbuf, psize)
   case VARPAR:
   case LOCVAR:
 	a = get_addr(sym, psize);
-	if (a) {
-		size = *psize;
-		*pbuf = malloc((unsigned) size);
-		if (! *pbuf) {
-			error("could not allocate enough memory");
-			break;
-		}
-		if (get_bytes(size, a, *pbuf)) {
-			retval = 1;
-		}
-	}
+	retval = get_v(a, pbuf, *psize);
+	size = *psize;
+	break;
+  case UBOUND:
+	a = get_addr(sym->sy_descr, psize);
+	retval = get_v(a, pbuf, *psize);
+	if (! retval) break;
+	size = get_int(*pbuf, *psize, T_INTEGER);
+	retval = get_v(a+*psize, pbuf, *psize);
+	if (! retval) break;
+	size += get_int(*pbuf, *psize, T_INTEGER);
+	put_int(*pbuf, *psize, size);
+	size = *psize;
+	break;
+  case LBOUND:
+	a = get_addr(sym->sy_descr, psize);
+	retval = get_v(a, pbuf, *psize);
 	break;
   }
 
@@ -1278,7 +1301,7 @@ eval_expr(p, pbuf, psize, ptp)
 	break;
   case OP_NAME:
   case OP_SELECT:
-	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST);
+	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST|LBOUND|UBOUND);
 	if (! sym) return 0;
 	if (! get_value(sym, pbuf, psize)) {
 		break;

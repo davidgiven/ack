@@ -129,7 +129,7 @@ add_file(s)
   return sym;
 }
 
-p_scope
+static p_scope
 def_scope(s)
   p_symbol	s;
 {
@@ -169,7 +169,7 @@ consistent(p, sc)
 
   switch(p->t_oper) {
   case OP_NAME:
-#define CLASS	(FILELINK|FILESYM|PROC|FUNCTION|MODULE|TYPE|VAR|REGVAR|LOCVAR|VARPAR)
+#define CLASS	(FILELINK|FILESYM|PROC|FUNCTION|MODULE|TYPE|VAR|REGVAR|LOCVAR|VARPAR|LBOUND|UBOUND)
 	sym = Lookfromscope(p->t_idf, CLASS, sc->sc_static_encl);
 	if (sym) {
 		int precise = 1;
@@ -322,6 +322,8 @@ pr_sym(s)
   case REGVAR:
   case LOCVAR:
   case VARPAR:
+  case LBOUND:
+  case UBOUND:
 	fprintf(db_out, "Variable:\t");
 	break;
   case FIELD:

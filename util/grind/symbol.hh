@@ -35,6 +35,8 @@ typedef struct symbol {
 #define FIELD		0x0400
 #define FILESYM		0x0800	/* a filename */
 #define FILELINK	0x1000	/* a filename without its suffix */
+#define LBOUND		0x2000	/* lower bound of array descriptor */
+#define UBOUND		0x4000	/* upper bound of array descriptor */
   struct idf	*sy_idf;	/* reference back to its idf structure */
   struct scope	*sy_scope;	/* scope in which this symbol resides */
   union {
@@ -42,6 +44,7 @@ typedef struct symbol {
 	t_name	syv_name;
 	struct file *syv_file;		/* for FILESYM */
 	struct symbol *syv_fllink;	/* for FILELINK */
+	struct symbol *syv_descr;	/* for LBOUND and UBOUND */
 	struct fields *syv_field;
   }	sy_v;
 #define sy_const	sy_v.syv_const
@@ -49,6 +52,7 @@ typedef struct symbol {
 #define sy_file		sy_v.syv_file
 #define sy_filelink	sy_v.syv_fllink
 #define sy_field	sy_v.syv_field
+#define sy_descr	sy_v.syv_descr
 } t_symbol, *p_symbol;
 
 /* ALLOCDEF "symbol" 50 */

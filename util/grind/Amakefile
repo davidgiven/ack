@@ -34,6 +34,7 @@ CSRC = {
 	rd.c,
 	do_comm.c,
 	modula-2.c,
+	pascal.c,
 	c.c
 } ;
 

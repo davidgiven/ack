@@ -29,6 +29,7 @@ add_language(suff, lang)
 
 init_languages()
 {
+  add_language(".p", pascal_dep);
   add_language(".mod", m2_dep);
   add_language(".c", c_dep);
 }

@@ -19,6 +19,7 @@ struct literal {
 /* structure for parameters */
 struct param {
   struct type *par_type;	/* type of parameter */
+  long par_off;			/* offset of parameter */
   char par_kind;		/* kind of parameter ('p', 'i', or 'v') */
 };
 

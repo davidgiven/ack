@@ -65,7 +65,7 @@ STSIMP:-+,!<>{}:`?\\
 %	ISTOKEN
 %
 %C
-1:-acefiprstuvxAEFGLMPQSTVX,;:+=()*
+1:-acefiprstuvxAEFGLMPQSTVXZ,;:+=()*
 %T char istoken[] = {
 %p
 %T};
