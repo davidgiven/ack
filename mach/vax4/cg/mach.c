@@ -200,7 +200,7 @@ f_regsave()
 	for (p = a_reg; p < p_reg; p++)
 		if (p->sr_off >= 0)
 			fprintf(codefile,
-				"mov%c\t%ld(ap), %s\n,
+				"mov%c\t%ld(ap), %s\n",
 				p->sr_size == 4 ? 'l' : 'q',
 				p->sr_off,
 				p->sr_str
