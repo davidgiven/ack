@@ -1773,9 +1773,15 @@ aar !defined($1) | |
 
 /* G R O U P XII :  C O M P A R E */
 
-cmi $1 == 2 |	ANY DATASCR |	"sub.w %[1],%[2]"
-				erase(%[2])
-				setcc(%[2])	| %[2] | |
+cmi $1 == 2 |	ANY DATAREG |	allocate(DATAREG={immediate, 0})
+				"cmp.w %[1],%[2]"
+				"beq 2f"
+				"bgt 1f"
+				"add.w #1,%[a]"
+				"bra 2f"
+				"1:sub.w #1,%[a]\n2:"
+				erase(%[a])
+				setcc(%[a])	| %[a] | |
 cmi $1 == 4 |	|		remove(ALL)
 				"jsr .cmi"
 						| D1 | |
