@@ -13,6 +13,7 @@ var RT=lib/mantra/head_
 var CPP_F=-D__unix -D__USG -D__mc68000 -D__m68k
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
+var MACHOPT_F=-ml10
 # 407 align is the default
 var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
 name be

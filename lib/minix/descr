@@ -16,6 +16,7 @@ var ALIGN=-a0:2 -a1:16 -a2:2 -a3:2
 var CC_ALIGN=-VS2U2
 var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
+var MACHOPT_F=-m8
 name be
 	from .m.g
 	to .s
