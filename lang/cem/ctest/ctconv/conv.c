@@ -17,13 +17,18 @@
 
 /* Author: E.G. Keizer */
 
+char rcs_id[] = "$Header$" ;
+
 main() {
 	t1() ;
 	return 0 ;
 }
 
 t1() {
-	char c ; int i ; long l ; unsigned u ; float f ;
+	char c ; int i ; long l ; unsigned u ;
+#ifndef NOFLOAT
+	float f ;
+#endif
 
 	/* test conversions */
 
@@ -31,8 +36,10 @@ t1() {
 
 	printf("(int) '\\377' = %d\n",(int) '\377') ;
 	printf("(long) -1 = %ld\n",(long) -1 ) ;
+#ifndef NOFLOAT
 	printf("(float) 12 = %f\n",(float) 12 ) ;
 	printf("(int) 3.14 = %d\n",(int) 3.14 ) ;
+#endif
 	printf("(int) 32767L = %d\n",(int) 32767L ) ;
 	printf("(int) -32768L = %d\n",(int) -32768L ) ;
 	printf("(char) 128L = %d\n",(char) 128L) ;
@@ -46,20 +53,35 @@ t1() {
 	i=c ;
 	l=c ;
 	u=c ;
+#ifndef NOFLOAT
 	f=c ;
-	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld, float %f\n",c,i,u,l,f) ;
+#endif
+	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld\n",c,i,u,l) ;
+#ifndef NOFLOAT
+	printf("\t\t\t\t\tfloat %f\n",f) ;
+#endif
 	c = -1 ;
 	i=c ;
 	l=c ;
 	u=c ;
+#ifndef NOFLOAT
 	f=c ;
-	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld, float %f\n",c,i,u,l,f) ;
+#endif
+	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld\n",c,i,u,l) ;
+#ifndef NOFLOAT
+	printf("\t\t\t\t\tfloat %f\n",f) ;
+#endif
 	c = 0377 ;
 	i=c ;
 	l=c ;
 	u=c ;
+#ifndef NOFLOAT
 	f=c ;
-	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld, float %f\n",c,i,u,l,f) ;
+#endif
+	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld\n",c,i,u,l) ;
+#ifndef NOFLOAT
+	printf("\t\t\t\t\tfloat %f\n",f) ;
+#endif
 
 	/* from integer */
 	printf("From integer\n") ;
@@ -67,18 +89,28 @@ t1() {
 	c=i ;
 	l=i ;
 	u=i ;
+#ifndef NOFLOAT
 	f=i ;
-	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld, float %f\n",c,i,u,l,f) ;
-
+#endif
+	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld\n",c,i,u,l) ;
+#ifndef NOFLOAT
+	printf("\t\t\t\t\tfloat %f\n",f) ;
+#endif
 	/* from long */
 	printf("From long\n") ;
 	l = -3 ;
 	c = l ;
 	i = l ;
 	u = l ;
+#ifndef NOFLOAT
 	f = l ;
-	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld, float %f\n",c,i,u,l,f) ;
+#endif
+	printf("\tchar %5d, int %6d, unsigned %6o, long %11ld\n",c,i,u,l) ;
+#ifndef NOFLOAT
+	printf("\t\t\t\t\tfloat %f\n",f) ;
+#endif
 
+#ifndef NOFLOAT
 	printf("From float\n") ;
 	f = 121.5 ;
 	c = f ;
@@ -100,6 +132,7 @@ t1() {
 	f = 1223432e3 ;
 	l = f ;
 	printf("\tlong %11ld, float %f\n",l,f) ;
+#endif
 
 	/* some special cases */
 	{

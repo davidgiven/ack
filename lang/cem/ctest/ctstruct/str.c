@@ -21,9 +21,17 @@ static char rcs_id[]=	"$Header$" ;
 /* test for structure parameters, assignment and return */
 # define ASIZE 26
 
-struct w1 { int w1_i ; } ;
-struct w2 { int w2_i ; double w2_d ; } ;
-struct w3 { char w3_a[ASIZE] ; double w3_x ; } ;
+struct w1 {
+	int w1_i ;
+} ;
+struct w2 {
+	int w2_i ;
+	long w2_l ;
+} ;
+struct w3 {
+	char w3_a[ASIZE] ;
+	unsigned w3_u ;
+} ;
 
 struct w1 es1 ;
 struct w1 es2[3] ;
@@ -70,24 +78,24 @@ asst() {
 
 	printf("w2\n") ;
 	s2t1.w2_i = 18000 ;
-	s2t1.w2_d = 3.1415 ;
+	s2t1.w2_l = 31415 ;
 	s2t2 = s2t1 ;
-	printf("\ts2t2: .w2_i %d .w2_d %f\n",s2t2.w2_i,s2t2.w2_d) ;
+	printf("\ts2t2: .w2_i %d .w2_l %ld\n",s2t2.w2_i,s2t2.w2_l) ;
 	s2t3 = &s2t2 ;
-	printf("\ts2t3->w2_d %f\n",s2t3->w2_d) ;
+	printf("\ts2t3->w2_l %ld\n",s2t3->w2_l) ;
 
 	printf("w3\n") ;
 	for ( i = 0 ; i<ASIZE ; i++ ) {
 		s3t1.w3_a[i]= 'a'+i ;
 	}
-	s3t1.w3_x = 1.0 ;
+	s3t1.w3_u = 0x8000 ;
 	s3t2 = s3t1 ;
 	s3t3 = &s3t1 ;
 	for ( i = 0 ; i<ASIZE ; i++ ) {
 		printf("s3t2.w3_a[%2d] %c\n",i,s3t2.w3_a[i]) ;
 	}
-	printf("s3t2.w3_x %f\n",s3t2.w3_x) ;
-	s3t2.w3_x = 1/3.1415 ;
+	printf("s3t2.w3_u %x\n",s3t2.w3_u) ;
+	s3t2.w3_u = 1415 ;
 	for ( i = 0 ; i<ASIZE ; i++ ) {
 		s3t2.w3_a[i]= 'A'+i ;
 	}
@@ -95,7 +103,7 @@ asst() {
 	for ( i = 0 ; i<ASIZE ; i++ ) {
 		printf("s3t1.w3_a[%2d] %c\n",i,s3t1.w3_a[i]) ;
 	}
-	printf("s3t1.w3_x %f",s3t1.w3_x) ;
+	printf("s3t1.w3_u %x",s3t1.w3_u) ;
 }
 
 struct w3 epars ;
@@ -110,7 +118,7 @@ part() {
 	for ( i=0 ; i<ASIZE ; i++ ) {
 		pars.w3_a[i]=i+1 ;
 	}
-	pars.w3_x = 2.81 ;
+	pars.w3_u = 281 ;
 	printf("\nstructure parameters\n") ;
 	psc(-1,pars,1000) ;
 }
@@ -122,7 +130,7 @@ psc(before,str,after) int before, after ; struct w3 str ; {
 	for ( i=0 ; i<ASIZE ; i++ ) {
 		printf("str.w3_a[%2d]\t%d\n",i,str.w3_a[i]) ;
 	}
-	printf("str.w3_x %f\n",str.w3_x) ;
+	printf("str.w3_u %x\n",str.w3_u) ;
 	printf("after %d\n",after) ;
 }
 

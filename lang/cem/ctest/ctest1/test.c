@@ -15,11 +15,15 @@
  *
  */
 
+char rcs_id[] = "$Header$" ;
+
 /* C-compiler test 1 */
 /* This program can be used to test C-compilers */
 
+#ifndef NOFLOAT
 # define EPSD 1e-6
 # define EPSF 1e-6
+#endif
 
 /* global counters */
 
@@ -58,7 +62,9 @@ char *alloc(size) {
 	return(retval) ;
 }
 
+#ifndef NOFLOAT
 double fabs(a) double a ; { return( a<0 ? -a : a) ; }
+#endif
 
 
 
@@ -68,23 +74,29 @@ int i,j,k,l,m;
 
 long li,lj,lk,ll,lm;
 
+#ifndef NOFLOAT
 float xf, yf, zf;
 
 double xd, yd, zd;
+#endif
 
 struct tp2 {
     char c1;
     int i,j;
+#ifndef NOFLOAT
     float aaa;
     double bbb;
+#endif
 } r1, r2;
 
 int p, *p1, *p11, **p2, ***p3, ****p4, *****p5;
 
 struct tp2 *pp1, *pp2, *pp3;
 int a1[20];
+#ifndef NOFLOAT
 float a2[20];
 double a3[20];
+#endif
 
 main()
 {
@@ -100,7 +112,9 @@ main()
     test8();
     test9();
     test10();
+#ifndef NOFLOAT
     test11();
+#endif
     printf("End of test program, %d tests completed, %d errors detected\n",
 	tct,ect);
 	return 0 ;
@@ -659,15 +673,518 @@ test5()		/* testing local long variables */
 
 
 
+test6()		/* global records */
+{
+#ifndef NOFLOAT
+    double epsd;
+    float epsf;
+    double fabs();
+#endif
 
-test6()		/* real arithmetic */
+    t = 6;
+    tct++;
+#ifndef NOFLOAT
+    epsd = EPSD;
+    epsf = EPSF;
+#endif
+    r1.c1 = 'x';
+    r1.i = 40;
+    r1.j = 50;
+#ifndef NOFLOAT
+    r1.aaa = 3.0;
+    r1.bbb = 4.0;
+#endif
+    r2.c1 = r1.c1;
+    r2.i = 50;
+    r2.j = 40;
+#ifndef NOFLOAT
+    r2.aaa = 4.0;
+    r2.bbb = 5.0;
+#endif
+    if ( r1.c1 != 'x' || r1.i != 40 ) e(1);
+#ifndef NOFLOAT
+    if ( r1.aaa != 3.0 ) e(1);
+#endif
+    if ( r1.i != 40 || r2.i != 50 ) e(2);
+    if ( r2.j != 40 || r1.j != 50 ) e(3);
+    if ( (r1.c1 + r2.c1)/2 != 'x' ) e(4);
+#ifndef NOFLOAT
+    if ( r1.aaa * r1.aaa + r2.aaa * r2.aaa != r2.bbb * r2.bbb ) e(5);
+    r1.i = r1.j = r2.i = r2.j = 3.0;
+#else
+    r1.i = r1.j = r2.i = r2.j = 3;
+#endif
+    if ( r1.i != 3 ) e(6);
+    if ( r1.i * r2.j - 9 ) e(7);
+    r1.i++;
+    if ( r1.i != 4 ) e(8);
+    if ( --r1.i != 3 ) e(9);
+    if ( (++r2.i) * (--r2.j) != 8 ) e(10);
+    if ( (r2.i = r2.j = r1.j = r1.i = -5 ) != -5 ) e(11);
+    if ( r2.i * r1.j / 25 != 1 ) e(12);
+    r1.c1 = '\0';
+    if ( r1.i * r1.j * r2.i * r1.c1 * r2.j ) e(13);
+    r2.c1 = 'j';
+    if ( r1.c1 + r2.c1 != 'j' ) e(14);
+    if ( r1.c1 * r2.c1 ) e(15);
+     r2.j = r1.i = r2.i = r1.j = 1;
+    if ( (r1.i<<0) != r1.j ) e(16);
+    if ( (r1.i >> -0 ) != ( r1.j >> 0 ) ) e(17);
+    if ( (r1.i<<1) != 2 ) e(18);
+    if ( (r1.i<<2) != 4 ) e(19);
+    if ( (r1.j<<3) != (r2.j<<3) ) e(20);
+    if ( (r1.i | r1.i | r1.i | r1.i | r1.i) != r1.i ) e(21);
+    if ( (r2.j & r1.j & r2.j & r2.i) != (r1.i<<3>>3) ) e(22);
+    r1.j = 1;
+#ifndef NOFLOAT
+    r1.aaa = 2.0;
+    if ( fabs ( r1.j * r1.aaa - 2.0 ) > epsd ) e(23);
+    if ( (r1.j << 4) * r1.aaa != (r1.j << 4) * r1.aaa ) e(24);
+    if ( ((r1.j<<6)&r1.j) * r1.aaa ) e(25);
+    if ((r1.j | (r1.j << 1)) * r1.aaa != ((r1.j << 1) ^ r1.j) * r1.aaa) e(26);
+#endif
+    r1.i = r1.j = r2.i = r2.j = -2;
+    if ( r1.i > 0 || r1.j >= 0 ) e(27);
+    if ( r1.i != r2.j ) e(28);
+    if ( !!! ((((( r1.i == r2.j ))))) ) e(28);
+    if ( -(-(r1.j)) != r2.j ) e(29);
+    if ( r1.i % r1.j ) e(30);
+    if ( (r1.i % r1.j) % r1.i ) e(31);
+    if ( 0 % r2.j ) e(32);
+    if ( 03 * r1.i != -6 ) e(33);
+#ifndef NOFLOAT
+    r1.aaa = r2.aaa = -4;
+    r1.bbb = r2.bbb = 4;
+    if ( r1.aaa > -3.5 ) e(34);
+    if ( fabs ( r1.aaa - r2.aaa ) > epsf ) e(35);
+#endif
+    r1.c1 = '\03';
+#ifndef NOFLOAT
+    if ( fabs ( r2.aaa * r1.aaa - r1.c1 * 5 - 1.0 ) > epsf ) e(36);
+#else
+    if ( 5*r1.c1 != 15 ) e(36) ;
+#endif
+}
+
+
+
+
+test7()		/* local records */
+{
+#ifndef NOFLOAT
+    double epsd;
+    float epsf;
+    double fabs();
+#endif
+    struct tp2 s1, s2;
+
+    t = 7;
+    tct++;
+#ifndef NOFLOAT
+    epsd = EPSD;
+    epsf = EPSF;
+#endif
+    s1.c1 = 'x';
+    s1.i = 40;
+    s1.j = 50;
+#ifndef NOFLOAT
+    s1.aaa = 3.0;
+    s1.bbb = 4.0;
+#endif
+    s2.c1 = s1.c1;
+    s2.i = 50;
+    s2.j = 40;
+#ifndef NOFLOAT
+    s2.aaa = 4.0;
+    s2.bbb = 5.0;
+#endif
+    if ( s1.c1 != 'x' || s1.i != 40 ) e(1);
+#ifndef NOFLOAT
+    if ( s1.aaa != 3.0 ) e(1);
+#endif
+    if ( s1.i != 40 || s2.i != 50 ) e(2);
+    if ( s2.j != 40 || s1.j != 50 ) e(3);
+    if ( (s1.c1 + s2.c1)/2 != 'x' ) e(4);
+#ifndef NOFLOAT
+    if ( s1.aaa * s1.aaa + s2.aaa * s2.aaa != s2.bbb * s2.bbb ) e(5);
+    s1.i = s1.j = s2.i = s2.j = 3.0;
+#else
+    s1.i = s1.j = s2.i = s2.j = 3;
+#endif
+    if ( s1.i != 3 ) e(6);
+    if ( s1.i * s2.j - 9 ) e(7);
+    s1.i++;
+    if ( s1.i != 4 ) e(8);
+    if ( --s1.i != 3 ) e(9);
+    if ( (++s2.i) * (--s2.j) != 8 ) e(10);
+    if ( (s2.i = s2.j = s1.j = s1.i = -5 ) != -5 ) e(11);
+    if ( s2.i * s1.j / 25 != 1 ) e(12);
+    s1.c1 = '\0';
+    if ( s1.i * s1.j * s2.i * s1.c1 * s2.j ) e(13);
+    s2.c1 = 'j';
+    if ( s1.c1 + s2.c1 != 'j' ) e(14);
+    if ( s1.c1 * s2.c1 ) e(15);
+     s2.j = s1.i = s2.i = s1.j = 1;
+    if ( (s1.i<<0) != s1.j ) e(16);
+    if ( (s1.i >> -0 ) != ( s1.j >> 0 ) ) e(17);
+    if ( (s1.i<<1) != 2 ) e(18);
+    if ( (s1.i<<2) != 4 ) e(19);
+    if ( (s1.j<<3) != (s2.j<<3) ) e(20);
+    if ( (s1.i | s1.i | s1.i | s1.i | s1.i) != s1.i ) e(21);
+    if ( (s2.j & s1.j & s2.j & s2.i) != (s1.i<<3>>3) ) e(22);
+    s1.j = 1;
+#ifndef NOFLOAT
+    s1.aaa = 2.0;
+    if ( fabs ( s1.j * s1.aaa - 2.0 ) > epsd ) e(23);
+    if ( (s1.j << 4) * s1.aaa != (s1.j << 4) * s1.aaa ) e(24);
+    if ( ((s1.j<<6)&s1.j) * s1.aaa ) e(25);
+    if ((s1.j | (s1.j << 1)) * s1.aaa != ((s1.j << 1) ^ s1.j) * s1.aaa) e(26);
+#endif
+    s1.i = s1.j = s2.i = s2.j = -2;
+    if ( s1.i > 0 || s1.j >= 0 ) e(27);
+    if ( s1.i != s2.j ) e(28);
+    if ( !!! ((((( s1.i == s2.j ))))) ) e(28);
+    if ( -(-(s1.j)) != s2.j ) e(29);
+    if ( s1.i % s1.j ) e(30);
+    if ( (s1.i % s1.j) % s1.i ) e(31);
+    if ( 0 % s2.j ) e(32);
+    if ( 03 * s1.i != -6 ) e(33);
+#ifndef NOFLOAT
+    s1.aaa = s2.aaa = -4;
+    s1.bbb = s2.bbb = 4;
+    if ( s1.aaa > -3.5 ) e(34);
+    if ( fabs ( s1.aaa - s2.aaa ) > epsf ) e(35);
+#endif
+    s1.c1 = '\03';
+#ifndef NOFLOAT
+    if ( fabs ( s2.aaa * s1.aaa - s1.c1 * 5 - 1.0 ) > epsf ) e(36);
+#else
+    if ( 5*r1.c1 != 15 ) e(36) ;
+#endif
+}
+
+
+
+
+test8()		/* global arrays */
+{
+#ifndef NOFLOAT
+    float epsf;
+    double epsd;
+    double fabs();
+#endif
+
+    t = 8;
+    tct++;
+#ifndef NOFLOAT
+    epsf = EPSF;
+    epsd = EPSD;
+#endif
+    for ( i=0; i<20 ; i++ )
+	a1[i] = i*i;
+    if ( a1[9] != 81 || a1[17] != 289 || a1[0] != 0 ) e(1);
+    if ( a1[1] + a1[2] + a1[3]  !=  14 ) e(2);
+    if ( ! a1[15] ) e(3);
+    if ( a1[8] / a1[4] != 4 ) e(4);
+#ifndef NOFLOAT
+    for ( i=0; i<20; i++ )
+	 a2[i] = 10.0e-1 + i/54.324e-1;
+    if ( fabs(a2[4]*a2[4]-a2[4]*(10.0e-1 + 4/54.324e-1 ) ) > epsf ) e(5);
+    if ( fabs(a2[8]/a2[8]*a2[9]/a2[9]-a2[10]+a2[10]-1.0 ) > epsf ) e(6);
+    if ( fabs(a2[5]-a2[4]-1/54.324e-1 ) > epsf ) e(7);
+    for ( i=0; i<20; i++)
+	 a3[i]= 10.0e-1 + i/54.324e-1;
+    if ( fabs(a3[4]*a3[4]-a3[4]*(1.0e0+4/54.324e-1 )) > epsd ) e(8);
+    if ( fabs( a3[8]*a3[9]/a3[8]/a3[9]-a3[10]+a3[10]-1000e-3) > epsd ) e(9);
+    if ( fabs(a3[8]+a3[6]-2*a3[7]) > epsd ) e(10);
+#endif
+    for ( i=0; i<20; i++ )
+	a1[i] = i+1;
+    if ( a1[a1[a1[a1[a1[a1[0]]]]]] != 6 ) e(11);
+    if ( a1[a1[0]+a1[1]+a1[2]+a1[3]] != 11 ) e(12);
+    if ( (a1[0] << 2) != 4 ) e(13);
+    if ( (a1[0] >> 2) ) e(14);
+    if ( (a1[0] << 3 >> 3) != a1[0] ) e(15);
+    if ( a1[a1[0] << 1] != 3 ) e(16);
+    if ( a1[4<<1] != 9 ) e(17);
+    if ( a1[4 << 1] != 9 ) e(18);
+    if ( (1 << a1[0]) != 2 ) e(19);
+    if ( (1 & a1[0]) != 1 ) e(20);
+    if ( a1[4]++ != 5 ) e(21);
+    if ( a1[4] != 6 ) e(22);
+    if ( --a1[4] != 5 ) e(23);
+    if ( a1[ --a1[10] ] != 10 ) e(24);
+    a1[0] = 0;
+    a1[1] = 1;
+    a1[2] = 2;
+    a1[3] = 3;
+    i = 3;
+    if ( a1[--i] != 2 ) e(25);
+    if ( a1[ a1[--i] ] != 1 ) e(26);
+    if ( a1[a1[a1[a1[a1[a1[a1[a1[3]]]]]]]] != 3 ) e(27);
+    if ( a1[1+2] != 3 ) e(28);
+    if ( a1[1+2] != a1[3/3] + 2 ) e(29);
+    if ( a1[i=2] != 2 ) e(30);
+    if ( -a1[i==3] ) e(31);
+    if ( a1[3*2 + a1[0]*6 - 10/2 -4 + 3/1] != 0 ) e(32);
+    if ( a1['a' + 'c' -2*'b'] ) e(33);
+    if ( a1[ a1[0]==a1[1] ] ) e(34);
+    if ( a1[a1[1<<1]>>1] != 1 ) e(35);
+    a1[i=j=4] = 10;
+    if ( (i!=4) || (j!=4) || (i!=j) ) e(36);
+    if ( a1[4] != 10 ) e(37);
+    if ( a1[--i] != 3 ) e(38);
+    if ( a1[i++] != 3 ) e(39);
+    if ( --a1[--i] != 2 ) e(40);
+    a1[a1[a1[a1[a1[0]=7]=5]=8]=2]=0;
+    if ( a1[0] != 7) e(41);
+    if ((a1[7] != 5) || (a1[5]!=8) || (a1[8]!=2))e(42);
+    if (a1[2]) e(43);
+    for ( i=0 ; i<20; i++)
+	a1[i] = i;
+    a1[0] = 0;
+    a1[1] = 01;
+    a1[2] = 02;
+    a1[3] = 04;
+    a1[4] = 010;
+    if ((a1[0] | a1[1] | a1[2] | a1[3] | a1[4]) != 017 ) e(44);
+    if ( a1[0]<<4 ) e(45);
+    if ( (a1[4]>>3) != 1 ) e(46);
+    a1[4] = 04;
+    a1[010] = 010;
+    if ( a1[8] != 8 ) e(47);
+    if ( a1[0|1|2|4|8] != (a1[0]|a1[1]|a1[2]|a1[4]|a1[8]) ) e(48);
+    if ( a1[a1[0]|a1[1]|a1[2]|a1[4]|a1[8]] != a1[017] ) e(49);
+    if ( a1[a1[1]^a1[2]^a1[4]^a1[8]] != a1[a1[1]|a1[2]|a1[4]|a1[8]] ) e(50);
+    for ( i = 0; i<20; i++ )
+	a1[i] = i+1;
+#ifndef NOFLOAT
+    for ( i = 0; i<20; i++ )
+	a2[i] = a3[i] = a1[i];
+    if ( a2[5] != 6.0 ) e(51);
+    if ( a2[13] != 14.0 ) e(52);
+    if ( a2[a1[a1[a1[a1[a1[0]]]]]] != 6.0 ) e(53);
+#endif
+    if ( a1[12] != 13 ) e(54);
+#ifndef NOFLOAT
+    if ( a1[ a1[12] = a2[a1[11]] ] != 14 ) e(55);
+    if ( fabs( a2[13] - a2[a1[12]] ) > epsf ) e(56);
+    if ( a2[8] != a1[8] ) e(57);
+#endif
+}
+
+
+
+
+test9()	/* local arrays */
+{
+#ifndef NOFLOAT
+    float epsf;
+    double epsd;
+    double fabs();
+#endif
+    int b1[20];
+#ifndef NOFLOAT
+    float b2[20];
+    double b3[20];
+#endif
+
+    t = 9;
+    tct++;
+#ifndef NOFLOAT
+    epsf = EPSF;
+    epsd = EPSD;
+#endif
+    for ( i=0; i<20 ; i++ )
+	b1[i] = i*i;
+    if ( b1[9] != 81 || b1[17] != 289 || b1[0] != 0 ) e(1);
+    if ( b1[1] + b1[2] + b1[3]  !=  14 ) e(2);
+    if ( ! b1[15] ) e(3);
+    if ( b1[8] / b1[4] != 4 ) e(4);
+#ifndef NOFLOAT
+    for ( i=0; i<20; i++ )
+	 b2[i] = 10.0e-1 + i/54.324e-1;
+    if ( fabs(b2[4]*b2[4]-b2[4]*(10.0e-1 + 4/54.324e-1 ) ) > epsf ) e(5);
+    if ( fabs(b2[8]/b2[8]*b2[9]/b2[9]-b2[10]+b2[10]-1.0 ) > epsf ) e(6);
+    if ( fabs(b2[5]-b2[4]-1/54.324e-1 ) > epsf ) e(7);
+    for ( i=0; i<20; i++)
+	 b3[i]= 10.0e-1 + i/54.324e-1;
+    if ( fabs(b3[4]*b3[4]-b3[4]*(1.0e0+4/54.324e-1 )) > epsd ) e(8);
+    if ( fabs( b3[8]*b3[9]/b3[8]/b3[9]-b3[10]+b3[10]-1000e-3) > epsd ) e(9);
+    if ( fabs(b3[8]+b3[6]-2*b3[7]) > epsd ) e(10);
+#endif
+    for ( i=0; i<20; i++ )
+	b1[i] = i+1;
+    if ( b1[b1[b1[b1[b1[b1[0]]]]]] != 6 ) e(11);
+    if ( b1[b1[0]+b1[1]+b1[2]+b1[3]] != 11 ) e(12);
+    if ( (b1[0] << 2) != 4 ) e(13);
+    if ( (b1[0] >> 2) ) e(14);
+    if ( (b1[0] << 3 >> 3) != b1[0] ) e(15);
+    if ( b1[b1[0] << 1] != 3 ) e(16);
+    if ( b1[4<<1] != 9 ) e(17);
+    if ( b1[4 << 1] != 9 ) e(18);
+    if ( (1 << b1[0]) != 2 ) e(19);
+    if ( (1 & b1[0]) != 1 ) e(20);
+    if ( b1[4]++ != 5 ) e(21);
+    if ( b1[4] != 6 ) e(22);
+    if ( --b1[4] != 5 ) e(23);
+    if ( b1[ --b1[10] ] != 10 ) e(24);
+    b1[0] = 0;
+    b1[1] = 1;
+    b1[2] = 2;
+    b1[3] = 3;
+    i = 3;
+    if ( b1[--i] != 2 ) e(25);
+    if ( b1[ b1[--i] ] != 1 ) e(26);
+    if ( b1[b1[b1[b1[b1[b1[b1[b1[3]]]]]]]] != 3 ) e(27);
+    if ( b1[1+2] != 3 ) e(28);
+    if ( b1[1+2] != b1[3/3] + 2 ) e(29);
+    if ( b1[i=2] != 2 ) e(30);
+    if ( -b1[i==3] ) e(31);
+    if ( b1[3*2 + b1[0]*6 - 10/2 -4 + 3/1] != 0 ) e(32);
+    if ( b1['a' + 'c' -2*'b'] ) e(33);
+    if ( b1[ b1[0]==b1[1] ] ) e(34);
+    if ( b1[b1[1<<1]>>1] != 1 ) e(35);
+    b1[i=j=4] = 10;
+    if ( (i!=4) || (j!=4) || (i!=j) ) e(36);
+    if ( b1[4] != 10 ) e(37);
+    if ( b1[--i] != 3 ) e(38);
+    if ( b1[i++] != 3 ) e(39);
+    if ( --b1[--i] != 2 ) e(40);
+    b1[b1[b1[b1[b1[0]=7]=5]=8]=2]=0;
+    if ( b1[0] != 7) e(41);
+    if ((b1[7] != 5) || (b1[5]!=8) || (b1[8]!=2))e(42);
+    if (b1[2]) e(43);
+    for ( i=0 ; i<20; i++)
+	b1[i] = i;
+    b1[0] = 0;
+    b1[1] = 01;
+    b1[2] = 02;
+    b1[3] = 04;
+    b1[4] = 010;
+    if ((b1[0] | b1[1] | b1[2] | b1[3] | b1[4]) != 017 ) e(44);
+    if ( b1[0]<<4 ) e(45);
+    if ( (b1[4]>>3) != 1 ) e(46);
+    b1[4] = 04;
+    b1[010] = 010;
+    if ( b1[8] != 8 ) e(47);
+    if ( b1[0|1|2|4|8] != (b1[0]|b1[1]|b1[2]|b1[4]|b1[8]) ) e(48);
+    if ( b1[b1[0]|b1[1]|b1[2]|b1[4]|b1[8]] != b1[017] ) e(49);
+    if ( b1[b1[1]^b1[2]^b1[4]^b1[8]] != b1[b1[1]|b1[2]|b1[4]|b1[8]] ) e(50);
+    for ( i = 0; i<20; i++ )
+	b1[i] = i+1;
+#ifndef NOFLOAT
+    for ( i = 0; i<20; i++ )
+	b2[i] = b3[i] = b1[i];
+    if ( b2[5] != 6.0 ) e(51);
+    if ( b2[13] != 14.0 ) e(52);
+    if ( b2[b1[b1[b1[b1[b1[0]]]]]] != 6.0 ) e(53);
+#endif
+    if ( b1[12] != 13 ) e(54);
+#ifndef NOFLOAT
+    if ( b1[ b1[12] = b2[b1[11]] ] != 14 ) e(55);
+    if ( fabs( b2[13] - b2[b1[12]] ) > epsf ) e(56);
+    if ( b2[8] != b1[8] ) e(57);
+#endif
+}
+
+
+
+
+test10()		/* global pointers */
+{
+#ifndef NOFLOAT
+    float epsf;
+    double fabs();
+#endif
+    int li;
+    struct tp2 strp2;
+
+#ifndef NOFLOAT
+    epsf = EPSF;
+#endif
+    t = 10;
+    tct++;
+    p1 = &li;
+    li = 076;
+    if ( p1 != &li ) e(1);
+    p11 = &li;
+    if ( p1 != p11 ) e(3);
+    if ( *p1 != *p11 ) e(4);
+    if ( &li != p11 ) e(5);
+    if ( *&p1 != p1 ) e(6);
+    if ( &*p1 != p1 ) e(7);
+    if ( **&p1 != *&*p1 ) e(10);
+    if ( *&*&*&*&*&li != li ) e(11);
+    p1 = &p ;
+    p2 = &p1;
+    *p1 = **p2 = 34;
+    if ( p1 != *p2 ) e(25);
+    li = 4;
+    p1 = &li;
+    p2 = &p1;
+    p3 = &p2;
+    p4 = &p3;
+    p5 = &p4;
+    if ( *p1 != **p2 ) e(26);
+    if ( **p2 != **p2 ) e(27);
+    if ( ***p3 != **p2 ) e(28);
+    if ( *****p5 != 4 ) e(30);
+    li = 3;
+    if ( *p1 - *p1 ) e(44);
+    if ( p1 != &li ) e(46);
+    pp1 = (struct tp2 *) alloc( sizeof *pp1 );
+    pp2 = (struct tp2 *) alloc( sizeof *pp2 );
+    pp3 = (struct tp2 *) alloc( sizeof *pp3 );
+    pp1->i = 1325;
+    if ( pp1->i != 1325 ) e(47);
+    pp1->i = pp2->i = pp3->i = 3;
+    if ( pp1->i * pp1->i != 9 ) e(48);
+    if ( pp1->i * pp2->i * pp3->i != pp2->i * 3 * 3 ) e(49);
+    if ( pp1->i - pp3->i ) e(50);
+    if ( (*pp1).i != pp1->i ) e(51);
+    pp1->i++;
+    if ( ++pp2->i != pp1->i ) e(52);
+    if ( pp2->i != 4 ) e(53);
+#ifndef NOFLOAT
+    pp1->aaa = 3.0;
+    pp2->aaa = -3.0;
+    pp3->bbb = 25.0;
+    if ( pp1->aaa != 3.0 ) e(54);
+    if ( fabs( pp1->aaa + pp2->aaa ) > epsf ) e(55);
+    if ( fabs( pp1->aaa * pp2->aaa + pp3->bbb - 16 ) > epsf ) e(56);
+    if ( fabs( pp1->aaa / pp2->aaa + 1 ) > epsf ) e(57);
+#endif
+    pp1->c1 = 'x';
+    pp1->i = pp1->j = 45;
+#ifndef NOFLOAT
+    pp1->aaa = 100.0;
+    pp1->bbb = 1024.0;
+#endif
+    strp2.c1 = pp1->c1;		/* strp2 is a local struct */
+    strp2.i = pp1->i = strp2.j = pp1->j;
+#ifndef NOFLOAT
+    strp2.aaa = pp1->aaa;
+    strp2.bbb = pp1->bbb;
+#endif
+    if ( strp2.c1 != 'x' ) e(58);
+    if ( strp2.i != strp2.j ) e(59);
+#ifndef NOFLOAT
+    if ( strp2.aaa != pp1->aaa ) e(60);
+    if ( strp2.bbb != pp1->bbb ) e(61);
+#endif
+}
+
+#ifndef NOFLOAT
+
+test11()	/* real arithmetic */
 {
     double fabs();
     double epsd;
     float epsf;
     float locxf;
 
-    t = 6;
+    t = 11 ;
     tct++;
     epsf = EPSF;
     epsd = EPSD;
@@ -734,427 +1251,6 @@ test6()		/* real arithmetic */
     if ( locxf == 2 ) e(50);
 }
 
+#endif
 
 
-
-test7()		/* global records */
-{
-    double epsd;
-    float epsf;
-    double fabs();
-
-    t = 7;
-    tct++;
-    epsd = EPSD;
-    epsf = EPSF;
-    r1.c1 = 'x';
-    r1.i = 40;
-    r1.j = 50;
-    r1.aaa = 3.0;
-    r1.bbb = 4.0;
-    r2.c1 = r1.c1;
-    r2.i = 50;
-    r2.j = 40;
-    r2.aaa = 4.0;
-    r2.bbb = 5.0;
-    if ( r1.c1 != 'x' || r1.i != 40 || r1.aaa != 3.0 ) e(1);
-    if ( r1.i != 40 || r2.i != 50 ) e(2);
-    if ( r2.j != 40 || r1.j != 50 ) e(3);
-    if ( (r1.c1 + r2.c1)/2 != 'x' ) e(4);
-    if ( r1.aaa * r1.aaa + r2.aaa * r2.aaa != r2.bbb * r2.bbb ) e(5);
-    r1.i = r1.j = r2.i = r2.j = 3.0;
-    if ( r1.i != 3 ) e(6);
-    if ( r1.i * r2.j - 9 ) e(7);
-    r1.i++;
-    if ( r1.i != 4 ) e(8);
-    if ( --r1.i != 3 ) e(9);
-    if ( (++r2.i) * (--r2.j) != 8 ) e(10);
-    if ( (r2.i = r2.j = r1.j = r1.i = -5 ) != -5 ) e(11);
-    if ( r2.i * r1.j / 25 != 1 ) e(12);
-    r1.c1 = '\0';
-    if ( r1.i * r1.j * r2.i * r1.c1 * r2.j ) e(13);
-    r2.c1 = 'j';
-    if ( r1.c1 + r2.c1 != 'j' ) e(14);
-    if ( r1.c1 * r2.c1 ) e(15);
-     r2.j = r1.i = r2.i = r1.j = 1;
-    if ( (r1.i<<0) != r1.j ) e(16);
-    if ( (r1.i >> -0 ) != ( r1.j >> 0 ) ) e(17);
-    if ( (r1.i<<1) != 2 ) e(18);
-    if ( (r1.i<<2) != 4 ) e(19);
-    if ( (r1.j<<3) != (r2.j<<3) ) e(20);
-    if ( (r1.i | r1.i | r1.i | r1.i | r1.i) != r1.i ) e(21);
-    if ( (r2.j & r1.j & r2.j & r2.i) != (r1.i<<3>>3) ) e(22);
-    r1.j = 1;
-    r1.aaa = 2.0;
-    if ( fabs ( r1.j * r1.aaa - 2.0 ) > epsd ) e(23);
-    if ( (r1.j << 4) * r1.aaa != (r1.j << 4) * r1.aaa ) e(24);
-    if ( ((r1.j<<6)&r1.j) * r1.aaa ) e(25);
-    if ((r1.j | (r1.j << 1)) * r1.aaa != ((r1.j << 1) ^ r1.j) * r1.aaa) e(26);
-    r1.i = r1.j = r2.i = r2.j = -2;
-    if ( r1.i > 0 || r1.j >= 0 ) e(27);
-    if ( r1.i != r2.j ) e(28);
-    if ( !!! ((((( r1.i == r2.j ))))) ) e(28);
-    if ( -(-(r1.j)) != r2.j ) e(29);
-    if ( r1.i % r1.j ) e(30);
-    if ( (r1.i % r1.j) % r1.i ) e(31);
-    if ( 0 % r2.j ) e(32);
-    if ( 03 * r1.i != -6 ) e(33);
-    r1.aaa = r2.aaa = -4;
-    r1.bbb = r2.bbb = 4;
-    if ( r1.aaa > -3.5 ) e(34);
-    if ( fabs ( r1.aaa - r2.aaa ) > epsf ) e(35);
-    r1.c1 = '\03';
-    if ( fabs ( r2.aaa * r1.aaa - r1.c1 * 5 - 1.0 ) > epsf ) e(36);
-}
-
-
-
-
-test8()		/* local records */
-{
-    double epsd;
-    float epsf;
-    double fabs();
-    struct tp2 s1, s2;
-
-    t = 8;
-    tct++;
-    epsd = EPSD;
-    epsf = EPSF;
-    s1.c1 = 'x';
-    s1.i = 40;
-    s1.j = 50;
-    s1.aaa = 3.0;
-    s1.bbb = 4.0;
-    s2.c1 = s1.c1;
-    s2.i = 50;
-    s2.j = 40;
-    s2.aaa = 4.0;
-    s2.bbb = 5.0;
-    if ( s1.c1 != 'x' || s1.i != 40 || s1.aaa != 3.0 ) e(1);
-    if ( s1.i != 40 || s2.i != 50 ) e(2);
-    if ( s2.j != 40 || s1.j != 50 ) e(3);
-    if ( (s1.c1 + s2.c1)/2 != 'x' ) e(4);
-    if ( s1.aaa * s1.aaa + s2.aaa * s2.aaa != s2.bbb * s2.bbb ) e(5);
-    s1.i = s1.j = s2.i = s2.j = 3.0;
-    if ( s1.i != 3 ) e(6);
-    if ( s1.i * s2.j - 9 ) e(7);
-    s1.i++;
-    if ( s1.i != 4 ) e(8);
-    if ( --s1.i != 3 ) e(9);
-    if ( (++s2.i) * (--s2.j) != 8 ) e(10);
-    if ( (s2.i = s2.j = s1.j = s1.i = -5 ) != -5 ) e(11);
-    if ( s2.i * s1.j / 25 != 1 ) e(12);
-    s1.c1 = '\0';
-    if ( s1.i * s1.j * s2.i * s1.c1 * s2.j ) e(13);
-    s2.c1 = 'j';
-    if ( s1.c1 + s2.c1 != 'j' ) e(14);
-    if ( s1.c1 * s2.c1 ) e(15);
-     s2.j = s1.i = s2.i = s1.j = 1;
-    if ( (s1.i<<0) != s1.j ) e(16);
-    if ( (s1.i >> -0 ) != ( s1.j >> 0 ) ) e(17);
-    if ( (s1.i<<1) != 2 ) e(18);
-    if ( (s1.i<<2) != 4 ) e(19);
-    if ( (s1.j<<3) != (s2.j<<3) ) e(20);
-    if ( (s1.i | s1.i | s1.i | s1.i | s1.i) != s1.i ) e(21);
-    if ( (s2.j & s1.j & s2.j & s2.i) != (s1.i<<3>>3) ) e(22);
-    s1.j = 1;
-    s1.aaa = 2.0;
-    if ( fabs ( s1.j * s1.aaa - 2.0 ) > epsd ) e(23);
-    if ( (s1.j << 4) * s1.aaa != (s1.j << 4) * s1.aaa ) e(24);
-    if ( ((s1.j<<6)&s1.j) * s1.aaa ) e(25);
-    if ((s1.j | (s1.j << 1)) * s1.aaa != ((s1.j << 1) ^ s1.j) * s1.aaa) e(26);
-    s1.i = s1.j = s2.i = s2.j = -2;
-    if ( s1.i > 0 || s1.j >= 0 ) e(27);
-    if ( s1.i != s2.j ) e(28);
-    if ( !!! ((((( s1.i == s2.j ))))) ) e(28);
-    if ( -(-(s1.j)) != s2.j ) e(29);
-    if ( s1.i % s1.j ) e(30);
-    if ( (s1.i % s1.j) % s1.i ) e(31);
-    if ( 0 % s2.j ) e(32);
-    if ( 03 * s1.i != -6 ) e(33);
-    s1.aaa = s2.aaa = -4;
-    s1.bbb = s2.bbb = 4;
-    if ( s1.aaa > -3.5 ) e(34);
-    if ( fabs ( s1.aaa - s2.aaa ) > epsf ) e(35);
-    s1.c1 = '\03';
-    if ( fabs ( s2.aaa * s1.aaa - s1.c1 * 5 - 1.0 ) > epsf ) e(36);
-}
-
-
-
-
-test9()		/* global arrays */
-{
-    float epsf;
-    double epsd;
-    double fabs();
-
-    t = 9;
-    tct++;
-    epsf = EPSF;
-    epsd = EPSD;
-    for ( i=0; i<20 ; i++ )
-	a1[i] = i*i;
-    if ( a1[9] != 81 || a1[17] != 289 || a1[0] != 0 ) e(1);
-    if ( a1[1] + a1[2] + a1[3]  !=  14 ) e(2);
-    if ( ! a1[15] ) e(3);
-    if ( a1[8] / a1[4] != 4 ) e(4);
-    for ( i=0; i<20; i++ )
-	 a2[i] = 10.0e-1 + i/54.324e-1;
-    if ( fabs(a2[4]*a2[4]-a2[4]*(10.0e-1 + 4/54.324e-1 ) ) > epsf ) e(5);
-    if ( fabs(a2[8]/a2[8]*a2[9]/a2[9]-a2[10]+a2[10]-1.0 ) > epsf ) e(6);
-    if ( fabs(a2[5]-a2[4]-1/54.324e-1 ) > epsf ) e(7);
-    for ( i=0; i<20; i++)
-	 a3[i]= 10.0e-1 + i/54.324e-1;
-    if ( fabs(a3[4]*a3[4]-a3[4]*(1.0e0+4/54.324e-1 )) > epsd ) e(8);
-    if ( fabs( a3[8]*a3[9]/a3[8]/a3[9]-a3[10]+a3[10]-1000e-3) > epsd ) e(9);
-    if ( fabs(a3[8]+a3[6]-2*a3[7]) > epsd ) e(10);
-    for ( i=0; i<20; i++ )
-	a1[i] = i+1;
-    if ( a1[a1[a1[a1[a1[a1[0]]]]]] != 6 ) e(11);
-    if ( a1[a1[0]+a1[1]+a1[2]+a1[3]] != 11 ) e(12);
-    if ( (a1[0] << 2) != 4 ) e(13);
-    if ( (a1[0] >> 2) ) e(14);
-    if ( (a1[0] << 3 >> 3) != a1[0] ) e(15);
-    if ( a1[a1[0] << 1] != 3 ) e(16);
-    if ( a1[4<<1] != 9 ) e(17);
-    if ( a1[4 << 1] != 9 ) e(18);
-    if ( (1 << a1[0]) != 2 ) e(19);
-    if ( (1 & a1[0]) != 1 ) e(20);
-    if ( a1[4]++ != 5 ) e(21);
-    if ( a1[4] != 6 ) e(22);
-    if ( --a1[4] != 5 ) e(23);
-    if ( a1[ --a1[10] ] != 10 ) e(24);
-    a1[0] = 0;
-    a1[1] = 1;
-    a1[2] = 2;
-    a1[3] = 3;
-    i = 3;
-    if ( a1[--i] != 2 ) e(25);
-    if ( a1[ a1[--i] ] != 1 ) e(26);
-    if ( a1[a1[a1[a1[a1[a1[a1[a1[3]]]]]]]] != 3 ) e(27);
-    if ( a1[1+2] != 3 ) e(28);
-    if ( a1[1+2] != a1[3/3] + 2 ) e(29);
-    if ( a1[i=2] != 2 ) e(30);
-    if ( -a1[i==3] ) e(31);
-    if ( a1[3*2 + a1[0]*6 - 10/2 -4 + 3/1] != 0 ) e(32);
-    if ( a1['a' + 'c' -2*'b'] ) e(33);
-    if ( a1[ a1[0]==a1[1] ] ) e(34);
-    if ( a1[a1[1<<1]>>1] != 1 ) e(35);
-    a1[i=j=4] = 10;
-    if ( (i!=4) || (j!=4) || (i!=j) ) e(36);
-    if ( a1[4] != 10 ) e(37);
-    if ( a1[--i] != 3 ) e(38);
-    if ( a1[i++] != 3 ) e(39);
-    if ( --a1[--i] != 2 ) e(40);
-    a1[a1[a1[a1[a1[0]=7]=5]=8]=2]=0;
-    if ( a1[0] != 7) e(41);
-    if ((a1[7] != 5) || (a1[5]!=8) || (a1[8]!=2))e(42);
-    if (a1[2]) e(43);
-    for ( i=0 ; i<20; i++)
-	a1[i] = i;
-    a1[0] = 0;
-    a1[1] = 01;
-    a1[2] = 02;
-    a1[3] = 04;
-    a1[4] = 010;
-    if ((a1[0] | a1[1] | a1[2] | a1[3] | a1[4]) != 017 ) e(44);
-    if ( a1[0]<<4 ) e(45);
-    if ( (a1[4]>>3) != 1 ) e(46);
-    a1[4] = 04;
-    a1[010] = 010;
-    if ( a1[8] != 8 ) e(47);
-    if ( a1[0|1|2|4|8] != (a1[0]|a1[1]|a1[2]|a1[4]|a1[8]) ) e(48);
-    if ( a1[a1[0]|a1[1]|a1[2]|a1[4]|a1[8]] != a1[017] ) e(49);
-    if ( a1[a1[1]^a1[2]^a1[4]^a1[8]] != a1[a1[1]|a1[2]|a1[4]|a1[8]] ) e(50);
-    for ( i = 0; i<20; i++ )
-	a1[i] = i+1;
-    for ( i = 0; i<20; i++ )
-	a2[i] = a3[i] = a1[i];
-    if ( a2[5] != 6.0 ) e(51);
-    if ( a2[13] != 14.0 ) e(52);
-    if ( a2[a1[a1[a1[a1[a1[0]]]]]] != 6.0 ) e(53);
-    if ( a1[12] != 13 ) e(54);
-    if ( a1[ a1[12] = a2[a1[11]] ] != 14 ) e(55);
-    if ( fabs( a2[13] - a2[a1[12]] ) > epsf ) e(56);
-    if ( a2[8] != a1[8] ) e(57);
-}
-
-
-
-
-test10()	/* local arrays */
-{
-    float epsf;
-    double epsd;
-    double fabs();
-    int b1[20];
-    float b2[20];
-    double b3[20];
-
-    t = 10;
-    tct++;
-    epsf = EPSF;
-    epsd = EPSD;
-    for ( i=0; i<20 ; i++ )
-	b1[i] = i*i;
-    if ( b1[9] != 81 || b1[17] != 289 || b1[0] != 0 ) e(1);
-    if ( b1[1] + b1[2] + b1[3]  !=  14 ) e(2);
-    if ( ! b1[15] ) e(3);
-    if ( b1[8] / b1[4] != 4 ) e(4);
-    for ( i=0; i<20; i++ )
-	 b2[i] = 10.0e-1 + i/54.324e-1;
-    if ( fabs(b2[4]*b2[4]-b2[4]*(10.0e-1 + 4/54.324e-1 ) ) > epsf ) e(5);
-    if ( fabs(b2[8]/b2[8]*b2[9]/b2[9]-b2[10]+b2[10]-1.0 ) > epsf ) e(6);
-    if ( fabs(b2[5]-b2[4]-1/54.324e-1 ) > epsf ) e(7);
-    for ( i=0; i<20; i++)
-	 b3[i]= 10.0e-1 + i/54.324e-1;
-    if ( fabs(b3[4]*b3[4]-b3[4]*(1.0e0+4/54.324e-1 )) > epsd ) e(8);
-    if ( fabs( b3[8]*b3[9]/b3[8]/b3[9]-b3[10]+b3[10]-1000e-3) > epsd ) e(9);
-    if ( fabs(b3[8]+b3[6]-2*b3[7]) > epsd ) e(10);
-    for ( i=0; i<20; i++ )
-	b1[i] = i+1;
-    if ( b1[b1[b1[b1[b1[b1[0]]]]]] != 6 ) e(11);
-    if ( b1[b1[0]+b1[1]+b1[2]+b1[3]] != 11 ) e(12);
-    if ( (b1[0] << 2) != 4 ) e(13);
-    if ( (b1[0] >> 2) ) e(14);
-    if ( (b1[0] << 3 >> 3) != b1[0] ) e(15);
-    if ( b1[b1[0] << 1] != 3 ) e(16);
-    if ( b1[4<<1] != 9 ) e(17);
-    if ( b1[4 << 1] != 9 ) e(18);
-    if ( (1 << b1[0]) != 2 ) e(19);
-    if ( (1 & b1[0]) != 1 ) e(20);
-    if ( b1[4]++ != 5 ) e(21);
-    if ( b1[4] != 6 ) e(22);
-    if ( --b1[4] != 5 ) e(23);
-    if ( b1[ --b1[10] ] != 10 ) e(24);
-    b1[0] = 0;
-    b1[1] = 1;
-    b1[2] = 2;
-    b1[3] = 3;
-    i = 3;
-    if ( b1[--i] != 2 ) e(25);
-    if ( b1[ b1[--i] ] != 1 ) e(26);
-    if ( b1[b1[b1[b1[b1[b1[b1[b1[3]]]]]]]] != 3 ) e(27);
-    if ( b1[1+2] != 3 ) e(28);
-    if ( b1[1+2] != b1[3/3] + 2 ) e(29);
-    if ( b1[i=2] != 2 ) e(30);
-    if ( -b1[i==3] ) e(31);
-    if ( b1[3*2 + b1[0]*6 - 10/2 -4 + 3/1] != 0 ) e(32);
-    if ( b1['a' + 'c' -2*'b'] ) e(33);
-    if ( b1[ b1[0]==b1[1] ] ) e(34);
-    if ( b1[b1[1<<1]>>1] != 1 ) e(35);
-    b1[i=j=4] = 10;
-    if ( (i!=4) || (j!=4) || (i!=j) ) e(36);
-    if ( b1[4] != 10 ) e(37);
-    if ( b1[--i] != 3 ) e(38);
-    if ( b1[i++] != 3 ) e(39);
-    if ( --b1[--i] != 2 ) e(40);
-    b1[b1[b1[b1[b1[0]=7]=5]=8]=2]=0;
-    if ( b1[0] != 7) e(41);
-    if ((b1[7] != 5) || (b1[5]!=8) || (b1[8]!=2))e(42);
-    if (b1[2]) e(43);
-    for ( i=0 ; i<20; i++)
-	b1[i] = i;
-    b1[0] = 0;
-    b1[1] = 01;
-    b1[2] = 02;
-    b1[3] = 04;
-    b1[4] = 010;
-    if ((b1[0] | b1[1] | b1[2] | b1[3] | b1[4]) != 017 ) e(44);
-    if ( b1[0]<<4 ) e(45);
-    if ( (b1[4]>>3) != 1 ) e(46);
-    b1[4] = 04;
-    b1[010] = 010;
-    if ( b1[8] != 8 ) e(47);
-    if ( b1[0|1|2|4|8] != (b1[0]|b1[1]|b1[2]|b1[4]|b1[8]) ) e(48);
-    if ( b1[b1[0]|b1[1]|b1[2]|b1[4]|b1[8]] != b1[017] ) e(49);
-    if ( b1[b1[1]^b1[2]^b1[4]^b1[8]] != b1[b1[1]|b1[2]|b1[4]|b1[8]] ) e(50);
-    for ( i = 0; i<20; i++ )
-	b1[i] = i+1;
-    for ( i = 0; i<20; i++ )
-	b2[i] = b3[i] = b1[i];
-    if ( b2[5] != 6.0 ) e(51);
-    if ( b2[13] != 14.0 ) e(52);
-    if ( b2[b1[b1[b1[b1[b1[0]]]]]] != 6.0 ) e(53);
-    if ( b1[12] != 13 ) e(54);
-    if ( b1[ b1[12] = b2[b1[11]] ] != 14 ) e(55);
-    if ( fabs( b2[13] - b2[b1[12]] ) > epsf ) e(56);
-    if ( b2[8] != b1[8] ) e(57);
-}
-
-
-
-
-test11()		/* global pointers */
-{
-    float epsf;
-    double fabs();
-    int li;
-    struct tp2 strp2;
-
-    epsf = EPSF;
-    t = 11;
-    tct++;
-    p1 = &li;
-    li = 076;
-    if ( p1 != &li ) e(1);
-    p11 = &li;
-    if ( p1 != p11 ) e(3);
-    if ( *p1 != *p11 ) e(4);
-    if ( &li != p11 ) e(5);
-    if ( *&p1 != p1 ) e(6);
-    if ( &*p1 != p1 ) e(7);
-    if ( **&p1 != *&*p1 ) e(10);
-    if ( *&*&*&*&*&li != li ) e(11);
-    p1 = &p ;
-    p2 = &p1;
-    *p1 = **p2 = 34;
-    if ( p1 != *p2 ) e(25);
-    li = 4;
-    p1 = &li;
-    p2 = &p1;
-    p3 = &p2;
-    p4 = &p3;
-    p5 = &p4;
-    if ( *p1 != **p2 ) e(26);
-    if ( **p2 != **p2 ) e(27);
-    if ( ***p3 != **p2 ) e(28);
-    if ( *****p5 != 4 ) e(30);
-    li = 3;
-    if ( *p1 - *p1 ) e(44);
-    if ( p1 != &li ) e(46);
-    pp1 = (struct tp2 *) alloc( sizeof *pp1 );
-    pp2 = (struct tp2 *) alloc( sizeof *pp2 );
-    pp3 = (struct tp2 *) alloc( sizeof *pp3 );
-    pp1->i = 1325;
-    if ( pp1->i != 1325 ) e(47);
-    pp1->i = pp2->i = pp3->i = 3;
-    if ( pp1->i * pp1->i != 9 ) e(48);
-    if ( pp1->i * pp2->i * pp3->i != pp2->i * 3 * 3 ) e(49);
-    if ( pp1->i - pp3->i ) e(50);
-    if ( (*pp1).i != pp1->i ) e(51);
-    pp1->i++;
-    if ( ++pp2->i != pp1->i ) e(52);
-    if ( pp2->i != 4 ) e(53);
-    pp1->aaa = 3.0;
-    pp2->aaa = -3.0;
-    pp3->bbb = 25.0;
-    if ( pp1->aaa != 3.0 ) e(54);
-    if ( fabs( pp1->aaa + pp2->aaa ) > epsf ) e(55);
-    if ( fabs( pp1->aaa * pp2->aaa + pp3->bbb - 16 ) > epsf ) e(56);
-    if ( fabs( pp1->aaa / pp2->aaa + 1 ) > epsf ) e(57);
-    pp1->c1 = 'x';
-    pp1->i = pp1->j = 45;
-    pp1->aaa = 100.0;
-    pp1->bbb = 1024.0;
-    strp2.c1 = pp1->c1;		/* strp2 is a local struct */
-    strp2.i = pp1->i = strp2.j = pp1->j;
-    strp2.aaa = pp1->aaa;
-    strp2.bbb = pp1->bbb;
-    if ( strp2.c1 != 'x' ) e(58);
-    if ( strp2.i != strp2.j ) e(59);
-    if ( strp2.aaa != pp1->aaa ) e(60);
-    if ( strp2.bbb != pp1->bbb ) e(61);
-}

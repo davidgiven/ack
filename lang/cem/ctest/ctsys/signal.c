@@ -1,4 +1,7 @@
 #include <signal.h>
+
+char rcs_id[] = "$Header$" ;
+
 foo()
 {
 	printf("signal received\n");

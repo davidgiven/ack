@@ -15,6 +15,8 @@
  *
  */
 
+char rcs_id[] = "$Header$" ;
+
 static int level = 0 ;
 int procentry(name) char *name ; {
 	register int count ;

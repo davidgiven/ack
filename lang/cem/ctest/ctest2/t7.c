@@ -16,6 +16,8 @@
  *
  */
 
+char rcs_id[] = "$Header$" ;
+
 
 /*
 #define TEST1 1

@@ -17,6 +17,8 @@
 
 /* Author: E.G. Keizer */
 
+char rcs_id[] = "$Header$" ;
+
 /* Test initialisation of a V7 C-compiler */
 /* 1 sept 1980 */
 #include "../local.h"
@@ -90,6 +92,7 @@ pch() {
 	printf("mult[0],mult[1],mult[2] %s, %s, %s\n",mult[0],mult[1],mult[2]);
 }
 
+#ifndef NOFLOAT
 /* floats */
 
 float fl1 = 0 ;
@@ -171,6 +174,7 @@ printf("dbl1\t%.20e\ndbl2\t%.20e\ndbl2\t%.20e\ndbl4\t%.20e\ndbl5\t%.20e\ndbl6\t%
 
 	printf("\n") ;
 }
+#endif
 
 /* long */
 long lo1 = 14L ;
@@ -193,12 +197,18 @@ struct s1 {
 	int	s_i ;
 	char	s_ca[3] ;
 	long	s_l ;
+#ifndef NOFLOAT
 	double	s_f ;
+#endif
 	struct	s1 *s_s1 ;
 } ;
 struct s1 st1 ;
 struct s1 sta[3] = {
+#ifndef NOFLOAT
 	1 , { 'a' , 'b' , 'c' } , 10 , -10 , &sta[0] ,
+#else
+	1 , { 'a' , 'b' , 'c' } , 10 , &sta[0] ,
+#endif
 	{ 2 } ,
 	3
 } ;
@@ -229,8 +239,10 @@ pstruct() {
 		st1.s_ca[2],sta[0].s_ca[2],sta[1].s_ca[2],sta[2].s_ca[2]) ;
 	printf("s_l\t%15D%15D%15D%15D\n",
 		st1.s_l,sta[0].s_l,sta[1].s_l,sta[2].s_l) ;
+#ifndef NOFLOAT
 	printf("s_f\t  %13e  %13e  %13e  %13e\n\n",
 		st1.s_f,sta[0].s_f,sta[1].s_f,sta[2].s_f) ;
+#endif
 	printf("(sta[0].s_s1)->s_i = %d\n",(sta[0].s_s1)->s_i) ;
 
 	printf("\nbit fields:\n\n") ;
@@ -242,8 +254,10 @@ pstruct() {
 main() {
 	pint() ;
 	pch() ;
+#ifndef NOFLOAT
 	pflt() ;
 	pdbl() ;
+#endif
 	plong() ;
 	pstruct() ;
 	return(0) ;

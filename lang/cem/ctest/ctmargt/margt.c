@@ -1,3 +1,5 @@
+char rcs_id[] = "$Header$" ;
+
 main(argc,argv,envp) char **argv,**envp ; {
 	register int rargc ;
 

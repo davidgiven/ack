@@ -17,6 +17,8 @@
 
 /* Author: E.G. Keizer */
 
+char rcs_id[] = "$Header$" ;
+
 main() {
 
 	assnull() ;

@@ -1,3 +1,5 @@
+char rcs_id[] = "$Header$" ;
+
 main(argc,argv) char **argv ; {
 	int child, waitchild ;
 	int status ;

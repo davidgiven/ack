@@ -15,6 +15,8 @@
  *
  */
 
+char rcs_id[] = "$Header$" ;
+
 /* This program can be used to test C-compilers */
 
 

@@ -17,6 +17,8 @@
 
 /* Author: E.G. Keizer */
 
+char rcs_id[] = "$Header$" ;
+
 /* Test a few declaration features */
 /* Such as:
 	forward function declarations,

@@ -17,6 +17,8 @@
 
 /* Author: E.G. Keizer */
 
+char rcs_id[] = "$Header$" ;
+
 /* This programs is a collection of derived from small tests develloped
    for specific bugs/features in the C->EM compiler
 */
@@ -69,12 +71,16 @@ loc_fa(p1,p2) {
 
 con_fold() {
 	set_err("con_fold") ;
+#ifndef NOFLOAT
 	con_flo( (1 ? 3 : 4.5), 200, 200, 200 ) ;
+#endif
 	con_lo( 4L + 3, 1 ) ;
 }
+#ifndef NOFLOAT
 con_flo(d) double d ; {
 	if ( d>3.00001 || d<2.99999 ) e(1) ;
 }
+#endif
 con_lo(l) long l ; {
 	if ( l!=7 ) e(2) ;
 }
