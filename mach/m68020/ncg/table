@@ -737,6 +737,14 @@ pat lil inreg($1)==reg_any
 			yields  {indirect4, %a}
 
 pat stl inreg($1)==reg_any
+with exact memory1-const
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    gen	clr_l {LOCAL, $1}
+	move_b %1, {dreg1, regvar($1,reg_any)}
+with exact memory2-const
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    gen	clr_l {LOCAL, $1}
+	move_w %1, {dreg2, regvar($1,reg_any)}
 with any4
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen move %1, {LOCAL, $1}
