@@ -357,13 +357,20 @@ opnd2logical(expp, oper)
 	register struct expr **expp;
 	int oper;
 {
-	int fund;
+	int fund = (*expp)->ex_type->tp_fund;
 
-	if ((*expp)->ex_type->tp_fund == FUNCTION)
-		function2pointer(*expp);
+	if (fund == FUNCTION || fund == ARRAY) {
+		expr_warning(*expp, "%s operand to %s",
+			symbol2str(fund),
+			symbol2str(oper));
+		if (fund == FUNCTION) {
+			function2pointer(*expp);
+		}
+		else	array2pointer(*expp);
+	}
 #ifndef NOBITFIELD
 	else
-	if ((*expp)->ex_type->tp_fund == FIELD)
+	if (fund == FIELD)
 		field2arith(expp);
 #endif NOBITFIELD
 	switch (fund = (*expp)->ex_type->tp_fund) {
