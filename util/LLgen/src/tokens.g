@@ -117,13 +117,13 @@ scanner() {
 	int		reserved = 0;	/* reserved word? */
 	char		*max = &ltext[LTEXTSZ - 1];
 
-	if (ch = savedtok.t_tokno) {
+	if (savedtok.t_tokno) {
 				/* A token has been inserted.
 				 * Now deliver the last lextoken again
 				 */
 		lextoken = savedtok;
 		savedtok.t_tokno = 0;
-		return ch;
+		return lextoken.t_tokno;
 	}
 	for (;;) {
 		ch = input();
