@@ -30,7 +30,7 @@ findworst(repl)
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
-		fprintf(ofile,"\t\t\tOO_backup(%d);\n", longestpattern-1);
+		fprintf(ofile,"\t\tOO_backup(%d);\n", longestpattern-1);
 		return;
 	}
 	for(s=1;s<=higheststate;s++) {
@@ -57,11 +57,12 @@ findworst(repl)
 		}
 	}
 	if(mostbackups)
-		fprintf(ofile,"\t\t\tOO_backup(%d);\n",mostbackups);
+		fprintf(ofile,"\t\tOO_backup(%d);\n",mostbackups);
 }
 
-findfail(state)
+findfail(state,resout,rescpy,resgto)
 	int state;
+	int *resout, *rescpy, *resgto;
 {
 	/*
 	/* If pattern matching fails in 'state', how many outputs and how many
@@ -85,12 +86,16 @@ findfail(state)
 				continue;
 			if((leftmatch(patterns[s],patterns[state],i,n)==1)&&
 				patterns[s].m_len==(n-i+1)) {
-				fprintf(ofile,"\t{%d,%d,%d},",i-1,n-i+1,s);
-				return;
-			}
+					*resout = i-1;
+					*rescpy = n-i+1;
+					*resgto = s;
+					return;
+				}
 		}
 	}
-	fprintf(ofile,"\t{%d,0,0},",n);
+	*resout = n;
+	*rescpy = 0;
+	*resgto = 0;
 }
 
 PRIVATE int

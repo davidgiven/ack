@@ -117,6 +117,15 @@ OO_free(p)
 	*OO_nxtifree++ = p;
 }
 
+OO_nfree(n)
+	register int n;
+{
+	while(n--) {
+		OO_free(*--OO_nxtpatt);
+	}
+	OO_state = 0;
+}
+
 char *
 OO_freestr(str)
 	char *str;

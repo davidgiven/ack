@@ -9,22 +9,97 @@ FILE *ofile;
 
 outputnopt()
 {
-	if((ofile=fopen("dfa.c","w"))==NULL) {
-		fprintf(stderr,"Couldn't open dfa.c for output\n");
-		sys_stop(S_EXIT);
-	}
+	openofile("dfa.c");
 	outheaders();
 	outtables();
 	outdfa();
 	outdodefault();
+	installofile();
+	openofile("trans.h");
+	outtranshdr();
+	installofile();
+	openofile("trans.c");
 	outdotrans();
+	installofile();
+	openofile("incalls.r");
 	outputincalls();
+	installofile();
+}
+
+static char ofilename[80];
+static char ofiletemp[80];
+
+PRIVATE
+openofile(filename)
+	char *filename;
+{
+	strcpy(ofilename,filename);
+	strcpy(ofiletemp,filename);
+	strcat(ofiletemp,".new");
+	if((ofile=fopen(ofiletemp,"w"))==NULL) {
+		fprintf(stderr,"Fatal Error: cannot open output file %s\n",ofiletemp);
+		sys_stop(S_EXIT);
+	}
+}
+
+PRIVATE
+installofile()
+{
+	/*
+	 * if contents of newly generated ofiletemp is different
+	 * from that of ofilename then copy over old file else
+	 * delete newly generated file
+	 */
+	register FILE	*f1, *f2;
+	register int	c1, c2;
+	fclose(ofile);
+	if((f1 = fopen(ofiletemp,"r")) == NULL) {
+		fprintf(stderr,"Fatal Error: cannont reopen file %s\n",ofiletemp);
+		sys_stop(S_EXIT);
+	}
+	if((f2 = fopen(ofilename,"r")) == NULL) {
+		fclose(f1);
+		RENAME(ofiletemp,ofilename);
+		return;
+	}
+	do {
+		c1 = getc(f1);
+		c2 = getc(f2);
+	} while (c1 == c2 && c1 != EOF);
+	fclose(f1);
+	fclose(f2);
+	if (c1 != c2) {
+		RENAME(ofiletemp,ofilename);
+	}
+	else UNLINK(ofiletemp);
+}
+
+PRIVATE
+UNLINK(x)
+	char *x;
+{
+	/* Must remove the file "x" */
+	unlink(x);	/* systemcall to remove file */
+}
+
+PRIVATE
+RENAME(x,y)
+	char *x, *y;
+{
+	/* Must move the file "x" to the file "y" */
+	unlink(y);
+	if(link(x,y)!=0) {
+		fprintf(stderr,"Cannot link to %s",y);
+		sys_stop(S_EXIT);
+	}
+	unlink(x);
 }
 
 PRIVATE
 outheaders()
 {
 	fprintf(ofile,"#include \"nopt.h\"\n");
+	fprintf(ofile,"#include \"trans.h\"\n");
 	fprintf(ofile,"\n");
 	fprintf(ofile,"int OO_maxpattern = %d;\n", longestpattern);
 	fprintf(ofile,"\n");
@@ -34,15 +109,21 @@ PRIVATE
 outtables()
 {
 	int s;
+	int nout, ncpy, ngto;
 	fprintf(ofile,"static struct defact {\n");
 	fprintf(ofile,"\tint numoutput;\n");
 	fprintf(ofile,"\tint numcopy;\n");
 	fprintf(ofile,"\tint nextstate;\n");
+	fprintf(ofile,"\tint (*transstate)();\n");
 	fprintf(ofile,"} defaultactions[] = {\n");
 	for(s=0;s<=higheststate;s++) {
-		findfail(s);
-		if(s%4==3)
-			fprintf(ofile,"\n");
+		findfail(s,&nout,&ncpy,&ngto);
+		fprintf(ofile,"\t{%d, %d, %d, ",nout,ncpy,ngto);
+		if(actions[ngto]==NULL)
+			fprintf(ofile,"0");
+		else
+			fprintf(ofile,"OO_%ddotrans",ngto);
+		fprintf(ofile,"},\n");
 	}
 	fprintf(ofile,"};\n");
 	fprintf(ofile,"\n");
@@ -75,7 +156,7 @@ outdfa()
 					fprintf(ofile,"\t\t\tcase %d: ",s);
 					if(actions[p->goto_state]==(struct action *)NULL)
 						fprintf(ofile,"OO_state = %d; ",p->goto_state);
-					else fprintf(ofile,"OO_dotrans(%d); ",p->goto_state);
+					else fprintf(ofile,"OO_%ddotrans(); ",p->goto_state);
 					fprintf(ofile,"break;\n");
 				}
 			}
@@ -116,36 +197,41 @@ outmnems(l)
 }
 
 PRIVATE
+outtranshdr()
+{
+	register int s;
+	for(s=0;s<=higheststate;s++) {
+		if(actions[s]!=NULL)
+			fprintf(ofile,"extern OO_%ddotrans();\n",s);
+	}
+}
+
+PRIVATE
 outdotrans()
 {
 	int s;
 	int i;
 	struct state *p;
 	struct action *a;
+	int firsttest;
 	int seennontested;
-	if((ofile=fopen("trans.c","w"))==NULL) {
-		fprintf(stderr,"Fatal Error: cannot open output file trans.c\n");
-		sys_stop(S_EXIT);
-	}
 	fprintf(ofile,"#include \"nopt.h\"\n\n");
-	fprintf(ofile,"\nOO_dotrans(s) int s; {\n");
-	fprintf(ofile,"\tregister p_instr *patt = OO_patternqueue;\n");
-	fprintf(ofile,"\tswitch(OO_state=s) {\n");
-	fprintf(ofile,"\tdefault: return;\n");
-	for(s=0;s<=higheststate;s++)
+	for(s=0;s<=higheststate;s++) {
 		if(actions[s]!=(struct action *)NULL) {
-			fprintf(ofile,"\tcase %d: /*",s);
+			fprintf(ofile,"\nOO_%ddotrans() {\n",s);
+			fprintf(ofile,"\t/* ");
 			outmnems(patterns[s]);
 			fprintf(ofile," */\n");
+			fprintf(ofile,"\tregister p_instr *patt = OO_patternqueue;\n");
 			seennontested=0;
+			firsttest=1;
 			for(a=actions[s];a!=(struct action *)NULL;a=a->next) {
 				if(a->test!=(struct exp_node *)NULL) {
-					fprintf(ofile,"\t\tif(");
+					fprintf(ofile,"\tif(");
 					outexp(a->test,s);
 					fprintf(ofile,") {\n");
 					outoneaction(s,a);
-					fprintf(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
-					fprintf(ofile,"\t\t}\n");
+					fprintf(ofile,"\t\tgoto free;\n\t}\n");
 				}
 				else {
 					if(seennontested) {
@@ -154,19 +240,19 @@ outdotrans()
 					}
 					seennontested++;
 					outoneaction(s,a);
-					fprintf(ofile,"\t\t\tgoto free%d;\n",patterns[s].m_len);
 				}
 			}
-			if(!seennontested)
-				fprintf(ofile,"\t\treturn;\n");
+			if(!seennontested) {
+				fprintf(ofile,"\tOO_state=%d;\n",s);
+				fprintf(ofile,"\treturn;\n");
+			}
+			fprintf(ofile,"free:\tOO_nfree(%d);\n",patterns[s].m_len);
+			fprintf(ofile,"}\n");
 		}
-	fprintf(ofile,"\t}\n");
-	for(i=longestpattern;i>0;i--)
-		fprintf(ofile," free%d: OO_free(*--OO_nxtpatt);\n",i);
-	fprintf(ofile," free0: ;\n");
-	fprintf(ofile,"\tOO_state=0;\n");
-	fprintf(ofile,"}\n");
-	fprintf(ofile,"\n");
+		/*
+		 * else fprintf(ofile,"\nOO_%ddotrans() {\n\tOO_state=%d;\n}\n",s,s);
+		 */
+	}
 }
 
 PRIVATE
@@ -176,7 +262,8 @@ outdodefault()
 	fprintf(ofile,"\tregister struct defact *p = &defaultactions[OO_state];\n");
 	fprintf(ofile,"\tOO_pushback(*--OO_nxtpatt);\n");
 	fprintf(ofile,"\tOO_dodefault(p->numoutput,p->numcopy);\n");
-	fprintf(ofile,"\tOO_dotrans(p->nextstate);\n");
+	fprintf(ofile,"\tOO_state=p->nextstate;\n");
+	fprintf(ofile,"\tif(p->transstate) (*(p->transstate))();\n");
 	fprintf(ofile,"}\n");
 }
 
@@ -185,12 +272,11 @@ outoneaction(s,a)
 	int s;
 	struct action *a;
 {
-	fprintf(ofile,"\t\t/* ");
-	fprintf(ofile," -> ");
+	fprintf(ofile,"\t\t/* -> ");
 	outmnems(a->replacement);
 	fprintf(ofile," */\n");
 	fprintf(ofile,"#ifdef STATS\n");
-	fprintf(ofile,"\t\t\tif(OO_wrstats) fprintf(stderr,\"%d\\n\");\n",a->linenum);
+	fprintf(ofile,"\t\tif(OO_wrstats) fprintf(stderr,\"%d\\n\");\n",a->linenum);
 	fprintf(ofile,"#endif\n");
 	outrepl(s,patterns[s],a->replacement);
 	findworst(a->replacement);
@@ -212,31 +298,31 @@ outrepl(state,patt,repl)
 		char *mnem = ri->op_code->id_text;
 		switch(ri->op_code->id_argfmt) {
 		case NOARG:
-			fprintf(ofile,"\t\t\tOO_outop(op_%s);\n",mnem);
+			fprintf(ofile,"\t\tOO_outop(op_%s);\n",mnem);
 			break;
 		case CST:
 		case CSTOPT:
-			fprintf(ofile,"\t\t\tOO_outcst(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_outcst(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case LAB:
-			fprintf(ofile,"\t\t\tOO_outlab(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_outlab(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case DEFILB:
-			fprintf(ofile,"\t\t\tOO_outdefilb(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_outdefilb(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case PNAM:
-			fprintf(ofile,"\t\t\tOO_outpnam(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_outpnam(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;
 		case EXT:
-			fprintf(ofile,"\t\t\tOO_outext(op_%s,",mnem);
+			fprintf(ofile,"\t\tOO_outext(op_%s,",mnem);
 			outexp(ri->arg,state);
 			fprintf(ofile,");\n");
 			break;

@@ -26,7 +26,7 @@ PREFLAGS= $(INCLDIR) -DPRIVATE=static#	 -DDEBUG
 # from the patterns file each time an optimization is performed.
 #PREFLAGS= $(PREFLAGS) -DSTATS
 PROFFLAG= -O
-CFLAGS	= $(PREFLAGS) $(PROFFLAG) -J
+CFLAGS	= $(PREFLAGS) $(PROFFLAG)
 LLOPT	=
 CMD	= '$(CC) -c $(CFLAGS)'
 
@@ -45,8 +45,8 @@ NOFILES = nopt.o dfa.o trans.o aux.o
 POFILES = parser.o syntax.o outputdfa.o outcalls.o findworst.o initlex.o Lpars.o
 
 GENFILES = Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
-		dfa.c dfa.c.save trans.c trans.c.save incalls.d incalls.r\
-		incalls.r.save pseudo.d
+		dfa.c dfa.c.new trans.h trans.h.new trans.c trans.c.new\
+		incalls.d incalls.r incalls.r.new pseudo.d
 
 all:		em_nopt $(LIBOPT)
 
@@ -78,15 +78,9 @@ $(LIBOPT):	$(NOFILES) mkstrct.o pseudo.d incalls.d
 		-sh -c 'ranlib $(LIBOPT)'
 
 dfadummy:	patterns parser
-		-mv dfa.c dfa.c.save
-		-mv trans.c trans.c.save
-		-mv incalls.r incalls.r.save
 		-/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
 		parser </tmp/patts
 		-rm /tmp/patts
-		-if cmp -s dfa.c dfa.c.save; then mv dfa.c.save dfa.c; else exit 0; fi
-		-if cmp -s trans.c trans.c.save; then mv trans.c.save trans.c; else exit 0; fi
-		-if cmp -s incalls.r incalls.r.save; then mv incalls.r.save incalls.r; else exit 0; fi
 		touch dfadummy
 
 # How to build program to parse patterns table and build c files.
@@ -108,7 +102,7 @@ nopt.o:		nopt.h
 mkstrct.o:	nopt.h
 aux.o:		nopt.h
 pseudo.d:	nopt.h makefuns.awk
-dfa.o:		nopt.h dfadummy
+dfa.o:		nopt.h trans.h dfadummy
 trans.o:	nopt.h dfadummy
 incalls.d:	nopt.h makefuns.awk
 incalls.r:	dfadummy

@@ -9,10 +9,6 @@ outputincalls()
 	struct idf *op;
 	int opcode;
 	char *s;
-	if((ofile=fopen("incalls.r","w"))==NULL) {
-		fprintf(stderr,"Fatal Error: cannot open output file incalls.r\n");
-		sys_stop(S_EXIT);
-	}
 	for(op=ops;op!=(struct idf *)NULL;op=op->id_nextidf) {
 		opcode = op->id_opcode;
 		s = op->id_text;
