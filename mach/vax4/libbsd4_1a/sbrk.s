@@ -1,5 +1,6 @@
 .set	break,17
-.globl	_sbrk, _brk
+.globl	_sbrk
+.globl	_brk
 .globl	_end
 
 .align	1
