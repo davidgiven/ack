@@ -176,6 +176,7 @@ struct idf **idpp;
 	return tg;
 }
 
+
 declare_protos(dc)
 	register struct declarator *dc;
 {
@@ -193,8 +194,15 @@ declare_protos(dc)
 		dumpidftab("start declare_protos", 0);
 #endif	DEBUG
 	du = dc->dc_decl_unary;
-	while (du && du->du_fund != FUNCTION)
+	while (du) {
+		if (du->du_fund == FUNCTION) {
+			if (du->next != (struct decl_unary *) 0) {
+				remove_proto_idfs(du->du_proto);
+				du->du_proto = 0;
+			} else break;
+		}
 		du = du->next;
+	}
 	pl = du ? du->du_proto : NO_PROTO;
 	if (pl) {
 #if	0 /* the id_proto member is deleted (???) */

@@ -153,7 +153,6 @@ function_of(tp, pl, qual)
 	if (!dtp)	{
 		dtp = create_type(FUNCTION);
 		dtp->tp_up = tp;
-		/* dtp->tp_size = pointer_size; ??? */
 		dtp->tp_size = -1;	/* function size is not known */
 		dtp->tp_align = pointer_align;
 		dtp->tp_typequal = qual;

@@ -560,8 +560,11 @@ check_formals(idf, dc)
 		return;
 	}
 
-	while (du && du->du_fund != FUNCTION)
+	while (du
+		&& (du->du_fund != FUNCTION
+		    || du->next != (struct decl_unary *) 0)) {
 		du = du->next;
+	}
 	if (!du) return;	/* terrible error, signalled earlier */
 
 	if (du->du_proto) return;
