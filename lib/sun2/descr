@@ -57,7 +57,7 @@ name led
 		(.b:{TAIL}={EM}/{PLIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/{PLIB}em {EM}/lib/{M}/end_em)
 	linker
 end
 name cv
