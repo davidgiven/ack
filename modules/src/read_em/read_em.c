@@ -266,9 +266,10 @@ EM_getinstr(p)
 				check(p->em_cst >= 0);
 				break;
 			case PAR_G:
-				if (p->em_argtype == cst_ptyp) {
-					check(p->em_cst >= 0);
+				if (p->em_argtype != cst_ptyp) {
+					break;
 				}
+				check(p->em_cst >= 0);
 				/* Fall through */
 			case PAR_F:
 				/* ??? not in original em_decode or em_encode */
