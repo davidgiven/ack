@@ -249,13 +249,14 @@ idf2type(idf, tpp)
 	struct idf *idf;
 	struct type **tpp;
 {
-	/*	Decoding  a typedef-ed identifier: if the size is yet
-		unknown we have to make copy of the type descriptor to
-		prevent garbage at the initialisation of arrays with
-		unknown size.
+	/*	Decoding  a typedef-ed identifier or basic type: if the
+		size is yet unknown we have to make copy of the type
+		descriptor to prevent garbage at the initialisation of
+		arrays with unknown size.
 	*/
 	register struct type *tp = idf->id_def->df_type;
 
+	if (*tpp) error("multiple types in declaration");
 	if (	tp->tp_size < (arith)0 && tp->tp_fund == ARRAY)	{
 		*tpp = new_type();
 		**tpp = *tp;

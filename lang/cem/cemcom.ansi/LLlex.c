@@ -342,10 +342,11 @@ garbage:
 		}
 #endif NOPP
 		ptok->tk_symb = (
-			idef->id_reserved ? idef->id_reserved
-			: idef->id_def && idef->id_def->df_sc == TYPEDEF ?
-				TYPE_IDENTIFIER
-			: IDENTIFIER
+			idef->id_reserved
+			    ? idef->id_reserved
+			    : idef->id_def && idef->id_def->df_sc == TYPEDEF
+				? TYPE_IDENTIFIER
+				: IDENTIFIER
 		);
 		return IDENTIFIER;
 	}

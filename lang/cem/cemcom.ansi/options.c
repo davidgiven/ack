@@ -175,21 +175,14 @@ deleted, is now a debug-flag
 			register char *new = text;
 			
 			if (++inc_total > inc_max) {
-				char **n = (char **)
-				   Malloc((10+inc_max)*sizeof(char *));
-				for (i = 0; i < inc_max; i++) {
-					n[i] = inctable[i];
-				}
-				free((char *) inctable);
-				inctable = n;
-				inc_max += 10;
+				inctable = (char **)
+				   Realloc(inctable,(inc_max+=10)*sizeof(char *));
 			}
 				
-			i = inc_pos++;
-			while (new)	{
+			for (i = inc_pos++; i<= inc_total ; i++) {
 				char *tmp = inctable[i];
 				
-				inctable[i++] = new;
+				inctable[i] = new;
 				new = tmp;
 			}
 		}

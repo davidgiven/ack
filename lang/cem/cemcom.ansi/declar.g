@@ -67,46 +67,49 @@ declaration
 		short typedef yepp;
 	makes all hope of writing a specific grammar for typedefs illusory.
 */
+/*	We do not accept the whole of the grammar, since when we see
+	something like 'unsigned plain' (where plain is a typedef) is
+	illegal if 'plain' is a typedef.  Therefore, we assume that
+	'plain' is the identifier of a declarator.  Unfortunately, this
+	causes declarations like 'unsigned plain x;' to be rejected on the
+	grounds of syntax, even though it is syntactically right.  This may
+	cause a lot of extra messages.
+	To do this, decl_specifiers is divided into:
+	1: normal specifiers == storage class specifiers + type_qualifiers
+	2: special specifiers == short + long + signed + unsigned
+	3: basic types == void + char + int + float + double
+	4: single type specifiers == struct or union specifiers
+				    + enum specifiers + typedef names
 
+ */
 decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 	/*	Reads a non-empty decl_specifiers and fills the struct
 		decspecs *ds.
 	*/
 :
-[
-	other_specifier(ds)+
-	[%if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
-		/* the thin ice in R.M. 11.1 */
-		single_type_specifier(ds) other_specifier(ds)*
-	|
-		empty
-	]
+[ %if (AHEAD == IDENTIFIER)			/* like: register i; */
+	normal_specifier(ds)
 |
-	single_type_specifier(ds) other_specifier(ds)*
+	normal_specifier(ds)*
+	[	special_specifier(ds)
+	|	basic_type(ds)
+	|	single_type_specifier(ds)
+	]
+	[	normal_specifier(ds)
+	|	special_specifier(ds)
+	|	basic_type(ds)
+	]*
 ]
 	{do_decspecs(ds);}
 ;
 
-/* 3.5.1 & 3.5.2 (partially) & 3.5.3 (partially) */
-other_specifier(register struct decspecs *ds;)
+normal_specifier(register struct decspecs *ds;)
 :
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
 			error("repeated storage class specifier");
 		ds->ds_sc_given = 1;
 		ds->ds_sc = DOT;
-	}
-|
-	[ SHORT | LONG ]
-	{	if (ds->ds_size)
-			error("repeated size specifier");
-		ds->ds_size = DOT;
-	}
-|
-	[ SIGNED | UNSIGNED ]
-	{	if (ds->ds_unsigned != 0)
-			error("repeated sign specifier");
-		ds->ds_unsigned = DOT;
 	}
 |
 	/*	This qualifier applies to the top type.
@@ -129,6 +132,21 @@ other_specifier(register struct decspecs *ds;)
 	}
 ;
 
+special_specifier(register struct decspecs *ds;)
+:
+	[ SHORT | LONG ]
+	{	if (ds->ds_size)
+			error("repeated size specifier");
+		ds->ds_size = DOT;
+	}
+|
+	[ SIGNED | UNSIGNED ]
+	{	if (ds->ds_unsigned != 0)
+			error("repeated sign specifier");
+		ds->ds_unsigned = DOT;
+	}
+;
+
 /* 3.5.2 */
 type_specifier(struct type **tpp;)
 	/*	Used in struct/union declarations and in casts; only the
@@ -146,9 +164,20 @@ type_specifier(struct type **tpp;)
 	{*tpp = Ds.ds_type;}
 ;
 
+basic_type(register struct decspecs *ds;):
+	[ VOID | CHAR | INT | FLOAT | DOUBLE ]
+	{
+		idf2type(dot.tk_idf, &ds->ds_type);
+		ds->ds_typedef = 0;
+	}
+;
+
 single_type_specifier(register struct decspecs *ds;):
 	%default TYPE_IDENTIFIER	/* this includes INT, CHAR, etc. */
-	{idf2type(dot.tk_idf, &ds->ds_type);}
+	{
+		idf2type(dot.tk_idf, &ds->ds_type);
+		ds->ds_typedef = 1;
+	}
 |
 	IDENTIFIER
 	{
@@ -283,7 +312,7 @@ declarator(register struct declarator *dc;)
 		|
 			formal_list(&fm)
 		|
-			empty
+			/* empty */
 		]
 		')'
 		{	add_decl_unary(dc, FUNCTION, 0, (arith)0, fm, pl);
@@ -308,6 +337,7 @@ arrayer(arith *sizep;)
 	{ struct expr *expr; }
 :
 	'['
+		{ *sizep = (arith)-1; }
 		[
 			constant_expression(&expr)
 			{
@@ -315,10 +345,7 @@ arrayer(arith *sizep;)
 				*sizep = expr->VL_VALUE;
 				free_expression(expr);
 			}
-		|
-			empty
-			{ *sizep = (arith)-1; }
-		]
+		]?
 	']'
 ;
 
@@ -358,7 +385,7 @@ enum_specifier(register struct type **tpp;)
 			enumerator_pack(*tpp, &l)
 		|
 			{apply_struct(ENUM, idf, tpp);}
-			empty
+			/* empty */
 		]
 	]
 ;
@@ -433,7 +460,7 @@ struct_or_union_specifier(register struct type **tpp;)
 			  if (DOT == ';') declare_struct(fund, idf, tpp);
 			  else apply_struct(fund, idf, tpp);
 			}
-			empty
+			/* empty */
 		]
 	]
 ;
@@ -533,7 +560,7 @@ abstract_declarator(register struct declarator *dc;)
 		[
 			parameter_type_list(&pl)
 		|
-			empty
+			/* empty */
 		]
 		')'
 		{add_decl_unary(dc, FUNCTION, 0, (arith)0, NO_PARAMS, pl);}
@@ -551,7 +578,7 @@ abstract_declarator(register struct declarator *dc;)
 primary_abstract_declarator(struct declarator *dc;)
 :
 [%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD))
-	empty
+	/* empty */
 |
 	'(' abstract_declarator(dc) ')'
 ]
@@ -663,7 +690,7 @@ primary_parameter_declarator(register struct declarator *dc;)
 :
 [%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD)
 				    && (AHEAD != IDENTIFIER))
-	empty
+	/* empty */
 |
 	identifier(&dc->dc_idf)
 |

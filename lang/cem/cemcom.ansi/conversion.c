@@ -56,6 +56,14 @@ conversion(from_type, to_type)
 				C_cii();
 				from_size = word_size;
 			}
+			/* 3.2.1.2 */
+			if (to_cnvtype == T_UNSIGNED
+			    && (int)from_size < (int)to_size) {
+				C_loc(from_size);
+				C_loc(to_size);
+				C_cii();
+				from_size = to_size;
+			}
 			C_loc(from_size);
 			C_loc(to_size);
 			if (to_cnvtype == T_UNSIGNED) C_ciu();

@@ -71,62 +71,42 @@ do_decspecs(ds)
 		ds->ds_notypegiven = 1;
 		tp = int_type;
 	}
-	switch (ds->ds_size)	{
-	case SHORT:
-		if (tp == int_type)
-			tp = short_type;
-		else
-			error("short with illegal type");
-		break;
-	case LONG:
-		if (tp == int_type)
-			tp = long_type;
-		else
-		if (tp == double_type)
-			tp = lngdbl_type;
-		else
-			error("long with illegal type");
-		break;
-	}
-	if (ds->ds_unsigned == UNSIGNED) {
-		switch (tp->tp_fund)	{
-		case CHAR:
-			tp = uchar_type;
-			break;
-		case SHORT:
-			tp = ushort_type;
-			break;
-		case INT:
-			tp = uint_type;
-			break;
-		case LONG:
-			tp = ulong_type;
-			break;
-		default:
-			error("unsigned with illegal type");
-			break;
-		}
-	}
-	if (ds->ds_unsigned == SIGNED) {
-		switch (tp->tp_fund) {
-		case CHAR:
-			tp = schar_type;
-			break;
-		case SHORT:
-			tp = short_type;
-			break;
-		case INT:
-			tp = int_type;
-			break;
-		case LONG:
-			tp = long_type;
-			break;
-		default:
-			error("signed with illegal type");
-			break;
-		}
-	}
+	if (ds->ds_size) {
+		register int ds_isshort = (ds->ds_size == SHORT);
 
+		if (ds->ds_typedef) goto SIZE_ERROR;		/* yes */
+		if (tp == int_type) {
+			if (ds_isshort) tp = short_type;
+			else tp = long_type;
+		} else if (tp == double_type && !ds_isshort ) {
+			tp = lngdbl_type;
+		} else {
+	SIZE_ERROR:
+			error("%s with illegal type",symbol2str(ds->ds_size));
+		}
+	}
+	if (ds->ds_unsigned) {
+		register int ds_isunsigned = (ds->ds_unsigned == UNSIGNED);
+
+		if (ds->ds_typedef) goto SIGN_ERROR;		/* yes */
+		/*
+		 * All integral types are signed by default (char too),
+		 * so the case that ds->ds_unsigned == SIGNED can be ignored.
+		 */
+		if (tp == schar_type) {
+			if (ds_isunsigned) tp = uchar_type;
+		} else if (tp == short_type) {
+			if (ds_isunsigned) tp = ushort_type;
+		} else if (tp == int_type) {
+			if (ds_isunsigned) tp = uint_type;
+		} else if (tp == long_type) {
+			if (ds_isunsigned) tp = ulong_type;
+		} else {
+	SIGN_ERROR:
+			error("%s with illegal type"
+				, symbol2str(ds->ds_unsigned));
+		}
+	}
 	ds->ds_type = qualifier_type(tp, ds->ds_typequal);
 }
 

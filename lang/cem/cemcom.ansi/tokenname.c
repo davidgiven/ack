@@ -91,18 +91,26 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{UNSIGNED, "unsigned"},
 	{VOLATILE, "volatile"},
 	{WHILE, "while"},
+
+	{VOID, "void"},
+	{CHAR, "char"},
+	{INT, "int"},
+	{FLOAT, "float"},
+	{DOUBLE, "double"},
 	{0, ""}
 };
 
 #ifdef	____
 struct tokenname tkfunny[] =	{	/* internal keywords */
-	{CHAR, "char"},
-	{INT, "int"},
-	{FLOAT, "float"},
-	{DOUBLE, "double"},
+/* The following may be removed after testing:
+	{Q_VOID, "void"},
+	{Q_CHAR, "char"},
+	{Q_INT, "int"},
+	{Q_FLOAT, "float"},
+	{Q_DOUBLE, "double"},
+*/
 	{LNGDBL, "long double"},
 	{ULONG, "unsigned long"},
-	{VOID, "void"},
 
 	{ARRAY, "array"},
 	{FUNCTION, "function"},
