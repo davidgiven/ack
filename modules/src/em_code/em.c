@@ -331,11 +331,11 @@ C_pt_ilb(l)
 {
 	if (fit8u(l))	{
 		put8(sp_ilb1);
-		put8(l);
+		put8((int)l);
 	}
 	else	{
 		put8(sp_ilb2);
-		put16(l);
+		put16((int)l);
 	}
 }
 
@@ -344,7 +344,7 @@ C_pt_dlb(l)
 {
 	if (fit8u(l))	{
 		put8(sp_dlb1);
-		put8(l);
+		put8((int)l);
 	}
 	else	{
 		put8(sp_dlb2);
