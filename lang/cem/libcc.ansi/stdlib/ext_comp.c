@@ -455,7 +455,7 @@ add_exponent(struct EXTEND *e, int exp)
 	}
 }
 
-_str_ext_cvt(char *s, char **ss, struct EXTEND *e)
+_str_ext_cvt(const char *s, char **ss, struct EXTEND *e)
 {
 	/*	Like strtod, but for extended precision */
 	register int	c;
@@ -463,7 +463,7 @@ _str_ext_cvt(char *s, char **ss, struct EXTEND *e)
 	int		digitseen = 0;
 	int		exp = 0;
 
-	if (ss) *ss = s;
+	if (ss) *ss = (char *)s;
 	while (isspace(*s)) s++;
 
 	e->sign = 0;
@@ -496,7 +496,7 @@ _str_ext_cvt(char *s, char **ss, struct EXTEND *e)
 	}
 	if (! digitseen) return;
 
-	if (ss) *ss = s - 1;
+	if (ss) *ss = (char *)s - 1;
 
 	if (c == 'E' || c == 'e') {
 		int	exp1 = 0;
@@ -519,7 +519,7 @@ _str_ext_cvt(char *s, char **ss, struct EXTEND *e)
 					exp_overflow = 1;
 				}
 			} while (c = *++s, isdigit(c));
-			if (ss) *ss = s;
+			if (ss) *ss = (char *)s;
 		}
 		exp += sign * exp1;
 		if (exp_overflow) {
