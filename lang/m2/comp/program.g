@@ -27,6 +27,8 @@
 #include	"f_info.h"
 #include	"warning.h"
 
+extern t_def	*GetDefinitionModule();
+
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -95,8 +97,13 @@ import(int local;)
 	t_node		*ImportList;
 	register t_node	*FromId = 0;
 	register t_def	*df;
-	extern t_def	*GetDefinitionModule();
 } :
+	/*
+	   When parsing a global module, this is the place where we must
+	   read already compiled definition modules.
+	   If the FROM clause is present, the identifier in it is a module
+	   name, otherwise the names in the import list are module names.
+	*/
 	[ FROM
 	  IDENT		{ FromId = dot2leaf(Name);
 			  if (local) {
@@ -104,21 +111,16 @@ import(int local;)
 			  }
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
+	  IMPORT IdentList(&ImportList) ';'
+			{ EnterFromImportList(ImportList, df, FromId); }
 	|
+	  IMPORT IdentList(&ImportList) ';'
+			{ EnterImportList(ImportList,
+					  local,
+					  enclosing(CurrVis)->sc_scope);
+			}
 	]
-	IMPORT IdentList(&ImportList) ';'
-	/*
-	   When parsing a global module, this is the place where we must
-	   read already compiled definition modules.
-	   If the FROM clause is present, the identifier in it is a module
-	   name, otherwise the names in the import list are module names.
-	*/
-			{ if (FromId) {
-				EnterFromImportList(ImportList, df, FromId);
-			  }
-			  else EnterImportList(ImportList,
-					       local,
-					       enclosing(CurrVis)->sc_scope);
+			{
 			  FreeNode(ImportList);
 			}
 ;
@@ -207,7 +209,6 @@ definition
 
 ProgramModule
 {
-	extern t_def	*GetDefinitionModule();
 	register t_def	*df;
 } :
 	MODULE

@@ -68,7 +68,7 @@ cstunary(expp)
 		expression below it, and the result restored in expp.
 	*/
 	register t_node *right = expp->nd_right;
-	arith o1;
+	arith o1 = right->nd_INT;
 
 	switch(expp->nd_symb) {
 	/* Should not get here
@@ -77,15 +77,15 @@ cstunary(expp)
 	*/
 
 	case '-':
-		if (right->nd_INT == min_int[(int)(right->nd_type->tp_size)])
+		if (o1 == min_int[(int)(right->nd_type->tp_size)])
 			overflow(expp);
 		
-		o1 = -right->nd_INT;
+		o1 = -o1;
 		break;
 
 	case NOT:
 	case '~':
-		o1 = !right->nd_INT;
+		o1 = !o1;
 		break;
 
 	default:

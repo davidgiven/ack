@@ -27,6 +27,8 @@
 #include	"Lpars.h"
 #include	"warning.h"
 
+extern char *sprint();
+
 STATIC
 internal(c)
 	register char *c;
@@ -254,7 +256,6 @@ DeclProc(type, id)
 	*/
 	register t_def *df;
 	register t_scope *scope;
-	extern char *sprint();
 	static int nmcount;
 	char buf[256];
 
@@ -338,7 +339,6 @@ DefineLocalModule(id)
 	register t_scope *sc;
 	static int modulecount = 0;
 	char buf[256];
-	extern char *sprint();
 	extern int proclevel;
 
 	sprint(buf, "_%d%s_", ++modulecount, id->id_text);

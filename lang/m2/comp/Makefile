@@ -10,6 +10,7 @@ MKDEP =		$(EMHOME)/bin/mkdep
 PRID =		$(EMHOME)/bin/prid
 CID =		$(EMHOME)/bin/cid
 CURRDIR =	.
+LINT =		lint
 
 INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
 OLIBS = $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a
@@ -20,7 +21,8 @@ GFILES =$(GENGFILES) $(GF)
 LLGENOPTIONS = -v
 PROFILE =
 COPTIONS=
-CFLAGS = $(PROFILE) $(INCLUDES) $(COPTIONS) -O -DSTATIC=
+OPTIM=-O
+CFLAGS = $(PROFILE) $(INCLUDES) $(COPTIONS) $(OPTIM) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
 LDFLAGS = -i $(PROFILE)
@@ -153,7 +155,7 @@ depend: Cfiles
 #INCLINCLINCLINCL
 
 Xlint:
-	lint $(INCLUDES) $(LINTFLAGS) $(SRC) \
+	$(LINT) $(INCLUDES) $(LINTFLAGS) $(SRC) \
 		$(LIBDIR)/llib-lem_mes.ln \
 		$(LIBDIR)/llib-lemk.ln \
 		$(LIBDIR)/llib-linput.ln \

@@ -480,7 +480,7 @@ CodeStd(nd)
 {
 	register t_node *arg = nd->nd_right;
 	register t_node *left = 0;
-	register t_type *tp;
+	register t_type *tp = 0;
 	int std = nd->nd_left->nd_def->df_value.df_stdname;
 
 	if (arg) {
@@ -863,12 +863,10 @@ CodeOper(expr, true_label, false_label)
 		break;
 	case OR:
 	case AND: {
-		label  l_maybe = ++text_label, l_end;
+		label  l_maybe = ++text_label, l_end = NO_LABEL;
 		t_desig *Des = new_desig();
-		int genlabels = 0;
 
 		if (true_label == NO_LABEL)	{
-			genlabels = 1;
 			true_label = ++text_label;
 			false_label = ++text_label;
 			l_end = ++text_label;
@@ -881,7 +879,7 @@ CodeOper(expr, true_label, false_label)
 		def_ilb(l_maybe);
 		clear((char *) Des, sizeof(t_desig));
 		CodeExpr(rightop, Des, true_label, false_label);
-		if (genlabels) {
+		if (l_end != NO_LABEL) {
 			def_ilb(true_label);
 			c_loc(1);
 			C_bra(l_end);

@@ -400,7 +400,7 @@ again:
 		*/
 		enum statetp {Oct,OptHex,Hex,Dec,OctEndOrHex,End,OptReal,Real};
 		register enum statetp state;
-		register int base;
+		register int base = 8;
 		register char *np = &buf[1];
 					/* allow a '-' to be added	*/
 
@@ -416,7 +416,6 @@ again:
 					LoadChar(ch);
 				}
 				if (ch == 'B' || ch == 'C') {
-					base = 8;
 					state = OctEndOrHex;
 					break;
 				}
@@ -480,7 +479,6 @@ again:
 				UnloadChar(ch);
 				ch = *--np;
 				*np++ = '\0';
-				base = 8;
 				/* Fall through */
 				
 			case End: {

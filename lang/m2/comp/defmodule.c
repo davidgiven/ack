@@ -105,6 +105,7 @@ GetDefinitionModule(id, incr)
 		ForeignFlag = 0;
 		DefId = id;
 		open_scope(CLOSEDSCOPE);
+		vis = CurrVis;
 		if (!strcmp(id->id_text, "SYSTEM")) {
 			do_SYSTEM();
 			df = lookup(id, GlobalScope, D_IMPORTED, 0);
@@ -138,7 +139,6 @@ GetDefinitionModule(id, incr)
 				df = lookup(id, GlobalScope, D_IMPORTED, 0);
 				newsc->sc_name = id->id_text;
 			}
-			vis = CurrVis;
 		}
 		close_scope(SC_CHKFORW);
 		if (! df) {

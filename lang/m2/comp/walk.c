@@ -366,7 +366,7 @@ WalkProcedure(procedure)
 	WalkDefList(procscope->sc_def, UseWarnings);
 }
 
-static int
+static
 WalkDef(df)
 	register t_def *df;
 {
@@ -394,7 +394,7 @@ WalkDef(df)
 	}
 }
 
-static int
+static
 MkCalls(df)
 	register t_def *df;
 {
@@ -570,10 +570,8 @@ WalkStat(nd, exit_label)
 					ForLoopVarExpr(nd);
 					C_stl(tmp2);
 				}
-			}
-			WalkNode(right, exit_label);
-			nd->nd_def->df_flags &= ~D_FORLOOP;
-			if (good_forvar) {
+				WalkNode(right, exit_label);
+				nd->nd_def->df_flags &= ~D_FORLOOP;
 				if (tmp2 != 0) {
 					label x = ++text_label;
 					C_lol(tmp2);
@@ -597,6 +595,10 @@ WalkStat(nd, exit_label)
 					RangeCheck(nd->nd_type, bstp);
 					CodeDStore(nd);
 				}
+			}
+			else {
+				WalkNode(right, exit_label);
+				nd->nd_def->df_flags &= ~D_FORLOOP;
 			}
 			C_bra(l1);
 			def_ilb(l2);
@@ -830,38 +832,36 @@ DoAssign(left, right)
 	free_desig(dsr);
 }
 
-static int
+static
 RegisterMessage(df)
 	register t_def *df;
 {
 	register t_type *tp;
-	arith sz;
-	int regtype;
 
 	if (df->df_kind == D_VARIABLE) {
 		if ( !(df->df_flags & D_NOREG)) {
 			/* Examine type and size
 			*/
-			regtype = -1;
 			tp = BaseType(df->df_type);
 			if ((df->df_flags & D_VARPAR) ||
 			    (tp->tp_fund&(T_POINTER|T_HIDDEN|T_EQUAL))) {
-				sz = pointer_size;
-				regtype = reg_pointer;
+				C_ms_reg(df->var_off,
+					 pointer_size,
+					 reg_pointer,
+					 0);
 			}
 			else if (tp->tp_fund & T_NUMERIC) {
-				sz = tp->tp_size;
-				regtype = tp->tp_fund == T_REAL ?
-					    reg_float : reg_any;
-			}
-			if (regtype >= 0) {
-				C_ms_reg(df->var_off, sz, regtype, 0);
+				C_ms_reg(df->var_off,
+					 tp->tp_size,
+					 tp->tp_fund == T_REAL ?
+					    reg_float : reg_any,
+					 0);
 			}
 		}
 	}
 }
 
-static int
+static
 UseWarnings(df)
 	register t_def *df;
 {
