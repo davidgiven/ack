@@ -1,4 +1,4 @@
-ed - Lpars.h <<'+'
+ed -s Lpars.h <<'+'
 1d
 1,$s/# *define //
 1,$s/ ...$//
