@@ -25,8 +25,7 @@ selector :
 ExpList :
 	expression
 	[
-		','
-		expression
+		',' expression
 	]*
 ;
 
@@ -43,18 +42,23 @@ expression :
 		/* relation */
 		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
 		SimpleExpression
-	]?
+	|
+		/* empty */
+	]
 ;
 
 SimpleExpression :
 	[
-		[ '+' | '-' ]
-	]?
+		'+' 
+	|
+		'-'
+	|
+		/* empty */
+	]
 	term
 	[
 		/* AddOperator */
-		[ '+' | '-' | OR ]
-		term
+		[ '+' | '-' | OR ] term
 	]*
 ;
 
@@ -62,8 +66,7 @@ term :
 	factor
 	[
 		/* MulOperator */
-		[ '*' | '/' | DIV | MOD | AND ]
-		factor
+		[ '*' | '/' | DIV | MOD | AND ] factor
 	]*
 ;
 
@@ -73,15 +76,16 @@ factor :
 		designator_tail?
 		[
 			ActualParameters
-		]?
+		|
+			/* empty */
+		]
 	|
 		bare_set
 	]
 |
 	bare_set
 | %default
-	[
-		%default
+	[ %default
 		INTEGER
 	|
 		REAL
@@ -101,7 +105,9 @@ bare_set :
 		[
 			',' element
 		]*
-	]?
+	|
+		/* empty */
+	]
 	'}'
 ;
 
@@ -112,20 +118,20 @@ ActualParameters :
 element :
 	expression
 	[
-		UPTO
-		expression
-	]?
+		UPTO expression
+	|
+		/* empty */
+	]
 ;
 
 designator :
-	qualident
-	designator_tail?
+	qualident designator_tail?
 ;
 
 designator_tail :
 	visible_designator_tail
 	[ %persistent
-		%default
+	    %default
 		selector
 	|
 		visible_designator_tail
@@ -133,7 +139,6 @@ designator_tail :
 ;
 
 visible_designator_tail :
-[
 	'['
 		expression
 		[
@@ -142,5 +147,4 @@ visible_designator_tail :
 	']'
 |
 	'^'
-]
 ;

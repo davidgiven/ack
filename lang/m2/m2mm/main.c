@@ -117,13 +117,13 @@ Add(parglist, f, d, copy)
 	char *f, *d;
 	struct file_list **parglist;
 {
-	register struct file_list *a = *parglist, *b = 0;
+	register struct file_list *a, *b = 0;
 
 	if (f == 0) return;
 
-	while (a && strcmp(a->a_filename, f) != 0) {
+	f_walk(*parglist, a) {
+		if (strcmp(f_filename(a), f) == 0) break;
 		b = a;
-		a = a->a_next;
 	}
 	if (a) return 0;
 	a = new_file_list();
@@ -139,45 +139,55 @@ Add(parglist, f, d, copy)
 	return 1;
 }
 
+int
+openfile(a)
+	register struct file_list *a;
+{
+	char *fn;
+	register struct file_list *p, *prev = 0;
+
+	if (! InsertFile(f_filename(a), DEFPATH, &fn)) {
+		Gerror("Could not find %s", f_filename(a));
+		f_walk(arglist, p) {
+			if (p == a) {
+				if (! prev) arglist = p->a_next;
+				else prev->a_next = a->a_next;
+				break;
+			}
+			prev = p;
+		}
+		return 0;
+	}
+	FileName = fn;
+	LineNumber = 1;
+	a->a_dir = WorkingDir = getwdir(FileName);
+	return 1;
+}
+
 ProcessArgs()
 {
-	register struct file_list *a = arglist;
-	char *fn;
+	register struct file_list *a;
 
-	while (a) {
-		register char *p = strrindex(a->a_filename, '.');
+	f_walk(arglist, a) {
+		register char *p = strrindex(f_filename(a), '.');
 
 		CurrentArg = a;
-		DEFPATH[0] = a->a_dir;
+		DEFPATH[0] = f_dir(a);
 		if ( p && strcmp(p, ".def") == 0) {
 			ForeignFlag = 0;
-			if (! InsertFile(a->a_filename, DEFPATH, &fn)) {
-				Gerror("Could not find %s", a->a_filename);
-				a->a_filename = "";
-				a = a->a_next;
+			if (! openfile(a)) {
 				continue;
 			}
-			FileName = fn;
-			a->a_dir = WorkingDir = getwdir(FileName);
 			DefModule();
 		}
 		else if (p && strcmp(p, ".mod") == 0) {
-			if (! InsertFile(a->a_filename, DEFPATH, &fn)) {
-				Gerror("Could not find %s", a->a_filename);
-				*p = 0;
-				a->a_filename = Salloc(a->a_filename,
-							strlen(a->a_filename) + 
-							(unsigned)11);
-				strcat(a->a_filename, ".$(SUFFIX)");
-				a = a->a_next;
+			if (! openfile(a)) {
+				*p = 0;		/* ??? */
 				continue;
 			}
-			FileName = fn;
-			a->a_dir = WorkingDir = getwdir(FileName);
 			CompUnit();
 		}
-		else fatal("No Modula-2 file: %s", a->a_filename);
-		a = a->a_next;
+		else fatal("No Modula-2 file: %s", f_filename(a));
 	}
 }
 
@@ -207,23 +217,25 @@ AddToList(name, ext)
 
 find_dependencies()
 {
-	register struct file_list *arg = arglist;
+	register struct file_list *arg;
 
 	print("\nall:\t");
-	while (arg) {
-		char *dotspot = strrindex(arg->a_filename, '.');
+	f_walk(arglist, arg) {
+		char *fn = f_filename(arg);
+		char *dotspot = strrindex(fn, '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = arg->a_idf;
+			register struct idf *id = f_idf(arg);
 
 			if (id) {
 				if (id->id_type == PROGRAM) {
-					print("%s ", id->id_text);
+					*dotspot = 0;
+					print("%s ", fn);
+					*dotspot = '.';
 				}
 				file_dep(id);
 			}
 		}
-		arg = arg->a_next;
 	}
 	print("\n\n");
 }
@@ -243,11 +255,11 @@ file_dep(id)
 			register struct file_list *p;
 
 			file_dep(iid);
-			for (p = iid->id_ddependson; p; p = p->a_next) {
-				Add(&(id->id_ddependson), p->a_filename,
-				    p->a_dir, 0);
-				Add(&(id->id_mdependson), p->a_filename,
-				    p->a_dir, 0);
+			f_walk(iid->id_ddependson, p) {
+				Add(&(id->id_ddependson), f_filename(p),
+				    f_dir(p), 0);
+				Add(&(id->id_mdependson), f_filename(p),
+				    f_dir(p), 0);
 			}
 		}
 	}
@@ -258,9 +270,9 @@ file_dep(id)
 			register struct file_list *p;
 
 			file_dep(iid);
-			for (p = iid->id_ddependson; p; p = p->a_next) {
-				Add(&(id->id_mdependson), p->a_filename,
-				    p->a_dir, 0);
+			f_walk(iid->id_ddependson, p) {
+				Add(&(id->id_mdependson), f_filename(p),
+				    f_dir(p), 0);
 			}
 		}
 	}
@@ -271,18 +283,18 @@ object(arg)
 	register struct file_list *arg;
 {
 	static char buf[512];
-	char *dotp = strrindex(arg->a_filename, '.');
+	char *dotp = strrindex(f_filename(arg), '.');
 
 	buf[0] = 0;
 /*
-	if (strcmp(arg->a_dir, ".") != 0) {
-		strcpy(buf, arg->a_dir);
+	if (strcmp(f_dir(arg), ".") != 0) {
+		strcpy(buf, f_dir(arg));
 		strcat(buf, "/");
 	}
 */
-	*dotp = 0;
-	strcat(buf, arg->a_filename);
-	*dotp = '.';
+	if (dotp) *dotp = 0;
+	strcat(buf, f_filename(arg));
+	if (dotp) *dotp = '.';
 	strcat(buf, ".$(SUFFIX)");
 	return buf;
 }
@@ -290,21 +302,21 @@ object(arg)
 pr_arg(a)
 	register struct file_list *a;
 {
-	if (strcmp(a->a_dir, ".") == 0) {
-		print(a->a_filename);
+	if (strcmp(f_dir(a), ".") == 0) {
+		print(f_filename(a));
 	}
-	else	print("%s/%s", a->a_dir, a->a_filename);
+	else	print("%s/%s", f_dir(a), f_filename(a));
 }
 
 print_dep()
 {
-	register struct file_list *arg = arglist;
+	register struct file_list *arg;
 
-	while (arg) {
-		char *dotspot = strrindex(arg->a_filename, '.');
+	f_walk(arglist, arg) {
+		char *dotspot = strrindex(f_filename(arg), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = arg->a_idf;
+			register struct idf *id = f_idf(arg);
 
 			if (id) {
 				char *obj = object(arg);
@@ -312,39 +324,44 @@ print_dep()
 
 				print("%s: \\\n\t", obj);
 				pr_arg(arg);
-				for (a = id->id_mdependson; a; a = a->a_next) {
-					if (*(a->a_filename)) {
+				f_walk(id->id_mdependson, a) {
+					if (*(f_filename(a))) /* ??? */ {
 						print(" \\\n\t");
 						pr_arg(a);
 					}
 				}
-				print("\n\t$(MOD) -c $(M2FLAGS) $(IFLAGS) ");
+				print("\n\t$(MOD) -c.$(SUFFIX) $(M2FLAGS) $(IFLAGS) ");
 				pr_arg(arg);
 				print("\n");
 			}
 		}
-	    	arg = arg->a_next;
 	}
 }
 
-prog_dep(id)
+prog_dep(id, a)
 	register struct idf *id;
+	struct file_list *a;
 {
 	register struct lnk *m;
 	register struct file_list *p;
 
 	id->id_mdependson = 0;
 	id->id_def = 0;
-	if (strlen(id->id_text) >= 10) id->id_text[10] = 0;
-	Add(&(id->id_mdependson), id->id_text, id->id_dir, 0);
+	if (id->id_type == PROGRAM) {
+		Add(&(id->id_mdependson), f_filename(a), f_dir(a), 0);
+	}
+	else {
+		if (strlen(id->id_text) >= 10) id->id_text[10] = 0;
+		Add(&(id->id_mdependson), id->id_text, id->id_dir, 0);
+	}
 	for (m = id->id_modimports; m; m = m->lnk_next) {
 		register struct idf *iid = m->lnk_imp;
 
 		if (Add(&(id->id_mdependson), iid->id_text, iid->id_dir, 0)) {
 			if (iid->id_def) prog_dep(iid);
-			for (p = iid->id_mdependson; p; p = p->a_next) {
-				Add(&(id->id_mdependson), p->a_filename,
-				    p->a_dir, 0);
+			f_walk(iid->id_mdependson, p) {
+				Add(&(id->id_mdependson), f_filename(p),
+				    f_dir(p), 0);
 			}
 		}
 	}
@@ -355,12 +372,12 @@ module_in_arglist(n)
 {
 	register struct file_list *a;
 
-	for (a = arglist; a; a = a->a_next) {
-		char *dotp = strrindex(a->a_filename, '.');
+	f_walk(arglist, a) {
+		char *dotp = strrindex(f_filename(a), '.');
 
 		if (dotp && strcmp(dotp, ".mod") == 0) {
 			*dotp = 0;
-			if (strcmp(a->a_filename, n) == 0) {
+			if (strcmp(f_filename(a), n) == 0) {
 				*dotp = '.';
 				return 1;
 			}
@@ -370,38 +387,48 @@ module_in_arglist(n)
 	return 0;
 }
 
-pr_prog_dep(id)
+pr_prog_dep(id, a)
 	register struct idf *id;
+	struct file_list *a;
 {
 	register struct file_list *p;
 
 	print("\nOBS_%s =", id->id_text);
-	for (p = id->id_mdependson; p; p = p->a_next) {
-		if (module_in_arglist(p->a_filename) || ! p->a_dir) {
-			print(" \\\n\t%s.$(SUFFIX)", p->a_filename);
+	f_walk(id->id_mdependson, p) {
+		if (module_in_arglist(f_filename(p)) || ! f_dir(p)) {
+			print(" \\\n\t%s", object(p));
 		}
-		else if (! is_library_dir(p->a_dir))  {
-			print(" \\\n\t%s/%s.$(SUFFIX)", p->a_dir, p->a_filename);
+	}
+	print("\n\nOBS2_%s =", id->id_text);
+	f_walk(id->id_mdependson, p) {
+		if (module_in_arglist(f_filename(p)) || ! f_dir(p)) {
+			/* nothing */
+		}
+		else if (! is_library_dir(f_dir(p)))  {
+			print(" \\\n\t%s/%s", f_dir(p), object(p));
 		}
 	}
 	print("\n\n");
-	print("%s:\t$(OBS_%s)\n", id->id_text, id->id_text);
-	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s)\n", id->id_text, id->id_text);
+	print("o_files:\t$(OBS_%s)\n\n", id->id_text);
+	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", id->id_text, id->id_text, id->id_text);
+	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s)\n", id->id_text, id->id_text, id->id_text);
 }
 
 programs()
 {
 	register struct file_list *a;
 
-	for (a = arglist; a; a = a->a_next) {
-		char *dotspot = strrindex(a->a_filename, '.');
+	f_walk(arglist, a) {
+		char *dotspot = strrindex(f_filename(a), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = a->a_idf;
+			register struct idf *id = f_idf(a);
 
 			if (id && id->id_type == PROGRAM) {
-				prog_dep(id);
-				pr_prog_dep(id);
+				prog_dep(id, a);
+				/* *dotspot = 0; */
+				pr_prog_dep(id, a);
+				/* *dotspot = '.'; */
 			}
 		}
 	}

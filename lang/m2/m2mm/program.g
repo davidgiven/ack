@@ -51,19 +51,15 @@ new_lnk()
 %start	DefModule, DefinitionModule;
 
 ModuleDeclaration :
-	MODULE IDENT
-	priority
-	';'
-	import((struct lnk **) 0)*
-	export?
-	block
-	IDENT
+	MODULE IDENT priority ';' import((struct lnk **) 0)* export?
+	block IDENT
 ;
 
 priority:
 	[
 		'[' ConstExpression ']'
 	|
+		/* empty */
 	]
 ;
 
@@ -72,6 +68,7 @@ export :
 	[
 		QUALIFIED
 	|
+		/* empty */
 	]
 	IdentList ';'
 ;

@@ -340,7 +340,11 @@ again:
 				if (is_hex(ch)) {
 					state = Hex;
 				}
-				else	state = End;
+				else {
+					ch = 'D';
+					state = End;
+					PushBack();
+				}
 				break;
 
 			case Hex:

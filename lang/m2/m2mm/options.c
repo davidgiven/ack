@@ -59,15 +59,9 @@ AddInclDir(text)
 	}
 
 	if (++nDEF > mDEF) {
-		char **n = (char **)
-			Malloc((unsigned)((10+mDEF)*sizeof(char *)));
-
-		for (i = 0; i < mDEF; i++) {
-			n[i] = DEFPATH[i];
-		}
-		free((char *) DEFPATH);
-		DEFPATH = n;
 		mDEF += 10;
+		DEFPATH = (char **) Realloc((char *)DEFPATH,
+					(unsigned)(mDEF * sizeof(char *)));
 	}
 
 	i = ndirs++;

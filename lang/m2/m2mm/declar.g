@@ -20,21 +20,27 @@ ProcedureHeading :
 			[
 				';' FPSection
 			]*
-		]?
+		|
+		]
 		')'
-		[	':' qualtype
-		]?
-	]?
+		[
+			':' qualtype
+		|
+			/* empty */
+		]
+	|
+		/* empty */
+	]
 ;
 
 block :
-	[	%persistent
+	[ %persistent
 		declaration
 	]*
-	[	%default
-		BEGIN
-		StatementSequence
+	[ %default
+		BEGIN StatementSequence
 	|
+		/* empty */
 	]
 	END
 ;
@@ -46,10 +52,7 @@ declaration :
 |
 	VAR [ VariableDeclaration ';' ]*
 |
-	ProcedureHeading ';'
-	block
-	IDENT
-	';'
+	ProcedureHeading ';' block IDENT ';'
 |
 	ModuleDeclaration ';'
 ;
@@ -65,12 +68,12 @@ FormalType :
 ;
 
 TypeDeclaration :
-	IDENT
-	'=' type
+	IDENT '=' type
 ;
 
 type :
-	%default SimpleType
+ %default
+	SimpleType
 |
 	ArrayType
 |
@@ -86,7 +89,7 @@ type :
 SimpleType :
 	qualtype
 	[
-		/* nothing */
+		/* empty */
 	|
 		SubrangeType
 		/* The subrange type is given a base type by the
@@ -115,22 +118,19 @@ SubrangeType :
 	   This is not exactly the rule in the new report, but see
 	   the rule for "SimpleType".
 	*/
-	'[' ConstExpression
-	UPTO ConstExpression
-	']'
+	'[' ConstExpression UPTO ConstExpression ']'
 ;
 
 ArrayType :
 	ARRAY SimpleType
 	[
 		',' SimpleType
-	]* OF type
+	]*
+	OF type
 ;
 
 RecordType :
-	RECORD
-	FieldListSequence
-	END
+	RECORD FieldListSequence END
 ;
 
 FieldListSequence :
@@ -141,40 +141,49 @@ FieldListSequence :
 ;
 
 FieldList :
-[
 	IdentList ':' type
 |
 	CASE
 	/* Also accept old fashioned Modula-2 syntax, but give a warning.
 	   Sorry for the complicated code.
 	*/
-	[ qualident
-	  [ ':' qualtype
+	[
+		qualident
+	  	[
+			':' qualtype
 			/* This is correct, in both kinds of Modula-2, if
 		   	   the first qualident is a single identifier.
 			*/
-	  |		/* Old fashioned! the first qualident now represents
+	  	|
+			/* empty */
+			/* Old fashioned! the first qualident now represents
 			   the type
 			*/
-	  ]
-	| ':' qualtype
-	  /* Aha, third edition. Well done! */
+	  	]
+	|
+		':' qualtype
+	  		/* Aha, third edition. Well done! */
 	]
 	OF variant
 	[
-	  '|' variant
+	  	'|' variant
 	]*
-	[ ELSE FieldListSequence
-	]?
+	[
+		ELSE FieldListSequence
+	|
+		/* empty */
+	]
 	END
-]?
+|
+	/* empty */
 ;
 
 variant :
 	[
-		CaseLabelList
-		':' FieldListSequence
-	]?
+		CaseLabelList ':' FieldListSequence
+	|
+		/* empty */
+	]
 			/* Changed rule in new modula-2 */
 ;
 
@@ -188,9 +197,10 @@ CaseLabelList :
 CaseLabels :
 	ConstExpression
 	[
-		UPTO
-		ConstExpression
-	]?
+		UPTO ConstExpression
+	|
+		/* empty */
+	]
 ;
 
 SetType :
@@ -214,6 +224,7 @@ ProcedureType :
 	[
 	  	FormalTypeList
 	|
+		/* empty */
 	]
 ;
 
@@ -224,29 +235,29 @@ FormalTypeList :
 		[
 			',' VarFormalType
 		]*
-	]?
-	')'
-	[ ':' qualtype
 	|
+		/* empty */
 	]
-;
-
-VarFormalType :
-	var
-	FormalType
-;
-
-var :
-	[
-		VAR
+	')'
+	[	
+		':' qualtype
 	|
 		/* empty */
 	]
 ;
 
+VarFormalType :
+	var FormalType
+;
+
+var :
+	VAR
+|
+	/* empty */
+;
+
 ConstantDeclaration :
-	IDENT
-	'=' ConstExpression
+	IDENT '=' ConstExpression
 ;
 
 VariableDeclaration :
@@ -259,8 +270,9 @@ VariableDeclaration :
 
 IdentAddr :
 	IDENT
-	[	'['
-		ConstExpression
-		']'
-	]?
+	[	
+		'[' ConstExpression ']'
+	|
+		/* empty */
+	]
 ;

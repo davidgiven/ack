@@ -20,7 +20,7 @@ is_library_dir(d)
 		"system" definition modules. Return 1 if it is, 0 otherwise.
 	*/
 
-	return strcmp(lib_dir, d) == 0 ? 1 : 0;
+	return strcmp(lib_dir, d) == 0;
 }
 
 init_lib()
