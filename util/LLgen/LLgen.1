@@ -6,10 +6,10 @@ LLgen, an extended LL(1) parser generator
 .SH SYNOPSIS
 \fBLLgen\fP
 [
-\fB\-vxjw\fP
+\fB\-vxw\fP
 ]
 [
-\fB\-m\fP\fInum\fP
+\fB\-j\fP[\fInum\fP]
 ]
 [
 \fB\-l\fP\fInum\fP
@@ -89,7 +89,7 @@ symbols and these extended sets are also included in the
 file.
 .IP \fB\-w\fP
 no warnings are given.
-.IP \fB\-j\fP
+.IP \fB\-j\fP[\fInum\fP]
 when this flag is given, \fILLgen\fP will generate dense switches,
 so that the compiler can generate a jump table for it. This will only be
 done for switches that have density between
@@ -98,9 +98,11 @@ Usually, compilers generate a jumptable when the density of the switch
 is above a certain threshold. If you want jump tables in more cases,
 set \fIhigh_percentage\fP to this threshold, and \fIlow_percentage\fP to
 a minimum threshold. There is a time-space trade-off here.
-.IP \fB\-m\fP\fInum\fP
-minimum number of cases in a switch for the \fB\-j\fP option to be
-effective. The default value is 8.
+.I num
+is the minimum number of cases in a switch for the \fB\-j\fP option to be
+effective. The default value (if
+.I num
+is not given) is 8.
 .IP \fB\-l\fP\fInum\fP
 The \fIlow_percentage\fP, as described above. Default value is 10.
 .IP \fB\-h\fP\fInum\fP

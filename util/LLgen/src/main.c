@@ -55,7 +55,9 @@ main(argc,argv) register string	argv[]; {
 			  case 'j':
 			  case 'J':
 				jmptable_option = 1;
-				continue;
+				if (*++arg)
+					min_cases_for_jmptable = atoi(arg);
+				break;
 			  case 'w':
 			  case 'W':
 				wflag = 1;
@@ -71,10 +73,6 @@ main(argc,argv) register string	argv[]; {
 			  case 'h':
 			  case 'H':
 				high_percentage = atoi(++arg);
-				break;
-			  case 'm':
-			  case 'M':
-				min_cases_for_jmptable = atoi(++arg);
 				break;
 # ifndef NDEBUG
 			  case 'd':
