@@ -527,8 +527,12 @@ char *strarg(t) {
 		strarg(offtyp);
 		for (p = argstr; *p; p++)
 			;
-		if (argval >= 0)
+		if ((full) argval >= 0)
 			*p++ = '+';
+		else {
+			*p++ = '-';
+			argval = - (full) argval;
+		}
 		sprintf(p,off_fmt,(full)argval);
 		break;
 	case sp_cend:
