@@ -89,7 +89,7 @@ depend:	Cfiles
 
 m2mm:	$(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LIBDIR)/libinput.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o m2mm
-	size m2mm
+	-size m2mm
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h
