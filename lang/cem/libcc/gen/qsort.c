@@ -9,7 +9,10 @@ qsort(base, nel, width, compar)
 	int (*compar)();
 {
 	qcompar = compar;
-	qsort1(base, base + (nel - 1) * width, width);
+	if (sizeof(int) < sizeof(char *)) {
+		qsort1(base, base + (nel - 1) * (long) width, width);
+	}
+	else	qsort1(base, base + (nel - 1) * width, width);
 }
 
 static
@@ -25,7 +28,12 @@ qsort1(a1, a2, width)
 		if (a2 <= a1) return;
 		left = a1;
 		right = a2;
-		lefteq = righteq = a1 + width * (((a2-a1)+width)/(2*width));
+		if (sizeof(int) < sizeof(char *)) {
+			lefteq = righteq = a1 + width *
+					((((long)a2-(long)a1)+width)/(2*width));
+		}
+		else 	lefteq = righteq = a1 + width *
+					(((a2-a1)+width)/(2*width));
 		/*
 		   Pick an element in the middle of the array.
 		   We will collect the equals around it.
