@@ -33,10 +33,13 @@ ch7sel(expp, oper, idf)
 	/*	The selector idf is applied to *expp; oper may be '.' or
 		ARROW.
 	*/
-	register struct expr *exp = *expp;
-	register struct type *tp = exp->ex_type;
+	register struct expr *exp;
+	register struct type *tp;
 	register struct sdef *sd;
 
+	any2opnd(expp, oper);
+	exp = *expp;
+	tp = exp->ex_type;
 	if (oper == ARROW)	{
 		if (tp->tp_fund == POINTER)	/* normal case */
 			tp = tp->tp_up;
@@ -44,11 +47,8 @@ ch7sel(expp, oper, idf)
 				"char c; c->selector"
 			*/
 			switch (tp->tp_fund)	{
-			case CHAR:
-			case SHORT:
 			case INT:
 			case LONG:
-			case ENUM:
 				/* Allowed by RM 14.1 */
 				ch7cast(expp, CAST, pa_type);
 				sd = idf2sdef(idf, tp);
@@ -76,11 +76,8 @@ ch7sel(expp, oper, idf)
 	case STRUCT:
 	case UNION:
 		break;
-	case CHAR:
-	case SHORT:
 	case INT:
 	case LONG:
-	case ENUM:
 		/* warning will be given by idf2sdef() */
 		break;
 	default:
