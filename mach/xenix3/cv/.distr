@@ -1,2 +1,3 @@
 cv.c
+chstack.c
 Makefile

@@ -97,10 +97,9 @@ int	output;
 
 char *program ;
 
-char flag ;
-
 int sep_id;
 
+extern long lseek();
 #define TEXTSG	0
 #define ROMSG	1
 #define DATASG	2
@@ -114,12 +113,6 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
-	long			magic ;
-	long			textsize ;
-	long			datasize ;
-	long			bsssize;
-	long			symstart;
 	long			stacksize = 0x1000;
 
 	output = 1;
@@ -373,7 +366,7 @@ emit_symtab()
 	long off = OFF_CHAR(outhead);
 	register char *p;
 
-	chars = malloc(outhead.oh_nchar);
+	chars = malloc((unsigned)(outhead.oh_nchar));
 	if (! chars) return 0;
 	names = (struct outname *)
 		malloc(outhead.oh_nname * sizeof(struct outname));
@@ -381,7 +374,7 @@ emit_symtab()
 		free(chars);
 		return 0;
 	}
-	xptr = malloc(outhead.oh_nchar + 9 * outhead.oh_nname);
+	xptr = malloc((unsigned)(outhead.oh_nchar) + 9 * outhead.oh_nname);
 	if (! xptr) {
 		free(chars);
 		free((char *) names);
@@ -427,7 +420,7 @@ emit_symtab()
 				break;
 			default:
 				fprintf(stderr,"warning: unknown s_type: %d\n",
-					names[i].on_type & S_TYP);
+					(int)(names[i].on_type) & S_TYP);
 			}
 		}
 		if (names[i].on_type & S_EXT) xnm.s_type |= 0x20;
