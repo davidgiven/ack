@@ -9,7 +9,7 @@
   Version:	$Header$
 */
 
-#if EM_WSIZE==EM_PSIZE
+#if _EM_WSIZE==_EM_PSIZE
 typedef unsigned pcnt;
 #else
 typedef unsigned long pcnt;
