@@ -101,7 +101,7 @@ mktime(register struct tm *timep)
 	timep->tm_yday = yday;
 	timep->tm_wday = (day + 4) % 7;		/* day 0 was thursday (4) */
 
-	seconds = ((timep->tm_hour * 60) + timep->tm_min) * 60 + timep->tm_sec;
+	seconds = ((timep->tm_hour * 60L) + timep->tm_min) * 60L + timep->tm_sec;
 
 	if ((TIME_MAX - seconds) / SECS_DAY < day) overflow++;
 	seconds += day * SECS_DAY;
