@@ -1,4 +1,5 @@
 #include "decl.h"
+#include <system.h>
 
 /* This file contains two arrays with information concerning the C_INSTR tokens:
  *	t_C_info C_info[];	- Describes the arguments of EM-instructions
@@ -414,9 +415,9 @@ struct { char *name; int class, segment;}
 				{ "C_zrf", W_ARG, SEGTXT},
 				{ "C_zrf_narg", NO_ARGS, SEGTXT},
 				{ "C_zrl", L_ARG, SEGTXT},
-				{ "jump", _STRING, SEGTXT},
-				{ "locals", N_ARG, SEGTXT},
-				{ "prolog", NO_ARGS, SEGTXT}
+				{ "C_jump", _STRING, SEGTXT},
+				{ "C_locals", N_ARG, SEGTXT},
+				{ "C_prolog", NO_ARGS, SEGTXT}
 			};
 
 set_C_instr_info( instr)
@@ -434,7 +435,7 @@ char *instr;
 		if ( rel == 0 )
 			break;
 		else if ( high == low) {
-			out( "ERROR : can't find >>%s<< !!\n", instr);
+			fprint(STDERR, "ERROR : can't find >>%s<< !!\n", instr);
 			abort();
 		}
 		else if ( rel < 0)
