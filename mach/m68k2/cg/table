@@ -2686,7 +2686,6 @@ blm $1 > 12 |	ADDSCR ADDSCR |	remove(MEM_ALL)
 				erase(%[a])
 				erase(%[1])
 				erase(%[2])	| | |
-/* Wait for restriction nregneeded<2 to be removed
 bls $1 == 2 |	DATASCR ADDSCR ADDSCR |
 				remove(MEM_ALL)
 				"asr #1,%[1]"
@@ -2699,7 +2698,7 @@ bls $1 == 2 |	DATASCR ADDSCR ADDSCR |
 				erase(%[1])
 				erase(%[2])
 				erase(%[3])	| | |
-*/
+#ifdef OLD
 bls $1 == 2 | STACK |
 				allocate(ADDREG,ADDREG,DATAREG)
 				"move.w (sp)+,%[c]"
@@ -2712,6 +2711,19 @@ bls $1 == 2 | STACK |
 				"move.w (%[a])+,(%[b])+"
 				"dbf %[c],1b"
 				"2:"	| | |
+#endif
+bls $1 == 4 |	DATASCR4 ADDSCR ADDSCR |
+				remove(MEM_ALL)
+				"asr_l #1,%[1]"
+				"sub.l #1,%[1]"
+				"blt 2f"
+				"1:"
+				"move.w (%[3])+,(%[2])+"
+				"dbf %[1],1b"
+				"2:"
+				erase(%[1])
+				erase(%[2])
+				erase(%[3])	| | |
 
 /* For csa and csb we just jump to a piece of code that computes
  * the jump-address and jumps to this address
