@@ -1,5 +1,5 @@
 echo "/* this part is generated from $1 at: " `date` "*/"
-ed - $1 <<'EOI' 
+ed -s $1 <<'EOI' 
 1,/^$/d
 1,/^$/d
 1,$s/^\(...\)	\(.\).*/\1:\2/
