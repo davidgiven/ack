@@ -13,6 +13,10 @@
 #include <alloc.h>
 #include "main.h"
 
+#ifdef OTHER_HOME
+#undef EM_DIR
+#define EM_DIR OTHER_HOME
+#endif
 static char lib_dir[128] = EM_DIR;
 
 static struct liblist {
@@ -41,7 +45,8 @@ init_lib()
 {
 	extern char *strcat();
 
-	strcat(lib_dir, "/lib/m2");
+	strcat(lib_dir, "/");
+	strcat(lib_dir, DEF_DIR);
 	AddLibDir(lib_dir);
 }
 
