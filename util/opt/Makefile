@@ -13,6 +13,7 @@ LDFLAGS=-i
 LINT=lint
 OPR=opr
 PROPTS=
+CPP=$(EMHOME)/lib/cpp
 # LEXLIB is implementation dependent, try -ll or -lln first
 LEXLIB=-ll
 
@@ -43,7 +44,7 @@ install:all
 	cp em_opt.6 $(EMHOME)/man/em_opt.6
 
 pattern.c:      patterns mktab
-	$(EMHOME)/lib/cpp patterns | mktab > pattern.c
+	$(CPP) patterns | mktab > pattern.c
 
 mktab:  mktab.o $(LIBS)
 	$(CC) $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
