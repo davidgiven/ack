@@ -42,6 +42,7 @@ expression.g
 faulty.h
 field.c
 field.str
+file_info.h
 idf.c
 idf.str
 init.c
