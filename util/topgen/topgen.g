@@ -200,22 +200,22 @@ instruction_list(int *n;) :
 ;
 
 instruction(int opt;)
-	{ int count;} :
+	{ int count = 0;} :
 	opcode(opt)
 			{   if (strcmp(buf,"ANY") != 0) {
-			        fprintf(genc,"\t{\"%s\"",buf);
+			        fprintf(genc,"\t{\"%s\", {",buf);
 			    }
-			    else fputs("\t{(char *) 0",genc);
+			    else fputs("\t{(char *) 0, {",genc);
 			    count = 0;
 			}
 	[
-	    operand
+	    operand(' ')
 	    		{   count = 1;}
 	    [
 	    	OPERAND_SEPARATOR
 			{   count++;}
 	    	SPACE*
-	    	operand
+	    	operand(',')
 	    ]*
 	    		{   if (count > maxoperand) {
 			        error("Too many operands");
@@ -223,8 +223,9 @@ instruction(int opt;)
 			}
 	]?
 			{   while (count++ < maxoperand) {
-				fputs(",{\"\",-1,\"\"}",genc);
+				fprintf(genc,"%c{\"\",-1,\"\"}",count == 1 ? ' ' : ',');
 			    }
+			    putc('}',genc);
 			    putc('}',genc);
 			}
 ;
@@ -244,9 +245,9 @@ opcode(int opt;)
 			}
 ;
 
-operand
+operand(int c;)
 	{ register struct symtab *p = 0;} :
-			{   fputs(",{\"",genc);}
+			{   fprintf(genc, "%c{\"", c);}
 	[
 	    identifier
 	    		{   if (!p) {
