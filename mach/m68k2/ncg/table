@@ -1286,17 +1286,17 @@ with conreg4-bconst
 #endif
 
 pat lil loi adi lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("add.l")
+					call lilixxlili("add.l")
 pat lil loi adu lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("add.l")
+					call lilixxlili("add.l")
 pat lil loi ads lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("add.l")
+					call lilixxlili("add.l")
 pat lil loi and lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("and.l")
+					call lilixxlili("and.l")
 pat lil loi ior lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("or.l")
+					call lilixxlili("or.l")
 pat lil loi xor lil sti $1==$4 && $2==4 && $5==4 && $3==4 && inreg($1)==reg_pointer
-					call lilfxxlilf("eor.l")
+					call lilixxlili("eor.l")
 
 proc leixxxsei example loe loi and loe sti
 with conreg4-bconst
