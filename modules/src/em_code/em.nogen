@@ -1,106 +1,83 @@
-% Definition of EM procedural interface: hand-written definitions
+/* Definition of EM procedural interface: hand-written definitions
 
-% C_open	| char *:filename	| <hand-written>
-% C_busy	|	| <hand-written>
-% C_close	|	| <hand-written>
-% C_magic	|	| <hand-written>
+  C_open	| char *:filename	| <hand-written>
+  C_busy	|	| <hand-written>
+  C_close	|	| <hand-written>
+  C_magic	|	| <hand-written>
+*/
 
-C_df_dlb	| label:l	| DFDLB(l); NL()
-C_df_dnam	| char *:s	| DFDNAM(s); NL()
-C_df_ilb	| label:l	| DFILB(l); NL()
+#define C_df_dlb(l)	CC_dfdlb(l)
+#define C_df_dnam(s)	CC_dfdnam(s)
+#define C_df_ilb(l)	CC_dfilb(l)
 
-C_pro		| char *:s arith:l	|
-	PS(ps_pro); PNAM(s); COMMA(); CST(l); NL()
-C_pro_narg	| char *:s		|
-	PS(ps_pro); PNAM(s); COMMA(); CCEND(); NL()
-C_end		| arith:l		| PS(ps_end); CST(l); NL()
-C_end_narg	|			| PS(ps_end); CCEND(); NL()
+#define C_pro(s,l)	CC_pro(s, l)
+#define C_pro_narg(s)	CC_pronarg(s)
+#define C_end(l)	CC_end(l)
+#define C_end_narg()	CC_endnarg()
 
-C_exa_dnam	| char *:s	| PS(ps_exa); DNAM(s); NL()
-C_exa_dlb	| label:l	| PS(ps_exa); DLB(l); NL()
-C_exp		| char *:s	| PS(ps_exp); PNAM(s); NL()
-C_ina_dnam	| char *:s	| PS(ps_ina); DNAM(s); NL()
-C_ina_dlb	| label:l	| PS(ps_ina); DLB(l); NL()
-C_inp		| char *:s	| PS(ps_inp); PNAM(s); NL()
+#define C_exa_dnam(s)	CC_psdnam(ps_exa, s)
+#define C_exa_dlb(l)	CC_psdlb(ps_exa, l)
+#define C_ina_dnam(s)	CC_psdnam(ps_ina, s)
+#define C_ina_dlb(l)	CC_psdlb(ps_ina, l)
+#define C_exp(s)	CC_pspnam(ps_exp, s)
+#define C_inp(s)	CC_pspnam(ps_inp, s)
 
-C_bss_cst	| arith:n arith:w int:i	|
-	PS(ps_bss); CST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
-C_bss_icon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); CST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
-C_bss_ucon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); CST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
-C_bss_fcon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); CST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
-C_bss_dnam	| arith:n char *:s arith:offs int:i	|
-	PS(ps_bss); CST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
-C_bss_dlb	| arith:n label:l arith:offs int:i	|
-	PS(ps_bss); CST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
-C_bss_ilb	| arith:n label:l int:i			|
-	PS(ps_bss); CST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
-C_bss_pnam	| arith:n char *:s int:i		|
-	PS(ps_bss); CST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
+#define C_bss_cst(n,w,i)	CC_bhcst(ps_bss, n, w, i)
+#define C_hol_cst(n,w,i)	CC_bhcst(ps_hol, n, w, i)
+#define C_bss_icon(n,s,sz,i)	CC_bhicon(ps_bss,n,s,sz,i)
+#define C_hol_icon(n,s,sz,i)	CC_bhicon(ps_hol,n,s,sz,i)
+#define C_bss_ucon(n,s,sz,i)	CC_bhucon(ps_bss,n,s,sz,i)
+#define C_hol_ucon(n,s,sz,i)	CC_bhucon(ps_hol,n,s,sz,i)
+#define C_bss_fcon(n,s,sz,i)	CC_bhfcon(ps_bss,n,s,sz,i)
+#define C_hol_fcon(n,s,sz,i)	CC_bhfcon(ps_hol,n,s,sz,i)
+#define C_bss_dnam(n,s,off,i)	CC_bhdnam(ps_bss,n,s,off,i)
+#define C_hol_dnam(n,s,off,i)	CC_bhdnam(ps_hol,n,s,off,i)
+#define C_bss_dlb(n,l,off,i)	CC_bhdlb(ps_bss,n,l,off,i)
+#define C_hol_dlb(n,l,off,i)	CC_bhdlb(ps_hol,n,l,off,i)
+#define C_bss_ilb(n,l,i)	CC_bhilb(ps_bss,n,l,i)
+#define C_hol_ilb(n,l,i)	CC_bhilb(ps_hol,n,l,i)
+#define C_bss_pnam(n,s,i)	CC_bhpnam(ps_bss,n,s,i)
+#define C_hol_pnam(n,s,i)	CC_bhpnam(ps_hol,n,s,i)
 
-C_hol_cst	| arith:n arith:w int:i	|
-	PS(ps_hol); CST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
-C_hol_icon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); CST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
-C_hol_ucon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); CST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
-C_hol_fcon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); CST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
-C_hol_dnam	| arith:n char *:s arith:offs int:i	|
-	PS(ps_hol); CST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
-C_hol_dlb	| arith:n label:l arith:offs int:i	|
-	PS(ps_hol); CST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
-C_hol_ilb	| arith:n label:l int:i			|
-	PS(ps_hol); CST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
-C_hol_pnam	| arith:n char *:s int:i		|
-	PS(ps_hol); CST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
+#define C_con_cst(v)	CC_crcst(ps_con,v)
+#define C_con_icon(v,s)	CC_cricon(ps_con,v,s)
+#define C_con_ucon(v,s)	CC_crucon(ps_con,v,s)
+#define C_con_fcon(v,s)	CC_crfcon(ps_con,v,s)
+#define C_con_scon(v,s)	CC_crscon(ps_con,v,s)
+#define C_con_dnam(v,s)	CC_crdnam(ps_con,v,s)
+#define C_con_dlb(v,s)	CC_crdlb(ps_con,v,s)
+#define C_con_ilb(v)	CC_crilb(ps_con,v)
+#define C_con_pnam(v)	CC_crpnam(ps_con,v)
 
-C_con_cst	| arith:l		| PS(ps_con); CST(l); CEND(); NL()
-C_con_icon	| char *:val arith:siz	|
-	PS(ps_con); WCON(sp_icon, val, siz); CEND(); NL()
-C_con_ucon	| char *:val arith:siz	|
-	PS(ps_con); WCON(sp_ucon, val, siz); CEND(); NL()
-C_con_fcon	| char *:val arith:siz	|
-	PS(ps_con); WCON(sp_fcon, val, siz); CEND(); NL()
-C_con_scon	| char *:str arith:siz	|
-	PS(ps_con); SCON(str, siz); CEND(); NL()
-C_con_dnam	| char *:str arith:val	|
-	PS(ps_con); NOFF(str, val); CEND(); NL()
-C_con_dlb	| label:l arith:val	|
-	PS(ps_con); DOFF(l, val); CEND(); NL()
-C_con_ilb	| label:l		| PS(ps_con); ILB(l); CEND(); NL()
-C_con_pnam	| char *:str		| PS(ps_con); PNAM(str); CEND(); NL()
+#define C_rom_cst(v)	CC_crcst(ps_rom,v)
+#define C_rom_icon(v,s)	CC_cricon(ps_rom,v,s)
+#define C_rom_ucon(v,s)	CC_crucon(ps_rom,v,s)
+#define C_rom_fcon(v,s)	CC_crfcon(ps_rom,v,s)
+#define C_rom_scon(v,s)	CC_crscon(ps_rom,v,s)
+#define C_rom_dnam(v,s)	CC_crdnam(ps_rom,v,s)
+#define C_rom_dlb(v,s)	CC_crdlb(ps_rom,v,s)
+#define C_rom_ilb(v)	CC_crilb(ps_rom,v)
+#define C_rom_pnam(v)	CC_crpnam(ps_rom,v)
 
-C_rom_cst	| arith:l		| PS(ps_rom); CST(l); CEND(); NL()
-C_rom_icon	| char *:val arith:siz	|
-	PS(ps_rom); WCON(sp_icon, val, siz); CEND(); NL()
-C_rom_ucon	| char *:val arith:siz	|
-	PS(ps_rom); WCON(sp_ucon, val, siz); CEND(); NL()
-C_rom_fcon	| char *:val arith:siz	|
-	PS(ps_rom); WCON(sp_fcon, val, siz); CEND(); NL()
-C_rom_scon	| char *:str arith:siz	|
-	PS(ps_rom); SCON(str, siz); CEND(); NL()
-C_rom_dnam	| char *:str arith:val	|
-	PS(ps_rom); NOFF(str, val); CEND(); NL()
-C_rom_dlb	| label:l arith:val	|
-	PS(ps_rom); DOFF(l, val); CEND(); NL()
-C_rom_ilb	| label:l		| PS(ps_rom); ILB(l); CEND(); NL()
-C_rom_pnam	| char *:str		| PS(ps_rom); PNAM(str); CEND(); NL()
+#define C_cst(l)	CC_cst(l)
+#define C_icon(v,s)	CC_icon(v,s)
+#define C_ucon(v,s)	CC_ucon(v,s)
+#define C_fcon(v,s)	CC_fcon(v,s)
+#define C_scon(v,s)	CC_scon(v,s)
+#define C_dnam(v,s)	CC_dnam(v,s)
+#define C_dlb(v,s)	CC_dlb(v,s)
+#define C_ilb(l)	CC_ilb(l)
+#define C_pnam(s)	CC_pnam(s)
 
-C_cst	| arith:l		| COMMA(); CST(l)
-C_icon	| char *:val arith:siz	| COMMA(); WCON(sp_icon, val, siz)
-C_ucon	| char *:val arith:siz	| COMMA(); WCON(sp_ucon, val, siz)
-C_fcon	| char *:val arith:siz	| COMMA(); WCON(sp_fcon, val, siz)
-C_scon	| char *:str arith:siz	| COMMA(); SCON(str, siz)
-C_dnam	| char *:str arith:val	| COMMA(); NOFF(str, val)
-C_dlb	| label:l arith:val	| COMMA(); DOFF(l, val)
-C_ilb	| label:l		| COMMA(); ILB(l)
-C_pnam	| char *:str		| COMMA(); PNAM(str)
+#define C_mes_begin(ms)	CC_msstart(ms)
+#define C_mes_end()	CC_msend()
 
-C_mes_begin	| int:ms	| PS(ps_mes); CST((arith)ms)
-C_mes_end	|		| CEND(); NL()
+#define C_exc(c1,c2)	CC_exc(c1,c2)
 
-% Yes, there really is a C_exc routine...
-C_exc	| arith:c1 arith:c2	| PS(ps_exc); CST(c1); COMMA(); CST(c2); NL()
+#ifndef ps_rom
+#include <em_pseu.h>
+#endif
+
+#ifndef op_lol
+#include <em_mnem.h>
+#endif

@@ -1,43 +1,52 @@
 EMHOME = ../../..
+ETC = $(EMHOME)/etc
 INSTALL = $(EMHOME)/modules/install
 COMPARE = $(EMHOME)/modules/compare
-CFLAGS = -I$(EMHOME)/h -I$(EMHOME)/modules/h -O
-SRC = failed.c insert.c internerr.c getid.c
+CFLAGS = -I$(EMHOME)/h -I$(EMHOME)/modules/h -I. -O
+AR = ar
+SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
+	crcst.c crdlb.c crdnam.c crfcon.c cricon.c crilb.c crpnam.c crscon.c \
+	crucon.c cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
+	exc.c failed.c fcon.c getid.c icon.c ilb.c insert.c internerr.c io.c \
+	msend.c op.c opcst.c opdlb.c opdnam.c opilb.c opnarg.c oppnam.c pnam.c \
+	pro.c pronarg.c msstart.c psdlb.c psdnam.c pspnam.c scon.c ucon.c \
+	C_out.c
+
 OBS = failed.o insert.o internerr.o getid.o
 
-all:		libeme.a libemk.a em_code.3
+all:		libeme.a libemk.a em_code.3 em_codeEK.h
 		rm -f C_*.c
 
 install:	all
 		$(INSTALL) lib/libeme.a
 		$(INSTALL) lib/libemk.a
 		$(INSTALL) man/em_code.3
+		$(INSTALL) h/em_codeEK.h
 
 compare:	all
 		$(COMPARE) lib/libeme.a
 		$(COMPARE) lib/libemk.a
 		$(COMPARE) man/em_code.3
+		$(COMPARE) h/em_codeEK.h
 
 em_code.3:	em_code.3X
 		-sh -c 'tbl < em_code.3X > em_code.3'
 		-sh -c 'if test -s em_code.3 ; then : ; else cp em_code.3X em_code.3 ; fi '
 
-libeme.a:	make.sh e/em_private.h e/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); export EMHOME; sh make.sh e
+libeme.a:	e/em_private.h e/em.c $(OBS) io.c
+		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ie $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh make.sh e
 		-sh -c 'ranlib libeme.a'
 
-libemk.a:	make.sh k/em_private.h k/em.c $(OBS) io.c
-		EMHOME=$(EMHOME); export EMHOME; sh make.sh k
+libemk.a:	k/em_private.h k/em.c $(OBS) io.c
+		EMHOME=$(EMHOME); cc="$(CC)"; cflags="-c -Ik $(CFLAGS)" ar="$(AR)"; export EMHOME cc ar cflags; sh make.sh k
 		-sh -c 'ranlib libemk.a'
 
-make.sh:	em.gen em.nogen make.fun
-		make.fun em.gen em.nogen | sh
-
-em.gen:		make.em.gen $(EMHOME)/etc/em_table
-		make.em.gen $(EMHOME)/etc/em_table > em.gen
+em_codeEK.h:	make.em.gen $(ETC)/em_table em.nogen
+		make.em.gen $(ETC)/em_table > em_codeEK.h
+		cat em.nogen >> em_codeEK.h
 
 pr:
-		@pr Makefile make.em.gen make.fun em.nogen insert.h $(SRC) e/em_private.h e/em.c k/em_private.h k/em.c
+		@pr Makefile em.nogen make.em.gen make.sh insert.h $(SRC) e/em_private.h e/em.c k/em_private.h k/em.c
 
 opr:
 		make pr | opr
@@ -45,9 +54,7 @@ opr:
 # don't put the next "rm"s all on one line. the argument list then
 # becomes too long for some systems
 clean:
-		rm -f *.o
-		rm -f C_*.c
-		rm -f *.a em_code.3 em.gen make.sh
+		rm -f *.o *.a em_code.3
 
 lintlib:	make.sh
 		lint -I. -I../../h -I../../../h -Ie -Ceme $(SRC) e/*.c

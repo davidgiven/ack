@@ -472,6 +472,9 @@ mechanism, the routine
 .I C_internal_error
 is called. Again, the user can override its default definition by supplying his
 own. Such errors, however, are caused by a programming error of the user.
+.SH REMARKS
+Some of the routines in this module may be implemented as macros. So,
+do not try to take the address of these functions.
 .SH BUGS
 It is not possible to indicate that the argument of
 .B C_con_cst ()
