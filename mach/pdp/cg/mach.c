@@ -63,15 +63,15 @@ con_float() {
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
 	f = atof(str);
-	f = frexp(f, &i);
-	if (f < 0) {
-		f = -f;
-		sign = 1;
-	}
 	if (f == 0) {
 		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
 		fprintf(codefile, ".data2 0, 0\n");
 		return;
+	}
+	f = frexp(f, &i);
+	if (f < 0) {
+		f = -f;
+		sign = 1;
 	}
 	while (f < 0.5) {
 		f += f;
