@@ -13,6 +13,7 @@
 #include	"def.h"
 
 extern char options[];
+extern long full_mask[/*MAXSIZE*/];	/* cstoper.c */
 char *symbol2str();
 
 ch7mon(oper, expp)
@@ -99,13 +100,18 @@ ch7mon(oper, expp)
 			erroneous2int(expp);
 			break;
 		}
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	}
 	case '-':
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
 			arith o1 = (*expp)->VL_VALUE;
-			(*expp)->VL_VALUE = (oper == '-') ? -o1 : ~o1;
+
+			(*expp)->VL_VALUE = (oper == '-') ? -o1 :
+			  ((*expp)->ex_type->tp_unsigned ?
+				(~o1) & full_mask[(*expp)->ex_type->tp_size] :
+				~o1
+			  );
 		}
 		else
 		if (is_fp_cst(*expp))
