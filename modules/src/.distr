@@ -3,6 +3,7 @@ alloc
 assert
 em_code
 em_mes
+flt_arith
 idf
 input
 malloc

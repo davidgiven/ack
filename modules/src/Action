@@ -34,3 +34,6 @@ end
 name "EM-code reading module"
 dir read_em
 end
+name "Floating point arithmetic module"
+dir flt_arith
+end
