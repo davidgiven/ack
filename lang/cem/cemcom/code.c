@@ -559,7 +559,7 @@ code_expr(expr, val, code, tlbl, flbl)
 		C_lin((arith)(expr->ex_line));
 	EVAL(expr, val, code, tlbl, flbl);
 #else	LINT
-	pre_lint_expr(expr, RVAL, code ? USED : IGNORED);
+	lint_expr(expr, code ? USED : IGNORED);
 #endif	LINT
 }
 

@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"interface.h"
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -26,6 +27,10 @@
 
 extern char *symbol2str();
 extern struct type *func_type;
+
+PRIVATE lint_enum_arith();
+PRIVATE lint_conversion();
+PRIVATE int numsize();
 
 lint_new_oper(expr)
 	struct expr *expr;
@@ -210,6 +215,7 @@ lint_new_oper(expr)
 	}
 }
 
+PRIVATE
 lint_enum_arith(l_fund, oper, r_fund)
 	int l_fund, oper, r_fund;
 {
@@ -228,10 +234,11 @@ lint_enum_arith(l_fund, oper, r_fund)
 	&&	l_fund != INT
 	) {
 		warning("%s on %s and enum",
-			symbol2str(oper), symbol2str(r_fund));
+			symbol2str(oper), symbol2str(l_fund));
 	}
 }
 
+PRIVATE
 lint_conversion(from_expr, to_fund)
 	struct expr *from_expr;
 	int to_fund;
@@ -267,7 +274,7 @@ lint_conversion(from_expr, to_fund)
 	}
 }
 
-int
+PRIVATE int
 numsize(fund)
 {
 	switch (fund) {

@@ -126,7 +126,7 @@ LINT = /usr/bin/lint
 LINTFLAGS =
 
 MYLINT = ../lpass2/lint
-MYLINTFLAGS = #-xh
+MYLINTFLAGS = -xh
 
 #EXCLEXCLEXCLEXCL
 
@@ -800,6 +800,7 @@ l_lint.o: def.h
 l_lint.o: expr.h
 l_lint.o: file_info.h
 l_lint.o: idf.h
+l_lint.o: interface.h
 l_lint.o: l_lint.h
 l_lint.o: l_outdef.h
 l_lint.o: l_state.h
@@ -822,6 +823,7 @@ l_states.o: def.h
 l_states.o: expr.h
 l_states.o: file_info.h
 l_states.o: idf.h
+l_states.o: interface.h
 l_states.o: l_brace.h
 l_states.o: l_comment.h
 l_states.o: l_lint.h
@@ -844,6 +846,7 @@ l_misc.o: def.h
 l_misc.o: expr.h
 l_misc.o: file_info.h
 l_misc.o: idf.h
+l_misc.o: interface.h
 l_misc.o: l_state.h
 l_misc.o: label.h
 l_misc.o: level.h
@@ -864,6 +867,7 @@ l_ev_ord.o: def.h
 l_ev_ord.o: expr.h
 l_ev_ord.o: file_info.h
 l_ev_ord.o: idf.h
+l_ev_ord.o: interface.h
 l_ev_ord.o: l_lint.h
 l_ev_ord.o: l_state.h
 l_ev_ord.o: label.h
@@ -879,12 +883,14 @@ l_outdef.o: LLlex.h
 l_outdef.o: Lpars.h
 l_outdef.o: arith.h
 l_outdef.o: assert.h
+l_outdef.o: code.h
 l_outdef.o: debug.h
 l_outdef.o: def.h
 l_outdef.o: expr.h
 l_outdef.o: field.h
 l_outdef.o: file_info.h
 l_outdef.o: idf.h
+l_outdef.o: interface.h
 l_outdef.o: l_class.h
 l_outdef.o: l_comment.h
 l_outdef.o: l_lint.h
@@ -900,6 +906,8 @@ l_outdef.o: stack.h
 l_outdef.o: struct.h
 l_outdef.o: type.h
 l_comment.o: arith.h
+l_comment.o: interface.h
+l_comment.o: l_comment.h
 l_comment.o: l_state.h
 l_comment.o: lint.h
 l_comment.o: spec_arith.h
@@ -991,7 +999,6 @@ ival.o: LLlex.h
 ival.o: Lpars.h
 ival.o: arith.h
 ival.o: assert.h
-ival.o: code.h
 ival.o: debug.h
 ival.o: def.h
 ival.o: estack.h

@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>
+#include	"interface.h"
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
@@ -33,7 +34,18 @@ extern char *bts2str();
 extern char *symbol2str();
 
 int stat_number = 9999;			/* static scope number */
-struct outdef OutDef, OutCall;
+struct outdef OutDef;
+
+PRIVATE struct outdef OutCall;
+
+PRIVATE local_EFDC();
+PRIVATE output_def();
+PRIVATE outargs();
+PRIVATE outarg();
+PRIVATE outargstring();
+PRIVATE outargtype();
+PRIVATE implicit_func_decl();
+PRIVATE fill_arg();
 
 lint_declare_idf(idf, sc)
 	struct idf *idf;
@@ -111,6 +123,7 @@ set_od_valreturned(n)
 	OutDef.od_valreturned = n;
 }
 
+PRIVATE
 local_EFDC(idf)
 	struct idf *idf;
 {
@@ -251,6 +264,7 @@ outcall()
 	output_def(&OutCall);
 }
 
+PRIVATE
 output_def(od)
 	struct outdef *od;
 {
@@ -319,6 +333,7 @@ output_def(od)
 	printf(":%u:%s\n", od->od_line, od->od_file);
 }
 
+PRIVATE
 outargs(arg, n)
 	struct argument *arg;
 {
@@ -341,6 +356,7 @@ outargs(arg, n)
 	}
 }
 
+PRIVATE
 outarg(arg)
 	struct argument *arg;
 {
@@ -379,6 +395,7 @@ outarg(arg)
 	}
 }
 
+PRIVATE
 outargstring(arg)
 	struct argument *arg;
 {
@@ -393,6 +410,7 @@ outargstring(arg)
 	printf("\"%s\"", buff);
 }
 
+PRIVATE
 outargtype(tp)
 	struct type *tp;
 {
@@ -436,6 +454,7 @@ outargtype(tp)
 	}
 }
 
+PRIVATE
 implicit_func_decl(idf, file, line)
 	struct idf *idf;
 	char *file;
@@ -485,6 +504,7 @@ fill_outcall(ex, used)
 	OutCall.od_valused = used;	/* USED, IGNORED or VOIDED */
 }
 
+PRIVATE
 fill_arg(e)
 	struct expr *e;
 {

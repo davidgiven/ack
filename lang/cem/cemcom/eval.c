@@ -453,7 +453,7 @@ EVAL(expr, val, code, true_label, false_label)
 			arith ParSize = (arith)0;
 			label setjmp_label = 0;
 
-			if (left->ex_class == Value && left->VL_CLASS == Name) {
+			if (ISNAME(left)) {
 				if (left->VL_IDF->id_special == SP_SETJMP) {
 					label addr_label = data_label();
 
@@ -480,7 +480,7 @@ EVAL(expr, val, code, true_label, false_label)
 						NO_LABEL, NO_LABEL);
 				ParSize += ATW(ex->ex_type->tp_size);
 			}
-			if (left->ex_class == Value && left->VL_CLASS == Name) {
+			if (ISNAME(left)) {
 				/* e.g., main() { (*((int (*)())0))(); } */
 				C_cal(left->VL_IDF->id_text);
 				if (setjmp_label) {
@@ -913,7 +913,7 @@ load_val(expr, rlval)
 		register struct idf *id = expr->VL_IDF;
 		register struct def *df = id->id_def;
 
-		ASSERT(expr->VL_CLASS == Name);
+		ASSERT(ISNAME(expr));
 		if (df->df_type->tp_fund == FUNCTION) {
 			/*	the previous statement tried to catch a function
 				identifier, which may be cast to a pointer to a

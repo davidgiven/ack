@@ -12,6 +12,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>
+#include	"interface.h"
 #include	"arith.h"
 #include	"l_state.h"
 #include	"l_comment.h"
@@ -24,13 +25,15 @@ extern char loptions[];
 	one token later.
 */
 
-static int notreached;
-static int varargsN = -1;
-static int argsused;
-static int formatN;
-static int formatVAR;
-static char *format;
-static char *prev_format;
+PRIVATE int notreached;
+PRIVATE int varargsN = -1;
+PRIVATE int argsused;
+PRIVATE int formatN;
+PRIVATE int formatVAR;
+PRIVATE char *format;
+PRIVATE char *prev_format;
+
+PRIVATE make_format();
 
 int LINTLIB;				/* file is lint library */
 int s_NOTREACHED;			/* statement not reached */
@@ -71,8 +74,8 @@ lint_comment_function()
 	formatVAR = 0;
 }
 
-static char buf[1000];
-static char *bufpos;			/* next free position in buf */
+PRIVATE char buf[1000];
+PRIVATE char *bufpos;			/* next free position in buf */
 
 lint_start_comment()
 {
@@ -139,6 +142,7 @@ lint_end_comment()
 #define	LETGIT		1
 #define	LETGITSPACE	2
 
+PRIVATE
 make_format(argn, oldf)
 	int argn;
 	char *oldf;

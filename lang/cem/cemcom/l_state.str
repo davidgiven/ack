@@ -66,6 +66,7 @@ struct expr_state {
 	struct idf *es_idf;
 	arith es_offset;
 	int es_used;
+	int es_referred;
 	int es_set;
 };
 

@@ -10,7 +10,9 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"interface.h"
 #include	"assert.h"
+#include	"debug.h"
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -38,15 +40,29 @@ extern int func_notypegiven;
 extern char loptions[];
 
 /* global variables for the lint_stack */
-struct lint_stack_entry stack_bottom;
-struct lint_stack_entry *top_ls = &stack_bottom;
+PRIVATE struct lint_stack_entry stack_bottom;
+PRIVATE struct lint_stack_entry *top_ls = &stack_bottom;
 
 /* global variables for the brace stack */
-int brace_count;
-struct brace brace_bottom;
-struct brace *top_br = &brace_bottom;
+PRIVATE int brace_count;
+PRIVATE struct brace brace_bottom;
+PRIVATE struct brace *top_br = &brace_bottom;
 
-static print_autos();
+PRIVATE end_brace();
+PRIVATE lint_1_local();
+PRIVATE lint_1_global();
+PRIVATE check_autos();
+PRIVATE struct auto_def *copy_st_auto_list();
+PRIVATE free_st_auto_list();
+PRIVATE struct state *copy_state();
+PRIVATE Free_state();
+PRIVATE remove_settings();
+PRIVATE struct auto_def *merge_autos();
+PRIVATE merge_states();
+PRIVATE struct lint_stack_entry *find_wdf(), *find_wdfc(), *find_cs();
+PRIVATE cont_break_merge();
+PRIVATE lint_push();
+PRIVATE lint_pop();
 
 lint_init_stack()
 {
@@ -90,6 +106,7 @@ lint_local_level(stl)
 	end_brace(stl);
 }
 
+PRIVATE
 end_brace(stl)
 	struct stack_level *stl;
 {
@@ -113,6 +130,7 @@ end_brace(stl)
 	free_brace(br);
 }
 
+PRIVATE
 lint_1_local(idf, def)
 	struct idf *idf;
 	struct def *def;
@@ -158,6 +176,7 @@ lint_global_level(stl)
 	}
 }
 
+PRIVATE
 lint_1_global(idf, def)
 	struct idf *idf;
 	struct def *def;
@@ -219,6 +238,7 @@ lint_1_global(idf, def)
 
 change_state(idf, to_state)
 	struct idf *idf;
+	int to_state;			/* SET or USED */
 {
 /* Changes the state of the variable identified by idf in the current state
  * on top of the stack.
@@ -228,10 +248,14 @@ change_state(idf, to_state)
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
 	if (def) {
-		if (to_state == SET)
+		switch (to_state) {
+		case SET:
 			def->df_set = 1;
-		else
+			break;
+		case USED:
 			def->df_used = 1;
+			break;
+		}
 
 		if (def->df_firstbrace == 0) {
 			def->df_firstbrace = brace_count;
@@ -256,20 +280,22 @@ change_state(idf, to_state)
 	if (a == 0)	/* identifier not in list */
 		return;
 
-	if (to_state == SET) {
+	switch (to_state) {
+	case SET:
 		a->ad_maybe_set = 0;
 		a->ad_set = 1;
-		return;
+		break;
+	case USED:
+		if (!a->ad_set) {
+			warning("%s%s uninitialized", idf->id_text,
+				(a->ad_maybe_set ? " possibly" : "")
+			);
+			a->ad_maybe_set = 0;
+			a->ad_set = 1;	/* one warning */
+		}
+		a->ad_used = 1;
+		break;
 	}
-	/* else to_state == USED */
-	if (!a->ad_set) {
-		warning("%s%s uninitialized", idf->id_text,
-			(a->ad_maybe_set ? " possibly" : "")
-		);
-		a->ad_maybe_set = 0;
-		a->ad_set = 1;	/* one warning */
-	}
-	a->ad_used = 1;
 }
 
 extern struct stack_level *local_level;
@@ -301,6 +327,7 @@ add_auto(idf)	/* to current state on top of lint_stack */
 	}
 }
 
+PRIVATE
 check_autos()
 {
 /* Before leaving a block remove the auto_defs of the automatic
@@ -348,7 +375,7 @@ check_args_used()
 	}
 }
 
-struct auto_def *
+PRIVATE struct auto_def *
 copy_st_auto_list(from_al, lvl)
 	struct auto_def *from_al;
 {
@@ -370,6 +397,7 @@ copy_st_auto_list(from_al, lvl)
 	return start;
 }
 
+PRIVATE
 free_st_auto_list(au)
 	register struct auto_def *au;
 {
@@ -382,7 +410,7 @@ free_st_auto_list(au)
 	}
 }
 
-struct state *
+PRIVATE struct state *
 copy_state(from_st, lvl)
 	struct state *from_st;
 {
@@ -397,7 +425,7 @@ copy_state(from_st, lvl)
 	return st;
 }
 
-static
+PRIVATE
 Free_state(stp)
 	struct state **stp;
 {
@@ -408,6 +436,7 @@ Free_state(stp)
 	*stp = 0;
 }
 
+PRIVATE
 remove_settings(state, lvl)
 	struct state *state;
 {
@@ -430,7 +459,7 @@ remove_settings(state, lvl)
 #define	CASE_BREAK	1
 #define	USE_ONLY	2
 
-struct auto_def *
+PRIVATE struct auto_def *
 merge_autos(a1, a2, lvl, mode)
 	struct auto_def *a1, *a2;
 	int mode;
@@ -491,6 +520,7 @@ merge_autos(a1, a2, lvl, mode)
 	return a;
 }
 
+PRIVATE
 merge_states(st1, st2, lvl, mode)
 	struct state *st1, *st2;
 	int mode;
@@ -532,7 +562,7 @@ merge_states(st1, st2, lvl, mode)
  * The letters mean : w: WHILE; d: DO; f: FOR; s: SWITCH; c: CASE.
  */
 
-struct lint_stack_entry *
+PRIVATE struct lint_stack_entry *
 find_wdf()
 {
 	register struct lint_stack_entry *lse = top_ls;
@@ -549,7 +579,7 @@ find_wdf()
 	return 0;
 }
 
-struct lint_stack_entry *
+PRIVATE struct lint_stack_entry *
 find_wdfc()
 {
 	register struct lint_stack_entry *lse = top_ls;
@@ -567,7 +597,7 @@ find_wdfc()
 	return 0;
 }
 
-struct lint_stack_entry *
+PRIVATE struct lint_stack_entry *
 find_cs()
 {
 	register struct lint_stack_entry *lse = top_ls;
@@ -691,6 +721,7 @@ end_do_stmt(const, cond)
 	}
 }
 
+PRIVATE
 cont_break_merge(lse)
 	struct lint_stack_entry *lse;
 {
@@ -988,7 +1019,7 @@ lint_statement()
 		return;
 	if (top_ls->ls_current->st_notreached) {
 		if (DOT != CASE && DOT != DEFAULT && AHEAD != ':') {
-			if (DOT != BREAK || !loptions['b'])
+			if (DOT != BREAK || loptions['b'])
 				warning("statement cannot be reached");
 			top_ls->ls_current->st_warned = 1;
 		}
@@ -999,6 +1030,7 @@ lint_statement()
 	}
 }
 
+PRIVATE
 lint_push(lse)
 	struct lint_stack_entry *lse;
 {
@@ -1007,13 +1039,14 @@ lint_push(lse)
 	top_ls = lse;
 }
 
+PRIVATE
 lint_pop()
 {
 	top_ls = top_ls->ls_previous;
 	free_lint_stack_entry(top_ls->next);
 }
 
-
+#ifdef	DEBUG
 /* FOR DEBUGGING */
 
 print_lint_stack()
@@ -1082,7 +1115,6 @@ print_lint_stack()
 	print("  |--------------\n\n");
 }
 
-static
 print_autos(a)
 	register struct auto_def *a;
 {
@@ -1094,4 +1126,6 @@ print_autos(a)
 	}
 	print("\n");
 }
+#endif	DEBUG
+
 #endif	LINT

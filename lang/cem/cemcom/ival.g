@@ -27,7 +27,6 @@
 #include	"LLlex.h"
 #include	"noRoption.h"
 #include	"estack.h"
-#include	"code.h"
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	LINT
@@ -54,7 +53,7 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 	assignment_expression(expp)
 		{
 #ifdef	LINT
-			pre_lint_expr(*expp, RVAL, USED);
+			lint_expr(*expp, USED);
 #endif	LINT
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);

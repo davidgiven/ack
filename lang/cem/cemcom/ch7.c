@@ -258,7 +258,7 @@ ch7cast(expp, oper, tp)
 			expr_warning(*expp, "incompatible pointers in %s",
 							symbol2str(oper));
 #ifdef	LINT
-		if (oper == CAST)
+		if (oper != CAST)
 			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
 #endif	LINT
 		(*expp)->ex_type = tp;	/* free conversion */

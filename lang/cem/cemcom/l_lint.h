@@ -9,6 +9,7 @@
 #define	IGNORED		1
 #define	SET		2
 #define	VOIDED		3
+#define	REFERRED	4
 
 /* for od_valreturned */
 #define	NOVALRETURNED	0

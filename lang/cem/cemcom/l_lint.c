@@ -10,6 +10,8 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"debug.h"
+#include	"interface.h"
 #include	"assert.h"
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
@@ -30,9 +32,13 @@
 extern char options[128];
 extern char *symbol2str();
 
-static struct expr_state *lint_expr();
-static struct expr_state *lint_value();
-static struct expr_state *lint_oper();
+PRIVATE struct expr_state *expr2state();
+PRIVATE struct expr_state *value2state();
+PRIVATE struct expr_state *oper2state();
+PRIVATE expr_ignored();
+PRIVATE add_expr_state();
+PRIVATE referred_esp();
+PRIVATE free_expr_states();
 
 lint_init()
 {
@@ -40,36 +46,22 @@ lint_init()
 	lint_init_stack();
 }
 
-pre_lint_expr(expr, val, used)
+lint_expr(expr, used)
 	struct expr *expr;
-	int val;			/* LVAL or RVAL */
-	int used;
+	int used;			/* USED or IGNORED */
 {
-/* Introduced to dispose the returned expression states */
-
 	register struct expr_state *esp;
 
-	esp = lint_expr(expr, val, used);
+	esp = expr2state(expr, RVAL, used);
+	referred_esp(esp);
 	free_expr_states(esp);
 }
 
-free_expr_states(esp)
-	register struct expr_state *esp;
-{
-	register struct expr_state *esp2;
-
-	while (esp) {
-		esp2 = esp;
-		esp = esp->next;
-		free_expr_state(esp2);
-	}
-}
-
-static struct expr_state *
-lint_expr(expr, val, used)
+PRIVATE struct expr_state *
+expr2state(expr, val, used)
 	register struct expr *expr;
-	int val;
-	int used;
+	int val;			/* RVAL or LVAL */
+	int used;			/* USED or IGNORED */
 {
 /* Main function to process an expression tree.
  * It returns a structure containing information about which variables
@@ -85,19 +77,20 @@ lint_expr(expr, val, used)
 
 	switch (expr->ex_class) {
 	case Value:
-		return lint_value(expr, val);
+		return value2state(expr, val);
 
 	case Oper:
-		return lint_oper(expr, val, used);
+		return oper2state(expr, val, used);
 
-	default:			/* String Float Type */
+	default:			/* String, Float, Type */
 		return 0;
 	}
 }
 
-static struct expr_state *
-lint_value(expr, val)
-	register struct expr *expr;
+PRIVATE struct expr_state *
+value2state(expr, val)
+	struct expr *expr;
+	int val;			/* RVAL or LVAL */
 {
 	switch (expr->VL_CLASS) {
 	case Const:
@@ -107,28 +100,21 @@ lint_value(expr, val)
 	case Name:
 	{
 		register struct idf *idf = expr->VL_IDF;
-		struct expr_state *esp1 = 0;
+		struct expr_state *esp = 0;
 
 		if (!idf || !idf->id_def)
 			return 0;
 
-		if (	val == LVAL
-		||	(	val == RVAL
-			&&	expr->ex_type->tp_fund == POINTER
-			&&	!expr->ex_lvalue
-			)
-		) {
-			change_state(idf, SET);
-			idf->id_def->df_file =
-				Salloc(dot.tk_file,
-					strlen(dot.tk_file) + 1);
-			idf->id_def->df_line = dot.tk_line;
-		}
-		if (val == RVAL) {
+		if (val == RVAL && expr->ex_lvalue == 1) {
+			/* value of identifier used */
 			change_state(idf, USED);
-			add_expr_state(expr->EX_VALUE, USED, &esp1);
+			add_expr_state(expr->EX_VALUE, USED, &esp);
 		}
-		return esp1;
+		if (val == RVAL && expr->ex_lvalue == 0) {
+			/* address of identifier used */
+			add_expr_state(expr->EX_VALUE, REFERRED, &esp);
+		}
+		return esp;
 	}
 
 	default:
@@ -137,19 +123,31 @@ lint_value(expr, val)
 	}
 }
 
-static struct expr_state *
-lint_oper(expr, val, used)
+/*	Let's get this straight.
+	An assignment is performed by elaborating the LHS and the RHS
+	collaterally, to use the A68 terminology, and then serially do the
+	actual assignment. This means:
+	1.	evaluate the LHS as an LVAL,
+	2.	evaluate the RHS as an RVAL,
+	3.	merge them checking for interference,
+	4.	set the result of the LHS to SET, if it is a named variable
+*/
+
+PRIVATE struct expr_state *
+oper2state(expr, val, used)
 	struct expr *expr;
-	int val;
-	int used;
+	int val;			/* RVAL or LVAL */
+	int used;			/* USED or IGNORED */
 {
 	register int oper = expr->OP_OPER;
 	register struct expr *left = expr->OP_LEFT;
 	register struct expr *right = expr->OP_RIGHT;
-	struct expr_state *esp1 = 0;
-	struct expr_state *esp2 = 0;
+	struct expr_state *esp_l = 0;
+	struct expr_state *esp_r = 0;
 
 	switch (oper) {
+
+	/* assignments */
 	case '=':
 	case PLUSAB:
 	case MINAB:
@@ -161,53 +159,42 @@ lint_oper(expr, val, used)
 	case ANDAB:
 	case XORAB:
 	case ORAB:
-		/* for cases like i += l; */
-		esp1 = lint_expr(right, RVAL, USED);
-		if (oper != '=') {
-			/* i += 1; is interpreted as i = i + 1; */
-			esp2 = lint_expr(left, RVAL, USED);
-			check_and_merge(&esp1, esp2, oper);
+		/* evaluate the LHS, only once; see RM 7.14 */
+		esp_l = expr2state(left, (oper == '=' ? LVAL : RVAL), USED);
+
+		/* evaluate the RHS as an RVAL and merge */
+		esp_r = expr2state(right, RVAL, USED);
+		check_and_merge(expr, &esp_l, esp_r);
+
+		/* set resulting variable, if any */
+		if (ISNAME(left)) {
+			change_state(left->VL_IDF, SET);
+			add_expr_state(left->EX_VALUE, SET, &esp_l);
 		}
-		esp2 = lint_expr(left, LVAL, USED);
-		/* for cases like i = i + 1; and i not set, this
-		** order is essential
-		*/
-		check_and_merge(&esp1, esp2, oper);
-		if (	left->ex_class == Value
-		&&	left->VL_CLASS == Name
-		) {
-			add_expr_state(left->EX_VALUE, SET, &esp1);
-		}
-		return esp1;
+
+		return esp_l;
 
 	case POSTINCR:
 	case POSTDECR:
 	case PLUSPLUS:
 	case MINMIN:
-		/* i++; is parsed as i = i + 1;
-		 * This isn't quite correct :
-		 * The first statement doesn't USE i,
-		 * the second does.
-		 */
-		esp1 = lint_expr(left, RVAL, USED);
-		esp2 = lint_expr(left, LVAL, USED);
-		check_and_merge(&esp1, esp2, oper);
-		if (	left->ex_class == Value
-		&&	left->VL_CLASS == Name
-		) {
-			add_expr_state(left->EX_VALUE, SET, &esp1);
-			add_expr_state(left->EX_VALUE, USED, &esp1);
-		}
-		return esp1;
+		esp_l = expr2state(left, RVAL, USED);
 
-	case '-':
-	case '*':
-		if (left == 0)	/* unary */
-			return lint_expr(right, RVAL, USED);
-		esp1 = lint_expr(left, RVAL, USED);
-		esp2 = lint_expr(right, RVAL, USED);
-		check_and_merge(&esp1, esp2, oper);
-		return esp1;
+		/* set resulting variable, if any */
+		if (ISNAME(left)) {
+			change_state(left->VL_IDF, SET);
+			add_expr_state(left->EX_VALUE, SET, &esp_l);
+		}
+
+		return esp_l;
+
+	case '?':
+		esp_l = expr2state(left, RVAL, USED);
+		esp_r = expr2state(right->OP_LEFT, RVAL, USED);
+		check_and_merge(expr, &esp_l, esp_r);
+		esp_r = expr2state(right->OP_RIGHT, RVAL, USED);
+		check_and_merge(expr, &esp_l, esp_r);
+		return esp_l;
 
 	case '(':
 		if (right != 0) {
@@ -217,17 +204,15 @@ lint_oper(expr, val, used)
 			while (	ex->ex_class == Oper
 			&&	ex->OP_OPER == PARCOMMA
 			) {
-				esp2 = lint_expr(ex->OP_RIGHT, RVAL,
-						 USED);
-				check_and_merge(&esp1, esp2, oper);
+				esp_r = expr2state(ex->OP_RIGHT, RVAL, USED);
+				check_and_merge(expr, &esp_l, esp_r);
 				ex = ex->OP_LEFT;
 			}
-			esp2 = lint_expr(ex, RVAL, USED);
-			check_and_merge(&esp1, esp2, oper);
+			esp_r = expr2state(ex, RVAL, USED);
+			check_and_merge(expr, &esp_l, esp_r);
 		}
-		if (	left->ex_class == Value
-		&&	left->VL_CLASS == Name
-		) {
+
+		if (ISNAME(left)) {
 			fill_outcall(expr,
 				expr->ex_type->tp_fund == VOID ?
 				VOIDED : used
@@ -236,35 +221,34 @@ lint_oper(expr, val, used)
 			left->VL_IDF->id_def->df_used = 1;
 		}
 		else {
-			esp2 = lint_expr(left, val, USED);
-			check_and_merge(&esp1, esp2, oper);
+			esp_r = expr2state(left, RVAL, USED);
+			check_and_merge(expr, &esp_l, esp_r);
 		}
-		return esp1;
+		referred_esp(esp_l);
+		return esp_l;
 
 	case '.':
-		return lint_expr(left, val, USED);
+		return expr2state(left, val, USED);
 
 	case ARROW:
-		return lint_expr(left, RVAL, USED);
-
-	case '~':
-	case '!':
-		return lint_expr(right, RVAL, USED);
-
-	case '?':
-		esp1 = lint_expr(left, RVAL, USED);
-		esp2 = lint_expr(right->OP_LEFT, RVAL, USED);
-		check_and_merge(&esp1, esp2, 0);
-		esp2 = lint_expr(right->OP_RIGHT, RVAL, USED);
-		check_and_merge(&esp1, esp2, 0);
-		return esp1;
+		return expr2state(left, RVAL, USED);
 
 	case INT2INT:
 	case INT2FLOAT:
 	case FLOAT2INT:
 	case FLOAT2FLOAT:
-		return lint_expr(right, RVAL, USED);
+		return expr2state(right, RVAL, USED);
 
+	/* monadic operators */
+	case '-':
+	case '*':
+		if (left)
+			goto dyadic;
+	case '~':
+	case '!':
+		return expr2state(right, RVAL, USED);
+
+	/* relational operators */
 	case '<':
 	case '>':
 	case LESSEQ:
@@ -279,7 +263,10 @@ lint_oper(expr, val, used)
 			oper == GREATEREQ ? LESSEQ :
 			oper
 		);
-		/*FALLTHROUGH*/
+		goto dyadic;
+
+	/* dyadic operators */
+	dyadic:
 	case '+':
 	case '/':
 	case '%':
@@ -291,21 +278,20 @@ lint_oper(expr, val, used)
 	case '^':
 	case OR:
 	case AND:
-		esp1 = lint_expr(left, RVAL,
+		esp_l = expr2state(left, RVAL,
 					oper == ',' ? IGNORED : USED);
-		esp2 = lint_expr(right, RVAL,
+		esp_r = expr2state(right, RVAL,
 					oper == ',' ? used : USED);
-		if (oper == OR || oper == AND || oper == ',')
-			check_and_merge(&esp1, esp2, 0);
-		else
-			check_and_merge(&esp1, esp2, oper);
-		return esp1;
+		check_and_merge(expr, &esp_l, esp_r);
+
+		return esp_l;
 
 	default:
 		return 0;	/* for initcomma */
 	}
 }
 
+PRIVATE
 expr_ignored(expr)
 	struct expr *expr;
 {
@@ -334,7 +320,7 @@ expr_ignored(expr)
 		case POSTDECR:
 		case PLUSPLUS:
 		case MINMIN:
-			/* may hide the operator * */
+			/* may hide the operator '*' */
 			if (	/* operation on a pointer */
 				expr->OP_TYPE->tp_fund == POINTER
 			&&	/* the result is dereferenced, e.g. *p++; */
@@ -360,5 +346,97 @@ expr_ignored(expr)
 		break;
 	}
 }
+
+PRIVATE
+add_expr_state(value, to_state, espp)
+	struct value value;
+	struct expr_state **espp;
+{
+	register struct expr_state *esp = *espp;
+
+	ASSERT(value.vl_class == Name);
+
+	/* try to find the esp */
+	while (	esp
+	&&	!(	esp->es_idf == value.vl_data.vl_idf
+		&&	esp->es_offset == value.vl_value
+		)
+	) {
+		esp = esp->next;
+	}
+
+	/* if not found, add it */
+	if (!esp) {
+		esp = new_expr_state();
+		esp->es_idf = value.vl_data.vl_idf;
+		esp->es_offset = value.vl_value;
+		esp->next = *espp;
+		*espp = esp;
+	}
+
+	/* set state */
+	switch (to_state) {
+	case USED:
+		esp->es_used = 1;
+		break;
+	case REFERRED:
+		esp->es_referred = 1;
+		break;
+	case SET:
+		esp->es_set = 1;
+		break;
+	default:
+		NOTREACHED();
+		/* NOTREACHED */
+	}
+}
+
+PRIVATE
+referred_esp(esp)
+	struct expr_state *esp;
+{
+	/* raises all REFERRED items to SET and USED status */
+	while (esp) {
+		if (esp->es_referred) {
+			esp->es_set = 1;
+			change_state(esp->es_idf, SET);
+			esp->es_used = 1;
+			change_state(esp->es_idf, USED);
+			esp->es_referred = 0;
+		}
+		esp = esp->next;
+	}
+}
+
+PRIVATE
+free_expr_states(esp)
+	register struct expr_state *esp;
+{
+	while (esp) {
+		register struct expr_state *esp2 = esp;
+
+		esp = esp->next;
+		free_expr_state(esp2);
+	}
+}
+
+#ifdef	DEBUG
+print_esp(msg, esp)
+	char *msg;
+	struct expr_state *esp;
+{
+	print("%s: <", msg);
+	while (esp) {
+		print(" %s[%d]%c%c%c ",
+			esp->es_idf->id_text, esp->es_offset,
+			(esp->es_used ? 'U' : ' '),
+			(esp->es_referred ? 'R' : ' '),
+			(esp->es_set ? 'S' : ' ')
+		);
+		esp = esp->next;
+	}
+	print(">\n");
+}
+#endif	DEBUG
 
 #endif	LINT

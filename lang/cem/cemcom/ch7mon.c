@@ -71,9 +71,7 @@ ch7mon(oper, expp)
 			expr_error(*expp, "& applied to non-lvalue");
 		else {
 			/* assume that enums are already filtered out	*/
-			if (	(*expp)->ex_class == Value
-			&&	(*expp)->VL_CLASS == Name
-			) {
+			if (ISNAME(*expp)) {
 				register struct def *def =
 					(*expp)->VL_IDF->id_def;
 
@@ -147,10 +145,7 @@ ch7mon(oper, expp)
 		ch7incr(expp, oper);
 		break;
 	case SIZEOF:
-		if (	(*expp)->ex_class == Value
-		&&	(*expp)->VL_CLASS == Name
-		&&	(*expp)->VL_IDF->id_def->df_formal_array
-		)
+		if (ISNAME(*expp) && (*expp)->VL_IDF->id_def->df_formal_array)
 			warning("sizeof formal array %s is sizeof pointer!",
 				(*expp)->VL_IDF->id_text);
 		expr = intexpr((*expp)->ex_type == string_type ?

@@ -104,8 +104,11 @@ struct expr	{
 
 #define	NILEXPR		((struct expr *)0)
 
+/* some useful tests */
+#define	ISNAME(e)	((e)->ex_class == Value && (e)->VL_CLASS == Name)
+#define	ISCOMMA(e)	((e)->ex_class == Oper && (e)->OP_OPER == INITCOMMA)
+
 extern struct expr *intexpr(), *new_oper();
 
 /* ALLOCDEF "expr" 20 */
 
-#define	ISCOMMA(e) ((e)->ex_class == Oper && (e)->OP_OPER == INITCOMMA)
