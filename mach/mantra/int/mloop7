@@ -20,7 +20,7 @@ sbu_l:		adroff		;	move.w	(a5),d0
 0:		checksize
 2:		move.w	(sp)+,d1 ;	sub.w	d1,(sp)
 		jmp	(a4)
-4:		move.w	(sp)+,d1 ;	sub.l	d1,(sp)
+4:		move.l	(sp)+,d1 ;	sub.l	d1,(sp)
 		jmp	(a4)
 
 !------------------------------------------------------------------------------
