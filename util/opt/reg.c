@@ -60,13 +60,11 @@ outregs() {
 
 	for(rp=curpro.freg; rp != (reg_p) 0; rp = tp) {
 		tp = rp->r_next;
-		if (rp->r_par[3] != 0) {
-			outinst(ps_mes);
-			outoff((offset)ms_reg);
-			for(i=0;i<4;i++)
-				outoff(rp->r_par[i]);
-			outinst(sp_cend);
-		}
+		outinst(ps_mes);
+		outoff((offset)ms_reg);
+		for(i=0;i<4;i++)
+			outoff(rp->r_par[i]);
+		outinst(sp_cend);
 		oldreg(rp);
 	}
 	/* List of register messages is followed by an empty ms_reg
