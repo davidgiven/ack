@@ -150,7 +150,7 @@ external_definition
 		}
 		function(&Ds, &Dc)
 	]
-	{remove_declarator(&Dc);}
+	{remove_declarator(&Dc); flush_strings(); }
 ;
 
 non_function(register struct decspecs *ds; register struct declarator *dc;)

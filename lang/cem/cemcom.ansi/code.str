@@ -14,7 +14,7 @@ struct string_cst	{	/* storing string constants */
 
 extern struct string_cst *str_list;
 
-/* ALLOCDEF "string_cst" 10 */
+/* ALLOCDEF "string_cst" 5 */
 
 #define	LVAL	0
 #define	RVAL	1

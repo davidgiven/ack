@@ -596,25 +596,30 @@ ch_array(tpp, ex)
 		*to++ = *from++;
 	}
 	free(ex->SG_VALUE);
-	str_cst(s, length);
+	str_cst(s, length, 0);		/* a string, but not in rom */
 	free(s);
 }
 
 /*	As long as some parts of the pipeline cannot handle very long string
 	constants, string constants are written out in chunks
 */
-str_cst(str, len)
+str_cst(str, len, inrom)
 	register char *str;
 	register int len;
+	int inrom;
 {
 	int chunksize = ((127 + (int) word_size) / (int) word_size) * (int) word_size;
 
 	while (len > chunksize) {
-		C_con_scon(str, (arith) chunksize);
+		if (inrom)
+			C_rom_scon(str, (arith) chunksize);
+		else	C_con_scon(str, (arith) chunksize);
 		len -= chunksize;
 		str += chunksize;
 	}
-	C_con_scon(str, (arith) len);
+	if (inrom)
+		C_rom_scon(str, (arith) len);
+	else	C_con_scon(str, (arith) len);
 }
 
 #ifndef NOBITFIELD

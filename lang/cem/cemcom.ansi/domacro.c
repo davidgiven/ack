@@ -765,6 +765,12 @@ do_line(l)
 
 	SkipToNewLine();
 	LineNumber = l;		/* the number of the next input line */
-	if (t == STRING)	/* is there a filespecifier? */
+	if (t == STRING) {	/* is there a filespecifier? */
+		extern char *source;	/* defined in main.c */
+
+		if (FileName != source) {	/* source points into argv */
+			free(FileName);
+		}
 		FileName = tk.tk_bts;
+	}
 }

@@ -98,9 +98,18 @@ def_strings(sc)
 		struct string_cst *sc1 = sc;
 
 		C_df_dlb(sc->sc_dlb);
-		str_cst(sc->sc_value, sc->sc_len);
+		str_cst(sc->sc_value, sc->sc_len, 1);	/* string in rom */
 		sc = sc->next;
+		free(sc1->sc_value);
 		free_string_cst(sc1);
+	}
+}
+
+/* flush_strings() is called from program.g after each external definition */
+flush_strings() {
+	if (str_list) {
+		def_strings(str_list);
+		str_list = 0;
 	}
 }
 
@@ -113,8 +122,6 @@ end_code()
 		/* floating point used	*/
 		C_ms_flt();
 	}
-	def_strings(str_list);
-	str_list = 0;
 	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
