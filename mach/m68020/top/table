@@ -61,6 +61,7 @@ move.l DREG,DREG2 : move.l DREG2,DREG	->	move.l DREG,DREG2 ;
 move.l DREG,AREG : move.l AREG,DREG	->	move.l DREG,AREG : tst.l DREG ;
 move.l AREG,DREG : move.l DREG,AREG	->	move.l AREG,DREG ;
 move.w DREG,DREG2 : move.w DREG2,DREG	->	move.w DREG,DREG2 ;
+move.l AREG,AREG			->	;
 
 /* register subsumption */
 move.w DREG,A : ANY A,X
