@@ -13,7 +13,7 @@
 #include	"interface.h"
 #ifdef ANSI
 #include	<flt_arith.h>
-#endif ANSI
+#endif /* ANSI */
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -424,4 +424,4 @@ lint_relop(left, right, oper)
 	}
 }
 
-#endif	LINT
+#endif	/* LINT */

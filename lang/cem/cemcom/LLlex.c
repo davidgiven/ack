@@ -78,7 +78,7 @@ LLlex()
 	else {		/* read ahead and return the old one	*/
 #ifdef	LINT
 		lint_comment_ahead();
-#endif	LINT
+#endif	/* LINT */
 		dot = ahead;
 		/*	the following test is performed due to the dual
 			task of LLlex(): it is also called for parsing the
@@ -164,7 +164,7 @@ firstline:
 			PushBack();
 			ch = '\\';
 		}
-#endif NOPP
+#endif /* NOPP */
 		if (040 < ch && ch < 0177)
 			lexerror("garbage char %c", ch);
 		else
@@ -274,7 +274,7 @@ firstline:
 			ptok->tk_fund = INT;
 			return ptok->tk_symb = INTEGER;
 		}
-#endif NOPP
+#endif /* NOPP */
 		ptok->tk_symb = (
 			idef->id_reserved ? idef->id_reserved
 			: idef->id_def && idef->id_def->df_sc == TYPEDEF ?
@@ -339,9 +339,9 @@ firstline:
 			/*	in the rest of the compiler, all floats
 				have to start with a digit.
 			*/
-#else NOFLOAT
+#else /* NOFLOAT */
 			return ptok->tk_symb = ch;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		}
 		if (ch == '0') {
 			*np++ = ch;
@@ -366,7 +366,7 @@ firstline:
 		}
 #ifndef NOFLOAT
 		if (base == 16 || !(ch == '.' || ch == 'e' || ch == 'E'))
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		{
 			PushBack();
 			ptok->tk_ival = val;
@@ -424,7 +424,7 @@ firstline:
 		else
 			ptok->tk_fval = Salloc(buf,(unsigned) (np - buf)) + 1;
 		return ptok->tk_symb = FLOATING;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	}
 	case STEOI:			/* end of text on source file	*/
 		return ptok->tk_symb = EOI;
@@ -453,7 +453,7 @@ skipcomment()
 #ifdef	LINT
 	lint_start_comment();
 	lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 	do {
 		while (c != '*') {
 			if (class(c) == STNL)
@@ -463,22 +463,22 @@ skipcomment()
 				NoUnstack--;
 #ifdef	LINT
 				lint_end_comment();
-#endif	LINT
+#endif	/* LINT */
 				return;
 			}
 			LoadChar(c);
 #ifdef	LINT
 			lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 		} /* last Character seen was '*' */
 		LoadChar(c);
 #ifdef	LINT
 		lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 	} while (c != '/');
 #ifdef	LINT
 	lint_end_comment();
-#endif	LINT
+#endif	/* LINT */
 	NoUnstack--;
 }
 

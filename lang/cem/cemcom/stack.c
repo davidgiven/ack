@@ -12,7 +12,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -56,7 +56,7 @@ stack_level()	{
 	local_level = stl;
 #ifdef	LINT
 	lint_start_local();
-#endif	LINT
+#endif	/* LINT */
 }
 
 stack_idf(idf, stl)
@@ -100,11 +100,11 @@ unstack_level()
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("before unstackidfs", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 
 #ifdef	LINT
 	lint_end_local(local_level);
-#endif	LINT
+#endif	/* LINT */
 
 	/*	The implementation below is more careful than strictly
 		necessary. Optimists may optimize it afterwards.
@@ -164,7 +164,7 @@ unstack_level()
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("after unstackidfs", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 }
 
 unstack_world()
@@ -180,7 +180,7 @@ unstack_world()
 
 #ifdef	LINT
 	lint_end_global(local_level);
-#endif	LINT
+#endif	/* LINT */
 
 	open_name_list();
 
@@ -208,7 +208,7 @@ unstack_world()
 				def->df_initialized ? "init" : "no init",
 				def->df_used ? "used" : "not used");
 		}
-#endif DEBUG
+#endif /* DEBUG */
 		/*
 		/_* find final storage class *_/
 		if (def->df_sc == GLOBAL || def->df_sc == IMPLICIT)

@@ -12,7 +12,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 
 #include	"nopp.h"
 #include	"errout.h"
@@ -41,7 +41,7 @@ int err_occurred = 0;
 extern char options[];
 #ifdef	LINT
 extern char loptions[];
-#endif	LINT
+#endif	/* LINT */
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -165,7 +165,7 @@ awarning(va_alist)			/* fmt, args */
 	va_end(ap);
 }
 
-#endif	LINT
+#endif	/* LINT */
 
 /*VARARGS*/
 lexerror(va_alist)			/* fmt, args */
@@ -193,7 +193,7 @@ lexwarning(va_alist)			/* fmt, args */
 	}
 	va_end(ap);
 }
-#endif	NOPP
+#endif	/* NOPP */
 
 /*VARARGS*/
 crash(va_alist)				/* fmt, args */
@@ -210,9 +210,9 @@ crash(va_alist)				/* fmt, args */
 	C_close();
 #ifdef	DEBUG
 	sys_stop(S_ABORT);
-#else	DEBUG
+#else	/* DEBUG */
 	sys_stop(S_EXIT);
-#endif	DEBUG
+#endif	/* DEBUG */
 	/* NOTREACHED */
 }
 
@@ -278,9 +278,9 @@ _error(class, fn, ln, ap)
 	case WARNING:
 #ifndef	LINT
 		remark = "(warning)";
-#else	LINT
+#else	/* LINT */
 		remark = 0;
-#endif	LINT
+#endif	/* LINT */
 		break;
 
 	case ERROR:
@@ -309,7 +309,7 @@ _error(class, fn, ln, ap)
 		/* we skip this message */
 		return;
 	}
-#endif	LINT
+#endif	/* LINT */
 	
 	if (fn)
 		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);

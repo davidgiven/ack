@@ -31,7 +31,7 @@ struct token	{
 		} tok_integer;
 #ifndef NOFLOAT
 		char *tok_fval;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	} tok_data;
 };
 
@@ -45,7 +45,7 @@ struct token	{
 #define tk_ival	tok_data.tok_integer.tok_ival
 #ifndef NOFLOAT
 #define tk_fval	tok_data.tok_fval
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 extern struct token dot, ahead, aside;
 extern int token_nmb;			/* number of the ahead token */
@@ -56,7 +56,7 @@ extern int ReplaceMacros;	/* "LLlex.c"	*/
 extern int AccDefined;		/* "LLlex.c"	*/
 extern int Unstacked;		/* "LLlex.c"	*/
 extern int UnknownIdIsZero;	/* "LLlex.c"	*/
-#endif NOPP
+#endif /* NOPP */
 extern int EoiForNewline;	/* "LLlex.c"	*/
 extern int AccFileSpecifier;	/* "LLlex.c"	*/
 extern int SkipEscNewline;	/* "LLlex.c"	*/

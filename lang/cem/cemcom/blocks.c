@@ -20,7 +20,7 @@
 #include "Lpars.h"
 extern arith NewLocal();
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
-#endif STB
+#endif /* STB */
 
 /*	Because EM does not support the loading and storing of
 	objects having other sizes than word fragment and multiple,
@@ -78,7 +78,7 @@ store_block(sz, al)
 		C_asp(ATW(sz));
 		FreeLocal(dst);
 		FreeLocal(src);
-#else STB
+#else /* STB *?
 		/*	address of destination lies on the stack	*/
 
 		/*	push address of first byte of block on stack onto
@@ -90,7 +90,7 @@ store_block(sz, al)
 		C_loc(sz);		/* number of bytes to transfer	*/
 		C_cal("__stb");		/* call transfer routine	*/
 		C_asp(pointer_size + pointer_size + int_size + ATW(sz));
-#endif STB
+#endif /* STB */
 	}
 }
 
@@ -123,7 +123,7 @@ load_block(sz, al)
 		copy_loop(sz, src, dst);
 		FreeLocal(dst);
 		FreeLocal(src);
-#else STB
+#else /* STB */
 		C_asp(-(esz - pointer_size));	/* allocate stack block */
 		C_lor((arith)1);	/* push & of stack block as dst	*/
 		C_dup(pointer_size);		/* fetch source address	*/
@@ -132,7 +132,7 @@ load_block(sz, al)
 		C_loc(sz);			/* # bytes to copy	*/
 		C_cal("__stb");			/* library copy routine	*/
 		C_asp(int_size + pointer_size + pointer_size);
-#endif STB
+#endif /* STB */
 	}
 }
 
@@ -162,7 +162,7 @@ copy_loop(sz, src, dst)
 	C_df_ilb(l_stop);
 	C_asp(word_size);
 }
-#endif STB
+#endif /* STB */
 
-#endif	LINT
+#endif	/* LINT */
 

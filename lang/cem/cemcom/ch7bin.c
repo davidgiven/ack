@@ -74,7 +74,7 @@ ch7bin(expp, oper, expr)
 #ifndef NOROPTION
 			if (options['R'])
 				warning("function pointer called");
-#endif NOROPTION
+#endif /* NOROPTION */
 			ch7mon('*', expp);
 		}
 		switch ((*expp)->ex_type->tp_fund)	{
@@ -265,7 +265,7 @@ ch7bin(expp, oper, expr)
 		) {
 			hwarning("operands of : are constant and equal");
 		}
-#endif	LINT
+#endif	/* LINT */
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 		break;
 
@@ -274,7 +274,7 @@ ch7bin(expp, oper, expr)
 		if (is_cp_cst(*expp)) {
 #ifdef	LINT
 			hwarning("condition in ?: expression is constant");
-#endif	LINT
+#endif	/* LINT */
 			*expp = (*expp)->VL_VALUE ?
 				expr->OP_LEFT : expr->OP_RIGHT;
 		}
@@ -287,7 +287,7 @@ ch7bin(expp, oper, expr)
 		if (is_cp_cst(*expp)) {
 #ifdef	LINT
 			hwarning("constant expression ignored");
-#endif	LINT
+#endif	/* LINT */
 			*expp = expr;
 		}
 		else {
@@ -356,7 +356,7 @@ pointer_arithmetic(expp1, oper, expp2)
 			"illegal combination of float and pointer");
 		erroneous2int(expp2);
 	}
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	ch7bin( expp2, '*',
 		intexpr(size_of_type((*expp1)->ex_type->tp_up, "object"),
 			pa_type->tp_fund)

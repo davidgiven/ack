@@ -19,7 +19,7 @@
 #define	T_UNSIGNED		2
 #ifndef NOFLOAT
 #define	T_FLOATING		3
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 /*	conversion() generates the EM code for a conversion between
 	the types char, short, int, long, float, double and pointer.
@@ -54,7 +54,7 @@ conversion(from_type, to_type)
 		case T_UNSIGNED:
 #ifndef NOFLOAT
 		case T_FLOATING:
-#endif NOFLOAT
+#endif /* NOFLOAT */
 			if ((int)from_size < (int)word_size) {
 				C_loc(from_size);
 				C_loc(word_size);
@@ -83,7 +83,7 @@ conversion(from_type, to_type)
 		case T_FLOATING:
 			C_cuf();
 			break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		}
 		break;
 #ifndef NOFLOAT
@@ -102,7 +102,7 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	default:
 		crash("(conversion) illegal type conversion");
 		/*NOTREACHED*/
@@ -110,7 +110,7 @@ conversion(from_type, to_type)
 	if ((int)(to_type->tp_size) < (int)word_size
 #ifndef NOFLOAT
 	    && to_cnvtype != T_FLOATING
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	    ) {
 		extern long full_mask[];
 
@@ -145,12 +145,12 @@ convtype(tp)
 	case FLOAT:
 	case DOUBLE:
 		return T_FLOATING;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	case POINTER:
 		return T_UNSIGNED;
 	}
 	return 0;
 }
 
-#endif	LINT
+#endif	/* LINT */
 

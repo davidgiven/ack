@@ -121,7 +121,7 @@ copyact(ch1, ch2, lvl)
 		case ']':
 			lexerror("unbalanced parenthesis");
 			break;
-#endif __MATCHING_PAR__
+#endif /* __MATCHING_PAR__ */
 
 		case '(':
 			copyact('(', ')', lvl+1);
@@ -139,7 +139,7 @@ copyact(ch1, ch2, lvl)
 		case '[':
 			copyact('[', ']', lvl+1);
 			break;
-#endif __MATCHING_PAR__
+#endif /* __MATCHING_PAR__ */
 
 		case '\n':
 			LineNumber++;
@@ -234,4 +234,4 @@ copyact(ch1, ch2, lvl)
 		}
 	}
 }
-#endif NOPP
+#endif /* NOPP */

@@ -19,9 +19,9 @@
 
 #include <em_arith.h>		/* obtain definition of "arith"	*/
 
-#else	SPECIAL_ARITHMETICS
+#else	/* SPECIAL_ARITHMETICS */
 
 /* not implemented yet */
 #define	arith	int				/* dummy */
 
-#endif	SPECIAL_ARITHMETICS
+#endif	/* SPECIAL_ARITHMETICS */

@@ -56,6 +56,6 @@ insert_token(tk)
 	case FLOATING:
 		dot.tk_fval = Salloc("0.0", 4);
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	}
 }

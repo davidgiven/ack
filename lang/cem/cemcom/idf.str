@@ -32,7 +32,7 @@ struct idf	{
 #ifndef NOPP
 	struct macro *id_macro;
 	int id_resmac;		/* if nonzero: keyword of macroproc. 	*/
-#endif NOPP
+#endif /* NOPP */
 	int id_reserved;	/* non-zero for reserved words		*/
 	char *id_file;		/* file containing the occurrence */
 	unsigned int id_line;	/* line number of the occurrence */

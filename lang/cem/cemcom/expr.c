@@ -148,7 +148,7 @@ dot2expr(expp)
 	case FLOATING:
 		float2expr(ex);
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	default:
 		crash("bad conversion to expression");
 		/*NOTREACHED*/
@@ -188,9 +188,9 @@ idf2expr(expr)
 			def->df_used = 1;
 #ifndef PREPEND_SCOPES
 			code_scope(idf->id_text, def);
-#endif PREPEND_SCOPES
+#endif /* PREPEND_SCOPES */
 		}
-#endif	LINT
+#endif	/* LINT */
 		expr->ex_type = def->df_type;
 		if (expr->ex_type == error_type)
 			expr->ex_flags |= EX_ERROR;
@@ -212,7 +212,7 @@ idf2expr(expr)
 		expr->VL_LBL = def->df_address;
 		expr->VL_VALUE = (arith)0;
 	}
-#endif	LINT
+#endif	/* LINT */
 	else {
 		expr->VL_CLASS = Name;
 		expr->VL_IDF = idf;
@@ -254,7 +254,7 @@ float2expr(expr)
 	expr->FL_VALUE = dot.tk_fval;
 	expr->FL_DATLAB = 0;
 }
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 struct expr*
 intexpr(ivalue, fund)
@@ -377,7 +377,7 @@ new_oper(tp, e1, oper, e2)
 	op->op_right = e2;
 #ifdef	LINT
 	lint_new_oper(expr);
-#endif	LINT
+#endif	/* LINT */
 	return expr;
 }
 
@@ -418,7 +418,7 @@ chk_cst_expr(expp)
 	
 #ifdef	DEBUG
 	print_expr("constant_expression", expr);
-#endif	DEBUG
+#endif	/* DEBUG */
 	if (	fund != CHAR && fund != SHORT && fund != INT &&
 		fund != ENUM && fund != LONG
 	)
@@ -437,7 +437,7 @@ chk_cst_expr(expp)
 			expr_warning(expr,
 				"expression comma in constant expression");
 	}
-#endif NOROPTION
+#endif /* NOROPTION */
 	if (err)
 		erroneous2int(expp);
 }
@@ -471,7 +471,7 @@ is_ld_cst(expr)
 #ifdef	LINT
 	if (expr->ex_class == String)
 		return 1;
-#endif	LINT
+#endif	/* LINT */
 	return expr->ex_lvalue == 0 && expr->ex_class == Value;
 }
 
@@ -495,7 +495,7 @@ is_fp_cst(expr)
 	*/
 	return expr->ex_class == Float;
 }
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 free_expression(expr)
 	register struct expr *expr;

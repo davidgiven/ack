@@ -70,7 +70,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	arith offset;
 #ifndef NOBITFIELD
 	extern arith add_field();
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	struct tag *tg = stp->tp_idf->id_struct;	/* or union */
 	struct sdef *sdef = idf->id_sdef;
@@ -98,10 +98,10 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 			*/
 			offset = add_field(szp, fd, &tp, idf, stp);
 		}
-#else NOBITFIELD
+#else /* NOBITFIELD */
 		offset = align(*szp, tp->tp_align);
 		field_busy = 0;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	}
 	else	{	/* (stp->tp_fund == UNION)		*/
 		if (fd)	{
@@ -139,7 +139,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 #ifndef NOBITFIELD
 	if (tp->tp_fund == FIELD)
 		tp->tp_field->fd_sdef = newsdef;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	stack_idf(idf, stack_level_of(lvl));
 
@@ -466,7 +466,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 	
 	return field_offset;
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 /* some utilities */
 int

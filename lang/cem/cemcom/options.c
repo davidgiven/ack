@@ -31,12 +31,12 @@ extern int inc_total;
 int do_dependencies = 0;
 char *dep_file = 0;
 
-#endif NOPP
+#endif /* NOPP */
 
 char options[128];			/* one for every char	*/
 #ifdef	LINT
 char loptions[128];			/* one for every char	*/
-#endif	LINT
+#endif	/* LINT */
 
 extern int idfsize;
 extern int density;
@@ -57,9 +57,9 @@ next_option:			/* to allow combined one-char options */
 	default:
 #ifndef	LINT
 		fatal("illegal option: %c", opt);
-#else	LINT
+#else	/* LINT */
 		warning("illegal option: %c", opt);
-#endif	LINT
+#endif	/* LINT */
 		break;
 
 	case '-':
@@ -69,14 +69,14 @@ next_option:			/* to allow combined one-char options */
 #ifndef	LINT
 #ifdef	DATAFLOW
 	case 'd':
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 	case 'p':			/* procentry/procexit */
 	case 'L' :			/* no fil/lin */
 	case 'n':			/* use no registers */
 	case 'w':			/* no warnings will be given */
 		options[opt] = 1;
 		goto next_option;
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	LINT
 	case 'h':	/* heuristic tests */
@@ -88,7 +88,7 @@ next_option:			/* to allow combined one-char options */
 	case 'L':	/* lintlibrary */
 		loptions[opt] = 1;
 		goto next_option;
-#endif	LINT
+#endif	/* LINT */
 
 #ifndef LINT
 #ifndef NOPP
@@ -102,8 +102,8 @@ next_option:			/* to allow combined one-char options */
 	case 'm':
 		options[opt] = 1;
 		break;
-#endif NOPP
-#endif LINT
+#endif /* NOPP */
+#endif /* LINT */
 #ifdef DBSYMTAB
 	case 'g':	/* symbol table for debugger */
 		options['g'] = 1;
@@ -114,9 +114,9 @@ next_option:			/* to allow combined one-char options */
 	case 'R':			/* strict version */
 #ifndef	NOROPTION
 		options[opt] = 1;
-#else	NOROPTION
+#else	/* NOROPTION */
 		warning("-R option not implemented");
-#endif	NOROPTION
+#endif	/* NOROPTION */
 		goto next_option;
 
 #ifdef	___XXX___
@@ -125,11 +125,11 @@ deleted, is now a debug-flag
 #ifndef	NOPP
 		options['E'] = 1;
 		warning("-C: comment is not output");
-#else NOPP
+#else /* NOPP */
 		warning("-C option ignored");
-#endif	NOPP
+#endif	/* NOPP */
 		break;
-#endif	___XXX___
+#endif	/* ___XXX___ */
 
 	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP
@@ -161,9 +161,9 @@ deleted, is now a debug-flag
 
 		macro_def(str2idf(name), mactext, -1, strlen(mactext),
 			NOFLAG);
-#else NOPP
+#else /* NOPP */
 		warning("-D option ignored");
-#endif NOPP
+#endif /* NOPP */
 		break;
 	}
 
@@ -172,11 +172,11 @@ deleted, is now a debug-flag
 	case 'E' :	/* run preprocessor only, with #<int>	*/
 #ifndef NOPP
 		options['E'] = 1;
-#else NOPP
+#else /* NOPP */
 		warning("-E option ignored");
-#endif NOPP
+#endif /* NOPP */
 		break;
-#endif ___XXX___
+#endif /* ___XXX___ */
 
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 #ifndef NOPP
@@ -197,9 +197,9 @@ deleted, is now a debug-flag
 			}
 		}
 		else inctable[inc_pos] = 0;
-#else NOPP
+#else /* NOPP */
 		warning("-I option ignored");
-#endif NOPP
+#endif /* NOPP */
 		break;
 
 	case 'M':	/* maximum identifier length */
@@ -216,11 +216,11 @@ deleted, is now a debug-flag
 #ifndef NOPP
 		options['E'] = 1;
 		options['P'] = 1;
-#else NOPP
+#else /* NOPP */
 		warning("-P option ignored");
-#endif NOPP
+#endif /* NOPP */
 		break;
-#endif ___XXX___
+#endif /* ___XXX___ */
 
 #ifdef	LINT
 	case 'S' : {		/* -Sint :	static scope number for lint */
@@ -228,7 +228,7 @@ deleted, is now a debug-flag
 		stat_number = txt2int(&text);
 		break;
 	}
-#endif	LINT
+#endif	/* LINT */
 
 	case 'T' : {
 #ifdef USE_TMP
@@ -237,9 +237,9 @@ deleted, is now a debug-flag
 			C_tmpdir = text;
 		else
 			C_tmpdir = ".";
-#else USE_TMP
+#else /* USE_TMP */
 		warning("-T option ignored");
-#endif USE_TMP
+#endif /* USE_TMP */
 		break;
 	}
 
@@ -253,9 +253,9 @@ deleted, is now a debug-flag
 				idef->id_macro = (struct macro *) 0;
 			}
 		}
-#else NOPP
+#else /* NOPP */
 		warning("-U option ignored");
-#endif NOPP
+#endif /* NOPP */
 		break;
 	}
 
@@ -264,7 +264,7 @@ deleted, is now a debug-flag
 #ifdef NOCROSS
 		warning("-V option ignored");
 		break;
-#else NOCROSS
+#else /* NOCROSS */
 	{
 		register arith sz, algn;
 		char c;
@@ -307,7 +307,7 @@ deleted, is now a debug-flag
 					float_size = sz;
 				if (algn != 0)
 					float_align = algn;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 				break;
 			case 'd':	/* double	*/
 #ifndef NOFLOAT
@@ -315,7 +315,7 @@ deleted, is now a debug-flag
 					double_size = sz;
 				if (algn != 0)
 					double_align = algn;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 				break;
 			case 'p':	/* pointer	*/
 				if (sz != (arith)0)
@@ -326,9 +326,9 @@ deleted, is now a debug-flag
 			case 'r':	/* adjust bitfields right	*/
 #ifndef NOBITFIELD
 				options['r'] = 1;
-#else NOBITFIELD
+#else /* NOBITFIELD */
 				warning("bitfields are not implemented");
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 				break;
 			case 'S':	/* initial struct alignment	*/
 				if (sz != (arith)0)
@@ -344,11 +344,11 @@ deleted, is now a debug-flag
 		}
 		break;
 	}
-#endif NOCROSS
+#endif /* NOCROSS */
 	case 'S':
 		density = txt2int(&text);
 		break;
-#endif	LINT
+#endif	/* LINT */
 	}
 }
 

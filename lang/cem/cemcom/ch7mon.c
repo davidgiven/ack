@@ -66,7 +66,7 @@ ch7mon(oper, expp)
 		if ((*expp)->ex_type->tp_fund == FIELD)
 			expr_error(*expp, "& applied to field variable");
 		else
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 		if (!(*expp)->ex_lvalue)
 			expr_error(*expp, "& applied to non-lvalue");
 		else {
@@ -105,7 +105,7 @@ ch7mon(oper, expp)
 		}
 		/* FALLTHROUGH */
 	}
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	case '-':
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
@@ -123,7 +123,7 @@ ch7mon(oper, expp)
 		if (is_fp_cst(*expp))
 			switch_sign_fp(*expp);
 		else
-#endif NOFLOAT
+#endif /* NOFLOAT */
 			*expp = new_oper((*expp)->ex_type,
 					NILEXPR, oper, *expp);
 		break;

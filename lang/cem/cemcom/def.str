@@ -26,7 +26,7 @@ struct def	{		/* for ordinary tags */
 	char df_set;
 	int df_firstbrace;	/* brace number of its first occurrence */
 	int df_minlevel;	/* the lowest level needed for this def */
-#endif	LINT
+#endif	/* LINT */
 	char df_formal_array;	/* to warn if sizeof is taken */
 	arith df_address;
 };

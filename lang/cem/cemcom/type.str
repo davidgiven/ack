@@ -34,7 +34,7 @@ extern struct type
 
 #ifndef NOBITFIELD
 extern struct type *field_of();
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 extern struct type
 	*char_type, *uchar_type,
@@ -44,7 +44,7 @@ extern struct type
 	*long_type, *ulong_type,
 #ifndef NOFLOAT
 	*float_type, *double_type,
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	*void_type, *label_type,
 	*string_type, *funint_type, *error_type;
 

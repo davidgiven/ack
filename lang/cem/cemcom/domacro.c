@@ -665,7 +665,7 @@ macroeq(s, t)
 		return (*s == '\0') && (*t == '\0');
 	}
 }
-#else NOPP
+#else /* NOPP */
 EXPORT
 domacro()
 {
@@ -691,7 +691,7 @@ domacro()
 	EoiForNewline = 0;
 	SkipEscNewline = 0;
 }
-#endif NOPP
+#endif /* NOPP */
 
 PRIVATE
 SkipRestOfLine()

@@ -11,7 +11,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -75,7 +75,7 @@ code_startswitch(expp)
 		error("float/double in switch");
 		erroneous2int(expp);
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	}
 	stack_stmt(l_break, NO_LABEL);
 	sh->sh_break = l_break;

@@ -52,7 +52,7 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 			int2float(e1p, double_type);
 		return;
 	}
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 	/* Now they are INT or LONG */
 	u1 = (*e1p)->ex_type->tp_unsigned;
@@ -165,10 +165,10 @@ any2arith(expp, oper)
 		}
 		else
 			expr_warning(*expp, "%s on enum", symbol2str(oper));
-#endif NOROPTION
+#endif /* NOROPTION */
 #ifndef	LINT
 		int2int(expp, int_type);
-#endif	LINT
+#endif	/* LINT */
 		break;
 #ifndef	NOFLOAT
 	case FLOAT:
@@ -176,12 +176,12 @@ any2arith(expp, oper)
 		break;
 	case DOUBLE:
 		break;
-#endif	NOFLOAT
+#endif	/* NOFLOAT */
 #ifndef NOBITFIELD
 	case FIELD:
 		field2arith(expp);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		expr_error(*expp, "operator %s on non-numerical operand (%s)",
 			symbol2str(oper), symbol2str(fund));
@@ -318,7 +318,7 @@ float2float(expp, tp)
 	else
 		*expp = arith2arith(tp, FLOAT2FLOAT, *expp);
 }
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 array2pointer(exp)
 	register struct expr *exp;
@@ -386,7 +386,7 @@ opnd2logical(expp, oper)
 	else
 	if (fund == FIELD)
 		field2arith(expp);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	switch (fund = (*expp)->ex_type->tp_fund) {
 	case CHAR:
 	case SHORT:
@@ -397,7 +397,7 @@ opnd2logical(expp, oper)
 #ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		break;
 	default:
 		expr_error(*expp, "%s operand to %s",
@@ -456,7 +456,7 @@ any2opnd(expp, oper)
 	case ENUM:
 #ifndef NOFLOAT
 	case FLOAT:
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		any2arith(expp, oper);
 		break;
 	case ARRAY:
@@ -470,7 +470,7 @@ any2opnd(expp, oper)
 	case FIELD:
 		field2arith(expp);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	}
 }
 
@@ -502,7 +502,7 @@ field2arith(expp)
 	}
 	ch7cast(expp, CAST, tp);	/* restore its original type */
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 #ifndef NOFLOAT
 /*	switch_sign_fp() negates the given floating constant expression
@@ -519,4 +519,4 @@ switch_sign_fp(expr)
 	else
 		--(expr->FL_VALUE);
 }
-#endif NOFLOAT
+#endif /* NOFLOAT */

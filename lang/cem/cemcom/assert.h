@@ -21,4 +21,4 @@
 #else
 #define	ASSERT(exp)
 #define	NOTREACHED()
-#endif	DEBUG
+#endif	/* DEBUG */

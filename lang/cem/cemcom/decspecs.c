@@ -72,7 +72,7 @@ do_decspecs(ds)
 		if (tp == float_type)
 			tp = double_type;
 		else
-#endif NOFLOAT
+#endif /* NOFLOAT */
 			error("long with illegal type");
 		break;
 	}

@@ -91,7 +91,7 @@ idf_hashed(tg, size, hc)
 	notch->id_text = Salloc(tg, (unsigned) size);
 #ifndef NOPP
 	notch->id_resmac = 0;
-#endif NOPP
+#endif /* NOPP */
 	return notch;
 }
 
@@ -115,7 +115,7 @@ hash_stat()
 		print("End hash table tally\n");
 	}
 }
-#endif	DEBUG
+#endif	/* DEBUG */
 
 struct idf *
 str2idf(tg)
@@ -231,7 +231,7 @@ declare_idf(ds, dc, lvl)
 		case FLOAT:	/* RM 10.1	*/
 			type = double_type;
 			break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		case CHAR:
 		case SHORT:
 			/*	The RM is not clear about this: we must
@@ -274,7 +274,7 @@ declare_idf(ds, dc, lvl)
 
 #ifdef	LINT
 	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
-#endif	LINT
+#endif	/* LINT */
 
 	if (def &&
 	    ( def->df_level == lvl ||
@@ -339,7 +339,7 @@ declare_idf(ds, dc, lvl)
 #ifdef	LINT
 		newdef->df_set = 0;
 		newdef->df_firstbrace = 0;
-#endif	LINT
+#endif	/* LINT */
 
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
@@ -478,14 +478,14 @@ global_redecl(idf, new_sc, tp)
 				/* warn unconditionally */
 				warning("%s redeclared to static",
 						idf->id_text);
-#else	LINT
+#else	/* LINT */
 #ifndef NOROPTION
 				/* warn conditionally */
 				if (options['R'])
 					warning("%s redeclared to static",
 						idf->id_text);
-#endif	NOROPTION
-#endif	LINT
+#endif	/* NOROPTION */
+#endif	/* LINT */
 				def->df_sc = STATIC;
 			}
 			break;
@@ -627,7 +627,7 @@ declare_formals(fp)
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("start declare_formals", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 	while (se)	{
 		register struct def *def = se->se_idf->id_def;
 
@@ -664,7 +664,7 @@ regtype(tp)
 	case FLOAT:
 	case DOUBLE:
 		return reg_float;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	case POINTER:
 		return reg_pointer;
 	}

@@ -13,7 +13,7 @@
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	<alloc.h>
 #include	"nobitfield.h"
@@ -58,7 +58,7 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 		{
 #ifdef	LINT
 			lint_expr(*expp, USED);
-#endif	LINT
+#endif	/* LINT */
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
 			if (tpp) {
@@ -440,7 +440,7 @@ pad(tpx)
 	case FIELD:
 		put_bf(tp, (arith)0);
 		return;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 		default:
 			break;
 	}
@@ -483,7 +483,7 @@ check_ival(expp, tp)
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (!is_ld_cst(expr))
 			illegal_init_cst(expr);
 		else
@@ -513,7 +513,7 @@ check_ival(expp, tp)
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (expr->ex_class == Float)
 			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
 #ifdef NOTDEF
@@ -533,11 +533,11 @@ and also to prevent runtime coercions for compile-time constants.
 			else 
 				illegal_init_cst(expr);
 		}
-#endif NOTDEF
+#endif /* NOTDEF */
 		else
 			illegal_init_cst(expr);
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 #ifndef NOBITFIELD
 	case FIELD:
@@ -545,13 +545,13 @@ and also to prevent runtime coercions for compile-time constants.
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (is_cp_cst(expr))
 			put_bf(tp, expr->VL_VALUE);
 		else
 			illegal_init_cst(expr);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	case ERRONEOUS:
 		if (! gen_error) gen_error = pack_level;
@@ -653,7 +653,7 @@ put_bf(tp, val)
 		offset = (arith)-1;
 	}
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 int
 zero_bytes(sd)

@@ -12,7 +12,7 @@
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"dataflow.h"
@@ -45,7 +45,7 @@ label datlab_count = 1;
 
 #ifndef NOFLOAT
 int fp_used;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 
 /* global function info */
 char *func_name;
@@ -55,7 +55,7 @@ int func_notypegiven;
 #ifdef USE_TMP
 static int	tmp_id;
 static int	pro_id;
-#endif USE_TMP
+#endif /* USE_TMP */
 
 extern char options[];
 extern char *symbol2str();
@@ -93,10 +93,10 @@ init_code(dst_file)
 #ifdef USE_TMP
 #ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
-#endif	USE_TMP
-#endif	PREPEND_SCOPES
+#endif	/* USE_TMP */
+#endif	/* PREPEND_SCOPES */
 }
-#endif	LINT
+#endif	/* LINT */
 
 struct string_cst *str_list = 0;
 
@@ -139,13 +139,13 @@ end_code()
 		/* floating point used	*/
 		C_ms_flt();
 	}
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	def_strings(str_list);
 	str_list = 0;
 	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	PREPEND_SCOPES
 prepend_scopes()
@@ -158,7 +158,7 @@ prepend_scopes()
 
 #ifdef USE_TMP
 	C_beginpart(tmp_id);
-#endif USE_TMP
+#endif /* USE_TMP */
 	while (se != 0)	{
 		register struct idf *id = se->se_idf;
 		register struct def *df = id->id_def;
@@ -169,9 +169,9 @@ prepend_scopes()
 	}
 #ifdef USE_TMP
 	C_endpart(tmp_id);
-#endif USE_TMP
+#endif /* USE_TMP */
 }
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 
 code_scope(text, def)
 	char *text;
@@ -229,11 +229,11 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 		*/
 #ifndef PREPEND_SCOPES
 	code_scope(name, def);
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaStartFunction(name);
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 
 	/* set global function info */
 	func_name = name;
@@ -310,7 +310,7 @@ end_proc(fbytes)
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaEndFunction();
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 	C_df_ilb(return2_label);
 	if (return_expr_occurred) C_asp(-func_size);
 	C_df_ilb(return_label);
@@ -327,7 +327,7 @@ end_proc(fbytes)
 			C_ret(func_size);
 	}
 	else	C_ret((arith) 0);
-#endif	LINT
+#endif	/* LINT */
 
 	/* getting the number of "local" bytes is posponed until here,
 	   because copying the function result in "func_res_label" may
@@ -440,7 +440,7 @@ code_declaration(idf, expr, lvl, sc)
 		if (expr) {	/* code only if initialized */
 #ifndef PREPEND_SCOPES
 			code_scope(idf->id_text, def);
-#endif PREPEND_SCOPES
+#endif /* PREPEND_SCOPES */
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(idf->id_text);
 		}
@@ -525,7 +525,7 @@ loc_init(expr, id)
 			if (e->OP_RIGHT != 0) /* int i = {1 , 2} */
 				expr_error(e, "too many initializers");
 		}
-#endif NOROPTION
+#endif /* NOROPTION */
 		while (e)	{
 			loc_init(e->OP_LEFT, id);
 			e = e->OP_RIGHT;
@@ -543,9 +543,9 @@ loc_init(expr, id)
 			vl.vl_value = (arith)0;
 			store_val(&vl, tp);
 		}
-#else	LINT
+#else	/* LINT */
 		id->id_def->df_set = 1;
-#endif	LINT
+#endif	/* LINT */
 		free_expression(expr);
 	}
 }
@@ -559,7 +559,7 @@ bss(idf)
 
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, idf->id_def);
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 #ifdef DBSYMTAB
 	if (options['g']) {
 		stb_string(idf->id_def, idf->id_def->df_sc, idf->id_text);
@@ -600,7 +600,7 @@ formal_cvt(df)
 
 #ifdef	LINT
 /*ARGSUSED*/
-#endif	LINT
+#endif	/* LINT */
 code_expr(expr, val, code, tlbl, flbl)
 	struct expr *expr;
 	label tlbl, flbl;
@@ -616,9 +616,9 @@ code_expr(expr, val, code, tlbl, flbl)
 	if (options['g']) db_line(expr->ex_file, (unsigned int)expr->ex_line);
 #endif
 	EVAL(expr, val, code, tlbl, flbl);
-#else	LINT
+#else	/* LINT */
 	lint_expr(expr, code ? USED : IGNORED);
-#endif	LINT
+#endif	/* LINT */
 }
 
 /*	The FOR/WHILE/DO/SWITCH stacking mechanism:

@@ -56,7 +56,7 @@ skipspaces(ch, skipnl)
 			return ch;
 	}
 }
-#endif NOPP
+#endif /* NOPP */
 
 PRIVATE 
 skipline()

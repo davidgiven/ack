@@ -13,8 +13,6 @@ asm.c
 assert.h
 atw.h
 blocks.c
-cem.1
-cem.c
 cemcom.1
 ch7.c
 ch7bin.c

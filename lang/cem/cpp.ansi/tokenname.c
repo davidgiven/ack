@@ -69,4 +69,4 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{ERRONEOUS, "erroneous"},
 	{0, ""}
 };
-#endif	____
+#endif	/* ____ */

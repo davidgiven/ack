@@ -16,7 +16,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 #include	<em_arith.h>
 #include	<em_reg.h>
 #include	<alloc.h>
@@ -34,7 +34,7 @@
 static struct localvar	*FreeTmps;
 #ifdef USE_TMP
 static int	loc_id;
-#endif USE_TMP
+#endif /* USE_TMP */
 
 #ifdef PEEPHOLE
 #undef REGCOUNT
@@ -47,7 +47,7 @@ LocalInit()
 {
 #ifdef USE_TMP
 	C_insertpart(loc_id = C_getid());
-#endif USE_TMP
+#endif /* USE_TMP */
 }
 
 arith
@@ -239,4 +239,4 @@ AddrLocal(off)
 	if (p) p->t_regtype = -1;
 	C_lal(off);
 }
-#endif	LINT
+#endif	/* LINT */

@@ -34,4 +34,4 @@ DfaCallFunction(s)
 	print("DFA: %s: %s\n", CurrentFunction, s);
 	++NumberOfCalls;
 }
-#endif	DATAFLOW
+#endif	/* DATAFLOW */

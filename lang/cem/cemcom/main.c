@@ -47,7 +47,7 @@ extern char *dep_file;
 static File *dep_fd = STDOUT;
 
 extern char *getwdir();
-#endif NOPP
+#endif /* NOPP */
 
 struct sp_id special_ids[] =	{
 	{"setjmp", SP_SETJMP},	/* non-local goto's are registered	*/
@@ -64,7 +64,7 @@ arith
 #ifndef NOFLOAT
 	float_size = SZ_FLOAT,
 	double_size = SZ_DOUBLE,
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	pointer_size = SZ_POINTER;
 
 int
@@ -75,15 +75,15 @@ int
 #ifndef NOFLOAT
 	float_align = AL_FLOAT,
 	double_align = AL_DOUBLE,
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT,
 	union_align = AL_UNION;
-#endif NOCROSS
+#endif /* NOCROSS */
 
 #ifndef NOPP
 arith ifval;	/* ifval will contain the result of the #if expression	*/
-#endif NOPP
+#endif /* NOPP */
 
 char *prog_name;
 
@@ -103,7 +103,7 @@ main(argc, argv)
 	inc_max = 10;
 
 	init_pp();	/* initialise the preprocessor macros	*/
-#endif NOPP
+#endif /* NOPP */
 
 	/*	Note: source file "-" indicates that the source is supplied
 		as standard input.  This is only allowed if INP_READ_IN_ONE is
@@ -111,9 +111,9 @@ main(argc, argv)
 	*/
 #ifdef INP_READ_IN_ONE
 	while (argc > 1 && *argv[1] == '-')
-#else INP_READ_IN_ONE
+#else /* INP_READ_IN_ONE */
 	while (argc > 1 && *argv[1] == '-' && argv[1][1] != '\0')
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 	{
 		char *par = &argv[1][1];
 
@@ -122,12 +122,12 @@ main(argc, argv)
 	}
 #ifdef	LINT
 	lint_init();
-#endif	LINT
+#endif	/* LINT */
 	compile(argc - 1, &argv[1]);
 
 #ifdef	DEBUG
 	hash_stat();
-#endif	DEBUG
+#endif	/* DEBUG */
 
 #ifndef NOPP
 	if (do_dependencies) {
@@ -201,7 +201,7 @@ char *s, *source;
     else    fprint(dep_fd, "%s\n", s);
 }
 
-#endif NOPP
+#endif /* NOPP */
 
 char *source = 0;
 
@@ -213,12 +213,12 @@ compile(argc, argv)
 	char *result;
 #ifndef	LINT
 	register char *destination = 0;
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef DEBUG
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'] || options['C'];
-#endif NOPP
+#endif /* NOPP */
 #endif
 
 	switch (argc) {
@@ -227,10 +227,10 @@ compile(argc, argv)
 #ifdef DEBUG
 #ifndef NOPP
 		if (!pp_only)
-#endif NOPP
+#endif /* NOPP */
 #endif
 			fatal("%s: destination file not specified", prog_name);
-#endif	LINT
+#endif	/* LINT */
 		break;
 
 #ifndef	LINT
@@ -241,14 +241,14 @@ compile(argc, argv)
 		nmlist = argv[2];
 		destination = argv[1];
 		break;
-#endif	LINT
+#endif	/* LINT */
 
 	default:
 #ifndef	LINT
 		fatal("use: %s source destination [namelist]", prog_name);
-#else	LINT
+#else	/* LINT */
 		fatal("use: %s source", prog_name);
-#endif	LINT
+#endif	/* LINT */
 		break;
 	}
 
@@ -271,7 +271,7 @@ compile(argc, argv)
 #endif
 #ifndef NOPP
 	WorkingDir = getwdir(source);
-#endif NOPP
+#endif /* NOPP */
 	PushLex();			/* initialize lex machine */
 
 #ifdef DEBUG
@@ -279,20 +279,20 @@ compile(argc, argv)
 	if (pp_only) /* run the preprocessor as if it is stand-alone	*/
 		preprocess();
 	else
-#endif NOPP
-#endif DEBUG
+#endif /* NOPP */
+#endif /* DEBUG */
 	{
 #ifndef	LINT
 		/* compile the source text			*/
 		C_program();
 #ifdef PREPEND_SCOPES
 		prepend_scopes();
-#endif PREPEND_SCOPES
+#endif /* PREPEND_SCOPES */
 		end_code();
-#else	LINT
+#else	/* LINT */
 		/* lint the source text				*/
 		C_program();
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	DEBUG
 		if (options['u'])	{
@@ -300,7 +300,7 @@ compile(argc, argv)
 		}
 		if (options['f'] || options['t'])
 			dumpidftab("end of main", options['f'] ? 0 : 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 	}
 	PopLex();
 }
@@ -338,7 +338,7 @@ init()
 #ifndef NOFLOAT
 	float_type = standard_type(FLOAT, 0, float_align, float_size);
 	double_type = standard_type(DOUBLE, 0, double_align, double_size);
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	void_type = standard_type(VOID, 0, 1, (arith)0);
 	label_type = standard_type(LABEL, 0, 0, (arith)0);
 	error_type = standard_type(ERRONEOUS, 0, 1, (arith)1);
@@ -377,7 +377,7 @@ init()
 #ifndef NOFLOAT
 	add_def(str2idf("float"), TYPEDEF, float_type, L_UNIVERSAL);
 	add_def(str2idf("double"), TYPEDEF, double_type, L_UNIVERSAL);
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	add_def(str2idf("void"), TYPEDEF, void_type, L_UNIVERSAL);
 	stack_level();
 }
@@ -457,7 +457,7 @@ preprocess()
 		case FLOATING:
 			print("%s ", dot.tk_fval);
 			break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		case EOI:
 		case EOF:
 			return;
@@ -466,8 +466,8 @@ preprocess()
 		}
 	}
 }
-#endif NOPP
-#endif DEBUG
+#endif /* NOPP */
+#endif /* DEBUG */
 
 No_Mem()				/* called by alloc package */
 {

@@ -14,10 +14,10 @@ extern int
 	short_align, word_align, int_align, long_align,
 #ifndef NOFLOAT
 	float_align, double_align,
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	pointer_align,
 	struct_align, union_align;
-#else NOCROSS
+#else /* NOCROSS */
 #define short_align	((int)AL_SHORT)
 #define word_align	((int)AL_WORD)
 #define int_align	((int)AL_INT)
@@ -25,10 +25,10 @@ extern int
 #ifndef NOFLOAT
 #define float_align	((int)AL_FLOAT)
 #define double_align	((int)AL_DOUBLE)
-#endif NOFLOAT
+#endif /* NOFLOAT */
 #define pointer_align	((int)AL_POINTER)
 #define struct_align	((int)AL_STRUCT)
 #define union_align	((int)AL_UNION)
-#endif NOCROSS
+#endif /* NOCROSS */
 
 extern arith align();

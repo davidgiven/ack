@@ -176,7 +176,7 @@ eval_field(expr, code)
 		conversion(atype, expr->ex_type);
 	}
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
-#endif	LINT
+#endif	/* LINT */
 

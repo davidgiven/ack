@@ -101,7 +101,7 @@ EVAL(expr, val, code, true_label, false_label)
 			C_loi(expr->ex_type->tp_size);
 		}
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	case Oper:	/* compound expression	*/
 	{
 		int oper = expr->OP_OPER;
@@ -142,7 +142,7 @@ EVAL(expr, val, code, true_label, false_label)
 				case DOUBLE:
 					C_adf(tp->tp_size);
 					break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 				default:
 					crash("bad type +");
 				}
@@ -162,7 +162,7 @@ EVAL(expr, val, code, true_label, false_label)
 					case DOUBLE:
 						C_ngf(tp->tp_size);
 						break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 					default:
 						CRASH();
 					}
@@ -200,7 +200,7 @@ EVAL(expr, val, code, true_label, false_label)
 			case DOUBLE:
 				C_sbf(tp->tp_size);
 				break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 			default:
 				crash("bad type -");
 			}
@@ -229,7 +229,7 @@ EVAL(expr, val, code, true_label, false_label)
 					case DOUBLE:
 						C_mlf(double_size);
 						break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 					default:
 						crash("bad type *");
 					}
@@ -252,7 +252,7 @@ EVAL(expr, val, code, true_label, false_label)
 				case DOUBLE:
 					C_dvf(double_size);
 					break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 				default:
 					crash("bad type /");
 				}
@@ -310,7 +310,7 @@ EVAL(expr, val, code, true_label, false_label)
 				case DOUBLE:
 					C_cmf(size);
 					break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 				case POINTER:
 					C_cmp();
 					break;
@@ -360,7 +360,7 @@ EVAL(expr, val, code, true_label, false_label)
 				eval_field(expr, gencode);
 				break;
 			}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			EVAL(right, RVAL, newcode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				C_dup(ATW(tp->tp_size));
@@ -397,7 +397,7 @@ EVAL(expr, val, code, true_label, false_label)
 				eval_field(expr, gencode);
 				break;
 			}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			if (newcode && left->ex_class == Value) {
 				compl = 0; /* Value */
 			}
@@ -520,7 +520,7 @@ EVAL(expr, val, code, true_label, false_label)
 						DfaCallFunction(
 							left->VL_IDF->id_text);
 				}
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 			}
 			else {
 				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
@@ -624,7 +624,7 @@ EVAL(expr, val, code, true_label, false_label)
 		case INT2FLOAT:
 		case FLOAT2INT:
 		case FLOAT2FLOAT:
-#endif NOFLOAT
+#endif /* NOFLOAT */
 			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 			if (gencode)
 				conversion(right->ex_type, left->ex_type);
@@ -800,7 +800,7 @@ assop(type, oper)
 			break;
 		}
 		break;
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	case POINTER:
 		if (oper == MINAB || oper == MINMIN || oper == POSTDECR)
 			C_ngi(size);
@@ -1004,5 +1004,5 @@ load_cst(val, siz)
 	}
 }
 
-#endif	LINT
+#endif	/* LINT */
 

@@ -13,7 +13,7 @@
 #include	"interface.h"
 #ifdef ANSI
 #include	<flt_arith.h>
-#endif ANSI
+#endif /* ANSI */
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
@@ -501,7 +501,7 @@ implicit_func_decl(idf, file, line)
 	output_def(&od);
 	/* The other fields are not used for this class. */
 }
-#endif	IMPLICIT
+#endif	/* IMPLICIT */
 
 fill_outcall(ex, used)
 	struct expr *ex;
@@ -515,7 +515,7 @@ fill_outcall(ex, used)
 		/* IFDC, first time */
 		implicit_func_decl(idf, ex->ex_file, ex->ex_line);
 	}
-#endif	IMPLICIT
+#endif	/* IMPLICIT */
 
 	OutCall.od_type = def->df_type->tp_up;
 	OutCall.od_statnr = (def->df_sc == STATIC ? stat_number : 0);
@@ -580,4 +580,4 @@ add_expr_arg(e)
 	OutCall.od_nrargs++;
 }
 
-#endif	LINT
+#endif	/* LINT */

@@ -174,7 +174,7 @@ ch7cast(expp, oper, tp)
 		ch7cast(expp, oper, tp->tp_up);
 	}
 	else
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	if (oldtp == tp) {
 		/* life is easy */
 	}
@@ -203,9 +203,9 @@ ch7cast(expp, oper, tp)
 				(*expp)->ex_type = tp;
 			else
 				int2int(expp, tp);
-#else	LINT
+#else	/* LINT */
 			int2int(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 #ifndef NOFLOAT
 		else
@@ -219,9 +219,9 @@ ch7cast(expp, oper, tp)
 				(*expp)->ex_type = tp;
 			else
 				int2float(expp, tp);
-#else	LINT
+#else	/* LINT */
 			int2float(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 		else
 		if (!oldi && i) {
@@ -230,9 +230,9 @@ ch7cast(expp, oper, tp)
 				(*expp)->ex_type = tp;
 			else
 				float2int(expp, tp);
-#else	LINT
+#else	/* LINT */
 			float2int(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 		else {
 			/* !oldi && !i */
@@ -241,16 +241,16 @@ ch7cast(expp, oper, tp)
 				(*expp)->ex_type = tp;
 			else
 				float2float(expp, tp);
-#else	LINT
+#else	/* LINT */
 			float2float(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
-#else NOFLOAT
+#else /* NOFLOAT */
 		else {
 			crash("(ch7cast) floats not implemented\n");
 			/*NOTREACHED*/
 		}
-#endif NOFLOAT
+#endif /* NOFLOAT */
 	}
 	else
 	if (oldtp->tp_fund == POINTER && tp->tp_fund == POINTER)	{
@@ -260,7 +260,7 @@ ch7cast(expp, oper, tp)
 #ifdef	LINT
 		if (oper != CAST)
 			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
-#endif	LINT
+#endif	/* LINT */
 		(*expp)->ex_type = tp;	/* free conversion */
 	}
 	else
@@ -387,9 +387,9 @@ ch7asgn(expp, oper, expr)
 		exp = new_oper(exp->ex_type->tp_up, exp, oper, expr);
 	else
 		exp = new_oper(exp->ex_type, exp, oper, expr);
-#else NOBITFIELD
+#else /* NOBITFIELD */
 	exp = new_oper(exp->ex_type, exp, oper, expr);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	exp->OP_TYPE = tp;	/* for EVAL() */
 	exp->ex_flags |= EX_SIDEEFFECTS;
 	*expp = exp;
@@ -411,7 +411,7 @@ is_integral_type(tp)
 #ifndef NOBITFIELD
 	case FIELD:
 		return is_integral_type(tp->tp_up);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		return 0;
 	}
@@ -430,12 +430,12 @@ is_arith_type(tp)
 #ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
-#endif NOFLOAT
+#endif /* NOFLOAT */
 		return 1;
 #ifndef NOBITFIELD
 	case FIELD:
 		return is_arith_type(tp->tp_up);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		return 0;
 	}

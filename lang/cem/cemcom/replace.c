@@ -235,4 +235,4 @@ EnableMacros()
 	}
 	Unstacked = 0;
 }
-#endif NOPP
+#endif /* NOPP */
