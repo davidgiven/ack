@@ -318,7 +318,7 @@ if (Debug>1) fprintf(stderr,"findcoerc returns %d at position %d\n",cp,i);
 				CHKCOST();
 				break;
 			} else {
-				if (cp->c3_prop==0) {
+				if (cp->c3_prop<0) {
 					totalcost+=docoerc(tp,cp,ply,toplevel,0);
 					CHKCOST();
 				} else {
@@ -361,7 +361,7 @@ if(Debug>1) fprintf(stderr,"Pattern too long, %d with only %d items on stack\n",
 				goto normalfailed;
 #endif
 			}
-			if (cp->c3_prop==0) {
+			if (cp->c3_prop<0) {
 				totalcost+=docoerc(tp,cp,ply,toplevel,0);
 				CHKCOST();
 			} else {
