@@ -18,7 +18,6 @@ keywords
 lookup.c
 lookup.h
 main.c
-makedepend
 output.c
 param.h
 property.h

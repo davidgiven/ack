@@ -12,7 +12,6 @@ finish.c
 led.6
 mach.c
 main.c
-makedepend
 memory.c
 memory.h
 orig.h
