@@ -38,7 +38,7 @@ long	tnum = 0;
 char	tstrtab[STRTABSZ];
 long	tssiz = 0;
 char	*malloc(), *strcpy(), *strncpy();
-long	tell();
+long	lseek();
 long	time();
 #endif AAL
 #else
