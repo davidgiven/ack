@@ -2852,7 +2852,7 @@ C_com_narg	==>
 			"ld	[$reg_sp+$a], $b";
 			"not	$a, $c";
 			"bnz	1b";
-			"st	$c, [$reg_sp+$a";
+			"st	$c, [$reg_sp+$a]";
 			free_reg(a);
 			free_reg(b);
 			free_reg(c);
