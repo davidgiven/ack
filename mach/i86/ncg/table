@@ -94,24 +94,17 @@ ADDR_LOCAL      = { INT ind; }      2 cost(1,9) ind "(bp)" .
 LOCAL          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
 LOCAL1          = { INT ind; INT size; } 2 cost(1,15) ind "(bp)" .
 
-Rreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg 
-                  ")" .
-Rbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "("
-                  reg ")" .
-Xreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg 
-                  ")" .
+Rreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg ")" .
+Rbpreg_off       = { AREG reg; INT ind;} 2 cost(1,11) ind "(bp)" "(" reg ")" .
+Xreg_off         = { AREG reg; ADDR off;} 2 cost(1,9) off "(" reg ")" .
 
 ind_reg2        = { AREG reg;} 2 cost(0,11) "(" reg ")" .
-ind_regoff2     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg
-                  ")" .
-ind_bpregoff2   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "("
-                  reg ")" .
+ind_regoff2     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg ")" .
+ind_bpregoff2   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "(" reg ")" .
 
 ind_reg1        = { AREG reg;} 2 cost(0,11) "(" reg ")" .
-ind_regoff1     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg
-                  ")" .
-ind_bpregoff1   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "("
-                  reg ")" .
+ind_regoff1     = { AREG reg; ADDR off;} 2 cost(1,15) off "(" reg ")" .
+ind_bpregoff1   = { AREG reg; INT ind;} 2 cost(1,18) ind "(bp)" "(" reg ")" .
 label           = { ADDR off;} 2 off .
 
 /*****************************************************************/
@@ -467,6 +460,20 @@ pat stl lol $1==$2
 #endif
 						leaving dup 2 stl $1
 
+pat stl lol lof $1==$2
+#ifdef REGVARS
+	&& inreg($1) <= 0
+#endif
+with AREG				yields %1 %1
+						leaving stl $1 lof $3
+
+pat stl lol loi $1==$2
+#ifdef REGVARS
+	&& inreg($1) <= 0
+#endif
+with AREG				yields %1 %1
+						leaving stl $1 loi $3
+
 pat sdl ldl $1==$2				leaving dup 4 sdl $1
 
 pat lol lol $1==$2
@@ -485,6 +492,14 @@ gen	move {LOCAL,$1,2}, {LOCAL,$3,2}
 pat loe					yields {EXTERN2,$1}
 
 pat ste loe $1==$2				leaving dup 2 ste $1
+
+pat ste loe lof $1==$2
+with AREG				yields %1 %1
+						leaving ste $1 lof $3
+
+pat ste loe loi $1==$2
+with AREG				yields %1 %1
+						leaving ste $1 loi $3
 
 pat sde lde $1==$2				leaving dup 4 sde $1
 
@@ -1466,6 +1481,40 @@ pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
 pat lol lof xor lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
 					call lofrxxxsof("xor")
 
+proc ldfrxxxsdf example lol ldf adi lol sdf
+with regorconst regorconst
+kills referals
+gen axx[1] {ind_regoff2, regvar($1), $2}, %1
+    axx[2] {ind_regoff2, regvar($1), $2+2}, %2
+
+pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call ldfrxxxsdf("add", "adc")
+pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call ldfrxxxsdf("add", "adc")
+pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call ldfrxxxsdf("and", "and")
+pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call ldfrxxxsdf("or", "or")
+pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
+					call ldfrxxxsdf("xor", "xor")
+
+proc ldirxxxsdi example lol loi adi lol sti
+with regorconst regorconst
+kills referals
+gen axx[1] {ind_reg2, regvar($1)}, %1
+    axx[2] {ind_regoff2, regvar($1), 2}, %2
+
+pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+					call ldirxxxsdi("add", "adc")
+pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+					call ldirxxxsdi("add", "adc")
+pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+					call ldirxxxsdi("and", "and")
+pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+					call ldirxxxsdi("or", "or")
+pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==2 && inreg($1)==reg_any
+					call ldirxxxsdi("xor", "xor")
+
 proc lofruxxsof example lol lof inc lol stf
 kills referals
 gen uxx* {ind_regoff2, regvar($1), $2}
@@ -1504,6 +1553,39 @@ pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("add")
 pat lol lof and lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("and")
 pat lol lof ior lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("or")
 pat lol lof xor lol stf $1==$4 && $2==$5 && $3==2	call lofxxxsof("xor")
+
+proc ldfxxxsdf example lol ldf adi lol sdf
+with regorconstnoaddr regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen axx[1] {ind_regoff2, %a, $2}, %1
+    axx[2] {ind_regoff2, %a, $2+2}, %2
+    killreg %a
+
+pat lol ldf adi lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("add", "adc")
+pat lol ldf adu lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("add", "adc")
+pat lol ldf and lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("and", "and")
+pat lol ldf ior lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("or", "or")
+pat lol ldf xor lol sdf $1==$4 && $2==$5 && $3==2	call ldfxxxsdf("xor", "xor")
+
+proc ldixxxsdi example lol loi adi lol sti
+with regorconstnoaddr regorconstnoaddr
+kills referals
+uses ADDREG={LOCAL,$1,2}
+gen axx[1] {ind_reg2, %a}, %1
+    axx[2] {ind_regoff2, %a, 2}, %2
+    killreg %a
+
+pat lol loi adi lol sti $1==$4 && $2==4 && $5==4 && $3==2
+					call ldixxxsdi("add", "adc")
+pat lol loi adu lol sti $1==$4 && $2==4 && $5==4 && $3==2
+					call ldixxxsdi("add", "adc")
+pat lol loi and lol sti $1==$4 && $2==4 && $5==4 && $3==2
+					call ldixxxsdi("and", "and")
+pat lol loi ior lol sti $1==$4 && $2==4 && $5==4 && $3==2
+					call ldixxxsdi("or", "or")
+pat lol loi xor lol sti $1==$4 && $2==4 && $5==4 && $3==2
+					call ldixxxsdi("xor", "xor")
 
 proc lefuxxsef example loe lof inc loe stf
 kills referals
@@ -1905,6 +1987,14 @@ with rmorconst rmorconst REG REG
   gen and %3,%1
       and %4,%2				yields %4 %3
 
+pat ldc and highw($1)==(0-1) && $2==4
+with REG
+  gen and %1,{ANYCON, loww($1)}		yields %1
+
+pat ldc and highw($1)==0 && $2==4
+with REG rmorconst
+  gen and %1,{ANYCON, loww($1)}		yields {ANYCON,0} %1
+
 pat and defined($1)
 kills ALL
   gen mov cx,{ANYCON,$1}
@@ -1928,6 +2018,14 @@ with EXACT REG REG rmorconst rmorconst
 with rmorconst rmorconst REG REG
   gen or %3,%1
       or %4,%2				yields %4 %3
+
+pat ldc ior highw($1)==(0-1) && $2==4
+with REG rmorconst
+  gen or %1,{ANYCON, loww($1)}		yields {ANYCON,0-1} %1
+
+pat ldc ior highw($1)==0 && $2==4
+with REG
+  gen or %1,{ANYCON, loww($1)}		yields %1
 
 pat ior defined($1)
 kills ALL
@@ -2366,6 +2464,50 @@ with rmorconst rmorconst	yields %2	leaving zge $3
 
 pat ldc cmi tge highw($1)==0 && loww($1)==0 && $2==4
 with rmorconst rmorconst	yields %2	leaving tge $3
+
+pat ldc cmi zle highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jg {label,$3}
+      jl {label,1f}
+      cmp %a,%1
+      je {label,$3}
+      1:
+
+pat ldc cmi tle highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jg {label,2f}
+      jl {label,1f}
+      cmp %a,%1
+      jne {label,1f}
+      2:
+      inc %a
+      1:			yields %a
+
+pat ldc cmi zgt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jl {label,$3}
+      jg {label,1f}
+      cmp %a,%1
+      jne {label,$3}
+      1:
+
+pat ldc cmi tgt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jl {label,2f}
+      jg {label,1f}
+      cmp %a,%1
+      je {label,1f}
+      2:
+      inc %a
+      1:			yields %a
 
 pat ldc cms zeq $2==4 && loww($1)==0 && highw($1)==0
 with rmorconst REG STACK
