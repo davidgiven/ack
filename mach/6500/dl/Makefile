@@ -1,7 +1,8 @@
-CFLAGS=-O
+EMHOME=../../..
+CFLAGS=-O -I$(EMHOME)/h
 
 dl:             dl.o
-		cc -o dl -n dl.o
+		cc -o dl -n dl.o $(EMHOME)/modules/lib/libobject.a
 
 install:	dl
 		../../install dl
