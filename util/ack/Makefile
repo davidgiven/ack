@@ -66,7 +66,7 @@ dmach.c intable.c: mktables dmach.h
 	mktables $(ACKDIR)
 
 mktables:       mktables.c
-	cc -o mktables mktables.c
+	$(CC) -o mktables mktables.c
 
 pr:
 	@pr Makefile $(HFILES) $(DSRC)

@@ -4,7 +4,7 @@ b=../../../lib/em22
 all:	$(INTS) eminform em
 
 em:	em.c
-	cc -o em -I../../../h em.c
+	$(CC) -o em -I../../../h em.c
 
 eminform:	eminform.s
 	as eminform.s;ld -i -o eminform a.out -lc

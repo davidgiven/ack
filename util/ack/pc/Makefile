@@ -6,7 +6,7 @@ PC_PATH=$(EMHOME)/lib/em_pc
 LDFLAGS = -i
 
 em_pc:          em_pc.c $h/local.h $h/em_path.h
-		cc $(LDFLAGS) -o em_pc -O -I$h em_pc.c
+		$(CC) $(LDFLAGS) -o em_pc -O -I$h em_pc.c
 
 cmp:            em_pc
 		cmp em_pc $(PC_PATH)

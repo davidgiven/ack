@@ -28,7 +28,7 @@ hash.o:		misc.h
 pattern.o:	misc.h symtab.h
 
 topgen:		$(OFILES)
-		cc $(OFILES) -o topgen
+		$(CC) $(OFILES) -o topgen
 
 lint:		parser
 		lint $(CFILES)

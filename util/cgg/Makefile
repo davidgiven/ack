@@ -9,7 +9,7 @@ LIBS=../../lib/em_data.a
 LEXLIB=-lln
 
 cgg:	bootgram.o
-	cc $(LDFLAGS) bootgram.o $(LIBS) $(LEXLIB) -o cgg
+	$(CC) $(LDFLAGS) bootgram.o $(LIBS) $(LEXLIB) -o cgg
 
 bootgram.c:	bootgram.y
 	@echo expect 1 shift/reduce conflict
