@@ -157,9 +157,12 @@ union pext_t {
 #define PF_ENVIRON	010	/* proc does a lxa or lxl */
 #define PF_LPI		020	/* proc may be called indirect */
 #define PF_CALINLOOP	040	/* proc ever called in a loop? (transitively) */
+#define PF_GTO		0100	/* proc may be entered via GTO instruction */
 
 #define CALLED_IN_LOOP(p)	p->p_flags1 |= PF_CALINLOOP
 #define IS_CALLED_IN_LOOP(p)	(p->p_flags1 & PF_CALINLOOP)
+#define IS_ENTERED_WITH_GTO(p)	(p->p_flags1 & PF_GTO)
+#define ENTERED_WITH_GTO(p)	p->p_flags1 |= PF_GTO
 
 
 /* LOOPS */
