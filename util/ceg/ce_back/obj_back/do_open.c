@@ -4,7 +4,7 @@
 #include "data.h"
 #include "header.h"
 
-do_open( filename)
+open_back( filename)
 char *filename;
 {
 	if ( filename == (char *) '\0')
