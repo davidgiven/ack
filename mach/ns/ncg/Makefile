@@ -6,12 +6,12 @@ TABLEFLAGS=
 #cgg options
 CGGFLAGS=
 
-PREFLAGS=-I$(EMHOME)/h -I. -DNDEBUG
+PREFLAGS=-I$(EMHOME)/h -I. -I$(EMHOME)/mach -I$(EMHOME)/modules/h -DNDEBUG
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) -O
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-bx
-LIBS=$(EMHOME)/lib/em_data.a
+LIBS=$(EMHOME)/lib/em_data.a $(EMHOME)/modules/lib/libflt.a
 CDIR=$(EMHOME)/mach/proto/ncg
 CGG=$(EMHOME)/lib/ncgg
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
