@@ -19,7 +19,8 @@
 	chmk    (ap)+
 	bcc     L1
 	pushl	$EHEAP
-	jmp     .fat
+	jsb     .trp
+	rsb
 L1:
 	movl	r1,ap
 L2:
