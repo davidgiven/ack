@@ -149,13 +149,4 @@ OUTENTITIES()
 	}
 }
 
-/* XXX */
-OUTTRACE(s, n)
-	char *s;
-{
-	fprintf(stderr,"trace: ");
-	fprintf(stderr,s, n);
-	fprintf(stderr,"\n");
-}
-
 #endif TRACE
