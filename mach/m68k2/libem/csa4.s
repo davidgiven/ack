@@ -6,8 +6,6 @@
 
 	.sect .text
 .csa4:
-	move.l	(sp)+,a0	! case descriptor
-	move.l	(sp)+,d0	! index
 	move.l	(a0)+,a1	! default address
 	sub.l	(a0)+,d0	! index - lower bound
 	blt	1f

@@ -1,13 +1,11 @@
-.define .csa
+.define .csa2
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
 	.sect .text
-.csa:
-	move.l	(sp)+,a0	! case descriptor
-	move	(sp)+,d0	! index
+.csa2:
 	move.l	(a0)+,a1	! default address
 	sub	(a0)+,d0	! index - lower bound
 	blt	1f

@@ -1,13 +1,11 @@
-.define .csb
+.define .csb2
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
 	.sect .text
-.csb:
-	move.l	(sp)+,a0	! case descriptor
-	move	(sp)+,d0	! index
+.csb2:
 	move.l	(a0)+,a1	! default jump address
 	move.w	(a0)+,d1	! # entries
 	beq	2f

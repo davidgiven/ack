@@ -12,5 +12,5 @@
 	jmp	EXIT
 
 	.sect .data
-fmt:	.asciz "system call %d not implemented"
+fmt:	.asciz "system call %d not implemented\n"
 .align 2
