@@ -24,7 +24,6 @@
 #include	<assert.h>
 #include	<alloc.h>
 
-#include	"squeeze.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"def.h"

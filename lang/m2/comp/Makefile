@@ -39,7 +39,7 @@ OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 GENH=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h \
-	inputtype.h density.h squeeze.h nocross.h \
+	inputtype.h density.h squeeze.h nocross.h nostrict.h \
 	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h f_info.h idf.h\

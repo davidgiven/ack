@@ -24,7 +24,6 @@
 #include	<alloc.h>
 
 #include	"strict3rd.h"
-#include	"squeeze.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"

@@ -33,7 +33,7 @@
 #include	"misc.h"
 #include	"warning.h"
 #include	"main.h"
-#include	"squeeze.h"
+#include	"nostrict.h"
 
 extern char *symbol2str();
 extern char *sprint();
@@ -658,7 +658,10 @@ ChkFunCall(expp)
 	/*	Check a call that must have a result
 	*/
 
-	if (! ChkCall(expp)) return 0;
+	if (! ChkCall(expp)) {
+		expp->nd_type = error_type;
+		return 0;
+	}
 
 	if (expp->nd_type == 0) {
 		node_error(expp, "function call expected");
@@ -1176,7 +1179,7 @@ ChkStandard(expp)
 			return 0;
 		}
 		if (! IsConformantArray(left->nd_type)) cstcall(expp, S_SIZE);
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 		else node_warning(expp,
 				  W_STRICT,
 				  "%s on conformant array",

@@ -28,7 +28,7 @@
 #include	"main.h"
 #include	"node.h"
 #include	"warning.h"
-#include	"squeeze.h"
+#include	"nostrict.h"
 
 /* error classes */
 #define	ERROR		1
@@ -177,7 +177,7 @@ _error(class, node, fmt, argv)
 			remark = "(old-fashioned use)";
 			break;
 #endif
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 		case W_STRICT:
 			remark = "(strict)";
 			break;

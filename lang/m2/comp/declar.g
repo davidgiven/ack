@@ -28,7 +28,7 @@
 #include	"main.h"
 #include	"chk_expr.h"
 #include	"warning.h"
-#include	"squeeze.h"
+#include	"nostrict.h"
 
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
@@ -74,7 +74,7 @@ ProcedureHeading(t_def **pdf; int type;)
 		]?
 	]?
 			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 			  if (tp && IsConstructed(tp)) {
 warning(W_STRICT, "procedure \"%s\" has a constructed result type",
 	(*pdf)->df_idf->id_text);

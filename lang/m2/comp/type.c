@@ -17,7 +17,7 @@
 #include	<em_label.h>
 #include	<em_code.h>
 
-#include	"squeeze.h"
+#include	"nostrict.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -475,7 +475,7 @@ set_type(tp)
 
 	getbounds(tp, &lb, &ub);
 
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 	if (lb < 0) {
 		warning(W_STRICT, "base type of set has negative lower bound");
 	}

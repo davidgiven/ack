@@ -19,7 +19,7 @@
 #include	"type.h"
 #include	"main.h"
 #include	"warning.h"
-#include	"squeeze.h"
+#include	"nostrict.h"
 #include	"nocross.h"
 
 #define	MINIDFSIZE	14
@@ -47,9 +47,7 @@ DoOption(text)
 	case 'n':	/* no register messages */
 	case 'x':	/* every name global */
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
-#ifndef STRICT_3RD_ED
 	case '3':	/* strict 3rd edition Modula-2 */
-#endif
 		options[text[-1]]++;
 		break;
 
@@ -62,7 +60,7 @@ DoOption(text)
 					warning_classes &= ~W_OLDFASHIONED;
 					break;
 #endif
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 				case 'R':
 					warning_classes &= ~W_STRICT;
 					break;
@@ -85,7 +83,7 @@ DoOption(text)
 					warning_classes |= W_OLDFASHIONED;
 					break;
 #endif
-#ifndef SQUEEZE
+#ifndef NOSTRICT
 				case 'R':
 					warning_classes |= W_STRICT;
 					break;

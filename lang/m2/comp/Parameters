@@ -71,3 +71,9 @@
 #undef NOCROSS		1	/* define when cross-compiler not needed */
 
 
+!File: nostrict.h
+#undef NOSTRICT		1	/* define when STRICT warnings disabled
+				   (yet another squeezing method)
+				*/
+
+
