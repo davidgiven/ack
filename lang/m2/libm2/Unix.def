@@ -99,6 +99,8 @@ DEFINITION MODULE Unix;
   PROCEDURE signal(sig: INTEGER;
 		   func: SignalPrc;
 		   VAR oldfunc: SignalPrc) : INTEGER;
+  PROCEDURE sigtrp(trapno, signo: INTEGER) : INTEGER;
+  (* Let Unix signal signo cause EM trap trapno to occur *)
   PROCEDURE stat(path: ADDRESS; statbuf: ADDRESS) : INTEGER;
   PROCEDURE fstat(fildes: INTEGER; statbuf: ADDRESS) : INTEGER;
   PROCEDURE stime(t: LONGINT) : INTEGER;

@@ -23,6 +23,7 @@
  exa MainLB
  exa StackSize
  exp $catch
+ exp $init
  inp $trap_handler
 
 handler
@@ -85,6 +86,7 @@ mainroutine
  lpi $trap_handler
  sig
  asp EM_PSIZE
+ cal $init
  cal $__M2M_
  cal $halt
  loc 0			; should not get here
@@ -98,6 +100,7 @@ mainroutine
  lae handler
  loi EM_PSIZE
  lpi $catch
+ lae handler
  sti EM_PSIZE
  cai
  asp EM_PSIZE+EM_WSIZE

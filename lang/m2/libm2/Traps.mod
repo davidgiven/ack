@@ -30,7 +30,7 @@ IMPLEMENTATION MODULE Traps;
   *)
   VAR 	p, q: POINTER TO CHAR;
 	l: CARDINAL;
-	dummy, lino: INTEGER;
+	lino: INTEGER;
 	buf, buf2: ARRAY [0..255] OF CHAR;
 	i, j: CARDINAL;
   BEGIN
@@ -40,10 +40,10 @@ IMPLEMENTATION MODULE Traps;
 		WHILE p^ # 0C DO
 			p := ADDRESS(p) + 1;
 		END;
-		dummy := Unix.write(2, q, ADDRESS(p) - ADDRESS(q));
+		IF Unix.write(2, q, ADDRESS(p) - ADDRESS(q)) < 0 THEN END;
 	ELSE
 		l := Argv(0, buf);
-		dummy := Unix.write(2, ADR(buf), l);
+		IF Unix.write(2, ADR(buf), l) < 0 THEN END;
 	END;
 	lino := EM.LINO();
 	i := 0;
@@ -70,14 +70,14 @@ IMPLEMENTATION MODULE Traps;
 	END;
 	buf[i] := ':';
 	buf[i+1] := ' ';
-	dummy := Unix.write(2, ADR(buf), i+2);
+	IF Unix.write(2, ADR(buf), i+2) < 0 THEN END;
 	i := 0;
 	WHILE (i <= HIGH(str)) AND (str[i] # 0C) DO
 		INC(i);
 	END;
-	dummy := Unix.write(2, ADR(str), i);
+	IF Unix.write(2, ADR(str), i) < 0 THEN END;
 	buf[0] := 12C;
-	dummy := Unix.write(2, ADR(buf), 1);
+	IF Unix.write(2, ADR(buf), 1) < 0 THEN END;
   END Message;
 
   PROCEDURE Trap(n: INTEGER);

@@ -17,6 +17,7 @@ DEFINITION MODULE Traps;
 				*)
 	ERRCARDUVFL =	69;	(* CARDINAL underflow *)
 	ERRINTERNAL =	70;	(* Internal error; should not happen *)
+	ERRUNIXSIG =	71;	(* received unix signal *)
 
   TYPE	TrapHandler = EM.TrapHandler;
 

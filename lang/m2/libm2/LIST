@@ -27,6 +27,8 @@ absi.c
 absl.c
 halt.c
 transfer.e
+init.c
+sigtrp.c
 store.c
 confarray.c
 load.c

@@ -135,6 +135,7 @@ IMPLEMENTATION MODULE Streams;
   END SetStreamBuffering;
 
   PROCEDURE FlushStream(stream: Stream; VAR result: StreamResult);
+  VAR cnt1: INTEGER;
   BEGIN
 	result := succeeded;
 	IF (stream = NIL) OR (stream^.kind = none) THEN
@@ -146,10 +147,11 @@ IMPLEMENTATION MODULE Streams;
 			result := illegaloperation;
 			RETURN;
 		END;
-		IF (cnt > 0) AND (Unix.write(fildes, ADR(buf), cnt) < 0) THEN
-			;
+		IF (cnt > 0) THEN
+			cnt1 := cnt;
+			cnt := 0;
+			IF Unix.write(fildes, ADR(buf), cnt) < 0) THEN END;
 		END;
-		cnt := 0;
 	END;
   END FlushStream;
 

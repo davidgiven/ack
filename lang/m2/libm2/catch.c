@@ -10,6 +10,7 @@
 */
 #include <em_abs.h>
 #include <m2_traps.h>
+#include <signal.h>
 
 static struct errm {
 	int errno;
@@ -47,6 +48,7 @@ static struct errm {
 	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
 	{ M2_UUVFL,	"cardinal underflow"},
 	{ M2_INTERNAL,	"internal error; ask an expert for help"},
+	{ M2_UNIXSIG,	"got a unix signal"},
 	{ -1,		0}
 };
 
@@ -83,6 +85,19 @@ catch(trapno)
 		*p = 0;
 		_Traps__Message(q, 0, (int) (p - q), 1);
 	}
+#ifndef int24
+#ifndef int44
+#ifndef int22
+	if (trapno == M2_UNIXSIG) {
+		extern int __signo;
+		signal(__signo, SIG_DFL);
+		_cleanup();
+		kill(getpid(), __signo);
+		_exit(trapno);
+	}
+#endif
+#endif
+#endif
 	if (trapno != M2_FORCH) exit(trapno);
 	SIG(catch);
 }
