@@ -10,11 +10,17 @@ var M=s2650
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
 var INCLUDES=-I{EM}/include -I/usr/include
-name asld
-	from .s.a
-	to .out
-	outfile a.out
+name as
+	from .s.so
+	to .o
 	program {EM}/lib/{M}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
