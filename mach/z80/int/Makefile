@@ -3,6 +3,7 @@ SRC =	em.s atof.s fpp.s mli4.s dvu4.s dvi4.s eb.s
 OBJ =	em.o atof.o fpp.o mli4.o dvu4.o dvi4.o eb.o
 DLSRC =	dl.c dlbin.c
 LIBOBJ = $(EMHOME)/modules/lib/libobject.a
+LDFLAGS =
 
 CFLAGS =	-O -I$(EMHOME)/h
 
@@ -34,10 +35,10 @@ int.hex:	a.out dlbin
 	./dosort int.hex
 
 dl:	dl.o
-	$(CC) -n -o dl dl.o
+	$(CC) $(LDFLAGS) -o dl dl.o
 
 dlbin:	dlbin.o
-	$(CC) -n -o dlbin dlbin.o $(LIBOBJ)
+	$(CC) $(LDFLAGS) -o dlbin dlbin.o $(LIBOBJ)
 
 cv:	cv.o
-	$(CC) -n -o cv cv.o
+	$(CC) $(LDFLAGS) -o cv cv.o
