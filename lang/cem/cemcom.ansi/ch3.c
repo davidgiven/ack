@@ -487,9 +487,13 @@ check_pseudoproto(pl, opl, diag)
 		return 0;
 	}
 	if (opl->pl_flag & PL_VOID) {
-		if (diag && !(pl->pl_flag & PL_VOID))
-			strict("function is defined without parameters");
-		return 0;
+		if (!(pl->pl_flag & PL_VOID)) {
+			if (diag) {
+				strict("function is defined without parameters");
+			}
+			return 0;
+		}
+		return 1;
 	}
 	while (pl && opl) {
 	    if (!equal_type(pl->pl_type, opl->pl_type, -1, diag)) {
