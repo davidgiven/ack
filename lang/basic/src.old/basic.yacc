@@ -83,7 +83,6 @@ double  dval;
 char	*sval;
 int 	e1,e2;
 int	chann;		/* input/output channel */
-int	deftype;	/* predefined type declarer */
 
 char	*formatstring;	/* formatstring used for printing */
 Symbol	*s;		/* Symbol dummy */
