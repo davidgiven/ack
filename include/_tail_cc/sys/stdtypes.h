@@ -15,5 +15,9 @@ typedef long	clock_t;
 typedef int	pid_t;
 typedef unsigned short	gid_t;
 typedef unsigned short	uid_t;
+typedef unsigned int	speed_t;
+typedef unsigned long	tcflag_t;
+typedef unsigned char	cc_t;
+
 
 #endif	/* __STDTYPES_H__ */
