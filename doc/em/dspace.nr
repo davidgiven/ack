@@ -23,7 +23,7 @@ Examples are LOE, LAE and STE.
 Part of the global data area is initialized by the
 compiler, the
 rest is not initialized at all or is initialized
-with a value, typically -32768 or 0.
+with a value, typically \-32768 or 0.
 Part of the initialized global data may be made read-only
 if the implementation supports protection.
 .P
@@ -47,7 +47,7 @@ addressed with the use of the DCH instruction.
 .A
 Many instructions have offsets to LB as argument,
 for instance LOL, LAL and STL.
-The arguments of these instructions range from -1 to some
+The arguments of these instructions range from \-1 to some
 (negative) minimum
 for the access of local storage and from 0 to some (positive)
 maximum for parameter access.
@@ -246,7 +246,7 @@ reserved.
 The parameters and local storage are accessed by the same instructions.
 Negative offsets are used for access to local variables.
 The highest byte, that is the byte nearest
-to LB, has to be accessed with offset -1.
+to LB, has to be accessed with offset \-1.
 The pseudoinstruction specifying the entry point of a
 procedure, has an argument that specifies the amount of local
 storage needed.
@@ -255,7 +255,7 @@ are the only ones that can be accessed with a fixed negative offset.
 The initial value of the allocated words is
 not defined, but implementations that check for undefined
 values will probably initialize them with a
-special 'undefined' pattern, typically -32768.
+special 'undefined' pattern, typically \-32768.
 .A
 Fourth, any EM implementation is allowed to reserve a variable size
 block beneath the local variables.
@@ -297,7 +297,7 @@ This can be done with the aforementioned ASP instruction.
 Each procedure frame is a separate fragment.
 Because any fragment may be placed anywhere in memory,
 procedure frames need not be contiguous.
-.DS
+.Dr 47
                 |===============================|
                 |     actual parameter  n-1     |
                 |-------------------------------|
@@ -305,14 +305,14 @@ procedure frames need not be contiguous.
                 |              .                |
                 |              .                |
                 |-------------------------------|
-                |     actual parameter  0       | ( <- AB )
+                |     actual parameter  0       | ( <\- AB )
                 |===============================|
 
 
                 |===============================|
                 |///////////////////////////////|
                 |///// return status block /////|
-                |///////////////////////////////|   <- LB
+                |///////////////////////////////|   <\- LB
                 |===============================|
                 |                               |
                 |       local variables         |
@@ -340,11 +340,11 @@ procedure frames need not be contiguous.
                 |              .                |
                 |              .                |
                 |-------------------------------|
-                |         parameter  0          | <- SP
+                |         parameter  0          | <\- SP
                 |===============================|
-
+.Df
           Figure 1. A sample procedure frame and parameters.
-.DE
+.De
 .S2 "Heap data area"
 The heap area starts empty, with HP
 pointing to the low end of it.

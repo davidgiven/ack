@@ -33,7 +33,7 @@ restrictions imposed on the representation of the types used.
 A number \fBn\fP used in these paragraphs indicates the size of
 the object in \fIbits\fP.
 .S2 "Unsigned integers"
-The range of unsigned integers is 0..2\v'-0.5m'\fBn\fP\v'0.5m'-1.
+The range of unsigned integers is 0..2\v'-0.5m'\fBn\fP\v'0.5m'\-1.
 A binary representation is assumed.
 The order of the bits within an object is knowingly left
 unspecified.
@@ -60,21 +60,22 @@ and expect a correct result.
 We assume existence of at least single word unsigned arithmetic
 in any implementation.
 .S2 "Signed Integers"
-The range of signed integers is -2\v'-0.5m'\fBn\fP-1\v'0.5m'~..~2\v'-0.5m'\fBn\fP-1\v'0.5m'-1,
+The range of signed integers is
+\-2\v'-0.5m'\fBn\fP\-1\v'0.5m'~..~2\v'-0.5m'\fBn\fP\-1\v'0.5m'\-1,
 in other words the range of signed integers of \fBn\fP bits
 using two's complement arithmetic.
-The representation is the same as for unsigned integers except
-the range 2\v'-0.5m'\fBn\fP-1\v'0.5m'~..~2\v'-0.5m'\fBn\fP\v'0.5m'-1 is mapped on the
-range -2\v'-0.5m'\fBn\fP-1\v'0.5m'~..~-1.
+The representation is the same as for unsigned integers except the range
+2\v'-0.5m'\fBn\fP\-1\v'0.5m'~..~2\v'-0.5m'\fBn\fP\v'0.5m'\-1 is mapped on the
+range \-2\v'-0.5m'\fBn\fP\-1\v'0.5m'~..~\-1.
 In other words, the most significant bit is used as sign bit.
 The convert instructions between signed and unsigned integers
 of the same size can be used to catch errors.
 .A
-The value -2\v'-0.5m'\fBn\fP-1\v'0.5m' is used for undefined
+The value \-2\v'-0.5m'\fBn\fP\-1\v'0.5m' is used for undefined
 signed integers.
 EM implementations should trap when this value is used in an
 operation on signed integers.
-The instruction mask, accessed with SIM and LIM -~see chapter 9~- ,
+The instruction mask, accessed with SIM and LIM \-~see chapter 9~\- ,
 can be used to disable such traps.
 .A
 We assume existence of at least single word signed arithmetic
@@ -126,5 +127,5 @@ the value of the unsigned integer is the summation of the
 Example: a 2-word bit set (wordsize 2) containing the
 elements 1, 6, 8, 15, 18, 21, 27 and 28 is composed of two
 integers, e.g. at addresses 40 and 42.
-The word at 40 contains the value 33090 (or~-32446),
+The word at 40 contains the value 33090 (or~\-32446),
 the word at 42 contains the value 6180.

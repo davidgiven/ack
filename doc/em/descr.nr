@@ -36,7 +36,7 @@ Array descriptors contain the following three integers:
 .PT
 lower bound~~~~~~~~~~~~~~~~~~~~~signed
 .PT
-upper bound - lower bound~~~~~~~unsigned
+upper bound \- lower bound~~~~~~~unsigned
 .PT
 number of bytes per element~~~~~unsigned
 .PE
@@ -60,7 +60,7 @@ LAR n (n is the size of the integers in the descriptor and I)
 All array instructions first pop the address of the descriptor
 and the index.
 If the index is not within the bounds specified, a trap occurs.
-If ok, (I~-~lower bound) is multiplied
+If ok, (I~\-~lower bound) is multiplied
 by the number of bytes per element (the third word).  The result is added
 to the address of A and replaces A on the stack.
 .A
@@ -128,12 +128,12 @@ each source language case statement
 is up to the front end.
 If the range of the index value is dense, i.e
 .DS
-(highest value - lowest value) / number of cases
+(highest value \- lowest value) / number of cases
 .DE 1
 is less than some threshold, then CSA is the obvious choice.
 If the range is sparse, CSB is better.
 .N 2
-.DS
+.Dr 30
    |--------------------|        |--------------------|  high address
    | pointer for upb    |        |    pointer n-1     |
    |--------------------|        |-  -  -  -  -  -  - |
@@ -157,7 +157,6 @@ If the range is sparse, CSB is better.
    |--------------------|        |--------------------|
 
        CSA descriptor                CSB descriptor
-
-
+.Df
       Figure 4. Descriptor layout for CSA and CSB
-.DE
+.De

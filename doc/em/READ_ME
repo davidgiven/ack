@@ -1,1 +1,7 @@
-Sorry, the kun macro package is not ours to distribute.
+This it the text of IR-81,
+DESCRIPTION OF A MACHINE ARCHITECTURE FOR  USE WITH BLOCK  STRUCTURED  LANGUAGES
+
+To print, set NROFF and TBL in the Makefile and call  make.
+It uses the kun macro package which is also distributed.
+
+The directory int contains the interpreter.

@@ -14,46 +14,46 @@ with 64K bytes of address space.
 Here we use a member of the EM family with 2-byte word and pointer
 size.
 The most straightforward layout is shown in figure 2.
-.N 1
-.DS
-       65534 -> |-------------------------------|
+.Dr 40
+       65534 \-> |-------------------------------|
                 |///////////////////////////////|
                 |//// unimplemented memory /////|
                 |///////////////////////////////|
-          ML -> |-------------------------------|
+          ML \-> |-------------------------------|
                 |                               |
-                |                               | <- LB
+                |                               | <\- LB
                 |     stack and local area      |
                 |                               |
-                |-------------------------------| <- SP
+                |-------------------------------| <\- SP
                 |///////////////////////////////|
                 |//////// inaccessible /////////|
                 |///////////////////////////////|
-                |-------------------------------| <- HP
+                |-------------------------------| <\- HP
                 |                               |
                 |           heap area           |
                 |                               |
                 |                               |
-          HB -> |-------------------------------|
+          HB \-> |-------------------------------|
                 |                               |
                 |       global data area        |
                 |                               |
-          EB -> |-------------------------------|
+          EB \-> |-------------------------------|
                 |                               |
-                |         program text          | <- PC
+                |         program text          | <\- PC
                 |                               |
                 |        ( and tables )         |
                 |                               |
                 |                               |
-          PB -> |-------------------------------|
+          PB \-> |-------------------------------|
                 |///////////////////////////////|
                 |////////// undefined //////////|
                 |///////////////////////////////|
-           0 -> |-------------------------------|
-
+           0 \-> |-------------------------------|
+.Df
            Figure 2.  Memory layout showing typical register
            positions during execution of an EM program.
-.DE 2
+.De
+.N 1
 The base registers for the various memory pieces can be stored
 in target machine registers or memory.
 .IS
@@ -123,8 +123,7 @@ upside down, as shown in figure 3.
 This is possible because the pointer format is explicitly undefined.
 The first element of a word array will have a
 lower physical address than the second element.
-.N 2
-.DS
+.Dr 18
           |                 |                    |                 |
           |      EB=60      |                    |        ^        |
           |                 |                    |        |        |
@@ -140,18 +139,18 @@ lower physical address than the second element.
           |                 |                    |                 |
 
                 Type A                                 Type B
-.sp 2
+.Df
               Figure 3. Two possible memory implementations.
                  Numbers within the boxes are EM addresses.
                  The other numbers are physical addresses.
-.DE 2
+.De
 .A 0 0
 So, we have two different EM memory implementations:
 .IS
 .PS - 4
-.PT A~-
+.PT A~\-
 stack downwards
-.PT B~-
+.PT B~\-
 stack upwards
 .PE
 .IE
@@ -188,7 +187,7 @@ ADP:3:pop:r0:pop:r0
 ::push:r0:push:r0
 
 LOI:1:pop:r0:pop:r0
-::-::neg:r0
+::\-::neg:r0
 ::clr:r1:clr:r1
 ::bisb:eb(r0),r1:bisb:eb(r0),r1
 ::push:r1:push:r1

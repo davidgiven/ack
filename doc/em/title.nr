@@ -1,6 +1,6 @@
 .po 0
 .TP 1
-.ll 79
+.ll 79n
 .sp 15
 .ce 4
 DESCRIPTION OF A MACHINE

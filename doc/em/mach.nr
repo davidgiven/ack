@@ -21,7 +21,7 @@ two groups of 256 secondary opcodes each.
 .A
 EM instructions without arguments have a single opcode assigned,
 possibly escaped:
-.DS
+.Dr 14
 
          |--------------|
          |    opcode    |
@@ -33,7 +33,7 @@ possibly escaped:
          |    escape    |     opcode   |
          |--------------|--------------|
 
-.DE
+.De
 The encoding for instructions with an argument is more complex.
 Several instructions have an address from the global data area
 as argument.
@@ -42,7 +42,7 @@ and negative arguments.
 .N 1
 There is always an opcode that takes the next two bytes as argument,
 high byte first:
-.DS
+.Dr 14
 
          |--------------|--------------|--------------|
          |    opcode    |    hibyte    |    lobyte    |
@@ -54,25 +54,25 @@ high byte first:
          |    escape    |    opcode    |    hibyte    |    lobyte    |
          |--------------|--------------|--------------|--------------|
 
-.DE
-.DS
+.De
 An extra escape is provided for instructions with four or eight byte arguments.
+.Dr 6
 
   |--------------|--------------|--------------|   |--------------|
   |    ESCAPE    |    opcode    |    hibyte    |...|    lobyte    |
   |--------------|--------------|--------------|   |--------------|
 
-.DE
+.De
 For most instructions some argument values predominate.
 The most frequent combinations of instruction and argument
 will be encoded in a single byte, called a mini:
-.DS
+.Dr 6
 
          |---------------|
          |opcode+argument|  (mini)
          |---------------|
 
-.DE
+.De
 The number of minis is restricted, because only
 254 primary opcodes are available.
 Many instructions have the bulk of their arguments
@@ -85,7 +85,7 @@ that combines the instruction and the high byte of the argument
 into a single opcode.
 These opcodes are called shorties.
 Shorties may be escaped.
-.DS
+.Dr 14
 
          |--------------|--------------|
          | opcode+high  |    lobyte    |  (shortie)
@@ -97,7 +97,7 @@ Shorties may be escaped.
          |    escape    | opcode+high  |    lobyte    |
          |--------------|--------------|--------------|
 
-.DE
+.De
 Escaped shorties are useless if the normal encoding has a primary opcode.
 Note that for some instruction-argument combinations
 several different encodings are available.
@@ -266,66 +266,66 @@ contain a null terminated ASCII string
 .PE 1
 .DE 0
 .VS 1 1
-.DS
+.Dr 6
 
     -------------------
     | 0 |      n      |           repeat last initialization n times
     -------------------
-.DE
-.DS
+.De
+.Dr 4
     ---------
     | 1 | m |                     m uninitialized words
     ---------
-.DE
-.DS
+.De
+.Dr 6
                ____________
               /    bytes   \e
     -----------------   -----
     | 2 | m | b | b |...| b |     m initialized bytes
     -----------------   -----
-.DE
-.DS
+.De
+.Dr 6
                _________
               /  word   \e
     -----------------------
     | 3 | m |      w      |...    m initialized wordsized integers
     -----------------------
-.DE
-.DS
+.De
+.Dr 6
                _________
               / pointer \e
     -----------------------
     | 4 | m |      p      |...    m initialized data pointers
     -----------------------
-.DE
-.DS
+.De
+.Dr 6
                _________
               / pointer \e
     -----------------------
     | 5 | m |      p      |...    m initialized instruction pointers
     -----------------------
-.DE
-.DS
+.De
+.Dr 6
                ____________
               /    bytes   \e
     -------------------------
     | 6 | m | b | b |...| b |     initialized integer of size m
     -------------------------
-.DE
-.DS
+.De
+.Dr 6
                ____________
               /    bytes   \e
     -------------------------
     | 7 | m | b | b |...| b |     initialized unsigned of size m
     -------------------------
-.DE
-.DS
+.De
+.Dr 6
                ____________
               /   string   \e
     -------------------------
     | 8 | m |        s      |     initialized float of size m
     -------------------------
-.DE 3
+.De 3
 .PS - 8
 .PT type~0:
 If the last initialization initialized k bytes starting

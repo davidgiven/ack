@@ -34,7 +34,7 @@ The scope of an instruction label is its procedure.
 .A
 The pseudoinstructions CON, ROM and BSS may be preceded by a
 line containing a
-1-8 character data label, the first character of which is a
+1\-8 character data label, the first character of which is a
 letter, period or underscore.
 The period may only be followed by
 digits, the others may be followed by letters, digits and underscores.
@@ -66,7 +66,7 @@ They do not belong to a specific procedure.
 All constants in EM are interpreted in the decimal base.
 The ASCII assembly language accepts constant expressions
 wherever constants are allowed.
-The operators recognized are: +, -, *, % and / with the usual
+The operators recognized are: +, \-, *, % and / with the usual
 precedence order.
 Use of the parentheses ( and ) to alter the precedence order is allowed.
 .S3 "Instruction arguments"
@@ -109,16 +109,16 @@ integers on top of the stack are to be compared.
 on top of the stack that specifies the size of the integers to
 be compared.
 Thus the following two sequences are equivalent:
-.N 2
+.N 1
 .TS
 center, tab(:) ;
 l r 30 l r.
-LDL:-10:LDL:-10
-LDL:-14:LDL:-14
+LDL:\-10:LDL:\-10
+LDL:\-14:LDL:\-14
 ::LOC:4
 CMI:4:CMI:
 ZEQ:*1:ZEQ:*1
-.TE 2
+.TE 1
 Section 11.1.6 shows the arguments allowed for each instruction.
 .S3 "Pseudoinstruction arguments"
 Pseudoinstruction arguments can be divided in two classes:
@@ -139,7 +139,7 @@ initializer's size.
 This integer is governed by the same restrictions as for
 transfer of objects to/from memory.
 As in instruction arguments, initializers include expressions of the form:
-\&"LABEL+offset" and "LABEL-offset".
+\&"LABEL+offset" and "LABEL\-offset".
 The offset must be an unsigned decimal constant.
 The 'IUF' indicators cannot be used in the offsets.
 .P
@@ -167,7 +167,7 @@ double quote:":\e"
 bit pattern:\fBddd\fP:\e\fBddd\fP
 .TE
 .DE
-The escape \fBddd\fP consists of the backslash followed by 1,
+The escape \fB\eddd\fP consists of the backslash followed by 1,
 2, or 3 octal digits specifing the value of
 the desired character.
 If the character following a backslash is not one of those
@@ -190,9 +190,9 @@ instructions and pseudoinstructions.
 .TS
 tab(:);
 l l l.
-<cst>:\&=:integer constant (current range -2**31..2**31-1)
+<cst>:\&=:integer constant (current range \-2**31..2**31\-1)
 <dlb>:\&=:data label
-<arg>:\&=:<cst> or <dlb> or <dlb>+<cst> or <dlb>-<cst>
+<arg>:\&=:<cst> or <dlb> or <dlb>+<cst> or <dlb>\-<cst>
 <con>:\&=:integer constant, unsigned constant, floating-point constant
 <str>:\&=:string constant (surrounded by double quotes),
 <ilb>:\&=:instruction label
@@ -425,13 +425,13 @@ etc. represent the succeeding bytes.
 tab(:) ;
 rw17 4 l.
 0:Reserved for future use
-1-129:Machine instructions, see Appendix A, alphabetical list
-130-149:Reserved for future use
-150-161:BSS,CON,END,EXA,EXC,EXP,HOL,INA,INP,MES,PRO,ROM
-162-179:Reserved for future pseudoinstructions
-180-239:Instruction labels 0 - 59  (180 is local label 0 etc.)
-240-244:See the Common Table below
-245-255:Not used
+1\-129:Machine instructions, see Appendix A, alphabetical list
+130\-149:Reserved for future use
+150\-161:BSS,CON,END,EXA,EXC,EXP,HOL,INA,INP,MES,PRO,ROM
+162\-179:Reserved for future pseudoinstructions
+180\-239:Instruction labels 0 \- 59  (180 is local label 0 etc.)
+240\-244:See the Common Table below
+245\-255:Not used
 .TE 1
 .DE 0
 After a label, the assembler is back in neutral state; it can immediately
@@ -449,9 +449,9 @@ encoded as follows:
 .TS
 tab(:);
 r l.
-0-239:Offsets from -120 to 119
+0\-239:Offsets from \-120 to 119
 
-240-255:See the Common Table below
+240\-255:See the Common Table below
 .TE 1
 Absence of an optional argument is indicated by a special
 byte.
@@ -467,8 +467,8 @@ class:bytes:description
 
 <ilb>:240:b1:Instruction label b1  (Not used for branches)
 <ilb>:241:b1 b2:16 bit instruction label  (256*b2 + b1)
-<dlb>:242:b1:Global label .0-.255, with b1 being the label
-<dlb>:243:b1 b2:Global label .0-.32767
+<dlb>:242:b1:Global label .0\-.255, with b1 being the label
+<dlb>:243:b1 b2:Global label .0\-.32767
 :::with 256*b2+b1 being the label
 <dlb>:244:<string>:Global symbol not of the form .nnn
 <cst>:245:b1 b2:16 bit constant
@@ -488,7 +488,7 @@ class:bytes:description
 The bytes specifying the value of a 16, 32 or 64 bit constant
 are presented in two's complement notation, with the least
 significant byte first. For example: the value of a 32 bit
-constant is ((s4*256+b3)*256+b2)*256+b1, where s4 is b4-256 if
+constant is ((s4*256+b3)*256+b2)*256+b1, where s4 is b4\-256 if
 b4 is greater than 128 else s4 takes the value of b4.
 A <string> consists of a <cst> inmediatly followed by
 a sequence of bytes with length <cst>.
@@ -498,10 +498,10 @@ The pseudoinstructions fall into several categories, depending on their
 arguments:
 .N 1
 .DS
- Group 1 -- EXC, BSS, HOL have a known number of arguments
- Group 2 -- EXA, EXP, INA, INP have a string as argument
- Group 3 -- CON, MES, ROM have a variable number of various things
- Group 4 -- END, PRO have a trailing optional argument.
+ Group 1 \- EXC, BSS, HOL have a known number of arguments
+ Group 2 \- EXA, EXP, INA, INP have a string as argument
+ Group 3 \- CON, MES, ROM have a variable number of various things
+ Group 4 \- END, PRO have a trailing optional argument.
 .DE 1
 Groups 1 and 2
 use the encoding described above.
@@ -522,7 +522,7 @@ Example  ASCII|Example compact
 2||182
 1||181
  LOC|10|69 130
- LOC|-10|69 110
+ LOC|\-10|69 110
  LOC|300|69 245 44 1
  BRA|*19|18 139
 300||241 44 1
@@ -531,7 +531,6 @@ Example  ASCII|Example compact
  CON|.35|151 242 35 255
 .TE 0
 .IE 0
-.BP
 .S2 "Assembly language instruction list"
 .P
 For each instruction in the list the range of argument values
@@ -556,7 +555,7 @@ are indicated by letters:
 .ds s \fBs\fP
 .ds z \fBz\fP
 .ds o \fBo\fP
-.ds - \fB-\fP
+.ds - \fB\-\fP
 .N 1
 .TS
 tab(:);
@@ -590,184 +589,185 @@ values and underflow or overflow
 are indicated below by (*).
 .N 1
 .DS B
-GROUP 1 - LOAD
+.ta 12n
+GROUP 1 \- LOAD
 
-  LOC \*c : Load constant (i.e. push one word onto the stack)
-  LDC \*d : Load double constant ( push two words )
-  LOL \*l : Load word at \*l-th local (\*l<0) or parameter (\*l>=0)
-  LOE \*g : Load external word \*g
-  LIL \*l : Load word pointed to by \*l-th local or parameter
-  LOF \*f : Load offsetted (top of stack + \*f yield address)
-  LAL \*l : Load address of local or parameter
-  LAE \*g : Load address of external
-  LXL \*n : Load lexical (address of LB \*n static levels back)
-  LXA \*n : Load lexical (address of AB \*n static levels back)
-  LOI \*o : Load indirect \*o bytes (address is popped from the stack)
-  LOS \*w : Load indirect, \*w-byte integer on top of stack gives object size
-  LDL \*l : Load double local or parameter (two consecutive words are stacked)
-  LDE \*g : Load double external (two consecutive externals are stacked)
-  LDF \*f : Load double offsetted (top of stack + \*f yield address)
-  LPI \*p : Load procedure identifier
+  LOC \*c :	Load constant (i.e. push one word onto the stack)
+  LDC \*d :	Load double constant ( push two words )
+  LOL \*l :	Load word at \*l-th local (\*l<0) or parameter (\*l>=0)
+  LOE \*g :	Load external word \*g
+  LIL \*l :	Load word pointed to by \*l-th local or parameter
+  LOF \*f :	Load offsetted (top of stack + \*f yield address)
+  LAL \*l :	Load address of local or parameter
+  LAE \*g :	Load address of external
+  LXL \*n :	Load lexical (address of LB \*n static levels back)
+  LXA \*n :	Load lexical (address of AB \*n static levels back)
+  LOI \*o :	Load indirect \*o bytes (address is popped from the stack)
+  LOS \*w :	Load indirect, \*w-byte integer on top of stack gives object size
+  LDL \*l :	Load double local or parameter (two consecutive words are stacked)
+  LDE \*g :	Load double external (two consecutive externals are stacked)
+  LDF \*f :	Load double offsetted (top of stack + \*f yield address)
+  LPI \*p :	Load procedure identifier
 
-GROUP 2 - STORE
+GROUP 2 \- STORE
 
-  STL \*l : Store local or parameter
-  STE \*g : Store external
-  SIL \*l : Store into word pointed to by \*l-th local or parameter
-  STF \*f : Store offsetted
-  STI \*o : Store indirect \*o bytes (pop address, then data)
-  STS \*w : Store indirect, \*w-byte integer on top of stack gives object size
-  SDL \*l : Store double local or parameter
-  SDE \*g : Store double external
-  SDF \*f : Store double offsetted
+  STL \*l :	Store local or parameter
+  STE \*g :	Store external
+  SIL \*l :	Store into word pointed to by \*l-th local or parameter
+  STF \*f :	Store offsetted
+  STI \*o :	Store indirect \*o bytes (pop address, then data)
+  STS \*w :	Store indirect, \*w-byte integer on top of stack gives object size
+  SDL \*l :	Store double local or parameter
+  SDE \*g :	Store double external
+  SDF \*f :	Store double offsetted
 
-GROUP 3 - INTEGER ARITHMETIC
+GROUP 3 \- INTEGER ARITHMETIC
 
-  ADI \*w : Addition (*)
-  SBI \*w : Subtraction (*)
-  MLI \*w : Multiplication (*)
-  DVI \*w : Division (*)
-  RMI \*w : Remainder (*)
-  NGI \*w : Negate (two's complement) (*)
-  SLI \*w : Shift left (*)
-  SRI \*w : Shift right (*)
+  ADI \*w :	Addition (*)
+  SBI \*w :	Subtraction (*)
+  MLI \*w :	Multiplication (*)
+  DVI \*w :	Division (*)
+  RMI \*w :	Remainder (*)
+  NGI \*w :	Negate (two's complement) (*)
+  SLI \*w :	Shift left (*)
+  SRI \*w :	Shift right (*)
 
-GROUP 4 - UNSIGNED ARITHMETIC
+GROUP 4 \- UNSIGNED ARITHMETIC
 
-  ADU \*w : Addition
-  SBU \*w : Subtraction
-  MLU \*w : Multiplication
-  DVU \*w : Division
-  RMU \*w : Remainder
-  SLU \*w : Shift left
-  SRU \*w : Shift right
+  ADU \*w :	Addition
+  SBU \*w :	Subtraction
+  MLU \*w :	Multiplication
+  DVU \*w :	Division
+  RMU \*w :	Remainder
+  SLU \*w :	Shift left
+  SRU \*w :	Shift right
 
-GROUP 5 - FLOATING POINT ARITHMETIC
+GROUP 5 \- FLOATING POINT ARITHMETIC
 
-  ADF \*w : Floating add (*)
-  SBF \*w : Floating subtract (*)
-  MLF \*w : Floating multiply (*)
-  DVF \*w : Floating divide (*)
-  NGF \*w : Floating negate (*)
-  FIF \*w : Floating multiply and split integer and fraction part (*)
-  FEF \*w : Split floating number in exponent and fraction part (*)
+  ADF \*w :	Floating add (*)
+  SBF \*w :	Floating subtract (*)
+  MLF \*w :	Floating multiply (*)
+  DVF \*w :	Floating divide (*)
+  NGF \*w :	Floating negate (*)
+  FIF \*w :	Floating multiply and split integer and fraction part (*)
+  FEF \*w :	Split floating number in exponent and fraction part (*)
 
-GROUP 6 - POINTER ARITHMETIC
+GROUP 6 \- POINTER ARITHMETIC
 
-  ADP \*f : Add \*f to pointer on top of stack
-  ADS \*w : Add \*w-byte value and pointer
-  SBS \*w : Subtract pointers in same fragment and push diff as size \*w integer
+  ADP \*f :	Add \*f to pointer on top of stack
+  ADS \*w :	Add \*w-byte value and pointer
+  SBS \*w :	Subtract pointers in same fragment and push diff as size \*w integer
 
-GROUP 7 - INCREMENT/DECREMENT/ZERO
+GROUP 7 \- INCREMENT/DECREMENT/ZERO
 
-  INC \*- : Increment word on top of stack by 1 (*)
-  INL \*l : Increment local or parameter (*)
-  INE \*g : Increment external (*)
-  DEC \*- : Decrement word on top of stack by 1 (*)
-  DEL \*l : Decrement local or parameter (*)
-  DEE \*g : Decrement external (*)
-  ZRL \*l : Zero local or parameter
-  ZRE \*g : Zero external
-  ZRF \*w : Load a floating zero of size \*w
-  ZER \*w : Load \*w zero bytes
+  INC \*- :	Increment word on top of stack by 1 (*)
+  INL \*l :	Increment local or parameter (*)
+  INE \*g :	Increment external (*)
+  DEC \*- :	Decrement word on top of stack by 1 (*)
+  DEL \*l :	Decrement local or parameter (*)
+  DEE \*g :	Decrement external (*)
+  ZRL \*l :	Zero local or parameter
+  ZRE \*g :	Zero external
+  ZRF \*w :	Load a floating zero of size \*w
+  ZER \*w :	Load \*w zero bytes
 
-GROUP 8 - CONVERT    (stack: source, source size, dest. size (top))
+GROUP 8 \- CONVERT    (stack:	source, source size, dest. size (top))
 
-  CII \*- : Convert integer to integer (*)
-  CUI \*- : Convert unsigned to integer (*)
-  CFI \*- : Convert floating to integer (*)
-  CIF \*- : Convert integer to floating (*)
-  CUF \*- : Convert unsigned to floating (*)
-  CFF \*- : Convert floating to floating (*)
-  CIU \*- : Convert integer to unsigned
-  CUU \*- : Convert unsigned to unsigned
-  CFU \*- : Convert floating to unsigned
+  CII \*- :	Convert integer to integer (*)
+  CUI \*- :	Convert unsigned to integer (*)
+  CFI \*- :	Convert floating to integer (*)
+  CIF \*- :	Convert integer to floating (*)
+  CUF \*- :	Convert unsigned to floating (*)
+  CFF \*- :	Convert floating to floating (*)
+  CIU \*- :	Convert integer to unsigned
+  CUU \*- :	Convert unsigned to unsigned
+  CFU \*- :	Convert floating to unsigned
 
-GROUP 9 - LOGICAL
+GROUP 9 \- LOGICAL
 
-  AND \*w : Boolean and on two groups of \*w bytes
-  IOR \*w : Boolean inclusive or on two groups of \*w bytes
-  XOR \*w : Boolean exclusive or on two groups of \*w bytes
-  COM \*w : Complement (one's complement of top \*w bytes)
-  ROL \*w : Rotate left a group of \*w bytes
-  ROR \*w : Rotate right a group of \*w bytes
+  AND \*w :	Boolean and on two groups of \*w bytes
+  IOR \*w :	Boolean inclusive or on two groups of \*w bytes
+  XOR \*w :	Boolean exclusive or on two groups of \*w bytes
+  COM \*w :	Complement (one's complement of top \*w bytes)
+  ROL \*w :	Rotate left a group of \*w bytes
+  ROR \*w :	Rotate right a group of \*w bytes
 
-GROUP 10 - SETS
+GROUP 10 \- SETS
 
-  INN \*w : Bit test on \*w byte set (bit number on top of stack)
-  SET \*w : Create singleton \*w byte set with bit n on (n is top of stack)
+  INN \*w :	Bit test on \*w byte set (bit number on top of stack)
+  SET \*w :	Create singleton \*w byte set with bit n on (n is top of stack)
 
-GROUP 11 - ARRAY
+GROUP 11 \- ARRAY
 
-  LAR \*w : Load array element, descriptor contains integers of size \*w
-  SAR \*w : Store array element
-  AAR \*w : Load address of array element
+  LAR \*w :	Load array element, descriptor contains integers of size \*w
+  SAR \*w :	Store array element
+  AAR \*w :	Load address of array element
 
-GROUP 12 - COMPARE
+GROUP 12 \- COMPARE
 
-  CMI \*w : Compare \*w byte integers, Push negative, zero, positive for <, = or >
-  CMF \*w : Compare \*w byte reals
-  CMU \*w : Compare \*w byte unsigneds
-  CMS \*w : Compare \*w byte values, can only be used for bit for bit equality test
-  CMP \*- : Compare pointers
+  CMI \*w :	Compare \*w byte integers, Push negative, zero, positive for <, = or >
+  CMF \*w :	Compare \*w byte reals
+  CMU \*w :	Compare \*w byte unsigneds
+  CMS \*w :	Compare \*w byte values, can only be used for bit for bit equality test
+  CMP \*- :	Compare pointers
 
-  TLT \*- : True if less, i.e. iff top of stack < 0
-  TLE \*- : True if less or equal, i.e. iff top of stack <= 0
-  TEQ \*- : True if equal, i.e. iff top of stack = 0
-  TNE \*- : True if not equal, i.e. iff top of stack non zero
-  TGE \*- : True if greater or equal, i.e. iff top of stack >= 0
-  TGT \*- : True if greater, i.e. iff top of stack > 0
+  TLT \*- :	True if less, i.e. iff top of stack < 0
+  TLE \*- :	True if less or equal, i.e. iff top of stack <= 0
+  TEQ \*- :	True if equal, i.e. iff top of stack = 0
+  TNE \*- :	True if not equal, i.e. iff top of stack non zero
+  TGE \*- :	True if greater or equal, i.e. iff top of stack >= 0
+  TGT \*- :	True if greater, i.e. iff top of stack > 0
 
-GROUP 13 - BRANCH
+GROUP 13 \- BRANCH
 
-  BRA \*b : Branch unconditionally to label \*b
+  BRA \*b :	Branch unconditionally to label \*b
 
-  BLT \*b : Branch less (pop 2 words, branch if top > second)
-  BLE \*b : Branch less or equal
-  BEQ \*b : Branch equal
-  BNE \*b : Branch not equal
-  BGE \*b : Branch greater or equal
-  BGT \*b : Branch greater
+  BLT \*b :	Branch less (pop 2 words, branch if top > second)
+  BLE \*b :	Branch less or equal
+  BEQ \*b :	Branch equal
+  BNE \*b :	Branch not equal
+  BGE \*b :	Branch greater or equal
+  BGT \*b :	Branch greater
 
-  ZLT \*b : Branch less than zero (pop 1 word, branch negative)
-  ZLE \*b : Branch less or equal to zero
-  ZEQ \*b : Branch equal zero
-  ZNE \*b : Branch not zero
-  ZGE \*b : Branch greater or equal zero
-  ZGT \*b : Branch greater than zero
+  ZLT \*b :	Branch less than zero (pop 1 word, branch negative)
+  ZLE \*b :	Branch less or equal to zero
+  ZEQ \*b :	Branch equal zero
+  ZNE \*b :	Branch not zero
+  ZGE \*b :	Branch greater or equal zero
+  ZGT \*b :	Branch greater than zero
 
-GROUP 14 - PROCEDURE CALL
+GROUP 14 \- PROCEDURE CALL
 
-  CAI \*- : Call procedure (procedure identifier on stack)
-  CAL \*p : Call procedure (with identifier \*p)
-  LFR \*s : Load function result
-  RET \*z : Return (function result consists of top \*z bytes)
+  CAI \*- :	Call procedure (procedure identifier on stack)
+  CAL \*p :	Call procedure (with identifier \*p)
+  LFR \*s :	Load function result
+  RET \*z :	Return (function result consists of top \*z bytes)
 
-GROUP 15 - MISCELLANEOUS
+GROUP 15 \- MISCELLANEOUS
 
-  ASP \*f : Adjust the stack pointer by \*f
-  ASS \*w : Adjust the stack pointer by \*w-byte integer
-  BLM \*z : Block move \*z bytes; first pop destination addr, then source addr
-  BLS \*w : Block move, size is in \*w-byte integer on top of stack
-  CSA \*w : Case jump; address of jump table at top of stack
-  CSB \*w : Table lookup jump; address of jump table at top of stack
-  DCH \*- : Follow dynamic chain, convert LB to LB of caller
-  DUP \*s : Duplicate top \*s bytes
-  DUS \*w : Duplicate top \*w bytes
-  EXG \*w : Exchange top \*w bytes
-  FIL \*g : File name (external 4 := \*g)
-  GTO \*g : Non-local goto, descriptor at \*g
-  LIM \*- : Load 16 bit ignore mask
-  LIN \*n : Line number (external 0 := \*n)
-  LNI \*- : Line number increment
-  LOR \*r : Load register (0=LB, 1=SP, 2=HP)
-  LPB \*- : Convert local base to argument base
-  MON \*- : Monitor call
-  NOP \*- : No operation
-  RCK \*w : Range check; trap on error
-  RTT \*- : Return from trap
-  SIG \*- : Trap errors to proc identifier on top of stack, -2 resets default
-  SIM \*- : Store 16 bit ignore mask
-  STR \*r : Store register (0=LB, 1=SP, 2=HP)
-  TRP \*- : Cause trap to occur (Error number on stack)
+  ASP \*f :	Adjust the stack pointer by \*f
+  ASS \*w :	Adjust the stack pointer by \*w-byte integer
+  BLM \*z :	Block move \*z bytes; first pop destination addr, then source addr
+  BLS \*w :	Block move, size is in \*w-byte integer on top of stack
+  CSA \*w :	Case jump; address of jump table at top of stack
+  CSB \*w :	Table lookup jump; address of jump table at top of stack
+  DCH \*- :	Follow dynamic chain, convert LB to LB of caller
+  DUP \*s :	Duplicate top \*s bytes
+  DUS \*w :	Duplicate top \*w bytes
+  EXG \*w :	Exchange top \*w bytes
+  FIL \*g :	File name (external 4 := \*g)
+  GTO \*g :	Non-local goto, descriptor at \*g
+  LIM \*- :	Load 16 bit ignore mask
+  LIN \*n :	Line number (external 0 := \*n)
+  LNI \*- :	Line number increment
+  LOR \*r :	Load register (0=LB, 1=SP, 2=HP)
+  LPB \*- :	Convert local base to argument base
+  MON \*- :	Monitor call
+  NOP \*- :	No operation
+  RCK \*w :	Range check; trap on error
+  RTT \*- :	Return from trap
+  SIG \*- :	Trap errors to proc identifier on top of stack, \-2 resets default
+  SIM \*- :	Store 16 bit ignore mask
+  STR \*r :	Store register (0=LB, 1=SP, 2=HP)
+  TRP \*- :	Cause trap to occur (Error number on stack)
 .DE 0

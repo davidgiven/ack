@@ -90,11 +90,11 @@ few internal registers with specific functions as follows:
 .TS
 tab(:);
 l 1 l l.
-PC:-:Program Counter:Pointer to next instruction
-LB:-:Local Base:Points to base of the local variables \
+PC:\-:Program Counter:Pointer to next instruction
+LB:\-:Local Base:Points to base of the local variables \
 in the current procedure.
-SP:-:Stack Pointer:Points to the highest occupied word on the stack.
-HP:-:Heap Pointer:Points to the top of the heap area.
+SP:\-:Stack Pointer:Points to the highest occupied word on the stack.
+HP:\-:Heap Pointer:Points to the top of the heap area.
 .TE 1
 .IE
 .A
