@@ -233,9 +233,9 @@ jne label cost(1,4).
 jmp label cost(1,4).
 proccall "call" label+rm cost(1,8).
 jxx "syntax error" label cost(1,4).
-setxx "syntax error" REG:rw cost(2,4).
-setle REG:rw cost(2,4).
-setgt REG:rw cost(2,4).
+setxx "syntax error" REG1:rw cost(2,4).
+setle REG1:rw cost(2,4).
+setg REG1:rw cost(2,4).
 lea anyreg:rw, halfindir:ro.
 lea LOCAL:rw, halfindir:ro.	/* only for register variables, UNSAFE!!! */
 leave cost(1,4).
@@ -2451,9 +2451,9 @@ uses REG = {ANYCON,0}
 
 proc txx
 with rm
-uses REG = {ANYCON,0}
+uses GENREG = {ANYCON,0}
   gen test %1
-      setxx* %a			    yields %a
+      setxx* %a.1		    yields %a
 
 pat tlt call txx("sets")
 pat teq call txx("sete")
@@ -2465,20 +2465,20 @@ pat tge call txx("setns")
 */
 pat tle
 with rm
-uses REG = {ANYCON,0}
+uses GENREG = {ANYCON,0}
   gen
       killcc.
       test %1
-      setle %a
+      setle %a.1
 				   yields %a
 
 pat tgt
 with rm
-uses REG = {ANYCON,0}
+uses GENREG = {ANYCON,0}
   gen
       killcc.
       test %1
-      setgt %a
+      setg %a.1
 				   yields %a
 
 proc txxior
