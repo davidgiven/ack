@@ -9,7 +9,7 @@ LLGEN =		$(EMHOME)/bin/LLgen
 MKDEP =		$(EMHOME)/bin/mkdep
 PRID =		$(EMHOME)/bin/prid
 CID =		$(EMHOME)/bin/cid
-CURRDIR =	.
+CURRDIR =
 LINT =		lint
 
 INCLUDES = -I$(MHDIR) -I$(EMHOME)/h -I$(PKGDIR)
@@ -57,30 +57,30 @@ NEXTFILES = def.H type.H node.H desig.H scope.C tmpvar.C casestat.C
 #EXCLEXCLEXCLEXCL
 
 all:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)main ; else EMHOME=$(EMHOME); export EMHOME; sh Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
 	mv *.o PEEPHOLE
 
 CEmain: Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)/cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
 	mv *.o CODE_EXPANDER
 
 install:	all
-	cp $(CURRDIR)/main $(EMHOME)/lib/em_m2
+	cp $(CURRDIR)main $(EMHOME)/lib/em_m2
 	rm -f $(EMHOME)/man/em_m2.6 $(EMHOME)/man/modula-2.1
-	cp $(CURRDIR)/em_m2.6 $(CURRDIR)/modula-2.1 $(EMHOME)/man
+	cp $(CURRDIR)em_m2.6 $(CURRDIR)modula-2.1 $(EMHOME)/man
 
 cmp:	all
-	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_m2
-	-cmp $(CURRDIR)/em_m2.6 $(EMHOME)/man/em_m2.6
-	-cmp $(CURRDIR)/modula-2.1 $(EMHOME)/man/modula-2.1
+	-cmp $(CURRDIR)main $(EMHOME)/lib/em_m2
+	-cmp $(CURRDIR)em_m2.6 $(EMHOME)/man/em_m2.6
+	-cmp $(CURRDIR)modula-2.1 $(EMHOME)/man/modula-2.1
 
 opr:
 	make pr | opr
@@ -90,7 +90,7 @@ pr:
 
 clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles clashes \
-		$(CURRDIR)/main LL.output
+		$(CURRDIR)main LL.output
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
@@ -162,17 +162,17 @@ Xlint:
 		$(LIBDIR)/llib-lstring.ln \
 		$(LIBDIR)/llib-lsystem.ln
 
-$(CURRDIR)/main:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/main
-	-size $(CURRDIR)/main
+$(CURRDIR)main:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)main
+	-size $(CURRDIR)main
 
-$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain
-	size $(CURRDIR)/omain
+$(CURRDIR)omain:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain
+	size $(CURRDIR)omain
 
-$(CURRDIR)/cemain:      $(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/cemain 
-	size $(CURRDIR)/cemain
+$(CURRDIR)cemain:      $(OBJ) $(CURRDIR)Makefile
+	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)cemain 
+	size $(CURRDIR)cemain
 
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
