@@ -181,7 +181,7 @@ deleted, is now a debug-flag
 				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
 			}
 				
-			for (i = inc_pos++; i <= inc_total; i++) {
+			for (i = inc_pos++; i < inc_total; i++) {
 				char *tmp = inctable[i];
 				
 				inctable[i] = new;
