@@ -1,9 +1,6 @@
 /* This file must be included in all the files which use the backlibrary.
  */
 
-extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
-	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
-	    *extnd_part(), *extnd_cont();
 #include <em.h>
 #include "data.h"
 
@@ -74,3 +71,6 @@ extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 #define	MAXNAME		512
 #define	MAXSTRING	4096
 
+extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
+	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
+	    *extnd_part(), *extnd_cont();
