@@ -129,11 +129,10 @@ char *parse_operand( ptr, n_ops, instr)
 		}
 		else {
 			error("strange operand format: %s\n", ptr);
-			/* 
+			/* We don't know what this code does ! */
 			*ptr++ = '\0';
 			ptr = skip_space( ptr);
 			if  ( *ptr != '\0') ptr++;   /* skip ';' */
-  			*/
 		}
 		ptr = skip_space( ptr);
 	}
