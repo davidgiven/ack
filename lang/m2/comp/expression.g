@@ -250,7 +250,7 @@ element(register t_node *nd;) :
 		expression(&(nd->nd_right->nd_right))
 	|
 	]
-			{ nd->nd_right = dot2node(Link, nd, NULLNODE);
+			{ nd->nd_right = dot2node(Link, nd->nd_right, NULLNODE);
 			  nd->nd_right->nd_symb = ',';
 			}
 ;
