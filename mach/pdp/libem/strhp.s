@@ -1,11 +1,12 @@
-/ $Header$
-.text
-.globl strhp~
-.globl fat~,reghp~,_end
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define strhp~
+.extern fat~,reghp~,_end
+! $Header$
 indir	= 0
 
-break	= 17.
-EHEAP	= 17.
+break	= 021
+EHEAP	= 021
 
 strhp~:
 	mov	(sp)+,r0
@@ -16,10 +17,10 @@ strhp~:
 	add	$01777,r1
 	bic	$01777,r1
 	mov	r1,2f+2
-	sys	indir ; 2f
+	sys	indir ; .data2 2f
 	bcs	3f
 1:	jmp	(r0)
 3:	mov	$EHEAP,-(sp)
 	jmp	fat~
-.data
-2:	sys	break; _end
+.sect .data
+2:	sys	break; .data2 _end

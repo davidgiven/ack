@@ -1,6 +1,7 @@
-/ $Header$
-	.text
-	.globl exg~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define exg~
+! $Header$
+
 exg~:	jsr pc,save~
 	mov sp,r4
 	sub r0,sp

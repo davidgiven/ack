@@ -1,8 +1,9 @@
-/ $Header$
-.text
-.globl and~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define and~
+! $Header$
 
-/ size in r0
+! size in r0
 and~:
 	mov	(sp)+,r3
 	mov	sp,r1

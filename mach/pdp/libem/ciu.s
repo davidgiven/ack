@@ -1,6 +1,8 @@
-/ $Header$
-.text
-.globl cuu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cuu~
+! $Header$
+
 cuu~:
 	mov	(sp)+,r1
 	mov	(sp)+,r0
@@ -9,5 +11,5 @@ cuu~:
 	asr	r0
 2:	clr	-(sp)
 	sob	r0,2b
-1:	sub	r0,sp	/ if out of sob loop r0==0
+1:	sub	r0,sp	! if out of sob loop r0==0
 	jmp	(r1)

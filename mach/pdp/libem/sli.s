@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl sli~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sli~
+.extern unknown~
+! $Header$
 
 sli~:
 	mov	(sp)+,r3

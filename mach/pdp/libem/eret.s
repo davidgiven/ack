@@ -1,5 +1,6 @@
-/ $Header$
-	.globl eret
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define eret
+! $Header$
 
 eret:
 	mov r5,sp

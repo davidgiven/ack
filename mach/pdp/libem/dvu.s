@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl dvu~
-.globl unknown~,dvu4~,dvu2~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvu~
+.extern unknown~,dvu4~,dvu2~
+! $Header$
 
 dvu~:
 	mov	(sp)+,r3

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl ngi~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define ngi~
+.extern unknown~
+! $Header$
 
 ngi~:
 	mov	(sp)+,r1

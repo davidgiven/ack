@@ -1,6 +1,7 @@
-/ $Header$
-	.text
-	.globl	cmu4~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define	cmu4~
+! $Header$
 cmu4~:
 	mov	(sp)+,r1
 	clr	r0
@@ -16,5 +17,5 @@ cmu4~:
 1:
 	dec	r0
 3:
-	add	$10,sp
+	add	$010,sp
 	jmp	(r1)

@@ -1,7 +1,7 @@
-/ $Header$
-.text
-.globl fef~
-.globl setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define fef~
+.extern setfloat~
+! $Header$
 
 fef~:
 	mov	(sp)+,r1

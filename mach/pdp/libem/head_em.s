@@ -1,36 +1,34 @@
-/ $Header$
-	.globl  LINO_AD,FILN_AD
-	.globl  ERANGE,ESET,EHEAP,EILLINS,ECASE
-	.globl  hol0,trppc~,trpim~,reghp~
+#
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define  LINO_AD,FILN_AD
+.define  ERANGE,ESET,EHEAP,EILLINS,ECASE
+.define  hol0,trppc~,trpim~,reghp~
+! $Header$
 
-rti     = 2
-stst    = 170300 ^ tst
+#define float 1
+#define hardfp 1
 
-.float  = 1             / this should be parameterized somehow
-.hardfp = 1             / only relevant if .float on
+LINO_AD = 0
+FILN_AD = 4
 
-LINO_AD = 0.
-FILN_AD = 4.
+ERANGE  = 1
+ESET    = 2
+EFOVFL  = 4
+EFUNFL  = 5
+EFDIVZ  = 7
+EFUND   = 011
+ECONV   = 012
+EHEAP   = 021
+EILLINS = 022
+ECASE   = 024
 
-ERANGE  = 1.
-ESET    = 2.
-EFOVFL  = 4.
-EFUNFL  = 5.
-EFDIVZ  = 7.
-EFUND   = 9.
-ECONV   = 10.
-EHEAP   = 17.
-EILLINS = 18.
-ECASE   = 20.
-
-.if .float
-/       .globl  fltused;        fltused:
-.if 1 - .hardfp
-/	sys     48.;4.;fptrap	/ if not commented it will appear as undefined
-.endif
-	sys     48.;8.;sig8
-	ldfps   $7600
-.endif
+#ifdef float
+#ifndef hardfp
+!	sys     060;.data2 4,fptrap	/ if not commented it will appear as undefined
+#endif
+	sys     060;.data2 010,sig8
+	ldfps   $07600
+#endif
 	mov     2(sp),r0
 	clr     -2(r0)
 	mov     sp,r0
@@ -47,30 +45,30 @@ ECASE   = 20.
 1:
 	mov     r0,4(sp)
 	jsr     pc,_m_a_i_n
-/ next two lines for as long as tail needs printf
-/	mov     r0,-(sp)
-/	jsr     pc,*$_exit
-	sys     1.
+! next two lines for as long as tail needs printf
+!	mov     r0,-(sp)
+!	jsr     pc,*$_exit
+	sys     1
 
-	.data
-hol0:   0;0     / line no
-	0;0     / file
-trppc~: 0
-trpim~: 0
-reghp~: _end
+	.sect .data
+hol0:   .data2 0,0     ! line no
+	.data2 0,0     ! file
+trppc~: .data2 0
+trpim~: .data2 0
+reghp~: .data2 _end
 
-	.text
+	.sect .text
 sig8:
-.if .float
+#ifdef float
 	mov     r0,-(sp)
 	stst    r0
 	mov     1f(r0),-(sp)
 	jsr     pc,trp~
-	sys     48.;8.;sig8
+	sys     060;.data2 010,sig8
 	mov     (sp)+,r0
 	rti
 
-	.data
-1:      EILLINS; EILLINS; EFDIVZ; ECONV; EFOVFL; EFUNFL; EFUND; EILLINS
-	.text
-.endif
+	.sect .data
+1:      .data2 EILLINS, EILLINS, EFDIVZ, ECONV, EFOVFL, EFUNFL, EFUND, EILLINS
+	.sect .text
+#endif

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl ror~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define ror~
+.extern save~,retu~
+! $Header$
 
 ror~:
 	asr	r0

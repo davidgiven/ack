@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl dvu2~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvu2~
+! $Header$
 dvu2~:
 	clr	r0
 	mov	04(sp),r1

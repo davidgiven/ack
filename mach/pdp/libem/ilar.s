@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl ilar~
-.globl lar~,trp~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define ilar~
+.extern lar~,trp~
+! $Header$
 
-EILLINS = 18.
+EILLINS = 022
 
 ilar~:
 	mov	(sp)+,r0

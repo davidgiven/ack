@@ -1,6 +1,7 @@
-/ $Header$
-.globl xor~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.define xor~
+.extern save~,retu~
+! $Header$
 
 xor~:
 	jsr	pc,save~

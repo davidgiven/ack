@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl inn~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define inn~
+! $Header$
 
 inn~:
 	mov	r0,-(sp)
@@ -18,5 +19,5 @@ inn~:
 	add	(sp)+,sp
 	tst	(sp)+
 	jmp	(r1)
-.data
-bits:	.byte	1,2,4,10,20,40,100,200
+.sect .data
+bits:	.data1	1,2,4,010,020,040,0100,0200

@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl cii~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cii~
+! $Header$
 
-/convert int to int
-/ 1 byte -> ? : sign extension
+!convert int to int
+! 1 byte -> ? : sign extension
 cii~:
 	mov	(sp)+,r3
 	mov	(sp)+,r0
@@ -18,5 +19,5 @@ cii~:
 	tst	(sp)
 4:	sxt	-(sp)
 	sob	r0,4b
-1:	sub	r0,sp	/ if out of sob loop r0==0
+1:	sub	r0,sp	! if out of sob loop r0==0
 3:	jmp	(r3)

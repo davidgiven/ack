@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl csb~
-.globl fat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define csb~
+.extern fat~
+! $Header$
 
-ECASE	= 20.
+ECASE	= 024
 
 csb~:
 	mov	(r0)+,-(sp)

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl rol~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define rol~
+.extern save~,retu~
+! $Header$
 
 rol~:
 	jsr	pc,save~

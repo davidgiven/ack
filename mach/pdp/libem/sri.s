@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl sri~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sri~
+.extern unknown~
+! $Header$
 
-/ Size in r0
+! Size in r0
 sri~:
 	mov	(sp)+,r3~
 	cmp	r0,$02

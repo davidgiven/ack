@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl adf~
-.globl setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define adf~
+.extern setfloat~
+! $Header$
 
-/size in r0
+!size in r0
 adf~:
 	mov	(sp)+,r1
 	jsr	pc,setfloat~

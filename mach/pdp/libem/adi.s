@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl adi~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define adi~
+.extern unknown~
+! $Header$
 
-/size in r0
+!size in r0
 adi~:
 	mov	(sp)+,r1
 	cmp	r0,$04

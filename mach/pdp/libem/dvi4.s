@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl dvi4~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvi4~
+.extern save~,retu~
+! $Header$
 
 dvi4~:
 	jsr	pc,save~

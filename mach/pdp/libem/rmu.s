@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl rmu~
-.globl rmu2~,rmu4~,unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define rmu~
+.extern rmu2~,rmu4~,unknown~
+! $Header$
 
 rmu~:
 	mov	(sp)+,r3

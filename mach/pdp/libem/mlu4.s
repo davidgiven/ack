@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl mlu4~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define mlu4~
+.extern save~,retu~
+! $Header$
 
 mlu4~:
 	jsr	pc,save~

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl dvu4~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvu4~
+.extern save~,retu~
+! $Header$
 
 dvu4~:
 	jsr	pc,save~

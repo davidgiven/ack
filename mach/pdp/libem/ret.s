@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl ret~,lfr~,retar
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define ret~,lfr~
+.extern unknown~, retar
+! $Header$
 
-/ Size in r0
+! Size in r0
 ret~:
 	mov	r0,r1
 	beq	1f

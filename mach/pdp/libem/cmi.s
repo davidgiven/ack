@@ -1,9 +1,10 @@
-/ $Header$
-.text
-.globl cmi~
-.globl cmi4~,unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cmi~
+.extern cmi4~,unknown~
+! $Header$
 
-/ Size in r0
+! Size in r0
 cmi~:
 	cmp	r0,$02
 	bne	1f

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl sbi~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sbi~
+.extern unknown~
+! $Header$
 
 sbi~:
 	mov	(sp)+,r1

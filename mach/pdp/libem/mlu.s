@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl mlu~
-.globl unknown~,mlu4~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define mlu~
+.extern unknown~,mlu4~
+! $Header$
 
 mlu~:
 	cmp	r0,$04

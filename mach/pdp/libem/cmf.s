@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl cmf~
-.globl setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cmf~
+.extern setfloat~
+! $Header$
 
 cmf~:
 	jsr	pc,setfloat~

@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl _printf
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define _printf
+! $Header$
 
 write	= 4
 
@@ -54,10 +55,10 @@ ready:
 	mov	$buff,9f
 	mov	r4,9f+2
 	sys	write
-9:	0;	0
+9:	.data2 0, 0
 	mov	(sp)+,r4
 	mov	(sp)+,r3
 	mov	(sp)+,r2
 	rts	pc
-.data
-buff:	.=.+256.
+.sect .bss
+buff:	.space 256

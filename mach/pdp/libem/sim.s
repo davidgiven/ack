@@ -1,15 +1,17 @@
-/ $Header$
-.text
-.globl sim~
-.globl trpim~
+#
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sim~
+.extern trpim~
+! $Header$
 
-.float = 1
+#define float
 
 sim~:
 	mov	(sp)+,r3
 	mov	(sp)+,r0
 	mov	r0,trpim~
-.if .float
+#ifdef float
 	stfps	r1
 	bis	$07400,r1
 	bit	$020,r0
@@ -25,5 +27,5 @@ sim~:
 	beq	0f
 	bic	$0400,r1
 0:	ldfps	r1
-.endif
+#endif
 	jmp	(r3)

@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl rmu2~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define rmu2~
+! $Header$
 
 rmu2~:
 	mov	04(sp),r1

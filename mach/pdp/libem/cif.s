@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl cif~,cuf~
-.globl setint~,setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cif~,cuf~
+.extern setint~,setfloat~
+! $Header$
 
 cif~:
 	mov	(sp)+,r1

@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl save~,retu~,savearea
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define save~,retu~,savearea
+! $Header$
 
 save~:
 	mov	r5,savearea
@@ -19,7 +20,6 @@ retu~:
 	mov	-(r5),r5
 	rts	pc
 
-.data
-.even
+.sect .bss
 savearea:
-	.=.+12.
+	.space 12

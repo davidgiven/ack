@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl cms~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define cms~
+.extern save~,retu~
+! $Header$
 
 cms~:
 	jsr	pc,save~

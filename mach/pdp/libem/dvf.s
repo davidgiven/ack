@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl dvf~
-.globl setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvf~
+.extern setfloat~
+! $Header$
 
 dvf~:
 	mov	(sp)+,r1

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl rmi4~
-.globl save~,retu~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define rmi4~
+.extern save~,retu~
+! $Header$
 
 rmi4~:
 	jsr	pc,save~

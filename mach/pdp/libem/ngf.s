@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl ngf~
-.globl setfloat~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define ngf~
+.extern setfloat~
+! $Header$
 
 ngf~:
 	jsr	pc,setfloat~

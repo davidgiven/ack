@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl sar~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sar~
+! $Header$
 
 sar~:
 	mov	(sp)+,r3

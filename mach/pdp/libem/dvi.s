@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl dvi~
-.globl unknown~,dvi4~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dvi~
+.extern unknown~,dvi4~
+! $Header$
 
 dvi~:
 	mov	(sp)+,r3

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl sru~
-.globl unknown~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define sru~
+.extern unknown~
+! $Header$
 
 sru~:
 	neg	2(sp)

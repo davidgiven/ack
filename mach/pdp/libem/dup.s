@@ -1,6 +1,7 @@
-/ $Header$
-.text
-.globl dup~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define dup~
+! $Header$
 
 dup~:
 	mov	(sp)+,r3

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl prf~
-.globl save~,retu~,hol0,_printf
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define prf~
+.extern save~,retu~,hol0,_printf
+! $Header$
 
 prf~:
 	jsr	pc,save~
@@ -9,7 +10,7 @@ prf~:
 	mov	hol0+4,r0
 	beq	1f
 	mov	r0,r2
-	mov	$40.,r1
+	mov	$050,r1
 3:	movb	(r2)+,r3
 	beq	2f
 	cmpb	r3,$0177
@@ -29,6 +30,6 @@ prf~:
 1:	mov	$name,r0
 	br	2b
 
-.data
-fmt:	<"%s", sp = %d, line %d: \0>
-name:	<_unknown file_\0>
+.sect .data
+fmt:	.asciz "\"%s\", sp = %d, line %d: "
+name:	.asciz "_unknown file_"

@@ -1,7 +1,8 @@
-/ $Header$
-.text
-.globl nop~
-.globl hol0,prf~
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define nop~
+.extern hol0,prf~
+! $Header$
 
 nop~:
 	mov	hol0,-(sp)
@@ -9,5 +10,5 @@ nop~:
 	jsr	pc,prf~
 	add	$04,sp
 	rts	pc
-.data
-fmt:	<test %d\n\0>
+.sect .data
+fmt:	.asciz "test %d\n"

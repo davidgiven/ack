@@ -1,12 +1,13 @@
-/ $Header$
-.text
-.globl trp~,fat~
-.globl trppc~,trpim~,savearea,retar
-	write=4.
+.sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
+.sect .text
+.define trp~,fat~
+.extern trppc~,trpim~,savearea,retar
+! $Header$
+	write=4
 
 fat~:
 	jsr     pc,trp~
-	4
+	.data2 4
 
 trp~:
 	mov     r0,-(sp)
@@ -14,7 +15,7 @@ trp~:
 	mov     02(sp),04(sp)
 	mov     (sp),02(sp)
 	mov     r1,(sp)
-	cmp     r0,$16.
+	cmp     r0,$020
 	jhis    0f
 	mov     $01,r1
 	ashc    r0,r1
@@ -50,7 +51,7 @@ trp~:
 	clr     trppc~
 	jsr     pc,(r0)
 	tst     (sp)+
-	mov	$retar+16.,r2
+	mov	$retar+020,r2
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
@@ -59,7 +60,7 @@ trp~:
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
-	mov	$savearea+12.,r2
+	mov	$savearea+014,r2
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
 	mov	(sp)+,-(r2)
@@ -78,18 +79,18 @@ trp~:
 	mov     (sp)+,r0
 	rts     pc
 9:      mov	(sp)+,r0
-	mov	$buf+11,r1
+	mov	$buf+011,r1
 	mov	$4,r2
 1:	mov	r0,r3
-	bic	$177770,r3
+	bic	$0177770,r3
 	bisb	r3,-(r1)
 	ash	$-3,r0
 	sob	r2,1b
 	mov	$2,r0
-	sys	write;buf;11.
-	4
+	sys	write;.data2 buf, 013
+	.data2 4
 
-.data
-retar:	.=.+16.
+.sect .data
+retar:	.space 16
 retend:
-buf:	<err 00000\n>
+buf:	.ascii "err 00000\n"
