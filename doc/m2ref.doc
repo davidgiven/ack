@@ -402,7 +402,7 @@ that its value is never changed, for instance by making its own copy
 of the array. The Modula-2 compiler does exactly this.
 .PP
 When the size of the return value of a function procedure is larger than
-the maximum of \fCWSIZE(LONGREAL)\fP and twice the word-size, the caller
+the maximum of \fCWSIZE(LONGREAL)\fP and twice the pointer-size, the caller
 reserves this space on the stack, above the parameters. Callee then stores
 its result there, and returns no other value.
 .NH 1
