@@ -129,7 +129,6 @@ gencode(argc) {
 		correct_prefix();
 		/* generate code ... */
 		genhdr();
-		copyfile(incl_file);
 		generate(p);
 		getaction(2);
 		doclose(fpars);
