@@ -1,4 +1,4 @@
-#include "string.h"
+#include "bc_string.h"
 
 /* $Header$ */
 

@@ -1,6 +1,6 @@
-#include "string.h"
+#include "bc_string.h"
 #include <stdio.h>
-#include "io.h"
+#include "bc_io.h"
 
 /* $Header$ */
 

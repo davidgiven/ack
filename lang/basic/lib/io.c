@@ -1,4 +1,4 @@
-#include "io.h"
+#include "bc_io.h"
 #include <sgtty.h>
 
 /* $Header$ */

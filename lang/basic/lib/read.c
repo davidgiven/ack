@@ -1,5 +1,5 @@
-#include "string.h"
-#include "io.h"
+#include "bc_string.h"
+#include "bc_io.h"
 #include <ctype.h>
 
 /* $Header$ */
