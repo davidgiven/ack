@@ -18,7 +18,10 @@ extern File *out_file;
 
 struct exec u_header;
 
-long ntext, ndata, nrelo, nchar, base_address();
+long ntext, ndata, nrelo, nchar;
+
+long base_address[SEGBSS+1];
+
 int trsize=0, drsize=0;
 
 struct relocation_info *u_reloc;
@@ -29,6 +32,7 @@ output()
 {
 	register int i;
 	register struct nlist *u_name;
+	register struct outrelo *rp;
 
 	/*
 	 * Convert relocation data structures. This also requires
@@ -41,16 +45,18 @@ output()
 	u_reloc = (struct relocation_info *)
 			Malloc((unsigned)nrelo*sizeof(struct relocation_info));
 
-	for (i = 0; i < nrelo; i++) {
-		if (  ( reloc_info[i].or_sect-S_MIN) == SEGTXT &&
-			convert_reloc( &reloc_info[i], u_reloc)) {
+	rp = reloc_info;
+	for (i = nrelo; i > 0; i--, rp++) {
+		if (  ( rp->or_sect-S_MIN) == SEGTXT &&
+			convert_reloc( rp, u_reloc)) {
 			trsize++;
 			u_reloc++;
 		}
 	}
-	for (i = 0; i < nrelo; i++) {
-		if (  ( reloc_info[i].or_sect-S_MIN) != SEGTXT &&
-			convert_reloc( &reloc_info[i], u_reloc)) {
+	rp = reloc_info;
+	for (i = nrelo; i > 0; i--, rp++) {
+		if (  ( rp->or_sect-S_MIN) != SEGTXT &&
+			convert_reloc( rp, u_reloc)) {
 			u_reloc++;
 			drsize++;
 		}
@@ -98,39 +104,42 @@ reduce_name_table()
 	 */
 
 #define S_NEEDED	0x8000
-#define removable(nm)	(!(nm.on_type & S_NEEDED) && *(nm.on_foff+string_area) == GENLAB)
+#define removable(nm)	(!(nm->on_type & S_NEEDED) && *(nm->on_foff+string_area) == GENLAB)
 
 	register int *diff_index =
 		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
 	register int i;
+	register struct outname *np;
 	char *new_str;
 	register char *p, *q;
+	register struct relocation_info *rp;
 
 	*diff_index++ = 0;
-	for (i = 0; i < nrelo; i++) {
-		if (u_reloc[i].r_extern) {
-			symbol_table[u_reloc[i].r_symbolnum].on_type |= S_NEEDED;
+	rp = u_reloc;
+	for (i = nrelo; i > 0; i--, rp++) {
+		if (rp->r_extern) {
+			symbol_table[rp->r_symbolnum].on_type |= S_NEEDED;
 		}
 	}
 
-	for (i = 0; i < nname; i++) {
+	np = symbol_table;
+	for (i = 0; i < nname; i++, np++) {
 		int old_diff_index = diff_index[i-1];
 
-		if (removable(symbol_table[i])) {
+		if (removable(np)) {
 			diff_index[i] = old_diff_index + 1;
 		}
 		else {
 			diff_index[i] = old_diff_index;
 			if (old_diff_index) {
-				symbol_table[i - old_diff_index] = symbol_table[i];
+				symbol_table[i - old_diff_index] = *np;
 			}
 		}
 	}
 	nname -= diff_index[nname - 1];
 
-	for (i = 0; i < nrelo; i++) {
-		register struct relocation_info *rp = &u_reloc[i];
-
+	rp = u_reloc;
+	for (i = nrelo; i > 0; i--, rp++) {
 		if (rp->r_extern) {
 			rp->r_symbolnum -= diff_index[rp->r_symbolnum];
 		}
@@ -139,9 +148,10 @@ reduce_name_table()
 	free((char *)(diff_index-1));
 
 	new_str = q = Malloc((unsigned)(string - string_area));
-	for (i = 0; i < nname; i++) {
-		p = symbol_table[i].on_foff + string_area;
-		symbol_table[i].on_foff = q - new_str;
+	np = symbol_table;
+	for (i = nname; i > 0; i--, np++) {
+		p = np->on_foff + string_area;
+		np->on_foff = q - new_str;
 		while (*q++ = *p) p++;
 	}
 	free(string_area);
@@ -172,8 +182,8 @@ init_unixheader()
 }
 
 convert_reloc( a_relo, u_relo)
-struct outrelo *a_relo;
-struct relocation_info *u_relo;
+register struct outrelo *a_relo;
+register struct relocation_info *u_relo;
 {
 	int retval = 1;
 
@@ -227,63 +237,41 @@ int length;
 
 
 convert_name( a_name, u_name)
-struct outname *a_name;
-struct nlist *u_name;
+register struct outname *a_name;
+register struct nlist *u_name;
 {
 	/* print( "naam is %s\n", a_name->on_foff + string_area);   */
 
 	u_name->n_str = a_name->on_foff + 4;
-	fill_type( &(u_name->n_type), &(a_name->on_type), a_name->on_valu);
+	if ((a_name->on_type & S_TYP) == S_UND ||
+	    (a_name->on_type & S_EXT)) u_name->n_type = N_EXT;
+	else	u_name->n_type = 0;
+	if (a_name->on_valu != -1 && (! (a_name->on_type & S_COM))) {
+		switch((a_name->on_type & S_TYP) - S_MIN) {
+		case SEGTXT:
+			u_name->n_type |= N_TEXT;
+			break;
+		case SEGCON:
+			u_name->n_type |= N_DATA;
+			break;
+		case SEGBSS:
+			u_name->n_type |= N_BSS;
+			break;
+		default:
+			fprint(STDERR, "convert_name(): bad section %d\n",
+				(a_name->on_type & S_TYP) - S_MIN);
+			break;
+		}
+	}
 	u_name->n_other = '\0';
 	u_name->n_desc = 0;
 	if (a_name->on_type & S_COM) 
 		u_name->n_value = a_name->on_valu;
 	else if ( a_name->on_valu != -1)
 		u_name->n_value = a_name->on_valu + 
-			base_address( ( a_name->on_type & S_TYP) - S_MIN);
+			base_address[( a_name->on_type & S_TYP) - S_MIN];
 	else 
 		 u_name->n_value = 0;
-}
-
-
-fill_type( u_type, a_type, valu)
-unsigned char *u_type;
-ushort *a_type;
-long valu; 
-{
-	int sect;
-
-	*u_type = ((*a_type&S_TYP) == S_UND || (*a_type & S_EXT)) ? N_EXT : 0;
-
-	if ( valu != -1 && (! (*a_type & S_COM))) {
-		sect = ( *a_type & S_TYP ) - S_MIN;
-		switch ( sect) {
-			case SEGTXT: *u_type |= N_TEXT;
-			      	     break;
-			case SEGCON : *u_type |= N_DATA;
-			              break;
-			case SEGBSS : *u_type |= N_BSS;
-			              break;
-			default: fprint(STDERR, 
-					"fill_type() : bad section %d\n", sect);
-		}
-	}
-}
-
-
-long base_address( seg)
-int seg;
-{
-	switch ( seg) {
-		case SEGTXT : return( 0);
-			      break;
-		case SEGCON : return( text - text_area);
-			      break;
-		case SEGBSS : return( text - text_area + data - data_area);
-			      break;
-		default : fprint( STDERR,
-			"base_adres() : bad section %d\n", seg);
-	}
 }
 
 put_stringtablesize( n)

@@ -1,8 +1,11 @@
 EMHOME=../../..
 BACK=$(EMHOME)/lib/ceg/ce_back
 
-install : back.a
-	install_ceg
+all : back.a
+	make -f ce_makefile
+
+install:	all
+	make -f ce_makefile install
 
 clean:
 	rm -rf back.a back

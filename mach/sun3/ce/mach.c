@@ -1,14 +1,14 @@
 #include "mach.h"
 #include <back.h>
-#include <stdio.h>
 #include <out.h>
+#include <system.h>
 
 
 arg_error( s, arg)
 char *s;
 int arg;
 {
-	fprintf( stderr, "arg_error %s %d\n", s, arg);
+	fprint( STDERR, "arg_error %s %d\n", s, arg);
 }
 
 
