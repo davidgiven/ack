@@ -12,6 +12,7 @@
 	.define tblmax
 	.define ml
 	.define argc
+	.define topstack
 .sect .text
 .sect .rom
 .sect .data
@@ -22,6 +23,7 @@
 !---------------------------------------------------------------------------
 
 _m_a_i_n:
+		move.l	sp,topstack
 		tst.l	(sp)+
 		lea	retarea,a5		!a5 POINTS AT RETURN AREA
 		move.l	nd,-(sp)		!nd contains endbss
@@ -507,6 +509,7 @@ maxcount:  .space 4
 
 tblmax:	.space	4
 globmax: .space	4
+topstack: .space 4
 ml:	.space	4
 eb:	.space	4		!EXPLICITELY REQUIRED eb, filb, curproc IN
 filb:	.space	4		!THIS ORDER

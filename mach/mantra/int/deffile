@@ -74,7 +74,9 @@
 #endif
 #define  adroff move.b	(a3)+,(a5) ;	move.b	(a3)+,1(a5)
 #define	claimstack	tst.b	-1024(sp)
-#define	locptr	cmp.l	sp,a0 ;\
+#define	locptr	cmp.l	topstack,a0 ;\
+		bhi	7f ;\
+		cmp.l	sp,a0 ;\
 		bcc	6f  
 #define	heaptr	cmp.l	hp,a0 ;\
 		bhi	7f ;\
