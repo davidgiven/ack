@@ -25,6 +25,7 @@
 #include	"class.h"
 #include	"macro.h"
 
+extern char options[];
 extern	char **inctable;	/* list of include directories		*/
 extern	char *getwdir();
 char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
@@ -211,7 +212,8 @@ int to_endif;
 			++(ifstack[nestlevel]);
 			if (!to_endif && nestlevel == skiplevel) {
 				if (SkipToNewLine())
-					strict("garbage following #else");
+					if (!options['o'])
+						strict("garbage following #else");
 				NoUnstack--;
 				return;
 			}
@@ -221,7 +223,8 @@ int to_endif;
 			ASSERT(nestlevel > nestlow);
 			if (nestlevel == skiplevel) {
 				if (SkipToNewLine())
-					strict("garbage following #endif");
+					if (!options['o'])
+						strict("garbage following #endif");
 				nestlevel--;
 				NoUnstack--;
 				return;
@@ -364,7 +367,8 @@ do_elif()
 do_else()
 {
 	if (SkipToNewLine())
-		strict("garbage following #else");
+		if (!options['o'])
+			strict("garbage following #else");
 	if (nestlevel <= nestlow)
 		lexerror("#else without corresponding #if");
 	else {	/* mark this level as else-d */
@@ -379,7 +383,8 @@ do_else()
 do_endif()
 {
 	if (SkipToNewLine())
-		strict("garbage following #endif");
+		if (!options['o'])
+			strict("garbage following #endif");
 	if (nestlevel <= nestlow)	{
 		lexerror("#endif without corresponding #if");
 	}

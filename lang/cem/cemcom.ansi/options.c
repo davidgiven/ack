@@ -68,7 +68,12 @@ next_option:			/* to allow combined one-char options */
 	case 'n':			/* use no registers */
 	case 'w':			/* no warnings will be given */
 	case 's':			/* no stricts will be given */
+	case 'o':			/* no complaints about old-style */
 		options[opt] = 1;
+		goto next_option;
+	case 'a':		/* suppress all but errors diagnostics */
+		options['w'] = 1;	/* implies -a */
+		options['s'] = 1;
 		goto next_option;
 #endif	LINT
 

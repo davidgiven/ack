@@ -591,10 +591,13 @@ check_formals(idf, dc)
 
 	while (du && du->du_fund != FUNCTION)
 		du = du->next;
-	ASSERT(du);
+	if (!du) return;	/* terrible error, signalled earlier */
+
 	if (du->du_proto) return;
 
-	warning("'%s' old-fashioned function definition", dc->dc_idf->id_text);
+	if (!options['o'])
+		warning("'%s' old-fashioned function definition"
+				, dc->dc_idf->id_text);
 
 	if (pl) {
 		if (pl->pl_flag & PL_ELLIPSIS) {

@@ -335,7 +335,7 @@ struct type *tp;
 	while((*tgpp) && (*tgpp)->tg_type != tp) {
 		tgpp = &((*tgpp)->next);
 	}
-	ASSERT(*tgpp);
+	if (!*tgpp) return;
 
 	tgp = *tgpp;
 	if (tgp->tg_level > L_PROTO) return;
