@@ -919,7 +919,7 @@ stat    {       int     ident, val; } :
         | '\en'
         ;
 
-expr(int level, *val;) {       int     expr; } :
+expr(int level, int *val;) {       int     expr; } :
           factor(val)
           [ %while (prio(tok.t_tokno) >= level)
                     /* Swallow operators as long as their priority is
