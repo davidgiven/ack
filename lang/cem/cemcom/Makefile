@@ -46,7 +46,7 @@ INPLLIB = $(EMHOME)/modules/lib/llib-linput.ln
 ALLOCLLIB = $(EMHOME)/modules/lib/llib-lalloc.ln
 #LINTLIBS =
 LINTLIBS = $(EMMESLLIB) $(EMKLLIB) $(PRTLLIB) $(STRLLIB) $(ALLOCLLIB) $(SYSLLIB)
-CURRDIR = .
+CURRDIR = 
 
 COPTIONS =
 
@@ -135,41 +135,41 @@ MYLINTFLAGS = #-xh
 	./make.allocd <$*.str >$*.h
 
 Main:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/main ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve main ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)main ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve main ; fi'
 	@rm -f nmclash.o a.out
 
 Emain:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/emain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve emain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)emain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve emain ; fi'
 	@rm -f nmclash.o a.out
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
 	mv *.o PEEPHOLE
 
 CEmain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)/cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
 	mv *.o CODE_EXPANDER
 
 Lnt:	Cfiles
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)/lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
-	make "EMHOME="$(EMHOME) $(CURRDIR)/lnt
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
+	make "EMHOME="$(EMHOME) $(CURRDIR)lnt
 	@rm -f nmclash.o a.out
 
 install:	Main
 	rm -f $(EMHOME)/lib/em_cemcom $(EMHOME)/man/em_cemcom.6
-	cp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
-	cp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
+	cp $(CURRDIR)main $(EMHOME)/lib/em_cemcom
+	cp $(CURRDIR)cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 Oinstall:	Omain
-	cp $(CURRDIR)/omain $(EMHOME)/lib/em_cemcomO
+	cp $(CURRDIR)omain $(EMHOME)/lib/em_cemcomO
 
 cmp:	Main
-	-cmp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
-	-cmp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
+	-cmp $(CURRDIR)main $(EMHOME)/lib/em_cemcom
+	-cmp $(CURRDIR)cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 pr:
 	@pr Makefile make.* char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
@@ -246,25 +246,25 @@ depend:	Cfiles
 
 #INCLINCLINCLINCL
 
-$(CURRDIR)/main:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)/main 
-	size $(CURRDIR)/main
+$(CURRDIR)main:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)main 
+	size $(CURRDIR)main
 
-$(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)/emain 
-	size $(CURRDIR)/emain
+$(CURRDIR)emain:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)emain 
+	size $(CURRDIR)emain
 
-$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain 
-	size $(CURRDIR)/omain
+$(CURRDIR)omain:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)omain 
+	size $(CURRDIR)omain
 
-$(CURRDIR)/cemain:	$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(CELIBS) -o $(CURRDIR)/cemain 
-	size $(CURRDIR)/cemain
+$(CURRDIR)cemain:	$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(CELIBS) -o $(CURRDIR)cemain 
+	size $(CURRDIR)cemain
 
-$(CURRDIR)/lnt:		$(OBJ) $(CURRDIR)/Makefile
-	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LLIBS) -o $(CURRDIR)/lnt 
-	size $(CURRDIR)/lnt
+$(CURRDIR)lnt:		$(OBJ) $(CURRDIR)Makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LLIBS) -o $(CURRDIR)lnt 
+	size $(CURRDIR)lnt
 
 Xlint:	$(SRC)
 	$(LINT) $(CDEFS) $(LINTFLAGS) $(SRC)
