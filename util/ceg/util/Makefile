@@ -1,7 +1,7 @@
 EM = ../../..
 CEGLIB = $(EM)/lib/ceg
 UTIL = $(CEGLIB)/util
-UtilList = create_ofiles make_as make_obj make_own update
+UtilList = create_ofiles make_as make_obj make_own update_ceg
 
 all:
 
@@ -9,7 +9,7 @@ install:
 	-mkdir $(CEGLIB)
 	-mkdir $(UTIL)
 	cp $(UtilList) $(UTIL)
-	cp install_ceg $(EM)/bin
+	cp install_ceg update_ceg $(EM)/bin
 
 cmp:
 	for i in $(UtilList) ; do cmp $$i $(UTIL)/$$i ; done

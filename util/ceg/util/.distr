@@ -3,5 +3,5 @@ install_ceg
 make_as
 make_obj
 make_own
-update
+update_ceg
 Makefile
