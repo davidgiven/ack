@@ -892,7 +892,11 @@ ChkBinOper(expp)
 		/* Operands must be compatible (distilled from Def 8.2)
 		*/
 		if (!TstCompat(tpr, tpl)) {
-			return ex_error(expp, "incompatible operand types");
+			extern char *incompat();
+			char buf[128];
+
+			sprint(buf, "%s in operand(s)", incompat(tpl, tpr));
+			return ex_error(expp, buf);
 		}
 
 		MkCoercion(&(expp->nd_left), tpl);

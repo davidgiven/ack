@@ -160,23 +160,27 @@ TstAssCompat(tp1, tp2)
 	if (tp1->tp_fund == T_ARRAY) {
 		/* check for string
 		*/
-		arith size;
-
 		if (IsConformantArray(tp1)) return 0;
 
-		tp = IndexType(tp1);
-		if (tp->tp_fund == T_SUBRANGE) {
-			size = tp->sub_ub - tp->sub_lb + 1;
-		}
-		else	size = tp->enm_ncst;
-	    	tp1 = BaseType(tp1->arr_elem);
 	    	return
-			tp1 == char_type
-		    &&	(tp2->tp_fund  == T_STRING && size >= tp2->tp_size)
+			BaseType(tp1->arr_elem) == char_type
+		    &&	tp2->tp_fund  == T_STRING
+		    &&  (tp1->arr_high - tp1->arr_low + 1) >= tp2->tp_size
 			;
 	}
 
 	return 0;
+}
+
+char *
+incompat(tp1, tp2)
+	register t_type *tp1, *tp2;
+{
+	
+	if (tp1->tp_fund == T_HIDDEN || tp2->tp_fund == T_HIDDEN) {
+		return "properties of opaque type are hidden; illegal use";
+	}
+	return "type incompatibility";
 }
 
 int
@@ -194,7 +198,6 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 	*/
 	register t_type *actualtype = (*nd)->nd_type;
 	char ebuf[256];
-	char ebuf1[256];
 
 	if (edf) {
 		sprint(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
@@ -246,19 +249,17 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 #ifndef STRICT_3RD_ED
 	if (! options['3'] && VARflag && TstCompat(formaltype, actualtype)) {
 		if (formaltype->tp_size == actualtype->tp_size) {
-			sprint(ebuf1, ebuf, "identical types required");
 			node_warning(*nd,
 				     W_OLDFASHIONED,
-				     ebuf1);
+				     ebuf,
+				     "identical types required");
 			return 1;
 		}
-		sprint(ebuf1, ebuf, "equal sized types required");
-		node_error(*nd, ebuf1);
+		node_error(*nd, ebuf, "equal sized types required");
 		return 0;
 	}
 #endif
-	sprint(ebuf1, ebuf, "type incompatibility");
-	node_error(*nd, ebuf1);
+	node_error(*nd, ebuf, incompat(formaltype, actualtype));
 	return 0;
 }
 
@@ -270,7 +271,9 @@ CompatCheck(nd, tp, message, fc)
 {
 	if (! (*fc)(tp, (*nd)->nd_type)) {
 		if (message) {
-			node_error(*nd, "type incompatibility in %s", message);
+			node_error(*nd, "%s in %s",
+					incompat(tp, (*nd)->nd_type),
+					message);
 		}
 		return 0;
 	}
