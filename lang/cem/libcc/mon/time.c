@@ -1,7 +1,8 @@
 /* $Header$ */
 #include <sys/types.h>
 #include <sys/timeb.h>
-time_t time(timpt) time_t *timpt ; {
+time_t
+time(timpt) time_t *timpt ; {
 	struct timeb buf ;
 
 	ftime(&buf) ;
