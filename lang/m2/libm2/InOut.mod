@@ -256,8 +256,6 @@ IMPLEMENTATION MODULE InOut ;
 		integ := int
 	END;
 	IF buf[index] > " " THEN
-		Write(buf[index]);
-		Write(termCH);
 		Traps.Message("illegal integer");
 		HALT;
 	END;
