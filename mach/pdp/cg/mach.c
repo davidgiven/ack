@@ -40,7 +40,7 @@ con_mult(sz) word sz; {
 		fatal("bad icon/ucon size");
 	l = atol(str);
 #ifdef ACK_ASS
-	fprintf(codefile,".data2 %o, %o !%s\n",(int)(l>>16),(int)l, str);
+	fprintf(codefile,".data2 0%o, 0%o !%s\n",(int)(l>>16),(int)l, str);
 #else
 	fprintf(codefile,"\t%o;%o\n",(int)(l>>16),(int)l);
 #endif
