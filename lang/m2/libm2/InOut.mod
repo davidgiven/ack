@@ -26,6 +26,7 @@ IMPLEMENTATION MODULE InOut ;
 	IF unread THEN
 		unread := FALSE;
 		c := unreadch;
+		Done := TRUE;
 	ELSE
 		WITH ibuf DO
 			IF cnt <= maxcnt THEN
