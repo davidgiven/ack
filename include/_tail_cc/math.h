@@ -63,8 +63,8 @@ extern double sinh(), tanh(), cosh();
 #endif
 
 #ifndef M_MAX_D
-#define M_MAX_D          4.494232837155780788e+307
-#define M_MIN_D		 5.562684646268003458e-309
+#define M_MAX_D          1.7976931348623157e+308
+#define M_MIN_D		 2.2250738585072014e-308
 #define M_DEXPLEN	 11
 #endif
 #define M_DMAXEXP	 ((1 << (M_DEXPLEN - 1)) - 1)
