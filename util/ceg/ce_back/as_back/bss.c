@@ -1,11 +1,5 @@
 #include "header.h"
 
-bss( n)
-arith n;
-{
-	fprint( codefile, BSS_FMT, (long) n);
-}
-
 common(n)
 arith n;
 {
