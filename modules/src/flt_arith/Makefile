@@ -27,8 +27,8 @@ OBJ =	flt_ar2flt.$(SUF) flt_div.$(SUF) flt_flt2ar.$(SUF) flt_modf.$(SUF) \
 all:		$(LIBFLT)
 
 test:		$(LIBFLT) test.c
-		$(CC) -o test test.c $(LIBFLT)
-		./test
+		$(CC) -o tst test.c $(LIBFLT)
+		./tst
 
 $(LIBFLT):	$(OBJ)
 		rm -f $(LIBFLT)
