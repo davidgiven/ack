@@ -1,3 +1,21 @@
 name "Z80 assembler"
 dir as
 end
+name "Z80 code generator"
+dir cg
+end
+name "Z80 Basic library"
+dir libbc
+end
+name "Z80 C libraries"
+dir libcc
+end
+name "Z80 EM library"
+dir libem
+end
+name "Z80 Pascal library"
+dir libpc
+end
+name "Z80 System library"
+dir libsys
+end
