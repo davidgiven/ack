@@ -414,26 +414,18 @@ C_dvf
   default	==>	arg_error("C_dvf", $1).
 
 C_fif
-  $1 == 4	==>	"call .fif4".
-  $1 == 8	==>	"call .fif8".
+  $1 == 4	==>	C_lor((arith)1);
+			"call .fif4";
+			"pop bx".
+  $1 == 8	==>	C_lor((arith)1);
+			"call .fif8";
+			"pop bx".
   default	==>	arg_error("C_fif", $1).
 
 C_fef
-  $1 == 4	==>	"pop ax";
-			"pop bx";
-			"push bx";
-			"push bx";
-			"push ax";
+  $1 == 4	==>	C_lor((arith)1);
 			"call .fef4".
-  $1 == 8	==>	"pop ax";
-			"pop bx";
-			"pop cx";
-			"pop dx";
-			"push dx";
-			"push dx";
-			"push cx";
-			"push bx";
-			"push ax";
+  $1 == 8	==>	C_lor((arith)1);
 			"call .fef8".
   default	==>	arg_error("C_fef", $1).
 
