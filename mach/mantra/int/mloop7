@@ -101,25 +101,151 @@ sru_l:		adroff		;	move.w	(a5),d0
 !------------------------------------------------------------------------------
 !	DUMMY FLOATING POINT ROUTINES
 !------------------------------------------------------------------------------
-adf_l:	sbf_l:	mlf_l:	dvf_l:
+adf_l:
 		adroff		;	move.w	(a5),d0
-1:		add.l	d0,sp	
+1:
 #ifdef FLTRAP
 		bra	flnim
 #else
+		checkfsize
+4:
+		jsr	.adf4
+		add.l	#4,sp
+		jmp	(a4)
+8:
+		jsr	.adf8
+		add.l	#8,sp
 		jmp	(a4)
 #endif
-adf_z:	sbf_z:	mlf_z:	dvf_z:
+adf_z:
 		mov	(sp)+,d0 ;	bra	1b
-adf_s0:	sbf_s0:	mlf_s0:	dvf_s0:
+adf_s0:
 		move.l	#0,d0	;	move.b	(a3)+,d0
 		bra	1b
-fef_l:		sub.l	wrd,sp
-fif_l:	ngf_l:	adroff
-fef_z:	
+
+sbf_l:
+		adroff		;	move.w	(a5),d0
+1:
 #ifdef FLTRAP
 		bra	flnim
 #else
+		checkfsize
+4:
+		jsr	.sbf4
+		add.l	#4,sp
+		jmp	(a4)
+8:
+		jsr	.sbf8
+		add.l	#8,sp
 		jmp	(a4)
 #endif
-ngf_z:	fif_z:	add.l	wrd,sp	;	bra	fef_z
+sbf_z:
+		mov	(sp)+,d0 ;	bra	1b
+sbf_s0:
+		move.l	#0,d0	;	move.b	(a3)+,d0
+		bra	1b
+
+mlf_l:
+		adroff		;	move.w	(a5),d0
+1:
+#ifdef FLTRAP
+		bra	flnim
+#else
+		checkfsize
+4:
+		jsr	.mlf4
+		add.l	#4,sp
+		jmp	(a4)
+8:
+		jsr	.mlf8
+		add.l	#8,sp
+		jmp	(a4)
+#endif
+mlf_z:
+		mov	(sp)+,d0 ;	bra	1b
+mlf_s0:
+		move.l	#0,d0	;	move.b	(a3)+,d0
+		bra	1b
+
+dvf_l:
+		adroff		;	move.w	(a5),d0
+1:
+#ifdef FLTRAP
+		bra	flnim
+#else
+		checkfsize
+4:
+		jsr	.dvf4
+		add.l	#4,sp
+		jmp	(a4)
+8:
+		jsr	.dvf8
+		add.l	#8,sp
+		jmp	(a4)
+#endif
+dvf_z:
+		mov	(sp)+,d0 ;	bra	1b
+dvf_s0:
+		move.l	#0,d0	;	move.b	(a3)+,d0
+		bra	1b
+
+ngf_l:		adroff		;	move.w	(a5),d0
+1:
+#ifdef FLTRAP
+		bra	flnim
+#else
+		checkfsize
+4:
+		jsr	.ngf4
+		jmp	(a4)
+8:
+		jsr	.ngf8
+		jmp	(a4)
+#endif
+ngf_z:
+		mov	(sp)+,d0 ;	bra	1b
+
+fif_l:		adroff		;	move.w	(a5),d0
+1:
+#ifdef FLTRAP
+		bra	flnim
+#else
+		checkfsize
+4:
+		jsr	.fif4
+		jmp	(a4)
+8:
+		jsr	.fif8
+		jmp	(a4)
+#endif
+fif_z:
+		mov	(sp)+,d0 ;	bra	1b
+
+fef_l:		adroff		;	move.w	(a5),d0
+1:
+#ifdef FLTRAP
+		bra	flnim
+#else
+		checkfsize
+4:
+		move.l	(sp)+,d0
+		clr.l	-(sp)
+		move.l	d0,-(sp)
+		jsr	.fef4
+#ifndef lword
+		add.l	#2,sp
+#endif		
+		jmp	(a4)
+8:
+		move.l	(sp)+,d0
+		move.l	(sp)+,d1
+		clr.l	-(sp)
+		move.l	d1,-(sp)
+		move.l	d0,-(sp)
+		jsr	.fef8
+#ifndef lword
+		add.l	#2,sp
+#endif		
+		jmp	(a4)
+#endif
+fef_z:		mov	(sp)+,d0 ;	bra	1b

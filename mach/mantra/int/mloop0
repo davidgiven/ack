@@ -174,13 +174,33 @@ dat6:		add.l	d2,a3	;	move.l	d2,d3
 		bne	6b	;	add.l	d3,a3
 		bra	datloop
 
-dofloat:	add.l	d2,a3	
-		bsr	atof	;	bra	datloop
+dofloat:
+		move.l	d2,d0
+		checkfsize
+4:
+8:
+		movem.l	a0/a1/d0-d2,-(sp)
+		move.l	a3,-(sp)
+		add.l	d0,a3
+		move.l	a4,-(sp)
+		move.l	d0,-(sp)
+		bsr	_con_float
+		lea	12(sp),sp
+		movem.l	(sp)+,a0/a1/d0-d2
+1:
+		tst.b	(a4)+ ;		bne	1b
+		bra	datloop
 
+#ifdef FLTRAP
 !DUMMY ASCII TO FLOAT ROUTINE
-atof:		tst.b	(a4)+	;	bne	atof	
+_con_float:
 		rts
-
+#else
+__fptrp:
+		move.l	4(sp),d0
+		mov	d0,-(sp)
+		bra	error
+#endif
 blshift:	move.l	a1,a0	;	move.l	#1024,d0
 		move.l	d1,-(sp)
 		tst.l	-(sp)

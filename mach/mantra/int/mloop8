@@ -133,11 +133,22 @@ cms_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 !		DUMMY FLOAT ROUTINES. POINTER ADJUSTMENT AND WARNING
 
 cmf_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
+#ifdef FLTRAP
 9:		add.w	d0,d0	;	add.l	d0,sp
 		cl	-(sp)
-#ifdef FLTRAP
 		bra	flnim	
 #else
+9:
+		checkfsize
+4:
+		jsr	.cmf4
+		lea	8(sp),sp
+		mov	d0,-(sp)
+		jmp	(a4)
+8:
+		jsr	.cmf8
+		lea	16(sp),sp
+		mov	d0,-(sp)
 		jmp	(a4)
 #endif
 cmf_l:		adroff		;	move.w	(a5),d0	;	bra 9b

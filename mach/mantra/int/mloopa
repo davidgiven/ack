@@ -28,8 +28,8 @@ e_badmon:	mov	#0x19,-(sp) ;	bra	error
 e_badlin:	mov	#0x1A,-(sp) ;	bra 	error
 e_badgto:	mov	#0x1B,-(sp) ;	bra	error
 
-flnim:		mov	#0xB,-(sp) ;	bra	error
-no8bar:		mov	#0xC,-(sp) ;	bra	error
+flnim:		bra	e_illins
+no8bar:		bra	e_oddz
 !---------------------------------------------------------------------------
 !		ERRORS AND TRAPS
 !----------------------------------------------------------------------------

@@ -86,4 +86,5 @@
 		bcc	7f ;\
 		cmp.l	a6,a0 ;\
 		bcc	6f 
+#define checkfsize cmp.w #4,d0 ; beq 4f ; cmp.w #8,d0 ; beq 8f ; bra e_oddz
 
