@@ -8,25 +8,32 @@
  * Miscellaneous sizes, tunable 
  */
 
-#define MAXREGS 40
-#define MAXPROPS 30
-#define MAXTOKENS 100
+#include <local.h>
+#if BIGMACHINE
+#define BORS(x,y) x
+#else
+#define BORS(x,y) y
+#endif
+
+#define MAXREGS BORS(40,30)
+#define MAXPROPS BORS(30,20)
+#define MAXTOKENS BORS(100,60)
 #define MAXATT 6
-#define MAXSETS 150
-#define MAXINSTR 200
-#define MAXSTRINGS 250
-#define MAXNODES 500
-#define EMPATMAX 20
-#define MAXPATTERNS 40
+#define MAXSETS BORS(150,100)
+#define MAXINSTR BORS(125,200)
+#define MAXSTRINGS BORS(250,150)
+#define MAXNODES BORS(500,350)
+#define EMPATMAX BORS(20,10)
+#define MAXPATTERNS BORS(40,30)
 #define MAXALLREG 5
-#define MAXINSTANCES 500
-#define MAXMOVES 40
+#define MAXINSTANCES BORS(500,300)
+#define MAXMOVES BORS(40,20)
 #define MAXTESTS 10
-#define MAXSTACKS 30
-#define MAXCOERCS 50
-#define MAXSPLCOERC 20
+#define MAXSTACKS BORS(30,20)
+#define MAXCOERCS BORS(50,30)
+#define MAXSPLCOERC BORS(20,10)
 #define MAXSPLIT 3
-#define MAXPATBYTES 7000
+#define MAXPATBYTES BORS(14000,7000)
 #define MAXREGVAR 10
 #define MAXSOURCELINES 6000
 
