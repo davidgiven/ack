@@ -13,7 +13,7 @@ _signal:	mov	bx,sp
 	jbe 2f
 	mov dvect(bx),cx
 	mov bx,sp
-	mov 4(bx),enter
+	mov 4(bx),entry
 	mov bx,dx
 	int 0xb0
 	mov dx,bx
@@ -36,7 +36,7 @@ _signal:	mov	bx,sp
 3:
 	jmp cerror
 
-enter:
+entry:
 	push bx
 	push cx
 	push dx
