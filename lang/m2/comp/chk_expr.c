@@ -63,7 +63,7 @@ MkCoercion(pnd, tp)
 	if (nd_tp->tp_fund == T_STRING) return;
 	nd_tp = BaseType(nd_tp);
 	if (nd->nd_class == Value &&
-	    (nd_tp->tp_fund != T_REAL && tp->tp_fund != REAL)) {
+	    (nd_tp->tp_fund != T_REAL && tp->tp_fund != T_REAL)) {
 		switch(tp->tp_fund) {
 		case T_SUBRANGE:
 			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
