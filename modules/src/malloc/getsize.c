@@ -19,6 +19,6 @@ main()
 		puts("typedef long size_type;");
 		exit(0);
 	}
-	fputs(stderr, "funny pointer size\n");
+	fputs("funny pointer size\n", stderr);
 	exit(1);
 }
