@@ -557,7 +557,6 @@ moncall()
 
 		pid = getpid();
 		push_i2(pid);
-		push_int(0);
 		LOG(("@m9 Getpid: succeeded, pid = %d", pid));
 		break;
 
