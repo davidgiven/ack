@@ -477,7 +477,6 @@ opnd2test(expp, oper)
 		case OR:	/* && and || also impose a test	*/
 			/* It is already a test */
 			return;
-		}
 		case ',':
 			opnd2test(&((*expp)->OP_RIGHT), oper);
 			return;
