@@ -73,10 +73,10 @@ con_float() {
 #endif OWNFLOAT
 
 	if (argval!= 4 && argval!= 8)	{
-		fprintf(stderr,"float constant size = %d\n",argval);
+		fprintf(stderr,"float constant size = %ld\n",argval);
 		fatal("bad fcon size");
 	}
-	fprintf(codefile,"!float %s sz %d\n", str, argval);
+	fprintf(codefile,"!float %s sz %ld\n", str, argval);
 	f = atof(str);
 	if (f == 0) {
 		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
