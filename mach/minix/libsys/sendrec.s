@@ -12,6 +12,8 @@ SYSVEC = 32
 !*========================================================================*
 ! send(), receive(), sendrec() all save bp, but destroy ax, bx, and cx.
 
+.sect .text
+
 _send:	mov cx,SEND		! send(dest, ptr)
 	jmp L0
 
