@@ -14,15 +14,15 @@
 .aar:
 	move.l	4(sp),a0	! descriptor address
 	move.l	8(sp),d0	! index
-	move.l	12(sp),a1	! base address
 	sub.l	(a0),d0		! index - lower bound : relative index
 	move.l	8(a0),-(sp)	! # bytes / element
 	move.l	d0,-(sp)
 	jsr	.mlu
+	move.l	12(sp),a1	! base address
 	add.l	d1,a1		! address of element
 	move.l	(sp)+,a0	! return address
-	add.l	#12,sp		! pop arguments
-	move.l	a1,-(sp)	! returned on stack
+	add.l	#8,sp		! pop arguments
+	move.l	a1,(sp)		! returned on stack
 	jmp	(a0)
 
 .lar:
@@ -33,14 +33,16 @@
 	move.l	12(sp),a1
 	sub.l	(a0),d0
 	move.l	d0,-(sp)
-	move.l	8(a0),d0
-	move.l	d0,-(sp)
+	move.l	8(a0),-(sp)
 	jsr	.mlu
+	move.l	12(sp),a1
+	move.l	4(sp),a0
 	add.l	d1,a1		! address of element
 	add.l	8(a0),a1	! a1++ because of predecrement
 	move.l	(sp)+,a0	! return address
 	add.l	#12,sp		! pop parameters
 	clr.l	d1		!?nodig?
+	move.l	8(a0),d0
 	asr	#1,d0
 	bne	3f
 	move.b	-(a1),d1	! 1 byte element
@@ -68,10 +70,12 @@
 	move.l	12(sp),a1
 	sub.l	(a0),d0
 	move.l	d0,-(sp)
-	move.l	8(a0),d0	! # bytes / element
-	move.l	d0,-(sp)
+	move.l	8(a0),-(sp)
 	jsr	.mlu
+	move.l	12(sp),a1
+	move.l	4(sp),a0
 	add.l	d1,a1
+	move.l	8(a0),d0	! # bytes / element
 	move.l	(sp)+,a0	! return address
 	add.l	#12,sp		! pop parameters
 	clr.l	d1		!?nodig?
