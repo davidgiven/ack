@@ -31,7 +31,7 @@ fmt:	.asciz "%s\n"
 	jsr	(a0)
 	add.l	#4, sp
 #if _M68881
-	fmovem.x (sp)+,fp0-fp7,-(sp)
+	fmovem.x (sp)+,fp0-fp7
 #endif
 	movem.l (sp)+,d2-d7/a1-a5
 3:
