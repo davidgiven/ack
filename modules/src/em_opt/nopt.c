@@ -188,7 +188,7 @@ OO_halfflush()
 	for(p=OO_buffer,i=n;i--;)
 		C_out(p++);
 	/* now copy the rest of buffer and pattern back */
-	BTSCPY(p,q,i,OO_buffer,OO_buffer+n,n+(OO_nxtpatt-OO_buffer));
+	BTSCPY(p,q,i,OO_buffer,OO_buffer+n,(OO_nxtpatt-OO_buffer)-n);
 	OO_patternqueue -= n;
 	OO_nxtpatt -= n;
 	printstate("after Half flush");
