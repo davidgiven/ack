@@ -258,6 +258,7 @@ WithStatement(t_node **pnd;)
 ReturnStatement(t_node **pnd;)
 {
 	register t_def *df = CurrentScope->sc_definedby;
+	register t_type *tp = df->df_type ? ResultType(df->df_type) : 0;
 	register t_node *nd;
 } :
 
@@ -267,12 +268,12 @@ ReturnStatement(t_node **pnd;)
 			{ if (scopeclosed(CurrentScope)) {
 error("a module body cannot return a value");
 			  }
-			  else if (! ResultType(df->df_type)) {
+			  else if (! tp) {
 error("procedure \"%s\" is not a function, so cannot return a value", df->df_idf->id_text);
 			  }
 			}
 	|
-			{ if (ResultType(df->df_type)) {
+			{ if (tp) {
 error("function procedure \"%s\" must return a value", df->df_idf->id_text);
 			  }
 			}
