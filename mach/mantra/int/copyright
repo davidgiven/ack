@@ -8,6 +8,8 @@
 ! version is made by Freek van Schagen
 !		     Vrije Universiteit
 !		     Amsterdam.
+! Heavily modified by Ceriel Jacobs for better system-call support,
+! floating point, and other miscellaneous fixes
 
 
 !-------------------------------------------------------------------------
