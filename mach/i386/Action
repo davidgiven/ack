@@ -4,6 +4,10 @@ end
 name "Intel 80386 backend"
 dir ncg
 end
+name "Intel 80386 code expander library"
+system i386
+dir ce
+end
 name "Intel 80386 Xenix System V conversion program"
 dir cv
 end
