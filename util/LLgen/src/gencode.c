@@ -1248,6 +1248,7 @@ correct_prefix()
 	if (s) {
 		fprintf(f, "#define LLsymb %ssymb\n", s);
 		fprintf(f, "#define LLerror %serror\n", s);
+		fprintf(f, "#define LLsafeerror %ssafeerror\n", s);
 		fprintf(f, "#ifndef LL_FASTER\n#define LLscan %sscan\n#endif\n", s);
 		fprintf(f, "#define LLscnt %sscnt\n", s);
 		fprintf(f, "#define LLtcnt %stcnt\n", s);
