@@ -85,6 +85,7 @@ TOKENS
 	 */
 
 	/* Part (i) */
+small_const	= {INT num;} 4 cost(0,4) "#" num .
 const		= {INT num;} 4 cost(4,4) "#" num .
 indirect4	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
 post_inc4	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
@@ -222,27 +223,27 @@ SETS
 
 #ifndef TBL68020
 	/* A m68k4 part */
-data4		= D_REG + LOCAL + const + post_inc4 + pre_dec4 +
+data4		= D_REG + LOCAL + const + small_const + post_inc4 + pre_dec4 +
 		  indirect4 + offsetted4 + index_off4 + absolute4 +
 		  ext_addr .
 memory4		= data4 - D_REG .
 control4	= indirect4 + offsetted4 + index_off4 + absolute4 +
 		  LOCAL .
-alterable4	= data4 + A_REG - const - ext_addr .
+alterable4	= data4 + A_REG - small_const - const - ext_addr .
 any4		= data4 + A_REG . /* all four above together */
 
 data2		= dreg2 + post_inc2 + pre_dec2 + indirect2 +
-		  offsetted2 + index_off2 + absolute2 + const .
+		  offsetted2 + index_off2 + absolute2 + const + small_const .
 memory2		= data2 - dreg2 .
 control2	= indirect2 + offsetted2 + index_off2 + absolute2 .
-alterable2	= data2 + A_REG + D_REG - const .
+alterable2	= data2 + A_REG + D_REG - const - small_const .
 any2		= data2 + A_REG + D_REG.
 
 data1		= dreg1 + post_inc1 + pre_dec1 + indirect1 +
-		  offsetted1 + index_off1 + absolute1 + const .
+		  offsetted1 + index_off1 + absolute1 + const + small_const .
 memory1		= data1 - dreg1 .
 control1	= indirect1 + offsetted1 + index_off1 + absolute1 .
-alterable1	= data1 + D_REG - const .
+alterable1	= data1 + D_REG - const -small_const .
 any1		= data1 + D_REG.
 
 #else TBL68020
@@ -251,31 +252,31 @@ data4		= D_REG + indirect4 + post_inc4 + pre_dec4 + index_off4 +
 		      offsetted4 + OFF_off4 + OFF_indoff4 +
 		  INDOFF_off4 +
 		  ABS_off4 + ABS_indoff4 + ABSIND_off4 +
-		  absolute4 + abs_index4 + const + ext_addr +
+		  absolute4 + abs_index4 + const + small_const + ext_addr +
 		  LOCAL + ILOCAL .
 memory4		= data4 - D_REG .
-control4	= memory4 - (post_inc4 + pre_dec4 + const + ext_addr) .
-alterable4	= data4 + A_REG - const - ext_addr .
+control4	= memory4 - (post_inc4 + pre_dec4 + const + small_const + ext_addr) .
+alterable4	= data4 + A_REG - const - ext_addr - small_const .
 any4		= data4 + A_REG . /* all four above together */
 
 data2		= dreg2 + indirect2 + post_inc2 + pre_dec2 + index_off2 +
 		      offsetted2 + OFF_off2 + OFF_indoff2 +
 		  INDOFF_off2 +
 		  ABS_off2 + ABS_indoff2 + ABSIND_off2 +
-		  absolute2 + abs_index2 + const .
+		  absolute2 + abs_index2 + const + small_const .
 memory2		= data2 - dreg2 .
-control2	= memory2 - (post_inc2 + pre_dec2 + const) .
-alterable2	= data2 + A_REG + D_REG - const .
+control2	= memory2 - (post_inc2 + pre_dec2 + const + small_const) .
+alterable2	= data2 + A_REG + D_REG - const - small_const .
 any2		= data2 + A_REG + D_REG. /* all four above together */
 
 data1		= dreg1 + indirect1 + post_inc1 + pre_dec1 + index_off1 +
 		      offsetted1 + OFF_off1 + OFF_indoff1 +
 		  INDOFF_off1 +
 		  ABS_off1 + ABS_indoff1 + ABSIND_off1 +
-		  absolute1 + abs_index1 + const .
+		  absolute1 + abs_index1 + const + small_const .
 memory1		= data1 - dreg1 .
-control1	= memory1 - (post_inc1 + pre_dec1 + const) .
-alterable1	= data1 + D_REG - const .
+control1	= memory1 - (post_inc1 + pre_dec1 + const + small_const) .
+alterable1	= data1 + D_REG - const - small_const .
 any1		= data1  + D_REG. /* all four above together */
 
 #endif TBL68020
@@ -296,7 +297,7 @@ address		= ext_addr + local_addr + regAcon + regAregXcon .
 all_regind	= indirect + offsetted + pre_post + index_off +
 		      regind_addr .
 all_indir	= all_regind .
-allexceptcon	= ALL - ( D_REG + A_REG + const + dreg2 + dreg1 +
+allexceptcon	= ALL - ( D_REG + A_REG + const + small_const + dreg2 + dreg1 +
 		    local_addr + ext_addr + regAcon + regAregXcon +
 		    t_regAcon + t_regAregXcon ) .
 use_index	= index_off4 + index_off2 + index_off1 .
@@ -325,7 +326,7 @@ address		= regind_addr +
 all_regind	= indirect + offsetted + index_off + pre_post +
 		      reg_memind + regind_addr .
 all_indir	= all_regind + memind + ILOCAL .
-allexceptcon	= ALL - ( D_REG + A_REG + const + dreg2 + dreg1 +
+allexceptcon	= ALL - ( D_REG + A_REG + const + small_const + dreg2 + dreg1 +
 		    local_addr + ext_addr + regAcon + regAregXcon + ext_regX ) .
 use_index4	= index_off4 + abs_index4 +
 		  OFF_indoff4 + INDOFF_off4 +
@@ -349,10 +350,10 @@ posextern	= absolute + all_indir .
 
 genreg		= D_REG + A_REG.
 label		= llabel + slabel .
-immediate4	= const + ext_addr .
+immediate4	= const + small_const + ext_addr .
 conreg4		= D_REG + immediate4 .
-conreg2		= dreg2 + const + D_REG .
-conreg1		= dreg1 + const + D_REG .
+conreg2		= dreg2 + const + small_const + D_REG .
+conreg1		= dreg1 + const + small_const + D_REG .
 shconreg	= D_REG + shconst .
 datalt4		= data4 * alterable4 .
 datalt2		= data2 * alterable2 .
@@ -364,7 +365,7 @@ memalt1		= memory1 * alterable1 .
 
 #ifndef TBL68020
 	/* A m68k4 part */
-imm_cmp4	= alterable4 .
+imm_cmp4	= alterable4 - genreg .
 imm_cmp2	= alterable2 + D_REG .
 imm_cmp1	= datalt1 + D_REG .
 
@@ -374,13 +375,13 @@ test_set1	= datalt1 .
 
 #else TBL68020
 
-imm_cmp4	= any4 - immediate4 .
-imm_cmp2	= any2 - const .
-imm_cmp1	= any1 - const .
+imm_cmp4	= any4 - immediate4 - genreg .
+imm_cmp2	= any2 - const - small_const .
+imm_cmp1	= any1 - const - small_const .
 
 test_set4	= data4 - immediate4 .
-test_set2	= data2 - const .
-test_set1	= data1 - const .
+test_set2	= data2 - const - small_const .
+test_set1	= data1 - const - small_const .
 
 #endif TBL68020
 
@@ -433,7 +434,7 @@ add_l  "add.l"	any4:ro,	A_REG:rw 		cost(2,3).
 add_l  "add.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
 and_l  "and.l"	data4:ro,	D_REG:rw:cc		cost(2,3).
 and_l  "and.l"	D_REG:ro,	memalt4:rw:cc		cost(2,6).
-and_l  "and.l"	const:ro,	datalt4:rw:cc		cost(2,6).
+and_l  "and.l"	const+small_const:ro,	datalt4:rw:cc	cost(2,6).
 asl_l  "asl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,5).
 asl   "asl #1,"	memalt2:rw:cc				cost(2,4).
 asr_l  "asr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
@@ -466,14 +467,15 @@ cmp_l  "cmp.l"	post_inc4:ro,	post_inc4:ro kills :cc 	cost(2,2).
 cmp_l  "cmp.l"	immediate4:ro,	imm_cmp4:ro kills :cc	cost(2,2).
 cmp_w  "cmp.w"	any2:ro,	dreg2:ro kills :cc	cost(2,3).
 cmp_w  "cmp.w"	post_inc2:ro,	post_inc2:ro kills :cc 	cost(2,2).
-cmp_w  "cmp.w"	const:ro,	imm_cmp2:ro kills :cc	cost(2,2).
+cmp_w  "cmp.w"	const+small_const:ro,	imm_cmp2:ro kills :cc	cost(2,2).
 cmp_b  "cmp.b"	any1:ro,	dreg1:ro kills :cc	cost(2,3).
 cmp_b  "cmp.b"	post_inc1:ro,	post_inc1:ro kills :cc 	cost(2,2).
-cmp_b  "cmp.b"	const:ro,	imm_cmp1:ro kills :cc	cost(2,2).
+cmp_b  "cmp.b"	const+small_const:ro,	imm_cmp1:ro kills :cc	cost(2,2).
 dbf		D_REG:rw,	label			cost(2,5).
 eor_l  "eor.l"	conreg4:ro,	datalt4:rw:cc		cost(2,6).
-ext_l  "ext.l"	D_REG:rw:cc				cost(2,2).
-ext_w  "ext.w"	D_REG:rw:cc				cost(2,2).
+/* in the next two instructions: LOCAL only allowed if register var */
+ext_l  "ext.l"	D_REG+LOCAL:rw:cc			cost(2,2).
+ext_w  "ext.w"	D_REG+LOCAL:rw:cc			cost(2,2).
 jmp		address+control4			cost(2,0).
 jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
 lea		address+control4:ro, A_REG:wo		cost(2,0).
@@ -490,7 +492,7 @@ not_l  "not.l"	D_REG:rw:cc				cost(2,3).
 not_l  "not.l"	memory4:rw:cc				cost(2,6).
 or_l   "or.l"	data4:ro,	D_REG:rw:cc		cost(2,3).
 or_l   "or.l"	D_REG:ro,	memalt4:rw:cc		cost(2,6).
-or_l   "or.l"	const:ro,	datalt4:rw:cc		cost(2,6).
+or_l   "or.l"	const+small_const:ro,	datalt4:rw:cc		cost(2,6).
 rol_l  "rol.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 rol   "rol #1,"	memalt2:rw:cc				cost(2,4).
 ror_l  "ror.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
@@ -519,7 +521,8 @@ divs_l "divs.l" data4:ro,	D_REG:rw:cc		cost(2,90).
 divsl_l "divsl.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,90).
 divu_l "divu.l" data4:ro,	D_REG:rw:cc		cost(2,78).
 divul_l "divul.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,78).
-extb_l "extb.l" D_REG:rw:cc				cost(2,4).
+/* in the next instruction: LOCAL only allowed if register var */
+extb_l "extb.l" D_REG+LOCAL:rw:cc			cost(2,4).
 muls_l "muls.l" data4:ro,	D_REG:rw:cc		cost(2,44).
 mulu_l "mulu.l" data4:ro,	D_REG:rw:cc		cost(2,44).
 pea		address+control4+regX			cost(2,4).
@@ -538,22 +541,22 @@ killreg "! kill" A_REG:wo				cost(0,0).
 
 MOVES
 
-from const %num==0 to D_REG
+from const+small_const %num==0 to D_REG
     gen clr_l %2
 
-from const %num==0 to memalt4
+from const+small_const %num==0 to memalt4
     gen clr_l %2
 
-from const %num==0 to memalt2
+from const+small_const %num==0 to memalt2
     gen clr_w %2
 
-from const %num==0 to memalt1
+from const+small_const %num==0 to memalt1
     gen clr_b %2
 
-from const to memalt1
+from const+small_const to memalt1
     gen move_b {const, lowb(%1.num)}, %2
 
-from const to memalt2
+from const+small_const to memalt2
     gen move_w {const, loww(%1.num)}, %2
 
 from regAcon %bd==0 to A_REG
@@ -606,7 +609,7 @@ to test test_set1
 STACKINGRULES
 
 
-from const %num==0 to STACK
+from const+small_const %num==0 to STACK
     gen clr_l {pre_dec4, sp}
 
 #ifndef TBL68020
@@ -625,21 +628,36 @@ from t_regAcon to STACK
 	add_l {const, %1.bd}, {indirect4, sp}
 #endif TBL68020
 
+from A_REG to STACK
+    gen pea {indirect4, %1}
+
 from address - ext_addr to STACK
     gen pea %1
 
 from ext_addr to STACK
     gen pea {absolute4, %1.bd}
 
-from const to STACK
+from const+small_const to STACK
     gen pea {absolute4, %1.num}
 
 from any4 to STACK
     gen move_l %1, {pre_dec4, sp}
 
 from any2 to STACK
+  uses DD_REG
+    gen clr_l %a
+	move_w %1, {dreg2, %a}
+	move_l %a, {pre_dec4, sp}
+
+from any2 to STACK
     gen clr_l {pre_dec4, sp}
 	move_w %1, {offsetted2, sp, 2}
+
+from data1 to STACK
+  uses DD_REG
+    gen clr_l %a
+	move_b %1, {dreg1, %a}
+	move_l %a, {pre_dec4, sp}
 
 from data1 to STACK
     gen clr_l {pre_dec4, sp}
@@ -737,11 +755,11 @@ pat lil inreg($1)==reg_any
 			yields  {indirect4, %a}
 
 pat stl inreg($1)==reg_any
-with exact memory1-const
+with exact memory1-const-small_const
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen	clr_l {LOCAL, $1}
 	move_b %1, {dreg1, regvar($1,reg_any)}
-with exact memory2-const
+with exact memory2-const-small_const
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen	clr_l {LOCAL, $1}
 	move_w %1, {dreg2, regvar($1,reg_any)}
@@ -922,6 +940,20 @@ pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
     kills allexceptcon
     gen add_l {const, $3}, {offsetted4, regvar($1, reg_pointer), $2}
 
+#ifdef TBL68020
+pat loe lof inc loe stf $1==$4 && $2==$5
+    kills allexceptcon
+    gen add_l {const, 1}, {ABS_off4, $1, $2}
+
+pat loe lof dec loe stf $1==$4 && $2==$5
+    kills allexceptcon
+    gen sub_l {const, 1}, {ABS_off4, $1, $2}
+
+pat loe lof adp loe stf $1==$4 && $2==$5
+    kills allexceptcon
+    gen add_l {const, $3}, {ABS_off4, $1, $2}
+#endif
+
 pat inl inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen add_l {const, 1}, {LOCAL, $1}
@@ -1098,6 +1130,15 @@ pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
     killreg %a
 			yields	%a
 
+#ifdef TBL68020
+pat loe lof dup adp loe stf $1==$5 && $2==$6
+    kills allexceptcon
+    uses AA_REG = {ABS_off4, $1, $2}
+    gen add_l {const, $4}, {ABS_off4, $1, $2}
+    killreg %a
+			yields	%a
+#endif
+
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==1 && $5==1 &&
 						inreg($1)==reg_pointer
     kills regvar($1, reg_pointer)
@@ -1201,6 +1242,8 @@ with any4
 /************************************************
  * Group 1: load instructions			*
  ************************************************/
+
+pat loc in_1($1)	yields	{small_const, $1}
 
 pat loc			yields	{const, $1}
 
@@ -2206,9 +2249,9 @@ pat zre
     kills posextern
     gen clr_l {absolute4, $1}
 
-pat zer $1==4		yields	{const, 0}
-pat zer $1==8		yields	{const, 0} {const, 0}
-pat zer $1==12		yields	{const, 0} {const, 0} {const, 0}
+pat zer $1==4		yields	{small_const, 0}
+pat zer $1==8		yields	{small_const, 0} {small_const, 0}
+pat zer $1==12		yields	{small_const, 0} {small_const, 0} {small_const, 0}
 
 pat zer
 with STACK
@@ -2264,9 +2307,9 @@ pat loc loc cff	$1==4 && $2==8
 
 
 proc log4
-with datalt4+const DD_REG
+with datalt4+const+small_const DD_REG
     gen xxx* %1, %2	yields	%2
-with DD_REG datalt4+const
+with DD_REG datalt4+const+small_const
     gen xxx* %2, %1	yields	%1
 
 proc logdef example and
@@ -2598,10 +2641,10 @@ with STACK
     gen bra {llabel, $1}
 
 proc brxx example beq
-with any4 genreg STACK
+with any4-small_const genreg STACK
     gen cmp_l %1, %2
 	bxx[1] {llabel, $1}
-with genreg any4 STACK
+with genreg any4-small_const STACK
     gen cmp_l %2, %1
 	bxx[2] {llabel, $1}
 with exact immediate4 imm_cmp4
@@ -2615,15 +2658,15 @@ with exact imm_cmp4 immediate4
 with genreg STACK
     gen cmp_l {post_inc4, sp}, %1
 	bxx[2] {llabel, $1}
-with exact immediate4 STACK
+with exact immediate4-small_const STACK
     gen cmp_l %1, {post_inc4, sp}
 	bxx[1] {llabel, $1}
 
 proc brnqxx example beq
-with any4 genreg STACK
+with any4-small_const genreg STACK
     gen cmp_l %1, %2
 	bxx[1] {llabel, $1}
-with genreg any4 STACK
+with genreg any4-small_const STACK
     gen cmp_l %2, %1
 	bxx[2] {llabel, $1}
 with exact immediate4 imm_cmp4
@@ -2637,7 +2680,7 @@ with exact imm_cmp4 immediate4
 with genreg STACK
     gen cmp_l {post_inc4, sp}, %1
 	bxx[2] {llabel, $1}
-with exact immediate4 STACK
+with exact immediate4-small_const STACK
     gen cmp_l %1, {post_inc4, sp}
 	bxx[1] {llabel, $1}
 
@@ -3287,12 +3330,12 @@ pat tge ior $2==4			call txxior("blt", "bcs")
 pat tgt ior $2==4			call txxior("ble", "bls")
 
 proc cmxtxxand
-with any4 genreg DD_REG
+with any4-small_const genreg DD_REG
     gen cmp_l %1, %2
 	bxx[1] {slabel, 1f}
 	clr_l %3
 	1:		yields	%3
-with genreg any4-genreg DD_REG
+with genreg any4-genreg-small_const DD_REG
     gen cmp_l %2, %1
 	bxx[2] {slabel, 1f}
 	clr_l %3
@@ -3309,12 +3352,12 @@ with exact imm_cmp4 immediate4 DD_REG
 	1:		yields	%3
 
 proc cmxtxxior
-with any4 genreg DD_REG
+with any4-small_const genreg DD_REG
     gen cmp_l %1, %2
 	bxx[1] {slabel, 1f}
 	move {const, 1},  %3
 	1:		yields	%3
-with genreg any4-genreg DD_REG
+with genreg any4-genreg-small_const DD_REG
     gen cmp_l %2, %1
 	bxx[2] {slabel, 1f}
 	move {const, 1},  %3
@@ -3331,13 +3374,13 @@ with exact imm_cmp4 immediate4 DD_REG
 	1:		yields	%3
 
 proc cmxtxx
-with any4 genreg
+with any4-small_const genreg
     uses DD_REG = {const, 1}
     gen cmp_l %1, %2
 	bxx[1] {slabel, 1f}
 	clr_l %a
 	1:		yields	%a
-with genreg any4-genreg
+with genreg any4-genreg-small_const
     uses DD_REG = {const, 1}
     gen cmp_l %2, %1
 	bxx[2] {slabel, 1f}
@@ -3361,7 +3404,7 @@ with genreg STACK
 	bxx[2] {slabel, 1f}
 	clr_l %a
 	1:		yields	%a
-with exact immediate4 STACK
+with exact immediate4-small_const STACK
     uses DD_REG = {const, 1}
     gen cmp_l %1, {post_inc4, sp}
 	bxx[1] {slabel, 1f}
@@ -3411,10 +3454,10 @@ pat cmu tge $1==4			call cmxtxx("bcc","bls")
 pat cmu tgt $1==4			call cmxtxx("bhi","bcs")
 
 proc cmuzxx example cmu zlt
-with any4 genreg STACK
+with any4-small_const genreg STACK
     gen cmp_l %1, %2
 	bxx[1] {llabel, $2}
-with genreg any4-genreg STACK
+with genreg any4-genreg-small_const STACK
     gen cmp_l %2, %1
 	bxx[2] {llabel, $2}
 with exact immediate4 imm_cmp4
@@ -3428,13 +3471,13 @@ with exact imm_cmp4 immediate4
 with genreg STACK
     gen cmp_l {post_inc4, sp}, %1
 	bxx[2] {llabel, $2}
-with exact immediate4 STACK
+with exact immediate4-small_const STACK
     gen cmp_l %1, {post_inc4, sp}
 	bxx[1] {llabel, $2}
-with data2 dreg2 STACK
+with data2-small_const dreg2 STACK
     gen cmp_w %1, %2
         bxx[1] {llabel, $2}
-with dreg2 data2-conreg2 STACK
+with dreg2 data2-conreg2-small_const STACK
     gen cmp_w %2, %1
         bxx[2] {llabel, $2}
 with data1 dreg1 STACK
@@ -3505,6 +3548,17 @@ pat loc loc cii loc beq $1==2 && $2==4 && in_2($4)	call bxx2_in("beq")
 pat loc loc cii loc bne $1==2 && $2==4 && in_2($4)	call bxx2_in("bne")
 pat loc loc cii loc bge $1==2 && $2==4 && in_2($4)	call bxx2_in("bge")
 pat loc loc cii loc bgt $1==2 && $2==4 && in_2($4)	call bxx2_in("bgt")
+
+pat loc loc cii stl $1==1 && $2==4 && inreg($4)==reg_any
+with memory1+DD_REG
+    kills regvar($4, reg_any), use_index %xreg==regvar($4, reg_any)
+    gen	move_b %1, {dreg1, regvar($4,reg_any)}
+#ifdef TBL68020
+	extb_l	{LOCAL,$4}
+#else TBL68020
+	ext_w	{LOCAL,$4}
+	ext_l	{LOCAL,$4}
+#endif TBL68020
 
 pat loc loc cii $1==2 && $2==4
 with DD_REG
