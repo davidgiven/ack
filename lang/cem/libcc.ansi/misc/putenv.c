@@ -46,6 +46,7 @@ putenv(char *name)
 				}
 			}
 		}
+		*r = '=';
 		v = environ;
 	}
 
