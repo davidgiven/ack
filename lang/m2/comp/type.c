@@ -350,7 +350,8 @@ subr_type(lb, ub, base)
 		   ???
 		*/
 		assert(lb->nd_INT >= 0);
-		if (BaseType(ub->nd_type) == int_type) tp = int_type;
+		if (BaseType(ub->nd_type) == int_type ||
+		    (base && BaseType(base) == int_type)) tp = int_type;
 		else tp = card_type;
 	}
 
