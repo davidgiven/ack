@@ -322,11 +322,18 @@ STATIC alloc_p find_prev(alloc,list)
 }
 
 
+/* If an item is always put in the same register during different loops,
+ * we try to put it in that register during the whole procedure.
+ * The profits of the whole-procedure allocation are updated to prevent
+ * account_regsave from rejecting it.
+ */
 
 STATIC repl_allocs(new,old,packed)
 	alloc_p new,old,packed;
 {
 	alloc_p x,next,prev,*p;
+	short prof = 0;
+
 	new->al_regnr = old->al_regnr;
 	new->al_dummy = old->al_dummy;
 	prev = find_prev(old,packed);
@@ -338,12 +345,14 @@ STATIC repl_allocs(new,old,packed)
 	for (x = old; x != (alloc_p) 0; x = next) {
 		next = x->al_mates;
 		if (x->al_item == new->al_item) {
+			prof += x->al_profits;
 			*p = next;
 			oldalloc(x);
 		} else {
 			p = &x->al_mates;
 		}
 	}
+	new->al_profits = prof;
 }
 
 
