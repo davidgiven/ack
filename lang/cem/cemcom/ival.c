@@ -668,8 +668,7 @@ con_int(expr)
 illegal_init_cst(expr)
 	struct expr *expr;
 {
-	if (expr->ex_type->tp_fund != ERRONEOUS)
-		expr_error(expr, "illegal initialisation constant");
+	expr_error(expr, "illegal initialisation constant");
 }
 
 too_many_initialisers(expr)

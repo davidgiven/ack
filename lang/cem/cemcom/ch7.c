@@ -61,7 +61,6 @@ ch7sel(expp, oper, idf)
 		/* filter out illegal expressions "non_lvalue.sel" */
 		if (!(*expp)->ex_lvalue) {
 			expr_error(*expp, "dot requires lvalue");
-			(*expp)->ex_type = error_type;
 			return;
 		}
 	}
@@ -102,6 +101,8 @@ ch7sel(expp, oper, idf)
 			*/
 			(*expp)->VL_VALUE += sd->sd_offset;
 			(*expp)->ex_type = sd->sd_type;
+			if ((*expp)->ex_type == error_type)
+				(*expp)->ex_flags |= EX_ERROR;
 		}
 		else
 		if ((*expp)->ex_class == Oper)	{
@@ -110,16 +111,20 @@ ch7sel(expp, oper, idf)
 			if (op->op_oper == '.' || op->op_oper == ARROW)	{
 				op->op_right->VL_VALUE += sd->sd_offset;
 				(*expp)->ex_type = sd->sd_type;
+				if ((*expp)->ex_type == error_type)
+					(*expp)->ex_flags |= EX_ERROR;
 			}
 			else
 				*expp = new_oper(sd->sd_type, *expp, '.',
 						intexpr(sd->sd_offset, INT));
 		}
 	}
-	else /* oper == ARROW */
+	else	{
+		/* oper == ARROW */
 		*expp = new_oper(sd->sd_type,
 			*expp, oper, intexpr(sd->sd_offset, INT));
-	(*expp)->ex_lvalue = sd->sd_type->tp_fund != ARRAY;
+	}
+	(*expp)->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
 }
 
 ch7incr(expp, oper)
@@ -152,8 +157,7 @@ ch7incr(expp, oper)
 		addend = (arith)1;
 #endif NOBITFIELD
 	else	{
-		if ((*expp)->ex_type != error_type)
-			expr_error(*expp, "%s on %s",
+		expr_error(*expp, "%s on %s",
 				symbol2str(oper),
 				symbol2str((*expp)->ex_type->tp_fund)
 			);
@@ -280,18 +284,22 @@ ch7cast(expp, oper, tp)
 			(*expp)->ex_type = tp;
 	}
 	else
+	if (oldtp->tp_fund == ERRONEOUS)	{
+		/* we just won't look */
+		(*expp)->ex_type = tp;		/* brute force */
+	}
+	else
 	if (oldtp->tp_size == tp->tp_size && oper == CAST)	{
 		expr_warning(*expp, "dubious conversion based on equal size");
 		(*expp)->ex_type = tp;		/* brute force */
 	}
-	else
-	{
+	else	{
 		if (oldtp->tp_fund != ERRONEOUS && tp->tp_fund != ERRONEOUS)
 			expr_error(*expp, "cannot convert %s to %s",
 				symbol2str(oldtp->tp_fund),
 				symbol2str(tp->tp_fund)
 			);
-		(*expp)->ex_type = tp;
+		(*expp)->ex_type = tp;		/* brute force */
 	}
 }
 

@@ -28,11 +28,9 @@ ch7mon(oper, expp)
 		if ((*expp)->ex_type->tp_fund == ARRAY)
 			array2pointer(expp);
 		if ((*expp)->ex_type->tp_fund != POINTER)	{
-			if ((*expp)->ex_type != error_type)
-				expr_error(*expp,
-					"* applied to non-pointer (%s)",
-					symbol2str((*expp)->ex_type->tp_fund));
-			(*expp)->ex_type = error_type;
+			expr_error(*expp,
+				"* applied to non-pointer (%s)",
+				symbol2str((*expp)->ex_type->tp_fund));
 		}
 		else {
 			expr = *expp;
@@ -59,13 +57,11 @@ ch7mon(oper, expp)
 #ifndef NOBITFIELD
 		if ((*expp)->ex_type->tp_fund == FIELD)	{
 			expr_error(*expp, "& applied to field variable");
-			(*expp)->ex_type = error_type;
 		}
 		else
 #endif NOBITFIELD
 		if (!(*expp)->ex_lvalue)	{
 			expr_error(*expp, "& applied to non-lvalue");
-			(*expp)->ex_type = error_type;
 		}
 		else {
 			/* assume that enums are already filtered out	*/
@@ -79,7 +75,6 @@ ch7mon(oper, expp)
 				if (def->df_sc == REGISTER) {
 					expr_error(*expp,
 					"& on register variable not allowed");
-					(*expp)->ex_type = error_type;
 					break;	/* break case '&' */
 				}
 				def->df_register = REG_NONE;

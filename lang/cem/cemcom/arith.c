@@ -110,12 +110,10 @@ ch76pointer(expp, oper, tp)
 	)		/* ch 7.7 */
 		ch7cast(expp, CAST, tp);
 	else	{
-		if ((*expp)->ex_type != error_type)
-			expr_error(*expp, "%s on %s and pointer",
+		expr_error(*expp, "%s on %s and pointer",
 				symbol2str(oper),
 				symbol2str((*expp)->ex_type->tp_fund)
 			);
-		(*expp)->ex_type = error_type;
 		ch7cast(expp, oper, tp);
 	}
 }
@@ -177,8 +175,11 @@ erroneous2int(expp)
 	/*	the (erroneous) expression *expp is replaced by an
 		int expression
 	*/
+	int flags = (*expp)->ex_flags;
+	
 	free_expression(*expp);
 	*expp = intexpr((arith)0, INT);
+	(*expp)->ex_flags = (flags | EX_ERROR);
 }
 
 struct expr *
@@ -291,8 +292,7 @@ opnd2integral(expp, oper)
 	register int fund = (*expp)->ex_type->tp_fund;
 
 	if (fund != INT && fund != LONG)	{
-		if (fund != ERRONEOUS)
-			expr_error(*expp, "%s operand to %s",
+		expr_error(*expp, "%s operand to %s",
 				symbol2str(fund), symbol2str(oper));
 		erroneous2int(expp);
 		/* fund = INT; */

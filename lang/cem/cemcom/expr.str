@@ -68,11 +68,12 @@ struct expr	{
 /*	some bits for the ex_flag field, to keep track of various
 	interesting properties of an expression.
 */
-#define	EX_SIZEOF	001		/* contains sizeof operator */
-#define	EX_CAST		002		/* contains cast */
-#define	EX_LOGICAL	004		/* contains logical operator */
-#define	EX_COMMA	010		/* contains expression comma */
-#define	EX_PARENS	020		/* the top level is parenthesized */
+#define	EX_SIZEOF	0001		/* contains sizeof operator */
+#define	EX_CAST		0002		/* contains cast */
+#define	EX_LOGICAL	0004		/* contains logical operator */
+#define	EX_COMMA	0010		/* contains expression comma */
+#define	EX_PARENS	0020		/* the top level is parenthesized */
+#define	EX_ERROR	0200		/* the expression is wrong */
 
 #define	NILEXPR		((struct expr *)0)
 

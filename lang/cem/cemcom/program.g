@@ -71,7 +71,8 @@ control_if_expression
 		{
 #ifndef NOPP
 			if (expr->ex_flags & EX_SIZEOF)
-				error("sizeof not allowed in preprocessor");
+				expr_error(expr,
+					"sizeof not allowed in preprocessor");
 			ifval = expr->VL_VALUE;
 			free_expression(expr);
 #endif NOPP

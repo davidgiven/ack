@@ -169,12 +169,13 @@ idf2expr(expr)
 	}
 	/* now def != 0 */
 	if (def->df_type->tp_fund == LABEL) {
-		error("illegal use of label %s", idf->id_text);
-		expr->ex_type = error_type;
+		expr_error(expr, "illegal use of label %s", idf->id_text);
 	}
 	else {
 		def->df_used = 1;
 		expr->ex_type = def->df_type;
+		if (expr->ex_type == error_type)
+			expr->ex_flags |= EX_ERROR;
 	}
 	expr->ex_lvalue =
 		(	def->df_type->tp_fund == FUNCTION ||
@@ -381,7 +382,6 @@ chk_cst_expr(expp)
 	
 	if (err) {
 		erroneous2int(expp);
-		(*expp)->ex_type = error_type;
 	}
 }
 

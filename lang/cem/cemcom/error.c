@@ -56,7 +56,10 @@ expr_error(expr, fmt, args)
 	struct expr *expr;
 	char *fmt;
 {
+	if (expr->ex_flags & EX_ERROR)
+		return;			/* to prevent proliferation */
 	_error(ERROR, expr, fmt, &args);
+	expr->ex_flags |= EX_ERROR;
 }
 
 /*VARARGS1*/
@@ -71,6 +74,8 @@ expr_warning(expr, fmt, args)
 	struct expr *expr;
 	char *fmt;
 {
+	if (expr->ex_flags & EX_ERROR)
+		return;			/* to prevent proliferation */
 	_error(WARNING, expr, fmt, &args);
 }
 

@@ -318,11 +318,11 @@ p1_expr(lvl, expr)
 		printf("NILEXPR\n");
 		return;
 	}
-	printf("expr: L=%u, T=%s, %cV, F=%02o, D=%d, %s: ",
+	printf("expr: L=%u, T=%s, %cV, F=%03o, D=%d, %s: ",
 		expr->ex_line,
 		type2str(expr->ex_type),
 		expr->ex_lvalue ? 'l' : 'r',
-		expr->ex_flags,
+		expr->ex_flags & 0xFF,
 		expr->ex_depth,
 		expr->ex_class == Value ? "Value" :
 		expr->ex_class == String ? "String" :

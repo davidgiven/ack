@@ -64,9 +64,8 @@ ch7bin(expp, oper, expr)
 			ch7mon('*', expp);
 		}
 		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
-			if ((*expp)->ex_type != error_type)
-				expr_error(*expp, "call of non-function (%s)",
-					symbol2str((*expp)->ex_type->tp_fund));
+			expr_error(*expp, "call of non-function (%s)",
+				symbol2str((*expp)->ex_type->tp_fund));
 			/* leave the expression; it may still serve */
 			free_expression(expr);	/* there go the parameters */
 		}
@@ -202,7 +201,6 @@ ch7bin(expp, oper, expr)
 		)	{
 			if ((*expp)->ex_type != expr->ex_type)	{
 				expr_error(*expp, "illegal balance");
-				(*expp)->ex_type = error_type;
 			}
 		}
 		else	{

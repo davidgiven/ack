@@ -129,6 +129,11 @@ code_case(expr)
 		return;
 	}
 	
+	if (expr->ex_flags & EX_ERROR)	{
+		/* is probably 0 anyway */
+		return;
+	}
+	
 	expr->ex_type = sh->sh_type;
 	cut_size(expr);
 	
