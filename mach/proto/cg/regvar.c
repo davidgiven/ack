@@ -1,10 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Header$";
-#endif
-
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
+
+#ifdef REGVARS
+
 #include "types.h"
 #include <cg_pattern.h>
 #include "data.h"
@@ -30,8 +29,6 @@ static char rcsid[] = "$Header$";
  *
  * Author: Hans van Staveren
  */
-
-#ifdef REGVARS
 
 struct regvar *rvlist;
 
@@ -95,7 +92,7 @@ tryreg(rvlp,typ) struct regvar *rvlp; {
 	}
 }
 
-fixregvars() {
+fixregvars(saveall) {
 	register struct regvar *rv;
 	register rvtyp,i;
 	
@@ -103,7 +100,11 @@ fixregvars() {
 	i_regsave();	/* machine dependent initialization */
 	for (rvtyp=reg_any;rvtyp<=reg_float;rvtyp++) {
 	    for(i=0;i<nregvar[rvtyp];i++)
-		if (regassigned[rvtyp][i].ra_score>0) {
+		if (saveall) {
+			struct reginfo *rp;
+			rp= &machregs[rvnumbers[rvtyp][i]];
+			regsave(codestrings[rp->r_repr],-EM_WSIZE,rp->r_size);
+		} else if(regassigned[rvtyp][i].ra_score>0) {
 			rv=regassigned[rvtyp][i].ra_rv;
 			rv->rv_reg=rvnumbers[rvtyp][i];
 			regsave(codestrings[machregs[rv->rv_reg].r_repr],
