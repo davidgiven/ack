@@ -1,3 +1,5 @@
+# $Header$
+
 CFILES=main.c getline.c lookup.c var.c process.c backward.c util.c\
 	alloc.c putline.c cleanup.c peephole.c flow.c reg.c
 OFILES=main.o getline.o lookup.o var.o process.o backward.o util.o\
@@ -12,28 +14,31 @@ OPR=wide|opr
 XREF=xref -c -w80
 PROPTS=
 # LEXLIB is implementation dependent, try -ll or -lln first
-LEXLIB=-lln
+LEXLIB=-ll
+
+.DEFAULT:
+	co -q $<
 
 opt:    $(OFILES) pattern.o $(LIBS)
 	cc $(LDFLAGS) $(CFLAGS) $(OFILES) pattern.o $(LIBS) -o opt
 
-test:   opt
+test:   opt testopt
 	testopt
 
 cmp :   opt
 	cmp opt ../../lib/em_opt
 
 install:opt
-	-size opt ../../lib/em_opt
+	size opt ../../lib/em_opt
 	cp opt ../../lib/em_opt
 
 pattern.c:      patterns mktab
-	../../lib/cpp patterns | mktab > pattern.c
+	/lib/cpp patterns | mktab > pattern.c
 
 mktab:  mktab.o $(LIBS)
 	cc $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
 
-depend:
+depend: makedepend
 	makedepend
 
 lint:   $(CFILES) pattern.c
@@ -44,13 +49,13 @@ printall:
 	touch print
 
 print:  Makefile *.h $(CFILES) mktab.y scan.l patterns
-	-pr $(PROPTS) $? | $(OPR)
+	-pr $(PROPTS) -n $? | $(OPR)
 
 opr:
 	make pr ^ $(OPR)
 
 pr:
-	@pr $(PROPTS) Makefile *.h $(CFILES) mktab.y scan.l patterns
+	@pr $(PROPTS) -n Makefile *.h $(CFILES) mktab.y scan.l patterns
 
 xref:
 	$(XREF) *.h $(CFILES) | pr $(PROPTS) -h "XREF EMOPT"|$(OPR)&
