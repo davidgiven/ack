@@ -37,6 +37,6 @@
 #define NL()
 #define CILB(x)		CST((arith) x)
 
-#define	put_cend()	putbyte(sp_cend)
-#define	put_op(x)	putbyte(x)
-#define	put_ps(x)	putbyte(x)
+#define	put_cend()	C_putbyte(sp_cend)
+#define	put_op(x)	C_putbyte(x)
+#define	put_ps(x)	C_putbyte(x)

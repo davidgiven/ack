@@ -8,12 +8,12 @@
 #include <system.h>
 #include "em_private.h"
 
-#define	put8(x)		putbyte(x)
+#define	put8(x)		C_putbyte(x)
 #define	put16(x)	put8((int) x); put8((int) (x >> 8))
 #define	put32(x)	put16((int) x); put16((int) (x >> 16))
 
 /*
-	putbyte(), C_open() and C_close() are the basic routines for
+	C_putbyte(), C_open() and C_close() are the basic routines for
 	respectively write on, open and close the output file.
 	The put_*() functions serve as formatting functions of the
 	various EM language constructs.
@@ -38,13 +38,13 @@ flush() {
 
 #define Xputbyte(c)	if (opp == &obuf[BUFSIZ]) flush(); *opp++ = (c)
 
-putbyte(b)
+C_putbyte(b)
 	int b;
 {
 	Xputbyte(b);
 }
 
-#define putbyte(c) Xputbyte(c)
+#define C_putbyte(c) Xputbyte(c)
 
 C_init(w, p)
 	arith w, p;
