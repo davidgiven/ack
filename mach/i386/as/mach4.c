@@ -89,7 +89,7 @@ oper	:	NOOP_1
 			{	emit1($1); ea_2($2<<3);}
 	|	LEAOP2 R32 ',' mem
 			{	emit1(0xF); emit1($1); ea_2($2<<3);}
-	|	ARPLOP mem ',' R32
+	|	ARPLOP ea_2 ',' R32
 			{	emit1($1); ea_2($4<<3);}
 	|	LSHFT	ea_1 ',' R32 ',' ea_2
 			{	extshft($1, $4);}
