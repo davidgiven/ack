@@ -1158,9 +1158,10 @@ This can of course be done with
 .DS
 kills ALL
 .DE
-or by ending the stack pattern with the word STACK, which is equivalent,
+or by ending the stack pattern with the word STACK,
 if the stack pattern does not start with
 .I exact .
+The latter does not erase the contents of registers.
 .PP
 It is unfortunate that this part is still present in the table
 but it is too much for now to let the
