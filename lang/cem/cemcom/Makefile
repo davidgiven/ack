@@ -280,6 +280,7 @@ main.o: input.h
 main.o: inputtype.h
 main.o: level.h
 main.o: lint.h
+main.o: macro.h
 main.o: noRoption.h
 main.o: nobitfield.h
 main.o: nocross.h
