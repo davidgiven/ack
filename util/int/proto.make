@@ -122,10 +122,10 @@ warn_msg:	$(SRC_DIR)/M.warn_msg $(APP_A)
 ./warn.h:		$(SRC_DIR)/M.warn_h $(APP_A)
 	$(SRC_DIR)/M.warn_h $(APP_A)
 
-switch/DoCases:
+./switch/DoCases:
 	(cd switch; make DoCases)
 
-switch/PrCases:	
+./switch/PrCases:	
 	(cd switch; make PrCases)
 
 test/awa.em22:
@@ -142,7 +142,7 @@ test/awa.em44:
 
 
 # Auxiliary entries
-lint:	$(CFILES) trap_msg warn_msg ./warn.h switch/DoCases switch/PrCases
+lint:	$(CFILES) trap_msg warn_msg ./warn.h ./switch/DoCases ./switch/PrCases
 	$(LINT) $(LINTFLAGS) $(CFILES)
 
 tags:	$(HDR) $(CFILES)
