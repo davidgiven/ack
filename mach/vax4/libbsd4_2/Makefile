@@ -14,12 +14,12 @@ all:            head_em tail_mon
 head_em:        head_em.s
 		vax4 -I../../../h -c head_em.s
 
-tail_mon:
+tail_mon:	libmon_s.a
 		ASAR=aal ; export ASAR ;\
 		march . tail_mon
 
 clean:
-		rm -f *.o
+		rm -f *.o tail_mon
 opr:
 		make pr | opr
 pr:
