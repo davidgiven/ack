@@ -58,7 +58,7 @@
  cal $_ChkSize
  asp EM_WSIZE
  lfr EM_WSIZE
- sil EM_WSIZE		; store size in area (indicated by A)
+ sil EM_PSIZE		; store size in area (indicated by A)
  lal EM_PSIZE
  loi EM_PSIZE		; address of area (A)
  lal 0
@@ -117,6 +117,18 @@ _target
  loi EM_PSIZE
  adp -2*EM_PSIZE
  sti EM_PSIZE	; save it
+ lor 1		; load SP
+ lae _CurrentProcess
+ loi EM_PSIZE
+ adp -EM_PSIZE
+ sti EM_PSIZE	; save it
+		; Now, we must find a stack we can temporarily use.
+		; Just take the one from the main program.
+ lae _MainProcess
+ loi EM_PSIZE
+ adp -EM_PSIZE
+ loi EM_PSIZE
+ str 1		; temporary stackpointer
  lae _CurrentProcess
  loi EM_PSIZE
  lae _MainProcess
@@ -143,21 +155,8 @@ _target
  adp -3*EM_PSIZE-EM_WSIZE
  loi EM_WSIZE
  bls EM_WSIZE	; copy
+
 2
- lor 1		; load SP
- lae _CurrentProcess
- loi EM_PSIZE
- adp -EM_PSIZE
- sti EM_PSIZE	; save it
-
-
-		; Now, we must find a stack we can temporarily use.
-		; Just take the one from the main program.
- lae _MainProcess
- loi EM_PSIZE
- adp -EM_PSIZE
- loi EM_PSIZE
- str 1		; temporary stackpointer
  lae _target
  loi EM_PSIZE
  dup EM_PSIZE
@@ -211,14 +210,14 @@ _target
 4
  lae _target
  loi EM_PSIZE
- adp -EM_PSIZE
- loi EM_PSIZE
- str 1		; restore SP
- lae _target
- loi EM_PSIZE
  adp -2*EM_PSIZE
  loi EM_PSIZE
  str 0		; restore LB
+ lae _target
+ loi EM_PSIZE
+ adp -EM_PSIZE
+ loi EM_PSIZE
+ str 1		; restore SP
  ret 0
  end 0
 
