@@ -2771,7 +2771,7 @@ lin | |				"move.w #$1,.lino"   | | |
 lni | |				"add.w #1,.lino"  | | |
 mon | STACK | "jsr .mon" | | |
 nop | STACK | "jsr .nop" | | |
-lim | | | {ABS4,".trpim"} | |
+lim | | | {ABS,".trpim"} | |
 lor $1 == 0 |	|   |  LB | |
 #ifdef REGVARS
 lor sdl $1 == 1 && inreg($2) == 2 |
