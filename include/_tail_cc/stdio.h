@@ -4,10 +4,10 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #define BUFSIZ  1024
-#ifdef vax
+#ifdef __vax
 #define _NBF	8
 #endif
-#ifdef mc68020
+#ifdef __mc68020
 #define _NBF	8
 #endif
 #ifndef _NBF

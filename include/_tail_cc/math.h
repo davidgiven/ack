@@ -50,13 +50,13 @@ extern double sinh(), tanh(), cosh();
 #define POLYNOM12(x, a)	(POLYNOM11((x),(a)+1)*(x)+(a)[0])
 #define POLYNOM13(x, a)	(POLYNOM12((x),(a)+1)*(x)+(a)[0])
 
-#ifdef vax
+#ifdef __vax
 #define M_MAX_D		 1.701411834604692293e+38
 #define M_MIN_D		 2.938735877055718770e-39
 #define M_DEXPLEN	 8
 #endif
 
-#ifdef pdp
+#ifdef __pdp
 #define M_MAX_D		 1.701411834604692293e+38
 #define M_MIN_D		 2.938735877055718770e-39
 #define M_DEXPLEN	 8
