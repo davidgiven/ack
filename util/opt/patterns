@@ -388,6 +388,8 @@ loi loc loc cii loc cmi zne $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:
 loi loc loc cii loc loc ciu loc and $1==1 && $2==1 && $3==w && $5==w && $6==w && $8==255 && $9==w:	loi 1
 cmp teq :       cms p   teq
 cmp tne :       cms p   tne
+cmp zeq :	cms p	zeq $2
+cmp zne :	cms p	zne $2
 cmu teq defined($1):    cms $1  teq
 cmu tne defined($1):    cms $1  tne
 cms zeq $1==w:  beq $2
