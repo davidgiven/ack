@@ -1,3 +1,9 @@
+case $2 in
+clean)
+	;;
+*)
 make "TS=$1"
+;;
+esac
 make "P=$1" -fk ../makefile $2
 rm -f $1.[ckmos]
