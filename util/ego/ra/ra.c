@@ -52,6 +52,8 @@ short regs_available[] = {
 	0	/* reg_float */
 } ;
 
+short use_any_as_pointer = 0;
+
 STATIC cond_p getcondtab(f)
 	FILE *f;
 {
@@ -114,6 +116,7 @@ STATIC ra_machinit(f)
 	fscanf(f,"%hd",&regs_available[reg_any]);
 	fscanf(f,"%hd",&regs_available[reg_pointer]);
 	fscanf(f,"%hd",&regs_available[reg_float]);
+	fscanf(f,"%hd",&use_any_as_pointer);
 	get_atab(f,alocaltab);
 	get_atab(f,alocaddrtab);
 	aconsttab = getcondtab(f);

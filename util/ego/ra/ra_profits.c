@@ -65,7 +65,7 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 	offset off;
 	short *time_out, *space_out;
 {
-	cond_p m;
+	cond_p m = (cond_p) 0;
 
 	if (localtyp == reg_loop) localtyp = reg_any;
 	if (size == ws || size ==ps && totyp == reg_pointer) {
@@ -74,7 +74,8 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 			m = alocaltab[localtyp][totyp];
 			break;
 		   case LOCAL_ADDR:
-			m = alocaddrtab[localtyp][totyp];
+			if (use_any_as_pointer || totyp == reg_pointer)
+				m = alocaddrtab[localtyp][totyp];
 			break;
 		   case CONST:
 			m = aconsttab;
@@ -83,14 +84,14 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 			m = aconsttab;
 			break;
 		   case GLOBL_ADDR:
-			m = aglobaltab;
+			if (use_any_as_pointer || totyp == reg_pointer)
+				m = aglobaltab;
 			break;
 		   case PROC_ADDR:
-			m = aproctab;
+			if (use_any_as_pointer || totyp == reg_pointer)
+				m = aproctab;
 			break;
 		}
-	} else {
-		m = (cond_p) 0;
 	}
 	*time_out = (m == (cond_p) 0 ? -1 : map_value(m,off,TRUE));
 	*space_out = (m == (cond_p) 0 ? -1 : map_value(m,off,FALSE));

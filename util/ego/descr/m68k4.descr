@@ -4,6 +4,7 @@ pointersize: 4
 general registers: 5
 address registers: 4
 floating point registers: 0
+use general as pointer: no
 
 register score parameters:
 	local variable:

@@ -36,6 +36,9 @@ typedef struct time *time_p;
 
 
 extern short regs_available[];  /* contains #registers of every type */
+extern short use_any_as_pointer;/* indicates whether general registers
+				   can be used as pointers
+				*/
 
 
 /* A thing that can be put in a register is called an "item". The are several
