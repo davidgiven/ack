@@ -44,6 +44,20 @@ static char rcsid2[] = "$Header$";
 #define newplb newilb
 #endif
 
+#ifdef fmt_id
+#ifdef id_first
+It is an error to define both fmt_id and id_first.
+Read the documentation.
+#endif
+#endif
+
+#ifdef fmt_ilb
+#ifdef ilb_fmt
+It is an error to define both fmt_ilb and ilb_fmt.
+Read the documentation.
+#endif
+#endif
+
 /* segment types for switchseg() */
 #define SEGTXT          0
 #define SEGCON          1
@@ -479,7 +493,11 @@ char *strarg(t) {
 	switch (t) {
 	case sp_ilb1:
 	case sp_ilb2:
+#ifdef fmt_ilb
+		fmt_ilb(procno,((int) argval),argstr);
+#else
 		sprintf(argstr,ilb_fmt,procno,(int)argval);
+#endif
 		break;
 	case sp_dlb1:
 	case sp_dlb2:
@@ -490,10 +508,14 @@ char *strarg(t) {
 		break;
 	case sp_dnam:
 	case sp_pnam:
+#ifdef fmt_id
+		fmt_id(str,argstr);
+#else
 		p = argstr;
 		if (strsiz < 8 || str[0] == id_first)
 			*p++ = id_first;
 		sprintf(p,"%.*s",strsiz,str);
+#endif
 		break;
 	case sp_doff:
 		strarg(offtyp);
