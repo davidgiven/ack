@@ -184,8 +184,8 @@ outpatterns() {
 	} else {
 		patbyte(0);
 		pat(callproc);
-		pat(procarg[0]);
-		pat(procarg[1]);
+		pat(nprocargs);
+		for (i = 0; i < nprocargs; i++) pat(procarg[i]);
 	}
 }
 
@@ -585,6 +585,7 @@ outdefs() {
 	cdef("MAXPATLEN",maxtokpatlen);
 	cdef("MAXREPLLEN",maxtokrepllen);
 	cdef("MAXEMREPLLEN",maxemrepllen);
+	cdef("MAXPROCARG",maxprocargs);
 	cdef("MAXRULE",maxrule<16 ? 16 : maxrule);
 	if (nsplit>0) {
 		cdef("MAXSPLIT",maxsplit);

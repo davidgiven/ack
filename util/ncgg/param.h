@@ -36,6 +36,7 @@
 #define MAXPATBYTES BORS(14000,7000)
 #define MAXREGVAR 10
 #define MAXSOURCELINES 6000
+#define MAXPROCARG 10
 
 /* end of tunable constants */
 

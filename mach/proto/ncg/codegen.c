@@ -57,7 +57,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #endif
 	unsigned totalcost = 0;
 	int inscoerc=0;
-	int procarg[2];
+	int procarg[MAXPROCARG];
 #ifdef ALLOW_NEXTEM
 	static int paniced;
 	char *savebp = 0;
@@ -149,9 +149,13 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #endif
 		n = *bp++;
 		if (n==0) {	/* "procedure" */
+			int j, nargs;
 			getint(i,bp);
-			getint(procarg[0],bp);
-			getint(procarg[1],bp);
+			getint(nargs,bp);
+			assert(nargs < MAXPROCARGS);
+			for (j = 0; j < nargs; j++) {
+				getint(procarg[j],bp);
+			}
 			bp= &pattern[i];
 			n = *bp++;
 			DEBUG("PROC_CALL");
@@ -677,7 +681,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	if (toplevel) {
 		swtxt();
 		if (stringno>10000) {
-			assert(stringno== 10001 || stringno== 10002);
+			assert(stringno < 100001 + MAXPROCARG);
 			genstr(procarg[stringno-10001]);
 		} else
 			genstr(stringno);

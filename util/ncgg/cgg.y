@@ -98,7 +98,7 @@ iocc_t iops[20];
 %type <yy_str> opt_par_string optstring
 %type <yy_int> register propno att_list_el_type tokenset_no
 %type <yy_int> adornlist optstar optuses optregvar regvartype optregvartype
-%type <yy_int> emarg tokarg subreg allreg optsecondstring
+%type <yy_int> emarg tokarg subreg allreg
 %type <yy_expr> expr regvarexpr
 %type <yy_iocc> tokeninstance
 %type <yy_int> optexpr optexact optstack
@@ -671,22 +671,23 @@ patterns
 		  if (npatterns>maxrule)
 		  	maxrule=npatterns;
 		}
-	| CALL IDENT '(' STRING optsecondstring ')'
+	| CALL IDENT '(' stringlist ')'
 		{ register symbol *sy_p;
 		  saferulefound=1;
 		  sy_p=lookup($2,symproc,mustexist);
 		  callproc=sy_p->sy_value.syv_procoff;
-		  procarg[0] = strlookup($4);
-		  procarg[1] = $5;
 		  free($2);
-		  free($4);
+		  if (nprocargs > maxprocargs) maxprocargs = nprocargs;
 		}
 	;
-optsecondstring
-	: /* empty */
-		{ $$ = 0; }
-	| ',' STRING
-		{ $$ = strlookup($2); free($2); }
+
+stringlist
+	: STRING
+		{ nprocargs = 1; procarg[0] = strlookup($1); free($1); }
+	| stringlist ',' STRING
+		{ NEXT(nprocargs, MAXPROCARG, "Procedure argument list");
+		  procarg[nprocargs-1] = strlookup($3); free($3);
+		}
 	;
 
 onepattern

@@ -30,11 +30,12 @@ extern int cursetno;
 extern int allsetno;
 extern int inproc;
 extern int callproc;
-extern int procarg[2];
+extern int procarg[];
 extern int fc1,fc2,fc3,fc4;
 extern int maxmembers;
 extern int regclass;
 extern int maxtokensize;
+extern int nprocargs, maxprocargs;
 
 extern char *mystrcpy();
 extern char *myalloc();

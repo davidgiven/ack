@@ -33,7 +33,6 @@ int cursetno = -1;
 int allsetno;
 int inproc=0;	/* scanning "procedure" */
 int callproc=0;
-int procarg[2];
 int fc1=1,fc2=1,fc3=1,fc4=1;
 int maxmembers=0;
 int regclass=1;
@@ -42,6 +41,8 @@ int rvused=0;
 int nregvar[4];
 int rvsize[4];
 int rvnumbers[4][MAXREGVAR];
+int procarg[MAXPROCARG];
+int maxprocargs, nprocargs;
 
 reginfo l_regs[MAXREGS];
 propinfo l_props[MAXPROPS];
