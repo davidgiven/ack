@@ -83,7 +83,13 @@ __flushbuf(int c, FILE * stream)
 		return c;
 	} else if (io_testflag(stream, _IOLBF)) {
 		*stream->_ptr++ = c;
+		/* stream->_count has been updated in putc macro. */
 		if (c == '\n' || stream->_count == -stream->_bufsiz) {
+			int count = -stream->_count;
+
+			stream->_ptr  = stream->_buf;
+			stream->_count = 0;
+
 			if (io_testflag(stream, _IOAPPEND)) {
 				if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
 					stream->_flags |= _IOERR;
@@ -91,12 +97,9 @@ __flushbuf(int c, FILE * stream)
 				}
 			}
 			if (! do_write(fileno(stream), (char *)stream->_buf,
-					-stream->_count)) {
+					count)) {
 				stream->_flags |= _IOERR;
 				return EOF;
-			} else {
-				stream->_ptr  = stream->_buf;
-				stream->_count = 0;
 			}
 		}
 	} else {
