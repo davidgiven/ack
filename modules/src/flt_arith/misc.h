@@ -19,3 +19,4 @@
 #define flt_nrm		flt__nrm
 #define flt_chk		flt__chk
 #define flt_b64_add	flt__64add
+#define flt_split	flt__split

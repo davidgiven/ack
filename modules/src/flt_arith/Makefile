@@ -13,11 +13,11 @@ LIBFLT = libflt.$(LIBSUF)
 
 SRC =	b64_add.c flt_ar2flt.c flt_div.c flt_nrm.c b64_sft.c flt_chk.c \
 	flt_flt2ar.c flt_str2fl.c flt_add.c flt_cmp.c flt_mul.c ucmp.c \
-	flt_modf.c flt_umin.c
+	flt_modf.c flt_umin.c split.c
 OBJ =	b64_add.$(SUF) flt_ar2flt.$(SUF) flt_div.$(SUF) flt_nrm.$(SUF) \
 	b64_sft.$(SUF) flt_chk.$(SUF) flt_flt2ar.$(SUF) flt_str2fl.$(SUF) \
 	flt_add.$(SUF) flt_cmp.$(SUF) flt_mul.$(SUF) ucmp.$(SUF) \
-	flt_modf.$(SUF) flt_umin.$(SUF)
+	flt_modf.$(SUF) flt_umin.$(SUF) split.$(SUF)
 
 .SUFFIXES:	.$(SUF)
 .c.$(SUF):
@@ -67,3 +67,4 @@ flt_mul.$(SUF):	misc.h flt_arith.h
 flt_modf.$(SUF):	misc.h flt_arith.h
 flt_umin.$(SUF):	misc.h
 ucmp.$(SUF):	misc.h flt_arith.h
+split.$(SUF):	misc.h flt_arith.h

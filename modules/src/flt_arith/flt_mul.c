@@ -32,14 +32,8 @@ flt_mul(e1,e2,e3)
 
 	/* assign unknown long formats		*/
 	/* to known unsigned word formats	*/
-	mp[0] = (e1->m1 >> 16) & 0xFFFF;
-	mp[1] = e1->m1 & 0xFFFF;
-	mp[2] = (e1->m2 >> 16) & 0xFFFF;
-	mp[3] = e1->m2 & 0xFFFF;
-	mc[0] = (e2->m1 >> 16) & 0xFFFF;
-	mc[1] = e2->m1 & 0xFFFF;
-	mc[2] = (e2->m2 >> 16) & 0xFFFF;
-	mc[3] = e2->m2 & 0xFFFF;
+	flt_split(e1, mp);
+	flt_split(e2, mc);
 	for (i = 8; i--;) {
 		result[i] = 0;
 	}

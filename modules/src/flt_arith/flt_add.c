@@ -65,7 +65,7 @@ flt_add(e1,e2,e3)
 	else {
 		*e3 = *e2;
 		if (flt_b64_add(&e3->flt_mantissa,&e1->flt_mantissa)) {/* addition carry */
-			flt_b64_rsft(&e3->flt_mantissa);
+			flt_b64_sft(&e3->flt_mantissa, 1);
 			e3->m1 |= 0x80000000L;	/* set max bit	*/
 			e3->flt_exp++;		/* increase the exponent */
 		}

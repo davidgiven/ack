@@ -204,26 +204,14 @@ add_exponent(e, exp)
 	if (neg) exp = -exp;
 	divsz = exp / SMALLSZ;
 	modsz = exp % SMALLSZ;
-	if (neg) {
-		flt_mul(e, &r_10pow[modsz], &x);
-		while (divsz >= BIGSZ) {
-			flt_mul(&x, &r_big_10pow[BIGSZ-1],&x);
-			divsz -= BIGSZ-1;
-			flt_chk(e);
-			if (flt_status != 0) return;
-		}
-		flt_mul(&x, &r_big_10pow[divsz], e);
+	flt_mul(e, (neg ? r_10pow : s10pow) + modsz, &x);
+	while (divsz >= BIGSZ) {
+		flt_mul(&x, neg ? &r_big_10pow[BIGSZ-1] : &big_10pow[BIGSZ-1],&x);
+		divsz -= BIGSZ-1;
+		flt_chk(e);
+		if (flt_status != 0) return;
 	}
-	else {
-		flt_mul(e, &s10pow[modsz], &x);
-		while (divsz >= BIGSZ) {
-			flt_mul(&x, &big_10pow[BIGSZ-1],&x);
-			divsz -= BIGSZ-1;
-			flt_chk(e);
-			if (flt_status != 0) return;
-		}
-		flt_mul(&x, &big_10pow[divsz], e);
-	}
+	flt_mul(&x, (neg ? r_big_10pow : big_10pow) + divsz, e);
 }
 
 flt_str2flt(s, e)
@@ -258,7 +246,7 @@ flt_str2flt(s, e)
 
 			a1 = e->flt_mantissa;
 			flt_b64_sft(&(e->flt_mantissa), -3);
-			flt_b64_lsft(&a1);
+			flt_b64_sft(&a1, -1);
 			flt_b64_add(&(e->flt_mantissa), &a1);
 			a1.flt_h_32 = 0;
 			a1.flt_l_32 = c - '0';

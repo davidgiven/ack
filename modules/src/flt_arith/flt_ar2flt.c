@@ -35,7 +35,7 @@ flt_arith2flt(n, e)
 		e->flt_exp++;
 	}
 	for (i = 64; i > 0 && n != 0; i--) {
-		flt_b64_rsft(&(e->flt_mantissa));
+		flt_b64_sft(&(e->flt_mantissa),1);
 		e->m1 |= (n & 1) << 31;
 		n >>= 1;
 	}

@@ -35,16 +35,10 @@ flt_div(e1,e2,e3)
 	e3->flt_exp = e1->flt_exp - e2->flt_exp;
 
 	u[4] = (e1->m2 & 1) << 15;
-	flt_b64_rsft(&(e1->flt_mantissa));
-	u[0] = (e1->m1 >> 16) & 0xFFFF;
-	u[1] = e1->m1 & 0xFFFF;
-	u[2] = (e1->m2 >> 16) & 0xFFFF;
-	u[3] = e1->m2 & 0xFFFF;
+	flt_b64_sft(&(e1->flt_mantissa),1);
+	flt_split(e1, u);
 	u[5] = 0; u[6] = 0; u[7] = 0;
-	v[1] = (e2->m1 >> 16) & 0xFFFF;
-	v[2] = e2->m1 & 0xFFFF;
-	v[3] = (e2->m2 >> 16) & 0xFFFF;
-	v[4] = e2->m2 & 0xFFFF;
+	flt_split(e2, &v[1]);
 	while (! v[maxv]) maxv--;
 	result[0] = 0;
 	result[1] = 0;
@@ -68,20 +62,20 @@ flt_div(e1,e2,e3)
 			q_est = temp;
 		}
 		else if (temp >= 0) {
-			q_est = temp / v[1];
+			q_est = temp / (long)v[1];
 		}
 		else {
 			long rem;
-			q_est = (0x7FFFFFFF/v[1])+((temp&0x7FFFFFFF)/v[1]);
-			rem = (0x7FFFFFFF%v[1])+((temp&0x7FFFFFFF)%v[1])+1;
-			while (rem > v[1]) {
+			q_est = (0x7FFFFFFF/(long)v[1])+((temp&0x7FFFFFFF)/(long)v[1]);
+			rem = (0x7FFFFFFF%(long)v[1])+((temp&0x7FFFFFFF)%(long)v[1])+1;
+			while (rem > (long)v[1]) {
 				q_est++;
 				rem -= v[1];
 			}
 		}
-		temp -= q_est * v[1];
+		temp -= q_est * (long)v[1];
 		while (!(temp&0xFFFF0000) &&
-		       ucmp((long)(v[2]*q_est),(long)((temp<<16)+u_p[2])) > 0) {
+		       ucmp((long)v[2]*q_est,(temp<<16)+(long)u_p[2]) > 0) {
 			q_est--;
 			temp += v[1];
 		}
@@ -95,7 +89,7 @@ flt_div(e1,e2,e3)
 			int borrow = 0;
 
 			for (i = maxv; i > 0; i--) {
-				long tmp = q_est * v[i] + k + borrow;
+				long tmp = q_est * (long)v[i] + k + borrow;
 				unsigned short md = tmp & 0xFFFF;
 
 				borrow = (md > u_p[i]);
