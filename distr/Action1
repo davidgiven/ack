@@ -1,6 +1,9 @@
-name "vax2/cg bootstrap files"
-dir mach/vax2/cg
+name "m68k2/cg bootstrap files"
+dir mach/m68k2/cg
 end
 name "vax4/cg bootstrap files"
 dir mach/vax4/cg
+end
+name "m68020/ncg bootstrap files"
+dir mach/m68020/ncg
 end
