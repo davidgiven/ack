@@ -33,3 +33,5 @@ extern struct memory	mems[];
 #define modulptr(offset)	(mems[ALLOMODL].mem_base+core_position+(offset))
 
 extern ind_t		core_position;
+extern ind_t		hard_alloc();
+extern ind_t		alloc();
