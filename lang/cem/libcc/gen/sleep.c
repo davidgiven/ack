@@ -26,9 +26,9 @@ sleep(n)
 				   enough
 				*/
   if (oldalarm > n) oldalarm -= n;
-  else {
-	n = oldalarm;
-	oldalarm = 1;
+  else if (oldalarm) {
+		n = oldalarm;
+		oldalarm = 1;
   }
   oldsig = signal(SIGALRM, alfun);
   alarm(n);
