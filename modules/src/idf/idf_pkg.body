@@ -149,7 +149,7 @@ init_idf()	{
 	/*	A simple congruence random number generator, as
 		described in Knuth, vol 2.
 	*/
-	int rnd = HASH_X;
+	register int rnd = HASH_X;
 	register char *phm;
 	
 	for (phm = &hmask[0]; phm < &hmask[IDF_HSIZE];)	{
