@@ -183,7 +183,7 @@ declare_struct(fund, idf, tpp)
 	if (*tpp) error("multiple types in declaration");
 	if (!idf)
 		idf = gen_idf();
-	tgp = (fund == ENUM ? &idf->id_enum : &idf->id_struct);
+	tgp = &idf->id_struct;
 	tg = *tgp;
 	if (tg
 	    && tg->tg_type->tp_size < 0
@@ -243,7 +243,7 @@ apply_struct(fund, idf, tpp)
 	*/
 	register struct tag **tgp;
 
-	tgp = (is_struct_or_union(fund) ? &idf->id_struct : &idf->id_enum);
+	tgp = &idf->id_struct;
 
 	if (*tgp)
 		*tpp = (*tgp)->tg_type;

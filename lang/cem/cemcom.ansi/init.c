@@ -56,7 +56,7 @@ init_pp()
 		register struct mkey *mk = &mkey[0];
 
 		while (mk->mk_reserved)	{
-			register struct idf *idf = str2idf(mk->mk_reserved);
+			register struct idf *idf = str2idf(mk->mk_reserved, 0);
 			
 			if (idf->id_resmac)
 				fatal("maximum identifier length insufficient");
@@ -75,22 +75,22 @@ init_pp()
 	sprint(dbuf, "\"%s %02d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
 	if (tp->tm_mday < 10) dbuf[5] = ' ';		/* hack */
-	macro_def(str2idf("__DATE__"), dbuf, -1, strlen(dbuf), NOUNDEF);
+	macro_def(str2idf("__DATE__", 0), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */
 	sprint(tbuf, "\"%02d:%02d:%02d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
-	macro_def(str2idf("__TIME__"), tbuf, -1, strlen(tbuf), NOUNDEF);
+	macro_def(str2idf("__TIME__", 0), tbuf, -1, strlen(tbuf), NOUNDEF);
 
 	/* __LINE__	*/
-	macro_def(str2idf("__LINE__"), "0", -1, 1, NOUNDEF | FUNC);
+	macro_def(str2idf("__LINE__", 0), "0", -1, 1, NOUNDEF | FUNC);
 
 	/* __FILE__	*/
-	macro_def(str2idf("__FILE__"), "", -1, 1, NOUNDEF | FUNC);
+	macro_def(str2idf("__FILE__", 0), "", -1, 1, NOUNDEF | FUNC);
 
 	/* __STDC__ */
-	macro_def(str2idf("__STDC__"), "1", -1, 1, NOUNDEF);
+	macro_def(str2idf("__STDC__", 0), "1", -1, 1, NOUNDEF);
 
 	/* defined(??) */
-	macro_def(str2idf("defined"), "", 1, 1, NOUNDEF | FUNC);
+	macro_def(str2idf("defined", 0), "", 1, 1, NOUNDEF | FUNC);
 }
 #endif NOPP

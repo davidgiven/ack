@@ -59,6 +59,8 @@ newline()	{
 		print("    ");
 }
 
+int	dumpidf();
+
 dumpidftab(msg, opt)
 	char msg[];
 {
@@ -68,18 +70,10 @@ dumpidftab(msg, opt)
 		Unless opt & 2, reserved identifiers are not dumped.
 		Unless opt & 4, universal identifiers are not dumped.
 	*/
-	int i;
 
 	print(">>> DUMPIDF, %s (start)", msg);
 	dumpstack();
-	for (i = 0; i < HASHSIZE; i++)	{
-		register struct idf *notch = idf_hashtable[i];
-
-		while (notch)	{
-			dumpidf(notch, opt);
-			notch = notch->next;
-		}
-	}
+	idfappfun(dumpidf, opt);
 	newline();
 	print(">>> DUMPIDF, %s (end)\n", msg);
 }
@@ -150,13 +144,6 @@ dumpidf(idf, opt)
 			print("%s:", idf->id_text);
 		}
 		dumptags(idf->id_struct);
-	}
-	if (idf->id_enum)	{
-		if (!started++)	{
-			newline();
-			print("%s:", idf->id_text);
-		}
-		dumptags(idf->id_enum);
 	}
 }
 

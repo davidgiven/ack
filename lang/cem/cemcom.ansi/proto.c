@@ -181,7 +181,7 @@ struct idf **idpp;
         }
 	*idpp = tp->tp_idf;
 	switch(tp->tp_fund) {
-	case ENUM: tg = tp->tp_idf->id_enum; break;
+	case ENUM:
 	case UNION:
 	case STRUCT: tg = tp->tp_idf->id_struct; break;
 	}
@@ -331,7 +331,7 @@ struct type *tp;
 
 	ident = tp->tp_idf;
 	switch (tp->tp_fund) {
-	case ENUM: tgpp = &(ident->id_enum); break;
+	case ENUM:
 	case STRUCT:
 	case UNION: tgpp = &(ident->id_struct); break;
 	default: return;

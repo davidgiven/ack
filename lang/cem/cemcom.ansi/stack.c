@@ -130,11 +130,14 @@ unstack_level()
 		local_level->sl_entry = se->next;
 		free_stack_entry(se);
 
+		if (level == L_LOCAL && (def = idf->id_label)) {
+			unstack_label(idf);
+			free_def(def);
+			idf->id_label = 0;
+		}
 		while ((def = idf->id_def) && def->df_level >= level)	{
 			/* unlink it from the def list under the idf block */
-			if (def->df_sc == LABEL)
-				unstack_label(idf);
-			else if (def->df_sc == REGISTER || def->df_sc == AUTO)
+			if (def->df_sc == REGISTER || def->df_sc == AUTO)
 				FreeLocal(def->df_address);
 			idf->id_def = def->next;
 			free_def(def);
@@ -152,11 +155,6 @@ unstack_level()
 		)	{
 			/* unlink it from the struct list under the idf block */
 			idf->id_struct = tag->next;
-			free_tag(tag);
-		}
-		while ((tag = idf->id_enum) && tag->tg_level >= level)	{
-			/* unlink it from the enum list under the idf block */
-			idf->id_enum = tag->next;
 			free_tag(tag);
 		}
 	}

@@ -41,7 +41,7 @@ insert_token(tk)
 		dot.tk_idf = gen_idf();
 		break;
 	case TYPE_IDENTIFIER:
-		dot.tk_idf = str2idf("int");
+		dot.tk_idf = str2idf("int", 0);
 		break;
 	case STRING:
 		dot.tk_bts = Salloc("", 1);

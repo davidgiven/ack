@@ -326,7 +326,6 @@ actual(repl)
 			register char *p = buf;
 			register struct idf *idef;
 			register int pos = -1;
-			register int hash;
 			extern int idfsize;
 			int NoExpandMacro;
 
@@ -335,26 +334,23 @@ actual(repl)
 				ch = GetChar();
 			} else NoExpandMacro = 0;
 
-			hash = STARTHASH();
 			do {
 				if (++pos < idfsize) {
 					*p++ = ch;
-					hash = ENHASH(hash, ch);
 				}
 				ch = GetChar();
 			} while (in_idf(ch));
-			hash = STOPHASH(hash);
 			*p++ = '\0';
 			UnGetChar();
 
 			/*	When the identifier has an associated macro
 				replacement list, it's expanded.
 			*/
-			idef = idf_hashed(buf, (int) (p - buf), hash);
-			if (NoExpandMacro || !replace(idef)) {
-				if ((idef->id_macro
-				    && (idef->id_macro->mc_flag & NOREPLACE))
-				    || NoExpandMacro)
+			idef = findidf(buf);
+			if (!idef || NoExpandMacro || !replace(idef)) {
+				if (NoExpandMacro
+				    || (idef && idef->id_macro
+				        && (idef->id_macro->mc_flag & NOREPLACE)))
 					stash(repl, NOEXPM, !nostashraw);
 				for (p = buf; *p != '\0'; p++)
 					stash(repl, *p, !nostashraw);

@@ -7,30 +7,35 @@
 
 #include	"nopp.h"
 
-#define	HASHSIZE	307	/* must be odd */
-
-#define	STARTHASH()		(0)
-#define	ENHASH(hs,ch)		((hs << 2) + ch)
-#define	STOPHASH(hs)		((unsigned)hs % HASHSIZE)
-
-struct idf	{
-	struct idf *next;
-	char *id_text;
+struct id_u {
 #ifndef NOPP
-	struct macro *id_macro;
-	int id_resmac;		/* if nonzero: keyword of macroproc. 	*/
+	struct macro *idd_macro;
+	int idd_resmac;		/* if nonzero: keyword of macroproc. 	*/
 #endif NOPP
-	int id_reserved;	/* non-zero for reserved words		*/
-	char *id_file;		/* file containing the occurrence	*/
-	unsigned int id_line;	/* line number of the occurrence	*/
-	struct def *id_def;	/* variables, typedefs, enum-constants	*/
-	struct sdef *id_sdef;	/* selector tags			*/
-	struct tag *id_struct;	/* struct and union tags		*/
-	struct tag *id_enum;	/* enum tags				*/
-	int id_special;		/* special action needed at occurrence	*/
+	int idd_reserved;	/* non-zero for reserved words		*/
+	char *idd_file;		/* file containing the occurrence	*/
+	unsigned int idd_line;	/* line number of the occurrence	*/
+	struct def *idd_label;	/* labels				*/
+	struct def *idd_def;	/* variables, typedefs, enum-constants	*/
+	struct sdef *idd_sdef;	/* selector tags			*/
+	struct tag *idd_struct;	/* struct and union tags		*/
+	int idd_special;	/* special action needed at occurrence	*/
 };
 
-/* ALLOCDEF "idf" 50 */
+#define IDF_TYPE	struct id_u
+#define id_macro	id_user.idd_macro
+#define id_resmac	id_user.idd_resmac
+#define id_reserved	id_user.idd_reserved
+#define id_file		id_user.idd_file
+#define id_line		id_user.idd_line
+#define id_label	id_user.idd_label
+#define id_def		id_user.idd_def
+#define id_sdef		id_user.idd_sdef
+#define id_struct	id_user.idd_struct
+#define id_enum		id_user.idd_struct
+#define id_special	id_user.idd_special
+
+#include <idf_pkg.spec>
 
 #ifndef NOPP
 struct dependency	{
@@ -40,8 +45,6 @@ struct dependency	{
 
 /* ALLOCDEF "dependency" 10 */
 #endif /* NOPP */
-
-extern struct idf *str2idf(), *idf_hashed();
 
 extern int level;
 extern struct idf *gen_idf();

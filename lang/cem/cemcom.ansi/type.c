@@ -34,7 +34,7 @@ struct type
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
 	*float_type, *double_type, *lngdbl_type,
-	*void_type, *label_type,
+	*void_type,
 	*string_type, *funint_type, *error_type;
 
 struct type *pa_type;	/* Pointer-Arithmetic type	*/

@@ -128,7 +128,7 @@ label
 		lint_label();
 #endif	LINT
 		define_label(idf);
-		C_df_ilb((label)idf->id_def->df_address);
+		C_df_ilb((label)idf->id_label->df_address);
 	}
 ;
 
@@ -455,7 +455,7 @@ jump
 	';'
 		{
 			apply_label(idf);
-			C_bra((label)idf->id_def->df_address);
+			C_bra((label)idf->id_label->df_address);
 #ifdef	LINT
 			lint_jump_stmt(idf);
 #endif	LINT

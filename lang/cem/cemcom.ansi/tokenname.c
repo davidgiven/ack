@@ -138,7 +138,7 @@ reserve(resv)
 		as reserved words.
 	*/
 	while (resv->tn_symbol)	{
-		struct idf *idf = str2idf(resv->tn_name);
+		struct idf *idf = str2idf(resv->tn_name, 0);
 		
 		if (idf->id_reserved)
 			fatal("maximum identifier length insufficient");

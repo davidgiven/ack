@@ -128,10 +128,12 @@ end_brace(stl)
 
 	while (se) {
 		register struct idf *idf = se->se_idf;
-		register struct def *def = idf->id_def;
 
-		if (def) {
-			lint_1_local(idf, def);
+		if (idf->id_def) {
+			lint_1_local(idf, idf->id_def);
+		}
+		if (stl->sl_level == L_LOCAL && idf->id_label) {
+			lint_1_local(idf, idf->id_label);
 		}
 		se = se->next;
 	}

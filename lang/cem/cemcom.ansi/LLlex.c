@@ -22,12 +22,15 @@
 #include	"class.h"
 #include	"assert.h"
 #include	"sizes.h"
+#include	"specials.h"	/* registration of special identifiers */
 
 /* Data about the token yielded */
 struct token dot, ahead, aside;
 int token_nmb = 0;		/* number of the ahead token */
 int tk_nmb_at_last_syn_err = -5/*ERR_SHADOW*/;
 				/* token number at last syntax error */
+int idfsize = IDFSIZE;
+char sp_occurred[SP_TOTAL+1];
 
 #ifndef	NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
@@ -307,7 +310,6 @@ garbage:
 	{
 		register char *tg = &buf[0];
 		register int pos = -1;
-		register int hash;
 		register struct idf *idef;
 		extern int idfsize;		/* ??? */
 #ifndef	NOPP
@@ -319,20 +321,18 @@ garbage:
 			ch = GetChar();
 		}
 #endif
-		hash = STARTHASH();
 		do	{			/* read the identifier	*/
 			if (++pos < idfsize) {
 				*tg++ = ch;
-				hash = ENHASH(hash, ch);
 			}
 			ch = GetChar();
 		} while (in_idf(ch));
 
-		hash = STOPHASH(hash);
 		if (ch != EOI)
 			UnGetChar();
 		*tg++ = '\0';	/* mark the end of the identifier	*/
-		idef = ptok->tk_idf = idf_hashed(buf, (int) (tg - buf), hash);
+		idef = ptok->tk_idf = str2idf(buf, 1);
+		sp_occurred[idef->id_special] = 1;
 		idef->id_file = ptok->tk_file;
 		idef->id_line = ptok->tk_line;
 #ifndef	NOPP

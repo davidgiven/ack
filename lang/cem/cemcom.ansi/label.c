@@ -23,26 +23,19 @@ enter_label(idf, defining)
 		scope, i.e., on the lowest possible level.
 		If defining, the label comes from a label statement.
 	*/
-	register struct def *def = idf->id_def;
+	register struct def *def = idf->id_label;
 
 	if (def)	{
-		if (def->df_sc == LABEL)	{
-			if (defining && def->df_initialized)
-				error("redeclaration of label %s",
-								idf->id_text);
-		}
-		else	{		/* there may still be room for it */
-			if (def->df_level == level)	/* but alas, no */
-				error("%s is not a label", idf->id_text);
-			else	{
-				add_def(idf, LABEL, label_type, L_LOCAL);
-			}
-		}
+		if (defining && def->df_initialized)
+			error("redeclaration of label %s", idf->id_text);
 	}
 	else	{
-		add_def(idf, LABEL, label_type, L_LOCAL);
+		def = new_def();
+		def->df_sc = LABEL;
+		idf->id_label = def;
+		def->df_file = idf->id_file;
+		def->df_line = idf->id_line;
 	}
-	def = idf->id_def;	/* might be changed by 1 of the 2 add_defs */
 	if (def->df_address == 0)
 		def->df_address = (arith) text_label();
 	if (defining)
@@ -54,6 +47,6 @@ unstack_label(idf)
 {
 	/*	The scope in which the label idf occurred is left.
 	*/
-	if (!idf->id_def->df_initialized && !is_anon_idf(idf))
+	if (!idf->id_label->df_initialized && !is_anon_idf(idf))
 		error("label %s not defined", idf->id_text);
 }

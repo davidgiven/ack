@@ -277,7 +277,7 @@ initializer(struct idf *idf; int sc;)
 			stb_string(idf->id_def, sc, idf->id_text);
 		}
 #endif	/* DBSYMTAB */
-		init_idf(idf);
+		idf_initialized(idf);
 	}
 ;
 

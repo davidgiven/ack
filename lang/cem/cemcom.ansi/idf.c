@@ -29,146 +29,16 @@
 #include	"sizes.h"
 #include	"Lpars.h"
 #include	"assert.h"
-#include	"specials.h"	/* registration of special identifiers	*/
 
-int idfsize = IDFSIZE;
 extern char options[];
 extern arith NewLocal();
 extern char *symbol2str();
 
-char sp_occurred[SP_TOTAL+1];	/* indicate occurrence of special id	*/
+#ifdef DEBUG
+#define IDF_DEBUG
+#endif
 
-struct idf *idf_hashtable[HASHSIZE];
-	/*	All identifiers can in principle be reached through
-		idf_hashtable; idf_hashtable[hc] is the start of a chain of
-		idf's whose tags all hash to hc. Each idf is the start of
-		a chain of def's for that idf, sorted according to level,
-		with the most recent one on top.
-		Any identifier occurring on a level is entered into this
-		list, regardless of the nature of its declaration
-		(variable, selector, structure tag, etc.).
-	*/
-
-static struct idf *
-idf_new(tg, size)
-	register char *tg;
-	register int size;
-{
-#define IBUFSIZ	2048
-	static unsigned int icnt;
-	static char *ip;
-	register char *p;
-	register struct idf *id = new_idf();
-
-	if (size > icnt) {
-		icnt = size > IBUFSIZ ? size : IBUFSIZ;
-		p = malloc(icnt);	/* yes, malloc, not Malloc */
-		if (! p) p = Malloc(size);
-	}
-	else p = ip;
-	icnt -= size;
-	id->id_text = p;
-	while (size--) {
-		*p++ = *tg++;
-	}
-	ip = p;
-	return id;
-}
-
-struct idf *
-idf_hashed(tg, size, hc)
-	char *tg;
-	int size;		/* includes the '\0' character */
-	int hc;
-{
-	/*	The tag tg with length size and known hash value hc is
-		looked up in the identifier table; if not found, it is
-		entered. A pointer to it is returned.
-		The identifier has already been truncated to idfsize
-		characters.
-	*/
-	register struct idf **hook = &idf_hashtable[hc], *notch;
-
-	while ((notch = *hook))	{
-		register char *s1 = tg;
-		register char *cp = notch->id_text;
-		register int cmp;
-
-		while (!(cmp = (*s1 - *cp++))) {
-			if (*s1++ == '\0') {
-				break;
-			}
-		}
-
-		if (cmp < 0)
-			break;
-		if (cmp == 0)	{
-			/*	suppose that special identifiers, as
-				"__setjmp", are already inserted
-			*/
-			sp_occurred[notch->id_special] = 1;
-			return notch;
-		}
-		hook = &notch->next;
-	}
-	/* a new struct idf must be inserted at the hook */
-	notch = idf_new(tg, size);
-	notch->next = *hook;
-	*hook = notch;		/* hooked in */
-#ifndef NOPP
-	/* notch->id_resmac = 0; */
-#endif NOPP
-	return notch;
-}
-
-#ifdef	DEBUG
-hash_stat()
-{
-	if (options['h'])	{
-		register int i;
-		
-		print("Hash table tally:\n");
-		for (i = 0; i < HASHSIZE; i++)	{
-			register struct idf *notch = idf_hashtable[i];
-			int cnt = 0;
-	
-			while (notch)	{
-				cnt++;
-				notch = notch->next;
-			}
-			print("%d %d\n", i, cnt);
-		}
-		print("End hash table tally\n");
-	}		
-}
-#endif	DEBUG
-
-struct idf *
-str2idf(tg)
-	char tg[];
-{
-	/*	str2idf() returns an entry in the symbol table for the
-		identifier tg.  If necessary, an entry is created.
-		It is used where the text of the identifier is available
-		but its hash value is not; otherwise idf_hashed() is to
-		be used.
-	*/
-	register char *cp = tg;
-	register int hash;
-	register int pos = -1;
-	register int ch;
-	char ntg[IDFSIZE + 1];
-	register char *ncp = ntg;
-
-	hash = STARTHASH();
-	while (++pos < idfsize && (ch = *cp++))	{
-		*ncp++ = ch;
-		hash = ENHASH(hash, ch);
-	}
-	hash = STOPHASH(hash);
-	*ncp++ = '\0';
-	return idf_hashed(ntg, (int) (ncp - ntg), hash);
-}
+#include <idf_pkg.body>
 
 struct idf *
 gen_idf()
@@ -181,7 +51,7 @@ gen_idf()
 
 	sprint(buff, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);
-	return str2idf(buff);
+	return str2idf(buff, 1);
 }
 
 int
@@ -236,10 +106,7 @@ declare_idf(ds, dc, lvl)
 						symbol2str(type->tp_fund));
 				} else	error("void is not a complete type");
 			}
-			else if (type->tp_fund != LABEL) {
-				/* CJ */
-				strict("%s has size 0", idf->id_text);
-			}
+			else strict("%s has size 0", idf->id_text);
 		}
 	}
 
@@ -522,7 +389,7 @@ declare_params(dc)
 	}
 }
 
-init_idf(idf)
+idf_initialized(idf)
 	register struct idf *idf;
 {
 	/*	The topmost definition of idf is set to initialized.

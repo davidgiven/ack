@@ -205,7 +205,7 @@ function(struct decspecs *ds; struct declarator *dc;)
 #ifdef	LINT
 		lint_start_function();
 #endif	LINT
-		init_idf(idf);
+		idf_initialized(idf);
 		stack_level();		/* L_FORMAL1 declarations */
 		declare_params(dc);
 		begin_proc(ds, idf);	/* sets global function info */

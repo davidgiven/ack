@@ -154,25 +154,19 @@ idf2expr(expr)
 		def = idf->id_def;
 	}
 	/* now def != 0 */
-	if (def->df_type->tp_fund == LABEL) {
-		expr_error(expr, "illegal use of label %s", idf->id_text);
-		expr->ex_type = error_type;
-	}
-	else {
 #ifndef	LINT
-		if (!InSizeof) {
-			if (! def->df_used) {
+	if (!InSizeof) {
+		if (! def->df_used) {
 #ifndef PREPEND_SCOPES
-				code_scope(idf->id_text, def);
+			code_scope(idf->id_text, def);
 #endif /* PREPEND_SCOPES */
-				def->df_used = 1;
-			}
+			def->df_used = 1;
 		}
+	}
 #endif	LINT
-		expr->ex_type = def->df_type;
-		if (expr->ex_type == error_type) {
-			expr->ex_flags |= EX_ERROR;
-		}
+	expr->ex_type = def->df_type;
+	if (expr->ex_type == error_type) {
+		expr->ex_flags |= EX_ERROR;
 	}
 	expr->ex_lvalue =
 		(	def->df_type->tp_fund == FUNCTION ||

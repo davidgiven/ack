@@ -146,7 +146,7 @@ next_option:			/* to allow combined one-char options */
 			break;
 		}
 
-		macro_def(str2idf(name), mactext, -1, (int)maclen, NOFLAG);
+		macro_def(str2idf(name, 0), mactext, -1, (int)maclen, NOFLAG);
 		break;
 	}
 
@@ -203,7 +203,7 @@ next_option:			/* to allow combined one-char options */
 		
 #ifndef NOPP
 	case 'U' :		/* -Uname :	undefine predefined	*/
-		if (*text) do_undef(str2idf(text));
+		if (*text) do_undef(str2idf(text, 0));
 		break;
 #endif NOPP
 
