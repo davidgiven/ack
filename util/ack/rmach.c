@@ -298,13 +298,13 @@ open_in(name) register char *name ; {
 	/* Not in core */
 	incore= NO ;
 	/* Try to read EM_DIR/lib/MACH/descr */
-	gr_cat(&rline,EM_DIR) ;
+	gr_cat(&rline,em_dir) ;
 	gr_cat(&rline,"/lib/") ; gr_cat(&rline,name) ;
 	gr_cat(&rline,"/descr") ;
 	infile= fopen(gr_start(rline),"r") ;
 	if ( !infile ) {
 		gr_throw(&rline) ;
-		gr_cat(&rline,EM_DIR) ; gr_cat(&rline,"/") ;
+		gr_cat(&rline,em_dir) ; gr_cat(&rline,"/") ;
 		gr_cat(&rline,ACK_PATH); gr_cat(&rline,"/") ;
 		gr_cat(&rline,name) ;
 		infile= fopen(gr_start(rline),"r") ;
