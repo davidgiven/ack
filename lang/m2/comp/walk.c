@@ -181,6 +181,9 @@ WalkModule(module)
 			C_zne(RETURN_LABEL);
 			C_ine_dlb(data_label, (arith) 0);
 		}
+		else if (! options['R']) {
+			C_cal("killbss");
+		}
 
 		for (; nd; nd = nd->nd_left) {
 			C_cal(nd->nd_def->mod_vis->sc_scope->sc_name);

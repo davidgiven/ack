@@ -111,10 +111,12 @@ StatementSequence(register t_node **pnd;)
 	[ %persistent
 		';'
 		statement(&nd)
-			{ nd1 = dot2node(Link, *pnd, nd);
-			  *pnd = nd1;
-			  nd1->nd_symb = ';';
-			  pnd = &(nd1->nd_right);
+			{ if (nd != EmptyStatement) {
+			  	nd1 = dot2node(Link, *pnd, nd);
+			  	*pnd = nd1;
+			  	nd1->nd_symb = ';';
+			  	pnd = &(nd1->nd_right);
+			  }
 			}
 	]*
 ;
@@ -262,15 +264,15 @@ ReturnStatement(t_node **pnd;)
 	[
 		expression(&(nd->nd_right))
 			{ if (scopeclosed(CurrentScope)) {
-error("a module body has no result value");
+error("a module body cannot return a value");
 			  }
 			  else if (! ResultType(df->df_type)) {
-error("procedure \"%s\" has no result value", df->df_idf->id_text);
+error("procedure \"%s\" is not a function, so cannot return a value", df->df_idf->id_text);
 			  }
 			}
 	|
 			{ if (ResultType(df->df_type)) {
-error("procedure \"%s\" must return a value", df->df_idf->id_text);
+error("function procedure \"%s\" must return a value", df->df_idf->id_text);
 			  }
 			}
 	]
