@@ -23,7 +23,7 @@ init()
 	sigtrp(M2_UNIXSIG, SIGTRAP);
 	sigtrp(M2_UNIXSIG, SIGIOT);
 	sigtrp(M2_UNIXSIG, SIGEMT);
-	/* sigtrp(M2_UNIXSIG, SIGFPE); leave this one for EM runtime startoff*/
+	sigtrp(M2_UNIXSIG, SIGFPE);
 	sigtrp(M2_UNIXSIG, SIGBUS);
 	sigtrp(M2_UNIXSIG, SIGSEGV);
 	sigtrp(EBADMON, SIGSYS);
