@@ -101,7 +101,7 @@ Key keywords [] ={
 "print",	PRINTSYM,	0,	0,
 "pos",		FUNCTION,	POSSYM,		0,
 "put",		PUTSYM,		0,	0,
-"randomize",	RANDOMIZESYM,	0,	0,
+"randomi",	RANDOMIZESYM,	0,	0,
 "read",		READSYM,	0,	0,
 "rem",		REMSYM,		0,	0,
 "renum",	ILLEGAL,	0,	0,
