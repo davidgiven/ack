@@ -1,6 +1,6 @@
 tail_ocm.a
 builtin.c
-chan_struct.c
+chan_strct.c
 channel.c
 co.c
 now.c
