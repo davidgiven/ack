@@ -393,6 +393,7 @@ t_address	= address + t_regAregXcon + t_regAcon .
 #define	t_address	address
 #endif TBL68020
 
+safe_any4	= any4 - (pre_dec4 + post_inc4) .
 
 INSTRUCTIONS
 
@@ -2828,13 +2829,14 @@ pat dch				leaving loi 4
 pat dup $1==4
 with exact STACK
     gen move_l {indirect4, sp}, {pre_dec4, sp}
-with any4		yields	%1 %1
+with safe_any4		yields	%1 %1
+with exact pre_dec4 + post_inc4		yields	{indirect4, %1.reg} %1
 
 pat dup $1==8
 with exact STACK
     gen move_l {offsetted4, sp, 4}, {pre_dec4, sp}
 	move_l {offsetted4, sp, 4}, {pre_dec4, sp}
-with any4 any4		yields	%2 %1 %2 %1
+with safe_any4 safe_any4		yields	%2 %1 %2 %1
 
 pat dup $1>8
 with STACK
