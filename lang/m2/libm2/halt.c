@@ -8,7 +8,7 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Header$
 */
-#define MAXPROCS 16
+#define MAXPROCS 32
 
 static int callindex = 0;
 static int (*proclist[MAXPROCS])();
@@ -17,7 +17,7 @@ _cleanup()
 {
 	register int i;
 
-	for (i = 0; i < callindex; i++) {
+	for (i = callindex; --i >= 0;) {
 		(*proclist[i])();
 	}
 	callindex = 0;
@@ -29,9 +29,7 @@ CallAtEnd(p)
 	if (callindex >= MAXPROCS) {
 		return 0;
 	}
-	else {
-		proclist[callindex++] = p;
-	}
+	proclist[callindex++] = p;
 	return 1;
 }
 
