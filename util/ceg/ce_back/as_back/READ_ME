@@ -1,5 +1,5 @@
 This directory contains the back-library that generates assembly code.
 
-All the files are similair to there object code version.
+All the files are similar to there object code version.
 
 The table write should define some constant in his "mach.h"
