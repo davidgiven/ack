@@ -3,6 +3,8 @@ static char rcsid2[] = "$Header$";
 #endif
 
 #include "nopt.h"
+
+extern int (*OO_fstate[])();	/* Initialized from patterns in dfa.c */
 extern int OO_maxpattern;	/* Initialized from patterns in dfa.c */
 #define MAXBACKUP	50
 #define MAXOUTPUT	200
@@ -59,6 +61,17 @@ O_magic()
 O_close()
 {
 	C_close();
+}
+
+OO_dfa(last)
+	register int last;
+{
+	for(;;) {
+		(*OO_fstate[OO_state])(last);
+		if (OO_nxtbackup==OO_bkupqueue)
+			return;
+		last = ((*OO_nxtpatt++ = *(--OO_nxtbackup))->em_opcode);
+	}
 }
 
 PRIVATE
@@ -276,10 +289,12 @@ OO_backup(n)
 	}
 }
 
-OO_dodefault(numout, numcopy)
+OO_dodefault(numout, numcopy,newstate)
 	register int numout, numcopy;
+	int newstate;
 {
 	register p_instr *p, *q;
+	OO_pushback(*--OO_nxtpatt);
 	q = (p = OO_patternqueue) + numout;
 	while(numcopy--) {
 		if(numout) {
@@ -290,6 +305,7 @@ OO_dodefault(numout, numcopy)
 	}
 	OO_nxtpatt = p;
 	while(numout--) OO_out(*p++);
+	OO_state = newstate;
 }
 
 #ifdef DEBUG

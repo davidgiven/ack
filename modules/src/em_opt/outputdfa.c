@@ -10,13 +10,7 @@ FILE *ofile;
 outputnopt()
 {
 	openofile("dfa.c");
-	outheaders();
-	outtables();
 	outdfa();
-	outdodefault();
-	installofile();
-	openofile("trans.h");
-	outtranshdr();
 	installofile();
 	openofile("trans.c");
 	outdotrans();
@@ -97,95 +91,70 @@ RENAME(x,y)
 }
 
 PRIVATE
-outheaders()
-{
-	fprintf(ofile,"#include \"nopt.h\"\n");
-	fprintf(ofile,"#include \"trans.h\"\n");
-	fprintf(ofile,"\n");
-	fprintf(ofile,"int OO_maxpattern = %d;\n", longestpattern);
-	fprintf(ofile,"\n");
-}
-
-PRIVATE
-outtables()
-{
-	int s;
-	int nout, ncpy, ngto;
-	fprintf(ofile,"static struct defact {\n");
-	fprintf(ofile,"\tint numoutput;\n");
-	fprintf(ofile,"\tint numcopy;\n");
-	fprintf(ofile,"\tint nextstate;\n");
-	fprintf(ofile,"\tint (*transstate)();\n");
-	fprintf(ofile,"} defaultactions[] = {\n");
-	for(s=0;s<=higheststate;s++) {
-		findfail(s,&nout,&ncpy,&ngto);
-		fprintf(ofile,"\t{%d, %d, %d, ",nout,ncpy,ngto);
-		if(actions[ngto]==NULL)
-			fprintf(ofile,"0");
-		else
-			fprintf(ofile,"OO_%ddotrans",ngto);
-		fprintf(ofile,"},\n");
-	}
-	fprintf(ofile,"};\n");
-	fprintf(ofile,"\n");
-}
-
-PRIVATE
 outdfa()
 {
 	int s;
 	struct idf *op;
 	struct state *p;
+	int nout, ncpy, ngto;
+	int seenswitch;
+	fprintf(ofile,"#include \"nopt.h\"\n");
+	fprintf(ofile,"\n");
+	fprintf(ofile,"int OO_maxpattern = %d;\n", longestpattern);
 	fprintf(ofile,"int OO_state = 0;\n");
 	fprintf(ofile,"\n");
-	fprintf(ofile,"OO_dfa(last) register int last; {\n");
-	fprintf(ofile,"\tfor(;;) {\n");
-	fprintf(ofile,"\t\tswitch(last) {\n");
-	for(op=ops;op!=(struct idf *)NULL;op=op->id_nextidf) {
-		if(!op->id_used)
-			continue;
-		fprintf(ofile,"\t\tcase op_%s:\n",op->id_text);
-		fprintf(ofile,"\t\t\tswitch(OO_state) {\n");
-		if(!op->id_startpatt) {
-				fprintf(ofile,"\t\t\tcase 0: ");
-				fprintf(ofile,"OO_out(*--OO_nxtpatt); ");
-				fprintf(ofile,"break;\n");
-		}
-		for(s=0;s<=higheststate;s++)
-			for(p=states[s];p!=(struct state *)NULL;p=p->next) {
-				if(p->op==op) {
-					fprintf(ofile,"\t\t\tcase %d: ",s);
-					if(actions[p->goto_state]==(struct action *)NULL)
-						fprintf(ofile,"OO_state = %d; ",p->goto_state);
-					else fprintf(ofile,"OO_%ddotrans(); ",p->goto_state);
-					fprintf(ofile,"break;\n");
-				}
-			}
-		fprintf(ofile,"\t\t\tdefault: dodefaultaction(); break;\n");
-		fprintf(ofile,"\t\t\t}\n");
-		fprintf(ofile,"\t\t\tbreak;\n");
+	for(s=0;s<=higheststate;s++) {
+		fprintf(ofile,"static dfa%d();\n",s);
 	}
-	fprintf(ofile,"\t\tdefault:\n");
-	fprintf(ofile,"\t\t\tif(OO_state) dodefaultaction();\n");
-	fprintf(ofile,"\t\t\telse {\n");
-	fprintf(ofile,"\t\t\t\tOO_flush();\n");
-	fprintf(ofile,"\t\t\t\tEM_mkcalls(*--OO_nxtpatt);\n");
-	fprintf(ofile,"\t\t\t\tOO_free(*OO_nxtpatt);\n");
-	fprintf(ofile,"\t\t\t}\n");
-	fprintf(ofile,"\t\t\tbreak;\n");
-	fprintf(ofile,"\t\tcase OTHER:\n");
-	fprintf(ofile,"\t\t\tif(OO_state) dodefaultaction();\n");
-	fprintf(ofile,"\t\t\telse {\n");
-	fprintf(ofile,"\t\t\t\tOO_flush();\n");
-	fprintf(ofile,"\t\t\t\t--OO_nxtpatt;\n");
-	fprintf(ofile,"\t\t\t}\n");
-	fprintf(ofile,"\t\t\tbreak;\n");
-	fprintf(ofile,"\t\t}\n");
-	fprintf(ofile,"\t\tif (OO_nxtbackup==OO_bkupqueue)\n");
-	fprintf(ofile,"\t\t\treturn;\n");
-	fprintf(ofile,"\t\tlast = ((*OO_nxtpatt++ = *(--OO_nxtbackup))->em_opcode);\n");
-	fprintf(ofile,"\t}\n");
-	fprintf(ofile,"}\n");
+	fprintf(ofile,"\nint (*OO_fstate[])()=\n{\n");
+	for(s=0;s<=higheststate;s++) {
+		fprintf(ofile,"\tdfa%d,\n",s);
+	}
+	fprintf(ofile,"};\n\n");
+	for(s=0;s<=higheststate;s++) {
+		fprintf(ofile,"static dfa%d(opcode)\n",s);
+		fprintf(ofile,"\tint opcode;\n");
+		fprintf(ofile,"{\n");
+		seenswitch = 0;
+		for(p=states[s];p!=(struct state *)NULL;p=p->next) {
+			if(!seenswitch) {
+				seenswitch++;
+				fprintf(ofile,"\tswitch(opcode) {\n");
+			}
+			fprintf(ofile,"\tcase op_%s: ",p->op->id_text);
+			if(actions[p->goto_state]==(struct action *)NULL)
+				fprintf(ofile,"OO_state = %d; ",p->goto_state);
+			else fprintf(ofile,"OO_%ddotrans(); ",p->goto_state);
+			fprintf(ofile,"break;\n");
+		}
+		if(s==0) {
+			if(!seenswitch) {
+				seenswitch++;
+				fprintf(ofile,"\tswitch(opcode) {\n");
+			}
+			fprintf(ofile,"\tdefault:\n");
+			fprintf(ofile,"\t\tOO_flush();\n");
+			fprintf(ofile,"\t\tEM_mkcalls(*--OO_nxtpatt);\n");
+			fprintf(ofile,"\t\tOO_free(*OO_nxtpatt);\n");
+			fprintf(ofile,"\t\tbreak;\n");
+			fprintf(ofile,"\tcase OTHER:\n");
+			fprintf(ofile,"\t\tOO_flush();\n");
+			fprintf(ofile,"\t\t--OO_nxtpatt;\n");
+			fprintf(ofile,"\t\tbreak;\n");
+		}
+		else {
+			if(seenswitch) fprintf(ofile,"\tdefault:\n");
+			findfail(s,&nout,&ncpy,&ngto);
+			fprintf(ofile,"\t\tOO_dodefault(%d,%d,%d);\n",
+				nout,ncpy,ngto);
+			if(actions[ngto]!=NULL)
+				fprintf(ofile,"\t\tOO_%ddotrans();\n",ngto);
+			if(seenswitch) fprintf(ofile,"\t\tbreak;\n");
+		}
+		if(seenswitch) fprintf(ofile,"\t}\n");
+		fprintf(ofile,"}\n");
+		fprintf(ofile,"\n");
+	}
 }
 
 PRIVATE
@@ -253,18 +222,6 @@ outdotrans()
 		 * else fprintf(ofile,"\nOO_%ddotrans() {\n\tOO_state=%d;\n}\n",s,s);
 		 */
 	}
-}
-
-PRIVATE
-outdodefault()
-{
-	fprintf(ofile,"\nstatic dodefaultaction() {\n");
-	fprintf(ofile,"\tregister struct defact *p = &defaultactions[OO_state];\n");
-	fprintf(ofile,"\tOO_pushback(*--OO_nxtpatt);\n");
-	fprintf(ofile,"\tOO_dodefault(p->numoutput,p->numcopy);\n");
-	fprintf(ofile,"\tOO_state=p->nextstate;\n");
-	fprintf(ofile,"\tif(p->transstate) (*(p->transstate))();\n");
-	fprintf(ofile,"}\n");
 }
 
 PRIVATE

@@ -41,7 +41,7 @@ POFILES =	parser.o syntax.o outputdfa.o outcalls.o findworst.o\
 		initlex.o Lpars.o
 
 GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
-		dfa.c dfa.c.new trans.h trans.h.new trans.c trans.c.new\
+		dfa.c dfa.c.new trans.c trans.c.new\
 		incalls.d incalls.r incalls.r.new pseudo.d
 
 all:		em_nopt $(LIBOPT) em_opt.3
@@ -49,7 +49,7 @@ all:		em_nopt $(LIBOPT) em_opt.3
 install:	all
 		$(INSTALL) lib/$(LIBOPT)
 		$(INSTALL) man/em_opt.3
-		cp em_nopt.1 $(EMHOME)/man
+		cp em_nopt.6 $(EMHOME)/man
 		cp em_nopt $(BINDIR)/em_nopt
 
 cmp:		all
@@ -145,7 +145,7 @@ nopt.o:		nopt.h
 mkstrct.o:	nopt.h
 aux.o:		nopt.h
 pseudo.d:	nopt.h makefuns.awk
-dfa.o:		nopt.h trans.h
+dfa.o:		nopt.h
 trans.o:	nopt.h
 incalls.d:	nopt.h makefuns.awk
 
