@@ -1066,6 +1066,11 @@ lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
 			remove(regvar($1))
 			"bisb (%(regvar($1)%))+,%[a]"
 			erase(%[a])			| %[a]	| |
+lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 && $6==1 && $7==2 | |
+			allocate(REG)
+			remove(regvar($1))
+			"movb (%(regvar($1)%))+,%[a]"
+			erase(%[a])			| %[a]	| |
 lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
 			allocate(REG)
 			remove(regvar($1))
