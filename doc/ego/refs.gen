@@ -39,6 +39,15 @@
 %P 21-36
 %D January 1982
 
+%T Language- and Machine-independent Global Optimization on Intermediate Code
+%A H.E. Bal
+%A A.S. Tanenbaum
+%J Computer Languages
+%V 11
+%N 2
+%P 105-121
+%D April 1986
+
 %T Description of a machine architecture for use with
 block structured languages
 %A A.S. Tanenbaum
