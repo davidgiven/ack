@@ -91,7 +91,7 @@ struct sigaction {
 #define	_NSIG	16
 #endif	/* __USG or __BSD4_2 */
 
-void	(*signal(int __sig, void (*__func)(int)))(int);
-int	raise(int __sig);
+void	(*signal(int _sig, void (*_func)(int)))(int);
+int	raise(int _sig);
 
 #endif	/* _SIGNAL_H */

@@ -22,12 +22,12 @@ typedef struct
 	char	*dd_buf;		/* -> directory block */
 	}	DIR;			/* stream data from opendir() */
 
-DIR *opendir(const char *__dirname);
-struct dirent *readdir(DIR *__dirp);
-void rewinddir(DIR *__dirp);
-int closedir(DIR *__dirp);
-off_t telldir(DIR *__dirp);
-void seekdir(DIR *__dirp, off_t __loc);
+DIR *opendir(const char *_dirname);
+struct dirent *readdir(DIR *_dirp);
+void rewinddir(DIR *_dirp);
+int closedir(DIR *_dirp);
+off_t telldir(DIR *_dirp);
+void seekdir(DIR *_dirp, off_t _loc);
 
 #define	NULL		((void *)0)	/* DAG -- added for convenience */
 

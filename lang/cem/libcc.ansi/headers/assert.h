@@ -6,7 +6,7 @@
  */
 /* $Header$ */
 
-void __bad_assertion(const char *__expr, const char *__file, int __line);
+void __bad_assertion(const char *_expr, const char *_file, int _line);
 
 #undef	assert
 

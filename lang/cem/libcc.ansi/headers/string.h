@@ -20,27 +20,27 @@ typedef unsigned long	size_t;		/* type returned by sizeof */
 #endif
 #endif	/* _SIZE_T */
 
-void	*memcpy(void *__s1, const void *__s2, size_t __n);
-void	*memmove(void *__s1, const void *__s2, size_t __n);
-char	*strcpy(char *__s1, const char *__s2);
-char	*strncpy(char *__s1, const char *__s2, size_t __n);
-char	*strcat(char *__s1, const char *__s2);
-char	*strncat(char *__s1, const char *__s2, size_t __n);
-int	memcmp(const void *__s1, const void *__s2, size_t __n);
-int	strcmp(const char *__s1, const char *__s2);
-int	strcoll(const char *__s1, const char *__s2);
-int	strncmp(const char *__s1, const char *__s2, size_t __n);
-size_t	strxfrm(char *__s1, const char *__s2, size_t __n);
-void	*memchr(const void *__s, int __c, size_t __n);
-char	*strchr(const char *__s, int __c);
-size_t	strcspn(const char *__s1, const char *__s2);
-char	*strpbrk(const char *__s1, const char *__s2);
-char	*strrchr(const char *__s, int __c);
-size_t	strspn(const char *__s1, const char *__s2);
-char	*strstr(const char *__s1, const char *__s2);
-char	*strtok(char *__s1, const char *__s2);
-void	*memset(void *__s, int __c, size_t __n);
-char	*strerror(int __errnum);
-size_t	strlen(const char *__s);
+void	*memcpy(void *_s1, const void *_s2, size_t _n);
+void	*memmove(void *_s1, const void *_s2, size_t _n);
+char	*strcpy(char *_s1, const char *_s2);
+char	*strncpy(char *_s1, const char *_s2, size_t _n);
+char	*strcat(char *_s1, const char *_s2);
+char	*strncat(char *_s1, const char *_s2, size_t _n);
+int	memcmp(const void *_s1, const void *_s2, size_t _n);
+int	strcmp(const char *_s1, const char *_s2);
+int	strcoll(const char *_s1, const char *_s2);
+int	strncmp(const char *_s1, const char *_s2, size_t _n);
+size_t	strxfrm(char *_s1, const char *_s2, size_t _n);
+void	*memchr(const void *_s, int _c, size_t _n);
+char	*strchr(const char *_s, int _c);
+size_t	strcspn(const char *_s1, const char *_s2);
+char	*strpbrk(const char *_s1, const char *_s2);
+char	*strrchr(const char *_s, int _c);
+size_t	strspn(const char *_s1, const char *_s2);
+char	*strstr(const char *_s1, const char *_s2);
+char	*strtok(char *_s1, const char *_s2);
+void	*memset(void *_s, int _c, size_t _n);
+char	*strerror(int _errnum);
+size_t	strlen(const char *_s);
 
 #endif	/* _STRING_H */

@@ -17,19 +17,19 @@ extern int	__x; 		/* scratch variable */
 #define _C		0x20	/* this bit is for control characters */
 #define _X		0x40	/* this bit is for hex digits [a-f] and [A-F]*/
 
-int isalnum(int __c);		/* alphanumeric [a-z], [A-Z], [0-9] */
-int isalpha(int __c);		/* alphabetic */
-int iscntrl(int __c);		/* control characters */
-int isdigit(int __c);		/* digit [0-9] */
-int isgraph(int __c);		/* graphic character */
-int islower(int __c);		/* lower-case letter [a-z] */
-int isprint(int __c);		/* printable character */
-int ispunct(int __c);		/* punctuation mark */
-int isspace(int __c);		/* white space sp, \f, \n, \r, \t, \v */
-int isupper(int __c);		/* upper-case letter [A-Z] */
-int isxdigit(int __c);		/* hex digit [0-9], [a-f], [A-F] */
-int tolower(int __c);		/* convert to lower case character */
-int toupper(int __c);		/* convert to upper case character */
+int isalnum(int _c);		/* alphanumeric [a-z], [A-Z], [0-9] */
+int isalpha(int _c);		/* alphabetic */
+int iscntrl(int _c);		/* control characters */
+int isdigit(int _c);		/* digit [0-9] */
+int isgraph(int _c);		/* graphic character */
+int islower(int _c);		/* lower-case letter [a-z] */
+int isprint(int _c);		/* printable character */
+int ispunct(int _c);		/* punctuation mark */
+int isspace(int _c);		/* white space sp, \f, \n, \r, \t, \v */
+int isupper(int _c);		/* upper-case letter [A-Z] */
+int isxdigit(int _c);		/* hex digit [0-9], [a-f], [A-F] */
+int tolower(int _c);		/* convert to lower case character */
+int toupper(int _c);		/* convert to upper case character */
 
 #define isalpha(c)	((__ctype+1)[c]&(_U|_L))
 #define isspace(c)	((__ctype+1)[c]&_S)

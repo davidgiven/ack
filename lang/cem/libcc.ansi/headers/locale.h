@@ -37,7 +37,7 @@ struct lconv {
 #define	LC_TIME		6
 
 
-char		*setlocale(int __category, const char *__locale);
-struct	lconv	*localeconv(void);
+char *setlocale(int _category, const char *_locale);
+struct lconv *localeconv(void);
 
 #endif	/* _LOCALE_H */

@@ -18,15 +18,15 @@
 
 typedef char jmp_buf[ sizeof(long) + sizeof(int) + 3 * sizeof(void *)];
 
-int	__setjmp(jmp_buf __env, int __savemask);
+int	__setjmp(jmp_buf _env, int _savemask);
 
 #define	setjmp(env)	__setjmp(env, 0)
-void	longjmp(jmp_buf __env, int __val);
+void	longjmp(jmp_buf _env, int _val);
 
 #if defined(_POSIX_SOURCE)
 typedef jmp_buf sigjmp_buf;
 #define	sigsetjmp(env, savemask)	__setjmp(env, savemask)
-int	siglongjmp(sigjmp_buf __env, int __val);
+int	siglongjmp(sigjmp_buf _env, int _val);
 #endif
 
 #endif	/* _SETJMP_H */

@@ -43,16 +43,16 @@ struct tm {
 };
 
 clock_t		clock(void);
-double		difftime(time_t __time1, time_t __time0);
-time_t		mktime(struct tm *__timeptr);
-time_t		time(time_t *__timeptr);
-char		*asctime(const struct tm *__timeptr);
-char		*ctime(const time_t *__timer);
-struct	tm	*gmtime(const time_t *__timer);
-struct	tm	*localtime(const time_t *__timer);
-size_t		strftime(char *__s, size_t __maxsize,
-			const char *__format,
-			const struct tm *__timeptr);
+double		difftime(time_t _time1, time_t _time0);
+time_t		mktime(struct tm *_timeptr);
+time_t		time(time_t *_timeptr);
+char		*asctime(const struct tm *_timeptr);
+char		*ctime(const time_t *_timer);
+struct	tm	*gmtime(const time_t *_timer);
+struct	tm	*localtime(const time_t *_timer);
+size_t		strftime(char *_s, size_t _maxsize,
+			const char *_format,
+			const struct tm *_timeptr);
 
 #if	defined(__USG) || defined(_POSIX_SOURCE)
 

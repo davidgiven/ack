@@ -73,50 +73,50 @@ typedef unsigned long	size_t;		/* type returned by sizeof */
 extern FILE	*__iotab[FOPEN_MAX];
 extern FILE	__stdin, __stdout, __stderr;
 
-int	remove(const char *__filename);
-int	rename(const char *__old, const char *__new);
+int	remove(const char *_filename);
+int	rename(const char *_old, const char *_new);
 FILE	*tmpfile(void);
-char	*tmpnam(char *__s);
-int	fclose(FILE *__stream);
-int	fflush(FILE *__stream);
-FILE	*fopen(const char *__filename, const char *__mode);
-FILE	*freopen(const char *__filename, const char *__mode, FILE *__stream);
-void	setbuf(FILE *__stream, char *__buf);
-int	setvbuf(FILE *__stream, char *__buf, int __mode, size_t __size);
-int	fprintf(FILE *__stream, const char *__format, ...);
-int	fscanf(FILE *__stream, const char *__format, ...);
-int	printf(const char *__format, ...);
-int	scanf(const char *__format, ...);
-int	sprintf(char *__s, const char *__format, ...);
-int	sscanf(char *__s, const char *__format, ...);
-int	vfprintf(FILE *__stream, const char *__format, char *__arg);
-int	vprintf(const char *__format, char *__arg);
-int	vsprintf(char *__s, const char *__format, char *__arg);
-int	fgetc(FILE *__stream);
-char	*fgets(char *__s, int __n, FILE *__stream);
-int	fputc(int __c, FILE *__stream);
-int	fputs(const char *__s, FILE *__stream);
-int	getc(FILE *__stream);
+char	*tmpnam(char *_s);
+int	fclose(FILE *_stream);
+int	fflush(FILE *_stream);
+FILE	*fopen(const char *_filename, const char *_mode);
+FILE	*freopen(const char *_filename, const char *_mode, FILE *_stream);
+void	setbuf(FILE *_stream, char *_buf);
+int	setvbuf(FILE *_stream, char *_buf, int _mode, size_t _size);
+int	fprintf(FILE *_stream, const char *_format, ...);
+int	fscanf(FILE *_stream, const char *_format, ...);
+int	printf(const char *_format, ...);
+int	scanf(const char *_format, ...);
+int	sprintf(char *_s, const char *_format, ...);
+int	sscanf(char *_s, const char *_format, ...);
+int	vfprintf(FILE *_stream, const char *_format, char *_arg);
+int	vprintf(const char *_format, char *_arg);
+int	vsprintf(char *_s, const char *_format, char *_arg);
+int	fgetc(FILE *_stream);
+char	*fgets(char *_s, int _n, FILE *_stream);
+int	fputc(int _c, FILE *_stream);
+int	fputs(const char *_s, FILE *_stream);
+int	getc(FILE *_stream);
 int	getchar(void);
-char	*gets(char *__s);
-int	putc(int __c, FILE *__stream);
-int	putchar(int __c);
-int	puts(const char *__s);
-int	ungetc(int __c, FILE *__stream);
-size_t	fread(void *__ptr, size_t __size, size_t __nmemb, FILE *__stream);
-size_t	fwrite(const void *__ptr, size_t __size, size_t __nmemb, FILE *__stream);
-int	fgetpos(FILE *__stream, fpos_t *__pos);
-int	fseek(FILE *__stream, long __offset, int __whence);
-int	fsetpos(FILE *__stream, fpos_t *__pos);
-long	ftell(FILE *__stream);
-void	rewind(FILE *__stream);
-void	clearerr(FILE *__stream);
-int	feof(FILE *__stream);
-int	ferror(FILE *__stream);
-void	perror(const char *__s);
+char	*gets(char *_s);
+int	putc(int _c, FILE *_stream);
+int	putchar(int _c);
+int	puts(const char *_s);
+int	ungetc(int _c, FILE *_stream);
+size_t	fread(void *_ptr, size_t _size, size_t _nmemb, FILE *_stream);
+size_t	fwrite(const void *_ptr, size_t _size, size_t _nmemb, FILE *_stream);
+int	fgetpos(FILE *_stream, fpos_t *_pos);
+int	fseek(FILE *_stream, long _offset, int _whence);
+int	fsetpos(FILE *_stream, fpos_t *_pos);
+long	ftell(FILE *_stream);
+void	rewind(FILE *_stream);
+void	clearerr(FILE *_stream);
+int	feof(FILE *_stream);
+int	ferror(FILE *_stream);
+void	perror(const char *_s);
 
-int __fillbuf(FILE *__stream);
-int __flushbuf(int __c, FILE *__stream);
+int __fillbuf(FILE *_stream);
+int __flushbuf(int _c, FILE *_stream);
 
 
 #define	getchar()	getc(stdin)
@@ -131,7 +131,7 @@ int __flushbuf(int __c, FILE *__stream);
 #define	ferror(p)	(((p)->_flags & _IOERR) != 0)
 
 #if	defined(__BSD4_2) || defined(__USG) || defined(_POSIX_SOURCE)
-int fileno(FILE *__stream);
+int fileno(FILE *_stream);
 #define	fileno(stream)		((stream)->_fd)
 #endif	/* __BSD4_2 || __USG || _POSIX_SOURCE */
 
