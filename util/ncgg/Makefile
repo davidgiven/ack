@@ -5,6 +5,7 @@ OFILES=cgg.o subr.o main.o coerc.o enterkeyw.o error.o emlookup.o expr.o instruc
 SOURCES=*.h cgg.y scan.l cvtkeywords keywords coerc.c emlookup.c error.c expr.c hall.c instruct.c iocc.c lookup.c main.c output.c set.c strlookup.c subr.c var.c
 EMHOME=../..
 EMH=$(EMHOME)/h
+MANDIR=$(EMHOME)/man
 CFLAGS=-O -I$(EMH)
 YFLAGS=-v -d
 LDFLAGS=-i
@@ -16,9 +17,12 @@ cgg:	cgg.o $(OFILES) output.o
 install:	cgg
 	rm -f $(EMHOME)/lib/ncgg
 	cp cgg $(EMHOME)/lib/ncgg
+	rm -f $(MANDIR)/ncgg.6
+	cp ncgg.6 $(MANDIR)/ncgg.6
 
 cmp:	cgg
-	cmp cgg $(EMHOME)/lib/ncgg
+	-cmp cgg $(EMHOME)/lib/ncgg
+	-cmp ncgg.6 $(MANDIR)/ncgg.6
 
 debugcgg:	cgg.o $(OFILES) debugoutput.o
 	cc $(LDFLAGS) $(OFILES) debugoutput.o $(EMHOME)/lib/em_data.a -ll -o cgg
