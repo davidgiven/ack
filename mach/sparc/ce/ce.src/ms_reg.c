@@ -263,8 +263,11 @@ int ms;
 
 	reg_mes_nr = 0;
 	in_reg_mes = (ms == ms_reg);
-	if (ms == ms_gto)
+	if (ms == ms_gto) {
+		free_all_reg_vars();
+		nr_reg_vars = 0; nr_flt_vars = 0;
 		fprint(codefile, "ta	3\n");
+	}
 	db_mes = (ms == ms_stb || ms == ms_std) ? ms : 0;
 #ifdef __solaris__
 	if (db_mes && ! inits) {
