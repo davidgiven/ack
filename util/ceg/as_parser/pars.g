@@ -41,7 +41,11 @@
 
 #include "decl.h"
 extern int lineno, yyleng;
+#ifdef FLEX
 extern char *yytext;
+#else
+extern char yytext[];
+#endif
 
 }
 
