@@ -24,10 +24,10 @@ all:    back ceg ce
         make -f ce_makefile ce.a
          
 clean:
-        rm -rf ce back ceg *.a Out 
+        rm -rf ce ceg ce.a back.a Out 
          
 dclean:
-        rm -rf ce back ceg Out
+        rm -rf ce ceg Out
 
 ce : ceg/ceg
 	mkdir ce

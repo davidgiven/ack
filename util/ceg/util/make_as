@@ -27,7 +27,7 @@ all:	back ceg ce
 	make -f ce_makefile ce.a
 
 clean:
-	rm -rf ce back ceg *.a Out
+	rm -rf ce back ceg ce.a back.a Out
 
 dclean:
 	rm -rf ce back ceg Out
