@@ -151,7 +151,7 @@ Xlint:
 
 $(CURRDIR)/main:	$(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(OBJECTCODE) $(LIBDIR)/libinput.a $(LIBDIR)/libassert.a $(LIBDIR)/liballoc.a $(MALLOC) $(LIBDIR)/libprint.a $(LIBDIR)/libstring.a $(LIBDIR)/libsystem.a -o $(CURRDIR)/main
-	size $(CURRDIR)/main
+	-size $(CURRDIR)/main
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h
