@@ -15,6 +15,8 @@ FLS =		README Makefile $(DOC)
 .distr:		Makefile
 		echo $(FLS) | tr ' ' '\012' >.distr
 
+distr:	.distr
+
 clean:
 		rm -f int.doc
 
