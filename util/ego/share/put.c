@@ -12,15 +12,7 @@
 #include "alloc.h"
 #include "put.h"
 
-
-/* the output file */
-
-static FILE *f;	/* current output file, can be EM text file,
-		 * basic block file, data block file or proc table file.
-		 */
-
-
-#define outbyte(b) putc(b,f)
+FILE *curoutp;
 
 
 /* The output can be either 'typed' or 'untyped'. Typed data
@@ -87,14 +79,14 @@ STATIC putstr(abp) register argb_p abp; {
 }
 
 
-STATIC outoff(off) offset off; {
+outoff(off) offset off; {
 
 	outshort( (short) (off&0177777L) );
 	outshort( (short) (off>>16) );
 }
 
 
-STATIC outshort(i) short i; {
+outshort(i) short i; {
 
 	outbyte( (byte) (i&BMASK) );
 	outbyte( (byte) (i>>8) );
@@ -145,7 +137,7 @@ short putlines(l,lf)
 	short instr;
 	short count= 0;
 
-	f = lf;	/* Set f to the EM-text output file */
+	curoutp = lf;	/* Set f to the EM-text output file */
 	for (lnp = l; lnp != (line_p) 0; lnp = next) {
 		VL(lnp);
 		count++;
@@ -222,7 +214,7 @@ putdtable(head,df)
 	dblock_p next;
 	register short n = 0;
 
-	f = df;	    /* set f to the data block output file */
+	curoutp = df;	    /* set f to the data block output file */
 	/* Count the number of objects */
 	for (dbl = head; dbl != (dblock_p) 0; dbl = dbl->d_next) {
 		for (obj = dbl->d_objlist; obj != (obj_p) 0;
@@ -243,7 +235,7 @@ putdtable(head,df)
 		putvalues(dbl->d_values);
 		olddblock(dbl);
 	}
-	fclose(f);
+	fclose(curoutp);
 	if (omap != (obj_p *) 0) {
 		oldmap(omap,olength);  /* release memory for omap */
 	}
@@ -282,7 +274,7 @@ putptable(head,pf,all)
 	register short n = 0;
 	/* Write the proc table */
 
-	f = pf;
+	curoutp = pf;
 	/* Determine the number of procs */
 	for (p = head; p != (proc_p) 0; p = p->p_next) {
 		n++;
@@ -316,7 +308,7 @@ putptable(head,pf,all)
 		}
 		oldproc(p);
 	}
-	fclose(f);
+	fclose(curoutp);
 	if (pmap != (proc_p *) 0) {
 		oldmap(pmap,plength);  /* release memory for pmap */
 	}
@@ -386,11 +378,11 @@ putunit(kind,p,l,gf,lf)
 	Lindex   pi;
 	loop_p   lp;
 
-	f = gf;
+	curoutp = gf;
 	if (kind == LDATA) {
 		outshort(0); /* No basic blocks */
 		n = putlines(l,lf);
-		f = gf;
+		curoutp = gf;
 		outshort(n);
 		return;
 	}
@@ -402,7 +394,7 @@ putunit(kind,p,l,gf,lf)
 	outshort(Lnrelems(p->p_loops));  /* # loops */
 	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
 		n = putlines(b->b_start,lf);
-		f = gf;
+		curoutp = gf;
 		outblock(b);  /* put its block_id */
 		outshort(n);  /* #instructions of the block */
 		outlset(b->b_succ, outblock); /* put succ set */
@@ -441,88 +433,5 @@ putunit(kind,p,l,gf,lf)
 	if (lbmap != (bblock_p *) 0) oldmap(lbmap,llength);
 	if (bmap != (bblock_p *) 0)  oldmap(bmap,blength);
 	if (lpmap != (loop_p *) 0) oldmap(lpmap,lplength);
-	f = lf;
-}
-
-
-/* The following routines are only used by the Inline Substitution phase */
-
-
-STATIC putactuals(alist,cfile)
-	actual_p alist;
-	FILE     *cfile;
-{
-	/* output a list of actual parameters */
-
-	actual_p a,next;
-	line_p l;
-	int count;
-
-	count = 0;
-	for (a = alist; a != (actual_p) 0; a = a->ac_next) count++;
-	outshort(count); /* number of actuals */
-	for (a = alist; a != (actual_p) 0; a = next) {
-		next = a->ac_next;
-		count = 0;
-		for (l = a->ac_exp; l != (line_p) 0; l= l->l_next) count++;
-		outshort(count); /* length of actual */
-		outoff(a->ac_size);
-		outbyte(a->ac_inl);
-		count = putlines(a->ac_exp,cfile);
-		oldactual(a);
-	}
-}
-
-
-
-putcall(c,cfile,level)
-	call_p c;
-	FILE   *cfile;
-	short  level;
-{
-	/* output a call */
-
-	call_p nc,nextc;
-
-
-	f = cfile;
-	outshort(level);  /* nesting level */
-	outshort(c->cl_caller->p_id);	/* calling proc */
-	outshort(c->cl_id);
-	outshort(c->cl_proc->p_id);	/* called proc */
-	outbyte(c->cl_looplevel);
-	outbyte(c->cl_flags);
-	outshort(c->cl_ratio);
-	putactuals(c->cl_actuals,cfile);
-	nc = c->cl_car;
-	oldcall(c);
-	for (; nc != (call_p) 0; nc = nextc) {
-		/* take care of nested calls */
-		nextc = nc->cl_cdr;
-		putcall(nc,cfile,level+1);
-	}
-}
-
-long putcc(head,ccf)
-	calcnt_p head;
-	FILE     *ccf;
-{
-	/* Write call-count information to file ccf.
-	 * Return the disk address of the info written.
-	 */
-
-	calcnt_p cc;
-	long addr;
-	short cnt;
-
-	addr = ftell(ccf);
-	f = ccf;
-	cnt = 0;
-	for (cc = head; cc != (calcnt_p) 0;cc = cc->cc_next) cnt++;
-	outshort(cnt);
-	for (cc = head; cc != (calcnt_p) 0; cc = cc->cc_next) {
-		outproc(cc->cc_proc);
-		outshort(cc->cc_count);
-	}
-	return addr;
+	curoutp = lf;
 }
