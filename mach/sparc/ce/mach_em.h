@@ -21,14 +21,22 @@
 
 #define	BSS_INIT	0
 
+#ifdef __solaris__
+#define NAME_FMT	"$%s"
+#define DNAM_FMT	"$%s"
+#define DLB_FMT		".L_%ld"
+#define	ILB_FMT		".L%x_%lx"
+#define GENLAB		'.'
+#else
 #define NAME_FMT	"_%s"
 #define DNAM_FMT	"_%s"
 #define DLB_FMT		"L_%ld"
 #define	ILB_FMT		"L%x_%lx"
+#define GENLAB		'L'
+#endif
 #define HOL_FMT		"hol%d"
 #define STR_FMT		".ascii\t"
 
-#define GENLAB		'L'
 
 #define	ALIGN_FMT		".align 4\n"
 
@@ -49,12 +57,20 @@
 
 #define	SYMBOL_DEF_FMT		"%s:\n"
 #define	GLOBAL_FMT		".global %s\n"
+#ifdef __solaris__
+#define COMM_FMT		".reserve %s, %ld, \".bss\"\n"
+#else
 #define COMM_FMT		".reserve %s, %ld, \"bss\"\n"
+#endif
 #define	LOCAL_FMT		""
 
 #define	RELOC1_FMT		"ONLY LONGS CAN BE RELOCATED!"
 #define	RELOC2_FMT		"ONLY LONGS CAN BE RELOCATED!"
+#ifdef __solaris__
+#define	RELOC4_FMT		".section \".data\"\n.align 4\n.word %s+%d\n"
+#else
 #define	RELOC4_FMT		".seg \"data\"\n.align 4\n.word %s+%d\n"
+#endif
 
 #define ALIGN_GAP	4
 #define FLOATTRANS	8
