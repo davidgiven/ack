@@ -153,7 +153,7 @@ move_up(piece, incr)
 		return (ind_t) 0;
 	}
 #ifndef NOSTATISTICS
-	if (statistics) fprintf(stderr,"moving up %X\n", (long) incr);
+	if (statistics) fprintf(stderr,"moving up %lx\n", (long) incr);
 #endif
 	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
 		copy_up(mem, incr);
