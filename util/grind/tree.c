@@ -44,6 +44,12 @@ mknode(va_alist)
 	case OP_INTEGER:
 		p->t_ival = va_arg(ap, long);
 		break;
+	case OP_STRING:
+		p->t_sval = va_arg(ap, char *);
+		break;
+	case OP_REAL:
+		p->t_fval = va_arg(ap, double);
+		break;
 	case OP_AT:
 		p->t_lino = va_arg(ap, long);
 		p->t_filename = va_arg(ap, char *);
@@ -74,23 +80,10 @@ freenode(p)
   register int na, i;
 
   if (! p) return;
-  switch(p->t_oper) {
-  case OP_NAME:
-  case OP_INTEGER:
-  case OP_AT:
-  case OP_CONT:
-  case OP_NEXT:
-  case OP_STEP:
-  case OP_REGS:
-  case OP_DELETE:
-	break;
-  default:
-	na = nargs(p->t_oper);
-	assert(na <= MAXARGS);
-	for (i = 0; i < na; i++) {
-		freenode(p->t_args[i]);
-	}
-	break;
+  na = nargs(p->t_oper);
+  assert(na <= MAXARGS);
+  for (i = 0; i < na; i++) {
+	freenode(p->t_args[i]);
   }
   free_tree(p);
 }
@@ -218,6 +211,12 @@ print_node(p, top_level)
 	break;
   case OP_INTEGER:
 	fprintf(db_out, "%d", p->t_ival);
+	break;
+  case OP_STRING:
+	fprintf(db_out, "%s", p->t_sval);
+	break;
+  case OP_REAL:
+	fprintf(db_out, "%.14g", p->t_fval);
 	break;
   }
   if (top_level) fputs("\n", db_out);
@@ -548,7 +547,7 @@ do_print(p)
 	break;
   case OP_NAME:
   case OP_SELECT:
-	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR);
+	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST);
 	if (! sym) return;
 	print_node(p, 0);
 	if (! print_sym(sym)) {

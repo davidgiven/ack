@@ -12,20 +12,21 @@ int stack_offset;		/* for up and down commands */
 
 extern long pointer_size;
 extern t_addr *get_EM_regs();
+extern char *memcpy();
 
 /* Get the value of the symbol indicated by sym.
    Return 0 on failure,
 	  1 on success.
-   On success, 'buf' contains the value, and 'AB' may contain the parameters
-   of the procedure invocation containing sym.
-   For both of these, storage is allocated by Malloc; this storage must
+   On success, 'buf' contains the value, and 'size' contains the size.
+   For 'buf', storage is allocated by Malloc; this storage must
    be freed by caller (I don't like this any more than you do, but caller
    does not know sizes).
 */
 int
-get_value(sym, buf, AB)
+get_value(sym, buf, psize)
   register p_symbol	sym;
-  char	**buf, **AB;
+  char	**buf;
+  long	*psize;
 {
   p_type	tp = sym->sy_type;
   long		size = tp->ty_size;
@@ -33,9 +34,9 @@ get_value(sym, buf, AB)
   t_addr	*EM_regs;
   int		i;
   p_scope	sc, symsc;
+  char		*AB;
 
   *buf = 0;
-  *AB = 0;
   switch(sym->sy_class) {
   case VAR:
 	/* exists if child exists; nm_value contains addres */
@@ -44,7 +45,40 @@ get_value(sym, buf, AB)
 		retval = 1;
 	}
 	break;
-
+  case CONST:
+	*buf = Malloc((unsigned) tp->ty_size);
+	switch(tp->ty_class) {
+	case T_REAL:
+		if (tp->ty_size != sizeof(double)) {
+			*((float *) *buf) = sym->sy_const.co_rval;
+		}
+		else	*((double *) *buf) = sym->sy_const.co_rval;
+		break;
+	case T_INTEGER:
+	case T_SUBRANGE:
+	case T_UNSIGNED:
+	case T_ENUM:
+		if (tp->ty_size == 1) {
+			*((char *) *buf) = sym->sy_const.co_ival;
+		}
+		else if (tp->ty_size == 2) {
+			*((short *) *buf) = sym->sy_const.co_ival;
+		}
+		else {
+			*((long *) *buf) = sym->sy_const.co_ival;
+		}
+		break;
+	case T_SET:
+		memcpy(*buf, sym->sy_const.co_setval, (int) tp->ty_size);
+		break;
+	case T_STRING:
+		memcpy(*buf, sym->sy_const.co_sval, (int) tp->ty_size);
+		break;
+	default:
+		fatal("strange constant");
+	}
+	retval = 1;
+	break;
   case VARPAR:
   case LOCVAR:
 	/* first find the stack frame in which it resides */
@@ -97,28 +131,29 @@ get_value(sym, buf, AB)
 
 		size = proctype->ty_nbparams;
 		if (has_static_link(sc)) size += pointer_size;
-		*AB = Malloc((unsigned) size);
-		if (! get_bytes(size, EM_regs[AB_OFF], *AB)) {
+		AB = Malloc((unsigned) size);
+		if (! get_bytes(size, EM_regs[AB_OFF], AB)) {
 			break;
 		}
 		if ((size = tp->ty_size) == 0) {
-			size = compute_size(tp, *AB);
+			size = compute_size(tp, AB);
 		}
 	}
 	*buf = Malloc((unsigned) size);
+	*psize = size;
 	if (get_bytes(size,
-		      (t_addr) BUFTOA(*AB+sym->sy_name.nm_value),
+		      (t_addr) BUFTOA(AB+sym->sy_name.nm_value),
 		      *buf)) {
 		retval = 1;
 	}
+	free(AB);
 	break;
   }
 
   if (retval == 0) {
 	if (*buf) free(*buf);
-	if (*AB) free(*AB);
 	*buf = 0;
-	*AB = 0;
+	*psize = 0;
   }
 
   return retval;

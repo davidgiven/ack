@@ -3,6 +3,7 @@
 #include "position.h"
 #include "operator.h"
 #include "tree.h"
+#include "expr.h"
 
 int
 eval_cond(p)

@@ -447,16 +447,24 @@ type(p_type *ptp; int *type_index;)
 ;
 
 structure_type(register p_type tp;)
-  { register struct fields *fldp; }
+  { register struct fields *fldp;
+    register p_symbol s;
+  }
 :
   integer_const(&(tp->ty_size))		/* size in bytes */
+			{ open_scope((p_symbol) 0, 0); }
   [			{ fldp = get_field_space(tp); }
 	name(&(fldp->fld_name))
+			{ s = NewSymbol(fldp->fld_name, CurrentScope, FIELD, currnam);
+			  s->sy_field = fldp;
+			}
 	type(&(fldp->fld_type), (int *) 0) ','
 	integer_const(&(fldp->fld_pos)) ','	/* offset in bits */
 	integer_const(&(fldp->fld_bitsize)) ';'	/* size in bits */
   ]*
-  ';'			{ end_field(tp); }
+  ';'			{ end_field(tp); 
+			  close_scope();
+			}
 ;
 
 enum_type(register p_type tp;)

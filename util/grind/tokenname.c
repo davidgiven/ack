@@ -29,6 +29,11 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{INTEGER, "number"},
 	{REAL, "real"},
 	{CHAR, "char"},
+	{BIN_OP, "<operator>"},
+	{PREF_OR_BIN_OP, "<operator>"},
+	{PREF_OP, "<operator>"},
+	{POST_OP, "<operator>"},
+	{SEL_OP, "<operator>"},
 	{0, ""}
 };
 #endif

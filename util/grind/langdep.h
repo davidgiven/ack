@@ -23,6 +23,11 @@ struct langdep {
   /* language dependant routines: */
   int	(*printstring)();
   long	(*arrayelsize)();
+  int	(*op_prio)();
+  int	(*get_string)();
+  int	(*get_name)();
+  int	(*get_number)();
+  int	(*get_token)();
 };
 
 extern struct langdep	*m2_dep, *currlang;

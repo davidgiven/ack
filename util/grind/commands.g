@@ -14,28 +14,24 @@
 #include	"idf.h"
 #include	"symbol.h"
 #include	"tree.h"
+#include	"langdep.h"
+#include	"token.h"
 
 extern char	*Salloc();
 extern t_lineno	currline;
 extern FILE	*db_in;
 
 int		errorgiven;
-int		extended_charset = 0;
+static int	extended_charset = 0;
+static int	in_expression = 0;
 jmp_buf		jmpbuf;
 
 static int	init_del();
 static int	skip_to_eol();
 
-static struct token {
-  int	tokno;
-  long	ival;
-  char	*str;
-  double fval;
-  struct idf *idf;
-} tok, aside;
+struct token	tok, aside;
 
-#define TOK	tok.tokno
-#define ASIDE	aside.tokno
+#define prio(op)	((*(currlang->op_prio))(op))
 }
 %start Commands, commands;
 
@@ -160,7 +156,7 @@ trace_command(p_tree *p;)
   { p_tree whr = 0, cond = 0, exp = 0; }
 :
   TRACE
-  [ ON expression(&exp) ]?
+  [ ON expression(&exp, 1) ]?
   where(&whr)?
   condition(&cond)?	{ *p = mknode(OP_TRACE, whr, cond, exp); }
 ;
@@ -234,19 +230,19 @@ delete_command(p_tree *p;)
 
 print_command(p_tree *p;)
 :
-  PRINT expression(p)	{ *p = mknode(OP_PRINT, *p); 
+  PRINT expression(p, 1){ *p = mknode(OP_PRINT, *p); 
 			  p = &((*p)->t_args[0]);
 			}
   [ ','			{ *p = mknode(OP_LINK, *p, (p_tree) 0);
 			  p = &((*p)->t_args[1]);
 			}
-    expression(p)
+    expression(p, 1)
   ]*
 ;
 
 condition(p_tree *p;)
 :
-  IF expression(p)
+  IF expression(p, 1)
 ;
 
 where(p_tree *p;)
@@ -256,9 +252,57 @@ where(p_tree *p;)
   position(p)
 ;
 
-expression(p_tree *p;)
+expression(p_tree *p; int level;)
+  { int currprio, currop; }
+:			{ in_expression++; }
+  factor(p)
+  [ %while ((currprio = prio(currop = (int) tok.ival)) > level)
+	[ BIN_OP | PREF_OR_BIN_OP ] 
+			{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
+			  (*p)->t_whichoper = currop;
+			}
+	expression(&((*p)->t_args[1]), currprio)
+  ]*
+			{ in_expression--; }
+;
+
+factor(p_tree *p;)
 :
-	qualified_name(p)
+  '(' expression(p, 1) ')'
+|
+  INTEGER		{ *p = mknode(OP_INTEGER, tok.ival); }
+|
+  REAL			{ *p = mknode(OP_REAL, tok.fval); }
+|
+  STRING		{ *p = mknode(OP_STRING, tok.str); }
+|
+  designator(p)
+|
+  PREF_OP		{ *p = mknode(OP_UNOP, (p_tree) 0);
+			  (*p)->t_whichoper = (int) tok.ival;
+			}
+  factor(&(*p)->t_args[0])
+;
+
+designator(p_tree *p;)
+:
+  qualified_name(p)
+  [
+	SEL_OP		{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
+			  (*p)->t_whichoper = (int) tok.ival;
+			}
+	name(&(*p)->t_args[1])
+  |
+	'['		{ *p = mknode(OP_BINOP, *p, (p_tree) 0);
+			  (*p)->t_whichoper = '[';
+			}
+	expression(&(*p)->t_args[1], 1)
+	']'
+  |
+	POST_OP		{ *p = mknode(OP_UNOP, *p);
+			  (*p)->t_whichoper = (int) tok.ival;
+			}
+  ]*
 ;
 
 position(p_tree *p;)
@@ -357,10 +401,11 @@ LLlex()
   if (c == EOF) return c;
   switch(class(c)) {
   case STSTR:
-	TOK = get_string(c);
+	TOK = (*currlang->get_string)(c);
 	break;
   case STIDF:
-	TOK = get_name(c);
+	if (in_expression) TOK = (*currlang->get_name)(c);
+	else TOK = get_name(c);
 	break;
   case STDOT:
 	c = getc(db_in);
@@ -371,15 +416,20 @@ LLlex()
 	}
 	/* Fall through */
   case STNUM:
-	TOK = get_number(c);
+	TOK = (*currlang->get_number)(c);
 	break;
   case STNL:
-  case STSIMP:
 	TOK = c;
 	break;
+  case STSIMP:
+	if (! in_expression) {
+		TOK = c;
+		break;
+	}
+	/* Fall through */
   default:
-	error("illegal character '\\0%o'", c);
-	return LLlex();
+	TOK = (*currlang->get_token)(c);
+	break;
   }
   return TOK;
 }
@@ -450,7 +500,8 @@ quoted(ch)
 
 }
 
-int get_string(c)
+int 
+get_string(c)
   int	c;
 {
   register int ch;

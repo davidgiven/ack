@@ -30,7 +30,7 @@ main(argc, argv)
   while (p = strindex(progname, '/')) {
 	progname = p + 1;
   }
-  if (argv[1][0] == '-') {
+  if (argv[1] && argv[1][0] == '-') {
 	switch(argv[1][1]) {
 	case 'd':
 		debug++;

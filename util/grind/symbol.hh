@@ -31,7 +31,7 @@ typedef struct symbol {
 #define REGVAR		0x0080
 #define LOCVAR		0x0100
 #define VARPAR		0x0200
-/* #define SYMENTRY	0x0400	/* a non-dbx entry */
+#define FIELD		0x0400
 #define FILESYM		0x0800	/* a filename */
 #define FILELINK	0x1000	/* a filename without its suffix */
   struct idf	*sy_idf;	/* reference back to its idf structure */
@@ -42,12 +42,14 @@ typedef struct symbol {
 /*	struct outname syv_onam;	/* for non-dbx entries */
 	struct file *syv_file;		/* for FILESYM */
 	struct symbol *syv_fllink;	/* for FILELINK */
+	struct fields *syv_field;
   }	sy_v;
 #define sy_const	sy_v.syv_const
 #define sy_name		sy_v.syv_name
 #define sy_onam		sy_v.syv_onam
 #define sy_file		sy_v.syv_file
 #define sy_filelink	sy_v.syv_fllink
+#define sy_field	sy_v.syv_field
 } t_symbol, *p_symbol;
 
 /* ALLOCDEF "symbol" 50 */

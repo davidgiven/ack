@@ -5,6 +5,8 @@ OP_RUN		1	start_child
 OP_INPUT	1	0
 OP_OUTPUT	1	0
 OP_INTEGER	0	0
+OP_REAL		0	0
+OP_STRING	0	0
 OP_NAME		0	0
 OP_AT		0	0
 OP_IN		1	0
@@ -22,3 +24,5 @@ OP_PRINT	1	do_print
 OP_DUMP		0	do_dump
 OP_RESTORE	0	do_restore
 OP_TRACE	3	do_trace
+OP_UNOP		1	0
+OP_BINOP	2	0

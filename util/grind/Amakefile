@@ -75,6 +75,8 @@ HSRC = {
 	scope.h,
 	langdep.h,
 	sizes.h,
+	token.h,
+	expr.h,
 	rd.h
 } ;
 

@@ -99,11 +99,11 @@ print_params(tp, AB, static_link)
 			fprintf(db_out, currlang->addr_fmt, BUFTOA(p));
 		}
 		else {
-			print_val(par->par_type, q, 1, 0, param_bytes);
+			print_val(par->par_type, size, q, 1, 0);
 		}
 		free(q);
 	}
-	else print_val(par->par_type, p, 1, 0, param_bytes);
+	else print_val(par->par_type, par->par_type->ty_size, p, 1, 0);
 	if (i) fputs(", ", db_out);
 	p += param_size(par->par_type, par->par_kind);
 	par++;
@@ -111,29 +111,27 @@ print_params(tp, AB, static_link)
   free(param_bytes);
 }
 
-print_val(tp, addr, compressed, indent, AB)
+print_val(tp, tp_sz, addr, compressed, indent)
   p_type	tp;		/* type of value to be printed */
+  long		tp_sz;		/* size of object to be printed */
   char		*addr;		/* address to get value from */
   int		compressed;	/* for parameter lists */
   int		indent;		/* indentation */
-  char		*AB;		/* argument base for dynamic subranges */
 {
-  long sz;
   register int i;
   long elsize;
 
   if (indent == 0) indent = 4;
   switch(tp->ty_class) {
   case T_SUBRANGE:
-	print_val(tp->ty_base, addr, compressed, indent, AB);
+	print_val(tp->ty_base, tp->ty_size, addr, compressed, indent);
 	break;
   case T_ARRAY:
 	if (tp->ty_elements == char_type ||
 	    tp->ty_elements == uchar_type) {
-		print_val(string_type, addr, compressed, indent, AB);
+		print_val(string_type, tp_sz, addr, compressed, indent);
 		break;
 	}
-	if ((sz = tp->ty_size) == 0) sz = compute_size(tp, AB);
 	if (compressed) {
 		fprintf(db_out, currlang->open_array_display);
 	}
@@ -146,8 +144,8 @@ print_val(tp, addr, compressed, indent, AB)
 	}
 	indent += 4;
 	elsize = (*currlang->arrayelsize)(tp->ty_elements->ty_size);
-	for (i = sz/elsize; i; i--) {
-		print_val(tp->ty_elements, addr, compressed, indent, AB);
+	for (i = tp_sz/elsize; i; i--) {
+		print_val(tp->ty_elements, tp->ty_elements->ty_size, addr, compressed, indent);
 		addr += elsize;
 		if (compressed && i > 1) {
 			fprintf(db_out, ", ...");
@@ -176,13 +174,14 @@ print_val(tp, addr, compressed, indent, AB)
 	}
 	indent += 4;
 	for (i = tp->ty_nfields; i; i--, fld++) {
+		long sz = fld->fld_type->ty_size;
 		if (! compressed) fprintf(db_out, "%s = ", fld->fld_name);
-		if (fld->fld_bitsize != fld->fld_type->ty_size << 3) {
+		if (fld->fld_bitsize != sz << 3) {
 			/* apparently a bit field */
 			/* ??? */
 			fprintf(db_out, "<bitfield, %d, %d>", fld->fld_bitsize, fld->fld_type->ty_size);
 		}
-		else print_val(fld->fld_type, addr+(fld->fld_pos>>3), compressed, indent, AB);
+		else print_val(fld->fld_type, sz, addr+(fld->fld_pos>>3), compressed, indent);
 		if (compressed && i > 1) {
 			fprintf(db_out, ", ...");
 			break;
@@ -200,9 +199,9 @@ print_val(tp, addr, compressed, indent, AB)
 	fprintf(db_out, "<union>");
 	break;
   case T_ENUM:
-	print_literal(tp,  tp->ty_size == 1 
+	print_literal(tp,  tp_sz == 1 
 			   ? (*addr & 0xFF)
-			   : tp->ty_size == 2
+			   : tp_sz == 2
 			      ? (BUFTOS(addr) & 0xFFFF)
 			      : (int) BUFTOL(addr));
 	break;
@@ -281,16 +280,16 @@ print_val(tp, addr, compressed, indent, AB)
 	break;
 	}
   case T_UNSIGNED:
-	print_unsigned(tp, tp->ty_size == 1 
+	print_unsigned(tp, tp_sz == 1 
 				? (*addr & 0xFF)
-				: tp->ty_size == 2
+				: tp_sz == 2
 			  	    ? (BUFTOS(addr) & 0xFFFF)
 			  	    : BUFTOL(addr));
 	break;
   case T_INTEGER:
-	print_integer(tp, tp->ty_size == 1 
+	print_integer(tp, tp_sz == 1 
 				? *addr
-				: tp->ty_size == 2
+				: tp_sz == 2
 			  	    ? BUFTOS(addr)
 			  	    : BUFTOL(addr));
 	break;
@@ -308,13 +307,12 @@ print_sym(sym)
   p_symbol	sym;
 {
   char		*buf;
-  char		*AB;
+  long		size;
 
-  if (get_value(sym, &buf, &AB)) {
+  if (get_value(sym, &buf, &size)) {
 	fputs(" = ", db_out);
-	print_val(sym->sy_type, buf, 0, 0, AB);
+	print_val(sym->sy_type, size, buf, 0, 0);
 	if (buf) free(buf);
-	if (AB) free(AB);
 	fputs("\n", db_out);
 	return 1;
   }
