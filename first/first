@@ -98,23 +98,26 @@ system type: "
 		exit 10
 	fi
 fi
+while :
+do
 echo -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
 if read YESNO
 then
 	case $YESNO in
-	j*|y*)	;;
+	j*|y*)	break
+		;;
 	n*)	echo Ok, I will give you another chance....
 		rm -f ../bin/ack_sys
 		exec sh $0
 		;;
-	*)	echo "I do not understand your answer ($YESNO). Bye"
-		exit 11
+	*)	echo "I do not understand your answer ($YESNO). Try again."
 		;;
 	esac
 else
 	echo Sorry, got EOF when reading your answer.
 	exit 12
 fi
+done
 : "Take action according to the system used"
 : 'Prevent the use of the system assembler on for certain systems'
 : 'prevent the use of ranlib on pdp 11s'
@@ -194,7 +197,13 @@ Choices:
 	BSD4_2	for Berkeley 4.2, 4.3, SunOS
 	SYS_5	for Xenix, System III, System V
 Your choice (V7|BSD4_1|BSD4_2|SYS_5): "
-	read SYS
+	if read SYS
+	then
+		:
+	else
+		echo "Sorry, got EOF when reading your answer"
+		exit 12
+	fi
 	;;
 esac
 done
@@ -417,4 +426,235 @@ then
 	:
 else
 	cp ../include/_tail_cc/varargs.h ../modules/h
+fi
+DISABLE_LANG=
+echo "Installation of the complete ACK takes a long time. Limiting the
+number of languages, runtime libraries, back-ends, and assemblers to be
+installed may save a lot of time. If you want to install everything,
+answer no to the next question. Otherwise, answer yes, and you will be
+prompted for details"
+while :
+do
+	echo -n "Do you want to limit the installation in any way? (y/n) "
+	if read YESNO
+	then
+		:
+	else
+		echo "Sorry, got EOF when reading your answer"
+		exit 12
+	fi
+	case X$YESNO in
+	Xj*|Xy*)
+		break
+		;;
+	Xn*)	exit 0
+		;;
+	*)	echo "I do not understand your answer ($YESNO). Try again."
+		;;
+	esac
+done
+for i in Modula-2 Pascal Occam Basic
+do
+    while :
+    do
+	echo -n "Do you want to install $i? (y/n) "
+	if read YESNO
+	then
+		:
+	else
+		echo "Sorry, got EOF when reading your answer"
+		exit 12
+	fi
+	case X$YESNO in
+	Xj*|Xy*|X)
+		break
+		;;
+	Xn*)	DISABLE_LANG=$DISABLE_LANG" $i"
+		break
+		;;
+	*)	echo "I do not understand your answer ($YESNO). Try again."
+		;;
+	esac
+    done
+done
+DISABLE_SUP=
+set i86 xenix3 minix 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 ns pdp s2650 vax4 z80 z8000
+while [ $# != 0 ]
+do
+    while :
+    do
+	case $1 in
+	i86)	echo "not installing i86 will disable installation of xenix3 and minix."
+		;;
+	m68k2)	echo "not installing m68k2 will disable installation of pmds, minixST,
+m68k4, pmds4, sun2, and mantra."
+		;;
+	m68k4)	echo "not installing m68k4 will disable installation of pmds4, sun2, and mantra."
+		;;
+	m68020)	echo "not installing m68020 will disable installation of sun3."
+		;;
+	esac
+	echo -n "Do you want to install the $1 support? (y/n) "
+	if read YESNO
+	then
+		:
+	else
+		echo "Sorry, got EOF when reading your answer"
+		exit 12
+	fi
+	case X$YESNO in
+	Xj*|Xy*|X)
+		break
+		;;
+	Xn*)	DISABLE_SUP=$DISABLE_SUP" $1"
+		case $1 in
+		i86)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68k2)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68k4)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68020)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		esac
+		break
+		;;
+	*)	echo "I do not understand your answer ($YESNO). Try again."
+		;;
+	esac
+    done
+    shift
+done
+for i in $DISABLE_LANG
+do
+	echo "disabling installation of $i"
+	if [ -f ../Action.orig ]
+	then
+		:
+	else
+		mv ../Action ../Action.orig
+		cp ../Action.orig ../Action
+	fi
+	ed - ../Action <<EOF
+/^name "$i/;/^end/s/^/!/
+w
+q
+EOF
+	case $i in
+	Modula-2)
+		ed - ../Action <<EOF
+/^name "$i definition/;/^end/s/^/!/
+/^name "$i makefile/;/^end/s/^/!/
+w
+q
+EOF
+		;;
+	esac
+	case $i in
+	Modula-2)
+		lib=libm2
+		;;
+	Pascal)
+		lib=libpc
+		;;
+	Basic)
+		lib=libbc
+		;;
+	Occam)
+		lib=liboc
+		;;
+	esac
+	( cd ../mach
+	  for j in */$lib
+	  do
+	    ( cd $j/..
+	      if [ -f Action.orig ]
+	      then
+		:
+	      else
+		mv Action Action.orig
+		cp Action.orig Action
+	      fi
+	      ed - Action <<EOF
+/^name.*$i/;/^end/s/^/!/
+w
+q
+EOF
+	    )
+	  done
+	)
+done
+DISABLE_INT=0
+for i in $DISABLE_SUP
+do
+	echo "disabling installation of $i"
+	if [ -f ../Action.orig ]
+	then
+		:
+	else
+		mv ../Action ../Action.orig
+		cp ../Action.orig ../Action
+	fi
+	ed - ../Action <<EOF
+/^dir .*$i\$/;?^name?;/^end/s/^/!/
+w
+q
+EOF
+	case $i in
+	m68k2|m68k4)
+		DISABLE_INT=1
+		;;
+	mantra)
+		if [ $SYSNAME = m68_sysV_0 ]
+		then
+			DISABLE_INT=1
+		fi
+		;;
+	sun2)
+		case $SYSNAME in
+		sun2|sun3)
+			DISABLE_INT=1
+			;;
+		esac
+		;;
+	pmds4)
+		case $SYSNAME in
+		pmds*)
+			DISABLE_INT=1
+			;;
+		esac
+		;;
+	esac
+done
+if [ $DISABLE_INT = 1 ]
+then
+	ed - ../Action <<EOF
+/68000 interpreters/;/^end/s/^/!/
+w
+q
+EOF
 fi
