@@ -14,8 +14,11 @@ IMPLEMENTATION MODULE Streams;
   Implementation for Unix
 *)
 
-  FROM SYSTEM IMPORT BYTE, ADR;
-  IMPORT StripUnix, Storage, Epilogue;
+  FROM	SYSTEM IMPORT	BYTE, ADR;
+  FROM	Epilogue IMPORT	CallAtEnd;
+  FROM	Storage IMPORT	Allocate, Available;
+  FROM	StripUnix IMPORT
+			open, close, lseek, read, write, creat, ioctl;
 
   CONST BUFSIZ = 1024;	(* tunable *)
   TYPE	IOB = RECORD
@@ -41,10 +44,10 @@ IMPLEMENTATION MODULE Streams;
                 stream := stream^.next;
         END;
         IF stream = NIL THEN
-		IF NOT Storage.Available(SIZE(IOB)) THEN
+		IF NOT Available(SIZE(IOB)) THEN
 			RETURN;
 		END;
-                Storage.Allocate(stream,SIZE(IOB));
+                Allocate(stream,SIZE(IOB));
                 stream^.next := head;
                 head := stream;
         END;
@@ -79,17 +82,17 @@ IMPLEMENTATION MODULE Streams;
                 buf[HIGH(filename)+2] := BYTE(0C);
 	END;
 	IF (mode = reading) THEN
-		fd := StripUnix.open(ADR(stream^.buf), 0);
+		fd := open(ADR(stream^.buf), 0);
 	ELSE
 		fd := -1;
 		IF (mode = appending) THEN
-			fd := StripUnix.open(ADR(stream^.buf), 1);
+			fd := open(ADR(stream^.buf), 1);
 			IF fd >= 0 THEN
-				IF (StripUnix.lseek(fd, 0D , 2) < 0D) THEN ; END;
+				IF (lseek(fd, 0D , 2) < 0D) THEN ; END;
 			END;
 		END;
 		IF fd < 0 THEN
-			fd := StripUnix.creat(ADR(stream^.buf), 666B);
+			fd := creat(ADR(stream^.buf), 666B);
 		END;
 	END;
 	IF fd < 0 THEN
@@ -150,7 +153,7 @@ IMPLEMENTATION MODULE Streams;
 		IF (cnt > 0) THEN
 			cnt1 := cnt;
 			cnt := 0;
-			IF StripUnix.write(fildes, ADR(buf), cnt1) < 0 THEN END;
+			IF write(fildes, ADR(buf), cnt1) < 0 THEN END;
 		END;
 	END;
   END FlushStream;
@@ -162,7 +165,7 @@ IMPLEMENTATION MODULE Streams;
 		IF stream^.mode # reading THEN
 			FlushStream(stream, result);
 		END;
-		IF StripUnix.close(stream^.fildes) < 0 THEN ; END;
+		IF close(stream^.fildes) < 0 THEN ; END;
 		freestruct(stream);
 	ELSE
 		result := nostream;
@@ -209,7 +212,7 @@ IMPLEMENTATION MODULE Streams;
 			IF stream = InputStream THEN
 				FlushLineBuffers();
 			END;
-			maxcnt := StripUnix.read(fildes, ADR(buf), bufferedcnt);
+			maxcnt := read(fildes, ADR(buf), bufferedcnt);
 			cnt := 1;
 			IF maxcnt <= 0 THEN
 				eof := TRUE;
@@ -332,7 +335,7 @@ IMPLEMENTATION MODULE Streams;
 		RETURN;
 	END;
 	IF (s^.mode # reading) THEN FlushStream(s, result); END;
-	position := StripUnix.lseek(s^.fildes, 0D, 1);
+	position := lseek(s^.fildes, 0D, 1);
 	IF position < 0D THEN
 		result := illegaloperation;
 		RETURN;
@@ -357,7 +360,7 @@ IMPLEMENTATION MODULE Streams;
 		s^.eof := FALSE;
 	END;
 	IF s^.mode = appending THEN
-		currpos := StripUnix.lseek(s^.fildes, 0D, 1);
+		currpos := lseek(s^.fildes, 0D, 1);
 		IF currpos < 0D THEN
 			result := illegaloperation;
 			RETURN;
@@ -367,7 +370,7 @@ IMPLEMENTATION MODULE Streams;
 		result := illegaloperation;
 		RETURN;
 	END;
-	currpos := StripUnix.lseek(s^.fildes, position, 0);
+	currpos := lseek(s^.fildes, position, 0);
 	IF currpos < 0D THEN
 		result := illegaloperation;
 		RETURN;
@@ -383,12 +386,12 @@ IMPLEMENTATION MODULE Streams;
 		RETURN FALSE;
 	END;
 #ifdef __USG
-	RETURN StripUnix.ioctl(stream^.fildes, INTEGER(ORD('T') * 256 + 1), ADR(buf)) >= 0;
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('T') * 256 + 1), ADR(buf)) >= 0;
 #else
 #ifdef __BSD4_2
-	RETURN StripUnix.ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8 + 6*65536 + 40000000H), ADR(buf)) >= 0;
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8 + 6*65536 + 40000000H), ADR(buf)) >= 0;
 #else
-	RETURN StripUnix.ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8), ADR(buf)) >= 0;
+	RETURN ioctl(stream^.fildes, INTEGER(ORD('t') * 256 + 8), ADR(buf)) >= 0;
 #endif
 #endif
   END isatty;
@@ -440,7 +443,7 @@ IMPLEMENTATION MODULE Streams;
 		END;
 	END;
 	head := InputStream;
-	IF Epilogue.CallAtEnd(EndIt) THEN ; END;
+	IF CallAtEnd(EndIt) THEN ; END;
   END InitStreams;
 
 BEGIN

@@ -15,9 +15,9 @@ IMPLEMENTATION MODULE Storage;
    same size. Commonly used sizes have their own bucket. The larger ones
    are put in a single list.
 *)
-  FROM Unix IMPORT sbrk, ILLBREAK;
-  FROM SYSTEM IMPORT ADDRESS, ADR;
-  FROM Traps IMPORT Message;
+  FROM	Unix IMPORT	sbrk, ILLBREAK;
+  FROM	SYSTEM IMPORT	ADDRESS, ADR;
+  FROM	Traps IMPORT	Message;
 
   CONST
 	NLISTS = 20;

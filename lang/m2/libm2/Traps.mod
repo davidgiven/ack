@@ -11,17 +11,18 @@ IMPLEMENTATION MODULE Traps;
   Version:      $Header$
 *)
 
-  IMPORT EM;
-  IMPORT Unix;
-  FROM SYSTEM IMPORT ADDRESS, ADR;
-  FROM Arguments IMPORT Argv;
+  FROM	EM IMPORT	SIG, LINO, FILN, TRP;
+  FROM	Unix IMPORT	write;
+  FROM	SYSTEM IMPORT	ADDRESS, ADR;
+  FROM	Arguments IMPORT
+			Argv;
 
   PROCEDURE InstallTrapHandler(t: TrapHandler): TrapHandler;
   (* Install a new trap handler, and return the previous one.
      Parameter of trap handler is the trap number.
   *)
   BEGIN
-	RETURN EM.SIG(t);
+	RETURN SIG(t);
   END InstallTrapHandler;
 
   PROCEDURE Message(str: ARRAY OF CHAR);
@@ -34,7 +35,7 @@ IMPLEMENTATION MODULE Traps;
 	buf, buf2: ARRAY [0..255] OF CHAR;
 	i, j: CARDINAL;
   BEGIN
-	p := EM.FILN();
+	p := FILN();
 	IF p # NIL THEN
 		i := 1;
 		buf[0] := '"';
@@ -45,12 +46,12 @@ IMPLEMENTATION MODULE Traps;
 		END;
 		buf[i] := '"';
 		INC(i);
-		IF Unix.write(2, ADR(buf), i) < 0 THEN END;
+		IF write(2, ADR(buf), i) < 0 THEN END;
 	ELSE
 		l := Argv(0, buf);
-		IF Unix.write(2, ADR(buf), l-1) < 0 THEN END;
+		IF write(2, ADR(buf), l-1) < 0 THEN END;
 	END;
-	lino := EM.LINO();
+	lino := LINO();
 	i := 0;
 	IF lino # 0 THEN
 		i := 7;
@@ -76,20 +77,20 @@ IMPLEMENTATION MODULE Traps;
 	END;
 	buf[i] := ':';
 	buf[i+1] := ' ';
-	IF Unix.write(2, ADR(buf), i+2) < 0 THEN END;
+	IF write(2, ADR(buf), i+2) < 0 THEN END;
 	i := 0;
 	WHILE (i <= HIGH(str)) AND (str[i] # 0C) DO
 		INC(i);
 	END;
-	IF Unix.write(2, ADR(str), i) < 0 THEN END;
+	IF write(2, ADR(str), i) < 0 THEN END;
 	buf[0] := 12C;
-	IF Unix.write(2, ADR(buf), 1) < 0 THEN END;
+	IF write(2, ADR(buf), 1) < 0 THEN END;
   END Message;
 
   PROCEDURE Trap(n: INTEGER);
   (* cause trap number "n" to occur *)
   BEGIN
-	EM.TRP(n);
+	TRP(n);
   END Trap;
 
 END Traps.

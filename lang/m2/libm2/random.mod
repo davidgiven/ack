@@ -11,30 +11,30 @@ IMPLEMENTATION MODULE random;
   Version:      $Header$
 *)
 
-FROM Unix IMPORT getpid, time;
-TYPE index = [1..55];
+  FROM	Unix IMPORT	getpid, time;
+  TYPE index = [1..55];
 
-VAR	X: ARRAY index OF CARDINAL;
+  VAR	X: ARRAY index OF CARDINAL;
 	j, k: index;
 	tm: LONGINT;
 
-PROCEDURE Random(): CARDINAL;
-BEGIN
+  PROCEDURE Random(): CARDINAL;
+  BEGIN
 	IF k-1 <= 0 THEN k := 55; ELSE DEC(k) END;
 	IF j-1 <= 0 THEN j := 55; ELSE DEC(j) END;
 	X[k] := X[k] + X[j];
 	RETURN X[k]
-END Random;
+  END Random;
 
-PROCEDURE Uniform (lwb, upb: CARDINAL): CARDINAL;
-BEGIN
+  PROCEDURE Uniform (lwb, upb: CARDINAL): CARDINAL;
+  BEGIN
     	IF upb <= lwb THEN RETURN lwb; END;
     	RETURN lwb + (Random() MOD (upb - lwb + 1));
-END Uniform;
+  END Uniform;
 
-PROCEDURE StartSeed(seed: CARDINAL);
-VAR v: CARDINAL;
-BEGIN
+  PROCEDURE StartSeed(seed: CARDINAL);
+  VAR v: CARDINAL;
+  BEGIN
 	FOR k := 1 TO 55 DO
 		seed := 1297 * seed + 123;
 		X[k] := seed;
@@ -49,7 +49,7 @@ BEGIN
 	END;
 	k := 1;
 	j := 25;
-END StartSeed;
+  END StartSeed;
 
 BEGIN
  	tm := time(NIL);

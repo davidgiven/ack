@@ -11,14 +11,16 @@ IMPLEMENTATION MODULE PascalIO;
   Version:	$Header$
 *)
 
-  IMPORT Conversions;
-  IMPORT Traps;
-  IMPORT RealConversions;
-  FROM Streams IMPORT Stream, StreamKind, StreamMode, StreamResult,
-		      InputStream, OutputStream, OpenStream, CloseStream, 
-		      EndOfStream, Read, Write, StreamBuffering;
-  FROM Storage IMPORT Allocate;
-  FROM SYSTEM IMPORT ADR;
+  FROM	Conversions IMPORT
+			ConvertInteger, ConvertCardinal;
+  FROM	RealConversions IMPORT
+			LongRealToString, StringToLongReal;
+  FROM	Traps IMPORT	Message;
+  FROM	Streams IMPORT	Stream, StreamKind, StreamMode, StreamResult,
+			InputStream, OutputStream, OpenStream, CloseStream, 
+			EndOfStream, Read, Write, StreamBuffering;
+  FROM	Storage IMPORT	Allocate;
+  FROM	SYSTEM IMPORT	ADR;
 
   TYPE	charset = SET OF CHAR;
 	btype = (Preading, Pwriting, free);
@@ -46,7 +48,7 @@ IMPLEMENTATION MODULE PascalIO;
 	WITH InputText^ DO
 		OpenStream(stream, Filename, text, reading, result);
 		IF result # succeeded THEN
-			Traps.Message("could not open input file");
+			Message("could not open input file");
 			HALT;
 		END;
 		type := Preading;
@@ -62,7 +64,7 @@ IMPLEMENTATION MODULE PascalIO;
 	WITH OutputText^ DO
 		OpenStream(stream, Filename, text, writing, result);
 		IF result # succeeded THEN
-			Traps.Message("could not open output file");
+			Message("could not open output file");
 			HALT;
 		END;
 		type := Pwriting;
@@ -107,9 +109,9 @@ IMPLEMENTATION MODULE PascalIO;
   PROCEDURE Error(tp: btype);
   BEGIN
 	IF tp = Preading THEN
-		Traps.Message("input text expected");
+		Message("input text expected");
 	ELSE
-		Traps.Message("output text expected");
+		Message("output text expected");
 	END;
 	HALT;
   END Error;
@@ -118,7 +120,7 @@ IMPLEMENTATION MODULE PascalIO;
   BEGIN
 	ch := NextChar(InputText);
 	IF InputText^.eof THEN
-		Traps.Message("unexpected EOF");
+		Message("unexpected EOF");
 		HALT;
 	END;
 	InputText^.done := FALSE;
@@ -218,7 +220,7 @@ IMPLEMENTATION MODULE PascalIO;
 	   		IF (int < -SAFELIMITDIV10) OR 
 		   	   ( (int = -SAFELIMITDIV10) AND
 		     	     (chvalue > safedigit)) THEN
-				Traps.Message("integer too large");
+				Message("integer too large");
 				HALT;
 	    		ELSE
 				int := 10*int - VAL(INTEGER, chvalue);
@@ -230,7 +232,7 @@ IMPLEMENTATION MODULE PascalIO;
    			int := -int
 		END;
 	ELSE
-		Traps.Message("integer expected");
+		Message("integer expected");
 		HALT;
 	END;
   END ReadInteger;
@@ -257,7 +259,7 @@ IMPLEMENTATION MODULE PascalIO;
 	    		IF (card > SAFELIMITDIV10) OR 
 			   ( (card = SAFELIMITDIV10) AND
 			     (chvalue > safedigit)) THEN
-				Traps.Message("cardinal too large");
+				Message("cardinal too large");
 				HALT;
 		    	ELSE
 				card := 10*card + chvalue;
@@ -266,7 +268,7 @@ IMPLEMENTATION MODULE PascalIO;
 		    	END;
 		END;
 	ELSE
-		Traps.Message("cardinal expected");
+		Message("cardinal expected");
 		HALT;
 	END;
   END ReadCardinal;
@@ -335,10 +337,10 @@ IMPLEMENTATION MODULE PascalIO;
 	END;
 	IF ok THEN
 		buf[index] := 0C;
-		RealConversions.StringToLongReal(buf, real, ok);
+		StringToLongReal(buf, real, ok);
 	END;
 	IF NOT ok THEN
-		Traps.Message("Illegal real");
+		Message("Illegal real");
 		HALT;
 	END;
   END ReadLongReal;
@@ -347,7 +349,7 @@ IMPLEMENTATION MODULE PascalIO;
   VAR
     	buf : numbuf;
   BEGIN
-	Conversions.ConvertCardinal(card, 1, buf);
+	ConvertCardinal(card, 1, buf);
 	WriteString(OutputText, buf, width);
   END WriteCardinal;
 
@@ -355,7 +357,7 @@ IMPLEMENTATION MODULE PascalIO;
   VAR
     	buf : numbuf;
   BEGIN
-    	Conversions.ConvertInteger(int, 1, buf);
+    	ConvertInteger(int, 1, buf);
 	WriteString(OutputText, buf, width);
   END WriteInteger;
 
@@ -383,7 +385,7 @@ IMPLEMENTATION MODULE PascalIO;
 		width := SIZE(buf);
 	END;
 	IF nfrac > 0 THEN
-		RealConversions.LongRealToString(real, width, nfrac, buf, ok);
+		LongRealToString(real, width, nfrac, buf, ok);
 	ELSE
 		IF width < 9 THEN width := 9; END;
 		IF real < 0.0D THEN
@@ -391,7 +393,7 @@ IMPLEMENTATION MODULE PascalIO;
 		ELSE
 			digits := 6 - INTEGER(width);
 		END;
-		RealConversions.LongRealToString(real, width, digits, buf, ok);
+		LongRealToString(real, width, digits, buf, ok);
 	END;
 	WriteString(OutputText, buf, 0);
   END WriteLongReal;

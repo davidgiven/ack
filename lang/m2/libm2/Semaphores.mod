@@ -13,10 +13,10 @@ IMPLEMENTATION MODULE Semaphores [1];
   Quasi-concurrency implementation
 *)
 
-  FROM SYSTEM IMPORT ADDRESS, NEWPROCESS, TRANSFER;
-  FROM Storage IMPORT Allocate;
-  FROM random IMPORT Uniform;
-  FROM Traps IMPORT Message;
+  FROM	SYSTEM IMPORT	ADDRESS, NEWPROCESS, TRANSFER;
+  FROM	Storage IMPORT	Allocate;
+  FROM	random IMPORT	Uniform;
+  FROM	Traps IMPORT	Message;
 
   TYPE	Sema = POINTER TO Semaphore;
 	Processes = POINTER TO Process;

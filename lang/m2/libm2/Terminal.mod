@@ -13,9 +13,12 @@ IMPLEMENTATION MODULE Terminal;
 
   Implementation for Unix.
 *)
-  IMPORT Unix;
-  FROM SYSTEM IMPORT ADR;
-
+  FROM	SYSTEM IMPORT	ADR;
+#ifdef __USG
+  FROM	Unix IMPORT	read, write, open, fcntl;
+#else
+  FROM	Unix IMPORT	read, write, open, ioctl;
+#endif
   VAR fildes: INTEGER;
       unreadch: CHAR;
       unread: BOOLEAN;
@@ -27,7 +30,7 @@ IMPLEMENTATION MODULE Terminal;
 		ch := unreadch;
 		unread := FALSE
 	ELSE
-		IF Unix.read(fildes, ADR(ch), 1) < 0 THEN
+		IF read(fildes, ADR(ch), 1) < 0 THEN
 			;
 		END;
 	END;
@@ -42,25 +45,25 @@ IMPLEMENTATION MODULE Terminal;
 		unread := FALSE
 	ELSE
 #ifdef __USG
-		l := Unix.fcntl(fildes, (*FGETFL*) 3, 0);
-		IF Unix.fcntl(fildes,
+		l := fcntl(fildes, (*FGETFL*) 3, 0);
+		IF fcntl(fildes,
 			      (* FSETFL *) 4,
 			      l + (*ONDELAY*) 2) < 0 THEN
 			;
 		END;
-		IF Unix.read(fildes, ADR(ch), 1) = 0 THEN
+		IF read(fildes, ADR(ch), 1) = 0 THEN
 			ch := 0C;
 		ELSE
 			unreadch := ch;
 		END;
-		IF Unix.fcntl(fildes, (*FSETFL*)4, l) < 0 THEN
+		IF fcntl(fildes, (*FSETFL*)4, l) < 0 THEN
 			;
 		END;
 #else
 #ifdef __BSD4_2
-		IF Unix.ioctl(fildes, INTEGER(ORD('f')*256+127+4*65536+40000000H), ADR(l)) < 0 THEN
+		IF ioctl(fildes, INTEGER(ORD('f')*256+127+4*65536+40000000H), ADR(l)) < 0 THEN
 #else
-		IF Unix.ioctl(fildes, INTEGER(ORD('f')*256+127), ADR(l)) < 0 THEN
+		IF ioctl(fildes, INTEGER(ORD('f')*256+127), ADR(l)) < 0 THEN
 #endif
 			;
 		END;
@@ -68,7 +71,7 @@ IMPLEMENTATION MODULE Terminal;
 		IF l = 0 THEN
 			ch := 0C;
 		ELSE
-			IF Unix.read(fildes, ADR(ch), 1) < 0 THEN
+			IF read(fildes, ADR(ch), 1) < 0 THEN
 				;
 			END;
 			unreadch := ch;
@@ -84,7 +87,7 @@ IMPLEMENTATION MODULE Terminal;
 
   PROCEDURE Write(ch: CHAR);
   BEGIN
-	IF Unix.write(fildes, ADR(ch), 1) < 0 THEN
+	IF write(fildes, ADR(ch), 1) < 0 THEN
 		;
 	END;
   END Write;
@@ -106,6 +109,6 @@ IMPLEMENTATION MODULE Terminal;
 
 BEGIN
 	tty := "/dev/tty";
-	fildes := Unix.open(ADR(tty), 2);
+	fildes := open(ADR(tty), 2);
 	unread := FALSE;
 END Terminal.

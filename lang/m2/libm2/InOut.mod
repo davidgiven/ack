@@ -11,9 +11,11 @@ IMPLEMENTATION MODULE InOut ;
   Version:	$Header$
 *)
 
-  IMPORT Streams;
-  IMPORT Conversions;
-  IMPORT Traps;
+  IMPORT	Streams;
+  FROM	Conversions IMPORT
+			ConvertCardinal, ConvertInteger,
+			ConvertOctal, ConvertHex;
+  FROM	Traps IMPORT	Message;
 
   CONST	TAB = 11C;
 
@@ -190,7 +192,7 @@ IMPLEMENTATION MODULE InOut ;
 	   	IF (int > SAFELIMITDIV10) OR 
 		   ( (int = SAFELIMITDIV10) AND
 		     (chvalue > safedigit)) THEN
-			Traps.Message("integer too large");
+			Message("integer too large");
 			HALT;
 	    	ELSE
 			int := 10*int + VAL(INTEGER, chvalue);
@@ -203,7 +205,7 @@ IMPLEMENTATION MODULE InOut ;
 		integ := int
 	END;
 	IF buf[index] > " " THEN
-		Traps.Message("illegal integer");
+		Message("illegal integer");
 		HALT;
 	END;
 	Done := TRUE;
@@ -235,7 +237,7 @@ IMPLEMENTATION MODULE InOut ;
 	    	IF (int > SAFELIMITDIV10) OR 
 		   ( (int = SAFELIMITDIV10) AND
 		     (chvalue > safedigit)) THEN
-			Traps.Message("cardinal too large");
+			Message("cardinal too large");
 			HALT;
 	    	ELSE
 			int := 10*int + chvalue;
@@ -243,7 +245,7 @@ IMPLEMENTATION MODULE InOut ;
 	    	END;
 	END;
 	IF buf[index] > " " THEN
-		Traps.Message("illegal cardinal");
+		Message("illegal cardinal");
 		HALT;
 	END;
 	card := int;
@@ -318,7 +320,7 @@ IMPLEMENTATION MODULE InOut ;
   VAR
     	buf : numbuf;
   BEGIN
-	Conversions.ConvertCardinal(card, width, buf);
+	ConvertCardinal(card, width, buf);
 	WriteString(buf);
   END WriteCard;
 
@@ -326,7 +328,7 @@ IMPLEMENTATION MODULE InOut ;
   VAR
     	buf : numbuf;
   BEGIN
-    	Conversions.ConvertInteger(int, width, buf);
+    	ConvertInteger(int, width, buf);
 	WriteString(buf);
   END WriteInt;
 
@@ -334,7 +336,7 @@ IMPLEMENTATION MODULE InOut ;
   VAR
     	buf : numbuf;
   BEGIN
-	Conversions.ConvertHex(card, width, buf);
+	ConvertHex(card, width, buf);
 	WriteString(buf);
   END WriteHex;
 
@@ -347,7 +349,7 @@ IMPLEMENTATION MODULE InOut ;
   VAR
     	buf : numbuf;
   BEGIN
-    	Conversions.ConvertOctal(card, width, buf);
+    	ConvertOctal(card, width, buf);
 	WriteString(buf);
   END WriteOct;
 

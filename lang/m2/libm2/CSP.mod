@@ -14,7 +14,7 @@ IMPLEMENTATION MODULE CSP;
   FROM random	IMPORT	Uniform;
   FROM SYSTEM	IMPORT	BYTE, ADDRESS, NEWPROCESS, TRANSFER;
   FROM Storage	IMPORT	Allocate, Deallocate;
-  IMPORT	Traps;
+  FROM Traps	IMPORT	Message;
 
   CONST	WorkSpaceSize = 1000;
 
@@ -212,7 +212,7 @@ IMPLEMENTATION MODULE CSP;
   BEGIN
 	WITH ch^ DO
 		IF owner # NIL THEN
-			Traps.Message("Channel already has an owner");
+			Message("Channel already has an owner");
 			HALT
 		END;
 		owner := cp
@@ -251,7 +251,7 @@ IMPLEMENTATION MODULE CSP;
   BEGIN
 	WITH ch^ DO
 		IF cp # owner THEN
-			Traps.Message("Only owner of channel can receive from it");
+			Message("Only owner of channel can receive from it");
 			HALT
 		END;
 		IF Sending(ch) THEN

@@ -11,10 +11,11 @@ IMPLEMENTATION MODULE RealInOut;
   Version:      $Header$
 *)
 
-  IMPORT InOut;
-  IMPORT RealConversions;
-  IMPORT Traps;
-  FROM SYSTEM IMPORT WORD;
+  FROM	InOut IMPORT	ReadString, WriteString, WriteOct;
+  FROM	Traps IMPORT	Message;
+  FROM	SYSTEM IMPORT	WORD;
+  FROM	RealConversions IMPORT
+			LongRealToString, StringToLongReal;
 
   CONST	MAXNDIG = 32;
 	MAXWIDTH = MAXNDIG+7;
@@ -32,8 +33,8 @@ IMPLEMENTATION MODULE RealInOut;
   BEGIN
 	IF ndigits > MAXWIDTH THEN ndigits := MAXWIDTH; END;
 	IF ndigits < 10 THEN ndigits := 10; END;
-	RealConversions.LongRealToString(arg, ndigits, -INTEGER(ndigits - 7), buf, ok);
-	InOut.WriteString(buf);
+	LongRealToString(arg, ndigits, -INTEGER(ndigits - 7), buf, ok);
+	WriteString(buf);
   END WriteLongReal;
 
   PROCEDURE WriteFixPt(arg: REAL; n, k: CARDINAL);
@@ -47,8 +48,8 @@ IMPLEMENTATION MODULE RealInOut;
 
   BEGIN
 	IF n > MAXWIDTH THEN n := MAXWIDTH END;
-	RealConversions.LongRealToString(arg, n, k, buf, ok);
-	InOut.WriteString(buf);
+	LongRealToString(arg, n, k, buf, ok);
+	WriteString(buf);
   END WriteLongFixPt;
 
   PROCEDURE ReadReal(VAR x: REAL);
@@ -63,10 +64,10 @@ IMPLEMENTATION MODULE RealInOut;
 	ok: BOOLEAN;
 
   BEGIN
-	InOut.ReadString(Buf);
-	RealConversions.StringToLongReal(Buf, x, ok);
+	ReadString(Buf);
+	StringToLongReal(Buf, x, ok);
 	IF NOT ok THEN
-		Traps.Message("real expected");
+		Message("real expected");
 		HALT;
 	END;
 	Done := TRUE;
@@ -76,8 +77,8 @@ IMPLEMENTATION MODULE RealInOut;
   VAR	i: CARDINAL;
   BEGIN
 	FOR i := 0 TO HIGH(x) DO
-		InOut.WriteOct(CARDINAL(x[i]), 0);
-		InOut.WriteString("  ");
+		WriteOct(CARDINAL(x[i]), 0);
+		WriteString("  ");
 	END;
   END wroct;
 

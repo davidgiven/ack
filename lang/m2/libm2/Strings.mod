@@ -11,12 +11,12 @@ IMPLEMENTATION MODULE Strings;
   Version:      $Header$
 *)
 
-PROCEDURE Assign(source: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);
-(* Assign string source to dest
-*)
-VAR	i: CARDINAL;
+  PROCEDURE Assign(source: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);
+  (* Assign string source to dest
+  *)
+  VAR	i: CARDINAL;
 	max: CARDINAL;
-BEGIN
+  BEGIN
 	max := HIGH(source);
 	IF HIGH(dest) < max THEN max := HIGH(dest); END;
 	i := 0;
@@ -25,15 +25,15 @@ BEGIN
 		INC(i);
 	END;
 	IF i < HIGH(dest) THEN dest[i] := 0C; END;
-END Assign;
+  END Assign;
 
-PROCEDURE Insert(substr: ARRAY OF CHAR; VAR str: ARRAY OF CHAR; inx: CARDINAL);
-(* Insert the string substr into str, starting at str[inx].
-   If inx is equal to or greater than Length(str) then substr is appended
-   to the end of str.
-*)
-VAR	sublen, length, i: CARDINAL;
-BEGIN
+  PROCEDURE Insert(substr: ARRAY OF CHAR; VAR str: ARRAY OF CHAR; inx: CARDINAL);
+  (* Insert the string substr into str, starting at str[inx].
+     If inx is equal to or greater than Length(str) then substr is appended
+     to the end of str.
+  *)
+  VAR	sublen, length, i: CARDINAL;
+  BEGIN
 	sublen := Length(substr);
 	IF sublen = 0 THEN RETURN; END;
 	length := Length(str);
@@ -54,16 +54,16 @@ BEGIN
 	IF length + sublen <= HIGH(str) THEN
 		str[length + sublen] := 0C;
 	END;
-END Insert;
+  END Insert;
 
-PROCEDURE Delete(VAR str: ARRAY OF CHAR; inx, len: CARDINAL);
-(* Delete len characters from str, starting at str[inx].
-   If inx >= Length(str) then nothing happens.
-   If there are not len characters to delete, characters to the end of the
-   string are deleted.
-*)
-VAR	length: CARDINAL;
-BEGIN
+  PROCEDURE Delete(VAR str: ARRAY OF CHAR; inx, len: CARDINAL);
+  (* Delete len characters from str, starting at str[inx].
+     If inx >= Length(str) then nothing happens.
+     If there are not len characters to delete, characters to the end of the
+     string are deleted.
+  *)
+  VAR	length: CARDINAL;
+  BEGIN
 	IF len = 0 THEN RETURN; END;
 	length := Length(str);
 	IF inx >= length THEN RETURN; END;
@@ -72,14 +72,14 @@ BEGIN
 		INC(inx);
 	END;
 	str[inx] := 0C;
-END Delete;
+  END Delete;
 
-PROCEDURE Pos(substr, str: ARRAY OF CHAR): CARDINAL;
-(* Return the index into str of the first occurrence of substr.
-   Pos returns a value greater than HIGH(str) of no occurrence is found.
-*)
-VAR	i, j, max, subl: CARDINAL;
-BEGIN
+  PROCEDURE Pos(substr, str: ARRAY OF CHAR): CARDINAL;
+  (* Return the index into str of the first occurrence of substr.
+     Pos returns a value greater than HIGH(str) of no occurrence is found.
+  *)
+  VAR	i, j, max, subl: CARDINAL;
+  BEGIN
 	max := Length(str);
 	subl := Length(substr);
 	IF subl > max THEN RETURN HIGH(str) + 1; END;
@@ -93,15 +93,15 @@ BEGIN
 		IF j = subl THEN RETURN i; END;
 	END;
 	RETURN HIGH(str) + 1;
-END Pos;
+  END Pos;
 
-PROCEDURE Copy(str: ARRAY OF CHAR;
-	       inx, len: CARDINAL;
-	       VAR result: ARRAY OF CHAR);
-(* Copy at most len characters from str into result, starting at str[inx].
-*)
-VAR	i: CARDINAL;
-BEGIN
+  PROCEDURE Copy(str: ARRAY OF CHAR;
+	         inx, len: CARDINAL;
+	         VAR result: ARRAY OF CHAR);
+  (* Copy at most len characters from str into result, starting at str[inx].
+  *)
+  VAR	i: CARDINAL;
+  BEGIN
 	IF Length(str) <= inx THEN RETURN END;
 	i := 0;
 	LOOP
@@ -112,13 +112,13 @@ BEGIN
 		INC(i); INC(inx); DEC(len);
 	END;
 	IF i <= HIGH(result) THEN result[i] := 0C; END;
-END Copy;
+  END Copy;
 
-PROCEDURE Concat(s1, s2: ARRAY OF CHAR; VAR result: ARRAY OF CHAR);
-(* Concatenate two strings.
-*)
-VAR	i, j: CARDINAL;
-BEGIN
+  PROCEDURE Concat(s1, s2: ARRAY OF CHAR; VAR result: ARRAY OF CHAR);
+  (* Concatenate two strings.
+  *)
+  VAR	i, j: CARDINAL;
+  BEGIN
 	i := 0;
 	WHILE (i <= HIGH(s1)) AND (s1[i] # 0C) DO
 		IF i > HIGH(result) THEN RETURN END;
@@ -133,27 +133,27 @@ BEGIN
 		INC(j);
 	END;
 	IF i <= HIGH(result) THEN result[i] := 0C; END;
-END Concat;
+  END Concat;
 
-PROCEDURE Length(str: ARRAY OF CHAR): CARDINAL;
-(* Return number of characters in str.
-*)
-VAR i: CARDINAL;
-BEGIN
+  PROCEDURE Length(str: ARRAY OF CHAR): CARDINAL;
+  (* Return number of characters in str.
+  *)
+  VAR i: CARDINAL;
+  BEGIN
 	i := 0;
 	WHILE (i <= HIGH(str)) DO
 		IF str[i] = 0C THEN RETURN i; END;
 		INC(i);
 	END;
 	RETURN i;
-END Length;
+  END Length;
 
-PROCEDURE CompareStr(s1, s2: ARRAY OF CHAR): INTEGER;
-(* Compare two strings, return -1 if s1 < s2, 0 if s1 = s2, and 1 if s1 > s2.
-*)
-VAR	i: CARDINAL;
+  PROCEDURE CompareStr(s1, s2: ARRAY OF CHAR): INTEGER;
+  (* Compare two strings, return -1 if s1 < s2, 0 if s1 = s2, and 1 if s1 > s2.
+  *)
+  VAR	i: CARDINAL;
 	max: CARDINAL;
-BEGIN
+  BEGIN
 	max := HIGH(s1);
 	IF HIGH(s2) < max THEN max := HIGH(s2); END;
 	i := 0;
@@ -166,6 +166,6 @@ BEGIN
 	IF (i <= HIGH(s1)) AND (s1[i] # 0C) THEN RETURN 1; END;
 	IF (i <= HIGH(s2)) AND (s2[i] # 0C) THEN RETURN -1; END;
 	RETURN 0;
-END CompareStr;
+  END CompareStr;
 
 END Strings.

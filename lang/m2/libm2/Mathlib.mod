@@ -11,8 +11,8 @@ IMPLEMENTATION MODULE Mathlib;
   Version:	$Header$
 *)
 
-  FROM EM IMPORT FIF, FEF;
-  FROM Traps IMPORT Message;
+  FROM	EM IMPORT	FIF, FEF;
+  FROM	Traps IMPORT	Message;
 
   CONST
 	OneRadianInDegrees	= 57.295779513082320876798155D;

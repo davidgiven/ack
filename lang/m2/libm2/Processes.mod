@@ -6,11 +6,9 @@ IMPLEMENTATION MODULE Processes [1];
   Version:      $Header$
 *)
 
-  FROM SYSTEM IMPORT ADDRESS, TSIZE, NEWPROCESS, TRANSFER;
-
-  FROM Storage IMPORT Allocate;
-
-  FROM Traps IMPORT Message;
+  FROM	SYSTEM IMPORT	ADDRESS, TSIZE, NEWPROCESS, TRANSFER;
+  FROM	Storage IMPORT	Allocate;
+  FROM	Traps IMPORT	Message;
 
   TYPE	SIGNAL = POINTER TO ProcessDescriptor;
 

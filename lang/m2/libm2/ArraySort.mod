@@ -10,7 +10,7 @@ IMPLEMENTATION MODULE ArraySort;
   Author:	Ceriel J.H. Jacobs
   Version:	$Header$
 *)
-  FROM SYSTEM IMPORT ADDRESS, BYTE;	(* no generics in Modula-2, sorry *)
+  FROM	SYSTEM IMPORT	ADDRESS, BYTE;	(* no generics in Modula-2, sorry *)
 
   TYPE BytePtr = POINTER TO BYTE;
 
@@ -153,4 +153,3 @@ IMPLEMENTATION MODULE ArraySort;
   END threewayexchange;
 
 END ArraySort.
-

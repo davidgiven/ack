@@ -11,41 +11,41 @@ IMPLEMENTATION MODULE MathLib0;
   Version:	$Header$
 *)
 
-  IMPORT Mathlib;
+  IMPORT	Mathlib;
 
-PROCEDURE cos(arg: REAL): REAL;
-BEGIN
+  PROCEDURE cos(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.cos(arg);
-END cos;
+  END cos;
 
-PROCEDURE sin(arg: REAL): REAL;
-BEGIN
+  PROCEDURE sin(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.sin(arg);
-END sin;
+  END sin;
 
-PROCEDURE arctan(arg: REAL): REAL;
-BEGIN
+  PROCEDURE arctan(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.arctan(arg);
-END arctan;
+  END arctan;
 
-PROCEDURE sqrt(arg: REAL): REAL;
-BEGIN
+  PROCEDURE sqrt(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.sqrt(arg);
-END sqrt;
+  END sqrt;
 
-PROCEDURE ln(arg: REAL): REAL;
-BEGIN
+  PROCEDURE ln(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.ln(arg);
-END ln;
+  END ln;
 
-PROCEDURE exp(arg: REAL): REAL;
-BEGIN
+  PROCEDURE exp(arg: REAL): REAL;
+  BEGIN
 	RETURN Mathlib.exp(arg);
-END exp;
+  END exp;
 
-PROCEDURE entier(x: REAL): INTEGER;
+  PROCEDURE entier(x: REAL): INTEGER;
   VAR i: INTEGER;
-BEGIN
+  BEGIN
 	IF x < 0.0 THEN
 		i := TRUNC(-x);
 		IF FLOAT(i) = -x THEN
@@ -55,15 +55,15 @@ BEGIN
 		END;
 	END;
 	RETURN TRUNC(x);
-END entier;
+  END entier;
 
-PROCEDURE real(x: INTEGER): REAL;
-BEGIN
+  PROCEDURE real(x: INTEGER): REAL;
+  BEGIN
 	IF x < 0 THEN
 		RETURN - FLOAT(-x);
 	END;
 	RETURN FLOAT(x);
-END real;
+  END real;
 
 BEGIN
 END MathLib0.
