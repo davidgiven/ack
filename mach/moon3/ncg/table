@@ -399,31 +399,27 @@ any1		= data1 + D_REG. /* all four above together */
 #endif TBL68020
 	/* This is a common part */
 #if WORD_SIZE==2
+/* Not any4, since any is used in 'with' and not in 'kills' */
 any		= any2 + any1 .
-/* absolute	= absolute2 + absolute1 . */
-control		= control2 + control1 .
-indirect	= indirect2 + indirect1 .
-pre_post	= pre_dec2 + pre_dec1 +
-		  post_inc2 + post_inc1 .
-offsetted	= offsetted2 + offsetted1 .
-index_off	= index_off2 + index_off1 .
 #else
 any		= any4 + any2 + any1 .
-/* absolute	= absolute4 + absolute2 + absolute1 . */
+#endif
 control		= control4 + control2 + control1 .
 indirect	= indirect4 + indirect2 + indirect1 .
-pre_post	= pre_dec4 + pre_dec2 + pre_dec1 +
-		  post_inc4 + post_inc2 + post_inc1 .
 offsetted	= offsetted4 + offsetted2 + offsetted1 .
 index_off	= index_off4 + index_off2 + index_off1 .
-#endif
 absolute	= absolute4 + absolute2 + absolute1 .
+pre_post	= pre_dec4 + pre_dec2 + pre_dec1 +
+		  post_inc4 + post_inc2 + post_inc1 .
 
 #ifndef TBL68020
 	/* A m68k2/m68k4 part */
 regind_addr	= regAcon + regAregXcon + t_regAcon + t_regAregXcon .
 address		= ext_addr + local_addr + regAcon + regAregXcon .
 all_regind	= indirect + offsetted + pre_post + index_off +
+#if WORD_SIZE==2
+		indirect4 + pre_dec4 + post_inc4 + offsetted4 + index_off4
+#endif
 		      regind_addr + areg .
 all_indir	= all_regind .
 allexceptcon	= ALL - ( D_REG + A_REG + consts + dreg2 + dreg1 +
