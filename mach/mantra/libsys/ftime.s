@@ -5,6 +5,12 @@
 .sect .data
 .sect .bss
 .sect .text
-_ftime:		move.l #0x23,d0
+_ftime:		clr.l -(sp)
+		jsr _time
+		lea 4(sp),sp
 		move.l 4(sp),a0
-		jmp callc
+		move.l d0,(a0)
+		clr.l 4(a0)
+		clr.w 8(a0)
+		clr.l d0
+		rts
