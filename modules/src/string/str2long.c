@@ -10,12 +10,14 @@ value(c, b)
 	char c;
 	int b;
 {
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-	if (c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
+	register int ch;
+
+	ch = c - '0';
+	if ((unsigned) ch <= 9) return ch;
+	ch = c - 'A';
+	if ((unsigned) ch <= 5) return ch + 10;
+	ch = c - 'a';
+	if ((unsigned) ch <= 5) return ch + 10;
 	return b;
 }
 

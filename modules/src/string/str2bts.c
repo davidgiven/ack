@@ -9,8 +9,7 @@ static
 is_oct(c)
 	char c;
 {
-	return (c == '0' || c == '1' || c == '2' || c == '3' ||
-		c == '4' || c == '5' || c == '6' || c == '7');
+	return ((unsigned int)(c-'0') <= ('7'-'0'));
 }
 
 /*	str2bts() strips the escaped characters of a
