@@ -486,7 +486,7 @@ MAIN 20
  bne *1
 OK
 TEST 026: test sti 1 and lol
-MAIN 0
+MAIN 20
  loc 257
  stl -12+WS
  loc 514
