@@ -38,7 +38,17 @@ extern char options[];
 overflow(expp)
 	t_node *expp;
 {
-	node_warning(expp, W_ORDINARY, "overflow in constant expression");
+	if (expp->nd_type != address_type) {
+	    node_warning(expp, W_ORDINARY, "overflow in constant expression");
+	}
+}
+
+underflow(expp)
+	t_node *expp;
+{
+	if (expp->nd_type != address_type) {
+	    node_warning(expp, W_ORDINARY, "underflow in constant expression");
+	}
 }
 
 STATIC
@@ -295,10 +305,10 @@ cstubin(expp)
 			if (expp->nd_type->tp_fund == T_INTORCARD) {
 				expp->nd_type = int_type;
 				if (! chk_bounds(min_int[sz], o1 - o2, T_CARDINAL)) {
-					overflow(expp);
+					underflow(expp);
 				}
 			}
-			else	overflow(expp);
+			else	underflow(expp);
 		}
 		o1 -= o2;
 		break;

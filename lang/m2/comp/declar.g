@@ -150,10 +150,7 @@ FPSection(t_param **ppr; arith *parmaddr;)
 			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
 ;
 
-FormalType(t_type **ptp;)
-{
-	extern arith ArrayElSize();
-} :
+FormalType(t_type **ptp;) :
 	ARRAY OF qualtype(ptp)
 		{ /* index type of conformant array is "CARDINAL".
 		     Recognize a conformant array by size 0.
@@ -162,11 +159,10 @@ FormalType(t_type **ptp;)
 
 		  tp->arr_elem = *ptp;
 		  *ptp = tp;
-		  tp->arr_elsize = ArrayElSize(tp->arr_elem);
-		  tp->tp_align = tp->arr_elem->tp_align;
+		  ArrayElSize(tp);
 		}
 |
-	 qualtype(ptp)
+	qualtype(ptp)
 ;
 
 TypeDeclaration
@@ -289,7 +285,7 @@ RecordType(t_type **ptp;)
 			warning(W_ORDINARY, "empty record declaration");
 			size = 1;
 		  }
-		  *ptp = standard_type(T_RECORD, xalign, size);
+		  *ptp = standard_type(T_RECORD, xalign, align(size, xalign));
 		  (*ptp)->rec_scope = scope;
 		}
 	END
@@ -408,8 +404,7 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 }:
 	ConstExpression(pnd)
 			{ 
-			  if (*ptp != 0) {
-				ChkCompat(pnd, *ptp, "case label");
+			  if (*ptp != 0 && ChkCompat(pnd, *ptp, "case label")) {
 			  }
 			  nd = *pnd;
 			  if (! (nd->nd_type->tp_fund & T_DISCRETE) ||
