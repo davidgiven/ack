@@ -2,3 +2,4 @@ MACH=sun2
 SUF=o
 ASAR=aal
 RANLIB=:
+MACHFL=-O -DNFS

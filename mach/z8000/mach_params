@@ -2,3 +2,4 @@ MACH=z8000
 SUF=s
 ASAR=arch
 RANLIB=:
+MACHFL=-O -DUFS

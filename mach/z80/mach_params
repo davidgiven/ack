@@ -2,3 +2,4 @@ MACH=z80
 SUF=o
 ASAR=aal
 RANLIB=:
+MACHFL=-O -DUFS

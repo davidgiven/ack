@@ -2,3 +2,4 @@ MACH=i386
 SUF=o
 ASAR=aal
 RANLIB=:
+MACHFL=-O -DUFS

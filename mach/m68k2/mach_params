@@ -2,3 +2,4 @@ MACH=m68k2
 SUF=o
 ASAR=aal
 RANLIB=:
+MACHFL=-O -DUFS
