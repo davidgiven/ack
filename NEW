@@ -7,7 +7,7 @@ The major additions are:
 	- a much improved 8086 back-end; unfortunately still only
 	  small model
 	- floating point package, usable with most back-ends
-	- cross-compilation to a Microsoft Xenix V3 80286 system
+	- ported to Microsoft Xenix V3.2
 	- cross-compilation to a PC running Minix
 	- cross-compilation to an Atari ST running Minix
 
