@@ -17,10 +17,10 @@ void	LLmessage(int);
 #endif
 #ifdef LL_USERHOOK
 #if LL_ANSI_C
-static void	LLdoskip(int);
+static int	LLdoskip(int);
 static int	LLuserhook(int, int*);
 #else
-static		LLdoskip();
+static int	LLdoskip();
 static int	LLuserhook();
 #endif
 #endif
