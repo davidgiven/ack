@@ -475,9 +475,11 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	tkdef_p tdp;
 	result_t result;
 
+	DEBUG("RREMOVE");
 	getint(nodeno,codep);
 	result=compute(&enodes[nodeno]);
-	assert(result.e_typ==EV_REG);
+	if (result.e_typ!=EV_REG)
+		break;
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (tp->t_token==-1) {
 			if(tp->t_att[0].ar==result.e_v.e_reg)
