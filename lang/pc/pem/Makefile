@@ -19,7 +19,7 @@ pem:            pem.m
 pem.m:          pem.p $(HEAD)
 		-rm -f pem.m
 		-if apc -I$h -O -c.m pem.p ; then :; else \
-			acc -o move move.c ; move ; rm move move.[oskm] ; \
+			acc -o move move.c ; move ; rm -f move move.[oskm] ; \
 		fi
 
 cmp:		pem
@@ -29,8 +29,8 @@ install:	pem
 		cp pem $(PEM)
 
 distr:
-		ln pem.p pem22.p ; apc -mpdp -c.m -I$h pem22.p ; rm pem22.p
-		ln pem.p pem24.p ; apc -mvax2 -c.m -I$h pem24.p ; rm pem24.p
+		ln pem.p pem22.p ; apc -mpdp -c.m -I$h pem22.p ; rm -f pem22.p
+		ln pem.p pem24.p ; apc -mvax2 -c.m -I$h pem24.p ; rm -f pem24.p
 clean:
 		-rm -f pem pem.out *.[os] *.old
 
