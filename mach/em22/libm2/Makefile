@@ -1,7 +1,7 @@
 SUF=m
 MAKEFILE=../../proto/libg/Makefile
 MACHDEF="MACH=int22" "SUF=$(SUF)"
-M2DEF="PREF=pc" "SUB=" "SRC=lang/m2/libm2"
+M2DEF="PREF=m2" "SUB=" "SRC=lang/m2/libm2"
 
 install:
 	make -f $(MAKEFILE) $(M2DEF) $(MACHDEF) cp
