@@ -14,20 +14,17 @@ flt_arith2flt(n, e, uns)
 {
 	/*	Convert the arith "n" to a flt_arith "e".
 	*/
-	register int i;
 
 	if (!uns && n < 0) {
 		e->flt_sign = 1;
 		n = -n;
 	}
 	else	e->flt_sign = 0;
-	switch(sizeof(arith)) {
-	case 4:
-		e->m1 = n; e->m2 = 0; break;
-	default:
+	if (sizeof(arith) == 4) {
+		e->m1 = n; e->m2 = 0;
+	} else {
 		e->m1 = (n >> (sizeof(arith)*8 - 32)) & 0xFFFFFFFF;
 		e->m2 = n << 32;
-		break;
 	}
 	if (n == 0) {
 		e->flt_exp = 0;
