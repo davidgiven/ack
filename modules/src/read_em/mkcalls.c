@@ -455,7 +455,7 @@ EM_mkcalls(line)
 			}
 #endif
 			if (line->em_type == EM_MESARG) {
-				EM_docon(line->em_args);
+				EM_docon(line->em_arg);
 				break;
 			}
 			C_mes_end();
