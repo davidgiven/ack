@@ -29,6 +29,7 @@ typedef struct class *class_p;
 #define CLASS9	9
 #define CLASS10 10
 #define CLASS11	11
+#define CLASS12	12
 
 #include "classdefs.h"
 /* The file classdefs.h contains the table classtab. It is
@@ -66,6 +67,7 @@ STATIC bool uses_arg(class)
 		case CLASS3:
 		case CLASS4:
 		case CLASS11:
+		case CLASS12:
 			return TRUE;
 		default:
 			return FALSE;
@@ -180,6 +182,9 @@ STATIC offset nrbytes(class,arg1,arg2)
 			break;
 		case CLASS11:
 			n = arg1 + 2*ps;
+			break;
+		case CLASS12:
+			n = (arg1 < ws ? ws : arg1);
 			break;
 		default:
 			assert(FALSE);
