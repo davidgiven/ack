@@ -2,7 +2,7 @@
 #include <out.h>
 #include "data.h"
 
-output()
+output_back()
 /* Dump the tables.
  * Notice : entries in the symbol_table are converted.
  */
