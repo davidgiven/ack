@@ -6,8 +6,8 @@
 
 #include "ip_spec.h"
 #include <stdio.h>
-#include "../../h/em_spec.h"
-#include "../../h/em_flag.h"
+#include <em_spec.h>
+#include <em_flag.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Header$" ;

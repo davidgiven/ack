@@ -5,7 +5,7 @@ h=$d/h
 m=$d/man
 ASS_PATH=$l/em_ass
 
-CFLAGS=-O
+CFLAGS=-O -I$d/h
 
 all:            ass
 

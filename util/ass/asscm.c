@@ -102,9 +102,9 @@ freearea(ptr,size) register area_t ptr ; unsigned size ; {
 	/* Beware they may both point to freehead */
 
 #ifdef MEMUSE
-	if ( ((char *)l_ptr)+l_ptr->f_size> (char *)ptr && l_ptr<=ptr )
+	if ( ((char *)l_ptr)+l_ptr->f_size> (char *)ptr && (char *)l_ptr<=(char *)ptr )
 		fatal("Double freed") ;
-	if ( ((char *)ptr)+size > (char *)c_ptr && ptr<=c_ptr )
+	if ( ((char *)ptr)+size > (char *)c_ptr && (char *)ptr<=(char *)c_ptr )
 		fatal("Frreed double") ;
 #endif
 	/* Is the block before this one adjacent ? */

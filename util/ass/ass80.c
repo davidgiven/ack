@@ -6,7 +6,7 @@
 
 #include        "ass00.h"
 #include        "assex.h"
-#include        "../../h/em_path.h"
+#include        <em_path.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Header$" ;

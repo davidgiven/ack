@@ -3,11 +3,11 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <stdio.h>
-#include "../../h/em_spec.h"
-#include "../../h/as_spec.h"
-#include "../../h/em_flag.h"
-#include "../../h/arch.h"
-#include "../../h/local.h"
+#include <em_spec.h>
+#include <as_spec.h>
+#include <em_flag.h>
+#include <arch.h>
+#include <local.h>
 
 #define	RCS_ASS	"$Header$"
 

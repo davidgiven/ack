@@ -6,9 +6,9 @@
 
 #include        "ass00.h"
 #include        "assex.h"
-#include        "../../h/em_mes.h"
-#include        "../../h/em_pseu.h"
-#include        "../../h/em_ptyp.h"
+#include        <em_mes.h>
+#include        <em_pseu.h>
+#include        <em_ptyp.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Header$" ;
