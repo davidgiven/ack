@@ -4,7 +4,6 @@
  */
 
 #include "bem.h"
-#include <em_path.h>
 
 #ifndef NORSCID
 static char rcs_id[] = "$Header$";
@@ -21,7 +20,6 @@ initialize()
 	register char *cindex, *cptr;
         int result1, result2;
 
-	(void) sprint(tmpfname,"%s/abc%d",TMP_DIR,getpid());
 	/* Find the basename */
 	/* Strip leading directories */
 	cindex= (char *)0;

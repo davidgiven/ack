@@ -44,7 +44,6 @@ extern char	*inpfile;		/* input tko compiler */
 extern char	*outfile;		/* output from compiler */
 
 extern char	datfname[MAXFILENAME];	/* data statements file */
-extern char	tmpfname[MAXFILENAME];	/* temporary statements file */
 
 extern File	*emfile;		/* EM output file */
 extern File	*datfile;		/* data file */

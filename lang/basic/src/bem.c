@@ -28,7 +28,6 @@ static char rcs_graph[]	= RCS_GRAPH ;
 char	*program;
 
 char	datfname[MAXFILENAME] ;
-char	tmpfname[MAXFILENAME] ;
 
 char	*inpfile, *outfile;
 int	BEMINTSIZE = EMINTSIZE;
