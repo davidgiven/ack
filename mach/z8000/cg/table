@@ -679,7 +679,7 @@ lil adp dup sil $1==$4 && $3==2 && $2==1	| |
 				move( {im2, 0}, %[a.1] )
 				"inc *%[a]"
 				setcc({ir2, %[a]})	| {ir2,%[a]} | |
-lol lol adp stl $1==$2 && $2==$4 && $3>0 && $3<=16	| |
+lol dup adp stl $1==$4 && $2==2 && $3>0 && $3<=16	| |
 			allocate( REG = {x2, LB, $1} )
 			remove( x2, %[xreg]==LB && %[ind]==$1 )
 			remove( x4, %[xreg]==LB &&
@@ -690,7 +690,7 @@ lol lol adp stl $1==$2 && $2==$4 && $3>0 && $3<=16	| |
 			remove( ind_access )
 			"inc $1(R13), $$$3"
 			setcc({x2, LB, $1})		| %[a]	| |
-lol lol adp stl $1==$2 && $2==$4 && $3<0 && $3>=0-16	| |
+lol dup adp stl $1==$4 && $2==2 && $3<0 && $3>=0-16	| |
 			allocate( REG = {x2, LB, $1} )
 			remove( x2, %[xreg]==LB && %[ind]==$1 )
 			remove( x4, %[xreg]==LB &&
@@ -701,14 +701,14 @@ lol lol adp stl $1==$2 && $2==$4 && $3<0 && $3>=0-16	| |
 			remove( ind_access )
 			"dec $1(R13), $$0-$3"
 			setcc({x2, LB, $1})		| %[a]	| |
-loe loe adp ste $1==$2 && $2==$4 && $3>0 && $3<=16	| |
+loe dup adp ste $1==$4 && $2==2 && $3>0 && $3<=16	| |
 			allocate( REG = {da2, $1} )
 			remove( da )
 			remove( indexed, %[xreg]!=LB )
 			remove( ind_access )
 			"inc $1, $$$3"
 			setcc({da2, $1})		| %[a]	| |
-loe loe adp ste $1==$2 && $2==$4 && $3<0 && $3>=0-16	| |
+loe dup adp ste $1==$2 && $2==2 && $3<0 && $3>=0-16	| |
 			allocate( REG = {da2, $1} )
 			remove( da )
 			remove( indexed, %[xreg]!=LB )
