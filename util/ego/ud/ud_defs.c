@@ -22,9 +22,6 @@
 #include "../share/alloc.h"
 #include "../share/aux.h"
 
-#define BODY_KNOWN(p)	(p->p_flags1 & (byte) PF_BODYSEEN)
-#define CHANGE_INDIR(p)	(p->p_change->c_flags & CF_INDIR)
-
 short nrdefs;		/* total number of definitions */
 short nrexpldefs;	/* number of explicit definitions */
 line_p *defs;

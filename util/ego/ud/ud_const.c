@@ -6,7 +6,7 @@
 /* C O N S T A N T   P R O P A G A T I O N */
 
 #include "../share/types.h"
-#include "../ud/ud.h"
+#include "ud.h"
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/alloc.h"
@@ -18,14 +18,12 @@
 #include "../../../h/em_mnem.h"
 #include "../../../h/em_pseu.h"
 #include "../../../h/em_spec.h"
-#include "../ud/ud_defs.h"
+#include "ud_defs.h"
 #include "ud_const.h"
 #include "ud_aux.h"
 
 
-#define CHANGE_INDIR(p)	(p->p_change->c_flags & CF_INDIR)
 #define IS_REG(v)	(locals[TO_LOCAL(v)]->lc_flags & LCF_REG)
-#define BODY_KNOWN(p)	(p->p_flags1 & (byte) PF_BODYSEEN)
 #define CALLS_UNKNOWN(p) (p->p_flags1 & (byte) PF_CALUNKNOWN)
 
 
