@@ -1,5 +1,5 @@
 /* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
- * For full copyright amd restrictions on use see the file COPYING in the top
+ * For full copyright and restrictions on use see the file COPYING in the top
  * level of the LLgen tree.
  */
 
