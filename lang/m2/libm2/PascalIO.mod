@@ -30,7 +30,7 @@ IMPLEMENTATION MODULE PascalIO;
   VAR	ibuf, obuf: IOBuf;
 	head: Text;
 
-  PROCEDURE Reset(Filename: ARRAY OF CHAR; VAR InputText: Text);
+  PROCEDURE Reset(VAR InputText: Text; Filename: ARRAY OF CHAR);
   BEGIN
 	doclose(InputText);
 	getstruct(InputText);
@@ -48,7 +48,7 @@ IMPLEMENTATION MODULE PascalIO;
 	END;
   END Reset;
 
-  PROCEDURE Rewrite(Filename: ARRAY OF CHAR; VAR OutputText: Text);
+  PROCEDURE Rewrite(VAR OutputText: Text; Filename: ARRAY OF CHAR);
   BEGIN
 	doclose(OutputText);
 	getstruct(OutputText);

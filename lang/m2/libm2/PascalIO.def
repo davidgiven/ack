@@ -16,14 +16,14 @@ DEFINITION MODULE PascalIO;
 				*)
   VAR	Notext: Text;		(* Initialize your Text variables with this *)
 
-  PROCEDURE Reset(Filename: ARRAY OF CHAR; VAR InputText: Text);
+  PROCEDURE Reset(VAR InputText: Text; Filename: ARRAY OF CHAR);
   (* When InputText indicates an open textfile, it is first flushed
      and closed. Then, the file indicated by "Filename" is opened for reading.
      If this fails, a runtime error results. Otherwise, InputText is
      associated with the new input file.
   *)
 
-  PROCEDURE Rewrite(Filename: ARRAY OF CHAR; VAR OutputText: Text);
+  PROCEDURE Rewrite(VAR OutputText: Text; Filename: ARRAY OF CHAR);
   (* When OutputText indicates an open textfile, it is first flushed
      and closed. Then, the file indicated by "Filename" is opened for writing.
      If this fails, a runtime error results. Otherwise, OutputText is
