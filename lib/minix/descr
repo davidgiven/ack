@@ -13,7 +13,8 @@ var MRT=lib/minix/head_
 var MLIB=lib/minix/tail_
 var CPP_F=-Dunix -DACK -Di8088
 var INCLUDES=-I{EM}/lib/minix/include -I{EM}/include/_tail_cc
-var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
+var ALIGN=-a0:2 -a1:16 -a2:2 -a3:2
+var CC_ALIGN=-VS2U2
 name be
 	from .m.g
 	to .s
