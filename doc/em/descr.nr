@@ -114,8 +114,7 @@ then fetch the new PC from the list of instruction pointers by indexing with
 index-lower.
 The table does not contain the value of the upper bound,
 but the value of upper-lower as an unsigned integer.
-If the index is out of bounds or if the fetched pointer is 0,
-then fetch the default instruction pointer.
+The default instruction pointer is used when the index is out of bounds.
 If the resulting PC is 0, then trap.
 .P
 CSB selects the new PC by searching.
