@@ -22,8 +22,13 @@ DoOption(text)
 	extern char *mflags;
 	extern char *suff;
 	extern char *compiler;
+	extern char *llibs;
 
 	switch(*text++)	{
+
+	case 'L' :
+		AddLibDir(text);
+		break;
 
 	case 'I' :
 		AddInclDir(text);
@@ -39,6 +44,22 @@ DoOption(text)
 
 	case 'S':
 		suff = text;
+		break;
+
+	case 'l':
+		{	static unsigned int liblen = 0;
+			unsigned int len = strlen(text) + 4;
+			
+			if (liblen) {
+				llibs = Realloc(llibs, liblen += len);
+			}
+			else {
+				llibs = Malloc(liblen = len);
+				*llibs = '\0';
+			}
+			strcat(llibs,"\\\n\t");
+			strcat(llibs, text);
+		}
 		break;
 
 	default:
@@ -70,5 +91,14 @@ AddInclDir(text)
 
 		DEFPATH[i++] = new;
 		new = tmp;
+	}
+}
+
+AddLibDir(text)
+	char *text;
+{
+	if (*text) {
+		set_libdir(ndirs);
+		AddInclDir(text);
 	}
 }

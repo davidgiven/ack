@@ -76,6 +76,7 @@ static struct file_list *arglist;
 char *mflags = "";
 char *compiler = "ack";
 char *suff = "o";
+char *llibs = 0;
 
 main(argc, argv)
 	register char **argv;
@@ -104,7 +105,7 @@ main(argc, argv)
 	for (i = 1; i < nDEF; i++) {
 		print(" -I%s", DEFPATH[i]);
 	}
-	print("\nM2FLAGS = %s\nMOD = %s\nSUFFIX = %s\n", mflags, compiler, suff);
+	print("\nM2FLAGS = %s\nMOD = %s\nSUFFIX = %s\nLIBS = %s\n", mflags, compiler, suff, llibs ? llibs : "");
 	init_lib();
 	ProcessArgs();
 	find_dependencies();
@@ -157,18 +158,10 @@ openfile(a)
 	register struct file_list *a;
 {
 	char *fn;
-	register struct file_list *p, *prev = 0;
 
-	if (! InsertFile(f_filename(a), DEFPATH, &fn)) {
+	if (!f_notfound(a) && ! InsertFile(f_filename(a), DEFPATH, &fn)) {
+		a->a_notfound = 1;
 		Gerror("Could not find %s", f_filename(a));
-		f_walk(arglist, p) {
-			if (p == a) {
-				if (! prev) arglist = p->a_next;
-				else prev->a_next = a->a_next;
-				break;
-			}
-			prev = p;
-		}
 		return 0;
 	}
 	FileName = fn;
@@ -240,7 +233,7 @@ find_dependencies()
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(arg);
 
-			if (id) {
+			if (! f_notfound(arg) && id) {
 				if (id->id_type == PROGRAM) {
 					*dotspot = 0;
 					print("%s ", fn);
@@ -331,7 +324,7 @@ print_dep()
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(arg);
 
-			if (id) {
+			if (! f_notfound(arg) && id) {
 				char *obj = object(arg);
 				register struct file_list *a;
 
@@ -388,7 +381,7 @@ module_in_arglist(n)
 	f_walk(arglist, a) {
 		char *dotp = strrindex(f_filename(a), '.');
 
-		if (dotp && strcmp(dotp, ".mod") == 0) {
+		if (dotp && strcmp(dotp, ".mod") == 0 && ! f_notfound(a)) {
 			*dotp = 0;
 			if (strcmp(f_filename(a), n) == 0) {
 				*dotp = '.';
@@ -417,14 +410,14 @@ pr_prog_dep(id, a)
 		if (module_in_arglist(f_filename(p)) || ! f_dir(p)) {
 			/* nothing */
 		}
-		else if (! is_library_dir(f_dir(p)))  {
+		else if (! is_library_dir(f_dir(p))) {
 			print(" \\\n\t%s/%s", f_dir(p), object(p));
 		}
 	}
 	print("\n\n");
 	print("o_files:\t$(OBS_%s)\n\n", id->id_text);
 	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
-	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
+	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
 }
 
 programs()
@@ -437,7 +430,7 @@ programs()
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(a);
 
-			if (id && id->id_type == PROGRAM) {
+			if (! f_notfound(a) && id && id->id_type == PROGRAM) {
 				prog_dep(id, a);
 				/* *dotspot = 0; */
 				pr_prog_dep(id, a);

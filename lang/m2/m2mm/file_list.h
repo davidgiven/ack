@@ -12,6 +12,7 @@ struct file_list {
 	char		*a_dir;		/* directory in which it resides */
 	struct idf	*a_idf;		/* its idf-structure */
 	struct file_list *a_next;	/* next in list */
+	char		a_notfound;	/* could not open ... */
 };
 
 #define f_walk(list, ctrl) \
@@ -20,3 +21,4 @@ struct file_list {
 #define f_filename(a)	((a)->a_filename)
 #define f_idf(a)	((a)->a_idf)
 #define f_dir(a)	((a)->a_dir)
+#define f_notfound(a)	((a)->a_notfound)
