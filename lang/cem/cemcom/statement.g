@@ -138,9 +138,6 @@ if_statement
 	'('
 	expression(&expr)
 		{
-#ifdef DEBUG
-		print_expr("expr in IF", expr);
-#endif DEBUG
 			opnd2test(&expr, IF);
 			if (is_cp_cst(expr))	{
 				/*	The comparison has been optimized
@@ -361,7 +358,7 @@ switch_statement
 		{
 			code_startswitch(&expr);
 #ifdef	LINT
-			start_switch_part(expr);
+			start_switch_part(is_cp_cst(expr));
 #endif	LINT
 		}
 	')'

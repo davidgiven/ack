@@ -8,7 +8,7 @@
 
 !File: errout.h
 #define	ERROUT		STDERR	/* file pointer for writing messages	*/
-#define	ERR_SHADOW	5	/* a syntax error overshadows error messages
+#define	ERR_SHADOW	0	/* a syntax error overshadows error messages
 					until ERR_SHADOW symbols have been
 					accepted without syntax error */
 

@@ -3,6 +3,7 @@
 
 # Machine and environ dependent definitions
 EMHOME = ../../..
+EMHOME = /usr/proj/em/Work#???
 MKDEP = $(EMHOME)/bin/mkdep
 PRID = $(EMHOME)/bin/prid
 CID = $(EMHOME)/bin/cid
@@ -141,6 +142,13 @@ LINTFLAGS =
 .str.h:
 	./make.allocd <$*.str >$*.h
 
+LINTTEST:	#???
+	make Lnt
+#	../lpass2/lint -Dunix -DMINIX /usr/star/ast/minix/tape3/commands/make/*.c
+	./lnt -h -Dlint --x s.c #x46.c #ceriel.c #m.c #lithm.c # fig4.c
+#	(cd ../lpass2; make lint.test)
+#	./lnt -Dmc68000 -I/usr/em/h -I/usr/em/modules/h -I/usr/em/modules/pkg u.c
+
 Main:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)main ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve main ; fi'
 	@rm -f nmclash.o a.out
@@ -161,7 +169,6 @@ CEmain:	Cfiles
 
 Lnt:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'
-	make "EMHOME="$(EMHOME) $(CURRDIR)lnt
 	@rm -f nmclash.o a.out
 
 install:	Main

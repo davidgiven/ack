@@ -38,7 +38,11 @@ declaration
 :
 	{Ds = null_decspecs;}
 	decl_specifiers(&Ds)
-	init_declarator_list(&Ds)?
+	[%default		/* missing identifier derailed parser */
+		init_declarator_list(&Ds)
+	|
+		empty
+	]
 	';'
 ;
 

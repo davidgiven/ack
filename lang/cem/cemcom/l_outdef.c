@@ -516,7 +516,10 @@ fill_arg(e)
 		arg->ar_class = ArgConst;
 		arg->CAA_VALUE = e->VL_VALUE;
 	}
-	else if (e->ex_class == Value && e->VL_CLASS == Label) {
+	else if (	e->ex_type == string_type
+		&&	e->ex_class == Value
+		&&	e->VL_CLASS == Label
+		) {
 		/* it may be a string; let's look it up */
 		register struct string_cst *sc = str_list;
 

@@ -6,7 +6,7 @@
 
 /*
  *The following functions are hacked to null-functions (i.e. they
- * do nothing). This needs another solution in the future.
+ * do nothing). This needs another solution in the future. !!???!!
  */
 #include	"lint.h"
 
@@ -29,17 +29,13 @@ CC_crdlb(ps_xxx,v,s) label v; arith s; {}
 /* ARGSUSED */
 CC_crdnam(ps_xxx,v,s) char *v; arith s; {}
 /* ARGSUSED */
-CC_crfcon(ps_xxx,v,s) char *v; arith s; {}
-/* ARGSUSED */
-CC_cricon(ps_xxx,v,s) char *v; arith s; {}
+CC_crxcon(op,ps_xxx,v,s) char *v; arith s; {}
 /* ARGSUSED */
 CC_crilb(ps_xxx,v) label v; {}
 /* ARGSUSED */
 CC_crpnam(ps_xxx,v) char *v; {}
 /* ARGSUSED */
 CC_crscon(ps_xxx,v,s) char *v; arith s; {}
-/* ARGSUSED */
-CC_crucon(ps_xxx,v,s) char *v; arith s; {}
 /* ARGSUSED */
 CC_cst(l) {}
 /* ARGSUSED */

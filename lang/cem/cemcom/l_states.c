@@ -149,6 +149,7 @@ lint_1_local(idf, def)
 
 	if (	(sc == STATIC || sc == LABEL)
 	&&	!def->df_used
+	&&	!is_anon_idf(idf)
 	) {
 		def_warning(def, "%s %s not used anywhere in function %s",
 			symbol2str(sc), idf->id_text, func_name);
@@ -159,6 +160,7 @@ lint_1_local(idf, def)
 	&&	!def->df_initialized
 	&&	def->df_firstbrace != 0
 	&&	def->df_minlevel != level
+	&&	!is_anon_idf(idf)
 	) {
 		register int diff = def->df_minlevel - level;
 
@@ -212,18 +214,22 @@ lint_1_global(idf, def)
 
 		if (sc == STATIC && !def->df_used) {
 			if (def->df_set) {
-				def_warning(def,
-					"%s %s %s set but not used",
-					symbol2str(sc),
-					symbol2str(fund),
-					idf->id_text);
+				if (!is_anon_idf(idf) && fund != ERRONEOUS) {
+					def_warning(def,
+						"%s %s %s set but not used",
+						symbol2str(sc),
+						symbol2str(fund),
+						idf->id_text);
+				}
 			}
 			else {
-				def_warning(def,
-					"%s %s %s not used anywhere",
-					symbol2str(sc),
-					symbol2str(fund),
-					idf->id_text);
+				if (!is_anon_idf(idf) && fund != ERRONEOUS) {
+					def_warning(def,
+						"%s %s %s not used anywhere",
+						symbol2str(sc),
+						symbol2str(fund),
+						idf->id_text);
+				}
 			}
 		}
 		if (loptions['x']) {
@@ -235,6 +241,8 @@ lint_1_global(idf, def)
 			&&	!def->df_initialized
 			&&	!def->df_used
 			&&	strcmp(&fn[strlen(fn)-2], ".c") == 0
+			&&	!is_anon_idf(idf)
+			&&	fund != ERRONEOUS
 			) {
 				def_warning(def,
 					"%s %s %s not used anywhere",
@@ -300,9 +308,11 @@ change_state(idf, to_state)
 		break;
 	case USED:
 		if (!a->ad_set) {
-			warning("%s%s uninitialized", idf->id_text,
-				(a->ad_maybe_set ? " possibly" : "")
-			);
+			if (!is_anon_idf(idf)) {
+				warning("%s%s uninitialized", idf->id_text,
+					(a->ad_maybe_set ? " possibly" : "")
+				);
+			}
 			a->ad_maybe_set = 0;
 			a->ad_set = 1;	/* one warning */
 		}
@@ -351,7 +361,7 @@ check_autos()
 
 	ASSERT(!(a && a->ad_def->df_level > level));
 	while (a && a->ad_def->df_level == level) {
-		if (!a->ad_used) {
+		if (!a->ad_used && !is_anon_idf(a->ad_idf)) {
 			if (a->ad_set || a->ad_maybe_set) {
 				def_warning(a->ad_def,
 					"%s set but not used in function %s",
@@ -384,6 +394,7 @@ lint_end_formals()
 
 		if (	(def && !def->df_used)
 		&&	!(f_ARGSUSED || LINTLIB)
+		&&	!is_anon_idf(se->se_idf)
 		) {
 			def_warning(def, "argument %s not used in function %s",
 					se->se_idf->id_text, func_name);
@@ -839,8 +850,7 @@ lint_continue_stmt()
 
 /******** A C T I O N S : S W I T C H ********/
 
-start_switch_part(expr)
-	struct expr *expr;
+start_switch_part(const)
 {
 /* ls_current of a SWITCH entry has different meaning from ls_current of
  * other entries. It keeps track of which variables are used in all
@@ -850,7 +860,7 @@ start_switch_part(expr)
 	register struct lint_stack_entry *new = mk_lint_stack_entry(SWITCH);
 
 	dbg_lint_stack("start_switch_part");
-	if (is_cp_cst(expr))
+	if (const)
 		hwarning("value in switch statement is constant");
 
 	new->LS_CASE = copy_state(top_ls->ls_current, level);
@@ -859,7 +869,6 @@ start_switch_part(expr)
 	top_ls->ls_current->st_notreached = 1;
 	top_ls->ls_current->st_warned = 0;
 	lint_push(new);
-	lint_expr(expr, USED);	/*???*/
 }
 
 end_switch_stmt()
@@ -1085,6 +1094,7 @@ lint_return_stmt(e)
 		if (	e == NOVALRETURNED
 		&&	!func_notypegiven
 		&&	fund != VOID
+		&&	fund != ERRONEOUS
 		) {
 			warning("function %s declared %s%s but no value returned",
 				func_name,
