@@ -5,7 +5,12 @@
  */
 #include "object.h"
 
+extern int __sectionnr;
+
 wr_putc(ch)
 {
-	OUTBYTE(PARTEMIT, ch);
+	register struct fil *ptr = &__parts[PARTEMIT+getsect(__sectionnr)];
+
+	if (ptr->cnt == 0) __wr_flush(ptr);
+	ptr->cnt--; *ptr->pnow++ = ch;
 }

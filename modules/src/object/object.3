@@ -2,7 +2,7 @@
 .ad
 .SH NAME
 wr_open, wr_close, wr_ohead, wr_sect, wr_outsect, wr_emit, wr_putc, wr_relo,
-wr_name, wr_string, wr_arhdr, wr_ranlib, wr_int2, wr_long, wr_bytes, wr_fd,
+wr_name, wr_string, wr_arhdr, wr_ranlib, wr_int2, wr_long, wr_bytes,
 rd_open, rd_fdopen, rd_close, rd_ohead, rd_sect, rd_outsect,
 rd_emit, rd_relo, rd_rew_relo, rd_name, rd_string, rd_arhdr, rd_ranlib,
 rd_int2, rd_unsigned2, rd_long, rd_bytes, rd_fd\ \-\ routines to read
@@ -81,8 +81,6 @@ and write ACK-object files and libraries
 .B char *buf;
 .br
 .B long l;
-.PP
-.B int wr_fd()
 .PP
 .B int rd_open(filename)
 .br
@@ -260,9 +258,6 @@ bytes from
 .I buf
 to file descriptor
 .IB fd .
-.PP
-.I Wr_fd
-returns the current output file descriptor.
 .PP
 Most of the
 .I rd_

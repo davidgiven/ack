@@ -26,7 +26,8 @@ struct fil		__parts[NPARTS];
 static int		outfile;
 static long		currpos;
 #endif
-static int		sectionnr;
+int			__sectionnr;
+#define sectionnr	__sectionnr
 static int		offcnt;
 
 __wr_flush(ptr)
@@ -40,7 +41,7 @@ __wr_flush(ptr)
 #endif
 		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
 		ptr->currpos += ptr->pnow - ptr->pbegin;
-		if (ptr == &__parts[PARTEMIT]) {
+		if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 			offset[sectionnr] = ptr->currpos;
 		}
 	}
@@ -70,7 +71,7 @@ static OUTWRITE(p, b, n)
 			n -= i;
 			b += i;
 			ptr->currpos += i;
-			if (ptr == &__parts[PARTEMIT]) {
+			if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 				offset[sectionnr] = ptr->currpos;
 			}
 		}
@@ -93,7 +94,7 @@ static OUTWRITE(p, b, n)
 			b += m;
 			n &= WBUFSIZ - 1;
 			ptr->currpos += m;
-			if (ptr == &__parts[PARTEMIT]) {
+			if (ptr < &__parts[PARTEMIT+SECTCNT]) {
 				offset[sectionnr] = ptr->currpos;
 			}
 		}
@@ -126,6 +127,8 @@ static BEGINSEEK(p, o)
 #else
 	ptr->currpos = lseek(ptr->fd, o, 0);
 #endif
+	if (p >= PARTRELO) o = 0;	/* no attempt to align writes
+					   for the time being */
 	ptr->cnt = WBUFSIZ - ((int)o & (WBUFSIZ-1));
 	ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
 	ptr->pnow = ptr->pbegin;
@@ -170,15 +173,6 @@ wr_close()
 	close(outfile);
 	outfile = -1;
 #endif /* OUTSEEK */
-}
-
-wr_fd()
-{
-#ifdef OUTSEEK
-	return outfile;
-#else
-	return __parts[PARTEMIT].fd;
-#endif
 }
 
 wr_ohead(head)
@@ -239,6 +233,9 @@ wr_sect(sect, cnt1)
 			put4(sect->os_size, c);	c += 4;
 			put4(sect->os_foff, c);	c += 4;
 		}
+		if (offcnt >= 1 && offcnt < SECTCNT) {
+			BEGINSEEK(PARTEMIT+offcnt, sect->os_foff);
+		}
 		offset[offcnt++] = sect->os_foff;
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 		if (sizeof(struct outsect) != SZ_SECT)
@@ -262,10 +259,9 @@ wr_sect(sect, cnt1)
 wr_outsect(s)
 	int		s;	/* section number */
 {
-	register struct fil *ptr = &__parts[PARTEMIT];
+	register struct fil *ptr = &__parts[PARTEMIT + getsect(sectionnr)];
 
-	if (s != sectionnr &&
-	    offset[s] != ptr->currpos + (ptr->pnow - ptr->pbegin)) {
+	if (s != sectionnr && s >= (SECTCNT-1) && sectionnr >= (SECTCNT-1)) {
 #ifdef OUTSEEK
 		if (currpos != ptr->currpos) 
 			currpos = lseek(ptr->fd, ptr->currpos, 0);
@@ -276,7 +272,9 @@ wr_outsect(s)
 #endif
 		ptr->currpos += ptr->pnow - ptr->pbegin;
 		offset[sectionnr] = ptr->currpos;
-		ptr->currpos = lseek(ptr->fd, offset[s], 0);
+		if (offset[s] != ptr->currpos) {
+			ptr->currpos = lseek(ptr->fd, offset[s], 0);
+		}
 		ptr->cnt = WBUFSIZ - ((int)offset[s] & (WBUFSIZ-1));
 		ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
 		ptr->pnow = ptr->pbegin;
@@ -291,7 +289,7 @@ wr_emit(emit, cnt)
 	char		*emit;
 	long		cnt;
 {
-	OUTWRITE(PARTEMIT, emit, cnt);
+	OUTWRITE(PARTEMIT + getsect(sectionnr) , emit, cnt);
 }
 
 wr_relo(relo, cnt)

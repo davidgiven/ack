@@ -11,6 +11,13 @@ extern long		lseek();
 /*
  * Parts of the output file.
  */
+#undef PARTEMIT
+#undef PARTRELO
+#undef PARTNAME
+#undef PARTCHAR
+#undef PARTDBUG
+#undef NPARTS
+
 #define	PARTEMIT	0
 #define	PARTRELO	1
 #define	PARTNAME	2

@@ -36,6 +36,7 @@
 #define put4(l, c)	(* ((long *) (c)) = (l))
 #endif
 
+#define SECTCNT	3	/* number of sections with own output buffer */
 #if BIGMACHINE
 #define WBUFSIZ	(8*BUFSIZ)
 #else
@@ -55,17 +56,15 @@ struct fil {
 
 extern struct fil __parts[];
 
-#define OUTBYTE(p, b)	{if (__parts[p].cnt == 0) __wr_flush(&__parts[p]);\
-			 __parts[p].cnt--; *__parts[p].pnow++ = (b);}
-
 #define	PARTEMIT	0
-#define	PARTRELO	1
-#define	PARTNAME	2
-#define	PARTCHAR	3
+#define	PARTRELO	(PARTEMIT+SECTCNT)
+#define	PARTNAME	(PARTRELO+1)
+#define	PARTCHAR	(PARTNAME+1)
 #ifdef SYMDBUG
-#define PARTDBUG	4
+#define PARTDBUG	(PARTCHAR+1)
 #else
-#define PARTDBUG	3
+#define PARTDBUG	(PARTCHAR+0)
 #endif
 #define	NPARTS		(PARTDBUG + 1)
 
+#define getsect(s)      (PARTEMIT+((s)>=(SECTCNT-1)?(SECTCNT-1):(s)))
