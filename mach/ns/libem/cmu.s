@@ -7,7 +7,7 @@
 
 	.sect .text
 
-.cmu:	movd tos, r7		!return addres
+.cmu:	movd tos, r3		!return addres
 	addr 4(sp), r1
 	movd r1, r2
 	addd 0(sp), r2
@@ -24,7 +24,7 @@
 	xord r1, r1
 4:
 	adjspd r0
-	movd r7, tos
+	movd r3, tos
 	ret 0
 1:	
 	movd 1, r1

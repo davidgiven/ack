@@ -7,7 +7,7 @@
 
 	.sect .text
 
-.cms:	movd tos, r7		!return addres
+.cms:	movd tos, r3		!return addres
 	addr 4(sp), r1
 	movd r1, r2
 	addd 0(sp), r2
@@ -23,7 +23,7 @@
 	xord r1, r1
 4:
 	adjspd r0
-	movd r7, tos
+	movd r3, tos
 	ret 0
 2:
 	movd 1, r1

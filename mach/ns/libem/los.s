@@ -8,7 +8,7 @@
 	.sect .text
 
 .los:
-	movd tos, r7
+	movd tos, r3
 	movd tos, r0
 	movd tos, r1
 	cmpqd 1, r0
@@ -21,7 +21,7 @@
 	movd 0(r1), tos
 	acbd -4, r0, 3b
 4:
-	movd r7, tos
+	movd r3, tos
 	ret 0
 1:	
 	movzbd 0(r1), tos

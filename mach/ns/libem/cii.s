@@ -7,9 +7,9 @@
 
 	.sect .text
 
-!r7 will save return addres
+!r3 will save return addres
 .cii:	
-	movd tos, r7
+	movd tos, r3
 	cmpqd 4, tos
 	bne 3f
 	movd tos, r0
@@ -23,7 +23,7 @@
 	movd EILLINS, tos
 	jsr @.trp
 4:
-	movd r7, tos
+	movd r3, tos
 	ret 0
 1:	
 	movxbd 0(sp), 0(sp)

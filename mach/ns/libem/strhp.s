@@ -6,9 +6,9 @@
 
 
 .strhp:
-	movd    tos,r7
+	movd    tos,r3
 	movd    tos,r0
-	movd	r7,tos
+	movd	r3,tos
 	movd    r0,@.reghp
 !	cmpd    r0,@.limhp
 !	blo	I2

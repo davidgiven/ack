@@ -10,7 +10,6 @@
 !r0 contains index
 !r1 contains pointer to csb descriptor
 .csb:
-	save[r2,r3]
 	movd 4(r1), r2		!number of entries
 	cmpqd 0, r2
 	beq 3f
@@ -23,7 +22,6 @@
 3:				!r1 now contains right pointer
 	cmpqd 0, 0(r1)		!test destination addres
 	beq 4f
-	restore[r2,r3]
 	movd 0(r1), tos		!jump to destination
 	ret 4
 2:
@@ -32,5 +30,4 @@
 4:
 	movd ECASE, tos
 	jsr @.trp
-	restore[r2,r3]
 	ret 0
