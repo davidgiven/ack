@@ -16,7 +16,6 @@ flt_flt2arith(e, uns)
 	*/
 	arith	n;
 	struct flt_mantissa a;
-	register int i;
 
 	if (uns) uns = 1;
 	flt_status = 0;
