@@ -160,9 +160,11 @@ MEM_ALL		=  ALL - DATAREG - DATAREG4 - ADDREG - IMMEDIATE - IMMEDIATE4
 ALL_ACCESSIBLE	=  IADDREG + IADDREG4 + IADDREG1 + INDEXED + INDEXED4
 
 ANY1		=  DISPL1 + ABS1 + IADDREG1
-DATA_ALT_1OR2	=  DATA_ALT + ANY1
+DATA_ALT1	=  ANY1
+DATA_ALT_1OR2	=  DATA_ALT + DATA_ALT1
 
 
+REG4		=  DATAREG4 + ADDREG
 DATA4		=  DATAREG4 + IADDREG4 + DISPL4 + INDEXED4 +
 		   ABS4     +  IMMEDIATE4 + DOUBLE
 MEMORY4		=  DATA4 - DATAREG4
@@ -228,15 +230,30 @@ lae | | | {EXTERNAL_ADDR,$1} | |
 /* For the lxl and lxa instructions we assume that the static link
  * (i.e. a pointer to the LB of the lexically enclosing subprogram)
  * is passed as zero-th actual parameter. The distance (in bytes)
- * between LB and the zero-th parameter is the constant 8
+ * between LB and the zero-th parameter is the constant EM_BSIZE
  */
 
 lxl $1 == 0 | | | LB | |
-lxl $1>=1	| STACK | 
-			"move.w #$1,-(sp)"
-			"jsr .lxl"	| A0	| |
-lxa | STACK |		"move.w #$1,-(sp)"
-			"jsr .lxa"	| A0	| |
+lxl $1 == 1 | | | {DISPL4,LB,8} | |
+lxl $1>1    | |
+		allocate(ADDREG,DATAREG = {IMMEDIATE,$1-1})
+		"move.l a6,%[a]"
+		"1:"
+		"move.l 8(%[a]),%[a]"
+		"dbf %[b],1b"
+		erase(%[b])	| %[a] | |
+lxa $1 == 0 | |	
+		allocate(ADDREG = {IMMEDIATE4,8})
+		"add.l a6,%[a]"
+		erase(%[a])		| %[a] | |
+lxa $1 > 0 | |
+		allocate(ADDREG, DATAREG = {IMMEDIATE,$1-1})
+		"move.l a6,%[a]"
+		"1:"
+		"move.l 8(%[a]),%[a]"
+		"dbf %[b],1b"
+		"add.l #8,%[a]"
+		erase(%[b])		| %[a] | |
 loi $1 == 1 | ADDREG | | {IADDREG1, %[1]} | |
 ...	    | nocoercions: LOCAL_ADDR | | {DISPL1,LB,%[1.off]} | |
 ...	    | nocoercions: REGOFF_ADDR | | {DISPL1,%[1.reg],%[1.off]} | |
@@ -599,6 +616,8 @@ ldl ldl adp sdl $1 == $2 && $2 == $4 && inreg($1)==2 | |
 ldl adp sdl $1 == $3  && inreg($1)==2 | |	remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | | 
+ldl adp dup sdl loi inreg($1) == 2 && $1 == $4 && $3 == 4 && $5 == 4 | | | |
+			ldl $1 adp $2 sdl $1 ldl $1 loi 4 |
 ldl loi ldl loi adp ldl sti $2==4&&$4==4&&$7==4&&$1==$3&&$1==$6&&inreg($1)==2
 			| |	remove(MEM_ALL)
 				allocate(ADDREG = {IADDREG4,regvar($1)})
@@ -817,12 +836,24 @@ lol ngi stl $1 == $3 && $2 == 4 | |
 loe ngi ste $1 == $3 && $2 == 4 | |
 				remove(MEM_ALL)
 				"neg.l $1"	| | |
-loc sli $1 >= 1 && $1 <= 8 && $2 == 2 | DATASCR |
+loc sli $1 == 1 && $2 == 2 | DATASCR |
+				"add.w %[1],%[1]"
+				erase(%[1])
+				setcc(%[1])		| %[1] | |
+loc sli $1 > 1 && $1 <= 8 && $2 == 2 | DATASCR |
 				"asl.w #$1,%[1]"
 				erase(%[1])		| %[1] | |
-loc sli $1 >= 1 && $1 <= 8 && $2 == 4 | DATASCR4 |
+loc sli $1 == 1 && $2 == 4 | DATASCR4 |
+				"add.l %[1],%[1]"
+				erase(%[1])
+				setcc(%[1])		| %[1] | |
+loc sli $1 > 1 && $1 <= 8 && $2 == 4 | DATASCR4 |
 				"asl.l #$1,%[1]"
 				erase(%[1])		| %[1] | |
+lol loc sli ads inreg($1) == 2 && $2 == 1 && $3 == 2 && $4 == 2 | ADDSCR |
+				"add.w %(regvar($1)%),%[1]"
+				"add.w %(regvar($1)%),%[1]"
+				erase(%[1]) 		| %[1] | |
 lol loc sli stl $1 == $4 && $2 == 1 && $3 == 2 | |
 				remove(MEM_ALL)
 				"asl.w #1, $1(a6)"		| | |
@@ -1241,6 +1272,11 @@ and defined($1) && $1 == 2 | ANY DATASCR |
 				"and %[2],%[1]"
 				setcc(%[1])
 				erase(%[1])		| %[1]  | | (2,2)+%[2]
+lol loc and $2 == 255 && inreg($1) < 2 && $3 == 2 | | | {DISPL1,LB,$1} | |
+lal loi and lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
+			   | DATAREG |
+				remove(MEM_ALL)
+				"and.b %[1],$1(a6)" | | |
 loc lol and stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
 				remove(MEM_ALL)
 				"and.w #$1,$2(a6)"	| | |	(6,10)
@@ -1320,6 +1356,10 @@ ior defined($1) && $1 == 2 | ANY DATASCR |
 				"or %[2],%[1]"
 				erase(%[1])
 				setcc(%[1])	| %[1]  | | (2,2)+%[2]
+lal loi ior lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
+			   | DATAREG |
+				remove(MEM_ALL)
+				"or.b %[1],$1(a6)" | | |
 loc lol ior stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
 				remove(MEM_ALL)
 				"or.w #$1,$2(a6)"	| | |	(6,10)
@@ -1396,6 +1436,10 @@ xor defined($1) && $1 == 2 | DATAREG DATASCR |
 				"eor %[2],%[1]"
 				erase(%[1])
 				setcc(%[1])	| %[1]  | | (2,2)+%[2]
+lal loi xor lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
+			   | DATAREG |
+				remove(MEM_ALL)
+				"eor.b %[1],$1(a6)" | | |
 lol loc xor stl $1 == $4 && $3 == 2 | |
 				remove(MEM_ALL)
 				"eor.w #$2,$1(a6)"	| | |  (6,10)
@@ -2029,22 +2073,22 @@ ldc cmi tgt loww(1)==0&&highw(1)==0 | DATA_ALT4 | allocate(DATAREG={IMMEDIATE,1}
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi zlt $1==4 | ANY4 DATAREG4 STACK |
+cmi zlt $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"blt $2" | | |
-cmi zle $1==4 | ANY4 DATAREG4 STACK |
+cmi zle $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"ble $2" | | |
-cmi zeq $1==4 | ANY4 DATAREG4 STACK |
+cmi zeq $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"beq $2" | | |
-cmi zne $1==4 | ANY4 DATAREG4 STACK |
+cmi zne $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"bne $2" | | |
-cmi zge $1==4 | ANY4 DATAREG4 STACK |
+cmi zge $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"bge $2" | | |
-cmi zgt $1==4 | ANY4 DATAREG4 STACK |
+cmi zgt $1==4 | ANY4 REG4 STACK |
 				"cmp.l %[1],%[2]"
 				"bgt $2" | | |
 ldc cmi zlt loww(1)==0&&highw(1)==0 && $2==4 | DATA_ALT4 STACK |
@@ -2290,6 +2334,21 @@ tgt	|	DATA_ALT |	allocate(DATAREG={IMMEDIATE,1})
 /* G R O U P XIII :  B R A N C H   */
 
 bra |  STACK |	"bra $1"	| | |
+/* byte comparisons */
+loc beq  $1 >= 0 && $1 < 256 | nocoercions: DATA_ALT1 |
+				remove(ALL)
+				"cmp.b #$1,%[1]"
+				"beq $2"	| | |
+...			     | DATA_ALT STACK |
+				"cmp #$1,%[1]"
+				"beq $2"	| | |
+loc bne  $1 >= 0 && $1 < 256 | nocoercions: DATA_ALT1 |
+				remove(ALL)
+				"cmp.b #$1,%[1]"
+				"bne $2"	| | |
+...			     | DATA_ALT STACK |
+				"cmp #$1,%[1]"
+				"bne $2"	| | |
 blt |	IMMEDIATE DATA_ALT STACK  |	"cmp %[1],%[2]"
 				"blt $1"	| | |
 ... |	ANY DATAREG STACK |	"cmp %[1],%[2]"
@@ -2527,8 +2586,12 @@ dus $1 == 2 | DATASCR |		remove(ALL)
 exg	| STACK |		"move.w #$1,d0"
 				"jsr .exg"	| | |
 fil | |				"move.l #$1,.filn"  | | |
-gto | STACK |			"pea $1"
-				"jmp .gto" | | |
+gto | STACK |			allocate(ADDREG)
+				"lea $1,%[a]"
+				"move.l 4(%[a]),sp"
+				"move.l 8(%[a]),a6"
+				"move.l (%[a]),%[a]"
+				"jmp (%[a])"	| | |
 lin | |				"move.w #$1,.lino"   | | |
 lni | |				"add.w #1,.lino"  | | |
 mon | STACK | "jsr .mon" | | |
@@ -2537,7 +2600,7 @@ lim | | | {ABS4,".trpim"} | |
 lor $1 == 0 |	|   |  LB | |
 lor $1 == 1 |	STACK |		"move.l sp,-(sp)"	| | |
 lor $1 == 2 | | | {ABS4,".reghp"} | |
-lpb | STACK  |			"jsr .lpb" | A0 | |
+lpb | | | | adp 8 |
 rck $1 == 2 | |			remove(ALL)
 				"jsr .rck"
 						| | |
