@@ -112,6 +112,7 @@ chk_forw(pdf)
 
 	while (df = *pdf) {
 		if (df->df_kind == D_FORWTYPE) {
+			pdf = &df->df_nextinscope;
 			ForceForwardTypeDef(df);	/* removes df */
 			continue;
 		}

@@ -725,6 +725,9 @@ ForceForwardTypeDef(df)
 		}
 		df = df->df_forw_def;
 	}
+	while (nd->nd_class == Link) {
+		nd = nd->nd_RIGHT;
+	}
 	df = lookfor(nd, CurrVis, 1, 0);
 	if (! df->df_kind & (D_ERROR|D_TYPE)) {
 		node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
