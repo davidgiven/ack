@@ -1,15 +1,20 @@
 # $Header$
 
-IP_SPEC =	../../../etc/ip_spec.t
+EM =		../../..
+IP_SPEC =	$(EM)/etc/ip_spec.t
+CFLAGS =	-I$(EM)
 
-SRC =	 	mkswitch.c
-OBJ =		mkswitch.o
+SRC =		mkiswitch.c	mkswitch.c
+OBJ =		mkiswitch.o	mkswitch.o
 
-mkswitch:	$(OBJ)
-	$(CC) -o mkswitch $(OBJ)
+mkiswitch:	mkiswitch.o
+	$(CC) -o mkiswitch mkiswitch.o $(EM)/lib/em_data.a
 
-DoCases:	mkswitch $(IP_SPEC)
-	mkswitch Do $(IP_SPEC) DoCases
+mkswitch:	mkswitch.o
+	$(CC) -o mkswitch mkswitch.o
+
+DoCases:	mkiswitch $(IP_SPEC)
+	mkiswitch Do $(IP_SPEC) DoCases
 	wc DoCases
 
 PrCases:	mkswitch $(IP_SPEC)
@@ -29,10 +34,10 @@ distr:		.distr
 	$(CC) $(CFLAGS) -c $<
 
 clean:						# NOT the cases files !
-	/bin/rm -f a.out core $(OBJ) mkswitch
+	rm -f a.out core $(OBJ) mkswitch mkiswitch
 
 bare:		clean
-	/bin/rm -f DoCases PrCases
+	rm -f DoCases PrCases
 
 all:	mkswitch
 

@@ -3,12 +3,20 @@
 This directory contains two programs:
 
 mkswitch:
-	C program, necessary for regenerating the giant switches
-	which are part of the INT project.
+	C program, necessary for regenerating the giant switch
+	needed for the disassembly function of the interpreter, 
+	which (still) works with Operand access method 2
+	(Intelligent Routines) as described in "The EM
+	interpreter".
 
-mkfuncs:
-	shell script that can be used to generate new function
-	files, if a new implementation is needed.
+mkiswitch:
+	C program, necessary for regenerating the giant switch
+	needed for finding the correct instruction handling routine 
+	for each opcode.  It works with Operand access method 3
+	(Intelligent Calls) as described in "The EM interpreter".
+	It constructs the operand of the instruction and passes
+	it to the appropriate routine with the operand as
+	argument.
 
 The first program reads an input file which holds the interpreter
 opcode table (as shown in the [IR-81] report appendix B),
@@ -86,3 +94,5 @@ message, and a call to newPC() which is necessary to skip the
 arguments.  The names of the generated files are: do_XXX.c, where
 XXX is the name of the corresponding instruction group.
 
+(Note: these remarks about mkfuncs are probably outdated now,
+since mkfuncs has disappeared. -rbf)
