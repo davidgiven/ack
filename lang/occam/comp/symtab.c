@@ -121,7 +121,7 @@ static void sym_destroy(ps) register struct symbol *ps;
 			}
 		} else
 		if ((ps->s_type&T_TYPE)==T_CONST)
-			destroy(ps->s_info.const);
+			destroy(ps->s_info.t_const);
 		free(ps->s_name);
 		free(ps);
 	}

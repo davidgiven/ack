@@ -348,7 +348,7 @@ const_def { register char *name; struct expr *e; }:
 	  '=' expression(&e)
 				{	if (!constant(e) && !arr_constant(e))
 						nonconst("expression in constant definition");
-					info.const=e;
+					info.t_const=e;
 					insert(name, T_CONST|T_USED, 0, &info);
 				}
 	;
@@ -457,7 +457,7 @@ item(register struct expr **e;)
 					var=searchall(token.t_sval);
 
 					if (var_constant(var))
-						*e=copy_const(var->s_info.const);
+						*e=copy_const(var->s_info.t_const);
 					else {
 						if (var_proc(var))
 							pars=var->s_info.proc.pars;

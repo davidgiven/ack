@@ -54,7 +54,7 @@ union type_info {
 		int offset;	/* from its local level or builtin name */
 	} vc;			/* Variable or channel */
 
-	struct expr *const;
+	struct expr *t_const;
 
 	struct {
 		union storage st;
