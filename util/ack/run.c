@@ -24,7 +24,7 @@ static unsigned  argcount ;     /* The current number of arguments */
 static unsigned  argmax;        /* The maximum number of arguments so far */
 
 int do_run() {
-	fatal("-g flag not implemeted") ;
+	fatal("-g flag not implemented") ;
 	/*NOTREACHED*/
 	return 0 ;
 }
