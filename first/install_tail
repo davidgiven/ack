@@ -6,19 +6,17 @@ export PATH
 $SRC_HOME/first/create_dir $CONFIG
 $SRC_HOME/first/create_dir $CONFIG/bin
 
-cat macros $SRC_HOME/first/mk_config > $CONFIG/bin/mk_config
-cat macros $SRC_HOME/first/mk_target > $CONFIG/bin/mk_target
-cat macros $SRC_HOME/first/limit_impl > $CONFIG/bin/limit_impl
-
+echo "PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb; export PATH" > $CONFIG/bin/TakeAction
+cat $SRC_HOME/TakeAction >> $CONFIG/bin/TakeAction
 sed '/^#PARAMS/r make_macros' < $SRC_HOME/first/mk_makefile > $CONFIG/bin/mk_makefile
-chmod +x $CONFIG/bin/*
 cp $SRC_HOME/first/create_dir $CONFIG/bin/create_dir
+chmod +x $CONFIG/bin/*
 
-mk_config
+$SRC_HOME/first/mk_config
 
-mk_target
+$SRC_HOME/first/mk_target
 
-limit_impl
+$SRC_HOME/first/limit_impl
 
 case $SYSNAME in
 i386)
@@ -82,4 +80,4 @@ esac
 : and finally installing ...
 cd $CONFIG
 set +e
-exec $SRC_HOME/TakeAction
+exec TakeAction

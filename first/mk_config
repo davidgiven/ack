@@ -108,6 +108,7 @@ EOF
 	for j in libcc libcc.ansi libm2 libpc libbc liboc libf77
 	do
 	    create_dir $i/$j
+	    rm -f $i/$j/No*
 	    cd $i/$j
 	    mk_makefile $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
 	    cd ../..
@@ -118,6 +119,7 @@ EOF
 	then :
 	else 
 		create_dir $i/libsys
+		rm -f $i/libsys/No*
 		cd $i/libsys
 		mk_makefile $SRC_HOME/mach/proto/libg/proto.sysmon | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
 		cd ../..
