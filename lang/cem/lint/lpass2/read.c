@@ -92,7 +92,7 @@ ReadString(buf, delim, maxsize)
 	/*	Reads a string until 'delim' is encountered; delim is
 		discarded.
 		If 'maxsize-1' is exceeded or the string contains a newline
-		(which is not delim), panic() is called.
+		panic() is called (unless delim == newline).
 		A '\0' is appended to the string.
 	*/
 
@@ -106,14 +106,14 @@ ReadString(buf, delim, maxsize)
 		if (ch == delim)
 			break;
 		if (ch == '\n') {
-			panic("newline in string");
+			panic("incomplete line in intermediate file");
 			/*NOTREACHED*/
 		}
 		buf[nread++] = (char)ch;
 	}
 	buf[nread++] = '\0';
 	if (ch != delim) {
-		panic("string too long");
+		panic("line too long in intermediate file");
 		/*NOTREACHED*/
 	}
 	return 1;
@@ -148,7 +148,7 @@ ReadInt(ip)
 		loadchar(ch);
 	}
 	pushback(ch);
-	*ip = negative ? -res : res;
+	*ip = (negative ? -res : res);
 	return 1;
 }
 
@@ -213,9 +213,11 @@ PRIVATE SkipChar(ch)
 	int c;
 
 	loadchar(c);
-	if (c != ch) {
-		panic("bad format, '%c' expected; '%c' read", ch, c);
-		/*NOTREACHED*/
-	}
+	if (c == ch)
+		return;
+	panic("bad format in intermediate file, '%c' expected; '%c' read",
+		ch, c
+	);
+	/*NOTREACHED*/
 }
 

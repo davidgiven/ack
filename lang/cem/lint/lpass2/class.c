@@ -7,47 +7,23 @@
 #include	"../lpass1/l_class.h"
 #include	"class.h"
 
-int class[] = {
-	/* mapping of class values onto bit patterns */
-	/* LFDF */ CL_LIB|CL_FUNC|CL_DEF,
-	/* LVDF */ CL_LIB|CL_VAR|CL_DEF,
-	/* EFDF */ CL_EXT|CL_FUNC|CL_DEF,
-	/* EVDF */ CL_EXT|CL_VAR|CL_DEF,
-	/* EFDC */ CL_EXT|CL_FUNC|CL_DECL,
-	/* EVDC */ CL_EXT|CL_VAR|CL_DECL,
-	/* IFDC */ CL_IMPL|CL_FUNC|CL_DECL,
-	/* SFDF */ CL_STAT|CL_FUNC|CL_DEF,
-	/* SVDF */ CL_STAT|CL_VAR|CL_DEF,
-	/* FC */ CL_FUNC|CL_USAGE,
-	/* VU */ CL_VAR|CL_USAGE
-};
-
-static int val[] = {
-	LFDF,
-	LVDF,
-	EFDF,
-	EVDF,
-	EFDC,
-	EVDC,
-	IFDC,
-	SFDF,
-	SVDF,
-	FC,
-	VU
-};
+int class[MAX_CLASS_CONST-MIN_CLASS_CONST+1];
 
 init_class()
 {
-	/*	The initialization of class[] has been taken care of above.
-		For it to work, we have to test that the class values are
-		in the right order.  This is also necessary for the scanning
-		sequence in lpass2.c to work properly.
-	*/
-	int i;
-
-	for (i = 0; i+1 < sizeof(val)/sizeof(val[0]); i++) {
-		if (val[i] >= val[i+1])
-			panic("class values out of sequence");
-	}
+	/* mapping of class values onto bit patterns */
+	class[LFDF-LFDF] = CL_LIB | CL_FUNC | CL_DEF;
+	class[LVDF-LFDF] = CL_LIB | CL_VAR | CL_DEF;
+	class[PFDF-LFDF] = CL_EXT | CL_FUNC | CL_DEF;
+	class[EFDF-LFDF] = CL_EXT | CL_FUNC | CL_DEF;
+	class[EVDF-LFDF] = CL_EXT | CL_VAR | CL_DEF;
+	class[EFDC-LFDF] = CL_EXT | CL_FUNC | CL_DECL;
+	class[EVDC-LFDF] = CL_EXT | CL_VAR | CL_DECL;
+	class[IFDC-LFDF] = CL_IMPL | CL_FUNC | CL_DECL;
+	class[SFDF-LFDF] = CL_STAT | CL_FUNC | CL_DEF;
+	class[SVDF-LFDF] = CL_STAT | CL_VAR | CL_DEF;
+	class[FC-LFDF] = CL_FUNC | CL_USAGE;
+	class[VU-LFDF] = CL_VAR | CL_USAGE;
+	class[XXDF-LFDF] = 0;
 }
 

@@ -26,5 +26,5 @@
 
 extern int class[];
 
-#define	is_class(id,cl)	((class[(id)->id_class-'a'] & (cl)) == (cl))
+#define	is_class(id,cl)	((class[(id)->id_class-MIN_CLASS_CONST] & (cl)) == (cl))
 

@@ -18,7 +18,7 @@ PRIVATE int is_formatargs;		/* present or not */
 PRIVATE char formatargs[1000];		/* the definitions */
 
 PRIVATE chk_argtps();
-PRIVATE char *next_atype();
+PRIVATE char *next_argtype();
 PRIVATE int type_match();
 PRIVATE form_type();
 
@@ -37,6 +37,14 @@ chk_args(id, def)
 	char *act_tp = id->id_argtps;
 	int nrargs = 0;			/* number of args */
 
+	/* void is a special case */
+	if (	/* the definition has one void argument */
+		def->id_nrargs == 1 && streq(def->id_argtps, "void:")
+	&&	/* the referent has no argumants */
+		id->id_nrargs == 0
+	)	/* we have a prefect match */
+		return;
+
 	/* clear format */
 	is_formatargs = 0;
 
@@ -49,7 +57,7 @@ chk_args(id, def)
 
 		/* skip over the actuals already covered */
 		for (i = 0; i < nrargs; i++) {
-			act_tp = next_atype(act_tp);
+			act_tp = next_argtype(act_tp);
 		}
 
 		/* and check the format arguments */
@@ -65,16 +73,16 @@ PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
 	char *act_tp;			/* actual types */
 	char *form_tp;			/* formal type definitions */
 {
-	while (*act_tp && *form_tp) {
+	while (*act_tp && *form_tp && *form_tp != '.') {
 		register char *act_start = act_tp;
 		register char *form_start = form_tp;
 
 		/* isolate actual argument type */
-		act_tp = next_atype(act_tp);
+		act_tp = next_argtype(act_tp);
 		act_tp[-1] = '\0';
 
 		/* isolate formal argument type */
-		form_tp = next_atype(form_tp);
+		form_tp = next_argtype(form_tp);
 		form_tp[-1] = '\0';
 
 		(*nrargs)++;
@@ -91,6 +99,9 @@ PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
 		act_tp[-1] = ':';
 		form_tp[-1] = ':';
 	}
+
+	if (*form_tp == '.')	/* ellipsis */
+		return;
 
 	if (*form_tp) {
 		/* formal type definitions not exhausted */
@@ -110,7 +121,7 @@ PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
 }
 
 PRIVATE char *
-next_atype(tp)
+next_argtype(tp)
 	char *tp;
 {
 	while (*tp && *tp != ':') {

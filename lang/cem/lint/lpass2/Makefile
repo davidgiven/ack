@@ -6,8 +6,8 @@
 #	M A K E F I L E   F O R   L P A S S 2
 
 # Machine and environ dependent definitions
-EMHOME =	/usr/proj/em/Work
-LPASS1 =	$(EMHOME)/lang/cem/cemcom
+EMHOME =	../../..
+LPASS1 =	../lpass1#			???
 
 # Libraries and EM interface definitions
 SYSLIB =	$(EMHOME)/modules/lib/libsystem.a
@@ -28,8 +28,8 @@ SRC =	lpass2.c checkargs.c read.c report.c class.c l_print3ack.c
 OBJ =	lpass2.o checkargs.o read.o report.o class.o l_print3ack.o
 
 test:	lpass2
-	make lint.test
-#	lpass2 -xh <.i
+	lpass2 -xh <proto.tst
+#	make lint.test
 
 
 lpass2:	$(OBJ) Makefile next.o
@@ -37,7 +37,7 @@ lpass2:	$(OBJ) Makefile next.o
 	size lpass2
 
 lint.test:
-	./lint -xh $(CFLAGS) $(SRC) next.c #???
+	./lint -h $(CFLAGS) $(SRC) next.c #???
 
 next.c:	$(LPASS1)/make.next inpdef.str
 	$(LPASS1)/make.next inpdef.str > next.c
@@ -49,7 +49,8 @@ clean:
 	rm -f a.out core next.c inpdef.h $(OBJ) next.o
 
 #----------------------------------------------------------------
+checkargs.o: inpdef.h private.h
 class.o: ../lpass1/l_class.h class.h
 lpass2.o: ../lpass1/l_class.h ../lpass1/l_lint.h class.h inpdef.h private.h
 read.o: ../lpass1/l_class.h class.h inpdef.h private.h
-report.o: inpdef.h
+report.o: ../lpass1/l_class.h class.h inpdef.h private.h

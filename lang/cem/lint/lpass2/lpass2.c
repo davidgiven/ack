@@ -17,10 +17,13 @@ extern char *strcpy();
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 
 PRIVATE char cur_name[NAMESIZE];
-PRIVATE struct inpdef *dot, *lib, *ext, *sta;
+PRIVATE struct inpdef *dot, *lib, *proto, *ext, *sta;
 
+PRIVATE one_name();
 PRIVATE chk_def();
 PRIVATE ext_decls();
+PRIVATE proto_defs();
+PRIVATE chk_proto();
 PRIVATE ext_def();
 PRIVATE get_dot();
 PRIVATE init();
@@ -35,8 +38,8 @@ PRIVATE usage();
 #define	same_name()	(dot && streq(cur_name, dot->id_name))
 #define	same_obj(stnr)	(same_name() && dot->id_statnr == stnr)
 
-#define	defdec(id)	(is_class(id, CL_DEF) ? "defined" : "declared")
-#define	funvar(id)	(is_class(id, CL_FUNC) ? "function" : "variable")
+#define	def_or_dec(id)	(is_class(id, CL_DEF) ? "defined" : "declared")
+#define	fun_or_var(id)	(is_class(id, CL_FUNC) ? "function" : "variable")
 
 
 /******** M A I N ********/
@@ -53,24 +56,15 @@ main(argc, argv)
 			free_inpdef(lib);
 			lib = 0;
 		}
+		if (proto) {
+			free_inpdef(proto);
+			proto = 0;
+		}
 		if (ext) {
 			free_inpdef(ext);
 			ext = 0;
 		}
-		strcpy(cur_name, dot->id_name);
-		lib_def();
-		ext_def();
-		ext_decls();
-		usage(0);
-		if (ext)
-			chk_def(ext);
-		statics();
-		if (same_name()) {
-			/*	there are more lines for this name that have
-				not been absorbed
-			*/
-			panic("sequence error in intermediate file");
-		}
+		one_name();
 	}
 }
 
@@ -81,7 +75,7 @@ PRIVATE init(argc, argv)
 	char *argv[];
 {
 /*
- * Parse options
+ * Get command line options
  * Prepare standard input for reading using the input-package
  */
 	char *result;
@@ -107,8 +101,9 @@ PRIVATE init(argc, argv)
 		argc--, argv++;
 	}
 
-	if (!InsertFile((char *)0, table, &result))
+	if (!InsertFile((char *)0, table, &result)) {
 		panic("InsertFile() fails");
+	}
 }
 
 PRIVATE get_dot()
@@ -118,8 +113,32 @@ PRIVATE get_dot()
 		dot = 0;
 		cur_name[0] = '\0';
 	}
+	if (loptions['X']) {
+		print_id("get_dot", dot);
+	}
 }
 
+PRIVATE one_name()
+{
+	strcpy(cur_name, dot->id_name);
+	lib_def();
+	proto_defs();
+	ext_def();
+	ext_decls();
+	usage(0);
+	if (proto) {
+		chk_def(proto);
+	}
+	else
+	if (ext) {
+		chk_def(ext);
+	}
+	statics();
+	if (same_name()) {
+		/* there are lines for this name that have not been absorbed */
+		panic("sequence error in intermediate file");
+	}
+}
 
 /******** L I B R A R Y ********/
 
@@ -129,12 +148,42 @@ PRIVATE lib_def()
 		lib = dot;
 		dot = new_inpdef();
 		get_dot();
+		while (same_obj(0) && is_class(dot, CL_LIB)) {
+			report(">%L: multiple definition of %s in library",
+				dot, dot->id_name);
+			get_dot();
+		}
 	}
+}
 
-	while (same_obj(0) && is_class(dot, CL_LIB)) {
-		report(">%L: multiple definition of %s in library",
-			dot, dot->id_name);
+
+/******** P R O T O T Y P E S ********/
+PRIVATE proto_defs()
+{
+	if (same_obj(0) && dot->id_class == PFDF) {
+		if (lib) {
+			report("%L: function %s also defined in %L",
+				dot, dot->id_name, lib);
+		}
+		proto = dot;
+		dot = new_inpdef();
 		get_dot();
+		while (same_obj(0) && dot->id_class == PFDF) {
+			chk_proto(dot);
+			get_dot();
+		}
+	}
+}
+
+PRIVATE chk_proto(def)
+	struct inpdef *def;
+{
+	if (proto->id_args) {
+		chk_args(def, proto);
+	}
+	if (!type_equal(def->id_type, proto->id_type)) {
+		report("%L: return type of function %s declared differently at %L",
+			def, def->id_name, proto);
 	}
 }
 
@@ -144,19 +193,21 @@ PRIVATE lib_def()
 PRIVATE ext_def()
 {
 	if (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
-		if (lib) {
+		if (lib && !proto) {
 			report("%L: %s %s also defined in %L",
-				dot, funvar(dot), dot->id_name, lib);
+				dot, fun_or_var(dot), dot->id_name, lib);
+		}
+		if (proto) {
+			chk_proto(dot);
 		}
 		ext = dot;
 		dot = new_inpdef();
 		get_dot();
-	}
-
-	while (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
-		report("%L: %s %s also defined at %L",
-			dot, funvar(dot), dot->id_name, ext);
-		get_dot();
+		while (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
+			report("%L: %s %s also defined at %L",
+				dot, fun_or_var(dot), dot->id_name, ext);
+			get_dot();
+		}
 	}
 }
 
@@ -180,7 +231,7 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 	char *other_kind;
 	int other_class;
 {
-	struct inpdef *def = ext ? ext : lib ? lib : 0;
+	struct inpdef *def = (proto ? proto : ext ? ext : lib ? lib : 0);
 
 	if (!def) {
 		/* the declaration will have to serve */
@@ -193,7 +244,9 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 	if (is_class(def, other_class)) {
 		/* e.g.: function FFF declared as variable at ... */
 		report("%L: %s %s %s as %s at %L",
-			dot, kind, dot->id_name, defdec(def), other_kind, def);
+			dot, kind, dot->id_name,
+			def_or_dec(def), other_kind, def
+		);
 		/* no further testing possible */
 		get_dot();
 		return;
@@ -202,7 +255,11 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 	if (!type_equal(dot->id_type, def->id_type)) {
 		/* e.g.: type of variable VVV defined differently at ... */
 		report("%L: type of %s %s %s differently at %L",
-			dot, kind, dot->id_name, defdec(def), def);
+			dot, kind, dot->id_name, def_or_dec(def), def);
+
+		/* no further testing needed */
+		get_dot();
+		return;
 	}
 
 	get_dot();
@@ -214,7 +271,8 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 PRIVATE usage(stnr)
 	int stnr;
 {
-	register struct inpdef *def = stnr ? sta : ext ? ext : lib ? lib : 0;
+	register struct inpdef *def =
+		(stnr ? sta : proto ? proto : ext ? ext : lib ? lib : 0);
 	register int VU_count = 0;
 	register int VU_samefile = 0;
 
@@ -236,8 +294,9 @@ PRIVATE usage(stnr)
 		if (	stnr == 0
 		&&	VU_count == 1
 		&&	VU_samefile == 1
-		&&	def == ext
-		&&	!is_class(ext, CL_IMPL)
+		&&	(	def == proto
+			||	(def == ext && !is_class(ext, CL_IMPL))
+			)
 		&&	streq(&fn[strlen(fn)-2], ".c")
 		) {
 			report("%L: extern %s could be declared static",
@@ -313,20 +372,25 @@ PRIVATE statics()
 	while (same_name()) {
 		int stnr = dot->id_statnr;
 
-		if (stnr == 0)
-			panic("sequence error in input");
+		if (stnr == 0) {
+			panic("sequence error in intermediate file: externals after statics");
+		}
 
 		if (sta) {
 			free_inpdef(sta);
 			sta = 0;
 		}
+
 		stat_def(stnr);
 		usage(stnr);
-		if (sta)
-			chk_def(sta);
 
-		if (same_obj(stnr))
-			panic("sequence error in input");
+		if (sta) {
+			chk_def(sta);
+		}
+
+		if (same_obj(stnr)) {
+			panic("sequence error in intermediate file: statics out of order");
+		}
 	}
 }
 
@@ -336,24 +400,26 @@ PRIVATE stat_def(stnr)
 	if (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
 		if (lib) {
 			report("%L: %s %s also defined in %L",
-				dot, funvar(dot), dot->id_name, lib);
+				dot, fun_or_var(dot), dot->id_name, lib);
 		}
-		if (ext) {
-			if (!streq(dot->id_file, ext->id_file)) {
+		if (proto || ext) {
+			struct inpdef *def = (proto ? proto : ext);
+
+			if (!streq(dot->id_file, def->id_file)) {
 				report("%L: %s %s also %s at %L",
-					dot, funvar(dot), dot->id_name,
-					defdec(ext), ext);
+					dot, fun_or_var(dot), dot->id_name,
+					def_or_dec(def), def
+				);
 			}
 		}
 		sta = dot;
 		dot = new_inpdef();
 		get_dot();
-	}
-
-	while (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
-		report("%L: %s %s also defined at %L",
-			dot, funvar(dot), dot->id_name, sta);
-		get_dot();
+		while (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
+			report("%L: %s %s also defined at %L",
+				dot, fun_or_var(dot), dot->id_name, sta);
+			get_dot();
+		}
 	}
 }
 
@@ -373,7 +439,7 @@ PRIVATE chk_def(def)
 		else {
 			if (!loptions['u']) {
 				report("%L: %s %s not used anywhere",
-					def, funvar(def), def->id_name);
+					def, fun_or_var(def), def->id_name);
 			}
 		}
 	}
@@ -398,9 +464,15 @@ print_id(name, id)
 	char *name;
 	struct inpdef *id;
 {
+	if (!id) {
+		print("%s: <NO_INPDEF>\n", name);
+		return;
+	}
+
 	print("%s: %s, %s, %04d, \"%s\", %d, %s", name,
 		id->id_class == LFDF ? "LFDF" :
 		id->id_class == LVDF ? "LVDF" :
+		id->id_class == PFDF ? "PFDF" :
 		id->id_class == EFDF ? "EFDF" :
 		id->id_class == EVDF ? "EVDF" :
 		id->id_class == EFDC ? "EFDC" :
@@ -419,19 +491,22 @@ print_id(name, id)
 	if (is_class(id, CL_FUNC|CL_DEF) || is_class(id, CL_FUNC|CL_USAGE)) {
 		print(", %d, %s, %s",
 			id->id_nrargs,
-			id->id_nrargs == 0 ? "" : id->id_argtps,
-			id->id_class == FC ?
-				(id->id_valused == USED ? "USED" :
-				id->id_valused == IGNORED ? "IGNORED" :
-				id->id_valused == VOIDED ? "VOIDED" :
-				"<BAD VALUSED>")
-			:	(id->id_valreturned == NOVALRETURNED ?
-					"NOVALRETURNED" :
-				id->id_valreturned == VALRETURNED ?
-					"VALRETURNED" :
-				id->id_valreturned == NORETURN ?
-					"NORETURN" : "<BAD VALRETURNED>"
+			(id->id_nrargs == 0 ? "" : id->id_argtps),
+			(	id->id_class == FC
+			?	(	id->id_valused == USED ? "USED" :
+					id->id_valused == IGNORED ? "IGNORED" :
+					id->id_valused == VOIDED ? "VOIDED" :
+					"<BAD VALUSED>"
 				)
+			:	(	id->id_valreturned == NOVALRETURNED
+				?	"NOVALRETURNED"
+				:	id->id_valreturned == VALRETURNED
+				?	"VALRETURNED"
+				:	id->id_valreturned == NORETURN
+				?	"NORETURN"
+				:	"<BAD VALRETURNED>"
+				)
+			)
 		);
 	}
 	print("\n");

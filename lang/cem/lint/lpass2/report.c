@@ -8,11 +8,12 @@
 
 #include	<system.h>
 #include	"private.h"
+#include	"../lpass1/l_class.h"
 #include	"class.h"
 #include	"inpdef.h"
 
-#define	MSGOUT		STDERR	/* filedes on which to write the messages */
-#define	ERROUT		STDERR	/* filedes on which to write the panics */
+#define	MSGOUT		STDERR	/* file descr. on which to write the messages */
+#define	ERROUT		STDERR	/* file descr. on which to write the panics */
 
 extern int LineNr;
 
@@ -75,7 +76,8 @@ report(va_alist)
 					fprint(MSGOUT, "%d", i);
 					break;
 				default:
-					panic("bad format %s", fmt);
+					panic("internal error: bad format %s",
+						fmt);
 					break;
 				}
 			}
