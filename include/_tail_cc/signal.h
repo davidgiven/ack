@@ -50,10 +50,10 @@
 #endif
 
 
-#define SIG_DFL		((void (*)())0)		/* default signal handling */
-#define SIG_IGN		((void (*)())1)		/* ignore signal */
-#define SIG_ERR		((void (*)())-1)
+#define SIG_DFL		((int (*)())0)		/* default signal handling */
+#define SIG_IGN		((int (*)())1)		/* ignore signal */
+#define SIG_ERR		((int (*)())-1)
 
-void (*signal()) ();
+int (*signal()) ();
 
 #endif /* _SIGNAL_H */
