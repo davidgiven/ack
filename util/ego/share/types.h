@@ -14,7 +14,7 @@
 #define LONGOFF
 
 
-#define IDL 8	/* identifier length */
+#define IDL 256	/* maximum identifier length */
 #define DYNAMIC 1
 #define NARGBYTES 14
 #define BMASK 0377
