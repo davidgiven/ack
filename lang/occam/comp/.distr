@@ -1,0 +1,16 @@
+Makefile
+builtin.c
+code.c
+code.h
+em.c
+em.h
+expr.c
+expr.h
+keytab.c
+lex.l
+occam.g
+report.c
+sizes.h
+symtab.c
+symtab.h
+token.h

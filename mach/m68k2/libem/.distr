@@ -1,0 +1,5 @@
+LIST
+Makefile
+compmodule
+end.s
+libem_s.a
