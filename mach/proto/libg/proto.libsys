@@ -17,7 +17,7 @@ libmon:		$(SRC_DIR)/libmon_s.a
 		if [ $(SUF) = o ] ; then march $(SRC_DIR) libmon $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/libmon_s.a libmon ; fi
 
 head:		$(SRC_DIR)/head_em.s
-		if [ $(SUF) = o ] ; then $(MACH) -c $(MACHFL) -I$(SRC_DIR) -I$(TARGET_HOME)/h $(SRC_DIR)/head_em.s ; else cp $(SRC_DIR)/head_em.s head_em.s ; fi
+		$(MACH) -c.$(SUF) $(MACHFL) -I$(SRC_DIR) -I$(TARGET_HOME)/h $(SRC_DIR)/head_em.s
 		mv head_em.$(SUF) head
 
 install:	all
