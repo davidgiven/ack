@@ -68,6 +68,11 @@ con_float() {
 		f = -f;
 		sign = 1;
 	}
+	if (f == 0) {
+		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
+		fprintf(codefile, ".data2 0, 0\n");
+		return;
+	}
 	while (f < 0.5) {
 		f += f;
 		i --;
