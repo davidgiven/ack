@@ -6,8 +6,20 @@
 .sect .text
 
 fatal:
+	push	*RR14, R1
+	inc	R15, $2
+	popl	saveret, *RR14
+	pop	R1, *RR14	!trap number in R1
+	push	*RR14, R1
+	push	*RR14, R1
+	dec	R15, $4
+	pop	R1, *RR14	!restore R1
+	inc	R15, $2
+	pushl	*RR14, saveret
 	calr	trp
-	sc	$EXIT
+	push	*RR14, $1
+	calr	mon
+	!NOTREACHED
 
 trp:
 	push	*RR14, R1
@@ -36,8 +48,13 @@ trp:
 2:	pop	R1, *RR14
 	pop	R0, *RR14
 	ret
-3:	push	*RR14, $err
+3:	pop	R1, *RR14
+	push	*RR14, R1
+	push	*RR14, R1
+	push	*RR14, $err
 	calr	printf
-	sc	$EXIT
+	push	*RR14, $1
+	calr	mon
+	!NOTREACHED
 .sect .data
 err:	.asciz	"trap error %d\n"

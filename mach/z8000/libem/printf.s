@@ -58,10 +58,15 @@ ready:	    !now really print the string we built in the buffer
 	ldb	0(R3), RL0	!end string with '\0'
 	sub	R3, $buff-1	!R3 contains the number of characters
 	ld	R1, $buff
-7:	ldb	RL0, 0(R1)
-	inc	R1
-	sc	$4
-	djnz	R3, 7b
+
+	push	*RR14, R3	!count
+	push	*RR14, R1	!buffer
+	push	*RR14, $2	!file descriptor
+	push	*RR14, $4	! write
+	calr	mon
+	pop	R1, *RR14
+	pop	R1, *RR14	! ignore result
+
 	ldm	R4, savereg, $10
 	pushl	*RR14, saveret
 	ret
