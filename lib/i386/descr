@@ -1,0 +1,56 @@
+# $Revision$
+var w=4
+var p=4
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=i386
+var M=i386
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var CPP_F=-Dunix -D__USG
+var INCLUDES=-I{EM}/include/_tail_cc
+var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b1:0x1880000
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/{M}/cg
+	args <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/{M}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -fp FLOATS={EM}/{LIB}fp
+	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
+		({RTS}:.ocm.b.c={EM}/{RT}cc) \
+		({RTS}:.mod={EM}/{RT}m2) \
+		({RTS}:.p={EM}/{RT}pc) \
+		-o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		{FLOATS?} \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{M}/cv
+	args < >
+	outfile a.out
+end

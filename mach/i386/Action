@@ -1,0 +1,33 @@
+name "Intel 80386 assembler"
+dir as
+end
+name "Intel 80386 backend"
+dir ncg
+end
+name "Intel 80386 Xenix System V conversion program"
+dir cv
+end
+name "Intel 80386 C libraries"
+dir libcc
+end
+name "Intel 80386 EM library"
+dir libem
+end
+name "Intel 80386 Pascal library"
+dir libpc
+end
+name "Intel 80386 Basic library"
+dir libbc
+end
+name "Intel 80836 Occam library"
+dir liboc
+end
+name "Intel 80836 floating point library"
+dir libfp
+end
+name "Intel 80836 Modula-2 library"
+dir libm2
+end
+name "Intel 80836 Xenix systemcall library"
+dir libsys
+end
