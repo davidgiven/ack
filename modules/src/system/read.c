@@ -12,5 +12,6 @@ sys_read(fp, bufptr, bufsiz, pnbytes)
 	char *bufptr;
 	int bufsiz, *pnbytes;
 {
+	if (! fp) return 0;
 	return (*pnbytes = read(fp->o_fd, bufptr, bufsiz)) >= 0;
 }

@@ -14,5 +14,6 @@ sys_seek(fp, off, whence, poff)
 	long off;
 	long *poff;
 {
+	if (! fp) return 0;
 	return (*poff = lseek(fp->o_fd, off, whence)) >= 0;
 }

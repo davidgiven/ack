@@ -12,5 +12,6 @@ sys_write(fp, bufptr, nbytes)
 	char *bufptr;
 	int nbytes;
 {
+	if (! fp) return 0;
 	return write(fp->o_fd, bufptr, nbytes) == nbytes;
 }
