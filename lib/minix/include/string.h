@@ -5,7 +5,9 @@
 #ifndef _STRING_H
 #define _STRING_H
 
+#ifndef NULL
 #define NULL    ((void *)0)
+#endif
 
 #ifndef _SIZE_T
 #define _SIZE_T
