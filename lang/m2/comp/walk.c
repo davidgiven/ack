@@ -556,7 +556,11 @@ WalkStat(nd, exit_label, end_reached)
 	if (! end_reached & REACH_FLAG) {
 		node_warning(nd, W_ORDINARY, "statement not reached");
 	}
-	DoLineno(nd);
+	if (nd->nd_symb != WHILE ||
+	    nd->nd_lineno != left->nd_lineno) {
+		/* Avoid double linenumber generation in while statements */
+		DoLineno(nd);
+	}
 	options['R'] = (nd->nd_flags & ROPTION);
 	options['A'] = (nd->nd_flags & AOPTION);
 	switch(nd->nd_symb) {

@@ -207,8 +207,8 @@ stb_type(tp, assign_num)
 				stb_type(sdef->df_type, 0);
 				adds_db_str(sprint(buf,
 					",%ld,%ld;",
-					sdef->df_type->tp_size*8,
-					sdef->fld_off*8));
+					sdef->fld_off*8,
+					sdef->df_type->tp_size*8));
 				sdef = sdef->df_nextinscope;
 			}
 		}
