@@ -1,5 +1,6 @@
 {$i1000}
 program test(output);
+const rcsversion='$Header$';
 var b:false..true;
     i:integer;
     s:set of 0..999;

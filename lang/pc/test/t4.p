@@ -18,6 +18,7 @@
 
 program t4(input,output);
 { Tests for the EM-1 compiler }
+const rcsversion='$Header$';
 type vec = array[1..1000] of integer;
      spectrum = set of (red,blue,yellow);
 #ifndef NOFLOAT

@@ -15,7 +15,8 @@
  
 }
 program tstenc(output);
-const   trapno=150;
+const   rcsversion='$Header$';
+	trapno=150;
 var     level:integer;
 	beenhere:boolean;
 	e:integer;

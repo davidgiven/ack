@@ -20,7 +20,9 @@ program t1(input,output);
 
 { This program can be used to test out PASCAL compilers }
 
-const ONE=1;  TWO=2;  TEN=10; FIFTY=50; MINONE=-1;
+const 
+   rcsversion='$Header$';
+   ONE=1;  TWO=2;  TEN=10; FIFTY=50; MINONE=-1;
 #ifndef NOFLOAT
    RR1=1.0; RR1H=1.5; RR2=2.0; RR3=3.0; RR4=4.0; RRMINONE=-1.0; 
 #endif

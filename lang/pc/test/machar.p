@@ -1,3 +1,5 @@
+{ $Header$ }
+
 procedure machar (var ibeta , it , irnd , ngrd , machep , negep , iexp,
   minexp , maxexp : integer ; var eps , epsneg , xmin , xmax : real ) ;
 var trapped:boolean;
