@@ -71,7 +71,7 @@ STATIC line_p last_code(lines,skip_pseu)
 
 	for (l = lines; l->l_next != (line_p) 0; l = l->l_next);
 	if (skip_pseu) {
-		while (INSTR(l) < sp_fmnem || INSTR(l) > sp_lmnem) l = PREV(l);
+		while (l && (INSTR(l) < sp_fmnem || INSTR(l) > sp_lmnem)) l = PREV(l);
 	}
 	return l;
 }
