@@ -303,7 +303,7 @@ kill_much()
 	register Lindex i;
 
 	OUTTRACE("kill much", 0);
-	for (i = Lfirst(entities); i != (Lindex) i; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
 		register entity_p rep = en_elem(i);
 
 		if (rep->en_static) continue;
