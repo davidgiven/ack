@@ -820,20 +820,10 @@ dvf $1==4	| | | | cal ".dvf4" asp 4 |
 dvf $1==8	| | | | cal ".dvf8" asp 8 |
 ngf $1==4	| | | | cal ".ngf4" |
 ngf $1==8	| | | | cal ".ngf8" |
-fif $1==4	| | | | cal ".fif4" |
-fif $1==8	| | | | cal ".fif8" |
-fef $1==4	| X_REG X_REG |
-		remove(ALL)
-		"push %[2]"
-		"push %[2]"
-		"push %[1]"	| | cal ".fef4" |
-fef $1==8	| X_REG X_REG X_REG X_REG |
-		remove(ALL)
-		"push %[4]"
-		"push %[4]"
-		"push %[3]"
-		"push %[2]"
-		"push %[1]"	| | cal ".fef8" |
+fif $1==4	| | | | lor 1 cal ".fif4" asp 2 |
+fif $1==8	| | | | lor 1 cal ".fif8" asp 2 |
+fef $1==4	| | | | lor 1 adp 0-2 cal ".fef4" |
+fef $1==8	| | | | lor 1 adp 0-2 cal ".fef8" |
 
 /****************************************
  * Group 6 : pointer arithmetic.	*
