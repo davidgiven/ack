@@ -21,13 +21,6 @@ name be
 	stdout
 	need .e
 end
-name as
-	from .s.so
-	to .o
-	program {EM}/lib/{M}/as
-	args - -o > <
-	prep cond
-end
 name asopt
 	from .s
 	to .so
@@ -36,6 +29,13 @@ name asopt
 	optimizer
 	stdin
 	stdout
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/{M}/as
+	args - -o > <
+	prep cond
 end
 name led
 	from .o.a
