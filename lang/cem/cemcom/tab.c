@@ -31,6 +31,7 @@ main(argc, argv)
 			process(*argv++, InputForm);
 		}
 	}
+	exit(0);
 }
 
 char *
