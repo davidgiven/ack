@@ -37,6 +37,8 @@ begtext:
 EXIT:
 
 	jsr __exit
+	! As a temporary measure
+	jsr .trp
 	
 
 	.data
