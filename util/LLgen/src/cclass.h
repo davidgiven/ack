@@ -1,5 +1,6 @@
 /* Copyright (c) 1991 by the Vrije Universiteit, Amsterdam, the Netherlands.
- * All rights reserved.
+ * For full copyright amd restrictions on use see the file COPYING in the top
+ * level of the LLgen tree.
  */
 
 /* $Id$ */
