@@ -431,7 +431,7 @@ STATIC reduce(code,vars)
 	} else {
 		make_header(code->co_loop);
 		/* make sure there's a header block */
-		tmp = tmplocal(curproc,code->co_tmpsize);
+		tmp = tmplocal(curproc,(offset) code->co_tmpsize);
 		code->co_temp = tmp;
 		/* create a new local variable in the stack frame
 		 * of current proc.

@@ -14,7 +14,7 @@ extern	offset aoff();		/* (arg_p list; int n)
 				 * n'th argument in the list (this argument
 				 * must have type ARGOFF). Start counting at 0.
 				 */
-extern	offset tmplocal();	/* (proc_p p, int size)
+extern	offset tmplocal();	/* (proc_p p, offset size)
 				 * Allocate a new local variable in the
 				 * stack frame of p.
 				 */

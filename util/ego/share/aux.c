@@ -49,11 +49,11 @@ offset aoff(ap,n)
 
 offset tmplocal(p,size)
 	proc_p p;
-	int    size;
+	offset   size;
 {
 	/* Allocate a new local variable in the stack frame of p */
 
-	p->p_localbytes += (offset) size;
+	p->p_localbytes +=  size;
 	return -(p->p_localbytes);
 }
 
