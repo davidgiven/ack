@@ -56,7 +56,7 @@ STATIC cond_p getcondtab(f)
 	fscanf(f,"%d",&l);
 	tab = newcondtab(l);
 	for (i = 0; i < l; i++) {
-		fscanf(f,"%d %d %d",&tab[i].mc_cond,&tab[i].mc_tval,
+		fscanf(f,"%hd %hd %hd",&tab[i].mc_cond,&tab[i].mc_tval,
 			 &tab[i].mc_sval);
 	}
 	assert(tab[l-1].mc_cond == DEFAULT);
@@ -106,9 +106,9 @@ STATIC ra_machinit(f)
 		fscanf(f,"%s",s);
 		if (strcmp(s,"%%RA") == 0)break;
 	}
-	fscanf(f,"%d",&regs_available[reg_any]);
-	fscanf(f,"%d",&regs_available[reg_pointer]);
-	fscanf(f,"%d",&regs_available[reg_float]);
+	fscanf(f,"%hd",&regs_available[reg_any]);
+	fscanf(f,"%hd",&regs_available[reg_pointer]);
+	fscanf(f,"%hd",&regs_available[reg_float]);
 	get_atab(f,alocaltab);
 	get_atab(f,alocaddrtab);
 	aconsttab = getcondtab(f);
@@ -262,7 +262,7 @@ STATIC item_p cat_items(items)
 		for ( it = items[t]; it != (item_p) 0; it = next) {
 			next = it->it_next;
 			if (!it->it_desirable || !useful_item(it)) {
-				clean_timeset(it->it_usage);
+				cleantimeset(it->it_usage);
 				olditem(it);
 			} else {
 				*ip = it;
@@ -290,7 +290,7 @@ STATIC clean_interval(list)
 
 
 
-STATIC clean_timeset(s)
+STATIC cleantimeset(s)
 	lset s;
 {
 	register Lindex i;
@@ -323,14 +323,14 @@ STATIC clean_allocs(list)
 
 
 
-STATIC clean_items(list)
+STATIC cleanitems(list)
 	item_p list;
 {
 	register item_p x,next;
 
 	for (x = list; x != (item_p) 0; x = next ) {
 		next = x->it_next;
-		clean_timeset(x->it_usage);
+		cleantimeset(x->it_usage);
 		olditem(x);
 	}
 }
@@ -379,7 +379,7 @@ ra_optimize(p)
 	 */
 	clean_allocs(unpacked);
 	clean_allocs(packed);
-	clean_items(itemlist);
+	cleanitems(itemlist);
 	oldmap(instrmap,nrinstrs-1);
 	ra_cleanproc(p);
 }
