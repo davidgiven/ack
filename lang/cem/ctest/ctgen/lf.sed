@@ -1,3 +1,5 @@
+1i\
+#ifndef NOFLOAT
 /ISTART/d
 s/FN/main/
 /LSTART/c\
@@ -25,3 +27,7 @@ s/Z1/x/g
 s/Z2/y/g
 s/#/\\n/
 s/@//
+$a\
+#else\
+main() { return 0; }\
+#endif
