@@ -125,6 +125,7 @@ pdp_*)		RMD="vax4"
 			exit 13
 		esac
 		;;
+vax*)		;;
 *)		RMD="vax4" ;;
 esac
 for i in $RMD
