@@ -78,7 +78,7 @@ int opcode;
 int offtyp;
 long argval;
 int dlbval;
-char str[MAXSTR],argstr[32],labstr[32];
+char str[MAXSTR],argstr[128],labstr[128];
 int strsiz;
 int holno=0;
 int procno=0;
