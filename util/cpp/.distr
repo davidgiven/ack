@@ -7,7 +7,6 @@ bits.h
 ch7bin.c
 ch7mon.c
 char.tab
-chtab.c
 class.h
 domacro.c
 error.c

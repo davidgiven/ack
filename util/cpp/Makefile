@@ -50,7 +50,7 @@ COBJ =	LLlex.o LLmessage.o ch7bin.o ch7mon.o domacro.o \
 PRFILES = Makefile Parameters \
 	make.hfiles make.tokcase make.tokfile LLlex.h bits.h file_info.h \
 	idf.h input.h interface.h macro.h \
-	class.h chtab.c char.tab expression.g $(CSRC)
+	class.h char.tab expression.g $(CSRC)
 
 # Objects of other generated C files
 GOBJ =	char.o symbol2str.o
@@ -77,8 +77,8 @@ hfiles: Parameters char.c charoffset.h
 	./make.hfiles Parameters
 	@touch hfiles
 
-charoffset.h char.c:	chtab char.tab
-	chtab -fchar.tab > char.c
+charoffset.h char.c:	char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab > char.c
 
 LLfiles: $(LSRC)
 	$(GEN) $(GENOPTIONS) $(LSRC)
@@ -89,9 +89,6 @@ tokenfile.g:	tokenname.c make.tokfile
 
 symbol2str.c:	tokenname.c make.tokcase
 	<tokenname.c ./make.tokcase >symbol2str.c
-
-chtab:	chtab.o
-	$(CC) -o chtab chtab.o
 
 # Objects needed for 'cpp'
 OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
@@ -138,7 +135,7 @@ lint:	cfiles
 	lint -bx $(CDEFS) $(SRC) >lint.out
 
 clean:
-	rm -f $(LCSRC) $(OBJ) $(GENERATED) $(GSRC) $(GHSRC) chtab.o chtab cpp Out
+	rm -f $(LCSRC) $(OBJ) $(GENERATED) $(GSRC) $(GHSRC) cpp Out
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h

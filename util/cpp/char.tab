@@ -3,11 +3,12 @@
 %
 % some general settings:
 %F	%s,
+%H
+%S257
 %
 %	START OF TOKEN
 %
-%C
-STGARB:\000-\377
+%iSTGARB
 STSKIP:\r \t\f\013
 STNL:\n
 STCOMP:!&<=>|
