@@ -37,13 +37,13 @@ _copy_array(p, a)
 	char dummy;
 
 	ppdescr--;
-	sz = (((*ppdescr)->highminlow + 1) * (*ppdescr)->size +
-		(EM_WSIZE -1)) & ~ (EM_WSIZE - 1);
+	sz = ((*ppdescr)->highminlow + 1) * (*ppdescr)->size;
 	
 	if ((char *) &a - (char *) &dummy > 0) {
 		(*ppdescr)->addr = q = (char *) &a;
 	}
-	else	(*ppdescr)->addr = q = (char *) &a - sz;
+	else	(*ppdescr)->addr = q = (char *) &a - 
+			((sz + (EM_WSIZE - 1)) & ~ (EM_WSIZE - 1));
 
 	while (sz--) *q++ = *p++;
 }

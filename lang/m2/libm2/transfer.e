@@ -130,16 +130,17 @@ _target
  adp -EM_PSIZE
  loi EM_PSIZE
  str 1		; temporary stackpointer
+
+ lae _MainLB
+ loi EM_PSIZE
+ str 0
+
  lae _CurrentProcess
  loi EM_PSIZE
  lae _MainProcess
  loi EM_PSIZE
  cmp
  zeq *2
-
- lae _MainLB
- loi EM_PSIZE
- str 0
 
  lae _StackBase
  loi EM_PSIZE
