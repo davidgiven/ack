@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE PascalIo;
+IMPLEMENTATION MODULE PascalIO;
 
   IMPORT Unix;
   IMPORT Conversions;
@@ -30,13 +30,13 @@ IMPLEMENTATION MODULE PascalIo;
   VAR	ibuf, obuf: IOBuf;
 	head: Text;
 
-  PROCEDURE Reset(filename: ARRAY OF CHAR; VAR inputtext: Text);
+  PROCEDURE Reset(Filename: ARRAY OF CHAR; VAR InputText: Text);
   BEGIN
-	doclose(inputtext);
-	getstruct(inputtext);
-	WITH inputtext^ DO
+	doclose(InputText);
+	getstruct(InputText);
+	WITH InputText^ DO
 		eof := FALSE;
-		fildes := Unix.open(ADR(filename), 0);
+		fildes := Unix.open(ADR(Filename), 0);
 		IF fildes < 0 THEN
 			Traps.Message("could not open input file");
 			HALT;
@@ -48,13 +48,13 @@ IMPLEMENTATION MODULE PascalIo;
 	END;
   END Reset;
 
-  PROCEDURE Rewrite(filename: ARRAY OF CHAR; VAR outputtext: Text);
+  PROCEDURE Rewrite(Filename: ARRAY OF CHAR; VAR OutputText: Text);
   BEGIN
-	doclose(outputtext);
-	getstruct(outputtext);
-	WITH outputtext^ DO
+	doclose(OutputText);
+	getstruct(OutputText);
+	WITH OutputText^ DO
 		eof := FALSE;
-		fildes := Unix.creat(ADR(filename), 666B);
+		fildes := Unix.creat(ADR(Filename), 666B);
 		IF fildes < 0 THEN
 			Traps.Message("could not open output file");
 			HALT;
@@ -66,7 +66,7 @@ IMPLEMENTATION MODULE PascalIo;
 	END;
   END Rewrite;
 
-  PROCEDURE PascalIoCleanup();
+  PROCEDURE CloseOutput();
   VAR text: Text;
   BEGIN
 	text := head;
@@ -74,12 +74,12 @@ IMPLEMENTATION MODULE PascalIo;
 		doclose(text);
 		text := text^.next;
 	END;
-  END PascalIoCleanup;
+  END CloseOutput;
 
   PROCEDURE doclose(text: Text);
   VAR dummy: INTEGER;
   BEGIN
-	IF text # notext THEN
+	IF text # Notext THEN
 		WITH text^ DO
 			IF type = writing THEN
 				Flush(text);
@@ -117,37 +117,37 @@ IMPLEMENTATION MODULE PascalIo;
 	END;
   END chk;
 
-  PROCEDURE ReadCHAR(inputtext: Text; VAR ch : CHAR);
+  PROCEDURE ReadChar(InputText: Text; VAR ch : CHAR);
   BEGIN
-	ch := NextCHAR(inputtext);
-	Get(inputtext);
-  END ReadCHAR;
+	ch := NextChar(InputText);
+	Get(InputText);
+  END ReadChar;
 
-  PROCEDURE NextCHAR(inputtext: Text): CHAR;
+  PROCEDURE NextChar(InputText: Text): CHAR;
   VAR c: CHAR;
   BEGIN
-	chk(inputtext, reading);
-	WITH inputtext^ DO
+	chk(InputText, reading);
+	WITH InputText^ DO
 		IF cnt <= maxcnt THEN
 			c := buf[cnt];
 		ELSE
-			c := FillBuf(inputtext);
+			c := FillBuf(InputText);
 		END;
 	END;
 	RETURN c;
-  END NextCHAR;
+  END NextChar;
 
-  PROCEDURE Get(inputtext: Text);
+  PROCEDURE Get(InputText: Text);
   VAR dummy: CHAR;
   BEGIN
-	chk(inputtext, reading);
-	WITH inputtext^ DO
+	chk(InputText, reading);
+	WITH InputText^ DO
 		IF eof THEN
 			Traps.Message("unexpected EOF");
 			HALT;
 		END;
 		IF cnt > maxcnt THEN
-			dummy := FillBuf(inputtext);
+			dummy := FillBuf(InputText);
 		END;
 		INC(cnt);
 	END;
@@ -170,21 +170,21 @@ IMPLEMENTATION MODULE PascalIo;
 	RETURN c;
   END FillBuf;
 
-  PROCEDURE Eoln(inputtext: Text): BOOLEAN;
+  PROCEDURE Eoln(InputText: Text): BOOLEAN;
   BEGIN
-	RETURN NextCHAR(inputtext) = 12C;
+	RETURN NextChar(InputText) = 12C;
   END Eoln;
 
-  PROCEDURE Eof(inputtext: Text): BOOLEAN;
+  PROCEDURE Eof(InputText: Text): BOOLEAN;
   BEGIN
-	RETURN (NextCHAR(inputtext) = 0C) AND inputtext^.eof;
+	RETURN (NextChar(InputText) = 0C) AND InputText^.eof;
   END Eof;
 
-  PROCEDURE ReadLn(inputtext: Text);
+  PROCEDURE ReadLn(InputText: Text);
   VAR ch: CHAR;
   BEGIN
 	REPEAT
-		ReadCHAR(inputtext, ch)
+		ReadChar(InputText, ch)
 	UNTIL ch = 12C;
   END ReadLn;
 
@@ -197,29 +197,29 @@ IMPLEMENTATION MODULE PascalIo;
 	END;
   END Flush;
 
-  PROCEDURE WriteCHAR(outputtext: Text; ch: CHAR);
+  PROCEDURE WriteChar(OutputText: Text; ch: CHAR);
   BEGIN
-	chk(outputtext, writing);
-	WITH outputtext^ DO
+	chk(OutputText, writing);
+	WITH OutputText^ DO
 		INC(cnt);
 		buf[cnt] := ch;
 		IF cnt >= bufferedcount THEN
-			Flush(outputtext);
+			Flush(OutputText);
 		END;
 	END;
-  END WriteCHAR;
+  END WriteChar;
 
-  PROCEDURE WriteLn(outputtext: Text);
+  PROCEDURE WriteLn(OutputText: Text);
   BEGIN
-	WriteCHAR(outputtext, 12C);
+	WriteChar(OutputText, 12C);
   END WriteLn;
 
-  PROCEDURE Page(outputtext: Text);
+  PROCEDURE Page(OutputText: Text);
   BEGIN
-	WriteCHAR(outputtext, 14C);
+	WriteChar(OutputText, 14C);
   END Page;
 
-  PROCEDURE ReadINTEGER(inputtext: Text; VAR int : INTEGER);
+  PROCEDURE ReadInteger(InputText: Text; VAR int : INTEGER);
   CONST
     	SAFELIMITDIV10 = MAX(INTEGER) DIV 10;
     	SAFELIMITREM10 = MAX(INTEGER) MOD 10;
@@ -229,17 +229,17 @@ IMPLEMENTATION MODULE PascalIo;
 	ch: CHAR;
     	chvalue: CARDINAL;
   BEGIN
-    	WHILE NextCHAR(inputtext) IN spaces DO
-		Get(inputtext);
+    	WHILE NextChar(InputText) IN spaces DO
+		Get(InputText);
 	END;
-	ch := NextCHAR(inputtext);
+	ch := NextChar(InputText);
     	IF ch = '-' THEN
-		Get(inputtext);
-		ch := NextCHAR(inputtext);
+		Get(InputText);
+		ch := NextChar(InputText);
 		neg := TRUE;
     	ELSIF ch = '+' THEN
-		Get(inputtext);
-		ch := NextCHAR(inputtext);
+		Get(InputText);
+		ch := NextChar(InputText);
 		neg := FALSE;
     	ELSE
 		neg := FALSE
@@ -258,8 +258,8 @@ IMPLEMENTATION MODULE PascalIo;
 				HALT;
 	    		ELSE
 				int := 10*int - VAL(INTEGER, chvalue);
-				Get(inputtext);
-				ch := NextCHAR(inputtext);
+				Get(InputText);
+				ch := NextChar(InputText);
 	    		END;
 		END;
 		IF NOT neg THEN
@@ -269,9 +269,9 @@ IMPLEMENTATION MODULE PascalIo;
 		Traps.Message("integer expected");
 		HALT;
 	END;
-  END ReadINTEGER;
+  END ReadInteger;
 
-  PROCEDURE ReadCARDINAL(inputtext: Text; VAR card : CARDINAL);
+  PROCEDURE ReadCardinal(InputText: Text; VAR card : CARDINAL);
   CONST
     	SAFELIMITDIV10 = MAX(CARDINAL) DIV 10;
     	SAFELIMITREM10 = MAX(CARDINAL) MOD 10;
@@ -281,10 +281,10 @@ IMPLEMENTATION MODULE PascalIo;
     	safedigit: CARDINAL;
     	chvalue: CARDINAL;
   BEGIN
-    	WHILE NextCHAR(inputtext) IN spaces DO
-		Get(inputtext);
+    	WHILE NextChar(InputText) IN spaces DO
+		Get(InputText);
 	END;
-	ch := NextCHAR(inputtext);
+	ch := NextChar(InputText);
     	safedigit := SAFELIMITREM10;
     	card := 0;
 	IF (ch >= '0') AND (ch <= '9') THEN
@@ -297,17 +297,17 @@ IMPLEMENTATION MODULE PascalIo;
 				HALT;
 		    	ELSE
 				card := 10*card + chvalue;
-				Get(inputtext);
-				ch := NextCHAR(inputtext);
+				Get(InputText);
+				ch := NextChar(InputText);
 		    	END;
 		END;
 	ELSE
 		Traps.Message("cardinal expected");
 		HALT;
 	END;
-  END ReadCARDINAL;
+  END ReadCardinal;
 
-  PROCEDURE ReadREAL(inputtext: Text; VAR real: REAL);
+  PROCEDURE ReadReal(InputText: Text; VAR real: REAL);
   VAR
 	buf: numbuf;
 	ch: CHAR;
@@ -318,17 +318,17 @@ IMPLEMENTATION MODULE PascalIo;
     BEGIN
 	buf[index] := ch;
 	INC(index);
-	Get(inputtext);
-	RETURN NextCHAR(inputtext);
+	Get(InputText);
+	RETURN NextChar(InputText);
     END inch;
 
   BEGIN
 	index := 0;
 	ok := TRUE;
-    	WHILE NextCHAR(inputtext) IN spaces DO
-		Get(inputtext);
+    	WHILE NextChar(InputText) IN spaces DO
+		Get(InputText);
 	END;
-	ch := NextCHAR(inputtext);
+	ch := NextChar(InputText);
 	IF (ch ='+') OR (ch = '-') THEN
 		ch := inch();
 	END;
@@ -370,34 +370,34 @@ IMPLEMENTATION MODULE PascalIo;
 		Traps.Message("Illegal real");
 		HALT;
 	END;
-  END ReadREAL;
+  END ReadReal;
 
-  PROCEDURE WriteCARDINAL(outputtext: Text; card: CARDINAL; width: CARDINAL);
+  PROCEDURE WriteCardinal(OutputText: Text; card: CARDINAL; width: CARDINAL);
   VAR
     	buf : numbuf;
   BEGIN
 	Conversions.ConvertCardinal(card, 1, buf);
-	WriteSTRING(outputtext, buf, width);
-  END WriteCARDINAL;
+	WriteString(OutputText, buf, width);
+  END WriteCardinal;
 
-  PROCEDURE WriteINTEGER(outputtext: Text; int: INTEGER; width: CARDINAL);
+  PROCEDURE WriteInteger(OutputText: Text; int: INTEGER; width: CARDINAL);
   VAR
     	buf : numbuf;
   BEGIN
     	Conversions.ConvertInteger(int, 1, buf);
-	WriteSTRING(outputtext, buf, width);
-  END WriteINTEGER;
+	WriteString(OutputText, buf, width);
+  END WriteInteger;
 
-  PROCEDURE WriteBOOLEAN(outputtext: Text; bool: BOOLEAN; width: CARDINAL);
+  PROCEDURE WriteBoolean(OutputText: Text; bool: BOOLEAN; width: CARDINAL);
   BEGIN
 	IF bool THEN
-		WriteSTRING(outputtext, " TRUE", width);
+		WriteString(OutputText, " TRUE", width);
 	ELSE
-		WriteSTRING(outputtext, "FALSE", width);
+		WriteString(OutputText, "FALSE", width);
 	END;
-  END WriteBOOLEAN;
+  END WriteBoolean;
 
-  PROCEDURE WriteREAL(outputtext: Text; real: REAL; width, nfrac: CARDINAL);
+  PROCEDURE WriteReal(OutputText: Text; real: REAL; width, nfrac: CARDINAL);
   VAR
 	buf: numbuf;
 	ok: BOOLEAN;
@@ -417,28 +417,28 @@ IMPLEMENTATION MODULE PascalIo;
 		END;
 		RealConversions.RealToString(real, width, digits, buf, ok);
 	END;
-	WriteSTRING(outputtext, buf, 0);
-  END WriteREAL;
+	WriteString(OutputText, buf, 0);
+  END WriteReal;
 
-  PROCEDURE WriteSTRING(outputtext: Text; str: ARRAY OF CHAR; width: CARDINAL);
+  PROCEDURE WriteString(OutputText: Text; str: ARRAY OF CHAR; width: CARDINAL);
   VAR index: CARDINAL;
   BEGIN
 	index := 0;
-	WHILE (index <= HIGH(str)) AND (str[index] # EOS) DO
+	WHILE (index <= HIGH(str)) AND (str[index] # Eos) DO
 		INC(index);
 	END;
 	WHILE index < width DO
-		WriteCHAR(outputtext, " ");
+		WriteChar(OutputText, " ");
 		INC(index);
 	END;
 	index := 0;
-	WHILE (index <= HIGH(str)) AND (str[index] # EOS) DO
-		WriteCHAR(outputtext, str[index]);
+	WHILE (index <= HIGH(str)) AND (str[index] # Eos) DO
+		WriteChar(OutputText, str[index]);
 		INC(index);
 	END;
-  END WriteSTRING;
+  END WriteString;
 
-BEGIN	(* PascalIo initialization *)
+BEGIN	(* PascalIO initialization *)
 	WITH ibuf DO
 		eof := FALSE;
 		type := reading;
@@ -458,10 +458,10 @@ BEGIN	(* PascalIo initialization *)
 		END;
 		cnt := 0;
 	END;
-	notext := NIL;
-	input := ADR(ibuf);
-	output := ADR(obuf);
-	input^.next := output;
-	output^.next := NIL;
-	head := input;
-END PascalIo.
+	Notext := NIL;
+	Input := ADR(ibuf);
+	Output := ADR(obuf);
+	Input^.next := Output;
+	Output^.next := NIL;
+	head := Input;
+END PascalIO.

@@ -1,85 +1,87 @@
-DEFINITION MODULE PascalIo;
+DEFINITION MODULE PascalIO;
 (* This module provides for I/O that is essentially equivalent to the I/O
    provided by Pascal with "text", or "file of char".
    However, the user must call a cleanup routine at the end of his program
    for the output buffers to be flushed.
 *)
 
-  CONST	EOS = 0C;		(* End of string character *)
+  CONST	Eos = 0C;		(* End of string character *)
 
   TYPE	Text;
 
-  VAR	input, output: Text;	(* standard input and standard output available
+  VAR	Input, Output: Text;	(* standard input and standard output available
 				   immediately.
 				   Standard output is not buffered when
 				   connected to a terminal.
 				*)
-  VAR	notext: Text;		(* Initialize your Text variables with this *)
+  VAR	Notext: Text;		(* Initialize your Text variables with this *)
 
-  PROCEDURE Reset(filename: ARRAY OF CHAR; VAR inputtext: Text);
-  (* When inputtext indicates an open textfile, it is first flushed
-     and closed. Then, the file indicated by "filename" is opened for reading.
-     If this fails, a runtime error results. Otherwise, inputtext is
+  PROCEDURE Reset(Filename: ARRAY OF CHAR; VAR InputText: Text);
+  (* When InputText indicates an open textfile, it is first flushed
+     and closed. Then, the file indicated by "Filename" is opened for reading.
+     If this fails, a runtime error results. Otherwise, InputText is
      associated with the new input file.
   *)
 
-  PROCEDURE Rewrite(filename: ARRAY OF CHAR; VAR outputtext: Text);
-  (* When outputtext indicates an open textfile, it is first flushed
-     and closed. Then, the file indicated by "filename" is opened for writing.
-     If this fails, a runtime error results. Otherwise, outputtext is
+  PROCEDURE Rewrite(Filename: ARRAY OF CHAR; VAR OutputText: Text);
+  (* When OutputText indicates an open textfile, it is first flushed
+     and closed. Then, the file indicated by "Filename" is opened for writing.
+     If this fails, a runtime error results. Otherwise, OutputText is
      associated with the new output file.
   *)
 
-  PROCEDURE PascalIoCleanup();
+  PROCEDURE CloseOutput();
   (* To be called at the end of the program, to flush all output buffers *)
 
   (***************************************************************************
      Input routines;
      All these routines result in a runtime error when not called with either
-     "input", or a "Text" value obtained by Reset.
+     "Input", or a "Text" value obtained by Reset.
      Also, the routines that actually advance the "read pointer", result in a
      runtime error when end of file is reached prematurely.
   ****************************************************************************)
 
-  PROCEDURE NextCHAR(inputtext: Text): CHAR;
-  (* Returns the next character of the inputtext, 0C on end of file.
+  PROCEDURE NextChar(InputText: Text): CHAR;
+  (* Returns the next character of the InputText, 0C on end of file.
      Does not advance the "read pointer", so behaves much like "input^"
-     in Pascal. However, unlike Pascal, if Eoln(inputtext) is true, it
+     in Pascal. However, unlike Pascal, if Eoln(InputText) is true, it
      returns the newline character, rather than a space.
   *)
 
-  PROCEDURE Get(inputtext: Text);
+  PROCEDURE Get(InputText: Text);
   (* Advances the "read pointer" by one character *)
 
-  PROCEDURE Eoln(inputtext: Text): BOOLEAN;
-  (* Returns TRUE if the next character of the inputtext is a linefeed *)
+  PROCEDURE Eoln(InputText: Text): BOOLEAN;
+  (* Returns TRUE if the next character of the InputText is a linefeed *)
 
-  PROCEDURE Eof(inputtext: Text): BOOLEAN;
-  (* Returns TRUE if the end of the inputtext is reached *)
+  PROCEDURE Eof(InputText: Text): BOOLEAN;
+  (* Returns TRUE if the end of the InputText is reached *)
 
-  PROCEDURE ReadCHAR(inputtext: Text; VAR ch: CHAR);
-  (* Read a character from the inputtext, and leave result in "ch" *)
+  PROCEDURE ReadChar(InputText: Text; VAR Char: CHAR);
+  (* Read a character from the InputText, and leave result in "Char" *)
 
-  PROCEDURE ReadLn(inputtext: Text);
-  (* Skip the rest of the current line of the inputtext, including the linefeed *)
+  PROCEDURE ReadLn(InputText: Text);
+  (* Skip the rest of the current line of the InputText,
+     including the linefeed
+  *)
 
-  PROCEDURE ReadINTEGER(inputtext: Text; VAR int: INTEGER);
+  PROCEDURE ReadInteger(InputText: Text; VAR Integer: INTEGER);
   (* Skip leading blanks, read an optionally signed integer from the
-     inputtext, and leave the result in "int".
+     InputText, and leave the result in "Integer".
      If no integer is read, or when overflow occurs, a runtime error results.
      Input stops at the character following the integer.
   *)
 
-  PROCEDURE ReadCARDINAL(inputtext: Text; VAR card: CARDINAL);
-  (* Skip leading blanks, read a cardinal from the inputtext, and leave the
+  PROCEDURE ReadCardinal(InputText: Text; VAR Cardinal: CARDINAL);
+  (* Skip leading blanks, read a cardinal from the InputText, and leave the
      result in "card".
      If no cardinal is read, or when overflow occurs, a runtime error results.
      Input stops at the character following the integer.
   *)
 
-  PROCEDURE ReadREAL(inputtext: Text; VAR real: REAL);
-  (* Skip leading blanks, read a real from the inputtext, and leave the
-     result in "card".
+  PROCEDURE ReadReal(InputText: Text; VAR Real: REAL);
+  (* Skip leading blanks, read a real from the InputText, and leave the
+     result in "Real".
      Syntax:
       real -->	[(+|-)] digit {digit} [. digit {digit}]
 		[ E [(+|-)] digit {digit} ]
@@ -91,48 +93,48 @@ DEFINITION MODULE PascalIo;
   (***************************************************************************
      Output routines;
      All these routines result in a runtime error when not called with either
-     "output", or a "Text" value obtained by Rewrite.
+     "Output", or a "Text" value obtained by Rewrite.
   ****************************************************************************)
 
-  PROCEDURE WriteCHAR(outputtext: Text; ch: CHAR);
-  (* Writes the character "ch" to the outputtext *)
+  PROCEDURE WriteChar(OutputText: Text; Char: CHAR);
+  (* Writes the character "Char" to the OutputText *)
 
-  PROCEDURE WriteLn(outputtext: Text);
-  (* Writes a linefeed to the outputtext *)
+  PROCEDURE WriteLn(OutputText: Text);
+  (* Writes a linefeed to the OutputText *)
 
-  PROCEDURE Page(outputtext: Text);
-  (* Writes a form-feed to the outputtext *)
+  PROCEDURE Page(OutputText: Text);
+  (* Writes a form-feed to the OutputText *)
 
-  PROCEDURE WriteINTEGER(outputtext: Text; int: INTEGER; width: CARDINAL);
-  (* Write integer "int" to the outputtext, using at least "width" places,
+  PROCEDURE WriteInteger(OutputText: Text; Integer: INTEGER; Width: CARDINAL);
+  (* Write integer "Integer" to the OutputText, using at least "Width" places,
      blank-padding to the left if needed.
   *)
 
-  PROCEDURE WriteCARDINAL(outputtext: Text; card: CARDINAL; width: CARDINAL);
-  (* Write cardinal "card" to the outputtext, using at least "width" places,
-     blank-padding to the left if needed.
+  PROCEDURE WriteCardinal(OutputText: Text; Cardinal, Width: CARDINAL);
+  (* Write cardinal "Cardinal" to the OutputText, using at least
+     "Width" places, blank-padding to the left if needed.
   *)
 
-  PROCEDURE WriteBOOLEAN(outputtext: Text; bool: BOOLEAN; width: CARDINAL);
-  (* Write boolean "bool" to the outputtext, using at least "width" places,
+  PROCEDURE WriteBoolean(OutputText: Text; Boolean: BOOLEAN; Width: CARDINAL);
+  (* Write boolean "Boolean" to the OutputText, using at least "Width" places,
      blank-padding to the left if needed.
-     Equivalent to WriteSTRING(" TRUE", width), or
-		   WriteSTRING("FALSE", width)
+     Equivalent to WriteString(" TRUE", Width), or
+		   WriteString("FALSE", Width)
   *)
 
-  PROCEDURE WriteSTRING(outputtext: Text;
-			str: ARRAY OF CHAR; width: CARDINAL);
-  (* Write string "str" to the outputtext, using at least "width" places,
+  PROCEDURE WriteString(OutputText: Text;
+			String: ARRAY OF CHAR; Width: CARDINAL);
+  (* Write string "String" to the OutputText, using at least "Width" places,
      blank-padding to the left if needed.
-     The string is terminated either by the character EOS, or the upperbound of
-     the array "str".
+     The string is terminated either by the character Eos, or the upperbound of
+     the array "String".
   *)
 
-  PROCEDURE WriteREAL(outputtext: Text; real: REAL; width, nfrac: CARDINAL);
-  (* Write real "real" to the outputtext. If "nfrac" = 0, use scientific
-     notation, otherwise use fixed-point notation with "nfrac" digits behind
+  PROCEDURE WriteReal(OutputText: Text; Real: REAL; Width, Nfrac: CARDINAL);
+  (* Write real "Real" to the OutputText. If "Nfrac" = 0, use scientific
+     notation, otherwise use fixed-point notation with "Nfrac" digits behind
      the dot.
-     Always use at least "width" places, blank-padding to the left if needed.
+     Always use at least "Width" places, blank-padding to the left if needed.
   *)
 
-END PascalIo.
+END PascalIO.
