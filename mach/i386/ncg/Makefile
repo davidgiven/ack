@@ -8,7 +8,7 @@ CGGFLAGS=
 
 PREFLAGS=-I$(EMHOME)/h -I. 
 PFLAGS=
-CFLAGS=$(PREFLAGS) $(PFLAGS)
+CFLAGS=$(PREFLAGS) $(PFLAGS) -O
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
 LIBS=$(EMHOME)/lib/em_data.a
@@ -26,41 +26,41 @@ all:
 	make cg
 
 cg: tables.o $(OFILES)
-	cc $(LDFLAGS) $(OFILES) tables.o $(LIBS) -o cg
+	$(CC) $(LDFLAGS) $(OFILES) tables.o $(LIBS) -o cg
 
 tables.o: tables.c
-	cc -c $(PREFLAGS) -I$(CDIR) tables.c
+	$(CC) -c $(PREFLAGS) -I$(CDIR) tables.c
 
 codegen.o: $(CDIR)/codegen.c
-	cc -c $(CFLAGS) $(CDIR)/codegen.c
+	$(CC) -c $(CFLAGS) $(CDIR)/codegen.c
 compute.o: $(CDIR)/compute.c
-	cc -c $(CFLAGS) $(CDIR)/compute.c
+	$(CC) -c $(CFLAGS) $(CDIR)/compute.c
 equiv.o: $(CDIR)/equiv.c
-	cc -c $(CFLAGS) $(CDIR)/equiv.c
+	$(CC) -c $(CFLAGS) $(CDIR)/equiv.c
 fillem.o: $(CDIR)/fillem.c
-	cc -c $(CFLAGS) $(CDIR)/fillem.c
+	$(CC) -c $(CFLAGS) $(CDIR)/fillem.c
 gencode.o: $(CDIR)/gencode.c
-	cc -c $(CFLAGS) $(CDIR)/gencode.c
+	$(CC) -c $(CFLAGS) $(CDIR)/gencode.c
 glosym.o: $(CDIR)/glosym.c
-	cc -c $(CFLAGS) $(CDIR)/glosym.c
+	$(CC) -c $(CFLAGS) $(CDIR)/glosym.c
 main.o: $(CDIR)/main.c
-	cc -c $(CFLAGS) $(CDIR)/main.c
+	$(CC) -c $(CFLAGS) $(CDIR)/main.c
 move.o: $(CDIR)/move.c
-	cc -c $(CFLAGS) $(CDIR)/move.c
+	$(CC) -c $(CFLAGS) $(CDIR)/move.c
 nextem.o: $(CDIR)/nextem.c
-	cc -c $(CFLAGS) $(CDIR)/nextem.c
+	$(CC) -c $(CFLAGS) $(CDIR)/nextem.c
 reg.o: $(CDIR)/reg.c
-	cc -c $(CFLAGS) $(CDIR)/reg.c
+	$(CC) -c $(CFLAGS) $(CDIR)/reg.c
 regvar.o: $(CDIR)/regvar.c
-	cc -c $(CFLAGS) $(CDIR)/regvar.c
+	$(CC) -c $(CFLAGS) $(CDIR)/regvar.c
 salloc.o: $(CDIR)/salloc.c
-	cc -c $(CFLAGS) $(CDIR)/salloc.c
+	$(CC) -c $(CFLAGS) $(CDIR)/salloc.c
 state.o: $(CDIR)/state.c
-	cc -c $(CFLAGS) $(CDIR)/state.c
+	$(CC) -c $(CFLAGS) $(CDIR)/state.c
 subr.o: $(CDIR)/subr.c
-	cc -c $(CFLAGS) $(CDIR)/subr.c
+	$(CC) -c $(CFLAGS) $(CDIR)/subr.c
 var.o: $(CDIR)/var.c
-	cc -c $(CFLAGS) $(CDIR)/var.c
+	$(CC) -c $(CFLAGS) $(CDIR)/var.c
 
 install: all
 	$(EMHOME)/mach/install cg
