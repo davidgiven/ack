@@ -29,7 +29,7 @@ cmp :   opt
 	cmp opt ../../lib/em_opt
 
 install:opt
-	size opt ../../lib/em_opt
+	-size opt ../../lib/em_opt
 	cp opt ../../lib/em_opt
 
 pattern.c:      patterns mktab
