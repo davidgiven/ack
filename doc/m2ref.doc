@@ -370,10 +370,16 @@ This error occurs when a procedure function does not return properly
 .br
 This error might occur when you use floating point operations on an
 implementation that does not have floating point.
+.PP
+In addition, some of the library modules may give error messages.
+The \fBTraps\fP-module has a suitable mechanism for this.
 .NH 1
 Calling the compiler
 .PP
 See [4,5,6] for a detailed explanation.
+.PP
+Ths compiler itself has no version checking mechanism. A special linker
+would be needed to do that. Therefore, a makefile generator is included [7].
 .NH 1
 The procedure call interface
 .PP
@@ -415,3 +421,5 @@ UNIX manual \fIack\fP(1)
 UNIX manual \fImodula-2\fP(1)
 .IP [6]
 UNIX manual \fIem_m2\fP(6)
+.IP [7]
+UNIX manual \fm2mm\fP(1)
