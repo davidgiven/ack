@@ -50,7 +50,7 @@ skipspaces(ch, skipnl)
 				return '/';
 			}
 		}
-		else if(nlseen && ch == '#') {
+		else if (nlseen && ch == '#') {
 			domacro();
 			ch = GetChar();
 		} else

@@ -641,14 +641,7 @@ parameter_declarator(register struct declarator *dc;)
 			parameter_type_list(&pl)
 		|
 			formal_list(&fm)
-		|
-			/* empty */
-			{
-				pl = new_proto();
-				pl->pl_type = void_type;
-				pl->pl_flag = PL_VOID;
-			}
-		]
+		]?
 		')'
 		{   add_decl_unary(dc, FUNCTION, 0, (arith)0, fm, pl);
 		    reject_params(dc);

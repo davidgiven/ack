@@ -117,7 +117,7 @@ check_array_subscript(expr)
 	}
 	else
 	if (size == 0) {
-		warning("array size is 0");
+		strict("array size is 0");
 	}
 	else
 	if (size & ~max_unsigned) {	/* absolutely ridiculous */

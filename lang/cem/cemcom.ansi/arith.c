@@ -143,14 +143,13 @@ relbalance(e1p, oper, e2p)
 		function2pointer(*e2p);
 	if ((*e1p)->ex_type->tp_fund == POINTER)
 		ch3pointer(e2p, oper, (*e1p)->ex_type);
-	else
-	if ((*e2p)->ex_type->tp_fund == POINTER)
+	else if ((*e2p)->ex_type->tp_fund == POINTER)
 		ch3pointer(e1p, oper, (*e2p)->ex_type);
-	else
-	if (	(*e1p)->ex_type == (*e2p)->ex_type &&
-		(*e1p)->ex_type->tp_fund == ENUM
-	)
-		{}
+	else if ((*e1p)->ex_type == (*e2p)->ex_type
+		&& (*e1p)->ex_type->tp_fund == ENUM) {}
+	else if (oper == ':'
+		    && (*e1p)->ex_type->tp_fund == VOID
+		    && (*e2p)->ex_type->tp_fund == VOID) {}
 	else
 		arithbalance(e1p, oper, e2p);
 }
@@ -160,7 +159,7 @@ ch3pointer(expp, oper, tp)
 	register struct type *tp;
 {
 	/*	Checks whether *expp may be compared to tp using oper,
-		as described in chapter 7.6 and 7.7.
+		as described in chapter 3.3.8 and 3.3.9.
 		tp is known to be a pointer.
 	*/
 	register struct expr *exp = *expp;

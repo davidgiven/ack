@@ -100,7 +100,7 @@ ch3mon(oper, expp)
 			(*expp)->ex_type = pointer_to((*expp)->ex_type,
 						(*expp)->ex_type->tp_typequal);
 			(*expp)->ex_lvalue = 0;
-			(*expp)->ex_flags &= ~EX_READONLY;
+			(*expp)->ex_flags &= ~(EX_READONLY | EX_VOLATILE);
 		}
 		break;
 	case '~':

@@ -40,23 +40,20 @@ replace(idf)
 		higher interface to the real thing: expand_macro().
 	*/
 	struct repl *repl;
-	
+
 	if (!(idf->id_macro)) return 0;
-	if (idf->id_macro->mc_flag & NOREPLACE){
+	if (idf->id_macro->mc_flag & NOREPLACE)
 		return 0;
-	}
 	repl = new_repl();
 	repl->r_ptr = repl->r_text;
 	repl->r_args = new_args();
 	repl->r_idf = idf;
-/* repl->r_level = InputLevel;	/* ?? temporary */
-	if (!expand_macro(repl, idf)) {
+	if (!expand_macro(repl, idf))
 		return 0;
-	}
 	InputLevel++;
 	InsertText(repl->r_text, repl->r_ptr - repl->r_text);
-	repl->r_level = InputLevel;
 	idf->id_macro->mc_flag |= NOREPLACE;
+	repl->r_level = InputLevel;
 	repl->next = ReplaceList;
 	ReplaceList = repl;
 	return 1;
@@ -122,7 +119,7 @@ expand_macro(repl, idf)
 #ifdef	DEBUG
 			if (strcmp("defined", idf->id_text))
 				crash("in %s, %u: assertion %s failed",
-					__FILE__, __LINE__ - 2, 
+					__FILE__, __LINE__ - 2,
 					"strcmp(\"defined\", idf->id_text)");
 #endif
 			if (!AccDefined) return 0;
@@ -133,10 +130,6 @@ expand_macro(repl, idf)
 		ch = GetChar();
 		ch = skipspaces(ch,1);
 		if (ch != '(') {	/* no replacement if no () */
-			/*	This is obscure. See the examples for the
-				replace algorithm in section 3`.8.3.5.
-			lexwarning("macro %s needs arguments", idf->id_text);
-			*/
 			UnGetChar();
 			return 0;
 		} else
@@ -153,7 +146,7 @@ expand_macro(repl, idf)
 
 			#define	a +
 			a+b; --> + + b ;
-		
+
 		'a' must be substituded, but the result should be
 		three tokens: + + ID. Because this preprocessor is
 		character based, we have a problem.
@@ -201,7 +194,7 @@ expand_defined(repl)
 }
 
 getactuals(repl, idf)
-	struct repl* repl;
+	struct repl *repl;
 	register struct idf *idf;
 {
 	/*	Get the actual parameters from the input stream.
@@ -217,7 +210,7 @@ getactuals(repl, idf)
 	args->a_expvec[0] = args->a_expptr = &args->a_expbuf[0];
 	args->a_rawvec[0] = args->a_rawptr = &args->a_rawbuf[0];
 	if ((ch = GetChar()) != ')') {
-		PushBack();
+		UnGetChar();
 		while ((ch = actual(repl)) != ')' ) {
 			if (ch != ',') {
 				lexerror("illegal macro call");
@@ -257,11 +250,11 @@ struct repl *repl;
 		like macro calls. It makes the following code
 		work:
 
-			#define def(a,b)	x(a,b)
+			#define	def(a,b)	x(a,b)
 			#define	glue(a,b)	a ## b
 
 			glue(abc,def(a,b))
-			
+
 		Results in:
 
 			abcdef(a,b);
@@ -371,7 +364,8 @@ actual(repl)
 			}
 			UnGetChar();
 		} else if (ch == '(' || ch == '[' || ch == '{') {
-			/* a comma may occur within these constructions */
+			/* a comma may occur within these constructions ???
+			 */
 			level++;
 			stash(repl, ch, !nostashraw);
 		} else if (ch == ')' || ch == ']' || ch == '}') {
@@ -392,7 +386,7 @@ actual(repl)
 			/* newlines are accepted as white spaces */
 			LineNumber++;
 			while ((ch = GetChar()), class(ch) == STSKIP)
-				/* VOID */;
+				/* EMPTY */;
 
 			/*	This piece of code needs some explanation:
 				consider the call of a macro defined as:
@@ -456,7 +450,7 @@ macro_func(idef)
 	register struct idf *idef;
 {
 	/*	macro_func() performs the special actions needed with some
-		macros.  These macros are __FILE__ and __LINE__ which
+		macros. These macros are __FILE__ and __LINE__ which
 		replacement texts must be evaluated at the time they are
 		used.
 	*/
@@ -504,7 +498,7 @@ macro2buffer(repl, idf, args)
 				|	TOKEN '##' PARAMETER
 				|	PARAMETER '##' PARAMETER
 				;
-		
+
 		As the grammar indicates, we could make a DFA and
 		use this finite state machine for the replacement
 		list parsing (inserting the arguments, etc.).
@@ -526,11 +520,11 @@ macro2buffer(repl, idf, args)
 		do {
 		    *repl->r_ptr++ = *ptr;
 		    if (*ptr == '\\')
-			    *repl->r_ptr++ = *++ptr;
+			*repl->r_ptr++ = *++ptr;
 		    if (*ptr == '\0') {
-			    lexerror("unterminated string");
-			    *repl->r_ptr = '\0';
-			    return;
+			lexerror("unterminated string");
+			*repl->r_ptr = '\0';
+			return;
 		    }
 		    ptr++;
 		} while (*ptr != delim || *ptr == '\0');
@@ -543,21 +537,20 @@ macro2buffer(repl, idf, args)
 			/* trim the actual replacement list */
 		    --repl->r_ptr;
 		    while (is_wsp(*repl->r_ptr)
-				&& repl->r_ptr >= repl->r_text)
-			    --repl->r_ptr;
+			    && repl->r_ptr >= repl->r_text)
+			--repl->r_ptr;
 
-		    /*	## occurred at the beginning of the
-			    replacement list.
-		    */
+		    /*	## occurred at the beginning of the replacement list.
+		     */
 		    if (repl->r_ptr == repl->r_text
 				&& is_wsp(*repl->r_ptr)) {
-			    err = 1;
-			    break;
+			err = 1;
+			break;
 		    }
 
 		    while(*repl->r_ptr == TOKSEP
-				&& repl->r_ptr >= repl->r_text)
-			    --repl->r_ptr;
+			    && repl->r_ptr >= repl->r_text)
+			--repl->r_ptr;
 
 		    tmpptr = repl->r_ptr;
 		    ++repl->r_ptr;
@@ -567,7 +560,7 @@ macro2buffer(repl, idf, args)
 			    ptr++;
 
 		    /*	## occurred at the end of the replacement list.
-		    */
+		     */
 		    if (*ptr & FORMALP) {
 			register int n = *ptr++ & 0177;
 			register char *p;
@@ -598,13 +591,13 @@ macro2buffer(repl, idf, args)
 				if (*tmpptr == NOEXPM) *tmpptr = TOKSEP;
 			    }
 		    }
-		} else
+		} else			/* # operator */
 		    ptr = stringify(repl, ptr, args);
 	    } else if (*ptr & FORMALP) {
 		/* insert actual parameter */
 		register int n = *ptr++ & 0177;
 		register char *p, *q;
-			
+
 		ASSERT(n > 0);
 
 		/*	This is VERY dirty, we look ahead for the
@@ -613,7 +606,7 @@ macro2buffer(repl, idf, args)
 			one.
 		*/
 		for (p = ptr; (*p & FORMALP) == 0 && is_wsp(*p); p++)
-				/* EMPTY */;
+			/* EMPTY */;
 		if (*p == '#' && p[1] == '#')
 			q = args->a_rawvec[n-1];
 		else
@@ -632,7 +625,6 @@ macro2buffer(repl, idf, args)
 	*repl->r_ptr = '\0';
 	if (err)
 		lexerror("illegal use of the ## operator");
-	return;
 }
 
 char *
@@ -664,7 +656,7 @@ stringify(repl, ptr, args)
 	if (*ptr & FORMALP) {
 		register int n = *ptr++ & 0177;
 		register char *p;
-		
+
 		ASSERT(n != 0);
 		p = args->a_rawvec[n-1];
 		*repl->r_ptr++ = '"';
@@ -692,11 +684,12 @@ stringify(repl, ptr, args)
 
 		/* trim spaces in the replacement list */
 		for (--repl->r_ptr; is_wsp(*repl->r_ptr); repl->r_ptr--)
-			/* VOID */;
+			/* EMPTY */;
 		*++repl->r_ptr = '"';
 		++repl->r_ptr;	/* oops, one to far */
 	} else
 		error("illegal use of # operator");
+	*repl->r_ptr = '\0';
 	return ptr;
 }
 

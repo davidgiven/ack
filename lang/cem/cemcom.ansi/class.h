@@ -22,7 +22,7 @@
 #define	STGARB	2	/* garbage ascii character: not allowed in C	*/
 #define	STSIMP	3	/* this character can occur as token in C	*/
 #define	STCOMP	4	/* this one can start a compound token in C	*/
-#define	STELL	5	/* possible start of wide char stuff or idf	*/
+#define	STELL	5	/* wide character- or string- constant prefix	*/
 #define	STIDF	6	/* being the initial character of an identifier	*/
 #define	STCHAR	7	/* the starter of a character constant		*/
 #define	STSTR	8	/* the starter of a string			*/

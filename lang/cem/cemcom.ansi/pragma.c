@@ -11,9 +11,6 @@
 #include	"debug.h"
 #include	"idf.h"
 #include	"input.h"
-#include	"nopp.h"
-
-#ifndef NOPP
 #include	"ifdepth.h"	
 #include	"botch_free.h"	
 #include	"nparams.h"	
@@ -58,15 +55,9 @@ do_pragma()
 			break;
 
 		case P_UNKNOWN:
-			strict("unknown pragma directive %s", id->id_text);
-			break;
-
 		default:
-			strict("unimplemented pragma directive");
 			break;
 		}
 		SkipToNewLine(0);
 	}
-	else strict("unrecognized pragma line");
 }
-#endif

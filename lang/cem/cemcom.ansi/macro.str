@@ -11,10 +11,10 @@
 /*	The flags of the mc_flag field of the macro structure. Note that
 	these flags can be set simultaneously.
 */
-#define NOFLAG		0		/* no special flags	*/
+#define	NOFLAG		0		/* no special flags	*/
 #define	FUNC		0x1		/* function attached    */
-#define	NOUNDEF		0x2		/* special macro */
-#define NOREPLACE	0x4		/* prevent recursion */
+#define	NOUNDEF		0x2		/* reserved macro	*/
+#define	NOREPLACE	0x4		/* prevent recursion	*/
 
 #define	FORMALP 0200	/* mask for creating macro formal parameter	*/
 
@@ -28,7 +28,6 @@ struct macro	{
 	char *	mc_text;	/* the replacement text		*/
 	int	mc_nps;		/* number of formal parameters	*/
 	int	mc_length;	/* length of replacement text	*/
-	int	mc_count;	/* # of "concurrent" invocations*/
 	char	mc_flag;	/* marking this macro		*/
 };
 

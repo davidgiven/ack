@@ -167,7 +167,7 @@ ch3bin(expp, oper, expr)
 	case RIGHTAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		arithbalance(expp, oper, &expr); /* ch. 7.5 */
+		arithbalance(expp, oper, &expr); /* ch. 3.3.7 */
 		ch3cast(&expr, oper, int_type); /* cvt. rightop to int */
 		non_commutative_binop(expp, oper, expr);
 		break;

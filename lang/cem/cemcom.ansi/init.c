@@ -74,6 +74,7 @@ init_pp()
 	/* __DATE__ */
 	sprintf(dbuf, "\"%.3s %.2d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
+	if (tp->tm_mday < 10) dbuf[5] = ' ';		/* hack */
 	macro_def(str2idf("__DATE__"), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */

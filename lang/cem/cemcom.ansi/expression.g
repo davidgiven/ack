@@ -22,7 +22,7 @@ int InSizeof = 0;	/* inside a sizeof- expression */
 int ResultKnown = 0;	/* result of the expression is already known */
 
 /* Since the grammar in the standard is not LL(n), it is modified so that
- * it accepts basically the same grammar. Thsi means that there is no 1-1
+ * it accepts basically the same grammar. This means that there is no 1-1
  * mapping from the grammar in the standard to the grammar given here.
  * Such is life.
  */

@@ -39,8 +39,8 @@ GetIdentifier(skiponerr)
 {
 	/*	returns a pointer to the descriptor of the identifier that is
 		read from the input stream. When the input doe not contain
-		an identifier, the rest of the line is skipped and a
-		null-pointer is returned.
+		an identifier, the rest of the line is skipped when
+		skiponerr is on, and a null-pointer is returned.
 		The substitution of macros is disabled.
 	*/
 	int tmp = UnknownIdIsZero;
@@ -422,7 +422,7 @@ do_undef()
 			if (id->id_macro->mc_flag & NOUNDEF) {
 				lexerror("it is not allowed to undef %s", id->id_text);
 			} else {
-				free(id->id_text);
+				free(id->id_macro->mc_text);
 				free_macro(id->id_macro);
 				id->id_macro = (struct macro *) 0;
 			}
@@ -539,7 +539,6 @@ macro_def(id, text, nformals, length, flags)
 	newdef->mc_nps  = nformals;	/* nr of formals	*/
 	newdef->mc_length = length;	/* length of repl. text	*/
 	newdef->mc_flag = flags;	/* special flags	*/
-	newdef->mc_count = 0;
 }
 
 int
@@ -699,9 +698,15 @@ domacro()
 
 	EoiForNewline = 1;
 	if ((tok = GetToken(&tk)) == IDENTIFIER) {
-		if (strcmp(tk.tk_idf->id_text, "line") != 0) {
+		if (strcmp(tk.tk_idf->id_text, "line")
+		    && strcmp(tk.tk_idf->id_text, "pragma")) {
 			error("illegal # line");
 			SkipToNewLine(0);
+			return;
+		}
+		else if ( !strcmp(tk.tk_idf->id_text, "pragma")) {
+			do_pragma();
+			EoiForNewline = 0;
 			return;
 		}
 		tok = GetToken(&tk);

@@ -37,6 +37,16 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 
 #ifdef	____
 struct tokenname tkcomp[] =	{	/* names of the composite tokens */
+	{PLUSAB, "+="},
+	{MINAB, "-="},
+	{TIMESAB, "*="},
+	{DIVAB, "/="},
+	{MODAB, "%="},
+	{LEFTAB, "<<="},
+	{RIGHTAB, ">>="},
+	{ANDAB, "&="},
+	{XORAB, "^="},
+	{ORAB, "|="},
 	{NOTEQUAL, "!="},
 	{AND, "&&"},
 	{PLUSPLUS, "++"},
@@ -113,16 +123,6 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{CASTAB, "castab"},
 	{POSTINCR, "postfix ++"},
 	{POSTDECR, "postfix --"},
-	{PLUSAB, "+="},
-	{MINAB, "-="},
-	{TIMESAB, "*="},
-	{DIVAB, "/="},
-	{MODAB, "%="},
-	{LEFTAB, "<<="},
-	{RIGHTAB, ">>="},
-	{ANDAB, "&="},
-	{XORAB, "^="},
-	{ORAB, "|="},
 
 	{INT2INT, "int2int"},
 	{INT2FLOAT, "int2float"},

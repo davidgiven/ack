@@ -44,8 +44,6 @@ getwdir(fn)
 
 int	NoUnstack;
 int	InputLevel;
-#if 0
-#endif
 
 AtEoIT()
 {

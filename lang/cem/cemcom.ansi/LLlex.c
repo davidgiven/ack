@@ -203,8 +203,7 @@ garbage:
 				ptok->tk_bts = string_token("file specifier",
 							'>', &(ptok->tk_len));
 				return ptok->tk_symb = FILESPECIFIER;
-			}
-			if (nch == '<') {
+			} else if (nch == '<') {
 				if ((nch = GetChar()) == '=')
 					return ptok->tk_symb = LEFTAB;
 				UnGetChar();
@@ -321,15 +320,9 @@ garbage:
 		idef->id_line = ptok->tk_line;
 #ifndef NOPP
 		if (idef->id_macro && ReplaceMacros && !NoExpandNext) {
-#if 0
-			if (idef->id_macro->mc_count > 0)
-				idef->id_macro->mc_count--;
-			else
-#endif	/* 0 */
 			if (replace(idef))
 					goto again;
 		}
-		NoExpandNext = 0;
 		if (UnknownIdIsZero && idef->id_reserved != SIZEOF) {
 			ptok->tk_ival = (arith)0;
 			ptok->tk_fund = INT;

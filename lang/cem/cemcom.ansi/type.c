@@ -112,7 +112,7 @@ construct_type(fund, tp, qual, count, pl)
 			count = (arith)-1;
 		}
 		else if (tp->tp_size == 0)	/* CJ */
-			warning("array elements have size 0");
+			strict("array elements have size 0");
 		if (count >= (arith)0)
 			count *= tp->tp_size;
 		dtp = array_of(tp, count, qual);

@@ -195,8 +195,9 @@ ch3cast(expp, oper, tp)
 	}
 	else
 #endif NOBITFIELD
-	if (equal_type(tp, oldtp, 0)) {
+	if (equal_type(tp, oldtp, oper != CAST)) {
 		/* life is easy */
+		(*expp)->ex_type = tp;	/* so qualifiers are allright */
 	}
 	else
 	if (tp->tp_fund == VOID) {
@@ -382,14 +383,16 @@ equal_type(tp, otp, check_qual)
 
 	case POINTER:
 		if (equal_type(tp->tp_up, otp->tp_up, check_qual)) {
-		    if (otp->tp_up->tp_typequal & TQ_CONST) {
-			if (!(tp->tp_up->tp_typequal & TQ_CONST)) {
-			    strict("illegal use of pointer to const object");
+		    if (check_qual) {
+			if (otp->tp_up->tp_typequal & TQ_CONST) {
+			    if (!(tp->tp_up->tp_typequal & TQ_CONST)) {
+				strict("illegal use of pointer to const object");
+			    }
 			}
-		    }
-		    if (otp->tp_up->tp_typequal & TQ_VOLATILE) {
-			if (!(tp->tp_up->tp_typequal & TQ_VOLATILE)) {
-			    strict("illegal use of pointer to volatile object");
+			if (otp->tp_up->tp_typequal & TQ_VOLATILE) {
+			    if (!(tp->tp_up->tp_typequal & TQ_VOLATILE)) {
+				strict("illegal use of pointer to volatile object");
+			    }
 			}
 		    }
 		    return 1;
@@ -568,8 +571,8 @@ ch3asgn(expp, oper, expr)
 	/*	Preserve volatile markers across the tree.
 		This is questionable, depending on the way the optimizer
 		wants this information.
-	vol = (exp->ex_flags & EX_VOLATILE) || (expr->ex_flags & EX_VOLATILE);
 	*/
+	vol = (exp->ex_flags & EX_VOLATILE) || (expr->ex_flags & EX_VOLATILE);
 
 	if (oper == '=') {
 		ch3cast(&expr, oper, exp->ex_type);
@@ -587,7 +590,7 @@ ch3asgn(expp, oper, expr)
 			((typeof (f op e))f op (typeof (f op e))e),
 		   where f ~ extmp and e ~ expr.
 		   We want to use (typeof (f op e))e.
-		   Ch7bin does not create a tree if both operands
+		   Ch3bin does not create a tree if both operands
 		   were illegal or constants!
 		*/
 		tp = extmp->ex_type;	/* perform the arithmetic in type tp */

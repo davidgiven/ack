@@ -210,7 +210,7 @@ declare_idf(ds, dc, lvl)
 			}
 			else if (type->tp_fund != LABEL) {
 				/* CJ */
-				warning("%s has size 0", idf->id_text);
+				strict("%s has size 0", idf->id_text);
 			}
 		}
 	}

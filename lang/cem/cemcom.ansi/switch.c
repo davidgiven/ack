@@ -60,9 +60,16 @@ code_startswitch(expp)
 	
 	switch (fund) {
 	case LONG:
+		/* switches on longs should work. Unfortunately, no backend
+		 * has simplemented switches with sizes other than the
+		 * word_size. Furthermore, building the rom should then be
+		 * done using C_rom_icon().
+		 * Just cast the expression to int and give a warning when
+		 * this means truncation.
+		 */
 		if (long_size > int_size)
 			warning("can't switch on longs (cast to int)");
-		int2int(expp, int_type);
+		int2int(expp, int_type);	/* for now ??? */
 		break;
 	case FLOAT:
 	case DOUBLE:

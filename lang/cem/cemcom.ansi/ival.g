@@ -475,8 +475,11 @@ check_ival(expp, tp)
 		if (expr->VL_CLASS == Name) {
 			register struct idf *idf = expr->VL_IDF;
 
-			if (idf->id_def->df_level >= L_LOCAL)
+			if (idf->id_def->df_level >= L_LOCAL
+			    && idf->id_def->df_sc != GLOBAL
+			    && idf->id_def->df_sc != EXTERN) {
 				illegal_init_cst(expr);
+			}
 			else	/* e.g., int f(); int p = f; */
 			if (idf->id_def->df_type->tp_fund == FUNCTION)
 				C_con_pnam(idf->id_text);
