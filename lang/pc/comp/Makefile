@@ -79,7 +79,7 @@ SRC =	$(CSRC) $(GENCFILES)
 GENGFILES=	tokenfile.g
 GENHFILES=	Lpars.h debugcst.h density.h errout.h idfsize.h inputtype.h\
 	numsize.h strsize.h def.h type.h desig.h scope.h node.h\
-	target_sizes.h nocross.h
+	target_sizes.h nocross.h dbsymtab.h
 HFILES=		LLlex.h chk_expr.h class.h const.h debug.h def.h desig.h\
 	f_info.h idf.h input.h main.h misc.h node.h required.h scope.h\
 	tokenname.h type.h $(GENHFILES)

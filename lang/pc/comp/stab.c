@@ -9,6 +9,10 @@
 
 /* $Header$ */
 
+#include	"dbsymtab.h"
+
+#ifdef	DBSYMTAB
+
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -225,6 +229,7 @@ stb_type(tp, assign_num)
 
 stb_string(df, kind)
 	register struct def *df;
+	long kind;
 {
 	register struct type	*tp = df->df_type;
 	char buf[64];
@@ -232,11 +237,12 @@ stb_string(df, kind)
 	create_db_str();
 	adds_db_str(df->df_idf->id_text);
 	addc_db_str(':');
-	switch(kind) {
-	case D_MODULE:
+	if (kind == D_MODULE) {
 		adds_db_str(sprint(buf, "M%d;", df->prc_vis->sc_count));
 		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, "m_a_i_n");
-		break;
+		return;
+	}
+	switch((int)kind) {
 	case D_PROCEDURE:
 	case D_FUNCTION:
 		adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
@@ -367,3 +373,4 @@ stb_string(df, kind)
 	}
 }
 
+#endif /* DBSYMTAB */

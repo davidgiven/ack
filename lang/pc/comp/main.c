@@ -21,6 +21,7 @@
 #include	"tokenname.h"
 #include	"type.h"
 #include	"scope.h"
+#include	"dbsymtab.h"
 
 char		options[128];
 char		*ProgName;
@@ -106,9 +107,11 @@ Compile(src, dst)
 		fatal("couldn't open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+#ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std(FileName, N_SO, 0);
 	}
+#endif /* DBSYMTAB */
 	AddRequired();
 	C_df_dlb(++data_label);
 	C_rom_scon(FileName,(arith) strlen(FileName) + 1);
@@ -250,7 +253,9 @@ AddRequired()
 	df->df_type = int_type;
 	df->con_const = &maxintnode;
 	df->df_flags |= D_SET;
+#ifdef DBSYMTAB
 	if (options['g']) stb_string(df, D_CONST);
+#endif /* DBSYMTAB */
 }
 
 #ifdef DEBUG

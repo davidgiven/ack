@@ -80,32 +80,32 @@ struct def	{		/* list of definitions for a name */
 	struct idf *df_idf;	/* link back to the name */
 	struct scope *df_scope;	/* scope in which this definition resides */
 	long df_kind;		/* the kind of this definition: */
-#define D_PROCEDURE	0x000001	/* procedure */
-#define D_FUNCTION	0x000002	/* function */
-#define D_TYPE		0x000004	/* a type */
-#define D_CONST		0x000008	/* a constant */
-#define D_ENUM		0x000010	/* an enumeration literal */
-#define D_FIELD		0x000020	/* a field in a record */
-#define D_PROGRAM	0x000040	/* the program */
-#define D_VARIABLE	0x000080	/* a variable */
-#define D_PARAMETER	0x000100	/* program parameter */
-#define D_FORWTYPE	0x000200	/* forward type */
-#define D_FTYPE		0x000400	/* resolved forward type */
-#define D_FWPROCEDURE	0x000800	/* forward procedure */
-#define D_FWFUNCTION	0x001000	/* forward function */
-#define D_LABEL		0x002000	/* a label */
-#define D_LBOUND	0x004000	/* lower bound id. in conform. array */
-#define D_UBOUND	0x008000	/* upper bound id. in conform. array */
-#define D_FORWARD	0x010000	/* directive "forward" */
-#define D_EXTERN	0x020000	/* directive "extern" */
-#define D_ERROR		0x040000	/* a compiler generated definition
+#define D_PROCEDURE	0x000001L	/* procedure */
+#define D_FUNCTION	0x000002L	/* function */
+#define D_TYPE		0x000004L	/* a type */
+#define D_CONST		0x000008L	/* a constant */
+#define D_ENUM		0x000010L	/* an enumeration literal */
+#define D_FIELD		0x000020L	/* a field in a record */
+#define D_PROGRAM	0x000040L	/* the program */
+#define D_VARIABLE	0x000080L	/* a variable */
+#define D_PARAMETER	0x000100L	/* program parameter */
+#define D_FORWTYPE	0x000200L	/* forward type */
+#define D_FTYPE		0x000400L	/* resolved forward type */
+#define D_FWPROCEDURE	0x000800L	/* forward procedure */
+#define D_FWFUNCTION	0x001000L	/* forward function */
+#define D_LABEL		0x002000L	/* a label */
+#define D_LBOUND	0x004000L	/* lower bound id. in conform. array */
+#define D_UBOUND	0x008000L	/* upper bound id. in conform. array */
+#define D_FORWARD	0x010000L	/* directive "forward" */
+#define D_EXTERN	0x020000L	/* directive "extern" */
+#define D_ERROR		0x040000L	/* a compiler generated definition
 					 * for an undefined variable */
-#define D_MODULE	0x080000	/* the module */
-#define D_INUSE		0x100000	/* variable is in use */
+#define D_MODULE	0x080000L	/* the module */
+#define D_INUSE		0x100000L	/* variable is in use */
 
 /* special values for stab.c */
-#define D_END		(D_MODULE|D_PROCEDURE)
-#define D_PEND		(D_MODULE|D_PROCEDURE|D_VARIABLE)
+#define D_END		(D_PROGRAM|D_PROCEDURE)
+#define D_PEND		(D_PROGRAM|D_PROCEDURE|D_VARIABLE)
 
 #define D_VALUE		(D_FUNCTION | D_CONST | D_ENUM | D_FIELD | D_VARIABLE\
 			 | D_FWFUNCTION | D_LBOUND | D_UBOUND)

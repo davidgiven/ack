@@ -12,6 +12,7 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"dbsymtab.h"
 
 extern int	proclevel;
 extern int	parlevel;
@@ -20,6 +21,7 @@ struct def *
 Enter(name, kind, type, pnam)
 	char *name;
 	register struct type *type;
+	long kind;
 {
 	/*	Enter a definition for "name" with kind "kind" and type
 		"type" in the Current Scope. If it is a standard name, also
@@ -34,7 +36,9 @@ Enter(name, kind, type, pnam)
 		df->df_value.df_reqname = pnam;
 		df->df_flags |= D_SET;
 	}
+#ifdef DBSYMTAB
 	else if (options['g']) stb_string(df, kind);
+#endif /*  DBSYMTAB */
 	return df;
 }
 
@@ -65,7 +69,9 @@ EnterProgList(Idlist)
 					df->var_name = output;
 					set_outp();
 				}
+#ifdef DBSYMTAB
 				if (options['g']) stb_string(df, D_VARIABLE);
+#endif /*  DBSYMTAB */
 			}
 		}
 		else	{
@@ -163,7 +169,9 @@ EnterVarList(Idlist, type, local)
 			df->var_name = df->df_idf->id_text;
 			df->df_flags |= D_NOREG;
 		}
+#ifdef DBSYMTAB
 		if (options['g']) stb_string(df, D_VARIABLE);
+#endif /*  DBSYMTAB */
 	}
 	FreeNode(Idlist);
 }

@@ -14,6 +14,7 @@
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
+#include	"dbsymtab.h"
 }
 
 %lexical LLlex;
@@ -28,10 +29,13 @@ Program
 }:
 	ProgramHeading(&df)
 	';' Block(df) '.'
-	  { if (options['g']) {
+	  {
+#ifdef DBSYMTAB
+	    if (options['g']) {
 		C_ms_stb_cst(df->df_idf->id_text, N_MAIN, 0, (arith) 0);
 		stb_string(df, D_END);
 	    }
+#endif /* DBSYMTAB */
 	  }
 	| { df = new_def();
 	    df->df_idf = str2idf(FileName, 1);
@@ -52,7 +56,9 @@ ProgramHeading(register struct def **df;):
 			  open_scope();
 			  GlobalScope = CurrentScope;
 			  (*df)->prc_vis = CurrVis;
+#ifdef DBSYMTAB
 	  		  if (options['g']) stb_string(*df, D_MODULE);
+#endif /* DBSYMTAB */
 			}
 	[
 		'('

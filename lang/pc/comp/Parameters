@@ -55,3 +55,7 @@
 
 !File: nocross.h
 #undef NOCROSS		1	/* define when cross compiler not needed */
+
+
+!File: dbsymtab.h
+#define DBSYMTAB	1	/* ability to produce symbol table for debugger */

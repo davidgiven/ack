@@ -19,6 +19,7 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"dbsymtab.h"
 
 #define	offsetof(type, field)	(int) &(((type *)0)->field)
 #define	PC_BUFSIZ	(sizeof(struct file) - (int)((struct file *)0)->bufadr)
@@ -180,7 +181,9 @@ ConstantDefinition
 			  	df->con_const = nd;
 				df->df_type = nd->nd_type;
 				df->df_flags |= D_SET;
+#ifdef DBSYMTAB
 				if (options['g']) stb_string(df, D_CONST);
+#endif /* DBSYMTAB */
 			  }
 			}
 ;
@@ -197,7 +200,9 @@ TypeDefinition
 			{ if( df = define(id, CurrentScope, D_TYPE) ) {
 			  	df->df_type = tp;
 				df->df_flags |= D_SET;
+#ifdef DBSYMTAB
 				if (options['g']) stb_string(df, D_TYPE);
+#endif /* DBSYMTAB */
 			  }
 			}
 ;
@@ -289,11 +294,15 @@ ProcedureDeclaration
 				{ DoDirective(dot.TOK_IDF, nd, tp, scl, 0); }
 	|
 				{ df = DeclProc(nd, tp, scl);
+#ifdef DBSYMTAB
 				  if (options['g']) stb_string(df, D_PROCEDURE);
+#endif /* DBSYMTAB */
 				}
 		Block(df)
 				{ /* open_scope() is simulated in DeclProc() */
+#ifdef DBSYMTAB
 				  if (options['g']) stb_string(df, D_PEND);
+#endif /* DBSYMTAB */
 				  close_scope();
 				}
 	]
@@ -368,12 +377,16 @@ FunctionDeclaration
 					df->prc_bool =
 						CurrentScope->sc_off =
 							df->prc_res - int_size;
+#ifdef DBSYMTAB
 					if (options['g']) stb_string(df, D_FUNCTION);
+#endif /* DBSYMTAB */
 				    }
 				}
 			Block(df)
 				{ if( df ) {
+#ifdef DBSYMTAB
 					if (options['g']) stb_string(df, D_PEND);
+#endif /* DBSYMTAB */
 					EndFunc(df);
 				  }
 
