@@ -1,5 +1,10 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
+
 /* expression types for predefined functions are assembled */
 int	typetable[10];
 int	exprlimit;

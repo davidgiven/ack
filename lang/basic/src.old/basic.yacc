@@ -458,4 +458,7 @@ exprlist: expression	{ typetable[0]= $1; $$=1;}
 	| exprlist ',' expression { typetable[$1]=$3;$$=$1+1;}
 
 %%
+#ifndef NORCSID
+static char rcs_id[]	= "$Header$" ;
+#endif
 #include "lex.c"

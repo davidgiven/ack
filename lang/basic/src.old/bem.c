@@ -1,5 +1,12 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[]	= "$Header$" ;
+static char rcs_bem[]	= RCS_BEM ;
+static char rcs_symb[]	= RCS_SYMB ;
+static char rcs_graph[]	= RCS_GRAPH ;
+#endif
+
 /* Author: M.L. Kersten
 **
 ** This is the main routine for the BASIC-EM frontend.

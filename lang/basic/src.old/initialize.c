@@ -1,5 +1,10 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
+
 /* generate temporary files etc */
 
 FILE	*emfile;

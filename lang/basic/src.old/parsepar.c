@@ -1,5 +1,9 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 int	listing;		/* -l listing required */
 int	debug;			/* -d compiler debugging */
 int	wflag=1;		/* -w no warnings */

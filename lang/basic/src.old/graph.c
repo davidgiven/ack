@@ -1,5 +1,10 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
+
 List *forwardlabel=0;
 
 /* Line management is handled here */

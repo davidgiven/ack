@@ -1,5 +1,10 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
+
 /* Here we find all routines dealing with pure EM code generation */
 
 static int	emlabel=1;

@@ -1,3 +1,7 @@
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /* This file contains the new lexical analizer */
 typedef struct {
 	char *name; 

@@ -9,6 +9,10 @@
 #include "graph.h"
 #include "y.tab.h"
 
+#ifndef NORCSID
+# define RCS_BEM	"$Header$"
+#endif
+
 #define POINTERSIZE	4
 #define MAXINT		32768
 #define MININT		-32767

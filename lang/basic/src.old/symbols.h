@@ -1,3 +1,7 @@
+#ifndef NORCSID
+# define RCS_SYMB	"$Header$"
+#endif
+
 #define NIL	0
 #define TRUE	1
 #define FALSE	0

@@ -1,5 +1,10 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
+
 /* Here you find all routines to evaluate expressions and
    generate code for assignment statements
 */

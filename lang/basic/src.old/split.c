@@ -1,5 +1,9 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /* Split the intermediate code into procedures.
    This is necessary to make the EM code fit on
    smaller machines. (for the Peephole optimizer!)

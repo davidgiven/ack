@@ -1,4 +1,9 @@
 #include "bem.h"
+
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /* Symboltable management module */
 
 int	deftype[128];		/* default type declarer */

@@ -1,4 +1,9 @@
 #
+
+#ifndef NORCSID
+# define RCS_GRAPH	"$Header$"
+#endif
+
 /* 
 ** The control graph is represented by a multi-list structure.
 ** The em code is stored on the em intermediate file already

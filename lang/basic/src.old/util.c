@@ -1,5 +1,9 @@
 #include "bem.h"
 
+#ifndef NORSCID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #define abs(X)  (X>=0?X:-X)
 /* Miscelaneous routines can be found here */
 
