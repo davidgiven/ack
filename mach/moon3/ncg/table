@@ -92,9 +92,9 @@ TOKENS
 	 */
 
 	/* Part (i) */
-zero_const	= {INT num;} 4 cost(0,4) "#" num .
-small_const	= {INT num;} 4 cost(0,4) "#" num .
-bconst		= {INT num;} 4 cost(0,4) "#" num .
+zero_const	= {INT num;} 4 cost(0,0) "#" num .
+small_const	= {INT num;} 4 cost(0,0) "#" num .
+bconst		= {INT num;} 4 cost(0,0) "#" num .
 const		= {INT num;} 4 cost(4,4) "#" num .
 indirect4	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
 post_inc4	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
@@ -112,7 +112,6 @@ pre_dec1	= {A_REG reg;} 4 cost(0,5) "-(" reg ")" .
 ext_addr	= {ADDR bd;} 4 cost(4,5) "#" bd .
 llabel		= {ADDR bd;} 4 cost(2,0) bd .
 slabel		= {ADDR bd;} 4 cost(0,0) bd .
-shconst		= {INT num;} 4 cost(0,0) "#" num .
 
 extend1		= {D_REG reg;} 4 cost(0,0) reg .
 extend2		= {D_REG reg;} 4 cost(0,0) reg .
@@ -369,7 +368,7 @@ immediate4	= consts + ext_addr .
 conreg4		= D_REG + immediate4 .
 conreg2		= dreg2 + consts + D_REG .
 conreg1		= dreg1 + consts + D_REG .
-shconreg	= D_REG + shconst .
+shconreg	= D_REG + small_const .
 datalt4		= data4 * alterable4 .
 datalt2		= data2 * alterable2 .
 datalt1		= data1 * alterable1 .
@@ -408,7 +407,7 @@ t_address	= address + t_regAregXcon + t_regAcon .
 #define	t_address	address
 #endif TBL68020
 
-safe_any4	= any4 - (pre_dec4 + post_inc4) .
+dups4		= genreg .
 
 INSTRUCTIONS
 
@@ -542,8 +541,8 @@ divu_l "divu.l" data4:ro,	D_REG:rw:cc		cost(2,78).
 divul_l "divul.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,78).
 /* in the next instruction: LOCAL only allowed if register var */
 extb_l "extb.l" extend1+D_REG+LOCAL:rw:cc			cost(2,4).
-muls_l "muls.l" data4:ro,	D_REG:rw:cc		cost(2,44).
-mulu_l "mulu.l" data4:ro,	D_REG:rw:cc		cost(2,44).
+muls_l "muls.l" data4:ro,	D_REG+LOCAL:rw:cc		cost(2,44).
+mulu_l "mulu.l" data4:ro,	D_REG+LOCAL:rw:cc		cost(2,44).
 pea		address+control4+regX			cost(2,4).
 #else TBL68020
 pea		address+control4			cost(2,4).
@@ -898,7 +897,7 @@ pat lil inc sil $1==$3 && inreg($1)!=reg_any
 
 proc lolcshstl example lol loc sli stl
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
-    gen sh* {shconst, $2}, {LOCAL, $1}
+    gen sh* {small_const, $2}, {LOCAL, $1}
 
 pat lol loc sli stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
 					call lolcshstl("asl.l")
@@ -1002,9 +1001,13 @@ pat lol xor stl $1==$3 && $2==4 && inreg($1)==reg_any
 					call lolxxstl("eor.l")
 #ifdef TBL68020
 pat lol mli stl $1==$3 && $2==4 && inreg($1)==reg_any
-					call lolxxstl("muls.l")
+with data4
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    gen muls_l %1, {LOCAL, $1}
 pat lol mlu stl $1==$3 && $2==4 && inreg($1)==reg_any
-					call lolxxstl("mulu.l")
+with data4
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    gen mulu_l %1, {LOCAL, $1}
 #endif TBL68020
 
 proc lolxxxstl example lol adi stl
@@ -1680,6 +1683,8 @@ pat ldl				leaving lol $1+4 lol $1
 pat loe			yields	{absolute4, $1}
 
 pat loe loe $1==$2		leaving loe $1 dup 4
+
+pat ste loe $1==$2		leaving dup 4 ste $1
 
 pat lil inreg($1)==reg_pointer
     kills pre_post %reg==regvar($1, reg_pointer)
@@ -2450,7 +2455,7 @@ with any4 AA_REG
 
 pat mli $1==4
 #ifdef TBL68020
-with data4-sconsts DD_REG
+with data4 DD_REG
     gen muls_l %1, %2	yields	%2
 #else TBL68020
 with STACK
@@ -2490,11 +2495,11 @@ with DD_REG
     gen neg_l %1	yields	%1
 
 pat sli $1==4
-with D_REG DD_REG
+with shconreg DD_REG
     gen asl_l %1, %2	yields	%2
 
 pat sri $1==4
-with D_REG DD_REG
+with shconreg DD_REG
     gen asr_l %1, %2	yields	%2
 
 
@@ -2548,7 +2553,7 @@ with STACK
 pat slu				leaving sli $1
 
 pat sru $1==4
-with D_REG DD_REG
+with shconreg DD_REG
     gen lsr_l %1, %2	yields	%2
 
 
@@ -2852,7 +2857,7 @@ with DD_REG STACK
 	 DD_REG
     gen
 	lea {regAregXcon, sp, %1, 1, 0},%a
-	asr_l {shconst, 2}, %1
+	asr_l {small_const, 2}, %1
 	sub_l {const, 1}, %1
 	1:
 	move_l {post_inc4, sp}, %b
@@ -2897,18 +2902,18 @@ pat com !defined($1)
 with DD_REG STACK
     uses AA_REG
     gen move_l sp, %a
-	asr_l {shconst, 2}, %1
+	asr_l {small_const, 2}, %1
 	sub_l {const, 1}, %1
 	1:
 	not_l {post_inc4, %a}
 	dbf %1, {slabel, 1b}
 
 pat rol $1==4
-with D_REG DD_REG
+with shconreg DD_REG
     gen rol_l %1, %2	yields	%2
 
 pat ror $1==4
-with D_REG DD_REG
+with shconreg DD_REG
     gen ror_l %1, %2	yields	%2
 
 	
@@ -2944,7 +2949,7 @@ with any4 any4 STACK
 
 pat loc inn $2==4 && small($1)
 with DD_REG
-    gen asr_l {shconst, $1}, %1
+    gen asr_l {small_const, $1}, %1
 	and_l {const, 1}, %1
 			yields	%1
 
@@ -3028,19 +3033,19 @@ with D_REG		yields	{regX, rom($1,3), %1}
 #else TBL68020
 pat lae aar $2==4 && rom($1,3)==2
 with DD_REG
-    gen asl_l {shconst, 1}, %1
+    gen asl_l {small_const, 1}, %1
 			yields	%1
 				leaving ads 4 adp (0 - rom($1,1))<<1
 
 pat lae aar $2==4 && rom($1,3)==4
 with DD_REG
-    gen asl_l {shconst, 2}, %1
+    gen asl_l {small_const, 2}, %1
 			yields	%1
 				leaving ads 4 adp (0 - rom($1,1))<<2
 
 pat lae aar $2==4 && rom($1,3)==8
 with DD_REG
-    gen asl_l {shconst, 3}, %1
+    gen asl_l {small_const, 3}, %1
 			yields	%1
 				leaving ads 4 adp (0 - rom($1,1))<<3
 #endif TBL68020
@@ -3267,27 +3272,29 @@ pat lfr $1==4		yields	d0
 pat lfr $1==8		yields	d1 d0
 
 pat ret $1==0
-with STACK
+    gen return
+
+pat asp ret $1==0
     gen return
 
 pat ret $1==4
-with any4 STACK
+with any4
     gen move %1, d0
 	return
-with STACK
+with exact STACK
     gen move_l {post_inc4, sp}, d0
 	return
 
 pat ret $1==8
-with any4 any4 STACK
+with any4 any4
     gen move %1, d0
 	move %2, d1
 	return
-with any4 STACK
+with exact any4 STACK
     gen move %1, d0
 	move_l {post_inc4, sp}, d1
 	return
-with STACK
+with exact STACK
     gen move_l {post_inc4, sp}, d0
 	move_l {post_inc4, sp}, d1
 	return
@@ -3330,7 +3337,7 @@ with AA_REG AA_REG
 pat bls $1==4
 with DD_REG AA_REG AA_REG
     kills ALL
-    gen asr_l {shconst, 2}, %1
+    gen asr_l {small_const, 2}, %1
 	beq {slabel, 2f}
 	sub_l {const, 1}, %1
 	1:
@@ -3353,15 +3360,10 @@ with any4 any4 STACK
 pat dch				leaving loi 4
 
 pat dup $1==4
-with exact STACK
-    gen move_l {indirect4, sp}, {pre_dec4, sp}
-with safe_any4+extend1+extend2		yields	%1 %1
+with dups4				yields	%1 %1
 
 pat dup $1==8
-with exact STACK
-    gen move_l {offsetted4, sp, 4}, {pre_dec4, sp}
-	move_l {offsetted4, sp, 4}, {pre_dec4, sp}
-with safe_any4 safe_any4		yields	%2 %1 %2 %1
+with dups4 dups4			yields	%2 %1 %2 %1
 
 pat dup $1>8
 with STACK
@@ -3375,7 +3377,7 @@ with DD_REG STACK
     uses AA_REG
     gen
     	lea {regAregXcon, sp, %1, 1, 0}, %a
-	asr_l {shconst, 2}, %1
+	asr_l {small_const, 2}, %1
 	beq {slabel, 2f}
 	sub_l {const, 1}, %1
 	1:
@@ -3580,19 +3582,6 @@ pat lil loc slu sil $1==$4 && $2==1 && $3==4	call llil1shsil("asl #1,")
 pat lol loc sru stl $1==$4 && $2==1 && $3==4	call rlol1shstl("lsr #1,")
 pat loe loc sru ste $1==$4 && $2==1 && $3==4	call rloe1shste("lsr #1,")
 pat lil loc sru sil $1==$4 && $2==1 && $3==4	call rlil1shsil("lsr #1,")
-
-proc locsh example loc sli
-with DD_REG
-    gen sh* {shconst, $1}, %1
-			yields	%1
-
-pat loc sli small($1) && $2==4		call locsh("asl.l")
-pat loc sri small($1) && $2==4		call locsh("asr.l")
-pat loc slu small($1) && $2==4		call locsh("asl.l")
-pat loc sru small($1) && $2==4		call locsh("lsr.l")
-pat loc rol small($1) && $2==4		call locsh("rol.l")
-pat loc ror small($1) && $2==4		call locsh("ror.l")
-
 
 
 proc txxand
