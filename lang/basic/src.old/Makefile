@@ -36,6 +36,8 @@ opr:
 pr:
 		@pr $(SRC)
 
+distr:		y.tab.c y.tab.h
+
 bem:		$(FILES)
 		$(CC) -o bem $(FILES)
 
