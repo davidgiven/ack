@@ -5272,19 +5272,19 @@ pat zrf		leaving zer $1
  ************************************************/
 
 #if WORD_SIZE==2
-pat lab stackheight($1)==4 && !fallthrough($1)
+pat lab topeltsize($1)==4 && !fallthrough($1)
 gen labeldef $1			yields dl0
 
-pat lab stackheight($1)==4 && fallthrough($1)
+pat lab topeltsize($1)==4 && fallthrough($1)
 with any4 STACK
 gen move %1, dl0
     labeldef $1			yields dl0
 #endif
 
-pat lab stackheight($1)==WORD_SIZE && !fallthrough($1)
+pat lab topeltsize($1)==WORD_SIZE && !fallthrough($1)
 gen labeldef $1			yields d0
 
-pat lab stackheight($1)==WORD_SIZE && fallthrough($1)
+pat lab topeltsize($1)==WORD_SIZE && fallthrough($1)
 with any_int STACK
 kills ALL
 gen move %1,d0
@@ -5296,13 +5296,13 @@ kills ALL
 gen labeldef $1
 
 #if WORD_SIZE==2
-pat bra stackheight($1)==4
+pat bra topeltsize($1)==4
 with any4 STACK
 gen move %1,dl0
     bra {llabel, $1}
 #endif
 
-pat bra	stackheight($1)==WORD_SIZE
+pat bra	topeltsize($1)==WORD_SIZE
 with any_int STACK
 gen move %1,d0
     bra {llabel, $1}
