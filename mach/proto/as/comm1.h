@@ -115,7 +115,6 @@ extern FILE	*ffcreat();
 extern FILE	*fftemp();
 
 /* some library functions used */
-extern long	atol();
 extern char	*mktemp();
 extern char	*malloc();
 extern char	*realloc();
