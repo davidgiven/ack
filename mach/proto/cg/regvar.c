@@ -107,7 +107,7 @@ fixregvars(saveall) {
 		if (saveall) {
 			struct reginfo *rp;
 			rp= &machregs[rvnumbers[rvtyp][i]];
-			regsave(codestrings[rp->r_repr],(long)-EM_WSIZE,rp->r_size);
+			regsave(codestrings[rp->r_repr],(long)-TEM_WSIZE,rp->r_size);
 		} else if(regassigned[rvtyp][i].ra_score>0) {
 			rv=regassigned[rvtyp][i].ra_rv;
 			rv->rv_reg=rvnumbers[rvtyp][i];
@@ -116,10 +116,6 @@ fixregvars(saveall) {
 		}
 	}
 	f_regsave();
-#ifndef EM_BSIZE
-	for(rv=rvlist;rv!=0;rv=rv->rv_next)
-		if (rv->rv_off >= 0) rv->rv_off += EM_BSIZE;
-#endif
 }
 
 isregvar(off) long off; {

@@ -147,7 +147,7 @@ fillemlines() {
 		case PAR_L:
 			assert(t == sp_cstx);
 			if (argval >= 0)
-				argval += EM_BSIZE;
+				argval += TEM_BSIZE;
 			lp->em_optyp = OPINT;
 			lp->em_u.em_ioper = argval;
 			lp->em_soper = tostring((word) argval);
@@ -263,10 +263,10 @@ dopseudo() {
 		getarg(ptyp(sp_cst2));
 		if (argval == ms_emx) {
 			getarg(ptyp(sp_cst2));
-			if (argval != EM_WSIZE)
+			if (argval != TEM_WSIZE)
 				fatal("bad word size");
 			getarg(ptyp(sp_cst2));
-			if (argval != EM_PSIZE)
+			if (argval != TEM_PSIZE)
 				fatal("bad pointer size");
 			if ( getarg(any_ptyp)!=sp_cend )
 				fatal("too many parameters");
@@ -289,10 +289,8 @@ dopseudo() {
 				regallowed=0;
 			} else {
 				r_off = argval;
-#ifdef EM_BSIZE
   				if (r_off >= 0)
-  					r_off += EM_BSIZE;
-#endif
+  					r_off += TEM_BSIZE;
 				getarg(ptyp(sp_cst2));
 				r_size = argval;
 				getarg(ptyp(sp_cst2));
@@ -514,7 +512,7 @@ char *strarg(t) {
 bss(n,t,b) full n; {
 	register long s;
 
-	if (n % EM_WSIZE)
+	if (n % TEM_WSIZE)
 		fatal("bad BSS size");
 	if (b==0
 #ifdef BSS_INIT
@@ -530,7 +528,7 @@ bss(n,t,b) full n; {
 	dumplab();
 	while (n > 0)
 		n -= (s = con(t));
-	if (s % EM_WSIZE)
+	if (s % TEM_WSIZE)
 		fatal("bad BSS initializer");
 }
 
@@ -544,24 +542,24 @@ long con(t) {
 	case sp_pnam:
 		part_flush();
 		con_ilb(argstr);
-		return((long)EM_PSIZE);
+		return((long)TEM_PSIZE);
 	case sp_dlb1:
 	case sp_dlb2:
 	case sp_dnam:
 	case sp_doff:
 		part_flush();
 		con_dlb(argstr);
-		return((long)EM_PSIZE);
+		return((long)TEM_PSIZE);
 	case sp_cstx:
-		con_part(EM_WSIZE,(word)argval);
-		return((long)EM_WSIZE);
+		con_part(TEM_WSIZE,(word)argval);
+		return((long)TEM_WSIZE);
 	case sp_scon:
 		for (i = 0; i < strsiz; i++)
 			con_part(1,(word) str[i]);
 		return((long)strsiz);
 	case sp_icon:
 	case sp_ucon:
-		if (argval > EM_WSIZE) {
+		if (argval > TEM_WSIZE) {
 			part_flush();
 			con_mult((word)argval);
 		} else {
