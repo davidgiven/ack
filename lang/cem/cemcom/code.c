@@ -43,8 +43,8 @@ int fp_used;
 #ifdef USE_TMP
 static int	tmp_id;
 static int	pro_id;
-static char	*pro_name;
 #endif USE_TMP
+static char	*pro_name;
 
 extern char options[];
 char *symbol2str();
@@ -199,10 +199,10 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		tp = tp->tp_up;
 	func_tp = tp;
 	func_size = ATW(tp->tp_size);
+	pro_name = name;
 #ifndef USE_TMP
 	C_pro_narg(name);
 #else
-	pro_name = name;
 	C_insertpart(pro_id = C_getid());
 #endif
 	if (is_struct_or_union(tp->tp_fund))	{
