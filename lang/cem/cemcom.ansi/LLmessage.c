@@ -19,7 +19,7 @@ LLmessage(tk)	{
 		error("end of file expected");
 	}
 	else if (tk)	{
-		error("%s missing", symbol2str(tk));
+		error("%s missing before %s", symbol2str(tk), symbol2str(DOT));
 		insert_token(tk);
 	}
 	else	{
