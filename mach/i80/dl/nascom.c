@@ -2,11 +2,13 @@
  * Download Z80 load module into the NASCOM
  *
  * Johan Stevenson, Vrije Universiteit, Amsterdam
+ * Ceriel Jacobs, Vrije Universiteit, Amsterdam
  */
 #include	<stdio.h>
 #include	<assert.h>
 #include	<sgtty.h>
 #include	<signal.h>
+#include	<out.h>
 
 int	check;
 int	nascom = 1;
@@ -16,9 +18,14 @@ int	disp = 0;
 
 char	hex[] = "0123456789ABCDEF";
 
+char *progname;
+
 struct sgttyb	ttynormal;
 struct sgttyb	ttyraw;
 int		rawmode = 0;
+
+struct outhead ohead;
+struct outsect sect[MAXSECT];
 
 stop(code) {
 	if (rawmode)
@@ -27,9 +34,12 @@ stop(code) {
 }
 
 main(argc,argv) char **argv; {
-	register unsigned nd,pc;
+	register unsigned nd;
+	long pc;
 	register char *s;
+	int i;
 
+	progname = argv[0];
 	while (argc > 1 && argv[1][0] == '-') {
 		switch (argv[1][1]) {
 		case 'u':
@@ -56,7 +66,7 @@ main(argc,argv) char **argv; {
 		fprintf(stderr,"usage: %s [flags] [object file]\n",argv[0]);
 		stop(-1);
 	}
-	if (freopen(s,"r",stdin) == NULL) {
+	if (! rd_open(s)) {
 		fprintf(stderr,"%s: can't open %s\n",argv[0],s);
 		stop(-1);
 	}
@@ -77,24 +87,37 @@ main(argc,argv) char **argv; {
 		stty(1, &ttyraw);
 		sleep(5);
 	}
-	for (;;) {
-		pc = get2c(stdin);
-		if (feof(stdin))
-			break;
-		nd = get2c(stdin);
-		nd = get2c(stdin);
-		if (nd > 256) {
-			fprintf(stderr,"bad format on %s\n",s);
-			stop(1);
+	rd_ohead(&ohead);
+	rd_sect(sect, ohead.oh_nsect);
+	for (i = 0; i < ohead.oh_nsect; i++) {
+		rd_outsect(i);
+		pc = sect[i].os_base;
+		while (sect[i].os_size) {
+			unsigned int sz = 8096, fl;
+			extern char *calloc();
+			register char *buf;
+			char *pbuf;
+
+			if (sz > sect[i].os_size) sz = sect[i].os_size;
+			sect[i].os_size -= sz;
+			pbuf = buf = calloc(sz, 1);
+			if (fl = sect[i].os_flen) {
+				if (fl > sz) fl = sz;
+				sect[i].os_flen -= fl;
+
+				rd_emit(buf, (long) fl);
+			}
+			while (sz >= 8) {
+				data(8, (int) pc, buf);
+				sz -= 8;
+				buf += 8;
+				pc += 8;
+			}
+			if (sz > 0) {
+				data(sz, (int) pc, buf);
+			}
+			free(pbuf);
 		}
-		while (nd > 8) {
-			data(8,pc);
-			nd -= 8;
-			pc += 8;
-		}
-		if (nd > 0)
-			data(nd,pc);
-		assert(feof(stdin) == 0);
 	}
 	putchar('.');
 	putchar(nl);
@@ -103,7 +126,10 @@ main(argc,argv) char **argv; {
 	stop(0);
 }
 
-data(nd,pc) {
+data(nd,pc,buf)
+	register char *buf;
+	int pc;
+{
 	register i;
 
 	check = 0;
@@ -112,7 +138,7 @@ data(nd,pc) {
 	byte(pc);
 	for (i = 0; i < nd; i++) {
 		putchar(' ');
-		byte(getc(stdin));
+		byte(*buf++);
 	}
 	while (i < 8) {
 		putchar(' ');
@@ -131,9 +157,8 @@ byte(b) {
 	putchar(hex[b & 017]);
 }
 
-get2c(f) FILE *f; {
-	register c;
-
-	c = getc(f);
-	return((getc(f) << 8) | c);
+rd_fatal()
+{
+	fprintf(stderr, "%s: Read error\n", progname);
+	stop(-1);
 }

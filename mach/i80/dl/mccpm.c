@@ -8,8 +8,8 @@
 
 #define MAXBYTE	24
 #include <stdio.h>
+#include <out.h>
 char hex[] =  "0123456789ABCDEF";
-FILE *fp, *fopen();
 char **s;
 int bytes, bytcnt, checksum;
 unsigned pc;
@@ -27,57 +27,70 @@ char *argv[];
 	if (argc == 3)
 		if (!(offset = htou(argv[2])))
 			fatal ("adres error %s\n", argv[2]);
-	if ((fp = fopen (*++argv,"r")) == NULL)
-		fatal ("can't open %s\n",*argv);
+	if (! rd_open(*++argv)) fatal ("can't open %s\n",*argv);
 	else 	{
 		s = argv;
 		convert ();
-		fclose (fp);
 		}
 	}
 
 convert ()
 	{
-	int c;
-	do
-		{
-		pc = getword ();
-		pc -= offset;
-		bytes = getword ();
-		bytes = getword ();
-		while (bytes != 0) 
-			{
-			bytcnt = (bytes < MAXBYTE) ? bytes : MAXBYTE;
-			bytes -= bytcnt;
-			checksum = 0;
-			Irecord ();
+	struct outhead head;
+	struct outsect sect[MAXSECT];
+	int i;
+
+	rd_ohead(&head);
+	rd_sect(sect, head.oh_nsect);
+	for (i = 0; i < head.oh_nsect; i++) {
+		rd_outsect(i);
+		pc = sect[i].os_base - offset;
+		while (sect[i].os_size) {
+			unsigned int sz = 8096, fl;
+			extern char *calloc();
+			register char *buf;
+			char *pbuf;
+
+			if (sz > sect[i].os_size) sz = sect[i].os_size;
+			sect[i].os_size -= sz;
+			pbuf = buf = calloc(sz, 1);
+			if (fl = sect[i].os_flen) {
+				if (fl > sz) fl = sz;
+				sect[i].os_flen -= fl;
+
+				rd_emit(buf, (long) fl);
 			}
-		c = getc (fp);
-		ungetc (c, fp);
+			while (sz >= MAXBYTE) {
+				data(MAXBYTE, (int) pc, buf);
+				checksum = 0;
+				sz -= MAXBYTE;
+				buf += MAXBYTE;
+				pc += MAXBYTE;
+			}
+			if (sz > 0) {
+				data(sz, (int) pc, buf);
+				checksum = 0;
+			}
+			free(pbuf);
 		}
-	while (c != EOF);
+	}
 	printf (":00000001FF\n");
 	}
 
 
-Irecord ()
-	{
+data (sz, pc, buf)
+	register char *buf;
+{
 	printf (":");
-	outbyte (bytcnt);
+	outbyte (sz);
 	bytcnt += 4;
 	outbyte (pc >> 8);
 	outbyte (pc);
 	outbyte (0);
-	record ();
-	}
-
-
-record ()
-	{
-	while (bytcnt != 0) 
+	while (sz != 0) 
 		{
-		outbyte (getbyte ());
-		pc ++;
+		outbyte (*buf++);
+		sz--;
 		}
 	outbyte (-checksum);
 	putchar ('\n');
@@ -91,28 +104,18 @@ int b;
 	checksum = (checksum + b) & 0xFF;
 	putchar (hex[(b>>4) & 0xF]);
 	putchar  (hex[b & 0xF]);
-	-- bytcnt;
 	}
 
-getword ()
-	{
-	int c;
-	c = getbyte ();
-	return ((getbyte () << 8) | c );
-	}
-
-getbyte ()
-	{
-	int c;
-	if ((c = getc (fp)) == EOF) fatal ("end of %s\n",*s);
-	return (c);
-	}
 fatal (s,a)
 	{
 	printf (s,a);
 	exit (-1);
 	}
 
+rd_fatal()
+{
+	fatal("Read error\n");
+}
 /* convert a string of hex digits to an unsigned 16 bit number */
 
 unsigned htou(t)

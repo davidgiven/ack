@@ -1,16 +1,22 @@
+EMHOME=../../..
+OBJLIB=$(EMHOME)/modules/lib/libobject.a
+
 head:	mccpm nascom
 
 mccpm:	mccpm.c
-	cc -o mccpm mccpm.c
+	$(CC) -o mccpm mccpm.c $(OBJLIB)
 
 nascom:	nascom.c
-	cc -o nascom nascom.c
+	$(CC) -o nascom nascom.c $(OBJLIB)
 
-install:
+install:	head
 	@echo Nothing is installed
 
+cmp:	head
+	@echo Nothing is compared
+
 clean:
-	rm nascom mccpm
+	rm -f *.o
 
 pr:
 	@pr `pwd`/Makefile `pwd`/mccpm.c `pwd`/nascom.c
