@@ -13,6 +13,9 @@
 	.define ml
 	.define argc
 	.define topstack
+#ifndef FPTRAP
+	.define __fptrp
+#endif
 .sect .text
 .sect .rom
 .sect .data

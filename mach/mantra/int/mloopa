@@ -41,6 +41,8 @@ error:		movem.l	d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6,-(sp)
 		mov	60(sp),d0		!ERROR NUMBER IN d0
 		lea	retsize,a1
 		move.l	eb,a6			!JUST TO BE SURE
+		lea	retarea,a5		!JUST TO BE SURE
+		lea	loop,a4
 		move.l	#16,d1
 1:		move.w	-(a1),-(sp)
 		dbra	d1,1b
