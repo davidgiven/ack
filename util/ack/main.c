@@ -325,21 +325,31 @@ int startrf(first) trf *first ; {
 
 	phase=first ;
 	for(;;) {
+		int do_preprocess = 0;
+		int only_prep = 0;
+
 		switch ( phase->t_prep ) {
 			/* BEWARE, sign extension */
+		case NO :    break ;
 		default :    if ( !mayprep() ) break ;
-		case YES:    if ( !transform(cpp_trafo) ) {
+		case YES:    do_preprocess = 1;
+			     break;
+		}
+		if ( cpp_trafo && stopsuffix &&
+		     strcmp(cpp_trafo->t_out,stopsuffix)==0 ) {
+			/* user explicitly asked for preprocessing */
+			do_preprocess = 1;
+			only_prep = 1;
+		}
+
+		if (do_preprocess && !transform(cpp_trafo) ) {
 				   n_error++ ;
 #ifdef DEBUG
 				   vprint("Pre-processor failed\n") ;
 #endif
 				   return 0 ;
-			     }
-		case NO :
-			     break ;
 		}
-		if ( cpp_trafo && stopsuffix &&
-		     strcmp(cpp_trafo->t_out,stopsuffix)==0 ) {
+		if ( only_prep ) {
 			break ;
 		}
 		if ( !transform(phase) ) {
