@@ -1,3 +1,0 @@
-/usr/em/mach/z80/as/as -d em.s atof.s fpp.s mli4.s dvu4.s dvi4.s eb.s >em.list
-dl a.out int.hex
-dosort int.hex
