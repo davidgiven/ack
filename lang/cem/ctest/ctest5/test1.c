@@ -445,7 +445,7 @@ test11()
   xd = 1.50 ; yd = 3.00 ; zd = 0.10;
   if ( fabs(1.0 + 1.0 - 2.0 ) > epsd ) e(1);
   if ( fabs( 1e10-1e10 ) > epsd ) e(2);
-  if ( abs( 1.0e+5*1.0e+5-100e+8 ) > epsd ) e(3);
+  if ( fabs( 1.0e+5*1.0e+5-100e+8 ) > epsd ) e(3);
   if ( fabs( 10.0/3.0*3.0/10.0-100e-2 ) > epsd ) e(4);
   if ( 0.0e0 != 0 ) e(5);
   if ( fabs( 32767.0 - 32767 ) > epsd ) e(6);
