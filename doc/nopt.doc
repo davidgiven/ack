@@ -415,20 +415,26 @@ Also, after a successful match, a replacement queue is constructed.
 If no errors are detected by the parser in the tables it output the following
 files if they have changed from the existing version of the file:
 .IP dfa.c 10
-this consists of a routine for each state in the dfa. Each routine contains
-a switch statement that decides on the basis of the current instruction
-opcode the next state if any in the dfa to make a transition to.
-These routines are called from
-.I OO_dfa
-declared in
-.I OO_dfa.c
-via an array
-.I OO_fstate
-that is indexed by state. Attempt to implement this code by a large nested
-switch statement experienced difficulties with compilers that had fixed
-limits on the size of switch statements. A better implementation of this
-might be to find some hashing function that mapped state and opcode onto a
-unique value and then switch on this via an array.
+this contains the dfa encoded into a number of arrays using the technique
+of row displacement for compacted sparse matricies. Given an opcode and
+the current state, the value of
+.I OO_base[OO_state]
+is consulted to obtain a pointer into the array
+.I OO_checknext.
+If this pointer in zero or the
+.I check
+field of the addressed structure does
+not correspond to the curerent state then it is known there is no entry for
+this opcode/state pair and the
+.I OO_default
+array is consulted instead.
+If the check field does match then the
+.I next
+field contains the new state.
+After each transition the array
+.I OO_ftrans
+is consulted to see if this state corresponds to a final state
+(i.e. a complete pattern) and if so the corresponding function is called.
 .IP trans.c 10
 this contains external declarations of transition routines with names like
 .B OO_xxxdotrans
@@ -440,10 +446,12 @@ These are called when there a transition to state
 that corresponds to a
 complete pattern. Any tests are performed if necessary to confirm that the
 pattern matches and then the replacement instructions are placed on the
-output queue and backup and freeing of instructions is performed. If there are
-a number of patterns with the same instructions but different tests, these
-will all appear in the same routine and the tests performed in the order they
-appear in the original
+output queue and the routine
+.I OO_mkrepl
+is called to make the replacement and if backup the amount required.
+If there are a number of patterns with the same instructions but different
+tests, these will all appear in the same routine and the tests performed in
+the order they appear in the original
 .I patterns
 file.
 .IP incalls.r 10
