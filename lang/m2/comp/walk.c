@@ -400,7 +400,7 @@ STATIC
 ForLoopVarExpr(nd)
 	register struct node *nd;
 {
-	register struct type *tp;
+	register struct type *tp = nd->nd_type;
 
 	CodePExpr(nd);
 	CodeCoercion(tp, BaseType(tp));
@@ -509,23 +509,22 @@ WalkStat(nd, exit_label)
 				bstp = BaseType(nd->nd_type);
 				uns = bstp->tp_fund != T_INTEGER;
 				C_dup(int_size);
+				RangeCheck(left->nd_left->nd_type, nd->nd_type);
+				CodeDStore(nd);
 				CodePExpr(fnd);
 				tmp = NewInt();
 				C_stl(tmp);
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
-				RangeCheck(bstp, nd->nd_type);
 				if (left->nd_INT >= 0) {
 					C_zgt(l2);
-					CodeDStore(nd);
 					C_lol(tmp);
 					ForLoopVarExpr(nd);
 				}
 				else {
 					C_zlt(l2);
-					C_dup(int_size);
-					CodeDStore(nd);
+					ForLoopVarExpr(nd);
 					C_lol(tmp);
 				}
 				C_sbu(int_size);
@@ -535,15 +534,18 @@ WalkStat(nd, exit_label)
 					C_loc((arith) 1);
 					C_adu(int_size);
 				}
+				C_stl(tmp);
 				nd->nd_def->df_flags |= D_FORLOOP;
 				C_df_ilb(l1);
 			}
 			WalkNode(right, exit_label);
 			nd->nd_def->df_flags &= ~D_FORLOOP;
 			if (stepsize && good_forvar) {	
+				C_lol(tmp);
 				C_loc((arith) 1);
 				C_sbu(int_size);
-				C_dup(int_size);
+				C_stl(tmp);
+				C_lol(tmp);
 				C_zeq(l2);
 				C_loc(left->nd_INT);
 				ForLoopVarExpr(nd);
@@ -553,7 +555,6 @@ WalkStat(nd, exit_label)
 			}
 			C_bra(l1);
 			C_df_ilb(l2);
-			C_asp(int_size);
 			FreeInt(tmp);
 #ifdef DEBUG
 			nd->nd_left = left;
