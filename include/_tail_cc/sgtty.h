@@ -13,7 +13,7 @@ struct sgttyb {
   char sg_ospeed;		/* output speed (not used) */
   char sg_erase;		/* erase character */
   char sg_kill;			/* kill character */
-#ifdef __USG
+#if defined(__USG) && !defined(_XENIX)
   int sg_flags;			/* mode flags */
 #else
   short sg_flags;		/* mode flags */
@@ -46,7 +46,11 @@ struct tchars {
 #  define CR2        0020000
 #  define CR3        0030000
 
+#if     defined(__USG) && !defined(_XENIX)
+#define XTABS	     0000002	/* do tab expansion */
+#else
 #define XTABS	     0006000	/* do tab expansion */
+#endif
 
 #define TBDELAY	     0006000
 #  define TAB0       0000000
@@ -68,8 +72,12 @@ struct tchars {
 #define ECHO	     0000010	/* echo input */
 #define LCASE	     0000004
 #define CBREAK	     0000002	/* enable cbreak mode */
+#if     defined(__BSD4_2) || defined(_XENIX)
 #define TANDEM	     0000001
-/*#define COOKED       0000000	/* neither CBREAK nor RAW */
+#else
+#define HUPCL	     0000001    /* unused ??? */
+#endif
+/*#define COOKED     0000000	/* neither CBREAK nor RAW */
 
 #ifdef __BDS4_2
 #define TIOCGETP (('t'<<8) | 8 | (6 << 16) | 0x40000000)
