@@ -20,7 +20,7 @@ SOURCES = \
 	$(SRC_DIR)/em44.descr
 
 TARGETS = i86descr m68k2descr vax4descr pdpdescr m68k4descr m68020descr \
-	  em22descr em24descr em44descr sparcdescr i386descr
+	  em22descr em24descr em44descr sparcdescr sparc_solarisdescr i386descr
 
 PRFILES = $(SRC_DIR)/proto.make $(SRC_DIR)/descr.sed $(SOURCES)
 
@@ -28,7 +28,6 @@ all:	$(TARGETS)
 
 install:	all
 	for i in $(TARGETS) ; do cp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
-	-ln $(TARGET_HOME)/lib.bin/ego/sparcdescr $(TARGET_HOME)/lib.bin/ego/sparc_solarisdescr
 
 cmp:	all
 	-for i in $(TARGETS) ; do cmp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
@@ -71,6 +70,9 @@ em44descr:	$(SRC_DIR)/em44.descr $(SRC_DIR)/descr.sed
 
 sparcdescr:	$(SRC_DIR)/sparc.descr $(SRC_DIR)/descr.sed
 		$(CPP) -P -I$(EMH) $(SRC_DIR)/sparc.descr | sed -f $(SRC_DIR)/descr.sed > sparcdescr
+
+sparc_solarisdescr:	$(SRC_DIR)/sparc.descr $(SRC_DIR)/descr.sed
+		$(CPP) -P -I$(EMH) $(SRC_DIR)/sparc.descr | sed -f $(SRC_DIR)/descr.sed > sparc_solarisdescr
 
 i386descr:	$(SRC_DIR)/i386.descr $(SRC_DIR)/descr.sed
 		$(CPP) -P -I$(EMH) $(SRC_DIR)/i386.descr | sed -f $(SRC_DIR)/descr.sed > i386descr
