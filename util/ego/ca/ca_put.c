@@ -271,7 +271,8 @@ STATIC outoperand(lnp)
 
 	switch(TYPE(lnp)) {
 		case OPNO:
-			if ((em_flag[INSTR(lnp)-sp_fmnem]&EM_PAR) != PAR_NO) {
+			if (INSTR(lnp) <= sp_lmnem &&
+			    (em_flag[INSTR(lnp)-sp_fmnem]&EM_PAR) != PAR_NO) {
 				outbyte((byte) sp_cend);
 			}
 			break;
