@@ -2499,7 +2499,9 @@ with DD_REG
  ************************************************/
 
 
-pat cmi $1==4			leaving sbi 4
+/* pat cmi $1==4			leaving sbi 4
+   WRONG !!
+*/
 
 pat cmi defined($1)
 with STACK
@@ -2515,7 +2517,9 @@ with any4 STACK
 	jsr {absolute4, ".cmi"}
 			yields	d0
 
-pat cmu $1==4			leaving sbi 4
+/* pat cmu $1==4			leaving sbi 4
+   WRONG !!
+*/
 
 pat cmu defined($1)
 with STACK
