@@ -9,6 +9,8 @@
 		C_out
 */
 
+#define CODE_EXPANDER
+
 #include <em_spec.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
