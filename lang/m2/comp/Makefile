@@ -82,7 +82,7 @@ symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
-type.o: LLlex.h Lpars.h def.h def_sizes.h idf.h node.h type.h
+type.o: LLlex.h Lpars.h const.h debug.h def.h def_sizes.h idf.h node.h type.h
 def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
