@@ -1,5 +1,7 @@
 rscid = "$Header$"
 
+#define UNTESTED
+
 EM_WSIZE=2
 EM_PSIZE=2
 EM_BSIZE=4
@@ -1606,6 +1608,20 @@ gen mov {autoinc,sp},r0
     mov {autoinc,sp},r1
     jsr pc,{label, "lar~"}
 
+#ifdef UNTESTED
+pat aar !defined($1)
+with STACK
+gen jsr pc,{label, "iaar~"}
+
+pat sar !defined($1)
+with STACK
+gen jsr pc,{label, "isar~"}
+
+pat lar !defined($1)
+with STACK
+gen jsr pc,{label, "ilar~"}
+#endif
+
 /****************************************
  * group 12 : Compare instructions      *
  ****************************************/
@@ -1643,6 +1659,12 @@ pat cms defined($1)
 with STACK
 gen move {const2,$1},r0
     jsr pc,{label, "cms~"}		yields r0
+
+pat cms !defined($1)
+with src2 STACK
+gen move %1,r0
+    jsr pc,{label, "cms~"}		yields r0
+
 pat cmp
 with src2 src2
 uses REG = {const2,0}
@@ -2057,6 +2079,16 @@ uses REG={const2,$1/2}
 gen 1:
     mov {autoinc,%2},{autoinc,%1}
     sob %a,{label,1b}
+
+pat bls $1==2
+with REG REG REG
+gen
+	asr %1
+	beq {label,1f}
+	2:
+	mov {autoinc,%3},{autoinc,%2}
+	sob %1,{label,2b}
+	1:
 
 pat lae csa $2==2
 with src2 STACK
