@@ -11,7 +11,6 @@ var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
 var CPP_F=-Dunix=unix -Dvax=vax
 var INCLUDES=-I{EM}/include/_tail_cc
-var M2SYSLIB=-I{EM}/lib/{M}/m2
 name be
 	from .m.g
 	to .s
@@ -48,8 +47,8 @@ name ld
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.mod:{TAIL}={EM}/{LIB}m2.1 {EM}/{LIB}m2.2 {EM}/{LIB}m2.3) \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon)
 	linker
 end
