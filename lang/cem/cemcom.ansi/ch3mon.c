@@ -16,6 +16,7 @@
 #include	"expr.h"
 #include	"idf.h"
 #include	"def.h"
+#include	"sizes.h"
 
 extern char options[];
 extern arith full_mask[/*MAXSIZE*/];	/* cstoper.c */
@@ -150,7 +151,7 @@ ch3mon(oper, expp)
 				   (arith)((*expp)->SG_LEN) :
 				   size_of_type((*expp)->ex_type,
 				       symbol2str((*expp)->ex_type->tp_fund))
-			       , ULONG);
+			       , (int_size == pointer_size ? UNSIGNED : ULONG));
 		expr->ex_flags |= EX_SIZEOF;
 		free_expression(*expp);
 		*expp = expr;

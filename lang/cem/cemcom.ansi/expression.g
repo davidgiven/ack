@@ -16,6 +16,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"
+#include	"sizes.h"
 
 extern struct expr *intexpr();
 int InSizeof = 0;	/* inside a sizeof- expression */
@@ -146,7 +147,8 @@ size_of(register struct expr **expp;)
 	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 		cast(&tp)
 		{
-			*expp = intexpr(size_of_type(tp, "type"), ULONG);
+			*expp = intexpr(size_of_type(tp, "type"),
+				(int_size == pointer_size ? UNSIGNED : ULONG));
 			(*expp)->ex_flags |= EX_SIZEOF;
 		}
 	|
