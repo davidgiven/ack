@@ -2,8 +2,10 @@
 
 ungetc(ch, iop)
 int ch;
-FILE *iop;
+register FILE *iop;
 {
+	unsigned char *p;
+
 	if ( ch < 0  || !io_testflag(iop,IO_READMODE))
 		return EOF;
 	if (iop->_ptr == iop->_buf) {
@@ -11,6 +13,7 @@ FILE *iop;
 		iop->_ptr++;
 	}
 	iop->_count++;
-	*--iop->_ptr = ch;
+	p = --(iop->_ptr);	/* ??? Bloody vax assembler !!! */
+	*p = ch;
 	return(ch);
 }
