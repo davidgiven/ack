@@ -34,7 +34,7 @@ GENOPTIONS =
 
 # Special #defines during compilation
 CDEFS =	$(LIB_INCLUDES)
-CFLAGS = $(CDEFS) $(COPTIONS) -O#	# we cannot pass the COPTIONS to lint!
+CFLAGS = $(CDEFS) $(COPTIONS)#	# we cannot pass the COPTIONS to lint!
 
 # Grammar files and their objects
 LSRC =	tokenfile.g expression.g

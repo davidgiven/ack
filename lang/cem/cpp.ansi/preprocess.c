@@ -53,7 +53,7 @@ do_pragma()
 	*c_ptr = '\0';
 	while(c != '\n') {
 		if (c_ptr + 1 - cur_line == size) {
-			cur_line = Realloc(cur_line, size += ITEXTSIZE);
+			cur_line = Realloc(cur_line, (unsigned)(size += ITEXTSIZE));
 			c_ptr = cur_line + size - 1;
 		}
 		*c_ptr++ = c;
@@ -63,8 +63,8 @@ do_pragma()
 	if (!pragma_nr) {
 		pragma_tab = (struct prag_info *)Malloc(sizeof(struct prag_info));
 	} else {
-		pragma_tab = (struct prag_info *)Realloc(pragma_tab
-				    , sizeof(struct prag_info) * (pragma_nr+1));
+		pragma_tab = (struct prag_info *)Realloc((char *)pragma_tab
+				    , (unsigned)(sizeof(struct prag_info) * (pragma_nr+1)));
 	}
 	pragma_tab[pragma_nr].pr_linnr = LineNumber;
 	pragma_tab[pragma_nr].pr_fil = FileName;
@@ -143,7 +143,7 @@ preprocess(fn)
 			    free(pragma_tab[i].pr_text);
 			    i++;
 			}
-			free(pragma_tab);
+			free((char *) pragma_tab);
 			pragma_tab = (struct prag_info *)0;
 			pragma_nr = 0;
 			LineNumber = LiNo;

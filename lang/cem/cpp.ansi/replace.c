@@ -22,6 +22,8 @@
 #include	"replace.h"
 
 extern char *GetIdentifier();
+extern char *strcpy();
+extern char *strcat();
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
 
@@ -254,7 +256,6 @@ struct repl *repl;
 {
 	register struct repl *nrepl = ReplaceList;
 	register struct args *ap = nrepl->r_args;
-	struct args *args = repl->r_args;
 	register char *p;
 
 	/* stash identifier name */
@@ -731,7 +732,7 @@ add2repl(repl, ch)
  
 	assert(index < repl->r_size);
 	if (index + 2 >= repl->r_size) {
-		repl->r_text = Realloc(repl->r_text, repl->r_size <<= 1);
+		repl->r_text = Realloc(repl->r_text, (unsigned)(repl->r_size <<= 1));
 		repl->r_ptr = repl->r_text + index;
 	}
 	*repl->r_ptr++ = ch;
@@ -756,7 +757,7 @@ stash(repl, ch, stashraw)
 		assert(index < args->a_expsize);
 		if (index + 1 >= args->a_expsize) {
 			args->a_expbuf = Realloc(args->a_expbuf,
-						    args->a_expsize <<= 1);
+						    (unsigned)(args->a_expsize <<= 1));
 			args->a_expptr = args->a_expbuf + index;
 		}
 		*args->a_expptr++ = ch;
@@ -767,7 +768,7 @@ stash(repl, ch, stashraw)
 		assert(index < args->a_rawsize);
 		if (index + 1 >= args->a_rawsize) {
 			args->a_rawbuf = Realloc(args->a_rawbuf,
-						    args->a_rawsize <<= 1);
+						    (unsigned)(args->a_rawsize <<= 1));
 			args->a_rawptr = args->a_rawbuf + index;
 		}
 		*args->a_rawptr++ = ch;

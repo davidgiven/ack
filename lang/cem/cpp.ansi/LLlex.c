@@ -31,8 +31,9 @@ int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int LexSave = 0;                /* last character read by GetChar       */
 extern int InputLevel;		/* # of current macro expansions	*/
 
-char	*string_token();
-arith	char_constant();
+extern char	*string_token();
+extern char	*strcpy();
+extern arith	char_constant();
 #define		FLG_ESEEN	0x01	/* possibly a floating point number */
 #define		FLG_DOTSEEN	0x02	/* certainly a floating point number */
 
@@ -57,7 +58,7 @@ GetToken(ptok)
 
 again:	/* rescan the input after an error or replacement	*/
 	ch = GetChar();
-go_on:	/* rescan, the following character has been read	*/
+	/* rescan, the following character has been read	*/
 	if ((ch & 0200) && ch != EOI) /* stop on non-ascii character */
 		fatal("non-ascii '\\%03o' read", ch & 0377);
 	/* keep track of the place of the token in the file	*/
@@ -387,11 +388,11 @@ string_token(nm, stop_char)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Realloc(str, str_size <<= 1);
+			str = Realloc(str, (unsigned)(str_size <<= 1));
 		ch = GetChar();
 	}
 	str[pos++] = '\0'; /* for filenames etc. */
-	str = Realloc(str, pos);
+	str = Realloc(str, (unsigned)pos);
 	return str;
 }
 

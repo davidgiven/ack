@@ -80,7 +80,7 @@ do_option(text)
 			error("malformed option -D%s", text);
 			break;
 		}
-		macro_def(str2idf(name, 0), mactext, -1, maclen, NOFLAG);
+		macro_def(str2idf(name, 0), mactext, -1, (int)maclen, NOFLAG);
 		break;
 	}
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
@@ -90,7 +90,8 @@ do_option(text)
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
-				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
+				  Realloc((char *)inctable,
+					  (unsigned)((inc_max+=10)*sizeof(char *)));
 			}
 
 			for(i = inc_pos++; i < inc_total; i++) {
