@@ -301,16 +301,17 @@ Here is a list of reserved words; all of these are unavailable as identifiers.
 .TS
 box;
 l l l l l.
-ADDR	STACK	from	proc	sfit
-COERCIONS	STACKINGRULES	gen	reg_any	test
-INSTRUCTIONS	TESTS	highw	reg_float	to
-INT	TIMEFACTOR	inreg	reg_loop	ufit
-MOVES	TOKENS	is_rom	reg_pointer	uses
-PATTERNS	call	kills	regvar	with
-PROPERTIES	cost	leaving	return	yields
-REGISTERS	defined	loww	reusing
-SETS	exact	move	rom
-SIZEFACTOR	example	pat	samesign
+ADDR	STACKINGRULES	gen	proc	test
+COERCIONS	TESTS	highw	reg_any	to
+INSTRUCTIONS	TIMEFACTOR	inreg	reg_float	topeltsize
+INT	TOKENS	is_rom	reg_loop	ufit
+MOVES	call	kills	reg_pointer	uses
+PATTERNS	cost	lab	regvar	with
+PROPERTIES	defined	labeldef	return	yields
+REGISTERS	exact	leaving	reusing	
+SETS	example	loww	rom	
+SIZEFACTOR	fallthrough	move	samesign	
+STACK	from	pat	sfit	
 .TE
 C style comments are accepted.
 .DS
@@ -928,6 +929,17 @@ If
 .I t
 is omitted reg_any is assumed.
 Undefined if inreg(\fIe\fP)<=0 .
+.LP
+The next two `functions' are only needed in a table that
+uses the top element size information.
+.IP topeltsize($a) 16
+Returns the size of the element on top of the EM-stack at the label
+identified by $a.  This can be used to put the top of the stack in a
+register at the moment of an unconditional jump.  At an unconditional jump,
+the size of the top-element will always look 0.
+.IP fallthrough($a)
+Returns 1 if the label identified by $a can be reached via fallthrough, 0
+otherwise.
 .NH 2
 Token descriptions
 .PP
@@ -1016,6 +1028,13 @@ to be of the same length.
 This rule of three is an unfortunate implementation dependent restriction,
 but patterns longer than three EM instructions are luckily not needed
 too often.
+.PP
+The EM mnemonic may also be the pseudo-instruction \fBlab\fP, which matches
+a label.  Its argument can be used in testing on topeltsize and
+fallthrough.  When this pattern is specified, the label should be defined
+explicitly with a
+.I labeldef
+statement.
 .PP
 Following the EM-pattern there may be more than one code
 rule,
@@ -1308,6 +1327,16 @@ C-routine
 Explanation of this must wait for the description of the
 file mach.c below.
 .IP 5)
+The
+.I labeldef
+statement.  Its only argument should be that of the
+.I lab
+pseudo-instruction.  This is needed to generate local labels when the
+top element size information is used.  It takes the form
+.DS
+	labeldef $i
+.DE
+.IP 6)
 A temporary label of the form <digit>: may be placed here.
 Expressions of the form [0-9][bf] in this code rule
 generate the same string as is used for this label.
@@ -1551,6 +1580,35 @@ gen jbr {label, $1}
 A simple jump.
 The stack pattern guarantees that everything will be stacked
 before the jump is taken.
+.DS
+pat lab	topeltsize($1)==2 && !fallthrough($1)
+gen labeldef $1					yields r0
+
+pat lab	topeltsize($1)==2 && fallthrough($1)
+with src2
+gen move %1,r0
+    labeldef $1					yields r0
+
+pat lab topeltsize($1)!=2
+with STACK
+kills all
+gen labeldef $1
+
+pat bra topeltsize($1)==2
+with src2 STACK
+    gen move %1,d0
+	jbr {label, $1}
+
+pat bra topeltsize($1)!=2
+with STACK
+    gen jbr {label, $1}
+.DE
+The combination of these patterns make sure that the top of the EM-stack will
+be in register r0 whenever necessary.  The top element size mechanism will
+also show a size of 0 whenever a conditional branch to a label
+occurs.  This saves a lot of patterns and hardly decreases performance.
+When the same register is used to return function results, this can save
+many moves to and from the stack.
 .DS
 .ta 7.5c
 pat cal
@@ -2738,6 +2796,11 @@ DO_RETURN
 Returns from this level of codegen().
 Is used at the end of coercions,
 move rules etc..
+.NH 4
+DO_LABDEF
+.PP
+This prints a label when the top element size mechanism is used.  Only done on
+toplevel.
 .NH 3
 compute.c
 .PP
@@ -2802,6 +2865,10 @@ This module maintains a list of global symbols that have a
 .B rom
 pseudo associated.
 There are functions to enter a symbol and to find a symbol.
+.NH 3
+label.c
+.PP
+This module contains routines to handle the top element size messages.
 .NH 3
 main.c
 .PP

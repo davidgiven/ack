@@ -49,7 +49,7 @@ occam.X:
 		cd occam; make "PIC="$(PIC) "TBL="$(TBL) "EQN="$(EQN) "TARGET="$(TARGET)
 ego.doc:	ego.X
 ego.X:
-		cd ego; make "REFER="$(REFER) "TARGET="$(TARGET)
+		cd ego; make "REFER="$(REFER) "TARGET="$(TARGET) "TBL="$(TBL)
 em.$(SUF):	em.X
 em.X:
 		cd em; make "TBL="$(TBL) "NROFF="$(NROFF) "SUF="$(SUF) "TARGET="$(TARGET)

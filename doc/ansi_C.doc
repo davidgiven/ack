@@ -13,7 +13,7 @@ Vrije Universiteit
 Amsterdam, The Netherlands
 .PP
 This document specifies the implementation-defined behaviour of the ANSI-C
-front end of the Amsterdam Compiler Kit as required by ANS X3.159-1989. Since
+front end of the Amsterdam Compiler Kit as required by ANS X3.159-1989.  Since
 the implementation-defined behaviour sometimes depends on the machine
 compiling on or for, some items will be left unspecified in this
 document\(dg.
@@ -24,7 +24,7 @@ compile-time behaviour
 The compiler assumes that it runs on a UNIX system.
 .NS A.6.3.1
 .IP -
-Diagnostics are placed on the standard error output. They have the
+Diagnostics are placed on the standard error output.  They have the
 following specification:
 .br
 "<file>", line <nr>: [(<class>)] <diagnostic>
@@ -33,21 +33,21 @@ There are three classes of diagnostics: "error", "strict" and "warning".
 When the class is "error", the <class> is absent.
 .br
 The class "strict" is used for violations of the standard which are
-not severe enough to stop compilation. An example is the the occurrence
+not severe enough to stop compilation.  An example is the the occurrence
 of non white-space after an '#else' or '#endif' pre-processing
-directive. The class "warning" is used for legal but dubious
-constructions. An example is overflow of constant expressions.
+directive.  The class "warning" is used for legal but dubious
+constructions.  An example is overflow of constant expressions.
 .NS A.6.3.2
 .IP -
-The function 'main' can have two arguments. The first argument is an
-integer specifying the number of arguments on the command line. The second
+The function 'main' can have two arguments.  The first argument is an
+integer specifying the number of arguments on the command line.  The second
 argument is a pointer to an array of pointers to the arguments (as
 strings).
 .IP -
 Interactive devices are terminals.
 .NS A.6.3.3
 .IP -
-The number of significant characters is an option. By default it is 64.
+The number of significant characters is an option.  By default it is 64.
 There is a distinction between upper and lower case.
 .NS A.6.3.4
 .IP -
@@ -70,13 +70,13 @@ A plain 'char' has the same range of values as 'signed char'.
 .NS A.6.3.5
 .IP -
 The compiler assumes that it works on and compiles for a
-2-complement binary-number system. Shorts will use 2 bytes and longs
-will use 4 bytes. The size of integers are machine dependent.
+2-complement binary-number system.  Shorts will use 2 bytes and longs
+will use 4 bytes.  The size of integers are machine dependent.
 .IP -
 Converting an integer to a shorter signed integer is implemented by
 ignoring the high-order byte(s) of the former.
 Converting a unsigned integer to a signed integer of the same type is
-only done in administration. This means that the bit-pattern remains
+only done in administration.  This means that the bit-pattern remains
 unchanged.
 .IP -
 The result of bitwise operations on signed integers are what can be
@@ -98,45 +98,45 @@ Truncation is always to the nearest floating-point number that can
 be represented.
 .NS A.6.3.7
 .IP -
-The type returned by the sizeof-operator is 'unsigned int'. This is done
-for backward compatibility reasons.
+The type returned by the sizeof-operator (also known as size_t)
+is 'unsigned int'.  This is done for backward compatibility reasons.
 .IP -
 Casting an integer to a pointer or vice versa has no effect in
-bit-pattern when the sizes are equal. Otherwise the value will be
+bit-pattern when the sizes are equal.  Otherwise the value will be
 truncated or zero-extended (depending on the direction of the
 conversion and the relative sizes).
 .IP -
 When a pointer is as large as an integer, the type of a 'ptrdiff_t' will
-be 'int'. Otherwise the type will be 'long'.
+be 'int'.  Otherwise the type will be 'long'.
 .NS A.6.3.8
 .IP -
 Since the front end has only limited control over the registers, it can
 only make it more likely that variables that are declared as
-registers also end up in registers. The only things that can possibly be
+registers also end up in registers.  The only things that can possibly be
 put into registers are : 'int', 'long', 'float', 'double', 'long double'
 and pointers.
 .NS A.6.3.9
 .IP -
 When a member of a union object is accessed using a member of a
-different type, the resulting value will usually be garbage. The
+different type, the resulting value will usually be garbage.  The
 compiler makes no effort to catch these errors.
 .IP -
-The alignment of types is a compile-time option. The alignment of
-a structure-member is the alignment of its type. Usually, the
-alignment is passed on to the compiler by the 'ack' program. When a
+The alignment of types is a compile-time option.  The alignment of
+a structure-member is the alignment of its type.  Usually, the
+alignment is passed on to the compiler by the 'ack' program.  When a
 user wants to do this manually, he/she should be prepared for trouble.
 .IP -
-A "plain" 'int' bit-field is taken as a 'signed int'. This means that
+A "plain" 'int' bit-field is taken as a 'signed int'.  This means that
 a field with a size 1 bit can only store the values 0 and -1.
 .IP -
-The order of allocation of bit-fields is a compile-time option. By
+The order of allocation of bit-fields is a compile-time option.  By
 default, high-order bits are allocated first.
 .IP -
 An enum has the same size as a "plain" 'int'.
 .NS A.6.3.10
 .IP -
 An access to a volatile declared variable is done by just mentioning
-the variable. E.g. the statement "x;" where x is declared volatile,
+the variable.  E.g. the statement "x;" where x is declared volatile,
 constitutes an access.
 .S A.6.3.11
 .IP -
@@ -153,10 +153,10 @@ Since both the pre-processor and the compiler assume ASCII-characters,
 a single character constant in a conditional-inclusion directive
 matches the same value in the execution character set.
 .IP -
-The pre-processor recognizes -I... command-line options. The
-directories thus specified are searched first. After that, depending on the
+The pre-processor recognizes -I... command-line options.  The
+directories thus specified are searched first.  After that, depending on the
 command that the preprocessor is called with, machine/system-dependant
-directories are searched. After that, ~em/include/_tail_ac and
+directories are searched.  After that, ~em/include/_tail_ac and
 /usr/include are visited.
 .IP -
 Quoted names are first looked for in the directory in which the file
@@ -171,7 +171,7 @@ Since the compiler runs on UNIX, __DATE__ and __TIME__ will always be
 defined.
 .NS A.6.3.14
 .IP -
-NULL is defined as ((void *)0). This in order to flag dubious
+NULL is defined as ((void *)0).  This in order to flag dubious
 constructions like "int x = NULL;".
 .IP -
 The diagnostic printed by 'assert' is as follows:
@@ -195,7 +195,7 @@ isprint()	<space>-~ (== \e040-\e176)
 .TE
 .KE
 As an addition, there is an isascii() macro, which tests whether a character
-is an ascii character. Characters in the range from \e000 to \e177 are ascii
+is an ascii character.  Characters in the range from \e000 to \e177 are ascii
 characters.
 .KS
 .IP -
@@ -221,9 +221,9 @@ The function fmod() returns 0.0 and sets errno to EDOM when the second
 argument is 0.0.
 .IP -
 The set of signals for the signal() function depends on the UNIX-system
-which the compiler is compiling for. The default handling, semantics
+which the compiler is compiling for.  The default handling, semantics
 and behaviour of these signals are those specified by the operating
-system vendor. The default handling is not reset when SIGILL is
+system vendor.  The default handling is not reset when SIGILL is
 received.
 .IP -
 A text-stream need not end in a new-line character.
@@ -249,11 +249,11 @@ the '/'.
 A file can be open multiple times.
 .IP -
 When a remove() is done on an open file, reading and writing behave
-just as can be expected from a non-removed file. When the associated
+just as can be expected from a non-removed file.  When the associated
 stream is closed, all written data will be lost.
 .IP -
 When a file exists prior to a call to rename(), the behaviour is that
-of the underlying UNIX system. Normally, the call would fail.
+of the underlying UNIX system.  Normally, the call would fail.
 .IP -
 The %p conversion in fprintf() has the same effect as %#x or %#lx,
 depending on the sizes of pointer and integer.
@@ -262,7 +262,7 @@ The %p conversion in fscanf() has the same effect as %x or %lx,
 depending on the sizes of pointer and integer.
 .IP -
 A - character that is neither the first nor the last character in the
-scanlist for %[ conversion is taken to be a range indicator. When the
+scanlist for %[ conversion is taken to be a range indicator.  When the
 first character has a higher ASCII-value than the second, the - will
 just be put into the scanlist.
 .IP -
@@ -284,7 +284,7 @@ The mapping of errors to strings is done by strerror().
 When the requested size is zero, malloc(), calloc() and realloc()
 return a null-pointer.
 .IP -
-When abort() is called, output buffers will be flushed. Temporary files
+When abort() is called, output buffers will be flushed.  Temporary files
 (made with the tmpfile() function) will have disappeared when SIGABRT
 is not caught or ignored.
 .IP -
@@ -300,7 +300,7 @@ putenv("TERM=a230");
 .br
 The argument to putenv() is stored in an internal table, so malloc'ed
 strings can not be freed until another call to putenv() (which sets the
-same environment variable) is made. The function returns 1 if it fails,
+same environment variable) is made.  The function returns 1 if it fails,
 0 otherwise.
 .LP
 .IP -
@@ -349,7 +349,7 @@ ERANGE	"Result too large"
 .TE
 everything else causes strerror() to return "unknown error"
 .IP -
-The local time zone is per default MET (GMT + 1:00:00). This can be
+The local time zone is per default MET (GMT + 1:00:00).  This can be
 changed through the TZ environment variable, or by some changes in the
 sources.
 .IP -
