@@ -2,23 +2,15 @@
 .\" See the copyright notice in the ACK home directory, in the file "Copyright".
 .\"
 .\" $Header$
-.TH LINT 1 89/10/04
+.TH LINT 1 "$Revision$"
 .SH NAME
 lint \- a C program checker
 .SH SYNOPSIS
 .B lint
-[
-.B \-abhuvx \-KR -ansi
-]
-[file | libname
-.BR \-l xxx
-] ...
+[ \-abhuvx \-KR -ansi ] [file | libname | \-l\fIxxx\fP ] ...
 .br
 .B lint
-.BR \-L libname
-[file | libname2
-.BR \-l xxx
-] ...
+\-L\fIlibname\fP [ file | libname2 | \-l\fIxxx\fP ] ...
 .br
 .SH DESCRIPTION
 .I Lint

@@ -9,7 +9,7 @@
 .ft \\n(Sf
 .sp 1
 ..
-.TH ACK 1ACK
+.TH ACK 1 "$Revision$"
 .ad
 .SH NAME
 ack \- Amsterdam Compiler Kit

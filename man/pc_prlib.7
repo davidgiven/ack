@@ -1,5 +1,5 @@
 .\" $Header$
-.TH PC_PRLIB 7ACK
+.TH PC_PRLIB 7 "$Revision$"
 .ad
 .SH NAME
 pc_prlib \- library of Pascal runtime routines
@@ -13,6 +13,8 @@ function	_abi(i:integer):integer;
 function	_abl(i:long):long;
 function	_mdi(j,i:integer):integer;
 function	_mdl(j,i:long):long;
+function	_dvi(j,i:integer):integer;
+function	_dvl(j,i:long):long;
 function	_abr(r:real):real;
 function	_sin(r:real):real;
 function	_cos(r:real):real;
@@ -136,6 +138,10 @@ Compute the absolute value of a long.
 Perform the Pascal modulo operation on integers.
 .IP _mdl
 Perform the Pascal modulo operation on longs.
+.IP _dvi
+Perform the Pascal divide operation on integers.
+.IP _dvl
+Perform the Pascal divide operation on longs.
 .IP _abr
 Compute the absolute value of a real.
 .IP _sin
