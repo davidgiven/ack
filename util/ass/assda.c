@@ -131,6 +131,7 @@ size_t  sizes[NDEFAULT] = {
 /*   mlab, glab,mproc,xproc, proc */
     { 151,   29,   31,   73,  130 },
     { 307,  127,  151,  401,  460 },
-    { 601,  251,  151,  401,  600 }
+    { 601,  251,  151,  401,  600 },
+    {2000, 2000, 2000, 2000, 2000 }
 };
 size_t  *oursize        =  &sizes[1] ;  /* point to selected sizes */

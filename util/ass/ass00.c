@@ -80,7 +80,7 @@ getcore() {
 getsizes(str) char *str; {
 
 	/*
-	 * accepts -ss (small), -sm (medium), -sl (large)
+	 * accepts -ss (small), -sm (medium), -sl (large), -sg (giant)
 	 */
 
 	switch(LC(*str)) {
@@ -88,6 +88,7 @@ getsizes(str) char *str; {
 	case 's':       oursize = &sizes[0]; break;
 	case 'm':       oursize = &sizes[1]; break;
 	case 'l':       oursize = &sizes[2]; break;
+	case 'g':	oursize = &sizes[3]; break;
 	}
 }
 

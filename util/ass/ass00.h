@@ -232,7 +232,7 @@ struct  rel {                   /* for relocation tables */
 #define HEADUCON        7
 #define HEADFCON        8
 
-#define NDEFAULT        3       /* number of different sizes available */
+#define NDEFAULT        4       /* number of different sizes available */
 struct  sizes {
 	int     n_mlab;         /* # of global labels per module */
 	int     n_glab;         /* # of extern global labels */
