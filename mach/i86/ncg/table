@@ -399,7 +399,7 @@ from rmorconst
   uses reusing %1,REG=%1		yields %a
 
 from Xreg_off
-  gen add %1.reg,{CONSTR,%1.off}			yields %1.reg
+  gen add %1.reg,{CONSTR,%1.off}	yields %1.reg
 
 from halfindir
   uses reusing %1,ADDREG
@@ -812,6 +812,16 @@ pat sdf
   kills referals
   gen pop {ind_regoff2,%1,$1}
       pop {ind_regoff2,%1,$1+2}
+  with exact halfindir STACK
+  kills referals
+  uses reusing %1,ADDREG=%1
+  gen pop {ind_regoff2,%a,$1}
+      pop {ind_regoff2,%a,$1+2}
+  with exact memory2 STACK
+  kills referals
+  uses reusing %1,ADDREG=%1
+  gen pop {ind_regoff2,%a,$1}
+      pop {ind_regoff2,%a,$1+2}
   with reg_off regorconst regorconst
   kills referals
   gen move %2,{ind_regoff2,%1.reg,%1.off+$1}
@@ -844,9 +854,6 @@ pat sdf
   kills all_locals,indexed
   gen move %2,{ind_bpregoff2,%1.reg,%1.ind+$1}
       move %3,{ind_bpregoff2,%1.reg,%1.ind+$1+2}
-  with halfindir regorconst
-  kills referals
-  gen mov %1,%2			yields %1	leaving stf $1+2
 
 
 /****************************************************************
