@@ -21,9 +21,6 @@ static char *RcsId = "$Header$";
 #include	"const.h"
 #include	"scope.h"
 
-/*	To be created dynamically in main() from defaults or from command
-	line parameters.
-*/
 int
 	word_align = AL_WORD,
 	int_align = AL_INT,
@@ -96,38 +93,34 @@ construct_type(fund, tp)
 
 	switch (fund)	{
 	case T_PROCEDURE:
+		if (tp && !returntype(tp)) {
+			error("illegal procedure result type");
+		}
+		/* Fall through */
 	case T_POINTER:
 	case T_HIDDEN:
 		dtp->tp_align = pointer_align;
 		dtp->tp_size = pointer_size;
-		dtp->next = tp;
-		if (fund == T_PROCEDURE && tp) {
-			if (! returntype(tp)) {
-				error("illegal procedure result type");
-			}
-		}
 		break;
 
 	case T_SET:
 		dtp->tp_align = word_align;
-		dtp->next = tp;
 		break;
 
 	case T_ARRAY:
 		dtp->tp_align = tp->tp_align;
-		dtp->next = tp;
 		break;
 
 	case T_SUBRANGE:
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
-		dtp->next = tp;
 		break;
 
 	default:
 		crash("funny type constructor");
 	}
 
+	dtp->next = tp;
 	return dtp;
 }
 
@@ -206,8 +199,11 @@ InitTypes()
 	address_type = construct_type(T_POINTER, word_type);
 
 	/* create BITSET type
+	   TYPE BITSET = SET OF [0..W-1];
+	   The subrange is a subrange of type cardinal, because the lower bound
+	   is a non-negative integer (See Rep. 6.3)
 	*/
-	tp = construct_type(T_SUBRANGE, int_type);
+	tp = construct_type(T_SUBRANGE, card_type);
 	tp->sub_lb = 0;
 	tp->sub_ub = word_size * 8 - 1;
 	bitset_type = set_type(tp);
@@ -229,7 +225,7 @@ chk_basesubrange(tp, base)
 
 	if (base->tp_fund == T_SUBRANGE) {
 		/* Check that the bounds of "tp" fall within the range
-		   of "base"
+		   of "base".
 		*/
 		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
 			error("Base type has insufficient range");
@@ -246,7 +242,7 @@ chk_basesubrange(tp, base)
 		error("Illegal base for a subrange");
 	}
 	else if (base == int_type && tp->next == card_type &&
-		 (tp->sub_ub > max_int || tp->sub_ub)) {
+		 (tp->sub_ub > max_int || tp->sub_ub < 0)) {
 		error("Upperbound to large for type INTEGER");
 	}
 	else if (base != tp->next && base != int_type) {
@@ -269,7 +265,7 @@ subr_type(lb, ub)
 	register struct type *tp = lb->nd_type, *res;
 
 	if (!TstCompat(lb->nd_type, ub->nd_type)) {
-		node_error(ub, "Types of subrange bounds not compatible");
+		node_error(ub, "Types of subrange bounds not equal");
 		return error_type;
 	}
 
@@ -306,32 +302,33 @@ subr_type(lb, ub)
 	return res;
 }
 
-label
-getrck(tp)
+genrck(tp)
 	register struct type *tp;
 {
 	/*	generate a range check descriptor for type "tp" when
-		neccessary. Return its label
+		neccessary. Return its label.
 	*/
+	arith lb, ub;
+	label ol, l;
 
-	assert(bounded(tp));
+	getbounds(tp, &lb, &ub);
 
 	if (tp->tp_fund == T_SUBRANGE) {
-		if (tp->sub_rck == (label) 0) {
-			tp->sub_rck = data_label();
-			C_df_dlb(tp->sub_rck);
-			C_rom_cst(tp->sub_lb);
-			C_rom_cst(tp->sub_ub);
+		if (!(ol = tp->sub_rck)) {
+			tp->sub_rck = l = data_label();
 		}
-		return tp->sub_rck;
 	}
-	if (tp->enm_rck == (label) 0) {
-		tp->enm_rck = data_label();
-		C_df_dlb(tp->enm_rck);
-		C_rom_cst((arith) 0);
-		C_rom_cst((arith) (tp->enm_ncst - 1));
+	else if (!(ol = tp->enm_rck)) {
+		tp->enm_rck = l = data_label();
 	}
-	return tp->enm_rck;
+	if (!ol) {
+		ol = l;
+		C_df_dlb(ol);
+		C_rom_cst(lb);
+		C_rom_cst(ub);
+	}
+	C_lae_dlb(ol, (arith) 0);
+	C_rck(word_size);
 }
 
 getbounds(tp, plo, phi)
@@ -352,6 +349,7 @@ getbounds(tp, plo, phi)
 		*phi = tp->enm_ncst - 1;
 	}
 }
+
 struct type *
 set_type(tp)
 	register struct type *tp;
@@ -361,26 +359,20 @@ set_type(tp)
 	*/
 	arith lb, ub;
 
-	if (tp->tp_fund == T_SUBRANGE) {
-		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAXSET - 1) {
-			error("Set type limits exceeded");
-			return error_type;
-		}
-	}
-	else if (tp->tp_fund == T_ENUMERATION || tp == char_type) {
-		lb = 0;
-		if ((ub = tp->enm_ncst - 1) > MAXSET - 1) {
-			error("Set type limits exceeded");
-			return error_type;
-		}
-	}
-	else {
+	if (! bounded(tp)) {
 		error("illegal base type for set");
 		return error_type;
 	}
 
+	getbounds(tp, &lb, &ub);
+
+	if (lb < 0 || ub > MAXSET-1) {
+		error("Set type limits exceeded");
+		return error_type;
+	}
+
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = WA(((ub - lb) + 7)/8);
+	tp->tp_size = WA(((ub - lb) + 8)/8);
 	return tp;
 }
 
@@ -412,47 +404,30 @@ ArraySizes(tp)
 	*/
 	register struct type *index_type = tp->next;
 	register struct type *elem_type = tp->arr_elem;
+	arith lo, hi;
 
 	tp->arr_elsize = ArrayElSize(elem_type);
 	tp->tp_align = elem_type->tp_align;
 
 	/* check index type
 	*/
-	if (! (index_type->tp_fund & T_INDEX)) {
+	if (! bounded(index_type)) {
 		error("Illegal index type");
 		tp->tp_size = 0;
 		return;
 	}
 
-	/* find out HIGH, LOW and size of ARRAY
+	getbounds(index_type, &lo, &hi);
+
+	tp->tp_size = WA((hi - lo + 1) * tp->arr_elsize);
+
+	/* generate descriptor and remember label.
 	*/
 	tp->arr_descr = data_label();
 	C_df_dlb(tp->arr_descr);
-
-	switch(index_type->tp_fund) {
-	case T_SUBRANGE:
-		tp->tp_size = tp->arr_elsize *
-			(index_type->sub_ub - index_type->sub_lb + 1);
-		C_rom_cst(index_type->sub_lb);
-		C_rom_cst(index_type->sub_ub - index_type->sub_lb);
-		break;
-
-	case T_CHAR:
-	case T_ENUMERATION:
-		tp->tp_size = tp->arr_elsize * index_type->enm_ncst;
-		C_rom_cst((arith) 0);
-		C_rom_cst((arith) (index_type->enm_ncst - 1));
-		break;
-
-	default:
-		crash("Funny index type");
-	}
-
+	C_rom_cst(lo);
+	C_rom_cst(hi - lo);
 	C_rom_cst(tp->arr_elsize);
-	tp->tp_size = WA(tp->tp_size);
-
-	/* ??? overflow checking ???
-	*/
 }
 
 FreeType(tp)

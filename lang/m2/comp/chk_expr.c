@@ -23,81 +23,150 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"const.h"
 #include	"standards.h"
+#include	"chk_expr.h"
 
 extern char *symbol2str();
 
-int
-chk_expr(expp)
-	register struct node *expp;
+STATIC int
+chk_arr(expp)
+	struct node *expp;
 {
-	/*	Check the expression indicated by expp for semantic errors,
-		identify identifiers used in it, replace constants by
-		their value, and try to evaluate the expression.
-	*/
+	return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
+}
 
-	switch(expp->nd_class) {
-	case Arrsel:
-		return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
-
-	case Oper:
-		return	chk_oper(expp);
-
-	case Arrow:
-		return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
-
-	case Uoper:
-		return	chk_uoper(expp);
-
-	case Value:
-		switch(expp->nd_symb) {
-		case REAL:
-		case STRING:
-		case INTEGER:
-			return 1;
-
-		default:
-			crash("(chk_expr(Value))");
-		}
-		break;
-
-	case Xset:
-		return chk_set(expp);
-
-	case Link:
-	case Name:
-		if (chk_designator(expp, VALUE|DESIGNATOR, D_USED)) {
-			if (expp->nd_class == Def &&
-			    expp->nd_def->df_kind == D_PROCEDURE) {
-				/* Check that this procedure is one that we
-				   may take the address from.
-				*/
-				if (expp->nd_def->df_type == std_type) {
-					/* Standard procedure. Illegal */
-node_error(expp, "address of standard procedure taken");
-					return 0;
-				}
-				if (expp->nd_def->df_scope->sc_level > 0) {
-					/* Address of nested procedure taken.
-					   Illegal.
-					*/
-node_error(expp, "address of a procedure local to another one taken");
-					return 0;
-				}
-			}
-			return 1;
-		}
-		return 0;
-
-	case Call:
-		return chk_call(expp);
+STATIC int
+chk_value(expp)
+	struct node *expp;
+{
+	switch(expp->nd_symb) {
+	case REAL:
+	case STRING:
+	case INTEGER:
+		return 1;
 
 	default:
-		crash("(chk_expr)");
+		crash("(chk_value)");
 	}
 	/*NOTREACHED*/
 }
 
-int
+STATIC int
+chk_linkorname(expp)
+	register struct node *expp;
+{
+	if (chk_designator(expp, VALUE|DESIGNATOR, D_USED)) {
+		if (expp->nd_class == Def &&
+		    expp->nd_def->df_kind == D_PROCEDURE) {
+			/* Check that this procedure is one that we
+			   may take the address from.
+			*/
+			if (expp->nd_def->df_type == std_type ||
+			    expp->nd_def->df_scope->sc_level > 0) {
+				/* Address of standard or nested procedure
+				   taken.
+				*/
+node_error(expp, "it is illegal to take the address of a standard or local procedure");
+				return 0;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
+STATIC int
+RemoveSet(set)
+	arith **set;
+{
+	/*	This routine is only used for error exits of chk_el.
+		It frees the set indicated by "set", and returns 0.
+	*/
+	if (*set) {
+		free((char *) *set);
+		*set = 0;
+	}
+	return 0;
+}
+
+STATIC int
+chk_el(expp, tp, set)
+	register struct node *expp;
+	register struct type *tp;
+	arith **set;
+{
+	/*	Check elements of a set. This routine may call itself
+		recursively.
+		Also try to compute the set!
+	*/
+	register struct node *left = expp->nd_left;
+	register struct node *right = expp->nd_right;
+	register int i;
+
+	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
+		/* { ... , expr1 .. expr2,  ... }
+		   First check expr1 and expr2, and try to compute them.
+		*/
+		if (!chk_el(left, tp, set) || !chk_el(right, tp, set)) {
+			return 0;
+		}
+
+		if (left->nd_class == Value && right->nd_class == Value) {
+			/* We have a constant range. Put all elements in the
+			   set
+			*/
+
+		    	if (left->nd_INT > right->nd_INT) {
+node_error(expp, "lower bound exceeds upper bound in range");
+				return RemoveSet(set);
+			}
+
+			if (*set) {
+				for (i=left->nd_INT+1; i<right->nd_INT; i++) {
+					(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
+				}
+			}
+		}
+		else if (*set) {
+			free((char *) *set);
+			*set = 0;
+		}
+
+		return 1;
+	}
+
+	/* Here, a single element is checked
+	*/
+	if (!chk_expr(expp)) {
+		return RemoveSet(set);
+	}
+
+	if (!TstCompat(tp, expp->nd_type)) {
+		node_error(expp, "set element has incompatible type");
+		return RemoveSet(set);
+	}
+
+	if (expp->nd_class == Value) {
+		/* a constant element
+		*/
+		i = expp->nd_INT;
+
+	    	if ((tp->tp_fund != T_ENUMERATION &&
+		     (i < tp->sub_lb || i > tp->sub_ub))
+		   ||
+		    (tp->tp_fund == T_ENUMERATION &&
+		     (i < 0 || i > tp->enm_ncst))
+		   ) {
+			node_error(expp, "set element out of range");
+			return RemoveSet(set);
+		}
+
+		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
+	}
+
+	return 1;
+}
+
+STATIC int
 chk_set(expp)
 	register struct node *expp;
 {
@@ -174,126 +243,49 @@ node_error(expp, "specifier does not represent a set type");
 	return 1;
 }
 
-int
-chk_el(expp, tp, set)
-	register struct node *expp;
-	register struct type *tp;
-	arith **set;
-{
-	/*	Check elements of a set. This routine may call itself
-		recursively.
-		Also try to compute the set!
-	*/
-	register struct node *left = expp->nd_left;
-	register struct node *right = expp->nd_right;
-	register int i;
-
-	if (expp->nd_class == Link && expp->nd_symb == UPTO) {
-		/* { ... , expr1 .. expr2,  ... }
-		   First check expr1 and expr2, and try to compute them.
-		*/
-		if (!chk_el(left, tp, set) || !chk_el(right, tp, set)) {
-			return 0;
-		}
-
-		if (left->nd_class == Value && right->nd_class == Value) {
-			/* We have a constant range. Put all elements in the
-			   set
-			*/
-
-		    	if (left->nd_INT > right->nd_INT) {
-node_error(expp, "lower bound exceeds upper bound in range");
-				return rem_set(set);
-			}
-
-			if (*set) {
-				for (i=left->nd_INT+1; i<right->nd_INT; i++) {
-					(*set)[i/wrd_bits] |= (1<<(i%wrd_bits));
-				}
-			}
-		}
-		else if (*set) {
-			free((char *) *set);
-			*set = 0;
-		}
-
-		return 1;
-	}
-
-	/* Here, a single element is checked
-	*/
-	if (!chk_expr(expp)) {
-		return rem_set(set);
-	}
-
-	if (!TstCompat(tp, expp->nd_type)) {
-		node_error(expp, "set element has incompatible type");
-		return rem_set(set);
-	}
-
-	if (expp->nd_class == Value) {
-		/* a constant element
-		*/
-		i = expp->nd_INT;
-
-	    	if ((tp->tp_fund != T_ENUMERATION &&
-		     (i < tp->sub_lb || i > tp->sub_ub))
-		   ||
-		    (tp->tp_fund == T_ENUMERATION &&
-		     (i < 0 || i > tp->enm_ncst))
-		   ) {
-			node_error(expp, "set element out of range");
-			return rem_set(set);
-		}
-
-		if (*set) (*set)[i/wrd_bits] |= (1 << (i%wrd_bits));
-	}
-
-	return 1;
-}
-
-int
-rem_set(set)
-	arith **set;
-{
-	/*	This routine is only used for error exits of chk_el.
-		It frees the set indicated by "set", and returns 0.
-	*/
-	if (*set) {
-		free((char *) *set);
-		*set = 0;
-	}
-	return 0;
-}
-
-struct node *
+STATIC struct node *
 getarg(argp, bases, designator)
 	struct node **argp;
 {
+	/*	This routine is used to fetch the next argument from an
+		argument list. The argument list is indicated by "argp".
+		The parameter "bases" is a bitset indicating which types
+		are allowed at this point, and "designator" is a flag
+		indicating that the address from this argument is taken, so
+		that it must be a designator and may not be a register
+		variable.
+	*/
 	struct type *tp;
 	register struct node *arg = *argp;
+	register struct node *left;
 
-	if (!arg->nd_right) {
+	if (! arg->nd_right) {
 		node_error(arg, "too few arguments supplied");
 		return 0;
 	}
+
 	arg = arg->nd_right;
-	if ((!designator && !chk_expr(arg->nd_left)) ||
-	    (designator && !chk_designator(arg->nd_left, DESIGNATOR, D_REFERRED))) {
+	left = arg->nd_left;
+
+	if ((!designator && !chk_expr(left)) ||
+	    (designator &&
+	     !chk_designator(left, DESIGNATOR|VARIABLE, D_USED|D_NOREG))) {
 		return 0;
 	}
-	tp = arg->nd_left->nd_type;
+
+	tp = left->nd_type;
 	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+
 	if (bases && !(tp->tp_fund & bases)) {
 		node_error(arg, "unexpected type");
 		return 0;
 	}
 
 	*argp = arg;
-	return arg->nd_left;
+	return left;
 }
 
-struct node *
+STATIC struct node *
 getname(argp, kinds)
 	struct node **argp;
 {
@@ -303,10 +295,11 @@ getname(argp, kinds)
 		node_error(arg, "too few arguments supplied");
 		return 0;
 	}
+
 	arg = arg->nd_right;
 	if (! chk_designator(arg->nd_left, 0, D_REFERRED)) return 0;
 
-	assert(arg->nd_left->nd_class == Def);
+	if (arg->nd_left->nd_class != Def);
 
 	if (!(arg->nd_left->nd_def->df_kind & kinds)) {
 		node_error(arg, "unexpected type");
@@ -315,6 +308,42 @@ getname(argp, kinds)
 
 	*argp = arg;
 	return arg->nd_left;
+}
+
+STATIC int
+chk_proccall(expp)
+	register struct node *expp;
+{
+	/*	Check a procedure call
+	*/
+	register struct node *left;
+	struct node *arg;
+	register struct paramlist *param;
+
+	left = expp->nd_left;
+	arg = expp;
+	expp->nd_type = left->nd_type->next;
+
+	for (param = left->nd_type->prc_params; param; param = param->next) {
+		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
+		if (left->nd_symb == STRING) {
+			TryToString(left, TypeOfParam(param));
+		}
+		if (! TstParCompat(TypeOfParam(param),
+				   left->nd_type,
+				   IsVarParam(param),
+				   left)) {
+node_error(left, "type incompatibility in parameter");
+			return 0;
+		}
+	}
+
+	if (arg->nd_right) {
+		node_error(arg->nd_right, "too many parameters supplied");
+		return 0;
+	}
+
+	return 1;
 }
 
 int
@@ -358,58 +387,7 @@ chk_call(expp)
 	return 0;
 }
 
-chk_proccall(expp)
-	register struct node *expp;
-{
-	/*	Check a procedure call
-	*/
-	register struct node *left;
-	struct node *arg;
-	register struct paramlist *param;
-
-	left = 0;
-	arg = expp->nd_right;
-	/* First, reverse the order in the argument list */
-	while (arg) {
-		expp->nd_right = arg;
-		arg = arg->nd_right;
-		expp->nd_right->nd_right = left;
-		left = expp->nd_right;
-	}
-
-	left = expp->nd_left;
-	arg = expp;
-	expp->nd_type = left->nd_type->next;
-	param = left->nd_type->prc_params;
-
-	while (param) {
-		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
-		if (left->nd_symb == STRING) {
-			TryToString(left, TypeOfParam(param));
-		}
-		if (! TstParCompat(TypeOfParam(param),
-				   left->nd_type,
-				   IsVarParam(param),
-				   left)) {
-node_error(left, "type incompatibility in parameter");
-			return 0;
-		}
-		if (IsVarParam(param) && left->nd_class == Def) {
-			left->nd_def->df_flags |= D_NOREG;
-		}
-
-		param = param->next;
-	}
-
-	if (arg->nd_right) {
-		node_error(arg->nd_right, "too many parameters supplied");
-		return 0;
-	}
-
-	return 1;
-}
-
-static int
+STATIC int
 FlagCheck(expp, df, flag)
 	struct node *expp;
 	struct def *df;
@@ -461,7 +439,6 @@ chk_designator(expp, flag, dflags)
 	*/
 	register struct def *df;
 	register struct type *tp;
-	struct def *lookfor();
 
 	expp->nd_type = error_type;
 
@@ -469,23 +446,20 @@ chk_designator(expp, flag, dflags)
 		expp->nd_def = lookfor(expp, CurrVis, 1);
 		expp->nd_class = Def;
 		expp->nd_type = expp->nd_def->df_type;
-		if (expp->nd_type == error_type) return 0;
 	}
+	else if (expp->nd_class == Link) {
+		register struct node *left = expp->nd_left;
 
-	if (expp->nd_class == Link) {
 		assert(expp->nd_symb == '.');
 
-		if (! chk_designator(expp->nd_left,
-				     flag|HASSELECTORS,
-				     dflags|D_NOREG)) return 0;
+		if (! chk_designator(left,
+				     (flag&DESIGNATOR)|HASSELECTORS,
+				     dflags)) return 0;
 
-		tp = expp->nd_left->nd_type;
-
+		tp = left->nd_type;
 		assert(tp->tp_fund == T_RECORD);
 
-		df = lookup(expp->nd_IDF, tp->rec_scope);
-
-		if (!df) {
+		if (!(df = lookup(expp->nd_IDF, tp->rec_scope))) {
 			id_not_declared(expp);
 			return 0;
 		}
@@ -493,17 +467,19 @@ chk_designator(expp, flag, dflags)
 			expp->nd_def = df;
 			expp->nd_type = df->df_type;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+				/* Fields of a record are always D_QEXPORTED,
+				   so ...
+				*/
 node_error(expp, "identifier \"%s\" not exported from qualifying module",
 df->df_idf->id_text);
 				return 0;
 			}
 		}
 
-		if (expp->nd_left->nd_class == Def &&
-		    expp->nd_left->nd_def->df_kind == D_MODULE) {
+		if (left->nd_class == Def &&
+		    left->nd_def->df_kind == D_MODULE) {
 			expp->nd_class = Def;
-			expp->nd_def = df;
-			FreeNode(expp->nd_left);
+			FreeNode(left);
 			expp->nd_left = 0;
 		}
 		else {
@@ -548,12 +524,12 @@ df->df_idf->id_text);
 		assert(expp->nd_symb == '[');
 
 		if ( 
-		    	!chk_designator(expp->nd_left, DESIGNATOR|VARIABLE, dflags|D_NOREG)
+		     !chk_designator(expp->nd_left, DESIGNATOR|VARIABLE, dflags)
 		   ||
-		    	!chk_expr(expp->nd_right)
+		     !chk_expr(expp->nd_right)
 		   ||
-		    	expp->nd_left->nd_type == error_type
-		   ) return 0;
+		     expp->nd_left->nd_type == error_type
+		   )	return 0;
 
 		tpr = expp->nd_right->nd_type;
 		tpl = expp->nd_left->nd_type;
@@ -598,7 +574,7 @@ symbol2str(expp->nd_symb));
 	return 0;
 }
 
-struct type *
+STATIC struct type *
 ResultOfOperation(operator, tp)
 	struct type *tp;
 {
@@ -616,13 +592,13 @@ ResultOfOperation(operator, tp)
 	return tp;
 }
 
-int
+STATIC int
 Boolean(operator)
 {
 	return operator == OR || operator == AND || operator == '&';
 }
 
-int
+STATIC int
 AllowedTypes(operator)
 {
 	switch(operator) {
@@ -654,7 +630,23 @@ AllowedTypes(operator)
 	/*NOTREACHED*/
 }
 
-int
+STATIC int
+chk_address(tpl, tpr)
+	register struct type *tpl, *tpr;
+{
+	
+	if (tpl == address_type) {
+		return tpr == address_type || tpr->tp_fund != T_POINTER;
+	}
+
+	if (tpr == address_type) {
+		return tpl->tp_fund != T_POINTER;
+	}
+
+	return 0;
+}
+
+STATIC int
 chk_oper(expp)
 	register struct node *expp;
 {
@@ -741,23 +733,7 @@ node_error(expp,"operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_
 	return 1;
 }
 
-int
-chk_address(tpl, tpr)
-	register struct type *tpl, *tpr;
-{
-	
-	if (tpl == address_type) {
-		return tpr == address_type || tpr->tp_fund != T_POINTER;
-	}
-
-	if (tpr == address_type) {
-		return tpl->tp_fund != T_POINTER;
-	}
-
-	return 0;
-}
-
-int
+STATIC int
 chk_uoper(expp)
 	register struct node *expp;
 {
@@ -826,7 +802,7 @@ chk_uoper(expp)
 	return 0;
 }
 
-struct node *
+STATIC struct node *
 getvariable(argp)
 	struct node **argp;
 {
@@ -916,7 +892,11 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 
 	case S_MAX:
 	case S_MIN:
-		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
+		if (!(left = getname(&arg, D_ISTYPE))) return 0;
+		if (!(left->nd_type->tp_fund & (T_DISCRETE))) {
+			node_error(left, "illegal type in MIN or MAX");
+			return 0;
+		}
 		expp->nd_type = left->nd_type;
 		cstcall(expp,std);
 		break;
@@ -1072,7 +1052,8 @@ TryToString(nd, tp)
 	struct node *nd;
 	struct type *tp;
 {
-	/*	Try a coercion from character constant to string */
+	/*	Try a coercion from character constant to string.
+	*/
 	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
 		int ch = nd->nd_INT;
 
@@ -1084,3 +1065,20 @@ TryToString(nd, tp)
 		nd->nd_SLE = 1;
 	}
 }
+
+extern int	NodeCrash();
+
+int (*ChkTable[])() = {
+	chk_value,
+	chk_arr,
+	chk_oper,
+	chk_uoper,
+	chk_arr,
+	chk_call,
+	chk_linkorname,
+	NodeCrash,
+	chk_set,
+	NodeCrash,
+	NodeCrash,
+	chk_linkorname
+};

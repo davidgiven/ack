@@ -50,6 +50,6 @@ struct withdesig {
 };
 
 extern struct withdesig	*WithDesigs;
-extern struct desig	Desig, InitDesig;
+extern struct desig	InitDesig;
 
 #define NO_LABEL	((label) 0)

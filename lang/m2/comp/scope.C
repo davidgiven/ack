@@ -90,7 +90,7 @@ Forward(tk, ptp)
 	CurrentScope->sc_forw = f;
 }
 
-static
+STATIC
 chk_proc(df)
 	register struct def *df;
 {
@@ -108,7 +108,7 @@ node_error(df->for_node, "procedure \"%s\" not defined", df->df_idf->id_text);
 	}
 }
 
-static
+STATIC
 chk_forw(pdf)
 	register struct def **pdf;
 {
@@ -153,7 +153,7 @@ node_error((*pdf)->for_node, "identifier \"%s\" has not been declared",
 	}
 }
 
-static
+STATIC
 rem_forwards(fo)
 	struct forwards *fo;
 {
@@ -161,7 +161,6 @@ rem_forwards(fo)
 	*/
 	register struct forwards *f;
 	register struct def *df;
-	struct def *lookfor();
 
 	while (f = fo) {
 		df = lookfor(&(f->fo_tok), CurrVis, 1);
@@ -181,11 +180,10 @@ Reverse(pdf)
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
 		Also, while we're at it, remove uninteresting definitions
-		from this list. The only interesting definitions are:
-		D_MODULE, D_PROCEDURE, and D_PROCHEAD.
+		from this list.
 	*/
 	register struct def *df, *df1;
-#define INTERESTING D_MODULE|D_PROCEDURE|D_PROCHEAD
+#define INTERESTING D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE
 
 	df = 0;
 	df1 = *pdf;
@@ -217,7 +215,6 @@ close_scope(flag)
 	register struct scope *sc = CurrentScope;
 
 	assert(sc != 0);
-	DO_DEBUG(1, debug("Closing a scope"));
 
 	if (flag) {
 		if (sc->sc_forw) rem_forwards(sc->sc_forw);

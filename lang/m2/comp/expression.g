@@ -18,19 +18,17 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"const.h"
 #include	"type.h"
+#include	"chk_expr.h"
 }
 
-number(struct node **p;)
-{
-	struct type *tp;
-} :
+number(struct node **p;) :
 [
 	%default
-	INTEGER		{ tp = toktype; }
+	INTEGER
 |
-	REAL		{ tp = real_type; }
+	REAL
 ]			{ *p = MkLeaf(Value, &dot);
-			  (*p)->nd_type = tp;
+			  (*p)->nd_type = toktype;
 			}
 ;
 

@@ -64,11 +64,17 @@ FreeNode(nd)
 	free_node(nd);
 }
 
+NodeCrash(expp)
+	struct node *expp;
+{
+	crash("Illegal node %d", expp->nd_class);
+}
+
 #ifdef DEBUG
 
 extern char *symbol2str();
 
-static
+STATIC
 printnode(nd)
 	register struct node *nd;
 {

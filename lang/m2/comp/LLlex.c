@@ -33,7 +33,7 @@ int idfsize = IDFSIZE;
 extern int	cntlines;
 #endif
 
-static
+STATIC
 SkipComment()
 {
 	/*	Skip Modula-2 comments (* ... *).
@@ -50,16 +50,12 @@ SkipComment()
 			cntlines++;
 #endif
 		}
-		else
-		if (ch == '(') {
+		else if (ch == '(') {
 			LoadChar(ch);
-			if (ch == '*') {
-				++NestLevel;
-			}
+			if (ch == '*') ++NestLevel;
 			else	continue;
 		}
-		else
-		if (ch == '*') {
+		else if (ch == '*') {
 			LoadChar(ch);
 			if (ch == ')') {
 				if (NestLevel-- == 0) return;
@@ -70,7 +66,7 @@ SkipComment()
 	}
 }
 
-static
+STATIC
 GetString(upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
@@ -118,11 +114,13 @@ LLlex()
 	register int ch, nch;
 
 	toktype = error_type;
+
 	if (ASIDE)	{	/* a token is put aside		*/
 		*tk = aside;
 		ASIDE = 0;
 		return tk->tk_symb;
 	}
+
 	tk->tk_lineno = LineNumber;
 
 again:
@@ -216,8 +214,7 @@ again:
 			LoadChar(ch);
 		} while(in_idf(ch));
 
-		if (ch != EOI)
-			PushBack(ch);
+		if (ch != EOI) PushBack(ch);
 		*tg++ = '\0';
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
@@ -396,6 +393,7 @@ Sreal:
 				lexerror("floating constant too long");
 			}
 			else	tk->TOK_REL = Salloc(buf, np - buf) + 1;
+			toktype = real_type;
 			return tk->tk_symb = REAL;
 
 		default:

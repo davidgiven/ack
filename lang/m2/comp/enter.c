@@ -116,6 +116,7 @@ EnterVarList(Idlist, type, local)
 			/* An address was supplied
 			*/
 			df->var_addrgiven = 1;
+			df->df_flags |= D_NOREG;
 			if (idlist->nd_left->nd_type != card_type) {
 node_error(idlist->nd_left,"Illegal type for address");
 			}
@@ -137,9 +138,12 @@ node_error(idlist->nd_left,"Illegal type for address");
 			sprint(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
 			df->var_name = Salloc(buf, (unsigned)(strlen(buf)+1));
+			df->df_flags |= D_NOREG;
 
  			if (DefinitionModule) {
-				C_exa_dnam(df->var_name);
+				if (sc == Defined->mod_vis) {
+					C_exa_dnam(df->var_name);
+				}
 			}
 			else {
 				C_ina_dnam(df->var_name);
@@ -163,11 +167,16 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	register struct paramlist *pr;
 	register struct def *df;
 	register struct node *idlist = Idlist;
+	static struct paramlist *last;
 
 	for ( ; idlist; idlist = idlist->next) {
 		pr = new_paramlist();
-		pr->next = *ppr;
-		*ppr = pr;
+		pr->next = 0;
+		if (!*ppr) {
+			*ppr = pr;
+		}
+		else	last->next = pr;
+		last = pr;
 		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 		pr->par_def = df;
 		df->df_type = type;
@@ -188,7 +197,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	FreeNode(Idlist);
 }
 
-static
+STATIC
 DoImport(df, scope)
 	register struct def *df;
 	struct scope *scope;
@@ -222,7 +231,7 @@ DoImport(df, scope)
 	}
 }
 
-static struct scopelist *
+STATIC struct scopelist *
 ForwModule(df, idn)
 	register struct def *df;
 	struct node *idn;
@@ -248,7 +257,7 @@ ForwModule(df, idn)
 	return vis;
 }
 
-static struct def *
+STATIC struct def *
 ForwDef(ids, scope)
 	register struct node *ids;
 	struct scope *scope;
@@ -351,7 +360,7 @@ EnterFromImportList(Idlist, Fromid, local)
 	register struct def *df;
 	struct scopelist *vis = enclosing(CurrVis);
 	int forwflag = 0;
-	extern struct def *lookfor(), *GetDefinitionModule();
+	extern struct def *GetDefinitionModule();
 
 	if (local) {
 		df = lookfor(Fromid, vis, 0);
@@ -412,7 +421,7 @@ EnterImportList(Idlist, local)
 	register struct node *idlist = Idlist;
 	register struct def *df;
 	struct scopelist *vis = enclosing(CurrVis);
-	extern struct def *lookfor(), *GetDefinitionModule();
+	extern struct def *GetDefinitionModule();
 
 	for (; idlist; idlist = idlist->next) {
 		if (local) df = ForwDef(idlist, vis->sc_scope);

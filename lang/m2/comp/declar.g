@@ -461,7 +461,6 @@ PointerType(struct type **ptp;)
 {
 	struct type *tp;
 	struct def *df;
-	struct def *lookfor();
 	struct node *nd;
 } :
 	POINTER TO

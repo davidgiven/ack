@@ -19,6 +19,7 @@ struct node {
 #define Def	9		/* an identified name */
 #define Stat	10		/* a statement */
 #define Link	11
+				/* do NOT change the order or the numbers!!! */
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;
 #define nd_set		nd_token.tk_data.tk_set

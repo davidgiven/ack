@@ -129,7 +129,6 @@ CodeExpr(nd, ds, true_label, false_label)
 		break;
 
 	case Uoper:
-		CodePExpr(nd->nd_right);
 		CodeUoper(nd);
 		ds->dsg_kind = DSG_LOADED;
 		break;
@@ -194,9 +193,9 @@ CodeCoercion(t1, t2)
 {
 	register int fund1, fund2;
 
-	if (t1 == t2) return;
 	if (t1->tp_fund == T_SUBRANGE) t1 = t1->next;
 	if (t2->tp_fund == T_SUBRANGE) t2 = t2->next;
+	if (t1 == t2) return;
 	if ((fund1 = t1->tp_fund) == T_WORD) fund1 = T_INTEGER;
 	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
 	switch(fund1) {
@@ -291,9 +290,6 @@ CodeCall(nd)
 		and result is already done.
 	*/
 	register struct node *left = nd->nd_left;
-	register struct node *arg = nd;
-	register struct paramlist *param;
-	struct type *tp;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -311,48 +307,9 @@ CodeCall(nd)
 
 	assert(IsProcCall(left));
 
-	for (param = left->nd_type->prc_params; param; param = param->next) {
-		tp = TypeOfParam(param);
-		arg = arg->nd_right;
-		assert(arg != 0);
-		left = arg->nd_left;
-		if (IsConformantArray(tp)) {
-			C_loc(tp->arr_elsize);
-			if (IsConformantArray(left->nd_type)) {
-				DoHIGH(left);
-			}
-			else if (left->nd_symb == STRING) {
-				C_loc(left->nd_SLE);
-			}
-			else if (tp->arr_elem == word_type) {
-				C_loc(left->nd_type->tp_size / word_size - 1);
-			}
-			else {
-				tp = left->nd_type->next;
-				if (tp->tp_fund == T_SUBRANGE) {
-					C_loc(tp->sub_ub - tp->sub_lb);
-				}
-				else	C_loc((arith) (tp->enm_ncst - 1));
-			}
-			C_loc((arith) 0);
-			if (left->nd_symb == STRING) {
-				CodeString(left);
-			}
-			else	CodeDAddress(left);
-		}
-		else if (IsVarParam(param)) {
-			CodeDAddress(left);
-		}
-		else {
-			if (left->nd_type->tp_fund == T_STRING) {
-				CodePadString(left, tp->tp_size);
-			}
-			else CodePExpr(left);
-			CheckAssign(left->nd_type, tp);
-		}
+	if (nd->nd_right) {
+		CodeParameters(left->nd_type->prc_params, nd->nd_right);
 	}
-
-	left = nd->nd_left;
 
 	if (left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) {
 		if (left->nd_def->df_scope->sc_level > 0) {
@@ -373,6 +330,63 @@ CodeCall(nd)
 	}
 }
 
+CodeParameters(param, arg)
+	struct paramlist *param;
+	struct node *arg;
+{
+	register struct type *tp;
+	register struct node *left;
+	
+	assert(param != 0 && arg != 0);
+
+	if (param->next) {
+		CodeParameters(param->next, arg->nd_right);
+	}
+
+	tp = TypeOfParam(param);
+	left = arg->nd_left;
+	if (IsConformantArray(tp)) {
+		C_loc(tp->arr_elsize);
+		if (IsConformantArray(left->nd_type)) {
+			DoHIGH(left);
+			if (tp->arr_elem->tp_size != left->nd_type->arr_elem->tp_size) {
+				/* This can only happen if the formal type is
+				   ARRAY OF WORD
+				*/
+				/* ??? */
+			}
+		}
+		else if (left->nd_symb == STRING) {
+			C_loc(left->nd_SLE);
+		}
+		else if (tp->arr_elem == word_type) {
+			C_loc(left->nd_type->tp_size / word_size - 1);
+		}
+		else {
+			tp = left->nd_type->next;
+			if (tp->tp_fund == T_SUBRANGE) {
+				C_loc(tp->sub_ub - tp->sub_lb);
+			}
+			else	C_loc((arith) (tp->enm_ncst - 1));
+		}
+		C_loc((arith) 0);
+		if (left->nd_symb == STRING) {
+			CodeString(left);
+		}
+		else	CodeDAddress(left);
+	}
+	else if (IsVarParam(param)) {
+		CodeDAddress(left);
+	}
+	else {
+		if (left->nd_type->tp_fund == T_STRING) {
+			CodePadString(left, tp->tp_size);
+		}
+		else CodePExpr(left);
+		CheckAssign(left->nd_type, tp);
+	}
+}
+
 CodeStd(nd)
 	struct node *nd;
 {
@@ -387,7 +401,6 @@ CodeStd(nd)
 		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 		arg = arg->nd_right;
 	}
-	Desig = InitDesig;
 
 	switch(std = nd->nd_left->nd_def->df_value.df_stdname) {
 	case S_ABS:
@@ -546,14 +559,12 @@ CheckAssign(tpl, tpr)
 	*/
 
 	arith llo, lhi, rlo, rhi;
-	label l = 0;
-	extern label getrck();
 
 	if (bounded(tpl)) {
 		/* in this case we might need a range check */
 		if (!bounded(tpr)) {
 			/* yes, we need one */
-			l = getrck(tpl);
+			genrck(tpl);
 		}
 		else {
 			/* both types are restricted. check the bounds
@@ -562,13 +573,8 @@ CheckAssign(tpl, tpr)
 			getbounds(tpl, &llo, &lhi);
 			getbounds(tpr, &rlo, &rhi);
 			if (llo > rlo || lhi < rhi) {
-				l = getrck(tpl);
+				genrck(tpl);
 			}
-		}
-
-		if (l) {
-			C_lae_dlb(l, (arith) 0);
-			C_rck(word_size);
 		}
 	}
 }
@@ -916,6 +922,7 @@ CodeUoper(nd)
 {
 	register struct type *tp = nd->nd_type;
 
+	CodePExpr(nd->nd_right);
 	switch(nd->nd_symb) {
 	case '~':
 	case NOT:

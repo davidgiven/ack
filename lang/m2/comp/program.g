@@ -42,36 +42,13 @@ static  char *RcsId = "$Header$";
 ModuleDeclaration
 {
 	struct idf *id;
-	register struct def *df;
-	extern int proclevel;
-	static int modulecount = 0;
-	char buf[256];
+	struct def *df;
 	struct node *nd;
 	struct node *exportlist = 0;
 	int qualified;
-	extern char *sprint();
 } :
-	MODULE IDENT	{
-			  id = dot.TOK_IDF;
-			  df = define(id, CurrentScope, D_MODULE);
-
-			  if (!df->mod_vis) {	
-			  	open_scope(CLOSEDSCOPE);
-			  	df->mod_vis = CurrVis;
-			  }
-			  else {
-				CurrVis = df->mod_vis;
-				CurrentScope->sc_level = proclevel;
-			  }
-			  CurrentScope->sc_definedby = df;
-
-			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
-			  df->df_type->rec_scope = df->mod_vis->sc_scope;
-			  sprint(buf, "_%d%s", ++modulecount, id->id_text);
-			  CurrentScope->sc_name =
-				Salloc(buf, (unsigned) (strlen(buf) + 1));
-			  if (! proclevel) C_ina_dnam(&buf[1]);
-			  C_inp(buf);
+	MODULE IDENT	{ id = dot.TOK_IDF;
+			  df = DefineLocalModule(id);
 			}
 	priority(&(df->mod_priority))?
 	';'
@@ -92,7 +69,7 @@ priority(arith *pprio;)
 	struct node *nd;
 } :
 	'[' ConstExpression(&nd) ']'
-			{ if (!(nd->nd_type->tp_fund & T_INTORCARD)) {
+			{ if (!(nd->nd_type->tp_fund & T_CARDINAL)) {
 				node_error(nd, "Illegal priority");
 			  }
 			  *pprio = nd->nd_INT;
@@ -141,13 +118,12 @@ DefinitionModule
 	int dummy;
 } :
 	DEFINITION
-	MODULE IDENT	{ 
-			  id = dot.TOK_IDF;
+	MODULE IDENT	{ id = dot.TOK_IDF;
 			  df = define(id, GlobalScope, D_MODULE);
-			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
 			  if (!Defined) Defined = df;
-			  df->mod_vis = CurrVis;
+			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
 			  CurrentScope->sc_name = id->id_text;
+			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  DefinitionModule++;
@@ -222,8 +198,7 @@ ProgramModule
 	struct node *nd;
 } :
 	MODULE
-	IDENT	{ 
-		  id = dot.TOK_IDF;
+	IDENT	{ id = dot.TOK_IDF;
 		  if (state == IMPLEMENTATION) {
 			df = GetDefinitionModule(id);
 			CurrVis = df->mod_vis;
@@ -232,11 +207,11 @@ ProgramModule
 		  }
 		  else {
 			df = define(id, CurrentScope, D_MODULE);
-		  	Defined = df;
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = id->id_text;
 		  }
+		  Defined = df;
 		  CurrentScope->sc_definedby = df;
 		}
 	priority(&(df->mod_priority))?

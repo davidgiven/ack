@@ -117,7 +117,11 @@ struct def	{		/* list of definitions for a name */
 
 extern struct def
 	*define(),
-	*lookup(),
+	*DefineLocalModule(),
+	*MkDef(),
 	*ill_df;
 
+extern struct def
+	*lookup(),
+	*lookfor();
 #define NULLDEF ((struct def *) 0)

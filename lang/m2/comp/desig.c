@@ -25,7 +25,6 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 
 extern int	proclevel;
-struct desig	Desig;
 struct desig	InitDesig = {DSG_INIT, 0, 0};
 
 CodeValue(ds, size)
@@ -225,6 +224,7 @@ CodeVarDesig(df, ds)
 	*/
 	assert(ds->dsg_kind == DSG_INIT);
 
+	df->df_flags |= D_USED;
 	if (df->var_addrgiven) {
 		/* the programmer specified an address in the declaration of
 		   the variable. Generate code to push the address.
@@ -232,7 +232,6 @@ CodeVarDesig(df, ds)
 		CodeConst(df->var_off, pointer_size);
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = 0;
-		df->df_flags |= D_NOREG;
 		return;
 	}
 
@@ -243,7 +242,6 @@ CodeVarDesig(df, ds)
 		ds->dsg_name = df->var_name;
 		ds->dsg_offset = 0;
 		ds->dsg_kind = DSG_FIXED;
-		df->df_flags |= D_NOREG;
 		return;
 	}
 
@@ -251,6 +249,8 @@ CodeVarDesig(df, ds)
 		/* the variable is local to a statically enclosing procedure.
 		*/
 		assert(proclevel > sc->sc_level);
+
+		df->df_flags |= D_NOREG;
 		if (df->df_flags & (D_VARPAR|D_VALPAR)) {
 			/* value or var parameter
 			*/
@@ -269,7 +269,6 @@ CodeVarDesig(df, ds)
 		else	C_lxl((arith) (proclevel - sc->sc_level));
 		ds->dsg_kind = DSG_PLOADED;
 		ds->dsg_offset = df->var_off;
-		df->df_flags |= D_NOREG;
 		return;
 	}
 

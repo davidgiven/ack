@@ -203,7 +203,7 @@ DeclProc(type)
 		df->for_node = MkLeaf(Name, &dot);
 		sprint(buf,"%s_%s",CurrentScope->sc_name,df->df_idf->id_text);
 		df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
-		C_exp(df->for_name);
+		if (CurrVis == Defined->mod_vis) C_exp(df->for_name);
 		open_scope(OPENSCOPE);
 	}
 	else {
@@ -290,6 +290,51 @@ DefInFront(df)
 		df->df_nextinscope = df->df_scope->sc_def;
 		df->df_scope->sc_def = df;
 	}
+}
+
+struct def *
+DefineLocalModule(id)
+	struct idf *id;
+{
+	/*	Create a definition for a local module. Also give it
+		a name to be used for code generation.
+	*/
+	register struct def *df = define(id, CurrentScope, D_MODULE);
+	register struct type *tp;
+	register struct scope *sc;
+	static int modulecount = 0;
+	char buf[256];
+	extern char *sprint();
+	extern int proclevel;
+
+	sprint(buf, "_%d%s", ++modulecount, id->id_text);
+
+	if (!df->mod_vis) {	
+		/* We never saw the name of this module before. Create a
+		   scope for it.
+		*/
+	  	open_scope(CLOSEDSCOPE);
+	  	df->mod_vis = CurrVis;
+	}
+
+	CurrVis = df->mod_vis;
+
+	sc = CurrentScope;
+	sc->sc_level = proclevel;
+	sc->sc_definedby = df;
+	sc->sc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+
+	/* Create a type for it
+	*/
+	df->df_type = tp = standard_type(T_RECORD, 0, (arith) 0);
+	tp->rec_scope = sc;
+
+	/* Generate code that indicates that the initialization procedure
+	   for this module is local.
+	*/
+	C_inp(buf);
+
+	return df;
 }
 
 #ifdef DEBUG

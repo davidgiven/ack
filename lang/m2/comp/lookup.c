@@ -16,8 +16,6 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"node.h"
 
-extern struct def	*MkDef();
-
 struct def *
 lookup(id, scope)
 	register struct idf *id;

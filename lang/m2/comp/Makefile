@@ -9,10 +9,11 @@ INCLUDES = -I$(HDIR) -I/usr/em/h -I$(PKGDIR) -I/user1/erikb/em/h
 
 LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
-GEN =	LLgen
-GENOPTIONS =
-PROFILE = 
-CFLAGS = $(PROFILE) $(INCLUDES)
+GEN =	/usr/em/util/LLgen/src/LLgen
+GENOPTIONS = -d
+PROFILE = -p
+CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
+LINTFLAGS = -DSTATIC= -DNORCSID
 LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
@@ -46,7 +47,7 @@ clean:
 	rm -f $(OBJ) $(GENFILES) LLfiles 
 
 lint:	LLfiles hfiles
-	lint $(INCLUDES) -DNORCSID `sources $(OBJ)`
+	lint $(INCLUDES) $(LINTFLAGS) `sources $(OBJ)`
 
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile <tokenname.c >tokenfile.g
@@ -98,16 +99,17 @@ defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h inputtype.h main.h sco
 typequiv.o: LLlex.h def.h node.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.h
-chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
+chk_expr.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
-walk.o: LLlex.h Lpars.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h
+walk.o: LLlex.h Lpars.h chk_expr.h debug.h def.h desig.h f_info.h idf.h main.h node.h scope.h type.h
 casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h
 desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
 code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h
 tmpvar.o: debug.h def.h scope.h type.h
+lookup.o: LLlex.h debug.h def.h idf.h node.h scope.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h
-expression.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h type.h
+expression.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h type.h
 statement.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h
 Lpars.o: Lpars.h

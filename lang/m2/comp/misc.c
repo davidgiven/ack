@@ -15,7 +15,7 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 
 match_id(id1, id2)
-	struct idf *id1, *id2;
+	register struct idf *id1, *id2;
 {
 	/*	Check that identifiers id1 and id2 are equal. If they
 		are not, check that we did'nt generate them in the
@@ -45,7 +45,7 @@ gen_anon_idf()
 }
 
 id_not_declared(id)
-	struct node *id;
+	register struct node *id;
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message

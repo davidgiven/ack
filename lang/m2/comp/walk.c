@@ -12,6 +12,7 @@ static char *RcsId = "$Header$";
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<em_reg.h>
 #include	<assert.h>
 
 #include	"def.h"
@@ -24,6 +25,7 @@ static char *RcsId = "$Header$";
 #include	"desig.h"
 #include	"f_info.h"
 #include	"idf.h"
+#include	"chk_expr.h"
 
 extern arith	NewPtr();
 extern arith	NewInt();
@@ -49,7 +51,7 @@ data_label()
 	return ++datalabel;
 }
 
-static
+STATIC
 DoProfil()
 {
 	static label	filename_label = 0;
@@ -119,16 +121,14 @@ WalkModule(module)
 		struct node *nd;
 
 		if (state == IMPLEMENTATION) {
-			label l1 = data_label(), l2 = text_label();
+			label l1 = data_label();
 			/* we don't actually prevent recursive calls,
 			   but do nothing if called recursively
 			*/
 			C_df_dlb(l1);
 			C_bss_cst(word_size, (arith) 0, 1);
 			C_loe_dlb(l1, (arith) 0);
-			C_zeq(l2);
-			C_ret((arith) 0);
-			C_df_ilb(l2);
+			C_zne((label) 1);
 			C_loc((arith) 1);
 			C_ste_dlb(l1, (arith) 0);
 		}
@@ -159,7 +159,8 @@ WalkProcedure(procedure)
 	*/
 	struct scopelist *vis = CurrVis;
 	register struct scope *sc;
-	register struct type *res_type;
+	register struct type *tp;
+	register struct paramlist *param;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -177,19 +178,20 @@ WalkProcedure(procedure)
 	MkCalls(sc->sc_def);
 	return_expr_occurred = 0;
 	instructionlabel = 2;
-	func_type = res_type = procedure->df_type->next;
-	if (! returntype(res_type)) {
+	func_type = tp = procedure->df_type->next;
+	if (! returntype(tp)) {
 		node_error(procedure->prc_body, "illegal result type");
 	}
 	WalkNode(procedure->prc_body, (label) 0);
 	C_df_ilb((label) 1);
-	if (res_type) {
+	if (tp) {
 		if (! return_expr_occurred) {
 node_error(procedure->prc_body,"function procedure does not return a value");
 		}
-		C_ret(WA(res_type->tp_size));
+		C_ret(WA(tp->tp_size));
 	}
 	else	C_ret((arith) 0);
+	RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
 	CurrVis = vis;
@@ -257,7 +259,6 @@ WalkStat(nd, lab)
 	*/
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
-	register struct desig *pds = &Desig;
 
 	if (!nd) {
 		/* Empty statement
@@ -385,9 +386,10 @@ WalkStat(nd, lab)
 		{
 			struct scopelist link;
 			struct withdesig wds;
+			struct desig ds;
 			arith tmp = 0;
 
-			WalkDesignator(left);
+			WalkDesignator(left, &ds);
 			if (left->nd_type->tp_fund != T_RECORD) {
 				node_error(left, "record variable expected");
 				break;
@@ -396,19 +398,21 @@ WalkStat(nd, lab)
 			wds.w_next = WithDesigs;
 			WithDesigs = &wds;
 			wds.w_scope = left->nd_type->rec_scope;
-			if (pds->dsg_kind != DSG_PFIXED) {
+			if (ds.dsg_kind != DSG_PFIXED) {
 				/* In this case, we use a temporary variable
 				*/
-				CodeAddress(pds);
-				pds->dsg_kind = DSG_FIXED;
-				/* Only for the store ... */
-				pds->dsg_offset = tmp = NewPtr();
-				pds->dsg_name = 0;
-				CodeStore(pds, pointer_size);
-				pds->dsg_kind = DSG_PFIXED;
+				CodeAddress(&ds);
+				ds.dsg_kind = DSG_FIXED;
+				/* Create a designator structure for the
+				   temporary.
+				*/
+				ds.dsg_offset = tmp = NewPtr();
+				ds.dsg_name = 0;
+				CodeStore(&ds, pointer_size);
+				ds.dsg_kind = DSG_PFIXED;
 				/* the record is indirectly available */
 			}
-			wds.w_desig = *pds;
+			wds.w_desig = ds;
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
 			CurrVis = &link;
@@ -439,7 +443,7 @@ node_error(right, "type incompatibility in RETURN statement");
 		break;
 
 	default:
-		assert(0);
+		crash("(WalkStat)");
 	}
 }
 
@@ -450,6 +454,7 @@ ExpectBool(nd, true_label, false_label)
 	/*	"nd" must indicate a boolean expression. Check this and
 		generate code to evaluate the expression.
 	*/
+	struct desig ds;
 
 	if (!chk_expr(nd)) return;
 
@@ -457,8 +462,8 @@ ExpectBool(nd, true_label, false_label)
 		node_error(nd, "boolean expression expected");
 	}
 
-	Desig = InitDesig;
-	CodeExpr(nd, &Desig,  true_label, false_label);
+	ds = InitDesig;
+	CodeExpr(nd, &ds,  true_label, false_label);
 }
 
 WalkExpr(nd)
@@ -474,8 +479,9 @@ WalkExpr(nd)
 	CodePExpr(nd);
 }
 
-WalkDesignator(nd)
+WalkDesignator(nd, ds)
 	struct node *nd;
+	struct desig *ds;
 {
 	/*	Check designator and generate code for it
 	*/
@@ -484,8 +490,8 @@ WalkDesignator(nd)
 
 	if (! chk_designator(nd, DESIGNATOR|VARIABLE, D_DEFINED)) return;
 
-	Desig = InitDesig;
-	CodeDesig(nd, &Desig);
+	*ds = InitDesig;
+	CodeDesig(nd, ds);
 }
 
 DoForInit(nd, left)
@@ -527,13 +533,13 @@ DoAssign(nd, left, right)
 	register struct node *left, *right;
 {
 	/* May we do it in this order (expression first) ??? */
-	struct desig ds;
+	struct desig dsl, dsr;
 
 	if (!chk_expr(right)) return;
 	if (! chk_designator(left, DESIGNATOR|VARIABLE, D_DEFINED)) return;
 	TryToString(right, left->nd_type);
-	Desig = InitDesig;
-	CodeExpr(right, &Desig, NO_LABEL, NO_LABEL);
+	dsr = InitDesig;
+	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
 
 	if (! TstAssCompat(left->nd_type, right->nd_type)) {
 		node_error(nd, "type incompatibility in assignment");
@@ -541,17 +547,44 @@ DoAssign(nd, left, right)
 	}
 
 	if (complex(right->nd_type)) {
-		CodeAddress(&Desig);
+		CodeAddress(&dsr);
 	}
 	else {
-		CodeValue(&Desig, right->nd_type->tp_size);
+		CodeValue(&dsr, right->nd_type->tp_size);
 		CheckAssign(left->nd_type, right->nd_type);
 	}
-	ds = Desig;
-	Desig = InitDesig;
-	CodeDesig(left, &Desig);
+	dsl = InitDesig;
+	CodeDesig(left, &dsl);
 
-	CodeAssign(nd, &ds, &Desig);
+	CodeAssign(nd, &dsr, &dsl);
+}
+
+RegisterMessages(df)
+	register struct def *df;
+{
+	struct type *tp;
+
+	for (; df; df = df->df_nextinscope) {
+		if (df->df_kind == D_VARIABLE && !(df->df_flags & D_NOREG)) {
+			/* Examine type and size
+			*/
+			tp = df->df_type;
+			if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+			if ((tp->tp_fund & T_NUMERIC) &&
+			     tp->tp_size <= dword_size) {
+				C_ms_reg(df->var_off,
+					 tp->tp_size,
+					 tp->tp_fund == T_REAL ?
+					    reg_float : reg_any,
+					 0);
+			}
+			else if ((df->df_flags & D_VARPAR) ||
+				 tp->tp_fund == T_POINTER) {
+				C_ms_reg(df->var_off, pointer_size,
+					 reg_pointer, 0);
+			}
+		}
+	}
 }
 
 #ifdef DEBUG

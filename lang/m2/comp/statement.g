@@ -83,13 +83,17 @@ ProcedureCall:
 
 StatementSequence(register struct node **pnd;)
 {
+	struct node *nd;
 } :
 	statement(pnd)
 	[
-		';'	{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
-			  pnd = &((*pnd)->nd_right);
+		';' statement(&nd)
+			{ if (nd) {
+				*pnd = MkNode(Link, *pnd, nd, &dot);
+				(*pnd)->nd_symb = ';';
+			  	pnd = &((*pnd)->nd_right);
+			  }
 			}
-		statement(pnd)
 	]*
 ;
 
