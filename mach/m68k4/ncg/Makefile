@@ -1,6 +1,11 @@
 # $Header$
 
 EMHOME=../../..
+#preprocessor flags for table
+TABLEFLAGS=
+#cgg options
+CGGFLAGS=
+
 PREFLAGS=-I$(EMHOME)/h -I. 
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS)
@@ -65,7 +70,7 @@ cmp:	 all
 
 
 tables.c: table $(CGG)
-	$(EMHOME)/lib/cpp table | $(CGG)
+	$(EMHOME)/lib/cpp $(TABLEFLAGS) table | $(CGG) $(CGGFLAGS)
 	-cmp tables.h tables.H || cp tables.H tables.h
 
 lint: $(CFILES)
