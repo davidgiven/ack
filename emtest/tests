@@ -327,7 +327,8 @@ MAIN 20
 #endif
 #if WS > 1
  loc 777
- stl -12
+ lal -12
+ sti 2
  lal -12
  loc 2
  los WS
