@@ -1,9 +1,5 @@
 /* $Header$ */
-#ifdef __BSD4_2
-#include <sys/time.h>
-#else
 #include <time.h>
-#endif
 
 #define LEAPYEAR(year)	(!((year) % 4) && (((year) % 100) || !((year) % 400)))
 #define YEARSIZE(year)	(LEAPYEAR(year) ? 366 : 365)
