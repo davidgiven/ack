@@ -1,17 +1,7 @@
+/* $Header$ */
 /*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
- *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
  */
 
@@ -20,7 +10,7 @@
 /* Print a readable version of the data in the post mortem dump */
 /* dmpc [-s] [-dn,m] [file] */
 
-#include "/usr/em/h/local.h"
+#include <local.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -109,7 +99,7 @@ main(argc,argv) char **argv;
 			printf(" ");
 		}
 		if ( line ) {
-			printf("line %D",line) ;
+			printf("line %ld",line) ;
 		}
 		if ( fileaddr || line ) printf(", ");
 		fseek(fcore,512L,0);
@@ -128,9 +118,9 @@ main(argc,argv) char **argv;
 		if ( tsize ) printn("Text size",tsize) ;
 		if ( dsize ) printn("Data size",dsize) ;
 	}
-	if ( dflag==0 ) return 0;
+	if ( dflag==0 ) exit(0);
 	fatal("d-flag not implemeted (yet)");
-	return 1 ;
+	exit(1) ;
 }
 
 scanargs(argc,argv) char **argv ; {
