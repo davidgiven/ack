@@ -122,6 +122,8 @@ List only the erroneous lines of each Pascal source program.
 .IP \-v
 Verbose.
 Print information while juggling with files.
+.IP \-KR
+Tell the C-compiler to conform to "Kernighan & Ritchie" C.
 .SB preprocessing
 .IP \-I\fIdir\fP
 \&\`#include\' files whose names do not begin with \`/\' are
@@ -136,6 +138,10 @@ If no definition is given the \fIname\fP is defined as 1.
 .IP \-U\fIname\fP
 Remove any initial definition of \fIname\fP, before
 preprocessing.
+.IP \-P
+Don't generate line directives.
+.IP \-C
+Leave C-comments in.
 .SB debugging
 .IP \-p
 This flag tells both the Pascal and C front ends to include
@@ -149,6 +155,58 @@ to a string containing the name of the routine.
 .IP \-Oopt1,opt2,...
 Try to use the named optimizers, or, if no optimizers are given,
 try using the peephole optimizer and a target optimizer.
+For optimizer names, see the table at the end of this manual page.
+For the global optimizer, the following flags indicate which
+phases must be executed:
+.RS
+.IP \-IL
+Inline substitution.
+.IP \-CS
+Commom subexpression elimination.
+.IP \-SR
+Strength reduction.
+.IP \-UD
+Use definition analysis.
+.IP \-LV
+Live variable analysis.
+.IP \-SA
+Register allocation.
+.IP \-SP
+Stack pollution.
+.IP \-BO
+Branch optimization.
+.IP \-CJ
+Cross jumping.
+.IP \-s<num>
+Give an indication to the IL phase, how much bigger the program may get.
+The IL phase will not make the program bigger when given \-s0.
+.RE
+.IP ""
+The default options are: -CJ -BO -SP.
+.br
+In principle, the optimization phases can be run in any order; a phase
+may even be run more than once. However, the following rules must be obeyed:
+.RS
+.IP -
+the Live Variable analysis phase (LV) must be run prior to the
+Register Alloacation phase (SA), as SA uses information produced by LV.
+.IP -
+SA should be the last phase.
+.RE
+.IP ""
+Also, the following may be of use:
+.RS
+.IP -
+Inline Substitution (IL) may create new opportunities for most other phases,
+so it should be run as early as possible.
+.IP -
+Use Definition analysis (UD) may introduce opportunities for LV.
+.IP -
+Strength Reduction (SR) may creaye opportunities for UD.
+.RE
+.IP ""
+The global optimizer is a combiner, so, when using it, offer it all the source
+files of your program. It may throw away definitions of unused routines.
 .IP \-L
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
