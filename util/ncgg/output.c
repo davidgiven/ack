@@ -387,7 +387,8 @@ outenodes() {
 
 outstrings() {
 	register i;
-	register char *p,c;
+	register char *p;
+	register int c;
 	extern char * filename;
 
 	if (tabledebug)
@@ -396,8 +397,14 @@ outstrings() {
 	for(i=0;i<nstrings;i++) {
 		p= l_strings[i];
 		fprintf(ctable,"\t\"");
-		while ((c= (*p++&0377))!=0)
-			fprintf(ctable, !isascii(c) || iscntrl(c) ? "\\%03o" : "%c",c);
+		while ((c= (*p++&0377))!=0) {
+			if (! isascii(c) || iscntrl(c)) {
+				fprintf(ctable,"\\%c%c%c",
+					((c&~0300)>>6) + '0', ((c&070)>>3)+'0',
+					(c&07)+'0');
+			}
+			else fprintf(ctable, "%c",c);
+		}
 		fprintf(ctable,"\",\n");
 	}
 	fprintf(ctable,"};\n\n");
@@ -411,7 +418,7 @@ outsets() {
 	for (sp=l_sets;sp< &l_sets[nsets]; sp++) {
 		fprintf(ctable,"{%3d,{",sp->set_size);
 		for (i=0;i<setsize;i++)
-			fprintf(ctable,"0x%04x,",sp->set_val[i]&0xFFFF);
+			fprintf(ctable,"0x%x,",sp->set_val[i]&0xFFFF);
 		fprintf(ctable,"}},\n");
 	}
 	fprintf(ctable,"};\n\n");
@@ -496,7 +503,7 @@ outproplists() {
 	register regno;
 
 	for(propno=0;propno<nprops;propno++) {
-		fprintf(ctable,"struct reginfo *rlist%02d[] = {\n",propno);
+		fprintf(ctable,"struct reginfo *rlist%d[] = {\n",propno);
 		for(regno=1;regno<nregs;regno++)
 			if (BIT(l_props[propno].pr_regset,regno))
 				fprintf(ctable,"&machregs[%d],\n",regno);
@@ -504,7 +511,7 @@ outproplists() {
 	}
 	fprintf(ctable,"struct reginfo **reglist[] = {\n");
 	for(propno=0;propno<nprops;propno++)
-		fprintf(ctable,"rlist%02d,\n",propno);
+		fprintf(ctable,"rlist%d,\n",propno);
 	fprintf(ctable,"};\n\n");
 }
 
