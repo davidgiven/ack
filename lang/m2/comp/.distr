@@ -46,6 +46,7 @@ nmclash.c
 node.H
 node.c
 options.c
+options
 program.g
 scope.C
 scope.h
