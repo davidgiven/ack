@@ -1,9 +1,0 @@
-.define _chroot
-.extern _chroot
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-.sect .text
-_chroot:	move.l #0x3D,d0
-		jmp (callc)

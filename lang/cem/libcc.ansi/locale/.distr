@@ -1,4 +1,0 @@
-LIST
-Makefile
-localeconv.c
-setlocale.c

@@ -1,6 +1,0 @@
-case $# in
-1)	DEST="$1" ;;
-2)	DEST="$2" ;;
-*)	echo $0 [source] destination ;;
-esac
-cmp "$1" ../../../lib/ego/$DEST

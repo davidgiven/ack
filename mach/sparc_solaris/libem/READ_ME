@@ -1,2 +1,0 @@
-As long as none of the libem source files use .seg, we can use the
-source files of the sparc libem.

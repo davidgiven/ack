@@ -1,6 +1,0 @@
-This library should contain one of the files char.her.s, that has routines
-getchar and putchar for the MC-CPM, and char.nas.s, that
-has the same routines for the Nascom.
-The default is char.her.s.
-The file char.nas.s resides in this directory and is not included
-in the library.

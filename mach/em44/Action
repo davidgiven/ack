@@ -1,6 +1,0 @@
-name "4-4 Interpreter etext,edata,end library"
-dir libend
-end
-name "4-4 Interpreter system call library"
-dir libsys
-end
