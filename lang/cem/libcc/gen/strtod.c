@@ -26,4 +26,4 @@ strtod(p, pp)
 	_str_ext_cvt(p, pp, &e);
 	return _ext_dbl_cvt(&e);
 }
-#endif NOFLOAT
+#endif /* NOFLOAT */

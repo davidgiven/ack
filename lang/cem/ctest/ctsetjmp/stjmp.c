@@ -2,7 +2,7 @@
 # include <stdio.h>
 # ifndef NOSIGNAL
 # include <signal.h>
-# endif not NOSIGNAL
+#endif /* not NOSIGNAL */
 
 /*
  * setjmptest
@@ -239,4 +239,4 @@ hard() {
 	printf("Sending signal ...");
 	kill(getpid(),SIGHUP);
 }
-# endif not NOSIGNAL
+#endif /* not NOSIGNAL */

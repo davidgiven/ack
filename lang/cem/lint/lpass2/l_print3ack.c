@@ -26,5 +26,5 @@ sprint(s, format) char *s; char *format; { ; }
 /* FORMAT1 */
 doprnt(filep, format) File *filep; char *format; { ; }
 
-#endif	lint
+#endif	/* lint */
 

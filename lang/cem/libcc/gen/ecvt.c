@@ -45,4 +45,4 @@ fcvt(value, ndigit, decpt, sign)
 	return cvt(value, ndigit, decpt, sign, 0);
 }
 
-#endif NOFLOAT
+#endif /* NOFLOAT */
