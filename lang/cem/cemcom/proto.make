@@ -128,11 +128,11 @@ install:	all
 		@-mkdir $(TARGET_HOME)/lib.bin
 		@-mkdir $(TARGET_HOME)/man
 		cp main $(TARGET_HOME)/lib.bin/em_cemcom
-		cp $(SRC_HOME)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6
+		cp $(SRC_DIR)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6
 
 cmp:		all
 		-cmp main $(TARGET_HOME)/lib.bin/em_cemcom
-		-cmp $(SRC_HOME)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6
+		-cmp $(SRC_DIR)/cemcom.1 $(TARGET_HOME)/man/em_cemcom.6
 
 opr:
 		make pr | opr
@@ -144,7 +144,7 @@ pr:
 lint:		make.main
 		make -f make.main lint
 
-Cfiles:		hfiles LLfiles $(GEN_C) $(GEN_H)
+Cfiles:		hfiles LLfiles $(GEN_C) $(GEN_H) Makefile
 		echo $(CFILES) | tr ' ' '\012' > Cfiles
 		echo $(HFILES) | tr ' ' '\012' >> Cfiles
 
