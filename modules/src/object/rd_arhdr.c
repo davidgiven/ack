@@ -28,13 +28,13 @@ rd_arhdr(fd, arhdr)
 		while (i--) {
 			*p++ = *c++;
 		}
-		arhdr->ar_date = get2(c) << 16; c += 2;
-		arhdr->ar_date |= get2(c) & 0xffff; c += 2;
+		arhdr->ar_date = ((long) get2(c)) << 16; c += 2;
+		arhdr->ar_date |= ((long) get2(c)) & 0xffff; c += 2;
 		arhdr->ar_uid = *c++;
 		arhdr->ar_gid = *c++;
 		arhdr->ar_mode = get2(c); c += 2;
-		arhdr->ar_size = get2(c) << 16; c += 2;
-		arhdr->ar_size |= get2(c) & 0xffff;
+		arhdr->ar_size = (long) get2(c) << 16; c += 2;
+		arhdr->ar_size |= (long) get2(c) & 0xffff;
 	}
 #if WORDS_REVERSED && !BYTES_REVERSED
 	else	{
