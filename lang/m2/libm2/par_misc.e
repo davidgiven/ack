@@ -138,6 +138,7 @@ sv
  lxl 0
 2
  dup EM_PSIZE
+ adb -3*EM_PSIZE
  lal 0
  loi EM_PSIZE		; compare target SP with current LB to see if we must
  loi EM_PSIZE
