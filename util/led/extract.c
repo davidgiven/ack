@@ -73,7 +73,8 @@ get_names(head)
 		 * with "the first name".
 		 */
 		if (name.on_foff) {
-			if (name.on_foff < 0 || name.on_foff >= charoff) {
+			if (name.on_foff < charoff ||
+			    name.on_foff >= charoff+head->oh_nchar) {
 				fatal("illegal offset in name");
 			}
 			name.on_foff += charindex - charoff;
