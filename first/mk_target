@@ -7,13 +7,8 @@ create_dir $TARGET_HOME
 create_dir $TARGET_HOME/config
 create_dir $TARGET_HOME/lib.bin
 create_dir $TARGET_HOME/modules
-create_dir $TARGET_HOME/modules/h
-create_dir $TARGET_HOME/modules/man
-create_dir $TARGET_HOME/modules/pkg
-create_dir $TARGET_HOME/modules/lib
 create_dir $TARGET_HOME/bin
 
-cp_dir $SRC_HOME/modules/h $TARGET_HOME/modules/h
 cp local.h em_path.h $TARGET_HOME/config
 cp_dir $SRC_HOME/bin $TARGET_HOME/bin
 cp $CONFIG/bin/cp_dir $TARGET_HOME/bin/cp_dir
