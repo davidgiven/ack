@@ -121,6 +121,7 @@ DefinitionModule
 } :
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
+			  df->df_flags |= D_BUSY;
 			  if (!Defined) Defined = df;
 			  if (df->df_idf != DefId) {
 				error("DEFINITION MODULE name is not \"%s\"",
@@ -155,6 +156,7 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 			  }
 			  DefinitionModule--;
 			  match_id(df->df_idf, dot.TOK_IDF);
+			  df->df_flags &= ~D_BUSY;
 			}
 	'.'
 ;

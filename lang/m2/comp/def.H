@@ -97,7 +97,7 @@ struct def	{		/* list of definitions for a name */
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
-	char df_flags;
+	unsigned short  df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
 #define D_USED		0x02	/* set if used (future use ???) */
 #define D_DEFINED	0x04	/* set if it is assigned a value (future use ???) */
@@ -105,6 +105,7 @@ struct def	{		/* list of definitions for a name */
 #define D_VALPAR	0x10	/* set if it is a value parameter */
 #define D_EXPORTED	0x20	/* set if exported */
 #define D_QEXPORTED	0x40	/* set if qualified exported */
+#define D_BUSY		0x80	/* set if busy reading this definition module */
 	struct type *df_type;
 	union {
 		struct module df_module;
@@ -119,8 +120,6 @@ struct def	{		/* list of definitions for a name */
 		int df_stdname;	/* define for standard name */
 	} df_value;
 };
-
-#define SetUsed(df)	((df)->df_flags |= D_USED)
 
 /* ALLOCDEF "def" 50 */
 

@@ -55,7 +55,7 @@ GetDefinitionModule(id, incr)
 		We may have to read the definition module itself.
 		Also increment level by "incr".
 	*/
-	struct def *df;
+	register struct def *df;
 	static int level;
 	struct scopelist *vis;
 
@@ -100,6 +100,10 @@ GetDefinitionModule(id, incr)
 			df->df_type = error_type;
 			df->mod_vis = vis;
 		}
+	}
+	else if (df->df_flags & D_BUSY) {
+		error("definition module \"%s\" depends on itself",
+			id->id_text);
 	}
 	else if (df == Defined && level == 1) {
 		error("cannot import from currently defined module");
