@@ -1,45 +1,39 @@
-.sect .text; .sect .rom; .sect .data; .sect .bss
+.define .adf4, .adf8, .sbf4, .sbf8, .mlf4, .mlf8, .dvf4, .dvf8
+.define .ngf4, .ngf8, .fif4, .fif8, .fef4, .fef8
+.define .cif4, .cif8, .cuf4, .cuf8, .cfi, .cfu, .cff4, .cff8
+.define .cmf4, .cmf8
 .sect .text
-.define .mlf,.dvf,.ngf,.adf,.sbf,.cmf,.zrf,.fif,.fef
-.define .mlf8,.dvf8,.ngf8,.adf8,.sbf8,.cmf8,.zrf8,.fif8,.fef8
-.define .mlf4,.dvf4,.ngf4,.adf4,.sbf4,.cmf4,.zrf4,.fif4,.fef4
-.define .cif,.cfi,.cuf,.cfu,.cff
+.sect .rom
+.sect .data
+.sect .bss
 
-.mlf:
-.dvf:
-.ngf:
-.adf:
-.sbf:
-.cmf:
-.zrf:
-.fif:
-.fef:
-.mlf4:
-.dvf4:
-.ngf4:
+!	$Header$
+
+	.sect .text
 .adf4:
-.sbf4:
-.cmf4:
-.zrf4:
-.fif4:
-.fef4:
-.mlf8:
-.dvf8:
-.ngf8:
 .adf8:
+.sbf4:
 .sbf8:
-.cmf8:
-.zrf8:
+.mlf4:
+.mlf8:
+.dvf4:
+.dvf8:
+.ngf4:
+.ngf8:
+.fif4:
 .fif8:
+.fef4:
 .fef8:
-.cif:
+.cif4:
+.cif8:
+.cuf4:
+.cuf8:
 .cfi:
-.cuf:
 .cfu:
-.cff:
-	pop     bx              ! return address
-.extern EILLINS
-.extern .fat
-	mov     ax,EILLINS
-	push    ax
-	jmp     .fat
+.cff4:
+.cff8:
+.cmf4:
+.cmf8:
+	mov	ax,18	! illegal instruction EILLINS
+	call	.trp
+	ret
