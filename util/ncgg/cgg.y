@@ -30,7 +30,6 @@ int emhere=0;	/* lexical analyzer flag */
 int optexact=0;	/* Inside "with exact" rule */
 int optstack=0;	/* Inside with <blah> STACK rule */
 int saferulefound=0;
-int maxempatlen=0;
 int maxrule=0;
 int in_em_repl=0;	/* set when in EM replacement part */
 struct varinfo *defcost;
@@ -727,6 +726,7 @@ stackpattern
 	: WITH optexact
 		{ startline = lineno; }
 	  setlist optstack
+		{ if (tokpatlen > maxtokpatlen) maxtokpatlen = tokpatlen; }
 	;
 optexact
 	: /* empty */
@@ -866,8 +866,8 @@ gen_oplist
 yields
 	: /* empty */
 		{ $$ = 0; }
-	| YIELDS yieldlist
-		{ $$ = $2; }
+	| YIELDS { tokrepllen = 0; } yieldlist
+		{ $$ = $3; if (tokrepllen > maxtokrepllen) maxtokrepllen = tokrepllen; }
 	;
 yieldlist
 	: /* empty */
@@ -877,14 +877,17 @@ yieldlist
 		  NEW($$,struct varinfo);
 		  $$->vi_next = $2;
 		  $$->vi_int[0] = $1.in_index;
+		  tokrepllen++;
 		}
 	;
 
 leaving
 	: /* empty */
 		{ $$ = 0; }
-	| LEAVING {emhere=1; in_em_repl=1; } leavelist
-		{ emhere=0; in_em_repl=0; $$ = $3; }
+	| LEAVING {emhere=1; in_em_repl=1; emrepllen = 0; } leavelist
+		{ emhere=0; in_em_repl=0; $$ = $3;
+		  if (emrepllen > maxemrepllen) maxemrepllen = emrepllen;
+		}
 	;
 leavelist
 	: leavelist_el
@@ -897,6 +900,7 @@ leavelist_el
 		  $$->vi_next=0;
 		  $$->vi_int[0] = $1;
 		  $$->vi_int[1] = $2;
+		  emrepllen++;
 		}
 	;
 

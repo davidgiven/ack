@@ -582,6 +582,9 @@ outdefs() {
 	cdef("TOKENSIZE",maxtokensize);
 	cdef("MAXMEMBERS",maxmembers);
 	cdef("LONGESTPATTERN",maxempatlen);
+	cdef("MAXPATLEN",maxtokpatlen);
+	cdef("MAXREPLLEN",maxtokrepllen);
+	cdef("MAXEMREPLLEN",maxemrepllen);
 	cdef("MAXRULE",maxrule<16 ? 16 : maxrule);
 	if (nsplit>0) {
 		cdef("MAXSPLIT",maxsplit);
