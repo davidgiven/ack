@@ -1,0 +1,34 @@
+.TH EM_OPT VI
+.ad
+.SH NAME
+em_opt \- EM peephole optimizer
+.SH SYNOPSIS
+/usr/em/lib/em_opt [-Ln] [ argument ]
+.SH DESCRIPTION
+Em_opt reads a compact EM-program, argument or standard input,
+and produces another compact EM program on standard output
+that is functionally equivalent,
+but smaller.
+Some other functions are here that make this program mandatory
+before running a codegenerator,
+it may be left out when interpretation is wanted.
+Flags recognized are:
+.IP -L
+Make a library module.
+This means that the output will start with a message giving
+the names of all exported entities in this module.
+.IP -n
+Do not optimize.
+No peephole optimizations will be performed,
+other functions will be carried out.
+.SH "FILES"
+/usr/tmp/emopt??????, is used when the -L flag is given only.
+.SH "SEE ALSO"
+ack(I)
+.PD 0
+.IP [1]
+A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
+Stevenson "Description of a machine architecture for use with
+block structured languages" Informatica report IR-81.
+.SH AUTHOR
+Hans van Staveren, Vrije Universiteit

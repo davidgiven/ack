@@ -1,0 +1,97 @@
+.TH LIBMON VII
+.ad
+.SH NAME
+libmon \- library of system call routines with EM calling sequence
+.SH DESCRIPTION
+The modules in this library contain the UNIX system calls with EM calling sequence.
+This library is written in EM assembly language and can be used
+for interpreted programs, and 'a.out' programs.
+If these routines are used in Pascal programs, then the calling sequence
+requires some attention.
+Some hints may be useful:
+.IP -
+The c-option {$c+} allows you to declare zero-terminated string
+constants in Pascal like "/etc/passwd".
+Moreover, the identifier 'string' is then defined as type identifier for
+a pointer to these zero-terminated strings.
+.IP -
+The d-option {$d+} allows you to use double precision integers (longs).
+The lseek system call, for instance, needs a long argument and returns a long result.
+.IP -
+If the system call requires a pointer as argument use a 'var' parameter.
+For instance declare times as:
+.br
+     procedure times(var t:timesbuf); extern;
+.br
+Note that a 'string' is already a pointer.
+.IP -
+When defining types, use packed records if two bytes must be allocated
+in a single word, as in
+.br
+     device = packed record
+.br
+                minor,major:0..255;
+.br
+              end;
+.IP -
+If a collection of bits is needed, then define an enumerated type and
+a set of this enumerated type. The create mode of a file, for example,
+can be declared as:
+.br
+     modebits = (XHIM,WHIM,RHIM,
+.br
+                 XYOU,WYOU,RYOU,
+.br
+                 XME, WME, RME,
+.br
+                 TEXT,SGID,SUID,... );
+.br
+     creatmode = set of XHIM..SUID;
+.IP -
+There are special system call routines 'uread' and 'uwrite' in libpc(VII),
+because the names 'read' and 'write' are blocked by similar functions in Pascal.
+.PP
+The system call 'signal' exists, but uses 'sigtrp'.
+This EM system call has the
+following calling sequence:
+.br
+     function sigtrp(signo,trapno:integer):integer;
+.br
+The action values of 'signal', odd for 'ignore' and zero
+for 'get back to default',
+may interfere with the EM procedure identification in some
+implementations.
+In most interpreters procedures in EM are numbered consecutively from zero up.
+The first argument of 'sigtrp' is the signal number 'signo' as for 'signal'.
+The second argument is an integer 'trapno', indicating the action to be performed
+when the signal is issued:
+.IP -2 8
+Reset the action for signal 'signo' to the default.
+.IP -3
+Ignore signal 'signo'.
+.IP "0-252"
+Perform an EM instruction TRP with error code 'trapno',
+whenever the signal 'signo' is issued.
+Note that the error codes 0-127 are reserved for EM machine errors
+and language runtime system errors.
+.PP
+The routine 'sigtrp' returns the old 'trapno' or -1 if an erroneous
+signal number is specified.
+Only the signal numbers 1, 2, 3, 13, 14, 15 and 16 may be used as argument
+for 'sigtrp'.
+.SH FILES
+.IP /usr/em/mach/*/lib/tail_mon
+.PD
+.SH "SEE ALSO"
+em(I), ack(I), *(II), libpc(VII)
+.SH DIAGNOSTICS
+All routines put the UNIX error code in the global variable 'errno'.
+Errno is not cleared by successful system calls, so it always gives
+the error of the last failed call.
+One exception: ptrace clears errno when successful.
+.SH AUTHOR
+Ed Keizer, Vrije Universiteit
+.SH BUGS
+There should be additional routines giving a fatal error when they fail.
+It would be pleasant to have routines,
+which print a nice message and stop execution for unexpected errors.
