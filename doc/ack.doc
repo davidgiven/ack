@@ -23,7 +23,7 @@ source file.
 Each transformation table entry tells which input suffixes are
 allowed and what suffix/name the output file has.
 When the output file does not already satisfy the request of the
-user, with the flag \fB\-c.suffix\fP, the table is scanned
+user (indicated with the flag \fB\-c.suffix\fP), the table is scanned
 starting with the next transformation in the table for another
 transformation that has as input suffix the output suffix of
 the previous transformation.
@@ -75,7 +75,7 @@ At the moment of writing this document, the descriptions
 included are: pdp, fe, i86, m68k2, vax2 and int.
 The name of a description is first searched for internally,
 then in lib/descr/\fIname\fP, then in
-lib/\fIname\fP/descr, band finally in the current
+lib/\fIname\fP/descr, and finally in the current
 directory of the user.
 .NH
 Using the description file
@@ -226,7 +226,7 @@ The mapflags are used to grab flags given to \fIack\fP and
 pass them on to a specific transformation.
 This feature uses a few simple pattern matching and replacement
 facilities.
-Multiple occurences of this keyword are allowed.
+Multiple occurrences of this keyword are allowed.
 This text following the keyword is
 subjected to backslashing.
 The keyword is followed by a match expression and a variable
@@ -254,7 +254,7 @@ preserved.
 The identifier LNAME is used in conjunction with the scanning of
 \fB\-l\fP flags.
 The value assigned to LNAME is used to replace the flag.
-The example further on shows the use all this.
+The example further on shows the use of all this.
 .IP \fIargs\fP
 .br
 The keyword is followed by the program call arguments.
@@ -329,7 +329,7 @@ transformations.
 \fIAck\fP sets the variable EM to the home directory of the
 Amsterdam Compiler Kit.
 The variable SOURCE is set to the name of the argument that is currently
-being massaged, this is usefull for debugging.
+being massaged, this is useful for debugging.
 The variable SUFFIX is set to the suffix of the argument that is
 currently being massaged.
 .br
@@ -363,7 +363,7 @@ name cpp	# the C-preprocessor
 	    \-DEM_SSIZE={s} \-DEM_LSIZE={l} \-DEM_FSIZE={f} \-DEM_DSIZE={d} <
 		# The arguments are: first the \-[IUD]...
 		#  then the include dir's for this machine
-		#  then the NAME and size valeus finally
+		#  then the NAME and size values finally
 		#  followed by the input file name
 	stdout	# Output on stdout
 	prep is	# Is preprocessor
