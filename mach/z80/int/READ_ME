@@ -1,8 +1,12 @@
 The interpreter contained here is tested under CP/M on a RC702 Z80
-microcomputer. Make it by typing `doas'.
-E.out files to interpret must be made with a special Pascal library
-using whatever means available, because the UNIX and CP/M conventions
+microcomputer. Make it by typing `make'.
+E.out files to interpret must be made with a special Pascal library,
+which can be obtained by compiling the Pascal library with -DCPM,
+because the UNIX and CP/M conventions
 about end of file and end of line differ.
+Also, the size of "double" must be 4 bytes.
+To accomplish this, use the "int22" ack-description file from this
+directory, by putting it in the directory where you perform the compilation.
 Then the following sequence can be used to transmit it to CP/M.
 cv <e.out >file.cv
 dl file.cv file.hex
@@ -21,3 +25,7 @@ De Boelelaan 1081
 1081 HV  Amsterdam
 Holland
 ..!decvax!mcvax!vu44!sater
+
+Also, some changes have been made to convert the interpreter to the
+new assembler syntax. This has never been tested, because we don't have
+the target machine anymore.
