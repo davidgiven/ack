@@ -266,6 +266,7 @@ copyfile(n) {
 		fatal(0,"Cannot open libraryfile, call an expert");
 	}
 	while ((c = getc(f)) != EOF) putc(c,fpars);
+	fclose(f);
 }
 
 install(target, source) string target, source; {
