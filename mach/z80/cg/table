@@ -1357,8 +1357,12 @@ lni	| |			 allocate(HL_REG)
 				"inc (hl)"
 				erase(HL)		| | |
 lpb		| | 		|			| adp 4 |
-nop		| |		allocate(ALL_REG)
-				"call .nop"	| | |
+nop		| STACK |
+#ifdef DEBUG
+				allocate(ALL_REG)
+				"call .nop"
+#endif
+							| | |
 rck $1 == 2 | STACK |		 allocate(ALL_REG)
 				"call .rck"
 									| | |

@@ -2151,9 +2151,11 @@ lpb	| | | | adp 2 |
 mon	| R16 |
 		"jsr Mon"
 					| %[1] | |
-nop	| |
+nop	| STACK |
+#ifdef DEBUG
 		allocate(R16)
 		"jsr Printstack"
+#endif
 					| | |
 rck	| R16 | | | |
 rtt	| |

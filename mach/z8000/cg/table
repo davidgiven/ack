@@ -1708,7 +1708,11 @@ lin	| | "ld hol0, $$$1"  samecc	| | |
 lni	| | "inc hol0"	| | |
 lpb	| | | | adp SL	|
 mon	| STACK	| "calr mon"	| | |
-nop	| STACK	| "calr noop"		| | |
+nop	| STACK	|
+#ifdef DEBUG
+	"calr noop"
+#ENDIF
+					| | |
 rtt	| | | | ret 0	|
 sig	| REG	| allocate(REG)
 		  move( {da2, "trppc"}, %[a] )
