@@ -171,12 +171,30 @@ static params_to_regs()		/* copy required parameters to registers */
   int i, j;
 
   for (i = 0; i < nr_reg_vars; i++)
-	if (reg_dat[i].offset > 0)
+	if (reg_dat[i].offset >= 4096) {
+		fprint(codefile, "set	%d, %s\n",
+			reg_dat[i].offset, reg_dat[i].reg);
+		fprint(codefile, "ld	[%%l1+%s], %s\n",
+			reg_dat[i].reg, reg_dat[i].reg);
+	}
+	else if (reg_dat[i].offset > 0)
 		fprint(codefile, "ld	[%%l1+%d], %s\n",
 			reg_dat[i].offset, reg_dat[i].reg);
 
   for (i = 0; i < nr_flt_vars; i++)
-	if (flt_dat[i].offset > 0)
+	if (reg_dat[i].offset >= 4092) {
+		fprint(codefile, "set	%d, %s\n",
+			reg_dat[i].offset, reg_dat[i].reg);
+		fprint(codefile, "ld	[%%l1+%s], %s\n",
+			reg_dat[i].reg, reg_dat[i].reg);
+		if (flt_dat[i].size == EM_DSIZE) {
+			fprint(codefile, "set	%d, %s\n",
+				reg_dat[i].offset+4, reg_dat[i].reg2);
+			fprint(codefile, "ld	[%%l1+%s], %s\n",
+				reg_dat[i].reg2, reg_dat[i].reg2);
+		}
+	}
+	else if (flt_dat[i].offset > 0)
 	{
 		fprint(codefile, "ld	[%%l1+%d], %s\n",
 		  flt_dat[i].offset, flt_dat[i].reg);
