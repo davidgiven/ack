@@ -126,6 +126,10 @@ char *srcvar() {
 	return orig.p_path ;
 }
 
+char *getsuffix() {
+	return strrindex(orig.p_path, SUFCHAR) ;
+}
+
 varinit() {
 	/* initialize the string variables */
 	register char *envstr ;
@@ -136,6 +140,7 @@ varinit() {
 		setsvar(keeps(HOME),keeps(EM_DIR)) ;
 	}
 	setpvar(keeps(SRC),srcvar)  ;
+	setpvar(keeps(SUFFIX),getsuffix) ;
 }
 
 /************************* flag processing ***********************/

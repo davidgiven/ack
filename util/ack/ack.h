@@ -21,6 +21,7 @@
 #define TAIL    "TAIL"
 #define SRC     "SOURCE"
 #define LIBVAR	"LNAME"
+#define SUFFIX	"SUFFIX"
 
 /* Intended for flags, possibly in bit fields */
 
