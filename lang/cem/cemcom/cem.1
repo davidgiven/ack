@@ -1,0 +1,238 @@
+.TH CEM 1 local
+.SH NAME
+cem \- ACK C compiler
+.SH SYNOPSIS
+.B cem
+[ option ] ... file ...
+.SH DESCRIPTION
+.I Cem
+is a \fIcc\fP(1)-like
+C compiler that uses the C front-end compiler \fIcemcom\fP(1)
+of the Amsterdam Compiler Kit.
+.I Cem
+interprets its arguments not starting with a '\-' as
+source files, to be compiled by the various parts of the compilation process,
+which are listed below.
+File arguments whose names end with \fB.\fP\fIcharacter\fP are interpreted as
+follows:
+.IP .[ao]
+object file.
+.IP .[ci]
+C source code
+.IP .e
+EM assembler source file.
+.IP .k
+compact EM file, not yet optimised by the EM peephole optimiser.
+.IP .m
+compact EM file, already optimised by the peephole optimiser.
+.IP .s
+assembler file.
+.LP
+The actions to be taken by
+.I cem
+are directed by the type of file argument and the various options that are
+presented to it.
+.PP
+The following options, which is a mixture of options interpreted by \fIcc\fP(1)
+and \fIack\fP(?),
+are interpreted by
+.I cem .
+(The options not specified here are passed to the front-end
+compiler \fIcemcom\fP(1).)
+.IP \fB\-B\fP\fIname\fP
+Use \fIname\fP as front-end compiler instead of the default \fIcemcom\fP(1).
+.br
+Same as "\fB\-Rcem=\fP\fIname\fP".
+.IP \fB\-C\fP
+Run C preprocessor \fI/lib/cpp\fP only and prevent it from eliding comments.
+.IP \fB\-D\fP\fIname\fP\fB=\fP\fIdef\fP
+Define the \fIname\fP to the preprocessor, as if by "#define".
+.IP \fB\-D\fP\fIname\fP
+.br
+Same as "\fB\-D\fP\fIname\fP\fB=1\fP".
+.IP \fB\-E\fP
+Run only the macro preprocessor on the named files and send the
+result to standard output.
+.IP \fB\-I\fP\fIdir\fP
+\&"#include" files whose names do not begin with '/' are always
+sought first in the directory of the \fIfile\fP argument, then in directories
+in \fB\-I\fP options, then in directories on a standard list (which in fact
+consists of "/usr/include").
+.IP \fB\-L\fP\fIdir\fP
+Use \fIdir\fP as library-containing directory instead of the default.
+.IP \fB\-P\fP
+Same as \fB\-E\fP, but sending the result of input file \fIfile\fP\fB.[ceis]\fP
+to \fIfile\fP\fB.i\fP.
+.IP \fB\-R\fP
+Passed to \fIcemcom\fP(1) in order to parse the named C programs according
+to the C language as described in [K&R] (also called \fIRestricted\fP C).
+.IP \fB\-R\fP\fIprog\fP\fB=\fP\fIname\fP
+.br
+Use \fIname\fP as program for phase \fIprog\fP of the compilation instead of
+the default.
+\&\fIProg\fP is one of the following names:
+.RS
+.IP \fBcpp\fP
+macro preprocessor (default: /lib/cpp)
+.IP \fBcem\fP
+front\-end compiler (default: $CEM/bin/cemcom)
+.IP \fBopt\fP
+EM peephole optimiser (default: $EM/lib/em_opt)
+.IP \fBdecode\fP
+EM compact to EM assembler translator (default: $EM/lib/em_decode)
+.IP \fBencode\fP
+EM assembler to EM compact translator (default: $EM/lib/em_encode)
+.IP \fBbe\fP
+EM compact code to target\-machine assembly code compiler
+(default: $EM/lib/vax4/cg)
+.IP \fBcg\fP
+same as \fBbe\fP
+.IP \fBas\fP
+assembler (default: /bin/as)
+.IP \fBld\fP
+linker/loader (default: /bin/ld)
+.RE
+.IP \fB\-R\fP\fIprog\fP\fB\-\fP\fIoption\fP
+.br
+Pass \fB\-\fP\fIoption\fP to the compilation phase indicated by \fIprog\fP.
+.IP \fB\-S\fP
+Same as \fB\-c.s\fP.
+.IP \fB\-U\fP\fIname\fP
+.br
+Remove any initial definition of \fIname\fP.
+.IP \fB\-V\fP\fIcm\fP.\fIn\fP,\ \fB\-V\fIcm\fP.\fIncm\fP.\fIn\fP\ ...
+.br
+Set the size and alignment requirements of the C constructs of the named
+C input files.
+The letter \fIc\fP indicates the simple type, which is one of
+\fBs\fP(short), \fBi\fP(int), \fBl\fP(long), \fBf\fP(float), \fBd\fP(double) or
+\fBp\fP(pointer).
+The \fIm\fP parameter can be used to specify the length of the type (in bytes)
+and the \fIn\fP parameter for the alignment of that type.
+Absence of \fIm\fP or \fIn\fP causes the default value to be retained.
+To specify that the bitfields should be right adjusted instead of the
+default left adjustment, specify \fBr\fP as \fIc\fP parameter
+without parameters.
+.br
+This option is passed directly to \fIcemcom\fP(1).
+.IP \fB\-c\fP
+Same as \fB\-c.o\fP.
+.IP \fB\-c.e\fP
+Produce EM assembly code on \fIfile\fP\fB.e\fP for the
+named files \fIfile\fP\fB.[cikm]\fP 
+.IP \fB\-c.k\fP
+Compile C source \fIfile\fP\fB.[ci]\fP or
+encode EM assembly code from \fIfile\fP\fB.e\fP
+into unoptimised compact EM code and write the result on \fIfile\fP\fB.k\fP
+.IP \fB\-c.m\fP
+Compile C source \fIfile\fP\fB.[ci]\fP,
+translate unoptimised EM code from \fIfile\fP\fB.k\fP or
+encode EM assembly code from \fIfile\fP\fB.e\fP
+into optimised compact EM code and write the result on \fIfile\fP\fB.m\fP
+.IP \fB\-c.o\fP
+Suppress the loading phase of the compilation, and force an object file to
+be produced even if only one program is compiled
+.IP \fB\-c.s\fP
+Compile the named \fIfile\fP\fB.[ceikm]\fP input files, and leave the 
+assembly language output on corresponding files suffixed ".s".
+.IP \fB\-k\fP
+Same as \fB\-c.k\fP.
+.IP \fB\-l\fP\fIname\fP
+.br
+Append the library \fBlib\fP\fIname\fP\fB.a\fP to the list of files that
+should be loaded and linked into the final output file.
+The library is searched for in the library directory.
+.IP \fB\-m\fP
+Same as \fB\-c.m\fP.
+.IP \fB\-o\fP\ \fIoutput\fP
+.br
+Name the final output file \fIoutput\fP.
+If this option is used, the default "a.out" will be left undisturbed.
+.IP \fB\-p\fP
+Produce EM profiling code (\fBfil\fP and \fBlin\fP instructions to
+enable an interpreter to keep track of the current location in the
+source code)
+.IP \fB\-t\fP
+Keep the intermediate files, produced during the various phases of the 
+compilation.
+The produced files are named \fIfile\fP\fB.\fP\fIcharacter\fP where 
+\&\fIcharacter\fP indicates the type of the file as listed before.
+.IP \fB\-v\fP
+Verbose.
+Print the commands before they are executed.
+.IP \fB\-vn\fP
+Do not really execute (for debugging purposes only).
+.IP \fB\-vd\fP
+Print some additional information (for debugging purposes only).
+.IP \fB\-\-\fP\fIanything\f
+.br
+Equivalent to \fB\-Rcem\-\-\fP\fIanything\fP.
+The options 
+.B \-\-C ,
+.B \-\-E
+and
+.B \-\-P
+all have the same effect as respectively
+.B \-C ,
+.B \-E
+and
+.B \-P
+except for the fact that the macro preprocessor is taken to be the
+built\-in preprocessor of the \fBcem\fP phase.
+Most "\-\-" options are used by
+.I cemcom (1)
+to set some internal debug switches.
+.IP loader\ options
+.br
+The options 
+.B \-d ,
+.B \-e ,
+.B \-F ,
+.B \-n ,
+.B \-N ,
+.B \-r ,
+.B \-s ,
+.B \-u ,
+.B \-x ,
+.B \-X
+and
+.B \-z
+are directly passed to the loader.
+.SH FILES
+$CEM/bin/cem: this program
+.br
+$CEM/src/cem.c: C source of the \fBcem\fP program
+.br
+$CEM/bin/cemcom: C front end compiler
+.br
+$CEM/lib: default library-containing directory
+.br
+$CEM/src/cem.1: this manual page
+.br
+$CEM/src/cemcom.1: manual page for the C front end compiler
+.SH SEE ALSO
+cemcom(1), cc(1), ack(?), as(1), ld(1)
+.br
+.IP [K&R]
+B.W. Kernighan and D.M. Ritchie, \fIThe C Programming Language\fP,
+Prentice-Hall, 1978.
+.SH DIAGNOSTICS
+Any failure of one of the phases is reported.
+.SH NOTES
+.IP \(bu
+The names $CEM and $EM refer to the directories containing the CEM compiler
+and the ACK distribution tree respectively.
+.IP \(bu
+This manual page contains references to programs that reside on our site
+which is a VAX 11/750 running UNIX BSD4.1.
+Setting up \fBcem\fP requires some names to be declared in $CEM/src/cem.c
+.SH BUGS
+.IP \(bu
+All intermediate files are placed in the current working directory which
+causes files with the same name as the intermediate files to be overwritten.
+.IP \(bu
+.B Cem
+only accepts a limited number of arguments to be passed to the various phases.
+(e.g. 256).
+.IP \(bu
+Please report suggestions and other bugs to erikb@tjalk.UUCP

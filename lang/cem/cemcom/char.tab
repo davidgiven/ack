@@ -1,0 +1,58 @@
+%
+%	CHARACTER CLASSES
+%
+% some general settings:
+%S129
+%F	%s,
+%
+%	START OF TOKEN
+%
+%C
+STGARB:\000-\200
+STSKIP:\r \t
+STNL:\n\f\013
+STCOMP:!&+-<=>|
+STSIMP:%()*,/:;?[]^{}~
+STCHAR:'
+STIDF:a-zA-Z_
+STNUM:.0-9
+STSTR:"
+STEOI:\200
+%T/* character classes */
+%T#include "class.h"
+%Tchar tkclass[] = {
+%p
+%T};
+%
+%	INIDF
+%
+%C
+1:a-zA-Z_0-9
+%Tchar inidf[] = {
+%F	%s,
+%p
+%T};
+%
+%	ISDIG
+%
+%C
+1:0-9
+%Tchar isdig[] = {
+%p
+%T};
+%
+%	ISHEX
+%
+%C
+1:a-fA-F
+%Tchar ishex[] = {
+%p
+%T};
+%
+%	ISOCT
+%
+%C
+1:0-7
+%Tchar isoct[] = {
+%p
+%T};

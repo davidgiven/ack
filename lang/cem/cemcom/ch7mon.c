@@ -1,0 +1,148 @@
+/* $Header$ */
+/* SEMANTIC ANALYSIS (CHAPTER 7RM) -- MONADIC OPERATORS */
+
+#include	"nobitfield.h"
+#include	"botch_free.h"
+#include	"Lpars.h"
+#include	"arith.h"
+#include	"type.h"
+#include	"label.h"
+#include	"expr.h"
+#include	"storage.h"
+#include	"idf.h"
+#include	"def.h"
+
+extern char options[];
+char *symbol2str();
+
+ch7mon(oper, expp)
+	register struct expr **expp;
+{
+	/*	The monadic prefix operator oper is applied to *expp.
+	*/
+	register struct expr *expr;
+
+	switch (oper)	{
+	case '*':			/* RM 7.2 */
+		/* no FIELD type allowed	*/
+		if ((*expp)->ex_type->tp_fund == ARRAY)
+			array2pointer(expp);
+		if ((*expp)->ex_type->tp_fund != POINTER)	{
+			if ((*expp)->ex_type != error_type)
+				error("* applied to non-pointer (%s)",
+					symbol2str((*expp)->ex_type->tp_fund));
+			(*expp)->ex_type = error_type;
+		}
+		else {
+			expr = *expp;
+			if (expr->ex_lvalue == 0)
+				/* dereference in administration only */
+				expr->ex_type = expr->ex_type->tp_up;
+			else	/* runtime code */
+				*expp = new_oper(expr->ex_type->tp_up, NILEXPR,
+							'*', expr);
+			(*expp)->ex_lvalue = (
+				(*expp)->ex_type->tp_fund != ARRAY &&
+				(*expp)->ex_type->tp_fund != FUNCTION);
+		}
+		break;
+	case '&':
+		if ((*expp)->ex_type->tp_fund == ARRAY)	{
+			array2pointer(expp);
+		}
+		else
+		if ((*expp)->ex_type->tp_fund == FUNCTION)	{
+			function2pointer(expp);
+		}
+		else
+#ifndef NOBITFIELD
+		if ((*expp)->ex_type->tp_fund == FIELD)	{
+			error("& applied to field variable");
+			(*expp)->ex_type = error_type;
+		}
+		else
+#endif NOBITFIELD
+		if (!(*expp)->ex_lvalue)	{
+			error("& applied to non-lvalue");
+			(*expp)->ex_type = error_type;
+		}
+		else {
+			/* assume that enums are already filtered out	*/
+			if ((*expp)->ex_class == Value && (*expp)->VL_IDF) {
+				register struct def *def =
+					(*expp)->VL_IDF->id_def;
+
+				/*	&<var> indicates that <var> cannot
+					be used as register anymore
+				*/
+				if (def->df_sc == REGISTER) {
+					error("'&' on register variable not allowed");
+					(*expp)->ex_type = error_type;
+					break;	/* break case '&' */
+				}
+				def->df_register = REG_NONE;
+			}
+			(*expp)->ex_type = pointer_to((*expp)->ex_type);
+			(*expp)->ex_lvalue = 0;
+		}
+		break;
+	case '~':
+	{
+		int fund = (*expp)->ex_type->tp_fund;
+
+		if (fund == FLOAT || fund == DOUBLE)	{
+			error("~ not allowed on %s operands", symbol2str(fund));
+			*expp = intexpr((arith)1, INT);
+			break;
+		}
+	}
+	case '-':
+		any2arith(expp, oper);
+		if (is_cp_cst(*expp))	{
+			arith o1 = (*expp)->VL_VALUE;
+			if (oper == '-')
+				o1 = -o1;
+			else
+				o1 = ~o1;
+			(*expp)->VL_VALUE = o1;
+		}
+		else
+		if (is_fp_cst(*expp))
+			switch_sign_fp(*expp);
+		else
+			*expp = new_oper((*expp)->ex_type, NILEXPR, oper, *expp);
+		break;
+	case '!':
+		if ((*expp)->ex_type->tp_fund == FUNCTION)
+			function2pointer(expp);
+		if ((*expp)->ex_type->tp_fund != POINTER)
+			any2arith(expp, oper);
+		opnd2test(expp, '!');
+		if (is_cp_cst(*expp))	{
+			arith o1 = (*expp)->VL_VALUE;
+			o1 = !o1;
+			(*expp)->VL_VALUE = o1;
+			(*expp)->ex_type = int_type;
+		}
+		else
+			*expp = new_oper(int_type, NILEXPR, oper, *expp);
+		(*expp)->ex_flags |= EX_LOGICAL;
+		break;
+	case PLUSPLUS:
+	case MINMIN:
+		ch7incr(expp, oper);
+		break;
+	case SIZEOF:
+		if (	(*expp)->ex_class == Value
+		&&	(*expp)->VL_IDF
+		&&	(*expp)->VL_IDF->id_def->df_formal_array
+		)
+			warning("sizeof formal array %s is sizeof pointer!",
+				(*expp)->VL_IDF->id_text);
+		expr = intexpr(size_of_type((*expp)->ex_type, "object"), INT);
+		free_expression(*expp);
+		*expp = expr;
+		(*expp)->ex_flags |= EX_SIZEOF;
+		break;
+	}
+}
