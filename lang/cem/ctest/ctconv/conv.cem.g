@@ -30,3 +30,5 @@ From float
 	long  1223432064, float 1223432064.000000
 a[l] (l==3) -17
 a[3l] -17
+(unsigned short) 0x1f010L = 0xf010
+(short) 0x1f010L = 0xfffff010

@@ -10,6 +10,7 @@ char rcs_id[] = "$Header$" ;
 
 main() {
 	t1() ;
+	t2() ;
 	return 0 ;
 }
 
@@ -138,4 +139,15 @@ t1() {
 
 	}
 	return 0 ;
+}
+
+t2()
+{
+	long l1 = 0x1f010L;
+	long l2;
+
+	l2 = (unsigned short) l1;
+	printf("(unsigned short) 0x1f010L = 0x%lx\n", l2);
+	l2 = (short) l1;
+	printf("(short) 0x1f010L = 0x%lx\n", l2);
 }
