@@ -63,4 +63,8 @@ extern char options[];
 				   but what is a reasonable choice ???
 				*/
 
+!File: ndir.h
+#define NDIRS	16		/* maximum number of directories searched */
+
+
 

@@ -181,7 +181,9 @@ WalkStat(nd, lab)
 	register struct node *right = nd->nd_right;
 
 	if (nd->nd_class == Call) {
-		/* ??? */
+		if (chk_call(nd)) {
+			/* ??? */
+		}
 		return;
 	}
 
@@ -189,6 +191,8 @@ WalkStat(nd, lab)
 
 	switch(nd->nd_symb) {
 	case BECOMES:
+		WalkExpr(nd->nd_right);
+		WalkDesignator(nd->nd_left);
 		/* ??? */
 		break;
 
@@ -305,6 +309,19 @@ WalkExpr(nd)
 	DO_DEBUG(1, (DumpTree(nd), print("\n")));
 
 	if (chk_expr(nd)) {
+		/* ??? */
+	}
+}
+
+WalkDesignator(nd)
+	struct node *nd;
+{
+	/*	Check designator and generate code for it
+	*/
+
+	DO_DEBUG(1, (DumpTree(nd), print("\n")));
+
+	if (chk_designator(nd, DESIGNATOR|VARIABLE)) {
 		/* ??? */
 	}
 }

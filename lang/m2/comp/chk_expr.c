@@ -35,7 +35,7 @@ chk_expr(expp)
 	switch(expp->nd_class) {
 	case Oper:
 		if (expp->nd_symb == '[') {
-			return chk_designator(expp, DESIGNATOR);
+			return chk_designator(expp, DESIGNATOR|VARIABLE);
 		}
 
 		return	chk_expr(expp->nd_left) &&
@@ -44,7 +44,7 @@ chk_expr(expp)
 
 	case Uoper:
 		if (expp->nd_symb == '^') {
-			return chk_designator(expp, DESIGNATOR);
+			return chk_designator(expp, DESIGNATOR|VARIABLE);
 		}
 
 		return	chk_expr(expp->nd_right) &&
@@ -66,13 +66,13 @@ chk_expr(expp)
 		return chk_set(expp);
 
 	case Name:
-		return chk_designator(expp, DESIGNATOR);
+		return chk_designator(expp, VALUE);
 
 	case Call:
 		return chk_call(expp);
 
 	case Link:
-		return chk_designator(expp, DESIGNATOR);
+		return chk_designator(expp, DESIGNATOR|VALUE);
 
 	default:
 		assert(0);
@@ -99,7 +99,7 @@ chk_set(expp)
 	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		if (! chk_designator(nd, QUALONLY)) return 0;
+		if (! chk_designator(nd, 0)) return 0;
 
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
@@ -270,12 +270,15 @@ getname(argp, kinds)
 		return 0;
 	}
 	argp = argp->nd_right;
-	if (! chk_designator(argp->nd_left, QUALONLY)) return 0;
+	if (! chk_designator(argp->nd_left, 0)) return 0;
+
 	assert(argp->nd_left->nd_class == Def);
+
 	if (!(argp->nd_left->nd_def->df_kind & kinds)) {
 		node_error(argp, "unexpected type");
 		return 0;
 	}
+
 	return argp;
 }
 
@@ -294,9 +297,8 @@ chk_call(expp)
 	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
-	if (! chk_designator(left, DESIGNATOR)) return 0;
+	if (! chk_designator(left, 0)) return 0;
 
-	if (left->nd_type == error_type) return 0;
 	if (left->nd_class == Def &&
 	    (left->nd_def->df_kind & (D_HTYPE|D_TYPE|D_HIDDEN))) {
 		/* It was a type cast. This is of course not portable.
@@ -310,7 +312,7 @@ node_error(expp, "only one parameter expected in type cast");
 		arg = arg->nd_left;
 		if (! chk_expr(arg)) return 0;
 		if (arg->nd_type->tp_size != left->nd_type->tp_size) {
-node_error(expp, "size of type in type cast does not match size of operand");
+node_error(expp, "unequal sizes in type cast");
 		}
 		arg->nd_type = left->nd_type;
 		FreeNode(expp->nd_left);
@@ -352,30 +354,59 @@ chk_proccall(expp)
 	register struct node *arg;
 	register struct paramlist *param;
 
-	expp->nd_type = left->nd_type->next;
-	param = left->nd_type->prc_params;
 	arg = expp;
+	arg->nd_type = left->nd_type->next;
+	param = left->nd_type->prc_params;
 
 	while (param) {
-		arg = getarg(arg, 0);
-		if (!arg) return 0;
-		if (param->par_var &&
-		    ! TstCompat(param->par_type, arg->nd_left->nd_type)) {
-node_error(arg->nd_left, "type incompatibility in var parameter");
+		if (!(arg = getarg(arg, 0))) return 0;
+
+		if (! TstParCompat(param->par_type,
+				   arg->nd_left->nd_type,
+				   param->par_var)) {
+node_error(arg->nd_left, "type incompatibility in parameter");
 			return 0;
 		}
-		else
-		if (!param->par_var &&
-		    !TstAssCompat(param->par_type, arg->nd_left->nd_type)) {
-node_error(arg->nd_left, "type incompatibility in value parameter");
-			return 0;
-		}
+
 		param = param->next;
 	}
+
 	if (arg->nd_right) {
 		node_error(arg->nd_right, "too many parameters supplied");
 		return 0;
 	}
+
+	return 1;
+}
+
+static int
+FlagCheck(expp, df, flag)
+	struct node *expp;
+	struct def *df;
+{
+	/*	See the routine "chk_designator" for an explanation of
+		"flag". Here, a definition "df" is checked against it.
+	*/
+
+	if ((flag & VARIABLE) &&
+	    !(df->df_kind & (D_FIELD|D_VARIABLE))) {
+		node_error(expp, "variable expected");
+		return 0;
+	}
+
+	if ((flag & HASSELECTORS) &&
+	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_MODULE)) ||
+	      df->df_type->tp_fund != T_RECORD)) {
+		node_error(expp, "illegal selection");
+		return 0;
+	}
+
+	if ((flag & VALUE) &&
+	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_CONST|D_ENUM)))) {
+		node_error(expp, "value expected");
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -384,7 +415,15 @@ chk_designator(expp, flag)
 	register struct node *expp;
 {
 	/*	Find the name indicated by "expp", starting from the current
-		scope.
+		scope.  "flag" indicates the kind of designator we expect:
+		It contains the flags VARIABLE, indicating that the result must
+		be something that can be assigned to.
+		It may also contain the flag VALUE, indicating that a
+		value is expected. In this case, VARIABLE may not be set.
+		It also contains the flag DESIGNATOR, indicating that '['
+		and '^' are allowed for this designator.
+		Also contained may be the flag HASSELECTORS, indicating that
+		the result must have selectors.
 	*/
 	register struct def *df;
 	register struct type *tp;
@@ -403,21 +442,20 @@ chk_designator(expp, flag)
 		assert(expp->nd_symb == '.');
 		assert(expp->nd_right->nd_class == Name);
 
-		if (! chk_designator(expp->nd_left, flag)) return 0;
+		if (! chk_designator(expp->nd_left,
+				     (flag|HASSELECTORS)&DESIGNATOR)) return 0;
+
 		tp = expp->nd_left->nd_type;
-		if (tp == error_type) return 0;
-		else if (tp->tp_fund != T_RECORD) {
-			/* This is also true for modules */
-			node_error(expp,"illegal selection");
-			return 0;
-		}
-		else df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
+
+		assert(tp->tp_fund == T_RECORD);
+
+		df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
 
 		if (!df) {
 			id_not_declared(expp->nd_right);
 			return 0;
 		}
-		else if (df != ill_df) {
+		else {
 			expp->nd_type = df->df_type;
 			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
 node_error(expp->nd_right,
@@ -434,11 +472,15 @@ df->df_idf->id_text);
 			FreeNode(expp->nd_right);
 			expp->nd_left = expp->nd_right = 0;
 		}
-		else	return 1;
+		else {
+			return FlagCheck(expp->nd_right, df, flag);
+		}
 	}
 
 	if (expp->nd_class == Def) {
 		df = expp->nd_def;
+
+		if (! FlagCheck(expp, df, flag)) return 0;
 
 		if (df->df_kind & (D_ENUM | D_CONST)) {
 			if (df->df_kind == D_ENUM) {
@@ -455,7 +497,7 @@ df->df_idf->id_text);
 		return 1;
 	}
 
-	if (flag == QUALONLY) {
+	if (! (flag & DESIGNATOR)) {
 		node_error(expp, "identifier expected");
 		return 0;
 	}
@@ -466,7 +508,7 @@ df->df_idf->id_text);
 		assert(expp->nd_symb == '[');
 
 		if ( 
-		    	!chk_designator(expp->nd_left, DESIGNATOR)
+		    	!chk_designator(expp->nd_left, DESIGNATOR|VARIABLE)
 		   ||
 		    	!chk_expr(expp->nd_right)
 		   ||
@@ -498,7 +540,10 @@ df->df_idf->id_text);
 	if (expp->nd_class == Uoper) {
 		assert(expp->nd_symb == '^');
 
-		if (! chk_designator(expp->nd_right, DESIGNATOR)) return 0;
+		if (! chk_designator(expp->nd_right, DESIGNATOR|VARIABLE)) {
+			return 0;
+		}
+
 		if (expp->nd_right->nd_type->tp_fund != T_POINTER) {
 node_error(expp, "illegal operand for unary operator \"%s\"",
 symbol2str(expp->nd_symb));

@@ -436,3 +436,70 @@ lcm(m, n)
  	*/
 	return m * (n / gcd(m, n));
 }
+
+#ifdef DEBUG
+DumpType(tp)
+	register struct type *tp;
+{
+	print(" a:%d; s:%ld;", tp->tp_align, (long) tp->tp_size);
+	if (tp->next && tp->tp_fund != T_POINTER) {
+		/* Avoid printing recursive types!
+		*/
+		print(" n:(");
+		DumpType(tp->next);
+		print(")");
+	}
+
+	print(" f:");
+	switch(tp->tp_fund) {
+	case T_RECORD:
+		print("RECORD"); break;
+	case T_ENUMERATION:
+		print("ENUMERATION; n:%d", tp->enm_ncst); break;
+	case T_INTEGER:
+		print("INTEGER"); break;
+	case T_CARDINAL:
+		print("CARDINAL"); break;
+	case T_REAL:
+		print("REAL"); break;
+	case T_POINTER:
+		print("POINTER"); break;
+	case T_CHAR:
+		print("CHAR"); break;
+	case T_WORD:
+		print("WORD"); break;
+	case T_SET:
+		print("SET"); break;
+	case T_SUBRANGE:
+		print("SUBRANGE %ld-%ld", (long) tp->sub_lb, (long) tp->sub_ub);
+		break;
+	case T_PROCEDURE:
+		{
+		register struct paramlist *par = tp->prc_params;
+
+		print("PROCEDURE");
+		if (par) {
+			print("; p:");
+			while(par) {
+				if (par->par_var) print("VAR ");
+				DumpType(par->par_type);
+				par = par->next;
+			}
+		}
+		break;
+		}
+	case T_ARRAY:
+		print("ARRAY %ld-%ld", (long) tp->arr_lb, (long) tp->arr_ub);
+		print("; el:");
+		DumpType(tp->arr_elem);
+		break;
+	case T_STRING:
+		print("STRING"); break;
+	case T_INTORCARD:
+		print("INTORCARD"); break;
+	default:
+		assert(0);
+	}
+	print(";");
+}
+#endif

@@ -248,8 +248,11 @@ again:
 		switch (ch) {
 		case 'H':
 Shex:			*np++ = '\0';
-			numtype = card_type;
 			tk->TOK_INT = str2long(&buf[1], 16);
+			if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
+				numtype = intorcard_type;
+			}
+			else	numtype = card_type;
 			return tk->tk_symb = INTEGER;
 
 		case '8':
@@ -283,11 +286,17 @@ Shex:			*np++ = '\0';
 			PushBack(ch);
 			ch = *--np;
 			*np++ = '\0';
+			tk->TOK_INT = str2long(&buf[1], 8);
 			if (ch == 'C') {
 				numtype = char_type;
+				if (tk->TOK_INT < 0 || tk->TOK_INT > 255) {
+lexwarning("Character constant out of range");
+				}
+			}
+			else if (tk->TOK_INT >= 0 && tk->TOK_INT <= max_int) {
+				numtype = intorcard_type;
 			}
 			else	numtype = card_type;
-			tk->TOK_INT = str2long(&buf[1], 8);
 			return tk->tk_symb = INTEGER;
 
 		case 'A':

@@ -17,6 +17,8 @@ static char *RcsId = "$Header$";
 #include	"misc.h"
 #include	"main.h"
 
+#include	"debug.h"
+
 int		proclevel = 0;	/* nesting level of procedures */
 extern char	*sprint();
 extern struct def *currentdef;
@@ -68,6 +70,10 @@ error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text);
 		  }
 		  df->df_type = tp;
 		  *pdf = df;
+
+		  DO_DEBUG(1, type == D_PROCEDURE && 
+				(print("proc %s:", df->df_idf->id_text),
+				 DumpType(tp), print("\n")));
 		}
 ;
 
@@ -107,9 +113,8 @@ FormalParameters(int doparams;
 	'('
 	[
 		FPSection(doparams, pr, parmaddr)	
-			{ pr1 = *pr; }
 		[
-			{ for (; pr1->next; pr1 = pr1->next) ; }
+			{ for (pr1 = *pr; pr1->next; pr1 = pr1->next) ; }
 			';' FPSection(doparams, &(pr1->next), parmaddr)
 		]*
 	]?
@@ -366,7 +371,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				{ warning("Old fashioned Modula-2 syntax!");
 				  id = gen_anon_idf();
 				  df = ill_df;
-				  if (chk_designator(nd, QUALONLY) &&
+				  if (chk_designator(nd, 0) &&
 				      (nd->nd_class != Def ||
 				       !(nd->nd_def->df_kind &
 					 (D_ERROR|D_TYPE|D_HTYPE|D_HIDDEN)))) {

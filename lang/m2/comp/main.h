@@ -2,17 +2,18 @@
 
 /* $Header$ */
 
-extern char options[];	/* Indicating which options were given */
+extern char options[];	/* indicating which options were given */
 
 extern int DefinitionModule;
-			/* Flag indicating that we are reading a definition
+			/* flag indicating that we are reading a definition
 			   module
 			*/
 
-extern int SYSTEMModule;/* Flag indicating that we are handling the SYSTEM
+extern int SYSTEMModule;/* flag indicating that we are handling the SYSTEM
 			   module
 			*/
 extern struct def *Defined;
-			/* Definition structure of module defined in this
+			/* definition structure of module defined in this
 			   compilation
 			*/
+extern char *DEFPATH[];	/* search path for DEFINITION MODULE's */

@@ -43,7 +43,7 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 			{ if (types) {
 				df = ill_df;
 
-				if (chk_designator(nd, QUALONLY)) {
+				if (chk_designator(nd, 0)) {
 				    if (nd->nd_class != Def) {
 					node_error(nd, "%s expected", str);
 				    }
@@ -83,7 +83,7 @@ ExpList(struct node **pnd;)
 		','		{ *nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
 				}
 		expression(&(*nd)->nd_left)
-				{ nd = &((*pnd)->nd_right); }
+				{ nd = &((*nd)->nd_right); }
 	]*
 ;
 

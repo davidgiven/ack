@@ -6,11 +6,14 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 
 #include	"idfsize.h"
+#include	"ndir.h"
 
 #include	"type.h"
+#include	"main.h"
 
-extern char options[];
 extern int	idfsize;
+
+static int	ndirs;
 
 do_option(text)
 	char *text;
@@ -35,6 +38,13 @@ do_option(text)
 
 	case 'p' :	/* generate profiling code (fil/lin) */
 		options['p'] = 1;
+		break;
+
+	case 'I' :
+		if (++ndirs >= NDIRS) {
+			fatal("Too many -I options");
+		}
+		DEFPATH[ndirs] = text;
 		break;
 
 	case 'V' :	/* set object sizes and alignment requirements	*/

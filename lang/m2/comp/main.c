@@ -19,14 +19,14 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 
 #include	"debug.h"
+#include	"ndir.h"
 
 char	options[128];
 int	DefinitionModule; 
 int	SYSTEMModule = 0;
 char	*ProgName;
 extern int err_occurred;
-char	*DEFPATH[128];
-char	*getenv();
+char	*DEFPATH[NDIRS+1];
 struct def *Defined;
 
 main(argc, argv)
@@ -67,7 +67,8 @@ Compile(src, dst)
 	}
 	LineNumber = 1;
 	FileName = src;
-	init_DEFPATH();
+	DEFPATH[0] = "";
+	DEFPATH[NDIRS] = 0;
 	init_idf();
 	init_cst();
 	reserve(tkidf);
@@ -179,23 +180,6 @@ add_standards()
 	df = df->enm_next;
 	df->enm_val = 1;
 	df->enm_next = 0;
-}
-
-init_DEFPATH()
-{
-	register char *p = getenv("M2path");
-	register int i = 0;
-
-	if (p) {
-		while (*p) {
-			DEFPATH[i++] = p;
-			while (*p && *p != ':') p++;
-			if (*p) *p++ = '\0';
-		}
-	}
-	else DEFPATH[i++] = "";
-
-	DEFPATH[i] = 0;
 }
 
 do_SYSTEM()

@@ -150,3 +150,21 @@ int TstAssCompat(tp1, tp2)
 
 	return 0;
 }
+
+int TstParCompat(formaltype, actualtype, VARflag)
+	struct type *formaltype, *actualtype;
+{
+	/*	Check type compatibility for a parameter in a procedure
+		call
+	*/
+
+	return
+		TstCompat(formaltype, actualtype)
+	    ||
+		( !VARflag && TstAssCompat(formaltype, actualtype))
+	    ||
+		(  formaltype->tp_fund == T_ARRAY
+		&& formaltype->next == 0	
+		&& actualtype->tp_fund == T_ARRAY
+		&& TstTypeEquiv(formaltype->arr_elem, actualtype->arr_elem));
+}

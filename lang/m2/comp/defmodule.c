@@ -26,7 +26,6 @@ GetFile(name)
 	/*	Try to find a file with basename "name" and extension ".def",
 		in the directories mentioned in "DEFPATH".
 	*/
-	extern char *DEFPATH[];
 	char buf[256];
 	char *strcpy(), *strcat();
 

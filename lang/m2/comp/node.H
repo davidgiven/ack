@@ -36,5 +36,8 @@ struct node {
 extern struct node *MkNode();
 
 #define NULLNODE ((struct node *) 0)
-#define QUALONLY 0
+
 #define DESIGNATOR 1
+#define HASSELECTORS 2
+#define VARIABLE 4
+#define VALUE 8
