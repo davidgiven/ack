@@ -19,6 +19,7 @@ REG		{is_register(VAL)};
 SREG		{is_scratchreg(VAL)};
 LAB,LAB2	{VAL[0] == LABEL_STARTER};
 A,B		{no_side_effects(VAL) };
+NO_INDEX	{strindex(VAL, '[') == 0};
 X,Y,LOG		{TRUE};
 
 %%;
@@ -105,18 +106,22 @@ addl2 M_ONE,X			->	decl X;
 subw2 M_ONE,X			->	incw X;
 subl2 M_ONE,X			->	incl X;
 
-bitw $NUM,A : jneq LAB
-	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,A,LAB;
-bitl $NUM,A : jneq LAB
-	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,A,LAB;
-bitw $NUM,A : jeql LAB
-	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,A,LAB;
-bitl $NUM,A : jeql LAB
-	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,A,LAB;
-bitw ONE,A : jneq LAB		->	jlbs A,LAB;
+/* careful! jbs has byte argument, jlbs has long argument, so be very careful
+   with indexed mode
+*/
+bitw $NUM,NO_INDEX : jneq LAB
+	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,NO_INDEX,LAB;
+bitl $NUM,NO_INDEX : jneq LAB
+	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,NO_INDEX,LAB;
+bitw $NUM,NO_INDEX : jeql LAB
+	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,NO_INDEX,LAB;
+bitl $NUM,NO_INDEX : jeql LAB
+	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,NO_INDEX,LAB;
+bitw ONE,NO_INDEX : jneq LAB	->	jlbs NO_INDEX,LAB;
 bitl ONE,A : jneq LAB		->	jlbs A,LAB;
-bitw ONE,A : jneq LAB		->	jlbc A,LAB;
+bitw ONE,NO_INDEX : jneq LAB	->	jlbc NO_INDEX,LAB;
 bitl ONE,A : jneq LAB		->	jlbc A,LAB;
+
 ashl $-NUM,A,REG : bicw2 $~NUM1,REG
 	{is_p2m1(NUM1,LOG)}	->	extzv $NUM,$LOG,A,REG;
 ashl $-NUM,A,REG : bicl2 $~NUM1,REG
