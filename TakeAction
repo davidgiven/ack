@@ -74,6 +74,7 @@ do
 				     indir)	
 					     if sh $THISFILE "$PAR" $ACTION
 					     then eval echo $SUCC
+						  touch NoAction
 					     else RETC=2 ; eval echo $FAIL
 					     fi ;;
 				     *)
@@ -82,8 +83,13 @@ do
 							;;
 					     *)		;;
 					     esac
+					     if [ -f NoAction ]
+					     then
+						ACTION='echo "No actions performed, NoAction file present"'
+					     fi
 					     if eval "{ $ACTION ; } >Out 2>&1 </dev/null"
 					     then eval echo $SUCC
+						  touch NoAction
 					     else RETC=1 ; X=: ; eval echo $FAIL
 					     fi
 					     ;;
