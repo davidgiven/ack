@@ -1,122 +1,109 @@
 /* $Header$ */
-/*
- * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
- *
- *          This product is part of the Amsterdam Compiler Kit.
- *
- * Permission to use, sell, duplicate or disclose this software must be
- * obtained in writing. Requests for such permissions may be sent to
- *
- *      Dr. Andrew S. Tanenbaum
- *      Wiskundig Seminarium
- *      Vrije Universiteit
- *      Postbox 7161
- *      1007 MC Amsterdam
- *      The Netherlands
- *
- */
+#ifndef NOFLOAT
 
-extern double	_fif();
+static char *cvt();
+#define NDIGITS	128
 
-/*
- *	_ecvt converts to decimal
- *	the number of digits is specified by ndigit
- *	decpt is set to the position of the decimal point
- *	sign is set to 0 for positive, 1 for negative
- */
-
-#define	NDIG	80
-
-static char*
-cvt(arg, ndigits, decpt, sign, eflag)
-double arg;
-int ndigits, *decpt, *sign, eflag;
+char *
+_ecvt(value, ndigit, decpt, sign)
+	double value;
+	int ndigit, *decpt, *sign;
 {
-	register int r2;
-	double fi, fj;
-	register char *p, *p1;
-	static char buf[NDIG];
-	int i;  /*!*/
+	return cvt(value, ndigit, decpt, sign, 1);
+}
 
-	if (ndigits<0)
-		ndigits = 0;
-	if (ndigits>=NDIG-1)
-		ndigits = NDIG-2;
-	r2 = 0;
+char *
+_fcvt(value, ndigit, decpt, sign)
+	double value;
+	int ndigit, *decpt, *sign;
+{
+	return cvt(value, ndigit, decpt, sign, 0);
+}
+
+static struct powers_of_10 {
+	double pval;
+	double rpval;
+	int exp;
+} p10[] = {
+	1.0e32, 1.0e-32, 32,
+	1.0e16, 1.0e-16, 16,
+	1.0e8, 1.0e-8, 8,
+	1.0e4, 1.0e-4, 4,
+	1.0e2, 1.0e-2, 2,
+	1.0e1, 1.0e-1, 1,
+	1.0e0, 1.0e0, 0
+};
+
+static char *
+cvt(value, ndigit, decpt, sign, ecvtflag)
+	double value;
+	int ndigit, *decpt, *sign;
+{
+	static char buf[NDIGITS+1];
+	register char *p = buf;
+	register char *pe;
+
+	if (ndigit < 0) ndigit = 0;
+	if (ndigit > NDIGITS) ndigit = NDIGITS;
+	pe = &buf[ndigit];
+	buf[0] = '\0';
+
 	*sign = 0;
-	p = &buf[0];
-	if (arg<0) {
+	if (value < 0) {
 		*sign = 1;
-		arg = -arg;
+		value = -value;
 	}
-	arg = _fif(arg, 1.0, &fi);
-	/*
-	 * Do integer part
-	 */
-	if (fi != 0) {
-		p1 = &buf[NDIG];
-		while (fi != 0) {
-			i = (_fif(fi, 0.1, &fi) + 0.03) * 10;
-			*--p1 = i + '0';
-			r2++;
-		}
-		while (p1 < &buf[NDIG])
-			*p++ = *p1++;
-	} else if (arg > 0) {
-		while ((fj = arg*10) < 1) {
-			arg = fj;
-			r2--;
-		}
+
+	*decpt = 0;
+	if (value != 0.0) {
+		register struct powers_of_10 *pp = &p10[0];
+
+		if (value >= 10.0) do {
+			while (value >= pp->pval) {
+				value *= pp->rpval;
+				*decpt += pp->exp;
+			}
+		} while ((++pp)->exp > 0);
+
+		pp = &p10[0];
+		if (value < 1.0) do {
+			while (value * pp->pval < 10.0) {
+				value *= pp->pval;
+				*decpt -= pp->exp;
+			}
+		} while ((++pp)->exp > 0);
+
+		(*decpt)++;	/* because now value in [1.0, 10.0) */
 	}
-	p1 = &buf[ndigits];
-	if (eflag==0)
-		p1 += r2;
-	*decpt = r2;
-	if (p1 < &buf[0]) {
-		buf[0] = '\0';
-		return(buf);
+	if (! ecvtflag) {
+		/* for fcvt() we need ndigit digits behind the dot */
+		pe += *decpt;
+		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
-	while (p<=p1 && p<&buf[NDIG]) {
-		arg = _fif(arg, 10.0, &fj);
-		i = fj;
-		*p++ = i + '0';
+	while (p <= pe) {
+		*p++ = (int)value + '0';
+		value = 10.0 * (value - (int)value);
 	}
-	if (p1 >= &buf[NDIG]) {
-		buf[NDIG-1] = '\0';
-		return(buf);
-	}
-	p = p1;
-	*p1 += 5;
-	while (*p1 > '9') {
-		*p1 = '0';
-		if (p1>buf) {
-			p1--; *p1 += 1;
-		} else {
-			*p1 = '1';
-			(*decpt)++;
-			if (eflag==0) {
-				if (p>buf)
-					*p = '0';
-				p++;
+	if (pe >= buf) {
+		p = pe;
+		*p += 5;	/* round of at the end */
+		while (*p > '9') {
+			*p = '0';
+			if (p > buf) ++*--p;
+			else {
+				*p = '1';
+				++*decpt;
+				if (! ecvtflag) {
+					/* maybe add another digit at the end,
+					   because the point was shifted right
+					*/
+					if (pe > buf) *pe = '0';
+					pe++;
+				}
 			}
 		}
+		*pe = '\0';
 	}
-	*p = '\0';
-	return(buf);
+	return buf;
 }
-
-char*
-_ecvt(arg, ndigits, decpt, sign)
-double arg;
-int ndigits, *decpt, *sign;
-{
-	return(cvt(arg, ndigits, decpt, sign, 1));
-}
-
-char*
-_fcvt(arg, ndigits, decpt, sign)
-double arg;
-int ndigits, *decpt, *sign;
-{
-	return(cvt(arg, ndigits, decpt, sign, 0));
-}
+#endif
