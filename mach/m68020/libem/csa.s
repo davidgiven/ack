@@ -8,9 +8,10 @@ ECASE=20
 .sect .text
 
 .csa:
-	move.l	(sp)+, a0	! jump table address
+		! jump table address in a0
+		! index in d0
+
 	move.l	(a0)+, a1	! default address
-	move.l	(sp)+, d0	! index
 	sub.l	(a0)+, d0	! index - lower bound
 	blt	1f
 	cmp.l	(a0)+, d0	! rel. index, upper - lower bound
