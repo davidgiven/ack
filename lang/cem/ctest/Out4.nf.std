@@ -1,89 +1,64 @@
-Tue Apr 26 14:36:39 MET DST 1988
+Fri Nov 17 15:33:31 MET 1989
+Compilation command: acc -DNOFLOAT
 ***** ctconv
-acc -DNOFLOAT conv.c
-conv.c
+compiling conv.c
 "conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 2a3,4
 > (float) 12 = 12.000000
 > (int) 3.14 = 3
-11,$c13,$
-< 	char    -1, int     -1, unsigned 37777777777, long          -1
-< 	char    -1, int     -1, unsigned 37777777777, long          -1
-< From integer
-< 	char   -64, int    -64, unsigned 37777777700, long         -64
-< From long
-< 	char    -3, int     -3, unsigned 37777777775, long          -3
-< Casts from long
-< 	char    -8, int 75000, unsigned short  22370, long       75000
-< a[l] (l==3) -17
-< a[3l] -17
-< (unsigned short) 0x1f010L = 0xf010
-< (short) 0x1f010L = 0xfffff010
----
+10a13
 > 					float 127.000000
-> 	char    -1, int     -1, unsigned 37777777777, long          -1
+11a15
 > 					float -1.000000
-> 	char    -1, int     -1, unsigned 37777777777, long          -1
+12a17
 > 					float -1.000000
-> From integer
-> 	char   -64, int    -64, unsigned 37777777700, long         -64
+14a20
 > 					float -64.000000
-> From long
-> 	char    -3, int     -3, unsigned 37777777775, long          -3
+16a23
 > 					float -3.000000
-> Casts from long
-> 	char    -8, int 75000, unsigned short  22370, long       75000
+18a26,30
 > From float
 > 	char   121, int    121, unsigned    171, long         121, float 121.500000
 > 	char     0, int      0, unsigned      0, long           0, float 0.000100
 > 	int  32766, unsigned  77776, long       32766, float 32766.000000
 > 	long  1223432064, float 1223432064.000000
-> a[l] (l==3) -17
-> a[3l] -17
-> (unsigned short) 0x1f010L = 0xf010
-> (short) 0x1f010L = 0xfffff010
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f conv.cem.g ; then diff conv.cem.r conv.cem.g ; else echo creating conv.cem.g ; cp conv.cem.r conv.cem.g ; fi
 ***** ctdecl
-acc -DNOFLOAT decl.c
-decl.c
+compiling decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-acc -DNOFLOAT ops.c
-ops.c
+compiling ops.c
 running ops.cem
 comparing ops
 ***** cterr
-acc -DNOFLOAT bugs.c
-bugs.c
+compiling bugs.c
 "bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-acc -DNOFLOAT test.c
-test.c
+compiling test.c
 running test.cem
 comparing test
-1,$c1,$
+1c1
 < End of test program, 10 tests completed, 0 errors detected
 ---
 > End of test program, 11 tests completed, 0 errors detected
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f test.cem.g ; then diff test.cem.r test.cem.g ; else echo creating test.cem.g ; cp test.cem.r test.cem.g ; fi
 ***** ctest2
-acc -DNOFLOAT t7.c
-t7.c
+compiling t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-acc -DNOFLOAT test2.c
-test2.c
+compiling test2.c
 running test2.cem
 comparing test2
 ***** ctest5
-acc -DNOFLOAT test1.c
-test1.c
+compiling test1.c
 "test1.c", line 375: (warning) incompatible pointers in =
 "test1.c", line 376: (warning) incompatible pointers in =
 "test1.c", line 377: (warning) incompatible pointers in =
@@ -94,43 +69,42 @@ test1.c
 "test1.c", line 426: (warning) incompatible pointers in =
 running test1.cem
 comparing test1
-1,$c1,$
-< program test1
+0a1
+> error 13 in test 11 
+2c3
 < 10 tests completed. Number of errors = 0
 ---
-> error 13 in test 11 
-> program test1
 > 11 tests completed. Number of errors = 1
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f test1.cem.g ; then diff test1.cem.r test1.cem.g ; else echo creating test1.cem.g ; cp test1.cem.r test1.cem.g ; fi
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-acc -DNOFLOAT bf.c
-bf.c
+compiling bf.c
 running bf.cem
 comparing bf
+sed -f bfu.sed <OPS >bfu.c
+compiling bfu.c
+running bfu.cem
+comparing bfu
 sed -f cel.sed <OPS >cel.c
-acc -DNOFLOAT cel.c
-cel.c
+compiling cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-acc -DNOFLOAT clu.c
-clu.c
+compiling clu.c
 running clu.cem
 comparing clu
 sed -f ec.sed <OPS >ec.c
-acc -DNOFLOAT ec.c
-ec.c
+compiling ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-acc -DNOFLOAT ef.c
-ef.c
+compiling ef.c
 running ef.cem
 comparing ef
-0a1,$
+0a1,72
 > .4e-5 + .3e-5
 > .4e-5 - .3e-5
 > .4e-5 / .3e-5
@@ -203,28 +177,25 @@ comparing ef
 > yes if ( x -- ) yes() ; else no() 2.141500e+00
 > yes if ( -- x ) yes() ; else no() 2.141500e+00
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f ef.cem.g ; then diff ef.cem.r ef.cem.g ; else echo creating ef.cem.g ; cp ef.cem.r ef.cem.g ; fi
 sed -f ei.sed <OPS >ei.c
-acc -DNOFLOAT ei.c
-ei.c
+compiling ei.c
 running ei.cem
 comparing ei
 sed -f el.sed <OPS >el.c
-acc -DNOFLOAT el.c
-el.c
+compiling el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-acc -DNOFLOAT eu.c
-eu.c
+compiling eu.c
 running eu.cem
 comparing eu
 sed -f id.sed <OPS >id.c
-acc -DNOFLOAT id.c
-id.c
+compiling id.c
 running id.cem
 comparing id
-0a1,$
+0a1,72
 > (-40) + 300
 > (-40) - 300
 > (-40) / 300
@@ -297,20 +268,19 @@ comparing id
 > yes if ( x -- ) yes() ; else no() 2.141500e+00
 > yes if ( -- x ) yes() ; else no() 2.141500e+00
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f id.cem.g ; then diff id.cem.r id.cem.g ; else echo creating id.cem.g ; cp id.cem.r id.cem.g ; fi
 sed -f lc.sed <OPS >lc.c
-acc -DNOFLOAT lc.c
-lc.c
+compiling lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-acc -DNOFLOAT ld.c
-ld.c
+compiling ld.c
 running ld.cem
 comparing ld
-0a1,$
+0a1,72
 > .4e-5 + .3e-5
 > .4e-5 - .3e-5
 > .4e-5 / .3e-5
@@ -383,13 +353,13 @@ comparing ld
 > yes if ( x -- ) yes() ; else no() 2.141500e+00
 > yes if ( -- x ) yes() ; else no() 2.141500e+00
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f ld.cem.g ; then diff ld.cem.r ld.cem.g ; else echo creating ld.cem.g ; cp ld.cem.r ld.cem.g ; fi
 sed -f lf.sed <OPS >lf.c
-acc -DNOFLOAT lf.c
-lf.c
+compiling lf.c
 running lf.cem
 comparing lf
-0a1,$
+0a1,72
 > .4e-5 + .3e-5
 > .4e-5 - .3e-5
 > .4e-5 / .3e-5
@@ -462,68 +432,41 @@ comparing lf
 > yes if ( x -- ) yes() ; else no() 2.141500e+00
 > yes if ( -- x ) yes() ; else no() 2.141500e+00
 > yes if ( ++ x ) yes() ; else no() 4.141500e+00
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f lf.cem.g ; then diff lf.cem.r lf.cem.g ; else echo creating lf.cem.g ; cp lf.cem.r lf.cem.g ; fi
 sed -f li.sed <OPS >li.c
-acc -DNOFLOAT li.c
-li.c
+compiling li.c
 running li.cem
 comparing li
 sed -f ll.sed <OPS >ll.c
-acc -DNOFLOAT ll.c
-ll.c
+compiling ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-acc -DNOFLOAT lu.c
-lu.c
+compiling lu.c
 running lu.cem
 comparing lu
 ***** ctill
 All program(s) in this directory should fail to compile.
-acc -DNOFLOAT noarg.c
-noarg.c
+compiling noarg.c
 "noarg.c", line 14: name not in parameter list
 *** Error code 1
-`gen' not remade because of errors
+The following command caused the error:
+acc -DNOFLOAT -o noarg.cem  noarg.c 1>/dev/null
+make: Warning: Target `gen' not remade because of errors
 ***** ctinit
-acc -DNOFLOAT init.c
-init.c
+compiling init.c
 running init.cem
 comparing init
-41,$c41,$
-< long
-< 
-< lo1	14
-< lo2	-17
-< lo3	2147483647
-< lo4	-2147483648
-< lo5	0
-< lo6	1
-< 
-< structures
-< 
-< 	 st1          sta[0..2]
-< s_i	              0              1              2              3
-< s_ca[0]	              0             97              0              0
-< s_ca[1]	              0             98              0              0
-< s_ca[2]	              0             99              0              0
-< s_l	              0             10              0              0
-< (sta[0].s_s1)->s_i = 1
-< 
-< bit fields:
-< 
-< sizeof stb 8
-< stb	-1 -2 3 4 -1 6 7
-< 
----
+40a41,86
 > Floats:
 > 
 > fl1	0.00000000000000000000e+00
 > fl2	2.00000000000000000000e+00
 > fl2	2.00000000000000000000e+00
 > fl4	4.00000000000000000000e+00
-> fl5	2.93873587705571892581e-39
-> fl6	1.70141173319264428000e+38
+> fl5	2.93873587705571876995e-39
+> fl6	1.70141173319264429908e+38
 > fl7	0.00000000000000000000e+00
 >     fla1                    fla2                    fla3
 >             1.000000e+00           -1.000000e+00            1.100000e+01
@@ -545,8 +488,8 @@ comparing init
 > dbl2	2.00000000000000000000e+00
 > dbl2	2.00000000000000000000e+00
 > dbl4	4.00000000000000000000e+00
-> dbl5	2.93873600000000034793e-39
-> dbl6	1.70141170000000000000e+38
+> dbl5	2.93873600000000015650e-39
+> dbl6	1.70141169999999996199e+38
 > dbl7	0.00000000000000000000e+00
 >     dbla1                    dbla2                    dbla3
 >             1.000000e+00           -1.000000e+00            1.100000e+01
@@ -562,68 +505,39 @@ comparing init
 >             0.000000e+00            0.000000e+00            0.000000e+00
 >             0.000000e+00            0.000000e+00            0.000000e+00
 > 
-> long
-> 
-> lo1	14
-> lo2	-17
-> lo3	2147483647
-> lo4	-2147483648
-> lo5	0
-> lo6	1
-> 
-> structures
-> 
-> 	 st1          sta[0..2]
-> s_i	              0              1              2              3
-> s_ca[0]	              0             97              0              0
-> s_ca[1]	              0             98              0              0
-> s_ca[2]	              0             99              0              0
-> s_l	              0             10              0              0
+57a104,105
 > s_f	   0.000000e+00  -1.000000e+01   0.000000e+00   0.000000e+00
 > 
-> (sta[0].s_s1)->s_i = 1
-> 
-> bit fields:
-> 
-> sizeof stb 8
-> stb	-1 -2 3 4 -1 6 7
-> 
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f init.cem.g ; then diff init.cem.r init.cem.g ; else echo creating init.cem.g ; cp init.cem.r init.cem.g ; fi
 ***** ctmargt
-acc -DNOFLOAT margt.c
-margt.c
+compiling margt.c
 running margt.cem
 comparing margt
+5c5
+< 	CEM=acc -DNOFLOAT
+---
+> 	CEM=acc
+The following command caused the error:
+if test -f margt.cem.g ; then diff margt.cem.r margt.cem.g ; else echo creating margt.cem.g ; cp margt.cem.r margt.cem.g ; fi
 ***** ctprof
 test profiling
 procentry.c
-acc -DNOFLOAT tp.c procentry.m
+compiling tp.c procentry.m
 tp.c
 procentry.m
-running tp
+running tp.cem
 comparing tp
 ***** ctsetjmp
-acc -DNOFLOAT stjmp.c
-stjmp.c
+compiling stjmp.c
 running stjmp.cem
 comparing stjmp
 ***** ctstruct
-acc -DNOFLOAT str.c
-str.c
+compiling str.c
 running str.cem
 comparing str
 ***** ctsys
-acc -DNOFLOAT tfork.c
-tfork.c
+compiling tfork.c
 running tfork.cem
 comparing tfork
-1,$c1,$
-< childno 26404
-< Child 26404, status 0x800
-< fork/wait ok
----
-> childno 16276
-> Child 16276, status 0x800
-> fork/wait ok
-*** Error code 1 (ignored)
-Tue Apr 26 14:49:48 MET DST 1988
+Fri Nov 17 15:44:00 MET 1989

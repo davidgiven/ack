@@ -1,49 +1,44 @@
-Thu Apr 28 12:20:53 MET DST 1988
+Fri Nov 17 17:19:16 MET 1989
+Compilation command: acc -mem24
+Run command: em
 ***** ctconv
-em24 conv.c
-conv.c
+compiling conv.c
 "conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
 comparing conv
-14,25c14,25
+14c14
 < 	char    -1, int     -1, unsigned 177777, long          -1
-< 					float -1.000000
-< 	char    -1, int     -1, unsigned 177777, long          -1
-< 					float -1.000000
-< From integer
-< 	char   -64, int    -64, unsigned 177700, long         -64
-< 					float -64.000000
-< From long
-< 	char    -3, int     -3, unsigned 177775, long          -3
-< 					float -3.000000
-< Casts from long
-< 	char    -8, int 9464, unsigned short  22370, long       75000
 ---
 > 	char    -1, int     -1, unsigned 37777777777, long          -1
-> 					float -1.000000
+16c16
+< 	char    -1, int     -1, unsigned 177777, long          -1
+---
 > 	char    -1, int     -1, unsigned 37777777777, long          -1
-> 					float -1.000000
-> From integer
+19c19
+< 	char   -64, int    -64, unsigned 177700, long         -64
+---
 > 	char   -64, int    -64, unsigned 37777777700, long         -64
-> 					float -64.000000
-> From long
+22c22
+< 	char    -3, int     -3, unsigned 177775, long          -3
+---
 > 	char    -3, int     -3, unsigned 37777777775, long          -3
-> 					float -3.000000
-> Casts from long
+25c25
+< 	char    -8, int 9464, unsigned short  22370, long       75000
+---
 > 	char    -8, int 75000, unsigned short  22370, long       75000
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f conv.cem.g ; then diff conv.cem.r conv.cem.g ; else echo creating conv.cem.g ; cp conv.cem.r conv.cem.g ; fi
 ***** ctdecl
-em24 decl.c
-decl.c
+compiling decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-em24 ops.c
-ops.c
+compiling ops.c
 running ops.cem
 comparing ops
-22,37c22,39
-<  u<<0  150715
+21a22
+>  u>>16      0
+23,37c24,39
 <  u<<1  121632
 <  u<<2   43464
 <  u<<3  107150
@@ -60,8 +55,6 @@ comparing ops
 <  u<<14  40000
 <  u<<15 100000
 ---
->  u>>16      0
->  u<<0  150715
 >  u<<1  321632
 >  u<<2  643464
 >  u<<3  1507150
@@ -78,33 +71,29 @@ comparing ops
 >  u<<14 6434640000
 >  u<<15 15071500000
 >  u<<16 32163200000
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f ops.cem.g ; then diff ops.cem.r ops.cem.g ; else echo creating ops.cem.g ; cp ops.cem.r ops.cem.g ; fi
 ***** cterr
-em24 bugs.c
-bugs.c
+compiling bugs.c
 "bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-em24 test.c
-test.c
+compiling test.c
 running test.cem
 comparing test
 ***** ctest2
-em24 t7.c
-t7.c
+compiling t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-em24 test2.c
-test2.c
+compiling test2.c
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 "test2.c", line 448: (warning) conversion of pointer to int loses accuracy
 running test2.cem
 comparing test2
 ***** ctest5
-em24 test1.c
-test1.c
+compiling test1.c
 "test1.c", line 375: (warning) incompatible pointers in =
 "test1.c", line 376: (warning) incompatible pointers in =
 "test1.c", line 377: (warning) incompatible pointers in =
@@ -117,128 +106,119 @@ running test1.cem
 comparing test1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-em24 bf.c
-bf.c
+compiling bf.c
 running bf.cem
 comparing bf
+sed -f bfu.sed <OPS >bfu.c
+compiling bfu.c
+running bfu.cem
+comparing bfu
 sed -f cel.sed <OPS >cel.c
-em24 cel.c
-cel.c
+compiling cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-em24 clu.c
-clu.c
+compiling clu.c
 "clu.c", line 60: (warning) overflow in unsigned constant expression
 "clu.c", line 66: (warning) overflow in unsigned constant expression
 running clu.cem
 comparing clu
-23,31c23,31
+23,25c23,25
 < x = 40000  -25536
 < x += 40000  -25526
 < x -= 40000  25546
-< x /= 40000  0
-< x %= 40000  10
-< x *= 40000  6784
-< x &= 40000  0
-< x |= 40000  -25526
-< x ^= 40000  -25526
 ---
 > x = 40000  40000
 > x += 40000  40010
 > x -= 40000  -39990
-> x /= 40000  0
-> x %= 40000  10
+28c28
+< x *= 40000  6784
+---
 > x *= 40000  400000
-> x &= 40000  0
+30,31c30,31
+< x |= 40000  -25526
+< x ^= 40000  -25526
+---
 > x |= 40000  40010
 > x ^= 40000  40010
 38c38
 < y = ( 40000 + 8012 ) -17524
 ---
 > y = ( 40000 + 8012 ) 48012
-42,52c42,52
+42c42
 < y = ( 40000 * 8012 ) 8960
-< y = ( 40000 & 8012 ) 7232
-< y = ( 40000 | 8012 ) -24756
-< y = ( 40000 ^ 8012 ) -31988
-< y = ( 40000 || 8012 ) 1
-< y = ( 40000 && 8012 ) 1
-< y = ( 40000 << 9 ) -32768
-< y = ( 40000 >> 9 ) 78
-< y = ( -40000  ) 25536
-< y = ( !40000  ) 0
-< y = ( ~40000  ) 25535
 ---
 > y = ( 40000 * 8012 ) 320480000
-> y = ( 40000 & 8012 ) 7232
+44,45c44,45
+< y = ( 40000 | 8012 ) -24756
+< y = ( 40000 ^ 8012 ) -31988
+---
 > y = ( 40000 | 8012 ) 40780
 > y = ( 40000 ^ 8012 ) 33548
-> y = ( 40000 || 8012 ) 1
-> y = ( 40000 && 8012 ) 1
+48c48
+< y = ( 40000 << 9 ) -32768
+---
 > y = ( 40000 << 9 ) 20480000
-> y = ( 40000 >> 9 ) 78
+50c50
+< y = ( -40000  ) 25536
+---
 > y = ( -40000  ) -40000
-> y = ( !40000  ) 0
+52c52
+< y = ( ~40000  ) 25535
+---
 > y = ( ~40000  ) -40001
-59,68c59,68
+59,62c59,62
 < y = ( 40000 ? 40000 : 8012 ) -25536
 < y = ( x = 40000  ) -25536 -25536
 < y = ( x += 40000  ) -25526 -25526
 < y = ( x -= 40000  ) 25546 25546
-< y = ( x /= 40000  ) 0 0
-< y = ( x %= 40000  ) 10 10
-< y = ( x *= 40000  ) 6784 6784
-< y = ( x &= 40000  ) 0 0
-< y = ( x |= 40000  ) -25526 -25526
-< y = ( x ^= 40000  ) -25526 -25526
 ---
 > y = ( 40000 ? 40000 : 8012 ) 40000
 > y = ( x = 40000  ) 40000 40000
 > y = ( x += 40000  ) 40010 40010
 > y = ( x -= 40000  ) -39990 -39990
-> y = ( x /= 40000  ) 0 0
-> y = ( x %= 40000  ) 10 10
+65c65
+< y = ( x *= 40000  ) 6784 6784
+---
 > y = ( x *= 40000  ) 400000 400000
-> y = ( x &= 40000  ) 0 0
+67,68c67,68
+< y = ( x |= 40000  ) -25526 -25526
+< y = ( x ^= 40000  ) -25526 -25526
+---
 > y = ( x |= 40000  ) 40010 40010
 > y = ( x ^= 40000  ) 40010 40010
-97,105c97,105
+97,99c97,99
 < yes if ( x = 40000  ) yes() ; else no() -25536
 < yes if ( x += 40000  ) yes() ; else no() -25526
 < yes if ( x -= 40000  ) yes() ; else no() 25546
-< no if ( x /= 40000  ) yes() ; else no() 0
-< yes if ( x %= 40000  ) yes() ; else no() 10
-< yes if ( x *= 40000  ) yes() ; else no() 6784
-< no if ( x &= 40000  ) yes() ; else no() 0
-< yes if ( x |= 40000  ) yes() ; else no() -25526
-< yes if ( x ^= 40000  ) yes() ; else no() -25526
 ---
 > yes if ( x = 40000  ) yes() ; else no() 40000
 > yes if ( x += 40000  ) yes() ; else no() 40010
 > yes if ( x -= 40000  ) yes() ; else no() -39990
-> no if ( x /= 40000  ) yes() ; else no() 0
-> yes if ( x %= 40000  ) yes() ; else no() 10
+102c102
+< yes if ( x *= 40000  ) yes() ; else no() 6784
+---
 > yes if ( x *= 40000  ) yes() ; else no() 400000
-> no if ( x &= 40000  ) yes() ; else no() 0
+104,105c104,105
+< yes if ( x |= 40000  ) yes() ; else no() -25526
+< yes if ( x ^= 40000  ) yes() ; else no() -25526
+---
 > yes if ( x |= 40000  ) yes() ; else no() 40010
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f clu.cem.g ; then diff clu.cem.r clu.cem.g ; else echo creating clu.cem.g ; cp clu.cem.r clu.cem.g ; fi
 sed -f ec.sed <OPS >ec.c
-em24 ec.c
-ec.c
+compiling ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-em24 ef.c
-ef.c
+compiling ef.c
 running ef.cem
 comparing ef
 sed -f ei.sed <OPS >ei.c
-em24 ei.c
-ei.c
+compiling ei.c
 "ei.c", line 22: (warning) overflow in constant expression
 "ei.c", line 65: (warning) overflow in constant expression
 "ei.c", line 108: (warning) overflow in constant expression
@@ -264,135 +244,122 @@ comparing ei
 < yes if ( x <<= 15 ) yes() ; else no() -32768
 ---
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f ei.cem.g ; then diff ei.cem.r ei.cem.g ; else echo creating ei.cem.g ; cp ei.cem.r ei.cem.g ; fi
 sed -f el.sed <OPS >el.c
-em24 el.c
-el.c
+compiling el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-em24 eu.c
-eu.c
+compiling eu.c
 "eu.c", line 58: (warning) overflow in unsigned constant expression
 "eu.c", line 64: (warning) overflow in unsigned constant expression
 running eu.cem
 comparing eu
-23,31c23,31
+23,25c23,25
 < x = 40000  -25536
 < x += 40000  -25526
 < x -= 40000  25546
-< x /= 40000  0
-< x %= 40000  10
-< x *= 40000  6784
-< x &= 40000  0
-< x |= 40000  -25526
-< x ^= 40000  -25526
 ---
 > x = 40000  40000
 > x += 40000  40010
 > x -= 40000  -39990
-> x /= 40000  0
-> x %= 40000  10
+28c28
+< x *= 40000  6784
+---
 > x *= 40000  400000
-> x &= 40000  0
+30,31c30,31
+< x |= 40000  -25526
+< x ^= 40000  -25526
+---
 > x |= 40000  40010
 > x ^= 40000  40010
 38c38
 < y = ( 40000 + 8012 ) -17524
 ---
 > y = ( 40000 + 8012 ) 48012
-42,52c42,52
+42c42
 < y = ( 40000 * 8012 ) 8960
-< y = ( 40000 & 8012 ) 7232
-< y = ( 40000 | 8012 ) -24756
-< y = ( 40000 ^ 8012 ) -31988
-< y = ( 40000 || 8012 ) 1
-< y = ( 40000 && 8012 ) 1
-< y = ( 40000 << 9 ) -32768
-< y = ( 40000 >> 9 ) 78
-< y = ( -40000  ) 25536
-< y = ( !40000  ) 0
-< y = ( ~40000  ) 25535
 ---
 > y = ( 40000 * 8012 ) 320480000
-> y = ( 40000 & 8012 ) 7232
+44,45c44,45
+< y = ( 40000 | 8012 ) -24756
+< y = ( 40000 ^ 8012 ) -31988
+---
 > y = ( 40000 | 8012 ) 40780
 > y = ( 40000 ^ 8012 ) 33548
-> y = ( 40000 || 8012 ) 1
-> y = ( 40000 && 8012 ) 1
+48c48
+< y = ( 40000 << 9 ) -32768
+---
 > y = ( 40000 << 9 ) 20480000
-> y = ( 40000 >> 9 ) 78
+50c50
+< y = ( -40000  ) 25536
+---
 > y = ( -40000  ) -40000
-> y = ( !40000  ) 0
+52c52
+< y = ( ~40000  ) 25535
+---
 > y = ( ~40000  ) -40001
-59,68c59,68
+59,62c59,62
 < y = ( 40000 ? 40000 : 8012 ) -25536
 < y = ( x = 40000  ) -25536 -25536
 < y = ( x += 40000  ) -25526 -25526
 < y = ( x -= 40000  ) 25546 25546
-< y = ( x /= 40000  ) 0 0
-< y = ( x %= 40000  ) 10 10
-< y = ( x *= 40000  ) 6784 6784
-< y = ( x &= 40000  ) 0 0
-< y = ( x |= 40000  ) -25526 -25526
-< y = ( x ^= 40000  ) -25526 -25526
 ---
 > y = ( 40000 ? 40000 : 8012 ) 40000
 > y = ( x = 40000  ) 40000 40000
 > y = ( x += 40000  ) 40010 40010
 > y = ( x -= 40000  ) -39990 -39990
-> y = ( x /= 40000  ) 0 0
-> y = ( x %= 40000  ) 10 10
+65c65
+< y = ( x *= 40000  ) 6784 6784
+---
 > y = ( x *= 40000  ) 400000 400000
-> y = ( x &= 40000  ) 0 0
+67,68c67,68
+< y = ( x |= 40000  ) -25526 -25526
+< y = ( x ^= 40000  ) -25526 -25526
+---
 > y = ( x |= 40000  ) 40010 40010
 > y = ( x ^= 40000  ) 40010 40010
-97,105c97,105
+97,99c97,99
 < yes if ( x = 40000  ) yes() ; else no() -25536
 < yes if ( x += 40000  ) yes() ; else no() -25526
 < yes if ( x -= 40000  ) yes() ; else no() 25546
-< no if ( x /= 40000  ) yes() ; else no() 0
-< yes if ( x %= 40000  ) yes() ; else no() 10
-< yes if ( x *= 40000  ) yes() ; else no() 6784
-< no if ( x &= 40000  ) yes() ; else no() 0
-< yes if ( x |= 40000  ) yes() ; else no() -25526
-< yes if ( x ^= 40000  ) yes() ; else no() -25526
 ---
 > yes if ( x = 40000  ) yes() ; else no() 40000
 > yes if ( x += 40000  ) yes() ; else no() 40010
 > yes if ( x -= 40000  ) yes() ; else no() -39990
-> no if ( x /= 40000  ) yes() ; else no() 0
-> yes if ( x %= 40000  ) yes() ; else no() 10
+102c102
+< yes if ( x *= 40000  ) yes() ; else no() 6784
+---
 > yes if ( x *= 40000  ) yes() ; else no() 400000
-> no if ( x &= 40000  ) yes() ; else no() 0
+104,105c104,105
+< yes if ( x |= 40000  ) yes() ; else no() -25526
+< yes if ( x ^= 40000  ) yes() ; else no() -25526
+---
 > yes if ( x |= 40000  ) yes() ; else no() 40010
 > yes if ( x ^= 40000  ) yes() ; else no() 40010
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f eu.cem.g ; then diff eu.cem.r eu.cem.g ; else echo creating eu.cem.g ; cp eu.cem.r eu.cem.g ; fi
 sed -f id.sed <OPS >id.c
-em24 id.c
-id.c
+compiling id.c
 running id.cem
 comparing id
 sed -f lc.sed <OPS >lc.c
-em24 lc.c
-lc.c
+compiling lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-em24 ld.c
-ld.c
+compiling ld.c
 running ld.cem
 comparing ld
 sed -f lf.sed <OPS >lf.c
-em24 lf.c
-lf.c
+compiling lf.c
 running lf.cem
 comparing lf
 sed -f li.sed <OPS >li.c
-em24 li.c
-li.c
+compiling li.c
 "li.c", line 22: (warning) overflow in constant expression
 "li.c", line 67: (warning) overflow in constant expression
 "li.c", line 112: (warning) overflow in constant expression
@@ -418,178 +385,147 @@ comparing li
 < yes if ( x <<= 15 ) yes() ; else no() -32768
 ---
 > yes if ( x <<= 15 ) yes() ; else no() 8355840
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f li.cem.g ; then diff li.cem.r li.cem.g ; else echo creating li.cem.g ; cp li.cem.r li.cem.g ; fi
 sed -f ll.sed <OPS >ll.c
-em24 ll.c
-ll.c
+compiling ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-em24 lu.c
-lu.c
+compiling lu.c
 running lu.cem
 comparing lu
-23,31c23,31
+23,25c23,25
 < z = x  -25302
 < z += x  -25292
 < z -= x  25312
-< z /= x  0
-< z %= x  10
-< z *= x  9124
-< z &= x  10
-< z |= x  -25302
-< z ^= x  -25312
 ---
 > z = x  40234
 > z += x  40244
 > z -= x  -40224
-> z /= x  0
-> z %= x  10
+28c28
+< z *= x  9124
+---
 > z *= x  402340
-> z &= x  10
+30,31c30,31
+< z |= x  -25302
+< z ^= x  -25312
+---
 > z |= x  40234
 > z ^= x  40224
 38c38
 < y = ( x + 8012 ) -17290
 ---
 > y = ( x + 8012 ) 48246
-42,52c42,52
+42c42
 < y = ( x * 8012 ) -16776
-< y = ( x & 8012 ) 7432
-< y = ( x | 8012 ) -24722
-< y = ( x ^ 8012 ) -32154
-< y = ( x || 8012 ) 1
-< y = ( x && 8012 ) 1
-< y = ( x << 9 ) 21504
-< y = ( x >> 9 ) 78
-< y = ( -x  ) 25302
-< y = ( !x  ) 0
-< y = ( ~x  ) 25301
 ---
 > y = ( x * 8012 ) 322354808
-> y = ( x & 8012 ) 7432
+44,45c44,45
+< y = ( x | 8012 ) -24722
+< y = ( x ^ 8012 ) -32154
+---
 > y = ( x | 8012 ) 40814
 > y = ( x ^ 8012 ) 33382
-> y = ( x || 8012 ) 1
-> y = ( x && 8012 ) 1
+48c48
+< y = ( x << 9 ) 21504
+---
 > y = ( x << 9 ) 20599808
-> y = ( x >> 9 ) 78
+50c50
+< y = ( -x  ) 25302
+---
 > y = ( -x  ) -40234
-> y = ( !x  ) 0
+52c52
+< y = ( ~x  ) 25301
+---
 > y = ( ~x  ) -40235
-59,68c59,68
+59,62c59,62
 < y = ( x ? x : 8012 ) -25302
 < y = ( z = x  ) -25302 -25302
 < y = ( z += x  ) -25292 -25292
 < y = ( z -= x  ) 25312 25312
-< y = ( z /= x  ) 0 0
-< y = ( z %= x  ) 10 10
-< y = ( z *= x  ) 9124 9124
-< y = ( z &= x  ) 10 10
-< y = ( z |= x  ) -25302 -25302
-< y = ( z ^= x  ) -25312 -25312
 ---
 > y = ( x ? x : 8012 ) 40234
 > y = ( z = x  ) 40234 40234
 > y = ( z += x  ) 40244 40244
 > y = ( z -= x  ) -40224 -40224
-> y = ( z /= x  ) 0 0
-> y = ( z %= x  ) 10 10
+65c65
+< y = ( z *= x  ) 9124 9124
+---
 > y = ( z *= x  ) 402340 402340
-> y = ( z &= x  ) 10 10
+67,68c67,68
+< y = ( z |= x  ) -25302 -25302
+< y = ( z ^= x  ) -25312 -25312
+---
 > y = ( z |= x  ) 40234 40234
 > y = ( z ^= x  ) 40224 40224
-97,105c97,105
+97,99c97,99
 < yes if ( z = x  ) yes() ; else no() -25302
 < yes if ( z += x  ) yes() ; else no() -25292
 < yes if ( z -= x  ) yes() ; else no() 25312
-< no if ( z /= x  ) yes() ; else no() 0
-< yes if ( z %= x  ) yes() ; else no() 10
-< yes if ( z *= x  ) yes() ; else no() 9124
-< yes if ( z &= x  ) yes() ; else no() 10
-< yes if ( z |= x  ) yes() ; else no() -25302
-< yes if ( z ^= x  ) yes() ; else no() -25312
 ---
 > yes if ( z = x  ) yes() ; else no() 40234
 > yes if ( z += x  ) yes() ; else no() 40244
 > yes if ( z -= x  ) yes() ; else no() -40224
-> no if ( z /= x  ) yes() ; else no() 0
-> yes if ( z %= x  ) yes() ; else no() 10
+102c102
+< yes if ( z *= x  ) yes() ; else no() 9124
+---
 > yes if ( z *= x  ) yes() ; else no() 402340
-> yes if ( z &= x  ) yes() ; else no() 10
+104,105c104,105
+< yes if ( z |= x  ) yes() ; else no() -25302
+< yes if ( z ^= x  ) yes() ; else no() -25312
+---
 > yes if ( z |= x  ) yes() ; else no() 40234
 > yes if ( z ^= x  ) yes() ; else no() 40224
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f lu.cem.g ; then diff lu.cem.r lu.cem.g ; else echo creating lu.cem.g ; cp lu.cem.r lu.cem.g ; fi
 ***** ctill
 All program(s) in this directory should fail to compile.
-em24 noarg.c
-noarg.c
+compiling noarg.c
 "noarg.c", line 14: name not in parameter list
 *** Error code 1
-`gen' not remade because of errors
+The following command caused the error:
+acc -mem24 -o noarg.cem  noarg.c 1>/dev/null
+make: Warning: Target `gen' not remade because of errors
 ***** ctinit
-em24 init.c
-init.c
-"init.c", line 172: (warning) overflow in constant expression
+compiling init.c
 running init.cem
 comparing init
-47,48c47,48
-< fl5	2.93873587705571956974e-39
-< fl6	1.70141173319264450000e+38
----
-> fl5	2.93873587705571892581e-39
-> fl6	1.70141173319264428000e+38
-70c70
-< dbl5	2.93873600000000188004e-39
----
-> dbl5	2.93873600000000034793e-39
-92c92
-< lo4	0
----
-> lo4	-2147483648
-110,$c110,$
+110c110
 < sizeof stb 6
-< stb	-1 -2 3 4 -1 6 7
-< 
 ---
 > sizeof stb 8
-> stb	-1 -2 3 4 -1 6 7
-> 
-*** Error code 1 (ignored)
+The following command caused the error:
+if test -f init.cem.g ; then diff init.cem.r init.cem.g ; else echo creating init.cem.g ; cp init.cem.r init.cem.g ; fi
 ***** ctmargt
-em24 margt.c
-margt.c
+compiling margt.c
 running margt.cem
 comparing margt
+5c5
+< 	CEM=acc -mem24
+---
+> 	CEM=acc
+11c11
+< 	RUN=em
+---
+> 	RUN=
+The following command caused the error:
+if test -f margt.cem.g ; then diff margt.cem.r margt.cem.g ; else echo creating margt.cem.g ; cp margt.cem.r margt.cem.g ; fi
 ***** ctprof
 test profiling
 procentry.c
-em24 tp.c procentry.m
+compiling tp.c procentry.m
 tp.c
 running tp.cem
 comparing tp
 ***** ctsetjmp
-em24 stjmp.c
-stjmp.c
+compiling stjmp.c
 running stjmp.cem
 comparing stjmp
 ***** ctstruct
-em24 str.c
-str.c
-running str.cem
 comparing str
 ***** ctsys
-em24 tfork.c
-tfork.c
+compiling tfork.c
 running tfork.cem
 comparing tfork
-1,$c1,$
-< childno 6310
-< Child 6310, status 0x800
-< fork/wait ok
----
-> childno 16276
-> Child 16276, status 0x800
-> fork/wait ok
-*** Error code 1 (ignored)
-Thu Apr 28 12:54:21 MET DST 1988
+Fri Nov 17 17:29:58 MET 1989

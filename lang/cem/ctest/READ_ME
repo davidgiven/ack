@@ -1,5 +1,10 @@
-To run this test, first copy makefile.std to makefile, and adapt the
-CEM variable; set it to the compiler you want to test.
+To run this test, set the CEM variable to the compilation command,
+and the RUN variable to the run command (name of the interpreter or empty).
+For instance:
+
+	CEM=acc -mem24; export CEM
+	RUN=em; export RUN
+
 Then type: sh run > out 2>&1 &
 
 The test are subdivided into several directories.

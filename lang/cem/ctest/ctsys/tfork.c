@@ -14,10 +14,10 @@ main(argc,argv) char **argv ; {
 	}
 	if ( child ) {
 	/* The parent */
-		printf("childno %d\n",child ) ;
+		/* printf("childno %d\n",child ) ; */
 		do {
 			waitchild= wait(&status ) ;
-			printf("Child %d, status 0x%x\n",waitchild,status) ;
+			/* printf("Child %d, status 0x%x\n",waitchild,status) ;*/
 			if ( waitchild== -1 ) {
 				printf("No children\n") ;
 				return 1 ;

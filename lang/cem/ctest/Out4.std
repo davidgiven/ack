@@ -1,44 +1,37 @@
-Tue Apr 26 14:08:56 MET DST 1988
+Fri Nov 17 14:55:28 MET 1989
+Compilation command: acc
 ***** ctconv
-acc -fp conv.c
-conv.c
+compiling conv.c
 "conv.c", line 38: (warning) overflow in constant expression
 running conv.cem
 comparing conv
 ***** ctdecl
-acc -fp decl.c
-decl.c
+compiling decl.c
 running decl.cem
 comparing decl
 ***** ctdivers
-acc -fp ops.c
-ops.c
+compiling ops.c
 running ops.cem
 comparing ops
 ***** cterr
-acc -fp bugs.c
-bugs.c
+compiling bugs.c
 "bugs.c", line 88: (warning) overflow in constant expression
 running bugs.cem
 comparing bugs
 ***** ctest1
-acc -fp test.c
-test.c
+compiling test.c
 running test.cem
 comparing test
 ***** ctest2
-acc -fp t7.c
-t7.c
+compiling t7.c
 running t7.cem
 comparing t7
 ***** ctest3
-acc -fp test2.c
-test2.c
+compiling test2.c
 running test2.cem
 comparing test2
 ***** ctest5
-acc -fp test1.c
-test1.c
+compiling test1.c
 "test1.c", line 375: (warning) incompatible pointers in =
 "test1.c", line 376: (warning) incompatible pointers in =
 "test1.c", line 377: (warning) incompatible pointers in =
@@ -51,142 +44,107 @@ running test1.cem
 comparing test1
 ***** ctgen
 sed -f bf.sed <OPS >bf.c
-acc -fp bf.c
-bf.c
+compiling bf.c
 running bf.cem
 comparing bf
+sed -f bfu.sed <OPS >bfu.c
+compiling bfu.c
+running bfu.cem
+comparing bfu
 sed -f cel.sed <OPS >cel.c
-acc -fp cel.c
-cel.c
+compiling cel.c
 running cel.cem
 comparing cel
 sed -f clu.sed <OPS >clu.c
-acc -fp clu.c
-clu.c
+compiling clu.c
 running clu.cem
 comparing clu
 sed -f ec.sed <OPS >ec.c
-acc -fp ec.c
-ec.c
+compiling ec.c
 "ec.c", line 58: (warning) overflow in constant expression
 "ec.c", line 64: (warning) overflow in constant expression
 running ec.cem
 comparing ec
 sed -f ef.sed <OPS >ef.c
-acc -fp ef.c
-ef.c
+compiling ef.c
 running ef.cem
 comparing ef
 sed -f ei.sed <OPS >ei.c
-acc -fp ei.c
-ei.c
+compiling ei.c
 running ei.cem
 comparing ei
 sed -f el.sed <OPS >el.c
-acc -fp el.c
-el.c
+compiling el.c
 running el.cem
 comparing el
 sed -f eu.sed <OPS >eu.c
-acc -fp eu.c
-eu.c
+compiling eu.c
 running eu.cem
 comparing eu
 sed -f id.sed <OPS >id.c
-acc -fp id.c
-id.c
+compiling id.c
 running id.cem
 comparing id
 sed -f lc.sed <OPS >lc.c
-acc -fp lc.c
-lc.c
+compiling lc.c
 "lc.c", line 60: (warning) overflow in constant expression
 "lc.c", line 66: (warning) overflow in constant expression
 running lc.cem
 comparing lc
 sed -f ld.sed <OPS >ld.c
-acc -fp ld.c
-ld.c
+compiling ld.c
 running ld.cem
 comparing ld
 sed -f lf.sed <OPS >lf.c
-acc -fp lf.c
-lf.c
+compiling lf.c
 running lf.cem
 comparing lf
 sed -f li.sed <OPS >li.c
-acc -fp li.c
-li.c
+compiling li.c
 running li.cem
 comparing li
 sed -f ll.sed <OPS >ll.c
-acc -fp ll.c
-ll.c
+compiling ll.c
 running ll.cem
 comparing ll
 sed -f lu.sed <OPS >lu.c
-acc -fp lu.c
-lu.c
+compiling lu.c
 running lu.cem
 comparing lu
 ***** ctill
 All program(s) in this directory should fail to compile.
-acc -fp noarg.c
-noarg.c
+compiling noarg.c
 "noarg.c", line 14: name not in parameter list
 *** Error code 1
-`gen' not remade because of errors
+The following command caused the error:
+acc -o noarg.cem  noarg.c 1>/dev/null
+make: Warning: Target `gen' not remade because of errors
 ***** ctinit
-acc -fp init.c
-init.c
+compiling init.c
 running init.cem
 comparing init
-47,48c47,48
-< fl5	2.93873587705571956974e-39
-< fl6	1.70141173319264450000e+38
----
-> fl5	2.93873587705571892581e-39
-> fl6	1.70141173319264428000e+38
-70c70
-< dbl5	2.93873600000000188004e-39
----
-> dbl5	2.93873600000000034793e-39
-*** Error code 1 (ignored)
 ***** ctmargt
-acc -fp margt.c
-margt.c
+compiling margt.c
 running margt.cem
 comparing margt
 ***** ctprof
 test profiling
 procentry.c
-acc -fp tp.c procentry.m
+compiling tp.c procentry.m
 tp.c
 procentry.m
-running tp
+running tp.cem
 comparing tp
 ***** ctsetjmp
-acc -fp stjmp.c
-stjmp.c
+compiling stjmp.c
 running stjmp.cem
 comparing stjmp
 ***** ctstruct
-acc -fp str.c
-str.c
+compiling str.c
 running str.cem
 comparing str
 ***** ctsys
-acc -fp tfork.c
-tfork.c
+compiling tfork.c
 running tfork.cem
 comparing tfork
-1,$c1,$
-< childno 25349
-< Child 25349, status 0x800
-< fork/wait ok
----
-> childno 16276
-> Child 16276, status 0x800
-> fork/wait ok
-*** Error code 1 (ignored)
-Tue Apr 26 14:26:04 MET DST 1988
+Fri Nov 17 15:08:47 MET 1989

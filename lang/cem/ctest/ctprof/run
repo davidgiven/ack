@@ -1,10 +1,10 @@
 echo test profiling
 case ${1-gen} in
 gen|tp.cem.r)
-	make -k "`grep CEM= ../makefile`" tp.cem
-	make "P=tp" -fsk ../makefile ${1-gen}
+	make -k "CEM=${CEM-acc}" tp.cem
+	make "P=tp" "CEM=${CEM-acc}" "RUN=${RUN-}" -fsk ../makefile ${1-gen}
 	;;
 *)
-	make -k "`grep CEM= ../makefile`" $1
+	make -k "CEM=${CEM-acc}" "RUN=${RUN-}" $1
 	;;
 esac
