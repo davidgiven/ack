@@ -35,8 +35,6 @@
 
 extern char options[];
 
-extern char *sprint();
-
 extern struct idf *idf_hashtable[];
 extern char *symbol2str(), *type2str(), *next_transient();
 
