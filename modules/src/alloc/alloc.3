@@ -70,4 +70,6 @@ These last two routines are best used in a macro.
 malloc(3)
 .SH DIAGNOSTICS
 \fIMalloc\fR, \fISalloc\fR, \fISrealloc\fR, and \fIst_alloc\fR
-give an error message and stop execution if there is no memory available.
+call a routine \fINo_Mem\fR if there is no memory available. This routine
+is not supposed to return. A default one, that
+gives an error message and stops execution, is provided.

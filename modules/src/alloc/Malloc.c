@@ -14,20 +14,13 @@
 #include	"in_all.h"
 #include	"alloc.h"
 
-PRIVATE
-m_fatal() {
-
-	(void) sys_write(2, "Out of memory\n", 14);
-	sys_stop(S_EXIT);
-}
-
 EXPORT char *
 Malloc(sz)
 	unsigned int sz;
 {
 	char *res = malloc(sz);
 	
-	if (res == 0) m_fatal();
+	if (res == 0) No_Mem();
 	return res;
 }
 
@@ -42,7 +35,7 @@ Salloc(str, sz)
 	char *res = malloc(sz);
 	register char *m = res;
 
-	if (m == 0) m_fatal();
+	if (m == 0) No_Mem();
 	while (sz--)
 		*m++ = *str++;
 	return res;
@@ -54,6 +47,6 @@ Srealloc(str, sz)
 	unsigned int sz;
 {
 	str = realloc(str, sz);
-	if (str == 0) m_fatal();
+	if (str == 0) No_Mem();
 	return str;
 }

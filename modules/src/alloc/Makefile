@@ -10,9 +10,10 @@ SOURCES =	alloc.h\
 		botch.c\
 		clear.c\
 		st_alloc.c\
-		std_alloc.c
+		std_alloc.c \
+		No_Mem.c
 
-OBJECTS =	botch.o clear.o st_alloc.o Malloc.o std_alloc.o
+OBJECTS =	botch.o clear.o st_alloc.o Malloc.o std_alloc.o No_Mem.o
 
 all:		liballoc.a
 
