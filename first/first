@@ -4,6 +4,21 @@ then :
 else
 	exit 1
 fi
+: check write-ability of /tmp and /usr/tmp
+if ( >/usr/tmp/aaax.$$ )
+then
+	rm /usr/tmp/aaax.$$
+else
+	echo /usr/tmp must exist and be writable.
+	exit 2
+fi
+if ( >/tmp/aaax.$$ )
+then
+	rm /tmp/aaax.$$
+else
+	echo /tmp must exist and be writable.
+	exit 2
+fi
 : set ACK HOME Directory in ../h/em_path.h
 rm -f em_path.h
 sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"`cd .. ; pwd`\"@" <../h/em_path.h >em_path.h
