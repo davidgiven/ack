@@ -21,9 +21,9 @@ double *i1,*i2;
 }
 
 _strswap(s1,s2)
-String *s1,*s2;
+String **s1,**s2;
 {
-	String s;
+	String *s;
 	s= *s1;
 	*s1= *s2;
 	*s2 = s;
