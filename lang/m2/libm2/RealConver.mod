@@ -202,7 +202,11 @@ IMPLEMENTATION MODULE RealConversions;
 			str[i] := ' ';
 		END;
 		ind1 := CARDINAL(width);
-		IF (ind1+1) <= HIGH(str) THEN str[ind1+1] := 0C; END;
+		IF (ind1+1) <= HIGH(str) THEN
+			FOR ind1 := ind1+1 TO HIGH(str) DO
+				str[ind1] := 0C;
+			END;
+		END;
 	END;
 
   END LongRealToString;

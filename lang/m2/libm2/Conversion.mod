@@ -28,7 +28,10 @@ IMPLEMENTATION MODULE Conversions;
 	r := 0;
 	WHILE len > i DO str[r] := ' '; INC(r); DEC(len); END;
 	WHILE i > 0 DO str[r] := tmp[i-1]; DEC(i); INC(r); END;
-	IF r <= HIGH(str) THEN str[r] := 0C; END;
+	WHILE r <= HIGH(str) DO
+		str[r] := 0C;
+		INC(r);
+	END;
     END ConvertNum;
 
   PROCEDURE ConvertOctal(num, len: CARDINAL; VAR str: ARRAY OF CHAR);

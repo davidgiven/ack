@@ -1,5 +1,4 @@
-#define MAXPROCS 20
-#include <m2_traps.h>
+#define MAXPROCS 16
 
 static int callindex;
 static int (*proclist[MAXPROCS])();
@@ -17,11 +16,12 @@ CallAtEnd(p)
 	int (*p)();
 {
 	if (callindex >= MAXPROCS) {
-		TRP(M2_ENDPROCS);
+		return 0;
 	}
 	else {
 		proclist[callindex++] = p;
 	}
+	return 1;
 }
 
 _halt()
