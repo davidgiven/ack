@@ -14,7 +14,7 @@
 #include "get_put.h"
 
 #define OFF ((FL_MSW_AT_LOW_ADDRESS ? 0 : 2) + (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
-SINGLE
+void
 ngf4(f)
 SINGLE	f;
 {
@@ -24,5 +24,4 @@ SINGLE	f;
 		p = (unsigned char *) &f + OFF;
 		*p ^= 0x80;
 	}
-	return f;
 }

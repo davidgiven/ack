@@ -16,7 +16,7 @@
 
 #include "FP_types.h"
 
-SINGLE
+void
 cuf4(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
@@ -40,7 +40,7 @@ long	src;	/* largest possible integer to convert */
 	}
 	if (i_src == 0)	{
 		*result = (SINGLE) 0L;
-		return (SINGLE) 0L;
+		return;
 	}
 			/* ESTABLISHED THAT src != 0	*/
 
@@ -54,5 +54,4 @@ long	src;	/* largest possible integer to convert */
 			/* adjust mantissa field	*/
 	nrm_ext(&buf);
 	compact(&buf,result,4);
-	return *result;
 }

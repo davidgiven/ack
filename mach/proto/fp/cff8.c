@@ -17,7 +17,7 @@
 
 #include "FP_types.h"
 
-DOUBLE
+void
 cff8(src)
 SINGLE	src;
 {
@@ -25,5 +25,4 @@ SINGLE	src;
 
 	extend(&src,&buf,sizeof(SINGLE));	/* no matter what */
 	compact(&buf, &src,sizeof(DOUBLE));
-	return *(DOUBLE *) ((void *) &src);
 }

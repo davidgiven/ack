@@ -11,7 +11,7 @@
 
 #include	"FP_types.h"
 
-SINGLE
+void
 mlf4(s2,s1)
 SINGLE	s1,s2;
 {
@@ -22,5 +22,4 @@ SINGLE	s1,s2;
 		/* do a multiply */
 	mul_ext(&e1,&e2);
 	compact(&e1,&s1,sizeof(SINGLE));
-	return(s1);
 }

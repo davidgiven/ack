@@ -16,7 +16,7 @@
 
 #include "FP_types.h"
 
-DOUBLE
+void
 cif8(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
@@ -39,7 +39,7 @@ long	src;	/* largest possible integer to convert */
 	}
 	if (i_src == 0)	{
 		zrf8(result);
-		return(*result);
+		return;
 	}
 			/* ESTABLISHED THAT src != 0	*/
 			/* adjust exponent field	*/
@@ -52,5 +52,4 @@ long	src;	/* largest possible integer to convert */
 		buf.m1 <<= 16;
 	nrm_ext(&buf);
 	compact(&buf,&result->d[0],8);
-	return(*result);
 }

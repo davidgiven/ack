@@ -11,16 +11,17 @@
 
 #include	"FP_types.h"
 
-DOUBLE
+void
 sbf8(s2,s1)
 DOUBLE	s1,s2;
 {
-	DOUBLE *result = &s1;	/* s1 may not be in a register! */
+	EXTEND e1, e2;
 
 	if (s2.d[0] == 0 && s2.d[1] == 0) {
-		return s1;
+		return;
 	}
-	s2 = ngf8(s2);
-	*result = adf8(s2,s1);	/* add and return result */
-	return(s1);
+	extend(&s1.d[0],&e1,sizeof(DOUBLE));
+	extend(&s2.d[0],&e2,sizeof(DOUBLE));
+	sub_ext(&e1,&e2);
+	compact(&e1,&s1.d[0],sizeof(DOUBLE));
 }

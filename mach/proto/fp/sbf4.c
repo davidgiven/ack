@@ -11,17 +11,17 @@
 
 #include	"FP_types.h"
 
-SINGLE
+void
 sbf4(s2,s1)
 SINGLE	s1,s2;
 {
-	SINGLE *result = &s1;	/* s1 may not be in a register! */
+	EXTEND e1,e2;
 
 	if (s2 == (SINGLE) 0) {
-		return s1;
+		return;
 	}
-	s2 = ngf4(s2);
-	*result = adf4(s2,s1);
-	return(s1);	/* add and return result */
+	extend(&s1,&e1,sizeof(SINGLE));
+	extend(&s2,&e2,sizeof(SINGLE));
+	sub_ext(&e1,&e2);
+	compact(&e1,&s1,sizeof(SINGLE));
 }
-

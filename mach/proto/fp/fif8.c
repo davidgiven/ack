@@ -41,5 +41,8 @@ struct fif8_returns *p;
 	b64_sft(&e1.mantissa, 63 - e1.exp);
 	b64_sft(&e1.mantissa, e1.exp - 63);	/* "loose" low order bits */
 	compact(&e1, &(p->ipart.d[0]), sizeof(DOUBLE));
-	p->fpart = sbf8(p->ipart, y);
+	extend(&(p->ipart.d[0]), &e2, sizeof(DOUBLE));
+	extend(&y.d[0], &e1, sizeof(DOUBLE));
+	sub_ext(&e1, &e2);
+	compact(&e1, &(p->fpart.d[0]), sizeof(DOUBLE));
 }

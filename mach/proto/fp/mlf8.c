@@ -11,7 +11,7 @@
 
 #include	"FP_types.h"
 
-DOUBLE
+void
 mlf8(s2,s1)
 DOUBLE	s1,s2;
 {
@@ -22,5 +22,4 @@ DOUBLE	s1,s2;
 		/* do a multiply */
 	mul_ext(&e1,&e2);
 	compact(&e1,&s1.d[0],sizeof(DOUBLE));
-	return(s1);
 }

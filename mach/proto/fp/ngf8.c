@@ -15,7 +15,7 @@
 
 #define OFF ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) + (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
 
-DOUBLE
+void
 ngf8(f)
 DOUBLE	f;
 {
@@ -25,5 +25,4 @@ DOUBLE	f;
 		p = (unsigned char *) &f + OFF;
 		*p ^= 0x80;
 	}
-	return f;
 }

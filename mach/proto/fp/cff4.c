@@ -17,7 +17,7 @@
 
 #include	"FP_types.h"
 
-SINGLE
+void
 cff4(src)
 DOUBLE	src;	/* the source itself -	THIS TIME it's DOUBLE */
 {
@@ -25,5 +25,4 @@ DOUBLE	src;	/* the source itself -	THIS TIME it's DOUBLE */
 
 	extend(&src.d[0],&buf,sizeof(DOUBLE));	/* no matter what */
 	compact(&buf,&(src.d[1]),sizeof(SINGLE));
-	return *(SINGLE *)&(src.d[1]);
 }

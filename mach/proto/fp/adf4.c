@@ -11,7 +11,7 @@
 
 #include	"FP_types.h"
 
-SINGLE
+void
 adf4(s2,s1)
 SINGLE	s1,s2;
 {
@@ -20,14 +20,13 @@ SINGLE	s1,s2;
 
 	if (s1 == (SINGLE) 0) {
 		s1 = s2;
-		return s1;
+		return;
 	}
 	if (s2 == (SINGLE) 0) {
-		return s1;
+		return;
 	}
 	extend(&s1,&e1,sizeof(SINGLE));
 	extend(&s2,&e2,sizeof(SINGLE));
 	add_ext(&e1,&e2);
 	compact(&e1,&s1,sizeof(SINGLE));
-	return s1;
 }
