@@ -148,7 +148,7 @@ cmp:	Main
 	-cmp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 pr:
-	@pr makefile make.* tab.c char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
+	@pr Makefile make.* tab.c char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
 
 opr:
 	make pr | opr
@@ -167,7 +167,7 @@ longnames:	$(SRC) $(HFILES)
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENCFILES) $(GSRC) $(GHSRC) makefile
+Cfiles:	hfiles LLfiles $(GENCFILES) $(GSRC) $(GHSRC) Makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 hfiles: ./make.hfiles Parameters
@@ -210,27 +210,27 @@ estack.h:	make.allocd
 util.h:		make.allocd
 
 depend:	Cfiles
-	sed '/^#AUTOAUTO/,$$d' makefile >makefile.new
-	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >>makefile.new
-	$(MKDEP) $(SRC) | sed 's/\.c:/.o:/' >>makefile.new
-	mv makefile makefile.old
-	mv makefile.new makefile
+	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
+	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >>Makefile.new
+	$(MKDEP) $(SRC) | sed 's/\.c:/.o:/' >>Makefile.new
+	mv Makefile Makefile.old
+	mv Makefile.new Makefile
 
 #INCLINCLINCLINCL
 
-$(CURRDIR)/main:	$(OBJ) $(CURRDIR)/makefile
+$(CURRDIR)/main:	$(OBJ) $(CURRDIR)/Makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)/main 
 	size $(CURRDIR)/main
 
-$(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/makefile
+$(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/Makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)/emain 
 	size $(CURRDIR)/emain
 
-$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/makefile
+$(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/Makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain 
 	size $(CURRDIR)/omain
 
-$(CURRDIR)/cemain:	$(OBJ) $(CURRDIR)/makefile
+$(CURRDIR)/cemain:	$(OBJ) $(CURRDIR)/Makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(CELIBS) -o $(CURRDIR)/cemain 
 	size $(CURRDIR)/cemain
 

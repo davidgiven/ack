@@ -165,11 +165,11 @@ util.h:		make.allocd
 OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
 SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 
-main:	$(OBJ) Makefile
+main:	$(OBJ) Makefile.erik
 	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(LIBS) -o main 
 	size main
 
-emain:	$(OBJ) Makefile
+emain:	$(OBJ) Makefile.erik
 	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(ELIBS) -o emain 
 	size emain
 
@@ -196,11 +196,11 @@ listobjects:
 	@echo $(OBJ)
 
 depend:	cfiles
-	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
-	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >>Makefile.new
-	$(MKDEP) $(SRC) | sed 's/\.c:/.o:/' >>Makefile.new
-	mv Makefile Makefile.old
-	mv Makefile.new Makefile
+	sed '/^#AUTOAUTO/,$$d' Makefile.erik >Makefile.erik.new
+	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >>Makefile.erik.new
+	$(MKDEP) $(SRC) | sed 's/\.c:/.o:/' >>Makefile.erik.new
+	mv Makefile.erik Makefile.erik.old
+	mv Makefile.erik.new Makefile.erik
 	
 xref:
 	ctags -x `grep "\.[ch]" files`|sed "s/).*/)/">Xref
