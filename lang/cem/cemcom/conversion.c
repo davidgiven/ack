@@ -102,6 +102,21 @@ conversion(from_type, to_type)
 	default:
 		crash("(conversion) illegal type conversion");
 	}
+	if (to_type->tp_size < word_size
+#ifndef NOFLOAT
+	    && to_fund != T_FLOATING
+#endif NOFLOAT
+	    ) {
+		extern long full_mask[];
+
+		C_loc((arith) full_mask[(int)(to_type->tp_size)]);
+		C_and(word_size);
+		if (to_fund == T_SIGNED) {
+			C_loc(to_type->tp_size);
+			C_loc(word_size);
+			C_cii();
+		}
+	}
 }
 
 /*	fundamental() returns in which category a given type falls:
