@@ -108,15 +108,11 @@ typedef struct gram {
  */
 typedef	struct {
 	short	n_flags;	/* low order three bits are reserved
-				 * for "safety" information,
-				 * the next three bits are reserved for
 				 * the parameter count
 				 */
-# define getntsafe(f)	((f)&07)
-# define setntsafe(p,i)	{assert(((unsigned)(i))<=7);*(p)&=~07;*(p)|=(i);}
-
+# define getntparams(p)	((p)->n_flags&07)
+# define setntparams(p,i)	{assert(((unsigned)(i))<=7);(p)->n_flags&=~07;(p)->n_flags|=(i);}
 # define RECURSIVE	00100	/* Set if the default rule is recursive */
-# define NNOSCAN	00200	/* Set if the nonterminal does not scan ahead */
 # define CONTIN		00400	/* continuation already computed? */
 # define BUSY		01000	/* or are we busy computing it? */
 # define PARAMS		02000	/* tells if a nonterminal has parameters */
@@ -125,8 +121,14 @@ typedef	struct {
 # define LOCALS		020000  /* local declarations ? */
 # define REACHABLE	040000	/* can this nonterminal be reached ? */
 # define VERBOSE	0100000	/* Set if in LL.output file */
+	char	n_insafety;
+	char	n_outsafety;
+# define getntsafe(p)	((p)->n_insafety)
+# define setntsafe(p,i)	{assert(((unsigned)(i))<=NOSAFETY);(p)->n_insafety=(i);}
+# define getntout(p)	((p)->n_outsafety)
+# define setntout(p,i)	{assert(((unsigned)(i))<=NOSAFETY);(p)->n_outsafety=(i);}
 	short	n_count;	/* pieces of code before this rule */
-	int	n_lineno;	/* declared on line ... */
+	short	n_lineno;	/* declared on line ... */
 	p_gram	n_rule;		/* pointer to right hand side of rule */
 	union {
 		p_set	n_f;	/* ptr to "first" set */
@@ -192,11 +194,12 @@ typedef short t_reps,*p_reps;
 typedef struct term {
 	t_reps	t_reps;		/* repeats ? */
 	short	t_flags;
+# define gettout(q)	((q)->t_flags&07)
+# define settout(q,i)	{assert(((unsigned)(i))<=NOSAFETY);(q)->t_flags&=~07;(q)->t_flags|=i;}
 # define PERSISTENT	010	/* Set if this term has %persistent */
 # define RESOLVER	020	/* Set if this term has %while */
 # define EMPTYFIRST	0100	/* Error, empty first */
 # define EMPTYTERM	0200	/* Error, term can produce empty */
-# define TNOSCAN	0400	/* Set if this term does not scan ahead */
 /* # define NOCONF	01000	see link structure */
 
 	p_gram	t_rule;		/* pointer to this term	*/

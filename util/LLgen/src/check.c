@@ -204,13 +204,16 @@ check(p) register p_gram p; {
 		switch (g_gettype(p)) {
 		  case EORULE :
 			return;
-		  case NONTERM :
-			if (g_getnpar(p)!=((nonterms[g_getnont(p)].n_flags&077) >> 3)){
+		  case NONTERM : {
+			register p_nont n;
+
+			n = &nonterms[g_getnont(p)];
+			if (g_getnpar(p) != getntparams(n)) {
 			    error(p->g_lineno,
 			        "Call of %s : parameter count mismatch",
 				(min_nt_ent+g_getnont(p))->h_name);
 			}
-			break;
+			break; }
 		  case TERM : {
 			register p_term q;
 

@@ -670,28 +670,28 @@ co_safes() {
 		/*
 		 * Don't know anything yet
 		 */
-		setntsafe(&(p->n_flags), NOSAFETY);
+		setntsafe(p, NOSAFETY);
+		setntout(p, NOSAFETY);
 	}
 	for (st = start; st; st = st->ff_next) {
 		/*
 		 * But start symbols are called with lookahead done
 		 */
 		p = st->ff_nont;
-		setntsafe(&(p->n_flags),SCANDONE);
+		setntsafe(p,SCANDONE);
 	}
 	change = 1;
 	while (change) {
 		change = 0;
 		for (p = nonterms; p < maxnt; p++) {
-			i = getntsafe(p->n_flags);
+			i = getntsafe(p);
 			if (i == NOSAFETY) {
-				change = 1;
 				continue;
 			}
-			if (do_safes(p->n_rule, i) == 2 &&
-			    !(p->n_flags & NNOSCAN)) {
-				p->n_flags |= NNOSCAN;
+			i = do_safes(p->n_rule, i);
+			if (getntout(p) != i) {
 				change = 1;
+				setntout(p, i);
 			}
 		}
 	}
@@ -705,8 +705,6 @@ do_safes(p,safe) register p_gram p; {
 	 */
 	register	retval;
 
-	if (safe == NOSCANDONE) retval = 2;
-	else retval = 1;
 	for (;;) {
 		switch (g_gettype(p)) {
 		  case ACTION:
@@ -724,10 +722,10 @@ do_safes(p,safe) register p_gram p; {
 			rep = r_getkind(&(q->t_reps));
 			retval = do_safes(q->t_rule,
 			       t_safety(rep,i,q->t_flags&PERSISTENT,safe));
-			if (retval == 2 && (!(q->t_flags & TNOSCAN))) {
-				q->t_flags |= TNOSCAN;
+			if (retval != gettout(q)) {
+				settout(q, retval);
 			}
-			safe = t_after(rep, i, q->t_flags & TNOSCAN);
+			safe = t_after(rep, i, gettout(q));
 			break; }
 		  case ALTERNATION : {
 		  	register p_link l;
@@ -736,51 +734,53 @@ do_safes(p,safe) register p_gram p; {
 			f = 1;
 			while (g_gettype(p) == ALTERNATION) {
 				l = (p_link) pentry[g_getcont(p)];
-				if (safe && (l->l_flag & DEF)) {
+				if (safe > SAFE && (l->l_flag & DEF)) {
 					i = do_safes(l->l_rule,SAFESCANDONE);
 				}
 				else	i = do_safes(l->l_rule,SAFE);
 				if (f) retval = i;
-				else retval &= i;
+				else if (i != retval) {
+					if (i == NOSCANDONE ||
+					    retval == NOSCANDONE) {
+						retval = SCANDONE;
+					}
+					else if (i > retval) retval = i;
+				}
 				p++;
 				f = 0;
 			}
 			return retval; }
 		  case NONTERM : {
 			register p_nont n;
-			int nsafe, osafe;;
+			int nsafe, osafe;
 
 			n = &nonterms[g_getnont(p)];
-			nsafe = getntsafe(n->n_flags);
+			nsafe = getntsafe(n);
 			osafe = safe;
-			if (!(n->n_flags & NNOSCAN)) {
-				safe = SCANDONE;
-			}
-			else safe = NOSCANDONE;
+			safe = getntout(n);
+			if (safe == NOSAFETY) safe = SCANDONE;
 			if (osafe == nsafe) break;
 			if (nsafe == NOSAFETY) {
 				change = 1;
-				setntsafe(&(n->n_flags), osafe);
+				setntsafe(n, osafe);
 				break;
 			}
 			if (osafe == NOSCANDONE || nsafe == NOSCANDONE) {
 				if (nsafe != SCANDONE) {
 					change = 1;
-					setntsafe(&(n->n_flags), SCANDONE);
+					setntsafe(n, SCANDONE);
 				}
 				break;
 			}
 			if (osafe > nsafe) {
-				setntsafe(&(n->n_flags), osafe);
+				setntsafe(n, osafe);
 				change = 1;
 			}
 			break; }
 		  case EORULE :
-			return retval;
+			return safe;
 		}
 		p++;
-		if (safe == NOSCANDONE) retval = 2;
-		else retval = 1;
 	}
 }
 
@@ -814,10 +814,13 @@ t_safety(rep, count, persistent, safety) {
 	/* NOTREACHED */
 }
 
-t_after(rep, count, noscan) {
+t_after(rep, count, outsafety) {
 	if (count == 0 && (rep == STAR || rep == PLUS)) {
 		return SAFESCANDONE;
 	}
-	if (rep == FIXED && noscan) return NOSCANDONE;
-	return SCANDONE;
+	if (rep != FIXED) {
+		if (outsafety <= SAFESCANDONE) return SAFESCANDONE;
+		return SCANDONE;
+	}
+	return outsafety;
 }

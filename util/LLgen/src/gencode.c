@@ -173,7 +173,7 @@ genrecovery() {
 		fprintf(f, "\tL%d_%s();\n",
 			st->ff_nont-nonterms,
 			(min_nt_ent+(st->ff_nont-nonterms))->h_name);
-		if (st->ff_nont->n_flags & NNOSCAN) {
+		if (getntout(st->ff_nont) == NOSCANDONE) {
 			fputs("\tLLscan(EOFILE);\n",f);
 		}
 		else	fputs("\tif (LLsymb != EOFILE) LLerror(EOFILE);\n",f);
@@ -240,7 +240,7 @@ generate(f) p_file f; {
 		else fputs(") {\n", fd);
 		fputs("register struct LLxx *LLx = &LLxx;\n#ifdef lint\nLLx=LLx;\n#endif\n", fd);
 		if (p->n_flags & LOCALS) getaction(1);
-		i = getntsafe(p->n_flags);
+		i = getntsafe(p);
 		mustpop = 0;
 		if (g_gettype(p->n_rule) == ALTERNATION) {
 			mustpop = 1;
@@ -252,7 +252,8 @@ generate(f) p_file f; {
 		nlabel = 1;
 		rulecode(p->n_rule,
 			 i,
-			 !(p->n_flags & NNOSCAN), mustpop);
+			 getntout(p) != NOSCANDONE,
+			 mustpop);
 		fputs(c_close, fd);
 	}
 }
@@ -443,7 +444,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			n = &nonterms[g_getnont(p)];
 			t= min_nt_ent+(n-nonterms);
 			if (safety == NOSCANDONE &&
-			    getntsafe(n->n_flags) < NOSCANDONE) fputs(c_read, f);
+			    getntsafe(n) < NOSCANDONE) fputs(c_read, f);
 			if (toplevel == 0 &&
 				   g_gettype(n->n_rule) != ALTERNATION) {
 				fputs(c_LLptrmin, f);
@@ -453,8 +454,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			fprintf(f,"L%d_%s(",n-nonterms, t->h_name);
 			if (params) getaction(0);
 			fputs(");\n",f);
-			safety = NOSCANDONE;
-			if (!(n->n_flags & NNOSCAN)) safety = SCANDONE;
+			safety = getntout(n);
 			break; }
 		  case TERM :
 			safety = codeforterm((p_term) pentry[g_getcont(p)],
@@ -707,13 +707,11 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	register int	i;
 	register int	rep;
 	int		persistent;
-	int		noscan;
 
 	f = fpars;
 	i = r_getnum(&(q->t_reps));
 	rep = r_getkind(&(q->t_reps));
 	persistent = (q->t_flags & PERSISTENT);
-	noscan = (q->t_flags & TNOSCAN);
 	if (safety == NOSCANDONE && (rep != FIXED || i == 0)) {
 		fputs(c_read, f);
 		if (rep == FIXED && g_gettype(q->t_rule) != ALTERNATION) {
@@ -726,7 +724,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		fputs("for (;;) {\nif (!LL_i--) {\nLLptr++;\n", f);
 		fputs("break;\n}\n", f);
 		if (rep == FIXED) {
-			if (noscan && safety == NOSCANDONE) {
+			if (gettout(q) == NOSCANDONE && safety == NOSCANDONE) {
 				fputs(c_read,f);
 			}
 		}
@@ -739,7 +737,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		genifhead(q,rep);
 	}
 	rulecode(q->t_rule,t_safety(rep,i,persistent,safety),
-		 rep != FIXED || !noscan,
+		 rep != FIXED || gettout(q) != NOSCANDONE,
 		 rep == FIXED && i == 0 && g_gettype(q->t_rule) == ALTERNATION);
 	/* in the case of '+', the if is after the code for the rule */
 	if (rep == PLUS) {
@@ -761,7 +759,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 			fputs(c_close, f);/* Close Register ... */
 		}
 	}
-	return t_after(rep, i, noscan);
+	return t_after(rep, i, gettout(q));
 }
 
 STATIC
