@@ -55,6 +55,13 @@ static int been_here;
 	}
 }
 
+#define MOVEM_LIMIT	2
+/* If #registers to be saved exceeds MOVEM_LIMIT, we
+* use the movem instruction to save registers; else
+* we simply use several move.l's.
+*/
+
+
 regscore(off,size,typ,score,totyp)
 	long off;
 {
@@ -64,7 +71,7 @@ regscore(off,size,typ,score,totyp)
 			return -1;
 		case reg_pointer:
 			if (size != 4 || totyp != reg_pointer) return -1;
-			score *= 2;
+			score += (score >> 1);
 			break;
 		case reg_loop:
 			score += 5;
@@ -79,7 +86,7 @@ regscore(off,size,typ,score,totyp)
 		 */
 		score -= 2;
 	}
-	score -= 1; /* take save/restore into account */
+	score--;	/* save/restore */
 	return score;
 }
 struct regsav_t {
@@ -95,12 +102,6 @@ i_regsave()
 {
 	regnr = 0;
 }
-
-#define MOVEM_LIMIT	2
-/* If #registers to be saved exceeds MOVEM_LIMIT, we
-* use the movem instruction to save registers; else
-* we simply use several move.l's.
-*/
 
 save()
 {

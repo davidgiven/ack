@@ -726,6 +726,9 @@ pat stl inreg($1)==reg_any
 with any4
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen move %1, {LOCAL, $1}
+with exact STACK
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    gen move {post_inc4, sp}, {LOCAL, $1}
 
 pat stl inreg($1)==reg_pointer
 with any4
@@ -737,11 +740,17 @@ with exact ext_addr
 with exact address-ext_addr
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen lea %1, {LOCAL, $1}
+with exact STACK
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
+    gen move {post_inc4, sp}, {LOCAL, $1}
 
 pat sil inreg($1)==reg_pointer
 with any4
     kills allexceptcon
     gen move %1, {indirect4, regvar($1, reg_pointer)}
+with exact STACK
+    kills allexceptcon
+    gen move {post_inc4, sp}, {indirect4, regvar($1, reg_pointer)}
 
 
 pat lol sbi stl $1==$3 && $2==4 && inreg($1)==reg_any
@@ -866,13 +875,41 @@ pat lil dec sil $1==$3 && inreg($1)==reg_pointer
     kills allexceptcon
     gen sub_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
 
+pat lil adp sil $1==$3 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen add_l {const, $2}, {indirect4, regvar($1, reg_pointer)}
+
+pat lol lof inc lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen add_l {const, 1}, {offsetted4, regvar($1, reg_pointer), $2}
+
+pat lol lof dec lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen sub_l {const, 1}, {offsetted4, regvar($1, reg_pointer), $2}
+
+pat lol lof adp lol stf $1==$4 && $2==$5 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen add_l {const, $3}, {offsetted4, regvar($1, reg_pointer), $2}
+
 pat inl inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen add_l {const, 1}, {LOCAL, $1}
 
+pat lol inl $1==$2 && inreg($1)==reg_any
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    uses DD_REG = {LOCAL, $1}
+    gen add_l {const, 1}, {LOCAL, $1}
+			yields %a
+
 pat del inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     gen sub_l {const, 1}, {LOCAL, $1}
+
+pat lol del $1==$2 && inreg($1)==reg_any
+    kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
+    uses DD_REG = {LOCAL, $1}
+    gen sub_l {const, 1}, {LOCAL, $1}
+			yields %a
 
 pat zrl inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
@@ -892,6 +929,11 @@ proc lilxxsil example lil and sil
 with conreg4
     kills allexceptcon
     gen xxx* %1, {indirect4, regvar($1, reg_pointer)}
+
+proc lolfxxlolf example lol lof and lol stf
+with conreg4
+    kills allexceptcon
+    gen xxx* %1, {offsetted4, regvar($1, reg_pointer), $2}
 
 proc lolcxxstl example lol loc and stl
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
@@ -915,6 +957,8 @@ pat lol loc adi stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("add.l")
 pat lil adi sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
 					call lilxxsil("add.l")
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
+					call lolfxxlolf("add.l")
 pat lil loc adi sil $1==$4 && $3==4 && inreg($1)==reg_pointer
 					call lilcxxsil("add.l")
 pat lol lol adi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
@@ -928,6 +972,8 @@ pat lol loc adu stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("add.l")
 pat lil adu sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
 					call lilxxsil("add.l")
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
+					call lolfxxlolf("add.l")
 pat lil loc adu sil $1==$4 && $3==4 && inreg($1)==reg_pointer
 					call lilcxxsil("add.l")
 pat lol lol adu stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
@@ -959,6 +1005,8 @@ pat lol loc and stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("and.l")
 pat lil and sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
 					call lilxxsil("and.l")
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
+					call lolfxxlolf("and.l")
 pat lil loc and sil $1==$4 && $3==4 && inreg($1)==reg_pointer
 					call lilcxxsil("and.l")
 pat lol lol and stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
@@ -972,6 +1020,8 @@ pat lol loc ior stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("or.l")
 pat lil ior sil $1==$3 && $2==4 && inreg($1)==reg_pointer
 					call lilxxsil("or.l")
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
+					call lolfxxlolf("or.l")
 pat lil loc ior sil $1==$4 && $3==4 && inreg($1)==reg_pointer
 					call lilcxxsil("or.l")
 pat lol lol ior stl $1==$4 && $3==4 && inreg($1)==reg_any &&
@@ -986,6 +1036,8 @@ pat lol loc xor stl $1==$4 && $3==4 && inreg($1)==reg_any
 					call lolcxxstl("eor.l")
 pat lil xor sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
 					call lilxxsil("eor.l")
+pat lol lof adi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_pointer
+					call lolfxxlolf("eor.l")
 pat lil loc xor sil $1==$4 && $3==4 && inreg($1)==reg_pointer
 					call lilcxxsil("eor.l")
 pat lol lol xor stl $1==$4 && $3==4 && inreg($1)==reg_any &&
@@ -1003,6 +1055,12 @@ pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
     uses AA_REG = {indirect4, regvar($1, reg_pointer)}
     gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
+			yields	%a
+
+pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
+    kills allexceptcon
+    uses AA_REG = {offsetted4, regvar($1, reg_pointer), $2}
+    gen add_l {const, $4}, {offsetted4, regvar($1, reg_pointer), $2}
 			yields	%a
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==1 && $5==1 &&
@@ -1307,6 +1365,7 @@ with A_REG		yields	{offsetted4, %1, 4}
 				{indirect4, %1}
 pat loi $1>8
 with AA_REG STACK
+    kills ALL
     uses DD_REG = {const, $1/4 -1}
     gen add_l {const, $1}, %1
 	1:
@@ -1315,6 +1374,7 @@ with AA_REG STACK
 
 pat los $1==4
 with STACK
+    kills ALL
     gen jsr {absolute4, ".los"}
 
 pat lde			yields	{absolute4, $1+4}
@@ -1380,6 +1440,7 @@ with any4
     kills all_indir, LOCAL %bd==$1
     gen move %1, {LOCAL, $1}
 with exact STACK
+    kills all_indir, LOCAL %bd==$1
     gen move {post_inc4,sp}, {LOCAL, $1}
 
 pat ste
@@ -1387,6 +1448,7 @@ with any4
     kills posextern
     gen move %1, {absolute4, $1}
 with exact STACK
+    kills posextern
     gen move {post_inc4, sp}, {absolute4, $1}
 
 pat sil
@@ -1395,6 +1457,7 @@ with any4
     kills allexceptcon
     gen move %1, {ILOCAL, $1}
 with exact STACK
+    kills allexceptcon
     gen move {post_inc4, sp}, {ILOCAL, $1}
 #else TBL68020
 with any4
@@ -1402,6 +1465,7 @@ with any4
     uses AA_REG = {LOCAL, $1}
     gen move %1, {indirect4, %a}
 with exact STACK
+    kills allexceptcon
     uses AA_REG = {LOCAL, $1}
     gen move {post_inc4, sp}, {indirect4, %a}
 #endif TBL68020
@@ -1411,6 +1475,7 @@ with A_REG any4
     kills allexceptcon
     gen move %2, {offsetted4, %1, $1}
 with A_REG STACK
+    kills allexceptcon
     gen move {post_inc4, sp}, {offsetted4, %1, $1}
 with exact local_addr any4
     kills allexceptcon
@@ -1605,6 +1670,7 @@ with A_REG any4
     kills allexceptcon
     gen move %2, {indirect4, %1}
 with A_REG STACK
+    kills allexceptcon
     gen move {post_inc4, sp}, {indirect4, %1}
 with exact local_addr any4
     kills allexceptcon
@@ -1669,6 +1735,7 @@ with exact ext_regX any4
 
 pat sti $1>4
 with AA_REG STACK
+    kills ALL
     uses DD_REG = {const, $1/4 -1}
     gen 1:
 	move_l {post_inc4, sp}, {post_inc4, %1}
@@ -1676,6 +1743,7 @@ with AA_REG STACK
 
 pat sts $1==4
 with STACK
+    kills ALL
     gen jsr {absolute4, ".sts"}
 
 pat sdl
@@ -1805,6 +1873,7 @@ with data4 DD_REG
     gen muls_l %1, %2	yields	%2
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".mli"}
 			yields	d1
 #endif TBL68020
@@ -1815,6 +1884,7 @@ with data4 DD_REG
     gen divs_l %1, %2	yields	%2
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".dvi"}
 			yields	d1
 #endif TBL68020
@@ -1829,6 +1899,7 @@ with data4 DD_REG
 			yields	%a
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".dvi"}
 			yields	d0
 #endif TBL68020
@@ -1862,6 +1933,7 @@ with data4 DD_REG
     gen mulu_l %1, %2	yields	%2
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".mlu"}
 			yields	d1
 #endif TBL68020
@@ -1872,6 +1944,7 @@ with data4 DD_REG
     gen divu_l %1, %2	yields	%2
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".dvu"}
 			yields	d1
 #endif TBL68020
@@ -1886,6 +1959,7 @@ with data4 DD_REG
 			yields	%a
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".dvu"}
 			yields	d0
 #endif TBL68020
@@ -2034,6 +2108,12 @@ pat inl
     kills all_indir, LOCAL %bd==$1
     gen add_l {const, 1}, {LOCAL, $1}
 
+pat lol inl $1==$2
+    kills all_indir, LOCAL %bd==$1
+    uses DD_REG = {LOCAL, $1}
+    gen add_l {const, 1}, {LOCAL, $1}
+			yields %a
+
 pat ine
     kills posextern
     gen add_l {const, 1}, {absolute4, $1}
@@ -2048,6 +2128,12 @@ with DD_REG+AA_REG
 pat del
     kills all_indir, LOCAL %bd==$1
     gen sub_l {const, 1}, {LOCAL, $1}
+
+pat lol del $1==$2
+    kills all_indir, LOCAL %bd==$1
+    uses DD_REG = {LOCAL, $1}
+    gen sub_l {const, 1}, {LOCAL, $1}
+			yields %a
 
 pat dee
     kills posextern
@@ -2086,10 +2172,12 @@ pat zrf				leaving loc 18 trp
 
 pat cii
 with STACK
+    kills ALL
     gen jsr {absolute4, ".cii"}
 
 pat cuu
 with STACK
+    kills ALL
     gen jsr {absolute4, ".cuu"}
 
 pat ciu				leaving cuu
@@ -2117,18 +2205,22 @@ with DD_REG datalt4+const
 proc logdef example and
 with STACK
     uses DD_REG = {const, $1/4 -1},
-	 AA_REG = {regAcon, sp, $1},
+	 AA_REG,
 	 DD_REG
-    gen 1:
+    gen 
+	lea {regAcon, sp, $1}, %b
+	1:
 	move_l {post_inc4, sp}, %c
 	xxx* %c, {post_inc4, %b}
 	dbf %a, {slabel, 1b}
 
 proc logndef
 with DD_REG STACK
-    uses AA_REG = {regAregXcon, sp, %1, 1, 0},
+    uses AA_REG,
 	 DD_REG
-    gen asr_l {shconst, 2}, %1
+    gen
+	lea {regAregXcon, sp, %1, 1, 0},%a
+	asr_l {shconst, 2}, %1
 	sub_l {const, 1}, %1
 	1:
 	move_l {post_inc4, sp}, %b
@@ -2204,6 +2296,7 @@ with conreg2 DD_REG
 
 pat inn defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	move {const, $1}, d1
 	jsr {absolute4, ".inn"}
@@ -2211,6 +2304,7 @@ with any4 STACK
 
 pat inn !defined($1)
 with any4 any4 STACK
+    kills ALL
     gen move %2, d0
 	move %1, d1
 	jsr {absolute4, ".inn"}
@@ -2229,12 +2323,14 @@ with conreg2
 
 pat set $1>4
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	move {const, $1}, d1
 	jsr {absolute4, ".set"}
 
 pat set !defined($1)
 with any4 any4 STACK
+    kills ALL
     gen move %2, d0
 	move %1, d1
 	jsr {absolute4, ".set"}
@@ -2249,32 +2345,38 @@ with any4 any4 STACK
 
 pat lar defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".lar"}
 
 pat lar !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".lar"}
 
 pat sar defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".sar"}
 
 pat sar !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".sar"}
 
 pat aar defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".aar"}
 			yields	a0
 
 pat aar !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".aar"}
 			yields	a0
@@ -2334,12 +2436,14 @@ pat cmi $1==4			leaving sbi 4
 
 pat cmi defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".cmi"}
 			yields	d0
 
 pat cmi !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".cmi"}
 			yields	d0
@@ -2348,12 +2452,14 @@ pat cmu $1==4			leaving sbi 4
 
 pat cmu defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".cmu"}
 			yields	d0
 
 pat cmu !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".cmu"}
 			yields	d0
@@ -2362,12 +2468,14 @@ pat cms $1==4			leaving sbi 4
 
 pat cms defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".cms"}
 			yields	d0
 
 pat cms !defined($1)
 with any4 STACK
+    kills ALL
     gen move %1, d0
 	jsr {absolute4, ".cms"}
 			yields	d0
@@ -2484,8 +2592,10 @@ with exact ext_addr
     kills ALL
     gen jsr {absolute4, %1.bd}
 with A_REG STACK
+    kills ALL
     gen jsr {indirect4, %1}
 with STACK
+    kills ALL
     uses AA_REG = {post_inc4, sp}
     gen jsr {indirect4, %a}
 #ifdef TBL68020
@@ -2494,11 +2604,13 @@ with exact address
     gen jsr %1
 #else TBL68020
 with address STACK
+    kills ALL
     gen jsr %1
 #endif TBL68020
 
 pat cal
 with STACK
+    kills ALL
     gen jsr {absolute4, $1}
 
 pat lfr $1==4		yields	d0
@@ -2567,7 +2679,7 @@ with AA_REG AA_REG
 
 pat bls $1==4
 with DD_REG AA_REG AA_REG
-    kills allexceptcon, AA_REG
+    kills ALL
     gen asr_l {shconst, 2}, %1
 	beq {slabel, 2f}
 	sub_l {const, 1}, %1
@@ -2606,8 +2718,10 @@ with STACK
 
 pat dus $1==4
 with DD_REG STACK
-    uses AA_REG = {regAregXcon, sp, %1, 1, 0}
-    gen asr_l {shconst, 2}, %1
+    uses AA_REG
+    gen
+    	lea {regAregXcon, sp, %1, 1, 0}, %a
+	asr_l {shconst, 2}, %1
 	beq {slabel, 2f}
 	sub_l {const, 1}, %1
 	1:
@@ -2620,11 +2734,13 @@ with any4 any4		yields	%1 %2
 
 pat exg defined($1)
 with STACK
+    kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".exg"}
 
 pat exg !defined($1)
 with any4 STACK
+    kills ALL
     gen move_l %1, d0
 	jsr {absolute4, ".exg"}
 
@@ -2663,10 +2779,12 @@ pat lpb				leaving adp 8
 
 pat mon
 with STACK
+    kills ALL
     gen jsr {absolute4, ".mon"}
 
 pat nop
 with STACK
+    kills ALL
     gen jsr {absolute4, ".nop"}
 
 pat rck
@@ -2691,6 +2809,7 @@ with A_REG D_REG
 	1:			yields	%2
 #else TBL68020
 with STACK
+    kills ALL
     gen jsr {absolute4, ".rck"}
 #endif TBL68020
 
@@ -2709,6 +2828,7 @@ with any4
 
 pat str $1==0
 with any4 STACK
+    kills ALL
     gen move %1, lb
 
 pat str $1==1
@@ -2717,10 +2837,12 @@ with any4 STACK
 
 pat str $1==2
 with STACK
+    kills ALL
     gen jsr {absolute4, ".strhp"}
 
 pat trp
 with STACK
+    kills ALL
     gen jsr {absolute4, ".trp"}
  
 
@@ -3235,13 +3357,13 @@ pat loc loc cii loc bne $1==2 && $2==4 && in_2($4)	call bxx2_in("bne")
 pat loc loc cii loc bge $1==2 && $2==4 && in_2($4)	call bxx2_in("bge")
 pat loc loc cii loc bgt $1==2 && $2==4 && in_2($4)	call bxx2_in("bgt")
 
-pat loc loc cii $1==1 && $2==2
-with DD_REG
-    gen ext_w %1	yields	%1
-
 pat loc loc cii $1==2 && $2==4
 with DD_REG
     gen ext_l %1	yields	%1
+with exact data2
+uses reusing %1,DD_REG
+    gen move %1,%a
+	ext_l %a	yields	%a
 
 pat loc loc cii $1==1 && $2==4
 with DD_REG
@@ -3250,6 +3372,15 @@ with DD_REG
 #else TBL68020
     gen ext_w %1
 	ext_l %1	yields	%1
+#endif TBL68020
+with exact data1
+uses reusing %1,DD_REG
+    gen move %1,%a
+#ifdef TBL68020
+        extb_l %a	yields %a
+#else TBL68020
+    	ext_w %a
+	ext_l %a	yields	%a
 #endif TBL68020
 
 pat loc loc ciu $1==$2	/* skip this */
