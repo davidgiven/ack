@@ -77,7 +77,7 @@
 
 
 !File: bigparam.h
-#define PASS_BIG_VAL_AS_VAR 1	/* define when big value parameters must be
+#undef PASS_BIG_VAL_AS_VAR 1	/* define when big value parameters must be
 				   passed as addresses
 				*/
 
