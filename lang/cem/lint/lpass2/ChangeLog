@@ -1,3 +1,8 @@
+28-Oct-88  Dick Grune (dick) at dick
+	The names of UNIX lint library files start with llib-l..., where the
+	-l is the -l from -lc and -lm, a hack if there ever was one.  Our
+	(ACK) lint library files now end in .llb.
+
  2-Sep-88  Dick Grune (dick) at dick
 	Guided by lint itself, many functions have been declared PRIVATE.
 

@@ -1,4 +1,8 @@
-.TH LINT 1 88/2/22
+.\" (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+.\" See the copyright notice in the ACK home directory, in the file "Copyright".
+.\"
+.\" $Header$
+.TH LINT 1 88/10/13
 .SH NAME
 lint \- a C program checker
 .SH SYNOPSIS
@@ -12,7 +16,9 @@ lint \- a C program checker
 .br
 .B lint
 .BR \-L libname
-[file | libname2 ] ...
+[file | libname2
+.BR \-l xxx
+] ...
 .br
 .SH DESCRIPTION
 .I Lint
@@ -20,32 +26,44 @@ does an extensive consistency and plausibility check on a set of C
 program files.
 When it detects a doubtful construction
 (which need not be an error) it gives a warning.
-.I Lint
-does a full flow-of-control check, except that
+.PP
+It does a full flow-of-control check, except that
 .BR goto s
-are not followed and non-termination of functions is not propagated.
+are not followed and that the fact that a function does not return
+is not propagated.
 If, however, no
 .BR goto s
-are used, each call to a non-terminating function is followed by
+are used, each call of a non-returning function is followed by
 /*NOTREACHED*/ and each switch has a default clause (possibly consisting
 of /*NOTREACHED*/), the initialization state of all local variables will
 be checked correctly.
 .PP
-The second command is used to maintain lint libraries; these are ASCII files
+It checks the types of the arguments implied by the format in a call of
+.IR printf() ,
+.IR scanf()
+and family, if the format-string is a direct argument in the call.
+Formats of user functions can be indicated using a FORMAT pseudo-comment; see
+below.
+.PP
+.I Libraries
+.PP
+The second command (the
+.BR \-L -option)
+is used to maintain lint libraries; these are ASCII files
 that contain the output of the first pass.
-A library name must start with
-.B llib\-l
-and cannot end in
-.BR .c .
+A library name ends in
+.BR .llb .
 A lint user library can be created and updated by using the
 .B \-L
 option.  The
 .I libname
-must be a local file and can be passed to
+must be a local file, end in
+.BR .llb ,
+and can be passed to
 .I lint
 again as a normal argument.
 .PP
-Standard libraries are searched using the
+Standard libraries are searched by default or by explicitly giving the
 .B \-l
 option; their format is identical to that of the user library files.
 Possibilities are
@@ -59,13 +77,19 @@ is default; a single
 tells
 .I lint
 not to use the standard C library.
+The standard libraries are searched for in the standard lint directory or
+in the directory given in the environment variable LINTLIB, if present.
+.PP
+.I Options
 .PP
 The
 .BR \-D ,
 .B \-U
 and
 .B \-I
-options are recognized as separate arguments.  The
+options are recognized as separate arguments and conform to those of
+.IR cc .
+The
 .B \-KR
 option tells
 .I lint
@@ -88,8 +112,9 @@ This flag may be useful when
 is run on a generated source file.
 .TP
 .B h
-Signal "null effects", possible pointer alignment problems and unexpected
-constructs.  Report definitions of variables that have a scope wider than
+Apply several heuristics:
+signal "null effects", possible pointer alignment problems and odd
+constructs; report definitions of variables that have a scope wider than
 necessary: extern variables that are used in one file only, automatic
 variables that could be more local.
 .TP
@@ -102,19 +127,10 @@ Do not warn about unused arguments of functions.
 .B x
 Complain about unused external variables.
 .PP
-In some cases where the programmer knows that a construction is questionable
-but nevertheless correct, a pseudo-comment can be used to silence
-.IR lint ;
-the comments recognized are:
-.TP
-/* VARARGS\fIn\fR */
-The next function can be called with a variable number of
-arguments.
-Only check the types of the first \fIn\fR arguments.
-The \fIn\fR must follow the word VARARGS immediately.
-.TP
-/* VARARGS */
-Same as /* VARARGS0 */
+.I Pseudo-comments
+.PP
+The following pseudo-comments can be used to influence the behaviour of
+.IR lint:
 .TP
 /* ARGSUSED */
 Do not warn about arguments not used in the next function
@@ -132,12 +148,63 @@ that a statement never "returns".
 The following definitions are assumed to be part of a library.
 It suppresses complaints about unused functions and variables
 and is used in the creation of lint libraries.
+It implies /* ARGSUSED */.
+.TP
+/* VARARGS\fIn\fR */
+The next function can be called with a variable number of
+arguments.
+Only check the types of the first \fIn\fR arguments.
+The \fIn\fR must follow the word VARARGS immediately.
+/* VARARGS0 */ may be abbreviated to /* VARARGS */.
+.TP
+/* FORMAT\fIn\fR $ ... $ */
+The \fIn\fP-th argument (counting from 0) of the  next function declaration
+corresponds to a
+.IR printf -like
+format string.  Details about the format are given between the $$. A missing
+$$ repeats the latest format.
+The \fIn\fR must follow the word FORMAT immediately.
+/* FORMAT\fIn\fR $ ... $ */ implies /* VARARGS\fIn+1\fP */; if the format
+is followed by more required arguments, a separate /* VARARGS\fIm\fP */
+must be given after the FORMAT pseudo-comment.
+.PP
+.I Formats
+.PP
+.I Lint
+recognizes conversion specifications of the form %[N|*|][.[N|*]]X where X
+is an arbitrary string, given in the $$-part of the FORMAT pseudo-comment.
+The latter consists of a list of format specifications, each of the form
+.IR %X = type ,
+where 
+.I type
+is the expected type in "C normal form" (like in a cast, with no superfluous
+parentheses and without the use of typedefs).
+.PP
+Example: the FORMAT pseudo-comment for
+.I printf()
+is:
+.br
+/* FORMAT0 $
+.br
+	%[dox] = int		%l[dox] = long		%[DOX] = long
+.br
+	%u = unsigned int	%lu = unsigned long	%U = unsigned long
+.br
+	%[feg] = double
+.br
+	%c = int		%s = char *
+.br
+$ */
+.SH "ENVIRONMENT VARIABLES"
+LINTFLAGS	additional flag arguments (e.g. LINTFLAGS=\-h)
+.br
+LINTLIB		directory in which the standard libraries are looked up
 .SH FILES
-.IP ???/lnt 35
+.IP ???/lnt 24
 first pass
 .IP ???/lpass2/lpass2
 second pass
-.IP ???/llib/llib\-l*
+.IP ???/llib/*.llb
 lint libraries
 .SH SEE ALSO
 cem(1)
@@ -152,3 +219,6 @@ After a label, all automatic variables are assumed initialized.
 Initializations hidden inside for statements are sometimes overlooked.
 .SH AUTHOR
 Frans Kunst, Vrije Universiteit, Amsterdam.
+.br
+Dick Grune, Vrije Universiteit, Amsterdam.
+.br

@@ -10,9 +10,11 @@ PATH=/bin:/usr/bin
 
 EMLINT=/usr/dick/lint
 
-LPASS1="$EMLINT/lpass1/lnt -Dmc68000"
-LPASS2="$EMLINT/lpass2/lpass2"
-LINTLIB=${LINTLIB-$EMLINT/llib}
+LPASS1="$EMLINT/lpass1/lnt -Dmc68000"	# pass 1 program
+LPASS2="$EMLINT/lpass2/lpass2"		# pass 2 program
+LLLIB="$EMLINT/llib"			# lint libraries directory
+
+LINTLIB=${LINTLIB-$LLLIB}
 
 TMP=/usr/tmp/lint1.$$
 NEW=/usr/tmp/lint2.$$
@@ -23,7 +25,7 @@ trap "rm -f $TMP $NEW; exit 0" 0
 set dummy $LINTFLAGS $@			# dummy as a shield for $LINTFLAGS
 shift					# remove dummy
 
-LIBRARY=no
+LIBRARY=
 
 # get the non-library options
 while	test -n "$1"
@@ -41,7 +43,7 @@ do
 		shift
 		;;
 	-L*)	# make a lint library
-		LIBRARY=`expr "$1" : '-L\(llib-l.*\)'`
+		LIBRARY=`expr "$1" : '-L\(.*\)'`
 		shift
 		;;
 	-*)	# for pass 1 or pass 2
@@ -56,23 +58,23 @@ do
 done
 
 case "$LIBRARY" in
-no)	# normal lint; we want its messages on stdout; this takes some doing
+'')	# normal lint; we want its messages on stdout; this takes some doing
 	(	# intermediate file has to go to stdout for pipe connection
 		(	# pass 1: messages to stderr
-			LIBC=true	# true if llib-lc to be included
+			LIBC=true	# true if c.llb to be included
 			STATNR=0	# static scope number
 
 			for F in $*
 			do
 				case $F in
-				-l)	# do NOT include llib-lc
+				-l)	# do NOT include c.llb
 					LIBC=
 					;;
-				-lc)	# do include llib-lc
+				-lc)	# do include c.llb
 					LIBC=true
 					;;
 				-l*)	# include special lint library
-					cat $LINTLIB/llib$F
+					cat $LINTLIB/`expr $F : '-l\(.*\)'`.llb
 					;;
 				*.c)	# a real C-file
 					STATNR=` expr $STATNR + 1 `
@@ -80,7 +82,7 @@ no)	# normal lint; we want its messages on stdout; this takes some doing
 					;;
 				*)	# a lint library?
 					case `basename $F` in
-					llib-l*)	# yes, it is
+					*.llb)	# yes, it is
 						cat $F
 						;;
 					*)
@@ -92,8 +94,8 @@ no)	# normal lint; we want its messages on stdout; this takes some doing
 			done
 
 			case "$LIBC" in
-			true)	# append llib-lc
-				cat $LINTLIB/llib-lc
+			true)	# append c.llb
+				cat $LINTLIB/c.llb
 				;;
 			esac
 		) |
@@ -108,15 +110,14 @@ no)	# normal lint; we want its messages on stdout; this takes some doing
 	cat $TMP
 	;;
 
-*)	# making a lint library
+?*)	# making a lint library
 	set -e				# stop at first sign of trouble
 
-	case $LIBRARY in
-	llib-l*)	# OK
+	case "$LIBRARY" in
+	*.llb)	# OK
 		;;
-	*)
-		echo "Lint library name does not start with 'llib-l'" >&2
-		exit 1
+	*)	# no suffix .llb
+		LIBRARY=$LIBRARY.llb
 		;;
 	esac
 
@@ -129,15 +130,11 @@ no)	# normal lint; we want its messages on stdout; this takes some doing
 	do
 		case $F in
 		*.c)	# a C file
-			(	echo "/* LINTLIBRARY */"
-				echo "#line 1 \"$F\""
-				cat $F
-			) >$TMP
-			$LPASS1 $PARAMS1 -Dlint -v $TMP
+			$LPASS1 $PARAMS1 -Dlint -L $F
 			;;
 		*)	# a library?
 			case `basename $F` in
-			llib-l*)	# yes, it is
+			*.llb)	# yes, it is
 				cat $F
 				;;
 			*)
@@ -151,12 +148,15 @@ no)	# normal lint; we want its messages on stdout; this takes some doing
 	# get the last line for each name and sort them
 	cat $LIBRARY $NEW |
 	awk -F: '
-		{	entry[$1] = $0;
-		}
-	END	{	for (e in entry) {print entry[e];}
-		}
+		{
+		entry[$1] = $0;
+	}
+	END	{
+		for (e in entry) {print entry[e];}
+	}
 	' |
-	sort >$TMP
+	sort |
+	grep -v '^main:' >$TMP
 
 	cp $TMP $LIBRARY
 
