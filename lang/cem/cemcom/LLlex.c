@@ -105,13 +105,8 @@ GetToken(ptok)
 again:	/* rescan the input after an error or replacement	*/
 	LoadChar(ch);
 go_on:	/* rescan, the following character has been read	*/
-	/* The following test is made to strip off the nonascii's	 */
-	if ((ch & 0200) && ch != EOI) {
-		/*	this is the only user-error which causes the
-			process to stop abruptly.
-		*/
+	if ((ch & 0200) && ch != EOI) /* stop on non-ascii character */
 		fatal("non-ascii '\\%03o' read", ch & 0377);
-	}
 	switch (class(ch)) {	/* detect character class	*/
 	case STNL:		/* newline, vertical space or formfeed	*/
 		LineNumber++;			/* also at vs and ff	*/
@@ -150,8 +145,7 @@ go_on:	/* rescan, the following character has been read	*/
 	case STSIMP:	/* a simple character, no part of compound token*/
 		if (ch == '/') { /* probably the start of comment	*/
 			LoadChar(ch);
-			if (ch == '*') {
-				/* start of comment	*/
+			if (ch == '*') { /* start of comment */
 				skipcomment();
 				goto again;
 			}
@@ -189,12 +183,8 @@ go_on:	/* rescan, the following character has been read	*/
 		case '<':
 			if (AccFileSpecifier) {
 				PushBack();	/* pushback nch */
-				ptok->tk_bts =
-					string_token(
-						"file specifier",
-						'>',
-						&(ptok->tk_len)
-					);
+				ptok->tk_bts = string_token("file specifier",
+							'>', &(ptok->tk_len));
 				return ptok->tk_symb = FILESPECIFIER;
 			}
 			if (nch == '<')
@@ -284,11 +274,10 @@ go_on:	/* rescan, the following character has been read	*/
 		}
 #endif NOPP
 		ptok->tk_symb = (
-			idef->id_reserved ?
-				idef->id_reserved :
-			idef->id_def && idef->id_def->df_sc == TYPEDEF ?
-				TYPE_IDENTIFIER :
-			IDENTIFIER
+			idef->id_reserved ? idef->id_reserved
+			: idef->id_def && idef->id_def->df_sc == TYPEDEF ?
+				TYPE_IDENTIFIER
+			: IDENTIFIER
 		);
 		return IDENTIFIER;
 	}
@@ -467,8 +456,7 @@ skipcomment()
 				return;
 			}
 			LoadChar(c);
-		}
-		/* Last Character seen was '*' */
+		} /* last Character seen was '*' */
 		LoadChar(c);
 	} while (c != '/');
 	NoUnstack--;
@@ -557,8 +545,8 @@ val_in_base(ch, base)
 	register int ch;
 {
 	return
-		is_dig(ch) ? ch - '0' :
-		base != 16 ? -1 :
-		is_hex(ch) ? (ch - 'a' + 10) & 017 :
-		-1;
+		is_dig(ch) ? ch - '0'
+		: base != 16 ? -1
+		: is_hex(ch) ? (ch - 'a' + 10) & 017
+		: -1;
 }
