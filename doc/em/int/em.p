@@ -192,7 +192,7 @@ var
   iclass: insclass;     { true for escaped opcodes }
   dispat: array[insclass,byte] of dispatch;
   retsize:size;         { holds size of last LFR }
-  insr: mnem;           { holds the instructionnumber }
+  insr: mnem;           { holds the instruction number }
   halted: boolean;      { normally false }
   exitstatus:word;      { parameter of MON 1 }
   ignmask:word;         { ignore mask for traps }
