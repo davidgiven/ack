@@ -75,7 +75,7 @@ MODULE StoreFetch;
 	REPEAT
 		INC(i);
 		Remove(OrdOfChar);
-		String[i] := CHR(OrdOfChar);
+		String[i] := CHR(CARDINAL(OrdOfChar));
 	UNTIL String[i] = eos;
 	WriteLn;
 	WriteString("After transfer: ");
