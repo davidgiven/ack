@@ -456,6 +456,13 @@ sti $1==8       | dadres2 DBL_REG |
 			INDSTORE
 			"movf %[2],%[1.ind]"
 			samecc					|	| |
+...		| SCR_REG regdef8 |
+			INDSTORE
+			"mov (%[2.reg]),(%[1])+"
+			"mov 2(%[2.reg]),(%[1])+"
+			"mov 4(%[2.reg]),(%[1])+"
+			"mov 6(%[2.reg]),(%[1])"
+			erase(%[1])				|	| |
 ...		| SCR_REG regind8 |
 			INDSTORE
 			"mov %[2.ind](%[2.reg]),(%[1])+"
