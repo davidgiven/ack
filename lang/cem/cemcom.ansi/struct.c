@@ -248,8 +248,15 @@ apply_struct(fund, idf, tpp)
 
 	tgp = &idf->id_tag;
 
-	if (*tgp)
+	if (*tgp) {
+		if (fund != (*tgp)->tg_type->tp_fund) {
+			error("tag %s indicates a %s, not a %s",
+				idf->id_text,
+				symbol2str((*tgp)->tg_type->tp_fund),
+				symbol2str(fund));
+		}
 		*tpp = (*tgp)->tg_type;
+	}
 	else
 		declare_struct(fund, idf, tpp);
 }
