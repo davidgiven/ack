@@ -6,30 +6,15 @@
 /* PREPROCESSOR: PRAGMA INTERPRETER */
 
 #include	"debug.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"Lpars.h"
 #include	"idf.h"
-#include	"input.h"
-#include	"ifdepth.h"	
-#include	"botch_free.h"	
-#include	"nparams.h"	
-#include	"parbufsize.h"	
-#include	"textsize.h"	
-#include	"idfsize.h"	
-#include	"assert.h"
-#include	<alloc.h>
-#include	"class.h"
-#include	"macro.h"
 
 #define P_UNKNOWN	0
-#define P_FLAGS		1
+#define NR_PRAGMAS	0
 
 struct pkey {
 	char *pk_name;
 	int pk_key;
-} pragmas[] = {
-	{"cemflags",	P_FLAGS},
+} pragmas[NR_PRAGMAS + 1] = {
 	{0,		P_UNKNOWN}
 };
 
@@ -37,27 +22,23 @@ extern struct idf *GetIdentifier();
 
 do_pragma()
 {
-	register struct pkey *pkp;
-	register struct idf *id;
-	struct token tk;
+	register struct pkey *pkp = &pragmas[0];
+	register struct idf *id = GetIdentifier(1);
 
-	if ((id = GetIdentifier(1)) != (struct idf *)0) {
-		/*	Lineair search - why bother ?
-		*/
-		for (pkp = &pragmas[0]; pkp->pk_key != P_UNKNOWN; pkp++)
+	if (id != (struct idf *)0) {
+#if	NR_PRAGMAS
+		while(pkp->pk_name) {
 			if (strcmp(pkp->pk_name, id->id_text) == 0)
 				break;
+			pkp++;
+		}
 
 		switch (pkp->pk_key) {
-		case P_FLAGS:
-			if (GetToken(&tk) == STRING)
-				do_option(tk.tk_bts);
-			break;
-
 		case P_UNKNOWN:
 		default:
 			break;
 		}
+#endif
 		SkipToNewLine();
 	}
 }
