@@ -1,3 +1,4 @@
+# $Revision$
 var w=2
 var p=2
 var s=2
@@ -6,20 +7,23 @@ var f=4
 var d=4
 var M=cpm
 var NAME=CPM
-var LIB=mach/z80/int/lib/tail_
-var RT=mach/z80/int/lib/head_
+var LIB=lib/z80/int/tail_
+var RT=lib/z80/int/head_
 var SIZE_F=-sm
 var INCLUDES=-I{EM}/include -I/usr/include
 name asld
-	from .k.m.a
-	to e.out
+	from .k.m.a.g
+	to .out
+	outfile e.out
 	program {EM}/lib/em_ass
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -+* ASS_F={ASS_F?} -+*
 	mapflag --* ASS_F={ASS_F?} --*
 	mapflag -s* SIZE_F=-s*
-	args {ASS_F?} ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
-(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.c.p:{TAIL}={EM}/{LIB}mon)
-	prop C
+	args {ASS_F?} ({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.b.c.p:{TAIL}={EM}/{LIB}mon)
+	linker
 end

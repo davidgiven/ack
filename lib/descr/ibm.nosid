@@ -1,3 +1,4 @@
+# $Revision$
 var w=2
 var p=2
 var s=2
@@ -28,10 +29,12 @@ name asld
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i  IFILE={EM}/{RT}i
 	args {IFILE?} (.e:{HEAD}={EM}/{RTIBM}em) \
-({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
-(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.e:{TAIL}={EM}/{LIBIBM}em) \
-(.c.p:{TAIL}={EM}/{LIBIBM}mon) \
-(.e:{TAIL}={EM}/{LIBIBM}em.vend)
+		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.e:{TAIL}={EM}/{LIBIBM}em) \
+		(.b.c.p:{TAIL}={EM}/{LIBIBM}mon) \
+		(.e:{TAIL}={EM}/{LIBIBM}em.vend)
 	linker
 end
