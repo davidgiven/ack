@@ -23,7 +23,7 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the Motorola 68000
  */
 
-/* #define IEEEFLOAT */
+#include "fppsim.h"
 
 #ifdef IEEEFLOAT
 #include "FP.h"
@@ -78,19 +78,24 @@ con_float()
 {
 	register word	sz;
 	register long	*l;
+#ifdef FPPSIM
 #ifdef IEEEFLOAT
 	register my_dbl	*md;
 #endif IEEEFLOAT
-		 double	d;
-	char	mesg[128];
+		 double	d, atof();
+#else not FPPSIM
+	static int been_here;
+#endif
 
 	sz = argval;
 	if (sz!= 4 && sz!= 8) {
+		char	mesg[128];
 		sprintf(mesg,"con_float(): bad fcon size %d %ld\nstr: %s\n\0",
 				sz,sz,str);
 		fatal(mesg);
 	}
 
+#ifdef FPPSIM
 	d = atof(str);
 	l = (long *) &d;
 
@@ -109,6 +114,16 @@ con_float()
 		sz -=4 ;
 		l++;
 	}
+#else not FPPSIM
+	if (! been_here) {
+		been_here = 1;
+		fprintf(stderr,"warning: dummy floating constant(s)\n");
+	}
+	while (sz) {
+		fprintf(codefile,"\t.data4 0 !dummy float\n");
+		sz -= 4;
+	}
+#endif
 }
 
 #ifdef REGVARS
