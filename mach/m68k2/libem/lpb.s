@@ -4,6 +4,7 @@
 .sect .data
 .sect .bss
 .extern .lpb
+	.sect .text
 .lpb:
 	! convert local to argument base
 	! should not destroy register d2 (used by lxa/lxl)

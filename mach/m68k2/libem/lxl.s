@@ -4,6 +4,7 @@
 .sect .data
 .sect .bss
 .extern .lxl
+	.sect .text
 .lxl:
 	! #levels on stack (> 0)
 

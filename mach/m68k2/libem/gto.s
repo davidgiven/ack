@@ -5,6 +5,7 @@
 .sect .bss
 .extern .gto
 
+	.sect .text
 .gto:
 	! nonlocal goto
 	! the argument on the stack is a pointer to a GTO-descriptor containing:
