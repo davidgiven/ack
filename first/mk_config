@@ -2,6 +2,10 @@ set -e
 
 create_dir $CONFIG
 
+create_dir $CONFIG/bin
+echo "echo $SYSNAME" > $CONFIG/bin/ack_sys
+chmod +x $CONFIG/bin/ack_sys
+
 cd $SRC_HOME
 find . -type d -print > $CONFIG/dir_list
 

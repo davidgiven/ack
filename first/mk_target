@@ -3,7 +3,6 @@ set -e
 : machine-dependant stuff
 
 create_dir $TARGET_HOME
-( cd $TARGET_HOME ; find . -exec chmod +w {} \; )
 create_dir $TARGET_HOME/config
 create_dir $TARGET_HOME/lib.bin
 create_dir $TARGET_HOME/modules
