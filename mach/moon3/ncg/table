@@ -3084,39 +3084,45 @@ pat loe lol sbu ste $1==$4 && $3==4 && inreg($2)==reg_any
 pat lil lol sbu sil $1==$4 && $3==4 && inreg($2)==reg_any
 					call lilrxxxsil("sub.l")
 
-pat lol and stl $1==$3 && $2==4		call lolxxxstl("and.l")
+pat lol and stl $1==$3 && $2==4 && inreg($1)!=reg_pointer
+	call lolxxxstl("and.l")
 pat loe and ste $1==$3 && $2==4		call loexxxste("and.l")
 pat lil and sil $1==$3 && $2==4		call lilxxxsil("and.l")
-pat lol loc and stl $1==$4 && $3==4	call lolcxxxstl("and.l")
+pat lol loc and stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
+	call lolcxxxstl("and.l")
 pat loe loc and ste $1==$4 && $3==4	call loecxxxste("and.l")
 pat lil loc and sil $1==$4 && $3==4	call lilcxxxsil("and.l")
-pat lol lol and stl $1==$4 && $3==4 && inreg($2)==reg_any
+pat lol lol and stl $1==$4 && $3==4 && inreg($2)==reg_any && inreg($1)!=reg_pointer
 					call lolrxxxstl("and.l")
 pat loe lol and ste $1==$4 && $3==4 && inreg($2)==reg_any
 					call loerxxxste("and.l")
 pat lil lol and sil $1==$4 && $3==4 && inreg($2)==reg_any
 					call lilrxxxsil("and.l")
 
-pat lol ior stl $1==$3 && $2==4		call lolxxxstl("or.l")
+pat lol ior stl $1==$3 && $2==4 && inreg($1)!=reg_pointer
+	call lolxxxstl("or.l")
 pat loe ior ste $1==$3 && $2==4		call loexxxste("or.l")
 pat lil ior sil $1==$3 && $2==4		call lilxxxsil("or.l")
-pat lol loc ior stl $1==$4 && $3==4	call lolcxxxstl("or.l")
+pat lol loc ior stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
+	call lolcxxxstl("or.l")
 pat loe loc ior ste $1==$4 && $3==4	call loecxxxste("or.l")
 pat lil loc ior sil $1==$4 && $3==4	call lilcxxxsil("or.l")
-pat lol lol ior stl $1==$4 && $3==4 && inreg($2)==reg_any
+pat lol lol ior stl $1==$4 && $3==4 && inreg($2)==reg_any && inreg($1)!=reg_pointer
 					call lolrxxxstl("or.l")
 pat loe lol ior ste $1==$4 && $3==4 && inreg($2)==reg_any
 					call loerxxxste("or.l")
 pat lil lol ior sil $1==$4 && $3==4 && inreg($2)==reg_any
 					call lilrxxxsil("or.l")
 
-pat lol xor stl $1==$3 && $2==4		call lolxxxstl("eor.l")
+pat lol xor stl $1==$3 && $2==4 && inreg($1)!=reg_pointer
+	call lolxxxstl("eor.l")
 pat loe xor ste $1==$3 && $2==4		call loexxxste("eor.l")
 pat lil xor sil $1==$3 && $2==4		call lilxxxsil("eor.l")
-pat lol loc xor stl $1==$4 && $3==4	call lolcxxxstl("eor.l")
+pat lol loc xor stl $1==$4 && $3==4 && inreg($1)!=reg_pointer
+	call lolcxxxstl("eor.l")
 pat loe loc xor ste $1==$4 && $3==4	call loecxxxste("eor.l")
 pat lil loc xor sil $1==$4 && $3==4	call lilcxxxsil("eor.l")
-pat lol lol xor stl $1==$4 && $3==4 && inreg($2)==reg_any
+pat lol lol xor stl $1==$4 && $3==4 && inreg($2)==reg_any && inreg($1)!=reg_pointer
 					call lolrxxxstl("eor.l")
 pat loe lol xor ste $1==$4 && $3==4 && inreg($2)==reg_any
 					call loerxxxste("eor.l")
