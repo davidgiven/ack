@@ -70,7 +70,7 @@ do_statistics()
 
 	while (m <= &mems[NMEMS-1]) {
 		fprintf(stderr, "mem %d: full %lx, free %lx\n",
-				m - mems,
+				(int)(m - mems),
 				(long) m->mem_full,
 				(long) m->mem_left);
 		m++;

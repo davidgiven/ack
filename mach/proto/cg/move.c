@@ -57,7 +57,7 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 			for (i=0;i<TOKENSIZE;i++)
 				if (tdp->t_type[i] == EV_REG &&
 				    clash(rp->r_contents.t_att[i].ar,tp2->t_att[0].ar)) {
-					erasereg(rp-machregs);
+					erasereg((int)(rp-machregs));
 					break;
 				}
 		}

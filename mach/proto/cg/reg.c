@@ -78,7 +78,7 @@ erasereg(regno) {
 			rp->r_contents.t_token = 0;
 			for (i=0;i<TOKENSIZE;i++)
 				rp->r_contents.t_att[i].aw = 0;
-			awayreg(rp-machregs);
+			awayreg((int)(rp-machregs));
 		}
 #endif
 }
@@ -94,13 +94,13 @@ awayreg(regno) {
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		if (rp->r_contents.t_token == -1) {
 			if (rp->r_contents.t_att[0].ar == regno)
-				erasereg(rp-machregs);
+				erasereg((int)(rp-machregs));
 		} else if (rp->r_contents.t_token > 0) {
 			tdp= & tokens[rp->r_contents.t_token];
 			for (i=0;i<TOKENSIZE;i++)
 				if (tdp->t_type[i] == EV_REG && 
 				    rp->r_contents.t_att[i].ar == regno) {
-					erasereg(rp-machregs);
+					erasereg((int)(rp-machregs));
 					break;
 				}
 		}

@@ -70,7 +70,7 @@ C_flush() {
 		return;
 	}
 #endif
-	if (C_opp != obuf && sys_write(C_ofp, obuf, C_opp - obuf) == 0) {
+	if (C_opp != obuf && sys_write(C_ofp, obuf, (int)(C_opp - obuf)) == 0) {
 		C_ofp = 0;
 		C_failed();
 	}

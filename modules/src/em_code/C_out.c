@@ -12,6 +12,7 @@ static arg();
 static pseudo();
 
 extern char em_flag[];
+char C_error;
 
 #define flags(pp)	(em_flag[(pp)->em_opcode - sp_fmnem] & EM_PAR)
 
@@ -26,6 +27,7 @@ C_alloc()
 arith C_holsize, C_bsssize;
 int C_holinit, C_bssinit;
 
+int
 C_out(p)
 	register struct e_instr *p;
 {
@@ -75,8 +77,11 @@ C_out(p)
 		DFDNAM(p->em_dnam);
 		NL();
 		break;
-
+	default:
+		C_error = "Illegal EM line";
+		return 0;
 	}
+	return 1;
 }
 
 static

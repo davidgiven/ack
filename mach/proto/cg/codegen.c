@@ -462,7 +462,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 		do {
 			npos=exactmatch=0;
 			for(rpp=reglist[propno];rp= *rpp; rpp++)
-				if (getrefcount(rp-machregs, FALSE)==0) {
+				if (getrefcount((int)(rp-machregs), FALSE)==0) {
 					pos[npos++] = rp-machregs;
 					if (eqtoken(&rp->r_contents,&token))
 						exactmatch++;

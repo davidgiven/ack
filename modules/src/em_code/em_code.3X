@@ -66,6 +66,13 @@ emcode \- EM code interface for compilers
 .B int C_getid()
 .PP
 .B char *C_tmpdir;
+.PP
+.B #include <em.h>
+.PP
+.B int C_out(p)
+.B struct e_instr *p;
+.PP
+.B char *C_error;
 .fi
 .SH DESCRIPTION
 This package provides a procedural EM code interface to be used in
@@ -437,6 +444,14 @@ The user can change this by just changing
 .I C_tmpdir
 before calling
 .IR C_open.
+.PP
+.I C_out
+accepts a structure as delivered by the
+.I read_em
+module, and produces code for it. It returns 1 if it succeeds, 0 if it fails
+for some reason. The reason can then be found in \fIC_error\fP. The
+.I C_out
+routine replaces the EM_mkcalls routine.
 .SH FILES
 .nf
 ~em/modules/h/em.h
