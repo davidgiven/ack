@@ -277,13 +277,13 @@ struct repl *repl;
 		/* stash arguments */
 		register int i;
 
-		*args->a_rawptr++ = '(';
 		for (i = 0; ap->a_rawvec[i] != (char *)0; i++) {
+			if (i == 0) stash(repl, '(', -1);
+			else stash(repl, ',', -1);
 			for (p = ap->a_rawvec[i]; *p != '\0'; p++)
 				 stash(repl, *p, -1);
-			stash(repl, ',', -1);
 		}
-		*(args->a_rawptr-1) = ')';	/* delete last ',' */
+		stash(repl, ')', -1);
 	}
 }
 
@@ -373,16 +373,14 @@ actual(repl)
 				}
 			}
 			UnGetChar();
-		} else if (ch == '(' || ch == '[' || ch == '{') {
-			/* a comma may occur within these constructions ???
-			 */
+		} else if (ch == '(') {
+			/* a comma may occur within parentheses */
 			level++;
 			stash(repl, ch, !nostashraw);
-		} else if (ch == ')' || ch == ']' || ch == '}') {
+		} else if (ch == ')') {
 			level--;
-			/* clossing parenthesis of macro call */
-			if (ch == ')' && level < 0)
-				return ')';
+			/* test on closing parenthesis of macro call */
+			if (level < 0) return ')';
 			stash(repl, ch, !nostashraw);
 		} else if (ch == ',') {
 			if (level <= 0) { /* comma separator for next argument */
@@ -406,7 +404,7 @@ actual(repl)
 				interpreted as such.
 			*/
 
-			ch = GetChar();
+a_new_line:		ch = GetChar();
 			while (class(ch) == STSKIP || ch == '/') {
 			    if (ch == '/') {
 				    if ((ch = GetChar()) == '*' && !InputLevel) {
@@ -423,9 +421,10 @@ actual(repl)
 			    } else ch = GetChar();
 			}
 
-			if (ch == '#')
+			if (ch == '#') {
 				domacro();
-			else if (ch == EOI) {
+				goto a_new_line;
+			} else if (ch == EOI) {
 				error("unterminated macro call");
 				return ')';
 			}
@@ -726,7 +725,8 @@ add2repl(repl, ch)
 {
 	register int index = repl->r_ptr - repl->r_text;
  
-	if (index + 1 >= repl->r_size) {
+	assert(index < repl->r_size);
+	if (index + 2 >= repl->r_size) {
 		repl->r_text = Realloc(repl->r_text, repl->r_size <<= 1);
 		repl->r_ptr = repl->r_text + index;
 	}
@@ -749,6 +749,7 @@ stash(repl, ch, stashraw)
 	register int index = args->a_expptr - args->a_expbuf;
  
 	if (stashraw >= 0) {
+		assert(index < args->a_expsize);
 		if (index + 1 >= args->a_expsize) {
 			args->a_expbuf = Realloc(args->a_expbuf,
 						    args->a_expsize <<= 1);
@@ -759,6 +760,7 @@ stash(repl, ch, stashraw)
  
 	if (stashraw) {
 		index = args->a_rawptr - args->a_rawbuf;
+		assert(index < args->a_rawsize);
 		if (index + 1 >= args->a_rawsize) {
 			args->a_rawbuf = Realloc(args->a_rawbuf,
 						    args->a_rawsize <<= 1);

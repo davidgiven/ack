@@ -41,8 +41,7 @@
 #define	is_oct(ch)	(isoct[ch])
 #define	is_dig(ch)	(isdig[ch])
 #define	is_hex(ch)	(ishex[ch])
-#define	is_suf(ch)	(issuf[ch])
 #define	is_wsp(ch)	(iswsp[ch])
 
 extern char tkclass[];
-extern char inidf[], isoct[], isdig[], ishex[], issuf[], iswsp[];
+extern char inidf[], isoct[], isdig[], ishex[], iswsp[];

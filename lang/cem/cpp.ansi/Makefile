@@ -77,7 +77,7 @@ GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 all:	cc
 
 cc:	cfiles
-	make "EMHOME="$(EMHOME) "CC="$(CC) ncpp
+	make "EMHOME="$(EMHOME) "CC=$(CC)" ncpp
 
 hfiles: Parameters char.c
 	./make.hfiles Parameters

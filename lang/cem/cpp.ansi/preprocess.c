@@ -6,6 +6,7 @@
 /* PREPROCESSOR DRIVER */
 
 #include	<system.h>
+#include	<alloc.h>
 #include	"input.h"
 #include	"obufsize.h"
 #include	"arith.h"
@@ -16,6 +17,7 @@
 #include	"idfsize.h"
 #include	"bits.h"
 #include	"line_prefix.h"
+#include	"textsize.h"
 
 char	_obuf[OBUFSIZE];
 #ifdef DOBITS
@@ -30,6 +32,46 @@ Xflush()
 
 static char *SkipComment();
 extern char options[];
+
+/* #pragma directives are saved here and passed to the compiler later on.
+ */
+struct prag_info {
+	int	pr_linnr;
+	char	*pr_fil;
+	char	*pr_text;
+};
+static struct prag_info *pragma_tab;
+static int pragma_nr;
+
+do_pragma()
+{
+	register int size = ITEXTSIZE;
+	char *cur_line = Malloc(size);
+	register char *c_ptr = cur_line;
+	register int c = GetChar();
+
+	*c_ptr = '\0';
+	while(c != '\n') {
+		if (c_ptr + 1 - cur_line == size) {
+			cur_line = Realloc(cur_line, size + ITEXTSIZE);
+			c_ptr = cur_line + size - 1;
+		}
+		*c_ptr++ = c;
+		c = GetChar();
+	}
+	*c_ptr = '\0';
+	if (!pragma_nr) {
+		pragma_tab = (struct prag_info *)Malloc(sizeof(struct prag_info));
+	} else {
+		pragma_tab = (struct prag_info *)Realloc(pragma_tab
+				    , sizeof(struct prag_info) * (pragma_nr+1));
+	}
+	pragma_tab[pragma_nr].pr_linnr = LineNumber;
+	pragma_tab[pragma_nr].pr_fil = FileName;
+	pragma_tab[pragma_nr].pr_text = cur_line;
+	pragma_nr++;
+	LineNumber++;
+}
 
 preprocess(fn)
 	char *fn;
@@ -58,7 +100,8 @@ preprocess(fn)
 			echo(*p++);
 		}
 	}
-#define	do_line(lineno, fn)						\
+
+#define	do_line_dir(lineno, fn)						\
 		if (lineno != LineNumber || fn != FileName) {		\
 			fn = FileName;					\
 			lineno = LineNumber;				\
@@ -81,6 +124,34 @@ preprocess(fn)
 		startline = 1;
 		c = GetChar();
 		while (startline) {
+		    /* first flush the saved pragma's */
+		    if (pragma_nr) {
+			register int i = 0;
+			int LiNo = LineNumber;
+			char *FiNam = FileName;
+
+			while (i < pragma_nr) {
+			    register char *c_ptr = "#pragma";
+
+			    LineNumber = pragma_tab[i].pr_linnr;
+			    FileName = pragma_tab[i].pr_fil;
+			    do_line_dir(lineno, fn);
+			    while (*c_ptr) { echo(*c_ptr++); }
+			    c_ptr = pragma_tab[i].pr_text;
+			    while (*c_ptr) { echo(*c_ptr++); }
+			    newline(); lineno++;
+			    free(pragma_tab[i].pr_text);
+			    i++;
+			}
+			free(pragma_tab);
+			pragma_tab = (struct prag_info *)0;
+			pragma_nr = 0;
+			LineNumber = LiNo;
+			FileName = FiNam;
+			do_line_dir(lineno, fn);
+		    }
+
+
 		    while (class(c) == STSKIP || c == '/') {
 			if (c == '/') {
 			    if (!InputLevel) {
@@ -102,25 +173,13 @@ preprocess(fn)
 		    }
 
 		    if (c == '#') {
-			if (!domacro()) {	/* pass pragma's to compiler */
-			    register char *p = "#pragma";
-
-			    do_line(lineno, fn);
-
-			    while(*p) {
-				echo(*p++);
-			    }
-			    while ((c = GetChar()) != EOI) {
-				if (class(c) == STNL) break;
-				echo(c);
-			    }
-			}
+			domacro();
 			lineno++;
 			newline();
 			c = GetChar();
 		    } else startline = 0;
 		}
-		do_line(lineno, fn);
+		do_line_dir(lineno, fn);
 		for (;;) {
 
 			/* illegal character */
@@ -205,7 +264,7 @@ preprocess(fn)
 						continue;
 					} else if (!is_dig(c)) {
 						continue;
-					}
+					} else echo(c);
 				}
 				c = GetChar();
 				while (in_idf(c) || c == '.') {

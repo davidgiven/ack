@@ -33,7 +33,7 @@ main(argc, argv)
 
 	inctable = (char **) Malloc(10 * sizeof(char *));
 	inc_max = 10;
-	inc_total = 2;
+	inc_total = 3;
 	inctable[0] = ".";
 	inctable[1] = "/usr/include";
 	init_pp();	/* initialise the preprocessor macros	*/

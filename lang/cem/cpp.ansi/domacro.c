@@ -67,12 +67,10 @@ GetIdentifier(skiponerr)
 	The token appearing directly after the '#' is obtained by calling
 	the basic lexical analyzing function GetToken() and is interpreted
 	to perform the action belonging to that token.
-	An error message is produced when the token is not recognized,
-	i.e. it is not one of "define" .. "undef" , integer or newline.
-	Return 1 if the preprocessing directive is done. This is to leave
-	pragma's in the input.
+	An error message is produced when the token is not recognized.
+	Pragma's are handled by do_pragma(). They are passed on to the
+	compiler.
 */
-int
 domacro()
 {
 	struct token tk;	/* the token itself			*/
@@ -132,7 +130,8 @@ domacro()
 			do_error();
 			break;
 		case K_PRAGMA:				/* "pragma"	*/
-			return 0;	/* this is for the compiler */
+			do_pragma();
+			break;
 		case K_UNDEF:				/* "undef"	*/
 			do_undef();
 			break;
@@ -151,7 +150,6 @@ domacro()
 		error("illegal # line");
 		SkipToNewLine();
 	}
-	return 1;
 }
 
 skip_block(to_endif)
