@@ -236,8 +236,8 @@ or LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
 or rm:rw:cc, regorconst:ro.
 or anyreg:rw:cc, rmorconst:ro.
-pop rmorconst+rm1:wo cost(1,8).
-push rmorconst+rm1:ro cost(1,10).
+pop rmorconst:wo cost(1,8).
+push rmorconst:ro cost(1,10).
 rcl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
 rcr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
 ret cost(1,8).
@@ -360,10 +360,12 @@ from rm1 to STACK
       push %a
 
 from rm1 to STACK
-  gen push %1
+  gen push ax
       push bx
+      move %1,al
+      xorb ah,ah
       mov bx,sp
-      movb {ind_regoff1,bx,3},{ANYCON,0}
+      xchg {ind_regoff2,bx,2},ax
       pop bx
 
 from Xreg_off to STACK
