@@ -12,5 +12,16 @@ The major changes are:
 	  machines
 	- improved Pascal compiler, now also handles 4-byte wordsize
 	- Motorola M68020 backend and assembler
+	- Support for (some) SUN systems
 	- improved version of LL(1) parser generator, producing faster code
 	- a new language: Occam
+	- better System V support, the Kit should now just compile and run
+
+				Ceriel J.H. Jacobs
+				Dept. of Math. and Computer Science
+				Vrije Universiteit
+				Postbus 7161
+				1007 MC  Amsterdam
+				The Netherlands
+
+				(UseNet: ceriel@cs.vu.nl)
