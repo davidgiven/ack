@@ -1,6 +1,6 @@
 name	"System definition"
 dir first
-action did_first
+action ack_sys
 failure "You have to run the shell script first in the directory first"
 fatal
 end
@@ -89,6 +89,18 @@ end
 name "LINT C program checker"
 dir lang/cem/lint
 end
+name "EM definition lint-library"
+action "make lintlib"
+dir util/data
+end
+name "Modules lint libraries"
+dir modules/src
+indir "Action.lint"
+end
+name "Global optimizer lint libraries"
+dir util/ego/share
+action "make lintlib"
+end
 name "Pascal frontend"
 dir lang/pc/comp
 end
@@ -106,6 +118,9 @@ dir lang/m2/libm2
 end
 name "Modula-2 makefile generator"
 dir lang/m2/m2mm
+end
+name "Fortran to C compiler"
+dir lang/fortran/comp
 end
 name "EM interpreter in C"
 dir util/int
@@ -197,7 +212,7 @@ name "Sun 3 M68020 support"
 dir mach/sun3
 indir
 end
-name Sun 4 SPARC support"
+name "Sun 4 SPARC support"
 dir mach/sparc
 system "sparc"
 indir

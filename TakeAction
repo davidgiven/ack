@@ -12,7 +12,12 @@ else
 	*)		echo No Action file "($CMD)" present ;;
 	esac
 fi
-THISFILE=`pwd`/$0
+case $0 in
+/*)	THISFILE=$0
+	;;
+*)	THISFILE=`pwd`/$0
+	;;
+esac
 SYS=
 RETC=0
 { while read LINE
