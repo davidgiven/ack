@@ -1,0 +1,74 @@
+# $Revision$
+var w=4
+var p=4
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=vax4
+var M=vax4
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var CPP_F=-Dunix -Dvax
+var CC_ALIGN=-Vw4.1
+# 413 align is the default, rom in text
+var ALIGN=-a0:4 -a1:4 -a2:0x400 -a3:4
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+var OLD_C_LIB={C_LIB}
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/{M}/cg
+	args <
+	stdout
+	need .e
+end
+name asopt
+	from .s
+	to .so
+	program {EM}/lib/{M}/top
+	args
+	optimizer
+	stdin
+	stdout
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/{M}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -N ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
+	mapflag -r ALIGN=-a0:4 -a1:0x400 -a2:4 -a3:4
+	mapflag -ansi C_LIB={EM}/{LIB}ac
+	args {ALIGN} (.e:{HEAD}= {EM}/{RT}em) \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
+		({RTS}:.mod={EM}/{RT}m2) \
+		({RTS}:.p.8={EM}/{RT}pc) \
+		-o > < \
+		(.8:{TAIL}={EM}/{LIB}a68s) \
+		(.p.8:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
+		(.mod:{TAIL}={EM}/{LIB}m2) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{M}/cv
+	mapflag -n CV_ARG=-n
+	args {CV_ARG?} < >
+	outfile a.out
+end
