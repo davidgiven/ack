@@ -1,0 +1,4 @@
+MACH=em44
+SUF=m
+ASAR=arch
+RANLIB=:
