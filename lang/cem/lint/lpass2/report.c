@@ -1,3 +1,9 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
 #include	<varargs.h>
 
 #include	<system.h>
@@ -25,16 +31,23 @@ report(va_alist)
 			/* it is an inpdef */
 			register struct inpdef *id =
 				va_arg(ap, struct inpdef *);
+			register char *fn = id->id_file;
 
 			f += 2;
-			/* is the file name global? */
-			if (id->id_file[0] == '/')
+			
+			if (	/* the file name global */
+				fn[0] == '/'
+			&&	/* it is not a .c file */
+				strcmp(&fn[strlen(fn)-2], ".c") != 0
+			) {
+				/* we skip this message */
 				return;
-			/*	if no, we have used up the argument,
+			}
+			/*	otherwise, we have used up the argument,
 				so print it here
 			*/
 			fprint(MSGOUT, "\"%s\", line %d",
-				id->id_file, id->id_line);
+				fn, id->id_line);
 		}
 		while ((fc = *f++)) {
 			if (fc == '%') {

@@ -1,3 +1,17 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
+/*	Bit patterns to allow fast answers to set questions about classes.
+	The classes in the inpdef are given as single letters; the array
+	class[] contains a bit pattern for each letter, with those bits set
+	that correspond to the lint class meaning of the letter.
+
+	This facility is used through the macro  is_class(inpdef_var, CL_???)
+*/
+
 #define	CL_DEF		(1<<0)
 #define	CL_DECL		(1<<1)
 #define	CL_USAGE	(1<<2)

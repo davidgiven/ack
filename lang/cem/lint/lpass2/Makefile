@@ -1,3 +1,8 @@
+# (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+# See the copyright notice in the ACK home directory, in the file "Copyright".
+#
+# $Header$
+
 #	M A K E F I L E   F O R   L P A S S 2
 
 # Machine and environ dependent definitions
@@ -24,13 +29,14 @@ OBJ =	lpass2.o read.o report.o class.o
 
 test:	lpass2
 	make lint
+#	lpass2 -xh <.i
 
 lpass2:	$(OBJ) Makefile next.o
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) next.o $(LLIBS) -o lpass2
 	size lpass2
 
 lint:
-	../lint $(CFLAGS) $(SRC) next.c #???
+	../lint -xh $(CFLAGS) $(SRC) next.c #???
 
 next.c:	$(LPASS1)/make.next inpdef.str
 	$(LPASS1)/make.next inpdef.str > next.c
@@ -42,7 +48,7 @@ clean:
 	rm -f a.out core next.c inpdef.h $(OBJ) next.o
 
 #----------------------------------------------------------------
-class.o: class.h
-lpass2.o: ../lpass1/l_class.h ../lpass1/l_lint.h class.h inpdef.h
-read.o: ../lpass1/l_class.h class.h inpdef.h
+class.o: ../lpass1/l_class.h class.h
+lpass2.o: ../lpass1/l_class.h ../lpass1/l_lint.h class.h inpdef.h private.h
+read.o: ../lpass1/l_class.h class.h inpdef.h private.h
 report.o: inpdef.h

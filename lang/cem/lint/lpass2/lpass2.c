@@ -1,20 +1,46 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
 #include	<alloc.h>
 
+#include	"private.h"
 #include	"../lpass1/l_lint.h"
 #include	"../lpass1/l_class.h"
 #include	"class.h"
 #include	"inpdef.h"
 
+extern char *strcpy();
+
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 #define	min(a,b)	((a) <= (b) ? (a) : (b))
 
-char cur_name[NAMESIZE];
-struct inpdef *dot, *lib, *ext, *sta;
+PRIVATE char cur_name[NAMESIZE];
+PRIVATE struct inpdef *dot, *lib, *ext, *sta;
+
+PRIVATE check_args();
+PRIVATE check_def();
+PRIVATE ext_decls();
+PRIVATE ext_def();
+PRIVATE get_dot();
+PRIVATE init();
+PRIVATE lib_def();
+PRIVATE one_ext_decl();
+PRIVATE one_func_call();
+PRIVATE one_var_usage();
+PRIVATE stat_def();
+PRIVATE statics();
+PRIVATE int type_equal();
+PRIVATE int type_match();
+PRIVATE usage();
 
 #define	same_name()	(dot && streq(cur_name, dot->id_name))
 #define	same_obj(stnr)	(same_name() && dot->id_statnr == stnr)
 
 #define	defdec(id)	(is_class(id, CL_DEF) ? "defined" : "declared")
+#define	funvar(id)	(is_class(id, CL_FUNC) ? "function" : "variable")
 
 
 /******** M A I N ********/
@@ -43,7 +69,6 @@ main(argc, argv)
 		if (ext)
 			check_def(ext);
 		statics();
-		/* inpdefs of class ERRCL are never generated */
 		if (same_name()) {
 			/*	there are more lines for this name that have
 				not been absorbed
@@ -53,10 +78,10 @@ main(argc, argv)
 	}
 }
 
-char options[128];
+char loptions[128];
 static char *table[] = {0};
 
-init(argc, argv)
+PRIVATE init(argc, argv)
 	char *argv[];
 {
 /*
@@ -67,18 +92,21 @@ init(argc, argv)
 
 	init_class();
 
-	while (argc > 1 && *argv[1] == '-') {
-		switch (argv[1][1]) {
-		case 'u':
-		/* don't report situations like "used but not defined"
-		 * and "defined but never used"
-		 */
-		case 'X':		/* ??? prints incoming inpdefs */
-			options[argv[1][1]] = 1;
-			break;
-		default:
-			/* ready to be extended */
-			break;
+	while (argc > 1 && argv[1][0] == '-') {
+		register char *arg = &argv[1][1];
+		register char ch;
+
+		while (ch = *arg++) {
+			switch (ch) {
+			case 'u':
+				/*	don't report situations like
+					"defined/declared but not used"
+				*/
+			case 'X':	/* ??? prints incoming inpdefs */
+			default:	/* and any other */
+				loptions[ch] = 1;
+				break;
+			}
 		}
 		argc--, argv++;
 	}
@@ -87,7 +115,7 @@ init(argc, argv)
 		panic("InsertFile() fails");
 }
 
-get_dot()
+PRIVATE get_dot()
 {
 	if (!get_id(dot)) {
 		free_inpdef(dot);
@@ -99,7 +127,7 @@ get_dot()
 
 /******** L I B R A R Y ********/
 
-lib_def()
+PRIVATE lib_def()
 {
 	if (same_obj(0) && is_class(dot, CL_LIB)) {
 		lib = dot;
@@ -108,7 +136,7 @@ lib_def()
 	}
 
 	while (same_obj(0) && is_class(dot, CL_LIB)) {
-		report("%L: multiple definition of %s in library",
+		report(">%L: multiple definition of %s in library",
 			dot, dot->id_name);
 		get_dot();
 	}
@@ -117,12 +145,12 @@ lib_def()
 
 /******** E X T E R N ********/
 
-ext_def()
+PRIVATE ext_def()
 {
 	if (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
 		if (lib) {
-			report("%L: %s also defined in library %L",
-				dot, dot->id_name, lib);
+			report("%L: %s %s also defined in library %L",
+				dot, funvar(dot), dot->id_name, lib);
 		}
 		ext = dot;
 		dot = new_inpdef();
@@ -130,13 +158,13 @@ ext_def()
 	}
 
 	while (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
-		report("%L: %s also defined at %L",
-			dot, dot->id_name, ext);
+		report("%L: %s %s also defined at %L",
+			dot, funvar(dot), dot->id_name, ext);
 		get_dot();
 	}
 }
 
-ext_decls()
+PRIVATE ext_decls()
 {
 	while (same_obj(0) && dot->id_class == EFDC) {
 		one_ext_decl("function", "variable", CL_VAR);
@@ -151,7 +179,7 @@ ext_decls()
 	}
 }
 
-one_ext_decl(kind, other_kind, other_class)
+PRIVATE one_ext_decl(kind, other_kind, other_class)
 	char *kind;
 	char *other_kind;
 	int other_class;
@@ -160,10 +188,6 @@ one_ext_decl(kind, other_kind, other_class)
 
 	if (!def) {
 		/* the declaration will have to serve */
-		if (!is_class(dot, CL_IMPL) && !options['u']) {
-			report("%L: %s %s declared but never defined",
-				dot, dot->id_name, kind);
-		}
 		ext = dot;
 		dot = new_inpdef();
 		get_dot();
@@ -190,25 +214,46 @@ one_ext_decl(kind, other_kind, other_class)
 
 /******** U S A G E ********/
 
-usage(stnr)
+PRIVATE usage(stnr)
 	int stnr;
 {
-	struct inpdef *def = stnr ? sta : ext ? ext : lib ? lib : 0;
+	register struct inpdef *def = stnr ? sta : ext ? ext : lib ? lib : 0;
+	register int VU_count = 0;
+	register int VU_samefile = 0;
 
 	while (same_obj(stnr) && dot->id_class == FC) {
 		one_func_call(def);
 	}
 
 	while (same_obj(stnr) && dot->id_class == VU) {
+		VU_count++;
+		if (def && streq(def->id_file, dot->id_file)) {
+			VU_samefile++;
+		}
 		one_var_usage(def);
+	}
+
+	if (def && loptions['h']) {
+		register char *fn = def->id_file;
+
+		if (	stnr == 0
+		&&	VU_count == 1
+		&&	VU_samefile == 1
+		&&	def == ext
+		&&	!is_class(ext, CL_IMPL)
+		&&	streq(&fn[strlen(fn)-2], ".c")
+		) {
+			report("%L: extern %s could be declared static",
+				def, def->id_name);
+		}
 	}
 }
 
-one_func_call(def)
+PRIVATE one_func_call(def)
 	struct inpdef *def;
 {
 	if (!def) {
-		if (!options['u']) {
+		if (!loptions['u']) {
 			report("%L: function %s used but not defined",
 				dot, dot->id_name);
 		}
@@ -220,7 +265,9 @@ one_func_call(def)
 
 	if (def->id_args) {
 		check_args(dot, def);
-		if (dot->id_valused == USED && !def->id_valreturned) {
+		if (	dot->id_valused == USED
+		&&	def->id_valreturned == NOVALRETURNED
+		) {
 			report("%L: value of %s is used, but none is returned at %L",
 				dot, dot->id_name, def);
 		}
@@ -244,11 +291,11 @@ one_func_call(def)
 	get_dot();
 }
 
-one_var_usage(def)
+PRIVATE one_var_usage(def)
 	struct inpdef *def;
 {
 	if (!def) {
-		if (!options['u']) {
+		if (!loptions['u']) {
 			report("%L: variable %s used but not defined",
 				dot, dot->id_name);
 		}
@@ -264,17 +311,14 @@ one_var_usage(def)
 
 /******** S T A T I C ********/
 
-statics()
+PRIVATE statics()
 {
-	while (same_name() && dot->id_statnr != 0) {
-		one_static(dot->id_statnr);
-	}
-}
+	while (same_name()) {
+		int stnr = dot->id_statnr;
 
-one_static(stnr)
-	int stnr;
-{
-	while (same_obj(stnr)) {
+		if (stnr == 0)
+			panic("sequence error in input");
+
 		if (sta) {
 			free_inpdef(sta);
 			sta = 0;
@@ -283,21 +327,24 @@ one_static(stnr)
 		usage(stnr);
 		if (sta)
 			check_def(sta);
-		get_dot();
+
+		if (same_obj(stnr))
+			panic("sequence error in input");
 	}
 }
 
-stat_def(stnr)
+PRIVATE stat_def(stnr)
 	int stnr;
 {
 	if (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
 		if (lib) {
-			report("%L: %s also defined in library %L",
-				dot, dot->id_name, lib);
+			report("%L: %s %s also defined in library %L",
+				dot, funvar(dot), dot->id_name, lib);
 		}
 		if (ext) {
-			report("%L: %s also %s at %L",
-				dot, dot->id_name, defdec(ext), ext);
+			report("%L: %s %s also %s at %L",
+				dot, funvar(dot), dot->id_name,
+				defdec(ext), ext);
 		}
 		sta = dot;
 		dot = new_inpdef();
@@ -305,13 +352,13 @@ stat_def(stnr)
 	}
 
 	while (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
-		report("%L: %s also defined at %L",
-			dot, dot->id_name, sta);
+		report("%L: %s %s also defined at %L",
+			dot, funvar(dot), dot->id_name, sta);
 		get_dot();
 	}
 }
 
-check_def(def)
+PRIVATE check_def(def)
 	struct inpdef *def;
 {
 	if (!def)
@@ -325,15 +372,19 @@ check_def(def)
 			/* silent */
 		}
 		else {
-			if (!options['u']) {
-				report("%L: %s %s but never used",
-					def, def->id_name, defdec(def));
+			if (!loptions['u']) {
+				report("%L: %s %s %s but not used",
+					def, funvar(def), def->id_name,
+					defdec(def));
 			}
 		}
 	}
 
 	if (is_class(def, CL_DEF|CL_FUNC)) {
-		if (def->id_valreturned && def->id_called && def->id_ignored) {
+		if (	def->id_valreturned == VALRETURNED
+		&&	def->id_called
+		&&	def->id_ignored
+		) {
 			report("%L: %s returns value which is %s ignored",
 				def, def->id_name,
 				(def->id_used || def->id_voided) ?
@@ -345,7 +396,7 @@ check_def(def)
 
 /******** T Y P E   C H E C K I N G ********/
 
-check_args(id, def)
+PRIVATE check_args(id, def)
 	struct inpdef *id, *def;
 {
 	register char *act_tp = id->id_argtps;
@@ -381,8 +432,8 @@ check_args(id, def)
 	}
 
 	for (i = 1; i <= nrargs; i++) {
-		register char *act = act_tp;
-		register char *def = def_tp;
+		register char *act_par = act_tp;
+		register char *def_par = def_tp;
 
 		/* isolate actual argument type */
 		while (*act_tp) {
@@ -401,7 +452,7 @@ check_args(id, def)
 			def_tp++;
 		}
 
-		if (!type_match(act, def)) {
+		if (!type_match(act_par, def_par)) {
 			report("%L: arg %d of %s differs from that at %L",
 				id, i, id->id_name, def);
 		}
@@ -411,14 +462,16 @@ check_args(id, def)
 }
 
 int
-type_equal(act, def)
+PRIVATE type_equal(act, def)
 	char *act, *def;
 {
-	return streq(act, def);
+	return	streq(act, def)
+	||	streq(act, "erroneous")
+	||	streq(def, "erroneous");
 }
 
 int
-type_match(act, def)
+PRIVATE type_match(act, def)
 	char *act, *def;
 {
 	if (type_equal(act, def))
@@ -429,8 +482,8 @@ type_match(act, def)
 		/* might be signed or unsigned */
 		if (type_equal(&act[1], def))
 			return 1;
-		if (	strncmp(def, "unsigned ", 9)
-		&&	type_equal(&act[1], &def[10])
+		if (	strncmp(def, "unsigned ", strlen("unsigned ")) == 0
+		&&	type_equal(&act[1], &def[strlen("unsigned ")])
 		) {
 			return 1;
 		}
@@ -441,10 +494,11 @@ type_match(act, def)
 
 /******** D E B U G G I N G ********/
 
-print_id(id)
+print_id(name, id)
+	char *name;
 	struct inpdef *id;
 {
-	print("inpdef: %s, %s, %04d, \"%s\", %d, %s",
+	print("%s: %s, %s, %04d, \"%s\", %d, %s", name,
 		id->id_class == LFDF ? "LFDF" :
 		id->id_class == LVDF ? "LVDF" :
 		id->id_class == EFDF ? "EFDF" :
@@ -455,8 +509,7 @@ print_id(id)
 		id->id_class == SFDF ? "SFDF" :
 		id->id_class == SVDF ? "SVDF" :
 		id->id_class == FC ? "FC" :
-		id->id_class == VU ? "VU" :
-		id->id_class == ERRCL ? "ERRCL" : "<BADCLASS>",
+		id->id_class == VU ? "VU" : "<BADCLASS>",
 		id->id_name,
 		id->id_statnr,
 		id->id_file,
@@ -472,8 +525,13 @@ print_id(id)
 				id->id_valused == IGNORED ? "IGNORED" :
 				id->id_valused == VOIDED ? "VOIDED" :
 				"<BAD VALUSED>")
-			:	(id->id_valreturned ? "VALRETURNED" :
-				"NOVALRETURNED")
+			:	(id->id_valreturned == NOVALRETURNED ?
+					"NOVALRETURNED" :
+				id->id_valreturned == VALRETURNED ?
+					"VALRETURNED" :
+				id->id_valreturned == NORETURN ?
+					"NORETURN" : "<BAD VALRETURNED>"
+				)
 		);
 	}
 	print("\n");

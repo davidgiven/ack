@@ -1,3 +1,9 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
 #include	"../lpass1/l_class.h"
 #include	"class.h"
 #include	"inpdef.h"
@@ -8,6 +14,8 @@
 
 #include	<inp_pkg.spec>
 #include	<inp_pkg.body>
+
+#include	"private.h"
 
 PRIVATE int LineNr = 1;
 
@@ -71,9 +79,9 @@ get_id(id)
 
 	if (!ReadString(id->id_file, '\n', FNAMESIZE))
 		return 0;
-	{	extern char options[];
-		if (options['X'])
-			print_id(id);/*???*/
+	{	extern char loptions[];
+		if (loptions['X'])
+			print_id("read", id);/*???*/
 	}
 	return (1);
 }
@@ -160,8 +168,10 @@ PRIVATE int
 ReadArgs(nrargs, buf)
 	char *buf;
 {
-/* Reads a string into buf with format <type1>:<type2>: ... :<typeN>: */
-
+	/*	Reads a string into buf with format
+			<type1>:<type2>: ... :<typeN>:
+		Note: format must include the final colon.
+	*/
 	int i;
 	int charcount = 1;
 	int n;

@@ -1,3 +1,9 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
 #define NAMESIZE 100
 #define FNAMESIZE 100
 #define ARGTPSSIZE 2000
@@ -17,7 +23,7 @@ struct inpdef {
 	int id_args;			/* set if arguments given */
 	int id_nrargs;			/* number of args, neg. for varargs */
 	char id_argtps[ARGTPSSIZE];	/* argument types, colon separated */
-	int id_valreturned;		/* for def/decl, set if val returned */
+	int id_valreturned;		/* for def/decl, see ../lpass1/l_lint.h */
 	int id_valused;			/* for FC, see ../lpass1/l_lint.h */
 
 	/* not filled by get_id() */

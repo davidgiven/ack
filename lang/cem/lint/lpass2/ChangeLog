@@ -1,3 +1,6 @@
+ 2-Sep-88  Dick Grune (dick) at dick
+	Guided by lint itself, many functions have been declared PRIVATE.
+
  7-Aug-88  Dick Grune (dick) at dick
 	About the class of an inpdef, often set-like questions are asked.
 	To speed up answering these questions, a mapping has been created
@@ -12,12 +15,12 @@
 		- external usage
 		- static defs
 		- static usage
-	This change to a much more natural order has been possible by the
+	This change to a much more natural order has been made possible by the
 	introduction of the static file number.  Many pieces of code could
 	now be taken together and the program is much cleaner now.
 
  8-Jul-88  Dick Grune (dick) at dick
-	Added a special meta-type (also in lpaas1) for non-negative
+	Added a special meta-type (also in lpass1) for non-negative
 	constant actual arguments, because these may match both the signed
 	and unsigned versions of the type.
 
@@ -44,3 +47,8 @@
 11-May-88  Dick Grune (dick) at dick
 	Received sources from Frans Kunst.
 
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
