@@ -16,6 +16,7 @@
 
 #include	"debug.h"
 #include	"botch_free.h"
+#include	"dbsymtab.h"
 
 #include	"arith.h"
 #include	"LLlex.h"
@@ -26,8 +27,12 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
+#ifdef DBSYMTAB
+#include	<stb.h>
+#endif /* DBSYMTAB */
 
 extern int level;
+extern char options[];
 }
 
 /*	Each statement construction is stacked in order to trace a ???
@@ -451,7 +456,14 @@ jump
 		}
 ;
 
-compound_statement:
+compound_statement
+	{
+#ifdef DBSYMTAB
+	static int	brc_level = 1;
+	int		decl_seen = brc_level == 1;
+#endif /* DBSYMTAB */
+	}
+:
 	'{'
 		{
 			stack_level();
@@ -460,13 +472,32 @@ compound_statement:
 		 (DOT == IDENTIFIER && AHEAD == IDENTIFIER))
 			/* >>> conflict on TYPE_IDENTIFIER, IDENTIFIER */
 		declaration
+		{
+#ifdef DBSYMTAB
+			decl_seen++;
+#endif /* DBSYMTAB */
+		}
 	]*
+		{
+#ifdef DBSYMTAB
+			++brc_level;
+			if (options['g'] && decl_seen) {
+				C_ms_std((char *) 0, N_LBRAC, brc_level);
+			}
+#endif /* DBSYMTAB */
+		}
 	[%persistent
 		statement
 	]*
 	'}'
 		{
 			unstack_level();
+#ifdef DBSYMTAB
+			if (options['g'] && decl_seen) {
+				C_ms_std((char *) 0, N_RBRAC, brc_level);
+			}
+			brc_level--;
+#endif /* DBSYMTAB */
 		}
 ;
 

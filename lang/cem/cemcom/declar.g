@@ -7,6 +7,7 @@
 
 {
 #include	"lint.h"
+#include	"dbsymtab.h"
 #include	<alloc.h>
 #include	"nobitfield.h"
 #include	"debug.h"
@@ -54,7 +55,7 @@ declaration
 	This means that something like:
 		unsigned extern int short xx;
 	is perfectly good C.
-	
+
 	On top of that, multiple occurrences of storage_class_specifiers,
 	unsigned_specifiers and size_specifiers are errors, but a second
 	type_specifier should end the decl_specifiers and be treated as
@@ -65,7 +66,7 @@ declaration
 	occurrence of the type_specifier in the grammar (we have no choice),
 	collecting all data in a `struct decspecs' and turning that data
 	structure into what we want.
-	
+
 	The existence of declarations like
 		short typedef yepp;
 	makes all hope of writing a specific grammar for typedefs illusory.
@@ -223,8 +224,19 @@ initializer(struct idf *idf; int sc;)
 #ifdef	LINT
 			change_state(idf, SET);
 #endif	LINT
+#ifdef	DBSYMTAB
+			if (options['g'] && level >= L_LOCAL && expr) {
+				db_line(expr->ex_file, (unsigned) expr->ex_line)
+;
+			}
+#endif	/* DBSYMTAB */
 			code_declaration(idf, expr, level, sc);
 		}
+#ifdef	DBSYMTAB
+		if (options['g'] && globalflag) {
+			stb_string(idf->id_def, sc, idf->id_text);
+		}
+#endif	/* DBSYMTAB */
 		init_idf(idf);
 	}
 ;
@@ -295,7 +307,7 @@ formal(struct formal **fmp;)
 	identifier(&idf)
 	{
 		register struct formal *new = new_formal();
-		
+
 		new->fm_idf = idf;
 		new->next = *fmp;
 		*fmp = new;
@@ -318,6 +330,13 @@ enum_specifier(register struct type **tpp;)
 		[
 			{declare_struct(ENUM, idf, tpp);}
 			enumerator_pack(*tpp, &l)
+			{
+#ifdef DBSYMTAB
+				if (options['g']) {
+					stb_tag(idf->id_enum, idf->id_text);
+				}
+#endif /*DBSYMTAB */
+			}
 		|
 			{apply_struct(ENUM, idf, tpp);}
 			empty
@@ -383,6 +402,11 @@ struct_or_union_specifier(register struct type **tpp;)
 			struct_declaration_pack(*tpp)
 			{
 				(idf->id_struct->tg_busy)--;
+#ifdef DBSYMTAB
+				if (options['g']) {
+					stb_tag(idf->id_struct, idf->id_text);
+				}
+#endif /*DBSYMTAB */
 			}
 		|
 			{apply_struct(fund, idf, tpp);}

@@ -100,12 +100,12 @@ hash_stat()
 {
 	if (options['h'])	{
 		register int i;
-		
+
 		print("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
 			register struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
-	
+
 			while (notch)	{
 				cnt++;
 				notch = notch->next;
@@ -113,7 +113,7 @@ hash_stat()
 			print("%d %d\n", i, cnt);
 		}
 		print("End hash table tally\n");
-	}		
+	}
 }
 #endif	DEBUG
 
@@ -122,7 +122,7 @@ str2idf(tg)
 	char tg[];
 {
 	/*	str2idf() returns an entry in the symbol table for the
-		identifier tg.  If necessary, an entry is created.
+		identifier tg.	If necessary, an entry is created.
 		It is used where the text of the identifier is available
 		but its hash value is not; otherwise idf_hashed() is to
 		be used.
@@ -187,7 +187,7 @@ declare_idf(ds, dc, lvl)
 	register struct type *type;
 	struct stack_level *stl = stack_level_of(lvl);
 	char formal_array = 0;
-	
+
 	/* determine the present type */
 	if (ds->ds_type == 0)	{
 		/*	at the L_FORMAL1 level there is no type specified yet
@@ -276,7 +276,7 @@ declare_idf(ds, dc, lvl)
 	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
 #endif	LINT
 
-	if (def && 
+	if (def &&
 	    ( def->df_level == lvl ||
 	      ( lvl != L_GLOBAL && def->df_level > lvl )
 	    )
@@ -382,7 +382,7 @@ actual_declaration(sc, tp)
 	/*	An actual_declaration needs space, right here and now.
 	*/
 	register int fund = tp->tp_fund;
-	
+
 	if (sc == ENUM || sc == TYPEDEF) /* virtual declarations */
 		return 0;
 	if (fund == FUNCTION || fund == ARRAY)
@@ -569,7 +569,7 @@ declare_params(dc)
 	/*	Declares the formal parameters if they exist.
 	*/
 	register struct formal *fm = dc->dc_formal;
-	
+
 	while (fm)	{
 		declare_parameter(fm->fm_idf);
 		fm = fm->next;
@@ -584,7 +584,7 @@ init_idf(idf)
 	/*	The topmost definition of idf is set to initialized.
 	*/
 	register struct def *def = idf->id_def;	/* the topmost */
-	
+
 	if (def->df_initialized)
 		error("multiple initialization of %s", idf->id_text);
 	if (def->df_sc == TYPEDEF)	{
@@ -630,7 +630,7 @@ declare_formals(fp)
 #endif	DEBUG
 	while (se)	{
 		register struct def *def = se->se_idf->id_def;
-		
+
 		def->df_address = f_offset;
 		/*	the alignment convention for parameters is: align on
 			word boundaries, i.e. take care that the following
@@ -638,11 +638,16 @@ declare_formals(fp)
 		*/
 		f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
 		formal_cvt(def); /* cvt int to char or short, if necessary */
-		se = se->next;
 		def->df_level = L_FORMAL2;	/* CJ */
 		RegisterAccount(def->df_address, def->df_type->tp_size,
 				regtype(def->df_type),
 				def->df_sc);
+#ifdef DBSYMTAB
+		if (options['g']) {
+			stb_string(def, FORMAL, se->se_idf->id_text);
+		}
+#endif /* DBSYMTAB */
+		se = se->next;
 	}
 	*fp = f_offset;
 }
@@ -721,7 +726,7 @@ init_hmask()
 		described in Knuth, vol 2.
 	*/
 	register int h, rnd = HASH_X;
-	
+
 	for (h = 0; h < IDFSIZE; h++)	{
 		hmask[h] = rnd;
 		rnd = (HASH_A * rnd + HASH_C) & HASHMASK;

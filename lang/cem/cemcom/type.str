@@ -7,6 +7,7 @@
 
 #include	"nofloat.h"
 #include	"nobitfield.h"
+#include	"dbsymtab.h"
 
 struct type	{
 	struct type *next;	/* used only with ARRAY */
@@ -22,6 +23,9 @@ struct type	{
 	struct type *tp_pointer;/* to POINTER */
 	struct type *tp_array;	/* to ARRAY */
 	struct type *tp_function;/* to FUNCTION */
+#ifdef DBSYMTAB
+	int tp_dbindex;
+#endif
 };
 
 extern struct type

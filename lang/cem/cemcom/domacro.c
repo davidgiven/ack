@@ -15,16 +15,22 @@
 #include	"nopp.h"
 
 #ifndef NOPP
-#include	"ifdepth.h"	
-#include	"botch_free.h"	
-#include	"nparams.h"	
-#include	"parbufsize.h"	
-#include	"textsize.h"	
-#include	"idfsize.h"	
+#include	"ifdepth.h"
+#include	"botch_free.h"
+#include	"nparams.h"
+#include	"parbufsize.h"
+#include	"textsize.h"
+#include	"idfsize.h"
 #include	"assert.h"
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
+#include	"dbsymtab.h"
+#ifdef DBSYMTAB
+#include	<stb.h>
+int		IncludeLevel = 0;
+extern char	options[];
+#endif
 
 IMPORT char **inctable;	/* list of include directories		*/
 IMPORT char *getwdir();
@@ -269,6 +275,12 @@ do_include()
 			FileName = result;
 			LineNumber = 0;
 			nestlow = nestlevel;
+#ifdef DBSYMTAB
+			IncludeLevel++;
+			if (options['g']) {
+				C_ms_std(FileName, N_BINCL, 0);
+			}
+#endif /* DBSYMTAB */
 		}
 	}
 }
@@ -294,7 +306,7 @@ do_define()
 		return;
 	}
 	/*	there is a formal parameter list if the identifier is
-		followed immediately by a '('. 
+		followed immediately by a '('.
 	*/
 	LoadChar(ch);
 	if (ch == '(') {
@@ -500,7 +512,7 @@ macro_def(id, text, nformals, length, flags)
 	else
 		id->id_macro = newdef = new_macro();
 	newdef->mc_text = text;		/* replacement text	*/
-	newdef->mc_nps  = nformals;	/* nr of formals	*/
+	newdef->mc_nps	= nformals;	/* nr of formals	*/
 	newdef->mc_length = length;	/* length of repl. text	*/
 	newdef->mc_flag = flags;	/* special flags	*/
 	newdef->mc_count = 0;
@@ -634,7 +646,7 @@ PRIVATE
 macroeq(s, t)
 	register char *s, *t;
 {
-	
+
 	/* skip leading spaces	*/
 	while (BLANK(*s)) s++;
 	while (BLANK(*t)) t++;

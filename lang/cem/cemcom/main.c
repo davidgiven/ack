@@ -265,6 +265,10 @@ compile(argc, argv)
 	init();
 	LineNumber = 0;
 	nestlow = -1;
+#ifndef LINT
+	init_code(destination && strcmp(destination, "-") != 0 ?
+				destination : 0);
+#endif
 #ifndef NOPP
 	WorkingDir = getwdir(source);
 #endif NOPP
@@ -279,8 +283,6 @@ compile(argc, argv)
 #endif DEBUG
 	{
 #ifndef	LINT
-		init_code(destination && strcmp(destination, "-") != 0 ?
-					destination : 0);
 		/* compile the source text			*/
 		C_program();
 #ifdef PREPEND_SCOPES

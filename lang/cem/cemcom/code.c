@@ -3,9 +3,10 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-/*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
+/*	C O D E - G E N E R A T I N G	R O U T I N E S		*/
 
 #include	"lint.h"
+#include	"dbsymtab.h"
 #ifndef	LINT
 #include	<em.h>
 #else
@@ -34,7 +35,10 @@
 #include	"atw.h"
 #include	"assert.h"
 #include	"noRoption.h"
-#include	"file_info.h"
+#include	"LLlex.h"
+#ifdef DBSYMTAB
+#include	<stb.h>
+#endif /* DBSYMTAB */
 
 label lab_count = 1;
 label datlab_count = 1;
@@ -68,6 +72,24 @@ init_code(dst_file)
 		fatal("cannot write to %s\n", dst_file);
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+#ifdef DBSYMTAB
+	if (options['g']) {
+		extern char *source;
+
+		C_ms_std(source, N_SO, 0);
+		stb_typedef(int_type, "int");
+		stb_typedef(char_type, "char");
+		stb_typedef(long_type, "long");
+		stb_typedef(short_type, "short");
+		stb_typedef(uchar_type, "unsigned char");
+		stb_typedef(ushort_type, "unsigned short");
+		stb_typedef(ulong_type, "unsigned long");
+		stb_typedef(uint_type, "unsigned int");
+		stb_typedef(float_type, "float");
+		stb_typedef(double_type, "double");
+		stb_typedef(void_type, "void");
+	}
+#endif /* DBSYMTAB */
 #ifdef USE_TMP
 #ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
@@ -140,7 +162,7 @@ prepend_scopes()
 	while (se != 0)	{
 		register struct idf *id = se->se_idf;
 		register struct def *df = id->id_def;
-		
+
 		if (df && (df->df_initialized || df->df_used || df->df_alloc))
 			code_scope(id->id_text, df);
 		se = se->next;
@@ -159,7 +181,7 @@ code_scope(text, def)
 		as given by def, if meaningful.
 	*/
 	int fund = def->df_type->tp_fund;
-	
+
 	switch (def->df_sc)	{
 	case EXTERN:
 	case GLOBAL:
@@ -257,6 +279,14 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 		C_fil_dlb(file_name_label, (arith)0);
 		C_lin((arith)LineNumber);
 	}
+#ifdef DBSYMTAB
+	if (options['g']) {
+		stb_string(def, FUNCTION, name);
+		if (! strcmp(name, "main")) {
+			C_ms_stb_cst(name, N_MAIN, 0, (arith) 0);
+		}
+	}
+#endif
 }
 
 end_proc(fbytes)
@@ -339,6 +369,9 @@ do_return()
 		probably smarter than generating a direct return.
 		Return sequences may be expensive.
 	*/
+#ifdef DBSYMTAB
+	if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 	C_bra(return2_label);
 }
 
@@ -373,7 +406,7 @@ code_declaration(idf, expr, lvl, sc)
 		Since the expression may be modified in the process,
 		code_declaration() frees it after use, as the caller can
 		no longer do so.
-		
+
 		If there is a storage class indication (EXTERN/STATIC),
 		code_declaration() will generate an exa or ina.
 		The sc is the actual storage class, as given in the
@@ -386,9 +419,15 @@ code_declaration(idf, expr, lvl, sc)
 	register struct def *def = idf->id_def;
 	register arith size = def->df_type->tp_size;
 	int def_sc = def->df_sc;
-	
-	if (def_sc == TYPEDEF)	/* no code for typedefs		*/
+
+	if (def_sc == TYPEDEF)	{	/* no code for typedefs		*/
+#ifdef DBSYMTAB
+		if (options['g']) {
+			stb_typedef(def->df_type, idf->id_text);
+		}
+#endif /* DBSYMTAB */
 		return;
+	}
 	if (sc == EXTERN && expr && !is_anon_idf(idf))
 		error("%s is extern; cannot initialize", idf->id_text);
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
@@ -418,6 +457,11 @@ code_declaration(idf, expr, lvl, sc)
 			/*	they are handled on the spot and get an
 				integer label in EM.
 			*/
+#ifdef DBSYMTAB
+			if (options['g'] && ! expr) {
+				stb_string(def, sc, idf->id_text);
+			}
+#endif /* DBSYMTAB */
 			C_df_dlb((label)def->df_address);
 			if (expr) { /* there is an initialisation */
 			}
@@ -436,6 +480,11 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		case AUTO:
 		case REGISTER:
+#ifdef DBSYMTAB
+			if (options['g']) {
+				stb_string(def, sc, idf->id_text);
+			}
+#endif /* DBSYMTAB */
 			if (expr)
 				loc_init(expr, idf);
 			break;
@@ -456,7 +505,7 @@ loc_init(expr, id)
 	*/
 	register struct expr *e = expr;
 	register struct type *tp = id->id_def->df_type;
-	
+
 	ASSERT(id->id_def->df_sc != STATIC);
 	switch (tp->tp_fund)	{
 	case ARRAY:
@@ -507,17 +556,22 @@ bss(idf)
 	/*	bss() allocates bss space for the global idf.
 	*/
 	arith size = idf->id_def->df_type->tp_size;
-	
+
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, idf->id_def);
 #endif	PREPEND_SCOPES
+#ifdef DBSYMTAB
+	if (options['g']) {
+		stb_string(idf->id_def, idf->id_def->df_sc, idf->id_text);
+	}
+#endif /* DBSYMTAB */
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:
 	*/
 	/*	but we already gave a warning at the declaration of the
 		array. Besides, the message given here does not apply to
 		voids
-	
+
 	if (options['R'] && size == 0)
 		warning("actual array of size 0");
 	*/
@@ -558,6 +612,9 @@ code_expr(expr, val, code, tlbl, flbl)
 #ifndef	LINT
 	if (! options['L'])	/* profiling	*/
 		C_lin((arith)(expr->ex_line));
+#ifdef DBSYMTAB
+	if (options['g']) db_line(expr->ex_file, (unsigned int)expr->ex_line);
+#endif
 	EVAL(expr, val, code, tlbl, flbl);
 #else	LINT
 	lint_expr(expr, code ? USED : IGNORED);
@@ -583,6 +640,9 @@ code_break()
 {
 	register struct stmt_block *stmt_block = stmt_stack;
 
+#ifdef DBSYMTAB
+	if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 	if (stmt_block)
 		C_bra(stmt_block->st_break);
 	else
@@ -600,6 +660,9 @@ code_continue()
 
 	while (stmt_block)	{
 		if (stmt_block->st_continue)	{
+#ifdef DBSYMTAB
+			if (options['g']) db_line(dot.tk_file, dot.tk_line);
+#endif /* DBSYMTAB */
 			C_bra(stmt_block->st_continue);
 			return;
 		}
@@ -651,3 +714,19 @@ prc_exit()
 		C_asp(pointer_size);
 	}
 }
+
+#ifdef DBSYMTAB
+db_line(file, line)
+	char		*file;
+	unsigned int	line;
+{
+	static unsigned	oldline;
+	static char	*oldfile;
+
+	if (file != oldfile || line != oldline) {
+		C_ms_std((char *) 0, N_SLINE, (int) line);
+		oldline = line;
+		oldfile = file;
+	}
+}
+#endif /* DBSYMTAB */

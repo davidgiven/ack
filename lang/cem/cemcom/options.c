@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Header$ */
-/*	U S E R   O P T I O N - H A N D L I N G		*/
+/*	U S E R	  O P T I O N - H A N D L I N G		*/
 
 #include	"lint.h"
 #include	"botch_free.h"
@@ -21,6 +21,7 @@
 #include	"use_tmp.h"
 #include	"dataflow.h"
 #include	"noRoption.h"
+#include	"dbsymtab.h"
 
 #ifndef NOPP
 extern char **inctable;
@@ -91,7 +92,7 @@ next_option:			/* to allow combined one-char options */
 
 #ifndef LINT
 #ifndef NOPP
-	case 'A' :      /* Amake dependency generation */
+	case 'A' :	/* Amake dependency generation */
 		do_dependencies = 1;
 		if (*text) {
 			dep_file = text;
@@ -103,7 +104,13 @@ next_option:			/* to allow combined one-char options */
 		break;
 #endif NOPP
 #endif LINT
-		
+#ifdef DBSYMTAB
+	case 'g':	/* symbol table for debugger */
+		options['g'] = 1;
+		options['n'] = 1;
+		break;
+#endif /* DBSYMTAB */
+
 	case 'R':			/* strict version */
 #ifndef	NOROPTION
 		options[opt] = 1;
@@ -176,15 +183,15 @@ deleted, is now a debug-flag
 		if (*text)	{
 			int i;
 			register char *new = text;
-			
+
 			if (++inc_total > inc_max) {
 				inctable = (char **)
 				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
 			}
-				
+
 			for (i = inc_pos++; i < inc_total; i++) {
 				char *tmp = inctable[i];
-				
+
 				inctable[i] = new;
 				new = tmp;
 			}
@@ -235,7 +242,7 @@ deleted, is now a debug-flag
 #endif USE_TMP
 		break;
 	}
-		
+
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
 		register struct idf *idef;
@@ -353,7 +360,7 @@ txt2int(tp)
 		*tp; the resulting value is yielded.
 	*/
 	register int val = 0, ch;
-	
+
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';
 		(*tp)++;

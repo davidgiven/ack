@@ -61,7 +61,9 @@ SRC_C = \
 	$(SRC_DIR)/switch.c \
 	$(SRC_DIR)/tokenname.c \
 	$(SRC_DIR)/type.c \
-	$(SRC_DIR)/util.c
+	$(SRC_DIR)/util.c \
+	$(SRC_DIR)/stab.c
+
 GEN_C =	tokenfile.c program.c declar.c expression.c statement.c ival.c \
 	symbol2str.c char.c Lpars.c next.c
 CFILES=	$(SRC_C) $(GEN_C)
@@ -96,7 +98,7 @@ GEN_H = botch_free.h dataflow.h debug.h density.h errout.h \
         regcount.h \
 	code.h declar.h decspecs.h def.h expr.h field.h estack.h util.h \
 	idf.h macro.h stmt.h struct.h switch.h type.h l_brace.h l_state.h \
-	l_outdef.h stack.h lapbuf.h noRoption.h nofloat.h
+	l_outdef.h stack.h lapbuf.h noRoption.h nofloat.h dbsymtab.h
 
 HFILES=	$(GEN_H) $(SRC_H)
 

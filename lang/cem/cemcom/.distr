@@ -98,3 +98,4 @@ type.c
 type.str
 util.str
 util.c
+stab.c
