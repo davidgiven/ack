@@ -453,6 +453,16 @@ cvlong(l)
 	*p++ = x >> 24;
 }
 
+cvshort(s)
+	short *s;
+{
+	int x = *s;
+	char *p = (char *) s;
+
+	*p++ = x;
+	*p = x >> 8;
+}
+
 int
 is_rest_local(A, i)
 	register int i;
@@ -489,7 +499,8 @@ emit_symtab()
 	ACKnames = A;
 	for (; i; i--, A++) {
 		M->value = A->on_valu;
-		if (A->on_type & S_SCT ||
+		M->desc = A->on_desc;
+		if ((A->on_type & S_SCT) ||
 		    (A->on_type & S_ETC) == S_FIL) {
 			static int rest_local;
 			if (! unresolved || rest_local || (rest_local = is_rest_local(A, i))) {
@@ -497,7 +508,10 @@ emit_symtab()
 				continue;
 			}
 		}
-		if (A->on_type & S_COM) {
+		if (A->on_type & S_STB) {
+			M->type = A->on_type >> 8;
+		}
+		else if (A->on_type & S_COM) {
 			M->type = N_UNDF | N_EXT;
 		}
 		else switch(A->on_type & S_TYP) {
@@ -560,6 +574,7 @@ emit_symtab()
 		else M->name = outhead.oh_nchar + 3;	/* pointer to nullbyte */
 		cvlong(&(M->name));
 		cvlong(&(M->value));
+		cvshort(&(M->desc));
 	}
 	writef(MACHnames, sizeof(struct sym), (long) outhead.oh_nname);
 	free(MACHnames);
