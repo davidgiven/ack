@@ -17,6 +17,7 @@ ffc.c
 ffs.c
 gcvt.c
 ecvt.c
+ext_comp.c
 getlogin.c
 index.c
 l3.c
