@@ -4,8 +4,8 @@ This directory will not be changed by the installation process.
 "
 while :
 do
-	./echo -n "Please give the root of the ACK source tree,
-an absolute path: [$SRC_HOME] "
+	echo $E_FLAG "Please give the root of the ACK source tree,
+an absolute path: [$SRC_HOME] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'') 	ANS="$SRC_HOME" ;;
@@ -25,8 +25,8 @@ the directories will usually only contain Makefiles and .o files.
 "
 while :
 do
-	./echo -n "Please give the root of the configuration tree,
-an absolute path: [$CONFIG] "
+	echo $E_FLAG "Please give the root of the configuration tree,
+an absolute path: [$CONFIG] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$CONFIG";;
@@ -51,8 +51,8 @@ and you have a shared file system. See the installation manual.
 "
 while :
 do
-	./echo -n "Please give the root of the ACK binaries,
-an absolute path: [$TARGET_HOME] "
+	echo $E_FLAG "Please give the root of the ACK binaries,
+an absolute path: [$TARGET_HOME] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$TARGET_HOME";;
@@ -84,7 +84,7 @@ m68020		Motorola M68020 VME131 running Unix System V/68 R2V2.1
 sparc		SUN SPARC workstation
 ANY		Neither of the above
 "
-./echo -n "system type: [$SYSNAME] "
+echo $E_FLAG "system type: [$SYSNAME] $E_SFX"
 . $FDIR/get_answer
 case $ANS in
 '')	ANS="$SYSNAME";;
@@ -93,7 +93,7 @@ SYSNAME="$ANS"
 
 while :
 do
-./echo -n "Is this the system you are running on? (y/n) [$CURRENT] "
+echo $E_FLAG "Is this the system you are running on? (y/n) [$CURRENT] $E_SFX"
 . $FDIR/get_answer
 case $ANS in
 '')	ANS="$CURRENT";;
@@ -109,8 +109,8 @@ This tree will not be changed by the installation process.
 "
 	while :
 	do
-		./echo -n "Please give the root of a runnable ACK tree,
-an absolute path: [$UTIL_HOME] "
+		echo $E_FLAG "Please give the root of a runnable ACK tree,
+an absolute path: [$UTIL_HOME] $E_SFX"
 		. $FDIR/get_answer
 		case $ANS in
 		'')	ANS="$UTIL_HOME" ;;
@@ -139,7 +139,7 @@ the root of the ACK binary tree to be created is $TARGET_HOME,
 and the root of a runnable ACK binary tree is $UTIL_HOME.
 If the machine to compile ACK for is the current machine, the last two names
 may be identical."
-./echo -n "Are you satisfied with all this? (y/n) "
+echo $E_FLAG "Are you satisfied with all this? (y/n) $E_SFX"
 . $FDIR/get_answer
 case X$ANS in
 Xj*|Xy*|X)	break

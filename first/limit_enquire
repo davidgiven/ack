@@ -6,7 +6,8 @@ on a different machine, in particular if you have an NFS file system.
 Therefore, it may not be neccessary to install them again. As this part
 of the ACK installation takes the most time, you are given the opportunity
 to disable installation of the machine-independent part"
-	./echo -n "Do you want to install the machine-independent part? (y/n) [$DO_MACHINE_INDEP] "
+	echo $E_FLAG \
+	"Do you want to install the machine-independent part? (y/n) [$DO_MACHINE_INDEP] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$DO_MACHINE_INDEP" ;;
@@ -22,7 +23,7 @@ to disable installation of the machine-independent part"
 		echo
 		break
 		;;
-	*)	./echo "I do not understand your answer ($ANS). Try again."
+	*)	echo "I do not understand your answer ($ANS). Try again."
 		;;
 	esac
 done
@@ -30,7 +31,7 @@ for i in Modula-2 Pascal Occam Basic ANSI-C C Fortran
 do
     while :
     do
-	./echo -n "Do you want to install $i? (y/n) "
+	echo $E_FLAG "Do you want to install $i? (y/n) $E_SFX"
 	. $FDIR/get_answer
 	case X$ANS in
 	Xj*|Xy*|X)
@@ -65,7 +66,7 @@ m68k4, pmds4, sun2, and mantra."
 	m68020)	echo "not installing m68020 will disable installation of sun3."
 		;;
 	esac
-	./echo -n "Do you want to install the $1 support? (y/n) "
+	echo $E_FLAG "Do you want to install the $1 support? (y/n) $E_SFX"
 	. $FDIR/get_answer
 	case X$ANS in
 	Xj*|Xy*|X)
@@ -127,9 +128,44 @@ m68k4, pmds4, sun2, and mantra."
 		esac
 		break
 		;;
-	*)	./echo "I do not understand your answer ($ANS). Try again."
+	*)	echo "I do not understand your answer ($ANS). Try again."
 		;;
 	esac
     done
     shift
 done
+
+if [ $TARGET_HOME = $UTIL_HOME ] 
+then
+	case $ACM in
+	sun3|m68020|i386|vax*)
+		while :
+		do
+			echo $E_FLAG "Do you want to install the fast compilers? (y/n) [$DO_FAST] $E_SFX"
+        		. $FDIR/get_answer
+        		case $ANS in
+        		'')     ANS="$DO_FAST" ;;
+        		esac
+        		case X$ANS in
+        		Xj*|Xy*|X)
+				DO_FAST=y
+				echo "The fast compilers will be installed"
+				break
+				;;
+			Xn*)
+				DO_FAST=n
+				echo "The fast compilers will not be installed"
+				break
+				;;
+			*)	echo "I do not understand your answer ($ANS). Try again."
+				;;
+			esac
+		done
+		;;
+	*)
+		DO_FAST=n
+		;;
+	esac
+else
+	DO_FAST=n
+fi

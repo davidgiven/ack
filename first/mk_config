@@ -87,7 +87,7 @@ EOF
 		fi
 		cd ../..
 	fi
-	for j in libem libend libmon libfp libsys libdb libce
+	for j in libem libend libmon libfp libsys libdb
 	do
 	    if [ -d $i/$j ]
 	    then

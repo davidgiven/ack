@@ -1,11 +1,11 @@
 while :
 do
-	./echo -n "Which system-call library do you want to install for the VAX?
+	echo $E_FLAG "Which system-call library do you want to install for the VAX?
 You can choose between
 	libbsd4_1a	for Berkeley Unix 4.1
 	libbsd4_2	for Berkeley Unix 4.2 or newer, or Ultrix
 	libsysV_2	for Unix System V
-Your choice: [$SYSVAX] "
+Your choice: [$SYSVAX] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$SYSVAX";;

@@ -161,3 +161,12 @@ EOF
 		done
 	done
 fi
+
+if [ $DO_FAST = n ]
+then
+	ed - $CONFIG/Action <<'EOF'
+/^name "Fast/;$s/^/!/
+w
+q
+EOF
+fi

@@ -5,6 +5,14 @@ case $0 in
 first)	FDIR=.
 	;;
 esac
+
+if echo 'a\c' | grep 'c' >/dev/null ; then
+	E_FLAG='-n' E_SFX=''   : We have BSD-like echo command.
+else
+	E_FLAG=''   E_SFX='\c' : We have SystemV-like echo command.
+fi
+export E_FLAG E_SFX
+
 echo check write-ability of /tmp and /usr/tmp ...
 if ( >/usr/tmp/aaax.$$ )
 then
@@ -21,19 +29,6 @@ else
 	exit 2
 fi
 echo "/tmp and /usr/tmp ok"
-
-if [ -f echo ]
-then :
-else
-echo compile own echo program, so that we know how it works ...
-if cc -o echo $FDIR/myecho.c > /dev/null 2>&1
-then
-	echo compilation succeeded
-else
-	echo "Sorry, cc does not seem to work"
-	exit 8
-fi
-fi
 
 if [ -f macros ]
 then
@@ -100,7 +95,7 @@ compile for. Choices:"
 	done
 	ACM=$OLDACM
 	echo $l
-	./echo -n "Your choice: [$OLDACM] "
+	echo $E_FLAG "Your choice: [$OLDACM] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$ACM";;
@@ -121,7 +116,7 @@ Choices:
 	BSD4_1	for Berkeley 4.1
 	BSD4_2	for Berkeley 4.2, 4.3, SunOS
 	SYS_5	for Xenix, System III, System V'
-	./echo -n "Your choice (V7|BSD4_1|BSD4_2|SYS_5): [$OLDSYS] "
+	echo $E_FLAG "Your choice (V7|BSD4_1|BSD4_2|SYS_5): [$OLDSYS] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$SYS";;
@@ -149,7 +144,7 @@ answer no to the next question. Otherwise, answer yes, and you will be
 prompted for details"
 while :
 do
-	./echo -n "Do you want to limit the installation in any way? (y/n) [$LIMIT] "
+	echo $E_FLAG "Do you want to limit the installation in any way? (y/n) [$LIMIT] $E_SFX"
 	. $FDIR/get_answer
 	case $ANS in
 	'')	ANS="$LIMIT";;
@@ -189,6 +184,7 @@ echo "SYSVAX=\"$SYSVAX\"; export SYSVAX" >> macros
 echo "MACH=\"$MACH\"; export MACH" >> macros
 echo "WS=\"$WS\"; export WS" >> macros
 echo "PS=\"$PS\"; export PS" >> macros
+echo "DO_FAST=\"$DO_FAST\"; export DO_FAST" >> macros
 
 cat macros $FDIR/install_tail > INSTALL
 chmod +x INSTALL

@@ -30,13 +30,13 @@ EOF
 		rm -f t$$ a.out ws.[co]
 	else
 		: we will have to ask installer.
-		./echo -n "Please give the word-size of the target-machine (sizeof(int)) in bytes: [$WS] "
+		echo $E_FLAG "Please give the word-size of the target-machine (sizeof(int)) in bytes: [$WS] $E_SFX"
 		. $FDIR/get_answer
 		case $ANS in
 		'')	ANS="$WS";;
 		esac
 		WS="$ANS"
-		./echo -n "Please give the pointer-size of the target-machine (sizeof(char *)) in bytes: [$PS] "
+		echo $E_FLAG "Please give the pointer-size of the target-machine (sizeof(char *)) in bytes: [$PS] $E_SFX"
 		. $FDIR/get_answer
 		case $ANS in
 		'')	ANS="$PS";;

@@ -13,6 +13,5 @@ local.h.src
 mk_config
 mk_makefile
 mk_target
-myecho.c
 target_comp
 util_comp
