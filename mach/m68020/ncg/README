@@ -1,10 +1,11 @@
 The file 'table' in this directory contains a back end table for the
-MC68020 processor as well as one for the MC68000. Both tables use 4 bytes
-for words as well as for pointers. The table must be preprocessed first
+MC68020 processor as well as one for the MC68000. Both tables use 2 or 4 bytes
+for words and 4 bytes for pointers. The table must be preprocessed first
 by the C preprocessor.
 The file "whichone.h" specifies which code generator is generated:
-it #defines either TBL68000 or TBL86020.
+it #defines either TBL68000 or TBL86020, and it defines WORD_SIZE to either
+2 or 4.
 The m68k4(TBL68000) cg can very well be used for the MC68010 processor,
 for it makes rather efficient use of the 68010 loop mode.
 
-The mach.[ch] files are also suitable for both the m68020 and the m68k4.
+The mach.[ch] files are also suitable for both the m68020 and the m68k[24].

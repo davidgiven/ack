@@ -4765,7 +4765,7 @@ proc logndef
 with any_int STACK
     uses AA_REG,
 	 DD_REG,
-	 DD_REG4
+	 DD_REG4={const,0}
     gen
 	move %1, %c.1
 	lea {regAregXcon, sp, %c, 1, 0},%a
@@ -4869,7 +4869,7 @@ with DD_REG STACK
 pat com !defined($1)
 with any_int STACK
     uses AA_REG,
-	 DD_REG4
+	 DD_REG4={const,0}
     gen move %1, %b.1
 	move_l sp, %a
 	asr_l {small_const, 1}, %b
