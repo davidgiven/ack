@@ -2,19 +2,31 @@ SUF=o
 EMHOME=../../..
 MAKEFILE=Makefile
 MACHDEF="MACH=sun3" "SUF=$(SUF)" "ASAR=aal" "DEFS=-DNFS"
-LIBC="PREF=ac"
+PREF=ac
+SUB=
+LIBC="PREF=$(PREF)" "SUB=$(SUB)"
 OLIB=tail_$(PREF)$(SUB)
 
-libc:
+install: cplibc
+
+cplibc:
 	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
 	tar xf libsrc
 	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tailcp
 
 cmp:	cmplibc
 
-
 cmplibc:
-	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) tail
+	cp $(EMHOME)/lang/cem/libcc.ansi/libsrc .
+	tar xf libsrc
+	make -f $(MAKEFILE) $(LIBC) $(MACHDEF) "EMHOME=../$(EMHOME)" tail
+	-../../compare $(OLIB)
 
 clean:
 	rm -rf `cat LIST` LIST MakeArch Makefile make.proto libsrc
+
+opr:
+	make pr | opr
+
+pr:
+	@pr makefile
