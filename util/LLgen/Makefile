@@ -1,6 +1,7 @@
 # $Header$
-INSTALLDIR=../../bin
-LIBDIR=../../lib/LLgen
+EMHOME=../..
+INSTALLDIR=$(EMHOME)/bin
+LIBDIR=$(EMHOME)/lib/LLgen
 
 all:	cmp
 
