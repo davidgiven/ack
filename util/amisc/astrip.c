@@ -138,14 +138,16 @@ register FILE	*f;
 		case '2':
 			i = getc(f);
 			i |= (getc(f) << 8);
-			*((short *)p)++ = i;
+			*((short *)p) = i;
+			p += sizeof(short);
 			continue;
 		case '4':
 			l = (long)getc(f);
 			l |= (long)(getc(f) << 8);
 			l |= ((long)getc(f) << 16);
 			l |= ((long)getc(f) << 24);
-			*((long *)p)++ = l;
+			*((long *)p) = l;
+			p += sizeof(long);
 			continue;
 		default:
 		case '\0':
@@ -171,11 +173,14 @@ char		*fnam;
 			i = *p++; putc(i,f);
 			break;
 		case 2:
-			i = *((short *)p)++; putc(i,f);
+			i = *((short *)p);
+			p += sizeof(short);
+			putc(i,f);
 			i>>=8; putc(i,f);
 			break;
 		case 4:
-			l = *((long *)p)++;
+			l = *((long *)p);
+			p += sizeof(long);
 			putc(l,f);
 			l >>=8; putc(l,f);
 			l >>=8; putc(l,f);

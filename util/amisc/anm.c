@@ -279,14 +279,16 @@ register FILE	*f;
 		case '2':
 			i = getc(f);
 			i |= (getc(f) << 8);
-			*((short *)p)++ = i;
+			*((short *)p) = i;
+			p += sizeof(short);
 			continue;
 		case '4':
 			l = (long)getc(f);
 			l |= ((long)getc(f) << 8);
 			l |= ((long)getc(f) << 16);
 			l |= ((long)getc(f) << 24);
-			*((long *)p)++ = l;
+			*((long *)p) = l;
+			p += sizeof(long);
 			continue;
 		default:
 		case '\0':
