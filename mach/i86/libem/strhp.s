@@ -13,7 +13,7 @@
 	and	ax,~0777
 	push	bx
 	push	ax
-	call	_brk
+	call	__brk
 	pop	cx
 	pop	bx
 	cmp	ax,-1

@@ -1,12 +1,9 @@
 Action
 cv
-libbc
-libcc
 libem
-libpc
+libend
 libsys
 as
-liboc
 libfp
 ncg
-libm2
+mach_params

@@ -39,7 +39,7 @@ printc:
 	push	ax
 	push	bx
 	push	ax
-	call	_write
+	call	__write
 	pop	bx
 	pop	bx
 	pop	bx

@@ -1,4 +1,4 @@
-libsys_s.a
+libmon_s.a
 mon.s
 trp.s
 inn2.s

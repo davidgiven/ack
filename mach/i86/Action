@@ -4,30 +4,18 @@ end
 name "Intel 8086 backend"
 dir ncg
 end
-name "Intel 8086 C libraries"
-dir libcc
-end
 name "Intel 8086 EM library"
 dir libem
 end
-name "Intel 8086 Pascal library"
-dir libpc
-end
-name "Intel 8086 PC/IX systemcall library"
-dir libsys
-end
-name "Intel 8086 Basic library"
-dir libbc
-end
-name "Intel 8086 Occam library"
-dir liboc
-end
-name "Intel 8086 conversion program from ack.out --> PC/IX a.out"
-dir cv
+name "Intel 8086 etext,edata,end library"
+dir libend
 end
 name "Intel 8086 floating point library"
 dir libfp
 end
-name "Intel 8086 Modula-2 library"
-dir libm2
+name "Intel 8086 PC/IX systemcall library"
+dir libsys
+end
+name "Intel 8086 conversion program from ack.out --> PC/IX a.out"
+dir cv
 end

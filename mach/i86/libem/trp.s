@@ -18,4 +18,4 @@
 	call    .stop
 
 .stop:
-	int     3
+	jmp	__exit

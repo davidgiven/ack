@@ -1,7 +1,5 @@
 LIST
-Makefile
-compmodule
 README
-libsys_s.a
+libmon_s.a
 char.nas.s
 head_em.s
