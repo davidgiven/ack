@@ -621,13 +621,23 @@ Char array[];
 
     switch ( array[1] )
 	{
+#ifdef ACK_MOD
+#if__STDC__
 	case 'a': return ( '\a' );
+	case 'v': return ( '\v' );
+#else
+	case 'a': return ( '\007' );
+	case 'v': return ( '\013' );
+#endif
+#else
+	case 'a': return ( '\a' );
+	case 'v': return ( '\v' );
+#endif
 	case 'b': return ( '\b' );
 	case 'f': return ( '\f' );
 	case 'n': return ( '\n' );
 	case 'r': return ( '\r' );
 	case 't': return ( '\t' );
-	case 'v': return ( '\v' );
 
 	case '0':
 	case '1':
