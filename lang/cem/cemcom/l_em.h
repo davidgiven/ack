@@ -72,4 +72,5 @@
 #define	C_ms_gto()
 #define	C_ms_par(b)
 #define	C_ms_reg(o,s,t,c)
+#define	C_ms_err()
 
