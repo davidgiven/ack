@@ -38,11 +38,11 @@ sig_bad:	mov	#22,-(sp)	!_Xsignal. If pointer 0 trapping is
 	.sect .data
 sig_adr:	.data4	sig1 ;	.data4	sig2 ;	.data4 sig3 ;	.data4	0
 		.data4	0 ;	.data4	0 ;	.data4 0 ;	.data4	0
-		.data4	0 ;	.data4	0 ;	.data4 sig11 ;	.data4	sig12
+		.data4	0 ;	.data4	sig10 ;	.data4 sig11 ;	.data4	sig12
 		.data4	sig13 ;	.data4	sig14 ;	.data4 sig15 ;	.data4	sig16
 sig_trp:	.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
 		.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
-		.data4	-2  ;	.data4	-2  ;	.data4	21  ;	.data4	25  
+		.data4	-2  ;	.data4	22  ;	.data4	21  ;	.data4	25  
 		.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
 	.sect .text
 !the next procedures map the catched signal to em errors. The em error
@@ -118,11 +118,12 @@ sig11:
 #ifdef __BSD4_2
 		jsr	setmask
 #endif		
-		move.l	4(a5),d0
-		sub.l	sp,d0
-		bcs	e_memflt	!in this case error handling possible
-		move.l	ml,sp		!refresh stack and stop .
-		bra	notrap1
+		bra	e_memflt
+sig10:
+#ifdef __BSD4_2
+		jsr	setmask
+#endif		
+		bra	e_badptr
 
 #ifdef __BSD4_2
 setmask:

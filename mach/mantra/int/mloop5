@@ -19,6 +19,13 @@ calcarr:	move.l	(sp)+,d3	!save return address
 		mulu	d1,d0		!objectsize in d1
 		move.l	(sp)+,a0
 		ad	d0,a0		!a0 address of array element
+#if	test
+		locptr
+		heaptr
+		extptr
+7:		bra	e_badptr
+6:
+#endif
 		move.l	d3,-(sp)
 		rts
 9:		bsr	e_array	;tst.l  (sp)+ ;	jmp	(a4)
