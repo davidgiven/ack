@@ -1271,7 +1271,7 @@ ret  		| |		remove(ALL)
 
 
 asp $1 == 0 | | | | |
-asp $1 > 0 | STACK | 		remove(ALL) allocate(HL_REG)
+asp $1 != 0 | STACK | 		remove(ALL) allocate(HL_REG)
 				move({IMMEDIATE,$1} , HL)
 				"add hl,sp"
 				"ld sp,hl"
