@@ -179,6 +179,14 @@ ldc mli $1==1 && $2==2*w:
 loc mlu $1==1 && $2==w:
 ldc mlu $1==1 && $2==2*w:
 loc sbi $1==1 && $2==w: dec
+loc loc sli $3==w:	loc ($1 << $2)
+loc loc slu $3==w:	loc ($1 << $2)
+ldc loc sli $3==2*w:	ldc ($1 << $2)
+ldc loc slu $3==2*w:	ldc ($1 << $2)
+loc loc sri $3==w:	loc ($1 >> $2)
+loc loc sru $1 >= 0 && $3==w:	loc ($1 >> $2)
+ldc loc sri $3==2*w:	ldc ($1 >> $2)
+ldc loc sru $1 >= 0 && $3==2*w:	ldc ($1 >> $2)
 loc loe mlu $3==w:      loe $2  loc $1  mlu w
 loc lol mlu $3==w:      lol $2  loc $1  mlu w
 ldc lde mlu $3==2*w:    lde $2  ldc $1  mlu 2*w
