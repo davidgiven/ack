@@ -32,3 +32,7 @@ confarray.c
 load.c
 stackprio.c
 EM.e
+rcku.e
+rcki.e
+rckul.e
+rckil.e
