@@ -90,7 +90,7 @@ put_scon(x, y)
 		*q++ = *p++;
 	}
 	*q = '\0';
-	_prnt("'%s'", buf);
+	_prnt("'%s'", sbuf);
 }
 
 put_ps(x)
