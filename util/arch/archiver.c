@@ -62,6 +62,9 @@ typedef char BOOL;
 #define IO_SIZE		(10 * 1024)
 
 #define equal(str1, str2)	(!strncmp((str1), (str2), 14))
+#ifndef S_ISDIR
+#define S_ISDIR(m)	(m & S_IFDIR)		/* is a directory */
+#endif
 
 BOOL verbose;
 BOOL app_fl;
@@ -415,7 +418,7 @@ char *mess;
 	error(FALSE, "cannot find %s\n", name);
 	return;
   }
-  else if (status.st_mode & S_IFDIR) {
+  else if (S_ISDIR(status.st_mode) {
 	error(FALSE, "%s is a directory (ignored)\n", name);
 	return;
   }
