@@ -7,12 +7,14 @@
 
 	.sect .text
 
+! putchar, for a unix
+
 .putchar:
-	save [r0, r1, r2, r3]
-	movqd 4, r0
-	addr 20(sp), r1
-	movqd 1, r2
-	xord r3, r3
-	svc
-	restore[r0,r1,r2,r3]
-	ret 1
+	enter [],0
+	movqd	1,tos
+	addr	8(fp),tos
+	movqd	1,tos
+	bsr	_write
+	asjspb	-12
+	exit	[]
+	ret	0
