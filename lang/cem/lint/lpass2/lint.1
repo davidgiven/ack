@@ -2,7 +2,7 @@
 .\" See the copyright notice in the ACK home directory, in the file "Copyright".
 .\"
 .\" $Header$
-.TH LINT 1 88/10/13
+.TH LINT 1 89/10/04
 .SH NAME
 lint \- a C program checker
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ When it detects a doubtful construction
 .PP
 It does a full flow-of-control check, except that
 .BR goto s
-are not followed and that the fact that a function does not return
+are not followed and that the fact that a function never returns
 is not propagated.
 If, however, no
 .BR goto s
@@ -38,16 +38,17 @@ are used, each call of a non-returning function is followed by
 of /*NOTREACHED*/), the initialization state of all local variables will
 be checked correctly.
 .PP
-It checks the types of the arguments implied by the format in a call of
+.I Lint
+checks the types of the arguments implied by the format in a call of
 .IR printf() ,
 .IR scanf()
-and family, if the format-string is a direct argument in the call.
+and family, if the format string is a direct argument in the call.
 Formats of user functions can be indicated using a FORMAT pseudo-comment; see
 below.
 .PP
 .I Libraries
 .PP
-The second command (the
+The second command (using the
 .BR \-L -option)
 is used to maintain lint libraries; these are ASCII files
 that contain the output of the first pass.
@@ -57,7 +58,7 @@ A lint user library can be created and updated by using the
 .B \-L
 option.  The
 .I libname
-must be a local file, end in
+end in
 .BR .llb ,
 and can be passed to
 .I lint
@@ -132,11 +133,11 @@ Complain about unused external variables.
 The following pseudo-comments can be used to influence the behaviour of
 .IR lint:
 .TP
-/* ARGSUSED */
+/*\ ARGSUSED\ */
 Do not warn about arguments not used in the next function
 (see also the \-\fBv\fR option).
 .TP
-/* NOTREACHED */
+/*\ NOTREACHED\ */
 This tells
 .I lint
 that the flow of control "cannot reach" this comment.
@@ -144,28 +145,29 @@ This is a way to tell
 .I lint
 that a statement never "returns".
 .TP
-/* LINTLIBRARY */
-The following definitions are assumed to be part of a library.
+/*\ LINTLIBRARY\ */
+The definitions following this pseudo-comment are assumed to be part of a
+library.
 It suppresses complaints about unused functions and variables
 and is used in the creation of lint libraries.
-It implies /* ARGSUSED */.
+It implies /*\ ARGSUSED\ */.
 .TP
-/* VARARGS\fIn\fR */
+/*\ VARARGS\fIn\fR\ */
 The next function can be called with a variable number of
 arguments.
 Only check the types of the first \fIn\fR arguments.
 The \fIn\fR must follow the word VARARGS immediately.
-/* VARARGS0 */ may be abbreviated to /* VARARGS */.
+/*\ VARARGS0\ */ may be abbreviated to /*\ VARARGS\ */.
 .TP
-/* FORMAT\fIn\fR $ ... $ */
+/*\ FORMAT\fIn\fR $ ... $\ */
 The \fIn\fP-th argument (counting from 0) of the  next function declaration
 corresponds to a
 .IR printf -like
 format string.  Details about the format are given between the $$; see below.
 A missing $$ repeats the latest format.
 The \fIn\fR must follow the word FORMAT immediately.
-/* FORMAT\fIn\fR $ ... $ */ implies /* VARARGS\fIn+1\fP */; if the format
-is followed by more required arguments, a separate /* VARARGS\fIm\fP */
+/*\ FORMAT\fIn\fR $ ... $\ */ implies /*\ VARARGS\fIn+1\fP\ */; if the format
+is followed by more required arguments, a separate /*\ VARARGS\fIm\fP\ */
 must be given after the FORMAT pseudo-comment.
 .IP
 If the printf-like heading also has to conform to some varargs.h convention,
@@ -174,21 +176,27 @@ to the word FORMAT\fIn\fR without intervening space.
 .PP
 .I Formats
 .PP
-.I Lint
-recognizes conversion specifications of the form %[N|*|][.[N|*]]X where X
-is an arbitrary string, given in the $$-part of the FORMAT pseudo-comment.
-The latter consists of a list of format specifications, each of the form
-.IR %X = type ,
-where 
+The $$-part of the FORMAT pseudo-comment consists of a list of format
+specifications, each of the form
+.IR %T = type ,
+where
+.I T
+is an arbitrary (short) string and
 .I type
 is the expected type in "C normal form" (like in a cast, with no superfluous
-parentheses and without the use of typedefs).
+parentheses and without the use of typedefs). E.g., %ld=long indicates that
+the format string ld corresponds to a parameter of type long. For a shorter
+notation see the example below.
+.I Lint
+recognizes conversion specifications of the form %[N|*|][.[N|*]]T where N is
+a number, the * is itself and T is a string as defined above. For the above
+example this would include %ld, %5.2ld, %.*ld, etc.
 .PP
 Example: the FORMAT pseudo-comment for
 .I printf()
 is:
 .br
-/* FORMAT0 $
+/*\ FORMAT0 $
 .br
 	%[dox] = int		%l[dox] = long		%[DOX] = long
 .br
@@ -196,9 +204,9 @@ is:
 .br
 	%[feg] = double
 .br
-	%c = int		%s = char *
+	%c = int			%s = char *
 .br
-$ */
+$\ */
 .PP
 .I Output
 .PP
@@ -210,7 +218,7 @@ through the command
 .br
 where the character between the apostrophes is a space.
 .SH "ENVIRONMENT VARIABLES"
-LINTFLAGS	additional flag arguments (e.g. LINTFLAGS=\-h)
+LINTFLAGS		additional flag arguments (e.g. LINTFLAGS=\-h)
 .br
 LINTLIB		directory in which the standard libraries are looked up
 .SH FILES
@@ -229,8 +237,6 @@ Frans Kunst,
 Conflicting options in the command line are not detected.
 .br
 After a label, all automatic variables are assumed initialized.
-.br
-Initializations hidden inside for statements are sometimes overlooked.
 .SH AUTHOR
 Frans Kunst, Vrije Universiteit, Amsterdam.
 .br

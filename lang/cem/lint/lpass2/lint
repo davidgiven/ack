@@ -10,11 +10,13 @@ PATH=/bin:/usr/bin
 
 EMLINT=/home/top/dick/lint
 
-LPASS1="$EMLINT/lpass1/lnt -Dmc68000"	# pass 1 program
-LPASS2="$EMLINT/lpass2/lpass2"		# pass 2 program
-LLLIB="$EMLINT/llib"			# lint libraries directory
+#LDEFMACH=-Dmc68000
 
-LINTLIB=${LINTLIB-$LLLIB}
+LPASS1=${LPASS1-"$EMLINT/lpass1/lnt $LDEFMACH"}	# pass 1 program
+LPASS2=${LPASS2-"$EMLINT/lpass2/lpass2"}	# pass 2 program
+LLIB=${LLIB-"$EMLINT/llib"}			# lint libraries directory
+
+LINTLIB=${LINTLIB-$LLIB}
 
 TMP=/usr/tmp/lint1.$$
 NEW=/usr/tmp/lint2.$$
@@ -68,7 +70,7 @@ case "$LIBRARY" in
 			do
 				case $F in
 				-l)	# do NOT include c.llb
-					LIBC=
+					LIBC=false
 					;;
 				-lc)	# do include c.llb
 					LIBC=true
@@ -100,7 +102,6 @@ case "$LIBRARY" in
 			esac
 		) |
 		sort -u |
-		tee /tmp/\#lint.debug |
 		(	# pass 2: divert messages to avoid interleaving
 			$LPASS2 $PARAMS2 2>$TMP
 		)
@@ -113,7 +114,7 @@ case "$LIBRARY" in
 ?*)	# making a lint library
 	set -e				# stop at first sign of trouble
 
-	case "$LIBRARY" in
+	case `basename $LIBRARY` in
 	*.llb)	# OK
 		;;
 	*)	# no suffix .llb
