@@ -2,6 +2,8 @@
 /* 68000 desciptor table for ACK target optimizer */
 
 MAXOP 2;
+PAREN_OPEN "(";
+PAREN_CLOSE ")";
 
 %%;
 
