@@ -77,7 +77,7 @@ float_cst(str, sz, buf)
 		e.flt_exp += 127;
 		if (e.flt_mantissa.flt_h_32 == 0) e.flt_exp = 0;
 #ifdef IEEEFLOAT
-		if (e.flt_mantissa.flt_l_32 & 0x80) {
+		if (e.flt_mantissa.flt_h_32 & 0x80) {
 			/* rounding */
 			if ((e.flt_mantissa.flt_h_32 & 0xffffff00) == 0xffffff00) {
 				e.flt_exp++;
