@@ -1,12 +1,19 @@
 /* $Header$ */
 #include <stdio.h>
+#include <varargs.h>
 
-fprintf (file, fmt, args)
-FILE *file;
-char *fmt;
-int args;
+fprintf(va_alist)
+va_dcl
 {
-	_doprnt (fmt, &args, file);
+	FILE *file;
+	char *fmt;
+	va_list ap;
+
+	va_start(ap);
+	file = va_arg(ap, FILE *);
+	fmt = va_arg(ap, char *);
+	_doprnt (fmt, ap, file);
 	if ( io_testflag(file,IO_PERPRINTF) )
         	fflush(file);
+	va_end(ap);
 }

@@ -1,36 +1,20 @@
 /* $Header$ */
 #include <stdio.h>
+#include <varargs.h>
 
 #ifndef NOFLOAT
 extern char     *_pfloat();
 extern char     *_pscien();
 #endif
 
-static int *nextarg ;
-
-static geta(p,size) int *p; int size; {
-	/* get 'size' words from arglist */
-
-	if ( (int *)&p - &size >0 ) {
-		p += size;
-		while ( size-- ) {
-			*--p = *nextarg--;
-		}
-	} else {
-		while ( size-- ) {
-			*p++ = *nextarg++ ;
-		}
-	}
-}
-
 # define wsize(par) ( (sizeof par) / sizeof (int) )
 
 
-static char *gnum(f,ip) register char *f; int *ip; {
+static char *gnum(f,ip,app) register char *f; int *ip; va_list *app; {
 	register int    i,c;
 
 	if (*f == '*') {
-		geta(ip,wsize(i)) ;
+		*ip = va_arg((*app), int);
 		f++;
 	} else {
 		i = 0;
@@ -78,8 +62,8 @@ static char *l_compute(l1,d,s) long l1; char *s; {
 }
 #endif
 
-_doprnt(fmt,args,stream)
-	register char *fmt; int *args ; FILE *stream;
+_doprnt(fmt,ap,stream)
+	register char *fmt; va_list ap ; FILE *stream;
 {
 	register char   *s;
 #ifndef NOLONG
@@ -97,7 +81,6 @@ _doprnt(fmt,args,stream)
 	int             i,c,rjust,width,ndigit,ndfnd,zfill;
 	char            *oldfmt,*s1,buf[1025];
 
-	nextarg = args;
 	while (c = *fmt++) {
 		if (c != '%') {
 #ifdef  CPM
@@ -120,11 +103,11 @@ _doprnt(fmt,args,stream)
 			fmt++;
 			zfill = '0';
 		}
-		fmt = gnum(fmt,&width);
+		fmt = gnum(fmt,&width,&ap);
 		ndigit = 0; ndfnd = 0;
 		if (*fmt == '.') {
 			fmt++; oldfmt = fmt;
-			fmt = gnum(fmt,&ndigit);
+			fmt = gnum(fmt,&ndigit,&ap);
 			ndfnd = (fmt != oldfmt);
 		}
 		s = s1 = buf;
@@ -141,7 +124,9 @@ _doprnt(fmt,args,stream)
 			putc(c,stream);
 			continue;
 		case 's':
-			geta(&s1,wsize(s1)) ;
+			s1 = va_arg(ap, char *);
+			if (s1 == 0)
+				s1 = "(null)";
 			s = s1;
 			do {
 				if (*s == 0)
@@ -154,13 +139,13 @@ _doprnt(fmt,args,stream)
 		case 'u':
 		getu:
 			if ( !lflag ) {
-				geta(&inte,wsize(inte)) ;
+				inte = va_arg(ap, int);
 				goto i_unsignd ;
 			}
 #ifndef NOLONG
 		case 'U':
 		getlu:
-			geta( &l,wsize(l)) ;
+			l = va_arg(ap, long);
 			goto l_unsignd ;
 		case 'B':
 			j = 2 ;
@@ -173,7 +158,7 @@ _doprnt(fmt,args,stream)
 			goto getlu ;
 		case 'D':
 		    l_signed:
-			geta(&l,wsize(l)) ;
+			l = va_arg(ap, long);
 			if (l < 0) {
 				*s++ = '-';
 				l = -l;
@@ -195,7 +180,7 @@ _doprnt(fmt,args,stream)
 			goto getu ;
 		case 'd':
 			if ( lflag ) goto l_signed; ;
-			geta(&inte,wsize(inte)) ;
+			inte = va_arg(ap, int);
 			if ( inte<0 ) {
 				*s++ = '-';
 				inte= -inte ;
@@ -208,7 +193,7 @@ _doprnt(fmt,args,stream)
 			s = i_compute(inte,j,s);
 			break;
 		case 'c':
-			geta ( &uint, wsize(uint)) ;
+			uint = va_arg(ap, unsigned int);
 			for ( i= sizeof uint -1  ; i>=0 ; i-- ) {
 				if ( *s = uint%256 ) s++;
 				uint/= 256 ;
@@ -217,18 +202,18 @@ _doprnt(fmt,args,stream)
 #ifndef NOFLOAT
 		case 'e':
 			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
-			geta(&dbl,wsize(dbl)) ;
+			dbl = va_arg(ap, double);
 			s = _pscien(dbl,s,ndigit,ndfnd);
 			break;
 		case 'f':
 			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
-			geta(&dbl,wsize(dbl)) ;
+			dbl = va_arg(ap, double);
 			s = _pfloat(dbl,s,ndigit,ndfnd);
 			break;
 #endif
 		case 'r':
-			geta(&nextarg,wsize(nextarg)) ;
-			geta(&oldfmt,wsize(fmt)) ;
+			ap = va_arg(ap, char *);
+			fmt = va_arg(ap, char *);
 			fmt=oldfmt;
 			continue;
 		}

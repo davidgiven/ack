@@ -1,6 +1,7 @@
 /* $Header$ */
 #include <stdio.h>
 #include <ctype.h>
+#include <varargs.h>
 
 union ptr_union {
 	char           *chr_p;
@@ -19,10 +20,10 @@ static char	Xtable[128];
  * the routine that does the job 
  */
 
-_doscanf (iop, format, argp)
+_doscanf (iop, format, ap)
 register FILE	*iop;
 char           *format;		/* the format control string */
-union ptr_union *argp;		/* our argument list */
+va_list ap;
 {
 	int             done = 0;	/* number of items done */
 	int             base;		/* conversion base */
@@ -139,28 +140,32 @@ union ptr_union *argp;		/* our argument list */
 				if (sign)
 					val = -val;
 				if (longflag)
-					*(argp++)->ulong_p = (unsigned long) val;
+					*va_arg(ap, unsigned long *) = (unsigned long) val;
 				else if (shortflag)
-					*(argp++)->ushort_p = (unsigned short) val;
+					*va_arg(ap, unsigned short *) = (unsigned short) val;
 				else
-					*(argp++)->uint_p = (unsigned) val;
+					*va_arg(ap, unsigned *) = (unsigned) val;
 			}
-			if (done_some)
+			if (done_some) {
 				if (do_assign) ++done;
+			}
 			else
 				goto all_done;
 			break;
 		case 'c':
 			if (!widflag)
 				width = 1;
-			while (width-- && ic >= 0) {
+			{ register char *p;
+			  if (do_assign)
+				p = va_arg(ap, char *);
+			  while (width-- && ic >= 0) {
 				if (do_assign)
-					*(argp)->chr_p++ = (char) ic;
+					*p++ = (char) ic;
 				ic = getc(iop);
 				done_some = 1;
+			  }
 			}
 			if (do_assign) {
-				argp++;	/* done with this one */
 				if (done_some)
 					++done;
 			}
@@ -168,16 +173,22 @@ union ptr_union *argp;		/* our argument list */
 		case 's':
 			if (!widflag)
 				width = 0xffff;
-			while (width-- && !isspace (ic) && ic > 0) {
+			{ register char *p;
+			  if (do_assign)
+				p = va_arg(ap, char *);
+			  while (width-- && !isspace (ic) && ic > 0) {
 				if (do_assign)
-					*(argp)->chr_p++ = (char) ic;
+					*p++ = (char) ic;
 				ic = getc(iop);
 				done_some = 1;
+			  }
+			  if (do_assign)	/* terminate the string */
+				*p = '\0';	
 			}
-			if (do_assign)		/* terminate the string */
-				*(argp++)->chr_p = '\0';	
-			if (done_some)
-				++done;
+			if (done_some) {
+				if (do_assign)
+					++done;
+			}
 			else
 				goto all_done;
 			break;
@@ -200,17 +211,23 @@ union ptr_union *argp;		/* our argument list */
 			if (!*format)
 				goto quit;
 			
-			while (width-- && !isspace (ic) && ic > 0 &&
+			{ register char *p;
+			  if (do_assign)
+				p = va_arg(ap, char *);
+			  while (width-- && !isspace (ic) && ic > 0 &&
 				(Xtable[ic] ^ reverse)) {
 				if (do_assign)
-					*(argp)->chr_p++ = (char) ic;
+					*p++ = (char) ic;
 				ic = getc(iop);
 				done_some = 1;
+			  }
+			  if (do_assign)	/* terminate the string */
+				*p = '\0';	
 			}
-			if (do_assign)		/* terminate the string */
-				*(argp++)->chr_p = '\0';	
-			if (done_some && do_assign)
-				++done;
+			if (done_some) {
+				if (do_assign)
+					++done;
+			}
 			else
 				goto all_done;
 			break;
@@ -262,9 +279,9 @@ union ptr_union *argp;		/* our argument list */
 			if (do_assign) {
 				done++;
 				if (longflag)
-					*(argp++)->double_p = atof(buffer);
+					*va_arg(ap, double *) = atof(buffer);
 				else
-					*(argp++)->float_p = atof(buffer);
+					*va_arg(ap, float *) = atof(buffer);
 			}
 			}
 			break;

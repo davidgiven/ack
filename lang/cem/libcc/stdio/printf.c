@@ -1,11 +1,17 @@
 /* $Header$ */
 #include <stdio.h>
+#include <varargs.h>
 
-printf (fmt, args)
-char *fmt;
-int args;
+printf(va_alist)
+va_dcl
 {
-	_doprnt (fmt, &args, stdout);
+	char *fmt;
+	va_list ap;
+
+	va_start(ap);
+	fmt = va_arg(ap, char *);
+	_doprnt (fmt, ap, stdout);
 	if ( io_testflag(stdout,IO_PERPRINTF) )
         	fflush(stdout);
+	va_end(list);
 }

@@ -1,11 +1,19 @@
 /* $Header$ */
 #include <stdio.h>
+#include <varargs.h>
 
-int scanf (format, args)
-char           *format;
-unsigned        args;
+int scanf(va_alist)
+va_dcl
 {
-	return _doscanf (stdin, format, &args);
+	char *format;
+	va_list ap;
+	int retval;
+
+	va_start(ap);
+	format = va_arg(ap, char *);
+	retval = _doscanf (stdin, format, ap);
+	va_end(ap);
+	return retval;
 }
 
 
