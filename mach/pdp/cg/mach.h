@@ -15,7 +15,7 @@
 #endif
 #define in_ap(y)	/* nothing */
 
-#define newplb(x)	fprintf(codefile,"%s:\n",x)
+#define newplb(x)	doplb(x)
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
 #define newdlb(x)	fprintf(codefile,"%s:\n",x)
 #ifdef ACK_ASS
