@@ -11,23 +11,23 @@
 
 #include	"FP_types.h"
 
-_float
+SINGLE
 adf4(s2,s1)
-_float	s1,s2;
+SINGLE	s1,s2;
 {
 	EXTEND	e1,e2;
 	int	swap = 0;
 
-	if (s1 == (_float) 0) {
+	if (s1 == (SINGLE) 0) {
 		s1 = s2;
 		return s1;
 	}
-	if (s2 == (_float) 0) {
+	if (s2 == (SINGLE) 0) {
 		return s1;
 	}
-	extend((_double *)&s1,&e1,sizeof(SINGLE));
-	extend((_double *)&s2,&e2,sizeof(SINGLE));
+	extend(&s1,&e1,sizeof(SINGLE));
+	extend(&s2,&e2,sizeof(SINGLE));
 	add_ext(&e1,&e2);
-	compact(&e1,(_double *)&s1,sizeof(SINGLE));
+	compact(&e1,&s1,sizeof(SINGLE));
 	return s1;
 }

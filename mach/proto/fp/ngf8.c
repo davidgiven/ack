@@ -15,13 +15,13 @@
 
 #define OFF ((FL_MSL_AT_LOW_ADDRESS ? 0 : 4) + (FL_MSW_AT_LOW_ADDRESS ? 0 : 2) + (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
 
-_double
+DOUBLE
 ngf8(f)
-_double	f;
+DOUBLE	f;
 {
 	unsigned char	*p;
 
-	if (f.__double[0] != 0 || f.__double[1] != 0) {
+	if (f.d[0] != 0 || f.d[1] != 0) {
 		p = (unsigned char *) &f + OFF;
 		*p ^= 0x80;
 	}

@@ -14,6 +14,7 @@
 #include "FP_shift.h"
 #include "FP_types.h"
 
+void
 nrm_ext(e1)
 EXTEND	*e1;
 {
@@ -44,6 +45,6 @@ EXTEND	*e1;
 			cnt--;
 		}
 		e1->exp += cnt;
-		b64_sft(&(e1->m1), cnt);
+		b64_sft(&(e1->mantissa), cnt);
 	}
 }

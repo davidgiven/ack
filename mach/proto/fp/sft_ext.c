@@ -13,6 +13,7 @@
 
 #include "FP_types.h"
 
+void
 sft_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
@@ -34,5 +35,5 @@ EXTEND	*e1,*e2;
 		s = e2;
 
 	s->exp += diff;
-	b64_sft(&(s->m1), diff);
+	b64_sft(&(s->mantissa), diff);
 }

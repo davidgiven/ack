@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-	CONVERT INTEGER TO FLOAT (CIF n 4)
+	CONVERT INTEGER TO SINGLE (CIF n 4)
 
 	THIS ROUTINE WORKS BY FILLING AN EXTENDED
 	WITH THE INTEGER VALUE IN EXTENDED FORMAT
@@ -16,7 +16,7 @@
 
 #include "FP_types.h"
 
-_float
+SINGLE
 cif4(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
@@ -24,22 +24,22 @@ long	src;	/* largest possible integer to convert */
 	EXTEND	buf;
 	short	*ipt;
 	long	i_src;
-	_float	*result;
+	SINGLE	*result;
 
 	zrf_ext(&buf);
 	if (ss == sizeof(long))	{
 		buf.exp = 31;
 		i_src = src;
-		result = (_float *) &src;
+		result = (SINGLE *) &src;
 	}
 	else	{
 		ipt = (short *) &src;
 		i_src = (long) *ipt;
 		buf.exp = 15;
-		result = (_float *) &ss;
+		result = (SINGLE *) &ss;
 	}
 	if (i_src == 0)	{
-		*result = (_float) 0L;
+		*result = (SINGLE) 0L;
 		return(0L);
 	}
 			/* ESTABLISHED THAT src != 0	*/
@@ -52,6 +52,6 @@ long	src;	/* largest possible integer to convert */
 	if (ss != sizeof(long))
 		buf.m1 <<= 16;
 	nrm_ext(&buf);		/* adjust mantissa field	*/
-	compact(&buf,(_double *) result,4);	/* put on stack */
+	compact(&buf, result,sizeof(SINGLE));	/* put on stack */
 	return(*result);
 }

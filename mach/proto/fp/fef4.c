@@ -11,13 +11,9 @@
 
 #include	"FP_types.h"
 
-struct	fef4_returns {
-	int	e;
-	_float	f;
-};
-
+void
 fef4(r,s1)
-_float	s1;
+SINGLE	s1;
 struct fef4_returns	*r;
 {
 	EXTEND	buf;
@@ -25,7 +21,7 @@ struct fef4_returns	*r;
 						   to itself (see table)
 						*/
 
-	extend((_double *) &s1,&buf,sizeof(_float));
+	extend(&s1,&buf,sizeof(SINGLE));
 	if (buf.exp == 0 && buf.m1 == 0 && buf.m2 == 0) {
 		p->e = 0;
 	}
@@ -33,5 +29,5 @@ struct fef4_returns	*r;
 		p->e = buf.exp+1;
 		buf.exp = -1;
 	}
-	compact(&buf,(_double *) &p->f,sizeof(_float));
+	compact(&buf,&p->f,sizeof(SINGLE));
 }

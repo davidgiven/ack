@@ -6,7 +6,7 @@
 /* $Header$ */
 
 /*
-		CONVERT FLOAT TO DOUBLE (CFF 4 8)
+		CONVERT SINGLE TO DOUBLE (CFF 4 8)
 
 	This routine works quite simply. A floating point
 	of size 04 is converted to extended format.
@@ -17,13 +17,13 @@
 
 #include "FP_types.h"
 
-_double
+DOUBLE
 cff8(src)
-_float	src;
+SINGLE	src;
 {
 	EXTEND	buf;
 
-	extend((_double *) &src,&buf,4);	/* no matter what */
-	compact(&buf,(_double *) &src,8);
-	return *(_double *) &src;
+	extend(&src,&buf,sizeof(SINGLE));	/* no matter what */
+	compact(&buf, &src,sizeof(DOUBLE));
+	return *(DOUBLE *) ((void *) &src);
 }

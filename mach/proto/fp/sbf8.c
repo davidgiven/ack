@@ -11,15 +11,13 @@
 
 #include	"FP_types.h"
 
-extern	_double	adf8(), ngf8();
-
-_double
+DOUBLE
 sbf8(s2,s1)
-_double	s1,s2;
+DOUBLE	s1,s2;
 {
-	_double *result = &s1;	/* s1 may not be in a register! */
+	DOUBLE *result = &s1;	/* s1 may not be in a register! */
 
-	if (s2.__double[0] == 0 && s2.__double[1] == 0) {
+	if (s2.d[0] == 0 && s2.d[1] == 0) {
 		return s1;
 	}
 	s2 = ngf8(s2);

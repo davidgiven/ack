@@ -20,15 +20,15 @@ long
 cfu(ds,ss,src)
 int	ds;	/* destination size (2 or 4) */
 int	ss;	/* source size	    (4 or 8) */
-_double	src;	/* assume worst case */
+DOUBLE	src;	/* assume worst case */
 {
 	EXTEND	buf;
 	long	new;
 	short	newint, max_exp;
 
-	extend(&src,&buf,ss);	/* get extended format	*/
+	extend(&src.d[0],&buf,ss);	/* get extended format	*/
 	if (buf.exp < 0) {	/* no conversion needed	*/
-		src.__double[ss == 8] = 0L;
+		src.d[ss == 8] = 0L;
 		return(0L);
 	}
 	max_exp = (ds << 3) - 1;
@@ -38,6 +38,6 @@ _double	src;	/* assume worst case */
 	}
 	new = buf.m1 >> (31-buf.exp);
 done:
-	src.__double[ss == 8] = new;
+	src.d[ss == 8] = new;
 	return(new);
 }

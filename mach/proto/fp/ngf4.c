@@ -14,13 +14,13 @@
 #include "get_put.h"
 
 #define OFF ((FL_MSW_AT_LOW_ADDRESS ? 0 : 2) + (FL_MSB_AT_LOW_ADDRESS ? 0 : 1))
-_float
+SINGLE
 ngf4(f)
-_float	f;
+SINGLE	f;
 {
 	unsigned char *p;
 
-	if (f != (_float) 0) {
+	if (f != (SINGLE) 0) {
 		p = (unsigned char *) &f + OFF;
 		*p ^= 0x80;
 	}

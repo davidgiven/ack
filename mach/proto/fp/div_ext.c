@@ -26,19 +26,20 @@
 */
 /********************************************************/
 
+void
 div_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-			short	error = 0;
-			unsigned long	result[2];
+	short	error = 0;
+	B64		result;
 	register	unsigned long	*lp;
 #ifndef USE_DIVIDE
-			short	count;
+	short	count;
 #else
-			unsigned short u[9], v[5];
-			register int j;
-			register unsigned short *u_p = u;
-			int maxv = 4;
+	unsigned short u[9], v[5];
+	register int j;
+	register unsigned short *u_p = u;
+	int maxv = 4;
 #endif
 
 	if ((e2->m1 | e2->m2) == 0) {
@@ -60,8 +61,8 @@ EXTEND	*e1,*e2;
 	 * that m1 is quaranteed to be larger if its
 	 * maximum bit is set
 	 */
-	b64_rsft(&e1->m1);	/* 64 bit shift right */
-	b64_rsft(&e2->m1);	/* 64 bit shift right */
+	b64_rsft(&e1->mantissa);	/* 64 bit shift right */
+	b64_rsft(&e2->mantissa);	/* 64 bit shift right */
 	e1->exp++;
 	e2->exp++;
 #endif
@@ -75,8 +76,8 @@ EXTEND	*e1,*e2;
 		/* init control variables	*/
 
 	count = 64;
-	result[0] = 0L;
-	result[1] = 0L;
+	result.h_32 = 0L;
+	result.l_32 = 0L;
 
 		/* partial product division loop */
 
@@ -84,7 +85,7 @@ EXTEND	*e1,*e2;
 		/* first left shift result 1 bit	*/
 		/* this is ALWAYS done			*/
 
-		b64_lsft(result);
+		b64_lsft(&result);
 
 		/* compare dividend and divisor		*/
 		/* if dividend >= divisor add a bit	*/
@@ -95,7 +96,7 @@ EXTEND	*e1,*e2;
 			;	/* null statement */
 				/* i.e., don't add or subtract */
 		else	{
-			result[1]++;	/* ADD	*/
+			result.l_32++;	/* ADD	*/
 			if (e2->m2 > e1->m2)
 				e1->m1 -= 1;	/* carry in */
 			e1->m1 -= e2->m1;	/* do SUBTRACTION */
@@ -116,7 +117,7 @@ EXTEND	*e1,*e2;
 		error = ((*lp | *(lp+1)) != 0L) ? 1 : 0;
 		if (error)	{	/* more work */
 			/*	assume max bit == 0 (see above)	*/
-			b64_lsft(&e1->m1);
+			b64_lsft(&e1->mantissa);
 			continue;
 		}
 		else
@@ -124,7 +125,7 @@ EXTEND	*e1,*e2;
 	}	/* end of divide by subtraction loop	*/
 
 	if (count > 0)	{
-		lp = result;
+		lp = &result.h_32;
 		if (count > 31) {	/* move to higher word */
 			*lp = *(lp+1);
 			count -= 32;
@@ -132,16 +133,16 @@ EXTEND	*e1,*e2;
 		}
 		if (*lp)
 			*lp <<= count;	/* shift rest of way	*/
-		lp++;	/*  == &result[1]	*/
+		lp++;	/*  == &result.l_32	*/
 		if (*lp) {
-			result[0] |= (*lp >> 32-count);
+			result.h_32 |= (*lp >> 32-count);
 			*lp <<= count;
 		}
 	}
 #else /* USE_DIVIDE */
 
 	u[4] = (e1->m2 & 1) << 15;
-	b64_rsft(&(e1->m1));
+	b64_rsft(&(e1->mantissa));
 	u[0] = e1->m1 >> 16;
 	u[1] = e1->m1;
 	u[2] = e1->m2 >> 16;
@@ -152,9 +153,9 @@ EXTEND	*e1,*e2;
 	v[3] = e2->m2 >> 16;
 	v[4] = e2->m2;
 	while (! v[maxv]) maxv--;
-	result[0] = 0;
-	result[1] = 0;
-	lp = result;
+	result.h_32 = 0;
+	result.l_32 = 0;
+	lp = &result.h_32;
 
 	/*
 	 * Use an algorithm of Knuth (The art of programming, Seminumerical
@@ -241,8 +242,7 @@ EXTEND	*e1,*e2;
                  */
                 INEXACT();
 #endif
-	e1->m1 = result[0];
-	e1->m2 = result[1];
+	e1->mantissa = result;
 
 	nrm_ext(e1);
 	if (e1->exp < EXT_MIN)	{

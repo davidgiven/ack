@@ -12,26 +12,20 @@
 #include "FP_types.h"
 #include "FP_shift.h"
 
-_float sbf4();
-
-struct fif4_returns {
-	_float ipart;
-	_float fpart;
-};
-
+void
 fif4(p,x,y)
-_float	x,y;
+SINGLE	x,y;
 struct fif4_returns *p;
 {
 
 	EXTEND	e1,e2;
 
-	extend((_double *)&y,&e1,sizeof(_float));
-	extend((_double *)&x,&e2,sizeof(_float));
+	extend(&y,&e1,sizeof(SINGLE));
+	extend(&x,&e2,sizeof(SINGLE));
 		/* do a multiply */
 	mul_ext(&e1,&e2);
 	e2 = e1;
-	compact(&e2, (_double *)&y, sizeof(_float));
+	compact(&e2,&y,sizeof(SINGLE));
 	if (e1.exp < 0) {
 		p->ipart = 0;
 		p->fpart = y;
@@ -42,8 +36,8 @@ struct fif4_returns *p;
 		p->fpart = 0;
 		return;
 	}
-	b64_sft(&e1.m1, 63 - e1.exp);
-	b64_sft(&e1.m1, e1.exp - 63);	/* "loose" low order bits */
-	compact(&e1,(_double *) &(p->ipart), sizeof(SINGLE));
+	b64_sft(&e1.mantissa, 63 - e1.exp);
+	b64_sft(&e1.mantissa, e1.exp - 63);	/* "loose" low order bits */
+	compact(&e1,&(p->ipart),sizeof(SINGLE));
 	p->fpart = sbf4(p->ipart, y);
 }

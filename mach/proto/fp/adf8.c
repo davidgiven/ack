@@ -11,23 +11,23 @@
 
 #include	"FP_types.h"
 
-_double
+DOUBLE
 adf8(s2,s1)
-_double	s1,s2;
+DOUBLE	s1,s2;
 {
 	EXTEND	e1,e2;
 
-	if (s1.__double[0] == 0 && s1.__double[1] == 0) {
+	if (s1.d[0] == 0 && s1.d[1] == 0) {
 		s1 = s2;
 		return s1;
 	}
-	if (s2.__double[0] == 0 && s2.__double[1] == 0) {
+	if (s2.d[0] == 0 && s2.d[1] == 0) {
 		return s1;
 	}
 
-	extend(&s1,&e1,sizeof(_double));
-	extend(&s2,&e2,sizeof(_double));
+	extend(&s1.d[0],&e1,sizeof(DOUBLE));
+	extend(&s2.d[0],&e2,sizeof(DOUBLE));
 	add_ext(&e1,&e2);
-	compact(&e1,&s1,sizeof(_double));
+	compact(&e1,&s1.d[0],sizeof(DOUBLE));
 	return s1;
 }

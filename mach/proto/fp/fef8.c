@@ -11,13 +11,9 @@
 
 #include	"FP_types.h"
 
-struct	fef8_returns	{
-	int	e;
-	_double	f;
-};
-
+void
 fef8(r, s1)
-_double	s1;
+DOUBLE	s1;
 struct fef8_returns *r;
 {
 	EXTEND	buf;
@@ -25,7 +21,7 @@ struct fef8_returns *r;
 						   to itself (see table)
 						*/
 
-	extend(&s1,&buf,sizeof(_double));
+	extend(&s1.d[0],&buf,sizeof(DOUBLE));
 	if (buf.exp == 0 && buf.m1 == 0 && buf.m2 == 0) {
 		p->e = 0;
 	}
@@ -33,5 +29,5 @@ struct fef8_returns *r;
 		p->e = buf.exp + 1;
 		buf.exp = -1;
 	}
-	compact(&buf,&p->f,sizeof(_double));
+	compact(&buf,&p->f.d[0],sizeof(DOUBLE));
 }

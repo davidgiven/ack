@@ -15,21 +15,22 @@
 # include "FP_types.h"
 # include "get_put.h"
 
+void
 compact(f,to,size)
 EXTEND	*f;
-_double	*to;
+unsigned long	*to;
 int	size;
 {
 	int	error = 0;
 
-	if (size == sizeof(_double)) {
+	if (size == sizeof(DOUBLE)) {
 	/*
 	 * COMPACT EXTENDED INTO DOUBLE
 	 */
-		DOUBLE *DBL;
+		DOUBLE *DBL = (DOUBLE *) (void *) to;
 
 		if ((f->m1|(f->m2 & DBL_ZERO)) == 0L)	{
-			zrf8(to);
+			zrf8(DBL);
 			return;
 		}
 		f->exp += DBL_BIAS;	/* restore proper bias	*/
@@ -42,25 +43,24 @@ dbl_over:			trap(EFOVFL);
 				return;
 		}
 		else if (f->exp < DBL_MIN)	{
-			b64_rsft(&(f->m1));
+			b64_rsft(&(f->mantissa));
 			if (f->exp < 0) {
-				b64_sft(&(f->m1), -f->exp);
+				b64_sft(&(f->mantissa), -f->exp);
 				f->exp = 0;
 			}
 			/* underflow ??? */
 		}
 			
 		/* local CAST conversion		*/
-		DBL = (DOUBLE *) to;
 
 		/* because of special format shift only 10 bits */
 		/* bit shift mantissa 10 bits		*/
 
 		/* first align within words, then do store operation */
 
-		DBL->_s.p1.fract = f->m1 >> DBL_RUNPACK;   /* plus 22 == 32 */
-		DBL->_s.p2       = f->m2 >> DBL_RUNPACK;   /* plus 22 == 32 */
-		DBL->_s.p2      |= (f->m1 << DBL_LUNPACK); /* plus 10 == 32 */
+		DBL->d[0] = f->m1 >> DBL_RUNPACK;   /* plus 22 == 32 */
+		DBL->d[1] = f->m2 >> DBL_RUNPACK;   /* plus 22 == 32 */
+		DBL->d[1] |= (f->m1 << DBL_LUNPACK); /* plus 10 == 32 */
 
 		/* if not exact then round to nearest	*/
 		/* on a tie, round to even */
@@ -72,17 +72,17 @@ dbl_over:			trap(EFOVFL);
 		    if (((f->m2 & DBL_EXACT) > DBL_ROUNDUP)
 			|| ((f->m2 & DBL_EXACT) == DBL_ROUNDUP
 			    && (f->m2 & (DBL_ROUNDUP << 1)))) {
-			DBL->_s.p2++;	/* rounding up	*/
-			if (DBL->_s.p2 == 0L) { /* carry out	*/
-			    DBL->_s.p1.fract++;
+			DBL->d[1]++;	/* rounding up	*/
+			if (DBL->d[1] == 0L) { /* carry out	*/
+			    DBL->d[0]++;
 
-			    if (f->exp == 0 && (DBL->_s.p1.fract & ~DBL_MASK)) {
+			    if (f->exp == 0 && (DBL->d[0] & ~DBL_MASK)) {
 					f->exp++;
 				}
-			    if (DBL->_s.p1.fract & DBL_CARRYOUT) { /* carry out */
-				if (DBL->_s.p1.fract & 01)
-				    DBL->_s.p2 = CARRYBIT;
-				DBL->_s.p1.fract >>= 1;
+			    if (DBL->d[0] & DBL_CARRYOUT) { /* carry out */
+				if (DBL->d[0] & 01)
+				    DBL->d[1] = CARRYBIT;
+				DBL->d[0] >>= 1;
 				f->exp++;
 			    }
 			}
@@ -101,24 +101,24 @@ dbl_over:			trap(EFOVFL);
 		 * 2) shift and store exponent
 		 */
 
-		DBL->_s.p1.fract &= DBL_MASK;
-		DBL->_s.p1.fract |= 
+		DBL->d[0] &= DBL_MASK;
+		DBL->d[0] |= 
 			((long) (f->exp << DBL_EXPSHIFT) << EXP_STORE);
 		if (f->sign)
-			DBL->_s.p1.fract |= CARRYBIT;
+			DBL->d[0] |= CARRYBIT;
 
 		/*
 		 * STORE MANTISSA
 		 */
 
 #if FL_MSL_AT_LOW_ADDRESS
-		put4(DBL->_s.p1.fract, (char *) &DBL->_s.p1.fract);
-		put4(DBL->_s.p2, (char *) &DBL->_s.p2);
+		put4(DBL->d[0], (char *) &DBL->d[0]);
+		put4(DBL->d[1], (char *) &DBL->d[1]);
 #else
 		{ unsigned long l;
-		  put4(DBL->_s.p2, (char *) &l);
-		  put4(DBL->_s.p1.fract, (char *) &DBL->_s.p2);
-		  DBL->_s.p1.fract = l;
+		  put4(DBL->d[1], (char *) &l);
+		  put4(DBL->d[0], (char *) &DBL->d[1]);
+		  DBL->d[0] = l;
 		}
 #endif
 	}
@@ -129,9 +129,9 @@ dbl_over:			trap(EFOVFL);
 		SINGLE	*SGL;
 
 		/* local CAST conversion		*/
-		SGL = (SINGLE *) to;
+		SGL = (SINGLE *) (void *) to;
 		if ((f->m1 & SGL_ZERO) == 0L)	{
-			SGL->fract = 0L;
+			*SGL = 0L;
 			return;
 		}
 		f->exp += SGL_BIAS;	/* restore bias	*/
@@ -144,16 +144,16 @@ sgl_over:			trap(EFOVFL);
 				return;
 		}
 		else if (f->exp < SGL_MIN)	{
-			b64_rsft(&(f->m1));
+			b64_rsft(&(f->mantissa));
 			if (f->exp < 0) {
-				b64_sft(&(f->m1), -f->exp);
+				b64_sft(&(f->mantissa), -f->exp);
 				f->exp = 0;
 			}
 			/* underflow ??? */
 		}
 
 		/* shift mantissa and store	*/
-		SGL->fract = (f->m1 >> SGL_RUNPACK);
+		*SGL = (f->m1 >> SGL_RUNPACK);
 
 		/* check for rounding to nearest	*/
 		/* on a tie, round to even		*/
@@ -165,13 +165,13 @@ sgl_over:			trap(EFOVFL);
 		        if (((f->m1 & SGL_EXACT) > SGL_ROUNDUP)
 			    || ((f->m1 & SGL_EXACT) == SGL_ROUNDUP
 			        && (f->m1 & (SGL_ROUNDUP << 1)))) {
-				SGL->fract++;
-				if (f->exp == 0 && (SGL->fract & ~SGL_MASK)) {
+				(*SGL)++;
+				if (f->exp == 0 && (*SGL & ~SGL_MASK)) {
 					f->exp++;
 				}
 			/* check normal */
-				if (SGL->fract & SGL_CARRYOUT)	{
-					SGL->fract >>= 1;
+				if (*SGL & SGL_CARRYOUT)	{
+					*SGL >>= 1;
 					f->exp++;
 				}
 				if (f->exp > SGL_MAX)
@@ -188,16 +188,15 @@ sgl_over:			trap(EFOVFL);
 		 * 2) shift and store exponent
 		 */
 
-		SGL->fract &= SGL_MASK; /* B23-B31 are 0 */
-		SGL->fract |= 
-			((long) (f->exp << SGL_EXPSHIFT) << EXP_STORE);
+		*SGL &= SGL_MASK; /* B23-B31 are 0 */
+		*SGL |= ((long) (f->exp << SGL_EXPSHIFT) << EXP_STORE);
 		if (f->sign)
-			SGL->fract |= CARRYBIT;
+			*SGL |= CARRYBIT;
 
 		/*
 		 * STORE MANTISSA
 		 */
 
-		put4(SGL->fract, (char *) &SGL->fract);
+		put4(*SGL, (char *) &SGL);
 	}
 }

@@ -9,12 +9,12 @@
 	ROUTINE TO MULTIPLY TWO EXTENDED FORMAT NUMBERS
 */
 
-# include "adder.h"
 # include "FP_bias.h"
 # include "FP_trap.h"
 # include "FP_types.h"
 # include "FP_shift.h"
 
+void
 mul_ext(e1,e2)
 EXTEND	*e1,*e2;
 {

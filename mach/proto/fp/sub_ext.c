@@ -11,6 +11,7 @@
 
 #include "FP_types.h"
 
+void
 sub_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
@@ -25,8 +26,8 @@ EXTEND	*e1,*e2;
 	sft_ext(e1, e2);
 	if (e1->sign != e2->sign) {
 		/* e1 - e2 = e1 + (-e2) */
-		if (b64_add(&e1->m1,&e2->m1)) { /* addition carry */
-                	b64_rsft(&e1->m1);      /* shift mantissa one bit RIGHT */
+		if (b64_add(&e1->mantissa,&e2->mantissa)) { /* addition carry */
+                	b64_rsft(&e1->mantissa);      /* shift mantissa one bit RIGHT */
                 	e1->m1 |= 0x80000000L;  /* set max bit  */
                 	e1->exp++;              /* increase the exponent */
         	}

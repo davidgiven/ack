@@ -12,8 +12,9 @@
 #include	"FP_types.h"
 #include	"get_put.h"
 
+int
 cmf8(d1,d2)
-_double	d1,d2;
+DOUBLE	d1,d2;
 {
 #define	SIGN(x)	(((x) < 0) ? -1 : 1)
 		/*

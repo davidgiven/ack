@@ -16,17 +16,17 @@
 
 #include "FP_types.h"
 
-_double
+DOUBLE
 cif8(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
 {
 	EXTEND	buf;
-	_double	*result;	/* for return value */
+	DOUBLE	*result;	/* for return value */
 	short	*ipt;
 	long	i_src;
 
-	result = (_double *) &ss;	/* always */
+	result = (DOUBLE *) ((void *) &ss);	/* always */
 	zrf_ext(&buf);
 	if (ss == sizeof(long))	{
 		buf.exp = 31;
@@ -51,6 +51,6 @@ long	src;	/* largest possible integer to convert */
 	if (ss != sizeof(long))
 		buf.m1 <<= 16;
 	nrm_ext(&buf);
-	compact(&buf,result,8);
+	compact(&buf,&result->d[0],8);
 	return(*result);
 }

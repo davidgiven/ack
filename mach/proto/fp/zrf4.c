@@ -9,8 +9,11 @@
 	return a zero float (ZRF 4)
 */
 
+#include "FP_types.h"
+
+void
 zrf4(l)
-long	*l;
+SINGLE	*l;
 {
 	*l = 0L;
 }

@@ -32,8 +32,9 @@
 #include "get_put.h"
 /********************************************************/
 
+void
 extend(from,to,size)
-_double	*from;
+unsigned long	*from;
 EXTEND	*to;
 int	size;
 {

@@ -11,10 +11,11 @@
 
 #include "FP_types.h"
 
+void
 zrf8(z)
-_double	*z;
+DOUBLE	*z;
 {
 
-	z->__double[0] = 0L;
-	z->__double[1] = 0L;
+	z->d[0] = 0L;
+	z->d[1] = 0L;
 }

@@ -11,6 +11,7 @@
 
 #include "FP_types.h"
 
+void
 zrf_ext(e)
 EXTEND	*e;
 {

@@ -16,7 +16,7 @@
 
 #include "FP_types.h"
 
-_double
+DOUBLE
 cuf8(ss,src)
 int	ss;	/* source size */
 long	src;	/* largest possible integer to convert */
@@ -36,7 +36,7 @@ long	src;	/* largest possible integer to convert */
 		buf.exp = 15;
 	}
 	if (i_src == 0)	{
-		zrf8(&ss);
+		zrf8((DOUBLE *)((void *)&ss));
 		return;
 	}
 			/* ESTABLISHED THAT src != 0	*/
@@ -50,6 +50,6 @@ long	src;	/* largest possible integer to convert */
 
 			/* adjust mantissa field	*/
 	nrm_ext(&buf);
-	compact(&buf,(_double *) &ss,8);
-	return *((_double *) &ss);
+	compact(&buf,(unsigned long *) (void *)&ss,8);
+	return *((DOUBLE *) (void *)&ss);
 }

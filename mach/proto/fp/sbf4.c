@@ -1,5 +1,5 @@
 /*
-  (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ (c) copyright 1988 by the Vrije Universiteit, Amsterdam, The Netherlands.
   See the copyright notice in the ACK home directory, in the file "Copyright".
 */
 
@@ -11,15 +11,13 @@
 
 #include	"FP_types.h"
 
-extern	_float	adf4(), ngf4();
-
-_float
+SINGLE
 sbf4(s2,s1)
-_float	s1,s2;
+SINGLE	s1,s2;
 {
-	_float *result = &s1;	/* s1 may not be in a register! */
+	SINGLE *result = &s1;	/* s1 may not be in a register! */
 
-	if (s2 == (_float) 0) {
+	if (s2 == (SINGLE) 0) {
 		return s1;
 	}
 	s2 = ngf4(s2);

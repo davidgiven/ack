@@ -14,7 +14,7 @@
 
 int
 cmf4(f1,f2)
-_float	f1,f2;
+SINGLE	f1,f2;
 {
 		/*
 		 * return ((f1 < f2) ? 1 : (f1 - f2))

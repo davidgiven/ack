@@ -11,16 +11,16 @@
 
 #include	"FP_types.h"
 
-_float
+SINGLE
 mlf4(s2,s1)
-_float	s1,s2;
+SINGLE	s1,s2;
 {
 	EXTEND	e1,e2;
 
-	extend((_double *)&s1,&e1,sizeof(_float));
-	extend((_double *)&s2,&e2,sizeof(_float));
+	extend(&s1,&e1,sizeof(SINGLE));
+	extend(&s2,&e2,sizeof(SINGLE));
 		/* do a multiply */
 	mul_ext(&e1,&e2);
-	compact(&e1,(_double *)&s1,sizeof(_float));
+	compact(&e1,&s1,sizeof(SINGLE));
 	return(s1);
 }

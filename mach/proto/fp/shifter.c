@@ -5,8 +5,9 @@
 
 /* $Header$ */
 
-# include "adder.h"
+# include "FP_types.h"
 
+void
 b64_sft(e1,n)
 B64	*e1;
 int	n;
@@ -53,6 +54,7 @@ int	n;
 	}
 }
 
+void
 b64_lsft(e1)
 B64	*e1;
 {
@@ -62,6 +64,7 @@ B64	*e1;
 	e1->l_32 <<= 1;
 }
 
+void
 b64_rsft(e1)
 B64	*e1;
 {

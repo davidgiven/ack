@@ -13,7 +13,7 @@
 # include <stdio.h>
 # endif
 
-# include "adder.h"
+# include "FP_types.h"
 # define	UNKNOWN -1
 # define	TRUE	 1
 # define	FALSE	 0
@@ -22,6 +22,7 @@
 	/*
 	 *	add 64 bits
 	 */
+int
 b64_add(e1,e2)
 		/*
 		 * pointers to 64 bit 'registers'
@@ -45,6 +46,5 @@ register	B64	*e1,*e2;
 # endif
 	if ((carry) && (++e1->h_32 == 0))
 		return(TRUE);		/* had a 64 bit overflow */
-	else
-		return(overflow);	/* return status from higher add */
+	return(overflow);		/* return status from higher add */
 }
