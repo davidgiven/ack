@@ -24,6 +24,6 @@ opr:
 	make pr ^ opr
 
 make:	$(OBJS)
-	$(CC) -i -o make $(OBJS)
+	$(CC) -o make $(OBJS)
 
 $(OBJS):	h.h

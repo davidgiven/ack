@@ -19,7 +19,7 @@ HOMEDIR =
 CFLAGS = -O $(PROFILE) $(INCLUDES) -DSTATIC= -DM2COMPILER=\"$(M2COMPILER)\" -DDEF_DIR=\"$(DEFDIR)\" $(HOMEDIR)
 LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
-LDFLAGS = -i $(PROFILE)
+LDFLAGS = $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 CSRC =	LLlex.c LLmessage.c error.c main.c lib.c \

@@ -65,7 +65,7 @@ TABGEN = $(EMHOME)/bin/tabgen
 PROF = #-pg
 CDEFS =	$(EM_INCLUDES) $(LIB_INCLUDES)
 CFLAGS = $(CDEFS) $(COPTIONS) -O $(PROF)
-LDFLAGS = -i $(PROF)
+LDFLAGS = $(PROF)
 
 # Grammar files and their objects
 LSRC =	tokenfile.g declar.g statement.g expression.g program.g ival.g
