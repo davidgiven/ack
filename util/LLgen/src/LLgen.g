@@ -26,33 +26,64 @@
 /*
  * LLgen.g
  * Defines the grammar of LLgen.
- * Some routines that are included build the internal structure
+ * Some routines that build the internal structure are also included
  */
 
 {
 # include "types.h"
 # include "io.h"
-# include "tunable.h"
 # include "extern.h"
 # include "assert.h"
+# include "cclass.h"
 
 # ifndef NORCSID
-static string	rcsidb = "$Header$";
+static string	rcsid = "$Header$";
 # endif
-p_mem		alloc();
+p_mem		alloc(), new_mem();
 string		store();
-t_gram		search();
+p_gram		search();
 
 static int	nparams;		/* parameter count for nonterminals */
-static t_gram	elem;			/* temporary space */
 static int	acount;			/* count #of global actions */
+static t_info	term_info,
+		link_info;
+static p_order	order,
+		maxorder;
 
 /* Here are defined : */
+extern		a_init();
+STATIC p_order	neworder();
 STATIC		copyact();
-STATIC unsigned	get();
-STATIC t_gram	mkalt();
-STATIC t_gram	mkterm();
+STATIC		mkalt();
+STATIC		mkterm();
 STATIC p_gram	copyrule();
+/* and of course LLparse() */
+
+a_init() {
+	term_info.i_esize = sizeof (t_term);
+	term_info.i_incr = 50;
+	link_info.i_esize = sizeof (t_link);
+	link_info.i_incr = 50;
+	name_init();
+}
+
+STATIC p_order
+neworder(index) {
+	register p_order po;
+
+	if ((po = order) == maxorder) {
+		po = (p_order) alloc(20 * sizeof(*order));
+		maxorder = po + 20;
+	}
+	order = po + 1;
+	po->o_next = 0;
+	po->o_index = index;
+	if (porder) {
+		porder->o_next = po;
+	}
+	else	sorder = po;
+	return po;
+}
 }
 
 %start	LLparse, spec;
@@ -62,7 +93,7 @@ spec	:		{	acount = 0; }
 			{	/*
 				 * Put an endmarker in temporary file
 				 */
-				putc('\0',fact); putc('\0',fact);
+				fprintf(fact,"%c%c",'\0', '\0');
 			}
 	;
 
@@ -85,12 +116,12 @@ def			{	register string p; }
 				 * Put the declaration in the list
 				 * of start symbols
 				 */
-				t_gram temp;
+				register p_gram temp;
 				register p_start ff;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_start) alloc(sizeof(t_start));
-				ff->ff_nont = &nonterms[g_getnont(&temp)];
+				ff->ff_nont = g_getnont(temp);
 				ff->ff_name = p;
 				ff->ff_next = start;
 				start = ff;
@@ -98,7 +129,8 @@ def			{	register string p; }
 	| C_LEXICAL C_IDENT
 			{	if (!lexical) {
 					lexical = store(lextoken.t_string);
-				} else	error(linecount,"Duplicate %%lexical");
+				}
+				else	error(linecount,"Duplicate %%lexical");
 			}
 	  ';'
 	  /*
@@ -118,17 +150,18 @@ def			{	register string p; }
 listel	: C_IDENT	{	search(TERMINAL,lextoken.t_string,ENTERING); }
 	;
 
-rule			{	register p_nont p;}
+rule			{	register p_nont p;
+				p_gram rr;
+				register p_gram temp;
+			}
 	: /*
 	   * grammar for a production rule
 	   */
-	  C_IDENT	{	t_gram temp;
-
-				temp = search(NONTERM,lextoken.t_string,BOTH);
-	 			p = &nonterms[g_getnont(&temp)];
+	  C_IDENT	{	temp = search(NONTERM,lextoken.t_string,BOTH);
+	 			p = &nonterms[g_getnont(temp)];
 				if (p->n_rule) {
 					error(linecount,
-						"nonterminal already defined");
+"nonterminal %s already defined", lextoken.t_string);
 				}
 				/*
 				 * Remember the order in which the nonterminals
@@ -136,20 +169,26 @@ rule			{	register p_nont p;}
 				 * order to keep track with the actions on the
 				 * temporary file
 				 */
-				*maxorder++ = p - nonterms;
+				porder = neworder(p - nonterms);
 				p->n_count = acount;
 				acount = 0;
 				p->n_lineno = linecount;
 	  		}
 	  [ params(2)	{	p->n_flags |= PARAMS;
-				if (nparams > 7) {
+				if (nparams > 15) {
 					error(linecount,"Too many parameters");
-				} else	setntparams(p,nparams);
+				}
+				else	setntparams(p,nparams);
 			}
 	  ]?
 	  [ action(0)	{	p->n_flags |= LOCALS; }
 	  ]?
-	  ':' productions(&(p->n_rule)) ';'
+	  ':' productions(&rr) ';'
+			/*
+			 * Do not use p->n_rule now! The nonterms array
+			 * might have been re-allocated.
+			 */
+	  		{	nonterms[g_getnont(temp)].n_rule = rr;}
 	;
 
 action(int n;)
@@ -173,73 +212,80 @@ productions(p_gram *p;)
 		register p_gram	p_alts = alts;
 		int		o_lc, n_lc;
 	} :
-			{	n_lc = o_lc = linecount; }
+			{	o_lc = linecount; }
 	  simpleproduction(p,&conflres)
-	  [ '|'		{	n_lc = linecount; }
-	    [ C_DEFAULT	{	if (haddefault) {
-					error(linecount,
-						"multiple %%default");
-				}
-				haddefault = 1;
-				t |= DEF;
-			}
-	    ]?
-	    simpleproduction(&prod,&t)
+			{	if (conflres & DEF) haddefault = 1; }
+	  [ 
+	    [ '|'	{	n_lc = linecount; }
+	      simpleproduction(&prod,&t)
 			{	if (p_alts - alts >= 97) {
 					error(n_lc,"Too many alternatives");
 					p_alts = alts;
 				}
-				*p_alts++ = mkalt(*p,conflres,o_lc);
+				if (t & DEF) {
+					if (haddefault) {
+						error(n_lc,
+		"More than one %%default in alternation");
+					}
+					haddefault = 1;
+				}
+				mkalt(*p,conflres,o_lc,p_alts++);
 				o_lc = n_lc;
 				conflres = t;
 				t = 0;
 				*p = prod;
 			}
-	  ]*		{	if (conflres & ~DEF) {
+	    ]+		{	if (conflres & ~DEF) {
 					error(n_lc,
-						"Resolver on last alternative");
+		"Resolver on last alternative not allowed");
 				}
-				if (p_alts > alts) {
-	  				*p_alts++ = mkalt(*p,conflres,n_lc);
-					g_settype(p_alts,EORULE);
-					*p = copyrule(alts,p_alts+1-alts);
-					if (!haddefault) {
-						((p_link) pentry[g_getcont(*p)])
-							->l_flag |= DEF;
-					}
-				}
+	  			mkalt(*p,conflres,n_lc,p_alts++);
+				g_settype(p_alts,EORULE);
+				*p = copyrule(alts,p_alts+1-alts);
 	  		}
+	  |
+			{	if (conflres & ~DEF) {
+					error(o_lc,
+		"No alternation conflict resolver allowed here");
+				}
+				/*
+				if (conflres & DEF) {
+					error(o_lc,
+		"No %%default allowed here");
+				}
+				*/
+			}
+	  ]
 	;
 {
 
-STATIC t_gram
-mkalt(prod,condition,lc) p_gram prod; {
+STATIC
+mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
 	/*
-	 * Create an alternation, initialise it and return
-	 * a grammar element containing it
+	 * Create an alternation and initialise it.
 	 */
-	register unsigned	hulp;
+	register int		hulp;
 	register p_link		l;
-	t_gram			r;
 
-	g_init(&r);
-	hulp = get(sizeof(*l));
-	l = (p_link) pentry[hulp];
+	l = (p_link) new_mem(&link_info);
+	links = (p_link) link_info.i_ptr;
+	hulp = l - links;
 	l->l_rule = prod;
 	l->l_flag = condition;
-	g_setcont(&r,hulp);
-	g_settype(&r,ALTERNATION);
-	r.g_lineno = lc;
-	return r;
+	g_setcont(res,hulp);
+	g_settype(res,ALTERNATION);
+	res->g_lineno = lc;
 }
 }
 
 simpleproduction(p_gram *p; register int *conflres;)
 	{	t_gram		rule[100];
+		t_gram		elem;
 		register p_gram	p_rule = rule;
-		t_reps		reps;
+		int		cnt, kind;
 	} :
-			{	r_init(&reps); }
+	  [ C_DEFAULT	{	*conflres = DEF; }
+	  ]?
 	  [
 	    /*
 	     * Optional conflict reslover
@@ -248,92 +294,91 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    | C_PREFER	{	*conflres |= PREFERING; }
 	    | C_AVOID	{	*conflres |= AVOIDING; }
 	  ]?
-	  [ %persistent elem
+	  [ %persistent elem(&elem)
 	 		{	if (p_rule - rule >= 98) {
 					error(linecount,"Production too long");
 					p_rule = rule;
 				}
-				r_setkind(&reps,FIXED);
-				r_setnum(&reps,0);
+				kind = FIXED;
+				cnt = 0;
 			}
-	    [ repeats(&reps)
+	    [ repeats(&kind, &cnt)
 			{	if (g_gettype(&elem) != TERM) {
 					*p_rule = elem;
 					g_settype(p_rule+1,EORULE);
-					elem = mkterm(copyrule(p_rule,2),
-							0,
-							&reps,
-							p_rule->g_lineno);
+					mkterm(copyrule(p_rule,2),
+					       0,
+					       p_rule->g_lineno,
+					       &elem);
 				}
 			}
 	    ]?		{	if (g_gettype(&elem) == TERM) {
 					register p_term q;
 
-					q = (p_term) pentry[g_getcont(&elem)];
-					q->t_reps = reps;
-					if (q->t_flags & RESOLVER &&
-					    (r_getkind(&reps) == PLUS ||
-					     r_getkind(&reps) == FIXED)) {
+					q = &terms[g_getcont(&elem)];
+					r_setkind(q,kind);
+					r_setnum(q,cnt);
+					if ((q->t_flags & RESOLVER) &&
+					    (kind == PLUS || kind == FIXED)) {
 						error(linecount,
-							"illegal %%while");
+		"%%while not allowed in this term");
 					}
-					if (q->t_flags & PERSISTENT &&
-					    r_getkind(&reps) == FIXED) {
+					/*
+					 * A persistent fixed term is the same
+					 * as a non-persistent fixed term.
+					 * Should we complain?
+					if ((q->t_flags & PERSISTENT) &&
+					    kind == FIXED) {
 						error(linecount,
 							"illegal %%persistent");
 					}
+					*/
 				}
 				*p_rule++ = elem;
 			}
 	  ]*		{	register p_term q;
 	  
 				g_settype(p_rule,EORULE);
+				*p = 0;
 				if (g_gettype(&rule[0]) == TERM &&
 				    p_rule-rule == 1) {
-				    	q=(p_term)pentry[g_getcont(&rule[0])];
-					if (r_getkind(&(q->t_reps))==FIXED &&
-					    r_getnum(&(q->t_reps)) == 0) {
+				    	q = &terms[g_getcont(&rule[0])];
+					if (r_getkind(q) == FIXED &&
+					    r_getnum(q) == 0) {
 					    	*p = q->t_rule;
 					}
-					else *p = copyrule(rule,2);
 				}
-				else *p = copyrule(rule,p_rule-rule+1);
+				if (!*p) *p = copyrule(rule,p_rule-rule+1);
 	  		}
 	;
 {
 
-STATIC t_gram
-mkterm(prod,flags,reps,lc) p_gram prod; register p_reps reps; {
+STATIC
+mkterm(prod,flags,lc, result) p_gram prod; register p_gram result; {
 	/*
 	 * Create a term, initialise it and return
-	 * a grammar element contianing it
+	 * a grammar element containing it
 	 */
 	register p_term		q;
-	register unsigned	hulp;
-	t_gram			r;
+	unsigned		hulp;
 	
-	g_init(&r);
-	hulp = get(sizeof(*q));
-	q = (p_term) pentry[hulp];
+	q = (p_term) new_mem(&term_info);
+	terms = (p_term) term_info.i_ptr;
+	hulp = q - terms;
 	q->t_rule = prod;
 	q->t_contains = 0;
-	/* "*1" = "?" */
-	if (r_getnum(reps) == 1 && r_getkind(reps) == STAR) {
-		r_setkind(reps,OPT);
-	}
-	q->t_reps = *reps;
 	q->t_flags = flags;
-	g_settype(&r,TERM);
-	g_setcont(&r,hulp);
-	r.g_lineno = lc;
-	return r;
+	g_settype(result,TERM);
+	g_setcont(result,hulp);
+	result->g_lineno = lc;
 }
 }
 
-elem	{	register short	t = 0;
+elem (register p_gram pres;)
+	{	register short	t = 0;
 		p_gram		p1;
-		t_reps		reps;
 		int		ln;
+		p_gram		pe;
 	} :
 	  '['		{	ln = linecount; }
 	  [ C_WHILE expr	{	t |= RESOLVER; }
@@ -341,23 +386,27 @@ elem	{	register short	t = 0;
 	  [ C_PERSISTENT	{	t |= PERSISTENT; }
 	  ]?
 	  productions(&p1)
-	  ']'		{	r_init(&reps);
-	  			elem = mkterm(p1,t,&reps,ln);
+	  ']'		{
+	  			mkterm(p1,t,ln,pres);
 			}
-	| %default
-	  C_IDENT	{	elem = search(UNKNOWN,lextoken.t_string,BOTH); }
-	  [ params(0)	{	if (nparams > 6) {
+	|
+	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
+				*pres = *pe;
+	 		}
+	  [ params(0)	{	if (nparams > 14) {
 					error(linecount,"Too many parameters");
-				} else	g_setnpar(&elem,nparams+1);
-				if (g_gettype(&elem) == TERMINAL) {
+				} else	g_setnpar(pres,nparams+1);
+				if (g_gettype(pres) == TERMINAL) {
 					error(linecount,
 						"Terminal with parameters");
 				}
 			}
 	  ]?
-	| C_LITERAL	{	elem = search(LITERAL,lextoken.t_string,BOTH); }
-	|		{	g_settype(&elem,ACTION);
-				elem.g_lineno = linecount;
+	| C_LITERAL	{	pe = search(LITERAL,lextoken.t_string,BOTH);
+				*pres = *pe;
+			}
+	|		{	g_settype(pres,ACTION);
+				pres->g_lineno = linecount;
 			}
 	  action(1)
 	;
@@ -371,20 +420,21 @@ expr	: '('		{	copyact('(',')',1,0); }
 	  ')'
 	;
 
-repeats(t_reps *t;)	{	int t1 = 0; } :
+repeats(int *kind, *cnt;)	{	int t1 = 0; } :
 	  [
-	    '?'		{	r_setkind(t,OPT); }
-	  | [ '*'	{	r_setkind(t,STAR); }
-	    | '+'	{	r_setkind(t,PLUS); }
+	    '?'		{	*kind = OPT; }
+	  | [ '*'	{	*kind = STAR; }
+	    | '+'	{	*kind = PLUS; }
 	    ]
 	    number(&t1)?
-			{	if (t1 == 1 && r_getkind(t) == PLUS) {
-					error(linecount,
-						"Illegal repetition specifier");
+			{	if (t1 == 1) {
+					t1 = 0;
+					if (*kind == STAR) *kind = OPT;
+					if (*kind == PLUS) *kind = FIXED;
 				}
 			}
 	  | number(&t1)
-	  ]		{	r_setnum(t,t1); }
+	  ]		{	*cnt = t1; }
 	;
 
 number(int *t;)
@@ -404,12 +454,12 @@ firsts	{	register string p; }
 				 * Store this %first in the list belonging
 				 * to this input file
 				 */
-				t_gram temp;
+				p_gram temp;
 				register p_first ff;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_first) alloc(sizeof(t_first));
-				ff->ff_nont = &nonterms[g_getnont(&temp)];
+				ff->ff_nont = g_getnont(temp);
 				ff->ff_name = p;
 				ff->ff_next = pfile->f_firsts;
 				pfile->f_firsts = ff;
@@ -436,11 +486,9 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	if (!level) {
 		saved = linecount;
 		nparams = 0;			/* count comma's */
-		putc('\0',f);
-		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
-		if (flag == 1) putc(ch1,f);
+		fprintf(f,"%c# line %d \"%s\"\n", '\0', linecount,f_input);
 	}
-	else	putc(ch1,f);
+	if (level || flag == 1) putc(ch1,f);
 	for (;;) {
 		ch = input();
 		if (ch == ch2) {
@@ -451,7 +499,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			}
 			return;
 		}
-		if (! isspace(ch)) semicolon = 0;
+		if (c_class[ch] != ISSPA) semicolon = 0;
 		switch(ch) {
 		  case ')':
 		  case '}':
@@ -474,6 +522,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 				skipcomment(1);
 				continue;
 			}
+			ch = '/';
 			break;
 		  case ';':
 			semicolon = 1;
@@ -516,21 +565,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	}
 }
 
-static int	ecount;			/* Index in "pentry" array */
-STATIC unsigned
-get(size) unsigned size; {
-	/*
-	 * Get some core, save a pointer to it in "pentry",
-	 * return index in pentry
-	 */
-
-	if (ecount >= ENTSIZ) fatal(linecount,"Entry table overflow");
-	pentry[ecount] = alloc(size);
-	return ecount++;
-}
-
 STATIC p_gram
-copyrule(p,length) register p_gram p; register length; {
+copyrule(p,length) register p_gram p; {
 	/*
 	 * Returns a pointer to a grammar rule that was created in
 	 * p. The space pointed to by p can now be reused

@@ -29,7 +29,6 @@
  * are all defined.
  */
 
-# include "tunable.h"
 # include "types.h"
 # include "extern.h"
 # include "io.h"
@@ -51,15 +50,15 @@ co_reach() {
 	 */
 	register p_nont		p;
 	register p_start	st;
-	register p_file		x = files;
-	register int		*s;
+	register p_file		x;
+	register p_order	s;
 
 	/* Check for undefined nonterminals */
 	for (p = nonterms; p < maxnt; p++) {
-		if (! p->n_rule) {
+		if (! p->n_rule) {	/* undefined */
 			f_input = p->n_string;
 			error(p->n_lineno,"nonterminal %s not defined",
-				(min_nt_ent + (p - nonterms))->h_name);
+				p->n_name);
 		}
 	}
 	/*
@@ -67,17 +66,19 @@ co_reach() {
 	 * Mark the nonterminals that are encountered with the flag
 	 * REACHABLE, and walk their rules, if not done before
 	 */
-	for (st = start; st; st = st->ff_next) reachable(st->ff_nont);
+	for (st = start; st; st = st->ff_next) {
+		reachable(&nonterms[st->ff_nont]);
+	}
 	/*
 	 * Now check for unreachable nonterminals
 	 */
-	for (; x->f_end < maxorder; x++) {
+	for (x = files; x < maxfiles; x++) {
 	    f_input = x->f_name;
-	    for (s = x->f_start; s <= x->f_end; s++) {
-		p = &nonterms[*s];
+	    for (s = x->f_list; s; s = s->o_next) {
+		p = &nonterms[s->o_index];
 		if (! (p->n_flags & REACHABLE)) {
 			error(p->n_lineno,"nonterminal %s unreachable",
-				(min_nt_ent + (p - nonterms))->h_name);
+				p->n_name);
 		}
 	    }
 	}
@@ -107,10 +108,10 @@ reachwalk(p) register p_gram p; {
 	for (;;) {
 		switch(g_gettype(p)) {
 		  case ALTERNATION :
-			reachwalk(((p_link) pentry[g_getcont(p)])->l_rule);
+			reachwalk(links[g_getcont(p)].l_rule);
 			break;
 		  case TERM :
-			reachwalk(((p_term) pentry[g_getcont(p)])->t_rule);
+			reachwalk(terms[g_getcont(p)].t_rule);
 			break;
 		  case NONTERM :
 			reachable(&nonterms[g_getnont(p)]);

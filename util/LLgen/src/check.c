@@ -30,7 +30,6 @@
 
 # include "types.h"
 # include "extern.h"
-# include "tunable.h"
 # include "io.h"
 # include "sets.h"
 # include "assert.h"
@@ -39,21 +38,18 @@
 static string rcsid1 = "$Header$";
 # endif
 
-# define PTERM(p) fprintf(fout,(p)->h_num < 0400 ? "'%s' " : "%s ",(p)->h_name);
 
 static string	c_first = "> firstset   ";
 static string	c_contains = "> containset ";
 static string	c_follow = "> followset  ";
 p_set		setalloc();
-static string	ntname;		/* nonterminal that is currently checked */
-static p_nont	nt;		/* pointer to its struct */
 static int	level;
 
 /* In this file are defined : */
 extern conflchecks();
-STATIC newline();
+STATIC prline();
 STATIC printset();
-STATIC check();
+STATIC int check();
 STATIC moreverbose();
 STATIC prrule();
 STATIC cfcheck();
@@ -70,8 +66,7 @@ conflchecks() {
 	 * must be disjunct.
 	 */
 	register p_nont	p;
-	register FILE	*f;
-	register short	*s;
+	register p_order s;
 	p_file		x = files;
 
 	f_input = x->f_name;
@@ -79,38 +74,43 @@ conflchecks() {
 		for (p = nonterms; p < maxnt; p++) p->n_flags |= VERBOSE;
 	}
 	if (verbose) {
-		if ((f = fopen(f_out,"w")) == NULL) fatal(1,e_noopen,f_out);
-		fout = f;
+		if ((fout = fopen(f_out,"w")) == NULL) fatal(1,e_noopen,f_out);
 	}
 	/*
 	 * Check the rules in the order in which they are declared,
 	 * and input file by input file, to give proper error messages
 	 */
-	for (; x->f_end < maxorder; x++) {
+	for (; x < maxfiles; x++) {
 	    f_input = x->f_name;
-	    for (s = x->f_start; s <= x->f_end; s++) {
-		nt = p = &nonterms[*s];
-		ntname = (min_nt_ent + *s)->h_name;
+	    for (s = x->f_list; s; s = s->o_next) {
+		p = &nonterms[s->o_index];
+	        if (check(p->n_rule)) p->n_flags |= VERBOSE;
+	    }
+	}
+	for (x = files; x < maxfiles; x++) {
+	    f_input = x->f_name;
+	    for (s = x->f_list; s; s = s->o_next) {
+		p = &nonterms[s->o_index];
 		if (p->n_flags & RECURSIVE) {
 			error(p->n_lineno,
 				"Recursion in default for nonterminal %s",
-				ntname);
+				p->n_name);
 		}
-		check(p->n_rule);
 		/*
 		 * If a printout is needed for this rule in
 		 * LL.output, just do it
 		 */
 		if (verbose && (p->n_flags & VERBOSE)) {
-			fprintf(f,"\n%s :\n",ntname);
+			fprintf(fout,"\n%s :\n",p->n_name);
 			printset(p->n_first,c_first);
 			printset(p->n_contains,c_contains);
 			printset(p->n_follow,c_follow);
-			fputs("> rule\n\t",f);
+			fprintf(fout,"> rule%s\n\t",
+				p->n_flags&EMPTY ? "\t(EMPTY producing)" : "");
 			level = 8;
 			prrule(p->n_rule);
 			level = 0;
-			newline();
+			prline("\n");
 		}
 		/*
 		 * Now, the conflicts may be resolved
@@ -118,16 +118,13 @@ conflchecks() {
 		resolve(p->n_rule);
 	    }
 	}
-	if (verbose) fclose(f);
+	if (verbose) fclose(fout);
 }
 
 STATIC
-newline() {
-	/*
-	 * Newline and "level" spaces indentation
-	 */
-	if (level > 0) fprintf(fout,"\n%*c",level,' ');
-	else putc('\n',fout);
+prline(s) char *s; {
+	fputs(s, fout);
+	spaces();
 }
 
 STATIC
@@ -135,69 +132,68 @@ printset(p,s) register p_set p; string s; {
 	/*
 	 * Print the elements of a set
 	 */
-	register FILE	*f;
-	register	i;
-	register	j;
+	register int	i;
+	register int	j;
+	register p_token pt;
+	string		name;
 	int		k;
 	int		hulp;
 
-	k = strlen(s)+1;
+	k = strlen(s) + 2 + level;
 	/*
 	 * k contains relative level of indentation
 	 */
-	f = fout;
-	fprintf(f,"%s{ ",s);
-	j = level+1+k;
+	fprintf(fout,"%s{ ",s);
+	j = k;
 	/*
 	 * j will gather the total length of the line
 	 */
-	if (p == (p_set) 0) fputs(">non existent (yet?)< ",f);
-	else {
-		for (i = 0; i < nterminals; i++) {
-			if (IN(p,i)) {
-				hulp = strlen(h_entry[i].h_name)+1;
-				if (h_entry[i].h_num < 0400) hulp += 2;
-				if ((j += hulp) >= 78) {
-					/*
-					 * Line becoming too long
-					 */
-					j = level+k+1+hulp;
-					newline();
-					fprintf(f,">%*c",k,' ');
-				}
-				PTERM(&h_entry[i]);
+	for (i = 0, pt = tokens; i < ntokens; i++,pt++) {
+		if (IN(p,i)) {
+			hulp = strlen(pt->t_string)+1;
+			if (pt->t_tokno < 0400) hulp += 2;
+			if ((j += hulp) >= 78) {
+				/*
+				 * Line becoming too long
+				 */
+				j = k+hulp;
+				prline("\n");
+				fprintf(fout,">%*c",k - level - 1,' ');
 			}
-		}
-		if (ntprint) for (i = 0; i < nnonterms; i++) {
-			/*
-			 * Nonterminals in the set must also be printed
-			 */
-			if (NTIN(p,i)) {
-				hulp = strlen((min_nt_ent+i)->h_name)+3;
-				if ((j += hulp) >= 78) {
-					j = level + k + 1 + hulp;
-					newline();
-					fprintf(f,">%*c",k,' ');
-				}
-				fprintf(f,"<%s> ",(min_nt_ent+i)->h_name);
-			}
+			fprintf(fout, pt->t_tokno<0400 ? "'%s' " : "%s ",pt->t_string);
 		}
 	}
-	putc('}',f);
-	newline();
+	if (ntprint) for (i = 0; i < nnonterms; i++) {
+		/*
+		 * Nonterminals in the set must also be printed
+		 */
+		if (NTIN(p,i)) {
+			name = nonterms[i].n_name;
+			hulp = strlen(name) + 3;
+			if ((j += hulp) >= 78) {
+				j = k + hulp;
+				prline("\n");
+				fprintf(fout,">%*c",k - level - 1,' ');
+			}
+			fprintf(fout,"<%s> ",name);
+		}
+	}
+	prline("}\n");
 }
 
-STATIC
+STATIC int
 check(p) register p_gram p; {
 	/*
 	 * Search for conflicts in a grammar rule.
 	 */
-	p_set	temp;
+	register p_set	temp;
+	register int retval;
 
+	retval = 0;
 	for (;;) {
 		switch (g_gettype(p)) {
 		  case EORULE :
-			return;
+			return retval;
 		  case NONTERM : {
 			register p_nont n;
 
@@ -205,28 +201,28 @@ check(p) register p_gram p; {
 			if (g_getnpar(p) != getntparams(n)) {
 			    error(p->g_lineno,
 			        "Call of %s : parameter count mismatch",
-				(min_nt_ent+g_getnont(p))->h_name);
+				n->n_name);
 			}
 			break; }
 		  case TERM : {
 			register p_term q;
 
-			q = (p_term) pentry[g_getcont(p)];
-			check(q->t_rule);
-			if (r_getkind(&(q->t_reps)) == FIXED) break;
+			q = &terms[g_getcont(p)];
+			retval |= check(q->t_rule);
+			if (r_getkind(q) == FIXED) break;
 			if (setempty(q->t_first)) {
 				q->t_flags |= EMPTYFIRST;
-				nt->n_flags |= VERBOSE;
+				retval = 1;
 				error(p->g_lineno, "No symbols in term");
 			}
 			if (empty(q->t_rule)) {
 				q->t_flags |= EMPTYTERM;
-				nt->n_flags |= VERBOSE;
+				retval = 1;
 				error(p->g_lineno, "Term produces empty");
 			}
-			temp = setalloc(setsize);
-			setunion(temp,q->t_first,setsize);
-			if (!setintersect(temp,q->t_follow,setsize)) {
+			temp = setalloc();
+			setunion(temp,q->t_first);
+			if (!setintersect(temp,q->t_follow)) {
 				/* 
 			 	 * q->t_first * q->t_follow != EMPTY
 			 	 */
@@ -235,16 +231,17 @@ check(p) register p_gram p; {
 			   		 * No conflict resolver
 			   		 */
 					error(p->g_lineno,
-						"Repitition conflict");
-					nt->n_flags |= VERBOSE;
-					if (verbose == 2) moreverbose(temp);
+						"Repetition conflict");
+					retval = 1;
+					moreverbose(temp);
 				}
-			} else {
+			}
+			else {
 				if (q->t_flags & RESOLVER) {
 					q->t_flags |= NOCONF;
 					error(p->g_lineno,
 						"%%while, no conflict");
-					nt->n_flags |= VERBOSE;
+					retval = 1;
 				}
 			}
 			free((p_mem) temp);
@@ -252,29 +249,30 @@ check(p) register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = (p_link) pentry[g_getcont(p)];
-			temp = setalloc(setsize);
-			setunion(temp,l->l_symbs,setsize);
-			if(!setintersect(temp,l->l_others,setsize)) {
+			l = &links[g_getcont(p)];
+			temp = setalloc();
+			setunion(temp,l->l_symbs);
+			if(!setintersect(temp,l->l_others)) {
 				/*
 				 * temp now contains the conflicting
 				 * symbols
 				 */
 				if (!(l->l_flag & (COND|PREFERING|AVOIDING))) {
 					error(p->g_lineno,
-						"Alternation conflict");
-					nt->n_flags |= VERBOSE;
-					if (verbose == 2) moreverbose(temp);
+"Alternation conflict");
+					retval = 1;
+					moreverbose(temp);
 				} 
 			} else {
 				if (l->l_flag & (COND|PREFERING|AVOIDING)) {
 					l->l_flag |= NOCONF;
-					error(p->g_lineno,"No conflict");
-					nt->n_flags |= VERBOSE;
+					error(p->g_lineno,
+"Conflict resolver without conflict");
+					retval = 1;
 				}
 			}
 			free( (p_mem) temp);
-			check(l->l_rule);
+			retval |= check(l->l_rule);
 			break; }
 		}
 		p++;
@@ -288,10 +286,11 @@ moreverbose(t) register p_set t; {
 	 * also containing nonterminals.
 	 * Take care that a printout will be prepared for these nonterminals
 	 */
-	register i;
+	register int i;
+	register p_nont p;
 
-	if (verbose) for (i = 0; i < nnonterms; i++) {
-		if (NTIN(t,i)) nonterms[i].n_flags |= VERBOSE;
+	if (verbose == 2) for (i = 0, p = nonterms; i < nnonterms; i++, p++) {
+		if (NTIN(t,i)) p->n_flags |= VERBOSE;
 	}
 }
 
@@ -307,54 +306,45 @@ prrule(p) register p_gram p; {
 	for (;;) {
 		switch (g_gettype(p)) {
 		  case EORULE :
-			putc('\n',f);
+			fputs("\n",f);
 			return;
 		  case TERM : {
 			register p_term	q;
-			register	c;
+			register int	c;
 
-			q = (p_term) pentry[g_getcont(p)];
-			if (present) newline();
-			if (r_getkind(&(q->t_reps)) != FIXED ||
-			    r_getnum(&(q->t_reps)) != 0) {
-				fputs("[   ",f);
-				level += 4;
-				if (q->t_flags & RESOLVER) {
-					fputs("%%while (..)",f);
-					newline();
-				}
-				if (r_getkind(&(q->t_reps)) != FIXED) {
-			    	    printset(q->t_first, c_first);
-				    printset(q->t_contains, c_contains);
-				    printset(q->t_follow,c_follow);
-				    if (q->t_flags & EMPTYFIRST) {
-					fputs(">>> empty first",f);
-					newline();
-				    }
-				    if (q->t_flags & EMPTYTERM) {
-					fputs(">>> term produces empty",f);
-					newline();
-				    }
-				    cfcheck(q->t_first,q->t_follow,
-						q->t_flags & RESOLVER);
-				}
-				prrule(q->t_rule);
-				level -= 4;
-				spaces();
-				c = r_getkind(&(q->t_reps));
-				putc(']',f);
-				if (c != FIXED) {
-					c = (c==STAR)?'*':(c==PLUS)?'+':'?';
-					putc(c,f);
-				}
-				if (c = r_getnum(&(q->t_reps))) {
-					fprintf(f,"%d",c);
-				}
-				newline();
-			} else {
-				prrule(q->t_rule);
-				spaces();
+			q = &terms[g_getcont(p)];
+			if (present) prline("\n");
+			fputs("[   ",f);
+			level += 4;
+			if (q->t_flags & RESOLVER) {
+				prline("%while (..)\n");
 			}
+			if (q->t_flags & PERSISTENT) {
+				prline("%persistent\n");
+			}
+			if (r_getkind(q) != FIXED) {
+				printset(q->t_first, c_first);
+				printset(q->t_contains, c_contains);
+				printset(q->t_follow,c_follow);
+				if (q->t_flags & EMPTYFIRST) {
+				    prline(">>> empty first\n");
+				}
+				if (q->t_flags & EMPTYTERM) {
+				    prline(">>> term produces empty\n");
+				}
+				cfcheck(q->t_first,q->t_follow,
+					q->t_flags & RESOLVER);
+			}
+			prrule(q->t_rule);
+			level -= 4;
+			spaces();
+			c = r_getkind(q);
+			fputs(c == STAR ? "]*" : c == PLUS ? "]+" :
+			      c == OPT ? "]?" : "]", f);
+			if (c = r_getnum(q)) {
+				fprintf(f,"%d",c);
+			}
+			prline("\n");
 			break; }
 		  case ACTION :
 			fputs("{..} ",f);
@@ -362,28 +352,44 @@ prrule(p) register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = (p_link) pentry[g_getcont(p)];
-			if (l->l_flag & (COND|PREFERING|AVOIDING)) {
-				printset(l->l_symbs,"> alt with resolver on ");
-			} else	printset(l->l_symbs,"> alternative on ");
+			l = &links[g_getcont(p)];
+			if (g_gettype(p-1) == ALTERNATION) {
+				prline("|\n");
+			}
+			printset(l->l_symbs,"> alternative on ");
 			cfcheck(l->l_symbs,
 				l->l_others,
 				(int)(l->l_flag&(COND|PREFERING|AVOIDING)));
 			fputs("    ",f);
 			level += 4;
+			if (l->l_flag & DEF) {
+				prline("%default\n");
+			}
+			if (l->l_flag & AVOIDING) {
+				prline("%avoid\n");
+			}
+			if (l->l_flag & PREFERING) {
+				prline("%prefer\n");
+			}
+			if (l->l_flag & COND) {
+				prline("%if ( ... )\n");
+			}
 			prrule(l->l_rule);
 			level -= 4;
-			spaces();
 			if (g_gettype(p+1) == EORULE) {
-				fputs("> end alternatives\n",f);
 				return;
 			}
+			spaces();
 			p++; continue; }
-		  case TERMINAL :
-			PTERM(&h_entry[g_getcont(p)]);
-			break;
+		  case LITERAL :
+		  case TERMINAL : {	
+			register p_token pt = &tokens[g_getcont(p)];
+
+			fprintf(f,pt->t_tokno<0400 ?
+				  "'%s' " : "%s ", pt->t_string);
+			break; }
 		  case NONTERM :
-			fprintf(f,"%s ",(g_getnont(p)+min_nt_ent)->h_name);
+			fprintf(f,"%s ",nonterms[g_getnont(p)].n_name);
 			break;
 		}
 		p++;
@@ -401,17 +407,16 @@ cfcheck(s1,s2,flag) p_set s1,s2; {
 	 */
 	register p_set temp;
 
-	temp = setalloc(setsize);
-	setunion(temp,s1,setsize);
-	if (!setintersect(temp,s2,setsize)) {
+	temp = setalloc();
+	setunion(temp,s1);
+	if (!setintersect(temp,s2)) {
 		if (! flag) {
 			printset(temp,">>> conflict on ");
-			newline();
+			prline("\n");
 		}
 	} else {
 		if (flag) {
-			fputs(">>> %if/%while, no conflict",fout);
-			newline();
+			prline(">>> %if/%while, no conflict\n");
 		}
 	}
 	free((p_mem) temp);
@@ -427,18 +432,18 @@ resolve(p) register p_gram p; {
 		  case EORULE :
 			return;
 		  case TERM :
-			resolve(((p_term) pentry[g_getcont(p)])->t_rule);
+			resolve(terms[g_getcont(p)].t_rule);
 			break;
 		  case ALTERNATION : {
 			register p_link	l;
 
-			l = (p_link) pentry[g_getcont(p)];
+			l = &links[g_getcont(p)];
 			if (l->l_flag & AVOIDING) {
 				/*
 				 * On conflicting symbols, this rule
 				 * is never chosen
 				 */
-				setminus(l->l_symbs,l->l_others,setsize);
+				setminus(l->l_symbs,l->l_others);
 			}
 			if (setempty(l->l_symbs)) {
 				/*
@@ -461,7 +466,7 @@ propagate(set,p) p_set set; register p_gram p; {
 	 * p will not be chosen.
 	 */
 	while (g_gettype(p) != EORULE) {
-		setminus(((p_link) pentry[g_getcont(p)])->l_symbs,set,setsize);
+		setminus(links[g_getcont(p)].l_symbs,set);
 		p++;
 	} 
 }

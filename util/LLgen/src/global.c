@@ -29,30 +29,28 @@
  */
 
 # include "types.h"
+# include "extern.h"
 # include "io.h"
-# include "tunable.h"
 
 # ifndef NORCSID
 static string rcsid4 = "$Header$";
 # endif
 
 char	ltext[LTEXTSZ];
-t_entry	h_entry[NTERMINALS+NNONTERMS+1];
-p_entry	max_t_ent;
-t_nont	nonterms[NNONTERMS+1];
+p_nont	nonterms;
+p_nont	maxnt;
 int	nnonterms;
-int	nterminals;
-int	order[NNONTERMS+1];
-int	*maxorder;
+p_token	tokens;
+p_token	maxt;
+int	ntokens;
+p_order	porder, sorder;
 p_start	start;
 int	linecount;
 int	assval;
-string	pentry[ENTSIZ];
 FILE	*fout;
 FILE	*fpars;
 FILE	*finput;
 FILE	*fact;
-p_nont	maxnt;
 string	f_pars = PARSERFILE;
 string	f_out = OUTFILE;
 string	f_temp = ACTFILE;
@@ -66,8 +64,11 @@ int	ntprint;
 int	debug;
 # endif not NDEBUG
 p_file	files;
+p_file	maxfiles;
 p_file	pfile;
 string	LLgenid = "/* LLgen generated code from source %s */\n";
 t_token lextoken;
 int	nerrors;
-int	fflag;
+string	rec_file, incl_file;
+p_link	links;
+p_term	terms;

@@ -25,11 +25,11 @@
 
 /*
  * name.c
- * Defines the symboltable search routine and an initialising routine
+ * Defines the symboltable search routine, a name store routine and an
+ * initialising routine.
  */
 
 # include "types.h"
-# include "tunable.h"
 # include "extern.h"
 # include "assert.h"
 # include "io.h"
@@ -39,42 +39,68 @@ static string rcsid7 = "$Header$";
 # endif
 
 # define HASHSIZE 128
+# define NMSIZ 2048	/* Room for names allocated NMSIZ bytes at a time */
 
-static char	name[NAMESZ];			/* space for names */
-static int	iname;				/* index in nametable */
+static char	*name, *maxname;
 static p_entry	h_root[HASHSIZE];		/* hash table */
 static string	e_literal = "Illegal literal";
+static p_entry	entries, maxentries;
+static t_info	token_info, nont_info;
 
 /* Defined in this file are: */
 extern string	store();
 extern		name_init();
 STATIC int	hash();
-extern t_gram	search();
+STATIC p_entry	newentry();
+extern p_gram	search();
+
+p_mem alloc();
+p_mem new_mem();
+
+name_init() {
+	token_info.i_esize = sizeof (t_token);
+	token_info.i_incr = 25;
+	nont_info.i_esize = sizeof (t_nont);
+	nont_info.i_incr = 25;
+	search(TERMINAL,"EOFILE",ENTERING);
+}
+
+STATIC p_entry
+newentry(str, next) string str; p_entry next; {
+	register p_entry p;
+
+	if ((p = entries) == maxentries) {
+		p = (p_entry) alloc(50 * sizeof(t_entry));
+		maxentries = p + 50;
+	}
+	entries = p + 1;
+	p->h_name = str;
+	p->h_next = next;
+	p->h_type.g_lineno = linecount;
+	return p;
+}
 
 string	
-store(s) register string s; {
+store(s) string s; {
 	/*
 	 * Store a string s in the name table
 	 */
-	register string	t,u;
+	register string	s1, t ,u;
 
-	u = t = &name[iname];
-	do {	if (u > &name[NAMESZ-1]) fatal(linecount,"name table overflow");
-		else *u++ = *s;
-	} while (*s++);
-	iname = u - name;
-	return t;
-}
-
-name_init() {
-	/*
-	 * Initialise hash-table and enter special terminal EOFILE
-	 */
-	register p_entry	*p;
-	t_gram			search();
-
-	for(p = h_root; p<= &h_root[HASHSIZE-1]; p++) *p = 0;
-	search(TERMINAL,"EOFILE",ENTERING);
+	u = name;
+	t = s;
+	s1 = u;
+	do {
+		if (u >= maxname) {
+			u = alloc(NMSIZ);
+			maxname = u + NMSIZ;
+			t = s;
+			s1 = u;
+		}
+		*u++ = *t;
+	} while (*t++);
+	name = u;
+	return s1;
 }
 
 STATIC int
@@ -82,7 +108,7 @@ hash(str) string str; {
 	/*
 	 * Compute the hash for string str
 	 */
-	register	i;
+	register int	i;
 	register string l;
 
 	l = str;
@@ -92,151 +118,133 @@ hash(str) string str; {
 	return i % HASHSIZE;
 }
 
-t_gram
+p_gram
 search(type,str,option) register string str; {
 	/*
 	 * Search for object str.
 	 * It has type UNKNOWN, LITERAL, TERMINAL or NONTERM.
-	 * option can be ENTERING, JUSTLOOKING or BOTH.
+	 * option can be ENTERING or BOTH (also looking).
 	 */
 	register int		val;
 	register p_entry	p;
-	t_gram			r;
 	register int		i;
+	int			type1;
 
-	g_init(&r);
-	g_setcont(&r,UNDEFINED);
-	r.g_lineno = linecount;
 	i = hash(str);
 	/*
 	 * Walk hash chain
 	 */
 	for (p = h_root[i]; p != (p_entry) 0; p = p->h_next) {
 		if(!strcmp(p->h_name,str)) {
-			val = p - h_entry;
-			if (type == LITERAL &&
-			    (val >= NTERMINALS || p->h_num >= 0400)) continue;
-			if (val>=NTERMINALS) {
-				/* Should be a nonterminal */
-				if (type == TERMINAL) {
-					error(linecount,
-						"%s : terminal expected",
-						str);
-				}
-				g_settype(&r,NONTERM);
-				g_setnont(&r,val - NTERMINALS);
-			} else {
-				if (type != LITERAL && p->h_num < 0400) {
+			type1 = g_gettype(&(p->h_type));
+			if (type1 != type) {
+				if (type1 == LITERAL || type == LITERAL) {
 					continue;
 				}
-				if (type == NONTERM) {
+				if (type != UNKNOWN) {
 					error(linecount,
-						"%s : nonterminal expected",
+						"%s : illegal type",
 						str);
 					continue;
 				}
-				g_setnont(&r, val);
-				g_settype(&r, TERMINAL);
 			}
 			if (option==ENTERING)  {
 				error(linecount,
 					"%s : already defined",str);
 			}
-			return r;
+			p->h_type.g_lineno = linecount;
+			return &(p->h_type);			
 		}
 	}
-	if (option == JUSTLOOKING) return r;
-	if (type == TERMINAL || type == LITERAL) {
-		if (nterminals == NTERMINALS) {
-			fatal(linecount,"too many terminals");
-		}
-		p = &h_entry[nterminals];
-	} else {
-		/*
-		 * type == NONTERM || type == UNKNOWN 
-		 * UNKNOWN and not yet declared means : NONTERM
-		 */
-		if (nnonterms == NNONTERMS) {
-			fatal(linecount,"too many nonterminals");
-		}
-		p = &h_entry[NTERMINALS+nnonterms];
-	}
-	p->h_name = store(str);
-	p->h_next = h_root[i];
+	p = newentry(store(str), h_root[i]);
 	h_root[i] = p;
-	if (type == NONTERM || type == UNKNOWN) {
+	if (type == TERMINAL || type == LITERAL) {
+		register p_token pt;
+		
+		pt = (p_token) new_mem(&token_info);
+		tokens = (p_token) token_info.i_ptr;
+		pt->t_string = p->h_name;
+		if (type == LITERAL) {
+			if (str[0] == '\\') {
+				/*
+				 * Handle escapes in literals
+				 */
+				if (str[2] == '\0') {
+					switch(str[1]) {
+					  case 'n' :
+					  	val = '\n';
+						break;
+					  case 'r' :
+						val = '\r';
+						break;
+					  case 'b' :
+						val = '\b';
+						break;
+					  case 'f' :
+					 	val = '\f';
+						break;
+					  case 't' :
+					  	val = '\t';
+						break;
+					  case '\'':
+					  	val = '\'';
+						break;
+					  case '\\':
+					  	val = '\\';
+						break;
+					  default  :
+					  	error(linecount,e_literal);
+					}
+				} else {
+					/*
+					 * Here, str[2] != '\0'
+					 */
+					if (str[1] > '3' || str[1] < '0' ||
+					    str[2] > '7' || str[2] < '0' ||
+					    str[3] > '7' || str[3] < '0' ||
+					    str[4] != '\0') error(linecount,e_literal);
+					val = 64*str[1] - 73*'0' +
+					      8*str[2] + str[3];
+				}
+			} else { 
+				/*
+				 * No escape in literal
+				 */
+				if (str[1] == '\0') val = str[0];
+				else error(linecount,e_literal);
+			}
+			pt->t_tokno = val;
+			g_settype(&(p->h_type), LITERAL);
+		} else {
+			/*
+			 * Here, type = TERMINAL
+			 */
+			pt->t_tokno = assval++;
+			g_settype(&(p->h_type), TERMINAL);
+		}
+		g_setcont(&(p->h_type), ntokens);
+		ntokens++;
+		return &(p->h_type);
+	}
+	/*
+	 * type == NONTERM || type == UNKNOWN 
+	 * UNKNOWN and not yet declared means : NONTERM
+	 */
+	{
 		register p_nont q;
 
-		q = &nonterms[nnonterms];
+		q = (p_nont) new_mem(&nont_info);
+		nonterms = (p_nont) nont_info.i_ptr;
+		q->n_name = p->h_name;
 		q->n_rule = 0;
 		q->n_lineno = linecount;
 		q->n_string = f_input;
 		q->n_follow = 0;
 		q->n_flags = 0;
 		q->n_contains = 0;
-		p->h_num = 0;
-		g_settype(&r, NONTERM);
-		g_setnont(&r, nnonterms);
+		g_settype(&(p->h_type), NONTERM);
+		g_setcont(&(p->h_type), nnonterms);
 		nnonterms++;
-		return r;
+		return &(p->h_type);
 	}
-	if (type == LITERAL) {
-		if (str[0] == '\\') {
-			/*
-			 * Handle escapes in literals
-			 */
-			if (str[2] == '\0') {
-				switch(str[1]) {
-				  case 'n' :
-				  	val = '\n';
-					break;
-				  case 'r' :
-					val = '\r';
-					break;
-				  case 'b' :
-					val = '\b';
-					break;
-				  case 'f' :
-				 	val = '\f';
-					break;
-				  case 't' :
-				  	val = '\t';
-					break;
-				  case '\'':
-				  	val = '\'';
-					break;
-				  case '\\':
-				  	val = '\\';
-					break;
-				  default  :
-				  	error(linecount,e_literal);
-				}
-			} else {
-				/*
-				 * Here, str[2] != '\0'
-				 */
-				if (str[1] > '3' || str[1] < '0' ||
-				    str[2] > '7' || str[2] < '0' ||
-				    str[3] > '7' || str[3] < '0' ||
-				    str[4] != '\0') error(linecount,e_literal);
-				val = 64*str[1] - 73*'0' + 8*str[2] + str[3];
-			}
-		} else { 
-			/*
-			 * No escape in literal
-			 */
-			if (str[1] == '\0') val = str[0];
-			else error(linecount,e_literal);
-		}
-		p->h_num = val;
-	} else {
-		/*
-		 * Here, type = TERMINAL
-		 */
-		p->h_num = assval++;
-	}
-	g_settype(&r, TERMINAL);
-	g_setnont(&r, nterminals);
-	nterminals++;
-	return r;
 }

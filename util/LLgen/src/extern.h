@@ -29,10 +29,12 @@
  * some variables that are visible in more than one file
  */
 
+# define LTEXTSZ	51	/* Size of longest token */
+
 /*
  * options for the identifier search routine
  */
-# define JUSTLOOKING	0
+
 # define ENTERING	1
 # define BOTH		2
 
@@ -42,27 +44,22 @@
 
 extern char	ltext[];	/* input buffer	*/
 extern int	nnonterms;	/* number of nonterminals */
-extern int	nterminals;	/* number of terminals */
+extern int	ntokens;	/* number of terminals */
 extern p_start	start;		/* will	contain	startsymbols */
 extern int	linecount;	/* line number */
 extern int	assval;		/* to create difference	between	literals
 				 * and other terminals
 				 */
-extern t_nont	nonterms[];	/* the nonterminal array */
+extern p_nont	nonterms;	/* the nonterminal array */
 extern p_nont	maxnt;		/* is filled up until here */
-extern int	order[];	/* order of nonterminals in the grammar,
+extern p_token	tokens;		/* the token array */
+extern p_token	maxt;		/* is filled up until here */
+extern struct order *sorder, *porder;
+				/* order of nonterminals in the grammar,
 				 * important because actions are copied to
 				 * a temporary file in the order in which they
 				 * were read
 				 */
-extern int	*maxorder;	/* will contain &order[nnonterms] */
-extern t_entry	h_entry[];	/* terminal and nonterminal entrys,
-				 * first NTERMINAL entrys reserved
-				 * for terminals
-				 */
-extern p_entry	max_t_ent;	/* will contain &h_entry[nterminals] */
-# define	min_nt_ent	&h_entry[NTERMINALS]
-extern string	pentry[];	/* pointers to various allocated things */
 extern string	e_noopen;	/* Error message string used often */
 extern int	verbose;	/* Level of verbosity */
 extern string	lexical;	/* name of lexical analyser */
@@ -78,9 +75,10 @@ extern int	debug;
 extern p_file	files,pfile;	/* pointers to file structure.
 				 * "files" points to the start of the
 				 * list */
+extern p_file	maxfiles;
 extern string	LLgenid;	/* LLgen identification string */
 extern t_token	lextoken;	/* the current token */
 extern int	nerrors;
-extern int	fflag;		/* Enable compiler to generate jump tables
-				 * for switches?
-				 */
+extern string	rec_file, incl_file;
+extern p_term	terms;
+extern p_link	links;

@@ -43,7 +43,7 @@ typedef struct token {
 	} t_x;
 # define t_string t_x.t_s
 # define t_num t_x.t_v
-} t_token;
+} t_token, *p_token;
 
 /*
  * structure for the grammar elements
@@ -74,49 +74,49 @@ typedef struct gram {
 # define TERMINAL	03	/* A terminal */
 # define TERM		04	/* Something between square brackets */
 # define ALTERNATION	05	/* Alternation (|) */
+# define LITERAL	06	/* Also a terminal */
 
 /*
  * Access macros for the x-field of a grammar element
  */
-# define g_init(p)	{(p)->x = 0;}
 # define g_gettype(p)	(((p)->x>>13)&07)
 # define g_getcont(p)	((p)->x&017777)
 # define g_getnont(p)	((p)->x&0777)
-# define g_getnpar(p)	(((p)->x>>9)&07)
+# define g_getnpar(p)	(((p)->x>>9)&017)
 # define g_settype(p,s)	{ assert(((unsigned)(s))<=07);(p)->x=((p)->x&017777)|((s)<<13);}
 # define g_setcont(p,s) { assert(((unsigned)(s))<=017777);(p)->x=((p)->x&0160000)|(s);}
 # define g_setnont(p,s) { assert(((unsigned)(s))<=0777);(p)->x=((p)->x&0177000)|(s);}
-# define g_setnpar(p,s) { assert(((unsigned)(s))<=07);(p)->x=((p)->x&0170777)|((s)<<9);}
+# define g_setnpar(p,s) { assert(((unsigned)(s))<=017);(p)->x=((p)->x&0160777)|((s)<<9);}
 
 /*
  * Some constants to communicate with the symbol table search routine
  */
-# define LITERAL	01	/* Not equal to NONTERM or TERMINAL */
 # define UNKNOWN	00	/* Not equal to NONTERM, TERMINAL or LITERAL */
 
 /*
  * Some constants for safety
  */
-# define SAFE		0
-# define SAFESCANDONE	1
-# define SCANDONE	2
-# define NOSCANDONE	3
-# define NOSAFETY	4
+# define SAFE		0	/* Indicates that a scan is done, and that the
+				 * token is correct
+				 */
+# define SAFESCANDONE	1	/* Indicates that a scan is done, and that the
+				 * token will not be skipped
+				 */
+# define SCANDONE	2	/* Indicates that a scan is done */
+# define NOSCANDONE	3	/* Indicates that no scan is done */
+# define NOSAFETY	4	/* Safety not yet computed */
 
 /*
  * nonterminal structure
  */
 typedef	struct {
-	short	n_flags;	/* low order three bits are reserved
+	short	n_flags;	/* low order four bits are reserved
 				 * the parameter count
 				 */
-# define getntparams(p)	((p)->n_flags&07)
-# define setntparams(p,i)	{assert(((unsigned)(i))<=7);(p)->n_flags&=~07;(p)->n_flags|=(i);}
-# define RECURSIVE	00100	/* Set if the default rule is recursive */
-# define CONTIN		00400	/* continuation already computed? */
-# define BUSY		01000	/* or are we busy computing it? */
-# define PARAMS		02000	/* tells if a nonterminal has parameters */
-# define PRODUCE	04000	/* tells if a nonterminal produces anything */
+# define getntparams(p)	((p)->n_flags&017)
+# define setntparams(p,i)	{assert(((unsigned)(i))<=017);(p)->n_flags&=~017;(p)->n_flags|=(i);}
+# define RECURSIVE	02000	/* Set if the default rule is recursive */
+# define PARAMS		04000	/* tells if a nonterminal has parameters */
 # define EMPTY		010000	/* tells if a nonterminal produces empty */
 # define LOCALS		020000  /* local declarations ? */
 # define REACHABLE	040000	/* can this nonterminal be reached ? */
@@ -141,6 +141,7 @@ typedef	struct {
 # define n_string n_x.n_s
 	p_set	n_follow;	/* pointer to the "follow" set	*/
 	p_set	n_contains;	/* pointer to symbols that can be produced */
+	string	n_name;		/* name of nonterminal */
 } t_nont, *p_nont;
 
 /* 
@@ -148,7 +149,7 @@ typedef	struct {
  */
 typedef struct h_entry {
 	string		h_name;		/* pointer to name */
-	int		h_num;		/* numbering of terminals */
+	t_gram		h_type;		/* Type and index */
 	struct h_entry	*h_next;	/* next in hash chain */
 } t_entry, *p_entry;
 
@@ -180,20 +181,19 @@ typedef short t_reps,*p_reps;
 # define OPT		03	/* 0 or 1 times */
 
 /*
- * Access macros for repitition
+ * Access macros for repitition in term
  */
-# define r_init(p)	{*(p)=0;}
-# define r_getkind(p)	(*(p)&03)
-# define r_getnum(p)	((*(p)>>2)&037777)
-# define r_setkind(p,s)	{ assert(((unsigned)(s))<=03);*(p)=(*(p)&0177774)|(s);}
-# define r_setnum(p,s)	{ assert(((unsigned)(s))<=037777);*(p)=(*(p)&03)|((s)<<2);}
+# define r_getkind(q)	((q)->t_reps&03)
+# define r_getnum(q)	(((q)->t_reps>>2)&037777)
+# define r_setkind(q,s)	{ assert(((unsigned)(s))<=03);(q)->t_reps=((q)->t_reps&0177774)|(s);}
+# define r_setnum(q,s)	{ assert(((unsigned)(s))<=037777);(q)->t_reps=((q)->t_reps&03)|((s)<<2);}
 
 /*
  * header structure for	a term
  */
 typedef struct term {
 	t_reps	t_reps;		/* repeats ? */
-	short	t_flags;
+	short	t_flags;	/* Low order three bits for safety */
 # define gettout(q)	((q)->t_flags&07)
 # define settout(q,i)	{assert(((unsigned)(i))<=NOSAFETY);(q)->t_flags&=~07;(q)->t_flags|=i;}
 # define PERSISTENT	010	/* Set if this term has %persistent */
@@ -205,7 +205,7 @@ typedef struct term {
 	p_gram	t_rule;		/* pointer to this term	*/
 	p_set	t_follow;	/* set of followers */
 	p_set	t_first;	/* set of firsts */
-	p_set	t_contains;
+	p_set	t_contains;	/* contains set */
 } t_term, *p_term;
 
 /*
@@ -213,7 +213,7 @@ typedef struct term {
  */
 typedef struct ff_firsts {
 	string	ff_name;	/* Name of the macro */
-	p_nont	ff_nont;	/* for this nonterminal */
+	int	ff_nont;	/* for this nonterminal */
 	struct ff_firsts *ff_next;
 } t_first, *p_first;
 
@@ -222,6 +222,11 @@ typedef struct ff_firsts {
  */
 typedef t_first t_start;
 typedef p_first p_start;
+
+typedef struct order {
+	int	o_index;	/* index in nonterminal array */
+	struct order *o_next;
+} t_order, *p_order;
 
 /*
  * structure for file names and info
@@ -232,11 +237,21 @@ typedef struct f_file {
 				 * generated in the target file for this
 				 * grammar file
 				 */
-	short	*f_start,*f_end;/* pointers in the "order" array,
-				 * Indicating which nonterminals were defined
-				 * in this file
-				 */
+	struct order *f_list;	/* list of nonterminals in this file  */
 } t_file, *p_file;
+
+typedef struct info_alloc {
+	/*
+	 * Structure used for dynamically growing arrays
+	 */
+	unsigned i_size;	/* Size of the array */
+	unsigned i_esize;	/* Size of an element */
+	unsigned i_incr;	/* When filled, add room for i_incr elements */
+	p_mem	i_ptr;		/* ptr to base of array */
+	p_mem	i_max;		/* ptr to first free */
+	p_mem	i_top;		/* ptr to top of array */
+} t_info, *p_info;
+
 # ifdef NDEBUG
 # define STATIC static
 # else not NDEBUG

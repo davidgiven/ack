@@ -38,12 +38,10 @@
 static string rcsid6 = "$Header$";
 # endif
 
-static string	rec_file;
-static string	incl_file;
-
 /* In this file the following routines are defined: */
 extern int	main();
 STATIC		readgrammar();
+STATIC		doparse();
 extern		error();
 extern		fatal();
 extern		comfatal();
@@ -56,11 +54,9 @@ extern		badassertion();
 main(argc,argv) register string	argv[]; {
 	register string arg;
 	string libpath();
-	int nflag = 0;
 
 	/* Initialize */
 
-	maxorder = order;
 	assval = 0400;
 	/* read options */
 	
@@ -71,20 +67,11 @@ main(argc,argv) register string	argv[]; {
 			  case 'V':
 				verbose++;
 				continue;
-			  case 'n':
-			  case 'N':
-				nflag++;
-				continue;
-			  case 'f':
-			  case 'F':
-			  	fflag++;
-				continue;
 # ifndef NDEBUG
-			  case 'a':
-			  case 'A':
+			  case 'd':
+			  case 'D':
 				debug++;
 				continue;
-# endif not NDEBUG
 			  case 'r':
 			  case 'R':
 				if (rec_file) {
@@ -101,6 +88,7 @@ main(argc,argv) register string	argv[]; {
 				}
 			  	incl_file = ++arg;
 				break;
+# endif not NDEBUG
 			  case 'x':
 			  case 'X':
 				ntneeded = 1;
@@ -110,7 +98,9 @@ main(argc,argv) register string	argv[]; {
 				fprintf(stderr,"illegal option : %c\n",*arg);
 				return 1;
 			}
+# ifndef NDEBUG
 			break;
+# endif
 		}
 		argv++;
 		argc--;
@@ -119,46 +109,44 @@ main(argc,argv) register string	argv[]; {
 	 * Now check wether the sets should include nonterminals
 	 */
 	if (verbose == 2) ntneeded = 1;
-	else if (! verbose) ntneeded = 0;
 	/*
 	 * Initialise
 	 */
-	 if (!rec_file) rec_file = libpath("rec");
-	 if (!incl_file) incl_file = libpath("incl");
+# ifndef NDEBUG
+	if (!rec_file) {
+# endif
+		rec_file = libpath("rec");
+# ifndef NDEBUG
+	}
+	if (!incl_file) {
+# endif
+		incl_file = libpath("incl");
+# ifndef NDEBUG
+	}
+# endif
 	if ((fact = fopen(f_temp,"w")) == NULL) {
 		fputs("Cannot create temporary\n",stderr);
 		return 1;
 	}
-	name_init();
+	a_init();
 	readgrammar(argc,argv);
-	if (nflag) comfatal();
 	setinit(ntneeded);
 	maxnt = &nonterms[nnonterms];
-	max_t_ent = &h_entry[nterminals];
+	maxt = &tokens[ntokens];
 	fclose(fact);
 	/*
 	 * Now, the grammar is read. Do some computations
 	 */
 	co_reach();		/* Check for undefined and unreachable */
 	if (nerrors) comfatal();
-	createsets();
-	co_empty();		/* Which nonterminals produce empty? */
-	co_first();		/* Computes first sets */
-	co_follow();		/* Computes follow sets */
-	co_symb();		/* Computes choice sets in alternations */
-	conflchecks();		/* Checks for conflicts etc, and also
-				 * takes care of LL.output etc
-				 */
+	do_compute();
+	conflchecks();
 	if (nerrors) comfatal();
-	co_contains();		/* Computes the contains sets */
-	co_safes();		/* Computes safe terms and nonterminals.
-				 * Safe means : always called with a terminal
-				 * symbol that is guarantied to be eaten by
-				 * the term
-				 */
 	if (argc-- == 1) {
-		fputs("No code generation for input from standard input\n",stderr);
-	} else	gencode(argc);
+		fputs("No code generation for input from standard input\n",
+		      stderr);
+	}
+	else	gencode(argc);
 	UNLINK(f_temp);
 	UNLINK(f_pars);
 	return 0;
@@ -180,32 +168,19 @@ readgrammar(argc,argv) char *argv[]; {
 	files = p = (p_file) alloc((unsigned) (argc+1) * sizeof(t_file));
 	if (argc-- == 1) {
 		finput = stdin;
-		p->f_name = f_input = "standard input";
-		p->f_firsts = 0;
-		p->f_start = maxorder;
-		pfile = p;
-		LLparse();
-		p->f_end = maxorder - 1;		
-		p++;
+		f_input = "standard input";
+		doparse(p++);
 	} else {
 		while (argc--) {
 			if ((finput = fopen(f_input=argv[1],"r")) == NULL) {
 				fatal(0,e_noopen,f_input);
 			}
-			linecount = 0;
-			p->f_name = f_input;
-			p->f_start = maxorder;
-			p->f_firsts = 0;
-			pfile = p;
-			LLparse();
-			p->f_end = maxorder-1;
-			p++;
+			doparse(p++);
 			argv++;
 			fclose(finput);
 		}
 	}
-	p->f_start = maxorder+1;
-	p->f_end = maxorder;
+	maxfiles = p;
 	if (! lexical) lexical = "yylex";
 	/*
 	 * There must be a start symbol!
@@ -216,19 +191,30 @@ readgrammar(argc,argv) char *argv[]; {
 	if (nerrors) comfatal();
 }
 
+STATIC
+doparse(p) register p_file p; {
+
+	linecount = 0;
+	p->f_name = f_input;
+	p->f_firsts = 0;
+	pfile = p;
+	sorder = 0;
+	porder = 0;
+	LLparse();
+	p->f_list = sorder;
+}
+
 /* VARARGS1 */
 error(lineno,s,t,u) string	s,t,u; {	
 	/*
 	 * Just an error message
 	 */
-	register FILE *f;
 
-	f = stderr;
 	++nerrors;
-	if (lineno) fprintf(f,"\"%s\", line %d : ",f_input,lineno);
-	else fprintf(f,"\"%s\" : ",f_input);
-	fprintf(f,s,t,u);
-	putc('\n',f);
+	if (!lineno) lineno = 1;
+	fprintf(stderr,"\"%s\", line %d : ",f_input, lineno);
+	fprintf(stderr,s,t,u);
+	fputs("\n",stderr);
 }
 
 /* VARARGS1 */
@@ -253,16 +239,14 @@ comfatal() {
 	exit(1);
 }
 
-copyfile(n) {
+copyfile(file) string file; {
 	/*
 	 * Copies a file indicated by the parameter to filedescriptor fpars.
-	 * If n != 0, the error recovery routines are copied,
-	 * otherwise a standard header is.
 	 */
-	register	c;
+	register int	c;
 	register FILE	*f;
 
-	if ((f = fopen(n?rec_file:incl_file,"r")) == NULL) {
+	if ((f = fopen(file,"r")) == NULL) {
 		fatal(0,"Cannot open libraryfile, call an expert");
 	}
 	while ((c = getc(f)) != EOF) putc(c,fpars);
@@ -275,12 +259,9 @@ install(target, source) string target, source; {
 	 * if allowed (which means that the target must be generated
 	 * by LLgen from the source, or that the target is not present
 	 */
-	register	c;
-	register FILE	*f1;
-	register FILE	*f2;
-	register string	s1;
-	register int	i;
-	char		buf[100];
+	register int	c1, c2;
+	register FILE	*f1, *f2;
+	int		cnt;
 
 	/*
 	 * First open temporary, generated for source
@@ -288,41 +269,38 @@ install(target, source) string target, source; {
 	if ((f1 = fopen(f_pars,"r")) == NULL) {
 		fatal(0,e_noopen,f_pars);
 	}
-	i = 0;
 	/*
 	 * Now open target for reading
 	 */
 	if ((f2 = fopen(target,"r")) == NULL) {
-		i = 1;
 		fclose(f1);
-	}
-	else {
-		/*
-		 * Create string recognised by LLgen. The target must
-		 * start with that!
-		 */
-		(int) sprintf(buf,LLgenid,source ? source : ".");
-		s1 = buf;
-		while (*s1 != '\0' && *s1++ == getc(f2)) { /* nothing */ }
-		/*
-		 * Ai,ai, it did not
-		 */
-		if (*s1 != '\0') {
-			fatal(0,"%s : not a file generated by LLgen",target);
-		}
-		rewind(f2);
-		/*
-		 * Now compare the target with the temporary
-		 */
-		while ((c = getc(f1)) != EOF && c == getc(f2)) { /* nothing */}
-		if (c != EOF || getc(f2) != EOF) i = 1;
-		fclose(f1);
-		fclose(f2);
+		RENAME(f_pars, target);
+		return;
 	}
 	/*
-	 * Here, if i != 0 the target must be recreated
+	 * Compute length of LLgen identification string. The target must
+	 * start with that!
 	 */
-	if (i) RENAME(f_pars,target);
+	cnt = strlen(LLgenid) + strlen(source) - 2;
+	/*
+	 * Now compare the target with the temporary
+	 */
+	do {
+		c1 = getc(f1);
+		c2 = getc(f2);
+		if (cnt >= 0) cnt--;
+	} while (c1 == c2 && c1 != EOF);
+	fclose(f1);
+	fclose(f2);
+	/*
+	 * Here, if c1 != c2 the target must be recreated
+	 */
+	if (c1 != c2) {
+		if (cnt >= 0) {
+			fatal(0,"%s : not a file generated by LLgen",target);
+		}
+		RENAME(f_pars,target);
+	}
 }
 
 #ifndef NDEBUG

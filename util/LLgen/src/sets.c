@@ -25,8 +25,7 @@
 
 /*
  * sets.c
- * Some general setmanipulation routines are defined,
- * and also two set allocating routines are defined
+ * Set manipulation and allocation routines.
  */
 
 # include "types.h"
@@ -41,6 +40,7 @@ static string rcsid9 = "$Header$";
 /* In this file the following routines are defined: */
 extern		setinit();
 extern p_set	setalloc();
+extern p_set	get_set();
 extern int	setunion();
 extern int	setintersect();
 extern 		setminus();
@@ -48,11 +48,12 @@ extern int	setempty();
 extern int	findindex();
 extern int	setcount();
 
-int		tbitset;
-int		setsize,tsetsize;
-p_set		*setptr, *maxptr, *topptr;
-
-static unsigned	size,nbytes;
+int		nbytes;
+static int	setsize;
+int		tsetsize;
+p_set		*setptr, *maxptr;
+static t_info	set_info;
+p_mem		alloc();
 
 setinit(ntneeded) {
 	/*
@@ -60,84 +61,99 @@ setinit(ntneeded) {
 	 */
 	register int	 bitset;
 
-	nbytes = NBYTES(nterminals);
-	tbitset = ALIGN(nbytes);
-	tsetsize = NINTS(tbitset);
-	bitset = tbitset;
+	nbytes = NBYTES(ntokens);
+	bitset = ALIGN(nbytes);
+	tsetsize = NINTS(bitset);
 	if (ntneeded) {
 		/* nonterminals must be included in the sets */
 		bitset += NBYTES(nnonterms);
 	}
 	setsize = NINTS(bitset);
-	tbitset *= 8;
+	set_info.i_esize = sizeof(p_set);
+	set_info.i_incr = 20;
 }
 
 p_set
-setalloc(size) int size; {
+get_set() {
 	/*
-	 * Allocate a set of size "size" ints
+	 * Allocate a set that cannot be freed
 	 */
-	register p_set	t;
-	register int	i;
-	p_mem		alloc();
+	register p_set p, q;
+	static p_set sets, maxsets;
 
-	assert(size == tsetsize || size == setsize);
-	t = (p_set) alloc((unsigned) (size * sizeof(int)));
-	i = size;
-	t += i;
-	for (; i; i--) {
-		*--t = 0;
+	if ((p = sets) >= maxsets) {
+		q = p = (p_set) alloc((unsigned) (50*setsize*sizeof(*sets)));
+		maxsets = p + 50 * setsize;
+		do {
+			*q++ = 0;
+		} while (q < maxsets);
 	}
-	return t;
+	sets = p + setsize;;
+	return p;
+}
+
+p_set
+setalloc() {
+	/*
+	 * Allocate a set which can later be freed.
+	 */
+	register p_set	p;
+	register int	size = setsize;
+
+	p = (p_set) alloc((unsigned) (size * sizeof(*p))) + size;
+	do {
+		*--p = 0;
+	} while (--size);
+	return p;
 }
 
 int
-setunion(a,b,size) register p_set a,b; int size; {
+setunion(a,b) register p_set a,b; {
 	/*
 	 * a = a union b.
 	 * Return 1 if the set a changed
 	 */
-	register	i;
-	register	j;
-	int		nsub = 0;
+	register int	i;
+	register int	j;
+	register int	nsub = 0;
 
-	assert(size == tsetsize || size == setsize);
-	for (i = size; i; i--) {
+	i = setsize;
+	do {
 		*a = (j = *a) | *b++;
 		if (*a++ != j) {
 			nsub = 1;
 		}
-	}
+	} while (--i);
 	return nsub;
 }
 
 int
-setintersect(a,b,size) register p_set a,b; int size; {
+setintersect(a,b) register p_set a,b; {
 	/*
 	 * a = a intersect b.
-	 * return 1 if the resut is empty
+	 * return 1 if the result is empty
 	 */
-	register	i;
-	register	nempty;
+	register int	i;
+	register int	nempty;
 
-	assert(size == tsetsize || size == setsize);
 	nempty = 1;
-	for (i = size; i; i--) {
+	i =  setsize;
+	do {
 		if (*a++ &= *b++) nempty = 0;
-	}
+	} while (--i);
 	return nempty;
 }
 
-setminus(a,b,size) register p_set a,b; int size; {
+setminus(a,b) register p_set a,b; {
 	/*
 	 * a = a setminus b
 	 */
-	register	i;
+	register int	i;
 
-	assert(size == tsetsize || size == setsize);
-	for (i = size; i; i--) {
+	i = setsize;
+	do {
 		*a++ &= ~(*b++);
-	}
+	} while (--i);
 }
 
 int
@@ -145,26 +161,28 @@ setempty(p) register p_set p; {
 	/*
 	 * Return 1 if the set p is empty
 	 */
-	register	i;
+	register int	i;
 
-	for (i = tsetsize; i; i--) {
+	i = tsetsize;
+	do {
 		if (*p++) return 0;
-	}
+	} while (--i);
 	return 1;
 }
 
 int
-findindex(set) p_set *set; {
+findindex(set) p_set set; {
 	/*
 	 * The set "set" will serve as a recovery set.
-	 * Search for it in the table. If not present, enter it
+	 * Search for it in the table. If not present, enter it.
+	 * Here is room for improvement. At the moment, the list of
+	 * sets is examined with linear search.
 	 */
 	register p_set	*t;
-	p_mem		alloc(),ralloc();
+	p_mem		new_mem();
 	register p_set	a;
 	register p_set	b;
-	register	i;
-	register	j;
+	register int	i;
 	int		saved;
 
 	/*
@@ -172,10 +190,11 @@ findindex(set) p_set *set; {
 	 */
 	for (t = setptr; t < maxptr; t++) {
 		a = *t;
-		b = *set;
-		for (i = tsetsize; i; i--) {
+		b = set;
+		i = tsetsize;
+		do {
 			if (*a++ != *b++) break;
-		}
+		} while (--i);
 		if (i) continue;
 		/*
 		 * Here, the sets are equal.
@@ -186,28 +205,14 @@ findindex(set) p_set *set; {
 	 * Now check if the set consists of only one element.
 	 * It would be a waste to use a set for that
 	 */
-	if (setcount(*set, &saved) == 1) return -h_entry[saved].h_num;
+	if (setcount(set, &saved) == 1) return -(saved + 1);
 	/*
 	 * If it does, return its number as a negative number.
 	 */
-	if (maxptr >= topptr) {
-		/*
-		 * Need new space for the list, in chunks of 50 pointers
-		 */
-		if (setptr == 0) {
-			setptr = (p_set *) alloc(50 * sizeof(p_set));
-			size = 50;
-			maxptr = setptr;
-		} else {
-			setptr = (p_set *) ralloc((p_mem) setptr,
-						(50+size)*sizeof(p_set));
-			maxptr = &setptr[size-1];
-			size += 50;
-		}
-		topptr = &setptr[size-1];
-	}
-	*maxptr = setalloc(tsetsize);
-	setunion(*maxptr, *set, tsetsize);
+	maxptr = (p_set *) new_mem(&set_info);
+	setptr = (p_set *) set_info.i_ptr;
+	*maxptr = setalloc();
+	setunion(*maxptr, set);
 	return nbytes * (maxptr++ - setptr);
 }
 
@@ -215,7 +220,7 @@ int
 setcount(set, saved) register p_set set; int *saved; {
 	register int i, j;
 
-	for (j = 0, i = 0; i < nterminals; i++) {
+	for (j = 0, i = 0; i < ntokens; i++) {
 		if (IN(set,i)) {
 			j++;
 			*saved = i;

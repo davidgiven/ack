@@ -32,15 +32,18 @@
 # include "extern.h"
 
 # ifndef NORCSID
-static string rcsida = "$Header$";
+static string rcsid = "$Header$";
 # endif
 
 static string e_nomem = "Out of memory";
 
 p_mem
 alloc(size) unsigned size; {
-	register p_mem	p;
-	p_mem		malloc();
+	/*
+	   Allocate "size" bytes. Panic if it fails
+	 */
+	p_mem	p;
+	p_mem	malloc();
 
 	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem);
 	return p;
@@ -48,9 +51,41 @@ alloc(size) unsigned size; {
 
 p_mem
 ralloc(p,size) p_mem p; unsigned size; {
-	register p_mem	q;
-	p_mem		realloc();
+	/*
+	   Re-allocate the chunk of memory indicated by "p", to
+	   occupy "size" bytes
+	 */
+	p_mem	realloc();
 
-	if ((q = realloc(p,size)) == 0) fatal(linecount,e_nomem);
-	return q;
+	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem);
+	return p;
+}
+
+p_mem
+new_mem(p) p_info p; {
+	/*
+	   This routine implements arrays that can grow.
+	   It must be called every time a new element is added to it.
+	   Also, the array has associated with it a "info_alloc" structure,
+	   which contains info on the element size, total allocated size,
+	   a pointer to the array, a pointer to the first free element,
+	   and a pointer to the top.
+	   If the base of the array is remembered elsewhere, it should
+	   be updated each time this routine is called
+	 */
+	p_mem	rp;
+	unsigned sz;
+	
+	if (p->i_max >= p->i_top) {	/* No more free elements */
+		sz = p->i_size;
+		p->i_size += p->i_incr * p->i_esize;
+		p->i_ptr = !p->i_ptr ? 
+			alloc(p->i_size) :
+			ralloc(p->i_ptr, p->i_size);
+		p->i_max = p->i_ptr + sz;
+		p->i_top = p->i_ptr + p->i_size;
+	}
+	rp = p->i_max;
+	p->i_max += p->i_esize;
+	return rp;
 }
