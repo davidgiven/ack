@@ -311,7 +311,7 @@ register c;
 			c += ('a' - 'A');
 		*p++ = c;
 		c = nextchar();
-	} while (ISALNUM(c));
+	} while (isalnum(c));
 	peekc = c;
 	*p = '\0';
 	c = *--p;
@@ -335,7 +335,7 @@ register c;
 		if (c > '9')
 			c -= ('a' - '9' - 1);
 		c -= '0';
-		if (c >= radix)
+		if ((unsigned)c >= radix)
 			serror("digit exceeds radix");
 		yylval.y_valu = yylval.y_valu * radix + c;
 	}
