@@ -45,7 +45,7 @@ o_print(va_list *ap, int flags, char *s, char c, int precision, int is_signed)
 	long signed_val;
 	unsigned long unsigned_val;
 	char *old_s = s;
-	int i, base, is_zero = 0, is_neg = 0;
+	int i, base;
 
 	switch (flags & (FL_SHORT | FL_LONG)) {
 	case FL_SHORT:
