@@ -1,13 +1,11 @@
 /*#define DEBUG 1	/* define when debugging */
-#ifdef __solaris__
-#include <sys/asm_linkage.h>
-#else
-#include <sun4/asm_linkage.h>
-#endif
-
 
 #define BYTES_REVERSED
 #define WORDS_REVERSED
+
+#ifndef WINDOWSIZE
+#define WINDOWSIZE	(16*4)
+#endif
 
 #define ONE_BYTE        int
 #define TWO_BYTES	int

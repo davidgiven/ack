@@ -5,6 +5,12 @@ mach.h
 #ifndef MACH_H
 #define MACH_H
 
+#ifdef __solaris__
+#include <sys/asm_linkage.h>
+#else
+#include <sun4/asm_linkage.h>
+#endif
+
 #define alloc_double B_alloc_double
 #define alloc_double_var B_allc_double_var
 #define alloc_float B_alloc_float

@@ -1,13 +1,14 @@
 SED = sed
 M4 = m4
-CPP = /lib/cpp
 
 all:	EM_table cache.c
 
-distr:	all
-
-EM_table:	EM_table.x cegpp
-	$(CPP) < EM_table.x -P | $(M4) | $(SED) -f cegpp > $@
+EM_table:
+	if [ -x /usr/ccs/lib/cpp ] ; then /usr/ccs/lib/cpp < EM_table.x -P | $(M4) | $(SED) -f cegpp > $@ ; else /lib/cpp < EM_table.x -P | $(M4) | $(SED) -f cegpp > $@ ; fi
 	
-cache.c:	cache.c.x cegpp
+cache.c:
 	$(SED) -f cegpp cache.c.x > $@
+
+distr:
+	rm -f EM_table cache.c
+	make all

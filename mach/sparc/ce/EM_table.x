@@ -287,7 +287,8 @@ C_los
 				arg_error ("loi",  size);
 		}
 		else {
-			a = pop_reg();	/* count */
+			a = alloc_reg();	/* count */
+			pop_reg_as(a);
 			b = pop_reg();	/* addr */
 			c = alloc_reg();
 			flush_cache();
@@ -1584,7 +1585,8 @@ C_zer_narg	==>
 		}
 		else
 		{
-			a= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
 			flush_cache();
 			"sub	$reg_sp, $a, $reg_sp";
 		"1:"
@@ -1618,7 +1620,8 @@ C_cii		==>
 
 		if (type_of_tos() != T_cst)
 		{
-			a= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
 			b= pop_reg();
 		}
 		else
@@ -2843,7 +2846,8 @@ C_com_narg	==>
 		}
 		else
 		{
-			a= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
 			b= alloc_reg();
 			c= alloc_reg();
 			flush_cache();
@@ -2881,7 +2885,8 @@ C_rol
 				n= n % 32;
 				if (n)
 				{
-					a= pop_reg();
+					a= alloc_reg();
+					pop_reg_as(a);
 					b= alloc_reg();
 					c= alloc_reg();
 					sprint(n_str, "%d", n);
@@ -2897,8 +2902,10 @@ C_rol
 		}
 		else
 		{
-			a= pop_reg();
-			b= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
+			b= alloc_reg();
+			pop_reg_as(b);
 			c= alloc_reg();
 			d= alloc_reg();
 			"and	$a, 31, $c";
@@ -2940,7 +2947,8 @@ C_ror
 				n= n % 32;
 				if (n)
 				{
-					a= pop_reg();
+					a= alloc_reg();
+					pop_reg_as(a);
 					b= alloc_reg();
 					c= alloc_reg();
 					sprint(n_str, "%d", n);
@@ -2956,8 +2964,10 @@ C_ror
 		}
 		else
 		{
-			a= pop_reg();
-			b= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
+			b= alloc_reg();
+			pop_reg_as(b);
 			c= alloc_reg();
 			d= alloc_reg();
 			"and	$a, 31, $c";
@@ -3014,12 +3024,10 @@ C_inn_narg	==>
 					{
 						a= pop_reg();
 						b= alloc_reg();
-						c= alloc_reg();
 						"srl	$a, $i_str, $b";
-						"and	$b, 1, $c";
+						"and	$b, 1, $b";
 						free_reg(a);
-						free_reg(b);
-						push_reg(c);
+						push_reg(b);
 					}
 				}
 				else
@@ -3028,10 +3036,10 @@ C_inn_narg	==>
 					b= pop_reg();
 					c= alloc_reg();
 					"srl	$b, $a, $c";
-					"and	$c, 1, $a";
-					push_reg(a);
+					"and	$c, 1, $c";
+					push_reg(c);
 					free_reg(b);
-					free_reg(c);
+					free_reg(a);
 				}
 			}
 			else if (n == 2*EM_WSIZE)
@@ -3162,8 +3170,10 @@ C_set_narg	==>
 				free_reg(d);
 			}
 		} else {
-			a= pop_reg();
-			b= pop_reg();
+			a= alloc_reg();
+			pop_reg_as(a);
+			b= alloc_reg();
+			pop_reg_as(b);
 			flush_cache();
 			c= alloc_reg();
 			d= alloc_reg();
@@ -4144,7 +4154,8 @@ C_bls
 		else
 		{
 
-			c= pop_reg();	/* size */
+			c= alloc_reg();	/* size */
+			pop_reg_as(c);
 			a= pop_reg();	/* dest */
 			b= pop_reg();	/* src */
 			d= alloc_reg();
