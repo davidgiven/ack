@@ -14,6 +14,7 @@ LINTOPTS=-bx
 LIBS=$(EMHOME)/lib/em_data.a $(EMHOME)/modules/lib/libflt.a
 CDIR=$(EMHOME)/mach/proto/ncg
 CGG=$(EMHOME)/lib/ncgg
+CPP=$(EMHOME)/lib/cpp
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
        $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/main.c $(CDIR)/move.c \
        $(CDIR)/nextem.c $(CDIR)/reg.c $(CDIR)/regvar.c $(CDIR)/salloc.c \
@@ -69,7 +70,7 @@ cmp:	 all
 
 
 tables.c: table $(CGG)
-	$(EMHOME)/lib/cpp $(TABLEFLAGS) table | $(CGG) $(CGGFLAGS)
+	$(CPP) $(TABLEFLAGS) table | $(CGG) $(CGGFLAGS)
 	-cmp tables.h tables.H || cp tables.H tables.h
 
 lint: $(CFILES) tables.c
