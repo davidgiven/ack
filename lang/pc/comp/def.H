@@ -70,7 +70,7 @@ struct def	{		/* list of definitions for a name */
 				/* link all definitions in a scope */
 	struct idf *df_idf;	/* link back to the name */
 	struct scope *df_scope;	/* scope in which this definition resides */
-	unsigned int df_kind;	/* the kind of this definition: */
+	long df_kind;		/* the kind of this definition: */
 #define D_PROCEDURE	0x00001	/* procedure */
 #define D_FUNCTION	0x00002	/* function */
 #define D_TYPE		0x00004	/* a type */

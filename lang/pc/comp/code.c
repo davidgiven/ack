@@ -19,7 +19,7 @@ int	fp_used;
 
 CodeFil()
 {
-	if( !options['L'] )
+	if ( !options['L'] )
 		C_fil_dlb((label) 1, (arith) 0);
 }
 
@@ -107,9 +107,9 @@ CodeBeginBlock(df)
 		offset = CodeGtoDescr(df->prc_vis->sc_scope);
 		CodeFil();
 
-		/* %%% initialiseren external files %%% */
-		make_con(); call_ini();	/* %%%TYDELIJK%%% */
-
+		/* initialize external files */
+		make_extfl();
+		call_ini();
 		break;
 
 	case D_PROCEDURE :

@@ -54,11 +54,11 @@ EnterProgList(Idlist)
 				df->df_flags |= (D_PROGPAR | D_NOREG);
 				if( !strcmp(input, idlist->nd_IDF->id_text) ) {
 					df->var_name = input;
-					set_inp();	/* %%% */
+					set_inp();
 				}
 				else {
 					df->var_name = output;
-					set_outp();	/* %%% */
+					set_outp();
 				}
 			}
 		}
@@ -66,7 +66,7 @@ EnterProgList(Idlist)
 			if( df = define(idlist->nd_IDF, CurrentScope,
 								D_PARAMETER) ) {
 				df->df_type = error_type;
-				set_prog(df);		/* %%% */
+				df->df_flags |= D_PROGPAR;
 			}
 		}
 	

@@ -4,11 +4,10 @@
 %
 %	CHARACTER CLASSES
 %
-%C
-STGARB:\000-\200
+%iSTGARB
 STSKIP: \r\t
 STNL:\012\013\014
-STSIMP:()*+,-/;=@[]^{}
+STSIMP:-()*+,/;=@[]^{}
 STCOMP:.:<>
 STIDF:a-zA-Z
 STSTR:'

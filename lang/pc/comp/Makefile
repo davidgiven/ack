@@ -21,9 +21,9 @@ MALLOC = $(LIBDIR)/malloc.o
 LFLAGS = $(PROFILE)
 LSRC =	declar.c expression.c program.c statement.c tokenfile.c
 LOBJ =	declar.o expression.o program.o statement.o tokenfile.o
-CSRC =	LLlex.c LLmessage.c body.c char.c chk_expr.c code.c\
+CSRC =	LLlex.c LLmessage.c body.c chk_expr.c code.c\
 	cstoper.c def.c desig.c enter.c error.c idf.c input.c label.c\
-	lookup.c main.c misc.c next.c node.c options.c readwrite.c\
+	lookup.c main.c misc.c node.c options.c readwrite.c\
 	scope.c symbol2str.c tokenname.c type.c typequiv.c progs.c
 COBJ =	LLlex.o LLmessage.o body.o casestat.o char.o chk_expr.o code.o\
 	cstoper.o def.o desig.o enter.o error.o idf.o input.o label.o\
@@ -33,7 +33,7 @@ OBJ =	Lpars.o $(COBJ) $(LOBJ)
 
 # Keep the next entries up to date!
 GENCFILES=	Lpars.c declar.c expression.c program.c statement.c\
-	tokenfile.c symbol2str.c casestat.c tmpvar.c
+	tokenfile.c symbol2str.c casestat.c tmpvar.c char.c next.c
 SRC =	Lpars.c $(CSRC) $(GENCFILES)
 GENGFILES=	tokenfile.g
 GENHFILES=	Lpars.h debugcst.h density.h errout.h idfsize.h inputtype.h\
@@ -95,11 +95,9 @@ tmpvar.c:	make.allocd
 next.c:		$(NEXTFILES) ./make.next
 		./make.next $(NEXTFILES) > next.c
 
-char.c:	char.tab tab
-	tab -fchar.tab > char.c
+char.c:	char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab > char.c
 
-tab:
-	$(CC) tab.c -o tab
 depend:
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
