@@ -9,9 +9,7 @@
 
 /* $Header$ */
 
-extern long
-	mach_long_sign;	/* sign bit of the machine long */
-extern int
-	mach_long_size;	/* size of long on this machine == sizeof(long) */
+#define	arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
+
 extern unsigned int
 	wrd_bits;	/* Number of bits in a word */

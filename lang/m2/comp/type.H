@@ -234,8 +234,8 @@ extern t_type
 #define IsBigParamTp(tpx)	(0)
 #endif PASS_BIG_VAL_AS_VAR
 
-extern long full_mask[];
-extern long max_int[];
-extern long min_int[];
+extern arith full_mask[];
+extern arith max_int[];
+extern arith min_int[];
 
 #define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)

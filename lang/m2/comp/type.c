@@ -298,9 +298,9 @@ chk_bounds(l1, l2, fund)
 	if (fund == T_INTEGER) {
 		return l2 >= l1;
 	}
-	return (l2 & mach_long_sign ?
-		(l1 & mach_long_sign ? l2 >= l1 : 1) :
-		(l1 & mach_long_sign ? 0 : l2 >= l1)
+	return (l2 & arith_sign ?
+		(l1 & arith_sign ? l2 >= l1 : 1) :
+		(l1 & arith_sign ? 0 : l2 >= l1)
 	       );
 }
 

@@ -23,12 +23,11 @@
 #include	"Lpars.h"
 #include	"standards.h"
 #include	"warning.h"
+#include	"const.h"
 
-long mach_long_sign;	/* sign bit of the machine long */
-int mach_long_size;	/* size of long on this machine == sizeof(long) */
-long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
-long max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
-long min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
+arith full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
+arith max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
+arith min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
 			   ...
 			*/
 unsigned int wrd_bits;	/* number of bits in a word */
@@ -68,7 +67,7 @@ cstunary(expp)
 		expression below it, and the result restored in expp.
 	*/
 	register t_node *right = expp->nd_right;
-	arith o1 = right->nd_INT;
+	register arith o1 = right->nd_INT;
 
 	switch(expp->nd_symb) {
 	/* Should not get here
@@ -77,9 +76,9 @@ cstunary(expp)
 	*/
 
 	case '-':
-		if (o1 == min_int[(int)(right->nd_type->tp_size)])
+		if (o1 == min_int[(int)(right->nd_type->tp_size)]) {
 			overflow(expp);
-		
+		}
 		o1 = -o1;
 		break;
 
@@ -110,10 +109,10 @@ divide(pdiv, prem)
 		think on C compilers which do not have
 		unsigned long.
 	*/
-	if (o2 & mach_long_sign)	{/* o2 > max_long */
+	if (o2 & arith_sign)	{/* o2 > max_arith */
 		if (! (o1 >= 0 || o1 < o2)) {
 			/*	this is the unsigned test
-				o1 < o2 for o2 > max_long
+				o1 < o2 for o2 > max_arith
 			*/
 			*prem = o2 - o1;
 			*pdiv = 1;
@@ -122,14 +121,14 @@ divide(pdiv, prem)
 			*pdiv = 0;
 		}
 	}
-	else	{		/* o2 <= max_long */
-		long half, bit, hdiv, hrem, rem;
+	else	{		/* o2 <= max_arith */
+		arith half, bit, hdiv, hrem, rem;
 
-		half = (o1 >> 1) & ~mach_long_sign;
+		half = (o1 >> 1) & ~arith_sign;
 		bit = o1 & 01;
 		/*	now o1 == 2 * half + bit
-			and half <= max_long
-			and bit <= max_long
+			and half <= max_arith
+			and bit <= max_arith
 		*/
 		hdiv = half / o2;
 		hrem = half % o2;
@@ -138,7 +137,7 @@ divide(pdiv, prem)
 		*prem = rem;
 		if (rem < 0 || rem >= o2) {
 			/*	that is the unsigned compare
-				rem >= o2 for o2 <= max_long
+				rem >= o2 for o2 <= max_arith
 			*/
 			*pdiv += 1;
 			*prem -= o2;
@@ -153,8 +152,8 @@ cstibin(expp)
 		expressions below it, and the result restored in expp.
 		This version is for INTEGER expressions.
 	*/
-	arith o1 = expp->nd_left->nd_INT;
-	arith o2 = expp->nd_right->nd_INT;
+	register arith o1 = expp->nd_left->nd_INT;
+	register arith o2 = expp->nd_right->nd_INT;
 	register int sz = expp->nd_type->tp_size;
 
 	assert(expp->nd_class == Oper);
@@ -184,7 +183,17 @@ cstibin(expp)
 			node_error(expp, "division by 0");
 			return;
 		}
-		o1 /= o2;	/* ??? */
+#if (-1)/2==0
+		o1 /= o2;
+#else
+		if (o1 == 0) break;
+		if ((o1 < 0) != (o2 < 0)) {
+			o1 = o1/o2 + 1;
+		}
+		else {
+			o1 /= o2;
+		}
+#endif
 		break;
 
 	case MOD:
@@ -192,7 +201,17 @@ cstibin(expp)
 			node_error(expp, "modulo by 0");
 			return;
 		}
-		o1 %= o2;	/* ??? */
+#if (-1)/2==0
+		o1 %= o2;
+#else
+		if (o1 == 0) break;
+		if ((o1 < 0) != (o2 < 0)) {
+			o1 -= (o1 / o2 + 1) * o2;
+		}
+		else {
+			o1 %= o2;
+		}
+#endif
 		break;
 
 	case '+':
@@ -549,7 +568,7 @@ CutSize(expr)
 		expr->nd_INT &= full_mask[(int)(tp->tp_size)];
 	}
 	else {
-		int nbits = (int) (mach_long_size - tp->tp_size) * 8;
+		int nbits = (int) (sizeof(arith) - tp->tp_size) * 8;
 
 		expr->nd_INT = (expr->nd_INT << nbits) >> nbits;
 	}
@@ -566,14 +585,12 @@ InitCst()
 		if (i == MAXSIZE)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
-		max_int[i] = bt & ~(1L << ((i << 3) - 1));
+		max_int[i] = bt & ~(1L << ((8 * i) - 1));
 		min_int[i] = - max_int[i];
 		if (! options['s']) min_int[i]--;
 	}
-	mach_long_size = i;
-	mach_long_sign = 1L << (mach_long_size * 8 - 1);
-	if (long_size > mach_long_size) {
-		fatal("sizeof (long) insufficient on this machine");
+	if ((int)long_size > sizeof(arith)) {
+		fatal("sizeof (arith) insufficient on this machine");
 	}
 
 	wrd_bits = 8 * (int) word_size;

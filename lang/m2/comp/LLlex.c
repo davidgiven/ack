@@ -458,7 +458,7 @@ again:
 				/* Fall through */
 				
 			case End: {
-				int sgnswtch = 0;
+				int ovfl = 0;
 
 				*np = '\0';
 				if (np >= &buf[NUMSIZE]) {
@@ -466,11 +466,19 @@ again:
 					lexerror("constant too long");
 				}
 				else {
+					/* The upperbound will be the same as
+					   when computed with something like
+					   max(unsigned long) / base (when base
+					   is even). The problem is that
+					   unsigned long or unsigned arith is
+					   not accepted by all compilers
+					*/
+					arith ubound = max_int[sizeof(arith)]
+							/ (base >> 1);
 					np = &buf[1];
 					while (*np == '0') np++;
 					tk->TOK_INT = 0;
 					while (*np) {
-						arith old = tk->TOK_INT;
 						int c;
 
 						if (is_dig(*np)) {
@@ -480,38 +488,46 @@ again:
 							assert(is_hex(*np));
 							c = *np++ - 'A' + 10;
 						}
-						tk->TOK_INT = tk->TOK_INT*base
-							+ c;
-						sgnswtch += (old < 0) ^
-							    (tk->TOK_INT < 0);
+						if (tk->TOK_INT < 0 ||
+						    tk->TOK_INT > ubound) {
+							ovfl++;
+						}
+						tk->TOK_INT = tk->TOK_INT*base;
+						if (tk->TOK_INT < 0 &&
+						    tk->TOK_INT + c >= 0) {
+							ovfl++;
+						}
+						tk->TOK_INT += c;
 					}
 				}
 				toktype = card_type;
-				if (sgnswtch >= 2) {
-lexwarning(W_ORDINARY, "overflow in constant");
-				}
-				else if (ch == 'C' && base == 8) {
+				if (ch == 'C' && base == 8) {
 					toktype = char_type;
-					if (sgnswtch != 0 || tk->TOK_INT>255) {
+					if (ovfl != 0 || tk->TOK_INT>255 ||
+					    tk->TOK_INT < 0) {
 lexwarning(W_ORDINARY, "character constant out of range");
 					}
+					return tk->tk_symb = INTEGER;
 				}
-				else if (ch == 'D' && base == 10) {
-					if (sgnswtch != 0 ||
-					    tk->TOK_INT > max_int[(int)long_size]) {
-lexwarning(W_ORDINARY, "overflow in constant");
+				if (ch == 'D' && base == 10) {
+					if (ovfl != 0 ||
+					    tk->TOK_INT > max_int[(int)long_size] ||
+					    tk->TOK_INT < 0) {
+						ovfl = 1;
 					}
 					toktype = longint_type;
 				}
-				else if (sgnswtch == 0 &&
+				else if (ovfl == 0 && tk->TOK_INT >= 0 &&
 					 tk->TOK_INT<=max_int[(int)int_size]) {
 					toktype = intorcard_type;
 				}
 				else if (! chk_bounds(tk->TOK_INT,
 						      full_mask[(int)int_size],
 						      T_CARDINAL)) {
-lexwarning(W_ORDINARY, "overflow in constant");
+							ovfl = 1;
 				}
+				if (ovfl)
+lexwarning(W_ORDINARY, "overflow in constant");
 				return tk->tk_symb = INTEGER;
 				}
 
