@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <system.h>
+#include <varargs.h>
 
 #define CODE_EXPANDER
 #include "em.h"
@@ -98,14 +99,18 @@ int seg;
 	}
 }
 
-
-out( fmt, argv)
-char *fmt;
-int argv;
+/*VARARGS*/
+out(va_alist)
+va_dcl
 {
-	doprnt( outfile, fmt, &argv);
+        va_list pvar;
+        char *fmt;
+ 
+        va_start(pvar);
+        fmt = va_arg(pvar, char *);
+        doprnt( outfile, fmt, pvar);
+        va_end(pvar);
 }
-
 
 char *suffix( str, suf)
 char *str, *suf;

@@ -1,13 +1,20 @@
 #include <system.h>
+#include <varargs.h>
 
 extern int nerrors;
 
-error( fmt, argv)
-char *fmt;
-int argv;
+/*VARARGS*/
+error(va_alist)
+va_dcl
 {
+	char *fmt;
+	va_list pvar;
+
+	va_start(pvar);
+	fmt = va_arg(pvar, char *);
 	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, &argv);
+	doprnt( STDERR, fmt, pvar);
 	fprint( STDERR, "	!!\n");
+	va_end(pvar);
 	nerrors++;
 }
