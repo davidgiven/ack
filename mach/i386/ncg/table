@@ -246,10 +246,10 @@ movb rm1:wo, regorconst124:ro.
 movb REG1:wo, rm1:ro.
 movw "o16 mov" rm2:wo, regorconst124:ro cost(3,2).
 movw "o16 mov" REG2:wo, rmorconst2:ro cost(3,2).
-movsxb anyreg:wo, REG+rmorconst1:ro.
-movsx anyreg:wo, REG+rmorconst2:ro.
-movzxb anyreg:wo, REG+rmorconst1:ro.
-movzx anyreg:wo, REG+rmorconst2:ro.
+movsxb anyreg:wo, REG+rm1:ro.
+movsx anyreg:wo, REG+rm2:ro.
+movzxb anyreg:wo, REG+rm1:ro.
+movzx anyreg:wo, REG+rm2:ro.
 mul rmorconst:ro kills :cc eax edx cost(2,41).
 neg rmorconst:rw:cc.
 not rmorconst:rw.
@@ -1951,14 +1951,14 @@ pat loc loc cii loc and zne $4<65536 && $4>=0 && $5==4 && $1==2 && $2==4
 pat loc loc cii $1==1 && $2==4
 with ACC
 gen movsxb %1,%1		yields eax
-with exact rmorconst1
+with exact rm1
 uses reusing %1, GENREG
 gen movsxb %a,%1		yields %a
 
 pat loc loc cii $1==2 && $2==4
 with ACC
 gen  movsx %1,%1		yields eax
-with exact rmorconst2
+with exact rm2
 uses reusing %1,GENREG
 gen movsx %a,%1			yields %a
 
