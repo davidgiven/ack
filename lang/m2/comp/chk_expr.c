@@ -314,11 +314,23 @@ ChkExLinkOrName(expp)
 			assert(df->df_kind == D_CONST);
 			expp->nd_token = df->con_const;
 			expp->nd_lineno = ln;
+			if (expp->nd_class == Set) {
+				register int i =
+					(unsigned) expp->nd_type->tp_size /
+					(unsigned) word_size;
+				register arith *p, *q;
+
+				p = expp->nd_set;
+				q = (arith *) Malloc((unsigned) i * sizeof(arith));
+				expp->nd_set = q;
+				while (i--) *q++ = *p++;
+			}
 		}
 	}
 
 	if (!(df->df_kind & D_VALUE)) {
 		Xerror(expp, "value expected", df);
+		return 0;
 	}
 
 	if (df->df_kind == D_PROCEDURE) {
@@ -663,7 +675,10 @@ ChkCall(expp)
 			   variable.
 			*/
 		}
-		else node_error(left, "procedure, type, or function expected");
+		else {
+			node_error(left, "procedure, type, or function expected");
+			left->nd_type = error_type;
+		}
 	}
 	return ChkProcCall(expp);
 }
@@ -865,6 +880,12 @@ ChkUnOper(expp)
 	register struct node *right = expp->nd_right;
 	register struct type *tpr;
 
+	if (expp->nd_symb == '(') {
+		*expp = *right;
+		free_node(right);
+		return ChkExpression(expp);
+	}
+	expp->nd_type = error_type;
 	if (! ChkExpression(right)) return 0;
 	expp->nd_type = tpr = BaseType(right->nd_type);
 	MkCoercion(&(expp->nd_right), tpr);
@@ -876,11 +897,6 @@ ChkUnOper(expp)
 	case '+':
 		if (!(tpr->tp_fund & T_NUMERIC)) break;
 		/* fall through */
-
-	case '(':
-		*expp = *right;
-		free_node(right);
-		return 1;
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
@@ -894,13 +910,10 @@ ChkUnOper(expp)
 		}
 		else if (tpr->tp_fund == T_REAL) {
 			if (right->nd_class == Value) {
-				if (*(right->nd_REL) == '-') (right->nd_REL)++;
-				else (right->nd_REL)--;
-				expp->nd_class = Value;
-				expp->nd_symb = REAL;
-				expp->nd_REL = right->nd_REL;
+				*expp = *right;
+				if (*(expp->nd_REL) == '-') (expp->nd_REL)++;
+				else (expp->nd_REL)--;
 				FreeNode(right);
-				expp->nd_right = 0;
 			}
 			return 1;
 		}
@@ -946,6 +959,7 @@ ChkStandard(expp)
 	struct node *arg = expp;
 	register struct node *left = expp->nd_left;
 	register struct def *edf = left->nd_def;
+	struct type *basetype;
 	int free_it = 0;
 
 	assert(left->nd_class == Def);
@@ -954,12 +968,17 @@ ChkStandard(expp)
 	switch(edf->df_value.df_stdname) {
 	case S_ABS:
 		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
-		MkCoercion(&(arg->nd_left), BaseType(left->nd_type));
+		basetype = BaseType(left->nd_type);
+		MkCoercion(&(arg->nd_left), basetype);
 		left = arg->nd_left;
 		expp->nd_type = left->nd_type;
 		if (left->nd_class == Value &&
 		    expp->nd_type->tp_fund != T_REAL) {
 			cstcall(expp, S_ABS);
+		}
+		else if (basetype->tp_fund != T_INTEGER &&
+			 basetype->tp_fund != T_REAL) {
+			free_it = 1;
 		}
 		break;
 

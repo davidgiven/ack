@@ -154,6 +154,8 @@ CodeExpr(nd, ds, true_label, false_label)
 		for (; i; i--) { 
 			C_loc(*--st);
 		}
+		free((char *) nd->nd_set);
+		nd->nd_set = 0;
 		CodeSet(nd);
 		}
 		break;

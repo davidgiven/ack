@@ -486,7 +486,8 @@ WalkStat(nd, exit_label)
 
 	case FOR:
 		{
-			arith tmp = 0;
+			arith tmp = NewInt();
+			arith tmp2;
 			register struct node *fnd;
 			int good_forvar;
 			label l1 = ++text_label;
@@ -506,10 +507,8 @@ WalkStat(nd, exit_label)
 				bstp = BaseType(nd->nd_type);
 				uns = bstp->tp_fund != T_INTEGER;
 				C_dup(int_size);
-				RangeCheck(left->nd_left->nd_type, nd->nd_type);
 				CodeDStore(nd);
 				CodePExpr(fnd);
-				tmp = NewInt();
 				C_stl(tmp);
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
@@ -534,7 +533,18 @@ WalkStat(nd, exit_label)
 				nd->nd_def->df_flags |= D_FORLOOP;
 				C_df_ilb(l1);
 			}
+			if (! options['R']) {
+				tmp2 = NewInt();
+				ForLoopVarExpr(nd);
+				C_stl(tmp2);
+			}
 			WalkNode(right, exit_label);
+			if (! options['R']) {
+				C_lol(tmp2);
+				ForLoopVarExpr(nd);
+				C_cal("_forloopchk");
+				FreeInt(tmp2);
+			}
 			nd->nd_def->df_flags &= ~D_FORLOOP;
 			if (good_forvar && stepsize) {	
 				C_lol(tmp);
@@ -546,7 +556,7 @@ WalkStat(nd, exit_label)
 				C_loc(left->nd_INT);
 				ForLoopVarExpr(nd);
 				C_adu(int_size);
-				RangeCheck(bstp, nd->nd_type);
+				RangeCheck(nd->nd_type, bstp);
 				CodeDStore(nd);
 			}
 			C_bra(l1);
@@ -736,7 +746,7 @@ DoForInit(nd)
 	tpl = left->nd_left->nd_type;
 	tpr = left->nd_right->nd_type;
 	if (!ChkAssCompat(&(left->nd_left), df->df_type, "FOR statement") ||
-	    !ChkAssCompat(&(left->nd_right), df->df_type,"FOR statement")) {
+	    !ChkAssCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
 		return 1;
 	}
 	if (!TstCompat(df->df_type, tpl) ||
@@ -788,6 +798,8 @@ RegisterMessages(df)
 	register struct def *df;
 {
 	register struct type *tp;
+	arith sz;
+	int regtype = -1;
 
 	for (; df; df = df->df_nextinscope) {
 		if (df->df_kind == D_VARIABLE && !(df->df_flags & D_NOREG)) {
@@ -796,15 +808,16 @@ RegisterMessages(df)
 			tp = BaseType(df->df_type);
 			if ((df->df_flags & D_VARPAR) ||
 				 (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
-				C_ms_reg(df->var_off, pointer_size,
-					 reg_pointer, 0);
+				sz = pointer_size;
+				regtype = reg_pointer;
 			}
 			else if (tp->tp_fund & T_NUMERIC) {
-				C_ms_reg(df->var_off,
-					 tp->tp_size,
-					 tp->tp_fund == T_REAL ?
-					    reg_float : reg_any,
-					 0);
+				sz = tp->tp_size;
+				regtype = tp->tp_fund == T_REAL ?
+					    reg_float : reg_any;
+			}
+			if (regtype >= 0) {
+				C_ms_reg(df->var_off, sz, regtype, 0);
 			}
 		}
 	}
