@@ -171,6 +171,7 @@ register int mode;
   return fd;
 }
 
+void
 catch()
 {
 	unlink(temp_arch);

@@ -135,7 +135,7 @@ add_uphase(p)
   uphases[nuphases++] = p;
 }
 
-static int
+static void
 catch()
 {
   /*	Catch interrupts and exit gracefully */
