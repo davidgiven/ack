@@ -145,7 +145,8 @@ char	*id;
 		return(-1);
 	while (*++cp != ':')
 		;
-	for (++cp ; *cp ; cp++) {
+	while (*cp) {
+		cp++;
 		while (ISSPACE(*cp))
 			cp++;
 		if (strncmp(cp, id, CAPABLEN) == 0) {
@@ -178,7 +179,8 @@ char	*id;
 		return(-1);
 	while (*++cp != ':')
 		;
-	for (++cp ; *cp ; cp++) {
+	while (*cp) {
+		cp++;
 		while (ISSPACE(*cp))
 			cp++;
 		if (strncmp(cp, id, CAPABLEN) == 0)
@@ -207,7 +209,8 @@ char	**area;
 		return(NULL);
 	while (*++cp != ':')
 		;
-	for (++cp ; *cp ; cp++) {
+	while (*cp) {
+		cp++;
 		while (ISSPACE(*cp))
 			cp++;
 		if (strncmp(cp, id, CAPABLEN) == 0) {
