@@ -24,6 +24,8 @@ ack \- Amsterdam Compiler Kit
 .br
 \fBint\fP arguments
 .br
+\fBocm\fP arguments
+.br
 \fImachine\fP arguments
 .SH DESCRIPTION
 This program transforms sources in several
@@ -60,6 +62,8 @@ Pascal program.
 C module.
 .IP .b
 Basic program.
+.IP .ocm
+Occam program.
 .IP .e
 EM assembly module in human readable form.
 .IP .k
@@ -157,7 +161,7 @@ routines for systems calls needed by both C and Pascal.
 When linking multiple \fI.o\fP or \fI.m\fP files created by
 separate calls of \fIack\fP together, \fIack\fP cannot deduce
 the run-time system needed,
-unless called as \fIapc\fP or \fIacc\fP.
+unless called as \fIapc\fP, \fIabc\P, \fIocm\fP or \fIacc\fP.
 This flag serves to tell \fIack\fP which runtime system is
 needed in such a case.
 For example: "ack \-c x.c ; ack \-.c x.o".
@@ -168,7 +172,7 @@ These flags tell \fIack\fP to include the libraries needed when
 a file with \fIsuffix\fP would be included in the arguments.
 .IP \-LIB
 This flag tells the peephole optimizer
-.RF em_opt VI
+.RF em_opt 6
 to add information about the visibility of the names used
 to each output module.
 This is needed by
@@ -266,15 +270,20 @@ input:name:output:description
 \&.c:cem:.k:C front end [4,5,6]
 \&.p:pc:.k:Pascal front end [2,3,6]
 \&.b:abc:.k:Basic front end [6,8]
+\&.ocm:ocm:.k:Occam front end [9]
 \&.e:encode:.k:Compactify EM assembly language [1]
 \&.k:opt:.m:EM peephole optimizer
 \&.k .m:decode:.e:Produce human readable EM assembly
 \&.k .m:emass:e.out:Linker producing EM machine code [1]
-\&.m:be:.s:backend
-\&.s:asld:.out:Assembler/linker producing machine code in Ack a.out format
-\&.s:as:.o:Assembler
-\&.o:ld:a.out:Linker producing machine code
-\&.o:led:.out:Linker producing machine code in Ack a.out format
+\&.m:ego:.gk:EM global optimizer [10]
+\&.gk:opt2:.g:Second EM peephole optimizer
+\&.m .g:be:.s:backend
+\&.s:asopt:.so:target opotimizer
+\&.s .so:asld:.out:Assembler/linker, Ack object format
+\&.s .so:as:.o:Assembler, relocatable object
+\&.o:ld:a.out:Linker, machine a.out format
+\&.o:led:.out:Linker, Ack object format
+\&.o:cv:a.out:Conversion from Ack object to machine object
 .TE
 .in -2
 .SH "SEE ALSO"
@@ -283,7 +292,7 @@ em_opt(6), em_ass(6), em_cg(6), ack.out(5)
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
 Stevenson \fIDescription of a machine architecture for use with
-block structured languages\fP Informatica report IR-81.
+block structured languages\fP, Informatica rapport IR-81.
 .IP [2]
 K. Jensen and N. Wirth
 \fIPASCAL, User manual and report\fP Springer Verlag.
@@ -300,6 +309,11 @@ Amsterdam Compiler Kit, reference manuals and UNIX manual pages.
 E.G. Keizer, Ack description file reference manual.
 .IP [8]
 M.L. Kersten, \fIThe ABC compiler\fP.
+.IP [9]
+Kees Bot and Edwin Scheffer, \fIAn Occam Compiler\fP, IM-6.
+.IP [10]
+H.E. Bal, \fIThe design and implementation of the EM Global Optimizer\fP,
+Informatica rapport IR-99.
 .PD
 .SH DIAGNOSTICS
 .PD
