@@ -658,3 +658,4 @@ w
 q
 EOF
 fi
+exit 0
