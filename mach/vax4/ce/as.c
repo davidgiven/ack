@@ -57,10 +57,10 @@ char *m;
 
 
 process_operand( arg, op)
-char *arg;
-struct t_operand *op;
+register char *arg;
+register struct t_operand *op;
 {
-	char *einde;
+	register char *einde;
 
 	if ( n_index == 3) 
 		n_index = 0;
@@ -116,7 +116,7 @@ struct t_operand *op;
 
 
 char *ind( buf, str)
-char *buf, *str;
+register char *buf, *str;
 
 /* Reads the index in front of '(register)'.
  */
@@ -129,7 +129,7 @@ char *buf, *str;
 
 
 char *lab( buf, str)
-char *buf, *str;
+register char *buf, *str;
 
 /* Reads 'label' in front of '+offset'.
  */
@@ -146,8 +146,8 @@ char *buf, *str;
 	
 
 int is_reg( str, num)
-char *str;
-int *num; 
+register char *str;
+register int *num; 
 
 /* Is "str" a 'registers' ?
  */
@@ -181,7 +181,7 @@ int *num;
 
 
 char *end_arg( str)
-char *str;
+register char *str;
 
 /* Shift to the last character of "str".
  */
@@ -193,7 +193,8 @@ char *str;
 
 
 char *match( str, sym)
-char *str, sym;
+register char *str;
+char sym;
 {
 	while ( *str != sym)
 		str++;
@@ -206,14 +207,27 @@ char *str, sym;
 char my_buf[256];
 
 gen_operand( op)
-struct t_operand *op;
+register struct t_operand *op;
 
 /* Generate object-code for a argument.
  */
 {
 	switch( op->type) {
-		case CONST :    @text1( 0x8f);
-				@text4( %$(op->const));
+		case CONST :
+				if (isdigit(op->const[0])) {
+					long l, atol();
+					l = atol(op->const);
+					if (fit_6bits(l)) {
+						@text1(%$(op->const));
+					}
+					else {
+						@text1( 0x8f);
+						@text4( %$(op->const));
+					}
+				}
+				else {
+					@as_const(%$(op->const));
+				}
 				break;
 		case REGISTER: 	@text1( %d(0x50 | op->num));
 				break;
@@ -223,8 +237,24 @@ struct t_operand *op;
 			  	break;
 		case AUTO_INC : @text1( %d(0x80 | op->num));
 			  	break;
-		case IND_REG : 	@text1( %d(0xe0 | op->num));
-			  	@text4( %$(op->index));
+		case IND_REG :
+				if (isdigit(op->index[0])) {
+					long l, atol();
+					l = atol(op->index);
+					if (fit_byte(l)) {
+						@text1( %d(0xa0 | op->num));
+			  			@text1( %$(op->index));
+					} else if (fit_word(l)) {
+						@text1( %d(0xc0 | op->num));
+			  			@text2( %$(op->index));
+					} else {
+						@text1( %d(0xe0 | op->num));
+			  			@text4( %$(op->index));
+					}
+				}
+				else {
+					@as_indexed(%$(op->index) , %d(op->num));
+				}
 				break;
 		case LABEL : 	@text1( 0xef);
 				if ( strindex( op->lab, DOLLAR)) {

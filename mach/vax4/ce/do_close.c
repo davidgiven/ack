@@ -2,7 +2,7 @@
 
 extern File *out_file;
 
-do_close()
+close_back()
 {
 	sys_close( out_file);
 }

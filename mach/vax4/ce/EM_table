@@ -61,7 +61,7 @@ C_loi
 				"movl ~$1/4, r1";
 				"addl2 ~$1, r0";	
 				"2:";
-				"movl -(r0), -(sp)";
+				"pushl -(r0)";
 				"sobgtr r1, 2b".
 	default		==> 	arg_error( "loi", $1).
 
@@ -222,6 +222,37 @@ C_sru		==> 	"movl ~$1, r0";
 /*									      */
 /******************************************************************************/
 
+C_adf		
+	$1 == 4	==>	"addf2 (sp)+, (sp)".
+	$1 == 8	==>	"addd2 (sp)+, (sp)".
+	default		==> 	arg_error( "adf", $1).
+
+C_sbf
+	$1 == 4	==> 	"subf2 (sp)+, (sp)".
+	$1 == 8	==> 	"subd2 (sp)+, (sp)".
+	default		==> 	arg_error( "sbf", $1).
+
+C_mlf
+	$1 == 4	==> 	"mulf2 (sp)+, (sp)".
+	$1 == 8	==> 	"muld2 (sp)+, (sp)".
+	default		==>	arg_error( "mlf", $1).
+
+C_dvf		
+	$1 == 4	==> 	"divf2 (sp)+, (sp)".
+	$1 == 8	==> 	"divd2 (sp)+, (sp)".
+	default		==> 	arg_error( "dvf", $1).
+
+C_ngf		
+	$1 == 4	==> 	"mnegf (sp), (sp)".
+	$1 == 8	==> 	"mnegd (sp), (sp)".
+	default 	==>	arg_error( "ngf", $1).
+
+C_fif	==>		"movl ~$1,r0";
+			"jsb .fif".
+
+C_fef	==>		"movl ~$1,r0";
+			"jsb .fef".
+
 /******************************************************************************/
 /*									      */
 /*		Group 6 : Pointer arithmetic 				      */
@@ -287,19 +318,19 @@ C_zer
 
 C_cii		==> 	"jsb .cii".
 
-C_cui		==> 	"jsb .cui".
+C_cui		==> 	C_cuu().
 
 C_cfi		==> 	"jsb .cfi".
 
-C_cif		==> 	"jsb cif".
+C_cif		==> 	"jsb .cif".
 
 C_cuf		==> 	"jsb .cuf".
 
 C_cff		==> 	"jsb .cff".
 
-C_ciu		==> 	"jsb .cuu".
+C_ciu		==> 	C_cuu().
 
-C_cuu		==> 	"jsb .cuu ".
+C_cuu		==> 	"addl2 ~8,sp".
 
 C_cfu		==> 	"jsb .cfu".
 
@@ -470,44 +501,62 @@ C_cmp		==> 	/* bug : "subl2 (sp)+, (sp)". */
 			"br 2f";
 			"1 : decl r0";
 			"2 : pushl r0".
+C_cmf
+	$1==4	==>	"clrl r0";
+			"cmpf (sp)+, (sp)+";
+                        "beql 2f";
+                        "bgtr 1f";
+                        "incl r0";
+                        "br 2f";
+                        "1 : decl r0";
+                        "2 : pushl r0".
+	$1==8	==>	"clrl r0";
+			"cmpd (sp)+, (sp)+";
+                        "beql 2f";
+                        "bgtr 1f";
+                        "incl r0";
+                        "br 2f";
+                        "1 : decl r0";
+                        "2 : pushl r0".
+	default	==>	arg_error("cmf", $1).
 
 C_tlt		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"blss 1f";
 			"clrl (sp)";
 			"1:".
 
 C_tle		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"bleq 1f";
 			"clrl (sp)";
 			"1:".
 
 C_teq		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"beql 1f";
 			"clrl (sp)";
 			"1:".
 
 C_tne		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"bneq 1f";
 			"clrl (sp)";
 			"1:".
 
 C_tge		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"bgeq 1f";
 			"clrl (sp)";
 			"1:".
 
 C_tgt		==> 	"movl (sp)+, r0";
-			"movl ~1, -(sp)";
+			"pushl ~1";
 			"tstl r0";
 			"bgtr 1f";
 			"clrl (sp)";
@@ -643,7 +692,7 @@ C_dup
   	default		==>	"movl ~$1/4, r0";
 				"addl3 ~$1, sp, r1";
 				"1:";
-				"movl -(r1), -(sp)";
+				"pushl -(r1)";
 				"sobgtr r0, 1b".
 
 C_dus		
@@ -651,7 +700,7 @@ C_dus
 				"addl3 r0, sp, r1";
 				"ashl ~-2, r0, r0";
 				"1:";
-				"movl -(r1), -(sp)";
+				"pushl -(r1)";
 				"sobgtr r0, 1b".
   	default		==>	arg_error( "dus", $1).
 
@@ -663,7 +712,7 @@ C_fil..		==> 	"moval $1 + $2, hol0 + 4".
 C_gto..		==> 	"pushal $1+$2";
 			"jmp .gto".
 
-C_lim		==> 	"movl .trpim, -(sp)".
+C_lim		==> 	"pushl .trpim".
 
 C_lin		==> 	"movl ~$1, hol0".
 
@@ -715,6 +764,7 @@ C_trp		==> 	"jsb .trp".
 	$2 == 2  ==> gen2( (short) atoi( $1)).
 	$2 == 4  ==> gen4( (long) atol( $1)).
 	default     ==> arg_error( "icon", $2).
+..fcon                 ==>     con_float($1, $2).
 
 /*****************************************************************************/
 

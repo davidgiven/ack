@@ -23,3 +23,7 @@ struct t_operand {
 		int type, num;
 		char *lab, *index, *const, *offset;
 	};
+
+#define fit_6bits(val)		((unsigned long)(val) < 64)
+#define fit_byte(val)		((unsigned long)((val)+128) < 256)
+#define fit_word(val)		((unsigned long)((val)+32768L) < 65536L)

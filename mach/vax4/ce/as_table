@@ -1,3 +1,13 @@
+addd2	src, dst	==>
+			@text1( 0x60);
+			gen_operand( src);
+			gen_operand( dst).
+
+addf2	src, dst	==>
+			@text1( 0x40);
+			gen_operand( src);
+			gen_operand( dst).
+
 addl2	src, dst 	==>
 			@text1( 0xc0);
 			gen_operand( src);
@@ -110,6 +120,16 @@ clrq 	src		==>
 			@text1( 0x7c);
 			gen_operand( src).
 
+cmpf	src, dest	==>
+			@text1( 0x51);
+			gen_operand( src);
+			gen_operand( dest).
+
+cmpd	src, dest	==>
+			@text1( 0x71);
+			gen_operand( src);
+			gen_operand( dest).
+
 cmpl	src, dest	==>
 			@text1( 0xd1);
 			gen_operand( src);
@@ -123,6 +143,16 @@ cvtlb	src, dst	==>
 decl 	src		==>
 			@text1( 0xd7);
 			gen_operand( src).
+
+divf2	src, dst	==>
+			@text1( 0x46);
+			gen_operand( src);
+			gen_operand( dst).
+
+divd2	src, dst	==>
+			@text1( 0x66);
+			gen_operand( src);
+			gen_operand( dst).
 
 divl2	src, dst	==>
 			@text1( 0xc6);
@@ -149,6 +179,16 @@ jsb	lab		==>
 
 mcoml	src, dst	==>
 			@text1( 0xd2);
+			gen_operand( src);
+			gen_operand( dst).
+
+mnegf	src, dst	==>
+			@text1( 0x52);
+			gen_operand( src);
+			gen_operand( dst).
+
+mnegd	src, dst	==>
+			@text1( 0x72);
 			gen_operand( src);
 			gen_operand( dst).
 
@@ -189,6 +229,16 @@ movq	src : const, dst	==>
 			gen_operand( dst).
 
 
+mulf2	src, dst	==>
+			@text1( 0x44);
+			gen_operand( src);
+			gen_operand( dst).
+
+muld2	src, dst	==>
+			@text1( 0x64);
+			gen_operand( src);
+			gen_operand( dst).
+
 mull2	src, dst	==>
 			@text1( 0xc4);
 			gen_operand( src);
@@ -215,6 +265,16 @@ sobgtr  tel, ilb	==>
 			@text1( 0xf5);
 			gen_operand( tel);
 			gen_operand( ilb).
+
+subf2	src, dst	==>
+			@text1( 0x42);
+			gen_operand( src);
+			gen_operand( dst).
+
+subd2	src, dst	==>
+			@text1( 0x62);
+			gen_operand( src);
+			gen_operand( dst).
 
 subl2	src, dst	==>
 			@text1( 0xc2);
