@@ -209,7 +209,6 @@ error.$(SUF):	$(SRC_DIR)/file_info.h
 error.$(SUF):	$(TARGET_HOME)/modules/h/em_arith.h
 error.$(SUF):	$(SRC_DIR)/LLlex.h
 error.$(SUF):	./errout.h
-error.$(SUF):	/usr/include/varargs.h
 error.$(SUF):	$(TARGET_HOME)/modules/h/system.h
 idf.$(SUF):	$(SRC_DIR)/idf.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/idf.c
