@@ -50,7 +50,6 @@ error.s
 unknown.s
 fat.s
 trp.s
-stop.s
 print.s
 ret6.s
 ret8.s

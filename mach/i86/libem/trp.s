@@ -1,7 +1,8 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define .trp
-.extern .trppc, .stop
+.define .stop
+.extern .trppc
 
 		! ax is trap number
 .trp:
@@ -15,3 +16,6 @@
 	ret
 2:
 	call    .stop
+
+.stop:
+	int     3
