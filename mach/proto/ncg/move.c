@@ -22,9 +22,9 @@ unsigned costcalc();
 
 move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 	register move_p mp;
-	register unsigned t;
+	unsigned t;
 	register struct reginfo *rp;
-	tkdef_p tdp;
+	register byte *tdpb;
 	int i;
 	unsigned codegen();
 
@@ -36,32 +36,14 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 				    &machregs[tp2->t_att[0].ar].r_contents) &&
 			      machregs[tp1->t_att[0].ar].r_contents.t_token!=0)
 				return(0);
-			erasereg(tp2->t_att[0].ar);
-			machregs[tp2->t_att[0].ar].r_contents =
-			  machregs[tp1->t_att[0].ar].r_contents ;
-
 		} else {
 			if (eqtoken(&machregs[tp2->t_att[0].ar].r_contents,tp1))
 				return(0);
-			erasereg(tp2->t_att[0].ar);
-			machregs[tp2->t_att[0].ar].r_contents = *tp1;
 		}
-		for (rp=machregs+1;rp<machregs+NREGS;rp++) {
-			if (rp->r_contents.t_token == 0)
-				continue;
-			assert(rp->r_contents.t_token > 0);
-			tdp = &tokens[rp->r_contents.t_token];
-			for (i=0;i<TOKENSIZE;i++)
-				if (tdp->t_type[i] == EV_REG &&
-				    clash(rp->r_contents.t_att[i].ar,tp2->t_att[0].ar)) {
-					erasereg(rp-machregs);
-					break;
-				}
-		}
+		erasereg(tp2->t_att[0].ar);
 	} else if (tp1->t_token == -1) {
 		if (eqtoken(tp2,&machregs[tp1->t_att[0].ar].r_contents))
 			return(0);
-		machregs[tp1->t_att[0].ar].r_contents = *tp2;
 	}
 	/*
 	 * If we arrive here the move must really be executed
@@ -89,6 +71,27 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 	t = codegen(&coderules[mp->m_cindex],ply,toplevel,maxcost,0);
 	tokpatlen -= 2;
 	stackheight -= 2;
+	if (tp2->t_token == -1) {
+		rp = &machregs[tp2->t_att[0].ar];
+		if (tp1->t_token == -1) {
+			rp->r_contents =
+			  machregs[tp1->t_att[0].ar].r_contents ;
+		}
+		else	rp->r_contents = *tp1;
+		if (rp->r_contents.t_token > 0) {
+			tdpb = &(tokens[rp->r_contents.t_token].t_type[0]);
+			for (i=0;i<TOKENSIZE;i++)
+				if (*tdpb++ == EV_REG &&
+				    clash(rp->r_contents.t_att[i].ar,tp2->t_att[0].ar)) {
+					rp->r_contents.t_token = 0;
+					for (i = 0; i < TOKENSIZE; i++)
+						rp->r_contents.t_att[i].aw = 0;
+					break;
+				}
+		}
+	}
+	else if (tp1->t_token == -1)
+		machregs[tp1->t_att[0].ar].r_contents = *tp2;
 	return(t);
 }
 
@@ -101,10 +104,7 @@ setcc(tp) token_p tp; {
 
 test(tp,ply,toplevel,maxcost) token_p tp; unsigned maxcost; {
 	register test_p mp;
-	register unsigned t;
-	register struct reginfo *rp;
-	tkdef_p tdp;
-	int i;
+	unsigned t;
 	unsigned codegen();
 
 	if (cocoreg.t_token!=0) {

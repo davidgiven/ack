@@ -62,8 +62,8 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 	int inscoerc=0;
 	int procarg[2];
 #ifdef ALLOW_NEXTEM
-	int paniced;
-	char *savebp;
+	static int paniced;
+	char *savebp = 0;
 #endif
 	state_t state;
 #define SAVEST	savestatus(&state)
@@ -128,7 +128,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #ifndef ALLOW_NEXTEM
 	bp = nextem(toplevel);
 #else
-	paniced=0;
+	if (toplevel) paniced=0;
 	savebp = nextem(toplevel);
     panic:
 	bp = savebp;
@@ -171,9 +171,18 @@ if (Debug)
 					if (dist<mindistance) {
 						if(dist==0)
 							goto gotit;
+#ifdef ALLOW_NEXTEM
+						if (! paniced) {
+#endif
 						npos=0;
 						mindistance = dist;
+#ifdef ALLOW_NEXTEM
+						}
+#endif
 					}
+#ifdef ALLOW_NEXTEM
+					if (dist < MAXINT)
+#endif
 					pos[npos++] = cindex;
 				}
 			}
@@ -198,8 +207,9 @@ if (Debug)
 					RESTST;
 				}
 				FREEST;
-				if (totalcost+mincost>costlimit)
+				if (totalcost+mincost>costlimit) {
 					BROKE();
+				}
 			} else {
 				cindex = pos[0];
 			}
@@ -344,11 +354,11 @@ if(Debug>1) fprintf(stderr,"Pattern too long, %d with only %d items on stack\n",
 					myfree(regls[j]);
 #ifndef ALLOW_NEXTEM
 				assert(!toplevel);
-				BROKE();
 #else
 				assert(!(toplevel&&paniced));
-				goto normalfailed;
+				if (paniced) goto normalfailed;
 #endif
+				BROKE();
 			}
 			if (cp->c3_prop<0) {
 				totalcost+=docoerc(tp,cp,ply,toplevel,0);
@@ -372,15 +382,21 @@ if(Debug>1) fprintf(stderr,"Pattern too long, %d with only %d items on stack\n",
 	besttup=0;
 	for (; tup != 0; tup = ntup) {
 #ifndef NDEBUG
-if(Debug>1) fprintf(stderr,"Next tuple %d,%d,%d,%d\n",
+if(Debug>1) { fprintf(stderr,"Next tuple %d,%d,%d,%d\n",
 			tup->p_rar[0],
 			tup->p_rar[1],
 			tup->p_rar[2],
 			tup->p_rar[3]);
+		fprintf(stderr, "totalcost = %u, costlimit = %u, mincost = %u\n",
+			totalcost, costlimit, mincost);
+	}
 #endif
 		ntup = tup->p_next;
 		for (i=0,t=0;i<nregneeded && t<mincost; i++)
 			t += docoerc(regtp[i],regcp[i],ply,FALSE,tup->p_rar[i]);
+#ifndef NDEBUG
+if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
+#endif
 		if ( t<mincost && tokpatlen<=stackheight ) {
 #ifndef NDEBUG
 			if (Debug>2)
@@ -415,17 +431,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			goto nextmatch;
 		}
 		totalcost += mincost;
-#ifndef ALLOW_NEXTEM
-		BROKE();
-#else
-		if (toplevel && !paniced) {
-			stackheight=0;
-			paniced++;
-			DEBUG("PANIC!");
-			goto panic;
-		} else
-			BROKE();
-#endif
+                BROKE();
 	}
 	for (i=0;i<nregneeded;i++)
 		totalcost += docoerc(regtp[i],regcp[i],ply,toplevel,besttup->p_rar[i]);
@@ -826,13 +832,25 @@ normalfailed:	if (stackpad!=tokpatlen) {
     case DO_RETURN:
 	DEBUG("RETURN");
 	assert(origcp!=startupcode);
-    doreturn:
 #ifndef NDEBUG
 	level--;
 #endif
 	return(totalcost);
 	}
 	}
+    doreturn:
+#ifdef ALLOW_NEXTEM
+	if (toplevel && totalcost == INFINITY && ! paniced) {
+		totalcost += stackupto(&fakestack[stackheight-1], ply, toplevel);
+		paniced = 1;
+		DEBUG("PANIC!");
+		goto panic;
+	}
+#endif
+#ifndef NDEBUG
+	level--;
+#endif
+	return(totalcost);
 }
 
 readcodebytes() {

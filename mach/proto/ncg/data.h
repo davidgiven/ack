@@ -29,6 +29,9 @@ struct reginfo {
 #if MAXMEMBERS!=0
 	int     r_members[MAXMEMBERS];  /* register contained within this reg */
 	short	r_clash[REGSETSIZE];	/* set of clashing registers */
+	int	r_iclash;		/* index in clashlist; other represen-
+					   tation of r_clash
+					*/
 #endif
 	int     r_refcount;             /* Times in use */
 	token_t r_contents;             /* Current contents */

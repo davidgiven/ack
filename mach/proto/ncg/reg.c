@@ -59,30 +59,33 @@ getrefcount(regno) {
 }
 
 erasereg(regno) {
-	register struct reginfo *rp;
+	register struct reginfo *rp = &machregs[regno];
 	register int i;
 
-	rp = &machregs[regno];
+#if MAXMEMBERS==0
 	rp->r_contents.t_token = 0;
 	for (i=0;i<TOKENSIZE;i++)
 		rp->r_contents.t_att[i].aw = 0;
 
-#if MAXMEMBERS==0
 	awayreg(regno);
 #else
-	for (rp=machregs+1;rp<machregs+NREGS;rp++)
-		if (rp->r_clash[regno>>4]&(1<<(regno&017))) {
-			rp->r_contents.t_token = 0;
-			for (i=0;i<TOKENSIZE;i++)
-				rp->r_contents.t_att[i].aw = 0;
-			awayreg(rp-machregs);
-		}
+	extern short clashlist[];
+	register short *sp = &clashlist[rp->r_iclash];
+
+	rp->r_contents.t_token = 0;
+	while (*sp) {
+		rp = &machregs[*sp];
+		rp->r_contents.t_token = 0;
+		for (i=0;i<TOKENSIZE;i++)
+			rp->r_contents.t_att[i].aw = 0;
+		awayreg(*sp++);
+	}
 #endif
 }
 
 awayreg(regno) {
 	register struct reginfo *rp;
-	register tkdef_p tdp;
+	register byte *tdpb;
 	register i;
 
 	/* Now erase recursively all registers containing
@@ -90,14 +93,27 @@ awayreg(regno) {
 	 */
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		if (rp->r_contents.t_token == -1) {
-			if (rp->r_contents.t_att[0].ar == regno)
-				erasereg(rp-machregs);
+			if (rp->r_contents.t_att[0].ar == regno) {
+				/* erasereg(rp-machregs);
+				   replaced by the following three
+				   lines
+				*/
+				rp->r_contents.t_token = 0;
+				for (i=0;i<TOKENSIZE;i++)
+					rp->r_contents.t_att[i].aw = 0;
+			}
 		} else if (rp->r_contents.t_token > 0) {
-			tdp= & tokens[rp->r_contents.t_token];
+			tdpb= & (tokens[rp->r_contents.t_token].t_type[0]);
 			for (i=0;i<TOKENSIZE;i++)
-				if (tdp->t_type[i] == EV_REG && 
+				if (*tdpb++ == EV_REG && 
 				    rp->r_contents.t_att[i].ar == regno) {
-					erasereg(rp-machregs);
+					/* erasereg(rp-machregs);
+					   replaced by the following three
+					   lines
+					*/
+					rp->r_contents.t_token = 0;
+					for (i=0;i<TOKENSIZE;i++)
+						rp->r_contents.t_att[i].aw = 0;
 					break;
 				}
 		}
@@ -137,7 +153,7 @@ inctcount(regno) {
 chkregs() {
 	register struct reginfo *rp;
 	register token_p tp;
-	register tkdef_p tdp;
+	register byte *tdpb;
 	int i;
 
 	for (rp=machregs+1;rp<machregs+NREGS;rp++) {
@@ -147,9 +163,9 @@ chkregs() {
 		if (tp->t_token == -1)
 			inctcount(tp->t_att[0].ar);
 		else {
-			tdp = &tokens[tp->t_token];
+			tdpb = &(tokens[tp->t_token].t_type[0]);
 			for (i=0;i<TOKENSIZE;i++)
-				if (tdp->t_type[i]==EV_REG)
+				if (*tdpb++==EV_REG)
 					inctcount(tp->t_att[i].ar);
 		}
 	}
