@@ -372,7 +372,7 @@ stb_string(df, kind)
 		case T_ENUMERATION:
 			addc_db_str('e');
 			stb_type(tp, 0);
-			adds_db_str(sprint(buf, ",%ld;", df->enm_val));
+			adds_db_str(sprint(buf, ",%ld;", df->con_const.TOK_INT));
 			break;
 		case T_SET: {
 			register int i;
