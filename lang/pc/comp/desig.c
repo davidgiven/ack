@@ -179,7 +179,7 @@ CodeValue(ds, tp)
 			C_loi(size);
 			break;
 		}
-		printf("(CodeValue) : not properly");
+		crash("(CodeValue)");
 		break;
 
 	case DSG_INDEXED:
@@ -224,7 +224,7 @@ CodeStore(ds, tp)
 			C_sti(size);
 			break;
 		}
-		printf("(CodeStore) : not properly");
+		crash("(CodeStore)");
 		break;
 
 	case DSG_INDEXED:
