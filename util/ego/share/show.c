@@ -14,12 +14,12 @@
 
 
 #include <stdio.h>
-#include "../../../h/em_spec.h"
-#include "../../../h/em_flag.h"
-#include "../../../h/em_pseu.h"
-#include "../share/types.h"
-#include "../share/def.h"
-#include "../share/global.h"
+#include <em_spec.h>
+#include <em_flag.h>
+#include <em_pseu.h>
+#include "types.h"
+#include "def.h"
+#include "global.h"
 
 
 #define BMASK 0377

@@ -8,13 +8,13 @@
  *  I L 1 _ A U X . C
  */
 
+#include <em_spec.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
 #include "../share/alloc.h"
 #include "../share/global.h"
 #include "../share/lset.h"
-#include "../../../h/em_spec.h"
 #include "il_aux.h"
 #include "il1_aux.h"
 

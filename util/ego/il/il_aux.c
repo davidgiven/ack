@@ -10,6 +10,9 @@
  */
 
 #include <stdio.h>
+#include <em_spec.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -19,9 +22,6 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/map.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
 #include "il_aux.h"
 
 

@@ -8,6 +8,10 @@
  */
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_mes.h>
 #include "types.h"
 #include "debug.h"
 #include "global.h"
@@ -17,10 +21,6 @@
 #include "get.h"
 #include "aux.h"
 #include "alloc.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_mes.h"
 #include "locals.h"
 
 

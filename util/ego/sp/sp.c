@@ -10,6 +10,8 @@
 
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/global.h"
@@ -22,8 +24,6 @@
 #include "../share/aux.h"
 #include "../share/go.h"
 #include "../share/stack_chg.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
 
 
 /* Stack pollution throws away the ASP instructions after a procedure call.

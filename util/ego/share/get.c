@@ -9,6 +9,10 @@
  */
 
 #include <stdio.h>
+#include <em_spec.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_mes.h>
 #include "types.h"
 #include "def.h"
 #include "debug.h"
@@ -19,10 +23,6 @@
 #include "alloc.h"
 #include "map.h"
 #include "aux.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_mes.h"
 
 FILE *curinp;
 block_id lastbid;	/* block identifying number */

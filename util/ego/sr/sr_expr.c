@@ -11,6 +11,7 @@
 
 
 #include <stdio.h>
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "sr.h"
 #include "../share/debug.h"
@@ -19,7 +20,6 @@
 #include "sr_aux.h"
 #include "../share/lset.h"
 #include "sr_iv.h"
-#include "../../../h/em_mnem.h"
 
 
 

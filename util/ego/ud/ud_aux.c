@@ -9,8 +9,11 @@
  */
 
 
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_spec.h>
 #include "../share/types.h"
-#include "../ud/ud.h"
+#include "ud.h"
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/alloc.h"
@@ -19,10 +22,7 @@
 #include "../share/def.h"
 #include "../share/locals.h"
 #include "../share/aux.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
-#include "../ud/ud_defs.h"
+#include "ud_defs.h"
 
 repl_line(old,new,b)
 	line_p old,new;

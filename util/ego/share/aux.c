@@ -9,15 +9,15 @@
  *
  */
 
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/alloc.h"
-#include "../share/aux.h"
-#include "../share/map.h"
-#include "../share/lset.h"
-#include "../../../h/em_mes.h"
-#include "../../../h/em_pseu.h"
+#include <em_mes.h>
+#include <em_pseu.h>
+#include "types.h"
+#include "debug.h"
+#include "global.h"
+#include "alloc.h"
+#include "aux.h"
+#include "map.h"
+#include "lset.h"
 
 offset off_set(lnp)
 	line_p lnp;

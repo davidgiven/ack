@@ -9,6 +9,8 @@
  */
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -16,8 +18,6 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/aux.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
 #include "il1_aux.h"
 #include "il1_formal.h"
 #include "il1_cal.h"

@@ -6,13 +6,13 @@
 /* P U T . C */
 
 #include <stdio.h>
+#include <em_pseu.h>
+#include <em_spec.h>
 #include "types.h"
 #include "global.h"
 #include "debug.h"
 #include "def.h"
 #include "map.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
 #include "lset.h"
 #include "alloc.h"
 #include "put.h"

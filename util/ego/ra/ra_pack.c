@@ -8,6 +8,7 @@
  *  R A _ P A C K . C
  */
 
+#include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/def.h"
@@ -16,7 +17,6 @@
 #include "../share/cset.h"
 #include "../share/alloc.h"
 #include "../share/aux.h"
-#include "../../../h/em_reg.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_interv.h"

@@ -5,6 +5,9 @@
  */
 /*  I N L I N E   S U B S T I T U T I O N */
 #include <stdio.h>
+#include <em_path.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -12,8 +15,6 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/files.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
 #include "../share/map.h"
 #include "il_aux.h"
 #include "il1_anal.h"
@@ -29,11 +30,12 @@ calcnt_p cchead;	/* call-count info of current proc */
 STATIC long space = 0;
 STATIC long total_size = 0;
 
-STATIC char cname[] = "/usr/tmp/ego.i1.XXXXXX";
-STATIC char ccname[] = "/usr/tmp/ego.i2.XXXXXX";
+STATIC char cname[128] = TMP_DIR;
+STATIC char ccname[128] = TMP_DIR;
 
 /* For debugging only */
-STATIC char sname[] = "/usr/tmp/ego.i3.XXXXXX";
+STATIC char sname[128] = TMP_DIR;
+STATIC int kp_temps = 0;
 
 int Ssubst;
 #ifdef VERBOSE
@@ -118,7 +120,7 @@ pass1(lnam,bnam,cnam)
 
 
 
-STATIC char cname2[] = "/usr/tmp/ego.i4.XXXXXX";
+STATIC char cname2[128] = TMP_DIR;
 
 pass2(cnam,space)
 	char *cnam;
@@ -145,14 +147,14 @@ pass2(cnam,space)
 		}
 	}
 	select_calls(fproc,ccf,space);
-	fclose(cf); unlink(cnam);
+	fclose(cf); if (! kp_temps) unlink(cnam);
 	fclose(cf2);
-	fclose(ccf); unlink(ccname);
+	fclose(ccf); if (! kp_temps) unlink(ccname);
 	cf2 = openfile(cname2,"r");
 	add_actuals(fproc,cf2);
 	cleancals(fproc); /* remove calls that were not selected */
 	/* add actual parameters to each selected call */
-	fclose(cf2); unlink(cname2);
+	fclose(cf2); if (! kp_temps) unlink(cname2);
 }
 
 
@@ -219,7 +221,7 @@ pass3(lnam,lnam2)
 	fclose(lfile2);
 	if (verbose) {
 		fclose(sfile);
-		unlink(sname);
+		if (! kp_temps) unlink(sname);
 	}
 }
 
@@ -289,6 +291,13 @@ il_flags(p)
 	case 'a':
 		complete_program = 1;
 		break;
+	case 't':
+		strcpy(cname, ".");
+		strcpy(ccname, ".");
+		strcpy(sname, ".");
+		strcpy(cname2, ".");
+		kp_temps = 1;
+		break;
 	}
 }
 
@@ -300,6 +309,10 @@ main(argc,argv)
 	
 	go(argc,argv,no_action,no_action,no_action,il_flags);
 	il_extptab(fproc); /* add extended data structures */
+	strcat(cname, "/ego.i1.XXXXXX");
+	strcat(ccname, "/ego.i2.XXXXXX");
+	strcat(sname, "/ego.i3.XXXXXX");
+	strcat(cname2, "/ego.i4.XXXXXX");
 	mktemp(cname);
 	mktemp(ccname);
 	mktemp(sname);

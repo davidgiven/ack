@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -16,7 +17,6 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/get.h"
-#include "../../../h/em_mnem.h"
 #include "il_aux.h"
 #include "il3_aux.h"
 #include "il3_change.h"

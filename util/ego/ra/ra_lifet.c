@@ -8,6 +8,12 @@
  *  R A _ L I F E T I M E . C
  */
 
+#include <em_mnem.h>
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_reg.h>
+#include <em_mes.h>
+#include <em_ego.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/def.h"
@@ -15,12 +21,6 @@
 #include "../share/lset.h"
 #include "../share/aux.h"
 #include "../share/alloc.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_reg.h"
-#include "../../../h/em_mes.h"
-#include "../../../h/em_ego.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_items.h"

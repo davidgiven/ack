@@ -7,6 +7,11 @@
 /* L I V E   V A R I A B L E S   A N A L Y S I S */
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_spec.h>
+#include <em_mes.h>
+#include <em_ego.h>
 #include "../share/types.h"
 #include "lv.h"
 #include "../share/debug.h"
@@ -23,11 +28,6 @@
 #include "../share/init_glob.h"
 #include "../share/locals.h"
 #include "../share/go.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mes.h"
-#include "../../../h/em_ego.h"
 #include "../share/parser.h"
 
 #define newlvbx()	(bext_p) newstruct(bext_lv)

@@ -5,14 +5,14 @@
  */
 
 #include <stdio.h>
+#include <em_spec.h>
+#include <em_mnem.h>
 #include "types.h"
 #include "debug.h"
 #include "alloc.h"
 #include "global.h"
 #include "lset.h"
 #include "aux.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mnem.h"
 
 struct class {
 	byte	src_class;

@@ -9,6 +9,7 @@
  *  U D _ D E F S . C
  */
 
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "ud.h"
 #include "../share/debug.h"
@@ -17,7 +18,6 @@
 #include "../share/cset.h"
 #include "../share/map.h"
 #include "../share/locals.h"
-#include "../../../h/em_mnem.h"
 #include "ud_defs.h"
 #include "../share/alloc.h"
 #include "../share/aux.h"

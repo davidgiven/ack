@@ -10,11 +10,11 @@
  *
  */
 
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/alloc.h"
-#include "../share/map.h"
+#include "types.h"
+#include "debug.h"
+#include "global.h"
+#include "alloc.h"
+#include "map.h"
 
 
 extern short nrglobals;

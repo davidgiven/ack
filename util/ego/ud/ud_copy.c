@@ -5,8 +5,11 @@
  */
 /* C O P Y   P R O P A G A T I O N */
 
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_spec.h>
 #include "../share/types.h"
-#include "../ud/ud.h"
+#include "ud.h"
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/alloc.h"
@@ -15,9 +18,6 @@
 #include "../share/def.h"
 #include "../share/aux.h"
 #include "../share/locals.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
 #include "../ud/ud_defs.h"
 #include "ud_copy.h"
 #include "ud_const.h"

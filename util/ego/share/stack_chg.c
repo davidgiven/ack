@@ -7,11 +7,11 @@
 
 
 #include <stdio.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mnem.h"
+#include <em_spec.h>
+#include <em_mnem.h>
+#include "types.h"
+#include "debug.h"
+#include "global.h"
 
 #include "pop_push.h"
 

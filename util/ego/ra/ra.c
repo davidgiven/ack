@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/global.h"
@@ -19,7 +20,6 @@
 #include "../share/map.h"
 #include "../share/alloc.h"
 #include "../share/go.h"
-#include "../../../h/em_reg.h"
 #include "ra.h"
 #include "ra_items.h"
 #include "ra_allocl.h"

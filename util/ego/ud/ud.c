@@ -6,6 +6,7 @@
 /*  U S E  -  D E F I N I T I O N   A N A L Y S I S */
 
 #include <stdio.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "ud.h"
 #include "../share/debug.h"
@@ -22,7 +23,6 @@
 #include "../share/init_glob.h"
 #include "../share/locals.h"
 #include "../share/go.h"
-#include "../../../h/em_spec.h"
 #include "ud_defs.h"
 #include "ud_const.h"
 #include "ud_copy.h"

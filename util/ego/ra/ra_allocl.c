@@ -8,6 +8,10 @@
  *  R A _ A L L O C L I S T . C
  */
 
+#include <em_mnem.h>
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/def.h"
@@ -17,10 +21,6 @@
 #include "../share/aux.h"
 #include "../share/alloc.h"
 #include "../share/map.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_reg.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_items.h"

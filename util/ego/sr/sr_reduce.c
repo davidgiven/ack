@@ -10,9 +10,13 @@
  */
 
 
+#include <em_pseu.h>
+#include <em_reg.h>
+#include <em_mes.h>
+#include <em_mnem.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "sr.h"
-#include "../../../h/em_mnem.h"
 #include "../share/debug.h"
 #include "../share/alloc.h"
 #include "../share/def.h"
@@ -23,11 +27,6 @@
 #include "sr_xform.h"
 #include "sr_reduce.h"
 #include "sr_expr.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_reg.h"
-#include "../../../h/em_mes.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
 
 
 

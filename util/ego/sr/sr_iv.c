@@ -10,10 +10,10 @@
  */
 
 
+#include <em_mnem.h>
+#include <em_pseu.h>
 #include "../share/types.h"
 #include "sr.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
 #include "../share/lset.h"
 #include "../share/cset.h"
 #include "../share/debug.h"

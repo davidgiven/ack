@@ -1,11 +1,10 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHR=../share
 
 LDFLAGS=
-CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT -I$(EMH)
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbu
 
@@ -76,8 +75,6 @@ depend:
 
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
-
-ra.o:	../../../h/em_reg.h
 ra.o:	../share/alloc.h
 ra.o:	../share/debug.h
 ra.o:	../share/files.h
@@ -94,10 +91,6 @@ ra.o:	ra_items.h
 ra.o:	ra_pack.h
 ra.o:	ra_profits.h
 ra.o:	ra_xform.h
-ra_allocl.o:	../../../h/em_mnem.h
-ra_allocl.o:	../../../h/em_pseu.h
-ra_allocl.o:	../../../h/em_reg.h
-ra_allocl.o:	../../../h/em_spec.h
 ra_allocl.o:	../share/alloc.h
 ra_allocl.o:	../share/aux.h
 ra_allocl.o:	../share/cset.h
@@ -112,10 +105,6 @@ ra_allocl.o:	ra_allocl.h
 ra_allocl.o:	ra_aux.h
 ra_allocl.o:	ra_interv.h
 ra_allocl.o:	ra_items.h
-ra_aux.o:	../../../h/em_mnem.h
-ra_aux.o:	../../../h/em_pseu.h
-ra_aux.o:	../../../h/em_reg.h
-ra_aux.o:	../../../h/em_spec.h
 ra_aux.o:	../share/alloc.h
 ra_aux.o:	../share/debug.h
 ra_aux.o:	../share/def.h
@@ -129,13 +118,8 @@ ra_interv.o:	../share/debug.h
 ra_interv.o:	../share/global.h
 ra_interv.o:	../share/lset.h
 ra_interv.o:	../share/types.h
-ra_interv.o:	../../../h/em_reg.h
 ra_interv.o:	ra.h
 ra_interv.o:	ra_interv.h
-ra_items.o:	../../../h/em_mnem.h
-ra_items.o:	../../../h/em_pseu.h
-ra_items.o:	../../../h/em_reg.h
-ra_items.o:	../../../h/em_spec.h
 ra_items.o:	../share/alloc.h
 ra_items.o:	../share/aux.h
 ra_items.o:	../share/debug.h
@@ -147,10 +131,6 @@ ra_items.o:	itemtab.h
 ra_items.o:	ra.h
 ra_items.o:	ra_aux.h
 ra_items.o:	ra_items.h
-ra_lifet.o:	../../../h/em_mnem.h
-ra_lifet.o:	../../../h/em_pseu.h
-ra_lifet.o:	../../../h/em_reg.h
-ra_lifet.o:	../../../h/em_spec.h
 ra_lifet.o:	../share/alloc.h
 ra_lifet.o:	../share/aux.h
 ra_lifet.o:	../share/debug.h
@@ -162,7 +142,6 @@ ra_lifet.o:	ra.h
 ra_lifet.o:	ra_aux.h
 ra_lifet.o:	ra_items.h
 ra_lifet.o:	ra_lifet.h
-ra_pack.o:	../../../h/em_reg.h
 ra_pack.o:	../share/alloc.h
 ra_pack.o:	../share/aux.h
 ra_pack.o:	../share/cset.h
@@ -174,7 +153,6 @@ ra_pack.o:	../share/types.h
 ra_pack.o:	ra.h
 ra_pack.o:	ra_aux.h
 ra_pack.o:	ra_interv.h
-ra_profits.o:	../../../h/em_reg.h
 ra_profits.o:	../share/debug.h
 ra_profits.o:	../share/global.h
 ra_profits.o:	../share/lset.h
@@ -182,11 +160,6 @@ ra_profits.o:	../share/types.h
 ra_profits.o:	ra.h
 ra_profits.o:	ra_aux.h
 ra_profits.o:	ra_profits.h
-ra_xform.o:	../../../h/em_mes.h
-ra_xform.o:	../../../h/em_mnem.h
-ra_xform.o:	../../../h/em_pseu.h
-ra_xform.o:	../../../h/em_reg.h
-ra_xform.o:	../../../h/em_spec.h
 ra_xform.o:	../share/alloc.h
 ra_xform.o:	../share/aux.h
 ra_xform.o:	../share/debug.h

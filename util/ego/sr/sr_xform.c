@@ -12,6 +12,9 @@
 
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "sr.h"
 #include "../share/debug.h"
@@ -22,9 +25,6 @@
 #include "sr_aux.h"
 #include "../share/lset.h"
 #include "../share/aux.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
 #include "sr_xform.h"
 
 /* Transformations on EM texts */

@@ -9,12 +9,12 @@
  */
 
 
+#include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/alloc.h"
 #include "../share/lset.h"
-#include "../../../h/em_reg.h"
 #include "ra.h"
 #include "ra_interv.h"
 
