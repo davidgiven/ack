@@ -140,6 +140,7 @@ do_flush() {
 	fflush(stderr) ;
 }
 
+void
 noodstop() {
 	quit(-3) ;
 }

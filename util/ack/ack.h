@@ -79,7 +79,7 @@ extern int  creat();
 /* Own routines */
 enum f_path getpath();
 enum f_path scan_end();
-extern int  noodstop();
+extern void noodstop();
 extern char *getvar();
 extern char *keeps();
 extern char *basename();

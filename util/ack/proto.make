@@ -51,7 +51,7 @@ FE=fe
 INTABLES=sun3
 LNTABLES=acc apc abc ocm m2 f2c vax4 i86 i386 m68k2 m68k4 pmds pmds4 mantra \
 	m68020 z8000 pdp em22 em24 em44 6500 6800 6805 6809 i80 ns s2650 z80 \
-	sun2 xenix3 minix minixST sparc  sparc_solaris arm
+	sun2 xenix3 minix minixST sparc sparc_solaris arm
 INCLUDES=-I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(SRC_DIR)
 CFLAGS= $(INCLUDES) $(COPTIONS)
 UCFLAGS= $(INCLUDES) $(UCOPTIONS)
