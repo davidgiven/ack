@@ -3,9 +3,11 @@
 _fork:		trap #0
 .short 0x2
 		bra 1f
-		bcc 2f
-		jmp cerror
+		bcs 2f
+		rts
 2:
-		clr.l d0
+		jmp cerror
 1:
+		bcs	2b
+		clr.l	d0
 		rts
