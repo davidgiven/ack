@@ -195,9 +195,24 @@ open_in(name) register char *name ; {
 	}
 	/* Not in core */
 	incore= NO ;
+#ifdef NEW
+	gr_cat(&rline,EM_DIR) ;
+	gr_cat(&rline,"/lib/n_ack/") ;
+#else
 	gr_cat(&rline,ACK_DIR); gr_cat(&rline,"/") ;
+#endif
 	gr_cat(&rline,name) ;
 	infile= fopen(gr_start(rline),"r") ;
+#ifdef NEW
+	if ( !infile ) {
+		/* Try to read EM_DIR/lib/MACH/plan */
+		gr_throw(&rline) ;
+		gr_cat(&rline,EM_DIR) ;
+		gr_cat(&rline,"/lib/") ; gr_cat(&rline,name) ;
+		gr_cat(&rline,"/plan") ;
+		infile= fopen(gr_start(rline),"r") ;
+	}
+#endif
 	if ( !infile ) {
 		infile= fopen(name,"r") ;
 	}
