@@ -80,6 +80,7 @@ extern struct type
 	*intorcard_type,
 	*string_type,
 	*bitset_type,
+	*std_type,
 	*error_type;		/* All from type.c */
 
 extern int
@@ -105,6 +106,8 @@ extern arith
 struct type
 	*create_type(),
 	*construct_type(),
-	*standard_type();	/* All from type.c */
+	*standard_type(),
+	*set_type(),
+	*subr_type();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)

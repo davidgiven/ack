@@ -91,7 +91,7 @@ defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h scope.h
 typequiv.o: Lpars.h def.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
 cstoper.o: LLlex.h Lpars.h def_sizes.h idf.h node.h type.h
-chk_expr.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h
+chk_expr.o: LLlex.h Lpars.h const.h def.h idf.h node.h scope.h standards.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h

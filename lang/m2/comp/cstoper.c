@@ -18,6 +18,7 @@ long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
+arith wrd_bits;		/* number of bits in a word */
 
 cstunary(expp)
 	register struct node *expp;
@@ -206,21 +207,85 @@ cstbin(expp)
 cstset(expp)
 	register struct node *expp;
 {
-	switch(expp->nd_symb) {
-	case IN:
-	case '+':
-	case '-':
-	case '*':
-	case '/':
-	case GREATEREQUAL:
-	case LESSEQUAL:
-	case '=':
-	case '#':
-		/* ??? */
-		break;
-	default:
-		assert(0);
+	register arith *set1 = 0, *set2;
+	register int setsize, j;
+
+	assert(expp->nd_right->nd_class == Set);
+	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
+	set2 = expp->nd_right->nd_set;
+	setsize = expp->nd_right->nd_type->tp_size / wrd_size;
+
+	if (expp->nd_symb == IN) {
+		arith i;
+
+		assert(expp->nd_left->nd_class == Value);
+		i = expp->nd_left->nd_INT;
+		expp->nd_INT = (i >= 0 &&
+		    i < setsize * wrd_bits &&
+		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
+		    free((char *) set2);
 	}
+	else {
+		set1 = expp->nd_left->nd_set;
+		switch(expp->nd_symb) {
+		case '+':
+			for (j = 0; j < setsize; j++) {
+				*set1++ |= *set2++;
+			}
+			break;
+		case '-':
+			for (j = 0; j < setsize; j++) {
+				*set1++ &= ~*set2++;
+			}
+			break;
+		case '*':
+			for (j = 0; j < setsize; j++) {
+				*set1++ &= *set2++;
+			}
+			break;
+		case '/':
+			for (j = 0; j < setsize; j++) {
+				*set1++ ^= *set2++;
+			}
+			break;
+		case GREATEREQUAL:
+		case LESSEQUAL:
+		case '=':
+		case '#':
+			/* Clumsy, but who cares? Nobody writes these things! */
+			for (j = 0; j < setsize; j++) {
+				switch(expp->nd_symb) {
+				case GREATEREQUAL:
+					if ((*set1 | *set2++) != *set1) break;
+					set1++;
+					continue;
+				case LESSEQUAL:
+					if ((*set2 | *set1++) != *set2) break;
+					set2++;
+					continue;
+				case '=':
+				case '#':
+					if (*set1++ != *set2++) break;
+					continue;
+				}
+				expp->nd_INT = expp->nd_symb == '#';
+				break;
+			}
+			if (j == setsize) expp->nd_INT = expp->nd_symb != '#';
+			expp->nd_class = Value;
+			free((char *) expp->nd_left->nd_set);
+			free((char *) expp->nd_right->nd_set);
+			break;
+		default:
+			assert(0);
+		}
+		free((char *) expp->nd_right->nd_set);
+		expp->nd_class = Set;
+		expp->nd_set = expp->nd_left->nd_set;
+	}
+	FreeNode(expp->nd_left);
+	FreeNode(expp->nd_right);
+	expp->nd_left = expp->nd_right = 0;
 }
 
 cut_size(expr)
@@ -273,4 +338,5 @@ init_cst()
 
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
+	wrd_bits = 8 * wrd_size;
 }

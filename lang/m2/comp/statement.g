@@ -10,7 +10,7 @@ static char *RcsId = "$Header$";
 
 statement
 {
-	struct node *nd1, *nd2;
+	struct node *nd1, *nd2 = 0;
 } :
 [
 	/*
@@ -21,8 +21,12 @@ statement
 	designator(&nd1)
 	[
 		ActualParameters(&nd2)?
+				{ nd1 = MkNode(Call, nd1, nd2, &dot);
+				  nd1->nd_symb = '(';
+				}
 	|
-		BECOMES expression(&nd2)
+		BECOMES		{ nd1 = MkNode(Stat, nd1, NULLNODE, &dot); }
+		expression(&(nd1->nd_right))
 	]
 	/*
 	 * end of changed part

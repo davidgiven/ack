@@ -234,7 +234,6 @@ IdentList(struct node **p;)
 SubrangeType(struct type **ptp;)
 {
 	struct node *nd1, *nd2;
-	extern struct type *subr_type();
 }:
 	/*
 	   This is not exactly the rule in the new report, but see
@@ -340,7 +339,6 @@ CaseLabels
 SetType(struct type **ptp;)
 {
 	struct type *tp;
-	struct type *set_type();
 } :
 	SET OF SimpleType(&tp)
 			{ 

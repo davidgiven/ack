@@ -49,6 +49,7 @@ struct type
 	*intorcard_type,
 	*string_type,
 	*bitset_type,
+	*std_type,
 	*error_type;
 
 struct paramlist *h_paramlist;
@@ -132,7 +133,8 @@ init_types()
 
 	char_type = standard_type(CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
-	bool_type = standard_type(BOOLEAN, 1, (arith) 1);
+	bool_type = standard_type(ENUMERATION, 1, (arith) 1);
+	bool_type->enm_ncst = 2;
 	int_type = standard_type(INTEGER, int_align, int_size);
 	longint_type = standard_type(LONGINT, lint_align, lint_size);
 	card_type = standard_type(CARDINAL, int_align, int_size);
@@ -145,8 +147,8 @@ init_types()
 	tp = construct_type(SUBRANGE, int_type);
 	tp->sub_lb = 0;
 	tp->sub_ub = wrd_size * 8 - 1;
-	bitset_type = construct_type(SET, tp);
-	bitset_type->tp_size = wrd_size;
+	bitset_type = set_type(tp);
+	std_type = construct_type(PROCEDURE, NULLTYPE);
 	error_type = standard_type(ERRONEOUS, 1, (arith) 1);
 }
 

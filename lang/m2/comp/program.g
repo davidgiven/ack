@@ -47,6 +47,9 @@ ModuleDeclaration
 				  df = define(id, CurrentScope, D_MODULE);
 				  open_scope(CLOSEDSCOPE, 0);
 				  df->mod_scope = CurrentScope->sc_scope;
+				  df->df_type = 
+					standard_type(RECORD, 0, (arith) 0);
+				  df->df_type->rec_scope = df->mod_scope;
 				}
 	priority? ';'
 	import(1)*
@@ -113,6 +116,8 @@ DefinitionModule
 			  df = define(id, GlobalScope, D_MODULE);
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE, 0);
 			  df->mod_scope = CurrentScope->sc_scope;
+			  df->df_type = standard_type(RECORD, 0, (arith) 0);
+			  df->df_type->rec_scope = df->mod_scope;
 			  DefinitionModule = 1;
 			  DO_DEBUG(1, debug("Definition module \"%s\"", id->id_text));
 			}

@@ -6,6 +6,7 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<assert.h>
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
@@ -36,21 +37,17 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 	register struct def *df;
 	register struct node **pnd;
 	struct node *nd;
-	struct def *findname();
 } :
 	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot);
 			  pnd = &nd;
 			}
 	[
-		/* selector */
-		'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot);
-			  pnd = &(*pnd)->nd_right;
-			}
-		IDENT
-			{ *pnd = MkNode(Name,NULLNODE,NULLNODE,&dot); }
+		selector(pnd)
 	]*
 			{ if (types) {
-				*pdf = df = findname(nd);
+				findname(nd);
+				assert(nd->nd_class == Def);
+				*pdf = df = nd->nd_def;
 			  	if (df->df_kind != D_ERROR &&
 				    !(types & df->df_kind)) {
 					error("identifier \"%s\" is not a %s",
@@ -62,11 +59,10 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 			}
 ;
 
-/* Inline substituted wherever it occurred
-selector:
-	'.' IDENT
+selector(struct node **pnd;):
+	'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot); }
+	IDENT	{ (*pnd)->nd_right = MkNode(Name,NULLNODE,NULLNODE,&dot); }
 ;
-*/
 
 ExpList(struct node **pnd;)
 {
@@ -238,11 +234,7 @@ designator(struct node **pnd;)
 designator_tail(struct node **pnd;):
 	visible_designator_tail(pnd)
 	[
-		/* selector */
-		'.'	{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
-		IDENT	{ (*pnd)->nd_right =
-				MkNode(Name, NULLNODE, NULLNODE, &dot);
-			}
+		selector(pnd)
 	|
 		visible_designator_tail(pnd)
 	]*
@@ -250,8 +242,15 @@ designator_tail(struct node **pnd;):
 
 visible_designator_tail(struct node **pnd;):
 	'['		{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
-	ExpList(&((*pnd)->nd_right))
+		expression(&((*pnd)->nd_right))
+		[
+			','
+			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot);
+			  (*pnd)->nd_symb = '[';
+			}
+			expression(&((*pnd)->nd_right))
+		]*
 	']'
 |
-	'^'		{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+	'^'		{ *pnd = MkNode(Oper, NULLNODE, *pnd, &dot); }
 ;

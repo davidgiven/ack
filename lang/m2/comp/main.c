@@ -128,23 +128,23 @@ add_standards()
 	register struct def *df;
 	struct def *Enter();
 
-	(void) Enter("ABS", D_STDFUNC, NULLTYPE, S_ABS);
-	(void) Enter("CAP", D_STDFUNC, NULLTYPE, S_CAP);
-	(void) Enter("CHR", D_STDFUNC, NULLTYPE, S_CHR);
-	(void) Enter("FLOAT", D_STDFUNC, NULLTYPE, S_FLOAT);
-	(void) Enter("HIGH", D_STDFUNC, NULLTYPE, S_HIGH);
-	(void) Enter("HALT", D_STDPROC, NULLTYPE, S_HALT);
-	(void) Enter("EXCL", D_STDPROC, NULLTYPE, S_EXCL);
-	(void) Enter("DEC", D_STDPROC, NULLTYPE, S_DEC);
-	(void) Enter("INC", D_STDPROC, NULLTYPE, S_INC);
-	(void) Enter("VAL", D_STDFUNC, NULLTYPE, S_VAL);
-	(void) Enter("TRUNC", D_STDFUNC, NULLTYPE, S_TRUNC);
-	(void) Enter("SIZE", D_STDFUNC, NULLTYPE, S_SIZE);
-	(void) Enter("ORD", D_STDFUNC, NULLTYPE, S_ORD);
-	(void) Enter("ODD", D_STDFUNC, NULLTYPE, S_ODD);
-	(void) Enter("MAX", D_STDFUNC, NULLTYPE, S_MAX);
-	(void) Enter("MIN", D_STDFUNC, NULLTYPE, S_MIN);
-	(void) Enter("INCL", D_STDPROC, NULLTYPE, S_INCL);
+	(void) Enter("ABS", D_PROCEDURE, std_type, S_ABS);
+	(void) Enter("CAP", D_PROCEDURE, std_type, S_CAP);
+	(void) Enter("CHR", D_PROCEDURE, std_type, S_CHR);
+	(void) Enter("FLOAT", D_PROCEDURE, std_type, S_FLOAT);
+	(void) Enter("HIGH", D_PROCEDURE, std_type, S_HIGH);
+	(void) Enter("HALT", D_PROCEDURE, std_type, S_HALT);
+	(void) Enter("EXCL", D_PROCEDURE, std_type, S_EXCL);
+	(void) Enter("DEC", D_PROCEDURE, std_type, S_DEC);
+	(void) Enter("INC", D_PROCEDURE, std_type, S_INC);
+	(void) Enter("VAL", D_PROCEDURE, std_type, S_VAL);
+	(void) Enter("TRUNC", D_PROCEDURE, std_type, S_TRUNC);
+	(void) Enter("SIZE", D_PROCEDURE, std_type, S_SIZE);
+	(void) Enter("ORD", D_PROCEDURE, std_type, S_ORD);
+	(void) Enter("ODD", D_PROCEDURE, std_type, S_ODD);
+	(void) Enter("MAX", D_PROCEDURE, std_type, S_MAX);
+	(void) Enter("MIN", D_PROCEDURE, std_type, S_MIN);
+	(void) Enter("INCL", D_PROCEDURE, std_type, S_INCL);
 
 	(void) Enter("CHAR", D_TYPE, char_type, 0);
 	(void) Enter("INTEGER", D_TYPE, int_type, 0);
@@ -195,8 +195,8 @@ END SYSTEM.\n";
 	open_scope(CLOSEDSCOPE, 0);
 	(void) Enter("WORD", D_TYPE, word_type, 0);
 	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
-	(void) Enter("ADR", D_STDFUNC, NULLTYPE, S_ADR);
-	(void) Enter("TSIZE", D_STDFUNC, NULLTYPE, S_TSIZE);
+	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
+	(void) Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
 	if (!InsertText(SYSTEM, strlen(SYSTEM))) {
 		fatal("Could not insert text");
 	}
