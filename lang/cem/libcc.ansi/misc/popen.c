@@ -17,6 +17,9 @@ typedef int wait_arg;
 #include	"../stdio/loc_incl.h"
 
 int _close(int d);
+#if defined(__USG)
+static
+#endif
 int _dup2(int oldd, int newd);		/* not present in System 5 */
 int _execl(const char *name, ... );
 int _fork(void);
@@ -24,7 +27,7 @@ int _pipe(int fildes[2]);
 int _wait(wait_arg *status);
 void _exit(int status);
 
-static int pids[20];
+static int pids[FOPEN_MAX];
 
 FILE *
 popen(const char *command, const char *type)
@@ -89,7 +92,7 @@ static int
 _dup2(int oldd, int newd)
 {
 	int i = 0, fd, tmp;
-	int fdbuf[_NFILES];
+	int fdbuf[FOPEN_MAX];
 
 	/* ignore the error on the close() */
 	tmp = errno; (void) _close(newd); errno = tmp;
