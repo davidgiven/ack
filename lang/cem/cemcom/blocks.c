@@ -5,6 +5,9 @@
 /* $Header$ */
 /*	B L O C K   S T O R I N G   A N D   L O A D I N G	*/
 
+#include	"lint.h"
+#ifndef	LINT
+
 #include <em.h>
 #include <em_reg.h>
 #include "arith.h"
@@ -160,4 +163,6 @@ copy_loop(sz, src, dst)
 	C_asp(word_size);
 }
 #endif STB
+
+#endif	LINT
 

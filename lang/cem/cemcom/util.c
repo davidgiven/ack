@@ -16,6 +16,7 @@
 #include	<alloc.h>
 #include	<em_mes.h>
 
+#include	"lint.h"
 #include	"util.h"
 #include	"use_tmp.h"
 #include	"regcount.h"
@@ -224,6 +225,7 @@ StoreLocal(off, sz)
 	}
 }
 
+#ifndef	LINT
 AddrLocal(off)
 	arith off;
 {
@@ -232,3 +234,4 @@ AddrLocal(off)
 	if (p) p->t_regtype = -1;
 	C_lal(off);
 }
+#endif	LINT

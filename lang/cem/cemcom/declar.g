@@ -6,6 +6,7 @@
 /*	DECLARATION SYNTAX PARSER	*/
 
 {
+#include	"lint.h"
 #include	<alloc.h>
 #include	"nobitfield.h"
 #include	"debug.h"
@@ -24,6 +25,11 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"level.h"
+#ifdef	LINT
+#include	"l_lint.h"
+#include	"l_state.h"
+#endif	LINT
+
 extern char options[];
 }
 
@@ -158,6 +164,9 @@ init_declarator(register struct decspecs *ds;)
 	{
 		reject_params(&Dc);
 		declare_idf(ds, &Dc, level);
+#ifdef	LINT
+		lint_declare_idf(Dc.dc_idf, ds->ds_sc);
+#endif	LINT
 	}
 	[
 		initializer(Dc.dc_idf, ds->ds_sc)
@@ -166,6 +175,9 @@ init_declarator(register struct decspecs *ds;)
 	]
 ]
 	{
+#ifdef	LINT
+		add_auto(Dc.dc_idf);
+#endif	LINT
 		remove_declarator(&Dc);
 	}
 ;
@@ -193,6 +205,9 @@ initializer(struct idf *idf; int sc;)
 		*/
 	]
 	{
+#ifdef	LINT
+		lint_statement();
+#endif	LINT
 		if (globalflag) {
 			struct expr ex;
 			code_declaration(idf, &ex, level, sc);
@@ -208,6 +223,10 @@ initializer(struct idf *idf; int sc;)
 #ifdef	DEBUG
 			print_expr("initializer-expression", expr);
 #endif	DEBUG
+#ifdef	LINT
+			change_state(idf, SET);
+			pre_lint_expr(expr, RVAL, USED);
+#endif	LINT
 			code_declaration(idf, expr, level, sc);
 		}
 		init_idf(idf);

@@ -5,6 +5,9 @@
 /* $Header$ */
 /*	BITFIELD EXPRESSION EVALUATOR	*/
 
+#include	"lint.h"
+#ifndef	LINT
+
 #include	"nobitfield.h"
 
 #ifndef NOBITFIELD
@@ -173,4 +176,6 @@ eval_field(expr, code)
 	}
 }
 #endif NOBITFIELD
+
+#endif	LINT
 

@@ -9,6 +9,7 @@
 #include	<system.h>
 #include	<em.h>
 
+#include	"lint.h"
 #include	"nopp.h"
 #include	"errout.h"
 #include	"debug.h"
@@ -34,6 +35,10 @@
 int err_occurred = 0;
 
 extern char options[];
+#ifdef	LINT
+extern char loptions[];
+#endif	LINT
+
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
 		error()		syntactic and semantic error messages
@@ -109,6 +114,54 @@ expr_warning(va_alist)			/* expr, fmt, args */
 	}
 	va_end(ap);
 }
+
+#ifdef	LINT
+
+/*VARARGS*/
+def_warning(va_alist)			/* def, fmt, args */
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	{
+		register struct def *def = va_arg(ap, struct def *);
+
+		_error(WARNING, def->df_file, def->df_line, ap);
+	}
+	va_end(ap);
+}
+
+
+/*VARARGS*/
+hwarning(va_alist)			/* fmt, args */
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	{
+		if (loptions['h'])
+			_error(WARNING, dot.tk_file, dot.tk_line, ap);
+	}
+	va_end(ap);
+}
+
+/*VARARGS*/
+awarning(va_alist)			/* fmt, args */
+	va_dcl
+{
+	va_list ap;
+
+	va_start(ap);
+	{
+		if (loptions['a'])
+			_error(WARNING, dot.tk_file, dot.tk_line, ap);
+	}
+	va_end(ap);
+}
+
+#endif	LINT
 
 /*VARARGS*/
 lexerror(va_alist)			/* fmt, args */
@@ -186,9 +239,11 @@ _error(class, fn, ln, ap)
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
 	*/
+#ifndef	LINT
 	static char *last_fn = 0;
 	static unsigned int last_ln = 0;
 	static int e_seen = 0;
+#endif	LINT
 	char *remark;
 	char *fmt = va_arg(ap, char *);
 	
@@ -215,7 +270,11 @@ _error(class, fn, ln, ap)
 	/* the remark */
 	switch (class)	{	
 	case WARNING:
+#ifndef	LINT
 		remark = "(warning)";
+#else	LINT
+		remark = 0;
+#endif	LINT
 		break;
 
 	case ERROR:
@@ -233,6 +292,7 @@ _error(class, fn, ln, ap)
 		/*NOTREACHED*/;
 	}
 	
+#ifndef	LINT
 	if (ln == last_ln && fn && last_fn && strcmp(fn, last_fn) == 0)	{
 		/* we've seen this place before */
 		e_seen++;
@@ -249,6 +309,20 @@ _error(class, fn, ln, ap)
 		last_ln = ln;
 		e_seen = 0;
 	}
+#endif	LINT
+
+#ifdef	LINT
+	if (	/* there is a file name */
+		fn
+	&&	/* the file name is global */
+		fn[0] == '/'
+	&&	/* it is not a .c file */
+		strcmp(&fn[strlen(fn)-2], ".c") != 0
+	) {
+		/* we skip this message */
+		return;
+	}
+#endif	LINT
 	
 	if (fn)
 		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);

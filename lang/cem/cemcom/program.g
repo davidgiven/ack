@@ -45,6 +45,7 @@
 %start		If_expr, control_if_expression;
 
 {
+#include	"lint.h"
 #include	"nopp.h"
 #include	"arith.h"
 #include	"LLlex.h"
@@ -56,6 +57,10 @@
 #include	"code.h"
 #include	"expr.h"
 #include	"def.h"
+#ifdef	LINT
+#include	"l_state.h"
+#endif	LINT
+
 #ifndef NOPP
 extern arith ifval;
 #endif NOPP
@@ -121,6 +126,9 @@ external_definition
 		declarator(&Dc)
 		{
 			declare_idf(&Ds, &Dc, level);
+#ifdef	LINT
+			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
+#endif	LINT
 		}
 		[%if (Dc.dc_idf->id_def->df_type->tp_fund == FUNCTION)
 			/*	int i (1) {2, 3}
@@ -156,6 +164,12 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 		{ code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
 	]
 	{
+#ifdef	LINT
+		if (dc->dc_idf->id_def->df_type->tp_fund == FUNCTION)
+			def2decl(ds->ds_sc);
+		if (dc->dc_idf->id_def->df_sc != TYPEDEF)
+			outdef();
+#endif	LINT
 	}
 	[
 		','
@@ -171,6 +185,9 @@ function(struct decspecs *ds; struct declarator *dc;)
 	}
 :
 	{	register struct idf *idf = dc->dc_idf;
+#ifdef	LINT
+		lint_start_function();
+#endif	LINT
 		init_idf(idf);
 		stack_level();		/* L_FORMAL1 declarations */
 		declare_params(dc);
@@ -180,11 +197,23 @@ function(struct decspecs *ds; struct declarator *dc;)
 	declaration*
 	{
 		declare_formals(&fbytes);
+#ifdef	LINT
+		lint_formals();
+#endif	LINT
 	}
 	compound_statement
 	{
 		end_proc(fbytes);
+#ifdef	LINT
+		lint_return_stmt(0);	/* implicit return at end of function */
+#endif	LINT
 		unstack_level();	/* L_FORMAL2 declarations */
+#ifdef	LINT
+		check_args_used();
+#endif	LINT
 		unstack_level();	/* L_FORMAL1 declarations */
+#ifdef	LINT
+		lint_end_function();
+#endif	LINT
 	}
 ;

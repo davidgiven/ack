@@ -5,6 +5,9 @@
 /* $Header$ */
 /*	C O N V E R S I O N - C O D E  G E N E R A T O R	*/
 
+#include	"lint.h"
+#ifndef	LINT
+
 #include	"nofloat.h"
 #include	<em.h>
 #include	"arith.h"
@@ -148,4 +151,6 @@ convtype(tp)
 	}
 	return 0;
 }
+
+#endif	LINT
 

@@ -5,6 +5,7 @@
 /* $Header$ */
 /* MAIN PROGRAM */
 
+#include	"lint.h"
 #include	"nofloat.h"
 #include	<system.h>
 #include	"nopp.h"
@@ -95,6 +96,9 @@ main(argc, argv)
 	inc_max = 10;
 
 	init_pp();	/* initialise the preprocessor macros	*/
+#ifdef	LINT
+	lint_init();
+#endif	LINT
 #endif NOPP
 
 	/*	Note: source file "-" indicates that the source is supplied
@@ -130,7 +134,10 @@ compile(argc, argv)
 	char *argv[];
 {
 	char *result;
+#ifndef	LINT
 	register char *destination = 0;
+#endif	LINT
+
 #ifdef DEBUG
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'] || options['C'];
@@ -139,14 +146,17 @@ compile(argc, argv)
 
 	switch (argc) {
 	case 1:
+#ifndef	LINT
 #ifdef DEBUG
 #ifndef NOPP
 		if (!pp_only)
 #endif NOPP
 #endif
 			fatal("%s: destination file not specified", prog_name);
+#endif	LINT
 		break;
 
+#ifndef	LINT
 	case 2:
 		destination = argv[1];
 		break;
@@ -154,8 +164,14 @@ compile(argc, argv)
 		nmlist = argv[2];
 		destination = argv[1];
 		break;
+#endif	LINT
+
 	default:
+#ifndef	LINT
 		fatal("use: %s source destination [namelist]", prog_name);
+#else	LINT
+		fatal("use: %s source", prog_name);
+#endif	LINT
 		break;
 	}
 
@@ -185,8 +201,11 @@ compile(argc, argv)
 #endif NOPP
 #endif DEBUG
 	{
+#ifndef	LINT
 		init_code(destination && strcmp(destination, "-") != 0 ?
 					destination : 0);
+#endif	LINT
+
 		/* compile the source text			*/
 		C_program();
 

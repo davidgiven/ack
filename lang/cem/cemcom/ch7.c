@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  7 RM	*/
 
+#include	"lint.h"
 #include	"nofloat.h"
 #include	"debug.h"
 #include	"nobitfield.h"
@@ -218,6 +219,10 @@ ch7cast(expp, oper, tp)
 		if (oper != CAST)
 			expr_warning(*expp, "incompatible pointers in %s",
 							symbol2str(oper));
+#ifdef	LINT
+		if (oper == CAST)
+			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
+#endif	LINT
 		(*expp)->ex_type = tp;	/* free conversion */
 	}
 	else

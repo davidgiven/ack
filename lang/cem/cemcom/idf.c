@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
+#include	"lint.h"
 #include	<em_reg.h>
 #include	"nofloat.h"
 #include	"debug.h"
@@ -266,6 +267,22 @@ declare_idf(ds, dc, lvl)
 	}
 #endif
 
+#ifdef	LINT
+	if (	def && def->df_level < lvl
+	&&	!(lvl == L_FORMAL2 || def->df_level == L_UNIVERSAL)
+	) {
+		/*	there is already a definition for this name
+			on a more global level
+		*/
+		warning("%s is already defined as a %s",
+			idf->id_text,
+			def->df_level == L_GLOBAL ? "global" :
+			def->df_level == L_FORMAL2 ? "formal" :
+				"more global local"
+		);
+	}
+#endif	LINT
+
 	if (def && 
 	    ( def->df_level == lvl ||
 	      ( lvl != L_GLOBAL && def->df_level > lvl )
@@ -326,6 +343,11 @@ declare_idf(ds, dc, lvl)
 		newdef->df_sc = sc;
 		newdef->df_file = idf->id_file;
 		newdef->df_line = idf->id_line;
+#ifdef	LINT
+		newdef->df_set = (type->tp_fund == ARRAY);
+		newdef->df_firstbrace = 0;
+#endif	LINT
+
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);

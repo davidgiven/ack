@@ -1,5 +1,5 @@
 !File: lint.h
-#undef	LINT		1	/* if defined, 'lint' is produced	*/
+#define	LINT		1	/* if defined, 'lint' is produced	*/
 
 
 !File: pathlength.h
@@ -78,7 +78,7 @@
 
 
 !File: dataflow.h
-#define DATAFLOW	1	/* produce some compile-time xref	*/
+#undef	DATAFLOW	1	/* produce some compile-time xref	*/
 
 
 !File: debug.h
@@ -86,7 +86,7 @@
 
 
 !File: use_tmp.h
-#define USE_TMP		1	/* collect exa, exp, ina and inp commands
+#undef USE_TMP		1	/* collect exa, exp, ina and inp commands
 					and let them precede the rest of
 					the generated compact code	*/
 

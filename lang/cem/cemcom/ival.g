@@ -6,6 +6,7 @@
 /* CODE FOR THE INITIALISATION OF GLOBAL VARIABLES */
 
 {
+#include	"lint.h"
 #include	"nofloat.h"
 #include	<em.h>
 #include	"debug.h"
@@ -27,6 +28,10 @@
 #include	"noRoption.h"
 #include	"estack.h"
 #include	"code.h"
+#ifdef	LINT
+#include	"l_lint.h"
+#endif	LINT
+
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
 
@@ -48,6 +53,9 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 [
 	assignment_expression(expp)
 		{
+#ifdef	LINT
+			pre_lint_expr(*expp, RVAL, USED);
+#endif	LINT
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
 			if (tpp) {

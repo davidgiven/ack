@@ -5,6 +5,7 @@
 /* $Header$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	"lint.h"
 #include	<alloc.h>
 #include	"nofloat.h"
 #include	"idfsize.h"
@@ -72,6 +73,9 @@ LLlex()
 		ASIDE = 0;
 	}
 	else {		/* read ahead and return the old one	*/
+#ifdef	LINT
+		move_NOT2s();
+#endif	LINT
 		dot = ahead;
 		/*	the following test is performed due to the dual
 			task of LLlex(): it is also called for parsing the
@@ -472,6 +476,10 @@ skipcomment()
 
 	NoUnstack++;
 	LoadChar(c);
+#ifdef	LINT
+	lint_comment(-2);
+	lint_comment(c);
+#endif	LINT
 	do {
 		while (c != '*') {
 			if (class(c) == STNL)
@@ -482,8 +490,14 @@ skipcomment()
 				return;
 			}
 			LoadChar(c);
+#ifdef	LINT
+			lint_comment(c);
+#endif	LINT
 		} /* last Character seen was '*' */
 		LoadChar(c);
+#ifdef	LINT
+		lint_comment(c);
+#endif	LINT
 	} while (c != '/');
 	NoUnstack--;
 }

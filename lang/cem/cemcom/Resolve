@@ -12,7 +12,7 @@ esac
 PW=`pwd`
 options=
 case $1 in
-main|emain)
+main|emain|lnt)
 	target=$PW/$1
 	;;
 omain)

@@ -5,6 +5,7 @@
 /* $Header$ */
 /* EXPRESSION TREE HANDLING */
 
+#include	"lint.h"
 #include	"nofloat.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -181,7 +182,9 @@ idf2expr(expr)
 		expr->ex_type = error_type;
 	}
 	else {
+#ifndef	LINT
 		def->df_used = 1;
+#endif	LINT
 		expr->ex_type = def->df_type;
 		if (expr->ex_type == error_type)
 			expr->ex_flags |= EX_ERROR;
@@ -196,12 +199,14 @@ idf2expr(expr)
 		expr->VL_CLASS = Const;
 		expr->VL_VALUE = def->df_address;
 	}
+#ifndef	LINT
 	else
 	if (def->df_sc == STATIC && def->df_level >= L_LOCAL) {
 		expr->VL_CLASS = Label;
 		expr->VL_LBL = def->df_address;
 		expr->VL_VALUE = (arith)0;
 	}
+#endif	LINT
 	else {
 		expr->VL_CLASS = Name;
 		expr->VL_IDF = idf;

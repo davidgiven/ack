@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
+#include	"lint.h"
 #include	<em.h>
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -29,6 +30,10 @@
 #include	"assert.h"
 #include	"noRoption.h"
 #include	"file_info.h"
+#ifdef	LINT
+#include	"l_lint.h"
+#endif	LINT
+
 label lab_count = 1;
 label datlab_count = 1;
 
@@ -49,6 +54,7 @@ static int	pro_id;
 extern char options[];
 extern char *symbol2str();
 
+#ifndef	LINT
 init_code(dst_file)
 	char *dst_file;
 {
@@ -64,6 +70,8 @@ init_code(dst_file)
 	C_insertpart(tmp_id = C_getid());
 #endif	USE_TMP
 }
+#endif	LINT
+
 static struct string_cst *str_list = 0;
 
 code_string(val, len, dlb)
@@ -262,6 +270,7 @@ end_proc(fbytes)
 	if (return_expr_occurred) C_asp(-func_size);
 	C_df_ilb(return_label);
 	prc_exit();
+#ifndef	LINT
 	if (return_expr_occurred) {
 		if (func_res_label != 0)	{
 			C_lae_dlb(func_res_label, (arith)0);
@@ -273,6 +282,8 @@ end_proc(fbytes)
 			C_ret(func_size);
 	}
 	else	C_ret((arith) 0);
+#endif	LINT
+
 	/* getting the number of "local" bytes is posponed until here,
 	   because copying the function result in "func_res_label" may
 	   need temporaries! However, local_level is now L_FORMAL2, because
@@ -466,6 +477,7 @@ loc_init(expr, id)
 	}
 	else	{	/* not embraced	*/
 		ch7cast(&expr, '=', tp);	/* may modify expr */
+#ifndef	LINT
 		{
 			struct value vl;
 
@@ -475,6 +487,9 @@ loc_init(expr, id)
 			vl.vl_value = (arith)0;
 			store_val(&vl, tp);
 		}
+#else	LINT
+		id->id_def->df_set = 1;
+#endif	LINT
 		free_expression(expr);
 	}
 }
@@ -522,6 +537,9 @@ formal_cvt(df)
 	}
 }
 
+#ifdef	LINT
+/*ARGSUSED*/
+#endif	LINT
 code_expr(expr, val, code, tlbl, flbl)
 	struct expr *expr;
 	label tlbl, flbl;
@@ -530,9 +548,13 @@ code_expr(expr, val, code, tlbl, flbl)
 		generator.  If line number trace is wanted, it generates a
 		lin instruction.  EVAL() is called directly.
 	*/
+#ifndef	LINT
 	if (! options['L'])	/* profiling	*/
 		C_lin((arith)(expr->ex_line));
 	EVAL(expr, val, code, tlbl, flbl);
+#else	LINT
+	pre_lint_expr(expr, RVAL, code ? USED : IGNORED);
+#endif	LINT
 }
 
 /*	The FOR/WHILE/DO/SWITCH stacking mechanism:

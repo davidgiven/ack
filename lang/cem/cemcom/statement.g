@@ -8,6 +8,7 @@
 {
 #include	<em.h>
 
+#include	"lint.h"
 #include	"debug.h"
 #include	"botch_free.h"
 
@@ -20,6 +21,11 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
+#ifdef	LINT
+#include	"l_lint.h"
+#include	"l_state.h"
+#endif	LINT
+
 extern int level;
 }
 
@@ -31,6 +37,9 @@ extern int level;
 /* 9 */
 statement
 	{
+#ifdef	LINT
+		lint_statement();
+#endif	LINT
 	}
 :
 %if (AHEAD != ':')
@@ -57,12 +66,18 @@ statement
 	BREAK
 	{
 		code_break();
+#ifdef	LINT
+		lint_break_stmt();
+#endif	LINT
 	}
 	';'
 |
 	CONTINUE
 	{
 		code_continue();
+#ifdef	LINT
+		lint_continue_stmt();
+#endif	LINT
 	}
 	';'
 |
@@ -104,6 +119,9 @@ label
 					grz: printf("A labelled statement\n");
 				}
 		*/
+#ifdef	LINT
+		lint_label();
+#endif	LINT
 		define_label(idf);
 		C_df_ilb((label)idf->id_def->df_address);
 	}
@@ -126,6 +144,9 @@ if_statement
 				/*	The comparison has been optimized
 					to a 0 or 1.
 				*/
+#ifdef	LINT
+				hwarning("condition in if is constant");
+#endif	LINT
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_false);
 				}
@@ -136,21 +157,33 @@ if_statement
 				C_df_ilb(l_true);
 			}
 			free_expression(expr);
+#ifdef	LINT
+			start_if_part();
+#endif	LINT
 		}
 	')'
 	statement
 	[%prefer
 		ELSE
 			{
+#ifdef	LINT
+				start_else_part();
+#endif	LINT
 				C_bra(l_end);
 				C_df_ilb(l_false);
 			}
 		statement
 			{	C_df_ilb(l_end);
+#ifdef	LINT
+				end_if_else_stmt();
+#endif	LINT
 			}
 	|
 		empty
 			{	C_df_ilb(l_false);
+#ifdef	LINT
+				end_if_stmt();
+#endif	LINT
 			}
 	]
 ;
@@ -176,10 +209,17 @@ while_statement
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
+#ifdef	LINT
+				start_loop_stmt(WHILE, 1,
+					expr->VL_VALUE != (arith)0);
+#endif	LINT
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_body, l_break);
 				C_df_ilb(l_body);
+#ifdef	LINT
+				start_loop_stmt(WHILE, 0, 0);
+#endif	LINT
 			}
 		}
 	')'
@@ -189,6 +229,9 @@ while_statement
 			C_df_ilb(l_break);
 			unstack_stmt();
 			free_expression(expr);
+#ifdef	LINT
+			end_loop_stmt();
+#endif	LINT
 		}
 ;
 
@@ -202,6 +245,9 @@ do_statement
 	DO
 		{	C_df_ilb(l_body);
 			stack_stmt(l_break, l_continue);
+#ifdef	LINT
+			start_loop_stmt(DO, 1, 1);
+#endif	LINT
 		}
 	statement
 	WHILE
@@ -215,9 +261,15 @@ do_statement
 				if (expr->VL_VALUE == (arith)1)	{
 					C_bra(l_body);
 				}
+#ifdef	LINT
+				end_do_stmt(1, expr->VL_VALUE != (arith)0);
+#endif	LINT
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_body, l_break);
+#ifdef	LINT
+				end_do_stmt(0, 0);
+#endif	LINT
 			}
 			C_df_ilb(l_break);
 		}
@@ -235,6 +287,9 @@ for_statement
 		label l_continue = text_label();
 		label l_body = text_label();
 		label l_test = text_label();
+#ifdef	LINT
+		int const = 1, cond = 1;	/* the default case */
+#endif	LINT
 	}
 :
 	FOR
@@ -257,10 +312,17 @@ for_statement
 				if (e_test->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
+#ifdef	LINT
+				const = 1,
+					cond = e_test->VL_VALUE != (arith)0;
+#endif	LINT
 			}
 			else	{
 				code_expr(e_test, RVAL, TRUE, l_body, l_break);
 				C_df_ilb(l_body);
+#ifdef	LINT
+				const = 0, cond = 0;
+#endif	LINT
 			}
 		}
 	]?
@@ -268,9 +330,15 @@ for_statement
 	expression(&e_incr)?
 	')'
 		{
+#ifdef	LINT
+			start_loop_stmt(FOR, const, cond);
+#endif	LINT
 		}
 	statement
 		{
+#ifdef	LINT
+			end_loop_stmt();
+#endif	LINT
 			C_df_ilb(l_continue);
 			if (e_incr)
 				code_expr(e_incr, RVAL, FALSE,
@@ -294,10 +362,22 @@ switch_statement
 	expression(&expr)
 		{
 			code_startswitch(&expr);
+#ifdef	LINT
+			start_switch_part();
+			/* the following is a trick to detect a constant
+			 * expression in a switch
+			 */
+			opnd2test(&expr, SWITCH);
+			if (is_cp_cst(expr))
+				hwarning("switch value is constant");
+#endif	LINT
 		}
 	')'
 	statement
 		{
+#ifdef	LINT
+			end_switch_stmt();
+#endif	LINT
 			code_endswitch();
 			free_expression(expr);
 		}
@@ -311,6 +391,9 @@ case_statement
 	CASE
 	constant_expression(&expr)
 		{
+#ifdef	LINT
+			lint_case_stmt(0);
+#endif	LINT
 			code_case(expr);
 			free_expression(expr);
 		}
@@ -322,6 +405,9 @@ default_statement
 :
 	DEFAULT
 		{
+#ifdef	LINT
+			lint_case_stmt(1);
+#endif	LINT
 			code_default();
 		}
 	':'
@@ -336,13 +422,23 @@ return_statement
 	[
 		expression(&expr)
 		{
+#ifdef	LINT
+			lint_ret_conv(expr->ex_type);
+#endif	LINT
+
 			do_return_expr(expr);
 			free_expression(expr);
+#ifdef	LINT
+			lint_return_stmt(1);
+#endif	LINT
 		}
 	|
 		empty
 		{
 			do_return();
+#ifdef	LINT
+			lint_return_stmt(0);
+#endif	LINT
 		}
 	]
 	';'
@@ -358,6 +454,9 @@ jump
 		{
 			apply_label(idf);
 			C_bra((label)idf->id_def->df_address);
+#ifdef	LINT
+			lint_jump_stmt(idf);
+#endif	LINT
 		}
 ;
 

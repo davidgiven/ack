@@ -6,6 +6,7 @@
 /*	EXPRESSION SYNTAX PARSER	*/
 
 {
+#include	"lint.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"type.h"
@@ -207,6 +208,10 @@ conditional_expression(struct expr **expp;)
 #endif
 			ch7bin(&e1, ':', e2);
 			opnd2test(expp, '?');
+#ifdef	LINT
+			if (is_cp_cst(*expp))
+				hwarning("condition in ?: is constant");
+#endif	LINT
 			ch7bin(expp, '?', e1);
 		}
 	]?

@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
+#include	"lint.h"
 #include	"nofloat.h"
 #include	<system.h>
 #include	<em.h>
@@ -51,6 +52,9 @@ stack_level()	{
 	stl->sl_level = ++level;
 	stl->sl_max_block = loclev->sl_max_block;
 	local_level = stl;
+#ifdef	LINT
+	lint_start_local();
+#endif	LINT
 }
 
 stack_idf(idf, stl)
@@ -95,6 +99,10 @@ unstack_level()
 	if (options['t'])
 		dumpidftab("before unstackidfs", 0);
 #endif	DEBUG
+
+#ifdef	LINT
+	lint_local_level(local_level);
+#endif	LINT
 
 	/*	The implementation below is more careful than strictly
 		necessary. Optimists may optimize it afterwards.
@@ -167,6 +175,10 @@ unstack_world()
 		are not and have to be encoded at this moment.
 	*/
 	register struct stack_entry *se = local_level->sl_entry;
+
+#ifdef	LINT
+	lint_global_level(local_level);
+#endif	LINT
 
 	open_name_list();
 

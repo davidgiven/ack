@@ -1,0 +1,31 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+/*	Lint output definition	*/
+
+struct tp_entry {
+	struct tp_entry *next;
+	struct type *te_type;
+	int te_class;			/* for constant parameters */
+	arith te_value;
+};
+
+/* ALLOCDEF "tp_entry" 10 */
+
+struct outdef {
+	char od_class;
+	int od_statnr;
+	char *od_name;
+	char *od_file;
+	unsigned int od_line;
+	int od_nrargs;
+	struct tp_entry *od_entry;	/* a list of the types of the
+					 * formal parameters */
+	int od_valreturned;
+		/* NOVALRETURNED, VALRETURNED, NORETURN; see l_lint.h */
+	int od_valused;
+		/* USED, IGNORED, SET, VOIDED; see l_lint.h */
+	struct type *od_type;
+};

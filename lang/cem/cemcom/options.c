@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	U S E R   O P T I O N - H A N D L I N G		*/
 
+#include	"lint.h"
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"nofloat.h"
@@ -29,6 +30,10 @@ extern int inc_total;
 #endif NOPP
 
 char options[128];			/* one for every char	*/
+#ifdef	LINT
+char loptions[128];			/* one for every char	*/
+#endif	LINT
+
 extern int idfsize;
 
 static int txt2int();
@@ -45,13 +50,18 @@ next_option:			/* to allow combined one-char options */
 		break;
 
 	default:
+#ifndef	LINT
 		fatal("illegal option: %c", opt);
+#else	LINT
+		warning("illegal option: %c", opt);
+#endif	LINT
 		break;
 
 	case '-':
 		options[*text++] = 1;	/* flags, debug options etc.	*/
 		goto next_option;
 
+#ifndef	LINT
 #ifdef	DATAFLOW
 	case 'd':
 #endif	DATAFLOW
@@ -59,16 +69,28 @@ next_option:			/* to allow combined one-char options */
 	case 'L' :			/* no fil/lin */
 	case 'n':			/* use no registers */
 	case 'w':			/* no warnings will be given */
-#ifndef	NOROPTION
-	case 'R':			/* strict version */
-#endif
 		options[opt] = 1;
 		goto next_option;
-#ifdef	NOROPTION
-	case 'R':
-		warning("-R option not implemented");
+#endif	LINT
+
+#ifdef	LINT
+	case 'h':	/* heuristic tests */
+	case 'v':	/* no complaints about unused arguments */
+	case 'a':	/* check long->int int->long conversions */
+	case 'b':	/* don't report unreachable break-statements */
+	case 'x':	/* complain about unused extern declared variables */
+	case 'u':	/* no "used but not defined"; for pass 2 */
+		loptions[opt] = 1;
 		goto next_option;
-#endif
+#endif	LINT
+
+	case 'R':			/* strict version */
+#ifndef	NOROPTION
+		options[opt] = 1;
+#else	NOROPTION
+		warning("-R option not implemented");
+#endif	NOROPTION
+		goto next_option;
 
 #ifdef	___XXX___
 deleted, is now a debug-flag
@@ -180,6 +202,14 @@ deleted, is now a debug-flag
 		break;
 #endif ___XXX___
 
+#ifdef	LINT
+	case 'S' : {		/* -Sint :	static scope number for lint */
+		extern int stat_number;
+		stat_number = txt2int(&text);
+		break;
+	}
+#endif	LINT
+
 	case 'T' : {
 #ifdef USE_TMP
 		extern char *C_tmpdir;
@@ -209,6 +239,7 @@ deleted, is now a debug-flag
 		break;
 	}
 
+#ifndef	LINT
 	case 'V' :	/* set object sizes and alignment requirements	*/
 #ifdef NOCROSS
 		warning("-V option ignored");
@@ -294,6 +325,7 @@ deleted, is now a debug-flag
 		break;
 	}
 #endif NOCROSS
+#endif	LINT
 	}
 }
 

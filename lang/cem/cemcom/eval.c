@@ -5,6 +5,9 @@
 /* $Header$ */
 /* EXPRESSION-CODE GENERATOR */
 
+#include	"lint.h"
+#ifndef	LINT
+
 #include	"nofloat.h"
 #include	<em.h>
 #include	<em_reg.h>
@@ -968,4 +971,6 @@ load_cst(val, siz)
 		C_loi(siz);
 	}
 }
+
+#endif	LINT
 
