@@ -586,9 +586,8 @@ ch_array(tpp, ex)
 		if (length == dim + 1) {
 			    expr_warning(ex, "array is not null-terminated");
 		} else
-#else
-		if (length > dim + 1) {
 #endif
+		if (length > dim + 1) {
 			expr_strict(ex, "too many initialisers");
 		}
 		length = dim;
