@@ -522,6 +522,9 @@ cstcall(expp, call)
 	default:
 		crash("(cstcall)");
 	}
+	expp->nd_right = 0;		/* don't deallocate, for further
+					   argument checking
+					*/
 	FreeLR(expp);
 }
 

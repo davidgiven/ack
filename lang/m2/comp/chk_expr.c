@@ -1200,6 +1200,17 @@ ChkStandard(expp)
 				  "%s on conformant array",
 				  expp->nd_left->nd_def->df_idf->id_text);
 #endif
+#ifndef STRICT_3RD_ED
+		if (! options['3'] && edf->df_value.df_stdname == S_TSIZE) {
+			if (arg->nd_right) {
+				node_warning(arg->nd_right,
+					     W_OLDFASHIONED,
+					     "TSIZE with multiple parameters, only first parameter used");
+				FreeNode(arg->nd_right);
+				arg->nd_right = 0;
+			}
+		}
+#endif
 		break;
 
 	case S_TRUNCD:
