@@ -23,7 +23,7 @@ del	= 0177
 	blt	1f
 	sub	#1,d0
 	bgt	3b
-	clr.b	(a1)
+	clr.b	(a0)
 2:
 	move.l	d2,-(sp)
 	pea	fmt
