@@ -1,5 +1,14 @@
 THE Z80 BACK END TABLE
 
+INTRODUCTION
+
+This table was written to make it run, not to make it clever!
+The effect is, that the table written for the intel 8080, 
+which was made very clever runs faster and requiers less space!!
+So, for anyone to run programs on a z80 machine:
+You could try to make the table as clever as the one for the i80,
+or you could run the i80 table, for that can run on every z80 too.
+
 IMPLEMENTATION
 
 It will not be possible to run the entire Amsterdam Compiler Kit on a
