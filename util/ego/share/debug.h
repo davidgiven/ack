@@ -12,7 +12,7 @@ extern int		linecount;	/* # lines in this file */
 extern bool		verbose_flag;  /* generate verbose output ? */
 
 /* VARARGS 1 */
-error();
+extern error();
 
 
 #ifdef TRACE
