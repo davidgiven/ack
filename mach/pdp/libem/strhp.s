@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .sect .text
 .define strhp~
-.extern fat~,reghp~,_end
+.extern trp~,reghp~,_end
 ! $Header$
 indir	= 0
 
@@ -21,6 +21,7 @@ strhp~:
 	bcs	3f
 1:	jmp	(r0)
 3:	mov	$EHEAP,-(sp)
-	jmp	fat~
+	jsr	trp~
+	jmp	(r0)
 .sect .data
 2:	sys	break; .data2 _end

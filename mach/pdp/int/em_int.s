@@ -2964,8 +2964,10 @@ str.s0:	clr	r0;		bisb	(pcx)+,r0
 	blos	5f;		add	$unixextra,sybreak+2;
 	sys	indir;sybreak		/ ask for more core
 	jec	5b;
+1:
 	jsr	pc,e.heap;		   / core claim	failed
-5:	cmp	r1,globmax;	jlo	e.heap;
+	next
+5:	cmp	r1,globmax;	jlo	1b
 	mov	r1,hp;		next
 
 /------------------------------------------------------------------------------
@@ -3161,7 +3163,7 @@ e.badmon:	mov	$EBADMON,-(sp);	       br      error
 e.case:		mov	$ECASE,-(sp);	       br      fatal
 e.oddz:		mov	$EODDZ,-(sp);	       br      fatal
 e.illins:	mov	$EILLINS,-(sp);	       br      fatal
-e.heap:		mov	$EHEAP,-(sp);	       br      fatal
+e.heap:		mov	$EHEAP,-(sp);	       br      error
 e.memflt:	mov	$EMEMFLT,-(sp);	       br      fatal
 e.badgto:	mov	$EBADGTO,-(sp);		br	error
 /------------------------------------------------------------------------------
