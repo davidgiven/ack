@@ -123,13 +123,18 @@ char *nmlist = 0;
 
 #ifdef USE_TMP
 extern char *mktemp();		/* library routine	*/
-static char tmpname[] = "/tmp/Cem.XXXXXX";
+char *tmpfdir = "/tmp";		/* where to keep the temporary file */
+static char *tmpfname = "/Cem.XXXXXX";
 char *tmpfile = 0;
 #endif USE_TMP
 
 compile(argc, argv)
 	char *argv[];
 {
+#ifdef USE_TMP
+	char tmpf[256];
+#endif
+
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'];
 #endif NOPP
@@ -155,8 +160,11 @@ compile(argc, argv)
 	}
 
 #ifdef USE_TMP
-	tmpfile = mktemp(tmpname);
+	strcpy(tmpf, tmpfdir);
+	strcat(tmpf, tmpfname);
+	tmpfile = mktemp(tmpf);
 #endif USE_TMP
+
 	if (strcmp(destination, "-") == 0)
 		destination = 0;
 	if (!InsertFile(source, (char **) 0)) /* read the source file	*/

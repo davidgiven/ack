@@ -12,6 +12,7 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"storage.h"
+#include	"use_tmp.h"
 
 #ifndef NOPP
 extern char *inctable[MAXINCL];
@@ -20,6 +21,7 @@ extern int inc_pos;
 
 extern char options[];
 extern int idfsize;
+extern char *tmpfdir;	/* main.c */
 
 int txt2int();
 
@@ -130,6 +132,17 @@ do_option(text)
 #endif NOPP
 		break;
 
+#ifdef USE_TMP
+	case 'T' :
+		if (*text)
+			tmpfdir = text;
+		else
+			tmpfdir = ".";
+#else USE_TMP
+		warning("-T option ignored");
+#endif USE_TMP
+		break;
+		
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
 		struct idf *idef;
