@@ -7,9 +7,6 @@
 #include	<stdio.h>
 #include	<signal.h>
 #if	defined(__BSD4_2)
-#if	_EM_WSIZE != 4
-#error	union wait is too small
-#endif
 union wait {
 	int	w_status;
 };
