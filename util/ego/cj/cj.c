@@ -83,7 +83,9 @@ STATIC line_p last_mnem(b)
 	register line_p l;
 
 	for (l = b->b_start; l->l_next != (line_p) 0; l = l->l_next);
-	while (INSTR(l) < sp_fmnem || INSTR(l) > sp_lmnem) l = PREV(l);
+	while (l != (line_p) 0 && (INSTR(l) < sp_fmnem || INSTR(l) > sp_lmnem)) {
+		l = PREV(l);
+	}
 	return l;
 }
 
@@ -205,6 +207,7 @@ STATIC bool try_tail(b1,b2)
 	if (b1->b_start == (line_p) 0 || b2->b_start == (line_p) 0) return FALSE;
 	l1 = last_mnem(b1);
 	l2 = last_mnem(b2);
+	if (l1 == (line_p) 0 || l2 == (line_p) 0) return FALSE;
 	/* printf("consider:\n"); showinstr(l1); showinstr(l2); */
 	if (INSTR(l1) == op_bra) {
 		b = b1;
