@@ -1,6 +1,7 @@
 # $Header$
 
 install:
+	-rm -f ../../bin/march
 	cp march.sh ../../bin/march
 
 clean:
