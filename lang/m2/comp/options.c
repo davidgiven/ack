@@ -41,7 +41,6 @@ DoOption(text)
 
 	case 'L':	/* no fil/lin */
 	case 'R':	/* no range checks */
-	case 'p':	/* call procentry/procexit */
 	case 'n':	/* no register messages */
 	case 'x':	/* every name global */
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
