@@ -96,7 +96,7 @@ changed.
 Include files needed by modules
 in the C library from lang/cem/libcc.
 Especially needed for "stdio".
-.IP "inlude/_tail_mon"
+.IP "include/_tail_mon"
 .br
 More or less system independent include files needed by modules
 in the library lang/cem/libcc/mon.
@@ -732,7 +732,8 @@ heavily used.
 Renaming of the programs linked to \fIack\fP will not always
 produce the desired result.
 This program uses its call name as an argument.
-Any call name not being \fIcc\fP, \fIacc\fP, \fIabc\fP, \fIpc\fP or \fIapc\fP will be
+Any call name not being \fIcc\fP, \fIacc\fP, \fIabc\fP, \fIpc\fP,
+\fIocm\fP, \fIm2\fP, or \fIapc\fP will be
 interpreted as the name of a 'machine description' and the
 program will try to find a description file with that name.
 The installation process will only touch the utilities in the Kit's bin
