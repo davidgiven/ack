@@ -1215,7 +1215,8 @@ rmu !defined($1) | source1or2or4 |
 			move(%[1],R0)
 			"jsb\t.rmu"
 			erase(R0)			|	| |
-slu		| |					|	| sli $1 |
+slu		| |					| | sli $1 |
+loc slu		| |					| | loc $1 sli $2 |
 sru $1==4	| source4 source4 |
 			allocate(%[1],REG,QREG)
 			"mnegl\t%[1],%[a]"
