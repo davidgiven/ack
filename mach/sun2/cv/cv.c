@@ -237,8 +237,6 @@ main(argc, argv)
 	if (rom_in_data && magic == ZMAGIC) {
 		lseek(output,textsize,0);
 	}
-	else if (! unresolved)
-		lseek(output, (long) TOT_HDRSIZE + (outsect[ROMSG].os_base-outsect[TEXTSG].os_base), 0);
 	emits(&outsect[ROMSG]) ;
 	if (!rom_in_data && magic == ZMAGIC) {
 		lseek(output,textsize,0);
