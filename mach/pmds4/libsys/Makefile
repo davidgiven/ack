@@ -1,6 +1,6 @@
 # $Header$
 MACH=pmds4
-all:		libmon_o.a head_em
+all:		libmon_o.a head_em.o
 
 install: 	all
 		../../install head_em.o head_em
@@ -19,7 +19,7 @@ head_em.o:	head_em.s
 		$(MACH) -I../../../h -c head_em.s
 
 clean:
-		rm -f *.o
+		rm -f *.o libmon_o.a
 
 opr :
 		make pr | opr
