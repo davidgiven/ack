@@ -45,25 +45,25 @@ asin_acos(x, cosfl)
 			errno = EDOM;
 			return 0;
 		}
-		g = 0.5 - 0.5 * y;
-		y = - sqrt(g);
-		y += y;
+		g = 0.5 - 0.5 * x;
+		x = - sqrt(g);
+		x += x;
 	}
 	else {
 		/* ??? avoid underflow ??? */
-		g = y * y;
+		g = x * x;
 	}
-	y += y * g * POLYNOM4(g, x) / POLYNOM5(g, y);
+	x += x * g * POLYNOM4(g, p) / POLYNOM5(g, q);
 	if (i == 1) {
 		if (cosfl == 0 || ! negative) {
-			y = (y + M_PI_4) + M_PI_4;
+			x = (x + M_PI_4) + M_PI_4;
 		}
 		else if (cosfl && negative) {
-			y = (y + M_PI_2) + M_PI_2;
+			x = (x + M_PI_2) + M_PI_2;
 		}
 	}
-	if (! cosfl && negative) y = -y;
-	return y;
+	if (! cosfl && negative) x = -x;
+	return x;
 }
 
 double

@@ -68,6 +68,6 @@ tan(x)
 	y = x * x;
 	x += x * y * POLYNOM2(y, p+1);
 	y = POLYNOM4(y, q);
-	if (neg) x = -x;
+	if (negative) x = -x;
 	return invert ? -y/x : x/y;
 }
