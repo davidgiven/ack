@@ -100,9 +100,9 @@ readfile(fd, fn, size, pbuf)
 	register File *fd;
 	char *fn;		/* file name */
 	register long *size;
-	extern long sys_filesize();
 	char **pbuf;		/* output parameter */
 {
+	extern long sys_filesize();
 	int rsize;
 
 	if (
@@ -296,7 +296,6 @@ InsertFile(filnam, table, result)
 	}
 
 	if (fd) {
-		struct buffer_header *push_bh();
 		register struct buffer_header *bh = push_bh();
 
 		if (!bh) {
@@ -331,7 +330,6 @@ int
 InsertText(text, length)
 	char *text;
 {
-	struct buffer_header *push_bh();
 	register struct buffer_header *bh = push_bh();
 
 	if (!bh) return 0;
