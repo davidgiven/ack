@@ -23,8 +23,8 @@ hash(string) char *string; {
 
 	if (strcmp(string,"ANY") == 0) return 128;
 	for (sum=i=0,p=string;*p;i += 3)
-		sum += (*p++)<<(i&07);
-	return sum % 127;
+		sum += (*p++)<<(i&03);
+	return sum % 128;
 }
 
 
