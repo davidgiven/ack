@@ -528,7 +528,7 @@ sti $1>4	| X_BXREG |
 */
 sts $1==2	| X_CXREG X_BXREG |
 			remove(ALL)
-			"call .sti"
+			"call .sts"
 			erase(%[1]) erase(%[2]) 		|	| |
 sdl		| regorconst regorconst  |  | %[2] %[1]  | stl $1 stl $1+2 |
 ...		| nocoercions: STACK |	| | stl $1 stl $1+2 |
