@@ -1,4 +1,5 @@
-int gtty(fildes,argp)
+int
+gtty(fildes,argp)
 	int fildes ;
 	char *argp ;
 {

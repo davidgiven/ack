@@ -1,6 +1,7 @@
-int stty(fildes,argp)
+int
+stty(fildes,argp)
 	int fildes ;
 	char *argp;
 {
-	return ioctl(fildes,/*TIOCSETP*/(('t'<<8)|9),argp) ;
+	return _ioctl(fildes,/*TIOCSETP*/(('t'<<8)|9),argp) ;
 }
