@@ -18,7 +18,7 @@ fatal:
 	pushl	*RR14, saveret
 	calr	trp
 	push	*RR14, $1
-	calr	__exit
+	jr	EXIT
 	!NOTREACHED
 
 trp:
@@ -54,7 +54,7 @@ trp:
 	push	*RR14, $err
 	calr	printf
 	push	*RR14, $1
-	calr	__exit
+	jr	EXIT
 	!NOTREACHED
 .sect .data
 err:	.asciz	"trap error %d\n"
