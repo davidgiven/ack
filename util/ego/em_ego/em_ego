@@ -3,6 +3,7 @@ DDUMP=$TMP.dd.$$
 PDUMP=$TMP.pd.$$
 PHASES=''
 FLAGS=''
+LEVEL=xxx
 EM=$1
 shift
 
@@ -26,12 +27,18 @@ do
 	-SP)	PHASES="$PHASES sp " ; continue;;
 	-BO)	PHASES="$PHASES bo " ; continue;;
 	-CJ)	PHASES="$PHASES cj " ; continue;;
+	-O*)	LEVEL=$A ; continue;;
 	-*)	FLAGS="$FLAGS $A"; continue;;
 	esac
 done
 if test "$PHASES"
 then :
-else PHASES='cj bo sp '
+else
+	case $LEVEL in
+	-O2|xxx)PHASES='cj bo sp ' ;;
+	-O3)	PHASES='cs sr cj bo sp ud lv ra ' ;;
+	*)	PHASES='il cf caopt ic cf cs sr cj bo sp ud lv ra ' ;;
+	esac
 fi
 PASSES="ic cf $PHASES ca"
 OUTFILES="$PDUMP $DDUMP"
