@@ -325,7 +325,7 @@ STATIC bool is_dispensable(callee,ccf)
 	    (complete_program || (callee->p_flags1 & PF_EXTERNAL) == 0) &&
 	    (callee->p_flags1 & PF_LPI) == 0) {
 		DISPENSABLE(callee);
-		OUTTRACE("procedure %d can be removed",callee->p_id);
+		OUTVERBOSE("dispensable: procedure %d can be removed",callee->p_id);
 #ifdef VERBOSE
 		Spremoved++;
 #endif
@@ -473,7 +473,7 @@ STATIC singles(cals)
 				EVER_EXPANDED(find_origin(c));
 				DISPENSABLE(c->cl_proc);
 				CHANGED(c->cl_caller);
-				OUTTRACE("procedure %d can be removed",
+				OUTVERBOSE("singles: procedure %d can be removed",
 				  c->cl_proc->p_id);
 #ifdef VERBOSE
 				  Spremoved++;

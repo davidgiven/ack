@@ -83,7 +83,7 @@ pass1(lnam,bnam,cnam)
 			remunit(LDATA,(proc_p) 0,l);
 			continue;
 		}
-		/* OUTTRACE("flow graph of proc %d read",curproc->p_id); */
+		OUTTRACE("flow graph of proc %d read",curproc->p_id);
 		assert(INSTR(g->b_start) == ps_pro);
 		curproc->p_start = g;
 		curproc->P_LADDR = laddr;
@@ -97,10 +97,10 @@ pass1(lnam,bnam,cnam)
 		}
 		calnr = 0;
 		anal_proc(curproc,cf,ccf);
-		/* OUTTRACE("proc %d processed",curproc->p_id); */
+		OUTTRACE("proc %d processed",curproc->p_id);
 		remunit(LTEXT,curproc,(line_p) 0);
 		/* remove control flow graph + text */
-		/* OUTTRACE("graph of proc %d removed",curproc->p_id); */
+		OUTTRACE("graph of proc %d removed",curproc->p_id);
 		Ldeleteset(mesregs);
 		mesregs = Lempty_set();
 	}
