@@ -37,6 +37,9 @@ pr:
 opr:
 	echo "nothing printed"
 
+clean:
+	rm -f *.llb Out
+
 c.llb:	$(SRC_DIR)/unix7.c
 	cp $(SRC_DIR)/c.llb c.llb
 	$(LINT) -Lc.llb $(SRC_DIR)/unix7.c
