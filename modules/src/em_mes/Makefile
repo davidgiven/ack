@@ -10,7 +10,7 @@ INCLUDES=-I$(EMHOME)/h -I$(HDIR)
 CFLAGS = $(INCLUDES) -O
 AR = ar
 
-all:		libem_mes.a libem_mesO.a libem_mesCE.a
+all:		libem_mes.a # libem_mesCE.a libem_mesO.a 
 
 libem_mes.a:	$(OBJ)
 		rm -f libem_mes.a
@@ -33,12 +33,12 @@ libem_mesCE.a:
 
 install:	all
 		$(INSTALL) lib/libem_mes.a
-		$(INSTALL) lib/libem_mesO.a
+		# $(INSTALL) lib/libem_mesO.a
 		$(INSTALL) man/em_mes.3
 
 cmp:		all
 		$(COMPARE) lib/libem_mes.a
-		$(COMPARE) lib/libem_mesO.a
+		# $(COMPARE) lib/libem_mesO.a
 		$(COMPARE) man/em_mes.3
 
 pr:
