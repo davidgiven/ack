@@ -1324,69 +1324,20 @@ with const4+fitcon GENREG		yields {imS, %2, "LSR", %1.num}
  *									*
  ************************************************************************/
 
- pat adf $1==8
- with STACK
- kills ALL
- leaving cal ".adf8" asp 16 lfr 4 loi 8
- pat adf $1==4
- with STACK
- kills ALL
- leaving cal ".adf4" asp 8 lfr 4
-
- pat sbf $1==8
- with STACK
- kills ALL
- leaving cal ".sbf8" asp 16 lfr 4 loi 8
- pat sbf $1==4
- with STACK
- kills ALL
- leaving cal ".sbf4" asp 8 lfr 4
-
- pat mlf $1==8
- with STACK
- kills ALL
- leaving cal ".mlf8" asp 16 lfr 4 loi 8
- pat mlf $1==4
- with STACK
- kills ALL
- leaving cal ".mlf4" asp 8 lfr 4
-
- pat dvf $1==8
- with STACK
- kills ALL
- leaving cal ".dvf8" asp 8
- pat dvf $1==4
- with STACK
- kills ALL
- leaving cal ".dvf4" asp 4
-
- pat ngf $1==8
- with STACK
- kills ALL
- leaving cal ".ngf8"
- pat ngf $1==4
- with STACK
- kills ALL
- leaving cal ".ngf4"
-
- pat fif $1==8
- with STACK
- kills ALL
- leaving cal ".fif8"
- pat fif $1==4
- with STACK
- kills ALL
- leaving cal ".fif4"
-
-/* the next two need a 4 byte hole on the stack */
- pat ldl fef $2==8
- with STACK
- kills ALL
- leaving loc 0 ldl $1 cal ".fef8"
- pat lol fef $2==4
- with STACK
- kills ALL
- leaving loc 0 lol $1 cal ".fef4"
+pat adf $1==4           leaving cal ".adf4" asp 4
+pat adf $1==8           leaving cal ".adf8" asp 8
+pat sbf $1==4           leaving cal ".sbf4" asp 4
+pat sbf $1==8           leaving cal ".sbf8" asp 8
+pat mlf $1==4           leaving cal ".mlf4" asp 4
+pat mlf $1==8           leaving cal ".mlf8" asp 8
+pat dvf $1==4           leaving cal ".dvf4" asp 4
+pat dvf $1==8           leaving cal ".dvf8" asp 8
+pat ngf $1==4           leaving cal ".ngf4"
+pat ngf $1==8           leaving cal ".ngf8"
+pat fif $1==4           leaving lor 1 cal ".fif4" asp 4
+pat fif $1==8           leaving lor 1 cal ".fif8" asp 4
+pat fef $1==4           leaving lor 1 adp 0-4 cal ".fef4"
+pat fef $1==8           leaving lor 1 adp 0-4 cal ".fef8"
 
 /************************************************************************
  *									*
@@ -1495,21 +1446,15 @@ pat loc loc cii ($1 > 2)
 pat cui
 with address +REGcon address + REGcon
 
-pat loc loc cif	$1==4 && $2==4 leaving loc 4 cal ".cif4" asp 8 lfr 4
-pat loc loc cif	$1==4 && $2==8 leaving loc 4 cal ".cif8" asp 8 lfr 4 loi 8
+pat loc loc cif	$1==4 && $2==4 leaving loc 4 cal ".cif4" asp 4
+pat loc loc cif	$1==4 && $2==8 leaving loc 4 cal ".cif8"
 
-pat loc loc cuf	$1==4 && $2==4 leaving loc 4 cal ".cuf4" asp 8 lfr 4
+pat loc loc cuf	$1==4 && $2==4 leaving loc 4 cal ".cuf4" asp 4
 pat loc loc cuf	$1==4 && $2==8 leaving loc 4 cal ".cuf8"
 
-pat loc loc cfi	$1==8 && $2==4
-		leaving loc $1 loc $2 cal ".cfi" asp 16 lfr 4
-pat loc loc cfi $1==4 && $2==4
-		leaving loc $1 loc $2 cal ".cfi" asp 12 lfr 4
+pat loc loc cfi	leaving loc $1 loc $2 cal ".cfi" asp 8+($1-4)
 
-pat loc loc cfu $1==8 && $2==4
-		leaving loc $1 loc $2 cal ".cfu" asp 16 lfr 4
-pat loc loc cfu $1==4 && $2==4
-		leaving loc $1 loc $2 cal ".cfu" asp 12 lfr 4
+pat loc loc cfu	leaving loc $1 loc $2 cal ".cfu" asp 8+($1-4)
 
 pat loc loc cff	$1==8 && $2==4 leaving cal ".cff4" asp 4
 
