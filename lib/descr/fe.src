@@ -19,18 +19,21 @@ name cem
 	from .c
 	to .k
 	program {EM}/lib/em_cemcom
-	mapflag -I* CEM_F={CEM_F?} -I*
-	mapflag -U* CEM_F={CEM_F?} -U*
-	mapflag -D* CEM_F={CEM_F?} -D*
+	mapflag -I* CPP_F={CPP_F?} -I*
+	mapflag -U* CPP_F={CPP_F?} -U*
+	mapflag -D* CPP_F={CPP_F?} -D*
 	mapflag -M* CEM_F={CEM_F?} -M*
 	mapflag -L CEM_F={CEM_F?} -L
 	mapflag -K CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
 	mapflag -p CEM_F={DEM_F?} -p
 	mapflag -V CEM_F={DEM_F?} -V*
-	args {CPP_F?} {CEM_F?} {INCLUDES?} -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
+	args \
+{CPP_F?} {INCLUDES?}  \
+-D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
 -DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
--Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} {CC_ALIGN?} < >
+-Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} {CC_ALIGN?} \
+{CEM_F?} < >
 	rts .c
 	need .c
 	callname acc
