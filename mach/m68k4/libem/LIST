@@ -29,5 +29,4 @@ fat.s
 fakfp.s
 trp.s
 dia.s
-printf.s
 dvu.s
