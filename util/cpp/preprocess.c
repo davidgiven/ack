@@ -9,6 +9,7 @@
 #include "idf.h"
 #include "idfsize.h"
 #include "bits.h"
+#include "line_prefix.h"
 
 char _obuf[OBUFSIZE];
 
@@ -51,8 +52,10 @@ preprocess(fn)
 				char Xbuf[256];
 				register char *p = Xbuf;
 
-				sprint(p, "# %d \"%s\"\n", LineNumber,
-								FileName);
+				sprint(p, "%s %d \"%s\"\n",
+					LINE_PREFIX,
+					LineNumber,
+					FileName);
 				while (*p) {
 					echo(*p++);
 				}
