@@ -309,6 +309,9 @@ loc fef !defined($2):   fef $1
 loc zer !defined($2):   zer $1
 loc zrf !defined($2):   zrf $1
 loc los $2==w:	loi $1
+ldc los $2==2*w && $1<=32767:	loi $1
+ldc sts $2==2*w && $1<=32767:	sti $1
+ldc bls $2==2*w && $1<=32767:	blm $1
 loc sts $2==w:	sti $1
 loc ads $2==w:	adp $1
 ldc ads $2==2*w && sfit($1,8*w):	adp $1
