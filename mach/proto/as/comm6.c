@@ -378,7 +378,7 @@ valu_t valu;
 		outname->on_foff = 0;
 	outname->on_type = type;
 	outname->on_desc = desc;
-	outname->on_valu = valu & ~((0xFFFFFFFF)<<(8*sizeof(valu_t)));
+	outname->on_valu = valu & ~(((0xFFFFFFFF)<<(4*sizeof(valu_t)))<<(4*sizeof(valu_t)));
 }
 
 oflush()
