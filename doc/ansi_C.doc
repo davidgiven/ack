@@ -127,7 +127,7 @@ alignment is passed on to the compiler by the 'ack' program.  When a
 user wants to do this manually, he/she should be prepared for trouble.
 .IP -
 A "plain" 'int' bit-field is taken as a 'signed int'.  This means that
-a field with a size 1 bit can only store the values 0 and -1.
+a field with a size of 1 bit can only store the values 0 and -1.
 .IP -
 The order of allocation of bit-fields is a compile-time option.  By
 default, high-order bits are allocated first.
