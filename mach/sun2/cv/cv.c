@@ -138,8 +138,10 @@ main(argc, argv)
 	if (BADMAGIC(outhead))
 		fatal("Not an ack object file.\n");
 	if (outhead.oh_flags & HF_LINK) {
+		if (! unresolved) {
+			fprintf(stderr,"Warning: contains unresolved references.\n");
+		}
 		unresolved++;
-		fprintf(stderr,"Warning: contains unresolved references.\n");
 	}
 	else if (outhead.oh_nrelo > 0)
 		fprintf(stderr, "Warning: relocation information present.\n");
