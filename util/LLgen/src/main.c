@@ -41,13 +41,13 @@ extern char	*sbrk();
 main(argc,argv) register string	argv[]; {
 	register string arg;
 	string libpath();
-	char	*beg_sbrk;
+	char	*beg_sbrk = 0;
 
 	/* Initialize */
 
 	assval = 0400;
 	/* read options */
-	
+
 	while (argc >= 2 && (arg = argv[1], *arg == '-')) {
 		while (*++arg) {
 			switch(*arg) {
@@ -84,7 +84,7 @@ main(argc,argv) register string	argv[]; {
 					fprintf(stderr,"duplicate -r flag\n");
 					exit(1);
 				}
-			  	rec_file = ++arg;
+				rec_file = ++arg;
 				break;
 			  case 'i':
 			  case 'I':
@@ -92,7 +92,7 @@ main(argc,argv) register string	argv[]; {
 					fprintf(stderr,"duplicate -i flag\n");
 					exit(1);
 				}
-			  	incl_file = ++arg;
+				incl_file = ++arg;
 				break;
 #endif /* not NDEBUG */
 			  case 'x':
@@ -104,8 +104,18 @@ main(argc,argv) register string	argv[]; {
 			  case 'A':
 				ansi_c = 1;
 				continue;
+#ifdef NON_CORRECTING
+			  case 'n':
+			  case 'N':
+				non_corr = 1;
+				continue;
 			  case 's':
 			  case 'S':
+				subpars_sim = 1;
+				continue;
+#endif
+			  case 'g':
+			  case 'G':
 				strip_grammar = 1;
 				continue;
 			  default:
@@ -119,6 +129,13 @@ main(argc,argv) register string	argv[]; {
 	}
 
 	if (verbose) beg_sbrk = sbrk(0);
+
+#ifdef NON_CORRECTING
+	if ((subpars_sim) && (!non_corr)) {
+	    fprintf(stderr,"option -s illegal without -n, turned off\n");
+	    subpars_sim = 0;
+	}
+#endif
 
 	/*
 	 * Now check wether the sets should include nonterminals
@@ -139,6 +156,12 @@ main(argc,argv) register string	argv[]; {
 # ifndef NDEBUG
 	}
 # endif
+#ifdef NON_CORRECTING
+	if (non_corr) {
+	    nc_incl_file = libpath("nc_incl");
+	    nc_rec_file = libpath ("nc_rec");
+	}
+#endif
 	mktemp(f_temp);
 	mktemp(f_pars);
 	if ((fact = fopen(f_temp,"w")) == NULL) {
@@ -154,6 +177,10 @@ main(argc,argv) register string	argv[]; {
 	*/
 	sprintf(f_include, HFILE, prefix ? prefix : "L");
 	sprintf(f_rec, RFILE, prefix ? prefix : "L");
+#ifdef NON_CORRECTING
+	if (non_corr)
+	    sprintf(f_nc, NCFILE, prefix ? prefix : "L");
+#endif
 	setinit(ntneeded);
 	maxnt = &nonterms[nnonterms];
 	maxt = &tokens[ntokens];
@@ -216,7 +243,7 @@ readgrammar(argc,argv) char *argv[]; {
 	/*
 	 * There must be a start symbol!
 	 */
-	if (start == 0) {
+	if (! nerrors && start == 0) {
 		fatal(linecount,"Missing %%start");
 	}
 	if (nerrors) comfatal();
@@ -237,7 +264,7 @@ doparse(p) register p_file p; {
 }
 
 /* VARARGS1 */
-error(lineno,s,t,u) string	s,t,u; {	
+error(lineno,s,t,u) string	s,t,u; {
 	/*
 	 * Just an error message
 	 */
@@ -250,7 +277,7 @@ error(lineno,s,t,u) string	s,t,u; {
 }
 
 /* VARARGS1 */
-warning(lineno,s,t,u) string	s,t,u; {	
+warning(lineno,s,t,u) string	s,t,u; {
 	/*
 	 * Just a warning
 	 */
@@ -292,7 +319,7 @@ copyfile(file) string file; {
 	register FILE	*f;
 
 	if ((f = fopen(file,"r")) == NULL) {
-		fatal(0,"Cannot open libraryfile, call an expert");
+		fatal(0,"Cannot open library file %s, call an expert",file);
 	}
 	while ((c = getc(f)) != EOF) putc(c,fpars);
 	fclose(f);

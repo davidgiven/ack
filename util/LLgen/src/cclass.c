@@ -47,8 +47,8 @@ char c_class[] = {
 	ISKEY,	/* '%' */
 	0,	/* '&' */
 	ISLIT,	/* ''' */
-	ISTOK,	/* '(' */
-	ISTOK,	/* ')' */
+	ISACT,	/* '(' */
+	0,	/* ')' */
 	ISTOK,	/* '*' */
 	ISTOK,	/* '+' */
 	ISTOK,	/* ',' */
@@ -130,9 +130,9 @@ char c_class[] = {
 	ISLET,	/* 'x' */
 	ISLET,	/* 'y' */
 	ISLET,	/* 'z' */
-	ISTOK,	/* '{' */
+	ISACT,	/* '{' */
 	ISTOK,	/* '|' */
-	ISTOK,	/* '}' */
+	0,	/* '}' */
 	0,	/* '~' */
 	0	/* 0177 */
 };

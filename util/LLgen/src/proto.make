@@ -15,11 +15,11 @@ LLOPT= # -vvv -x
 
 OBJECTS = main.$(SUF) gencode.$(SUF) compute.$(SUF) LLgen.$(SUF) tokens.$(SUF) \
 	check.$(SUF) reach.$(SUF) global.$(SUF) name.$(SUF) sets.$(SUF) \
-	Lpars.$(SUF) alloc.$(SUF) machdep.$(SUF) cclass.$(SUF)
+	Lpars.$(SUF) alloc.$(SUF) machdep.$(SUF) cclass.$(SUF) savegram.$(SUF)
 CSRC = $(SRC_DIR)/main.c $(SRC_DIR)/gencode.c $(SRC_DIR)/compute.c \
 	$(SRC_DIR)/check.c $(SRC_DIR)/reach.c $(SRC_DIR)/global.c \
 	$(SRC_DIR)/name.c $(SRC_DIR)/sets.c $(SRC_DIR)/alloc.c \
-	$(SRC_DIR)/machdep.c $(SRC_DIR)/cclass.c
+	$(SRC_DIR)/machdep.c $(SRC_DIR)/cclass.c $(SRC_DIR)/savegram.c
 CFILES = LLgen.c tokens.c Lpars.c $(CSRC)
 GFILES = $(SRC_DIR)/tokens.g $(SRC_DIR)/LLgen.g
 FILES = $(SRC_DIR)/types.h $(SRC_DIR)/extern.h \

@@ -1,0 +1,1791 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include "Lpars.h"
+
+/*
+	compile with -DNOFIRST to disable firstset optimization
+		-DFOLLOW_OPT to enable followset optimization
+		NOTE: Followset optimization is not
+			supported when using -s option of LLgen
+		-DDEBUG to print debug information
+*/
+
+extern int	LLsymb;
+extern int	LLstartsymb;
+
+#if LL_ANSI_C
+void		LLmessage(int);
+#endif
+
+
+struct stacks {
+
+	/* Acces to the stacks is through a 'dynamic array' of pointers
+	 * to the heads. We implemented it this way to save on the number
+	 * of Malloc() calls. nr_heads is the number of heads; heads_buf_size
+	 * is the current size of heads_buf.
+	 */
+
+	int nr_heads;
+	struct stack_elt **heads_buf;
+	int heads_buf_size;
+
+	/* r_rec contains nonterminals already tried to build a new
+	 * stack with, to prevent right-recursive rules making the
+	 * process loop forever
+	 */
+
+	char r_rec[(LLNNONTERMINALS + 7)/8];
+
+	/* join_array contains pointers to already substituted stack
+	 * elements, so that if the same nonterminal turns up again
+	 * we can make a link
+	 */
+
+	struct stack_elt *join_array[LLNNONTERMINALS];
+
+	/* cleanup_buf contains pointerts to elements that can possibly
+	 * be deleted. Again this is implemented as a `growing array'.
+	 * Although it's not so clean to do it this way, it DOES save
+	 * a lot of time, mainly because much less pointer manipulation
+	 * is required, and because it's not necessary to deallocate
+	 * the buffer after each turn. Just set nr_cleanups to 0...
+	 */
+
+	int nr_cleanups;
+	int cleanup_buf_size;
+	struct stack_elt **cleanup_buf;
+
+	/* visited_buf contains pointers to elements whose flags
+	 * need to be cleared
+	 */
+
+	int nr_visited;
+	int visited_buf_size;
+	struct stack_elt **visited_buf;
+
+
+	/* start_seen indicates if the last prediction phase
+	 * has matched the start symbol
+	 */
+
+	int start_seen;
+
+	/* exp_terminals will contain the terminals that are `on top'
+	 * of the prediction graph after a prediction phase
+	 */
+
+	char exp_terminals[LLSETSIZE];
+
+	/* check_run_ok indicates whether a stack element can be deleted
+	 * or not
+	*/
+
+	int check_run_ok;
+};
+
+
+#ifdef DEBUG
+static int allocates = 0;
+static int deallocates = 0;
+static int max_in_use = 0;
+static int edge_allocates = 0;
+static int edge_deallocates = 0;
+static int edge_max_in_use = 0;
+#endif
+
+static int grammar_index = 0;
+
+/* The grammar should only be build the first time we enter the
+ * recovery routine. grammar_read == 0 indicates this has not
+ * been done yet
+ */
+
+static int grammar_read = 0;
+
+/* 'terminals' is an array indexed by the number of a terminal and links
+ * all rules containing this terminal in the RHS
+ */
+
+static struct terminal *terminals;
+
+/* 'nonterminals' is an array indexed by the number of a nonterminal
+ * and contains all rules with this nonterminal in the LHS and links all
+ * rules containing this nonterminal in the RHS
+ */
+
+static struct nonterminal *nonterminals;
+
+
+/* These functions must be called instead of the original functions in
+ * 'malloc.h'. They offer a checking allocation mechanism.
+*/
+#if LL_ANSI_C
+static char *Malloc(unsigned);
+static char *Realloc(char*, unsigned);
+
+#else
+
+static char *Malloc();
+static char *Realloc();
+#endif
+
+
+/* These functions build the grammar */
+#if LL_ANSI_C
+static void init_grammar(void);
+static void build_grammar(void);
+static struct lhs *build_rule(void);
+static struct symbol *build_rhs(struct lhs*);
+static struct symbol *make_link(struct symbol*);
+
+#else
+
+static init_grammar();
+static build_grammar();
+static struct lhs *build_rule();
+static struct symbol *build_rhs();
+static struct symbol *make_link();
+#endif
+
+
+/* These functions operate on the stacks */
+#if LL_ANSI_C
+static int optimize(struct stacks*, struct symbol*, int);
+static void read_token(void);
+static void start_stack(struct stacks*, int, int);
+static void continuation(struct stacks*, int, int);
+static struct stack_elt *push_rule(struct stack_elt*, struct symbol*);
+static void new_head(struct stacks*, struct stack_elt*);
+static void to_delete(struct stacks*, struct stack_elt*);
+static void substitute(struct stacks*, struct stack_elt*, int);
+static int join(struct stacks*, struct stack_elt*, int);
+static int path(struct stack_elt*, struct stack_elt*);
+static int part_of_loop(struct stack_elt*);
+static void generate_heads(struct stacks*, struct stack_elt*, int);
+static void delete(struct stacks*, struct stack_elt*);
+static void hyp_run(struct stack_elt*);
+static void check_run(struct stacks*, struct stack_elt*);
+static struct stack_elt *split(struct stack_elt*);
+static void test(struct stacks*);
+static void dump_stack(struct stack_elt*, int);
+static void clear_flags(struct stack_elt*, char);
+static void clear_gen_flags(struct stacks*);
+static void match_heads(struct stacks*, int);
+static void cleanup(struct stacks*);
+static void initialize(struct stacks*);
+static void calculate(struct stacks*, int);
+static void kill_stack(struct stacks *stack);
+void LLnc_recover(void);
+
+#else
+
+static int optimize();
+static read_token();
+static start_stack();
+static continuation();
+static struct stack_elt *push_rule();
+static new_head();
+static to_delete();
+static substitute();
+static int join();
+static int path();
+static int part_of_loop();
+static generate_heads();
+static delete();
+static hyp_run();
+static check_run();
+static struct stack_elt *split();
+static test();
+static dump_stack();
+static clear_flags();
+static clear_gen_flags();
+static match_heads();
+static cleanup();
+static initialize();
+static calculate();
+static kill_stack();
+LLnc_recover();
+#endif
+
+
+#if LL_ANSI_C
+static char *Malloc(unsigned size)
+#else
+static char *Malloc(size)
+unsigned size;
+#endif
+{
+	char *p;
+
+	if ((p = malloc(size)) == (char *)0) {
+		fprintf(stderr, "fatal error: out of memory\n");
+		exit(1);
+	}
+	return p;
+}
+
+
+#if LL_ANSI_C
+static char *Realloc(char *ptr, unsigned size)
+#else
+static char *Realloc(ptr, size)
+char *ptr;
+unsigned size;
+#endif
+{
+	char *p;
+
+	if ((p = realloc(ptr, size)) == (char *)0) {
+		fprintf(stderr, "fatal error: out of memory\n");
+		exit(1);
+	}
+	return p;
+}
+
+
+#if LL_ANSI_C
+static void init_grammar(void)
+#else
+static init_grammar()
+#endif
+{
+/* Allocate and initialize an array for terminals and nonterminals */
+
+	int i;
+
+	terminals = (struct terminal *)
+		Malloc((unsigned) LLFIRST_NT * sizeof(struct terminal));
+	for (i = 0; i < LLFIRST_NT; i++) {
+		(terminals + i)->link = (struct symbol *)0;
+	}
+
+	nonterminals = (struct nonterminal *)
+		Malloc((unsigned)LLNNONTERMINALS * sizeof(struct nonterminal));
+	for (i = 0; i < LLNNONTERMINALS; i++) {
+		(nonterminals + i)->rule = (struct lhs *)0;
+		(nonterminals + i)->link = (struct symbol *)0;
+	}
+}
+
+
+#if LL_ANSI_C
+static void build_grammar(void)
+#else
+static build_grammar()
+#endif
+{
+/* Build a rule for every nonterminal. The LHS must be saved first because
+ * of the fact that the right side of an assignment statement (in C) will
+ * be evaluated before the left side
+ */
+	int nt, j;
+
+	init_grammar();
+	for (j = 0; j < LLNNONTERMINALS; j++) {
+		nt = LLgrammar[grammar_index];
+		(nonterminals + nt - LLFIRST_NT)->rule = build_rule();
+	}
+}
+
+
+#if LL_ANSI_C
+static struct lhs *build_rule(void)
+#else
+static struct lhs *build_rule()
+#endif
+{
+/* Build LHS and call a funcion to create RHS */
+
+	struct lhs *l;
+	int j;
+
+	l = (struct lhs *)Malloc(sizeof(struct lhs));
+	l->nr = LLgrammar[grammar_index++];
+
+	/* Build first set */
+	for (j = 0; j < LLSETSIZE; j++)	{
+		l->first[j] = LLgrammar[grammar_index++];
+	}
+
+	/* Build follow set */
+	for (j = 0; j < LLSETSIZE; j++)	{
+		l->follow[j] = LLgrammar[grammar_index++];
+	}
+
+	l->empty = LLgrammar[grammar_index++];	/* Can NT produce empty? */
+
+	l->rhs = build_rhs(l);
+
+	return l;
+}
+
+
+#if LL_ANSI_C
+static struct symbol *build_rhs(struct lhs *l)
+#else
+static struct symbol *build_rhs(l)
+struct lhs *l;
+#endif
+{
+/* Build RHS by creating structs for all symbols including ALT and
+ * EORULE. Also call a function for linking same terminals and
+ * nonterminals.
+ */
+
+	struct symbol *r;
+
+	r = (struct symbol *)Malloc(sizeof(struct symbol));
+	if (LLgrammar[grammar_index] == LLALT) {
+		grammar_index++;
+		r->x = LLALT;
+		r->nr = -1;			/* Not applicable */
+		r->link = (struct symbol *)0;	/* Not applicable */
+		r->next = build_rhs(l);
+		r->lhs = l;
+	}
+	else if (LLgrammar[grammar_index] == LLEORULE) {
+		grammar_index++;
+		r->x = LLEORULE;
+		r->nr = -1;			/* Not applicable */
+		r->link = (struct symbol *)0;	/* Not applicable */
+		r->next = (struct symbol *)0;	/* Not applicable */
+		r->lhs = l;
+	}
+	else if (LLgrammar[grammar_index] < LLFIRST_NT) {
+		r->x = LLTERMINAL;
+		r->nr = LLgrammar[grammar_index++];
+		r->link = make_link(r);
+		r->next = build_rhs(l);
+		r->lhs = l;
+	}
+	else {
+		r->x = LLNONTERMINAL;
+		r->nr = LLgrammar[grammar_index++];
+		r->link = make_link(r);
+		r->next = build_rhs(l);
+		r->lhs = l;
+	}
+	return r;
+}
+
+
+#if LL_ANSI_C
+static struct symbol *make_link(struct symbol *r)
+#else
+static struct symbol *make_link(r)
+struct symbol *r;
+#endif
+{
+/* Link same terminals and nonterminals. Every new symbol is appended
+ * in front of the corresponding list for efficiency.
+ */
+
+	struct symbol *tmp;
+
+	if (r->nr < LLFIRST_NT) {
+		/* Terminal array */
+		tmp = (terminals + r->nr)->link;
+		(terminals + r->nr)->link = r;
+	}
+	else {					/* Nonterminal array */
+		tmp = (nonterminals + (r->nr - LLFIRST_NT))->link;
+		(nonterminals + (r->nr - LLFIRST_NT))->link = r;
+	}
+	return tmp;
+}
+
+
+/*****************************************************************************/
+
+
+#if LL_ANSI_C
+static int optimize(struct stacks* stack, struct symbol *symb_ptr, int l_ahead)
+#else
+static int optimize(stack, symb_ptr, l_ahead)
+struct stacks *stack;
+struct symbol *symb_ptr;
+int l_ahead;
+#endif
+
+/* Return 1 if rule symb_ptr can start with terminal l_ahead, else return 0.
+ * The array with expected terminals will also be filled in.
+ */
+{
+	struct lhs *l;
+	int i;
+
+#ifdef NOFIRST
+	return(1);
+#else
+
+	if ((l_ahead <= 0) || (l_ahead == EOFILE)) return 1;
+
+	switch(symb_ptr->x) {
+	case LLTERMINAL:
+		LLPUTIN(stack->exp_terminals, LLindex[symb_ptr->nr]);
+		if (symb_ptr->nr != l_ahead) return 0;
+		else return 1;/*???*/
+
+ 	case LLNONTERMINAL:
+		l = (nonterminals + symb_ptr->nr - LLFIRST_NT)->rule;
+		if (LLIN(l->first, LLindex[l_ahead])) return 1;
+		else if (l->empty) {
+		 	/* Try next symbol */
+			return optimize(stack, symb_ptr->next, l_ahead);
+		}
+		else {
+			for (i = 0; i < LLSETSIZE; i++) {
+				stack->exp_terminals[i] |= (l->first)[i];
+			}
+			return 0;
+		}
+
+	default:
+
+#ifndef FOLLOW_OPT
+		return(1);
+#else
+
+		l = (nonterminals + symb_ptr->lhs->nr - LLFIRST_NT)->rule;
+
+		if (LLIN(l->follow, LLindex[l_ahead])) return 1;
+		else {
+			for (i = 0; i < LLSETSIZE; i++) {
+				stack->exp_terminals[i] |= (l->follow)[i];
+			}
+			return 0;
+		}
+#endif /*FOLLOW_OPT */
+	}
+#endif /* NOFIRST */
+}
+
+
+#if LL_ANSI_C
+static void read_token(void)
+#else
+static read_token()
+#endif
+
+/* Read token and put it in global variable LLsymb, skipping
+ * invalid tokens
+ */
+{
+	LLsymb = LL_LEXI();
+	while (LLindex[LLsymb] < 0) {
+		/* Skip garbage tokens */
+		LLmessage(0);
+		LLsymb = LL_LEXI();
+	}
+}
+
+
+#if LL_ANSI_C
+static void start_stack(struct stacks *stack, int base, int l_ahead)
+#else
+static start_stack(stack, base, l_ahead)
+struct stacks *stack;
+int base, l_ahead;
+#endif
+
+/* Start stack on base symbol base with lookahead l_ahead */
+
+{
+	struct stack_elt *bottom, *top;
+	struct symbol *symb_ptr;
+	int i;
+
+	/* Find first applicable rule */
+	symb_ptr = (terminals + base)->link;
+
+	/* Now try all applicable rules */
+	while (symb_ptr != (struct symbol *)0) {
+
+		/* If the current rule cannot start with l_ahead,
+		 * try the next one
+		 */
+		if (!optimize(stack, symb_ptr->next, l_ahead)) {
+			symb_ptr = symb_ptr->link;
+			continue;
+		}
+
+		if (	(symb_ptr->next->x == LLTERMINAL)
+		||	(symb_ptr->next->x == LLNONTERMINAL)
+		) {
+			/* Allocate an end-of-stack */
+#ifdef DEBUG
+			allocates++;
+			if (allocates - deallocates > max_in_use) {
+				max_in_use = allocates - deallocates;
+			}
+#endif
+			bottom = (struct stack_elt *)
+					Malloc(sizeof(struct stack_elt));
+			bottom->edges = (struct edge *)0;
+			bottom->nr = LLEOSTACK;
+			bottom->flags = 0;
+			bottom->nr_nexts = 0;
+			bottom->ref_count = 0;
+			bottom->hyp_ref_count = -1;
+
+			/* And use the rule to build a stack on it */
+			top = push_rule(bottom, symb_ptr->next);
+
+			/* Remember that we're now trying to match the LHS
+			 * of the used rule
+			 */
+			bottom->matched = symb_ptr->lhs->nr;
+
+			if (top->nr >= LLFIRST_NT) {
+				substitute(stack, top, l_ahead);
+			}
+			else {
+				new_head(stack, top);
+			}
+
+			/* Perhaps this only has produced an empty stack, in
+			 * that case bottom can be deallocated.
+		 	 */
+			if (bottom->ref_count == 0) {
+				to_delete(stack, bottom);
+			}
+		}
+		else {
+			/* base was the last element of the rule, so we
+			 * figure we have matched the LHS of this rule.
+			 */
+			if (symb_ptr->lhs->nr == LLstartsymb) {
+				stack->start_seen = 1;
+			}
+
+			continuation(stack, symb_ptr->lhs->nr, l_ahead);
+		}
+		symb_ptr = symb_ptr->link;
+	}
+
+
+	/* Reinitialize some arrays */
+	for (i = 0; i < (LLNNONTERMINALS + 7)/8; i++) {
+		stack->r_rec[i] = (char) 0;
+	}
+
+	for (i = 0; i < LLNNONTERMINALS; i++) {
+		stack->join_array[i] = (struct stack_elt *)0;
+	}
+
+	/* Delete all HEAD flags */
+	for (i = 0; i < stack->nr_heads; i++) {
+		(*(stack->heads_buf + i))->flags &= ~LLHEAD;
+	}
+
+	/* Delete flags turned on by 'generate_heads()' */
+		clear_gen_flags(stack);
+	/* Try to delete elements on cleanup_buf */
+	cleanup(stack);
+}
+
+
+#if LL_ANSI_C
+static void continuation(struct stacks *stack, int nt, int l_ahead)
+#else
+static continuation(stack, nt, l_ahead)
+struct stacks *stack;
+int nt, l_ahead;
+#endif
+
+/* We have 'eaten' a whole stack, and think we recognized nt. Now
+look for rules that we can proceed with, ie containing nt in the RHS.
+Each rule found will be developed untill a terminal is at the top
+of the stack.*/
+{
+
+	struct symbol *symb_ptr;
+	struct stack_elt *bottom, *top;
+
+	/* If we've already tried this nt, don't do it again.
+	 * Otherwise we may loop forever on right-recursive rules
+	 */
+	if (LLIN(stack->r_rec, nt - LLFIRST_NT)) return;
+
+	/* Mark that we have looked for a continuation for nt */
+	LLPUTIN(stack->r_rec, nt - LLFIRST_NT);
+
+	/* Find first applicable rule */
+	symb_ptr = (nonterminals + nt - LLFIRST_NT)->link;
+
+	/* Try all applicable rules */
+	while (symb_ptr != (struct symbol *)0) {
+
+		/* If the current rule cannot start with l_ahead,
+		 * try the next one
+		 */
+		if (!optimize(stack, symb_ptr->next, l_ahead)) {
+			symb_ptr = symb_ptr->link;
+			continue;
+		}
+
+		if (	(symb_ptr->next->x == LLTERMINAL)
+		||	(symb_ptr->next->x == LLNONTERMINAL)
+		) {
+#ifdef DEBUG
+			allocates++;
+			if (allocates - deallocates > max_in_use) {
+					max_in_use = allocates - deallocates;
+				}
+#endif
+			bottom = (struct stack_elt *)
+					Malloc(sizeof(struct stack_elt));
+			bottom->edges = (struct edge *)0;
+			bottom->nr = LLEOSTACK;
+			bottom->flags = 0;
+			bottom->nr_nexts = 0;
+			bottom->ref_count = 0;
+			bottom->hyp_ref_count = -1;
+
+			/* Use the rule to build a stack on bottom */
+			top = push_rule(bottom, symb_ptr->next);
+
+			/* Remember that we're now trying to match the LHS
+			 * of the used rule
+			 */
+			bottom->matched = symb_ptr->lhs->nr;
+
+			if (top->nr >= LLFIRST_NT) {
+				substitute(stack, top, l_ahead);
+			}
+			else {
+				new_head(stack, top);
+			}
+
+			/* Perhaps this only has produced an empty stack, in
+			 * that case bottom can be deallocated.
+		 	 */
+			if (bottom->ref_count == 0) {
+				delete(stack, bottom);
+			}
+		}
+		else {
+			/* Stack is still empty */
+			if (symb_ptr->lhs->nr == LLstartsymb) {
+				stack->start_seen = 1;
+			}
+
+			continuation(stack, symb_ptr->lhs->nr, l_ahead);
+		}
+
+		symb_ptr = symb_ptr->link;
+	}
+}
+
+
+#if LL_ANSI_C
+static struct stack_elt *push_rule(struct stack_elt *element,
+					struct symbol *symb_ptr)
+#else
+static struct stack_elt *push_rule(element, symb_ptr)
+struct stack_elt *element;
+struct symbol *symb_ptr;
+#endif
+
+/* Append the rule symb_ptr to stack element 'element'. Return a
+ * pointer to the new top of the stack
+ */
+{
+	struct stack_elt *se, *top;
+
+	if (	(symb_ptr->next->x == LLTERMINAL)
+	||	(symb_ptr->next->x == LLNONTERMINAL)
+	) {
+		top = push_rule(element, symb_ptr->next);
+	}
+	else {
+		top = element;
+	}
+
+#ifdef DEBUG
+	allocates++;
+	if (allocates - deallocates > max_in_use) {
+		max_in_use = allocates - deallocates;
+	}
+#endif
+
+	se = (struct stack_elt *)Malloc(sizeof(struct stack_elt));
+	se->flags = 0;
+	se->nr = symb_ptr->nr;
+	se->ref_count = 0;
+	se->hyp_ref_count = -1;
+	se->matched = -1;
+	se->nr_nexts = 1;
+
+#ifdef DEBUG
+	edge_allocates++;
+	if (edge_allocates - edge_deallocates > edge_max_in_use) {
+		edge_max_in_use = edge_allocates - edge_deallocates;
+	}
+#endif
+
+	se->edges = (struct edge *)Malloc(sizeof(struct edge));
+	se->edges->ptr = top;
+	se->edges->flags = 0;
+
+	top->ref_count++;
+	return se;
+}
+
+
+#if LL_ANSI_C
+static void new_head(struct stacks *stack, struct stack_elt *ptr)
+#else
+static new_head(stack, ptr)
+struct stacks *stack;
+struct stack_elt *ptr;
+#endif
+
+/* Make ptr a head of stack */
+{
+
+	/* Is this already a head?*/
+	if (ptr->flags & LLHEAD) return;
+
+	if (stack->heads_buf_size == 0) {
+		stack->heads_buf_size = LLHEADS_BUF_INCR;
+		stack->heads_buf = (struct stack_elt **)
+			Malloc(LLHEADS_BUF_INCR * sizeof(struct stack_elt *));
+	}
+	else if (stack->nr_heads == stack->heads_buf_size) {
+		/* buffer full? */
+		stack->heads_buf_size += LLHEADS_BUF_INCR;
+		stack->heads_buf = (struct stack_elt **)
+			Realloc((char *)
+				stack->heads_buf, (unsigned)
+				stack->heads_buf_size *
+					sizeof(struct stack_elt *)
+			);
+	}
+
+	*(stack->heads_buf + stack->nr_heads) = ptr;	/* Add at the tail */
+	stack->nr_heads++;		/* Increase number of heads */
+	ptr->flags |= LLHEAD;		/* Mark it as a head */
+	ptr->ref_count++;		/* Increase reference count */
+	LLPUTIN(stack->exp_terminals, LLindex[ptr->nr]);
+}
+
+
+#if LL_ANSI_C
+static void to_delete(struct stacks *stack, struct stack_elt *ptr)
+#else
+static to_delete(stack, ptr)
+struct stacks *stack;
+struct stack_elt *ptr;
+#endif
+
+/* Remember that ptr has to be deleted */
+{
+
+	int i;
+
+#ifdef NOCLEAN
+	return;
+#endif
+
+
+
+	for (i = 0; i < stack->nr_cleanups; i++) {
+		/* Check if already in buffer */
+		if (*(stack->cleanup_buf + i) == ptr) return;
+	}
+
+	if (stack->cleanup_buf_size == 0) {
+		stack->cleanup_buf_size = LLCLEANUP_BUF_INCR;
+		stack->cleanup_buf = (struct stack_elt **)
+		Malloc(LLCLEANUP_BUF_INCR * sizeof(struct stack_elt *));
+	}
+	else if (stack->nr_cleanups == stack->cleanup_buf_size) {
+		stack->cleanup_buf_size += LLCLEANUP_BUF_INCR;
+		stack->cleanup_buf = (struct stack_elt **)
+			Realloc((char *) stack->cleanup_buf,
+				(unsigned) stack->cleanup_buf_size *
+				sizeof(struct stack_elt *));
+	}
+	*(stack->cleanup_buf + stack->nr_cleanups) = ptr;
+	stack->nr_cleanups++;
+}
+
+
+#if LL_ANSI_C
+static void substitute(struct stacks *stack, struct stack_elt *top, int l_ahead)
+#else
+static substitute(stack, top, l_ahead)
+struct stacks *stack;
+struct stack_elt *top;
+int l_ahead;
+#endif
+
+/* This function substitutes the NT pointed to by 'top'. 'top' should be a top
+ * of a stack
+ */
+{
+	struct symbol *symb_ptr;
+	struct stack_elt *new_top;
+
+	/* Try to join top NT */
+	if (join(stack, top, l_ahead)) return;
+
+	/* Find RHS of the rule of nonterminal 'top->nr' */
+	symb_ptr = (nonterminals + top->nr - LLFIRST_NT)->rule->rhs;
+
+	/* Mark top as dummy */
+	top->flags |= LLDUMMY;
+
+	while (1) {
+		/* If this an empty production, search down the stack for
+		 * terminals
+		 */
+		if ((symb_ptr->x == LLALT) || (symb_ptr->x == LLEORULE)) {
+			generate_heads(stack, top, l_ahead);
+		}
+
+		/* Skip other empty productions, they have no effect. */
+		while (symb_ptr->x == LLALT) {
+			symb_ptr = symb_ptr->next;
+		}
+
+		if (symb_ptr->x == LLEORULE) {
+			/* If there are only empty productions, the NT on top
+			 * can be deleted
+			 */
+			if (top->ref_count == 0) {
+				to_delete(stack, top);
+			}
+			return;
+		}
+
+		/* If this rule can produce 'l_ahead' on the top of the stack
+		 * substitute the nonterminal
+		 */
+		if (optimize(stack, symb_ptr, l_ahead)) {
+			new_top = push_rule(top, symb_ptr);
+
+			/* If the new element on top is a nonterminal
+			 * substitute it, else make it a head
+			 */
+			if (new_top->nr >= LLFIRST_NT) {
+				substitute(stack, new_top, l_ahead);
+			}
+			else {
+				new_head(stack, new_top);
+			}
+		}
+
+		/* Search to next alternative */
+		while (	(symb_ptr->x == LLTERMINAL)
+		||	(symb_ptr->x == LLNONTERMINAL)
+		) {
+			symb_ptr = symb_ptr->next;
+		}
+
+		if (symb_ptr->x == LLEORULE) {
+			if (top->ref_count == 0) {
+				to_delete(stack, top);
+			}
+			return;
+		}
+		else {
+			symb_ptr = symb_ptr->next;
+		}
+	}
+
+}
+
+
+#if LL_ANSI_C
+static int join(struct stacks *stack, struct stack_elt *top, int l_ahead)
+#else
+static int join(stack, top, l_ahead)
+struct stacks *stack;
+struct stack_elt *top;
+int l_ahead;
+#endif
+
+/* This function tries to connect a NT on top of a stack with another stack,
+ * which has already substituted this NT
+ */
+{
+	struct stack_elt *se;
+	int size;
+
+	if (	(se = stack->join_array[top->nr - LLFIRST_NT]) ==
+			(struct stack_elt *)0
+	) {
+		stack->join_array[top->nr - LLFIRST_NT] = top;
+		return 0;		/* Join not possible */
+	}
+	else {
+		se->nr_nexts++;		/* Increase number of descendants */
+
+#ifdef DEBUG
+		edge_allocates++;
+		if (edge_allocates - edge_deallocates > edge_max_in_use) {
+			edge_max_in_use = edge_allocates - edge_deallocates;
+		}
+#endif
+
+		/* Allocate one more pointer to descendants */
+		size = se->nr_nexts * sizeof(struct edge);
+		se->edges = (struct edge *)Realloc((char *) se->edges,
+							(unsigned) size);
+
+		/* Link it */
+		(se->edges + se->nr_nexts - 1)->ptr = top->edges->ptr;
+		(se->edges + se->nr_nexts - 1)->flags = 0;
+
+		/* The successor of 'top' gets an extra predecessor.
+		 * 'top' has always only one successor because the stacks are
+		 * constructed in 'depth first' order
+		 */
+		top->edges->ptr->ref_count++;
+
+
+#ifndef NOLOOPS
+		/* If we have made a new loop find all stack elements of this
+		 * loop and mark them
+		 */
+		if (path(top->edges->ptr, se)) {
+			(se->edges + se->nr_nexts - 1)->flags |= LLLOOP;
+			(se->edges + se->nr_nexts - 1)->flags |= LLYES;
+		}
+		clear_flags(top->edges->ptr, (LLNO | LLYES));
+#endif
+
+
+		/* Check if joined NT produces empty */
+		if ((nonterminals + se->nr - LLFIRST_NT)->rule->empty) {
+			generate_heads(stack, top, l_ahead);
+		}
+
+		/* Deallocate top symbol */
+		if (top->ref_count == 0) {
+			to_delete(stack, top);
+		}
+
+		return 1;
+	}
+}
+
+
+#ifndef NOLOOPS
+
+#if LL_ANSI_C
+static int path(struct stack_elt *se1, struct stack_elt *se2)
+#else
+static int path(se1, se2)
+struct stack_elt *se1, *se2;
+#endif /* LL_ANSI_C */
+
+/* If there is a path from se1 to se2 it returns 1 and marks all the paths
+ * betweeen these two points, otherwise it returns 0. The flags LLYES and
+ * LLNO are used for optimization. */
+{
+	int i, result = 0;
+
+	if (se1 == se2) return 1;
+
+	for (i = 0; i < se1->nr_nexts; i++) {
+		if (	(!((se1->edges + i)->flags & LLNO))
+		&&	(!((se1->edges + i)->flags & LLLOOP_SEARCH))
+		) {
+			(se1->edges + i)->flags |= LLLOOP_SEARCH;
+
+			if (path((se1->edges + i)->ptr, se2)) {
+				(se1->edges + i)->flags |= LLLOOP;
+				result = 1;
+			}
+			else {
+				(se1->edges + i)->flags |= LLNO;
+			}
+
+			(se1->edges + i)->flags &= ~LLLOOP_SEARCH;
+		}
+		(se1->edges + i)->flags |= LLYES;
+	}
+	return result;
+}
+
+
+#if LL_ANSI_C
+static int part_of_loop(struct stack_elt *se)
+#else
+static int part_of_loop(se)
+struct stack_elt *se;
+#endif /* LL_ANSI_C */
+
+/* Checks if 'se' belongs to a loop */
+{
+	int i;
+
+	for (i = 0; i < se->nr_nexts; i++) {
+		if ((se->edges + i)->flags & LLLOOP) return 1;
+	}
+	return 0;
+}
+
+#endif /* NOLOOPS */
+
+
+#if LL_ANSI_C
+static void generate_heads(struct stacks *stack, struct stack_elt *se,
+				int l_ahead)
+#else
+static generate_heads(stack, se, l_ahead)
+struct stacks *stack;
+struct stack_elt *se;
+int l_ahead;
+#endif
+
+/* This funcion finds all heads starting at 'se'. */
+{
+	int i;
+	struct stack_elt *next_se;
+
+
+	for (i = 0; i < se->nr_nexts; i++) {
+
+		if (!((se->edges + i)->ptr->flags & LLGEN_SEARCH)) {
+
+			(se->edges + i)->ptr->flags |= LLGEN_SEARCH;
+
+			next_se = (se->edges + i)->ptr;
+
+			/* Remember a flag has to be cleared later */
+
+			if (stack->visited_buf_size == 0) {
+				stack->visited_buf_size = LL_VIS_INCR;
+				stack->visited_buf = (struct stack_elt **)
+				Malloc(LL_VIS_INCR * sizeof(struct stack_elt *));
+			}
+			else if (stack->nr_visited == stack->visited_buf_size) {
+				stack->visited_buf_size += LL_VIS_INCR;
+				stack->visited_buf = (struct stack_elt **)
+					Realloc((char *) stack->visited_buf,
+					(unsigned) stack->visited_buf_size *
+					sizeof(struct stack_elt *));
+			}
+			*(stack->visited_buf + stack->nr_visited) = next_se;
+			stack->nr_visited++;
+
+			if (next_se->flags & LLDUMMY) {
+				generate_heads(stack, next_se, l_ahead);
+			}
+			else if (next_se->nr == LLEOSTACK) {
+				/* We have matched a nt */
+				if (next_se->matched == LLstartsymb) {
+					stack->start_seen = 1;
+				}
+
+				continuation(stack, next_se->matched, l_ahead);
+				if (next_se->ref_count == 0) {
+					to_delete(stack, next_se);
+				}
+			}
+			else if (next_se->nr < LLFIRST_NT) {
+				/* terminal */
+				new_head(stack, next_se);
+			}
+			else {
+				if (next_se->ref_count > 0) {
+					next_se = split(next_se);
+				}
+				substitute(stack, next_se, l_ahead);
+			}
+		}
+	}
+}
+
+
+#if LL_ANSI_C
+static void delete(struct stacks *stack, struct stack_elt *se)
+#else
+static delete(stack, se)
+struct stacks *stack;
+struct stack_elt *se;
+#endif
+
+/* This function runs down the stack(s) deleting every element which cannot be
+ * reached anymore. */
+{
+	int i;
+
+#ifdef NOCLEAN
+	return;
+#endif
+
+	if (se->ref_count == 0) {
+
+		/* Decrease reference counts of all successors */
+		for (i = 0; i < se->nr_nexts; i++) {
+			if ((se->edges + i)->ptr->ref_count != 0) {
+				(se->edges + i)->ptr->ref_count--;
+
+				/* Try to delete next element */
+				delete(stack, (se->edges + i)->ptr);
+			}
+		}
+
+		/* If this element is saved in the join_array clear it */
+		if (se->nr >= LLFIRST_NT) {
+			if (stack->join_array[se->nr - LLFIRST_NT] == se) {
+				stack->join_array[se->nr - LLFIRST_NT] =
+					(struct stack_elt *)0;
+			}
+		}
+#ifdef DEBUG
+		deallocates++;
+		edge_deallocates += se->nr_nexts;
+#endif
+		free((char *) se->edges);
+		free((char *) se);
+	}
+
+#ifndef NOLOOPS
+	/* If this element belongs to a loop try to delete it */
+	else if (part_of_loop(se)) {
+
+		/* Do a temporary delete */
+		hyp_run(se);
+
+		/* Check it */
+		stack->check_run_ok = 1;
+		check_run(stack, se);
+
+		/* If it can be deleted delete it */
+		if (stack->check_run_ok) {
+			se->ref_count = 0;
+			delete(stack, se);
+		}
+
+	}
+#endif
+}
+
+
+#ifndef NOLOOPS
+
+#if LL_ANSI_C
+static void hyp_run(struct stack_elt *se)
+#else
+static hyp_run(se)
+struct stack_elt *se;
+#endif /* LL_ANSI_C */
+
+/* This function sets the 'hyp_ref_counts' of all elements of the loop that
+ * 'se' belongs to to the value that 'ref_count' will get when 'se' is
+ * deleted
+ */
+{
+	int i;
+	struct stack_elt *next_se;
+
+	for (i = 0; i < se->nr_nexts; i++) {
+		next_se = (se->edges + i)->ptr;
+
+		if (	(!((se->edges + i)->flags & LLHYP_SEARCH))
+		&&	((se->edges + i)->flags & LLLOOP)
+		) {
+			(se->edges + i)->flags |= LLHYP_SEARCH;
+
+			/* If this element is not yet visited initialize
+			 * 'hyp_ref_count' else decrease it by one
+			 */
+			if (next_se->hyp_ref_count == -1) {
+				next_se->hyp_ref_count = next_se->ref_count - 1;
+			}
+			else {
+				next_se->hyp_ref_count--;
+			}
+
+			/* Continue searching */
+			hyp_run(next_se);
+		}
+	}
+}
+
+
+#if LL_ANSI_C
+static void check_run(struct stacks *stack, struct stack_elt *se)
+#else
+static check_run(stack, se)
+struct stacks *stack;
+struct stack_elt *se;
+#endif /* LL_ANSI_C */
+
+/* This function checks all 'hyp_ref_counts' that 'hyp_run()' has set.
+ * If one of them is not 0, 'check_run_ok' will be set to 0 indicating
+ * that 'se' cannot be deleted. 'check_run()' also resets all 'hyp_ref_counts'
+ */
+{
+	int i;
+
+	if (se->hyp_ref_count > 0) {
+		stack->check_run_ok = 0;
+	}
+
+	/* Reset 'hyp_ref_count' */
+	se->hyp_ref_count = -1;
+	for (i = 0; i < se->nr_nexts; i++) {
+		if ((se->edges + i)->flags & LLHYP_SEARCH) {
+			(se->edges + i)->flags &= ~LLHYP_SEARCH;
+			check_run(stack, (se->edges + i)->ptr);
+		}
+	}
+}
+
+#endif /* NOLOOPS */
+
+
+#if LL_ANSI_C
+static struct stack_elt *split(struct stack_elt *se)
+#else
+static struct stack_elt *split(se)
+struct stack_elt *se;
+#endif
+
+/* This function splits of a NT in de stack, and returns a pointer to it */
+{
+	struct stack_elt *new_stack;
+	int i;
+
+#ifdef DEBUG
+	allocates++;
+	if (allocates - deallocates > max_in_use) {
+		max_in_use = allocates - deallocates;
+	}
+#endif
+
+	new_stack = (struct stack_elt *)Malloc(sizeof(struct stack_elt));
+	new_stack->flags = 0;		/* Used by 'clear_gen_flags()' */
+	new_stack->nr = se->nr;
+	new_stack->ref_count = 0;	/* Copy is new top */
+	new_stack->hyp_ref_count = -1;
+	new_stack->matched = -1;
+	new_stack->nr_nexts = se->nr_nexts;
+
+#ifdef DEBUG
+	edge_allocates++;
+	if (edge_allocates - edge_deallocates > edge_max_in_use) {
+		edge_max_in_use = edge_allocates - edge_deallocates;
+	}
+#endif
+
+	new_stack->edges = (struct edge *)
+		Malloc((unsigned)se->nr_nexts * sizeof(struct edge));
+
+	/* Copy gets the same successors as the original */
+	memcpy((char *) new_stack->edges, (char *) se->edges,
+					se->nr_nexts * sizeof(struct edge));
+
+	/* Each successor gets a new predecessor */
+	for (i = 0; i < new_stack->nr_nexts; i++) {
+		(new_stack->edges + i)->ptr->ref_count++;
+		(new_stack->edges + i)->flags = 0;
+	}
+
+	return new_stack;
+}
+
+
+#ifdef DEBUG
+#if LL_ANSI_C
+static void test(struct stacks *stack)
+#else
+static test(stack)
+struct stacks *stack;
+#endif
+{
+	struct stack_elt *se;
+	int i;
+
+	printf("STACKS:\n");
+	for (i = 0; i < stack->nr_heads; i++) {
+		printf("%2d: ", i + 1);
+		if (*(stack->heads_buf + i) == (struct stack_elt *)0) {
+			printf("NIL\n");
+			continue;
+		}
+		se = *(stack->heads_buf + i);
+		dump_stack(se, 1);
+		clear_flags(se, PRINT_SEARCH);
+	}
+}
+
+
+#if LL_ANSI_C
+static void dump_stack(struct stack_elt *se, int level)
+#else
+static dump_stack(se, level)
+struct stack_elt *se;
+int level;
+#endif
+{
+	int i, j;
+
+	while (se->nr != LLEOSTACK) {
+		if ((se->flags & LLDUMMY) && (se->nr_nexts > 1)) {
+			printf("[%d] <%d,%d,%d>\n",
+				se->nr, se->ref_count,
+				se->hyp_ref_count,
+				se->flags
+			);
+			for (j = 0; j < se->nr_nexts; j++) {
+				for (i = 1; i <= level; i++) {
+					printf("    ");
+				}
+				printf("%d: ", j + 1);
+				if (!((se->edges + j)->flags & PRINT_SEARCH)) {
+					printf(" (%d) ", (se->edges + j)->flags);
+					(se->edges + j)->flags |= PRINT_SEARCH;
+					dump_stack((se->edges+j)->ptr,level+1);
+					/*clear_flags((se->edges+j)->ptr,PRINT_SEARCH);*/
+				}
+				else {
+					printf("LOOP\n");
+				}
+			}
+			return;
+		}
+		else {
+			if (se->flags & LLDUMMY) {
+				printf("[%d] <%d,%d,%d> ",
+					se->nr,se->ref_count,
+					se->hyp_ref_count,
+					se->flags
+				);
+			}
+			else {
+				printf("%d <%d,%d,%d> ",
+					se->nr, se->ref_count,
+					se->hyp_ref_count,
+					se->flags
+				);
+			}
+			if (!(se->edges->flags & PRINT_SEARCH)) {
+				printf(" (%d) ", se->edges->flags);
+				se->edges->flags |= PRINT_SEARCH;
+				se = se->edges->ptr;
+			}
+			else {
+				printf("LOOP\n");
+				return;
+			}
+		}
+	}
+	printf("\n");
+}
+#endif
+
+
+#if LL_ANSI_C
+static void clear_flags(struct stack_elt *se, char flag)
+#else
+static clear_flags(se, flag)
+struct stack_elt *se;
+char flag;
+#endif
+
+/* Clears edge flag 'flag' */
+{
+	int i;
+
+	for (i = 0; i < se->nr_nexts; i++) {
+		if ((se->edges + i)->flags & flag) {
+			(se->edges + i)->flags &= ~flag; /* clear flag */
+			clear_flags((se->edges + i)->ptr, flag);
+		}
+	}
+}
+
+#if LL_ANSI_C
+static void clear_gen_flags(struct stacks *stack)
+#else
+static clear_gen_flags(stack)
+struct stacks *stack;
+#endif
+
+{
+	int i;
+
+	for (i = 0; i < stack->nr_visited; i++) {
+		(*(stack->visited_buf + i))->flags &= ~(LLGEN_SEARCH);
+	}
+
+	stack->nr_visited = 0;
+}
+
+
+#if LL_ANSI_C
+static void match_heads(struct stacks *stack, int symb)
+#else
+static match_heads(stack, symb)
+struct stacks *stack;
+int symb;
+#endif
+
+/* Match heads_buf against symb, leaving only matching heads,
+ * whilst deallocating the non-matching stacks
+ */
+{
+	int i;
+
+	int old_nr_heads;
+	struct stack_elt **old_heads_buf;
+
+
+	/* Copy the 'old' heads */
+	old_nr_heads = stack->nr_heads;
+	old_heads_buf = stack->heads_buf;
+
+
+	/* Set heads in stack to 0 */
+	stack->nr_heads = 0;
+	stack->heads_buf_size = 0;
+	stack->heads_buf = (struct stack_elt **) 0;
+
+
+	for (i = 0; i < old_nr_heads; i++) {
+		if ((*(old_heads_buf + i))->nr != symb) {
+			/* Does not match? */
+			(*(old_heads_buf + i))->ref_count--;
+			(*(old_heads_buf + i))->flags &= ~LLHEAD;
+			delete(stack, *(old_heads_buf + i));
+		}
+		else {	/* Matches */
+			if (stack->heads_buf_size == 0) {
+				stack->heads_buf_size = LLHEADS_BUF_INCR;
+				stack->heads_buf = (struct stack_elt **)
+					Malloc((unsigned)stack->heads_buf_size *
+						sizeof(struct stack_elt *));
+			}
+			else if (stack->nr_heads == stack->heads_buf_size) {
+				stack->heads_buf_size += LLHEADS_BUF_INCR;
+				stack->heads_buf = (struct stack_elt **)
+					Realloc((char *) stack->heads_buf,
+						(unsigned) stack->heads_buf_size *
+						sizeof(struct stack_elt *));
+			}
+			*(stack->heads_buf + stack->nr_heads) =
+				*(old_heads_buf + i);
+			stack->nr_heads++;
+		}
+	}
+	free((char *) old_heads_buf);
+}
+
+
+#if LL_ANSI_C
+static void cleanup(struct stacks *stack)
+#else
+static cleanup(stack)
+struct stacks *stack;
+#endif
+
+/* Deletes all elements in 'cleanup_buf()' */
+{
+	int i;
+
+	for (i = 0; i < stack->nr_cleanups; i++) {
+		delete(stack, *(stack->cleanup_buf + i));
+	}
+
+	stack->nr_cleanups = 0;
+
+}
+
+
+#if LL_ANSI_C
+static void initialize(struct stacks *stack)
+#else
+static initialize(stack)
+struct stacks *stack;
+#endif
+
+/* Initializes some variables and arrays */
+{
+	int j;
+
+	stack->nr_heads = 0;
+	stack->heads_buf_size = 0;
+	stack->heads_buf = (struct stack_elt **)0;
+
+	stack->nr_cleanups = 0;
+	stack->cleanup_buf_size = 0;
+	stack->cleanup_buf = (struct stack_elt **)0;
+
+	stack->nr_visited = 0;
+	stack->visited_buf_size = 0;
+	stack->visited_buf = (struct stack_elt **)0;
+
+	for (j = 0; j < (LLNNONTERMINALS + 7)/8; j++) {
+		stack->r_rec[j] = (char) 0;
+	}
+
+	for (j = 0; j < LLNNONTERMINALS; j++) {
+		stack->join_array[j] = (struct stack_elt *)0;
+	}
+
+	for (j = 0; j < LLSETSIZE; j++) {
+		stack->exp_terminals[j] = 0;
+	}
+
+	stack->start_seen = 0;
+}
+
+
+#if LL_ANSI_C
+static void calculate(struct stacks *stack, int l_ahead)
+#else
+static calculate(stack, l_ahead)
+struct stacks *stack;
+int l_ahead;
+#endif
+
+/* This function finds all new heads and deletes the old heads */
+{
+	int i;
+	int old_nr_heads;
+	struct stack_elt **old_heads_buf;
+
+	/* Make a copy of the heads */
+	old_nr_heads = stack->nr_heads;
+	old_heads_buf = stack->heads_buf;
+
+	stack->nr_heads = 0;
+	stack->heads_buf = (struct stack_elt **) 0;
+	stack->heads_buf_size = 0;
+
+	for (i = 0; i < old_nr_heads; i++) {
+		/* Find all new heads */
+		generate_heads(stack, *(old_heads_buf + i), l_ahead);
+		clear_gen_flags(stack);
+
+		/* Old head can be deleted now */
+		(*(old_heads_buf + i))->ref_count--;
+		delete(stack, *(old_heads_buf + i));
+	}
+
+
+	cleanup(stack);
+	free((char *) old_heads_buf);
+
+	/* Reinitialize some things */
+	for (i = 0; i < (LLNNONTERMINALS + 7)/8; i++) {
+		stack->r_rec[i] = (char) 0;
+	}
+
+	for (i = 0; i < LLNNONTERMINALS; i++) {
+		stack->join_array[i] = (struct stack_elt *)0;
+	}
+
+	/* Delete all HEAD flags */
+	for (i = 0; i < stack->nr_heads; i++) {
+		(*(stack->heads_buf + i))->flags &= ~LLHEAD;
+	}
+}
+
+#if LL_ANSI_C
+static void kill_stack(struct stacks *stack)
+#else
+static kill_stack(stack)
+struct stacks *stack;
+#endif
+{
+	int i;
+
+	for (i = 0; i < stack->nr_heads; i++) {
+		(*(stack->heads_buf + i))->ref_count--;
+		delete(stack, *(stack->heads_buf + i));
+	}
+}
+
+
+
+#if LL_ANSI_C
+void LLnc_recover(void)
+#else
+LLnc_recover()
+#endif
+
+/* This function contains the main loop for non correcting syntax error
+ * recovery
+ */
+{
+	int j;
+	int base_symb;
+	struct stacks stack;
+	int max_nr_heads;
+	int max_nr_good_heads;
+
+	initialize(&stack);
+	max_nr_heads = 0;
+	max_nr_good_heads = 0;
+
+	/* Grammar has to be read only once */
+	if (!grammar_read) {
+		build_grammar();
+		grammar_read = 1;
+	}
+
+	/* Read first token */
+	read_token();
+	base_symb = LLsymb;
+
+	/* Check on end of file */
+	if ((base_symb <= 0) || (base_symb == EOFILE)) {
+
+		if ((nonterminals + LLstartsymb - LLFIRST_NT)->rule->empty != 1
+		) {
+			LLsymb = EOFILE;
+			LLmessage(0);
+		}
+
+		kill_stack(&stack);
+		return;
+	}
+
+	/* Read look ahead token */
+	read_token();
+
+	/* Now search applicable rules and starts the ball rolling */
+	start_stack(&stack, base_symb, LLsymb);
+
+	if (stack.nr_heads > max_nr_heads) {
+		max_nr_heads = stack.nr_heads;
+	}
+
+
+	/* Only matching heads are needed */
+	match_heads(&stack, LLsymb);
+
+	if (stack.nr_heads > max_nr_good_heads) {
+		max_nr_good_heads = stack.nr_heads;
+	}
+
+
+#ifdef DEBUG
+	test(&stack);
+#endif
+
+	/* Loop untill end of inputfile */
+	while ((LLsymb > 0) && (LLsymb != EOFILE)) {
+		/* When entering the loop LLsymb always contains the
+		 * symbol that was used as look_ahead to construct the stacks,
+		 * or, if optimization is OFF, it contains the symbol with
+		 * which the current heads have been matched 
+		 */
+
+		if (stack.nr_heads == 0) {
+			/* No more heads left */
+			LLmessage(0);
+
+			/* Restart the whole thing */
+			initialize(&stack);
+
+			/* The look-ahead caused the empty stack, don't
+			 * use it to start a new one !
+			 */
+
+			read_token();
+			base_symb = LLsymb;
+
+			/* Check on end of file */
+			if ((base_symb <= 0) || (base_symb == EOFILE)) {
+				if ((nonterminals + LLstartsymb - LLFIRST_NT)->rule->empty != 1) {
+					LLsymb = EOFILE;
+					LLmessage(0);
+				}
+				kill_stack(&stack);
+				return;
+			}
+
+			read_token();
+
+			start_stack(&stack, base_symb, LLsymb);
+
+			if (stack.nr_heads > max_nr_heads) {
+				max_nr_heads = stack.nr_heads;
+			}
+
+
+			match_heads(&stack, LLsymb);
+
+			if (stack.nr_heads > max_nr_good_heads) {
+				max_nr_good_heads = stack.nr_heads;
+			}
+
+			continue;
+		}
+
+
+		/* Normal case starts here */
+		stack.start_seen = 0;
+
+		for (j = 0; j < LLSETSIZE; j++) {
+			stack.exp_terminals[j] = 0;
+		}
+
+		/* Read next symbol */
+		read_token();
+
+		/* Generate all new heads and delete old ones */
+		calculate(&stack, LLsymb);
+
+		/* Leave out not wanted heads */
+
+		if (stack.nr_heads > max_nr_heads) {
+			max_nr_heads = stack.nr_heads;
+		}
+
+		match_heads(&stack, LLsymb);
+
+		if (stack.nr_heads > max_nr_good_heads) {
+			max_nr_good_heads = stack.nr_heads;
+		}
+
+
+
+#ifdef DEBUG
+		test(&stack);
+#endif
+
+	}
+
+	/* End of file reached, check if we have seen a start symbol */
+	if (stack.start_seen == 1) return;
+	else {
+		LLsymb = EOFILE;
+		LLmessage(0);
+	}
+
+	kill_stack(&stack);
+
+#ifdef DEBUG
+	printf("Maximum number of heads: %d\n", max_nr_heads);
+	printf("Maximum number of good heads: %d\n", max_nr_good_heads);
+	printf("Number of node allocates: %d\n", allocates);
+	printf("Number of node deallocates: %d\n", deallocates);
+	printf("Maximum number of nodes in use: %8d\n", max_in_use);
+	printf("Sizeof(struct stack_elt)              = %8d\n", sizeof(struct stack_elt));
+	printf("                                        --------x\n");
+	printf("                                        %8d\n", max_in_use * sizeof(
+					struct stack_elt));
+	printf("Number of edge allocates: %d\n", edge_allocates);
+	printf("Number of edge deallocates: %d\n", edge_deallocates);
+	printf("Maximum number of edges in use: %8d\n", edge_max_in_use);
+	printf("Sizeof(struct edge)              = %8d\n", sizeof(struct edge));
+	printf("                                   --------x\n");
+	printf("                                   %8d\n", edge_max_in_use * sizeof(struct edge));
+
+#endif
+}
+

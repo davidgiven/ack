@@ -14,3 +14,4 @@ extern char c_class[];
 #define ISTOK 5
 #define ISCOM 6
 #define ISLIT 7
+#define ISACT 8

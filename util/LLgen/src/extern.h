@@ -36,6 +36,11 @@ extern int	ntokens;	/* number of terminals */
 extern int	nterms;		/* number of terms */
 extern int	nalts;		/* number of alternatives */
 extern p_start	start;		/* will	contain	startsymbols */
+#ifdef NON_CORRECTING
+extern int	nsubstarts;	/* number of subparserstarts */
+extern p_set	start_firsts;	/* Will contain the union of first sets of
+				   startsymbols when -n -s option is on */
+#endif
 extern int	linecount;	/* line number */
 extern int	assval;		/* to create difference	between	literals
 				 * and other terminals
@@ -73,8 +78,17 @@ extern string	LLgenid;	/* LLgen identification string */
 extern t_token	lextoken;	/* the current token */
 extern int	nerrors;
 extern string	rec_file, incl_file;
+#ifdef NON_CORRECTING
+extern string	nc_rec_file, nc_incl_file;
+#endif
 extern int	low_percentage, high_percentage;
 extern int	min_cases_for_jmptable;
 extern int	jmptable_option;
 extern int	ansi_c;
+#ifdef NON_CORRECTING
+extern int	non_corr;
+extern int	subpars_sim;
+extern p_gram	illegal_gram;
+#endif
 extern int	strip_grammar;
+extern int	in_production;

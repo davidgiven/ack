@@ -26,7 +26,6 @@
 static string rcsid1 = "$Id$";
 # endif
 
-
 static string	c_first = "> firstset   ";
 static string	c_contains = "> containset ";
 static string	c_follow = "> followset  ";
@@ -72,7 +71,7 @@ conflchecks() {
 	    f_input = x->f_name;
 	    for (s = x->f_nonterminals; s != -1; s = p->n_next) {
 		p = &nonterms[s];
-	        if (check(p->n_rule)) p->n_flags |= VERBOSE;
+		if (check(p->n_rule)) p->n_flags |= VERBOSE;
 	    }
 	}
 	for (x = files; x < maxfiles; x++) {
@@ -188,7 +187,7 @@ check(p) register p_gram p; {
 			n = &nonterms[g_getcont(p)];
 			if (g_getnpar(p) != getntparams(n)) {
 			    error(p->g_lineno,
-			        "Call of %s: parameter count mismatch",
+				"Call of %s: parameter count mismatch",
 				n->n_name);
 			}
 			break; }
@@ -211,13 +210,13 @@ check(p) register p_gram p; {
 			temp = setalloc();
 			setunion(temp,q->t_first);
 			if (!setintersect(temp,q->t_follow)) {
-				/* 
-			 	 * q->t_first * q->t_follow != EMPTY
-			 	 */
+				/*
+				 * q->t_first * q->t_follow != EMPTY
+				 */
 				if (!(q->t_flags & RESOLVER)) {
-			  		/*
-			   		 * No conflict resolver
-			   		 */
+					/*
+					 * No conflict resolver
+					 */
 					error(p->g_lineno,
 						"Repetition conflict");
 					retval = 1;
@@ -249,7 +248,7 @@ check(p) register p_gram p; {
 "Alternation conflict");
 					retval = 1;
 					moreverbose(temp);
-				} 
+				}
 			} else {
 				if (l->l_flag & (COND|PREFERING|AVOIDING)) {
 					l->l_flag |= NOCONF;
@@ -257,8 +256,8 @@ check(p) register p_gram p; {
 "Conflict resolver without conflict");
 				}
 			}
-			if (l->l_flag & PREFERING) propagate(l->l_symbs,p+1);
 			free( (p_mem) temp);
+			if (l->l_flag & PREFERING) propagate(l->l_symbs,p+1);
 			retval |= check(l->l_rule);
 			break; }
 		}
@@ -378,7 +377,7 @@ prrule(p) register p_gram p; {
 			spaces();
 			p++; continue; }
 		  case LITERAL :
-		  case TERMINAL : {	
+		  case TERMINAL : {
 			register p_token pt = &tokens[g_getcont(p)];
 
 			fprintf(f,pt->t_tokno<0400 ?
@@ -463,7 +462,7 @@ propagate(set,p) p_set set; register p_gram p; {
 	while (g_gettype(p) != EORULE) {
 		setminus(g_getlink(p)->l_symbs,set);
 		p++;
-	} 
+	}
 }
 
 STATIC

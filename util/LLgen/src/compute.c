@@ -59,6 +59,12 @@ STATIC do_contains();
 STATIC contains();
 STATIC int nsafes();
 STATIC int do_safes();
+#ifdef NON_CORRECTING
+STATIC int nc_nfirst();
+STATIC nc_first();
+STATIC int nc_nfollow();
+STATIC nc_follow();
+#endif
 
 do_compute() {
 	/*
@@ -116,6 +122,31 @@ do_compute() {
 		setntsafe(p,SCANDONE);
 	}
 	co_trans(nsafes);
+
+#ifdef NON_CORRECTING
+	if (subpars_sim) {
+	    int s;
+
+	    /* compute the union of the first sets of all start symbols
+	       Used to compute the nc-first-sets when -s option is given */
+	    start_firsts = get_set();
+	    for (st = start; st; st = st->ff_next) {
+		s = setunion(start_firsts, (&nonterms[st->ff_nont])->n_first);
+	    }
+	}
+
+	if (non_corr) {
+	    /* compute the non_corr first sets for all nonterminals and terms */
+
+	    co_trans(nc_nfirst);
+	    for (st = start; st; st = st->ff_next) {
+		p = &nonterms[st->ff_nont];
+		PUTIN(p->n_nc_follow,0);
+	    }
+	    co_trans(nc_nfollow);
+	}
+#endif
+
 # ifndef NDEBUG
 	if (debug) {
 		fputs("Safeties:\n", stderr);
@@ -151,6 +182,10 @@ createsets() {
 			p = &nonterms[i];
 			p->n_flags |= GENSTATIC;
 			p->n_first = get_set();
+#ifdef NON_CORRECTING
+			p->n_nc_first = get_set();
+			p->n_nc_follow = get_set();
+#endif
 			p->n_follow = get_set();
 			walk(f->f_used, p->n_rule);
 		}
@@ -185,6 +220,10 @@ walk(u, p) p_set u; register p_gram p; {
 
 			q = g_getterm(p);
 			q->t_first = get_set();
+#ifdef NON_CORRECTING
+			q->t_nc_first = get_set();
+			q->t_nc_follow = get_set();
+#endif
 			q->t_follow = get_set();
 			walk(u, q->t_rule);
 			break; }
@@ -193,6 +232,9 @@ walk(u, p) p_set u; register p_gram p; {
 
 			l = g_getlink(p);
 			l->l_symbs = get_set();
+#ifdef NON_CORRECTING
+			l->l_nc_symbs = get_set();
+#endif
 			l->l_others = get_set();
 			walk(u, l->l_rule);
 			break; }
@@ -237,7 +279,7 @@ empty(p) register p_gram p; {
 
 	for (;;) {
 		switch (g_gettype(p)) {
-		  case EORULE : 
+		  case EORULE :
 			return 1;
 		  case TERM :  {
 			register p_term q;
@@ -271,6 +313,12 @@ nfirst(p) register p_nont p; {
 	return first(p->n_first, p->n_rule, 0);
 }
 
+#ifdef NON_CORRECTING
+STATIC int nc_nfirst(p) register p_nont p; {
+	return nc_first(p->n_nc_first, p->n_rule, 0);
+}
+#endif
+
 STATIC
 first(setp,p,flag) p_set setp; register p_gram p; {
 	/*
@@ -282,8 +330,8 @@ first(setp,p,flag) p_set setp; register p_gram p; {
 	 */
 	register	s;	/* Will gather return value */
 	int		noenter;/* when set, unables entering of elements into
-			 	 * setp. This is necessary to walk through the
-			 	 * rest of rule p.
+				 * setp. This is necessary to walk through the
+				 * rest of rule p.
 				 */
 
 	s = 0;
@@ -348,6 +396,108 @@ first(setp,p,flag) p_set setp; register p_gram p; {
 		return s;
 	}
 }
+
+#ifdef NON_CORRECTING
+STATIC
+nc_first(setp,p,flag) p_set setp; register p_gram p; {
+	/*
+	 * Compute the non_corr FIRST set of rule p.
+	 * If flag = 0, also the non_corr first sets for terms and
+	 * alternations in the rule p are computed.
+	 * The non_corr FIRST set is put in setp.
+	 * return 1 if the set refered to by "setp" changed
+	 * If the -s flag was given, the union of the first-sets of all
+	 * start symbols is used whenever an action occurs. Else, only the
+	 * first-sets of startsynbols in the  %substart are used
+	 */
+
+	register	s;	/* Will gather return value */
+	int		noenter;/* when set, unables entering of elements into
+				 * setp. This is necessary to walk through the
+				 * rest of rule p.
+				 */
+
+	s = 0;
+	noenter = 0;
+	for (;;) {
+		switch (g_gettype(p)) {
+		  case EORULE :
+			return s;
+		  case TERM : {
+			register p_term q;
+
+			q = g_getterm(p);
+			if (flag == 0) {
+				if (nc_first(q->t_nc_first,q->t_rule,0))/*nothing*/;
+			}
+			if (!noenter) s |= setunion(setp,q->t_nc_first);
+			p++;
+			if (r_getkind(q) == STAR ||
+			    r_getkind(q) == OPT ||
+			    empty(q->t_rule)) continue;
+			break; }
+		  case ALTERNATION : {
+			register p_link l;
+
+			l = g_getlink(p);
+			if (flag == 0) {
+				if (nc_first(l->l_nc_symbs,l->l_rule,0))/*nothing*/;
+			}
+			if (noenter == 0) {
+				s |= setunion(setp,l->l_nc_symbs);
+			}
+			if (g_gettype(p+1) == EORULE) return s;
+			}
+			p++;
+			continue;
+		  case ACTION : {
+			register p_start subp;
+
+			if (!noenter)
+			  if (subpars_sim)
+			    s |= setunion(setp, start_firsts);
+			  else {
+			    for (subp = g_getsubparse(p); subp;
+				 subp = subp->ff_next)
+				s |= setunion(setp, (&nonterms[subp->ff_nont])->n_nc_first);
+
+			  }
+			p++;
+			continue;
+			}
+		  case LITERAL :
+		  case TERMINAL :
+			if (g_getcont(p) == g_getcont(illegal_gram)) {
+				/* Ignore for this set. */
+				p++;
+				continue;
+			}
+			if ((noenter == 0) && !IN(setp,g_getcont(p))) {
+				s = 1;
+				PUTIN(setp,g_getcont(p));
+			}
+			p++;
+			break;
+		  case NONTERM : {
+			register p_nont n;
+
+			n = &nonterms[g_getcont(p)];
+			if (noenter == 0)  {
+				s |= setunion(setp,n->n_nc_first);
+				if (ntneeded) NTPUTIN(setp,g_getcont(p));
+			}
+			p++;
+			if (n->n_flags & EMPTY) continue;
+			break; }
+		}
+		if (flag == 0) {
+			noenter = 1;
+			continue;
+		}
+		return s;
+	}
+}
+#endif
 
 STATIC int
 nfollow(p) register p_nont p; {
@@ -425,6 +575,87 @@ follow(setp,p) p_set setp; register p_gram p; {
 		p++;
 	}
 }
+
+#ifdef NON_CORRECTING
+
+STATIC int
+nc_nfollow(p) register p_nont p; {
+	return follow(p->n_nc_follow, p->n_rule);
+}
+
+STATIC
+nc_follow(setp,p) p_set setp; register p_gram p; {
+	/*
+	 * setp is the follow set for the rule p.
+	 * Compute the follow sets in the rule p from this set.
+	 * Return 1 if a follow set of a nonterminal changed.
+	 */
+	register	s;	/* Will gather return value */
+
+	s = 0;
+	for (;;) {
+		switch (g_gettype(p)) {
+		  case EORULE :
+			return s;
+		  case TERM : {
+			register p_term q;
+
+			q = g_getterm(p);
+			if (empty(p+1)) {
+				/*
+				 * If what follows the term can be empty,
+				 * everything that can follow the whole
+				 * rule can also follow the term
+				 */
+				s |= setunion(q->t_nc_follow,setp);
+			}
+			/*
+			 * Everything that can start the rest of the rule
+			 * can follow the term
+			 */
+			s |= nc_first(q->t_nc_follow,p+1,1);
+			if (r_getkind(q) == STAR ||
+			    r_getkind(q) == PLUS ||
+			    r_getnum(q) ) {
+				/*
+				 * If the term involves a repetition
+				 * of possibly more than one,
+				 * everything that can start the term
+				 * can also follow it.
+				 */
+				s |= nc_follow(q->t_nc_first,q->t_rule);
+			}
+			/*
+			 * Now propagate the set computed sofar
+			 */
+			s |= nc_follow(q->t_nc_follow, q->t_rule);
+			break; }
+		  case ALTERNATION :
+			/*
+			 * Just propagate setp
+			 */
+			s |= nc_follow(setp,g_getlink(p)->l_rule);
+			break;
+		  case NONTERM : {
+			register p_nont n;
+
+			n = &nonterms[g_getcont(p)];
+			s |= nc_first(n->n_nc_follow,p+1,1);
+			if (empty(p+1)) {
+				/*
+				 * If the rest of p can produce empty,
+				 * everything that follows p can follow
+				 * the nonterminal
+				 */
+				s |= setunion(n->n_nc_follow,setp);
+			}
+			break; }
+		}
+		p++;
+	}
+}
+
+#endif
 
 STATIC
 co_dirsymb(setp,p) p_set setp; register p_gram p; {
@@ -519,7 +750,7 @@ do_lengthcomp() {
 	 * Compute the minimum length of a terminal production for each
 	 * nonterminal.
 	 * This length consists of two fields: the number of terminals,
-	 * and a number that is composed of 
+	 * and a number that is composed of
 	 * - the number of this alternative
 	 * - a crude measure of the number of terms and nonterminals in the
 	 *   production of this shortest string.
@@ -562,6 +793,12 @@ complength(p,le) register p_gram p; p_length le; {
 		switch (g_gettype(p)) {
 		  case LITERAL :
 		  case TERMINAL :
+#ifdef NON_CORRECTING
+			if (g_getcont(p) == g_getcont(illegal_gram)) {
+				add(&X, INFINITY, 0);
+				break;
+			}
+#endif
 			add(&X, 1, 0);
 			break;
 		  case ALTERNATION :
@@ -571,6 +808,7 @@ complength(p,le) register p_gram p; p_length le; {
 			while (g_gettype(p) != EORULE) {
 				cnt++;
 				l = g_getlink(p);
+				p++;
 				complength(l->l_rule,&i);
 				i.val += cnt;
 				if (l->l_flag & DEF) {
@@ -580,7 +818,6 @@ complength(p,le) register p_gram p; p_length le; {
 				if (compare(&i, &X) < 0) {
 					X = i;
 				}
-				p++;
 			}
 			/* Fall through */
 		  case EORULE :
@@ -593,7 +830,7 @@ complength(p,le) register p_gram p; p_length le; {
 			q = g_getterm(p);
 			rep = r_getkind(q);
 			X.val += 1;
-			if ((q->t_flags&PERSISTENT) || 
+			if ((q->t_flags&PERSISTENT) ||
 			    rep==FIXED || rep==PLUS) {
 				complength(q->t_rule,&i);
 				add(&X, i.cnt, i.val);
@@ -661,6 +898,7 @@ setdefaults(p) register p_gram p; {
 			do {
 				cnt++;
 				l = g_getlink(p);
+				p++;
 				complength(l->l_rule,&i);
 				i.val += cnt;
 				if (l->l_flag & DEF) temp = 1;
@@ -671,7 +909,6 @@ setdefaults(p) register p_gram p; {
 					count = i;
 				}
 				setdefaults(l->l_rule);
-				p++;
 			} while (g_gettype(p) != EORULE);
 			if (!temp) {
 				/* No user specified default */
@@ -687,7 +924,7 @@ STATIC
 do_contains(n) register p_nont n; {
 	/*
 	 * Compute the total set of symbols that nonterminal n can
-	 * produce 
+	 * produce
 	 */
 
 	if (n->n_contains == 0) {
@@ -811,7 +1048,7 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 	for (;;) {
 		switch (g_gettype(p)) {
 		  case ACTION:
-		  	p++;
+			p++;
 			continue;
 		  case LITERAL:
 		  case TERMINAL:
@@ -830,12 +1067,13 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 			safe = t_after(rep, i, retval);
 			break; }
 		  case ALTERNATION : {
-		  	register p_link l;
+			register p_link l;
 			register int i;
 
 			retval = -1;
 			while (g_gettype(p) == ALTERNATION) {
 				l = g_getlink(p);
+				p++;
 				if (safe > SAFE && (l->l_flag & DEF)) {
 					i = do_safes(l->l_rule,SAFESCANDONE,ch);
 				}
@@ -848,7 +1086,6 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 					}
 					else if (i > retval) retval = i;
 				}
-				p++;
 			}
 			return retval; }
 		  case NONTERM : {

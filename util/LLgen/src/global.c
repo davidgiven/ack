@@ -33,6 +33,10 @@ p_token	maxt;
 int	ntokens;
 int	nterms, nalts;
 int	norder, torder;
+#ifdef NON_CORRECTING
+int	nsubstarts;
+p_set	start_firsts;
+#endif
 p_start	start;
 int	linecount;
 int	assval;
@@ -42,6 +46,9 @@ FILE	*finput;
 FILE	*fact;
 char	f_pars[] = PARSERFILE;
 char	f_temp[] = ACTFILE;
+#ifdef NON_CORRECTING
+char	f_nc[20];
+#endif
 char	f_out[20];
 string	f_input;
 char	f_include[20];
@@ -64,8 +71,19 @@ string	LLgenid = "/* LLgen generated code from source %s */\n";
 t_token lextoken;
 int	nerrors;
 string	rec_file, incl_file;
+#ifdef NON_CORRECTING
+string	nc_rec_file, nc_incl_file;
+#endif
 int	low_percentage = 10, high_percentage = 30;
 int	min_cases_for_jmptable = 8;
 int	jmptable_option;
 int	ansi_c = 0;
+#ifdef NON_CORRECTING
+int	non_corr = 0;
+int	subpars_sim = 0;
+p_gram	illegal_gram;
+#endif
 int	strip_grammar = 0;
+int	in_production;		/* set when the parser is reading a production
+				   rule.
+				*/

@@ -51,6 +51,9 @@ extern		gencode();
 STATIC		opentemp();
 STATIC		geninclude();
 STATIC		genrecovery();
+#ifdef NON_CORRECTING
+STATIC		genncrecovery();
+#endif
 STATIC string	genname();
 STATIC		generate();
 STATIC		prset();
@@ -109,18 +112,31 @@ genhdr()
 	else {
 		fputs("#if __STDC__ || __cplusplus\n#define LL_ANSI_C 1\n#endif\n", fpars);
 	}
+#ifdef NON_CORRECTING
+	if (non_corr) fputs("#define LL_NON_CORR 1\n", fpars);
+#endif
 	fprintf(fpars, "#define LL_LEXI %s\n", lexical);
 	copyfile(incl_file);
 }
 
 gencode(argc) {
 	register p_file p = files;
-	
+
 	/* Set up for code generation */
 	if ((fact = fopen(f_temp,"r")) == NULL) {
 		fatal(0,e_noopen,f_temp);
 	}
 
+#ifdef NON_CORRECTING
+	/* The non-correcting error recovery must be generated BEFORE
+	   parser code is generated!!!! In case of conflict resolvers,
+	   the code-generation process will delete conflicting symbols
+	   from first and followsets, making them UNUSABLE for the
+	   non-correcting error recovery code.
+	 */
+	if (non_corr)
+	    genncrecovery();
+#endif
 	/* For every source file .... */
 	while (argc--) {
 		/* Open temporary */
@@ -138,6 +154,7 @@ gencode(argc) {
 	}
 	geninclude();
 	genrecovery();
+
 	fclose(fact);
 }
 
@@ -167,13 +184,18 @@ geninclude() {
 	}
 	fprintf(fpars, "#define %s_MAXTOKNO %d\n", prefix ? prefix : "LL",
 		maxno);
+#ifdef NON_CORRECTING
+	if (non_corr) {
+		fprintf(fpars, "#define %sNONCORR\n", prefix ? prefix : "LL");
+	}
+#endif
 	doclose(fpars);
 	install(f_include, ".");
 }
 
 STATIC
 genrecovery() {
-	register FILE 	*f;
+	register FILE	*f;
 	register p_token t;
 	register int	*q;
 	register p_nont	p;
@@ -202,6 +224,12 @@ genrecovery() {
 		  i > 0 ? i : 1,
 		  ntokens);
 	if (onerror) fprintf(f,"#define LL_USERHOOK %s\n", onerror);
+#ifdef NON_CORRECTING
+	if (non_corr) {
+	    fputs("static int nc_done = 0;\n", f);
+	    fputs("static int err_seen = 0;\n", f);
+	}
+#endif
 	/* Now generate the routines that call the startsymbols */
 	fputs("#if LL_ANSI_C\n", f);
 	for (st = start; st; st = st->ff_next) {
@@ -214,7 +242,18 @@ genrecovery() {
 	for (st = start; st; st = st->ff_next) {
 		fprintf(f, "#if LL_ANSI_C\nvoid %s(void)\n#else\n%s()\n#endif\n", st->ff_name, st->ff_name);
 		p = &nonterms[st->ff_nont];
-		fputs(" {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];\n\tLLnewlevel(s);\n\tLLread();\n", f);
+		fputs(" {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];", f);
+#ifdef NON_CORRECTING
+		if (non_corr) {
+		    fputs(" \n\tint oldstartsymb;", f);
+		    fputs(" \n\tint oldncflag;", f);
+		    fputs(" \n\toldstartsymb = LLstartsymb;", f);
+		    fputs(" \n\toldncflag = nc_done;", f);
+		    fputs(" \n\tnc_done = 0;", f);
+		    fprintf(f, "\n\tLLstartsymb = %d;", st->ff_nont + assval);
+		}
+#endif
+		fputs("\n\tLLnewlevel(s);\n\tLLread();\n", f);
 		if (g_gettype(p->n_rule) == ALTERNATION) {
 			genpush(findindex(p->n_contains));
 		}
@@ -224,7 +263,18 @@ genrecovery() {
 			fputs("\tLL_NOSCANDONE(EOFILE);\n",f);
 		}
 		else	fputs("\tLL_SCANDONE(EOFILE);\n",f);
-		fputs("\tLLoldlevel(s);\n}\n",f);
+		fputs("\tLLoldlevel(s);\n",f);
+#ifdef NON_CORRECTING
+		if (non_corr) {
+		    fputs("\tLLstartsymb = oldstartsymb;\n", f);
+		    fputs("\tif (nc_done == 1) { \n", f);
+		    fputs("\t\terr_seen = 1;\n", f);
+		    fputs("\tnc_done = oldncflag;\n", f);
+		    fputs("\t}\n", f);
+		}
+#endif
+		fputs("}\n", f);
+
 	}
 	/* Now generate the sets */
 	fputs("static char LLsets[] = {\n",f);
@@ -254,6 +304,46 @@ genrecovery() {
 	install(f_rec, ".");
 }
 
+#ifdef NON_CORRECTING
+STATIC
+genncrecovery() {
+    register FILE    *f;
+    register p_token  t;
+    register int     *q;
+    int		     *index;
+
+    /* Generate the non-correcting error recovery file */
+
+    opentemp((string) 0);
+    f = fpars;
+
+    genhdr();
+    correct_prefix();
+    save_grammar(f);
+
+    fprintf(f, "#define LLFIRST_NT %d\n", assval);
+    fprintf(f, "#define LLSETSIZE %d\n", nbytes);
+
+    index = (int *) alloc((unsigned) (assval * sizeof(int)));
+    for (q = index; q < &index[assval];) *q++ = -1;
+    for (t = tokens; t < maxt; t++) {
+	index[t->t_tokno] = t - tokens;
+    }
+    fputs("#define LLindex (LL_index+1)\nstatic short LL_index[] = {0,0,\n",f);
+    for (q = index+1; q < &index[assval]; q++) {
+	fprintf(f, "%d,\n", *q);
+    }
+    fputs(c_arrend, f);
+    free((p_mem) index);
+
+    copyfile(nc_incl_file);
+    copyfile(nc_rec_file);
+
+    doclose(f);
+    install(f_nc, ".");
+}
+#endif
+
 STATIC
 generate(f) p_file f; {
 	/*
@@ -272,7 +362,7 @@ generate(f) p_file f; {
 	for (ff = f->f_firsts; ff; ff = ff->ff_next) {
 		macro(ff->ff_name,&nonterms[ff->ff_nont]);
 	}
-	
+
 	/* For every nonterminal generate a function */
 	for (s = f->f_nonterminals; s != -1; s = p->n_next) {
 		p = &nonterms[s];
@@ -378,7 +468,7 @@ STATIC
 getparams() {
 	/* getparams is called if a nonterminal has parameters. The names
 	 * of the parameters have to be found, and they should be declared
- 	 */
+	 */
 	long off;
 	register int l;
 	long ftell();
@@ -407,7 +497,7 @@ getparams() {
 	}
 	fputs(") ",fpars);
 	/*
-	 * Now copy the declarations 
+	 * Now copy the declarations
 	 */
 	l = getc(fact);		/* patch: some implementations of fseek
 				   do not work properly after "ungetc"
@@ -469,7 +559,7 @@ getansiparams(mkdef) {
 	/* getansiparams is called if a nonterminal has parameters
 	 * and an ANSI C function definition/declaration has to be produced.
 	 * If a definition has to be produced, "mkdef" is set to 1.
- 	 */
+	 */
 	register int l;
 	int delayed = 0;
 
@@ -911,7 +1001,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	int		term_is_persistent = (q->t_flags & PERSISTENT);
 	int		ispushed = NOPOP;
 
-	if (!(toplevel > 0 && 
+	if (!(toplevel > 0 &&
 	      (safety == 0 || (!onerror && safety <= SAFESCANDONE)) &&
 	    (rep_kind == OPT || (rep_kind == FIXED && rep_count == 0)))) {
 		ispushed = findindex(q->t_contains);
@@ -1091,21 +1181,21 @@ genswhead(q, rep_kind, rep_count, safety, ispushed) register p_term q; {
 
 STATIC
 gencases(tokenlist, caseno, compacted)
-	int 	*tokenlist;
+	int	*tokenlist;
 {
 	/*
 	 * setp points to a bitset indicating which cases must
 	 * be generated.
-	 * YECH, the PCC compiler does not accept many cases without statements
-	 * inbetween, so after every case label an empty statement is
-	 * generated.
+	 * YECH, the PCC compiler does not accept many cases without
+	 * statements in between, so after every case label an empty
+	 * statement is generated.
 	 * The C-grammar used by PCC is really stupid on this point :
 	 * it contains the rule
-	 * 	statement : label statement
+	 *	statement : label statement
 	 * which is right-recursive, and as is well known, LALR parsers don't
-	 * handle these things very good.
+	 * handle these things very well.
 	 * The grammar should have been written :
-	 * 	labeledstatement : labels statement ;
+	 *	labeledstatement : labels statement ;
 	 *	labels : labels label | ;
 	 */
 	register p_token p;
@@ -1119,7 +1209,7 @@ gencases(tokenlist, caseno, compacted)
 				   (p->t_tokno < 0400 ? "/* case '%s' */\n" :
 							"/* case %s */\n") :
 				   p->t_tokno<0400 ? "case /* '%s' */ %d : ;\n"
-					        : "case /*  %s  */ %d : ;\n",
+						: "case /*  %s  */ %d : ;\n",
 				p->t_string, i);
 		}
 	}
@@ -1220,10 +1310,10 @@ out_list(tokenlist, listno, casecnt)
 	register int i;
 	register FILE *f = fpars;
 
-	fprintf(f, "static %s LL%d_tklist[] = {", 
+	fprintf(f, "static %s LL%d_tklist[] = {",
 		casecnt <= 127 ? "char" : "short",
 		listno);
-	
+
 	for (i = 0; i < ntokens; i++) {
 		fprintf(f, "%c%d,", i % 10 == 0 ? '\n': ' ', tokenlist[i]);
 	}
@@ -1260,6 +1350,10 @@ correct_prefix()
 		fprintf(f, "#define LLnewlevel %snewlevel\n", s);
 		fprintf(f, "#define LLoldlevel %soldlevel\n", s);
 		fprintf(f, "#define LLmessage %smessage\n", s);
+#ifdef NON_CORRECTING
+		fprintf(f, "#define LLnc_recovery %sncrecovery\n", s);
+		fprintf(f, "#define LLstartsymb %sstartsymb\n", s);
+#endif
 	}
 	fprintf(f, "#include \"%s\"\n", f_include);
 }

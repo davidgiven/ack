@@ -14,7 +14,7 @@
 /*
  * tokens.g
  * Defines the tokens for the grammar of LLgen.
- * The lexical analyser and LLmessage are also included here. 
+ * The lexical analyser and LLmessage are also included here.
  */
 
 {
@@ -30,7 +30,7 @@ static string	rcsidc = "$Id$";
 
 /* Here are defined : */
 extern int	scanner();
-extern 		LLmessage();
+extern		LLmessage();
 extern int	input();
 extern		unput();
 extern		skipcomment();
@@ -39,12 +39,18 @@ STATIC		linedirective();
 # endif
 STATIC string	cpy();
 STATIC string	vallookup();
+STATIC		copyact();
+
+static int	nparams;
 }
 /* Classes */
 
-%token  C_IDENT ;	/* lextoken.t_string contains the identifier read */
+%token	C_IDENT ;	/* lextoken.t_string contains the identifier read */
 %token	C_NUMBER ;	/* lextoken.t_num contains the number read */
 %token	C_LITERAL ;	/* lextoken.t_string contains the literal read */
+%token	C_EXPR ;	/* A C expression (%if or %while) */
+%token	C_PARAMS ;	/* formal or actual parameters */
+%token	C_ACTION ;	/* a C action */
 
 /* Keywords */
 
@@ -60,6 +66,9 @@ STATIC string	vallookup();
 %token	C_AVOID ;
 %token	C_PREFER ;
 %token	C_DEFAULT ;
+%token	C_SUBSTART ;
+%token	C_ERRONEOUS ;
+%token	C_ILLEGAL ;
 
 %lexical scanner ;
 
@@ -80,25 +89,142 @@ typedef struct keyword {
  */
 
 static t_keyw resword[] = {
-	{ "token",	C_TOKEN	},
-	{ "avoid",	C_AVOID	},
+	{ "token",	C_TOKEN		},
+	{ "avoid",	C_AVOID		},
 	{ "prefer",	C_PREFER	},
 	{ "persistent", C_PERSISTENT	},
 	{ "default",	C_DEFAULT	},
-	{ "if",		C_IF	},
-	{ "while",	C_WHILE	},
-	{ "first",	C_FIRST	},
-	{ "start",	C_START	},
+	{ "if",		C_IF		},
+	{ "while",	C_WHILE		},
+	{ "first",	C_FIRST		},
+	{ "start",	C_START		},
 	{ "lexical",	C_LEXICAL	},
 	{ "onerror",	C_ONERROR	},
 	{ "prefix",	C_PREFIX	},
-	{ 0,		0	}
+#ifdef NON_CORRECTING
+	{ "substart",	C_SUBSTART	},
+	{ "erroneous",	C_ERRONEOUS	},
+	{ "illegal",	C_ILLEGAL	},
+#endif
+	{ 0,		0		}
 };
 
 static t_token	savedtok;	/* to save lextoken in case of an insertion */
 # ifdef LINE_DIRECTIVE
-static  int	nostartline;	/* = 0 if at the start of a line */
+static	int	nostartline;	/* = 0 if at the start of a line */
 # endif
+
+STATIC
+copyact(ch1,ch2,flag,level) char ch1,ch2; {
+	/*
+	 * Copy an action to file f. Opening bracket is ch1, closing bracket
+	 * is ch2.
+	 * If flag & 1, copy opening and closing parameters too.
+	 * If flag & 2, don't allow ','.
+	 */
+	static int	text_seen = 0;
+	register	FILE *f;
+	register	ch;		/* Current char */
+	register	match;		/* used to read strings */
+	int		saved = linecount;
+					/* save linecount */
+	int		sav_strip = strip_grammar;
+
+	f = fact;
+	if (ch1 == '{' || flag != 1) strip_grammar = 0;
+	if (!level) {
+		text_seen = 0;
+		nparams = 0;			/* count comma's */
+		putc('\0',f);
+		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
+	}
+	if (level || (flag & 1)) putc(ch1,f);
+	for (;;) {
+		ch = input();
+		if (ch == ch2) {
+			if (!level) {
+				if (text_seen) nparams++;
+			}
+			if (level || (flag & 1)) putc(ch,f);
+			if (strip_grammar != sav_strip) {
+				if (ch1 == '{' || flag != 1) putchar(ch);
+			}
+			strip_grammar = sav_strip;
+			return;
+		}
+		switch(ch) {
+		  case ')':
+		  case '}':
+		  case ']':
+			error(linecount,"Parentheses mismatch");
+			break;
+		  case '(':
+			text_seen = 1;
+			copyact('(',')',flag,level+1);
+			continue;
+		  case '{':
+			text_seen = 1;
+			copyact('{','}',flag,level+1);
+			continue;
+		  case '[':
+			text_seen = 1;
+			copyact('[',']',flag,level+1);
+			continue;
+		  case '/':
+			ch = input();
+			unput(ch);
+			if (ch == '*') {
+				putc('/', f);
+				skipcomment(1);
+				continue;
+			}
+			ch = '/';
+			text_seen = 1;
+			break;
+		  case ';':
+		  case ',':
+			if (! level && text_seen) {
+				text_seen = 0;
+				nparams++;
+				if (ch == ',' && (flag & 2)) {
+					warning(linecount, "Parameters may not be separated with a ','");
+					ch = ';';
+				}
+			}
+			break;
+		  case '\'':
+		  case '"' :
+			/*
+			 * watch out for brackets in strings, they do not
+			 * count !
+			 */
+			text_seen = 1;
+			match = ch;
+			putc(ch,f);
+			while((ch = input())) {
+				if (ch == match) break;
+				if (ch == '\\') {
+					putc(ch,f);
+					ch = input();
+				}
+				if (ch == '\n') {
+					error(linecount,"Newline in string");
+					unput(match);
+				}
+				putc(ch,f);
+			}
+			if (ch == match) break;
+			/* Fall through */
+		    case EOF :
+			if (!level) error(saved,"Action does not terminate");
+			strip_grammar = sav_strip;
+			return;
+		    default:
+			if (c_class[ch] != ISSPA) text_seen = 1;
+		}
+		putc(ch,f);
+	}
+}
 
 scanner() {
 	/*
@@ -108,7 +234,11 @@ scanner() {
 	register char *p = ltext;
 	int		reserved = 0;	/* reserved word? */
 	char		*max = &ltext[LTEXTSZ - 1];
+	static int	nextexpr;
+	int		expect_expr = nextexpr;
+	long		off;
 
+	nextexpr = 0;
 	if (savedtok.t_tokno) {
 				/* A token has been inserted.
 				 * Now deliver the last lextoken again
@@ -127,6 +257,21 @@ scanner() {
 		}
 # endif
 		switch(c_class[ch]) {
+		  case ISACT :
+			if (ch == '{') {
+				copyact('{', '}', in_production, 0);
+				return C_ACTION;
+			}
+			assert(ch == '(');
+			if (expect_expr) {
+				copyact('(', ')', 1, 0);
+				return C_EXPR;
+			}
+			off = ftell(fact);
+			copyact('(', ')', in_production != 0 ? 0 : 2, 0);
+			if (nparams == 0) fseek(fact, off, 0);
+			lextoken.t_num = nparams;
+			return C_PARAMS;
 		  case ISLIT :
 			for (;;) {
 				ch = input();
@@ -177,7 +322,7 @@ scanner() {
 			unput(ch);
 			*p = '\0';
 			if (reserved) {	/*
-			 		 * Now search for the keyword
+					 * Now search for the keyword
 					 */
 				register p_keyw w;
 
@@ -187,6 +332,10 @@ scanner() {
 						/*
 						 * Return token number.
 						 */
+						if (w->w_value == C_IF ||
+						    w->w_value == C_WHILE) {
+							nextexpr = 1;
+						}
 						return w->w_value;
 					}
 					w++;
@@ -208,11 +357,11 @@ input() {
 	 */
 	register	c;
 
-        if (c = backupc) {
+	if (c = backupc) {
 			/* Last char was "unput()". Deliver it again
 			 */
 		backupc = 0;
-                return c;
+		return c;
 	}
 	if ((c = getc(finput)) == EOF) {
 		nonline = 0;
@@ -337,7 +486,7 @@ cpy(s,p,inserted) register string p; {
 	register string t = 0;
 
 	switch(s) {
-	  case C_IDENT : 	
+	  case C_IDENT :
 		if (!inserted) t = lextoken.t_string;
 		else t = "identifier";
 		break;
@@ -353,7 +502,7 @@ cpy(s,p,inserted) register string p; {
 		t = "literal";
 		break;
 	  case EOFILE :
-		t = "endoffile";
+		t = "end-of-file";
 		break;
 	}
 	if (!t && (t = vallookup(s))) {
@@ -382,12 +531,14 @@ cpy(s,p,inserted) register string p; {
 	      case '\r' : *p++ = 'r'; break;
 	      case '\t' : *p++ = 't'; break;
 	      default : *p++='0'+((s&0377)>>6); *p++='0'+((s>>3)&07);
-		        *p++='0'+(s&07);
+			*p++='0'+(s&07);
 	    }
 	}
 	*p++ = '\'';
 	return p;
 }
+
+string strcpy();
 
 LLmessage(d) {
 	/*
@@ -400,9 +551,16 @@ LLmessage(d) {
 
 	nerrors++;
 	s = buf;
-	if (d == 0) {
-		s = cpy(LLsymb,s,0);
+	if (d < 0) {
+		strcpy(buf, "end-of-file expected");
+	}
+	else if (d == 0) {
+#ifdef LLNONCORR
+		t = " unexpected";
+#else
 		t = " deleted";
+#endif
+		s = cpy(LLsymb,s,0);
 		do *s++ = *t; while (*t++);
 	} else {
 		s = cpy(d,s,1);
@@ -411,12 +569,7 @@ LLmessage(d) {
 		s = cpy(LLsymb,s,0);
 		*s = '\0';
 	}
-	error(linecount, "%s", buf);
-			/* Don't change this line to 
-			 * error(linecount, buf).
-			 * The string in "buf" might contain '%' ...
-			 */
-	if (d) {	/*
+	if (d > 0) {	/*
 			 * Save the current token and make up some
 			 * attributes for the inserted token
 			 */
@@ -426,5 +579,17 @@ LLmessage(d) {
 		else if (d == C_LITERAL) lextoken.t_string = "dummy_literal";
 		else if (d == C_NUMBER) lextoken.t_num = 1;
 	}
+#ifdef LLNONCORR
+	else
+#endif
+	error(linecount, "%s", buf);
+			/* Don't change this line to 
+			 * error(linecount, buf).
+			 * The string in "buf" might contain '%' ...
+			 */
+#ifdef LLNONCORR
+	in_production = 1;
+			/* To prevent warnings from copyact */
+#endif
 }
 }

@@ -40,12 +40,20 @@ typedef struct token {
  * structure for the grammar elements
  */
 typedef struct gram {
-	short	x;		/* for lay-out see comment below */
-	short	g_lineno;	/* element found on this line number */
+	int	x;		/* for lay-out see comment below */
+	int	g_lineno;	/* element found on this line number */
+#ifdef NON_CORRECTING
+	int	g_erroneous;	/* 1 if element declared erroneous */
+#endif
 	union {
 		int	g_index;
 		struct term *	g_term;
 		struct link *	g_link;
+#ifdef NON_CORRECTING
+		/* If this is an action with a %substart g_subparse
+		   points to the list of startsymbols of the subparser */
+		struct ff_firsts *g_subparse;
+#endif
 	} g_i;
 } t_gram,*p_gram;
 
@@ -78,7 +86,10 @@ typedef struct gram {
 # define g_setterm(p,s)	((p)->g_i.g_term = (s))
 # define g_setlink(p,s)	((p)->g_i.g_link = (s))
 # define g_setnpar(p,s) { assert(((unsigned)(s))<=017);(p)->x=((p)->x&~0170)|((s)<<3);}
-
+#ifdef NON_CORRECTING
+# define g_getsubparse(p)	((p)->g_i.g_subparse)
+# define g_setsubparse(p,s)	((p)->g_i.g_subparse = (s))
+#endif
 /*
  * Some constants to communicate with the symbol table search routine
  */
@@ -101,7 +112,7 @@ typedef struct gram {
  * nonterminal structure
  */
 typedef	struct {
-	short	n_flags;	/* low order four bits are reserved
+	int	n_flags;	/* low order four bits are reserved
 				 * the parameter count
 				 */
 # define getntparams(p)	((p)->n_flags&017)
@@ -110,7 +121,7 @@ typedef	struct {
 # define RECURSIVE	02000	/* Set if the default rule is recursive */
 # define PARAMS		04000	/* tells if a nonterminal has parameters */
 # define EMPTY		010000	/* tells if a nonterminal produces empty */
-# define LOCALS		020000  /* local declarations ? */
+# define LOCALS		020000	/* local declarations ? */
 # define REACHABLE	040000	/* can this nonterminal be reached ? */
 # define VERBOSE	0100000	/* Set if in LL.output file */
 	char	n_insafety;
@@ -119,8 +130,8 @@ typedef	struct {
 # define setntsafe(p,i)	{assert(((unsigned)(i))<=NOSAFETY);(p)->n_insafety=(i);}
 # define getntout(p)	((p)->n_outsafety)
 # define setntout(p,i)	{assert(((unsigned)(i))<=NOSAFETY);(p)->n_outsafety=(i);}
-	short	n_count;	/* pieces of code before this rule */
-	short	n_lineno;	/* declared on line ... */
+	int	n_count;	/* pieces of code before this rule */
+	int	n_lineno;	/* declared on line ... */
 	p_gram	n_rule;		/* pointer to right hand side of rule */
 	union {
 		p_set	n_f;	/* ptr to "first" set */
@@ -131,6 +142,10 @@ typedef	struct {
 	} n_x;
 # define n_first  n_x.n_f
 # define n_string n_x.n_s
+#ifdef NON_CORRECTING
+	p_set	n_nc_first;	/* Pointer to non-corr first set */
+	p_set	n_nc_follow;	/* Pointer to non-corr follow set */
+#endif
 	p_set	n_follow;	/* pointer to the "follow" set	*/
 	p_set	n_contains;	/* pointer to symbols that can be produced */
 	string	n_name;		/* name of nonterminal */
@@ -138,7 +153,7 @@ typedef	struct {
 	long	n_off;		/* index of parameters in action file */
 } t_nont, *p_nont;
 
-/* 
+/*
  * hash table structure
  */
 typedef struct h_entry {
@@ -161,13 +176,16 @@ typedef struct link {
 					 */
 	p_gram		l_rule;		/* pointer to this rule	*/
 	p_set		l_symbs;	/* set,	when to take this rule */
+#ifdef NON_CORRECTING
+	p_set		l_nc_symbs;
+#endif
 	p_set		l_others;	/* set, when to take another rule */
 } t_link, *p_link;
 
 /*
  * Structure for a repitition specification
  */
-typedef short t_reps,*p_reps;
+typedef int t_reps,*p_reps;
 
 # define FIXED		00	/* a fixed number */
 # define STAR		01	/* 0 or more times */
@@ -187,7 +205,7 @@ typedef short t_reps,*p_reps;
  */
 typedef struct term {
 	t_reps	t_repeats;
-	short	t_flags;	/* Low order three bits for safety */
+	int	t_flags;	/* Low order three bits for safety */
 # define gettout(q)	((q)->t_flags&07)
 # define settout(q,i)	{assert(((unsigned)(i))<=NOSAFETY);(q)->t_flags&=~07;(q)->t_flags|=i;}
 # define PERSISTENT	010	/* Set if this term has %persistent */
@@ -199,6 +217,10 @@ typedef struct term {
 	p_gram	t_rule;		/* pointer to this term	*/
 	p_set	t_follow;	/* set of followers */
 	p_set	t_first;	/* set of firsts */
+#ifdef NON_CORRECTING
+	p_set	t_nc_first;	/* set of non corr firsts */
+	p_set	t_nc_follow;	/* set of non corr followers */
+#endif
 	p_set	t_contains;	/* contains set */
 } t_term, *p_term;
 

@@ -51,6 +51,9 @@ name_init() {
 	nont_info.i_esize = sizeof (t_nont);
 	nont_info.i_incr = 50;
 	search(TERMINAL,"EOFILE",ENTERING);
+#ifdef NON_CORRECTING
+	illegal_gram = search(TERMINAL,"LLILLEGAL",ENTERING);
+#endif
 }
 
 STATIC p_entry
@@ -65,10 +68,13 @@ newentry(str, next) string str; p_entry next; {
 	p->h_name = str;
 	p->h_next = next;
 	p->h_type.g_lineno = linecount;
+#ifdef NON_CORRECTING
+	p->h_type.g_erroneous = 0;
+#endif
 	return p;
 }
 
-string	
+string
 store(s) string s; {
 	/*
 	 * Store a string s in the name table
@@ -147,14 +153,14 @@ search(type,str,option) register string str; {
 					"%s : is already defined",str);
 			}
 			p->h_type.g_lineno = linecount;
-			return &(p->h_type);			
+			return &(p->h_type);
 		}
 	}
 	p = newentry(store(str), h_root[i]);
 	h_root[i] = p;
 	if (type == TERMINAL || type == LITERAL) {
 		register p_token pt;
-		
+
 		pt = (p_token) new_mem(&token_info);
 		tokens = (p_token) token_info.i_ptr;
 		pt->t_string = p->h_name;
@@ -166,7 +172,7 @@ search(type,str,option) register string str; {
 				if (str[2] == '\0') {
 					switch(str[1]) {
 					  case 'n' :
-					  	val = '\n';
+						val = '\n';
 						break;
 					  case 'r' :
 						val = '\r';
@@ -175,19 +181,19 @@ search(type,str,option) register string str; {
 						val = '\b';
 						break;
 					  case 'f' :
-					 	val = '\f';
+						val = '\f';
 						break;
 					  case 't' :
-					  	val = '\t';
+						val = '\t';
 						break;
 					  case '\'':
-					  	val = '\'';
+						val = '\'';
 						break;
 					  case '\\':
-					  	val = '\\';
+						val = '\\';
 						break;
 					  default  :
-					  	error(linecount,e_literal);
+						error(linecount,e_literal);
 					}
 				} else {
 					/*
@@ -200,7 +206,7 @@ search(type,str,option) register string str; {
 					val = 64*str[1] - 73*'0' +
 					      8*str[2] + str[3];
 				}
-			} else { 
+			} else {
 				/*
 				 * No escape in literal
 				 */
@@ -221,7 +227,7 @@ search(type,str,option) register string str; {
 		return &(p->h_type);
 	}
 	/*
-	 * type == NONTERM || type == UNKNOWN 
+	 * type == NONTERM || type == UNKNOWN
 	 * UNKNOWN and not yet declared means : NONTERM
 	 */
 	{

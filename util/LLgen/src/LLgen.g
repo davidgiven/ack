@@ -32,9 +32,7 @@ string		store();
 p_gram		search();
 long		ftell();
 
-static int	nparams;		/* parameter count for nonterminals */
 static int	acount;			/* count #of global actions */
-static int	order;
 static p_term t_list;
 static int t_cnt;
 static p_gram	alt_table;
@@ -48,9 +46,8 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC 		newnorder();
-STATIC 		newtorder();
-STATIC		copyact();
+STATIC		newnorder();
+STATIC		newtorder();
 STATIC		mkalt();
 STATIC		mkterm();
 STATIC p_gram	copyrule();
@@ -169,13 +166,20 @@ def			{	register string p; }
 			}
 	  ';'
 	| C_ONERROR C_IDENT
-			{	if (! onerror) {
+			{
+#ifdef NON_CORRECTING
+				if (non_corr) {
+					warning(linecount, "%%onerror conflicts with -n option");
+				}
+				else
+#endif
+				  if (! onerror) {
 					onerror = store(lextoken.t_string);
 				}
 				else	error(linecount,"Duplicate %%onerror");
 			}
 	  ';'
-	| action(0)	{	acount++; }
+	| C_ACTION	{	acount++; }
 	  /*
 	   * A global C-declaration
 	   */
@@ -216,32 +220,25 @@ rule			{	register p_nont p;
 				p->n_lineno = linecount;
 				p->n_off = ftell(fact);
 			}
-	  [ params(1)	{	if (nparams > 0) {
+	  [ C_PARAMS	{	if (lextoken.t_num > 0) {
 					p->n_flags |= PARAMS;
-					if (nparams > 15) {
+					if (lextoken.t_num > 15) {
 						error(linecount,"Too many parameters");
 					}
-					else	setntparams(p,nparams);
+					else	setntparams(p,lextoken.t_num);
 				}
 			}
 	  ]?
-	  [ action(0)	{	p->n_flags |= LOCALS; }
+	  [ C_ACTION	{	p->n_flags |= LOCALS; }
 	  ]?
-	  ':' productions(&rr) ';'
+	  ':' 		{ 	in_production = 1; }
+	  productions(&rr) ';'
+			{	in_production = 0; }
 			/*
 			 * Do not use p->n_rule now! The nonterms array
 			 * might have been re-allocated.
 			 */
 			{	nonterms[g_getcont(temp)].n_rule = rr;}
-	;
-
-action(int n;)
-	/*
-	 * The parameter n is non-zero when the opening and closing
-	 * bracket must be copied along with the action
-	 */
-	: '{'		{	copyact('{','}',n,0); }
-	  '}'
 	;
 
 productions(p_gram *p;)
@@ -280,7 +277,7 @@ productions(p_gram *p;)
 				t = 0;
 				*p = prod;
 			}
-	    ]+		{	if (conflres & ~DEF) {
+	    ]+		{	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(n_lc,
 		"Resolver on last alternative not allowed");
 				}
@@ -290,7 +287,7 @@ productions(p_gram *p;)
 				*p = copyrule(&alt_table[n_alts-altcnt],altcnt+1);
 			}
 	  |
-			{	if (conflres & ~DEF) {
+			{	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(o_lc,
 		"No alternation conflict resolver allowed here");
 				}
@@ -336,15 +333,31 @@ simpleproduction(p_gram *p; register int *conflres;)
 		int		cnt, kind;
 		int		termdeleted = 0;
 	} :
-	  [ C_DEFAULT	{	*conflres = DEF; }
+	  [ C_DEFAULT	{	*conflres |= DEF; }
 	  ]?
 	  [
 	    /*
 	     * Optional conflict reslover
 	     */
-	      C_IF expr {	*conflres |= COND; }
+	      C_IF C_EXPR {	*conflres |= COND; }
 	    | C_PREFER	{	*conflres |= PREFERING; }
 	    | C_AVOID	{	*conflres |= AVOIDING; }
+	  ]?
+	  [ C_ILLEGAL	{
+#ifdef NON_CORRECTING
+				if (n_rules >= max_rules-2) {
+					rule_table = (p_gram) ralloc(
+						  (p_mem) rule_table,
+						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
+				}
+				elmcnt++;
+				rule_table[n_rules++] =
+				    *search(TERMINAL, "LLILLEGAL", BOTH);
+				if (*conflres & DEF) {
+					error(linecount, "%%illegal not allowed in %%default rule");
+				}
+#endif
+			}
 	  ]?
 	  [ %persistent elem(&elem)
 			{	if (n_rules >= max_rules-2) {
@@ -467,9 +480,12 @@ elem (register p_gram pres;)
 		p_gram		p1;
 		int		ln;
 		p_gram		pe;
+#ifdef NON_CORRECTING
+		int		erroneous = 0;
+#endif
 	} :
 	  '['		{	ln = linecount; }
-	  [ C_WHILE expr	{	t |= RESOLVER; }
+	  [ C_WHILE C_EXPR	{	t |= RESOLVER; }
 	  ]?
 	  [ C_PERSISTENT	{	t |= PERSISTENT; }
 	  ]?
@@ -478,12 +494,32 @@ elem (register p_gram pres;)
 				mkterm(p1,t,ln,pres);
 			}
 	|
+	  [ C_ERRONEOUS		{
+#ifdef NON_CORRECTING
+					erroneous = 1;
+#endif
+				}
+	  ]?
+
+	  [
 	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
+#ifdef NON_CORRECTING
+				if (erroneous) {
+					if (g_gettype(pres) != TERMINAL){
+						warning(linecount,
+							"Erroneous only allowed on terminal");
+						erroneous = 0;
+					}
+					else
+						pres->g_erroneous = 1;
+				}
+#endif
+
 			}
-	  [ params(0)	{	if (nparams > 15) {
+	  [ C_PARAMS	{	if (lextoken.t_num > 15) {
 					error(linecount,"Too many parameters");
-				} else	g_setnpar(pres,nparams);
+				} else	g_setnpar(pres,lextoken.t_num);
 				if (g_gettype(pres) == TERMINAL) {
 					error(linecount,
 						"Terminal with parameters");
@@ -492,27 +528,73 @@ elem (register p_gram pres;)
 	  ]?
 	| C_LITERAL	{	pe = search(LITERAL,lextoken.t_string,BOTH);
 				*pres = *pe;
+#ifdef NON_CORRECTING
+				if (erroneous)
+					pres->g_erroneous = 1;
+#endif
 			}
+	  ]
 	|		{	g_settype(pres,ACTION);
 				pres->g_lineno = linecount;
+#ifdef NON_CORRECTING
+				g_setsubparse(pres, (p_start) 0);
+#endif
 			}
-	  action(1)
-	;
 
-params(int formal)
-{
-	long off = ftell(fact);
-}
-	: '('		{	copyact('(', ')', formal ? 2 : 0, 0); }
-	  ')'
-			{	if (nparams == 0) {
-					fseek(fact, off, 0);
+	  [ C_SUBSTART
+
+			{
+#ifdef NON_CORRECTING
+				nsubstarts++;
+#endif
+			}
+
+	    C_IDENT
+			{
+#ifdef NON_CORRECTING
+				register p_gram temp;
+				register p_start subp;
+
+				temp = search(NONTERM,lextoken.t_string,BOTH);
+				subp = (p_start) alloc (sizeof(t_start));
+
+				subp->ff_nont = g_getcont(temp);
+				subp->ff_name = (string) 0;
+				subp->ff_next = (p_start) 0;
+				g_setsubparse(pres, subp);
+#endif
+			}
+
+		[ ',' C_IDENT
+			{
+#ifdef NON_CORRECTING
+				register p_gram temp;
+				register p_start ff;
+
+				temp = search(NONTERM,lextoken.t_string,BOTH);
+
+				ff = g_getsubparse(pres);
+				while (ff) {
+					if (ff->ff_nont == g_getcont(temp)) {
+						warning(linecount, "\"%s\" used twice in %%substart", lextoken.t_string);
+						break;
+					}
+					ff = ff->ff_next;
+
 				}
-			}
-	;
 
-expr	: '('		{	copyact('(',')',1,0); }
-	  ')'
+				ff = (p_start) alloc(sizeof(t_start));
+				ff->ff_nont = g_getcont(temp);
+				ff->ff_name = (string) 0;
+				ff->ff_next = g_getsubparse(pres);
+				g_setsubparse(pres, ff);
+#endif
+			}
+
+	       ]* ';'
+	   ]?
+
+	  C_ACTION
 	;
 
 repeats(int *kind; int *cnt;)	{	int t1 = 0; } :
@@ -561,119 +643,6 @@ firsts	{	register string p; }
 			}
 	;
 {
-
-STATIC
-copyact(ch1,ch2,flag,level) char ch1,ch2; {
-	/*
-	 * Copy an action to file f. Opening bracket is ch1, closing bracket
-	 * is ch2.
-	 * If flag & 1, copy opening and closing parameters too.
-	 * If flag & 2, don't allow ','.
-	 */
-	static int	text_seen = 0;
-	register	FILE *f;
-	register	ch;		/* Current char */
-	register	match;		/* used to read strings */
-	int		saved;		/* save linecount */
-	int		sav_strip = strip_grammar;
-
-	f = fact;
-	if (ch1 == '{' || flag != 1) strip_grammar = 0;
-	if (!level) {
-		saved = linecount;
-		text_seen = 0;
-		nparams = 0;			/* count comma's */
-		putc('\0',f);
-		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
-	}
-	if (level || (flag & 1)) putc(ch1,f);
-	for (;;) {
-		ch = input();
-		if (ch == ch2) {
-			if (!level) {
-				unput(ch);
-				if (text_seen) nparams++;
-			}
-			if (level || (flag & 1)) putc(ch,f);
-			if (strip_grammar != sav_strip) {
-				if (ch1 == '{' || flag != 1) putchar(ch);
-			}
-			strip_grammar = sav_strip;
-			return;
-		}
-		switch(ch) {
-		  case ')':
-		  case '}':
-		  case ']':
-			error(linecount,"Parentheses mismatch");
-			break;
-		  case '(':
-			text_seen = 1;
-			copyact('(',')',flag,level+1);
-			continue;
-		  case '{':
-			text_seen = 1;
-			copyact('{','}',flag,level+1);
-			continue;
-		  case '[':
-			text_seen = 1;
-			copyact('[',']',flag,level+1);
-			continue;
-		  case '/':
-			ch = input();
-			unput(ch);
-			if (ch == '*') {
-				putc('/', f);
-				skipcomment(1);
-				continue;
-			}
-			ch = '/';
-			text_seen = 1;
-			break;
-		  case ';':
-		  case ',':
-			if (! level && text_seen) {
-				text_seen = 0;
-				nparams++;
-				if (ch == ',' && (flag & 2)) {
-					warning(linecount, "Parameters may not be separated with a ','");
-					ch = ';';
-				}
-			}
-			break;
-		  case '\'':
-		  case '"' :
-			/*
-			 * watch out for brackets in strings, they do not
-			 * count !
-			 */
-			text_seen = 1;
-			match = ch;
-			putc(ch,f);
-			while((ch = input())) {
-				if (ch == match) break;
-				if (ch == '\\') {
-					putc(ch,f);
-					ch = input();
-				}
-				if (ch == '\n') {
-					error(linecount,"Newline in string");
-					unput(match);
-				}
-				putc(ch,f);
-			}
-			if (ch == match) break;
-			/* Fall through */
-		    case EOF :
-			if (!level) error(saved,"Action does not terminate");
-			strip_grammar = sav_strip;
-			return;
-		    default:
-			if (c_class[ch] != ISSPA) text_seen = 1;
-		}
-		putc(ch,f);
-	}
-}
 
 STATIC p_gram
 copyrule(p,length) register p_gram p; {

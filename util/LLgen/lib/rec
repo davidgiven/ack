@@ -12,6 +12,11 @@ unsigned int	LLscnt[LL_NSETS];
 int		LLcsymb, LLsymb;
 static int	LLlevel;
 
+#if LL_NON_CORR
+int		LLstartsymb;
+static int	fake_eof = 0;
+#endif
+
 #if LL_ANSI_C
 #define LL_VOIDCST (void)
 void	LLmessage(int);
@@ -39,7 +44,38 @@ LLscan(t)
 	/*
 	 * Check if the next symbol is equal to the parameter
 	 */
+
+#if LL_NON_CORR
+	/* See if the error recovery has eaten an eof */
+	if (fake_eof) {
+		LLsymb = EOFILE;
+		fake_eof = 0;
+	}
+	else {
+		LLsymb = LL_LEXI();
+	}
+
+	if (LLsymb == t) {
+#else
 	if ((LLsymb = LL_LEXI()) == t) {
+#endif
+
+#if LL_NON_CORR
+		/* Check if a previous parser has 'crashed', in that
+		 * case continue with non-correcting parser 
+		 */
+		if (err_seen && !nc_done) {
+			LLnc_recover();
+			nc_done = 1;
+			/* Remember that the error recovery has eaten an eof */
+			fake_eof = 1;
+			if (t != LLsymb) {
+				LLerror(t);
+			}
+			else
+				return;
+		}
+#endif
 		return;
 	}
 	/*
@@ -54,6 +90,31 @@ void LLread(void) {
 #else
 LLread() {
 #endif
+
+#if LL_NON_CORR
+	/* Again, check if another parser has crashed,
+	 * in that case intercept and go to the
+	 * non-correcting parser
+	 */
+
+	if (err_seen && !nc_done) {
+		LLnc_recover();
+		nc_done = 1;
+		/* Pretend we read end of file */
+		LLsymb = EOFILE;
+		LLcsymb = LLindex[EOFILE];
+		fake_eof = 0;
+		return;
+	}
+
+	if (fake_eof) {
+		LLsymb = EOFILE;
+		LLcsymb = LLindex[EOFILE];
+		fake_eof = 0;
+		return;
+	}
+#endif
+
 	for (;;) {
 		if ((LLcsymb = LLindex[(LLsymb = LL_LEXI())]) >= 0) return;
 		LLmessage(0);
@@ -85,6 +146,16 @@ LLerror(t)
 		return;
 	}
 #endif
+
+#if LL_NON_CORR
+	if ((!nc_done) && (LLsymb > 0) && (LLsymb != EOFILE)) {
+		LLmessage(0);
+		LLnc_recover();
+		nc_done = 1;
+		LLsymb = EOFILE;
+	}
+#endif
+	
 	if ((LLcsymb = LLindex[LLsymb]) < 0) {
 		LLmessage(0);
 		LLread();
@@ -97,7 +168,25 @@ LLerror(t)
 	LL_VOIDCST LLskip();
 #endif
 	LLtcnt[i]--;
-	if (LLsymb != t) LLmessage(t);
+	if (LLsymb != t) {
+#if LL_NON_CORR
+		/* A little kludge here; when using non-correcting recovery
+		 * it can happen that a program is correct but incomplete. 
+		 * Here, we test this, and make sure the appropriate 
+		 * message is generated 
+	 	 */
+		if (! nc_done) {
+			int oldLLsymb;
+			oldLLsymb = LLsymb;
+			LLsymb = EOFILE;
+			LLmessage(0);
+			nc_done = 1;	
+		/* Not really, but to prevent more than 1 error message */
+			LLsymb = oldLLsymb;
+		}
+#endif
+		LLmessage(t);
+	}
 }
 
 #if LL_ANSI_C
@@ -120,6 +209,14 @@ LLsafeerror(t)
 				/* nothing */ ;
 		}
 		return;
+	}
+#endif
+#if LL_NON_CORR
+	if ((!nc_done) && (LLsymb > 0) && (LLsymb != EOFILE)) {
+		LLmessage(0);
+		LLnc_recover();
+		nc_done = 1;
+		LLsymb = EOFILE;
 	}
 #endif
 	LLmessage(t);
@@ -265,7 +362,19 @@ static int LLdoskip(e)
 			continue;
 		}
 #endif /* LL_USERHOOK */
+#if LL_NON_CORR
+		if ((!nc_done) && (LLsymb > 0)) {
+			LLmessage(0);
+			LLnc_recover();
+			nc_done = 1;
+			fake_eof = 1;
+		}
+		else {
+			LLmessage(0);
+		}
+#else
 		LLmessage(0);
+#endif
 		retval = 1;
 		LLread();
 	}

@@ -80,7 +80,7 @@ new_mem(p) register p_info p; {
 			 */
 			p->i_size += p->i_incr * p->i_esize;
 		}
-		p->i_ptr = !p->i_ptr ? 
+		p->i_ptr = !p->i_ptr ?
 			alloc(p->i_size) :
 			ralloc(p->i_ptr, p->i_size);
 		p->i_max = p->i_ptr + sz;

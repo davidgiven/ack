@@ -31,7 +31,7 @@ extern p_set	setalloc();
 extern p_set	get_set();
 extern int	setunion();
 extern int	setintersect();
-extern 		setminus();
+extern		setminus();
 extern int	setempty();
 extern int	findindex();
 extern int	setcount();

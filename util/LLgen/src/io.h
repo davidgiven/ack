@@ -25,7 +25,9 @@
 # define ACTFILE	"tempXXXXXX"	/* temporary file to save actions */
 # define HFILE		"%spars.h"	/* file for "#define's " */
 # define RFILE		"%spars.c"	/* Error recovery */
-
+#ifdef NON_CORRECTING
+# define NCFILE		"%sncor.c"	/* Non-corrcting error recovery */
+#endif
 extern FILE *finput;
 extern FILE *fpars;
 extern FILE *fact;
@@ -36,3 +38,6 @@ extern char	f_out[];
 extern string	f_input;
 extern char	f_include[];
 extern char	f_rec[];
+#ifdef NON_CORRECTING
+extern char	f_nc[];
+#endif

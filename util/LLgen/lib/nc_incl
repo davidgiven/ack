@@ -1,0 +1,70 @@
+#define LLALT 9999			/* Alternative is following */
+
+#define LLTERMINAL 1			/* Symbol is a terminal */
+#define LLNONTERMINAL 2			/* Symbol is a nonterminal */
+#define LLEORULE 0			/* No more alternatives */
+
+
+struct lhs {				/* LHS of a rule */
+	int nr;				/* Nr of the nonterminal */
+	struct symbol *rhs;		/* Pointer to RHS */
+	char first[LLSETSIZE];		/* First set */
+	char follow[LLSETSIZE];		/* Follow set */
+	char empty;			/* Set if nonterminal produces empty */
+};
+
+struct symbol {				/* Symbol in the RHS of a rule */
+	int x;				/* LLTERMINAL or LLNONTERMINAL */
+	int nr;				/* Nr of the symbol */
+	struct symbol *link;		/* Ptr to next rule with this symbol */
+	struct symbol *next;		/* Ptr to next symbol in this rule */
+	struct lhs *lhs;		/* Ptr to LHS */
+};
+
+struct terminal {			/* Array with links to terminals in a */
+	struct symbol *link;		/* rule */	
+};
+
+struct nonterminal {			/* Array with links to nt's in a rule */
+	struct symbol *link;		/* and pointer to LHS's */
+	struct lhs *rule;
+};
+
+struct stack_elt {			/* Stack element */
+	int flags;			/* Some flags */
+	int nr;				/* Nr of symbol */
+	int ref_count;			/* Nr of predecessors */
+	int hyp_ref_count;		/* Temporary nr of predecessors */
+	int matched;			/* Nr of LHS trying to match */
+	int nr_nexts;			/* Nr of successors */	
+	struct edge *edges;		/* Array of edges to other stack elt's*/
+};
+
+/* Possible flags in a stack element */
+#define LLHEAD		1		/* Stack element is a head */
+#define LLDUMMY		2		/* Stack element is substituted */
+#define LLGEN_SEARCH	8		/* Set by 'generate_heads()' */
+
+ 
+struct edge {				/* Edges of a stack element */
+	char flags;			/* Some flags */
+	struct stack_elt *ptr;		/* Array with pointers to stack elt's */
+};
+
+/* Possible flags in an edge */
+#define LLLOOP		 1		/* Belongs to a loop */
+#define LLLOOP_SEARCH	 2		/* Used by 'loop()' */
+#define LLHYP_SEARCH 	 4		/* Used by 'hyp_run()' */
+#define PRINT_SEARCH	 8		/* DEBUG */
+#define LLMARK_SEARCH	16		/* Used by 'mark_loop()' */
+#define LLYES		32	
+#define LLNO		64
+
+#define LLEOSTACK -1			/* Indicates last element of a stack */
+#define LLHEADS_BUF_INCR 10		/* Nr of elements the buffer will be */
+#define LLCLEANUP_BUF_INCR 25 		/* increased by */
+#define LL_VIS_INCR 200
+
+/* Macro's to manipulate bit sets */
+#define LLIN(a, i)	((a)[(i)/8] & (1 << ((i) % 8)))
+#define LLPUTIN(a, i)	((a)[(i)/8] |= (1 << ((i) % 8)))
