@@ -462,40 +462,40 @@ print_allocs(list)
 	short t;
 	interv_p iv;
 
-	printf("BEGIN ALLOCLIST of proc %d\n",curproc->p_id);
+	fprintf(stderr,"BEGIN ALLOCLIST of proc %d\n",curproc->p_id);
 	for (m = list ; m != (alloc_p) 0; m = m->al_next) {
 		for (al = m; al != (alloc_p) 0; al = al->al_mates) {
 			item = al->al_item;
 			t = item->it_type;
-			printf("\nitem: [type = %s, ",str_types[t]);
+			fprintf(stderr,"\nitem: [type = %s, ",str_types[t]);
 			switch(t) {
 			case GLOBL_ADDR:
-				printf("id = %d]\n", item->i_t.it_obj->o_id);
+				fprintf(stderr,"id = %d]\n", item->i_t.it_obj->o_id);
 				break;
 			case PROC_ADDR:
-				printf("id = %d]\n", item->i_t.it_proc->p_id);
+				fprintf(stderr,"id = %d]\n", item->i_t.it_proc->p_id);
 				break;
 			default:
-				printf("offset = %D]\n", item->i_t.it_off);
+				fprintf(stderr,"offset = %D]\n", item->i_t.it_off);
 			}
-			printf("#usages(static) = %d\n",al->al_susecount);
-			printf("#usages(dyn) = %d\n",al->al_dusecount);
-			printf("#inits = %d\n",Lnrelems(al->al_inits));
-			printf("timespan = {");
+			fprintf(stderr,"#usages(static) = %d\n",al->al_susecount);
+			fprintf(stderr,"#usages(dyn) = %d\n",al->al_dusecount);
+			fprintf(stderr,"#inits = %d\n",Lnrelems(al->al_inits));
+			fprintf(stderr,"timespan = {");
 			for (iv = al->al_timespan; iv != (interv_p) 0;
 			     iv = iv->i_next) {
-				printf("(%d,%d) ",iv->i_start,iv->i_stop);
+				fprintf(stderr,"(%d,%d) ",iv->i_start,iv->i_stop);
 			}
-			printf("} \n");
-			printf("busy = {");
+			fprintf(stderr,"} \n");
+			fprintf(stderr,"busy = {");
 			for (iv = al->al_busy; iv != (interv_p) 0;
 			     iv = iv->i_next) {
-				printf("(%d,%d) ",iv->i_start,iv->i_stop);
+				fprintf(stderr,"(%d,%d) ",iv->i_start,iv->i_stop);
 			}
-			printf("} \n");
-			printf("profits = %d\n",al->al_profits);
-			printf("dummy local = %D\n",al->al_dummy);
-			printf("regnr = %d\n",al->al_regnr);
+			fprintf(stderr,"} \n");
+			fprintf(stderr,"profits = %d\n",al->al_profits);
+			fprintf(stderr,"dummy local = %D\n",al->al_dummy);
+			fprintf(stderr,"regnr = %d\n",al->al_regnr);
 		}
 	}
 }
