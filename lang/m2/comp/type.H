@@ -220,6 +220,7 @@ extern t_type
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->tp_next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
+#define	TooBigForReturnArea(tpx) ((tpx)->tp_size > dword_size)
 
 extern long full_mask[];
 extern long max_int[];

@@ -321,6 +321,12 @@ CodeCall(nd)
 
 	assert(IsProc(left));
 
+	if (result_tp = ResultType(left->nd_type)) {
+		if (TooBigForReturnArea(result_tp)) {
+			C_asp(-WA(result_tp->tp_size));
+		}
+	}
+
 	if (nd->nd_right) {
 		CodeParameters(ParamList(left->nd_type), nd->nd_right);
 	}
@@ -349,13 +355,10 @@ CodeCall(nd)
 		C_cai();
 	}
 	C_asp(left->nd_type->prc_nbpar);
-	if (result_tp = ResultType(left->nd_type)) {
-		arith sz = WA(result_tp->tp_size);
-		if (IsConstructed(result_tp)) {
-			C_lfr(pointer_size);
-			C_loi(sz);
+	if (result_tp) {
+		if (TooBigForReturnArea(result_tp)) {
 		}
-		else	C_lfr(sz);
+		else	C_lfr(WA(result_tp->tp_size));
 	}
 	DoFilename(needs_fn);
 	DoLineno(nd);

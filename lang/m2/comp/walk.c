@@ -215,7 +215,7 @@ WalkProcedure(procedure)
 	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	register t_type *tp;
 	register t_param *param;
-	label func_res_label = 0;
+	int too_big = 0;
 	arith StackAdjustment = 0;
 	arith retsav = 0;
 	arith func_res_size = 0;
@@ -227,10 +227,24 @@ WalkProcedure(procedure)
 	*/
 	WalkDefList(procscope->sc_def, WalkDef);
 
+	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
+
+	if (tp) {
+		func_res_size = WA(tp->tp_size);
+		if (TooBigForReturnArea(tp)) {
+			/* The result type of this procedure is constructed.
+			   The caller will have reserved space on its stack,
+			   above the parameters, to store the result.
+			*/
+			too_big = 1;
+		}
+	}
+
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(procscope->sc_name);
-	C_ms_par(procedure->df_type->prc_nbpar);
+	C_ms_par(procedure->df_type->prc_nbpar +
+		 (too_big ? func_res_size : 0));
 	TmpOpen(procscope);
 	DoPriority();
 	/* generate code for filename only when the procedure can be
@@ -239,25 +253,6 @@ WalkProcedure(procedure)
 	   this case it is a nested procedure).
 	*/
 	DoFilename(! procscope->sc_level);
-
-	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
-
-	if (tp) {
-		func_res_size = WA(tp->tp_size);
-		if (IsConstructed(tp)) {
-			/* The result type of this procedure is constructed.
-			   The actual procedure will return a pointer to a
-			   global data area in which the function result is
-			   stored.
-			   Notice that this does make the code non-reentrant.
-			   Here, we create the data area for the function
-			   result.
-			*/
-			func_res_label = ++data_label;
-			C_df_dlb(func_res_label);
-			C_bss_cst(func_res_size, (arith) 0, 0);
-		}
-	}
 
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
@@ -295,7 +290,7 @@ WalkProcedure(procedure)
 				if (! StackAdjustment) {
 					/* First time we get here
 					*/
-					if (func_type && !func_res_label) {
+					if (func_type && !too_big) {
 						/* Some local space, only
 						   needed if the value itself
 						   is returned
@@ -332,11 +327,11 @@ WalkProcedure(procedure)
 		C_asp(-func_res_size);
 	}
 	def_ilb(RETURN_LABEL);	/* label at end */
-	if (func_res_label) {
+	if (too_big) {
 		/* Fill the data area reserved for the function result
 		   with the result
 		*/
-		c_lae_dlb(func_res_label);
+		C_lal(procedure->df_type->prc_nbpar);
 		C_sti(func_res_size);
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
@@ -344,8 +339,7 @@ WalkProcedure(procedure)
 			LOL(StackAdjustment, pointer_size);
 			C_str((arith) 1);
 		}
-		c_lae_dlb(func_res_label);
-		func_res_size = pointer_size;
+		func_res_size = 0;
 	}
 	else if (StackAdjustment) {
 		/* First save the function result in a safe place.
