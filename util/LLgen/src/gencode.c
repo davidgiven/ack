@@ -526,12 +526,6 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	fputs("switch(LLcsymb) {\n", f);
 	while (g_gettype(p) != EORULE) {
 		l = g_getlink(p);
-		if (unsafe && (l->l_flag & DEF)) {
-			haddefault = 1;
-			fprintf(f,
-"default: if (LLskip()) goto L_%d;\ngoto L_%d;\n",
-			lb, hulp2);
-		}
 		if (l->l_flag & COND) {
 			if (l->l_flag & NOCONF) {
 				fputs("#ifdef ___NOCONFLICT___\n", f);
@@ -551,7 +545,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 				free((p_mem) set);
 			}
 		}
-		if (!haddefault && (l->l_flag & DEF)) {
+		if (!unsafe && (l->l_flag & DEF)) {
 			haddefault = 1;
 			fputs("default:\n", f);
 		}
@@ -565,6 +559,12 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 		}
 		rulecode(l->l_rule, nsafe, mustscan, mustpop);
 		fputs(c_break,f);
+		if (unsafe && (l->l_flag & DEF)) {
+			haddefault = 1;
+			fprintf(f,
+"default: if (LLskip()) goto L_%d;\ngoto L_%d;\n",
+			lb, hulp2);
+		}
 		if ((l->l_flag & COND) && !(l->l_flag & NOCONF)) {
 			p++;
 			fprintf(f,"L_%d : ;\n",hulp);
