@@ -645,7 +645,7 @@ get_text(formals, length)
 	*repl->r_ptr = '\0';
 	while ((c != EOI) && (class(c) != STNL)) {
 		if (BLANK(c)) {
-			if (!blank++) add2repl(repl, ' ');
+			blank++;
 			c = GetChar();
 			continue;
 		}
@@ -653,6 +653,10 @@ get_text(formals, length)
 		if (c == '\'' || c == '"') {
 			register int delim = c;
 
+			if (blank) {
+				blank = 0;
+				add2repl(repl, ' ');
+			}
 			do {
 			    add2repl(repl, c);
 			    if (c == '\\') add2repl(repl, GetChar());
@@ -668,10 +672,15 @@ get_text(formals, length)
 			c = GetChar();
 			if (c == '*') {
 				skipcomment();
-				if (!blank++) add2repl(repl, ' ');
+				blank++;
 				c = GetChar();
 				continue;
-			} else add2repl(repl, '/');
+			} 
+			if (blank) {
+				blank = 0;
+				add2repl(repl, ' ');
+			}
+			add2repl(repl, '/');
 		} else if (formals
 			    && (class(c) == STIDF || class(c) == STELL)) {
 			char id_buf[IDFSIZE + 1];
@@ -686,6 +695,11 @@ get_text(formals, length)
 					*idp++ = c;
 			} while (in_idf(c));
 			*--idp = '\0';
+
+			if (blank) {
+				blank = 0;
+				add2repl(repl, ' ');
+			}
 			/* construct the formal parameter mark or identifier */
 			if (n = find_name(id_buf, formals))
 			    add2repl(repl, FORMALP | (char) n);
@@ -694,11 +708,15 @@ get_text(formals, length)
 			    while (*idp) add2repl(repl, *idp++);
 			}
 		} else if (class(c) == STNUM) {
+			if (blank) {
+				blank = 0;
+				add2repl(repl, ' ');
+			}
 			add2repl(repl, c);
 			if (c == '.') {
 				c = GetChar();
 				if (class(c) != STNUM) {
-					blank = 0; continue;
+					continue;
 				}
 				add2repl(repl, c);
 			}
@@ -715,10 +733,13 @@ get_text(formals, length)
 				}
 			}
 		} else {
+			if (blank) {
+				blank = 0;
+				add2repl(repl, ' ');
+			}
 			add2repl(repl, c);
 			c = GetChar();
 		}
-		blank = 0;
 	}
 	*length = repl->r_ptr - repl->r_text;
 	return Realloc(repl->r_text, (unsigned)(repl->r_ptr - repl->r_text +1));
