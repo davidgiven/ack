@@ -33,6 +33,15 @@ begtext:
 	mov	%sp, %l0
 	sub	%sp, %g4, %sp
 	dec	12, %l0
+					! enable divide by 0 trap and improper
+					! trap
+	st	%fsr, [%l0]
+	ld	[%l0], %o3
+	set	0x09000000, %o4
+	or	%o3, %o4, %o3
+	st	%o3, [%l0]
+	ld	[%l0], %fsr
+
 	st	%o0, [%l0]
 	st	%o1, [%l0+4]
 	st	%o2, [%l0+8]
