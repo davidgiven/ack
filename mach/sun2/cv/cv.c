@@ -143,7 +143,7 @@ main(argc, argv)
 		}
 		unresolved++;
 	}
-	else if (outhead.oh_nrelo > 0)
+	else if (outhead.oh_nrelo > 0 && !unresolved)
 		fprintf(stderr, "Warning: relocation information present.\n");
 	if ( outhead.oh_nsect!=LSECT && outhead.oh_nsect!=NSECT )
 		fatal("Input file must have %d sections, not %ld\n",
