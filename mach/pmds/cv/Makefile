@@ -1,20 +1,13 @@
 CFLAGS=-O
 
-cv:             cv.o
-		$(CC) -o cv -n cv.o
-
 pmcv:		pmcv.o
 		$(CC) -o pmcv -n pmcv.o
 
-install:	ins_cv ins_pmcv
-ins_cv:		cv
-		../../install cv
+install:	ins_pmcv
 ins_pmcv:	pmcv
 		../../install pmcv
 
-cmp:		cmp_cv cmp_pmcv
-cmp_cv:		cv
-		-../../compare cv
+cmp:		cmp_pmcv
 cmp_pmcv:	pmcv
 		-../../compare pmcv
 
@@ -22,7 +15,7 @@ opr:
 		make pr | opr
 
 pr:
-		@pr `pwd`/cv.c `pwd`/pmcv.c
+		@pr `pwd`/pmcv.c
 
 clean:
-		-rm -f *.o *.old cv pmcv
+		-rm -f *.o *.old pmcv
