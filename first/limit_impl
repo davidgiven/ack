@@ -165,6 +165,7 @@ fi
 if [ $DO_FAST = n ]
 then
 	ed - $CONFIG/Action <<'EOF'
+/^name "Peephole optimizer lib/;/^end/s/^/!/
 /^name "Fast/;$s/^/!/
 w
 q
