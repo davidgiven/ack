@@ -163,7 +163,7 @@ preprocess(fn)
 							++LineNumber;
 							lineno++;
 						}
-						else if (c == '\'') escaped = 1;
+						else escaped = 1;
 					}
 				} while (escaped || c != stopc);
 				echo(c);
