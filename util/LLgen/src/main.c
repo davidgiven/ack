@@ -192,12 +192,12 @@ main(argc,argv) register string	argv[]; {
 	do_compute();
 	conflchecks();
 	if (nerrors) comfatal();
+	fclose(fact);
 	if (argc-- == 1) {
 		fputs("No code generation for input from standard input\n",
 		      stderr);
 	}
 	else	gencode(argc);
-	fclose(fact);
 	UNLINK(f_temp);
 	UNLINK(f_pars);
 	if (verbose) {
