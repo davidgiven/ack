@@ -28,6 +28,7 @@
 extern char *SBRK();
 #ifdef STORE
 #define	MAX_STORE	32
+#define MAX_SZ_IN_STORE	(MAX_STORE*ALIGNMENT)
 private do_free(), sell_out();
 privatedata mallink *store[MAX_STORE];
 #endif STORE
@@ -44,9 +45,9 @@ malloc(n)
 	}
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
 #ifdef STORE
-	if (n <= MAX_STORE*MIN_SIZE)	{
+	if (n <= MAX_SZ_IN_STORE)	{
 		/* look in the store first */
-		register mallink **stp = &store[(n >> LOG_MIN_SIZE) - 1];
+		register mallink **stp = &store[(n >> LOG_ALIGNMENT) - 1];
 		
 		if (ml = *stp)	{
 			*stp = log_next_of(ml);
@@ -165,9 +166,9 @@ free(addr)
 
 	if (free_of(ml) || in_store(ml))
 		return;				/* user frees free block */
-	if (size_of(ml) <= MAX_STORE*MIN_SIZE)	{
+	if (size_of(ml) <= MAX_SZ_IN_STORE)	{
 		/* return to store */
-		mallink **stp = &store[(size_of(ml) >> LOG_MIN_SIZE) - 1];
+		mallink **stp = &store[(size_of(ml) >> LOG_ALIGNMENT) - 1];
 		
 		set_log_next(ml, *stp);
 		*stp = ml;
@@ -253,7 +254,7 @@ realloc(addr, n)
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
 #ifdef STORE
 	if (in_store(ml)) {
-		register mallink *stp = store[(size_of(ml) >> LOG_MIN_SIZE) - 1];
+		register mallink *stp = store[(size_of(ml) >> LOG_ALIGNMENT) - 1];
 		mallink *stp1 = 0;
 		while (ml != stp)	{
 			stp1 = stp;

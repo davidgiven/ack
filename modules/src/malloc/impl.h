@@ -12,6 +12,18 @@
 #if ALIGNMENT != 4 && ALIGNMENT != 8 && ALIGNMENT != 16
 ALIGNMENT must be 4, 8, or 16
 #endif
+#if MIN_SIZE % ALIGNMENT
+ALIGNMENT must be a dividor of MIN_SIZE
+#endif
+#if ALIGNMENT == 4
+#define LOG_ALIGNMENT 2
+#endif
+#if ALIGNMENT == 8
+#define LOG_ALIGNMENT 3
+#endif
+#if ALIGNMENT == 16
+#define LOG_ALIGNMENT 4
+#endif
 #define align(n)	(((n) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
 union _inf {
