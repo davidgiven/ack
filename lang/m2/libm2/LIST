@@ -31,6 +31,7 @@ store.c
 confarray.c
 load.c
 stackprio.c
+ChkCards.e
 EM.e
 rcku.e
 rcki.e

@@ -2,6 +2,12 @@ DEFINITION MODULE Traps;
 
   IMPORT EM;
 
+  CONST
+	ERRTOOLARGE =	64;	(* stack size of process too large *)
+	ERRTOOMANY =	65;	(* too many nested traps + handlers *)
+	ERRNORESULT =	66;	(* no RETURN from function procedure *)
+	ERRCARDOVFL =	67;	(* CARDINAL overflow *)
+
   TYPE	TrapHandler = EM.TrapHandler;
 
   PROCEDURE InstallTrapHandler(t: TrapHandler): TrapHandler;

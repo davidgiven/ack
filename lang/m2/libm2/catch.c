@@ -33,6 +33,7 @@ static struct errm {
 	{ M2_TOOLARGE,	"stack size of process too large"},
 	{ M2_TOOMANY,	"too many nested traps + handlers"},
 	{ M2_NORESULT,	"no RETURN from procedure function"},
+	{ M2_UOVFL,	"cardinal overflow"},
 	{ -1,		0}
 };
 
