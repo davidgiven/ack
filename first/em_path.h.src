@@ -4,7 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* Intended as a common directory for ALL temporary files */
-#define TMP_DIR		"/usr/tmp"
+#define TMP_DIR		"/tmp"
 
 /* Access to the ACK tree and parts thereof */
 #define EM_DIR		"/usr/em"	/* The root directory for EM stuff */

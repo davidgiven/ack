@@ -1,0 +1,147 @@
+: This script creates a configuration tree.
+: Should be called with 3 parameters: the configuration root, the source
+: root, and a file containing the makefile definitions.
+
+set -e
+
+USAGE="Usage: $0 <config_root> <source_root> <macro_file>"
+
+case $# in
+3)	;;
+*)	echo $USAGE 1>&2
+	exit 1
+	;;
+esac
+
+CONFIG=$1
+SRC_HOME=$2
+MACROS=$3
+
+if [ -d $SRC_HOME ]
+then :
+else echo "$0: $SRC_HOME is not a directory" 1>&2
+     exit 2
+fi
+
+if [ -f $MACROS ]
+then :
+else echo "$0: $MACROS not found" 1>&2
+     exit 3
+fi
+
+case ${CONFIG}XX${MACROS}XX${SRC_HOME} in
+/*XX/*XX/*)	;;
+*)	echo "$0: all arguments should be absolute path names" 1>&2
+	exit 4
+	;;
+esac
+
+create_dir $CONFIG
+
+cd $SRC_HOME
+find . -type d -print > $CONFIG/dir_list
+
+cd $CONFIG
+for i in `cat dir_list`
+do
+	create_dir $i
+	if [ -f $SRC_HOME/$i/proto.make ]
+	then mk_makefile $MACROS $SRC_HOME/$i/proto.make > $i/Makefile
+	fi
+	if [ -f $SRC_HOME/$i/Action ]
+	then
+		cp $SRC_HOME/$i/Action $i/Action
+	fi
+done
+
+cd $SRC_HOME/util/ceg/util
+for i in make_*
+do
+	mk_makefile $MACROS $i > $CONFIG/util/ceg/util/$i
+done
+
+cd $CONFIG
+
+for i in lang/cem/cemcom.ansi lang/cem/cemcom lang/m2/comp
+do
+	cp $SRC_HOME/$i/BigPars $CONFIG/$i/Parameters
+done
+for i in lang/pc/comp lang/cem/cpp.ansi
+do
+	cp $SRC_HOME/$i/Parameters $CONFIG/$i/Parameters
+done
+
+cd $CONFIG/mach
+for i in *
+do
+    if [ -d $i ]
+    then
+	if [ -d $i/as ]
+	then
+		cd $i/as
+		mk_makefile $MACROS $SRC_HOME/mach/proto/as/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		cd ../..
+	fi
+	if [ -d $i/top ]
+	then
+		cd $i/top
+		mk_makefile $MACROS $SRC_HOME/mach/proto/top/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		cd ../..
+	fi
+	if [ -d $i/cg ]
+	then
+		cd $i/cg
+		mk_makefile $MACROS $SRC_HOME/mach/proto/cg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		cd ../..
+	fi
+	if [ -d $i/ncg ]
+	then
+		cd $i/ncg
+		mk_makefile $MACROS $SRC_HOME/mach/proto/ncg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		if [ -f $SRC_HOME/mach/$i/ncg/table_dir ]
+		then
+			ed - Makefile <<EOF
+/^#TABLE_DEFINE/+1r $SRC_HOME/mach/$i/ncg/table_dir
+w
+q
+EOF
+		fi
+		cd ../..
+	fi
+	for j in libem libend libmon libfp libsys libdb
+	do
+	    if [ -d $i/$j ]
+	    then
+		cd $i/$j
+		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+		cd ../..
+	    fi
+	done
+	for j in libbsd4_1a libbsd4_2 libsysV_2
+	do
+	    if [ -d $i/$j ]
+	    then
+		cd $i/$j
+		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.libsys | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" -e "s/libsys/$j/g" > Makefile
+		cd ../..
+	    fi
+	done
+	for j in libcc libcc.ansi libm2 libpc libbc liboc libf77
+	do
+	    create_dir $i/$j
+	    cd $i/$j
+	    mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+	    cd ../..
+	done
+	if [ $i = vax4 ]
+	then :
+	elif [ -d $i/libsys ]
+	then :
+	else 
+		create_dir $i/libsys
+		cd $i/libsys
+		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.sysmon | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+		cd ../..
+	fi
+    fi
+done

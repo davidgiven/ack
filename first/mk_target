@@ -1,0 +1,43 @@
+set -e
+
+. macros
+
+: machine-dependant stuff
+
+create_dir $TARGET_HOME
+create_dir $TARGET_HOME/config
+create_dir $TARGET_HOME/lib.bin
+create_dir $TARGET_HOME/modules
+create_dir $TARGET_HOME/modules/h
+create_dir $TARGET_HOME/modules/man
+create_dir $TARGET_HOME/modules/pkg
+create_dir $TARGET_HOME/modules/lib
+create_dir $TARGET_HOME/bin
+( cd $SRC_HOME/modules/h ; tar chf - . ) | ( cd $TARGET_HOME/modules/h ; tar xf - )
+cp local.h em_path.h $TARGET_HOME/config
+( cd $SRC_HOME/bin ; tar chf - . ) | ( cd $TARGET_HOME/bin ; tar xf - )
+echo "echo $SYSNAME" > $TARGET_HOME/bin/ack_sys
+chmod +x $TARGET_HOME/bin/ack_sys
+
+: machine-independant stuff
+
+if [ $DO_MACHINE_INDEP = n ]
+then
+	exit 0
+fi
+
+create_dir $TARGET_HOME/lib
+create_dir $TARGET_HOME/etc
+create_dir $TARGET_HOME/h
+create_dir $TARGET_HOME/include
+create_dir $TARGET_HOME/doc
+create_dir $TARGET_HOME/man
+
+cp $SRC_HOME/etc/ip_spec.t $TARGET_HOME/etc/ip_spec.t
+( cd $SRC_HOME/lib ; tar chf - . ) | ( cd $TARGET_HOME/lib ; tar xf - )
+( cd $SRC_HOME/include ; tar chf - . ) | ( cd $TARGET_HOME/include ; tar xf - )
+( cd $SRC_HOME/h ; tar chf - . ) | ( cd $TARGET_HOME/h ; tar xf - )
+( cd $SRC_HOME/man ; tar chf - . ) | ( cd $TARGET_HOME/man ; tar xf - )
+( cd $SRC_HOME/doc ; tar chf - . ) | ( cd $TARGET_HOME/doc ; tar xf - )
+
+exit 0

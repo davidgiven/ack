@@ -1,0 +1,15 @@
+: '$Header$'
+
+: This shell script inserts the file "make_macros" after a line
+: starting with #PARAMS in "make_proto", and produces the result on
+: standard output.
+
+case $# in
+2)	;;
+*)	echo "Usage: $0 <make_macros> <make_proto>" 1>&2
+	exit 1
+	;;
+esac
+
+sed -e "/^#PARAMS/r $1" $2
+exit 0

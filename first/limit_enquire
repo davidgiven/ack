@@ -1,0 +1,123 @@
+while :
+do
+	echo "The libraries will end up in the machine-independent part of the
+ACK binary tree. You may already have them from a previous ACK installation
+on a different machine, in particular if you have an NFS file system.
+Therefore, it may not be neccessary to install them again. As this part
+of the ACK installation takes the most time, you are given the opportunity
+to disable installation of the machine-independent part"
+	./echo -n "Do you want to install the machine-independent part? (y/n) [$DO_MACHINE_INDEP] "
+	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$DO_MACHINE_INDEP" ;;
+	esac
+	case $ANS in
+	j*|y*)	DO_MACHINE_INDEP=y
+		break
+		;;
+	n*)	DO_MACHINE_INDEP=n
+		break
+		;;
+	*)	./echo "I do not understand your answer ($ANS). Try again."
+		;;
+	esac
+done
+for i in Modula-2 Pascal Occam Basic ANSI-C C Fortran
+do
+    while :
+    do
+	./echo -n "Do you want to install $i? (y/n) "
+	. $FDIR/get_answer
+	case X$ANS in
+	Xj*|Xy*|X)
+		break
+		;;
+	Xn*)	DISABLE_LANG=$DISABLE_LANG" $i"
+		break
+		;;
+	*)	./echo "I do not understand your answer ($ANS). Try again."
+		;;
+	esac
+    done
+done
+DISABLE_SUP=
+set $MACH_LIST
+while test $# != 0
+do
+    while :
+    do
+	case $1 in
+	i86)	./echo "not installing i86 will disable installation of xenix3 and minix."
+		;;
+	m68k2)	./echo "not installing m68k2 will disable installation of pmds, minixST,
+m68k4, pmds4, sun2, and mantra."
+		;;
+	m68k4)	./echo "not installing m68k4 will disable installation of pmds4, sun2, and mantra."
+		;;
+	m68020)	./echo "not installing m68020 will disable installation of sun3."
+		;;
+	esac
+	./echo -n "Do you want to install the $1 support? (y/n) "
+	. $FDIR/get_answer
+	case X$ANS in
+	Xj*|Xy*|X)
+		case $1 in
+		vax4)	case $SYSNAME in
+			vax_bsd4_1a)	SYSVAX=libbsd4_1a
+					;;
+			vax_bsd4_2)	SYSVAX=libbsd4_2
+					;;
+			vax_sysV_2)	SYSVAX=libsysV_2
+					;;
+			*)		if [ $DO_MACHINE_INDEP = y ]
+					then
+						. get_sysvax
+					fi
+					;;
+			esac
+		esac
+		break
+		;;
+	Xn*)	DISABLE_SUP=$DISABLE_SUP" $1"
+		case $1 in
+		i86)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68k2)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68k4)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		m68020)
+			shift
+			DISABLE_SUP=$DISABLE_SUP" $1"
+			;;
+		esac
+		break
+		;;
+	*)	./echo "I do not understand your answer ($ANS). Try again."
+		;;
+	esac
+    done
+    shift
+done

@@ -1,20 +1,10 @@
-: check that the script is started from the "first" directory
-p=`pwd`
-case `basename $p` in
-first)
+case $0 in
+*/first)
+	FDIR=`expr $0 : '\(.*\)/first'`
 	;;
-*)
-	echo "this script must be started from the 'first' directory"
-	exit 3
+first)	FDIR=.
 	;;
 esac
-: check $PATH first
-if sh ckpath
-then
-	echo "PATH is ok"
-else
-	exit 1
-fi
 echo check write-ability of /tmp and /usr/tmp ...
 if ( >/usr/tmp/aaax.$$ )
 then
@@ -31,178 +21,92 @@ else
 	exit 2
 fi
 echo "/tmp and /usr/tmp ok"
-echo setting ACK HOME Directory in ../h/em_path.h ...
-rm -f em_path.h
-HM=`cd ..; pwd`
-sed -e "/^#define[ 	]*EM_DIR/s@\".*\"@\"$HM\"@" <em_path.h.src >em_path.h
-if cmp ../h/em_path.h em_path.h >/dev/null 2>&1
-then
-	: Don't touch ../h/em_path.h, it's already correct
-	echo "../h/em_path.h already correct"
+
+if [ -f echo ]
+then :
 else
-	rm -f ../h/em_path.h
-	if mv em_path.h ../h >/dev/null 2>&1
-	then	echo "../h/em_path.h replaced"
-	else
-		echo "Sorry, can't replace ../h/em_path.h"
-		exit 7
-	fi
-fi
 echo compile own echo program, so that we know how it works ...
-if cc -o echo myecho.c > /dev/null 2>&1
+if cc -o echo $FDIR/myecho.c > /dev/null 2>&1
 then
 	echo compilation succeeded
 else
 	echo "Sorry, cc does not seem to work"
 	exit 8
 fi
-cp echo ../bin/echo
-: find cc option for lex library
-if fixlexlib
-then
-	:
-else
-	exit 9
 fi
-: remove non-system as and ld from descr files
-if (ack_sys) >/dev/null 2>&1
-then
-	: echo Your system is: `ack_sys`.
-else
-	echo -n "Give me the type of your system, the current choice is:
-pdp_v7		PDP11 with sep I/D and version 7 (or BSD 2.8, 2.9)
-vax_bsd4_1a	VAX11 with BSD4.1a
-vax_bsd4_2	VAX11 with BSD4.2
-vax_sysV_2	VAX11 with System V.2
-pc_ix		IBM PC with PC/IX
-xenix3		IBM AT running Microsoft Xenix V3.2
-i386		Intel 80386 system running Xenix System V
-m68_unisoft	Motorola 68000 with Unisoft UNIX
-sun3		Sun 3 M68020 workstation 
-sun2		Sun 2 M68000 workstation
-m68_sysV_0	Motorola 68000 with Uniplus System V.0 Unix
-m68020		Motorola M68020 VME131 running Unix System V/68 R2V2.1
-SMALL		Neither of the above, small address space
-ANY		Neither of the above
 
-system type: "
-	if read SYSNAME
-	then
-		echo echo "$SYSNAME" >../bin/ack_sys
-		chmod +x ../bin/ack_sys
-		case `ack_sys` in
-		pdp_v7|vax_bsd4_1a|vax_bsd4_2|vax_sysV_2|pc_ix|m68_unisoft|sun3|sun2|m68_sysV_0|xenix3|i386|m68020) ;;
-		*)	echo None of the software especially intended for the named systems will work ;;
-		esac
-	else
-		echo Sorry, got EOF when reading system name.
-		exit 10
-	fi
+if [ -f macros ]
+then
+	. macros
 fi
+
+: "Now get system name and directories"
+. $FDIR/get_sys
+
+: "Take action according to the system used"
+BM=1
+OLDACM=$ACM
+OLDSYS=$SYS
+case $SYSNAME in
+vax_bsd4_1a)    ACM=vax4 ; SYS=BSD4_1 ; BYTE_ORDER=0123 ;;
+vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ; BYTE_ORDER=0123 ;;
+vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ; BYTE_ORDER=0123 ;;
+i386)		ACM=i386 ; SYS=SYS_5 ; BYTE_ORDER=0123 ;;
+sun3)		ACM=sun3 ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
+sun2)		ACM=sun2 ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
+m68_unisoft|m68k2)	ACM=m68k2 ; SYS=V7; BYTE_ORDER=3210 ;;
+m68_sysV_0|mantra)	ACM=mantra ; SYS=SYS_5; BYTE_ORDER=3210 ;;
+m68020)		ACM=m68020 ; SYS=SYS_5; BYTE_ORDER=3210 ;;
+sparc)		ACM=sparc ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
+i86)		ACM=i86 ; SYS=SYS_5; BYTE_ORDER=0123 ;;
+xenix3)		ACM=xenix3 ; SYS=SYS_5; BYTE_ORDER=0123 ;;
+minix)		ACM=minix ; SYS=V7; BYTE_ORDER=0123 ;;
+pmds)		ACM=pmds ; SYS=V7; BYTE_ORDER=3210 ;;
+pmds4)		ACM=pmds4 ; SYS=V7; BYTE_ORDER=3210 ;;
+minixST)	ACM=minixST ; SYS=V7; BYTE_ORDER=3210 ;;
+m68k4)		ACM=m68k4 ; SYS=V7; BYTE_ORDER=3210 ;;
+*)		ACM=XXX ; SYS=XXX ; BYTE_ORDER=XXX ;;
+esac
+
+: do not change the order in MACH_LIST. check limit_enquire first.
+MACH_LIST="i86 xenix3 minix i386 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 sparc ns pdp s2650 vax4 z80 z8000 arm"
+
 while :
 do
-echo -n "Your system is `ack_sys`, are you satisfied with that? (y/n) "
-if read YESNO
-then
-	case $YESNO in
-	j*|y*)	break
-		;;
-	n*)	echo Ok, I will give you another chance....
-		rm -f ../bin/ack_sys
-		exec sh $0
-		;;
-	*)	echo "I do not understand your answer ($YESNO). Try again."
-		;;
-	esac
-else
-	echo Sorry, got EOF when reading your answer.
-	exit 12
-fi
-done
-: "Take action according to the system used"
-: 'Prevent the use of the system assembler on for certain systems'
-: 'prevent the use of ranlib on pdp 11s'
-cp ../lib/vax4/descr.src ../lib/vax4/descr
-cp ../lib/descr/fe.src ../lib/descr/fe
-echo "take some actions according to system used ..."
-case `ack_sys` in
-pdp_*)		echo "disabling use of ranlib; cannot trust its result"
-		echo 'echo "no ranlib on this system"; exit 93' > ../bin/ranlib
-		chmod +x ../bin/ranlib
-		RMD=""
-		;;
-*)		RMD=""
-		;;
-esac
-for i in $RMD
-do
-(	cd ../lib/$i
-	echo "disabling use of local assembler and loader for $i"
-	if grep '^name as$' descr >/dev/null 2>&1
-	then
-		ed - descr <<'ABC'
-/^name as$/;/^end$/d
-/^name ld$/;/^end$/d
-w
-q
-ABC
+	for i in $MACH_LIST
+	do
+		if [ $i = $ACM ]
+		then break
+		fi
+	done
+	if [ $i = $ACM ]
+	then break
 	fi
-)
+	echo "This installation script has no knowledge about $SYSNAME.
+You will have to specify the default machine that you want ACK to
+compile for. Choices:"
+	l=
+	x=
+	for i in $MACH_LIST
+	do
+		l="$l $i"
+		x=x$x
+		case $x in
+		xxxxxxxxxx)	echo $l
+				x=
+				l=
+				;;
+		esac
+	done
+	ACM=$OLDACM
+	echo $l
+	./echo -n "Your choice: [$OLDACM] "
+	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$ACM";;
+	esac
+	ACM="$ANS"
 done
-case `ack_sys` in
-vax_bsd_4_1a)
-	( cd ../mach/vax4
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libbsd4_1a/* libsys
-	)
-	;;
-vax_sysV_2)
-	( cd ../lib/vax4
-	  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__USG/
-w
-q
-ABC
-	)
-	( cd ../mach/vax4 
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libsysV_2/* libsys
-	)
-	;;
-*)	( cd ../lib/vax4
-	  ed - descr <<'ABC'
-/CPP_F/s/$/ -D__BSD4_2/
-w
-q
-ABC
-	)
-	( cd ../mach/vax4
-	  mkdir libsys > /dev/null 2>&1
-	  rm -f libsys/*
-	  cp libbsd4_2/* libsys
-	)
-	;;
-esac
-echo 'Setting the default machine in ../h/local.h ...'
-BM=1
-case `ack_sys` in
-pdp_v7)		ACM=pdp ; BM=0 ; SYS=V7 ;;
-vax_bsd4_1a)    ACM=vax4 ; SYS=BSD4_1 ;;
-vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ;;
-vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ;;
-pc_ix)		ACM=i86 ; BM=0 ; SYS=SYS_5 ;;
-xenix3)		ACM=xenix3 ; BM=0; SYS=SYS_5 ;;
-i386)		ACM=i386 ; SYS=SYS_5 ;;
-sun3)		ACM=sun3 ; SYS=BSD4_2 ;;
-sun2)		ACM=sun2 ; SYS=BSD4_2 ;;
-m68_unisoft)	ACM=m68k2 ; SYS=V7 ;;
-m68_sysV_0)	ACM=mantra ; SYS=SYS_5 ;;
-m68020)		ACM=m68020 ; SYS=SYS_5 ;;
-SMALL)		ACM=i86 ; BM = 0 ; SYS=XXX ;;
-*)		ACM=m68k2 ; SYS=XXX ;;
-esac
 while :
 do
 case $SYS in
@@ -210,230 +114,33 @@ V7|BSD4_1|BSD4_2|SYS_5)
 	break
 	;;
 *)
-	echo -n "What kind of Unix are you running?
+	SYS=$OLDSYS
+	echo 'What kind of Unix is the target system running?
 Choices:
 	V7	for Unix V7, BSD 2.*
 	BSD4_1	for Berkeley 4.1
 	BSD4_2	for Berkeley 4.2, 4.3, SunOS
-	SYS_5	for Xenix, System III, System V
-Your choice (V7|BSD4_1|BSD4_2|SYS_5): "
-	if read SYS
-	then
-		:
-	else
-		echo "Sorry, got EOF when reading your answer"
-		exit 12
-	fi
+	SYS_5	for Xenix, System III, System V'
+	./echo -n "Your choice (V7|BSD4_1|BSD4_2|SYS_5): [$OLDSYS] "
+	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$SYS";;
+	esac
+	SYS="$ANS"
 	;;
 esac
 done
 rm -f local.h
-sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < local.h.src >local.h
-if cmp -s ../h/local.h local.h
-then
-	echo "../h/local.h already correct"
-else
-	cp local.h ../h
-	echo "../h/local.h updated"
-	rm -f local.h
-fi
+sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < $FDIR/local.h.src >local.h
+case $BYTE_ORDER in
+XXX)	;;
+*)	echo '/* Optional definition of BYTE_ORDER: */' >> local.h
+	echo "#define BYTE_ORDER 0x$BYTE_ORDER" >> local.h
+	;;
+esac
+
 echo "Your default machine to compile for is $ACM"
-case `ack_sys` in
-i386)
-	( cd ../lib/descr
-	  ed - fe << ABC
-1,$s/-D{NAME}/-D{NAME} -DNO_PROTOTYPE/
-w
-q
-ABC
-	)
-	;;
-xenix3)
-	echo "Xenix cannot handle our Makefiles; install our own make ..."
-	if ( cd ../util/make; make install )
-	then
-		echo "Done"
-	else
-		echo "Sorry, this seems to have failed."
-		echo "You have to install it by hand later, or use the Xenix"
-		echo "make anyway"
-	fi
-	echo "The Xenix C compiler cannot compile some of our programs."
-	echo "It complains about lack of heap space when many #defines are"
-	echo 'used. This is prevented by installing a "cc" shell script in'
-	echo 'the EM bin directory, which runs a .c file through a preprocessor'
-	echo 'before running it through the C compiler proper. Unfortunately,'
-	echo 'line number and filename information is lost. The compiler does'
-	echo 'not recognize its own line directives.'
-	echo 'You can remove this "cc" script from the EM bin directory'
-	echo 'when installation is done.'
-	cp cc.xenix.src cc.xenix
-	ed - cc.xenix <<ABC
-/EMHOME/s/=.*/=$HM/
-w
-q
-ABC
-	cp cc.xenix ../bin/cc
-	chmod +x ../bin/cc
-	echo "code-generators and peephole optimizer need more stack than the default."
-	echo "adapting LDFLAGS in Makefiles"
-	for i in ../mach/*/*cg
-	do
-		cp $i/Makefile $i/makefile
-		ed - $i/makefile <<ABC
-/LDFLAGS/s/$/ -F 3000/
-w
-q
-ABC
-	done
-	cp ../util/opt/Makefile ../util/opt/makefile
-	ed - ../util/opt/makefile <<ABC
-/LDFLAGS/s/$/-F 2000/
-w
-q
-ABC
-	echo "target optimizers do not work on Xenix; disabling their use"
-	for i in ../lib/*/descr
-	do
-		if grep "name asopt" $i > /dev/null 2>&1
-		then
-			if test -f $i.top
-			then
-				:
-			else
-				mv $i $i.top
-			fi
-			cp $i.top $i
-			ed - $i <<ABC
-/name asopt/;/^end/d
-w
-q
-ABC
-		fi
-	done
-	echo "the -l option in cc command puts library in wrong place."
-	echo "this is a problem with the lex library for the occam compiler."
-	echo "changing Makefile for Occam compiler"
-	cp ../lang/occam/comp/Makefile ../lang/occam/comp/makefile
-	ed - ../lang/occam/comp/makefile <<ABC
-/LEXLIB/s;-l.*;/lib/Slibl.a;
-w
-q
-ABC
-	;;
-esac
-case X$BM in
-X0)
-	echo "set some installation parameters for small machines"
-	( cd ../lang/cem/cemcom
-	  cp SmallPars Parameters
-	  cp Makefile makefile
-	  ed - makefile <<ABC
-/MALLOC/s/=/=#/
-w
-q
-ABC
-	  cd ../../../util/cpp
-	  cp Makefile makefile
-	  ed - makefile <<ABC
-/MALLOC/s/=/=#/
-w
-q
-ABC
-	  cd ../../lib/descr
-	  ed - fe << ABC
-/em_cemcom/i
-	prep always
-.
-/CPP_F/;.+2d
-/CPP_F/;.+2d
-w
-q
-ABC
-	)
-	for i in ../mach/vax4/cg ../mach/m68k2/cg ../mach/m68020/ncg
-	do
-	( cd $i
-	  cp tables1.c tables.c
-	  cp tables1.h tables.h
-	)
-	done
-	( cd ../modules/src/malloc
-	  if test -f param.h.orig
-	  then
-		:
-	  else
-	  	mv param.h param.h.orig
-	  fi
-	  cp param.h.orig param.h
-	  ed - param.h <<ABC
-/STORE/s/define/undef/
-w
-q
-ABC
-	)
-	( cd ../lang/m2/comp
-	  cp SmallPars Parameters
-	  cp Makefile makefile
-	  ed - makefile <<ABC
-/MALLOC/s/=/=#/
-w
-q
-ABC
-	)
-	( cd ../mach
-	  : machines with word or pointer size not 2
-	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4 i386
-	  do
-	  if test -f $i/Action.orig
-	  then
-		:
-	  else
-		mv $i/Action $i/Action.orig
-	  fi
-	  cp $i/Action.orig $i/Action
-	  ed - $i/Action <<ABC
-/odula-2/;/^end/s/^/!/
-w
-q
-ABC
-	  done
-	)
-	( cd ..
-	  if test -f Action.orig
-	  then
-		:
-	  else
-		mv Action Action.orig
-	  fi
-	  cp Action.orig Action
-	  ed - Action <<ABC
-/Peephole optimizer libraries/;/^end/s/^/!/
-/Bootstrap for code expanders/;/^end/s/^/!/
-/EM interpreter in C/;/^end/s/^/!/
-w
-q
-ABC
-	)
-	;;
-*)	( echo "set some installation parameters for big machines"
-	  cd ../lang/cem/cemcom
-	  cp BigPars Parameters
-	  cd ../../m2/comp
-	  cp BigPars Parameters
-	)
-	;;
-esac
 
-: find varargs include file
-: if not present use our own
-
-if test -f /usr/include/varargs.h
-then
-	:
-else
-	cp ../include/_tail_cc/varargs.h ../modules/h
-fi
 DISABLE_LANG=
 echo "Installation of the complete ACK takes a long time. Limiting the
 number of languages, runtime libraries, back-ends, and assemblers to be
@@ -442,227 +149,47 @@ answer no to the next question. Otherwise, answer yes, and you will be
 prompted for details"
 while :
 do
-	echo -n "Do you want to limit the installation in any way? (y/n) "
-	if read YESNO
-	then
-		:
-	else
-		echo "Sorry, got EOF when reading your answer"
-		exit 12
-	fi
-	case X$YESNO in
+	./echo -n "Do you want to limit the installation in any way? (y/n) [$LIMIT] "
+	. $FDIR/get_answer
+	case $ANS in
+	'')	ANS="$LIMIT";;
+	esac
+	case X$ANS in
 	Xj*|Xy*)
+		LIMIT=y
+		. $FDIR/limit_enquire
 		break
 		;;
-	Xn*)	exit 0
+	Xn*)	. $FDIR/get_sysvax
+		LIMIT=n
+		DO_MACHINE_INDEP=y
+		break
 		;;
-	*)	echo "I do not understand your answer ($YESNO). Try again."
+	*)	echo "I do not understand your answer ($ANS). Try again."
 		;;
 	esac
 done
-for i in Modula-2 Pascal Occam Basic
-do
-    while :
-    do
-	echo -n "Do you want to install $i? (y/n) "
-	if read YESNO
-	then
-		:
-	else
-		echo "Sorry, got EOF when reading your answer"
-		exit 12
-	fi
-	case X$YESNO in
-	Xj*|Xy*|X)
-		break
-		;;
-	Xn*)	DISABLE_LANG=$DISABLE_LANG" $i"
-		break
-		;;
-	*)	echo "I do not understand your answer ($YESNO). Try again."
-		;;
-	esac
-    done
-done
-DISABLE_SUP=
-set i86 xenix3 minix i386 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 ns pdp s2650 vax4 z80 z8000
-while test $# != 0
-do
-    while :
-    do
-	case $1 in
-	i86)	echo "not installing i86 will disable installation of xenix3 and minix."
-		;;
-	m68k2)	echo "not installing m68k2 will disable installation of pmds, minixST,
-m68k4, pmds4, sun2, and mantra."
-		;;
-	m68k4)	echo "not installing m68k4 will disable installation of pmds4, sun2, and mantra."
-		;;
-	m68020)	echo "not installing m68020 will disable installation of sun3."
-		;;
-	esac
-	echo -n "Do you want to install the $1 support? (y/n) "
-	if read YESNO
-	then
-		:
-	else
-		echo "Sorry, got EOF when reading your answer"
-		exit 12
-	fi
-	case X$YESNO in
-	Xj*|Xy*|X)
-		break
-		;;
-	Xn*)	DISABLE_SUP=$DISABLE_SUP" $1"
-		case $1 in
-		i86)
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			;;
-		m68k2)
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			;;
-		m68k4)
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			;;
-		m68020)
-			shift
-			DISABLE_SUP=$DISABLE_SUP" $1"
-			;;
-		esac
-		break
-		;;
-	*)	echo "I do not understand your answer ($YESNO). Try again."
-		;;
-	esac
-    done
-    shift
-done
-for i in $DISABLE_LANG
-do
-	echo "disabling installation of $i"
-	if test -f ../Action.orig
-	then
-		:
-	else
-		mv ../Action ../Action.orig
-		cp ../Action.orig ../Action
-	fi
-	ed - ../Action <<EOF
-/^name "$i/;/^end/s/^/!/
-w
-q
-EOF
-	case $i in
-	Modula-2)
-		ed - ../Action <<EOF
-/^name "$i definition/;/^end/s/^/!/
-/^name "$i makefile/;/^end/s/^/!/
-w
-q
-EOF
-		;;
-	esac
-	case $i in
-	Modula-2)
-		lib=libm2
-		;;
-	Pascal)
-		lib=libpc
-		;;
-	Basic)
-		lib=libbc
-		;;
-	Occam)
-		lib=liboc
-		;;
-	esac
-	( cd ../mach
-	  for j in */$lib
-	  do
-	    ( cd $j/..
-	      if test -f Action.orig
-	      then
-		:
-	      else
-		mv Action Action.orig
-		cp Action.orig Action
-	      fi
-	      ed - Action <<EOF
-/^name.*$i/;/^end/s/^/!/
-w
-q
-EOF
-	    )
-	  done
-	)
-done
-DISABLE_INT=0
-for i in $DISABLE_SUP
-do
-	echo "disabling installation of $i"
-	if test -f ../Action.orig
-	then
-		:
-	else
-		mv ../Action ../Action.orig
-		cp ../Action.orig ../Action
-	fi
-	ed - ../Action <<EOF
-/^dir .*$i\$/;?^name?;/^end/s/^/!/
-w
-q
-EOF
-	case $i in
-	m68k2|m68k4)
-		DISABLE_INT=1
-		;;
-	mantra)
-		if test $SYSNAME = m68_sysV_0
-		then
-			DISABLE_INT=1
-		fi
-		;;
-	sun2)
-		case $SYSNAME in
-		sun2|sun3)
-			DISABLE_INT=1
-			;;
-		esac
-		;;
-	pmds4)
-		case $SYSNAME in
-		pmds*)
-			DISABLE_INT=1
-			;;
-		esac
-		;;
-	esac
-done
-if test $DISABLE_INT = 1
-then
-	ed - ../Action <<EOF
-/68000 interpreters/;/^end/s/^/!/
-w
-q
-EOF
-fi
+
+. $FDIR/get_makepars
+
+echo TARGET_HOME=\"$TARGET_HOME\" > macros
+echo UTIL_HOME=\"$UTIL_HOME\" >> macros
+echo SRC_HOME=\"$SRC_HOME\" >> macros
+echo SYSNAME=\"$SYSNAME\" >> macros
+echo ACM=\"$ACM\" >> macros
+echo CURRENT=\"$CURRENT\" >> macros
+echo SYS=\"$SYS\" >> macros
+echo LIMIT=\"$LIMIT\" >> macros
+echo CONFIG=\"$CONFIG\" >> macros
+echo DISABLE_LANG=\"$DISABLE_LANG\" >> macros
+echo DISABLE_SUP=\"$DISABLE_SUP\" >> macros
+echo DO_MACHINE_INDEP=\"$DO_MACHINE_INDEP\" >> macros
+echo MACH_LIST=\"$MACH_LIST\" >> macros
+echo SYSVAX=\"$SYSVAX\" >> macros
+echo WS=\"$WS\" >> macros
+echo PS=\"$PS\" >> macros
+
+cat macros $FDIR/install_tail > INSTALL
+chmod +x INSTALL
+
 exit 0

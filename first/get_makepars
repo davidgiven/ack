@@ -1,0 +1,93 @@
+know_target=0
+case $SYSNAME in
+vax*|i386|sun*|sparc|m68_sysV_0|m68020|mantra|pmds4|m68k4)
+	WS=4 ; PS=4
+	know_target=1
+	;;
+m68_unisoft|m68k2|minixST|pmds)
+	WS=2 ; PS=4
+	know_target=1
+	;;
+i86|minix|xenix3)
+	WS=2 ; PS=2
+	know_target=1
+	;;
+*)	if [ $TARGET_HOME = $UTIL_HOME ]
+	then
+		: We can find out ourselves what the word-size and
+		: the pointer-size of the target machine is.
+		cat > ws.c <<'EOF'
+#include <stdio.h>
+main()
+{
+	printf("WS=%d ; PS=%d\n", sizeof(int), sizeof(char *));
+	exit(0);
+}
+EOF
+		cc ws.c 2>/dev/null
+		a.out > t$$
+		. t$$
+		rm -f t$$ a.out ws.[co]
+	else
+		: we will have to ask installer.
+		./echo -n "Please give the word-size of the target-machine (sizeof(int)) in bytes: [$WS] "
+		. $FDIR/get_answer
+		case $ANS in
+		'')	ANS="$WS";;
+		esac
+		WS="$ANS"
+		./echo -n "Please give the pointer-size of the target-machine (sizeof(char *)) in bytes: [$PS] "
+		. $FDIR/get_answer
+		case $ANS in
+		'')	ANS="$PS";;
+		esac
+		PS="$ANS"
+	fi
+	;;
+esac
+
+echo "# Paths:
+SRC_HOME = $SRC_HOME
+TARGET_HOME = $TARGET_HOME
+UTIL_HOME = $UTIL_HOME
+
+# Machine independent part created?
+DO_MACHINE_INDEP = $DO_MACHINE_INDEP
+" > make_macros
+
+if [ $TARGET_HOME = $UTIL_HOME ]
+then	
+	sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+	if [ -f /bin/arch ]
+	then
+		case `/bin/arch` in
+		sun3|sun4)
+			ed - make_macros <<'EOF'
+/cc-and-mkdep.sun/s/^..//
+w
+q
+EOF
+			;;
+		esac
+	fi
+	cat $FDIR/util_comp >> make_macros
+else
+	case $knowtarget in
+	1)	sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "/cc-and-mkdep.ack/s/^..//" -e "s/^CC=cc/CC=acc -m$ACM" -e "s/^# AR=aal/AR=aal/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
+		;;
+	*)	sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
+		;;
+	esac
+	sed "s/^#U/U/" < $FDIR/util_comp >> make_macros
+fi
+
+cat $FDIR/lint_params >> make_macros
+
+echo "A file called 'make_macros' has been created. This file defines some
+'make' variables that parameterize all Makefiles in ACK. You may want
+to check it before attempting to actually install ACK."
+case $knowtarget in
+0)	echo "In fact, this installation script does not know much about
+your target machine, so expect some things to be wrong"
+	;;
+esac
