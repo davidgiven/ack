@@ -4623,16 +4623,16 @@ STACKS:
 (source1,,	"movzbl\t%[1],-(sp)",	(3,7) + %[1])
 (CONST sfit(%[num],16),,
 		"cvtwl\t%[1],-(sp)",	(3,7) + %[1])
+(FCONST4,,	"pushl\t%[1]",		(2,7) + %[1])
+(FCONST8 %[num]==0,,
+		"clrq\t-(sp)",		(2,10))
+(FCONST8,,	"movd\t%[1],-(sp)",	(3,10) + %[1])
 (source2,,	"movzwl\t%[1],-(sp)",	(3,7) + %[1])
 (source4,,	"pushl\t%[1]"
 		setcc(%[1]),		(2,7) + %[1])
 (source8,,	"movq\t%[1],-(sp)"
 		setcc(%[1]),		(3,10)+ %[1])
 (nonexist1,,	"pushal\t%[1]",		(2,7) + %[1])
-(FCONST4,,	"pushl\t%[1]",		(2,7) + %[1])
-(FCONST8 %[num]==0,,
-		"clrq\t-(sp)",		(2,10))
-(FCONST8,,	"movd\t%[1],-(sp)",	(3,10) + %[1])
 (aind1,,	"pushab\t%[1]",		(2,7) + %[1])
 (aind2,,	"pushaw\t%[1]",		(2,7) + %[1])
 (aind4,,	"pushal\t%[1]",		(2,7) + %[1])
