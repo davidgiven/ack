@@ -79,6 +79,10 @@ Each time an address is computed the assembler decide which segment register
 to use. You can override the assembler's choice by prefixing the instruction
 with one of eseg, cseg, sseg, or dseg; these prefixes indicate that the
 assembler should choose es, cs, ss, or ds instead.
+.br
+Example: 
+.ti +8
+dseg movs
 .SH "SEE ALSO"
 uni_ass(6),
 ack(1),
