@@ -7,18 +7,24 @@ end
 name	"EM definition"
 dir etc
 end
-name "C preprocessor"
-dir util/cpp
+name "LL(1) Parser generator"
+dir util/LLgen
 end
 name "EM definition library"
 dir util/data
 end
 name "Modules"
-dir modules
+dir modules/src
 indir
+end
+name "C preprocessor"
+dir util/cpp
 end
 name "C utilities"
 dir util/cmisc
+end
+name "ACK object utilities"
+dir util/amisc
 end
 name "Encode/Decode"
 dir util/misc
@@ -32,6 +38,10 @@ end
 name "EM Peephole optimizer"
 dir util/opt
 end
+name "EM Global optimizer"
+dir util/ego
+indir
+end
 name "ACK archiver"
 dir util/arch
 end
@@ -41,14 +51,17 @@ end
 name "Bootstrap for backend tables"
 dir util/cgg
 end
-name "LL(1) Parser generator"
-dir util/LLgen
-end
 name "Bootstrap for newest form of backend tables"
 dir util/ncgg
 end
+name "LED link editor"
+dir util/led
+end
+name "TOPGEN target optimizer generator"
+dir util/topgen
+end
 name "C frontend"
-dir lang/cem/comp
+dir lang/cem/cemcom
 end
 name "Basic frontend"
 dir lang/basic/src
@@ -89,10 +102,6 @@ name "4-4 Interpreter support"
 dir mach/int44
 indir
 end
-name "IBM PC/IX support"
-dir mach/ix
-indir
-end
 name "Motorola 68000 2-4 support"
 dir mach/m68k2
 indir
@@ -117,16 +126,28 @@ name "PMDS 4/4 support"
 dir mach/pmds4
 indir
 end
+name "Mantra 68000 System V.0 support"
+dir mach/mantra
+indir
+end
+name "Mantra 68000 System V.0 4/4 support"
+dir mach/mantra4
+indir
+end
 name "Signetics 2650 support"
 dir mach/s2650
 indir
 end
-name "Vax 2-4 support"
-dir mach/vax2
-indir
-end
 name "Vax 4-4 support"
 dir mach/vax4
+indir
+end
+name "M68020 System V/68 support"
+dir mach/m68020
+indir
+end
+name "Sun 3 M68020 support"
+dir mach/sun3
 indir
 end
 name "Z80 support"
