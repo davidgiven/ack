@@ -21,5 +21,14 @@ ed - /tmp/mk_mak$$ << 'EOF'
 w
 q
 EOF
+case `ack_sys` in
+sparc_solaris)
+	ed - /tmp/mk_mak$$ << 'EOF'
+g/^EXTRALIB/s/=/= -lelf/
+w
+q
+EOF
+	;;
+esac
 cat /tmp/mk_mak$$
 exit 0
