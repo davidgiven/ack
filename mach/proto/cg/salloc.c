@@ -35,7 +35,7 @@ static char rcsid[] = "$Header$";
  * Every now and then call garbage_collect() from toplevel.
  */
 
-#define MAXSTAB         500
+#define MAXSTAB         2500
 #define THRESHOLD       200
 
 char *stab[MAXSTAB];
