@@ -28,6 +28,7 @@
 #include	"assert.h"
 #include	"Lpars.h"
 #include	"sizes.h"
+#include	"align.h"
 #include	"idf.h"
 #include	"level.h"
 #include	"def.h"
@@ -450,7 +451,7 @@ pad(tpx)
 	}
 #endif NOBITFIELD
 
-	while (sz >= word_size) {
+	if (tp->tp_align >= word_align) while (sz >= word_size) {
 		C_con_cst((arith) 0);
 		sz -= word_size;
 	}
