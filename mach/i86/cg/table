@@ -2327,16 +2327,16 @@ ldc cms zne $2==4 && loww(1)==0 && highw(1)==0 | rmorconst X_REG |
 			"jne $3"			|		| |
 ldc cms zeq $2==4       | rmorconst rmorconst |
                         remove(ALL)
-                        "cmp %[2],%(loww(1)%)"
+                        "cmp %[1],%(loww(1)%)"
                         "jne 1f"
-                        "cmp %[1],%(highw(1)%)"
+                        "cmp %[2],%(highw(1)%)"
                         "je $3"
                         "1:"                            |               | |
 ldc cms zne $2==4       | rmorconst rmorconst |
                         remove(ALL)
-                        "cmp %[2],%(loww(1)%)"
+                        "cmp %[1],%(loww(1)%)"
                         "jne $3"
-                        "cmp %[1],%(highw(1)%)"
+                        "cmp %[2],%(highw(1)%)"
                         "jne $3"                        |               | |
 cms zne $1==4	| regorconst regorconst rm rm STACK |
 			"cmp %[3],%[1]"
