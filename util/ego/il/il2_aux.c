@@ -131,7 +131,7 @@ STATIC bool too_expensive(fm,act)
 
 	return (OFTEN_USED(fm) && !is_simple(act->ac_exp));
 }
-anal_params(c)
+bool anal_params(c)
 	call_p c;
 {
 	/* Determine which of the actual parameters of a
@@ -144,12 +144,13 @@ anal_params(c)
 	int inlpars = 0;
 
 	p = c->cl_proc; /* the called procedure */
-	if (!INLINE_PARS(p) || !match_pars(p->P_FORMALS, c->cl_actuals)) {
+	if (!match_pars(p->P_FORMALS, c->cl_actuals)) return FALSE;
+	if (!INLINE_PARS(p)) {
 		for (act = c->cl_actuals; act != (actual_p) 0;
 		     act = act->ac_next) {
 			NOT_INLINE(act);
 		}
-		return; /* "# of inline pars." field in cl_flags remains 0 */
+		return TRUE; /* "# of inline pars." field in cl_flags remains 0 */
 	}
 	for (act = c->cl_actuals, form = p->P_FORMALS; act != (actual_p) 0;
 	     act = act->ac_next, form = form->f_next) {
@@ -163,6 +164,7 @@ anal_params(c)
 	}
 	if (inlpars > 15) inlpars = 15; /* We've only got 4 bits! */
 	c->cl_flags |= inlpars; /* number of inline parameters */
+	return TRUE;
 }
 
 

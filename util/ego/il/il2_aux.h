@@ -1,6 +1,8 @@
-extern anal_params();		/* (call_p c)
+extern bool anal_params();	/* (call_p c)
 				 * See which parameters of the call
 				 * may be expanded in line.
+				 * If the formals and actuals do not
+				 * match, return FALSE
 				 */
 extern assign_ratio();		/* (call_p c)
 				 * Assigna ratio number to the call,

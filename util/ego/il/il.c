@@ -124,9 +124,8 @@ pass2(cnam,space)
 	ccf = openfile(ccname,"r");
 	while ((c = getcall(cf)) != (call_p) 0) {
 		/* process all calls */
-		if (SUITABLE(c->cl_proc)) {
+		if (SUITABLE(c->cl_proc) && anal_params(c)) {
 			/* called proc. may be put in line */
-			anal_params(c);
 			/* see which parameters may be put in line */
 			assign_ratio(c); /* assign a rank */
 			a = abstract(c); /* abstract essential info */
