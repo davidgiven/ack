@@ -191,7 +191,7 @@ cmp_ext(e1, e2)
 	add_ext(e1, e2, &tmp);
 	e2->sign = ! e2->sign;
 	if (tmp.m1 == 0 && tmp.m2 == 0) return 0;
-	if (tmp->sign) return -1;
+	if (tmp.sign) return -1;
 	return 1;
 }
 
