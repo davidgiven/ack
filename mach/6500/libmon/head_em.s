@@ -9,6 +9,7 @@
 .define RETSIZE, TRAPVAL, STACK, BRANCH
 .define start, Push, Pop, STACKTh, STACKTl
 .define F_DUM
+.define EXIT
 .sect .zero
 .sect .text
 .sect .rom
@@ -186,6 +187,12 @@ start:
 	jsr OSBYTE	! input only from R423
 	rts
 
+EXIT:
+	ldx STACK	! load stackpointer
+	dex
+	dex		! adjust
+	txs		! reset hardware stackpointer
+	rts
 
 ! The subroutine Push pushes the registerpair AX onto the stack.
 
