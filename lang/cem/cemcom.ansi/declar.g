@@ -30,7 +30,6 @@
 #include	"level.h"
 #ifdef	LINT
 #include	"l_lint.h"
-#include	"l_state.h"
 #endif	LINT
 
 extern char	options[];
@@ -643,7 +642,7 @@ parameter_decl(struct proto **plp;)
 
 /*	This is weird. Due to the LR structure of the ANSI C grammar
 	we have to duplicate the actions of 'declarator' and
-	'abstract_declarator'. Calling these separate, as in
+	'abstract_declarator'. Calling these separately, as in
 
 	parameter_decl:
 		decl_specifiers

@@ -5,7 +5,12 @@
 /* $Header$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	"lint.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"l_em.h"
+#endif	LINT
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -73,6 +78,9 @@ code_startswitch(expp)
 	sh->sh_type = (*expp)->ex_type;	/* the expression switched	*/
 	/* sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->sh_expr = *expp;
+#ifdef LINT
+	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+#endif
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
 	C_bra(l_table);			/* goto start of switch_table	*/
@@ -92,7 +100,9 @@ code_endswitch()
 	C_bra(sh->sh_break);		/* skip the switch table now	*/
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	/* evaluate the switch expr.	*/
+#ifndef LINT
 	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+#endif
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
 	C_rom_ilb(sh->sh_default);

@@ -84,7 +84,7 @@ CSRC =	main.c idf.c declarator.c decspecs.c struct.c \
 	skip.c stack.c type.c ch3mon.c label.c eval.c \
 	switch.c conversion.c util.c proto.c \
 	pragma.c blocks.c dataflow.c Version.c stab.c\
-	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c l_dummy.c
+	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c
 COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	expr.o ch3.o ch3bin.o cstoper.o fltcstoper.o arith.o \
 	code.o dumpidf.o error.o field.o\
@@ -93,7 +93,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	skip.o stack.o type.o ch3mon.o label.o eval.o \
 	switch.o conversion.o util.o proto.o \
 	pragma.o blocks.o dataflow.o Version.o stab.o \
-	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o l_dummy.o
+	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o
 
 # Objects of other generated C files
 GCSRC =	char.c symbol2str.c next.c
@@ -123,8 +123,8 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	regcount.h
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
-	 input.h label.h level.h mes.h sizes.h specials.h \
-	 file_info.h tokenname.h l_lint.h
+	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
+	 file_info.h tokenname.h l_em.h l_lint.h
 
 HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
@@ -496,6 +496,7 @@ arith.o: sizes.h
 arith.o: spec_arith.h
 arith.o: trgt_sizes.h
 arith.o: type.h
+code.o: LLlex.h
 code.o: Lpars.h
 code.o: arith.h
 code.o: assert.h
@@ -508,6 +509,7 @@ code.o: debug.h
 code.o: declar.h
 code.o: decspecs.h
 code.o: def.h
+code.o: l_em.h
 code.o: expr.h
 code.o: file_info.h
 code.o: idf.h
@@ -549,6 +551,7 @@ error.o: LLlex.h
 error.o: arith.h
 error.o: debug.h
 error.o: def.h
+error.o: l_em.h
 error.o: errout.h
 error.o: expr.h
 error.o: file_info.h
@@ -611,6 +614,7 @@ LLmessage.o: file_info.h
 LLmessage.o: idf.h
 LLmessage.o: nopp.h
 LLmessage.o: spec_arith.h
+input.o: dbsymtab.h
 input.o: file_info.h
 input.o: input.h
 input.o: inputtype.h
@@ -621,6 +625,7 @@ domacro.o: arith.h
 domacro.o: assert.h
 domacro.o: botch_free.h
 domacro.o: class.h
+domacro.o: dbsymtab.h
 domacro.o: debug.h
 domacro.o: file_info.h
 domacro.o: idf.h
@@ -688,6 +693,7 @@ stack.o: botch_free.h
 stack.o: dbsymtab.h
 stack.o: debug.h
 stack.o: def.h
+stack.o: l_em.h
 stack.o: idf.h
 stack.o: level.h
 stack.o: lint.h
@@ -778,9 +784,11 @@ switch.o: code.h
 switch.o: dbsymtab.h
 switch.o: debug.h
 switch.o: density.h
+switch.o: l_em.h
 switch.o: expr.h
 switch.o: idf.h
 switch.o: label.h
+switch.o: lint.h
 switch.o: nobitfield.h
 switch.o: nocross.h
 switch.o: nopp.h
@@ -803,6 +811,7 @@ util.o: Lpars.h
 util.o: align.h
 util.o: debug.h
 util.o: def.h
+util.o: l_em.h
 util.o: lint.h
 util.o: nocross.h
 util.o: regcount.h
@@ -919,7 +928,6 @@ l_misc.o: Lpars.h
 l_misc.o: arith.h
 l_misc.o: code.h
 l_misc.o: dbsymtab.h
-l_misc.o: debug.h
 l_misc.o: def.h
 l_misc.o: expr.h
 l_misc.o: file_info.h
@@ -963,6 +971,8 @@ l_outdef.o: assert.h
 l_outdef.o: code.h
 l_outdef.o: dbsymtab.h
 l_outdef.o: debug.h
+l_outdef.o: declar.h
+l_outdef.o: decspecs.h
 l_outdef.o: def.h
 l_outdef.o: expr.h
 l_outdef.o: field.h
@@ -988,10 +998,6 @@ l_comment.o: l_comment.h
 l_comment.o: l_state.h
 l_comment.o: lint.h
 l_comment.o: spec_arith.h
-l_dummy.o: arith.h
-l_dummy.o: label.h
-l_dummy.o: lint.h
-l_dummy.o: spec_arith.h
 tokenfile.o: Lpars.h
 declar.o: LLlex.h
 declar.o: Lpars.h
@@ -1007,7 +1013,6 @@ declar.o: field.h
 declar.o: file_info.h
 declar.o: idf.h
 declar.o: l_lint.h
-declar.o: l_state.h
 declar.o: label.h
 declar.o: level.h
 declar.o: lint.h
@@ -1028,11 +1033,11 @@ statement.o: code.h
 statement.o: dbsymtab.h
 statement.o: debug.h
 statement.o: def.h
+statement.o: l_em.h
 statement.o: expr.h
 statement.o: file_info.h
 statement.o: idf.h
 statement.o: l_lint.h
-statement.o: l_state.h
 statement.o: label.h
 statement.o: lint.h
 statement.o: nobitfield.h
@@ -1070,7 +1075,7 @@ program.o: def.h
 program.o: expr.h
 program.o: file_info.h
 program.o: idf.h
-program.o: l_state.h
+program.o: l_lint.h
 program.o: label.h
 program.o: lint.h
 program.o: nobitfield.h
@@ -1085,6 +1090,7 @@ ival.o: assert.h
 ival.o: dbsymtab.h
 ival.o: debug.h
 ival.o: def.h
+ival.o: l_em.h
 ival.o: estack.h
 ival.o: expr.h
 ival.o: field.h

@@ -5,9 +5,14 @@
 /* $Header$ */
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
+#include	"lint.h"
 #include	<varargs.h>
 #include	<system.h>
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"l_em.h"
+#endif	LINT
 
 #include	"debug.h"
 #include	"lint.h"

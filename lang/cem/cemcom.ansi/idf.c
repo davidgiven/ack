@@ -266,23 +266,7 @@ declare_idf(ds, dc, lvl)
 				: AUTO;
 
 #ifdef	LINT
-	if (	def && def->df_level < lvl
-	&&	!(	lvl == L_FORMAL2
-		||	def->df_level == L_UNIVERSAL
-		||	sc == GLOBAL
-		||	sc == EXTERN
-		)
-	) {
-		/*	there is already a definition for this non-extern name
-			on a more global level
-		*/
-		warning("%s is already defined as a %s",
-			idf->id_text,
-			def->df_level == L_GLOBAL ? "global" :
-			def->df_level == L_FORMAL2 ? "formal" :
-				"more global local"
-		);
-	}
+	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
 #endif	LINT
 
 	if ((def && 
@@ -332,8 +316,8 @@ declare_idf(ds, dc, lvl)
 		newdef->df_file = idf->id_file;
 		newdef->df_line = idf->id_line;
 #ifdef	LINT
-		newdef->df_set = (type->tp_fund == ARRAY);
-		/* newdef->df_firstbrace = 0; */
+		newdef->df_set = 0;
+		newdef->df_firstbrace = 0;
 #endif	LINT
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;

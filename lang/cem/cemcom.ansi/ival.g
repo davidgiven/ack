@@ -7,7 +7,12 @@
 
 {
 #include	"lint.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"l_em.h"
+#include	"l_lint.h"
+#endif	LINT
 #include	"debug.h"
 #include	<alloc.h>
 #include	<assert.h>
@@ -28,9 +33,6 @@
 #include	"def.h"
 #include	"LLlex.h"
 #include	"estack.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	LINT
 
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)

@@ -60,7 +60,7 @@
 #include	"expr.h"
 #include	"def.h"
 #ifdef	LINT
-#include	"l_state.h"
+#include	"l_lint.h"
 #endif	LINT
 
 #ifndef NOPP
@@ -182,10 +182,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 	]
 	{
 #ifdef	LINT
-		if (dc->dc_idf->id_def->df_type->tp_fund == FUNCTION)
-			def2decl(ds->ds_sc);
-		if (dc->dc_idf->id_def->df_sc != TYPEDEF)
-			outdef();
+		lint_non_function_decl(ds, dc);
 #endif	LINT
 	}
 	[
@@ -225,11 +222,11 @@ function(struct decspecs *ds; struct declarator *dc;)
 	{
 		end_proc(fbytes);
 #ifdef	LINT
-		lint_return_stmt(0);	/* implicit return at end of function */
+		lint_implicit_return();
 #endif	LINT
 		unstack_level();	/* L_FORMAL2 declarations */
 #ifdef	LINT
-		check_args_used();
+		lint_end_formals();
 #endif	LINT
 		unstack_level();	/* L_FORMAL1 declarations */
 #ifdef	LINT

@@ -270,10 +270,15 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case ',':
-		if (is_cp_cst(*expp))
+		if (is_cp_cst(*expp)) {
+#ifdef	LINT
+			hwarning("constant expression ignored");
+#endif	LINT
 			*expp = expr;
-		else
+		}
+		else {
 			*expp = new_oper(expr->ex_type, *expp, oper, expr);
+		}
 		(*expp)->ex_flags |= EX_COMMA;
 		break;
 	}

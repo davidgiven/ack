@@ -11,12 +11,17 @@
 	allowing re-use.
 */
 
+#include	"lint.h"
+#ifndef	LINT
 #include	<em.h>
+#else
+#include	"l_em.h"
+#endif	LINT
+#include	<em_arith.h>
 #include	<em_reg.h>
 #include	<alloc.h>
 #include	<em_mes.h>
 
-#include	"lint.h"
 #include	"debug.h"
 #include	"util.h"
 #include	"use_tmp.h"

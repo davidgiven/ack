@@ -6,9 +6,14 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
-#include	<em_code.h>
-
 #include	"lint.h"
+#ifndef	LINT
+#include	<em.h>
+#else
+#include	"l_em.h"
+#include	"l_lint.h"
+#endif	LINT
+
 #include	"debug.h"
 #include	"botch_free.h"
 #include	"dbsymtab.h"
@@ -23,10 +28,6 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#include	"l_state.h"
-#endif	LINT
 #ifdef DBSYMTAB
 #include	<stb.h>
 #endif /* DBSYMTAB */
@@ -215,18 +216,14 @@ while_statement
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
-#ifdef	LINT
-				start_loop_stmt(WHILE, 1,
-					expr->VL_VALUE != (arith)0);
-#endif	LINT
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_body, l_break);
 				C_df_ilb(l_body);
-#ifdef	LINT
-				start_loop_stmt(WHILE, 0, 0);
-#endif	LINT
 			}
+#ifdef	LINT
+			start_while_stmt(expr);
+#endif	LINT
 		}
 	')'
 	statement
@@ -236,6 +233,7 @@ while_statement
 			unstack_stmt();
 			free_expression(expr);
 #ifdef	LINT
+			end_loop_body();
 			end_loop_stmt();
 #endif	LINT
 		}
@@ -253,13 +251,17 @@ do_statement
 		{	C_df_ilb(l_body);
 			stack_stmt(l_break, l_continue);
 #ifdef	LINT
-			start_loop_stmt(DO, 1, 1);
+			start_do_stmt();
 #endif	LINT
 		}
 	statement
 	WHILE
 	'('
-		{	C_df_ilb(l_continue);
+		{
+#ifdef	LINT
+			end_loop_body();
+#endif	LINT
+			C_df_ilb(l_continue);
 		}
 	expression(&expr)
 		{
@@ -295,9 +297,6 @@ for_statement
 		label l_continue = text_label();
 		label l_body = text_label();
 		label l_test = text_label();
-#ifdef	LINT
-		int const = 1, cond = 1;	/* the default case */
-#endif	LINT
 	}
 :
 	FOR
@@ -320,17 +319,10 @@ for_statement
 				if (e_test->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
-#ifdef	LINT
-				const = 1,
-					cond = e_test->VL_VALUE != (arith)0;
-#endif	LINT
 			}
 			else	{
 				code_expr(e_test, RVAL, TRUE, l_body, l_break);
 				C_df_ilb(l_body);
-#ifdef	LINT
-				const = 0, cond = 0;
-#endif	LINT
 			}
 		}
 	]?
@@ -339,13 +331,13 @@ for_statement
 	')'
 		{
 #ifdef	LINT
-			start_loop_stmt(FOR, const, cond);
+			start_for_stmt(e_test);
 #endif	LINT
 		}
 	statement
 		{
 #ifdef	LINT
-			end_loop_stmt();
+			end_loop_body();
 #endif	LINT
 			C_df_ilb(l_continue);
 			if (e_incr)
@@ -357,6 +349,9 @@ for_statement
 			free_expression(e_init);
 			free_expression(e_test);
 			free_expression(e_incr);
+#ifdef	LINT
+			end_loop_stmt();
+#endif	LINT
 		}
 ;
 
@@ -372,7 +367,7 @@ switch_statement
 		{
 			code_startswitch(&expr);
 #ifdef	LINT
-			start_switch_part(expr);
+			start_switch_part(is_cp_cst(expr));
 #endif	LINT
 		}
 	')'
@@ -435,7 +430,7 @@ return_statement
 			do_return_expr(expr);
 			free_expression(expr);
 #ifdef	LINT
-			lint_return_stmt(1);
+			lint_return_stmt(VALRETURNED);
 #endif	LINT
 		}
 	|
@@ -443,7 +438,7 @@ return_statement
 		{
 			do_return();
 #ifdef	LINT
-			lint_return_stmt(0);
+			lint_return_stmt(NOVALRETURNED);
 #endif	LINT
 		}
 	]

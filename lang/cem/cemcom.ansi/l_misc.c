@@ -10,9 +10,10 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
-#include	"debug.h"
 #include	"interface.h"
+#ifdef ANSI
 #include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -32,6 +33,32 @@ extern struct type *func_type;
 PRIVATE lint_enum_arith();
 PRIVATE lint_conversion();
 PRIVATE int numsize();
+
+check_hiding(idf, lvl, sc)
+	struct idf *idf;
+	int lvl;
+	int sc;
+{
+	/*	Checks if there is already a definition for this non-extern
+		name on a more global level.
+	*/
+	struct def *def = idf->id_def;
+	
+	if (	def && def->df_level < lvl
+	&&	! (	lvl == L_FORMAL2
+		||	def->df_level == L_UNIVERSAL
+		||	sc == GLOBAL
+		||	sc == EXTERN
+		)
+	) {
+		warning("%s is already defined as a %s",
+			idf->id_text,
+			def->df_level == L_GLOBAL ? "global" :
+			def->df_level == L_FORMAL2 ? "formal" :
+				"more global local"
+		);
+	}
+}
 
 lint_new_oper(expr)
 	struct expr *expr;
@@ -53,14 +80,14 @@ lint_new_oper(expr)
 		right == 0 ? 0 :		/* for ( without parameters */
 		right->ex_type->tp_fund;
 
-	/*	In ch3.c, in ch3asgn(), a combined operator/assignment
+	/*	In ch7.c, in ch7asgn(), a combined operator/assignment
 		is hammered into correctness by repeated application of
-		ch3bin(), which calls new_oper(), which calls lint_new_oper().
+		ch7bin(), which calls new_oper(), which calls lint_new_oper().
 		These spurious calls understandably cause spurious error
 		messages, which we don't like.  So we try to suppress these
 		wierd calls here.  This refers to the code marked
 			this is really $#@&*%$# !
-		in ch3asgn().
+		in ch7asgn().
 	*/
 	switch (oper) {
 	case PLUSAB:
@@ -104,7 +131,7 @@ lint_new_oper(expr)
 		else {
 			/* binary */
 			if (l_fund == ENUM && r_fund == ENUM) {
-				if (!equal_type(left->ex_type, right->ex_type, 0))
+				if (left->ex_type != right->ex_type)
 					warning("subtracting enums of different type");
 				/* update the type, cem does not do it */
 				expr->ex_type = int_type;
@@ -141,8 +168,7 @@ lint_new_oper(expr)
 		break;
 
 	case '~':
-		if (r_fund == ENUM || r_fund == FLOAT || r_fund == DOUBLE
-					    /* ??? ||  r_fund == LNGDBL */ )
+		if (r_fund == ENUM || r_fund == FLOAT || r_fund == DOUBLE)
 			warning("~ on %s", symbol2str(r_fund));
 		break;
 
@@ -165,7 +191,7 @@ lint_new_oper(expr)
 	case EQUAL:
 	case NOTEQUAL:
 		if (	(l_fund == ENUM || r_fund == ENUM)
-		&&	!equal_type(left->ex_type, right->ex_type, 0)
+		&&	left->ex_type != right->ex_type
 		) {
 			warning("comparing enum with non-enum");
 		}
@@ -287,7 +313,6 @@ numsize(fund)
 	case LONG:	return 4;
 	case FLOAT:	return 5;
 	case DOUBLE:	return 6;
-	case LNGDBL:	return 7;
 	default:	return 0;
 	}
 }
@@ -303,8 +328,8 @@ lint_ptr_conv(from, to)
 {
 /* X -> X ok			-- this includes struct -> struct, of any size
  * X -> CHAR ok
- * LNGDBL -> X ok
- * DOUBLE -> FLOAT -> LONG -> INT -> SHORT  ok
+ * DOUBLE -> X ok
+ * FLOAT -> LONG -> INT -> SHORT  ok
  */
 	if (from == to)
 		return;
@@ -312,18 +337,10 @@ lint_ptr_conv(from, to)
 	if (to == CHAR)
 		return;
 
-	if (from == LNGDBL)
+	if (from == DOUBLE)
 		return;
 
 	switch (from) {
-	case DOUBLE:
-		switch(to) {
-		case FLOAT:
-		case INT:
-		case SHORT:
-			return;
-		}
-		break;
 	case FLOAT:
 		switch (to) {
 		case LONG:
@@ -373,7 +390,7 @@ lint_relop(left, right, oper)
 	&&	right->ex_class == Value
 	&&	right->VL_CLASS == Const
 	) {
-		if (right->VL_VALUE < 0) {
+		if (!right->ex_type->tp_unsigned && right->VL_VALUE < 0) {
 			warning("unsigned compared to negative constant");
 		}
 		if (right->VL_VALUE == 0) {

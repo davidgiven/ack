@@ -298,7 +298,10 @@ compile(argc, argv)
 #ifdef PREPEND_SCOPES
 		prepend_scopes();
 #endif PREPEND_SCOPES
+
+#ifndef	LINT
 		end_code();
+#endif	LINT
 
 #ifdef	DEBUG
 		if (options['u'])	{

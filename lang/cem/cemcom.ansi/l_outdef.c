@@ -10,12 +10,15 @@
 #ifdef	LINT
 
 #include	<alloc.h>
-#include	"debug.h"
 #include	"interface.h"
+#ifdef ANSI
 #include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"
 #include	"assert.h"
 #include	"type.h"
+#include	"declar.h"
+#include	"decspecs.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"stack.h"
@@ -34,6 +37,7 @@
 
 extern char *bts2str();
 extern char *symbol2str();
+extern char *strindex();
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;
@@ -46,7 +50,6 @@ PRIVATE outargs();
 PRIVATE outarg();
 PRIVATE outargstring();
 PRIVATE outargtype();
-PRIVATE implicit_func_decl();
 PRIVATE fill_arg();
 
 lint_declare_idf(idf, sc)
@@ -69,10 +72,23 @@ lint_declare_idf(idf, sc)
 	}
 }
 
+lint_non_function_decl(ds, dc)
+	struct decspecs *ds;
+	struct declarator *dc;
+{
+	register struct def *def = dc->dc_idf->id_def;
+	register int is_function = def->df_type->tp_fund == FUNCTION;
+
+	if (is_function)
+		def2decl(ds->ds_sc);
+	if (def->df_sc != TYPEDEF)
+		outdef();
+}
+
 lint_ext_def(idf, sc)
 	struct idf *idf;
 {
-/* At this place the following fields of the outputdefinition can be
+/* At this place the following fields of the output definition can be
  * filled:
  *		name, stat_number, class, file, line, type.
  * For variable definitions and declarations this will be all.
@@ -165,7 +181,7 @@ lint_formals()
 		switch (type->tp_fund) {
 		case CHAR:
 		case SHORT:
-			type = int_type;
+			type = (type->tp_unsigned ? uint_type : int_type);
 			break;
 		case FLOAT:
 			type = double_type;
@@ -273,7 +289,7 @@ output_def(od)
 /* As the types are output the tp_entries are removed, because they
  * are then not needed anymore.
  */
-	if (od->od_class == XXDF)
+	if (od->od_class == XXDF || !od->od_name || od->od_name[0] == '#')
 		return;
 
 	if (LINTLIB) {
@@ -435,7 +451,18 @@ outargtype(tp)
 	case STRUCT:
 	case UNION:
 	case ENUM:
-		printf("%s %s", symbol2str(tp->tp_fund), tp->tp_idf->id_text);
+		/* watch out for anonymous identifiers; the count field does
+		   not have to be the same for all compilation units.
+		   Remove it, so that pass 2 does not see it. The only
+		   problem with this is that pass2 will not see a difference
+		   between two non-tagged types declared on the same line.
+		*/
+		printf("%s ", symbol2str(tp->tp_fund));
+		if (is_anon_idf(tp->tp_idf)) {
+			/* skip the #<num>, replace it by '#anonymous id' */
+			printf("#anonymous id%s", strindex(tp->tp_idf->id_text, ' '));
+		}
+		else printf(tp->tp_idf->id_text);
 		break;
 
 	case CHAR:
@@ -444,7 +471,6 @@ outargtype(tp)
 	case LONG:
 	case FLOAT:
 	case DOUBLE:
-	case LNGDBL:
 	case VOID:
 	case ERRONEOUS:
 		if (tp->tp_unsigned)
@@ -457,6 +483,7 @@ outargtype(tp)
 	}
 }
 
+#ifdef	IMPLICIT
 PRIVATE
 implicit_func_decl(idf, file, line)
 	struct idf *idf;
@@ -474,6 +501,7 @@ implicit_func_decl(idf, file, line)
 	output_def(&od);
 	/* The other fields are not used for this class. */
 }
+#endif	IMPLICIT
 
 fill_outcall(ex, used)
 	struct expr *ex;
@@ -482,10 +510,12 @@ fill_outcall(ex, used)
 	register struct idf *idf = ex->OP_LEFT->VL_IDF;
 	register struct def *def = idf->id_def;
 
+#ifdef	IMPLICIT
 	if (def->df_sc == IMPLICIT && !idf->id_def->df_used) {
 		/* IFDC, first time */
 		implicit_func_decl(idf, ex->ex_file, ex->ex_line);
 	}
+#endif	IMPLICIT
 
 	OutCall.od_type = def->df_type->tp_up;
 	OutCall.od_statnr = (def->df_sc == STATIC ? stat_number : 0);
@@ -519,7 +549,10 @@ fill_arg(e)
 		arg->ar_class = ArgConst;
 		arg->CAA_VALUE = e->VL_VALUE;
 	}
-	else if (e->ex_class == Value && e->VL_CLASS == Label) {
+	else if (	e->ex_type == string_type
+		&&	e->ex_class == Value
+		&&	e->VL_CLASS == Label
+		) {
 		/* it may be a string; let's look it up */
 		register struct string_cst *sc = str_list;
 

@@ -10,12 +10,14 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
-#include	"debug.h"
 #include	"interface.h"
 #include	"assert.h"
+#include	"debug.h"
+#ifdef ANSI
 #include	<flt_arith.h>
-#include	"arith.h"	/* definition arith */
-#include	"label.h"	/* definition label */
+#endif ANSI
+#include	"arith.h"
+#include	"label.h"
 #include	"expr.h"
 #include	"idf.h"
 #include	"def.h"
@@ -31,50 +33,62 @@
 #include	"l_comment.h"
 #include	"l_outdef.h"
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
+#ifdef	DEBUG
+#define	dbg_lint_stack(m)	/*print_lint_stack(m)	/* or not */
+#else
+#define	dbg_lint_stack(m)
+#endif	DEBUG
 
 extern char *symbol2str();
 extern char *func_name;
 extern struct type *func_type;
 extern int func_notypegiven;
 extern char loptions[];
+extern struct stack_level *local_level;
 
 /* global variables for the lint_stack */
-PRIVATE struct lint_stack_entry stack_bottom;
-PRIVATE struct lint_stack_entry *top_ls = &stack_bottom;
+PRIVATE struct lint_stack_entry *top_ls;
 
 /* global variables for the brace stack */
 PRIVATE int brace_count;
-PRIVATE struct brace brace_bottom;
-PRIVATE struct brace *top_br = &brace_bottom;
+PRIVATE struct brace *top_br;
+
+/* global variables for the function return */
+PRIVATE int valreturned;		/* see l_lint.h */
+PRIVATE int return_warned;
 
 PRIVATE end_brace();
 PRIVATE lint_1_local();
 PRIVATE lint_1_global();
+PRIVATE start_loop_stmt();
 PRIVATE check_autos();
-PRIVATE struct auto_def *copy_st_auto_list();
-PRIVATE free_st_auto_list();
+PRIVATE struct auto_def *copy_auto_list();
+PRIVATE free_auto_list();
 PRIVATE struct state *copy_state();
 PRIVATE Free_state();
 PRIVATE remove_settings();
 PRIVATE struct auto_def *merge_autos();
 PRIVATE merge_states();
 PRIVATE struct lint_stack_entry *find_wdf(), *find_wdfc(), *find_cs();
-PRIVATE cont_break_merge();
+PRIVATE cont_merge();
+PRIVATE break_merge();
+PRIVATE struct lint_stack_entry *mk_lint_stack_entry();
 PRIVATE lint_push();
 PRIVATE lint_pop();
 
 lint_init_stack()
 {
-/* Allocate some memory for the global stack_bottom
- */
-	stack_bottom.ls_current = new_state();
+/*	Allocate memory for the global lint-stack elements.
+*/
+	top_ls = new_lint_stack_entry();
+	top_ls->ls_current = new_state();
 }
 
 lint_start_local()
 {
 	register struct brace *br = new_brace();
 
+	dbg_lint_stack("lint_start_local");
 	brace_count++;
 	br->br_count = brace_count;
 	br->br_level = level;
@@ -82,24 +96,20 @@ lint_start_local()
 	top_br = br;
 }	
 
-lint_local_level(stl)
+lint_end_local(stl)
 	struct stack_level *stl;
 {
+
+	dbg_lint_stack("lint_end_local");
 	if (s_NOTREACHED) {
 		top_ls->ls_current->st_notreached = 1;
+		top_ls->ls_current->st_warned = 0;
 		s_NOTREACHED = 0;
 	}
 
 	if (top_ls->ls_class == CASE && level == top_ls->ls_level) {
+		/* supply missing  break;  at end of switch */
 		lint_break_stmt();
-			/* To prevent a warning for the case
-			 *	switch (cond) {
-			 *	int i;
-			 *	case 0:
-			 *		i = 0;
-			 *		use(i);
-			 *	}
-			 */
 	}
 
 	check_autos();
@@ -111,6 +121,7 @@ end_brace(stl)
 	struct stack_level *stl;
 {
 	/*	Check if static variables and labels are used and/or set.
+		Automatic vars have already been checked by check_autos().
 	*/
 	register struct stack_entry *se = stl->sl_entry;
 	register struct brace *br;
@@ -125,6 +136,7 @@ end_brace(stl)
 		se = se->next;
 	}
 
+	/* remove entry from brace stack */
 	br = top_br;
 	top_br = br->next;
 	free_brace(br);
@@ -139,8 +151,9 @@ lint_1_local(idf, def)
 
 	if (	(sc == STATIC || sc == LABEL)
 	&&	!def->df_used
+	&&	!is_anon_idf(idf)
 	) {
-		def_warning(def, "%s %s declared but not used in function %s",
+		def_warning(def, "%s %s not applied anywhere in function %s",
 			symbol2str(sc), idf->id_text, func_name);
 	}
 
@@ -149,6 +162,7 @@ lint_1_local(idf, def)
 	&&	!def->df_initialized
 	&&	def->df_firstbrace != 0
 	&&	def->df_minlevel != level
+	&&	!is_anon_idf(idf)
 	) {
 		register int diff = def->df_minlevel - level;
 
@@ -159,11 +173,12 @@ lint_1_local(idf, def)
 	}
 }
 
-lint_global_level(stl)
+lint_end_global(stl)
 	struct stack_level *stl;
 {
 	register struct stack_entry *se = stl->sl_entry;
 
+	dbg_lint_stack("lint_end_global");
 	ASSERT(level == L_GLOBAL);
 	while (se) {
 		register struct idf *idf = se->se_idf;
@@ -188,7 +203,9 @@ lint_1_global(idf, def)
 	case STATIC:
 	case EXTERN:
 	case GLOBAL:
+#ifdef	IMPLICIT
 	case IMPLICIT:
+#endif	IMPLICIT
 		if (fund == ERRONEOUS)
 			break;
 
@@ -198,16 +215,19 @@ lint_1_global(idf, def)
 			 */
 			output_use(idf);
 		}
-		else {
-			if (sc == STATIC) {
-				if (def->df_set) {
+
+		if (sc == STATIC && !def->df_used) {
+			if (def->df_set) {
+				if (!is_anon_idf(idf) && fund != ERRONEOUS) {
 					def_warning(def,
 						"%s %s %s set but not used",
 						symbol2str(sc),
 						symbol2str(fund),
 						idf->id_text);
 				}
-				else {
+			}
+			else {
+				if (!is_anon_idf(idf) && fund != ERRONEOUS) {
 					def_warning(def,
 						"%s %s %s not used anywhere",
 						symbol2str(sc),
@@ -215,21 +235,24 @@ lint_1_global(idf, def)
 						idf->id_text);
 				}
 			}
-			if (loptions['x']) {
-				register char *fn = def->df_file;
+		}
+		if (loptions['x']) {
+			register char *fn = def->df_file;
 
-				if (	(sc == EXTERN || sc == GLOBAL)
-				&&	def->df_alloc == 0
-				&&	!def->df_set
-				&&	!def->df_initialized
-				&&	strcmp(&fn[strlen(fn)-2], ".c") == 0
-				) {
-					def_warning(def,
-						"%s %s %s not used anywhere",
-						symbol2str(sc),
-						symbol2str(fund),
-						idf->id_text);
-				}
+			if (	(sc == EXTERN || sc == GLOBAL)
+			&&	def->df_alloc == 0
+			&&	!def->df_set
+			&&	!def->df_initialized
+			&&	!def->df_used
+			&&	strcmp(&fn[strlen(fn)-2], ".c") == 0
+			&&	!is_anon_idf(idf)
+			&&	fund != ERRONEOUS
+			) {
+				def_warning(def,
+					"%s %s %s not used anywhere",
+					symbol2str(sc),
+					symbol2str(fund),
+					idf->id_text);
 			}
 		}
 		break;
@@ -242,42 +265,44 @@ change_state(idf, to_state)
 {
 /* Changes the state of the variable identified by idf in the current state
  * on top of the stack.
- * For non-automatic variables, the fields in the def-descriptor are set too.
+ * The fields in the def-descriptor are set too.
  */
 	register struct def *def = idf->id_def;
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
-	if (def) {
-		switch (to_state) {
-		case SET:
-			def->df_set = 1;
-			break;
-		case USED:
-			def->df_used = 1;
-			break;
-		}
+	ASSERT(def);
 
-		if (def->df_firstbrace == 0) {
-			def->df_firstbrace = brace_count;
-			def->df_minlevel = level;
-		}
-		else {
-			register struct brace *br = top_br;
-
-			/*	find the smallest brace range from which
-				firstbrace is visible
-			*/
-			while (br && br->br_count > def->df_firstbrace) {
-				br = br->next;
-			}
-			ASSERT(br && def->df_minlevel >= br->br_level);
-			def->df_minlevel = br->br_level;
-		}
+	switch (to_state) {
+	case SET:
+		def->df_set = 1;
+		break;
+	case USED:
+		def->df_used = 1;
+		break;
 	}
 
+	/* adjust minimum required brace level */
+	if (def->df_firstbrace == 0) {
+		def->df_firstbrace = brace_count;
+		def->df_minlevel = level;
+	}
+	else {
+		register struct brace *br = top_br;
+
+		/*	find the smallest brace range from which
+			firstbrace is visible
+		*/
+		while (br && br->br_count > def->df_firstbrace) {
+			br = br->next;
+		}
+		ASSERT(br && def->df_minlevel >= br->br_level);
+		def->df_minlevel = br->br_level;
+	}
+
+	/* search auto_list */
 	while(a && a->ad_idf != idf)
 		a = a->next;
-	if (a == 0)	/* identifier not in list */
+	if (a == 0)	/* identifier not in list, global definition */
 		return;
 
 	switch (to_state) {
@@ -287,9 +312,12 @@ change_state(idf, to_state)
 		break;
 	case USED:
 		if (!a->ad_set) {
-			warning("%s%s uninitialized", idf->id_text,
-				(a->ad_maybe_set ? " possibly" : "")
-			);
+			if (!is_anon_idf(idf)) {
+				warning("variable %s%s uninitialized",
+					idf->id_text,
+					(a->ad_maybe_set ? " possibly" : "")
+				);
+			}
 			a->ad_maybe_set = 0;
 			a->ad_set = 1;	/* one warning */
 		}
@@ -298,30 +326,31 @@ change_state(idf, to_state)
 	}
 }
 
-extern struct stack_level *local_level;
-
 add_auto(idf)	/* to current state on top of lint_stack */
 	struct idf *idf;
 {
 /* Check if idf's definition is really an auto (or register).
  * It could be a static or extern too.
- * Watch out for register formal parameters.
+ * Watch out for formal parameters.
  */
 	register struct def *def = idf->id_def;
-	register struct auto_def *a;
 
-	if (!def)
-		return;
+	ASSERT(def);
+
 	switch (def->df_sc) {
+		register struct auto_def *a;
 	case AUTO:
 	case REGISTER:
 		if (def->df_level < L_LOCAL)
-			return;		/* a register formal */
+			return;		/* a formal */
+
 		a = new_auto_def();
+
 		a->ad_idf = idf;
-		a->ad_def = idf->id_def;
+		a->ad_def = def;
 		a->ad_used = def->df_used;
 		a->ad_set = def->df_set;
+
 		a->next = top_ls->ls_current->st_auto_list;
 		top_ls->ls_current->st_auto_list = a;
 	}
@@ -330,43 +359,50 @@ add_auto(idf)	/* to current state on top of lint_stack */
 PRIVATE
 check_autos()
 {
-/* Before leaving a block remove the auto_defs of the automatic
+/* Before leaving a block, remove the auto_defs of the automatic
  * variables on this level and check if they are used
  */
-	register struct auto_def *a1 = top_ls->ls_current->st_auto_list;
-	register struct auto_def *a2;
+	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
-	ASSERT(!(a1 && a1->ad_def->df_level > level));
-	while (a1 && a1->ad_def->df_level == level) {
-		a2 = a1;
-		a1 = a1->next;
-		if (!a2->ad_used) {
-			if (a2->ad_set || a2->ad_maybe_set) {
-				def_warning(a2->ad_def,
+	ASSERT(!(a && a->ad_def->df_level > level));
+	while (a && a->ad_def->df_level == level) {
+		struct idf *idf = a->ad_idf;
+		struct def *def = idf->id_def;
+
+		if (!def->df_used && !is_anon_idf(idf)) {
+			if (def->df_set || a->ad_maybe_set) {
+				def_warning(def,
 					"%s set but not used in function %s",
-					a2->ad_idf->id_text, func_name);
+					idf->id_text, func_name);
 			}
 			else {
-				def_warning(a2->ad_def,
-					"%s neither set nor used in function %s",
-					a2->ad_idf->id_text, func_name);
+				def_warning(def,
+					"%s not used anywhere in function %s",
+					idf->id_text, func_name);
 			}
 		}
-		free_auto_def(a2);
+
+		{	/* free a */
+			register struct auto_def *aux = a;
+			a = a->next;
+			free_auto_def(aux);
+		}
 	}
-	top_ls->ls_current->st_auto_list = a1;
+	top_ls->ls_current->st_auto_list = a;
 }
 
-check_args_used()
+lint_end_formals()
 {
 	register struct stack_entry *se = local_level->sl_entry;
 
+	dbg_lint_stack("lint_end_formals");
 	ASSERT(level == L_FORMAL1);
 	while (se) {
 		register struct def *def = se->se_idf->id_def;
 
 		if (	(def && !def->df_used)
 		&&	!(f_ARGSUSED || LINTLIB)
+		&&	!is_anon_idf(se->se_idf)
 		) {
 			def_warning(def, "argument %s not used in function %s",
 					se->se_idf->id_text, func_name);
@@ -376,15 +412,18 @@ check_args_used()
 }
 
 PRIVATE struct auto_def *
-copy_st_auto_list(from_al, lvl)
+copy_auto_list(from_al, lvl)
 	struct auto_def *from_al;
+	int lvl;
 {
 	struct auto_def *start = 0;
 	register struct auto_def **hook = &start;
 
+	/* skip too high levels */
 	while (from_al && from_al->ad_def->df_level > lvl) {
 		from_al = from_al->next;
 	}
+
 	while (from_al) {
 		register struct auto_def *a = new_auto_def();
 
@@ -398,28 +437,27 @@ copy_st_auto_list(from_al, lvl)
 }
 
 PRIVATE
-free_st_auto_list(au)
-	register struct auto_def *au;
-{
+free_auto_list(a)
 	register struct auto_def *a;
-
-	while (au) {
-		a = au;
-		au = au->next;
-		free_auto_def(a);
+{
+	while (a) {
+		register struct auto_def *aux = a;
+		a = a->next;
+		free_auto_def(aux);
 	}
 }
 
 PRIVATE struct state *
 copy_state(from_st, lvl)
 	struct state *from_st;
+	int lvl;
 {
 /* Memory for the struct state and the struct auto_defs is allocated
  * by this function
  */
 	register struct state *st = new_state();
 
-	st->st_auto_list = copy_st_auto_list(from_st->st_auto_list, lvl);
+	st->st_auto_list = copy_auto_list(from_st->st_auto_list, lvl);
 	st->st_notreached = from_st->st_notreached;
 	st->st_warned = from_st->st_warned;
 	return st;
@@ -431,19 +469,20 @@ Free_state(stp)
 {
 /* This function also frees the list of auto_defs
  */
-	free_st_auto_list((*stp)->st_auto_list);
+	free_auto_list((*stp)->st_auto_list);
 	free_state(*stp);
 	*stp = 0;
 }
 
 PRIVATE
-remove_settings(state, lvl)
-	struct state *state;
+remove_settings(st, lvl)
+	struct state *st;
+	int lvl;
 {
-/* The state of all variables on this level are set to 'not set' and
+/* The states of all variables on this level are set to 'not set' and
  * 'not maybe set'. (I think you have to read this twice.)
  */
-	register struct auto_def *a = state->st_auto_list;
+	register struct auto_def *a = st->st_auto_list;
 
 	while (a && a->ad_def->df_level == lvl) {
 		a->ad_set = a->ad_maybe_set = 0;
@@ -459,9 +498,48 @@ remove_settings(state, lvl)
 #define	CASE_BREAK	1
 #define	USE_ONLY	2
 
+PRIVATE
+merge_states(st1, st2, lvl, mode)
+	struct state *st1, *st2;
+	int lvl;
+	int mode;			/* NORMAL or CASE_BREAK */
+{
+/* st2 becomes the result.
+ * st1 is left unchanged.
+ * The resulting state is the state the program gets in if st1 OR st2
+ * becomes the state. (E.g. the states at the end of an if-part and an
+ * end-part are merged by this function.)
+ */
+	if (st1->st_notreached) {
+		if (mode == NORMAL || st2->st_notreached) {
+			st2->st_auto_list =
+				merge_autos(st1->st_auto_list,
+					st2->st_auto_list, lvl, USE_ONLY);
+		}
+	}
+	else
+	if (st2->st_notreached) {
+		register struct auto_def *tmp = st2->st_auto_list;
+
+		st2->st_auto_list = copy_auto_list(st1->st_auto_list, lvl);
+		st2->st_notreached = 0;
+		st2->st_warned = 0;
+		st2->st_auto_list = merge_autos(tmp, st2->st_auto_list,
+							lvl, USE_ONLY);
+		free_auto_list(tmp);
+	}
+	else {
+		/* both st1 and st2 reached */
+		st2->st_auto_list =
+			merge_autos(st1->st_auto_list, st2->st_auto_list,
+				lvl, mode);
+	}
+}
+
 PRIVATE struct auto_def *
 merge_autos(a1, a2, lvl, mode)
 	struct auto_def *a1, *a2;
+	int lvl;
 	int mode;
 {
 /* Returns a pointer to the result.
@@ -484,17 +562,23 @@ merge_autos(a1, a2, lvl, mode)
  */
 	register struct auto_def *a;
 
+	/* skip too local entries */
 	while (a1 && a1->ad_def->df_level > lvl) {
 		a1 = a1->next;
 	}
+
+	/* discard too local entries */
 	while (a2 && a2->ad_def->df_level > lvl) {
-		a = a2;
+		register struct auto_def *aux = a2;
 		a2 = a2->next;
-		free_auto_def(a);
+		free_auto_def(aux);
 	}
+
 	a = a2;	/* pointer to the result */
 	while (a1) {
 		ASSERT(a2);
+
+		/* merge the auto_defs for one idf */
 		ASSERT(a1->ad_idf == a2->ad_idf);
 		if (a1->ad_used)
 			a2->ad_used = 1;
@@ -520,41 +604,6 @@ merge_autos(a1, a2, lvl, mode)
 	return a;
 }
 
-PRIVATE
-merge_states(st1, st2, lvl, mode)
-	struct state *st1, *st2;
-	int mode;
-{
-/* st2 becomes the result.
- * st1 is left unchanged.
- * The resulting state is the state the program gets in if st1 OR st2
- * becomes the state. (E.g. the states at the end of an if-part and an
- * end-part are merged by this function.)
- */
-	if (st1->st_notreached) {
-		if (mode == NORMAL || st2->st_notreached) {
-			st2->st_auto_list =
-				merge_autos(st1->st_auto_list,
-					st2->st_auto_list, lvl, USE_ONLY);
-		}
-	}
-	else if (st2->st_notreached) {
-		register struct auto_def *tmp = st2->st_auto_list;
-
-		st2->st_auto_list = copy_st_auto_list(st1->st_auto_list, lvl);
-		st2->st_notreached = 0;
-		st2->st_warned = 0;
-		st2->st_auto_list = merge_autos(tmp, st2->st_auto_list,
-							lvl, USE_ONLY);
-		free_st_auto_list(tmp);
-	}
-	else {
-		st2->st_auto_list =
-			merge_autos(st1->st_auto_list, st2->st_auto_list,
-				lvl, mode);
-	}
-}
-
 
 /******** L I N T   S T A C K   S E A R C H I N G ********/
 
@@ -567,7 +616,7 @@ find_wdf()
 {
 	register struct lint_stack_entry *lse = top_ls;
 
-	while (lse != &stack_bottom) {
+	while (lse) {
 		switch (lse->ls_class) {
 		case WHILE:
 		case DO:
@@ -584,7 +633,7 @@ find_wdfc()
 {
 	register struct lint_stack_entry *lse = top_ls;
 
-	while (lse != &stack_bottom) {
+	while (lse) {
 		switch (lse->ls_class) {
 		case WHILE:
 		case DO:
@@ -602,7 +651,7 @@ find_cs()
 {
 	register struct lint_stack_entry *lse = top_ls;
 
-	while (lse != &stack_bottom) {
+	while (lse) {
 		switch (lse->ls_class) {
 		case CASE:
 		case SWITCH:
@@ -613,163 +662,227 @@ find_cs()
 	return 0;
 }
 
-/******** A C T I O N S ********/
+/******** A C T I O N S : I F ********/
 
 start_if_part(const)
 {
-/* Push a new stack entry on the lint_stack with class == IF
- * copy the ls_current to the top of this stack
- */
-	register struct lint_stack_entry *lse = new_lint_stack_entry();
+	register struct lint_stack_entry *new = mk_lint_stack_entry(IF);
 
+	dbg_lint_stack("start_if_part");
 	if (const)
 		hwarning("condition in if statement is constant");
 
-	lse->ls_class = IF;
-	lse->ls_current = copy_state(top_ls->ls_current, level);
-	lse->ls_level = level;
-	lint_push(lse);
+	lint_push(new);
+/*	ls_current:	the state at the start of the if-part
+*/
 }
 
 start_else_part()
 {
-/* Move ls_current to LS_IF_STATE
- * ls_current of the stack entry one below is copied to ls_current.
- */
+/*	ls_current:	the state at the end of the if-part
+	ls_previous->ls_current:	the state before the if-part
+*/
+
+	dbg_lint_stack("start_else_part");
 	if (s_NOTREACHED) {
 		top_ls->ls_current->st_notreached = 1;
+		top_ls->ls_current->st_warned = 0;
 		s_NOTREACHED = 0;
 	}
-	top_ls->LS_IF_STATE = top_ls->ls_current;
+	top_ls->LS_IF = top_ls->ls_current;
 	/* this is the reason why ls_current is a pointer */
-	top_ls->ls_current = copy_state(top_ls->ls_previous->ls_current,
-								level);
+	top_ls->ls_current =
+		copy_state(top_ls->ls_previous->ls_current, level);
 	top_ls->ls_level = level;
+/*	ls_current:	the state before the if-part and the else-part
+	LS_IF:		the state at the end of the if-part
+*/
 }
 
 end_if_else_stmt()
 {
-	Free_state(&top_ls->ls_previous->ls_current);
-	merge_states(top_ls->LS_IF_STATE, top_ls->ls_current,
+/*	ls_current:	state at the end of the else-part
+	LS_IF:		state at the end of the if-part
+*/
+
+	dbg_lint_stack("end_if_else_stmt");
+	merge_states(top_ls->LS_IF, top_ls->ls_current,
 					top_ls->ls_level, NORMAL);
-	Free_state(&top_ls->LS_IF_STATE);
+	Free_state(&top_ls->LS_IF);
+	Free_state(&top_ls->ls_previous->ls_current);
 	top_ls->ls_previous->ls_current = top_ls->ls_current;
 	lint_pop();
 }
 
 end_if_stmt()
 {
-/* No else-part met; merge ls_current with ls_current of previous
- * stack entry
- */
+/*	No else-part met.
+	ls_current:	state at the end of the if-part
+*/
+
+	dbg_lint_stack("end_if_stmt");
 	merge_states(top_ls->ls_current, top_ls->ls_previous->ls_current,
 						top_ls->ls_level, NORMAL);
 	Free_state(&top_ls->ls_current);
 	lint_pop();
 }
 
+/******** A C T I O N S : L O O P S ********/
+
+start_while_stmt(expr)
+	struct expr *expr;
+{
+	if (is_cp_cst(expr))	{
+		start_loop_stmt(WHILE, 1, expr->VL_VALUE != (arith)0);
+	}
+	else	{
+		start_loop_stmt(WHILE, 0, 0);
+	}
+}
+
+start_do_stmt()
+{
+	start_loop_stmt(DO, 1, 1);
+}
+
+start_for_stmt(expr)
+	struct expr *expr;
+{
+	if (!expr)	{
+		start_loop_stmt(FOR, 1, 1);
+	}
+	else
+	if (is_cp_cst(expr))	{
+		start_loop_stmt(FOR, 1, expr->VL_VALUE != (arith)0);
+	}
+	else	{
+		start_loop_stmt(FOR, 0, 0);
+	}
+}
+
+PRIVATE
 start_loop_stmt(looptype, const, cond)
 {
-/* If const, the condition is constant and given in cond */
-	register struct lint_stack_entry *lse = new_lint_stack_entry();
+/*	If const, the condition is a constant and its value is cond
+*/
+	register struct lint_stack_entry *new = mk_lint_stack_entry(looptype);
 
-	lse->ls_class = looptype;
-	lse->ls_current = copy_state(top_ls->ls_current, level);
-	lse->ls_level = level;
+	dbg_lint_stack("start_loop_stmt");
 	if (const && !cond) {
 		/* while (0) | for (;0;) */
-		hwarning("condition in %s statement is constant",
+		hwarning("condition in %s statement is always false",
 						symbol2str(looptype));
-		lse->ls_current->st_notreached = 1;
+		new->ls_current->st_notreached = 1;
 	}
 	if (const && cond) {
 		/* while (1) | for (;;) | do */
-		/*	omitting the copy for LS_END will force this loop
+		/*	omitting the copy for LS_LOOP will force this loop
 			to be treated as a do loop
 		*/
 		top_ls->ls_current->st_notreached = 1;
+		top_ls->ls_current->st_warned = 0;
 	}
 	else {
-		lse->LS_END = copy_state(top_ls->ls_current, level);
+		new->LS_LOOP = copy_state(top_ls->ls_current, level);
 	}
-	lint_push(lse);
+	new->LS_TEST = (!const ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
+	lint_push(new);
+
+/*	ls_current:	the state at the start of the body
+	LS_TEST:	info about the loop test
+	LS_BODY:	0, the state at the end of the body
+	LS_LOOP:	the state at the end of the loop, or 0 if the loop
+			does not end
+*/
+}
+
+end_loop_body()
+{
+	register struct lint_stack_entry *lse = find_wdf();
+
+	dbg_lint_stack("end_loop_body");
+	ASSERT(lse == top_ls);
+	if (!lse->ls_current->st_notreached)
+		cont_merge(lse);
 }
 
 end_loop_stmt()
 {
-	register struct lint_stack_entry *prev_ls = top_ls->ls_previous;
+	register struct lint_stack_entry *lse = find_wdf();
 
-	lint_continue_stmt();
-	top_ls->LS_END->st_notreached = prev_ls->ls_current->st_notreached;
-	top_ls->LS_END->st_warned = prev_ls->ls_current->st_warned;
-	Free_state(&top_ls->ls_current);
-	Free_state(&prev_ls->ls_current);
-	prev_ls->ls_current = top_ls->LS_END;
+	dbg_lint_stack("end_loop_stmt");
+	ASSERT(lse == top_ls);
+	if (lse->LS_TEST != TEST_TRUE)
+		break_merge(lse);
+
+	dbg_lint_stack("end_loop_stmt after break_merge");
+	if (!top_ls->LS_LOOP) {
+		/* no break met; this is really an endless loop */
+		hwarning("endless %s loop", symbol2str(top_ls->ls_class));
+		Free_state(&top_ls->ls_current);
+	}
+	else {
+		Free_state(&top_ls->ls_current);
+		Free_state(&top_ls->ls_previous->ls_current);
+		top_ls->ls_previous->ls_current = top_ls->LS_LOOP;
+	}
 	lint_pop();
 }
 
 end_do_stmt(const, cond)
 {
-	end_loop_stmt();
-	if (const)
-		hwarning("condition in do-while statement is constant");
-	if (const && cond && top_ls->ls_current->st_notreached) {
-		/* no break met; this is really an endless loop */
-	}
-	else {
-		top_ls->ls_current->st_notreached = 0;
-	}
-}
+	register struct lint_stack_entry *lse = find_wdf();
 
-PRIVATE
-cont_break_merge(lse)
-	struct lint_stack_entry *lse;
-{
-	/* merge for continue and break statements */
-	if (lse->LS_END) {
-		merge_states(top_ls->ls_current, lse->LS_END,
-						lse->ls_level, NORMAL);
+	dbg_lint_stack("end_do_stmt");
+	if (const && !cond) {
+		/* do ... while (0) */
+		hwarning("condition in do statement is always false");
 	}
-	else {
-		lse->LS_END = copy_state(top_ls->ls_current, lse->ls_level);
-	}
+	lse->LS_TEST = (!const ? TEST_VAR : cond ? TEST_TRUE : TEST_FALSE);
+	end_loop_stmt();
+
 }
 
 lint_continue_stmt()
 {
 	register struct lint_stack_entry *lse = find_wdf();
 
+	dbg_lint_stack("lint_continue_stmt");
 	if (!lse)
 		return;		/* not inside a loop statement */
 
-	cont_break_merge(lse);
+	cont_merge(lse);
 	top_ls->ls_current->st_notreached = 1;
+	top_ls->ls_current->st_warned = 0;
 }
 
-start_switch_part(expr)
-	struct expr *expr;
+/******** A C T I O N S : S W I T C H ********/
+
+start_switch_part(const)
 {
 /* ls_current of a SWITCH entry has different meaning from ls_current of
  * other entries. It keeps track of which variables are used in all
  * following case parts. (Needed for variables declared in a compound
  * switch-block.)
  */
-	register struct lint_stack_entry *lse = new_lint_stack_entry();
+	register struct lint_stack_entry *new = mk_lint_stack_entry(SWITCH);
 
-	if (is_cp_cst(expr))
+	dbg_lint_stack("start_switch_part");
+	if (const)
 		hwarning("value in switch statement is constant");
 
-	lse->ls_class = SWITCH;
-	lse->ls_current = copy_state(top_ls->ls_current, level);
-	lse->ls_level = level;
-	lse->LS_CASE = copy_state(top_ls->ls_current, level);
-	lse->ls_current->st_notreached = 1;
+	new->LS_CASE = copy_state(top_ls->ls_current, level);
+	new->ls_current->st_notreached = 1;
+	new->ls_current->st_warned = 0;
 	top_ls->ls_current->st_notreached = 1;
-	lint_push(lse);
+	top_ls->ls_current->st_warned = 0;
+	lint_push(new);
 }
 
 end_switch_stmt()
 {
+
+	dbg_lint_stack("end_switch_stmt");
 	if (top_ls->ls_class == CASE) {
 		/* no break after last case or default */
 		lint_break_stmt();	/* introduce break */
@@ -814,30 +927,33 @@ end_switch_stmt()
 lint_case_stmt(dflt)
 {
 /* A default statement is just a special case statement */
-
-	register struct lint_stack_entry *lse;
 	register struct lint_stack_entry *cs_entry = find_cs();
 
+	dbg_lint_stack("lint_case_stmt");
 	if (!cs_entry)
 		return;		/* not inside switch */
+
 	if (cs_entry != top_ls) {
 		warning("%s statement in strange context",
 			dflt ? "default" : "case");
 		return;
 	}
-	if (cs_entry->ls_class == SWITCH) {
+
+	switch (cs_entry->ls_class) {
+		register struct lint_stack_entry *new;
+
+	case SWITCH:
 		if (dflt) {
 			cs_entry->LS_DEFAULT_MET = 1;
 		}
-		lse = new_lint_stack_entry();
-		lse->ls_class = CASE;
-		lse->ls_current = copy_state(top_ls->ls_current, level);
-		remove_settings(lse->ls_current, level);
-		lse->ls_level = level;
-		lint_push(lse);
-	}
-	else {
-		ASSERT(cs_entry->ls_class == CASE);
+
+		new = mk_lint_stack_entry(CASE);
+		remove_settings(new->ls_current, level);
+		lint_push(new);
+		break;
+
+	case CASE:
+		ASSERT(top_ls->ls_previous->ls_class == SWITCH);
 		if (dflt) {
 			cs_entry->ls_previous->LS_DEFAULT_MET = 1;
 		}
@@ -851,6 +967,11 @@ lint_case_stmt(dflt)
 			copy_state(top_ls->ls_previous->ls_current,
 					top_ls->ls_previous->ls_level);
 		remove_settings(top_ls->ls_current, top_ls->ls_level);
+		break;
+
+	default:
+		NOTREACHED();
+		/*NOTREACHED*/
 	}
 }
 
@@ -858,6 +979,7 @@ lint_break_stmt()
 {
 	register struct lint_stack_entry *lse = find_wdfc();
 
+	dbg_lint_stack("lint_break_stmt");
 	if (!lse)
 		return;
 
@@ -867,7 +989,7 @@ lint_break_stmt()
 	case DO:
 		/* loop break */
 		lse->ls_previous->ls_current->st_notreached = 0;
-		cont_break_merge(lse);
+		break_merge(lse);
 		break;
 
 	case CASE:
@@ -878,115 +1000,146 @@ lint_break_stmt()
 		merge_states(lse->ls_current, lse->ls_previous->ls_current,
 					lse->ls_previous->ls_level, NORMAL);
 		if (lse->ls_previous->LS_BREAK) {
-			merge_states(top_ls->ls_current, lse->ls_previous->LS_BREAK,
-					lse->ls_previous->ls_level, NORMAL);
+			merge_states(top_ls->ls_current,
+				lse->ls_previous->LS_BREAK,
+				lse->ls_previous->ls_level, NORMAL);
 		}
 		else {
-			lse->ls_previous->LS_BREAK = copy_state(top_ls->ls_current,
-						 lse->ls_previous->ls_level);
+			lse->ls_previous->LS_BREAK =
+				copy_state(top_ls->ls_current,
+					 lse->ls_previous->ls_level);
 		}
 		if (lse == top_ls) {
 			Free_state(&lse->ls_current);
 			lint_pop();
 		}
 		break;
+
 	default:
 		NOTREACHED();
 		/*NOTREACHED*/
 	}
 	top_ls->ls_current->st_notreached = 1;
+	top_ls->ls_current->st_warned = 0;
 }
+
+PRIVATE
+cont_merge(lse)
+	struct lint_stack_entry *lse;
+{
+	/* merge for continue statements */
+	if (lse->LS_BODY) {
+		merge_states(top_ls->ls_current, lse->LS_BODY,
+						lse->ls_level, NORMAL);
+	}
+	else {
+		lse->LS_BODY = copy_state(top_ls->ls_current, lse->ls_level);
+	}
+}
+
+PRIVATE
+break_merge(lse)
+	struct lint_stack_entry *lse;
+{
+	/* merge for break statements */
+	if (lse->LS_LOOP) {
+		merge_states(top_ls->ls_current, lse->LS_LOOP,
+						lse->ls_level, NORMAL);
+	}
+	else {
+		lse->LS_LOOP = copy_state(top_ls->ls_current, lse->ls_level);
+	}
+}
+
+/******** A C T I O N S : R E T U R N ********/
 
 lint_start_function()
 {
-	lint_return_stmt(-1);	/* initialization */
+
+	dbg_lint_stack("lint_start_function");
+	valreturned = NORETURN;		/* initialization */
+	return_warned = 0;
 	lint_comment_function();
 }
 
 lint_end_function()
 {
-	extern struct outdef OutDef;
-	register int fund = func_type->tp_fund;
 
-	if (	OutDef.od_valreturned == NOVALRETURNED
-	&&	!func_notypegiven
-	&&	fund != VOID
-	) {
-		warning("function %s declared %s%s but no value returned",
-			func_name,
-			(func_type->tp_unsigned && fund != POINTER) ?
-				"unsigned " : "",
-			 symbol2str(fund)
-		);
-	}
+	dbg_lint_stack("lint_end_function");
 	/* write the function definition record */
 	outdef();
 
-	/* At this stage it is possible that stack_bottom.ls_current is
+	/* At this stage it is possible that top_ls->ls_current is
 	 * pointing to a state with a list of auto_defs.
 	 * These auto_defs must be freed and the state must be filled
 	 * with zeros.
 	 */
-	ASSERT(top_ls == &stack_bottom);
-	if (top_ls->ls_current->st_auto_list != 0)
-		free_st_auto_list(top_ls->ls_current->st_auto_list);
+	ASSERT(!top_ls->ls_previous);
+	free_auto_list(top_ls->ls_current->st_auto_list);
 	top_ls->ls_current->st_auto_list = 0;
 	top_ls->ls_current->st_notreached = 0;
 	top_ls->ls_current->st_warned = 0;
 }
 
+lint_implicit_return()
+{
+
+	dbg_lint_stack("lint_implicit_return");
+	if (!top_ls->ls_current->st_notreached) {
+		lint_return_stmt(NOVALRETURNED);
+	}
+}
+
 lint_return_stmt(e)
 	int e;
 {
-/* The statics of this function are initialized by calling it with e = -1. */
 
-	static int ret_e;
-				/*-1	no return met yet
-				 * 0	return; met
-				 * 1	return with expression met
-				 */
-	static int warned;
+	dbg_lint_stack("lint_return_stmt");
+	if (valreturned == NORETURN) {
+		/* first return met */
+		register int fund = func_type->tp_fund;
 
-	switch (e) {
-	case -1:
-		ret_e = -1;
-		warned = 0;
-		return;
-	case 0:
-		if (top_ls->ls_current->st_notreached)
-			break;
-		if (ret_e == 1 && !warned) {
-			warning("function %s does not always return a value",
-				func_name);
-			warned = 1;
+		if (	e == NOVALRETURNED
+		&&	!func_notypegiven
+		&&	fund != VOID
+		&&	fund != ERRONEOUS
+		) {
+			warning("function %s declared %s%s but no value returned",
+				func_name,
+				(func_type->tp_unsigned && fund != POINTER) ?
+					"unsigned " : "",
+				 symbol2str(fund)
+			);
+			/* adjust */
+			e = VALRETURNED;
 		}
-		else
-			ret_e = 0;
-		break;
-	case 1:
-		if (top_ls->ls_current->st_notreached)
-			break;
-		if (ret_e == 0 && !warned) {
-			warning("function %s does not always return a value",
-				func_name);
-			warned = 1;
-		}
-		else
-			ret_e = 1;
-		break;
+		valreturned = e;
 	}
-	if (!top_ls->ls_current->st_notreached)
-		set_od_valreturned(e);
+	else
+	if (valreturned != e && !return_warned) {
+		warning("function %s does not always return a value",
+			func_name);
+		return_warned = 1;
+	}
+
+	if (!top_ls->ls_current->st_notreached) {
+		set_od_valreturned(valreturned);
+	}
 	top_ls->ls_current->st_notreached = 1;
+	top_ls->ls_current->st_warned = 0;
 }
+
+/******** A C T I O N S : J U M P ********/
 
 lint_jump_stmt(idf)
 	struct idf *idf;
 {
+
+	dbg_lint_stack("lint_jump_stmt");
 	top_ls->ls_current->st_notreached = 1;
-	if (!idf->id_def)
-		return;
-	idf->id_def->df_used = 1;
+	top_ls->ls_current->st_warned = 0;
+	if (idf->id_def)
+		idf->id_def->df_used = 1;
 }
 
 lint_label()
@@ -998,6 +1151,7 @@ lint_label()
 */
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
+	dbg_lint_stack("lint_label");
 	while (a) {
 		a->ad_maybe_set = 0;
 		a->ad_set = 1;
@@ -1005,12 +1159,17 @@ lint_label()
 	}
 }
 
+/******** A C T I O N S : S T A T E M E N T ********/
+
 lint_statement()
 {
-/* Check if this statement can be reached
- */
+/*	Check if this statement can be reached
+*/
+
+	dbg_lint_stack("lint_statement");
 	if (s_NOTREACHED) {
 		top_ls->ls_current->st_notreached = 1;
+		top_ls->ls_current->st_warned = 0;
 		s_NOTREACHED = 0;
 	}
 	if (DOT == '{' || DOT == ';')
@@ -1028,6 +1187,22 @@ lint_statement()
 			top_ls->ls_current->st_warned = 0;
 		}
 	}
+}
+
+PRIVATE struct lint_stack_entry *
+mk_lint_stack_entry(cl)
+	int cl;
+{
+/*	Prepare a new stack entry for the lint_stack with class cl.
+	Copy the top ls_current to this entry and set its level.
+*/
+	register struct lint_stack_entry *new = new_lint_stack_entry();
+	
+	new->ls_class = cl;
+	new->ls_current = copy_state(top_ls->ls_current, level);
+	new->ls_level = level;
+
+	return new;
 }
 
 PRIVATE
@@ -1049,64 +1224,77 @@ lint_pop()
 #ifdef	DEBUG
 /* FOR DEBUGGING */
 
-print_lint_stack()
+PRIVATE
+print_autos(a)
+	struct auto_def *a;
+{
+	while (a) {
+		struct idf *idf = a->ad_idf;
+		struct def *def = idf->id_def;
+
+		print("%s", idf->id_text);
+		print("(lvl=%d)", a->ad_def->df_level);
+		print("(u%ds%dm%d U%dS%d) ",
+			a->ad_used, a->ad_set, a->ad_maybe_set,
+			def->df_used, def->df_set
+		);
+		a = a->next;
+	}
+}
+
+PRIVATE
+pr_lint_state(nm, st)
+	char *nm;
+	struct state *st;
+{
+	print("%s: ", nm);
+	if (st) {
+		print("notreached == %d ", st->st_notreached);
+		print_autos(st->st_auto_list);
+	}
+	else {
+		print("NULL");
+	}
+	print("\n");
+}
+
+print_lint_stack(msg)
+	char *msg;
 {
 	register struct lint_stack_entry *lse = top_ls;
 
+	print("Lint stack: %s(level=%d)\n", msg, level);
 	while (lse) {
 		print("  |-------------- level %d ------------\n",
 					lse->ls_level);
-		print("  |cur: ");
-		if (lse->ls_current) {
-			print_autos(lse->ls_current->st_auto_list);
-			print("  |st_notreached == %d\n",
-				lse->ls_current->st_notreached);
-		}
-		else
-			print("\n");
+		pr_lint_state("  |current", lse->ls_current);
+
 		print("  |class == %s\n",
 			lse->ls_class ? symbol2str(lse->ls_class) : "{");
+
 		switch (lse->ls_class) {
 		case SWITCH:
-			print("  |LS_BREAK: ");
-			if (lse->LS_BREAK) {
-				print_autos(lse->LS_BREAK->st_auto_list);
-				print("  |st_notreached == %d\n",
-					lse->LS_BREAK->st_notreached);
-			}
-			else
-				print("\n");
-			print("  |LS_CASE:  ");
-			if (lse->LS_CASE) {
-				print_autos(lse->LS_CASE->st_auto_list);
-				print("  |st_notreached == %d\n",
-					lse->LS_CASE->st_notreached);
-			}
-			else
-				print("\n");
+			pr_lint_state("   |LS_BREAK", lse->LS_BREAK);
+			pr_lint_state("   |LS_CASE", lse->LS_CASE);
 			break;
+
 		case DO:
 		case WHILE:
 		case FOR:
-			print("  |LS_END:  ");
-			if (lse->LS_END) {
-				print_autos(lse->LS_END->st_auto_list);
-				print("  |st_notreached == %d\n",
-					lse->LS_END->st_notreached);
-			}
-			else
-				print("\n");
+			print("   |LS_TEST == %s\n",
+				lse->LS_TEST == TEST_VAR ? "TEST_VAR" :
+				lse->LS_TEST == TEST_TRUE ? "TEST_TRUE" :
+				lse->LS_TEST == TEST_FALSE ? "TEST_FALSE" :
+				"<<BAD VALUE>>"
+			);
+			pr_lint_state("   |LS_BODY", lse->LS_BODY);
+			pr_lint_state("   |LS_LOOP", lse->LS_LOOP);
 			break;
+
 		case IF:
-			print("  |LS_IF_STATE: ");
-			if (lse->LS_IF_STATE) {
-				print_autos(lse->LS_IF_STATE->st_auto_list);
-				print("  |st_notreached == %d\n",
-					lse->LS_IF_STATE->st_notreached);
-			}
-			else
-				print("\n");
+			pr_lint_state("   |LS_IF", lse->LS_IF);
 			break;
+
 		default:
 			break;
 		}
@@ -1115,17 +1303,6 @@ print_lint_stack()
 	print("  |--------------\n\n");
 }
 
-print_autos(a)
-	register struct auto_def *a;
-{
-	while (a) {
-		print("%s", a->ad_idf->id_text);
-		print("(l=%d)", a->ad_def->df_level);
-		print("(U%dS%dM%d) ", a->ad_used, a->ad_set, a->ad_maybe_set);
-		a = a->next;
-	}
-	print("\n");
-}
 #endif	DEBUG
 
 #endif	LINT

@@ -13,7 +13,9 @@
 #include	"debug.h"
 #include	"interface.h"
 #include	"assert.h"
+#ifdef ANSI
 #include	<flt_arith.h>
+#endif ANSI
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -255,14 +257,6 @@ oper2state(expr, val, used)
 	case GREATEREQ:
 	case EQUAL:
 	case NOTEQUAL:
-		lint_relop(left, right, oper);
-		lint_relop(right, left, 
-			oper == '<' ? '>' :
-			oper == '>' ? '<' :
-			oper == LESSEQ ? GREATEREQ :
-			oper == GREATEREQ ? LESSEQ :
-			oper
-		);
 		goto dyadic;
 
 	/* dyadic operators */
@@ -296,8 +290,10 @@ expr_ignored(expr)
 	struct expr *expr;
 {
 	switch (expr->ex_class) {
+		int oper;
 	case Oper:
-		switch (expr->OP_OPER) {
+		oper = expr->OP_OPER;
+		switch (oper) {
 		case '=':
 		case TIMESAB:
 		case DIVAB:
@@ -312,6 +308,7 @@ expr_ignored(expr)
 		case '(':
 		case '?':
 		case ',':
+			oper = 0;		/* ignore the ignoring */
 			break;
 
 		case PLUSAB:
@@ -320,29 +317,45 @@ expr_ignored(expr)
 		case POSTDECR:
 		case PLUSPLUS:
 		case MINMIN:
-			/* may hide the operator '*' */
+			oper = 0;		/* ignore in priciple */
+			/* may, however, hide the operator '*' */
 			if (	/* operation on a pointer */
 				expr->OP_TYPE->tp_fund == POINTER
 			&&	/* the result is dereferenced, e.g. *p++; */
 				expr->ex_type == expr->OP_TYPE->tp_up
 			) {
-				hwarning("result of * ignored");
+				oper = '*';
 			}
 			break;
 
-		default:
-			hwarning("result of %s ignored",
-						symbol2str(expr->OP_OPER));
+		case '/':
+			/*	this is a specially weird case: the '/' may
+				result from pointer subtraction
+			*/
+			if (	expr->OP_TYPE->tp_fund == INT
+			&&	expr->OP_LEFT->OP_OPER == '-'
+			&&	expr->OP_LEFT->OP_TYPE->tp_fund == POINTER
+			) {
+				oper = '-';
+			}
 			break;
+		}
+		if (oper) {
+			hwarning("result of %s ignored", symbol2str(oper));
 		}
 		break;
 
 	case Value:
-		hwarning("value as statement");
+		if (expr->VL_CLASS == Const) {
+			hwarning("constant expression ignored");
+		}
+		else {
+			hwarning("value ignored");
+		}
 		break;
 
 	default:			/* String Float */
-		hwarning("constant as statement");
+		hwarning("constant ignored");
 		break;
 	}
 }

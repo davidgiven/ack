@@ -8,7 +8,12 @@
 #include	"lint.h"
 #include	"debug.h"
 #include	"dbsymtab.h"
-#include	<em_code.h>
+#ifndef	LINT
+#include	<em.h>
+#else
+#include	"l_em.h"
+#include	"l_lint.h"
+#endif	LINT
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"dataflow.h"
@@ -135,6 +140,7 @@ flush_strings() {
 	}
 }
 
+#ifndef	LINT
 end_code()
 {
 	/*	end_code() performs the actions to be taken when closing
@@ -147,6 +153,7 @@ end_code()
 	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
+#endif	LINT
 
 #ifdef	PREPEND_SCOPES
 prepend_scopes()
@@ -592,7 +599,7 @@ loc_init(expr, id)
 			store_val(&vl, tp);
 		}
 #else	LINT
-		df->df_set = 1;
+		id->id_def->df_set = 1;
 #endif	LINT
 		free_expression(expr);
 	}
@@ -644,7 +651,9 @@ formal_cvt(hasproto,df)
 		    && tp->tp_fund == FLOAT
 		    && !hasproto) {
 		LoadLocal(df->df_address, double_size);
+#ifndef	LINT
 		conversion(double_type, float_type);
+#endif	LINT
 		StoreLocal(df->df_address, tp->tp_size);
 	}
 }
@@ -666,7 +675,6 @@ code_expr(expr, val, code, tlbl, flbl)
 #ifdef DBSYMTAB
 	if (options['g']) db_line(expr->ex_file, (unsigned int)expr->ex_line);
 #endif
-
 	EVAL(expr, val, code, tlbl, flbl);
 #else	LINT
 	lint_expr(expr, code ? USED : IGNORED);
