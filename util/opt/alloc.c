@@ -371,7 +371,7 @@ oldcore(p,size) short *p; int size; {
 	assert(size<2*MAXSHORT);
 #ifdef CORECHECK
 	for (cp=freelist[size/sizeof(short)]; cp != (short *) 0;
-	    cp = (short *) *cp)
+	    cp = *(short **) cp)
 		assert(cp != p);
 #endif
 	*(short **) p = freelist[size/sizeof(short)];
