@@ -17,6 +17,7 @@ create_dir $TARGET_HOME/bin
 cp local.h em_path.h $TARGET_HOME/config
 ( cd $SRC_HOME/bin ; tar cf - . ) | ( cd $TARGET_HOME/bin ; tar xf - )
 echo "echo $SYSNAME" > $TARGET_HOME/bin/ack_sys
+chmod +x $TARGET_HOME/bin/ack_sys
 
 : machine-independant stuff
 

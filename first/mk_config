@@ -14,9 +14,15 @@ cd $SRC_HOME
 find . -type d -print > $CONFIG/dir_list
 
 cd $CONFIG
+for i in mach/*/libsys
+do
+	rm -rf $i
+fi
+
 for i in `cat dir_list`
 do
 	create_dir $i
+	rm -f $i/NoAction
 	if [ -f $SRC_HOME/$i/proto.make ]
 	then mk_makefile $MACROS $SRC_HOME/$i/proto.make > $i/Makefile
 	fi
