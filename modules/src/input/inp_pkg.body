@@ -87,7 +87,7 @@ struct INP_i_buf {
 # endif not INP_READ_IN_ONE
 
 char *_ipp;
-INP_PRIVATE struct INP_buffer_header *INP_head;
+INP_PRIVATE struct INP_buffer_header *INP_head, *INP_free;
 
 #ifdef INP_READ_IN_ONE
 /*	INP_rdfile() creates a buffer in which the text of the file
@@ -162,7 +162,9 @@ INP_push_bh()
 		bh->bh_i = INP_VAR;
 #endif INP_TYPE
 	}
-	if (!(bh = (struct INP_buffer_header *)malloc(sizeof(struct INP_buffer_header)))) return 0;
+	bh = INP_free;
+	if (bh) INP_free = bh->bh_next;
+	else if (!(bh = (struct INP_buffer_header *)malloc(sizeof(struct INP_buffer_header)))) return 0;
 	bh->bh_next = INP_head;
 	bh->bh_eofreturned = 0;
 	INP_head = bh;
@@ -180,7 +182,8 @@ INP_pop_bh()
 
 
 	bh = bh->bh_next;
-	free((char *) INP_head);
+	INP_head->bh_next = INP_free;
+	INP_free = INP_head;
 	INP_head = bh;
 
 	if (!bh)	{	/* no more entries */
