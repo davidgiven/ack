@@ -762,6 +762,7 @@ do_line(l)
 {
 	struct token tk;
 	int t = GetToken(&tk);
+	static char *saved_name = (char *)0;
 
 	SkipToNewLine();
 	LineNumber = l;		/* the number of the next input line */
@@ -769,7 +770,15 @@ do_line(l)
 		extern char *source;	/* defined in main.c */
 
 		if (FileName != source) {	/* source points into argv */
-			free(FileName);
+			/* Since we are looking one token ahead, we can't
+			 * free the string when it is mentioned in dot.
+			 */
+			if (dot.tok_file != FileName) {
+				free(FileName);
+			} else if (dot.tok_file != saved_name) {
+				if (saved_name) free(saved_name);
+				saved_name = dot.tok_file;
+			}
 		}
 		FileName = tk.tk_bts;
 	}

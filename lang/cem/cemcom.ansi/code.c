@@ -183,7 +183,7 @@ static label return_label, return2_label;
 static char return_expr_occurred;
 static arith func_size;
 static label func_res_label;
-static char *last_fn_given = "";
+static char *last_fn_given = (char *)0;
 static label file_name_label;
 
 begin_proc(ds, idf)		/* to be called when entering a procedure */
@@ -244,7 +244,7 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	LocalInit();
 	prc_entry(name);
 	if (! options['L'])	{	/* profiling */
-		if (strcmp(last_fn_given, FileName) != 0)	{
+		if (!last_fn_given || strcmp(last_fn_given, FileName) != 0) {
 			/* previous function came from other file */
 			C_df_dlb(file_name_label = data_label());
 			C_con_scon(last_fn_given = FileName,
