@@ -53,7 +53,7 @@ checkarg(arg, typset)
 	}
 }
 #else not CHECKING
-#define c_getarg(arg, x)
+#define checkarg(arg, x)
 #endif CHECKING
 
 /*	EM_doinstr: An EM instruction
