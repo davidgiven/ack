@@ -33,7 +33,6 @@ decspecs.c
 decspecs.str
 def.str
 domacro.c
-doprnt.c
 dumpidf.c
 error.c
 eval.c

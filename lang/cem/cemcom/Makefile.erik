@@ -12,9 +12,10 @@ SYSLIB = /user1/erikb/em/lib/libsystem.a
 EMKLIB = /user1/erikb/em/lib/libemk.a
 EMELIB = /user1/erikb/em/lib/libeme.a
 STRLIB = /user1/erikb/em/lib/libstr.a
+PRTLIB = /user1/erikb/em/lib/libprint.a
 EMMESLIB = /user1/erikb/em/lib/libem_mes.a
-LIBS = $(EMMESLIB) $(EMKLIB) $(STRLIB) $(SYSLIB)
-ELIBS = $(EMMESLIB) $(EMELIB) $(STRLIB) $(SYSLIB)
+LIBS = $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
+ELIBS = $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
 LIB_INCLUDES = /user1/erikb/em/h
 
 # Where to install the compiler and its driver
@@ -47,7 +48,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	input.o domacro.o replace.o init.o options.o \
 	scan.o skip.o stack.o type.o ch7mon.o label.o eval.o \
 	switch.o storage.o ival.o conversion.o \
-	blocks.o dataflow.o doprnt.o
+	blocks.o dataflow.o
 
 # Objects of other generated C files
 GOBJ =	char.o symbol2str.o next.o
@@ -62,8 +63,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	idepth.h idfsize.h ifdepth.h inputtype.h inumlength.h lapbuf.h \
 	maxincl.h myalloc.h nobitfield.h nopp.h \
 	nparams.h numsize.h parbufsize.h pathlength.h predefine.h \
-	strsize.h target_sizes.h textsize.h use_tmp.h \
-	ssize.h spec_arith.h
+	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
@@ -191,15 +191,15 @@ sim:	cfiles
 	$(SIM) $(SIMFLAGS) `sources $(COBJ)` $(GSRC) $(LSRC)
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-main.o: LLlex.h Lpars.h alloc.h arith.h debug.h declar.h idf.h input.h inputtype.h level.h maxincl.h myalloc.h nobitfield.h nopp.h spec_arith.h specials.h target_sizes.h tokenname.h type.h use_tmp.h ssize.h
+main.o: LLlex.h Lpars.h alloc.h arith.h debug.h declar.h idf.h input.h inputtype.h level.h maxincl.h myalloc.h nobitfield.h nopp.h spec_arith.h specials.h target_sizes.h tokenname.h type.h use_tmp.h
 idf.o: LLlex.h Lpars.h align.h alloc.h arith.h assert.h botch_free.h debug.h declar.h decspecs.h def.h idf.h idfsize.h label.h level.h nobitfield.h nopp.h sizes.h spec_arith.h specials.h stack.h storage.h struct.h type.h
 declarator.o: Lpars.h alloc.h arith.h botch_free.h declar.h expr.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h type.h
 decspecs.o: Lpars.h arith.h decspecs.h def.h level.h nobitfield.h spec_arith.h type.h
 struct.o: LLlex.h Lpars.h align.h arith.h assert.h botch_free.h debug.h def.h field.h idf.h level.h nobitfield.h nopp.h sizes.h spec_arith.h stack.h storage.h struct.h type.h
-expr.o: LLlex.h Lpars.h alloc.h arith.h botch_free.h declar.h decspecs.h def.h expr.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h type.h level.h
+expr.o: LLlex.h Lpars.h alloc.h arith.h botch_free.h declar.h decspecs.h def.h expr.h idf.h label.h level.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h type.h
 ch7.o: Lpars.h arith.h assert.h debug.h def.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h struct.h type.h
 ch7bin.o: Lpars.h arith.h botch_free.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h storage.h struct.h type.h
-cstoper.o: Lpars.h arith.h expr.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h target_sizes.h type.h assert.h
+cstoper.o: Lpars.h arith.h assert.h debug.h expr.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h target_sizes.h type.h
 arith.o: Lpars.h alloc.h arith.h botch_free.h expr.h field.h idf.h label.h mes.h nobitfield.h nopp.h spec_arith.h storage.h type.h
 alloc.o: alloc.h assert.h debug.h myalloc.h
 code.o: LLlex.h Lpars.h alloc.h arith.h assert.h atw.h botch_free.h code.h dataflow.h debug.h declar.h decspecs.h def.h expr.h idf.h label.h level.h mes.h nobitfield.h nopp.h sizes.h spec_arith.h specials.h stack.h storage.h type.h use_tmp.h
@@ -227,7 +227,6 @@ ival.o: Lpars.h align.h arith.h assert.h class.h debug.h def.h expr.h field.h id
 conversion.o: Lpars.h arith.h nobitfield.h sizes.h spec_arith.h type.h
 blocks.o: arith.h atw.h sizes.h spec_arith.h
 dataflow.o: dataflow.h
-doprnt.o: ssize.h
 tokenfile.o: Lpars.h
 declar.o: LLlex.h Lpars.h arith.h debug.h declar.h decspecs.h def.h expr.h field.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h struct.h type.h
 statement.o: LLlex.h Lpars.h arith.h botch_free.h code.h debug.h def.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h stack.h storage.h type.h

@@ -122,10 +122,6 @@
 #undef NOBITFIELD	1	/* implement bitfields	*/
 
 
-!File: ssize.h
-#define SSIZE	1024	/* string-buffer size for print routines	*/
-
-
 !File: spec_arith.h
 /* describes internal compiler arithmetics */
 #undef	SPECIAL_ARITHMETICS	/* something different from native long */

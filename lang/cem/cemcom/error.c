@@ -209,9 +209,9 @@ _error(class, expr, fmt, argv)
 	}
 	
 	if (fn)
-		fprintf(ERROUT, "\"%s\", line %u: ", fn, ln);
+		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
-		fprintf(ERROUT, "%s ", remark);
+		fprint(ERROUT, "%s ", remark);
 	doprnt(ERROUT, fmt, argv);		/* contents of error */
-	fprintf(ERROUT, "\n");
+	fprint(ERROUT, "\n");
 }

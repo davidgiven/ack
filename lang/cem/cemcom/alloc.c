@@ -152,7 +152,7 @@ mem_stat()
 	extern char options[];
 
 	if (options['m'])
-		printf("Total nr of bytes allocated: %d\n",
+		print("Total nr of bytes allocated: %d\n",
 			sys_break(0) - firstfreeb);
 }
 #endif	DEBUG

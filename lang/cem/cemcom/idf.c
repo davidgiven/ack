@@ -88,7 +88,7 @@ hash_stat()
 	if (options['h'])	{
 		int i;
 		
-		printf("Hash table tally:\n");
+		print("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
 			struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
@@ -97,9 +97,9 @@ hash_stat()
 				cnt++;
 				notch = notch->next;
 			}
-			printf("%d %d\n", i, cnt);
+			print("%d %d\n", i, cnt);
 		}
-		printf("End hash table tally\n");
+		print("End hash table tally\n");
 	}		
 }
 #endif	DEBUG
@@ -139,9 +139,9 @@ gen_idf()
 	*/
 	static int name_cnt;
 	char buff[100];
-	char *sprintf();
+	char *sprint();
 
-	sprintf(buff, "#%d in %s, line %u",
+	sprint(buff, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);
 	return str2idf(buff);
 }

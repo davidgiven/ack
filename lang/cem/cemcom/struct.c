@@ -72,30 +72,17 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	register struct sdef *newsdef;
 	int lvl = tg->tg_level;
 	
-/*
- * char *type2str();
- * printf("add_sel: \n  stp = %s\n  tp = %s\n  name = %s\n  *szp = %ld\n",
- *	type2str(stp), type2str(tp), idf->id_text, *szp);
- *	ASSERT(**sdefpp == 0);
- *	ASSERT(tg->tg_type == stp);
- */
-	
 	if (options['R'] && !is_anon_idf(idf))	{
 		/* a K & R test */
-		if (idf->id_struct && idf->id_struct->tg_level == level
-		)	{
-			warning("%s is also a struct/union tag",
-				idf->id_text);
-		}
+		if (idf->id_struct && idf->id_struct->tg_level == level)
+			warning("%s is also a struct/union tag", idf->id_text);
 	}
 
 	if (stp->tp_fund == STRUCT)	{
 #ifndef NOBITFIELD
 		if (fd == 0)	{	/* no field width specified	*/
-#endif NOBITFIELD
 			offset = align(*szp, tp->tp_align);
 			field_busy = 0;
-#ifndef NOBITFIELD
 		}
 		else	{
 			/*	if something is wrong, the type of the
@@ -104,6 +91,9 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 			*/
 			offset = add_field(szp, fd, &tp, idf, stp);
 		}
+#else NOBITFIELD
+		offset = align(*szp, tp->tp_align);
+		field_busy = 0;
 #endif NOBITFIELD
 	}
 	else	{	/* (stp->tp_fund == UNION)		*/
@@ -138,9 +128,8 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	newsdef->sd_offset = offset;
 
 #ifndef NOBITFIELD
-	if (tp->tp_fund == FIELD) {
+	if (tp->tp_fund == FIELD)
 		tp->tp_field->fd_sdef = newsdef;
-	}
 #endif NOBITFIELD
 
 	stack_idf(idf, stack_level_of(lvl));
@@ -162,9 +151,8 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	if (stp->tp_fund == UNION)	{
 		arith sel_size = size_of_type(tp, "member");
 
-		if (*szp < sel_size) {
+		if (*szp < sel_size)
 			*szp = sel_size;
-		}
 		stp->tp_align = lcm(stp->tp_align, tp->tp_align);
 	}
 }

@@ -210,7 +210,7 @@ unstack_world()
 		
 #ifdef DEBUG
 		if (options['a']) {
-			printf("\"%s\", %s, %s, %s\n",
+			print("\"%s\", %s, %s, %s\n",
 				idf->id_text,
 				(def->df_alloc == 0) ? "no alloc" :
 				(def->df_alloc == ALLOC_SEEN) ? "alloc seen" :

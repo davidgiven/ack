@@ -21,7 +21,6 @@
 #include	"LLlex.h"
 #include	"alloc.h"
 #include	"specials.h"
-#include	"ssize.h"
 
 extern struct tokenname tkidf[], tkother[];
 extern char *symbol2str();
@@ -296,12 +295,12 @@ preprocess()
 			if (strcmp(lastfilenm, dot.tk_file) == 0)	{
 				if (dot.tk_line - lastlineno <= 1)	{
 					lastlineno++;
-					printf("\n");
+					print("\n");
 				}
 				else	{
 					lastlineno = dot.tk_line;
 					if (!options['P'])
-						printf("\n#line %ld \"%s\"\n",
+						print("\n#line %ld \"%s\"\n",
 							lastlineno,
 							lastfilenm
 						);
@@ -311,7 +310,7 @@ preprocess()
 				lastfilenm = dot.tk_file;
 				lastlineno = dot.tk_line;
 				if (!options['P'])
-					printf("\n#line %ld \"%s\"\n",
+					print("\n#line %ld \"%s\"\n",
 						lastlineno, lastfilenm);
 			}
 		}
@@ -319,35 +318,33 @@ preprocess()
 		if (strcmp(lastfilenm, dot.tk_file) != 0)	{
 			lastfilenm = dot.tk_file;
 			if (!options['P'])
-				printf("\n#line %ld \"%s\"\n",
+				print("\n#line %ld \"%s\"\n",
 					lastlineno, lastfilenm);
 		}
 		switch (DOT)	{
 		case IDENTIFIER:
 		case TYPE_IDENTIFIER:
-			printf(dot.tk_idf->id_text);
-			printf(" ");
+			print("%s ", dot.tk_idf->id_text);
 			break;
 		case STRING:
 		{
-			char sbuf[SSIZE];
+			char sbuf[1024];	/* a transient buffer */
 			char *bts2str();
 
-			printf("\"%s\" ", 
-				bts2str(dot.tk_bts, dot.tk_len, sbuf));
+			print("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len, sbuf));
 			break;
 		}
 		case INTEGER:
-			printf("%ld ", dot.tk_ival);
+			print("%ld ", dot.tk_ival);
 			break;
 		case FLOATING:
-			printf("%s ", dot.tk_fval);
+			print("%s ", dot.tk_fval);
 			break;
 		case EOI:
 		case EOF:
 			return;
 		default:	/* very expensive...	*/
-			printf("%s ", symbol2str(DOT));
+			print("%s ", symbol2str(DOT));
 		}
 	}
 }
