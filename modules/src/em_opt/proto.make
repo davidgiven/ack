@@ -65,8 +65,10 @@ install:	all
 		cp $(LIBCEOPT) $(MOD_DIR)/lib/$(LIBCEOPT)
 		$(RANLIB) $(MOD_DIR)/lib/$(LIBCEOPT)
 		cp $(SRC_DIR)/em_opt.3 $(MOD_DIR)/man/em_opt.3
-		cp $(SRC_DIR)/em_nopt.6 $(TARGET_HOME)/man/em_nopt.6
 		cp em_nopt $(TARGET_HOME)/lib.bin/em_nopt
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp $(SRC_DIR)/em_nopt.6 $(TARGET_HOME)/man/em_nopt.6 ; \
+		fi
 
 cmp:		all
 		-cmp $(LIBOPT) $(MOD_DIR)/lib/$(LIBOPT)
