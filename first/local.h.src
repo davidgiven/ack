@@ -4,4 +4,4 @@
 #	define	VERSION		3	/* 16 bits number */
 
 /* The default machine used by ack, acc, apc */
-#	define	ACKM		"pdp"
+#	define	ACKM		"vax2"
