@@ -232,14 +232,6 @@ input() {
 		nostartline = 0;
 		nonline = 1;
 	}
-	if (c == ' ' || c == '\t') {	/*
-					 * Deliver space, but only once
-					 */
-		do	c = getc(f);
-		while (c == ' ' || c == '\t');
-		ungetc(c,f);
-		return ' ';
-	}
 	if (c == '\n') nonline = 0;
 	return c;
 }
