@@ -3189,18 +3189,10 @@ pat dvf $1==4	leaving  cal ".dvf4" asp 4
 pat dvf $1==8	leaving  cal ".dvf8" asp 8
 pat ngf $1==4	leaving  cal ".ngf4"
 pat ngf $1==8	leaving  cal ".ngf8"
-pat fif $1==4	leaving  cal ".fif4"
-pat fif $1==8	leaving  cal ".fif8"
-pat fef $1==4	leaving  dup 4 cal ".fef4"
-pat fef $1==8
-	kills ALL
-	gen
-	    move_l {post_inc4, sp}, d0
-	    move_l {post_inc4, sp}, d1
-	    move_l d0, {pre_dec4, sp}
-	    move_l d1, {pre_dec4, sp}
-	    move_l d0, {pre_dec4, sp}
-		leaving cal ".fef8"
+pat fif $1==4	leaving  lor 1 cal ".fif4" asp 4
+pat fif $1==8	leaving  lor 1 cal ".fif8" asp 4
+pat fef $1==4	leaving  lor 1 adp 0-4 cal ".fef4"
+pat fef $1==8	leaving	 lor 1 adp 0-4 cal ".fef8"
 #endif
 
 /************************************************
@@ -3653,8 +3645,8 @@ pat loc loc cif	$1==4 && $2==4 leaving loc 4 cal ".cif4" asp 4
 pat loc loc cif	$1==4 && $2==8 leaving loc 4 cal ".cif8"
 pat loc loc cuf	$1==4 && $2==4 leaving loc 4 cal ".cuf4" asp 4
 pat loc loc cuf	$1==4 && $2==8 leaving loc 4 cal ".cuf8"
-pat loc loc cfi	leaving loc $1 loc $2 cal ".cfi" asp 8+($1-4)
-pat loc loc cfu	leaving loc $1 loc $2 cal ".cfu" asp 8+($1-4)
+pat loc loc cfi	leaving loc $1 loc $2 cal ".cfi" asp $1+4
+pat loc loc cfu	leaving loc $1 loc $2 cal ".cfu" asp $1+4
 pat loc loc cff	$1==8 && $2==4 leaving cal ".cff4" asp 4
 pat loc loc cff	$1==4 && $2==8
 	leaving loc 0 exg 4 cal ".cff8"
