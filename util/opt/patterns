@@ -126,6 +126,8 @@ loc sbi $1==-1 && $2==w:        inc
 loc inc sfit($1+1,8*w) :	loc $1+1
 loc adi $1==0 && $2==w:
 ldc adi $1==0 && $2==2*w:
+loc adu $1==0 && $2==w:
+ldc adu $1==0 && $2==2*w:
 loc ads $1==0 && $2==w:
 ldc ads $1==0 && $2==2*w:
 zer adi $1==$2:
@@ -152,7 +154,10 @@ loc ste $1==0:  zre $2
 loc stl $1==0:  zrl $2
 loc sbi $1==0 && $2==w:
 ldc sbi $1==0 && $2==2*w:
+loc sbu $1==0 && $2==w:
+ldc sbu $1==0 && $2==2*w:
 zer sbi $1==$2:
+zer sbu $1==$2:
 loc xor $1==0 && $2==w:
 ldc xor $1==0 && $2==2*w:
 zer xor $1==$2:
@@ -384,6 +389,7 @@ tne zne :       zne $2
 loc loc loc $1==0 && $2==0 && $3==0 :    zer 3*w
 zer loc defined($1) && $2==0:   zer $1+w
 #endif
+loi loc loc cui $1 < w && $2==$3 && $2==w: loi $1
 loi loc and $1==1 && $3==w && ($2&255)==255:    loi 1
 loi loc and loc loc cii $1==1 && $4==w && $3==w && $2==255: loi $1 loc $4 loc $5 cii
 loi loc loc cii loc and $1==1 && $2==1 && $3==w && $5==255 && $6==w:	loi 1
