@@ -159,7 +159,7 @@ preprocess(fn)
 				if (c == '*') {
 				    op = SkipComment(op, &lineno);
 				    if (!op) return;
-				    if (!options['C']) echo(' ');
+				    if (!options['C']) { echo(' '); }
 				    c = GetChar();
 				    continue;
 				}
@@ -198,7 +198,7 @@ preprocess(fn)
 				if (c == '*') {
 					op = SkipComment(op, &lineno);
 					if (!op) return;
-					if (!options['C']) echo(' ');
+					if (!options['C']) { echo(' '); }
 					c = GetChar();
 					continue;
 				}
@@ -264,7 +264,7 @@ preprocess(fn)
 						continue;
 					} else if (!is_dig(c)) {
 						continue;
-					} else echo(c);
+					} else { echo(c); }
 				}
 				c = GetChar();
 				while (in_idf(c) || c == '.') {
@@ -338,7 +338,7 @@ preprocess(fn)
 						echo(*tg++);
 					}
 					c = GetChar();
-					if (in_idf(c)) echo(' ');
+					if (in_idf(c)) { echo(' '); }
 					continue;
 				}
 			nomac:

@@ -304,6 +304,7 @@ do_include()
 			error("cannot open include file \"%s\"", filenm);
 		}
 		else {
+			if (filenm != result) free(filenm);
 			WorkingDir = getwdir(result);
 			svnestlevel[++nestcount] = nestlevel;
 			FileName = result;

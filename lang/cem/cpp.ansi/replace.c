@@ -65,8 +65,8 @@ freeargs(args)
 
 	/* We must don't know how many parameters were specified, so be
 	 * prepared to free all NPARAMS parameters.
-	 * When an expvec is !0, the rawvec will also be !0.
-	 * When an expvec is 0, all remaining vectors will also be 0.
+	 * When an expvec is !NULL, the rawvec will also be !NULL.
+	 * When an expvec is NULL, all remaining vectors will also be NULL.
 	 */
 	for (i = 0; i < NPARAMS; i++) {
 		if (args->a_expvec[i]) {
