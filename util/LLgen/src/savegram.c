@@ -58,7 +58,7 @@ static struct subparse_list {
 /* Index in t_list */
 static int t_list_index;
 
-/* Index in subparse_list */;
+/* Index in subparse_list */
 static int sub_list_index;
 
 /* File to save grammar to */
