@@ -6,22 +6,23 @@ var f=4
 var d=8
 var NAME=i8080
 var M=8080
-var LIB=mach/8080/lib/tail_
-var RT=mach/8080/lib/head_
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
 var INCLUDES=-I{EM}/include -I/usr/include
 name be
-	from .m
+	from .m.g
 	to .s
-	program {EM}/lib/{M}_be
+	program {EM}/lib/{M}/be
 	args <
-	prop >
+	stdout
 	need .e
 end
 name asld
 	from .s.a
-	to a.out
-	program {EM}/lib/{M}_as
+	to .out
+	outfile a.out
+	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	args ({RTS}:.c={EM}/{RT}cc) -o > <
-	prop C
+	linker
 end
