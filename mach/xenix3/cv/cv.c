@@ -265,7 +265,7 @@ main(argc, argv)
 	header();
 
 	if ( outputfile_created ) chmod(argv[2],0755);
-	return 0;
+	exit(0);
 }
 
 #define shortcvt(val, p) (*p++ = val, *p++ = val >> 8)
