@@ -249,6 +249,7 @@
 	fmove.d	4(sp),fp0
 	add.l	#4,sp
 2:
+	fintrz	fp0,fp0
 	cmp.w	#2,d1
 	bne	1f
 	fmove.w	fp0,6(sp)
