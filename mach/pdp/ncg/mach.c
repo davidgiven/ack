@@ -46,78 +46,12 @@ con_mult(sz) word sz; {
 #endif
 }
 
-/*
- * The next function is difficult to do when not running on a PDP 11 or VAX
- * The strategy followed is to assume the code generator is running on a PDP 11
- * unless the ACK_ASS define  is on.
- */
-
-con_float() {
-#ifdef ACK_ASS
-	double f;
-	double atof(), frexp();
-	int i, j;
-	int sign = 0;
-	int fraction ;
-
-	if (argval != 4 && argval != 8)
-		fatal("bad fcon size");
-	f = atof(str);
-	if (f == 0) {
-		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
-		fprintf(codefile, ".data2 0, 0\n");
-		return;
-	}
-	f = frexp(f, &i);
-	if (f < 0) {
-		f = -f;
-		sign = 1;
-	}
-	while (f < 0.5) {
-		f += f;
-		i --;
-	}
-	f = 2*f - 1.0;		/* hidden bit */
-	i = (i + 128) & 0377;
-	fraction = (sign << 15) | (i << 7);
-	for (j = 6; j>= 0; j--) {
-		f *= 2;
-		if (f >= 1.0) {
-			fraction |= (1 << j);
-			f -= 1.0;
-		}
-	}
-	fprintf(codefile, ".data2 0%o", fraction);
-	for (i = argval / 2 - 1; i; i--) {
-		fraction = 0;
-		for (j = 15; j>= 0; j--) {
-			f *= 2;
-			if (f >= 1.0) {
-				fraction |= (1 << j);
-				f -= 1.0;
-			}
-		}
-		fprintf(codefile, ", 0%o", fraction);
-	}
-	putc('\n', codefile);
-#else
-	double f;
-	double atof();
-	int i;
-	short *p;
-
-	if (argval != 4 && argval != 8)
-		fatal("bad fcon size");
-	f = atof(str);
-	p = (short *) &f;
-	i = *p++;
-	if (argval == 8) {
-		fprintf(codefile,"\t%o;%o;",i,*p++);
-		i = *p++;
-	}
-	fprintf(codefile,"\t%o;%o\n",i,*p++);
-#endif
-}
+#define PDPFLOAT
+#define FL_MSL_AT_LOW_ADDRESS	1
+#define FL_MSW_AT_LOW_ADDRESS	1
+#define FL_MSB_AT_LOW_ADDRESS	0
+#define CODE_GENERATOR
+#include <con_float>
 
 #ifdef REGVARS
 
