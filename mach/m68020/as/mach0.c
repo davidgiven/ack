@@ -14,7 +14,7 @@
 #define	WORDS_REVERSED		/* high order word has lowest address */
 #define	LISTING			/* enable listing facilities */
 #define RELOCATION		/* generate relocatable code */
-#define DEBUG 1
+#define DEBUG 0
 
 #undef	valu_t
 #define	valu_t		long

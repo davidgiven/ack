@@ -105,7 +105,7 @@ instruction
 			}
 	|	TRAPCC	{	T_EMIT2($1 | 4,0,0,0);}
 	|	PACK '-' '(' AREG ')' ',' '-' '(' AREG ')' ',' imm
-			{	T_EMIT2($1 | 1 | $4 | $9<<9, 0, 0, 0);
+			{	T_EMIT2($1 | 8 | $4 | $9<<9, 0, 0, 0);
 				ea_2(SIZE_W, 0);
 			}
 	|	PACK DREG ',' DREG ',' imm
