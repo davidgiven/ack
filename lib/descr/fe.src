@@ -8,6 +8,8 @@ name cpp
 	mapflag -I* CPP_F={CPP_F?} -I*
 	mapflag -U* CPP_F={CPP_F?} -U*
 	mapflag -D* CPP_F={CPP_F?} -D*
+	mapflag -P CPP_F={CPP_F?} -P
+	mapflag -C CPP_F={CPP_F?} -C
 	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
 	({SUFFIX}:.c={INCLUDES?}) \
 	-D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
