@@ -87,7 +87,7 @@ dump(n)
 	if (d_flag==0) return;
 if ( (n==0 && d_flag) || (n==4 && d_flag>=2) || (n<100 && d_flag>=3) ) {
 	printf("\nEM1-assembler      *****   pass %1d complete:\n",n);
-	printf("current size %D\n",prog_size) ;
+	printf("current size %ld\n",prog_size) ;
 	printf("  %9.9s%9.9s%14.14s%8.8s%8.8s\n", "instr_nr",
 		"type1","addr1","length","format");
 	for (ln = pstate.s_fline ; ln ;

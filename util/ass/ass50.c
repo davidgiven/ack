@@ -66,7 +66,7 @@ pass_5() {
 #ifdef JOHAN
 		if ( jflag ) {
 			extern char em_mnem[][4] ;
-			printf("%s %D\n",em_mnem[ope],off1) ;
+			printf("%s %ld\n",em_mnem[ope],off1) ;
 		}
 #endif
 
