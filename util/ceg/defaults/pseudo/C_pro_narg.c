@@ -13,6 +13,7 @@ char*s;
  * roepen en daarna terug-jump-en naar het begin van de EM-procedure.
  */
 {
+	char *ss;
 	swtxt();
 
 	symbol_definition( extnd_name( s));
@@ -20,6 +21,6 @@ char*s;
 	prolog();
 	locals_created = 0;
 	jump( extnd_pro( procno));
-	symbol_definition( extnd_start( procno));
-	set_local_visible( extnd_start( procno));
+	symbol_definition( ss = extnd_start( procno));
+	set_local_visible( ss);
 }
