@@ -285,11 +285,11 @@ replacement (int *n;)
 	|		/* empty replacement, but there must be a
 			 * structure initializer anyway
 			 */
-			{   fputs("\t{\"\"",genc);
+			{   fputs("\t{\"\", {",genc);
 			    for (i = 0; i < maxoperand; i++) {
-				fputs(",{\"\",-1,\"\"}",genc);
+				fprintf(genc, "%c{\"\",-1,\"\"}",i?',':' ');
 			    }
-			    putc('}',genc);
+			    fputs("}}",genc);
 			}
 	]
 ;
