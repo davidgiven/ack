@@ -34,18 +34,13 @@ I3:
 	bisb2	r3,-(r1)	! Put them in the '0'.
 	ashl	$-3,r0,r0	! Shift the 3 bits off.
 	sobgtr	r2,I3
-	movl	ap,r2
-	movl	$Iwr,ap
-	chmk	$4		! write
-	movl	r2,ap
+	pushl	$Iemesend-Iemes
+	pushab	Iemes
+	pushl	$2
+	calls	$3,_write
 	bpt
 .sect .data
 Iemes:
 .data1 'E','M',' ','t','r','a','p',' ','0','0','0','0','0',' ','(','o','c','t','a','l',')',0xa
 Iemesend:
 .align 2
-Iwr:
-.data4 3		! 3 arguments.
-.data4 2		! File descriptor 2.
-.data4 Iemes		! Address of character buffer.
-.data4 Iemesend - Iemes	! Number of characters to write.

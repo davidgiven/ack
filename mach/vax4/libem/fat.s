@@ -6,12 +6,5 @@
 .fat:
 	pushl	(sp)
 	jsb	.trp
-	movl	$I1,ap
-	movl	(sp)+,6(ap)
-	chmk	(ap)+
+	calls	$1,__exit
 	halt
-
-	.sect .rom
-I1:	.data2	1
-	.data4	1
-	.data4	0

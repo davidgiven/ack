@@ -10,24 +10,16 @@
 	movl    (sp)+,r0
 	pushl	r1
 	movl    r0,.reghp
-	cmpl    r0,.hplim
+	cmpl    r0,.limhp
 	blssu   I2
 	addl2   $02000,r0
 	bicl2   $0777,r0
-	movl    r0,.hplim
-	movl	ap,r1
-	movl    $I9,ap
-	chmk    (ap)+
-	bcc     I1
+	pushl	r0
+	calls	$1,_brk
+	tst.l	r0
+	beql	I2
 	pushl	$EHEAP
 	jsb     .trp
 	rsb
-I1:
-	movl	r1,ap
 I2:
 	rsb
-
-	.sect .data
-I9:     .data2   17
-	.data4   1
-.hplim: .data4   _end

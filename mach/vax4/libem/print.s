@@ -15,19 +15,12 @@ I1:
 	addb3   $'0',r1,r0
 
 printc:
-	movb    r0,Ich
-	movl	ap,r2
-	movl    $I9,ap
-	chmk    $4
-	movl	r2,ap
+	movb	r0,Ich
+	pushl	$1
+	pushab	Ich
+	pushl	$2
+	calls	$3,_write
 	rsb
 
-	.sect .rom
-I9:
-	.data4   3
-	.data4   2
-	.data4   Ich
-	.data4   1
-
 	.sect .data
-Ich:    .data2   0
+Ich:    .data1   0
