@@ -27,11 +27,11 @@ but is certainly recommended.
 .SH CALLING THE COMPILER
 The easiest way to do this is to let the \fIack\fR(1) program do it for you.
 So, to compile a program module "prog.mod", just call
-.DS
-\fBack\fR \-m\fImach\fR prog.mod [ objects of implementation modules ]
-	or
-\fImach\fR prog.mod [ objects of implementation modules ]
-.DE
+.nf
+	\fBack\fR \-m\fImach\fR prog.mod [ objects of implementation modules ]
+		or
+	\fImach\fR prog.mod [ objects of implementation modules ]
+.fi
 where \fImach\fR is one of the target machines of ACK.
 .PP
 To compile an implementation module, use the \-\fBc\fR flag
