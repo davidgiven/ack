@@ -10,7 +10,7 @@
 UCC=$(CC)
 #UCC=cc				# compiler to be used
 
-UCOPTION=$(COPTIONS)
+UCOPTIONS=$(COPTIONS)
 #UCOPTIONS=-O			# always passed to $(UCC) -c.
 
 ULDOPTIONS=$(LDOPTIONS)
