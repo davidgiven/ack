@@ -856,7 +856,7 @@ end end;
 procedure load;
 var sz:integer;
 begin with a do begin sz:=sizeof(asp,packbit);
-  if asp<>nil then
+  if asp<>nil then begin
     case ak of
       cst:
 	gencst(op_loc,pos.ad);  {only one-word scalars}
@@ -871,12 +871,13 @@ begin with a do begin sz:=sizeof(asp,packbit);
       indexed:
 	gencst(op_lar,sz_word);
     end;  {case}
-  ak:=loaded;
   if asp^.form = subrange then
      if sz < sz_word then
 	if asp^.min < 0 then
 	   { do sign extension }
-	   begin gencst(op_loc, sz); gencst(op_loc, sz_word); genop(op_cii) end
+	   begin gencst(op_loc, sz); gencst(op_loc, sz_word); genop(op_cii) end;
+  end;
+  ak:=loaded;
 end end;
 
 procedure store;
