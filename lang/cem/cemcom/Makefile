@@ -44,6 +44,7 @@ GENOPTIONS =
 # Special #defines during compilation
 CDEFS =	$(EM_INCLUDES) $(LIB_INCLUDES)
 CFLAGS = $(CDEFS) $(COPTIONS) -O
+LDFLAGS = -i
 
 # Grammar files and their objects
 LSRC =	tokenfile.g declar.g statement.g expression.g program.g
@@ -139,11 +140,11 @@ lint:	Cfiles
 	@rm -f nmclash.o a.out
 
 longnames:	$(SRC) $(HFILES)
-	sh -c 'if test -f longnames ; then $(PRID) -l7 longnames $? > Xlongnames ; mv Xlongnames longnames ; else $(PRID) -l7 $? > longnames ; fi'
+	sh -c 'if test -f longnames ; then : ; else touch longnames ; fi ; $(PRID) -l7 longnames $? > Xlongnames ; mv Xlongnames longnames'
 
 # entry points not to be used directly
 
-Cfiles:	hfiles LLfiles $(GENCFILES) $(GHSTRSRC) $(GHSRC) makefile
+Cfiles:	hfiles LLfiles $(GENCFILES) $(GSRC) $(GHSRC) makefile
 	echo $(SRC) $(HFILES) > Cfiles
 
 hfiles: ./make.hfiles Parameters
@@ -193,11 +194,11 @@ depend:	Cfiles
 #INCLINCLINCLINCL
 
 $(CURRDIR)/main:	$(OBJ) $(CURRDIR)/makefile
-	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)/main 
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(LIBS) -o $(CURRDIR)/main 
 	size $(CURRDIR)/main
 
 $(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/makefile
-	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)/emain 
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(ELIBS) -o $(CURRDIR)/emain 
 	size $(CURRDIR)/emain
 
 Xlint:

@@ -40,11 +40,6 @@ else
 	mv Xclashes clashes
 fi
 rm -f makefile
-ed - $PW/makefile <<'EOF'
-/^#EXCLEXCL/,/^#INCLINCL/d
-w makefile
-q
-EOF
 for i in `cat $PW/Cfiles`
 do
 	cat >> makefile <<EOF
@@ -53,4 +48,11 @@ $i:	clashes $PW/$i
 	cid -Fclashes < $PW/$i > $i
 EOF
 done
+make `cat $PW/Cfiles`
+rm -f makefile
+ed - $PW/makefile <<'EOF'
+/^#EXCLEXCL/,/^#INCLINCL/d
+w makefile
+q
+EOF
 make CURRDIR=$PW $target
