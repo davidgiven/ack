@@ -1,5 +1,9 @@
 %{
 
+#ifndef NORCSID
+static char rcsid[]="$Header$";
+#endif
+
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *
@@ -26,6 +30,7 @@
 #define MAXPROPS 16             /* Total number of register properties */
 #define MAXTOKENS 32            /* Different kind of tokens */
 #define MAXSETS 80              /* Number of tokenexpressions definable */
+#define MAXEMPATLEN 25		/* Maximum length of EM-pattern/replacement */
 #define TOKENSIZE 5             /* Maximum number of fields in token struct */
 #define MAXINSTANCE 120         /* Maximum number of different tokeninstances */
 #define MAXSTRINGS 400          /* Maximum number of different codestrings */
@@ -50,7 +55,7 @@
 #define TRUE    1
 #define FALSE   0
 
-#define MAXPATLEN 7             /* Maximum length of em- or tokenpatterns */
+#define MAXPATLEN 7             /* Maximum length of tokenpatterns */
 
 typedef char byte;
 typedef char * string;
@@ -158,7 +163,7 @@ token_t machtokens[MAXTOKENS];
 int nmachtokens=1;
 set_t machsets[MAXSETS];
 int nmachsets=0;
-int patmnem[MAXPATLEN];
+int patmnem[MAXEMPATLEN];
 int empatlen;
 int maxempatlen;
 int empatexpr;
@@ -190,7 +195,7 @@ FILE *hfile;
 int maxtokensize=0;
 int dealflag;
 int emrepllen;
-int replmnem[MAXPATLEN];
+int replmnem[MAXEMPATLEN];
 int tokrepllen;
 int replinst[MAXPATLEN];
 int replexpr[MAXPATLEN];
@@ -623,7 +628,7 @@ mnemlist
 	:       mnem
 		{ empatlen = 1; patmnem[empatlen] = $1; }
 	|       mnemlist mnem
-		{ chktabsiz(empatlen+1,MAXPATLEN,"EM pattern");
+		{ chktabsiz(empatlen+1,MAXEMPATLEN,"EM pattern");
 		  patmnem[++empatlen] = $2;
 		}
 	;
@@ -855,7 +860,7 @@ emrepllist
 		  replexpr[0]=$2.expr_index;
 		}
 	| emrepllist mnem optexpr
-		{ chktabsiz(emrepllen+1,MAXPATLEN,"EM replacement");
+		{ chktabsiz(emrepllen+1,MAXEMPATLEN,"EM replacement");
 		  replmnem[emrepllen]=$2;
 		  replexpr[emrepllen]=$3.expr_index;
 		  emrepllen++;
