@@ -3,10 +3,12 @@ Robbert and Ed found while making the linker usable for the 68000 and amoeba.
 I (Ceriel Jacobs) took the liberty of removing the ones that I fixed from
 this list.
 
+...
 
 Another problem form the commons:
-1 - Local commons are not handled by led and not produced by as.
-    Must, and will be handled by as.
+
+...
+
 2 - The commons are allocated at the very end of the first pass, after the
     initialezed data has been allocated in the segments. The order on which
     the commons are allocated seems to be random. That way it is impossible
@@ -15,11 +17,3 @@ Another problem form the commons:
     The currently used trick is to declare an extra segment after the
     segment containing the commons. The first bytre in this segment
     inmediatly follows the commons and can be used as _end or endbss.
-
-The archiver (aal) with the automatic ranlib is buggy.
-The only thing that seems to work at the moment is creation of a fresh
-archive.
-replacing/adding/deleting modules is likely to produce libraries
-with incorrect ranlib entries.
-The major troublemaker seems to be the extra padding byte at the end
-of odd sized modules.
