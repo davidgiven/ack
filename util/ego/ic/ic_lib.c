@@ -175,14 +175,14 @@ STATIC bool is_archive(name)
 	char *name;
 {
 	/* See if 'name' is the name of an archive file, i.e. it
-	 * should end on ".a" and should at least be three characters
-	 * long (i.e. the name ".a" is not accepted as an archive name!).
+	 * should end on ".ma" and should at least be four characters
+	 * long (i.e. the name ".ma" is not accepted as an archive name!).
 	 */
 
 	register char *p;
 
 	for (p = name; *p; p++);
-	return (p > name+2) && (*--p == 'a') && (*--p == '.');
+	return (p > name+3) && (*--p == 'a') && (*--p == 'm') && (*--p == '.');
 }
 
 
@@ -193,9 +193,29 @@ STATIC bool read_hdr()
 {
 	/* Read the header of an archive module */
 
+	char buf[AR_TOTAL];
+	register char *c = buf;
+	register char *p = hdr.ar_name;
+	register int i;
 
-	fread(&hdr, sizeof(hdr), 1, curfile);
-	return !feof(curfile);
+	fread(c, AR_TOTAL, 1, curfile);
+	if (feof(curfile)) return 0;
+	i = 14;
+	while (i--) {
+		*p++ = *c++;
+	}
+
+#define get2(c)        (((c)[0]&0377) | ((unsigned) ((c)[1]&0377) << 8))
+
+	hdr.ar_date = ((long) get2(c)) << 16; c += 2;
+	hdr.ar_date |= ((long) get2(c)) & 0xffff; c += 2;
+	hdr.ar_uid = *c++;
+	hdr.ar_gid = *c++;
+	hdr.ar_mode = get2(c); c += 2;
+	hdr.ar_size = (long) get2(c) << 16; c += 2;
+	hdr.ar_size |= (long) get2(c) & 0xffff;
+
+	return 1;
 }
 
 
@@ -267,7 +287,7 @@ FILE *next_file(argc,argv)
 				error("cannot open %s",filename);
 			}
 			if (is_archive(filename)) {
-				/* ends on '.a' */
+				/* ends on '.ma' */
 				arstate = ARCHIVE;
 				arch_init(curfile); /* read magic ar number */
 			} else {
