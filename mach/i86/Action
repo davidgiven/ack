@@ -4,9 +4,6 @@ end
 name "Intel 8086 backend"
 dir cg
 end
-name "Intel 8086 download program(s)"
-dir dl
-end
 name "Intel 8086 C libraries"
 dir libcc
 end
@@ -16,9 +13,15 @@ end
 name "Intel 8086 Pascal library"
 dir libpc
 end
-name "Intel 8086 Stand-alone io library"
-dir saio
+name "Intel 8086 PC/IX systemcall library"
+dir libsys
 end
 name "Intel 8086 Basic library"
 dir libbc
+end
+name "Intel 8086 Occam library"
+dir liboc
+end
+name "Intel 8086 conversion program from ack.out --> PC/IX a.out"
+dir cv
 end
