@@ -7,8 +7,4 @@
 
 #include "sizes.h"
 
-#if word_size==2 || word_size==4
-#define	ATW(arg)	(((arg) + (word_size - 1)) & ~ (word_size - 1))
-#else
 #define	ATW(arg)	((((arg) + ((int)word_size - 1)) / word_size) * word_size)
-#endif
