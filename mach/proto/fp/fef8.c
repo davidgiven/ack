@@ -12,7 +12,7 @@
 #include	"FP_types.h"
 
 struct	fef8_returns	{
-	short	e;
+	int	e;
 	_double	f;
 };
 

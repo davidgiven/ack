@@ -12,7 +12,7 @@
 #include	"FP_types.h"
 
 struct	fef4_returns {
-	short	e;
+	int	e;
 	_float	f;
 };
 
