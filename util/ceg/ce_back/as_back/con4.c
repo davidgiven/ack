@@ -1,7 +1,7 @@
 #include "header.h"
 
 con4( w)
-arith w;
+FOUR_BYTES w;
 {
 	gen4( w);
 }

@@ -1,7 +1,7 @@
 #include "header.h"
 
 rom4( w)
-arith w;
+FOUR_BYTES w;
 {
 	gen4( w);
 }

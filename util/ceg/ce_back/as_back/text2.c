@@ -1,7 +1,7 @@
 #include "header.h"
 
 text2( w)
-arith w;
+TWO_BYTES w;
 {
 	gen2( w);
 }

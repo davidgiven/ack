@@ -1,14 +1,14 @@
 #include "header.h"
 
 gen1( w)
-arith w;
+ONE_BYTE w;
 {
 	switch ( cur_seg) {
-	  case SEGTXT : fprint( codefile, BYTE_FMT, (arith) w);
+	  case SEGTXT : fprint( codefile, BYTE_FMT, (long) w);
 			break;
-	  case SEGCON : fprint( codefile, BYTE_FMT, (arith) w);
+	  case SEGCON : fprint( codefile, BYTE_FMT, (long) w);
 			break;
-	  case SEGROM : fprint( codefile, BYTE_FMT, (arith) w);
+	  case SEGROM : fprint( codefile, BYTE_FMT, (long) w);
 			break;
 	  case SEGBSS : bss( (arith) 1);
 			break;

@@ -1,7 +1,7 @@
 #include "header.h"
 
 con1( w)
-arith w;
+ONE_BYTE w;
 {
 	gen1( w);
 }

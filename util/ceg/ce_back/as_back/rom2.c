@@ -1,7 +1,7 @@
 #include "header.h"
 
 rom2( w)
-arith w;
+TWO_BYTES w;
 {
 	gen2( w);
 }

@@ -5,5 +5,5 @@ char *s;
 arith o;
 int r;
 {
-	fprint( codefile, RELOC2_FMT, s, (arith) o);
+	fprint( codefile, RELOC2_FMT, s, (long) o);
 }
