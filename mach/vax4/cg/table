@@ -3156,15 +3156,8 @@ cmp		| source4 source4 |
 			erase(%[a])
 			setcc(%[a])		| %[a]	| |
 cms $1==4	| source4 source4 |
-			allocate(REG={CONST4,0})
-			"cmpl\t%[1],%[2]"
-#ifdef LOCLABS
-			"bneq\t1f"
-			"incl\t%[a]\n1:"
-#else
-			"bneq\t.+4"
-			"incl\t%[a]"
-#endif
+			allocate(%[1],%[2],REG)
+			"xorl3\t%[1],%[2],%[a]"
 			setcc(%[a])
 			erase(%[a])		| %[a]	| |
 cms defined($1) | STACK |
