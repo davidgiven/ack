@@ -138,6 +138,7 @@ sigsetmask.s
 _sigsetmask.s
 sigstack.s
 sigtramp.s
+_sigvec.c
 sigvec.c
 socket.s
 socketpair.s
@@ -147,6 +148,7 @@ statfs.s
 swapon.s
 symlink.s
 sync.s
+_syscall.s
 syscall.s
 time.c
 times.c
