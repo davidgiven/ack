@@ -1,5 +1,5 @@
 
-ws		([ \t\n]*)
+ws		([ \t]*)
 arrow		("==>")
 letter		([a-zA-Z_])
 digit		([0-9])
@@ -12,6 +12,7 @@ identifier	({letter}({letter}|{digit})*)
 #include "Lpars.h"
 #include "decl.h"
 int special, n_haakjes;
+int lineno = 1;
 
 %}
 
@@ -21,7 +22,7 @@ int special, n_haakjes;
 "/*"			BEGIN COM;
 <COM>[^\n\*]*"*"+"/"	BEGIN 0;
 <COM>[^\n^\*]*"*"+	;
-<COM>[^\n\*]*"\n"	;
+<COM>[^\n\*]*"\n"	lineno++;
 
 ";"			return( ';');
 "."			return( '.');
@@ -50,3 +51,4 @@ int special, n_haakjes;
 			}
 
 {ws}			;
+\n			lineno++;

@@ -40,8 +40,8 @@
 {
 
 #include "decl.h"
-extern int yylineno, yyleng, yymorfg;
-extern char yytext[];
+extern int lineno, yyleng;
+extern char *yytext;
 
 }
 
@@ -100,13 +100,23 @@ action		: if_statement
  * by '(' and ')'. CONDITION is a token that matches this construct;
  */
 
-subroutine	: IDENTIFIER		{ yymorfg=1;}
-		  CONDITION		{ pr_subroutine( yytext);}
+subroutine
+  { char *s; }	: IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
+		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+					  strcat(s, yytext);
+					  pr_subroutine( s);
+					  free(s);
+					}
 		;
 
-call		: '@'
-		  IDENTIFIER		{ yymorfg=1;}
-		  CONDITION		{ pr_call( yytext);}
+call
+  { char *s; }	: '@'
+		  IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
+		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+					  strcat(s, yytext);
+					  pr_call( s);
+					  free(s);
+					}
 		;
 
 if_statement	: IF
@@ -133,16 +143,16 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( STDERR, "Sytax error in line %d, ", yylineno);
+		fprint( STDERR, "Sytax error in line %d, ", lineno);
 		print_token( LLsymb);
 		fprint( STDERR, "  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
 		fprint( STDERR, "Garbage at end, line %d!!\n",
-			 yylineno);
+			 lineno);
 	}
 	else {
-		fprint( STDERR, "Sytax error in line %d, ", yylineno);
+		fprint( STDERR, "Sytax error in line %d, ", lineno);
 		print_token( inserted_token);
 		fprint( STDERR, "  will be inserted!!\n");
 		token = LLsymb;
