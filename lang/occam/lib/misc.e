@@ -34,14 +34,14 @@ oldtrp
 
  exp $block_move
  pro $block_move, 0
- lal 4
+ lal EM_PSIZE
  loi EM_PSIZE
- lal 8
+ lal 2*EM_PSIZE
  loi EM_PSIZE
 
  lal 0
- loi EM_LSIZE
- loc EM_LSIZE
+ loi EM_PSIZE
+ loc EM_PSIZE
  loc EM_WSIZE
  cuu
  bls EM_WSIZE
