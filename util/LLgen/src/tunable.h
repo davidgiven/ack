@@ -28,8 +28,4 @@
  * Tunable constants
  */
 
-# define NNONTERMS	150	/* size	of nonterminal array */
-# define NTERMINALS	150	/* size	of terminal array */
-# define NAMESZ		3000	/* size	of name	table */
 # define LTEXTSZ	51	/* size	of token */
-# define ENTSIZ		900	/* size	of entry table, max 8191 */
