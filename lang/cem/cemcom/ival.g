@@ -38,6 +38,7 @@ extern char options[];
 static int gen_error;
 struct type **gen_tphead(), **gen_tpmiddle();
 struct sdef *gen_align_to_next();
+struct e_stack *p_stack;
 }
 
 /*	initial_value recursively guides the initialisation expression.
@@ -61,9 +62,22 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 ]
 ;
 
-initial_value_pack(struct type **tpp; struct expr **expp;) :
+initial_value_pack(struct type **tpp; struct expr **expp;)
+	{ static int level; }
+:
 	'{'
+			{ if (level == 0) gen_error = 0; level++; }
 	initial_value_list(tpp, expp)
+			{ level--;
+			  if (! level) {
+				while (p_stack) {
+					struct e_stack *p = p_stack->next;
+
+					free_e_stack(p_stack);
+					p_stack = p;
+				}
+			  }
+			}
 	'}'
 ;
 
@@ -140,8 +154,6 @@ gen_simple_exp(tpp, expp)
 	}
 }
 
-struct e_stack *p_stack;
-
 struct type **
 arr_elem(tpp, p)
 	struct type **tpp;
@@ -178,10 +190,11 @@ gen_tphead(tpp, nest)
 	struct type **tpp;
 {
 	register struct type *tp = *tpp;
-	register struct e_stack *p = new_e_stack();
+	register struct e_stack *p;
 	register struct sdef *sd;
 
 	if (gen_error) return tpp;
+	p = new_e_stack();
 	p->next = p_stack;
 	p_stack = p;
 	p->s_nested = nest;
@@ -223,7 +236,7 @@ gen_tpmiddle()
 	register struct sdef *sd;
 	register struct e_stack *p = p_stack;
 
-	if (gen_error) return p->s_tpp;
+	if (gen_error) if (p) return p->s_tpp; else return 0;
 again:
 	tp = *(p->s_tpp);
 	switch(tp->tp_fund) {
