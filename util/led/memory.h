@@ -21,8 +21,6 @@
 #define ALLORANL	(ALLOMODL + 1)		/* Ranlib information. */
 #define NMEMS		(ALLORANL + 1)
 
-#define INCRSIZE	1024
-
 typedef long		ind_t;
 #define BADOFF		((ind_t)-1)
 

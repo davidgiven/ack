@@ -19,6 +19,9 @@ static char rcsid[] = "$Header$";
 #include "orig.h"
 
 extern bool	incore;
+#ifndef NOSTATISTICS
+int		statistics;
+#endif
 #ifndef NDEBUG
 int			DEB = 0;
 #endif
@@ -37,6 +40,9 @@ static			change_names();
 static bool		tstbit();
 static			second_pass();
 static			pass2();
+#ifndef NOSTATISTICS
+static			do_statistics();
+#endif
 
 main(argc, argv)
 	int	argc;
@@ -44,6 +50,9 @@ main(argc, argv)
 {
 	initializations(argc, argv);
 	first_pass(argv);
+#ifndef NOSTATISTICS
+	do_statistics();
+#endif
 	freeze_core();
 	evaluate();
 	beginoutput();
@@ -51,6 +60,22 @@ main(argc, argv)
 	endoutput();
 	stop();
 }
+
+#ifndef NOSTATISTICS
+static
+do_statistics()
+{
+	register struct memory *m = mems;
+
+	while (m <= &mems[NMEMS-1]) {
+		fprintf(stderr, "mem %d: full %lx, free %lx\n",
+				m - mems,
+				(long) m->mem_full,
+				(long) m->mem_left);
+		m++;
+	}
+}
+#endif
 
 char		*progname;	/* Name this program was invoked with. */
 int		passnumber;	/* Pass we are in. */
@@ -192,6 +217,9 @@ first_pass(argv)
 			h = hash(*argv);
 			if (searchname(*argv, h) == (struct outname *)0)
 				entername(makename(*argv), h);
+			break;
+		case 'S':
+			statistics = 1;
 			break;
 		default:
 			warning("bad flag letter %c", *argp);

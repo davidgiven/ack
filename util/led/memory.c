@@ -60,7 +60,7 @@ sbreak(incr)
 			refused = incr;
 		return -1;
 	}
-	BASE = sbrk(0);
+	BASE += inc;
 	return 0;
 }
 
