@@ -21,13 +21,10 @@
 #include "../../../h/em_flag.h"
 
 extern char em_flag[];
+FILE *curinp;
+block_id lastbid;	/* block identifying number */
+lab_id	 lastlabid;	/* last label identifier */
 
-
-/* global variables */
-
-static	FILE	*f;
-STATIC	block_id lastbid;	/* block identifying number */
-STATIC	lab_id	 lastlabid;	/* last label identifier */
 
 /* creating new identifying numbers, i.e. numbers that did not
  * appear in the input.
@@ -49,13 +46,9 @@ lab_id freshlabel()
 }
 
 
-/* local routines */
-
-#define getbyte()	getc(f)
-
 #define getmark()	getbyte()
 
-STATIC short getshort() {
+short getshort() {
 	register int l_byte, h_byte;
 
 	l_byte = getbyte();
@@ -65,7 +58,7 @@ STATIC short getshort() {
 }
 
 
-STATIC offset getoff() {
+offset getoff() {
 	register long l;
 	register int h_byte;
 
@@ -174,7 +167,7 @@ proc_p getptable(pname)
 	proc_p head, p, *pp;
 	short all;
 
-	if ((f = fopen(pname,"r")) == NULL) {
+	if ((curinp = fopen(pname,"r")) == NULL) {
 		error("cannot open %s",pname);
 	}
 
@@ -187,7 +180,7 @@ proc_p getptable(pname)
 	head = (proc_p) 0;
 	pp = &head;
 	for (i = 0; i < plength; i++) {
-		if (feof(f)) {
+		if (feof(curinp)) {
 			error("unexpected eof %s", pname);
 		}
 		p = newproc();
@@ -211,7 +204,7 @@ proc_p getptable(pname)
 		*pp = p;
 		pp = &(p->p_next);
 	}
-	fclose(f);
+	fclose(curinp);
 	OUTTRACE("have read proc table of length %d",plength);
 	return head;	/* pointer to first structure of list */
 }
@@ -243,7 +236,7 @@ dblock_p getdtable(dname)
 
 	head = (dblock_p) 0;
 	dp = &head;
-	if ((f = fopen(dname,"r")) == NULL) {
+	if ((curinp = fopen(dname,"r")) == NULL) {
 		error("cannot open %s", dname);
 	}
 	olength = getshort();
@@ -254,7 +247,7 @@ dblock_p getdtable(dname)
 
 	while (TRUE) {
 		n = getmark();
-		if (feof(f)) break;
+		if (feof(curinp)) break;
 		switch(n) {
 			case MARK_DBLOCK:
 				d = *dp = newdblock();
@@ -368,7 +361,7 @@ STATIC arg_p readargs()
 }
 
 
-STATIC line_p read_line(p_out)
+line_p read_line(p_out)
 	proc_p *p_out;
 {
 	/* Read a line of EM code (i.e. one instruction)
@@ -382,7 +375,7 @@ STATIC line_p read_line(p_out)
 	byte   instr;
 
 	instr = getbyte();
-	if (feof(f)) return (line_p) 0;
+	if (feof(curinp)) return (line_p) 0;
 	lnp = newline(getbyte());
 	linecount++;
 	lnp->l_instr = instr;
@@ -461,7 +454,7 @@ STATIC message(lnp)
 
 
 
-STATIC line_p getlines(lf,n,p_out,collect_mes)
+line_p getlines(lf,n,p_out,collect_mes)
 	FILE *lf;
 	int n;
 	proc_p *p_out;
@@ -473,7 +466,7 @@ STATIC line_p getlines(lf,n,p_out,collect_mes)
 
 	line_p head, *pp, l, lprev;
 
-	f = lf; /* EM input file */
+	curinp = lf; /* EM input file */
 	pp = &head;
 	lprev = (line_p) 0;
 	while (n--) {
@@ -511,9 +504,9 @@ bool getunit(gf,lf,kind_out,g_out,l_out,p_out,collect_mes)
 	bblock_p head, *pp, b;
 	loop_p lp;
 
-	f = gf;
+	curinp = gf;
 	blength = getshort(); /* # basic blocks in this procedure */
-	if (feof(f)) return FALSE;
+	if (feof(curinp)) return FALSE;
 	if (blength == 0) {
 		/* data unit */
 		*kind_out = LDATA;
@@ -539,7 +532,7 @@ bool getunit(gf,lf,kind_out,g_out,l_out,p_out,collect_mes)
 		b->b_start = getlines(lf,n,p_out,collect_mes);  /* read EM text */
 		*pp = b;
 		pp = &b->b_next;
-		f = gf;
+		curinp = gf;
 	}
 	lastbid = blength; /* last block_id */
 
@@ -554,358 +547,4 @@ bool getunit(gf,lf,kind_out,g_out,l_out,p_out,collect_mes)
 	}
 	*g_out = head;
 	return TRUE;
-}
-
-
-/* The procedure getbblocks is used only by the Control Flow phase.
- * It reads the EM textfile and partitions every procedure into
- * a number of basic blocks.
- */
-
-
-#define LABEL0		0
-#define LABEL		1
-#define NORMAL		2
-#define JUMP		3
-#define END		4
-#define AFTERPRO	5
-#define INIT		6
-
-
-/* These global variables are used by getbblocks and nextblock. */
-
-STATIC bblock_p b, *bp;  /* b is the current basic block, bp is
-			  * the address where the next block has
-			  * to be linked.
-			  */
-STATIC line_p   lnp, *lp; /* lnp is the current line, lp is
-			   * the address where the next line
-			   * has to be linked.
-			   */
-STATIC short state;	/* We use a finite state machine with the
-			 * following states:
-			 *  LABEL0: after the first (successive)
-			 *	    instruction label.
-			 *  LABEL1:  after at least two successive
-			 *	    instruction labels.
-			 *  NORMAL: after a normal instruction.
-			 *  JUMP:   after a branch (conditional,
-			 *	    unconditional or CSA/CSB).
-			 *  END:    after an END pseudo
-			 *  AFTERPRO: after we've read a PRO pseudo
-			 *  INIT:   initial state
-			 */
-
-
-STATIC nextblock()
-{
-	/* allocate a new basic block structure and
-	 * set b, bp and lp.
-	 */
-
-	b = *bp = freshblock();
-	bp = &b->b_next;
-	b->b_start = lnp;
-	b->b_succ = Lempty_set();
-	b->b_pred = Lempty_set();
-	b->b_extend = newcfbx(); /* basic block extension for CF */
-	b->b_extend->bx_cf.bx_bucket = Lempty_set();
-	b->b_extend->bx_cf.bx_semi = 0;
-	lp = &lnp->l_next;
-#ifdef TRACE
-	fprintf(stderr,"new basic block, id = %d\n",lastbid);
-#endif
-}
-
-
-STATIC short kind(lnp)
-	line_p lnp;
-{
-	/* determine if lnp is a label, branch, end or otherwise */
-
-	short instr;
-	byte  flow;
-
-	if ((instr = INSTR(lnp)) == op_lab) return (short) LABEL;
-	if (instr == ps_end) return (short) END;
-	if (instr > sp_lmnem) return (short) NORMAL; /* pseudo */
-	if ((flow = (em_flag[instr-sp_fmnem] & EM_FLO)) == FLO_C ||
-	     flow == FLO_T) return (short) JUMP; /* conditional/uncond. jump */
-	return (short) NORMAL;
-}
-
-
-
-bool getbblocks(fp,kind_out,n_out,g_out,l_out)
-	FILE *fp;
-	short *kind_out;
-	short *n_out;
-	bblock_p *g_out;
-	line_p *l_out;
-{
-	bblock_p head = (bblock_p) 0;
-	line_p headl = (line_p) 0;
-
-	curproc = (proc_p) 0;
-	/* curproc will get a value when we encounter a PRO pseudo.
-	 * If there is no such pseudo, we're reading only data
-	 * declarations or messages (outside any proc.).
-	 */
-	f = fp;
-	lastbid = (block_id) 0;  /* block identier */
-	state = INIT;	/* initial state */
-	bp = &head;
-
-	for (;;) {
-#ifdef TRACE
-		fprintf(stderr,"state = %d\n",state);
-#endif
-		switch(state) {
-			case LABEL0:
-				nextblock();
-				/* Fall through !! */
-			case LABEL:
-				lbmap[INSTRLAB(lnp)] = b;
-				/* The lbmap table contains for each
-				 * label_id the basic block of that label.
-				 */
-				lnp = read_line(&curproc);
-				state = kind(lnp);
-				if (state != END) {
-					*lp = lnp;
-					lp = &lnp->l_next;
-				}
-				break;
-			case NORMAL:
-				lnp = read_line(&curproc);
-				if ( (state = kind(lnp)) == LABEL) {
-					/* If we come accross a label
-					 * here, it must be the beginning
-					 * of a new basic block.
-					 */
-					state = LABEL0;
-				} else {
-					if (state != END) {
-						*lp = lnp;
-						lp = &lnp->l_next;
-					}
-				}
-				break;
-			case JUMP:
-				lnp = read_line(&curproc);
-				/* fall through ... */
-			case AFTERPRO:
-				switch(state = kind(lnp)) {
-					case LABEL:
-						state = LABEL0;
-						break;
-					case JUMP:
-					case NORMAL:
-						nextblock();
-						break;
-				}
-				break;
-			case END:
-				*lp = lnp;
-#ifdef TRACE
-				fprintf(stderr,"at end of proc, %d blocks\n",lastbid);
-#endif
-				if (head == (bblock_p) 0) {
-					*kind_out = LDATA;
-					*l_out = headl;
-				} else {
-					*kind_out = LTEXT;
-					*g_out = head;
-					*n_out = (short) lastbid;
-					/* number of basic blocks */
-				}
-				return TRUE;
-			case INIT:
-				lnp = read_line(&curproc);
-				if (feof(f)) return FALSE;
-				if (INSTR(lnp) == ps_pro) {
-					state = AFTERPRO;
-				} else {
-					state = NORMAL;
-					headl = lnp;
-					lp = &lnp->l_next;
-				}
-				break;
-		}
-	}
-}
-
-/* The following routines are only used by the Inline Substitution phase */
-
-call_p getcall(cf)
-	FILE *cf;
-{
-	/* read a call from the call-file */
-
-	call_p c;
-	proc_p voided;
-	actual_p act,*app;
-	short n,m;
-
-	f = cf;
-	c = newcall();
-	n = getshort(); /* void nesting level */
-	if (feof(f)) return (call_p) 0;
-	c->cl_caller = pmap[getshort()];
-	c->cl_id     = getshort();
-	c->cl_proc   = pmap[getshort()];
-	c->cl_looplevel = getbyte();
-	c->cl_flags = getbyte();
-	c->cl_ratio  = getshort();
-	app = &c->cl_actuals;
-	n = getshort();
-	while(n--) {
-		act = newactual();
-		m = getshort();
-		act->ac_size = getoff();
-		act->ac_inl = getbyte();
-		act->ac_exp = getlines(cf,m,&voided);
-		*app = act;
-		app = &act->ac_next;
-	}
-	*app = (actual_p) 0;
-	return c;
-}
-
-
-
-line_p get_text(lf,p_out)
-	FILE *lf;
-	proc_p *p_out;
-{
-	/* Read the EM text of one unit
-	 * If it is a procedure, set p_out to
-	 * the proc. just read. Else set p_out
-	 * to 0.
-	 */
-
-	line_p dumhead, l, lprev;
-	loop_p *oldlpmap = lpmap;
-	line_p *oldlmap = lmap;
-	short oldllength = llength;
-	short oldlastlabid = lastlabid;
-
-	f = lf;
-	*p_out = (proc_p) 0;
-	dumhead = newline(OPNO);
-	/* The list of instructions is preceeded by a dummy
-	 * line, to simplify list manipulation
-	 */
-	dumhead->l_instr = op_nop; /* just for fun */
-	lprev = dumhead;
-	for (;;) {
-		l = read_line(p_out);
-		if (feof(f)) return (line_p) 0;
-		lprev->l_next = l;
-		PREV(l) = lprev;
-		if (INSTR(l) == ps_end) break;
-		if (INSTR(l) == ps_mes) {
-			message(l);
-		}
-		lprev = l;
-	}
-	/* The tables that map labels to instructions
-	 * and labels to basic blocks are not used.
-	 */
-	if (*p_out != (proc_p) 0) {
-		oldmap(lmap,llength);
-		oldmap(lbmap,llength);
-		lmap = oldlmap;
-		lpmap = oldlpmap;
-	}
-	llength = oldllength;
-	lastlabid = oldlastlabid;
-	return dumhead;
-}
-
-
-
-calcnt_p getcc(ccf,p)
-	FILE *ccf;
-	proc_p p;
-{
-	/* Get call-count info of procedure p */
-
-	calcnt_p head,cc,*ccp;
-	short i;
-
-	fseek(ccf,p->p_extend->px_il.p_ccaddr,0);
-	f = ccf;
-	head = (calcnt_p) 0;
-	ccp = &head;
-	for (i = getshort(); i != (short) 0; i--) {
-		cc = *ccp = newcalcnt();
-		cc->cc_proc = pmap[getshort()];
-		cc->cc_count = getshort();
-		ccp = &cc->cc_next;
-	}
-	return head;
-}
-
-
-/* The following routine is only used by the Compact Assembly generation phase,
- * which does not read basic blocks.
- */
-
-line_p get_ca_lines(lf,p_out)
-	FILE *lf;
-	proc_p *p_out;
-{
-	/* Read lines of EM text and link them.
-	 * Register messages are outputted immediately after the PRO.
-	 */
-
-	line_p head, *pp, l;
-	line_p headm, *mp;
-	arg_p a;
-
-	f = lf; /* EM input file */
-	pp = &head;
-	mp = &headm;
-	headm = (line_p) 0;
-	while (TRUE) {
-		l = read_line(p_out);
-		if (feof(f)) break;
-		assert (l != (line_p) 0);
-		if (INSTR(l) == ps_end && INSTR(head) != ps_pro) {
-			/* Delete end pseudo after data-unit */
-			oldline(l);
-			break;
-		}
-		if (INSTR(l) == ps_mes && l->l_a.la_arg->a_a.a_offset == ms_reg) {
-			/* l is a register message */
-			if (l->l_a.la_arg->a_next == (arg_p) 0) {
-				/* register message without arguments */
-				oldline(l);
-			} else {
-				*mp = l;
-				mp = &l->l_next;
-			}
-		} else {
-			*pp = l;
-			pp = &l->l_next;
-		}
-		if (INSTR(l) == ps_end) {
-			break;
-		}
-	}
-	*pp = (line_p) 0;
-	if (INSTR(head) == ps_pro) {
-		/* append register message without arguments to list */
-		l = newline(OPLIST);
-		l->l_instr = ps_mes;
-		a = ARG(l) = newarg(ARGOFF);
-		a->a_a.a_offset = ms_reg;
-		*mp = l;
-		l->l_next = head->l_next;
-		head->l_next = headm;
-	} else {
-		assert(headm == (line_p) 0);
-	}
-	return head;
 }
