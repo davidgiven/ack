@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "assert.h"
 #include <stdio.h>
 #include "param.h"
@@ -57,6 +61,12 @@ out_finish() {
 	else
 #endif
 		fclose(codefile);
+}
+
+tstoutput() {
+
+	if (ferror(codefile))
+		error("Write error on output");
 }
 
 gencode(code) register char *code; {

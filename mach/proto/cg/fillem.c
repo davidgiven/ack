@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid2[] = "$Header$";
+#endif
+
 #include <stdio.h>
 #include "assert.h"
 #include <em_spec.h>
@@ -203,6 +207,7 @@ dopseudo() {
 	case EOF:
 		swtxt();
 		popstr(0);
+		tstoutput();
 		exit(0);
 	default:
 		error("Unknown opcode %d",savetab1);
@@ -330,6 +335,7 @@ dopseudo() {
 #ifdef REGVARS
 		unlinkregs();
 #endif
+		tstoutput();
 		break;
 	default:
 		error("No table entry for %d",savetab1);
