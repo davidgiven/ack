@@ -34,6 +34,8 @@ EM_mkcalls\ \-\ a module to read EM assembly code
 .B unsigned int EM_lineno;
 .PP
 .B char *EM_filename;
+.PP
+.B int EM_wordsize, EM_pointersize;
 .SH DESCRIPTION
 This package provides routines to read EM assembly code.
 The object is to simplify the program
@@ -250,10 +252,15 @@ reason can then be found in \fIEM_error\fR.
 given as parameter to \fIEM_open\fR, but may have a different value, when
 the input was the result of some preprocessing.
 .PP
+.I EM_wordsize
+and
+.I EM_pointersize
+contain the wordsize and pointersize, but only after the first
+(pseudo-)instruction has successfully been read.
 .SH FILES
 .nf
 ~em/modules/h/em.h
-~em/modules/h/em_ptyp.h
+~em/h/em_ptyp.h
 ~em/modules/h/em_comp.h
 ~em/modules/lib/libread_emk.a: non-checking library for reading compact EM code
 ~em/modules/lib/libread_emkV.a: checking library for reading compact EM code
