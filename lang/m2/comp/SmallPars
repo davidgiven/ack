@@ -93,6 +93,6 @@
 
 
 !File: uns_arith.h
-#define UNSIGNED_ARITH	unsigned arith
+#undef UNSIGNED_ARITH	unsigned arith
 
 
