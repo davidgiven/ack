@@ -1,12 +1,26 @@
 /* $Header$ */
+#ifdef LL_DEBUG
+#define LL_assert(x) if(!(x)) LL_badassertion("x",__FILE__,__LINE__)
+#else
+#define LL_assert(x)	/* nothing */
+#endif
 
-#define LLin(x) (LLsets[(x)+LLi]&LLb)
-
-extern short *LLptr;
-extern char LLsets[];
-extern int LLi, LLb;
 extern int LLsymb;
-extern int LLcsymb;
-extern int LLscd;
+extern char LLsets[];
+
+#define LL_SAFE(x)	/* Nothing */
+#define LL_SSCANDONE(x)	if (LLsymb != x) LLmessage(x); else
+#define LL_SCANDONE(x)	if (LLsymb != x) LLerror(x); else
+#define LL_T_NOSCANDONE(x)	LLscan(x)
 
 # include "Lpars.h"
+
+extern unsigned int LLscnt[];
+extern unsigned int LLtcnt[];
+extern int LLcsymb;
+extern int LL_symb;
+
+#define LLsdecr(d)	{LL_assert(LLscnt[d] > 0); LLscnt[d]--;}
+#define LLtdecr(d)	{LL_assert(LLtcnt[d] > 0); LLtcnt[d]--;}
+#define LLsincr(d)	LLscnt[d]++
+#define LLtincr(d)	LLtcnt[d]++
