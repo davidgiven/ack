@@ -40,7 +40,7 @@ as:	$(COBJ) as.o
 
 as.y:	$(CDIR)/comm2.y
 	$(CPP) -P -I. -I$h $(DEF) $(CDIR)/comm2.y >as.y
-	@if test -f Expect ; then cat Expect ; else echo "expect 1 shift/reduce conflict"; fi
+	-@if test -f Expect ; then cat Expect ; else echo "expect 1 shift/reduce conflict"; fi
 
 lint:   $(CSRC) as.c
 	lint $(INCL) $(CSRC) as.c
