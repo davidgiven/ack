@@ -161,7 +161,7 @@ register int mode;
   }
   lseek(fd, 0L, 0);
   magic = rd_unsigned2(fd);
-  if (magic != MAGIC_NUMBER)
+  if (magic != AALMAG && magic != ARMAG)
 	error(TRUE, "%s is not in ar format\n", name);
   
   return fd;
