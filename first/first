@@ -288,3 +288,13 @@ ABC
 	)
 	;;
 esac
+
+: find varargs include file
+: if not present use our own
+
+if [ -f /usr/include/varargs.h ]
+then
+	:
+else
+	cp ../include/_tail_cc/varargs.h ../modules/h
+fi
