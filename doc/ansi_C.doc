@@ -82,7 +82,10 @@ unchanged.
 The result of bitwise operations on signed integers are what can be
 expected on a 2-complement machine.
 .IP -
-The sign of the remainder on integer division is machine dependent.
+If either operand is negative, whether the result of the / operator is the
+largest integer less than or equal to the algebraic quotient or the
+smallest integer greater than or equal to the algebraic quotient is machine
+dependent, as is the sign of the result of the % operator.
 .IP -
 The right-shift of a negative value is negative.
 .NS A.6.3.6
@@ -95,9 +98,8 @@ Truncation is always to the nearest floating-point number that can
 be represented.
 .NS A.6.3.7
 .IP -
-When a pointer is as large as an integer, the type of the sizeof-operator is
-'unsigned int', otherwise it is 'unsigned long'. The compiler will not
-run when a pointer fits in neither.
+The type returned by the sizeof-operator is 'unsigned int'. This is done
+for backward compatibility reasons.
 .IP -
 Casting an integer to a pointer or vice versa has no effect in
 bit-pattern when the sizes are equal. Otherwise the value will be
@@ -125,7 +127,7 @@ alignment is passed on to the compiler by the 'ack' program. When a
 user wants to do this manually, he/she should be prepared for trouble.
 .IP -
 A "plain" 'int' bit-field is taken as a 'signed int'. This means that
-a field with size 1 can only store the values 0 and -1.
+a field with a size 1 bit can only store the values 0 and -1.
 .IP -
 The order of allocation of bit-fields is a compile-time option. By
 default, high-order bits are allocated first.
@@ -133,20 +135,18 @@ default, high-order bits are allocated first.
 An enum has the same size as a "plain" 'int'.
 .NS A.6.3.10
 .IP -
-An access to a volatile object is either a load or a store. Just
-mentioning a volatile variable is not enough.
-E.g. the statement "x;" where x is declared volatile, does not
-constitute an access. When a volatile object should be read, but its
-value ignored, "if (x);" should do the trick.
-.NS A.6.3.11
+An access to a volatile declared variable is done by just mentioning
+the variable. E.g. the statement "x;" where x is declared volatile,
+constitutes an access.
+.S A.6.3.11
 .IP -
 There is no fixed limit on the number of declarators that may modify an
 arithmetic, structure or union type, although specifying too many may
-cause the compiler ro run out of memory.
+cause the compiler to run out of memory.
 .NS A.6.3.12
 .IP -
 The maximum number of cases in a switch-statement is in the order of
-1e9, although the compile may run out of memory somewhat earlier.
+1e9, although the compiler may run out of memory somewhat earlier.
 .NS A.6.3.13
 .IP -
 Since both the pre-processor and the compiler assume ASCII-characters, 
@@ -155,12 +155,12 @@ matches the same value in the execution character set.
 .IP -
 The pre-processor recognizes -I... command-line options. The
 directories thus specified are searched first. After that, depending on the
-command that the preprocessor is call with, machine/system-dependant
+command that the preprocessor is called with, machine/system-dependant
 directories are searched. After that, ~em/include/_tail_ac and
 /usr/include are visited.
 .IP -
-Quoted names are looked for in the directory in which the file currently
-being compiled resides.
+Quoted names are first looked for in the directory in which the file
+which does the include resides.
 .IP -
 The characters in a h- or q- char-sequence are taken to be UNIX
 paths.
@@ -180,6 +180,7 @@ The diagnostic printed by 'assert' is as follows:
 .br
 where <expr> is the argument to the assert macro, printed as string.
 (the <file> and <line> should be clear)
+.KS
 .IP -
 The sets for character test macros.
 .TS
@@ -192,6 +193,11 @@ islower()	a-z
 isupper()	A-Z
 isprint()	<space>-~ (== \e040-\e176)
 .TE
+.KE
+As an addition, there is an isascii() macro, which tests whether a character
+is an ascii character. Characters in the range from \e000 to \e177 are ascii
+characters.
+.KS
 .IP -
 The behaviour of mathematic functions on domain error:
 .TS
@@ -207,6 +213,7 @@ log10()	-HUGE_VAL
 pow()	0.0
 sqrt()	0.0
 .TE
+.KE
 .IP -
 Underflow range errors do not cause errno to be set.
 .IP -
@@ -237,7 +244,7 @@ The buffering intended by the standard is fully supported.
 A zero-length file actually exists.
 .IP -
 A file name can consist of any character, except for the '\e0' and
-the '\e'.
+the '/'.
 .IP -
 A file can be open multiple times.
 .IP -
@@ -259,7 +266,8 @@ scanlist for %[ conversion is taken to be a range indicator. When the
 first character has a higher ASCII-value than the second, the - will
 just be put into the scanlist.
 .IP -
-The value of errno is that of lseek(). This means:
+The value of errno when fgetpos() or ftell() failed is that of lseek().
+This means:
 .RS
 .IP "EBADF \-" 10
 when the stream is not valid
