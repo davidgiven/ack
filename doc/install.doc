@@ -559,6 +559,11 @@ For others, the installation procedure has only been tested with earlier
 distributions, as we don't have those systems anymore.
 However, the sun3 and sparc systems are known to behave reasonably.
 The Sun systems should run SunOs Release 3.0 or newer.
+The i386 choice may also be used for Intel 80386 or 80486 systems
+running 
+.UX
+System V Release 4. These systems are also able to run Xenix System V
+binaries.
 If the target system is not on this list, choose one that comes close.
 If none of them come close, use the "ANY" choice.
 For ANY, any name can be used,
