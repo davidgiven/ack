@@ -106,19 +106,108 @@ kfiles: $(KFILES)
 
 # the next lines are generated automatically
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-main.o: ../../h/em_spec.h alloc.h ext.h param.h types.h
-getline.o: ../../h/em_flag.h ../../h/em_mes.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h ext.h line.h lookup.h param.h proinf.h types.h
-lookup.o: alloc.h lookup.h param.h proinf.h types.h
-var.o: lookup.h param.h proinf.h types.h
-process.o: ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h lookup.h param.h proinf.h types.h
-backward.o: ../../h/em_mnem.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h lookup.h param.h proinf.h types.h
-util.o: assert.h ext.h lookup.h optim.h param.h proinf.h types.h
-alloc.o: alloc.h assert.h line.h lookup.h param.h proinf.h types.h
-putline.o: ../../h/em_flag.h ../../h/em_mnem.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h lookup.h optim.h param.h proinf.h types.h
-cleanup.o: ../../h/em_mes.h ../../h/em_pseu.h ../../h/em_spec.h assert.h ext.h lookup.h param.h types.h
-peephole.o: ../../h/em_mnem.h ../../h/em_spec.h alloc.h assert.h ext.h line.h lookup.h optim.h param.h pattern.h proinf.h types.h
-flow.o: ../../h/em_flag.h ../../h/em_mnem.h ../../h/em_spec.h alloc.h ext.h line.h optim.h param.h proinf.h types.h
-reg.o: ../../h/em_mes.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h param.h proinf.h types.h
-pattern.o: param.h pattern.h types.h
-regglob.o: ../../h/em_mes.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h param.h proinf.h types.h
-regnoglob.o: ../../h/em_mes.h ../../h/em_pseu.h ../../h/em_spec.h alloc.h assert.h ext.h line.h param.h proinf.h types.h
+main.o: alloc.h
+main.o: ext.h
+main.o: param.h
+main.o: types.h
+getline.o: alloc.h
+getline.o: ext.h
+getline.o: line.h
+getline.o: lookup.h
+getline.o: param.h
+getline.o: proinf.h
+getline.o: types.h
+lookup.o: alloc.h
+lookup.o: lookup.h
+lookup.o: param.h
+lookup.o: proinf.h
+lookup.o: types.h
+var.o: lookup.h
+var.o: param.h
+var.o: proinf.h
+var.o: types.h
+process.o: alloc.h
+process.o: assert.h
+process.o: ext.h
+process.o: line.h
+process.o: lookup.h
+process.o: param.h
+process.o: proinf.h
+process.o: types.h
+backward.o: alloc.h
+backward.o: assert.h
+backward.o: ext.h
+backward.o: line.h
+backward.o: lookup.h
+backward.o: param.h
+backward.o: proinf.h
+backward.o: types.h
+util.o: assert.h
+util.o: ext.h
+util.o: lookup.h
+util.o: optim.h
+util.o: param.h
+util.o: proinf.h
+util.o: types.h
+alloc.o: alloc.h
+alloc.o: assert.h
+alloc.o: line.h
+alloc.o: lookup.h
+alloc.o: param.h
+alloc.o: proinf.h
+alloc.o: types.h
+putline.o: alloc.h
+putline.o: assert.h
+putline.o: ext.h
+putline.o: line.h
+putline.o: lookup.h
+putline.o: optim.h
+putline.o: param.h
+putline.o: proinf.h
+putline.o: types.h
+cleanup.o: assert.h
+cleanup.o: ext.h
+cleanup.o: lookup.h
+cleanup.o: param.h
+cleanup.o: types.h
+peephole.o: alloc.h
+peephole.o: assert.h
+peephole.o: ext.h
+peephole.o: line.h
+peephole.o: lookup.h
+peephole.o: optim.h
+peephole.o: param.h
+peephole.o: pattern.h
+peephole.o: proinf.h
+peephole.o: types.h
+flow.o: alloc.h
+flow.o: ext.h
+flow.o: line.h
+flow.o: optim.h
+flow.o: param.h
+flow.o: proinf.h
+flow.o: types.h
+reg.o: alloc.h
+reg.o: assert.h
+reg.o: ext.h
+reg.o: line.h
+reg.o: param.h
+reg.o: proinf.h
+reg.o: types.h
+pattern.o: param.h
+pattern.o: pattern.h
+pattern.o: types.h
+regglob.o: alloc.h
+regglob.o: assert.h
+regglob.o: ext.h
+regglob.o: line.h
+regglob.o: param.h
+regglob.o: proinf.h
+regglob.o: types.h
+regnoglob.o: alloc.h
+regnoglob.o: assert.h
+regnoglob.o: ext.h
+regnoglob.o: line.h
+regnoglob.o: param.h
+regnoglob.o: proinf.h
+regnoglob.o: types.h

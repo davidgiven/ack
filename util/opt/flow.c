@@ -4,9 +4,9 @@ static char rcsid[] = "$Header$";
 
 #include "param.h"
 #include "types.h"
-#include "../../h/em_flag.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_mnem.h"
+#include <em_flag.h>
+#include <em_spec.h>
+#include <em_mnem.h>
 #include "alloc.h"
 #include "line.h"
 #include "proinf.h"

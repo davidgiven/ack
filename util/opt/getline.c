@@ -9,10 +9,10 @@ static char rcsid[] = "$Header$";
 #include "lookup.h"
 #include "alloc.h"
 #include "proinf.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_pseu.h"
-#include "../../h/em_flag.h"
-#include "../../h/em_mes.h"
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_flag.h>
+#include <em_mes.h>
 #include "ext.h"
 
 /*

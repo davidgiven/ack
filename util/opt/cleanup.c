@@ -6,9 +6,9 @@ static char rcsid[] = "$Header$";
 #include "param.h"
 #include "types.h"
 #include "assert.h"
-#include "../../h/em_pseu.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_mes.h"
+#include <em_pseu.h>
+#include <em_spec.h>
+#include <em_mes.h>
 #include "lookup.h"
 #include "ext.h"
 

@@ -8,9 +8,9 @@ static char rcsid[] = "$Header$";
 #include "line.h"
 #include "proinf.h"
 #include "alloc.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_pseu.h"
-#include "../../h/em_mes.h"
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_mes.h>
 #include "ext.h"
 
 /*

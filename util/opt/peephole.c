@@ -10,8 +10,8 @@ static char rcsid[] = "$Header$";
 #include "proinf.h"
 #include "alloc.h"
 #include "pattern.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_mnem.h"
+#include <em_spec.h>
+#include <em_mnem.h>
 #include "optim.h"
 #include "ext.h"
 

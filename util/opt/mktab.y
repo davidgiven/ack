@@ -7,8 +7,8 @@ static char rcsid[] = "$Header$";
 #include "param.h"
 #include "types.h"
 #include "pattern.h"
-#include "../../h/em_spec.h"
-#include "../../h/em_mnem.h"
+#include <em_spec.h>
+#include <em_mnem.h>
 #include "optim.h"
 
 /*
