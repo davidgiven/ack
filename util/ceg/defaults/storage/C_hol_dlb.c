@@ -29,6 +29,8 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+extern int holno;
+
 C_hol_dlb( n, l, offs, i)
 arith n, offs;
 label l;

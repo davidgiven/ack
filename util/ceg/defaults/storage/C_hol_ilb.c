@@ -29,6 +29,8 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+extern int holno, procno;
+
 C_hol_ilb( n, l, i)
 arith n;
 label l;
@@ -47,6 +49,6 @@ int i;
 		symbol_definition( extnd_hol( ++holno));
 
 		for ( i = 0; i < n/EM_PSIZE; i++)
-			relocEM_PSIZE( extnd_ilb( l), 0, ABSOLUTE);
+			relocEM_PSIZE( extnd_ilb( l, procno), 0, ABSOLUTE);
 	 }
 }
