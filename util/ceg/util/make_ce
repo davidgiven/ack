@@ -11,7 +11,7 @@ IFILES	= -I. -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back
 
 CFLAGS = -O $(IFILES)
 
-.c.o:	mach.h back.a
+.c.o:
 	cd ce ; $(CC) -c $(CFLAGS) ../$*.c ; cd ..
 
 all:	ce.a
