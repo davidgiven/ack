@@ -1,9 +1,0 @@
-proto.make
-as_parser.h
-const.h
-conversion.c
-decl.h
-eval
-help.c
-pars.g
-table.l

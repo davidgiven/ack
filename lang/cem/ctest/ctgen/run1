@@ -1,9 +1,0 @@
-case $2 in
-clean)
-	;;
-*)
-make "TS=$1"
-;;
-esac
-make "P=$1" "CEM=${CEM-acc}" "RUN=${RUN-}" -fk ../makefile $2
-rm -f $1.[ckmos]

@@ -1,6 +1,0 @@
-name "Ack.out --> Sun 2 M68000 a.out format conversion program"
-dir cv
-end
-name "Sun 2 M68000 systemcall library"
-dir libsys
-end

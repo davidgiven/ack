@@ -1,2 +1,0 @@
-echo "All program(s) in this directory should fail to compile."
-make "P=noarg" "CEM=${CEM-acc}" "RUN=${RUN-}" -fsk ../makefile ${1-gen}

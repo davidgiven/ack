@@ -1,4 +1,0 @@
-The routines in mli.s, mlu.s, dvi.s, and dvu.s are written by
-Kai-Uwe Bloem and were published on the comp.os.minix newsgroup.
-He allowed us to use them for ACK, but requested that
-they do not fall under the ACK copyright notice. So, they don't.

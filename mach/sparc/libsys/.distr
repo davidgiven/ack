@@ -1,5 +1,0 @@
-LIST
-libmon_s.a
-head_em.s
-SYS.h
-syscall.h
