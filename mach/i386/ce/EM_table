@@ -1106,3 +1106,5 @@ C_locals
 			==>	"push ebp";
 				"mov ebp,esp";
 				"sub esp, $1".
+
+C_db_sline		==>	"call ___u_LiB".
