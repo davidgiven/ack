@@ -10,7 +10,7 @@
    overflow.
 */
 int
-atol(register const char *nptr)
+atoi(register const char *nptr)
 {
 	int total = 0;
 	register unsigned int digit;
