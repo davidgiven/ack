@@ -68,7 +68,6 @@ EVAL(expr, val, code, true_label, false_label)
 			load_val(expr, val);
 		break;
 	case String:	/* a string constant	*/
-		expr_warning(expr, "(DEBUG) value-class 'String' seen");
 		if (gencode) {
 			struct expr *ex = expr;
 			string2pointer(&ex);
