@@ -1052,9 +1052,11 @@ lil ngi sil $1==$3 && $2==2 && inreg($1)==2 | |
 			INDSTORE
 			"neg *%(regvar($1)%)" 		|	| |
 lil inc sil $1==$3 && inreg($1)==2 | | INDSTORE
-			"inc *%(regvar($1)%)"		|	| |
+			"inc *%(regvar($1)%)"
+			setcc({regdef2, regvar($1)})	|	| |
 lil dec sil $1==$3 && inreg($1)==2 | | INDSTORE
-			"dec *%(regvar($1)%)"		|	| |
+			"dec *%(regvar($1)%)"
+			setcc({regdef2, regvar($1)})	|	| |
 lol adi stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))
 			"add %[1],%(regvar($1)%)"
@@ -1105,6 +1107,18 @@ lol adp stl $1==$3 && inreg($1)==2 | |
 			remove(regvar($1))
 			"add $$$2,%(regvar($1)%)"
 			erase(regvar($1))		|	| |
+lil adp sil $1==$3 && $2==1 && inreg($1)==2 | |
+			INDSTORE
+			"inc *%(regvar($1)%)"
+			erase(regvar($1))		|	| |
+lil adp sil $1==$3 && $2==0-1 && inreg($1)==2 | |
+			INDSTORE
+			"dec *%(regvar($1)%)"
+			erase(regvar($1))		|	| |
+lil adp sil $1==$3 && inreg($1)==2 | |
+			INDSTORE
+			"add $$$2,*%(regvar($1)%)"
+			erase(regvar($1))		|	| |
 #endif
 lol loc sbi stl $1==$4 && $3==2 | | 
 			remove(indordef)
@@ -1119,9 +1133,11 @@ lol ngi stl $1==$3 && $2==2 | |
 lil ngi sil $1==$3 && $2==2 | | INDSTORE
 			"neg *$1(r5)"			|	| |
 lil inc sil $1==$3 | | INDSTORE
-			"inc *$1(r5)"			|	| |
+			"inc *$1(r5)"
+			setcc({reginddef2, lb, tostring($1)})	|	| |
 lil dec sil $1==$3 | | INDSTORE
-			"dec *$1(r5)"			|	| |
+			"dec *$1(r5)"
+			setcc({reginddef2, lb, tostring($1)})	|	| |
 lol adi stl $2==2 && $1==$3 | source2 |
 			remove(indordef)
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
@@ -1142,6 +1158,18 @@ lol adp stl $1==$3 | |
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
 			"add $$$2,$1(r5)"
 			setcc({LOCAL2,$1,2})		|	| |
+lil adp sil $1==$3 && $2==1 | |
+			INDSTORE
+			"inc *$1(r5)"
+			setcc({LOCAL2,$1,2})		|	| |
+lil adp sil $1==$3 && $2==0-1 | |
+			INDSTORE
+			"dec *$1(r5)"
+			setcc({LOCAL2,$1,2})		|	| |
+lil adp sil $1==$3 | |
+			INDSTORE
+			"add $$$2,*$1(r5)"
+			setcc({LOCAL2,$1,2})		|	| |
 loe adi ste $2==2 && $1==$3 | source2 |
 			remove(posextern)
 			"add %[1],$1"
@@ -1158,6 +1186,27 @@ loe adp ste $1==$3 | |
 			remove(posextern)
 			"add $$$2,$1"
 			setcc({relative2,$1})		|	| |
+loe loi adp loe sti $1==$4 && $2==2 && $5==2 && $3==1 | |
+			INDSTORE
+			"inc *$1"
+			setcc({reldef2,$1})		|	| |
+loe loi adp loe sti $1==$4 && $2==2 && $5==2 && $3==0-1 | |
+			INDSTORE
+			"dec *$1"
+			setcc({reldef2,$1})		|	| |
+loe loi adp loe sti $1==$4 && $2==2 && $5==2 | |
+			INDSTORE
+			"add $$$3,*$1"
+			setcc({reldef2,$1})		|	| |
+loe ine $1==$2 | |
+			allocate(REG={relative2, $1})	| %[a] 
+							| ine $2 |
+loe dee $1==$2 | |
+			allocate(REG={relative2, $1})	| %[a] 
+							| dee $2 |
+loe loe adp ste $1==$2 && $2==$4 | |
+			allocate(REG={relative2, $1})	| %[a] 
+							| loe $2 adp $3 ste $2 |
 #ifdef REGVARS
 lol ior stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))
