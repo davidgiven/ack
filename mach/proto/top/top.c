@@ -289,7 +289,8 @@ bool opmatch(t,s)
 	was_instantiated = (var[vno].vstate == INSTANTIATED);
 	strcpy(buf,s);
 	if ( (l=lstrip(buf,t->lctxt)) != NULLSTRING && rstrip(l,t->rctxt)) {
-		return vno == 0 || (unify(l,&var[vno]) &&
+		return (vno == 0 && *l == '\0') ||
+		       (vno != 0 && unify(l,&var[vno]) &&
 			(was_instantiated || tok_chk(vno)));
 	}
 	return FALSE;
