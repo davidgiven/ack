@@ -21,6 +21,6 @@
 #define	SIGALRM	14	/* alarm clock */
 #define	SIGTERM	15	/* software termination signal from kill */
 
-int	(*signal())();
-#define	SIG_DFL	(int (*)())-2
-#define	SIG_IGN	(int (*)())-3
+void	(*signal())();
+#define	SIG_DFL	(void (*)())-2
+#define	SIG_IGN	(void (*)())-3
