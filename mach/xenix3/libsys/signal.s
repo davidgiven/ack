@@ -77,6 +77,7 @@ ctch:
 retadr: .space 2
 dummy: .space 2
 .sect .text
+.align 2
 tbl:
 	call	ctch
 .align 2
