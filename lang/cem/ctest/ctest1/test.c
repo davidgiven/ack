@@ -859,7 +859,7 @@ test7()		/* local records */
 #ifndef NOFLOAT
     if ( fabs ( s2.aaa * s1.aaa - s1.c1 * 5 - 1.0 ) > epsf ) e(36);
 #else
-    if ( 5*r1.c1 != 15 ) e(36) ;
+    if ( 5*s1.c1 != 15 ) e(36) ;
 #endif
 }
 
