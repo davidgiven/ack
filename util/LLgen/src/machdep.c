@@ -29,6 +29,7 @@
  */
 
 
+# include "../../../h/em_path.h"
 # include "types.h"
 
 static string rcsid = "$Header$";
@@ -52,7 +53,8 @@ string
 libpath(s) char *s; {
 	static char buf[100];
 
-	strcpy(buf,"/usr/local/lib/LLgen/");
+	strcpy(buf,EM_DIR);
+	strcat(buf,"/lib/LLgen/");
 	strcat(buf,s);
 	return buf;
 }
