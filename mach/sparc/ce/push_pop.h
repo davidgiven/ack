@@ -17,8 +17,6 @@ typedef struct cache_elt {
 	arith	cst;
 } cache_elt;
 
-#define REG_NUM(r) (((char(*)[8])(r))-regnam)
-
 #define T_cst	1
 #define T_ext	2
 #define T_reg	4

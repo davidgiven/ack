@@ -19,7 +19,7 @@ define(`BP_OFFSET',`'WINDOWSIZE)
 define(`'`EM_BSIZE',EM_BSIZE)
 define(STACK_CLICK,4)
 
-#if RESOLVE_debug
+#if RESOLV_debug
 define(Comment0)
 define(Comment)
 define(Comment2)
@@ -190,7 +190,7 @@ C_lxl
 				a = alloc_reg();
 				b = alloc_reg();
 				c = alloc_reg();
-				sprintf(n_str, "%d", $1);
+				sprint(n_str, "%d", $1);
 				"set	$n_str, $a";
 				"mov 	$reg_lb, $b";
 			"1:	ld	[$b + EM_BSIZE], $c";
@@ -671,7 +671,7 @@ C_mli
 
 				if (n0) {
 					a = alloc_reg();
-					sprintf(n_str, "%d", n0);
+					sprint(n_str, "%d", n0);
 					"sll	$orig, $n_str, $a";
 					free_reg(orig);
 					orig = a;
@@ -689,7 +689,7 @@ C_mli
 					n <<= n1;
 				} else {
 					a = alloc_reg();
-					sprintf(n_str, "%d", n1);
+					sprint(n_str, "%d", n1);
 					"sll	$orig, $n_str, $a";
 					b = alloc_reg();
 					"sub	$a, $orig, $b";
@@ -738,7 +738,7 @@ C_dvi
 		if (type_of_tos() == T_cst &&
 			power_of_2(top_const(), &n_exp))
 		{
-			sprintf (n_exp_str, "%d", n_exp);
+			sprint (n_exp_str, "%d", n_exp);
 			n= pop_const(NULL);
 			a= pop_reg();
 			if (n <0)
@@ -921,7 +921,7 @@ C_dvu
 		if (type_of_tos() == T_cst &&
 			uns_power_of_2(top_const(), &n_exp))
 		{
-			sprintf (n_exp_str, "%d", n_exp);
+			sprint (n_exp_str, "%d", n_exp);
 			n= pop_const(NULL);
 			a= pop_reg();
 			b= alloc_reg();
@@ -1450,7 +1450,7 @@ C_ine..		==>
 			b= alloc_reg();
 
 			ename= $1;
-			sprintf(evalue, "%d", $2);
+			sprint(evalue, "%d", $2);
 			"sethi	%hi($ename+$evalue), $a";
 			"ld	[$a+%lo($ename+$evalue)], $b";
 			"inc	$b";
@@ -1497,7 +1497,7 @@ C_dee..		==>
 			b= alloc_reg();
 
 			ename= $1;
-			sprintf(evalue, "%d", $2);
+			sprint(evalue, "%d", $2);
 			"sethi	%hi($ename+$evalue), $a";
 			"ld	[$a+%lo($ename+$evalue)], $b";
 			"dec	$b";
@@ -1533,7 +1533,7 @@ C_zre..		==>
 			a= alloc_reg();
 
 			ename= $1;
-			sprintf(evalue, "%d", $2);
+			sprint(evalue, "%d", $2);
 			"sethi	%hi($ename+$evalue), $a";
 			"st	%g0, [$a+%lo($ename+$evalue)]"
 			free_reg(a);
@@ -2744,7 +2744,7 @@ C_com_narg	==>
 				b= alloc_reg();
 				for (i= 0; i< n; i += 4)
 				{
-					sprintf(i_str, "%d", i);
+					sprint(i_str, "%d", i);
 					"ld	[$reg_sp+$i_str], $a";
 					"not	$a, $b";
 					"st	$b, [$reg_sp+$i_str]";
@@ -2796,9 +2796,9 @@ C_rol
 					a= pop_reg();
 					b= alloc_reg();
 					c= alloc_reg();
-					sprintf(n_str, "%d", n);
+					sprint(n_str, "%d", n);
 					"sll	$a, $n_str, $b";
-					sprintf(n_str, "%d", 32-n);
+					sprint(n_str, "%d", 32-n);
 					"srl	$a, $n_str, $c";
 					"or	$b, $c, $a";
 					push_reg(a);
@@ -2855,9 +2855,9 @@ C_ror
 					a= pop_reg();
 					b= alloc_reg();
 					c= alloc_reg();
-					sprintf(n_str, "%d", n);
+					sprint(n_str, "%d", n);
 					"srl	$a, $n_str, $b";
-					sprintf(n_str, "%d", 32-n);
+					sprint(n_str, "%d", 32-n);
 					"sll	$a, $n_str, $c";
 					"or	$b, $c, $a";
 					push_reg(a);
@@ -3020,7 +3020,7 @@ C_inn_narg	==>
 			}
 		}
 		else
-			arg_error ("inn_narg");
+			not_implemented ("inn_narg");
 	}.
 
 C_set	==>	Comment( set, $1);
@@ -3055,7 +3055,7 @@ C_set_narg	==>
 				c= alloc_reg();
 				d= alloc_reg();
 				flush_cache();
-				sprintf(n_str, "%d", n);
+				sprint(n_str, "%d", n);
 				"set	$n_str, $a";
 				"sub	$reg_sp, $a, $reg_sp";
 			"1:";
@@ -4164,7 +4164,7 @@ C_dus
 				"sub	$reg_sp, $n_str, $reg_sp";
 				for (i=0; i<n; i += 4)
 				{
-					sprintf(i_str, "%d", i);
+					sprint(i_str, "%d", i);
 					"ld	[$reg_sp+$i_str+$n_str], $a";
 					"st	$a, [$reg_sp+$i_str]";
 				}
@@ -4239,8 +4239,8 @@ C_exg_narg	==>
 				flush_cache();
 				for (i=0; i<n; i += 4)
 				{
-					sprintf(i_str, "%d", i);
-					sprintf(in_str, "%d", i+n);
+					sprint(i_str, "%d", i);
+					sprint(in_str, "%d", i+n);
 					"ld	[$reg_sp+$i_str], $a";
 					"ld	[$reg_sp+$in_str], $b";
 					"st	$b, [$reg_sp+$i_str]";
@@ -4344,7 +4344,7 @@ C_lin		==>
 #ifdef FAST_LIN_LNI_FIL
 			{
 				const_str_t n_str;
-				sprintf(n_str, "%d", $1);
+				sprint(n_str, "%d", $1);
 				"set	$n_str, $reg_fil";
 			}.
 #else
@@ -4506,6 +4506,7 @@ C_sim		==>
 C_str
 	$1 == 0		==>
 				Comment( str , $1 );
+				flush_cache();
 				"ld	[$reg_sp], $reg_lb";
 				"add	$reg_lb, 4, %fp";
 				"and	%fp, -8, %fp";
@@ -4514,7 +4515,8 @@ C_str
 	$1 == 1		==>
 	{
 		Comment( str , $1 );
-		pop_reg_as(reg_sp);
+		flush_cache();
+		"ld [$reg_sp], $reg_sp";
 	}.
 	$1 == 2		==>
 	{

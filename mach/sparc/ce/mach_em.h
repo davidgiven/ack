@@ -1,4 +1,4 @@
-#define DEBUG 1
+#undef DEBUG 1
 #include <sun4/asm_linkage.h>
 
 #define BYTES_REVERSED
@@ -55,5 +55,7 @@
 #define MATH_DIVIDE	1
 
 #ifndef DEBUG
+#undef arg_error
 #define arg_error(s,i)
+#define RESOLV_debug 1
 #endif
