@@ -482,15 +482,8 @@ core_alloc(piece, size)
 {
 	register ind_t	off;
 
-	if ((off = alloc(piece, size)) == BADOFF) {
-		int sv = alloctype;
-
-		alloctype = FORCED;
-		off = alloc(piece, size);
-		alloctype = sv;
-		if (off == BADOFF)
-			return (char *)0;
-	}
+	if ((off = alloc(piece, size)) == BADOFF)
+		return (char *)0;
 	return address(piece, off);
 }
 
