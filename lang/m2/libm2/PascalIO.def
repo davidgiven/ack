@@ -82,7 +82,7 @@ DEFINITION MODULE PascalIo;
      result in "card".
      Syntax:
       real -->	[(+|-)] digit {digit} [. digit {digit}]
-		[ (e|E) [(+|-)] digit {digit} ]
+		[ E [(+|-)] digit {digit} ]
      If no real is read, or when overflow/underflow occurs, a runtime error
      results.
      Input stops at the character following the integer.

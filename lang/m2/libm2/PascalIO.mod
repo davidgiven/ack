@@ -143,7 +143,8 @@ IMPLEMENTATION MODULE PascalIo;
 	chk(inputtext, reading);
 	WITH inputtext^ DO
 		IF eof THEN
-			(* ??? trap here ??? *)
+			Traps.Message("unexpected EOF");
+			HALT;
 		END;
 		IF cnt > maxcnt THEN
 			dummy := FillBuf(inputtext);
@@ -312,6 +313,15 @@ IMPLEMENTATION MODULE PascalIo;
 	ch: CHAR;
 	ok: BOOLEAN;
 	index: INTEGER;
+
+    PROCEDURE inch(): CHAR;
+    BEGIN
+	buf[index] := ch;
+	INC(index);
+	Get(inputtext);
+	RETURN NextCHAR(inputtext);
+    END inch;
+
   BEGIN
 	index := 0;
     	WHILE NextCHAR(inputtext) IN spaces DO
@@ -319,45 +329,30 @@ IMPLEMENTATION MODULE PascalIo;
 	END;
 	ch := NextCHAR(inputtext);
 	IF (ch ='+') OR (ch = '-') THEN
-		buf[index] := ch;
-		INC(index);
-		Get(inputtext);
-		ch := NextCHAR(inputtext);
+		ch := inch();
 	END;
 	IF (ch >= '0') AND (ch <= '9') THEN
 		WHILE (ch >= '0') AND (ch <= '9') DO
-			buf[index] := ch;
-			INC(index);
-			Get(inputtext);
-			ch := NextCHAR(inputtext);
+			ch := inch();
 		END;
 		IF (ch = '.') THEN
+			ch := inch();
 			IF (ch >= '0') AND (ch <= '9') THEN
 				WHILE (ch >= '0') AND (ch <= '9') DO
-					buf[index] := ch;
-					INC(index);
-					Get(inputtext);
-					ch := NextCHAR(inputtext);
+					ch := inch();
 				END;
 			ELSE
 				ok := FALSE;
 			END;
 		END;
 		IF ok AND (ch = 'E') THEN
-			Get(inputtext);
-			ch := NextCHAR(inputtext);
+			ch := inch();
 			IF (ch ='+') OR (ch = '-') THEN
-				buf[index] := ch;
-				INC(index);
-				Get(inputtext);
-				ch := NextCHAR(inputtext);
+				ch := inch();
 			END;
 			IF (ch >= '0') AND (ch <= '9') THEN
 				WHILE (ch >= '0') AND (ch <= '9') DO
-					buf[index] := ch;
-					INC(index);
-					Get(inputtext);
-					ch := NextCHAR(inputtext);
+					ch := inch();
 				END;
 			ELSE
 				ok := FALSE;
@@ -411,7 +406,7 @@ IMPLEMENTATION MODULE PascalIo;
 		width := SIZE(buf);
 	END;
 	IF nfrac > 0 THEN
-		RealConversions.RealToString(real, nfrac, width, buf, ok);
+		RealConversions.RealToString(real, width, nfrac, buf, ok);
 	ELSE
 		IF width < 9 THEN width := 9; END;
 		IF real < 0.0 THEN
@@ -419,7 +414,7 @@ IMPLEMENTATION MODULE PascalIo;
 		ELSE
 			digits := 6 - INTEGER(width);
 		END;
-		RealConversions.RealToString(real, digits, width, buf, ok);
+		RealConversions.RealToString(real, width, digits, buf, ok);
 	END;
 	WriteSTRING(outputtext, buf, 0);
   END WriteREAL;

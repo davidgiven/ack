@@ -26,7 +26,6 @@ IMPLEMENTATION MODULE RealConversions;
 
   BEGIN
 	r := arg;
-	DEC(width);
 	IF digits < 0 THEN
 		ecvtflag := TRUE;
 		ndigits := -digits;
@@ -34,7 +33,9 @@ IMPLEMENTATION MODULE RealConversions;
 		ecvtflag := FALSE;
 		ndigits := digits;
 	END;
-	IF HIGH(str) < ndigits + 3 THEN str[0] := 0C; ok := FALSE; RETURN END;
+	IF (HIGH(str) < ndigits + 3) THEN
+		str[0] := 0C; ok := FALSE; RETURN
+	END;
 	pointpos := 0;
 	sign := r < 0.0D;
 	IF sign THEN r := -r END;
@@ -124,7 +125,6 @@ IMPLEMENTATION MODULE RealConversions;
 			END;
 		END;
 	END;
-	str[ind1] := 0C;
 	IF ecvtflag THEN
 		FOR i := ind1 TO 2 BY -1 DO
 			str[i] := str[i-1];
@@ -185,11 +185,15 @@ IMPLEMENTATION MODULE RealConversions;
 			INC(ind1);
 		END;
 	END;
-	IF ind1 > CARDINAL(width) THEN
+	IF (ind1+1) <= HIGH(str) THEN str[ind1+1] := 0C; END;
+	IF ind1 >= CARDINAL(width) THEN
 		ok := FALSE;
 		RETURN;
 	END;
-	IF ind1 < CARDINAL(width) THEN
+	IF width > 0 THEN
+		DEC(width);
+	END;
+	IF (width > 0) AND (ind1 < CARDINAL(width)) THEN
 		FOR i := ind1 TO 0 BY -1 DO
 			str[i + CARDINAL(width) - ind1] := str[i];
 		END;
@@ -197,8 +201,8 @@ IMPLEMENTATION MODULE RealConversions;
 			str[i] := ' ';
 		END;
 		ind1 := CARDINAL(width);
+		IF (ind1+1) <= HIGH(str) THEN str[ind1+1] := 0C; END;
 	END;
-	IF (ind1+1) <= HIGH(str) THEN str[ind1+1] := 0C; END;
 
   END LongRealToString;
 
