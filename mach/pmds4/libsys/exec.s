@@ -22,14 +22,14 @@ pushp:
 		unlk	a6
 		rts
 _execve:	trap #0
-.data2 3B
+.data2 0x3b
 		jmp cerror
 _execv:		
 		tst.b -48(sp)
 		link a6,#0
 		move.l _environ,-(sp)
 		move.l	12(a6),-(sp)
-		br	pushp
+		bra	pushp
 _execle:	tst.b	-48(sp)
 		link	a6,#0
 		lea	12(a6),a0
@@ -37,4 +37,4 @@ _execle:	tst.b	-48(sp)
 		tst.l	(a0)+
 		bne	1b
 		move.l	a0,-(sp)
-		br	pusha
+		bra	pusha
