@@ -1,3 +1,5 @@
+# $Header$
+
 MACH=MACHINE
 MACHFL=-c -O -L
 SUB =
