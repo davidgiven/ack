@@ -55,7 +55,7 @@
  dvu EM_WSIZE
  lol EM_WSIZE
  cmu EM_WSIZE
- zle *1
+ zge *1
  loc M2_UOVFL
  trp
 1
@@ -77,7 +77,7 @@
  dvu EM_LSIZE
  ldl EM_LSIZE
  cmu EM_LSIZE
- zle *1
+ zge *1
  loc M2_UOVFL
  trp
 1
