@@ -16,6 +16,7 @@ output_back()
 	int 	nrelo = relo - reloc_info;
 
 	header.oh_magic = O_MAGIC;
+	header.oh_stamp = 0;
 	header.oh_flags = HF_LINK;
 	header.oh_nsect = 4;
 	header.oh_nrelo = nrelo;
