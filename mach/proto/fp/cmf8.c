@@ -28,7 +28,11 @@ _double	d1,d2;
 	sign1 = SIGN(l1);
 	sign2 = SIGN(l2);
 	if (sign1 != sign2) {
-		return ((sign1 > 0) ? -1 : 1);
+		l1 &= 0x7fffffff;
+		l2 &= 0x7fffffff;
+		if (l1 != 0 || l2 != 0) {
+			return ((sign1 > 0) ? -1 : 1);
+		}
 	}
 	if (l1 != l2)	{	/* we can decide here */
 		rv = l1 < l2 ? 1 : -1;

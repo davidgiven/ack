@@ -26,7 +26,12 @@ struct fef8_returns *r;
 						*/
 
 	extend(&s1,&buf,sizeof(_double));
-	p->e = buf.exp + 1;
-	buf.exp = -1;
+	if (buf.exp == 0 && buf.m1 == 0 && buf.m2 == 0) {
+		p->e = 0;
+	}
+	else {
+		p->e = buf.exp + 1;
+		buf.exp = -1;
+	}
 	compact(&buf,&p->f,sizeof(_double));
 }

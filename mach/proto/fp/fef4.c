@@ -26,7 +26,12 @@ struct fef4_returns	*r;
 						*/
 
 	extend((_double *) &s1,&buf,sizeof(_float));
-	p->e = buf.exp+1;
-	buf.exp = -1;
+	if (buf.exp == 0 && buf.m1 == 0 && buf.m2 == 0) {
+		p->e = 0;
+	}
+	else {
+		p->e = buf.exp+1;
+		buf.exp = -1;
+	}
 	compact(&buf,(_double *) &p->f,sizeof(_float));
 }

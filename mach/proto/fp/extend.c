@@ -42,7 +42,8 @@ int	size;
 	int	leadbit = 0;
 
 	cpt1 = (char *) from;
-	if (((DOUBLE *) cpt1)->_s.p1.fract == 0L) 	{
+	if (((DOUBLE *) cpt1)->_s.p1.fract == 0L ||
+	    ((DOUBLE *) cpt1)->_s.p1.fract == 0x80000000) 	{
 		if (size == sizeof(SINGLE))	{
 zero:			zrf_ext(to);
 			return;
