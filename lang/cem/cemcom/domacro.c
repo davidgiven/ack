@@ -698,7 +698,7 @@ do_line(l)
 	int t = GetToken(&tk);
 
 	SkipRestOfLine();
-	LineNumber = l - 1;	/* the number of the next input line */
+	LineNumber = l;		/* the number of the next input line */
 	if (t == STRING)	/* is there a filespecifier? */
 		FileName = tk.tk_bts;
 }
