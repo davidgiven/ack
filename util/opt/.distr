@@ -1,4 +1,4 @@
-Makefile
+proto.make
 alloc.c
 alloc.h
 assert.h

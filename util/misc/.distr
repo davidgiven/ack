@@ -1,4 +1,4 @@
-Makefile
+proto.make
 convert.c
 em_decode.6
 esize.1

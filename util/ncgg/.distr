@@ -1,4 +1,4 @@
-Makefile
+proto.make
 assert.h
 cgg.y
 coerc.c

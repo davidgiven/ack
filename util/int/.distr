@@ -1,5 +1,5 @@
 READ_ME
-Makefile
+proto.make
 M.trap_msg
 M.warn_h
 M.warn_msg
