@@ -280,7 +280,7 @@ static  int             incore ;
 static  growstring      rline ;
 static  FILE            *infile ;
 static  char            *inptr ;
-static	char		em_dir[100] = EM_DIR;	/* this way it is easier to
+char			em_dir[100] = EM_DIR;	/* this way it is easier to
 						 *     patch ...
 						 */
 

@@ -7,7 +7,6 @@
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
-#include <em_path.h>
 #include <local.h>
 #include "data.h"
 #include <signal.h>
@@ -122,11 +121,12 @@ char *getsuffix() {
 varinit() {
 	/* initialize the string variables */
 	register char *envstr ;
+	extern char em_dir[];
 
 	if ( envstr=getenv("EM_DIR") ) {
 		setsvar(keeps(HOME),keeps(envstr)) ;
 	} else {
-		setsvar(keeps(HOME),keeps(EM_DIR)) ;
+		setsvar(keeps(HOME),keeps(em_dir)) ;
 	}
 	setpvar(keeps(SRC),srcvar)  ;
 	setpvar(keeps(SUFFIX),getsuffix) ;
