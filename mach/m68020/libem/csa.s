@@ -19,6 +19,7 @@ ECASE=20
 	move.l	(a0,d0.l*4), d1	! jump address
 	beq	1f
 	move.l	d1,a1
+	jmp	(a1)
 1:
 	move.l	a1, d0
 	beq	2f

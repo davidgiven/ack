@@ -29,3 +29,5 @@ pr:
 
 trpstr.s:	trpstr.c strscript
 		sh strscript
+
+distr:		trpstr.s
