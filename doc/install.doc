@@ -540,7 +540,8 @@ sun3	Sun-3 Motorola 68020 workstation	sun3
 sun2	Sun-2 Motorola 68010 workstation	sun2
 m68_sysV_0	68000 + Uniplus System V.0	mantra
 m68020	Motorola 68020 VME131 + System V/68 R2V2.1	m68020
-sparc	Sun-4 or SPARC workstation	sparc
+sparc	Sun-4 or SPARC workstation running SunOs 4	sparc
+sparc_solaris	Sun-4 or SPARC workstation running Solaris 2	sparc_solaris
 ANY	Neither of the above	???
 .TE
 For some of these, the installation procedure has not been tested, as
@@ -825,6 +826,13 @@ vax4	VAX/BSD 4.?	4/4	C	*	vax4
 			Fortran
 
 sparc	Sun-4	4/4	C	*	sparc
+			Pascal
+			Basic
+			occam
+			Modula-2
+			Fortran
+
+sparc_solaris	Sun-4	4/4	C	*	sparc_solaris
 			Pascal
 			Basic
 			occam
