@@ -22,7 +22,8 @@ name be
 	from .m.g
 	to .s
 	program {EM}/lib.bin/{M}/cg
-	args <
+	mapflag -gdb GF=-gdb
+	args {GF?} <
 	stdout
 	need .e
 end
