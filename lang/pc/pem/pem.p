@@ -2158,7 +2158,10 @@ begin with a do begin
     end;
   if sz<>0 then gencst(op_asp,sz);
   asp:=fip^.idtype;
-  if asp<>nil then genasp(op_lfr)
+  if asp<>nil then genasp(op_lfr);
+  if (fip^.pfkind = extern) and (opt['l'] <> off) then
+    begin genop(op_fil); argdlb(fildlb) end;
+  genlin
 end end;
 
 procedure fileaddr;
