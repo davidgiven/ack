@@ -749,7 +749,8 @@ with regcon4 consrc4 consrc4
 	move %2, {regrel4, %1.reg, %1.disp+4}
 
 pat sti defined($1)
-with REG STACK
+with REG
+kills ALL
     uses REG={const4, $1}
     gen 1:
 	movd {TOS}, {regrel4, %1, 0}
@@ -1740,17 +1741,17 @@ kills ALL
 gen jsr {absolute4, ".sar"}
 
 pat aar !defined($1)
-with src4 STACK
+with src4
 kills ALL
 gen jsr {absolute4, ".aar"}
 
 pat lar !defined($1)
-with src4 STACK
+with src4
 kills ALL
 gen jsr {absolute4, ".lar"}
 
 pat sar !defined($1)
-with src4 STACK
+with src4
 kills ALL
 gen jsr {absolute4, ".sar"}
 
@@ -2008,7 +2009,7 @@ kills ALL
     gen jsr {absolute4, $1}
 
 pat cai
-with REG STACK
+with REG
 kills ALL
     gen jsr %1
 
@@ -2094,7 +2095,7 @@ kills ALL
 	adjspd {const4, 0-8}
 
 pat lae csa $2==4
-with src4 STACK
+with src4
 kills ALL
     gen move %1, r0
 	move {addr_external, $1}, r1
@@ -2107,7 +2108,7 @@ kills ALL
 	jsr {absolute4, ".csa"}
 
 pat lae csb $2==4
-with src4 STACK
+with src4
 kills ALL
     gen move %1, r0
 	move {addr_external, $1}, r1
@@ -2135,7 +2136,7 @@ kills ALL
 	jsr {absolute4, ".dup"}
 
 pat dus $1==4
-with src4 STACK
+with src4
 kills ALL
     gen move %1, r0
 	jsr {absolute4, ".dup"}
@@ -2203,11 +2204,13 @@ with src24
     gen movw %1, {absolute2, ".ignmask"}
 
 pat str $1==0
-with src4 STACK
+with src4
+kills ALL
 gen sprd fp, %1
 
 pat str $1==1
-with src4 STACK
+with src4
+kills ALL
 gen sprd sp, %1
 
 pat str $1==2
