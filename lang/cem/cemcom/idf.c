@@ -335,7 +335,7 @@ declare_idf(ds, dc, lvl)
 				if (type->tp_size == (arith)-1) {
 					error("size of local %s unknown",
 						idf->id_text);
-					type = idf->id_def->df_type = int_type;
+				/** type = idf->id_def->df_type = int_type; **/
 				}
 				idf->id_def->df_register =
 					(sc == REGISTER)
