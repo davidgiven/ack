@@ -20,14 +20,7 @@ typedef char * string;
 #define full            int
 #endif
 
-#if TEM_WSIZE>2
 #define word long
 #ifndef WRD_FMT
-#define WRD_FMT "%D"
+#define WRD_FMT "%ld"
 #endif WRD_FMT
-#else
-#define word int
-#ifndef WRD_FMT
-#define WRD_FMT "%d"
-#endif WRD_FMT
-#endif
