@@ -51,6 +51,8 @@ pattern.c:      patterns mktab
 mktab:  mktab.o $(LIBS)
 	cc $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
 
+mktab.o:	scan.c
+
 depend: regglob.c regnoglob.c pattern.c
 	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
