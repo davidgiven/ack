@@ -50,7 +50,7 @@ o_collect(register int c, register FILE *stream, char type,
 
 	if (c == '-' || c == '+') {
 		*bufp++ = c;
-		if (--width);
+		if (--width)
 		    c = getc(stream);
 	}
 
