@@ -1,4 +1,4 @@
-Wed Feb 25 13:13:37 MET 1987
+Thu Mar  5 23:10:57 MET 1987
 ***** ctconv
 vax2 -DNOFLOAT conv.c
 conv.c
@@ -247,6 +247,80 @@ vax2 -DNOFLOAT ef.c
 ef.c
 running ef.cem
 comparing ef
+0a1,$
+> .4e-5 + .3e-5
+> .4e-5 - .3e-5
+> .4e-5 / .3e-5
+> .4e-5 * .3e-5
+> .4e-5 || .3e-5
+> .4e-5 && .3e-5
+> -.4e-5 
+> !.4e-5 
+> .4e-5 == .3e-5
+> .4e-5 != .3e-5
+> .4e-5 <= .3e-5
+> .4e-5 >= .3e-5
+> .4e-5 < .3e-5
+> .4e-5 > .3e-5
+> .4e-5 ? .4e-5 : .3e-5
+> x = .4e-5  4.000000e-06
+> x += .4e-5  3.141504e+00
+> x -= .4e-5  3.141496e+00
+> x /= .4e-5  7.853750e+05
+> x *= .4e-5  1.256600e-05
+> x ++ 4.141500e+00
+> x -- 2.141500e+00
+> -- x 2.141500e+00
+> ++ x 4.141500e+00
+> y = ( .4e-5 + .3e-5 ) 7.000000e-06
+> y = ( .4e-5 - .3e-5 ) 1.000000e-06
+> y = ( .4e-5 / .3e-5 ) 1.333333e+00
+> y = ( .4e-5 * .3e-5 ) 1.200000e-11
+> y = ( .4e-5 || .3e-5 ) 1.000000e+00
+> y = ( .4e-5 && .3e-5 ) 1.000000e+00
+> y = ( -.4e-5  ) -4.000000e-06
+> y = ( !.4e-5  ) 0.000000e+00
+> y = ( .4e-5 == .3e-5 ) 0.000000e+00
+> y = ( .4e-5 != .3e-5 ) 1.000000e+00
+> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
+> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
+> y = ( .4e-5 < .3e-5 ) 0.000000e+00
+> y = ( .4e-5 > .3e-5 ) 1.000000e+00
+> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
+> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
+> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
+> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
+> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
+> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
+> y = ( x ++ ) 4.141500e+00 3.141500e+00
+> y = ( x -- ) 2.141500e+00 3.141500e+00
+> y = ( -- x ) 2.141500e+00 2.141500e+00
+> y = ( ++ x ) 4.141500e+00 4.141500e+00
+> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
+> yes if ( -.4e-5  ) yes() ; else no()
+> no if ( !.4e-5  ) yes() ; else no()
+> no if ( .4e-5 == .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
+> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
+> no if ( .4e-5 < .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
+> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
+> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
+> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
+> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
+> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
+> yes if ( x ++ ) yes() ; else no() 4.141500e+00
+> yes if ( x -- ) yes() ; else no() 2.141500e+00
+> yes if ( -- x ) yes() ; else no() 2.141500e+00
+> yes if ( ++ x ) yes() ; else no() 4.141500e+00
+*** Error code 1 (ignored)
 sed -f ei.sed <OPS >ei.c
 vax2 -DNOFLOAT ei.c
 ei.c
@@ -424,11 +498,159 @@ vax2 -DNOFLOAT ld.c
 ld.c
 running ld.cem
 comparing ld
+0a1,$
+> .4e-5 + .3e-5
+> .4e-5 - .3e-5
+> .4e-5 / .3e-5
+> .4e-5 * .3e-5
+> .4e-5 || .3e-5
+> .4e-5 && .3e-5
+> -.4e-5 
+> !.4e-5 
+> .4e-5 == .3e-5
+> .4e-5 != .3e-5
+> .4e-5 <= .3e-5
+> .4e-5 >= .3e-5
+> .4e-5 < .3e-5
+> .4e-5 > .3e-5
+> .4e-5 ? .4e-5 : .3e-5
+> x = .4e-5  4.000000e-06
+> x += .4e-5  3.141504e+00
+> x -= .4e-5  3.141496e+00
+> x /= .4e-5  7.853750e+05
+> x *= .4e-5  1.256600e-05
+> x ++ 4.141500e+00
+> x -- 2.141500e+00
+> -- x 2.141500e+00
+> ++ x 4.141500e+00
+> y = ( .4e-5 + .3e-5 ) 7.000000e-06
+> y = ( .4e-5 - .3e-5 ) 1.000000e-06
+> y = ( .4e-5 / .3e-5 ) 1.333333e+00
+> y = ( .4e-5 * .3e-5 ) 1.200000e-11
+> y = ( .4e-5 || .3e-5 ) 1.000000e+00
+> y = ( .4e-5 && .3e-5 ) 1.000000e+00
+> y = ( -.4e-5  ) -4.000000e-06
+> y = ( !.4e-5  ) 0.000000e+00
+> y = ( .4e-5 == .3e-5 ) 0.000000e+00
+> y = ( .4e-5 != .3e-5 ) 1.000000e+00
+> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
+> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
+> y = ( .4e-5 < .3e-5 ) 0.000000e+00
+> y = ( .4e-5 > .3e-5 ) 1.000000e+00
+> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
+> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
+> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
+> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
+> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
+> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
+> y = ( x ++ ) 4.141500e+00 3.141500e+00
+> y = ( x -- ) 2.141500e+00 3.141500e+00
+> y = ( -- x ) 2.141500e+00 2.141500e+00
+> y = ( ++ x ) 4.141500e+00 4.141500e+00
+> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
+> yes if ( -.4e-5  ) yes() ; else no()
+> no if ( !.4e-5  ) yes() ; else no()
+> no if ( .4e-5 == .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
+> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
+> no if ( .4e-5 < .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
+> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
+> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
+> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
+> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
+> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
+> yes if ( x ++ ) yes() ; else no() 4.141500e+00
+> yes if ( x -- ) yes() ; else no() 2.141500e+00
+> yes if ( -- x ) yes() ; else no() 2.141500e+00
+> yes if ( ++ x ) yes() ; else no() 4.141500e+00
+*** Error code 1 (ignored)
 sed -f lf.sed <OPS >lf.c
 vax2 -DNOFLOAT lf.c
 lf.c
 running lf.cem
 comparing lf
+0a1,$
+> .4e-5 + .3e-5
+> .4e-5 - .3e-5
+> .4e-5 / .3e-5
+> .4e-5 * .3e-5
+> .4e-5 || .3e-5
+> .4e-5 && .3e-5
+> -.4e-5 
+> !.4e-5 
+> .4e-5 == .3e-5
+> .4e-5 != .3e-5
+> .4e-5 <= .3e-5
+> .4e-5 >= .3e-5
+> .4e-5 < .3e-5
+> .4e-5 > .3e-5
+> .4e-5 ? .4e-5 : .3e-5
+> x = .4e-5  4.000000e-06
+> x += .4e-5  3.141504e+00
+> x -= .4e-5  3.141496e+00
+> x /= .4e-5  7.853750e+05
+> x *= .4e-5  1.256600e-05
+> x ++ 4.141500e+00
+> x -- 2.141500e+00
+> -- x 2.141500e+00
+> ++ x 4.141500e+00
+> y = ( .4e-5 + .3e-5 ) 7.000000e-06
+> y = ( .4e-5 - .3e-5 ) 1.000000e-06
+> y = ( .4e-5 / .3e-5 ) 1.333333e+00
+> y = ( .4e-5 * .3e-5 ) 1.200000e-11
+> y = ( .4e-5 || .3e-5 ) 1.000000e+00
+> y = ( .4e-5 && .3e-5 ) 1.000000e+00
+> y = ( -.4e-5  ) -4.000000e-06
+> y = ( !.4e-5  ) 0.000000e+00
+> y = ( .4e-5 == .3e-5 ) 0.000000e+00
+> y = ( .4e-5 != .3e-5 ) 1.000000e+00
+> y = ( .4e-5 <= .3e-5 ) 0.000000e+00
+> y = ( .4e-5 >= .3e-5 ) 1.000000e+00
+> y = ( .4e-5 < .3e-5 ) 0.000000e+00
+> y = ( .4e-5 > .3e-5 ) 1.000000e+00
+> y = ( .4e-5 ? .4e-5 : .3e-5 ) 4.000000e-06
+> y = ( x = .4e-5  ) 4.000000e-06 4.000000e-06
+> y = ( x += .4e-5  ) 3.141504e+00 3.141504e+00
+> y = ( x -= .4e-5  ) 3.141496e+00 3.141496e+00
+> y = ( x /= .4e-5  ) 7.853750e+05 7.853750e+05
+> y = ( x *= .4e-5  ) 1.256600e-05 1.256600e-05
+> y = ( x ++ ) 4.141500e+00 3.141500e+00
+> y = ( x -- ) 2.141500e+00 3.141500e+00
+> y = ( -- x ) 2.141500e+00 2.141500e+00
+> y = ( ++ x ) 4.141500e+00 4.141500e+00
+> yes if ( .4e-5 + .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 - .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 / .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 * .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 || .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 && .3e-5 ) yes() ; else no()
+> yes if ( -.4e-5  ) yes() ; else no()
+> no if ( !.4e-5  ) yes() ; else no()
+> no if ( .4e-5 == .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 != .3e-5 ) yes() ; else no()
+> no if ( .4e-5 <= .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 >= .3e-5 ) yes() ; else no()
+> no if ( .4e-5 < .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 > .3e-5 ) yes() ; else no()
+> yes if ( .4e-5 ? .4e-5 : .3e-5 ) yes() ; else no()
+> yes if ( x = .4e-5  ) yes() ; else no() 4.000000e-06
+> yes if ( x += .4e-5  ) yes() ; else no() 3.141504e+00
+> yes if ( x -= .4e-5  ) yes() ; else no() 3.141496e+00
+> yes if ( x /= .4e-5  ) yes() ; else no() 7.853750e+05
+> yes if ( x *= .4e-5  ) yes() ; else no() 1.256600e-05
+> yes if ( x ++ ) yes() ; else no() 4.141500e+00
+> yes if ( x -- ) yes() ; else no() 2.141500e+00
+> yes if ( -- x ) yes() ; else no() 2.141500e+00
+> yes if ( ++ x ) yes() ; else no() 4.141500e+00
+*** Error code 1 (ignored)
 sed -f li.sed <OPS >li.c
 vax2 -DNOFLOAT li.c
 li.c
@@ -673,25 +895,6 @@ vax2 -DNOFLOAT margt.c
 margt.c
 running margt.cem
 comparing margt
-5,$c5,$
-< 	CDPATH=:~:~em:/usr/spool
-< 	CWD=/usr/em/lang/cem/ctest/ctmargt
-< 	ESHKEYS=dcl=^?:dcl=^H:dcr=^D:dlr=^K:dtm=^W:dwl=^[h:dew=^[d:eof=^[^C:eof=^X^C:eof=^X^F:exp=^u:fcl=^[?:fcr=^[/:gcl=^B:gcr=^F:gll=^A:glr=^E:gwl=^[b:gew=^[f:hlp=^[H:hst=^_:int=^G:lnx=^V:prh=^P:rdr=^L:rtn=^J:rtn=^M:stm=^@:tab=^I:xgm=^X^X:xpl=^[^J:xpl=^[^M:yn< k=^Y:ipl=^N
-< 	HOME=/user0/ceriel
-< 	M2PATH=.:/user0/ceriel/modula-2/lib/m2v
-< 	PAGER=/user0/ceriel/bin/yap
-< 	PATH=/user0/ceriel/bin:/usr/local:/usr/ucb:/bin:/usr/bin:/usr/em/bin:/usr/new::/user0/ceriel/modula-2/bin/m2v
-< 	REFS=/user0/ceriel/etc/refer/refs
-< 	SHELL=/usr/local/esh
-< 	TERM=sun
-< 	TERMCAP=Mu|sun:li#34:co#80:cl=^L:cm=\E[%i%d;%dH:nd=\E[C:up=\E[A:am:bs:mi:ms:ce=\E[K:cd=\E[J:so=\E[7m:se=\E[m:kd=\E[B:kl=\E[D:ku=\E[A:kr=\E[C:kh=\E[H:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:al=\E[L:dl=\E[M:im=:ei=:ic=\E[@:dc=\E[P
-< 	USER=ceriel
----
-> 	HOME=/usr/em
-> 	PATH=:/bin:/usr/ucb:/usr/local:/usr/bin:/usr/em/bin
-> 	SHELL=/usr/local/esh
-> 	TERM=dialup
-> 	USER=em
 ***** ctprof
 test profiling
 procentry.c
@@ -711,11 +914,11 @@ tfork.c
 running tfork.cem
 comparing tfork
 1,$c1,$
-< childno 15195
-< Child 15195, status 0x800
+< childno 29134
+< Child 29134, status 0x800
 < fork/wait ok
 ---
 > childno 16276
 > Child 16276, status 0x800
 > fork/wait ok
-Wed Feb 25 14:53:48 MET 1987
+Thu Mar  5 23:59:20 MET 1987
