@@ -67,7 +67,7 @@ initial_value_pack(struct type **tpp; struct expr **expp;) :
 	'}'
 ;
 
-initial_value_list(register struct type *tpp; struct expr **expp;)
+initial_value_list(register struct type **tpp; struct expr **expp;)
 	{ struct expr *e1;
 	  register struct type **tpp2 = 0;
 	}

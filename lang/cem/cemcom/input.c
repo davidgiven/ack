@@ -10,8 +10,8 @@
 #define INP_TYPE	struct file_info
 #define INP_VAR		finfo
 struct file_info	finfo;
-#include <inp_pkg.body>
 #include "nopp.h"
+#include <inp_pkg.body>
 
 #ifndef NOPP
 char *

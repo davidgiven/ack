@@ -153,7 +153,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 	[
 		initializer(dc->dc_idf, ds->ds_sc)
 	|
-		{ code_declaration(dc->dc_idf, (struct excpr *) 0, level, ds->ds_sc); }
+		{ code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
 	]
 	[
 		','
