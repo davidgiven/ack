@@ -1,3 +1,5 @@
+\." $Header$
+.\" eqn crefman.doc | troff -ms
 .EQ
 delim $$
 .EN

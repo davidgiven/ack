@@ -1,4 +1,5 @@
 .\" $Header$
+.\" tbl pcref.doc | troff
 .ds OF \\fBtest~off:~\\fR
 .ds ON \\fBtest~on:~~\\fR
 .ds AL \\fBtest~all:~\\fR
