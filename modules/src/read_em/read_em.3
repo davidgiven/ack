@@ -174,7 +174,8 @@ a non-numeric data label definition.
 .br
 The field \fIem_defdnam\fR contains the label.
 .IP "EM_ERROR	none" \nau
-an error in the input.
+an error in the input that makes the rest of the data in the structure 
+meaningless.
 .br
 \fIEM_error\fR
 contains an error message.
@@ -239,6 +240,11 @@ a floating constant.
 A string representation of the constant is found in \fIem_str\fR.
 It has size \fIem_size\fR bytes on the target machine.
 .PD
+.PP
+When an error occurs, \fIEM_error\fR is set to indicate the reason.
+\fIEM_error\fR also is the only means of detecting whether an error
+occurred. The EM_ERROR described above is only set when the error
+is serious enough.
 .PP
 The routine \fIEM_mkcalls\fR "translates" the EM instruction indicated
 by \fIinstr\fR
