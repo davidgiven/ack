@@ -163,6 +163,7 @@ union pext_t {
 #define IS_CALLED_IN_LOOP(p)	(p->p_flags1 & PF_CALINLOOP)
 #define IS_ENTERED_WITH_GTO(p)	(p->p_flags1 & PF_GTO)
 #define ENTERED_WITH_GTO(p)	p->p_flags1 |= PF_GTO
+#define BODY_KNOWN(p)		(p->p_flags1 & (byte) PF_BODYSEEN)
 
 
 /* LOOPS */
@@ -212,6 +213,7 @@ struct use {
 #define CF_INDIR 01
 #define UF_INDIR 01
 
+#define CHANGE_INDIR(p)		(p->p_change->c_flags & CF_INDIR)
 
 /* SETS */
 

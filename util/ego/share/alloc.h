@@ -9,16 +9,16 @@
  */
 
 #ifdef DEBUG
-extern short *newcore();
+extern char *newcore();
 extern oldcore();
 #else
-extern short *myalloc();
+extern char *myalloc();
 #define newcore(size) myalloc(size)
-#define oldcore(p,size) free(p)
+#define oldcore(p,size) free((char *)p)
 #endif
 
-#define newstruct(t)	(newcore (sizeof (struct t)))
-#define oldstruct(t,p)	oldcore((short *) p,sizeof (struct t))
+#define newstruct(t)	((struct t *) newcore (sizeof (struct t)))
+#define oldstruct(t,p)	oldcore((char *) p,sizeof (struct t))
 
 extern line_p	newline();		/* (byte optype) */
 extern arg_p	newarg();		/* (byte argtype) */

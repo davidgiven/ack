@@ -6,13 +6,14 @@ SHARE=../share
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
-LINTFLAGS=-hbac
+LINTFLAGS=-hbu
 
+CFILES=\
+debug.c global.c files.c go.c map.c aux.c get.c put.c alloc.c lset.c\
+cset.c parser.c stack_chg.c locals.c init_glob.c
 SRC=\
-types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c\
-map.h map.c aux.h aux.c get.h get.c put.h put.c alloc.h alloc.c lset.h lset.c\
-cset.h cset.c parser.h parser.c stack_chg.h stack_chg.c locals.h locals.c\
-init_glob.h init_glob.c
+types.h def.h debug.h global.h files.h go.h map.h aux.h get.h put.h alloc.h\
+lset.h cset.h parser.h stack_chg.h locals.h init_glob.h $(CFILES)
 
 PRFILES=$(SRC)
 

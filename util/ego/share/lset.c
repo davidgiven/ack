@@ -118,6 +118,7 @@ Lindex Lfirst(s)
 }
 
 
+/*ARGSUSED1*/
 Lindex Lnext(i,s)
 	Lindex i;
 	lset   s;

@@ -441,7 +441,7 @@ message(lnp)
 		case ms_reg:
 			if (ARG(lnp)->a_next != (arg_p) 0) {
 				/* take only "mes 3" with further arguments */
-				Ladd(lnp,&mesregs);
+				Ladd((Lelem_t) lnp,&mesregs);
 			}
 			break;
 		case ms_err:
@@ -546,7 +546,7 @@ bool getunit(gf,lf,kind_out,g_out,l_out,p_out,collect_mes)
 		lp->lp_level = getshort(); /* nesting level */
 		lp->lp_entry = getblock(getshort()); /* entry block of the loop */
 		lp->lp_end = getblock(getshort()); /* tail of back edge of loop */
-		Ladd(lp,&curproc->p_loops);
+		Ladd((Lelem_t)lp,&curproc->p_loops);
 	}
 	*g_out = head;
 	return TRUE;

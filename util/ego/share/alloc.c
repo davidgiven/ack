@@ -16,14 +16,14 @@
 #include "alloc.h"
 
 
-short * myalloc();
-short * malloc();
+char * myalloc();
+char * calloc();
 
 #ifdef DEBUG
 
 STATIC unsigned maxuse, curruse;
 
-short *newcore(size)
+char *newcore(size)
 	int size;
 {
 	if ((curruse += (unsigned)  (size+2)) > maxuse) maxuse = curruse;
@@ -31,7 +31,7 @@ short *newcore(size)
 }
 
 oldcore(p,size)
-	short *p;
+	char *p;
 	int size;
 {
 	curruse -= (size+2);
@@ -129,7 +129,7 @@ oldline(lnp) register line_p lnp; {
 
 	if (kind == OPLIST)
 		oldargs(ARG(lnp));
-	oldcore((short *) lnp,lsizetab[kind]);
+	oldcore((char *) lnp,lsizetab[kind]);
 }
 
 arg_p newarg(kind) int kind; {
@@ -155,7 +155,7 @@ oldargs(ap) register arg_p ap; {
 			oldargb(ap->a_a.a_con.ac_con.ab_next);
 			break;
 		}
-		oldcore((short *) ap,asizetab[ap->a_type]);
+		oldcore((char *) ap,asizetab[ap->a_type]);
 		ap = next;
 	}
 }
@@ -165,7 +165,7 @@ oldargb(abp) register argb_p abp; {
 
 	while (abp != (argb_p) 0) {
 		next = abp->ab_next;
-		oldcore((short *) abp,sizeof (argb_t));
+		oldcore((char *) abp,sizeof (argb_t));
 		abp = next;
 	}
 }
@@ -175,7 +175,7 @@ oldobjects(op) register obj_p op; {
 
 	while (op != (obj_p) 0) {
 		next = op->o_next;
-		oldcore((short *) op, sizeof(struct obj));
+		oldcore((char *) op, sizeof(struct obj));
 		op = next;
 	}
 }
@@ -183,7 +183,7 @@ oldobjects(op) register obj_p op; {
 olddblock(dbl) dblock_p dbl; {
 	oldobjects(dbl->d_objlist);
 	oldargs(dbl->d_values);
-	oldcore((short *) dbl, sizeof(struct dblock));
+	oldcore((char *) dbl, sizeof(struct dblock));
 }
 
 
@@ -191,8 +191,9 @@ short **newmap(length) short length; {
 	return((short **) newcore((length+1) * sizeof(short *)));
 }
 
+/*ARGSUSED1*/
 oldmap(mp,length) short **mp, length; {
-	oldcore((short *) mp, (length+1) * sizeof(short *));
+	oldcore((char *) mp, (length+1) * sizeof(short *));
 }
 
 
@@ -204,8 +205,9 @@ cset newbitvect(n) short n; {
 	 */
 }
 
+/*ARGSUSED1*/
 oldbitvect(s,n) cset s; short n; {
-	oldcore((short *) s, (n-1)*sizeof(int) + sizeof(struct bitvector));
+	oldcore((char *) s, (n-1)*sizeof(int) + sizeof(struct bitvector));
 }
 
 
@@ -213,8 +215,9 @@ short *newtable(length) short length; {
 	return((short *) newcore((length+1) * sizeof(short)));
 }
 
+/*ARGSUSED1*/
 oldtable(mp,length) short **mp, length; {
-	oldcore((short *) mp, (length+1) * sizeof(short));
+	oldcore((char *) mp, (length+1) * sizeof(short));
 }
 
 cond_p newcondtab(l) int l;
@@ -226,17 +229,15 @@ oldcondtab(tab) cond_p tab;
 {
 	int i;
 	for (i = 0; tab[i].mc_cond != DEFAULT; i++);
-	oldcore((short *) tab,((i+1) * sizeof (struct cond_tab)));
+	oldcore((char *) tab,((i+1) * sizeof (struct cond_tab)));
 }
 
 
-short *myalloc(size) register size; {
-	register short *p,*q;
+char *myalloc(size) register size; {
+	register char *p;
 
-	p = malloc(size);
+	p = calloc((unsigned) size, 1);
 	if (p == 0)
 		error("out of memory");
-	for(q=p;size>0;size -= sizeof(short))
-		*q++ = 0;
 	return(p);
 }
