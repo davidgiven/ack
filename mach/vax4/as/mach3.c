@@ -1,8 +1,9 @@
-/* $Header$ */
 /*
  * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#define RCSID3 "$Header$"
+
 /*
  * VAX-11 keywords
  */
@@ -33,6 +34,8 @@
    size.
    For now, immediate floating point and immediate values of size > 4 are not
    implemented. _u is used for this.
+   The valu_t field is used for the opcode. Most opcodes take one byte.
+   The ones that don't take two bytes.
 */
 
 /* integer arithmetic and logical instructions */
@@ -409,8 +412,13 @@
 
 /* Other VAX-11 instructions */
 
-0,		OP1_Bw,		0xfeff,		"bugw",	/* ??? */
-0,		OP1_Bl,		0xfdff,		"bugl",	/* ??? */
+/* BSD 4.3 adb has a different opinion of the bugw and bugl instructions:
+   it thinks that an addressing mode byte is required. However, according
+   to the VAX-11 Architecture Reference Manual, Revision 6.1, 1982, the
+   access type is b, which means that the operand is a branch displacement.
+*/
+0,		OP1_Bw,		0xfeff,		"bugw",
+0,		OP1_Bl,		0xfdff,		"bugl",
 
 0,		OP3_b_w_A,	0x0c,		"prober",
 0,		OP3_b_w_A,	0x0d,		"probew",

@@ -1,11 +1,29 @@
 /*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #define RCSID2 "$Header$"
 
 /*
-* VAX-11 machine dependent yacc declarations
+ * VAX-11 machine dependent yacc declarations
+ */
+
+/* operands are indicated with a letter combination:
+	b -	general operand of byte size
+	w -	general operand of word size
+	l -	general operand of long size
+	u -	general operand of > long size (immediate mode is not
+		implemented for this size, and neither are immediate
+		floating point encodings
+	A -	an operand of which the address is taken (so, no register
+		or immediate mode)
+	V -	a bit-field operand (no immediate mode)
+	Bb -	byte offset branch
+	Bw -	word offset branch
+	Bl -	long offset branch
+	Bx -	branch, size of offset determined by instruction
+	Be -	extended conditional branch; the instruction may be replaced
+		by a reverse-conditional branch over a branch or jump
 */
 
 %token <y_word> REG
@@ -25,14 +43,18 @@
 %token <y_word>	OP5_u_b_u_l_u, OP5_u_w_u_l_u, OP5_w_A_A_w_A, OP5_w_A_b_w_A
 %token <y_word>	OP6_b_w_A_b_w_A, OP6_l_l_l_l_l_l, OP6_w_A_b_A_w_A,
 		OP6_w_A_w_A_w_A
-%token <y_word>
-%type <y_word>	OP1_O, OP1_B
-%type <y_word>	OP2_O_O, OP2_A_O, OP2_O_B, OP2_O_A
-%type <y_word>	OP3_O_O_O, OP3_O_O_B, OP3_O_O_A, OP3_O_A_A, OP3_O_A_O
-%type <y_word>	OP4_O_O_O_O, OP4_O_O_O_B, OP4_O_A_O_A, OP4_O_A_A_O,
-		OP4_O_A_A_A, OP4_A_O_O_A
-%type <y_word>	OP5_O_A_A_O_A, OP5_O_A_O_O_A, OP5_O_O_O_O_O
-%type <y_word>	OP6_O_O_O_O_O_O, OP6_O_A_O_A_O_A, OP6_O_O_A_O_O_A
-%type <y_word>	CASE_O_O_O
 
+/* operand types:
+	O -	the b, w, l, A and V operands (they all fall into the same
+		syntactic category)
+	B -	branch offsets (these do not result in an addressing mode
+		byte)
+*/
+%type <y_word>	OP1_O, OP1_B
+%type <y_word>	OP2_O_O, OP2_O_B
+%type <y_word>	OP3_O_O_O, OP3_O_O_B
+%type <y_word>	OP4_O_O_O_O, OP4_O_O_O_B
+%type <y_word>	OP5_O_O_O_O_O
+%type <y_word>	OP6_O_O_O_O_O_O
+%type <y_word>	CASE_O_O_O
 %type <y_word>	oper
