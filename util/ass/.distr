@@ -12,7 +12,6 @@ asscm.c
 assda.c
 assex.h
 assrl.c
-ip_spec.h
 maktab.c
 asprint.p
 em_ass.6

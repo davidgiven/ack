@@ -42,7 +42,7 @@ ass:		$(OBS)
 asstb.c:        maktab $(SRC_HOME)/etc/ip_spec.t
 		maktab $(SRC_HOME)/etc/ip_spec.t asstb.c
 
-maktab:         $(SRC_DIR)/maktab.c $(SRC_DIR)/ip_spec.h
+maktab:         $(SRC_DIR)/maktab.c $(TARGET_HOME)/h/ip_spec.h
 		$(UCC) $(ULDFLAGS) $(UCFLAGS) -o maktab $(SRC_DIR)/maktab.c $(UTIL_HOME)/lib.bin/em_data.$(ULIBSUF)
 
 asprint:	$(SRC_DIR)/asprint.p
@@ -52,7 +52,7 @@ opr:
 		make pr ^ opr
 
 pr:
-		@pr $(SRC_DIR)/ass00.h $(SRC_DIR)/assex.h $(SRC_DIR)/ip_spec.h $(SRC_DIR)/ass?0.c $(SRC_DIR)/ass[rcd]?.c $(SRC_DIR)/maktab.c
+		@pr $(SRC_DIR)/ass00.h $(SRC_DIR)/assex.h $(SRC_DIR)/ass?0.c $(SRC_DIR)/ass[rcd]?.c $(SRC_DIR)/maktab.c
 
 depend:	asstb.c
 	sed '/^#DEPENDENCIES/,$$d' Makefile >Makefile.new
@@ -78,7 +78,7 @@ ass00.$(SUF):	$(TARGET_HOME)/h/em_spec.h
 ass00.$(SUF):	$(SRC_DIR)/ass00.h
 ass30.$(SUF):	$(SRC_DIR)/ass30.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass30.c
-ass30.$(SUF):	$(SRC_DIR)/ip_spec.h
+ass30.$(SUF):	$(TARGET_HOME)/h/ip_spec.h
 ass30.$(SUF):	$(SRC_DIR)/assex.h
 ass30.$(SUF):	$(TARGET_HOME)/config/local.h
 ass30.$(SUF):	$(TARGET_HOME)/h/arch.h
@@ -97,7 +97,7 @@ ass40.$(SUF):	$(TARGET_HOME)/h/em_spec.h
 ass40.$(SUF):	$(SRC_DIR)/ass00.h
 ass50.$(SUF):	$(SRC_DIR)/ass50.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass50.c
-ass50.$(SUF):	$(SRC_DIR)/ip_spec.h
+ass50.$(SUF):	$(TARGET_HOME)/h/ip_spec.h
 ass50.$(SUF):	$(SRC_DIR)/assex.h
 ass50.$(SUF):	$(TARGET_HOME)/config/local.h
 ass50.$(SUF):	$(TARGET_HOME)/h/arch.h
@@ -107,7 +107,7 @@ ass50.$(SUF):	$(TARGET_HOME)/h/em_spec.h
 ass50.$(SUF):	$(SRC_DIR)/ass00.h
 ass60.$(SUF):	$(SRC_DIR)/ass60.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass60.c
-ass60.$(SUF):	$(SRC_DIR)/ip_spec.h
+ass60.$(SUF):	$(TARGET_HOME)/h/ip_spec.h
 ass60.$(SUF):	$(SRC_DIR)/assex.h
 ass60.$(SUF):	$(TARGET_HOME)/config/local.h
 ass60.$(SUF):	$(TARGET_HOME)/h/arch.h
