@@ -350,6 +350,7 @@ actual(repl)
 				ch = GetChar();
 			} while (in_idf(ch));
 			*p++ = '\0';
+			ch = '\0';	/* It could be an unstashed TOKSEP */
 			UnGetChar();
 
 			/*	When the identifier has an associated macro
@@ -376,6 +377,7 @@ actual(repl)
 			if (ch == '.') {
 				ch = GetChar();
 				if (class(ch) != STNUM) {
+					ch = '\0';	/* It could be an unstashed TOKSEP */
 					UnGetChar();
 					continue;
 				}
@@ -393,6 +395,7 @@ actual(repl)
 					}
 				}
 			}
+			ch = '\0';	/* It could be an unstashed TOKSEP */
 			UnGetChar();
 		} else if (ch == '(') {
 			/* a comma may occur between parentheses */
@@ -455,6 +458,7 @@ a_new_line:		ch = GetChar();
 			}
 			if (ch != '/') {
 				UnGetChar();
+				ch = ' ';
 				stash(repl, ' ', !nostashraw);
 			}
 		} else if (ch == '/') {
@@ -464,6 +468,7 @@ a_new_line:		ch = GetChar();
 				stash(repl, ' ', !nostashraw);
 			} else {
 				UnGetChar();
+				ch = '/';
 				stash(repl, '/', !nostashraw);
 			}
 		} else if (ch == '\'' || ch == '"') {
