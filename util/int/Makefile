@@ -126,7 +126,7 @@ clean:
 		trap_msg warn_msg warn.h tags print \
 		$(OBJ) $(INT)
 	(cd switch; make clean)
-	(cd switch; make clean)
+	(cd test; make clean)
 
 bare:	clean
 	(cd switch; make bare)
