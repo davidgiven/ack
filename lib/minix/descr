@@ -7,20 +7,19 @@ var f=4
 var d=8
 var NAME=minix
 var M=i86
-var LIB=lib/{M}/tail_
-var RT=lib/{M}/head_
-var MRT=lib/minix/head_
-var MLIB=lib/minix/tail_
-var CPP_F=-Dunix -DACK -Di8088
-var INCLUDES=-I{EM}/lib/minix/include
+var MLIB=lib/{M}/tail_
+var RT=lib/minix/head_
+var LIB=lib/minix/tail_
+var CPP_F=-D__unix -D_MINIX
+var SYSINCLUDES=-I{EM}/lib/minix/include
 var ALIGN=-a0:2 -a1:16 -a2:2 -a3:2
 var CC_ALIGN=-VS2U2
-var C_LIB={EM}/{MLIB}cc.1s {EM}/{MLIB}cc.2g
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
 var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/cg
+	program {EM}/lib.bin/{M}/cg
 	args <
 	stdout
 	need .e
@@ -28,37 +27,37 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{M}/as
+	program {EM}/lib.bin/{M}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib/em_led
-	mapflag -l* LNAME={EM}/{MLIB}*
+	program {EM}/lib.bin/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i SEPID=-b1:0
-	mapflag -fp LIBFP={EM}/{LIB}fp
-	mapflag -ansi C_LIB={EM}/{MLIB}ac
+	mapflag -fp LIBFP={EM}/{MLIB}fp
+	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args {ALIGN} {SEPID?} \
-		(.e:{HEAD}={EM}/{MRT}em) \
-		({RTS}:.ocm.b={EM}/{MRT}cc) \
-		({RTS}{ANSI?}:.c={EM}/{MRT}cc) \
-		({RTS}{ANSI?}:.cansi={EM}/{MRT}ac) \
-		({RTS}:.p={EM}/{MRT}pc) -o > < \
-		(.p:{TAIL}={EM}/{MLIB}pc) \
+		(.e:{HEAD}={EM}/{RT}em) \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
+		({RTS}:.p={EM}/{RT}pc) -o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
-		(.ocm:{TAIL}={EM}/{MLIB}ocm) \
+		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
-		(.e:{TAIL}={EM}/{MLIB}mon {EM}/lib/minix/end_em)
+		(.e:{TAIL}={EM}/{MLIB}em {EM}/{LIB}mon {EM}/lib/i86/end_em)
 	linker
 end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{M}/cv
+	program {EM}/lib.bin/{M}/cv
 	args < >
 	outfile a.out
 end
