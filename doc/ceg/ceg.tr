@@ -24,7 +24,7 @@ Normally, a program to be compiled with \fBACK\fR
 is first fed to the preprocessor. The output of the preprocessor goes 
 into the appropriate front end, which produces EM
 .[
-Tanenbaum
+Tanenbaum toolkit
 .]
 (a
 machine independent low level intermediate code). The generated EM code is fed
