@@ -694,7 +694,7 @@ with GENREG GENREG			yields {regS, %2, "ASR", %1}
 
 pat adu					leaving adi
 
-pat sbu					leaving sbu
+pat sbu					leaving sbi
 
 pat loc mlu $1<11 && $1>0 && $2==4	leaving loc $1
 						mli 4
