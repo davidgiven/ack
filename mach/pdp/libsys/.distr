@@ -1,5 +1,4 @@
 LIST
-Makefile
-compmodule
 libmon_s.a
 sys.h
+head_em.s
