@@ -44,7 +44,6 @@ static string	c_read =	"LLread();\n";
 # define IDENT		0401
 
 static int nlabel;		/* count for the generation of labels */
-static int nvar;		/* count for generation of variables */
 static int firsts;		/* are there any? */
 
 /* In this file the following routines are defined: */
@@ -247,7 +246,6 @@ generate(f) p_file f; {
 			}
 		}
 		nlabel = 1;
-		nvar = 1;
 		rulecode(p->n_rule,
 			 i,
 			 getntout(p) != NOSCANDONE,
@@ -485,7 +483,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			p++;
 			continue;
 		  case ALTERNATION :
-			alternation(p, safety, mustscan, mustpop, 0, 0);
+			alternation(p, safety, mustscan, mustpop, 0);
 			return;
 		}
 		p++;
@@ -494,7 +492,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 }
 
 STATIC
-alternation(p, safety, mustscan, mustpop, lb, var) register p_gram p; {
+alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	register FILE *f = fpars;
 	register p_link	l;
 	int		hulp, hulp1,hulp2;
@@ -510,14 +508,13 @@ alternation(p, safety, mustscan, mustpop, lb, var) register p_gram p; {
 	hulp1 = nlabel++;
 	hulp2 = nlabel++;
 	if (!lb) lb = hulp1;
-	if (safety <= SAFESCANDONE) unsafe = 0;
+	if (!onerror && safety <= SAFESCANDONE) unsafe = 0;
 	if (!unsafe) {
 		genpop(mustpop);
 		mustpop = NOPOP;
 	}
 	if (unsafe && hulp1 == lb) {
-		var = ++nvar;
-		fprintf(f,"{ int LL_%d = 0;\nL_%d: \n", var, hulp1);
+		fprintf(f,"L_%d: \n", hulp1);
 	}
 	fputs("switch(LLcsymb) {\n", f);
 	while (g_gettype(p) != EORULE) {
@@ -525,8 +522,8 @@ alternation(p, safety, mustscan, mustpop, lb, var) register p_gram p; {
 		if (unsafe && (l->l_flag & DEF)) {
 			haddefault = 1;
 			fprintf(f,
-"default: if (!LL_%d && LLskip()) {LL_%d = 1; goto L_%d;}\ngoto L_%d;\n",
-			var, var, lb, hulp2);
+"default: if (LLskip()) goto L_%d;\ngoto L_%d;\n",
+			lb, hulp2);
 		}
 		if (l->l_flag & COND) {
 			set = setalloc();
@@ -541,8 +538,8 @@ alternation(p, safety, mustscan, mustpop, lb, var) register p_gram p; {
 			fprintf(f,") goto L_%d;\n", hulp);
 		}
 		if (!haddefault && (l->l_flag & DEF)) {
-			fputs("default:\n", f);
 			haddefault = 1;
+			fputs("default:\n", f);
 		}
 		else	gencases(l->l_symbs);
 		nsafe = SAFE;
@@ -569,18 +566,18 @@ alternation(p, safety, mustscan, mustpop, lb, var) register p_gram p; {
 			else {
 				gencases(l->l_others);
 				safety = SAFE;
+				unsafe = 0;
 			}
-			if (safety <= SAFESCANDONE) {
+			if (! unsafe) {
 				genpop(mustpop);
 				mustpop = NOPOP;
 			}
-			alternation(p,safety,mustscan,mustpop,lb,var);
+			alternation(p,safety,mustscan,mustpop,lb);
 			break;
 		}
 		p++;
 	}
 	fputs(c_close, f);
-	if (unsafe && hulp1 == lb) fputs(c_close, f);
 }
 
 STATIC int *
@@ -718,7 +715,8 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	rep = r_getkind(q);
 	persistent = (q->t_flags & PERSISTENT);
 	ispushed = NOPOP;
-	if (!(toplevel > 0 && safety <= SAFESCANDONE &&
+	if (!(toplevel > 0 && 
+	      (safety == 0 || (!onerror && safety <= SAFESCANDONE)) &&
 	    (rep == OPT || (rep == FIXED && i == 0)))) {
 		ispushed = findindex(q->t_contains);
 	}
@@ -756,7 +754,8 @@ codeforterm(q,safety,toplevel) register p_term q; {
 		/* '+' or '*', so generate infinite loop */
 		fputs("for (;;) {\n",f);
 	}
-	else if (safety <= SAFESCANDONE && rep == OPT) {
+	else if (rep == OPT &&
+		 (safety == 0 || (!onerror && safety <= SAFESCANDONE))) {
 		genpop(ispushed);
 		ispushed = NOPOP;
 	}
@@ -780,9 +779,6 @@ codeforterm(q,safety,toplevel) register p_term q; {
 	if (rep != OPT && rep != FIXED) fputs("continue;\n", f);
 	if (rep != FIXED) {
 		fputs(c_close, f); /* Close switch */
-		if (sw > SAFESCANDONE && (q->t_flags & RESOLVER)) {
-			fputs(c_close, f);
-		}
 		if (rep != OPT) {
 			genpop(ispushed);
 			fputs(c_break, f);
@@ -805,18 +801,16 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 	register FILE	*f;
 	p_set		p1;
 	p_set		setalloc();
-	int		hulp1, hulp2, var;
+	int		hulp1, hulp2;
 	int		safeterm;
+	int		termissafe = 0;
 
 	f = fpars;
 	if (rep == PLUS) safeterm = gettout(q);
 	else if (rep == OPT) safeterm = safety;
 	else /* if (rep == STAR) */ safeterm = max(safety, gettout(q));
-	if ((q->t_flags & RESOLVER) && safeterm > SAFESCANDONE) {
-		hulp2 = nlabel++;
-		var = nvar++;
-		fprintf(f, "{ int LL_%d = 0;\nL_%d : ", var, hulp2);
-	}
+	hulp2 = nlabel++;
+	fprintf(f, "L_%d : ", hulp2);
 	fputs("switch(LLcsymb) {\n", f);
 	if (q->t_flags & RESOLVER) {
 		hulp1 = nlabel++;
@@ -837,29 +831,29 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 		getaction(0);
 		fprintf(f, ") goto L_%d;\n", hulp1);
 	}
-	if (safeterm <= SAFESCANDONE) fputs("default:\n", f);
+	if (safeterm == 0 || (!onerror && safeterm <= SAFESCANDONE)) {
+		fputs("default:\n", f);
+		termissafe = 1;
+	}
 	else	gencases(q->t_follow);
 	if (rep == OPT) genpop(ispushed);
 	fputs(c_break, f);
-	if (safeterm > SAFESCANDONE) {
+	if (! termissafe) {
 		int i;
+		static int nvar;
 
 		assert(ispushed != NOPOP);
 		if (ispushed >= 0) i = -ispushed;
 		else i = tokens[-(ispushed+1)].t_tokno;
-		fputs("default: if (", f);
-		if (q->t_flags & RESOLVER) {
-			fprintf(f, "LL_%d ||", var);
-		}
-		fprintf(f, "!LLnext(%d)) {\n", i);
+		++nvar;
+		fprintf(f,"default:{int LL_%d=LLnext(%d);\n;if (!LL_%d) {\n",
+			nvar, i, nvar);
 		if (rep == OPT) genpop(ispushed);
 		fputs(c_break, f);
 		fputs(c_close, f);
-		if (q->t_flags & RESOLVER) {
-			fprintf(f,"LL_%d = 1;\ngoto L_%d;\n", var, hulp2);
-		}
+		fprintf(f,"else if (LL_%d & 1) goto L_%d;}\n",nvar, hulp2);
 	}
-	if ((q->t_flags & PERSISTENT) && safeterm != SAFE) {
+	if (!onerror && (q->t_flags & PERSISTENT) && safeterm != SAFE) {
 		gencases(q->t_contains);
 	}
 	else	gencases(q->t_first);
