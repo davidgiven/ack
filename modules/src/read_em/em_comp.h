@@ -62,3 +62,4 @@ struct e_args {
 extern char *EM_error;
 extern unsigned int EM_lineno;
 extern char *EM_filename;
+extern int EM_wordsize, EM_pointersize;
