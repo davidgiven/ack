@@ -2,3 +2,4 @@ dir.h
 times.h
 wait.h
 types.h
+stat.h
