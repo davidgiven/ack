@@ -138,11 +138,14 @@ main(argc, argv)
 	/* 410 file with ROMSG in instruction space */
 	rom_in_data = 0;
 	magic= 0410 ;
-	textsize= outsect[TEXTSG].os_size + outsect[ROMSG].os_size ;
-	datasize= outsect[DATASG].os_size ;
+	textsize= (outsect[ROMSG].os_base - outsect[TEXTSG].os_base) 
+			+ outsect[ROMSG].os_size ;
+	datasize= outsect[BSSSG].os_base - outsect[DATASG].os_base ;
 	if ( ! follows(&outsect[ROMSG], &outsect[TEXTSG]))
 		fatal("rom segment must follow text\n") ;
 
+	outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
+	outsect[DATASG].os_size = datasize;
 	bsssize = outsect[BSSSG].os_size;
 	if ( outhead.oh_nsect==NSECT ) {
 		if ( ! follows(&outsect[LSECT], &outsect[BSSSG]))
