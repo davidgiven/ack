@@ -14,4 +14,4 @@ channel.c.t:	channel.c
 	ctot <channel.c >channel.c.t
 
 channel.c:	$(EMHOME)/lang/occam/lib/tail_ocm.a
-		arch x tail_ocm.a channel.c
+		arch x $(EMHOME)/lang/occam/lib/tail_ocm.a channel.c
