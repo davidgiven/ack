@@ -3,6 +3,7 @@ MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
 CFLAGS = -O
+AR = ar
 
 OBJECTS =	AtEoIF.o\
 		AtEoIT.o
@@ -10,7 +11,7 @@ OBJECTS =	AtEoIF.o\
 all:		libinput.a
 
 libinput.a:	$(OBJECTS)
-		ar cr libinput.a $(OBJECTS)
+		$(AR) cr libinput.a $(OBJECTS)
 		-sh -c 'ranlib libinput.a'
 
 install:	all

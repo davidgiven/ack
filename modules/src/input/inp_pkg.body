@@ -111,7 +111,6 @@ readfile(fd, fn, size, pbuf)
 	     ((unsigned) (*size + 1) != (*size + 1))
 	   ||
 	     !(*pbuf = malloc((unsigned) (*size + 1)))) {
-		sys_close(fd);
 		return 0;
 	}
 	if (
@@ -119,11 +118,9 @@ readfile(fd, fn, size, pbuf)
 	   ||
 	     *size != rsize
 	   )  {
-		sys_close(fd);
 		free(*pbuf);
 		return 0;
 	}
-	sys_close(fd);
 	(*pbuf)[*size] = '\0';	/* invoke loadbuf() at end */
 	return 1;
 }
@@ -181,17 +178,6 @@ pop_bh()
 {
 	register struct buffer_header *bh = head;
 
-	if (bh->bh_fd) {	/* unstack a file */
-#ifndef INP_READ_IN_ONE
-		struct i_buf *ib;
-
-		ib = i_ptr->next;
-		free((char *) i_ptr);
-		i_ptr = ib;
-#else INP_READ_IN_ONE
-		free(bh->bh_text);
-#endif INP_READ_IN_ONE
-	}
 
 	bh = bh->next;
 	free((char *) head);
@@ -356,40 +342,51 @@ loadbuf()
 		return EOI;
 	}
 
-	if (_ipp < &(bh->bh_text[bh->bh_size])) {
+	if (!bh->bh_eofreturned) {
+		if (_ipp < &(bh->bh_text[bh->bh_size])) {
 				/* a genuine '\0' character has been seen */
-		return '\0';
-	}
+			return '\0';
+		}
 
-	FromFile = (bh->bh_fd != 0);
+		FromFile = (bh->bh_fd != 0);
 
 #ifndef INP_READ_IN_ONE
-	if (FromFile) {
+		if (FromFile && bh->bh_size > 0) {
 #if INP_PUSHBACK > 1
-		register char *so = &(bh->bh_text[bh->bh_size]);
-		register char *de = bh->bh_text;
-		register int i = INP_NPUSHBACK - 1;
+			register char *so = &(bh->bh_text[bh->bh_size]);
+			register char *de = bh->bh_text;
+			register int i = INP_NPUSHBACK - 1;
 
-		while (i-- > 0) {
+			while (i-- > 0) {
 				/* make sure PushBack will work */
-			*--de = *--so;
-		}
+				*--de = *--so;
+			}
 #endif
-		if (
-		     readblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
-		   &&
-		     bh->bh_size > 0
-		   ) {
-			_ipp = bh->bh_text;
-			return *_ipp++;
+			if ( readblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
+		   	   &&
+			     bh->bh_size > 0
+			   ) {
+				_ipp = bh->bh_text;
+				return *_ipp++;
+			}
 		}
-	}
 
 #endif not INP_READ_IN_ONE
+		if (FromFile && bh->bh_fd != STDIN) sys_close(bh->bh_fd);
 
-	if (!bh->bh_eofreturned) {
+		if (bh->bh_fd) {	/* unstack a file */
+#ifndef INP_READ_IN_ONE
+			struct i_buf *ib;
+
+			ib = i_ptr->next;
+			free((char *) i_ptr);
+			i_ptr = ib;
+#else INP_READ_IN_ONE
+			free(bh->bh_text);
+#endif INP_READ_IN_ONE
+		}
 		bh->bh_eofreturned = 1;
-		_ipp--;
+		_ipp = "";
 		if (FromFile) {
 			if (AtEoIF()) return EOI;
 		}
@@ -397,10 +394,6 @@ loadbuf()
 			if (AtEoIT()) return EOI;
 		}
 	}
-
-#ifndef INP_READ_IN_ONE
-	if (FromFile && bh->bh_fd != STDIN) sys_close(bh->bh_fd);
-#endif not INP_READ_IN_ONE
 
 	if (pop_bh()) {
 		if (*_ipp) return *_ipp++;
