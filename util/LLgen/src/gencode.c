@@ -194,9 +194,9 @@ genrecovery() {
 			st->ff_nont,
 			p->n_name);
 		if (getntout(p) == NOSCANDONE) {
-			fputs("\tLLscan(EOFILE);\n",f);
+			fputs("\tLL_NOSCANDONE(EOFILE);\n",f);
 		}
-		else	fputs("\tif (LLsymb != EOFILE) LLerror(EOFILE);\n",f);
+		else	fputs("\tLL_SCANDONE(EOFILE);\n",f);
 		fputs("\tLLoldlevel(s);\n}\n",f);
 	}
 	/* Now generate the sets */
@@ -461,7 +461,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 				fputs("LL_SCANDONE(",f);
 			}
 			else /* if (safety == NOSCANDONE) */ {
-				fputs("LL_T_NOSCANDONE(", f);
+				fputs("LL_NOSCANDONE(", f);
 			}
 			if (t->t_tokno < 0400) s = "'%s');\n";
 			else	s = "%s);\n";
