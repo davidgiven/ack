@@ -78,6 +78,12 @@ lint: $(CFILES)
 clean:
 	rm -f *.o tables.c tables.h debug.out cg tables.H
 
+distr:	tables.c
+	rm -f tables1.c tables1.h
+	cp tables.c tables1.c
+	cp tables.h tables1.h
+	chmod -w tables1.[ch]
+
 codegen.o:	$(CDIR)/assert.h $(EMHOME)/h/cgg_cg.h
 codegen.o:	$(CDIR)/data.h
 codegen.o:	$(CDIR)/equiv.h
