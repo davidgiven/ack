@@ -248,6 +248,7 @@ cstset(expp)
 		assert(expp->nd_left->nd_class == Value);
 
 		i = expp->nd_left->nd_INT;
+		expp->nd_class = Value;
 		expp->nd_INT = (i >= 0 && set2 != 0 &&
 		    i < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));

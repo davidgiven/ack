@@ -168,8 +168,12 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	register struct paramlist *pr;
 	register struct def *df;
 	register struct node *idlist = Idlist;
+	struct node *dummy = 0;
 	static struct paramlist *last;
 
+	if (! idlist) {
+		dummy = Idlist = idlist = MkLeaf(Name, &dot);
+	}
 	for ( ; idlist; idlist = idlist->next) {
 		pr = new_paramlist();
 		pr->next = 0;
@@ -178,11 +182,17 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		}
 		else	last->next = pr;
 		last = pr;
-		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
+		if (idlist != dummy) {
+			df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
+			df->var_off = *off;
+		}
+		else {
+			df = new_def();
+		}
 		pr->par_def = df;
 		df->df_type = type;
-		df->var_off = *off;
 		df->df_flags = VARp;
+
 		if (IsConformantArray(type)) {
 			/* we need room for the base address and a descriptor
 			*/
@@ -347,49 +357,38 @@ node_error(idlist, "opaque type \"%s\" is not a pointer type", df->df_idf->id_te
 	FreeNode(Idlist);
 }
 
-EnterFromImportList(Idlist, Fromid, local)
+EnterFromImportList(Idlist, FromDef)
 	struct node *Idlist;
-	register struct node *Fromid;
+	register struct def *FromDef;
 {
-	/*	Import the list Idlist from the module indicated by Fromid.
-		An exception must be made for imports of the Compilation Unit,
-		because in this case the definition module for Fromid must
-		be read.
-		This case is indicated by  the value 0 of the flag "local".
+	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
 	register struct node *idlist = Idlist;
+	register struct scopelist *vis;
 	register struct def *df;
-	struct scopelist *vis = enclosing(CurrVis);
 	int forwflag = 0;
-	extern struct def *GetDefinitionModule();
 
-	if (local) {
-		df = lookfor(Fromid, vis, 0);
-		switch(df->df_kind) {
-		case D_ERROR:
-			/* The module from which the import was done
-			   is not yet declared. I'm not sure if I must
-			   accept this, but for the time being I will.
-			   ???
-			*/
-			vis = ForwModule(df, Fromid);
-			forwflag = 1;
-			break;
-		case D_FORWMODULE:
-			vis = df->for_vis;
-			break;
-		case D_MODULE:
-			vis = df->mod_vis;
-			break;
-		default:
-node_error(Fromid, "identifier \"%s\" does not represent a module",
-Fromid->nd_IDF->id_text);
-			break;
-		}
+	switch(FromDef->df_kind) {
+	case D_ERROR:
+		/* The module from which the import was done
+		   is not yet declared. I'm not sure if I must
+		   accept this, but for the time being I will.
+		   ???
+		*/
+		vis = ForwModule(FromDef, FromDef->df_idf);
+		forwflag = 1;
+		break;
+	case D_FORWMODULE:
+		vis = FromDef->for_vis;
+		break;
+	case D_MODULE:
+		vis = FromDef->mod_vis;
+		break;
+	default:
+error("identifier \"%s\" does not represent a module",
+FromDef->df_idf->id_text);
+		break;
 	}
-	else	vis = GetDefinitionModule(Fromid->nd_IDF)->mod_vis;
-
-	FreeNode(Fromid);
 
 	for (; idlist; idlist = idlist->next) {
 		if (forwflag) {

@@ -67,14 +67,14 @@ InitScope()
 
 struct forwards {
 	struct forwards *next;
-	struct node fo_tok;
+	struct node *fo_tok;
 	struct type *fo_ptyp;
 };
 
 /* STATICALLOCDEF "forwards" */
 
 Forward(tk, ptp)
-	struct token *tk;
+	struct node *tk;
 	struct type *ptp;
 {
 	/*	Enter a forward reference into a list belonging to the
@@ -84,7 +84,7 @@ Forward(tk, ptp)
 	*/
 	register struct forwards *f = new_forwards();
 
-	f->fo_tok.nd_token = *tk;
+	f->fo_tok = tk;
 	f->fo_ptyp = ptp;
 	f->next = CurrentScope->sc_forw;
 	CurrentScope->sc_forw = f;
@@ -168,23 +168,24 @@ node_error((*pdf)->for_node, "identifier \"%s\" has not been declared",
 
 STATIC
 rem_forwards(fo)
-	struct forwards *fo;
+	register struct forwards *fo;
 {
 	/*	When closing a scope, all forward references must be resolved
 	*/
-	register struct forwards *f;
 	register struct def *df;
 
-	while (f = fo) {
-		df = lookfor(&(f->fo_tok), CurrVis, 1);
-		if (!(df->df_kind & (D_TYPE|D_ERROR))) {
-			node_error(&(f->fo_tok), "identifier \"%s\" not a type",
-			      df->df_idf->id_text);
-		}
-		f->fo_ptyp->next = df->df_type;
-		fo = f->next;
-		free_forwards(f);
+	if (fo->next) rem_forwards(fo->next);
+	df = lookfor(fo->fo_tok, CurrVis, 0);
+	if (df->df_kind == D_ERROR) {
+		node_error(fo->fo_tok, "identifier \"%s\" not declared",
+			df->df_idf->id_text);
 	}
+	else if (df->df_kind != D_TYPE) {
+		node_error(fo->fo_tok, "identifier \"%s\" not a type",
+			     df->df_idf->id_text);
+	}
+	fo->fo_ptyp->next = df->df_type;
+	free_forwards(fo);
 }
 
 Reverse(pdf)

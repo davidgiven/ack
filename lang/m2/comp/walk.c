@@ -132,6 +132,8 @@ WalkProcedure(procedure)
 	register struct type *tp;
 	register struct paramlist *param;
 	label func_res_label = 0;
+	arith tmpvar1 = 0;
+	arith retsav = 0;
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
@@ -147,6 +149,14 @@ WalkProcedure(procedure)
 	DoProfil();
 	TmpOpen(sc);
 
+	func_type = tp = ResultType(procedure->df_type);
+
+	if (tp && IsConstructed(tp)) {
+		func_res_label = ++data_label;
+		C_df_dlb(func_res_label);
+		C_bss_cst(tp->tp_size, (arith) 0, 0);
+	}
+
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
@@ -154,6 +164,7 @@ WalkProcedure(procedure)
 
 	/* Make sure that arguments of size < word_size are on a
 	   fixed place.
+	   Also make copies of conformant arrays when neccessary.
 	*/
 	for (param = ParamList(procedure->df_type);
 	     param;
@@ -161,37 +172,114 @@ WalkProcedure(procedure)
 		if (! IsVarParam(param)) {
 			tp = TypeOfParam(param);
 
-			if (!IsConformantArray(tp) && tp->tp_size < word_size) {
-				C_lol(param->par_def->var_off);
+			if (! IsConformantArray(tp)) {
+				if (tp->tp_size < word_size) {
+					C_lol(param->par_def->var_off);
+					C_lal(param->par_def->var_off);
+					C_sti(tp->tp_size);
+				}
+			}
+			else {
+				/* Here, we have to make a copy of the
+				   array. We must also remember how much
+				   room is reserved for copies, because
+				   we have to adjust the stack pointer before
+				   a RET is done. This is even more complicated
+				   when the procedure returns a value.
+				   Then, the value must be saved (in retval),
+				   the stack adjusted, the return value pushed
+				   again, and then RET
+				*/
+				arith tmpvar = NewInt();
+
+				if (! tmpvar1) {
+					if (tp && !func_res_label) {
+						/* Some local space, only
+						   needed if the value itself
+						   is returned
+						*/
+						sc->sc_off -= WA(tp->tp_size);
+						retsav = sc->sc_off;
+					}
+					tmpvar1 = NewInt();
+					C_loc((arith) 0);
+					C_stl(tmpvar1);
+				}
+				/* First compute the size */
+				C_lol(param->par_def->var_off +
+				      pointer_size + word_size);
+				C_inc();	/* gives number of elements */
+				C_loc(tp->arr_elem->tp_size);
+				C_cal("_wa");
+				C_asp(dword_size);
+				C_lfr(word_size);
+						/* size in words */
+				C_loc(word_size);
+				C_mli(word_size);
+						/* size in bytes */
+				C_stl(tmpvar);
+				C_lol(tmpvar);
+				C_dup(word_size);
+				C_lol(tmpvar1);
+				C_adi(word_size);
+				C_stl(tmpvar1);	/* remember all stack adjustments */
+				C_ngi(word_size);
+				C_ass(word_size);
+						/* adjusted stack pointer */
+				C_lor((arith) 1);
+						/* destination address */
 				C_lal(param->par_def->var_off);
-				C_sti(tp->tp_size);
+				C_loi(pointer_size);
+						/* push source address */
+				C_exg(pointer_size);
+						/* exchange them */
+				C_lol(tmpvar);	/* push size */
+				C_bls(word_size);
+						/* copy */
+				C_lor((arith) 1);	
+						/* push new address of array */
+				C_lal(param->par_def->var_off);
+				C_sti(pointer_size);
+				FreeInt(tmpvar);
 			}
 		}
 	}
 
 	text_label = 1;
-	func_type = tp = ResultType(procedure->df_type);
-
-	if (IsConstructed(tp)) {
-		func_res_label = ++data_label;
-		C_df_dlb(func_res_label);
-		C_bss_cst(tp->tp_size, (arith) 0, 0);
-	}
 
 	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	WalkNode(procedure->prc_body, (label) 0);
-	C_ret((arith) 0);
-	if (tp) {
-		C_df_ilb((label) 1);
-		if (func_res_label) {
-			C_lae_dlb(func_res_label, (arith) 0);
-			C_sti(tp->tp_size);
-			C_lae_dlb(func_res_label, (arith) 0);
-			C_ret(pointer_size);
+	C_df_ilb((label) 1);
+	tp = func_type;
+	if (func_res_label) {
+		C_lae_dlb(func_res_label, (arith) 0);
+		C_sti(tp->tp_size);
+		if (tmpvar1) {
+			C_lol(tmpvar1);
+			C_ass(word_size);
 		}
-		else	C_ret(WA(tp->tp_size));
+		C_lae_dlb(func_res_label, (arith) 0);
+		C_ret(pointer_size);
 	}
-
+	else if (tp) {
+		if (tmpvar1) {
+			C_lal(retsav);
+			C_sti(WA(tp->tp_size));
+			C_lol(tmpvar1);
+			C_ass(word_size);
+			C_lal(retsav);
+			C_loi(WA(tp->tp_size));
+		}
+		C_ret(WA(tp->tp_size));
+	}
+	else	{
+		if (tmpvar1) {
+			C_lol(tmpvar1);
+			C_ass(word_size);
+		}
+		C_ret((arith) 0);
+	}
+	if (tmpvar1) FreeInt(tmpvar1);
 	if (! options['n']) RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
@@ -394,7 +482,7 @@ WalkStat(nd, lab)
 			struct desig ds;
 			arith tmp = 0;
 
-			WalkDesignator(left, &ds);
+			if (! WalkDesignator(left, &ds)) break;
 			if (left->nd_type->tp_fund != T_RECORD) {
 				node_error(left, "record variable expected");
 				break;
@@ -432,7 +520,7 @@ WalkStat(nd, lab)
 
 	case RETURN:
 		if (right) {
-			WalkExpr(right);
+			if (! WalkExpr(right)) break;
 			/* The type of the return-expression must be
 			   assignment compatible with the result type of the
 			   function procedure (See Rep. 9.11).
@@ -440,9 +528,8 @@ WalkStat(nd, lab)
 			if (!TstAssCompat(func_type, right->nd_type)) {
 node_error(right, "type incompatibility in RETURN statement");
 			}
-			C_bra((label) 1);
 		}
-		else	C_ret((arith) 0);
+		C_bra((label) 1);
 		break;
 
 	default:
@@ -487,17 +574,20 @@ ExpectBool(nd, true_label, false_label)
 	CodeExpr(nd, &ds,  true_label, false_label);
 }
 
+int
 WalkExpr(nd)
 	struct node *nd;
 {
 	/*	Check an expression and generate code for it
 	*/
 
-	if (! ChkExpression(nd)) return;
+	if (! ChkExpression(nd)) return 0;
 
 	CodePExpr(nd);
+	return 1;
 }
 
+int
 WalkDesignator(nd, ds)
 	struct node *nd;
 	struct desig *ds;
@@ -505,10 +595,11 @@ WalkDesignator(nd, ds)
 	/*	Check designator and generate code for it
 	*/
 
-	if (! ChkVariable(nd)) return;
+	if (! ChkVariable(nd)) return 0;
 
 	*ds = InitDesig;
 	CodeDesig(nd, ds);
+	return 1;
 }
 
 DoForInit(nd, left)

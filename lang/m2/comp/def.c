@@ -290,7 +290,6 @@ DefineLocalModule(id)
 		a name to be used for code generation.
 	*/
 	register struct def *df = define(id, CurrentScope, D_MODULE);
-	register struct type *tp;
 	register struct scope *sc;
 	static int modulecount = 0;
 	char buf[256];
@@ -316,8 +315,8 @@ DefineLocalModule(id)
 
 	/* Create a type for it
 	*/
-	df->df_type = tp = standard_type(T_RECORD, 0, (arith) 0);
-	tp->rec_scope = sc;
+	df->df_type = standard_type(T_RECORD, 0, (arith) 0);
+	df->df_type->rec_scope = sc;
 
 	/* Generate code that indicates that the initialization procedure
 	   for this module is local.

@@ -108,9 +108,7 @@ declaration:
 FormalParameters(struct paramlist **pr;
 		 struct type **ptp;
 		 arith *parmaddr;)
-{
-	struct def *df;
-} :
+:	
 	'('
 	[
 		FPSection(pr, parmaddr)
@@ -128,74 +126,38 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 	struct node *FPList;
 	struct type *tp;
 	int VARp;
-	struct paramlist *p = 0;
 } :
-	var(&VARp) IdentList(&FPList) ':' FormalType(&p, 0)
-			{ EnterParamList(ppr, FPList, p->par_def->df_type,
-					 VARp, parmaddr);
-			  free_def(p->par_def);
-			  free_paramlist(p);
-			}
+	var(&VARp) IdentList(&FPList) ':' FormalType(&tp)
+			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
 ;
 
-FormalType(struct paramlist **ppr; int VARp;)
+FormalType(struct type **ptp;)
 {
-	register struct def *df;
-	int ARRAYflag;
 	register struct type *tp;
-	struct type *tp1;
-	register struct paramlist *p = new_paramlist();
 	extern arith ArrayElSize();
 } :
-	[ ARRAY OF	{ ARRAYflag = 1; }
-	|		{ ARRAYflag = 0; }
-	]
-	qualtype(&tp1)
-		{ if (ARRAYflag) {
-			tp = construct_type(T_ARRAY, NULLTYPE);
-			tp->arr_elem = tp1;
-			tp->arr_elsize = ArrayElSize(tp1);
-			tp->tp_align = lcm(word_align, pointer_align);
-		  }
-		  else	tp = tp1;
-		  p->next = *ppr;
-		  *ppr = p;
-		  p->par_def = df = new_def();
-		  df->df_type = tp;
-		  df->df_flags = VARp;
+	ARRAY OF qualtype(ptp)
+		{ tp = construct_type(T_ARRAY, NULLTYPE);
+		  tp->arr_elem = *ptp; *ptp = tp;
+		  tp->arr_elsize = ArrayElSize(tp->arr_elem);
+		  tp->tp_align = lcm(word_align, pointer_align);
 		}
+|
+	 qualtype(ptp)
 ;
 
 TypeDeclaration
 {
-	register struct def *df;
+	struct def *df;
 	struct type *tp;
 }:
 	IDENT		{ df = define(dot.TOK_IDF,CurrentScope,D_TYPE); }
 	'=' type(&tp)
-			{ if (df->df_type && df->df_type->tp_fund == T_HIDDEN) {
-			  	if (tp->tp_fund != T_POINTER) {
-error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
-				}
-				/* Careful now ... we might have declarations
-				   referring to the hidden type.
-				*/
-				*(df->df_type) = *tp;
-				if (! tp->next) {
-					/* It also contains a forward
-					   reference, so update the forward-
-					   list
-					*/
-					ChForward(tp, df->df_type);
-				}
-				free_type(tp);
-			  }
-			  else	df->df_type = tp;
-			}
+			{ DeclareType(df, tp); }
 ;
 
 type(struct type **ptp;):
-	SimpleType(ptp)
+	%default SimpleType(ptp)
 |
 	ArrayType(ptp)
 |
@@ -247,7 +209,7 @@ IdentList(struct node **p;)
 	register struct node *q;
 } :
 	IDENT		{ *p = q = MkLeaf(Value, &dot); }
-	[
+	[ %persistent
 		',' IDENT
 			{ q->next = MkLeaf(Value, &dot);
 			  q = q->next;
@@ -460,11 +422,12 @@ PointerType(struct type **ptp;)
 		*/
 		qualtype(&((*ptp)->next))
 	| %if ( nd = new_node(), nd->nd_token = dot,
-		df = lookfor(nd, CurrVis, 0), free_node(nd),
+		df = lookfor(nd, CurrVis, 0),
 	        df->df_kind == D_MODULE)
-		type(&((*ptp)->next))
+		type(&((*ptp)->next)) 
+			{ free_node(nd); }
 	|
-		IDENT	{ Forward(&dot, (*ptp)); }
+		IDENT	{ Forward(nd, (*ptp)); }
 	]
 ;
 
@@ -486,24 +449,28 @@ ProcedureType(struct type **ptp;)
 {
 	struct paramlist *pr = 0;
 	register struct type *tp;
+	arith nbytes = 0;
 } :
 			{ *ptp = 0; }
-	PROCEDURE FormalTypeList(&pr, ptp)?
+	PROCEDURE FormalTypeList(&pr, ptp, &nbytes)?
 			{ *ptp = tp = construct_type(T_PROCEDURE, *ptp);
 			  tp->prc_params = pr;
+			  tp->prc_nbpar = nbytes;
 			}
 ;
 
-FormalTypeList(struct paramlist **ppr; struct type **ptp;)
+FormalTypeList(struct paramlist **ppr; struct type **ptp; arith *parmaddr;)
 {
-	struct def *df;
 	int VARp;
+	struct type *tp;
 } :
 	'('		{ *ppr = 0; }
 	[
-		var(&VARp) FormalType(ppr, VARp)
+		var(&VARp) FormalType(&tp)
+			{ EnterParamList(ppr,NULLNODE,tp,VARp,parmaddr); }
 		[
-			',' var(&VARp) FormalType(ppr, VARp)
+			',' var(&VARp) FormalType(&tp)
+			{ EnterParamList(ppr,NULLNODE,tp,VARp,parmaddr); }
 		]*
 	]?
 	')'
@@ -535,7 +502,7 @@ VariableDeclaration
 } :
 	IdentAddr(&VarList)
 			{ nd = VarList; }
-	[
+	[ %persistent
 		',' IdentAddr(&(nd->nd_right))
 			{ nd = nd->nd_right; }
 	]*

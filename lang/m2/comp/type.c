@@ -104,10 +104,11 @@ construct_type(fund, tp)
 		break;
 
 	case T_ARRAY:
-		dtp->tp_align = tp->tp_align;
+		if (tp) dtp->tp_align = tp->tp_align;
 		break;
 
 	case T_SUBRANGE:
+		assert(tp != 0);
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
 		break;
@@ -386,7 +387,7 @@ ArrayElSize(tp)
 
 	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
 	algn = align(tp->tp_size, tp->tp_align);
-	if (word_size % algn != 0) {
+	if (algn && word_size % algn != 0) {
 		/* algn is not a dividor of the word size, so make sure it
 		   is a multiple
 		*/
@@ -447,6 +448,36 @@ FreeType(tp)
 	}
 
 	free_type(tp);
+}
+
+DeclareType(df, tp)
+	register struct def *df;
+	register struct type *tp;
+{
+	/*	A type with type-description "tp" is declared and must
+		be bound to definition "df".
+		This routine also handles the case that the type-field of
+		"df" is already bound. In that case, it is either an opaque
+		type, or an error message was given when "df" was created.
+	*/
+
+	if (df->df_type && df->df_type->tp_fund == T_HIDDEN) {
+	  	if (tp->tp_fund != T_POINTER) {
+error("opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+		}
+		/* Careful now ... we might have declarations
+		   referring to the hidden type.
+		*/
+		*(df->df_type) = *tp;
+		if (! tp->next) {
+			/* It also contains a forward reference,
+			   so update the forwardlist
+			*/
+			ChForward(tp, df->df_type);
+		}
+		free_type(tp);
+	}
+	else	df->df_type = tp;
 }
 
 int

@@ -201,7 +201,6 @@ CodeCoercion(t1, t2)
 	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
 	switch(fund1) {
 	case T_INTEGER:
-	case T_INTORCARD:
 		switch(fund2) {
 		case T_INTEGER:
 			if (t2->tp_size != t1->tp_size) {
@@ -232,11 +231,13 @@ CodeCoercion(t1, t2)
 	case T_CHAR:
 	case T_ENUMERATION:
 	case T_CARDINAL:
+	case T_INTORCARD:
 		switch(fund2) {
 		case T_ENUMERATION:
 		case T_CHAR:
 		case T_CARDINAL:
 		case T_POINTER:
+		case T_INTORCARD:
 			if (t2->tp_size > word_size) {
 				C_loc(word_size);
 				C_loc(t2->tp_size);
@@ -313,16 +314,25 @@ CodeCall(nd)
 		CodeParameters(ParamList(left->nd_type), nd->nd_right);
 	}
 
-	if (left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) {
-		if (left->nd_def->df_scope->sc_level > 0) {
-			C_lxl((arith) proclevel - left->nd_def->df_scope->sc_level);
+	switch(left->nd_class) {
+	case Def: {
+		register struct def *df = left->nd_def;
+
+		if (df->df_kind == D_PROCEDURE) {
+			arith level = df->df_scope->sc_level;
+
+			if (level > 0) {
+				C_lxl((arith) proclevel - level);
+			}
+			C_cal(NameOfProc(df));
+			break;
 		}
-		C_cal(NameOfProc(left->nd_def));
-	}
-	else if (left->nd_class == Def && left->nd_def->df_kind == D_PROCHEAD) {
-		C_cal(left->nd_def->for_name);
-	}
-	else {
+		else if (df->df_kind == D_PROCHEAD) {
+			C_cal(df->for_name);
+			break;
+		}}
+		/* Fall through */
+	default:
 		CodePExpr(left);
 		C_cai();
 	}
@@ -342,6 +352,7 @@ CodeParameters(param, arg)
 {
 	register struct type *tp;
 	register struct node *left;
+	register struct type *left_type;
 	
 	assert(param != 0 && arg != 0);
 
@@ -351,25 +362,31 @@ CodeParameters(param, arg)
 
 	tp = TypeOfParam(param);
 	left = arg->nd_left;
+	left_type = left->nd_type;
 	if (IsConformantArray(tp)) {
 		C_loc(tp->arr_elsize);
-		if (IsConformantArray(left->nd_type)) {
+		if (IsConformantArray(left_type)) {
 			DoHIGH(left);
-			if (tp->arr_elem->tp_size != left->nd_type->arr_elem->tp_size) {
+			if (tp->arr_elem->tp_size !=
+			    left_type->arr_elem->tp_size) {
 				/* This can only happen if the formal type is
 				   ARRAY OF WORD
 				*/
-				/* ??? */
+				assert(tp->arr_elem == word_type);
+				C_loc(left_type->arr_elem->tp_size);
+				C_cal("_wa");
+				C_asp(dword_size);
+				C_lfr(word_size);
 			}
 		}
 		else if (left->nd_symb == STRING) {
 			C_loc(left->nd_SLE);
 		}
 		else if (tp->arr_elem == word_type) {
-			C_loc(left->nd_type->tp_size / word_size - 1);
+			C_loc((left_type->tp_size+word_size-1) / word_size - 1);
 		}
 		else {
-			tp = IndexType(left->nd_type);
+			tp = IndexType(left_type);
 			if (tp->tp_fund == T_SUBRANGE) {
 				C_loc(tp->sub_ub - tp->sub_lb);
 			}
@@ -385,11 +402,11 @@ CodeParameters(param, arg)
 		CodeDAddress(left);
 	}
 	else {
-		if (left->nd_type->tp_fund == T_STRING) {
+		if (left_type->tp_fund == T_STRING) {
 			CodePadString(left, tp->tp_size);
 		}
 		else CodePExpr(left);
-		CheckAssign(left->nd_type, tp);
+		CheckAssign(left_type, tp);
 	}
 }
 
@@ -422,6 +439,7 @@ CodeStd(nd)
 			}
 			else	C_cal("_absd");
 		}
+		C_asp(tp->tp_size);
 		C_lfr(tp->tp_size);
 		break;
 
@@ -447,6 +465,7 @@ CodeStd(nd)
 		break;
 
 	case S_ODD:
+		CodePExpr(left);
 		if (tp->tp_size == word_size) {
 			C_loc((arith) 1);
 			C_and(word_size);
@@ -584,45 +603,39 @@ CheckAssign(tpl, tpr)
 	}
 }
 
-Operands(leftop, rightop)
+Operands(leftop, rightop, tp)
 	register struct node *leftop, *rightop;
+	struct type *tp;
 {
 
 	CodePExpr(leftop);
-
-	if (rightop->nd_type->tp_fund == T_POINTER && 
-	    leftop->nd_type->tp_size != pointer_size) {
-		CodeCoercion(leftop->nd_type, rightop->nd_type);
-		leftop->nd_type = rightop->nd_type;
-	}
-
+	CodeCoercion(leftop->nd_type, tp);
 	CodePExpr(rightop);
+	CodeCoercion(rightop->nd_type, tp);
 }
 
 CodeOper(expr, true_label, false_label)
-	struct node *expr;	/* the expression tree itself		*/
+	register struct node *expr;	/* the expression tree itself	*/
 	label true_label;
 	label false_label;	/* labels to jump to in logical expr's	*/
 {
-	register int oper = expr->nd_symb;
 	register struct node *leftop = expr->nd_left;
 	register struct node *rightop = expr->nd_right;
 	register struct type *tp = expr->nd_type;
 
-	switch (oper)	{
+	switch (expr->nd_symb)	{
 	case '+':
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_adi(tp->tp_size);
 			break;
-		case T_POINTER:
-			C_ads(rightop->nd_type->tp_size);
-			break;
 		case T_REAL:
 			C_adf(tp->tp_size);
 			break;
+		case T_POINTER:
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_adu(tp->tp_size);
 			break;
 		case T_SET:
@@ -633,24 +646,17 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '-':
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_sbi(tp->tp_size);
 			break;
-		case T_POINTER:
-			if (rightop->nd_type->tp_fund == T_POINTER) {
-				C_sbs(pointer_size);
-			}
-			else	{
-				C_ngi(rightop->nd_type->tp_size);
-				C_ads(rightop->nd_type->tp_size);
-			}
-			break;
 		case T_REAL:
 			C_sbf(tp->tp_size);
 			break;
+		case T_POINTER:
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_sbu(tp->tp_size);
 			break;
 		case T_SET:
@@ -662,15 +668,14 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '*':
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_mli(tp->tp_size);
 			break;
 		case T_POINTER:
-			CodeCoercion(rightop->nd_type, tp);
-			/* Fall through */
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_mlu(tp->tp_size);
 			break;
 		case T_REAL:
@@ -684,7 +689,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '/':
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_REAL:
 			C_dvf(tp->tp_size);
@@ -697,15 +702,14 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case DIV:
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_dvi(tp->tp_size);
 			break;
 		case T_POINTER:
-			CodeCoercion(rightop->nd_type, tp);
-			/* Fall through */
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_dvu(tp->tp_size);
 			break;
 		default:
@@ -713,15 +717,14 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case MOD:
-		Operands(leftop, rightop);
+		Operands(leftop, rightop, tp);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_rmi(tp->tp_size);
 			break;
 		case T_POINTER:
-			CodeCoercion(rightop->nd_type, tp);
-			/* Fall through */
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_rmu(tp->tp_size);
 			break;
 		default:
@@ -734,18 +737,17 @@ CodeOper(expr, true_label, false_label)
 	case GREATEREQUAL:
 	case '=':
 	case '#':
-		Operands(leftop, rightop);
-		CodeCoercion(rightop->nd_type, leftop->nd_type);
-		tp = BaseType(leftop->nd_type);	/* Not the result type! */
+		tp = BaseType(leftop->nd_type);
+		if (tp == intorcard_type) tp = BaseType(rightop->nd_type);
+		Operands(leftop, rightop, tp);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_cmi(tp->tp_size);
 			break;
 		case T_HIDDEN:
 		case T_POINTER:
-			C_cmp();
-			break;
 		case T_CARDINAL:
+		case T_INTORCARD:
 			C_cmu(tp->tp_size);
 			break;
 		case T_ENUMERATION:
@@ -756,19 +758,18 @@ CodeOper(expr, true_label, false_label)
 			C_cmf(tp->tp_size);
 			break;
 		case T_SET:
-			if (oper == GREATEREQUAL) {
+			if (expr->nd_symb == GREATEREQUAL) {
 				/* A >= B is the same as A equals A + B
 				*/
 				C_dup(2*tp->tp_size);
 				C_asp(tp->tp_size);
-				C_zer(tp->tp_size);
+				C_ior(tp->tp_size);
 			}
-			else if (oper == LESSEQUAL) {
+			else if (expr->nd_symb == LESSEQUAL) {
 				/* A <= B is the same as A - B = {}
 				*/
 				C_com(tp->tp_size);
 				C_and(tp->tp_size);
-				C_ior(tp->tp_size);
 				C_zer(tp->tp_size);
 			}
 			C_cms(tp->tp_size);
@@ -777,11 +778,11 @@ CodeOper(expr, true_label, false_label)
 			crash("bad type COMPARE");
 		}
 		if (true_label != 0)	{
-			compare(oper, true_label);
+			compare(expr->nd_symb, true_label);
 			C_bra(false_label);
 		}
 		else	{
-			truthvalue(oper);
+			truthvalue(expr->nd_symb);
 		}
 		break;
 	case IN:
@@ -789,7 +790,8 @@ CodeOper(expr, true_label, false_label)
 		   INN instruction expects the bit number on top of the
 		   stack
 		*/
-		Operands(rightop, leftop);
+		CodePExpr(rightop);
+		CodePExpr(leftop);
 		CodeCoercion(leftop->nd_type, word_type);
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != 0) {
@@ -798,19 +800,26 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case AND:
-	case '&':
-		if (true_label == 0)	{
-			label l_true = ++text_label;
-			label l_false = ++text_label;
-			label l_maybe = ++text_label;
-			label l_end = ++text_label;
-			struct desig Des;
+	case '&': {
+		label l_true, l_false, l_maybe = ++text_label, l_end;
+		struct desig Des;
 
-			Des = InitDesig;
-			CodeExpr(leftop, &Des, l_maybe, l_false);
-			C_df_ilb(l_maybe);
-			Des = InitDesig;
-			CodeExpr(rightop, &Des, l_true, l_false);
+		if (true_label == 0)	{
+			l_true = ++text_label;
+			l_false = ++text_label;
+			l_end = ++text_label;
+		}
+		else {
+			l_true = true_label;
+			l_false = false_label;
+		}
+
+		Des = InitDesig;
+		CodeExpr(leftop, &Des, l_maybe, l_false);
+		C_df_ilb(l_maybe);
+		Des = InitDesig;
+		CodeExpr(rightop, &Des, l_true, l_false);
+		if (true_label == 0) {
 			C_df_ilb(l_true);
 			C_loc((arith)1);
 			C_bra(l_end);
@@ -818,30 +827,27 @@ CodeOper(expr, true_label, false_label)
 			C_loc((arith)0);
 			C_df_ilb(l_end);
 		}
-		else	{
-			label l_maybe = ++text_label;
-			struct desig Des;
-
-			Des = InitDesig;
-			CodeExpr(leftop, &Des, l_maybe, false_label);
-			Des = InitDesig;
-			C_df_ilb(l_maybe);
-			CodeExpr(rightop, &Des, true_label, false_label);
-		}
 		break;
-	case OR:
-		if (true_label == 0)	{
-			label l_true = ++text_label;
-			label l_false = ++text_label;
-			label l_maybe = ++text_label;
-			label l_end = ++text_label;
-			struct desig Des;
+		}
+	case OR: {
+		label l_true, l_false, l_maybe = ++text_label, l_end;
+		struct desig Des;
 
-			Des = InitDesig;
-			CodeExpr(leftop, &Des, l_true, l_maybe);
-			C_df_ilb(l_maybe);
-			Des = InitDesig;
-			CodeExpr(rightop, &Des, l_true, l_false);
+		if (true_label == 0)	{
+			l_true = ++text_label;
+			l_false = ++text_label;
+			l_end = ++text_label;
+		}
+		else {
+			l_true = true_label;
+			l_false = false_label;
+		}
+		Des = InitDesig;
+		CodeExpr(leftop, &Des, l_true, l_maybe);
+		C_df_ilb(l_maybe);
+		Des = InitDesig;
+		CodeExpr(rightop, &Des, l_true, l_false);
+		if (true_label == 0) {
 			C_df_ilb(l_false);
 			C_loc((arith)0);
 			C_bra(l_end);
@@ -849,19 +855,10 @@ CodeOper(expr, true_label, false_label)
 			C_loc((arith)1);
 			C_df_ilb(l_end);
 		}
-		else	{
-			label l_maybe = ++text_label;
-			struct desig Des;
-
-			Des = InitDesig;
-			CodeExpr(leftop, &Des, true_label, l_maybe);
-			C_df_ilb(l_maybe);
-			Des = InitDesig;
-			CodeExpr(rightop, &Des, true_label, false_label);
-		}
 		break;
+		}
 	default:
-		crash("(CodeOper) Bad operator %s\n", symbol2str(oper));
+		crash("(CodeOper) Bad operator %s\n",symbol2str(expr->nd_symb));
 	}
 }
 
@@ -936,6 +933,7 @@ CodeUoper(nd)
 	case '-':
 		switch(tp->tp_fund) {
 		case T_INTEGER:
+		case T_INTORCARD:
 			C_ngi(tp->tp_size);
 			break;
 		case T_REAL:
@@ -977,7 +975,7 @@ CodeEl(nd, tp)
 			C_loc(eltype->sub_ub);
 		}
 		else	C_loc((arith) (eltype->enm_ncst - 1));
-		Operands(nd->nd_left, nd->nd_right);
+		Operands(nd->nd_left, nd->nd_right, word_type);
 		C_cal("_LtoUset");	/* library routine to fill set */
 		C_asp(4 * word_size);
 	}
@@ -1032,13 +1030,20 @@ CodeDStore(nd)
 DoHIGH(nd)
 	struct node *nd;
 {
+	/*	Get the high index of a conformant array, indicated by "nd".
+		The high index is the second field in the descriptor of
+		the array, so it is easily found.
+	*/
 	register struct def *df = nd->nd_def;
 	register arith highoff;
 
 	assert(nd->nd_class == Def);
 	assert(df->df_kind == D_VARIABLE);
+	assert(IsConformantArray(df->df_type));
 
-	highoff = df->var_off + pointer_size + word_size;
+	highoff = df->var_off		/* base address and descriptor */
+		  + pointer_size	/* skip base address */
+		  + word_size;		/* skip first field of descriptor */
 	if (df->df_scope->sc_level < proclevel) {
 		C_lxa((arith) (proclevel - df->df_scope->sc_level));
 		C_lof(highoff);

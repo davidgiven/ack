@@ -18,6 +18,7 @@ static  char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"node.h"
+#include	"f_info.h"
 
 }
 /*
@@ -91,12 +92,22 @@ export(int *QUALflag; struct node **ExportList;)
 import(int local;)
 {
 	struct node *ImportList;
-	register struct node *id;
+	register struct def *df;
+	int fromid;
+	extern struct def *GetDefinitionModule();
 } :
 	[ FROM
-	  IDENT		{ id = MkLeaf(Value, &dot); }
+	  IDENT		{ fromid = 1;
+			  if (local) {
+				struct node *nd = MkLeaf(Name, &dot);
+
+				df = lookfor(nd,enclosing(CurrVis),0);
+				FreeNode(nd);
+			  }
+			  else	df = GetDefinitionModule(dot.TOK_IDF);
+			}
 	|
-			{ id = 0; }
+			{ fromid = 0; }
 	]
 	IMPORT IdentList(&ImportList) ';'
 	/*
@@ -105,7 +116,7 @@ import(int local;)
 	   If the FROM clause is present, the identifier in it is a module
 	   name, otherwise the names in the import list are module names.
 	*/
-			{ if (id) EnterFromImportList(ImportList, id, local);
+			{ if (fromid) EnterFromImportList(ImportList, df);
 			  else EnterImportList(ImportList, local);
 			}
 ;

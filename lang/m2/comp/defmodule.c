@@ -74,7 +74,7 @@ GetDefinitionModule(id)
 		}
 		df = lookup(id, GlobalScope);
 	}
-	assert(df != 0 && df->df_kind == D_MODULE);
+	assert(df && df->df_kind == D_MODULE);
 	level--;
 	return df;
 }

@@ -5,7 +5,7 @@
 
 
 !File: idfsize.h
-#define	IDFSIZE	30	/* maximum significant length of an identifier	*/
+#define	IDFSIZE	128	/* maximum significant length of an identifier	*/
 
 
 !File: numsize.h

@@ -1,16 +1,16 @@
 # make modula-2 "compiler"
 # $Header$
-EMDIR =		/usr/em
+EMDIR =		/usr/ceriel/em
 MHDIR =		$(EMDIR)/modules/h
 PKGDIR =	$(EMDIR)/modules/pkg
 LIBDIR =	$(EMDIR)/modules/lib
-LLGEN =		$(EMDIR)/util/LLgen/src/LLgen
+LLGEN =		$(EMDIR)/bin/LLgen
 
 INCLUDES = -I$(MHDIR) -I$(EMDIR)/h -I$(PKGDIR)
 
 LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
-LLGENOPTIONS = -d
+LLGENOPTIONS =
 PROFILE = 
 CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
 LINTFLAGS = -DSTATIC= -DNORCSID
@@ -23,7 +23,7 @@ COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	code.o tmpvar.o lookup.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
-# Keep the next three entries up to date!
+# Keep the next entries up to date!
 GENCFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
 	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c
@@ -32,12 +32,42 @@ GENHFILES=	errout.h\
 	idfsize.h numsize.h strsize.h target_sizes.h debug.h\
 	inputtype.h maxset.h ndir.h density.h\
 	def.h type.h Lpars.h node.h
+HFILES=		LLlex.h\
+	chk_expr.h class.h const.h desig.h f_info.h idf.h\
+	input.h main.h misc.h scope.h standards.h tokenname.h\
+	walk.h $(GENHFILES)
 #
 GENFILES = $(GENGFILES) $(GENCFILES) $(GENHFILES)
-all:
-	make hfiles
-	make LLfiles
-	make main
+
+all:	Cfiles
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make main ; else sh Resolve main ; fi'
+	@rm -f nmclash.o a.out
+
+clean:
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab cclash.o cid.o cclash cid
+	(cd .. ; rm -rf Xsrc)
+
+lint:	Cfiles
+	sh -c `if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
+	@rm -f nmclash.o a.out
+
+mkdep:	mkdep.o
+	$(CC) -o mkdep mkdep.o
+
+cclash:	cclash.o
+	$(CC) -o cclash cclash.o
+
+cid:	cid.o
+	$(CC) -o cid cid.o
+
+# entry points not to be used directly
+
+Xlint:
+	lint $(INCLUDES) $(LINTFLAGS) `./sources $(OBJ)`
+
+Cfiles:	hfiles LLfiles $(GENHFILES) $(GENCFILES)
+	./sources $(OBJ) > Cfiles
+	sh -c 'for i in $(HFILES) ; do echo $$i ; done >> Cfiles'
 
 LLfiles:	$(LSRC)
 	$(LLGEN) $(LLGENOPTIONS) $(LSRC)
@@ -47,46 +77,47 @@ hfiles:	Parameters make.hfiles
 	make.hfiles Parameters
 	touch hfiles
 
-main:	$(OBJ) Makefile
-	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libeme.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o main
-	size main
-
-clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles
-
-lint:	LLfiles hfiles
-	lint $(INCLUDES) $(LINTFLAGS) `sources $(OBJ)`
+main:	$(OBJ) ../src/Makefile
+	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libem_mes.a $(LIBDIR)/libemk.a $(LIBDIR)/input.a $(LIBDIR)/assert.a $(LIBDIR)/alloc.a $(LIBDIR)/malloc.o $(LIBDIR)/libprint.a $(LIBDIR)/libstr.a $(LIBDIR)/libsystem.a -o ../src/main
+	size ../src/main
 
 tokenfile.g:	tokenname.c make.tokfile
 	make.tokfile <tokenname.c >tokenfile.g
 
-symbol2str.c:	tokenname.c make.tokcase
-	make.tokcase <tokenname.c >symbol2str.c
+symbol2str.c:	../src/tokenname.c ../src/make.tokcase
+	../src/make.tokcase <../src/tokenname.c >symbol2str.c
 
-def.h:		def.H make.allocd
-type.h:		type.H make.allocd
-node.h:		node.H make.allocd
-scope.c:	scope.C make.allocd
-tmpvar.c:	tmpvar.C make.allocd
-casestat.c:	casestat.C make.allocd
+def.h:		../src/def.H ../src/make.allocd
+		../src/make.allocd < ../src/def.H > def.h
 
-char.c: char.tab tab
-	./tab -fchar.tab >char.c
+type.h:		../src/type.H ../src/make.allocd
+		../src/make.allocd < ../src/type.H > type.h
 
-tab: 
-	$(CC) tab.c -o tab
+node.h:		../src/node.H ../src/make.allocd
+		../src/make.allocd < ../src/node.H > node.h
 
-depend:
+scope.c:	../src/scope.C ../src/make.allocd
+		../src/make.allocd < ../src/scope.C > scope.c
+
+tmpvar.c:	../src/tmpvar.C ../src/make.allocd
+		../src/make.allocd < ../src/tmpvar.C > tmpvar.c
+
+casestat.c:	../src/casestat.C ../src/make.allocd
+		../src/make.allocd < ../src/casestat.C > casestat.c
+
+char.c: ../src/char.tab ../src/tab
+	../src/tab -fchar.tab >char.c
+
+../src/tab: 
+	$(CC) ../src/tab.c -o ../src/tab
+
+depend:	mkdep
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
-	/user1/erikb/bin/mkdep `sources $(OBJ)` |\
+	./mkdep `./sources $(OBJ)` |\
 		sed 's/\.c:/\.o:/' >> Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
-
-.SUFFIXES:	.H .h .C
-.H.h .C.c :
-	make.allocd < $< > $@
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h Lpars.h class.h const.h debug.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
@@ -116,7 +147,7 @@ code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h standards.h type.h 
 tmpvar.o: debug.h def.h main.h scope.h type.h
 lookup.o: LLlex.h debug.h def.h idf.h node.h scope.h
 tokenfile.o: Lpars.h
-program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
+program.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h chk_expr.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h
 expression.o: LLlex.h Lpars.h chk_expr.h const.h debug.h def.h idf.h node.h type.h
 statement.o: LLlex.h Lpars.h def.h idf.h node.h scope.h type.h

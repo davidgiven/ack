@@ -81,6 +81,9 @@ TstProcEquiv(tp1, tp2)
 		p2 = p2->next;
 	}
 
+	/* Here, at least one of the parameterlists is exhausted.
+	   Check that they are both.
+	*/
 	return p1 == p2;
 }
 
@@ -101,18 +104,17 @@ TstCompat(tp1, tp2)
 	    ||
 		(  tp1 == intorcard_type
 		&&
-		   (tp2 == int_type || tp2 == card_type)
+		   (tp2 == int_type || tp2 == card_type || tp2 == address_type)
 		)
 	    ||
 		(  tp2 == intorcard_type
 		&&
-		   (tp1 == int_type || tp1 == card_type)
+		   (tp1 == int_type || tp1 == card_type || tp1 == address_type)
 		)
 	    ||
 		(  tp1 == address_type
 		&& 
 	          (  tp2 == card_type
-		  || tp2 == intorcard_type
 		  || tp2->tp_fund == T_POINTER
 		  )
 		)
@@ -120,7 +122,6 @@ TstCompat(tp1, tp2)
 		(  tp2 == address_type
 		&& 
 	          (  tp1 == card_type
-		  || tp1 == intorcard_type
 		  || tp1->tp_fund == T_POINTER
 		  )
 		)
@@ -173,7 +174,7 @@ TstAssCompat(tp1, tp2)
 
 int
 TstParCompat(formaltype, actualtype, VARflag, nd)
-	struct type *formaltype, *actualtype;
+	register struct type *formaltype, *actualtype;
 	struct node *nd;
 {
 	/*	Check type compatibility for a parameter in a procedure call.
@@ -218,19 +219,12 @@ TstParCompat(formaltype, actualtype, VARflag, nd)
 		   )
 		)
 	    ||
-		( VARflag && OldCompat(formaltype, actualtype, nd))
+		(  VARflag
+		&& (  TstCompat(formaltype, actualtype)
+		   &&
+(node_warning(nd, "oldfashioned! types of formal and actual must be identical"),
+		      1)
+		   )
+		)
 	;
-}
-
-int
-OldCompat(ft, at, nd)
-	struct type *ft, *at;
-	struct node *nd;
-{
-	if (TstCompat(ft, at)) {
-node_warning(nd, "oldfashioned! types of formal and actual must be identical");
-		return 1;
-	}
-
-	return 0;
 }

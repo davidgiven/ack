@@ -132,6 +132,8 @@ ChkLinkOrName(expp)
 {
 	register struct def *df;
 
+	expp->nd_type = error_type;
+
 	if (expp->nd_class == Name) {
 		expp->nd_def = lookfor(expp, CurrVis, 1);
 		expp->nd_class = Def;
@@ -183,7 +185,7 @@ df->df_idf->id_text);
 	assert(expp->nd_class == Def);
 
 	df = expp->nd_def;
-	if (df == ill_df) return 0;
+	if (df->df_kind == D_ERROR) return 0;
 
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		if (df->df_kind == D_ENUM) {
@@ -855,7 +857,7 @@ ChkStandard(expp, left)
 	case S_MIN:
 		if (!(left = getname(&arg, D_ISTYPE))) return 0;
 		if (!(left->nd_type->tp_fund & (T_DISCRETE))) {
-			node_error(left, "illegal type in MIN or MAX");
+node_error(left, "illegal type in %s", std == S_MAX ? "MAX" : "MIN");
 			return 0;
 		}
 		expp->nd_type = left->nd_type;
@@ -961,7 +963,7 @@ ChkStandard(expp, left)
 		expp->nd_type = 0;
 		if (! (left = getvariable(&arg))) return 0;
 		if (! (left->nd_type->tp_fund & T_DISCRETE)) {
-node_error(left, "illegal type in argument of INC or DEC");
+node_error(left,"illegal type in argument of %s",std == S_INC ? "INC" : "DEC");
 			return 0;
 		}
 		if (arg->nd_right) {
@@ -982,7 +984,7 @@ node_error(left, "illegal type in argument of INC or DEC");
 		if (!(left = getvariable(&arg))) return 0;
 		tp = left->nd_type;
 		if (tp->tp_fund != T_SET) {
-node_error(arg, "EXCL and INCL expect a SET parameter");
+node_error(arg, "%s expects a SET parameter", std == S_EXCL ? "EXCL" : "INCL");
 			return 0;
 		}
 		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
