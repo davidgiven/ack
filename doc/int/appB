@@ -31,17 +31,17 @@ Compile the program into an \fIe.out\fP, the EM machine version of a
 if in doubt, use \fIem44\fP.  These compilers can be found in the ACK
 \fIbin\fP directory, and should be used instead of \fIacc\fP (or normal
 .UX
-\fIcc\fP).  Alternatively, you can use \fIacc \-memNN\fP instead of
+\fIcc\fP).  Alternatively, \fIacc \-memNN\fP can be used instead of
 \fIemNN\fP.
 .LP
-If your C program consists of more than one file, as it usually does, there is
+If a C program consists of more than one file, as it usually does, there is
 a small problem.  The \fIacc\fP and \fIcc\fP compilers generate .o files,
 whereas the \fIemNN\fP compilers generate .m files as object files.
 A simple technique to avoid the problem is to call
 .DS
 em44 *.c
 .DE
-if you can.  If not, the following hack on the \fIMakefile\fP generally works.
+if possible.  If not, the following hack on the \fIMakefile\fP generally works.
 .IP \-
 Make sure the \fIMakefile\fP is reasonably clean and complete: all calls to
 the compiler are through \fI$(CC)\fP, \fICFLAGS\fP is used properly and all
@@ -57,17 +57,17 @@ Add the following lines to the \fIMakefile\fP (possibly permanently):
 Set CC to \fIem44 \-.c\fP (for example).  Make sure CFLAGS includes
 the \-O option; this yields a speed-up of about 15 %.
 .IP \-
-Change all .o to .m (or .k if you do not use the \-O option).
+Change all .o to .m (or .k if the \-O option is not used).
 .IP \-
 If necessary, change \fIa.out\fP to \fIe.out\fP.
 .PP
-With these changes, \fImake\fP will produce an EM object; you can use
-\fIesize\fP to verify that it is indeed an EM object and obtain some
+With these changes, \fImake\fP will produce an EM object;
+\fIesize\fP can be used to verify that it is indeed an EM object and obtain some
 statistics.  Then call the interpreter:
 .DS
 int <EM-object-file> [ parameters ]
 .DE
-where the parameters are the normal parameters of your program.  This should
+where the parameters are the normal parameters of the program.  This should
 work exactly like the original program, though slower.  It reads from the
 terminal if the original does, it opens and closes files like the original and
 it accepts interrupts.
@@ -163,7 +163,7 @@ which is pretty clear as it stands.
 .PP
 Let's, for the sake of argument
 and to avoid the fierce realism of 10000-line programs, assume that the above
-still puzzles you.
+still does not give enough information.
 Since the error occurred in EM instruction number 17, we should like to see
 more information around that moment.  Call the interpreter again, now with the
 shell variable AT set at 17:
@@ -172,7 +172,7 @@ int AT=17 t.em
 .DE
 (The interpreter has a number of internal variables that can be set by
 assignments on the command line, like with \fImake\fP.)
-This gives you a file called \fIint.log\fP containing the
+This gives a file called \fIint.log\fP containing the
 stack dump of 150 lines presented at the end of this chapter.
 .PP
 Since dumping is a subfacility of logging in the interpreter, the formats of
@@ -233,7 +233,7 @@ Locals Base at 2147483572 (pointing just above the local \fIa\fP), the Stack
 Pointer at 2147483560 (pointing at the undefined pointer), the line count is 4
 and the file name is "t.c".
 .LP
-(Notice that there is one more stack frame than you would probably expect, the
+(Notice that there is one more stack frame than one would probably expect, the
 one above the start-up routine.)
 .LP
 The Function Return Area
@@ -312,7 +312,7 @@ and indeed at line 18 of the file buff.c we find:
 This problem can be avoided by using a specially compiled version of the
 library that contains the correct LIN and FIL instructions, or, less
 elegantly, by including the source code of the library routines in the
-program; in the latter case, make sure you have them all.
+program; in the latter case, one has to be sure to have them all.
 .sp
 .LP
 .I "Unavoidable messages"

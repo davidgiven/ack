@@ -77,8 +77,7 @@ In general, the lower the \fIdigit\fP following the \fIletter\fP,
 the more important the message.
 E.g. m5 reports about unsuccessful monitor calls only, m9 also reports
 about successful monitors (which are obviously less interesting).
-New logging messages can be added to the source code on places you
-think relevant.
+New logging messages can be added to the source code on relevant places.
 .LP
 Reasonable settings for the logmask are:
 .TS

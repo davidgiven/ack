@@ -61,7 +61,7 @@ have not been implemented.  The monitor call fails.
 .Wn "Inaccessible memory in system call" WMONFLT 21
 Bad pointers passed to system calls do not cause a memory fault (which in UNIX
 would happen to the kernel), but cause the system call to fail with the UNIX
-variable errno set to 14 (EFAULT).  It seems likely that your program is at
+variable errno set to 14 (EFAULT).  It seems likely that the program is at
 fault, but there is also a good possibility that a library routine made
 unwarranted assumptions about word size and pointer size.
 .Wn "READ \- buffer resides in unallocated memory" WRUMEM 23
@@ -158,7 +158,7 @@ dynamic link, etc.
 This may or may not be an error.
 The current implementation of \fIsetjmp()\fP/\fIlongjmp()\fP
 may be responsible for it.
-If your program does not use setjmp(), there \fIis\fP something
+If the program does not use setjmp(), there \fIis\fP something
 very wrong (e.g. argument for ASP too large).
 Note that there are some library routines (such as \fIalarm()\fP) which
 use \fIsetjmp()\fP.
@@ -202,7 +202,7 @@ because it results in arithmetic with the NULL pointer.
 This warning is generated when the size of the expected return value
 is not equal to the size actually returned.
 .br
-Your interpreted program may have fallen through the end of
+An interpreted program may have fallen through the end of
 the code without explicitly doing an \fIexit()\fP or \fIreturn()\fP.
 The start-up routine (\fIcrt0()\fP) however always expects to get some
 value returned by the program proper.
