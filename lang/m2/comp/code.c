@@ -647,15 +647,11 @@ CodeStd(nd)
 	}
 }
 
-RangeCheck(tpl, tpr)
-	register t_type *tpl, *tpr;
+int
+needs_rangecheck(tpl, tpr)
+	register t_type	*tpl, *tpr;
 {
-	/*	Generate a range check if neccessary
-	*/
-
 	arith rlo, rhi;
-
-	if (options['R']) return;
 
 	if (bounded(tpl)) {
 		/* In this case we might need a range check.
@@ -668,9 +664,25 @@ RangeCheck(tpl, tpr)
 		if (bounded(tpr)) {
 			getbounds(tpr, &rlo, &rhi);
 			if (in_range(rlo, tpl) && in_range(rhi, tpl)) {
-				return;
+				return 0;
 			}
 		}
+		return 1;
+	}
+	return 0;
+}
+
+RangeCheck(tpl, tpr)
+	register t_type *tpl, *tpr;
+{
+	/*	Generate a range check if neccessary
+	*/
+
+	arith rlo, rhi;
+
+	if (options['R']) return;
+
+	if (needs_rangecheck(tpl, tpr)) {
 		genrck(tpl);
 		return;
 	}
@@ -906,21 +918,39 @@ CodeOper(expr, true_label, false_label)
 		break;
 		}
 
-	case IN:
+	case IN: {
 		/* In this case, evaluate right hand side first! The
 		   INN instruction expects the bit number on top of the
 		   stack
 		*/
+		label l_toolarge = NO_LABEL;
+
 		CodePExpr(rightop);
 		CodePExpr(leftop);
 		C_loc(rightop->nd_type->set_low);
 		C_sbu(word_size);
+		if (needs_rangecheck(ElementType(rightop->nd_type), leftop->nd_type)) {
+			l_toolarge = ++text_label;
+			l_cont = ++text_label;
+			C_dup(word_size);
+			C_loc(rightop->nd_type->tp_size*8);
+			C_cmu(word_size);
+			C_zge(l_toolarge);
+		}
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != NO_LABEL) {
 			C_zne(true_label);
 			C_bra(false_label);
 		}
+		if (l_toolarge != NO_LABEL) {
+			C_asp(word_size+rightop->nd_type->tp_size);
+			if (true_label != NO_LABEL) {
+				C_bra(false_label);
+			}
+			c_loc(0);
+		}
 		break;
+		}
 	case OR:
 	case AND: {
 		label  l_maybe = ++text_label, l_end = NO_LABEL;
