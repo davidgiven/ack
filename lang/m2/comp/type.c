@@ -473,9 +473,11 @@ set_type(tp)
 
 	getbounds(tp, &lb, &ub);
 
+#ifndef SQUEEZE
 	if (lb < 0) {
 		warning(W_STRICT, "base type of set has negative lower bound");
 	}
+#endif
 
 	diff = ub - lb + 1;
 	if (diff < 0 || (sizeof(int) == 2 && diff > 65535)) {

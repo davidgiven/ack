@@ -28,6 +28,7 @@
 #include	"main.h"
 #include	"node.h"
 #include	"warning.h"
+#include	"squeeze.h"
 
 /* error classes */
 #define	ERROR		1
@@ -176,9 +177,11 @@ _error(class, node, fmt, argv)
 			remark = "(old-fashioned use)";
 			break;
 #endif
+#ifndef SQUEEZE
 		case W_STRICT:
 			remark = "(strict)";
 			break;
+#endif
 		default:
 			remark = "(warning)";
 			break;

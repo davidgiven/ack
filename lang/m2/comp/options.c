@@ -19,6 +19,7 @@
 #include	"type.h"
 #include	"main.h"
 #include	"warning.h"
+#include	"squeeze.h"
 
 #define	MINIDFSIZE	14
 
@@ -60,9 +61,11 @@ DoOption(text)
 					warning_classes &= ~W_OLDFASHIONED;
 					break;
 #endif
+#ifndef SQUEEZE
 				case 'R':
 					warning_classes &= ~W_STRICT;
 					break;
+#endif
 				case 'W':
 					warning_classes &= ~W_ORDINARY;
 					break;
@@ -81,9 +84,11 @@ DoOption(text)
 					warning_classes |= W_OLDFASHIONED;
 					break;
 #endif
+#ifndef SQUEEZE
 				case 'R':
 					warning_classes |= W_STRICT;
 					break;
+#endif
 				case 'W':
 					warning_classes |= W_ORDINARY;
 					break;

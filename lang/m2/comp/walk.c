@@ -554,9 +554,13 @@ WalkStat(nd, exit_label)
 			nd->nd_def->df_flags &= ~D_FORLOOP;
 			if (good_forvar) {
 				if (! options['R']) {
+					label x = ++text_label;
 					C_lol(tmp2);
 					ForLoopVarExpr(nd);
-					C_cal("_forloopchk");
+					C_beq(x);
+					c_loc(M2_FORCH);
+					C_trp();
+					C_df_ilb(x);
 					FreeInt(tmp2);
 				}
 				if (stepsize) {

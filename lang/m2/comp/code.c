@@ -207,28 +207,34 @@ CodeCoercion(t1, t2)
 	switch(fund1) {
 	case T_INTEGER:
 		if (sz1 < word_size) {
-			C_loc(sz1);
+			c_loc((int)sz1);
 			c_loc((int) word_size);
 			C_cii();
 		}
 		switch(fund2) {
 		case T_INTEGER:
-			if (t2->tp_size != t1->tp_size) {
-				C_loc(t1->tp_size);
-				C_loc(t2->tp_size);
+#ifndef SQUEEZE
+			if (t2->tp_size != t1->tp_size)
+#endif
+			{
+				c_loc((int)(t1->tp_size));
+				c_loc((int)(t2->tp_size));
 				C_cii();
 			}
 			break;
 		case T_CARDINAL:
-			if (t1->tp_size != word_size) {
-				C_loc(t1->tp_size);
+#ifndef SQUEEZE
+			if (t1->tp_size != word_size)
+#endif
+			{
+				c_loc((int)(t1->tp_size));
 				c_loc((int) word_size);
 				C_ciu();
 			}
 			break;
 		case T_REAL:
-			C_loc(t1->tp_size);
-			C_loc(t2->tp_size);
+			c_loc((int)(t1->tp_size));
+			c_loc((int)(t2->tp_size));
 			C_cif();
 			break;
 		default:
@@ -243,20 +249,24 @@ CodeCoercion(t1, t2)
 		case T_INTORCARD:
 			if (t2->tp_size > word_size) {
 				c_loc((int) word_size);
-				C_loc(t2->tp_size);
+				c_loc((int)(t2->tp_size));
 				C_cuu();
 			}
 			break;
 		case T_INTEGER:
-			if (fund1 == T_CARDINAL || t2->tp_size != word_size) {
+			if (fund1 == T_CARDINAL
+#ifndef SQUEEZE
+			    || t2->tp_size != word_size
+#endif
+			   ) {
 				c_loc((int) word_size);
-				C_loc(t2->tp_size);
+				c_loc((int)(t2->tp_size));
 				C_cui();
 			}
 			break;
 		case T_REAL:
 			c_loc((int) word_size);
-			C_loc(t2->tp_size);
+			c_loc((int)(t2->tp_size));
 			C_cuf();
 			break;
 		default:
@@ -267,15 +277,18 @@ CodeCoercion(t1, t2)
 	case T_REAL:
 		switch(fund2) {
 		case T_REAL:
-			if (t2->tp_size != t1->tp_size) {
-				C_loc(t1->tp_size);
-				C_loc(t2->tp_size);
+#ifndef SQUEEZE
+			if (t2->tp_size != t1->tp_size)
+#endif
+			{
+				c_loc((int)(t1->tp_size));
+				c_loc((int)(t2->tp_size));
 				C_cff();
 			}
 			break;
 		case T_INTEGER:
-			C_loc(t1->tp_size);
-			C_loc(t2->tp_size);
+			c_loc((int)(t1->tp_size));
+			c_loc((int)(t2->tp_size));
 			C_cfi();
 			break;
 		case T_CARDINAL:
@@ -290,8 +303,8 @@ CodeCoercion(t1, t2)
 				C_trp();
 				C_df_ilb(lb);
 			}
-			C_loc(t1->tp_size);
-			C_loc(t2->tp_size);
+			c_loc((int)(t1->tp_size));
+			c_loc((int)(t2->tp_size));
 			C_cfu();
 			break;
 		default:

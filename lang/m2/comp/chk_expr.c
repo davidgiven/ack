@@ -33,6 +33,7 @@
 #include	"misc.h"
 #include	"warning.h"
 #include	"main.h"
+#include	"squeeze.h"
 
 extern char *symbol2str();
 extern char *sprint();
@@ -1175,10 +1176,12 @@ ChkStandard(expp)
 			return 0;
 		}
 		if (! IsConformantArray(left->nd_type)) cstcall(expp, S_SIZE);
+#ifndef SQUEEZE
 		else node_warning(expp,
 				  W_STRICT,
 				  "%s on conformant array",
 				  expp->nd_left->nd_def->df_idf->id_text);
+#endif
 		break;
 
 	case S_TRUNCD:
