@@ -1,6 +1,6 @@
 EMHOME=../../..
 
-LDFLAGS = -i
+LDFLAGS =
 CFLAGS=-O -I$(EMHOME)/h
 
 cv:		cv.o

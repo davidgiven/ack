@@ -1,5 +1,5 @@
 CFLAGS=-O -I../../../h
-LDFLAGS = -i
+LDFLAGS =
 
 cv:             cv.o
 		$(CC) -o cv $(LDFLAGS) cv.o
