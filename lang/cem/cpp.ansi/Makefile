@@ -68,7 +68,7 @@ GSTRSRC = macro.h replace.h
 GHSRC =	errout.h idfsize.h ifdepth.h macbuf.h \
 	nparams.h numsize.h obufsize.h \
 	parbufsize.h pathlength.h strsize.h textsize.h \
-	botch_free.h debug.h inputtype.h dobits.h line_prefix.h
+	botch_free.h debug.h inputtype.h dobits.h ln_prefix.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
@@ -223,9 +223,10 @@ preprocess.o: idf.h
 preprocess.o: idfsize.h
 preprocess.o: input.h
 preprocess.o: inputtype.h
-preprocess.o: line_prefix.h
+preprocess.o: ln_prefix.h
 preprocess.o: macro.h
 preprocess.o: obufsize.h
+preprocess.o: textsize.h
 replace.o: LLlex.h
 replace.o: arith.h
 replace.o: class.h

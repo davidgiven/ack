@@ -64,7 +64,7 @@
 #define DOBITS		1	/* use trick to reduce symboltable accesses */
 
 
-!File: line_prefix.h
+!File: ln_prefix.h
 #define LINE_PREFIX	"#"	/* prefix for generated line directives,
 				   either "#" or "#line"
 				*/

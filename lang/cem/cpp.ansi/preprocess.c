@@ -16,7 +16,7 @@
 #include	"idf.h"
 #include	"idfsize.h"
 #include	"bits.h"
-#include	"line_prefix.h"
+#include	"ln_prefix.h"
 #include	"textsize.h"
 
 char	_obuf[OBUFSIZE];
