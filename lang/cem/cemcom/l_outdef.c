@@ -11,6 +11,7 @@
 
 #include	<alloc.h>
 #include	"arith.h"
+#include	"assert.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -252,7 +253,7 @@ output_def(od)
 	case VU:
 		break;
 	default:
-		crash("(output_def) illegal class");
+		NOTREACHED();
 		/*NOTREACHED*/
 	}
 	printf(":");
@@ -268,10 +269,7 @@ outtypes(te, n)
 	register struct tp_entry *tmp;
 
 	while (n--) {
-		if (!te) {
-			crash("(outtypes) not enough tp_entries");
-			/*NOTREACHED*/
-		}
+		ASSERT(te);
 		printf(":");
 		if (te->te_class == Const && te->te_value >= 0) {
 			/* constant non-negative actual parameter */
@@ -338,7 +336,7 @@ outtype(tp)
 		printf("%s", symbol2str(tp->tp_fund));
 		break;
 	default:
-		crash("(outtype) illegal tp_fund");
+		NOTREACHED();
 		/*NOTREACHED*/
 	}
 }

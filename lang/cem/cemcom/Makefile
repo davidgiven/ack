@@ -790,7 +790,9 @@ dataflow.o: dataflow.h
 l_lint.o: LLlex.h
 l_lint.o: Lpars.h
 l_lint.o: arith.h
+l_lint.o: assert.h
 l_lint.o: code.h
+l_lint.o: debug.h
 l_lint.o: def.h
 l_lint.o: expr.h
 l_lint.o: file_info.h
@@ -851,7 +853,9 @@ l_misc.o: type.h
 l_ev_ord.o: LLlex.h
 l_ev_ord.o: Lpars.h
 l_ev_ord.o: arith.h
+l_ev_ord.o: assert.h
 l_ev_ord.o: code.h
+l_ev_ord.o: debug.h
 l_ev_ord.o: def.h
 l_ev_ord.o: expr.h
 l_ev_ord.o: file_info.h
@@ -870,6 +874,8 @@ l_ev_ord.o: type.h
 l_outdef.o: LLlex.h
 l_outdef.o: Lpars.h
 l_outdef.o: arith.h
+l_outdef.o: assert.h
+l_outdef.o: debug.h
 l_outdef.o: def.h
 l_outdef.o: expr.h
 l_outdef.o: field.h

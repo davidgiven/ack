@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"assert.h"
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -136,7 +137,7 @@ lint_value(expr, val)
 	}
 
 	default:
-		crash("(lint_expr) bad value class\n");
+		NOTREACHED();
 		/* NOTREACHED */
 	}
 }

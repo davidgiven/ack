@@ -12,46 +12,53 @@
 #include	"arith.h"
 #include	"l_state.h"
 
-static int NOTREACHED;
-static int VARARGSn = -1;
-static int ARGSUSED;
-int LINTLIB;
+/*	Since the lexical analyser does a one-token look-ahead, pseudo-
+	comments are read too soon.  This is remedied by first storing them
+	in static variables and then moving them to the real variables
+	one token later.
+*/
 
-int s_NOTREACHED;
-int f_VARARGSn;
-int f_ARGSUSED;
+static int notreached;
+static int varargsN = -1;
+static int argsused;
+static check_pseudo();
+
+int LINTLIB;				/* file is lint library */
+int s_NOTREACHED;			/* statement not reached */
+int f_VARARGSn;				/* function with variable # of args */
+int f_ARGSUSED;				/* function does not use all args */
 
 set_not_reached()
 {
-	NOTREACHED = 1;
+	notreached = 1;
 }
 
 move_NOT2s()
 {
-	s_NOTREACHED = NOTREACHED;
-	NOTREACHED = 0;
+	s_NOTREACHED = notreached;
+	notreached = 0;
 }
 
 set_varargs(n)
 {
-	VARARGSn = n;
+	varargsN = n;
 }
 
 move_VAR2f()
 {
-	f_VARARGSn = VARARGSn;
-	VARARGSn = -1;
+	f_VARARGSn = varargsN;
+	varargsN = -1;
 }
 
 set_argsused(n)
 {
-	ARGSUSED = n;
+	argsused = n;
 }
 
 move_ARG2f()
 {
-	f_ARGSUSED = ARGSUSED;
-	ARGSUSED = 0;
+	f_ARGSUSED = argsused;
+	argsused = 0;
 }
 
 set_lintlib()
@@ -83,8 +90,10 @@ lint_comment(c)
 		i = 0;
 		return;
 	}
+
 	if (position == IN_COMMENT)
 		return;
+
 	if (position == IN_SPACE) {
 		if (c == ' ' || c == '\t')
 			return;
@@ -104,6 +113,7 @@ lint_comment(c)
 
 #include	<ctype.h>
 
+static
 check_pseudo(buf, i)
 	char *buf;
 {
@@ -112,17 +122,22 @@ check_pseudo(buf, i)
  * (the u_nderscores are there to not confuse (UNIX) lint)
  */
 	buf[i++] = '\0';
-	if (!strcmp(buf, "NOTREACHED"))
+	if (strcmp(buf, "NOTREACHED") == 0) {
 		set_not_reached();
-	else if (!strcmp(buf, "ARGSUSED"))
+	}
+	else if (strcmp(buf, "ARGSUSED") == 0) {
 		set_argsused(1);
-	else if (!strcmp(buf, "LINTLIBRARY"))
+	}
+	else if (strcmp(buf, "LINTLIBRARY") == 0) {
 		set_lintlib();
-	else if (!strncmp(buf, "VARARGS", 7)) {
-		if (i == 8)
+	}
+	else if (strncmp(buf, "VARARGS", 7) == 0) {
+		if (i == 8) {
 			set_varargs(0);
-		else if (i == 9 && isdigit(buf[7]))
+		}
+		else if (i == 9 && isdigit(buf[7])) {
 			set_varargs(atoi(&buf[7]));
+		}
 	}
 }
 

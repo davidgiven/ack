@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"assert.h"
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -91,10 +92,7 @@ add_expr_state(value, to_state, espp)
 {
 	register struct expr_state *esp = *espp;
 
-	if (value.vl_class != Name) {
-		crash("(add_expr_state) invalid vl_class");
-		/*NOTREACHED*/
-	}
+	ASSERT(value.vl_class == Name);
 	while (	esp
 	&&	!(	esp->es_idf == value.vl_data.vl_idf
 		&&	esp->es_offset == value.vl_value

@@ -302,10 +302,7 @@ check_autos()
 	register struct auto_def *a1 = top_ls->ls_current->st_auto_list;
 	register struct auto_def *a2;
 
-	if (a1 && a1->ad_def->df_level > level) {
-		crash("(check_autos) corrupt level in st_auto_list");
-		/*NOTREACHED*/
-	}
+	ASSERT(!(a1 && a1->ad_def->df_level > level));
 	while (a1 && a1->ad_def->df_level == level) {
 		a2 = a1;
 		a1 = a1->next;
@@ -331,10 +328,7 @@ check_args_used()
 	register struct stack_entry *se = local_level->sl_entry;
 	extern int f_ARGSUSED;
 
-	if (level != L_FORMAL1) {
-		crash("(check_args_used) invalid level %d", level);
-		/*NOTREACHED*/
-	}
+	ASSERT(level == L_FORMAL1);
 	while (se) {
 		register struct def *def = se->se_idf->id_def;
 
@@ -463,16 +457,8 @@ merge_autos(a1, a2, lvl, mode)
 	}
 	a = a2;	/* pointer to the result */
 	while (a1) {
-		if (!a2) {
-			crash("(merge_autos) a1 longer than a2");
-			/*NOTREACHED*/
-		}
-		if (a1->ad_idf != a2->ad_idf) {
-			crash("(merge_autos) identifiers should be the same %s %s",
-				a1->ad_idf->id_text, a2->ad_idf->id_text);
-			/*NOTREACHED*/
-		}
-
+		ASSERT(a2);
+		ASSERT(a1->ad_idf == a2->ad_idf);
 		if (a1->ad_used)
 			a2->ad_used = 1;
 
@@ -493,10 +479,7 @@ merge_autos(a1, a2, lvl, mode)
 		a1 = a1->next;
 		a2 = a2->next;
 	}
-	if (a2) {
-		crash("(merge_autos) a2 longer than a1");
-		/*NOTREACHED*/
-	}
+	ASSERT(!a2);
 	return a;
 }
 
@@ -873,8 +856,7 @@ lint_break_stmt()
 		}
 		break;
 	default:
-		/* bad break */
-		crash("find_wdfc() returned invalid entry");
+		NOTREACHED();
 		/*NOTREACHED*/
 	}
 	top_ls->ls_current->st_notreached = 1;
@@ -911,10 +893,7 @@ lint_end_function()
 	 * These auto_defs must be freed and the state must be filled
 	 * with zeros.
 	 */
-	if (top_ls != &stack_bottom) {
-		crash("(lint_end_function) top_ls != &stack_bottom");
-		/*NOTREACHED*/
-	}
+	ASSERT(top_ls == &stack_bottom);
 	if (top_ls->ls_current->st_auto_list != 0)
 		free_st_auto_list(top_ls->ls_current->st_auto_list);
 	top_ls->ls_current->st_auto_list = 0;

@@ -14,8 +14,11 @@
 
 #ifdef	DEBUG
 /*	Note: this macro uses parameter substitution inside strings */
-#define	ASSERT(exp) (exp || crash("in %s, %u: assertion %s failed", \
+#define	ASSERT(exp)	(exp || crash("in %s, %u: assertion %s failed", \
 				__FILE__, __LINE__, "exp"))
+#define	NOTREACHED()	crash("in %s, %u: unreachable statement reached", \
+				__FILE__, __LINE__)
 #else
 #define	ASSERT(exp)
+#define	NOTREACHED()
 #endif	DEBUG
