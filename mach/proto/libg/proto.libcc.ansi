@@ -9,10 +9,10 @@ SRC_DIR = $(SRC_HOME)/lang/cem/libcc.ansi
 .SUFFIXES: .o .e .c .m .s .so
 
 .c.o .c.m .c.s .c.so:
-		$(MACH) $(MACHFL) -ansi -c $<
+		$(MACH) $(MACHFL) -LIB -ansi -c $<
 
 .e.o .e.m .e.s .e.so:
-		$(MACH) $(MACHFL) -c $<
+		$(MACH) $(MACHFL) -c -LIB $<
 
 fake:
 all:		copy head tail

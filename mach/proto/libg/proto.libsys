@@ -13,7 +13,7 @@ libmon:		$(SRC_DIR)/libmon_s.a
 		RANLIB="$(RANLIB)" ; export RANLIB ; \
 		MACH="$(MACH)" ; export MACH ; \
 		SUF="$(SUF)" ; export SUF ; \
-		MACHFL="$(MACHFL) -I$(SRC_DIR) -I$(TARGET_HOME)/h" ; export MACHFL ; \
+		MACHFL="$(MACHFL) -LIB -I$(SRC_DIR) -I$(TARGET_HOME)/h" ; export MACHFL ; \
 		if [ $(SUF) = o ] ; then march $(SRC_DIR) libmon $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/libmon_s.a libmon ; fi
 
 head:		$(SRC_DIR)/head_em.s

@@ -9,7 +9,7 @@ SRC_DIR = $(SRC_HOME)/lang/fortran/lib
 .SUFFIXES: .o .e .c .m .s .so
 
 .c.o .c.m .c.s .c.so .e.o .e.m .e.s .e.so:
-		$(MACH) $(MACHFL) -DSkip_f2c_Undefs -ansi -DNON_UNIX_STDIO -wo -c $<
+		$(MACH) $(MACHFL) -LIB -DSkip_f2c_Undefs -ansi -DNON_UNIX_STDIO -wo -c $<
 
 fake:
 all:		copy tail
