@@ -230,7 +230,7 @@ ch3cast(expp, oper, tp)
 			break;
 	}
 
-	if (equal_type(tp, oldtp, qual_lev)) {
+	if (equal_type(tp, oldtp, qual_lev, 0)) {
 		/* life is easy */
 		if (ascompat && tp->tp_fund == POINTER) {
 			if ((tp->tp_up->tp_typequal & oldtp->tp_up->tp_typequal)
@@ -408,9 +408,9 @@ ch3cast(expp, oper, tp)
 
 /*	Determine whether two types are equal.
 */
-equal_type(tp, otp, qual_lev)
+equal_type(tp, otp, qual_lev, diag)
 	register struct type *tp, *otp;
-	int qual_lev;
+	int qual_lev, diag;
 {
 	 if (tp == otp)
 		return 1;
@@ -426,9 +426,8 @@ equal_type(tp, otp, qual_lev)
 			return 0;
 	}
 
-	if (qual_lev >= 0) {
-		if (tp->tp_typequal != otp->tp_typequal)
-			strict("illegal qualifiers");
+	if (qual_lev >= 0 && tp->tp_typequal != otp->tp_typequal) {
+		strict("illegal qualifiers");
 	}
 
 	switch (tp->tp_fund) {
@@ -439,13 +438,13 @@ equal_type(tp, otp, qual_lev)
 			is the composite type of the corresponding paramaters.
 		*/
 		if (tp->tp_proto && otp->tp_proto) {
-			if (!equal_proto(tp->tp_proto, otp->tp_proto))
+			if (!equal_proto(tp->tp_proto, otp->tp_proto, diag))
 				return 0;
 		} else if (tp->tp_proto || otp->tp_proto) {
-			if (!legal_mixture(tp, otp))
+			if (!legal_mixture(tp, otp, diag))
 				return 0;
 		}
-		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1);
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1, diag);
 
 	case ARRAY:
 		/*	If one type is an array of known size, the composite
@@ -454,13 +453,13 @@ equal_type(tp, otp, qual_lev)
 		if (tp->tp_size != otp->tp_size &&
 		     (tp->tp_size != -1 && otp->tp_size != -1))
 			return 0;
-		return equal_type(tp->tp_up, otp->tp_up, qual_lev); /* ??? +1 */
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev/* ??? +1 */, diag);
 
 	case POINTER:
-		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1);
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev + 1, diag);
 
 	case FIELD:
-		return equal_type(tp->tp_up, otp->tp_up, qual_lev); /* ??? +1 */
+		return equal_type(tp->tp_up, otp->tp_up, qual_lev/* ??? +1 */, diag);
 
 	case STRUCT:
 	case UNION:
@@ -472,44 +471,49 @@ equal_type(tp, otp, qual_lev)
 	}
 }
 
-check_pseudoproto(pl, opl)
+check_pseudoproto(pl, opl, diag)
 	register struct proto *pl, *opl;
 {
 	int retval = 1;
 
 	if (pl->pl_flag & PL_ELLIPSIS) {
-		error("illegal ellipsis terminator");
-		pl->pl_flag |= PL_ERRGIVEN;
-		opl->pl_flag |= PL_ERRGIVEN;
+		if (diag) {	
+			error("illegal ellipsis terminator");
+			pl->pl_flag |= PL_ERRGIVEN;
+			opl->pl_flag |= PL_ERRGIVEN;
+		}
 		return 0;
 	}
 	if (opl->pl_flag & PL_VOID) {
-		if (!(pl->pl_flag & PL_VOID))
+		if (diag && !(pl->pl_flag & PL_VOID))
 			strict("function is defined without parameters");
 		return 0;
 	}
 	while (pl && opl) {
-	    if (!equal_type(pl->pl_type, opl->pl_type, -1)) {
-		if (!(pl->pl_flag & PL_ERRGIVEN)
-		    && !(opl->pl_flag & PL_ERRGIVEN))
-			error("incorrect type for parameter %s of definition",
-				opl->pl_idf->id_text);
-		pl->pl_flag |= PL_ERRGIVEN;
-		opl->pl_flag |= PL_ERRGIVEN;
+	    if (!equal_type(pl->pl_type, opl->pl_type, -1, diag)) {
+		if (diag) {
+			if (!(pl->pl_flag & PL_ERRGIVEN)
+			    && !(opl->pl_flag & PL_ERRGIVEN))
+				error("incorrect type for parameter %s of definition",
+					opl->pl_idf->id_text);
+			pl->pl_flag |= PL_ERRGIVEN;
+			opl->pl_flag |= PL_ERRGIVEN;
+		}
 		retval = 0;
 	    }
 	    pl = pl->next;
 	    opl = opl->next;
 	}
 	if (pl || opl) {
-		error("incorrect number of parameters");
+		if (diag) error("incorrect number of parameters");
 		retval = 0;
 	}
 	return retval;
 }
 
-legal_mixture(tp, otp)
+legal_mixture(tp, otp, diag)
 	struct type *tp, *otp;
+	int diag;
 {
 	register struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
 	int retval = 1;
@@ -523,11 +527,11 @@ legal_mixture(tp, otp)
 		prot = opl;
 	}
 	if (!opl && otp->tp_pseudoproto) {
-		return check_pseudoproto(tp->tp_proto, otp->tp_pseudoproto);
+		return check_pseudoproto(tp->tp_proto, otp->tp_pseudoproto, diag);
 	}
 
 	if (prot->pl_flag & PL_ELLIPSIS) {
-		if (!(prot->pl_flag & PL_ERRGIVEN)) {
+		if (diag && !(prot->pl_flag & PL_ERRGIVEN)) {
 			if (pl)
 				error("illegal ellipsis terminator");
 			else	error("ellipsis terminator in previous (prototype) declaration");
@@ -539,7 +543,7 @@ legal_mixture(tp, otp)
 				/* if (!(prot->pl_flag & PL_ELLIPSIS)) {} */
 		fund = prot->pl_type->tp_fund;
 		if (fund == CHAR || fund == SHORT || fund == FLOAT) {
-			if (!(prot->pl_flag & PL_ERRGIVEN))
+			if (diag && !(prot->pl_flag & PL_ERRGIVEN))
 			    error("illegal %s parameter in %sdeclaration",
 				symbol2str(fund), (opl ? "previous (prototype) " : "" ));
 			prot->pl_flag |= PL_ERRGIVEN;
@@ -550,8 +554,9 @@ legal_mixture(tp, otp)
 	return retval;
 }
 
-equal_proto(pl, opl)
+equal_proto(pl, opl, diag)
 	register struct proto *pl, *opl;
+	int diag;
 {
 	if (pl == opl)
 		return 1;
@@ -563,7 +568,7 @@ equal_proto(pl, opl)
 	while ( pl && opl) {
 
 	    if ((pl->pl_flag & ~PL_ERRGIVEN) != (opl->pl_flag & ~PL_ERRGIVEN) ||
-	        !equal_type(pl->pl_type, opl->pl_type, -1))
+	        !equal_type(pl->pl_type, opl->pl_type, -1, diag))
 		return 0;
 
 	    pl = pl->next;

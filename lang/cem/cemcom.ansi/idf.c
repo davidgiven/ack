@@ -409,7 +409,7 @@ global_redecl(idf, new_sc, tp)
 	register struct def *def = idf->id_def;
 
 	while (def->df_level != L_GLOBAL) def = def->next;
-	if (!equal_type(tp, def->df_type, 0)) {
+	if (!equal_type(tp, def->df_type, 0, 0)) {
 		error("redeclaration of %s with different type", idf->id_text);
 		return;
 	} else	update_proto(tp, def->df_type);
@@ -592,7 +592,7 @@ check_formals(idf, dc)
 		}
 		while(fm && pl) {
 		    if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type)
-					, pl->pl_type, -1)) {
+					, pl->pl_type, -1, 1)) {
 			if (!(pl->pl_flag & PL_ERRGIVEN))
 			    error("incorrect type for parameter %s"
 						, fm->fm_idf->id_text);

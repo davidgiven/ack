@@ -265,7 +265,7 @@ initializer(struct idf *idf; int sc;)
 #endif	LINT
 #ifdef	DBSYMTAB
 			if (options['g'] && level >= L_LOCAL && expr) {
-				db_line(expr->ex_file, (int) expr->ex_line);
+				db_line(expr->ex_file, (unsigned) expr->ex_line);
 			}
 #endif	/* DBSYMTAB */
 			if (autoagg)

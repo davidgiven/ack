@@ -239,7 +239,7 @@ ch3bin(expp, oper, expr)
 	case ':':
 		if (is_struct_or_union(expp_tp->tp_fund)
 		    || is_struct_or_union(expr->ex_type->tp_fund))	{
-			if (!equal_type(expp_tp, expr->ex_type, -1))
+			if (!equal_type(expp_tp, expr->ex_type, -1, 0))
 				expr_error(*expp, "illegal balance");
 		}
 		else 
@@ -292,7 +292,7 @@ pntminuspnt(expp, oper, expr)
 	*/
 	struct type *up_type = (*expp)->ex_type->tp_up;
 
-	if (!equal_type(up_type, expr->ex_type->tp_up, -1)) {
+	if (!equal_type(up_type, expr->ex_type->tp_up, -1, 0)) {
 		expr_error(*expp, "subtracting incompatible pointers");
 		free_expression(expr);
 		erroneous2int(expp);
