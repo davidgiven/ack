@@ -99,6 +99,11 @@ t1() {
 	printf("\t\t\t\t\tfloat %f\n",f) ;
 #endif
 
+	printf("Casts from long\n");
+	l = 75000;
+	printf("\tchar %5d, int %d, unsigned short %6o, long %11ld\n",
+		(char) l,(int) l,(unsigned short)l ,l) ;
+
 #ifndef NOFLOAT
 	printf("From float\n") ;
 	f = 121.5 ;

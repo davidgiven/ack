@@ -21,6 +21,8 @@ From integer
 From long
 	char    -3, int     -3, unsigned 37777777775, long          -3
 					float -3.000000
+Casts from long
+	char    -8, int 75000, unsigned short  22370, long       75000
 From float
 	char   121, int    121, unsigned    171, long         121, float 121.500000
 	char     0, int      0, unsigned      0, long           0, float 0.000100
