@@ -306,7 +306,7 @@ chk_basesubrange(tp, base)
 	else if (base == int_type) {
 		if (tp->tp_next == card_type &&
 		    ! chk_bounds(tp->sub_ub,max_int[(int)int_size],T_CARDINAL)){
-			error("upperbound to large for type INTEGER");
+			error("upperbound too large for type INTEGER");
 		}
 	}
 	else	error("illegal base for a subrange");
