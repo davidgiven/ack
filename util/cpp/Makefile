@@ -41,10 +41,10 @@ LOBJ =	tokenfile.o expression.o Lpars.o
 
 # Objects of hand-written C files
 CSRC =	LLlex.c LLmessage.c ch7bin.c ch7mon.c domacro.c \
-	error.c idf.c init.c input.c main.c options.c \
+	error.c idf.c init.c input.c main.c options.c Version.c \
 	preprocess.c replace.c scan.c skip.c tokenname.c next.c expr.c
 COBJ =	LLlex.o LLmessage.o ch7bin.o ch7mon.o domacro.o \
-	error.o idf.o init.o input.o main.o options.o \
+	error.o idf.o init.o input.o main.o options.o Version.o \
 	preprocess.o replace.o scan.o skip.o tokenname.o next.o expr.o
 
 PRFILES = Makefile Parameters \

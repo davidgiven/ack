@@ -32,3 +32,4 @@ scan.c
 skip.c
 tokenname.c
 cpp.6
+Version.c
