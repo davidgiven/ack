@@ -4,5 +4,5 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #undef W2S
-#undef FS
-#undef F2S
+#define FS 	4
+#define F2S	8

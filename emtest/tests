@@ -408,8 +408,8 @@ TEST 020: test ldf
 MAIN 20
  loc 123
  loc 77
- sdl -4
- lal -9
+ sdl -8
+ lal -13
  ldf 5
  loc 77
  bne *1
@@ -546,9 +546,9 @@ MAIN 20
  loc 102
 #endif
  loc 103
- lal -14
+ lal -16
  sti 4
- lol -14
+ lol -16
  loc 103
  bne *1
 OK
@@ -597,10 +597,10 @@ MAIN 20
  loc 102
 #endif
  loc 103
- lal -14
+ lal -16
  loc 4
  sts WS
- lol -14
+ lol -16
  loc 103
  bne *1
 OK
