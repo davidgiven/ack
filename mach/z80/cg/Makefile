@@ -61,6 +61,13 @@ install: all
 cmp:	 all
 	-../../compare cg
 
+distr:
+	make tables.c
+	rm -f tables1.[ch]
+	cp tables.c tables1.c
+	cp tables.h tables1.h
+	chmod -w tables1.[ch]
+
 
 tables.c: table
 	-mv tables.h tables.h.save
