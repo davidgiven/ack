@@ -1,2 +1,0 @@
-${MACH?} -I../../../h ${MACHFL?} $1 1>&2
-echo `basename $1 $2`.o

@@ -1,1 +1,0 @@
-make "P=margt" -fsk ../makefile ${1-gen}

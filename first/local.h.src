@@ -1,7 +1,0 @@
-/* collection of options, selected by including or excluding 'defines' */
-
-/* Version number of the EM object code */
-#	define	VERSION		3	/* 16 bits number */
-
-/* The default machine used by ack, acc, apc */
-#	define	ACKM		"vax2"

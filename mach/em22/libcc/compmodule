@@ -1,2 +1,0 @@
-${MACH?} -Rcpp=/lib/cpp -I/usr/em/h ${MACHFL?} -LIB $1 1>&2
-echo `basename $1 $2`.m

@@ -1,1 +1,0 @@
-make "P=str" -fsk ../makefile ${1-gen}

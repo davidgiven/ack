@@ -1,2 +1,0 @@
-echo test profiling
-make -k "`grep CEM= ../makefile`" ${1-gen}
