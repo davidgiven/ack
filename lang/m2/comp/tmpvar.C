@@ -30,7 +30,7 @@
 #include	"main.h"
 
 struct tmpvar {
-	struct tmpvar	*next;
+	struct tmpvar	*t_next;
 	arith		t_offset;	/* offset from LocalBase */
 };
 
@@ -74,7 +74,7 @@ NewTmp(plist, sz, al, regtype)
 	else {
 		tmp = *plist;
 		offset = tmp->t_offset;
-		*plist = tmp->next;
+		*plist = tmp->t_next;
 		free_tmpvar(tmp);
 	}
 	return offset;
@@ -99,7 +99,7 @@ FreeTmp(plist, off)
 {
 	register struct tmpvar *tmp = new_tmpvar();
 
-	tmp->next = *plist;
+	tmp->t_next = *plist;
 	tmp->t_offset = off;
 	*plist = tmp;
 }
@@ -123,13 +123,13 @@ TmpClose()
 	tmp = TmpInts;
 	while (tmp) {
 		tmp1 = tmp;
-		tmp = tmp->next;
+		tmp = tmp->t_next;
 		free_tmpvar(tmp1);
 	}
 	tmp = TmpPtrs;
 	while (tmp) {
 		tmp1 = tmp;
-		tmp = tmp->next;
+		tmp = tmp->t_next;
 		free_tmpvar(tmp1);
 	}
 	TmpInts = TmpPtrs = 0;

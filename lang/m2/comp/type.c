@@ -458,7 +458,7 @@ set_type(tp)
 	}
 
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = WA((ub - lb + 8) >> 3);
+	tp->tp_size = WA((ub + 8) >> 3);
 	return tp;
 }
 

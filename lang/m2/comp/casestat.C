@@ -48,7 +48,7 @@ struct switch_hdr	{
 /* STATICALLOCDEF "switch_hdr" 5 */
 
 struct case_entry	{
-	struct case_entry *next;	/* next in list */
+	struct case_entry *ce_next;	/* next in list */
 	label ce_label;			/* generated label */
 	arith ce_value;			/* value of case label */
 };
@@ -143,7 +143,7 @@ CaseCode(nd, exitlabel)
 			assert(ce);
 			if (val == ce->ce_value)	{
 				C_rom_ilb(ce->ce_label);
-				ce = ce->next;
+				ce = ce->ce_next;
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
 			else C_rom_ucon("0", pointer_size);
@@ -155,7 +155,7 @@ CaseCode(nd, exitlabel)
 		/* CSB
 		*/
 		C_rom_cst((arith)sh->sh_nrofentries);
-		for (ce = sh->sh_entries; ce; ce = ce->next)	{
+		for (ce = sh->sh_entries; ce; ce = ce->ce_next)	{
 			/* generate the entries: value + prog.label
 			*/
 			C_rom_cst(ce->ce_value);
@@ -201,7 +201,7 @@ FreeSh(sh)
 
 	ce = sh->sh_entries;
 	while (ce)	{
-		struct case_entry *tmp = ce->next;
+		struct case_entry *tmp = ce->ce_next;
 
 		free_case_entry(ce);
 		ce = tmp;
@@ -260,7 +260,7 @@ AddOneCase(sh, node, lbl)
 	if (sh->sh_entries == 0)	{
 		/* first case entry
 		*/
-		ce->next = (struct case_entry *) 0;
+		ce->ce_next = (struct case_entry *) 0;
 		sh->sh_entries = ce;
 		sh->sh_lowerbd = sh->sh_upperbd = ce->ce_value;
 		sh->sh_nrofentries = 1;
@@ -278,7 +278,7 @@ AddOneCase(sh, node, lbl)
 		}
 		while (c1 && c1->ce_value < ce->ce_value)	{
 			c2 = c1;
-			c1 = c1->next;
+			c1 = c1->ce_next;
 		}
 		/*	At this point three cases are possible:
 			1: c1 != 0 && c2 != 0:
@@ -297,19 +297,19 @@ node_error(node, "multiple case entry for value %ld", ce->ce_value);
 				return 0;
 			}
 			if (c2)	{
-				ce->next = c2->next;
-				c2->next = ce;
+				ce->ce_next = c2->ce_next;
+				c2->ce_next = ce;
 			}
 			else	{
-				ce->next = sh->sh_entries;
+				ce->ce_next = sh->sh_entries;
 				sh->sh_entries = ce;
 			}
 		}
 		else	{
 			assert(c2);
 
-			ce->next = (struct case_entry *) 0;
-			c2->next = ce;
+			ce->ce_next = (struct case_entry *) 0;
+			c2->ce_next = ce;
 		}
 		(sh->sh_nrofentries)++;
 	}
