@@ -1,13 +1,10 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
-.define syscal, sysal, sysn, sysnl, sysnx, sysc, syse, cerror, _errno
+.define sysal, sysn, sysnl, sysnx, sysc, syse, cerror, _errno
 
 .sect .bss
 	.comm	_errno, 2
 
 .sect .text
-syscal:
-	int	5
-	ret
 
 sysal:
 	push	bp

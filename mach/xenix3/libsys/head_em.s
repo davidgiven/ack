@@ -1,6 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 
-.define begtext,begdata,begbss
+.define begtext,begdata,begbss,syscal
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
 .extern _end
@@ -14,6 +14,22 @@ EODDZ           = 19
 ECASE           = 20
 
 .sect .text
+	.data1	0353
+	.data1	0176	! jmp to begtext in 2 bytes. Assembler generates 3
+			! bytes.
+syscal: jmp 1f
+grow:	jmp 2f
+	jmp 2f
+	.data2 -277, -277, -277, -277, -277, -277
+2:
+	mov ax,2088
+1:
+	int 5
+	jmp 1f
+	.space 100
+1:
+	ret
+
 begtext:
 	mov bx,sp
 	mov cx,(bx)
@@ -26,6 +42,12 @@ begtext:
 	push bx
 	push cx
 	xor bp,bp
+	mov bx,_end
+	mov cx,9
+	add bx,1024
+	shr bx,cl
+	shl bx,cl
+	call grow
 	call    _m_a_i_n
 	call	__exit
 .sect	.data
