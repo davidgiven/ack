@@ -341,6 +341,9 @@ getparams() {
 	/*
 	 * Now copy the declarations 
 	 */
+	l = getc(fact);		/* patch: some implementations of fseek
+				   do not work properly after "ungetc"
+				*/
 	fseek(fact,off,0);
 	getaction(0);
 	fputs(" {\n",fpars);
