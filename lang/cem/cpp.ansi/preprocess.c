@@ -329,6 +329,7 @@ preprocess(fn)
 				    && idef->id_macro
 				    && ReplaceMacros && !NoExpandNext) {
 					if (replace(idef)) {
+						echo(' ');
 						c = GetChar();
 						continue;
 					}
