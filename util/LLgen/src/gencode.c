@@ -144,7 +144,6 @@ gencode(argc) {
 		opentemp(f_input);
 		correct_prefix();
 		/* generate code ... */
-		genhdr();
 		generate(p);
 		getaction(2);
 		doclose(fpars);
@@ -362,6 +361,8 @@ generate(f) p_file f; {
 	for (ff = f->f_firsts; ff; ff = ff->ff_next) {
 		macro(ff->ff_name,&nonterms[ff->ff_nont]);
 	}
+
+	genhdr();
 
 	/* For every nonterminal generate a function */
 	for (s = f->f_nonterminals; s != -1; s = p->n_next) {
