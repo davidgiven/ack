@@ -8,8 +8,8 @@ struct sgttyb {
 };
 
 #ifdef __BSD4_2
-#define	TIOCGETP	((('t'<<8)|8)|(sizeof(struct sgttyb)<<16)|0x80000000)
-#define	TIOCSETN	((('t'<<8)|10)|(sizeof(struct sgttyb)<<16)|0x40000000)
+#define	TIOCGETP	((('t'<<8)|8)|(sizeof(struct sgttyb)<<16)|0x40000000)
+#define	TIOCSETN	((('t'<<8)|10)|(sizeof(struct sgttyb)<<16)|0x80000000)
 #else
 #define	TIOCGETP	(('t'<<8)|8)
 #define	TIOCSETN	(('t'<<8)|10)
