@@ -162,9 +162,9 @@ def_row	: [ special | simple]	{ out( "}\n\n");}
 c_table	: c_row*
 	;
 
-c_row	: %if ( strcmp( yytext, to_change) == 0)
+c_row	: %if ( to_change && strcmp( yytext, to_change) == 0)
 	  C_INSTR 		{ set_outfile( yytext); header( yytext);}
-	  [ special | simple]	{ out( "}\n\n"); }
+	  [ special | simple]	{ out( "}\n\n"); to_change = 0; }
 
 	| C_INSTR
 	  [ c_special | c_simple]
@@ -319,8 +319,11 @@ char **argv;
 			library = TRUE;
 			to_change = argv[2];
 			c_table();
-			fprint( STDERR, "No rule for %s\n", to_change);
-			exit( 1);
+			if (to_change) {
+				fprint( STDERR, "No rule for %s\n", to_change);
+				exit( 1);
+			}
+			exit(nerrors);
 		}
 	}
 	else {
