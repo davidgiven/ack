@@ -81,12 +81,13 @@ SkipToNewLine()
 			delim = ch;
 			garbage = 1;
 		} else if (ch == '/') {
-			if ((ch = GetChar()) == '*'
+			if (GetChar() == '*'
 			    && !InputLevel
 			) {
 				skipcomment();
 				continue;
 			}
+			else UnGetChar();
 		}
 		else if (ch == TOKSEP && InputLevel) {
 			continue;
