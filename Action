@@ -122,9 +122,6 @@ name "Zilog Z8000 support"
 dir mach/z8000
 indir
 end
-name "Nascom support"
-dir mach/z80a
-indir
 end
 name "Pascal frontend"
 dir lang/pc/pem
