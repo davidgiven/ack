@@ -3,7 +3,7 @@
 .ocm.o:
 	ack -c $<
 
-ALL =	Huffman aatob copy key lifegame matmul sort tst use_prnt xxtoy
+ALL =	Huffman aatob copy key lifegame matmul sort use_prnt xxtoy
 
 all:		$(ALL)
 
@@ -38,5 +38,3 @@ matmul:	matmul.o
 		ack -.ocm -o matmul matmul.o
 sort:	sort.o
 		ack -.ocm -o sort sort.o
-tst:	tst.o
-		ack -.ocm -o tst tst.o
