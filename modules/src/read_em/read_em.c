@@ -106,7 +106,7 @@ int EM_wordsize, EM_pointersize;
 
 #ifdef CHECKING
 static char *argrange = "Argument range error";
-#define check(expr) (expr || (xerror(argrange)))
+#define check(expr) (expr || !EM_error || (EM_error = argrange))
 #else not CHECKING
 #define check(x)	/* nothing */
 #endif CHECKING
@@ -204,7 +204,7 @@ startmes(p)
 
 	if (ap->em_cst == ms_emx) {
 		if (wsize || psize) {
-			xerror("Duplicate ms_emx");
+			if (!EM_error) EM_error = "Duplicate ms_emx";
 		}
 		argp = ap = getarg(cst_ptyp);
 		wsize = ap->em_cst;
@@ -344,7 +344,8 @@ EM_getinstr()
 				/* Check that the last value is 0 or 1
 				*/
 				if (ap1->em_cst != 1 && ap1->em_cst != 0) {
-				  xerror("Third argument of hol/bss not 0/1");
+				  if (! EM_error)
+				   EM_error="Third argument of hol/bss not 0/1";
 				}
 #endif CHECKING
 				break;
@@ -391,10 +392,11 @@ EM_getinstr()
 			startmes(p);
 			break;
 		}
-		if (!wsize) {
-			xerror("EM code should start with mes 2");
+		if (!wsize && !EM_error) {
+			wsize = 2;
+			psize = 2;
+			EM_error = "EM code should start with mes 2";
 		}
-		if (EM_error && p->em_type != EM_FATAL) p->em_type = EM_ERROR;
 		return p;
 	}
 
@@ -413,10 +415,10 @@ EM_getinstr()
 		default:
 			assert(0);
 		case MES:
-			xerror("String too long in message");
-			/* p->em_type = EM_MESARG;
-			   p->em_arg = args;
-			*/
+			if (!EM_error)
+				EM_error = "String too long in message";
+			p->em_type = EM_MESARG;
+			p->em_arg = args;
 			break;
 		case CON:
 			p->em_type = EM_PSEU;
@@ -429,14 +431,12 @@ EM_getinstr()
 			p->em_args = args;
 			break;
 		}
-		if (EM_error && p->em_type != EM_FATAL) p->em_type = EM_ERROR;
 		return p;
 	}
 
 	/* Here, we are in a state reading arguments */
 	args = getarg(any_ptyp);
 	if (EM_error && p->em_type != EM_FATAL) {
-		p->em_type = EM_ERROR;
 		return p;
 	}
 	if (!args) {	/* No more arguments */
