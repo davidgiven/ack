@@ -178,7 +178,7 @@ genrecovery() {
 	for (st = start; st; st = st->ff_next) {
 		fputs(st->ff_name, f);
 		p = &nonterms[st->ff_nont];
-		fputs("() {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+1];\n\tLLnewlevel(s);\n\tLLread();\n", f);
+		fputs("() {\n\tunsigned int s[LL_NTERMINALS+LL_NSETS+2];\n\tLLnewlevel(s);\n\tLLread();\n", f);
 		if (g_gettype(p->n_rule) == ALTERNATION) {
 			genpush(findindex(p->n_contains));
 		}
@@ -206,6 +206,7 @@ genrecovery() {
 	}
 	fputs(c_arrend, f);
 	free((p_mem) index);
+	if (nflag) fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
 	if (ferror(f) != 0) {
 		fatal(0,"write error on temporary");
