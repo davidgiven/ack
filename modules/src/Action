@@ -25,12 +25,12 @@ end
 name "ACK-object reading and writing module"
 dir object
 end
-name "EM-code reading module"
-dir read_em
-end
 name "EM code generation module"
 dir em_code
 end
 name "EM messages generation module"
 dir em_mes
+end
+name "EM-code reading module"
+dir read_em
 end
