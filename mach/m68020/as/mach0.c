@@ -7,7 +7,7 @@
  * Motorola 68020 options
  */
 #undef	BITMAX
-#define	BITMAX	20000
+#define	BITMAX	32000
 
 #define	THREE_PASS		/* branch and offset optimization */
 #define	BYTES_REVERSED		/* high order byte has lowest address */
