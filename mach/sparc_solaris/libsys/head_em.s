@@ -71,9 +71,9 @@ lino:
 filn:
 	.word	0	! filn
 reghp:
-	.word	$_end
+	.word	_end
 limhp:
-	.word	$_end
+	.word	_end
 trppc:
 	.word	0
 trpim:
