@@ -75,6 +75,7 @@ statement.g
 stb.c
 storage.c
 storage.h
+stmt.str
 struct.c
 struct.str
 switch.c

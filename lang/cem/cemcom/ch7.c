@@ -192,9 +192,6 @@ ch7cast(expp, oper, tp)
 	if ((*expp)->ex_class == String)
 		string2pointer(expp);
 	oldtp = (*expp)->ex_type;
-	if (oldtp == tp)
-		{}			/* life is easy */
-	else
 #ifndef NOBITFIELD
 	if (oldtp->tp_fund == FIELD)	{
 		field2arith(expp);
@@ -205,6 +202,9 @@ ch7cast(expp, oper, tp)
 		ch7cast(expp, oper, tp->tp_up);
 	else
 #endif NOBITFIELD
+	if (oldtp == tp)
+		{}			/* life is easy */
+	else
 	if (tp->tp_fund == VOID)	/* Easy again */
 		(*expp)->ex_type = void_type;
 	else
@@ -311,6 +311,17 @@ ch7asgn(expp, oper, expr)
 	struct expr *expr;
 {
 	/*	The assignment operators.
+		"f op= e" should be interpreted as
+		"f = (typeof f)((typeof (f op e))f op (typeof (f op e))e)"
+		and not as "f = f op (typeof f)e".
+		Consider, for example, (i == 10) i *= 0.9; (i == 9), where
+		typeof i == int.
+		The resulting expression tree becomes:
+				op=
+				/ \
+			       /   \
+			      f     (typeof (f op e))e
+		EVAL should however take care of evaluating (typeof (f op e))f
 	*/
 	int fund = (*expp)->ex_type->tp_fund;
 
@@ -320,48 +331,30 @@ ch7asgn(expp, oper, expr)
 		(*expp)->ex_depth = 99;	/* no direct store/load at EVAL() */
 			/* what is 99 ??? DG */
 	}
-	switch (oper)	{
-	case '=':
+	if (oper == '=') {
 		ch7cast(&expr, oper, (*expp)->ex_type);
-		break;
-	case TIMESAB:
-	case DIVAB:
-	case MODAB:
-		check_arith_type(expp, oper);
-		any2arith(&expr, oper);
-		ch7cast(&expr, CAST, (*expp)->ex_type);
-		break;
-	case PLUSAB:
-	case MINAB:
-		any2arith(&expr, oper);
-		if (fund == POINTER)	{
-			check_integral_type(&expr, oper);
-			ch7bin(&expr, '*',
-				intexpr(
-					size_of_type(
-						(*expp)->ex_type->tp_up,
-						"object"
-					),
-					pa_type->tp_fund
-				)
-			);
+	}
+	else {	/* turn e into e' where typeof(e') = typeof (f op e) */
+		struct expr *extmp = intexpr(0, INT);
+
+		/* this is really $#@&*%$# ! */
+		extmp->ex_lvalue = 1;
+		extmp->ex_type = (*expp)->ex_type;
+		ch7bin(&extmp, oper, expr);
+		/* note that ch7bin creates a tree of the expression
+			((typeof (f op e))f op (typeof (f op e))e),
+		   where f ~ extmp and e ~ expr;
+		   we have to use (typeof (f op e))e
+		   Ch7bin does not create a tree if both operands
+		   were illegal or constants!
+		*/
+		if (extmp->ex_class == Oper) {
+			expr = extmp->OP_RIGHT;
+			extmp->OP_RIGHT = NILEXPR;
+			free_expression(extmp);
 		}
-		else	{
-			check_arith_type(expp, oper);
-			ch7cast(&expr, CAST, (*expp)->ex_type);
-		}
-		break;
-	case LEFTAB:
-	case RIGHTAB:
-		check_integral_type(expp, oper);
-		ch7cast(&expr, oper, int_type);
-		break;
-	case ANDAB:
-	case XORAB:
-	case ORAB:
-		check_integral_type(expp, oper);
-		ch7cast(&expr, oper, (*expp)->ex_type);
-		break;
+		else
+			expr = extmp;
 	}
 #ifndef NOBITFIELD
 	if (fund == FIELD)
@@ -369,6 +362,7 @@ ch7asgn(expp, oper, expr)
 	else
 #endif NOBITFIELD
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
+	(*expp)->OP_TYPE = expr->ex_type;	/* for EVAL() */
 }
 
 /*	Some interesting (?) questions answered.
@@ -393,18 +387,6 @@ is_integral_type(tp)
 	}
 }
 
-check_integral_type(expp, oper)
-	struct expr **expp;
-{
-	register struct expr *expr = *expp;
-	
-	if (!is_integral_type(expr->ex_type))	{
-		expr_error(expr, "%s on non-integral type (%s)",
-			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
-		erroneous2int(expp);
-	}
-}
-
 int
 is_arith_type(tp)
 	struct type *tp;
@@ -424,17 +406,5 @@ is_arith_type(tp)
 #endif NOBITFIELD
 	default:
 		return 0;
-	}
-}
-
-check_arith_type(expp, oper)
-	struct expr **expp;
-{
-	register struct expr *expr = *expp;
-	
-	if (!is_arith_type(expr->ex_type))	{
-		expr_error(expr, "%s on non-arithmetical type (%s)",
-			symbol2str(oper), symbol2str(expr->ex_type->tp_fund));
-		erroneous2int(expp);
 	}
 }

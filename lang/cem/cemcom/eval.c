@@ -389,27 +389,33 @@ EVAL(expr, val, code, true_label, false_label)
 				C_sti(pointer_size);
 				C_lal(tmpvar);
 				C_loi(pointer_size);
-				C_loi(tp->tp_size);
+				C_loi(leftop->ex_type->tp_size);
+				conversion(leftop->ex_type, tp);
 				EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 				assop(tp, oper);
+				conversion(tp, leftop->ex_type);
 				if (gencode)
-					C_dup(roundup(tp->tp_size));
+					C_dup(roundup(leftop->ex_type->tp_size));
 				C_lal(tmpvar);
 				C_loi(pointer_size);
-				C_sti(tp->tp_size);
+				C_sti(leftop->ex_type->tp_size);
 				free_tmp_var(old_offset);
 			}
 			else	{
 				load_val(leftop, RVAL);
+				conversion(leftop->ex_type, tp);
 				EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 				assop(tp, oper);
+				conversion(tp, leftop->ex_type);
 				if (gencode)
-					C_dup(roundup(tp->tp_size));
+					C_dup(roundup(leftop->ex_type->tp_size));
 				store_val(
 					&(leftop->ex_object.ex_value),
 					leftop->ex_type
 				);
 			}
+			if (gencode)
+				conversion(leftop->ex_type, expr->ex_type);
 			break;
 		case '(':
 		{

@@ -115,6 +115,7 @@ fundamental(tp)
 	case CHAR:
 	case SHORT:
 	case INT:
+	case ERRONEOUS:
 	case LONG:
 	case ENUM:
 		return tp->tp_unsigned ? T_UNSIGNED : T_SIGNED;

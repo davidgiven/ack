@@ -40,13 +40,16 @@ eval_field(expr, code)
 	struct type *tp = leftop->ex_type->tp_up;
 	arith old_offset, tmpvar;
 
-	/*	The type in which the bitfield arithmetic is done:
+	/*	The type in which the bitfield arithmetic is done;
+		AND IN WHICH BITFIELDS ARE STORED!
 	*/
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
 	arith asize = atype->tp_size;
 
-	ASSERT(leftop->ex_type->tp_fund == FIELD);
+	/* First some assertions to be sure that the rest is legal */
 	ASSERT(asize == word_size);	/* make sure that C_loc() is legal */
+	ASSERT(leftop->ex_type->tp_fund == FIELD);
+
 	leftop->ex_type = atype;	/* this is cheating but it works... */
 
 	/*	Note that op is either an assignment operator or an increment/
@@ -55,6 +58,8 @@ eval_field(expr, code)
 	if (op == '=') {
 		/*	F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f)
 		*/
+		ASSERT(tp == rightop->ex_type);
+
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		C_loc(fd->fd_mask);
@@ -71,10 +76,7 @@ eval_field(expr, code)
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
-			store_val(
-				&(leftop->ex_object.ex_value),
-				leftop->ex_type
-			);
+			store_val(&(leftop->ex_object.ex_value), atype);
 		}
 		else	{			/* complex case	*/
 			tmpvar = tmp_pointer_var(&old_offset);
@@ -114,16 +116,19 @@ eval_field(expr, code)
 		C_and(asize);
 		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
 			C_dup(asize);
+
+		/* the 'op' operation: */
+		conversion(atype, rightop->ex_type);
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
-		conversion(tp, atype);
-		/* generate code for the operator */
 		if (op == PLUSPLUS || op == POSTINCR)
-			assop(atype, PLUSAB);
+			assop(rightop->ex_type, PLUSAB);
 		else
 		if (op == MINMIN || op == POSTDECR)
-			assop(atype, MINAB);
+			assop(rightop->ex_type, MINAB);
 		else
-			assop(atype, op);
+			assop(rightop->ex_type, op);
+		conversion(rightop->ex_type, atype);
+
 		C_loc(fd->fd_mask);
 		C_and(asize);
 		if (code == TRUE && op != POSTINCR && op != POSTDECR)
@@ -138,10 +143,7 @@ eval_field(expr, code)
 			load_val(leftop, RVAL);
 			C_and(asize);
 			C_ior(asize);
-			store_val(
-				&(leftop->ex_object.ex_value),
-				leftop->ex_type
-			);
+			store_val(&(leftop->ex_object.ex_value), atype);
 		}
 		else	{
 			C_lal(tmpvar);
@@ -168,7 +170,7 @@ eval_field(expr, code)
 			C_loc(shift);
 			C_sri(asize);
 		}
-		conversion(atype, tp);
+		conversion(atype, expr->ex_type);
 	}
 }
 #endif NOBITFIELD

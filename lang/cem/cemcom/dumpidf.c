@@ -271,9 +271,10 @@ type2str(tp)
 			if (tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
-				sprint(buf, "%s [s=%ld,w=%ld]", buf,
+				sprint(buf, "%s [s=%ld,w=%ld] of ", buf,
 					fd->fd_shift, fd->fd_width);
 			}
+			else
 #endif NOBITFIELD
 			ops = 0;
 			break;
@@ -367,7 +368,10 @@ p1_expr(lvl, expr)
 		o = &expr->ex_object.ex_oper;
 		print("\n");
 		p1_expr(lvl+1, o->op_left);
-		p1_indent(lvl); print("%s\n", symbol2str(o->op_oper));
+		p1_indent(lvl);
+		print("%s <%s>\n", symbol2str(o->op_oper),
+			type2str(o->op_type)
+		);
 		p1_expr(lvl+1, o->op_right);
 		break;
 	case Type:

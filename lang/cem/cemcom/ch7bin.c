@@ -24,6 +24,7 @@ ch7bin(expp, oper, expr)
 	struct expr *expr;
 {
 	/*	apply binary operator oper between *expp and expr.
+		NB: don't swap operands if op is one of the op= operators!!!
 	*/
 	any2opnd(expp, oper);
 	any2opnd(&expr, oper);
@@ -79,21 +80,34 @@ ch7bin(expp, oper, expr)
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
 		break;
 	case '%':
+	case MODAB:
+/*** NB  "not float" means "integral" !!!
 		fund = arithbalance(expp, oper, &expr);
 		if (fund == DOUBLE)	{
-			expr_error(*expp, "floating operand to %%");
+			expr_error(*expp, "floating operand to %s", 
+				symbol2str(oper));
 			erroneous2int(expp);
 		}
 		else
 			non_commutative_binop(expp, oper, expr);
+***/
+		opnd2integral(expp, oper);
+		opnd2integral(&expr, oper);
+		fund = arithbalance(expp, oper, &expr);
+		non_commutative_binop(expp, oper, expr);
 		break;
 	case '/':
+	case DIVAB:
 		fund = arithbalance(expp, oper, &expr);
 		non_commutative_binop(expp, oper, expr);
 		break;
 	case '*':
 		fund = arithbalance(expp, oper, &expr);
 		commutative_binop(expp, oper, expr);
+		break;
+	case TIMESAB:
+		fund = arithbalance(expp, oper, &expr);
+		non_commutative_binop(expp, oper, expr);
 		break;
 	case '+':
 		if (expr->ex_type->tp_fund == POINTER)	{
@@ -102,6 +116,8 @@ ch7bin(expp, oper, expr)
 			expr = *expp;
 			*expp = etmp;
 		}
+		/*FALLTHROUGH*/
+	case PLUSAB:
 		if ((*expp)->ex_type->tp_fund == POINTER)	{
 			pointer_arithmetic(expp, oper, &expr);
 			if (	expr->ex_type->tp_size !=
@@ -113,10 +129,14 @@ ch7bin(expp, oper, expr)
 		}
 		else	{
 			fund = arithbalance(expp, oper, &expr);
-			commutative_binop(expp, oper, expr);
+			if (oper == '+')
+				commutative_binop(expp, oper, expr);
+			else
+				non_commutative_binop(expp, oper, expr);
 		}
 		break;
 	case '-':
+	case MINAB:
 		if ((*expp)->ex_type->tp_fund == POINTER)	{
 			if (expr->ex_type->tp_fund == POINTER)
 				pntminuspnt(expp, oper, expr);
@@ -131,7 +151,9 @@ ch7bin(expp, oper, expr)
 		}
 		break;
 	case LEFT:
+	case LEFTAB:
 	case RIGHT:
+	case RIGHTAB:
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
 		ch7cast(&expr, oper, int_type); /* leftop should be int	*/
@@ -152,8 +174,16 @@ ch7bin(expp, oper, expr)
 	case '|':
 		opnd2integral(expp, oper);
 		opnd2integral(&expr, oper);
-		fund = arithbalance(expp, oper, &expr);	/* <===	*/
+		fund = arithbalance(expp, oper, &expr);
 		commutative_binop(expp, oper, expr);
+		break;
+	case ANDAB:
+	case XORAB:
+	case ORAB:
+		opnd2integral(expp, oper);
+		opnd2integral(&expr, oper);
+		fund = arithbalance(expp, oper, &expr);
+		non_commutative_binop(expp, oper, expr);
 		break;
 	case AND:
 	case OR:
