@@ -185,3 +185,6 @@ end
 name "Pascal frontend"
 dir lang/pc/pem
 end
+name "EM interpreter in C"
+dir util/int
+end
