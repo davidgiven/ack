@@ -74,7 +74,7 @@ getwdir(fn)
 static struct file_list *arglist;
 
 char *mflags = "";
-char *compiler = "m2";
+char *compiler = M2COMPILER;
 char *suff = "o";
 char *llibs = 0;
 

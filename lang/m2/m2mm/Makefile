@@ -11,18 +11,19 @@ INCLUDES = -I$(MHDIR) -I$(PKGDIR) -I$(EMHOME)/h
 GF =	program.g declar.g expression.g statement.g
 GENGFILES=	tokenfile.g
 GFILES =$(GENGFILES) $(GF)
-LLGENOPTIONS = -v
+LLGENOPTIONS =
 PROFILE =
-CFLAGS = $(PROFILE) $(INCLUDES) -DSTATIC=
+M2COMPILER = m2
+CFLAGS = -O $(PROFILE) $(INCLUDES) -DSTATIC= -DM2COMPILER=\"$(M2COMPILER)\"
 LINTFLAGS = -DSTATIC= -DNORCSID
 MALLOC = $(LIBDIR)/malloc.o
 LDFLAGS = -i $(PROFILE)
 LSRC =	tokenfile.c program.c declar.c expression.c statement.c
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 CSRC =	LLlex.c LLmessage.c error.c main.c lib.c \
-	tokenname.c idf.c input.c misc.c options.c
+	tokenname.c idf.c input.c misc.c options.c Version.c
 COBJ =	LLlex.o LLmessage.o error.o main.o lib.o \
-	tokenname.o idf.o input.o misc.o options.o char.o symbol2str.o
+	tokenname.o idf.o input.o misc.o options.o char.o symbol2str.o Version.o
 GENC=	$(LSRC) symbol2str.c char.c Lpars.c
 SRC =	$(CSRC) $(GENC)
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
@@ -33,7 +34,7 @@ HFILES =$(GENH) $(HSRC)
 GENFILES = $(GENGFILES) $(GENC) $(GENH)
 
 all:	Cfiles
-	make "EMHOME="$(EMHOME) m2mm
+	make "EMHOME="$(EMHOME) "M2COMPILER="$(M2COMPILER) m2mm
 
 install:	all
 	cp m2mm $(EMHOME)/bin
