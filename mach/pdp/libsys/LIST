@@ -1,4 +1,4 @@
-tail_mon.a
+libmon_s.a
 exit.c
 cleanup.c
 stty.c
