@@ -1,0 +1,14 @@
+echo ''
+echo '/**********************************************************/'
+echo '/*'
+echo '/*		' This was file $1
+echo '/*'
+echo '/**********************************************************/'
+echo ''
+cat $1 |
+sed '
+	/#include[ 	].*"/d
+	s/^public/private/
+	s/^publicdata/static/
+'
+echo ''
