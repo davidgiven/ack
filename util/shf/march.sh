@@ -27,6 +27,7 @@ then
     else
       while read file
       do
+	echo $file: 1>&2
 	suffix=`expr $file : '.*\(\..*\)'`
 	ofile=`$makecmd $1/$file $suffix`
 	if test $? != 0
@@ -37,9 +38,10 @@ then
     fi
     if test $errors = no
     then
-      ${ASAR-arch} cr $2 $OFILES
-      ${RANLIB-:} $2
-      rm $OFILES
+      if ${ASAR-arch} cr $2 $OFILES && ${RANLIB-:} $2
+      then
+        rm $OFILES
+      fi
     else
       echo $2 not made, due to compilation errors
       exit 1
