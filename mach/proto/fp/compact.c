@@ -108,8 +108,16 @@ dbl_over:			trap(EFOVFL);
 		 * STORE MANTISSA
 		 */
 
+#if FL_MSL_AT_LOW_ADDRESS
 		put4(DBL->_s.p1.fract, (char *) &DBL->_s.p1.fract);
 		put4(DBL->_s.p2, (char *) &DBL->_s.p2);
+#else
+		{ unsigned long l;
+		  put4(DBL->_s.p2, (char *) &l);
+		  put4(DBL->_s.p1.fract, (char *) &DBL->_s.p2);
+		  DBL->_s.p1.fract = l;
+		}
+#endif
 	}
 	else {
 		/*

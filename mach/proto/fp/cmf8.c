@@ -23,8 +23,13 @@ _double	d1,d2;
 	int	sign1,sign2;
 	int	rv;
 
+#if FL_MSL_AT_LOW_ADDRESS
 	l1 = get4((char *)&d1);
 	l2 = get4((char *)&d2);
+#else
+	l1 = get4(((char *)&d1+4));
+	l2 = get4(((char *)&d2+4));
+#endif
 	sign1 = SIGN(l1);
 	sign2 = SIGN(l2);
 	if (sign1 != sign2) {
@@ -39,8 +44,13 @@ _double	d1,d2;
 	}
 	else	{ 		/* decide in 2nd half */
 		unsigned long u1, u2;
+#if FL_MSL_AT_LOW_ADDRESS
 		u1 = get4(((char *)&d1 + 4));
 		u2 = get4(((char *)&d2 + 4));
+#else
+		u1 = get4((char *)&d1);
+		u2 = get4((char *)&d2);
+#endif
 		if (u1 == u2)
 			return(0);
 		if (u1 < u2) rv = 1;

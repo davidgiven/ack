@@ -13,7 +13,11 @@
 #define Xchar(ch)	((ch) & 0377)
 #endif
 
-#if ! BYTES_REVERSED
+#define BYTES_REVERSED (MSB_AT_LOW_ADDRESS != FL_MSB_AT_LOW_ADDRESS)
+#define WORDS_REVERSED (MSW_AT_LOW_ADDRESS != FL_MSW_AT_LOW_ADDRESS)
+#define LONGS_REVERSED (FL_MSL_AT_LOW_ADDRESS)
+
+#if BYTES_REVERSED
 #define uget2(c)	(Xchar((c)[1]) | ((unsigned) Xchar((c)[0]) << 8))
 #define Xput2(i, c)	(((c)[1] = (i)), ((c)[0] = (i) >> 8))
 #define put2(i, c)	{ register int j = (i); Xput2(j, c); }
@@ -25,7 +29,7 @@
 
 #define get2(c)		((short) uget2(c))
 
-#if WORDS_REVERSED || ! BYTES_REVERSED
+#if WORDS_REVERSED || BYTES_REVERSED
 #define get4(c)		(uget2((c)+2) | ((long) uget2(c) << 16))
 #define put4(l, c)	{ register long x=(l); \
 			  Xput2((int)x,(c)+2); \

@@ -52,9 +52,20 @@ zero:			zrf_ext(to);
 			goto zero;
 	}
 /*	there is a number to convert so lets get started	*/
-/*	first extract the exponent; its always in the first two bytes */
 
+#if FL_MSL_AT_LOW_ADDRESS
+#if FL_MSW_AT_LOW_ADDRESS
 	to->exp = uget2(cpt1);
+#else
+	to->exp = uget2(cpt1+2);
+#endif
+#else
+#if FL_MSW_AT_LOW_ADDRESS
+	to->exp = uget2(cpt1+4);
+#else
+	to->exp = uget2(cpt1+6);
+#endif
+#endif
 	to->sign = (to->exp & 0x8000);	/* set sign bit */
 	to->exp ^= to->sign;
 	if (size == sizeof(DOUBLE))
@@ -65,17 +76,23 @@ zero:			zrf_ext(to);
 		leadbit++;	/* will set Lead bit later	*/
 	else to->exp++;
 
-	to->m1 = get4(cpt1);
-
 	if (size == sizeof(DOUBLE))	{
-		to->m1 <<= DBL_M1LEFT;		/* shift	*/
-		to->exp -= DBL_BIAS;		/* remove bias	*/
+#if FL_MSL_AT_LOW_ADDRESS
+		to->m1 = get4(cpt1);
 		cpt1 += 4;
 		tmp = get4(cpt1);
+#else
+		tmp = get4(cpt1);
+		cpt1 += 4;
+		to->m1 = get4(cpt1);
+#endif
+		to->m1 <<= DBL_M1LEFT;		/* shift	*/
+		to->exp -= DBL_BIAS;		/* remove bias	*/
 		to->m1 |= (tmp>>DBL_RPACK);	/* plus 10 == 32	*/
 		to->m2 = (tmp<<DBL_LPACK);	/* plus 22 == 32	*/
 	}
 	else	{	/* size == sizeof(SINGLE)		*/
+		to->m1 = get4(cpt1);
 		to->m1  <<= SGL_M1LEFT;	/* shift	*/
 		to->exp -= SGL_BIAS;		/* remove bias	*/
 		to->m2 = 0L;
