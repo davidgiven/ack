@@ -34,7 +34,7 @@ name led
 	from .o.a
 	to .out
 	program {EM}/lib/em_led
-	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -l* LNAME={EM}/{ILIB}*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
