@@ -23,6 +23,9 @@
 
 #define LP_BLOCKS	lp_extend->lpx_ra.lpx_blocks
 
+#define newbolpx()	(lpext_p)	newstruct(lpext_ra)
+#define oldbolpx(x)	oldstruct(lpext_ra,x)
+
 STATIC int Sbo;  /* #optimizations found */
 
 #define DLINK(l1,l2)	l1->l_next=l2; l2->l_prev=l1
@@ -248,15 +251,11 @@ STATIC bo_extproc(p)
 
 	register loop_p lp;
 	register Lindex pi;
-	register bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex) 0;
 	   pi = Lnext(pi,p->p_loops)) {
 		lp = (loop_p) Lelem(pi);
-		lp->lp_extend = newralpx();
-	}
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		b->b_extend = newrabx();
+		lp->lp_extend = newbolpx();
 	}
 }
 
@@ -289,10 +288,7 @@ STATIC bo_cleanproc(p)
 	for (pi = Lfirst(p->p_loops); pi != (Lindex) 0;
 	   pi = Lnext(pi,p->p_loops)) {
 		lp = (loop_p) Lelem(pi);
-		oldralpx(lp->lp_extend);
-	}
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		oldrabx(b->b_extend);
+		oldbolpx(lp->lp_extend);
 	}
 }
 
