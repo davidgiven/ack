@@ -8,7 +8,6 @@
 #include "file_info.h"
 #include "idfsize.h"
 
-extern struct tokenname tkidf[], tkkey[];
 extern char *symbol2str();
 extern char *getwdir();
 extern char *inctable[];
