@@ -18,7 +18,7 @@
 #include	"em.h"
 #include	"level.h"
 #include	"decspecs.h"
-#include	"declarator.h"
+#include	"declar.h"
 #include	"Lpars.h"
 #include	"mes.h"
 #include	"LLlex.h"
