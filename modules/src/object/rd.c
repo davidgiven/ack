@@ -81,6 +81,12 @@ rd_close()
 {
 
 	close(outfile);
+	outfile = -1;
+}
+
+rd_fd()
+{
+	return outfile;
 }
 
 rd_ohead(head)

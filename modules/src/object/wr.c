@@ -108,11 +108,22 @@ wr_close()
 	}
 #ifdef OUTSEEK
 	close(outfile);
+	outfile = -1;
 #else not OUTSEEK
 	for (fdp = &outfile[PARTEMIT]; fdp < &outfile[NPARTS]; fdp++) {
 		close(*fdp);
+		*fdp = -1;
 	}
 #endif not OUTSEEK
+}
+
+wr_fd()
+{
+#ifdef OUTSEEK
+	return outfile;
+#else
+	return outfile[PARTEMIT];
+#endif
 }
 
 wr_ohead(head)

@@ -1,10 +1,10 @@
 .TH OBJECT 3ACK "October 16, 1986"
 .SH NAME
 wr_open, wr_close, wr_ohead, wr_sect, wr_outsect, wr_emit, wr_putc, wr_relo,
-wr_name, wr_string, wr_arhdr, wr_ranlib, wr_int2, wr_long,
+wr_name, wr_string, wr_arhdr, wr_ranlib, wr_int2, wr_long, wr_bytes, wr_fd,
 rd_open, rd_fdopen, rd_close, rd_ohead, rd_sect, rd_outsect,
 rd_emit, rd_relo, rd_rew_relo, rd_name, rd_string, rd_arhdr, rd_ranlib,
-rd_int2, rd_unsigned2, rd_long\ \-\ routines to read
+rd_int2, rd_unsigned2, rd_long, rd_bytes, rd_fd\ \-\ routines to read
 and write ACK-object files and libraries
 .SH SYNOPSIS
 .B #include <out.h>
@@ -75,6 +75,14 @@ and write ACK-object files and libraries
 .br
 .B long l;
 .PP
+.B wr_bytes(fd, buf, l)
+.br
+.B char *buf;
+.br
+.B long l;
+.PP
+.B int wr_fd()
+.PP
 .B int rd_open(filename)
 .br
 .B char *filename;
@@ -140,6 +148,14 @@ and write ACK-object files and libraries
 .B unsigned int rd_unsigned2(fd)
 .PP
 .B long rd_long(fd)
+.PP
+.B rd_bytes(fd, buf, l)
+.br
+.B char *buf;
+.br
+.B long l;
+.PP
+.B rd_fd()
 .SH DESCRIPTION
 These routines come in handy when reading or writing ACK-object files
 or libraries. No checking is performed.
@@ -235,6 +251,17 @@ writes a 4-byte integer
 to file descriptor
 .IB fd ,
 low order word first, low order byte first.
+.PP
+.I Wr_bytes
+writes
+.I l
+bytes from
+.I buf
+to file descriptor
+.IB fd .
+.PP
+.I Wr_fd
+returns the current output file descriptor.
 .PP
 Most of the
 .I rd_
