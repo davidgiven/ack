@@ -28,7 +28,7 @@ main(argc,argv) int argc; char *argv[]; {
 	while (argc-->1 && **++argv == '-')
 		flags(*argv);
 	if (argc>1) {
-		fprintf(stderr,"Usage: %s [-Ln] [name]\n",progname);
+		fprintf(stderr,"Usage: %s [-Ln] [-m<num>] [name]\n",progname);
 		exit(-1);
 	}
 	if (argc)
@@ -47,6 +47,11 @@ flags(s) register char *s; {
 		switch(*s) {
 		case 'L':	Lflag = TRUE; break;
 		case 'n':	nflag = TRUE; break;
+		case 'm':	if (*(s+1) == 'l') {
+					s++;
+					repl_longmuls = TRUE;
+				}
+				repl_muls = atoi(s+1); break;
 		}
 }
 

@@ -11,6 +11,8 @@ extern	unsigned linecount;
 extern	int	prodepth;
 extern	bool	Lflag;
 extern	bool	nflag;
+extern	int	repl_muls;
+extern	bool	repl_longmuls;
 extern	byte	em_flag[];
 extern	line_p	instrs,pseudos;
 extern	FILE	*outfile;

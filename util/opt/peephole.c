@@ -608,7 +608,30 @@ basicblock(alpp) line_p *alpp; {
 
 	lpp = alpp; madeopt = FALSE;
 	while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
-		lp = *lpp; next = &lp->l_next;
+		lp = *lpp;
+		if (repl_muls) {
+			line_p b_repl, e_repl;
+			int cnt = repl_mul(lp, &b_repl, &e_repl);
+
+			if (cnt > 0 && cnt <= repl_muls) {
+				*lpp = b_repl;
+				e_repl->l_next = lp->l_next->l_next;
+				oldline(lp->l_next);
+				oldline(lp);
+				lp = b_repl;
+				madeopt = TRUE;
+			}
+			else {
+				while (b_repl != (line_p) 0) {
+					line_p n = b_repl->l_next;
+
+					oldline(b_repl);
+					b_repl = n;
+				}
+			}
+		}
+
+		next = &lp->l_next;
 		hash[0] = lp->l_instr&BMASK;
 		lp=lp->l_next;
 		if (lp != (line_p) 0) {
@@ -654,4 +677,132 @@ basicblock(alpp) line_p *alpp; {
 		lpp = next;
 	}
 	return madeopt;
+}
+
+repl_mul(lp, b, e)
+	register line_p	lp;
+	line_p	*b, *e;
+{
+	register line_p next = lp->l_next;
+	int	ins;
+	int	sz;
+	unsigned long	n;
+	int	n0, n1;
+  	int	virgin = 1;
+	int	retval = 0;
+
+	*b = 0;
+	if (! next) return 0;
+	if ((ins = (next->l_instr & BMASK)) != op_mli && ins != op_mlu) {
+		return 0;
+	}
+	if ((ins = (lp->l_instr & BMASK)) != op_loc && ins != op_ldc) {
+		return 0;
+	}
+	switch(next->l_optyp) {
+	case OPNO:
+		return 0;
+	case OPSHORT:
+		sz = next->l_a.la_short;
+		break;
+#ifdef LONGOFF
+	case OPOFFSET:
+		sz = next->l_a.la_offset;
+		break;
+#endif
+	default:
+		sz = (next->l_optyp & BMASK) - Z_OPMINI;
+		break;
+	}
+	if (ins == op_loc && sz != wordsize) return 0;
+	if (ins == op_ldc && sz != 2*wordsize) return 0;
+	if (! repl_longmuls && sz != wordsize) return 0;
+	switch(lp->l_optyp) {
+	case OPSHORT:
+		n = (long) lp->l_a.la_short;
+		break;
+#ifdef LONGOFF
+	case OPOFFSET:
+		n = lp->l_a.la_offset;
+		break;
+#endif
+	default:
+		n = (long)((lp->l_optyp & BMASK) - Z_OPMINI);
+		break;
+	}
+
+#define newinstr(res, opcode, val)	(*(res) = newline((short)(val)+Z_OPMINI), (*(res))->l_instr = (opcode))
+
+  	while (n) {
+		/* first find "0*1*$" in n */
+		for (n1 = 0; n & 1; n>>=1) ++n1;	/* count "1" bits */
+		if (n)
+			for (n0 = 0; !(n & 1); n>>=1)	/* count "0" bits */
+				++n0;
+		else
+			n0 = 0;
+
+		if (n1 == 0) {
+			if (n0) {
+				newinstr(b, op_loc, n0); b = &((*b)->l_next);
+				newinstr(b, op_slu, sz); b = &((*b)->l_next);
+				retval++;
+			}
+		} else if (n1 == 1) {
+			if (virgin) {
+				newinstr(b, op_dup, sz); b = &((*b)->l_next);
+				virgin = 0;
+			}
+			else {
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
+				newinstr(b, op_asp, sz); b = &((*b)->l_next);
+				newinstr(b, op_adu, sz); b = &((*b)->l_next);
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				retval++;
+			}
+			if (n) {
+				newinstr(b, op_loc, n0+n1); b = &((*b)->l_next);
+				newinstr(b, op_slu, sz); b = &((*b)->l_next);
+				retval++;
+			}
+		} else {
+			if (virgin) {
+				newinstr(b, op_dup, sz); b = &((*b)->l_next);
+				newinstr(b, op_loc, 0); b = &((*b)->l_next);
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				virgin = 0;
+			}
+			else {
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
+				newinstr(b, op_asp, sz); b = &((*b)->l_next);
+				newinstr(b, op_sbu, sz); b = &((*b)->l_next);
+				retval++;
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				newinstr(b, op_loc, n1); b = &((*b)->l_next);
+				newinstr(b, op_slu, sz); b = &((*b)->l_next);
+				retval++;
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				newinstr(b, op_dup, 2*sz); b = &((*b)->l_next);
+				newinstr(b, op_asp, sz); b = &((*b)->l_next);
+				newinstr(b, op_adu, sz); b = &((*b)->l_next);
+				newinstr(b, op_exg, sz); b = &((*b)->l_next);
+				retval++;
+			}
+			if (n0) {
+				newinstr(b, op_loc, n0); b = &((*b)->l_next);
+				newinstr(b, op_slu, sz); b = &((*b)->l_next);
+				retval++;
+			}
+		}
+  	}
+	newinstr(b, op_asp, sz);
+  	if (virgin) {
+		b = &((*b)->l_next);
+		newinstr(b, sz == wordsize ? op_loc : op_ldc, 0);
+  	}
+	*e = *b;
+	return retval == 0 ? 1 : retval;
+#undef newinstr
 }
