@@ -1,4 +1,5 @@
-#include <em.h>
+#include <em_arith.h>
+#include <em_label.h>
 #include <em_comp.h>
 #include <em_pseu.h>
 #include <em_flag.h>
