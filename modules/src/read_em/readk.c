@@ -138,7 +138,7 @@ getarg(typset)
 		*ap = *ap1;
 		i_emargs--;
 		ap1 = getarg(cst_ptyp);
-		if (argtyp == sof_ptyp) {	/* non-numeric label */
+		if (ap->em_argtype == sof_ptyp) {	/* non-numeric label */
 			ap->em_soff = ap1->em_cst;
 		}
 		else	ap->em_noff = ap1->em_cst;
