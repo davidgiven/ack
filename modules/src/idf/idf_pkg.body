@@ -38,7 +38,7 @@ IDF_new(tg, size, cpy)
 		pidf = (struct idf *) Malloc(NIDS * sizeof (struct idf));
 	}
 
-	id = *pidf;
+	id = pidf;
 	pidf++;
 	*id = null_idf;
 
