@@ -16,6 +16,7 @@
  */
 
 /* Author: E.G. Keizer */
+static char rcs_id[]=	"$Header$" ;
 
 /* test for structure parameters, assignment and return */
 # define ASIZE 26
@@ -148,11 +149,11 @@ callt() {
 struct w3 setp1(count) {
 	struct w3 myp ;
 
-	if ( count<0 ) {
+	if ( count<=0 ) {
 		return(myp) ;
 	}
 	myp = setp1(count-1) ;
-	myp.w3_a[count] = 99-count ;
+	myp.w3_a[count-1] = 99-count ;
 	return(myp) ;
 }
 
