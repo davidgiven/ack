@@ -1,35 +1,38 @@
 # $Header$
 #	M A K E F I L E   F O R   A C K   C - C O M P I L E R
 
-# Some paths
-BIN =/user1/$$USER/bin#		# provisional ???
-EM = /usr/em#			# where to find the ACK tree
-ACK = $(EM)/bin/ack#		# old ACK C compiler
-EM_INCLUDES =$(EM)/h#		# directory containing EM interface definition
+# Machine and environ dependent definitions
+EM = /user1/erikb/em#				# ACK tree on this machine
+DESTINATION = /user1/$$USER/bin#		# where to put the stuff
+MKDEP = /user1/erikb/bin/mkdep#			# dependency generator
+MAP = -DInsertFile=ins_file -DInsertText=ins_text#	# bug in m68k2 back end
+SIM = /user1/dick/bin/sim#			# Dicks sim program
 
-# Libraries
-SYSLIB = /user1/erikb/em/lib/libsystem.a
-EMKLIB = /user1/erikb/em/lib/libemk.a
-EMELIB = /user1/erikb/em/lib/libeme.a
-STRLIB = /user1/erikb/em/lib/libstr.a
-PRTLIB = /user1/erikb/em/lib/libprint.a
-EMMESLIB = /user1/erikb/em/lib/libem_mes.a
-LIBS = $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
-ELIBS = $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
-LIB_INCLUDES = /user1/erikb/em/h
+# Libraries and EM interface definitions
+SYSLIB = $(EM)/modules/lib/libsystem.a
+EMKLIB = $(EM)/modules/lib/libemk.a
+EMELIB = $(EM)/modules/lib/libeme.a
+STRLIB = $(EM)/modules/lib/libstr.a
+PRTLIB = $(EM)/modules/lib/libprint.a
+EMMESLIB = $(EM)/modules/lib/libem_mes.a
+CH3LIB = $(EM)/modules/lib/libch3.a
+LIBS = $(CH3LIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
+ELIBS = $(CH3LIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) $(SYSLIB)
+LIB_INCLUDES = $(EM)/modules/h
+EM_INCLUDES = $(EM)/h
 
 # Where to install the compiler and its driver
-CEMCOM = $(BIN)/cemcom
-DRIVER = $(BIN)/cem
+CEMCOM = $(DESTINATION)/cemcom
+DRIVER = $(DESTINATION)/cem
 
 # What C compiler to use and how
-CC = $(ACK) -.c
-CC = CC
-CC = /bin/cc
+# CC = $(ACK) -.c
+# CC = CC
+# CC = /bin/cc
 COPTIONS =
 
 # What parser generator to use and how
-GEN = /user0/ceriel/bin/LLgen
+GEN = $(EM)/bin/LLgen
 GENOPTIONS = -vv
 
 # Special #defines during compilation
@@ -79,10 +82,10 @@ NEXTFILES = code.str declar.str decspecs.str def.str expr.str field.str \
 
 all:	cc
 
-cc:	
-	make hfiles
-	make LLfiles
-	make main
+cc:
+	make "CC=$(CC)" hfiles
+	make "CC=$(CC)" LLfiles
+	make "CC=$(CC)" main
 
 cem:	cem.c
 	$(CC) -O cem.c $(SYSLIB) -o cem
@@ -160,8 +163,7 @@ listobjects:
 depend:	cfiles
 	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >>Makefile.new
-	/user1/erikb/bin/mkdep `sources $(OBJ)` | \
-		sed 's/\.c:/.o:/' >>Makefile.new
+	$(MKDEP) `sources $(OBJ)` | sed 's/\.c:/.o:/' >>Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
 	
@@ -214,7 +216,7 @@ input.o: LLlex.h alloc.h arith.h assert.h debug.h idepth.h input.h inputtype.h i
 domacro.o: LLlex.h Lpars.h alloc.h arith.h assert.h botch_free.h class.h debug.h idf.h idfsize.h ifdepth.h input.h interface.h macro.h nopp.h nparams.h parbufsize.h spec_arith.h storage.h textsize.h
 replace.o: LLlex.h alloc.h arith.h assert.h class.h debug.h idf.h input.h interface.h macro.h nopp.h pathlength.h spec_arith.h strsize.h
 init.o: alloc.h class.h idf.h interface.h macro.h nopp.h predefine.h
-options.o: align.h arith.h class.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h
+options.o: align.h arith.h class.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h use_tmp.h
 scan.o: class.h idf.h input.h interface.h lapbuf.h macro.h nopp.h nparams.h
 skip.o: LLlex.h arith.h class.h input.h interface.h nopp.h spec_arith.h
 stack.o: Lpars.h alloc.h arith.h botch_free.h debug.h def.h idf.h level.h mes.h nobitfield.h nopp.h spec_arith.h stack.h storage.h struct.h type.h use_tmp.h
