@@ -582,6 +582,7 @@ lexwarning(W_ORDINARY, "overflow in constant");
 				LoadChar(ch);
 				if (!(ch == '+' || ch == '-' || is_dig(ch)))
 					goto noscale;
+				UnloadChar(ch);
 			}
 			if (np < &buf[NUMSIZE]) *np++ = 'E';
 			LoadChar(ch);
