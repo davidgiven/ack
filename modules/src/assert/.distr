@@ -1,4 +1,4 @@
 BadAssert.c
-Makefile
+proto.make
 assert.3
 assert.h

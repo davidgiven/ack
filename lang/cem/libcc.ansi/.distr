@@ -1,15 +1,13 @@
 LIST
-MakeArch
-Makefile
 assert
 ctype
 errno
 head_ac.e
 headers
 locale
-make.proto
 math
 misc
+proto.make
 setjmp
 signal
 stdio
