@@ -83,8 +83,8 @@ char *sect;
 long addr;
 {
 #ifdef WORDS_REVERSED
-	return ((long)get2(sect,addr) << 16) | get2(sect, addr+2);
+	return ((long)get2(sect,addr) << 16) | (get2(sect, addr+2) & 65535L);
 #else
-	return ((long)get2(sect,addr+2) << 16) | get2(sect, addr);
+	return ((long)get2(sect,addr+2) << 16) | (get2(sect, addr) & 65535L);
 #endif
 }
