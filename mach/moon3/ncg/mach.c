@@ -9,7 +9,7 @@
  * machine dependent back end routines for the Motorola 68000, 68010 or 68020
  */
 
-#include "whichone.h"
+#include <whichone.h>
 #include <stb.h>
 
 con_part(sz,w) register sz; word w; {
