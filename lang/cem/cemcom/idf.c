@@ -607,7 +607,7 @@ declare_formals(fp)
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
-		f_offset = align(f_offset + def->df_type->tp_size, word_align);
+		f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
 		formal_cvt(def); /* cvt int to char or short, if necessary */
 		se = se->next;
 		def->df_level = L_FORMAL2;	/* CJ */
