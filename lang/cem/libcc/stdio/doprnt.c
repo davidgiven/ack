@@ -95,7 +95,7 @@ _doprnt(fmt,args,stream)
 	unsigned int    uint ;
 	register int    j ;
 	int             i,c,rjust,width,ndigit,ndfnd,zfill;
-	char            *oldfmt,*s1,buf[129];
+	char            *oldfmt,*s1,buf[1025];
 
 	nextarg = args;
 	while (c = *fmt++) {
