@@ -186,6 +186,34 @@ STATIC fiddle_stack(lnp)
 			dummy.tk_size = off_set(lnp);
 			Push(&dummy);
 			break;
+		case op_beq:
+		case op_bge:
+		case op_bgt:
+		case op_bne:
+		case op_ble:
+		case op_blt:
+			Pop(&dummy, (offset) ws);
+			Pop(&dummy, (offset) ws);
+			break;
+		case op_bra:
+		case op_csa:/* ??? */
+		case op_csb:/* ??? */
+		case op_gto:/* ??? */
+		case op_ret:/* ??? */
+		case op_rtt:/* ??? */
+			break;
+		case op_zeq:
+		case op_zge:
+		case op_zgt:
+		case op_zne:
+		case op_zle:
+		case op_zlt:
+		case op_trp:
+			Pop(&dummy, (offset) ws);
+			break;
+		case op_rck:
+			Pop(&dummy, (offset) ps);
+			break;
 	}
 }
 
@@ -317,6 +345,7 @@ vnm(bp)
 				hopeless(INSTR(lnp));
 				break;
 			case BBLOCK_END:
+				fiddle_stack(lnp);
 				break;
 			default:
 				assert(FALSE);
