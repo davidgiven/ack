@@ -62,9 +62,14 @@ byte *trypat(bp,len) register byte *bp; {
 		}
 	getint(i,bp);
 	if (i!=0) {
+		struct emline *svp = saveemp;
+
+		saveemp = emp;
 		result = compute(&enodes[i]);
-		if (result.e_typ != EV_INT || result.e_v.e_con == 0)
+		if (result.e_typ != EV_INT || result.e_v.e_con == 0) {
+			saveemp = svp;
 			return(0);
+		}
 	}
 #ifndef NDEBUG
 	if (Debug) {
