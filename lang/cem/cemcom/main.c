@@ -171,6 +171,7 @@ compile(argc, argv)
 	File_Inserted = 1;
 	init();
 	LineNumber = 0;
+	nestlevel = -1;
 #ifndef NOPP
 	WorkingDir = getwdir(source);
 #endif NOPP

@@ -53,7 +53,6 @@ AtEoIT()
 AtEoIF()
 {
 #ifndef NOPP
-	extern int nestlevel;
 
 	if (nestlevel != -1) lexwarning("missing #endif");
 	else

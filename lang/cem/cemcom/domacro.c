@@ -31,7 +31,6 @@ IMPORT char *getwdir();
 PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
-int nestlevel = -1;		/* initially no nesting level.		*/
 
 PRIVATE struct idf *
 GetIdentifier()
@@ -250,6 +249,7 @@ do_include()
 			File_Inserted = 1;
 			FileName = result;
 			LineNumber = 0;
+			nestlevel = -1;
 		}
 	}
 }
