@@ -1,99 +1,130 @@
 .\" $Header$
-.tr ~
 .TH UNI_ASS VI
 .ad
 .SH NAME
-uni_ass \- universal assembler/loader
+uni_ass \- universal assembler, assembler/loader
 .SH SYNOPSIS
-/usr/em/lib/\fImachine\fP_as [options] argument ...
+~em/lib/\fImach\fP/as [options] argument ...
 .SH DESCRIPTION
 The universal assembler is a framework allowing easy
 generation of an assembler for any byte oriented machine.
 The framework includes common pseudo instructions for name
 definition, label usage, storage allocation and initialization
 and expression evaluation.
-The resulting program assembles and links assembly modules.
-Arguments may be flags, assembly language modules or libraries.
+The resulting program assembles assembly modules.
+For some machines, it also does the link-editing (loading).
+Arguments may be flags, assembly language modules, or,
+in the case of an assembler/loader, arch(1) libraries.
 .br
 Flags are:
-.IP -d[\fIn\fP]
-Produce a listing on standard output, the octal number
-\fIn\fP is mainly used for debugging purposes.
-The default is 700. 500 and 600 give slightly different
-listings.
-.IP -s[\fIn\fP]
-Produce a human-readable symbol table on standard output.
-The default for \fIn\fP is 3.
-The value 2 causes a listing of only the symbols internal to
-the modules.
-The value 1 causes a listing of external symbols only.
-.IP -o
-The argument following this flag is taken as the name of the
+.IP \-d\fIonum\fP
+This option controls the listing.  Default is no listing.
+.I Onum
+is interpreted as an octal number.
+Each bit controls part of the listing as follows:
+.RS
+.nf
+0001: addresses in pass 1
+0002: generated code in pass 1
+0004: not used
+0010: addresses in pass 2
+0020: generated code in pass 2
+0040: source lines in pass 2
+0100: addresses in pass 3
+0200: generated code in pass 3
+0400: source lines in pass 3
+1000: force .list and ignore .nolist
+.fi
+.RE
+Thus bits in 0 to 8 control the listing format and
+bit 9 forces a complete listing.
+If
+.I onum
+is omitted or is 000 it is interpreted as 0700.
+If
+.I onum
+is 1000 it is interpreted as 1700.
+.br
+Note that '-d' alone (unless it contains bit 9)
+is not enough to get a listing.
+A .list pseudo is also needed in each module to be listed.
+.IP -s[\fIonum\fP]
+This option controls the
+amount of symbolic debug information generated.
+.I Onum
+is interpreted as an octal number.
+The bits have the following meaning:
+.RS
+.nf
+001: external symbols
+002: local symbols
+004: local, compiler generated labels
+010: symbols defined in
+.I .symb
+pseudo instruction
+020: records for
+.I .line
+and
+.I .file
+statements
+040: section names
+.fi
+.RE
+Default is 073: all except local compiler labels.
+.IP -r
+Generate relocation information, for assemblers that can.
+.IP -b
+Turn off branch optimization.
+.IP -o\fIname\fP
+.IP -"o \fIname\fP"
+.I name
+is taken as the name of the
 resulting load file.
 The default name is \fBa.out\fP.
-.PD
 .PP
-The assemblers assemble
+The assembler\-loaders assemble
 and link together assembly language modules
 machine
 from files and libraries,
-producing an a.out file.
+producing an \fIack.out\fP(5) format file, without relocation information.
+The assemblers produce a relocatable \fIack.out\fP(5) format file.
 .PP
 Two different types of arguments are allowed:
 .IP "1-"
 Assembly language modules
 .PD 0
 .IP "2-"
-UNIX archives, as maintained by arch(I). These archives must
+UNIX archives, as maintained by arch(1). These archives must
 only contain
 assembly language modules with \fI.define\fP as their first
 statement.
+These are only accepted by assembler\-loaders.
 .PD
 .PP
-Note that it is not possible to do a partial load;
+Note that assembler\-loaders cannot do a partial load;
 loading starts from assembly language and produces binary
-machine code. No symbol table and no relocation bits are produced.
-.SH "SEGMENTS and TYPES"
+machine code. No relocation bits are produced.
+On the other hand, assemblers produce a relocatable file, to be handled
+by \fIled\fP(1).
+.SH "SECTIONS and TYPES"
 The statements allocating and initializing space,
 like instructions and
 some pseudo-instruction reserve that space in the current
-segment.
-The currently reigning type of segment is determined by
-one of the pseudo-instructions: \fI.text, .data, .bss\fP and
-\&\fI.org\fP.
-The assembler concatenates all space allocated in each of the
-text, data and bss segments.
-That is: every byte in a text segment is followed by another
-byte in the text segment except the last, of which there is
-only one in each program.
-The org segment differs from the other three in the sense that
-the assembler makes no attempt to concatenate pieces of org
-segments.
-Each \fI.org\fP pseudo-instruction has a parameter telling where it
-should start allocating space.
-In the final stages of the assembly the text, data and bss
-segments are concatenated in that order after the length of
-each segment has been made a multiple of a machine dependent
-constant.
-The first segment (text) starts at the location that is given
-as an argument to the .base pseudo-instruction.
-The default is 0.
-.sp
-The labels defined in a particular segment
-have the type of that
-segment, other types are: \fIundefined\fP and \fIabsolute\fP.
-All variables that do not have a value have the type
-\fIundefined\fP, a good example is an unsatisfied external
-reference.
-Numbers have the type \fIabsolute\fP.
-The type of expressions depends on both the operators and the
-operands used.
-Generally, but not always, the following rule holds: whenever
-one of the operands is absolute and the resulting type is that
-of the other operand.
-Not every operation is allowed on every combination of types,
-for example: it is not allowed to add two \fItext\fP values.
+section.
+The currently reigning type of section is determined by
+the pseudo-instruction \fI.sect\fP.
+Actually, the assembler knows nothing about section types. Sections have
+numbers. The first section met gets number 0, the second gets number 1, etc.
+Therefore, every assembly files should start with a line just mentioning the
+sections used in the right order, so that no confusion can arise for \fIled\fP(1).
 .SH SYNTAX
+.PP
+The syntax of expressions is identical to the C expression syntax,
+except that square brackets are used for grouping.
+Labels are followed by a colon, and are identifiers or
+numbers between 0 and 9.
+Numeric labels can be referenced using the label followed by 'b' of 'f'
+determining the direction of search, backwards or forwards.
 .IP letters
 Both upper and lower case may be used and are seen as
 different.
@@ -101,24 +132,8 @@ The underscore '_' is considered to be a letter.
 .IP identifiers
 Identifiers are a sequence of letters and digits, starting with
 a letter or a period '.'.
-Only the first eight characters are remembered by the
-assemblers, identifiers with the same first eight characters
-are considered to be identical.
 Identifiers can, only once, receive a value through assignment or a
 label definition.
-.IP "local labels"
-Local labels consist of a single digit.
-They can only be defined in the label part of a statement and
-used anywhere an identifier is allowed.
-They can be redefined at will.
-Two forms of use exist: \fIf\fPorward and \fIb\fPackward
-references.
-The first consists of the digit followed by an \fIf\fP
-and refers to the first definition of that label following the
-reference.
-The second consists of the digit followed by an \fIb\fP
-and refers to the last definition of the label before the
-reference.
 .IP strings
 Strings are enclosed in single "'" or double """ quotes.
 The use of \eddd where ddd is an octal number and \en, \er,
@@ -131,44 +146,13 @@ No difference is made between small and capital letters.
 .br
 The base of the number is determined in the following way:
 .nf
-if the number ends with an 'h' it is hexadecimal else
-    if the number starts with '0x' it is hexadecimal else
-        if the number starts with '0' it is octal else
-            it's decimal.
+if the number starts with '0x' it is hexadecimal else
+    if the number starts with '0' it is octal else
+        it's decimal.
 .fi
-Note that the number \fI0x10h\fP is an illegal hexadecimal number,
-because \fIx\fP is an illegal hexadecimal digit.
-The number should be written as \fI0x10\fP or \fI10h\fP.
 The range of numbers depends on the machine.
 A rule of the thumb is that the width of the machine's registers
 the same is as the number of bits allowed in numbers.
-.IP expressions
-The following operators are recognized:
-.nf
-.sp 1
-  op    type       action
-
-   |    binary    bitwise or
-   &    binary    bitwise and
-   ^    binary    bitwise exclusive or
-   +    binary    two's complement addition
-   +    unary     no effect
-   -    binary    two's complement subtraction
-   -    unary     two's complement negation
-   *    binary    two's complement multiplication
-   /    binary    two's complement division
-   %    binary    two's complement remainder
-.tr ~~
-   ~    unary     one's complement negation
-.tr ~
-.sp 1
-.fi
-The operator precedence is the same as in C.
-.br
-The operands allowed are: identifiers, numbers and expressions.
-The evaluation order can be changed using the brackets '[' and
-\&']'.
-.sp
 .IP comment
 The character '!' denotes the start of comment, every character
 up to the next newline is skipped.
@@ -177,8 +161,8 @@ comment.
 .IP statements
 Statements are separated by newlines and ';' and can be
 preceded by label definitions.
-Label definitions have the form "\fIidentifier\fP~:" or
-"\fIdigit\fP~:".
+Label definitions have the form "\fIidentifier\fP:" or
+"\fIdigit\fP:".
 Statements can be: empty, an assignment, an instruction or a
 pseudo-instruction.
 .IP assignment
@@ -190,8 +174,6 @@ The identifier receives the value and type of the expression.
 .IP instruction
 The syntax of an instruction depends on the type of the target
 machine.
-An example of a assembly file is presented at
-the end of the document.
 .IP pseudo-instruction
 .de Pu
 .sp 1
@@ -205,24 +187,20 @@ used in other modules.
 .Pu ".define \fIidentifier [, identifier]*\fP"
 Used for modules that are to be part of a libary.
 The .define pseudo's should be the first in such modules.
-When scanning a module in a library the univeral assembler
+When scanning a module in a library the assembler\-loader
 checks whether any of its unsatified external references is
 mentioned in a .define list. If so, it includes that module in
 the program.
 The identifiers mentioned in the list are exported and can be
 used in other modules.
-.Pu ".byte \fIexpression [, expression]*\fP"
+.Pu ".data1 \fIexpression [, expression]*\fP"
 Initialize a sequence of bytes.
 This is not followed by automatic alignment.
-.Pu ".short \fIexpression [, expression]*\fP"
+.Pu ".data2 \fIexpression [, expression]*\fP"
 Initialize a sequence of shorts (2-byte values).
 This is not followed by automatic alignment.
-.Pu ".long \fIexpression [, expression]*\fP"
+.Pu ".data4 \fIexpression [, expression]*\fP"
 Initialize a sequence of longs (4-byte values).
-This is not followed by automatic alignment.
-.Pu ".word \fIexpression [, expression]*\fP"
-Initialize a sequence of words. The number of bytes occupied by
-a word depends on the target machine.
 This is not followed by automatic alignment.
 .Pu ".ascii \fIstring\fP"
 Initialize a sequence of bytes with the value of the bytes in
@@ -239,94 +217,42 @@ The default is the word-size of the target machine.
 .Pu ".space \fIexpression\fP"
 Allocate the indicated amount of bytes.
 The expression must be absolute.
-.Pu ".org \fIexpression\fP"
-Start an org segment with the location counter at the indicated
-value.
-The value of the expression must be absolute.
-.Pu ".text"
-.Pu ".data"
-.Pu ".bss"
-Start an segment of the indicated type.
+.Pu ".comm \fIname\fP,\fIexpression\fP"
+Allocate the indicated amount of bytes and assign the location of the first
+byte allocated to
+.IR name ,
+unless
+.I name 
+is defined elsewhere.
+If the scope of
+.I name
+is extern, then assemblers leave definition of
+.I name 
+to the linkeditor \fIled\fP(1).
+.Pu .sect \fIname\fP
+section name definition.
 .Pu ".base \fIexpresssion\fP"
 Set the starting address of the first of the consecutive segments 
 (text) to the value of the expression.
 The expression must be absolute.
-.Pu ".errnz \fIexpression\fP"
-Stop with a fatal error message when the value of the
-expression is non-zero.
+.Pu .assert \fIexpression\fP
+assembly-time assertion checking. Stop with a fatal error message when
+the value of the expression is zero.
+.Pu .symb, .line, .file
+symbolic debug
+.Pu .nolist, .list
+.br
+listing control
 .SH "SEE ALSO"
-ack(I), arch(I), a.out(V)
-.SH "EXAMPLE"
-An example of INtel 8086 assembly code.
-.sp 2
-.nf
-.ta 8n 16n 32n 40n 48n 56n 64n
-	.define begbss
-	.define hol0,.diverr,.reghp
-	.define EIDIVZ
-
-	EIDIVZ          = 6
-
-	base            = 0x01C0
-	topmem          = 0xFFF0
-
-		.org    topmem-16
-	.extern __n_line
-	maxmem:
-	__n_line:
-		.space  16
-		.errnz  __n_line-0xFFE0
-
-		.base   base
-
-		.text
-		cld
-		xor     ax,ax
-		mov     (2),cs
-		mov     (0),.diverr
-		mov     sp,maxmem
-		mov     di,begbss
-		mov     cx,[[endbss-begbss]/2]&0x7FFF
-		! xor     ax,ax ! ax still is 0
-		rep stos
-		mov     ax,1
-		push    ax
-		call    _start
-	3:
-		jmp	3b
-	.diverr:
-		push    ax
-		mov     ax,EIDIVZ
-		call    .error
-		pop     ax
-		iret
-		cmp	0,4(bx)(di)	! just to show this addr. mode
-
-		.data
-	begdata:
-	hol0:
-		.word   0,0
-		.word   0,0
-		.word   3f
-	.reghp:
-		.word   endbss
-	3:
-		.asciz "PROGRAM"
-	.sp 3
-.fi
+ack(1), arch(1), ack.out(5)
 .SH DIAGNOSTICS
 Various diagnostics may be produced.
 The most likely errors, however, are unresolved references,
 probably caused by the omission of a library argument.
 .SH BUGS
-The resulting a.out file contains no information about the size
-and starting address of the segments.
-.br
-The resulting a.out file does not contain a symbol table.
-.br
 The alignment might give rise to internal assertion errors when
 the alignment requestes is larger than the machine dependent
 segment alignment.
 .br
 Identifiers declared as externals cannot be used as locals in
-any following module.
+any following module. This only is a problem for assembler\-loaders.
