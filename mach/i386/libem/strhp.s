@@ -13,7 +13,7 @@
 	and	eax,~0777
 	push	ebx
 	push	eax
-	call	__brk
+	call	BRK
 	pop	ecx
 	pop	ebx
 	cmp	eax,-1

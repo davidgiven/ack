@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define .trp
-.extern .trppc, .stop
+.extern .trppc, EXIT
 
 		! eax is trap number
 .trp:
@@ -15,4 +15,4 @@
 	ret
 2:
 	push	eax
-	call    .stop
+	jmp	EXIT

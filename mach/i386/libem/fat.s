@@ -4,7 +4,7 @@
 
 .fat:
 .extern .trp
-.extern .stop
+.extern EXIT
 	call    .trp
-	call    .stop
+	jmp     EXIT
 	! no return

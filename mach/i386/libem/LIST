@@ -39,7 +39,6 @@ set.s
 sli.s
 sri.s
 sti.s
-stop.s
 strhp.s
 trp.s
 unknown.s

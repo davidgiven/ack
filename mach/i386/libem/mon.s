@@ -3,5 +3,5 @@
 .define .mon
 
 .mon:
-.extern .stop
-	call    .stop
+.extern EXIT
+	jmp    EXIT
