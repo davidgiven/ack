@@ -135,7 +135,7 @@ case `ack_sys` in
 vax_bsd4_2)	( cd ../lib/vax4
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__BSD4_2/
+/CPP_F/s/$/ -D__BSD4_2/
 w
 q
 ABC
@@ -144,7 +144,7 @@ ABC
 vax_sysV_2)	( cd ../lib/vax4
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__USG/
+/CPP_F/s/$/ -D__USG/
 w
 q
 ABC
@@ -156,7 +156,7 @@ m68_sysV_0)
 		( cd ../lib/int24
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__USG/
+/CPP_F/s/$/ -D__USG/
 w
 q
 ABC
@@ -164,7 +164,7 @@ ABC
 		( cd ../lib/int44
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__USG/
+/CPP_F/s/$/ -D__USG/
 w
 q
 ABC
@@ -174,7 +174,7 @@ sun2|sun3)
 		( cd ../lib/int24
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__BSD4_2/
+/CPP_F/s/$/ -D__BSD4_2/
 w
 q
 ABC
@@ -182,7 +182,7 @@ ABC
 		( cd ../lib/int44
 		  cp descr descr.orig
 		  ed - descr <<'ABC'
-/CPP_F/s/$/-D__BSD4_2/
+/CPP_F/s/$/ -D__BSD4_2/
 w
 q
 ABC
