@@ -1,9 +1,0 @@
-case $# in
-1) ;;
-*) echo "usage $0 file";exit ;;
-esac
-head -1 $1>$$.head
-tail -1 $1>$$.tail
-tail +2 $1|sort +0.3|tail +2>$$.middle
-cat $$.head $$.middle $$.tail >$1
-rm $$.head $$.middle $$.tail

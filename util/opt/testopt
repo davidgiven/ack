@@ -1,8 +1,0 @@
-: '$Header$'
-while true
-do
-  (echo ' mes 2,2,2
- pro $foo,0';cat;echo ' end') >t.e
-  npc -2=${1-opt} -O -2 t.e;npc -D t.m
-  cat t.e
-done
