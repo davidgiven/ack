@@ -719,7 +719,7 @@ ForceForwardTypeDef(df)
 		node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 	}
 	while (df1 && df1->df_kind == D_FORWTYPE) {
-		t_def *df2 = df1->df_forw_def;
+		df2 = df1->df_forw_def;
 		df1->df_type = df->df_type;
 		SolveForwardTypeRefs(df1);
 		free_def(df1);

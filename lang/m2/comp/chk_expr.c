@@ -86,6 +86,7 @@ MkCoercion(pnd, tp)
 				break;
 			default:
 				crash("MkCoercion");
+				/*NOTREACHED*/
 			}
 			if (flt_status == FLT_OVFL) {
 				wmess = "conversion";
@@ -912,7 +913,8 @@ ChkBinOper(expp)
 
 	/* First, check BOTH operands */
 
-	retval = ChkExpression(&(exp->nd_LEFT)) & ChkExpression(&(exp->nd_RIGHT));
+	retval = ChkExpression(&(exp->nd_LEFT));
+	retval &= ChkExpression(&(exp->nd_RIGHT));
 
 	tpl = BaseType(exp->nd_LEFT->nd_type);
 	tpr = BaseType(exp->nd_RIGHT->nd_type);

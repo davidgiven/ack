@@ -29,7 +29,6 @@
 #include	"type.h"
 #include	"warning.h"
 
-extern long str2long();
 extern char *getwdir();
 
 t_token		dot,

@@ -901,10 +901,12 @@ DoForInit(nd)
 	register t_def *df;
 	t_type *base_tp;
 	t_type *tpl, *tpr;
+	int r;
 
-	if (!( ChkVariable(&(nd->nd_LEFT), D_USED|D_DEFINED) &
-	       ChkExpression(&(right->nd_LEFT)) &
-	       ChkExpression(&(right->nd_RIGHT)))) return 0;
+	r = ChkVariable(&(nd->nd_LEFT), D_USED|D_DEFINED);
+	r &= ChkExpression(&(right->nd_LEFT));
+	r &= ChkExpression(&(right->nd_RIGHT));
+	if (!r) return 0;
 
 	df = nd->nd_LEFT->nd_def;
 	if (df->df_kind == D_FIELD) {
