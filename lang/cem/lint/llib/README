@@ -4,19 +4,19 @@
 # $Header$
 
 This directory contains the standard lint libraries.  Normally, nothing
-needs to be done here.  The standard library llib-lc contains all entries
+needs to be done here.  The standard library c.llb contains all entries
 from termlib, curses and math as well, which provides the user with
 advance warnings if he inadvertently uses a global name that is also
 used by one of these libraries.
 
 A file with a UNIX 7 view of the system calls is provided, named unix7.c.
-If need be it can be updated and merged into llib-lc by calling
+If need be it can be updated and merged into c.llb by calling
 
-	make llib-lc  (or just make)
+	make c.llb  (or just make)
 
 If one of the other entries is a shade off, it is unsually easier to edit
-llib-lc by hand.
+c.llb by hand.
 
-Empty files for llib-ltermlib, llib-lcurses and llib-lm are provided
+Empty files for termlib.llb, curses.llb and m.llb are provided
 for compatibility.
 

@@ -46,8 +46,8 @@ int	getuid() { return(0); }
 int	getgid() { return(0); }
 int	geteuid() { return(0); }
 int	getegid() { return(0); }
-	/*VARGARGS2*/
-int	ioctl(d, r) int d, r; { return(0); }
+	/*VARARGS2*/
+int	ioctl(d, r) int d; unsigned int r; { return(0); }
 int	kill(p, s) { return(0); }
 int	link(a, b) char *a, *b; { return(0); }
 long	lseek(f, o, d) long o; { return(0); }
