@@ -35,7 +35,6 @@ STATIC reachwalk();
 co_reach() {
 	/*
 	 * Check for undefined or unreachable nonterminals.
-	 * An undefined nonterminal is a fatal error!
 	 */
 	register p_nont		p;
 	register p_start	st;
@@ -50,6 +49,7 @@ co_reach() {
 				p->n_name);
 		}
 	}
+
 	/*
 	 * Walk the grammar rules, starting with the startsymbols
 	 * Mark the nonterminals that are encountered with the flag
@@ -106,7 +106,7 @@ reachwalk(p) register p_gram p; {
 			register p_nont n = &nonterms[g_getcont(p)];
 
 			reachable(n);
-			if (g_gettype(n->n_rule) == EORULE &&
+			if (p->n_rule && g_gettype(n->n_rule) == EORULE &&
 			    ! g_getnpar(p) && (getntparams(n) == 0)) {
 				register p_gram np = p;
 				do {
