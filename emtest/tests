@@ -3583,19 +3583,6 @@ OK
  cmp
  zne *1
 OK
-; same as above but with ASS instead of ASP
- lxl 0
- cal $retp2
- loc PS
- ass WS
- lfr 2*PS
- lpi $retp2
- cmp
- zne *1
- lxl 0
- cmp
- zne *1
-OK
 PROC
  pro $retw0,0
  ret 0
