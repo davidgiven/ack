@@ -15,4 +15,5 @@ flt_str2fl.c
 flt_umin.c
 misc.h
 ucmp.c
+split.c
 flt_arith.3
