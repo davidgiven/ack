@@ -12,7 +12,7 @@ struct flt_mantissa {
 	long	flt_l_32;	/* low order 32 bits of mantissa */
 };
 
-typedef struct {
+typedef struct flt_arith {
 	short	flt_sign;	/* 0 for positive, 1 for negative */
 	short	flt_exp;	/* between -16384 and 16384 */
 	struct flt_mantissa flt_mantissa;	/* normalized, in [1,2). */
