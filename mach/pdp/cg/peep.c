@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include <stdio.h>
 
 /*
@@ -51,7 +55,7 @@ main() {
 		case 0:break;
 		case 2:puts("tst (sp)+");sa=0;break;
 		case 4:puts("cmp (sp)+,(sp)+");sa=0;break;
-		case 6:puts("add $6.,sp");sa=0;break;
+		case 6:puts("add $06,sp");sa=0;break;
 		}
 		puts(buf);
 	}
@@ -100,8 +104,8 @@ stackadjust() {
 	    buf[2]=='d' &&
 	    buf[3]==' ' &&
 	    buf[4]=='$' &&
-	    buf[5]=='6' &&
-	    buf[6]=='.' &&
+	    buf[5]=='0' &&
+	    buf[6]=='6' &&
 	    buf[7]==',' &&
 	    buf[8]=='s' &&
 	    buf[9]=='p' &&
@@ -112,7 +116,7 @@ stackadjust() {
 nullinstruction() {
 	register char *p;
 
-	if (buf[4]=='$' && buf[5]=='0' && buf[6]=='.' && buf[7]==',') {
+	if (buf[4]=='$' && buf[5]=='0' && buf[6]=='0' && buf[7]==',') {
 		p=index(buf,'-');
 		if (p!=0 && p[1]=='(')
 			return(0);
