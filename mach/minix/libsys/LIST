@@ -84,7 +84,6 @@ _getppid.c
 _getuid.c
 _gtty.c
 _ioctl.c
-_isatty.c
 _kill.c
 _link.c
 _lseek.c
