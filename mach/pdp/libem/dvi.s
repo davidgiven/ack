@@ -1,10 +1,10 @@
 / $Header$
 .text
 .globl dvi~
-.globl save1~,unknown~,dvi4~
+.globl unknown~,dvi4~
 
 dvi~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3
 	cmp	r0,$04
 	bgt	1f
 	beq	2f
@@ -16,5 +16,5 @@ dvi~:
 2:	jsr	pc,dvi4~
 	mov	r1,-(sp)
 	mov	r0,-(sp)
-3:	jmp	*save1~
+3:	jmp	(r3)
 1:	jmp	unknown~

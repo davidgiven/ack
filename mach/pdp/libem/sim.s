@@ -1,12 +1,12 @@
 / $Header$
 .text
 .globl sim~
-.globl trpim~,save1~
+.globl trpim~
 
 .float = 1
 
 sim~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3
 	mov	(sp)+,r0
 	mov	r0,trpim~
 .if .float
@@ -26,4 +26,4 @@ sim~:
 	bic	$0400,r1
 0:	ldfps	r1
 .endif
-	jmp	*save1~
+	jmp	(r3)

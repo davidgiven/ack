@@ -1,7 +1,6 @@
 / $Header$
 .text
 .globl ret~,lfr~,retar
-.globl save1~
 .globl unknown~
 
 / Size in r0
@@ -19,13 +18,13 @@ ret~:
 	rts	pc
 9:	jmp	unknown~
 lfr~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3
 	asr	r0
 	beq	4f
 	mov	$retar,r1
 5:	mov	(r1)+,-(sp)
 	sob	r0,5b
-4:	jmp	*save1~
+4:	jmp	(r3)
 
 .data
 retar:	.=.+16.

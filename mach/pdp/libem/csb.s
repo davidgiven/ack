@@ -6,7 +6,6 @@
 ECASE	= 20.
 
 csb~:
-	mov	r3,-(sp)
 	mov	(r0)+,-(sp)
 	mov	(r0)+,r3
 	beq	1f
@@ -19,8 +18,6 @@ csb~:
 2:	tst	(sp)+
 	mov	(r0),r1
 4:	beq	5f
-	mov	(sp)+,r3
 	jmp	(r1)
-5:	mov	(sp)+,r3
-	mov	$ECASE,-(sp)
+5:	mov	$ECASE,-(sp)
 	jmp	fat~

@@ -1,19 +1,19 @@
 / $Header$
 .text
 .globl sru~,slu~
-.globl save1~,unknown~
+.globl unknown~
 
 sru~:
 	neg	2(sp)
 slu~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3
 	cmp	r0,$02
 	bgt	1f
 	mov	2(sp),r1
 	clr	r0
 	ashc	(sp)+,r0
 2:	mov	r1,-(sp)
-	jmp	*save1~
+	jmp	(r3)
 1:	cmp	r0,$04
 	bgt	3f
 	mov	02(sp),r0
@@ -27,5 +27,5 @@ slu~:
 	ashc	(sp)+,r0
 4:	mov	r0,(sp)
 	mov	r1,02(sp)
-	jmp	*save1~
+	jmp	(r3)
 3:	jmp	unknown~

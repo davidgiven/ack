@@ -1,7 +1,7 @@
 / $Header$
 .text
 .globl trp~,fat~
-.globl trppc~,trpim~
+.globl trppc~,trpim~,savearea,retar
 	write=4.
 
 fat~:
@@ -28,12 +28,44 @@ trp~:
 	movf    r2,-(sp)
 	movf    r3,-(sp)
 	stfps   -(sp)
+	mov	$savearea,r2
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	$retar,r2
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
+	mov	(r2)+,-(sp)
 	mov     r0,-(sp)
 	mov     trppc~,r0
 	beq     9f
 	clr     trppc~
 	jsr     pc,(r0)
 	tst     (sp)+
+	mov	$retar+16.,r2
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	$savearea+12.,r2
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
+	mov	(sp)+,-(r2)
 	ldfps   (sp)+
 	movf    (sp)+,r3
 	movf    (sp)+,r2

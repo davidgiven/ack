@@ -1,6 +1,6 @@
 / $Header$
 .text
-.globl save~,retu~,save1~
+.globl save~,retu~,savearea
 
 save~:
 	mov	r5,savearea
@@ -23,4 +23,3 @@ retu~:
 .even
 savearea:
 	.=.+12.
-save1~:	0

@@ -1,7 +1,7 @@
 / $Header$
 .text
 .globl mlu~
-.globl save1~,unknown~,mlu4~
+.globl unknown~,mlu4~
 
 mlu~:
 	cmp	r0,$04
@@ -12,9 +12,9 @@ mlu~:
 	mul	(sp)+,r1
 	mov	r1,-(sp)
 	jmp	(r0)
-2:	mov	(sp)+,save1~
+2:	mov	(sp)+,r3
 	jsr	pc,mlu4~
 	mov	r1,-(sp)
 	mov	r0,-(sp)
-	jmp	*save1~
+	jmp	(r3)
 1:	jmp	unknown~

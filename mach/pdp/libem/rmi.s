@@ -1,10 +1,10 @@
 / $Header$
 .text
 .globl rmi~
-.globl save1~,unknown~,rmi4~
+.globl unknown~,rmi4~
 
 rmi~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3
 	cmp	r0,$04
 	bgt	1f
 	beq	2f
@@ -16,5 +16,5 @@ rmi~:
 2:	jsr	pc,rmi4~
 	mov	r1,-(sp)
 	mov	r0,-(sp)
-3:	jmp	*save1~
+3:	jmp	(r3)
 1:	jmp	unknown~

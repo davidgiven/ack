@@ -9,6 +9,5 @@ cuu~:
 	asr	r0
 2:	clr	-(sp)
 	sob	r0,2b
-	jmp	(r1)
-1:	sub	r0,sp
+1:	sub	r0,sp	/ if out of sob loop r0==0
 	jmp	(r1)

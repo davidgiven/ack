@@ -1,7 +1,6 @@
 / $Header$
 	.text
 	.globl	cmu4~
-	.globl	save~,retu~
 cmu4~:
 	mov	(sp)+,r1
 	clr	r0

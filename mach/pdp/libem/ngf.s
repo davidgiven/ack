@@ -4,8 +4,7 @@
 .globl setfloat~
 
 ngf~:
-	mov	(sp)+,r1
 	jsr	pc,setfloat~
-	negf	(sp)
+	negf	2(sp)
 	setd
-	jmp	(r1)
+	rts	pc

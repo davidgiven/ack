@@ -1,11 +1,11 @@
 / $Header$
 .text
 .globl sri~
-.globl unknown~,save1~
+.globl unknown~
 
 / Size in r0
 sri~:
-	mov	(sp)+,save1~
+	mov	(sp)+,r3~
 	cmp	r0,$02
 	bgt	1f
 	mov	(sp)+,r1
@@ -13,7 +13,7 @@ sri~:
 	neg	r1
 	ash	r1,r0
 	mov	r0,-(sp)
-	jmp	*save1~
+	jmp	(r3)
 1:	cmp	r0,$04
 	bgt	2f
 	mov	02(sp),r0
@@ -22,5 +22,5 @@ sri~:
 	ashc	(sp)+,r0
 	mov	r0,(sp)
 	mov	r1,02(sp)
-	jmp	*save1~
+	jmp	(r3)
 2:	jmp	unknown~

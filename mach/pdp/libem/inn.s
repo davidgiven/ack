@@ -9,8 +9,7 @@ inn~:
 	cmp	r0,(sp)
 	bcc	1f
 	add	sp,r0
-	add	$4,r0
-	bitb	bits(r1),(r0)
+	bitb	bits(r1),4(r0)
 	beq	1f
 	mov	$01,r0
 	br	2f
