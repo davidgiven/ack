@@ -938,7 +938,7 @@ rmi lol stf $1==4 && inreg($2)==2
 			allocate(REG)
 			"divl3\t%[1],%[2],%[a]"
 			"mull2\t%[1],%[a]"
-			"subl3\t%[1],%[2],$3(%(regvar($2)%))"
+			"subl3\t%[a],%[2],$3(%(regvar($2)%))"
 			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 rmi sil $1==4 && $2<0
