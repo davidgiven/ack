@@ -30,7 +30,8 @@ statement :
 		ActualParameters?
 	|
 		[ BECOMES	
-		| '='		{ error("':=' expected instead of '='");
+		| %erroneous
+		  '='		{ error("':=' expected instead of '='");
 				  DOT = BECOMES;
 				}
 		]
