@@ -31,6 +31,7 @@
 
 extern int B_procno;
 
+void
 C_bss_ilb( n, l, i)
 arith n;
 label l;

@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_bss_cst( n, w, i)
 arith n, w;
 int i;

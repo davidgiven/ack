@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_bss_dlb( n, l, offs, i)
 arith n, offs;
 label l;

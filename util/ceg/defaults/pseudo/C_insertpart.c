@@ -2,6 +2,7 @@
 #include <em.h>
 #include "back.h"
 
+void
 C_insertpart( d)
 int d;
 
@@ -15,6 +16,7 @@ int d;
 }
 
 
+void
 C_beginpart( d)
 int d;
 
@@ -28,6 +30,7 @@ int d;
 }
 
 
+void
 C_endpart( d)
 int d;
 
@@ -41,6 +44,7 @@ int d;
 }
 
 
+int
 C_getid()
 {
 	static int id = 0;

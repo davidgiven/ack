@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_bss_dnam( n, s, offs, i)
 arith n, offs;
 char *s;

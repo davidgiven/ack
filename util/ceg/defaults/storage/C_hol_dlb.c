@@ -31,6 +31,7 @@
 
 extern int B_holno;
 
+void
 C_hol_dlb( n, l, offs, i)
 arith n, offs;
 label l;

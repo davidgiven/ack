@@ -4,6 +4,7 @@
 
 extern int B_busy; 
 
+void
 C_close()
 {
 	assert( B_busy);

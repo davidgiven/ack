@@ -31,6 +31,7 @@
 
 extern int B_holno;
 
+void
 C_hol_pnam( n, s, i)
 arith n;
 char *s;

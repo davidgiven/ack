@@ -4,6 +4,7 @@
 
 extern int B_locals_created; 
 
+void
 C_end_narg()
 {
 	assert( B_locals_created);

@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_rom_dnam( g, o)
 char *g;
 arith o;

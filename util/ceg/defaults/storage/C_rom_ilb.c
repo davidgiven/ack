@@ -31,6 +31,7 @@
 
 extern int B_procno;
 
+void
 C_rom_ilb( l)
 label l;
 {

@@ -30,6 +30,7 @@
 #endif
 
 
+void
 C_con_cst( c)
 arith c;
 {

@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_rom_scon( s, n)
 char *s;
 arith n;

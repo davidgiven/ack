@@ -5,6 +5,7 @@
 extern int B_locals_created;
 extern int B_procno;
 
+void
 C_pro( s, l)
 char *s;
 arith l;

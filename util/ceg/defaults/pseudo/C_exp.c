@@ -2,6 +2,7 @@
 #include <em.h>
 #include "back.h"
 
+void
 C_exp( s)
 char *s;
 {

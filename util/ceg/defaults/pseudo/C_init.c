@@ -3,6 +3,7 @@
 #include <system.h>
 #include "mach.h"
 
+void
 C_init( wsize, psize)
 arith wsize, psize;
 {

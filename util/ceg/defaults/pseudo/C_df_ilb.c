@@ -4,6 +4,7 @@
 
 extern int B_procno;
 
+void
 C_df_ilb( l)
 label l;
 {

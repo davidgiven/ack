@@ -31,6 +31,7 @@
 
 extern int B_holno;
 
+void
 C_hol_cst( n, w, i)
 arith n, w;
 int i;

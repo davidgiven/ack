@@ -31,6 +31,7 @@
 
 extern int B_procno;
 
+void
 C_con_ilb( l)
 label l;
 {

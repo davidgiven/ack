@@ -29,6 +29,7 @@
 #define relocEM_PSIZE	reloc4
 #endif
 
+void
 C_con_dlb( g, o)
 label g;
 arith o;
