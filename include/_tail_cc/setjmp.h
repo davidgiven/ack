@@ -1,1 +1,1 @@
-typedef char *jmp_buf[3];
+typedef char jmp_buf[256];
