@@ -99,7 +99,7 @@ sys4:		cmp.l	#-1,d0
 _Xwait:		move.l	(sp)+,.retaddr
 .sect .data
 xxxx:
-	.data4 0, 0
+	.data4 0
 .sect .text
 		move.l	#xxxx,-(sp)
 		jsr	_wait
@@ -110,7 +110,7 @@ sys6:		cmp.l	#-1,d0
 		mov	d0,-(sp)
 		mov	d0,-(sp)
 		bra	2f
-1:		mov	xxxx+4,-(sp)		! ??
+1:		mov	d0,-(sp)		! ??
 		mov	xxxx,-(sp)
 		cl	-(sp)
 2:		move.l	.retaddr,a0
