@@ -21,8 +21,9 @@
 #define ALLORANL	(ALLOMODL + 1)		/* Ranlib information. */
 #define NMEMS		(ALLORANL + 1)
 
-typedef long		ind_t;
 #define BADOFF		((ind_t)-1)
+
+typedef long		ind_t;
 
 struct memory {
 	char	*mem_base;

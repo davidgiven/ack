@@ -422,6 +422,7 @@ hard_alloc(piece, size)
 		case ALLOSYMB:
 		case ALLOARCH:
 		case ALLOMODL:
+		case ALLORANL:
 			break;	/* Do not try to deallocate this. */
 		default:
 			dealloc(i);
@@ -499,8 +500,16 @@ core_free(piece, p)
 	char	*q = address(piece, mems[piece].mem_full);
 
 	assert(p < q);
-	mems[piece].mem_full -= ((ind_t)q - (ind_t)p);
-	mems[piece].mem_left += ((ind_t)q - (ind_t)p);
+	switch(sizeof(unsigned) == sizeof(char *)) {
+	case 1:
+		mems[piece].mem_full -= (unsigned) (q - p);
+		mems[piece].mem_left += (unsigned) (q - p);
+		break;
+	default:
+		mems[piece].mem_full -= (ind_t) q - (ind_t) p;
+		mems[piece].mem_left += (ind_t) q - (ind_t) p;
+		break;
+	}
 }
 
 /*
