@@ -1,4 +1,9 @@
 .define prf
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 prf:
 	ld	R0, hol0+4	!pointer to filename
@@ -29,8 +34,8 @@ prf:
 	ret
 1:	ld	R0, $name
 	jr	2b
-.data
+.sect .data
 fmt1:	.asciz	"%s, sp = %x, line %d:\n"
 name:	.asciz	"_unknown file_"
 saveprf:
-	.long 0
+	.data4 0

@@ -1,4 +1,9 @@
 .define sts2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 sts2:
 	popl	saveret, *RR14

@@ -1,4 +1,9 @@
 .define cmi4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 cmi4:
 	popl	saveret, *RR14

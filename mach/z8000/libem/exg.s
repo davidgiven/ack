@@ -1,4 +1,9 @@
 .define exg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !size (bytes) in R0
 exg:

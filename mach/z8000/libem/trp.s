@@ -1,4 +1,9 @@
 .define trp, fatal
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 fatal:
 	calr	trp
@@ -34,5 +39,5 @@ trp:
 3:	push	*RR14, $err
 	calr	printf
 	sc	$EXIT
-.data
+.sect .data
 err:	.asciz	"trap error %d\n"

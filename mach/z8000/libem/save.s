@@ -1,8 +1,13 @@
 .define saveret
 .define savereg
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
-.data
+.sect .data
 saveret:
-	.long 0
+	.data4 0
 savereg:
 	.space 20

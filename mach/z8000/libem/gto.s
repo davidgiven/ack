@@ -1,4 +1,9 @@
 .define gto
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 gto:
 	pop	R3, *RR14

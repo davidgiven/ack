@@ -1,4 +1,9 @@
 .define rmu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 rmu4:
 	popl	saveret, *RR14

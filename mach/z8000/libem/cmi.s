@@ -1,4 +1,9 @@
 .define cmi
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !size in R0
 cmi:

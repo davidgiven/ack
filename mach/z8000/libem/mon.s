@@ -1,4 +1,9 @@
 .define mon
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 mon:
 	popl	saveret, *RR14

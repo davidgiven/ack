@@ -1,4 +1,9 @@
 .define sar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !R1 contains description address
 !R3 contains element number

@@ -1,6 +1,11 @@
 .define  EXIT, F_DUM
 .define  ERANGE, ESET, EHEAP, EILLINS, EODDZ, ECASE, EBADMON
 .define  hol0, trppc, trpim, reghp, argv, envp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 EXIT	= 0
 F_DUM	= 0
@@ -13,8 +18,8 @@ EODDZ	= 19
 ECASE   = 20
 EBADMON = 25
 
-.text
-			!clear .bss
+.sect .text
+			!clear .sect .bss
 	ldk	R2, $0
 	ld	R3, $endbss
 	ld	R0, R3
@@ -38,20 +43,20 @@ EBADMON = 25
 	ldl	RR14, $0xC00017FC
 	sc	$0
 
-.bss
+.sect .bss
 begbss:
-.data
+.sect .data
 hol0:
-	.word 0,0			! line no
-	.word 0,0			! file
+	.data2 0,0			! line no
+	.data2 0,0			! file
 trppc:
-	.word 0
+	.data2 0
 trpim:
-	.word 0
+	.data2 0
 argv:
 envp:
-	.word 1f
-	.word 0
+	.data2 1f
+	.data2 0
 1:	.asciz	"program"
 reghp:
-	.word endbss
+	.data2 endbss

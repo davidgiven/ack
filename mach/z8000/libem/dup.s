@@ -1,4 +1,9 @@
 .define dup
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 dup:
 	popl	saveret, *RR14

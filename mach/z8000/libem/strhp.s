@@ -1,4 +1,9 @@
 .define strhp
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 strhp:
 	popl	RR2, *RR14

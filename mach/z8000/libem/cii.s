@@ -1,4 +1,9 @@
 .define cii
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 cii:
 	popl	saveret, *RR14

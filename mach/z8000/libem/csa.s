@@ -1,4 +1,9 @@
 .define csa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !R1 contains address of jump table
 !R2 contains case index

@@ -1,4 +1,9 @@
 .define xset
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 !bitnr in R1
 !size (bytes) in R0

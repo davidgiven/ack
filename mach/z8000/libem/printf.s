@@ -1,4 +1,9 @@
 .define printf
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 printf:
 	popl	saveret, *RR14
@@ -77,6 +82,6 @@ printn:
 	inc	R3
 	ret
 
-.data
+.sect .data
 buff:
 	.space 256

@@ -1,4 +1,9 @@
 .define los2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 los2:
 	popl	saveret, *RR14

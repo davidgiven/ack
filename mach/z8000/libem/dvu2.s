@@ -1,4 +1,9 @@
 .define dvu2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 dvu2:
 	popl	saveret, *RR14

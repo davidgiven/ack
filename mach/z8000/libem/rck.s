@@ -1,4 +1,9 @@
 .define rck
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 rck:
 	ld	R0, RR14($4)

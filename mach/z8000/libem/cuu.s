@@ -1,4 +1,9 @@
 .define cuu
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 cuu:
 	popl	RR2, *RR14
