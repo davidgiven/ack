@@ -7,10 +7,10 @@ AR = ar
 SRC =	bhcst.c bhdlb.c bhdnam.c bhfcon.c bhicon.c bhilb.c bhpnam.c bhucon.c \
 	crcst.c crdlb.c crdnam.c crfcon.c cricon.c crilb.c crpnam.c crscon.c \
 	crucon.c cst.c dfdlb.c dfdnam.c dfilb.c dlb.c dnam.c end.c endarg.c \
-	exc.c failed.c fcon.c getid.c icon.c ilb.c insert.c internerr.c io.c \
+	exc.c fcon.c getid.c icon.c ilb.c insert.c internerr.c io.c \
 	msend.c op.c opcst.c opdlb.c opdnam.c opilb.c opnarg.c oppnam.c pnam.c \
 	pro.c pronarg.c msstart.c psdlb.c psdnam.c pspnam.c scon.c ucon.c \
-	C_out.c
+	C_out.c failed.c
 
 OBS = failed.o insert.o internerr.o getid.o
 

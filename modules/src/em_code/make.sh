@@ -48,4 +48,4 @@ $cc $cflags -I../read_em C_out.c
 
 $cc $cflags $1/em.c
 mv em.o em$1.o
-$ar rc libem$1.a bhcst.o bhdlb.o bhdnam.o bhfcon.o bhicon.o bhilb.o bhpnam.o bhucon.o crcst.o crdlb.o crdnam.o crfcon.o cricon.o crilb.o crpnam.o crscon.o crucon.o cst.o dfdlb.o dfdnam.o dfilb.o dlb.o dnam.o end.o endarg.o exc.o failed.o fcon.o getid.o icon.o ilb.o insert.o internerr.o msend.o op.o opcst.o opdlb.o opdnam.o opilb.o opnarg.o oppnam.o pnam.o pro.o pronarg.o msstart.o psdlb.o psdnam.o pspnam.o scon.o ucon.o C_out.o em$1.o
+$ar rc libem$1.a bhcst.o bhdlb.o bhdnam.o bhfcon.o bhicon.o bhilb.o bhpnam.o bhucon.o crcst.o crdlb.o crdnam.o crfcon.o cricon.o crilb.o crpnam.o crscon.o crucon.o cst.o dfdlb.o dfdnam.o dfilb.o dlb.o dnam.o end.o endarg.o exc.o fcon.o getid.o icon.o ilb.o insert.o internerr.o msend.o op.o opcst.o opdlb.o opdnam.o opilb.o opnarg.o oppnam.o pnam.o pro.o pronarg.o msstart.o psdlb.o psdnam.o pspnam.o scon.o ucon.o C_out.o em$1.o failed.o
