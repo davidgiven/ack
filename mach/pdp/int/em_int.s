@@ -1649,9 +1649,6 @@ ciu.z:	mov	(sp)+,r0
 9:	jsr	pc,e.conv;	next
 5:	neg	r0
 4:	tst	(sp)+
-.if .test
-	jne	9b
-.endif
 	sob	r0,4b
 	next
 cuu.z:

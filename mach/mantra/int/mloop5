@@ -133,11 +133,6 @@ ciu_z:		mov	(sp)+,d0 ;	mov	(sp)+,d1
 1:		bgt	4f	;	cmp.w	#-2,d0
 		beq	5f	;	bsr	e_conv
 5:
-#if test
-		move.w	(sp),d1	;	beq	6f
-		not.w	d1	;	beq	6f
-		bsr	e_conv
-#endif
 6:		add.l	#2,sp	;	jmp	(a4)
 #endif
 4:	1:	bclr	#0,d0	;	beq	2f
