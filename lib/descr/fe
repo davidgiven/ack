@@ -170,7 +170,7 @@ name abc
 	need .b
 	callname abc
 end
-var A68INIT={EM}/lib/em_a68s_init
+var A68INIT={EM}/lib.bin/em_a68s_init
 name a68s
         from .8.a68
         to .k
