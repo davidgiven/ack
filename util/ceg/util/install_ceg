@@ -10,12 +10,12 @@ case $# in
      SRC_DIR=$2
      ;;
 
+  1) MAKE=$CEG/make_own;OBJ=obj;SRC_DIR=$1
+     ;;
 
-  1) MAKE=$CEG/make_own;OBJ=obj;SRC_DIR=$1 ;;
-
-
-  *) echo Usage: $0 [-as|-obj] <source directory>
-     exit 1;;
+  *) echo "Usage: $0 [-as|-obj] <source directory>"
+     exit 1
+     ;;
 esac
 
 case X$MACH in
@@ -23,7 +23,7 @@ X)	MACH=`expr $SRC_DIR : '.*/mach/\(.*\)/ce*`
 	;;
 esac
 case X$MACH in
-	echo environment definition for MACH required
+X)	echo environment definition for MACH required
 	exit 1
 	;;
 esac
