@@ -1,3 +1,4 @@
+#define ex_ap(y)	fprintf(codefile,".extern %s\n", y)
 #define in_ap(y)	/* nothing */
 
 #define newilb(x)	fprintf(codefile,"%s:\n",x)
