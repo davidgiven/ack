@@ -115,6 +115,26 @@ STATIC short kind(lnp)
 }
 
 
+STATIC line_p doread_line(p_out)
+	proc_p *p_out;
+{
+	/* read a line, and check pseudos for procedure addresses */
+
+	register line_p lnp = read_line(p_out);
+
+	if (lnp && TYPE(lnp) == OPLIST && INSTR(lnp) != ps_mes) {
+		register arg_p arg = ARG(lnp);
+		
+		while (arg) {
+			if (arg->a_type == ARGPROC) {
+				Cadd(arg->a_a.a_proc->p_id, &lpi_set);
+				arg->a_a.a_proc->p_flags1 |= PF_LPI;
+			}
+			arg = arg->a_next;
+		}
+	}
+	return lnp;
+}
 
 STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
 	FILE *fp;
@@ -149,7 +169,7 @@ STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
 				/* The lbmap table contains for each
 				 * label_id the basic block of that label.
 				 */
-				lnp = read_line(&curproc);
+				lnp = doread_line(&curproc);
 				state = kind(lnp);
 				if (state != END) {
 					*lp = lnp;
@@ -157,7 +177,7 @@ STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
 				}
 				break;
 			case NORMAL:
-				lnp = read_line(&curproc);
+				lnp = doread_line(&curproc);
 				if ( (state = kind(lnp)) == LABEL) {
 					/* If we come accross a label
 					 * here, it must be the beginning
@@ -172,7 +192,7 @@ STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
 				}
 				break;
 			case JUMP:
-				lnp = read_line(&curproc);
+				lnp = doread_line(&curproc);
 				/* fall through ... */
 			case AFTERPRO:
 				switch(state = kind(lnp)) {
@@ -201,7 +221,7 @@ STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
 				}
 				return TRUE;
 			case INIT:
-				lnp = read_line(&curproc);
+				lnp = doread_line(&curproc);
 				if (feof(curinp)) return FALSE;
 				if (INSTR(lnp) == ps_pro) {
 					state = AFTERPRO;
