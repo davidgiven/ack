@@ -44,7 +44,7 @@ GENH=	errout.h\
 HFILES=		LLlex.h\
 	chk_expr.h class.h const.h debug.h desig.h f_info.h idf.h\
 	input.h main.h misc.h scope.h standards.h tokenname.h\
-	walk.h warning.h $(GENH)
+	walk.h warning.h SYSTEM.h $(GENH)
 #
 GENFILES = $(GENGFILES) $(GENC) $(GENH)
 NEXTFILES = def.H type.H node.H scope.C tmpvar.C casestat.C
