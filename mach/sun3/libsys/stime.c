@@ -5,5 +5,5 @@ stime(tp)
 
 	x.l1 = *tp;
 	x.l2 = 0;
-	settimeofday(&x, (char *) 0);
+	return settimeofday(&x, (char *) 0);
 }

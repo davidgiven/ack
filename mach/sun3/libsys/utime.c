@@ -9,5 +9,5 @@ utime(file, timep)
 	x.l2 = x.l4 = 0;
 	x.l1 = timep[0];
 	x.l3 = timep[1];
-	utimes(file,&x);
+	return utimes(file,&x);
 }

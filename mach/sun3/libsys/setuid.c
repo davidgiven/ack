@@ -1,4 +1,4 @@
 setuid(u)
 {
-	setreuid(u,u);
+	return setreuid(u,u);
 }

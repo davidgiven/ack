@@ -1,4 +1,4 @@
 setgid(u)
 {
-	setregid(u,u);
+	return setregid(u,u);
 }
