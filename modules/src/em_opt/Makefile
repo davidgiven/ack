@@ -53,16 +53,18 @@ GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
 		dfa.c dfa.c.new trans.c trans.c.new\
 		incalls.d incalls.r incalls.r.new pseudo.d
 
-all:		em_nopt $(LIBOPT) em_opt.3
+all:		em_nopt $(LIBOPT) $(LIBCEOPT) em_opt.3
 
 install:	all
 		$(INSTALL) lib/$(LIBOPT)
+		$(INSTALL) lib/$(LIBCEOPT)
 		$(INSTALL) man/em_opt.3
 		cp em_nopt.6 $(EMHOME)/man
 		cp em_nopt $(BINDIR)/em_nopt
 
 cmp:		all
 		-$(COMPARE) lib/$(LIBOPT)
+		-$(COMPARE) lib/$(LIBCEOPT)
 		-$(COMPARE) man/em_opt.3
 		-cmp em_nopt $(BINDIR)/em_nopt
 
@@ -78,7 +80,7 @@ clean:
 		rm -f O_*.$(SUF)
 		rm -f O_*.c
 		rm -f $(NOFILES) main.$(SUF) $(POFILES)
-		rm -f $(GENFILES) parser em_nopt $(LIBOPT)
+		rm -f $(GENFILES) parser em_nopt $(LIBOPT) $(LIBCEOPT)
 
 # How to build stand alone version of the optimizer
 
@@ -108,16 +110,16 @@ lintnopt:	dfadummy $(OLINT)
 
 # How to build the library version of the optimizer
 
-$(LIBOPT):	dfadummy $(NOFILES) mkstrct.$(SUF) pseudo.d incalls.d
+$(LIBOPT):	dfadummy $(NOFILES) pseudo.d incalls.d
 		rm -f $(LIBOPT)
 		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES)
 		-sh -c 'ranlib $(LIBOPT)'
 
-$(LIBCEOPT):
-		make clean
+$(LIBCEOPT):	dfadummy pseudo.d incalls.d
+		rm -f O_*.$(SUF) $(NOFILES)
 		make "EMHOME="$(EMHOME) PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
 		mv $(LIBOPT) $(LIBCEOPT)
-		make clean
+		rm -f O_*.$(SUF) $(NOFILES)
 
 dfadummy:	patterns parser
 		-$(EMHOME)/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
