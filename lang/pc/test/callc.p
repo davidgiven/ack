@@ -1,3 +1,4 @@
+#
 program callc(input,output) ;
 var success: integer ;
 procedure rcsid ; begin writeln('$Header$') end ;
@@ -5,6 +6,7 @@ function kwad(val:integer) : integer ; extern ;
 procedure cmain ; extern ;
 procedure incs ; begin success:=success+1 end ;
 procedure pptr( function ptwice(val:integer):integer ) ; extern ;
+#ifndef NOFLOAT
 function ceval( function pinside(val:integer):real ): boolean ; extern ;
 function outside(val:integer):real ;
 begin
@@ -25,6 +27,7 @@ begin
 	if ceval(outside) then success:=success+1
 		 else writeln('Calling outside through C doesn''t work')
 end;
+#endif
 procedure cptr( function pkwad(val:integer):integer ) ;
 begin
 	if ( pkwad(-2)<>4 ) and (pkwad(-8)<>64) then
@@ -44,7 +47,15 @@ begin
 		success:=success+1 ;
 	cmain;
 	pptr(twice) ;
+#ifndef NOFLOAT
 	envellop ;
-	if success <>7 then writeln('Only ',success,' tests passed')
+#endif
+	if success <>
+#ifdef NOFLOAT
+	4
+#else
+	7
+#endif
+	then writeln('Only ',success,' tests passed')
 		      else writeln('All tests passed')
 end.

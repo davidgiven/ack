@@ -10,10 +10,12 @@ typedef struct {
 	char	*p_slink ;
 } p_fiptr ;
 
+#ifndef NOFLOAT
 typedef struct {
 	double	(*p_func)() ;
 	char	*p_slink ;
 } p_ffptr ;
+#endif
 
 int kwad(val) int val ; { return val*val ; }
 cmain() {
@@ -43,6 +45,7 @@ pptr(p_twice) p_fiptr p_twice ; {
 	else	incs() ;
 }
 
+#ifndef NOFLOAT
 double callpas(pasfunc,par) p_ffptr pasfunc ; int par ; {
 	/* Call a Pascal function, both inner block and outer block */
 	/* Function must return a double, (In pascal terms: real) */
@@ -60,3 +63,4 @@ int ceval(p_inside) p_ffptr p_inside ; {
 	resval= callpas(p_inside,2) ;
 	return resval>1.41 && resval<1.42 ;
 }
+#endif
