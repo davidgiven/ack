@@ -36,7 +36,9 @@
 #define CHANNEL		0
 #define THRESHOLD	40		/* for splitting blocks */
 
+#ifndef __STDC__
 #define void		int		/* Some C compilers don't know void */
+#endif
 
 extern int	BEMINTSIZE, BEMPTRSIZE, BEMFLTSIZE;
 extern char	*program;		/* name of source program */
@@ -73,4 +75,8 @@ extern char *salloc();
 extern char *sprint();
 extern char *strcpy();
 extern char *strcat();
+#if __STDC__
+#include <stdlib.h>
+#else
 extern char *malloc();
+#endif
