@@ -749,16 +749,14 @@ getaction(flag) {
 	 * flag = 1 if it is an action,
 	 * 0 when reading parameters
 	 */
-	register int match,ch;
+	register int ch;
 	register FILE *f;
-	register int newline;
 	int mark = 0;
 
 	if (flag == 1) {
 		controlline();
 	}
 	f = fpars;
-	newline = 0;
 	for (;;) {
 		ch = gettok();
 		switch(ch) {
@@ -770,37 +768,12 @@ getaction(flag) {
 			if (mark) return;
 			mark = 1;
 			continue;
-		  case '\n':
-			newline = 1;
-			break;
-		  case '\'' :
-		  case '"' :
-			if (newline) {
-				newline = 0;
-			}
-			match = ch;
-			for (;;) {
-				putc(ch,f);
-				ch = getc(fact);
-				if (ch == match || !ch) break;
-				if (ch == '\\') {
-					putc(ch,f);
-					ch = getc(fact);
-				}
-			}
-			break;
 		  case IDENT :
-			if (newline) {
-				newline = 0;
-			}
 			fputs(ltext,f);
 			continue;
 		}
 		mark = 0;
 		if (ch == ENDDECL) break;
-		if (newline && ch != '\n') {
-			newline = 0;
-		}
 		putc(ch,f);
 	}
 	if (flag) fputs("\n",f);
