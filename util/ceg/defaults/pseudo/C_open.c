@@ -14,6 +14,6 @@ char *filename;
 		fprint( STDERR, "Couldn't open %s\n", filename);
 		return( 0);
 	}
-	else
-	        return( 1);
+	B_busy = 1;
+	return( 1);
 }
