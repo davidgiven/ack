@@ -80,4 +80,5 @@ main(argc,argv)
 		error("cannot open class file");
 	}
 	convert(f1,f2);
+	exit(0);
 }

@@ -116,6 +116,7 @@ main(argc, argv)
 	}
 
 	fclose(f);
+	exit(0);
 }
 
 
