@@ -61,3 +61,6 @@ em24descr:	em24.descr descr.sed
 em44descr:	em44.descr descr.sed
 		$(CPP) -P -I$(EMH) em44.descr | sed -f descr.sed > em44descr
 
+sparcdescr:	sparc.descr descr.sed
+		$(CPP) -P -I$(EMH) sparc.descr | sed -f descr.sed > sparcdescr
+

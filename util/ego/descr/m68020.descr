@@ -25,9 +25,9 @@ register score parameters:
 			default ->	(2,2)
 	constant:
 		(3 sizes)
-		in_0_8 ->	(0,0)
-		fitbyte ->	(2,2)
-		default ->	(4,4)
+		in_0_8 ->	(-1,-1)
+		fitbyte ->	(-1,-1)
+		default ->	(-1,-1)
 	double constant:
 		(1 size)
 		default ->	(-1,-1)
@@ -57,8 +57,8 @@ opening cost parameters:
 			general ->	(4,4)
 	constant:
 		(2 sizes)
-		fitbyte ->	(4,2)
-		default ->	(6,6)
+		fitbyte ->	(1000,1000)
+		default ->	(1000,1000)
 	double constant:
 		(1 size)
 		default ->	(1000,1000)

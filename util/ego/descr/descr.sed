@@ -8,6 +8,7 @@ s/sizes//
 s/size//
 s/->//
 s/pointer/2/g
+s/float/3/g
 s/general/0/g
 s/fitbyte/1/
 s/default/0/
