@@ -34,7 +34,11 @@ const
 
 type wavelength = (red,blue,yellow,purple,white,gray,pink,black,fuchia,maple,
              violet,darkred,darkblue,darkyellow,darkwhite,darkpink,darkblack);
+#if EM_WSIZE < 4
   ww2= 1939..1945;
+#else
+  ww2= 1000939..1000945;
+#endif
 #ifndef NOFLOAT
   tp2=  record c1:char; i,j:integer; p:boolean; x:real end;
 #else
@@ -52,7 +56,11 @@ var t,pct,ect:integer;
 #endif
  p,q,r:boolean;
  c1,c2,c3:char;
+#if EM_WSIZE < 4
  sr1,sr2,sr3: 1939..1945;
+#else
+ sr1,sr2,sr3: 1000939..1000945;
+#endif
  bar: packed array[0..3] of 0..255;
  color,hue,tint: wavelength;
  grat:spectrum;
@@ -115,7 +123,11 @@ begin t:=1; pct := pct + 1;
   if -3 div 2 <> -1 then e(15);
   if ((1+2+3) * (2+3+4) * (3+5+5)) div 2 <> ((3 * ((5+3+2)*10)+51)*6) div 6
        then e(16);
+#if EM_WSIZE < 4
   if (1000*2 + 5*7 + 13) div 8 <> 2*2*2*2*4*4 then e(17);
+#else
+  if (1000*2 + 5*7 + 13) * 128 div 8 <> 2*2*2*2*4*4*128 then e(17);
+#endif
   if (1 * 2 * 3 * 4 * 5 * 6 * 7) div 5040  <> 
       5040 div 7 div 6 div 5 div 4 div 3 div 2 then e(18);
   if -(-(-(-(-(-(-(-(-(1))))))))) <> -1 then e(19);
@@ -232,7 +244,11 @@ begin t:=5; pct := pct + 1;
   if c1 = c2 then e(2);
   if c1 <> c3 then e(3);
 
+#if EM_WSIZE < 4
   sr1:=1939; sr2:=1945; sr3:=1939;
+#else
+  sr1:=1000939; sr2:=1000945; sr3:=1000939;
+#endif
   if sr1=sr2 then e(4);
   if sr1<>sr3 then e(5);
 
@@ -251,8 +267,13 @@ begin t:=6; pct := pct + 1;
   if (a1[-10]<>100) or (a1[9]<>81) then e(1);
 
 #ifndef NOFLOAT
+#if EM_WSIZE < 4
   for i:=1939 to 1945 do a2[i]:=i-1938.5;
   if (abs(a2[1939]-0.5) > eps) or (abs(a2[1945]-6.5) > eps) then e(2);
+#else
+  for i:=1000939 to 1000945 do a2[i]:=i-1000938.5;
+  if (abs(a2[1000939]-0.5) > eps) or (abs(a2[1000945]-6.5) > eps) then e(2);
+#endif
 #endif
 
   color := yellow;
@@ -264,10 +285,17 @@ begin t:=6; pct := pct + 1;
   a4[mouse]:='m'; a4[house]:='h';
   if (a4[mouse] <> 'm') or (a4[house]<>'h' ) then e(5);
 
+#if EM_WSIZE < 4
   for i:=1939 to 1945 do a5[51,bat,false,i]:=300+i;
   if a5[51,bat,false,1940] <> 2240 then e(6);
   for i:=50 to 52 do a5[i,cat,true,1943]:=200+i;
   if (a5[50,cat,true,1943] <> 250) or (a5[52,cat,true,1943] <> 252) then e(7);
+#else
+  for i:=1000939 to 1000945 do a5[51,bat,false,i]:=300+i;
+  if a5[51,bat,false,1000940] <> 1001240 then e(6);
+  for i:=50 to 52 do a5[i,cat,true,1000943]:=200+i;
+  if (a5[50,cat,true,1000943] <> 250) or (a5[52,cat,true,1000943] <> 252) then e(7);
+#endif
 
   for i:= -10 to 10 do a1[i]:= 0;
   for i:= 0 to 10 do a1[i div 2 + i div 2]:= i+1;
@@ -360,8 +388,13 @@ procedure tst9;
 { Global pointers }
 begin t:=9; pct := pct + 1;
   new(p1); new(p2); new(p3); new(p4);
+#if EM_WSIZE < 4
   p1^ := 1066;
   if p1^ <> 1066 then e(1);
+#else
+  p1^ := 1000066;
+  if p1^ <> 1000066 then e(1);
+#endif
   p2^.i := 1215;
   if p2^.i <> 1215 then e(2);
   p3^[0]:= 1566;
@@ -460,7 +493,11 @@ end;
  procedure tst14;
  { Characters, Subranges, Enumerated types using locals }
  var cc1,cc2,cc3:char;
+#if EM_WSIZE < 4
    sr1,sr2,sr3: 1939..1945;
+#else
+   sr1,sr2,sr3: 1000939..1000945;
+#endif
    color,hue,tint: (ochre,magenta);
  begin t:=14; pct := pct + 1;
   if 'q' <> kew then e(1);
@@ -468,7 +505,11 @@ end;
   if cc1 = cc2 then e(2);
   if cc1 <> cc3 then e(3);
 
+#if EM_WSIZE < 4
   sr1:=1939; sr2:=1945; sr3:=1939;
+#else
+  sr1:=1000939; sr2:=1000945; sr3:=1000939;
+#endif
   if sr1=sr2 then e(4);
   if sr1<>sr3 then e(5);
   bar[0]:=200;  bar[1]:=255;  bar[2]:=255; bar[3]:=203;
@@ -498,8 +539,13 @@ end;
   if (aa1[-10]<>100) or (aa1[9]<>81) then e(1);
 
 #ifndef NOFLOAT
+#if EM_WSIZE < 4
   for i:=1939 to 1945 do aa2[i]:=i-1938.5;
   if (abs(aa2[1939]-0.5) > eps) or (abs(aa2[1945]-6.5) > eps) then e(2);
+#else
+  for i:=1000939 to 1000945 do aa2[i]:=i-1000938.5;
+  if (abs(aa2[1000939]-0.5) > eps) or (abs(aa2[1000945]-6.5) > eps) then e(2);
+#endif
 #endif
 
   aa3[magenta] := true;  aa3[ochre] := true;
@@ -510,10 +556,17 @@ end;
   aa4[mouse]:='m'; aa4[house]:='h';  aa4[louse]:='l';
   if (aa4[mouse] <> 'm') or (aa4[house]<>'h' ) or (aa4[louse]<>'l') then e(5);
 
+#if EM_WSIZE < 4
   for i:=1939 to 1945 do aa5[51,bat,false,i]:=300+i;
   if aa5[51,bat,false,1940] <> 2240 then e(6);
   for i:=50 to 52 do aa5[i,cat,true,1943]:=200+i;
   if (aa5[50,cat,true,1943] <> 250) or (aa5[52,cat,true,1943] <> 252) then e(7);
+#else
+  for i:=1000939 to 1000945 do aa5[51,bat,false,i]:=300+i;
+  if aa5[51,bat,false,1000940] <> 1001240 then e(6);
+  for i:=50 to 52 do aa5[i,cat,true,1000943]:=200+i;
+  if (aa5[50,cat,true,1000943] <> 250) or (aa5[52,cat,true,1000943] <> 252) then e(7);
+#endif
 
   for i:= -10 to 10 do aa1[i]:= 0;
   for i:= 0 to 10 do aa1[i div 2 + i div 2]:= i+1;
