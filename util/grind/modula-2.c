@@ -30,7 +30,8 @@ static int
 	get_string(),
 	print_op(),
 	binop_prio(),
-	unop_prio();
+	unop_prio(),
+	fix_bin_to_pref();
 
 static long
 	array_elsize();
@@ -61,7 +62,8 @@ static struct langdep m2 = {
 	get_name,
 	get_number,
 	get_token,
-	print_op
+	print_op,
+	fix_bin_to_pref
 };
 
 struct langdep *m2_dep = &m2;
@@ -536,4 +538,10 @@ print_op(p)
 	fputs(")", db_out);
 	break;
   }
+}
+
+static int
+fix_bin_to_pref()
+{
+  /* No problems of this kind in Modula-2 */
 }

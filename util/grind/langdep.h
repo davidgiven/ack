@@ -33,6 +33,7 @@ struct langdep {
   int	(*get_number)();
   int	(*get_token)();
   int	(*printop)();
+  int	(*fix_bin_to_pref)();
 };
 
 extern struct langdep	*m2_dep, *c_dep, *currlang;

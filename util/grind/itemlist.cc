@@ -65,6 +65,7 @@ item_addr_actions(a)
 			    eval_cond(p->t_args[1])) stopping = 1;
 			break;
 		case OP_DUMP:
+		case OP_DISPLAY:
 			break;
 		default:
 			assert(0);
@@ -73,6 +74,18 @@ item_addr_actions(a)
 	i = i->i_next;
   }
   return stopping;
+}
+
+handle_displays()
+{
+  register p_item i = item_list.il_first;
+
+  while (i) {
+	register p_tree p = i->i_node;
+
+	if (p->t_oper == OP_DISPLAY) do_print(p);
+	i = i->i_next;
+  }
 }
 
 add_to_item_list(p)

@@ -40,6 +40,10 @@ find_language(suff)
 {
   register struct langlist *p = list;
 
+  if (! suff) {
+	currlang = c_dep;
+	return;
+  }
   while (p) {
 	currlang = p->l_lang;
 	if (! strcmp(p->l_suff, suff)) break;

@@ -349,7 +349,10 @@ could_send(m, stop_message)
 			}
 			single_stepping = 0;
 		}
-		if (stop_message) stopped("stopped", a);
+		if (stop_message) {
+			stopped("stopped", a);
+			handle_displays();
+		}
 		return 1;
 	}
 	return 0;

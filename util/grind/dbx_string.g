@@ -56,6 +56,7 @@ debugger_string
   | /* type name */
 			{ s = NewSymbol(str, CurrentScope, TYPE, currnam); }
 	't' type_name(&(s->sy_type))
+			{ if (! s->sy_type->ty_sym) s->sy_type->ty_sym = s; }
 
   | /* tag name (only C?) */
 			{ s = NewSymbol(str, CurrentScope, TAG, currnam); }
@@ -76,7 +77,7 @@ debugger_string
 			}
 
   | /* external procedure */
-			{ s = NewSymbol(str, PervasiveScope, PROC, currnam); }
+			{ s = NewSymbol(str, FileScope, PROC, currnam); }
 	'P' routine(s)
 
   | /* private procedure */
@@ -84,7 +85,7 @@ debugger_string
 	'Q' routine(s)
 
   | /* external function */
-			{ s = NewSymbol(str, PervasiveScope, FUNCTION, currnam); }
+			{ s = NewSymbol(str, FileScope, FUNCTION, currnam); }
 	'F' function(s)
 
   | /* private function */
@@ -96,10 +97,10 @@ debugger_string
 				   the type information anyway for other
 				   types.
 				*/
-			{ s = Lookup(findidf(str), PervasiveScope, VAR);
+			{ s = Lookup(findidf(str), FileScope, VAR);
 			  if (s) {
 				tmp = s->sy_type;
-			  } else s = NewSymbol(str, PervasiveScope, VAR, currnam);
+			  } else s = NewSymbol(str, FileScope, VAR, currnam);
 			}
 	'G' type(&(s->sy_type), (int *) 0)
 			{ if (tmp) s->sy_type = tmp; } 

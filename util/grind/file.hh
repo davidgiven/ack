@@ -13,6 +13,7 @@
 
 typedef struct file {
 	struct symbol	*f_sym;
+	struct symbol	*f_base;
 	char		*f_fullname;	/* name including directory */
 	struct scope	*f_scope;	/* reference to scope of this file */
 	t_lineno	f_nlines;	/* number of lines in file */

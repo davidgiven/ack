@@ -308,6 +308,23 @@ do_deref(p, pbuf, psize, ptp)
 }
 
 static int
+do_addr(p, pbuf, psize, ptp)
+  p_tree	p;
+  char		**pbuf;
+  long		*psize;
+  p_type	*ptp;
+{
+  t_addr addr;
+
+  if (eval_desig(p->t_args[0], &addr, psize, ptp)) {
+	*pbuf = Malloc((unsigned) pointer_size);
+	put_int(*pbuf, pointer_size, (long) addr);
+	return 1;
+  }
+  return 0;
+}
+
+static int
 do_unmin(p, pbuf, psize, ptp)
   p_tree	p;
   char		**pbuf;
@@ -370,7 +387,7 @@ static int (*un_op[])() = {
   0,
   do_unplus,
   do_unmin,
-  do_deref,
+  0,
   0,
   0,
   0,
@@ -383,7 +400,9 @@ static int (*un_op[])() = {
   0,
   do_bnot,
   0,
-  0
+  0,
+  0,
+  do_addr
 };
 
 static p_type
@@ -961,8 +980,10 @@ static int (*bin_op[])() = {
   do_arith,
   do_arith,
   0,
+  0,
   do_sft,
-  do_sft
+  do_sft,
+  0
 };
 
 int

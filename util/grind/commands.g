@@ -94,15 +94,27 @@ command_line(p_tree *p;)
 | step_command(p)
 | next_command(p)
 | regs_command(p)
-| WHERE			{ *p = mknode(OP_WHERE); }
+| where_command(p)
 | STATUS		{ *p = mknode(OP_STATUS); }
 | DUMP			{ *p = mknode(OP_DUMP); }
 | RESTORE INTEGER	{ *p = mknode(OP_RESTORE, tok.ival); }
 | delete_command(p)
 | print_command(p)
+| display_command(p)
 | trace_command(p)
 | set_command(p)
+| FIND qualified_name(p){ *p = mknode(OP_FIND, *p); }
+| WHICH qualified_name(p){ *p = mknode(OP_WHICH, *p); }
 |			{ *p = 0; }
+;
+
+where_command(p_tree *p;)
+  { long l; }
+:
+  WHERE
+  [ INTEGER		{ l = tok.ival; }
+  |			{ l = 0x7fffffff; }
+  ]			{ *p = mknode(OP_WHERE, l); }
 ;
 
 list_command(p_tree *p;)
@@ -233,9 +245,19 @@ delete_command(p_tree *p;)
 
 print_command(p_tree *p;)
 :
-  PRINT expression(p, 1){ *p = mknode(OP_PRINT, *p); 
-			  p = &((*p)->t_args[0]);
-			}
+  PRINT expression_list(p)
+			{ *p = mknode(OP_PRINT, *p); }
+;
+
+display_command(p_tree *p;)
+:
+  DISPLAY expression_list(p)
+			{ *p = mknode(OP_DISPLAY, *p); }
+;
+
+expression_list(p_tree *p;)
+:
+  expression(p, 1)
   [ ','			{ *p = mknode(OP_LINK, *p, (p_tree) 0);
 			  p = &((*p)->t_args[1]);
 			}
@@ -291,7 +313,9 @@ factor(p_tree *p;)
   			{ *p = mknode(OP_UNOP, (p_tree) 0);
 			  (*p)->t_whichoper = (int) tok.ival;
 			}
-  [ PREF_OP | PREF_OR_BIN_OP ]
+  [ PREF_OP 
+  | PREF_OR_BIN_OP 	{ (*currlang->fix_bin_to_pref)(*p); }
+  ]
   expression(&(*p)->t_args[0], unprio((*p)->t_whichoper))
 ;
 
@@ -394,6 +418,9 @@ name(p_tree *p;)
   | ON
   | SET
   | TO
+  | FIND
+  | DISPLAY
+  | WHICH
   ]			{ *p = mknode(OP_NAME, tok.idf, tok.str); }
 ;
 

@@ -43,9 +43,6 @@ mknode(va_alist)
 		p->t_idf = va_arg(ap, struct idf *);
 		p->t_str = va_arg(ap, char *);
 		break;
-	case OP_INTEGER:
-		p->t_ival = va_arg(ap, long);
-		break;
 	case OP_STRING:
 		p->t_sval = va_arg(ap, char *);
 		break;
@@ -56,11 +53,13 @@ mknode(va_alist)
 		p->t_lino = va_arg(ap, long);
 		p->t_filename = va_arg(ap, char *);
 		break;
+	case OP_INTEGER:
 	case OP_NEXT:
 	case OP_STEP:
 	case OP_REGS:
 	case OP_DELETE:
 	case OP_RESTORE:
+	case OP_WHERE:
 		p->t_ival = va_arg(ap, long);
 		break;
 	default:
@@ -124,6 +123,10 @@ print_node(p, top_level)
 	fputs("print ", db_out);
 	print_node(p->t_args[0], 0);
 	break;
+  case OP_DISPLAY:
+	fputs("display ", db_out);
+	print_node(p->t_args[0], 0);
+	break;
   case OP_FILE:
 	fputs("file ", db_out);
 	print_node(p->t_args[0], 0);
@@ -134,17 +137,25 @@ print_node(p, top_level)
 	fputs(" to ", db_out);
 	print_node(p->t_args[1], 0);
 	break;
+  case OP_FIND:
+	fputs("find ", db_out);
+	print_node(p->t_args[0], 0);
+	break;
+  case OP_WHICH:
+	fputs("which ", db_out);
+	print_node(p->t_args[0], 0);
+	break;
   case OP_DELETE:
-	fprintf(db_out, "delete %d", p->t_ival);
+	fprintf(db_out, "delete %ld", p->t_ival);
 	break;
   case OP_REGS:
-	fprintf(db_out, "regs %d", p->t_ival);
+	fprintf(db_out, "regs %ld", p->t_ival);
 	break;
   case OP_NEXT:
-	fprintf(db_out, "next %d", p->t_ival);
+	fprintf(db_out, "next %ld", p->t_ival);
 	break;
   case OP_STEP:
-	fprintf(db_out, "step %d", p->t_ival);
+	fprintf(db_out, "step %ld", p->t_ival);
 	break;
   case OP_STATUS:
 	fputs("status", db_out);
@@ -154,15 +165,16 @@ print_node(p, top_level)
 	print_position(p->t_address, 1);
 	break;
   case OP_RESTORE:
-	fprintf(db_out, "restore %d", p->t_ival);
+	fprintf(db_out, "restore %ld", p->t_ival);
 	break;
   case OP_WHERE:
 	fputs("where", db_out);
+	if (p->t_ival != 0x7fffffff) fprintf(" %ld", p->t_ival);
 	break;
   case OP_CONT:
 	fputs("cont", db_out);
 	if (p->t_args[0]) {
-		fprintf(db_out, " %d", p->t_args[0]->t_ival);
+		fprintf(db_out, " %ld", p->t_args[0]->t_ival);
 	}
 	if (p->t_args[1]) {
 		fputs(" ", db_out);
@@ -274,6 +286,7 @@ in_status(com)
   case OP_WHEN:
   case OP_TRACE:
   case OP_DUMP:
+  case OP_DISPLAY:
 	return 1;
   }
   return 0;
@@ -487,8 +500,9 @@ do_where(p)
   p_tree	p;
 {
   int i = 0;
+  unsigned int cnt;
 
-  for (;;) {
+  for (cnt = p->t_ival; cnt != 0; cnt--) {
 	t_addr AB;
 	t_addr PC;
 	p_scope sc;
@@ -568,6 +582,7 @@ do_print(p)
 
   switch(p->t_oper) {
   case OP_PRINT:
+  case OP_DISPLAY:
 	do_print(p->t_args[0]);
 	break;
   case OP_LINK:

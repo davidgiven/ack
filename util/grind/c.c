@@ -31,7 +31,8 @@ static int
 	get_token(),
 	print_op(),
 	unop_prio(),
-	binop_prio();
+	binop_prio(),
+	fix_bin_to_pref();
 
 static long
 	array_elsize();
@@ -62,7 +63,8 @@ static struct langdep c = {
 	get_name,
 	get_number,
 	get_token,
-	print_op
+	print_op,
+	fix_bin_to_pref
 };
 
 struct langdep *c_dep = &c;
@@ -270,12 +272,11 @@ get_token(c)
 	c = getc(db_in);
 	if (c == '&') {
 		tok.ival = E_AND;
+		return BIN_OP;
 	}
-	else {
-		ungetc(c, db_in);
-		tok.ival = E_BAND;
-	}
-	return BIN_OP;
+	ungetc(c, db_in);
+	tok.ival = E_BAND;
+	return PREF_OR_BIN_OP;
   case '^':
 	tok.ival = E_BXOR;
 	return BIN_OP;
@@ -428,12 +429,15 @@ print_op(p)
 		print_node(p->t_args[0], 0);
 		break;
 	case E_DEREF:
-	case E_MUL:
 		fputs("*", db_out);
 		print_node(p->t_args[0], 0);
 		break;
 	case E_BNOT:
 		fputs("~", db_out);
+		print_node(p->t_args[0], 0);
+		break;
+	case E_ADDR:
+		fputs("&", db_out);
 		print_node(p->t_args[0], 0);
 		break;
 	}
@@ -518,6 +522,20 @@ print_op(p)
 	}
 	print_node(p->t_args[1], 0);
 	fputs(")", db_out);
+	break;
+  }
+}
+
+static int
+fix_bin_to_pref(p)
+  p_tree	p;
+{
+  switch(p->t_whichoper) {
+  case E_MUL:
+	p->t_whichoper = E_DEREF;
+	break;
+  case E_BAND:
+	p->t_whichoper = E_ADDR;
 	break;
   }
 }

@@ -33,3 +33,4 @@
 #define E_DERSELECT 25		/* -> in C */
 #define E_LSFT	26
 #define E_RSFT	27
+#define E_ADDR	28

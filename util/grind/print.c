@@ -124,7 +124,7 @@ print_val(tp, tp_sz, addr, compressed, indent)
   if (indent == 0) indent = 4;
   switch(tp->ty_class) {
   case T_SUBRANGE:
-	print_val(tp->ty_base, tp->ty_size, addr, compressed, indent);
+	print_val(tp->ty_base, tp_sz, addr, compressed, indent);
 	break;
   case T_ARRAY:
 	if (tp->ty_elements == char_type ||

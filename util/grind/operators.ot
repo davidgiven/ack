@@ -25,5 +25,8 @@ OP_PRINT	1	do_print
 OP_DUMP		0	do_dump
 OP_RESTORE	0	do_restore
 OP_TRACE	3	do_trace
+OP_FIND		1	do_find
+OP_DISPLAY	1	add_to_item_list
+OP_WHICH	1	do_which
 OP_UNOP		1	0
 OP_BINOP	2	0

@@ -2,6 +2,7 @@
 
 /* Symbol handling */
 
+#include	<stdio.h>
 #include	<alloc.h>
 #include	<out.h>
 #include	<stb.h>
@@ -17,6 +18,8 @@
 #include	"operator.h"
 
 p_symbol	currfile;
+
+extern FILE	*db_out;
 
 p_symbol
 NewSymbol(s, scope, class, nam)
@@ -120,8 +123,27 @@ add_file(s)
 			 (struct outname *) 0);
 	*p = c;
 	sym1->sy_filelink = sym;
+	sym->sy_file->f_base = sym1;
   }
   return sym;
+}
+
+p_scope
+def_scope(s)
+  p_symbol	s;
+{
+  switch(s->sy_class) {
+  case FILELINK:
+	s = s->sy_filelink;
+	/* fall through */
+  case FILESYM:
+	return s->sy_file->f_scope;
+  case PROC:
+  case FUNCTION:
+  case MODULE:
+	return s->sy_name.nm_scope;
+  }
+  return 0;
 }
 
 /* Determine if the OP_SELECT tree indicated by 'p' could lead to scope 'sc'.
@@ -133,23 +155,35 @@ consistent(p, sc)
 {
   p_tree	arg;
   p_symbol	sym;
+  p_scope	target_sc;
 
   assert(p->t_oper == OP_SELECT);
-  sc = sc->sc_static_encl;
-  if (!sc) return 0;
 
   p = p->t_args[0];
 
   switch(p->t_oper) {
   case OP_NAME:
-	sym = Lookfromscope(p->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc);
-	return sym != 0;
+	sym = Lookfromscope(p->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc->sc_static_encl);
+	if (sym) {
+		target_sc = def_scope(sym);
+		while (sc && sc != target_sc) {
+			sc = sc->sc_static_encl;
+		}
+		return sc != 0;
+	}
+	return 0;
 
   case OP_SELECT:
 	arg = p->t_args[1];
-	sym = Lookfromscope(arg->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc);
-	if (sym == 0) return 0;
-	return consistent(p, sym->sy_scope);
+	sym = Lookfromscope(arg->t_idf, FILELINK|FILESYM|PROC|FUNCTION|MODULE, sc->sc_static_encl);
+	if (sym) {
+		target_sc = def_scope(sym);
+		while (sc && sc != target_sc) {
+			sc = sc->sc_static_encl;
+		}
+		return sc != 0 && consistent(p, sym->sy_scope);
+	}
+	return 0;
 
   default:
 	assert(0);
@@ -223,4 +257,107 @@ identify(p, class_set)
 	assert(0);
   }
   return sym;
+}
+
+static
+pr_scopes(sc)
+  p_scope	sc;
+{
+  while (sc && ! sc->sc_definedby) {
+	sc = sc->sc_static_encl;
+  }
+  if (sc) {
+	pr_scopes(sc->sc_static_encl);
+	if (sc->sc_definedby->sy_class == FILESYM &&
+	    sc->sc_definedby->sy_file->f_base) {
+		fprintf(db_out, "%s`", sc->sc_definedby->sy_file->f_base->sy_idf->id_text);
+	}
+	else fprintf(db_out, "%s`", sc->sc_definedby->sy_idf->id_text);
+  }
+}
+
+static
+pr_sym(s)
+  p_symbol	s;
+{
+  switch(s->sy_class) {
+  case CONST:
+	fprintf(db_out, "Constant:\t");
+	break;
+  case TYPE:
+	fprintf(db_out, "Type:\t\t");
+	break;
+  case TAG:
+	fprintf(db_out, "Tag:\t\t");
+	break;
+  case MODULE:
+	fprintf(db_out, "Module:\t\t");
+	break;
+  case PROC:
+  case FUNCTION:
+	fprintf(db_out, "Routine:\t");
+	break;
+  case VAR:
+  case REGVAR:
+  case LOCVAR:
+  case VARPAR:
+	fprintf(db_out, "Variable:\t");
+	break;
+  case FIELD:
+	fprintf(db_out, "Field:\t\t");
+	break;
+  case FILESYM:
+  case FILELINK:
+	fprintf(db_out, "File:\t\t");
+	break;
+  default:
+	assert(0);
+  }
+  pr_scopes(s->sy_scope);
+  fprintf(db_out, "%s\n", s->sy_idf->id_text);
+}
+
+/* Print all identifications of p->t_args[0].
+*/
+do_find(p)
+  p_tree	p;
+{
+  p_symbol	sym = 0;
+  register p_symbol s;
+  p_tree	arg;
+
+  p = p->t_args[0];
+  switch(p->t_oper) {
+  case OP_NAME:
+	s = p->t_idf->id_def;
+	while (s) {
+		pr_sym(s);
+		s = s->sy_next;
+	}
+	break;
+
+  case OP_SELECT:
+	arg = p->t_args[1];
+	assert(arg->t_oper == OP_NAME);
+	s = arg->t_idf->id_def;
+	sym = 0;
+	while (s) {
+		if (consistent(p, s->sy_scope)) {
+			pr_sym(s);
+		}
+		s = s->sy_next;
+	}
+	break;
+
+  default:
+	assert(0);
+  }
+}
+
+do_which(p)
+  p_tree	p;
+{
+  p_symbol	sym = identify(p->t_args[0], 0xffff);
+
+  if ( sym) pr_sym(sym);
 }

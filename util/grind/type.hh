@@ -42,6 +42,7 @@ typedef struct type {
   short		ty_flags;
 #define T_CROSS		0x0001
   long		ty_size;
+  struct symbol	*ty_sym;
   union {
      /* cross references */
      char	    *typ_tag;
