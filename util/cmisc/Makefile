@@ -2,7 +2,7 @@ EM = ../..
 EMBIN =	$(EM)/bin
 EMMAN = $(EM)/man
 CFLAGS = -O
-LDFLAGS =
+LDFLAGS = -i
 TARGETS = mkdep cid cclash prid
 
 all:	mkdep cid cclash prid
