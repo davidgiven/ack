@@ -2,7 +2,7 @@ name "Intel 8086 assembler"
 dir as
 end
 name "Intel 8086 backend"
-dir cg
+dir ncg
 end
 name "Intel 8086 C libraries"
 dir libcc
