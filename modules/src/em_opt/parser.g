@@ -487,7 +487,7 @@ LLmessage(insertedtok)
 	fprintf(stderr,"parser: syntax error on line %d: ",linenum);
 	if(insertedtok) {
 		fprintf(stderr,"Inserted token %d\n",insertedtok);
-		yyless(0);
+		back_token();
 	}
 	else fprintf(stderr,"Deleted token %d\n",LLsymb);
 }

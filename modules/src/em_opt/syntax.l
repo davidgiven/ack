@@ -58,3 +58,8 @@ offset		return(OFFSET);
 \n		{ linenum++; return(yytext[0]);}
 .		return(yytext[0]);
 %%
+
+back_token()
+{
+	yyless(0);
+}
