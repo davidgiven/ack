@@ -1,7 +1,7 @@
 (*$R-*)
 IMPLEMENTATION MODULE RealConversions;
 
-  FROM EM IMPORT FIF, FEF;
+  FROM EM IMPORT FIF;
 
   PROCEDURE RealToString(arg: REAL;
 		width, digits: INTEGER;
