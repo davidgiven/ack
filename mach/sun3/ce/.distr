@@ -7,7 +7,6 @@ as_table
 do_close.c
 do_open.c
 end_back.c
-lib
 mach.c
 mach.h
 misc.c
