@@ -291,10 +291,10 @@ next_option:			/* to allow combined one-char options */
 		}
 		break;
 	}
-#endif NOCROSS
 	case 'S':
 		density = txt2int(&text);
 		break;
+#endif NOCROSS
 #endif	LINT
 	}
 }
