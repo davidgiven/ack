@@ -45,7 +45,7 @@ move.w X,A : tst.w A			->	move.w X,A ;
 move.l A,D : tst.l A {no_part(D,A)}	->	move.l A,D ;
 move.l X,D : tst.l D 			->	move.l X,D ;
 move.l A,AREG : tst.l A
-		{no_part(AREG,A)}	->	tst.l A: move.l A,AREG ;
+		{no_part(AREG,A)}	->	tst.l A : move.l A,AREG ;
 move.l X,AREG : move.l AREG,DREG :
 	tst.l DREG : beq LAB		->	move.l X,DREG :
 						move.l DREG,AREG: beq LAB ;
@@ -55,6 +55,8 @@ move.l X,AREG : move.l AREG,DREG :
 
 /* redundant move */
 move.l DREG,DREG2 : move.l DREG2,DREG	->	move.l DREG,DREG2 ;
+move.l DREG,AREG : move.l AREG,DREG	->	move.l DREG,AREG : tst.l DREG
+move.l AREG,DREG : move.l DREG,AREG	->	move.l AREG,DREG ;
 move.w DREG,DREG2 : move.w DREG2,DREG	->	move.w DREG,DREG2 ;
 
 /* register subsumption */
@@ -66,33 +68,33 @@ move.l DREG,A : ANY A,X
 	 !is_dreg(A)	}		->	move.l DREG,A : ANY DREG,X ;
 
 /* change some compares to tests */
-cmp.w #0,X : beq LAB			->	tst.w X : beq LAB ;
-cmp.w #0,X : bne LAB			->	tst.w X : bne LAB ;
-cmp.w #0,X : blt LAB			->	tst.w X : bgt LAB ;
-cmp.w #0,X : ble LAB			->	tst.w X : bge LAB ;
-cmp.w #0,X : bge LAB			->	tst.w X : ble LAB ;
-cmp.w #0,X : bgt LAB			->	tst.w X : blt LAB ;
+cmp.w #0,D : beq LAB			->	tst.w D : beq LAB ;
+cmp.w #0,D : bne LAB			->	tst.w D : bne LAB ;
+cmp.w #0,D : blt LAB			->	tst.w D : bgt LAB ;
+cmp.w #0,D : ble LAB			->	tst.w D : bge LAB ;
+cmp.w #0,D : bge LAB			->	tst.w D : ble LAB ;
+cmp.w #0,D : bgt LAB			->	tst.w D : blt LAB ;
 
-cmp.l #0,X : beq LAB			->	tst.l X : beq LAB ;
-cmp.l #0,X : bne LAB			->	tst.l X : bne LAB ;
-cmp.l #0,X : blt LAB			->	tst.l X : bgt LAB ;
-cmp.l #0,X : ble LAB			->	tst.l X : bge LAB ;
-cmp.l #0,X : bge LAB			->	tst.l X : ble LAB ;
-cmp.l #0,X : bgt LAB			->	tst.l X : blt LAB ;
+cmp.l #0,D : beq LAB			->	tst.l D : beq LAB ;
+cmp.l #0,D : bne LAB			->	tst.l D : bne LAB ;
+cmp.l #0,D : blt LAB			->	tst.l D : bgt LAB ;
+cmp.l #0,D : ble LAB			->	tst.l D : bge LAB ;
+cmp.l #0,D : bge LAB			->	tst.l D : ble LAB ;
+cmp.l #0,D : bgt LAB			->	tst.l D : blt LAB ;
 
-cmp.w X,#0 : beq LAB			->	tst.w X : beq LAB ;
-cmp.w X,#0 : bne LAB			->	tst.w X : bne LAB ;
-cmp.w X,#0 : blt LAB			->	tst.w X : blt LAB ;
-cmp.w X,#0 : ble LAB			->	tst.w X : ble LAB ;
-cmp.w X,#0 : bge LAB			->	tst.w X : bge LAB ;
-cmp.w X,#0 : bgt LAB			->	tst.w X : bgt LAB ;
+cmp.w D,#0 : beq LAB			->	tst.w D : beq LAB ;
+cmp.w D,#0 : bne LAB			->	tst.w D : bne LAB ;
+cmp.w D,#0 : blt LAB			->	tst.w D : blt LAB ;
+cmp.w D,#0 : ble LAB			->	tst.w D : ble LAB ;
+cmp.w D,#0 : bge LAB			->	tst.w D : bge LAB ;
+cmp.w D,#0 : bgt LAB			->	tst.w D : bgt LAB ;
 
-cmp.l X,#0 : beq LAB			->	tst.l X : beq LAB ;
-cmp.l X,#0 : bne LAB			->	tst.l X : bne LAB ;
-cmp.l X,#0 : blt LAB			->	tst.l X : blt LAB ;
-cmp.l X,#0 : ble LAB			->	tst.l X : ble LAB ;
-cmp.l X,#0 : bge LAB			->	tst.l X : bge LAB ;
-cmp.l X,#0 : bgt LAB			->	tst.l X : bgt LAB ;
+cmp.l D,#0 : beq LAB			->	tst.l D : beq LAB ;
+cmp.l D,#0 : bne LAB			->	tst.l D : bne LAB ;
+cmp.l D,#0 : blt LAB			->	tst.l D : blt LAB ;
+cmp.l D,#0 : ble LAB			->	tst.l D : ble LAB ;
+cmp.l D,#0 : bge LAB			->	tst.l D : bge LAB ;
+cmp.l D,#0 : bgt LAB			->	tst.l D : bgt LAB ;
 
 /* change "cmp" into "add" or "sub" (possibly "addq" or "subq") */
 cmp.w #-NUM,DSREG : beq LAB		->	add.w #NUM,DSREG : beq LAB ;
