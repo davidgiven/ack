@@ -59,6 +59,7 @@ compile(argc, argv)
 		WorkingDir = 0;
 		break;
 	default:
+		FileName = argv[0];
 		fatal("use: %s [options] [source]", prog_name);
 		break;
 	}
