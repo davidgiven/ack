@@ -32,11 +32,13 @@ MarkDef(nd, flags, on)
 		    BlockScope != nd->nd_def->df_scope )
 			nd->nd_def->df_flags |= D_SETINHIGH;
 		if( on ) {
+			/*
 			if( (flags & D_SET) &&
 			    (nd->nd_def->df_flags & D_WITH) )
 				node_warning(nd,
 				"variable \"%s\" already referenced in with",
 				nd->nd_def->df_idf->id_text);
+			*/
 			nd->nd_def->df_flags |= flags;
 		}
 		else
