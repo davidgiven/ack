@@ -44,19 +44,6 @@ int transform(phase) register trf *phase ; {
 		disc_files(phase) ;
 		return 0 ;
 	}
-	if ( !phase->t_visited ) {
-		/* The flags are set up once.
-		   At the first time the phase is used.
-		   The program name and flags may already be touched
-		   by vieuwargs.
-		*/
-		phase->t_visited=YES ;
-		if ( !rts && phase->t_rts ) rts= phase->t_rts ;
-		if ( phase->t_needed ) {
-			add_head(phase->t_needed) ;
-			add_tail(phase->t_needed) ;
-		}
-	}
 	getcallargs(phase) ;
 	ok= runphase(phase) ;
 	if ( !ok ) rmfile(&out) ;
@@ -93,9 +80,15 @@ getmapflags(phase) register trf *phase ; {
 		scanlist(l_first(phase->t_inputs),elem) {
 			l_in = p_cont(*elem) ;
 			if ( mapflag(&(phase->t_mapf),l_in->p_path) ) {
-				if ( l_in->p_keeps) throws(l_in->p_path) ;
 				ptr= keeps(getvar(LIBVAR)) ;
 				clr_noscan(ptr) ;
+#ifdef DEBUG
+				if ( debug >=4 ) {
+					vprint("phase %s, library %s(%s)\n",
+					   phase->t_name,l_in->p_path,ptr) ;
+				}
+#endif
+				if ( l_in->p_keeps) throws(l_in->p_path) ;
 				l_in->p_path= ptr ;
 				l_in->p_keeps=YES ;
 			}
@@ -109,6 +102,13 @@ getmapflags(phase) register trf *phase ; {
 			*/
 			if ( !( *(l_content(*elem))&NO_SCAN ) ) {
 				l_add(&(phase->t_flags),l_content(*elem)) ;
+#ifdef DEBUG
+				if ( debug >=4 ) {
+					vprint("phase %s, added flag %s\n",
+						phase->t_name,
+						l_content(*elem) ) ;
+				}
+#endif
 			}
 		}
 	}
@@ -174,7 +174,6 @@ transini() {
 	setpvar(keeps(NEEDS),needvar) ;
 	setpvar(keeps(HEAD),headvar) ;
 	setpvar(keeps(TAIL),tailvar) ;
-	if ( linker ) getmapflags(linker) ;
 }
 
 set_Rflag(argp) register char *argp ; {
@@ -182,15 +181,17 @@ set_Rflag(argp) register char *argp ; {
 	register char *eos ;
 	register list_elem *prog ;
 	register int length ;
-	char *eq ;
+	char *eq, *colon ;
 
 	eos= index(&argp[2],'-');
 	eq= index(&argp[2],EQUAL) ;
+	colon= index(&argp[2],':');
 	if ( !eos ) {
 		eos= eq ;
 	} else {
 		if ( eq && eq<eos ) eos= eq ;
 	}
+	if ( colon && ( !eos || eos>colon ) ) eos= colon ;
 	if ( !eos ) fuerror("Incorrect use of -R flag") ;
 	length= eos - &argp[2] ;
 	seen=NO ;
@@ -198,10 +199,13 @@ set_Rflag(argp) register char *argp ; {
 		if ( strncmp(t_cont(*prog)->t_name, &argp[2], length )==0 ) {
 			if ( *eos=='-' ) {
 				l_add(&(t_cont(*prog)->t_flags),eos) ;
-			} else {
+			} else
+			if ( *eos=='=' ) {
 				t_cont(*prog)->t_prog= eos+1 ;
+			} else {
+				t_cont(*prog)->t_priority= atoi(eos+1) ;
 			}
-			seen=YES ;
+			seen=YES ; 
 		}
 	}
 	if ( !seen ) error("Cannot find program for %s",argp) ;
