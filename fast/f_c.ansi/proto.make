@@ -9,7 +9,7 @@ UTIL_BIN = \
 SRC_DIR = \
 	$(SRC_HOME)/lang/cem/cemcom.ansi
 FSRC_DIR = \
-	$(SRC_HOME)/fast/f_c
+	$(SRC_HOME)/fast/f_c.ansi
 
 TABGEN=	$(UTIL_BIN)/tabgen
 LLGEN =	$(UTIL_BIN)/LLgen
@@ -129,10 +129,10 @@ all:		make.main
 		make -f make.main main
 
 install:	all
-		cp main $(TARGET_HOME)/lib.bin/c_ce
+		cp main $(TARGET_HOME)/lib.bin/c_ce.ansi
 
 cmp:		all
-		-cmp main $(TARGET_HOME)/lib.bin/c_ce
+		-cmp main $(TARGET_HOME)/lib.bin/c_ce.ansi
 
 opr:
 		make pr | opr
