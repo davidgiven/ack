@@ -100,7 +100,7 @@ GHSRC = botch_free.h dataflow.h debug.h density.h errout.h \
 	reg_count.h
 
 # Other generated files, for 'make clean' only
-GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
+GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 	print Xref lxref hfiles cfiles $(GLCSRC)
 
 # include files containing ALLOCDEF specifications
@@ -139,8 +139,8 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	<tokenname.c ./make.tokcase >symbol2str.c
 
-char.c:	tab char.tab
-	tab -fchar.tab >char.c
+char.c:	char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab >char.c
 
 next.c:	make.next $(NEXTFILES)
 	./make.next $(NEXTFILES) >next.c
@@ -208,7 +208,7 @@ xref:
 lxref:
 	lxref $(OBJ) -lc >lxref
 
-lint:	lint.main lint.cem lint.tab
+lint:	lint.main lint.cem
 
 lint.main: cfiles
 	$(LINT) -bx $(CDEFS) $(SRC) $(LINTLIBS) >lint.out
@@ -218,12 +218,6 @@ cchk:
 
 clean:
 	rm -f $(LCSRC) $(OBJ) $(GENERATED) $(GSRC) $(GHSRC)
-
-tab:
-	$(CC) tab.c -o tab
-
-lint.tab:
-	$(LINT) -abx tab.c
 
 sim:	cfiles
 	$(SIM) $(SIMFLAGS) $(CSRC) $(GSRC) $(LSRC)

@@ -17,7 +17,7 @@ PRTLIB = $(EMHOME)/modules/lib/libprint.a
 EMMESLIB = $(EMHOME)/modules/lib/libem_mes.a
 EMMESOLIB = $(EMHOME)/modules/lib/libem_mesO.a
 EMMESCELIB = $(EMHOME)/modules/lib/libem_mesCE.a
-MACH = sun3
+MACH = vax4
 EMCELIB = $(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/back.a \
 		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a
@@ -115,7 +115,7 @@ HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 HFILES = $(HSRC) $(GHSRC) $(GHSTRSRC)
 
 # generated files, for 'make clean' only
-GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
+GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 	print hfiles Cfiles $(GHSRC) $(GSRC) longnames $(LCSRC)
 
 # include files containing ALLOCDEF specifications
@@ -172,7 +172,7 @@ cmp:	Main
 	-cmp $(CURRDIR)/cemcom.1 $(EMHOME)/man/em_cemcom.6
 
 pr:
-	@pr Makefile make.* tab.c char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
+	@pr Makefile make.* char.tab Parameters $(HSRC) $(STRSRC) $(LSRC) $(CSRC)
 
 opr:
 	make pr | opr
@@ -212,11 +212,8 @@ tokenfile.g:	tokenname.c make.tokfile
 symbol2str.c:	tokenname.c make.tokcase
 	<tokenname.c ./make.tokcase >symbol2str.c
 
-char.c:	tab char.tab
-	tab -fchar.tab >char.c
-
-tab:
-	$(CC) tab.c -o tab
+char.c:	char.tab
+	$(EMHOME)/bin/tabgen -fchar.tab >char.c
 
 next.c:	make.next $(STRSRC)
 	./make.next $(STRSRC) >next.c

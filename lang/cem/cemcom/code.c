@@ -67,8 +67,10 @@ init_code(dst_file)
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
 #ifdef USE_TMP
+#ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
 #endif	USE_TMP
+#endif	PREPEND_SCOPES
 }
 #endif	LINT
 
@@ -119,7 +121,7 @@ end_code()
 	C_close();
 }
 
-#ifdef	USE_TMP
+#ifdef	PREPEND_SCOPES
 prepend_scopes()
 {
 	/*	prepend_scopes() runs down the list of global idf's
@@ -128,7 +130,9 @@ prepend_scopes()
 	*/
 	register struct stack_entry *se = local_level->sl_entry;
 
+#ifdef USE_TMP
 	C_beginpart(tmp_id);
+#endif USE_TMP
 	while (se != 0)	{
 		register struct idf *id = se->se_idf;
 		register struct def *df = id->id_def;
@@ -137,9 +141,11 @@ prepend_scopes()
 			code_scope(id->id_text, df);
 		se = se->next;
 	}
+#ifdef USE_TMP
 	C_endpart(tmp_id);
+#endif USE_TMP
 }
-#endif	USE_TMP
+#endif	PREPEND_SCOPES
 
 code_scope(text, def)
 	char *text;
@@ -190,9 +196,9 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	register char *name = idf->id_text;
 	register struct def *def = idf->id_def;
 
-#ifndef USE_TMP
+#ifndef PREPEND_SCOPES
 	code_scope(name, def);
-#endif	USE_TMP
+#endif	PREPEND_SCOPES
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaStartFunction(name);
@@ -376,11 +382,11 @@ code_declaration(idf, expr, lvl, sc)
 		return;
 	if (sc == EXTERN && expr && !is_anon_idf(idf))
 		error("%s is extern; cannot initialize", idf->id_text);
-#ifndef USE_TMP
+#ifndef PREPEND_SCOPES
 	if (def->df_type->tp_fund == FUNCTION) {
 		code_scope(idf->id_text, def);
 	}
-#endif
+#endif PREPEND_SCOPES
 	if (lvl == L_GLOBAL)	{	/* global variable	*/
 		/* is this an allocating declaration? */
 		if (	(sc == 0 || sc == STATIC)
@@ -389,9 +395,9 @@ code_declaration(idf, expr, lvl, sc)
 		)
 			def->df_alloc = ALLOC_SEEN;
 		if (expr) {	/* code only if initialized */
-#ifndef USE_TMP
+#ifndef PREPEND_SCOPES
 			code_scope(idf->id_text, def);
-#endif USE_TMP
+#endif PREPEND_SCOPES
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(idf->id_text);
 		}
@@ -423,9 +429,9 @@ code_declaration(idf, expr, lvl, sc)
 		case GLOBAL:
 		case IMPLICIT:
 			/* we are sure there is no expression */
-#ifndef	USE_TMP
+#ifndef	PREPEND_SCOPES
 			code_scope(idf->id_text, def);
-#endif	USE_TMP
+#endif	PREPEND_SCOPES
 			break;
 		case AUTO:
 		case REGISTER:
@@ -501,9 +507,9 @@ bss(idf)
 	*/
 	arith size = idf->id_def->df_type->tp_size;
 	
-#ifndef	USE_TMP
+#ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, idf->id_def);
-#endif	USE_TMP
+#endif	PREPEND_SCOPES
 	/*	Since bss() is only called if df_alloc is non-zero, and
 		since df_alloc is only non-zero if size >= 0, we have:
 	*/

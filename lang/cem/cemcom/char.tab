@@ -7,8 +7,7 @@
 %
 %	START OF TOKEN
 %
-%C
-STGARB:\000-\200
+%iSTGARB
 STSKIP:\r \t\013\f
 STNL:\n
 STCOMP:-!&+<=>|

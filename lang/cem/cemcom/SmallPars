@@ -86,9 +86,15 @@
 
 
 !File: use_tmp.h
-#undef USE_TMP		1	/* collect exa, exp, ina and inp commands
-					and let them precede the rest of
-					the generated compact code	*/
+#undef PREPEND_SCOPES	1	/* collect exa, exp, ina and inp commands
+					and if USE_TMP is defined let them
+					precede the rest of the generated
+					compact code	*/
+#undef USE_TMP		1	/* use C_insertpart, C_endpart mechanism
+					to generate EM-code in the order needed
+					for the code-generators. If not defined,
+					the old-style peephole optimizer is
+					needed.	*/
 
 
 !File: parbufsize.h

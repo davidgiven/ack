@@ -209,9 +209,9 @@ compile(argc, argv)
 		/* compile the source text			*/
 		C_program();
 
-#ifdef USE_TMP
+#ifdef PREPEND_SCOPES
 		prepend_scopes();
-#endif USE_TMP
+#endif PREPEND_SCOPES
 		end_code();
 
 #ifdef	DEBUG

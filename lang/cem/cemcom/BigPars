@@ -39,7 +39,7 @@
 !File: strsize.h
 #define ISTRSIZE	32	/* minimum number of bytes allocated for
 					storing a string		*/
-#define RSTRSIZE	8	/* step size in enlarging the memory for
+#define RSTRSIZE	16	/* step size in enlarging the memory for
 					the storage of a string		*/
 
 
@@ -86,9 +86,15 @@
 
 
 !File: use_tmp.h
-#define USE_TMP		1	/* collect exa, exp, ina and inp commands
-					and let them precede the rest of
-					the generated compact code	*/
+#define PREPEND_SCOPES	1	/* collect exa, exp, ina and inp commands
+					and if USE_TMP is defined let them
+					precede the rest of the generated
+					compact code	*/
+#define USE_TMP		1	/* use C_insertpart, C_endpart mechanism
+					to generate EM-code in the order needed
+					for the code-generators. If not defined,
+					the old-style peephole optimizer is
+					needed.	*/
 
 
 !File: parbufsize.h
@@ -96,8 +102,8 @@
 
 
 !File: textsize.h
-#define ITEXTSIZE	8	/* 1st piece of memory for repl. text	*/
-#define RTEXTSIZE	8	/* stepsize for enlarging repl.text	*/
+#define ITEXTSIZE	32	/* 1st piece of memory for repl. text	*/
+#define RTEXTSIZE	16	/* stepsize for enlarging repl.text	*/
 
 
 !File: inputtype.h
