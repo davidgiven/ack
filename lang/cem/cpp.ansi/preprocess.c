@@ -25,6 +25,8 @@ char	bits[128];
 #endif
 extern int InputLevel;
 
+extern char *sprint();
+
 Xflush()
 {
 	sys_write(STDOUT, _obuf, OBUFSIZE);
@@ -46,7 +48,7 @@ static int pragma_nr;
 do_pragma()
 {
 	register int size = ITEXTSIZE;
-	char *cur_line = Malloc(size);
+	char *cur_line = Malloc((unsigned)size);
 	register char *c_ptr = cur_line;
 	register int c = GetChar();
 	register int delim = 0;
@@ -136,7 +138,7 @@ preprocess(fn)
 				register char *p = Xbuf;		\
 				sprint(Xbuf, "%s %d \"%s\"\n",		\
 					LINE_PREFIX,			\
-					LineNumber,			\
+					(int)LineNumber,		\
 					FileName);			\
 				op--;					\
 				while (op >= _obuf			\

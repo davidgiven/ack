@@ -32,6 +32,7 @@ struct mkey	{
 };
 
 char *strcpy();
+char *sprint();
 
 init_pp()
 {

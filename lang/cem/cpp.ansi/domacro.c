@@ -665,7 +665,7 @@ get_text(formals, length)
 
 	c = GetChar();
 
-	repl->r_ptr = repl->r_text = Malloc(repl->r_size = ITEXTSIZE);
+	repl->r_ptr = repl->r_text = Malloc((unsigned)(repl->r_size = ITEXTSIZE));
 	*repl->r_ptr = '\0';
 	while ((c != EOI) && (class(c) != STNL)) {
 		if (BLANK(c)) {

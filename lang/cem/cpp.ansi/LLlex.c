@@ -259,7 +259,10 @@ garbage:
 	}
 	case STNUM:				/* a numeric constant	*/
 	{			/* it may only be an integer constant */
-		register int base = 10, val = 0, vch;
+		register int base = 10, vch;
+		register arith val = 0;
+		int ovfl = 0;
+		arith ubound = ~(1<<(sizeof(arith)*8-1))/(base/2);
 
 		/* Since the preprocessor only knows integers and has
 		 * nothing to do with ellipsis we just return when the
@@ -279,11 +282,35 @@ garbage:
 
 		}
 		while ((vch = val_in_base(ch, base)) >= 0) {
-			val = val * base + vch;		/* overflow? nah */
+			if (val < 0 || val > ubound) ovfl++;
+			val *= base;
+			if (val < 0 && val + vch >= 0) ovfl++;
+			val += vch;
 			ch = GetChar();
 		}
-		while (ch == 'l' || ch == 'L' || ch == 'u' || ch == 'U')
+		ptok->tk_unsigned = 0;
+		if (ch == 'u' || ch == 'U') {
+			ptok->tk_unsigned = 1;
 			ch = GetChar();
+			if (ch == 'l' || ch == 'L') {
+				ch = GetChar();
+			}
+		}
+		else if (ch == 'l' || ch == 'L') {
+			ch = GetChar();
+			if (ch == 'u' || ch == 'U') {
+				ptok->tk_unsigned = 1;
+				ch = GetChar();
+			}
+		}
+		if (ovfl) {
+			warning("overflow in constant");
+			ptok->tk_unsigned = 1;
+		}
+		else if (val < 0) {
+			/* give warning??? */
+			ptok->tk_unsigned = 1;
+		}
 		UnGetChar();
 		ptok->tk_val = val;
 		return ptok->tk_symb = INTEGER;

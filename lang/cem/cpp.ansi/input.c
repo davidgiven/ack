@@ -12,6 +12,7 @@
 #define INP_VAR		finfo
 struct file_info	finfo;
 #include <inp_pkg.body>
+#include <alloc.h>
 
 char *
 getwdir(fn)

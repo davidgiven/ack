@@ -8,8 +8,10 @@
 #include	"Lpars.h"
 #include	"arith.h"
 
-ch3mon(oper, pval)
+/*ARGSUSED2*/
+ch3mon(oper, pval, puns)
 	register arith *pval;
+	int *puns;
 {
 	switch (oper)	{
 	case '~':

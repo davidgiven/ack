@@ -41,7 +41,7 @@ replace(idf)
 	if (idf->id_macro->mc_flag & NOREPLACE)
 		return 0;
 	repl = new_repl();
-	repl->r_ptr = repl->r_text = Malloc(repl->r_size = LAPBUF);
+	repl->r_ptr = repl->r_text = Malloc((unsigned)(repl->r_size = LAPBUF));
 	repl->r_args = new_args();
 	repl->r_idf = idf;
 	if (!expand_macro(repl, idf))
@@ -206,8 +206,8 @@ expand_defined(repl)
 newarg(args)
 	struct args *args;
 {
-	args->a_expptr = args->a_expbuf = Malloc(args->a_expsize = ARGBUF);
-	args->a_rawptr = args->a_rawbuf = Malloc(args->a_rawsize = ARGBUF);
+	args->a_expptr = args->a_expbuf = Malloc((unsigned)(args->a_expsize = ARGBUF));
+	args->a_rawptr = args->a_rawbuf = Malloc((unsigned)(args->a_rawsize = ARGBUF));
 }
 
 getactuals(repl, idf)
@@ -302,14 +302,23 @@ actual(repl)
 	register int ch = 0;
 	register int level = 0, nostashraw = 0;
 	int lastch;
+	static int Unstacked_missed;
 
 	while (1) {
 		lastch = ch;
 		ch = GetChar();
 
+		if (nostashraw 
+		    && nostashraw >= Unstacked_missed) {
+			nostashraw -= Unstacked_missed;
+			Unstacked_missed = 0;
+		}
 		if (Unstacked) {
 			nostashraw -= Unstacked;
-			if (nostashraw < 0) nostashraw = 0;
+			if (nostashraw < 0) {
+				Unstacked_missed = -nostashraw;
+				nostashraw = 0;
+			}
 			EnableMacros();
 		}
 		if (class(ch) == STIDF || class(ch) == STELL) {

@@ -23,12 +23,12 @@ err_hdr(s)
 	char *s;
 {
 	if (FileName) {
-		fprint(ERROUT, "\"%s\", line %d: %s", FileName, LineNumber, s);
+		fprint(ERROUT, "\"%s\", line %d: %s", FileName, (int)LineNumber, s);
 	}
 	else	fprint(ERROUT, s);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 error(va_alist)
 	va_dcl
 {
@@ -44,7 +44,7 @@ error(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 warning(va_alist)
 	va_dcl
 {
@@ -59,7 +59,7 @@ warning(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 strict(va_alist)
 	va_dcl
 {
@@ -74,7 +74,7 @@ strict(va_alist)
 	va_end(ap);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 crash(va_alist)
 	va_dcl
 {
@@ -90,7 +90,7 @@ crash(va_alist)
 	sys_stop(S_ABORT);
 }
 
-/*VARARGS1*/
+/*VARARGS*/
 fatal(va_alist)
 	va_dcl
 {
