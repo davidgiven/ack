@@ -78,18 +78,31 @@ int	wait(s) int *s; { return(0); }
 int	write(f, b, l) char *b; { return(0); }
 int	abort() {/*NOTREACHED*/ }
 
-/* Some definitions to prevent some warnings */
-/* VARARGS1 */
+/* Some definitions of format functions */
+/* FORMAT0 $
+	%[dox] = int		%l[dox] = long		%[DOX] = long
+	%u = unsigned int	%lu = unsigned long	%U = unsigned long
+	%[feg] = double
+	%c = int		%s = char *
+$ */
 printf(fmt) char *fmt; { ; }
-/* VARARGS1 */
+
+/* FORMAT1 */
 fprintf(fp, fmt) FILE *fp; char *fmt; { ; }
-/* VARARGS2 */
+/* FORMAT1 */
 sprintf(s, fmt) char *s; char *fmt; { ; }
-/* VARARGS1 */
+
+/* FORMAT0 $
+	%[dox] = int *		%l[dox] = long *	%[DOX] = long *
+	%h[dox] = short *
+	%u = unsigned int *	%lu = unsigned long *	%U = unsigned long *
+	%[fe] = float *		%l[fe] = double *	%[FE] = double *
+	%c = char *		%s = char *		%[[] = char *
+$ */
 int scanf(fmt) char *fmt; { return(0); }
-/* VARARGS2 */
+/* FORMAT1 */
 int fscanf(fp, fmt) FILE *fp; char *fmt; { return(0); }
-/* VARARGS2 */
+/* FORMAT1 */
 int sscanf(s, fmt) char *s; char *fmt; { return(0); }
 int _flsbuf(i, fp) unsigned int i; FILE *fp; { return(0); }
 

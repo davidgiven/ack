@@ -6,7 +6,7 @@
 This directory contains the standard lint libraries.  Normally, nothing
 needs to be done here.  The standard library llib-lc contains all entries
 from termlib, curses and math as well, which provides the user with
-advanced warnings if he inadvertently uses a global name that is also
+advance warnings if he inadvertently uses a global name that is also
 used by one of these libraries.
 
 A file with a UNIX 7 view of the system calls is provided, named unix7.c.

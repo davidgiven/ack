@@ -11,7 +11,7 @@ _doprnt:0:a:3:char*:char*:struct _iobuf*:0:int:65:/usr/em/lang/cem/libcc/stdio/d
 _doscanf:0:a:3:struct _iobuf*:char*:char*:1:int:23:/usr/em/lang/cem/libcc/stdio/doscan.c
 _exit:0:a:1:int:0:int:42:unix7.c
 _fillbuf:0:a:1:struct _iobuf*:1:int:6:/usr/em/lang/cem/libcc/stdio/fillbuf.c
-_flsbuf:0:a:2:unsigned int:struct _iobuf*:1:int:94:unix7.c
+_flsbuf:0:a:2:unsigned int:struct _iobuf*:1:int:107:unix7.c
 _flushbuf:0:a:2:int:struct _iobuf*:1:int:5:/usr/em/lang/cem/libcc/stdio/flushbuf.c
 _io_table:0:b:struct _io_buf**:19:/usr/em/lang/cem/libcc/stdio/data.c
 _pfloat:0:a:4:double:char*:int:int:1:char*:7:/usr/em/lang/cem/libcc/stdio/fltpr.c
@@ -53,8 +53,8 @@ ecvt:0:a:4:double:int:int*:int*:1:char*:8:/usr/em/lang/cem/libcc/gen/ecvt.c
 encrypt:0:a:2:char*:int:0:int:196:/usr/em/lang/cem/libcc/gen/crypt.c
 endgrent:0:a:0:0:int:33:/usr/em/lang/cem/libcc/stdio/getgrent.c
 endpwent:0:a:0:0:int:36:/usr/em/lang/cem/libcc/stdio/getpwent.c
-environ:0:b:char**:97:unix7.c
-errno:0:b:int:98:unix7.c
+environ:0:b:char**:110:unix7.c
+errno:0:b:int:111:unix7.c
 execl:0:a:-3:char*:char*:0:int:37:unix7.c
 execle:0:a:-4:char*:char*:char*:0:int:40:unix7.c
 execlp:0:a:2:char*:char*:1:int:5:/usr/em/lang/cem/libcc/gen/execvp.c
@@ -72,13 +72,13 @@ fgetc:0:a:1:struct _iobuf*:1:int:4:/usr/em/lang/cem/libcc/stdio/fgetc.c
 fgets:0:a:3:char*:unsigned int:struct _iobuf*:1:char*:4:/usr/em/lang/cem/libcc/stdio/fgets.c
 fopen:0:a:2:char*:char*:1:struct _iobuf*:7:/usr/em/lang/cem/libcc/stdio/fopen.c
 fork:0:a:0:1:int:43:unix7.c
-fprintf:0:a:-2:struct _iobuf*:0:int:85:unix7.c
+fprintf:0:a:-3:struct _iobuf*:"%[dox]=int%l[dox]=long%[DOX]=long%u=unsigned int%lu=unsigned long%U=unsigned long%[feg]=double%c=int%s=char*":0:int:91:unix7.c
 fputc:0:a:2:int:struct _iobuf*:1:int:4:/usr/em/lang/cem/libcc/stdio/fputc.c
 fputs:0:a:2:char*:struct _iobuf*:0:int:4:/usr/em/lang/cem/libcc/stdio/fputs.c
 fread:0:a:4:char*:unsigned int:int:struct _iobuf*:1:int:4:/usr/em/lang/cem/libcc/stdio/fread.c
 free:0:a:1:char*:0:int:112:/usr/em/lang/cem/libcc/gen/malloc.c
 freopen:0:a:3:char*:char*:struct _iobuf*:1:struct _iobuf*:7:/usr/em/lang/cem/libcc/stdio/freopen.c
-fscanf:0:a:-3:struct _iobuf*:char*:1:int:91:unix7.c
+fscanf:0:a:-3:struct _iobuf*:"%[dox]=int*%l[dox]=long*%[DOX]=long*%h[dox]=short*%u=unsigned int*%lu=unsigned long*%U=unsigned long*%[fe]=float*%l[fe]=double*%[FE]=double*%c=char*%s=char*%[[]=char*":1:int:104:unix7.c
 fseek:0:a:3:struct _iobuf*:long:int:1:int:5:/usr/em/lang/cem/libcc/stdio/fseek.c
 fstat:0:a:2:int:struct stat*:1:int:68:unix7.c
 ftell:0:a:1:struct _iobuf*:1:long:5:/usr/em/lang/cem/libcc/stdio/ftell.c
@@ -142,7 +142,7 @@ pclose:0:a:1:struct _iobuf*:1:int:38:/usr/em/lang/cem/libcc/stdio/popen.c
 perror:0:a:1:char*:0:int:45:/usr/em/lang/cem/libcc/gen/perror.c
 pipe:0:a:1:int*:1:int:60:unix7.c
 popen:0:a:2:char*:char*:1:struct _iobuf*:8:/usr/em/lang/cem/libcc/stdio/popen.c
-printf:0:a:-2:char*:0:int:83:unix7.c
+printf:0:a:-2:"%[dox]=int%l[dox]=long%[DOX]=long%u=unsigned int%lu=unsigned long%U=unsigned long%[feg]=double%c=int%s=char*":0:int:88:unix7.c
 procentry:0:a:1:char*:0:int:23:/usr/em/lang/cem/libcc/gen/procentry.c
 procexit:0:a:1:char*:0:int:32:/usr/em/lang/cem/libcc/gen/procentry.c
 profil:0:a:4:char*:int:int:int:0:int:61:unix7.c
@@ -158,7 +158,7 @@ realloc:0:a:2:char*:unsigned int:1:char*:85:/usr/em/lang/cem/libcc/gen/malloc.c
 rewind:0:a:1:struct _iobuf*:1:int:4:/usr/em/lang/cem/libcc/stdio/rewind.c
 rindex:0:a:2:char*:char:1:char*:2:/usr/em/lang/cem/libcc/gen/rindex.c
 sbrk:0:a:1:int:1:char*:27:unix7.c
-scanf:0:a:-2:char*:1:int:89:unix7.c
+scanf:0:a:-2:"%[dox]=int*%l[dox]=long*%[DOX]=long*%h[dox]=short*%u=unsigned int*%lu=unsigned long*%U=unsigned long*%[fe]=float*%l[fe]=double*%[FE]=double*%c=char*%s=char*%[[]=char*":1:int:102:unix7.c
 seekdir:0:a:2:struct _dirdesc*:long:0:void:9:/usr/em/lang/cem/libcc/gen/seekdir.c
 setbuf:0:a:2:struct _iobuf*:char*:0:int:4:/usr/em/lang/cem/libcc/stdio/setbuf.c
 setgid:0:a:1:int:1:int:65:unix7.c
@@ -168,9 +168,9 @@ setpwent:0:a:0:1:int:24:/usr/em/lang/cem/libcc/stdio/getpwent.c
 setuid:0:a:1:int:1:int:64:unix7.c
 signal:0:a:2:int:int()*:1:int()*:66:unix7.c
 sleep:0:a:1:int:0:int:12:/usr/em/lang/cem/libcc/gen/sleep.c
-sprintf:0:a:-3:char*:char*:0:int:87:unix7.c
+sprintf:0:a:-3:char*:"%[dox]=int%l[dox]=long%[DOX]=long%u=unsigned int%lu=unsigned long%U=unsigned long%[feg]=double%c=int%s=char*":0:int:93:unix7.c
 srand:0:a:1:unsigned int:0:int:14:/usr/em/lang/cem/libcc/gen/rand.c
-sscanf:0:a:-3:char*:char*:1:int:93:unix7.c
+sscanf:0:a:-3:char*:"%[dox]=int*%l[dox]=long*%[DOX]=long*%h[dox]=short*%u=unsigned int*%lu=unsigned long*%U=unsigned long*%[fe]=float*%l[fe]=double*%[FE]=double*%c=char*%s=char*%[[]=char*":1:int:106:unix7.c
 stat:0:a:2:char*:struct stat*:1:int:67:unix7.c
 stime:0:a:1:long*:1:int:69:unix7.c
 strcat:0:a:2:char*:char*:1:char*:2:/usr/em/lang/cem/libcc/gen/strcat.c
@@ -190,7 +190,7 @@ strtok:0:a:2:char*:char*:1:char*:5:/usr/em/lang/cem/libcc/gen/strtok.c
 stty:0:a:2:int:struct sgttyb*:1:int:3:/usr/em/lang/cem/libcc/mon/stty.c
 swab:0:a:3:char*:char*:int:0:int:2:/usr/em/lang/cem/libcc/gen/swab.c
 sync:0:a:0:0:int:70:unix7.c
-sys_errlist:0:b:char**:99:unix7.c
+sys_errlist:0:b:char**:112:unix7.c
 sys_nerr:0:b:int:43:/usr/em/lang/cem/libcc/gen/perror.c
 system:0:a:1:char*:1:int:4:/usr/em/lang/cem/libcc/stdio/system.c
 tell:0:a:1:int:1:long:8:/usr/em/lang/cem/libcc/mon/tell.c
