@@ -44,7 +44,7 @@ tzset()
 		register int n = 0;
 		int sign = 1;
 
-		strncpy(tzname[0], p, 3);
+		strncpy(__tzname[0], p, 3);
 		p += 3;
 		if (*(p += 3) == '-') {
 			sign = -1;
@@ -56,7 +56,7 @@ tzset()
 		n *= sign;
 		__timezone = ((long)(n * 60)) * 60;
 		__daylight = (*p != '\0');
-		strncpy(tzname[1], p, 3);
+		strncpy(__tzname[1], p, 3);
 	}
 	}
 #ifdef USG
