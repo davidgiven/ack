@@ -54,7 +54,7 @@ ushift() {
 	printf(" u>>13 %6o\n", u>>13 ) ;
 	printf(" u>>14 %6o\n", u>>14 ) ;
 	printf(" u>>15 %6o\n", u>>15 ) ;
-	printf(" u>>16 %6o\n", u>>16 ) ;
+	if (sizeof(unsigned) > 2) printf(" u>>16 %6o\n", u>>16 ) ;
 	printf(" u<<0  %6o\n", u<<0 ) ;
 	printf(" u<<1  %6o\n", u<<1 ) ;
 	printf(" u<<2  %6o\n", u<<2 ) ;
@@ -71,7 +71,7 @@ ushift() {
 	printf(" u<<13 %6o\n", u<<13 ) ;
 	printf(" u<<14 %6o\n", u<<14 ) ;
 	printf(" u<<15 %6o\n", u<<15 ) ;
-	printf(" u<<16 %6o\n", u<<16 ) ;
+	if (sizeof(unsigned) > 2) printf(" u<<16 %6o\n", u<<16 ) ;
 }
 
 lshift() {
