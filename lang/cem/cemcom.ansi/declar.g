@@ -578,7 +578,9 @@ abstract_declarator(register struct declarator *dc;)
 			/* empty */
 		]
 		')'
-		{add_decl_unary(dc, FUNCTION, 0, (arith)0, NO_PARAMS, pl);}
+		{add_decl_unary(dc, FUNCTION, 0, (arith)0, NO_PARAMS, pl);
+		 if (pl) remove_proto_idfs(pl);
+		}
 	|
 		arrayer(&count)
 		{add_decl_unary(dc, ARRAY, 0, count, NO_PARAMS, NO_PROTO);}
