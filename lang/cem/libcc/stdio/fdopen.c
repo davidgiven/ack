@@ -34,6 +34,7 @@ char *mode;
 	fp->_count = 0;
 	fp->_fd = fd;
 	fp->_flags = flags;
+	fp->_buf = 0;
 	_io_table[i] = fp;
 	return(fp);
 }
