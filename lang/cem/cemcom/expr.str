@@ -5,6 +5,8 @@
 	a union of various goodies, we define them first; so be patient.
 */
 
+#include "nofloat.h"
+
 /* classes of value */
 #define Const	1
 #define Name	2

@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
+#include	"nofloat.h"
 #include	"Lpars.h"
 #include	"decspecs.h"
 #include	"arith.h"
@@ -15,12 +16,12 @@ extern char *symbol2str();
 struct decspecs null_decspecs;
 
 do_decspecs(ds)
-	struct decspecs *ds;
+	register struct decspecs *ds;
 {
 	/*	The provisional decspecs ds as obtained from the program
 		is turned into a legal consistent decspecs.
 	*/
-	struct type *tp = ds->ds_type;
+	register struct type *tp = ds->ds_type;
 	
 	if (level == L_FORMAL1)
 		crash("do_decspecs");

@@ -49,9 +49,9 @@ int lcm();
 */
 
 add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
-	struct type *stp;	/* type of the structure */
-	struct type *tp;	/* type of the selector */
-	struct idf *idf;	/* idf of the selector */
+	register struct type *stp;	/* type of the structure */
+	struct type *tp;		/* type of the selector */
+	register struct idf *idf;	/* idf of the selector */
 	struct sdef ***sdefpp;	/* address of hook to selector definition */
 	arith *szp;		/* pointer to struct size upto here */
 	struct field *fd;
@@ -67,8 +67,8 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	extern arith add_field();
 #endif NOBITFIELD
 
-	register struct tag *tg = stp->tp_idf->id_struct;	/* or union */
-	register struct sdef *sdef = idf->id_sdef;
+	struct tag *tg = stp->tp_idf->id_struct;	/* or union */
+	struct sdef *sdef = idf->id_sdef;
 	register struct sdef *newsdef;
 	int lvl = tg->tg_level;
 	
@@ -164,7 +164,7 @@ check_selector(idf, stp)
 	/*	checks if idf occurs already as a selector in
 		struct or union *stp.
 	*/
-	struct sdef *sdef = stp->tp_sdef;
+	register struct sdef *sdef = stp->tp_sdef;
 	
 	while (sdef)	{
 		if (sdef->sd_idf == idf)
@@ -174,7 +174,7 @@ check_selector(idf, stp)
 }
 
 declare_struct(fund, idf, tpp)
-	struct idf *idf;
+	register struct idf *idf;
 	struct type **tpp;
 {
 	/*	A struct, union or enum (depending on fund) with tag (!)
@@ -251,7 +251,7 @@ declare_struct(fund, idf, tpp)
 }
 
 apply_struct(fund, idf, tpp)
-	struct idf *idf;
+	register struct idf *idf;
 	struct type **tpp;
 {
 	/*	The occurrence of a struct, union or enum (depending on
@@ -271,7 +271,7 @@ apply_struct(fund, idf, tpp)
 
 struct sdef *
 idf2sdef(idf, tp)
-	struct idf *idf;
+	register struct idf *idf;
 	struct type *tp;
 {
 	/*	The identifier idf is identified as a selector, preferably
@@ -280,7 +280,7 @@ idf2sdef(idf, tp)
 		If the attempt fails, a selector of type error_type is
 		created.
 	*/
-	struct sdef **sdefp = &idf->id_sdef, *sdef;
+	register struct sdef **sdefp = &idf->id_sdef, *sdef;
 	
 	/* Follow chain from idf, to meet tp. */
 	while ((sdef = *sdefp))	{
@@ -316,7 +316,7 @@ idf2sdef(idf, tp)
 
 int
 uniq_selector(idf_sdef)
-	struct sdef *idf_sdef;
+	register struct sdef *idf_sdef;
 {
 	/*	Returns true if idf_sdef (which is guaranteed to exist)
 		is unique for this level, i.e there is no other selector
@@ -326,7 +326,7 @@ uniq_selector(idf_sdef)
 		case!
 	*/
 	
-	struct sdef *sdef = idf_sdef->next;
+	register struct sdef *sdef = idf_sdef->next;
 	
 	while (sdef && sdef->sd_level == idf_sdef->sd_level)	{
 		if (	sdef->sd_type != idf_sdef->sd_type
@@ -342,11 +342,11 @@ uniq_selector(idf_sdef)
 #ifndef NOBITFIELD
 arith
 add_field(szp, fd, fdtpp, idf, stp)
-	arith *szp;		/* size of struct upto here	*/
-	struct field *fd;	/* bitfield, containing width	*/
-	struct type **fdtpp;	/* type of selector		*/
-	struct idf *idf;	/* name of selector		*/
-	struct type *stp;	/* current struct descriptor	*/
+	arith *szp;			/* size of struct upto here	*/
+	register struct field *fd;	/* bitfield, containing width	*/
+	register struct type **fdtpp;	/* type of selector		*/
+	struct idf *idf;		/* name of selector		*/
+	register struct type *stp;	/* current struct descriptor	*/
 {
 	/*	The address where this selector is put is returned. If the
 		selector with specified width does not fit in the word, or
@@ -376,7 +376,6 @@ add_field(szp, fd, fdtpp, idf, stp)
 	}
 
 	switch ((*fdtpp)->tp_fund)	{
-
 	case CHAR:
 	case SHORT:
 	case INT:
@@ -419,22 +418,19 @@ add_field(szp, fd, fdtpp, idf, stp)
 		bits_declared = fd->fd_width;
 	}
 	else
-	if (fd->fd_width == 0)	{
+	if (fd->fd_width == 0)
 		/*	next field should be aligned on the next boundary.
 			This will take care that no field will fit in the
 			space allocated upto here.
 		*/
 		bits_declared = bits_in_type + 1;
-	}
-	else {	/* the bitfield fits in the current field	*/
+	else	/* the bitfield fits in the current field	*/
 		bits_declared += fd->fd_width;
-	}
 	
 	/*	Arrived here, the place where the selector is stored in the
 		struct is computed.
 		Now we need a mask to use its value in expressions.
 	*/
-
 	*fdtpp = construct_type(FIELD, *fdtpp, (arith)0);
 	(*fdtpp)->tp_field = fd;
 
@@ -446,12 +442,10 @@ add_field(szp, fd, fdtpp, idf, stp)
 	*/
 	fd->fd_mask = (1 << fd->fd_width) - 1;
 
-	if (options['r']) {	/* adjust the field at the right	*/
+	if (options['r'])	/* adjust the field at the right	*/
 		fd->fd_shift = bits_declared - fd->fd_width;
-	}
-	else {			/* adjust the field at the left		*/
+	else			/* adjust the field at the left		*/
 		fd->fd_shift = bits_in_type - bits_declared;
-	}
 	
 	return field_offset;
 }

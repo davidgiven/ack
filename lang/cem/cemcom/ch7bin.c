@@ -1,7 +1,8 @@
 /* $Header$ */
 /* SEMANTIC ANALYSIS (CHAPTER 7RM)  --  BINARY OPERATORS */
 
-#include	"botch_free.h"	/* UF */
+#include	"nofloat.h"
+#include	"botch_free.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"

@@ -1,7 +1,8 @@
 /* $Header$ */
 /* TYPE DESCRIPTOR */
 
-#include	"nobitfield.h"
+#include "nofloat.h"
+#include "nobitfield.h"
 
 struct type	{
 	struct type *next;	/* used only with ARRAY */

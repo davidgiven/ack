@@ -1,8 +1,7 @@
 /* $Header$ */
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 
-#include	"target_sizes.h"	/* UF */
-
+#include	"target_sizes.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
@@ -19,14 +18,14 @@ arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 
 cstbin(expp, oper, expr)
-	struct expr **expp, *expr;
+	register struct expr **expp, *expr;
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in
 		*expp.
 	*/
-	arith o1 = (*expp)->VL_VALUE;
-	arith o2 = expr->VL_VALUE;
+	register arith o1 = (*expp)->VL_VALUE;
+	register arith o2 = expr->VL_VALUE;
 	int uns = (*expp)->ex_type->tp_unsigned;
 
 	ASSERT(is_ld_cst(*expp) && is_cp_cst(expr));
@@ -184,7 +183,7 @@ cstbin(expp, oper, expr)
 }
 
 cut_size(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
@@ -214,8 +213,8 @@ cut_size(expr)
 
 init_cst()
 {
-	int i = 0;
-	arith bt = (arith)0;
+	register int i = 0;
+	register arith bt = (arith)0;
 
 	while (!(bt < 0))	{
 		bt = (bt << 8) + 0377, i++;
@@ -227,8 +226,6 @@ init_cst()
 	mach_long_sign = 1 << (mach_long_size * 8 - 1);
 	if (long_size < mach_long_size)
 		fatal("sizeof (long) insufficient on this machine");
-	
-	
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
 }

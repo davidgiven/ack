@@ -4,6 +4,7 @@
 #include	"debug.h"
 
 #ifdef	DEBUG
+#include	"nofloat.h"
 #include	"nopp.h"
 #include	"nobitfield.h"
 #include	"arith.h"
@@ -41,7 +42,7 @@ static int dumplevel;
 
 static
 newline()	{
-	int dl = dumplevel;
+	register int dl = dumplevel;
 	
 	print("\n");
 	while (dl >= 2)	{
@@ -66,7 +67,7 @@ dumpidftab(msg, opt)
 	print(">>> DUMPIDF, %s (start)", msg);
 	dumpstack();
 	for (i = 0; i < HASHSIZE; i++)	{
-		struct idf *notch = idf_hashtable[i];
+		register struct idf *notch = idf_hashtable[i];
 
 		while (notch)	{
 			dumpidf(notch, opt);
@@ -77,13 +78,14 @@ dumpidftab(msg, opt)
 	print(">>> DUMPIDF, %s (end)\n", msg);
 }
 
-dumpstack()	{
+dumpstack()
+{
 	/*	Dumps the identifier stack, starting at the top.
 	*/
-	struct stack_level *stl = local_level;
+	register struct stack_level *stl = local_level;
 	
 	while (stl)	{
-		struct stack_entry *se = stl->sl_entry;
+		register struct stack_entry *se = stl->sl_entry;
 		
 		newline();
 		print("%3d: ", stl->sl_level);
@@ -97,7 +99,7 @@ dumpstack()	{
 }
 
 dumpidf(idf, opt)
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	All information about the identifier idf is divulged in a
 		hopefully readable format.
@@ -174,7 +176,7 @@ dumpdefs(def, opt)
 }
 
 dumptags(tag)
-	struct tag *tag;
+	register struct tag *tag;
 {
 	dumplevel++;
 	while (tag)	{
@@ -202,7 +204,7 @@ dumptags(tag)
 }
 
 dumpsdefs(sdef, sdk)
-	struct sdef *sdef;
+	register struct sdef *sdef;
 	enum sdef_kind sdk;
 {
 	/*	Since sdef's are members of two chains, there are actually
@@ -235,7 +237,7 @@ dumpsdefs(sdef, sdk)
 
 char *
 type2str(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	/*	Yields a pointer to a one-line description of the type tp.
 	*/
@@ -312,7 +314,7 @@ print_expr(msg, expr)
 }
 
 p1_expr(lvl, expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	extern char *type2str(), *symbol2str();
 
@@ -389,7 +391,9 @@ p1_expr(lvl, expr)
 	}
 }
 
-p1_indent(lvl)	{
+p1_indent(lvl)
+	register int lvl;
+{
 	while (lvl--)
 		print("  ");
 }

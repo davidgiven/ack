@@ -1,6 +1,8 @@
 /* $Header$ */
 /* VARIOUS TARGET MACHINE SIZE DESCRIPTORS */
 
+#include "nofloat.h"
+
 extern arith
 	short_size, word_size, dword_size, int_size, long_size,
 #ifndef NOFLOAT

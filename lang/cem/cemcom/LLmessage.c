@@ -1,6 +1,7 @@
 /* $Header$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
+#include	"nofloat.h"
 #include	"idf.h"
 #include	"alloc.h"
 #include	"arith.h"

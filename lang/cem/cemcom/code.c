@@ -1,12 +1,11 @@
 /* $Header$ */
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
+#include	"nofloat.h"
 #include	<em.h>
-
 #include	"dataflow.h"
 #include	"use_tmp.h"
 #include	"botch_free.h"
-
 #include	"arith.h"
 #include	"type.h"
 #include	"idf.h"
@@ -67,7 +66,7 @@ code_string(val, len, dlb)
 	int len;
 	label dlb;
 {
-	struct string_cst *sc = new_string_cst();
+	register struct string_cst *sc = new_string_cst();
 
 	C_ina_dlb(dlb);
 	sc->next = str_list;
@@ -107,14 +106,14 @@ prepend_scopes(dst_file)
 		and generates those exa's, exp's, ina's and inp's
 		that superior hindsight has provided, on the file dst_file.
 	*/
-	struct stack_entry *se = local_level->sl_entry;
+	register struct stack_entry *se = local_level->sl_entry;
 
 	if (C_open(dst_file) == 0)
 		fatal("cannot create %s", dst_file ? dst_file : "stdout");
 	famous_first_words();
 	while (se != 0)	{
-		struct idf *idf = se->se_idf;
-		struct def *def = idf->id_def;
+		register struct idf *idf = se->se_idf;
+		register struct def *def = idf->id_def;
 		
 		if (def &&
 			(	def->df_initialized ||
@@ -131,7 +130,7 @@ prepend_scopes(dst_file)
 
 code_scope(text, def)
 	char *text;
-	struct def *def;
+	register struct def *def;
 {
 	/*	generates code for one name, text, of the storage class
 		as given by def, if meaningful.
@@ -165,7 +164,7 @@ static label file_name_label;
 
 begin_proc(name, def)	/* to be called when entering a procedure	*/
 	char *name;
-	struct def *def;
+	register struct def *def;
 {
 	/*	begin_proc() is called at the entrance of a new function
 		and performs the necessary code generation:
@@ -291,7 +290,7 @@ do_return_expr(expr)
 }
 
 code_declaration(idf, expr, lvl, sc)
-	struct idf *idf;	/* idf to be declared	*/
+	register struct idf *idf;	/* idf to be declared	*/
 	struct expr *expr;	/* initialisation; NULL if absent	*/
 	int lvl;		/* declaration level	*/
 	int sc;			/* storage class, as in the declaration */
@@ -319,7 +318,7 @@ code_declaration(idf, expr, lvl, sc)
 			extern int a = 5;
 	*/
 	char *text = idf->id_text;
-	struct def *def = idf->id_def;
+	register struct def *def = idf->id_def;
 	arith size = def->df_type->tp_size;
 	int def_sc = def->df_sc;
 	
@@ -437,7 +436,7 @@ loc_init(expr, id)
 }
 
 bss(idf)
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
@@ -456,21 +455,21 @@ bss(idf)
 	C_bss_cst(align(size, word_align), (arith)0, 1);
 }
 
-formal_cvt(def)
-	struct def *def;
+formal_cvt(df)
+	register struct def *df;
 {
 	/*	formal_cvt() converts a formal parameter of type char or
 		short from int to that type.
 	*/
-	register struct type* tp = def->df_type;
+	register struct type *tp = df->df_type;
 
 	if (tp->tp_size != int_size)
 		if (tp->tp_fund == CHAR || tp->tp_fund == SHORT) {
-			C_lol(def->df_address);
-			conversion(int_type, def->df_type);
-			C_lal(def->df_address);
+			C_lol(df->df_address);
+			conversion(int_type, df->df_type);
+			C_lal(df->df_address);
 			C_sti(tp->tp_size);
-			def->df_register = REG_NONE;
+			df->df_register = REG_NONE;
 		}
 }
 

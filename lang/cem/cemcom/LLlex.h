@@ -6,6 +6,8 @@
 	to it.
 */
 
+#include "nofloat.h"
+
 /* the structure of a token:	*/
 struct token	{
 	int tok_symb;		/* the token itself */

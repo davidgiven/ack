@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  7 RM	*/
 
+#include	"nofloat.h"
 #include	"debug.h"
 #include	"nobitfield.h"
 #include	"idf.h"

@@ -1,7 +1,8 @@
 /* $Header$ */
 /* EXPRESSION TREE HANDLING */
 
-#include	"botch_free.h"	/* UF */
+#include	"nofloat.h"
+#include	"botch_free.h"
 #include	"alloc.h"
 #include	"idf.h"
 #include	"arith.h"
@@ -92,7 +93,7 @@ rank_of(oper)
 
 int
 rank_of_expression(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	Returns the rank of the top node in the expression.
 	*/
@@ -115,7 +116,7 @@ check_conditional(expr, oper, pos_descr)
 }
 
 dot2expr(expp)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	/*	The token in dot is converted into an expression, a
 		pointer to which is stored in *expp.
@@ -146,7 +147,7 @@ dot2expr(expp)
 }
 
 idf2expr(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	Dot contains an identifier which is turned into an
 		expression.
@@ -205,7 +206,7 @@ idf2expr(expr)
 }
 
 string2expr(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	Dot contains a string which is turned into an expression.
 	*/
@@ -228,7 +229,7 @@ int2expr(expr)
 
 #ifndef NOFLOAT
 float2expr(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	Dot contains a floating point constant which is turned
 		into an expression.
@@ -243,11 +244,12 @@ float2expr(expr)
 struct expr*
 intexpr(ivalue, fund)
 	arith ivalue;
+	int fund;
 {
 	/*	The value ivalue is turned into an integer expression of
 		the size indicated by fund.
 	*/
-	struct expr *expr = new_expr();
+	register struct expr *expr = new_expr();
 	
 	clear((char *)expr, sizeof(struct expr));
 	expr->ex_file = dot.tk_file;
@@ -258,8 +260,9 @@ intexpr(ivalue, fund)
 }
 
 fill_int_expr(expr, ivalue, fund)
-	struct expr *expr;
+	register struct expr *expr;
 	arith ivalue;
+	int fund;
 {
 	/*	Details derived from ivalue and fund are put into the
 		constant integer expression expr.
@@ -308,12 +311,12 @@ new_oper(tp, e1, oper, e2)
 		During the construction of the right recursive initialisation
 		tree it is possible for e2 to be NILEXPR.
 	*/
-	struct expr *expr = new_expr();
-	struct oper *op;
+	register struct expr *expr = new_expr();
+	register struct oper *op;
 
 	clear((char *)expr, sizeof(struct expr));
 	if (e2)	{
-		struct expr *e = e2;
+		register struct expr *e = e2;
 		
 		while (e->ex_class == Oper && e->OP_LEFT)
 			e = e->OP_LEFT;
@@ -322,7 +325,7 @@ new_oper(tp, e1, oper, e2)
 	}
 	else
 	if (e1)	{
-		struct expr *e = e1;
+		register struct expr *e = e1;
 		
 		while (e->ex_class == Oper && e->OP_RIGHT)
 			e = e->OP_RIGHT;
@@ -387,7 +390,7 @@ chk_cst_expr(expp)
 	register struct expr *expr = *expp;
 	register int fund = expr->ex_type->tp_fund;
 	register int flags = expr->ex_flags;
-	register int err = 0;
+	int err = 0;
 	
 #ifdef	DEBUG
 	print_expr("constant_expression", expr);
@@ -417,7 +420,7 @@ chk_cst_expr(expp)
 }
 
 init_expression(eppp, expr)
-	struct expr ***eppp, *expr;
+	register struct expr ***eppp, *expr;
 {
 	/*	The expression expr is added to the tree designated
 		indirectly by **eppp.
@@ -468,7 +471,7 @@ is_fp_cst(expr)
 #endif NOFLOAT
 
 free_expression(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	The expression expr is freed recursively.
 	*/

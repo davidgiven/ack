@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
+#include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"alloc.h"
 #include	"Lpars.h"
@@ -52,13 +53,13 @@ create_type(fund)
 
 struct type *
 construct_type(fund, tp, count)
-	struct type *tp;
+	register struct type *tp;
 	arith count; /* for fund == ARRAY only */
 {
 	/*	fund must be a type constructor: FIELD, FUNCTION, POINTER or
 		ARRAY. The pointer to the constructed type is returned.
 	*/
-	struct type *dtp;
+	register struct type *dtp;
 
 	switch (fund)	{
 #ifndef NOBITFIELD
@@ -97,9 +98,9 @@ construct_type(fund, tp, count)
 
 struct type *
 function_of(tp)
-	struct type *tp;
+	register struct type *tp;
 {
-	struct type *dtp = tp->tp_function;
+	register struct type *dtp = tp->tp_function;
 
 	if (!dtp)	{
 		tp->tp_function = dtp = create_type(FUNCTION);
@@ -112,9 +113,9 @@ function_of(tp)
 
 struct type *
 pointer_to(tp)
-	struct type *tp;
+	register struct type *tp;
 {
-	struct type *dtp = tp->tp_pointer;
+	register struct type *dtp = tp->tp_pointer;
 
 	if (!dtp)	{
 		tp->tp_pointer = dtp = create_type(POINTER);
@@ -128,10 +129,10 @@ pointer_to(tp)
 
 struct type *
 array_of(tp, count)
-	struct type *tp;
+	register struct type *tp;
 	arith count;
 {
-	struct type *dtp = tp->tp_array;
+	register struct type *dtp = tp->tp_array;
 
 	/* look for a type with the right size */
 	while (dtp && dtp->tp_size != count)
@@ -151,9 +152,9 @@ array_of(tp, count)
 #ifndef NOBITFIELD
 struct type *
 field_of(tp)
-	struct type *tp;
+	register struct type *tp;
 {
-	struct type *dtp = create_type(FIELD);
+	register struct type *dtp = create_type(FIELD);
 
 	dtp->tp_up = tp;
 	dtp->tp_align = tp->tp_align;
@@ -177,7 +178,7 @@ size_of_type(tp, nm)
 }
 
 idf2type(idf, tpp)
-	struct idf *idf;
+	register struct idf *idf;
 	struct type **tpp;
 {
 	/*	Decoding  a typedef-ed identifier: if the size is yet

@@ -1,11 +1,10 @@
 /* $Header$ */
 /* CODE FOR THE INITIALISATION OF GLOBAL VARIABLES */
 
+#include	"nofloat.h"
 #include	<em.h>
-
 #include	"debug.h"
 #include	"nobitfield.h"
-
 #include	"arith.h"
 #include	"align.h"
 #include	"label.h"
@@ -54,7 +53,7 @@ do_ival(tpp, ex)
 struct expr *
 IVAL(tpp, ex)
 	struct type **tpp;		/* type of global variable	*/
-	struct expr *ex;		/* initialiser expression	*/
+	register struct expr *ex;	/* initialiser expression	*/
 {
 	register struct type *tp = *tpp;
 	
@@ -116,7 +115,7 @@ IVAL(tpp, ex)
 */
 struct expr *
 do_array(ex, tpp)
-	struct expr *ex;
+	register struct expr *ex;
 	struct type **tpp;
 {
 	register struct type *tp = *tpp;
@@ -215,10 +214,10 @@ do_array(ex, tpp)
 */
 struct expr *
 do_struct(ex, tp)
-	struct expr *ex;
-	struct type *tp;
+	register struct expr *ex;
+	register struct type *tp;
 {
-	struct sdef *sd = tp->tp_sdef;
+	register struct sdef *sd = tp->tp_sdef;
 	arith bytes_upto_here = (arith)0;
 	arith last_offset = (arith)-1;
 	
@@ -248,8 +247,7 @@ do_struct(ex, tp)
 					put_bf(sd->sd_type, (arith)0);
 				else {
 					/* fundamental type, not embraced */
-					check_ival(ex->OP_LEFT,
-							sd->sd_type);
+					check_ival(ex->OP_LEFT, sd->sd_type);
 					ex = ex->OP_RIGHT;
 				}
 #endif NOBITFIELD
@@ -293,11 +291,11 @@ do_struct(ex, tp)
 	the rest is zeroed.
 */
 check_and_pad(ex, tpp)
-	struct expr *ex;
+	register struct expr *ex;
 	struct type **tpp;
 {
 	/* ex is of a fundamental type	*/
-	struct type *tp = *tpp;
+	register struct type *tp = *tpp;
 
 	if (tp->tp_fund == ARRAY) {
 		if (valid_type(tp->tp_up, "array element") == 0)
@@ -339,7 +337,7 @@ check_and_pad(ex, tpp)
 	If the element is an aggregate, pad() is called recursively.
 */
 pad(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	switch (tp->tp_fund) {
 	case ARRAY:
@@ -408,7 +406,7 @@ pad(tp)
 */
 check_ival(ex, tp)
 	struct expr *ex;
-	struct type *tp;
+	register struct type *tp;
 {
 	/*	The philosophy here is that ch7cast puts an explicit
 		conversion node in front of the expression if the types
@@ -506,8 +504,8 @@ ch_array(tpp, ex)
 {
 	register struct type *tp = *tpp;
 	register arith length;
-	char *s = ex->SG_VALUE;
-	arith ntopad;
+	register char *s = ex->SG_VALUE;
+	register arith ntopad;
 
 	ASSERT(ex->ex_class == String);
 	length = ex->SG_LEN;
@@ -588,7 +586,7 @@ put_bf(tp, val)
 
 int
 zero_bytes(sd)
-	struct sdef *sd;
+	register struct sdef *sd;
 {
 	/*	fills the space between a selector of a struct
 		and the next selector of that struct with zero-bytes.
@@ -640,7 +638,7 @@ too_many_initialisers(ex)
 }
 
 aggregate_type(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	return tp->tp_fund == ARRAY || tp->tp_fund == STRUCT;
 }

@@ -1,6 +1,7 @@
 /* $Header$ */
 /* SEMANTIC ANALYSIS (CHAPTER 7RM) -- MONADIC OPERATORS */
 
+#include	"nofloat.h"
 #include	"nobitfield.h"
 #include	"botch_free.h"
 #include	"Lpars.h"

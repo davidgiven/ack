@@ -1,6 +1,7 @@
 /* $Header$ */
 /* MAIN PROGRAM */
 
+#include	"nofloat.h"
 #include	<system.h>
 #include	"nopp.h"
 #include	"target_sizes.h"
@@ -9,7 +10,6 @@
 #include	"use_tmp.h"
 #include	"maxincl.h"
 #include	"inputtype.h"
-
 #include	"input.h"
 #include	"level.h"
 #include	"idf.h"
@@ -84,6 +84,7 @@ main(argc, argv)
 #endif	OWNALLOC
 
 	init_hmask();
+
 #ifndef NOPP
 	init_pp();	/* initialise the preprocessor macros	*/
 #endif NOPP
@@ -289,7 +290,7 @@ init()
 }
 
 init_specials(si)
-	struct sp_id *si;
+	register struct sp_id *si;
 {
 	while (si->si_identifier)	{
 		struct idf *idf = str2idf(si->si_identifier);

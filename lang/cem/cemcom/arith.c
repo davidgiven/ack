@@ -7,6 +7,7 @@
 	semantics of C is a mess.
 */
 
+#include	"nofloat.h"
 #include	"botch_free.h"
 #include	"nobitfield.h"
 #include	"alloc.h"
@@ -25,7 +26,8 @@ extern char options[];
 
 int
 arithbalance(e1p, oper, e2p)	/* RM 6.6 */
-	struct expr **e1p, **e2p;
+	register struct expr **e1p, **e2p;
+	int oper;
 {
 	/*	The expressions *e1p and *e2p are balanced to be operands
 		of the arithmetic operator oper.
@@ -127,9 +129,9 @@ any2arith(expp, oper)
 	/*	Turns any expression into int_type, long_type or
 		double_type.
 	*/
-	int fund = (*expp)->ex_type->tp_fund;
+	int fund;
 
-	switch (fund)	{
+	switch (fund = (*expp)->ex_type->tp_fund)	{
 	case CHAR:
 	case SHORT:
 		int2int(expp,
@@ -174,7 +176,7 @@ any2arith(expp, oper)
 }
 
 erroneous2int(expp)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	/*	the (erroneous) expression *expp is replaced by an
 		int expression
@@ -190,7 +192,7 @@ struct expr *
 arith2arith(tp, oper, expr)
 	struct type *tp;
 	int oper;
-	struct expr *expr;
+	register struct expr *expr;
 {
 	/*	arith2arith constructs a new expression containing a
 		run-time conversion between some arithmetic types.
@@ -280,7 +282,7 @@ array2pointer(expp)
 }
 
 function2pointer(expp)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	/*	The expression, which must be a function, is converted
 		to a pointer to the function.
@@ -295,7 +297,7 @@ string2pointer(expp)
 	/*	The expression, which must be a string constant, is converted
 		to a pointer to the string-containing area.
 	*/
-	struct expr *ex = *expp;
+	register struct expr *ex = *expp;
 	label lbl = data_label();
 
 	code_string(ex->SG_VALUE, ex->SG_LEN, lbl);
@@ -306,7 +308,7 @@ string2pointer(expp)
 }
 
 opnd2integral(expp, oper)
-	struct expr **expp;
+	register struct expr **expp;
 	int oper;
 {
 	register int fund = (*expp)->ex_type->tp_fund;
@@ -320,7 +322,7 @@ opnd2integral(expp, oper)
 }
 
 opnd2logical(expp, oper)
-	struct expr **expp;
+	register struct expr **expp;
 	int oper;
 {
 	register int fund;
@@ -332,11 +334,7 @@ opnd2logical(expp, oper)
 	if ((*expp)->ex_type->tp_fund == FIELD)
 		field2arith(expp);
 #endif NOBITFIELD
-
-	fund = (*expp)->ex_type->tp_fund;
-
-	switch (fund)	{
-
+	switch (fund = (*expp)->ex_type->tp_fund) {
 	case CHAR:
 	case SHORT:
 	case INT:
@@ -358,7 +356,7 @@ opnd2logical(expp, oper)
 }
 
 opnd2test(expp, oper)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	opnd2logical(expp, oper);
 	if ((*expp)->ex_class == Oper && is_test_op((*expp)->OP_OPER))
@@ -429,7 +427,7 @@ is_asgn_op(oper)
 }
 
 any2opnd(expp, oper)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	if (!*expp)
 		return;

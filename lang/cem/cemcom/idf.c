@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
+#include	"nofloat.h"
 #include	"debug.h"
 #include	"idfsize.h"
 #include	"botch_free.h"
@@ -86,11 +87,11 @@ idf_hashed(tg, size, hc)
 hash_stat()
 {
 	if (options['h'])	{
-		int i;
+		register int i;
 		
 		print("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
-			struct idf *notch = idf_hashtable[i];
+			register struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
 	
 			while (notch)	{
@@ -374,8 +375,8 @@ actual_declaration(sc, tp)
 }
 
 global_redecl(idf, new_sc, tp)
-	struct idf *idf;
-	struct type *tp;
+	register struct idf *idf;
+	register struct type *tp;
 {
 	/*	A global identifier may be declared several times,
 		provided the declarations do not conflict; they might
@@ -386,7 +387,7 @@ global_redecl(idf, new_sc, tp)
 	register struct def *def = idf->id_def;
 
 	if (tp != def->df_type)	{
-		struct type *otp = def->df_type;
+		register struct type *otp = def->df_type;
 
 		if (	tp->tp_fund != ARRAY || otp->tp_fund != ARRAY ||
 			tp->tp_up != otp->tp_up
@@ -425,10 +426,8 @@ global_redecl(idf, new_sc, tp)
 		return;			/* no new information */
 	
 	switch (def->df_sc)	{	/* the old storage class */
-
 	case EXTERN:
 		switch (new_sc)	{	/* the new storage class */
-		
 		case EXTERN:
 		case GLOBAL:
 			break;
@@ -449,10 +448,8 @@ global_redecl(idf, new_sc, tp)
 			break;
 		}
 		break;
-	
 	case GLOBAL:
 		switch (new_sc)	{	/* the new storage class */
-
 		case EXTERN:
 			def->df_sc = EXTERN;
 			break;
@@ -475,10 +472,8 @@ global_redecl(idf, new_sc, tp)
 			break;
 		}
 		break;
-	
 	case STATIC:
 		switch (new_sc)	{	/* the new storage class */
-
 		case EXTERN:
 			if (def->df_initialized)	{
 				error("cannot redeclare %s to extern",
@@ -501,10 +496,8 @@ global_redecl(idf, new_sc, tp)
 			break;
 		}
 		break;
-	
 	case IMPLICIT:
 		switch (new_sc)	{	/* the new storage class */
-		
 		case EXTERN:
 		case GLOBAL:
 			def->df_sc = new_sc;
@@ -520,7 +513,6 @@ global_redecl(idf, new_sc, tp)
 			break;
 		}
 		break;
-	
 	case ENUM:
 	case TYPEDEF:
 		error("illegal redeclaration of %s", idf->id_text);
@@ -550,7 +542,7 @@ good_formal(def, idf)
 }
 
 declare_params(dc)
-	struct declarator *dc;
+	register struct declarator *dc;
 {
 	/*	Declares the formal parameters if they exist.
 	*/
@@ -607,7 +599,7 @@ declare_formals(fp)
 		An address is assigned to each formal parameter.
 		The total size of the formals is returned in *fp;
 	*/
-	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
+	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
 	arith f_offset = (arith)0;
 
 #ifdef	DEBUG
@@ -615,8 +607,7 @@ declare_formals(fp)
 		dumpidftab("start declare_formals", 0);
 #endif	DEBUG
 	while (se)	{
-		struct idf *idf = se->se_idf;
-		struct def *def = idf->id_def;
+		register struct def *def = se->se_idf->id_def;
 		
 		def->df_address = f_offset;
 
@@ -624,8 +615,7 @@ declare_formals(fp)
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
-		f_offset = align(f_offset + def->df_type->tp_size,
-								word_align);
+		f_offset = align(f_offset + def->df_type->tp_size, word_align);
 
 		/*	the following is absurd: any char or short formal
 			must be converted from integer to that type
@@ -673,7 +663,7 @@ update_ahead(idf)
 }
 
 free_formals(fm)
-	struct formal *fm;
+	register struct formal *fm;
 {
 	while (fm)	{
 		register struct formal *tmp = fm->next;
@@ -684,11 +674,12 @@ free_formals(fm)
 
 char hmask[IDFSIZE];
 
-init_hmask()	{
+init_hmask()
+{
 	/*	A simple congruence random number generator, as
 		described in Knuth, vol 2.
 	*/
-	int h, rnd = HASH_X;
+	register int h, rnd = HASH_X;
 	
 	for (h = 0; h < IDFSIZE; h++)	{
 		hmask[h] = rnd;

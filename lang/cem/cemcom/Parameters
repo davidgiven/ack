@@ -133,3 +133,8 @@
 
 !File: static.h
 #define GSTATIC			/* for large global "static" arrays */
+
+
+!File: nofloat.h
+#undef NOFLOAT			/* floats implemented by default */
+

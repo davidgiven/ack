@@ -12,11 +12,10 @@
 		compare()
 */
 
+#include	"nofloat.h"
 #include	<em.h>
-
 #include	"debug.h"
 #include	"nobitfield.h"
-
 #include	"dataflow.h"
 #include	"arith.h"
 #include	"type.h"
@@ -71,13 +70,13 @@ arith tmp_pointer_var();
 */
 
 EVAL(expr, val, code, true_label, false_label)
-	struct expr *expr;	/* the expression tree itself		*/
+	register struct expr *expr;	/* the expression tree itself	*/
 	int val;		/* either RVAL or LVAL			*/
 	int code;		/* generate explicit code or not	*/
 	label true_label;
 	label false_label;	/* labels to jump to in logical expr's	*/
 {
-	register gencode = (code == TRUE);
+	register int gencode = (code == TRUE);
 
 	switch (expr->ex_class)	{
 	case Value:	/* just a simple value	*/
@@ -87,7 +86,9 @@ EVAL(expr, val, code, true_label, false_label)
 	case String:	/* a string constant	*/
 		expr_warning(expr, "(DEBUG) value-class 'String' seen");
 		if (gencode) {
-			string2pointer(&expr);
+			struct expr *ex = expr;
+			string2pointer(&ex);
+			expr = ex;
 			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
@@ -105,7 +106,7 @@ EVAL(expr, val, code, true_label, false_label)
 #endif NOFLOAT
 	case Oper:	/* compound expression	*/
 	{
-		register int oper = expr->OP_OPER;
+		int oper = expr->OP_OPER;
 		register struct expr *leftop = expr->OP_LEFT;
 		register struct expr *rightop = expr->OP_RIGHT;
 		register struct type *tp = expr->OP_TYPE;
@@ -250,12 +251,11 @@ EVAL(expr, val, code, true_label, false_label)
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
 			EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
 			ASSERT(tp->tp_fund==INT || tp->tp_fund==LONG);
-			if (gencode) {
+			if (gencode)
 				if (tp->tp_unsigned)
 					C_rmu(tp->tp_size);
 				else
 					C_rmi(tp->tp_size);
-			}
 			break;
 		case LEFT:
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
@@ -429,22 +429,21 @@ EVAL(expr, val, code, true_label, false_label)
 		}
 		case '(':
 		{
-			register struct expr *expr;
+			register struct expr *ex;
 			arith ParSize = (arith)0;
 
-			if (expr = rightop)	{
+			if ((ex = rightop) != NILEXPR)	{
 				/* function call with parameters*/
-				while (	expr->ex_class == Oper &&
-					expr->OP_OPER == PARCOMMA
-				)	{
-					EVAL(expr->OP_RIGHT, RVAL, TRUE,
+				while (	ex->ex_class == Oper &&
+					ex->OP_OPER == PARCOMMA
+				) {
+					EVAL(ex->OP_RIGHT, RVAL, TRUE,
 							NO_LABEL, NO_LABEL);
-					ParSize += 
-						ATW(expr->ex_type->tp_size);
-					expr = expr->OP_LEFT;
+					ParSize += ATW(ex->ex_type->tp_size);
+					ex = ex->OP_LEFT;
 				}
-				EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
-				ParSize += ATW(expr->ex_type->tp_size);
+				EVAL(ex, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				ParSize += ATW(ex->ex_type->tp_size);
 			}
 			if (	leftop->ex_class == Value
 			&&	leftop->VL_CLASS == Name
@@ -469,14 +468,14 @@ EVAL(expr, val, code, true_label, false_label)
 			/* remove parameters from stack	*/
 			if (ParSize > (arith)0)
 				C_asp(ParSize);
-			if (!gencode)
-				break;
-			if (is_struct_or_union(tp->tp_fund)) {
-				C_lfr(pointer_size);
-				load_block(tp->tp_size, tp->tp_align);
+			if (gencode) {
+				if (is_struct_or_union(tp->tp_fund)) {
+					C_lfr(pointer_size);
+					load_block(tp->tp_size, tp->tp_align);
+				}
+				else
+					C_lfr(ATW(tp->tp_size));
 			}
-			else
-				C_lfr(ATW(tp->tp_size));
 			break;
 		}
 		case '.':
@@ -507,22 +506,32 @@ EVAL(expr, val, code, true_label, false_label)
 		{
 			arith old_offset, tmp;
 			arith esize = tp->tp_size;
+			int compl;	/* Complexity of left operand */
 #ifndef NOBITFIELD
 			if (leftop->ex_type->tp_fund == FIELD)	{
 				eval_field(expr, code);
 				break;
 			}
 #endif NOBITFIELD
-			if (leftop->ex_class != Value)	{
+			if (leftop->ex_class == Value) {
+				compl = 0; /* Value */
+				load_val(leftop, RVAL);
+			}
+			else
+			if (leftop->ex_depth == 1 && leftop->OP_OPER == ARROW) {
+				compl = 1; /* Value->sel */
+				ASSERT(leftop->OP_LEFT->ex_class == Value);
+				EVAL(leftop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			}
+			else {
+				compl = 2; /* otherwise */
 				tmp = tmp_pointer_var(&old_offset);
 				EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
 				C_dup(pointer_size);
 				C_lal(tmp);
 				C_sti(pointer_size);
-				C_loi(tp->tp_size);
+				C_loi(esize);
 			}
-			else
-				load_val(leftop, RVAL);
 
 			/*	We made the choice to put this stuff here
 				and not to put the conversion in the expression
@@ -542,17 +551,23 @@ EVAL(expr, val, code, true_label, false_label)
 				C_dup(esize);
 			if (tp->tp_size < word_size)
 				conversion(word_type, tp);
-			if (leftop->ex_class != Value) {
+			if (compl == 0) {
+				store_val(
+					&(leftop->ex_object.ex_value),
+					leftop->ex_type
+				);
+			}
+			else
+			if (compl == 1) {
+				EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				C_sti(tp->tp_size);
+			}
+			else {
 				C_lal(tmp);	/* always init'd */
 				C_loi(pointer_size);
 				C_sti(tp->tp_size);
 				free_tmp_var(old_offset);
 			}
-			else
-				store_val(
-					&(leftop->ex_object.ex_value),
-					leftop->ex_type
-				);
 			break;
 		}
 		case '?':	/* must be followed by ':'	*/
@@ -685,7 +700,6 @@ EVAL(expr, val, code, true_label, false_label)
 				expr->ex_type->tp_align);
 		break;
 	}
-	case Type:
 	default:
 		crash("(EVAL) bad expression class");
 	}
@@ -722,13 +736,13 @@ compare(relop, lbl)
 
 /*	assop() generates the opcode of an assignment operators op=	*/
 assop(type, oper)
-	struct type *type;
+	register struct type *type;
 	int oper;
 {
-	register arith size = type->tp_size;
+	register arith size;
 	register uns = type->tp_unsigned;
 
-	if (size < word_size)
+	if ((size = type->tp_size) < word_size)
 		size = word_size;
 	switch (type->tp_fund)	{
 	case CHAR:
@@ -837,7 +851,7 @@ arith
 tmp_pointer_var(oldoffset)
 	arith *oldoffset;	/* previous allocated address	*/
 {
-	struct stack_level *stl = local_level;
+	register struct stack_level *stl = local_level;
 
 	*oldoffset = stl->sl_local_offset;
 	stl->sl_local_offset =
@@ -940,16 +954,16 @@ store_val(vl, tp)
 	- local variable
 */
 load_val(expr, val)
-	struct expr *expr;	/* expression containing the value	*/
+	register struct expr *expr; /* expression containing the value	*/
 	int val;		/* generate either LVAL or RVAL		*/
 {
 	register struct type *tp = expr->ex_type;
-	register int rvalue = (val == RVAL && expr->ex_lvalue != 0);
-	register arith size = tp->tp_size;
-	register int tpalign = tp->tp_align;
-	register int al_on_word;
+	int rvalue = (val == RVAL && expr->ex_lvalue != 0);
+	arith size = tp->tp_size;
+	int tpalign = tp->tp_align;
+	int al_on_word;
 	register int inword, indword;
-	register arith val = expr->VL_VALUE;
+	arith val = expr->VL_VALUE;
 
 	if (expr->VL_CLASS == Const)	{
 		if (rvalue)	{ /* absolute addressing */

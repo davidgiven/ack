@@ -1,12 +1,12 @@
 /* $Header$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	"nofloat.h"
 #include	"idfsize.h"
 #include	"numsize.h"
 #include	"debug.h"
 #include	"strsize.h"
 #include	"nopp.h"
-
 #include	"input.h"
 #include	"alloc.h"
 #include	"arith.h"

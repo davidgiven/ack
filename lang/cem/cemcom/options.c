@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	U S E R   O P T I O N - H A N D L I N G		*/
 
+#include	"nofloat.h"
 #include	"nopp.h"
 #include	"idfsize.h"
 #include	"maxincl.h"
@@ -174,7 +175,6 @@ do_option(text)
 				align = txt2int(&text);
 			}
 			switch (c)	{
-
 			case 's':	/* short	*/
 				if (size != (arith)0)
 					short_size = size;
@@ -242,11 +242,9 @@ do_option(text)
 		}
 		break;
 	}
-
 	case 'n':
 		options['n'] = 1;	/* use no registers	*/
 		break;
-
 	case 'w':
 		options['w'] = 1;	/* no warnings will be given	*/
 		break;
@@ -260,8 +258,7 @@ txt2int(tp)
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0;
-	register int ch;
+	register int val = 0, ch;
 	
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';

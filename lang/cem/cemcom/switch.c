@@ -1,12 +1,11 @@
 /* $Header$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	"nofloat.h"
 #include	<em.h>
-
 #include	"debug.h"
 #include	"botch_free.h"
 #include	"density.h"
-
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"label.h"

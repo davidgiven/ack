@@ -1,14 +1,13 @@
 /* $Header$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
+#include	"nofloat.h"
 #include	<system.h>
 #include	<em.h>
 #include	<em_reg.h>
-
 #include	"debug.h"
 #include	"use_tmp.h"
 #include	"botch_free.h"
-
 #include	"alloc.h"
 #include	"Lpars.h"
 #include	"arith.h"
@@ -42,7 +41,7 @@ int level;	/* Always equal to local_level->sl_level. */
 stack_level()	{
 	/*	A new level is added on top of the identifier stack.
 	*/
-	struct stack_level *stl = new_stack_level();
+	register struct stack_level *stl = new_stack_level();
 	
 	clear((char *)stl, sizeof(struct stack_level));
 	local_level->sl_next = stl;
@@ -55,7 +54,7 @@ stack_level()	{
 
 stack_idf(idf, stl)
 	struct idf *idf;
-	struct stack_level *stl;
+	register struct stack_level *stl;
 {
 	/*	The identifier idf is inserted in the stack on level stl.
 	*/

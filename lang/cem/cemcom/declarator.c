@@ -33,7 +33,7 @@ declare_type(tp, dc)
 }
 
 add_decl_unary(dc, fund, count, fm)
-	struct declarator *dc;
+	register struct declarator *dc;
 	arith count;
 	struct formal *fm;
 {
@@ -77,7 +77,7 @@ remove_declarator(dc)
 }
 
 reject_params(dc)
-	struct declarator *dc;
+	register struct declarator *dc;
 {
 	/*	The declarator is checked to have no parameters, if it
 		is a function.
@@ -90,7 +90,7 @@ reject_params(dc)
 }
 
 array_subscript(expr)
-	struct expr *expr;
+	register struct expr *expr;
 {
 	arith size = expr->VL_VALUE;
 

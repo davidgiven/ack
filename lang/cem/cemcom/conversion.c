@@ -1,6 +1,7 @@
 /* $Header$ */
 /*	C O N V E R S I O N - C O D E  G E N E R A T O R	*/
 
+#include	"nofloat.h"
 #include	<em.h>
 #include	"arith.h"
 #include	"type.h"
@@ -29,30 +30,23 @@ conversion(from_type, to_type)
 	arith from_size;
 	arith to_size;
 
-	if (from_type == to_type) {	/* a little optimisation */
+	if (from_type == to_type)	/* a little optimisation */
 		return;
-	}
-
 	from_size = from_type->tp_size;
 	to_size = to_type->tp_size;
-
 	switch (fundamental(from_type))	{
-
 	case T_SIGNED:
 		switch (fundamental(to_type))	{
-
 		case T_SIGNED:
 			C_loc(from_size);
 			C_loc(to_size < word_size ? word_size : to_size);
 			C_cii();
 			break;
-
 		case T_UNSIGNED:
 			C_loc(from_size < word_size ? word_size : from_size);
 			C_loc(to_size < word_size ? word_size : to_size);
 			C_ciu();
 			break;
-
 #ifndef NOFLOAT
 		case T_FLOATING:
 			C_loc(from_size < word_size ? word_size : from_size);
@@ -62,21 +56,16 @@ conversion(from_type, to_type)
 #endif NOFLOAT
 		}
 		break;
-
 	case T_UNSIGNED:
 		C_loc(from_size < word_size ? word_size : from_size);
 		C_loc(to_size < word_size ? word_size : to_size);
-
 		switch (fundamental(to_type))	{
-
 		case T_SIGNED:
 			C_cui();
 			break;
-
 		case T_UNSIGNED:
 			C_cuu();
 			break;
-
 #ifndef NOFLOAT
 		case T_FLOATING:
 			C_cuf();
@@ -84,22 +73,17 @@ conversion(from_type, to_type)
 #endif NOFLOAT
 		}
 		break;
-
 #ifndef NOFLOAT
 	case T_FLOATING:
 		C_loc(from_size < word_size ? word_size : from_size);
 		C_loc(to_size < word_size ? word_size : to_size);
-
 		switch (fundamental(to_type))	{
-
 		case T_SIGNED:
 			C_cfi();
 			break;
-
 		case T_UNSIGNED:
 			C_cfu();
 			break;
-
 		case T_FLOATING:
 			C_cff();
 			break;
@@ -116,10 +100,9 @@ conversion(from_type, to_type)
 */
 int
 fundamental(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
-
 	case CHAR:
 	case SHORT:
 	case INT:
@@ -127,13 +110,11 @@ fundamental(tp)
 	case LONG:
 	case ENUM:
 		return tp->tp_unsigned ? T_UNSIGNED : T_SIGNED;
-
 #ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		return T_FLOATING;
 #endif NOFLOAT
-
 	case POINTER:	/* pointer : signed / unsigned	???	*/
 		return T_SIGNED;
 	}
