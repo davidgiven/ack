@@ -6,6 +6,7 @@ create_dir $TARGET_HOME
 create_dir $TARGET_HOME/config
 create_dir $TARGET_HOME/lib.bin
 create_dir $TARGET_HOME/modules
+create_dir $TARGET_HOME/modules/h
 create_dir $TARGET_HOME/bin
 
 cp local.h em_path.h $TARGET_HOME/config
