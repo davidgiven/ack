@@ -36,4 +36,7 @@ typedef struct _ALLOC_ {
 #define	st_free(ptr, phead, size)	(botch((char *)(ptr), size), \
 						_A_st_free(ptr, phead, size))
 #endif	BOTCH_FREE
+
+#define Free(p)	free(p)
+
 #endif __ALLOC_INCLUDED__
