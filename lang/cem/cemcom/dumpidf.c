@@ -164,7 +164,7 @@ dumpdefs(def, opt)
 	dumplevel++;
 	while (def && ((opt&4) || def->df_level))	{
 		newline();
-		print("L%d: %s %s%s%s%s%s %lo;",
+		print("L%d: %s %s%s%s%s %lo;",
 			def->df_level,
 			symbol2str(def->df_sc),
 			def->df_initialized ? "init'd " : "",

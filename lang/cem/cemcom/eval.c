@@ -124,7 +124,7 @@ EVAL(expr, val, code, true_label, false_label)
 				case POINTER:
 					C_loc(right->ex_type->tp_size);
 					C_loc(pointer_size);
-					C_ciu();
+					C_cuu();
 					C_ads(pointer_size);
 					break;
 #ifndef NOFLOAT
@@ -181,7 +181,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_ngi(right->ex_type->tp_size);
 					C_loc(right->ex_type->tp_size);
 					C_loc(pointer_size);
-					C_ciu();
+					C_cuu();
 					C_ads(pointer_size);
 				}
 				break;
@@ -756,7 +756,7 @@ assop(type, oper)
 			C_ngi(size);
 		C_loc(size);
 		C_loc(pointer_size);
-		C_ciu();
+		C_cuu();
 		C_ads(pointer_size);
 		break;
 	case ERRONEOUS:
