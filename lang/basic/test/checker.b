@@ -71,7 +71,7 @@
 7000 if u<1 then 8700
 7100 if u>8 then 8700
 7200 if v<1 then 8700
-7300 if v.8 then 8700
+7300 if v>8 then 8700
 7400 if s(u,v)<>0 then 7700
 7500 gosub 9100
 7600 goto 8700
@@ -174,7 +174,7 @@
 17300 print
 17500 rem
 17400 goto 16700
-17600 s(a,b)=s(e.h)
+17600 s(a,b)=s(e,h)
 17700 s(e,h)=0
 17800 t=(4.5-(3.5*g))
 17900 if abs(e-a)<>2 then 18100
